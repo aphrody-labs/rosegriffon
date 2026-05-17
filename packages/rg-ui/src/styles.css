@@ -9,6 +9,16 @@
  *   - elevation (6 levels)
  *   - typescale (15 rôles officiels)
  *   - state-layer utility
+ *
+ * Thèmes unifiés (4) — appliqués via classe sur <html> ou ancêtre :
+ *   - .theme-roy           — Inazuma character, light, accent bleu/doré
+ *   - .theme-gaelle        — Inazuma character, light, vermillon/orange
+ *   - .theme-azalee-light  — Wiki Azalée, light, seed MD3 #F89C5A
+ *   - .theme-azalee-dark   — Wiki Azalée, dark, seed MD3 #F89C5A
+ *
+ * Pont shadcn → MD3 : chaque thème mappe les vars shadcn (--primary, --background,
+ * --card, --foreground, …) vers les sys-color MD3 actifs, pour que les composants
+ * shadcn héritent automatiquement de la palette MD3 sélectionnée.
  */
 
 @theme inline {
@@ -203,6 +213,306 @@
 		--md-sys-color-surface-container: oklch(0.18 0.02 264);
 		--md-sys-color-surface-container-high: oklch(0.22 0.02 264);
 		--md-sys-color-surface-container-highest: oklch(0.27 0.02 264);
+	}
+
+	/* ═══════════════════════════════════════════════════════════════════════
+	 * THÈMES UNIFIÉS — source unique de vérité pour website + azalee
+	 *
+	 * Chaque thème redéfinit :
+	 *   1. Les sys-color MD3 (primary, secondary, tertiary, surface, etc.)
+	 *   2. Le pont shadcn → MD3 (--background, --primary, --card, etc.)
+	 *   3. Les tokens sidebar (--sidebar*, en fallback hex)
+	 *
+	 * Les composants shadcn de @rg/ui consomment les vars shadcn et héritent
+	 * automatiquement de la palette MD3 active sans modification de code.
+	 * ═══════════════════════════════════════════════════════════════════════ */
+
+	/* ─── ROY — Inazuma character (light, bleu #344E8C + doré #FFC46E) ───── */
+	:root.theme-roy,
+	.theme-roy {
+		/* MD3 sys-color — palette Roy */
+		--md-sys-color-primary: oklch(0.45 0.12 250);
+		--md-sys-color-on-primary: oklch(0.985 0 0);
+		--md-sys-color-primary-container: oklch(0.85 0.08 250);
+		--md-sys-color-on-primary-container: oklch(0.18 0.10 250);
+		--md-sys-color-secondary: oklch(0.8 0.1 80);
+		--md-sys-color-on-secondary: oklch(0.2 0.05 250);
+		--md-sys-color-secondary-container: oklch(0.92 0.06 80);
+		--md-sys-color-on-secondary-container: oklch(0.20 0.08 80);
+		--md-sys-color-tertiary: oklch(0.55 0.10 240);
+		--md-sys-color-on-tertiary: oklch(1 0 0);
+		--md-sys-color-tertiary-container: oklch(0.88 0.06 240);
+		--md-sys-color-on-tertiary-container: oklch(0.18 0.08 240);
+		--md-sys-color-error: oklch(0.577 0.245 27.325);
+		--md-sys-color-on-error: oklch(1 0 0);
+		--md-sys-color-error-container: oklch(0.92 0.06 27);
+		--md-sys-color-on-error-container: oklch(0.20 0.18 27);
+		--md-sys-color-background: oklch(0.97 0.01 80);
+		--md-sys-color-on-background: oklch(0.2 0.05 250);
+		--md-sys-color-surface: oklch(0.97 0.01 80);
+		--md-sys-color-on-surface: oklch(0.2 0.05 250);
+		--md-sys-color-surface-variant: oklch(0.92 0.02 250);
+		--md-sys-color-on-surface-variant: oklch(0.40 0.04 250);
+		--md-sys-color-outline: oklch(0.55 0.04 250);
+		--md-sys-color-outline-variant: oklch(0.85 0.02 250);
+		--md-sys-color-surface-dim: oklch(0.88 0.01 80);
+		--md-sys-color-surface-bright: oklch(0.99 0.005 80);
+		--md-sys-color-surface-container-lowest: oklch(1 0 0);
+		--md-sys-color-surface-container-low: oklch(0.97 0.008 80);
+		--md-sys-color-surface-container: oklch(0.95 0.01 80);
+		--md-sys-color-surface-container-high: oklch(0.93 0.012 80);
+		--md-sys-color-surface-container-highest: oklch(0.91 0.014 80);
+		--md-sys-color-inverse-surface: oklch(0.25 0.05 250);
+		--md-sys-color-inverse-on-surface: oklch(0.96 0.01 80);
+		--md-sys-color-inverse-primary: oklch(0.75 0.10 250);
+
+		/* Pont shadcn → MD3 + tokens Roy d'origine (compat website) */
+		--background: oklch(0.97 0.01 80);
+		--foreground: oklch(0.2 0.05 250);
+		--card: oklch(1 0 0);
+		--card-foreground: oklch(0.2 0.05 250);
+		--popover: oklch(1 0 0);
+		--popover-foreground: oklch(0.2 0.05 250);
+		--primary: oklch(0.45 0.12 250);
+		--primary-foreground: oklch(0.985 0 0);
+		--secondary: oklch(0.8 0.1 80);
+		--secondary-foreground: oklch(0.2 0.05 250);
+		--muted: oklch(0.95 0.01 80);
+		--muted-foreground: oklch(0.5 0.05 250);
+		--accent: oklch(0.8 0.1 80);
+		--accent-foreground: oklch(0.2 0.05 250);
+		--destructive: oklch(0.577 0.245 27.325);
+		--border: oklch(0.9 0.02 250);
+		--input: oklch(0.9 0.02 250);
+		--ring: oklch(0.45 0.12 250);
+		--chart-1: oklch(0.45 0.12 250);
+		--chart-2: oklch(0.8 0.1 80);
+		--chart-3: oklch(0.6 0.08 250);
+		--chart-4: oklch(0.7 0.09 260);
+		--chart-5: oklch(0.55 0.1 240);
+		--sidebar: #344e8c;
+		--sidebar-foreground: #ffffff;
+		--sidebar-primary: #243d5b;
+		--sidebar-primary-foreground: #ffffff;
+		--sidebar-accent: rgba(255, 196, 110, 0.2);
+		--sidebar-accent-foreground: #ffffff;
+		--sidebar-border: rgba(255, 196, 110, 0.3);
+		--sidebar-ring: rgba(255, 196, 110, 0.4);
+	}
+
+	/* ─── GAELLE — Inazuma character (light, vermillon #B03519 + orange) ─── */
+	:root.theme-gaelle,
+	.theme-gaelle {
+		/* MD3 sys-color — palette Gaelle */
+		--md-sys-color-primary: oklch(0.5 0.18 25);
+		--md-sys-color-on-primary: oklch(0.985 0 0);
+		--md-sys-color-primary-container: oklch(0.88 0.08 25);
+		--md-sys-color-on-primary-container: oklch(0.20 0.15 25);
+		--md-sys-color-secondary: oklch(0.8 0.12 50);
+		--md-sys-color-on-secondary: oklch(0.25 0.15 25);
+		--md-sys-color-secondary-container: oklch(0.92 0.06 50);
+		--md-sys-color-on-secondary-container: oklch(0.20 0.10 50);
+		--md-sys-color-tertiary: oklch(0.6 0.15 35);
+		--md-sys-color-on-tertiary: oklch(1 0 0);
+		--md-sys-color-tertiary-container: oklch(0.90 0.06 35);
+		--md-sys-color-on-tertiary-container: oklch(0.20 0.10 35);
+		--md-sys-color-error: oklch(0.35 0.2 15);
+		--md-sys-color-on-error: oklch(1 0 0);
+		--md-sys-color-error-container: oklch(0.90 0.10 15);
+		--md-sys-color-on-error-container: oklch(0.18 0.18 15);
+		--md-sys-color-background: oklch(0.95 0.03 40);
+		--md-sys-color-on-background: oklch(0.25 0.15 25);
+		--md-sys-color-surface: oklch(0.95 0.03 40);
+		--md-sys-color-on-surface: oklch(0.25 0.15 25);
+		--md-sys-color-surface-variant: oklch(0.90 0.04 30);
+		--md-sys-color-on-surface-variant: oklch(0.40 0.08 25);
+		--md-sys-color-outline: oklch(0.55 0.06 25);
+		--md-sys-color-outline-variant: oklch(0.85 0.04 30);
+		--md-sys-color-surface-dim: oklch(0.88 0.03 40);
+		--md-sys-color-surface-bright: oklch(0.97 0.02 40);
+		--md-sys-color-surface-container-lowest: oklch(1 0 0);
+		--md-sys-color-surface-container-low: oklch(0.96 0.025 40);
+		--md-sys-color-surface-container: oklch(0.94 0.03 40);
+		--md-sys-color-surface-container-high: oklch(0.92 0.035 40);
+		--md-sys-color-surface-container-highest: oklch(0.90 0.04 40);
+		--md-sys-color-inverse-surface: oklch(0.25 0.05 25);
+		--md-sys-color-inverse-on-surface: oklch(0.96 0.02 40);
+		--md-sys-color-inverse-primary: oklch(0.75 0.12 25);
+
+		/* Pont shadcn → MD3 + tokens Gaelle d'origine (compat website) */
+		--background: oklch(0.95 0.03 40);
+		--foreground: oklch(0.25 0.15 25);
+		--card: oklch(1 0 0);
+		--card-foreground: oklch(0.25 0.15 25);
+		--popover: oklch(1 0 0);
+		--popover-foreground: oklch(0.25 0.15 25);
+		--primary: oklch(0.5 0.18 25);
+		--primary-foreground: oklch(0.985 0 0);
+		--secondary: oklch(0.8 0.12 50);
+		--secondary-foreground: oklch(0.25 0.15 25);
+		--muted: oklch(0.92 0.03 40);
+		--muted-foreground: oklch(0.5 0.1 25);
+		--accent: oklch(0.8 0.12 50);
+		--accent-foreground: oklch(0.25 0.15 25);
+		--destructive: oklch(0.35 0.2 15);
+		--border: oklch(0.88 0.05 30);
+		--input: oklch(0.88 0.05 30);
+		--ring: oklch(0.5 0.18 25);
+		--chart-1: oklch(0.5 0.18 25);
+		--chart-2: oklch(0.8 0.12 50);
+		--chart-3: oklch(0.35 0.2 15);
+		--chart-4: oklch(0.6 0.15 35);
+		--chart-5: oklch(0.7 0.14 45);
+		--sidebar: #b03519;
+		--sidebar-foreground: #ffffff;
+		--sidebar-primary: #770007;
+		--sidebar-primary-foreground: #ffffff;
+		--sidebar-accent: rgba(255, 196, 110, 0.2);
+		--sidebar-accent-foreground: #ffffff;
+		--sidebar-border: rgba(255, 196, 110, 0.3);
+		--sidebar-ring: rgba(255, 196, 110, 0.4);
+	}
+
+	/* ─── AZALEE LIGHT — Wiki Azalée, seed MD3 #F89C5A (orange) ──────────── */
+	:root.theme-azalee-light,
+	.theme-azalee-light {
+		/* MD3 sys-color light — orange/rose Azalée (extrait depuis apps/azalee :root) */
+		--md-sys-color-primary: #f2a93b;
+		--md-sys-color-on-primary: #2a1519;
+		--md-sys-color-primary-container: #ffe08b;
+		--md-sys-color-on-primary-container: #2a1519;
+		--md-sys-color-secondary: #a92335;
+		--md-sys-color-on-secondary: #ffffff;
+		--md-sys-color-secondary-container: #ffdad6;
+		--md-sys-color-on-secondary-container: #410006;
+		--md-sys-color-tertiary: #2f4f4f;
+		--md-sys-color-on-tertiary: #ffffff;
+		--md-sys-color-tertiary-container: #b1ecec;
+		--md-sys-color-on-tertiary-container: #002020;
+		--md-sys-color-error: #ba1a1a;
+		--md-sys-color-on-error: #ffffff;
+		--md-sys-color-error-container: #ffdad6;
+		--md-sys-color-on-error-container: #93000a;
+		--md-sys-color-background: #fff8f5;
+		--md-sys-color-on-background: #221a15;
+		--md-sys-color-surface: #fff8f5;
+		--md-sys-color-on-surface: #221a15;
+		--md-sys-color-surface-variant: #f4ded3;
+		--md-sys-color-on-surface-variant: #52443c;
+		--md-sys-color-outline: #84746a;
+		--md-sys-color-outline-variant: #d7c3b7;
+		--md-sys-color-scrim: #000000;
+		--md-sys-color-shadow: #000000;
+		--md-sys-color-inverse-surface: #382e29;
+		--md-sys-color-inverse-on-surface: #feede5;
+		--md-sys-color-inverse-primary: #ffb786;
+		--md-sys-color-surface-dim: #e7d7ce;
+		--md-sys-color-surface-bright: #fff8f5;
+		--md-sys-color-surface-container-lowest: #ffffff;
+		--md-sys-color-surface-container-low: #fff1ea;
+		--md-sys-color-surface-container: #fcebe2;
+		--md-sys-color-surface-container-high: #f6e5dc;
+		--md-sys-color-surface-container-highest: #f0dfd7;
+
+		/* Pont shadcn → MD3 */
+		--background: var(--md-sys-color-surface);
+		--foreground: var(--md-sys-color-on-surface);
+		--card: var(--md-sys-color-surface-container-low);
+		--card-foreground: var(--md-sys-color-on-surface);
+		--popover: var(--md-sys-color-surface-container-high);
+		--popover-foreground: var(--md-sys-color-on-surface);
+		--primary: var(--md-sys-color-primary);
+		--primary-foreground: var(--md-sys-color-on-primary);
+		--secondary: var(--md-sys-color-secondary-container);
+		--secondary-foreground: var(--md-sys-color-on-secondary-container);
+		--muted: var(--md-sys-color-surface-container);
+		--muted-foreground: var(--md-sys-color-on-surface-variant);
+		--accent: var(--md-sys-color-tertiary-container);
+		--accent-foreground: var(--md-sys-color-on-tertiary-container);
+		--destructive: var(--md-sys-color-error);
+		--destructive-foreground: var(--md-sys-color-on-error);
+		--border: var(--md-sys-color-outline-variant);
+		--input: var(--md-sys-color-outline);
+		--ring: var(--md-sys-color-primary);
+		--sidebar: var(--md-sys-color-surface);
+		--sidebar-foreground: var(--md-sys-color-on-surface);
+		--sidebar-primary: var(--md-sys-color-primary);
+		--sidebar-primary-foreground: var(--md-sys-color-on-primary);
+		--sidebar-accent: var(--md-sys-color-tertiary-container);
+		--sidebar-accent-foreground: var(--md-sys-color-on-tertiary-container);
+		--sidebar-border: var(--md-sys-color-outline-variant);
+		--sidebar-ring: var(--md-sys-color-primary);
+	}
+
+	/* ─── AZALEE DARK — Wiki Azalée, seed MD3 #F89C5A inversé ────────────── */
+	:root.theme-azalee-dark,
+	.theme-azalee-dark {
+		/* MD3 sys-color dark — orange/rose Azalée (extrait depuis apps/azalee :root.dark) */
+		--md-sys-color-primary: #ffc66c;
+		--md-sys-color-on-primary: #412d00;
+		--md-sys-color-primary-container: #5d4200;
+		--md-sys-color-on-primary-container: #ffe0aa;
+		--md-sys-color-secondary: #ffb2be;
+		--md-sys-color-on-secondary: #5e1123;
+		--md-sys-color-secondary-container: #7c2939;
+		--md-sys-color-on-secondary-container: #ffd9df;
+		--md-sys-color-tertiary: #edc26e;
+		--md-sys-color-on-tertiary: #422d00;
+		--md-sys-color-tertiary-container: #5e4200;
+		--md-sys-color-on-tertiary-container: #ffdea6;
+		--md-sys-color-error: #ffb4ab;
+		--md-sys-color-on-error: #690005;
+		--md-sys-color-error-container: #93000a;
+		--md-sys-color-on-error-container: #ffdad6;
+		--md-sys-color-background: #1a120d;
+		--md-sys-color-on-background: #ede0db;
+		--md-sys-color-surface: #1a120d;
+		--md-sys-color-on-surface: #ede0db;
+		--md-sys-color-surface-variant: #52443c;
+		--md-sys-color-on-surface-variant: #d7c3b7;
+		--md-sys-color-outline: #9f8d83;
+		--md-sys-color-outline-variant: #52443c;
+		--md-sys-color-scrim: #000000;
+		--md-sys-color-shadow: #000000;
+		--md-sys-color-inverse-surface: #ede0db;
+		--md-sys-color-inverse-on-surface: #1a120d;
+		--md-sys-color-inverse-primary: #8b5023;
+		--md-sys-color-surface-dim: #1a120d;
+		--md-sys-color-surface-bright: #413732;
+		--md-sys-color-surface-container-lowest: #140d09;
+		--md-sys-color-surface-container-low: #221a15;
+		--md-sys-color-surface-container: #271e19;
+		--md-sys-color-surface-container-high: #322823;
+		--md-sys-color-surface-container-highest: #3d332d;
+
+		/* Pont shadcn → MD3 */
+		--background: var(--md-sys-color-surface);
+		--foreground: var(--md-sys-color-on-surface);
+		--card: var(--md-sys-color-surface-container-low);
+		--card-foreground: var(--md-sys-color-on-surface);
+		--popover: var(--md-sys-color-surface-container-high);
+		--popover-foreground: var(--md-sys-color-on-surface);
+		--primary: var(--md-sys-color-primary);
+		--primary-foreground: var(--md-sys-color-on-primary);
+		--secondary: var(--md-sys-color-secondary-container);
+		--secondary-foreground: var(--md-sys-color-on-secondary-container);
+		--muted: var(--md-sys-color-surface-container);
+		--muted-foreground: var(--md-sys-color-on-surface-variant);
+		--accent: var(--md-sys-color-tertiary-container);
+		--accent-foreground: var(--md-sys-color-on-tertiary-container);
+		--destructive: var(--md-sys-color-error);
+		--destructive-foreground: var(--md-sys-color-on-error);
+		--border: var(--md-sys-color-outline-variant);
+		--input: var(--md-sys-color-outline);
+		--ring: var(--md-sys-color-primary);
+		--sidebar: var(--md-sys-color-surface);
+		--sidebar-foreground: var(--md-sys-color-on-surface);
+		--sidebar-primary: var(--md-sys-color-primary);
+		--sidebar-primary-foreground: var(--md-sys-color-on-primary);
+		--sidebar-accent: var(--md-sys-color-tertiary-container);
+		--sidebar-accent-foreground: var(--md-sys-color-on-tertiary-container);
+		--sidebar-border: var(--md-sys-color-outline-variant);
+		--sidebar-ring: var(--md-sys-color-primary);
 	}
 
 	html {

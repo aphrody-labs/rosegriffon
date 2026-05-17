@@ -1,5 +1,6 @@
 @import "tailwindcss";
 @import "tw-animate-css";
+@import "@rg/ui/styles.css";
 
 /* Font Faces from Supabase Assets */
 @font-face {
@@ -315,77 +316,12 @@
   --md-sys-color-surface-container-highest: oklch(0.26 0.01 30);
 }
 
-/* ===== THÈME ROY (BLEU ÉLÉGANT & DORÉ) ===== */
-/* Roy : Bleu #344E8C, Doré #FFC46E, Beige Roy #F8EADD */
-.roy {
-  --background: oklch(0.97 0.01 80); /* Beige Roy clair */
-  --foreground: oklch(0.2 0.05 250); /* Bleu Roy foncé */
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.2 0.05 250);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.2 0.05 250);
-  --primary: oklch(0.45 0.12 250); /* Bleu Roy #344E8C */
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.8 0.1 80); /* Doré #FFC46E */
-  --secondary-foreground: oklch(0.2 0.05 250);
-  --muted: oklch(0.95 0.01 80);
-  --muted-foreground: oklch(0.5 0.05 250);
-  --accent: oklch(0.8 0.1 80); /* Doré */
-  --accent-foreground: oklch(0.2 0.05 250);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.9 0.02 250);
-  --input: oklch(0.9 0.02 250);
-  --ring: oklch(0.45 0.12 250);
-  --chart-1: oklch(0.45 0.12 250);
-  --chart-2: oklch(0.8 0.1 80);
-  --chart-3: oklch(0.6 0.08 250);
-  --chart-4: oklch(0.7 0.09 260);
-  --chart-5: oklch(0.55 0.1 240);
-  --sidebar: #344e8c; /* Bleu Roy */
-  --sidebar-foreground: #ffffff;
-  --sidebar-primary: #243d5b; /* Bleu plus foncé */
-  --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: rgba(255, 196, 110, 0.2); /* Overlay doré */
-  --sidebar-accent-foreground: #ffffff;
-  --sidebar-border: rgba(255, 196, 110, 0.3);
-  --sidebar-ring: rgba(255, 196, 110, 0.4);
-}
-
-/* ===== THÈME GAËLLE (VERMILLON PASSION & ORANGE) ===== */
-/* Gaëlle : Vermillon #B03519, Rouge #770007, Beige Gaëlle #FABBA2 */
-.gaelle {
-  --background: oklch(0.95 0.03 40); /* Beige Gaëlle clair */
-  --foreground: oklch(0.25 0.15 25); /* Vermillon foncé */
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.25 0.15 25);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.25 0.15 25);
-  --primary: oklch(0.5 0.18 25); /* Vermillon #B03519 */
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.8 0.12 50); /* Orange dérivé doré */
-  --secondary-foreground: oklch(0.25 0.15 25);
-  --muted: oklch(0.92 0.03 40);
-  --muted-foreground: oklch(0.5 0.1 25);
-  --accent: oklch(0.8 0.12 50); /* Orange */
-  --accent-foreground: oklch(0.25 0.15 25);
-  --destructive: oklch(0.35 0.2 15); /* Rouge #770007 */
-  --border: oklch(0.88 0.05 30);
-  --input: oklch(0.88 0.05 30);
-  --ring: oklch(0.5 0.18 25);
-  --chart-1: oklch(0.5 0.18 25);
-  --chart-2: oklch(0.8 0.12 50);
-  --chart-3: oklch(0.35 0.2 15);
-  --chart-4: oklch(0.6 0.15 35);
-  --chart-5: oklch(0.7 0.14 45);
-  --sidebar: #b03519; /* Vermillon */
-  --sidebar-foreground: #ffffff;
-  --sidebar-primary: #770007; /* Rouge passion */
-  --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: rgba(255, 196, 110, 0.2); /* Overlay doré */
-  --sidebar-accent-foreground: #ffffff;
-  --sidebar-border: rgba(255, 196, 110, 0.3);
-  --sidebar-ring: rgba(255, 196, 110, 0.4);
-}
+/* ===== THÈMES ROY + GAELLE =====
+ * Fournis maintenant par @rg/ui/styles.css via les classes
+ * `.theme-roy` et `.theme-gaelle` (cf. import en tête de fichier).
+ * Les anciennes classes `.roy` / `.gaelle` ont été retirées ici pour
+ * unification cross-app (website + azalee) — source unique de vérité.
+ * ===== */
 
 @layer base {
   * {
