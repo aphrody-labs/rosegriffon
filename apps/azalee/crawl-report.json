@@ -1,0 +1,34 @@
+{
+  "timestamp": "2026-04-20T11:46:49.366Z",
+  "base": "http://127.0.0.1:3002",
+  "total": 26,
+  "ok": 26,
+  "warnings": 0,
+  "errors": 0,
+  "avgTimeMs": 216,
+  "elapsed_s": 1,
+  "errorPages": [],
+  "warningPages": [],
+  "slowest": [
+    {
+      "url": "/tools",
+      "timeMs": 426
+    },
+    {
+      "url": "/tools/random-team",
+      "timeMs": 424
+    },
+    {
+      "url": "/tools/compare",
+      "timeMs": 350
+    },
+    {
+      "url": "/passive",
+      "timeMs": 295
+    },
+    {
+      "url": "/aura/miximax",
+      "timeMs": 292
+    }
+  ]
+}

@@ -1,0 +1,43 @@
+import Link from "next/link";
+import { DashboardPageHeader } from "@/components/dashboard/DashboardPageHeader";
+import { Button } from "@/components/ui/button";
+import { Icon } from "@/components/ui/Icon";
+import { createClient } from "@/lib/supabase/server";
+import { TweetRow } from "./tweet-row";
+
+export default async function TweetsPage() {
+  const supabase = await createClient();
+  const { data: tweets } = await supabase
+    .from("tweets")
+    .select("*")
+    .order("created_at", { ascending: false })
+    .limit(50);
+
+  return (
+    <div className="space-y-6 sm:space-y-8 pb-24 sm:pb-8">
+      <DashboardPageHeader
+        breadcrumbs={[{ label: "Tableau de bord", href: "/dashboard" }, { label: "Tweets" }]}
+        title="Tweets"
+        subtitle="Gérer le feed Twitter (X)"
+        icon="tag"
+        actions={
+          <Button asChild className="rounded-full">
+            <Link href="/dashboard/tweets/new">
+              <Icon name="add" size={18} className="mr-2" />
+              Nouveau Tweet
+            </Link>
+          </Button>
+        }
+      />
+
+      <div className="bg-surface-container rounded-3xl border border-outline-variant/20 overflow-hidden">
+        {tweets?.map((tweet: any) => (
+          <TweetRow key={tweet.id} tweet={tweet} />
+        ))}
+        {(!tweets || tweets.length === 0) && (
+          <div className="p-10 text-center text-on-surface-variant">Aucun tweet trouvé.</div>
+        )}
+      </div>
+    </div>
+  );
+}

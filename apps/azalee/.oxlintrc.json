@@ -1,0 +1,97 @@
+{
+	"$schema": "./node_modules/oxlint/configuration_schema.json",
+	"plugins": ["import", "typescript", "react", "jsx-a11y", "nextjs", "unicorn"],
+	"env": {
+		"browser": true,
+		"node": true
+	},
+	"settings": {
+		"react": {
+			"version": "19"
+		},
+		"next": {
+			"rootDir": "."
+		}
+	},
+	"rules": {
+		"eqeqeq": ["warn", "smart"],
+		"no-console": ["warn", { "allow": ["warn", "error"] }],
+		"no-debugger": "error",
+		"no-unused-vars": "error",
+		"no-var": "error",
+		"prefer-const": "error",
+		"no-eval": "error",
+		"no-implied-eval": "error",
+		"no-new-func": "error",
+		"no-throw-literal": "error",
+		"prefer-template": "warn",
+		"no-useless-concat": "warn",
+
+		"typescript/no-explicit-any": "warn",
+		"typescript/no-non-null-assertion": "warn",
+		"typescript/consistent-type-imports": "warn",
+		"typescript/array-type": ["warn", { "default": "array-simple" }],
+		"typescript/no-import-type-side-effects": "warn",
+		"typescript/no-useless-empty-export": "error",
+
+		"react/no-danger": "off",
+		"react/self-closing-comp": "error",
+		"react/no-unknown-property": "error",
+		"react/jsx-no-target-blank": "error",
+		"react/jsx-key": "error",
+		"react/no-array-index-key": "warn",
+		"react/rules-of-hooks": "error",
+		"react/exhaustive-deps": "error",
+
+		"jsx-a11y/alt-text": "error",
+		"jsx-a11y/anchor-is-valid": "error",
+		"jsx-a11y/no-autofocus": "warn",
+
+		"import/no-cycle": "error",
+		"import/no-self-import": "error",
+		"import/no-duplicates": "error",
+
+		"nextjs/no-img-element": "warn",
+		"nextjs/no-html-link-for-pages": "error",
+		"nextjs/no-sync-scripts": "error",
+		"nextjs/no-title-in-document-head": "error",
+
+		"unicorn/no-null": "off",
+		"unicorn/prefer-node-protocol": "warn",
+		"unicorn/prefer-string-replace-all": "warn"
+	},
+	"overrides": [
+		{
+			"files": [
+				"*.test.ts",
+				"*.test.tsx",
+				"*.spec.ts",
+				"*.spec.tsx",
+				"tests/**"
+			],
+			"rules": {
+				"typescript/no-explicit-any": "off",
+				"typescript/no-non-null-assertion": "off",
+				"no-console": "off"
+			}
+		},
+		{
+			"files": [
+				"app/api/og/**",
+				"app/api/share/**",
+				"app/og-image/**",
+				"app/**/opengraph-image.*"
+			],
+			"rules": {
+				"nextjs/no-img-element": "off"
+			}
+		},
+		{
+			"files": ["scripts/**", "data/**"],
+			"rules": {
+				"no-console": "off",
+				"typescript/no-explicit-any": "off"
+			}
+		}
+	]
+}
