@@ -134,7 +134,7 @@ function TierCard({ tier }: { tier: Tier }) {
 				{tier.perks.map((perk, i) => (
 					<li key={i} className="flex gap-2">
 						<Check
-							className="mt-0.5 h-4 w-4 flex-shrink-0"
+							className="mt-0.5 size-4 shrink-0"
 							style={{ color: tier.color }}
 						/>
 						<span>{perk}</span>
@@ -161,7 +161,7 @@ function TierCard({ tier }: { tier: Tier }) {
 					)}
 				>
 					{tier.cta}
-					<ExternalLink className="h-4 w-4" aria-hidden="true" />
+					<ExternalLink className="size-4" aria-hidden="true" />
 				</a>
 			</div>
 		</div>

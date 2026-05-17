@@ -143,7 +143,7 @@ export function PatreonMembersTable({ members, tierOptions }: Props) {
 		<div className="space-y-4">
 			<div className="flex flex-col gap-3 sm:flex-row">
 				<div className="relative flex-1">
-					<Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+					<Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
 					<Input
 						placeholder="Rechercher : nom, email, Discord ID…"
 						value={q}
@@ -228,7 +228,7 @@ export function PatreonMembersTable({ members, tierOptions }: Props) {
 														key={t}
 														className="inline-flex items-center gap-1 rounded-md bg-muted px-2 py-0.5 text-xs"
 													>
-														<Star className="h-3 w-3 text-amber-500" />
+														<Star className="size-3 text-amber-500" />
 														{t}
 													</div>
 												))}

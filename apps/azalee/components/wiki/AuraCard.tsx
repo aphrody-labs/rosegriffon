@@ -120,11 +120,11 @@ export function AuraCard({
           )}
 
           {/* Bottom gradient */}
-          <div className="absolute inset-x-0 bottom-0 h-12 bg-gradient-to-t from-neutral-950 to-transparent" />
+          <div className="absolute inset-x-0 bottom-0 h-12 bg-linear-to-t from-neutral-950 to-transparent" />
         </div>
 
         {/* Info area */}
-        <div className="px-3 py-2 flex flex-col gap-1 bg-neutral-950 flex-grow">
+        <div className="px-3 py-2 flex flex-col gap-1 bg-neutral-950 grow">
           <h3 className="text-xs sm:text-sm font-bold text-white leading-tight line-clamp-2">
             {name}
           </h3>

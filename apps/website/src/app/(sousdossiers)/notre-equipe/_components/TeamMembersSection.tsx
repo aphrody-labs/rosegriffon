@@ -48,7 +48,7 @@ function TeamMembersSection({
     () =>
       [...Array(8)].map((_, index) => (
         <div key={index} className="flex flex-col items-center text-center gap-4 w-full p-4 sm:p-6">
-          <Skeleton className="w-28 h-28 sm:w-36 sm:h-36 lg:w-40 lg:h-40 rounded-full bg-linear-to-br from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-800 animate-pulse" />
+          <Skeleton className="size-28 sm:w-36 sm:h-36 lg:w-40 lg:h-40 rounded-full bg-linear-to-br from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-800 animate-pulse" />
           <div className="space-y-2 w-full">
             <Skeleton className="h-5 sm:h-6 w-3/4 mx-auto bg-gray-200 dark:bg-gray-700" />
             <Skeleton className="h-4 w-1/2 mx-auto bg-gray-200 dark:bg-gray-700" />
@@ -70,7 +70,7 @@ function TeamMembersSection({
           style={{ animationDelay: `${idx * 50}ms` }}
         >
           <div className="relative">
-            <div className="relative w-28 h-28 sm:w-36 sm:h-36 lg:w-40 lg:h-40 rounded-full overflow-hidden border-3 sm:border-4 border-gaelle-blue group-hover:border-gaelle-blue-light transition-all duration-300 group-hover:scale-105 group-hover:shadow-2xl group-hover:shadow-gaelle-blue/20">
+            <div className="relative size-28 sm:w-36 sm:h-36 lg:w-40 lg:h-40 rounded-full overflow-hidden border-3 sm:border-4 border-gaelle-blue group-hover:border-gaelle-blue-light transition-all duration-300 group-hover:scale-105 group-hover:shadow-2xl group-hover:shadow-gaelle-blue/20">
               <ImageWithSkeleton
                 src={member.image || "https://placehold.co/200x200"}
                 alt={`${member.name} Rose Griffon`}

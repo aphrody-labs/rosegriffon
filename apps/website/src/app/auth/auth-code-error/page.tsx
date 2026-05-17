@@ -29,7 +29,7 @@ export default function AuthCodeErrorPage() {
 
         <CardContent className="space-y-6">
           <Alert variant="destructive">
-            <AlertCircle className="h-4 w-4" />
+            <AlertCircle className="size-4" />
             <AlertDescription>{displayError}</AlertDescription>
           </Alert>
 
@@ -46,7 +46,7 @@ export default function AuthCodeErrorPage() {
           <div className="flex gap-3">
             <Link href="/login" className="flex-1">
               <Button className="w-full gap-2">
-                <ArrowLeft className="h-4 w-4" />
+                <ArrowLeft className="size-4" />
                 Retour à la connexion
               </Button>
             </Link>

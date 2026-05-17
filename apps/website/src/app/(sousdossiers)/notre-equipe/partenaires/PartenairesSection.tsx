@@ -43,7 +43,7 @@ export default function PartenairesSection() {
     () =>
       [...Array(8)].map((_, index) => (
         <div key={index} className="flex flex-col items-center text-center gap-4 p-4 sm:p-6">
-          <Skeleton className="w-28 h-28 sm:w-36 sm:h-36 lg:w-40 lg:h-40 rounded-full bg-gradient-to-br from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-800 animate-pulse" />
+          <Skeleton className="size-28 sm:w-36 sm:h-36 lg:w-40 lg:h-40 rounded-full bg-linear-to-br from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-800 animate-pulse" />
           <div className="space-y-2 w-full">
             <Skeleton className="h-5 sm:h-6 w-3/4 mx-auto bg-gray-200 dark:bg-gray-700" />
             <Skeleton className="h-4 w-1/2 mx-auto bg-gray-200 dark:bg-gray-700" />
@@ -73,7 +73,7 @@ export default function PartenairesSection() {
           style={{ animationDelay: `${idx * 100}ms` }}
         >
           <div className="relative">
-            <div className="relative w-28 h-28 sm:w-36 sm:h-36 lg:w-40 lg:h-40 rounded-full overflow-hidden border-3 sm:border-4 border-[#2f6e9c]/30 group-hover:border-[#2f6e9c] transition-all duration-300 group-hover:scale-105 group-hover:shadow-2xl group-hover:shadow-[#2f6e9c]/20">
+            <div className="relative size-28 sm:w-36 sm:h-36 lg:w-40 lg:h-40 rounded-full overflow-hidden border-3 sm:border-4 border-[#2f6e9c]/30 group-hover:border-[#2f6e9c] transition-all duration-300 group-hover:scale-105 group-hover:shadow-2xl group-hover:shadow-[#2f6e9c]/20">
               <ImageWithSkeleton
                 src={member.image || "https://placehold.co/200x200"}
                 alt={`${member.name} Rose Griffon`}
@@ -97,7 +97,7 @@ export default function PartenairesSection() {
                   className="mt-2 text-xs sm:text-sm border-[#2f6e9c]/50 text-[#2f6e9c] hover:bg-[#2f6e9c] hover:text-white dark:border-[#4088b8]/50 dark:text-[#4088b8] dark:hover:bg-[#4088b8] dark:hover:text-white transition-all duration-300 group-hover:shadow-lg"
                 >
                   Visiter
-                  <ArrowUpRight className="w-3 h-3 sm:w-4 sm:h-4 ml-1" />
+                  <ArrowUpRight className="size-3 sm:w-4 sm:h-4 ml-1" />
                 </Button>
               </Link>
             )}
@@ -109,14 +109,14 @@ export default function PartenairesSection() {
   return (
     <section className="flex flex-col gap-10 lg:gap-12">
       <div className="text-center space-y-4 max-w-4xl mx-auto animate-fade-in">
-        <h1 className="text-4xl lg:text-6xl font-black bg-gradient-to-r from-[#2f6e9c] to-[#4088b8] dark:from-[#4088b8] dark:to-[#2f6e9c] bg-clip-text text-transparent">
+        <h1 className="text-4xl lg:text-6xl font-black bg-linear-to-r from-[#2f6e9c] to-[#4088b8] dark:from-[#4088b8] dark:to-[#2f6e9c] bg-clip-text text-transparent">
           Nos Partenaires
         </h1>
         <p className="text-lg lg:text-xl text-gray-700 dark:text-gray-300 leading-relaxed">
           Découvrez les partenaires qui contribuent à enrichir l&apos;univers de Rose Griffon par
           leur expertise et leur créativité.
         </p>
-        <div className="w-24 h-1 bg-gradient-to-r from-[#2f6e9c] to-[#4088b8] mx-auto rounded-full" />
+        <div className="w-24 h-1 bg-linear-to-r from-[#2f6e9c] to-[#4088b8] mx-auto rounded-full" />
       </div>
 
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 sm:gap-6 lg:gap-8 mt-6">

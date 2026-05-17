@@ -70,7 +70,7 @@ export const MobileBottomNavigation = () => {
 
 							<Icon
 								className={cn(
-									"h-6 w-6 transition-transform duration-300",
+									"size-6 transition-transform duration-300",
 									isActive && "animate-bounce-subtle",
 								)}
 							/>
@@ -100,7 +100,7 @@ export const MobileBottomNavigation = () => {
 					)}
 					<Menu
 						className={cn(
-							"h-6 w-6 transition-transform duration-300",
+							"size-6 transition-transform duration-300",
 							isMenuOpen && "rotate-90",
 						)}
 					/>

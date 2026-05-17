@@ -29,14 +29,14 @@ export function PaginationControls({ currentPage, totalPages, baseUrl }: Paginat
       <div className="flex gap-2">
         <Button variant="outline" size="sm" disabled={currentPage <= 1} asChild>
           <Link href={createPageUrl(currentPage - 1)}>
-            <ChevronLeft className="w-4 h-4 mr-2" />
+            <ChevronLeft className="size-4 mr-2" />
             Précédent
           </Link>
         </Button>
         <Button variant="outline" size="sm" disabled={currentPage >= totalPages} asChild>
           <Link href={createPageUrl(currentPage + 1)}>
             Suivant
-            <ChevronRight className="w-4 h-4 ml-2" />
+            <ChevronRight className="size-4 ml-2" />
           </Link>
         </Button>
       </div>

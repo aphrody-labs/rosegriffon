@@ -31,9 +31,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 				<SidebarHeader className="gap-3 border-b border-sidebar-border/40 px-3 pb-3 pt-4">
 					<Link
 						href="/"
-						className="flex items-center gap-2.5 rounded-md px-1 py-0.5 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring"
+						className="flex items-center gap-2.5 rounded-md px-1 py-0.5 transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-sidebar-ring"
 					>
-						<div className="relative h-10 w-10 shrink-0">
+						<div className="relative size-10 shrink-0">
 							<Image
 								src="/RG_Logo_V2.5.webp"
 								fill

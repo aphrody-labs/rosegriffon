@@ -78,28 +78,28 @@ export function ChronicleActions({ id, published }: ChronicleActionsProps) {
     <>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="ghost" className="h-8 w-8 p-0">
+          <Button variant="ghost" className="size-8 p-0">
             <span className="sr-only">Ouvrir le menu</span>
-            <MoreHorizontal className="h-4 w-4" />
+            <MoreHorizontal className="size-4" />
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
           <DropdownMenuLabel>Actions</DropdownMenuLabel>
           <DropdownMenuItem asChild>
             <Link href={`/admin/chroniques/${id}/edit`}>
-              <Edit className="mr-2 h-4 w-4" />
+              <Edit className="mr-2 size-4" />
               Éditer
             </Link>
           </DropdownMenuItem>
           <DropdownMenuItem onClick={handleToggleStatus} disabled={isPending}>
             {published ? (
               <>
-                <EyeOff className="mr-2 h-4 w-4" />
+                <EyeOff className="mr-2 size-4" />
                 Dépublier
               </>
             ) : (
               <>
-                <Eye className="mr-2 h-4 w-4" />
+                <Eye className="mr-2 size-4" />
                 Publier
               </>
             )}
@@ -109,7 +109,7 @@ export function ChronicleActions({ id, published }: ChronicleActionsProps) {
             onClick={() => setShowDeleteDialog(true)}
             className="text-destructive focus:text-destructive"
           >
-            <Trash className="mr-2 h-4 w-4" />
+            <Trash className="mr-2 size-4" />
             Supprimer
           </DropdownMenuItem>
         </DropdownMenuContent>

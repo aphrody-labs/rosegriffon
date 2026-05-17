@@ -31,8 +31,8 @@ export function AchilleaBanner({
       <Card className="overflow-hidden border-transparent shadow-[0_0_30px_-10px_rgba(223,255,87,0.3)] bg-[#D9D9D9] relative group rounded-3xl p-0">
         {/* Background effects similar to Azalee but with Achillea colors */}
         <div className="absolute inset-0 opacity-10 mix-blend-overlay pointer-events-none" style={{ backgroundImage: "url(/images/noise.svg)" }} />
-        <div className="absolute -right-20 -top-20 w-96 h-96 bg-[#6d00ce] rounded-full blur-[128px] opacity-20 pointer-events-none" />
-        <div className="absolute -left-20 -bottom-20 w-96 h-96 bg-[#DFFF57] rounded-full blur-[128px] opacity-10 pointer-events-none" />
+        <div className="absolute -right-20 -top-20 size-96 bg-[#6d00ce] rounded-full blur-[128px] opacity-20 pointer-events-none" />
+        <div className="absolute -left-20 -bottom-20 size-96 bg-[#DFFF57] rounded-full blur-[128px] opacity-10 pointer-events-none" />
 
         <div className="grid md:grid-cols-2 gap-0 relative z-20 md:min-h-[320px] lg:min-h-[360px]">
           {/* Left: Image Banner */}
@@ -52,11 +52,11 @@ export function AchilleaBanner({
             <div className="space-y-5">
               <div className="flex items-center justify-between w-full">
                 <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#6d00ce]/10 border border-[#6d00ce]/30 text-[#6d00ce] text-xs font-bold uppercase tracking-wide shadow-sm">
-                  <Zap className="w-3 h-3 fill-[#6d00ce]" />
+                  <Zap className="size-3 fill-[#6d00ce]" />
                   E-Sport
                 </div>
                 {/* Logo SVG */}
-                <div className="relative w-14 h-14 shrink-0">
+                <div className="relative size-14 shrink-0">
                   <Image
                     src="/achillea/logo1.svg"
                     alt="Logo Achillea"
@@ -76,7 +76,7 @@ export function AchilleaBanner({
                     priority
                   />
                 </div>
-                <div className="h-1 w-24 bg-gradient-to-r from-[#6d00ce] to-transparent rounded-full opacity-80" />
+                <div className="h-1 w-24 bg-linear-to-r from-[#6d00ce] to-transparent rounded-full opacity-80" />
               </div>
             </div>
 
@@ -102,7 +102,7 @@ export function AchilleaBanner({
               >
                 <a href={discordLink} target="_blank" rel="noopener noreferrer">
                   Discord
-                  <DiscordIcon className="ml-2 w-5 h-5" />
+                  <DiscordIcon className="ml-2 size-5" />
                 </a>
               </Button>
             </div>

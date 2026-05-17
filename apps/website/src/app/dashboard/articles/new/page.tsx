@@ -32,13 +32,13 @@ export default async function NewArticlePage() {
             href="/dashboard/articles"
             className="inline-flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 hover:text-[#a14b3f] transition-colors mb-4"
           >
-            <ArrowLeft className="w-4 h-4" />
+            <ArrowLeft className="size-4" />
             Retour aux Articles
           </Link>
 
           <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-xl bg-linear-to-br from-indigo-500 to-indigo-600 flex items-center justify-center">
-              <PenSquare className="w-6 h-6 text-white" />
+            <div className="size-12 rounded-xl bg-linear-to-br from-indigo-500 to-indigo-600 flex items-center justify-center">
+              <PenSquare className="size-6 text-white" />
             </div>
             <div>
               <h1 className="text-3xl sm:text-4xl font-bold bg-clip-text text-transparent bg-linear-to-r from-indigo-500 to-indigo-600">
@@ -68,7 +68,7 @@ export default async function NewArticlePage() {
         <Card className="mt-6 border-l-4 border-l-blue-500">
           <CardContent className="p-6">
             <h3 className="font-semibold mb-3 flex items-center gap-2">
-              <PenSquare className="w-5 h-5 text-blue-500" />
+              <PenSquare className="size-5 text-blue-500" />
               Conseils rapides
             </h3>
             <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-400">

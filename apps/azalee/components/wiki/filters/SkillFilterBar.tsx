@@ -147,7 +147,7 @@ export function SkillFilterBar({
               )}
             >
               {f.imageIcon ? (
-                <div className="relative w-5 h-5">
+                <div className="relative size-5">
                   <Image src={f.imageIcon} alt="" fill className="object-contain" sizes="20px" />
                 </div>
               ) : f.sprite ? (
@@ -255,7 +255,7 @@ export function SkillFilterBar({
                 {f.commonSprite ? (
                   <CommonSpriteIcon name={f.commonSprite} scale={0.28} />
                 ) : f.imageIcon ? (
-                  <div className="relative w-4 h-4">
+                  <div className="relative size-4">
                     <Image src={f.imageIcon} alt="" fill className="object-contain" sizes="16px" />
                   </div>
                 ) : f.icon ? (

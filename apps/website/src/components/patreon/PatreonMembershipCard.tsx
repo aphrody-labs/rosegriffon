@@ -188,7 +188,7 @@ export async function PatreonMembershipCard({ userId }: { userId: string }) {
 		: null;
 
 	const accent = isActive
-		? "border-emerald-500/30 bg-gradient-to-br from-emerald-500/5 via-card to-card"
+		? "border-emerald-500/30 bg-linear-to-br from-emerald-500/5 via-card to-card"
 		: wasMember
 			? "border-zinc-500/20 bg-card"
 			: "border-[#FF424D]/30 bg-card";
@@ -199,8 +199,8 @@ export async function PatreonMembershipCard({ userId }: { userId: string }) {
 				{/* Header */}
 				<div className="flex flex-wrap items-start justify-between gap-4">
 					<div className="flex items-start gap-3">
-						<div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-[#FF424D]/10 text-[#FF424D]">
-							<Heart className="h-5 w-5" />
+						<div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-[#FF424D]/10 text-[#FF424D]">
+							<Heart className="size-5" />
 						</div>
 						<div className="min-w-0">
 							<div className="flex flex-wrap items-center gap-2">
@@ -240,7 +240,7 @@ export async function PatreonMembershipCard({ userId }: { userId: string }) {
 					<div className="flex flex-wrap items-center gap-2">
 						{isActive && (
 							<Badge className="bg-emerald-500/15 text-emerald-700 hover:bg-emerald-500/20 dark:text-emerald-300">
-								<Sparkles className="mr-1 h-3 w-3" />-{PATRON_DISCOUNT_PERCENT}%
+								<Sparkles className="mr-1 size-3" />-{PATRON_DISCOUNT_PERCENT}%
 								sur la boutique
 							</Badge>
 						)}
@@ -262,7 +262,7 @@ export async function PatreonMembershipCard({ userId }: { userId: string }) {
 					<div className="rounded-lg border border-border bg-muted/40 p-4">
 						<div className="flex flex-wrap items-center justify-between gap-3">
 							<div className="flex items-center gap-2">
-								<Crown className="h-4 w-4 text-amber-500" />
+								<Crown className="size-4 text-amber-500" />
 								<span className="font-semibold text-foreground">
 									{tierTitle}
 								</span>
@@ -340,7 +340,7 @@ export async function PatreonMembershipCard({ userId }: { userId: string }) {
 				{requiresShipping && address && (
 					<div className="rounded-lg border border-border bg-muted/30 p-4 text-sm">
 						<div className="mb-2 flex items-center gap-2 font-semibold text-foreground">
-							<Mail className="h-4 w-4 text-muted-foreground" />
+							<Mail className="size-4 text-muted-foreground" />
 							Adresse de livraison Patreon
 						</div>
 						<address className="not-italic text-xs text-muted-foreground leading-relaxed">
@@ -380,7 +380,7 @@ export async function PatreonMembershipCard({ userId }: { userId: string }) {
 				{legacy && (
 					<div className="rounded-lg border border-dashed border-amber-500/30 bg-amber-500/5 p-4 text-sm">
 						<div className="mb-2 flex items-center gap-2 font-semibold text-amber-700 dark:text-amber-300">
-							<History className="h-4 w-4" />
+							<History className="size-4" />
 							Historique pré-migration RG
 						</div>
 						<dl className="grid gap-1 text-xs text-muted-foreground sm:grid-cols-2">

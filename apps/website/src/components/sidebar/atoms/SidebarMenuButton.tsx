@@ -28,7 +28,7 @@ export const SidebarMenuButton = forwardRef<
 				"text-sm font-medium",
 				"transition-colors duration-150",
 				"text-sidebar-foreground/85 hover:bg-sidebar-accent hover:text-sidebar-foreground",
-				"focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring focus-visible:ring-offset-2 focus-visible:ring-offset-sidebar",
+				"focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-sidebar-ring focus-visible:ring-offset-2 focus-visible:ring-offset-sidebar",
 				"disabled:cursor-not-allowed disabled:opacity-50",
 				isActive &&
 					"bg-sidebar-accent text-sidebar-foreground font-semibold shadow-sm",
@@ -38,7 +38,7 @@ export const SidebarMenuButton = forwardRef<
 			{...props}
 		>
 			{icon && (
-				<span className="flex h-4 w-4 shrink-0 items-center justify-center">
+				<span className="flex size-4 shrink-0 items-center justify-center">
 					{icon}
 				</span>
 			)}

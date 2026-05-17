@@ -105,7 +105,7 @@ export const SidebarSimpleItem = React.forwardRef<
 
 						{/* External link indicator */}
 						{isExternal && (
-							<ExternalLink className="h-3 w-3 opacity-50 group-hover:opacity-100 transition-opacity" />
+							<ExternalLink className="size-3 opacity-50 group-hover:opacity-100 transition-opacity" />
 						)}
 					</span>
 

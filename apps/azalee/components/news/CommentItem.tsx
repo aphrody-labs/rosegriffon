@@ -266,7 +266,7 @@ export function CommentItem({
                 value={editContent}
                 onChange={(e) => setEditContent(e.target.value)}
                 rows={3}
-                className="w-full resize-none bg-transparent px-3 pt-3 pb-9 text-sm text-on-surface focus:outline-none leading-relaxed"
+                className="w-full resize-none bg-transparent px-3 pt-3 pb-9 text-sm text-on-surface focus:outline-hidden leading-relaxed"
                 style={{ minHeight: "80px" }}
               />
               <div className="absolute bottom-0 inset-x-0 flex items-center justify-between px-3 pb-2">

@@ -47,7 +47,7 @@ function EventsList({ events, isLoading }: EventsListProps) {
   if (isLoading) {
     return (
       <div className="flex flex-col items-center justify-center py-12 gap-4">
-        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-gaelle-blue mr-2" />
+        <div className="animate-spin rounded-full size-10 border-b-2 border-gaelle-blue mr-2" />
         <p className="text-muted-foreground animate-pulse font-medium">
           Recherche des événements...
         </p>
@@ -58,7 +58,7 @@ function EventsList({ events, isLoading }: EventsListProps) {
   if (events.length === 0) {
     return (
       <div className="py-12 text-center rounded-2xl border-2 border-dashed border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
-        <Info className="h-10 w-10 text-gray-400 mx-auto mb-3" />
+        <Info className="size-10 text-gray-400 mx-auto mb-3" />
         <p className="text-gray-600 dark:text-gray-400 font-bold text-lg">
           Aucun événement trouvé pour le moment.
         </p>
@@ -128,7 +128,7 @@ function EventsList({ events, isLoading }: EventsListProps) {
               <div className="space-y-3 text-sm text-gray-600 dark:text-gray-300 font-medium">
                 <div className="flex items-center gap-3">
                   <div className="p-1.5 rounded-lg bg-gray-100 dark:bg-gray-700">
-                    <Calendar className="h-4 w-4 shrink-0 text-gaelle-blue" />
+                    <Calendar className="size-4 shrink-0 text-gaelle-blue" />
                   </div>
                   <span>
                     {event.startDateFormatted.split(" ")[0]}
@@ -138,14 +138,14 @@ function EventsList({ events, isLoading }: EventsListProps) {
                 </div>
                 <div className="flex items-center gap-3">
                   <div className="p-1.5 rounded-lg bg-gray-100 dark:bg-gray-700">
-                    <Clock className="h-4 w-4 shrink-0 text-gaelle-blue" />
+                    <Clock className="size-4 shrink-0 text-gaelle-blue" />
                   </div>
                   <span>{event.startDateFormatted.split(" ").slice(1).join(" ")}</span>
                 </div>
                 <div className="flex flex-col gap-3">
                   <div className="flex items-start gap-3">
                     <div className="p-1.5 rounded-lg bg-gray-100 dark:bg-gray-700 mt-0.5">
-                      <MapPin className="h-4 w-4 shrink-0 text-gaelle-blue" />
+                      <MapPin className="size-4 shrink-0 text-gaelle-blue" />
                     </div>
                     <span className="line-clamp-2 leading-relaxed">{event.location}</span>
                   </div>
@@ -155,7 +155,7 @@ function EventsList({ events, isLoading }: EventsListProps) {
                       href="/epita-map"
                       className="ml-10 inline-flex items-center gap-2 text-xs font-bold text-blue-600 dark:text-blue-400 hover:underline hover:text-blue-700 dark:hover:text-blue-300 transition-colors"
                     >
-                      <Map className="h-3 w-3" />
+                      <Map className="size-3" />
                       Voir le plan du campus
                     </Link>
                   )}

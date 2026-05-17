@@ -62,7 +62,7 @@ export function FilterChips({
 						className={cn(
 							// MD3 Filter Chip styling
 							"inline-flex items-center gap-1.5 transition-all duration-200 ease-[cubic-bezier(0.2,0,0,1)]",
-							"focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50",
+							"focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-primary/50",
 							isImageOnly
 								? "p-0 bg-transparent border-none hover:scale-110 active:scale-95"
 								: "px-4 py-2 rounded-full text-sm font-medium border",
@@ -79,7 +79,7 @@ export function FilterChips({
 							<div
 								className={cn(
 									"relative",
-									isImageOnly ? "w-10 h-10" : "w-6 h-6",
+									isImageOnly ? "size-10" : "size-6",
 								)}
 							>
 								<Image

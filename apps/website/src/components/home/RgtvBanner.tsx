@@ -60,7 +60,7 @@ export function RgtvBanner({
                   alt="RGTV Logo"
                   width={16}
                   height={16}
-                  className="w-4 h-4"
+                  className="size-4"
                 />
                 {subtitle}
               </div>
@@ -91,7 +91,7 @@ export function RgtvBanner({
                     alt="RGTV Logo"
                     width={20}
                     height={20}
-                    className="mr-2 w-5 h-5"
+                    className="mr-2 size-5"
                   />
                   {buttonText}
                 </a>

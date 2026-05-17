@@ -309,7 +309,7 @@ function SidebarTrigger({
 			data-slot="sidebar-trigger"
 			variant="ghost"
 			className={cn(
-				"p-2 h-12 w-12 flex items-center justify-center",
+				"p-2 size-12 flex items-center justify-center",
 				className,
 			)}
 			onClick={(event) => {
@@ -318,7 +318,7 @@ function SidebarTrigger({
 			}}
 			{...props}
 		>
-			<Menu className="h-8 w-8 min-h-8 min-w-8" />
+			<Menu className="size-8 min-h-8 min-w-8" />
 			<span className="sr-only">Toggle Sidebar</span>
 		</Button>
 	);

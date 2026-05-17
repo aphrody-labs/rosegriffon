@@ -89,7 +89,7 @@ export function TwitchEnrichedInfo() {
                   className="p-3 rounded-full"
                   style={{ backgroundColor: `${colors.primary}20` }}
                 >
-                  <Users className="h-6 w-6" style={{ color: colors.primary }} />
+                  <Users className="size-6" style={{ color: colors.primary }} />
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">Abonnés</p>
@@ -112,7 +112,7 @@ export function TwitchEnrichedInfo() {
                   className="p-3 rounded-full"
                   style={{ backgroundColor: `${colors.primary}20` }}
                 >
-                  <Eye className="h-6 w-6" style={{ color: colors.primary }} />
+                  <Eye className="size-6" style={{ color: colors.primary }} />
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">Vues totales</p>
@@ -137,7 +137,7 @@ export function TwitchEnrichedInfo() {
                   className="p-3 rounded-full"
                   style={{ backgroundColor: `${colors.primary}20` }}
                 >
-                  <TrendingUp className="h-6 w-6" style={{ color: colors.primary }} />
+                  <TrendingUp className="size-6" style={{ color: colors.primary }} />
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">Contenus</p>
@@ -187,7 +187,7 @@ export function TwitchEnrichedInfo() {
                         className="object-cover group-hover:scale-110 transition-transform duration-300"
                       />
                       <div className="absolute bottom-2 right-2 px-2 py-1 rounded bg-black/80 text-white text-xs font-semibold flex items-center gap-1">
-                        <Clock className="h-3 w-3" />
+                        <Clock className="size-3" />
                         {formatDuration(video.duration)}
                       </div>
                       <div className="absolute top-2 left-2">
@@ -205,11 +205,11 @@ export function TwitchEnrichedInfo() {
                       </h4>
                       <div className="flex items-center justify-between text-sm text-muted-foreground">
                         <div className="flex items-center gap-1">
-                          <Eye className="h-3 w-3" />
+                          <Eye className="size-3" />
                           {formatViews(video.view_count)} vues
                         </div>
                         <div className="flex items-center gap-1">
-                          <Calendar className="h-3 w-3" />
+                          <Calendar className="size-3" />
                           {formatDate(video.created_at)}
                         </div>
                       </div>
@@ -232,7 +232,7 @@ export function TwitchEnrichedInfo() {
               />
               <CardContent className="p-12 text-center relative z-10">
                 <Gamepad2
-                  className="h-12 w-12 mx-auto mb-4 opacity-50"
+                  className="size-12 mx-auto mb-4 opacity-50"
                   style={{ color: colors.primary }}
                 />
                 <h3 className="font-bold text-lg mb-2">Aucun VOD disponible</h3>
@@ -286,16 +286,16 @@ export function TwitchEnrichedInfo() {
                       </h4>
                       <div className="flex items-center justify-between text-sm text-muted-foreground">
                         <div className="flex items-center gap-1">
-                          <Eye className="h-3 w-3" />
+                          <Eye className="size-3" />
                           {formatViews(clip.view_count)} vues
                         </div>
                         <div className="flex items-center gap-1">
-                          <Users className="h-3 w-3" />
+                          <Users className="size-3" />
                           {clip.creator_name}
                         </div>
                       </div>
                       <div className="flex items-center gap-1 text-xs text-muted-foreground mt-1">
-                        <Calendar className="h-3 w-3" />
+                        <Calendar className="size-3" />
                         {formatDate(clip.created_at)}
                       </div>
                     </CardContent>
@@ -317,7 +317,7 @@ export function TwitchEnrichedInfo() {
               />
               <CardContent className="p-12 text-center relative z-10">
                 <TrendingUp
-                  className="h-12 w-12 mx-auto mb-4 opacity-50"
+                  className="size-12 mx-auto mb-4 opacity-50"
                   style={{ color: colors.primary }}
                 />
                 <h3 className="font-bold text-lg mb-2">Aucun clip cette semaine</h3>

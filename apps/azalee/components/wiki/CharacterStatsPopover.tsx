@@ -32,9 +32,9 @@ export function CharacterStatsPopover({ stats, name }: CharacterStatsPopoverProp
         <Button
           variant="ghost"
           size="icon"
-          className="h-8 w-8 text-on-surface-variant hover:text-primary"
+          className="size-8 text-on-surface-variant hover:text-primary"
         >
-          <BarChart3 className="h-4 w-4" />
+          <BarChart3 className="size-4" />
           <span className="sr-only">Stats de {name}</span>
         </Button>
       </PopoverTrigger>

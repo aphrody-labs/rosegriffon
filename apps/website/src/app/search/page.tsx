@@ -45,7 +45,7 @@ export default async function SearchPage({
             className="flex-1"
           />
           <Button type="submit">
-            <Search className="h-4 w-4 mr-2" />
+            <Search className="size-4 mr-2" />
             Rechercher
           </Button>
         </form>
@@ -59,7 +59,7 @@ export default async function SearchPage({
 
           {!hasResults && (
             <div className="text-center py-12 bg-muted/30 rounded-lg">
-              <Search className="h-12 w-12 mx-auto text-muted-foreground mb-4 opacity-50" />
+              <Search className="size-12 mx-auto text-muted-foreground mb-4 opacity-50" />
               <p className="text-lg font-medium">Aucun résultat trouvé</p>
               <p className="text-muted-foreground">
                 Essayez avec d'autres mots-clés ou vérifiez l'orthographe.
@@ -70,7 +70,7 @@ export default async function SearchPage({
           {articles && articles.length > 0 && (
             <section className="space-y-4">
               <h3 className="text-2xl font-semibold flex items-center gap-2">
-                <Newspaper className="h-6 w-6" /> Articles
+                <Newspaper className="size-6" /> Articles
               </h3>
               <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                 {articles.map((article) => (

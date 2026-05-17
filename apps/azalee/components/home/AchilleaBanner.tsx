@@ -39,14 +39,14 @@ function EsportBadge({ variant }: { variant: "mobile" | "desktop" }) {
           : "px-4 py-1.5 bg-[#6d00ce]/10 border border-[#6d00ce]/30 text-[#6d00ce] text-xs shadow-sm"
       }`}
     >
-      <Zap className={`w-3 h-3 ${isMobile ? "fill-[#DFFF57] text-[#DFFF57]" : "fill-[#6d00ce]"}`} />
+      <Zap className={`size-3 ${isMobile ? "fill-[#DFFF57] text-[#DFFF57]" : "fill-[#6d00ce]"}`} />
       E-Sport
     </div>
   );
 }
 
 function AchilleaLogo({ size }: { size: "sm" | "lg" }) {
-  const cls = size === "sm" ? "w-10 h-10" : "w-14 h-14";
+  const cls = size === "sm" ? "size-10" : "size-14";
   return (
     <div className={`relative shrink-0 ${cls}`}>
       <Image
@@ -107,7 +107,7 @@ function AchilleaButtons({
       >
         <a href={discordLink} target="_blank" rel="noopener noreferrer">
           Discord
-          <DiscordIcon className={`ml-2 ${isMobile ? "w-4 h-4" : "w-5 h-5"}`} />
+          <DiscordIcon className={`ml-2 ${isMobile ? "size-4" : "size-5"}`} />
         </a>
       </Button>
     </div>
@@ -131,10 +131,10 @@ export function AchilleaBanner({
           className="object-cover object-center"
           sizes="100vw"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/60 to-black/35" />
+        <div className="absolute inset-0 bg-linear-to-t from-black/85 via-black/60 to-black/35" />
         <div className="absolute inset-0 bg-[url('/noise.svg')] opacity-10 mix-blend-overlay pointer-events-none" />
-        <div className="absolute -right-10 -top-10 w-48 h-48 bg-[#6d00ce] rounded-full blur-[80px] opacity-20 pointer-events-none" />
-        <div className="absolute -left-10 -bottom-10 w-48 h-48 bg-[#DFFF57] rounded-full blur-[80px] opacity-10 pointer-events-none" />
+        <div className="absolute -right-10 -top-10 size-48 bg-[#6d00ce] rounded-full blur-[80px] opacity-20 pointer-events-none" />
+        <div className="absolute -left-10 -bottom-10 size-48 bg-[#DFFF57] rounded-full blur-[80px] opacity-10 pointer-events-none" />
 
         <div className="relative z-10 p-5 flex flex-col gap-4">
           <div className="flex items-center justify-between">
@@ -152,8 +152,8 @@ export function AchilleaBanner({
       {/* ── Desktop: side-by-side grid ── */}
       <Card className="hidden md:block overflow-hidden border-transparent shadow-[0_0_30px_-10px_rgba(223,255,87,0.3)] bg-[#D9D9D9] relative group rounded-[32px] p-0">
         <div className="absolute inset-0 bg-[url('/noise.svg')] opacity-10 mix-blend-overlay pointer-events-none" />
-        <div className="absolute -right-20 -top-20 w-96 h-96 bg-[#6d00ce] rounded-full blur-[128px] opacity-20 pointer-events-none" />
-        <div className="absolute -left-20 -bottom-20 w-96 h-96 bg-[#DFFF57] rounded-full blur-[128px] opacity-10 pointer-events-none" />
+        <div className="absolute -right-20 -top-20 size-96 bg-[#6d00ce] rounded-full blur-[128px] opacity-20 pointer-events-none" />
+        <div className="absolute -left-20 -bottom-20 size-96 bg-[#DFFF57] rounded-full blur-[128px] opacity-10 pointer-events-none" />
 
         <div className="grid md:grid-cols-2 gap-0 relative z-20">
           <div className="relative h-auto w-full overflow-hidden">
@@ -174,7 +174,7 @@ export function AchilleaBanner({
               </div>
               <div className="space-y-1">
                 <AchilleaTitle className="h-20 md:h-24 max-w-md" />
-                <div className="h-1 w-24 bg-gradient-to-r from-[#6d00ce] to-transparent rounded-full opacity-80" />
+                <div className="h-1 w-24 bg-linear-to-r from-[#6d00ce] to-transparent rounded-full opacity-80" />
               </div>
             </div>
             <p className="text-gray-700 text-lg leading-relaxed max-w-md font-medium border-l-2 border-[#6d00ce]/30 pl-4">

@@ -49,11 +49,11 @@ export const SidebarIconButton = React.forwardRef<
 				target="_blank"
 				rel="noopener noreferrer"
 				className={cn(
-					"h-9 w-9 rounded-md sm:h-10 sm:w-10",
+					"size-9 rounded-md sm:h-10 sm:w-10",
 					"flex items-center justify-center",
 					"text-sidebar-foreground/80",
 					"transition-colors duration-150",
-					"focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring",
+					"focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-sidebar-ring",
 					"hover:bg-sidebar-accent",
 					"active:scale-95",
 					colorClasses[color],

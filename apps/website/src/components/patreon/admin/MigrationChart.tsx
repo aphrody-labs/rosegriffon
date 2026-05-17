@@ -63,7 +63,7 @@ export function MigrationChart({
 				{segments.map((s) => (
 					<div key={s.label} className="flex items-center gap-2">
 						<span
-							className="h-2.5 w-2.5 flex-shrink-0 rounded-full"
+							className="h-2.5 w-2.5 shrink-0 rounded-full"
 							style={{ backgroundColor: s.color }}
 						/>
 						<span className="text-white/70">{s.label}</span>

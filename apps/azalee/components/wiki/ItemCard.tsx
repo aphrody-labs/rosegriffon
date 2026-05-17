@@ -92,14 +92,14 @@ export function ItemCard({
 		>
 			<div className="p-4 flex gap-4">
 				{/* Icon */}
-				<div className="w-14 h-14 shrink-0 rounded-xl bg-surface-container-high flex items-center justify-center border border-outline-variant/20 overflow-hidden">
+				<div className="size-14 shrink-0 rounded-xl bg-surface-container-high flex items-center justify-center border border-outline-variant/20 overflow-hidden">
 					{imageSrc && !imgError ? (
 						<Image
 							src={imageSrc}
 							alt={name}
 							width={48}
 							height={48}
-							className="object-contain w-11 h-11"
+							className="object-contain size-11"
 							unoptimized
 							onError={() => setImgError(true)}
 						/>

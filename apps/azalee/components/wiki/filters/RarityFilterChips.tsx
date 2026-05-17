@@ -35,7 +35,7 @@ export function RarityFilterChips() {
             onClick={() => toggle(value)}
             className={cn(
               "transition-all duration-200 rounded-full",
-              "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50",
+              "focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-primary/50",
               isSelected
                 ? "ring-2 ring-primary scale-105 shadow-md"
                 : "opacity-70 hover:opacity-100 hover:scale-105",

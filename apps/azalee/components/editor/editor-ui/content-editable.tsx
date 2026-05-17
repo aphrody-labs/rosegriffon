@@ -18,7 +18,7 @@ export function ContentEditable({
     <LexicalContentEditable
       className={
         className ??
-        "ContentEditable__root relative block min-h-72 min-h-full overflow-auto px-8 py-4 focus:outline-none"
+        "ContentEditable__root relative block min-h-72 min-h-full overflow-auto px-8 py-4 focus:outline-hidden"
       }
       aria-label="Contenu de l'article"
       aria-placeholder={typeof placeholder === "string" ? placeholder : "Éditeur de texte"}

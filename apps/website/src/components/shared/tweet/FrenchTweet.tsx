@@ -10,7 +10,7 @@ const TwitterLogo = () => (
 	<svg
 		viewBox="0 0 24 24"
 		aria-hidden="true"
-		className="h-5 w-5 fill-current text-[#1DA1F2] dark:text-white"
+		className="size-5 fill-current text-[#1DA1F2] dark:text-white"
 	>
 		<path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
 	</svg>
@@ -54,7 +54,7 @@ export async function FrenchTweet({ id }: { id: string }) {
 						<Link
 							href={userUrl}
 							target="_blank"
-							className="relative w-10 h-10 rounded-full overflow-hidden"
+							className="relative size-10 rounded-full overflow-hidden"
 						>
 							<Image
 								src={tweet.user.profile_image_url_https}
@@ -121,11 +121,11 @@ export async function FrenchTweet({ id }: { id: string }) {
 					<div className="flex items-center justify-between text-muted-foreground text-sm">
 						<div className="flex items-center gap-6">
 							<div className="flex items-center gap-1.5 group cursor-pointer hover:text-pink-600">
-								<Heart className="w-4 h-4 group-hover:scale-110 transition-transform" />
+								<Heart className="size-4 group-hover:scale-110 transition-transform" />
 								<span>{formatNumber(tweet.favorite_count)}</span>
 							</div>
 							<div className="flex items-center gap-1.5 group cursor-pointer hover:text-blue-500">
-								<MessageCircle className="w-4 h-4 group-hover:scale-110 transition-transform" />
+								<MessageCircle className="size-4 group-hover:scale-110 transition-transform" />
 								<span>{formatNumber(tweet.conversation_count)}</span>
 							</div>
 							{/* Retweet count isn't always accurate in basic object, assuming conversation_count is replies */}

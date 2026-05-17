@@ -162,7 +162,7 @@ export function RgEmoteGrid({
         <button
           key={emote.name}
           onClick={() => onEmoteClick?.(emote)}
-          className="flex flex-col items-center gap-2 p-2 rounded-lg hover:bg-muted transition-colors focus:outline-none focus:ring-2 focus:ring-primary/50"
+          className="flex flex-col items-center gap-2 p-2 rounded-lg hover:bg-muted transition-colors focus:outline-hidden focus:ring-2 focus:ring-primary/50"
           type="button"
         >
           <RgEmote name={emote.name as keyof typeof EMOTES} size={size} animated={animated} />

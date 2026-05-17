@@ -25,7 +25,7 @@ export function RecentUsers({ users }: { users: RecentUser[] }) {
 					className="flex items-center gap-1 text-xs font-medium text-muted-foreground transition-colors hover:text-primary"
 				>
 					Tout voir
-					<ArrowRight className="h-3 w-3" aria-hidden="true" />
+					<ArrowRight className="size-3" aria-hidden="true" />
 				</Link>
 			</CardHeader>
 			<CardContent>
@@ -38,7 +38,7 @@ export function RecentUsers({ users }: { users: RecentUser[] }) {
 								key={u.id}
 								className="flex items-center gap-3 py-3 first:pt-0 last:pb-0"
 							>
-								<Avatar className="h-9 w-9">
+								<Avatar className="size-9">
 									<AvatarImage src={u.avatar_url ?? ""} alt="" />
 									<AvatarFallback className="text-xs">
 										{(u.username ?? "?")[0]?.toUpperCase()}

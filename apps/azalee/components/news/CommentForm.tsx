@@ -142,7 +142,7 @@ export function CommentForm({
 						onChange={handleChange}
 						placeholder={defaultPlaceholder}
 						rows={2}
-						className="w-full resize-none bg-transparent px-4 pt-3 pb-10 text-sm text-on-surface placeholder:text-on-surface-variant/40 focus:outline-none leading-relaxed"
+						className="w-full resize-none bg-transparent px-4 pt-3 pb-10 text-sm text-on-surface placeholder:text-on-surface-variant/40 focus:outline-hidden leading-relaxed"
 						style={{ minHeight: "80px", maxHeight: "192px" }}
 					/>
 

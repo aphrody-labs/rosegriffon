@@ -49,7 +49,7 @@ export function PaginationControls({
 			<div className="flex gap-2">
 				<Button variant="outline" size="sm" disabled={currentPage <= 1} asChild>
 					<LinkComponent href={createPageUrl(currentPage - 1)}>
-						<ChevronLeft className="w-4 h-4 mr-2" />
+						<ChevronLeft className="size-4 mr-2" />
 						{previousLabel}
 					</LinkComponent>
 				</Button>
@@ -61,7 +61,7 @@ export function PaginationControls({
 				>
 					<LinkComponent href={createPageUrl(currentPage + 1)}>
 						{nextLabel}
-						<ChevronRight className="w-4 h-4 ml-2" />
+						<ChevronRight className="size-4 ml-2" />
 					</LinkComponent>
 				</Button>
 			</div>

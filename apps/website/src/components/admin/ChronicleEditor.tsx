@@ -234,7 +234,7 @@ export function ChronicleEditor({
 			{/* Alerte erreurs */}
 			{errors.length > 0 && (
 				<Alert variant="destructive">
-					<AlertCircle className="h-4 w-4" />
+					<AlertCircle className="size-4" />
 					<AlertDescription>
 						<ul className="list-disc list-inside">
 							{errors.map((error, i) => (
@@ -248,7 +248,7 @@ export function ChronicleEditor({
 			{/* Alerte brouillon trouvé */}
 			{hasDraft && (
 				<Alert className="border-sky-500/40 bg-sky-500/10">
-					<AlertCircle className="h-4 w-4 text-sky-600 dark:text-sky-400" />
+					<AlertCircle className="size-4 text-sky-600 dark:text-sky-400" />
 					<AlertDescription className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
 						<span className="text-sm text-foreground">
 							Un brouillon non enregistré a été trouvé. Voulez-vous le restaurer
@@ -298,7 +298,7 @@ export function ChronicleEditor({
 							onClick={() => setIsPreview(!isPreview)}
 							className="flex-1 sm:flex-none"
 						>
-							<Eye className="h-4 w-4 mr-2" />
+							<Eye className="size-4 mr-2" />
 							{isPreview ? "Éditer" : "Prévisualiser"}
 						</Button>
 
@@ -329,7 +329,7 @@ export function ChronicleEditor({
 							disabled={isSaving}
 							className="text-xs sm:text-sm"
 						>
-							<Save className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-2" />
+							<Save className="size-3 sm:h-4 sm:w-4 sm:mr-2" />
 							<span className="hidden sm:inline">
 								{isSaving && !published ? "Enregistrement..." : "Brouillon"}
 							</span>
@@ -343,7 +343,7 @@ export function ChronicleEditor({
 							disabled={isSaving}
 							className="bg-linear-to-r from-rg-primary to-rg-secondary hover:opacity-90 text-white text-xs sm:text-sm"
 						>
-							<Send className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-2" />
+							<Send className="size-3 sm:h-4 sm:w-4 sm:mr-2" />
 							<span className="hidden sm:inline">
 								{isSaving && published ? "Publication..." : "Publier"}
 							</span>

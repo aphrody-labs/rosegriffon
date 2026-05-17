@@ -83,7 +83,7 @@ export default function ProjectsSection() {
   return (
     <div className="space-y-8 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div className="text-center space-y-3 mb-12">
-        <h2 className="text-3xl sm:text-4xl md:text-5xl font-black bg-clip-text text-transparent bg-gradient-to-r from-gray-900 via-gray-700 to-gray-900 dark:from-white dark:via-gray-200 dark:to-white tracking-tight">
+        <h2 className="text-3xl sm:text-4xl md:text-5xl font-black bg-clip-text text-transparent bg-linear-to-r from-gray-900 via-gray-700 to-gray-900 dark:from-white dark:via-gray-200 dark:to-white tracking-tight">
           Nos Projets
         </h2>
         <p className="text-base sm:text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto leading-relaxed font-medium">
@@ -99,14 +99,14 @@ export default function ProjectsSection() {
               href={project.href}
               target={project.external ? "_blank" : undefined}
               key={project.title}
-              className="block h-full group outline-none"
+              className="block h-full group outline-hidden"
             >
               <Card
                 className={`h-full overflow-hidden border-0 bg-white dark:bg-zinc-900/50 shadow-lg hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 rounded-3xl relative isolate ring-1 ring-zinc-200 dark:ring-zinc-800 hover:ring-[#a14b3f]/50 dark:hover:ring-[#a14b3f]/50 p-0 ${project.title === "Azalée" ? "azalee" : ""}`}
               >
                 {/* Background Gradient Blob */}
                 <div
-                  className={`absolute inset-0 opacity-0 group-hover:opacity-10 transition-opacity duration-500 bg-gradient-to-br ${project.color}`}
+                  className={`absolute inset-0 opacity-0 group-hover:opacity-10 transition-opacity duration-500 bg-linear-to-br ${project.color}`}
                 />
 
                 <CardContent className="p-0 flex flex-col h-full">
@@ -123,14 +123,14 @@ export default function ProjectsSection() {
                       />
                     ) : (
                       <div
-                        className={`w-full h-full bg-gradient-to-br ${project.color} flex items-center justify-center`}
+                        className={`w-full h-full bg-linear-to-br ${project.color} flex items-center justify-center`}
                       >
-                        <IconComponent className="w-24 h-24 text-muted-foreground/30 group-hover:scale-110 transition-transform duration-500" />
+                        <IconComponent className="size-24 text-muted-foreground/30 group-hover:scale-110 transition-transform duration-500" />
                       </div>
                     )}
 
                     {/* Overlay Gradient */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent" />
+                    <div className="absolute inset-0 bg-linear-to-t from-black/90 via-black/30 to-transparent" />
 
                     {/* Top Badge */}
                     <div className="absolute top-4 right-4">
@@ -147,7 +147,7 @@ export default function ProjectsSection() {
                   <div className="p-6 sm:p-8 flex flex-col grow space-y-4 relative bg-white dark:bg-zinc-900">
                     {/* Decorative line */}
                     <div
-                      className={`absolute top-0 left-6 right-6 h-0.5 bg-gradient-to-r ${project.color} opacity-0 group-hover:opacity-100 transition-opacity duration-500`}
+                      className={`absolute top-0 left-6 right-6 h-0.5 bg-linear-to-r ${project.color} opacity-0 group-hover:opacity-100 transition-opacity duration-500`}
                     />
 
                     <div className="space-y-3 grow">
@@ -155,7 +155,7 @@ export default function ProjectsSection() {
                         <div
                           className={`p-2.5 rounded-xl bg-gray-100 dark:bg-zinc-800 text-gray-900 dark:text-white group-hover:bg-[#a14b3f] group-hover:text-white transition-colors duration-300 shadow-sm`}
                         >
-                          <IconComponent className="w-5 h-5" />
+                          <IconComponent className="size-5" />
                         </div>
                         <h3 className="text-2xl font-bold text-gray-900 dark:text-white">
                           {project.title}
@@ -182,7 +182,7 @@ export default function ProjectsSection() {
                               title={social.label}
                               aria-label={social.label}
                             >
-                              <SocialIcon className="w-4 h-4" />
+                              <SocialIcon className="size-4" />
                             </a>
                           );
                         })}
@@ -191,8 +191,8 @@ export default function ProjectsSection() {
                       {/* CTA Button */}
                       <div className="flex items-center gap-2 text-sm font-bold text-gray-900 dark:text-white group-hover:text-[#a14b3f] dark:group-hover:text-[#ff6b6b] transition-colors duration-300 group/btn">
                         <span>Explorer</span>
-                        <div className="w-8 h-8 rounded-full bg-gray-100 dark:bg-zinc-800 group-hover/btn:bg-[#a14b3f]/10 flex items-center justify-center transition-all duration-300 group-hover/btn:scale-110">
-                          <ArrowRight className="w-4 h-4 group-hover/btn:-rotate-45 transition-transform duration-300" />
+                        <div className="size-8 rounded-full bg-gray-100 dark:bg-zinc-800 group-hover/btn:bg-[#a14b3f]/10 flex items-center justify-center transition-all duration-300 group-hover/btn:scale-110">
+                          <ArrowRight className="size-4 group-hover/btn:-rotate-45 transition-transform duration-300" />
                         </div>
                       </div>
                     </div>

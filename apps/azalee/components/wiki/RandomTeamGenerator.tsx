@@ -198,7 +198,7 @@ function PlayerCard({
             className="object-cover"
             unoptimized
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
+          <div className="absolute inset-0 bg-linear-to-t from-black/80 via-transparent to-transparent" />
 
           {/* Rarity */}
           <div className="absolute top-0.5 left-0.5 sm:top-1.5 sm:left-1.5">
@@ -265,7 +265,7 @@ function StaffSlot({ person, role }: { person: Coordinator; role: string }) {
 
   return (
     <div className="flex items-center gap-2 px-2 py-1.5 rounded-xl bg-surface-container elevation-1">
-      <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-surface-container-high flex items-center justify-center shrink-0 overflow-hidden">
+      <div className="size-8 sm:w-10 sm:h-10 rounded-full bg-surface-container-high flex items-center justify-center shrink-0 overflow-hidden">
         {imageUrl ? (
           <Image
             src={imageUrl}
@@ -321,7 +321,7 @@ function FormationPicker({
           <select
             value={selectedIdx}
             onChange={(e) => onSelect(Number(e.target.value))}
-            className="w-full appearance-none rounded-xl bg-surface-container border border-outline-variant/30 px-3 py-2.5 pr-8 text-sm font-bold text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/50"
+            className="w-full appearance-none rounded-xl bg-surface-container border border-outline-variant/30 px-3 py-2.5 pr-8 text-sm font-bold text-on-surface focus:outline-hidden focus:ring-2 focus:ring-primary/50"
           >
             {formations.map((f, i) => (
               <option key={i} value={i}>

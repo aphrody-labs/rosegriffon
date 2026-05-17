@@ -67,7 +67,7 @@ export default async function ChroniquePage({ params }: { params: Promise<{ slug
             href="/chroniques"
             className="inline-flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 hover:text-[#a14b3f]"
           >
-            <ArrowLeft className="w-4 h-4" />
+            <ArrowLeft className="size-4" />
             Retour aux chroniques
           </Link>
         </nav>
@@ -90,11 +90,11 @@ export default async function ChroniquePage({ params }: { params: Promise<{ slug
 
             <div className="flex gap-4 text-sm text-gray-600 dark:text-gray-400">
               <div className="flex items-center gap-2">
-                <Calendar className="w-4 h-4" />
+                <Calendar className="size-4" />
                 {publishedDate ? new Date(publishedDate).toLocaleDateString("fr-FR") : "Non publié"}
               </div>
               <div className="flex items-center gap-2">
-                <Eye className="w-4 h-4" />
+                <Eye className="size-4" />
                 {viewCount} vues
               </div>
             </div>

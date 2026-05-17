@@ -229,7 +229,7 @@ export default async function PassivesPage({
                   >
                     <div className="flex items-center gap-2 mb-4">
                       {group.sprite ? (
-                        <div className="w-6 h-6 flex items-center justify-center">
+                        <div className="size-6 flex items-center justify-center">
                           <CommonSpriteIcon name={group.sprite} scale={0.5} />
                         </div>
                       ) : (
@@ -320,7 +320,7 @@ export default async function PassivesPage({
                   >
                     <div className="flex items-center gap-2 mb-4">
                       {group.sprite ? (
-                        <div className="w-6 h-6 flex items-center justify-center">
+                        <div className="size-6 flex items-center justify-center">
                           <CommonSpriteIcon name={group.sprite} scale={0.5} />
                         </div>
                       ) : (

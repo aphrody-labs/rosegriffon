@@ -32,7 +32,7 @@ function FeaturedMain({ item }: { item: FeedItem }) {
           priority
           onError={() => setImgError(true)}
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
+        <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/30 to-transparent" />
 
         <div className="absolute bottom-0 left-0 w-full p-4 md:p-8">
           <div className="flex items-center gap-2 mb-3">
@@ -77,7 +77,7 @@ function FeaturedSecondary({ item }: { item: FeedItem }) {
           sizes="(max-width: 768px) 100vw, 600px"
           onError={() => setImgError(true)}
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+        <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/20 to-transparent" />
 
         <div className="absolute bottom-0 left-0 w-full p-3 md:p-4">
           <div className="flex items-center gap-2 mb-2">

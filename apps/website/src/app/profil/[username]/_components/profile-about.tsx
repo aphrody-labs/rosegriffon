@@ -26,14 +26,14 @@ export function ProfileAbout({
 		<Card>
 			<CardContent className="p-6">
 				<h2 className="mb-4 flex items-center gap-2 text-base font-semibold text-foreground">
-					<User className="h-4 w-4 text-muted-foreground" aria-hidden="true" />À
+					<User className="size-4 text-muted-foreground" aria-hidden="true" />À
 					propos
 				</h2>
 
 				{staffMember && (
 					<div className="mb-4 rounded-lg border border-sky-500/30 bg-sky-500/10 p-3">
 						<p className="mb-1 flex items-center gap-2 font-semibold text-sky-700 dark:text-sky-300">
-							<ShieldCheck className="h-4 w-4" aria-hidden="true" />
+							<ShieldCheck className="size-4" aria-hidden="true" />
 							Staff Officiel
 						</p>
 						<p className="text-xs text-sky-700/80 dark:text-sky-300/80">

@@ -26,7 +26,7 @@ function PatreonMigrationPreview() {
 			{/* Banner preview staff */}
 			<div className="border-b border-amber-500/40 bg-amber-500/15 px-6 py-3">
 				<div className="mx-auto flex max-w-5xl items-center gap-3 text-sm text-amber-700 dark:text-amber-200">
-					<EyeOff className="h-4 w-4 flex-shrink-0" />
+					<EyeOff className="size-4 shrink-0" />
 					<span>
 						<strong>Preview interne staff RG</strong> — page non publiée. Aucune
 						communication tant que l'annonce migration Patreon n'est pas
@@ -49,7 +49,7 @@ function PatreonMigrationPreview() {
 						Migration en cours
 					</div>
 					<h1 className="text-4xl font-bold sm:text-5xl md:text-6xl">
-						<span className="bg-gradient-to-r from-[#a08540] via-[#c9a958] to-[#a08540] bg-clip-text text-transparent dark:from-[#c9a958] dark:via-[#dab86a] dark:to-[#c9a958]">
+						<span className="bg-linear-to-r from-[#a08540] via-[#c9a958] to-[#a08540] bg-clip-text text-transparent dark:from-[#c9a958] dark:via-[#dab86a] dark:to-[#c9a958]">
 							Rose Griffon prend son envol
 						</span>
 					</h1>
@@ -98,7 +98,7 @@ function PatreonMigrationPreview() {
 							key={i}
 							className="rounded-2xl border border-border bg-card p-6 text-card-foreground"
 						>
-							<card.icon className="h-6 w-6 text-[#c9a958]" />
+							<card.icon className="size-6 text-[#c9a958]" />
 							<h3 className="mt-4 font-bold">{card.title}</h3>
 							<p className="mt-2 text-sm text-muted-foreground">{card.desc}</p>
 						</div>

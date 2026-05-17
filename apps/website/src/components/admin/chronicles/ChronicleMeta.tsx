@@ -219,7 +219,7 @@ export function ChronicleMeta({
 					>
 						{isUploading ? (
 							<div className="absolute inset-0 flex flex-col items-center justify-center bg-muted/30">
-								<Loader2 className="h-8 w-8 animate-spin text-rg-primary" />
+								<Loader2 className="size-8 animate-spin text-rg-primary" />
 								<span className="text-sm text-muted-foreground mt-2">
 									Upload en cours...
 								</span>
@@ -243,7 +243,7 @@ export function ChronicleMeta({
 											fileInputRef.current?.click();
 										}}
 									>
-										<Crop className="h-4 w-4 mr-2" />
+										<Crop className="size-4 mr-2" />
 										Recadrer
 									</Button>
 									<Button
@@ -255,7 +255,7 @@ export function ChronicleMeta({
 											onImageUpload();
 										}}
 									>
-										<ImageIcon className="h-4 w-4 mr-2" />
+										<ImageIcon className="size-4 mr-2" />
 										Changer
 									</Button>
 									<Button
@@ -267,13 +267,13 @@ export function ChronicleMeta({
 											setFeaturedImage("");
 										}}
 									>
-										<Trash2 className="h-4 w-4" />
+										<Trash2 className="size-4" />
 									</Button>
 								</div>
 							</>
 						) : (
 							<div className="absolute inset-0 flex flex-col items-center justify-center text-muted-foreground gap-2">
-								<ImageIcon className="h-10 w-10" />
+								<ImageIcon className="size-10" />
 								<span className="text-sm font-medium">Bibliothèque</span>
 								<span className="text-xs text-muted-foreground">ou</span>
 								<Button
@@ -285,7 +285,7 @@ export function ChronicleMeta({
 										fileInputRef.current?.click();
 									}}
 								>
-									<Upload className="h-3 w-3 mr-2" />
+									<Upload className="size-3 mr-2" />
 									Uploader & Recadrer
 								</Button>
 							</div>

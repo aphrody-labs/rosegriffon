@@ -84,7 +84,7 @@ export function SecuritySection({ sessions }: { sessions: SessionItem[] }) {
 			<Card>
 				<CardHeader>
 					<CardTitle className="flex items-center gap-2">
-						<ShieldCheck className="h-5 w-5 text-emerald-500" />
+						<ShieldCheck className="size-5 text-emerald-500" />
 						Double authentification (2FA)
 					</CardTitle>
 					<CardDescription>
@@ -118,9 +118,9 @@ export function SecuritySection({ sessions }: { sessions: SessionItem[] }) {
 								disabled={busy !== null}
 							>
 								{busy === "all" ? (
-									<Loader2 className="mr-2 h-4 w-4 animate-spin" />
+									<Loader2 className="mr-2 size-4 animate-spin" />
 								) : (
-									<LogOut className="mr-2 h-4 w-4" />
+									<LogOut className="mr-2 size-4" />
 								)}
 								Déconnecter tous les autres
 							</Button>
@@ -143,8 +143,8 @@ export function SecuritySection({ sessions }: { sessions: SessionItem[] }) {
 								className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-border p-4"
 							>
 								<div className="flex min-w-0 items-start gap-3">
-									<div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground">
-										<Icon className="h-4 w-4" />
+									<div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground">
+										<Icon className="size-4" />
 									</div>
 									<div className="min-w-0">
 										<div className="flex flex-wrap items-center gap-2">
@@ -181,9 +181,9 @@ export function SecuritySection({ sessions }: { sessions: SessionItem[] }) {
 										className="text-destructive hover:text-destructive hover:bg-destructive/10"
 									>
 										{busy === s.id ? (
-											<Loader2 className="mr-2 h-4 w-4 animate-spin" />
+											<Loader2 className="mr-2 size-4 animate-spin" />
 										) : (
-											<LogOut className="mr-2 h-4 w-4" />
+											<LogOut className="mr-2 size-4" />
 										)}
 										Révoquer
 									</Button>

@@ -33,7 +33,7 @@ export default function ChroniquesError({
       </div>
 
       <Alert variant="destructive" className="max-w-2xl mx-auto">
-        <AlertCircle className="h-4 w-4" />
+        <AlertCircle className="size-4" />
         <AlertTitle>Détails de l'erreur</AlertTitle>
         <AlertDescription className="mt-2 font-mono text-xs bg-red-950/10 p-2 rounded overflow-auto max-h-64">
           <div className="font-bold mb-2">{error.message || "Erreur inconnue"}</div>
@@ -51,7 +51,7 @@ export default function ChroniquesError({
           Retour à la liste
         </Button>
         <Button onClick={() => reset()} variant="default">
-          <RefreshCw className="mr-2 h-4 w-4" />
+          <RefreshCw className="mr-2 size-4" />
           Réessayer
         </Button>
       </div>

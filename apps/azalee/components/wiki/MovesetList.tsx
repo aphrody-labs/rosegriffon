@@ -52,21 +52,21 @@ export function MovesetList({ skills, maxSlots = 4, className }: MovesetListProp
               key={skill.id || i}
               href={skillHref}
               className={cn(
-                "group relative h-12 bg-gradient-to-r rounded-r-xl border-l-[6px] shadow-sm border border-outline-variant/30 flex items-center overflow-hidden transition-transform hover:translate-x-1",
+                "group relative h-12 bg-linear-to-r rounded-r-xl border-l-[6px] shadow-sm border border-outline-variant/30 flex items-center overflow-hidden transition-transform hover:translate-x-1",
                 skill.isPassive
                   ? "from-purple-500/10 to-surface-container border-l-purple-500" // Passifs en violet
                   : "from-surface-container-high to-surface-container border-l-lime-500", // Techniques en vert
               )}
             >
               {/* Slot Number */}
-              <div className="absolute -left-3 top-1/2 -translate-y-1/2 w-6 h-6 flex items-center justify-center">
+              <div className="absolute -left-3 top-1/2 -translate-y-1/2 size-6 flex items-center justify-center">
                 <span className="text-[10px] font-black text-white ml-2">{i + 1}</span>
               </div>
 
               {/* Icon */}
               <div className="w-10 h-full flex items-center justify-center bg-surface-dim">
                 {elementIcon ? (
-                  <div className="w-5 h-5 relative">
+                  <div className="size-5 relative">
                     <Image
                       src={elementIcon}
                       alt={skill.element || ""}
@@ -137,7 +137,7 @@ export function MovesetList({ skills, maxSlots = 4, className }: MovesetListProp
             key={`empty-${i}`}
             className="h-10 border-b border-outline-variant/20 flex items-center gap-4 px-4 opacity-30 select-none"
           >
-            <span className="font-bold border border-outline w-5 h-5 flex items-center justify-center rounded text-xs text-outline">
+            <span className="font-bold border border-outline size-5 flex items-center justify-center rounded text-xs text-outline">
               {skills.length + i + 1}
             </span>
             <div className="h-1 w-full bg-outline-variant/30 rounded-full" />

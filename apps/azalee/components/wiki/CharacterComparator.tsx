@@ -135,7 +135,7 @@ function CompareCard({ char, onClick }: { char: CompareCharacter; onClick: () =>
     >
       {/* Image area with element gradient - compact height */}
       <div
-        className={cn("relative w-full h-36 sm:h-48 overflow-hidden bg-gradient-to-br", gradient)}
+        className={cn("relative w-full h-36 sm:h-48 overflow-hidden bg-linear-to-br", gradient)}
       >
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_50%_80%,rgba(255,255,255,0.06),transparent_60%)]" />
         <Image
@@ -199,7 +199,7 @@ function EmptySlot({ side, onChoose }: { side: 1 | 2; onChoose: () => void }) {
         "transition-all duration-200 min-h-[180px] sm:min-h-[260px] w-full cursor-pointer group overflow-hidden",
       )}
     >
-      <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-primary-container flex items-center justify-center">
+      <div className="size-14 sm:w-16 sm:h-16 rounded-full bg-primary-container flex items-center justify-center">
         <Icon name="compare_arrows" size={28} className="text-on-primary-container sm:hidden" />
         <Icon
           name="compare_arrows"
@@ -389,8 +389,8 @@ function SkillRow({ skill, isCommon }: { skill: SkillInfo; isCommon: boolean }) 
       className={cn(
         "group relative flex items-center gap-1.5 sm:gap-2 h-10 sm:h-11 rounded-r-xl border-l-[5px] border border-outline-variant/20 overflow-hidden transition-all hover:translate-x-0.5",
         skill.isPassive
-          ? "bg-gradient-to-r from-purple-500/10 to-surface-container border-l-purple-500"
-          : "bg-gradient-to-r from-surface-container-high to-surface-container border-l-lime-500",
+          ? "bg-linear-to-r from-purple-500/10 to-surface-container border-l-purple-500"
+          : "bg-linear-to-r from-surface-container-high to-surface-container border-l-lime-500",
         isCommon && "ring-1 ring-primary/30",
       )}
     >

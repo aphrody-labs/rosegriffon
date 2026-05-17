@@ -101,7 +101,7 @@ export function TeamStats({ members, formation }: TeamStatsProps) {
       {/* Top row: ring + balance + rarities */}
       <div className="flex items-center gap-4">
         {/* Completion ring */}
-        <div className="relative w-20 h-20 shrink-0">
+        <div className="relative size-20 shrink-0">
           <svg className="w-full h-full -rotate-90" viewBox="0 0 80 80">
             <circle
               cx="40"

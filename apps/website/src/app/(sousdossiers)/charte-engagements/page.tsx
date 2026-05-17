@@ -115,7 +115,7 @@ export default function CharteEngagementsPage() {
           <CardContent>
             <div className="flex flex-col space-y-6">
               <div className="flex items-start gap-3">
-                <div className="min-w-6 h-6 rounded-full bg-red-600 flex items-center justify-center text-white font-bold">
+                <div className="min-size-6 rounded-full bg-red-600 flex items-center justify-center text-white font-bold">
                   1
                 </div>
                 <p className="text-base lg:text-lg">
@@ -124,7 +124,7 @@ export default function CharteEngagementsPage() {
               </div>
 
               <div className="flex items-start gap-3">
-                <div className="min-w-6 h-6 rounded-full bg-red-600 flex items-center justify-center text-white font-bold">
+                <div className="min-size-6 rounded-full bg-red-600 flex items-center justify-center text-white font-bold">
                   2
                 </div>
                 <p className="text-base lg:text-lg">
@@ -136,7 +136,7 @@ export default function CharteEngagementsPage() {
               </div>
 
               <div className="flex items-start gap-3">
-                <div className="min-w-6 h-6 rounded-full bg-red-600 flex items-center justify-center text-white font-bold">
+                <div className="min-size-6 rounded-full bg-red-600 flex items-center justify-center text-white font-bold">
                   3
                 </div>
                 <p className="text-base lg:text-lg">
@@ -147,7 +147,7 @@ export default function CharteEngagementsPage() {
               </div>
 
               <div className="flex items-start gap-3">
-                <div className="min-w-6 h-6 rounded-full bg-red-600 flex items-center justify-center text-white font-bold">
+                <div className="min-size-6 rounded-full bg-red-600 flex items-center justify-center text-white font-bold">
                   4
                 </div>
                 <p className="text-base lg:text-lg">

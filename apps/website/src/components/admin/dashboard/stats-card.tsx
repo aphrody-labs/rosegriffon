@@ -79,11 +79,11 @@ export function StatsCard({
 						</div>
 						<div
 							className={cn(
-								"flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg",
+								"flex size-10 shrink-0 items-center justify-center rounded-lg",
 								ACCENTS[accent],
 							)}
 						>
-							<Icon className="h-5 w-5" />
+							<Icon className="size-5" />
 						</div>
 					</div>
 				</CardContent>

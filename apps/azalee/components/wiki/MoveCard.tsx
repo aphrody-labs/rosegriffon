@@ -131,7 +131,7 @@ export function MoveCard({
 					<div className="absolute inset-0 flex items-center justify-center pointer-events-none">
 						<div
 							className={cn(
-								"flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 rounded-full",
+								"flex items-center justify-center size-10 sm:w-12 sm:h-12 rounded-full",
 								"bg-black/50 backdrop-blur-sm border border-white/20",
 								"transition-all duration-200",
 								"group-hover:bg-black/70 group-hover:scale-110",
@@ -140,7 +140,7 @@ export function MoveCard({
 							<svg
 								viewBox="0 0 24 24"
 								fill="white"
-								className="w-5 h-5 sm:w-6 sm:h-6 ml-0.5"
+								className="size-5 sm:w-6 sm:h-6 ml-0.5"
 							>
 								<path d="M8 5v14l11-7z" />
 							</svg>
@@ -168,7 +168,7 @@ export function MoveCard({
 				)}
 
 				{/* Bottom gradient */}
-				<div className="absolute inset-x-0 bottom-0 h-10 bg-gradient-to-t from-neutral-950 to-transparent" />
+				<div className="absolute inset-x-0 bottom-0 h-10 bg-linear-to-t from-neutral-950 to-transparent" />
 			</div>
 
 			{/* Name + stats bar */}
@@ -177,7 +177,7 @@ export function MoveCard({
 					<p className="text-[11px] sm:text-xs font-bold text-on-surface truncate leading-tight flex-1 min-w-0">
 						{name}
 					</p>
-					<div className="flex items-center gap-1.5 flex-shrink-0">
+					<div className="flex items-center gap-1.5 shrink-0">
 						{tensionCost != null && tensionCost > 0 && (
 							<span className="text-[9px] font-bold text-primary/80 tabular-nums">
 								{tensionCost}TP

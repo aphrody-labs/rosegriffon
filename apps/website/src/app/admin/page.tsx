@@ -46,7 +46,7 @@ export default async function AdminDashboardPage() {
 		return (
 			<div className="mx-auto max-w-7xl space-y-8 px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
 				<AdminPageHeader
-					icon={<LayoutDashboard className="h-5 w-5" />}
+					icon={<LayoutDashboard className="size-5" />}
 					title="Tableau de bord"
 					description="Service Supabase indisponible."
 				/>
@@ -142,7 +142,7 @@ export default async function AdminDashboardPage() {
 	return (
 		<div className="mx-auto max-w-7xl space-y-8 px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
 			<AdminPageHeader
-				icon={<LayoutDashboard className="h-5 w-5" />}
+				icon={<LayoutDashboard className="size-5" />}
 				title="Tableau de bord"
 				description="Vue d'ensemble de l'activité de Rose Griffon."
 			/>

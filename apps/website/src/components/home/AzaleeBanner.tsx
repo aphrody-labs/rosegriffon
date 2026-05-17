@@ -29,8 +29,8 @@ export function AzaleeBanner({
       <Card className="overflow-hidden border border-[#b78250] border-t-0 shadow-[0_0_40px_-10px_rgba(200,60,81,0.2)] bg-[#240112] relative group rounded-3xl p-0">
         {/* Soft Paper/Noise Texture effect */}
         <div className="absolute inset-0 opacity-10 mix-blend-overlay pointer-events-none" style={{ backgroundImage: "url(/images/noise.svg)" }} />
-        <div className="absolute -right-20 -top-20 w-96 h-96 bg-[#C83C51] rounded-full blur-[128px] opacity-20 pointer-events-none" />
-        <div className="absolute -left-20 -bottom-20 w-96 h-96 bg-[#FECD50] rounded-full blur-[128px] opacity-10 pointer-events-none" />
+        <div className="absolute -right-20 -top-20 size-96 bg-[#C83C51] rounded-full blur-[128px] opacity-20 pointer-events-none" />
+        <div className="absolute -left-20 -bottom-20 size-96 bg-[#FECD50] rounded-full blur-[128px] opacity-10 pointer-events-none" />
 
         <div className="grid md:grid-cols-2 gap-0 relative z-20 md:min-h-[320px] lg:min-h-[360px]">
           {/* Left: Image */}
@@ -50,10 +50,10 @@ export function AzaleeBanner({
             <div className="space-y-4">
               <div className="flex items-center justify-between w-full">
                 <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#FECD50]/10 border border-[#FECD50]/30 text-[#FECD50] text-xs font-bold uppercase tracking-wide shadow-sm">
-                  <Newspaper className="w-3 h-3 fill-[#FECD50]" />
+                  <Newspaper className="size-3 fill-[#FECD50]" />
                   {tag}
                 </div>
-                <div className="relative w-12 h-12 sm:w-16 sm:h-16 shrink-0">
+                <div className="relative size-12 sm:w-16 sm:h-16 shrink-0">
                   <Image
                     src={logo}
                     alt={`Logo ${title} Miniature`}
@@ -66,7 +66,7 @@ export function AzaleeBanner({
                 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl text-white"
                 style={{ fontFamily: '"BradBunR", system-ui' }}
               >
-                <span className="bg-clip-text text-transparent bg-gradient-to-r from-[#FECD50] to-[#C83C51] drop-shadow-sm">
+                <span className="bg-clip-text text-transparent bg-linear-to-r from-[#FECD50] to-[#C83C51] drop-shadow-sm">
                   {title}
                 </span>
               </h2>
@@ -83,7 +83,7 @@ export function AzaleeBanner({
                 className="bg-white hover:bg-gray-100 text-[#240112] font-bold rounded-full shadow-lg hover:shadow-white/20 transition-all duration-300 px-5 text-sm sm:text-base"
               >
                 <a href={twitterLink} target="_blank" rel="noopener noreferrer">
-                  <Twitter className="mr-2 w-4 h-4 sm:w-5 sm:h-5 fill-current" />
+                  <Twitter className="mr-2 size-4 sm:w-5 sm:h-5 fill-current" />
                   Suivre sur X
                 </a>
               </Button>
@@ -94,7 +94,7 @@ export function AzaleeBanner({
                 className="border-[#C83C51] text-[#FECD50] hover:bg-[#C83C51]/20 hover:text-white hover:border-[#FECD50] rounded-full backdrop-blur-sm bg-[#240112]/50 transition-all duration-300 px-5 text-sm sm:text-base"
               >
                 <a href={instagramLink} target="_blank" rel="noopener noreferrer">
-                  <Instagram className="mr-2 w-4 h-4 sm:w-5 sm:h-5" />
+                  <Instagram className="mr-2 size-4 sm:w-5 sm:h-5" />
                   Instagram
                 </a>
               </Button>

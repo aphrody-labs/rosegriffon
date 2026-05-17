@@ -61,7 +61,7 @@ export function ElementChart({ data }: { data: Array<{ name: string; value: numb
           {data.map((entry) => (
             <div key={entry.name} className="flex items-center gap-2">
               <div
-                className="w-3 h-3 rounded-full"
+                className="size-3 rounded-full"
                 style={{ backgroundColor: (COLORS as any)[entry.name] || "#8884d8" }}
               />
               <span className="text-sm font-medium text-on-surface-variant">

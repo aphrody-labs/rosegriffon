@@ -124,9 +124,9 @@ export function PatreonAdminActions() {
 					className="gap-2"
 				>
 					{busy === "export" ? (
-						<Loader2 className="h-4 w-4 animate-spin" />
+						<Loader2 className="size-4 animate-spin" />
 					) : (
-						<RefreshCw className="h-4 w-4" />
+						<RefreshCw className="size-4" />
 					)}
 					Lancer export complet
 				</Button>
@@ -137,9 +137,9 @@ export function PatreonAdminActions() {
 					className="gap-2"
 				>
 					{busy === "reconcile" ? (
-						<Loader2 className="h-4 w-4 animate-spin" />
+						<Loader2 className="size-4 animate-spin" />
 					) : (
-						<Shuffle className="h-4 w-4" />
+						<Shuffle className="size-4" />
 					)}
 					Réconciliation auto
 				</Button>
@@ -150,9 +150,9 @@ export function PatreonAdminActions() {
 					className="gap-2 border-rose-500/40 text-rose-300 hover:bg-rose-500/10"
 				>
 					{busy === "churn" ? (
-						<Loader2 className="h-4 w-4 animate-spin" />
+						<Loader2 className="size-4 animate-spin" />
 					) : (
-						<XCircle className="h-4 w-4" />
+						<XCircle className="size-4" />
 					)}
 					Cleanup post-cutoff (90j)
 				</Button>

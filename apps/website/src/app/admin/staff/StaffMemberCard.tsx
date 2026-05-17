@@ -57,7 +57,7 @@ export function StaffMemberCard({
 				<div className="relative h-24 bg-linear-to-r from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-900">
 					<div className="absolute -bottom-10 left-1/2 -translate-x-1/2">
 						<div
-							className={`relative h-20 w-20 overflow-hidden rounded-full border-4 shadow-sm ${isPending ? "border-orange-100" : "border-background"}`}
+							className={`relative size-20 overflow-hidden rounded-full border-4 shadow-sm ${isPending ? "border-orange-100" : "border-background"}`}
 						>
 							{member.image_url ? (
 								<Image
@@ -69,7 +69,7 @@ export function StaffMemberCard({
 								/>
 							) : (
 								<div className="flex h-full w-full items-center justify-center bg-muted text-muted-foreground">
-									<UsersIcon className="h-8 w-8" />
+									<UsersIcon className="size-8" />
 								</div>
 							)}
 						</div>
@@ -80,9 +80,9 @@ export function StaffMemberCard({
 								<Button
 									variant="ghost"
 									size="icon"
-									className="h-8 w-8 text-muted-foreground hover:text-foreground hover:bg-muted/400"
+									className="size-8 text-muted-foreground hover:text-foreground hover:bg-muted/400"
 								>
-									<MoreHorizontal className="h-4 w-4" />
+									<MoreHorizontal className="size-4" />
 								</Button>
 							</DropdownMenuTrigger>
 							<DropdownMenuContent align="end">
@@ -92,17 +92,17 @@ export function StaffMemberCard({
 										onClick={() => onApprove(member)}
 										className="text-green-600"
 									>
-										<Check className="mr-2 h-4 w-4" />
+										<Check className="mr-2 size-4" />
 										Valider
 									</DropdownMenuItem>
 								)}
 								<DropdownMenuItem onClick={() => onEdit(member)}>
-									<Edit className="mr-2 h-4 w-4" />
+									<Edit className="mr-2 size-4" />
 									Modifier
 								</DropdownMenuItem>
 								{onDeactivate && !isPending && (
 									<DropdownMenuItem onClick={() => onDeactivate(member)}>
-										<EyeOff className="mr-2 h-4 w-4" />
+										<EyeOff className="mr-2 size-4" />
 										Désactiver
 									</DropdownMenuItem>
 								)}
@@ -111,7 +111,7 @@ export function StaffMemberCard({
 									onClick={() => onDelete(member)}
 									className="text-destructive focus:text-destructive"
 								>
-									<Trash2 className="mr-2 h-4 w-4" />
+									<Trash2 className="mr-2 size-4" />
 									Supprimer
 								</DropdownMenuItem>
 							</DropdownMenuContent>
@@ -155,7 +155,7 @@ export function StaffMemberCard({
 						onClick={() => onApprove(member)}
 						className="w-full bg-green-600 hover:bg-green-700"
 					>
-						<Check className="mr-2 h-4 w-4" />
+						<Check className="mr-2 size-4" />
 						Valider
 					</Button>
 				) : (

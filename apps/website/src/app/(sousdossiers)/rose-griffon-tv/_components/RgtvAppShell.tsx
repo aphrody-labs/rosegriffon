@@ -146,7 +146,7 @@ export function RgtvAppShell({
 					{/* Logo & Title */}
 					<div className="flex items-center gap-3">
 						<div
-							className="relative h-10 w-10 rounded-full ring-2 ring-offset-2 overflow-hidden"
+							className="relative size-10 rounded-full ring-2 ring-offset-2 overflow-hidden"
 							style={{ "--tw-ring-color": "#d63901" } as React.CSSProperties}
 						>
 							<Image
@@ -181,7 +181,7 @@ export function RgtvAppShell({
 							<motion.div
 								animate={{ scale: [1, 1.2, 1] }}
 								transition={{ repeat: Infinity, duration: 2 }}
-								className="w-2 h-2 rounded-full"
+								className="size-2 rounded-full"
 								style={{ backgroundColor: "#d63901" }}
 							/>
 							<span
@@ -206,7 +206,7 @@ export function RgtvAppShell({
 							onClick={handleShare}
 							className="hidden sm:flex"
 						>
-							<Share2 className="h-5 w-5" />
+							<Share2 className="size-5" />
 						</Button>
 						<Button
 							variant="ghost"
@@ -214,9 +214,9 @@ export function RgtvAppShell({
 							onClick={() => setShowNotifications(!showNotifications)}
 							className="relative"
 						>
-							<Bell className="h-5 w-5" />
+							<Bell className="size-5" />
 							{notificationPermission === "default" && (
-								<span className="absolute top-1 right-1 w-2 h-2 bg-[#d63901] rounded-full animate-pulse" />
+								<span className="absolute top-1 right-1 size-2 bg-[#d63901] rounded-full animate-pulse" />
 							)}
 						</Button>
 						<Button
@@ -224,7 +224,7 @@ export function RgtvAppShell({
 							size="icon"
 							onClick={() => setShowMenu(!showMenu)}
 						>
-							<Menu className="h-5 w-5" />
+							<Menu className="size-5" />
 						</Button>
 					</div>
 				</div>
@@ -322,7 +322,7 @@ export function RgtvAppShell({
 										size="icon"
 										onClick={() => setShowMenu(false)}
 									>
-										<Menu className="h-5 w-5" />
+										<Menu className="size-5" />
 									</Button>
 								</div>
 								<nav className="space-y-2">
@@ -331,7 +331,7 @@ export function RgtvAppShell({
 										className="w-full justify-start"
 										onClick={() => handleTabClick("stream")}
 									>
-										<Radio className="mr-2 h-4 w-4" />
+										<Radio className="mr-2 size-4" />
 										Stream en direct
 									</Button>
 									<Button
@@ -339,7 +339,7 @@ export function RgtvAppShell({
 										className="w-full justify-start"
 										onClick={() => handleTabClick("planning")}
 									>
-										<CalendarDays className="mr-2 h-4 w-4" />
+										<CalendarDays className="mr-2 size-4" />
 										Planning
 									</Button>
 									<Button
@@ -347,7 +347,7 @@ export function RgtvAppShell({
 										className="w-full justify-start"
 										onClick={() => handleTabClick("community")}
 									>
-										<Users className="mr-2 h-4 w-4" />
+										<Users className="mr-2 size-4" />
 										Communauté
 									</Button>
 									<div className="h-px bg-border my-4" />
@@ -356,7 +356,7 @@ export function RgtvAppShell({
 										className="w-full justify-start"
 										onClick={handleShare}
 									>
-										<Share2 className="mr-2 h-4 w-4" />
+										<Share2 className="mr-2 size-4" />
 										Partager
 									</Button>
 									<Button
@@ -364,7 +364,7 @@ export function RgtvAppShell({
 										className="w-full justify-start"
 										onClick={requestNotificationPermission}
 									>
-										<Bell className="mr-2 h-4 w-4" />
+										<Bell className="mr-2 size-4" />
 										Notifications
 									</Button>
 								</nav>

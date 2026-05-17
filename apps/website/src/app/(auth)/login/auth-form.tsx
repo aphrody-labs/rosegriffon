@@ -71,7 +71,7 @@ export function AuthForm() {
 				className="h-12 w-full gap-3 bg-[#5865F2] font-semibold text-white shadow-md hover:bg-[#4752c4]"
 			>
 				{loadingProvider === "discord" ? (
-					<Loader2 className="h-5 w-5 animate-spin" aria-hidden="true" />
+					<Loader2 className="size-5 animate-spin" aria-hidden="true" />
 				) : (
 					<DiscordIcon />
 				)}
@@ -88,7 +88,7 @@ export function AuthForm() {
 				className="h-12 w-full gap-3 bg-[#e63b46] font-semibold text-white shadow-md hover:bg-[#c8323b]"
 			>
 				{loadingProvider === "patreon" ? (
-					<Loader2 className="h-5 w-5 animate-spin" aria-hidden="true" />
+					<Loader2 className="size-5 animate-spin" aria-hidden="true" />
 				) : (
 					<PatreonIcon />
 				)}

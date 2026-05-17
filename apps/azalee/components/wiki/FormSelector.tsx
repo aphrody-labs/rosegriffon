@@ -78,8 +78,8 @@ export function FormSelector({ forms, currentFormId }: FormSelectorProps) {
               key={form.id}
               href={`/chara/${form.slug}`}
               className={cn(
-                "relative flex-shrink-0 rounded-xl overflow-hidden transition-all group",
-                "w-14 h-14 sm:w-[56px] sm:h-[56px]",
+                "relative shrink-0 rounded-xl overflow-hidden transition-all group",
+                "size-14 sm:w-[56px] sm:h-[56px]",
                 isCurrent
                   ? "ring-2 ring-primary shadow-lg shadow-primary/20 opacity-100"
                   : "opacity-70 hover:opacity-100 ring-1 ring-white/20 hover:ring-white/40",
@@ -116,7 +116,7 @@ export function FormSelector({ forms, currentFormId }: FormSelectorProps) {
 
               {/* Element badge overlay */}
               {elemIcon && (
-                <div className="absolute bottom-0.5 right-0.5 w-4 h-4 rounded-full bg-black/60 flex items-center justify-center backdrop-blur-sm">
+                <div className="absolute bottom-0.5 right-0.5 size-4 rounded-full bg-black/60 flex items-center justify-center backdrop-blur-sm">
                   <NextImage
                     src={elemIcon}
                     alt=""
@@ -129,25 +129,25 @@ export function FormSelector({ forms, currentFormId }: FormSelectorProps) {
 
               {/* BASARA indicator */}
               {isBasara && (
-                <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#4facfe] via-[#7367f0] to-[#9733ee]" />
+                <div className="absolute top-0 left-0 right-0 h-1 bg-linear-to-r from-[#4facfe] via-[#7367f0] to-[#9733ee]" />
               )}
 
               {/* Hero indicator — color by type */}
               {isHero && form.heroType === "fire" && (
-                <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-red-500 via-orange-400 to-red-500" />
+                <div className="absolute top-0 left-0 right-0 h-1 bg-linear-to-r from-red-500 via-orange-400 to-red-500" />
               )}
               {isHero && form.heroType === "black" && (
-                <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-gray-600 via-gray-800 to-gray-600" />
+                <div className="absolute top-0 left-0 right-0 h-1 bg-linear-to-r from-gray-600 via-gray-800 to-gray-600" />
               )}
               {isHero && form.heroType === "pink" && (
-                <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-pink-400 via-rose-300 to-pink-400" />
+                <div className="absolute top-0 left-0 right-0 h-1 bg-linear-to-r from-pink-400 via-rose-300 to-pink-400" />
               )}
               {isHero && !form.heroType && (
-                <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-amber-400 via-yellow-300 to-amber-400" />
+                <div className="absolute top-0 left-0 right-0 h-1 bg-linear-to-r from-amber-400 via-yellow-300 to-amber-400" />
               )}
 
               {/* Position label at bottom */}
-              <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent pt-3 pb-0.5 px-1">
+              <div className="absolute bottom-0 left-0 right-0 bg-linear-to-t from-black/80 to-transparent pt-3 pb-0.5 px-1">
                 <span className="text-[8px] font-bold text-white/90 block text-center leading-tight truncate">
                   {pos}
                 </span>

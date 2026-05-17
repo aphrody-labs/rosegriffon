@@ -461,7 +461,7 @@ export default async function ArticlePage({
 							unoptimized={!news.featured_image_url}
 						/>
 						{/* Gradient overlay */}
-						<div className="absolute inset-0 bg-gradient-to-t from-background via-background/50 to-transparent" />
+						<div className="absolute inset-0 bg-linear-to-t from-background via-background/50 to-transparent" />
 
 						{/* Back button — always visible on image */}
 						<div className="absolute top-3 left-3 sm:top-6 sm:left-6 z-10">
@@ -526,7 +526,7 @@ export default async function ArticlePage({
 								<div className="flex items-center gap-2">
 									<div className="flex -space-x-2">
 										{news.author && (
-											<div className="size-8 sm:size-9 rounded-full bg-surface-container-high overflow-hidden relative flex-shrink-0 ring-2 ring-background z-[4]">
+											<div className="size-8 sm:size-9 rounded-full bg-surface-container-high overflow-hidden relative shrink-0 ring-2 ring-background z-[4]">
 												{news.author.avatar_url ? (
 													<Image
 														src={news.author.avatar_url}
@@ -554,7 +554,7 @@ export default async function ArticlePage({
 													<div
 														key={`${co.name}-${i}`}
 														title={co.name}
-														className="size-8 sm:size-9 rounded-full bg-surface-container-high overflow-hidden relative flex-shrink-0 ring-2 ring-background"
+														className="size-8 sm:size-9 rounded-full bg-surface-container-high overflow-hidden relative shrink-0 ring-2 ring-background"
 														style={{ zIndex: 3 - i }}
 													>
 														{co.avatar_url ? (
@@ -680,7 +680,7 @@ export default async function ArticlePage({
 						{/* Tags */}
 						{news.tags && news.tags.length > 0 && (
 							<div className="flex flex-wrap items-center gap-2 pt-4">
-								<Tag className="size-4 text-on-surface-variant/40 flex-shrink-0" />
+								<Tag className="size-4 text-on-surface-variant/40 shrink-0" />
 								{news.tags.map((tag: string) => (
 									<Link key={tag} href={`/news/tag/${encodeURIComponent(tag)}`}>
 										<Badge

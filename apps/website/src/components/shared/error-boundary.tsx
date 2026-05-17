@@ -46,7 +46,7 @@ export class ErrorBoundary extends Component<Props, State> {
       return (
         <div className="flex min-h-[200px] flex-col items-center justify-center p-8">
           <div className="rounded-lg border border-red-200 bg-red-50 p-6 text-center shadow-sm dark:border-red-900 dark:bg-red-950">
-            <AlertCircle className="mx-auto mb-4 h-12 w-12 text-red-500" />
+            <AlertCircle className="mx-auto mb-4 size-12 text-red-500" />
             <h2 className="mb-2 text-lg font-semibold text-red-900 dark:text-red-100">
               Une erreur est survenue
             </h2>
@@ -55,7 +55,7 @@ export class ErrorBoundary extends Component<Props, State> {
             </p>
             <button
               onClick={() => this.setState({ hasError: false, error: null })}
-              className="rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
+              className="rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 focus:outline-hidden focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
             >
               Réessayer
             </button>
@@ -83,7 +83,7 @@ export function SimpleErrorBoundary({
       fallback={
         <div className="flex items-center justify-center p-4">
           <div className="text-center">
-            <AlertCircle className="mx-auto mb-2 h-8 w-8 text-red-500" />
+            <AlertCircle className="mx-auto mb-2 size-8 text-red-500" />
             <p className="text-sm text-muted-foreground">{message}</p>
           </div>
         </div>

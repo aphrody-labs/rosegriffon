@@ -81,7 +81,7 @@ export function EditorMetadata({
                 </h3>
                 <div className="bg-surface-container-lowest rounded-2xl border border-outline-variant/30 p-4">
                   <input
-                    className="w-full bg-transparent text-xl font-bold font-sans placeholder:text-muted-foreground/40 border-none outline-none focus:ring-0 p-0 leading-tight"
+                    className="w-full bg-transparent text-xl font-bold font-sans placeholder:text-muted-foreground/40 border-none outline-hidden focus:ring-0 p-0 leading-tight"
                     placeholder="Titre de l'article"
                     value={title}
                     onChange={(e) => onTitleChange(e.target.value)}

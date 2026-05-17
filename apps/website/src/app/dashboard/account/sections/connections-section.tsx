@@ -190,7 +190,7 @@ export function ConnectionsSection({
 										disabled={busy !== null}
 									>
 										{busy === "patreon-refresh" ? (
-											<Loader2 className="mr-2 h-4 w-4 animate-spin" />
+											<Loader2 className="mr-2 size-4 animate-spin" />
 										) : null}
 										Synchroniser
 									</Button>
@@ -203,9 +203,9 @@ export function ConnectionsSection({
 										className={meta.color + " text-white"}
 									>
 										{busy === "patreon" ? (
-											<Loader2 className="mr-2 h-4 w-4 animate-spin" />
+											<Loader2 className="mr-2 size-4 animate-spin" />
 										) : (
-											<Heart className="mr-2 h-4 w-4" />
+											<Heart className="mr-2 size-4" />
 										)}
 										Lier Patreon
 									</Button>
@@ -222,7 +222,7 @@ export function ConnectionsSection({
 										onClick={() => setConfirmUnlink(provider)}
 										disabled={busy !== null}
 									>
-										<X className="mr-2 h-4 w-4" />
+										<X className="mr-2 size-4" />
 										Dissocier
 									</Button>
 								)}
@@ -270,7 +270,7 @@ export function ConnectionsSection({
 								className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
 							>
 								{busy ? (
-									<Loader2 className="mr-2 h-4 w-4 animate-spin" />
+									<Loader2 className="mr-2 size-4 animate-spin" />
 								) : null}
 								Dissocier
 							</AlertDialogAction>

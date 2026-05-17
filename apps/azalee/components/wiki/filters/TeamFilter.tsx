@@ -60,7 +60,7 @@ export function TeamFilter({ teams }: TeamFilterProps) {
           <div className="flex items-center border-b px-3">
             <CommandInput
               placeholder="Nom de l'équipe..."
-              className="flex h-11 w-full rounded-md bg-transparent py-3 text-sm outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50"
+              className="flex h-11 w-full rounded-md bg-transparent py-3 text-sm outline-hidden placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50"
             />
           </div>
           <CommandList>

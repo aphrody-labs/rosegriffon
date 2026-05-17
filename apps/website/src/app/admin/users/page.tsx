@@ -29,7 +29,7 @@ export default async function UsersPage({ searchParams }: UsersPageProps) {
 		return (
 			<div className="mx-auto max-w-7xl space-y-8 px-4 py-8 lg:px-8">
 				<AdminPageHeader
-					icon={<Users className="h-5 w-5" />}
+					icon={<Users className="size-5" />}
 					title="Utilisateurs"
 					description="Service Supabase indisponible."
 				/>
@@ -81,7 +81,7 @@ export default async function UsersPage({ searchParams }: UsersPageProps) {
 	return (
 		<div className="mx-auto max-w-7xl space-y-8 px-4 py-8 lg:px-8">
 			<AdminPageHeader
-				icon={<Users className="h-5 w-5" />}
+				icon={<Users className="size-5" />}
 				title="Utilisateurs"
 				description={`${count ?? 0} compte${count !== 1 ? "s" : ""} sur la plateforme`}
 			/>

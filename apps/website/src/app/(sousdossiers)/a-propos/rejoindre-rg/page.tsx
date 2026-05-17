@@ -38,7 +38,7 @@ export default async function RejoindreRGPage() {
             priority
           />
           {/* Gradient plus sombre pour assurer la lisibilité */}
-          <div className="absolute inset-0 bg-gradient-to-r from-[#2f6e9c]/95 to-[#1a4c70]/90 mix-blend-multiply" />
+          <div className="absolute inset-0 bg-linear-to-r from-[#2f6e9c]/95 to-[#1a4c70]/90 mix-blend-multiply" />
           <div className="absolute inset-0 bg-black/50" />
         </div>
 
@@ -47,7 +47,7 @@ export default async function RejoindreRGPage() {
 
         <div className="relative z-10">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-muted border border-border backdrop-blur-md mb-4">
-            <Sparkles className="h-4 w-4 text-[#FECD50] animate-pulse" />
+            <Sparkles className="size-4 text-[#FECD50] animate-pulse" />
             <span className="text-white font-medium text-sm uppercase tracking-wide">
               Recrutement Ouvert
             </span>
@@ -55,7 +55,7 @@ export default async function RejoindreRGPage() {
 
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-black mb-4 text-white tracking-tight font-[family-name:var(--font-poppins)] drop-shadow-lg">
             Rejoignez l'aventure <br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-white to-white/80">
+            <span className="text-transparent bg-clip-text bg-linear-to-r from-white to-white/80">
               Rose Griffon
             </span>
           </h1>
@@ -85,7 +85,7 @@ export default async function RejoindreRGPage() {
                   className="rounded-full"
                 />
                 Rejoindre Rose Griffon
-                <ArrowRight className="h-5 w-5" />
+                <ArrowRight className="size-5" />
               </a>
             </Button>
 
@@ -108,7 +108,7 @@ export default async function RejoindreRGPage() {
                   className="rounded-full bg-white p-0.5"
                 />
                 Rejoindre Azalée
-                <ArrowRight className="h-5 w-5" />
+                <ArrowRight className="size-5" />
               </a>
             </Button>
 
@@ -124,9 +124,9 @@ export default async function RejoindreRGPage() {
                 rel="noopener noreferrer"
                 className="flex items-center gap-3"
               >
-                <Shield className="h-5 w-5" />
+                <Shield className="size-5" />
                 Équipe Modération
-                <ArrowRight className="h-5 w-5" />
+                <ArrowRight className="size-5" />
               </a>
             </Button>
           </div>
@@ -173,7 +173,7 @@ export default async function RejoindreRGPage() {
               <div
                 className={`p-3 rounded-2xl ${stat.bg} ${stat.color} group-hover:scale-110 transition-transform duration-300`}
               >
-                <stat.icon className="h-6 w-6" />
+                <stat.icon className="size-6" />
               </div>
               <div>
                 <p className="text-2xl font-black text-gray-900 dark:text-white mb-0.5">
@@ -192,11 +192,11 @@ export default async function RejoindreRGPage() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
         {/* Conditions d'intégration */}
         <Card className="border-0 shadow-xl bg-white dark:bg-zinc-900 overflow-hidden h-full flex flex-col">
-          <div className="h-1.5 bg-gradient-to-r from-[#2f6e9c] to-[#a14b3f]" />
+          <div className="h-1.5 bg-linear-to-r from-[#2f6e9c] to-[#a14b3f]" />
           <CardHeader className="pb-2">
             <div className="flex items-center gap-3 mb-2">
               <div className="p-2.5 rounded-xl bg-[#2f6e9c]/10 text-[#2f6e9c]">
-                <CheckCircle className="h-6 w-6" />
+                <CheckCircle className="size-6" />
               </div>
               <CardTitle className="text-2xl font-bold">Conditions d&apos;intégration</CardTitle>
             </div>
@@ -239,11 +239,11 @@ export default async function RejoindreRGPage() {
 
         {/* Postes Ouverts */}
         <Card className="border-0 shadow-xl bg-white dark:bg-zinc-900 overflow-hidden h-full flex flex-col">
-          <div className="h-1.5 bg-gradient-to-r from-[#a14b3f] to-[#FECD50]" />
+          <div className="h-1.5 bg-linear-to-r from-[#a14b3f] to-[#FECD50]" />
           <CardHeader className="pb-2">
             <div className="flex items-center gap-3 mb-2">
               <div className="p-2.5 rounded-xl bg-[#a14b3f]/10 text-[#a14b3f]">
-                <Briefcase className="h-6 w-6" />
+                <Briefcase className="size-6" />
               </div>
               <CardTitle className="text-2xl font-bold">Postes Ouverts</CardTitle>
             </div>
@@ -253,7 +253,7 @@ export default async function RejoindreRGPage() {
           <CardContent className="space-y-3 pt-4 grow">
             <div className="group p-4 rounded-xl border border-gray-100 dark:border-zinc-800 hover:border-[#2f6e9c] hover:bg-blue-50/50 dark:hover:bg-blue-900/10 transition-all duration-300">
               <h3 className="text-lg font-bold text-[#2f6e9c] mb-1 flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-[#2f6e9c]" />
+                <span className="size-2 rounded-full bg-[#2f6e9c]" />
                 Rose Griffon (Asso)
               </h3>
               <p className="text-gray-600 dark:text-gray-300 text-sm">
@@ -264,7 +264,7 @@ export default async function RejoindreRGPage() {
 
             <div className="group p-4 rounded-xl border border-gray-100 dark:border-zinc-800 hover:border-[#a14b3f] hover:bg-red-50/50 dark:hover:bg-red-900/10 transition-all duration-300">
               <h3 className="text-lg font-bold text-[#a14b3f] mb-1 flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-[#a14b3f]" />
+                <span className="size-2 rounded-full bg-[#a14b3f]" />
                 Média Azalée
               </h3>
               <p className="text-gray-600 dark:text-gray-300 text-sm">
@@ -276,7 +276,7 @@ export default async function RejoindreRGPage() {
 
             <div className="group p-4 rounded-xl border border-gray-100 dark:border-zinc-800 hover:border-[#FECD50] hover:bg-yellow-50/50 dark:hover:bg-yellow-900/10 transition-all duration-300">
               <h3 className="text-lg font-bold text-amber-600 dark:text-[#FECD50] mb-1 flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-[#FECD50]" />
+                <span className="size-2 rounded-full bg-[#FECD50]" />
                 Modération
               </h3>
               <p className="text-gray-600 dark:text-gray-300 text-sm">
@@ -301,7 +301,7 @@ export default async function RejoindreRGPage() {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 relative">
           {/* Connecting Line (Desktop) */}
-          <div className="hidden md:block absolute top-12 left-[16%] right-[16%] h-0.5 bg-gradient-to-r from-gray-200 via-[#2f6e9c] to-gray-200 dark:from-gray-800 dark:to-gray-800 z-0" />
+          <div className="hidden md:block absolute top-12 left-[16%] right-[16%] h-0.5 bg-linear-to-r from-gray-200 via-[#2f6e9c] to-gray-200 dark:from-gray-800 dark:to-gray-800 z-0" />
 
           {[
             {
@@ -332,9 +332,9 @@ export default async function RejoindreRGPage() {
             <div key={index} className="relative z-10 group">
               <div className="flex flex-col items-center text-center p-6 rounded-3xl bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 shadow-lg hover:shadow-2xl hover:-translate-y-2 transition-all duration-300">
                 <div
-                  className={`w-14 h-14 rounded-2xl ${item.bg} ${item.color} flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300 shadow-inner`}
+                  className={`size-14 rounded-2xl ${item.bg} ${item.color} flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300 shadow-inner`}
                 >
-                  <item.icon className="h-7 w-7" />
+                  <item.icon className="size-7" />
                 </div>
                 <span className="text-xs font-bold text-muted-foreground mb-2 opacity-50">
                   ÉTAPE {item.step}
@@ -357,8 +357,8 @@ export default async function RejoindreRGPage() {
         className="relative overflow-hidden rounded-3xl bg-[#a14b3f] p-6 md:p-10 shadow-2xl text-center isolate"
       >
         <div className="absolute inset-0 opacity-20 mix-blend-overlay pointer-events-none" style={{ backgroundImage: "url(/images/noise.svg)" }} />
-        <div className="absolute top-0 right-0 w-96 h-96 bg-[#FECD50] rounded-full blur-[150px] opacity-20 pointer-events-none" />
-        <div className="absolute bottom-0 left-0 w-96 h-96 bg-[#2f6e9c] rounded-full blur-[150px] opacity-30 pointer-events-none" />
+        <div className="absolute top-0 right-0 size-96 bg-[#FECD50] rounded-full blur-[150px] opacity-20 pointer-events-none" />
+        <div className="absolute bottom-0 left-0 size-96 bg-[#2f6e9c] rounded-full blur-[150px] opacity-30 pointer-events-none" />
 
         <div className="relative z-10 max-w-4xl mx-auto space-y-6">
           <h2 className="text-3xl md:text-4xl lg:text-5xl font-black text-white tracking-tight">
@@ -390,7 +390,7 @@ export default async function RejoindreRGPage() {
                   className="rounded-full"
                 />
                 Candidater maintenant
-                <ArrowRight className="h-6 w-6" />
+                <ArrowRight className="size-6" />
               </a>
             </Button>
 
@@ -406,14 +406,14 @@ export default async function RejoindreRGPage() {
                 rel="noopener noreferrer"
                 className="flex items-center gap-3"
               >
-                <Shield className="h-6 w-6" />
+                <Shield className="size-6" />
                 Devenir Modérateur
               </a>
             </Button>
           </div>
 
           <p className="text-muted-foreground text-sm font-medium flex items-center justify-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
+            <span className="size-2 rounded-full bg-green-400 animate-pulse" />
             Réponse sous 48h en moyenne
           </p>
         </div>

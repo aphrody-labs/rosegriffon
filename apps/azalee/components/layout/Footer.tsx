@@ -3,7 +3,7 @@ import Link from "next/link";
 const socialLinkClass =
   "group relative p-2.5 rounded-full bg-surface-container-high hover:scale-110 hover:shadow-lg transition-all duration-300 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 active:scale-95";
 const socialIconClass =
-  "w-[18px] h-[18px] text-on-surface-variant group-hover:text-white transition-colors duration-300";
+  "size-[18px] text-on-surface-variant group-hover:text-white transition-colors duration-300";
 
 export function Footer() {
   return (

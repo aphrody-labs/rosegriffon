@@ -98,9 +98,9 @@ export function LiveStatus() {
               aria-label="Rose Griffon TV est en direct - Cliquez pour regarder"
             >
               {/* Badge LIVE pulsant avec double animation */}
-              <span className="relative flex h-3 w-3">
+              <span className="relative flex size-3">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75" />
-                <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500 animate-pulse" />
+                <span className="relative inline-flex rounded-full size-3 bg-red-500 animate-pulse" />
               </span>
 
               {/* Texte LIVE */}
@@ -115,7 +115,7 @@ export function LiveStatus() {
               )}
 
               {/* Icône TV (très petits écrans) */}
-              <Tv className="h-4 w-4 sm:hidden group-hover:animate-pulse" />
+              <Tv className="size-4 sm:hidden group-hover:animate-pulse" />
             </Button>
           </Link>
         </TooltipTrigger>
@@ -124,9 +124,9 @@ export function LiveStatus() {
           <div className="space-y-2">
             {/* Header du tooltip */}
             <div className="flex items-center gap-2">
-              <div className="relative flex h-2 w-2">
+              <div className="relative flex size-2">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75" />
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500" />
+                <span className="relative inline-flex rounded-full size-2 bg-red-500" />
               </div>
               <span className="font-semibold text-sm">Rose Griffon TV est en direct !</span>
             </div>

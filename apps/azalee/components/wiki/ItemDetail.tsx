@@ -71,7 +71,7 @@ export function ItemDetail({ item, itemName, itemDesc }: ItemDetailProps) {
       {/* Main Card */}
       <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-6 lg:gap-8 p-4 sm:p-6 lg:p-8 rounded-2xl sm:rounded-[32px] bg-surface-container border border-outline-variant/30 shadow-sm relative overflow-hidden">
         {/* Decorative Background */}
-        <div className="absolute top-0 right-0 w-96 h-96 bg-primary/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none" />
+        <div className="absolute top-0 right-0 size-96 bg-primary/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none" />
 
         {/* Left: Image */}
         <div className="flex flex-col items-center gap-6">

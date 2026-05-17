@@ -150,7 +150,7 @@ function RecursiveNavItem({
 
   const buttonClass = cn(
     "relative overflow-hidden w-full transition-all duration-200 group",
-    "rounded-xl focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 outline-none",
+    "rounded-xl focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 outline-hidden",
     isCollapsed && depth === 0
       ? "h-[56px] flex-col justify-center px-1 gap-1"
       : "h-11 px-4 gap-3 justify-start",

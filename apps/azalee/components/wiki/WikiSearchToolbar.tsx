@@ -118,7 +118,7 @@ export function WikiSearchToolbar({
       )}
       <span>{t("search.filters_button")}</span>
       {activeFilterCount > 0 && (
-        <span className="flex items-center justify-center bg-primary text-on-primary text-[10px] w-5 h-5 rounded-full ml-0.5">
+        <span className="flex items-center justify-center bg-primary text-on-primary text-[10px] size-5 rounded-full ml-0.5">
           {activeFilterCount}
         </span>
       )}
@@ -128,7 +128,7 @@ export function WikiSearchToolbar({
   return (
     <div className="relative group w-full max-w-sm">
       {/* Animated Gradient Border - Gemini Style */}
-      <div className="absolute -inset-0.5 bg-gradient-to-r from-[#4facfe] via-[#7367f0] to-[#9733ee] rounded-full blur opacity-0 group-focus-within:opacity-20 transition duration-500" />
+      <div className="absolute -inset-0.5 bg-linear-to-r from-[#4facfe] via-[#7367f0] to-[#9733ee] rounded-full blur opacity-0 group-focus-within:opacity-20 transition duration-500" />
 
       <div
         className={cn(
@@ -159,7 +159,7 @@ export function WikiSearchToolbar({
             size="icon"
             onClick={handleClear}
             aria-label="Effacer la recherche"
-            className="h-8 w-8 rounded-full text-on-surface-variant hover:bg-surface-container-highest"
+            className="size-8 rounded-full text-on-surface-variant hover:bg-surface-container-highest"
           >
             <X size={18} aria-hidden="true" />
           </Button>

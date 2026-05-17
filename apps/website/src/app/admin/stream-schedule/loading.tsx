@@ -16,8 +16,8 @@ export default function StreamScheduleLoading() {
               <Skeleton className="h-4 w-32" />
             </div>
             <div className="flex gap-2">
-              <Skeleton className="h-9 w-9" />
-              <Skeleton className="h-9 w-9" />
+              <Skeleton className="size-9" />
+              <Skeleton className="size-9" />
             </div>
           </div>
         ))}

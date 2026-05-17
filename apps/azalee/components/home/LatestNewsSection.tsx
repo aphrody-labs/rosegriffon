@@ -97,8 +97,8 @@ function AuthorInfo({
 				<div
 					className={`rounded-full flex items-center justify-center font-bold ${
 						isLight
-							? "w-5 h-5 bg-white/20 text-white text-[8px]"
-							: "w-6 h-6 bg-primary/20 text-primary text-[10px]"
+							? "size-5 bg-white/20 text-white text-[8px]"
+							: "size-6 bg-primary/20 text-primary text-[10px]"
 					}`}
 				>
 					RG
@@ -136,7 +136,7 @@ function SectionHeader({ size }: { size: "sm" | "lg" }) {
 			className={`font-black text-on-surface font-grade-high flex items-center ${isSm ? "text-xl gap-2.5" : "text-2xl md:text-3xl gap-3"}`}
 		>
 			<span
-				className={`flex items-center justify-center rounded-full bg-primary/10 text-primary ${isSm ? "w-9 h-9" : "w-10 h-10"}`}
+				className={`flex items-center justify-center rounded-full bg-primary/10 text-primary ${isSm ? "size-9" : "size-10"}`}
 			>
 				<Newspaper size={isSm ? 20 : 24} aria-hidden="true" />
 			</span>
@@ -186,7 +186,7 @@ function TweetCard({
 		return (
 			<Link
 				href={`/news/tweet/${tweet.id}`}
-				className="flex-shrink-0 min-w-[220px] max-w-[220px] flex items-start gap-2.5 px-3 py-2.5 rounded-xl bg-surface-container border border-outline-variant/10 hover:border-[#1DA1F2]/30 transition-colors"
+				className="shrink-0 min-w-[220px] max-w-[220px] flex items-start gap-2.5 px-3 py-2.5 rounded-xl bg-surface-container border border-outline-variant/10 hover:border-[#1DA1F2]/30 transition-colors"
 			>
 				{heroImage ? (
 					<div className="size-10 rounded-lg overflow-hidden relative bg-surface-container-high shrink-0">
@@ -238,7 +238,7 @@ function TweetCard({
 					/>
 				</div>
 			) : (
-				<div className="relative aspect-[16/9] bg-gradient-to-br from-[#1DA1F2]/10 via-surface-container to-primary/5 flex items-center justify-center">
+				<div className="relative aspect-[16/9] bg-linear-to-br from-[#1DA1F2]/10 via-surface-container to-primary/5 flex items-center justify-center">
 					<svg
 						className="size-10 text-[#1DA1F2]/20"
 						viewBox="0 0 24 24"
@@ -350,7 +350,7 @@ export function LatestNewsSection({
 									key={item.id}
 									href={`/news/${item.slug}`}
 									data-slide={i}
-									className="group relative min-w-[82vw] max-w-[82vw] snap-start flex-shrink-0 rounded-2xl overflow-hidden"
+									className="group relative min-w-[82vw] max-w-[82vw] snap-start shrink-0 rounded-2xl overflow-hidden"
 									role="group"
 									aria-roledescription="slide"
 									aria-label={`${i + 1} sur ${articles.length}`}
@@ -366,7 +366,7 @@ export function LatestNewsSection({
 											className="object-cover"
 											sizes="82vw"
 										/>
-										<div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
+										<div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/30 to-transparent" />
 										<div className="absolute top-3 left-3">
 											<CategoryBadge
 												category={item.category}
@@ -462,7 +462,7 @@ export function LatestNewsSection({
 												i === 0 ? "(max-width: 1024px) 50vw, 66vw" : "33vw"
 											}
 										/>
-										<div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-60 group-hover:opacity-40 transition-opacity" />
+										<div className="absolute inset-0 bg-linear-to-t from-black/60 to-transparent opacity-60 group-hover:opacity-40 transition-opacity" />
 										<div className="absolute top-3 left-3">
 											<CategoryBadge category={item.category} variant="card" />
 										</div>

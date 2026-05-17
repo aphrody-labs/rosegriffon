@@ -37,7 +37,7 @@ function TeamsSection() {
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 lg:gap-6">
             {[...Array(4)].map((_, memberIndex) => (
               <div key={memberIndex} className="flex flex-col items-center text-center gap-3">
-                <Skeleton className="w-32 h-32 sm:w-40 sm:h-40 rounded-full bg-linear-to-br from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-800" />
+                <Skeleton className="size-32 sm:w-40 sm:h-40 rounded-full bg-linear-to-br from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-800" />
                 <div className="w-full space-y-2">
                   <Skeleton className="h-5 w-24 mx-auto bg-gray-300 dark:bg-gray-700 rounded-md" />
                   <Skeleton className="h-4 w-20 mx-auto bg-gray-200 dark:bg-gray-800 rounded-md" />
@@ -89,7 +89,7 @@ function TeamsSection() {
             const cardContent = (
               <>
                 {/* Member Image */}
-                <div className="relative w-24 h-24 sm:w-32 sm:h-32 lg:w-40 lg:h-40 rounded-full overflow-hidden border-3 sm:border-4 border-gaelle-blue/30 group-hover:border-gaelle-blue transition-all duration-300 group-hover:shadow-lg group-hover:shadow-gaelle-blue/20">
+                <div className="relative size-24 sm:w-32 sm:h-32 lg:w-40 lg:h-40 rounded-full overflow-hidden border-3 sm:border-4 border-gaelle-blue/30 group-hover:border-gaelle-blue transition-all duration-300 group-hover:shadow-lg group-hover:shadow-gaelle-blue/20">
                   <ImageWithSkeleton
                     src={member.image || "https://placehold.co/200x200"}
                     alt={`${member.name} Rose Griffon`}

@@ -123,14 +123,14 @@ export function MediaDialog({ open, onOpenChange, onInsert }: MediaDialogProps) 
                 value="upload"
                 className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-rg-primary rounded-none px-0 py-2"
               >
-                <Upload className="h-4 w-4 mr-2" />
+                <Upload className="size-4 mr-2" />
                 Téléverser
               </TabsTrigger>
               <TabsTrigger
                 value="emotes"
                 className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-rg-primary rounded-none px-0 py-2"
               >
-                <Smile className="h-4 w-4 mr-2" />
+                <Smile className="size-4 mr-2" />
                 Emotes
               </TabsTrigger>
             </TabsList>
@@ -157,13 +157,13 @@ export function MediaDialog({ open, onOpenChange, onInsert }: MediaDialogProps) 
                 />
                 {isUploading ? (
                   <div className="text-center">
-                    <Loader2 className="h-10 w-10 animate-spin text-rg-primary mx-auto mb-4" />
+                    <Loader2 className="size-10 animate-spin text-rg-primary mx-auto mb-4" />
                     <p className="text-sm text-slate-500">Téléchargement en cours...</p>
                   </div>
                 ) : (
                   <div className="text-center p-6">
-                    <div className="w-16 h-16 bg-rg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                      <Upload className="h-8 w-8 text-rg-primary" />
+                    <div className="size-16 bg-rg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <Upload className="size-8 text-rg-primary" />
                     </div>
                     <h3 className="font-semibold text-lg mb-2">Cliquez pour téléverser</h3>
                     <p className="text-sm text-slate-500">PNG, JPG, WEBP jusqu&apos;à 5Mo</p>

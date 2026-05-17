@@ -20,7 +20,7 @@ export function ProfileActivity({ activities }: { activities: Activity[] }) {
 				id="activity-title"
 				className="flex items-center gap-2 text-xl font-bold text-foreground"
 			>
-				<History className="h-5 w-5 text-primary" aria-hidden="true" />
+				<History className="size-5 text-primary" aria-hidden="true" />
 				Activités récentes
 			</h2>
 
@@ -38,15 +38,15 @@ export function ProfileActivity({ activities }: { activities: Activity[] }) {
 						<li key={activity.id}>
 							<Link
 								href={`/chroniques/${activity.slug}`}
-								className="group block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:rounded-lg"
+								className="group block focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:rounded-lg"
 							>
 								<Card className="transition-all group-hover:border-primary/40 group-hover:shadow-md">
 									<CardContent className="flex gap-4 p-5">
 										<div
-											className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-lg bg-primary/10"
+											className="flex size-12 shrink-0 items-center justify-center rounded-lg bg-primary/10"
 											aria-hidden="true"
 										>
-											<FileText className="h-6 w-6 text-primary" />
+											<FileText className="size-6 text-primary" />
 										</div>
 										<div className="min-w-0 flex-1">
 											<h3 className="truncate font-semibold text-foreground transition-colors group-hover:text-primary">
@@ -57,7 +57,7 @@ export function ProfileActivity({ activities }: { activities: Activity[] }) {
 											</p>
 											<p className="mt-3 flex items-center gap-3 text-xs text-muted-foreground">
 												<span className="flex items-center gap-1">
-													<Calendar className="h-3 w-3" aria-hidden="true" />
+													<Calendar className="size-3" aria-hidden="true" />
 													{activity.created_at
 														? format(
 																new Date(activity.created_at),

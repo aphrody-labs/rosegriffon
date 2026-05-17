@@ -74,11 +74,11 @@ export default async function ArticlesPage() {
               href="/dashboard"
               className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-colors"
             >
-              <ChevronRight className="w-6 h-6 rotate-180" />
+              <ChevronRight className="size-6 rotate-180" />
             </Link>
             <div>
-              <div className="w-12 h-12 rounded-xl bg-linear-to-br from-indigo-500 to-indigo-600 flex items-center justify-center">
-                <FileText className="w-6 h-6 text-white" />
+              <div className="size-12 rounded-xl bg-linear-to-br from-indigo-500 to-indigo-600 flex items-center justify-center">
+                <FileText className="size-6 text-white" />
               </div>
             </div>
             <div>
@@ -92,7 +92,7 @@ export default async function ArticlesPage() {
 
           <Button asChild>
             <Link href="/dashboard/articles/new">
-              <Plus className="w-5 h-5 mr-2" />
+              <Plus className="size-5 mr-2" />
               Nouvel Article
             </Link>
           </Button>
@@ -107,7 +107,7 @@ export default async function ArticlesPage() {
                   <div className="text-xs text-gray-600 dark:text-gray-400">Total</div>
                   <div className="text-2xl font-bold">{stats.total}</div>
                 </div>
-                <FileText className="w-8 h-8 text-indigo-500 opacity-50" />
+                <FileText className="size-8 text-indigo-500 opacity-50" />
               </div>
             </CardContent>
           </Card>
@@ -119,7 +119,7 @@ export default async function ArticlesPage() {
                   <div className="text-xs text-gray-600 dark:text-gray-400">Publiés</div>
                   <div className="text-2xl font-bold">{stats.published}</div>
                 </div>
-                <Eye className="w-8 h-8 text-green-500 opacity-50" />
+                <Eye className="size-8 text-green-500 opacity-50" />
               </div>
             </CardContent>
           </Card>
@@ -131,7 +131,7 @@ export default async function ArticlesPage() {
                   <div className="text-xs text-gray-600 dark:text-gray-400">Brouillons</div>
                   <div className="text-2xl font-bold">{stats.drafts}</div>
                 </div>
-                <Edit className="w-8 h-8 text-yellow-500 opacity-50" />
+                <Edit className="size-8 text-yellow-500 opacity-50" />
               </div>
             </CardContent>
           </Card>
@@ -143,7 +143,7 @@ export default async function ArticlesPage() {
                   <div className="text-xs text-gray-600 dark:text-gray-400">Vues totales</div>
                   <div className="text-2xl font-bold">{stats.totalViews}</div>
                 </div>
-                <Eye className="w-8 h-8 text-purple-500 opacity-50" />
+                <Eye className="size-8 text-purple-500 opacity-50" />
               </div>
             </CardContent>
           </Card>
@@ -154,7 +154,7 @@ export default async function ArticlesPage() {
           <Card className="shadow-lg">
             <CardContent className="p-12">
               <div className="text-center">
-                <PenSquare className="w-16 h-16 mx-auto text-gray-300 dark:text-gray-700 mb-4" />
+                <PenSquare className="size-16 mx-auto text-gray-300 dark:text-gray-700 mb-4" />
                 <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
                   Aucune chronique pour le moment
                 </h2>
@@ -164,7 +164,7 @@ export default async function ArticlesPage() {
                 </p>
                 <Button asChild size="lg">
                   <Link href="/dashboard/articles/new">
-                    <Plus className="w-5 h-5 mr-2" />
+                    <Plus className="size-5 mr-2" />
                     Créer ma première chronique
                   </Link>
                 </Button>
@@ -189,7 +189,7 @@ export default async function ArticlesPage() {
                     </div>
 
                     {article.featured_image_url && (
-                      <div className="hidden sm:block w-24 h-24 rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800 shrink-0 relative">
+                      <div className="hidden sm:block size-24 rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800 shrink-0 relative">
                         <Image
                           src={article.featured_image_url}
                           alt={article.title}
@@ -205,11 +205,11 @@ export default async function ArticlesPage() {
                   <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                     <div className="flex items-center gap-4 text-sm text-gray-600 dark:text-gray-400">
                       <div className="flex items-center gap-1">
-                        <Eye className="w-4 h-4" />
+                        <Eye className="size-4" />
                         {article.view_count || 0} vues
                       </div>
                       <div className="flex items-center gap-1">
-                        <Calendar className="w-4 h-4" />
+                        <Calendar className="size-4" />
                         {new Date(article.updated_at).toLocaleDateString("fr-FR")}
                       </div>
                     </div>
@@ -218,13 +218,13 @@ export default async function ArticlesPage() {
                       {article.status === "published" && (
                         <Button variant="outline" size="sm" asChild>
                           <Link href={`/chroniques/${article.slug}`} target="_blank">
-                            <Eye className="w-4 h-4" />
+                            <Eye className="size-4" />
                           </Link>
                         </Button>
                       )}
                       <Button variant="outline" size="sm" asChild>
                         <Link href={`/dashboard/articles/${article.id}/edit`}>
-                          <Edit className="w-4 h-4" />
+                          <Edit className="size-4" />
                         </Link>
                       </Button>
                       <Button
@@ -232,7 +232,7 @@ export default async function ArticlesPage() {
                         size="sm"
                         className="text-red-500 hover:text-red-600"
                       >
-                        <Trash2 className="w-4 h-4" />
+                        <Trash2 className="size-4" />
                       </Button>
                     </div>
                   </div>
@@ -246,7 +246,7 @@ export default async function ArticlesPage() {
         <Card className="mt-8 border-l-4 border-l-indigo-500">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <PenSquare className="w-5 h-5 text-indigo-500" />
+              <PenSquare className="size-5 text-indigo-500" />
               Conseils de rédaction
             </CardTitle>
           </CardHeader>

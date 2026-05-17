@@ -6,7 +6,7 @@ export function ProfileSkeleton() {
     <div className="flex flex-col items-center justify-center p-4 md:p-8">
       <Card className="w-full max-w-2xl shadow-lg">
         <CardHeader className="flex flex-col items-center text-center space-y-4">
-          <Skeleton className="w-24 h-24 rounded-full" />
+          <Skeleton className="size-24 rounded-full" />
           <Skeleton className="h-8 w-48" />
           <Skeleton className="h-6 w-32" />
         </CardHeader>

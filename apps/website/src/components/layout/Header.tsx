@@ -90,10 +90,10 @@ export function Header({
 								variant="ghost"
 								size="icon"
 								asChild
-								className="text-muted-foreground hover:text-primary h-9 w-9"
+								className="text-muted-foreground hover:text-primary size-9"
 							>
 								<Link href="/admin" title="Administration">
-									<ShieldCheck className="h-5 w-5" />
+									<ShieldCheck className="size-5" />
 									<span className="sr-only">Administration</span>
 								</Link>
 							</Button>
@@ -138,7 +138,7 @@ export function Header({
 							className="text-muted-foreground hover:text-primary"
 						>
 							<Link href="/" title="Retour à l'accueil">
-								<Home className="h-5 w-5" />
+								<Home className="size-5" />
 								<span className="sr-only">Accueil</span>
 							</Link>
 						</Button>
@@ -151,7 +151,7 @@ export function Header({
 							className="text-muted-foreground hover:text-primary hidden sm:flex"
 						>
 							<Link href="/admin" title="Administration">
-								<ShieldCheck className="h-5 w-5" />
+								<ShieldCheck className="size-5" />
 								<span className="sr-only">Administration</span>
 							</Link>
 						</Button>

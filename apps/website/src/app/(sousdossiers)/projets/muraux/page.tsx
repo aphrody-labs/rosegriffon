@@ -73,7 +73,7 @@ export default function MurauxPage() {
                   >
                     <Card className="overflow-hidden bg-[var(--md-sys-color-surface-container-low)] border border-[var(--md-sys-color-outline-variant)] hover:border-[var(--md-sys-color-primary)] hover:bg-[var(--md-sys-color-surface-container)] transition-all duration-300 hover:shadow-[var(--md-ref-elevation-2)] h-full">
                       {/* Image Container */}
-                      <div className="relative overflow-hidden bg-gradient-to-br from-[var(--md-sys-color-surface-container)] to-[var(--md-sys-color-surface-container-high)] aspect-video">
+                      <div className="relative overflow-hidden bg-linear-to-br from-[var(--md-sys-color-surface-container)] to-[var(--md-sys-color-surface-container-high)] aspect-video">
                         <Image
                           src={mural.image}
                           alt={mural.title}
@@ -85,12 +85,12 @@ export default function MurauxPage() {
 
                         {/* Gradient Glow */}
                         <div
-                          className={`absolute inset-0 bg-gradient-to-br ${mural.color} opacity-30 transition-opacity duration-500 mix-blend-overlay pointer-events-none group-hover:opacity-50`}
+                          className={`absolute inset-0 bg-linear-to-br ${mural.color} opacity-30 transition-opacity duration-500 mix-blend-overlay pointer-events-none group-hover:opacity-50`}
                         />
 
                         {/* Emote Badge */}
                         <div className="absolute top-2 left-2">
-                          <div className="bg-[var(--md-sys-color-surface)] rounded-full w-8 h-8 flex items-center justify-center shadow-lg">
+                          <div className="bg-[var(--md-sys-color-surface)] rounded-full size-8 flex items-center justify-center shadow-lg">
                             <RgEmote
                               name={index === 0 ? "roy-coeur" : "gaelle-coeur"}
                               size={28}
@@ -127,7 +127,7 @@ export default function MurauxPage() {
               <Card className="bg-blue-50 dark:bg-blue-950/20 border-blue-200 dark:border-blue-800 p-4 sm:p-5 transition-all duration-300 hover:shadow-lg hover:scale-[1.02]">
                 <div className="flex gap-2 items-center mb-3">
                   <div className="text-blue-600 dark:text-blue-400 shrink-0">
-                    <Info className="w-5 h-5" />
+                    <Info className="size-5" />
                   </div>
                   <h2 className="text-base font-bold text-blue-900 dark:text-blue-100">
                     Mise à jour
@@ -175,7 +175,7 @@ export default function MurauxPage() {
                 <span className="font-semibold">La Route du Sacre</span> — qui invitent chacun à
                 inventer, scénariser ou illustrer sa propre vision d&apos;Inazuma.
               </span>
-              <RgEmote name="gaelle-coeur" size={28} animated className="flex-shrink-0 mt-1" />
+              <RgEmote name="gaelle-coeur" size={28} animated className="shrink-0 mt-1" />
             </p>
             <p>
               Enfin, via l&apos;onglet{" "}
@@ -200,7 +200,7 @@ export default function MurauxPage() {
 
       {/* Call to Action Section */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10 lg:py-12">
-        <Card className="bg-gradient-to-br from-[var(--md-sys-color-primary-container)] to-[var(--md-sys-color-secondary-container)] border border-[var(--md-sys-color-outline-variant)] p-6 sm:p-8 md:p-10 text-center space-y-4 sm:space-y-5 transition-all duration-300 hover:shadow-[var(--md-ref-elevation-3)]">
+        <Card className="bg-linear-to-br from-[var(--md-sys-color-primary-container)] to-[var(--md-sys-color-secondary-container)] border border-[var(--md-sys-color-outline-variant)] p-6 sm:p-8 md:p-10 text-center space-y-4 sm:space-y-5 transition-all duration-300 hover:shadow-[var(--md-ref-elevation-3)]">
           <div className="flex items-center justify-center gap-3">
             <h3 className="text-xl sm:text-2xl md:text-3xl font-bold text-[var(--md-sys-color-on-primary-container)]">
               Envie de participer ?
@@ -222,7 +222,7 @@ export default function MurauxPage() {
                 rel="noopener noreferrer"
                 className="flex items-center gap-2"
               >
-                <Users className="w-5 h-5" />
+                <Users className="size-5" />
                 Rejoindre le Discord
               </Link>
             </Button>

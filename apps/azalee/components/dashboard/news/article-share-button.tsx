@@ -305,7 +305,7 @@ export function ArticleShareButton({
 							sizes="320px"
 							className="object-cover"
 						/>
-						<div className="absolute inset-0 bg-gradient-to-t from-surface-container to-transparent" />
+						<div className="absolute inset-0 bg-linear-to-t from-surface-container to-transparent" />
 						<div className="absolute bottom-2 left-3 right-3">
 							<p className="text-xs font-bold text-on-surface line-clamp-2 drop-shadow">
 								{title}
@@ -317,14 +317,14 @@ export function ArticleShareButton({
 				{/* URL bar */}
 				<div className="px-3 pt-3 pb-2">
 					<div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-surface-container-low border border-outline-variant/10">
-						<Link2 className="size-3.5 text-on-surface-variant/40 flex-shrink-0" />
+						<Link2 className="size-3.5 text-on-surface-variant/40 shrink-0" />
 						<span className="text-xs text-on-surface-variant/60 truncate flex-1">
 							{shareUrl.replace(/^https?:\/\//, "")}
 						</span>
 						<button
 							onClick={handleCopyLink}
 							className={cn(
-								"flex-shrink-0 p-1 rounded-lg transition-colors",
+								"shrink-0 p-1 rounded-lg transition-colors",
 								copied
 									? "text-green-500"
 									: "text-on-surface-variant/50 hover:text-on-surface",

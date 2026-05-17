@@ -81,12 +81,12 @@ export default function ProjetsPage() {
       />
       {/* Hero Section */}
       <section className="relative overflow-hidden rounded-3xl bg-linear-to-br from-(--md-sys-color-primary-container) to-(--md-sys-color-surface-variant) p-8 md:p-12 lg:p-16 text-center shadow-sm border border-(--md-sys-color-outline-variant)">
-        <div className="absolute top-0 right-0 -mt-12 -mr-12 h-64 w-64 rounded-full bg-(--md-sys-color-primary) opacity-10 blur-3xl" />
-        <div className="absolute bottom-0 left-0 -mb-12 -ml-12 h-64 w-64 rounded-full bg-(--md-sys-color-tertiary) opacity-10 blur-3xl" />
+        <div className="absolute top-0 right-0 -mt-12 -mr-12 size-64 rounded-full bg-(--md-sys-color-primary) opacity-10 blur-3xl" />
+        <div className="absolute bottom-0 left-0 -mb-12 -ml-12 size-64 rounded-full bg-(--md-sys-color-tertiary) opacity-10 blur-3xl" />
 
         <div className="relative z-10 mx-auto max-w-3xl space-y-6">
           <div className="inline-flex items-center rounded-full border border-(--md-sys-color-outline) bg-(--md-sys-color-surface)/50 px-3 py-1 text-sm font-medium text-(--md-sys-color-primary) backdrop-blur-sm">
-            <Sparkles className="mr-2 h-4 w-4" />
+            <Sparkles className="mr-2 size-4" />
             <span>Espace Créatif</span>
           </div>
 
@@ -116,7 +116,7 @@ export default function ProjetsPage() {
                   <div
                     className={`rounded-xl p-3 ${project.bgColor} ${project.color} transition-all group-hover:scale-105`}
                   >
-                    <project.icon className="h-8 w-8 opacity-30" />
+                    <project.icon className="size-8 opacity-30" />
                   </div>
                   {/* Emote Rose Griffon en premier plan */}
                   <div className="absolute inset-0 flex items-center justify-center">
@@ -144,7 +144,7 @@ export default function ProjetsPage() {
               >
                 <Link href={project.href}>
                   Accéder au projet
-                  <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
+                  <ArrowRight className="ml-2 size-4 transition-transform group-hover:translate-x-1" />
                 </Link>
               </Button>
             </CardFooter>

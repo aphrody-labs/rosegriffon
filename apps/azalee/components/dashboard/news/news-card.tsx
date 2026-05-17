@@ -31,7 +31,7 @@ export function NewsCard({ item }: { item: NewsItem }) {
               className="object-cover transition-transform duration-700 group-hover:scale-105"
             />
             {/* Overlay Gradient */}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-60 group-hover:opacity-70 transition-opacity" />
+            <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/20 to-transparent opacity-60 group-hover:opacity-70 transition-opacity" />
 
             {/* Status Chip */}
             <div className="absolute top-4 right-4 z-10">

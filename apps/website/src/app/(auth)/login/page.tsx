@@ -61,7 +61,7 @@ function LoginPageContent() {
 	const success = searchParams?.get("success");
 
 	return (
-		<main className="flex min-h-svh w-full items-center justify-center bg-gradient-to-br from-muted/40 via-background to-muted/40 p-4 pb-24 sm:pb-4">
+		<main className="flex min-h-svh w-full items-center justify-center bg-linear-to-br from-muted/40 via-background to-muted/40 p-4 pb-24 sm:pb-4">
 			<Card className="w-full max-w-5xl overflow-hidden shadow-2xl">
 				<div className="grid grid-cols-1 lg:grid-cols-2">
 					<div className="flex flex-col justify-center p-6 sm:p-10">
@@ -69,7 +69,7 @@ function LoginPageContent() {
 							<Link
 								href="/"
 								aria-label="Retour à l'accueil Rose Griffon"
-								className="relative mx-auto block h-20 w-20 transition-transform hover:scale-105"
+								className="relative mx-auto block size-20 transition-transform hover:scale-105"
 							>
 								<Image
 									src="/RG_Logo_V2.5.webp"
@@ -90,13 +90,13 @@ function LoginPageContent() {
 						<CardContent className="space-y-4">
 							{error && message && (
 								<Alert variant="destructive">
-									<AlertCircle className="h-4 w-4" aria-hidden="true" />
+									<AlertCircle className="size-4" aria-hidden="true" />
 									<AlertDescription>{message}</AlertDescription>
 								</Alert>
 							)}
 							{success && message && (
 								<Alert className="border-emerald-500/40 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300">
-									<CheckCircle className="h-4 w-4" aria-hidden="true" />
+									<CheckCircle className="size-4" aria-hidden="true" />
 									<AlertDescription>{message}</AlertDescription>
 								</Alert>
 							)}
@@ -118,7 +118,7 @@ function LoginPageContent() {
 											variant="outline"
 											size="icon"
 											asChild
-											className="h-10 w-10 rounded-full"
+											className="size-10 rounded-full"
 										>
 											<a
 												href={href}
@@ -141,7 +141,7 @@ function LoginPageContent() {
 
 					<aside
 						aria-label="Présentation Rose Griffon"
-						className="relative hidden flex-col items-center justify-center overflow-hidden border-l border-border/50 bg-gradient-to-br from-primary/8 via-primary/3 to-transparent p-10 lg:flex"
+						className="relative hidden flex-col items-center justify-center overflow-hidden border-l border-border/50 bg-linear-to-br from-primary/8 via-primary/3 to-transparent p-10 lg:flex"
 					>
 						<div
 							className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(161,75,63,0.18),transparent_60%)]"
@@ -149,7 +149,7 @@ function LoginPageContent() {
 						/>
 
 						<div className="relative z-10 max-w-sm space-y-6 text-center">
-							<div className="relative mx-auto h-64 w-64">
+							<div className="relative mx-auto size-64">
 								<div
 									className="absolute inset-0 animate-pulse rounded-full bg-primary/15 opacity-60 blur-3xl"
 									aria-hidden="true"
@@ -189,7 +189,7 @@ function LoginFallback() {
 		<div className="flex min-h-svh w-full items-center justify-center p-4">
 			<Card className="w-full max-w-md shadow-lg">
 				<CardHeader className="text-center">
-					<Skeleton className="mx-auto mb-3 h-20 w-20 rounded-full" />
+					<Skeleton className="mx-auto mb-3 size-20 rounded-full" />
 					<Skeleton className="mx-auto mb-2 h-7 w-2/3" />
 					<Skeleton className="mx-auto h-4 w-3/4" />
 				</CardHeader>

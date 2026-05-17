@@ -22,8 +22,8 @@ export default function PfpPage() {
       />
       {/* Background elements */}
       <div className="absolute top-0 left-0 w-full h-full overflow-hidden -z-10 pointer-events-none">
-        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-primary/5 rounded-full blur-3xl" />
-        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-accent/5 rounded-full blur-3xl" />
+        <div className="absolute top-[-10%] left-[-10%] size-[40%] bg-primary/5 rounded-full blur-3xl" />
+        <div className="absolute bottom-[-10%] right-[-10%] size-[40%] bg-accent/5 rounded-full blur-3xl" />
       </div>
 
       <div className="grid lg:grid-cols-2 gap-12 items-center">

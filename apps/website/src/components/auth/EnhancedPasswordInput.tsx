@@ -88,7 +88,7 @@ export const EnhancedPasswordInput = React.forwardRef<HTMLInputElement, Enhanced
               className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
               aria-label={isVisible ? "Masquer le mot de passe" : "Afficher le mot de passe"}
             >
-              {isVisible ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+              {isVisible ? <EyeOff className="size-5" /> : <Eye className="size-5" />}
             </button>
           )}
         </div>

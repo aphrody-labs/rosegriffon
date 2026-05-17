@@ -44,7 +44,7 @@ function LoginContent() {
           {/* Header */}
           <div className="relative px-8 pt-10 pb-8 text-center overflow-hidden">
             {/* Background accent */}
-            <div className="absolute inset-0 bg-gradient-to-b from-primary/5 to-transparent" />
+            <div className="absolute inset-0 bg-linear-to-b from-primary/5 to-transparent" />
 
             <div className="relative">
               {/* Logo */}
@@ -53,7 +53,7 @@ function LoginContent() {
                   <h1 className="type-display-small font-black italic tracking-tighter text-on-surface">
                     AZALÉE
                   </h1>
-                  <div className="absolute -bottom-1 left-0 right-0 h-1 bg-gradient-to-r from-primary via-secondary to-primary rounded-full" />
+                  <div className="absolute -bottom-1 left-0 right-0 h-1 bg-linear-to-r from-primary via-secondary to-primary rounded-full" />
                 </div>
               </div>
 

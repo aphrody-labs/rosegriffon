@@ -40,7 +40,7 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
           <div className="min-h-screen flex items-center justify-center bg-muted/30 p-4">
             <div className="text-center">
               <div className="flex justify-center mb-4">
-                <AlertTriangle className="w-12 h-12 text-red-500" />
+                <AlertTriangle className="size-12 text-red-500" />
               </div>
               <h1 className="text-2xl font-bold text-foreground mb-2">
                 Une erreur s'est produite
@@ -50,7 +50,7 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
               </p>
               <div className="flex gap-3 justify-center">
                 <Button onClick={this.resetError} className="gap-2">
-                  <RefreshCw className="w-4 h-4" />
+                  <RefreshCw className="size-4" />
                   Réessayer
                 </Button>
                 <Button variant="outline" onClick={() => (window.location.href = "/admin")}>

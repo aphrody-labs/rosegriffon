@@ -37,10 +37,10 @@ export function PatchNoteViewer({ data }: PatchNoteViewerProps) {
               fill
               className="object-cover opacity-90 transition-transform duration-700 group-hover:scale-105"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-background/95 via-background/60 to-background/30" />
+            <div className="absolute inset-0 bg-linear-to-t from-background/95 via-background/60 to-background/30" />
           </div>
         ) : (
-          <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-secondary/5" />
+          <div className="absolute inset-0 bg-linear-to-br from-primary/5 via-transparent to-secondary/5" />
         )}
 
         {/* Decorator */}

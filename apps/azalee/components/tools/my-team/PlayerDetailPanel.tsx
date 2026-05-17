@@ -74,7 +74,7 @@ export function PlayerDetailPanel({ member, onClose, onRemove }: PlayerDetailPan
     <div className="rounded-2xl bg-surface-container elevation-2 overflow-hidden animate-in slide-in-from-right-4 duration-200">
       {/* Header */}
       <div className="relative h-28 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-surface-container-highest to-surface-container-high" />
+        <div className="absolute inset-0 bg-linear-to-br from-surface-container-highest to-surface-container-high" />
         <SafeImage
           src={member.imageUrl}
           alt={member.name}
@@ -83,7 +83,7 @@ export function PlayerDetailPanel({ member, onClose, onRemove }: PlayerDetailPan
           className="object-cover opacity-40 blur-sm scale-110"
           unoptimized
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-surface-container via-transparent to-transparent" />
+        <div className="absolute inset-0 bg-linear-to-t from-surface-container via-transparent to-transparent" />
 
         {/* Close button */}
         <button

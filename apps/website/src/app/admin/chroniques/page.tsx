@@ -67,7 +67,7 @@ export default async function ChroniquesAdminPage({
             className="bg-linear-to-r from-rg-primary to-rg-secondary hover:opacity-90 text-white w-full sm:w-auto"
           >
             <Link href="/admin/chroniques/new" className="flex items-center justify-center">
-              <Plus className="w-4 h-4 sm:mr-2" />
+              <Plus className="size-4 sm:mr-2" />
               <span className="hidden sm:inline">Nouvelle Chronique</span>
               <span className="sm:hidden">Nouvelle</span>
             </Link>
@@ -104,14 +104,14 @@ export default async function ChroniquesAdminPage({
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-lg">
-            <Filter className="w-5 h-5" />
+            <Filter className="size-5" />
             Filtres et Recherche
           </CardTitle>
         </CardHeader>
         <CardContent>
           <form className="flex flex-col gap-3 sm:gap-4">
             <div className="relative flex-1">
-              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Search className="absolute left-2.5 top-2.5 size-4 text-muted-foreground" />
               <Input
                 placeholder="Rechercher..."
                 className="pl-8 text-sm"
@@ -158,7 +158,7 @@ export default async function ChroniquesAdminPage({
       {filteredChronicles.length === 0 ? (
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-16">
-            <FileText className="w-16 h-16 text-muted-foreground/30 mb-4" />
+            <FileText className="size-16 text-muted-foreground/30 mb-4" />
             <h3 className="text-xl font-semibold mb-2">Aucune chronique trouvée</h3>
             <p className="text-muted-foreground mb-6">
               {query
@@ -168,7 +168,7 @@ export default async function ChroniquesAdminPage({
             {!query && (
               <Button asChild>
                 <Link href="/admin/chroniques/new">
-                  <Plus className="w-4 h-4 mr-2" />
+                  <Plus className="size-4 mr-2" />
                   Créer une chronique
                 </Link>
               </Button>
@@ -196,7 +196,7 @@ export default async function ChroniquesAdminPage({
                     />
                   ) : (
                     <div className="flex items-center justify-center h-full text-muted-foreground">
-                      <FileText className="w-12 h-12 sm:w-16 sm:h-16 opacity-20" />
+                      <FileText className="size-12 sm:w-16 sm:h-16 opacity-20" />
                     </div>
                   )}
                   <div className="absolute top-2 sm:top-3 right-2 sm:right-3">
@@ -216,7 +216,7 @@ export default async function ChroniquesAdminPage({
                 {/* Contenu */}
                 <CardHeader className="space-y-2 p-4 sm:p-6 flex-1">
                   <div className="flex items-center gap-1.5 sm:gap-2 text-xs text-muted-foreground">
-                    <Calendar className="w-3 h-3 shrink-0" />
+                    <Calendar className="size-3 shrink-0" />
                     <span className="truncate">
                       {new Date(chronicle.created_at || "").toLocaleDateString("fr-FR", {
                         day: "numeric",

@@ -66,7 +66,7 @@ export function ArticleCard({
 						onError={() => setImgError(true)}
 					/>
 					{/* Subtle bottom gradient for legibility hint on hover */}
-					<div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-black/30 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+					<div className="absolute inset-x-0 bottom-0 h-1/3 bg-linear-to-t from-black/30 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
 				</div>
 
 				{/* Content */}
@@ -147,7 +147,7 @@ export function ArticleCard({
 							className="object-cover"
 							sizes="320px"
 						/>
-						<div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+						<div className="absolute inset-0 bg-linear-to-t from-black/60 to-transparent" />
 						<Badge
 							className={cn(
 								"absolute top-3 left-3 rounded-md border-none px-2 py-0.5 font-bold text-[10px] uppercase tracking-wider",

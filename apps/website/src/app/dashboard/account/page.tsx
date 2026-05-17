@@ -107,7 +107,7 @@ export default async function AccountPage({
 				<nav aria-label="Retour" className="mb-4">
 					<Button variant="ghost" size="sm" asChild className="-ml-2">
 						<Link href={backHref}>
-							<ArrowLeft className="mr-2 h-4 w-4" aria-hidden="true" />
+							<ArrowLeft className="mr-2 size-4" aria-hidden="true" />
 							Retour à mon profil
 						</Link>
 					</Button>

@@ -143,7 +143,7 @@ export function ArticleEditor({ categories, userId, initialData }: ArticleEditor
               <SelectItem key={cat.id} value={cat.slug}>
                 <div className="flex items-center gap-2">
                   {cat.color && (
-                    <div className="w-3 h-3 rounded-full" style={{ backgroundColor: cat.color }} />
+                    <div className="size-3 rounded-full" style={{ backgroundColor: cat.color }} />
                   )}
                   {cat.name}
                 </div>
@@ -221,9 +221,9 @@ export function ArticleEditor({ categories, userId, initialData }: ArticleEditor
           className="flex-1"
         >
           {isLoading ? (
-            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+            <Loader2 className="size-4 mr-2 animate-spin" />
           ) : (
-            <Save className="w-4 h-4 mr-2" />
+            <Save className="size-4 mr-2" />
           )}
           Enregistrer en brouillon
         </Button>
@@ -235,9 +235,9 @@ export function ArticleEditor({ categories, userId, initialData }: ArticleEditor
           className="flex-1"
         >
           {isLoading ? (
-            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+            <Loader2 className="size-4 mr-2 animate-spin" />
           ) : (
-            <Eye className="w-4 h-4 mr-2" />
+            <Eye className="size-4 mr-2" />
           )}
           Publier la chronique
         </Button>

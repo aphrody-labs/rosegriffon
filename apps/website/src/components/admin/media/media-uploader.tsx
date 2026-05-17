@@ -85,7 +85,7 @@ export function MediaUploader({ onUploadComplete }: MediaUploaderProps) {
         }`}
       >
         <input {...getInputProps()} />
-        <Upload className="w-10 h-10 mx-auto mb-4 text-muted-foreground" />
+        <Upload className="size-10 mx-auto mb-4 text-muted-foreground" />
         {isDragActive ? (
           <p>Déposez les fichiers ici...</p>
         ) : (
@@ -115,14 +115,14 @@ export function MediaUploader({ onUploadComplete }: MediaUploaderProps) {
                   onClick={() => removeFile(index)}
                   className="absolute -top-2 -right-2 bg-destructive text-destructive-foreground rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
                 >
-                  <X className="w-3 h-3" />
+                  <X className="size-3" />
                 </button>
               </div>
             ))}
           </div>
           <div className="flex justify-end">
             <Button onClick={handleUpload} disabled={uploading}>
-              {uploading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              {uploading && <Loader2 className="mr-2 size-4 animate-spin" />}
               {uploading ? "Téléchargement..." : "Envoyer vers le serveur"}
             </Button>
           </div>

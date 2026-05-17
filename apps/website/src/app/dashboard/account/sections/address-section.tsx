@@ -77,7 +77,7 @@ export function AddressSection({ profile }: { profile: Profile | null }) {
 		<Card>
 			<CardHeader>
 				<CardTitle className="flex items-center gap-2">
-					<Truck className="h-5 w-5 text-muted-foreground" />
+					<Truck className="size-5 text-muted-foreground" />
 					Adresse de livraison
 				</CardTitle>
 				<CardDescription>

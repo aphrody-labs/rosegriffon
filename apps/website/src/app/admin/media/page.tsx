@@ -67,7 +67,7 @@ export default async function MediaPage({ searchParams }: MediaPageProps) {
 								<Link
 									href={`/admin/media?page=${page - 1}${query ? `&query=${query}` : ""}`}
 								>
-									<ChevronLeft className="w-4 h-4 mr-2" />
+									<ChevronLeft className="size-4 mr-2" />
 									Précédent
 								</Link>
 							</Button>
@@ -81,7 +81,7 @@ export default async function MediaPage({ searchParams }: MediaPageProps) {
 									href={`/admin/media?page=${page + 1}${query ? `&query=${query}` : ""}`}
 								>
 									Suivant
-									<ChevronRight className="w-4 h-4 ml-2" />
+									<ChevronRight className="size-4 ml-2" />
 								</Link>
 							</Button>
 						</div>

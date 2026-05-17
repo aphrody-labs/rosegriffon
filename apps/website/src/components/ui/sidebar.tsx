@@ -290,14 +290,14 @@ function SidebarTrigger({ className, onClick, ...props }: React.ComponentProps<t
       data-sidebar="trigger"
       data-slot="sidebar-trigger"
       variant="ghost"
-      className={cn("p-2 h-12 w-12 flex items-center justify-center", className)}
+      className={cn("p-2 size-12 flex items-center justify-center", className)}
       onClick={(event) => {
         onClick?.(event);
         toggleSidebar();
       }}
       {...props}
     >
-      <Menu className="h-8 w-8 min-h-8 min-w-8" />
+      <Menu className="size-8 min-h-8 min-w-8" />
       <span className="sr-only">Toggle Sidebar</span>
     </Button>
   );

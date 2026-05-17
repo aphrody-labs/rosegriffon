@@ -97,7 +97,7 @@ function TweetPost({ item }: { item: FeedItem }) {
 						/>
 					</div>
 				) : (
-					<div className="relative aspect-[16/9] bg-gradient-to-br from-[#1DA1F2]/10 via-surface-container to-primary/5 flex items-center justify-center">
+					<div className="relative aspect-[16/9] bg-linear-to-br from-[#1DA1F2]/10 via-surface-container to-primary/5 flex items-center justify-center">
 						<Twitter className="size-12 text-[#1DA1F2]/20 fill-[#1DA1F2]/20" />
 					</div>
 				)}

@@ -22,7 +22,7 @@ export function UpcomingEvents({ events }: { events: UpcomingEvent[] }) {
 					className="flex items-center gap-1 text-xs font-medium text-muted-foreground transition-colors hover:text-primary"
 				>
 					Tout voir
-					<ArrowRight className="h-3 w-3" aria-hidden="true" />
+					<ArrowRight className="size-3" aria-hidden="true" />
 				</Link>
 			</CardHeader>
 			<CardContent>
@@ -38,10 +38,10 @@ export function UpcomingEvents({ events }: { events: UpcomingEvent[] }) {
 								className="flex items-start gap-3 py-3 first:pt-0 last:pb-0"
 							>
 								<div
-									className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400"
+									className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400"
 									aria-hidden="true"
 								>
-									<CalendarClock className="h-4 w-4" />
+									<CalendarClock className="size-4" />
 								</div>
 								<div className="min-w-0 flex-1">
 									<p className="truncate text-sm font-medium text-foreground">
@@ -55,7 +55,7 @@ export function UpcomingEvents({ events }: { events: UpcomingEvent[] }) {
 										</span>
 										{e.location && (
 											<span className="flex items-center gap-1">
-												<MapPin className="h-3 w-3" aria-hidden="true" />
+												<MapPin className="size-3" aria-hidden="true" />
 												{e.location}
 											</span>
 										)}

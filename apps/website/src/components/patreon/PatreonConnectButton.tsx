@@ -85,11 +85,11 @@ export function PatreonConnectButton({
 			)}
 		>
 			{loading ? (
-				<Loader2 className="h-4 w-4 animate-spin" />
+				<Loader2 className="size-4 animate-spin" />
 			) : variant === "reactivate" ? (
-				<Heart className="h-4 w-4" />
+				<Heart className="size-4" />
 			) : (
-				<Link2 className="h-4 w-4" />
+				<Link2 className="size-4" />
 			)}
 			{label ?? LABELS[variant]}
 		</Button>

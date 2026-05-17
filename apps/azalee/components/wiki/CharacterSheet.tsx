@@ -183,7 +183,7 @@ function HeroTypeSelector({
           <span
             key={hf.type}
             className={cn(
-              "px-3 py-1 rounded-full text-[11px] font-bold bg-gradient-to-r text-white shadow-sm",
+              "px-3 py-1 rounded-full text-[11px] font-bold bg-linear-to-r text-white shadow-sm",
               HERO_GRADIENTS[hf.type],
             )}
           >
@@ -350,7 +350,7 @@ export function CharacterSheet({
         {/* Background gradient based on element */}
         <div
           className={cn(
-            "absolute inset-0 bg-gradient-to-br",
+            "absolute inset-0 bg-linear-to-br",
             ELEMENT_GRADIENTS[element] || ELEMENT_GRADIENTS.Void,
           )}
         />
@@ -359,7 +359,7 @@ export function CharacterSheet({
 
         <div className="relative z-10 flex flex-col sm:flex-row items-center sm:items-end gap-3 sm:gap-6 p-4 sm:p-8 pb-5 sm:pb-8">
           {/* Portrait */}
-          <div className="relative w-28 h-28 sm:w-44 sm:h-44 lg:w-52 lg:h-52 rounded-[20px] sm:rounded-[28px] overflow-hidden border-[3px] border-white/20 shadow-2xl flex-shrink-0 bg-black/30">
+          <div className="relative size-28 sm:w-44 sm:h-44 lg:w-52 lg:h-52 rounded-[20px] sm:rounded-[28px] overflow-hidden border-[3px] border-white/20 shadow-2xl shrink-0 bg-black/30">
             <SafeImage
               src={finalImageSrc}
               zukanHash={zukanHash}
@@ -379,7 +379,7 @@ export function CharacterSheet({
                   {name}
                 </h1>
                 {genderSprite && (
-                  <div className="flex-shrink-0 drop-shadow-md">
+                  <div className="shrink-0 drop-shadow-md">
                     <CommonSpriteIcon name={genderSprite} scale={0.4} />
                   </div>
                 )}
@@ -522,7 +522,7 @@ export function CharacterSheet({
               {prevCharacterHref && (
                 <NextLink
                   href={prevCharacterHref}
-                  className="flex items-center justify-center w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 transition-colors text-white/80"
+                  className="flex items-center justify-center size-8 rounded-full bg-white/10 hover:bg-white/20 transition-colors text-white/80"
                   title="Précédent"
                 >
                   <ChevronLeft size={18} aria-hidden="true" />
@@ -532,7 +532,7 @@ export function CharacterSheet({
               {nextCharacterHref && (
                 <NextLink
                   href={nextCharacterHref}
-                  className="flex items-center justify-center w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 transition-colors text-white/80"
+                  className="flex items-center justify-center size-8 rounded-full bg-white/10 hover:bg-white/20 transition-colors text-white/80"
                   title="Suivant"
                 >
                   <ChevronRight size={18} aria-hidden="true" />
@@ -554,7 +554,7 @@ export function CharacterSheet({
 
           {/* Uniform — small on mobile (beside portrait area), larger on desktop */}
           {uniformUrl && !uniformError && (
-            <div className="flex flex-col items-center gap-1.5 sm:gap-2 flex-shrink-0">
+            <div className="flex flex-col items-center gap-1.5 sm:gap-2 shrink-0">
               <div className="relative w-12 h-16 sm:w-20 sm:h-28 rounded-xl sm:rounded-2xl overflow-hidden bg-black/20 border border-white/10 shadow-lg">
                 <NextImage
                   src={uniformUrl}
@@ -681,7 +681,7 @@ export function CharacterSheet({
                       BASARA
                     </NextLink>
                   ) : (
-                    <span className="px-3 py-1 rounded-full text-[11px] font-bold bg-gradient-to-r from-[#4facfe] via-[#7367f0] to-[#9733ee] text-white shadow-sm shadow-purple-500/30">
+                    <span className="px-3 py-1 rounded-full text-[11px] font-bold bg-linear-to-r from-[#4facfe] via-[#7367f0] to-[#9733ee] text-white shadow-sm shadow-purple-500/30">
                       BASARA
                     </span>
                   )}
@@ -739,7 +739,7 @@ export function CharacterSheet({
                   className="flex items-center gap-2 sm:gap-3 px-3 sm:px-6 py-2 sm:py-3 hover:bg-on-surface/[0.04] transition-colors group"
                 >
                   {/* Category icon */}
-                  <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-lg sm:rounded-xl bg-surface-container-high flex items-center justify-center flex-shrink-0 border border-outline-variant/15">
+                  <div className="size-6 sm:w-8 sm:h-8 rounded-lg sm:rounded-xl bg-surface-container-high flex items-center justify-center shrink-0 border border-outline-variant/15">
                     {catIcon ? (
                       <NextImage
                         src={catIcon}
@@ -764,7 +764,7 @@ export function CharacterSheet({
                   </div>
 
                   {/* Slot number badge */}
-                  <span className="w-5 h-5 sm:w-6 sm:h-6 rounded-md sm:rounded-lg bg-surface-container-highest flex items-center justify-center text-[10px] sm:text-[11px] font-black text-on-surface-variant flex-shrink-0">
+                  <span className="size-5 sm:w-6 sm:h-6 rounded-md sm:rounded-lg bg-surface-container-highest flex items-center justify-center text-[10px] sm:text-[11px] font-black text-on-surface-variant shrink-0">
                     {skill.slotNumber ?? i + 1}
                   </span>
 
@@ -774,12 +774,12 @@ export function CharacterSheet({
                       {skill.name}
                     </span>
                     {skill.evolutionSuffix && (
-                      <span className="text-[10px] sm:text-[11px] font-black text-amber-400 flex-shrink-0">
+                      <span className="text-[10px] sm:text-[11px] font-black text-amber-400 shrink-0">
                         {skill.evolutionSuffix}
                       </span>
                     )}
                     {skill.element && (
-                      <div className="w-3 h-3 sm:w-3.5 sm:h-3.5 relative flex-shrink-0 opacity-80">
+                      <div className="size-3 sm:w-3.5 sm:h-3.5 relative shrink-0 opacity-80">
                         <NextImage
                           src={getSkillElementIconUrl(skill.element)}
                           alt=""
@@ -798,7 +798,7 @@ export function CharacterSheet({
                   </div>
 
                   {/* Power & TP — labels hidden on mobile */}
-                  <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
+                  <div className="flex items-center gap-2 sm:gap-3 shrink-0">
                     {!skill.isPassive && skill.power && (
                       <div className="flex flex-col items-end">
                         <span className="hidden sm:block text-[10px] font-black text-on-surface-variant/40 leading-none uppercase">
@@ -835,7 +835,7 @@ export function CharacterSheet({
                     <ChevronRight
                       size={14}
                       aria-hidden="true"
-                      className="sm:size-4 text-on-surface-variant/30 group-hover:text-primary transition-colors flex-shrink-0 ml-0.5 sm:ml-1"
+                      className="sm:size-4 text-on-surface-variant/30 group-hover:text-primary transition-colors shrink-0 ml-0.5 sm:ml-1"
                     />
                   )}
                 </Wrapper>

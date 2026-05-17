@@ -79,7 +79,7 @@ export function QuickActions() {
 						<Card className="h-full transition-all group-hover:border-primary/40 group-hover:-translate-y-0.5 group-hover:shadow-md">
 							<CardContent className="flex items-start gap-3 p-4">
 								<div className={`mt-0.5 ${accent}`} aria-hidden="true">
-									<Icon className="h-5 w-5" />
+									<Icon className="size-5" />
 								</div>
 								<div className="min-w-0 flex-1">
 									<p className="font-semibold text-foreground">{title}</p>
