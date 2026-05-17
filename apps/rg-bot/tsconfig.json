@@ -1,0 +1,14 @@
+{
+	"extends": "@rg/config/tsconfig-bun.json",
+	"compilerOptions": {
+		"paths": {
+			"@/*": ["./src/*"]
+		},
+		"outDir": "dist",
+		"noEmit": true,
+		"allowImportingTsExtensions": true,
+		"moduleDetection": "force"
+	},
+	"include": ["src/**/*.ts"],
+	"exclude": ["node_modules", "dist"]
+}
