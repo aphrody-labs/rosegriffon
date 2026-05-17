@@ -108,7 +108,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
 							<p className="inline-flex items-center gap-2 rounded-full border-2 border-[#d4af37]/40 bg-[#0c1730] px-3 py-1 text-[10px] font-bold uppercase tracking-[0.2em] text-[#d4af37]">
 								{CATEGORY_LABELS[product.category]}
 							</p>
-							<h1 className="mt-3 text-balance text-3xl font-extrabold leading-tight tracking-tight text-white md:text-4xl">
+							<h1 className="mt-3 text-balance text-fluid-headline-xl font-extrabold leading-tight tracking-tight text-white">
 								{product.name}
 							</h1>
 							<p className="mt-2 text-base text-white/70">{product.tagline}</p>

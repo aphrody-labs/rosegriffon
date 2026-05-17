@@ -38,7 +38,7 @@ export default async function ThankYouPage({ searchParams }: ThankYouProps) {
 			<div className="grid size-20 place-items-center rounded-full bg-[#d4af37] shadow-[0_4px_0_0_rgba(0,0,0,0.5)]">
 				<Check className="size-10 text-[#0c1730]" strokeWidth={3} />
 			</div>
-			<h1 className="mt-6 text-4xl font-extrabold tracking-tight text-white md:text-5xl">
+			<h1 className="mt-6 text-fluid-display-lg font-extrabold tracking-tight text-white">
 				Merci 🌹
 			</h1>
 			<p className="mt-4 max-w-md text-base text-white/80">

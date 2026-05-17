@@ -50,7 +50,7 @@ export default async function CartPage() {
 			</nav>
 
 			<header className="mb-8 flex items-end justify-between gap-4">
-				<h1 className="text-4xl font-extrabold tracking-tight text-white md:text-5xl">
+				<h1 className="text-fluid-headline-xl font-extrabold tracking-tight text-white">
 					Mon panier
 				</h1>
 				<p className="text-sm font-semibold uppercase tracking-widest text-[#d4af37]">

@@ -63,6 +63,30 @@
 	--md-sys-motion-duration-extra-long3: 900ms;
 	--md-sys-motion-duration-extra-long4: 1000ms;
 
+	/* ─── Breakpoint custom xs (375px / iPhone) ──────────────────────────── */
+	/* Tailwind defaults : sm 640 / md 768 / lg 1024 / xl 1280 / 2xl 1536.
+	 * Ajout `xs` 375px pour cibler les iPhones standard et améliorer le
+	 * fine-grained responsive sur petites screens. */
+	--breakpoint-xs: 23.4375rem;
+
+	/* ─── Fluid typography ───────────────────────────────────────────────── */
+	/* Type scale fluide qui interpole entre 320px (mobile) et 1920px (desktop)
+	 * via `clamp(min, preferred, max)`. Évite les cascades sm:/md:/lg: dans le
+	 * markup. À utiliser sur les titres hero, landing, design-system, shop.
+	 * Min = mobile lisible · Preferred = fluide vw · Max = desktop majestueux. */
+	--text-fluid-display-2xl: clamp(3rem, 7vw + 1rem, 9.75rem);   /* 48 → 156 */
+	--text-fluid-display-xl: clamp(2.5rem, 5.5vw + 1rem, 7.5rem); /* 40 → 120 */
+	--text-fluid-display-lg: clamp(2.25rem, 4vw + 1rem, 5rem);    /* 36 → 80 */
+	--text-fluid-headline-xl: clamp(1.75rem, 3vw + 0.5rem, 3.5rem); /* 28 → 56 */
+	--text-fluid-headline-lg: clamp(1.5rem, 2vw + 0.5rem, 2.5rem);  /* 24 → 40 */
+	--text-fluid-headline-md: clamp(1.25rem, 1.2vw + 0.5rem, 2rem); /* 20 → 32 */
+	--text-fluid-body-lg: clamp(1rem, 0.5vw + 0.875rem, 1.25rem);   /* 16 → 20 */
+	--text-fluid-body-md: clamp(0.9375rem, 0.25vw + 0.875rem, 1rem); /* 15 → 16 */
+
+	/* Spacing fluide section padding-block (mobile généreux → desktop spacieux) */
+	--space-fluid-section-y: clamp(3rem, 6vw + 1rem, 8rem);  /* 48 → 128 */
+	--space-fluid-section-x: clamp(1rem, 3vw + 0.5rem, 5rem); /* 16 → 80 */
+
 	/* ─── M3 Elevation ───────────────────────────────────────────────────── */
 	--md-sys-elevation-level0: none;
 	--md-sys-elevation-level1: 0 1px 2px 0 rgb(0 0 0 / 0.30), 0 1px 3px 1px rgb(0 0 0 / 0.15);

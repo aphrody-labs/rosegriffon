@@ -26,7 +26,7 @@ export default async function ShopIndexPage({ searchParams }: ShopPageProps) {
 						<span>Édition Communauté 2026</span>
 						<span>★</span>
 					</p>
-					<h1 className="text-balance text-4xl font-extrabold leading-[0.95] tracking-tight text-white sm:text-5xl md:text-6xl lg:text-7xl">
+					<h1 className="text-balance text-fluid-display-xl font-extrabold leading-[0.95] tracking-tight text-white">
 						La boutique <span className="text-[#d4af37]">Rose Griffon</span>.
 					</h1>
 					<p className="mt-5 max-w-2xl text-base text-white/80 md:text-lg">
