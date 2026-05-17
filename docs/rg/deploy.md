@@ -20,11 +20,11 @@ Procédure complète pour passer le monorepo `rose-griffon/rg` en prod. **À ex�
 |---|---|
 | `git push origin main` (n'importe qui) | **AUCUN** — auto-deploy disabled |
 | `git push origin <tag>` | **AUCUN** — idem |
-| Bunlight Bot push en boucle | **AUCUN** — idem |
+| Pushes en boucle (autre session Claude / alias git `bot@bunlight.com`) | **AUCUN** — idem |
 | Appel API `POST /v13/deployments` avec SHA explicite | **1 deploy production déclenché** |
 | Vercel CLI `vercel --prod` | idem |
 
-**Principe** : Bunlight Bot et autres processus peuvent push librement sur `main`. Vercel ne réagit jamais. Pour déployer = appel API explicit avec SHA validé.
+**Principe** : n'importe quelle session Claude (commits sous alias git `bot@bunlight.com` ou autres) peut push librement sur `main`. Vercel ne réagit jamais. Pour déployer = appel API explicit avec SHA validé.
 
 **Workflow recommandé pour shipper :**
 
@@ -47,7 +47,7 @@ git push origin --tags
 
 ## État actuel (2026-05-18 01:32 CET, mis à jour après incident)
 
-**Incident migration (résolu) :** un cycle de pushes Bunlight Bot (~1 commit/6min) a annulé tous les builds rg-* successifs avant qu'aucun n'aboutisse READY. Les domains custom avaient été pré-attachés à rg-azalee/rg-website avec TXT verification mismatch → 404 DEPLOYMENT_NOT_FOUND sur les 3 domains.
+**Incident migration (résolu) :** un cycle de pushes rapides (~1 commit/6min, identité git `bot@bunlight.com` d'une session Claude parallèle) a annulé tous les builds rg-* successifs avant qu'aucun n'aboutisse READY. Les domains custom avaient été pré-attachés à rg-azalee/rg-website avec TXT verification mismatch → 404 DEPLOYMENT_NOT_FOUND sur les 3 domains.
 
 **Résolution appliquée (sans rien casser, 100% réversible) :**
 1. **Domains rollback** : `azalee.rosegriffon.fr`, `rosegriffon.fr`, `www.rosegriffon.fr` retransférés aux anciens projects `azalee`/`rosegriffon`. Anciens deploys READY (commits `fd75f75a` azalee + `c231b48d` website du 10 mai) servent à nouveau la prod (3/3 HTTP 200 OK).
