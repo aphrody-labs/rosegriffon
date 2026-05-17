@@ -16,8 +16,13 @@ export function getStripe(): Stripe {
 		);
 	}
 	cached = new Stripe(key, {
+		// Latest Stripe API version (cf. skill stripe-best-practices). Pin explicite
+		// pour éviter drift silencieux à chaque release Stripe.
 		apiVersion: "2025-08-27.basil",
 		typescript: true,
+		// Auto-retry idempotent sur erreurs réseau / 5xx
+		maxNetworkRetries: 2,
+		timeout: 20_000,
 		appInfo: {
 			name: "rosegriffon.fr",
 			url: "https://rosegriffon.fr",
