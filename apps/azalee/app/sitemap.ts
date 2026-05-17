@@ -1,6 +1,6 @@
 export const dynamic = "force-dynamic";
 
-import { createSupabaseServiceClient } from "@rg/db/service";
+import { getSupabaseClient } from "@/lib/api/supabase";
 import type { MetadataRoute } from "next";
 
 const BASE_URL = "https://azalee.rosegriffon.fr";
@@ -22,7 +22,7 @@ const AURA_TYPE_MAP: Record<string, string> = {
 };
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-	const supabase = createSupabaseServiceClient();
+	const supabase = getSupabaseClient();
 
 	// Fetch all IDs in parallel — using correct column names
 	const [characters, skills, items, auras, tactics, articles, tags] =

@@ -39,7 +39,7 @@ function EventCard({ event }: EventCardProps) {
         style={{
           background: "linear-gradient(to right, #a14b3f, transparent)",
         }}
-      ></div>
+       />
 
       {/* Icon avec background coloré */}
       <div className="relative flex-shrink-0 mb-3 sm:mb-0 sm:mr-4 md:mr-5">
@@ -52,7 +52,7 @@ function EventCard({ event }: EventCardProps) {
             <div
               className="absolute -top-0.5 -right-0.5 sm:-top-1 sm:-right-1 w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full animate-pulse"
               style={{ backgroundColor: "#a14b3f" }}
-            ></div>
+             />
           )}
         </div>
       </div>
@@ -91,7 +91,7 @@ function EventCard({ event }: EventCardProps) {
             target="_blank"
             rel="noopener noreferrer"
           >
-            <span className="absolute inset-0 bg-white opacity-0 group-hover/btn:opacity-20 transition-opacity duration-300"></span>
+            <span className="absolute inset-0 bg-white opacity-0 group-hover/btn:opacity-20 transition-opacity duration-300" />
             <span className="relative flex items-center justify-center text-xs sm:text-sm">
               Rejoindre l&apos;événement
               <ArrowRight className="ml-2 h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0 group-hover/btn:translate-x-1 transition-transform duration-300" />

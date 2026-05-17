@@ -1,65 +1,85 @@
 "use client";
 
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
+	Dialog,
+	DialogContent,
+	DialogDescription,
+	DialogFooter,
+	DialogHeader,
+	DialogTitle,
 } from "./dialog";
 import {
-  Drawer,
-  DrawerContent,
-  DrawerDescription,
-  DrawerFooter,
-  DrawerHeader,
-  DrawerTitle,
+	Drawer,
+	DrawerContent,
+	DrawerDescription,
+	DrawerFooter,
+	DrawerHeader,
+	DrawerTitle,
 } from "./drawer";
 import { useMediaQuery } from "../hooks/use-media-query";
+import { cn } from "../lib/utils";
 
 interface ResponsiveDialogProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  title: React.ReactNode;
-  description?: React.ReactNode;
-  children: React.ReactNode;
+	open: boolean;
+	onOpenChange: (open: boolean) => void;
+	title: React.ReactNode;
+	description?: React.ReactNode;
+	children: React.ReactNode;
+	footer?: React.ReactNode;
+	contentClassName?: string;
 }
 
 export function ResponsiveDialog({
-  open,
-  onOpenChange,
-  title,
-  description,
-  children,
+	open,
+	onOpenChange,
+	title,
+	description,
+	children,
+	footer,
+	contentClassName,
 }: ResponsiveDialogProps) {
-  const isDesktop = useMediaQuery("(min-width: 768px)");
+	const isDesktop = useMediaQuery("(min-width: 768px)");
 
-  if (isDesktop) {
-    return (
-      <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto sm:max-w-[600px]">
-          <DialogHeader>
-            <DialogTitle>{title}</DialogTitle>
-            {description && <DialogDescription>{description}</DialogDescription>}
-          </DialogHeader>
-          {children}
-        </DialogContent>
-      </Dialog>
-    );
-  }
+	if (isDesktop) {
+		return (
+			<Dialog open={open} onOpenChange={onOpenChange}>
+				<DialogContent
+					data-slot="responsive-dialog-content"
+					className={cn(
+						"max-w-2xl max-h-[90vh] overflow-y-auto sm:max-w-[600px]",
+						contentClassName,
+					)}
+				>
+					<DialogHeader>
+						<DialogTitle>{title}</DialogTitle>
+						{description && (
+							<DialogDescription>{description}</DialogDescription>
+						)}
+					</DialogHeader>
+					{children}
+					{footer && <DialogFooter>{footer}</DialogFooter>}
+				</DialogContent>
+			</Dialog>
+		);
+	}
 
-  return (
-    <Drawer open={open} onOpenChange={onOpenChange}>
-      <DrawerContent className="max-h-[90vh]">
-        <DrawerHeader className="text-left">
-          <DrawerTitle>{title}</DrawerTitle>
-          {description && <DrawerDescription>{description}</DrawerDescription>}
-        </DrawerHeader>
-        <div className="px-4 overflow-y-auto">{children}</div>
-        <DrawerFooter className="pt-2">
-          {/* Footer buttons are often inside the form, but Drawer provides a specific slot if needed */}
-        </DrawerFooter>
-      </DrawerContent>
-    </Drawer>
-  );
+	return (
+		<Drawer open={open} onOpenChange={onOpenChange}>
+			<DrawerContent
+				data-slot="responsive-dialog-drawer"
+				className="max-h-[90vh]"
+			>
+				<DrawerHeader className="text-left">
+					<DrawerTitle>{title}</DrawerTitle>
+					{description && <DrawerDescription>{description}</DrawerDescription>}
+				</DrawerHeader>
+				<div className="px-4 overflow-y-auto">{children}</div>
+				{footer ? (
+					<DrawerFooter>{footer}</DrawerFooter>
+				) : (
+					<DrawerFooter className="pt-2" />
+				)}
+			</DrawerContent>
+		</Drawer>
+	);
 }

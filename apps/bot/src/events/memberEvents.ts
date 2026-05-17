@@ -2,8 +2,7 @@ import { type ArgsOf, Discord, On } from "@rpbey/discordx";
 import type { Client } from "discord.js";
 
 import { syncOneMember, syncOneUser } from "../services/syncMembers.ts";
-
-const GUILD_ID = Bun.env.GUILD_ID;
+import { GUILD_ID } from "../lib/config.ts";
 
 @Discord()
 export class MemberEvents {

@@ -106,8 +106,8 @@ export default function EmotesPage() {
       <Toaster richColors position="top-center" />
       {/* Hero Section */}
       <section className="relative overflow-hidden rounded-b-3xl bg-linear-to-br from-primary/10 via-background to-background p-8 md:p-12 lg:p-16 text-center border-b border-border/50">
-        <div className="absolute top-0 right-0 -mt-12 -mr-12 h-64 w-64 rounded-full bg-primary/5 blur-3xl"></div>
-        <div className="absolute bottom-0 left-0 -mb-12 -ml-12 h-64 w-64 rounded-full bg-blue-500/5 blur-3xl"></div>
+        <div className="absolute top-0 right-0 -mt-12 -mr-12 h-64 w-64 rounded-full bg-primary/5 blur-3xl" />
+        <div className="absolute bottom-0 left-0 -mb-12 -ml-12 h-64 w-64 rounded-full bg-blue-500/5 blur-3xl" />
 
         <div className="relative z-10 mx-auto max-w-3xl space-y-6">
           <div className="inline-flex items-center rounded-full border border-border bg-background/50 px-3 py-1 text-sm font-medium text-primary backdrop-blur-sm">

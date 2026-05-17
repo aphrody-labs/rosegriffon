@@ -27,7 +27,15 @@
 		"no-debugger": "error",
 		"no-array-index-key": "off",
 		"no-non-null-assertion": "off",
-		"no-explicit-any": "warn"
+		"no-explicit-any": "warn",
+		"no-unused-vars": [
+			"warn",
+			{
+				"argsIgnorePattern": "^_",
+				"caughtErrorsIgnorePattern": "^_",
+				"varsIgnorePattern": "^_"
+			}
+		]
 	},
 	"ignorePatterns": [
 		"**/node_modules/**",

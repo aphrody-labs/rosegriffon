@@ -71,7 +71,7 @@ export async function GET() {
 			ok: true,
 			webhooks: list.map((w) => ({
 				id: w.id,
-				...(w.attributes ?? {}),
+				...w.attributes,
 			})),
 		});
 	} catch (e) {

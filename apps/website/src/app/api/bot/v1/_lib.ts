@@ -114,7 +114,7 @@ export async function logBotAction(opts: {
       action: opts.action,
       entity_type: opts.entity_type ?? "bot-api",
       entity_id: opts.entity_id ?? null,
-      details: { via: "bot-api", discord_id: opts.principal.discord_id, ...(opts.details ?? {}) },
+      details: { via: "bot-api", discord_id: opts.principal.discord_id, ...opts.details },
     });
   } catch (err) {
     console.error("[bot-api] audit log failed:", err);

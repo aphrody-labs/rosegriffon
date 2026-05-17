@@ -94,7 +94,7 @@ export default function DiscordBlock({ children, isWidgetLeft = false }: Discord
         className={`w-3 h-3 rounded-full ${
           statusColors[status as keyof typeof statusColors]
         } absolute -bottom-0.5 -right-0.5 border-2 border-[#36393f]`}
-      ></div>
+       />
     );
   };
 
@@ -110,7 +110,7 @@ export default function DiscordBlock({ children, isWidgetLeft = false }: Discord
     if (loading) {
       return (
         <div className="w-full h-full bg-[#36393f] text-white flex flex-col items-center justify-center gap-3">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white" />
           <p className="text-sm">Chargement du widget Discord...</p>
         </div>
       );

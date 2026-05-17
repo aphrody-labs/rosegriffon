@@ -3,9 +3,7 @@ import type { Client } from "discord.js";
 
 import { syncAllMembers } from "../services/syncMembers.ts";
 import { syncStaffPhotos } from "../services/teamPhotos.ts";
-
-const SYNC_INTERVAL_MS = Number(Bun.env.SYNC_INTERVAL_MS ?? 30 * 60 * 1000);
-const GUILD_ID = Bun.env.GUILD_ID;
+import { GUILD_ID, SYNC_INTERVAL_MS } from "../lib/config.ts";
 
 @Discord()
 export class ReadyEvent {

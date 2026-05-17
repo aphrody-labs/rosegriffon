@@ -212,7 +212,7 @@ function RgtvPageInner({
           className="mt-12 sm:mt-16 md:mt-20 relative overflow-hidden"
           aria-labelledby="streamers-heading-rgtv"
         >
-          <div className="absolute inset-0 -z-10 bg-linear-to-br from-primary/5 via-transparent to-secondary/5 rounded-3xl blur-3xl"></div>
+          <div className="absolute inset-0 -z-10 bg-linear-to-br from-primary/5 via-transparent to-secondary/5 rounded-3xl blur-3xl" />
 
           <div className="space-y-6 sm:space-y-8">
             <div className="text-center space-y-3 sm:space-y-4">
@@ -240,7 +240,7 @@ function RgtvPageInner({
               ].map((streamer) => (
                 <div key={streamer.name} className="group flex justify-center">
                   <div className="relative w-full aspect-square flex items-center justify-center">
-                    <div className="absolute -inset-2 bg-linear-to-r from-[#345182] to-[#d63901] rounded-full opacity-0 group-hover:opacity-50 blur-2xl transition-all duration-300 group-hover:animate-pulse scale-75 group-hover:scale-100"></div>
+                    <div className="absolute -inset-2 bg-linear-to-r from-[#345182] to-[#d63901] rounded-full opacity-0 group-hover:opacity-50 blur-2xl transition-all duration-300 group-hover:animate-pulse scale-75 group-hover:scale-100" />
                     <div className="relative w-full h-full rounded-2xl overflow-hidden border-2 border-[#345182] shadow-lg group-hover:shadow-2xl group-hover:border-[#d63901] transition-all duration-300 transform group-hover:scale-110 group-hover:-translate-y-2">
                       <Image
                         src={`/rgtv/${streamer.file}`}
@@ -249,13 +249,13 @@ function RgtvPageInner({
                         fill
                         sizes="(max-width: 360px) 120px, (max-width: 640px) 160px, (max-width: 768px) 192px, 224px"
                       />
-                      <div className="absolute inset-0 bg-linear-to-t from-[#345182]/90 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                      <div className="absolute inset-0 bg-linear-to-t from-[#345182]/90 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                       <div className="absolute inset-0 flex flex-col items-center justify-end pb-2 sm:pb-3 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0">
                         <span className="text-white font-bold text-xs sm:text-sm tracking-wider drop-shadow-lg">
                           {streamer.name}
                         </span>
                         <div className="flex items-center gap-1 mt-1.5 px-2 py-0.5 rounded-full bg-[#d63901] text-white text-[10px] font-semibold">
-                          <span className="w-1 h-1 bg-white rounded-full animate-pulse"></span>
+                          <span className="w-1 h-1 bg-white rounded-full animate-pulse" />
                           Live
                         </div>
                       </div>
