@@ -69,9 +69,13 @@ src/
 ## Liens monorepo
 
 - [`@rg/db`](../../packages/db) — client Supabase partagé (browser/server/service + Database types générés)
-- [`@rg/types`](../../packages/types) — zod schemas partagés (user, team, article, event, stream)
 - [`@rg/config`](../../packages/config) — tsconfig (`tsconfig-bun.json`), oxlintrc, eslint base
 
-## TODO migration Supabase
+## Couche DB — Bun.SQL + Supabase client
 
-Les services historiques utilisent encore `Bun.SQL` directement sur la connexion Postgres Supabase (via `DATABASE_URL` pooler URL). Voir le bloc `TODO migration Supabase` dans `src/lib/db.ts`. Migration prévue vers `supabase.from(...)` / `.rpc()` une fois `packages/db/src/types.gen.ts` regénéré sur les vraies tables (`profiles`, `articles`, `events`, `stream_schedules`, `team_members`, `discord_members`, `chronicles`, `settings`, `admin_audit_log`, `account`, `user`).
+Le bot utilise **deux** chemins d'accès DB selon le contexte de la query :
+
+- **`supabase`** (de `@rg/db/service`) : client Supabase service-role typé. Préférer pour les queries simples (`from().select()`, `.insert()`, `.rpc()`) — bénéficie du type-checking sur les colonnes via `Database`.
+- **`sql`** (de `bun`) : connexion Postgres directe via `DATABASE_URL` (pooler Supabase). Préférer pour les queries SQL complexes (CTE, fenêtres, jointures multi-niveaux) où le query builder Supabase serait verbeux ou impossible.
+
+Les deux clients pointent sur la **même DB Supabase**. Voir `src/lib/db.ts`.

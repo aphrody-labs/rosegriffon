@@ -27,8 +27,6 @@
 			"@rg/ui/*": ["./packages/ui/src/*"],
 			"@rg/db": ["./packages/db/src/index.ts"],
 			"@rg/db/*": ["./packages/db/src/*"],
-			"@rg/types": ["./packages/types/src/index.ts"],
-			"@rg/types/*": ["./packages/types/src/*"],
 			"@rg/config/*": ["./packages/config/*"]
 		}
 	},
