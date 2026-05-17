@@ -3,20 +3,36 @@ name: CI
 on:
   push:
     branches: [main]
+    paths-ignore:
+      - "**.md"
+      - "docs/**"
+      - "LICENSE"
+      - ".gitignore"
   pull_request:
     branches: [main]
+    paths-ignore:
+      - "**.md"
+      - "docs/**"
+      - "LICENSE"
+      - ".gitignore"
+  workflow_dispatch:
 
 concurrency:
-  group: ci-${{ github.ref }}
+  group: ci-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 env:
+  TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+  TURBO_TEAM: ${{ secrets.TURBO_TEAM }}
+  TURBO_REMOTE_ONLY: true
   TURBO_TELEMETRY_DISABLED: 1
+  NEXT_TELEMETRY_DISABLED: 1
 
 jobs:
-  install:
-    name: Install
+  lint-type:
+    name: Lint + Type-check
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
 
@@ -24,72 +40,27 @@ jobs:
         with:
           bun-version: 1.3.14
 
-      - name: Cache turbo + bun
+      - name: Restore bun + turbo cache
         uses: actions/cache@v4
         with:
           path: |
             .turbo/cache
             ~/.bun/install/cache
           key: ${{ runner.os }}-bun-${{ hashFiles('bun.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-bun-
+          restore-keys: ${{ runner.os }}-bun-
 
-      - name: bun install
-        run: bun install --frozen-lockfile
+      - run: bun install --frozen-lockfile --no-save
 
-  lint:
-    name: Lint
-    runs-on: ubuntu-latest
-    needs: install
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: oven-sh/setup-bun@v2
-        with:
-          bun-version: 1.3.14
-
-      - uses: actions/cache@v4
-        with:
-          path: |
-            .turbo/cache
-            ~/.bun/install/cache
-          key: ${{ runner.os }}-bun-${{ hashFiles('bun.lock') }}
-
-      - run: bun install --frozen-lockfile
-      - run: bun turbo run lint
-
-  type-check:
-    name: Type-check
-    runs-on: ubuntu-latest
-    needs: install
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: oven-sh/setup-bun@v2
-        with:
-          bun-version: 1.3.14
-
-      - uses: actions/cache@v4
-        with:
-          path: |
-            .turbo/cache
-            ~/.bun/install/cache
-          key: ${{ runner.os }}-bun-${{ hashFiles('bun.lock') }}
-
-      - run: bun install --frozen-lockfile
-      - run: bun turbo run type-check
+      - run: bun turbo run lint type-check
 
   build:
-    name: Build (${{ matrix.workspace }})
+    name: Build ${{ matrix.workspace }}
     runs-on: ubuntu-latest
-    needs: install
+    timeout-minutes: 15
     strategy:
       fail-fast: false
       matrix:
-        workspace:
-          - "@rg/azalee"
-          - "@rg/website"
-          - "@rg/bot"
+        workspace: ["@rg/website", "@rg/azalee", "@rg/bot"]
     steps:
       - uses: actions/checkout@v4
 
@@ -97,15 +68,22 @@ jobs:
         with:
           bun-version: 1.3.14
 
-      - uses: actions/cache@v4
+      - name: Restore bun + turbo cache
+        uses: actions/cache@v4
         with:
           path: |
             .turbo/cache
             ~/.bun/install/cache
-          key: ${{ runner.os }}-bun-${{ hashFiles('bun.lock') }}
+            apps/website/.next/cache
+            apps/azalee/.next/cache
+          key: ${{ runner.os }}-build-${{ matrix.workspace }}-${{ hashFiles('bun.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-build-${{ matrix.workspace }}-
+            ${{ runner.os }}-bun-
 
-      - run: bun install --frozen-lockfile
-      - run: bun turbo run build --filter=${{ matrix.workspace }}
+      - run: bun install --frozen-lockfile --no-save
+
+      - run: bun turbo run build --filter=${{ matrix.workspace }}...
         env:
           NEXT_PUBLIC_SUPABASE_URL: "https://stub.supabase.co"
           NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: "sb_publishable_stub"
@@ -113,7 +91,7 @@ jobs:
   test:
     name: Test
     runs-on: ubuntu-latest
-    needs: install
+    timeout-minutes: 8
     steps:
       - uses: actions/checkout@v4
 
@@ -121,23 +99,25 @@ jobs:
         with:
           bun-version: 1.3.14
 
-      - uses: actions/cache@v4
+      - name: Restore bun + turbo cache
+        uses: actions/cache@v4
         with:
           path: |
             .turbo/cache
             ~/.bun/install/cache
           key: ${{ runner.os }}-bun-${{ hashFiles('bun.lock') }}
+          restore-keys: ${{ runner.os }}-bun-
 
-      - run: bun install --frozen-lockfile
+      - run: bun install --frozen-lockfile --no-save
+
       - run: bun turbo run test
-        continue-on-error: true
 
   ci-success:
     name: CI Success
     if: always()
-    needs: [lint, type-check, build, test]
+    needs: [lint-type, build, test]
     runs-on: ubuntu-latest
     steps:
-      - if: ${{ contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled') }}
+      - if: contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled')
         run: exit 1
       - run: echo "All CI checks passed"
