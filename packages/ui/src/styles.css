@@ -3,6 +3,32 @@
  * Les apps complètent avec leurs propres tokens (cf. apps/<app>/src/app/globals.css).
  */
 
+@theme inline {
+	/* Accordion animation tokens — utilisés par packages/ui/src/components/accordion.tsx.
+	 * Présents dans le package partagé pour que toute app qui importe @rg/ui/styles.css
+	 * obtienne les keyframes sans dépendre de tw-animate-css / tailwindcss-animate. */
+	--animate-accordion-down: accordion-down 0.2s ease-out;
+	--animate-accordion-up: accordion-up 0.2s ease-out;
+}
+
+@keyframes accordion-down {
+	from {
+		height: 0;
+	}
+	to {
+		height: var(--radix-accordion-content-height);
+	}
+}
+
+@keyframes accordion-up {
+	from {
+		height: var(--radix-accordion-content-height);
+	}
+	to {
+		height: 0;
+	}
+}
+
 @layer base {
 	:root {
 		/* Rose Griffon — branding tokens */
