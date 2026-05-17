@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 import { Calendar, Clock, Eye, Gamepad2, TrendingUp, Users } from "lucide-react";
 import Image from "next/image";
 

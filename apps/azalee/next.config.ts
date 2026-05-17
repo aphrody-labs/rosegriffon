@@ -112,6 +112,7 @@ const nextConfig: NextConfig = {
 
 	// Packages Node.js natifs exclus du bundling serveur
 	serverExternalPackages: [
+		"@rosegriffon/inagle",
 		"better-auth",
 		"pg",
 		"sharp",

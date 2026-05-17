@@ -1,5 +1,9 @@
-const CACHE_NAME = "azalee-shell-v6-20260517";
+const CACHE_NAME = "azalee-shell-v7-20260517";
 const SHELL_URLS = ["/manifest.webmanifest", "/icon.webp", "/logo.webp"];
+// Origin du CDN VPS — quand NEXT_PUBLIC_CDN_URL est actif, les chunks
+// _next/static sont chargés depuis cdn.rosegriffon.fr et non self.location.
+// Sans ce match, le SW devient no-op en prod CDN.
+const CDN_ORIGIN = "https://cdn.rosegriffon.fr";
 
 // Install: precache shell assets (versioned static only — pas de navigations)
 self.addEventListener("install", (event) => {
@@ -38,11 +42,14 @@ self.addEventListener("fetch", (event) => {
 
 	const url = new URL(request.url);
 
-	// Cache UNIQUEMENT les ressources versionnées /_next/static/ (immutables)
-	if (
-		url.origin === self.location.origin &&
-		url.pathname.startsWith("/_next/static/")
-	) {
+	// Cache UNIQUEMENT les ressources versionnées /_next/static/ (immutables),
+	// que ce soit servi par l'origin Next OU par le CDN VPS (assetPrefix).
+	const isStaticPath =
+		url.pathname.startsWith("/_next/static/") ||
+		url.pathname.includes("/_next/static/");
+	const isAllowedOrigin =
+		url.origin === self.location.origin || url.origin === CDN_ORIGIN;
+	if (isAllowedOrigin && isStaticPath) {
 		event.respondWith(
 			caches.match(request).then(
 				(cached) =>
