@@ -1,4 +1,11 @@
-import { ArrowLeft, ShoppingBag } from "lucide-react";
+import {
+	ArrowLeft,
+	Lock,
+	RefreshCw,
+	ShoppingBag,
+	Sparkles,
+	Truck,
+} from "lucide-react";
 import Link from "next/link";
 import { Suspense } from "react";
 
@@ -90,7 +97,10 @@ export default async function CartPage() {
 							</div>
 							<div className="flex items-center justify-between text-white/60">
 								<dt>Livraison</dt>
-								<dd>Calculée à l'étape suivante</dd>
+								<dd className="text-right">
+									<span className="block text-white">À partir de 4,90 €</span>
+									<span className="block text-[10px]">FR · UE 9,90 €</span>
+								</dd>
 							</div>
 							<div className="flex items-center justify-between text-white/60">
 								<dt>Réduction Patron</dt>
@@ -108,9 +118,68 @@ export default async function CartPage() {
 						</div>
 
 						<CheckoutButton subtotalCents={cart.subtotalCents} />
+
+						{/* Trust signals — Baymard 2024 anti-friction */}
+						<ul className="grid grid-cols-2 gap-3 border-t border-[#d4af37]/20 pt-4 text-[11px] text-white/70">
+							<TrustItem
+								icon={<Lock className="size-3.5" />}
+								label="Paiement sécurisé"
+								sub="Stripe TLS"
+							/>
+							<TrustItem
+								icon={<RefreshCw className="size-3.5" />}
+								label="Retours 14j"
+								sub="Satisfait ou remboursé"
+							/>
+							<TrustItem
+								icon={<Truck className="size-3.5" />}
+								label="Expédié FR"
+								sub="3-7 jours"
+							/>
+							<TrustItem
+								icon={<Sparkles className="size-3.5" />}
+								label="Édité par RG"
+								sub="Imprimé en France"
+							/>
+						</ul>
+
+						{/* Urgency badge limited items */}
+						{cart.items.some(
+							(i) =>
+								i.product.stockHint === "limited" ||
+								i.product.stockHint === "low-stock",
+						) && (
+							<p className="rounded-xl border border-[#a14b3f] bg-[#a14b3f]/15 px-3 py-2 text-[11px] font-bold text-[#fbcfca]">
+								⚡ Édition limitée dans ton panier — réserve avant rupture.
+							</p>
+						)}
 					</div>
 				</aside>
 			</div>
 		</main>
+	);
+}
+
+function TrustItem({
+	icon,
+	label,
+	sub,
+}: {
+	icon: React.ReactNode;
+	label: string;
+	sub: string;
+}) {
+	return (
+		<li className="flex items-start gap-2">
+			<span className="grid size-7 shrink-0 place-items-center rounded-full bg-[#d4af37]/15 text-[#d4af37]">
+				{icon}
+			</span>
+			<span>
+				<span className="block font-bold uppercase tracking-wider text-white">
+					{label}
+				</span>
+				<span className="block text-[10px] text-white/55">{sub}</span>
+			</span>
+		</li>
 	);
 }
