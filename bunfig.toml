@@ -17,5 +17,4 @@ bun = true
 silent = false
 
 [test]
-preload = []
 coverage = false
