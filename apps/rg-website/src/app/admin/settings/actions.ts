@@ -1,0 +1,55 @@
+"use server";
+
+import { revalidatePath } from "next/cache";
+import { logAdminAction } from "@/lib/admin-logger";
+import { getServerUser } from "@/lib/auth-helpers";
+import { createClient } from "@/lib/supabase/server";
+
+export async function updateSetting(
+  key: string,
+  value: unknown, // Changed to unknown to avoid any lint error
+  description?: string
+) {
+  const supabase = await createClient();
+
+  // 1. Vérification du rôle Admin
+  const user = await getServerUser();
+
+  if (!user) {
+    return { message: "Erreur : Non authentifié" };
+  }
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single();
+
+  if (profile?.role !== "admin") {
+    return { message: "Erreur : Non autorisé" };
+  }
+
+  // 2. Mise à jour
+  const updateData: Record<string, unknown> = {
+    key,
+    value,
+    updated_at: new Date().toISOString(),
+  };
+
+  if (description) {
+    updateData.description = description;
+  }
+
+  const { error } = await supabase.from("settings").upsert(updateData);
+
+  if (error) {
+    return { message: `Erreur lors de la mise à jour: ${error.message}` };
+  }
+
+  // 3. Log de l'action
+  await logAdminAction("update", "settings", key, { value, description });
+
+  revalidatePath("/admin/settings");
+  revalidatePath("/"); // Revalidate home page as well
+  return { message: "Paramètre mis à jour avec succès" };
+}

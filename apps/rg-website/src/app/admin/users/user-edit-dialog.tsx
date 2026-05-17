@@ -1,0 +1,156 @@
+"use client";
+
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
+import { z } from "zod";
+
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Edit } from "@/lib/icons-config";
+import type { Database } from "@/types/supabase";
+
+import { updateUserProfile } from "./actions";
+
+const userEditSchema = z.object({
+  full_name: z.string().optional(),
+  role: z.enum(["user", "admin", "moderator", "staff"]),
+});
+
+type UserEditFormValues = z.infer<typeof userEditSchema>;
+
+interface UserEditDialogProps {
+  user: Database["public"]["Tables"]["profiles"]["Row"];
+}
+
+export function UserEditDialog({ user }: UserEditDialogProps) {
+  const [open, setOpen] = useState(false);
+  const router = useRouter();
+
+  const form = useForm<UserEditFormValues>({
+    resolver: zodResolver(userEditSchema),
+    defaultValues: {
+      full_name: user.full_name || "",
+      role: (user.role || "user") as "user" | "admin" | "moderator" | "staff",
+    },
+  });
+
+  const onSubmit = async (values: UserEditFormValues) => {
+    const toastId = toast.loading("Mise à jour...");
+
+    try {
+      const result = await updateUserProfile(user.id, values);
+
+      if (result.error) {
+        toast.error("Erreur", {
+          id: toastId,
+          description: result.error,
+        });
+      } else {
+        toast.success("Utilisateur mis à jour", {
+          id: toastId,
+          description: `Le profil de ${user.email || "l'utilisateur"} a été mis à jour.`,
+        });
+        setOpen(false);
+        router.refresh();
+      }
+    } catch (_error) {
+      toast.error("Erreur", {
+        id: toastId,
+        description: "Une erreur est survenue.",
+      });
+    }
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button variant="ghost" size="sm">
+          <Edit className="w-4 h-4" />
+        </Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Modifier l'utilisateur</DialogTitle>
+          <DialogDescription>Modifier les informations de {user.email}</DialogDescription>
+        </DialogHeader>
+
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <FormField
+              control={form.control}
+              name="full_name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Nom complet</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Nom complet" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="role"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Rôle</FormLabel>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Sélectionner un rôle" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="user">Utilisateur</SelectItem>
+                      <SelectItem value="staff">Staff</SelectItem>
+                      <SelectItem value="moderator">Modérateur</SelectItem>
+                      <SelectItem value="admin">Administrateur</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <div className="flex justify-end gap-2">
+              <Button type="button" variant="outline" onClick={() => setOpen(false)}>
+                Annuler
+              </Button>
+              <Button type="submit" disabled={form.formState.isSubmitting}>
+                {form.formState.isSubmitting ? "Sauvegarde..." : "Sauvegarder"}
+              </Button>
+            </div>
+          </form>
+        </Form>
+      </DialogContent>
+    </Dialog>
+  );
+}
