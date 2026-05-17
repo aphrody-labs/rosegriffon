@@ -21,6 +21,7 @@
 		"jsx": "preserve",
 		"jsxImportSource": "react",
 		"baseUrl": ".",
+		"ignoreDeprecations": "6.0",
 		"paths": {
 			"@rg/ui": ["./packages/ui/src/index.ts"],
 			"@rg/ui/*": ["./packages/ui/src/*"],

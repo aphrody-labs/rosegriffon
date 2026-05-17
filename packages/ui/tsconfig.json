@@ -2,6 +2,8 @@
 	"extends": "../config/tsconfig-nextjs.json",
 	"compilerOptions": {
 		"baseUrl": ".",
+		"ignoreDeprecations": "6.0",
+		"types": ["react", "react-dom"],
 		"paths": {
 			"@/lib/utils": ["./src/lib/utils.ts"],
 			"@/components/*": ["./src/components/*"]

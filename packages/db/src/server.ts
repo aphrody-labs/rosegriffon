@@ -25,7 +25,13 @@ export function createSupabaseServerClient(cookies: CookieStore) {
 			getAll() {
 				return cookies.getAll();
 			},
-			setAll(cookiesToSet) {
+			setAll(
+				cookiesToSet: Array<{
+					name: string;
+					value: string;
+					options?: Record<string, unknown>;
+				}>,
+			) {
 				try {
 					for (const { name, value, options } of cookiesToSet) {
 						cookies.set?.(name, value, options);

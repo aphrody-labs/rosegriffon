@@ -1,0 +1,25 @@
+{
+  "name": "@patreon-api.ts/discord-bot",
+  "version": "0.1.0",
+  "description": "",
+  "private": true,
+  "type": "module",
+  "author": "ghostrider-05",
+  "license": "MIT",
+  "scripts": {
+    "deploy": "wrangler deploy -j -c ./config/wrangler.json",
+    "config-schema": "bunx typescript-json-schema ./tsconfig.json Vars --id Config --out ./config/schema.json --include ./src/types.d.ts --noExtraProps --required --ignoreErrors",
+    "config-merge": "cd config && bunx json-merger --pretty --output combined.json wrangler.json options.json",
+    "secrets": "wrangler secret bulk secrets.json",
+    "login": "wrangler login"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "4.20260401.1",
+    "@types/node": "^18.19.31",
+    "discord-api-types": "^0.38.2",
+    "json-merger": "^3.0.0",
+    "patreon-api.ts": "../../",
+    "typescript-json-schema": "^0.67.0",
+    "wrangler": "^4.79.0"
+  }
+}

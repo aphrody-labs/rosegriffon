@@ -1,0 +1,13 @@
+{
+    "compilerOptions": {
+    "ignoreDeprecations": "6.0",
+        "resolveJsonModule": true,
+        "lib": ["ES2015"],
+        "types": [
+            "@cloudflare/workers-types/2023-07-01"
+        ]
+    },
+    "include": [
+        "src"
+    ]
+}
