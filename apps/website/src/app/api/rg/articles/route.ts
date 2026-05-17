@@ -2,6 +2,9 @@ import { NextResponse } from "next/server";
 
 import { createClient } from "@/lib/supabase/server";
 
+// Articles publiés — re-fetch toutes les 5 min (compromis fraîcheur/CDN hit).
+export const revalidate = 300;
+
 export async function GET(request: Request) {
 	const { searchParams } = new URL(request.url);
 	const limitRaw = parseInt(searchParams.get("limit") || "5", 10);

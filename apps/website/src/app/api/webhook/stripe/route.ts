@@ -46,11 +46,17 @@ export async function POST(req: NextRequest) {
 				});
 
 				// Persist le miroir local de la commande (table `orders`).
-				// Try/catch silencieux : si la migration SQL n'est pas appliquée,
-				// le webhook ne plante pas — Stripe reste la source de vérité.
-				try {
-					const supabase = createAdminClient();
-					await supabase.from("orders").upsert(
+				// Stripe reste la source de vérité — un échec d'upsert est loggué
+				// en ERROR (monitoring catch) mais ne fait pas planter le webhook.
+				let dbSync: "ok" | "skipped" | "failed" = "skipped";
+				const supabase = createAdminClient();
+				if (!supabase) {
+					console.error(
+						"[stripe-webhook] no admin supabase client — order NOT mirrored",
+						{ session_id: session.id },
+					);
+				} else {
+					const { error: upsertErr } = await supabase.from("orders").upsert(
 						{
 							user_id:
 								session.metadata?.user_id !== "anonymous"
@@ -86,13 +92,20 @@ export async function POST(req: NextRequest) {
 						},
 						{ onConflict: "stripe_session_id" },
 					);
-				} catch (err) {
-					console.warn(
-						"[stripe-webhook] orders table upsert failed (migration probablement non appliquée):",
-						err,
-					);
+					if (upsertErr) {
+						dbSync = "failed";
+						console.error("[stripe-webhook] orders upsert FAILED", {
+							session_id: session.id,
+							amount: session.amount_total,
+							email: session.customer_details?.email,
+							error: upsertErr.message,
+							code: upsertErr.code,
+						});
+					} else {
+						dbSync = "ok";
+					}
 				}
-				break;
+				return NextResponse.json({ received: true, db_sync: dbSync });
 			}
 			case "charge.refunded": {
 				const charge = event.data.object;

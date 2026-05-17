@@ -21,11 +21,24 @@ export async function POST(req: NextRequest) {
 	let userEmail: string | undefined;
 	try {
 		const supabase = await createClient();
-		const { data: auth } = await supabase.auth.getUser();
-		userId = auth.user?.id ?? null;
-		userEmail = auth.user?.email ?? undefined;
-	} catch {
-		// Anonymous checkout is allowed — discount Patron only if logged in
+		if (!supabase) {
+			console.warn(
+				"[checkout] createClient() returned null — anonymous checkout (no Patron discount)",
+			);
+		} else {
+			const { data: auth, error: authErr } = await supabase.auth.getUser();
+			if (authErr) {
+				console.warn("[checkout] auth.getUser() failed", authErr.message);
+			} else {
+				userId = auth.user?.id ?? null;
+				userEmail = auth.user?.email ?? undefined;
+			}
+		}
+	} catch (e) {
+		console.warn(
+			"[checkout] supabase init threw — anonymous checkout",
+			e instanceof Error ? e.message : String(e),
+		);
 	}
 
 	const couponId = userId ? await getStripeCouponForUser(userId) : null;
