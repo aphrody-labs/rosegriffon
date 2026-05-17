@@ -1,6 +1,7 @@
 "use client";
 
 import { Loader2 } from "lucide-react";
+import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useState } from "react";
 
@@ -98,9 +99,9 @@ export function AuthForm() {
 
 			<p className="pt-1 text-center text-xs text-muted-foreground">
 				En te connectant, tu acceptes nos{" "}
-				<a href="/legal/cgu" className="underline hover:text-foreground">
+				<Link href="/legal/cgu" className="underline hover:text-foreground">
 					conditions d&apos;utilisation
-				</a>
+				</Link>
 				.
 			</p>
 		</div>
