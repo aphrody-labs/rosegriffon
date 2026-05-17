@@ -5,10 +5,10 @@ import { createAdminClient } from "@/lib/supabase/admin";
  * POST /api/admin/news/draft
  *
  * Cree un article en brouillon dans le CMS azalee.
- * Reserve aux integrations admin (Claude/scripts/CLI). Auth via Bearer token.
+ * Reserve aux integrations admin (scripts/CLI). Auth via Bearer token.
  *
  * Headers:
- *   Authorization: Bearer <CLAUDE_API_KEY>     (depuis .env)
+ *   Authorization: Bearer <ADMIN_API_KEY>      (depuis .env, alias historique CLAUDE_API_KEY)
  *   Content-Type: application/json
  *
  * Body JSON (title requis, le reste optionnel):
@@ -155,7 +155,7 @@ function heading(tag: "h1" | "h2" | "h3", text: string): LexicalHeading {
 }
 
 function buildLexical(content: string) {
-	const lines = (content || "").replaceAll('\r\n', "\n").split("\n");
+	const lines = (content || "").replaceAll("\r\n", "\n").split("\n");
 	const children: Array<LexicalParagraph | LexicalHeading> = [];
 	for (const line of lines) {
 		const trimmed = line.trimEnd();

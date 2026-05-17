@@ -399,8 +399,7 @@ Aucun
 
 ### Contributors
 
-- **Claude Code** (Anthropic) - Initial implementation
-- **Rose Griffon Team** - Integration & testing
+- **Rose Griffon Team** - Implementation & testing
 
 ---
 

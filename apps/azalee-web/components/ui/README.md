@@ -229,5 +229,5 @@ Fait partie du projet Rose Griffon (Azalee).
 
 **Version**: 1.0.0
 **Date**: 2026-01-20
-**Auteur**: Claude Code
+**Auteur**: Rose Griffon Team
 **Projet**: Azalee - Inazuma Eleven Victory Road
