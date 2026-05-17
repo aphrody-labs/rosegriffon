@@ -53,11 +53,16 @@ logs/
 .parcel-cache/
 .swc/
 
-# Markdown — only allow root README/CLAUDE/CHANGELOG/SECURITY/LICENSE + docs/**
+# AI instructions files — gardés en local seulement, jamais commit/push
+CLAUDE.md
+**/CLAUDE.md
+GEMINI.md
+**/GEMINI.md
+
+# Markdown — only allow root README/CHANGELOG/SECURITY/LICENSE + docs/**
 *.md
 *.txt
 !README.md
-!CLAUDE.md
 !CHANGELOG.md
 !SECURITY.md
 !LICENSE
@@ -65,7 +70,6 @@ logs/
 !docs/**/*.txt
 !packages/*/README.md
 !apps/*/README.md
-!apps/*/CLAUDE.md
 
 # Deployment artifacts
 .deployments/
