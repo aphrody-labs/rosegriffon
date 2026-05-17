@@ -202,9 +202,9 @@ const nextConfig = {
 	},
 	images: {
 		formats: ["image/avif", "image/webp"],
-		deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
-		imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
-		minimumCacheTTL: 60,
+		deviceSizes: [640, 828, 1080, 1920, 2048],
+		imageSizes: [32, 64, 128, 256, 384],
+		minimumCacheTTL: 86400,
 		qualities: [75, 85],
 		unoptimized: false,
 		// Loader custom CDN passthrough — actif si NEXT_PUBLIC_CDN_LOADER=1.

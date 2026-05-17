@@ -68,15 +68,22 @@ export async function POST(req: Request) {
 
 	const nowIso = new Date().toISOString();
 
-	// Idempotence : si déjà 'done', no-op (mais on ack 200).
+	// Idempotence : déjà 'done' OU 'pending' (en vol) → no-op, ack 200.
+	// Le check pending évite qu'un retry Patreon rapide ne lance un 2e
+	// processPatreonEvent() en parallèle (double-crédit / double webhook).
 	const { data: existing } = await supabase
 		.from("patreon_webhook_events")
 		.select("id, status")
 		.eq("id", eventId)
 		.maybeSingle();
-	if (existing && (existing as { status: string }).status === "done") {
+	const existingStatus = (existing as { status?: string } | null)?.status;
+	if (existingStatus === "done" || existingStatus === "pending") {
 		await heartbeat(supabase, { eventId, trigger, success: true });
-		return NextResponse.json({ deduped: true, ok: true });
+		return NextResponse.json({
+			deduped: true,
+			status: existingStatus,
+			ok: true,
+		});
 	}
 
 	// Audit trail : stocke le payload tel que parsé.
@@ -130,35 +137,22 @@ export async function POST(req: Request) {
 
 /**
  * Met à jour le single-row `patreon_webhook_state` à chaque event valide.
- * Sert au monitoring (dernier ping reçu, total received/failed, dernier trigger).
+ * Utilise la RPC atomique `patreon_heartbeat` (INSERT...ON CONFLICT côté PG)
+ * pour éviter la race condition lost-update quand 2+ webhooks arrivent
+ * concurremment (Patreon peut envoyer 5+ events en burst).
  */
 async function heartbeat(
 	supabase: NonNullable<ReturnType<typeof createAdminClient>>,
 	opts: { eventId: string; trigger: PatreonTrigger; success: boolean },
 ): Promise<void> {
-	const nowIso = new Date().toISOString();
-	const { data } = await supabase
-		.from("patreon_webhook_state")
-		.select("total_received, total_failed")
-		.eq("id", 1)
-		.maybeSingle();
-	const cur =
-		(data as {
-			total_received?: number;
-			total_failed?: number;
-		} | null) ?? null;
-
-	await supabase
-		.from("patreon_webhook_state")
-		.update({
-			last_received_at: nowIso,
-			last_event_id: opts.eventId,
-			last_trigger: opts.trigger,
-			total_received: (cur?.total_received ?? 0) + 1,
-			total_failed: (cur?.total_failed ?? 0) + (opts.success ? 0 : 1),
-			updated_at: nowIso,
-		})
-		.eq("id", 1);
+	const { error } = await supabase.rpc("patreon_heartbeat", {
+		p_event_id: opts.eventId,
+		p_trigger: opts.trigger,
+		p_success: opts.success,
+	});
+	if (error) {
+		console.error("[patreon/webhook] heartbeat rpc failed", error);
+	}
 }
 
 /**
