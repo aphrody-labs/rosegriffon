@@ -50,8 +50,117 @@ export default async function ProductPage({ params }: ProductPageProps) {
 		(p) => p.category === product.category && p.slug !== product.slug,
 	).slice(0, 4);
 
+	const stockHintToAvailability = (hint: typeof product.stockHint): string => {
+		switch (hint) {
+			case "low-stock":
+			case "limited":
+				return "https://schema.org/LimitedAvailability";
+			case "preorder":
+				return "https://schema.org/PreOrder";
+			default:
+				return "https://schema.org/InStock";
+		}
+	};
+
+	const baseUrl = "https://rosegriffon.fr";
+	const allImages = [
+		`${baseUrl}${product.image}`,
+		...(product.gallery ?? [])
+			.filter((src) => src !== product.image)
+			.map((src) => `${baseUrl}${src}`),
+	];
+
+	const offersSchema = product.variants
+		? {
+				"@type": "AggregateOffer",
+				priceCurrency: "EUR",
+				lowPrice: Math.min(
+					...product.variants.map(
+						(v) => (v.priceCentsOverride ?? product.priceCents) / 100,
+					),
+				).toFixed(2),
+				highPrice: Math.max(
+					...product.variants.map(
+						(v) => (v.priceCentsOverride ?? product.priceCents) / 100,
+					),
+				).toFixed(2),
+				offerCount: product.variants.length,
+				offers: product.variants.map((v) => ({
+					"@type": "Offer",
+					name: v.label,
+					priceCurrency: "EUR",
+					price: ((v.priceCentsOverride ?? product.priceCents) / 100).toFixed(
+						2,
+					),
+					availability: stockHintToAvailability(product.stockHint),
+					itemCondition: "https://schema.org/NewCondition",
+					url: `${baseUrl}/shop/${product.slug}`,
+					seller: {
+						"@type": "Organization",
+						name: "Association Rose Griffon",
+					},
+				})),
+			}
+		: {
+				"@type": "Offer",
+				url: `${baseUrl}/shop/${product.slug}`,
+				priceCurrency: "EUR",
+				price: (product.priceCents / 100).toFixed(2),
+				availability: stockHintToAvailability(product.stockHint),
+				itemCondition: "https://schema.org/NewCondition",
+				seller: {
+					"@type": "Organization",
+					name: "Association Rose Griffon",
+				},
+			};
+
+	const productSchema = {
+		"@context": "https://schema.org/",
+		"@type": "Product",
+		name: product.name,
+		description: product.description,
+		image: allImages,
+		sku: product.slug,
+		brand: { "@type": "Brand", name: "Rose Griffon" },
+		category: CATEGORY_LABELS[product.category],
+		offers: offersSchema,
+	};
+
+	const breadcrumbSchema = {
+		"@context": "https://schema.org",
+		"@type": "BreadcrumbList",
+		itemListElement: [
+			{
+				"@type": "ListItem",
+				position: 1,
+				name: "Accueil",
+				item: baseUrl,
+			},
+			{
+				"@type": "ListItem",
+				position: 2,
+				name: "Boutique",
+				item: `${baseUrl}/shop`,
+			},
+			{
+				"@type": "ListItem",
+				position: 3,
+				name: product.name,
+				item: `${baseUrl}/shop/${product.slug}`,
+			},
+		],
+	};
+
 	return (
 		<main className="mx-auto max-w-7xl px-4 pb-16 pt-8 md:px-8 md:pt-12">
+			<script
+				type="application/ld+json"
+				dangerouslySetInnerHTML={{ __html: JSON.stringify(productSchema) }}
+			/>
+			<script
+				type="application/ld+json"
+				dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+			/>
 			<nav aria-label="Fil d'Ariane" className="mb-6">
 				<Link
 					href="/shop"
