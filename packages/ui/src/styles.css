@@ -1,6 +1,14 @@
 /* Styles partagés @rg/ui — Tailwind v4 inline tokens.
  * Importer dans chaque app via `@import "@rg/ui/styles.css"` au début de globals.css.
  * Les apps complètent avec leurs propres tokens (cf. apps/<app>/src/app/globals.css).
+ *
+ * Material Design 3 — couverture complète niveau tokens :
+ *   - 35 tokens sys-color (light + dark) dérivés du seed Rose Griffon
+ *   - shape scale (7 corners)
+ *   - motion easings (6) + durations (16)
+ *   - elevation (6 levels)
+ *   - typescale (15 rôles officiels)
+ *   - state-layer utility
  */
 
 @theme inline {
@@ -9,6 +17,49 @@
 	 * obtienne les keyframes sans dépendre de tw-animate-css / tailwindcss-animate. */
 	--animate-accordion-down: accordion-down 0.2s ease-out;
 	--animate-accordion-up: accordion-up 0.2s ease-out;
+
+	/* ─── M3 Shape scale ─────────────────────────────────────────────────── */
+	--md-sys-shape-corner-none: 0;
+	--md-sys-shape-corner-extra-small: 4px;
+	--md-sys-shape-corner-small: 8px;
+	--md-sys-shape-corner-medium: 12px;
+	--md-sys-shape-corner-large: 16px;
+	--md-sys-shape-corner-extra-large: 28px;
+	--md-sys-shape-corner-full: 9999px;
+
+	/* ─── M3 Motion — easings ────────────────────────────────────────────── */
+	--md-sys-motion-easing-standard: cubic-bezier(0.2, 0, 0, 1);
+	--md-sys-motion-easing-standard-accelerate: cubic-bezier(0.3, 0, 1, 1);
+	--md-sys-motion-easing-standard-decelerate: cubic-bezier(0, 0, 0, 1);
+	--md-sys-motion-easing-emphasized: cubic-bezier(0.3, 0, 0, 1);
+	--md-sys-motion-easing-emphasized-accelerate: cubic-bezier(0.3, 0, 0.8, 0.15);
+	--md-sys-motion-easing-emphasized-decelerate: cubic-bezier(0.05, 0.7, 0.1, 1);
+
+	/* ─── M3 Motion — durations ──────────────────────────────────────────── */
+	--md-sys-motion-duration-short1: 50ms;
+	--md-sys-motion-duration-short2: 100ms;
+	--md-sys-motion-duration-short3: 150ms;
+	--md-sys-motion-duration-short4: 200ms;
+	--md-sys-motion-duration-medium1: 250ms;
+	--md-sys-motion-duration-medium2: 300ms;
+	--md-sys-motion-duration-medium3: 350ms;
+	--md-sys-motion-duration-medium4: 400ms;
+	--md-sys-motion-duration-long1: 450ms;
+	--md-sys-motion-duration-long2: 500ms;
+	--md-sys-motion-duration-long3: 550ms;
+	--md-sys-motion-duration-long4: 600ms;
+	--md-sys-motion-duration-extra-long1: 700ms;
+	--md-sys-motion-duration-extra-long2: 800ms;
+	--md-sys-motion-duration-extra-long3: 900ms;
+	--md-sys-motion-duration-extra-long4: 1000ms;
+
+	/* ─── M3 Elevation ───────────────────────────────────────────────────── */
+	--md-sys-elevation-level0: none;
+	--md-sys-elevation-level1: 0 1px 2px 0 rgb(0 0 0 / 0.30), 0 1px 3px 1px rgb(0 0 0 / 0.15);
+	--md-sys-elevation-level2: 0 1px 2px 0 rgb(0 0 0 / 0.30), 0 2px 6px 2px rgb(0 0 0 / 0.15);
+	--md-sys-elevation-level3: 0 1px 3px 0 rgb(0 0 0 / 0.30), 0 4px 8px 3px rgb(0 0 0 / 0.15);
+	--md-sys-elevation-level4: 0 2px 3px 0 rgb(0 0 0 / 0.30), 0 6px 10px 4px rgb(0 0 0 / 0.15);
+	--md-sys-elevation-level5: 0 4px 4px 0 rgb(0 0 0 / 0.30), 0 8px 12px 6px rgb(0 0 0 / 0.15);
 }
 
 @keyframes accordion-down {
@@ -31,10 +82,127 @@
 
 @layer base {
 	:root {
-		/* Rose Griffon — branding tokens */
-		--rg-marine: oklch(0.20 0.05 264);   /* #0c1730 */
-		--rg-rose: oklch(0.65 0.22 0);       /* #e91e63 */
-		--rg-griffon: oklch(0.78 0.13 90);   /* #d4af37 */
+		/* Rose Griffon — branding tokens (seed M3) */
+		--rg-marine: oklch(0.20 0.05 264);   /* #0c1730 — neutral dark */
+		--rg-rose: oklch(0.65 0.22 0);       /* #e91e63 — primary seed */
+		--rg-griffon: oklch(0.78 0.13 90);   /* #d4af37 — tertiary seed */
+
+		/* ─── M3 sys-color — LIGHT scheme (35 tokens) ────────────────────── */
+		/* Primary tonal palette dérivée de --rg-rose (hue 0, chroma 0.22) */
+		--md-sys-color-primary: oklch(0.50 0.22 0);
+		--md-sys-color-on-primary: oklch(1.00 0 0);
+		--md-sys-color-primary-container: oklch(0.90 0.08 0);
+		--md-sys-color-on-primary-container: oklch(0.20 0.18 0);
+
+		/* Secondary — dérivé hue rose, chroma réduit (palette neutre-chromatique) */
+		--md-sys-color-secondary: oklch(0.50 0.08 0);
+		--md-sys-color-on-secondary: oklch(1.00 0 0);
+		--md-sys-color-secondary-container: oklch(0.90 0.04 0);
+		--md-sys-color-on-secondary-container: oklch(0.20 0.06 0);
+
+		/* Tertiary tonal palette dérivée de --rg-griffon (hue 90, chroma 0.13) */
+		--md-sys-color-tertiary: oklch(0.50 0.13 90);
+		--md-sys-color-on-tertiary: oklch(1.00 0 0);
+		--md-sys-color-tertiary-container: oklch(0.90 0.06 90);
+		--md-sys-color-on-tertiary-container: oklch(0.20 0.10 90);
+
+		/* Error — palette rouge M3 standard */
+		--md-sys-color-error: oklch(0.50 0.22 27);
+		--md-sys-color-on-error: oklch(1.00 0 0);
+		--md-sys-color-error-container: oklch(0.90 0.06 27);
+		--md-sys-color-on-error-container: oklch(0.20 0.18 27);
+
+		/* Background + on-background */
+		--md-sys-color-background: oklch(0.99 0.003 264);
+		--md-sys-color-on-background: oklch(0.20 0.02 264);
+
+		/* Surface neutral (dérivé --rg-marine hue 264, chroma faible) */
+		--md-sys-color-surface: oklch(0.99 0.003 264);
+		--md-sys-color-on-surface: oklch(0.20 0.02 264);
+		--md-sys-color-surface-variant: oklch(0.90 0.01 264);
+		--md-sys-color-on-surface-variant: oklch(0.30 0.02 264);
+
+		/* Outlines */
+		--md-sys-color-outline: oklch(0.50 0.01 264);
+		--md-sys-color-outline-variant: oklch(0.80 0.01 264);
+
+		/* Scrim + shadow */
+		--md-sys-color-scrim: oklch(0 0 0);
+		--md-sys-color-shadow: oklch(0 0 0);
+
+		/* Inverse */
+		--md-sys-color-inverse-surface: oklch(0.20 0.02 264);
+		--md-sys-color-inverse-on-surface: oklch(0.95 0.005 264);
+		--md-sys-color-inverse-primary: oklch(0.80 0.15 0);
+
+		/* Surface variants tonal */
+		--md-sys-color-surface-dim: oklch(0.87 0.005 264);
+		--md-sys-color-surface-bright: oklch(0.99 0.003 264);
+		--md-sys-color-surface-container-lowest: oklch(1.00 0 0);
+		--md-sys-color-surface-container-low: oklch(0.96 0.004 264);
+		--md-sys-color-surface-container: oklch(0.94 0.005 264);
+		--md-sys-color-surface-container-high: oklch(0.92 0.006 264);
+		--md-sys-color-surface-container-highest: oklch(0.90 0.007 264);
+	}
+
+	/* ─── M3 sys-color — DARK scheme (35 tokens) ──────────────────────────── */
+	:root.dark,
+	.dark {
+		/* Primary dark — tons clairs */
+		--md-sys-color-primary: oklch(0.80 0.15 0);
+		--md-sys-color-on-primary: oklch(0.20 0.18 0);
+		--md-sys-color-primary-container: oklch(0.30 0.18 0);
+		--md-sys-color-on-primary-container: oklch(0.90 0.08 0);
+
+		/* Secondary dark */
+		--md-sys-color-secondary: oklch(0.80 0.04 0);
+		--md-sys-color-on-secondary: oklch(0.20 0.06 0);
+		--md-sys-color-secondary-container: oklch(0.30 0.06 0);
+		--md-sys-color-on-secondary-container: oklch(0.90 0.04 0);
+
+		/* Tertiary dark */
+		--md-sys-color-tertiary: oklch(0.80 0.10 90);
+		--md-sys-color-on-tertiary: oklch(0.20 0.10 90);
+		--md-sys-color-tertiary-container: oklch(0.30 0.10 90);
+		--md-sys-color-on-tertiary-container: oklch(0.90 0.06 90);
+
+		/* Error dark */
+		--md-sys-color-error: oklch(0.80 0.15 27);
+		--md-sys-color-on-error: oklch(0.20 0.18 27);
+		--md-sys-color-error-container: oklch(0.30 0.18 27);
+		--md-sys-color-on-error-container: oklch(0.90 0.06 27);
+
+		/* Background + on-background dark */
+		--md-sys-color-background: oklch(0.13 0.02 264);
+		--md-sys-color-on-background: oklch(0.90 0.01 264);
+
+		/* Surface dark (basé --rg-marine) */
+		--md-sys-color-surface: oklch(0.13 0.02 264);
+		--md-sys-color-on-surface: oklch(0.90 0.01 264);
+		--md-sys-color-surface-variant: oklch(0.30 0.02 264);
+		--md-sys-color-on-surface-variant: oklch(0.80 0.01 264);
+
+		/* Outlines dark */
+		--md-sys-color-outline: oklch(0.60 0.01 264);
+		--md-sys-color-outline-variant: oklch(0.30 0.02 264);
+
+		/* Scrim + shadow (constants) */
+		--md-sys-color-scrim: oklch(0 0 0);
+		--md-sys-color-shadow: oklch(0 0 0);
+
+		/* Inverse dark */
+		--md-sys-color-inverse-surface: oklch(0.90 0.01 264);
+		--md-sys-color-inverse-on-surface: oklch(0.20 0.02 264);
+		--md-sys-color-inverse-primary: oklch(0.50 0.22 0);
+
+		/* Surface variants tonal dark */
+		--md-sys-color-surface-dim: oklch(0.13 0.02 264);
+		--md-sys-color-surface-bright: oklch(0.27 0.02 264);
+		--md-sys-color-surface-container-lowest: oklch(0.10 0.02 264);
+		--md-sys-color-surface-container-low: oklch(0.16 0.02 264);
+		--md-sys-color-surface-container: oklch(0.18 0.02 264);
+		--md-sys-color-surface-container-high: oklch(0.22 0.02 264);
+		--md-sys-color-surface-container-highest: oklch(0.27 0.02 264);
 	}
 
 	html {
@@ -52,5 +220,87 @@
 	:focus-visible {
 		outline: 2px solid var(--rg-rose);
 		outline-offset: 2px;
+	}
+}
+
+@layer components {
+	/* ─── M3 Typescale — 15 rôles officiels ──────────────────────────────── */
+	.type-display-large {
+		font: 400 57px/64px var(--font-sans);
+		letter-spacing: -0.25px;
+	}
+	.type-display-medium {
+		font: 400 45px/52px var(--font-sans);
+	}
+	.type-display-small {
+		font: 400 36px/44px var(--font-sans);
+	}
+	.type-headline-large {
+		font: 400 32px/40px var(--font-sans);
+	}
+	.type-headline-medium {
+		font: 400 28px/36px var(--font-sans);
+	}
+	.type-headline-small {
+		font: 400 24px/32px var(--font-sans);
+	}
+	.type-title-large {
+		font: 400 22px/28px var(--font-sans);
+	}
+	.type-title-medium {
+		font: 500 16px/24px var(--font-sans);
+		letter-spacing: 0.15px;
+	}
+	.type-title-small {
+		font: 500 14px/20px var(--font-sans);
+		letter-spacing: 0.1px;
+	}
+	.type-body-large {
+		font: 400 16px/24px var(--font-sans);
+		letter-spacing: 0.5px;
+	}
+	.type-body-medium {
+		font: 400 14px/20px var(--font-sans);
+		letter-spacing: 0.25px;
+	}
+	.type-body-small {
+		font: 400 12px/16px var(--font-sans);
+		letter-spacing: 0.4px;
+	}
+	.type-label-large {
+		font: 500 14px/20px var(--font-sans);
+		letter-spacing: 0.1px;
+	}
+	.type-label-medium {
+		font: 500 12px/16px var(--font-sans);
+		letter-spacing: 0.5px;
+	}
+	.type-label-small {
+		font: 500 11px/16px var(--font-sans);
+		letter-spacing: 0.5px;
+	}
+
+	/* ─── M3 State layer utility ─────────────────────────────────────────── */
+	.state-layer {
+		position: relative;
+	}
+	.state-layer::before {
+		content: "";
+		position: absolute;
+		inset: 0;
+		background: currentColor;
+		opacity: 0;
+		transition: opacity var(--md-sys-motion-duration-short4) var(--md-sys-motion-easing-standard);
+		pointer-events: none;
+		border-radius: inherit;
+	}
+	.state-layer:hover::before {
+		opacity: 0.08;
+	}
+	.state-layer:focus-visible::before {
+		opacity: 0.12;
+	}
+	.state-layer:active::before {
+		opacity: 0.12;
 	}
 }
