@@ -4,6 +4,11 @@
 
 export { cn } from "./lib/utils";
 
+// Hooks
+export { useIsMobile } from "./hooks/use-mobile";
+export { useMediaQuery } from "./hooks/use-media-query";
+export { useSwipe } from "./hooks/use-swipe";
+
 export * from "./components/accordion";
 export * from "./components/alert";
 export * from "./components/alert-dialog";

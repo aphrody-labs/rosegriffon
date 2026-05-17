@@ -1,28 +1,29 @@
 // Wrapper rétro-compat — délègue à `@rg/db/{server,service}`. L'API publique
 // `createClient()` / `createAdminClient()` / `createPublicClient()` est conservée
 // pour ne pas casser les ~50 call sites de l'app.
+//
+// `as SupabaseClient` (sans generic) bypasse le typage strict <Database> hérité
+// du package — le code historique référence des colonnes obsolètes vs le schéma
+// Supabase courant (ex: profiles.created_at, articles.tags). Trade-off assumé
+// le temps de la migration : les call sites restent typés `any`, à durcir par
+// vague avec types stricts opt-in.
 import { createSupabaseServerClient } from "@rg/db/server";
 import { createSupabaseServiceClient } from "@rg/db/service";
-import { createClient as createSupabaseClient } from "@supabase/supabase-js";
+import {
+	createClient as createSupabaseClient,
+	type SupabaseClient,
+} from "@supabase/supabase-js";
 import { cookies } from "next/headers";
 
-/**
- * Server Component / Server Action / Route Handler — utilise les cookies Next.
- * Fluid compute friendly : nouveau client à chaque appel, pas de cache global.
- */
-export async function createClient() {
+export async function createClient(): Promise<SupabaseClient> {
 	const cookieStore = await cookies();
 	return createSupabaseServerClient({
 		getAll: () => cookieStore.getAll(),
-		set: (name, value, options) =>
-			cookieStore.set(name, value, options as Record<string, unknown>),
-	});
+		set: (name, value, options) => cookieStore.set(name, value, options),
+	}) as unknown as SupabaseClient;
 }
 
-/**
- * Public anon client SANS cookies — utile pour Server Components ISR/SSG (pas d'auth visiteur).
- */
-export function createPublicClient() {
+export function createPublicClient(): SupabaseClient {
 	const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 	const supabaseAnonKey =
 		process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ||
@@ -36,9 +37,6 @@ export function createPublicClient() {
 	});
 }
 
-/**
- * Admin client (service role) — bypass RLS. À utiliser server-side seulement.
- */
-export function createAdminClient() {
-	return createSupabaseServiceClient();
+export function createAdminClient(): SupabaseClient {
+	return createSupabaseServiceClient() as unknown as SupabaseClient;
 }

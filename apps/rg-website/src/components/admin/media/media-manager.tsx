@@ -295,7 +295,7 @@ export function MediaManager({ initialFiles }: MediaManagerProps) {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="w-[50px]"></TableHead>
+                <TableHead className="w-[50px]" />
                 <TableHead>Nom</TableHead>
                 <TableHead>Taille</TableHead>
                 <TableHead>Type</TableHead>
@@ -325,7 +325,7 @@ export function MediaManager({ initialFiles }: MediaManagerProps) {
                   <TableCell>-</TableCell>
                   <TableCell>Dossier</TableCell>
                   <TableCell>-</TableCell>
-                  <TableCell></TableCell>
+                  <TableCell />
                 </TableRow>
               ))}
               {currentFiles.map((file) => (

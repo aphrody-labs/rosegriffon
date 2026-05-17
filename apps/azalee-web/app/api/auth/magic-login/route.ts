@@ -1,5 +1,5 @@
 import crypto from "node:crypto";
-import { createSupabaseServiceClient } from "@rg/db/service";
+import { getSupabaseClient } from "@/lib/api/supabase";
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 import { logAudit } from "@/lib/audit";
@@ -74,7 +74,7 @@ export async function GET(request: Request) {
 	}
 
 	// Client Admin Supabase (service-role via @rg/db)
-	const supabaseAdmin = createSupabaseServiceClient();
+	const supabaseAdmin = getSupabaseClient();
 
 	// Mode liste
 	if (url.searchParams.get("list") === "1") {

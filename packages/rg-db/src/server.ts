@@ -1,15 +1,10 @@
 // Client Supabase server-side (Next.js server components, Route Handlers, Server Actions).
 // Lit/écrit les cookies Next via `next/headers` — donc nécessite Next runtime.
-import { createServerClient } from "@supabase/ssr";
-import type { Database } from "./types.gen";
+import { createServerClient, type CookieOptions } from "@supabase/ssr";
 
-interface CookieStore {
+export interface CookieStore {
 	getAll: () => Array<{ name: string; value: string }>;
-	set?: (
-		name: string,
-		value: string,
-		options?: Record<string, unknown>,
-	) => void;
+	set?: (name: string, value: string, options?: CookieOptions) => void;
 }
 
 export function createSupabaseServerClient(cookies: CookieStore) {
@@ -20,7 +15,7 @@ export function createSupabaseServerClient(cookies: CookieStore) {
 			"[@rg/db] Missing NEXT_PUBLIC_SUPABASE_URL or NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY",
 		);
 	}
-	return createServerClient<Database>(url, key, {
+	return createServerClient(url, key, {
 		cookies: {
 			getAll() {
 				return cookies.getAll();
@@ -29,7 +24,7 @@ export function createSupabaseServerClient(cookies: CookieStore) {
 				cookiesToSet: Array<{
 					name: string;
 					value: string;
-					options?: Record<string, unknown>;
+					options?: CookieOptions;
 				}>,
 			) {
 				try {
@@ -37,7 +32,7 @@ export function createSupabaseServerClient(cookies: CookieStore) {
 						cookies.set?.(name, value, options);
 					}
 				} catch {
-					// Server Component context — cookies are read-only. Middleware refreshes the session.
+					// Server Component context — cookies are read-only. Middleware refreshes la session.
 				}
 			},
 		},

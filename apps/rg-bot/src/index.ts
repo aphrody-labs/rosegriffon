@@ -17,8 +17,7 @@ import "./commands/admin/settings.ts";
 import "./commands/admin/team.ts";
 import "./events/ready.ts";
 import "./events/memberEvents.ts";
-
-const GUILD_ID = Bun.env.GUILD_ID;
+import { DISCORD_TOKEN, GUILD_ID } from "./lib/config.ts";
 
 const client = new Client({
 	intents: [
@@ -70,10 +69,4 @@ client.on("interactionCreate", async (interaction) => {
 	}
 });
 
-const token = Bun.env.DISCORD_BOT_TOKEN ?? Bun.env.DISCORD_TOKEN;
-if (!token) {
-	console.error("✗ DISCORD_BOT_TOKEN is required (see .env.example)");
-	process.exit(1);
-}
-
-await client.login(token);
+await client.login(DISCORD_TOKEN);

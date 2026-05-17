@@ -81,8 +81,8 @@ export default function ProjetsPage() {
       />
       {/* Hero Section */}
       <section className="relative overflow-hidden rounded-3xl bg-linear-to-br from-(--md-sys-color-primary-container) to-(--md-sys-color-surface-variant) p-8 md:p-12 lg:p-16 text-center shadow-sm border border-(--md-sys-color-outline-variant)">
-        <div className="absolute top-0 right-0 -mt-12 -mr-12 h-64 w-64 rounded-full bg-(--md-sys-color-primary) opacity-10 blur-3xl"></div>
-        <div className="absolute bottom-0 left-0 -mb-12 -ml-12 h-64 w-64 rounded-full bg-(--md-sys-color-tertiary) opacity-10 blur-3xl"></div>
+        <div className="absolute top-0 right-0 -mt-12 -mr-12 h-64 w-64 rounded-full bg-(--md-sys-color-primary) opacity-10 blur-3xl" />
+        <div className="absolute bottom-0 left-0 -mb-12 -ml-12 h-64 w-64 rounded-full bg-(--md-sys-color-tertiary) opacity-10 blur-3xl" />
 
         <div className="relative z-10 mx-auto max-w-3xl space-y-6">
           <div className="inline-flex items-center rounded-full border border-(--md-sys-color-outline) bg-(--md-sys-color-surface)/50 px-3 py-1 text-sm font-medium text-(--md-sys-color-primary) backdrop-blur-sm">
