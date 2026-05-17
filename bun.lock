@@ -143,7 +143,6 @@
         "@rg/config": "workspace:*",
         "@types/bun": "catalog:",
         "oxlint": "catalog:",
-        "oxlint-tsgolint": "^0.22.0",
         "typescript": "catalog:",
         "vitest": "catalog:",
       },

@@ -3,6 +3,7 @@
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { Heart, Loader2, X } from "lucide-react";
+import Link from "next/link";
 import { useState } from "react";
 import { toast } from "sonner";
 
@@ -211,7 +212,7 @@ export function ConnectionsSection({
 								)}
 								{!isLinked && provider !== "patreon" && (
 									<Button size="sm" variant="outline" asChild>
-										<a href="/login">Se connecter avec {meta.label}</a>
+										<Link href="/login">Se connecter avec {meta.label}</Link>
 									</Button>
 								)}
 								{isLinked && !onlyOne && (
