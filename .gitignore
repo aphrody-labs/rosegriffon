@@ -1,0 +1,78 @@
+# Bun
+node_modules/
+bun.lock
+bun.lockb
+
+# Turbo
+.turbo/
+
+# Next.js
+.next/
+out/
+.vercel/
+
+# Build outputs
+dist/
+build/
+*.tsbuildinfo
+
+# Test coverage
+coverage/
+*.lcov
+.nyc_output/
+
+# Logs
+*.log
+logs/
+
+# Environment
+.env
+.env.local
+.env.*.local
+.env.production
+.env.development
+
+# Editor / OS
+.DS_Store
+.idea/
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+*.swp
+*.swo
+
+# Claude / AI
+.claude/local.json
+.serena/
+.aider*
+
+# Caches
+.cache/
+.eslintcache
+.oxlintcache
+.parcel-cache/
+.swc/
+
+# Markdown — only allow root README/CLAUDE/CHANGELOG/SECURITY/LICENSE + docs/**
+*.md
+*.txt
+!README.md
+!CLAUDE.md
+!CHANGELOG.md
+!SECURITY.md
+!LICENSE
+!docs/**/*.md
+!docs/**/*.txt
+!packages/*/README.md
+!apps/*/README.md
+!apps/*/CLAUDE.md
+
+# Deployment artifacts
+.deployments/
+
+# Supabase
+.supabase/
+supabase/.temp/
+
+# Sentry
+.sentryclirc

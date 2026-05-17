@@ -1,0 +1,35 @@
+{
+	"$schema": "https://json.schemastore.org/tsconfig",
+	"compilerOptions": {
+		"target": "ESNext",
+		"lib": ["ESNext", "DOM", "DOM.Iterable"],
+		"module": "ESNext",
+		"moduleResolution": "Bundler",
+		"strict": true,
+		"noImplicitAny": true,
+		"strictNullChecks": true,
+		"noFallthroughCasesInSwitch": true,
+		"noImplicitOverride": true,
+		"forceConsistentCasingInFileNames": true,
+		"esModuleInterop": true,
+		"allowSyntheticDefaultImports": true,
+		"resolveJsonModule": true,
+		"isolatedModules": true,
+		"verbatimModuleSyntax": false,
+		"skipLibCheck": true,
+		"allowJs": false,
+		"jsx": "preserve",
+		"jsxImportSource": "react",
+		"baseUrl": ".",
+		"paths": {
+			"@rg/ui": ["./packages/ui/src/index.ts"],
+			"@rg/ui/*": ["./packages/ui/src/*"],
+			"@rg/db": ["./packages/db/src/index.ts"],
+			"@rg/db/*": ["./packages/db/src/*"],
+			"@rg/types": ["./packages/types/src/index.ts"],
+			"@rg/types/*": ["./packages/types/src/*"],
+			"@rg/config/*": ["./packages/config/*"]
+		}
+	},
+	"exclude": ["node_modules", ".next", "dist", "build", ".turbo", "coverage"]
+}

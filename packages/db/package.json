@@ -1,0 +1,26 @@
+{
+	"name": "@rg/db",
+	"version": "0.1.0",
+	"private": true,
+	"type": "module",
+	"description": "Client Supabase partagé + Database types générés (site + bot)",
+	"exports": {
+		".": "./src/index.ts",
+		"./browser": "./src/browser.ts",
+		"./server": "./src/server.ts",
+		"./service": "./src/service.ts",
+		"./types": "./src/types.ts"
+	},
+	"scripts": {
+		"types:gen": "supabase gen types typescript --project-id isbkaeltubqittywibeh > src/types.gen.ts",
+		"type-check": "tsc --noEmit"
+	},
+	"dependencies": {
+		"@supabase/supabase-js": "catalog:",
+		"@supabase/ssr": "catalog:"
+	},
+	"devDependencies": {
+		"@types/bun": "catalog:",
+		"typescript": "catalog:"
+	}
+}

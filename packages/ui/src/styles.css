@@ -1,0 +1,30 @@
+/* Styles partagés @rg/ui — Tailwind v4 inline tokens.
+ * Importer dans chaque app via `@import "@rg/ui/styles.css"` au début de globals.css.
+ * Les apps complètent avec leurs propres tokens (cf. apps/<app>/src/app/globals.css).
+ */
+
+@layer base {
+	:root {
+		/* Rose Griffon — branding tokens */
+		--rg-marine: oklch(0.20 0.05 264);   /* #0c1730 */
+		--rg-rose: oklch(0.65 0.22 0);       /* #e91e63 */
+		--rg-griffon: oklch(0.78 0.13 90);   /* #d4af37 */
+	}
+
+	html {
+		scroll-behavior: smooth;
+		text-rendering: optimizeLegibility;
+		-webkit-font-smoothing: antialiased;
+		-moz-osx-font-smoothing: grayscale;
+	}
+
+	body {
+		font-feature-settings: "rlig" 1, "calt" 1;
+	}
+
+	/* Focus visible accessible (jamais retiré) */
+	:focus-visible {
+		outline: 2px solid var(--rg-rose);
+		outline-offset: 2px;
+	}
+}
