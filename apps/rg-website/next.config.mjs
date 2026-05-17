@@ -35,7 +35,7 @@ const nextConfig = {
 	turbopack: {},
 
 	// Packages workspace ESM — transpile pour éviter les erreurs Next 16 sur les .ts internes.
-	transpilePackages: ["@rg/ui", "@rg/db", "@rg/types"],
+	transpilePackages: ["@rg/ui", "@rg/db"],
 
 	typescript: {
 		ignoreBuildErrors: true,

@@ -108,7 +108,7 @@ const nextConfig: NextConfig = {
 					root: path.resolve(__dirname, "../../"),
 				},
 			}),
-	transpilePackages: ["@rosegriffon/inagle", "@rg/ui", "@rg/db", "@rg/types"],
+	transpilePackages: ["@rosegriffon/inagle", "@rg/ui", "@rg/db"],
 
 	// Packages Node.js natifs exclus du bundling serveur
 	serverExternalPackages: [

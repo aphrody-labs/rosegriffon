@@ -1,6 +1,5 @@
-// Database types — généré par `bun run types:gen` dans ce package.
-// Le fichier généré (types.gen.ts) est commit pour que les apps n'aient pas à exécuter supabase gen
-// lors du build Vercel. Re-générer après chaque migration Supabase.
+// Re-export des types Supabase générés (depuis types.gen.ts).
+// Le fichier types.gen.ts est généré par `bun run types:gen` puis commit.
 
 export type {
 	Database,
@@ -8,4 +7,5 @@ export type {
 	TablesInsert,
 	TablesUpdate,
 	Enums,
+	Json,
 } from "./types.gen";

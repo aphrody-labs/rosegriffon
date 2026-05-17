@@ -17,7 +17,6 @@
 	},
 	"dependencies": {
 		"@rg/db": "workspace:*",
-		"@rg/types": "workspace:*",
 		"@rpbey/discordx": "catalog:",
 		"@supabase/supabase-js": "catalog:",
 		"discord.js": "catalog:",

@@ -1,33 +1,22 @@
 /**
- * Couche DB du bot — Supabase first, raw SQL en transition.
+ * Couche DB du bot — deux chemins sur la même Postgres Supabase.
  *
- * Nouvelle architecture (préférée pour tout nouveau code) :
- *   import { supabase } from "../lib/db.ts";
- *   const { data } = await supabase.from("profiles").select("...").eq(...);
+ *   - `supabase` (de @rg/db/service) : query builder typé. Préférer pour les queries
+ *     simples (`from().select()`, `.insert()`, `.rpc()`) — type-checking sur les
+ *     colonnes via le type `Database` généré.
+ *   - `sql` (Bun.SQL) : connexion Postgres directe sur le pooler Supabase
+ *     (DATABASE_URL = postgresql://postgres.<ref>:<pwd>@aws-0-<region>.pooler.supabase.com:6543/postgres).
+ *     Préférer pour les queries SQL complexes (CTE, fenêtres, agrégats multi-niveaux)
+ *     où le builder Supabase serait verbeux ou impossible.
  *
- * Le client Supabase service-role vient de `@rg/db/service` (partagé site + bot).
- * Bypass RLS. Ne JAMAIS exposer côté client (le bot tourne en Bun/serveur uniquement).
- *
- * ─── TODO migration Supabase ──────────────────────────────────────────────
- * Les services historiques (`services/admin.ts`, `services/website.ts`,
- * `services/syncMembers.ts`, `services/teamPhotos.ts`, `lib/audit.ts`,
- * `lib/rbac.ts`, `commands/staff.ts`, `scripts/smoke-admin.ts`) utilisent
- * encore `sql\`…\`` via Bun.SQL en direct sur la connexion Postgres Supabase
- * (DATABASE_URL = pooler URL Supabase, ex.
- *  postgresql://postgres.<ref>:<pwd>@aws-0-<region>.pooler.supabase.com:6543/postgres).
- *
- * À migrer progressivement vers `supabase.from(...).select()` / `.rpc()` une
- * fois `packages/db/src/types.gen.ts` regénéré (les types courants sont un
- * placeholder vide). Tant que la migration n'est pas complète, on garde
- * `Bun.SQL` pour ne pas casser la logique métier.
+ * Les deux clients accèdent à la même base. Bypass RLS (service-role + connexion directe) —
+ * ne JAMAIS exposer côté client (le bot tourne en Bun/serveur uniquement).
  */
 import { SQL } from "bun";
 import { createSupabaseServiceClient } from "@rg/db/service";
 
-// ─── Supabase service client (préférer pour tout nouveau code) ─────────────
 export const supabase = createSupabaseServiceClient();
 
-// ─── Bun.SQL adapter sur la connexion Postgres Supabase (legacy services) ──
 const databaseUrl = Bun.env.DATABASE_URL;
 if (!databaseUrl) {
 	throw new Error(
