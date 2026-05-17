@@ -1,0 +1,343 @@
+import { unstable_cache } from "next/cache";
+import { createClient } from "@/lib/supabase/server";
+
+// Types pour edge cache
+interface EdgeCacheOptions {
+  revalidate?: number;
+  tags?: string[];
+  region?: string;
+}
+
+// Cache avec distribution géographique optimisée
+export const edgeCache = {
+  // Données publiques (produits, articles, pages statiques)
+  public: <T>(
+    key: string,
+    fetcher: () => Promise<T>,
+    revalidate = 3600,
+    options: EdgeCacheOptions = {}
+  ) => {
+    return unstable_cache(fetcher, [key], {
+      tags: [`public:${key}`, ...(options.tags || [])],
+      revalidate,
+    });
+  },
+
+  // Données régionales (événements locaux, contenu géolocalisé)
+  regional: <T>(
+    region: string,
+    key: string,
+    fetcher: () => Promise<T>,
+    options: EdgeCacheOptions = {}
+  ) => {
+    return unstable_cache(fetcher, [region, key], {
+      tags: [`regional:${region}:${key}`, ...(options.tags || [])],
+      revalidate: options.revalidate || 1800, // 30 minutes par défaut
+    });
+  },
+
+  // Données statiques (images, assets, configurations)
+  static: <T>(
+    key: string,
+    fetcher: () => Promise<T>,
+    options: EdgeCacheOptions = {}
+  ) => {
+    return unstable_cache(fetcher, [key], {
+      tags: [`static:${key}`, ...(options.tags || [])],
+      revalidate: options.revalidate || 86400, // 24 heures par défaut
+    });
+  },
+
+  // Cache utilisateur (personnalisé mais cacheable)
+  user: <T>(
+    userId: string,
+    key: string,
+    fetcher: () => Promise<T>,
+    options: EdgeCacheOptions = {}
+  ) => {
+    return unstable_cache(fetcher, [userId, key], {
+      tags: [`user:${userId}:${key}`, ...(options.tags || [])],
+      revalidate: options.revalidate || 300, // 5 minutes par défaut
+    });
+  },
+};
+
+// Cache intelligent avec fallback stratégique
+export class SmartEdgeCache {
+  private fallbackData = new Map<string, { data: any; timestamp: number }>();
+
+  async get<T>(
+    cacheKey: string,
+    fetcher: () => Promise<T>,
+    options: EdgeCacheOptions & { fallbackTTL?: number } = {}
+  ): Promise<T> {
+    const { fallbackTTL = 5 * 60 * 1000 } = options; // 5 minutes fallback
+
+    try {
+      // Essayer le cache edge d'abord
+      const cachedFetcher = edgeCache.public(
+        cacheKey,
+        fetcher,
+        options.revalidate
+      );
+      const result = await cachedFetcher();
+
+      // Stocker en fallback si succès
+      this.fallbackData.set(cacheKey, {
+        data: result,
+        timestamp: Date.now(),
+      });
+
+      return result;
+    } catch (error) {
+      console.warn(`Edge cache miss for ${cacheKey}, trying fallback...`);
+
+      // Utiliser fallback si disponible et récent
+      const fallback = this.fallbackData.get(cacheKey);
+      if (fallback && Date.now() - fallback.timestamp < fallbackTTL) {
+        console.info(`Using fallback data for ${cacheKey}`);
+        return fallback.data;
+      }
+
+      // Derniers recours : appeler le fetcher directement
+      console.warn(`No fallback for ${cacheKey}, fetching directly...`);
+      return await fetcher();
+    }
+  }
+
+  // Nettoyer les fallbacks expirés
+  cleanupFallbacks(maxAge = 30 * 60 * 1000) {
+    // 30 minutes
+    const now = Date.now();
+    for (const [key, value] of this.fallbackData.entries()) {
+      if (now - value.timestamp > maxAge) {
+        this.fallbackData.delete(key);
+      }
+    }
+  }
+}
+
+export const smartCache = new SmartEdgeCache();
+
+// Fonctions cached pour les données publiques communes
+export const getCachedProducts = edgeCache.public(
+  "products",
+  async () => {
+    const supabase = await createClient();
+    const { data } = await supabase
+      .from("products")
+      .select("*")
+      .eq("status", "active")
+      .order("created_at", { ascending: false });
+    return data || [];
+  },
+  600, // 10 minutes
+  { tags: ["products", "store"] }
+);
+
+export const getCachedCategories = edgeCache.static(
+  "categories",
+  async () => {
+    const supabase = await createClient();
+    const { data } = await supabase
+      .from("categories")
+      .select("*")
+      .eq("active", true)
+      .order("name");
+    return data || [];
+  },
+  { tags: ["categories", "store"] }
+);
+
+export const getCachedPublicStats = edgeCache.public(
+  "public-stats",
+  async () => {
+    const supabase = await createClient();
+
+    const [
+      { count: usersCount },
+      { count: ordersCount },
+      { data: recentOrders },
+    ] = await Promise.all([
+      supabase.from("profiles").select("*", { count: "exact", head: true }),
+      supabase.from("orders").select("*", { count: "exact", head: true }),
+      supabase
+        .from("orders")
+        .select("total_amount")
+        .eq("status", "completed")
+        .order("created_at", { ascending: false })
+        .limit(100),
+    ]);
+
+    const totalRevenue =
+      recentOrders?.reduce((sum, order) => sum + order.total_amount, 0) || 0;
+
+    return {
+      totalUsers: usersCount || 0,
+      totalOrders: ordersCount || 0,
+      totalRevenue,
+      lastUpdated: new Date().toISOString(),
+    };
+  },
+  1800, // 30 minutes
+  { tags: ["stats", "public"] }
+);
+
+// Cache géolocalisé pour événements
+export const getCachedEventsByRegion = (region: string) =>
+  edgeCache.regional(
+    region,
+    "events",
+    async () => {
+      const supabase = await createClient();
+      const { data } = await supabase
+        .from("events")
+        .select("*")
+        .eq("region", region)
+        .eq("status", "published")
+        .gte("date", new Date().toISOString())
+        .order("date");
+      return data || [];
+    },
+    { tags: ["events", region] }
+  );
+
+// Helpers pour invalidation edge cache
+export async function invalidateEdgeCache(patterns: string | string[]) {
+  const patternsArray = Array.isArray(patterns) ? patterns : [patterns];
+
+  try {
+    for (const pattern of patternsArray) {
+      // Invalider via l'API Vercel
+      await fetch("/api/revalidate", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${process.env.REVALIDATE_TOKEN}`,
+        },
+        body: JSON.stringify({ tag: pattern }),
+      });
+
+      console.info(`Invalidated edge cache for pattern: ${pattern}`);
+    }
+  } catch (error) {
+    console.error("Failed to invalidate edge cache:", error);
+  }
+}
+
+// Préchargement massif pour CDN
+export async function warmupEdgeCache() {
+  console.info("Starting edge cache warmup...");
+
+  const warmupTasks = [
+    // Données critiques
+    getCachedProducts(),
+    getCachedCategories(),
+    getCachedPublicStats(),
+
+    // Données régionales populaires
+    getCachedEventsByRegion("france"),
+    getCachedEventsByRegion("europe"),
+
+    // Pages statiques communes
+    smartCache.get("homepage-content", async () => {
+      return await fetch("/api/content/homepage").then((r) => r.json());
+    }),
+
+    smartCache.get("footer-links", async () => {
+      return await fetch("/api/content/footer").then((r) => r.json());
+    }),
+  ];
+
+  try {
+    await Promise.allSettled(warmupTasks);
+    console.info("Edge cache warmup completed");
+  } catch (error) {
+    console.error("Edge cache warmup failed:", error);
+  }
+}
+
+// Monitoring du cache edge
+export class EdgeCacheMonitor {
+  private stats = {
+    hits: 0,
+    misses: 0,
+    errors: 0,
+    totalRequests: 0,
+  };
+
+  recordHit(cacheKey: string) {
+    this.stats.hits++;
+    this.stats.totalRequests++;
+    console.debug(`Edge cache HIT: ${cacheKey}`);
+  }
+
+  recordMiss(cacheKey: string) {
+    this.stats.misses++;
+    this.stats.totalRequests++;
+    console.debug(`Edge cache MISS: ${cacheKey}`);
+  }
+
+  recordError(cacheKey: string, error: Error) {
+    this.stats.errors++;
+    this.stats.totalRequests++;
+    console.error(`Edge cache ERROR: ${cacheKey}`, error);
+  }
+
+  getStats() {
+    const hitRate =
+      this.stats.totalRequests > 0
+        ? (this.stats.hits / this.stats.totalRequests) * 100
+        : 0;
+
+    return {
+      ...this.stats,
+      hitRate: Math.round(hitRate * 100) / 100,
+    };
+  }
+
+  reset() {
+    this.stats = { hits: 0, misses: 0, errors: 0, totalRequests: 0 };
+  }
+}
+
+export const edgeCacheMonitor = new EdgeCacheMonitor();
+
+// Headers optimisés pour CDN
+export function getOptimizedCacheHeaders(
+  type: "static" | "dynamic" | "api" = "dynamic"
+) {
+  const headers = new Headers();
+
+  switch (type) {
+    case "static":
+      headers.set(
+        "Cache-Control",
+        "public, s-maxage=86400, stale-while-revalidate=604800"
+      ); // 24h / 7d
+      headers.set("CDN-Cache-Control", "public, s-maxage=31536000"); // 1 an sur CDN
+      break;
+
+    case "dynamic":
+      headers.set(
+        "Cache-Control",
+        "public, s-maxage=300, stale-while-revalidate=1800"
+      ); // 5min / 30min
+      headers.set("CDN-Cache-Control", "public, s-maxage=3600"); // 1h sur CDN
+      break;
+
+    case "api":
+      headers.set(
+        "Cache-Control",
+        "public, s-maxage=60, stale-while-revalidate=300"
+      ); // 1min / 5min
+      headers.set("CDN-Cache-Control", "public, s-maxage=600"); // 10min sur CDN
+      break;
+  }
+
+  headers.set("Vary", "Accept-Encoding, Accept");
+  headers.set("X-Cache-Strategy", type);
+  headers.set("X-Edge-Region", process.env.VERCEL_REGION || "unknown");
+
+  return headers;
+}

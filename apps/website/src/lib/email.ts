@@ -1,0 +1,325 @@
+import nodemailer from "nodemailer";
+
+interface OrderConfirmationData {
+  orderId: string;
+  customerEmail: string;
+  customerName?: string;
+  totalAmount: number;
+  items: Array<{
+    productName: string;
+    variantName: string;
+    quantity: number;
+    price: number;
+  }>;
+  shippingAddress?: {
+    address_line1?: string;
+    address_line2?: string;
+    city?: string;
+    postal_code?: string;
+    country?: string;
+  };
+}
+
+// Créer le transporteur SMTP
+const transporter = nodemailer.createTransport({
+  host: process.env.SMTP_HOST || "smtp.gmail.com",
+  port: parseInt(process.env.SMTP_PORT || "587", 10),
+  secure: process.env.SMTP_SECURE === "true", // true pour 465, false pour 587
+  auth: {
+    user: process.env.SMTP_USER,
+    pass: process.env.SMTP_PASSWORD,
+  },
+});
+
+/**
+ * Envoyer un email de confirmation de commande
+ */
+export async function sendOrderConfirmationEmail(data: OrderConfirmationData) {
+  try {
+    const itemsHtml = data.items
+      .map(
+        (item) => `
+      <tr>
+        <td style="padding: 12px; border-bottom: 1px solid #e0e0e0;">${item.productName}</td>
+        <td style="padding: 12px; border-bottom: 1px solid #e0e0e0;">${item.variantName}</td>
+        <td style="padding: 12px; border-bottom: 1px solid #e0e0e0; text-align: center;">${item.quantity}</td>
+        <td style="padding: 12px; border-bottom: 1px solid #e0e0e0; text-align: right;">${item.price.toFixed(2)}€</td>
+        <td style="padding: 12px; border-bottom: 1px solid #e0e0e0; text-align: right;">${(item.price * item.quantity).toFixed(2)}€</td>
+      </tr>
+    `
+      )
+      .join("");
+
+    const addressHtml = data.shippingAddress
+      ? `
+      <p style="margin: 8px 0;">
+        <strong>Adresse de livraison:</strong><br/>
+        ${data.shippingAddress.address_line1 || ""}<br/>
+        ${data.shippingAddress.address_line2 ? `${data.shippingAddress.address_line2}<br/>` : ""}
+        ${data.shippingAddress.postal_code || ""} ${data.shippingAddress.city || ""}<br/>
+        ${data.shippingAddress.country || ""}
+      </p>
+    `
+      : "";
+
+    const htmlContent = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <meta charset="UTF-8">
+          <style>
+            body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+            .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+            .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 8px 8px 0 0; }
+            .header h1 { margin: 0; font-size: 24px; }
+            .content { background: #f9f9f9; padding: 20px; border: 1px solid #e0e0e0; border-radius: 0 0 8px 8px; }
+            table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+            .footer { margin-top: 20px; font-size: 12px; color: #999; text-align: center; }
+            .button { display: inline-block; padding: 12px 24px; background: #667eea; color: white; text-decoration: none; border-radius: 4px; margin-top: 20px; }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="header">
+              <h1>🐉 Commande confirmée !</h1>
+            </div>
+            <div class="content">
+              <p>Bonjour ${data.customerName || "client"},</p>
+              
+              <p>Merci pour votre commande ! Nous avons bien reçu votre paiement. Voici un résumé de votre commande :</p>
+              
+              <p><strong>Numéro de commande:</strong> ${data.orderId}</p>
+              
+              <table>
+                <thead>
+                  <tr style="background: #f0f0f0;">
+                    <th style="padding: 12px; text-align: left;">Produit</th>
+                    <th style="padding: 12px; text-align: left;">Variante</th>
+                    <th style="padding: 12px; text-align: center;">Quantité</th>
+                    <th style="padding: 12px; text-align: right;">Prix unitaire</th>
+                    <th style="padding: 12px; text-align: right;">Total</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${itemsHtml}
+                </tbody>
+              </table>
+              
+              <div style="text-align: right; font-size: 18px; font-weight: bold; margin-top: 20px; padding-top: 20px; border-top: 2px solid #667eea;">
+                <span>Montant total : ${data.totalAmount.toFixed(2)}€</span>
+              </div>
+              
+              ${addressHtml}
+              
+              <p style="background: #e3f2fd; padding: 12px; border-left: 4px solid #667eea; border-radius: 4px; margin-top: 20px;">
+                <strong>📦 Prochaines étapes:</strong><br/>
+                Votre commande est en cours de traitement. Vous recevrez un email de confirmation d'expédition avec un numéro de suivi dans les 24-48 heures.
+              </p>
+              
+              <p style="margin-top: 20px;">
+                Si vous avez des questions, n'hésitez pas à nous contacter à <a href="mailto:contact@rosegriffon.com">contact@rosegriffon.com</a>
+              </p>
+              
+              <p style="margin-top: 20px;">
+                Merci de votre soutien ! 💜<br/>
+                L'équipe Rose Griffon
+              </p>
+            </div>
+            
+            <div class="footer">
+              <p>© 2025 Rose Griffon. Tous droits réservés.</p>
+            </div>
+          </div>
+        </body>
+      </html>
+    `;
+
+    const mailOptions = {
+      from: process.env.SMTP_USER,
+      to: data.customerEmail,
+      subject: `🐉 Confirmation de commande #${data.orderId}`,
+      html: htmlContent,
+    };
+
+    const info = await transporter.sendMail(mailOptions);
+    // Email envoyé avec succès
+    return { success: true, messageId: info.messageId };
+  } catch (error) {
+    console.error("Erreur lors de l'envoi de l'email:", error);
+    throw error;
+  }
+}
+
+/**
+ * Envoyer un email d'avis d'expédition
+ */
+export async function sendShippingNotificationEmail(
+  customerEmail: string,
+  orderId: string,
+  trackingNumber?: string
+) {
+  try {
+    const trackingHtml = trackingNumber
+      ? `<p><strong>Numéro de suivi:</strong> ${trackingNumber}</p>`
+      : "";
+
+    const htmlContent = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <meta charset="UTF-8">
+          <style>
+            body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+            .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+            .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 8px 8px 0 0; }
+            .content { background: #f9f9f9; padding: 20px; border: 1px solid #e0e0e0; border-radius: 0 0 8px 8px; }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="header">
+              <h1>📦 Votre commande est en route !</h1>
+            </div>
+            <div class="content">
+              <p>Bonjour,</p>
+              
+              <p>Votre commande <strong>#${orderId}</strong> a été expédiée !</p>
+              
+              ${trackingHtml}
+              
+              <p>Vous pouvez suivre votre colis sur le site du transporteur. Vous devriez le recevoir dans 5 à 7 jours ouvrables.</p>
+              
+              <p>Merci encore pour votre soutien ! 💜<br/>
+              L'équipe Rose Griffon</p>
+            </div>
+          </div>
+        </body>
+      </html>
+    `;
+
+    const mailOptions = {
+      from: process.env.SMTP_USER,
+      to: customerEmail,
+      subject: `📦 Votre commande #${orderId} a été expédiée`,
+      html: htmlContent,
+    };
+
+    const info = await transporter.sendMail(mailOptions);
+    return { success: true, messageId: info.messageId };
+  } catch (error) {
+    console.error("Erreur lors de l'envoi de l'email d'expédition:", error);
+    throw error;
+  }
+}
+
+/**
+ * Envoyer un email de confirmation de livraison
+ */
+export async function sendDeliveryConfirmationEmail(customerEmail: string, orderId: string) {
+  try {
+    const htmlContent = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <meta charset="UTF-8">
+          <style>
+            body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+            .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+            .header { background: linear-gradient(135deg, #34d399 0%, #10b981 100%); color: white; padding: 20px; border-radius: 8px 8px 0 0; }
+            .content { background: #f9f9f9; padding: 20px; border: 1px solid #e0e0e0; border-radius: 0 0 8px 8px; }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="header">
+              <h1>✅ Colis reçu !</h1>
+            </div>
+            <div class="content">
+              <p>Bonjour,</p>
+              
+              <p>Super ! Votre commande <strong>#${orderId}</strong> a été livrée avec succès.</p>
+              
+              <p>Nous espérons que vous apprécierez votre achat. N'hésitez pas à nous contacter si vous avez des questions.</p>
+              
+              <p>Merci de votre confiance ! 💜<br/>
+              L'équipe Rose Griffon</p>
+            </div>
+          </div>
+        </body>
+      </html>
+    `;
+
+    const mailOptions = {
+      from: process.env.SMTP_USER,
+      to: customerEmail,
+      subject: `✅ Votre commande #${orderId} a été livrée`,
+      html: htmlContent,
+    };
+
+    const info = await transporter.sendMail(mailOptions);
+    return { success: true, messageId: info.messageId };
+  } catch (error) {
+    console.error("Erreur lors de l'envoi de l'email de livraison:", error);
+    throw error;
+  }
+}
+
+/**
+ * Envoyer un email d'annulation de commande
+ */
+export async function sendOrderCancellationEmail(
+  customerEmail: string,
+  orderId: string,
+  reason?: string
+) {
+  try {
+    const reasonHtml = reason ? `<p><strong>Raison:</strong> ${reason}</p>` : "";
+
+    const htmlContent = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <meta charset="UTF-8">
+          <style>
+            body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+            .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+            .header { background: linear-gradient(135deg, #f87171 0%, #ef4444 100%); color: white; padding: 20px; border-radius: 8px 8px 0 0; }
+            .content { background: #f9f9f9; padding: 20px; border: 1px solid #e0e0e0; border-radius: 0 0 8px 8px; }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="header">
+              <h1>❌ Commande annulée</h1>
+            </div>
+            <div class="content">
+              <p>Bonjour,</p>
+              
+              <p>Votre commande <strong>#${orderId}</strong> a été annulée.</p>
+              
+              ${reasonHtml}
+              
+              <p>Si vous aviez déjà effectué un paiement, celui-ci sera remboursé sur votre compte bancaire dans 5 à 10 jours ouvrables.</p>
+              
+              <p>N'hésitez pas à nous contacter si vous avez des questions.<br/>
+              L'équipe Rose Griffon</p>
+            </div>
+          </div>
+        </body>
+      </html>
+    `;
+
+    const mailOptions = {
+      from: process.env.SMTP_USER,
+      to: customerEmail,
+      subject: `❌ Votre commande #${orderId} a été annulée`,
+      html: htmlContent,
+    };
+
+    const info = await transporter.sendMail(mailOptions);
+    return { success: true, messageId: info.messageId };
+  } catch (error) {
+    console.error("Erreur lors de l'envoi de l'email d'annulation:", error);
+    throw error;
+  }
+}

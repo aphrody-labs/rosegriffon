@@ -1,7 +1,7 @@
 # Bun
 node_modules/
-bun.lock
 bun.lockb
+# bun.lock is COMMITTED (text lockfile, reproducible builds)
 
 # Turbo
 .turbo/
