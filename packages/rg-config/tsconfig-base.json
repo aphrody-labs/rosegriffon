@@ -15,7 +15,8 @@
 		"resolveJsonModule": true,
 		"isolatedModules": true,
 		"skipLibCheck": true,
-		"allowJs": false
+		"allowJs": false,
+		"ignoreDeprecations": "6.0"
 	},
 	"exclude": ["node_modules", "dist", "build", ".turbo", "coverage"]
 }
