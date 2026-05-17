@@ -11,7 +11,7 @@
 
 CREATE TABLE IF NOT EXISTS public.orders (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id uuid REFERENCES public."user"(id) ON DELETE SET NULL,
+  user_id text REFERENCES public."user"(id) ON DELETE SET NULL,  -- Better Auth utilise text IDs (CUID/nanoid)
   stripe_session_id text UNIQUE NOT NULL,
   stripe_customer_id text,
   stripe_payment_intent_id text,
@@ -82,7 +82,7 @@ ALTER TABLE public.orders ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "orders_select_own" ON public.orders;
 CREATE POLICY "orders_select_own" ON public.orders
   FOR SELECT
-  USING (auth.uid() = user_id);
+  USING (auth.uid()::text = user_id);
 
 DROP POLICY IF EXISTS "orders_select_admin" ON public.orders;
 CREATE POLICY "orders_select_admin" ON public.orders
@@ -90,7 +90,7 @@ CREATE POLICY "orders_select_admin" ON public.orders
   USING (
     EXISTS (
       SELECT 1 FROM public.profiles
-      WHERE id = auth.uid()
+      WHERE id::text = auth.uid()::text
         AND role IN ('admin', 'superadmin')
     )
   );
