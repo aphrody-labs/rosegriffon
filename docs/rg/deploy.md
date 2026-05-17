@@ -12,6 +12,39 @@ Procédure complète pour passer le monorepo `rose-griffon/rg` en prod. **À ex�
 
 ---
 
+## Workflow stable (post-incident 2026-05-18)
+
+**Modèle "git-Vercel decoupling"** — désormais le repo `rg/` est isolé de Vercel.
+
+| Action | Effet sur Vercel |
+|---|---|
+| `git push origin main` (n'importe qui) | **AUCUN** — auto-deploy disabled |
+| `git push origin <tag>` | **AUCUN** — idem |
+| Bunlight Bot push en boucle | **AUCUN** — idem |
+| Appel API `POST /v13/deployments` avec SHA explicite | **1 deploy production déclenché** |
+| Vercel CLI `vercel --prod` | idem |
+
+**Principe** : Bunlight Bot et autres processus peuvent push librement sur `main`. Vercel ne réagit jamais. Pour déployer = appel API explicit avec SHA validé.
+
+**Workflow recommandé pour shipper :**
+
+```bash
+# 1. Identifier un SHA stable (HEAD du moment, ou après validation type-check/test)
+cd ~/rg && git log --oneline -1
+SHA=$(git rev-parse main)
+
+# 2. Tag pour traçabilité (optionnel mais recommandé)
+git tag -a rg-prod-$(date +%Y-%m-%d-%H%M) $SHA -m "deploy prod"
+git push origin --tags
+
+# 3. Trigger deploy via API (cf. étape 1.bis ci-dessous pour le payload)
+```
+
+**Historique tags prod :**
+- `rg-prod-2026-05-18-01` → SHA `24b913c` (dead code purge + ts-check OK)
+
+---
+
 ## État actuel (2026-05-18 01:32 CET, mis à jour après incident)
 
 **Incident migration (résolu) :** un cycle de pushes Bunlight Bot (~1 commit/6min) a annulé tous les builds rg-* successifs avant qu'aucun n'aboutisse READY. Les domains custom avaient été pré-attachés à rg-azalee/rg-website avec TXT verification mismatch → 404 DEPLOYMENT_NOT_FOUND sur les 3 domains.
@@ -20,6 +53,7 @@ Procédure complète pour passer le monorepo `rose-griffon/rg` en prod. **À ex�
 1. **Domains rollback** : `azalee.rosegriffon.fr`, `rosegriffon.fr`, `www.rosegriffon.fr` retransférés aux anciens projects `azalee`/`rosegriffon`. Anciens deploys READY (commits `fd75f75a` azalee + `c231b48d` website du 10 mai) servent à nouveau la prod (3/3 HTTP 200 OK).
 2. **DNS TXT** : `_vercel.rosegriffon.fr` mis à jour via OVH API REST (CLI `ovhcloud` bugué, contournement signed curl). 3 records correspondant aux codes vérification des anciens projects.
 3. **Auto-deploy disabled** sur `rg-azalee` + `rg-website` via `PATCH /v9/projects/{id} {gitProviderOptions: {createDeployments: "disabled"}}` → les pushes sur `rose-griffon/rg main` ne triggers plus aucun build. Cycle CANCELED stoppé.
+4. **Tag stable `rg-prod-2026-05-18-01`** créé sur SHA `24b913c` + 2 deploys API REST triggers pour valider le workflow tag-based isolé.
 
 **Pour reprendre la migration sereinement :**
 - Les nouveaux projects sont en pause, prêts à recevoir un deploy manuel quand le repo `rg/` sera stable
