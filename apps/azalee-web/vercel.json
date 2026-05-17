@@ -2,7 +2,6 @@
 	"$schema": "https://openapi.vercel.sh/vercel.json",
 	"framework": "nextjs",
 	"installCommand": "cd ../.. && bun install --no-save",
-	"buildCommand": "cd ../.. && bunx --bun turbo run build --filter=@rg/azalee",
-	"outputDirectory": ".next",
-	"ignoreCommand": "cd ../.. && bunx turbo-ignore @rg/azalee"
+	"buildCommand": "turbo build",
+	"outputDirectory": ".next"
 }
