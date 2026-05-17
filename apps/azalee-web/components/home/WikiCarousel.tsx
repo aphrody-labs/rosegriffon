@@ -24,7 +24,7 @@ const WIKI_SECTIONS: Array<{
 		description: "Stats, techniques et recrutement",
 		href: "/chara",
 		sprite: "chara",
-		gradientColors: "bg-gradient-to-r from-blue-600 to-cyan-500",
+		gradientColors: "bg-linear-to-r from-blue-600 to-cyan-500",
 		statKey: "characters",
 	},
 	{
@@ -32,7 +32,7 @@ const WIKI_SECTIONS: Array<{
 		description: "Tirs, dribbles et blocages",
 		href: "/skill",
 		sprite: "skill",
-		gradientColors: "bg-gradient-to-r from-red-600 to-orange-500",
+		gradientColors: "bg-linear-to-r from-red-600 to-orange-500",
 		statKey: "skills",
 	},
 	{
@@ -40,7 +40,7 @@ const WIKI_SECTIONS: Array<{
 		description: "Keshins, totems, miximax et plus",
 		href: "/aura",
 		sprite: "keshin",
-		gradientColors: "bg-gradient-to-r from-violet-600 to-purple-500",
+		gradientColors: "bg-linear-to-r from-violet-600 to-purple-500",
 		statKey: "keshins",
 	},
 	{
@@ -48,7 +48,7 @@ const WIKI_SECTIONS: Array<{
 		description: "Équipements et consommables",
 		href: "/item",
 		icon: "backpack",
-		gradientColors: "bg-gradient-to-r from-emerald-600 to-green-500",
+		gradientColors: "bg-linear-to-r from-emerald-600 to-green-500",
 		statKey: "items",
 	},
 	{
@@ -56,7 +56,7 @@ const WIKI_SECTIONS: Array<{
 		description: "Effets des talents innés",
 		href: "/passive",
 		sprite: "tension",
-		gradientColors: "bg-gradient-to-r from-pink-600 to-rose-500",
+		gradientColors: "bg-linear-to-r from-pink-600 to-rose-500",
 		statKey: "passives",
 	},
 	{
@@ -64,21 +64,21 @@ const WIKI_SECTIONS: Array<{
 		description: "Comparez deux joueurs côte à côte",
 		href: "/tools/compare",
 		icon: "compare_arrows",
-		gradientColors: "bg-gradient-to-r from-indigo-600 to-blue-500",
+		gradientColors: "bg-linear-to-r from-indigo-600 to-blue-500",
 	},
 	{
 		title: "Mon Équipe",
 		description: "Composez votre équipe idéale",
 		href: "/tools/my-team",
 		icon: "stadium",
-		gradientColors: "bg-gradient-to-r from-teal-600 to-cyan-500",
+		gradientColors: "bg-linear-to-r from-teal-600 to-cyan-500",
 	},
 	{
 		title: "Actualités",
 		description: "News et mises à jour",
 		href: "/news",
 		icon: "newspaper",
-		gradientColors: "bg-gradient-to-r from-slate-600 to-gray-500",
+		gradientColors: "bg-linear-to-r from-slate-600 to-gray-500",
 	},
 ];
 
@@ -106,7 +106,7 @@ export function WikiCarousel({ stats }: WikiCarouselProps) {
 						<Link
 							key={section.href}
 							href={section.href}
-							className="flex-shrink-0 min-w-[110px] snap-start md:min-w-0 md:snap-align-none group flex flex-col rounded-2xl bg-surface-container overflow-hidden transition-colors active:bg-surface-container-high md:transition-all md:duration-200 md:hover:bg-surface-container-high md:hover:shadow-md md:hover:-translate-y-1"
+							className="shrink-0 min-w-[110px] snap-start md:min-w-0 md:snap-align-none group flex flex-col rounded-2xl bg-surface-container overflow-hidden transition-colors active:bg-surface-container-high md:transition-all md:duration-200 md:hover:bg-surface-container-high md:hover:shadow-md md:hover:-translate-y-1"
 						>
 							<div className={`h-[3px] w-full ${section.gradientColors}`} />
 							<div className="p-3 md:p-5 flex flex-col gap-1 md:gap-1.5">

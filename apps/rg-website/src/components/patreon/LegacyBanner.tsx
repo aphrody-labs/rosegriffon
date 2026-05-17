@@ -31,7 +31,7 @@ export async function LegacyBanner({ userId }: Props) {
 	return (
 		<div className="rounded-2xl border border-[#c9a958]/40 bg-card p-5 text-card-foreground">
 			<div className="flex flex-wrap items-center gap-4">
-				<Heart className="h-6 w-6 flex-shrink-0 text-[#c9a958]" />
+				<Heart className="size-6 shrink-0 text-[#c9a958]" />
 				<div className="min-w-0 flex-1">
 					<p className="font-semibold">
 						Vous étiez supporter Patreon

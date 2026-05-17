@@ -99,7 +99,7 @@ function ResetPasswordContent() {
         <div className="bg-surface-container-lowest rounded-[28px] elevation-2 overflow-hidden">
           {/* Header */}
           <div className="relative px-8 pt-10 pb-8 text-center overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-b from-primary/5 to-transparent" />
+            <div className="absolute inset-0 bg-linear-to-b from-primary/5 to-transparent" />
             <div className="relative space-y-4">
               <div className="mx-auto size-12 rounded-2xl bg-primary/10 flex items-center justify-center">
                 <KeyRound className="size-6 text-primary" />

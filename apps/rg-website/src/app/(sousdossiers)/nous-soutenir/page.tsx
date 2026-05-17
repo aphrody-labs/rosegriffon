@@ -100,7 +100,7 @@ function CtaButton({ option }: { option: (typeof SUPPORT_OPTIONS)[number] }) {
 			rel="noopener noreferrer"
 			className={className}
 		>
-			{option.cta} <ExternalLink className="h-4 w-4" />
+			{option.cta} <ExternalLink className="size-4" />
 		</a>
 	);
 }
@@ -122,7 +122,7 @@ export default function NousSoutenirPage() {
 						<Heart className="h-3.5 w-3.5" /> Communauté & soutien
 					</div>
 					<h1 className="text-4xl font-bold sm:text-5xl md:text-6xl">
-						<span className="bg-gradient-to-r from-[#a08540] via-[#c9a958] to-[#a08540] bg-clip-text text-transparent dark:from-[#c9a958] dark:via-[#dab86a] dark:to-[#c9a958]">
+						<span className="bg-linear-to-r from-[#a08540] via-[#c9a958] to-[#a08540] bg-clip-text text-transparent dark:from-[#c9a958] dark:via-[#dab86a] dark:to-[#c9a958]">
 							Nous soutenir
 						</span>
 					</h1>
@@ -179,7 +179,7 @@ export default function NousSoutenirPage() {
 							key={i}
 							className="rounded-2xl border border-border bg-card p-6 text-card-foreground"
 						>
-							<card.icon className="h-6 w-6 text-[#c9a958]" />
+							<card.icon className="size-6 text-[#c9a958]" />
 							<h3 className="mt-4 font-bold">{card.title}</h3>
 							<p className="mt-2 text-sm text-muted-foreground">{card.desc}</p>
 						</div>
@@ -229,7 +229,7 @@ export default function NousSoutenirPage() {
 							key={i}
 							className="rounded-2xl border border-border bg-card p-6 text-card-foreground"
 						>
-							<card.icon className="h-6 w-6 text-[#c9a958]" />
+							<card.icon className="size-6 text-[#c9a958]" />
 							<h3 className="mt-4 font-bold">{card.title}</h3>
 							<p className="mt-2 text-sm text-muted-foreground">{card.desc}</p>
 						</div>
@@ -240,7 +240,7 @@ export default function NousSoutenirPage() {
 			{/* Footer CTA */}
 			<section className="mx-auto max-w-3xl px-6 py-12 text-center">
 				<div className="rounded-3xl border border-[#c9a958]/40 bg-card p-10">
-					<Heart className="mx-auto h-8 w-8 text-[#c9a958]" />
+					<Heart className="mx-auto size-8 text-[#c9a958]" />
 					<h2 className="mt-3 text-2xl font-bold">Merci de faire vivre RG</h2>
 					<p className="mt-3 text-muted-foreground">
 						Chaque soutien — petit ou grand — fait avancer la communauté.
@@ -251,7 +251,7 @@ export default function NousSoutenirPage() {
 							className="inline-flex items-center gap-2 rounded-full bg-[#c9a958] px-6 py-3 font-semibold text-[#0c1730] hover:bg-[#dab86a]"
 						>
 							Comment soutenir
-							<ChevronRight className="h-4 w-4" />
+							<ChevronRight className="size-4" />
 						</a>
 					</div>
 				</div>

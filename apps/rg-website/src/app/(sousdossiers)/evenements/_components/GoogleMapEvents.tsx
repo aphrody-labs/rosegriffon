@@ -121,7 +121,7 @@ export default function GoogleMapEvents({ events, isLoading }: GoogleMapEventsPr
       {showLoading && (
         <div className="absolute inset-0 z-20 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm flex items-center justify-center">
           <div className="flex flex-col items-center gap-3">
-            <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600" />
+            <div className="animate-spin rounded-full size-10 border-b-2 border-blue-600" />
             <p className="text-sm font-medium text-gray-600 dark:text-gray-300">
               {isLoading ? "Localisation des événements..." : "Chargement de la carte..."}
             </p>

@@ -38,8 +38,8 @@ export async function LatestChroniqueSection() {
 
 				<CardHeader>
 					<div className="flex items-center gap-3 mb-3">
-						<div className="w-12 h-12 rounded-xl bg-linear-to-br from-[#a14b3f] to-[#d16854] flex items-center justify-center shadow-lg">
-							<Newspaper className="w-6 h-6 text-white" />
+						<div className="size-12 rounded-xl bg-linear-to-br from-[#a14b3f] to-[#d16854] flex items-center justify-center shadow-lg">
+							<Newspaper className="size-6 text-white" />
 						</div>
 						<div>
 							<h2
@@ -102,7 +102,7 @@ export async function LatestChroniqueSection() {
 								{/* Meta */}
 								<div className="flex flex-wrap items-center gap-4 text-sm text-gray-500 dark:text-gray-500">
 									<div className="flex items-center gap-2">
-										<Calendar className="w-4 h-4" />
+										<Calendar className="size-4" />
 										<time
 											dateTime={
 												article.published_at || article.created_at || ""
@@ -118,7 +118,7 @@ export async function LatestChroniqueSection() {
 										</time>
 									</div>
 									<div className="flex items-center gap-2">
-										<Eye className="w-4 h-4" />
+										<Eye className="size-4" />
 										<span>{article.view_count || 0} vues</span>
 									</div>
 								</div>
@@ -129,7 +129,7 @@ export async function LatestChroniqueSection() {
 									className="group/btn border-[#a14b3f] text-[#a14b3f] hover:bg-[#a14b3f] hover:text-white transition-all"
 								>
 									Lire la chronique
-									<ArrowRight className="w-4 h-4 ml-2 group-hover/btn:translate-x-1 transition-transform" />
+									<ArrowRight className="size-4 ml-2 group-hover/btn:translate-x-1 transition-transform" />
 								</Button>
 							</div>
 						</div>
@@ -142,7 +142,7 @@ export async function LatestChroniqueSection() {
 							className="inline-flex items-center gap-2 text-sm font-medium text-[#a14b3f] hover:text-[#8b3f35] transition-colors group"
 						>
 							Voir toutes les chroniques
-							<ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+							<ArrowRight className="size-4 group-hover:translate-x-1 transition-transform" />
 						</Link>
 					</div>
 				</CardContent>

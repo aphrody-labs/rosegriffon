@@ -97,7 +97,7 @@ export function UserActions({ profile }: UserActionsProps) {
             variant="ghost"
             size="icon"
             aria-label="Actions utilisateur"
-            className="rounded-full hover:bg-surface-container-high w-12 h-12"
+            className="rounded-full hover:bg-surface-container-high size-12"
           >
             <MoreVertical size={20} aria-hidden="true" />
           </Button>

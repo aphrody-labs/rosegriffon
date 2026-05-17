@@ -56,7 +56,7 @@ export function ConfirmationDialog({
       <DialogContent>
         <DialogHeader>
           <div className="flex items-center gap-2">
-            {danger && <AlertTriangle className="w-5 h-5 text-red-500" />}
+            {danger && <AlertTriangle className="size-5 text-red-500" />}
             <DialogTitle>{title}</DialogTitle>
           </div>
           {description && <DialogDescription>{description}</DialogDescription>}

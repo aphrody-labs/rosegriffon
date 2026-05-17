@@ -52,14 +52,14 @@ export function TacticDetail({ tactic }: TacticDetailProps) {
         {/* Header */}
         <div className="px-6 pt-6 pb-4">
           <div className="flex items-start gap-4">
-            <div className="w-16 h-16 shrink-0 rounded-2xl bg-surface-container-high flex items-center justify-center border border-outline-variant/20 overflow-hidden">
+            <div className="size-16 shrink-0 rounded-2xl bg-surface-container-high flex items-center justify-center border border-outline-variant/20 overflow-hidden">
               {imageSrc && !imgError ? (
                 <Image
                   src={imageSrc}
                   alt={tactic.name_fr || tactic.name}
                   width={56}
                   height={56}
-                  className="object-contain w-14 h-14"
+                  className="object-contain size-14"
                   unoptimized
                   onError={() => setImgError(true)}
                 />
@@ -144,7 +144,7 @@ export function TacticDetail({ tactic }: TacticDetailProps) {
                   key={i}
                   className="flex items-start gap-3 px-4 py-3 rounded-xl bg-surface-container border border-outline-variant/20"
                 >
-                  <span className="w-6 h-6 shrink-0 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs font-black mt-0.5">
+                  <span className="size-6 shrink-0 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs font-black mt-0.5">
                     {i + 1}
                   </span>
                   <div className="flex-1 min-w-0">

@@ -133,10 +133,10 @@ export default async function TweetPage({
 							sizes="100vw"
 						/>
 					) : (
-						<div className="absolute inset-0 bg-gradient-to-br from-[#1DA1F2]/20 via-surface-container to-primary/10" />
+						<div className="absolute inset-0 bg-linear-to-br from-[#1DA1F2]/20 via-surface-container to-primary/10" />
 					)}
 					{/* Gradient overlay */}
-					<div className="absolute inset-0 bg-gradient-to-t from-background via-background/50 to-transparent" />
+					<div className="absolute inset-0 bg-linear-to-t from-background via-background/50 to-transparent" />
 
 					{/* Back button */}
 					<div className="absolute top-3 left-3 sm:top-6 sm:left-6 z-10">
@@ -170,7 +170,7 @@ export default async function TweetPage({
 					<div className="flex flex-wrap items-center gap-3 sm:gap-4 text-xs sm:text-sm text-on-surface-variant">
 						{/* Author */}
 						<div className="flex items-center gap-2">
-							<div className="size-8 sm:size-9 rounded-full bg-surface-container-high overflow-hidden relative flex-shrink-0 ring-2 ring-background">
+							<div className="size-8 sm:size-9 rounded-full bg-surface-container-high overflow-hidden relative shrink-0 ring-2 ring-background">
 								<Image
 									src="/icon.webp"
 									alt="Azalée"

@@ -94,7 +94,7 @@ export function HowToObtain({
                   heroConstellations.map((hc) => (
                     <div
                       key={hc.name}
-                      className="inline-flex items-center gap-2 px-3 py-1.5 bg-gradient-to-r from-purple-100 to-indigo-100 dark:from-purple-900/30 dark:to-indigo-900/30 rounded-full border border-purple-200 dark:border-purple-700"
+                      className="inline-flex items-center gap-2 px-3 py-1.5 bg-linear-to-r from-purple-100 to-indigo-100 dark:from-purple-900/30 dark:to-indigo-900/30 rounded-full border border-purple-200 dark:border-purple-700"
                     >
                       <Pin size={14} className="text-purple-500" aria-hidden="true" />
                       <span className="text-sm font-medium text-purple-700 dark:text-purple-300">
@@ -103,7 +103,7 @@ export function HowToObtain({
                     </div>
                   ))
                 ) : constellation ? (
-                  <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-gradient-to-r from-purple-100 to-indigo-100 dark:from-purple-900/30 dark:to-indigo-900/30 rounded-full border border-purple-200 dark:border-purple-700">
+                  <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-linear-to-r from-purple-100 to-indigo-100 dark:from-purple-900/30 dark:to-indigo-900/30 rounded-full border border-purple-200 dark:border-purple-700">
                     <Pin size={14} className="text-purple-500" aria-hidden="true" />
                     <span className="text-sm font-medium text-purple-700 dark:text-purple-300">
                       {constellation.names.fr ||

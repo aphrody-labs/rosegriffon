@@ -25,7 +25,7 @@ export default async function EditEventPage({ params }: PageProps) {
       <div className="flex items-center space-x-4">
         <Button variant="ghost" size="icon" asChild>
           <Link href="/admin/events">
-            <ArrowLeft className="w-4 h-4" />
+            <ArrowLeft className="size-4" />
           </Link>
         </Button>
         <h1 className="text-3xl font-bold">Modifier l'événement</h1>

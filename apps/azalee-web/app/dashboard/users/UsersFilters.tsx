@@ -68,7 +68,7 @@ export function UsersFilters({ totalItems, currentRole }: UsersFiltersProps) {
           value={searchValue}
           onChange={(e) => handleSearch(e.target.value)}
           placeholder="Rechercher par nom ou email..."
-          className="w-full h-12 pl-10 pr-10 rounded-full bg-surface-container-low border border-outline-variant/50 text-sm text-on-surface placeholder:text-on-surface-variant/50 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/50 transition-all"
+          className="w-full h-12 pl-10 pr-10 rounded-full bg-surface-container-low border border-outline-variant/50 text-sm text-on-surface placeholder:text-on-surface-variant/50 focus:outline-hidden focus:ring-2 focus:ring-primary/30 focus:border-primary/50 transition-all"
         />
         {searchValue && (
           <button

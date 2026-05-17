@@ -156,13 +156,13 @@ export function EventForm({ event, isEditing = false }: EventFormProps) {
                 onClick={() => setDeleteDialogOpen(true)}
                 disabled={isPending || isDeleting}
               >
-                <Trash2 className="mr-2 h-4 w-4" />
+                <Trash2 className="mr-2 size-4" />
                 Supprimer
               </Button>
             )}
             <div className="flex-1 flex justify-end">
               <Button type="submit" disabled={isPending || isDeleting}>
-                {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                {isPending && <Loader2 className="mr-2 size-4 animate-spin" />}
                 {isEditing ? "Mettre à jour" : "Créer l'événement"}
               </Button>
             </div>

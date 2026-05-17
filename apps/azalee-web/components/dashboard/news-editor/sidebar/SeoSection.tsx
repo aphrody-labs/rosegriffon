@@ -71,7 +71,7 @@ export function SeoSection({
               type="button"
               variant="ghost"
               size="icon"
-              className="shrink-0 h-10 w-10 rounded-xl hover:bg-surface-container-highest"
+              className="shrink-0 size-10 rounded-xl hover:bg-surface-container-highest"
               onClick={() => onSlugChange(generatedSlug)}
               aria-label="Regénérer le slug depuis le titre"
             >

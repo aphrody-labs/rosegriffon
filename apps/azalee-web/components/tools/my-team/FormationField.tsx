@@ -328,7 +328,7 @@ function StaffSlot({
               className="object-cover"
               unoptimized
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
+            <div className="absolute inset-0 bg-linear-to-t from-black/80 via-transparent to-transparent" />
             <span className="absolute bottom-0 inset-x-0 px-0.5 pb-0.5 text-white font-bold text-[6px] sm:text-[8px] truncate text-center drop-shadow-lg">
               {member.name}
             </span>
@@ -497,7 +497,7 @@ export function FormationField({
         className="relative w-full sm:rounded-2xl overflow-hidden"
         style={{ aspectRatio: "75/132" }}
       >
-        <div className="absolute inset-0 bg-gradient-to-b from-emerald-900 via-emerald-700 to-emerald-900" />
+        <div className="absolute inset-0 bg-linear-to-b from-emerald-900 via-emerald-700 to-emerald-900" />
         <PitchSVG />
 
         {/* Field players (11 positions) */}

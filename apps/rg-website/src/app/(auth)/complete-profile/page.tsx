@@ -112,14 +112,14 @@ export default function CompleteProfilePage() {
         <CardContent>
           {success && (
             <Alert className="mb-4 border-green-500 text-green-700 dark:text-green-400">
-              <CheckCircle className="h-4 w-4" />
+              <CheckCircle className="size-4" />
               <AlertDescription>Bienvenue sur Rose Griffon !</AlertDescription>
             </Alert>
           )}
 
           {error && (
             <Alert variant="destructive" className="mb-4">
-              <AlertCircle className="h-4 w-4" />
+              <AlertCircle className="size-4" />
               <AlertDescription>{error}</AlertDescription>
             </Alert>
           )}
@@ -165,7 +165,7 @@ export default function CompleteProfilePage() {
                 onChange={(e) => setBio(e.target.value)}
                 maxLength={200}
                 disabled={isLoading || success}
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-rose-500 dark:focus:ring-rose-400 resize-none"
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-hidden focus:ring-2 focus:ring-rose-500 dark:focus:ring-rose-400 resize-none"
                 rows={4}
               />
               <p className="text-xs text-gray-500 mt-1">{bio.length}/200 caractères</p>
@@ -183,7 +183,7 @@ export default function CompleteProfilePage() {
                 Passer
               </Button>
               <Button type="submit" disabled={isLoading || success} className="flex-1 gap-2">
-                {isLoading && <Loader2 className="h-4 w-4 animate-spin" />}
+                {isLoading && <Loader2 className="size-4 animate-spin" />}
                 {success ? "Redirection..." : "Continuer"}
               </Button>
             </div>

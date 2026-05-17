@@ -53,12 +53,12 @@ export const CommandList = forwardRef((props: CommandListProps, ref) => {
         {props.items.map((item, index) => (
           <button
             key={index}
-            className={`relative flex w-full cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none ${
+            className={`relative flex w-full cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-hidden ${
               index === selectedIndex ? "bg-accent text-accent-foreground" : ""
             }`}
             onClick={() => selectItem(index)}
           >
-            <div className="mr-2 flex h-4 w-4 items-center justify-center">{item.icon}</div>
+            <div className="mr-2 flex size-4 items-center justify-center">{item.icon}</div>
             <div className="flex flex-col items-start">
               <span className="font-medium">{item.title}</span>
               <span className="text-xs text-muted-foreground">{item.description}</span>

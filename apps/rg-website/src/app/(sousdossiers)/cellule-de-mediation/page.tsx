@@ -24,7 +24,7 @@ export default function RejoindreRGPage() {
         <div className="max-w-4xl mx-auto mb-16">
           <div className="bg-white dark:bg-gray-800 rounded-2xl p-8 shadow-sm border border-gray-100 dark:border-gray-700">
             <h2 className="text-2xl lg:text-3xl font-bold mb-6 text-gaelle-blue dark:text-blue-400 flex items-center gap-3">
-              <Shield className="w-8 h-8" />
+              <Shield className="size-8" />
               Qu&apos;est-ce que la cellule de médiation RG ?
             </h2>
             <p className="text-lg text-gray-700 dark:text-gray-300 leading-relaxed text-justify">
@@ -45,14 +45,14 @@ export default function RejoindreRGPage() {
           <Card className="border-t-4 border-t-gaelle-blue shadow-lg hover:shadow-xl transition-shadow duration-300">
             <CardHeader className="pb-2">
               <CardTitle className="flex items-center gap-3 text-2xl lg:text-3xl text-gray-800 dark:text-gray-100">
-                <Scale className="w-8 h-8 text-gaelle-blue" />
+                <Scale className="size-8 text-gaelle-blue" />
                 Ses missions principales
               </CardTitle>
             </CardHeader>
 
             <CardContent className="pt-6 space-y-6">
               <div className="flex gap-4 items-start p-4 rounded-lg bg-blue-50 dark:bg-blue-900/20">
-                <div className="bg-gaelle-blue text-white w-8 h-8 rounded-full flex items-center justify-center shrink-0 font-bold">
+                <div className="bg-gaelle-blue text-white size-8 rounded-full flex items-center justify-center shrink-0 font-bold">
                   1
                 </div>
                 <p className="text-base lg:text-lg text-gray-700 dark:text-gray-300">
@@ -65,7 +65,7 @@ export default function RejoindreRGPage() {
               </div>
 
               <div className="flex gap-4 items-start p-4 rounded-lg bg-blue-50 dark:bg-blue-900/20">
-                <div className="bg-gaelle-blue text-white w-8 h-8 rounded-full flex items-center justify-center shrink-0 font-bold">
+                <div className="bg-gaelle-blue text-white size-8 rounded-full flex items-center justify-center shrink-0 font-bold">
                   2
                 </div>
                 <p className="text-base lg:text-lg text-gray-700 dark:text-gray-300">
@@ -79,7 +79,7 @@ export default function RejoindreRGPage() {
               </div>
 
               <div className="flex gap-4 items-start p-4 rounded-lg bg-blue-50 dark:bg-blue-900/20">
-                <div className="bg-gaelle-blue text-white w-8 h-8 rounded-full flex items-center justify-center shrink-0 font-bold">
+                <div className="bg-gaelle-blue text-white size-8 rounded-full flex items-center justify-center shrink-0 font-bold">
                   3
                 </div>
                 <p className="text-base lg:text-lg text-gray-700 dark:text-gray-300">
@@ -98,7 +98,7 @@ export default function RejoindreRGPage() {
           <Card className="border-t-4 border-t-amber-500 shadow-lg hover:shadow-xl transition-shadow duration-300 flex flex-col">
             <CardHeader>
               <CardTitle className="flex items-center gap-3 text-2xl lg:text-3xl text-gray-800 dark:text-gray-100">
-                <Users className="w-8 h-8 text-amber-500" />
+                <Users className="size-8 text-amber-500" />
                 Besoin d&apos;en parler ?
               </CardTitle>
             </CardHeader>
@@ -108,7 +108,7 @@ export default function RejoindreRGPage() {
                 confidentialité. N&apos;hésitez pas à nous contacter.
               </p>
 
-              <div className="relative w-64 h-64 mb-8 animate-in fade-in zoom-in duration-700">
+              <div className="relative size-64 mb-8 animate-in fade-in zoom-in duration-700">
                 <Image
                   src="/emote.webp"
                   alt="Médiation Rose Griffon"
@@ -129,7 +129,7 @@ export default function RejoindreRGPage() {
                   rel="noopener noreferrer"
                   className="flex items-center justify-center gap-3"
                 >
-                  <Mail className="w-6 h-6" />
+                  <Mail className="size-6" />
                   Contacter la cellule
                 </a>
               </Button>

@@ -87,7 +87,7 @@ export function SkillVideoActions({ videoUrl, skillName }: SkillVideoActionsProp
 
       <button
         onClick={handleShare}
-        className="inline-flex items-center justify-center w-9 h-9 rounded-full bg-surface-container-highest hover:bg-surface-container-high text-on-surface transition-colors"
+        className="inline-flex items-center justify-center size-9 rounded-full bg-surface-container-highest hover:bg-surface-container-high text-on-surface transition-colors"
         title="Partager"
       >
         {shareConfirmed ? (

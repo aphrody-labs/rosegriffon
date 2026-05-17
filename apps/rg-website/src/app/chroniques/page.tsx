@@ -195,25 +195,25 @@ export default async function ChroniquesListPage({
 
 			{/* Hero Section */}
 			<section
-				className="relative overflow-hidden bg-gradient-to-br from-[#a14b3f]/10 via-background to-[#344E8C]/10 animate-in fade-in slide-in-from-bottom-4 duration-500"
+				className="relative overflow-hidden bg-linear-to-br from-[#a14b3f]/10 via-background to-[#344E8C]/10 animate-in fade-in slide-in-from-bottom-4 duration-500"
 				style={{ animationDelay: "50ms" }}
 			>
 				{/* Blur blobs décoratifs */}
-				<div className="absolute -left-32 -top-32 w-96 h-96 bg-[#a14b3f]/20 rounded-full blur-[128px] pointer-events-none" />
-				<div className="absolute -right-32 -bottom-32 w-96 h-96 bg-[#344E8C]/20 rounded-full blur-[128px] pointer-events-none" />
+				<div className="absolute -left-32 -top-32 size-96 bg-[#a14b3f]/20 rounded-full blur-[128px] pointer-events-none" />
+				<div className="absolute -right-32 -bottom-32 size-96 bg-[#344E8C]/20 rounded-full blur-[128px] pointer-events-none" />
 
 				<div className="relative max-w-7xl mx-auto px-4 md:px-6 lg:px-8 py-12 md:py-16 lg:py-20">
 					<div className="text-center space-y-6">
 						{/* Badge */}
 						<div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/15 border border-primary/30">
-							<Newspaper className="w-4 h-4 text-primary" aria-hidden="true" />
+							<Newspaper className="size-4 text-primary" aria-hidden="true" />
 							<span className="text-sm font-semibold text-primary">
 								Journal de bord
 							</span>
 						</div>
 
 						{/* Titre */}
-						<h1 className="text-4xl sm:text-5xl md:text-6xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-[#a14b3f] via-[#d16854] to-[#344E8C]">
+						<h1 className="text-4xl sm:text-5xl md:text-6xl font-bold bg-clip-text text-transparent bg-linear-to-r from-[#a14b3f] via-[#d16854] to-[#344E8C]">
 							Chroniques du Bouquet
 						</h1>
 
@@ -235,7 +235,7 @@ export default async function ChroniquesListPage({
 									Rechercher une chronique
 								</label>
 								<Search
-									className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground"
+									className="absolute left-4 top-1/2 -translate-y-1/2 size-5 text-muted-foreground"
 									aria-hidden="true"
 								/>
 								<Input
@@ -303,7 +303,7 @@ export default async function ChroniquesListPage({
                     shrink-0 inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium transition-all duration-200
                     ${
 											isActive
-												? "bg-gradient-to-r from-[#a14b3f] to-[#344E8C] text-white shadow-lg shadow-[#a14b3f]/25"
+												? "bg-linear-to-r from-[#a14b3f] to-[#344E8C] text-white shadow-lg shadow-[#a14b3f]/25"
 												: "bg-muted/50 hover:bg-muted text-muted-foreground hover:text-foreground"
 										}
                   `}
@@ -339,7 +339,7 @@ export default async function ChroniquesListPage({
 						{isPatreonFilter ? (
 							<Badge className="border-0 bg-[#FF424D]/15 text-sm font-medium text-[#FF424D]">
 								<Heart
-									className="mr-1 h-3 w-3 fill-current"
+									className="mr-1 size-3 fill-current"
 									aria-hidden="true"
 								/>
 								Patreon
@@ -382,7 +382,7 @@ export default async function ChroniquesListPage({
 										href={post.url ?? "https://patreon.com/RoseGriffon"}
 										target="_blank"
 										rel="noopener noreferrer"
-										className="group rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF424D] focus-visible:ring-offset-2"
+										className="group rounded-2xl focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-[#FF424D] focus-visible:ring-offset-2"
 									>
 										<article className="h-full flex flex-col overflow-hidden rounded-2xl bg-card border border-border/50 shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
 											<div className="relative aspect-video overflow-hidden bg-muted">
@@ -395,17 +395,17 @@ export default async function ChroniquesListPage({
 													/>
 												) : (
 													<div className="flex h-full w-full items-center justify-center text-muted-foreground/40">
-														<Heart className="h-12 w-12" aria-hidden="true" />
+														<Heart className="size-12" aria-hidden="true" />
 													</div>
 												)}
-												<div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
+												<div className="absolute inset-0 bg-linear-to-t from-black/50 via-transparent to-transparent" />
 												<div className="absolute top-3 left-3 flex flex-wrap gap-1.5">
 													<Badge className="border-0 bg-[#FF424D]/95 text-xs font-semibold text-white backdrop-blur-sm">
 														Patreon
 													</Badge>
 													{post.isPaid && (
 														<Badge className="gap-1 border-0 bg-[#c9a958]/95 text-xs font-semibold text-[#0c1730] backdrop-blur-sm">
-															<Lock className="h-3 w-3" aria-hidden="true" />
+															<Lock className="size-3" aria-hidden="true" />
 															Mécène
 														</Badge>
 													)}
@@ -448,9 +448,9 @@ export default async function ChroniquesListPage({
 						</div>
 					) : (
 						<div className="text-center py-16">
-							<div className="w-20 h-20 mx-auto mb-6 rounded-full bg-[#FF424D]/10 flex items-center justify-center">
+							<div className="size-20 mx-auto mb-6 rounded-full bg-[#FF424D]/10 flex items-center justify-center">
 								<Heart
-									className="w-10 h-10 text-[#FF424D]"
+									className="size-10 text-[#FF424D]"
 									aria-hidden="true"
 								/>
 							</div>
@@ -498,7 +498,7 @@ export default async function ChroniquesListPage({
 											className="object-cover group-hover:scale-105 transition-transform duration-500"
 										/>
 										{/* Gradient overlay */}
-										<div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
+										<div className="absolute inset-0 bg-linear-to-t from-black/50 via-transparent to-transparent" />
 
 										{/* Catégorie badge */}
 										{article.category && (
@@ -550,7 +550,7 @@ export default async function ChroniquesListPage({
 									</div>
 
 									{/* Hover indicator */}
-									<div className="h-0.5 bg-gradient-to-r from-[#a14b3f] to-[#344E8C] transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left" />
+									<div className="h-0.5 bg-linear-to-r from-[#a14b3f] to-[#344E8C] transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left" />
 								</article>
 							</Link>
 						))}
@@ -561,8 +561,8 @@ export default async function ChroniquesListPage({
 						className="text-center py-16 animate-in fade-in slide-in-from-bottom-4 duration-500"
 						style={{ animationDelay: "200ms" }}
 					>
-						<div className="w-20 h-20 mx-auto mb-6 rounded-full bg-muted/50 flex items-center justify-center">
-							<Newspaper className="w-10 h-10 text-muted-foreground/50" />
+						<div className="size-20 mx-auto mb-6 rounded-full bg-muted/50 flex items-center justify-center">
+							<Newspaper className="size-10 text-muted-foreground/50" />
 						</div>
 						<h2 className="text-2xl font-bold text-foreground mb-2">
 							Aucune chronique trouvée
@@ -600,11 +600,11 @@ export default async function ChroniquesListPage({
 									href={buildPageUrl(page - 1)}
 									aria-label="Page précédente"
 								>
-									<ChevronLeft className="w-4 h-4" />
+									<ChevronLeft className="size-4" />
 								</Link>
 							) : (
 								<span>
-									<ChevronLeft className="w-4 h-4" />
+									<ChevronLeft className="size-4" />
 								</span>
 							)}
 						</Button>
@@ -632,9 +632,9 @@ export default async function ChroniquesListPage({
 												variant={p === page ? "default" : "outline"}
 												size="icon"
 												asChild={p !== page}
-												className={`rounded-full w-10 h-10 ${
+												className={`rounded-full size-10 ${
 													p === page
-														? "bg-gradient-to-r from-[#a14b3f] to-[#344E8C] border-0"
+														? "bg-linear-to-r from-[#a14b3f] to-[#344E8C] border-0"
 														: ""
 												}`}
 											>
@@ -661,11 +661,11 @@ export default async function ChroniquesListPage({
 						>
 							{page < meta.totalPages ? (
 								<Link href={buildPageUrl(page + 1)} aria-label="Page suivante">
-									<ChevronRight className="w-4 h-4" />
+									<ChevronRight className="size-4" />
 								</Link>
 							) : (
 								<span>
-									<ChevronRight className="w-4 h-4" />
+									<ChevronRight className="size-4" />
 								</span>
 							)}
 						</Button>

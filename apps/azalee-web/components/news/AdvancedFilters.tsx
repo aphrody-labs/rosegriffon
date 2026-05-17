@@ -174,7 +174,7 @@ export function AdvancedFilters({
                 <select
                   value={category}
                   onChange={(e) => setCategory(e.target.value)}
-                  className="w-full appearance-none pl-8 pr-8 py-2 rounded-xl bg-surface-container border border-outline-variant/30 text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/40"
+                  className="w-full appearance-none pl-8 pr-8 py-2 rounded-xl bg-surface-container border border-outline-variant/30 text-sm text-on-surface focus:outline-hidden focus:ring-2 focus:ring-primary/40"
                 >
                   {ALL_CATEGORIES.map((c) => (
                     <option key={c.value} value={c.value}>
@@ -195,7 +195,7 @@ export function AdvancedFilters({
                 <select
                   value={sort}
                   onChange={(e) => setSort(e.target.value)}
-                  className="w-full appearance-none px-3 pr-8 py-2 rounded-xl bg-surface-container border border-outline-variant/30 text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/40"
+                  className="w-full appearance-none px-3 pr-8 py-2 rounded-xl bg-surface-container border border-outline-variant/30 text-sm text-on-surface focus:outline-hidden focus:ring-2 focus:ring-primary/40"
                 >
                   {SORT_OPTIONS.map((o) => (
                     <option key={o.value} value={o.value}>

@@ -56,13 +56,13 @@ export default function NotFound() {
           onClick={() => router.back()}
           className="gap-2 border-input hover:bg-accent hover:text-accent-foreground"
         >
-          <ArrowLeft className="h-4 w-4" />
+          <ArrowLeft className="size-4" />
           Page précédente
         </Button>
 
         <Link href="/">
           <Button className="gap-2 bg-[#a14b3f] text-white hover:bg-[#8a3e34]">
-            <Home className="h-4 w-4" />
+            <Home className="size-4" />
             Retour au vestiaire
             <RgEmote name="gaelle-salut" size={20} />
           </Button>

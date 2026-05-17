@@ -608,7 +608,7 @@ export function TeamBuilder({
 								onChange={(e) => setTeamName(e.target.value)}
 								placeholder="Nom de l'équipe..."
 								aria-label="Nom de l'équipe"
-								className="w-full bg-transparent font-[BradBunR] text-2xl sm:text-3xl md:text-4xl text-on-surface tracking-wide border-none focus:outline-none placeholder:text-on-surface-variant/30"
+								className="w-full bg-transparent font-[BradBunR] text-2xl sm:text-3xl md:text-4xl text-on-surface tracking-wide border-none focus:outline-hidden placeholder:text-on-surface-variant/30"
 							/>
 						</div>
 						{isAuthenticated && (

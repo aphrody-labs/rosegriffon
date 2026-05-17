@@ -169,7 +169,7 @@ export function NewsFilters({
 						value={searchValue}
 						onChange={(e) => handleSearch(e.target.value)}
 						placeholder="Rechercher  /  pour focus"
-						className="h-12 w-full rounded-full border border-outline-variant/50 bg-surface-container-low pr-10 pl-10 text-on-surface text-sm placeholder:text-on-surface-variant/50 transition-all focus:border-primary/50 focus:outline-none focus:ring-2 focus:ring-primary/30"
+						className="h-12 w-full rounded-full border border-outline-variant/50 bg-surface-container-low pr-10 pl-10 text-on-surface text-sm placeholder:text-on-surface-variant/50 transition-all focus:border-primary/50 focus:outline-hidden focus:ring-2 focus:ring-primary/30"
 					/>
 					{searchValue && (
 						<button

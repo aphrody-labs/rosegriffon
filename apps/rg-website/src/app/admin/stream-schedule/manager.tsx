@@ -167,7 +167,7 @@ export function StreamScheduleManager({ initialSchedules }: StreamScheduleManage
   return (
     <div className="space-y-6">
       <Alert>
-        <Calendar className="h-4 w-4" />
+        <Calendar className="size-4" />
         <AlertTitle>Synchronisation Google Calendar</AlertTitle>
         <AlertDescription className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <span>
@@ -182,7 +182,7 @@ export function StreamScheduleManager({ initialSchedules }: StreamScheduleManage
             size="sm"
             className="shrink-0"
           >
-            <RefreshCw className={`mr-2 h-4 w-4 ${syncing ? "animate-spin" : ""}`} />
+            <RefreshCw className={`mr-2 size-4 ${syncing ? "animate-spin" : ""}`} />
             {syncing ? "Synchro..." : "Forcer la synchro"}
           </Button>
         </AlertDescription>
@@ -191,7 +191,7 @@ export function StreamScheduleManager({ initialSchedules }: StreamScheduleManage
       {/* Formulaire */}
       <AdminCard
         title={editingId ? "Modifier un horaire" : "Ajouter un nouvel horaire"}
-        icon={editingId ? <Edit2 className="h-5 w-5" /> : <Plus className="h-5 w-5" />}
+        icon={editingId ? <Edit2 className="size-5" /> : <Plus className="size-5" />}
       >
         <form onSubmit={handleAddOrUpdate} className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
@@ -305,7 +305,7 @@ export function StreamScheduleManager({ initialSchedules }: StreamScheduleManage
       {/* Liste des horaires */}
       <AdminCard
         title={`Horaires existants (${schedules.length})`}
-        icon={<Calendar className="h-5 w-5" />}
+        icon={<Calendar className="size-5" />}
       >
         <div className="space-y-2">
           {schedules.length === 0 ? (
@@ -332,10 +332,10 @@ export function StreamScheduleManager({ initialSchedules }: StreamScheduleManage
                 </div>
                 <div className="flex gap-2">
                   <Button size="sm" variant="outline" onClick={() => handleEdit(schedule)}>
-                    <Edit2 className="h-4 w-4" />
+                    <Edit2 className="size-4" />
                   </Button>
                   <Button size="sm" variant="destructive" onClick={() => handleDelete(schedule.id)}>
-                    <Trash2 className="h-4 w-4" />
+                    <Trash2 className="size-4" />
                   </Button>
                 </div>
               </div>

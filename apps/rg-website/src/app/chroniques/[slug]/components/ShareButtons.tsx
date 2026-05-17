@@ -62,7 +62,7 @@ export function ShareButtons({ title, slug }: ShareButtonsProps) {
         onClick={handleShare}
         className="hover:bg-primary/5 hover:text-primary transition-colors"
       >
-        <Share2 className="w-4 h-4 mr-2" />
+        <Share2 className="size-4 mr-2" />
         Partager
       </Button>
       <Button
@@ -71,7 +71,7 @@ export function ShareButtons({ title, slug }: ShareButtonsProps) {
         onClick={handleTweet}
         className="hover:bg-[#1DA1F2]/10 hover:text-[#1DA1F2] transition-colors"
       >
-        <TwitterIcon className="w-4 h-4 mr-2" />
+        <TwitterIcon className="size-4 mr-2" />
         Tweeter
       </Button>
     </div>

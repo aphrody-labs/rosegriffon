@@ -97,7 +97,7 @@ export default function AdminSidebar({
 								)}
 							>
 								<div className="flex items-center gap-3">
-									<Icon className="h-4 w-4 flex-shrink-0" />
+									<Icon className="size-4 shrink-0" />
 									<span>{item.title}</span>
 								</div>
 								<ChevronDown
@@ -118,7 +118,7 @@ export default function AdminSidebar({
 										: "text-sidebar-foreground/80 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground",
 								)}
 							>
-								<Icon className="h-4 w-4 flex-shrink-0" />
+								<Icon className="size-4 shrink-0" />
 								<span className="flex-1 truncate">{item.title}</span>
 								{item.badge && (
 									<span className="rounded-full bg-primary/20 px-2 py-0.5 text-xs font-medium uppercase tracking-wide text-primary">
@@ -158,8 +158,8 @@ export default function AdminSidebar({
 			{/* Mobile Header */}
 			<div className="fixed top-0 left-0 right-0 z-30 flex h-16 items-center justify-between border-b border-sidebar-border bg-sidebar px-4 shadow-sm lg:hidden">
 				<Link href="/admin" className="flex items-center gap-2">
-					<div className="flex h-8 w-8 items-center justify-center rounded-lg bg-sidebar-foreground/15">
-						<Shield className="h-4 w-4 text-sidebar-foreground" />
+					<div className="flex size-8 items-center justify-center rounded-lg bg-sidebar-foreground/15">
+						<Shield className="size-4 text-sidebar-foreground" />
 					</div>
 					<span className="font-bold text-sidebar-foreground">Admin</span>
 				</Link>
@@ -169,8 +169,8 @@ export default function AdminSidebar({
 			<aside className="sticky top-0 hidden h-screen w-64 flex-col border-r border-sidebar-border bg-sidebar lg:flex">
 				<div className="border-b border-sidebar-border p-4">
 					<Link href="/admin" className="flex items-center gap-3">
-						<div className="flex h-9 w-9 items-center justify-center rounded-lg bg-sidebar-foreground/15">
-							<Shield className="h-4 w-4 text-sidebar-foreground" />
+						<div className="flex size-9 items-center justify-center rounded-lg bg-sidebar-foreground/15">
+							<Shield className="size-4 text-sidebar-foreground" />
 						</div>
 						<div className="min-w-0">
 							<h2 className="truncate font-semibold text-sidebar-foreground">
@@ -190,7 +190,7 @@ export default function AdminSidebar({
 						href="/dashboard"
 						className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-sidebar-foreground/80 transition-colors hover:bg-sidebar-accent/50 hover:text-sidebar-foreground"
 					>
-						<Home className="h-4 w-4" />
+						<Home className="size-4" />
 						<span>Compte personnel</span>
 					</Link>
 				</div>
@@ -207,7 +207,7 @@ export default function AdminSidebar({
 							: "text-sidebar-foreground/80",
 					)}
 				>
-					<Home className="h-5 w-5" />
+					<Home className="size-5" />
 					<span className="text-[11px] font-medium leading-none">Accueil</span>
 				</Link>
 				<Link
@@ -219,7 +219,7 @@ export default function AdminSidebar({
 							: "text-sidebar-foreground/80",
 					)}
 				>
-					<Calendar className="h-5 w-5" />
+					<Calendar className="size-5" />
 					<span className="text-[11px] font-medium leading-none">Events</span>
 				</Link>
 				<Link
@@ -231,14 +231,14 @@ export default function AdminSidebar({
 							: "text-sidebar-foreground/80",
 					)}
 				>
-					<Shield className="h-5 w-5" />
+					<Shield className="size-5" />
 					<span className="text-[11px] font-medium leading-none">Staff</span>
 				</Link>
 
 				<Drawer open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
 					<DrawerTrigger asChild>
 						<button className="flex flex-col items-center gap-1 rounded-lg p-2 text-sidebar-foreground/80 transition-colors hover:text-sidebar-foreground">
-							<Menu className="h-5 w-5" />
+							<Menu className="size-5" />
 							<span className="text-[11px] font-medium leading-none">Menu</span>
 						</button>
 					</DrawerTrigger>
@@ -255,7 +255,7 @@ export default function AdminSidebar({
 									onClick={() => setIsDrawerOpen(false)}
 									className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-foreground/80 transition-colors hover:bg-muted"
 								>
-									<Home className="h-4 w-4" />
+									<Home className="size-4" />
 									<span>Compte personnel</span>
 								</Link>
 							</div>

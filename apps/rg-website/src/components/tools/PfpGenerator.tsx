@@ -203,12 +203,12 @@ export default function PfpGenerator() {
               {previewUrl ? (
                 <div className="relative rounded-full overflow-hidden shadow-2xl border-[6px] border-background ring-4 ring-primary/20 transition-transform hover:scale-105 duration-500">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={previewUrl} alt="Aperçu" className="w-64 h-64 object-cover" />
+                  <img src={previewUrl} alt="Aperçu" className="size-64 object-cover" />
                 </div>
               ) : (
                 <div
                   onClick={triggerFileInput}
-                  className="w-64 h-64 rounded-full bg-muted/30 border-4 border-dashed border-primary/20 flex flex-col items-center justify-center text-muted-foreground gap-3 transition-all hover:bg-primary/5 hover:border-primary/50 relative overflow-hidden cursor-pointer group-hover:scale-105 duration-300"
+                  className="size-64 rounded-full bg-muted/30 border-4 border-dashed border-primary/20 flex flex-col items-center justify-center text-muted-foreground gap-3 transition-all hover:bg-primary/5 hover:border-primary/50 relative overflow-hidden cursor-pointer group-hover:scale-105 duration-300"
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
@@ -217,7 +217,7 @@ export default function PfpGenerator() {
                     className="absolute inset-0 w-full h-full object-cover opacity-40 group-hover:opacity-60 transition-opacity duration-300"
                   />
                   <div className="relative z-10 flex flex-col items-center justify-center gap-2 bg-background/80 p-4 rounded-xl backdrop-blur-sm shadow-sm">
-                    <ImageIcon className="w-8 h-8 text-primary" />
+                    <ImageIcon className="size-8 text-primary" />
                     <span className="text-sm font-bold text-primary">Cliquez pour ajouter</span>
                   </div>
                 </div>
@@ -230,7 +230,7 @@ export default function PfpGenerator() {
             <div className="flex justify-center gap-4">
               <button
                 onClick={() => setSelectedOverlay("/overlay.webp")}
-                className={`relative w-16 h-16 rounded-full overflow-hidden border-2 transition-all ${
+                className={`relative size-16 rounded-full overflow-hidden border-2 transition-all ${
                   selectedOverlay === "/overlay.webp"
                     ? "border-primary ring-2 ring-primary/30 scale-110"
                     : "border-transparent opacity-70 hover:opacity-100"
@@ -241,7 +241,7 @@ export default function PfpGenerator() {
               </button>
               <button
                 onClick={() => setSelectedOverlay("/overlay2.webp")}
-                className={`relative w-16 h-16 rounded-full overflow-hidden border-2 transition-all ${
+                className={`relative size-16 rounded-full overflow-hidden border-2 transition-all ${
                   selectedOverlay === "/overlay2.webp"
                     ? "border-primary ring-2 ring-primary/30 scale-110"
                     : "border-transparent opacity-70 hover:opacity-100"
@@ -268,7 +268,7 @@ export default function PfpGenerator() {
                   size="lg"
                   className="w-full sm:w-auto min-w-[200px] font-bold shadow-lg hover:shadow-primary/25 transition-all"
                 >
-                  <ImageIcon className="mr-2 h-5 w-5" />
+                  <ImageIcon className="mr-2 size-5" />
                   Choisir une image
                 </Button>
               ) : (
@@ -294,7 +294,7 @@ export default function PfpGenerator() {
                         "Mise à jour..."
                       ) : (
                         <>
-                          <UserIcon className="mr-2 h-5 w-5" />
+                          <UserIcon className="mr-2 size-5" />
                           Mettre en profil
                         </>
                       )}
@@ -311,7 +311,7 @@ export default function PfpGenerator() {
                       "Génération..."
                     ) : (
                       <>
-                        <Download className="mr-2 h-5 w-5" />
+                        <Download className="mr-2 size-5" />
                         Télécharger
                       </>
                     )}
@@ -331,7 +331,7 @@ export default function PfpGenerator() {
               className="hover:text-primary hover:bg-primary/10 hover:border-primary/50 transition-colors"
               title="Partager sur X"
             >
-              <XIcon className="w-5 h-5" />
+              <XIcon className="size-5" />
             </Button>
             <Button
               variant="outline"
@@ -340,7 +340,7 @@ export default function PfpGenerator() {
               className="hover:text-[#5865F2] hover:bg-[#5865F2]/10 hover:border-[#5865F2]/50 transition-colors"
               title="Copier le lien pour Discord"
             >
-              <DiscordIcon className="w-5 h-5" />
+              <DiscordIcon className="size-5" />
             </Button>
             <Button
               variant="outline"
@@ -349,7 +349,7 @@ export default function PfpGenerator() {
               className="hover:text-[#E1306C] hover:bg-[#E1306C]/10 hover:border-[#E1306C]/50 transition-colors"
               title="Copier le lien pour Instagram"
             >
-              <Instagram className="w-5 h-5" />
+              <Instagram className="size-5" />
             </Button>
           </div>
         </CardFooter>

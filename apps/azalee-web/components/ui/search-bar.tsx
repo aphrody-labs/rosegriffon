@@ -39,7 +39,7 @@ const SearchBar = React.forwardRef<HTMLDivElement, SearchBarProps>(
           type="text"
           placeholder={placeholder}
           defaultValue={defaultValue}
-          className="flex-1 bg-transparent py-2 text-base outline-none placeholder:text-on-surface-variant"
+          className="flex-1 bg-transparent py-2 text-base outline-hidden placeholder:text-on-surface-variant"
           onChange={handleChange}
           onKeyDown={handleKeyDown}
         />

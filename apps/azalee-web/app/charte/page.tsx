@@ -121,7 +121,7 @@ export default function CharteEngagementsPage() {
           <CardContent>
             <div className="flex flex-col space-y-6">
               <div className="flex items-start gap-3">
-                <div className="min-w-6 h-6 rounded-full bg-error flex items-center justify-center text-on-error font-bold text-sm">
+                <div className="min-size-6 rounded-full bg-error flex items-center justify-center text-on-error font-bold text-sm">
                   1
                 </div>
                 <p className="type-body-large text-on-surface-variant">
@@ -131,7 +131,7 @@ export default function CharteEngagementsPage() {
               </div>
 
               <div className="flex items-start gap-3">
-                <div className="min-w-6 h-6 rounded-full bg-error flex items-center justify-center text-on-error font-bold text-sm">
+                <div className="min-size-6 rounded-full bg-error flex items-center justify-center text-on-error font-bold text-sm">
                   2
                 </div>
                 <p className="type-body-large text-on-surface-variant">
@@ -143,7 +143,7 @@ export default function CharteEngagementsPage() {
               </div>
 
               <div className="flex items-start gap-3">
-                <div className="min-w-6 h-6 rounded-full bg-error flex items-center justify-center text-on-error font-bold text-sm">
+                <div className="min-size-6 rounded-full bg-error flex items-center justify-center text-on-error font-bold text-sm">
                   3
                 </div>
                 <p className="type-body-large text-on-surface-variant">
@@ -154,7 +154,7 @@ export default function CharteEngagementsPage() {
               </div>
 
               <div className="flex items-start gap-3">
-                <div className="min-w-6 h-6 rounded-full bg-error flex items-center justify-center text-on-error font-bold text-sm">
+                <div className="min-size-6 rounded-full bg-error flex items-center justify-center text-on-error font-bold text-sm">
                   4
                 </div>
                 <p className="type-body-large text-on-surface-variant">

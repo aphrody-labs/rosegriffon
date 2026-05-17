@@ -40,7 +40,7 @@ const columns: ColumnDef<User>[] = [
 				onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
 			>
 				Email
-				<ArrowUpDown className="ml-2 h-4 w-4" />
+				<ArrowUpDown className="ml-2 size-4" />
 			</Button>
 		),
 		cell: ({ row }) =>
@@ -76,7 +76,7 @@ const columns: ColumnDef<User>[] = [
 				onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
 			>
 				Date
-				<ArrowUpDown className="ml-2 h-4 w-4" />
+				<ArrowUpDown className="ml-2 size-4" />
 			</Button>
 		),
 		cell: ({ row }) => {
@@ -163,7 +163,7 @@ export function UsersTable({ users: initialUsers }: UsersTableProps) {
 		<div className="space-y-4">
 			<div className="flex items-center gap-2">
 				<div className="relative flex-1">
-					<Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+					<Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
 					<Input
 						placeholder="Rechercher par email..."
 						defaultValue={searchParams?.get("query")?.toString()}

@@ -128,7 +128,7 @@ export function RgtvScheduleClient({ scheduleByDay, error }: RgtvScheduleClientP
         }}
       />
       <div
-        className="absolute -top-20 -right-20 w-40 h-40 rounded-full blur-3xl group-hover:opacity-30 transition-all duration-500 opacity-10"
+        className="absolute -top-20 -right-20 size-40 rounded-full blur-3xl group-hover:opacity-30 transition-all duration-500 opacity-10"
         style={{ backgroundColor: "#d63901" }}
       />
 
@@ -147,7 +147,7 @@ export function RgtvScheduleClient({ scheduleByDay, error }: RgtvScheduleClientP
             alt="RGTV"
             width={24}
             height={24}
-            className="h-6 w-6 shrink-0"
+            className="size-6 shrink-0"
           />
           <span>Planning des Streams</span>
         </CardTitle>
@@ -156,7 +156,7 @@ export function RgtvScheduleClient({ scheduleByDay, error }: RgtvScheduleClientP
         {error ? (
           <div className="flex flex-col items-center justify-center py-12 gap-4">
             <div className="p-4 bg-red-500/20 rounded-lg">
-              <AlertCircle className="h-10 w-10 text-red-400 mx-auto mb-2" />
+              <AlertCircle className="size-10 text-red-400 mx-auto mb-2" />
             </div>
             <div className="text-center">
               <p className="text-red-300 text-sm font-semibold mb-1">
@@ -176,7 +176,7 @@ export function RgtvScheduleClient({ scheduleByDay, error }: RgtvScheduleClientP
             />
             <div className="flex flex-col items-center justify-center py-12 gap-4 relative z-10">
               <div className="p-4 bg-purple-500/20 rounded-lg">
-                <Zap className="h-10 w-10 text-purple-400 mx-auto mb-2" />
+                <Zap className="size-10 text-purple-400 mx-auto mb-2" />
               </div>
               <div className="text-center">
                 <p className="text-purple-300 text-sm font-semibold mb-1">Planning à venir !</p>
@@ -209,7 +209,7 @@ export function RgtvScheduleClient({ scheduleByDay, error }: RgtvScheduleClientP
                     className="flex items-center gap-3 mb-3 pb-2 border-b group-hover/day:border-opacity-60 transition-colors"
                     style={{ borderColor: "#345182" + "50" }}
                   >
-                    <CalendarDays className="h-5 w-5 shrink-0" style={{ color: "#d63901" }} />
+                    <CalendarDays className="size-5 shrink-0" style={{ color: "#d63901" }} />
                     <div className="flex-1 min-w-0">
                       <h3
                         className="font-bold text-lg truncate"
@@ -233,7 +233,7 @@ export function RgtvScheduleClient({ scheduleByDay, error }: RgtvScheduleClientP
                       </span>
                       {totalMinutesStreamed > 0 && (
                         <span className="flex items-center gap-1 justify-end mt-0.5">
-                          <Clock className="h-3 w-3" />
+                          <Clock className="size-3" />
                           {hoursStreamed}h
                         </span>
                       )}

@@ -183,11 +183,11 @@ export function MediaManager({ initialFiles }: MediaManagerProps) {
             onClick={() => setCurrentPath("")}
             disabled={!currentPath}
           >
-            <Home className="w-4 h-4" />
+            <Home className="size-4" />
           </Button>
           {breadcrumbs.map((part, index) => (
             <div key={index} className="flex items-center gap-1">
-              <ChevronRight className="w-4 h-4 text-muted-foreground" />
+              <ChevronRight className="size-4 text-muted-foreground" />
               <Button
                 variant="ghost"
                 size="sm"
@@ -204,7 +204,7 @@ export function MediaManager({ initialFiles }: MediaManagerProps) {
 
         <div className="flex items-center gap-2 w-full sm:w-auto">
           <div className="relative flex-1 sm:w-64">
-            <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+            <Search className="absolute left-2 top-2.5 size-4 text-muted-foreground" />
             <Input
               placeholder="Rechercher des fichiers..."
               value={searchQuery}
@@ -219,7 +219,7 @@ export function MediaManager({ initialFiles }: MediaManagerProps) {
               onClick={() => setViewMode("grid")}
               className="rounded-r-none"
             >
-              <LayoutGrid className="w-4 h-4" />
+              <LayoutGrid className="size-4" />
             </Button>
             <Button
               variant={viewMode === "list" ? "secondary" : "ghost"}
@@ -227,7 +227,7 @@ export function MediaManager({ initialFiles }: MediaManagerProps) {
               onClick={() => setViewMode("list")}
               className="rounded-l-none"
             >
-              <ListIcon className="w-4 h-4" />
+              <ListIcon className="size-4" />
             </Button>
           </div>
         </div>
@@ -240,7 +240,7 @@ export function MediaManager({ initialFiles }: MediaManagerProps) {
               className="cursor-pointer hover:bg-accent/50 transition-colors flex flex-col items-center justify-center p-6 aspect-square"
               onClick={navigateUp}
             >
-              <Folder className="w-12 h-12 text-blue-300 mb-2" />
+              <Folder className="size-12 text-blue-300 mb-2" />
               <span className="text-sm font-medium">..</span>
             </Card>
           )}
@@ -250,7 +250,7 @@ export function MediaManager({ initialFiles }: MediaManagerProps) {
               className="cursor-pointer hover:bg-accent/50 transition-colors flex flex-col items-center justify-center p-6 aspect-square"
               onClick={() => navigateToFolder(folder)}
             >
-              <Folder className="w-12 h-12 text-blue-500 mb-2" />
+              <Folder className="size-12 text-blue-500 mb-2" />
               <span className="text-sm font-medium truncate w-full text-center">{folder}</span>
             </Card>
           ))}
@@ -265,7 +265,7 @@ export function MediaManager({ initialFiles }: MediaManagerProps) {
                       variant="secondary"
                       onClick={() => copyToClipboard(file.name)}
                     >
-                      <Copy className="w-4 h-4" />
+                      <Copy className="size-4" />
                     </Button>
                     <Button
                       size="icon"
@@ -274,9 +274,9 @@ export function MediaManager({ initialFiles }: MediaManagerProps) {
                       disabled={deletingId === file.id}
                     >
                       {deletingId === file.id ? (
-                        <Loader2 className="w-4 h-4 animate-spin" />
+                        <Loader2 className="size-4 animate-spin" />
                       ) : (
-                        <Trash2 className="w-4 h-4" />
+                        <Trash2 className="size-4" />
                       )}
                     </Button>
                   </div>
@@ -307,7 +307,7 @@ export function MediaManager({ initialFiles }: MediaManagerProps) {
               {currentPath && (
                 <TableRow className="cursor-pointer hover:bg-muted/50" onClick={navigateUp}>
                   <TableCell>
-                    <Folder className="w-4 h-4 text-blue-300" />
+                    <Folder className="size-4 text-blue-300" />
                   </TableCell>
                   <TableCell colSpan={5}>..</TableCell>
                 </TableRow>
@@ -319,7 +319,7 @@ export function MediaManager({ initialFiles }: MediaManagerProps) {
                   onClick={() => navigateToFolder(folder)}
                 >
                   <TableCell>
-                    <Folder className="w-4 h-4 text-blue-500" />
+                    <Folder className="size-4 text-blue-500" />
                   </TableCell>
                   <TableCell className="font-medium">{folder}</TableCell>
                   <TableCell>-</TableCell>
@@ -331,7 +331,7 @@ export function MediaManager({ initialFiles }: MediaManagerProps) {
               {currentFiles.map((file) => (
                 <TableRow key={file.id}>
                   <TableCell>
-                    <div className="w-8 h-8 relative rounded overflow-hidden bg-muted">
+                    <div className="size-8 relative rounded overflow-hidden bg-muted">
                       <StorageImage src={file.name} alt={file.name} fill className="object-cover" />
                     </div>
                   </TableCell>
@@ -348,7 +348,7 @@ export function MediaManager({ initialFiles }: MediaManagerProps) {
                         variant="ghost"
                         onClick={() => copyToClipboard(file.name)}
                       >
-                        <Copy className="w-4 h-4" />
+                        <Copy className="size-4" />
                       </Button>
                       <Button
                         size="icon"
@@ -358,9 +358,9 @@ export function MediaManager({ initialFiles }: MediaManagerProps) {
                         disabled={deletingId === file.id}
                       >
                         {deletingId === file.id ? (
-                          <Loader2 className="w-4 h-4 animate-spin" />
+                          <Loader2 className="size-4 animate-spin" />
                         ) : (
-                          <Trash2 className="w-4 h-4" />
+                          <Trash2 className="size-4" />
                         )}
                       </Button>
                     </div>

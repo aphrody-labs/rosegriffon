@@ -35,7 +35,7 @@ function TeamSectionSkeleton() {
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 sm:gap-6 lg:gap-8 mt-6">
         {[...Array(6)].map((_, index) => (
           <div key={index} className="flex flex-col items-center text-center gap-4 p-4 sm:p-6">
-            <Skeleton className="w-28 h-28 sm:w-36 sm:h-36 lg:w-40 lg:h-40 rounded-full bg-linear-to-br from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-800" />
+            <Skeleton className="size-28 sm:w-36 sm:h-36 lg:w-40 lg:h-40 rounded-full bg-linear-to-br from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-800" />
             <div className="space-y-2 w-full">
               <Skeleton className="h-5 sm:h-6 w-3/4 mx-auto bg-gray-200 dark:bg-gray-700 rounded-lg" />
               <Skeleton className="h-4 w-1/2 mx-auto bg-gray-200 dark:bg-gray-700 rounded-full" />

@@ -12,7 +12,7 @@ export default function StaffLoading() {
         {[...Array(6)].map((_, i) => (
           <div key={i} className="rounded-xl border p-4 space-y-4">
             <div className="flex items-center gap-4">
-              <Skeleton className="h-12 w-12 rounded-full" />
+              <Skeleton className="size-12 rounded-full" />
               <div className="space-y-2">
                 <Skeleton className="h-4 w-32" />
                 <Skeleton className="h-3 w-24" />

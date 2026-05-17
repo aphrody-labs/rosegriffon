@@ -81,7 +81,7 @@ function WikiGrid() {
             {/* Gradient accent */}
             <div
               className={cn(
-                "absolute inset-0 bg-gradient-to-br opacity-0 group-hover:opacity-100 transition-opacity",
+                "absolute inset-0 bg-linear-to-br opacity-0 group-hover:opacity-100 transition-opacity",
                 section.accent,
               )}
             />
@@ -212,7 +212,7 @@ export function SearchClient({ defaultQuery }: { defaultQuery?: string }) {
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Rechercher sur Azalée..."
             autoComplete="off"
-            className="flex-1 bg-transparent outline-none type-body-large text-on-surface placeholder:text-on-surface-variant/50 min-w-0"
+            className="flex-1 bg-transparent outline-hidden type-body-large text-on-surface placeholder:text-on-surface-variant/50 min-w-0"
           />
 
           {isSearching && (

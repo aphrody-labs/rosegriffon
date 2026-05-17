@@ -245,7 +245,7 @@ export function CharacterTable({ characters, startIndex = 0 }: CharacterTablePro
                     href={`/chara/${(character as any).baseSlug || character.slug || character.charaParamId}`}
                     className="flex items-center gap-3 group"
                   >
-                    <div className="relative w-12 h-12 rounded-lg overflow-hidden bg-surface-container-highest flex-shrink-0 ring-1 ring-outline-variant/30">
+                    <div className="relative size-12 rounded-lg overflow-hidden bg-surface-container-highest shrink-0 ring-1 ring-outline-variant/30">
                       <Image
                         src={getCharacterImageUrl(character.internalCode)}
                         alt={name}
@@ -291,7 +291,7 @@ export function CharacterTable({ characters, startIndex = 0 }: CharacterTablePro
                 <TableCell className="text-center">
                   <div className="flex flex-col items-center gap-1">
                     {positionImage ? (
-                      <div className="relative w-6 h-6" title={positionFr}>
+                      <div className="relative size-6" title={positionFr}>
                         <Image
                           src={positionImage}
                           alt={positionFr}
@@ -313,7 +313,7 @@ export function CharacterTable({ characters, startIndex = 0 }: CharacterTablePro
                     )}
 
                     {subPositionImage && (
-                      <div className="relative w-4 h-4 opacity-70" title={subPos || ""}>
+                      <div className="relative size-4 opacity-70" title={subPos || ""}>
                         <Image
                           src={subPositionImage}
                           alt={subPos || ""}
@@ -352,7 +352,7 @@ export function CharacterTable({ characters, startIndex = 0 }: CharacterTablePro
                             alt=""
                             width={20}
                             height={20}
-                            className="size-5 object-contain flex-shrink-0"
+                            className="size-5 object-contain shrink-0"
                             unoptimized
                           />
                         )}

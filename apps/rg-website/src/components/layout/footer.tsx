@@ -12,7 +12,7 @@ export default function Footer() {
             <h3 className="text-sm font-semibold text-foreground mb-1">L'association</h3>
             <Link
               href={"/charte-engagements"}
-              className="text-sm text-muted-foreground hover:text-foreground hover:underline transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-sm"
+              className="text-sm text-muted-foreground hover:text-foreground hover:underline transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-sm"
             >
               Charte et engagements
             </Link>
@@ -20,7 +20,7 @@ export default function Footer() {
               href="https://www.journal-officiel.gouv.fr/pages/associations-detail-annonce/?q.id=id:202400200922"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-sm text-muted-foreground hover:text-foreground hover:underline transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-sm"
+              className="text-sm text-muted-foreground hover:text-foreground hover:underline transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-sm"
             >
               Numéro RNA
             </Link>
@@ -30,13 +30,13 @@ export default function Footer() {
             <h3 className="text-sm font-semibold text-foreground mb-1">Contact</h3>
             <Link
               href={"/a-propos/contact"}
-              className="text-sm text-muted-foreground hover:text-foreground hover:underline transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-sm"
+              className="text-sm text-muted-foreground hover:text-foreground hover:underline transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-sm"
             >
               Nous contacter
             </Link>
             <Link
               href={"/a-propos/soutenir"}
-              className="text-sm text-muted-foreground hover:text-foreground hover:underline transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-sm"
+              className="text-sm text-muted-foreground hover:text-foreground hover:underline transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-sm"
             >
               Nous Soutenir
             </Link>
@@ -46,19 +46,19 @@ export default function Footer() {
             <h3 className="text-sm font-semibold text-foreground mb-1">Informations légales</h3>
             <Link
               href={"/mentions-legales"}
-              className="text-sm text-muted-foreground hover:text-foreground hover:underline transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-sm"
+              className="text-sm text-muted-foreground hover:text-foreground hover:underline transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-sm"
             >
               Mentions légales
             </Link>
             <Link
               href={"/legal/cgu"}
-              className="text-sm text-muted-foreground hover:text-foreground hover:underline transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-sm"
+              className="text-sm text-muted-foreground hover:text-foreground hover:underline transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-sm"
             >
               Conditions d'utilisation
             </Link>
             <Link
               href={"/legal/confidentialite"}
-              className="text-sm text-muted-foreground hover:text-foreground hover:underline transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-sm"
+              className="text-sm text-muted-foreground hover:text-foreground hover:underline transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-sm"
             >
               Politique de confidentialité
             </Link>
@@ -71,7 +71,7 @@ export default function Footer() {
                 href="https://x.com/rose_griffon"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="group relative p-3 rounded-full bg-muted hover:bg-black transition-all duration-300 hover:scale-110 hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                className="group relative p-3 rounded-full bg-muted hover:bg-black transition-all duration-300 hover:scale-110 hover:shadow-lg focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                 aria-label="X (Twitter) Rose Griffon"
               >
                 <TwitterIcon
@@ -84,7 +84,7 @@ export default function Footer() {
                 href="https://discord.gg/TYzQvbByv4"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="group relative p-3 rounded-full bg-muted hover:bg-[#5865F2] transition-all duration-300 hover:scale-110 hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                className="group relative p-3 rounded-full bg-muted hover:bg-[#5865F2] transition-all duration-300 hover:scale-110 hover:shadow-lg focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                 aria-label="Discord Rose Griffon"
               >
                 <DiscordIcon
@@ -97,7 +97,7 @@ export default function Footer() {
                 href="https://twitch.tv/rose_griffontv"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="group relative p-3 rounded-full bg-muted hover:bg-[#9146FF] transition-all duration-300 hover:scale-110 hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                className="group relative p-3 rounded-full bg-muted hover:bg-[#9146FF] transition-all duration-300 hover:scale-110 hover:shadow-lg focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                 aria-label="Twitch RoseGriffonTV"
               >
                 <svg
@@ -114,7 +114,7 @@ export default function Footer() {
                 href="https://www.youtube.com/@RoseGriffon"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="group relative p-3 rounded-full bg-muted hover:bg-[#FF0000] transition-all duration-300 hover:scale-110 hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                className="group relative p-3 rounded-full bg-muted hover:bg-[#FF0000] transition-all duration-300 hover:scale-110 hover:shadow-lg focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                 aria-label="YouTube Rose Griffon"
               >
                 <svg
@@ -131,7 +131,7 @@ export default function Footer() {
                 href="https://www.instagram.com/rose_griffonfr"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="group relative p-3 rounded-full bg-muted hover:bg-linear-to-tr hover:from-[#FD5949] hover:via-[#D6249F] hover:to-[#285AEB] transition-all duration-300 hover:scale-110 hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                className="group relative p-3 rounded-full bg-muted hover:bg-linear-to-tr hover:from-[#FD5949] hover:via-[#D6249F] hover:to-[#285AEB] transition-all duration-300 hover:scale-110 hover:shadow-lg focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                 aria-label="Instagram Rose Griffon France"
               >
                 <svg

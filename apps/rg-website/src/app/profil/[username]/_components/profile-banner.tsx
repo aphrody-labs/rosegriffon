@@ -3,7 +3,7 @@ import { StorageImage } from "@/components/ui/storage-image";
 export function ProfileBanner({ src }: { src: string | null }) {
 	return (
 		<div
-			className="relative h-44 w-full overflow-hidden bg-gradient-to-r from-[#a14b3f] via-[#c47867] to-[#d16854] sm:h-56 md:h-64"
+			className="relative h-44 w-full overflow-hidden bg-linear-to-r from-[#a14b3f] via-[#c47867] to-[#d16854] sm:h-56 md:h-64"
 			aria-hidden="true"
 		>
 			{src ? (
@@ -14,7 +14,7 @@ export function ProfileBanner({ src }: { src: string | null }) {
 					style={{ backgroundImage: "url(/patterns/grid.svg)" }}
 				/>
 			)}
-			<div className="absolute inset-0 bg-gradient-to-t from-background/80 to-transparent" />
+			<div className="absolute inset-0 bg-linear-to-t from-background/80 to-transparent" />
 		</div>
 	);
 }

@@ -366,7 +366,7 @@ export function MiniStatHeptagon({
       width={size}
       height={size}
       viewBox={`0 0 ${size} ${size}`}
-      className={cn("flex-shrink-0", className)}
+      className={cn("shrink-0", className)}
     >
       <defs>
         <radialGradient id="miniBg" cx="50%" cy="50%" r="50%">

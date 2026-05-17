@@ -34,7 +34,7 @@ export function UserMenu() {
   if (isLoading) {
     return (
       <Button variant="ghost" size="sm" disabled>
-        <Loader2 className="h-5 w-5 animate-spin" />
+        <Loader2 className="size-5 animate-spin" />
       </Button>
     );
   }
@@ -75,7 +75,7 @@ export function UserMenu() {
         aria-haspopup="true"
         aria-expanded={isOpen}
       >
-        <Avatar className="h-8 w-8">
+        <Avatar className="size-8">
           <AvatarImage src={`https://avatar.vercel.sh/${user.id}`} />
           <AvatarFallback className="bg-rose-500 text-white text-xs font-semibold">
             {initials}
@@ -85,7 +85,7 @@ export function UserMenu() {
           {displayName}
         </span>
         <ChevronDown
-          className={cn("h-4 w-4 text-gray-500 transition-transform", isOpen && "rotate-180")}
+          className={cn("size-4 text-gray-500 transition-transform", isOpen && "rotate-180")}
         />
       </button>
 
@@ -107,7 +107,7 @@ export function UserMenu() {
               className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
               onClick={() => setIsOpen(false)}
             >
-              <User className="h-4 w-4" />
+              <User className="size-4" />
               Mon profil
             </Link>
 
@@ -116,7 +116,7 @@ export function UserMenu() {
               className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
               onClick={() => setIsOpen(false)}
             >
-              <Settings className="h-4 w-4" />
+              <Settings className="size-4" />
               Paramètres
             </Link>
 
@@ -128,9 +128,9 @@ export function UserMenu() {
               className="w-full flex items-center gap-3 px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950 transition-colors disabled:opacity-50"
             >
               {isLoggingOut ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
+                <Loader2 className="size-4 animate-spin" />
               ) : (
-                <LogOut className="h-4 w-4" />
+                <LogOut className="size-4" />
               )}
               {isLoggingOut ? "Déconnexion..." : "Se déconnecter"}
             </button>

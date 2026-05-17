@@ -289,7 +289,7 @@ function DesktopTopBar() {
 
         {title && (
           <div className="flex items-center gap-2 ml-2 animate-in fade-in slide-in-from-left-2 duration-300">
-            <span className="w-1 h-1 rounded-full bg-outline-variant/40" />
+            <span className="size-1 rounded-full bg-outline-variant/40" />
             <span className="font-bold text-sm text-on-surface-variant tracking-wide opacity-80 mt-0.5">
               {title}
             </span>

@@ -28,7 +28,7 @@ export function PatreonOAuthConfig({ redirectUri, clientIdMasked }: Props) {
 		<Card>
 			<CardContent className="p-6">
 				<h2 className="mb-4 flex items-center gap-2 font-semibold text-foreground">
-					<Settings className="h-4 w-4" />
+					<Settings className="size-4" />
 					Configuration OAuth Patreon
 				</h2>
 				<p className="mb-4 text-sm text-muted-foreground">
@@ -89,7 +89,7 @@ export function PatreonOAuthConfig({ redirectUri, clientIdMasked }: Props) {
 							target="_blank"
 							rel="noopener noreferrer"
 						>
-							<ExternalLink className="mr-2 h-4 w-4" />
+							<ExternalLink className="mr-2 size-4" />
 							Ouvrir le portail Patreon Developer
 						</a>
 					</Button>

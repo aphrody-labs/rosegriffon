@@ -133,7 +133,7 @@ function DraggableCharaCard({
           className="object-cover"
           unoptimized
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
+        <div className="absolute inset-0 bg-linear-to-t from-black/80 via-transparent to-transparent" />
 
         {/* Rarity */}
         <div className="absolute top-0.5 left-0.5">
@@ -244,7 +244,7 @@ export function CharacterPicker({
             }}
             placeholder="Rechercher un joueur..."
             aria-label="Rechercher un joueur par nom"
-            className="w-full h-11 pl-10 pr-3 rounded-2xl bg-surface-container-high border-none text-sm text-on-surface placeholder:text-on-surface-variant/50 focus:outline-none focus:ring-2 focus:ring-primary/50"
+            className="w-full h-11 pl-10 pr-3 rounded-2xl bg-surface-container-high border-none text-sm text-on-surface placeholder:text-on-surface-variant/50 focus:outline-hidden focus:ring-2 focus:ring-primary/50"
           />
         </div>
       </div>
@@ -397,7 +397,7 @@ export function CharacterPickerOverlay({ char }: { char: PickerCharacter }) {
   const roleLabel = ROLE_LABELS[char.position] || char.position;
 
   return (
-    <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-lg overflow-hidden bg-neutral-900 shadow-2xl ring-2 ring-primary pointer-events-none">
+    <div className="size-16 sm:w-20 sm:h-20 rounded-lg overflow-hidden bg-neutral-900 shadow-2xl ring-2 ring-primary pointer-events-none">
       <div className="relative w-full h-full">
         <SafeImage
           src={char.imageUrl}
@@ -407,7 +407,7 @@ export function CharacterPickerOverlay({ char }: { char: PickerCharacter }) {
           className="object-cover"
           unoptimized
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
+        <div className="absolute inset-0 bg-linear-to-t from-black/70 via-transparent to-transparent" />
         <span
           className="absolute top-0.5 left-0.5 text-[7px] font-black px-1 py-px rounded text-white"
           style={{ backgroundColor: roleColor }}

@@ -86,9 +86,9 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
   return (
     <div className="min-h-screen pb-20">
       {/* Cover */}
-      <div className="h-44 sm:h-56 bg-gradient-to-br from-primary/70 via-secondary/60 to-tertiary/50 relative overflow-hidden">
+      <div className="h-44 sm:h-56 bg-linear-to-br from-primary/70 via-secondary/60 to-tertiary/50 relative overflow-hidden">
         <div className="absolute inset-0 bg-[url('/grid-pattern.svg')] opacity-10" />
-        <div className="absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-surface to-transparent" />
+        <div className="absolute inset-x-0 bottom-0 h-28 bg-linear-to-t from-surface to-transparent" />
       </div>
 
       <div className="relative -mt-20 sm:-mt-24">
@@ -97,7 +97,7 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
           <div className="flex flex-col sm:flex-row items-start gap-5 sm:gap-8">
             {/* Avatar */}
             <div className="relative group shrink-0 -mt-16 sm:-mt-20">
-              <Avatar className="w-28 h-28 sm:w-36 sm:h-36 border-4 border-surface-container-lowest shadow-xl">
+              <Avatar className="size-28 sm:w-36 sm:h-36 border-4 border-surface-container-lowest shadow-xl">
                 <AvatarImage
                   src={profile.avatar_url || ""}
                   alt={profile.username || "Avatar"}
@@ -112,7 +112,7 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
                   <Button
                     size="icon"
                     variant="secondary"
-                    className="rounded-full shadow-lg h-9 w-9 border-2 border-surface-container-lowest"
+                    className="rounded-full shadow-lg size-9 border-2 border-surface-container-lowest"
                   >
                     <Edit className="h-3.5 w-3.5" />
                   </Button>
@@ -131,7 +131,7 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
                     <span
                       className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${role.color}`}
                     >
-                      <RoleIcon className="w-3 h-3" />
+                      <RoleIcon className="size-3" />
                       {role.label}
                     </span>
                   </div>
@@ -148,7 +148,7 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
                       className="flex-1 sm:flex-none rounded-full border-outline font-bold"
                     >
                       <Link href="/dashboard/settings">
-                        <Settings className="w-4 h-4 mr-2" />
+                        <Settings className="size-4 mr-2" />
                         Paramètres
                       </Link>
                     </Button>
@@ -158,7 +158,7 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
                     variant="ghost"
                     className="rounded-full text-on-surface-variant shrink-0"
                   >
-                    <Share2 className="w-5 h-5" />
+                    <Share2 className="size-5" />
                   </Button>
                 </div>
               </div>
@@ -166,14 +166,14 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
               {/* Meta */}
               <div className="flex flex-wrap items-center gap-x-5 gap-y-2 type-body-medium text-on-surface-variant">
                 <div className="flex items-center gap-2">
-                  <CalendarDays className="w-4 h-4" />A rejoint en {joinedDate}
+                  <CalendarDays className="size-4" />A rejoint en {joinedDate}
                 </div>
                 {profile.email && !isOwner
                   ? null
                   : isOwner &&
                     currentUser?.email && (
                       <div className="flex items-center gap-2">
-                        <Mail className="w-4 h-4" />
+                        <Mail className="size-4" />
                         <span className="truncate max-w-[200px]">{currentUser.email}</span>
                       </div>
                     )}

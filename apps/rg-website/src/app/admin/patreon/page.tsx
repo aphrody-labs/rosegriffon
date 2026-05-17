@@ -94,7 +94,7 @@ export default async function AdminPatreonPage() {
 	return (
 		<div className="mx-auto max-w-7xl space-y-8 px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
 			<AdminPageHeader
-				icon={<Heart className="h-5 w-5" />}
+				icon={<Heart className="size-5" />}
 				title="Patreon — Live"
 				description={
 					live
@@ -126,7 +126,7 @@ export default async function AdminPatreonPage() {
 				<Card className="border-amber-500/40 bg-amber-50/40 dark:bg-amber-950/20">
 					<CardContent className="space-y-2 p-5 text-sm">
 						<div className="flex items-center gap-2 font-semibold text-amber-700 dark:text-amber-300">
-							<AlertCircle className="h-4 w-4" />
+							<AlertCircle className="size-4" />
 							API Patreon live indisponible
 						</div>
 						<p className="text-muted-foreground">
@@ -183,7 +183,7 @@ export default async function AdminPatreonPage() {
 						<Card>
 							<CardContent className="p-6">
 								<h2 className="mb-4 flex items-center gap-2 font-semibold text-foreground">
-									<RefreshCw className="h-4 w-4" />
+									<RefreshCw className="size-4" />
 									Synchronisation API live
 								</h2>
 								<dl className="space-y-3 text-sm">

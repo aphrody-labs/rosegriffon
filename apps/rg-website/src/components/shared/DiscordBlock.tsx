@@ -91,7 +91,7 @@ export default function DiscordBlock({ children, isWidgetLeft = false }: Discord
 
     return (
       <div
-        className={`w-3 h-3 rounded-full ${
+        className={`size-3 rounded-full ${
           statusColors[status as keyof typeof statusColors]
         } absolute -bottom-0.5 -right-0.5 border-2 border-[#36393f]`}
        />
@@ -110,7 +110,7 @@ export default function DiscordBlock({ children, isWidgetLeft = false }: Discord
     if (loading) {
       return (
         <div className="w-full h-full bg-[#36393f] text-white flex flex-col items-center justify-center gap-3">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white" />
+          <div className="animate-spin rounded-full size-12 border-b-2 border-white" />
           <p className="text-sm">Chargement du widget Discord...</p>
         </div>
       );
@@ -131,7 +131,7 @@ export default function DiscordBlock({ children, isWidgetLeft = false }: Discord
             rel="noopener noreferrer"
             className="bg-[#5865F2] hover:bg-[#4752C4] text-white font-bold py-3 px-6 rounded-lg transition-colors duration-200 flex items-center gap-2"
           >
-            <DiscordIcon className="w-5 h-5" />
+            <DiscordIcon className="size-5" />
             Rejoindre le Discord
           </a>
         </div>

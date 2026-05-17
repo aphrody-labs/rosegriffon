@@ -58,7 +58,7 @@ const ImageCropperDialog = nextDynamic(
 		ssr: false,
 		loading: () => (
 			<div className="flex items-center justify-center p-4">
-				<Loader2 className="h-6 w-6 animate-spin" />
+				<Loader2 className="size-6 animate-spin" />
 			</div>
 		),
 	},
@@ -107,7 +107,7 @@ const UploadPlaceholder = ({
 					className={cn("absolute inset-0 blur-xl opacity-30", colorClass)}
 				/>
 				<ImageIcon
-					className={cn("h-16 w-16 sm:h-20 sm:w-20 relative", colorClass)}
+					className={cn("size-16 sm:h-20 sm:w-20 relative", colorClass)}
 				/>
 			</div>
 
@@ -132,7 +132,7 @@ const UploadPlaceholder = ({
 
 			<Button asChild variant="default" size="lg" className="w-full max-w-60">
 				<label className="cursor-pointer">
-					<CloudUpload className="mr-2 h-4 w-4" />
+					<CloudUpload className="mr-2 size-4" />
 					Choisir une image
 					<input
 						ref={inputRef}
@@ -178,7 +178,7 @@ const ImagePreview = ({
 					{year}
 				</Badge>
 			</div>
-			<CheckCircle2 className="h-5 w-5 text-green-500" />
+			<CheckCircle2 className="size-5 text-green-500" />
 		</div>
 
 		<div className="relative w-full aspect-4/3 rounded-lg overflow-hidden border-2 border-border bg-muted group">
@@ -195,7 +195,7 @@ const ImagePreview = ({
 		<div className="flex gap-2">
 			<Button asChild variant="outline" size="sm" className="flex-1">
 				<label className="cursor-pointer">
-					<RefreshCw className="mr-2 h-4 w-4" />
+					<RefreshCw className="mr-2 size-4" />
 					Changer
 					<input
 						ref={inputRef}
@@ -212,7 +212,7 @@ const ImagePreview = ({
 				size="sm"
 				className="flex-1"
 			>
-				<Trash2 className="mr-2 h-4 w-4" />
+				<Trash2 className="mr-2 size-4" />
 				Supprimer
 			</Button>
 		</div>
@@ -359,7 +359,7 @@ export default function NostalgieVR() {
 				<div className="container max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
 					<div className="text-center space-y-4 mb-8 sm:mb-12">
 						<div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium mb-4">
-							<Scissors className="h-4 w-4" />
+							<Scissors className="size-4" />
 							Outil de montage photo
 						</div>
 
@@ -381,7 +381,7 @@ export default function NostalgieVR() {
 						<CardContent className="pt-6">
 							<div className="flex gap-4 items-start">
 								<div className="p-2 bg-primary/10 rounded-full">
-									<Info className="h-5 w-5 text-primary mt-0.5 shrink-0" />
+									<Info className="size-5 text-primary mt-0.5 shrink-0" />
 								</div>
 								<div className="space-y-1">
 									<CardTitle className="text-base sm:text-lg">
@@ -460,12 +460,12 @@ export default function NostalgieVR() {
 						>
 							{isProcessing ? (
 								<>
-									<Loader2 className="mr-2 h-5 w-5 animate-spin" />
+									<Loader2 className="mr-2 size-5 animate-spin" />
 									Création en cours...
 								</>
 							) : (
 								<>
-									<Scissors className="mr-2 h-5 w-5" />
+									<Scissors className="mr-2 size-5" />
 									Créer le montage
 								</>
 							)}
@@ -478,7 +478,7 @@ export default function NostalgieVR() {
 							className="min-w-40"
 							disabled={!ogUpload.image && !vrUpload.image && !finalImage}
 						>
-							<X className="mr-2 h-5 w-5" />
+							<X className="mr-2 size-5" />
 							Réinitialiser
 						</Button>
 					</div>
@@ -491,7 +491,7 @@ export default function NostalgieVR() {
 						<Card>
 							<CardHeader>
 								<div className="flex items-center gap-2">
-									<Settings className="h-5 w-5 text-primary" />
+									<Settings className="size-5 text-primary" />
 									<CardTitle>Paramètres Avancés</CardTitle>
 								</div>
 								<CardDescription>Personnalisez votre export</CardDescription>
@@ -595,7 +595,7 @@ export default function NostalgieVR() {
 						<Card>
 							<CardHeader>
 								<div className="flex items-center gap-2">
-									<Share2 className="h-5 w-5 text-primary" />
+									<Share2 className="size-5 text-primary" />
 									<CardTitle>Partager</CardTitle>
 								</div>
 								<CardDescription>
@@ -609,7 +609,7 @@ export default function NostalgieVR() {
 									className="w-full justify-start"
 									size="lg"
 								>
-									<MessageCircle className="mr-2 h-5 w-5" />
+									<MessageCircle className="mr-2 size-5" />
 									Citer le tweet d&apos;origine
 								</Button>
 
@@ -619,7 +619,7 @@ export default function NostalgieVR() {
 									className="w-full justify-start"
 									size="lg"
 								>
-									<SiDiscord className="mr-2 h-5 w-5" />
+									<SiDiscord className="mr-2 size-5" />
 									Partager sur Discord
 								</Button>
 
@@ -629,7 +629,7 @@ export default function NostalgieVR() {
 									className="w-full justify-start"
 									size="lg"
 								>
-									<Instagram className="mr-2 h-5 w-5" />
+									<Instagram className="mr-2 size-5" />
 									Partager sur Instagram
 								</Button>
 
@@ -641,7 +641,7 @@ export default function NostalgieVR() {
 									className="w-full justify-start"
 									size="lg"
 								>
-									<Link2 className="mr-2 h-5 w-5" />
+									<Link2 className="mr-2 size-5" />
 									Copier le lien
 								</Button>
 
@@ -673,7 +673,7 @@ export default function NostalgieVR() {
 								{loadingExampleImage ? (
 									<div className="w-full aspect-video bg-muted flex items-center justify-center">
 										<div className="flex flex-col items-center gap-2">
-											<Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+											<Loader2 className="size-8 animate-spin text-muted-foreground" />
 											<p className="text-sm text-muted-foreground">
 												Chargement de l&apos;exemple...
 											</p>
@@ -741,7 +741,7 @@ export default function NostalgieVR() {
 				quality={1}
 				validateButtonText={
 					<>
-						<Download className="mr-2 h-4 w-4" />
+						<Download className="mr-2 size-4" />
 						Télécharger le montage
 					</>
 				}
@@ -751,7 +751,7 @@ export default function NostalgieVR() {
 						variant="default"
 						className="w-full sm:w-auto bg-black hover:bg-black/90 text-white"
 					>
-						<MessageCircle className="mr-2 h-4 w-4" />
+						<MessageCircle className="mr-2 size-4" />
 						Citer le tweet
 					</Button>
 				}

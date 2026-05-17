@@ -10,7 +10,7 @@ export function SocialLinksSkeleton() {
 	return (
 		<div className="flex items-center justify-center gap-1">
 			{[1, 2, 3, 4, 5].map((i) => (
-				<Skeleton key={i} className="h-9 w-9 rounded-md bg-muted" />
+				<Skeleton key={i} className="size-9 rounded-md bg-muted" />
 			))}
 		</div>
 	);

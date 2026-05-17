@@ -182,12 +182,12 @@ export function StaffClientPage({ initialMembers }: StaffClientPageProps) {
 	return (
 		<div className="space-y-8">
 			<AdminPageHeader
-				icon={<UsersIcon className="h-5 w-5" />}
+				icon={<UsersIcon className="size-5" />}
 				title="Gestion du Staff"
 				description="Gérez les membres de toutes les équipes Rose Griffon"
 				actions={
 					<Button onClick={handleAdd}>
-						<Plus className="mr-2 h-4 w-4" />
+						<Plus className="mr-2 size-4" />
 						Ajouter un membre
 					</Button>
 				}
@@ -224,7 +224,7 @@ export function StaffClientPage({ initialMembers }: StaffClientPageProps) {
 			{/* Filtres */}
 			<div className="flex flex-col sm:flex-row gap-4">
 				<div className="relative flex-1">
-					<Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+					<Search className="absolute left-2.5 top-2.5 size-4 text-muted-foreground" />
 					<Input
 						placeholder="Nom, rôle, ID Discord…"
 						className="pl-9"
@@ -254,15 +254,15 @@ export function StaffClientPage({ initialMembers }: StaffClientPageProps) {
 								? "Tri par ordre (cliquer pour A-Z)"
 								: "Tri A-Z (cliquer pour ordre)"
 						}
-						className="rounded-none h-10 w-10"
+						className="rounded-none size-10"
 						onClick={() =>
 							setSortMode((s) => (s === "order" ? "name" : "order"))
 						}
 					>
 						{sortMode === "order" ? (
-							<ArrowUp01 className="h-4 w-4" />
+							<ArrowUp01 className="size-4" />
 						) : (
-							<ArrowDownAZ className="h-4 w-4" />
+							<ArrowDownAZ className="size-4" />
 						)}
 					</Button>
 					<div className="w-[1px] h-6 bg-border" />
@@ -270,20 +270,20 @@ export function StaffClientPage({ initialMembers }: StaffClientPageProps) {
 						variant="ghost"
 						size="icon"
 						title="Vue liste"
-						className={`rounded-none h-10 w-10 ${viewMode === "list" ? "bg-muted" : ""}`}
+						className={`rounded-none size-10 ${viewMode === "list" ? "bg-muted" : ""}`}
 						onClick={() => setViewMode("list")}
 					>
-						<List className="h-4 w-4" />
+						<List className="size-4" />
 					</Button>
 					<div className="w-[1px] h-6 bg-border" />
 					<Button
 						variant="ghost"
 						size="icon"
 						title="Vue grille"
-						className={`rounded-none h-10 w-10 ${viewMode === "grid" ? "bg-muted" : ""}`}
+						className={`rounded-none size-10 ${viewMode === "grid" ? "bg-muted" : ""}`}
 						onClick={() => setViewMode("grid")}
 					>
-						<LayoutGrid className="h-4 w-4" />
+						<LayoutGrid className="size-4" />
 					</Button>
 				</div>
 			</div>
@@ -297,7 +297,7 @@ export function StaffClientPage({ initialMembers }: StaffClientPageProps) {
 						{
 							header: "Photo",
 							cell: (member) => (
-								<div className="relative w-10 h-10 rounded-full overflow-hidden bg-muted">
+								<div className="relative size-10 rounded-full overflow-hidden bg-muted">
 									{member.image_url ? (
 										<Image
 											src={member.image_url}
@@ -307,7 +307,7 @@ export function StaffClientPage({ initialMembers }: StaffClientPageProps) {
 										/>
 									) : (
 										<div className="w-full h-full flex items-center justify-center text-muted-foreground">
-											<UsersIcon className="h-5 w-5" />
+											<UsersIcon className="size-5" />
 										</div>
 									)}
 								</div>
@@ -337,7 +337,7 @@ export function StaffClientPage({ initialMembers }: StaffClientPageProps) {
 										className="text-green-600 border-green-200 hover:bg-green-50"
 										onClick={() => handleApprove(member)}
 									>
-										<Check className="h-4 w-4 mr-1" />
+										<Check className="size-4 mr-1" />
 										Valider
 									</Button>
 									<Button
@@ -345,14 +345,14 @@ export function StaffClientPage({ initialMembers }: StaffClientPageProps) {
 										size="icon"
 										onClick={() => handleEdit(member)}
 									>
-										<Edit className="h-4 w-4" />
+										<Edit className="size-4" />
 									</Button>
 									<Button
 										variant="ghost"
 										size="icon"
 										onClick={() => confirmDelete(member)}
 									>
-										<Trash2 className="h-4 w-4 text-red-500" />
+										<Trash2 className="size-4 text-red-500" />
 									</Button>
 								</div>
 							),
@@ -367,10 +367,10 @@ export function StaffClientPage({ initialMembers }: StaffClientPageProps) {
 			pendingMembers.length === 0 ? (
 				<Card>
 					<CardContent className="py-12 text-center">
-						<UsersIcon className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+						<UsersIcon className="size-12 mx-auto mb-4 text-muted-foreground" />
 						<p className="text-muted-foreground">Aucun membre pour le moment</p>
 						<Button onClick={handleAdd} className="mt-4">
-							<Plus className="h-4 w-4 mr-2" />
+							<Plus className="size-4 mr-2" />
 							Ajouter le premier membre
 						</Button>
 					</CardContent>
@@ -393,7 +393,7 @@ export function StaffClientPage({ initialMembers }: StaffClientPageProps) {
 								{
 									header: "Photo",
 									cell: (member) => (
-										<div className="relative w-10 h-10 rounded-full overflow-hidden bg-muted">
+										<div className="relative size-10 rounded-full overflow-hidden bg-muted">
 											{member.image_url ? (
 												<Image
 													src={member.image_url}
@@ -403,7 +403,7 @@ export function StaffClientPage({ initialMembers }: StaffClientPageProps) {
 												/>
 											) : (
 												<div className="w-full h-full flex items-center justify-center text-muted-foreground">
-													<UsersIcon className="h-5 w-5" />
+													<UsersIcon className="size-5" />
 												</div>
 											)}
 										</div>
@@ -453,7 +453,7 @@ export function StaffClientPage({ initialMembers }: StaffClientPageProps) {
 												title="Modifier"
 												onClick={() => handleEdit(member)}
 											>
-												<Edit className="h-4 w-4" />
+												<Edit className="size-4" />
 											</Button>
 											<Button
 												variant="ghost"
@@ -461,7 +461,7 @@ export function StaffClientPage({ initialMembers }: StaffClientPageProps) {
 												title="Désactiver"
 												onClick={() => handleDeactivate(member)}
 											>
-												<EyeOff className="h-4 w-4 text-orange-500" />
+												<EyeOff className="size-4 text-orange-500" />
 											</Button>
 											<Button
 												variant="ghost"
@@ -469,7 +469,7 @@ export function StaffClientPage({ initialMembers }: StaffClientPageProps) {
 												title="Supprimer"
 												onClick={() => confirmDelete(member)}
 											>
-												<Trash2 className="h-4 w-4 text-red-500" />
+												<Trash2 className="size-4 text-red-500" />
 											</Button>
 										</div>
 									),
@@ -489,7 +489,7 @@ export function StaffClientPage({ initialMembers }: StaffClientPageProps) {
 						{
 							header: "Photo",
 							cell: (member) => (
-								<div className="relative w-10 h-10 rounded-full overflow-hidden bg-muted opacity-60">
+								<div className="relative size-10 rounded-full overflow-hidden bg-muted opacity-60">
 									{member.image_url ? (
 										<Image
 											src={member.image_url}
@@ -499,7 +499,7 @@ export function StaffClientPage({ initialMembers }: StaffClientPageProps) {
 										/>
 									) : (
 										<div className="w-full h-full flex items-center justify-center text-muted-foreground">
-											<UsersIcon className="h-5 w-5" />
+											<UsersIcon className="size-5" />
 										</div>
 									)}
 								</div>
@@ -526,7 +526,7 @@ export function StaffClientPage({ initialMembers }: StaffClientPageProps) {
 										title="Réactiver"
 										onClick={() => handleApprove(member)}
 									>
-										<RotateCcw className="h-4 w-4 mr-1" />
+										<RotateCcw className="size-4 mr-1" />
 										Réactiver
 									</Button>
 									<Button
@@ -535,7 +535,7 @@ export function StaffClientPage({ initialMembers }: StaffClientPageProps) {
 										title="Supprimer"
 										onClick={() => confirmDelete(member)}
 									>
-										<Trash2 className="h-4 w-4 text-red-500" />
+										<Trash2 className="size-4 text-red-500" />
 									</Button>
 								</div>
 							),

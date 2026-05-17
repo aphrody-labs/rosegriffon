@@ -170,7 +170,7 @@ export function PatreonLiveMembersTable({ members, tierOptions }: Props) {
 
 			<div className="flex flex-col gap-3 sm:flex-row">
 				<div className="relative flex-1">
-					<Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+					<Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
 					<Input
 						placeholder="Rechercher : nom, email, Discord ID, Patreon ID…"
 						value={q}
@@ -267,9 +267,9 @@ export function PatreonLiveMembersTable({ members, tierOptions }: Props) {
 												title="Détails"
 											>
 												{isExpanded ? (
-													<ChevronDown className="h-4 w-4" />
+													<ChevronDown className="size-4" />
 												) : (
-													<ChevronRight className="h-4 w-4" />
+													<ChevronRight className="size-4" />
 												)}
 											</button>
 										</td>
@@ -280,10 +280,10 @@ export function PatreonLiveMembersTable({ members, tierOptions }: Props) {
 													<img
 														src={m.patreon_thumb_url}
 														alt=""
-														className="h-8 w-8 flex-shrink-0 rounded-full bg-muted object-cover"
+														className="size-8 shrink-0 rounded-full bg-muted object-cover"
 													/>
 												) : (
-													<div className="h-8 w-8 flex-shrink-0 rounded-full bg-muted" />
+													<div className="size-8 shrink-0 rounded-full bg-muted" />
 												)}
 												<div className="min-w-0">
 													<div className="font-medium text-foreground">
@@ -331,7 +331,7 @@ export function PatreonLiveMembersTable({ members, tierOptions }: Props) {
 															key={t}
 															className="inline-flex items-center gap-1 rounded-md bg-muted px-2 py-0.5 text-xs"
 														>
-															<Star className="h-3 w-3 text-amber-500" />
+															<Star className="size-3 text-amber-500" />
 															{t}
 														</div>
 													))}
@@ -386,7 +386,7 @@ export function PatreonLiveMembersTable({ members, tierOptions }: Props) {
 										<td className="px-4 py-3 text-xs text-muted-foreground">
 											{addrLine ? (
 												<span title={addrLine}>
-													<MapPin className="mr-1 inline h-3 w-3 text-emerald-500" />
+													<MapPin className="mr-1 inline size-3 text-emerald-500" />
 													{m.address?.country ?? "—"}
 												</span>
 											) : (

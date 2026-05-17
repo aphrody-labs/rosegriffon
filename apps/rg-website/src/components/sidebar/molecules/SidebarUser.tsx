@@ -46,14 +46,14 @@ export function SidebarUser() {
 	return (
 		<div className="flex items-center gap-2">
 			{loading ? (
-				<Skeleton className="h-9 w-9 rounded-md" />
+				<Skeleton className="size-9 rounded-md" />
 			) : !user ? (
 				<Link
 					href="/login"
 					aria-label="Se connecter"
-					className="inline-flex h-9 w-9 items-center justify-center rounded-md text-sidebar-foreground/85 transition-colors hover:bg-sidebar-accent hover:text-sidebar-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring"
+					className="inline-flex size-9 items-center justify-center rounded-md text-sidebar-foreground/85 transition-colors hover:bg-sidebar-accent hover:text-sidebar-foreground focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-sidebar-ring"
 				>
-					<LogIn className="h-5 w-5" aria-hidden="true" />
+					<LogIn className="size-5" aria-hidden="true" />
 					<span className="sr-only">Se connecter</span>
 				</Link>
 			) : (
@@ -62,9 +62,9 @@ export function SidebarUser() {
 						<button
 							type="button"
 							aria-label="Menu du compte"
-							className="flex min-w-0 flex-1 items-center gap-2 rounded-md px-1.5 py-1 text-sm transition-colors hover:bg-sidebar-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring"
+							className="flex min-w-0 flex-1 items-center gap-2 rounded-md px-1.5 py-1 text-sm transition-colors hover:bg-sidebar-accent focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-sidebar-ring"
 						>
-							<Avatar className="h-8 w-8 border border-sidebar-border/40">
+							<Avatar className="size-8 border border-sidebar-border/40">
 								<AvatarImage src={avatarSrc} alt="" />
 								<AvatarFallback className="bg-sidebar-accent text-xs font-bold text-sidebar-foreground">
 									{displayName[0]?.toUpperCase()}
@@ -74,7 +74,7 @@ export function SidebarUser() {
 								{displayName}
 							</span>
 							<ChevronUp
-								className="h-4 w-4 shrink-0 text-sidebar-foreground/75"
+								className="size-4 shrink-0 text-sidebar-foreground/75"
 								aria-hidden="true"
 							/>
 						</button>
@@ -87,20 +87,20 @@ export function SidebarUser() {
 						<DropdownMenuSeparator />
 						<DropdownMenuItem asChild>
 							<Link href={profileHref}>
-								<User className="mr-2 h-4 w-4" aria-hidden="true" />
+								<User className="mr-2 size-4" aria-hidden="true" />
 								Mon profil
 							</Link>
 						</DropdownMenuItem>
 						<DropdownMenuItem asChild>
 							<Link href="/dashboard/account">
-								<User className="mr-2 h-4 w-4" aria-hidden="true" />
+								<User className="mr-2 size-4" aria-hidden="true" />
 								Paramètres du compte
 							</Link>
 						</DropdownMenuItem>
 						{isAdmin && (
 							<DropdownMenuItem asChild>
 								<Link href="/admin">
-									<ShieldCheck className="mr-2 h-4 w-4" aria-hidden="true" />
+									<ShieldCheck className="mr-2 size-4" aria-hidden="true" />
 									Administration
 								</Link>
 							</DropdownMenuItem>
@@ -110,7 +110,7 @@ export function SidebarUser() {
 							onSelect={signOut}
 							className="text-destructive focus:text-destructive"
 						>
-							<LogOut className="mr-2 h-4 w-4" aria-hidden="true" />
+							<LogOut className="mr-2 size-4" aria-hidden="true" />
 							Se déconnecter
 						</DropdownMenuItem>
 					</DropdownMenuContent>

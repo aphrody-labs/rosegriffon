@@ -121,7 +121,7 @@ export function Toolbar() {
         <Button
           variant={isBold ? "secondary" : "ghost"}
           size="sm"
-          className="h-8 w-8 p-0"
+          className="size-8 p-0"
           onClick={() => onClick("bold")}
           aria-label="Gras"
           aria-pressed={isBold}
@@ -131,7 +131,7 @@ export function Toolbar() {
         <Button
           variant={isItalic ? "secondary" : "ghost"}
           size="sm"
-          className="h-8 w-8 p-0"
+          className="size-8 p-0"
           onClick={() => onClick("italic")}
           aria-label="Italique"
           aria-pressed={isItalic}
@@ -141,7 +141,7 @@ export function Toolbar() {
         <Button
           variant={isUnderline ? "secondary" : "ghost"}
           size="sm"
-          className="h-8 w-8 p-0"
+          className="size-8 p-0"
           onClick={() => onClick("underline")}
           aria-label="Souligné"
           aria-pressed={isUnderline}
@@ -151,7 +151,7 @@ export function Toolbar() {
         <Button
           variant={isStrikethrough ? "secondary" : "ghost"}
           size="sm"
-          className="h-8 w-8 p-0"
+          className="size-8 p-0"
           onClick={() => onClick("strikethrough")}
           aria-label="Barré"
           aria-pressed={isStrikethrough}
@@ -161,7 +161,7 @@ export function Toolbar() {
         <Button
           variant={isCode ? "secondary" : "ghost"}
           size="sm"
-          className="h-8 w-8 p-0"
+          className="size-8 p-0"
           onClick={() => onClick("code")}
           aria-label="Code en ligne"
           aria-pressed={isCode}
@@ -178,7 +178,7 @@ export function Toolbar() {
         <Button
           variant="ghost"
           size="sm"
-          className="h-8 w-8 p-0"
+          className="size-8 p-0"
           onClick={() => onClick("left")}
           aria-label="Aligner à gauche"
         >
@@ -187,7 +187,7 @@ export function Toolbar() {
         <Button
           variant="ghost"
           size="sm"
-          className="h-8 w-8 p-0"
+          className="size-8 p-0"
           onClick={() => onClick("center")}
           aria-label="Centrer"
         >
@@ -196,7 +196,7 @@ export function Toolbar() {
         <Button
           variant="ghost"
           size="sm"
-          className="h-8 w-8 p-0"
+          className="size-8 p-0"
           onClick={() => onClick("right")}
           aria-label="Aligner à droite"
         >
@@ -212,7 +212,7 @@ export function Toolbar() {
         <Button
           variant="ghost"
           size="sm"
-          className="h-8 w-8 p-0"
+          className="size-8 p-0"
           onClick={() => onClick("ul")}
           aria-label="Liste à puces"
         >
@@ -221,7 +221,7 @@ export function Toolbar() {
         <Button
           variant="ghost"
           size="sm"
-          className="h-8 w-8 p-0"
+          className="size-8 p-0"
           onClick={() => onClick("ol")}
           aria-label="Liste numérotée"
         >
@@ -230,7 +230,7 @@ export function Toolbar() {
         <Button
           variant="ghost"
           size="sm"
-          className="h-8 w-8 p-0"
+          className="size-8 p-0"
           onClick={() => onClick("checklist")}
           aria-label="Liste de tâches"
         >
@@ -246,7 +246,7 @@ export function Toolbar() {
         <Button
           variant={isLink ? "secondary" : "ghost"}
           size="sm"
-          className="h-8 w-8 p-0"
+          className="size-8 p-0"
           onClick={() => onClick("link")}
           aria-label={isLink ? "Supprimer le lien" : "Insérer un lien"}
           aria-pressed={isLink}
@@ -256,7 +256,7 @@ export function Toolbar() {
         <Button
           variant="ghost"
           size="sm"
-          className="h-8 w-8 p-0"
+          className="size-8 p-0"
           onClick={insertImage}
           aria-label="Insérer une image"
         >

@@ -51,11 +51,11 @@ export default function PresencesPage() {
         ]}
       />
       {/* Hero Section */}
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-gaelle-blue via-blue-600 to-purple-600 p-8 md:p-12 lg:p-16 shadow-2xl">
+      <div className="relative overflow-hidden rounded-3xl bg-linear-to-br from-gaelle-blue via-blue-600 to-purple-600 p-8 md:p-12 lg:p-16 shadow-2xl">
         <div className="absolute inset-0 bg-grid-white/[0.05] bg-[size:20px_20px]" />
         <div className="relative z-10">
           <div className="flex items-center gap-3 mb-4">
-            <Calendar className="h-8 w-8 text-yellow-300" />
+            <Calendar className="size-8 text-yellow-300" />
             <span className="text-yellow-300 font-semibold text-sm md:text-base uppercase tracking-wide">
               {conventionsCount} Conventions répertoriées
             </span>
@@ -74,7 +74,7 @@ export default function PresencesPage() {
               onClick={filterConventions}
               className="px-6 py-2.5 bg-muted hover:bg-muted border border-border rounded-full text-white text-sm font-bold backdrop-blur-sm transition-all flex items-center gap-2"
             >
-              <Tag className="h-4 w-4" />
+              <Tag className="size-4" />
               Voir uniquement les Conventions
             </button>
           </div>
@@ -85,7 +85,7 @@ export default function PresencesPage() {
       <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-xl p-6 border-2 border-blue-500/30 hover:shadow-2xl transition-all duration-300">
         <div className="flex items-center gap-3 mb-6">
           <div className="p-2 rounded-lg bg-blue-600 text-white shadow-lg shadow-blue-500/20">
-            <MapPin className="h-6 w-6" />
+            <MapPin className="size-6" />
           </div>
           <div>
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white">
@@ -103,7 +103,7 @@ export default function PresencesPage() {
       <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-xl p-6 border-2 border-purple-500/30 hover:shadow-2xl transition-all duration-300">
         <div className="flex items-center gap-3 mb-6">
           <div className="p-2 rounded-lg bg-purple-600 text-white shadow-lg shadow-purple-500/20">
-            <DiscordIcon className="h-6 w-6" />
+            <DiscordIcon className="size-6" />
           </div>
           <div>
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white">
@@ -122,7 +122,7 @@ export default function PresencesPage() {
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
           <div className="flex items-center gap-3">
             <div className="p-2 rounded-lg bg-green-500 text-white shadow-lg shadow-green-500/20">
-              <Calendar className="h-6 w-6" />
+              <Calendar className="size-6" />
             </div>
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white">
               Prochains événements
@@ -130,7 +130,7 @@ export default function PresencesPage() {
           </div>
           <div className="flex items-center gap-2 w-full md:w-auto">
             <div className="relative flex-1 md:flex-initial">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-5 text-gray-400" />
               <input
                 type="text"
                 placeholder="Rechercher..."
@@ -144,7 +144,7 @@ export default function PresencesPage() {
                 onClick={resetFilter}
                 className="px-4 py-3 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 rounded-xl hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors flex items-center gap-2"
               >
-                <X className="h-5 w-5" />
+                <X className="size-5" />
                 <span className="hidden sm:inline">Réinitialiser</span>
               </button>
             )}
@@ -158,7 +158,7 @@ export default function PresencesPage() {
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
           <div className="flex items-center gap-3">
             <div className="p-2 rounded-lg bg-red-500 text-white shadow-lg shadow-red-500/20">
-              <Calendar className="h-6 w-6" />
+              <Calendar className="size-6" />
             </div>
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white">
               Événements passés
@@ -166,7 +166,7 @@ export default function PresencesPage() {
           </div>
           <div className="flex items-center gap-2 w-full md:w-auto">
             <div className="relative flex-1 md:flex-initial">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-5 text-gray-400" />
               <input
                 type="text"
                 placeholder="Rechercher..."
@@ -180,7 +180,7 @@ export default function PresencesPage() {
                 onClick={resetFilter}
                 className="px-4 py-3 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 rounded-xl hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors flex items-center gap-2"
               >
-                <X className="h-5 w-5" />
+                <X className="size-5" />
                 <span className="hidden sm:inline">Réinitialiser</span>
               </button>
             )}

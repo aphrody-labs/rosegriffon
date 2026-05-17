@@ -281,7 +281,7 @@ function MetaRow({
 	return (
 		<div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
 			<div className="flex items-center gap-3 flex-wrap">
-				<div className="w-10 h-10 rounded-full bg-surface-container-highest flex items-center justify-center border border-outline-variant/10 overflow-hidden shrink-0">
+				<div className="size-10 rounded-full bg-surface-container-highest flex items-center justify-center border border-outline-variant/10 overflow-hidden shrink-0">
 					{elementIconUrl ? (
 						<Image
 							src={elementIconUrl}

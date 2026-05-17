@@ -58,13 +58,13 @@ export default async function EditArticlePage({ params }: { params: { id: string
             href="/dashboard/articles"
             className="inline-flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 hover:text-[#a14b3f] transition-colors mb-4"
           >
-            <ArrowLeft className="w-4 h-4" />
+            <ArrowLeft className="size-4" />
             Retour aux Chroniques
           </Link>
 
           <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-xl bg-linear-to-br from-indigo-500 to-indigo-600 flex items-center justify-center">
-              <PenSquare className="w-6 h-6 text-white" />
+            <div className="size-12 rounded-xl bg-linear-to-br from-indigo-500 to-indigo-600 flex items-center justify-center">
+              <PenSquare className="size-6 text-white" />
             </div>
             <div>
               <h1 className="text-3xl sm:text-4xl font-bold bg-clip-text text-transparent bg-linear-to-r from-indigo-500 to-indigo-600">

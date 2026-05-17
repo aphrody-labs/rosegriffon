@@ -293,7 +293,7 @@ export function ImportExportPlugin() {
           <textarea
             value={importContent}
             onChange={(e) => setImportContent(e.target.value)}
-            className="w-full h-64 p-4 rounded-2xl bg-surface-container-low border border-outline-variant/30 text-sm font-mono text-on-surface placeholder:text-on-surface-variant/40 focus:outline-none focus:ring-2 focus:ring-primary/30 resize-none"
+            className="w-full h-64 p-4 rounded-2xl bg-surface-container-low border border-outline-variant/30 text-sm font-mono text-on-surface placeholder:text-on-surface-variant/40 focus:outline-hidden focus:ring-2 focus:ring-primary/30 resize-none"
             placeholder={
               importType === "html"
                 ? "<h1>Mon titre</h1>\n<p>Mon contenu...</p>"

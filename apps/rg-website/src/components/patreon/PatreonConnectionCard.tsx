@@ -94,8 +94,8 @@ export function PatreonConnectionCard({ isLinked, hasDiscord }: Props) {
 			<Card className="border-[#FF424D]/30 bg-card">
 				<CardContent className="flex flex-wrap items-center justify-between gap-4 p-5">
 					<div className="flex items-start gap-3">
-						<div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-[#FF424D]/10 text-[#FF424D]">
-							<Heart className="h-5 w-5" />
+						<div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-[#FF424D]/10 text-[#FF424D]">
+							<Heart className="size-5" />
 						</div>
 						<div className="min-w-0">
 							<p className="font-semibold text-foreground">
@@ -126,7 +126,7 @@ export function PatreonConnectionCard({ isLinked, hasDiscord }: Props) {
 							onClick={() => setConfirmOpen(true)}
 							disabled={busy}
 						>
-							<X className="mr-2 h-4 w-4" />
+							<X className="mr-2 size-4" />
 							Déconnecter
 						</Button>
 					) : (
@@ -137,9 +137,9 @@ export function PatreonConnectionCard({ isLinked, hasDiscord }: Props) {
 							className="bg-[#FF424D] text-white hover:bg-[#e63b46]"
 						>
 							{busy ? (
-								<Loader2 className="mr-2 h-4 w-4 animate-spin" />
+								<Loader2 className="mr-2 size-4 animate-spin" />
 							) : (
-								<Link2 className="mr-2 h-4 w-4" />
+								<Link2 className="mr-2 size-4" />
 							)}
 							Lier mon Patreon
 						</Button>
@@ -166,7 +166,7 @@ export function PatreonConnectionCard({ isLinked, hasDiscord }: Props) {
 							disabled={busy}
 							className="bg-rose-500 hover:bg-rose-600"
 						>
-							{busy ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+							{busy ? <Loader2 className="mr-2 size-4 animate-spin" /> : null}
 							Déconnecter
 						</AlertDialogAction>
 					</AlertDialogFooter>
@@ -176,8 +176,8 @@ export function PatreonConnectionCard({ isLinked, hasDiscord }: Props) {
 			<Dialog open={promoOpen} onOpenChange={setPromoOpen}>
 				<DialogContent>
 					<DialogHeader>
-						<div className="mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-[#FF424D]/10">
-							<Heart className="h-6 w-6 text-[#FF424D]" />
+						<div className="mb-3 flex size-12 items-center justify-center rounded-xl bg-[#FF424D]/10">
+							<Heart className="size-6 text-[#FF424D]" />
 						</div>
 						<DialogTitle>Liez votre Patreon</DialogTitle>
 						<DialogDescription>
@@ -199,9 +199,9 @@ export function PatreonConnectionCard({ isLinked, hasDiscord }: Props) {
 							className="bg-[#FF424D] text-white hover:bg-[#e63b46]"
 						>
 							{busy ? (
-								<Loader2 className="mr-2 h-4 w-4 animate-spin" />
+								<Loader2 className="mr-2 size-4 animate-spin" />
 							) : (
-								<Link2 className="mr-2 h-4 w-4" />
+								<Link2 className="mr-2 size-4" />
 							)}
 							Lier mon Patreon
 						</Button>

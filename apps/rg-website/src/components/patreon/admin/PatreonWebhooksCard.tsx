@@ -53,7 +53,7 @@ export function PatreonWebhooksCard() {
 			<CardContent className="p-6">
 				<div className="mb-4 flex items-center justify-between gap-4">
 					<h2 className="flex items-center gap-2 font-semibold text-foreground">
-						<Webhook className="h-4 w-4" />
+						<Webhook className="size-4" />
 						Webhooks Patreon
 					</h2>
 					<Button variant="outline" size="sm" onClick={load} disabled={loading}>
@@ -101,17 +101,17 @@ export function PatreonWebhooksCard() {
 										<div className="flex flex-wrap items-center gap-2">
 											{w.paused ? (
 												<span className="inline-flex items-center gap-1 rounded-full bg-amber-500/15 px-2 py-0.5 text-xs font-medium text-amber-700 dark:text-amber-300">
-													<AlertTriangle className="h-3 w-3" />
+													<AlertTriangle className="size-3" />
 													En pause
 												</span>
 											) : failing ? (
 												<span className="inline-flex items-center gap-1 rounded-full bg-rose-500/15 px-2 py-0.5 text-xs font-medium text-rose-700 dark:text-rose-300">
-													<AlertTriangle className="h-3 w-3" />
+													<AlertTriangle className="size-3" />
 													{w.num_consecutive_times_failed} échecs consécutifs
 												</span>
 											) : (
 												<span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/15 px-2 py-0.5 text-xs font-medium text-emerald-700 dark:text-emerald-300">
-													<CheckCircle2 className="h-3 w-3" />
+													<CheckCircle2 className="size-3" />
 													Actif
 												</span>
 											)}

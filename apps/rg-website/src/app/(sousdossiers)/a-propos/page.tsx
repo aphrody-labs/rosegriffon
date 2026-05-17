@@ -14,7 +14,7 @@ export default function AProposPage() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <Card className="hover:shadow-lg transition-shadow">
           <CardHeader>
-            <Users className="w-12 h-12 text-primary mb-4" />
+            <Users className="size-12 text-primary mb-4" />
             <CardTitle>Rejoindre l&apos;équipe</CardTitle>
             <CardDescription>Devenez bénévole et participez à l&apos;aventure</CardDescription>
           </CardHeader>
@@ -27,7 +27,7 @@ export default function AProposPage() {
 
         <Card className="hover:shadow-lg transition-shadow">
           <CardHeader>
-            <Heart className="w-12 h-12 text-primary mb-4" />
+            <Heart className="size-12 text-primary mb-4" />
             <CardTitle>Nous soutenir</CardTitle>
             <CardDescription>Aidez l&apos;association à grandir</CardDescription>
           </CardHeader>
@@ -40,7 +40,7 @@ export default function AProposPage() {
 
         <Card className="hover:shadow-lg transition-shadow">
           <CardHeader>
-            <Mail className="w-12 h-12 text-primary mb-4" />
+            <Mail className="size-12 text-primary mb-4" />
             <CardTitle>Contact</CardTitle>
             <CardDescription>Une question ? Écrivez-nous</CardDescription>
           </CardHeader>

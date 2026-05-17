@@ -266,7 +266,7 @@ export function TeamMemberDialog({
 							<Label>Image de profil</Label>
 							<div className="flex items-start gap-4">
 								{previewUrl ? (
-									<div className="relative w-24 h-24 rounded-full overflow-hidden border-2 border-border shrink-0">
+									<div className="relative size-24 rounded-full overflow-hidden border-2 border-border shrink-0">
 										<Image
 											src={previewUrl}
 											alt="Preview"
@@ -278,15 +278,15 @@ export function TeamMemberDialog({
 											type="button"
 											variant="destructive"
 											size="icon"
-											className="absolute top-1 right-1 h-5 w-5"
+											className="absolute top-1 right-1 size-5"
 											onClick={handleRemoveImage}
 										>
-											<X className="h-3 w-3" />
+											<X className="size-3" />
 										</Button>
 									</div>
 								) : (
-									<div className="w-24 h-24 rounded-full border-2 border-dashed border-border flex items-center justify-center shrink-0">
-										<Upload className="h-6 w-6 text-muted-foreground" />
+									<div className="size-24 rounded-full border-2 border-dashed border-border flex items-center justify-center shrink-0">
+										<Upload className="size-6 text-muted-foreground" />
 									</div>
 								)}
 								<div className="flex-1 space-y-2">

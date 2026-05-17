@@ -119,7 +119,7 @@ export function SidebarSearch() {
 				className="h-9 w-full justify-start gap-2 border-sidebar-border/40 bg-sidebar-accent/30 px-2.5 text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-foreground"
 				aria-label="Rechercher dans la navigation"
 			>
-				<Search className="h-4 w-4" aria-hidden="true" />
+				<Search className="size-4" aria-hidden="true" />
 				<span className="flex-1 text-left text-sm">Rechercher…</span>
 				<kbd className="hidden items-center gap-0.5 rounded border border-sidebar-border/40 bg-sidebar-accent/40 px-1.5 py-0.5 text-xs font-mono text-sidebar-foreground/85 sm:inline-flex">
 					<span className="text-xs">⌘</span>K
@@ -142,7 +142,7 @@ export function SidebarSearch() {
 											value={`${entry.title} ${entry.description ?? ""} ${entry.section}`}
 											onSelect={() => handleSelect(entry.url)}
 										>
-											<Icon className="mr-2 h-4 w-4" aria-hidden="true" />
+											<Icon className="mr-2 size-4" aria-hidden="true" />
 											<div className="min-w-0 flex-1">
 												<p className="truncate">{entry.title}</p>
 												{entry.description && (
@@ -167,7 +167,7 @@ export function SidebarSearch() {
 									value={entry.title}
 									onSelect={() => handleSelect(entry.url)}
 								>
-									<Icon className="mr-2 h-4 w-4" aria-hidden="true" />
+									<Icon className="mr-2 size-4" aria-hidden="true" />
 									{entry.title}
 								</CommandItem>
 							);

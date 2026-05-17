@@ -68,8 +68,8 @@ export function LandingHero({ stats }: LandingHeroProps) {
       </div>
 
       {/* Gradient Overlays — layered for depth */}
-      <div className="absolute inset-0 z-0 bg-gradient-to-b from-black/40 via-black/50 to-background" />
-      <div className="absolute inset-0 z-0 bg-gradient-to-r from-black/30 via-transparent to-black/20 hidden md:block" />
+      <div className="absolute inset-0 z-0 bg-linear-to-b from-black/40 via-black/50 to-background" />
+      <div className="absolute inset-0 z-0 bg-linear-to-r from-black/30 via-transparent to-black/20 hidden md:block" />
 
       {/* CSS Particles */}
       <div className="absolute inset-0 z-10 overflow-hidden pointer-events-none" aria-hidden="true">
@@ -114,7 +114,7 @@ export function LandingHero({ stats }: LandingHeroProps) {
           <h1 className="mt-4 text-[1.5rem] leading-tight font-black text-white text-center drop-shadow-lg">
             L&apos;encyclopédie
             <br />
-            <span className="bg-clip-text text-transparent bg-gradient-to-r from-[#F07D7D] via-[#F4D03F] to-[#F07D7D] bg-300% animate-gradient">
+            <span className="bg-clip-text text-transparent bg-linear-to-r from-[#F07D7D] via-[#F4D03F] to-[#F07D7D] bg-300% animate-gradient">
               Inazuma Eleven
             </span>
           </h1>
@@ -140,7 +140,7 @@ export function LandingHero({ stats }: LandingHeroProps) {
               Explorer
             </span>
             <div className="p-1.5 rounded-full bg-white/5 border border-white/10">
-              <ArrowDown className="w-4 h-4 text-white/60" />
+              <ArrowDown className="size-4 text-white/60" />
             </div>
           </button>
         </div>
@@ -160,7 +160,7 @@ export function LandingHero({ stats }: LandingHeroProps) {
 
           <h1 className="type-display-small lg:type-display-medium font-black text-white drop-shadow-lg max-w-lg">
             L&apos;information la plus précise autour d&apos;
-            <span className="bg-clip-text text-transparent bg-gradient-to-r from-[#F07D7D] via-[#F4D03F] to-[#F07D7D] bg-300% animate-gradient">
+            <span className="bg-clip-text text-transparent bg-linear-to-r from-[#F07D7D] via-[#F4D03F] to-[#F07D7D] bg-300% animate-gradient">
               Inazuma Eleven
             </span>
             .
@@ -227,7 +227,7 @@ export function LandingHero({ stats }: LandingHeroProps) {
             Explorer
           </span>
           <div className="p-2 rounded-full bg-white/5 border border-white/10 backdrop-blur-sm group-hover:border-[#F07D7D]/50 group-hover:bg-[#F07D7D]/10 transition-all">
-            <ArrowDown className="w-5 h-5 text-white group-hover:text-[#F07D7D]" />
+            <ArrowDown className="size-5 text-white group-hover:text-[#F07D7D]" />
           </div>
         </div>
       </div>

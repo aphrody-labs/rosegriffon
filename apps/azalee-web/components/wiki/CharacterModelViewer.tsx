@@ -77,16 +77,16 @@ export default function CharacterModelViewer({ hash, name }: CharacterModelViewe
         <Button
           variant="ghost"
           size="icon"
-          className="h-8 w-8 text-on-surface-variant hover:text-primary"
+          className="size-8 text-on-surface-variant hover:text-primary"
         >
-          <Box className="h-4 w-4" />
+          <Box className="size-4" />
           <span className="sr-only">Voir le modèle 3D de {name}</span>
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[400px] bg-surface p-0 overflow-hidden border-outline-variant rounded-xl sm:rounded-2xl">
         <DialogHeader className="p-4 bg-surface-container absolute top-0 w-full z-10 bg-opacity-80 backdrop-blur-sm border-b border-outline-variant/20">
           <DialogTitle className="text-on-surface flex items-center gap-2 text-base">
-            <Box className="h-4 w-4 text-primary" />
+            <Box className="size-4 text-primary" />
             {name || "Modèle 3D"}
           </DialogTitle>
         </DialogHeader>
@@ -116,7 +116,7 @@ export default function CharacterModelViewer({ hash, name }: CharacterModelViewe
           {/* Loading Indicator */}
           {loading && (
             <div className="absolute inset-0 flex items-center justify-center bg-surface/50">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
+              <div className="animate-spin rounded-full size-8 border-b-2 border-primary" />
             </div>
           )}
 
@@ -126,29 +126,29 @@ export default function CharacterModelViewer({ hash, name }: CharacterModelViewe
               <Button
                 variant={!isFullBody ? "secondary" : "ghost"}
                 size="icon"
-                className="h-8 w-8 rounded-full"
+                className="size-8 rounded-full"
                 onClick={() => setIsFullBody(false)}
                 title="Portrait"
               >
-                <ZoomIn className="h-4 w-4" />
+                <ZoomIn className="size-4" />
               </Button>
               <Button
                 variant={isFullBody ? "secondary" : "ghost"}
                 size="icon"
-                className="h-8 w-8 rounded-full"
+                className="size-8 rounded-full"
                 onClick={() => setIsFullBody(true)}
                 title="Plein pied"
               >
-                <ZoomOut className="h-4 w-4" />
+                <ZoomOut className="size-4" />
               </Button>
               <div className="w-px bg-outline-variant my-1" />
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-8 w-8 rounded-full"
+                className="size-8 rounded-full"
                 onClick={() => setFrame((f) => (f + 1) % TOTAL_FRAMES)}
               >
-                <RotateCw className="h-4 w-4" />
+                <RotateCw className="size-4" />
               </Button>
             </div>
           </div>

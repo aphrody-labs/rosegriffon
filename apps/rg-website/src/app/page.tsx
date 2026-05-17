@@ -226,7 +226,7 @@ export default async function Home() {
 			<main className="flex flex-col min-h-screen">
 				<a
 					href="#main-content"
-					className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-background focus:text-foreground focus:rounded-lg focus:shadow-lg focus:outline-none focus:ring-2 focus:ring-primary"
+					className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-background focus:text-foreground focus:rounded-lg focus:shadow-lg focus:outline-hidden focus:ring-2 focus:ring-primary"
 				>
 					Aller au contenu principal
 				</a>
@@ -346,7 +346,7 @@ export default async function Home() {
 												name="roy-salut"
 												size={32}
 												animated
-												className="w-8 h-8"
+												className="size-8"
 											/>
 										</div>
 
@@ -392,7 +392,7 @@ export default async function Home() {
 												rel="noopener noreferrer"
 											>
 												<svg
-													className="w-4 h-4 mr-2"
+													className="size-4 mr-2"
 													fill="currentColor"
 													viewBox="0 0 24 24"
 												>

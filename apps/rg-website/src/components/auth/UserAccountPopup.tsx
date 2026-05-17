@@ -53,7 +53,7 @@ export function UserAccountPopup({
 	};
 
 	if (loading) {
-		return <Skeleton className="h-14 w-14 rounded-full" />;
+		return <Skeleton className="size-14 rounded-full" />;
 	}
 
 	const displayName =
@@ -71,9 +71,9 @@ export function UserAccountPopup({
 			<DropdownMenuTrigger asChild>
 				<Button
 					variant="ghost"
-					className="relative h-10 w-10 rounded-full ring-2 ring-white/20 hover:ring-white/40 transition-all duration-200 shadow-md hover:shadow-lg bg-white dark:bg-slate-900"
+					className="relative size-10 rounded-full ring-2 ring-white/20 hover:ring-white/40 transition-all duration-200 shadow-md hover:shadow-lg bg-white dark:bg-slate-900"
 				>
-					<Avatar className="h-10 w-10">
+					<Avatar className="size-10">
 						<AvatarImage src={avatarUrl || undefined} alt={displayName} />
 						<AvatarFallback className="bg-linear-to-br from-[#a14b3f] to-gaelle-blue text-white text-sm font-bold">
 							{initials}
@@ -108,7 +108,7 @@ export function UserAccountPopup({
 							href="/profil"
 							className="flex items-center gap-2 cursor-pointer"
 						>
-							<UserCircle className="h-4 w-4" />
+							<UserCircle className="size-4" />
 							<span>Mon Profil</span>
 						</Link>
 					</DropdownMenuItem>
@@ -118,7 +118,7 @@ export function UserAccountPopup({
 							href="/dashboard/account"
 							className="flex items-center gap-2 cursor-pointer"
 						>
-							<Settings className="h-4 w-4" />
+							<Settings className="size-4" />
 							<span>Paramètres</span>
 						</Link>
 					</DropdownMenuItem>
@@ -132,7 +132,7 @@ export function UserAccountPopup({
 					onClick={handleLogout}
 					disabled={isLoggingOut}
 				>
-					<LogOut className="h-4 w-4 mr-2" />
+					<LogOut className="size-4 mr-2" />
 					<span>{isLoggingOut ? "Déconnexion..." : "Se déconnecter"}</span>
 				</DropdownMenuItem>
 			</DropdownMenuContent>

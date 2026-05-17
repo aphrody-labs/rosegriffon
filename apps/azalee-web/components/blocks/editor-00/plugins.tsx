@@ -51,7 +51,7 @@ export function Plugins({ id }: { id?: string }) {
               contentEditable={
                 <div className="h-full min-h-[50vh] px-4 md:px-8 py-4" ref={onRef}>
                   <ContentEditable
-                    className="outline-none min-h-full relative"
+                    className="outline-hidden min-h-full relative"
                     placeholder="Commencez à écrire..."
                     placeholderClassName="text-muted-foreground absolute top-0 left-0 pointer-events-none select-none"
                   />

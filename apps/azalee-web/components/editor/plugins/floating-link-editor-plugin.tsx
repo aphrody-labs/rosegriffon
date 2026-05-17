@@ -219,7 +219,7 @@ function FloatingLinkEditor({
             value={editedLinkUrl}
             onChange={(event) => setEditedLinkUrl(event.target.value)}
             onKeyDown={monitorInputInteraction}
-            className="flex-grow"
+            className="grow"
             aria-label="URL du lien"
           />
           <Button
@@ -232,7 +232,7 @@ function FloatingLinkEditor({
             className="shrink-0"
             aria-label="Annuler la modification"
           >
-            <X className="h-4 w-4" />
+            <X className="size-4" />
           </Button>
           <Button
             size="icon"
@@ -240,7 +240,7 @@ function FloatingLinkEditor({
             className="shrink-0"
             aria-label="Confirmer le lien"
           >
-            <Check className="h-4 w-4" />
+            <Check className="size-4" />
           </Button>
         </div>
       ) : (
@@ -263,7 +263,7 @@ function FloatingLinkEditor({
               }}
               aria-label="Modifier le lien"
             >
-              <Pencil className="h-4 w-4" />
+              <Pencil className="size-4" />
             </Button>
             <Button
               size="icon"
@@ -273,7 +273,7 @@ function FloatingLinkEditor({
               }}
               aria-label="Supprimer le lien"
             >
-              <Trash className="h-4 w-4" />
+              <Trash className="size-4" />
             </Button>
           </div>
         </div>

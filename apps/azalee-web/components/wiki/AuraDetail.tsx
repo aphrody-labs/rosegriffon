@@ -95,7 +95,7 @@ export function AuraDetail({
 			{/* Main Card */}
 			<div className="grid grid-cols-1 lg:grid-cols-[320px_1fr] gap-6 lg:gap-8 p-4 sm:p-6 lg:p-8 rounded-2xl sm:rounded-[32px] bg-surface-container border border-outline-variant/30 shadow-sm relative overflow-hidden">
 				{/* Decorative Background */}
-				<div className="absolute top-0 right-0 w-[500px] h-[500px] bg-primary/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none" />
+				<div className="absolute top-0 right-0 size-[500px] bg-primary/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none" />
 
 				{/* Left: Image */}
 				<div className="flex flex-col items-center gap-6">

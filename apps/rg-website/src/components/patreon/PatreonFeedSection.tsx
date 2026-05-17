@@ -16,13 +16,13 @@ export async function PatreonFeedSection() {
 	return (
 		<section
 			aria-labelledby="patreon-feed-title"
-			className="border-b border-border/50 bg-gradient-to-br from-[#FF424D]/5 via-background to-[#c9a958]/5"
+			className="border-b border-border/50 bg-linear-to-br from-[#FF424D]/5 via-background to-[#c9a958]/5"
 		>
 			<div className="mx-auto max-w-7xl px-4 py-8 md:px-6 md:py-10 lg:px-8">
 				<div className="mb-6 flex flex-wrap items-center justify-between gap-3">
 					<div className="flex items-center gap-3">
-						<div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#FF424D]/10 text-[#FF424D]">
-							<Heart className="h-5 w-5" />
+						<div className="flex size-10 items-center justify-center rounded-full bg-[#FF424D]/10 text-[#FF424D]">
+							<Heart className="size-5" />
 						</div>
 						<div>
 							<h2
@@ -103,7 +103,7 @@ function PatreonPostCard({
 			href={post.url ?? "https://patreon.com/RoseGriffon"}
 			target="_blank"
 			rel="noopener noreferrer"
-			className="group block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF424D] focus-visible:ring-offset-2 rounded-2xl"
+			className="group block focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-[#FF424D] focus-visible:ring-offset-2 rounded-2xl"
 		>
 			<article className="flex h-full flex-col overflow-hidden rounded-2xl border border-border/50 bg-card shadow-sm transition-all group-hover:-translate-y-0.5 group-hover:border-[#FF424D]/40 group-hover:shadow-md">
 				<div className="relative aspect-video overflow-hidden bg-muted">
@@ -116,7 +116,7 @@ function PatreonPostCard({
 						/>
 					) : (
 						<div className="flex h-full w-full items-center justify-center text-muted-foreground/50">
-							<Heart className="h-10 w-10" aria-hidden="true" />
+							<Heart className="size-10" aria-hidden="true" />
 						</div>
 					)}
 					<div className="absolute left-3 top-3 flex flex-wrap gap-1.5">

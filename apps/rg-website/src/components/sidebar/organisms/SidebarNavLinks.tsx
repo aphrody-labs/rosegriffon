@@ -54,7 +54,7 @@ export const SidebarNavLinks = React.memo(function SidebarNavLinks({
 									<SidebarCollapsibleItem
 										title={item.title}
 										icon={
-											<item.icon className="w-4 h-4 md:w-5 md:h-5 transition-all duration-200" />
+											<item.icon className="size-4 md:w-5 md:h-5 transition-all duration-200" />
 										}
 										// badge={item.badge} // Badge removed
 										description={item.description}
@@ -79,7 +79,7 @@ export const SidebarNavLinks = React.memo(function SidebarNavLinks({
 									<SidebarSimpleItem
 										href={item.url || "/"}
 										icon={
-											<item.icon className="w-4 h-4 md:w-5 md:h-5 transition-all duration-200" />
+											<item.icon className="size-4 md:w-5 md:h-5 transition-all duration-200" />
 										}
 										label={item.title}
 										// badge={item.badge} // Badge removed

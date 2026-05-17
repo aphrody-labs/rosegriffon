@@ -200,7 +200,7 @@ export default async function HomePage() {
 						alt=""
 						width={20}
 						height={20}
-						className="w-5 h-5 opacity-30"
+						className="size-5 opacity-30"
 					/>
 					<div className="flex-1 h-px bg-outline-variant/20" />
 				</div>

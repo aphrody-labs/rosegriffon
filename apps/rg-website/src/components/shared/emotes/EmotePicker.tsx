@@ -86,7 +86,7 @@ export default function EmotePicker({
       <DialogTrigger asChild>
         {trigger || (
           <Button variant="outline" size="sm">
-            <Smile className="w-4 h-4 mr-2" />
+            <Smile className="size-4 mr-2" />
             Emote
           </Button>
         )}
@@ -94,7 +94,7 @@ export default function EmotePicker({
       <DialogContent className="max-w-2xl max-h-[600px] flex flex-col p-0">
         <DialogHeader className="px-6 py-4 border-b">
           <DialogTitle className="flex items-center gap-2">
-            <Smile className="w-5 h-5 text-[#B03519]" />
+            <Smile className="size-5 text-[#B03519]" />
             {title}
           </DialogTitle>
         </DialogHeader>
@@ -103,7 +103,7 @@ export default function EmotePicker({
           {/* Barre de recherche */}
           <div className="px-6 py-4 border-b">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
               <Input
                 placeholder="Rechercher une emote..."
                 className="pl-10"
@@ -139,7 +139,7 @@ export default function EmotePicker({
               <TabsContent value={activeTab} className="mt-0">
                 {filteredEmotes.length === 0 ? (
                   <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
-                    <Smile className="w-12 h-12 mb-2 opacity-20" />
+                    <Smile className="size-12 mb-2 opacity-20" />
                     <p>Aucune emote trouvée</p>
                   </div>
                 ) : (
@@ -148,7 +148,7 @@ export default function EmotePicker({
                       <button
                         key={emote.name}
                         onClick={() => handleSelect(emote)}
-                        className="group flex flex-col items-center gap-2 p-3 rounded-lg hover:bg-muted transition-all focus:outline-none focus:ring-2 focus:ring-[#B03519]/50 bg-background border border-border/50 hover:border-[#B03519]/50"
+                        className="group flex flex-col items-center gap-2 p-3 rounded-lg hover:bg-muted transition-all focus:outline-hidden focus:ring-2 focus:ring-[#B03519]/50 bg-background border border-border/50 hover:border-[#B03519]/50"
                         title={emote.alt}
                         type="button"
                       >

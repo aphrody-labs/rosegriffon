@@ -61,7 +61,7 @@ export function AccountTabs({
 						aria-label={label}
 						className="flex min-h-11 flex-col items-center justify-center gap-0.5 px-1 text-xs sm:h-9 sm:min-h-9 sm:flex-row sm:gap-2 sm:text-sm"
 					>
-						<Icon className="h-4 w-4 shrink-0" aria-hidden="true" />
+						<Icon className="size-4 shrink-0" aria-hidden="true" />
 						<span className="truncate">{label}</span>
 					</TabsTrigger>
 				))}
@@ -71,7 +71,7 @@ export function AccountTabs({
 				<TabsContent
 					key={v}
 					value={v}
-					className="mt-6 focus-visible:outline-none"
+					className="mt-6 focus-visible:outline-hidden"
 				>
 					{slots[v]}
 				</TabsContent>

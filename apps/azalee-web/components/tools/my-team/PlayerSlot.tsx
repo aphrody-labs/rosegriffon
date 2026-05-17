@@ -56,7 +56,7 @@ export function PlayerSlot({ member, onRemove, compact }: PlayerSlotProps) {
       />
 
       {/* Bottom gradient */}
-      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
+      <div className="absolute inset-0 bg-linear-to-t from-black/80 via-transparent to-transparent" />
 
       {/* Role badge */}
       {!compact && (
@@ -114,7 +114,7 @@ export function PlayerSlotOverlay({ member }: { member: TeamMember }) {
           className="object-cover"
           unoptimized
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
+        <div className="absolute inset-0 bg-linear-to-t from-black/80 via-transparent to-transparent" />
         <span
           className="absolute top-1 left-1 text-[8px] font-black px-1 py-px rounded text-white"
           style={{ backgroundColor: roleColor }}

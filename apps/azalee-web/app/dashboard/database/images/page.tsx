@@ -195,7 +195,7 @@ export default async function ImageValidationPage({
                 </span>
                 <span className="text-xs font-mono text-on-surface-variant">{charaId}</span>
                 {hasBasara && (
-                  <Badge className="bg-gradient-to-r from-[#4facfe] via-[#7367f0] to-[#9733ee] text-white border-none text-[10px] font-black">
+                  <Badge className="bg-linear-to-r from-[#4facfe] via-[#7367f0] to-[#9733ee] text-white border-none text-[10px] font-black">
                     BASARA
                   </Badge>
                 )}
@@ -226,7 +226,7 @@ export default async function ImageValidationPage({
                       key={row.id}
                       className="flex flex-col items-center gap-2 p-2 rounded-xl bg-surface-container-low/50"
                     >
-                      <div className="relative w-16 h-16 rounded-xl overflow-hidden bg-surface-container-highest">
+                      <div className="relative size-16 rounded-xl overflow-hidden bg-surface-container-highest">
                         {imgUrl ? (
                           <Image
                             src={imgUrl}

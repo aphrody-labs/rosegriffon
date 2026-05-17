@@ -20,7 +20,7 @@ function RgBadge({ subtitle, className }: { subtitle: string; className?: string
     <div
       className={`inline-flex items-center gap-2 rounded-full bg-white/10 text-white font-black uppercase tracking-wide ${className}`}
     >
-      <Image src="/rg.webp" alt="" width={16} height={16} className="w-4 h-4 object-contain" />
+      <Image src="/rg.webp" alt="" width={16} height={16} className="size-4 object-contain" />
       {subtitle}
     </div>
   );
@@ -73,7 +73,7 @@ export function RgtvBanner({
       {/* ── Mobile: image-as-background, full-bleed ── */}
       <div className="md:hidden -mx-4 relative overflow-hidden">
         <Image src={image} alt={title} fill className="object-cover object-top" sizes="100vw" />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#8B5023]/90 via-[#8B5023]/60 to-[#8B5023]/30" />
+        <div className="absolute inset-0 bg-linear-to-t from-[#8B5023]/90 via-[#8B5023]/60 to-[#8B5023]/30" />
         <div
           className="absolute inset-0 pointer-events-none opacity-10"
           style={{ background: STRIPE_PATTERN }}

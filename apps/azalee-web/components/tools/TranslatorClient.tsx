@@ -167,7 +167,7 @@ export function TranslatorClient() {
                 placeholder="Mark Evans, Fire Tornado, 円堂守..."
                 aria-label="Rechercher un nom"
                 rows={3}
-                className="w-full h-full min-h-[120px] sm:min-h-[160px] p-4 bg-transparent text-on-surface text-lg sm:text-xl placeholder:text-on-surface-variant/30 focus:outline-none resize-none"
+                className="w-full h-full min-h-[120px] sm:min-h-[160px] p-4 bg-transparent text-on-surface text-lg sm:text-xl placeholder:text-on-surface-variant/30 focus:outline-hidden resize-none"
               />
             </div>
 

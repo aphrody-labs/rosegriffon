@@ -273,7 +273,7 @@ export default function EmotesShowcasePage() {
                     toast.success(`Emote aléatoire : ${emote.name}`);
                   }}
                 >
-                  <Sparkles className="w-4 h-4 mr-2" />
+                  <Sparkles className="size-4 mr-2" />
                   Emote Aléatoire
                 </Button>
 

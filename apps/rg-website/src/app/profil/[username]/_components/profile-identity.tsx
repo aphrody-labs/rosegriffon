@@ -32,7 +32,7 @@ export function ProfileIdentity({
 			aria-label="Identité"
 			className="relative mb-8 flex flex-col items-center gap-6 md:flex-row md:items-start"
 		>
-			<Avatar className="h-24 w-24 border-2 border-border shadow-md sm:h-32 sm:w-32 md:h-36 md:w-36">
+			<Avatar className="size-24 border-2 border-border shadow-md sm:h-32 sm:w-32 md:h-36 md:w-36">
 				<AvatarImage
 					src={avatarUrl ?? ""}
 					alt={`Avatar de ${username}`}
@@ -90,7 +90,7 @@ export function ProfileIdentity({
 								rel="noopener noreferrer"
 								className="flex items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-primary"
 							>
-								<ExternalLink className="h-4 w-4" aria-hidden="true" />
+								<ExternalLink className="size-4" aria-hidden="true" />
 								Site Web
 							</a>
 						)}
@@ -101,7 +101,7 @@ export function ProfileIdentity({
 								rel="noopener noreferrer"
 								className="flex items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-[#1DA1F2]"
 							>
-								<TwitterIcon className="h-4 w-4" />
+								<TwitterIcon className="size-4" />
 								Twitter
 							</a>
 						)}

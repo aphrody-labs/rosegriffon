@@ -200,7 +200,7 @@ function BaseCharacterRow({
 					href={`/chara/${(character as any).baseSlug || character.slug || activeVariant.charaParamId}`}
 					className="flex items-center gap-3 group"
 				>
-					<div className="relative w-12 h-12 rounded-lg overflow-hidden bg-surface-container-highest flex-shrink-0 ring-1 ring-outline-variant/30">
+					<div className="relative size-12 rounded-lg overflow-hidden bg-surface-container-highest shrink-0 ring-1 ring-outline-variant/30">
 						<SafeImage
 							src={imageUrl}
 							zukanHash={character.zukanHash}
@@ -218,7 +218,7 @@ function BaseCharacterRow({
 							</span>
 							{character.isBasara && (
 								<div
-									className="flex items-center justify-center w-4 h-4 rounded-full bg-gradient-to-br from-[#4facfe] via-[#7367f0] to-[#9733ee] shadow-sm animate-pulse"
+									className="flex items-center justify-center size-4 rounded-full bg-linear-to-br from-[#4facfe] via-[#7367f0] to-[#9733ee] shadow-sm animate-pulse"
 									title="Personnage BASARA"
 								>
 									<Sparkles
@@ -230,7 +230,7 @@ function BaseCharacterRow({
 							)}
 							{!character.isBasara && character.bestRarityCode >= 10 && (
 								<span
-									className="px-1.5 py-0.5 text-[9px] font-bold rounded-full bg-gradient-to-r from-amber-500 to-orange-500 text-white leading-none"
+									className="px-1.5 py-0.5 text-[9px] font-bold rounded-full bg-linear-to-r from-amber-500 to-orange-500 text-white leading-none"
 									title="Héros"
 								>
 									H
@@ -238,7 +238,7 @@ function BaseCharacterRow({
 							)}
 							{variants.length > 1 && (
 								<span
-									className="bg-surface-container-highest text-on-surface text-[10px] font-bold rounded-full size-5 flex items-center justify-center flex-shrink-0"
+									className="bg-surface-container-highest text-on-surface text-[10px] font-bold rounded-full size-5 flex items-center justify-center shrink-0"
 									title={`${variants.length} versions`}
 								>
 									{variants.length}
@@ -299,7 +299,7 @@ function BaseCharacterRow({
 			<TableCell className="text-center">
 				<div className="flex flex-col items-center gap-1">
 					{positionImage ? (
-						<div className="relative w-6 h-6" title={positionFr}>
+						<div className="relative size-6" title={positionFr}>
 							<Image
 								src={positionImage}
 								alt={positionFr}
@@ -323,7 +323,7 @@ function BaseCharacterRow({
 
 					{subPositionImage && (
 						<div
-							className="relative w-4 h-4 opacity-70"
+							className="relative size-4 opacity-70"
 							title={activeVariant.subPosition || ""}
 						>
 							<Image

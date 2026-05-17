@@ -53,7 +53,7 @@ export default async function EventsPage({ searchParams }: EventsPageProps) {
 						<SyncEventsButton />
 						<Button asChild>
 							<Link href="/admin/events/new">
-								<Plus className="w-4 h-4 mr-2" />
+								<Plus className="size-4 mr-2" />
 								Nouvel Événement
 							</Link>
 						</Button>
@@ -69,7 +69,7 @@ export default async function EventsPage({ searchParams }: EventsPageProps) {
 						</CardHeader>
 						<CardContent>
 							<div className="flex items-center text-sm text-muted-foreground mb-4">
-								<Calendar className="w-4 h-4 mr-2" />
+								<Calendar className="size-4 mr-2" />
 								{event.start_time
 									? new Date(event.start_time).toLocaleDateString("fr-FR")
 									: "Date inconnue"}
@@ -85,7 +85,7 @@ export default async function EventsPage({ searchParams }: EventsPageProps) {
 				))}
 				{(!events || events.length === 0) && (
 					<div className="col-span-full text-center py-12 text-muted-foreground bg-muted/30 rounded-lg border-2 border-dashed">
-						<Calendar className="w-12 h-12 mx-auto mb-4 text-muted-foreground/50" />
+						<Calendar className="size-12 mx-auto mb-4 text-muted-foreground/50" />
 						<p>Aucun événement trouvé.</p>
 						<p className="text-sm">
 							Synchronisez avec Google Calendar ou créez-en un manuellement.

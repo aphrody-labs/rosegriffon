@@ -26,7 +26,7 @@ export function RecentArticles({ articles }: { articles: RecentArticle[] }) {
 					className="flex items-center gap-1 text-xs font-medium text-muted-foreground transition-colors hover:text-primary"
 				>
 					Tout voir
-					<ArrowRight className="h-3 w-3" aria-hidden="true" />
+					<ArrowRight className="size-3" aria-hidden="true" />
 				</Link>
 			</CardHeader>
 			<CardContent>
@@ -41,10 +41,10 @@ export function RecentArticles({ articles }: { articles: RecentArticle[] }) {
 								<li key={a.id} className="py-3 first:pt-0 last:pb-0">
 									<div className="flex items-start gap-3">
 										<div
-											className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg bg-violet-500/10 text-violet-600 dark:text-violet-400"
+											className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-violet-500/10 text-violet-600 dark:text-violet-400"
 											aria-hidden="true"
 										>
-											<FileText className="h-4 w-4" />
+											<FileText className="size-4" />
 										</div>
 										<div className="min-w-0 flex-1">
 											<div className="flex items-start justify-between gap-2">
@@ -54,7 +54,7 @@ export function RecentArticles({ articles }: { articles: RecentArticle[] }) {
 												{isDraft && (
 													<Badge
 														variant="outline"
-														className="flex-shrink-0 text-xs"
+														className="shrink-0 text-xs"
 													>
 														Brouillon
 													</Badge>
@@ -70,7 +70,7 @@ export function RecentArticles({ articles }: { articles: RecentArticle[] }) {
 												)}
 												{typeof a.view_count === "number" && (
 													<span className="flex items-center gap-1">
-														<Eye className="h-3 w-3" aria-hidden="true" />
+														<Eye className="size-3" aria-hidden="true" />
 														{a.view_count}
 													</span>
 												)}

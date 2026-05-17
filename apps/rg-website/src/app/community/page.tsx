@@ -54,7 +54,7 @@ function MemberCard({ member }: { member: DiscordMember }) {
       {/* Premium Glow effect for Médaille Azalée */}
       {isMedaille && (
         <>
-          <div className="absolute -inset-[2px] bg-gradient-to-r from-primary via-secondary to-primary rounded-[26px] opacity-20 group-hover:opacity-100 blur-sm transition-opacity duration-500" />
+          <div className="absolute -inset-[2px] bg-linear-to-r from-primary via-secondary to-primary rounded-[26px] opacity-20 group-hover:opacity-100 blur-sm transition-opacity duration-500" />
           <div className="absolute inset-0 bg-surface-container rounded-[24px] m-[1px]" />
           <div className="absolute top-0 right-0 p-3 opacity-20 group-hover:opacity-100 transition-opacity">
             <Sparkles className="size-5 text-primary animate-pulse" />

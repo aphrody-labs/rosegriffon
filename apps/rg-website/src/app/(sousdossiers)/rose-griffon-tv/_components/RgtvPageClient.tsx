@@ -68,15 +68,15 @@ function RgtvPageInner({
             className={`grid w-full grid-cols-3 ${isStreamer ? "lg:grid-cols-4" : ""} mb-6`}
           >
             <TabsTrigger value="stream" className="flex items-center gap-2">
-              <Radio className="h-4 w-4" />
+              <Radio className="size-4" />
               <span className="hidden sm:inline">Stream</span>
             </TabsTrigger>
             <TabsTrigger value="planning" className="flex items-center gap-2">
-              <Monitor className="h-4 w-4" />
+              <Monitor className="size-4" />
               <span className="hidden sm:inline">Planning</span>
             </TabsTrigger>
             <TabsTrigger value="community" className="flex items-center gap-2">
-              <Users className="h-4 w-4" />
+              <Users className="size-4" />
               <span className="hidden sm:inline">Communauté</span>
             </TabsTrigger>
           </TabsList>
@@ -101,7 +101,7 @@ function RgtvPageInner({
                   style={twitchChannel === c.id ? { backgroundColor: colors.primary } : undefined}
                   aria-pressed={twitchChannel === c.id}
                 >
-                  <Radio className="inline-block h-4 w-4 mr-1.5 -mt-0.5" />
+                  <Radio className="inline-block size-4 mr-1.5 -mt-0.5" />
                   {c.label}
                 </button>
               ))}
@@ -130,12 +130,12 @@ function RgtvPageInner({
                         </h2>
                         <div className="flex items-center gap-4 text-sm">
                           <div className="flex items-center gap-2">
-                            <Users className="h-4 w-4" style={{ color: colors.primary }} />
+                            <Users className="size-4" style={{ color: colors.primary }} />
                             <span>{twitchData.streamInfo.viewer_count} viewers</span>
                           </div>
                           {twitchData.streamInfo.game_name && (
                             <div className="flex items-center gap-2">
-                              <Monitor className="h-4 w-4" style={{ color: colors.primary }} />
+                              <Monitor className="size-4" style={{ color: colors.primary }} />
                               <span>{twitchData.streamInfo.game_name}</span>
                             </div>
                           )}
@@ -147,7 +147,7 @@ function RgtvPageInner({
                               target="_blank"
                               rel="noopener noreferrer"
                             >
-                              <Monitor className="mr-2 h-4 w-4" />
+                              <Monitor className="mr-2 size-4" />
                               Ouvrir Twitch
                             </Link>
                           </Button>
@@ -157,7 +157,7 @@ function RgtvPageInner({
                               target="_blank"
                               rel="noopener noreferrer"
                             >
-                              <Youtube className="mr-2 h-4 w-4" />
+                              <Youtube className="mr-2 size-4" />
                               YouTube
                             </Link>
                           </Button>
@@ -255,7 +255,7 @@ function RgtvPageInner({
                           {streamer.name}
                         </span>
                         <div className="flex items-center gap-1 mt-1.5 px-2 py-0.5 rounded-full bg-[#d63901] text-white text-[10px] font-semibold">
-                          <span className="w-1 h-1 bg-white rounded-full animate-pulse" />
+                          <span className="size-1 bg-white rounded-full animate-pulse" />
                           Live
                         </div>
                       </div>
