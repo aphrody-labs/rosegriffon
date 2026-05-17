@@ -1,72 +1,115 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { motion, useInView, useReducedMotion } from "motion/react";
+import { Children, isValidElement, useRef } from "react";
 
 type AnimationDirection = "up" | "left" | "right" | "scale";
 
 interface AnimatedSectionProps {
-  children: React.ReactNode;
-  className?: string;
-  delay?: number;
-  direction?: AnimationDirection;
-  /** Stagger delay (in seconds) between direct children */
-  stagger?: number;
+	children: React.ReactNode;
+	className?: string;
+	delay?: number;
+	direction?: AnimationDirection;
+	/** Stagger delay (in seconds) between direct children */
+	stagger?: number;
 }
 
 const directionClass: Record<AnimationDirection, string> = {
-  up: "scroll-reveal-up",
-  left: "scroll-reveal-left",
-  right: "scroll-reveal-right",
-  scale: "scroll-reveal-scale",
+	up: "scroll-reveal-up",
+	left: "scroll-reveal-left",
+	right: "scroll-reveal-right",
+	scale: "scroll-reveal-scale",
+};
+
+// MD3 emphasized-decelerate easing
+const EMPHASIZED_DECELERATE: [number, number, number, number] = [
+	0.05, 0.7, 0.1, 1,
+];
+
+const initialByDirection: Record<
+	AnimationDirection,
+	{ opacity: number; x?: number; y?: number; scale?: number }
+> = {
+	up: { opacity: 0, y: 40 },
+	left: { opacity: 0, x: -40 },
+	right: { opacity: 0, x: 40 },
+	scale: { opacity: 0, scale: 0.92 },
+};
+
+const visibleByDirection: Record<
+	AnimationDirection,
+	{ opacity: number; x?: number; y?: number; scale?: number }
+> = {
+	up: { opacity: 1, y: 0 },
+	left: { opacity: 1, x: 0 },
+	right: { opacity: 1, x: 0 },
+	scale: { opacity: 1, scale: 1 },
 };
 
 export function AnimatedSection({
-  children,
-  className,
-  delay = 0,
-  direction = "up",
-  stagger,
+	children,
+	className,
+	delay = 0,
+	direction = "up",
+	stagger,
 }: AnimatedSectionProps) {
-  const ref = useRef<HTMLDivElement>(null);
+	const ref = useRef<HTMLDivElement>(null);
+	const inView = useInView(ref, { once: true, margin: "-60px 0px -60px 0px" });
+	const prefersReducedMotion = useReducedMotion();
 
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
+	const initial = prefersReducedMotion
+		? { opacity: 1 }
+		: initialByDirection[direction];
+	const animate = prefersReducedMotion
+		? { opacity: 1 }
+		: inView
+			? visibleByDirection[direction]
+			: initialByDirection[direction];
 
-    const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (prefersReduced) {
-      el.classList.add("scroll-reveal-visible");
-      return;
-    }
+	// Stagger: wrap each direct child in a motion.div with incremental delay.
+	if (stagger && !prefersReducedMotion) {
+		const childrenArray = Children.toArray(children);
+		return (
+			<div
+				ref={ref}
+				className={`${directionClass[direction]} ${className || ""}`}
+			>
+				{childrenArray.map((child, index) => {
+					const key =
+						isValidElement(child) && child.key != null ? child.key : index;
+					return (
+						<motion.div
+							key={key}
+							initial={initial}
+							animate={animate}
+							transition={{
+								duration: 0.7,
+								delay: delay + index * stagger,
+								ease: EMPHASIZED_DECELERATE,
+							}}
+							className="scroll-stagger-child"
+						>
+							{child}
+						</motion.div>
+					);
+				})}
+			</div>
+		);
+	}
 
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          el.style.transitionDelay = `${delay}s`;
-          el.classList.add("scroll-reveal-visible");
-
-          // Stagger direct children if requested
-          if (stagger) {
-            const children = el.querySelectorAll(":scope > .scroll-stagger-child");
-            children.forEach((child, i) => {
-              (child as HTMLElement).style.transitionDelay = `${delay + i * stagger}s`;
-              child.classList.add("scroll-reveal-visible");
-            });
-          }
-
-          observer.unobserve(el);
-        }
-      },
-      { rootMargin: "-60px", threshold: 0.1 },
-    );
-
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, [delay, stagger]);
-
-  return (
-    <div ref={ref} className={`${directionClass[direction]} ${className || ""}`}>
-      {children}
-    </div>
-  );
+	return (
+		<motion.div
+			ref={ref}
+			className={`${directionClass[direction]} ${className || ""}`}
+			initial={initial}
+			animate={animate}
+			transition={{
+				duration: 0.7,
+				delay,
+				ease: EMPHASIZED_DECELERATE,
+			}}
+		>
+			{children}
+		</motion.div>
+	);
 }
