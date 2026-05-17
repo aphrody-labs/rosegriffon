@@ -295,7 +295,7 @@ export function CharacterSheet({
   const currentSkills = allSkills.slice(0, moveLimit);
 
   // Robust image URL selection — zukanHash prioritaire
-  let characterImageUrl = "/ievr.png";
+  let characterImageUrl = "/ievr.webp";
   if (zukanHash) {
     characterImageUrl = `https://dxi4wb638ujep.cloudfront.net/1/${zukanHash}.png`;
   } else if (avatarUrl && (avatarUrl.startsWith("/") || avatarUrl.startsWith("http"))) {

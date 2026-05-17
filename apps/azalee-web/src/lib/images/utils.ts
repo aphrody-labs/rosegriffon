@@ -416,12 +416,14 @@ export function getCharacterModel360Url(
 }
 
 /**
- * URL de fallback générique
+ * URL de fallback générique — pointe vers /ievr.webp qui existe en public/.
+ * (Le dossier /images/placeholders/ n'a jamais été créé ; ces 3 paths
+ * étaient des 404 silencieux dans les Image fallbacks de characters/skills/items.)
  */
 export const PLACEHOLDERS = {
-	character: "/images/placeholders/character.webp",
-	skill: "/images/placeholders/skill.webp",
-	item: "/images/placeholders/item.webp",
+	character: "/ievr.webp",
+	skill: "/ievr.webp",
+	item: "/ievr.webp",
 } as const;
 
 /**

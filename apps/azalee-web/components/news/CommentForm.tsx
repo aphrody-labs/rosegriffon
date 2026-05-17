@@ -92,7 +92,7 @@ export function CommentForm({
 				</div>
 				<p className="text-sm text-on-surface-variant">
 					<Link
-						href="/connexion"
+						href="/login"
 						className="text-primary font-medium hover:underline underline-offset-2"
 					>
 						Connectez-vous
