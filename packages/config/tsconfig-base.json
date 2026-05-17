@@ -9,6 +9,7 @@
 		"strictNullChecks": true,
 		"noFallthroughCasesInSwitch": true,
 		"noImplicitOverride": true,
+		"noUncheckedIndexedAccess": true,
 		"forceConsistentCasingInFileNames": true,
 		"esModuleInterop": true,
 		"allowSyntheticDefaultImports": true,
