@@ -15,6 +15,7 @@ import { RgtvBanner } from "@/components/home/RgtvBanner";
 import RgEmote from "@/components/shared/emotes/RgEmote";
 import { FeaturedTweets } from "@/components/shared/FeaturedTweets";
 import { LatestChroniqueSection } from "@/components/shared/LatestChroniqueSection";
+import { MotionSection } from "@/components/shared/MotionSection";
 import { RealtimeSettingsListener } from "@/components/shared/RealtimeSettingsListener";
 import {
 	OrganizationSchema,
@@ -168,7 +169,10 @@ export default async function Home() {
 		getPublicSetting("home_azalee_image", "/azalee-bg.webp"),
 		getPublicSetting("home_azalee_logo", "/RG_Azalee-logo.webp"),
 		getPublicSetting("home_azalee_twitter", "https://x.com/Azalee_IE"),
-		getPublicSetting("home_azalee_instagram", "https://www.instagram.com/azaleefr/"),
+		getPublicSetting(
+			"home_azalee_instagram",
+			"https://www.instagram.com/azaleefr/",
+		),
 		// Achillea Defaults
 		getPublicSetting(
 			"home_achillea_description",
@@ -235,9 +239,8 @@ export default async function Home() {
 					id="main-content"
 					className="flex flex-col gap-4 md:gap-6 lg:gap-8 pb-12 md:pb-16 lg:pb-20 pt-2 md:pt-4 will-change-scroll"
 				>
-					<section
-						className="max-w-7xl mx-auto px-4 md:px-6 lg:px-8 w-full animate-in fade-in slide-in-from-bottom-4 duration-500"
-						style={{ animationDelay: "50ms" }}
+					<MotionSection
+						className="max-w-7xl mx-auto px-4 md:px-6 lg:px-8 w-full"
 						aria-labelledby="about-heading"
 					>
 						{/* Affichage du prochain événement s'il existe */}
@@ -256,11 +259,10 @@ export default async function Home() {
 								</p>
 							</div>
 						</FusionBlock>
-					</section>
+					</MotionSection>
 
-					<section
-						className="max-w-7xl mx-auto px-4 md:px-6 lg:px-8 w-full animate-in fade-in slide-in-from-bottom-4 duration-500"
-						style={{ animationDelay: "75ms" }}
+					<MotionSection
+						className="max-w-7xl mx-auto px-4 md:px-6 lg:px-8 w-full"
 						aria-labelledby="rgtv-heading"
 					>
 						<RgtvBanner
@@ -271,11 +273,10 @@ export default async function Home() {
 							buttonText={rgtvButtonText}
 							link={rgtvLink}
 						/>
-					</section>
+					</MotionSection>
 
-					<section
-						className="max-w-7xl mx-auto px-4 md:px-6 lg:px-8 w-full animate-in fade-in slide-in-from-bottom-4 duration-500"
-						style={{ animationDelay: "90ms" }}
+					<MotionSection
+						className="max-w-7xl mx-auto px-4 md:px-6 lg:px-8 w-full"
 						aria-labelledby="azalee-heading"
 					>
 						<AzaleeBanner
@@ -287,11 +288,10 @@ export default async function Home() {
 							twitterLink={azaleeTwitter}
 							instagramLink={azaleeInstagram}
 						/>
-					</section>
+					</MotionSection>
 
-					<section
-						className="max-w-7xl mx-auto px-4 md:px-6 lg:px-8 w-full animate-in fade-in slide-in-from-bottom-4 duration-500"
-						style={{ animationDelay: "105ms" }}
+					<MotionSection
+						className="max-w-7xl mx-auto px-4 md:px-6 lg:px-8 w-full"
 						aria-labelledby="achillea-heading"
 					>
 						<AchilleaBanner
@@ -300,26 +300,23 @@ export default async function Home() {
 							link={achilleaLink}
 							discordLink={achilleaDiscord}
 						/>
-					</section>
+					</MotionSection>
 
 					<Suspense fallback={null}>
 						<LatestChroniqueSection />
 					</Suspense>
 
-					<section
+					<MotionSection
 						id="projets-section"
-						className="animate-in fade-in slide-in-from-bottom-4 duration-500"
-						style={{ animationDelay: "100ms" }}
 						aria-labelledby="projects-heading"
 					>
 						<ProjectsSection />
-					</section>
+					</MotionSection>
 
 					{/* Section Réseaux Sociaux & Communauté */}
 
-					<section
-						className="w-full space-y-4 md:space-y-8 lg:space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-500"
-						style={{ animationDelay: "200ms" }}
+					<MotionSection
+						className="w-full space-y-4 md:space-y-8 lg:space-y-10"
 						aria-labelledby="community-heading"
 					>
 						<div className="text-center space-y-2 max-w-7xl mx-auto px-4">
@@ -411,7 +408,7 @@ export default async function Home() {
 						<div className="w-full">
 							<FeaturedTweets />
 						</div>
-					</section>
+					</MotionSection>
 
 					{/* Section Dernière Chronique */}
 				</div>

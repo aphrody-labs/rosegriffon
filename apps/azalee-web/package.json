@@ -74,6 +74,7 @@
 		"jsonwebtoken": "^9.0.3",
 		"lexical": "^0.44.0",
 		"lucide-react": "catalog:",
+		"motion": "^12.38.0",
 		"next": "catalog:",
 		"next-themes": "^0.4.6",
 		"node-ipinfo": "^4.3.0",
