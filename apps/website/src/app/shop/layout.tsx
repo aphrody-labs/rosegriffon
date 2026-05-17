@@ -17,6 +17,26 @@ export const metadata = {
 	},
 };
 
+const organizationSchema = {
+	"@context": "https://schema.org",
+	"@type": "Organization",
+	name: "Association Rose Griffon",
+	url: "https://rosegriffon.fr",
+	logo: "https://rosegriffon.fr/RG_Logo_V2.5_B.webp",
+	sameAs: [
+		"https://twitter.com/rosegriffon_fr",
+		"https://www.tiktok.com/@rosegriffon",
+		"https://discord.gg/rosegriffon",
+		"https://www.patreon.com/rosegriffon",
+	],
+	contactPoint: {
+		"@type": "ContactPoint",
+		email: "contact@rosegriffon.fr",
+		contactType: "Customer Service",
+		availableLanguage: ["French"],
+	},
+};
+
 export default async function ShopLayout({
 	children,
 }: {
@@ -26,6 +46,10 @@ export default async function ShopLayout({
 
 	return (
 		<div className="relative min-h-screen bg-[#0c1730] text-white">
+			<script
+				type="application/ld+json"
+				dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}
+			/>
 			{/* Grain overlay */}
 			<div
 				aria-hidden

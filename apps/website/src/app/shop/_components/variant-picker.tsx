@@ -1,16 +1,26 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useTransition } from "react";
 
+import { addToCart } from "@/lib/shop/cart";
 import { formatEuros, type Product } from "@/lib/shop/products";
 import { AddToCart } from "./add-to-cart";
+import { MobileStickyCta } from "./mobile-sticky-cta";
 
 export function VariantPickerWithCta({ product }: { product: Product }) {
 	const variants = product.variants ?? [];
 	const [selected, setSelected] = useState<string | undefined>(undefined);
+	const [, startTransition] = useTransition();
 	const selectedVariant = variants.find((v) => v.id === selected);
 	const displayPrice =
 		selectedVariant?.priceCentsOverride ?? product.priceCents;
+
+	const handleMobileAdd = () => {
+		if (variants.length > 0 && !selected) return;
+		startTransition(async () => {
+			await addToCart(product.slug, selected, 1);
+		});
+	};
 
 	if (variants.length === 0) {
 		return (
@@ -19,6 +29,10 @@ export function VariantPickerWithCta({ product }: { product: Product }) {
 					{formatEuros(product.priceCents)}
 				</p>
 				<AddToCart product={product} size="lg" />
+				<MobileStickyCta
+					priceCents={product.priceCents}
+					onAdd={handleMobileAdd}
+				/>
 			</div>
 		);
 	}
@@ -76,6 +90,13 @@ export function VariantPickerWithCta({ product }: { product: Product }) {
 			</div>
 
 			<AddToCart product={product} variantId={selected} size="lg" />
+
+			<MobileStickyCta
+				priceCents={displayPrice}
+				label={selectedVariant?.label ?? "Choisis ta variante"}
+				disabled={!selected}
+				onAdd={handleMobileAdd}
+			/>
 		</div>
 	);
 }
