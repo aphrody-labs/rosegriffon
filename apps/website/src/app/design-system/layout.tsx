@@ -1,4 +1,5 @@
-import { Fraunces, JetBrains_Mono } from "next/font/google";
+import { Fraunces, JetBrains_Mono, Poppins } from "next/font/google";
+import localFont from "next/font/local";
 import type { ReactNode } from "react";
 
 const fraunces = Fraunces({
@@ -14,10 +15,23 @@ const jetbrains = JetBrains_Mono({
 	variable: "--font-mono-ds",
 });
 
+const poppins = Poppins({
+	weight: ["400", "500", "600", "700"],
+	subsets: ["latin"],
+	display: "swap",
+	variable: "--font-body-ds",
+});
+
+const superCartoon = localFont({
+	src: "../../../public/fonts/Super Cartoon.woff2",
+	display: "swap",
+	variable: "--font-cartoon-ds",
+});
+
 export const metadata = {
 	title: "Design System — Rose Griffon",
 	description:
-		"Showcase du design system @rg/ui : 4 thèmes, tokens MD3, composants modernisés.",
+		"Showcase du design system @rg/ui : 4 thèmes, tokens MD3, composants — DA Rose Griffon (manga / gaming / Inazuma).",
 };
 
 export default function DesignSystemLayout({
@@ -27,7 +41,7 @@ export default function DesignSystemLayout({
 }) {
 	return (
 		<div
-			className={`${fraunces.variable} ${jetbrains.variable} theme-azalee-light min-h-screen bg-surface text-on-surface antialiased`}
+			className={`${fraunces.variable} ${jetbrains.variable} ${poppins.variable} ${superCartoon.variable} theme-azalee-light min-h-screen bg-surface text-on-surface antialiased`}
 		>
 			{children}
 		</div>

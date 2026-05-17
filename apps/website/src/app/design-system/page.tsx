@@ -1,7 +1,13 @@
-import { ArrowDownRightIcon, PlusIcon, SparklesIcon } from "lucide-react";
+import { PlusIcon, SparklesIcon, StarIcon, ZapIcon } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 
 import { ThemeSwitcher } from "./_components/theme-switcher";
+
+const RG_MARINE = "#0c1730";
+const RG_OR = "#d4af37";
+const RG_BRIQUE = "#a14b3f";
+const RG_AZALEE = "#F89C5A";
 
 const M3_COLORS = [
 	{ name: "primary", bg: "bg-primary", text: "text-on-primary" },
@@ -78,86 +84,140 @@ const MOTION_DURATIONS = [
 
 const ELEVATION_LEVELS = ["0", "1", "2", "3", "4", "5"];
 
-const NOISE_SVG = `data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.45 0'/></filter><rect width='100%' height='100%' filter='url(%23n)' opacity='0.35'/></svg>`;
+const HARD_SHADOW = "4px 4px 0 0 rgba(0,0,0,0.55)";
+const HARD_SHADOW_LG = "6px 6px 0 0 rgba(0,0,0,0.65)";
+
+// Style chunk pour la typo cartoon : outline blanc + drop shadow rouge brique.
+// Utilisé sur tous les titres de section pour assurer la cohérence DA.
+const cartoonTitleStyle: React.CSSProperties = {
+	fontFamily: "var(--font-cartoon-ds), 'Super Cartoon', sans-serif",
+	WebkitTextStroke: "2px #ffffff",
+	color: RG_MARINE,
+	textShadow: `4px 4px 0 ${RG_BRIQUE}, 6px 6px 0 rgba(0,0,0,0.4)`,
+	letterSpacing: "0.02em",
+};
 
 export default function DesignSystemShowcase() {
 	return (
 		<main
 			data-design-system-root
-			className="theme-azalee-light relative isolate font-mono-ds"
+			className="theme-azalee-light relative isolate overflow-hidden"
 			style={{
-				fontFamily: "var(--font-mono-ds), ui-monospace, monospace",
+				fontFamily: "var(--font-body-ds), 'Poppins', system-ui, sans-serif",
+				backgroundColor: RG_MARINE,
 			}}
 		>
-			{/* Grain background */}
+			{/* Logo griffon en filigrane sur tout le document */}
 			<div
 				aria-hidden
-				className="pointer-events-none fixed inset-0 z-0 opacity-40 mix-blend-multiply"
-				style={{
-					backgroundImage: `url("${NOISE_SVG}")`,
-					backgroundSize: "200px 200px",
-				}}
-			/>
+				className="pointer-events-none fixed inset-0 z-0 flex items-center justify-center opacity-[0.04]"
+			>
+				<Image
+					src="/RG_Logo_V2.5_NB.webp"
+					alt=""
+					width={900}
+					height={900}
+					priority={false}
+					sizes="900px"
+					className="select-none"
+				/>
+			</div>
 
 			{/* ────────────────────────────────────────────── HERO */}
-			<section className="relative z-10 mx-auto grid min-h-[88svh] max-w-[1440px] grid-cols-12 gap-6 px-6 pt-10 pb-24 md:px-12">
-				<header className="col-span-12 flex items-start justify-between gap-6 pb-16">
-					<div className="font-mono-ds text-[11px] uppercase tracking-[0.32em] text-on-surface-variant">
+			<section
+				className="relative z-10 mx-auto grid min-h-[92svh] max-w-[1440px] grid-cols-12 gap-6 px-6 pt-10 pb-24 md:px-12"
+				style={{ backgroundColor: RG_MARINE }}
+			>
+				{/* Arc diagonal or en fond du hero */}
+				<div
+					aria-hidden
+					className="pointer-events-none absolute inset-0 z-0"
+					style={{
+						background: `radial-gradient(ellipse 90% 60% at 20% 10%, ${RG_BRIQUE}30 0%, transparent 60%), radial-gradient(ellipse 70% 50% at 90% 90%, ${RG_OR}25 0%, transparent 55%)`,
+					}}
+				/>
+
+				<header className="relative z-20 col-span-12 flex items-start justify-between gap-6 pb-12">
+					<div
+						className="text-[11px] uppercase tracking-[0.32em]"
+						style={{
+							color: RG_OR,
+							fontFamily: "var(--font-cartoon-ds), sans-serif",
+						}}
+					>
 						<span className="block">@rg/ui</span>
-						<span className="block">Design&nbsp;System · v0.1.0</span>
+						<span className="block">Design System · v0.1.0</span>
 					</div>
 					<ThemeSwitcher />
 				</header>
 
-				<div className="col-span-12 grid grid-cols-12 gap-6 md:col-span-12">
+				<div className="relative z-20 col-span-12 grid grid-cols-12 gap-6">
 					<div className="col-span-12 lg:col-span-8">
 						<p
-							className="mb-8 inline-flex items-center gap-3 rounded-full border border-on-surface/30 px-4 py-1.5 text-[11px] uppercase tracking-[0.28em] text-on-surface-variant"
-							style={{ animationDelay: "0ms" }}
-						>
-							<SparklesIcon className="size-3" aria-hidden />
-							<span>Material Design 3 · Tailwind v4 · 55 composants</span>
-						</p>
-						<h1
-							className="font-display-ds text-on-surface"
+							className="mb-8 inline-flex items-center gap-3 rounded-full border-2 px-4 py-1.5 text-[11px] uppercase tracking-[0.28em]"
 							style={{
-								fontFamily:
-									"var(--font-display-ds), 'Fraunces', ui-serif, serif",
-								fontWeight: 360,
-								fontSize: "clamp(60px, 9vw, 156px)",
-								lineHeight: 0.86,
-								letterSpacing: "-0.04em",
-								fontVariationSettings: "'opsz' 144, 'SOFT' 100, 'WONK' 0",
+								borderColor: RG_OR,
+								color: RG_OR,
+								backgroundColor: "rgba(212,175,55,0.08)",
+								fontFamily: "var(--font-cartoon-ds), sans-serif",
+								boxShadow: HARD_SHADOW,
 							}}
 						>
-							Le{" "}
-							<em
-								className="text-primary"
+							<ZapIcon className="size-3" aria-hidden />
+							<span>Inazuma × Material Design 3 · 55 composants</span>
+						</p>
+						<h1
+							className="text-fluid-display-2xl leading-[0.9] text-balance"
+							style={{
+								...cartoonTitleStyle,
+								transform: "rotate(-2deg)",
+								transformOrigin: "left bottom",
+								color: "#fffdf5",
+								textShadow: `5px 5px 0 ${RG_BRIQUE}, 8px 8px 0 rgba(0,0,0,0.5)`,
+								WebkitTextStroke: `3px ${RG_MARINE}`,
+							}}
+						>
+							ROSE
+							<br />
+							GRIFFON
+							<span
 								style={{
-									fontStyle: "italic",
-									fontVariationSettings: "'opsz' 144, 'SOFT' 100, 'WONK' 1",
+									color: RG_OR,
+									display: "inline-block",
+									marginLeft: "0.3em",
 								}}
 							>
-								design
-							</em>
+								×
+							</span>
 							<br />
-							s'<span className="text-tertiary">écrit</span>
-							<br />
-							en tokens.
+							SYSTEM
 						</h1>
 					</div>
 
 					<aside className="col-span-12 mt-10 flex flex-col gap-6 self-end lg:col-span-4 lg:mt-0">
+						<div className="relative mx-auto h-[200px] w-[200px] md:h-[260px] md:w-[260px] motion-safe:animate-pulse">
+							<Image
+								src="/emote.webp"
+								alt="Mascotte chibi Rose Griffon"
+								fill
+								sizes="(max-width: 768px) 200px, 260px"
+								className="object-contain drop-shadow-[6px_6px_0_rgba(0,0,0,0.55)]"
+								priority
+							/>
+						</div>
 						<p
-							className="text-[15px] leading-[1.55] text-on-surface-variant"
-							style={{ fontFamily: "var(--font-mono-ds), monospace" }}
+							className="text-fluid-body-lg leading-relaxed"
+							style={{ color: "#f5e9d4" }}
 						>
 							Catalogue vivant des 55 composants{" "}
-							<strong className="text-on-surface">@rg/ui</strong>, de la palette{" "}
-							<strong className="text-on-surface">MD3</strong> complète et des 4
-							thèmes unifiés — Roy, Gaëlle, Azalée light & dark.
+							<strong style={{ color: RG_OR }}>@rg/ui</strong>, palette{" "}
+							<strong style={{ color: RG_OR }}>MD3</strong> et 4 thèmes — Roy,
+							Gaëlle, Azalée light & dark.
 						</p>
-						<dl className="grid grid-cols-3 gap-3 border-t border-on-surface/20 pt-6 text-on-surface">
+						<dl
+							className="grid grid-cols-3 gap-3 border-t-2 pt-6"
+							style={{ borderColor: RG_OR }}
+						>
 							{[
 								{ k: "Composants", v: "58" },
 								{ k: "Tokens", v: "212" },
@@ -165,15 +225,20 @@ export default function DesignSystemShowcase() {
 							].map((stat) => (
 								<div key={stat.k}>
 									<dd
-										className="font-display-ds text-[40px] leading-none tracking-tight"
+										className="text-fluid-headline-xl leading-none"
 										style={{
-											fontFamily: "var(--font-display-ds), serif",
-											fontWeight: 500,
+											fontFamily: "var(--font-cartoon-ds), sans-serif",
+											color: RG_OR,
+											WebkitTextStroke: "1.5px #fffdf5",
+											textShadow: `3px 3px 0 ${RG_BRIQUE}`,
 										}}
 									>
 										{stat.v}
 									</dd>
-									<dt className="mt-1 text-[10px] uppercase tracking-[0.22em] text-on-surface-variant">
+									<dt
+										className="mt-1 text-[10px] uppercase tracking-[0.22em]"
+										style={{ color: "#f5e9d4" }}
+									>
 										{stat.k}
 									</dt>
 								</div>
@@ -184,35 +249,74 @@ export default function DesignSystemShowcase() {
 
 				<a
 					href="#palette"
-					className="col-span-12 mt-12 inline-flex items-center gap-3 self-end text-[11px] uppercase tracking-[0.28em] text-on-surface-variant transition-colors motion-safe:duration-200 hover:text-primary"
+					className="relative z-20 col-span-12 mt-12 inline-flex items-center gap-3 self-end text-[11px] uppercase tracking-[0.28em] transition-transform motion-safe:duration-200 hover:translate-y-1"
+					style={{
+						color: RG_OR,
+						fontFamily: "var(--font-cartoon-ds), sans-serif",
+					}}
 				>
-					<span>Scroll · Système</span>
-					<ArrowDownRightIcon className="size-4" aria-hidden />
+					<span>★ Scroll · Système ★</span>
 				</a>
 			</section>
 
 			{/* ────────────────────────────────────────────── PALETTE */}
 			<section
 				id="palette"
-				className="relative z-10 border-t border-on-surface/15 bg-surface-container-low"
+				className="relative z-10 overflow-hidden"
+				style={{
+					backgroundColor: "#3a1a1a",
+					borderTop: `2px solid ${RG_OR}`,
+				}}
 			>
-				<div className="mx-auto max-w-[1440px] px-6 py-24 md:px-12">
-					<SectionLabel kicker="01 · Color" title="Palette MD3" />
+				{/* Arc diagonal or en fond */}
+				<div
+					aria-hidden
+					className="pointer-events-none absolute inset-0"
+					style={{
+						background: `linear-gradient(135deg, transparent 0%, transparent 55%, ${RG_OR}15 55%, ${RG_OR}15 58%, transparent 58%)`,
+					}}
+				/>
+				<div className="relative mx-auto max-w-[1440px] px-6 py-24 md:px-12">
+					{/* Trading card Roy en haut à droite */}
+					<div
+						className="pointer-events-none absolute top-8 right-4 z-20 hidden h-[180px] w-[120px] md:right-12 md:block md:h-[220px] md:w-[150px]"
+						style={{
+							transform: "rotate(8deg)",
+							filter: "drop-shadow(6px 6px 0 rgba(0,0,0,0.6))",
+						}}
+					>
+						<Image
+							src="/RG_roy_LC.webp"
+							alt="Trading card Roy"
+							fill
+							sizes="(max-width: 768px) 0px, 150px"
+							className="object-contain"
+						/>
+					</div>
 
-					<div className="mt-14 grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-4">
+					<SectionLabel kicker="01 · Color" title="★ PALETTE ★" />
+
+					<div className="mt-14 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
 						{M3_COLORS.map((c) => (
 							<div
 								key={c.name}
-								className={`${c.bg} ${c.text} group flex aspect-[5/3] flex-col justify-between p-5`}
+								className={`${c.bg} ${c.text} group flex aspect-[5/3] flex-col justify-between p-5 rounded-[12px]`}
+								style={{
+									border: `2px solid ${RG_OR}`,
+									boxShadow: HARD_SHADOW,
+								}}
 							>
-								<span className="font-mono-ds text-[10px] uppercase tracking-[0.18em] opacity-70">
+								<span
+									className="text-[10px] uppercase tracking-[0.18em] opacity-90"
+									style={{ fontFamily: "var(--font-cartoon-ds), sans-serif" }}
+								>
 									{c.name}
 								</span>
 								<span
-									className="font-display-ds text-[40px] leading-[0.9] tracking-tight"
+									className="text-fluid-headline-xl leading-[0.9]"
 									style={{
-										fontFamily: "var(--font-display-ds), serif",
-										fontWeight: 400,
+										fontFamily: "var(--font-cartoon-ds), sans-serif",
+										WebkitTextStroke: "1.5px currentColor",
 									}}
 								>
 									Aa
@@ -221,16 +325,31 @@ export default function DesignSystemShowcase() {
 						))}
 					</div>
 
-					<h3 className="mt-20 mb-6 font-mono-ds text-[11px] uppercase tracking-[0.24em] text-on-surface-variant">
-						Surface tonal stack
+					<h3
+						className="mt-20 mb-6 text-[12px] uppercase tracking-[0.24em]"
+						style={{
+							color: RG_OR,
+							fontFamily: "var(--font-cartoon-ds), sans-serif",
+						}}
+					>
+						Surface tonal stack · MD3
 					</h3>
-					<div className="grid grid-cols-2 gap-px overflow-hidden md:grid-cols-4 lg:grid-cols-8">
+					<div
+						className="grid grid-cols-2 gap-0 overflow-hidden md:grid-cols-4 lg:grid-cols-8 rounded-[12px]"
+						style={{
+							border: `2px solid ${RG_OR}`,
+							boxShadow: HARD_SHADOW,
+						}}
+					>
 						{M3_SURFACES.map((s) => (
 							<div
 								key={s.name}
 								className={`${s.bg} flex aspect-square flex-col items-center justify-center p-3 text-center text-on-surface`}
 							>
-								<span className="font-mono-ds text-[9px] uppercase tracking-[0.16em] opacity-70">
+								<span
+									className="text-[9px] uppercase tracking-[0.16em] opacity-80"
+									style={{ fontFamily: "var(--font-cartoon-ds), sans-serif" }}
+								>
 									{s.name.replace("surface-", "") || "default"}
 								</span>
 							</div>
@@ -240,26 +359,65 @@ export default function DesignSystemShowcase() {
 			</section>
 
 			{/* ────────────────────────────────────────────── TYPESCALE */}
-			<section className="relative z-10 border-t border-on-surface/15">
+			<section
+				className="relative z-10"
+				style={{ backgroundColor: RG_MARINE, borderTop: `2px solid ${RG_OR}` }}
+			>
 				<div className="mx-auto max-w-[1440px] px-6 py-24 md:px-12">
-					<SectionLabel kicker="02 · Type" title="Typescale M3" />
+					<SectionLabel kicker="02 · Type" title="TYPOGRAPHIE" />
 
-					<ul className="mt-12 divide-y divide-on-surface/15 border-y border-on-surface/15">
+					{/* Phrase test cartoon */}
+					<div className="mt-12 mb-10 text-center">
+						<p
+							className="text-fluid-display-xl leading-[0.95]"
+							style={{
+								...cartoonTitleStyle,
+								color: "#fffdf5",
+								WebkitTextStroke: `3px ${RG_MARINE}`,
+								textShadow: `5px 5px 0 ${RG_BRIQUE}, 8px 8px 0 rgba(0,0,0,0.5)`,
+								transform: "rotate(-1deg)",
+								display: "inline-block",
+							}}
+						>
+							Quelle est ta couleur ?
+						</p>
+					</div>
+
+					<ul
+						className="mt-12 divide-y rounded-[16px]"
+						style={{
+							borderColor: RG_OR,
+							borderWidth: "2px",
+							borderStyle: "solid",
+							boxShadow: HARD_SHADOW,
+							backgroundColor: "rgba(255,253,245,0.03)",
+						}}
+					>
 						{TYPESCALE.map((t) => (
 							<li
 								key={t.cls}
-								className="group grid grid-cols-12 items-baseline gap-4 py-4 transition-colors motion-safe:duration-200 hover:bg-surface-container-low"
+								className="group grid grid-cols-12 items-baseline gap-4 px-5 py-4 transition-colors motion-safe:duration-200 hover:bg-white/5"
+								style={{ borderColor: `${RG_OR}40` }}
 							>
 								<span
-									className={`${t.cls} col-span-12 truncate text-on-surface md:col-span-7`}
-									style={{ fontFamily: "var(--font-display-ds), serif" }}
+									className={`${t.cls} col-span-12 truncate md:col-span-7`}
+									style={{ color: "#fffdf5" }}
 								>
 									Quelle est ta couleur ?
 								</span>
-								<span className="col-span-6 font-mono-ds text-[11px] uppercase tracking-[0.18em] text-on-surface-variant md:col-span-3">
+								<span
+									className="col-span-6 text-[11px] uppercase tracking-[0.18em] md:col-span-3"
+									style={{
+										color: RG_OR,
+										fontFamily: "var(--font-cartoon-ds), sans-serif",
+									}}
+								>
 									{t.label}
 								</span>
-								<span className="col-span-6 text-right font-mono-ds text-[10px] text-on-surface-variant md:col-span-2">
+								<span
+									className="col-span-6 text-right text-[10px] md:col-span-2"
+									style={{ color: "#f5e9d4", fontFamily: "monospace" }}
+								>
 									{t.spec}
 								</span>
 							</li>
@@ -269,45 +427,76 @@ export default function DesignSystemShowcase() {
 			</section>
 
 			{/* ────────────────────────────────────────────── COMPONENTS */}
-			<section className="relative z-10 border-t border-on-surface/15 bg-surface-container-low">
+			<section
+				className="relative z-10 overflow-hidden"
+				style={{
+					backgroundColor: "#1a2447",
+					borderTop: `2px solid ${RG_OR}`,
+				}}
+			>
 				<div className="mx-auto grid max-w-[1440px] grid-cols-12 gap-6 px-6 py-24 md:px-12">
 					<div className="col-span-12 mb-12">
-						<SectionLabel kicker="03 · Components" title="Buttons & FAB" />
+						<SectionLabel kicker="03 · Components" title="COMPOSANTS RG" />
 					</div>
 
 					<div className="col-span-12 grid grid-cols-1 gap-10 md:grid-cols-2 lg:grid-cols-3">
-						<ComponentTile title="Filled Button">
+						<ComponentTile title="Filled · OR">
 							<button
 								type="button"
-								className="inline-flex h-10 items-center justify-center gap-2 rounded-(--md-sys-shape-corner-full) bg-primary px-6 font-mono-ds text-[13px] font-medium text-on-primary transition-all motion-safe:duration-200 hover:shadow-(--md-sys-elevation-level1) outline-hidden focus-visible:ring-[3px] focus-visible:ring-primary/40"
+								className="inline-flex h-11 items-center justify-center gap-2 rounded-full px-6 text-[13px] font-semibold uppercase tracking-wider transition-transform motion-safe:duration-200 hover:-translate-y-0.5"
+								style={{
+									backgroundColor: RG_OR,
+									color: RG_MARINE,
+									boxShadow: HARD_SHADOW,
+									fontFamily: "var(--font-cartoon-ds), sans-serif",
+								}}
 							>
 								<PlusIcon className="size-4" aria-hidden /> Nouvelle action
 							</button>
 						</ComponentTile>
 
-						<ComponentTile title="Tonal Button">
+						<ComponentTile title="Tonal · BRIQUE">
 							<button
 								type="button"
-								className="inline-flex h-10 items-center justify-center gap-2 rounded-(--md-sys-shape-corner-full) bg-secondary-container px-6 font-mono-ds text-[13px] font-medium text-on-secondary-container transition-all motion-safe:duration-200 hover:shadow-(--md-sys-elevation-level1) outline-hidden focus-visible:ring-[3px] focus-visible:ring-primary/40"
+								className="inline-flex h-11 items-center justify-center gap-2 rounded-full px-6 text-[13px] font-semibold uppercase tracking-wider transition-transform motion-safe:duration-200 hover:-translate-y-0.5"
+								style={{
+									backgroundColor: RG_BRIQUE,
+									color: "#fffdf5",
+									boxShadow: HARD_SHADOW,
+									fontFamily: "var(--font-cartoon-ds), sans-serif",
+								}}
 							>
 								Tonal
 							</button>
 						</ComponentTile>
 
-						<ComponentTile title="Outlined Button">
+						<ComponentTile title="Outlined · MARINE">
 							<button
 								type="button"
-								className="inline-flex h-10 items-center justify-center gap-2 rounded-(--md-sys-shape-corner-full) border border-outline px-6 font-mono-ds text-[13px] font-medium text-primary transition-all motion-safe:duration-200 hover:bg-primary/8 outline-hidden focus-visible:ring-[3px] focus-visible:ring-primary/40"
+								className="inline-flex h-11 items-center justify-center gap-2 rounded-full px-6 text-[13px] font-semibold uppercase tracking-wider transition-transform motion-safe:duration-200 hover:-translate-y-0.5"
+								style={{
+									backgroundColor: "transparent",
+									border: `2px solid ${RG_OR}`,
+									color: RG_OR,
+									boxShadow: HARD_SHADOW,
+									fontFamily: "var(--font-cartoon-ds), sans-serif",
+								}}
 							>
 								Outlined
 							</button>
 						</ComponentTile>
 
-						<ComponentTile title="FAB · Primary">
+						<ComponentTile title="FAB · Azalée">
 							<button
 								type="button"
 								aria-label="Ajouter"
-								className="grid size-14 place-items-center rounded-(--md-sys-shape-corner-extra-large) bg-primary-container text-on-primary-container shadow-(--md-sys-elevation-level3) transition-shadow motion-safe:duration-200 hover:shadow-(--md-sys-elevation-level4) outline-hidden focus-visible:ring-[3px] focus-visible:ring-primary/40"
+								className="grid size-14 place-items-center rounded-full transition-transform motion-safe:duration-200 hover:rotate-90"
+								style={{
+									backgroundColor: RG_AZALEE,
+									color: RG_MARINE,
+									border: `2px solid ${RG_OR}`,
+									boxShadow: HARD_SHADOW_LG,
+								}}
 							>
 								<PlusIcon className="size-6" aria-hidden />
 							</button>
@@ -316,59 +505,134 @@ export default function DesignSystemShowcase() {
 						<ComponentTile title="FAB Extended">
 							<button
 								type="button"
-								className="inline-flex h-14 items-center gap-3 rounded-(--md-sys-shape-corner-extra-large) bg-tertiary-container px-5 font-mono-ds text-[14px] font-medium text-on-tertiary-container shadow-(--md-sys-elevation-level3) transition-shadow motion-safe:duration-200 hover:shadow-(--md-sys-elevation-level4) outline-hidden focus-visible:ring-[3px] focus-visible:ring-primary/40"
+								className="inline-flex h-14 items-center gap-3 rounded-full px-5 text-[14px] font-semibold uppercase tracking-wider transition-transform motion-safe:duration-200 hover:-translate-y-1"
+								style={{
+									backgroundColor: RG_OR,
+									color: RG_MARINE,
+									border: `2px solid ${RG_MARINE}`,
+									boxShadow: HARD_SHADOW_LG,
+									fontFamily: "var(--font-cartoon-ds), sans-serif",
+								}}
 							>
-								<PlusIcon className="size-5" aria-hidden /> Composer
+								<SparklesIcon className="size-5" aria-hidden /> Composer
 							</button>
 						</ComponentTile>
 
-						<ComponentTile title="Badge stack">
-							<div className="flex flex-wrap items-center gap-2 font-mono-ds text-[11px] uppercase tracking-[0.12em]">
-								<span className="rounded-full bg-primary px-2.5 py-1 text-on-primary">
-									Primary
+						<ComponentTile title="Badges PATRON">
+							<div
+								className="flex flex-wrap items-center gap-2 text-[11px] uppercase tracking-[0.12em]"
+								style={{ fontFamily: "var(--font-cartoon-ds), sans-serif" }}
+							>
+								<span
+									className="inline-flex items-center gap-1 rounded-full px-2.5 py-1"
+									style={{
+										backgroundColor: RG_OR,
+										color: RG_MARINE,
+										border: `1.5px solid ${RG_MARINE}`,
+										boxShadow: "2px 2px 0 0 rgba(0,0,0,0.5)",
+									}}
+								>
+									<StarIcon className="size-3" aria-hidden /> Patron
 								</span>
-								<span className="rounded-full bg-secondary-container px-2.5 py-1 text-on-secondary-container">
-									Secondary
+								<span
+									className="rounded-full px-2.5 py-1"
+									style={{
+										backgroundColor: RG_BRIQUE,
+										color: "#fffdf5",
+										border: `1.5px solid ${RG_OR}`,
+										boxShadow: "2px 2px 0 0 rgba(0,0,0,0.5)",
+									}}
+								>
+									Roy
 								</span>
-								<span className="rounded-full bg-tertiary-container px-2.5 py-1 text-on-tertiary-container">
-									Tertiary
+								<span
+									className="rounded-full px-2.5 py-1"
+									style={{
+										backgroundColor: RG_AZALEE,
+										color: RG_MARINE,
+										border: `1.5px solid ${RG_OR}`,
+										boxShadow: "2px 2px 0 0 rgba(0,0,0,0.5)",
+									}}
+								>
+									Azalée
 								</span>
-								<span className="rounded-full bg-error-container px-2.5 py-1 text-on-error-container">
-									Error
-								</span>
-								<span className="rounded-full border border-outline px-2.5 py-1 text-on-surface">
-									Outline
+								<span
+									className="rounded-full px-2.5 py-1"
+									style={{
+										backgroundColor: "transparent",
+										color: RG_OR,
+										border: `1.5px solid ${RG_OR}`,
+									}}
+								>
+									IEVR
 								</span>
 							</div>
 						</ComponentTile>
 					</div>
 
-					{/* Card preview avec elevation tonale */}
+					{/* Cards persos avec mascots */}
 					<div className="col-span-12 mt-16 grid grid-cols-1 gap-6 md:grid-cols-3">
-						{ELEVATION_LEVELS.slice(0, 3).map((lvl, i) => (
+						{[
+							{ name: "Roy", asset: "/RG_roy_LC.webp", tint: RG_BRIQUE },
+							{ name: "Gaëlle", asset: "/RG_gaelle_LC.webp", tint: RG_OR },
+							{
+								name: "Azalée",
+								asset: "/RG_Azalee-logo.webp",
+								tint: RG_AZALEE,
+							},
+						].map((card, i) => (
 							<article
-								key={lvl}
-								className="bg-surface-container-low rounded-(--md-sys-shape-corner-large) p-6"
+								key={card.name}
+								className="group relative overflow-hidden rounded-[16px] p-6 transition-transform motion-safe:duration-300 hover:-translate-y-2"
 								style={{
-									boxShadow: `var(--md-sys-elevation-level${i + 1})`,
+									backgroundColor: RG_MARINE,
+									border: `2px solid ${RG_OR}`,
+									boxShadow: HARD_SHADOW_LG,
 								}}
 							>
 								<header className="mb-3 flex items-center justify-between">
-									<span className="font-mono-ds text-[10px] uppercase tracking-[0.2em] text-on-surface-variant">
-										Card · elev {lvl}
+									<span
+										className="text-[10px] uppercase tracking-[0.2em]"
+										style={{
+											color: RG_OR,
+											fontFamily: "var(--font-cartoon-ds), sans-serif",
+										}}
+									>
+										Card · elev {i + 1}
 									</span>
-									<span className="grid size-7 place-items-center rounded-full bg-primary-container text-on-primary-container">
-										<SparklesIcon className="size-3.5" aria-hidden />
+									<span
+										className="grid size-8 place-items-center rounded-full"
+										style={{
+											backgroundColor: card.tint,
+											color: "#fffdf5",
+											border: `1.5px solid ${RG_OR}`,
+										}}
+									>
+										<StarIcon className="size-4" aria-hidden />
 									</span>
 								</header>
+								<div className="relative mt-2 mb-4 h-[140px] w-full">
+									<Image
+										src={card.asset}
+										alt={`Mascotte ${card.name}`}
+										fill
+										sizes="(max-width: 768px) 100vw, 33vw"
+										className="object-contain transition-transform motion-safe:duration-300 group-hover:scale-110"
+									/>
+								</div>
 								<h4
-									className="font-display-ds text-[28px] leading-tight text-on-surface"
-									style={{ fontFamily: "var(--font-display-ds), serif" }}
+									className="text-fluid-headline-lg leading-tight"
+									style={{
+										fontFamily: "var(--font-cartoon-ds), sans-serif",
+										color: "#fffdf5",
+										WebkitTextStroke: `1.5px ${RG_MARINE}`,
+										textShadow: `3px 3px 0 ${card.tint}`,
+									}}
 								>
-									{["Roy", "Gaëlle", "Azalée"][i]}
+									{card.name}
 								</h4>
-								<p className="mt-2 text-[13px] text-on-surface-variant">
-									Tonale élévation niveau {i + 1}, surface container low.
+								<p className="mt-2 text-[13px]" style={{ color: "#f5e9d4" }}>
+									Container low · elevation niveau {i + 1} · token MD3.
 								</p>
 							</article>
 						))}
@@ -377,9 +641,12 @@ export default function DesignSystemShowcase() {
 			</section>
 
 			{/* ────────────────────────────────────────────── SHAPE */}
-			<section className="relative z-10 border-t border-on-surface/15">
+			<section
+				className="relative z-10"
+				style={{ backgroundColor: RG_MARINE, borderTop: `2px solid ${RG_OR}` }}
+			>
 				<div className="mx-auto max-w-[1440px] px-6 py-24 md:px-12">
-					<SectionLabel kicker="04 · Shape" title="Corner scale" />
+					<SectionLabel kicker="04 · Shape" title="CORNER SCALE" />
 					<div className="mt-12 grid grid-cols-2 gap-4 sm:grid-cols-4 lg:grid-cols-7">
 						{SHAPE_SCALE.map((s) => (
 							<div
@@ -387,22 +654,33 @@ export default function DesignSystemShowcase() {
 								className="group flex flex-col items-center gap-3"
 							>
 								<div
-									className="grid aspect-square w-full place-items-center bg-primary-container text-on-primary-container transition-transform motion-safe:duration-200 group-hover:-translate-y-1"
+									className="grid aspect-square w-full place-items-center transition-transform motion-safe:duration-200 group-hover:-translate-y-1 group-hover:rotate-3"
 									style={{
+										backgroundColor: RG_OR,
+										color: RG_MARINE,
+										border: `2px solid ${RG_MARINE}`,
+										boxShadow: HARD_SHADOW,
 										borderRadius: s.name === "full" ? "9999px" : `${s.value}px`,
 									}}
 								>
 									<span
-										className="font-display-ds text-[28px]"
+										className="text-[28px]"
 										style={{
-											fontFamily: "var(--font-display-ds), serif",
-											fontWeight: 500,
+											fontFamily: "var(--font-cartoon-ds), sans-serif",
+											WebkitTextStroke: `1.5px ${RG_MARINE}`,
+											textShadow: `2px 2px 0 ${RG_BRIQUE}`,
 										}}
 									>
 										{s.value === "9999" ? "∞" : s.value}
 									</span>
 								</div>
-								<span className="text-center font-mono-ds text-[10px] uppercase tracking-[0.16em] text-on-surface-variant">
+								<span
+									className="text-center text-[10px] uppercase tracking-[0.16em]"
+									style={{
+										color: RG_OR,
+										fontFamily: "var(--font-cartoon-ds), sans-serif",
+									}}
+								>
 									{s.name}
 								</span>
 							</div>
@@ -412,28 +690,50 @@ export default function DesignSystemShowcase() {
 			</section>
 
 			{/* ────────────────────────────────────────────── MOTION */}
-			<section className="relative z-10 border-t border-on-surface/15 bg-surface-container">
+			<section
+				className="relative z-10"
+				style={{
+					backgroundColor: "#1a2447",
+					borderTop: `2px solid ${RG_OR}`,
+				}}
+			>
 				<div className="mx-auto max-w-[1440px] px-6 py-24 md:px-12">
-					<SectionLabel kicker="05 · Motion" title="Durations & easings" />
+					<SectionLabel kicker="05 · Motion" title="MOTION TOKENS" />
 
 					<div className="mt-12 grid gap-10 lg:grid-cols-2">
 						<div>
-							<h3 className="mb-6 font-mono-ds text-[11px] uppercase tracking-[0.22em] text-on-surface-variant">
-								Durations
+							<h3
+								className="mb-6 text-[12px] uppercase tracking-[0.22em]"
+								style={{
+									color: RG_OR,
+									fontFamily: "var(--font-cartoon-ds), sans-serif",
+								}}
+							>
+								★ Durations
 							</h3>
 							<div className="space-y-2">
 								{MOTION_DURATIONS.map((row) => (
 									<div
 										key={row.tier}
-										className="flex items-center gap-3 font-mono-ds text-[11px]"
+										className="flex items-center gap-3 text-[11px]"
+										style={{ fontFamily: "var(--font-cartoon-ds), sans-serif" }}
 									>
-										<span className="w-16 uppercase tracking-[0.16em] text-on-surface-variant">
+										<span
+											className="w-20 uppercase tracking-[0.16em]"
+											style={{ color: RG_OR }}
+										>
 											{row.tier}
 										</span>
 										{row.values.map((ms) => (
 											<span
 												key={ms}
-												className="flex-1 rounded-md bg-secondary-container px-2 py-3 text-center text-on-secondary-container"
+												className="flex-1 rounded-md px-2 py-3 text-center"
+												style={{
+													backgroundColor: RG_BRIQUE,
+													color: "#fffdf5",
+													border: `1.5px solid ${RG_OR}`,
+													boxShadow: "2px 2px 0 0 rgba(0,0,0,0.5)",
+												}}
 											>
 												{ms}ms
 											</span>
@@ -444,29 +744,73 @@ export default function DesignSystemShowcase() {
 						</div>
 
 						<div>
-							<h3 className="mb-6 font-mono-ds text-[11px] uppercase tracking-[0.22em] text-on-surface-variant">
-								Easings
+							<h3
+								className="mb-6 text-[12px] uppercase tracking-[0.22em]"
+								style={{
+									color: RG_OR,
+									fontFamily: "var(--font-cartoon-ds), sans-serif",
+								}}
+							>
+								★ Easings · live preview
 							</h3>
-							<div className="space-y-3 font-mono-ds text-[11px]">
+							<div className="space-y-3 text-[11px]">
 								{[
-									{ name: "standard", curve: "cubic-bezier(.2,0,0,1)" },
-									{ name: "emphasized", curve: "cubic-bezier(.3,0,0,1)" },
-									{ name: "standard-decel", curve: "cubic-bezier(0,0,0,1)" },
+									{
+										name: "standard",
+										curve: "cubic-bezier(.2,0,0,1)",
+										dur: "var(--md-sys-motion-duration-medium2)",
+									},
+									{
+										name: "emphasized",
+										curve: "cubic-bezier(.3,0,0,1)",
+										dur: "var(--md-sys-motion-duration-medium4)",
+									},
+									{
+										name: "standard-decel",
+										curve: "cubic-bezier(0,0,0,1)",
+										dur: "var(--md-sys-motion-duration-long1)",
+									},
 									{
 										name: "emphasized-decel",
 										curve: "cubic-bezier(.05,.7,.1,1)",
+										dur: "var(--md-sys-motion-duration-long2)",
 									},
 								].map((e) => (
 									<div
 										key={e.name}
-										className="rounded-md border border-outline-variant bg-surface px-4 py-3"
+										className="group relative flex items-center justify-between overflow-hidden rounded-md px-4 py-3"
+										style={{
+											backgroundColor: RG_MARINE,
+											border: `2px solid ${RG_OR}`,
+											boxShadow: "3px 3px 0 0 rgba(0,0,0,0.55)",
+										}}
 									>
-										<div className="flex justify-between text-on-surface">
-											<span className="uppercase tracking-[0.18em]">
+										<div className="flex flex-col" style={{ color: "#fffdf5" }}>
+											<span
+												className="uppercase tracking-[0.18em]"
+												style={{
+													fontFamily: "var(--font-cartoon-ds), sans-serif",
+													color: RG_OR,
+												}}
+											>
 												{e.name}
 											</span>
-											<span className="text-on-surface-variant">{e.curve}</span>
+											<span
+												style={{ color: "#f5e9d4", fontFamily: "monospace" }}
+											>
+												{e.curve}
+											</span>
 										</div>
+										<span
+											className="block size-4 rounded-full motion-safe:group-hover:translate-x-24"
+											style={{
+												backgroundColor: RG_AZALEE,
+												border: `1.5px solid ${RG_OR}`,
+												transitionProperty: "transform",
+												transitionTimingFunction: e.curve,
+												transitionDuration: e.dur,
+											}}
+										/>
 									</div>
 								))}
 							</div>
@@ -476,78 +820,155 @@ export default function DesignSystemShowcase() {
 			</section>
 
 			{/* ────────────────────────────────────────────── ELEVATION */}
-			<section className="relative z-10 border-t border-on-surface/15">
+			<section
+				className="relative z-10"
+				style={{ backgroundColor: RG_MARINE, borderTop: `2px solid ${RG_OR}` }}
+			>
 				<div className="mx-auto max-w-[1440px] px-6 py-24 md:px-12">
-					<SectionLabel kicker="06 · Elevation" title="6 levels" />
+					<SectionLabel kicker="06 · Elevation" title="6 LEVELS" />
 					<div className="mt-12 grid grid-cols-2 gap-6 sm:grid-cols-3 lg:grid-cols-6">
-						{ELEVATION_LEVELS.map((lvl) => (
+						{ELEVATION_LEVELS.map((lvl, i) => (
 							<div key={lvl} className="flex flex-col items-center gap-4">
 								<div
-									className="grid size-24 place-items-center rounded-(--md-sys-shape-corner-medium) bg-surface text-on-surface"
+									className="grid size-24 place-items-center rounded-[12px] transition-transform motion-safe:duration-300 hover:-translate-y-2"
 									style={{
-										boxShadow: `var(--md-sys-elevation-level${lvl})`,
+										backgroundColor: RG_OR,
+										color: RG_MARINE,
+										border: `2px solid ${RG_MARINE}`,
+										boxShadow:
+											i === 0
+												? "none"
+												: `${i + 1}px ${i + 1}px 0 0 rgba(0,0,0,0.55), ${(i + 1) * 2}px ${(i + 1) * 2}px 0 0 ${RG_BRIQUE}`,
 									}}
 								>
 									<span
-										className="font-display-ds text-[24px]"
-										style={{ fontFamily: "var(--font-display-ds), serif" }}
+										className="text-[28px]"
+										style={{
+											fontFamily: "var(--font-cartoon-ds), sans-serif",
+											WebkitTextStroke: `1.5px ${RG_MARINE}`,
+										}}
 									>
 										{lvl}
 									</span>
 								</div>
-								<span className="font-mono-ds text-[10px] uppercase tracking-[0.18em] text-on-surface-variant">
+								<span
+									className="text-[10px] uppercase tracking-[0.18em]"
+									style={{
+										color: RG_OR,
+										fontFamily: "var(--font-cartoon-ds), sans-serif",
+									}}
+								>
 									level{lvl}
 								</span>
 							</div>
 						))}
 					</div>
+
+					{/* Bandeau tuto avatars en bonus */}
+					<div
+						className="mt-20 grid grid-cols-1 items-center gap-8 rounded-[20px] p-8 md:grid-cols-[1fr_2fr]"
+						style={{
+							backgroundColor: "#1a2447",
+							border: `2px solid ${RG_OR}`,
+							boxShadow: HARD_SHADOW_LG,
+						}}
+					>
+						<div className="relative aspect-[4/3] w-full">
+							<Image
+								src="/avatarRG/avatarRG.webp"
+								alt="Tutoriel avatars chibi Rose Griffon"
+								fill
+								sizes="(max-width: 768px) 100vw, 33vw"
+								className="rounded-[12px] object-cover"
+								style={{ border: `2px solid ${RG_BRIQUE}` }}
+							/>
+						</div>
+						<div>
+							<p
+								className="text-fluid-headline-md leading-tight"
+								style={{
+									fontFamily: "var(--font-cartoon-ds), sans-serif",
+									color: "#fffdf5",
+									WebkitTextStroke: `1.5px ${RG_MARINE}`,
+									textShadow: `3px 3px 0 ${RG_BRIQUE}`,
+								}}
+							>
+								Avatars chibi · style maison
+							</p>
+							<p
+								className="mt-3 text-fluid-body-md"
+								style={{ color: "#f5e9d4" }}
+							>
+								Toute l&apos;identité RG repose sur des mascots illustrés à la
+								main (Roy, Gaëlle, Mark, Achillea…). Le design system étend ce
+								langage aux composants : bordures dorées 2px, dropshadows durs,
+								palette marine / or / brique.
+							</p>
+						</div>
+					</div>
 				</div>
 			</section>
 
 			{/* ────────────────────────────────────────────── FOOTER */}
-			<footer className="relative z-10 border-t border-on-surface/15 bg-surface-container-highest">
+			<footer
+				className="relative z-10"
+				style={{ backgroundColor: "#080f24", borderTop: `2px solid ${RG_OR}` }}
+			>
 				<div className="mx-auto max-w-[1440px] px-6 py-16 md:px-12">
-					<div className="flex flex-col items-start justify-between gap-8 md:flex-row md:items-end">
-						<div>
-							<p
-								className="font-display-ds text-[44px] leading-none tracking-tight text-on-surface md:text-[64px]"
-								style={{
-									fontFamily: "var(--font-display-ds), serif",
-									fontWeight: 380,
-								}}
-							>
-								Tu{" "}
-								<em className="text-primary" style={{ fontStyle: "italic" }}>
-									composes
-								</em>
-								,
-								<br />
-								la couleur <span className="text-tertiary">suit</span>.
-							</p>
-						</div>
-						<dl className="space-y-2 font-mono-ds text-[11px] uppercase tracking-[0.18em] text-on-surface-variant md:text-right">
+					<div className="flex flex-col items-center gap-8 text-center">
+						<Link
+							href="https://rose-griffon.fr"
+							className="relative block size-24 transition-transform motion-safe:duration-500 hover:rotate-[360deg] md:size-32"
+						>
+							<Image
+								src="/RG_Logo_V2.5_NB.webp"
+								alt="Logo Rose Griffon"
+								fill
+								sizes="(max-width: 768px) 96px, 128px"
+								className="drop-shadow-[4px_4px_0_rgba(212,175,55,0.6)]"
+							/>
+						</Link>
+						<p
+							className="text-fluid-headline-md leading-tight"
+							style={{
+								fontFamily: "var(--font-cartoon-ds), sans-serif",
+								color: "#fffdf5",
+								WebkitTextStroke: `2px ${RG_MARINE}`,
+								textShadow: `4px 4px 0 ${RG_BRIQUE}, 6px 6px 0 rgba(0,0,0,0.4)`,
+							}}
+						>
+							ASSOCIATION ROSE GRIFFON
+							<br />
+							<span style={{ color: RG_OR }}>· INAZUMA ELEVEN FRANCE ·</span>
+						</p>
+						<dl
+							className="grid grid-cols-2 gap-4 text-[11px] uppercase tracking-[0.18em] md:grid-cols-4"
+							style={{
+								color: "#f5e9d4",
+								fontFamily: "var(--font-cartoon-ds), sans-serif",
+							}}
+						>
 							<div>
-								<dt className="inline">Package · </dt>
-								<dd className="inline text-on-surface">@rg/ui</dd>
+								<dt className="block opacity-60">Package</dt>
+								<dd style={{ color: RG_OR }}>@rg/ui</dd>
 							</div>
 							<div>
-								<dt className="inline">Version · </dt>
-								<dd className="inline text-on-surface">0.1.0</dd>
+								<dt className="block opacity-60">Version</dt>
+								<dd style={{ color: RG_OR }}>0.1.0</dd>
 							</div>
 							<div>
-								<dt className="inline">Stack · </dt>
-								<dd className="inline text-on-surface">
-									Tailwind v4 · Radix · MD3
-								</dd>
+								<dt className="block opacity-60">Stack</dt>
+								<dd style={{ color: RG_OR }}>Tailwind · MD3</dd>
 							</div>
 							<div>
-								<dt className="inline">Docs · </dt>
-								<dd className="inline">
+								<dt className="block opacity-60">Docs</dt>
+								<dd>
 									<Link
-										className="text-on-surface underline-offset-4 hover:underline"
 										href="https://github.com/rose-griffon/rg/blob/main/packages/ui/README.md"
+										style={{ color: RG_OR }}
+										className="underline-offset-4 hover:underline"
 									>
-										packages/ui/README.md
+										README
 									</Link>
 								</dd>
 							</div>
@@ -562,18 +983,25 @@ export default function DesignSystemShowcase() {
 function SectionLabel({ kicker, title }: { kicker: string; title: string }) {
 	return (
 		<div className="grid grid-cols-12 items-end gap-6">
-			<span className="col-span-12 font-mono-ds text-[10px] uppercase tracking-[0.32em] text-on-surface-variant md:col-span-3">
+			<span
+				className="col-span-12 text-[11px] uppercase tracking-[0.32em] md:col-span-3"
+				style={{
+					color: RG_OR,
+					fontFamily: "var(--font-cartoon-ds), sans-serif",
+				}}
+			>
 				{kicker}
 			</span>
 			<h2
-				className="col-span-12 font-display-ds text-on-surface md:col-span-9"
+				className="col-span-12 text-fluid-display-lg leading-[0.95] md:col-span-9"
 				style={{
-					fontFamily: "var(--font-display-ds), serif",
-					fontWeight: 380,
-					fontSize: "clamp(40px, 6vw, 80px)",
-					lineHeight: 0.92,
-					letterSpacing: "-0.025em",
-					fontVariationSettings: "'opsz' 144, 'SOFT' 100, 'WONK' 0",
+					...cartoonTitleStyle,
+					color: "#fffdf5",
+					WebkitTextStroke: `3px ${RG_MARINE}`,
+					textShadow: `4px 4px 0 ${RG_BRIQUE}, 6px 6px 0 rgba(0,0,0,0.45)`,
+					transform: "rotate(-1deg)",
+					transformOrigin: "left",
+					display: "inline-block",
 				}}
 			>
 				{title}
@@ -590,11 +1018,24 @@ function ComponentTile({
 	children: React.ReactNode;
 }) {
 	return (
-		<div className="flex flex-col gap-5 border-t border-on-surface/15 pt-5">
-			<span className="font-mono-ds text-[10px] uppercase tracking-[0.22em] text-on-surface-variant">
+		<div className="flex flex-col gap-4">
+			<span
+				className="text-[11px] uppercase tracking-[0.22em]"
+				style={{
+					color: RG_OR,
+					fontFamily: "var(--font-cartoon-ds), sans-serif",
+				}}
+			>
 				{title}
 			</span>
-			<div className="grid min-h-[120px] place-items-center rounded-(--md-sys-shape-corner-medium) bg-surface p-8">
+			<div
+				className="grid min-h-[140px] place-items-center rounded-[16px] p-8"
+				style={{
+					backgroundColor: "rgba(255,253,245,0.04)",
+					border: `2px solid ${RG_OR}`,
+					boxShadow: HARD_SHADOW,
+				}}
+			>
 				{children}
 			</div>
 		</div>
