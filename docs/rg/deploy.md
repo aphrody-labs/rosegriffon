@@ -12,6 +12,62 @@ Procédure complète pour passer le monorepo `rose-griffon/rg` en prod. **À ex�
 
 ---
 
+## État actuel (2026-05-18 01:32 CET, mis à jour après incident)
+
+**Incident migration (résolu) :** un cycle de pushes Bunlight Bot (~1 commit/6min) a annulé tous les builds rg-* successifs avant qu'aucun n'aboutisse READY. Les domains custom avaient été pré-attachés à rg-azalee/rg-website avec TXT verification mismatch → 404 DEPLOYMENT_NOT_FOUND sur les 3 domains.
+
+**Résolution appliquée (sans rien casser, 100% réversible) :**
+1. **Domains rollback** : `azalee.rosegriffon.fr`, `rosegriffon.fr`, `www.rosegriffon.fr` retransférés aux anciens projects `azalee`/`rosegriffon`. Anciens deploys READY (commits `fd75f75a` azalee + `c231b48d` website du 10 mai) servent à nouveau la prod (3/3 HTTP 200 OK).
+2. **DNS TXT** : `_vercel.rosegriffon.fr` mis à jour via OVH API REST (CLI `ovhcloud` bugué, contournement signed curl). 3 records correspondant aux codes vérification des anciens projects.
+3. **Auto-deploy disabled** sur `rg-azalee` + `rg-website` via `PATCH /v9/projects/{id} {gitProviderOptions: {createDeployments: "disabled"}}` → les pushes sur `rose-griffon/rg main` ne triggers plus aucun build. Cycle CANCELED stoppé.
+
+**Pour reprendre la migration sereinement :**
+- Les nouveaux projects sont en pause, prêts à recevoir un deploy manuel quand le repo `rg/` sera stable
+- Voir Étape 1.bis (procédure deploy manuel) ci-dessous
+- Une fois 1 READY validé → re-swap domains via Étape 2
+
+---
+
+## Étape 1.bis — Deploy manuel (auto-deploy disabled)
+
+Auto-deploy est **disabled** sur rg-azalee + rg-website. Pour déclencher un build, soit :
+
+**A. Via API Vercel (recommandé, depuis n'importe où) :**
+
+```bash
+export VERCEL_TOKEN=$(grep "^VERCEL_TOKEN=" /home/ubuntu/vps/.env | cut -d= -f2)
+TEAM=team_guWQJZI4ZmSLj2K3RWuU4VqM
+SHA=$(cd ~/rg && git rev-parse main)
+
+# Trigger deploy production rg-azalee
+curl -X POST "https://api.vercel.com/v13/deployments?teamId=${TEAM}" \
+  -H "Authorization: Bearer ${VERCEL_TOKEN}" \
+  -H "Content-Type: application/json" \
+  -d "{\"name\":\"rg-azalee\",\"target\":\"production\",\"gitSource\":{\"type\":\"github\",\"repoId\":\"1241626917\",\"ref\":\"main\",\"sha\":\"${SHA}\"},\"project\":\"prj_XAwaDaX0ugQaqcleEiJ0BFfrtKfT\"}"
+
+# Trigger deploy production rg-website (même payload, project + name différents)
+```
+
+**B. Via Vercel CLI :**
+
+```bash
+cd ~/rg
+vercel --prod --cwd apps/azalee --yes
+vercel --prod --cwd apps/website --yes
+```
+
+**C. Réactiver temporairement auto-deploy** (uniquement quand tu sais qu'un seul push va arriver) :
+
+```bash
+curl -X PATCH "https://api.vercel.com/v9/projects/prj_XAwaDaX0ugQaqcleEiJ0BFfrtKfT?teamId=${TEAM}" \
+  -H "Authorization: Bearer ${VERCEL_TOKEN}" \
+  -H "Content-Type: application/json" \
+  -d '{"gitProviderOptions":{"createDeployments":"enabled"}}'
+# Push 1 commit, attendre READY, puis re-disable.
+```
+
+---
+
 ## Étape 1 — Valider les nouveaux projets Vercel (preview deploy)
 
 Les projets Vercel `rg-azalee` et `rg-website` ont été créés et configurés via API, mais **aucun deploy n'a été déclenché** pour ne pas risquer de casser quoi que ce soit. Avant de basculer la prod, il faut valider que le build passe.
