@@ -1,0 +1,881 @@
+"use server";
+
+import { revalidatePath } from "next/cache";
+import { requireEditorOrFail } from "@/lib/auth-helpers";
+import { createClient } from "@/lib/supabase/server";
+
+const APP_SCOPE = "azalee";
+
+/** Invalide les caches liés aux articles (feed + page article + RSS) */
+export async function revalidateNews(slug?: string) {
+	revalidatePath("/news", "page");
+	revalidatePath("/news/feed.xml", "page");
+	if (slug) revalidatePath(`/news/${slug}`, "page");
+}
+
+/**
+ * Sauvegarde un article (création ou mise à jour).
+ * Utilise le admin client côté serveur pour bypasser le RLS.
+ * Toujours scoppé `app="azalee"`.
+ */
+export async function saveArticle(
+	articleId: string | null,
+	data: Record<string, unknown>,
+): Promise<{ id: string; error?: string }> {
+	let session;
+	try {
+		({ session } = await requireEditorOrFail());
+	} catch (e) {
+		return { id: articleId ?? "", error: (e as Error).message };
+	}
+
+	const { createAdminClient } = await import("@/lib/supabase/admin");
+	const supabase = createAdminClient();
+
+	if (articleId) {
+		// UPDATE — scope `app="azalee"` pour empêcher l'écriture cross-app
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		const { error } = await (supabase as any)
+			.from("articles")
+			.update({ ...data, app: APP_SCOPE })
+			.eq("id", articleId)
+			.eq("app", APP_SCOPE);
+
+		if (error) return { id: articleId, error: error.message };
+
+		revalidateNews(data.slug as string | undefined);
+		return { id: articleId };
+	}
+
+	// INSERT — l'auteur est l'éditeur courant
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	const { data: inserted, error } = await (supabase as any)
+		.from("articles")
+		.insert([{ ...data, author_id: session.user.id, app: APP_SCOPE }])
+		.select("id")
+		.maybeSingle();
+
+	if (error) return { id: "", error: error.message };
+
+	revalidateNews(data.slug as string | undefined);
+	return { id: inserted?.id || "" };
+}
+
+/**
+ * Change le statut d'un article (publish, archive, draft...).
+ * Met à jour published_at si besoin.
+ */
+export async function updateArticleStatus(
+	articleId: string,
+	newStatus: string,
+	currentStatus?: string,
+): Promise<{ error?: string }> {
+	try {
+		await requireEditorOrFail();
+	} catch (e) {
+		return { error: (e as Error).message };
+	}
+
+	const { createAdminClient } = await import("@/lib/supabase/admin");
+	const supabase = createAdminClient();
+
+	const updateData: Record<string, unknown> = {
+		status: newStatus,
+		updated_at: new Date().toISOString(),
+	};
+	if (newStatus === "published" && currentStatus !== "published") {
+		updateData.published_at = new Date().toISOString();
+		updateData.scheduled_at = null;
+	}
+	if (newStatus === "draft" || newStatus === "archived") {
+		updateData.scheduled_at = null;
+	}
+
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	const { error } = await (supabase as any)
+		.from("articles")
+		.update(updateData)
+		.eq("id", articleId)
+		.eq("app", APP_SCOPE);
+
+	if (error) return { error: error.message };
+	revalidateNews();
+	return {};
+}
+
+/**
+ * Supprime un article.
+ */
+export async function deleteArticle(
+	articleId: string,
+): Promise<{ error?: string }> {
+	try {
+		await requireEditorOrFail();
+	} catch (e) {
+		return { error: (e as Error).message };
+	}
+
+	const { createAdminClient } = await import("@/lib/supabase/admin");
+	const supabase = createAdminClient();
+
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	const { error } = await (supabase as any)
+		.from("articles")
+		.delete()
+		.eq("id", articleId)
+		.eq("app", APP_SCOPE);
+
+	if (error) return { error: error.message };
+	revalidateNews();
+	return {};
+}
+
+/**
+ * Pin/unpin un article.
+ */
+export async function toggleArticlePin(
+	articleId: string,
+	pinned: boolean,
+): Promise<{ error?: string }> {
+	try {
+		await requireEditorOrFail();
+	} catch (e) {
+		return { error: (e as Error).message };
+	}
+
+	const { createAdminClient } = await import("@/lib/supabase/admin");
+	const supabase = createAdminClient();
+
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	const { error } = await (supabase as any)
+		.from("articles")
+		.update({ pinned: !pinned })
+		.eq("id", articleId)
+		.eq("app", APP_SCOPE);
+
+	if (error) return { error: error.message };
+	revalidateNews();
+	return {};
+}
+
+/**
+ * Vérifie si un slug d'article est disponible (scopé app=azalee).
+ */
+export async function checkSlugAvailability(
+	slug: string,
+	excludeId?: string,
+): Promise<{ available: boolean; suggestion?: string }> {
+	const supabase = await createClient();
+
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	let query = (supabase as any)
+		.from("articles")
+		.select("id, slug")
+		.eq("slug", slug)
+		.eq("app", APP_SCOPE);
+
+	if (excludeId) {
+		query = query.neq("id", excludeId);
+	}
+
+	const { data, error } = await query;
+
+	if (error) {
+		console.error("Error checking slug:", error);
+		return { available: true };
+	}
+
+	if (data && data.length > 0) {
+		const suggestion = `${slug}-${Date.now().toString(36).slice(-4)}`;
+		return { available: false, suggestion };
+	}
+
+	return { available: true };
+}
+
+/**
+ * Partage un article sur Discord via webhook/bot.
+ * Réservé aux éditeurs.
+ */
+export async function shareToDiscord(article: {
+	title: string;
+	slug: string;
+	excerpt: string;
+	featured_image_url: string;
+}) {
+	await requireEditorOrFail();
+
+	const botToken = process.env.DISCORD_BOT_TOKEN;
+	const channelId = process.env.DISCORD_NEWS_CHANNEL_ID;
+
+	if (!botToken || !channelId) {
+		throw new Error("Configuration Discord manquante");
+	}
+
+	const articleUrl = `https://azalee.rosegriffon.fr/news/${article.slug}`;
+
+	const embed = {
+		title: article.title,
+		description: article.excerpt || undefined,
+		url: articleUrl,
+		color: 0xf2a93b,
+		image: article.featured_image_url
+			? { url: article.featured_image_url }
+			: undefined,
+		footer: { text: "Azalée — Rose Griffon" },
+		timestamp: new Date().toISOString(),
+	};
+
+	const response = await fetch(
+		`https://discord.com/api/v10/channels/${channelId}/messages`,
+		{
+			method: "POST",
+			headers: {
+				Authorization: `Bot ${botToken}`,
+				"Content-Type": "application/json",
+			},
+			body: JSON.stringify({ embeds: [embed] }),
+		},
+	);
+
+	if (!response.ok) {
+		const errorText = await response.text();
+		console.error("Discord API error:", response.status, errorText);
+		throw new Error(`Erreur Discord: ${response.status}`);
+	}
+
+	return { success: true };
+}
+
+/**
+ * Duplique un article comme nouveau brouillon (scopé app=azalee).
+ */
+export async function duplicateArticle(
+	articleId: string,
+): Promise<{ id: string } | { error: string }> {
+	try {
+		await requireEditorOrFail();
+	} catch (e) {
+		return { error: (e as Error).message };
+	}
+
+	const { createAdminClient } = await import("@/lib/supabase/admin");
+	const supabase = createAdminClient();
+
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	const { data: original, error: fetchError } = await (supabase as any)
+		.from("articles")
+		.select("*")
+		.eq("id", articleId)
+		.eq("app", APP_SCOPE)
+		.single();
+
+	if (fetchError || !original) {
+		return { error: "Article introuvable" };
+	}
+
+	const now = new Date().toISOString();
+	const newSlug = `${original.slug}-copie-${Date.now().toString(36).slice(-4)}`;
+
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	const { data: inserted, error: insertError } = await (supabase as any)
+		.from("articles")
+		.insert([
+			{
+				app: APP_SCOPE,
+				title: `${original.title} (copie)`,
+				slug: newSlug,
+				content: original.content,
+				excerpt: original.excerpt,
+				category: original.category,
+				status: "draft",
+				featured_image_url: original.featured_image_url,
+				featured_image_alt: original.featured_image_alt,
+				meta_title: original.meta_title,
+				meta_description: original.meta_description,
+				tags: original.tags,
+				author_id: original.author_id,
+				created_at: now,
+				updated_at: now,
+			},
+		])
+		.select("id")
+		.single();
+
+	if (insertError) {
+		console.error("Error duplicating article:", insertError);
+		return { error: insertError.message };
+	}
+
+	revalidateNews();
+	return { id: inserted.id };
+}
+
+/**
+ * Récupère les tags populaires (scope public).
+ */
+export async function getPopularTags(
+	limit = 30,
+): Promise<Array<{ tag: string; count: number }>> {
+	const supabase = await createClient();
+
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	const { data, error } = await (supabase as any).rpc("get_popular_tags", {
+		tag_limit: limit,
+	});
+
+	if (error) {
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		const { data: articles } = await (supabase as any)
+			.from("articles")
+			.select("tags")
+			.eq("status", "published")
+			.eq("app", APP_SCOPE)
+			.not("tags", "is", null);
+
+		if (!articles) return [];
+
+		const tagCounts = new Map<string, number>();
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		for (const article of articles as any[]) {
+			if (Array.isArray(article.tags)) {
+				for (const tag of article.tags) {
+					tagCounts.set(tag, (tagCounts.get(tag) || 0) + 1);
+				}
+			}
+		}
+
+		return Array.from(tagCounts.entries())
+			.map(([tag, count]) => ({ tag, count }))
+			.sort((a, b) => b.count - a.count)
+			.slice(0, limit);
+	}
+
+	return data || [];
+}
+
+/**
+ * Récupère les articles tendance (score basé sur vues récentes pondérées par fraîcheur).
+ */
+export async function getTrendingArticles(limit = 5): Promise<
+	Array<{
+		id: string;
+		title: string;
+		slug: string;
+		excerpt: string | null;
+		featured_image_url: string | null;
+		category: string | null;
+		view_count: number;
+		published_at: string | null;
+		trending_score: number;
+	}>
+> {
+	const supabase = await createClient();
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	const { data, error } = await (supabase as any).rpc("get_trending_articles", {
+		days_window: 14,
+		result_limit: limit,
+	});
+
+	if (error) {
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		const { data: articles } = await (supabase as any)
+			.from("articles")
+			.select(
+				"id, title, slug, excerpt, featured_image_url, category, view_count, published_at",
+			)
+			.eq("status", "published")
+			.eq("app", APP_SCOPE)
+			.gte("published_at", new Date(Date.now() - 14 * 86400000).toISOString())
+			.order("view_count", { ascending: false })
+			.limit(limit);
+
+		if (!articles) return [];
+		const now = Date.now();
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		return (articles as any[]).map((a) => {
+			const publishedAt = a.published_at
+				? new Date(a.published_at).getTime()
+				: now;
+			const ageDays = Math.max(1, (now - publishedAt) / 86400000);
+			return {
+				...a,
+				trending_score: (a.view_count || 0) / ageDays,
+			};
+		});
+	}
+
+	return data || [];
+}
+
+/**
+ * Récupère les articles les plus populaires par nombre de vues.
+ */
+export async function getPopularArticles(limit = 5): Promise<
+	Array<{
+		id: string;
+		title: string;
+		slug: string;
+		category: string | null;
+		view_count: number;
+	}>
+> {
+	const supabase = await createClient();
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	const { data } = await (supabase as any)
+		.from("articles")
+		.select("id, title, slug, category, view_count")
+		.eq("status", "published")
+		.eq("app", APP_SCOPE)
+		.order("view_count", { ascending: false })
+		.limit(limit);
+
+	return data || [];
+}
+
+/**
+ * Récupère les articles liés par tags et catégorie.
+ */
+export async function getRelatedArticles(
+	articleId: string,
+	category: string | null,
+	tags: string[] | null,
+	limit = 4,
+): Promise<
+	Array<{
+		id: string;
+		title: string;
+		slug: string;
+		excerpt: string | null;
+		featured_image_url: string | null;
+		published_at: string | null;
+		category: string | null;
+	}>
+> {
+	const supabase = await createClient();
+	const results: Map<string, unknown> = new Map();
+
+	// 1. Par tags communs
+	if (tags && tags.length > 0) {
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		const { data } = await (supabase as any)
+			.from("articles")
+			.select(
+				"id, title, slug, excerpt, featured_image_url, published_at, category",
+			)
+			.eq("status", "published")
+			.eq("app", APP_SCOPE)
+			.neq("id", articleId)
+			.overlaps("tags", tags)
+			.order("published_at", { ascending: false })
+			.limit(limit);
+
+		if (data) {
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any
+			for (const item of data as any[]) {
+				results.set(item.id, item);
+			}
+		}
+	}
+
+	// 2. Compléter par catégorie si pas assez
+	if (results.size < limit && category) {
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		const { data } = await (supabase as any)
+			.from("articles")
+			.select(
+				"id, title, slug, excerpt, featured_image_url, published_at, category",
+			)
+			.eq("status", "published")
+			.eq("app", APP_SCOPE)
+			.eq("category", category)
+			.neq("id", articleId)
+			.order("published_at", { ascending: false })
+			.limit(limit);
+
+		if (data) {
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any
+			for (const item of data as any[]) {
+				if (results.size < limit) {
+					results.set(item.id, item);
+				}
+			}
+		}
+	}
+
+	// 3. Compléter par articles récents si toujours pas assez.
+	// On utilise `.neq` séquentiellement pour éviter d'injecter une chaîne arbitraire dans `.not("id","in",...)`.
+	if (results.size < limit) {
+		const excludeIds = new Set([articleId, ...results.keys()]);
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		const { data } = await (supabase as any)
+			.from("articles")
+			.select(
+				"id, title, slug, excerpt, featured_image_url, published_at, category",
+			)
+			.eq("status", "published")
+			.eq("app", APP_SCOPE)
+			.order("published_at", { ascending: false })
+			.limit(limit + excludeIds.size);
+
+		if (data) {
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any
+			for (const item of data as any[]) {
+				if (results.size >= limit) break;
+				if (!excludeIds.has(item.id)) {
+					results.set(item.id, item);
+				}
+			}
+		}
+	}
+
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	return Array.from(results.values()) as any[];
+}
+
+/**
+ * Actions en masse sur les articles (scope app=azalee).
+ */
+export async function bulkUpdateArticles(
+	ids: string[],
+	updates: { status?: string; category?: string; pinned?: boolean },
+): Promise<{ success: boolean; count: number; error?: string }> {
+	if (ids.length === 0)
+		return { success: false, count: 0, error: "Aucun article sélectionné" };
+
+	try {
+		await requireEditorOrFail();
+	} catch (e) {
+		return { success: false, count: 0, error: (e as Error).message };
+	}
+
+	const { createAdminClient } = await import("@/lib/supabase/admin");
+	const supabase = createAdminClient();
+
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	const { error } = await (supabase as any)
+		.from("articles")
+		.update({ ...updates, updated_at: new Date().toISOString() })
+		.in("id", ids)
+		.eq("app", APP_SCOPE);
+
+	if (error) {
+		console.error("Bulk update error:", error);
+		return { success: false, count: 0, error: error.message };
+	}
+
+	revalidateNews();
+	return { success: true, count: ids.length };
+}
+
+export async function bulkDeleteArticles(
+	ids: string[],
+): Promise<{ success: boolean; count: number; error?: string }> {
+	if (ids.length === 0)
+		return { success: false, count: 0, error: "Aucun article sélectionné" };
+
+	try {
+		await requireEditorOrFail();
+	} catch (e) {
+		return { success: false, count: 0, error: (e as Error).message };
+	}
+
+	const { createAdminClient } = await import("@/lib/supabase/admin");
+	const supabase = createAdminClient();
+
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	const { error } = await (supabase as any)
+		.from("articles")
+		.delete()
+		.in("id", ids)
+		.eq("app", APP_SCOPE);
+
+	if (error) {
+		console.error("Bulk delete error:", error);
+		return { success: false, count: 0, error: error.message };
+	}
+
+	revalidateNews();
+	return { success: true, count: ids.length };
+}
+
+/**
+ * Statistiques des articles (4 statuts couverts, total views via SUM SQL).
+ */
+export async function getArticleStats(): Promise<{
+	totalArticles: number;
+	totalPublished: number;
+	totalDrafts: number;
+	totalScheduled: number;
+	totalArchived: number;
+	totalViews: number;
+	topArticles: Array<{
+		id: string;
+		title: string;
+		slug: string;
+		view_count: number;
+	}>;
+	recentArticles: Array<{
+		id: string;
+		title: string;
+		slug: string;
+		view_count: number;
+		published_at: string;
+	}>;
+}> {
+	const supabase = await createClient();
+
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	const client = supabase as any;
+
+	const [
+		{ count: totalArticles },
+		{ count: totalPublished },
+		{ count: totalDrafts },
+		{ count: totalScheduled },
+		{ count: totalArchived },
+		viewsAgg,
+		{ data: topArticles },
+		{ data: recentArticles },
+	] = await Promise.all([
+		client
+			.from("articles")
+			.select("*", { count: "exact", head: true })
+			.eq("app", APP_SCOPE),
+		client
+			.from("articles")
+			.select("*", { count: "exact", head: true })
+			.eq("status", "published")
+			.eq("app", APP_SCOPE),
+		client
+			.from("articles")
+			.select("*", { count: "exact", head: true })
+			.eq("status", "draft")
+			.eq("app", APP_SCOPE),
+		client
+			.from("articles")
+			.select("*", { count: "exact", head: true })
+			.eq("status", "scheduled")
+			.eq("app", APP_SCOPE),
+		client
+			.from("articles")
+			.select("*", { count: "exact", head: true })
+			.eq("status", "archived")
+			.eq("app", APP_SCOPE),
+		// SUM via une lecture des seules colonnes utiles. PostgREST n'expose pas
+		// d'agrégat SUM natif via supabase-js sans vue dédiée — on streame uniquement
+		// view_count (4 octets/ligne) côté serveur.
+		client
+			.from("articles")
+			.select("view_count")
+			.eq("status", "published")
+			.eq("app", APP_SCOPE),
+		client
+			.from("articles")
+			.select("id, title, slug, view_count")
+			.eq("status", "published")
+			.eq("app", APP_SCOPE)
+			.order("view_count", { ascending: false })
+			.limit(10),
+		client
+			.from("articles")
+			.select("id, title, slug, view_count, published_at")
+			.eq("status", "published")
+			.eq("app", APP_SCOPE)
+			.order("published_at", { ascending: false })
+			.limit(10),
+	]);
+
+	const totalViews = (
+		(viewsAgg.data as Array<{ view_count: number | null }>) || []
+	).reduce((sum, a) => sum + (a.view_count || 0), 0);
+
+	return {
+		totalArticles: totalArticles || 0,
+		totalPublished: totalPublished || 0,
+		totalDrafts: totalDrafts || 0,
+		totalScheduled: totalScheduled || 0,
+		totalArchived: totalArchived || 0,
+		totalViews,
+		topArticles: topArticles || [],
+		recentArticles: recentArticles || [],
+	};
+}
+
+/**
+ * Crée un snapshot de la version actuelle d'un article.
+ */
+export async function createArticleVersion(
+	articleId: string,
+): Promise<{ success: boolean; versionNumber?: number; error?: string }> {
+	try {
+		await requireEditorOrFail();
+	} catch (e) {
+		return { success: false, error: (e as Error).message };
+	}
+
+	const { createAdminClient } = await import("@/lib/supabase/admin");
+	const supabase = createAdminClient();
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	const client = supabase as any;
+
+	const { data: article, error: fetchErr } = await client
+		.from("articles")
+		.select(
+			"title, content, excerpt, category, tags, status, featured_image_url, meta_title, meta_description, author_id",
+		)
+		.eq("id", articleId)
+		.eq("app", APP_SCOPE)
+		.single();
+
+	if (fetchErr || !article) {
+		return { success: false, error: "Article introuvable" };
+	}
+
+	// Trouver le numéro de version suivant. `maybeSingle` évite le 406 quand
+	// aucun snapshot n'existe encore.
+	const { data: lastVersion } = await client
+		.from("article_versions")
+		.select("version_number")
+		.eq("article_id", articleId)
+		.order("version_number", { ascending: false })
+		.limit(1)
+		.maybeSingle();
+
+	const nextVersion = (lastVersion?.version_number || 0) + 1;
+
+	const { error: insertErr } = await client.from("article_versions").insert({
+		article_id: articleId,
+		version_number: nextVersion,
+		title: article.title,
+		content:
+			typeof article.content === "object"
+				? JSON.stringify(article.content)
+				: article.content,
+		excerpt: article.excerpt,
+		category: article.category,
+		tags: article.tags,
+		status: article.status,
+		featured_image_url: article.featured_image_url,
+		meta_title: article.meta_title,
+		meta_description: article.meta_description,
+		created_by: article.author_id,
+	});
+
+	if (insertErr) {
+		console.error("Version create error:", insertErr);
+		return { success: false, error: insertErr.message };
+	}
+
+	return { success: true, versionNumber: nextVersion };
+}
+
+/**
+ * Liste les versions d'un article (lecture publique côté admin).
+ */
+export async function getArticleVersions(articleId: string): Promise<
+	Array<{
+		id: string;
+		version_number: number;
+		title: string;
+		status: string | null;
+		created_at: string;
+	}>
+> {
+	const supabase = await createClient();
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	const { data } = await (supabase as any)
+		.from("article_versions")
+		.select("id, version_number, title, status, created_at")
+		.eq("article_id", articleId)
+		.order("version_number", { ascending: false });
+
+	return data || [];
+}
+
+/**
+ * Récupère le contenu d'une version spécifique.
+ */
+export async function getArticleVersion(versionId: string): Promise<{
+	id: string;
+	version_number: number;
+	title: string;
+	content: string;
+	excerpt: string | null;
+	category: string | null;
+	tags: string[] | null;
+	featured_image_url: string | null;
+	meta_title: string | null;
+	meta_description: string | null;
+	created_at: string;
+} | null> {
+	const supabase = await createClient();
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	const { data } = await (supabase as any)
+		.from("article_versions")
+		.select("*")
+		.eq("id", versionId)
+		.maybeSingle();
+
+	return data || null;
+}
+
+/**
+ * Restaure un article à une version spécifique.
+ * Vérifie que la version appartient bien à l'article cible.
+ */
+export async function restoreArticleVersion(
+	articleId: string,
+	versionId: string,
+): Promise<{ success: boolean; error?: string }> {
+	try {
+		await requireEditorOrFail();
+	} catch (e) {
+		return { success: false, error: (e as Error).message };
+	}
+
+	const { createAdminClient } = await import("@/lib/supabase/admin");
+	const supabase = createAdminClient();
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	const client = supabase as any;
+
+	// Snapshot de la version actuelle avant restauration
+	await createArticleVersion(articleId);
+
+	// Récupérer la version à restaurer en s'assurant qu'elle correspond bien à l'article
+	const { data: version, error: fetchErr } = await client
+		.from("article_versions")
+		.select(
+			"title, content, excerpt, category, tags, featured_image_url, meta_title, meta_description, article_id",
+		)
+		.eq("id", versionId)
+		.eq("article_id", articleId)
+		.maybeSingle();
+
+	if (fetchErr || !version) {
+		return { success: false, error: "Version introuvable pour cet article" };
+	}
+
+	const { error: updateErr } = await client
+		.from("articles")
+		.update({
+			title: version.title,
+			content: version.content,
+			excerpt: version.excerpt,
+			category: version.category,
+			tags: version.tags,
+			featured_image_url: version.featured_image_url,
+			meta_title: version.meta_title,
+			meta_description: version.meta_description,
+			updated_at: new Date().toISOString(),
+		})
+		.eq("id", articleId)
+		.eq("app", APP_SCOPE);
+
+	if (updateErr) {
+		return { success: false, error: updateErr.message };
+	}
+
+	revalidateNews();
+	return { success: true };
+}

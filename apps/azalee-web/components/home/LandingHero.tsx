@@ -1,0 +1,236 @@
+"use client";
+
+import { ArrowDown } from "lucide-react";
+import Image from "next/image";
+import { useEffect, useRef } from "react";
+import { GlobalSearch } from "@/components/wiki/GlobalSearch";
+import type { WikiSectionStats } from "./WikiCarousel";
+
+interface LandingHeroProps {
+  stats?: WikiSectionStats;
+}
+
+export function LandingHero({ stats }: LandingHeroProps) {
+  const bgRef = useRef<HTMLDivElement>(null);
+
+  // Desktop parallax on sky background
+  useEffect(() => {
+    const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (prefersReduced) return;
+
+    let ticking = false;
+    const onScroll = () => {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(() => {
+        const el = bgRef.current;
+        if (el) {
+          const rect = el.getBoundingClientRect();
+          if (rect.bottom > 0) {
+            el.style.transform = `translateY(${window.scrollY * 0.15}px) scale(1.05)`;
+          }
+        }
+        ticking = false;
+      });
+    };
+
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  const handleScrollToContent = () => {
+    const contentElement = document.getElementById("home-content");
+    if (contentElement) {
+      contentElement.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  };
+
+  const statPills = stats
+    ? [
+        { label: "joueurs", count: stats.characters },
+        { label: "techniques", count: stats.skills },
+        { label: "objets", count: stats.items },
+      ].filter((s) => s.count > 0)
+    : [];
+
+  return (
+    <section className="relative h-[90svh] min-h-[520px] md:h-[75vh] md:min-h-[520px] md:max-h-[700px] overflow-hidden bg-black -mx-4 w-[calc(100%+2rem)] md:-mx-8 md:w-[calc(100%+4rem)] lg:-mx-12 lg:w-[calc(100%+6rem)]">
+      {/* Background Image with parallax wrapper */}
+      <div ref={bgRef} className="absolute inset-0 will-change-transform">
+        <Image
+          src="/sky.webp"
+          alt=""
+          fill
+          priority
+          sizes="100vw"
+          className="object-cover object-center opacity-70 scale-105"
+        />
+      </div>
+
+      {/* Gradient Overlays — layered for depth */}
+      <div className="absolute inset-0 z-0 bg-gradient-to-b from-black/40 via-black/50 to-background" />
+      <div className="absolute inset-0 z-0 bg-gradient-to-r from-black/30 via-transparent to-black/20 hidden md:block" />
+
+      {/* CSS Particles */}
+      <div className="absolute inset-0 z-10 overflow-hidden pointer-events-none" aria-hidden="true">
+        <div className="hero-particle hero-particle-1" />
+        <div className="hero-particle hero-particle-2" />
+        <div className="hero-particle hero-particle-3" />
+        <div className="hero-particle hero-particle-4" />
+        <div className="hidden md:block hero-particle hero-particle-5" />
+        <div className="hidden md:block hero-particle hero-particle-6" />
+      </div>
+
+      {/* ── Mobile Layout ── */}
+      <div className="relative z-20 h-full flex flex-col md:hidden">
+        {/* Ambient Reika — more visible on mobile */}
+        <div
+          className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[80%] max-w-[300px] pointer-events-none"
+          aria-hidden="true"
+        >
+          <div className="relative animate-[mascotEntrance_1.2s_ease-out_0.3s_both]">
+            <div className="absolute -inset-8 bg-[#F4D03F]/15 blur-[60px] rounded-full animate-[glowPulse_4s_ease-in-out_infinite]" />
+            <Image
+              src="/reika.webp"
+              alt=""
+              width={300}
+              height={375}
+              sizes="80vw"
+              className="object-contain opacity-25 dark:opacity-20"
+            />
+          </div>
+        </div>
+
+        {/* Content */}
+        <div className="flex-1 flex flex-col items-center justify-center -translate-y-[5vh] px-6 animate-[fadeSlideUp_0.8s_ease-out_0.2s_both]">
+          <Image
+            src="/ie.webp"
+            alt="Inazuma Eleven Logo"
+            width={280}
+            height={160}
+            className="h-14 object-contain drop-shadow-[0_0_25px_rgba(240,125,125,0.4)] animate-[gentleFloat_4s_ease-in-out_infinite]"
+          />
+
+          <h1 className="mt-4 text-[1.5rem] leading-tight font-black text-white text-center drop-shadow-lg">
+            L&apos;encyclopédie
+            <br />
+            <span className="bg-clip-text text-transparent bg-gradient-to-r from-[#F07D7D] via-[#F4D03F] to-[#F07D7D] bg-300% animate-gradient">
+              Inazuma Eleven
+            </span>
+          </h1>
+
+          <p className="mt-2 text-sm text-white/60 text-center max-w-[280px]">
+            Joueurs, techniques, objets et actus en français.
+          </p>
+
+          {/* Search CTA with glow */}
+          <div className="mt-5 w-full max-w-[300px] hero-search-glow rounded-2xl">
+            <GlobalSearch isMobileHero />
+          </div>
+        </div>
+
+        {/* Scroll indicator */}
+        <div className="relative z-30 flex justify-center pb-24">
+          <button
+            onClick={handleScrollToContent}
+            className="flex flex-col items-center gap-1.5 animate-[fadeSlideUp_0.6s_ease-out_2s_both]"
+            aria-label="Défiler vers le contenu"
+          >
+            <span className="text-[10px] font-bold uppercase tracking-widest text-white/40">
+              Explorer
+            </span>
+            <div className="p-1.5 rounded-full bg-white/5 border border-white/10">
+              <ArrowDown className="w-4 h-4 text-white/60" />
+            </div>
+          </button>
+        </div>
+      </div>
+
+      {/* ── Desktop Layout ── */}
+      <div className="relative z-20 container mx-auto h-full hidden md:flex flex-row items-center justify-center gap-12 lg:gap-20 px-4 pt-6">
+        {/* Left: Text & CTA */}
+        <div className="flex flex-col items-start text-left space-y-5 max-w-xl animate-[fadeSlideUp_0.8s_ease-out_0.2s_both]">
+          <Image
+            src="/ie.webp"
+            alt="Inazuma Eleven Logo"
+            width={320}
+            height={180}
+            className="h-28 lg:h-32 object-contain mb-4 drop-shadow-[0_0_30px_rgba(240,125,125,0.5)] animate-[gentleFloat_4s_ease-in-out_infinite]"
+          />
+
+          <h1 className="type-display-small lg:type-display-medium font-black text-white drop-shadow-lg max-w-lg">
+            L&apos;information la plus précise autour d&apos;
+            <span className="bg-clip-text text-transparent bg-gradient-to-r from-[#F07D7D] via-[#F4D03F] to-[#F07D7D] bg-300% animate-gradient">
+              Inazuma Eleven
+            </span>
+            .
+          </h1>
+
+          {/* Stat pills */}
+          {statPills.length > 0 && (
+            <div className="flex items-center gap-2 flex-wrap animate-[fadeSlideUp_0.6s_ease-out_0.6s_both]">
+              {statPills.map((pill, i) => (
+                <span key={pill.label}>
+                  <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/15 text-white/90 text-sm font-bold shadow-lg">
+                    <span className="text-[#F4D03F]">{pill.count.toLocaleString("fr-FR")}+</span>{" "}
+                    {pill.label}
+                  </span>
+                  {i < statPills.length - 1 && <span className="mx-1 text-white/20">·</span>}
+                </span>
+              ))}
+            </div>
+          )}
+
+          {/* Desktop Search */}
+          <div className="w-full max-w-md hero-search-glow rounded-2xl animate-[fadeSlideUp_0.6s_ease-out_0.8s_both]">
+            <GlobalSearch isHero />
+          </div>
+        </div>
+
+        {/* Right: Mascot Reika — bigger and more prominent */}
+        <div className="relative animate-[mascotEntrance_1s_ease-out_0.4s_both]">
+          <div className="relative w-[320px] h-[420px] lg:w-[420px] lg:h-[540px] animate-[gentleFloat_6s_ease-in-out_infinite]">
+            {/* Multi-layered glow behind mascot */}
+            <div className="absolute top-1/3 left-1/4 w-2/3 h-2/3 bg-[#F4D03F]/25 blur-[100px] rounded-full animate-[glowPulse_4s_ease-in-out_infinite]" />
+            <div className="absolute bottom-1/4 right-1/4 w-1/2 h-1/2 bg-[#B03A2E]/20 blur-[80px] rounded-full animate-[glowPulse_4s_ease-in-out_1s_infinite]" />
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-3/4 h-3/4 bg-[#F07D7D]/10 blur-[120px] rounded-full" />
+
+            {/* Mascot image with enhanced drop shadow */}
+            <Image
+              src="/reika.webp"
+              alt="Reika, mascotte vue en plongée : cheveux roses corail en haute queue-de-cheval, pull jaune, regard déterminé et confiant"
+              width={420}
+              height={540}
+              sizes="(max-width: 1024px) 320px, 420px"
+              className="w-full h-full object-contain relative z-10 drop-shadow-[0_10px_40px_rgba(0,0,0,0.4)]"
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Desktop Scroll Down Indicator */}
+      <div
+        className="absolute bottom-8 left-1/2 -translate-x-1/2 z-30 cursor-pointer animate-[fadeSlideUp_1s_ease-out_1.5s_both] hidden md:block"
+        onClick={handleScrollToContent}
+        role="button"
+        tabIndex={0}
+        aria-label="Défiler vers le contenu"
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") handleScrollToContent();
+        }}
+      >
+        <div className="flex flex-col items-center gap-2 group animate-[gentleBounce_2s_ease-in-out_infinite]">
+          <span
+            className="text-xs font-bold uppercase tracking-widest text-white/50 group-hover:text-[#F07D7D] transition-colors"
+            aria-hidden="true"
+          >
+            Explorer
+          </span>
+          <div className="p-2 rounded-full bg-white/5 border border-white/10 backdrop-blur-sm group-hover:border-[#F07D7D]/50 group-hover:bg-[#F07D7D]/10 transition-all">
+            <ArrowDown className="w-5 h-5 text-white group-hover:text-[#F07D7D]" />
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
