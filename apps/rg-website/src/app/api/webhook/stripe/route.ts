@@ -1,5 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server";
 
+import { createAdminClient } from "@/lib/supabase/server";
 import { getStripe } from "@/lib/shop/stripe";
 
 export const runtime = "nodejs";
@@ -43,8 +44,54 @@ export async function POST(req: NextRequest) {
 					amount: session.amount_total,
 					patron: session.metadata?.patron_discount,
 				});
-				// TODO branchement DB orders ici quand la table sera créée.
-				// Pour l'instant : Stripe est la source de vérité, on log + notif.
+
+				// Persist le miroir local de la commande (table `orders`).
+				// Try/catch silencieux : si la migration SQL n'est pas appliquée,
+				// le webhook ne plante pas — Stripe reste la source de vérité.
+				try {
+					const supabase = createAdminClient();
+					await supabase.from("orders").upsert(
+						{
+							user_id:
+								session.metadata?.user_id !== "anonymous"
+									? session.metadata?.user_id
+									: null,
+							stripe_session_id: session.id,
+							stripe_customer_id:
+								typeof session.customer === "string"
+									? session.customer
+									: (session.customer?.id ?? null),
+							stripe_payment_intent_id:
+								typeof session.payment_intent === "string"
+									? session.payment_intent
+									: (session.payment_intent?.id ?? null),
+							amount_subtotal_cents: session.amount_subtotal ?? 0,
+							amount_discount_cents:
+								session.total_details?.amount_discount ?? 0,
+							amount_shipping_cents:
+								session.total_details?.amount_shipping ?? 0,
+							amount_tax_cents: session.total_details?.amount_tax ?? 0,
+							amount_total_cents: session.amount_total ?? 0,
+							patron_discount_applied:
+								session.metadata?.patron_discount === "yes",
+							shipping_address:
+								session.collected_information?.shipping_details?.address ??
+								null,
+							shipping_name:
+								session.collected_information?.shipping_details?.name ?? null,
+							shipping_email: session.customer_details?.email ?? null,
+							shipping_phone: session.customer_details?.phone ?? null,
+							status: "paid",
+							paid_at: new Date().toISOString(),
+						},
+						{ onConflict: "stripe_session_id" },
+					);
+				} catch (err) {
+					console.warn(
+						"[stripe-webhook] orders table upsert failed (migration probablement non appliquée):",
+						err,
+					);
+				}
 				break;
 			}
 			case "charge.refunded": {

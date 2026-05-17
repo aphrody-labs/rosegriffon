@@ -1,0 +1,168 @@
+import { ArrowRight, PackageOpen, ShoppingBag } from "lucide-react";
+import Link from "next/link";
+import { redirect } from "next/navigation";
+
+import { createAdminClient, createClient } from "@/lib/supabase/server";
+import { formatEuros } from "@/lib/shop/products";
+
+export const metadata = {
+	title: "Mes commandes · Boutique Rose Griffon",
+};
+
+const STATUS_LABEL = {
+	pending: "En attente",
+	paid: "Payée",
+	shipped: "Expédiée",
+	delivered: "Livrée",
+	refunded: "Remboursée",
+	failed: "Échec",
+	canceled: "Annulée",
+} as const;
+
+const STATUS_TONE = {
+	pending: "bg-amber-100 text-amber-900 border-amber-400",
+	paid: "bg-sky-100 text-sky-900 border-sky-400",
+	shipped: "bg-indigo-100 text-indigo-900 border-indigo-400",
+	delivered: "bg-emerald-100 text-emerald-900 border-emerald-400",
+	refunded: "bg-rose-100 text-rose-900 border-rose-400",
+	failed: "bg-red-200 text-red-900 border-red-500",
+	canceled: "bg-zinc-200 text-zinc-900 border-zinc-400",
+} as const;
+
+interface OrderRow {
+	id: string;
+	stripe_session_id: string;
+	amount_total_cents: number;
+	patron_discount_applied: boolean;
+	status: keyof typeof STATUS_LABEL;
+	created_at: string;
+	items: Array<{ slug?: string; label?: string; qty?: number }> | null;
+}
+
+async function fetchOrders(userId: string): Promise<OrderRow[]> {
+	try {
+		const supabase = createAdminClient();
+		const { data, error } = await supabase
+			.from("orders")
+			.select(
+				"id, stripe_session_id, amount_total_cents, patron_discount_applied, status, created_at, items",
+			)
+			.eq("user_id", userId)
+			.order("created_at", { ascending: false })
+			.limit(50);
+		if (error) {
+			console.warn("[shop/commandes] fetch error", error.message);
+			return [];
+		}
+		return (data ?? []) as OrderRow[];
+	} catch (err) {
+		console.warn("[shop/commandes] table orders absente ou indisponible:", err);
+		return [];
+	}
+}
+
+export default async function OrdersPage() {
+	const supabase = await createClient();
+	const { data: auth } = await supabase.auth.getUser();
+	if (!auth.user) {
+		redirect("/login?next=/shop/commandes");
+	}
+
+	const orders = await fetchOrders(auth.user.id);
+
+	return (
+		<main className="mx-auto max-w-5xl px-4 pb-16 pt-10 md:px-8 md:pt-16">
+			<header className="mb-10 flex flex-wrap items-end justify-between gap-4">
+				<div>
+					<p className="mb-2 inline-flex items-center gap-2 rounded-full border-2 border-[#d4af37] bg-[#0c1730] px-3 py-1 text-[10px] font-bold uppercase tracking-[0.24em] text-[#d4af37]">
+						<ShoppingBag className="size-3" />
+						<span>Boutique Rose Griffon</span>
+					</p>
+					<h1 className="text-fluid-headline-xl font-extrabold tracking-tight text-white">
+						Mes commandes
+					</h1>
+				</div>
+				<Link
+					href="/shop"
+					className="inline-flex h-10 items-center gap-2 rounded-full bg-[#d4af37] px-5 text-xs font-extrabold uppercase tracking-wider text-[#0c1730] shadow-[0_3px_0_0_rgba(0,0,0,0.5)] transition-transform motion-safe:duration-200 hover:-translate-y-0.5"
+				>
+					<span>Continuer mes achats</span>
+					<ArrowRight className="size-4" />
+				</Link>
+			</header>
+
+			{orders.length === 0 ? (
+				<EmptyOrders />
+			) : (
+				<ul className="flex flex-col gap-3">
+					{orders.map((order) => (
+						<li key={order.id}>
+							<Link
+								href={`/shop/commandes/${order.id}`}
+								className="group block overflow-hidden rounded-2xl border-2 border-[#d4af37]/40 bg-[#0c1730]/60 p-5 transition-all motion-safe:duration-200 hover:-translate-y-0.5 hover:border-[#d4af37] hover:bg-[#0c1730]/80"
+							>
+								<div className="flex flex-wrap items-start justify-between gap-4">
+									<div>
+										<p className="text-[10px] font-bold uppercase tracking-widest text-[#d4af37]">
+											Commande #{order.id.slice(0, 8).toUpperCase()}
+										</p>
+										<p className="mt-1 text-sm text-white/80">
+											{new Date(order.created_at).toLocaleDateString("fr-FR", {
+												day: "2-digit",
+												month: "long",
+												year: "numeric",
+												hour: "2-digit",
+												minute: "2-digit",
+											})}
+										</p>
+										<p className="mt-2 text-xs text-white/60">
+											{order.items?.length ?? 0} article
+											{(order.items?.length ?? 0) > 1 ? "s" : ""}
+											{order.patron_discount_applied && (
+												<span className="ml-2 inline-flex items-center rounded-full bg-[#d4af37]/20 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-[#d4af37]">
+													Patron −20%
+												</span>
+											)}
+										</p>
+									</div>
+									<div className="flex flex-col items-end gap-2">
+										<span
+											className={`inline-flex items-center rounded-full border px-3 py-0.5 text-[10px] font-bold uppercase tracking-wider ${STATUS_TONE[order.status] ?? STATUS_TONE.pending}`}
+										>
+											{STATUS_LABEL[order.status] ?? order.status}
+										</span>
+										<span className="text-2xl font-extrabold text-white">
+											{formatEuros(order.amount_total_cents)}
+										</span>
+									</div>
+								</div>
+							</Link>
+						</li>
+					))}
+				</ul>
+			)}
+		</main>
+	);
+}
+
+function EmptyOrders() {
+	return (
+		<div className="grid place-items-center rounded-3xl border-2 border-dashed border-[#d4af37]/40 bg-[#0c1730]/40 px-6 py-20 text-center">
+			<PackageOpen className="size-14 text-[#d4af37]" />
+			<h2 className="mt-6 text-2xl font-extrabold text-white">
+				Aucune commande pour le moment
+			</h2>
+			<p className="mt-2 max-w-md text-sm text-white/70">
+				Quand tu auras commandé, tes commandes apparaîtront ici avec le statut
+				d'expédition et le suivi.
+			</p>
+			<Link
+				href="/shop"
+				className="mt-6 inline-flex h-11 items-center gap-2 rounded-full bg-[#d4af37] px-5 text-xs font-extrabold uppercase tracking-wider text-[#0c1730] shadow-[0_3px_0_0_rgba(0,0,0,0.5)] hover:-translate-y-0.5 transition-transform motion-safe:duration-200"
+			>
+				<ShoppingBag className="size-4" />
+				Voir le catalogue
+			</Link>
+		</div>
+	);
+}
