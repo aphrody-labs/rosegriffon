@@ -2,7 +2,7 @@
 
 export const dynamic = "force-dynamic";
 
-import { Badge, Button, Card, CardContent, CardDescription, CardHeader, CardTitle, Tabs, TabsContent, TabsList, TabsTrigger } from "@rose-griffon/ui";
+import { Badge, Button, Card, CardContent, CardDescription, CardHeader, CardTitle, Tabs, TabsContent, TabsList, TabsTrigger } from "@rosegriffon/ui";
 import { useState } from "react";
 import { Toaster, toast } from "sonner";
 

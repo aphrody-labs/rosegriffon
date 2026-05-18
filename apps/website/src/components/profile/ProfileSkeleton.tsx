@@ -1,6 +1,6 @@
 
-import { Card, CardContent, CardHeader } from "@rose-griffon/ui";
-import { Skeleton } from "@rose-griffon/ui";
+import { Card, CardContent, CardHeader } from "@rosegriffon/ui";
+import { Skeleton } from "@rosegriffon/ui";
 
 export function ProfileSkeleton() {
   return (

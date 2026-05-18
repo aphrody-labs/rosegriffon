@@ -1,4 +1,4 @@
-import { Card, CardContent } from "@rose-griffon/ui";
+import { Card, CardContent } from "@rosegriffon/ui";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { ShieldCheck, User } from "lucide-react";

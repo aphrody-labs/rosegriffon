@@ -3,8 +3,8 @@
 import { google } from "googleapis";
 
 import { createLogger } from "@/lib/logger";
-import type { StreamSchedule } from "@rose-griffon/types";
-import type { Database, Tables, Insert, Update } from "@rose-griffon/db";
+import type { StreamSchedule } from "@rosegriffon/types";
+import type { Database, Tables, Insert, Update } from "@rosegriffon/db";
 
 const logger = createLogger("google-calendar");
 

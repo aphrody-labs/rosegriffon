@@ -4,7 +4,7 @@ import type { RealtimeChannel } from "@supabase/supabase-js";
 import { useCallback, useEffect, useMemo } from "react";
 
 import { createClient } from "@/lib/supabase/client";
-import type { Database } from "@rose-griffon/db";
+import type { Database } from "@rosegriffon/db";
 
 type Profile = Database["public"]["Tables"]["profiles"]["Row"];
 

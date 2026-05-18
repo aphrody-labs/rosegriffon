@@ -5,8 +5,8 @@ import { getServerUser } from "@/lib/auth-helpers";
 
 import { createLogger } from "@/lib/logger";
 import { createClient } from "@/lib/supabase/server";
-import type { Insert } from "@rose-griffon/db";
-import type { StreamSchedule } from "@rose-griffon/types";
+import type { Insert } from "@rosegriffon/db";
+import type { StreamSchedule } from "@rosegriffon/types";
 
 import { fetchGoogleCalendarEvents } from "./google-calendar-actions";
 

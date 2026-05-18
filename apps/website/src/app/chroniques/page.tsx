@@ -1,4 +1,4 @@
-import { Badge, Button, Input } from "@rose-griffon/ui";
+import { Badge, Button, Input } from "@rosegriffon/ui";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import {

@@ -1,6 +1,6 @@
 "use client";
 
-import { Button, Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, Input, Tabs, TabsContent, TabsList, TabsTrigger } from "@rose-griffon/ui";
+import { Button, Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, Input, Tabs, TabsContent, TabsList, TabsTrigger } from "@rosegriffon/ui";
 import { Search, Smile } from "lucide-react";
 import { useState } from "react";
 

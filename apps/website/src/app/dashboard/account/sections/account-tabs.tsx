@@ -1,6 +1,6 @@
 "use client";
 
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@rose-griffon/ui";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@rosegriffon/ui";
 import { KeyRound, Link2, Truck, UserCircle } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 import * as React from "react";

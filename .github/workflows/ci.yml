@@ -21,6 +21,10 @@ concurrency:
   group: ci-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+permissions:
+  contents: read
+  packages: read
+
 env:
   TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
   TURBO_TEAM: ${{ secrets.TURBO_TEAM }}
@@ -50,6 +54,8 @@ jobs:
           restore-keys: ${{ runner.os }}-bun-
 
       - run: bun install --frozen-lockfile --no-save
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - run: bun turbo run lint type-check
 
@@ -60,7 +66,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        workspace: ["@rose-griffon/website", "@rose-griffon/azalee", "@rose-griffon/bot"]
+        workspace: ["@rosegriffon/website", "@rosegriffon/azalee", "@rosegriffon/bot"]
     steps:
       - uses: actions/checkout@v4
 
@@ -82,6 +88,8 @@ jobs:
             ${{ runner.os }}-bun-
 
       - run: bun install --frozen-lockfile --no-save
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - run: bun turbo run build --filter=${{ matrix.workspace }}...
         env:
@@ -109,6 +117,8 @@ jobs:
           restore-keys: ${{ runner.os }}-bun-
 
       - run: bun install --frozen-lockfile --no-save
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - run: bun turbo run test
 

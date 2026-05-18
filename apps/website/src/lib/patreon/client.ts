@@ -1,7 +1,7 @@
 import {
 	PatreonCreatorClient,
 	type Oauth2StoredToken,
-} from "@rose-griffon/patreon-bun";
+} from "@rosegriffon/patreon-bun";
 
 import type {
 	JsonApiResource,

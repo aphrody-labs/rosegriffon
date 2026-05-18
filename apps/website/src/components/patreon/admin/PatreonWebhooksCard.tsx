@@ -1,6 +1,6 @@
 "use client";
 
-import { Button, Card, CardContent } from "@rose-griffon/ui";
+import { Button, Card, CardContent } from "@rosegriffon/ui";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { AlertTriangle, CheckCircle2, Loader2, Webhook } from "lucide-react";

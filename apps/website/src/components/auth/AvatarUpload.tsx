@@ -1,12 +1,12 @@
 "use client";
 
-import { Input } from "@rose-griffon/ui";
+import { Input } from "@rosegriffon/ui";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 import { updateUserAvatar } from "@/app/dashboard/account/actions";
 
-import { Label } from "@rose-griffon/ui";
+import { Label } from "@rosegriffon/ui";
 import { authClient } from "@/lib/auth-client";
 import { createClient } from "@/lib/supabase/client";
 

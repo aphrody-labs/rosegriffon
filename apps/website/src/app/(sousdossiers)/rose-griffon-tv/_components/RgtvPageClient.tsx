@@ -1,6 +1,6 @@
 "use client";
 
-import { Button, Card, CardContent, CardFooter, Tabs, TabsContent, TabsList, TabsTrigger } from "@rose-griffon/ui";
+import { Button, Card, CardContent, CardFooter, Tabs, TabsContent, TabsList, TabsTrigger } from "@rosegriffon/ui";
 import { motion } from "motion/react";
 import Image from "next/image";
 import Link from "next/link";
@@ -10,8 +10,8 @@ import { RgtvScheduleClient } from "@/components/RgtvScheduleClient";
 
 import { useTheme } from "@/contexts/theme-context";
 import { Monitor, Radio, Users, Youtube } from "@/lib/icons-config";
-import type { StreamSchedule } from "@rose-griffon/types";
-import type { Database, Tables, Insert, Update } from "@rose-griffon/db";
+import type { StreamSchedule } from "@rosegriffon/types";
+import type { Database, Tables, Insert, Update } from "@rosegriffon/db";
 
 import { type TwitchChannel, TwitchProvider, useTwitch } from "../_context/twitch-context";
 import { RgtvAppShell } from "./RgtvAppShell";

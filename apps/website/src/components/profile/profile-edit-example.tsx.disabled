@@ -1,10 +1,10 @@
 "use client";
 
-import { Alert, AlertDescription, Button, Card, CardContent, CardDescription, CardHeader, CardTitle, Input } from "@rose-griffon/ui";
+import { Alert, AlertDescription, Button, Card, CardContent, CardDescription, CardHeader, CardTitle, Input } from "@rosegriffon/ui";
 import { useState } from "react";
 import { useProfile } from "@/contexts/profile-context";
 
-import { Skeleton } from "@rose-griffon/ui";
+import { Skeleton } from "@rosegriffon/ui";
 
 import { AlertCircle, Check, Loader2 } from "lucide-react";
 

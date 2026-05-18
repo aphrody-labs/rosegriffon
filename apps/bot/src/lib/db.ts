@@ -1,7 +1,7 @@
 /**
  * Couche DB du bot — deux chemins sur la même Postgres Supabase.
  *
- *   - `supabase` (de @rose-griffon/db/service) : query builder typé. Préférer pour les queries
+ *   - `supabase` (de @rosegriffon/db/service) : query builder typé. Préférer pour les queries
  *     simples (`from().select()`, `.insert()`, `.rpc()`) — type-checking sur les
  *     colonnes via le type `Database` généré.
  *   - `sql` (Bun.SQL) : connexion Postgres directe sur le pooler Supabase
@@ -13,7 +13,7 @@
  * ne JAMAIS exposer côté client (le bot tourne en Bun/serveur uniquement).
  */
 import { SQL } from "bun";
-import { createSupabaseServiceClient } from "@rose-griffon/db/service";
+import { createSupabaseServiceClient } from "@rosegriffon/db/service";
 
 export const supabase = createSupabaseServiceClient();
 

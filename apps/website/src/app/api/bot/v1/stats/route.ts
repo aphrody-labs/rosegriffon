@@ -2,7 +2,7 @@ import { type NextRequest, NextResponse } from "next/server";
 
 import { createAdminClient } from "@/lib/supabase/server";
 import { assertBotAuth } from "../_lib";
-import { getDashboardStats } from "@rose-griffon/db";
+import { getDashboardStats } from "@rosegriffon/db";
 
 // Cache 30s côté Next.js
 export const revalidate = 30;

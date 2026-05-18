@@ -3,21 +3,21 @@
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { useState } from "react";
-import { Button } from "@rose-griffon/ui";
-import { Calendar } from "@rose-griffon/ui";
-import { Input } from "@rose-griffon/ui";
+import { Button } from "@rosegriffon/ui";
+import { Calendar } from "@rosegriffon/ui";
+import { Input } from "@rosegriffon/ui";
 import {
 	Popover,
 	PopoverContent,
 	PopoverTrigger,
-} from "@rose-griffon/ui";
+} from "@rosegriffon/ui";
 import {
 	Select,
 	SelectContent,
 	SelectItem,
 	SelectTrigger,
 	SelectValue,
-} from "@rose-griffon/ui";
+} from "@rosegriffon/ui";
 import { CalendarClock } from "@/lib/icons-config";
 import { cn } from "@/lib/utils";
 import { CATEGORIES, STATUS_OPTIONS } from "../constants";

@@ -1,4 +1,4 @@
-# `@rose-griffon/ui` — Design System Rose Griffon
+# `@rosegriffon/ui` — Design System Rose Griffon
 
 Composants partagés du monorepo `rose-griffon/rg`. Construit sur **shadcn/ui new-york** (Radix + Tailwind v4) avec une couche **Material Design 3** complète (tokens couleur, shape, motion, elevation, typescale) et **4 thèmes unifiés** prêts à l'emploi.
 
@@ -12,7 +12,7 @@ Déjà câblé dans le monorepo via `workspace:*`. Pour une nouvelle app :
 // apps/<app>/package.json
 {
   "dependencies": {
-    "@rose-griffon/ui": "workspace:*"
+    "@rosegriffon/ui": "workspace:*"
   }
 }
 ```
@@ -21,21 +21,21 @@ Dans le `globals.css` de l'app :
 
 ```css
 @import "tailwindcss";
-@import "@rose-griffon/ui/styles.css"; /* tokens MD3 + 4 thèmes + utilities Tailwind */
+@import "@rosegriffon/ui/styles.css"; /* tokens MD3 + 4 thèmes + utilities Tailwind */
 ```
 
 Importer les composants :
 
 ```tsx
-import { Button, Card, Dialog, Sheet } from "@rose-griffon/ui";
+import { Button, Card, Dialog, Sheet } from "@rosegriffon/ui";
 // ou par fichier :
-import { Button } from "@rose-griffon/ui/button";
+import { Button } from "@rosegriffon/ui/button";
 ```
 
 Importer les hooks :
 
 ```tsx
-import { useIsMobile, useMediaQuery, useSwipe } from "@rose-griffon/ui";
+import { useIsMobile, useMediaQuery, useSwipe } from "@rosegriffon/ui";
 ```
 
 ---
@@ -195,11 +195,11 @@ Tous les composants suivent le pattern moderne shadcn :
 
 ## Migration depuis copies locales d'apps
 
-Les apps `website` et `azalee` ont des copies locales de certains composants UI. Pour migrer vers `@rose-griffon/ui` :
+Les apps `website` et `azalee` ont des copies locales de certains composants UI. Pour migrer vers `@rosegriffon/ui` :
 
 1. Supprimer `apps/<app>/src/components/ui/<comp>.tsx`
-2. Remplacer `import { Comp } from "@/components/ui/comp"` par `import { Comp } from "@rose-griffon/ui"`
-3. Vérifier le rendu (les composants `@rose-griffon/ui` peuvent avoir une API légèrement différente — voir audit `docs/ui-audit-2026-05-17.md`)
+2. Remplacer `import { Comp } from "@/components/ui/comp"` par `import { Comp } from "@rosegriffon/ui"`
+3. Vérifier le rendu (les composants `@rosegriffon/ui` peuvent avoir une API légèrement différente — voir audit `docs/ui-audit-2026-05-17.md`)
 
 ---
 

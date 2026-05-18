@@ -13,8 +13,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
-import { Button } from "@rose-griffon/ui";
-import { Input } from "@rose-griffon/ui";
+import { Button } from "@rosegriffon/ui";
+import { Input } from "@rosegriffon/ui";
 import { authClient } from "@/lib/auth-client";
 
 type AuthMode = "login" | "signup" | "forgot-password";

@@ -1,10 +1,10 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@rose-griffon/ui";
+import { Card, CardContent, CardHeader, CardTitle } from "@rosegriffon/ui";
 import { formatDistanceToNow } from "date-fns";
 import { fr } from "date-fns/locale";
 import { ArrowRight } from "lucide-react";
 import Link from "next/link";
 
-import { Avatar, AvatarFallback, AvatarImage } from "@rose-griffon/ui";
+import { Avatar, AvatarFallback, AvatarImage } from "@rosegriffon/ui";
 
 interface RecentUser {
 	id: string;

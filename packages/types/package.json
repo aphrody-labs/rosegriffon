@@ -1,5 +1,5 @@
 {
-  "name": "@rose-griffon/types",
+  "name": "@rosegriffon/types",
   "version": "0.1.0",
   "type": "module",
   "description": "Types métier partagés (roles, user, discord) — source unique de vérité bot/azalee/website",
@@ -17,7 +17,7 @@
   },
   "dependencies": {},
   "devDependencies": {
-    "@rose-griffon/config": "workspace:*",
+    "@rosegriffon/config": "workspace:*",
     "typescript": "catalog:"
   },
   "publishConfig": {

@@ -1,6 +1,6 @@
 "use client";
 
-import { Button, Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle, Input } from "@rose-griffon/ui";
+import { Button, Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle, Input } from "@rosegriffon/ui";
 import { Download, Image as ImageIcon, User as UserIcon } from "lucide-react";
 import NextImage from "next/image";
 import { useEffect, useRef, useState } from "react";

@@ -10,7 +10,7 @@ import {
 	TooltipContent,
 	TooltipProvider,
 	TooltipTrigger,
-} from "@rose-griffon/ui";
+} from "@rosegriffon/ui";
 import { getBadgeVariant, sidebarTransitions } from "@/lib/sidebar-config";
 import { cn } from "@/lib/utils";
 

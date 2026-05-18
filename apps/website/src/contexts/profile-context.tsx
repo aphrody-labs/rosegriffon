@@ -4,7 +4,7 @@ import { createContext, useCallback, useContext, useEffect, useState } from "rea
 
 import { useAuth } from "@/contexts/auth-context";
 import { useProfileSync, useUpdateProfile } from "@/hooks/use-profile-sync";
-import type { Database } from "@rose-griffon/db";
+import type { Database } from "@rosegriffon/db";
 
 type Profile = Database["public"]["Tables"]["profiles"]["Row"];
 

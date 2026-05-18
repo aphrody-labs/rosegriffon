@@ -10,7 +10,7 @@ import {
 	type PatchNoteDetail,
 	type PatchNoteSummary,
 } from "@/app/actions/news";
-import { ScrollArea } from "@rose-griffon/ui";
+import { ScrollArea } from "@rosegriffon/ui";
 import { cn } from "@/lib/utils";
 import { PatchNoteViewer } from "./PatchNoteViewer";
 

@@ -7,7 +7,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 import type { FeedItem } from "@/app/news/news-client";
-import { Badge } from "@rose-griffon/ui";
+import { Badge } from "@rosegriffon/ui";
 
 const CATEGORY_LABELS: Record<string, string> = {
   announcement: "Annonce",

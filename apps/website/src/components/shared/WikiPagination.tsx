@@ -10,7 +10,7 @@ import {
   PaginationLink,
   PaginationNext,
   PaginationPrevious,
-} from "@rose-griffon/ui";
+} from "@rosegriffon/ui";
 
 interface WikiPaginationProps {
   totalItems: number;

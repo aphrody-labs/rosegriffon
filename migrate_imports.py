@@ -31,8 +31,8 @@ def migrate_file(filepath):
         # Deduplicate and sort
         new_imports = sorted(list(set(new_imports)))
         
-        # Check if @rose-griffon/ui is already imported
-        rg_ui_pattern = re.compile(r'import\s+\{(?P<imports>[^}]*)\}\s+from\s+"@rose-griffon/ui";?', re.MULTILINE | re.DOTALL)
+        # Check if @rosegriffon/ui is already imported
+        rg_ui_pattern = re.compile(r'import\s+\{(?P<imports>[^}]*)\}\s+from\s+"@rosegriffon/ui";?', re.MULTILINE | re.DOTALL)
         rg_ui_match = rg_ui_pattern.search(new_content)
         
         if rg_ui_match:
@@ -41,10 +41,10 @@ def migrate_file(filepath):
             new_imports.extend([i for i in existing_imports if i])
             new_imports = sorted(list(set(new_imports)))
             
-            import_line = 'import { %s } from "@rose-griffon/ui";' % ", ".join(new_imports)
+            import_line = 'import { %s } from "@rosegriffon/ui";' % ", ".join(new_imports)
             new_content = rg_ui_pattern.sub(import_line, new_content)
         else:
-            import_line = 'import { %s } from "@rose-griffon/ui";\n' % ", ".join(new_imports)
+            import_line = 'import { %s } from "@rosegriffon/ui";\n' % ", ".join(new_imports)
             lines = new_content.splitlines()
             inserted = False
             for i, line in enumerate(lines):

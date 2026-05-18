@@ -1,6 +1,6 @@
 "use client";
 
-import { DashboardStatsCard as StatsCard } from "@rose-griffon/ui";
+import { DashboardStatsCard as StatsCard } from "@rosegriffon/ui";
 import { Clock, Shield, UserCheck, Users } from "@/lib/icons-config";
 
 interface UserStatsProps {

@@ -1,5 +1,5 @@
 {
-  "name": "@rose-griffon/auth",
+  "name": "@rosegriffon/auth",
   "version": "0.1.0",
   "type": "module",
   "description": "Shared authentication logic and guards for Rose Griffon apps",
@@ -12,8 +12,8 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@rose-griffon/db": "workspace:*",
-    "@rose-griffon/types": "workspace:*",
+    "@rosegriffon/db": "workspace:*",
+    "@rosegriffon/types": "workspace:*",
     "better-auth": "catalog:"
   },
   "devDependencies": {

@@ -1,4 +1,4 @@
-import type { Database } from "@rose-griffon/db";
+import type { Database } from "@rosegriffon/db";
 
 /** Horaire de stream. */
 export type StreamSchedule = Database["public"]["Tables"]["stream_schedules"]["Row"];

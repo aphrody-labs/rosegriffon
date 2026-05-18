@@ -14,7 +14,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@rose-griffon/ui";
+} from "@rosegriffon/ui";
 import type { SpriteCommonKey } from "@/config/sprites-common";
 import { formatDescription } from "@/lib/format-description";
 import { type GenderValue, isFemaleGender } from "@/lib/gender";
