@@ -124,6 +124,10 @@ export const auth = betterAuth({
 
 	trustedOrigins: [
 		"https://rosegriffon.fr",
+		"https://www.rosegriffon.fr",
+		"https://rg-website.vercel.app",
+		"https://rg-website-aphrody.vercel.app",
+		"https://rg-website-git-main-aphrody.vercel.app",
 		process.env.BETTER_AUTH_URL ?? "https://rosegriffon.fr",
 		"http://localhost:3000",
 		"http://localhost:3001",
