@@ -4,8 +4,14 @@ import { auth } from "@/lib/auth";
 import { mintSupabaseJwt } from "@/lib/supabase/jwt";
 import type { Database } from "@rosegriffon/db";
 
-const supabaseUrl = process.env.SUPABASE_INTERNAL_URL || process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+const getEnv = (key: string, fallback: string) => {
+  const val = process.env[key];
+  if (!val || val === "" || val.startsWith("{")) return fallback;
+  return val;
+};
+
+const supabaseUrl = getEnv("SUPABASE_INTERNAL_URL", getEnv("NEXT_PUBLIC_SUPABASE_URL", "https://isbkaeltubqittywibeh.supabase.co"));
+const supabaseAnonKey = getEnv("NEXT_PUBLIC_SUPABASE_ANON_KEY", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlzYmthZWx0dWJxaXR0eXdpYmVoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDYwNjk0MzAsImV4cCI6MjA2MTY0NTQzMH0.N4l07k3V_X5I8iW0n_D6K9-O4v5l7l6s6MYGpJIXRW_rB8zc45k7chqi8Ljl_CLiLc=");
 
 // Skip the Better Auth -> Supabase JWT bridge when the local SUPABASE_JWT_SECRET
 // is desynchronized from Supabase Cloud (minted JWTs rejected with PGRST301).
