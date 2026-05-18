@@ -1,4 +1,4 @@
-export const dynamic = "force-dynamic";
+export const revalidate = 3600; // ISR: Revalidate every hour
 
 import { ArrowLeftRight } from "lucide-react";
 import type { Metadata } from "next";

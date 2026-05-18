@@ -48,6 +48,7 @@ const nextConfig = {
 	],
 
 	experimental: {
+		serverSourceMaps: true,
 		turbopackFileSystemCacheForBuild: true,
 		optimizePackageImports: [
 			"lucide-react",

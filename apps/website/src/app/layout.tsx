@@ -3,8 +3,21 @@ import "./globals.css";
 import type { Metadata, Viewport } from "next";
 
 import { lato, notoSans, poppins, roboto } from "@/lib/fonts";
+import { Geist, Geist_Mono } from "next/font/google";
+import { Analytics } from "@vercel/analytics/react";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 
 import ClientLayout from "./client-layout";
+
+const geistSans = Geist({
+  variable: "--font-geist-sans",
+  subsets: ["latin"],
+});
+
+const geistMono = Geist_Mono({
+  variable: "--font-geist-mono",
+  subsets: ["latin"],
+});
 
 export const viewport: Viewport = {
   themeColor: "#a14b3f",
@@ -144,14 +157,8 @@ export default function RootLayout({
         suppressHydrationWarning
       >
         <ClientLayout>{children}</ClientLayout>
-      </body>
-    </html>
-  );
-}
-ble} ${poppins.variable} ${notoSans.variable} ${lato.variable}`}
-        suppressHydrationWarning
-      >
-        <ClientLayout>{children}</ClientLayout>
+        <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   );

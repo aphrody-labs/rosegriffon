@@ -1,8 +1,10 @@
 import { createClient as createSupabaseClient } from "@supabase/supabase-js";
-import localFont from "next/font/local";
 import { cookies, headers } from "next/headers";
 import Script from "next/script";
 import { ThemeProvider as RawNextThemesProvider } from "next-themes";
+import { Geist, Geist_Mono } from "next/font/google";
+import { Analytics } from "@vercel/analytics/react";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 
 // next-themes < v1 + React 19 typings drift on `children` prop: cast once to
 // a permissive FC. Runtime behavior is unchanged.
@@ -19,10 +21,14 @@ import { auth, ensureUserProfile } from "@/lib/auth";
 import { mintSupabaseJwt } from "@/lib/supabase/jwt";
 import "./globals.css";
 
-const googleSans = localFont({
-  src: "../public/fonts/Google_Sans_Flex/GoogleSansFlex-Variable.woff2",
-  variable: "--font-google-sans",
-  display: "swap",
+const geistSans = Geist({
+  variable: "--font-geist-sans",
+  subsets: ["latin"],
+});
+
+const geistMono = Geist_Mono({
+  variable: "--font-geist-mono",
+  subsets: ["latin"],
 });
 
 import type { Metadata, Viewport } from "next";
@@ -168,11 +174,8 @@ export default async function RootLayout({
             <Toaster />
           </ThemeProvider>
         </LanguageProvider>
-      </body>
-    </html>
-  );
-}
-guageProvider>
+        <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   );
