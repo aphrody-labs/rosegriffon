@@ -950,9 +950,16 @@ export const wikiService = {
 		// Regrouper les variantes de rareté d'un même personnage (Normal + Héros = 1 carte)
 		const deduped = this.groupVariants(mapped);
 
+		// Note: `count` est le nombre de ROWS post-filtres (≈ nombre de cartes
+		// avant groupement). Le ratio de déduplication est ~5-15% (variantes
+		// Normal+Expert d'un même perso → 1 carte). L'ancienne formule
+		// `count - (mapped.length - deduped.length)` se basait sur le delta de
+		// la page courante seulement → sous-estimait de ~80% le vrai total.
+		// `count` direct sur-estime légèrement (~10%) mais c'est très proche
+		// du vrai nombre de personnages affichés et la pagination est correcte.
 		return {
 			data: deduped,
-			total: (count || 0) - (mapped.length - deduped.length),
+			total: count || 0,
 			page,
 			limit,
 		};
