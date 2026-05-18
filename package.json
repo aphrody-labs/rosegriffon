@@ -62,7 +62,6 @@
 			"swr": "^2.3.6",
 			"@tanstack/query-sync-storage-persister": "^5.99.1",
 			"@tanstack/react-query-persist-client": "^5.99.1",
-			"turbo": "^2.9.14",
 			"prettier": "^3.8.3"
 		}
 	},
@@ -87,7 +86,7 @@
 		"geist": "^1.7.0",
 		"oxlint": "catalog:",
 		"prettier": "catalog:",
-		"turbo": "catalog:",
+		"turbo": "^2.9.14",
 		"typescript": "catalog:"
 	}
 }
