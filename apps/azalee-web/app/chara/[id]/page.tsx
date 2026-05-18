@@ -55,6 +55,13 @@ export async function generateMetadata({
     ? `${parts.join(" - ")}. ${charDesc.slice(0, 120)}${charDesc.length > 120 ? "..." : ""}`
     : `${parts.join(" - ")}. Stats, techniques et détails dans Inazuma Eleven: Victory Road.`;
 
+  const ogImageUrl = new URL("/api/og/character", "https://azalee.rosegriffon.fr");
+  ogImageUrl.searchParams.set("id", id);
+  ogImageUrl.searchParams.set("name", name);
+  ogImageUrl.searchParams.set("element", variant?.element || "neutral");
+  ogImageUrl.searchParams.set("rarity", rarity);
+  if (baseChar.image) ogImageUrl.searchParams.set("image", baseChar.image);
+
   return {
     title: `${name} | Inazuma Eleven Victory Road - Azalée`,
     description: shortDesc,
@@ -68,13 +75,20 @@ export async function generateMetadata({
       siteName: "Azalée - Inazuma Eleven Victory Road",
       locale: "fr_FR",
       type: "article",
-      images: baseChar.image ? [{ url: baseChar.image, alt: name }] : [],
+      images: [
+        {
+          url: ogImageUrl.toString(),
+          width: 1200,
+          height: 630,
+          alt: `${name} - Fiche personnage Azalée`,
+        },
+      ],
     },
     twitter: {
-      card: baseChar.image ? "summary_large_image" : "summary",
+      card: "summary_large_image",
       title: `${name} | Azalée`,
       description: shortDesc,
-      images: baseChar.image ? [baseChar.image] : undefined,
+      images: [ogImageUrl.toString()],
     },
   };
 }
