@@ -24,19 +24,24 @@ export async function createClient(): Promise<SupabaseClient> {
 }
 
 export function createPublicClient(): SupabaseClient {
-	const supabaseUrl =
-		process.env.NEXT_PUBLIC_SUPABASE_URL &&
-		process.env.NEXT_PUBLIC_SUPABASE_URL !== "" &&
-		!process.env.NEXT_PUBLIC_SUPABASE_URL.startsWith("{")
-			? process.env.NEXT_PUBLIC_SUPABASE_URL
-			: "https://isbkaeltubqittywibeh.supabase.co";
+	let supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+	let supabaseAnonKey =
+		process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ||
+		process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-	const supabaseAnonKey =
-		process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY &&
-		process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY !== "" &&
-		!process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY.startsWith("{")
-			? process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
-			: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlzYmthZWx0dWJxaXR0eXdpYmVoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDYwNjk0MzAsImV4cCI6MjA2MTY0NTQzMH0.N4l07k3V_X5I8iW0n_D6K9-O4v5l7l6s6MYGpJIXRW_rB8zc45k7chqi8Ljl_CLiLc=";
+	// Safety: Vercel might pass encrypted JSON or empty string during build.
+	if (!supabaseUrl || supabaseUrl === "" || supabaseUrl.startsWith("{")) {
+		supabaseUrl = "https://isbkaeltubqittywibeh.supabase.co";
+	}
+
+	if (
+		!supabaseAnonKey ||
+		supabaseAnonKey === "" ||
+		supabaseAnonKey.startsWith("{")
+	) {
+		supabaseAnonKey =
+			"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlzYmthZWx0dWJxaXR0eXdpYmVoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDYwNjk0MzAsImV4cCI6MjA2MTY0NTQzMH0.N4l07k3V_X5I8iW0n_D6K9-O4v5l7l6s6MYGpJIXRW_rB8zc45k7chqi8Ljl_CLiLc=";
+	}
 
 	return createSupabaseClient(supabaseUrl, supabaseAnonKey, {
 		auth: {
