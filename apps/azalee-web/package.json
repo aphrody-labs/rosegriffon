@@ -133,7 +133,7 @@
 		"oxlint": "catalog:",
 		"tailwindcss": "catalog:",
 		"tailwindcss-animate": "catalog:",
-		"turbo": "catalog:",
+		"turbo": "^2.9.14",
 		"typescript": "catalog:",
 		"vitest": "catalog:"
 	}
