@@ -140,7 +140,15 @@ export default function RootLayout({
         <link rel="dns-prefetch" href="https://cdn.discordapp.com" />
       </head>
       <body
-        className={`${roboto.className} ${roboto.variable} ${poppins.variable} ${notoSans.variable} ${lato.variable}`}
+        className={`${geistSans.variable} ${geistMono.variable} ${roboto.className} ${roboto.variable} ${poppins.variable} ${notoSans.variable} ${lato.variable}`}
+        suppressHydrationWarning
+      >
+        <ClientLayout>{children}</ClientLayout>
+      </body>
+    </html>
+  );
+}
+ble} ${poppins.variable} ${notoSans.variable} ${lato.variable}`}
         suppressHydrationWarning
       >
         <ClientLayout>{children}</ClientLayout>

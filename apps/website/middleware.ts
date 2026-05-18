@@ -1,19 +1,29 @@
 import { getSessionCookie } from "better-auth/cookies";
 import { type NextRequest, NextResponse } from "next/server";
+import { get } from "@vercel/edge-config";
 
 const PROTECTED_PATHS = ["/dashboard", "/admin", "/profil/settings"];
 
-/**
- * Optimistic auth check — `getSessionCookie` lit le cookie de session Better Auth
- * en respectant la config (incluant préfixe `__Secure-` quand `useSecureCookies: true`).
- * Pas de validation crypto ici — juste un check d'existence pour rediriger vite.
- * La validation forte est faite côté pages via `auth.api.getSession()` dans `auth-helpers.ts`.
- */
-export function middleware(request: NextRequest) {
+export async function middleware(request: NextRequest) {
+  // 1. Zero-latency maintenance mode via Edge Config
+  try {
+    // Only check if EDGE_CONFIG is available in the environment
+    if (process.env.EDGE_CONFIG) {
+      const isMaintenanceMode = await get<boolean>("maintenanceMode");
+      if (isMaintenanceMode && request.nextUrl.pathname !== "/maintenance") {
+        request.nextUrl.pathname = `/maintenance`;
+        return NextResponse.rewrite(request.nextUrl);
+      }
+    }
+  } catch (error) {
+    console.error("[Middleware] Edge Config Error:", error);
+  }
+
   const { pathname } = request.nextUrl;
   const isProtected = PROTECTED_PATHS.some((p) => pathname.startsWith(p));
   if (!isProtected) return NextResponse.next();
 
+  // 2. Optimistic Auth Check
   const sessionCookie = getSessionCookie(request);
   if (!sessionCookie) {
     const loginUrl = new URL("/login", request.url);
@@ -25,5 +35,14 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/dashboard/:path*", "/admin/:path*", "/profil/settings/:path*"],
+  matcher: [
+    /*
+     * Match all request paths except for the ones starting with:
+     * - api (API routes)
+     * - _next/static (static files)
+     * - _next/image (image optimization files)
+     * - favicon.ico, sitemap.xml, robots.txt (metadata files)
+     */
+    '/((?!api|_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt|logo.webp).*)',
+  ],
 };

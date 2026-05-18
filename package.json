@@ -81,11 +81,13 @@
 		"bot:start": "bun --filter @rosegriffon/bot start"
 	},
 	"devDependencies": {
-		"turbo": "catalog:",
-		"typescript": "catalog:",
-		"prettier": "catalog:",
 		"@types/bun": "catalog:",
+		"@vercel/edge-config": "^1.4.3",
+		"eslint": "catalog:",
+		"geist": "^1.7.0",
 		"oxlint": "catalog:",
-		"eslint": "catalog:"
+		"prettier": "catalog:",
+		"turbo": "catalog:",
+		"typescript": "catalog:"
 	}
 }
