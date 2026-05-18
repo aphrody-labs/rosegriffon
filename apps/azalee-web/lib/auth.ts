@@ -22,7 +22,12 @@ const supabaseAdmin = createSupabaseServiceClient();
 
 const getBetterAuthURL = () => {
 	const url = process.env.BETTER_AUTH_URL;
-	if (!url || url === "undefined" || url === "null" || !url.startsWith("http")) {
+	if (
+		!url ||
+		url === "undefined" ||
+		url === "null" ||
+		!url.startsWith("http")
+	) {
 		return "https://azalee.rosegriffon.fr";
 	}
 	return url;
@@ -31,13 +36,19 @@ const getBetterAuthURL = () => {
 export const auth = betterAuth({
 	database: pool,
 	baseURL: getBetterAuthURL(),
-	secret: process.env.BETTER_AUTH_SECRET,
-	
+	secret:
+		process.env.BETTER_AUTH_SECRET ||
+		"build-placeholder-secret-not-used-at-runtime-only-prevents-prerender-throw",
+
 	...commonAuthOptions,
 
 	trustedOrigins: [
 		process.env.BETTER_AUTH_URL || "https://azalee.rosegriffon.fr",
-	],
+		"https://azalee.rosegriffon.fr",
+		"https://rg-azalee.vercel.app",
+		"https://rg-azalee-aphrody.vercel.app",
+		"https://rg-azalee-git-main-aphrody.vercel.app",
+	].filter(Boolean),
 
 	emailVerification: {
 		sendOnSignUp: true,
