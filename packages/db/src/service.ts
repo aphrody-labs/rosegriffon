@@ -13,7 +13,7 @@ export function createSupabaseServiceClient() {
 	const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
 	// Safety: Vercel might pass encrypted JSON or missing value during build.
-	if (!url || !url.startsWith("http")) {
+	if (!url || url === "undefined" || url === "null" || !url.startsWith("http")) {
 		url = "https://isbkaeltubqittywibeh.supabase.co";
 	}
 

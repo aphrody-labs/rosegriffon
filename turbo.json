@@ -1,7 +1,7 @@
 {
 	"$schema": "https://turborepo.dev/schema.json",
 	"globalDependencies": ["tsconfig.base.json", "bunfig.toml", ".oxlintrc.json"],
-	"globalEnv": ["NODE_ENV"],
+	"globalEnv": ["NODE_ENV", "NEXT_PUBLIC_SUPABASE_URL"],
 	"globalPassThroughEnv": [
 		"PATH",
 		"HOME",
