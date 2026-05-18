@@ -11,12 +11,26 @@ import { createClient } from "@supabase/supabase-js";
 import { unstable_cache } from "next/cache";
 import { resolveAssetUrl, resolveAuraTelopUrl } from "@/lib/images";
 
-const supabaseUrl =
-  typeof window === "undefined" && process.env.SUPABASE_INTERNAL_URL
-    ? process.env.SUPABASE_INTERNAL_URL
-    : process.env.NEXT_PUBLIC_SUPABASE_URL!;
+// Lazy getter for Supabase to prevent top-level execution during build
+let _supabase: ReturnType<typeof createClient> | null = null;
+function getSupabase() {
+  if (_supabase) return _supabase;
 
-const supabase = createClient(supabaseUrl, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!);
+  const url =
+    typeof window === "undefined" && process.env.SUPABASE_INTERNAL_URL && process.env.SUPABASE_INTERNAL_URL.startsWith("http")
+      ? process.env.SUPABASE_INTERNAL_URL
+      : process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_URL.startsWith("http")
+        ? process.env.NEXT_PUBLIC_SUPABASE_URL
+        : "https://isbkaeltubqittywibeh.getSupabase().co";
+
+  const key =
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY && !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY.startsWith("{")
+      ? process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+      : "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlzYmthZWx0dWJxaXR0eXdpYmVoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDYwNjk0MzAsImV4cCI6MjA2MTY0NTQzMH0.N4l07k3V_X5I8iW0n_D6K9-O4v5l7l6s6MYGpJIXRW_rB8zc45k7chqi8Ljl_CLiLc=";
+
+  _supabase = createClient(url, key);
+  return _supabase;
+}
 
 const CACHE_TTL = 3600 * 24;
 
@@ -87,7 +101,7 @@ function mapToBaseCharacter(row: any): BaseCharacter {
 
 // --- Generic Fetcher ---
 async function fetchTable<T>(table: string): Promise<T[]> {
-  const { data, error } = await supabase.from(table).select("*");
+  const { data, error } = await getSupabase().from(table).select("*");
   if (error) return [];
   return (data || []) as T[];
 }

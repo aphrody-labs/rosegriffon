@@ -18,9 +18,8 @@ interface UseSidebarAuthReturn {
   error: string | null;
 }
 
-const supabase = createClient();
-
 export function useSidebarAuth(): UseSidebarAuthReturn {
+  const supabase = createClient();
   const queryClient = useQueryClient();
   const _router = useRouter();
 
