@@ -13,8 +13,7 @@ export function createSupabaseBrowserClient() {
 	const key = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
 
 	// Safety: Vercel might pass encrypted JSON or missing value during build.
-	// We check for falsy, empty string or starting with {
-	if (!url || url === "" || url === "undefined" || url === "null" || url.startsWith("{")) {
+	if (!url || !url.startsWith("http")) {
 		url = "https://isbkaeltubqittywibeh.supabase.co";
 	}
 

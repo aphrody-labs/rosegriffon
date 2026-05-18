@@ -71,10 +71,7 @@ export function SupabaseProvider({
 
     const supabaseUrl =
       process.env.NEXT_PUBLIC_SUPABASE_URL &&
-      process.env.NEXT_PUBLIC_SUPABASE_URL !== "" &&
-      process.env.NEXT_PUBLIC_SUPABASE_URL !== "undefined" &&
-      process.env.NEXT_PUBLIC_SUPABASE_URL !== "null" &&
-      !process.env.NEXT_PUBLIC_SUPABASE_URL.startsWith("{")
+      process.env.NEXT_PUBLIC_SUPABASE_URL.startsWith("http")
         ? process.env.NEXT_PUBLIC_SUPABASE_URL
         : "https://isbkaeltubqittywibeh.supabase.co";
 
