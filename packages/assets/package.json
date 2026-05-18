@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "description": "Shared static assets for Rose Griffon apps",
   "exports": {
+    ".": "./package.json",
     "./public/*": "./public/*"
   },
   "publishConfig": {

@@ -24,7 +24,7 @@ const nextConfig = {
 	...(CDN_URL && { assetPrefix: CDN_URL }),
 
 	turbopack: {
-		root: path.join(process.cwd(), "../../"),
+		root: path.resolve(process.cwd(), "../../"),
 	},
 	transpilePackages: [
 		"@rosegriffon/ui",
