@@ -12,8 +12,10 @@ export async function GET() {
 			SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL?.slice(0, 60),
 			SUPABASE_INTERNAL_URL: process.env.SUPABASE_INTERNAL_URL?.slice(0, 60),
 			ANON_KEY_LEN: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.length,
-			ANON_KEY_START: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.slice(0, 25),
+			ANON_KEY_FULL: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+			ANON_KEY_END: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.slice(-30),
 			JWT_BRIDGE_DISABLED: process.env.DISABLE_SUPABASE_JWT_BRIDGE,
+			SERVICE_ROLE_LEN: process.env.SUPABASE_SERVICE_ROLE_KEY?.length,
 		},
 	};
 
