@@ -105,6 +105,25 @@ const nextConfig = {
 		];
 	},
 
+	async rewrites() {
+		const supabaseUrl =
+			process.env.SUPABASE_INTERNAL_URL ||
+			process.env.NEXT_PUBLIC_SUPABASE_URL ||
+			"https://isbkaeltubqittywibeh.supabase.co";
+
+		// Safety check: ensure destination starts with https://
+		const destination = supabaseUrl.startsWith("http")
+			? `${supabaseUrl}/storage/v1/:path*`
+			: `https://isbkaeltubqittywibeh.supabase.co/storage/v1/:path*`;
+
+		return [
+			{
+				source: "/storage/v1/:path*",
+				destination,
+			},
+		];
+	},
+
 	async headers() {
 		return [
 			{
