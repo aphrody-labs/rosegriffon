@@ -20,9 +20,17 @@ const pool = new Pool({
 // Service-role Supabase client for hooks
 const supabaseAdmin = createSupabaseServiceClient();
 
+const getBetterAuthURL = () => {
+	const url = process.env.BETTER_AUTH_URL;
+	if (!url || url === "undefined" || url === "null" || !url.startsWith("http")) {
+		return "https://azalee.rosegriffon.fr";
+	}
+	return url;
+};
+
 export const auth = betterAuth({
 	database: pool,
-	baseURL: process.env.BETTER_AUTH_URL,
+	baseURL: getBetterAuthURL(),
 	secret: process.env.BETTER_AUTH_SECRET,
 	
 	...commonAuthOptions,

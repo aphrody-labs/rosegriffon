@@ -53,9 +53,17 @@ function detectCreatorScopes(scope: string | null | undefined): boolean {
 	);
 }
 
+const getBetterAuthURL = () => {
+	const url = process.env.BETTER_AUTH_URL;
+	if (!url || url === "undefined" || url === "null" || !url.startsWith("http")) {
+		return "https://rosegriffon.fr";
+	}
+	return url;
+};
+
 export const auth = betterAuth({
 	database: pool,
-	baseURL: process.env.BETTER_AUTH_URL ?? "https://rosegriffon.fr",
+	baseURL: getBetterAuthURL(),
 	secret: process.env.BETTER_AUTH_SECRET,
 
 	...commonAuthOptions,
