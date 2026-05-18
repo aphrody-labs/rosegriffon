@@ -1,0 +1,25 @@
+import { Geist } from "next/font/google";
+import { Geist_Mono } from "next/font/google";
+
+const geistSans = Geist({
+  variable: "--font-geist-sans",
+  subsets: ["latin"],
+});
+
+const geistMono = Geist_Mono({
+  variable: "--font-geist-mono",
+  subsets: ["latin"],
+});
+
+export default function MaintenancePage() {
+  return (
+    <div className={`${geistSans.variable} ${geistMono.variable} flex min-h-screen flex-col items-center justify-center bg-background text-foreground p-4 text-center font-sans`}>
+      <h1 className="mb-4 text-4xl font-extrabold tracking-tight lg:text-5xl">
+        Maintenance en cours
+      </h1>
+      <p className="max-w-[600px] text-lg text-muted-foreground sm:text-xl">
+        Rose Griffon est actuellement en cours de mise à jour. Nous serons de retour très bientôt. Merci de votre patience !
+      </p>
+    </div>
+  );
+}
