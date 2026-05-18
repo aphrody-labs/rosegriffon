@@ -21,13 +21,13 @@ Le `rg-monorepo` est focalisé sur l'écosystème **Rose Griffon** uniquement : 
 
 | Avant (`~/vps/`) | Après (`~/rg/`) | Note |
 |---|---|---|
-| `apps/azalee/` (submodule `rose-griffon/azalee`) | `apps/azalee/` | name : `@rose-griffon/azalee` → `@rg/azalee` |
-| `apps/rosegriffon/` (submodule `rose-griffon/rosegriffon`) | `apps/website/` | renommée `website` pour clarté ; name : `@rose-griffon/website` → `@rg/website` |
+| `apps/azalee/` (submodule `rose-griffon/azalee`) | `apps/azalee/` | name : `@rose-griffon/azalee` → `@rose-griffon/azalee` |
+| `apps/rosegriffon/` (submodule `rose-griffon/rosegriffon`) | `apps/website/` | renommée `website` pour clarté ; name : `@rose-griffon/website` → `@rose-griffon/website` |
 | `apps/rg-bot/` (supprimé au commit `c4d47a683`) | `apps/bot/` | restauré depuis `vps@c4d47a683^`, modernisé Bun + discordx + Supabase shared client |
 | `packages/patreon-bun/` (submodule `rose-griffon/patreon-bun`) | `packages/patreon-bun/` | vendoré en local (repo privé → impossible via `github:` dep) |
 | `apps/rosegriffon/src/types/supabase.ts` (3925 lignes) | `packages/db/src/types.gen.ts` | source de vérité unique pour les types Database (site + bot) |
 | `apps/rosegriffon/src/components/ui/` (57 fichiers) | `packages/ui/src/components/` | shadcn new-york style, partagé site + futur dashboard bot |
-| `apps/rosegriffon/src/lib/supabase/{client,server}.ts` | `packages/db/src/{browser,server,service}.ts` | helpers centralisés ; les fichiers source du site sont devenus de simples shims réexportant `@rg/db/*` (zéro modif des 84 call sites) |
+| `apps/rosegriffon/src/lib/supabase/{client,server}.ts` | `packages/db/src/{browser,server,service}.ts` | helpers centralisés ; les fichiers source du site sont devenus de simples shims réexportant `@rose-griffon/db/*` (zéro modif des 84 call sites) |
 
 ## Décisions architecture
 
@@ -38,11 +38,11 @@ Contrairement à `vps` qui utilisait `react@canary` / `next@canary` pour les bes
 Générés une fois via `bun run types:gen` dans `packages/db/` (nécessite `SUPABASE_ACCESS_TOKEN`). Le fichier `types.gen.ts` est commit pour que les builds Vercel n'aient pas à appeler l'API Supabase.
 
 ### Pas de `packages/types`
-Au début un package `@rg/types` avec des zod schemas dérivés avait été envisagé, mais il dupliquait `Tables<'X'>` du `Database` type Supabase. **Décision** : importer directement `Tables<'profiles'>` depuis `@rg/db` plutôt que de maintenir une couche d'abstraction supplémentaire.
+Au début un package `@rose-griffon/types` avec des zod schemas dérivés avait été envisagé, mais il dupliquait `Tables<'X'>` du `Database` type Supabase. **Décision** : importer directement `Tables<'profiles'>` depuis `@rose-griffon/db` plutôt que de maintenir une couche d'abstraction supplémentaire.
 
 ### Bot DB : double accès
 Le bot expose **deux** clients DB pointant sur la même Postgres Supabase :
-- `supabase` (`@rg/db/service`) : query builder typé, préféré pour les nouvelles queries.
+- `supabase` (`@rose-griffon/db/service`) : query builder typé, préféré pour les nouvelles queries.
 - `sql` (Bun.SQL) : connexion Postgres directe via pooler, préféré pour les queries SQL complexes (CTE, agrégats, fenêtres).
 
 Pas une transition à terminer — c'est un choix assumé : chaque chemin a son use case.

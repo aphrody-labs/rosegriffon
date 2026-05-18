@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import React, { useMemo } from "react";
 
 import ImageWithSkeleton from "@/components/shared/ImageWithSkeleton";
-import { Skeleton } from "@rg/ui";
+import { Skeleton } from "@rose-griffon/ui";
 import getTeamMembers from "@/lib/get-team-members";
 
 type TeamMember = {

@@ -1,6 +1,6 @@
 @import "tailwindcss";
 @import "tw-animate-css";
-@import "@rg/ui/styles.css";
+@import "@rose-griffon/ui/styles.css";
 
 /* Font Faces from Supabase Assets */
 @font-face {
@@ -317,7 +317,7 @@
 }
 
 /* ===== THÈMES ROY + GAELLE =====
- * Fournis maintenant par @rg/ui/styles.css via les classes
+ * Fournis maintenant par @rose-griffon/ui/styles.css via les classes
  * `.theme-roy` et `.theme-gaelle` (cf. import en tête de fichier).
  * Les anciennes classes `.roy` / `.gaelle` ont été retirées ici pour
  * unification cross-app (website + azalee) — source unique de vérité.

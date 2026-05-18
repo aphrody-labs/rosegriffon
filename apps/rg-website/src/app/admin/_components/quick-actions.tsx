@@ -1,4 +1,4 @@
-import { DashboardGrid, QuickActionCard } from "@rg/ui";
+import { DashboardGrid, QuickActionCard } from "@rose-griffon/ui";
 import {
 	BookOpen,
 	Calendar,

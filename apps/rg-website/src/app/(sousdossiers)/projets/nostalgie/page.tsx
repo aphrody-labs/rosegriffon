@@ -2,7 +2,7 @@
 
 export const dynamic = "force-dynamic";
 
-import { Badge, Button, Card, CardContent, CardDescription, CardHeader, CardTitle, Tabs, TabsList, TabsTrigger } from "@rg/ui";
+import { Badge, Button, Card, CardContent, CardDescription, CardHeader, CardTitle, Tabs, TabsList, TabsTrigger } from "@rose-griffon/ui";
 import {
 	CheckCircle2,
 	CloudUpload,
@@ -27,11 +27,11 @@ import { SiDiscord } from "react-icons/si";
 import { Toaster, toast } from "sonner";
 import { BreadcrumbSchema } from "@/components/shared/StructuredData";
 
-import { Label } from "@rg/ui";
-import { Separator } from "@rg/ui";
-import { Slider } from "@rg/ui";
-import { StorageImage } from "@rg/ui";
-import { Switch } from "@rg/ui";
+import { Label } from "@rose-griffon/ui";
+import { Separator } from "@rose-griffon/ui";
+import { Slider } from "@rose-griffon/ui";
+import { StorageImage } from "@rose-griffon/ui";
+import { Switch } from "@rose-griffon/ui";
 
 import { useNostalgieCollage } from "@/hooks/use-nostalgie-collage";
 import { useNostalgieExampleImage } from "@/hooks/use-nostalgie-example-image";

@@ -17,7 +17,7 @@ import {
 	DashboardStatsCard as StatsCard,
 	DashboardGrid,
 	RecentListCard,
-} from "@rg/ui";
+} from "@rose-griffon/ui";
 import { createAdminClient } from "@/lib/supabase/server";
 
 import { QuickActions } from "./_components/quick-actions";

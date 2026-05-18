@@ -1,6 +1,6 @@
-// Barrel central — `@rg/ui`
+// Barrel central — `@rose-griffon/ui`
 // Réexporte les 55 composants shadcn (style new-york) + le helper `cn`.
-// Imports subpath alternatifs disponibles via `@rg/ui/<nom>` (cf. exports.package.json).
+// Imports subpath alternatifs disponibles via `@rose-griffon/ui/<nom>` (cf. exports.package.json).
 
 export { cn } from "./lib/utils";
 

@@ -38,11 +38,11 @@ import {
 	type ImagePayload,
 } from "@/components/editor/nodes/image-node";
 import { CAN_USE_DOM } from "@/components/editor/shared/can-use-dom";
-import { Button } from "@rg/ui";
-import { DialogFooter } from "@rg/ui";
-import { Input } from "@rg/ui";
-import { Label } from "@rg/ui";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@rg/ui";
+import { Button } from "@rose-griffon/ui";
+import { DialogFooter } from "@rose-griffon/ui";
+import { Input } from "@rose-griffon/ui";
+import { Label } from "@rose-griffon/ui";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@rose-griffon/ui";
 
 export type InsertImagePayload = Readonly<ImagePayload>;
 

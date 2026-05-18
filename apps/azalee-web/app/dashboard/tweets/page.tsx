@@ -1,6 +1,6 @@
 import Link from "next/link";
-import { AdminPageHeader as DashboardPageHeader } from "@rg/ui";
-import { Button } from "@rg/ui";
+import { AdminPageHeader as DashboardPageHeader } from "@rose-griffon/ui";
+import { Button } from "@rose-griffon/ui";
 import { Icon } from "@/components/ui/Icon";
 import { createClient } from "@/lib/supabase/server";
 import { TweetRow } from "./tweet-row";

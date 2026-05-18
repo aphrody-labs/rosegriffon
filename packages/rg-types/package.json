@@ -1,24 +1,27 @@
 {
-	"name": "@rg/types",
-	"version": "0.1.0",
-	"private": true,
-	"type": "module",
-	"description": "Types métier partagés (roles, user, discord) — source unique de vérité bot/azalee/website",
-	"exports": {
-		".": "./src/index.ts",
-		"./roles": "./src/roles.ts",
-		"./user": "./src/user.ts",
-		"./discord": "./src/discord.ts",
-		"./article": "./src/article.ts",
-		"./stats": "./src/stats.ts",
-		"./visitor": "./src/visitor.ts",
-		"./event": "./src/event.ts",
-		"./stream": "./src/stream.ts",
-		"./team": "./src/team.ts"
-	},
-	"dependencies": {},
-	"devDependencies": {
-		"@rg/config": "workspace:*",
-		"typescript": "catalog:"
-	}
+  "name": "@rose-griffon/types",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Types métier partagés (roles, user, discord) — source unique de vérité bot/azalee/website",
+  "exports": {
+    ".": "./src/index.ts",
+    "./roles": "./src/roles.ts",
+    "./user": "./src/user.ts",
+    "./discord": "./src/discord.ts",
+    "./article": "./src/article.ts",
+    "./stats": "./src/stats.ts",
+    "./visitor": "./src/visitor.ts",
+    "./event": "./src/event.ts",
+    "./stream": "./src/stream.ts",
+    "./team": "./src/team.ts"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "@rose-griffon/config": "workspace:*",
+    "typescript": "catalog:"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com",
+    "access": "restricted"
+  }
 }

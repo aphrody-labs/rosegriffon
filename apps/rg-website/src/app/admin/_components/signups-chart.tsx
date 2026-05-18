@@ -1,6 +1,6 @@
 "use client";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@rg/ui";
+import { Card, CardContent, CardHeader, CardTitle } from "@rose-griffon/ui";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from "recharts";
@@ -10,7 +10,7 @@ import {
 	ChartContainer,
 	ChartTooltip,
 	ChartTooltipContent,
-} from "@rg/ui";
+} from "@rose-griffon/ui";
 
 export interface SignupPoint {
 	date: string;

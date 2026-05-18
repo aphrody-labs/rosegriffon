@@ -1,5 +1,5 @@
-/* Styles partagés @rg/ui — Tailwind v4 inline tokens.
- * Importer dans chaque app via `@import "@rg/ui/styles.css"` au début de globals.css.
+/* Styles partagés @rose-griffon/ui — Tailwind v4 inline tokens.
+ * Importer dans chaque app via `@import "@rose-griffon/ui/styles.css"` au début de globals.css.
  * Les apps complètent avec leurs propres tokens (cf. apps/<app>/src/app/globals.css).
  *
  * Material Design 3 — couverture complète niveau tokens :
@@ -23,7 +23,7 @@
 
 @theme inline {
 	/* Accordion animation tokens — utilisés par packages/ui/src/components/accordion.tsx.
-	 * Présents dans le package partagé pour que toute app qui importe @rg/ui/styles.css
+	 * Présents dans le package partagé pour que toute app qui importe @rose-griffon/ui/styles.css
 	 * obtienne les keyframes sans dépendre de tw-animate-css / tailwindcss-animate. */
 	--animate-accordion-down: accordion-down 0.2s ease-out;
 	--animate-accordion-up: accordion-up 0.2s ease-out;
@@ -98,7 +98,7 @@
 	/* ─── Pont MD3 → utilities Tailwind v4 ───────────────────────────────── */
 	/* Expose chaque rôle MD3 comme utility Tailwind (`bg-primary-container`,
 	 * `text-on-surface-variant`, `border-outline-variant`, etc.) — source unique
-	 * de vérité pour TOUTE app qui importe @rg/ui/styles.css. Évite la
+	 * de vérité pour TOUTE app qui importe @rose-griffon/ui/styles.css. Évite la
 	 * duplication du pont dans chaque globals.css. */
 	--color-primary: var(--md-sys-color-primary);
 	--color-on-primary: var(--md-sys-color-on-primary);

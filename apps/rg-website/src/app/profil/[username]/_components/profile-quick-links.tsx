@@ -1,4 +1,4 @@
-import { Card, CardContent } from "@rg/ui";
+import { Card, CardContent } from "@rose-griffon/ui";
 import { FileText, Palette, Settings, type LucideIcon } from "lucide-react";
 import Link from "next/link";
 

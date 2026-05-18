@@ -3,7 +3,7 @@
 import { ArrowLeft, Frown, Home } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Button } from "@rg/ui";
+import { Button } from "@rose-griffon/ui";
 
 export default function NotFound() {
   const router = useRouter();

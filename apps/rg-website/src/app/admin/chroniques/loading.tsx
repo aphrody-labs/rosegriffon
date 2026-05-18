@@ -1,4 +1,4 @@
-import { Skeleton } from "@rg/ui";
+import { Skeleton } from "@rose-griffon/ui";
 
 export default function ChroniquesLoading() {
   return (

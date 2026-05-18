@@ -1,6 +1,6 @@
 "use client";
 
-import { Button, Card, CardContent, CardHeader, CardTitle, Input, Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@rg/ui";
+import { Button, Card, CardContent, CardHeader, CardTitle, Input, Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@rose-griffon/ui";
 import {
 	ArrowDownAZ,
 	ArrowUp01,
@@ -21,9 +21,9 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 import { ConfirmationDialog } from "@/components/admin/confirmation-dialog";
-import { DashboardStatsCard as StatsCard } from "@rg/ui";
+import { DashboardStatsCard as StatsCard } from "@rose-griffon/ui";
 import { AdminDataGrid } from "@/components/admin/shared/AdminDataGrid";
-import { AdminPageHeader } from "@rg/ui";
+import { AdminPageHeader } from "@rose-griffon/ui";
 
 import { deleteTeamMember, type TeamMember, updateTeamMember } from "./actions";
 import { StaffMemberCard } from "./StaffMemberCard";

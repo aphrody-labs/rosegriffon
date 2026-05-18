@@ -9,13 +9,13 @@ import { SidebarSearch } from "@/components/sidebar/molecules/SidebarSearch";
 import { SidebarUser } from "@/components/sidebar/molecules/SidebarUser";
 import { SidebarNavLinks } from "@/components/sidebar/organisms/SidebarNavLinks";
 import { SocialLinksSkeleton } from "@/components/sidebar/skeletons/SocialLinksSkeleton";
-import { Separator } from "@rg/ui";
+import { Separator } from "@rose-griffon/ui";
 import {
 	Sidebar,
 	SidebarContent,
 	SidebarFooter,
 	SidebarHeader,
-} from "@rg/ui";
+} from "@rose-griffon/ui";
 import { assoMenu, contactMenu, exploreMenu } from "@/lib/sidebar-config";
 
 const SocialLinks = lazy(

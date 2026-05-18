@@ -1,4 +1,4 @@
-import nextjs from "@rg/config/eslint-nextjs.mjs";
+import nextjs from "@rose-griffon/config/eslint-nextjs.mjs";
 
 export default [
 	...nextjs,

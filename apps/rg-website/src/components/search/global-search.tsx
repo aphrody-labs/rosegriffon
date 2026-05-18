@@ -1,6 +1,6 @@
 "use client";
 
-import { Input } from "@rg/ui";
+import { Input } from "@rose-griffon/ui";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 

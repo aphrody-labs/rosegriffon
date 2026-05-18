@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Button } from "@rg/ui";
+import { Button } from "@rose-griffon/ui";
 
 export const metadata: Metadata = {
   title: "Erreur d'authentification - Azalée",

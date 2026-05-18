@@ -1,13 +1,13 @@
-import { Button, Card, CardContent, CardHeader, CardTitle } from "@rg/ui";
+import { Button, Card, CardContent, CardHeader, CardTitle } from "@rose-griffon/ui";
 import { Calendar, Plus } from "lucide-react";
 import Link from "next/link";
 
 import { SyncEventsButton } from "@/components/admin/events/sync-button";
-import { AdminPageHeader } from "@rg/ui";
+import { AdminPageHeader } from "@rose-griffon/ui";
 
-import { PaginationControls } from "@rg/ui";
+import { PaginationControls } from "@rose-griffon/ui";
 import { createAdminClient } from "@/lib/supabase/server";
-import type { Tables } from "@rg/db";
+import type { Tables } from "@rose-griffon/db";
 
 export const dynamic = "force-dynamic";
 

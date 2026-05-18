@@ -1,6 +1,6 @@
 "use client";
 
-import { Card, CardContent } from "@rg/ui";
+import { Card, CardContent } from "@rose-griffon/ui";
 import Image from "next/image";
 import Link from "next/link";
 

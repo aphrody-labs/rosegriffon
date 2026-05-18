@@ -1,6 +1,6 @@
 "use client";
 
-import { Button, Card, CardContent, Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@rg/ui";
+import { Button, Card, CardContent, Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@rose-griffon/ui";
 import { Heart, Link2, Loader2, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
@@ -14,7 +14,7 @@ import {
 	AlertDialogFooter,
 	AlertDialogHeader,
 	AlertDialogTitle,
-} from "@rg/ui";
+} from "@rose-griffon/ui";
 
 import { authClient } from "@/lib/auth-client";
 

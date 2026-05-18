@@ -7,7 +7,7 @@ import { useCallback, useEffect, useState } from "react";
 import { CommonSpriteIcon } from "@/components/ui/CommonSpriteIcon";
 import { Icon } from "@/components/ui/Icon";
 import { SpriteIcon } from "@/components/ui/SpriteIcon";
-import { Slider } from "@rg/ui";
+import { Slider } from "@rose-griffon/ui";
 import type { SpriteKey } from "@/config/sprites";
 import type { SpriteCommonKey } from "@/config/sprites-common";
 import { cn } from "@/lib/utils";

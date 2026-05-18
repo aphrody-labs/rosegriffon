@@ -6,8 +6,8 @@ import { CalendarDays, Edit, Mail, Settings, Share2, Shield, User } from "lucide
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Avatar, AvatarFallback, AvatarImage } from "@rg/ui";
-import { Button } from "@rg/ui";
+import { Avatar, AvatarFallback, AvatarImage } from "@rose-griffon/ui";
+import { Button } from "@rose-griffon/ui";
 import { getServerSession } from "@/lib/auth-helpers";
 import { createClient } from "@/lib/supabase/server";
 

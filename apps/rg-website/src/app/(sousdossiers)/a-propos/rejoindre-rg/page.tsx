@@ -1,4 +1,4 @@
-import { Button, Card, CardContent, CardDescription, CardHeader, CardTitle } from "@rg/ui";
+import { Button, Card, CardContent, CardDescription, CardHeader, CardTitle } from "@rose-griffon/ui";
 import {
   ArrowRight,
   Award,

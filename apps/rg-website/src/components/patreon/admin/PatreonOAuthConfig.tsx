@@ -1,6 +1,6 @@
 "use client";
 
-import { Button, Card, CardContent } from "@rg/ui";
+import { Button, Card, CardContent } from "@rose-griffon/ui";
 import { Check, Copy, ExternalLink, Settings } from "lucide-react";
 import { useState } from "react";
 

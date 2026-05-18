@@ -1,7 +1,7 @@
 import Image from "next/image";
 
-import { Button } from "@rg/ui";
-import { Card, CardContent } from "@rg/ui";
+import { Button } from "@rose-griffon/ui";
+import { Card, CardContent } from "@rose-griffon/ui";
 
 export interface RgtvBannerProps {
   title?: string;

@@ -10,7 +10,7 @@ import {
 	Popover,
 	PopoverContent,
 	PopoverTrigger,
-} from "@rg/ui";
+} from "@rose-griffon/ui";
 import { cn } from "@/lib/utils";
 
 interface ArticleShareButtonProps {

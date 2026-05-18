@@ -1,7 +1,7 @@
 import { Pencil } from "lucide-react";
 import Link from "next/link";
-import { AdminPageHeader as DashboardPageHeader } from "@rg/ui";
-import { Badge } from "@rg/ui";
+import { AdminPageHeader as DashboardPageHeader } from "@rose-griffon/ui";
+import { Badge } from "@rose-griffon/ui";
 import {
   Table,
   TableBody,
@@ -9,7 +9,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@rg/ui";
+} from "@rose-griffon/ui";
 import { apiClient } from "@/lib/api-client";
 import { verifier } from "@/lib/verification";
 

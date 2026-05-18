@@ -1,4 +1,4 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@rg/ui";
+import { Card, CardContent, CardHeader, CardTitle } from "@rose-griffon/ui";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { ArrowRight, CalendarClock, MapPin } from "lucide-react";

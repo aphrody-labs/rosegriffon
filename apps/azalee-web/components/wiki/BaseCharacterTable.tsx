@@ -15,7 +15,7 @@ import {
 	TableHead,
 	TableHeader,
 	TableRow,
-} from "@rg/ui";
+} from "@rose-griffon/ui";
 import type { SpriteCommonKey } from "@/config/sprites-common";
 import { isFemaleGender } from "@/lib/gender";
 import { getCharacterImageUrl, getSkillCategoryIconUrl } from "@/lib/images";

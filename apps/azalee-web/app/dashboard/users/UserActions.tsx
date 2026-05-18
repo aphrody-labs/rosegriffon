@@ -13,15 +13,15 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@rg/ui";
-import { Button } from "@rg/ui";
+} from "@rose-griffon/ui";
+import { Button } from "@rose-griffon/ui";
 import {
   Dialog,
   DialogContent,
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@rg/ui";
+} from "@rose-griffon/ui";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -29,14 +29,14 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@rg/ui";
+} from "@rose-griffon/ui";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@rg/ui";
+} from "@rose-griffon/ui";
 import { banUser, changeUserRole } from "./actions";
 
 interface UserActionsProps {

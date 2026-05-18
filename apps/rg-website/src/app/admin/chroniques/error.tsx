@@ -1,6 +1,6 @@
 "use client";
 
-import { Alert, AlertDescription, AlertTitle, Button } from "@rg/ui";
+import { Alert, AlertDescription, AlertTitle, Button } from "@rose-griffon/ui";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 

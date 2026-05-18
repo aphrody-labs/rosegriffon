@@ -1,4 +1,4 @@
-import { Button, Card, CardContent } from "@rg/ui";
+import { Button, Card, CardContent } from "@rose-griffon/ui";
 import { Zap } from "lucide-react";
 import localFont from "next/font/local";
 import Image from "next/image";

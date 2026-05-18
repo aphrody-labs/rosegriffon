@@ -1,4 +1,4 @@
-import { Button, Card, CardContent, CardHeader, CardTitle, Input } from "@rg/ui";
+import { Button, Card, CardContent, CardHeader, CardTitle, Input } from "@rose-griffon/ui";
 import Link from "next/link";
 
 import { Newspaper, Search } from "@/lib/icons-config";

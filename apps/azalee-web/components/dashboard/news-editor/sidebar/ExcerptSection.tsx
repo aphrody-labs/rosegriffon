@@ -1,6 +1,6 @@
 "use client";
 
-import { Textarea } from "@rg/ui";
+import { Textarea } from "@rose-griffon/ui";
 import { cn } from "@/lib/utils";
 
 interface ExcerptSectionProps {

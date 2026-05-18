@@ -1,6 +1,6 @@
 "use client";
 
-import { Button, Card, CardContent, CardDescription, CardHeader, CardTitle, Input, Tabs, TabsContent, TabsList, TabsTrigger, Textarea } from "@rg/ui";
+import { Button, Card, CardContent, CardDescription, CardHeader, CardTitle, Input, Tabs, TabsContent, TabsList, TabsTrigger, Textarea } from "@rose-griffon/ui";
 import { Loader2, Save } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -12,8 +12,8 @@ import { AzaleeBanner } from "@/components/home/AzaleeBanner";
 import { RgtvBanner } from "@/components/home/RgtvBanner";
 import FusionBlock from "@/components/shared/FusionBlock";
 
-import { Label } from "@rg/ui";
-import { Separator } from "@rg/ui";
+import { Label } from "@rose-griffon/ui";
+import { Separator } from "@rose-griffon/ui";
 
 export type Setting = {
   key: string;

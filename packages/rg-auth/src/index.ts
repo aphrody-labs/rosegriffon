@@ -1,6 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
-import type { Database } from "@rg/db";
-import { ADMIN_ROLES } from "@rg/types";
+import type { Database } from "@rose-griffon/db";
+import { ADMIN_ROLES } from "@rose-griffon/types";
 
 type Profile = Database["public"]["Tables"]["profiles"]["Row"];
 
@@ -65,7 +65,7 @@ export function isStaff(role: string | null | undefined): boolean {
 	return role === "admin" || role === "staff";
 }
 
-import { createSupabaseServiceClient } from "@rg/db/service";
+import { createSupabaseServiceClient } from "@rose-griffon/db/service";
 
 /**
  * Ensures a profile exists in Supabase for the given user.
@@ -130,13 +130,13 @@ export async function ensureUserProfile(
 			.single();
 
 		if (error) {
-			console.error(`[@rg/auth] Failed to create profile for user ${user.id}:`, error.message);
+			console.error(`[@rose-griffon/auth] Failed to create profile for user ${user.id}:`, error.message);
 			return null;
 		}
 
 		return newProfile;
 	} catch (err) {
-		console.error(`[@rg/auth] Exception in ensureUserProfile for ${user.id}:`, err);
+		console.error(`[@rose-griffon/auth] Exception in ensureUserProfile for ${user.id}:`, err);
 		return null;
 	}
 }

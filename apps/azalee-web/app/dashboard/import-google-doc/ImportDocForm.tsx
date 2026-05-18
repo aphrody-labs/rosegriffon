@@ -3,10 +3,10 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
-import { Button } from "@rg/ui";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@rg/ui";
-import { Input } from "@rg/ui";
-import { Label } from "@rg/ui";
+import { Button } from "@rose-griffon/ui";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@rose-griffon/ui";
+import { Input } from "@rose-griffon/ui";
+import { Label } from "@rose-griffon/ui";
 import { importDriveFolder, importGoogleDoc } from "./actions";
 
 export function ImportDocForm() {

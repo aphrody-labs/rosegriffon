@@ -1,9 +1,9 @@
 "use client";
 
 import { AlertCircle, Check, Loader2, RefreshCw } from "lucide-react";
-import { Button } from "@rg/ui";
-import { Input } from "@rg/ui";
-import { Textarea } from "@rg/ui";
+import { Button } from "@rose-griffon/ui";
+import { Input } from "@rose-griffon/ui";
+import { Textarea } from "@rose-griffon/ui";
 import { cn } from "@/lib/utils";
 import { generateSlug } from "../utils";
 

@@ -12,7 +12,7 @@ export function createSupabaseBrowserClient() {
 	const key = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
 	if (!url || !key) {
 		throw new Error(
-			"[@rg/db] Missing NEXT_PUBLIC_SUPABASE_URL or NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY",
+			"[@rose-griffon/db] Missing NEXT_PUBLIC_SUPABASE_URL or NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY",
 		);
 	}
 	cachedClient = createBrowserClient<Database>(url, key);

@@ -8,11 +8,11 @@
 @plugin "tailwindcss-animate";
 @plugin "@tailwindcss/typography";
 
-/* Thèmes unifiés cross-app (Roy, Gaelle, Azalee light/dark) fournis par @rg/ui.
+/* Thèmes unifiés cross-app (Roy, Gaelle, Azalee light/dark) fournis par @rose-griffon/ui.
  * La palette `:root` par défaut ci-dessous reste la palette MD3 azalee (seed #F89C5A)
  * pour préserver le rendu d'origine ; `.theme-azalee-light` / `.theme-azalee-dark`
- * de @rg/ui exposent la même palette pour usage par d'autres apps du monorepo. */
-@import "@rg/ui/styles.css";
+ * de @rose-griffon/ui exposent la même palette pour usage par d'autres apps du monorepo. */
+@import "@rose-griffon/ui/styles.css";
 
 @custom-variant dark (&:is(.dark, .dark *));
 
@@ -574,7 +574,7 @@ a,
 }
 
 /* ── Character Themes (Roy + Gaelle) ──────────────────────
- * Fournis maintenant par @rg/ui/styles.css via les classes
+ * Fournis maintenant par @rose-griffon/ui/styles.css via les classes
  * `.theme-roy` et `.theme-gaelle` (cf. import en tête de fichier).
  * Les anciens sélecteurs `:root:not(.dark).roy` / `.gaelle` ont été
  * retirés pour unification cross-app — source unique de vérité. */

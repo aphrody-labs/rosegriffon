@@ -5,7 +5,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { getNotifications, getUnreadCount, markAllAsRead } from "@/app/actions/notifications";
 import { NotificationItem } from "@/components/news/NotificationItem";
 import { useAuth } from "@/components/providers/AuthProvider";
-import { Popover, PopoverContent, PopoverTrigger } from "@rg/ui";
+import { Popover, PopoverContent, PopoverTrigger } from "@rose-griffon/ui";
 
 export function NotificationBell() {
   const { user } = useAuth();

@@ -9,8 +9,8 @@ import { toast } from "sonner";
 import { deleteComment, getReplies, updateComment } from "@/app/actions/comments";
 import { CommentForm } from "@/components/news/CommentForm";
 import { useAuth } from "@/components/providers/AuthProvider";
-import { Badge } from "@rg/ui";
-import { Button } from "@rg/ui";
+import { Badge } from "@rose-griffon/ui";
+import { Button } from "@rose-griffon/ui";
 import { cn } from "@/lib/utils";
 
 export interface Comment {

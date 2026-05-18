@@ -1,5 +1,5 @@
 {
-	"name": "@rg/bot",
+	"name": "@rose-griffon/bot",
 	"version": "0.1.0",
 	"private": true,
 	"type": "module",
@@ -17,8 +17,8 @@
 	},
 	"dependencies": {
 		"@aphrody-code/canvas": "0.1.99-fork.4",
-		"@rg/db": "workspace:*",
-		"@rg/types": "workspace:*",
+		"@rose-griffon/db": "workspace:*",
+		"@rose-griffon/types": "workspace:*",
 		"@rpbey/discordx": "catalog:",
 		"@supabase/supabase-js": "catalog:",
 		"discord.js": "catalog:",
@@ -26,7 +26,7 @@
 		"zod": "catalog:"
 	},
 	"devDependencies": {
-		"@rg/config": "workspace:*",
+		"@rose-griffon/config": "workspace:*",
 		"@types/bun": "catalog:",
 		"oxlint": "catalog:",
 		"typescript": "catalog:",

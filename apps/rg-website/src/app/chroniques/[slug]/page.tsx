@@ -1,11 +1,11 @@
-import { Badge, Card, CardContent } from "@rg/ui";
+import { Badge, Card, CardContent } from "@rose-griffon/ui";
 import { ArrowLeft, Calendar, Eye } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { ArticleSchema, BreadcrumbSchema } from "@/components/shared/StructuredData";
 
-import { StorageImage } from "@rg/ui";
+import { StorageImage } from "@rose-griffon/ui";
 import { createClient } from "@/lib/supabase/server";
 
 import { ShareButtons } from "./components/ShareButtons";
