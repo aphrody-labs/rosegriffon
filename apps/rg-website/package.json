@@ -6,12 +6,12 @@
 		"bun": ">=1.3.0"
 	},
 	"scripts": {
-		"dev": "bunx --bun next dev",
+		"dev": "bun run --bun next dev",
 		"test": "vitest",
 		"test:ui": "vitest --ui",
 		"test:run": "vitest run",
-		"build": "next build",
-		"start": "bunx --bun next start",
+		"build": "bun run --bun next build",
+		"start": "bun run --bun next start",
 		"lint": "oxlint -W all .",
 		"lint:fix": "oxlint -W all --fix .",
 		"lint:ox": "oxlint .",
