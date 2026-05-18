@@ -205,9 +205,10 @@ const nextConfig: NextConfig = {
 	},
 
 	experimental: {
-		viewTransition: true,
+		serverSourceMaps: true,
+		viewTransition: false,
 		turbopackFileSystemCacheForBuild: true,
-		optimizeCss: true,
+		optimizeCss: false,
 		optimizePackageImports: [
 			"lucide-react",
 			"date-fns",
