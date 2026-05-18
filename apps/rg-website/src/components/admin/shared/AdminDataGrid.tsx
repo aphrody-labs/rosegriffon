@@ -1,7 +1,7 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@rose-griffon/ui";
+import { Card, CardContent, CardHeader, CardTitle } from "@rosegriffon/ui";
 import type { ReactNode } from "react";
 
-import { Skeleton } from "@rose-griffon/ui";
+import { Skeleton } from "@rosegriffon/ui";
 import {
   Table,
   TableBody,
@@ -9,7 +9,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@rose-griffon/ui";
+} from "@rosegriffon/ui";
 import { cn } from "@/lib/utils";
 
 interface Column<T> {

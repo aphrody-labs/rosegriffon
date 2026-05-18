@@ -3,7 +3,7 @@
 import "./globals.css";
 
 import { usePathname } from "next/navigation";
-import { SidebarInset, SidebarProvider, Toaster } from "@rose-griffon/ui";
+import { SidebarInset, SidebarProvider, Toaster } from "@rosegriffon/ui";
 
 import { AppSidebar } from "@/components/app-sidebar";
 import Footer from "@/components/layout/footer";

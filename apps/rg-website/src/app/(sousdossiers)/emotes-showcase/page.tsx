@@ -1,6 +1,6 @@
 "use client";
 
-import { Button, Card, CardContent, CardDescription, CardHeader, CardTitle, Tabs, TabsContent, TabsList, TabsTrigger, Textarea } from "@rose-griffon/ui";
+import { Button, Card, CardContent, CardDescription, CardHeader, CardTitle, Tabs, TabsContent, TabsList, TabsTrigger, Textarea } from "@rosegriffon/ui";
 import { Sparkles } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -12,7 +12,7 @@ import EmoteRenderer, {
 } from "@/components/shared/emotes/EmoteRenderer";
 import RgEmote, { RgEmoteGrid, RgEmoteLine } from "@/components/shared/emotes/RgEmote";
 
-import { Separator } from "@rose-griffon/ui";
+import { Separator } from "@rosegriffon/ui";
 
 import {
   useEmoteHistory,

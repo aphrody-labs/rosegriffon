@@ -4,7 +4,7 @@ import { Camera, Loader2, Upload } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { updateAvatar } from "@/app/settings/actions";
-import { Avatar, AvatarFallback, AvatarImage } from "@rose-griffon/ui";
+import { Avatar, AvatarFallback, AvatarImage } from "@rosegriffon/ui";
 import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
 

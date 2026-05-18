@@ -1,7 +1,7 @@
 import { Users } from "lucide-react";
 
-import { AdminPageHeader } from "@rose-griffon/ui";
-import { PaginationControls } from "@rose-griffon/ui";
+import { AdminPageHeader } from "@rosegriffon/ui";
+import { PaginationControls } from "@rosegriffon/ui";
 import { createAdminClient } from "@/lib/supabase/server";
 
 import { UserStats } from "./user-stats";

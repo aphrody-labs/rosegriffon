@@ -24,7 +24,7 @@ const nextConfig = {
 	...(CDN_URL && { assetPrefix: CDN_URL }),
 
 	turbopack: {},
-	transpilePackages: ["@rose-griffon/ui", "@rose-griffon/db"],
+	transpilePackages: ["@rosegriffon/ui", "@rosegriffon/db"],
 
 	typescript: {
 		ignoreBuildErrors: true,
@@ -36,7 +36,7 @@ const nextConfig = {
 		"@sentry/nextjs",
 		"@supabase/supabase-js",
 		"@supabase/realtime-js",
-		"@rose-griffon/patreon-bun",
+		"@rosegriffon/patreon-bun",
 		"discord.js",
 		"googleapis",
 		"nodemailer",

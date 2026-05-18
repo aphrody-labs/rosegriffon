@@ -2,8 +2,8 @@ import { ChevronLeft, ChevronRight, ImageOff, List, Star, Users } from "lucide-r
 import Image from "next/image";
 import Link from "next/link";
 import type React from "react";
-import { AdminPageHeader as DashboardPageHeader } from "@rose-griffon/ui";
-import { Badge } from "@rose-griffon/ui";
+import { AdminPageHeader as DashboardPageHeader } from "@rosegriffon/ui";
+import { Badge } from "@rosegriffon/ui";
 import { createClient } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";

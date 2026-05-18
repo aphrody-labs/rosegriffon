@@ -5,7 +5,7 @@ import type { LexicalEditor } from "lexical";
 import type * as React from "react";
 import { type JSX, useRef } from "react";
 
-import { Button } from "@rose-griffon/ui";
+import { Button } from "@rosegriffon/ui";
 
 function clamp(value: number, min: number, max: number) {
   return Math.min(Math.max(value, min), max);

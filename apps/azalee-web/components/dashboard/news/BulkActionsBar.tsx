@@ -12,15 +12,15 @@ import {
 	AlertDialogFooter,
 	AlertDialogHeader,
 	AlertDialogTitle,
-} from "@rose-griffon/ui";
-import { Button } from "@rose-griffon/ui";
+} from "@rosegriffon/ui";
+import { Button } from "@rosegriffon/ui";
 import {
 	Select,
 	SelectContent,
 	SelectItem,
 	SelectTrigger,
 	SelectValue,
-} from "@rose-griffon/ui";
+} from "@rosegriffon/ui";
 
 interface BulkActionsBarProps {
 	selectedCount: number;

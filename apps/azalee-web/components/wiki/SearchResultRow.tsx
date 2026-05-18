@@ -3,7 +3,7 @@
 import { ArrowRight, ArrowUpLeft } from "lucide-react";
 import Image from "next/image";
 import type { EnhancedSearchResult } from "@/app/actions/search";
-import { Badge } from "@rose-griffon/ui";
+import { Badge } from "@rosegriffon/ui";
 import { Icon } from "@/components/ui/Icon";
 import { RarityBadge } from "@/components/ui/rarity-badge";
 import { SearchResultHighlight } from "@/components/wiki/SearchResultHighlight";

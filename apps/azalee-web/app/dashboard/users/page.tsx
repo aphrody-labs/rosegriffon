@@ -1,9 +1,9 @@
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { Calendar, Mail, MessageSquare, Shield, UserX } from "lucide-react";
-import { AdminPageHeader as DashboardPageHeader } from "@rose-griffon/ui";
-import { Avatar, AvatarFallback, AvatarImage } from "@rose-griffon/ui";
-import { Badge } from "@rose-griffon/ui";
+import { AdminPageHeader as DashboardPageHeader } from "@rosegriffon/ui";
+import { Avatar, AvatarFallback, AvatarImage } from "@rosegriffon/ui";
+import { Badge } from "@rosegriffon/ui";
 import { Icon } from "@/components/ui/Icon";
 import {
   Table,
@@ -12,7 +12,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@rose-griffon/ui";
+} from "@rosegriffon/ui";
 import { WikiPagination } from "@/components/wiki/WikiPagination";
 import { createClient } from "@/lib/supabase/server";
 import { parseSearchParams } from "@/lib/validations";

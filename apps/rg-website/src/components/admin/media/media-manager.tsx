@@ -1,13 +1,13 @@
 "use client";
 
-import { Button, Card, CardContent, Input } from "@rose-griffon/ui";
+import { Button, Card, CardContent, Input } from "@rosegriffon/ui";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 
 import { logAction } from "@/app/admin/actions/log";
 
-import { StorageImage } from "@rose-griffon/ui";
+import { StorageImage } from "@rosegriffon/ui";
 import {
   Table,
   TableBody,
@@ -15,7 +15,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@rose-griffon/ui";
+} from "@rosegriffon/ui";
 import {
   ChevronRight,
   Copy,

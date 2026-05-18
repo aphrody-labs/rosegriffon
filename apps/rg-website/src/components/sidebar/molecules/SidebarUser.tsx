@@ -1,14 +1,14 @@
 "use client";
 
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@rose-griffon/ui";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@rosegriffon/ui";
 import { ChevronUp, LogIn, LogOut, ShieldCheck, User } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 import { ThemeToggle } from "@/components/shared/ThemeToggle";
-import { Avatar, AvatarFallback, AvatarImage } from "@rose-griffon/ui";
+import { Avatar, AvatarFallback, AvatarImage } from "@rosegriffon/ui";
 
-import { Skeleton } from "@rose-griffon/ui";
+import { Skeleton } from "@rosegriffon/ui";
 import { useSidebarAuth } from "@/hooks/useSidebarAuth";
 import { authClient } from "@/lib/auth-client";
 

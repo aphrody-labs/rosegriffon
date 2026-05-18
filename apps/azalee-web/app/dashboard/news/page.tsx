@@ -1,7 +1,7 @@
 import Link from "next/link";
-import { AdminPageHeader as DashboardPageHeader } from "@rose-griffon/ui";
+import { AdminPageHeader as DashboardPageHeader } from "@rosegriffon/ui";
 import { NewsListClient } from "@/components/dashboard/news/NewsListClient";
-import { Button } from "@rose-griffon/ui";
+import { Button } from "@rosegriffon/ui";
 import {
 	Empty,
 	EmptyContent,
@@ -9,7 +9,7 @@ import {
 	EmptyHeader,
 	EmptyMedia,
 	EmptyTitle,
-} from "@rose-griffon/ui";
+} from "@rosegriffon/ui";
 import { Icon } from "@/components/ui/Icon";
 import { WikiPagination } from "@/components/wiki/WikiPagination";
 import { sanitizeNewsSearchQuery } from "@/lib/news-search";

@@ -1,6 +1,6 @@
 "use client";
 
-import { Button } from "@rose-griffon/ui";
+import { Button } from "@rosegriffon/ui";
 import { Search } from "lucide-react";
 import { useRouter } from "next/navigation";
 import * as React from "react";
@@ -13,7 +13,7 @@ import {
 	CommandItem,
 	CommandList,
 	CommandSeparator,
-} from "@rose-griffon/ui";
+} from "@rosegriffon/ui";
 import {
 	assoMenu,
 	contactMenu,

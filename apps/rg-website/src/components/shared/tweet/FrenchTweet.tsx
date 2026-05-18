@@ -1,4 +1,4 @@
-import { Card } from "@rose-griffon/ui";
+import { Card } from "@rosegriffon/ui";
 import Image from "next/image";
 import Link from "next/link";
 import { getTweet } from "react-tweet/api";

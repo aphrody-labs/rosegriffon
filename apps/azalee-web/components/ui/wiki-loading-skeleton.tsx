@@ -1,4 +1,4 @@
-import { Skeleton } from "@rose-griffon/ui";
+import { Skeleton } from "@rosegriffon/ui";
 
 /**
  * Loading skeleton for wiki list pages (characters, skills, items, etc.)

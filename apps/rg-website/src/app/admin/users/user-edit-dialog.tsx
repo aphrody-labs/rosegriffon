@@ -1,6 +1,6 @@
 "use client";
 
-import { Button, Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, Input, Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@rose-griffon/ui";
+import { Button, Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, Input, Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@rosegriffon/ui";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -15,10 +15,10 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@rose-griffon/ui";
+} from "@rosegriffon/ui";
 
 import { Edit } from "@/lib/icons-config";
-import type { Database } from "@rose-griffon/db";
+import type { Database } from "@rosegriffon/db";
 
 import { updateUserProfile } from "./actions";
 

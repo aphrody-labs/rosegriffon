@@ -10,7 +10,7 @@ import {
   useRef,
   useState,
 } from "react";
-import type { Database } from "@rose-griffon/db";
+import type { Database } from "@rosegriffon/db";
 
 type SupabaseClient = ReturnType<typeof createClient<Database>>;
 

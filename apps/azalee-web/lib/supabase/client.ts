@@ -1,7 +1,7 @@
-// Re-export pour compat backward — utiliser directement `@rose-griffon/db/browser` dans les nouveaux modules.
-// Cast en SupabaseClient permissif : le typing strict <Database> de `@rose-griffon/db` casse les call
+// Re-export pour compat backward — utiliser directement `@rosegriffon/db/browser` dans les nouveaux modules.
+// Cast en SupabaseClient permissif : le typing strict <Database> de `@rosegriffon/db` casse les call
 // sites azalee historiques (colonnes obsolètes, types nullable vs strict). Trade-off assumé.
-import { createSupabaseBrowserClient } from "@rose-griffon/db/browser";
+import { createSupabaseBrowserClient } from "@rosegriffon/db/browser";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 /**

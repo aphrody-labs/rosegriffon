@@ -6,7 +6,7 @@ import { cache } from "react";
 
 import { auth } from "@/lib/auth";
 import { isPatreonAdmin } from "@/lib/patreon/admin-access";
-import { resolveProfile, isAdmin } from "@rose-griffon/auth";
+import { resolveProfile, isAdmin } from "@rosegriffon/auth";
 import { createAdminClient } from "@/lib/supabase/server";
 
 /**

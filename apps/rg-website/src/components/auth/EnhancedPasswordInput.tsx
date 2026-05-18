@@ -1,6 +1,6 @@
 "use client";
 
-import { Input } from "@rose-griffon/ui";
+import { Input } from "@rosegriffon/ui";
 import React from "react";
 
 import { Eye, EyeOff } from "@/lib/icons-config";

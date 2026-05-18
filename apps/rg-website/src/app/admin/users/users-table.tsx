@@ -1,6 +1,6 @@
 "use client";
 
-import { Badge, Button, Input } from "@rose-griffon/ui";
+import { Badge, Button, Input } from "@rosegriffon/ui";
 import {
 	type ColumnDef,
 	flexRender,
@@ -20,10 +20,10 @@ import {
 	TableHead,
 	TableHeader,
 	TableRow,
-} from "@rose-griffon/ui";
+} from "@rosegriffon/ui";
 import { useTableBroadcast } from "@/hooks";
 import { ArrowUpDown, Search } from "@/lib/icons-config";
-import type { Database } from "@rose-griffon/db";
+import type { Database } from "@rosegriffon/db";
 
 import { UserEditDialog } from "./user-edit-dialog";
 

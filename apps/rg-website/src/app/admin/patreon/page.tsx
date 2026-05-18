@@ -1,4 +1,4 @@
-import { Badge, Card, CardContent, Tabs, TabsContent, TabsList, TabsTrigger } from "@rose-griffon/ui";
+import { Badge, Card, CardContent, Tabs, TabsContent, TabsList, TabsTrigger } from "@rosegriffon/ui";
 import {
 	AlertCircle,
 	BarChart3,
@@ -8,8 +8,8 @@ import {
 	Users,
 } from "lucide-react";
 
-import { DashboardStatsCard as StatsCard } from "@rose-griffon/ui";
-import { AdminPageHeader } from "@rose-griffon/ui";
+import { DashboardStatsCard as StatsCard } from "@rosegriffon/ui";
+import { AdminPageHeader } from "@rosegriffon/ui";
 import { PatreonAdminActions } from "@/components/patreon/admin/PatreonAdminActions";
 import { PatreonLiveMembersTable } from "@/components/patreon/admin/PatreonLiveMembersTable";
 import { PatreonOAuthConfig } from "@/components/patreon/admin/PatreonOAuthConfig";

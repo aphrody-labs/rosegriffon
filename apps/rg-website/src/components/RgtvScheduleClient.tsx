@@ -1,13 +1,13 @@
 "use client";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@rose-griffon/ui";
+import { Card, CardContent, CardHeader, CardTitle } from "@rosegriffon/ui";
 import Image from "next/image";
 
 import { useTheme } from "@/contexts/theme-context";
 import { AlertCircle, CalendarDays, Clock, Zap } from "@/lib/icons-config";
 import { createLogger } from "@/lib/logger";
-import type { StreamSchedule } from "@rose-griffon/types";
-import type { Database, Tables, Insert, Update } from "@rose-griffon/db";
+import type { StreamSchedule } from "@rosegriffon/types";
+import type { Database, Tables, Insert, Update } from "@rosegriffon/db";
 
 const logger = createLogger("RgtvSchedule");
 

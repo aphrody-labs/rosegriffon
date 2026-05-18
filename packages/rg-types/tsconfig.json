@@ -1,5 +1,5 @@
 {
-	"extends": "@rose-griffon/config/tsconfig-base.json",
+	"extends": "@rosegriffon/config/tsconfig-base.json",
 	"compilerOptions": {
 		"outDir": "dist",
 		"noEmit": true,

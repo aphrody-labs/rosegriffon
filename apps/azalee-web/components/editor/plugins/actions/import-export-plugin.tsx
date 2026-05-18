@@ -13,7 +13,7 @@ import { Code, Download, FileCode, FileJson, FileText, Upload } from "lucide-rea
 import { useCallback, useRef, useState } from "react";
 import { toast } from "sonner";
 import { IMAGE } from "@/components/editor/transformers/markdown-image-transformer";
-import { Button } from "@rose-griffon/ui";
+import { Button } from "@rosegriffon/ui";
 import {
   Dialog,
   DialogContent,
@@ -21,7 +21,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@rose-griffon/ui";
+} from "@rosegriffon/ui";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -29,7 +29,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@rose-griffon/ui";
+} from "@rosegriffon/ui";
 
 const ALL_TRANSFORMERS = [IMAGE, ...TRANSFORMERS];
 

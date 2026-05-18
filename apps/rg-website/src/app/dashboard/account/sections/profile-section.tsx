@@ -1,6 +1,6 @@
 "use client";
 
-import { Button, Card, CardContent, CardDescription, CardHeader, CardTitle, Input, Textarea } from "@rose-griffon/ui";
+import { Button, Card, CardContent, CardDescription, CardHeader, CardTitle, Input, Textarea } from "@rosegriffon/ui";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -16,9 +16,9 @@ import {
 	FormItem,
 	FormLabel,
 	FormMessage,
-} from "@rose-griffon/ui";
+} from "@rosegriffon/ui";
 
-import type { Database } from "@rose-griffon/db";
+import type { Database } from "@rosegriffon/db";
 
 import { updateProfile } from "../actions";
 

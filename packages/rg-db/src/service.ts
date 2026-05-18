@@ -12,7 +12,7 @@ export function createSupabaseServiceClient() {
 	const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
 	if (!url || !key) {
 		throw new Error(
-			"[@rose-griffon/db] Missing SUPABASE_INTERNAL_URL/NEXT_PUBLIC_SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY",
+			"[@rosegriffon/db] Missing SUPABASE_INTERNAL_URL/NEXT_PUBLIC_SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY",
 		);
 	}
 	cachedClient = createClient<Database>(url, key, {

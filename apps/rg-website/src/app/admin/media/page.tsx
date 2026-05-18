@@ -1,4 +1,4 @@
-import { Button } from "@rose-griffon/ui";
+import { Button } from "@rosegriffon/ui";
 import Link from "next/link";
 
 import { MediaManager } from "@/components/admin/media/media-manager";

@@ -1,4 +1,4 @@
-import type { Database } from "@rose-griffon/db";
+import type { Database } from "@rosegriffon/db";
 
 /**
  * Statut d'un article/chronique.

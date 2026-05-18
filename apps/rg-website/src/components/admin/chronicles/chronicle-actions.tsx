@@ -1,6 +1,6 @@
 "use client";
 
-import { Button, DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@rose-griffon/ui";
+import { Button, DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@rosegriffon/ui";
 import Link from "next/link";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -15,7 +15,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@rose-griffon/ui";
+} from "@rosegriffon/ui";
 
 import { Edit, Eye, EyeOff, MoreHorizontal, Trash } from "@/lib/icons-config";
 

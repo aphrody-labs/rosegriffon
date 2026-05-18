@@ -1,5 +1,5 @@
 {
-	"name": "@rose-griffon/website",
+	"name": "@rosegriffon/website",
 	"version": "1.4.0",
 	"private": true,
 	"engines": {
@@ -53,10 +53,10 @@
 		"@radix-ui/react-toggle": "^1.1.10",
 		"@radix-ui/react-toggle-group": "^1.1.11",
 		"@radix-ui/react-tooltip": "^1.2.8",
-		"@rose-griffon/db": "workspace:*",
-		"@rose-griffon/types": "workspace:*",
-		"@rose-griffon/ui": "workspace:*",
-		"@rose-griffon/patreon-bun": "workspace:*",
+		"@rosegriffon/db": "workspace:*",
+		"@rosegriffon/types": "workspace:*",
+		"@rosegriffon/ui": "workspace:*",
+		"@rosegriffon/patreon-bun": "workspace:*",
 		"@sentry/nextjs": "^10.49.0",
 		"@stripe/stripe-js": "^5.0.0",
 		"@supabase/ssr": "catalog:",
@@ -113,7 +113,7 @@
 	"devDependencies": {
 		"@next/bundle-analyzer": "catalog:",
 		"@next/eslint-plugin-next": "catalog:",
-		"@rose-griffon/config": "workspace:*",
+		"@rosegriffon/config": "workspace:*",
 		"@tailwindcss/postcss": "catalog:",
 		"@testing-library/jest-dom": "catalog:",
 		"@testing-library/react": "^16.3.0",
