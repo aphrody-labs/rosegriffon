@@ -326,11 +326,14 @@
 @layer base {
   * {
     @apply border-border outline-ring/50;
-    max-width: 100vw;
   }
+  /* Le `overflow-x: hidden` sur body suffit pour bloquer le scroll horizontal.
+     Mettre `max-width: 100vw` sur `*` écrase les éléments lors du zoom
+     navigateur (vw reste constant) et casse les grilles responsive. */
   body {
     @apply bg-background text-foreground;
-    overflow-x: hidden;
+    overflow-x: clip;
+    max-width: 100%;
     transition:
       background-color 0.3s ease,
       color 0.3s ease;

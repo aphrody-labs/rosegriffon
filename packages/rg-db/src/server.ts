@@ -1,6 +1,7 @@
 // Client Supabase server-side (Next.js server components, Route Handlers, Server Actions).
 // Lit/écrit les cookies Next via `next/headers` — donc nécessite Next runtime.
 import { createServerClient, type CookieOptions } from "@supabase/ssr";
+import { getSupabasePublishableKey, getSupabaseUrl } from "./env";
 
 export interface CookieStore {
 	getAll: () => Array<{ name: string; value: string }>;
@@ -8,21 +9,7 @@ export interface CookieStore {
 }
 
 export function createSupabaseServerClient(cookies: CookieStore) {
-	let url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-	const key = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
-
-	// Safety: Vercel might pass encrypted JSON or missing value during build.
-	if (!url || url === "undefined" || url === "null" || !url.startsWith("http")) {
-		url = "https://isbkaeltubqittywibeh.supabase.co";
-	}
-
-	if (!key) {
-		throw new Error(
-			"[@rosegriffon/db] Missing NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY",
-		);
-	}
-
-	return createServerClient(url, key, {
+	return createServerClient(getSupabaseUrl(), getSupabasePublishableKey(), {
 		cookies: {
 			getAll() {
 				return cookies.getAll();

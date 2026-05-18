@@ -22,7 +22,8 @@ const pool = new Pool({
 });
 
 // Lazy getter for Supabase admin to prevent top-level execution during build
-let _supabaseAdmin: ReturnType<typeof createSupabaseAdmin<Database>> | null = null;
+let _supabaseAdmin: ReturnType<typeof createSupabaseAdmin<Database>> | null =
+	null;
 function getSupabaseAdmin() {
 	if (_supabaseAdmin) return _supabaseAdmin;
 
@@ -34,7 +35,8 @@ function getSupabaseAdmin() {
 			: "https://isbkaeltubqittywibeh.supabase.co";
 
 	const key =
-		process.env.SUPABASE_SERVICE_ROLE_KEY && !process.env.SUPABASE_SERVICE_ROLE_KEY.startsWith("{")
+		process.env.SUPABASE_SERVICE_ROLE_KEY &&
+		!process.env.SUPABASE_SERVICE_ROLE_KEY.startsWith("{")
 			? process.env.SUPABASE_SERVICE_ROLE_KEY
 			: "missing-key-during-build";
 
@@ -55,7 +57,12 @@ function detectCreatorScopes(scope: string | null | undefined): boolean {
 
 const getBetterAuthURL = () => {
 	const url = process.env.BETTER_AUTH_URL;
-	if (!url || url === "undefined" || url === "null" || !url.startsWith("http")) {
+	if (
+		!url ||
+		url === "undefined" ||
+		url === "null" ||
+		!url.startsWith("http")
+	) {
 		return "https://rosegriffon.fr";
 	}
 	return url;
@@ -64,7 +71,9 @@ const getBetterAuthURL = () => {
 export const auth = betterAuth({
 	database: pool,
 	baseURL: getBetterAuthURL(),
-	secret: process.env.BETTER_AUTH_SECRET,
+	secret:
+		process.env.BETTER_AUTH_SECRET ||
+		"build-placeholder-secret-not-used-at-runtime-only-prevents-prerender-throw",
 
 	...commonAuthOptions,
 
@@ -143,7 +152,7 @@ export const auth = betterAuth({
 		session: {
 			create: {
 				after: async (session) => {
-					const { data: user } = await supabaseAdmin
+					const { data: user } = await getSupabaseAdmin()
 						.from("user")
 						.select("id, name, image, email")
 						.eq("id", session.userId)
@@ -252,59 +261,63 @@ async function syncPatreonAccount(
 			: new Date(Date.now() + 30 * 24 * 3600 * 1000).toISOString();
 
 		await Promise.all([
-			getSupabaseAdmin().from("patreon_oauth_tokens").upsert(
-				{
-					user_id: account.userId,
-					patreon_user_id: identity.patreonUserId,
-					is_creator: isCreator,
-					access_token_enc: encryptToken(account.accessToken),
-					refresh_token_enc: encryptToken(account.refreshToken),
-					expires_at: expiresAt,
-					scope: account.scope ?? fallbackScopes,
-				},
-				{ onConflict: "user_id,patreon_user_id" },
-			),
-			getSupabaseAdmin().from("patreon_memberships").upsert(
-				{
-					user_id: account.userId,
-					patreon_user_id: identity.patreonUserId,
-					patreon_member_id: top?.memberId ?? null,
-					campaign_id: top?.campaignId ?? null,
-					patreon_email: identity.user.email ?? null,
-					patreon_full_name: identity.user.full_name ?? null,
-					patreon_thumb_url: identity.user.thumb_url ?? null,
-					patreon_url: identity.user.url ?? null,
-					discord_user_id: identity.discordUserId,
-					patron_status: top?.attrs.patron_status ?? null,
-					last_charge_date: top?.attrs.last_charge_date ?? null,
-					last_charge_status: top?.attrs.last_charge_status ?? null,
-					currently_entitled_cents:
-						top?.attrs.currently_entitled_amount_cents ?? null,
-					lifetime_support_cents:
-						top?.attrs.campaign_lifetime_support_cents ??
-						top?.attrs.lifetime_support_cents ??
-						null,
-					pledge_start: top?.attrs.pledge_relationship_start ?? null,
-					pledge_cadence: top?.attrs.pledge_cadence ?? null,
-					will_pay_amount_cents: top?.attrs.will_pay_amount_cents ?? null,
-					next_charge_date: top?.attrs.next_charge_date ?? null,
-					is_free_trial: top?.attrs.is_free_trial ?? null,
-					is_gifted: top?.attrs.is_gifted ?? null,
-					member_email: top?.attrs.email ?? null,
-					note: top?.attrs.note ?? null,
-					address: (top?.address ?? null) as never,
-					tier_ids: top?.tierIds ?? [],
-					tier_titles: top?.tierTitles ?? [],
-					tier_amounts_cents: top?.tierAmountsCents ?? [],
-					tier_requires_shipping: top?.tierRequiresShipping ?? [],
-					discord_role_ids: top?.discordRoleIds ?? [],
-					raw_identity: resp as never,
-					scope: account.scope ?? fallbackScopes,
-					fetched_at: new Date().toISOString(),
-				},
-				{ onConflict: "user_id,patreon_user_id" },
-			),
-			supabaseAdmin
+			getSupabaseAdmin()
+				.from("patreon_oauth_tokens")
+				.upsert(
+					{
+						user_id: account.userId,
+						patreon_user_id: identity.patreonUserId,
+						is_creator: isCreator,
+						access_token_enc: encryptToken(account.accessToken),
+						refresh_token_enc: encryptToken(account.refreshToken),
+						expires_at: expiresAt,
+						scope: account.scope ?? fallbackScopes,
+					},
+					{ onConflict: "user_id,patreon_user_id" },
+				),
+			getSupabaseAdmin()
+				.from("patreon_memberships")
+				.upsert(
+					{
+						user_id: account.userId,
+						patreon_user_id: identity.patreonUserId,
+						patreon_member_id: top?.memberId ?? null,
+						campaign_id: top?.campaignId ?? null,
+						patreon_email: identity.user.email ?? null,
+						patreon_full_name: identity.user.full_name ?? null,
+						patreon_thumb_url: identity.user.thumb_url ?? null,
+						patreon_url: identity.user.url ?? null,
+						discord_user_id: identity.discordUserId,
+						patron_status: top?.attrs.patron_status ?? null,
+						last_charge_date: top?.attrs.last_charge_date ?? null,
+						last_charge_status: top?.attrs.last_charge_status ?? null,
+						currently_entitled_cents:
+							top?.attrs.currently_entitled_amount_cents ?? null,
+						lifetime_support_cents:
+							top?.attrs.campaign_lifetime_support_cents ??
+							top?.attrs.lifetime_support_cents ??
+							null,
+						pledge_start: top?.attrs.pledge_relationship_start ?? null,
+						pledge_cadence: top?.attrs.pledge_cadence ?? null,
+						will_pay_amount_cents: top?.attrs.will_pay_amount_cents ?? null,
+						next_charge_date: top?.attrs.next_charge_date ?? null,
+						is_free_trial: top?.attrs.is_free_trial ?? null,
+						is_gifted: top?.attrs.is_gifted ?? null,
+						member_email: top?.attrs.email ?? null,
+						note: top?.attrs.note ?? null,
+						address: (top?.address ?? null) as never,
+						tier_ids: top?.tierIds ?? [],
+						tier_titles: top?.tierTitles ?? [],
+						tier_amounts_cents: top?.tierAmountsCents ?? [],
+						tier_requires_shipping: top?.tierRequiresShipping ?? [],
+						discord_role_ids: top?.discordRoleIds ?? [],
+						raw_identity: resp as never,
+						scope: account.scope ?? fallbackScopes,
+						fetched_at: new Date().toISOString(),
+					},
+					{ onConflict: "user_id,patreon_user_id" },
+				),
+			getSupabaseAdmin()
 				.from("profiles")
 				.update({
 					patreon_id: identity.patreonUserId,

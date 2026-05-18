@@ -7,7 +7,7 @@
 	"scripts": {
 		"dev": "bun --watch src/index.ts",
 		"start": "bun src/index.ts",
-		"build": "bun build src/index.ts --target=bun --outdir=dist",
+		"build": "bun build src/index.ts --target=bun --packages=external --outdir=dist",
 		"type-check": "tsc --noEmit",
 		"lint": "oxlint src",
 		"lint:fix": "oxlint --fix src",
