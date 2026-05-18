@@ -1,8 +1,9 @@
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
-import { ADMIN_ROLES, MEDAILLE_AZALEE_ROLE_ID } from "@/lib/auth-roles";
 import { createClient } from "@/lib/supabase/server";
+import { resolveProfile, isAdmin } from "@rg/auth";
+import { MEDAILLE_AZALEE_ROLE_ID, ADMIN_ROLES } from "@rg/types";
 
 /**
  * Get the current Better Auth session server-side.
@@ -20,7 +21,6 @@ export async function getServerSession() {
 
 /**
  * Require auth — returns user or null.
- * Use in server components / actions that need authentication.
  */
 export async function requireAuth() {
 	const session = await getServerSession();
@@ -32,7 +32,6 @@ export async function requireAuth() {
 
 /**
  * Require auth or fail with an error (for server actions).
- * Throws if no valid session.
  */
 export async function requireAuthOrFail() {
 	const session = await getServerSession();
@@ -43,60 +42,43 @@ export async function requireAuthOrFail() {
 }
 
 /**
- * Require admin role — redirects to "/" if not admin/editor/moderator.
- * Use in admin pages.
+ * Require admin role — redirects to "/" if not authorized.
  */
 export async function requireAdmin() {
-	const session = await getServerSession();
-	if (!session?.user) {
-		redirect("/login");
-	}
+	const user = await requireAuth();
+	if (!user) redirect("/login");
 
 	const supabase = await createClient();
-	const { data: profile, error } = await supabase
-		.from("profiles")
-		.select("role")
-		.eq("id", session.user.id)
-		.single();
+	// @ts-ignore - migration typing
+	const profile = await resolveProfile(supabase, user);
 
-	if (error) {
-		console.error("[requireAdmin] Profile fetch failed:", error.message);
+	if (!profile || !isAdmin(profile.role)) {
+		console.warn("[requireAdmin] denied", {
+			userId: user.id,
+			resolvedRole: profile?.role,
+		});
 		redirect("/");
 	}
 
-	if (
-		!profile ||
-		!ADMIN_ROLES.includes(profile.role as (typeof ADMIN_ROLES)[number])
-	) {
-		redirect("/");
-	}
-
-	return { session, profile };
+	return { session: { user }, profile };
 }
 
 /**
  * Same as requireAdmin but throws instead of redirecting.
- * Use in server actions invoked over POST.
  */
 export async function requireAdminOrFail() {
-	const session = await getServerSession();
-	if (!session?.user) throw new Error("Non autorisé");
+	const user = await requireAuth();
+	if (!user) throw new Error("Non autorisé");
 
 	const supabase = await createClient();
-	const { data: profile } = await supabase
-		.from("profiles")
-		.select("role")
-		.eq("id", session.user.id)
-		.single();
+	// @ts-ignore - migration typing
+	const profile = await resolveProfile(supabase, user);
 
-	if (
-		!profile ||
-		!ADMIN_ROLES.includes(profile.role as (typeof ADMIN_ROLES)[number])
-	) {
+	if (!profile || !isAdmin(profile.role)) {
 		throw new Error("Accès réservé aux administrateurs");
 	}
 
-	return { session, profile };
+	return { session: { user }, profile };
 }
 
 /**
@@ -131,23 +113,18 @@ export async function hasMedailleAzaleeRole(
 
 /**
  * Editor-tier guard: ADMIN_ROLES or Médaille Azalée members.
- * Mirrors the policy of `app/dashboard/layout.tsx`.
- * Throws on failure (use in server actions). Returns the session+profile on success.
  */
 export async function requireEditorOrFail() {
 	const session = await getServerSession();
 	if (!session?.user) throw new Error("Non autorisé");
 
 	const supabase = await createClient();
-	const { data: profile } = await supabase
-		.from("profiles")
-		.select("role, discord_id")
-		.eq("id", session.user.id)
-		.single();
+	// @ts-ignore - migration typing
+	const profile = await resolveProfile(supabase, session.user);
 
 	if (!profile) throw new Error("Profil introuvable");
 
-	if (ADMIN_ROLES.includes(profile.role as (typeof ADMIN_ROLES)[number])) {
+	if (isAdmin(profile.role)) {
 		return {
 			session,
 			profile,

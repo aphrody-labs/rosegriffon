@@ -1,5 +1,6 @@
 "use client";
 
+import { Button, Card, CardContent, CardDescription, CardHeader, CardTitle, Tabs, TabsContent, TabsList, TabsTrigger, Textarea } from "@rg/ui";
 import { Sparkles } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -10,11 +11,9 @@ import EmoteRenderer, {
   stripEmotes,
 } from "@/components/shared/emotes/EmoteRenderer";
 import RgEmote, { RgEmoteGrid, RgEmoteLine } from "@/components/shared/emotes/RgEmote";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Textarea } from "@/components/ui/textarea";
+
+import { Separator } from "@rg/ui";
+
 import {
   useEmoteHistory,
   useEmoteRotation,

@@ -6,7 +6,7 @@ import { Edit, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 import { toast } from "sonner";
-import { Button } from "@/components/ui/button";
+import { Button } from "@rg/ui";
 import { deleteTweet } from "./actions";
 
 export function TweetRow({ tweet }: { tweet: any }) {

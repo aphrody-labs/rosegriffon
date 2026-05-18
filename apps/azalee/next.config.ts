@@ -1,13 +1,10 @@
 import type { NextConfig } from "next";
 import path from "node:path";
+import { withSentryConfig } from "@sentry/nextjs";
 
 const IS_VERCEL = process.env.VERCEL === "1";
 
 // CDN externe — décharge .next/static/ + assets public/ vers cdn.rosegriffon.fr.
-// 2 toggles indépendants (build-time, NEXT_PUBLIC_*) :
-//   NEXT_PUBLIC_CDN_URL=https://cdn.rosegriffon.fr/static/azalee  → assetPrefix (chunks JS/CSS/fonts)
-//   NEXT_PUBLIC_CDN_LOADER=1                                       → bypass /_next/image (tous <Image> via cdn-loader.js)
-// Vide → comportement legacy (assets servis depuis l'origin Next).
 const CDN_URL = process.env.NEXT_PUBLIC_CDN_URL?.trim() || "";
 const CDN_ORIGIN = CDN_URL ? new URL(CDN_URL).origin : "";
 const CDN_LOADER = CDN_URL && process.env.NEXT_PUBLIC_CDN_LOADER === "1";
@@ -19,8 +16,6 @@ const nextConfig: NextConfig = {
 	compress: false,
 
 	// assetPrefix : Next préfixe TOUTES les URLs /_next/static/* avec CDN_URL.
-	// Les assets public/ restent référencés par path relatif → conserver miroir local OU
-	// remplacer manuellement par `${CDN_URL}/public/...` côté composants.
 	...(CDN_URL && { assetPrefix: CDN_URL }),
 
 	// React Compiler — memoization automatique (stable en Next.js 16)
@@ -82,16 +77,9 @@ const nextConfig: NextConfig = {
 		contentDispositionType: "attachment",
 		qualities: [75, 90, 100],
 		formats: ["image/avif", "image/webp"],
-		// Restreint les widths du srcset pour matcher notre cache disque G4TX (256/384/512/768/1024).
-		// Defaults Next sont [16, 32, 48, 64, 96, 128, 256, 384] (imageSizes)
-		// + [640, 750, 828, 1080, 1200, 1920, 2048, 3840] (deviceSizes) → 14 widths,
-		// trop de variants a pre-warm. On reduit a 6 widths totaux qui couvrent
-		// les usages : icones (96px), thumbs grille (256-512), full screen (1024+).
 		imageSizes: [96, 256, 384, 512],
 		deviceSizes: [768, 1024, 1920],
-		minimumCacheTTL: 86400, // 24h cache pour images optimisees (defaut: 60s)
-		// Loader custom CDN passthrough — actif si NEXT_PUBLIC_CDN_LOADER=1.
-		// Bypass /_next/image (pas de redim runtime) ; nginx sert les assets tels quels.
+		minimumCacheTTL: 86400,
 		...(CDN_LOADER && {
 			loader: "custom",
 			loaderFile: "./cdn-loader.js",
@@ -108,7 +96,7 @@ const nextConfig: NextConfig = {
 					root: path.resolve(__dirname, "../../"),
 				},
 			}),
-	transpilePackages: ["@rosegriffon/inagle", "@rg/ui", "@rg/db"],
+	transpilePackages: ["@rg/ui", "@rg/db"],
 
 	// Packages Node.js natifs exclus du bundling serveur
 	serverExternalPackages: [
@@ -132,12 +120,9 @@ const nextConfig: NextConfig = {
 			: { fetches: { fullUrl: true } },
 
 	typescript: {
-		// Type-check géré par `bun run type-check` en CI (tsc --noEmit).
-		// Le build Next 16 re-vérifie nativement avec TS 6.0.3.
 		ignoreBuildErrors: false,
 	},
 
-	// Suppression des console.log en production (garde error + warn)
 	compiler: {
 		removeConsole:
 			process.env.NODE_ENV === "production"
@@ -186,7 +171,6 @@ const nextConfig: NextConfig = {
 
 	async headers() {
 		const isDev = process.env.NODE_ENV === "development";
-
 		const cdnSrc = CDN_ORIGIN ? ` ${CDN_ORIGIN}` : "";
 
 		const cspHeader = [
@@ -208,34 +192,13 @@ const nextConfig: NextConfig = {
 			{
 				source: "/(.*)",
 				headers: [
-					{
-						key: "X-Content-Type-Options",
-						value: "nosniff",
-					},
-					{
-						key: "X-Frame-Options",
-						value: "DENY",
-					},
-					{
-						key: "Referrer-Policy",
-						value: "strict-origin-when-cross-origin",
-					},
-					{
-						key: "Permissions-Policy",
-						value: "camera=(), microphone=(), geolocation=()",
-					},
-					{
-						key: "Strict-Transport-Security",
-						value: "max-age=63072000; includeSubDomains; preload",
-					},
-					{
-						key: "Content-Security-Policy",
-						value: cspHeader,
-					},
-					{
-						key: "X-DNS-Prefetch-Control",
-						value: "on",
-					},
+					{ key: "X-Content-Type-Options", value: "nosniff" },
+					{ key: "X-Frame-Options", value: "DENY" },
+					{ key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+					{ key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=()" },
+					{ key: "Strict-Transport-Security", value: "max-age=63072000; includeSubDomains; preload" },
+					{ key: "Content-Security-Policy", value: cspHeader },
+					{ key: "X-DNS-Prefetch-Control", value: "on" },
 				],
 			},
 		];
@@ -243,12 +206,8 @@ const nextConfig: NextConfig = {
 
 	experimental: {
 		viewTransition: true,
-		// Cache Turbopack persistant entre builds (gain 2-5x)
 		turbopackFileSystemCacheForBuild: true,
-		// Minification CSS via Lightning CSS
 		optimizeCss: true,
-		// Turbopack optimise automatiquement les barrel files,
-		// mais on garde la liste pour le fallback webpack
 		optimizePackageImports: [
 			"lucide-react",
 			"date-fns",
@@ -265,8 +224,6 @@ const nextConfig: NextConfig = {
 			"@dnd-kit/core",
 			"@dnd-kit/sortable",
 			"@dnd-kit/utilities",
-			"graphql",
-			"graphql-yoga",
 			"@radix-ui/react-accordion",
 			"@radix-ui/react-alert-dialog",
 			"@radix-ui/react-avatar",
@@ -294,4 +251,10 @@ const nextConfig: NextConfig = {
 	},
 };
 
-export default nextConfig;
+export default withSentryConfig(nextConfig, {
+	org: "rose-griffon",
+	project: "rg-azalee",
+	silent: !process.env.CI,
+	widenClientFileUpload: true,
+	tunnelRoute: "/monitoring",
+});

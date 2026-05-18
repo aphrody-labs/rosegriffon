@@ -1,7 +1,6 @@
+import { Card, CardContent, CardHeader, CardTitle } from "@rg/ui";
 // Page statique avec ISR - Revalidate toutes les semaines (charte rarement modifiée)
 export const revalidate = 604800; // 1 semaine
-
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export default function CharteEngagementsPage() {
   return (

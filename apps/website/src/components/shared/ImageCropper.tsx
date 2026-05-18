@@ -1,17 +1,10 @@
 "use client";
 
+import { Button, Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@rg/ui";
 import { useCallback, useState } from "react";
 import Cropper, { type Area } from "react-easy-crop";
 
-import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { Slider } from "@/components/ui/slider";
+import { Slider } from "@rg/ui";
 import getCroppedImg from "@/lib/canvasUtils";
 
 interface ImageCropperProps {

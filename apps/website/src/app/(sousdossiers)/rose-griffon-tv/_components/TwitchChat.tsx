@@ -1,13 +1,12 @@
 "use client";
 
+import { Badge, Button, Card, CardContent, CardHeader } from "@rg/ui";
 import { AnimatePresence, motion } from "motion/react";
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Avatar, AvatarFallback, AvatarImage } from "@rg/ui";
+
 import { useTheme } from "@/contexts/theme-context";
 import { authClient, type ClientSession } from "@/lib/auth-client";
 import { Bell, BellOff, LogIn, LogOut, MessageSquare } from "@/lib/icons-config";

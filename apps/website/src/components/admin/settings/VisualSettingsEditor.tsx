@@ -1,5 +1,6 @@
 "use client";
 
+import { Button, Card, CardContent, CardDescription, CardHeader, CardTitle, Input, Tabs, TabsContent, TabsList, TabsTrigger, Textarea } from "@rg/ui";
 import { Loader2, Save } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -10,13 +11,9 @@ import { AchilleaBanner } from "@/components/home/AchilleaBanner";
 import { AzaleeBanner } from "@/components/home/AzaleeBanner";
 import { RgtvBanner } from "@/components/home/RgtvBanner";
 import FusionBlock from "@/components/shared/FusionBlock";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Separator } from "@/components/ui/separator";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Textarea } from "@/components/ui/textarea";
+
+import { Label } from "@rg/ui";
+import { Separator } from "@rg/ui";
 
 export type Setting = {
   key: string;

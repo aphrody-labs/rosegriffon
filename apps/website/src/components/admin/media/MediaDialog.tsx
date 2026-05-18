@@ -1,19 +1,14 @@
 "use client";
 
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Tabs, TabsContent, TabsList, TabsTrigger } from "@rg/ui";
 import { Loader2, Smile, Upload } from "lucide-react";
 import { useRef, useState } from "react";
 import { toast } from "sonner";
 
 import { EmoteGallery } from "@/components/shared/emotes/EmoteGallery";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+
+import { ScrollArea } from "@rg/ui";
+
 import { authClient } from "@/lib/auth-client";
 import { createClient } from "@/lib/supabase/client";
 

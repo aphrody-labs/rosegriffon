@@ -1,18 +1,17 @@
 "use client";
 
+import { Button, Card, CardContent, CardFooter, CardHeader, CardTitle, Input, Textarea } from "@rg/ui";
 import { useRouter } from "next/navigation";
 import { useActionState, useState } from "react";
 import { toast } from "sonner";
 
 import { createEvent, deleteEvent, updateEvent } from "@/app/admin/events/actions";
 import { ConfirmationDialog } from "@/components/admin/confirmation-dialog";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
+
+import { Label } from "@rg/ui";
+
 import { Loader2, Trash2 } from "@/lib/icons-config";
-import type { Tables } from "@/types/rg";
+import type { Tables } from "@rg/db";
 
 type EventFormProps = {
   event?: Tables<"events">;

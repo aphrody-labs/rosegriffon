@@ -74,7 +74,7 @@ export class ChroniqueCommand {
         .setDescription(truncate(c.excerpt ?? c.content?.replace(/<[^>]+>/g, ""), 1500))
         .addFields(
           { name: "Catégorie", value: c.category, inline: true },
-          { name: "Vues", value: String(c.views_count), inline: true },
+          { name: "Vues", value: String(c.views_count ?? 0), inline: true },
           { name: "Publié", value: fmtDate(c.created_at), inline: true },
         );
       if (c.featured_image) embed.setImage(c.featured_image);

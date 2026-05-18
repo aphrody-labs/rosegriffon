@@ -1,20 +1,11 @@
 "use client";
 
+import { Button, Input, Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@rg/ui";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { CheckCircle2, Loader2, RefreshCw, Search, Star } from "lucide-react";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
-
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import {
-	Select,
-	SelectContent,
-	SelectItem,
-	SelectTrigger,
-	SelectValue,
-} from "@/components/ui/select";
 
 export interface AdminLegacyMember {
 	id: string;

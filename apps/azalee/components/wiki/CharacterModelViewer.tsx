@@ -3,14 +3,14 @@
 import { Box, RotateCw, ZoomIn, ZoomOut } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useState } from "react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@rg/ui";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
+} from "@rg/ui";
 import { getCharacterModel360Url } from "@/lib/images";
 
 interface CharacterModelViewerProps {

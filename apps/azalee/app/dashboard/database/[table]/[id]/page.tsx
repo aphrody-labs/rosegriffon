@@ -1,6 +1,6 @@
 import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
+import { Button } from "@rg/ui";
 import { createClient } from "@/lib/supabase/server";
 import { GenericEditorForm } from "./generic-editor-form";
 

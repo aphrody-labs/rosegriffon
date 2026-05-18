@@ -6,7 +6,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import * as React from "react";
 import { useLanguage } from "@/components/providers/language-provider";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@rg/ui";
 import {
   Sidebar,
   SidebarContent,
@@ -17,7 +17,7 @@ import {
   SidebarMenuItem,
   SidebarRail,
   useSidebar,
-} from "@/components/ui/sidebar";
+} from "@rg/ui";
 import { dashboardItems, type NavItem, navigationItems } from "@/config/navigation";
 import type { SpriteCommonKey } from "@/config/sprites-common";
 import { iconMap } from "@/lib/icons";

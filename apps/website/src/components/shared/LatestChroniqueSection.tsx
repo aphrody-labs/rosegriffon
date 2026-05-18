@@ -1,11 +1,9 @@
+import { Badge, Button, Card, CardContent, CardHeader } from "@rg/ui";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import Image from "next/image";
 import Link from "next/link";
 
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { ArrowRight, Calendar, Eye, Newspaper } from "@/lib/icons-config";
 import { createPublicClient } from "@/lib/supabase/server";
 

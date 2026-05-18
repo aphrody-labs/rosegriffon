@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@rg/ui";
 
 export const metadata: Metadata = {
   title: "Charte d'engagements - Azalée",

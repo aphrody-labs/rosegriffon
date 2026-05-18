@@ -1,13 +1,11 @@
 export const dynamic = "force-dynamic";
 
+import { Badge, Button, Card, CardContent, CardDescription, CardHeader, CardTitle } from "@rg/ui";
 import { Calendar, ChevronRight, Edit, Eye, FileText, PenSquare, Plus, Trash2 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { getServerUser } from "@/lib/auth-helpers";
 import { createClient } from "@/lib/supabase/server";
 

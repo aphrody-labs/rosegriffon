@@ -1,10 +1,8 @@
 "use client";
 
+import { Alert, AlertDescription, AlertTitle, Button } from "@rg/ui";
 import { AlertCircle, Home, RefreshCcw } from "lucide-react";
 import { useEffect } from "react";
-
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Button } from "@/components/ui/button";
 
 export default function AdminError({
   error,

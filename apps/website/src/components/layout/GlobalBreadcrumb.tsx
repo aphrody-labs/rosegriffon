@@ -11,7 +11,7 @@ import {
   BreadcrumbList,
   BreadcrumbPage,
   BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb";
+} from "@rg/ui";
 
 // Mapping des routes pour un affichage plus convivial
 const routeMapping: Record<string, string> = {

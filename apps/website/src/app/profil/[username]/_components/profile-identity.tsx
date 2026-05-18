@@ -1,9 +1,9 @@
+import { Badge, Button } from "@rg/ui";
 import { Edit, ExternalLink } from "lucide-react";
 import Link from "next/link";
 
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@rg/ui";
+
 import TwitterIcon from "@/shared/icons/twitter";
 
 interface ProfileIdentityProps {

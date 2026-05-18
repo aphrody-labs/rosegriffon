@@ -1,9 +1,8 @@
+import { Button, Card, CardContent } from "@rg/ui";
 import { Zap } from "lucide-react";
 import localFont from "next/font/local";
 import Image from "next/image";
 
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import DiscordIcon from "@/shared/icons/discord";
 
 // Load local font

@@ -1,5 +1,6 @@
 "use client";
 
+import { Button, DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@rg/ui";
 import Link from "next/link";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -14,16 +15,8 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+} from "@rg/ui";
+
 import { Edit, Eye, EyeOff, MoreHorizontal, Trash } from "@/lib/icons-config";
 
 interface ChronicleActionsProps {

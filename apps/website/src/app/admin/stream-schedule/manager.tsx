@@ -1,23 +1,17 @@
 "use client";
 
+import { Alert, AlertDescription, AlertTitle, Button, Input, Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@rg/ui";
 import { Calendar, Edit2, Plus, RefreshCw, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 import { AdminCard } from "@/components/admin/shared/AdminCard";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import type { StreamSchedule } from "@/types/rg";
+
+import { Label } from "@rg/ui";
+
+import type { StreamSchedule } from "@rg/types";
+import type { Database, Tables, Insert, Update } from "@rg/db";
 
 import { addSchedule, deleteSchedule, syncWithGoogleCalendar, updateSchedule } from "./actions";
 

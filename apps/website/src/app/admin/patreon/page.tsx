@@ -1,3 +1,4 @@
+import { Badge, Card, CardContent, Tabs, TabsContent, TabsList, TabsTrigger } from "@rg/ui";
 import {
 	AlertCircle,
 	BarChart3,
@@ -7,16 +8,14 @@ import {
 	Users,
 } from "lucide-react";
 
-import { StatsCard } from "@/components/admin/dashboard/stats-card";
-import { AdminPageHeader } from "@/components/admin/shared/AdminPageHeader";
+import { DashboardStatsCard as StatsCard } from "@rg/ui";
+import { AdminPageHeader } from "@rg/ui";
 import { PatreonAdminActions } from "@/components/patreon/admin/PatreonAdminActions";
 import { PatreonLiveMembersTable } from "@/components/patreon/admin/PatreonLiveMembersTable";
 import { PatreonOAuthConfig } from "@/components/patreon/admin/PatreonOAuthConfig";
 import { PatreonWebhooksCard } from "@/components/patreon/admin/PatreonWebhooksCard";
 import { PatreonConnectButton } from "@/components/patreon/PatreonConnectButton";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+
 import { requirePatreonCreator } from "@/lib/auth-helpers";
 import { fetchLiveCampaignSnapshot } from "@/lib/patreon/live";
 import { createAdminClient } from "@/lib/supabase/server";

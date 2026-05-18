@@ -1,3 +1,4 @@
+import { ADMIN_ROLES } from "@rg/types/roles";
 import { type NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 
@@ -49,7 +50,6 @@ const VALID_CATEGORIES = [
 ] as const;
 type Category = (typeof VALID_CATEGORIES)[number];
 
-const ADMIN_ROLES = ["admin", "superadmin", "editor", "moderator"] as const;
 const APP_SCOPE = "azalee";
 const ORIGIN = "https://azalee.rosegriffon.fr";
 

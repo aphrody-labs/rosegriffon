@@ -10,9 +10,12 @@
 		"unicorn"
 	],
 	"categories": {
-		"correctness": "error",
+		"correctness": "warn",
 		"suspicious": "warn",
-		"perf": "warn"
+		"pedantic": "warn",
+		"perf": "warn",
+		"style": "warn",
+		"restriction": "warn"
 	},
 	"env": {
 		"browser": true,

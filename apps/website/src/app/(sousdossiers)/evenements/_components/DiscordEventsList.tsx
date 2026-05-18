@@ -1,9 +1,8 @@
 "use client";
 
+import { Badge } from "@rg/ui";
 import { Calendar, MapPin, Users } from "lucide-react";
 import Image from "next/image";
-
-import { Badge } from "@/components/ui/badge";
 
 import {
   type DiscordScheduledEvent,

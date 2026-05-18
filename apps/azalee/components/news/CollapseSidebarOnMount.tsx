@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { useSidebar } from "@/components/ui/sidebar";
+import { useSidebar } from "@rg/ui";
 
 /**
  * Ferme la sidebar desktop a l'arrivee sur une page article.

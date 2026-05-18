@@ -3,7 +3,7 @@
 	"version": "0.1.0",
 	"private": true,
 	"type": "module",
-	"description": "Bot Discord Rose Griffon — slash commands public + admin, sync members, canvas cards",
+	"description": "Bot Discord Rose Griffon \u2014 slash commands public + admin, sync members, canvas cards",
 	"scripts": {
 		"dev": "bun --watch src/index.ts",
 		"start": "bun src/index.ts",
@@ -16,13 +16,14 @@
 		"smoke:canvas": "bun src/scripts/smoke-canvas.ts"
 	},
 	"dependencies": {
+		"@aphrody-code/canvas": "0.1.99-fork.4",
 		"@rg/db": "workspace:*",
+		"@rg/types": "workspace:*",
 		"@rpbey/discordx": "catalog:",
 		"@supabase/supabase-js": "catalog:",
 		"discord.js": "catalog:",
 		"reflect-metadata": "catalog:",
-		"zod": "catalog:",
-		"@aphrody-code/canvas": "0.1.99-fork.4"
+		"zod": "catalog:"
 	},
 	"devDependencies": {
 		"@rg/config": "workspace:*",

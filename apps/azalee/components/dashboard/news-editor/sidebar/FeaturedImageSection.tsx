@@ -3,8 +3,8 @@
 import { Crop, ImagePlus, Loader2, Trash2, Upload } from "lucide-react";
 import Image from "next/image";
 import { useCallback, useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Button } from "@rg/ui";
+import { Input } from "@rg/ui";
 import { cn } from "@/lib/utils";
 
 interface FeaturedImageSectionProps {

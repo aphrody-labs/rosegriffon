@@ -2,7 +2,7 @@
 
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
+import { Button } from "@rg/ui";
 
 const ACTION_LABELS: Record<string, { label: string; color: string }> = {
   signup: { label: "Inscription", color: "bg-green-500/10 text-green-700" },

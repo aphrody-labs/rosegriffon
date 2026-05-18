@@ -1,10 +1,10 @@
 "use client";
 
+import { Button } from "@rg/ui";
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 
-import { Button } from "@/components/ui/button";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@rg/ui";
 import { Tv, Users, Video } from "@/lib/icons-config";
 import { cn } from "@/lib/utils";
 

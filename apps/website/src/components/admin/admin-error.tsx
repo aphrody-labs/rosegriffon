@@ -1,8 +1,8 @@
 "use client";
 
+import { Button } from "@rg/ui";
 import { useEffect } from "react";
 
-import { Button } from "@/components/ui/button";
 import { AlertTriangle } from "@/lib/icons-config";
 
 interface AdminErrorProps {

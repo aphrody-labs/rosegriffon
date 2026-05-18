@@ -1,9 +1,9 @@
 "use client";
 
+import { Input } from "@rg/ui";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
-import { Input } from "@/components/ui/input";
 import { Search } from "@/lib/icons-config";
 import { cn } from "@/lib/utils";
 

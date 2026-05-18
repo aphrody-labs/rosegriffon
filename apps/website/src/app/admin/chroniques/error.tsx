@@ -1,10 +1,9 @@
 "use client";
 
+import { Alert, AlertDescription, AlertTitle, Button } from "@rg/ui";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Button } from "@/components/ui/button";
 import { AlertCircle, RefreshCw } from "@/lib/icons-config";
 
 export default function ChroniquesError({

@@ -1,13 +1,13 @@
+import { Button, Card, CardContent, CardHeader, CardTitle } from "@rg/ui";
 import { Calendar, Plus } from "lucide-react";
 import Link from "next/link";
 
 import { SyncEventsButton } from "@/components/admin/events/sync-button";
-import { AdminPageHeader } from "@/components/admin/shared/AdminPageHeader";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { PaginationControls } from "@/components/ui/pagination-controls";
+import { AdminPageHeader } from "@rg/ui";
+
+import { PaginationControls } from "@rg/ui";
 import { createAdminClient } from "@/lib/supabase/server";
-import type { Tables } from "@/types/supabase";
+import type { Tables } from "@rg/db";
 
 export const dynamic = "force-dynamic";
 

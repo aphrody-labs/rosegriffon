@@ -1,10 +1,10 @@
 "use client";
 
+import { Button } from "@rg/ui";
 import { Search } from "lucide-react";
 import { useRouter } from "next/navigation";
 import * as React from "react";
 
-import { Button } from "@/components/ui/button";
 import {
 	CommandDialog,
 	CommandEmpty,
@@ -13,7 +13,7 @@ import {
 	CommandItem,
 	CommandList,
 	CommandSeparator,
-} from "@/components/ui/command";
+} from "@rg/ui";
 import {
 	assoMenu,
 	contactMenu,

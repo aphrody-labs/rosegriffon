@@ -1,6 +1,6 @@
 "use client";
 
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { ScrollArea } from "@rg/ui";
 import { ExcerptSection } from "./sidebar/ExcerptSection";
 import { FeaturedImageSection } from "./sidebar/FeaturedImageSection";
 import { PublicationSection } from "./sidebar/PublicationSection";

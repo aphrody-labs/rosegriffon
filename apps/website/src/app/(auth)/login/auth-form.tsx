@@ -1,11 +1,11 @@
 "use client";
 
+import { Button } from "@rg/ui";
 import { Loader2 } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useState } from "react";
 
-import { Button } from "@/components/ui/button";
 import { authClient } from "@/lib/auth-client";
 
 import { DiscordIcon, PatreonIcon } from "./_components/social-icons";

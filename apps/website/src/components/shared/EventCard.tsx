@@ -1,12 +1,11 @@
 "use client";
 
+import { Button, Card } from "@rg/ui";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import Link from "next/link";
 import { memo, useEffect, useMemo, useState } from "react";
 
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 import { ArrowRight, CalendarDays, MapPin } from "@/lib/icons-config";
 import type { CalendarEvent } from "@/types/api";
 

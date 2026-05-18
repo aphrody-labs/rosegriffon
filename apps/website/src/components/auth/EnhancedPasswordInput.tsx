@@ -1,8 +1,8 @@
 "use client";
 
+import { Input } from "@rg/ui";
 import React from "react";
 
-import { Input } from "@/components/ui/input";
 import { Eye, EyeOff } from "@/lib/icons-config";
 import { cn } from "@/lib/utils";
 

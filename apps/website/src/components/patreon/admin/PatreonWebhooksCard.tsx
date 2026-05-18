@@ -1,12 +1,10 @@
 "use client";
 
+import { Button, Card, CardContent } from "@rg/ui";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { AlertTriangle, CheckCircle2, Loader2, Webhook } from "lucide-react";
 import { useEffect, useState } from "react";
-
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 
 interface WebhookRow {
 	id: string;

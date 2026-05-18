@@ -1,3 +1,4 @@
+import { DashboardGrid, QuickActionCard } from "@rg/ui";
 import {
 	BookOpen,
 	Calendar,
@@ -7,9 +8,6 @@ import {
 	Shield,
 	Users,
 } from "lucide-react";
-import Link from "next/link";
-
-import { Card, CardContent } from "@/components/ui/card";
 
 interface QuickAction {
 	title: string;
@@ -66,32 +64,10 @@ const ACTIONS: QuickAction[] = [
 
 export function QuickActions() {
 	return (
-		<section aria-labelledby="quick-actions-title">
-			<h2
-				id="quick-actions-title"
-				className="mb-3 text-sm font-semibold uppercase tracking-wide text-muted-foreground"
-			>
-				Modules
-			</h2>
-			<div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-				{ACTIONS.map(({ title, description, href, icon: Icon, accent }) => (
-					<Link key={href} href={href} className="group">
-						<Card className="h-full transition-all group-hover:border-primary/40 group-hover:-translate-y-0.5 group-hover:shadow-md">
-							<CardContent className="flex items-start gap-3 p-4">
-								<div className={`mt-0.5 ${accent}`} aria-hidden="true">
-									<Icon className="size-5" />
-								</div>
-								<div className="min-w-0 flex-1">
-									<p className="font-semibold text-foreground">{title}</p>
-									<p className="mt-0.5 text-xs text-muted-foreground">
-										{description}
-									</p>
-								</div>
-							</CardContent>
-						</Card>
-					</Link>
-				))}
-			</div>
-		</section>
+		<DashboardGrid title="Modules" className="lg:grid-cols-3">
+			{ACTIONS.map((action) => (
+				<QuickActionCard key={action.href} {...action} />
+			))}
+		</DashboardGrid>
 	);
 }

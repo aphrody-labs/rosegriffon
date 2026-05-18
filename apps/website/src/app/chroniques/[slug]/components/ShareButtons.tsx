@@ -1,8 +1,9 @@
 "use client";
 
+import { Button } from "@rg/ui";
 import { Share2 } from "lucide-react";
 import { toast } from "sonner";
-import { Button } from "@/components/ui/button";
+
 import TwitterIcon from "@/shared/icons/twitter";
 
 interface ShareButtonsProps {

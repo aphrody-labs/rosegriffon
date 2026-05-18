@@ -1,11 +1,11 @@
 "use client";
 
+import { Button } from "@rg/ui";
 import { RefreshCw } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
 import { syncGoogleEvents } from "@/app/admin/events/actions";
-import { Button } from "@/components/ui/button";
 
 export function SyncEventsButton() {
   const [isSyncing, setIsSyncing] = useState(false);

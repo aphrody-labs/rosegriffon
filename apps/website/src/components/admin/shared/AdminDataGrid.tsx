@@ -1,7 +1,7 @@
+import { Card, CardContent, CardHeader, CardTitle } from "@rg/ui";
 import type { ReactNode } from "react";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
+import { Skeleton } from "@rg/ui";
 import {
   Table,
   TableBody,
@@ -9,7 +9,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
+} from "@rg/ui";
 import { cn } from "@/lib/utils";
 
 interface Column<T> {

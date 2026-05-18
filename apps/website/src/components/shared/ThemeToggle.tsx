@@ -1,8 +1,8 @@
 "use client";
 
+import { Button } from "@rg/ui";
 import Image from "next/image";
 
-import { Button } from "@/components/ui/button";
 import { useTheme } from "@/contexts/theme-context";
 
 const THEME_METADATA = {

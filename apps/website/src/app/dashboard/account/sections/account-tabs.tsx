@@ -1,10 +1,9 @@
 "use client";
 
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@rg/ui";
 import { KeyRound, Link2, Truck, UserCircle } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 import * as React from "react";
-
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const TABS = [
 	{ value: "profile", label: "Profil", icon: UserCircle },

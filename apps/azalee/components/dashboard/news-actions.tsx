@@ -21,7 +21,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 import { exportToGoogleDrive } from "@/app/dashboard/import-google-doc/actions";
-import { Button } from "@/components/ui/button";
+import { Button } from "@rg/ui";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -32,7 +32,7 @@ import {
   DropdownMenuSubContent,
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+} from "@rg/ui";
 
 interface NewsActionsProps {
   newsId: string;

@@ -6,7 +6,7 @@ import { signOutAction } from "@/app/actions/auth";
 import { useSupabase } from "@/hooks/use-supabase";
 import { authClient } from "@/lib/auth-client";
 import { ADMIN_ROLES } from "@/lib/auth-roles";
-import type { Database } from "@/types/database.types";
+import type { Database } from "@rg/db";
 
 export type AzaleeProfile = Database["public"]["Tables"]["profiles"]["Row"];
 

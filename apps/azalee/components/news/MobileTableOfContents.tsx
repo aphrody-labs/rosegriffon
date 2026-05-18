@@ -9,7 +9,7 @@ import {
   DrawerHeader,
   DrawerTitle,
   DrawerTrigger,
-} from "@/components/ui/drawer";
+} from "@rg/ui";
 import type { TocItem } from "@/lib/lexical-utils";
 
 interface MobileTableOfContentsProps {

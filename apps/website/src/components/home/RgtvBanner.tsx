@@ -1,7 +1,5 @@
+import { Button, Card, CardContent } from "@rg/ui";
 import Image from "next/image";
-
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 
 export interface RgtvBannerProps {
   title?: string;

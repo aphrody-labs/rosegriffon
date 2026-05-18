@@ -1,6 +1,6 @@
 "use client";
 
-import { StatsCard } from "@/components/admin/dashboard/stats-card";
+import { DashboardStatsCard as StatsCard } from "@rg/ui";
 import { Clock, Shield, UserCheck, Users } from "@/lib/icons-config";
 
 interface UserStatsProps {

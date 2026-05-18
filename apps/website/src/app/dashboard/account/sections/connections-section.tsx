@@ -1,5 +1,6 @@
 "use client";
 
+import { Badge, Button, Card, CardContent, CardDescription, CardHeader, CardTitle } from "@rg/ui";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { Heart, Loader2, X } from "lucide-react";
@@ -16,16 +17,8 @@ import {
 	AlertDialogFooter,
 	AlertDialogHeader,
 	AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import {
-	Card,
-	CardContent,
-	CardDescription,
-	CardHeader,
-	CardTitle,
-} from "@/components/ui/card";
+} from "@rg/ui";
+
 import { authClient } from "@/lib/auth-client";
 
 export interface LinkedAccount {

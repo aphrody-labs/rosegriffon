@@ -1,12 +1,13 @@
 "use client";
 
+import { Card, CardContent, CardHeader, CardTitle } from "@rg/ui";
 import Image from "next/image";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useTheme } from "@/contexts/theme-context";
 import { AlertCircle, CalendarDays, Clock, Zap } from "@/lib/icons-config";
 import { createLogger } from "@/lib/logger";
-import type { StreamSchedule } from "@/types/rg";
+import type { StreamSchedule } from "@rg/types";
+import type { Database, Tables, Insert, Update } from "@rg/db";
 
 const logger = createLogger("RgtvSchedule");
 

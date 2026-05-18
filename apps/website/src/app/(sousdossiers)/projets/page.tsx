@@ -1,21 +1,13 @@
 export const dynamic = "force-dynamic";
 
+import { Badge, Button, Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@rg/ui";
 import type { Metadata } from "next";
 import Link from "next/link";
 
 import RgEmote from "@/components/shared/emotes/RgEmote";
 import { BreadcrumbSchema } from "@/components/shared/StructuredData";
 import { PfpIcon } from "@/components/sidebar/atoms/PfpIcon";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+
 import { ArrowRight, Palette, Smile, Sparkles, Users } from "@/lib/icons-config";
 
 export const metadata: Metadata = {

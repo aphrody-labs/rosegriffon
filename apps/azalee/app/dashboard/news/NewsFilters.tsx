@@ -10,13 +10,13 @@ import {
 	CommandInput,
 	CommandItem,
 	CommandList,
-} from "@/components/ui/command";
+} from "@rg/ui";
 import { Icon } from "@/components/ui/Icon";
 import {
 	Popover,
 	PopoverContent,
 	PopoverTrigger,
-} from "@/components/ui/popover";
+} from "@rg/ui";
 import {
 	Select,
 	SelectContent,
@@ -24,13 +24,13 @@ import {
 	SelectItem,
 	SelectTrigger,
 	SelectValue,
-} from "@/components/ui/select";
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+} from "@rg/ui";
+import { ToggleGroup, ToggleGroupItem } from "@rg/ui";
 import {
 	Tooltip,
 	TooltipContent,
 	TooltipTrigger,
-} from "@/components/ui/tooltip";
+} from "@rg/ui";
 import {
 	Check as CheckIcon,
 	ChevronsUpDown,

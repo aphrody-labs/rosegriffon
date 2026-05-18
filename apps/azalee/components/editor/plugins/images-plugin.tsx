@@ -38,11 +38,11 @@ import {
 	type ImagePayload,
 } from "@/components/editor/nodes/image-node";
 import { CAN_USE_DOM } from "@/components/editor/shared/can-use-dom";
-import { Button } from "@/components/ui/button";
-import { DialogFooter } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Button } from "@rg/ui";
+import { DialogFooter } from "@rg/ui";
+import { Input } from "@rg/ui";
+import { Label } from "@rg/ui";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@rg/ui";
 
 export type InsertImagePayload = Readonly<ImagePayload>;
 

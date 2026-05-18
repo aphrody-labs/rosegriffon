@@ -1,3 +1,4 @@
+import { Badge, Button, Input } from "@rg/ui";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import {
@@ -15,9 +16,7 @@ import Image from "next/image";
 import Link from "next/link";
 
 import { BreadcrumbSchema } from "@/components/shared/StructuredData";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+
 import { getArticles } from "@/lib/api/articles";
 import { getPatreonFeedForViewer } from "@/lib/patreon/feed";
 import { createAdminClient } from "@/lib/supabase/server";

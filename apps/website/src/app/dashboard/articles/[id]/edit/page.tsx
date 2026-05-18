@@ -1,11 +1,12 @@
 export const dynamic = "force-dynamic";
 
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@rg/ui";
 import { ArrowLeft, PenSquare } from "lucide-react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
 import { ArticleEditor } from "@/components/articles/ArticleEditor";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+
 import { getServerUser } from "@/lib/auth-helpers";
 import { createClient } from "@/lib/supabase/server";
 

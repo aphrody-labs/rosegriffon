@@ -1,7 +1,7 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
-import { useSidebar } from "@/components/ui/sidebar";
+import { Button } from "@rg/ui";
+import { useSidebar } from "@rg/ui";
 import { Menu, X } from "@/lib/icons-config";
 
 /**

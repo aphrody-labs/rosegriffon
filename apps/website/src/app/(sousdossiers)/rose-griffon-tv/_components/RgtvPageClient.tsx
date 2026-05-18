@@ -1,17 +1,17 @@
 "use client";
 
+import { Button, Card, CardContent, CardFooter, Tabs, TabsContent, TabsList, TabsTrigger } from "@rg/ui";
 import { motion } from "motion/react";
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 
 import { RgtvScheduleClient } from "@/components/RgtvScheduleClient";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardFooter } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+
 import { useTheme } from "@/contexts/theme-context";
 import { Monitor, Radio, Users, Youtube } from "@/lib/icons-config";
-import type { StreamSchedule } from "@/types/rg";
+import type { StreamSchedule } from "@rg/types";
+import type { Database, Tables, Insert, Update } from "@rg/db";
 
 import { type TwitchChannel, TwitchProvider, useTwitch } from "../_context/twitch-context";
 import { RgtvAppShell } from "./RgtvAppShell";

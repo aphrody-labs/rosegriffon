@@ -4,8 +4,8 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
 import { ChronicleEditor } from "@/components/admin/ChronicleEditor";
-import { AdminPageHeader } from "@/components/admin/shared/AdminPageHeader";
-import type { Tables } from "@/types/supabase";
+import { AdminPageHeader } from "@rg/ui";
+import type { Tables } from "@rg/db";
 
 import { updateChronicle } from "../../actions";
 

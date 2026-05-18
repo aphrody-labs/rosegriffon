@@ -1,17 +1,9 @@
 "use client";
 
+import { Button, Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@rg/ui";
 import { Cropper } from "@origin-space/image-cropper";
 import * as React from "react";
 
-import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import { Loader2 } from "@/lib/icons-config";
 
 interface ImageCropperDialogProps {

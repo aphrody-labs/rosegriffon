@@ -1,4 +1,4 @@
-import { StorageImage } from "@/components/ui/storage-image";
+import { StorageImage } from "@rg/ui";
 
 export function ProfileBanner({ src }: { src: string | null }) {
 	return (

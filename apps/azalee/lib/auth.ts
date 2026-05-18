@@ -9,79 +9,24 @@ import { logAudit } from "@/lib/audit";
 import { ADMIN_ROLES } from "@/lib/auth-roles";
 import { getIPIntelligence } from "@/lib/ip-intelligence";
 import { sendEmail } from "@/src/lib/email";
+import { commonAuthOptions, ensureUserProfile } from "@rg/auth";
+
+export { ensureUserProfile } from "@rg/auth";
 
 const pool = new Pool({
 	connectionString: process.env.DATABASE_URL,
 });
 
-// Service-role Supabase client for creating profiles in the hook
+// Service-role Supabase client for hooks
 const supabaseAdmin = createSupabaseServiceClient();
-
-/**
- * Ensures a profile exists in Supabase for the given user.
- * Used by auth hooks and for self-healing in the layout.
- */
-export async function ensureUserProfile(user: {
-	id: string;
-	name?: string;
-	email: string;
-	image?: string | null;
-}) {
-	try {
-		const username =
-			user.name
-				?.toLowerCase()
-				.replaceAll(/[^a-z0-9_]/g, "_")
-				.slice(0, 30) || user.email.split("@")[0];
-
-		const { data } = await supabaseAdmin
-			.from("profiles")
-			.select("*")
-			.eq("id", user.id)
-			.maybeSingle();
-
-		if (data) return data;
-
-		const { data: newProfile, error: insertError } = await supabaseAdmin
-			.from("profiles")
-			.upsert(
-				{
-					id: user.id,
-					username,
-					full_name: user.name || "",
-					avatar_url: user.image || null,
-					role: "member",
-					updated_at: new Date().toISOString(),
-				},
-				{ onConflict: "id" },
-			)
-			.select()
-			.single();
-
-		if (insertError) {
-			console.error(
-				"[Ensure Profile] Failed to create profile for user:",
-				user.id,
-				insertError,
-			);
-			return null;
-		}
-
-		await logAudit(user.id, "profile_created", {
-			email: user.email,
-			name: user.name,
-		});
-		return newProfile;
-	} catch (err) {
-		console.error("[Ensure Profile] Exception creating profile:", user.id, err);
-		return null;
-	}
-}
 
 export const auth = betterAuth({
 	database: pool,
 	baseURL: process.env.BETTER_AUTH_URL,
 	secret: process.env.BETTER_AUTH_SECRET,
+	
+	...commonAuthOptions,
+
 	trustedOrigins: [
 		process.env.BETTER_AUTH_URL || "https://azalee.rosegriffon.fr",
 	],
@@ -111,7 +56,7 @@ export const auth = betterAuth({
             Vérifier mon email
           </a>
           <p style="margin:20px 0 0;font-size:12px;color:#6B5D52;line-height:1.5">
-            Ce lien expire dans 1 heure. Si tu n'as pas créé de compte, ignore cet email.
+            Ce lien expire dans 1 heure. Si tu n'as pas fait cette demande, ignore cet email.
           </p>
         </td></tr>
         <tr><td style="padding:16px 32px;border-top:1px solid #3D2E22;text-align:center">
@@ -128,21 +73,17 @@ export const auth = betterAuth({
 
 	emailAndPassword: {
 		enabled: true,
-		requireEmailVerification: false, // ne pas bloquer l'accès si pas vérifié
+		requireEmailVerification: false,
 		password: {
-			// Hybrid verify: supports both bcrypt (migrated from GoTrue) and default Scrypt (new signups)
 			verify: async ({ hash, password }) => {
-				// Bcrypt hashes start with $2a$ or $2b$
 				if (hash.startsWith("$2a$") || hash.startsWith("$2b$")) {
 					return bcrypt.compare(password, hash);
 				}
-				// Fall back to Better Auth's default Scrypt verification
 				const { verifyPassword } = await import("better-auth/crypto");
 				return verifyPassword({ hash, password });
 			},
 		},
 		sendResetPassword: async ({ user, url }) => {
-			// Fire-and-forget pour éviter les timing attacks (détection d'email existant)
 			void sendEmail({
 				to: user.email,
 				subject: "Réinitialisation de ton mot de passe — Azalée",
@@ -195,11 +136,8 @@ export const auth = betterAuth({
 		},
 	},
 
-	// Rate limiting: protection brute-force
 	rateLimit: {
-		enabled: true,
-		window: 10,
-		max: 100,
+		...commonAuthOptions.rateLimit,
 		customRules: {
 			"/sign-in/email": { window: 60, max: 10 },
 			"/sign-up/email": { window: 60, max: 5 },
@@ -207,71 +145,16 @@ export const auth = betterAuth({
 		},
 	},
 
-	user: {
-		changeEmail: {
-			enabled: true,
-		},
-		fields: {
-			emailVerified: "email_verified",
-			createdAt: "created_at",
-			updatedAt: "updated_at",
-		},
-	},
-
-	session: {
-		expiresIn: 60 * 60 * 24 * 30, // 30 days
-		updateAge: 60 * 60 * 24, // 1 day
-		cookieCache: {
-			enabled: true,
-			maxAge: 5 * 60, // 5 min cache → fewer DB queries
-		},
-		fields: {
-			userId: "user_id",
-			expiresAt: "expires_at",
-			ipAddress: "ip_address",
-			userAgent: "user_agent",
-			createdAt: "created_at",
-			updatedAt: "updated_at",
-		},
-	},
-
 	account: {
+		...commonAuthOptions.account,
 		accountLinking: {
 			enabled: true,
 			trustedProviders: ["google", "discord"],
 		},
-		fields: {
-			userId: "user_id",
-			accountId: "account_id",
-			providerId: "provider_id",
-			accessToken: "access_token",
-			refreshToken: "refresh_token",
-			accessTokenExpiresAt: "access_token_expires_at",
-			refreshTokenExpiresAt: "refresh_token_expires_at",
-			idToken: "id_token",
-			createdAt: "created_at",
-			updatedAt: "updated_at",
-		},
-	},
-
-	verification: {
-		fields: {
-			expiresAt: "expires_at",
-			createdAt: "created_at",
-			updatedAt: "updated_at",
-		},
 	},
 
 	advanced: {
-		useSecureCookies: true, // Force Secure flag (HTTPS behind Nginx)
-		ipAddress: {
-			ipAddressHeaders: ["x-forwarded-for", "x-real-ip"],
-		},
-		defaultCookieAttributes: {
-			httpOnly: true,
-			secure: true,
-			sameSite: "lax" as const,
-		},
+		...commonAuthOptions.advanced,
 		database: {
 			generateId: () => crypto.randomUUID(),
 		},
@@ -281,10 +164,9 @@ export const auth = betterAuth({
 		user: {
 			create: {
 				after: async (user, ctx) => {
-					// Create profile in Supabase (replaces the on_auth_user_created trigger)
-					await ensureUserProfile(user);
+					// @ts-ignore - migration typing
+					await ensureUserProfile(supabaseAdmin, user);
 
-					// Log signup with Smart IP Intelligence
 					const ip =
 						ctx?.headers?.get("x-forwarded-for")?.split(",")[0]?.trim() ||
 						"unknown";
@@ -312,7 +194,6 @@ export const auth = betterAuth({
 		session: {
 			create: {
 				before: async (session) => {
-					// Extend session to 10 years for admin/editor roles
 					try {
 						const { data: profile } = await supabaseAdmin
 							.from("profiles")
@@ -329,12 +210,11 @@ export const auth = betterAuth({
 							return { data: { ...session, expiresAt: tenYears } };
 						}
 					} catch {
-						// Fallback to default expiry
+						// ignore
 					}
 					return { data: session };
 				},
 				after: async (session) => {
-					// Log login with Smart IP Intelligence (Better Auth populates session.ipAddress based on config)
 					const ip = session.ipAddress || "unknown";
 					const ipInfo = await getIPIntelligence(ip);
 
@@ -358,7 +238,5 @@ export const auth = betterAuth({
 		},
 	},
 
-	// bearer() : auth via header Authorization Bearer (utile pour API/mobile)
-	// nextCookies() : OBLIGATOIRE Next.js — propage Set-Cookie depuis server actions. DOIT être en dernier.
 	plugins: [bearer(), nextCookies()],
 });

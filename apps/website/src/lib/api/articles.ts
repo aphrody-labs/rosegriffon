@@ -1,5 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
-import type { Tables } from "@/types/supabase";
+import type { Tables } from "@rg/db";
 
 export type Article = Tables<"articles">;
 

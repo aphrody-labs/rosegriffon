@@ -10,7 +10,7 @@ import {
 	SidebarGroupLabel,
 	SidebarMenu,
 	SidebarMenuItem,
-} from "@/components/ui/sidebar";
+} from "@rg/ui";
 import type { MenuItem } from "@/lib/sidebar-config";
 
 interface SidebarNavLinksProps {

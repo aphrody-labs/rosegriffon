@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { DashboardPageHeader } from "@/components/dashboard/DashboardPageHeader";
+import { AdminPageHeader as DashboardPageHeader } from "@rg/ui";
 import { createClient } from "@/lib/supabase/server";
 import { DatabaseTableClient } from "./DatabaseTableClient";
 

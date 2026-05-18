@@ -1,10 +1,11 @@
 "use client";
 
+import { Card, CardContent } from "@rg/ui";
 import Image from "next/image";
 import Link from "next/link";
 
 import { PfpIcon } from "@/components/sidebar/atoms/PfpIcon";
-import { Card, CardContent } from "@/components/ui/card";
+
 import {
   ArrowRight,
   ExternalLink,

@@ -1,9 +1,10 @@
+import { Button } from "@rg/ui";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { EventForm } from "@/components/admin/events/event-form";
-import { Button } from "@/components/ui/button";
+
 import { createClient } from "@/lib/supabase/server";
 
 type PageProps = {

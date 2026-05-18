@@ -1,3 +1,4 @@
+import { Button, Card, CardContent, CardDescription, CardHeader, CardTitle } from "@rg/ui";
 import {
   ArrowRight,
   Award,
@@ -14,8 +15,6 @@ import {
 import Image from "next/image";
 
 import { getAllTeamMembers } from "@/app/admin/staff/actions";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 export const dynamic = "force-dynamic";
 

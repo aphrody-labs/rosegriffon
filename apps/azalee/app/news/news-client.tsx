@@ -13,7 +13,7 @@ import { PopularArticles } from "@/components/news/PopularArticles";
 import { TagCloud } from "@/components/news/TagCloud";
 import { TrendingArticles } from "@/components/news/TrendingArticles";
 import { useLanguage } from "@/components/providers/language-provider";
-import { Button } from "@/components/ui/button";
+import { Button } from "@rg/ui";
 import {
 	Empty,
 	EmptyContent,
@@ -21,7 +21,7 @@ import {
 	EmptyHeader,
 	EmptyMedia,
 	EmptyTitle,
-} from "@/components/ui/empty";
+} from "@rg/ui";
 import { SearchBar } from "@/components/ui/search-bar";
 import { WikiPagination } from "@/components/wiki/WikiPagination";
 import { ExternalLink, Newspaper, Twitter, X } from "@/lib/icons-config";

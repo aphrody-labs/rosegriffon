@@ -13,14 +13,17 @@
 	},
 	"scripts": {
 		"types:gen": "supabase gen types typescript --project-id isbkaeltubqittywibeh > src/types.gen.ts",
-		"type-check": "tsc --noEmit"
+		"type-check": "tsc --noEmit",
+		"test": "vitest run"
 	},
 	"dependencies": {
+		"@rg/types": "workspace:*",
 		"@supabase/supabase-js": "catalog:",
 		"@supabase/ssr": "catalog:"
 	},
 	"devDependencies": {
 		"@types/bun": "catalog:",
-		"typescript": "catalog:"
+		"typescript": "catalog:",
+		"vitest": "catalog:"
 	}
 }

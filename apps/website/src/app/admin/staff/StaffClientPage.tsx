@@ -1,5 +1,6 @@
 "use client";
 
+import { Button, Card, CardContent, CardHeader, CardTitle, Input, Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@rg/ui";
 import {
 	ArrowDownAZ,
 	ArrowUp01,
@@ -20,19 +21,9 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 import { ConfirmationDialog } from "@/components/admin/confirmation-dialog";
-import { StatsCard } from "@/components/admin/dashboard/stats-card";
+import { DashboardStatsCard as StatsCard } from "@rg/ui";
 import { AdminDataGrid } from "@/components/admin/shared/AdminDataGrid";
-import { AdminPageHeader } from "@/components/admin/shared/AdminPageHeader";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import {
-	Select,
-	SelectContent,
-	SelectItem,
-	SelectTrigger,
-	SelectValue,
-} from "@/components/ui/select";
+import { AdminPageHeader } from "@rg/ui";
 
 import { deleteTeamMember, type TeamMember, updateTeamMember } from "./actions";
 import { StaffMemberCard } from "./StaffMemberCard";

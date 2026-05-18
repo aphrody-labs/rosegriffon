@@ -10,7 +10,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
+} from "@rg/ui";
 
 export function LoginDialog({ children }: { children: React.ReactNode }) {
   const [open, setOpen] = useState(false);

@@ -1,11 +1,12 @@
 "use client";
 
+import { Input } from "@rg/ui";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 import { updateUserAvatar } from "@/app/dashboard/account/actions";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+
+import { Label } from "@rg/ui";
 import { authClient } from "@/lib/auth-client";
 import { createClient } from "@/lib/supabase/client";
 

@@ -1,5 +1,6 @@
 "use client";
 
+import { Alert, AlertDescription, Button } from "@rg/ui";
 import "react-quill-new/dist/quill.snow.css";
 
 import { AlertCircle, Eye, Save, Send } from "lucide-react";
@@ -9,8 +10,6 @@ import { useEffect, useRef, useState } from "react";
 import { ChronicleMeta } from "@/components/admin/chronicles/ChronicleMeta";
 import { ChroniclePreview } from "@/components/admin/chronicles/ChroniclePreview";
 import { MediaDialog } from "@/components/admin/media/MediaDialog";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Button } from "@/components/ui/button";
 
 // Interface minimaliste pour ReactQuill
 interface QuillInstance {

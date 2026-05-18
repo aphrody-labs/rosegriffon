@@ -1,4 +1,5 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@rg/ui";
 import { cn } from "@/lib/utils";
 
 interface AdminCardProps extends React.ComponentPropsWithoutRef<typeof Card> {

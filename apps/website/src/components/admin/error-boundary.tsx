@@ -1,8 +1,8 @@
 "use client";
 
+import { Button } from "@rg/ui";
 import React from "react";
 
-import { Button } from "@/components/ui/button";
 import { AlertTriangle, RefreshCw } from "@/lib/icons-config";
 
 interface ErrorBoundaryProps {

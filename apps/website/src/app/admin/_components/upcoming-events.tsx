@@ -1,9 +1,8 @@
+import { Card, CardContent, CardHeader, CardTitle } from "@rg/ui";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { ArrowRight, CalendarClock, MapPin } from "lucide-react";
 import Link from "next/link";
-
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 interface UpcomingEvent {
 	id: string;

@@ -14,8 +14,8 @@ import {
 	CommandInput,
 	CommandItem,
 	CommandList,
-} from "@/components/ui/command";
-import { Skeleton } from "@/components/ui/skeleton";
+} from "@rg/ui";
+import { Skeleton } from "@rg/ui";
 import { getSkillCategoryIconUrl, getSkillElementIconUrl } from "@/lib/images";
 import { cn } from "@/lib/utils";
 

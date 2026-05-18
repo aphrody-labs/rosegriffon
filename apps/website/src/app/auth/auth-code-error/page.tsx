@@ -2,12 +2,10 @@
 
 export const dynamic = "force-dynamic";
 
+import { Alert, AlertDescription, Button, Card, CardContent, CardDescription, CardHeader, CardTitle } from "@rg/ui";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { AlertCircle, ArrowLeft } from "@/lib/icons-config";
 
 export default function AuthCodeErrorPage() {

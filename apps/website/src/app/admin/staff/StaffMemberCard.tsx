@@ -1,5 +1,6 @@
 "use client";
 
+import { Button, Card, CardContent, CardFooter, CardHeader, DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@rg/ui";
 import {
 	Check,
 	Edit,
@@ -9,22 +10,6 @@ import {
 	Users as UsersIcon,
 } from "lucide-react";
 import Image from "next/image";
-
-import { Button } from "@/components/ui/button";
-import {
-	Card,
-	CardContent,
-	CardFooter,
-	CardHeader,
-} from "@/components/ui/card";
-import {
-	DropdownMenu,
-	DropdownMenuContent,
-	DropdownMenuItem,
-	DropdownMenuLabel,
-	DropdownMenuSeparator,
-	DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 
 import type { TeamMember } from "./actions";
 
