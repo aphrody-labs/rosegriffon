@@ -1,7 +1,7 @@
 "use client";
 
-import { Button } from "@rg/ui";
-import { useSidebar } from "@rg/ui";
+import { Button } from "@rose-griffon/ui";
+import { useSidebar } from "@rose-griffon/ui";
 import { Menu, X } from "@/lib/icons-config";
 
 /**

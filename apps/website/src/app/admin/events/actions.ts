@@ -7,7 +7,7 @@ import { logAdminAction } from "@/lib/admin-logger";
 import { getCalendarEvents } from "@/lib/api/events";
 import { getServerUser } from "@/lib/auth-helpers";
 import { createClient } from "@/lib/supabase/server";
-import type { Insert } from "@rg/db";
+import type { Insert } from "@rose-griffon/db";
 
 const eventSchema = z.object({
   title: z.string().min(3, "Le titre doit contenir au moins 3 caractères"),

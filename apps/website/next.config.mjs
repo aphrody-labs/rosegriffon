@@ -24,7 +24,7 @@ const nextConfig = {
 	...(CDN_URL && { assetPrefix: CDN_URL }),
 
 	turbopack: {},
-	transpilePackages: ["@rg/ui", "@rg/db"],
+	transpilePackages: ["@rose-griffon/ui", "@rose-griffon/db"],
 
 	typescript: {
 		ignoreBuildErrors: true,

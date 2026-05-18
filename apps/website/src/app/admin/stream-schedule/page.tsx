@@ -1,4 +1,4 @@
-import { AdminPageHeader } from "@rg/ui";
+import { AdminPageHeader } from "@rose-griffon/ui";
 import { createAdminClient } from "@/lib/supabase/server";
 
 import { StreamScheduleManager } from "./manager";

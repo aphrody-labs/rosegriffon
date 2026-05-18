@@ -3,7 +3,7 @@
 import { AlertCircle, ArrowLeft, RefreshCw } from "lucide-react";
 import Link from "next/link";
 import { useEffect } from "react";
-import { Button } from "@rg/ui";
+import { Button } from "@rose-griffon/ui";
 
 export default function Error({
   error,

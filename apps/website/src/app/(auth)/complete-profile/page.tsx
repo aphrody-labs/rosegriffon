@@ -1,11 +1,11 @@
 "use client";
 
-import { Alert, AlertDescription, Button, Card, CardContent, CardDescription, CardHeader, CardTitle, Input } from "@rg/ui";
+import { Alert, AlertDescription, Button, Card, CardContent, CardDescription, CardHeader, CardTitle, Input } from "@rose-griffon/ui";
 import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
-import { Skeleton } from "@rg/ui";
+import { Skeleton } from "@rose-griffon/ui";
 import { useAuth } from "@/contexts/auth-context";
 import { AlertCircle, CheckCircle } from "@/lib/icons-config";
 

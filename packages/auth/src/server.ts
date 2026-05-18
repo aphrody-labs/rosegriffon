@@ -2,7 +2,7 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { resolveProfile, isAdmin } from "./index";
 import type { SupabaseClient } from "@supabase/supabase-js";
-import type { Database } from "@rg/db";
+import type { Database } from "@rose-griffon/db";
 
 /**
  * Server-only helpers requiring Next.js runtime.

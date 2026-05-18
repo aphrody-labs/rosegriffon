@@ -1,7 +1,6 @@
 {
-  "name": "@rg/auth",
+  "name": "@rose-griffon/auth",
   "version": "0.1.0",
-  "private": true,
   "type": "module",
   "description": "Shared authentication logic and guards for Rose Griffon apps",
   "exports": {
@@ -13,8 +12,8 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@rg/db": "workspace:*",
-    "@rg/types": "workspace:*",
+    "@rose-griffon/db": "workspace:*",
+    "@rose-griffon/types": "workspace:*",
     "better-auth": "catalog:"
   },
   "devDependencies": {
@@ -23,5 +22,9 @@
     "react": "catalog:",
     "typescript": "catalog:",
     "vitest": "catalog:"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com",
+    "access": "restricted"
   }
 }

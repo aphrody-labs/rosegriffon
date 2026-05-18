@@ -4,7 +4,7 @@ import { ListFilter, Search, SlidersHorizontal, X } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useLanguage } from "@/components/providers/language-provider";
-import { Button } from "@rg/ui";
+import { Button } from "@rose-griffon/ui";
 import {
   Drawer,
   DrawerClose,
@@ -13,9 +13,9 @@ import {
   DrawerHeader,
   DrawerTitle,
   DrawerTrigger,
-} from "@rg/ui";
-import { Input } from "@rg/ui";
-import { ScrollArea } from "@rg/ui";
+} from "@rose-griffon/ui";
+import { Input } from "@rose-griffon/ui";
+import { ScrollArea } from "@rose-griffon/ui";
 import {
   Sheet,
   SheetClose,
@@ -25,7 +25,7 @@ import {
   SheetHeader,
   SheetTitle,
   SheetTrigger,
-} from "@rg/ui";
+} from "@rose-griffon/ui";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { cn } from "@/lib/utils";
 

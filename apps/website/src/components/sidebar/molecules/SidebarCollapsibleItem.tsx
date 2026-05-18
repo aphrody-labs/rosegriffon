@@ -8,7 +8,7 @@ import {
 	TooltipContent,
 	TooltipProvider,
 	TooltipTrigger,
-} from "@rg/ui";
+} from "@rose-griffon/ui";
 import { getBadgeVariant, sidebarTransitions } from "@/lib/sidebar-config";
 import { cn } from "@/lib/utils";
 import { useSidebarStore } from "@/stores/sidebar-store";

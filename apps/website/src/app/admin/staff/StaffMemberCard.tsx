@@ -1,6 +1,6 @@
 "use client";
 
-import { Button, Card, CardContent, CardFooter, CardHeader, DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@rg/ui";
+import { Button, Card, CardContent, CardFooter, CardHeader, DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@rose-griffon/ui";
 import {
 	Check,
 	Edit,

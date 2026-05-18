@@ -1,6 +1,6 @@
 "use client";
 
-import { Button } from "@rg/ui";
+import { Button } from "@rose-griffon/ui";
 import Image from "next/image";
 
 import { useTheme } from "@/contexts/theme-context";

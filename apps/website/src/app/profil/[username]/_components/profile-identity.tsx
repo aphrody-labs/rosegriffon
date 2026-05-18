@@ -1,8 +1,8 @@
-import { Badge, Button } from "@rg/ui";
+import { Badge, Button } from "@rose-griffon/ui";
 import { Edit, ExternalLink } from "lucide-react";
 import Link from "next/link";
 
-import { Avatar, AvatarFallback, AvatarImage } from "@rg/ui";
+import { Avatar, AvatarFallback, AvatarImage } from "@rose-griffon/ui";
 
 import TwitterIcon from "@/shared/icons/twitter";
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { Button, Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@rg/ui";
+import { Button, Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@rose-griffon/ui";
 import { Cropper } from "@origin-space/image-cropper";
 import * as React from "react";
 

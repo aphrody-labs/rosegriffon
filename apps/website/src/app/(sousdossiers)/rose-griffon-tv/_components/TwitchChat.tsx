@@ -1,11 +1,11 @@
 "use client";
 
-import { Badge, Button, Card, CardContent, CardHeader } from "@rg/ui";
+import { Badge, Button, Card, CardContent, CardHeader } from "@rose-griffon/ui";
 import { AnimatePresence, motion } from "motion/react";
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 
-import { Avatar, AvatarFallback, AvatarImage } from "@rg/ui";
+import { Avatar, AvatarFallback, AvatarImage } from "@rose-griffon/ui";
 
 import { useTheme } from "@/contexts/theme-context";
 import { authClient, type ClientSession } from "@/lib/auth-client";

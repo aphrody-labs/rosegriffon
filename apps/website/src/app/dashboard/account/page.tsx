@@ -1,4 +1,4 @@
-import { Button } from "@rg/ui";
+import { Button } from "@rose-griffon/ui";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { redirect } from "next/navigation";

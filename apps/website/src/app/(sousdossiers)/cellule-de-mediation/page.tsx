@@ -1,4 +1,4 @@
-import { Button, Card, CardContent, CardHeader, CardTitle } from "@rg/ui";
+import { Button, Card, CardContent, CardHeader, CardTitle } from "@rose-griffon/ui";
 import Image from "next/image";
 
 import { Mail, Scale, Shield, Users } from "@/lib/icons-config";

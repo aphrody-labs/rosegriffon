@@ -1,6 +1,6 @@
 "use client";
 
-import { Button, Card, CardContent, CardDescription, CardHeader, CardTitle, Input } from "@rg/ui";
+import { Button, Card, CardContent, CardDescription, CardHeader, CardTitle, Input } from "@rose-griffon/ui";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Truck } from "lucide-react";
 import { useForm } from "react-hook-form";
@@ -14,9 +14,9 @@ import {
 	FormItem,
 	FormLabel,
 	FormMessage,
-} from "@rg/ui";
+} from "@rose-griffon/ui";
 
-import type { Database } from "@rg/db";
+import type { Database } from "@rose-griffon/db";
 
 import { updateProfile } from "../actions";
 

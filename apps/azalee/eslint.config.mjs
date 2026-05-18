@@ -1,4 +1,4 @@
-// Étend la config Next partagée @rg/config/eslint-nextjs.mjs et y ajoute les overrides spécifiques azalee.
+// Étend la config Next partagée @rose-griffon/config/eslint-nextjs.mjs et y ajoute les overrides spécifiques azalee.
 // - quotes/semi/explicit-any/etc. — règles azalee historiques
 // - ignores : modules legacy/generated inagle, scripts/, data/, public/, etc.
 // - better-tailwindcss entryPoint = app/globals.css (PAS src/app/globals.css)

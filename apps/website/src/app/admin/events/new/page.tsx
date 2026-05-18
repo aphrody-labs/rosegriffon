@@ -1,4 +1,4 @@
-import { Button } from "@rg/ui";
+import { Button } from "@rose-griffon/ui";
 import Link from "next/link";
 
 import { EventForm } from "@/components/admin/events/event-form";

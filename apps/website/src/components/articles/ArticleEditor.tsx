@@ -1,12 +1,12 @@
 "use client";
 
-import { Button, Input, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, Textarea } from "@rg/ui";
+import { Button, Input, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, Textarea } from "@rose-griffon/ui";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 
-import { Label } from "@rg/ui";
+import { Label } from "@rose-griffon/ui";
 
 import { Eye, Loader2, Save } from "@/lib/icons-config";
 import { createClient } from "@/lib/supabase/client";

@@ -1,5 +1,5 @@
 // Barrel — réexporte tous les types métier partagés.
-// Préférer les imports spécifiques `@rg/types/roles` etc.
+// Préférer les imports spécifiques `@rose-griffon/types/roles` etc.
 // quand on veut limiter la surface importée.
 
 export * from "./roles";

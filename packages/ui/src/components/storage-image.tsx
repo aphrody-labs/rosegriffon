@@ -2,7 +2,7 @@
 
 import Image, { type ImageProps } from "next/image";
 import { useState } from "react";
-import { getAssetUrl } from "@rg/db";
+import { getAssetUrl } from "@rose-griffon/db";
 import { cn } from "../lib/utils";
 
 export interface StorageImageProps extends Omit<ImageProps, "src"> {

@@ -1,6 +1,6 @@
 export const dynamic = "force-dynamic";
 
-import { Badge, Button, Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@rg/ui";
+import { Badge, Button, Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@rose-griffon/ui";
 import type { Metadata } from "next";
 import Link from "next/link";
 

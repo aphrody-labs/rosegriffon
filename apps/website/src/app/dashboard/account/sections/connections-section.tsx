@@ -1,6 +1,6 @@
 "use client";
 
-import { Badge, Button, Card, CardContent, CardDescription, CardHeader, CardTitle } from "@rg/ui";
+import { Badge, Button, Card, CardContent, CardDescription, CardHeader, CardTitle } from "@rose-griffon/ui";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { Heart, Loader2, X } from "lucide-react";
@@ -17,7 +17,7 @@ import {
 	AlertDialogFooter,
 	AlertDialogHeader,
 	AlertDialogTitle,
-} from "@rg/ui";
+} from "@rose-griffon/ui";
 
 import { authClient } from "@/lib/auth-client";
 

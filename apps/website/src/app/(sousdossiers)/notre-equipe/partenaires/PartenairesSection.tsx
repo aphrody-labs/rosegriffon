@@ -1,13 +1,13 @@
 "use client";
 
-import { Button } from "@rg/ui";
+import { Button } from "@rose-griffon/ui";
 import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import { useMemo } from "react";
 
 import ImageWithSkeleton from "@/components/shared/ImageWithSkeleton";
 
-import { Skeleton } from "@rg/ui";
+import { Skeleton } from "@rose-griffon/ui";
 import getTeamMembers from "@/lib/get-team-members";
 import { ArrowUpRight } from "@/lib/icons-config";
 import { createLogger } from "@/lib/logger";

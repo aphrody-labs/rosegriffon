@@ -73,7 +73,7 @@ export async function GET(request: Request) {
 		return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 	}
 
-	// Client Admin Supabase (service-role via @rg/db)
+	// Client Admin Supabase (service-role via @rose-griffon/db)
 	const supabaseAdmin = getSupabaseClient();
 
 	// Mode liste

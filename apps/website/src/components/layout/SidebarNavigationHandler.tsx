@@ -3,7 +3,7 @@
 import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useRef } from "react";
 
-import { useSidebar } from "@rg/ui";
+import { useSidebar } from "@rose-griffon/ui";
 
 /**
  * Handler pour la navigation dans la sidebar

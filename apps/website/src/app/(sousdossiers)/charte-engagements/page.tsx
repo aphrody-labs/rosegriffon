@@ -1,4 +1,4 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@rg/ui";
+import { Card, CardContent, CardHeader, CardTitle } from "@rose-griffon/ui";
 // Page statique avec ISR - Revalidate toutes les semaines (charte rarement modifiée)
 export const revalidate = 604800; // 1 semaine
 

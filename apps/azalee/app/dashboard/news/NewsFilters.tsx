@@ -10,13 +10,13 @@ import {
 	CommandInput,
 	CommandItem,
 	CommandList,
-} from "@rg/ui";
+} from "@rose-griffon/ui";
 import { Icon } from "@/components/ui/Icon";
 import {
 	Popover,
 	PopoverContent,
 	PopoverTrigger,
-} from "@rg/ui";
+} from "@rose-griffon/ui";
 import {
 	Select,
 	SelectContent,
@@ -24,13 +24,13 @@ import {
 	SelectItem,
 	SelectTrigger,
 	SelectValue,
-} from "@rg/ui";
-import { ToggleGroup, ToggleGroupItem } from "@rg/ui";
+} from "@rose-griffon/ui";
+import { ToggleGroup, ToggleGroupItem } from "@rose-griffon/ui";
 import {
 	Tooltip,
 	TooltipContent,
 	TooltipTrigger,
-} from "@rg/ui";
+} from "@rose-griffon/ui";
 import {
 	Check as CheckIcon,
 	ChevronsUpDown,

@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 import { RGTVIcon } from "@/components/sidebar/atoms/RGTVIcon";
-import { useSidebar } from "@rg/ui";
+import { useSidebar } from "@rose-griffon/ui";
 import { Home, Menu, Sparkles, Users } from "@/lib/icons-config";
 import { cn } from "@/lib/utils";
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { Badge, Button, Input, Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@rg/ui";
+import { Badge, Button, Input, Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@rose-griffon/ui";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import {

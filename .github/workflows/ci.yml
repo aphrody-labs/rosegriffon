@@ -60,7 +60,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        workspace: ["@rg/website", "@rg/azalee", "@rg/bot"]
+        workspace: ["@rose-griffon/website", "@rose-griffon/azalee", "@rose-griffon/bot"]
     steps:
       - uses: actions/checkout@v4
 

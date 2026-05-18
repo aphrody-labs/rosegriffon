@@ -4,11 +4,11 @@ import { Loader2, Lock, Mail, Palette, Save, User } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { Button } from "@rg/ui";
-import { Card, CardContent, CardHeader, CardTitle } from "@rg/ui";
-import { Input } from "@rg/ui";
-import { Label } from "@rg/ui";
-import { Switch } from "@rg/ui";
+import { Button } from "@rose-griffon/ui";
+import { Card, CardContent, CardHeader, CardTitle } from "@rose-griffon/ui";
+import { Input } from "@rose-griffon/ui";
+import { Label } from "@rose-griffon/ui";
+import { Switch } from "@rose-griffon/ui";
 import { useSupabase } from "@/hooks/use-supabase";
 import { authClient } from "@/lib/auth-client";
 

@@ -14,8 +14,8 @@ import {
 	CommandInput,
 	CommandItem,
 	CommandList,
-} from "@rg/ui";
-import { Skeleton } from "@rg/ui";
+} from "@rose-griffon/ui";
+import { Skeleton } from "@rose-griffon/ui";
 import { getSkillCategoryIconUrl, getSkillElementIconUrl } from "@/lib/images";
 import { cn } from "@/lib/utils";
 

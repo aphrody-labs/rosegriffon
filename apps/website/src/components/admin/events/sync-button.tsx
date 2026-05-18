@@ -1,6 +1,6 @@
 "use client";
 
-import { Button } from "@rg/ui";
+import { Button } from "@rose-griffon/ui";
 import { RefreshCw } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
