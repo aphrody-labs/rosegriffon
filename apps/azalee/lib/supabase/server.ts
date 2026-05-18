@@ -6,7 +6,7 @@ import type { Database } from "@rosegriffon/db";
 
 const getEnv = (key: string, fallback: string) => {
   const val = process.env[key];
-  if (!val || val === "" || val.startsWith("{")) return fallback;
+  if (!val || val === "" || val === "undefined" || val === "null" || val.startsWith("{")) return fallback;
   return val;
 };
 

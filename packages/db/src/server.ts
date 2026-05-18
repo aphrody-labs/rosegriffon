@@ -12,7 +12,7 @@ export function createSupabaseServerClient(cookies: CookieStore) {
 	const key = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
 
 	// Safety: Vercel might pass encrypted JSON or missing value during build.
-	if (!url || url === "" || url.startsWith("{")) {
+	if (!url || url === "" || url === "undefined" || url === "null" || url.startsWith("{")) {
 		url = "https://isbkaeltubqittywibeh.supabase.co";
 	}
 
