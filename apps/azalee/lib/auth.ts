@@ -33,31 +33,32 @@ const getBetterAuthURL = () => {
 	return url;
 };
 
-export const auth = betterAuth({
-	database: pool,
-	baseURL: getBetterAuthURL(),
-	secret:
-		process.env.BETTER_AUTH_SECRET ||
-		"build-placeholder-secret-not-used-at-runtime-only-prevents-prerender-throw",
+function createAuth() {
+	return betterAuth({
+		database: pool,
+		baseURL: getBetterAuthURL(),
+		secret:
+			process.env.BETTER_AUTH_SECRET ||
+			"build-placeholder-secret-not-used-at-runtime-only-prevents-prerender-throw",
 
-	...commonAuthOptions,
+		...commonAuthOptions,
 
-	trustedOrigins: [
-		process.env.BETTER_AUTH_URL || "https://azalee.rosegriffon.fr",
-		"https://azalee.rosegriffon.fr",
-		"https://rg-azalee.vercel.app",
-		"https://rg-azalee-aphrody.vercel.app",
-		"https://rg-azalee-git-main-aphrody.vercel.app",
-	].filter(Boolean),
+		trustedOrigins: [
+			process.env.BETTER_AUTH_URL || "https://azalee.rosegriffon.fr",
+			"https://azalee.rosegriffon.fr",
+			"https://rg-azalee.vercel.app",
+			"https://rg-azalee-aphrody.vercel.app",
+			"https://rg-azalee-git-main-aphrody.vercel.app",
+		].filter(Boolean),
 
-	emailVerification: {
-		sendOnSignUp: true,
-		autoSignInAfterVerification: true,
-		sendVerificationEmail: async ({ user, url }) => {
-			void sendEmail({
-				to: user.email,
-				subject: "Vérifie ton adresse email — Azalée",
-				html: `<!DOCTYPE html>
+		emailVerification: {
+			sendOnSignUp: true,
+			autoSignInAfterVerification: true,
+			sendVerificationEmail: async ({ user, url }) => {
+				void sendEmail({
+					to: user.email,
+					subject: "Vérifie ton adresse email — Azalée",
+					html: `<!DOCTYPE html>
 <html lang="fr">
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
 <body style="margin:0;padding:0;background:#1A120D;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif">
@@ -86,27 +87,27 @@ export const auth = betterAuth({
   </table>
 </body>
 </html>`,
-			});
-		},
-	},
-
-	emailAndPassword: {
-		enabled: true,
-		requireEmailVerification: false,
-		password: {
-			verify: async ({ hash, password }) => {
-				if (hash.startsWith("$2a$") || hash.startsWith("$2b$")) {
-					return bcrypt.compare(password, hash);
-				}
-				const { verifyPassword } = await import("better-auth/crypto");
-				return verifyPassword({ hash, password });
+				});
 			},
 		},
-		sendResetPassword: async ({ user, url }) => {
-			void sendEmail({
-				to: user.email,
-				subject: "Réinitialisation de ton mot de passe — Azalée",
-				html: `<!DOCTYPE html>
+
+		emailAndPassword: {
+			enabled: true,
+			requireEmailVerification: false,
+			password: {
+				verify: async ({ hash, password }) => {
+					if (hash.startsWith("$2a$") || hash.startsWith("$2b$")) {
+						return bcrypt.compare(password, hash);
+					}
+					const { verifyPassword } = await import("better-auth/crypto");
+					return verifyPassword({ hash, password });
+				},
+			},
+			sendResetPassword: async ({ user, url }) => {
+				void sendEmail({
+					to: user.email,
+					subject: "Réinitialisation de ton mot de passe — Azalée",
+					html: `<!DOCTYPE html>
 <html lang="fr">
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
 <body style="margin:0;padding:0;background:#1A120D;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif">
@@ -140,122 +141,151 @@ export const auth = betterAuth({
   </table>
 </body>
 </html>`,
-			});
-		},
-	},
-
-	socialProviders: {
-		google: {
-			clientId: process.env.GOOGLE_CLIENT_ID!,
-			clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
-		},
-		discord: {
-			clientId: process.env.DISCORD_CLIENT_ID!,
-			clientSecret: process.env.DISCORD_CLIENT_SECRET!,
-		},
-	},
-
-	rateLimit: {
-		...commonAuthOptions.rateLimit,
-		customRules: {
-			"/sign-in/email": { window: 60, max: 10 },
-			"/sign-up/email": { window: 60, max: 5 },
-			"/forget-password": { window: 60, max: 3 },
-		},
-	},
-
-	account: {
-		...commonAuthOptions.account,
-		accountLinking: {
-			enabled: true,
-			trustedProviders: ["google", "discord"],
-		},
-	},
-
-	advanced: {
-		...commonAuthOptions.advanced,
-		database: {
-			generateId: () => crypto.randomUUID(),
-		},
-	},
-
-	databaseHooks: {
-		user: {
-			create: {
-				after: async (user, ctx) => {
-					// @ts-ignore - migration typing
-					await ensureUserProfile(supabaseAdmin, user);
-
-					const ip =
-						ctx?.headers?.get("x-forwarded-for")?.split(",")[0]?.trim() ||
-						"unknown";
-					const ipInfo = await getIPIntelligence(ip);
-
-					await logAudit(
-						user.id,
-						"signup",
-						{
-							email: user.email,
-							name: user.name,
-							geo: ipInfo
-								? {
-										city: ipInfo.city,
-										country: ipInfo.country,
-										privacy: ipInfo.privacy,
-									}
-								: undefined,
-						},
-						{ ipAddress: ip },
-					);
-				},
+				});
 			},
 		},
-		session: {
-			create: {
-				before: async (session) => {
-					try {
-						const { data: profile } = await supabaseAdmin
-							.from("profiles")
-							.select("role")
-							.eq("id", session.userId)
-							.maybeSingle();
 
-						if (
-							profile &&
-							ADMIN_ROLES.includes(profile.role as (typeof ADMIN_ROLES)[number])
-						) {
-							const tenYears = new Date();
-							tenYears.setFullYear(tenYears.getFullYear() + 10);
-							return { data: { ...session, expiresAt: tenYears } };
+		socialProviders: {
+			google: {
+				clientId: process.env.GOOGLE_CLIENT_ID!,
+				clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+			},
+			discord: {
+				clientId: process.env.DISCORD_CLIENT_ID!,
+				clientSecret: process.env.DISCORD_CLIENT_SECRET!,
+			},
+		},
+
+		rateLimit: {
+			...commonAuthOptions.rateLimit,
+			customRules: {
+				"/sign-in/email": { window: 60, max: 10 },
+				"/sign-up/email": { window: 60, max: 5 },
+				"/forget-password": { window: 60, max: 3 },
+			},
+		},
+
+		account: {
+			...commonAuthOptions.account,
+			accountLinking: {
+				enabled: true,
+				trustedProviders: ["google", "discord"],
+			},
+		},
+
+		advanced: {
+			...commonAuthOptions.advanced,
+			database: {
+				generateId: () => crypto.randomUUID(),
+			},
+		},
+
+		databaseHooks: {
+			user: {
+				create: {
+					after: async (user, ctx) => {
+						// @ts-ignore - migration typing
+						await ensureUserProfile(supabaseAdmin, user);
+
+						const ip =
+							ctx?.headers?.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+							"unknown";
+						const ipInfo = await getIPIntelligence(ip);
+
+						await logAudit(
+							user.id,
+							"signup",
+							{
+								email: user.email,
+								name: user.name,
+								geo: ipInfo
+									? {
+											city: ipInfo.city,
+											country: ipInfo.country,
+											privacy: ipInfo.privacy,
+										}
+									: undefined,
+							},
+							{ ipAddress: ip },
+						);
+					},
+				},
+			},
+			session: {
+				create: {
+					before: async (session) => {
+						try {
+							const { data: profile } = await supabaseAdmin
+								.from("profiles")
+								.select("role")
+								.eq("id", session.userId)
+								.maybeSingle();
+
+							if (
+								profile &&
+								ADMIN_ROLES.includes(
+									profile.role as (typeof ADMIN_ROLES)[number],
+								)
+							) {
+								const tenYears = new Date();
+								tenYears.setFullYear(tenYears.getFullYear() + 10);
+								return { data: { ...session, expiresAt: tenYears } };
+							}
+						} catch {
+							// ignore
 						}
-					} catch {
-						// ignore
-					}
-					return { data: session };
-				},
-				after: async (session) => {
-					const ip = session.ipAddress || "unknown";
-					const ipInfo = await getIPIntelligence(ip);
+						return { data: session };
+					},
+					after: async (session) => {
+						const ip = session.ipAddress || "unknown";
+						const ipInfo = await getIPIntelligence(ip);
 
-					await logAudit(
-						session.userId,
-						"login",
-						{
-							geo: ipInfo
-								? {
-										city: ipInfo.city,
-										country: ipInfo.country,
-										privacy: ipInfo.privacy,
-										org: ipInfo.org,
-									}
-								: undefined,
-						},
-						{ ipAddress: ip },
-					);
+						await logAudit(
+							session.userId,
+							"login",
+							{
+								geo: ipInfo
+									? {
+											city: ipInfo.city,
+											country: ipInfo.country,
+											privacy: ipInfo.privacy,
+											org: ipInfo.org,
+										}
+									: undefined,
+							},
+							{ ipAddress: ip },
+						);
+					},
 				},
 			},
 		},
-	},
 
-	plugins: [bearer(), nextCookies()],
-});
+		plugins: [bearer(), nextCookies()],
+	});
+}
+
+type Auth = ReturnType<typeof createAuth>;
+
+function createAuthMock(): Auth {
+	const noSession = async () => null;
+	return {
+		api: { getSession: noSession },
+		handler: async () => new Response(null, { status: 503 }),
+		options: {} as never,
+		$context: undefined as never,
+		$ERROR_CODES: {} as never,
+	} as unknown as Auth;
+}
+
+let _auth: Auth | null = null;
+try {
+	_auth = createAuth();
+} catch (e) {
+	console.error(
+		"[auth] betterAuth() init failed — falling back to mock:",
+		e instanceof Error ? e.message : String(e),
+	);
+	_auth = createAuthMock();
+}
+
+export const auth: Auth = _auth;
