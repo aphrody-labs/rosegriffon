@@ -21,10 +21,26 @@ const pool = new Pool({
 	connectionTimeoutMillis: 5_000,
 });
 
-const supabaseAdmin = createSupabaseAdmin<Database>(
-	process.env.NEXT_PUBLIC_SUPABASE_URL!,
-	process.env.SUPABASE_SERVICE_ROLE_KEY!,
-);
+// Lazy getter for Supabase admin to prevent top-level execution during build
+let _supabaseAdmin: ReturnType<typeof createSupabaseAdmin<Database>> | null = null;
+function getSupabaseAdmin() {
+	if (_supabaseAdmin) return _supabaseAdmin;
+
+	const url =
+		process.env.NEXT_PUBLIC_SUPABASE_URL &&
+		process.env.NEXT_PUBLIC_SUPABASE_URL !== "undefined" &&
+		process.env.NEXT_PUBLIC_SUPABASE_URL.startsWith("http")
+			? process.env.NEXT_PUBLIC_SUPABASE_URL
+			: "https://isbkaeltubqittywibeh.supabase.co";
+
+	const key =
+		process.env.SUPABASE_SERVICE_ROLE_KEY && !process.env.SUPABASE_SERVICE_ROLE_KEY.startsWith("{")
+			? process.env.SUPABASE_SERVICE_ROLE_KEY
+			: "missing-key-during-build";
+
+	_supabaseAdmin = createSupabaseAdmin<Database>(url, key);
+	return _supabaseAdmin;
+}
 
 /**
  * Détecte si un account Patreon a été autorisé avec les scopes créateur.
@@ -112,7 +128,7 @@ export const auth = betterAuth({
 			create: {
 				after: async (user) => {
 					// @ts-ignore - migration typing
-					await ensureUserProfile(supabaseAdmin, user);
+					await ensureUserProfile(getSupabaseAdmin(), user);
 				},
 			},
 		},
@@ -126,7 +142,7 @@ export const auth = betterAuth({
 						.maybeSingle();
 					if (user)
 						// @ts-ignore - migration typing
-						await ensureUserProfile(supabaseAdmin, user);
+						await ensureUserProfile(getSupabaseAdmin(), user);
 				},
 			},
 		},
@@ -228,7 +244,7 @@ async function syncPatreonAccount(
 			: new Date(Date.now() + 30 * 24 * 3600 * 1000).toISOString();
 
 		await Promise.all([
-			supabaseAdmin.from("patreon_oauth_tokens").upsert(
+			getSupabaseAdmin().from("patreon_oauth_tokens").upsert(
 				{
 					user_id: account.userId,
 					patreon_user_id: identity.patreonUserId,
@@ -240,7 +256,7 @@ async function syncPatreonAccount(
 				},
 				{ onConflict: "user_id,patreon_user_id" },
 			),
-			supabaseAdmin.from("patreon_memberships").upsert(
+			getSupabaseAdmin().from("patreon_memberships").upsert(
 				{
 					user_id: account.userId,
 					patreon_user_id: identity.patreonUserId,
