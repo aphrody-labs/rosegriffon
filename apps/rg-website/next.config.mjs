@@ -46,7 +46,6 @@ const nextConfig = {
 		"@sentry/nextjs",
 		"@supabase/supabase-js",
 		"@supabase/realtime-js",
-		"@rosegriffon/patreon-bun",
 		"discord.js",
 		"googleapis",
 		"nodemailer",
