@@ -23,8 +23,18 @@ const nextConfig = {
 	compress: false,
 	...(CDN_URL && { assetPrefix: CDN_URL }),
 
-	turbopack: {},
-	transpilePackages: ["@rosegriffon/ui", "@rosegriffon/db"],
+	turbopack: {
+		root: path.join(process.cwd(), "../../"),
+	},
+	transpilePackages: [
+		"@rosegriffon/ui",
+		"@rosegriffon/db",
+		"@rosegriffon/types",
+		"@rosegriffon/config",
+		"@rosegriffon/patreon-bun",
+		"@rosegriffon/auth",
+		"@rosegriffon/assets",
+	],
 
 	typescript: {
 		ignoreBuildErrors: true,

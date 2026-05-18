@@ -88,7 +88,11 @@ const nextConfig: NextConfig = {
 
 	// Output standalone pour systemd VPS — Vercel package son runtime.
 	...(IS_VERCEL
-		? {}
+		? {
+				turbopack: {
+					root: path.resolve(__dirname, "../../"),
+				},
+			}
 		: {
 				output: "standalone" as const,
 				outputFileTracingRoot: path.resolve(__dirname, "../../"),
@@ -96,7 +100,14 @@ const nextConfig: NextConfig = {
 					root: path.resolve(__dirname, "../../"),
 				},
 			}),
-	transpilePackages: ["@rosegriffon/ui", "@rosegriffon/db"],
+	transpilePackages: [
+		"@rosegriffon/ui",
+		"@rosegriffon/db",
+		"@rosegriffon/types",
+		"@rosegriffon/config",
+		"@rosegriffon/auth",
+		"@rosegriffon/assets",
+	],
 
 	// Packages Node.js natifs exclus du bundling serveur
 	serverExternalPackages: [
