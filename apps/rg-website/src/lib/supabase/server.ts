@@ -30,21 +30,11 @@ export function createPublicClient(): SupabaseClient {
 		process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
 	// Safety: Vercel might pass encrypted JSON or empty string during build.
-	if (
-		!supabaseUrl ||
-		supabaseUrl === "" ||
-		supabaseUrl === "undefined" ||
-		supabaseUrl === "null" ||
-		supabaseUrl.startsWith("{")
-	) {
+	if (!supabaseUrl || !supabaseUrl.startsWith("http")) {
 		supabaseUrl = "https://isbkaeltubqittywibeh.supabase.co";
 	}
 
-	if (
-		!supabaseAnonKey ||
-		supabaseAnonKey === "" ||
-		supabaseAnonKey.startsWith("{")
-	) {
+	if (!supabaseAnonKey || supabaseAnonKey.startsWith("{")) {
 		supabaseAnonKey =
 			"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlzYmthZWx0dWJxaXR0eXdpYmVoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDYwNjk0MzAsImV4cCI6MjA2MTY0NTQzMH0.N4l07k3V_X5I8iW0n_D6K9-O4v5l7l6s6MYGpJIXRW_rB8zc45k7chqi8Ljl_CLiLc=";
 	}
