@@ -69,11 +69,21 @@ export function SupabaseProvider({
         }
       : undefined;
 
-    return createClient<Database>(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      opts,
-    );
+    const supabaseUrl =
+      process.env.NEXT_PUBLIC_SUPABASE_URL &&
+      process.env.NEXT_PUBLIC_SUPABASE_URL !== "" &&
+      !process.env.NEXT_PUBLIC_SUPABASE_URL.startsWith("{")
+        ? process.env.NEXT_PUBLIC_SUPABASE_URL
+        : "https://isbkaeltubqittywibeh.supabase.co";
+
+    const supabaseAnonKey =
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY &&
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY !== "" &&
+      !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY.startsWith("{")
+        ? process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+        : "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlzYmthZWx0dWJxaXR0eXdpYmVoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDYwNjk0MzAsImV4cCI6MjA2MTY0NTQzMH0.N4l07k3V_X5I8iW0n_D6K9-O4v5l7l6s6MYGpJIXRW_rB8zc45k7chqi8Ljl_CLiLc=";
+
+    return createClient<Database>(supabaseUrl, supabaseAnonKey, opts);
   }, [token]);
 
   return <SupabaseContext.Provider value={client}>{children}</SupabaseContext.Provider>;
