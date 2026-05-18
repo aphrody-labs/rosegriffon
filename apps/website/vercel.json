@@ -3,6 +3,6 @@
 	"framework": "nextjs",
 	"installCommand": "cd ../.. && bun install --no-save --frozen-lockfile",
 	"ignoreCommand": "cd ../.. && npx turbo-ignore @rosegriffon/website",
-	"buildCommand": "cd ../.. && turbo run build --filter=@rosegriffon/website... --remote-only",
+	"buildCommand": "cd ../.. && turbo run build --filter=@rosegriffon/website... --cache=remote:rw",
 	"outputDirectory": ".next"
 }
