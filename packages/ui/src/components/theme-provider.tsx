@@ -1,22 +1,32 @@
 "use client";
 
+import {
+	ThemeProvider as NextThemesProvider,
+	type ThemeProviderProps,
+	useTheme as useNextTheme,
+} from "next-themes";
 import * as React from "react";
-import { ThemeProvider as NextThemesProvider, type ThemeProviderProps } from "next-themes";
 import { THEMES, type ThemeType } from "../lib/themes";
 
 export interface RGThemeProviderProps extends ThemeProviderProps {
 	children: React.ReactNode;
 }
 
+const ALL_THEMES = Object.keys(THEMES) as ThemeType[];
+
 /**
- * Unified Theme Provider for Rose Griffon.
- * Handles both the next-themes logic and the custom CSS variables for M3/Legacy themes.
+ * Provider thèmes Rose Griffon — wrap next-themes avec la liste explicite
+ * des thèmes supportés (sans dark/light auto). La classe est appliquée sur
+ * `<html>` (`class="roy"`, etc.) et `styles.css` aligne sur ces noms.
  */
 export function ThemeProvider({
 	children,
 	attribute = "class",
 	defaultTheme = "roy",
 	storageKey = "rg-theme",
+	themes = ALL_THEMES,
+	enableSystem = false,
+	disableTransitionOnChange = true,
 	...props
 }: RGThemeProviderProps) {
 	return (
@@ -24,42 +34,19 @@ export function ThemeProvider({
 			attribute={attribute}
 			defaultTheme={defaultTheme}
 			storageKey={storageKey}
+			themes={themes}
+			enableSystem={enableSystem}
+			disableTransitionOnChange={disableTransitionOnChange}
 			{...props}
 		>
-			<ThemeSync>{children}</ThemeSync>
+			{children}
 		</NextThemesProvider>
 	);
 }
 
-/**
- * Helper component to sync the active theme's colors to CSS variables
- * if the app still relies on them (legacy compat).
- */
-function ThemeSync({ children }: { children: React.ReactNode }) {
-	const { theme } = useTheme();
-
-	React.useEffect(() => {
-		const root = document.documentElement;
-		const activeTheme = theme as ThemeType;
-
-		if (THEMES[activeTheme]) {
-			const colors = THEMES[activeTheme].colors;
-			root.style.setProperty("--theme-primary", colors.primary);
-			root.style.setProperty("--theme-secondary", colors.secondary);
-			root.style.setProperty("--theme-accent", colors.accent);
-			root.style.setProperty("--theme-background", colors.background);
-			root.style.setProperty("--theme-text", colors.text);
-		}
-	}, [theme]);
-
-	return <>{children}</>;
-}
-
-// Re-export useTheme from next-themes for convenience, or custom if needed
-import { useTheme as useNextTheme } from "next-themes";
-
+/** Hook unifié — expose `mounted` pour éviter le mismatch SSR/CSR. */
 export function useTheme() {
-	const context = useNextTheme();
+	const ctx = useNextTheme();
 	const [mounted, setMounted] = React.useState(false);
 
 	React.useEffect(() => {
@@ -67,17 +54,26 @@ export function useTheme() {
 	}, []);
 
 	const toggleTheme = React.useCallback(() => {
-		const next = context.theme === "roy" ? "gaelle" : "roy";
-		context.setTheme(next);
-	}, [context]);
+		const ordered: ThemeType[] = ["roy", "gaelle"];
+		const idx = ordered.indexOf(ctx.theme as ThemeType);
+		const next = ordered[(idx + 1) % ordered.length] ?? "roy";
+		ctx.setTheme(next);
+	}, [ctx]);
+
+	const cycleTheme = React.useCallback(() => {
+		const idx = ALL_THEMES.indexOf(ctx.theme as ThemeType);
+		const next = ALL_THEMES[(idx + 1) % ALL_THEMES.length] ?? "roy";
+		ctx.setTheme(next);
+	}, [ctx]);
 
 	return {
-		...context,
+		...ctx,
 		mounted,
 		toggleTheme,
-		isRoy: context.theme === "roy",
-		isGaelle: context.theme === "gaelle",
-		isAzalee: context.theme?.startsWith("azalee"),
-		colors: THEMES[context.theme as ThemeType]?.colors,
+		cycleTheme,
+		isRoy: ctx.theme === "roy",
+		isGaelle: ctx.theme === "gaelle",
+		isAzalee: ctx.theme?.startsWith("azalee") ?? false,
+		colors: THEMES[ctx.theme as ThemeType]?.colors,
 	};
 }
