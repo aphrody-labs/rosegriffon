@@ -4,5 +4,8 @@
 	"installCommand": "cd ../.. && bun install --no-save --frozen-lockfile",
 	"ignoreCommand": "cd ../.. && npx turbo-ignore @rosegriffon/website",
 	"buildCommand": "cd ../.. && turbo run build --filter=@rosegriffon/website... --cache=remote:rw",
+	"env": {
+		"NEXT_PUBLIC_SUPABASE_URL": "https://isbkaeltubqittywibeh.supabase.co"
+	},
 	"outputDirectory": ".next"
 }
