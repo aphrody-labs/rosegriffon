@@ -14,7 +14,7 @@ export function createSupabaseBrowserClient() {
 
 	// Safety: Vercel might pass encrypted JSON or missing value during build.
 	// We check for falsy, empty string or starting with {
-	if (!url || url === "" || url.startsWith("{")) {
+	if (!url || url === "" || url === "undefined" || url === "null" || url.startsWith("{")) {
 		url = "https://isbkaeltubqittywibeh.supabase.co";
 	}
 
