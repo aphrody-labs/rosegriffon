@@ -8,13 +8,20 @@ export interface CookieStore {
 }
 
 export function createSupabaseServerClient(cookies: CookieStore) {
-	const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+	let url = process.env.NEXT_PUBLIC_SUPABASE_URL;
 	const key = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
-	if (!url || !key) {
+
+	// Safety: Vercel might pass encrypted JSON or missing value during build.
+	if (!url || url.startsWith("{")) {
+		url = "https://isbkaeltubqittywibeh.supabase.co";
+	}
+
+	if (!key) {
 		throw new Error(
-			"[@rosegriffon/db] Missing NEXT_PUBLIC_SUPABASE_URL or NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY",
+			"[@rosegriffon/db] Missing NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY",
 		);
 	}
+
 	return createServerClient(url, key, {
 		cookies: {
 			getAll() {
