@@ -139,21 +139,13 @@
 }
 
 @keyframes accordion-down {
-	from {
-		height: 0;
-	}
-	to {
-		height: var(--radix-accordion-content-height);
-	}
+	from { height: 0; }
+	to { height: var(--radix-accordion-content-height); }
 }
 
 @keyframes accordion-up {
-	from {
-		height: var(--radix-accordion-content-height);
-	}
-	to {
-		height: 0;
-	}
+	from { height: var(--radix-accordion-content-height); }
+	to { height: 0; }
 }
 
 @layer base {
@@ -164,54 +156,35 @@
 		--rg-griffon: oklch(0.78 0.13 90);   /* #d4af37 — tertiary seed */
 
 		/* ─── M3 sys-color — LIGHT scheme (35 tokens) ────────────────────── */
-		/* Primary tonal palette dérivée de --rg-rose (hue 0, chroma 0.22) */
 		--md-sys-color-primary: oklch(0.50 0.22 0);
 		--md-sys-color-on-primary: oklch(1.00 0 0);
 		--md-sys-color-primary-container: oklch(0.90 0.08 0);
 		--md-sys-color-on-primary-container: oklch(0.20 0.18 0);
-
-		/* Secondary — dérivé hue rose, chroma réduit (palette neutre-chromatique) */
 		--md-sys-color-secondary: oklch(0.50 0.08 0);
 		--md-sys-color-on-secondary: oklch(1.00 0 0);
 		--md-sys-color-secondary-container: oklch(0.90 0.04 0);
 		--md-sys-color-on-secondary-container: oklch(0.20 0.06 0);
-
-		/* Tertiary tonal palette dérivée de --rg-griffon (hue 90, chroma 0.13) */
 		--md-sys-color-tertiary: oklch(0.50 0.13 90);
 		--md-sys-color-on-tertiary: oklch(1.00 0 0);
 		--md-sys-color-tertiary-container: oklch(0.90 0.06 90);
 		--md-sys-color-on-tertiary-container: oklch(0.20 0.10 90);
-
-		/* Error — palette rouge M3 standard */
 		--md-sys-color-error: oklch(0.50 0.22 27);
 		--md-sys-color-on-error: oklch(1.00 0 0);
 		--md-sys-color-error-container: oklch(0.90 0.06 27);
 		--md-sys-color-on-error-container: oklch(0.20 0.18 27);
-
-		/* Background + on-background */
 		--md-sys-color-background: oklch(0.99 0.003 264);
 		--md-sys-color-on-background: oklch(0.20 0.02 264);
-
-		/* Surface neutral (dérivé --rg-marine hue 264, chroma faible) */
 		--md-sys-color-surface: oklch(0.99 0.003 264);
 		--md-sys-color-on-surface: oklch(0.20 0.02 264);
 		--md-sys-color-surface-variant: oklch(0.90 0.01 264);
 		--md-sys-color-on-surface-variant: oklch(0.30 0.02 264);
-
-		/* Outlines */
 		--md-sys-color-outline: oklch(0.50 0.01 264);
 		--md-sys-color-outline-variant: oklch(0.80 0.01 264);
-
-		/* Scrim + shadow */
 		--md-sys-color-scrim: oklch(0 0 0);
 		--md-sys-color-shadow: oklch(0 0 0);
-
-		/* Inverse */
 		--md-sys-color-inverse-surface: oklch(0.20 0.02 264);
 		--md-sys-color-inverse-on-surface: oklch(0.95 0.005 264);
 		--md-sys-color-inverse-primary: oklch(0.80 0.15 0);
-
-		/* Surface variants tonal */
 		--md-sys-color-surface-dim: oklch(0.87 0.005 264);
 		--md-sys-color-surface-bright: oklch(0.99 0.003 264);
 		--md-sys-color-surface-container-lowest: oklch(1.00 0 0);
@@ -221,57 +194,36 @@
 		--md-sys-color-surface-container-highest: oklch(0.90 0.007 264);
 	}
 
-	/* ─── M3 sys-color — DARK scheme (35 tokens) ──────────────────────────── */
-	:root.dark,
-	.dark {
-		/* Primary dark — tons clairs */
+	:root.dark, .dark {
 		--md-sys-color-primary: oklch(0.80 0.15 0);
 		--md-sys-color-on-primary: oklch(0.20 0.18 0);
 		--md-sys-color-primary-container: oklch(0.30 0.18 0);
 		--md-sys-color-on-primary-container: oklch(0.90 0.08 0);
-
-		/* Secondary dark */
 		--md-sys-color-secondary: oklch(0.80 0.04 0);
 		--md-sys-color-on-secondary: oklch(0.20 0.06 0);
 		--md-sys-color-secondary-container: oklch(0.30 0.06 0);
 		--md-sys-color-on-secondary-container: oklch(0.90 0.04 0);
-
-		/* Tertiary dark */
 		--md-sys-color-tertiary: oklch(0.80 0.10 90);
 		--md-sys-color-on-tertiary: oklch(0.20 0.10 90);
 		--md-sys-color-tertiary-container: oklch(0.30 0.10 90);
 		--md-sys-color-on-tertiary-container: oklch(0.90 0.06 90);
-
-		/* Error dark */
 		--md-sys-color-error: oklch(0.80 0.15 27);
 		--md-sys-color-on-error: oklch(0.20 0.18 27);
 		--md-sys-color-error-container: oklch(0.30 0.18 27);
 		--md-sys-color-on-error-container: oklch(0.90 0.06 27);
-
-		/* Background + on-background dark */
 		--md-sys-color-background: oklch(0.13 0.02 264);
 		--md-sys-color-on-background: oklch(0.90 0.01 264);
-
-		/* Surface dark (basé --rg-marine) */
 		--md-sys-color-surface: oklch(0.13 0.02 264);
 		--md-sys-color-on-surface: oklch(0.90 0.01 264);
 		--md-sys-color-surface-variant: oklch(0.30 0.02 264);
 		--md-sys-color-on-surface-variant: oklch(0.80 0.01 264);
-
-		/* Outlines dark */
 		--md-sys-color-outline: oklch(0.60 0.01 264);
 		--md-sys-color-outline-variant: oklch(0.30 0.02 264);
-
-		/* Scrim + shadow (constants) */
 		--md-sys-color-scrim: oklch(0 0 0);
 		--md-sys-color-shadow: oklch(0 0 0);
-
-		/* Inverse dark */
 		--md-sys-color-inverse-surface: oklch(0.90 0.01 264);
 		--md-sys-color-inverse-on-surface: oklch(0.20 0.02 264);
 		--md-sys-color-inverse-primary: oklch(0.50 0.22 0);
-
-		/* Surface variants tonal dark */
 		--md-sys-color-surface-dim: oklch(0.13 0.02 264);
 		--md-sys-color-surface-bright: oklch(0.27 0.02 264);
 		--md-sys-color-surface-container-lowest: oklch(0.10 0.02 264);
@@ -281,22 +233,7 @@
 		--md-sys-color-surface-container-highest: oklch(0.27 0.02 264);
 	}
 
-	/* ═══════════════════════════════════════════════════════════════════════
-	 * THÈMES UNIFIÉS — source unique de vérité pour website + azalee
-	 *
-	 * Chaque thème redéfinit :
-	 *   1. Les sys-color MD3 (primary, secondary, tertiary, surface, etc.)
-	 *   2. Le pont shadcn → MD3 (--background, --primary, --card, etc.)
-	 *   3. Les tokens sidebar (--sidebar*, en fallback hex)
-	 *
-	 * Les composants shadcn de @rg/ui consomment les vars shadcn et héritent
-	 * automatiquement de la palette MD3 active sans modification de code.
-	 * ═══════════════════════════════════════════════════════════════════════ */
-
-	/* ─── ROY — Inazuma character (light, bleu #344E8C + doré #FFC46E) ───── */
-	:root.theme-roy,
-	.theme-roy {
-		/* MD3 sys-color — palette Roy */
+	:root.theme-roy, .theme-roy, :root.roy, .roy {
 		--md-sys-color-primary: oklch(0.45 0.12 250);
 		--md-sys-color-on-primary: oklch(0.985 0 0);
 		--md-sys-color-primary-container: oklch(0.85 0.08 250);
@@ -331,8 +268,6 @@
 		--md-sys-color-inverse-surface: oklch(0.25 0.05 250);
 		--md-sys-color-inverse-on-surface: oklch(0.96 0.01 80);
 		--md-sys-color-inverse-primary: oklch(0.75 0.10 250);
-
-		/* Pont shadcn → MD3 + tokens Roy d'origine (compat website) */
 		--background: oklch(0.97 0.01 80);
 		--foreground: oklch(0.2 0.05 250);
 		--card: oklch(1 0 0);
@@ -366,10 +301,7 @@
 		--sidebar-ring: rgba(255, 196, 110, 0.4);
 	}
 
-	/* ─── GAELLE — Inazuma character (light, vermillon #B03519 + orange) ─── */
-	:root.theme-gaelle,
-	.theme-gaelle {
-		/* MD3 sys-color — palette Gaelle */
+	:root.theme-gaelle, .theme-gaelle, :root.gaelle, .gaelle {
 		--md-sys-color-primary: oklch(0.5 0.18 25);
 		--md-sys-color-on-primary: oklch(0.985 0 0);
 		--md-sys-color-primary-container: oklch(0.88 0.08 25);
@@ -404,8 +336,6 @@
 		--md-sys-color-inverse-surface: oklch(0.25 0.05 25);
 		--md-sys-color-inverse-on-surface: oklch(0.96 0.02 40);
 		--md-sys-color-inverse-primary: oklch(0.75 0.12 25);
-
-		/* Pont shadcn → MD3 + tokens Gaelle d'origine (compat website) */
 		--background: oklch(0.95 0.03 40);
 		--foreground: oklch(0.25 0.15 25);
 		--card: oklch(1 0 0);
@@ -439,10 +369,7 @@
 		--sidebar-ring: rgba(255, 196, 110, 0.4);
 	}
 
-	/* ─── AZALEE LIGHT — Wiki Azalée, seed MD3 #F89C5A (orange) ──────────── */
-	:root.theme-azalee-light,
-	.theme-azalee-light {
-		/* MD3 sys-color light — orange/rose Azalée (extrait depuis apps/azalee :root) */
+	:root.theme-azalee-light, .theme-azalee-light, :root.azalee-light, .azalee-light {
 		--md-sys-color-primary: #f2a93b;
 		--md-sys-color-on-primary: #2a1519;
 		--md-sys-color-primary-container: #ffe08b;
@@ -479,8 +406,6 @@
 		--md-sys-color-surface-container: #fcebe2;
 		--md-sys-color-surface-container-high: #f6e5dc;
 		--md-sys-color-surface-container-highest: #f0dfd7;
-
-		/* Pont shadcn → MD3 */
 		--background: var(--md-sys-color-surface);
 		--foreground: var(--md-sys-color-on-surface);
 		--card: var(--md-sys-color-surface-container-low);
@@ -510,10 +435,7 @@
 		--sidebar-ring: var(--md-sys-color-primary);
 	}
 
-	/* ─── AZALEE DARK — Wiki Azalée, seed MD3 #F89C5A inversé ────────────── */
-	:root.theme-azalee-dark,
-	.theme-azalee-dark {
-		/* MD3 sys-color dark — orange/rose Azalée (extrait depuis apps/azalee :root.dark) */
+	:root.theme-azalee-dark, .theme-azalee-dark, :root.azalee-dark, .azalee-dark {
 		--md-sys-color-primary: #ffc66c;
 		--md-sys-color-on-primary: #412d00;
 		--md-sys-color-primary-container: #5d4200;
@@ -550,8 +472,6 @@
 		--md-sys-color-surface-container: #271e19;
 		--md-sys-color-surface-container-high: #322823;
 		--md-sys-color-surface-container-highest: #3d332d;
-
-		/* Pont shadcn → MD3 */
 		--background: var(--md-sys-color-surface);
 		--foreground: var(--md-sys-color-on-surface);
 		--card: var(--md-sys-color-surface-container-low);
@@ -588,11 +508,8 @@
 		-moz-osx-font-smoothing: grayscale;
 	}
 
-	body {
-		font-feature-settings: "rlig" 1, "calt" 1;
-	}
+	body { font-feature-settings: "rlig" 1, "calt" 1; }
 
-	/* Focus visible accessible (jamais retiré) */
 	:focus-visible {
 		outline: 2px solid var(--rg-rose);
 		outline-offset: 2px;
@@ -600,66 +517,23 @@
 }
 
 @layer components {
-	/* ─── M3 Typescale — 15 rôles officiels ──────────────────────────────── */
-	.type-display-large {
-		font: 400 57px/64px var(--font-sans);
-		letter-spacing: -0.25px;
-	}
-	.type-display-medium {
-		font: 400 45px/52px var(--font-sans);
-	}
-	.type-display-small {
-		font: 400 36px/44px var(--font-sans);
-	}
-	.type-headline-large {
-		font: 400 32px/40px var(--font-sans);
-	}
-	.type-headline-medium {
-		font: 400 28px/36px var(--font-sans);
-	}
-	.type-headline-small {
-		font: 400 24px/32px var(--font-sans);
-	}
-	.type-title-large {
-		font: 400 22px/28px var(--font-sans);
-	}
-	.type-title-medium {
-		font: 500 16px/24px var(--font-sans);
-		letter-spacing: 0.15px;
-	}
-	.type-title-small {
-		font: 500 14px/20px var(--font-sans);
-		letter-spacing: 0.1px;
-	}
-	.type-body-large {
-		font: 400 16px/24px var(--font-sans);
-		letter-spacing: 0.5px;
-	}
-	.type-body-medium {
-		font: 400 14px/20px var(--font-sans);
-		letter-spacing: 0.25px;
-	}
-	.type-body-small {
-		font: 400 12px/16px var(--font-sans);
-		letter-spacing: 0.4px;
-	}
-	.type-label-large {
-		font: 500 14px/20px var(--font-sans);
-		letter-spacing: 0.1px;
-	}
-	.type-label-medium {
-		font: 500 12px/16px var(--font-sans);
-		letter-spacing: 0.5px;
-	}
-	.type-label-small {
-		font: 500 11px/16px var(--font-sans);
-		letter-spacing: 0.5px;
-	}
+	.type-display-large { font: 400 57px/64px var(--font-sans); letter-spacing: -0.25px; }
+	.type-display-medium { font: 400 45px/52px var(--font-sans); }
+	.type-display-small { font: 400 36px/44px var(--font-sans); }
+	.type-headline-large { font: 400 32px/40px var(--font-sans); }
+	.type-headline-medium { font: 400 28px/36px var(--font-sans); }
+	.type-headline-small { font: 400 24px/32px var(--font-sans); }
+	.type-title-large { font: 400 22px/28px var(--font-sans); }
+	.type-title-medium { font: 500 16px/24px var(--font-sans); letter-spacing: 0.15px; }
+	.type-title-small { font: 500 14px/20px var(--font-sans); letter-spacing: 0.1px; }
+	.type-body-large { font: 400 16px/24px var(--font-sans); letter-spacing: 0.5px; }
+	.type-body-medium { font: 400 14px/20px var(--font-sans); letter-spacing: 0.25px; }
+	.type-body-small { font: 400 12px/16px var(--font-sans); letter-spacing: 0.4px; }
+	.type-label-large { font: 500 14px/20px var(--font-sans); letter-spacing: 0.1px; }
+	.type-label-medium { font: 500 12px/16px var(--font-sans); letter-spacing: 0.5px; }
+	.type-label-small { font: 500 11px/16px var(--font-sans); letter-spacing: 0.5px; }
 
-	/* ─── M3 State layer utility ─────────────────────────────────────────── */
-	.state-layer {
-		position: relative;
-	}
+	.state-layer { position: relative; }
 	.state-layer::before {
 		content: "";
 		position: absolute;
@@ -670,13 +544,7 @@
 		pointer-events: none;
 		border-radius: inherit;
 	}
-	.state-layer:hover::before {
-		opacity: 0.08;
-	}
-	.state-layer:focus-visible::before {
-		opacity: 0.12;
-	}
-	.state-layer:active::before {
-		opacity: 0.12;
-	}
+	.state-layer:hover::before { opacity: 0.08; }
+	.state-layer:focus-visible::before { opacity: 0.12; }
+	.state-layer:active::before { opacity: 0.12; }
 }

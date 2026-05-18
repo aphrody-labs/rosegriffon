@@ -1,7 +1,6 @@
+import { Button, Card, CardContent, CardHeader, CardTitle } from "@rg/ui";
 import Image from "next/image";
 
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Mail, Scale, Shield, Users } from "@/lib/icons-config";
 
 export default function RejoindreRGPage() {

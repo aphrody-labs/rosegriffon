@@ -1,7 +1,7 @@
 import Link from "next/link";
-import { DashboardPageHeader } from "@/components/dashboard/DashboardPageHeader";
+import { AdminPageHeader as DashboardPageHeader } from "@rg/ui";
 import { NewsListClient } from "@/components/dashboard/news/NewsListClient";
-import { Button } from "@/components/ui/button";
+import { Button } from "@rg/ui";
 import {
 	Empty,
 	EmptyContent,
@@ -9,7 +9,7 @@ import {
 	EmptyHeader,
 	EmptyMedia,
 	EmptyTitle,
-} from "@/components/ui/empty";
+} from "@rg/ui";
 import { Icon } from "@/components/ui/Icon";
 import { WikiPagination } from "@/components/wiki/WikiPagination";
 import { sanitizeNewsSearchQuery } from "@/lib/news-search";

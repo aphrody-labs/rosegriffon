@@ -1,11 +1,9 @@
+import { Badge, Button, Card, CardContent } from "@rg/ui";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { Calendar, ExternalLink, Heart, Lock } from "lucide-react";
 import Link from "next/link";
 
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { getPatreonFeedForViewer } from "@/lib/patreon/feed";
 
 export async function PatreonFeedSection() {

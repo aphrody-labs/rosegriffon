@@ -1,7 +1,7 @@
 import { Pencil } from "lucide-react";
 import Link from "next/link";
-import { DashboardPageHeader } from "@/components/dashboard/DashboardPageHeader";
-import { Badge } from "@/components/ui/badge";
+import { AdminPageHeader as DashboardPageHeader } from "@rg/ui";
+import { Badge } from "@rg/ui";
 import {
   Table,
   TableBody,
@@ -9,7 +9,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
+} from "@rg/ui";
 import { apiClient } from "@/lib/api-client";
 import { verifier } from "@/lib/verification";
 

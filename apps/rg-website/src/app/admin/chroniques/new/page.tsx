@@ -1,11 +1,11 @@
 "use client";
 
+import { Card } from "@rg/ui";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
 import { ChronicleEditor } from "@/components/admin/ChronicleEditor";
-import { AdminPageHeader } from "@/components/admin/shared/AdminPageHeader";
-import { Card } from "@/components/ui/card";
+import { AdminPageHeader } from "@rg/ui";
 
 import { createChronicle } from "../actions";
 

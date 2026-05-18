@@ -1,7 +1,8 @@
+import { Button } from "@rg/ui";
 import Link from "next/link";
 
 import { MediaManager } from "@/components/admin/media/media-manager";
-import { Button } from "@/components/ui/button";
+
 import { ChevronLeft, ChevronRight } from "@/lib/icons-config";
 import { createAdminClient } from "@/lib/supabase/server";
 

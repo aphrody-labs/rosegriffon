@@ -1,7 +1,6 @@
+import { Button, Card, CardContent, CardDescription, CardHeader, CardTitle } from "@rg/ui";
 import Link from "next/link";
 
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Heart, Mail, Users } from "@/lib/icons-config";
 
 export const dynamic = "force-dynamic";

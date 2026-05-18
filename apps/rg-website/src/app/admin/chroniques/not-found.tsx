@@ -1,7 +1,6 @@
+import { Button } from "@rg/ui";
 import { FileQuestion } from "lucide-react";
 import Link from "next/link";
-
-import { Button } from "@/components/ui/button";
 
 export default function ChroniqueNotFound() {
   return (

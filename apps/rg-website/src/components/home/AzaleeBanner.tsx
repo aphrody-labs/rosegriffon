@@ -1,7 +1,7 @@
+import { Button, Card, CardContent } from "@rg/ui";
 import { Newspaper } from "lucide-react";
 import Image from "next/image";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+
 import { Twitter } from "@/lib/icons-config";
 import { InstagramIcon as Instagram } from "@/shared/icons/instagram";
 

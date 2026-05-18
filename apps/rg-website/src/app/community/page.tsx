@@ -1,3 +1,4 @@
+import { Badge, Button, Input } from "@rg/ui";
 import { formatDistanceToNow } from "date-fns";
 import { fr } from "date-fns/locale";
 import { Crown, Search, ShieldCheck, Sparkles, Zap } from "lucide-react";
@@ -5,9 +6,7 @@ import Image from "next/image";
 import Link from "next/link";
 
 import { WikiPagination } from "@/components/shared/WikiPagination";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+
 import { createClient } from "@/lib/supabase/server";
 import { cn } from "@/lib/utils";
 import { parseSearchParams } from "@/lib/validations";

@@ -14,7 +14,7 @@ import { LanguageProvider } from "@/components/providers/language-provider";
 import { SupabaseProvider } from "@/components/providers/SupabaseProvider";
 import { ThemeProvider } from "@/components/providers/theme-provider";
 import { Shell } from "@/components/Shell";
-import { Toaster } from "@/components/ui/sonner";
+import { Toaster } from "@rg/ui";
 import { auth, ensureUserProfile } from "@/lib/auth";
 import { mintSupabaseJwt } from "@/lib/supabase/jwt";
 import "./globals.css";
@@ -153,23 +153,21 @@ export default async function RootLayout({
         }}
       />
       <body className={`${googleSans.variable} antialiased`}>
-        <NextThemesProvider
-          attribute="class"
-          defaultTheme="dark"
-          enableSystem
-          disableTransitionOnChange
-        >
-          <LanguageProvider>
-            <ThemeProvider>
-              <SupabaseProvider initialToken={supabaseToken}>
-                <Shell user={user} profile={profile} defaultOpen={defaultOpen}>
-                  {children}
-                </Shell>
-              </SupabaseProvider>
-              <Toaster />
-            </ThemeProvider>
-          </LanguageProvider>
-        </NextThemesProvider>
+        <LanguageProvider>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="azalee-dark"
+            enableSystem
+            disableTransitionOnChange
+          >
+            <SupabaseProvider initialToken={supabaseToken}>
+              <Shell user={user} profile={profile} defaultOpen={defaultOpen}>
+                {children}
+              </Shell>
+            </SupabaseProvider>
+            <Toaster />
+          </ThemeProvider>
+        </LanguageProvider>
       </body>
     </html>
   );

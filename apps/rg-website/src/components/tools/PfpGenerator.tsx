@@ -1,20 +1,12 @@
 "use client";
 
+import { Button, Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle, Input } from "@rg/ui";
 import { Download, Image as ImageIcon, User as UserIcon } from "lucide-react";
 import NextImage from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { updateUserAvatar } from "@/app/dashboard/account/actions";
-import { Button } from "@/components/ui/button";
-import {
-	Card,
-	CardContent,
-	CardDescription,
-	CardFooter,
-	CardHeader,
-	CardTitle,
-} from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
+
 import { useSidebarAuth } from "@/hooks/useSidebarAuth";
 import { createClient } from "@/lib/supabase/client";
 import { InstagramIcon as Instagram } from "@/shared/icons/instagram";

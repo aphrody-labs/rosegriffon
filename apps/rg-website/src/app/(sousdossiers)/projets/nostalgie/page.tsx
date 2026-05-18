@@ -2,6 +2,7 @@
 
 export const dynamic = "force-dynamic";
 
+import { Badge, Button, Card, CardContent, CardDescription, CardHeader, CardTitle, Tabs, TabsList, TabsTrigger } from "@rg/ui";
 import {
 	CheckCircle2,
 	CloudUpload,
@@ -25,21 +26,13 @@ import { useState } from "react";
 import { SiDiscord } from "react-icons/si";
 import { Toaster, toast } from "sonner";
 import { BreadcrumbSchema } from "@/components/shared/StructuredData";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import {
-	Card,
-	CardContent,
-	CardDescription,
-	CardHeader,
-	CardTitle,
-} from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
-import { Separator } from "@/components/ui/separator";
-import { Slider } from "@/components/ui/slider";
-import { StorageImage } from "@/components/ui/storage-image";
-import { Switch } from "@/components/ui/switch";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+
+import { Label } from "@rg/ui";
+import { Separator } from "@rg/ui";
+import { Slider } from "@rg/ui";
+import { StorageImage } from "@rg/ui";
+import { Switch } from "@rg/ui";
+
 import { useNostalgieCollage } from "@/hooks/use-nostalgie-collage";
 import { useNostalgieExampleImage } from "@/hooks/use-nostalgie-example-image";
 import { useNostalgieUpload } from "@/hooks/use-nostalgie-upload";

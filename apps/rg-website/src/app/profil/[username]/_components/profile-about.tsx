@@ -1,8 +1,7 @@
+import { Card, CardContent } from "@rg/ui";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { ShieldCheck, User } from "lucide-react";
-
-import { Card, CardContent } from "@/components/ui/card";
 
 interface StaffMember {
 	role?: string;

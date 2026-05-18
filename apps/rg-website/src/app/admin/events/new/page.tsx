@@ -1,7 +1,8 @@
+import { Button } from "@rg/ui";
 import Link from "next/link";
 
 import { EventForm } from "@/components/admin/events/event-form";
-import { Button } from "@/components/ui/button";
+
 import { ArrowLeft } from "@/lib/icons-config";
 
 export default function NewEventPage() {

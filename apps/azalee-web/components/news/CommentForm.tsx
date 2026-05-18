@@ -7,7 +7,7 @@ import { useRef, useState, useTransition } from "react";
 import { toast } from "sonner";
 import { createComment } from "@/app/actions/comments";
 import { useAuth } from "@/components/providers/AuthProvider";
-import { Button } from "@/components/ui/button";
+import { Button } from "@rg/ui";
 import { cn } from "@/lib/utils";
 
 const MAX_LENGTH = 2000;

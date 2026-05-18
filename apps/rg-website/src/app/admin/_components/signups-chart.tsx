@@ -1,16 +1,16 @@
 "use client";
 
+import { Card, CardContent, CardHeader, CardTitle } from "@rg/ui";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from "recharts";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
 	type ChartConfig,
 	ChartContainer,
 	ChartTooltip,
 	ChartTooltipContent,
-} from "@/components/ui/chart";
+} from "@rg/ui";
 
 export interface SignupPoint {
 	date: string;

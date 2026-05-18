@@ -1,8 +1,8 @@
+import { Button } from "@rg/ui";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
-import { Button } from "@/components/ui/button";
 import { auth } from "@/lib/auth";
 import { getServerSession, getServerUser } from "@/lib/auth-helpers";
 import { createAdminClient, createClient } from "@/lib/supabase/server";

@@ -25,16 +25,16 @@ import {
 import { useCallback, useState } from "react";
 import { useToolbarContext } from "@/components/editor/context/toolbar-context";
 import { InsertImageDialog } from "@/components/editor/plugins/images-plugin";
-import { Button } from "@/components/ui/button";
+import { Button } from "@rg/ui";
 import {
   Dialog,
   DialogContent,
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+} from "@rg/ui";
+import { Input } from "@rg/ui";
+import { Label } from "@rg/ui";
 
 export function Toolbar() {
   const {

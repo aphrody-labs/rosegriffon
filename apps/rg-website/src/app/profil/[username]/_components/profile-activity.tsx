@@ -1,9 +1,8 @@
+import { Card, CardContent } from "@rg/ui";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { Calendar, FileText, History } from "lucide-react";
 import Link from "next/link";
-
-import { Card, CardContent } from "@/components/ui/card";
 
 interface Activity {
 	id: string;

@@ -1,7 +1,6 @@
+import { Card, CardContent } from "@rg/ui";
 import { FileText, Palette, Settings, type LucideIcon } from "lucide-react";
 import Link from "next/link";
-
-import { Card, CardContent } from "@/components/ui/card";
 
 interface QuickLink {
 	title: string;

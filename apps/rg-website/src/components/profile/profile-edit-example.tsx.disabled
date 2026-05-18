@@ -1,18 +1,11 @@
 "use client";
 
+import { Alert, AlertDescription, Button, Card, CardContent, CardDescription, CardHeader, CardTitle, Input } from "@rg/ui";
 import { useState } from "react";
 import { useProfile } from "@/contexts/profile-context";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+
+import { Skeleton } from "@rg/ui";
+
 import { AlertCircle, Check, Loader2 } from "lucide-react";
 
 /**

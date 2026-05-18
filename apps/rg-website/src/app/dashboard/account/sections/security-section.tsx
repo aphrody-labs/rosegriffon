@@ -1,5 +1,6 @@
 "use client";
 
+import { Badge, Button, Card, CardContent, CardDescription, CardHeader, CardTitle } from "@rg/ui";
 import { format, formatDistanceToNow } from "date-fns";
 import { fr } from "date-fns/locale";
 import {
@@ -12,15 +13,6 @@ import {
 import { useState } from "react";
 import { toast } from "sonner";
 
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import {
-	Card,
-	CardContent,
-	CardDescription,
-	CardHeader,
-	CardTitle,
-} from "@/components/ui/card";
 import { authClient } from "@/lib/auth-client";
 
 export interface SessionItem {

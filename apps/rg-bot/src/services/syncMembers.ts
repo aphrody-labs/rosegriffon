@@ -1,18 +1,7 @@
 import type { Guild, GuildMember, User } from "discord.js";
+import type { DiscordMember as MemberRow } from "@rg/types";
 
 import { sql } from "../lib/db.ts";
-
-export interface MemberRow {
-  discord_id: string;
-  username: string;
-  display_name: string | null;
-  nickname: string | null;
-  avatar_url: string | null;
-  joined_at: Date | null;
-  premium_since: Date | null;
-  roles: string[];
-  is_bot: boolean;
-}
 
 function resolveAvatarUrl(member: GuildMember): string | null {
   const guildAvatar = member.avatarURL({ size: 256, extension: "webp" });
@@ -34,10 +23,11 @@ export function memberToRow(member: GuildMember): MemberRow {
     display_name: member.user.globalName ?? null,
     nickname: member.nickname ?? null,
     avatar_url: resolveAvatarUrl(member),
-    joined_at: member.joinedAt ?? null,
-    premium_since: member.premiumSince ?? null,
+    joined_at: member.joinedAt?.toISOString() ?? null,
+    premium_since: member.premiumSince?.toISOString() ?? null,
     roles: roleIds,
     is_bot: member.user.bot,
+    updated_at: new Date().toISOString(),
   };
 }
 
@@ -46,7 +36,7 @@ function toPgTextArray(values: string[]): string {
 }
 
 async function upsertRow(row: MemberRow): Promise<void> {
-  const rolesLiteral = toPgTextArray(row.roles);
+  const rolesLiteral = toPgTextArray(row.roles || []);
   await sql`
     INSERT INTO discord_members (
       discord_id, username, display_name, nickname,

@@ -1,5 +1,6 @@
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
+
+import { Card, CardContent, CardHeader } from "@rg/ui";
+import { Skeleton } from "@rg/ui";
 
 export function ProfileSkeleton() {
   return (

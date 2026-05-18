@@ -1,11 +1,11 @@
 "use client";
 
+import { Button } from "@rg/ui";
 import Image from "next/image";
 import { useCallback, useState } from "react";
 import { useDropzone } from "react-dropzone";
 import { toast } from "sonner";
 
-import { Button } from "@/components/ui/button";
 import { Loader2, Upload, X } from "@/lib/icons-config";
 import { createClient } from "@/lib/supabase/client";
 

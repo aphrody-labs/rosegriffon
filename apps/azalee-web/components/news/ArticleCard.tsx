@@ -7,12 +7,12 @@ import Link from "next/link";
 import { useState } from "react";
 import type { FeedItem } from "@/app/news/news-client";
 import { LikeButton } from "@/components/news/LikeButton";
-import { Badge } from "@/components/ui/badge";
+import { Badge } from "@rg/ui";
 import {
 	HoverCard,
 	HoverCardContent,
 	HoverCardTrigger,
-} from "@/components/ui/hover-card";
+} from "@rg/ui";
 import { ArrowRight, MessageCircle } from "@/lib/icons-config";
 import { cn } from "@/lib/utils";
 

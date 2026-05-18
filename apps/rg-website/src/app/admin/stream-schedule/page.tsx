@@ -1,4 +1,4 @@
-import { AdminPageHeader } from "@/components/admin/shared/AdminPageHeader";
+import { AdminPageHeader } from "@rg/ui";
 import { createAdminClient } from "@/lib/supabase/server";
 
 import { StreamScheduleManager } from "./manager";

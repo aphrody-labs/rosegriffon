@@ -2,7 +2,7 @@
 
 import { useRouter, useSearchParams } from "next/navigation";
 import * as React from "react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@rg/ui";
 import {
   Command,
   CommandEmpty,
@@ -10,8 +10,8 @@ import {
   CommandInput,
   CommandItem,
   CommandList,
-} from "@/components/ui/command";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+} from "@rg/ui";
+import { Popover, PopoverContent, PopoverTrigger } from "@rg/ui";
 import { cn } from "@/lib/utils";
 
 export interface TeamOption {

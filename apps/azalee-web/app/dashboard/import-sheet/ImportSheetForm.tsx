@@ -3,12 +3,12 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@rg/ui";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@rg/ui";
+import { Input } from "@rg/ui";
+import { Label } from "@rg/ui";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@rg/ui";
+import { Textarea } from "@rg/ui";
 import { importCsv, importGoogleSheet } from "./actions";
 
 export function ImportSheetForm() {

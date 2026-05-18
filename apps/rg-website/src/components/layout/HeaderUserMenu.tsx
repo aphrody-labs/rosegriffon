@@ -1,10 +1,11 @@
 "use client";
 
+import { Button } from "@rg/ui";
 import Link from "next/link";
 
 import { UserAccountPopup } from "@/components/auth/UserAccountPopup";
-import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
+
+import { Skeleton } from "@rg/ui";
 import { useSidebarAuth } from "@/hooks/useSidebarAuth";
 import { Loader2, UserCircle } from "@/lib/icons-config";
 import { cn } from "@/lib/utils";

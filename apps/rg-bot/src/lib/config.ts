@@ -2,14 +2,9 @@
 // Fallback DISCORD_GUILD_ID : Bun n'expand pas `GUILD_ID=$DISCORD_GUILD_ID`
 // dans .env (passe la string littérale). On lit les 2 et on filtre les valeurs
 // qui ressemblent à une référence shell non résolue ($VAR).
-function resolveGuildId(): string | undefined {
-	const candidates = [Bun.env.GUILD_ID, Bun.env.DISCORD_GUILD_ID];
-	for (const v of candidates) {
-		if (v && !v.startsWith("$")) return v;
-	}
-	return undefined;
-}
-export const GUILD_ID = resolveGuildId();
+import { resolveGuildId } from "@rg/types/discord";
+
+export const GUILD_ID = resolveGuildId(Bun.env as Record<string, string | undefined>);
 
 export const SYNC_INTERVAL_MS = Number(
 	Bun.env.SYNC_INTERVAL_MS ?? 30 * 60 * 1000,

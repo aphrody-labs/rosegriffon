@@ -6,8 +6,8 @@ import { History, RotateCcw } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { Badge } from "@rg/ui";
+import { Button } from "@rg/ui";
 
 interface Version {
   id: string;

@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { DashboardPageHeader } from "@/components/dashboard/DashboardPageHeader";
+import { AdminPageHeader as DashboardPageHeader } from "@rg/ui";
 import { requireAdmin } from "@/lib/auth-helpers";
 import { createClient } from "@/lib/supabase/server";
 import { AuditTable } from "./AuditTable";

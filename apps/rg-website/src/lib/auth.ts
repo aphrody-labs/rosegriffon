@@ -5,13 +5,14 @@ import { nextCookies } from "better-auth/next-js";
 import { bearer, genericOAuth } from "better-auth/plugins";
 import { Pool } from "pg";
 
+import { commonAuthOptions, ensureUserProfile } from "@rg/auth";
 import {
 	fetchIdentity,
 	parseIdentityWithMemberships,
 } from "@/lib/patreon/client";
 import { encryptToken } from "@/lib/patreon/encryption";
 import { SCOPES_CREATOR, SCOPES_PATRON } from "@/lib/patreon/types";
-import type { Database } from "@/types/supabase";
+import type { Database } from "@rg/db";
 
 const pool = new Pool({
 	connectionString: process.env.DATABASE_URL,
@@ -25,63 +26,8 @@ const supabaseAdmin = createSupabaseAdmin<Database>(
 	process.env.SUPABASE_SERVICE_ROLE_KEY!,
 );
 
-async function ensureUserProfile(user: {
-	id: string;
-	name?: string;
-	email?: string | null;
-	image?: string | null;
-}) {
-	try {
-		const { data } = await supabaseAdmin
-			.from("profiles")
-			.select("id")
-			.eq("id", user.id)
-			.maybeSingle();
-
-		if (data) {
-			// Mettre à jour l'avatar à chaque connexion (Discord peut le changer)
-			await supabaseAdmin
-				.from("profiles")
-				.update({
-					avatar_url: user.image || null,
-					updated_at: new Date().toISOString(),
-				})
-				.eq("id", user.id);
-			return;
-		}
-
-		// Username fallback : Discord/Twitch peuvent ne pas exposer email (scope absent
-		// ou compte sans email vérifié). Fallback ultime : `user-<8chars id>`.
-		const username =
-			user.name
-				?.toLowerCase()
-				.replace(/[^a-z0-9_]/g, "_")
-				.slice(0, 30) ||
-			user.email?.split("@")[0] ||
-			`user-${user.id.slice(0, 8)}`;
-
-		await supabaseAdmin.from("profiles").upsert(
-			{
-				id: user.id,
-				username,
-				full_name: user.name || "",
-				avatar_url: user.image || null,
-				role: "member",
-				updated_at: new Date().toISOString(),
-			},
-			{ onConflict: "id" },
-		);
-	} catch (err) {
-		console.error("[auth] ensureUserProfile failed:", user.id, err);
-	}
-}
-
 /**
- * Détecte si un account Patreon a été autorisé avec les scopes créateur en
- * inspectant la chaîne `scope` retournée par Patreon (séparateur `,` côté
- * Better Auth, `space` côté Patreon brut). On utilise `campaigns.members`
- * comme témoin : ce scope ne peut être accordé qu'au propriétaire de la
- * campagne — il marque sans ambiguïté un OAuth créateur.
+ * Détecte si un account Patreon a été autorisé avec les scopes créateur.
  */
 function detectCreatorScopes(scope: string | null | undefined): boolean {
 	if (!scope) return false;
@@ -96,12 +42,12 @@ export const auth = betterAuth({
 	baseURL: process.env.BETTER_AUTH_URL ?? "https://rosegriffon.fr",
 	secret: process.env.BETTER_AUTH_SECRET,
 
+	...commonAuthOptions,
+
 	socialProviders: {
 		discord: {
 			clientId: process.env.DISCORD_CLIENT_ID!,
 			clientSecret: process.env.DISCORD_CLIENT_SECRET!,
-			// Better Auth Discord provider expose nativement email/name/image — pas besoin de mapper.
-			// overrideUserInfoOnSignIn: true rafraîchit ces champs à chaque login.
 			overrideUserInfoOnSignIn: true,
 		},
 		twitch: {
@@ -110,8 +56,6 @@ export const auth = betterAuth({
 			clientSecret:
 				process.env.TWITCH_AUTH_CLIENT_SECRET ??
 				process.env.TWITCH_CLIENT_SECRET!,
-			// Scopes pour récupérer follows + abonnements (utilisable plus tard via auth.api.getAccessToken).
-			// Twitch provider Better Auth typé string[] (vs autres providers en string).
 			scope: [
 				"user:read:email",
 				"user:read:follows",
@@ -137,55 +81,11 @@ export const auth = betterAuth({
 		max: 100,
 	},
 
-	user: {
-		fields: {
-			emailVerified: "email_verified",
-			createdAt: "created_at",
-			updatedAt: "updated_at",
-		},
-	},
-
-	session: {
-		expiresIn: 60 * 60 * 24 * 30, // 30 jours
-		updateAge: 60 * 60 * 24,
-		cookieCache: {
-			enabled: true,
-			maxAge: 5 * 60, // 5 min → réduit les requêtes DB
-		},
-		fields: {
-			userId: "user_id",
-			expiresAt: "expires_at",
-			ipAddress: "ip_address",
-			userAgent: "user_agent",
-			createdAt: "created_at",
-			updatedAt: "updated_at",
-		},
-	},
-
 	account: {
+		...commonAuthOptions.account,
 		accountLinking: {
 			enabled: true,
 			trustedProviders: ["discord", "twitch", "patreon"],
-		},
-		fields: {
-			userId: "user_id",
-			accountId: "account_id",
-			providerId: "provider_id",
-			accessToken: "access_token",
-			refreshToken: "refresh_token",
-			accessTokenExpiresAt: "access_token_expires_at",
-			refreshTokenExpiresAt: "refresh_token_expires_at",
-			idToken: "id_token",
-			createdAt: "created_at",
-			updatedAt: "updated_at",
-		},
-	},
-
-	verification: {
-		fields: {
-			expiresAt: "expires_at",
-			createdAt: "created_at",
-			updatedAt: "updated_at",
 		},
 	},
 
@@ -194,41 +94,30 @@ export const auth = betterAuth({
 		process.env.BETTER_AUTH_URL ?? "https://rosegriffon.fr",
 		"http://localhost:3000",
 		"http://localhost:3001",
-	].filter((v, i, a) => a.indexOf(v) === i), // déduplique
+	].filter((v, i, a) => a.indexOf(v) === i),
 
 	advanced: {
-		useSecureCookies: true,
-		// Récupère l'IP réelle derrière Nginx
-		ipAddress: {
-			ipAddressHeaders: ["x-forwarded-for", "x-real-ip"],
-		},
-		defaultCookieAttributes: {
-			httpOnly: true,
-			secure: true,
-			sameSite: "lax" as const,
-		},
+		...commonAuthOptions.advanced,
 		database: {
 			generateId: () => crypto.randomUUID(),
 		},
 	},
 
 	logger: {
-		// En prod : seulement les erreurs (sinon trop de bruit). En dev : debug.
 		level: process.env.NODE_ENV === "production" ? "error" : "debug",
 	},
 
 	databaseHooks: {
 		user: {
 			create: {
-				// Crée le profil Supabase à la première connexion Discord
 				after: async (user) => {
-					await ensureUserProfile(user);
+					// @ts-ignore - migration typing
+					await ensureUserProfile(supabaseAdmin, user);
 				},
 			},
 		},
 		session: {
 			create: {
-				// Met à jour l'avatar Discord à chaque session (profil peut changer)
 				after: async (session) => {
 					const { data: user } = await supabaseAdmin
 						.from("user")
@@ -236,22 +125,13 @@ export const auth = betterAuth({
 						.eq("id", session.userId)
 						.maybeSingle();
 					if (user)
-						await ensureUserProfile(
-							user as {
-								id: string;
-								name: string;
-								image: string | null;
-								email: string;
-							},
-						);
+						// @ts-ignore - migration typing
+						await ensureUserProfile(supabaseAdmin, user);
 				},
 			},
 		},
 		account: {
 			create: {
-				// Quand un account Patreon est lié (login OU link), on enrichit
-				// patreon_memberships en réutilisant l'access_token stocké par
-				// Better Auth + on miroite dans patreon_oauth_tokens (chiffré).
 				after: async (account) => {
 					if (account.providerId !== "patreon") return;
 					await syncPatreonAccount(account, {
@@ -270,10 +150,6 @@ export const auth = betterAuth({
 		},
 	},
 
-	// bearer() : permet l'auth via header `Authorization: Bearer <session_token>`
-	//   (utile pour bots, mobile apps, server-to-server).
-	// nextCookies() : OBLIGATOIRE Next.js — propage les Set-Cookie depuis les server actions.
-	//   DOIT rester DERNIER (cf. CLAUDE.md).
 	plugins: [
 		bearer(),
 		genericOAuth({
@@ -284,12 +160,6 @@ export const auth = betterAuth({
 					clientSecret: process.env.PATREON_CLIENT_SECRET!,
 					authorizationUrl: "https://www.patreon.com/oauth2/authorize",
 					tokenUrl: "https://www.patreon.com/api/oauth2/token",
-					// Patreon n'expose pas de discovery OIDC.
-					// Scopes patron par défaut. Les scopes créateur (campaigns,
-					// campaigns.members*, w:campaigns.webhook) sont demandés à
-					// la volée via `signIn.oauth2({ scopes })` côté client (cf.
-					// PatreonConnectButton variant="creator-link") — Better Auth
-					// merge ces scopes avec ceux d'ici.
 					scopes: [...SCOPES_PATRON],
 					getUserInfo: async (tokens: unknown) => {
 						const accessToken = (tokens as { accessToken?: string })
@@ -324,9 +194,7 @@ export const auth = betterAuth({
 });
 
 /**
- * Sync les données Patreon vers nos tables custom (patreon_oauth_tokens +
- * patreon_memberships) quand Better Auth crée/MAJ un account Patreon.
- * Réutilise l'access_token déjà stocké par Better Auth dans la table `account`.
+ * Sync les données Patreon vers nos tables custom.
  */
 async function syncPatreonAccount(
 	account: {
@@ -420,11 +288,6 @@ async function syncPatreonAccount(
 				})
 				.eq("id", account.userId),
 		]);
-		// La promotion superadmin du compte créateur RG est déléguée à un trigger
-		// SQL (cf. migration `20260502000005_promote_rg_creator.sql`). Le trigger
-		// se déclenche après INSERT/UPDATE sur `patreon_memberships` et upgrade
-		// `profiles.role='admin'` quand le `patreon_user_id` correspond à l'URL
-		// canonique RG ou à un token `is_creator=true`.
 	} catch (e) {
 		console.error("[auth/patreon] syncPatreonAccount failed", e);
 	}

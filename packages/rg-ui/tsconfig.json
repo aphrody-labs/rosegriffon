@@ -3,7 +3,7 @@
 	"compilerOptions": {
 		"baseUrl": ".",
 		"ignoreDeprecations": "6.0",
-		"types": ["react", "react-dom"],
+		"types": ["react", "react-dom", "bun"],
 		"paths": {
 			"@/lib/utils": ["./src/lib/utils.ts"],
 			"@/components/*": ["./src/components/*"]

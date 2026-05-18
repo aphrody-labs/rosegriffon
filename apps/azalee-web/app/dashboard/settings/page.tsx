@@ -1,4 +1,4 @@
-import { DashboardPageHeader } from "@/components/dashboard/DashboardPageHeader";
+import { AdminPageHeader as DashboardPageHeader } from "@rg/ui";
 import { SettingsForm } from "@/components/dashboard/settings-form";
 import { getServerSession } from "@/lib/auth-helpers";
 import { createClient } from "@/lib/supabase/server";

@@ -13,8 +13,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Button } from "@rg/ui";
+import { Input } from "@rg/ui";
 import { authClient } from "@/lib/auth-client";
 
 type AuthMode = "login" | "signup" | "forgot-password";

@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
-import { DashboardMetricCard } from "@/components/dashboard/DashboardMetricCard";
-import { DashboardPageHeader } from "@/components/dashboard/DashboardPageHeader";
+import { DashboardStatsCard as DashboardMetricCard } from "@rg/ui";
+import { AdminPageHeader as DashboardPageHeader } from "@rg/ui";
 import { requireAdmin } from "@/lib/auth-helpers";
 import { createClient } from "@/lib/supabase/server";
 import { type ZukanCandidate, ZukanReviewClient } from "./ZukanReviewClient";

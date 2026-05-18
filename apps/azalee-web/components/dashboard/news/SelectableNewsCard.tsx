@@ -16,7 +16,7 @@ import {
 	ContextMenuSubContent,
 	ContextMenuSubTrigger,
 	ContextMenuTrigger,
-} from "@/components/ui/context-menu";
+} from "@rg/ui";
 import {
 	Archive,
 	CheckCircle,

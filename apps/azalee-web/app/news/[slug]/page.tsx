@@ -36,7 +36,7 @@ import { ReadingProgressTracker } from "@/components/news/ReadingProgressTracker
 import { RelatedArticles } from "@/components/news/RelatedArticles";
 import { SeriesNavigation } from "@/components/news/SeriesNavigation";
 import { TableOfContents } from "@/components/news/TableOfContents";
-import { Badge } from "@/components/ui/badge";
+import { Badge } from "@rg/ui";
 import { extractTableOfContents } from "@/lib/lexical-utils";
 
 interface ArticlePageProps {

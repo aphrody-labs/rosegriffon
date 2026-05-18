@@ -1,10 +1,10 @@
+import { Button, Card } from "@rg/ui";
 import Image from "next/image";
 import Link from "next/link";
 
 import RgEmote from "@/components/shared/emotes/RgEmote";
 import { BreadcrumbSchema, ImageObjectSchema } from "@/components/shared/StructuredData";
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
+
 import { ExternalLink, Info, Users } from "@/lib/icons-config";
 
 export default function MurauxPage() {

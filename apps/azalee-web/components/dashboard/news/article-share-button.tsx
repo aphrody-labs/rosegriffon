@@ -10,7 +10,7 @@ import {
 	Popover,
 	PopoverContent,
 	PopoverTrigger,
-} from "@/components/ui/popover";
+} from "@rg/ui";
 import { cn } from "@/lib/utils";
 
 interface ArticleShareButtonProps {

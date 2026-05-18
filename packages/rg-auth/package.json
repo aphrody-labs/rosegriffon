@@ -1,0 +1,27 @@
+{
+  "name": "@rg/auth",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Shared authentication logic and guards for Rose Griffon apps",
+  "exports": {
+    ".": "./src/index.ts",
+    "./server": "./src/server.ts"
+  },
+  "scripts": {
+    "type-check": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@rg/db": "workspace:*",
+    "@rg/types": "workspace:*",
+    "better-auth": "catalog:"
+  },
+  "devDependencies": {
+    "@types/bun": "catalog:",
+    "next": "catalog:",
+    "react": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  }
+}

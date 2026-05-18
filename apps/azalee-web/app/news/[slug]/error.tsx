@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect } from "react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@rg/ui";
 
 export default function Error({
   error,

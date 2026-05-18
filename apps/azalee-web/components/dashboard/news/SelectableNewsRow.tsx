@@ -6,7 +6,7 @@ import { Pin } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { NewsActions } from "@/components/dashboard/news-actions";
-import { Badge } from "@/components/ui/badge";
+import { Badge } from "@rg/ui";
 import { Icon } from "@/components/ui/Icon";
 
 interface SelectableNewsRowProps {

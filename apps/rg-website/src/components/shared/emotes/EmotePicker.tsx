@@ -1,18 +1,9 @@
 "use client";
 
+import { Button, Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, Input, Tabs, TabsContent, TabsList, TabsTrigger } from "@rg/ui";
 import { Search, Smile } from "lucide-react";
 import { useState } from "react";
 
-import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { EMOTES, type Emote } from "@/lib/emotes";
 
 import RgEmote from "./RgEmote";

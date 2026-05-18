@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { searchTranslations, type TranslationResult } from "@/app/actions/translate";
 import { Icon } from "@/components/ui/Icon";
-import { Skeleton } from "@/components/ui/skeleton";
+import { Skeleton } from "@rg/ui";
 import { cn } from "@/lib/utils";
 
 const ENTITY_TYPES = [

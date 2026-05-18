@@ -4,8 +4,8 @@
 export type {
 	Database,
 	Tables,
-	TablesInsert,
-	TablesUpdate,
+	TablesInsert as Insert,
+	TablesUpdate as Update,
 	Enums,
 	Json,
 } from "./types.gen";

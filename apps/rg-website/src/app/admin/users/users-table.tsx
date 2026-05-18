@@ -1,5 +1,6 @@
 "use client";
 
+import { Badge, Button, Input } from "@rg/ui";
 import {
 	type ColumnDef,
 	flexRender,
@@ -12,9 +13,6 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import {
 	Table,
 	TableBody,
@@ -22,10 +20,10 @@ import {
 	TableHead,
 	TableHeader,
 	TableRow,
-} from "@/components/ui/table";
+} from "@rg/ui";
 import { useTableBroadcast } from "@/hooks";
 import { ArrowUpDown, Search } from "@/lib/icons-config";
-import type { Database } from "@/types/supabase";
+import type { Database } from "@rg/db";
 
 import { UserEditDialog } from "./user-edit-dialog";
 

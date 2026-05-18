@@ -1,12 +1,10 @@
 "use client";
 
+import { Badge, Card, CardContent, Tabs, TabsContent, TabsList, TabsTrigger } from "@rg/ui";
 import { motion } from "motion/react";
 import { Calendar, Clock, Eye, Gamepad2, TrendingUp, Users } from "lucide-react";
 import Image from "next/image";
 
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useTheme } from "@/contexts/theme-context";
 
 import { useTwitch } from "../_context/twitch-context";

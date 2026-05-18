@@ -2,15 +2,13 @@
 
 export const dynamic = "force-dynamic";
 
+import { Badge, Button, Card, CardContent, CardDescription, CardHeader, CardTitle, Tabs, TabsContent, TabsList, TabsTrigger } from "@rg/ui";
 import { useState } from "react";
 import { Toaster, toast } from "sonner";
 
 import RgEmote from "@/components/shared/emotes/RgEmote";
 import { BreadcrumbSchema, ImageObjectSchema } from "@/components/shared/StructuredData";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+
 import { EMOTES, type Emote } from "@/lib/emotes";
 import { Copy, Smile } from "@/lib/icons-config";
 

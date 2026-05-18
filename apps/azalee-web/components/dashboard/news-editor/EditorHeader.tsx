@@ -18,15 +18,15 @@ import {
 	Type,
 } from "lucide-react";
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
+import { Button } from "@rg/ui";
 import {
 	DropdownMenu,
 	DropdownMenuContent,
 	DropdownMenuItem,
 	DropdownMenuSeparator,
 	DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { TabsList, TabsTrigger } from "@/components/ui/tabs";
+} from "@rg/ui";
+import { TabsList, TabsTrigger } from "@rg/ui";
 import { cn } from "@/lib/utils";
 import { STATUS_OPTIONS } from "./constants";
 

@@ -1,11 +1,11 @@
 "use client";
 
+import { Button } from "@rg/ui";
 import { AnimatePresence, motion } from "motion/react";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
-import { Button } from "@/components/ui/button";
 import { useTheme } from "@/contexts/theme-context";
 import {
 	Bell,

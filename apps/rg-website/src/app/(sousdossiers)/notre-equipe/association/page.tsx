@@ -2,7 +2,7 @@ export const dynamic = "force-dynamic";
 
 import { Suspense } from "react";
 
-import { Skeleton } from "@/components/ui/skeleton";
+import { Skeleton } from "@rg/ui";
 
 import AssoMembersSection from "../_components/asso";
 import BoardMembersSection from "../_components/board";

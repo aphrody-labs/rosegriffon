@@ -1,3 +1,4 @@
+import { Button } from "@rg/ui";
 import type { Metadata } from "next";
 import dynamicImport from "next/dynamic";
 import { Suspense } from "react";
@@ -21,7 +22,7 @@ import {
 	OrganizationSchema,
 	WebsiteSchema,
 } from "@/components/shared/StructuredData";
-import { Button } from "@/components/ui/button";
+
 import { getCalendarEvents } from "@/lib/api/events";
 import { getPublicSetting } from "@/lib/api/settings";
 

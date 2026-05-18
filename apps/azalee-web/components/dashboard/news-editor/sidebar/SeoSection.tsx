@@ -1,9 +1,9 @@
 "use client";
 
 import { AlertCircle, Check, Loader2, RefreshCw } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@rg/ui";
+import { Input } from "@rg/ui";
+import { Textarea } from "@rg/ui";
 import { cn } from "@/lib/utils";
 import { generateSlug } from "../utils";
 

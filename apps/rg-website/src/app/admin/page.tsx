@@ -7,17 +7,21 @@ import {
 	LayoutDashboard,
 	MonitorSmartphone,
 	Users,
+	UserPlus,
+	Calendar,
+	Eye,
 } from "lucide-react";
 
-import { StatsCard } from "@/components/admin/dashboard/stats-card";
-import { AdminPageHeader } from "@/components/admin/shared/AdminPageHeader";
+import {
+	AdminPageHeader,
+	DashboardStatsCard as StatsCard,
+	DashboardGrid,
+	RecentListCard,
+} from "@rg/ui";
 import { createAdminClient } from "@/lib/supabase/server";
 
 import { QuickActions } from "./_components/quick-actions";
-import { RecentArticles } from "./_components/recent-articles";
-import { RecentUsers } from "./_components/recent-users";
-import { SignupsChart, type SignupPoint } from "./_components/signups-chart";
-import { UpcomingEvents } from "./_components/upcoming-events";
+import { type SignupPoint, SignupsChart } from "./_components/signups-chart";
 
 function buildDailySignups(
 	rows: { created_at: string | null }[],
@@ -147,89 +151,73 @@ export default async function AdminDashboardPage() {
 				description="Vue d'ensemble de l'activité de Rose Griffon."
 			/>
 
-			<section aria-labelledby="kpis-title" className="space-y-3">
-				<h2
-					id="kpis-title"
-					className="text-sm font-semibold uppercase tracking-wide text-muted-foreground"
-				>
-					Indicateurs clés
-				</h2>
-				<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-					<StatsCard
-						title="Utilisateurs"
-						value={usersCount}
-						description={`+${newUsersWeek} sur 7 jours`}
-						icon={Users}
-						href="/admin/users"
-						accent="sky"
-					/>
-					<StatsCard
-						title="Inscriptions 24h"
-						value={newUsersToday}
-						description="Nouveaux comptes du jour"
-						icon={Activity}
-						accent="emerald"
-					/>
-					<StatsCard
-						title="Sessions actives"
-						value={activeSessions}
-						description="Connexions en cours"
-						icon={MonitorSmartphone}
-						accent="primary"
-					/>
-					<StatsCard
-						title="Patreon liés"
-						value={patreonLinked}
-						description="Comptes connectés"
-						icon={Heart}
-						href="/admin/patreon"
-						accent="rose"
-					/>
-				</div>
-			</section>
+			<DashboardGrid title="Indicateurs clés">
+				<StatsCard
+					title="Utilisateurs"
+					value={usersCount}
+					description={`+${newUsersWeek} sur 7 jours`}
+					icon={Users}
+					href="/admin/users"
+					accent="sky"
+				/>
+				<StatsCard
+					title="Inscriptions 24h"
+					value={newUsersToday}
+					description="Nouveaux comptes du jour"
+					icon={Activity}
+					accent="emerald"
+				/>
+				<StatsCard
+					title="Sessions actives"
+					value={activeSessions}
+					description="Connexions en cours"
+					icon={MonitorSmartphone}
+					accent="primary"
+				/>
+				<StatsCard
+					title="Patreon liés"
+					value={patreonLinked}
+					description="Comptes connectés"
+					icon={Heart}
+					href="/admin/patreon"
+					accent="rose"
+				/>
+			</DashboardGrid>
 
-			<section aria-labelledby="content-stats-title" className="space-y-3">
-				<h2
-					id="content-stats-title"
-					className="text-sm font-semibold uppercase tracking-wide text-muted-foreground"
-				>
-					Contenu
-				</h2>
-				<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-					<StatsCard
-						title="Articles publiés"
-						value={articlesCount}
-						description="Visibles par les visiteurs"
-						icon={BookOpen}
-						href="/admin/chroniques"
-						accent="violet"
-					/>
-					<StatsCard
-						title="Brouillons"
-						value={draftsCount}
-						description="En attente de publication"
-						icon={FileText}
-						href="/admin/chroniques?status=draft"
-						accent="amber"
-					/>
-					<StatsCard
-						title="Événements"
-						value={eventsCount}
-						description="Total créés"
-						icon={CalendarClock}
-						href="/admin/events"
-						accent="amber"
-					/>
-					<StatsCard
-						title="À venir"
-						value={upcomingEventsCount}
-						description="Événements futurs"
-						icon={CalendarClock}
-						href="/admin/events"
-						accent="emerald"
-					/>
-				</div>
-			</section>
+			<DashboardGrid title="Contenu">
+				<StatsCard
+					title="Articles publiés"
+					value={articlesCount}
+					description="Visibles par les visiteurs"
+					icon={BookOpen}
+					href="/admin/chroniques"
+					accent="violet"
+				/>
+				<StatsCard
+					title="Brouillons"
+					value={draftsCount}
+					description="En attente de publication"
+					icon={FileText}
+					href="/admin/chroniques?status=draft"
+					accent="amber"
+				/>
+				<StatsCard
+					title="Événements"
+					value={eventsCount}
+					description="Total créés"
+					icon={CalendarClock}
+					href="/admin/events"
+					accent="amber"
+				/>
+				<StatsCard
+					title="À venir"
+					value={upcomingEventsCount}
+					description="Événements futurs"
+					icon={CalendarClock}
+					href="/admin/events"
+					accent="emerald"
+				/>
+			</DashboardGrid>
 
 			<SignupsChart data={signupsTimeline} />
 
@@ -240,9 +228,49 @@ export default async function AdminDashboardPage() {
 				<h2 id="recent-title" className="sr-only">
 					Activité récente
 				</h2>
-				<RecentUsers users={recentUsersRes.data ?? []} />
-				<RecentArticles articles={recentArticlesRes.data ?? []} />
-				<UpcomingEvents events={upcomingEventsListRes.data ?? []} />
+				<RecentListCard
+					title="Utilisateurs récents"
+					href="/admin/users"
+					icon={UserPlus}
+					accent="bg-sky-500/10 text-sky-600"
+					items={(recentUsersRes.data ?? []).map((u) => ({
+						id: u.id,
+						title: u.full_name || u.username || "Sans nom",
+						subtitle: u.role || "Utilisateur",
+						date: u.created_at || undefined,
+					}))}
+				/>
+				<RecentListCard
+					title="Articles récents"
+					href="/admin/chroniques"
+					icon={FileText}
+					accent="bg-violet-500/10 text-violet-600"
+					items={(recentArticlesRes.data ?? []).map((a) => ({
+						id: a.id,
+						title: a.title,
+						status: a.status !== "published" ? "Brouillon" : undefined,
+						date: (a.published_at || a.updated_at) ?? undefined,
+						meta:
+							typeof a.view_count === "number" ? (
+								<span className="flex items-center gap-1">
+									<Eye className="size-3" aria-hidden="true" />
+									{a.view_count}
+								</span>
+							) : undefined,
+					}))}
+				/>
+				<RecentListCard
+					title="Événements à venir"
+					href="/admin/events"
+					icon={Calendar}
+					accent="bg-amber-500/10 text-amber-600"
+					items={(upcomingEventsListRes.data ?? []).map((e) => ({
+						id: e.id,
+						title: e.title,
+						subtitle: e.location || "Lieu non précisé",
+						date: e.start_time,
+					}))}
+				/>
 			</section>
 
 			<QuickActions />

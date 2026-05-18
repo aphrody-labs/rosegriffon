@@ -1,12 +1,13 @@
 "use client";
 
+import { Button } from "@rg/ui";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 import TextPressure from "@/components/blocks/TextAnimations/TextPressure/TextPressure";
 import RgEmote from "@/components/shared/emotes/RgEmote";
-import { Button } from "@/components/ui/button";
+
 import { ArrowLeft, Home } from "@/lib/icons-config";
 
 export default function NotFound() {

@@ -2,8 +2,8 @@ import { Zap } from "lucide-react";
 import localFont from "next/font/local";
 import Image from "next/image";
 
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@rg/ui";
+import { Card, CardContent } from "@rg/ui";
 
 const humane = localFont({
   src: "../../public/fonts/Humane-Regular.otf",

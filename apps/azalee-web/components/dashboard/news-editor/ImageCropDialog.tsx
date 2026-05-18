@@ -6,14 +6,14 @@ import RawReactCrop, { type Crop, type PixelCrop } from "react-image-crop";
 
 // React 19 / react-image-crop typings drift: cast to FC<any> (TS2607/TS2786).
 const ReactCrop = RawReactCrop as unknown as React.FC<any>;
-import { Button } from "@/components/ui/button";
+import { Button } from "@rg/ui";
 import {
   Dialog,
   DialogContent,
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
+} from "@rg/ui";
 import { cn } from "@/lib/utils";
 import "react-image-crop/dist/ReactCrop.css";
 import { CROP_RATIO_PRESETS } from "./constants";

@@ -4,7 +4,7 @@ import type { SerializedEditorState } from "lexical";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
-import { Tabs, TabsContent } from "@/components/ui/tabs";
+import { Tabs, TabsContent } from "@rg/ui";
 import { EMPTY_CONTENT } from "./constants";
 import { EditorContent } from "./EditorContent";
 import { EditorHeader } from "./EditorHeader";

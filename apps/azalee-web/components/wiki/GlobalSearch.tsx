@@ -4,7 +4,7 @@ import { Lightbulb, Search, SearchX } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 import * as React from "react";
 import { type EnhancedSearchResult, searchGlobal } from "@/app/actions/search";
-import { Button } from "@/components/ui/button";
+import { Button } from "@rg/ui";
 import {
   CommandDialog,
   CommandEmpty,
@@ -12,8 +12,8 @@ import {
   CommandInput,
   CommandItem,
   CommandList,
-} from "@/components/ui/command";
-import { Skeleton } from "@/components/ui/skeleton";
+} from "@rg/ui";
+import { Skeleton } from "@rg/ui";
 import { SearchResultRow } from "@/components/wiki/SearchResultRow";
 import { TYPE_LABELS_PLURAL } from "@/lib/search/search-ui-config";
 import type { SearchContext } from "@/lib/search/smart-search";

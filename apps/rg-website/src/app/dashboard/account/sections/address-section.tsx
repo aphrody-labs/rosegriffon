@@ -1,19 +1,12 @@
 "use client";
 
+import { Button, Card, CardContent, CardDescription, CardHeader, CardTitle, Input } from "@rg/ui";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Truck } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
 
-import { Button } from "@/components/ui/button";
-import {
-	Card,
-	CardContent,
-	CardDescription,
-	CardHeader,
-	CardTitle,
-} from "@/components/ui/card";
 import {
 	Form,
 	FormControl,
@@ -21,9 +14,9 @@ import {
 	FormItem,
 	FormLabel,
 	FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import type { Database } from "@/types/supabase";
+} from "@rg/ui";
+
+import type { Database } from "@rg/db";
 
 import { updateProfile } from "../actions";
 

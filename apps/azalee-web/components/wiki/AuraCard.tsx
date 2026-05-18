@@ -4,7 +4,7 @@ import { CircleDot, Sparkles } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
-import { Badge } from "@/components/ui/badge";
+import { Badge } from "@rg/ui";
 import { CommonSpriteIcon } from "@/components/ui/CommonSpriteIcon";
 import { ElementIcon } from "@/components/wiki/ElementIcon";
 import type { SpriteCommonKey } from "@/config/sprites-common";

@@ -1,6 +1,6 @@
 import Link from "next/link";
-import { DashboardPageHeader } from "@/components/dashboard/DashboardPageHeader";
-import { Button } from "@/components/ui/button";
+import { AdminPageHeader as DashboardPageHeader } from "@rg/ui";
+import { Button } from "@rg/ui";
 import { Icon } from "@/components/ui/Icon";
 import { createClient } from "@/lib/supabase/server";
 import { TweetRow } from "./tweet-row";

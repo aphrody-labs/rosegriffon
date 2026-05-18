@@ -1,8 +1,8 @@
+import { Card } from "@rg/ui";
 import Image from "next/image";
 import Link from "next/link";
 import { getTweet } from "react-tweet/api";
 
-import { Card } from "@/components/ui/card";
 import { Heart, MessageCircle } from "@/lib/icons-config"; // Assurez-vous que Repeat2 (Retweet) est dispo, sinon une autre icone
 import { formatDate, formatNumber } from "@/lib/tweet-utils";
 

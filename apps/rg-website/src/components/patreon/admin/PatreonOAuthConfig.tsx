@@ -1,10 +1,8 @@
 "use client";
 
+import { Button, Card, CardContent } from "@rg/ui";
 import { Check, Copy, ExternalLink, Settings } from "lucide-react";
 import { useState } from "react";
-
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 
 interface Props {
 	redirectUri: string;

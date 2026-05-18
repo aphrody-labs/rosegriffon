@@ -2,7 +2,7 @@ import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
 import { mintSupabaseJwt } from "@/lib/supabase/jwt";
-import type { Database } from "@/types/database.types";
+import type { Database } from "@rg/db";
 
 const supabaseUrl = process.env.SUPABASE_INTERNAL_URL || process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;

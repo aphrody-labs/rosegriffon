@@ -1,3 +1,4 @@
+import { Badge, Card, CardContent } from "@rg/ui";
 import { format, formatDistanceToNow } from "date-fns";
 import { fr } from "date-fns/locale";
 import {
@@ -14,8 +15,6 @@ import {
 	Trophy,
 } from "lucide-react";
 
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent } from "@/components/ui/card";
 import { PATRON_DISCOUNT_PERCENT } from "@/lib/patreon/discount";
 import { createAdminClient } from "@/lib/supabase/server";
 

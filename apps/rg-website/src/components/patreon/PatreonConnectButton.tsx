@@ -1,11 +1,11 @@
 "use client";
 
+import { Button } from "@rg/ui";
 import { PatreonOauthScope } from "@rose-griffon/patreon-bun";
 import { Heart, Link2, Loader2 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
-import { Button } from "@/components/ui/button";
 import { authClient } from "@/lib/auth-client";
 import { cn } from "@/lib/utils";
 

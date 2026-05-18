@@ -1,5 +1,6 @@
 "use client";
 
+import { Button } from "@rg/ui";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -7,8 +8,8 @@ import { usePathname } from "next/navigation";
 import { LiveStatus } from "@/components/header/LiveStatus";
 import { GlobalSearch } from "@/components/search/global-search";
 import { ThemeToggle } from "@/components/shared/ThemeToggle";
-import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
+
+import { Separator } from "@rg/ui";
 import { useSidebarAuth } from "@/hooks/useSidebarAuth";
 import { Home, ShieldCheck } from "@/lib/icons-config";
 import { cn } from "@/lib/utils";

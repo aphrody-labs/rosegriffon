@@ -3,7 +3,7 @@
 import "./globals.css";
 
 import { usePathname } from "next/navigation";
-import { Toaster } from "sonner";
+import { SidebarInset, SidebarProvider, Toaster } from "@rg/ui";
 
 import { AppSidebar } from "@/components/app-sidebar";
 import Footer from "@/components/layout/footer";
@@ -12,7 +12,6 @@ import { MobileBottomNavigation } from "@/components/layout/MobileBottomNavigati
 import SidebarNavigationHandler from "@/components/layout/SidebarNavigationHandler";
 import EdgeSwipeDetector from "@/components/shared/EdgeSwipeDetector";
 import MobileWatermark from "@/components/shared/MobileWatermark";
-import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { AuthProvider } from "@/contexts/auth-context";
 import { ProfileProvider } from "@/contexts/profile-context";
 import { ThemeProvider } from "@/contexts/theme-context";

@@ -1,20 +1,14 @@
 "use client";
 
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@rg/ui";
 import { ChevronUp, LogIn, LogOut, ShieldCheck, User } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 import { ThemeToggle } from "@/components/shared/ThemeToggle";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import {
-	DropdownMenu,
-	DropdownMenuContent,
-	DropdownMenuItem,
-	DropdownMenuLabel,
-	DropdownMenuSeparator,
-	DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Skeleton } from "@/components/ui/skeleton";
+import { Avatar, AvatarFallback, AvatarImage } from "@rg/ui";
+
+import { Skeleton } from "@rg/ui";
 import { useSidebarAuth } from "@/hooks/useSidebarAuth";
 import { authClient } from "@/lib/auth-client";
 

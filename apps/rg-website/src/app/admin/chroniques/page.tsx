@@ -1,22 +1,14 @@
+import { Badge, Button, Card, CardContent, CardHeader, CardTitle, Input, Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@rg/ui";
 import { BarChart3, Calendar, Eye, FileText, Filter, Plus, Search } from "lucide-react";
 import Link from "next/link";
 
 import { ChronicleActions } from "@/components/admin/chronicles/chronicle-actions";
-import { StatsCard } from "@/components/admin/dashboard/stats-card";
-import { AdminPageHeader } from "@/components/admin/shared/AdminPageHeader";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { PaginationControls } from "@/components/ui/pagination-controls";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { StorageImage } from "@/components/ui/storage-image";
+import { DashboardStatsCard as StatsCard } from "@rg/ui";
+import { AdminPageHeader } from "@rg/ui";
+
+import { PaginationControls } from "@rg/ui";
+
+import { StorageImage } from "@rg/ui";
 import { getArticleStats, getArticles } from "@/lib/api/articles";
 
 export default async function ChroniquesAdminPage({

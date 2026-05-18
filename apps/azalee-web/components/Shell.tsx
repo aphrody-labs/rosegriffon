@@ -15,7 +15,7 @@ import { NotificationBell } from "@/components/news/NotificationBell";
 import { AuthProvider, useAuth } from "@/components/providers/AuthProvider";
 import { useLanguage } from "@/components/providers/language-provider";
 import { PullToRefresh } from "@/components/ui/pull-to-refresh";
-import { SidebarInset, SidebarProvider, useSidebar } from "@/components/ui/sidebar";
+import { SidebarInset, SidebarProvider, useSidebar } from "@rg/ui";
 import { GlobalSearch } from "@/components/wiki/GlobalSearch";
 import { cn } from "@/lib/utils";
 import type { AzaleeProfile, BetterAuthUser } from "./providers/AuthProvider";

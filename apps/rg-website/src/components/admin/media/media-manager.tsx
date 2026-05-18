@@ -1,14 +1,13 @@
 "use client";
 
+import { Button, Card, CardContent, Input } from "@rg/ui";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 
 import { logAction } from "@/app/admin/actions/log";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { StorageImage } from "@/components/ui/storage-image";
+
+import { StorageImage } from "@rg/ui";
 import {
   Table,
   TableBody,
@@ -16,7 +15,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
+} from "@rg/ui";
 import {
   ChevronRight,
   Copy,

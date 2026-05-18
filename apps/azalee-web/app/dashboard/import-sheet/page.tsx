@@ -1,4 +1,4 @@
-import { DashboardPageHeader } from "@/components/dashboard/DashboardPageHeader";
+import { AdminPageHeader as DashboardPageHeader } from "@rg/ui";
 import { ImportSheetForm } from "./ImportSheetForm";
 
 export default function ImportSheetPage() {
