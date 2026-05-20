@@ -1,5 +1,6 @@
 "use server";
 
+import { resolveProfile, isAdmin } from "@rosegriffon/auth";
 import { getServerUser } from "@/lib/auth-helpers";
 import { createAdminClient } from "@/lib/supabase/server";
 
@@ -14,6 +15,14 @@ export async function logAdminAction(
     if (!user) {return;}
 
     const admin = createAdminClient();
+
+    // Vérifier les permissions admin/staff
+    const profile = await resolveProfile(admin, user);
+    if (!profile || !isAdmin(profile.role)) {
+      console.warn("[logAdminAction] Tentative non autorisée d'écriture de log par", user.id);
+      return;
+    }
+
     await admin.from("admin_audit_log").insert({
       action,
       details: details as unknown as Record<string, unknown>,

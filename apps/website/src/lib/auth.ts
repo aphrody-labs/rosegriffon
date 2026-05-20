@@ -185,16 +185,14 @@ export const auth = betterAuth({
 						.eq("id", session.userId)
 						.maybeSingle();
 					if (user)
-						// @ts-ignore - migration typing
-						await ensureUserProfile(getSupabaseAdmin(), user);
+						await ensureUserProfile(user, getSupabaseAdmin());
 				},
 			},
 		},
 		user: {
 			create: {
 				after: async (user) => {
-					// @ts-ignore - migration typing
-					await ensureUserProfile(getSupabaseAdmin(), user);
+					await ensureUserProfile(user, getSupabaseAdmin());
 				},
 			},
 		},

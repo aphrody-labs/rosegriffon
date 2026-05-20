@@ -85,7 +85,7 @@ export function AchilleaBanner({
               <Button
                 asChild
                 size="lg"
-                className="bg-[#6d00ce] hover:bg-[#6d00ce] text-black font-black rounded-xl shadow-[0_0_20px_-5px_rgba(223,255,87,0.6)] hover:shadow-[0_0_25px_-5px_rgba(223,255,87,0.8)] transition-all duration-300 border border-[#DFFF57] px-8"
+                className="bg-[#6d00ce] hover:bg-[#7e14e6] text-[#DFFF57] font-black rounded-xl shadow-[0_0_20px_-5px_rgba(223,255,87,0.6)] hover:shadow-[0_0_25px_-5px_rgba(223,255,87,0.8)] transition-all duration-300 border border-[#DFFF57] px-8"
               >
                 <a href={link} target="_blank" rel="noopener noreferrer">
                   Site web

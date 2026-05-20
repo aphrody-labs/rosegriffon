@@ -1,17 +1,16 @@
 import { Sparkles } from "lucide-react";
 
-import { createClient } from "@/lib/supabase/server";
 import {
 	PATRON_DISCOUNT_PERCENT,
 	getPatronDiscount,
 } from "@/lib/patreon/discount";
+import { getServerUser } from "@/lib/auth-helpers";
 
 export async function PatreonDiscountBanner() {
 	let userId: string | null = null;
 	try {
-		const supabase = await createClient();
-		const { data: auth } = await supabase.auth.getUser();
-		userId = auth.user?.id ?? null;
+		const user = await getServerUser();
+		userId = user?.id ?? null;
 	} catch {
 		// Not logged in
 	}

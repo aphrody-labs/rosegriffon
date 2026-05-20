@@ -3,8 +3,9 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 
-import { createAdminClient, createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/server";
 import { formatEuros, getProduct } from "@/lib/shop/products";
+import { getServerUser } from "@/lib/auth-helpers";
 
 export const metadata = {
 	title: "Détail commande · Boutique Rose Griffon",
@@ -23,7 +24,6 @@ const STATUS_LABEL = {
 interface OrderDetail {
 	id: string;
 	stripe_session_id: string;
-	user_id: string | null;
 	amount_subtotal_cents: number;
 	amount_discount_cents: number;
 	amount_shipping_cents: number;
@@ -34,26 +34,27 @@ interface OrderDetail {
 		line1?: string;
 		line2?: string;
 		city?: string;
+		state?: string;
 		postal_code?: string;
 		country?: string;
 	} | null;
 	shipping_name: string | null;
 	shipping_email: string | null;
 	shipping_phone: string | null;
+	status: keyof typeof STATUS_LABEL;
 	tracking_number: string | null;
 	tracking_carrier: string | null;
-	status: keyof typeof STATUS_LABEL;
-	items: {
-		slug?: string;
-		variantId?: string;
-		qty?: number;
-		unit_amount_cents?: number;
-		label?: string;
-	}[] | null;
 	created_at: string;
 	paid_at: string | null;
 	shipped_at: string | null;
 	delivered_at: string | null;
+	items: {
+		slug?: string;
+		label?: string;
+		qty?: number;
+		unit_amount_cents?: number;
+		variantId?: string;
+	}[] | null;
 }
 
 async function fetchOrder(
@@ -64,9 +65,7 @@ async function fetchOrder(
 		const supabase = createAdminClient();
 		const { data, error } = await supabase
 			.from("orders")
-			.select(
-				"id, stripe_session_id, user_id, amount_subtotal_cents, amount_discount_cents, amount_shipping_cents, amount_tax_cents, amount_total_cents, patron_discount_applied, shipping_address, shipping_name, shipping_email, shipping_phone, tracking_number, tracking_carrier, status, items, created_at, paid_at, shipped_at, delivered_at",
-			)
+			.select("*")
 			.eq("id", orderId)
 			.eq("user_id", userId)
 			.maybeSingle();
@@ -83,11 +82,10 @@ export default async function OrderDetailPage({
 	params: Promise<{ id: string }>;
 }) {
 	const { id } = await params;
-	const supabase = await createClient();
-	const { data: auth } = await supabase.auth.getUser();
-	if (!auth.user) {redirect(`/login?next=/shop/commandes/${id}`);}
+	const user = await getServerUser();
+	if (!user) {redirect(`/login?next=/shop/commandes/${id}`);}
 
-	const order = await fetchOrder(id, auth.user.id);
+	const order = await fetchOrder(id, user.id);
 	if (!order) {notFound();}
 
 	return (

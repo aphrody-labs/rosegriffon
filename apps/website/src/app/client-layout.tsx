@@ -3,8 +3,30 @@
 import "./globals.css";
 
 import { usePathname } from "next/navigation";
-import { BREAKPOINTS, SidebarInset, SidebarProvider, SidebarTrigger, Toaster, useBreakpoint } from "@rosegriffon/ui";
+import { BREAKPOINTS, SidebarInset, SidebarProvider, Toaster, useBreakpoint } from "@rosegriffon/ui";
 import { WebsiteNavigationRail } from "@/components/layout/WebsiteNavigationRail";
+import { Menu, ChevronLeft } from "lucide-react";
+
+function CustomSidebarTrigger() {
+	const { isOpen, toggleSidebar } = useSidebarStore();
+	return (
+		<button
+			onClick={toggleSidebar}
+			className={cn(
+				"fixed top-4 z-50 rounded-full flex items-center justify-center transition-all duration-300",
+				"size-8 text-foreground/75 hover:bg-black/10 dark:hover:bg-white/10 hover:text-foreground",
+				"bg-transparent border border-border/10 shadow-sm backdrop-blur-xs",
+				"focus-visible:outline-hidden cursor-pointer",
+				isOpen 
+					? "left-[calc(var(--sidebar-width)+12px)]" 
+					: "left-4"
+			)}
+			aria-label={isOpen ? "Fermer le menu" : "Ouvrir le menu"}
+		>
+			{isOpen ? <ChevronLeft size={16} /> : <Menu size={16} />}
+		</button>
+	);
+}
 
 import { AppSidebar } from "@/components/app-sidebar";
 import Footer from "@/components/layout/footer";
@@ -76,7 +98,7 @@ export default function ClientLayout({
 							)}
 
 							{!shouldHideSidebar && isExpanded && (
-								<SidebarTrigger className="fixed top-4 left-4 z-50 rounded-lg border bg-background/80 shadow-md backdrop-blur-xs transition-[left] duration-200 peer-data-[state=expanded]:left-[calc(var(--sidebar-width)+16px)]" />
+								<CustomSidebarTrigger />
 							)}
 
 							<SidebarNavigationHandler />
@@ -84,7 +106,7 @@ export default function ClientLayout({
 							<SidebarInset className={cn(
 								"transition-all duration-300",
 								isMedium && "ml-20",
-								isExpanded && "ml-0" // Sidebar handles its own gap
+								isExpanded && "ml-[var(--sidebar-width)] peer-data-[state=collapsed]:ml-0"
 							)}>
 								<div
 									className={cn(
