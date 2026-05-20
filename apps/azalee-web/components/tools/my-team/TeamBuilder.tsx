@@ -1,19 +1,7 @@
 "use client";
 
-import {
-	type CollisionDetection,
-	closestCenter,
-	DndContext,
-	type DragEndEvent,
-	DragOverlay,
-	type DragStartEvent,
-	KeyboardSensor,
-	PointerSensor,
-	pointerWithin,
-	TouchSensor,
-	useSensor,
-	useSensors,
-} from "@dnd-kit/core";
+import { closestCenter, DndContext, DragOverlay, KeyboardSensor, PointerSensor, pointerWithin, TouchSensor, useSensor, useSensors } from '@dnd-kit/core';
+import type { CollisionDetection, DragEndEvent, DragStartEvent } from '@dnd-kit/core';
 import { sortableKeyboardCoordinates } from "@dnd-kit/sortable";
 import { toPng } from "html-to-image";
 import Image from "next/image";
@@ -22,14 +10,12 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import { deleteTeam, saveTeam, updateTeam } from "@/app/actions/teams";
 import { Icon } from "@/components/ui/Icon";
-import { FORMATIONS, type Formation, ROLE_COLORS } from "@/lib/formations";
+import { FORMATIONS, ROLE_COLORS } from '@/lib/formations';
+import type { Formation } from '@/lib/formations';
 import type { SavedTeam, TeamData, TeamMember } from "@/lib/team-types";
 import { cn } from "@/lib/utils";
-import {
-	CharacterPicker,
-	CharacterPickerOverlay,
-	type PickerCharacter,
-} from "./CharacterPicker";
+import { CharacterPicker, CharacterPickerOverlay } from './CharacterPicker';
+import type { PickerCharacter } from './CharacterPicker';
 import { FormationField } from "./FormationField";
 import { PlayerDetailPanel } from "./PlayerDetailPanel";
 import { PlayerSlotOverlay } from "./PlayerSlot";
@@ -50,7 +36,7 @@ type DragData =
 
 const customCollision: CollisionDetection = (args) => {
 	const pointer = pointerWithin(args);
-	if (pointer.length > 0) return pointer;
+	if (pointer.length > 0) {return pointer;}
 	return closestCenter(args);
 };
 
@@ -65,7 +51,7 @@ function loadFromLocalStorage(): {
 } | null {
 	try {
 		const raw = localStorage.getItem(LS_KEY);
-		if (!raw) return null;
+		if (!raw) {return null;}
 		return JSON.parse(raw);
 	} catch {
 		return null;
@@ -83,7 +69,7 @@ function saveToLocalStorage(
 			JSON.stringify({ formationIdx, members, teamName }),
 		);
 	} catch {
-		/* quota */
+		/* Quota */
 	}
 }
 
@@ -109,7 +95,7 @@ function decodeTeamFromURL(
 		const parts = decoded.split("|");
 		const formationId = parts[0];
 		const formationIdx = FORMATIONS.findIndex((f) => f.id === formationId);
-		if (formationIdx < 0) return null;
+		if (formationIdx === -1) {return null;}
 
 		const charMap = new Map(characters.map((c) => [c.charaId, c]));
 		const members: Record<string, TeamMember> = {};
@@ -119,13 +105,13 @@ function decodeTeamFromURL(
 			const char = charMap.get(charaId);
 			if (char && slot) {
 				members[slot] = {
-					slot,
 					charaId: char.charaId,
+					element: char.element,
+					imageUrl: char.imageUrl,
 					name: char.name,
 					position: char.position,
-					element: char.element,
 					rarity: char.rarity,
-					imageUrl: char.imageUrl,
+					slot,
 					slug: char.slug,
 				};
 			}
@@ -140,10 +126,10 @@ function decodeTeamFromURL(
 
 const RARITY_SCORE: Record<string, number> = {
 	BASARA: 6,
-	Héros: 5,
-	Émérite: 4,
 	Expérimenté: 3,
+	Héros: 5,
 	Normal: 1,
+	Émérite: 4,
 };
 
 /* ── Formation Mini-Preview ───────────────────────────────── */
@@ -214,14 +200,14 @@ export function TeamBuilder({
 			const t = params.get("t");
 			if (t) {
 				const decoded = decodeTeamFromURL(t, characters);
-				if (decoded) return decoded.formationIdx;
+				if (decoded) {return decoded.formationIdx;}
 			}
 		}
 		if (initialTeam) {
 			const idx = FORMATIONS.findIndex(
 				(f) => f.id === initialTeam.formation_id,
 			);
-			return idx >= 0 ? idx : 0;
+			return Math.max(idx, 0);
 		}
 		const ls = loadFromLocalStorage();
 		return ls?.formationIdx ?? 0;
@@ -233,13 +219,13 @@ export function TeamBuilder({
 			const t = params.get("t");
 			if (t) {
 				const decoded = decodeTeamFromURL(t, characters);
-				if (decoded) return decoded.members;
+				if (decoded) {return decoded.members;}
 			}
 		}
 		if (initialTeam?.formation_data) {
 			const data = initialTeam.formation_data as TeamData;
 			const map: Record<string, TeamMember> = {};
-			for (const m of data.members || []) map[m.slot] = m;
+			for (const m of data.members || []) {map[m.slot] = m;}
 			return map;
 		}
 		const ls = loadFromLocalStorage();
@@ -247,7 +233,7 @@ export function TeamBuilder({
 	});
 
 	const [teamName, setTeamName] = useState(() => {
-		if (initialTeam?.name) return initialTeam.name;
+		if (initialTeam?.name) {return initialTeam.name;}
 		const ls = loadFromLocalStorage();
 		return ls?.teamName ?? "";
 	});
@@ -277,21 +263,21 @@ export function TeamBuilder({
 
 	const handleSlotTap = useCallback(
 		(slotId: string) => {
-			if (!selectedCharaId) return;
+			if (!selectedCharaId) {return;}
 			const char = characters.find((c) => c.charaId === selectedCharaId);
-			if (!char) return;
+			if (!char) {return;}
 
 			pushHistory({ ...members });
 			setMembers((prev) => ({
 				...prev,
 				[slotId]: {
-					slot: slotId,
 					charaId: char.charaId,
+					element: char.element,
+					imageUrl: char.imageUrl,
 					name: char.name,
 					position: char.position,
-					element: char.element,
 					rarity: char.rarity,
-					imageUrl: char.imageUrl,
+					slot: slotId,
 					slug: char.slug,
 					stats: char.stats,
 				},
@@ -303,7 +289,7 @@ export function TeamBuilder({
 
 	const undo = useCallback(() => {
 		setHistory((prev) => {
-			if (prev.length === 0) return prev;
+			if (prev.length === 0) {return prev;}
 			const newHistory = [...prev];
 			const last = newHistory.pop()!;
 			setMembers(last);
@@ -327,7 +313,7 @@ export function TeamBuilder({
 	const fieldRef = useRef<HTMLDivElement>(null);
 
 	// ── Auto-save to localStorage ──────────────────────
-	const saveTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
+	const saveTimerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 	useEffect(() => {
 		clearTimeout(saveTimerRef.current);
 		saveTimerRef.current = setTimeout(() => {
@@ -363,11 +349,11 @@ export function TeamBuilder({
 		(event: DragEndEvent) => {
 			const { active, over } = event;
 			setActiveDrag(null);
-			if (!over) return;
+			if (!over) {return;}
 
 			const dragData = active.data.current as DragData;
 			const dropId = over.id as string;
-			if (!over.data.current) return;
+			if (!over.data.current) {return;}
 
 			// Save to undo before mutation
 			pushHistory({ ...members });
@@ -377,13 +363,13 @@ export function TeamBuilder({
 				setMembers((prev) => ({
 					...prev,
 					[dropId]: {
-						slot: dropId,
 						charaId: char.charaId,
+						element: char.element,
+						imageUrl: char.imageUrl,
 						name: char.name,
 						position: char.position,
-						element: char.element,
 						rarity: char.rarity,
-						imageUrl: char.imageUrl,
+						slot: dropId,
 						slug: char.slug,
 						stats: char.stats,
 					},
@@ -395,15 +381,15 @@ export function TeamBuilder({
 				"member" in dragData
 			) {
 				const fromSlot = dragData.slotId;
-				if (fromSlot === dropId) return;
+				if (fromSlot === dropId) {return;}
 				setMembers((prev) => {
 					const next = { ...prev };
 					const from = prev[fromSlot];
 					const to = prev[dropId];
-					if (from) next[dropId] = { ...from, slot: dropId };
-					else delete next[dropId];
-					if (to) next[fromSlot] = { ...to, slot: fromSlot };
-					else delete next[fromSlot];
+					if (from) {next[dropId] = { ...from, slot: dropId };}
+					else {delete next[dropId];}
+					if (to) {next[fromSlot] = { ...to, slot: fromSlot };}
+					else {delete next[fromSlot];}
 					return next;
 				});
 			}
@@ -431,7 +417,7 @@ export function TeamBuilder({
 
 	// ── Clear all ──────────────────────────────────────
 	const handleClearAll = useCallback(() => {
-		if (Object.keys(members).length === 0) return;
+		if (Object.keys(members).length === 0) {return;}
 		pushHistory({ ...members });
 		setMembers({});
 	}, [members, pushHistory]);
@@ -444,7 +430,7 @@ export function TeamBuilder({
 			setMembers((prev) => {
 				const next: Record<string, TeamMember> = {};
 				for (const [slot, member] of Object.entries(prev)) {
-					if (!slot.startsWith("field-")) next[slot] = member;
+					if (!slot.startsWith("field-")) {next[slot] = member;}
 				}
 				return next;
 			});
@@ -470,19 +456,19 @@ export function TeamBuilder({
 			// Fill field positions
 			for (const pos of formation.positions) {
 				const slotId = `field-${pos.index}`;
-				if (next[slotId]) continue;
+				if (next[slotId]) {continue;}
 				const match = available.find(
 					(c) => c.position === pos.role && !usedNow.has(c.charaId),
 				);
 				if (match) {
 					next[slotId] = {
-						slot: slotId,
 						charaId: match.charaId,
+						element: match.element,
+						imageUrl: match.imageUrl,
 						name: match.name,
 						position: match.position,
-						element: match.element,
 						rarity: match.rarity,
-						imageUrl: match.imageUrl,
+						slot: slotId,
 						slug: match.slug,
 						stats: match.stats,
 					};
@@ -493,17 +479,17 @@ export function TeamBuilder({
 			// Fill reserves
 			for (let i = 0; i < 5; i++) {
 				const slotId = `reserve-${i}`;
-				if (next[slotId]) continue;
+				if (next[slotId]) {continue;}
 				const match = available.find((c) => !usedNow.has(c.charaId));
 				if (match) {
 					next[slotId] = {
-						slot: slotId,
 						charaId: match.charaId,
+						element: match.element,
+						imageUrl: match.imageUrl,
 						name: match.name,
 						position: match.position,
-						element: match.element,
 						rarity: match.rarity,
-						imageUrl: match.imageUrl,
+						slot: slotId,
 						slug: match.slug,
 						stats: match.stats,
 					};
@@ -527,11 +513,11 @@ export function TeamBuilder({
 		try {
 			if (teamId) {
 				const result = await updateTeam(teamId, name, data);
-				if ("error" in result) toast.error(result.error);
-				else toast.success("Équipe mise à jour");
+				if ("error" in result) {toast.error(result.error);}
+				else {toast.success("Équipe mise à jour");}
 			} else {
 				const result = await saveTeam(name, data);
-				if ("error" in result) toast.error(result.error);
+				if ("error" in result) {toast.error(result.error);}
 				else {
 					setTeamId(result.id);
 					toast.success("Équipe sauvegardée");
@@ -545,9 +531,9 @@ export function TeamBuilder({
 
 	// ── Delete ─────────────────────────────────────────
 	const handleDelete = useCallback(async () => {
-		if (!teamId || !window.confirm("Supprimer cette équipe ?")) return;
+		if (!teamId || !window.confirm("Supprimer cette équipe ?")) {return;}
 		const result = await deleteTeam(teamId);
-		if ("error" in result) toast.error(result.error);
+		if ("error" in result) {toast.error(result.error);}
 		else {
 			setTeamId(null);
 			setMembers({});
@@ -558,13 +544,13 @@ export function TeamBuilder({
 
 	// ── Export ─────────────────────────────────────────
 	const handleExport = useCallback(async () => {
-		if (!fieldRef.current) return;
+		if (!fieldRef.current) {return;}
 		try {
 			const dataUrl = await toPng(fieldRef.current, {
-				pixelRatio: 3,
 				backgroundColor: "#064e3b",
 				cacheBust: true,
 				filter: (node) => !node.classList?.contains("no-export"),
+				pixelRatio: 3,
 			});
 			const link = document.createElement("a");
 			link.download = `${teamName || "mon-equipe"}-${formation.id}.png`;
@@ -584,7 +570,7 @@ export function TeamBuilder({
 			await navigator.clipboard.writeText(url);
 			toast.success("Lien de partage copié");
 		} catch {
-			/* silent */
+			/* Silent */
 		}
 	}, [formation.id, members]);
 
@@ -790,21 +776,21 @@ export function TeamBuilder({
 					{/* Animated pill indicator */}
 					{(() => {
 						const tabIndex =
-							mobilePanel === "field" ? 0 : mobilePanel === "roster" ? 1 : 2;
+							mobilePanel === "field" ? 0 : (mobilePanel === "roster" ? 1 : 2);
 						return (
 							<div
 								className="absolute top-1 bottom-1 rounded-xl bg-primary transition-all duration-300 ease-[cubic-bezier(0.2,0,0,1)]"
 								style={{
-									width: "calc((100% - 8px) / 3)",
 									left: `calc(4px + ${tabIndex} * (100% - 8px) / 3)`,
+									width: "calc((100% - 8px) / 3)",
 								}}
 							/>
 						);
 					})()}
 					{[
-						{ key: "field" as const, icon: "stadium", label: "Terrain" },
-						{ key: "roster" as const, icon: "group", label: "Joueurs" },
-						{ key: "stats" as const, icon: "analytics", label: "Stats" },
+						{ icon: "stadium", key: "field" as const, label: "Terrain" },
+						{ icon: "group", key: "roster" as const, label: "Joueurs" },
+						{ icon: "analytics", key: "stats" as const, label: "Stats" },
 					].map((tab) => (
 						<button
 							key={tab.key}

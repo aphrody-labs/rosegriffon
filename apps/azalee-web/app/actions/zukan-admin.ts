@@ -18,12 +18,12 @@ export async function updateZukanHash(
       .eq("id", characterId);
 
     if (error) {
-      return { success: false, error: error.message };
+      return { error: error.message, success: false };
     }
 
     revalidatePath("/dashboard/zukan-review");
     return { success: true };
   } catch {
-    return { success: false, error: "Accès non autorisé ou erreur serveur." };
+    return { error: "Accès non autorisé ou erreur serveur.", success: false };
   }
 }

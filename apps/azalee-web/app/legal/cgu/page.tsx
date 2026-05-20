@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Conditions générales d'utilisation - Azalée",
   description: "Conditions générales d'utilisation du site Azalée et des services Rose Griffon.",
+  title: "Conditions générales d'utilisation - Azalée",
 };
 
 export default function TermsOfServicePage() {

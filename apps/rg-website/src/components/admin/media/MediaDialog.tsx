@@ -30,7 +30,7 @@ export function MediaDialog({ open, onOpenChange, onInsert }: MediaDialogProps) 
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (!file) return;
+    if (!file) {return;}
 
     if (!file.type.startsWith("image/")) {
       toast.error("Le fichier doit être une image");
@@ -56,7 +56,7 @@ export function MediaDialog({ open, onOpenChange, onInsert }: MediaDialogProps) 
       const fileExt = file.name.split(".").pop()?.toLowerCase();
       const fileName = `chronicles/${Date.now()}-${Math.random()
         .toString(36)
-        .substring(2)}.${fileExt}`;
+        .slice(2)}.${fileExt}`;
 
       const { error: uploadError } = await supabase.storage.from("assets").upload(fileName, file, {
         cacheControl: "3600",
@@ -79,9 +79,9 @@ export function MediaDialog({ open, onOpenChange, onInsert }: MediaDialogProps) 
       } = supabase.storage.from("assets").getPublicUrl(fileName);
 
       onInsert({
-        type: "image",
-        src: publicUrl,
         alt: file.name.split(".")[0],
+        src: publicUrl,
+        type: "image",
       });
       onOpenChange(false);
       toast.success("Image téléchargée avec succès");
@@ -172,10 +172,10 @@ export function MediaDialog({ open, onOpenChange, onInsert }: MediaDialogProps) 
                 <EmoteGallery
                   onSelect={(emote) => {
                     onInsert({
-                      type: "emote",
-                      src: emote.src,
                       alt: emote.alt,
+                      src: emote.src,
                       title: emote.name,
+                      type: "emote",
                     });
                     onOpenChange(false);
                   }}

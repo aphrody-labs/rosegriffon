@@ -20,8 +20,8 @@ export async function GET(req: Request) {
 	}
 
 	const result = await refreshAllMemberships({
-		olderThanMs: 6 * 24 * 3600 * 1000,
 		limit: 200,
+		olderThanMs: 6 * 24 * 3600 * 1000,
 	});
 	return NextResponse.json(result);
 }

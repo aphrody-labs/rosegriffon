@@ -3,10 +3,8 @@
 import { SearchX, User } from "lucide-react";
 import Image from "next/image";
 import * as React from "react";
-import {
-	type CompareSearchResult,
-	searchCompareCharacters,
-} from "@/app/actions/search";
+import { searchCompareCharacters } from '@/app/actions/search';
+import type { CompareSearchResult } from '@/app/actions/search';
 import {
 	CommandDialog,
 	CommandEmpty,
@@ -26,38 +24,38 @@ interface CharacterSearchDialogProps {
 }
 
 const ELEMENT_OPTIONS = [
-	{ value: "Fire", label: "Feu", sprite: "fire" },
-	{ value: "Wind", label: "Vent", sprite: "wind" },
-	{ value: "Forest", label: "Forêt", sprite: "forest" },
-	{ value: "Mountain", label: "Montagne", sprite: "mountain" },
+	{ label: "Feu", sprite: "fire", value: "Fire" },
+	{ label: "Vent", sprite: "wind", value: "Wind" },
+	{ label: "Forêt", sprite: "forest", value: "Forest" },
+	{ label: "Montagne", sprite: "mountain", value: "Mountain" },
 ] as const;
 
 const POSITION_OPTIONS = [
-	{ value: "GK", label: "GAR", icon: "gardien" },
-	{ value: "DF", label: "DEF", icon: "defense" },
-	{ value: "MF", label: "MIL", icon: "dribble" },
-	{ value: "FW", label: "ATT", icon: "tir" },
+	{ icon: "gardien", label: "GAR", value: "GK" },
+	{ icon: "defense", label: "DEF", value: "DF" },
+	{ icon: "dribble", label: "MIL", value: "MF" },
+	{ icon: "tir", label: "ATT", value: "FW" },
 ] as const;
 
 const RARITY_OPTIONS = [
-	{ value: "0", label: "Normal" },
-	{ value: "2", label: "Expérimenté" },
-	{ value: "10", label: "Héros" },
-	{ value: "20", label: "BASARA" },
+	{ label: "Normal", value: "0" },
+	{ label: "Expérimenté", value: "2" },
+	{ label: "Héros", value: "10" },
+	{ label: "BASARA", value: "20" },
 ] as const;
 
 const POSITION_FR: Record<string, string> = {
-	FW: "ATT",
-	MF: "MIL",
 	DF: "DEF",
+	FW: "ATT",
 	GK: "GAR",
+	MF: "MIL",
 };
 
 const ELEMENT_FR: Record<string, string> = {
 	Fire: "Feu",
-	Wind: "Vent",
 	Forest: "Forêt",
 	Mountain: "Montagne",
+	Wind: "Vent",
 };
 
 export function CharacterSearchDialog({
@@ -92,7 +90,7 @@ export function CharacterSearchDialog({
 
 	// Debounced search — triggers on text query OR filter-only browse
 	React.useEffect(() => {
-		if (abortRef.current) abortRef.current.abort();
+		if (abortRef.current) {abortRef.current.abort();}
 
 		if (!canSearch) {
 			setResults([]);
@@ -339,7 +337,7 @@ export function CharacterSearchDialog({
 												className="object-contain"
 												unoptimized
 											/>
-										) : result.imageUrl ? (
+										) : (result.imageUrl ? (
 											<Image
 												src={result.imageUrl}
 												alt=""
@@ -356,7 +354,7 @@ export function CharacterSearchDialog({
 												aria-hidden="true"
 												className="text-[var(--md-sys-color-on-surface-variant)] m-auto"
 											/>
-										)}
+										))}
 									</div>
 
 									<div className="flex-1 min-w-0">

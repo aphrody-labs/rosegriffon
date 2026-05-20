@@ -20,7 +20,7 @@ export async function LatestChroniqueSection() {
 		.limit(1)
 		.single();
 
-	if (!latestChronique) return null;
+	if (!latestChronique) {return null;}
 
 	const article = latestChronique;
 

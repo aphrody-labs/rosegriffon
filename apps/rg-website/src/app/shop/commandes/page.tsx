@@ -10,23 +10,23 @@ export const metadata = {
 };
 
 const STATUS_LABEL = {
-	pending: "En attente",
-	paid: "Payée",
-	shipped: "Expédiée",
-	delivered: "Livrée",
-	refunded: "Remboursée",
-	failed: "Échec",
 	canceled: "Annulée",
+	delivered: "Livrée",
+	failed: "Échec",
+	paid: "Payée",
+	pending: "En attente",
+	refunded: "Remboursée",
+	shipped: "Expédiée",
 } as const;
 
 const STATUS_TONE = {
-	pending: "bg-amber-100 text-amber-900 border-amber-400",
-	paid: "bg-sky-100 text-sky-900 border-sky-400",
-	shipped: "bg-indigo-100 text-indigo-900 border-indigo-400",
-	delivered: "bg-emerald-100 text-emerald-900 border-emerald-400",
-	refunded: "bg-rose-100 text-rose-900 border-rose-400",
-	failed: "bg-red-200 text-red-900 border-red-500",
 	canceled: "bg-zinc-200 text-zinc-900 border-zinc-400",
+	delivered: "bg-emerald-100 text-emerald-900 border-emerald-400",
+	failed: "bg-red-200 text-red-900 border-red-500",
+	paid: "bg-sky-100 text-sky-900 border-sky-400",
+	pending: "bg-amber-100 text-amber-900 border-amber-400",
+	refunded: "bg-rose-100 text-rose-900 border-rose-400",
+	shipped: "bg-indigo-100 text-indigo-900 border-indigo-400",
 } as const;
 
 interface OrderRow {
@@ -36,7 +36,7 @@ interface OrderRow {
 	patron_discount_applied: boolean;
 	status: keyof typeof STATUS_LABEL;
 	created_at: string;
-	items: Array<{ slug?: string; label?: string; qty?: number }> | null;
+	items: { slug?: string; label?: string; qty?: number }[] | null;
 }
 
 async function fetchOrders(userId: string): Promise<OrderRow[]> {
@@ -55,8 +55,8 @@ async function fetchOrders(userId: string): Promise<OrderRow[]> {
 			return [];
 		}
 		return (data ?? []) as OrderRow[];
-	} catch (err) {
-		console.warn("[shop/commandes] table orders absente ou indisponible:", err);
+	} catch (error) {
+		console.warn("[shop/commandes] table orders absente ou indisponible:", error);
 		return [];
 	}
 }
@@ -109,10 +109,10 @@ export default async function OrdersPage() {
 										<p className="mt-1 text-sm text-white/80">
 											{new Date(order.created_at).toLocaleDateString("fr-FR", {
 												day: "2-digit",
-												month: "long",
-												year: "numeric",
 												hour: "2-digit",
 												minute: "2-digit",
+												month: "long",
+												year: "numeric",
 											})}
 										</p>
 										<p className="mt-2 text-xs text-white/60">

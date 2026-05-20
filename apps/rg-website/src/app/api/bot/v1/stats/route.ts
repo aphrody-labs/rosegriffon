@@ -1,4 +1,5 @@
-import { type NextRequest, NextResponse } from "next/server";
+import { NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
 
 import { createAdminClient } from "@/lib/supabase/server";
 import { assertBotAuth } from "../_lib";
@@ -13,7 +14,7 @@ export const dynamic = "force-dynamic";
  */
 export async function GET(request: NextRequest) {
 	const denied = assertBotAuth(request);
-	if (denied) return denied;
+	if (denied) {return denied;}
 
 	const supabase = createAdminClient();
 	if (!supabase) {
@@ -21,17 +22,16 @@ export async function GET(request: NextRequest) {
 	}
 
 	try {
-		// @ts-ignore - bypassing strict generic check for migration
 		const stats = await getDashboardStats(supabase);
 		return NextResponse.json(stats, {
-			status: 200,
 			headers: {
 				"cache-control": "private, max-age=30, s-maxage=30",
 			},
+			status: 200,
 		});
-	} catch (err) {
+	} catch (error) {
 		return NextResponse.json(
-			{ error: err instanceof Error ? err.message : "Failed to fetch stats" },
+			{ error: error instanceof Error ? error.message : "Failed to fetch stats" },
 			{ status: 500 },
 		);
 	}

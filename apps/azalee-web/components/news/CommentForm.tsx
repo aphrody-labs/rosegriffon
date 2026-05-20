@@ -35,7 +35,7 @@ export function CommentForm({
 	const [isPending, startTransition] = useTransition();
 	const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-	const isReply = !!parentId;
+	const isReply = Boolean(parentId);
 	const defaultPlaceholder =
 		placeholder ?? (isReply ? "Écrire une réponse…" : "Écrire un commentaire…");
 	const remaining = MAX_LENGTH - content.length;
@@ -61,7 +61,7 @@ export function CommentForm({
 
 	const handleSubmit = (e: React.FormEvent) => {
 		e.preventDefault();
-		if (isEmpty || isOverLimit || isPending) return;
+		if (isEmpty || isOverLimit || isPending) {return;}
 
 		startTransition(async () => {
 			try {
@@ -76,9 +76,9 @@ export function CommentForm({
 				}
 				onSubmit(comment);
 				toast.success(isReply ? "Réponse publiée" : "Commentaire publié");
-			} catch (err) {
+			} catch (error) {
 				const message =
-					err instanceof Error ? err.message : "Erreur lors de la publication";
+					error instanceof Error ? error.message : "Erreur lors de la publication";
 				toast.error(message);
 			}
 		});
@@ -143,7 +143,7 @@ export function CommentForm({
 						placeholder={defaultPlaceholder}
 						rows={2}
 						className="w-full resize-none bg-transparent px-4 pt-3 pb-10 text-sm text-on-surface placeholder:text-on-surface-variant/40 focus:outline-hidden leading-relaxed"
-						style={{ minHeight: "80px", maxHeight: "192px" }}
+						style={{ maxHeight: "192px", minHeight: "80px" }}
 					/>
 
 					{/* Footer interne */}
@@ -153,9 +153,9 @@ export function CommentForm({
 								"text-xs tabular-nums",
 								isOverLimit
 									? "text-red-500 font-medium"
-									: remaining <= 100
+									: (remaining <= 100
 										? "text-amber-500"
-										: "text-on-surface-variant/40",
+										: "text-on-surface-variant/40"),
 							)}
 						>
 							{remaining}
@@ -179,7 +179,7 @@ export function CommentForm({
 								disabled={isEmpty || isOverLimit || isPending}
 								className="h-7 px-3 text-xs rounded-xl"
 							>
-								{isPending ? "…" : isReply ? "Répondre" : "Commenter"}
+								{isPending ? "…" : (isReply ? "Répondre" : "Commenter")}
 							</Button>
 						</div>
 					</div>

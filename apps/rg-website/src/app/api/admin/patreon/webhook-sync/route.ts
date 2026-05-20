@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { requirePatreonCreator } from "@/lib/auth-helpers";
-import { patreonFetch, PatreonApiError } from "@/lib/patreon/client";
+import { PatreonApiError, patreonFetch } from "@/lib/patreon/client";
 import { decryptToken } from "@/lib/patreon/encryption";
 import { ALL_TRIGGERS } from "@/lib/patreon/webhooks";
 import { createAdminClient } from "@/lib/supabase/server";
@@ -75,13 +75,13 @@ export async function POST(req: Request) {
 			? campaigns.data[0]
 			: campaigns.data;
 		campaignId = data?.id ?? null;
-	} catch (e) {
-		console.error("[admin/webhook-sync] fetch campaigns failed", e);
+	} catch (error) {
+		console.error("[admin/webhook-sync] fetch campaigns failed", error);
 		return NextResponse.json(
 			{
 				ok: false,
 				reason: "fetch_campaign_failed",
-				detail: e instanceof Error ? e.message : String(e),
+				detail: error instanceof Error ? error.message : String(error),
 			},
 			{ status: 500 },
 		);
@@ -102,8 +102,8 @@ export async function POST(req: Request) {
 		) as unknown as PatreonWebhookResource[];
 		const ours = arr.find((w) => w.attributes?.uri === targetUri);
 		existingId = ours?.id ?? null;
-	} catch (e) {
-		console.warn("[admin/webhook-sync] list webhooks failed (proceed)", e);
+	} catch (error) {
+		console.warn("[admin/webhook-sync] list webhooks failed (proceed)", error);
 	}
 
 	// 4. Création ou mise à jour
@@ -120,7 +120,7 @@ export async function POST(req: Request) {
 				? {}
 				: {
 						relationships: {
-							campaign: { data: { type: "campaign", id: campaignId } },
+							campaign: { data: { id: campaignId, type: "campaign" } },
 						},
 					}),
 		},
@@ -132,13 +132,13 @@ export async function POST(req: Request) {
 	let result: PatreonWebhookResource | null = null;
 	try {
 		const res = await fetch(`https://www.patreon.com/api/oauth2/v2${path}`, {
-			method,
+			body: JSON.stringify(body),
 			headers: {
+				accept: "application/json",
 				authorization: `Bearer ${creatorToken}`,
 				"content-type": "application/json",
-				accept: "application/json",
 			},
-			body: JSON.stringify(body),
+			method,
 		});
 		if (!res.ok) {
 			const text = await res.text();
@@ -150,18 +150,18 @@ export async function POST(req: Request) {
 		}
 		const json = (await res.json()) as { data: PatreonWebhookResource };
 		result = json.data;
-	} catch (e) {
-		console.error("[admin/webhook-sync] upstream failed", e);
+	} catch (error) {
+		console.error("[admin/webhook-sync] upstream failed", error);
 		return NextResponse.json(
 			{
 				ok: false,
 				reason: "patreon_api_failed",
 				detail:
-					e instanceof PatreonApiError
-						? { status: e.status, body: e.body }
-						: e instanceof Error
-							? e.message
-							: String(e),
+					error instanceof PatreonApiError
+						? { status: error.status, body: error.body }
+						: error instanceof Error
+							? error.message
+							: String(error),
 			},
 			{ status: 500 },
 		);
@@ -172,21 +172,22 @@ export async function POST(req: Request) {
 		await supabase
 			.from("patreon_webhook_state")
 			.update({
-				patreon_webhook_id: result.id,
-				uri: result.attributes.uri,
-				triggers: result.attributes.triggers,
-				paused: result.attributes.paused,
+				last_attempted_at: result.attributes.last_attempted_at,
 				num_consecutive_times_failed:
 					result.attributes.num_consecutive_times_failed,
-				last_attempted_at: result.attributes.last_attempted_at,
+				patreon_webhook_id: result.id,
+				paused: result.attributes.paused,
+				triggers: result.attributes.triggers,
 				updated_at: new Date().toISOString(),
+				uri: result.attributes.uri,
 			})
 			.eq("id", 1);
 	}
 
 	return NextResponse.json({
-		ok: true,
 		mode: existingId ? "patched" : "created",
+		ok: true,
+		secret_changed: !existingId,
 		webhook: result
 			? {
 					id: result.id,
@@ -197,7 +198,6 @@ export async function POST(req: Request) {
 						result.attributes.num_consecutive_times_failed,
 				}
 			: null,
-		secret_changed: !existingId,
 	});
 }
 
@@ -237,20 +237,20 @@ export async function GET() {
 			ok: true,
 			webhooks: arr.map((w) => ({
 				id: w.id,
-				uri: w.attributes.uri,
-				triggers: w.attributes.triggers,
-				paused: w.attributes.paused,
-				num_consecutive_times_failed: w.attributes.num_consecutive_times_failed,
 				last_attempted_at: w.attributes.last_attempted_at,
+				num_consecutive_times_failed: w.attributes.num_consecutive_times_failed,
+				paused: w.attributes.paused,
+				triggers: w.attributes.triggers,
+				uri: w.attributes.uri,
 			})),
 		});
-	} catch (e) {
-		console.error("[admin/webhook-sync] list failed", e);
+	} catch (error) {
+		console.error("[admin/webhook-sync] list failed", error);
 		return NextResponse.json(
 			{
 				ok: false,
 				reason: "patreon_api_failed",
-				detail: e instanceof Error ? e.message : String(e),
+				detail: error instanceof Error ? error.message : String(error),
 			},
 			{ status: 500 },
 		);

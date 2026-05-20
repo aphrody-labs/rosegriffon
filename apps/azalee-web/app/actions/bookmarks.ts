@@ -52,7 +52,7 @@ export async function getBookmarkStates(articleIds: string[]): Promise<Record<st
 
 export async function getUserBookmarks(): Promise<string[]> {
   const session = await getServerSession();
-  if (!session?.user) return [];
+  if (!session?.user) {return [];}
 
   const supabase = await createClient();
   const { data } = await supabase

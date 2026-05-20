@@ -63,7 +63,7 @@ export function TagsSection({ tags, onTagsChange }: TagsSectionProps) {
 
   const addTag = (tag: string) => {
     const trimmed = tag.trim().toLowerCase();
-    if (!trimmed || tags.includes(trimmed) || tags.length >= MAX_TAGS) return;
+    if (!trimmed || tags.includes(trimmed) || tags.length >= MAX_TAGS) {return;}
     onTagsChange([...tags, trimmed]);
     setInputValue("");
     setSuggestions([]);
@@ -79,7 +79,10 @@ export function TagsSection({ tags, onTagsChange }: TagsSectionProps) {
       e.preventDefault();
       addTag(inputValue);
     } else if (e.key === "Backspace" && !inputValue && tags.length > 0) {
-      removeTag(tags[tags.length - 1]);
+      const lastTag = tags.at(-1);
+      if (lastTag) {
+        removeTag(lastTag);
+      }
     }
   };
 

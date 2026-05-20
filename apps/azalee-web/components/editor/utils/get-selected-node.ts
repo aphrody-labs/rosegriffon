@@ -1,4 +1,5 @@
-import { $isRootNode, type ElementNode, type RangeSelection, type TextNode } from "lexical";
+import { $isRootNode } from 'lexical';
+import type { ElementNode, RangeSelection, TextNode } from 'lexical';
 
 export function getSelectedNode(selection: RangeSelection): TextNode | ElementNode {
   const anchorNode = selection.anchor.getNode();
@@ -9,7 +10,7 @@ export function getSelectedNode(selection: RangeSelection): TextNode | ElementNo
   const isBackward = selection.isBackward();
   if (isBackward) {
     return $isRootNode(focusNode) ? focusNode : focusNode.getParentOrThrow();
-  } else {
-    return $isRootNode(anchorNode) ? anchorNode : anchorNode.getParentOrThrow();
   }
+    return $isRootNode(anchorNode) ? anchorNode : anchorNode.getParentOrThrow();
+  
 }

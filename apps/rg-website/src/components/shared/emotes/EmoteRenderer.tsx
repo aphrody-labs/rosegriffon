@@ -2,7 +2,8 @@
 
 import { useMemo } from "react";
 
-import { EMOTES, type Emote } from "@/lib/emotes";
+import { EMOTES } from '@/lib/emotes';
+import type { Emote } from '@/lib/emotes';
 import { cn } from "@/lib/utils";
 
 import RgEmote from "./RgEmote";

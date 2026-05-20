@@ -33,16 +33,16 @@ interface StatusCfg {
 	cls: string;
 }
 const STATUS_ACTIVE: StatusCfg = {
-	label: "Actif",
 	cls: "bg-emerald-500/15 text-emerald-700 dark:text-emerald-300",
+	label: "Actif",
 };
 const STATUS_DECLINED: StatusCfg = {
-	label: "Décliné",
 	cls: "bg-rose-500/15 text-rose-700 dark:text-rose-300",
+	label: "Décliné",
 };
 const STATUS_FORMER: StatusCfg = {
-	label: "Ancien",
 	cls: "bg-slate-500/15 text-slate-700 dark:text-slate-300",
+	label: "Ancien",
 };
 const STATUS_LABEL: Record<string, StatusCfg> = {
 	active_patron: STATUS_ACTIVE,
@@ -51,12 +51,12 @@ const STATUS_LABEL: Record<string, StatusCfg> = {
 };
 
 function formatEur(cents: number | null | undefined): string {
-	if (cents === null || cents === undefined || cents === 0) return "—";
-	return (cents / 100).toFixed(2).replace(".", ",") + " €";
+	if (cents === null || cents === undefined || cents === 0) {return "—";}
+	return `${(cents / 100).toFixed(2).replace(".", ",")  } €`;
 }
 
 function formatDate(iso: string | null | undefined): string {
-	if (!iso) return "—";
+	if (!iso) {return "—";}
 	try {
 		return format(new Date(iso), "d MMM yyyy", { locale: fr });
 	} catch {
@@ -65,7 +65,7 @@ function formatDate(iso: string | null | undefined): string {
 }
 
 function formatAddress(addr: LiveMember["address"]): string | null {
-	if (!addr) return null;
+	if (!addr) {return null;}
 	const candidates: (string | null | undefined)[] = [
 		addr.addressee,
 		addr.line_1,
@@ -77,7 +77,7 @@ function formatAddress(addr: LiveMember["address"]): string | null {
 	const parts = candidates.filter(
 		(s): s is string => typeof s === "string" && s.trim().length > 0,
 	);
-	return parts.length ? parts.join(" · ") : null;
+	return parts.length > 0 ? parts.join(" · ") : null;
 }
 
 export function PatreonLiveMembersTable({ members, tierOptions }: Props) {
@@ -93,11 +93,11 @@ export function PatreonLiveMembersTable({ members, tierOptions }: Props) {
 		return members.filter((m) => {
 			if (status !== "all") {
 				if (status === "active" && m.patron_status !== "active_patron")
-					return false;
+					{return false;}
 				if (status === "former" && m.patron_status !== "former_patron")
-					return false;
+					{return false;}
 				if (status === "declined" && m.patron_status !== "declined_patron")
-					return false;
+					{return false;}
 				if (
 					status === "former_paid" &&
 					!(
@@ -106,13 +106,13 @@ export function PatreonLiveMembersTable({ members, tierOptions }: Props) {
 						m.lifetime_support_cents > 0
 					)
 				)
-					return false;
-				if (status === "no_status" && m.patron_status !== null) return false;
+					{return false;}
+				if (status === "no_status" && m.patron_status !== null) {return false;}
 			}
-			if (tier !== "all" && !m.tier_titles.includes(tier)) return false;
-			if (withAddress && !m.address) return false;
-			if (withDiscord && !m.discord_user_id) return false;
-			if (!needle) return true;
+			if (tier !== "all" && !m.tier_titles.includes(tier)) {return false;}
+			if (withAddress && !m.address) {return false;}
+			if (withDiscord && !m.discord_user_id) {return false;}
+			if (!needle) {return true;}
 			return (
 				(m.full_name ?? "").toLowerCase().includes(needle) ||
 				(m.email ?? "").toLowerCase().includes(needle) ||
@@ -129,18 +129,18 @@ export function PatreonLiveMembersTable({ members, tierOptions }: Props) {
 		let formerPaid = 0;
 		let totalLifetime = 0;
 		for (const m of members) {
-			if (m.patron_status === "active_patron") active++;
-			else if (m.patron_status === "former_patron") former++;
-			else if (m.patron_status === "declined_patron") declined++;
+			if (m.patron_status === "active_patron") {active++;}
+			else if (m.patron_status === "former_patron") {former++;}
+			else if (m.patron_status === "declined_patron") {declined++;}
 			if (
 				(m.patron_status === "former_patron" ||
 					m.patron_status === "declined_patron") &&
 				m.lifetime_support_cents > 0
 			)
-				formerPaid++;
+				{formerPaid++;}
 			totalLifetime += m.lifetime_support_cents;
 		}
-		return { active, former, declined, formerPaid, totalLifetime };
+		return { active, declined, former, formerPaid, totalLifetime };
 	}, [members]);
 
 	return (
@@ -406,9 +406,9 @@ export function PatreonLiveMembersTable({ members, tierOptions }: Props) {
 															value={
 																m.pledge_cadence === 1
 																	? "mensuelle"
-																	: m.pledge_cadence === 12
+																	: (m.pledge_cadence === 12
 																		? "annuelle"
-																		: "—"
+																		: "—")
 															}
 														/>
 														<DetailRow

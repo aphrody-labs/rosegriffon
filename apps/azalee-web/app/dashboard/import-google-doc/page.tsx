@@ -6,7 +6,7 @@ export default function ImportGoogleDocPage() {
     <div className="space-y-6 sm:space-y-8 pb-24 sm:pb-8">
       <DashboardPageHeader
         breadcrumbs={[
-          { label: "Tableau de bord", href: "/dashboard" },
+          { href: "/dashboard", label: "Tableau de bord" },
           { label: "Import Google Doc" },
         ]}
         title="Import Google Doc"

@@ -7,36 +7,36 @@ export async function fetchGoogleSheetData(sheetId: string): Promise<string[][]>
     scopes: ["https://www.googleapis.com/auth/spreadsheets.readonly"],
   });
 
-  const sheets = google.sheets({ version: "v4", auth });
+  const sheets = google.sheets({ auth, version: "v4" });
 
   try {
     const response = await sheets.spreadsheets.values.get({
-      spreadsheetId: sheetId,
       range: "A1:Z1000", // Default range, fetches first sheet up to 1000 rows
+      spreadsheetId: sheetId,
     });
 
     return (response.data.values as string[][]) || [];
   } catch (error) {
     console.error("Error fetching Google Sheet:", error);
-    throw new Error("Impossible de récupérer le Google Sheet. Vérifiez l'ID et qu'il est public.");
+    throw new Error("Impossible de récupérer le Google Sheet. Vérifiez l'ID et qu'il est public.", { cause: error });
   }
 }
 
 export function parseCsvData(csvString: string): string[][] {
   try {
     const records = parse(csvString, {
-      skip_empty_lines: true,
       relax_column_count: true,
+      skip_empty_lines: true,
     });
     return records as string[][];
   } catch (error) {
     console.error("Error parsing CSV:", error);
-    throw new Error("Format CSV invalide.");
+    throw new Error("Format CSV invalide.", { cause: error });
   }
 }
 
 export function convertTableToHtml(data: string[][], title: string = "Tableau de données"): string {
-  if (!data || data.length === 0) return "";
+  if (!data || data.length === 0) {return "";}
 
   // Helper to escape HTML to prevent XSS (basic)
   const escape = (str: string) =>

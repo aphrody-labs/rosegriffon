@@ -8,7 +8,7 @@ import { convertTableToHtml, fetchGoogleSheetData, parseCsvData } from "@/lib/ta
 
 async function requireImportAdmin() {
   const session = await getServerSession();
-  if (!session?.user) return { error: "Non authentifié" as const, user: null };
+  if (!session?.user) {return { error: "Non authentifié" as const, user: null };}
 
   const supabase = await createClient();
   const { data: profile } = await supabase
@@ -38,29 +38,29 @@ async function saveArticle(title: string, content: string, userId: string, categ
   const { data, error } = await supabase
     .from("articles")
     .insert({
-      title: title,
-      content: content,
+      title,
+      content,
       author_id: userId,
       status: "draft",
-      slug: slug,
-      category: category,
+      slug,
+      category,
       excerpt: "Tableau de données importé",
     })
     .select()
     .single();
 
-  if (error) throw new Error(error.message);
+  if (error) {throw new Error(error.message);}
   return data;
 }
 
 export async function importGoogleSheet(sheetId: string) {
   try {
     const { error: authError, user } = await requireImportAdmin();
-    if (authError || !user) return { success: false, error: authError || "Non authentifié" };
+    if (authError || !user) {return { success: false, error: authError || "Non authentifié" };}
 
     const data = await fetchGoogleSheetData(sheetId);
     if (!data || data.length === 0) {
-      return { success: false, error: "Le sheet est vide ou inaccessible." };
+      return { error: "Le sheet est vide ou inaccessible.", success: false };
     }
 
     const title = `Import Sheet ${sheetId.slice(0, 8)}`;
@@ -69,12 +69,12 @@ export async function importGoogleSheet(sheetId: string) {
     const article = await saveArticle(title, html, user.id, "Data");
 
     revalidatePath("/dashboard/news");
-    return { success: true, data: article };
+    return { data: article, success: true };
   } catch (error: unknown) {
     console.error("Sheet Import Error:", error);
     return {
-      success: false,
       error: error instanceof Error ? error.message : "Une erreur inconnue est survenue",
+      success: false,
     };
   }
 }
@@ -82,7 +82,7 @@ export async function importGoogleSheet(sheetId: string) {
 export async function importCsv(title: string, csvContent: string) {
   try {
     const { error: authError, user } = await requireImportAdmin();
-    if (authError || !user) return { success: false, error: authError || "Non authentifié" };
+    if (authError || !user) {return { success: false, error: authError || "Non authentifié" };}
 
     const data = parseCsvData(csvContent);
     const html = convertTableToHtml(data, title);
@@ -90,12 +90,12 @@ export async function importCsv(title: string, csvContent: string) {
     const article = await saveArticle(title, html, user.id, "Data");
 
     revalidatePath("/dashboard/news");
-    return { success: true, data: article };
+    return { data: article, success: true };
   } catch (error: unknown) {
     console.error("CSV Import Error:", error);
     return {
-      success: false,
       error: error instanceof Error ? error.message : "Une erreur inconnue est survenue",
+      success: false,
     };
   }
 }

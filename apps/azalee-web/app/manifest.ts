@@ -2,15 +2,12 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "Azalée",
-    short_name: "Azalée",
-    description: "L'information la plus précise sur Inazuma Eleven: Victory Road.",
-    id: "/",
-    start_url: "/",
-    scope: "/",
-    display: "standalone",
     background_color: "#19120D",
-    theme_color: "#FFB700",
+    categories: ["entertainment", "sports", "games"],
+    description: "L'information la plus précise sur Inazuma Eleven: Victory Road.",
+    dir: "ltr",
+    display: "standalone",
+    display_override: ["window-controls-overlay"],
     icons: [
       {
         src: "/icon.webp",
@@ -29,11 +26,14 @@ export default function manifest(): MetadataRoute.Manifest {
         purpose: "maskable",
       },
     ],
-    orientation: "portrait",
-    display_override: ["window-controls-overlay"],
-    categories: ["entertainment", "sports", "games"],
+    id: "/",
     lang: "fr",
-    dir: "ltr",
+    name: "Azalée",
+    orientation: "portrait",
     prefer_related_applications: false,
+    scope: "/",
+    short_name: "Azalée",
+    start_url: "/",
+    theme_color: "#FFB700",
   };
 }

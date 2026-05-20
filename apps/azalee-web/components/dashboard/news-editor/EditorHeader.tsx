@@ -80,9 +80,9 @@ export function EditorHeader({
 	const currentStatus = STATUS_OPTIONS.find((s) => s.value === status);
 	const isPublished = status === "published" || initialStatus === "published";
 	const previewUrl = slug
-		? isPublished
+		? (isPublished
 			? `/news/${slug}`
-			: `/news/${slug}?preview=true`
+			: `/news/${slug}?preview=true`)
 		: null;
 
 	// Dernier enregistrement (serveur > localStorage)

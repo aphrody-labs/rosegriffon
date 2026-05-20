@@ -2,21 +2,21 @@ import { useQuery } from "@tanstack/react-query";
 
 import getTeamMembers from "@/lib/get-team-members";
 
-type TeamMember = {
+interface TeamMember {
   name: string;
   role: string;
   image?: string;
   link?: string;
-};
+}
 
-type Team = {
+interface Team {
   name: string;
   members: TeamMember[];
-};
+}
 
 export function useTeams(teamConfig: Record<string, string>) {
   const { data: teams, isLoading } = useQuery<Team[]>({
-    queryKey: ["teams"],
+    gcTime: 30 * 60 * 1000, // 30 minutes
     queryFn: async () => {
       const teamIds = Object.keys(teamConfig);
 
@@ -46,9 +46,9 @@ export function useTeams(teamConfig: Record<string, string>) {
 
       return teamsData.filter((team) => team.members.length > 0);
     },
+    queryKey: ["teams"],
     staleTime: 5 * 60 * 1000, // 5 minutes
-    gcTime: 30 * 60 * 1000, // 30 minutes
   });
 
-  return { teams, isLoading };
+  return { isLoading, teams };
 }

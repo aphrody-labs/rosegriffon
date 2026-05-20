@@ -14,54 +14,65 @@ import { encryptToken } from "@/lib/patreon/encryption";
 import { SCOPES_CREATOR, SCOPES_PATRON } from "@/lib/patreon/types";
 import type { Database } from "@rosegriffon/db";
 
+const getDatabaseURL = () => {
+	const url = process.env.DATABASE_URL;
+	if (!url || url.startsWith("eyJ2Ijo")) {
+		return "***REDACTED-DATABASE-URL***";
+	}
+	return url;
+};
+
 const pool = new Pool({
-	connectionString: process.env.DATABASE_URL,
-	max: 10,
-	idleTimeoutMillis: 30_000,
+	connectionString: getDatabaseURL(),
 	connectionTimeoutMillis: 5_000,
+	idleTimeoutMillis: 30_000,
+	max: 10,
 });
 
 // Lazy getter for Supabase admin to prevent top-level execution during build
 let _supabaseAdmin: ReturnType<typeof createSupabaseAdmin<Database>> | null =
 	null;
 function getSupabaseAdmin() {
-	if (_supabaseAdmin) return _supabaseAdmin;
-
+	if (_supabaseAdmin) {return _supabaseAdmin;}
+ 
 	const url =
 		process.env.NEXT_PUBLIC_SUPABASE_URL &&
 		process.env.NEXT_PUBLIC_SUPABASE_URL !== "undefined" &&
-		process.env.NEXT_PUBLIC_SUPABASE_URL.startsWith("http")
+		process.env.NEXT_PUBLIC_SUPABASE_URL.startsWith("http") &&
+		!process.env.NEXT_PUBLIC_SUPABASE_URL.startsWith("eyJ2Ijo")
 			? process.env.NEXT_PUBLIC_SUPABASE_URL
 			: "https://isbkaeltubqittywibeh.supabase.co";
-
+ 
 	const key =
 		process.env.SUPABASE_SERVICE_ROLE_KEY &&
-		!process.env.SUPABASE_SERVICE_ROLE_KEY.startsWith("{")
+		!process.env.SUPABASE_SERVICE_ROLE_KEY.startsWith("{") &&
+		!process.env.SUPABASE_SERVICE_ROLE_KEY.startsWith("eyJ2Ijo")
 			? process.env.SUPABASE_SERVICE_ROLE_KEY
-			: "missing-key-during-build";
-
+			: "***REDACTED-SERVICE-ROLE***";
+ 
 	_supabaseAdmin = createSupabaseAdmin<Database>(url, key);
 	return _supabaseAdmin;
 }
-
+ 
 /**
  * Détecte si un account Patreon a été autorisé avec les scopes créateur.
  */
 function detectCreatorScopes(scope: string | null | undefined): boolean {
-	if (!scope) return false;
+	if (!scope) {return false;}
 	const parts = scope.split(/[\s,]+/).filter(Boolean);
 	return parts.some(
 		(s) => s === "campaigns.members" || s === "w:campaigns.webhook",
 	);
 }
-
+ 
 const getBetterAuthURL = () => {
 	const url = process.env.BETTER_AUTH_URL;
 	if (
 		!url ||
 		url === "undefined" ||
 		url === "null" ||
-		!url.startsWith("http")
+		!url.startsWith("http") ||
+		url.startsWith("eyJ2Ijo")
 	) {
 		return "https://rosegriffon.fr";
 	}
@@ -89,11 +100,6 @@ export const auth = betterAuth({
 			clientSecret:
 				process.env.TWITCH_AUTH_CLIENT_SECRET ??
 				process.env.TWITCH_CLIENT_SECRET!,
-			scope: [
-				"user:read:email",
-				"user:read:follows",
-				"user:read:subscriptions",
-			],
 			mapProfileToUser: (profile) => {
 				const p = profile as unknown as Record<string, unknown>;
 				return {
@@ -105,13 +111,18 @@ export const auth = betterAuth({
 					image: (p.profile_image_url as string) ?? undefined,
 				};
 			},
+			scope: [
+				"user:read:email",
+				"user:read:follows",
+				"user:read:subscriptions",
+			],
 		},
 	},
 
 	rateLimit: {
 		enabled: true,
-		window: 10,
 		max: 100,
+		window: 10,
 	},
 
 	account: {
@@ -145,28 +156,6 @@ export const auth = betterAuth({
 	},
 
 	databaseHooks: {
-		user: {
-			create: {
-				after: async (user) => {
-					// @ts-ignore - migration typing
-					await ensureUserProfile(getSupabaseAdmin(), user);
-				},
-			},
-		},
-		session: {
-			create: {
-				after: async (session) => {
-					const { data: user } = await getSupabaseAdmin()
-						.from("user")
-						.select("id, name, image, email")
-						.eq("id", session.userId)
-						.maybeSingle();
-					if (user)
-						// @ts-ignore - migration typing
-						await ensureUserProfile(getSupabaseAdmin(), user);
-				},
-			},
-		},
 		account: {
 			create: {
 				after: async (account) => {
@@ -185,6 +174,28 @@ export const auth = betterAuth({
 				},
 			},
 		},
+		session: {
+			create: {
+				after: async (session) => {
+					const { data: user } = await getSupabaseAdmin()
+						.from("user")
+						.select("id, name, image, email")
+						.eq("id", session.userId)
+						.maybeSingle();
+					if (user)
+						// @ts-ignore - migration typing
+						await ensureUserProfile(getSupabaseAdmin(), user);
+				},
+			},
+		},
+		user: {
+			create: {
+				after: async (user) => {
+					// @ts-ignore - migration typing
+					await ensureUserProfile(getSupabaseAdmin(), user);
+				},
+			},
+		},
 	},
 
 	plugins: [
@@ -192,12 +203,9 @@ export const auth = betterAuth({
 		genericOAuth({
 			config: [
 				{
-					providerId: "patreon",
+					authorizationUrl: "https://www.patreon.com/oauth2/authorize",
 					clientId: process.env.PATREON_CLIENT_ID!,
 					clientSecret: process.env.PATREON_CLIENT_SECRET!,
-					authorizationUrl: "https://www.patreon.com/oauth2/authorize",
-					tokenUrl: "https://www.patreon.com/api/oauth2/token",
-					scopes: [...SCOPES_PATRON],
 					getUserInfo: async (tokens: unknown) => {
 						const accessToken = (tokens as { accessToken?: string })
 							.accessToken;
@@ -223,6 +231,9 @@ export const auth = betterAuth({
 							return null;
 						}
 					},
+					providerId: "patreon",
+					scopes: [...SCOPES_PATRON],
+					tokenUrl: "https://www.patreon.com/api/oauth2/token",
 				},
 			],
 		}),
@@ -245,7 +256,7 @@ async function syncPatreonAccount(
 	},
 	opts: { isCreator?: boolean } = {},
 ) {
-	if (!account.accessToken || !account.refreshToken) return;
+	if (!account.accessToken || !account.refreshToken) {return;}
 	const isCreator = opts.isCreator === true;
 	const fallbackScopes = (isCreator ? SCOPES_CREATOR : SCOPES_PATRON).join(" ");
 	try {
@@ -254,7 +265,7 @@ async function syncPatreonAccount(
 		});
 		const identity = parseIdentityWithMemberships(resp);
 		const top =
-			[...identity.memberships].sort((a, b) => {
+			[...identity.memberships].toSorted((a, b) => {
 				const score = (s: string | null | undefined) =>
 					s === "active_patron" ? 0 : 1;
 				return score(a.attrs.patron_status) - score(b.attrs.patron_status);
@@ -269,13 +280,13 @@ async function syncPatreonAccount(
 				.from("patreon_oauth_tokens")
 				.upsert(
 					{
-						user_id: account.userId,
-						patreon_user_id: identity.patreonUserId,
-						is_creator: isCreator,
 						access_token_enc: encryptToken(account.accessToken),
-						refresh_token_enc: encryptToken(account.refreshToken),
 						expires_at: expiresAt,
+						is_creator: isCreator,
+						patreon_user_id: identity.patreonUserId,
+						refresh_token_enc: encryptToken(account.refreshToken),
 						scope: account.scope ?? fallbackScopes,
+						user_id: account.userId,
 					},
 					{ onConflict: "user_id,patreon_user_id" },
 				),
@@ -283,41 +294,41 @@ async function syncPatreonAccount(
 				.from("patreon_memberships")
 				.upsert(
 					{
-						user_id: account.userId,
-						patreon_user_id: identity.patreonUserId,
-						patreon_member_id: top?.memberId ?? null,
+						address: (top?.address ?? null) as never,
 						campaign_id: top?.campaignId ?? null,
-						patreon_email: identity.user.email ?? null,
-						patreon_full_name: identity.user.full_name ?? null,
-						patreon_thumb_url: identity.user.thumb_url ?? null,
-						patreon_url: identity.user.url ?? null,
-						discord_user_id: identity.discordUserId,
-						patron_status: top?.attrs.patron_status ?? null,
-						last_charge_date: top?.attrs.last_charge_date ?? null,
-						last_charge_status: top?.attrs.last_charge_status ?? null,
 						currently_entitled_cents:
 							top?.attrs.currently_entitled_amount_cents ?? null,
+						discord_role_ids: top?.discordRoleIds ?? [],
+						discord_user_id: identity.discordUserId,
+						fetched_at: new Date().toISOString(),
+						is_free_trial: top?.attrs.is_free_trial ?? null,
+						is_gifted: top?.attrs.is_gifted ?? null,
+						last_charge_date: top?.attrs.last_charge_date ?? null,
+						last_charge_status: top?.attrs.last_charge_status ?? null,
 						lifetime_support_cents:
 							top?.attrs.campaign_lifetime_support_cents ??
 							top?.attrs.lifetime_support_cents ??
 							null,
-						pledge_start: top?.attrs.pledge_relationship_start ?? null,
-						pledge_cadence: top?.attrs.pledge_cadence ?? null,
-						will_pay_amount_cents: top?.attrs.will_pay_amount_cents ?? null,
-						next_charge_date: top?.attrs.next_charge_date ?? null,
-						is_free_trial: top?.attrs.is_free_trial ?? null,
-						is_gifted: top?.attrs.is_gifted ?? null,
 						member_email: top?.attrs.email ?? null,
+						next_charge_date: top?.attrs.next_charge_date ?? null,
 						note: top?.attrs.note ?? null,
-						address: (top?.address ?? null) as never,
-						tier_ids: top?.tierIds ?? [],
-						tier_titles: top?.tierTitles ?? [],
-						tier_amounts_cents: top?.tierAmountsCents ?? [],
-						tier_requires_shipping: top?.tierRequiresShipping ?? [],
-						discord_role_ids: top?.discordRoleIds ?? [],
+						patreon_email: identity.user.email ?? null,
+						patreon_full_name: identity.user.full_name ?? null,
+						patreon_member_id: top?.memberId ?? null,
+						patreon_thumb_url: identity.user.thumb_url ?? null,
+						patreon_url: identity.user.url ?? null,
+						patreon_user_id: identity.patreonUserId,
+						patron_status: top?.attrs.patron_status ?? null,
+						pledge_cadence: top?.attrs.pledge_cadence ?? null,
+						pledge_start: top?.attrs.pledge_relationship_start ?? null,
 						raw_identity: resp as never,
 						scope: account.scope ?? fallbackScopes,
-						fetched_at: new Date().toISOString(),
+						tier_amounts_cents: top?.tierAmountsCents ?? [],
+						tier_ids: top?.tierIds ?? [],
+						tier_requires_shipping: top?.tierRequiresShipping ?? [],
+						tier_titles: top?.tierTitles ?? [],
+						user_id: account.userId,
+						will_pay_amount_cents: top?.attrs.will_pay_amount_cents ?? null,
 					},
 					{ onConflict: "user_id,patreon_user_id" },
 				),
@@ -329,8 +340,8 @@ async function syncPatreonAccount(
 				})
 				.eq("id", account.userId),
 		]);
-	} catch (e) {
-		console.error("[auth/patreon] syncPatreonAccount failed", e);
+	} catch (error) {
+		console.error("[auth/patreon] syncPatreonAccount failed", error);
 	}
 }
 

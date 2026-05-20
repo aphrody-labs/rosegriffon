@@ -11,7 +11,7 @@ export default function Footer() {
           <div className="flex flex-col items-center sm:items-start gap-2">
             <h3 className="text-sm font-semibold text-foreground mb-1">L'association</h3>
             <Link
-              href={"/charte-engagements"}
+              href="/charte-engagements"
               className="text-sm text-muted-foreground hover:text-foreground hover:underline transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-sm"
             >
               Charte et engagements
@@ -29,13 +29,13 @@ export default function Footer() {
           <div className="flex flex-col items-center sm:items-start gap-2">
             <h3 className="text-sm font-semibold text-foreground mb-1">Contact</h3>
             <Link
-              href={"/a-propos/contact"}
+              href="/a-propos/contact"
               className="text-sm text-muted-foreground hover:text-foreground hover:underline transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-sm"
             >
               Nous contacter
             </Link>
             <Link
-              href={"/a-propos/soutenir"}
+              href="/a-propos/soutenir"
               className="text-sm text-muted-foreground hover:text-foreground hover:underline transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-sm"
             >
               Nous Soutenir
@@ -45,19 +45,19 @@ export default function Footer() {
           <div className="flex flex-col items-center sm:items-start gap-2">
             <h3 className="text-sm font-semibold text-foreground mb-1">Informations légales</h3>
             <Link
-              href={"/mentions-legales"}
+              href="/mentions-legales"
               className="text-sm text-muted-foreground hover:text-foreground hover:underline transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-sm"
             >
               Mentions légales
             </Link>
             <Link
-              href={"/legal/cgu"}
+              href="/legal/cgu"
               className="text-sm text-muted-foreground hover:text-foreground hover:underline transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-sm"
             >
               Conditions d'utilisation
             </Link>
             <Link
-              href={"/legal/confidentialite"}
+              href="/legal/confidentialite"
               className="text-sm text-muted-foreground hover:text-foreground hover:underline transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-sm"
             >
               Politique de confidentialité

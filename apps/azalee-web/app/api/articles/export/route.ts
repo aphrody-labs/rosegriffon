@@ -13,8 +13,8 @@ export async function GET() {
 
   return new NextResponse(csv, {
     headers: {
-      "Content-Type": "text/csv; charset=utf-8",
       "Content-Disposition": `attachment; filename="articles-stats-${new Date().toISOString().slice(0, 10)}.csv"`,
+      "Content-Type": "text/csv; charset=utf-8",
     },
   });
 }

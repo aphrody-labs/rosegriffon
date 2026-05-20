@@ -1,11 +1,11 @@
 import {
-	createClient as createServerClient,
 	createPublicClient,
+	createClient as createServerClient,
 } from "@/lib/supabase/server";
 
 export const FEATURE_SHOW_DISCORD_EVENTS = "feature_show_discord_events";
 
-type SupabaseLike = {
+interface SupabaseLike {
 	from: (table: string) => {
 		select: (cols: string) => {
 			eq: (
@@ -19,7 +19,7 @@ type SupabaseLike = {
 			};
 		};
 	};
-};
+}
 
 /**
  * Fetch a global setting value (cookies-aware client — bascule la page en dynamic).
@@ -72,11 +72,11 @@ async function fetchSetting<T>(
 		return defaultValue;
 	}
 
-	const value = data.value;
+	const {value} = data;
 
 	if (typeof defaultValue === "boolean" && typeof value === "string") {
-		if (value === "true") return true as unknown as T;
-		if (value === "false") return false as unknown as T;
+		if (value === "true") {return true as unknown as T;}
+		if (value === "false") {return false as unknown as T;}
 	}
 
 	return value as T;

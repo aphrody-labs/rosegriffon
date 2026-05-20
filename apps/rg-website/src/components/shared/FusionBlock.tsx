@@ -1,14 +1,14 @@
 import Image from "next/image";
 import type React from "react";
 
-type FusionBlockProps = {
+interface FusionBlockProps {
   isImageLeft: boolean;
   image?: string;
   children: React.ReactNode;
   imageStyle?: React.CSSProperties;
   imageOverlay?: React.ReactNode;
   isPriority?: boolean;
-};
+}
 
 export default function FusionBlock({
   isImageLeft,

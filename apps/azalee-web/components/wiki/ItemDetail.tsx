@@ -29,13 +29,13 @@ const LOCATION_FR: Record<string, string> = {
 const STAT_MAX = 15;
 
 const STAT_LABELS: Record<string, { label: string; icon: string }> = {
-  kick: { label: "Tir", icon: "sports_soccer" },
-  control: { label: "Contrôle", icon: "touch_app" },
-  technique: { label: "Technique", icon: "precision_manufacturing" },
-  pressure: { label: "Pression", icon: "compress" },
-  physical: { label: "Physique", icon: "fitness_center" },
-  agility: { label: "Agilité", icon: "directions_run" },
-  intelligence: { label: "Intelligence", icon: "psychology" },
+  agility: { icon: "directions_run", label: "Agilité" },
+  control: { icon: "touch_app", label: "Contrôle" },
+  intelligence: { icon: "psychology", label: "Intelligence" },
+  kick: { icon: "sports_soccer", label: "Tir" },
+  physical: { icon: "fitness_center", label: "Physique" },
+  pressure: { icon: "compress", label: "Pression" },
+  technique: { icon: "precision_manufacturing", label: "Technique" },
 };
 
 interface CommunitySheetData {
@@ -57,10 +57,10 @@ export function ItemDetail({ item, itemName, itemDesc }: ItemDetailProps) {
   const nameJA = item.names?.ja;
   const nameEN = item.names?.en;
   const descJA = item.descriptions?.ja || (item as any).description_JA;
-  const rarity = (item as any).rarity;
+  const {rarity} = (item as any);
   const rarityLabel = rarity ? RARITY_LABELS[String(rarity)] || String(rarity) : null;
-  const internalCode = (item as any).internalCode;
-  const price = (item as any).price;
+  const {internalCode} = (item as any);
+  const {price} = (item as any);
   const sheetData = (item as any).sheetData as CommunitySheetData | null;
   const exchangeRecipes = (item as any).exchangeRecipes as
     | Array<{ shop: string; costs: Array<{ name: string; code: string; quantity: number }> }>
@@ -170,7 +170,7 @@ export function ItemDetail({ item, itemName, itemDesc }: ItemDetailProps) {
             (() => {
               const translatedLocation = LOCATION_FR[sheetData.location] || sheetData.location;
               const existingShops = (item.shops?.fr || []).map((s: string) => s.toLowerCase());
-              if (existingShops.includes(translatedLocation.toLowerCase())) return null;
+              if (existingShops.includes(translatedLocation.toLowerCase())) {return null;}
               return (
                 <div className="flex items-center gap-2">
                   <MapPin size={18} className="text-on-surface-variant" aria-hidden="true" />
@@ -187,8 +187,8 @@ export function ItemDetail({ item, itemName, itemDesc }: ItemDetailProps) {
               </span>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {Object.entries(sheetData.stats).map(([key, value]) => {
-                  if (!value || value === 0) return null;
-                  const info = STAT_LABELS[key] || { label: key, icon: "bar_chart" };
+                  if (!value || value === 0) {return null;}
+                  const info = STAT_LABELS[key] || { icon: "bar_chart", label: key };
                   const pct = Math.min(100, (value / STAT_MAX) * 100);
                   return (
                     <div
@@ -266,7 +266,7 @@ export function ItemDetail({ item, itemName, itemDesc }: ItemDetailProps) {
             ))}
           </div>
         </section>
-      ) : item.shops?.fr && item.shops.fr.length > 0 ? (
+      ) : (item.shops?.fr && item.shops.fr.length > 0 ? (
         <section className="bg-surface-container rounded-2xl sm:rounded-[24px] p-4 sm:p-6 border border-border/50">
           <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
             <Store size={24} aria-hidden="true" />
@@ -284,7 +284,7 @@ export function ItemDetail({ item, itemName, itemDesc }: ItemDetailProps) {
             ))}
           </div>
         </section>
-      ) : null}
+      ) : null)}
     </div>
   );
 }

@@ -19,7 +19,7 @@ export default async function SettingsPage() {
   return (
     <div className="space-y-6 sm:space-y-8 pb-24 sm:pb-8 max-w-4xl">
       <DashboardPageHeader
-        breadcrumbs={[{ label: "Tableau de bord", href: "/dashboard" }, { label: "Paramètres" }]}
+        breadcrumbs={[{ href: "/dashboard", label: "Tableau de bord" }, { label: "Paramètres" }]}
         title="Paramètres"
         subtitle="Gérer votre profil et préférences"
         icon="settings"

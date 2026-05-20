@@ -16,24 +16,24 @@ export const MobileBottomNavigation = () => {
 
 	const navItems = [
 		{
-			label: "Accueil",
 			href: "/",
 			icon: Home,
+			label: "Accueil",
 		},
 		{
-			label: "Projets",
 			href: "/projets",
 			icon: Sparkles,
+			label: "Projets",
 		},
 		{
-			label: "Staff",
 			href: "/notre-equipe",
 			icon: Users,
+			label: "Staff",
 		},
 		{
-			label: "RG TV",
 			href: "/rose-griffon-tv",
 			icon: RGTVIcon,
+			label: "RG TV",
 		},
 	];
 
@@ -42,9 +42,9 @@ export const MobileBottomNavigation = () => {
 			<nav className="flex h-16 items-center justify-around px-2">
 				{navItems.map((item) => {
 					const isActive = pathname
-						? item.href === "/"
+						? (item.href === "/"
 							? pathname === "/"
-							: pathname.startsWith(item.href)
+							: pathname.startsWith(item.href))
 						: false;
 					const Icon = item.icon;
 
@@ -53,7 +53,7 @@ export const MobileBottomNavigation = () => {
 							key={item.href}
 							href={item.href}
 							onClick={() => {
-								if (navigator.vibrate) navigator.vibrate(10);
+								if (navigator.vibrate) {navigator.vibrate(10);}
 							}}
 							className={cn(
 								"relative flex flex-col items-center justify-center gap-1 rounded-xl p-2 transition-all duration-300 min-w-[60px]",
@@ -84,7 +84,7 @@ export const MobileBottomNavigation = () => {
 				<button
 					onClick={() => {
 						toggleSidebar();
-						if (navigator.vibrate) navigator.vibrate(10);
+						if (navigator.vibrate) {navigator.vibrate(10);}
 					}}
 					className={cn(
 						"relative flex flex-col items-center justify-center gap-1 rounded-xl p-2 transition-all duration-300 min-w-[60px]",

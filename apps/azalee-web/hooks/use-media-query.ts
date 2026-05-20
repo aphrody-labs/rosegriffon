@@ -7,13 +7,9 @@ export function useMediaQuery(query: string) {
     return () => matchMedia.removeEventListener("change", callback);
   };
 
-  const getSnapshot = () => {
-    return window.matchMedia(query).matches;
-  };
+  const getSnapshot = () => window.matchMedia(query).matches;
 
-  const getServerSnapshot = () => {
-    return false;
-  };
+  const getServerSnapshot = () => false;
 
   return useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
 }

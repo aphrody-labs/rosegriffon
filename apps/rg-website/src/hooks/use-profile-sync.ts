@@ -52,13 +52,12 @@ export function useProfileSync({ userId, onProfileChange, enabled = true }: UseP
             "postgres_changes",
             {
               event: "*", // Écouter INSERT, UPDATE, DELETE
+              filter: `id=eq.${userId}`,
               schema: "public",
               table: "profiles",
-              filter: `id=eq.${userId}`,
             },
             (payload) => {
-              if (process.env.NODE_ENV === "development") {
-              }
+              if (process.env.NODE_ENV === "development") {}
 
               // Appeler le callback si fourni
               if (payload.new && onProfileChange) {
@@ -73,16 +72,16 @@ export function useProfileSync({ userId, onProfileChange, enabled = true }: UseP
             }
           )
           .subscribe((status, err) => {
-            if (process.env.NODE_ENV === "development") {
-            }
+            if (process.env.NODE_ENV === "development") {}
 
             switch (status) {
-              case "SUBSCRIBED":
+              case "SUBSCRIBED": {
                 if (process.env.NODE_ENV === "development") {
                 }
                 break;
+              }
 
-              case "CHANNEL_ERROR":
+              case "CHANNEL_ERROR": {
                 // Ne pas logger en warning pour éviter le spam console si c'est juste un token expiré
                 // Le listener onAuthStateChange gérera la reconnexion proprement
                 if (process.env.NODE_ENV === "development") {
@@ -97,8 +96,9 @@ export function useProfileSync({ userId, onProfileChange, enabled = true }: UseP
                   }, 5000);
                 }
                 break;
+              }
 
-              case "TIMED_OUT":
+              case "TIMED_OUT": {
                 console.warn("[useProfileSync] ⏱️ Timeout de connexion");
                 // Réessayer après 2 secondes si pas démonté
                 if (!isUnmounted) {
@@ -107,13 +107,15 @@ export function useProfileSync({ userId, onProfileChange, enabled = true }: UseP
                   }, 2000);
                 }
                 break;
+              }
 
-              case "CLOSED":
+              case "CLOSED": {
                 if (process.env.NODE_ENV === "development") {
                 }
                 break;
+              }
 
-              default:
+              default: {
                 // Gérer les autres statuts ou erreurs
                 if (err) {
                   console.error("[useProfileSync] ❌ Erreur:", err);
@@ -124,6 +126,7 @@ export function useProfileSync({ userId, onProfileChange, enabled = true }: UseP
                   }
                 }
                 break;
+              }
             }
           });
       } catch (error) {
@@ -148,8 +151,8 @@ export function useProfileSync({ userId, onProfileChange, enabled = true }: UseP
       }
 
       if (channel) {
-        supabase.removeChannel(channel).catch((err) => {
-          console.error("[useProfileSync] Erreur lors du nettoyage:", err);
+        supabase.removeChannel(channel).catch((error) => {
+          console.error("[useProfileSync] Erreur lors du nettoyage:", error);
         });
       }
     };
@@ -176,8 +179,7 @@ export function useUpdateProfile() {
           };
         }
 
-        if (process.env.NODE_ENV === "development") {
-        }
+        if (process.env.NODE_ENV === "development") {}
 
         const { data, error } = await supabase
           .from("profiles")
@@ -191,16 +193,15 @@ export function useUpdateProfile() {
           return { data: null, error };
         }
 
-        if (process.env.NODE_ENV === "development") {
-        }
+        if (process.env.NODE_ENV === "development") {}
 
         // Le trigger DB enverra automatiquement la mise à jour à tous les abonnés
-        // via l'événement broadcast
+        // Via l'événement broadcast
         return { data, error: null };
-      } catch (err) {
-        const error = err instanceof Error ? err : new Error("Erreur inconnue");
-        console.error("[useUpdateProfile] Erreur inattendue:", error);
-        return { data: null, error };
+      } catch (error) {
+        const normalizedError = error instanceof Error ? error : new Error("Erreur inconnue");
+        console.error("[useUpdateProfile] Erreur inattendue:", normalizedError);
+        return { data: null, error: normalizedError };
       }
     },
     [supabase]
@@ -218,7 +219,7 @@ export function useProfile(userId?: string | null) {
   const { updateProfile } = useUpdateProfile();
 
   const fetchProfile = useCallback(async () => {
-    if (!userId) return null;
+    if (!userId) {return null;}
 
     try {
       const { data, error } = await supabase.from("profiles").select("*").eq("id", userId).single();

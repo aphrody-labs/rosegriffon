@@ -4,33 +4,33 @@ import { wikiService } from "@/lib/wiki-service";
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || "https://azalee.rosegriffon.fr";
 
 function absoluteUrl(url?: string | null): string | undefined {
-  if (!url) return undefined;
-  if (url.startsWith("http")) return url;
-  if (url.startsWith("/storage/")) return `${SUPABASE_URL}${url}`;
+  if (!url) {return undefined;}
+  if (url.startsWith("http")) {return url;}
+  if (url.startsWith("/storage/")) {return `${SUPABASE_URL}${url}`;}
   return `https://azalee.rosegriffon.fr${url}`;
 }
 
 export const alt = "Personnage Inazuma Eleven Victory Road - Azalée";
-export const size = { width: 1200, height: 630 };
+export const size = { height: 630, width: 1200 };
 export const contentType = "image/png";
 
 const ELEMENT_COLORS: Record<string, string> = {
-  Fire: "#E53935",
   Feu: "#E53935",
-  Wind: "#43A047",
-  Vent: "#43A047",
+  Fire: "#E53935",
   Forest: "#1B5E20",
   Foret: "#1B5E20",
-  Mountain: "#F9A825",
   Montagne: "#F9A825",
+  Mountain: "#F9A825",
+  Vent: "#43A047",
+  Wind: "#43A047",
 };
 
 const POSITION_LABELS: Record<string, string> = {
-  GK: "Gardien",
-  DF: "Defenseur",
-  MF: "Milieu",
-  FW: "Attaquant",
   Coach: "Coach",
+  DF: "Defenseur",
+  FW: "Attaquant",
+  GK: "Gardien",
+  MF: "Milieu",
 };
 
 export default async function Image({ params }: { params: Promise<{ id: string }> }) {
@@ -45,15 +45,15 @@ export default async function Image({ params }: { params: Promise<{ id: string }
     return new ImageResponse(
       <div
         style={{
-          width: "100%",
-          height: "100%",
-          display: "flex",
           alignItems: "center",
-          justifyContent: "center",
           background: "linear-gradient(135deg, #1A120D 0%, #2D1F14 100%)",
           color: "#F2A93B",
+          display: "flex",
           fontSize: 48,
           fontWeight: 700,
+          height: "100%",
+          justifyContent: "center",
+          width: "100%",
         }}
       >
         Personnage introuvable
@@ -78,51 +78,51 @@ export default async function Image({ params }: { params: Promise<{ id: string }
   return new ImageResponse(
     <div
       style={{
-        width: "100%",
-        height: "100%",
-        display: "flex",
         background: "linear-gradient(135deg, #1A120D 0%, #2D1F14 50%, #1A120D 100%)",
         color: "white",
+        display: "flex",
         fontFamily: "sans-serif",
-        position: "relative",
+        height: "100%",
         overflow: "hidden",
+        position: "relative",
+        width: "100%",
       }}
     >
       {/* Background accent */}
       <div
         style={{
-          position: "absolute",
-          top: 0,
-          right: 0,
-          width: 400,
-          height: "100%",
           background: `linear-gradient(180deg, ${elementColor}15 0%, ${elementColor}05 100%)`,
           display: "flex",
+          height: "100%",
+          position: "absolute",
+          right: 0,
+          top: 0,
+          width: 400,
         }}
       />
 
       {/* Top bar */}
       <div
         style={{
-          position: "absolute",
-          top: 0,
-          left: 0,
-          right: 0,
-          height: 4,
           background: `linear-gradient(90deg, #F2A93B, ${elementColor}, #F2A93B)`,
           display: "flex",
+          height: 4,
+          left: 0,
+          position: "absolute",
+          right: 0,
+          top: 0,
         }}
       />
 
       {/* Character image area */}
       <div
         style={{
-          display: "flex",
           alignItems: "center",
-          justifyContent: "center",
-          width: 280,
-          padding: "40px 20px 40px 40px",
+          display: "flex",
           flexShrink: 0,
+          justifyContent: "center",
+          padding: "40px 20px 40px 40px",
+          width: 280,
         }}
       >
         {absoluteUrl(baseChar.image) ? (
@@ -132,24 +132,24 @@ export default async function Image({ params }: { params: Promise<{ id: string }
             width={200}
             height={200}
             style={{
-              borderRadius: 24,
-              objectFit: "cover",
               border: `3px solid ${elementColor}`,
+              borderRadius: 24,
               boxShadow: `0 0 40px ${elementColor}40`,
+              objectFit: "cover",
             }}
           />
         ) : (
           <div
             style={{
-              width: 200,
-              height: 200,
-              borderRadius: 24,
-              background: "#3D2E22",
-              display: "flex",
               alignItems: "center",
-              justifyContent: "center",
-              fontSize: 72,
+              background: "#3D2E22",
               border: `3px solid ${elementColor}`,
+              borderRadius: 24,
+              display: "flex",
+              fontSize: 72,
+              height: 200,
+              justifyContent: "center",
+              width: 200,
             }}
           >
             ?
@@ -161,22 +161,22 @@ export default async function Image({ params }: { params: Promise<{ id: string }
       <div
         style={{
           display: "flex",
+          flex: 1,
           flexDirection: "column",
+          gap: 12,
           justifyContent: "center",
           padding: "40px 40px 40px 0",
-          flex: 1,
-          gap: 12,
         }}
       >
         {/* Name */}
         <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
           <div
             style={{
+              color: "white",
+              display: "flex",
               fontSize: 48,
               fontWeight: 900,
-              color: "white",
               lineHeight: 1.1,
-              display: "flex",
             }}
           >
             {name}
@@ -184,9 +184,9 @@ export default async function Image({ params }: { params: Promise<{ id: string }
           {nameJa && (
             <div
               style={{
-                fontSize: 20,
                 color: "#A09080",
                 display: "flex",
+                fontSize: 20,
               }}
             >
               {nameJa}
@@ -195,18 +195,18 @@ export default async function Image({ params }: { params: Promise<{ id: string }
         </div>
 
         {/* Badges row */}
-        <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>
           {positionLabel && (
             <div
               style={{
-                display: "flex",
                 background: "#3D2E22",
+                border: "1px solid #5D4E42",
                 borderRadius: 20,
-                padding: "6px 16px",
+                color: "#F2A93B",
+                display: "flex",
                 fontSize: 16,
                 fontWeight: 700,
-                color: "#F2A93B",
-                border: "1px solid #5D4E42",
+                padding: "6px 16px",
               }}
             >
               {positionLabel}
@@ -215,14 +215,14 @@ export default async function Image({ params }: { params: Promise<{ id: string }
           {element && (
             <div
               style={{
-                display: "flex",
                 background: `${elementColor}20`,
+                border: `1px solid ${elementColor}40`,
                 borderRadius: 20,
-                padding: "6px 16px",
+                color: elementColor,
+                display: "flex",
                 fontSize: 16,
                 fontWeight: 700,
-                color: elementColor,
-                border: `1px solid ${elementColor}40`,
+                padding: "6px 16px",
               }}
             >
               {element}
@@ -231,14 +231,14 @@ export default async function Image({ params }: { params: Promise<{ id: string }
           {rarity && (
             <div
               style={{
-                display: "flex",
                 background: rarity === "BASARA" ? "#7367f020" : "#3D2E22",
+                border: `1px solid ${rarity === "BASARA" ? "#7367f040" : "#5D4E42"}`,
                 borderRadius: 20,
-                padding: "6px 16px",
+                color: rarity === "BASARA" ? "#9B8FFF" : "#C0A080",
+                display: "flex",
                 fontSize: 16,
                 fontWeight: 700,
-                color: rarity === "BASARA" ? "#9B8FFF" : "#C0A080",
-                border: `1px solid ${rarity === "BASARA" ? "#7367f040" : "#5D4E42"}`,
+                padding: "6px 16px",
               }}
             >
               {rarity}
@@ -249,9 +249,9 @@ export default async function Image({ params }: { params: Promise<{ id: string }
         {team && (
           <div
             style={{
-              fontSize: 18,
               color: "#A09080",
               display: "flex",
+              fontSize: 18,
             }}
           >
             {team}
@@ -263,45 +263,45 @@ export default async function Image({ params }: { params: Promise<{ id: string }
           <div
             style={{
               display: "flex",
+              flexWrap: "wrap",
               gap: 16,
               marginTop: 8,
-              flexWrap: "wrap",
             }}
           >
             {[
-              { label: "FRA", value: stats.kick, color: "#E53935" },
-              { label: "CTR", value: stats.control, color: "#43A047" },
-              { label: "TEC", value: stats.technique, color: "#29B6F6" },
-              { label: "PRE", value: stats.pressure, color: "#1565C0" },
-              { label: "PHY", value: stats.physical, color: "#FF9800" },
-              { label: "AGI", value: stats.agility, color: "#FDD835" },
-              { label: "INT", value: stats.intelligence, color: "#AB47BC" },
+              { color: "#E53935", label: "FRA", value: stats.kick },
+              { color: "#43A047", label: "CTR", value: stats.control },
+              { color: "#29B6F6", label: "TEC", value: stats.technique },
+              { color: "#1565C0", label: "PRE", value: stats.pressure },
+              { color: "#FF9800", label: "PHY", value: stats.physical },
+              { color: "#FDD835", label: "AGI", value: stats.agility },
+              { color: "#AB47BC", label: "INT", value: stats.intelligence },
             ].map((s) => (
               <div
                 key={s.label}
                 style={{
+                  alignItems: "center",
                   display: "flex",
                   flexDirection: "column",
-                  alignItems: "center",
                   gap: 2,
                 }}
               >
                 <div
                   style={{
-                    fontSize: 11,
-                    fontWeight: 700,
                     color: s.color,
                     display: "flex",
+                    fontSize: 11,
+                    fontWeight: 700,
                   }}
                 >
                   {s.label}
                 </div>
                 <div
                   style={{
-                    fontSize: 22,
-                    fontWeight: 900,
                     color: "white",
                     display: "flex",
+                    fontSize: 22,
+                    fontWeight: 900,
                   }}
                 >
                   {s.value || "?"}
@@ -315,29 +315,29 @@ export default async function Image({ params }: { params: Promise<{ id: string }
       {/* Branding footer */}
       <div
         style={{
-          position: "absolute",
-          bottom: 16,
-          left: 40,
-          display: "flex",
           alignItems: "center",
+          bottom: 16,
+          display: "flex",
           gap: 8,
+          left: 40,
+          position: "absolute",
         }}
       >
         <div
           style={{
-            fontSize: 14,
-            fontWeight: 700,
             color: "#F2A93B",
             display: "flex",
+            fontSize: 14,
+            fontWeight: 700,
           }}
         >
           azalee.rosegriffon.fr
         </div>
         <div
           style={{
-            fontSize: 12,
             color: "#6D5E50",
             display: "flex",
+            fontSize: 12,
           }}
         >
           Inazuma Eleven: Victory Road

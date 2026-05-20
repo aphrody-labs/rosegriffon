@@ -22,7 +22,7 @@ import {
 	TooltipProvider,
 	TooltipTrigger,
 } from "./tooltip";
-import { useIsMobile } from "../hooks/use-mobile";
+import { useIsMobile, BREAKPOINTS } from "../hooks/use-mobile";
 import { useSwipe } from "../hooks/use-swipe";
 import { Menu } from "lucide-react";
 import { cn } from "../lib/utils";
@@ -30,8 +30,8 @@ import { cn } from "../lib/utils";
 const SIDEBAR_COOKIE_NAME = "sidebar_state";
 const SIDEBAR_COOKIE_MAX_AGE = 60 * 60 * 24 * 7;
 const SIDEBAR_WIDTH = "16rem";
-const SIDEBAR_WIDTH_MOBILE = "20rem"; // 320px pour mobile (meilleur touch target)
-const SIDEBAR_WIDTH_ICON = "3rem";
+const SIDEBAR_WIDTH_MOBILE = "18rem"; // Material 3 standard modal drawer width
+const SIDEBAR_WIDTH_ICON = "5rem"; // Material 3 standard navigation rail width
 const SIDEBAR_KEYBOARD_SHORTCUT = "b";
 
 type SidebarContextProps = {

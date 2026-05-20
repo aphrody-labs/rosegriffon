@@ -2,8 +2,8 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
-import { resolveProfile, isAdmin } from "@rosegriffon/auth";
-import { MEDAILLE_AZALEE_ROLE_ID, ADMIN_ROLES } from "@rosegriffon/types";
+import { isAdmin, resolveProfile } from "@rosegriffon/auth";
+import { ADMIN_ROLES, MEDAILLE_AZALEE_ROLE_ID } from "@rosegriffon/types";
 
 /**
  * Get the current Better Auth session server-side.
@@ -46,21 +46,20 @@ export async function requireAuthOrFail() {
  */
 export async function requireAdmin() {
 	const user = await requireAuth();
-	if (!user) redirect("/login");
+	if (!user) {redirect("/login");}
 
 	const supabase = await createClient();
-	// @ts-ignore - migration typing
 	const profile = await resolveProfile(supabase, user);
 
 	if (!profile || !isAdmin(profile.role)) {
 		console.warn("[requireAdmin] denied", {
-			userId: user.id,
 			resolvedRole: profile?.role,
+			userId: user.id,
 		});
 		redirect("/");
 	}
 
-	return { session: { user }, profile };
+	return { profile, session: { user } };
 }
 
 /**
@@ -68,17 +67,16 @@ export async function requireAdmin() {
  */
 export async function requireAdminOrFail() {
 	const user = await requireAuth();
-	if (!user) throw new Error("Non autorisé");
+	if (!user) {throw new Error("Non autorisé");}
 
 	const supabase = await createClient();
-	// @ts-ignore - migration typing
 	const profile = await resolveProfile(supabase, user);
 
 	if (!profile || !isAdmin(profile.role)) {
 		throw new Error("Accès réservé aux administrateurs");
 	}
 
-	return { session: { user }, profile };
+	return { profile, session: { user } };
 }
 
 /**
@@ -87,7 +85,7 @@ export async function requireAdminOrFail() {
 export async function hasMedailleAzaleeRole(
 	discordId: string | null | undefined,
 ): Promise<boolean> {
-	if (!discordId) return false;
+	if (!discordId) {return false;}
 	const supabase = await createClient();
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	const { data } = (await (supabase as any)
@@ -96,7 +94,7 @@ export async function hasMedailleAzaleeRole(
 		.eq("discord_id", discordId)
 		.single()) as { data: { roles: unknown } | null };
 
-	if (!data?.roles) return false;
+	if (!data?.roles) {return false;}
 
 	const roles = Array.isArray(data.roles)
 		? (data.roles as string[])
@@ -116,29 +114,28 @@ export async function hasMedailleAzaleeRole(
  */
 export async function requireEditorOrFail() {
 	const session = await getServerSession();
-	if (!session?.user) throw new Error("Non autorisé");
+	if (!session?.user) {throw new Error("Non autorisé");}
 
 	const supabase = await createClient();
-	// @ts-ignore - migration typing
 	const profile = await resolveProfile(supabase, session.user);
 
-	if (!profile) throw new Error("Profil introuvable");
+	if (!profile) {throw new Error("Profil introuvable");}
 
 	if (isAdmin(profile.role)) {
 		return {
-			session,
-			profile,
 			isAdmin: true as const,
 			isMedaille: false as const,
+			profile,
+			session,
 		};
 	}
 
 	if (await hasMedailleAzaleeRole(profile.discord_id)) {
 		return {
-			session,
-			profile,
 			isAdmin: false as const,
 			isMedaille: true as const,
+			profile,
+			session,
 		};
 	}
 

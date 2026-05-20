@@ -3,7 +3,8 @@
 import { calculateZoomLevel } from "@lexical/utils";
 import type { LexicalEditor } from "lexical";
 import type * as React from "react";
-import { type JSX, useRef } from "react";
+import { useRef } from 'react';
+import type { JSX } from 'react';
 
 import { Button } from "@rosegriffon/ui";
 
@@ -69,9 +70,9 @@ export function ImageResizer({
   // Find max width, accounting for editor padding.
   const maxWidthContainer = maxWidth
     ? maxWidth
-    : editorRootElement !== null
+    : (editorRootElement !== null
       ? editorRootElement.getBoundingClientRect().width - 20
-      : 100;
+      : 100);
   const maxHeightContainer =
     editorRootElement !== null ? editorRootElement.getBoundingClientRect().height - 20 : 100;
 
@@ -217,7 +218,7 @@ export function ImageResizer({
         <Button
           className="image-caption-button absolute bottom-1 left-1/2 -translate-x-1/2"
           ref={buttonRef}
-          variant={"outline"}
+          variant="outline"
           onClick={() => {
             setShowCaption(!showCaption);
           }}

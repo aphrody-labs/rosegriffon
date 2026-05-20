@@ -35,11 +35,11 @@ export const SidebarIconButton = React.forwardRef<
 		ref,
 	) => {
 		const colorClasses = {
-			rose: "hover:text-rose-300",
 			blue: "hover:text-sky-300",
-			purple: "hover:text-violet-300",
-			green: "hover:text-emerald-300",
 			gray: "hover:text-sidebar-foreground",
+			green: "hover:text-emerald-300",
+			purple: "hover:text-violet-300",
+			rose: "hover:text-rose-300",
 		};
 
 		return (

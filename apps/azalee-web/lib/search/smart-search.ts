@@ -95,7 +95,7 @@ function getCachedResults(query: string, config: SmartSearchConfig): SmartSearch
   const key = getCacheKey(query, config);
   const entry = searchCache.get(key);
 
-  if (!entry) return null;
+  if (!entry) {return null;}
 
   const age = Date.now() - entry.timestamp;
   if (age > CACHE_TTL) {
@@ -135,15 +135,8 @@ function cacheResults(
  * Map search context to prioritized types
  */
 const CONTEXT_PRIORITY: Record<SearchContext, SearchableType[]> = {
-  chara: ["basara", "character"],
-  skill: ["skill"],
   aura: ["keshin", "soul", "miximax", "awakening", "modechange", "aura"],
-  passive: ["passive"],
-  tactic: ["tactic", "item"],
-  team: ["team", "character", "basara"],
-  item: ["item", "tactic"],
-  news: ["article", "patchnote"],
-  patchnotes: ["patchnote", "article"],
+  chara: ["basara", "character"],
   global: [
     "basara",
     "character",
@@ -160,6 +153,13 @@ const CONTEXT_PRIORITY: Record<SearchContext, SearchableType[]> = {
     "article",
     "patchnote",
   ],
+  item: ["item", "tactic"],
+  news: ["article", "patchnote"],
+  passive: ["passive"],
+  patchnotes: ["patchnote", "article"],
+  skill: ["skill"],
+  tactic: ["tactic", "item"],
+  team: ["team", "character", "basara"],
 };
 
 /**
@@ -171,14 +171,14 @@ function prioritizeResults(
 ): SmartSearchResult[] {
   const priorities = CONTEXT_PRIORITY[context];
 
-  return results.sort((a, b) => {
+  return results.toSorted((a, b) => {
     // First sort by type priority
     const aPriority = priorities.indexOf(a.type);
     const bPriority = priorities.indexOf(b.type);
 
     if (aPriority !== bPriority) {
-      if (aPriority === -1) return 1;
-      if (bPriority === -1) return -1;
+      if (aPriority === -1) {return 1;}
+      if (bPriority === -1) {return -1;}
       return aPriority - bPriority;
     }
 
@@ -212,8 +212,8 @@ function enhanceResults(results: GlobalSearchResult[], query: string): SmartSear
       // For Skills (uppercase keys from sheet_data)
       if (data.name_FR || data.name_EN || data.name_JA) {
         const matchedLang = detectMatchedLanguage(query, {
-          fr: data.name_FR as string,
           en: data.name_EN as string,
+          fr: data.name_FR as string,
           ja: data.name_JA as string,
         });
         if (matchedLang) {
@@ -229,8 +229,8 @@ function enhanceResults(results: GlobalSearchResult[], query: string): SmartSear
       // For auras, teams, items with lowercase keys (name_fr/name_en/name_ja)
       if (data.name_fr || data.name_en || data.name_ja) {
         const matchedLang = detectMatchedLanguage(query, {
-          fr: data.name_fr as string,
           en: data.name_en as string,
+          fr: data.name_fr as string,
           ja: data.name_ja as string,
         });
         if (matchedLang) {
@@ -260,9 +260,9 @@ function generateSuggestions(query: string, allResults: GlobalSearchResult[]): s
       if (data.names && typeof data.names === "object") {
         allNames.push(...getNameVariations(data.names as Record<string, string>).filter(Boolean));
       }
-      if (typeof data.name_FR === "string") allNames.push(data.name_FR);
-      if (typeof data.name_EN === "string") allNames.push(data.name_EN);
-      if (typeof data.name_JA === "string") allNames.push(data.name_JA);
+      if (typeof data.name_FR === "string") {allNames.push(data.name_FR);}
+      if (typeof data.name_EN === "string") {allNames.push(data.name_EN);}
+      if (typeof data.name_JA === "string") {allNames.push(data.name_JA);}
     }
   }
 
@@ -283,7 +283,7 @@ export async function smartSearch(
 
   // Check cache first
   const cached = getCachedResults(query, config);
-  if (cached) return cached;
+  if (cached) {return cached;}
 
   // Enhance results with language detection
   let results = enhanceResults(rawResults, query);
@@ -306,12 +306,12 @@ export async function smartSearch(
       // Return empty results with suggestion metadata
       results = [
         {
-          type: "character",
+          data: null,
           id: "",
           name: "",
           score: 0,
-          data: null,
           suggestion,
+          type: "character",
         } as SmartSearchResult,
       ];
     }
@@ -335,11 +335,11 @@ export function clearSearchCache(): void {
  */
 export function getCacheStats() {
   return {
-    size: searchCache.size,
     entries: Array.from(searchCache.entries()).map(([key, entry]) => ({
       key,
       age: Date.now() - entry.timestamp,
       resultCount: entry.results.length,
     })),
+    size: searchCache.size,
   };
 }

@@ -3,11 +3,12 @@ import { DashboardStatsCard as DashboardMetricCard } from "@rosegriffon/ui";
 import { AdminPageHeader as DashboardPageHeader } from "@rosegriffon/ui";
 import { requireAdmin } from "@/lib/auth-helpers";
 import { createClient } from "@/lib/supabase/server";
-import { type ZukanCandidate, ZukanReviewClient } from "./ZukanReviewClient";
+import { ZukanReviewClient } from './ZukanReviewClient';
+import type { ZukanCandidate } from './ZukanReviewClient';
 
 export const metadata: Metadata = {
-  title: "Audit Zukan | Administration",
   description: "Vérification des correspondances zukan/images des personnages.",
+  title: "Audit Zukan | Administration",
 };
 
 export const dynamic = "force-dynamic";
@@ -67,21 +68,21 @@ export default async function ZukanReviewPage() {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     for (const row of seriesBreakdown as any[]) {
       const s = row.series || "Inconnu";
-      if (!seriesStats.has(s)) seriesStats.set(s, { total: 0, matched: 0 });
+      if (!seriesStats.has(s)) {seriesStats.set(s, { total: 0, matched: 0 });}
       const entry = seriesStats.get(s)!;
       entry.total++;
-      if (row.zukan_hash) entry.matched++;
+      if (row.zukan_hash) {entry.matched++;}
     }
   }
 
-  const seriesCoverage = Array.from(seriesStats.entries())
+  const seriesCoverage = [...seriesStats.entries()]
     .map(([series, stats]) => ({
+      coverage: Math.round((stats.matched / stats.total) * 100),
+      matched: stats.matched,
       series,
       total: stats.total,
-      matched: stats.matched,
-      coverage: Math.round((stats.matched / stats.total) * 100),
     }))
-    .sort((a, b) => a.coverage - b.coverage);
+    .toSorted((a, b) => a.coverage - b.coverage);
 
   // Static audit issues (if file exists)
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -93,7 +94,7 @@ export default async function ZukanReviewPage() {
   return (
     <div className="space-y-6 sm:space-y-8 pb-24 sm:pb-8">
       <DashboardPageHeader
-        breadcrumbs={[{ label: "Tableau de bord", href: "/dashboard" }, { label: "Audit Zukan" }]}
+        breadcrumbs={[{ href: "/dashboard", label: "Tableau de bord" }, { label: "Audit Zukan" }]}
         title="Audit Zukan — Images"
         subtitle={`Couverture globale : ${coverage}% (${matched.toLocaleString("fr-FR")} / ${total.toLocaleString("fr-FR")})`}
         icon="image_search"
@@ -146,9 +147,9 @@ export default async function ZukanReviewPage() {
                     className={`text-xs font-bold ${
                       s.coverage >= 95
                         ? "text-green-600"
-                        : s.coverage >= 80
+                        : (s.coverage >= 80
                           ? "text-amber-600"
-                          : "text-red-500"
+                          : "text-red-500")
                     }`}
                   >
                     {s.coverage}%
@@ -159,9 +160,9 @@ export default async function ZukanReviewPage() {
                     className={`h-full rounded-full transition-all ${
                       s.coverage >= 95
                         ? "bg-green-500"
-                        : s.coverage >= 80
+                        : (s.coverage >= 80
                           ? "bg-amber-500"
-                          : "bg-red-500"
+                          : "bg-red-500")
                     }`}
                     style={{ width: `${s.coverage}%` }}
                   />

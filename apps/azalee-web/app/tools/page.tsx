@@ -4,13 +4,13 @@ import { Icon } from "@/components/ui/Icon";
 import { cn } from "@/lib/utils";
 
 export const metadata: Metadata = {
-	title: "Outils | Inazuma Eleven Victory Road - Azalée",
+	alternates: { canonical: "/tools" },
 	description:
 		"Comparateur de personnages, générateur d'équipe aléatoire, traducteur de noms et plus pour Inazuma Eleven: Victory Road.",
-	alternates: { canonical: "/tools" },
+	title: "Outils | Inazuma Eleven Victory Road - Azalée",
 };
 
-export const revalidate = 86400;
+export const revalidate = 86_400;
 
 const TOOLS: Array<{
 	href: string;
@@ -20,35 +20,35 @@ const TOOLS: Array<{
 	container: string;
 }> = [
 	{
+		container: "bg-primary-container text-on-primary-container",
+		description: "Stats, techniques et auras de deux joueurs côte à côte.",
 		href: "/tools/compare",
 		icon: "compare_arrows",
 		title: "Comparateur",
-		description: "Stats, techniques et auras de deux joueurs côte à côte.",
-		container: "bg-primary-container text-on-primary-container",
 	},
 	{
+		container: "bg-secondary-container text-on-secondary-container",
+		description:
+			"11 joueurs, 1 coach, 3 manageuses. Filtrez par élément ou style de jeu.",
 		href: "/tools/random-team",
 		icon: "casino",
 		title: "Équipe aléatoire",
-		description:
-			"11 joueurs, 1 coach, 3 manageuses. Filtrez par élément ou style de jeu.",
-		container: "bg-secondary-container text-on-secondary-container",
 	},
 	{
+		container: "bg-tertiary-container text-on-tertiary-container",
+		description:
+			"Trouvez les noms français, anglais et japonais de toutes les entités du jeu.",
 		href: "/tools/translator",
 		icon: "translate",
 		title: "Traducteur",
-		description:
-			"Trouvez les noms français, anglais et japonais de toutes les entités du jeu.",
-		container: "bg-tertiary-container text-on-tertiary-container",
 	},
 	{
+		container: "bg-primary-container text-on-primary-container",
+		description:
+			"Composez votre équipe idéale en glissant-déposant vos joueurs sur le terrain.",
 		href: "/tools/my-team",
 		icon: "stadium",
 		title: "Mon Équipe",
-		description:
-			"Composez votre équipe idéale en glissant-déposant vos joueurs sur le terrain.",
-		container: "bg-primary-container text-on-primary-container",
 	},
 ];
 

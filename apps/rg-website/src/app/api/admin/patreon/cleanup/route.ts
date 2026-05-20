@@ -14,7 +14,7 @@ export async function POST(req: Request) {
 	const supabase = createAdminClient();
 	if (!supabase) {
 		return NextResponse.json(
-			{ ok: false, error: "no admin client" },
+			{ error: "no admin client", ok: false },
 			{ status: 500 },
 		);
 	}
@@ -22,7 +22,7 @@ export async function POST(req: Request) {
 	try {
 		body = (await req.json()) as Body;
 	} catch {
-		// body optional
+		// Body optional
 	}
 	const days = Math.max(1, Math.floor(body.daysSincePending ?? 90));
 	const cutoff = new Date(
@@ -39,7 +39,7 @@ export async function POST(req: Request) {
 	if (error) {
 		console.error("[admin/patreon/cleanup]", error);
 		return NextResponse.json(
-			{ ok: false, error: error.message },
+			{ error: error.message, ok: false },
 			{ status: 500 },
 		);
 	}
@@ -47,9 +47,9 @@ export async function POST(req: Request) {
 	const expiredCount = await archiveExpiredTokens(supabase);
 
 	return NextResponse.json({
-		ok: true,
-		count: data?.length ?? 0,
 		archivedTokens: expiredCount,
+		count: data?.length ?? 0,
+		ok: true,
 	});
 }
 

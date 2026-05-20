@@ -62,15 +62,15 @@ export function SkillFilterBar({
 
   // Local slider state for smooth dragging
   const [powerRange, setPowerRange] = useState<[number, number]>([
-    currentPowerMin ? parseInt(currentPowerMin, 10) : POWER_MIN,
-    currentPowerMax ? parseInt(currentPowerMax, 10) : POWER_MAX,
+    currentPowerMin ? Number.parseInt(currentPowerMin, 10) : POWER_MIN,
+    currentPowerMax ? Number.parseInt(currentPowerMax, 10) : POWER_MAX,
   ]);
 
   // Sync from URL when params change externally
   useEffect(() => {
     setPowerRange([
-      currentPowerMin ? parseInt(currentPowerMin, 10) : POWER_MIN,
-      currentPowerMax ? parseInt(currentPowerMax, 10) : POWER_MAX,
+      currentPowerMin ? Number.parseInt(currentPowerMin, 10) : POWER_MIN,
+      currentPowerMax ? Number.parseInt(currentPowerMax, 10) : POWER_MAX,
     ]);
   }, [currentPowerMin, currentPowerMax]);
 
@@ -150,9 +150,9 @@ export function SkillFilterBar({
                 <div className="relative size-5">
                   <Image src={f.imageIcon} alt="" fill className="object-contain" sizes="20px" />
                 </div>
-              ) : f.sprite ? (
+              ) : (f.sprite ? (
                 <SpriteIcon name={f.sprite} scale={0.4} className="-my-2" />
-              ) : null}
+              ) : null)}
               <span>{f.label}</span>
             </button>
           );

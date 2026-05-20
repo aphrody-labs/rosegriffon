@@ -7,8 +7,7 @@ import { cn } from "@/lib/utils";
  * Utilise l'image officielle RGTV depuis /public
  * Simplifié pour utiliser width/height pour une taille fixe.
  */
-export const RGTVIcon = ({ className }: { className?: string }) => {
-  return (
+export const RGTVIcon = ({ className }: { className?: string }) => (
     <Image
       src="/rgtv/rgtv.webp"
       alt="Rose Griffon TV"
@@ -17,4 +16,3 @@ export const RGTVIcon = ({ className }: { className?: string }) => {
       className={cn("rounded-sm", className)}
     />
   );
-};

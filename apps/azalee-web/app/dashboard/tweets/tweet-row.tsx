@@ -13,7 +13,7 @@ export function TweetRow({ tweet }: { tweet: any }) {
   const [deleting, setDeleting] = useState(false);
 
   const handleDelete = async () => {
-    if (!confirm("Supprimer ce tweet ?")) return;
+    if (!confirm("Supprimer ce tweet ?")) {return;}
     setDeleting(true);
     try {
       await deleteTweet(tweet.id);

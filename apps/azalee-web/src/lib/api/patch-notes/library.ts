@@ -4,8 +4,8 @@ import { fileURLToPath } from "node:url";
 import type { PatchNoteSummary } from "../types";
 
 // Get the directory of this file
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+const __filename = import.meta.filename;
+const __dirname = import.meta.dirname;
 
 // Data path relative to the API root
 // Using EN for now as verified source, but structure allows adding FR later
@@ -27,14 +27,14 @@ export class PatchNotesLibrary {
   }
 
   private loadData() {
-    if (this.initialized) return;
+    if (this.initialized) {return;}
 
     // We need to scan all platform folders: ps-steam, switch, xbox
     const platforms = ["ps-steam", "switch", "xbox"];
 
     platforms.forEach((platform) => {
       const platformPath = path.join(DATA_PATH, platform);
-      if (!fs.existsSync(platformPath)) return;
+      if (!fs.existsSync(platformPath)) {return;}
 
       // Look for an index.json if we generated one, OR verify folders
       // For topics we parsed index.html. Here, we might not have a main index.html for the list if we scrape individual pages.
@@ -45,7 +45,7 @@ export class PatchNotesLibrary {
       if (fs.existsSync(listPath)) {
         try {
           const platformNotes = JSON.parse(
-            fs.readFileSync(listPath, "utf-8"),
+            fs.readFileSync(listPath, "utf8"),
           ) as PatchNoteSummary[];
           // Add them to our main list, avoiding duplicates if any
           platformNotes.forEach((note) => {
@@ -60,8 +60,8 @@ export class PatchNotesLibrary {
               });
             }
           });
-        } catch (e) {
-          console.error(`[PatchNotesLib] Failed to parse index.json for ${platform}`, e);
+        } catch (error) {
+          console.error(`[PatchNotesLib] Failed to parse index.json for ${platform}`, error);
         }
       }
     });
@@ -73,15 +73,15 @@ export class PatchNotesLibrary {
   }
 
   public getAll(platform?: string): PatchNoteSummary[] {
-    if (this.initialized === false) this.loadData();
+    if (this.initialized === false) {this.loadData();}
 
-    if (!platform) return this.notes;
+    if (!platform) {return this.notes;}
     // Filter: check if the note's platform array includes the requested platform
     // The API request might ask for "ps-steam", "switch", etc.
     // Our scraper stores platform as ["ps4", "ps5", "steam"] for "ps-steam".
 
     let targetPlatforms: string[] = [platform];
-    if (platform === "ps-steam") targetPlatforms = ["ps4", "ps5", "steam"];
+    if (platform === "ps-steam") {targetPlatforms = ["ps4", "ps5", "steam"];}
 
     return this.notes.filter((n) => n.platform.some((p) => targetPlatforms.includes(p)));
   }
@@ -90,7 +90,7 @@ export class PatchNotesLibrary {
     compositeId: string,
     _platformIgnored: string = "ps-steam",
   ): LocalPatchNoteDetail | null {
-    if (this.initialized === false) this.loadData();
+    if (this.initialized === false) {this.loadData();}
 
     const summary = this.notes.find((n) => n.id === compositeId);
 
@@ -116,20 +116,20 @@ export class PatchNotesLibrary {
       return null;
     }
 
-    const html = fs.readFileSync(detailPath, "utf-8");
+    const html = fs.readFileSync(detailPath, "utf8");
 
     const jsonPath = path.join(DATA_PATH, platform, realId, "data.json");
     let featured_image = summary?.featured_image || null;
 
     if (fs.existsSync(jsonPath)) {
       try {
-        const data = JSON.parse(fs.readFileSync(jsonPath, "utf-8"));
-        if (data.featured_image) featured_image = data.featured_image;
+        const data = JSON.parse(fs.readFileSync(jsonPath, "utf8"));
+        if (data.featured_image) ({ featured_image } = data);
       } catch {}
     }
 
     return {
-      ...(summary || { id: compositeId, title: "Unknown", date: "", platform: [], url: "" }),
+      ...(summary || { date: "", id: compositeId, platform: [], title: "Unknown", url: "" }),
       content_html: html,
       featured_image,
     };

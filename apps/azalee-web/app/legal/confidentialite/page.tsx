@@ -2,9 +2,9 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Politique de confidentialité - Azalée",
   description:
     "Comment Rose Griffon collecte, utilise et protège vos données personnelles, conformément au RGPD.",
+  title: "Politique de confidentialité - Azalée",
 };
 
 export default function PrivacyPolicyPage() {

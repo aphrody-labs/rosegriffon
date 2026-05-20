@@ -7,7 +7,7 @@ interface TagCloudProps {
 }
 
 export function TagCloud({ tags }: TagCloudProps) {
-  if (tags.length === 0) return null;
+  if (tags.length === 0) {return null;}
 
   const maxCount = Math.max(...tags.map((t) => t.count));
   const minCount = Math.min(...tags.map((t) => t.count));
@@ -15,7 +15,7 @@ export function TagCloud({ tags }: TagCloudProps) {
 
   const getSize = (count: number) => {
     const ratio = (count - minCount) / range;
-    // text-xs (0.75rem) to text-lg (1.125rem)
+    // Text-xs (0.75rem) to text-lg (1.125rem)
     return 0.75 + ratio * 0.375;
   };
 

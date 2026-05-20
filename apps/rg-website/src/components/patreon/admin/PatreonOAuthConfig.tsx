@@ -18,7 +18,7 @@ export function PatreonOAuthConfig({ redirectUri, clientIdMasked }: Props) {
 			setCopied(true);
 			setTimeout(() => setCopied(false), 1500);
 		} catch {
-			// ignore
+			// Ignore
 		}
 	};
 

@@ -28,13 +28,13 @@ export interface Formation {
 }
 
 // GK is always at the same position across all formations
-const GK: PositionCoord = { index: 10, top: 43, left: 40, role: "GK" };
+const GK: PositionCoord = { index: 10, left: 40, role: "GK", top: 43 };
 
 export const FORMATIONS: Formation[] = [
   {
     id: "diamond442",
-    name: "4-4-2 Diamond",
     label: "4-4-2",
+    name: "4-4-2 Diamond",
     positions: [
       // FW (2)
       { index: 0, top: 1, left: 15, role: "FW" },
@@ -54,8 +54,8 @@ export const FORMATIONS: Formation[] = [
   },
   {
     id: "box442",
-    name: "4-4-2 Box",
     label: "4-4-2",
+    name: "4-4-2 Box",
     positions: [
       // FW (2)
       { index: 0, top: 1, left: 22, role: "FW" },
@@ -75,8 +75,8 @@ export const FORMATIONS: Formation[] = [
   },
   {
     id: "freedom352",
-    name: "3-5-2 Liberté",
     label: "3-5-2",
+    name: "3-5-2 Liberté",
     positions: [
       // FW (2)
       { index: 0, top: 1, left: 22, role: "FW" },
@@ -96,8 +96,8 @@ export const FORMATIONS: Formation[] = [
   },
   {
     id: "triangle433",
-    name: "4-3-3 Triangle",
     label: "4-3-3",
+    name: "4-3-3 Triangle",
     positions: [
       // FW (3)
       { index: 0, top: 4, left: 2, role: "FW" },
@@ -117,8 +117,8 @@ export const FORMATIONS: Formation[] = [
   },
   {
     id: "delta433",
-    name: "4-3-3 Delta",
     label: "4-3-3",
+    name: "4-3-3 Delta",
     positions: [
       // FW (3)
       { index: 0, top: 4, left: 2, role: "FW" },
@@ -138,8 +138,8 @@ export const FORMATIONS: Formation[] = [
   },
   {
     id: "balance451",
-    name: "4-5-1 Équilibré",
     label: "4-5-1",
+    name: "4-5-1 Équilibré",
     positions: [
       // FW (1)
       { index: 0, top: 1, left: 40, role: "FW" },
@@ -159,8 +159,8 @@ export const FORMATIONS: Formation[] = [
   },
   {
     id: "hexa361",
-    name: "3-6-1 Hexa",
     label: "3-6-1",
+    name: "3-6-1 Hexa",
     positions: [
       // FW (1)
       { index: 0, top: 1, left: 40, role: "FW" },
@@ -180,8 +180,8 @@ export const FORMATIONS: Formation[] = [
   },
   {
     id: "double541",
-    name: "5-4-1 Double Volante",
     label: "5-4-1",
+    name: "5-4-1 Double Volante",
     positions: [
       // FW (1)
       { index: 0, top: 1, left: 40, role: "FW" },
@@ -203,21 +203,21 @@ export const FORMATIONS: Formation[] = [
 
 /** Reserve / Support / Manager slot counts (matches zukan) */
 export const BENCH_SLOTS = {
-  reserves: 5,
   manager: 1,
+  reserves: 5,
   support: 3,
 } as const;
 
 export const ROLE_COLORS: Record<string, string> = {
-  FW: "rgb(220, 38, 38)",
-  MF: "rgb(16, 185, 129)",
   DF: "rgb(59, 130, 246)",
+  FW: "rgb(220, 38, 38)",
   GK: "rgb(217, 119, 6)",
+  MF: "rgb(16, 185, 129)",
 };
 
 export const ROLE_LABELS: Record<string, string> = {
-  FW: "ATT",
-  MF: "MIL",
   DF: "DEF",
+  FW: "ATT",
   GK: "GAR",
+  MF: "MIL",
 };

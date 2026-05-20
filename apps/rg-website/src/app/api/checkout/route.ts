@@ -1,5 +1,6 @@
 import { randomUUID } from "node:crypto";
-import { type NextRequest, NextResponse } from "next/server";
+import { NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
 
 import { createClient } from "@/lib/supabase/server";
 import { getStripeCouponForUser } from "@/lib/patreon/discount";
@@ -34,10 +35,10 @@ export async function POST(req: NextRequest) {
 				userEmail = auth.user?.email ?? undefined;
 			}
 		}
-	} catch (e) {
+	} catch (error) {
 		console.warn(
 			"[checkout] supabase init threw — anonymous checkout",
-			e instanceof Error ? e.message : String(e),
+			error instanceof Error ? error.message : String(error),
 		);
 	}
 
@@ -50,7 +51,7 @@ export async function POST(req: NextRequest) {
 
 	// Idempotency key par requête — protège contre double-clic / retry réseau.
 	// Inclut l'identifiant user + signature du panier pour différencier des
-	// tentatives légitimement distinctes.
+	// Tentatives légitimement distinctes.
 	const idempotencyKey =
 		req.headers.get("x-idempotency-key") ?? `co_${randomUUID()}`;
 
@@ -59,8 +60,8 @@ export async function POST(req: NextRequest) {
 			mode: "payment",
 			ui_mode: "hosted",
 			// Pas de `payment_method_types` — dynamic payment methods activés (Stripe
-			// pousse automatiquement card/Apple Pay/Google Pay/SEPA/Link selon eligibility
-			// et géo, géré côté dashboard.stripe.com/settings/payment_methods).
+			// Pousse automatiquement card/Apple Pay/Google Pay/SEPA/Link selon eligibility
+			// Et géo, géré côté dashboard.stripe.com/settings/payment_methods).
 			locale: "fr",
 			customer_email: userEmail,
 			allow_promotion_codes: true,
@@ -85,54 +86,54 @@ export async function POST(req: NextRequest) {
 			shipping_options: [
 				{
 					shipping_rate_data: {
-						type: "fixed_amount",
-						fixed_amount: { amount: 490, currency: "eur" },
-						display_name: "Lettre suivie France",
 						delivery_estimate: {
-							minimum: { unit: "business_day", value: 3 },
 							maximum: { unit: "business_day", value: 7 },
+							minimum: { unit: "business_day", value: 3 },
 						},
+						display_name: "Lettre suivie France",
+						fixed_amount: { amount: 490, currency: "eur" },
+						type: "fixed_amount",
 					},
 				},
 				{
 					shipping_rate_data: {
-						type: "fixed_amount",
-						fixed_amount: { amount: 990, currency: "eur" },
-						display_name: "Colissimo suivi (UE)",
 						delivery_estimate: {
-							minimum: { unit: "business_day", value: 4 },
 							maximum: { unit: "business_day", value: 10 },
+							minimum: { unit: "business_day", value: 4 },
 						},
+						display_name: "Colissimo suivi (UE)",
+						fixed_amount: { amount: 990, currency: "eur" },
+						type: "fixed_amount",
 					},
 				},
 			],
 			line_items: cart.items.map((item) => ({
-				quantity: item.qty,
 				price_data: {
 					currency: "eur",
-					unit_amount: item.unitPriceCents,
-					tax_behavior: "inclusive",
 					product_data: {
-						name: item.variantLabel
-							? `${item.product.name} — ${item.variantLabel}`
-							: item.product.name,
 						description: item.product.tagline,
 						images: [`${origin}${item.product.image}`],
 						metadata: {
 							slug: item.product.slug,
 							variantId: item.variantId ?? "default",
 						},
+						name: item.variantLabel
+							? `${item.product.name} — ${item.variantLabel}`
+							: item.product.name,
 					},
+					tax_behavior: "inclusive",
+					unit_amount: item.unitPriceCents,
 				},
+				quantity: item.qty,
 			})),
 			discounts: couponId ? [{ coupon: couponId }] : undefined,
 			metadata: {
-				user_id: userId ?? "anonymous",
-				source: "rosegriffon.fr/shop",
-				patron_discount: couponId ? "yes" : "no",
 				cart_signature: cart.items
 					.map((i) => `${i.slug}:${i.variantId ?? "_"}x${i.qty}`)
 					.join("|"),
+				patron_discount: couponId ? "yes" : "no",
+				source: "rosegriffon.fr/shop",
+				user_id: userId ?? "anonymous",
 			},
 			success_url: `${origin}/shop/merci?session_id={CHECKOUT_SESSION_ID}`,
 			cancel_url: `${origin}/shop/panier`,

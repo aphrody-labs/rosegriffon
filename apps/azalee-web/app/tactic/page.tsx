@@ -10,10 +10,10 @@ import { parseSearchParams } from "@/lib/validations";
 import { wikiService } from "@/lib/wiki-service";
 
 export const metadata: Metadata = {
-  title: "Tactiques | Inazuma Eleven Victory Road - Azalée",
+  alternates: { canonical: "/tactic" },
   description:
     "Liste complète des tactiques spéciales dans Inazuma Eleven: Victory Road. Effets, durée et disponibilité en boutique.",
-  alternates: { canonical: "/tactic" },
+  title: "Tactiques | Inazuma Eleven Victory Road - Azalée",
 };
 
 const ITEMS_PER_PAGE = 48;
@@ -21,7 +21,7 @@ const ITEMS_PER_PAGE = 48;
 export default async function TacticsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const rawParams = await searchParams;
   const params = parseSearchParams(rawParams);
@@ -29,10 +29,10 @@ export default async function TacticsPage({
   const q = params.q || "";
 
   const { data: tactics, total } = await wikiService.getTacticsList({
-    page,
-    limit: ITEMS_PER_PAGE,
-    q,
     category: "special_tactics",
+    limit: ITEMS_PER_PAGE,
+    page,
+    q,
   });
 
   return (

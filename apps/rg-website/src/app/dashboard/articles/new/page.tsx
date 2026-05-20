@@ -12,7 +12,7 @@ import { createClient } from "@/lib/supabase/server";
 
 export default async function NewArticlePage() {
   const user = await getServerUser();
-  if (!user) redirect("/login");
+  if (!user) {redirect("/login");}
 
   const supabase = await createClient();
 

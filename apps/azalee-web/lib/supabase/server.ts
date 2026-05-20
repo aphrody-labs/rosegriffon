@@ -22,7 +22,7 @@ function isValidKey(v: string | undefined | null): v is string {
 function pickUrl(...keys: string[]): string {
 	for (const k of keys) {
 		const v = process.env[k];
-		if (isValidHttpUrl(v)) return v;
+		if (isValidHttpUrl(v)) {return v;}
 	}
 	return PLACEHOLDER_URL;
 }
@@ -30,7 +30,7 @@ function pickUrl(...keys: string[]): string {
 function pickKey(...keys: string[]): string {
 	for (const k of keys) {
 		const v = process.env[k];
-		if (isValidKey(v)) return v;
+		if (isValidKey(v)) {return v;}
 	}
 	return PLACEHOLDER_ANON_JWT;
 }
@@ -45,7 +45,7 @@ const supabaseAnonKey = pickKey(
 );
 
 // Skip the Better Auth -> Supabase JWT bridge when the local SUPABASE_JWT_SECRET
-// is desynchronized from Supabase Cloud (minted JWTs rejected with PGRST301).
+// Is desynchronized from Supabase Cloud (minted JWTs rejected with PGRST301).
 // Lectures publiques via anon + GRANT SELECT sur schema public (appliqué 2026-04-20).
 // Défaut: true. Pour réactiver le bridge après avoir resyncé le secret: DISABLE_SUPABASE_JWT_BRIDGE=false.
 const DISABLE_SUPABASE_JWT_BRIDGE =

@@ -39,8 +39,8 @@ async function ensureFreshCreatorToken(
 		.from("patreon_oauth_tokens")
 		.update({
 			access_token_enc: encryptToken(refreshed.access_token),
-			refresh_token_enc: encryptToken(refreshed.refresh_token),
 			expires_at: newExpiresAt,
+			refresh_token_enc: encryptToken(refreshed.refresh_token),
 			scope: refreshed.scope || row.scope,
 		})
 		.eq("id", row.id);
@@ -181,7 +181,7 @@ function getRel(
 	name: string,
 ): { id: string; type: string }[] {
 	const rel = resource.relationships?.[name]?.data;
-	if (!rel) return [];
+	if (!rel) {return [];}
 	return Array.isArray(rel) ? rel : [rel];
 }
 
@@ -198,7 +198,7 @@ function getRel(
  */
 export async function fetchLiveCampaignSnapshot(): Promise<LiveSnapshotResult> {
 	const supabase = createAdminClient();
-	if (!supabase) return { ok: false, reason: "no_admin_client" };
+	if (!supabase) {return { ok: false, reason: "no_admin_client" };}
 
 	const { data: tokenRow } = await supabase
 		.from("patreon_oauth_tokens")
@@ -209,32 +209,32 @@ export async function fetchLiveCampaignSnapshot(): Promise<LiveSnapshotResult> {
 		.maybeSingle();
 
 	const row = tokenRow as CreatorTokenRow | null;
-	if (!row) return { ok: false, reason: "no_creator_token" };
+	if (!row) {return { ok: false, reason: "no_creator_token" };}
 
 	const t0 = performance.now();
 	let accessToken: string;
 	try {
 		accessToken = await ensureFreshCreatorToken(supabase, row);
-	} catch (e) {
+	} catch (error) {
 		return {
 			ok: false,
 			reason: "fetch_failed",
-			error: `refresh token failed: ${e instanceof Error ? e.message : String(e)}`,
+			error: `refresh token failed: ${error instanceof Error ? error.message : String(error)}`,
 		};
 	}
 
 	let campaignsResp: Awaited<ReturnType<typeof patreonFetch>>;
 	try {
 		campaignsResp = await patreonFetch(accessToken, "/campaigns", {
-			include: "tiers",
 			"fields[campaign]": CAMPAIGN_FIELDS,
 			"fields[tier]": TIER_FIELDS,
+			include: "tiers",
 		});
-	} catch (e) {
+	} catch (error) {
 		return {
 			ok: false,
 			reason: "fetch_failed",
-			error: `GET /campaigns: ${e instanceof Error ? e.message : String(e)}`,
+			error: `GET /campaigns: ${error instanceof Error ? error.message : String(error)}`,
 		};
 	}
 
@@ -244,7 +244,7 @@ export async function fetchLiveCampaignSnapshot(): Promise<LiveSnapshotResult> {
 	const c = campaignsData[0] as
 		| JsonApiResource<PatreonCampaignAttrs>
 		| undefined;
-	if (!c) return { ok: false, reason: "no_campaign" };
+	if (!c) {return { ok: false, reason: "no_campaign" };}
 
 	const tierResources = (campaignsResp.included ?? []).filter(
 		(r) => r.type === "tier",
@@ -252,17 +252,17 @@ export async function fetchLiveCampaignSnapshot(): Promise<LiveSnapshotResult> {
 
 	const tiers: LiveTier[] = tierResources
 		.map((t) => ({
-			id: t.id,
-			title: t.attributes.title ?? "",
 			amount_cents: t.attributes.amount_cents ?? 0,
+			description: t.attributes.description ?? null,
+			discord_role_ids: t.attributes.discord_role_ids ?? [],
+			id: t.id,
+			image_url: t.attributes.image_url ?? null,
 			patron_count: t.attributes.patron_count ?? null,
 			published: t.attributes.published ?? null,
-			description: t.attributes.description ?? null,
-			image_url: t.attributes.image_url ?? null,
-			discord_role_ids: t.attributes.discord_role_ids ?? [],
+			title: t.attributes.title ?? "",
 			url: t.attributes.url ?? null,
 		}))
-		.sort((a, b) => a.amount_cents - b.amount_cents);
+		.toSorted((a, b) => a.amount_cents - b.amount_cents);
 
 	const members: LiveMember[] = [];
 	let cursor: string | null = null;
@@ -271,13 +271,13 @@ export async function fetchLiveCampaignSnapshot(): Promise<LiveSnapshotResult> {
 	try {
 		do {
 			const query: Record<string, string> = {
-				include: "currently_entitled_tiers,user,address",
 				"fields[member]": MEMBER_FIELDS,
 				"fields[tier]": TIER_FIELDS,
 				"fields[user]": USER_FIELDS,
+				include: "currently_entitled_tiers,user,address",
 				"page[count]": "200",
 			};
-			if (cursor) query["page[cursor]"] = cursor;
+			if (cursor) {query["page[cursor]"] = cursor;}
 
 			const resp = await patreonFetch<PatreonMemberAttrs>(
 				accessToken,
@@ -320,53 +320,49 @@ export async function fetchLiveCampaignSnapshot(): Promise<LiveSnapshotResult> {
 				const addressAttrs =
 					(addressId && addressesById.get(addressId)?.attributes) || null;
 
-				const discordRoleIds = Array.from(
-					new Set(
-						memberTiers.flatMap((t) => t.attributes.discord_role_ids ?? []),
-					),
-				).filter((s): s is string => Boolean(s));
+				const discordRoleIds = [...new Set(memberTiers.flatMap((t) => t.attributes.discord_role_ids ?? []))].filter((s): s is string => Boolean(s));
 
 				members.push({
-					id: m.id,
-					full_name: m.attributes.full_name ?? null,
-					email: m.attributes.email ?? null,
-					patreon_user_id: userId,
-					patreon_thumb_url: userResource?.attributes.thumb_url ?? null,
-					patreon_url: userResource?.attributes.url ?? null,
-					discord_user_id: discordUserId,
-					patron_status: m.attributes.patron_status ?? null,
-					last_charge_date: m.attributes.last_charge_date ?? null,
-					last_charge_status: m.attributes.last_charge_status ?? null,
+					address: addressAttrs as PatreonAddressAttrs | null,
 					currently_entitled_cents:
 						m.attributes.currently_entitled_amount_cents ?? 0,
+					discord_role_ids: discordRoleIds,
+					discord_user_id: discordUserId,
+					email: m.attributes.email ?? null,
+					full_name: m.attributes.full_name ?? null,
+					id: m.id,
+					is_free_trial: m.attributes.is_free_trial ?? false,
+					is_gifted: m.attributes.is_gifted ?? false,
+					last_charge_date: m.attributes.last_charge_date ?? null,
+					last_charge_status: m.attributes.last_charge_status ?? null,
 					lifetime_support_cents:
 						m.attributes.campaign_lifetime_support_cents ??
 						m.attributes.lifetime_support_cents ??
 						0,
-					will_pay_amount_cents: m.attributes.will_pay_amount_cents ?? 0,
 					next_charge_date: m.attributes.next_charge_date ?? null,
-					pledge_start: m.attributes.pledge_relationship_start ?? null,
+					note: m.attributes.note ?? null,
+					patreon_thumb_url: userResource?.attributes.thumb_url ?? null,
+					patreon_url: userResource?.attributes.url ?? null,
+					patreon_user_id: userId,
+					patron_status: m.attributes.patron_status ?? null,
 					pledge_cadence: m.attributes.pledge_cadence ?? null,
-					is_free_trial: m.attributes.is_free_trial ?? false,
-					is_gifted: m.attributes.is_gifted ?? false,
+					pledge_start: m.attributes.pledge_relationship_start ?? null,
 					tier_ids: memberTiers.map((t) => t.id),
 					tier_titles: memberTiers
 						.map((t) => t.attributes.title ?? "")
 						.filter((s): s is string => Boolean(s)),
-					discord_role_ids: discordRoleIds,
-					address: addressAttrs as PatreonAddressAttrs | null,
-					note: m.attributes.note ?? null,
+					will_pay_amount_cents: m.attributes.will_pay_amount_cents ?? 0,
 				});
 			}
 
 			cursor = resp.meta?.pagination?.cursors?.next ?? null;
 			pages += 1;
 		} while (cursor && pages < MAX_PAGES);
-	} catch (e) {
+	} catch (error) {
 		return {
 			ok: false,
 			reason: "fetch_failed",
-			error: `GET /campaigns/${c.id}/members: ${e instanceof Error ? e.message : String(e)}`,
+			error: `GET /campaigns/${c.id}/members: ${error instanceof Error ? error.message : String(error)}`,
 		};
 	}
 
@@ -378,22 +374,22 @@ export async function fetchLiveCampaignSnapshot(): Promise<LiveSnapshotResult> {
 		ok: true,
 		snapshot: {
 			campaign: {
-				id: c.id,
 				creation_name: c.attributes.creation_name ?? null,
-				vanity: c.attributes.vanity ?? null,
-				one_liner: c.attributes.one_liner ?? null,
-				summary: c.attributes.summary ?? null,
+				id: c.id,
 				image_url: c.attributes.image_url ?? null,
+				is_charged_immediately: c.attributes.is_charged_immediately ?? null,
+				is_monthly: c.attributes.is_monthly ?? null,
+				one_liner: c.attributes.one_liner ?? null,
 				patron_count: c.attributes.patron_count ?? 0,
 				pledge_url: c.attributes.pledge_url ?? null,
-				is_monthly: c.attributes.is_monthly ?? null,
-				is_charged_immediately: c.attributes.is_charged_immediately ?? null,
 				published_at: c.attributes.published_at ?? null,
+				summary: c.attributes.summary ?? null,
+				vanity: c.attributes.vanity ?? null,
 			},
-			tiers,
-			members,
-			fetchedAt: new Date().toISOString(),
 			fetchDurationMs: Math.round(performance.now() - t0),
+			fetchedAt: new Date().toISOString(),
+			members,
+			tiers,
 			tokenExpiresAt: row.expires_at,
 			tokenScope: row.scope,
 		},

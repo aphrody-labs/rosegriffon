@@ -12,11 +12,11 @@ interface UsersFiltersProps {
 }
 
 const ROLES = [
-  { label: "Tous", value: "", icon: "group" },
-  { label: "Admins", value: "admin", icon: "shield" },
-  { label: "Modérateurs", value: "moderator", icon: "verified_user" },
-  { label: "Éditeurs", value: "editor", icon: "edit" },
-  { label: "Membres", value: "member", icon: "person" },
+  { icon: "group", label: "Tous", value: "" },
+  { icon: "shield", label: "Admins", value: "admin" },
+  { icon: "verified_user", label: "Modérateurs", value: "moderator" },
+  { icon: "edit", label: "Éditeurs", value: "editor" },
+  { icon: "person", label: "Membres", value: "member" },
 ];
 
 export function UsersFilters({ totalItems, currentRole }: UsersFiltersProps) {
@@ -45,7 +45,7 @@ export function UsersFilters({ totalItems, currentRole }: UsersFiltersProps) {
 
   const handleSearch = (value: string) => {
     setSearchValue(value);
-    if (searchTimerRef.current) clearTimeout(searchTimerRef.current);
+    if (searchTimerRef.current) {clearTimeout(searchTimerRef.current);}
     searchTimerRef.current = setTimeout(() => {
       router.push(buildHref({ q: value || null }));
     }, 400);

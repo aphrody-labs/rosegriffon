@@ -1,4 +1,5 @@
-import { type NextRequest, NextResponse } from "next/server";
+import { NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
 
 /**
  * GET /api/admin/discord/role/[roleId]/members
@@ -49,7 +50,7 @@ async function fetchAllMembers(
 	while (true) {
 		const u = new URL(`https://discord.com/api/v10/guilds/${guildId}/members`);
 		u.searchParams.set("limit", "1000");
-		if (after) u.searchParams.set("after", after);
+		if (after) {u.searchParams.set("after", after);}
 		const res = await fetch(u, {
 			headers: { Authorization: `Bot ${token}` },
 		});
@@ -60,8 +61,10 @@ async function fetchAllMembers(
 		}
 		const batch = (await res.json()) as DiscordMember[];
 		all.push(...batch);
-		if (batch.length < 1000) break;
-		after = batch[batch.length - 1].user.id;
+		if (batch.length < 1000) {break;}
+		const lastMember = batch[batch.length - 1];
+		if (!lastMember) {break;}
+		after = lastMember.user.id;
 	}
 	return all;
 }
@@ -101,13 +104,13 @@ export async function GET(
 	let members: DiscordMember[];
 	try {
 		members = await fetchAllMembers(guildId, token);
-	} catch (e) {
-		return NextResponse.json({ error: (e as Error).message }, { status: 502 });
+	} catch (error) {
+		return NextResponse.json({ error: (error as Error).message }, { status: 502 });
 	}
 
 	const withRole = members.filter((m) => m.roles?.includes(roleId));
 	if (withRole.length === 0) {
-		return NextResponse.json({ roleId, members: [] });
+		return NextResponse.json({ members: [], roleId });
 	}
 
 	// Lookup profiles existants
@@ -129,17 +132,17 @@ export async function GET(
 	const out = withRole.map((m) => {
 		const profile = profileByDiscord.get(m.user.id);
 		return {
-			discord_id: m.user.id,
-			username: m.user.username,
-			global_name: m.user.global_name ?? null,
-			nick: m.nick ?? null,
-			name: m.nick || m.user.global_name || m.user.username,
 			avatar_url: avatarUrl(m.user.id, m.user.avatar),
+			discord_id: m.user.id,
+			global_name: m.user.global_name ?? null,
+			name: m.nick || m.user.global_name || m.user.username,
+			nick: m.nick ?? null,
+			profile_full_name: profile?.full_name ?? null,
 			profile_id: profile?.id ?? null,
 			profile_username: profile?.username ?? null,
-			profile_full_name: profile?.full_name ?? null,
+			username: m.user.username,
 		};
 	});
 
-	return NextResponse.json({ roleId, count: out.length, members: out });
+	return NextResponse.json({ count: out.length, members: out, roleId });
 }

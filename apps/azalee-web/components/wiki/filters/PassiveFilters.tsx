@@ -10,9 +10,9 @@ import { cn } from "@/lib/utils";
 /* ── Filter options ────────────────────────────────── */
 
 const TYPE_OPTIONS = [
-  { value: "player", label: "Joueur", icon: "person", color: "text-blue-600" },
-  { value: "custom", label: "Personnalisé", icon: "auto_fix_high", color: "text-purple-600" },
-  { value: "coordinator", label: "Coord. / Manager", icon: "groups", color: "text-amber-600" },
+  { color: "text-blue-600", icon: "person", label: "Joueur", value: "player" },
+  { color: "text-purple-600", icon: "auto_fix_high", label: "Personnalisé", value: "custom" },
+  { color: "text-amber-600", icon: "groups", label: "Coord. / Manager", value: "coordinator" },
 ] as const;
 
 const PLAYSTYLE_OPTIONS: ReadonlyArray<{
@@ -22,22 +22,22 @@ const PLAYSTYLE_OPTIONS: ReadonlyArray<{
   icon?: string;
   color: string;
 }> = [
-  { value: "", label: "Généraux", icon: "tune", color: "text-on-surface-variant" },
-  { value: "Breach", label: "Brèche", sprite: "breche", color: "text-red-500" },
-  { value: "Tension", label: "Tension", sprite: "tension", color: "text-amber-500" },
-  { value: "Counter", label: "Contre-attaque", sprite: "contre", color: "text-blue-500" },
-  { value: "Bond", label: "Lien", sprite: "lien", color: "text-pink-500" },
-  { value: "Rough Play", label: "Jeu brutal", sprite: "jeu_violent", color: "text-orange-500" },
-  { value: "Justice", label: "Justice", sprite: "justice", color: "text-emerald-500" },
+  { color: "text-on-surface-variant", icon: "tune", label: "Généraux", value: "" },
+  { color: "text-red-500", label: "Brèche", sprite: "breche", value: "Breach" },
+  { color: "text-amber-500", label: "Tension", sprite: "tension", value: "Tension" },
+  { color: "text-blue-500", label: "Contre-attaque", sprite: "contre", value: "Counter" },
+  { color: "text-pink-500", label: "Lien", sprite: "lien", value: "Bond" },
+  { color: "text-orange-500", label: "Jeu brutal", sprite: "jeu_violent", value: "Rough Play" },
+  { color: "text-emerald-500", label: "Justice", sprite: "justice", value: "Justice" },
 ];
 
 const STAT_CATEGORY_OPTIONS = [
-  { value: "shot", label: "Tir", icon: "sports_soccer" },
-  { value: "focus", label: "Affrontement", icon: "flash_on" },
-  { value: "scramble", label: "Mêlée", icon: "swap_horiz" },
-  { value: "castle", label: "Mur de déf.", icon: "shield" },
-  { value: "team", label: "Équipe", icon: "groups" },
-  { value: "own", label: "Personnel", icon: "person" },
+  { icon: "sports_soccer", label: "Tir", value: "shot" },
+  { icon: "flash_on", label: "Affrontement", value: "focus" },
+  { icon: "swap_horiz", label: "Mêlée", value: "scramble" },
+  { icon: "shield", label: "Mur de déf.", value: "castle" },
+  { icon: "groups", label: "Équipe", value: "team" },
+  { icon: "person", label: "Personnel", value: "own" },
 ] as const;
 
 /* ── Component ─────────────────────────────────────── */
@@ -144,13 +144,13 @@ export function PassiveFilters({ typeCounts, playstyleCounts }: PassiveFiltersPr
             >
               {opt.sprite ? (
                 <CommonSpriteIcon name={opt.sprite} scale={0.22} />
-              ) : opt.icon ? (
+              ) : (opt.icon ? (
                 <Icon
                   name={opt.icon}
                   size={14}
                   className={cn(isActive ? "text-primary" : opt.color)}
                 />
-              ) : null}
+              ) : null)}
               {opt.label}
               {count !== undefined && (
                 <span className="text-[9px] opacity-60 ml-0.5">({count})</span>

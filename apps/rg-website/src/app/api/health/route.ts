@@ -17,9 +17,9 @@ export async function GET() {
 		if (result.error) {
 			dbError = result.error.message;
 		}
-	} catch (e) {
+	} catch (error) {
 		checks.db = "error";
-		dbError = e instanceof Error ? e.message : String(e);
+		dbError = error instanceof Error ? error.message : String(error);
 	}
 
 	const allOk = Object.values(checks).every((v) => v === "ok");

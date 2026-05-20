@@ -23,32 +23,32 @@ import { cn } from "@/lib/utils";
 import { CharacterStatsPopover } from "./CharacterStatsPopover";
 
 const ELEMENT_SPRITE_MAP: Record<string, SpriteCommonKey> = {
-	Fire: "fire",
 	Feu: "fire",
-	Wind: "wind",
-	Vent: "wind",
+	Fire: "fire",
 	Forest: "forest",
 	Forêt: "forest",
-	Mountain: "mountain",
 	Montagne: "mountain",
+	Mountain: "mountain",
+	Vent: "wind",
+	Wind: "wind",
 };
 
 const PLAYSTYLE_SPRITE: Record<string, SpriteCommonKey> = {
-	Justice: "justice",
 	Bond: "lien",
-	Counter: "contre",
 	Breach: "breche",
+	Counter: "contre",
 	Freedom: "breche",
+	Justice: "justice",
 	"Rough Play": "jeu_violent",
 	Tension: "tension",
 };
 
 const PLAYSTYLE_LABEL: Record<string, string> = {
-	Justice: "Justice",
 	Bond: "Lien",
-	Counter: "Contre",
 	Breach: "Brèche",
+	Counter: "Contre",
 	Freedom: "Brèche",
+	Justice: "Justice",
 	"Rough Play": "Jeu violent",
 	Tension: "Tension",
 };
@@ -72,14 +72,14 @@ function BaseCharacterRow({
 	const variants = character.variants || [];
 	const activeVariant = variants[0];
 
-	if (!activeVariant) return null;
+	if (!activeVariant) {return null;}
 
 	const name =
 		(language === "ja"
 			? character.names.ja
-			: language === "en"
+			: (language === "en"
 				? character.names.en
-				: character.names.fr) ||
+				: character.names.fr)) ||
 		character.names.fr ||
 		character.names.en ||
 		character.names.ja ||
@@ -90,19 +90,24 @@ function BaseCharacterRow({
 	const getElementName = (el: string) => {
 		switch (el) {
 			case "Fire":
-			case "Feu":
+			case "Feu": {
 				return t("wiki.elements.fire");
+			}
 			case "Wind":
-			case "Vent":
+			case "Vent": {
 				return t("wiki.elements.wind");
+			}
 			case "Forest":
-			case "Forêt":
+			case "Forêt": {
 				return t("wiki.elements.forest");
+			}
 			case "Mountain":
-			case "Montagne":
+			case "Montagne": {
 				return t("wiki.elements.mountain");
-			default:
+			}
+			default: {
 				return el;
+			}
 		}
 	};
 
@@ -112,26 +117,32 @@ function BaseCharacterRow({
 	// Position Helper
 	const getPositionName = (pos: string) => {
 		switch (pos) {
-			case "Coach":
+			case "Coach": {
 				return t("wiki.positions.coach");
-			case "GK":
+			}
+			case "GK": {
 				return t("wiki.positions.gk_long");
-			case "DF":
+			}
+			case "DF": {
 				return t("wiki.positions.df_long");
-			case "MF":
+			}
+			case "MF": {
 				return t("wiki.positions.mf_long");
-			case "FW":
+			}
+			case "FW": {
 				return t("wiki.positions.fw_long");
-			default:
+			}
+			default: {
 				return pos;
+			}
 		}
 	};
 
 	const positionCategoryMap: Record<string, string> = {
-		GK: "gardien",
 		DF: "defense",
-		MF: "dribble",
 		FW: "tir",
+		GK: "gardien",
+		MF: "dribble",
 	};
 	const positionImage = positionCategoryMap[activeVariant.position]
 		? getSkillCategoryIconUrl(positionCategoryMap[activeVariant.position])
@@ -148,22 +159,30 @@ function BaseCharacterRow({
 	// Rarity
 	const getRarityName = (r: string) => {
 		switch (r) {
-			case "N":
+			case "N": {
 				return t("wiki.rarities.normal");
-			case "R":
+			}
+			case "R": {
 				return t("wiki.rarities.rare");
-			case "SR":
+			}
+			case "SR": {
 				return t("wiki.rarities.super_rare");
-			case "SSR":
+			}
+			case "SSR": {
 				return t("wiki.rarities.super_super_rare");
-			case "UR":
+			}
+			case "UR": {
 				return t("wiki.rarities.ultra_rare");
-			case "Légendaire":
+			}
+			case "Légendaire": {
 				return t("wiki.rarities.normal");
-			case "BASARA":
+			}
+			case "BASARA": {
 				return "BASARA";
-			default:
+			}
+			default: {
 				return r;
+			}
 		}
 	};
 

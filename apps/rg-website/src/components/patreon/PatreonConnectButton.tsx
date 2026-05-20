@@ -12,8 +12,8 @@ import { cn } from "@/lib/utils";
 type Variant = "patron-link" | "creator-link" | "reactivate";
 
 // Scopes additionnels demandés uniquement pour le link créateur. Better Auth
-// les merge avec les scopes patron définis dans la config genericOAuth, donc
-// pas besoin de redéclarer identity / identity.memberships ici.
+// Les merge avec les scopes patron définis dans la config genericOAuth, donc
+// Pas besoin de redéclarer identity / identity.memberships ici.
 const CREATOR_EXTRA_SCOPES: string[] = [
 	PatreonOauthScope.Campaigns,
 	PatreonOauthScope.CampaignMembers,
@@ -31,8 +31,8 @@ interface Props {
 }
 
 const LABELS: Record<Variant, string> = {
-	"patron-link": "Lier mon compte Patreon",
 	"creator-link": "Lier le compte créateur Patreon",
+	"patron-link": "Lier mon compte Patreon",
 	reactivate: "Réactiver mon soutien",
 };
 
@@ -58,8 +58,8 @@ export function PatreonConnectButton({
 			const callbackURL =
 				redirect ?? (variant === "creator-link" ? "/admin/patreon" : "/profil");
 			const res = await authClient.signIn.oauth2({
-				providerId: "patreon",
 				callbackURL,
+				providerId: "patreon",
 				...(variant === "creator-link" ? { scopes: CREATOR_EXTRA_SCOPES } : {}),
 			});
 			const err = (res as { error?: { message?: string } | null })?.error;
@@ -67,8 +67,8 @@ export function PatreonConnectButton({
 				toast.error(err.message ?? "Erreur lors du link Patreon");
 				setLoading(false);
 			}
-		} catch (e) {
-			console.error("[PatreonConnectButton]", e);
+		} catch (error) {
+			console.error("[PatreonConnectButton]", error);
 			toast.error("Erreur lors du link Patreon");
 			setLoading(false);
 		}
@@ -86,11 +86,11 @@ export function PatreonConnectButton({
 		>
 			{loading ? (
 				<Loader2 className="size-4 animate-spin" />
-			) : variant === "reactivate" ? (
+			) : (variant === "reactivate" ? (
 				<Heart className="size-4" />
 			) : (
 				<Link2 className="size-4" />
-			)}
+			))}
 			{label ?? LABELS[variant]}
 		</Button>
 	);

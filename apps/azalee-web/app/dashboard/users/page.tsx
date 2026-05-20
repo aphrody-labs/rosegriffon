@@ -21,17 +21,17 @@ import { UsersFilters } from "./UsersFilters";
 
 const ITEMS_PER_PAGE = 20;
 const ROLE_LABELS: Record<string, string> = {
-  superadmin: "Super Admin",
   admin: "Admin",
-  moderator: "Modérateur",
   editor: "Éditeur",
   member: "Membre",
+  moderator: "Modérateur",
+  superadmin: "Super Admin",
 };
 
 export default async function UsersPage({
   searchParams,
 }: {
-  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const params = await searchParams;
   const { page: currentPage, q } = parseSearchParams(params);
@@ -44,8 +44,8 @@ export default async function UsersPage({
   // Count
   let countQuery = client.from("profiles").select("*", { count: "exact", head: true });
   if (q)
-    countQuery = countQuery.or(`username.ilike.%${q}%,email.ilike.%${q}%,full_name.ilike.%${q}%`);
-  if (role) countQuery = countQuery.eq("role", role);
+    {countQuery = countQuery.or(`username.ilike.%${q}%,email.ilike.%${q}%,full_name.ilike.%${q}%`);}
+  if (role) {countQuery = countQuery.eq("role", role);}
   const { count } = await countQuery;
   const totalItems = count || 0;
 
@@ -56,8 +56,8 @@ export default async function UsersPage({
     .order("updated_at", { ascending: false })
     .range((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE - 1);
 
-  if (q) query = query.or(`username.ilike.%${q}%,email.ilike.%${q}%,full_name.ilike.%${q}%`);
-  if (role) query = query.eq("role", role);
+  if (q) {query = query.or(`username.ilike.%${q}%,email.ilike.%${q}%,full_name.ilike.%${q}%`);}
+  if (role) {query = query.eq("role", role);}
 
   // Article counts per author (all azalee articles)
   const [{ data: profiles, error }, { data: articleCounts }] = await Promise.all([
@@ -83,7 +83,7 @@ export default async function UsersPage({
   return (
     <div className="space-y-6 sm:space-y-8 pb-24 sm:pb-8">
       <DashboardPageHeader
-        breadcrumbs={[{ label: "Tableau de bord", href: "/dashboard" }, { label: "Utilisateurs" }]}
+        breadcrumbs={[{ href: "/dashboard", label: "Tableau de bord" }, { label: "Utilisateurs" }]}
         title="Communauté"
         subtitle={`${totalItems} membre${totalItems !== 1 ? "s" : ""}`}
         icon="group"

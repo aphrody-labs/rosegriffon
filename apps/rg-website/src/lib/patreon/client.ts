@@ -1,7 +1,5 @@
-import {
-	PatreonCreatorClient,
-	type Oauth2StoredToken,
-} from "@rosegriffon/patreon-bun";
+import { PatreonCreatorClient } from '@rosegriffon/patreon-bun';
+import type { Oauth2StoredToken } from '@rosegriffon/patreon-bun';
 
 import type {
 	JsonApiResource,
@@ -44,8 +42,8 @@ function toLegacyTokenShape(token: Oauth2StoredToken): PatreonTokenResponse {
 	const t = token as Oauth2StoredToken & { scope?: string };
 	return {
 		access_token: t.access_token,
-		refresh_token: t.refresh_token,
 		expires_in: Number(t.expires_in) || 0,
+		refresh_token: t.refresh_token,
 		scope: t.scope ?? "",
 		token_type: "Bearer",
 	};
@@ -100,14 +98,14 @@ export function getCreatorClient(accessToken: string): PatreonCreatorClient {
 			fetch: globalThis.fetch as never,
 			retries: [
 				{
-					status: 429,
-					retries: 5,
 					backoff: { time: 1000, jitter: 500, type: "exponential" } as never,
+					retries: 5,
+					status: 429,
 				},
 				{
-					status: [500, 599],
-					retries: 3,
 					backoff: { time: 1000, jitter: 500, type: "exponential" } as never,
+					retries: 3,
+					status: [500, 599],
 				},
 			] as never,
 		},
@@ -126,18 +124,18 @@ export async function patreonFetch<T = Record<string, unknown>>(
 ): Promise<JsonApiResponse<T>> {
 	const url = new URL(`https://www.patreon.com/api/oauth2/v2${path}`);
 	if (query) {
-		for (const [k, v] of Object.entries(query)) url.searchParams.set(k, v);
+		for (const [k, v] of Object.entries(query)) {url.searchParams.set(k, v);}
 	}
 
 	for (let attempt = 0; attempt < 5; attempt++) {
 		const res = await fetch(url, {
 			headers: {
-				authorization: `Bearer ${accessToken}`,
 				accept: "application/json",
+				authorization: `Bearer ${accessToken}`,
 			},
 		});
 
-		if (res.ok) return (await res.json()) as JsonApiResponse<T>;
+		if (res.ok) {return (await res.json()) as JsonApiResponse<T>;}
 
 		const retryable = res.status === 429 || res.status >= 500;
 		if (retryable && attempt < 4) {
@@ -236,7 +234,7 @@ export function parseIdentityWithMemberships(
 	response: JsonApiResponse,
 ): ParsedIdentity {
 	const data = Array.isArray(response.data) ? response.data[0] : response.data;
-	if (!data) throw new PatreonApiError("identity returned no data", 0, null);
+	if (!data) {throw new PatreonApiError("identity returned no data", 0, null);}
 
 	const userAttrs = data.attributes as PatreonUserAttrs;
 	const discordUserId =
@@ -263,7 +261,7 @@ export function parseIdentityWithMemberships(
 	const userMembershipIds = new Set<string>(
 		(() => {
 			const rel = data.relationships?.memberships?.data;
-			if (!rel) return [];
+			if (!rel) {return [];}
 			const arr = Array.isArray(rel) ? rel : [rel];
 			return arr.map((r) => r.id);
 		})(),
@@ -279,9 +277,9 @@ export function parseIdentityWithMemberships(
 			const tierRel = m.relationships?.currently_entitled_tiers?.data;
 			const tierRefs = Array.isArray(tierRel)
 				? tierRel
-				: tierRel
+				: (tierRel
 					? [tierRel]
-					: [];
+					: []);
 			const tiers = tierRefs
 				.map((ref) => tiersById.get(ref.id))
 				.filter((t): t is JsonApiResource<PatreonTierAttrs> => Boolean(t));
@@ -293,28 +291,28 @@ export function parseIdentityWithMemberships(
 				(addressId && addressesById.get(addressId)?.attributes) || null;
 
 			return {
-				memberId: m.id,
-				campaignId,
+				address,
 				attrs: m.attributes,
-				tierIds: tiers.map((t) => t.id),
-				tierTitles: tiers
-					.map((t) => t.attributes.title)
-					.filter((s): s is string => Boolean(s)),
-				tierAmountsCents: tiers.map((t) => t.attributes.amount_cents ?? 0),
-				tierRequiresShipping: tiers.map(
-					(t) => t.attributes.requires_shipping ?? false,
-				),
+				campaignId,
 				discordRoleIds: tiers
 					.flatMap((t) => t.attributes.discord_role_ids ?? [])
 					.filter((s): s is string => Boolean(s)),
-				address,
+				memberId: m.id,
+				tierAmountsCents: tiers.map((t) => t.attributes.amount_cents ?? 0),
+				tierIds: tiers.map((t) => t.id),
+				tierRequiresShipping: tiers.map(
+					(t) => t.attributes.requires_shipping ?? false,
+				),
+				tierTitles: tiers
+					.map((t) => t.attributes.title)
+					.filter((s): s is string => Boolean(s)),
 			};
 		});
 
 	return {
-		patreonUserId: data.id,
-		user: userAttrs,
 		discordUserId,
 		memberships,
+		patreonUserId: data.id,
+		user: userAttrs,
 	};
 }

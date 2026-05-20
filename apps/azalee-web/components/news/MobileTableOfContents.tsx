@@ -22,19 +22,19 @@ export function MobileTableOfContents({ items }: MobileTableOfContentsProps) {
   const observerRef = useRef<IntersectionObserver | null>(null);
 
   useEffect(() => {
-    if (items.length === 0) return;
+    if (items.length === 0) {return;}
 
     const headingElements = items
       .map((item) => document.getElementById(item.id))
       .filter(Boolean) as HTMLElement[];
 
-    if (headingElements.length === 0) return;
+    if (headingElements.length === 0) {return;}
 
     observerRef.current = new IntersectionObserver(
       (entries) => {
         const visible = entries.filter((e) => e.isIntersecting);
         if (visible.length > 0) {
-          const sorted = visible.sort(
+          const sorted = visible.toSorted(
             (a, b) => a.boundingClientRect.top - b.boundingClientRect.top,
           );
           setActiveId(sorted[0].target.id);
@@ -53,7 +53,7 @@ export function MobileTableOfContents({ items }: MobileTableOfContentsProps) {
     };
   }, [items]);
 
-  if (items.length === 0) return null;
+  if (items.length === 0) {return null;}
 
   return (
     <div className="lg:hidden">

@@ -50,7 +50,7 @@ const TextPressure: React.FC<TextPressureProps> = ({
   const [scaleY, setScaleY] = useState(1);
   const [lineHeight, setLineHeight] = useState(1);
 
-  const chars = text.split("");
+  const chars = [...text];
 
   const dist = (a: { x: number; y: number }, b: { x: number; y: number }) => {
     const dx = b.x - a.x;
@@ -89,7 +89,7 @@ const TextPressure: React.FC<TextPressureProps> = ({
   }, []);
 
   const setSize = () => {
-    if (!containerRef.current || !titleRef.current) return;
+    if (!containerRef.current || !titleRef.current) {return;}
 
     const { width: containerW, height: containerH } = containerRef.current.getBoundingClientRect();
 
@@ -101,7 +101,7 @@ const TextPressure: React.FC<TextPressureProps> = ({
     setLineHeight(1);
 
     requestAnimationFrame(() => {
-      if (!titleRef.current) return;
+      if (!titleRef.current) {return;}
       const textRect = titleRef.current.getBoundingClientRect();
 
       if (scale && textRect.height > 0) {
@@ -129,7 +129,7 @@ const TextPressure: React.FC<TextPressureProps> = ({
         const maxDist = titleRect.width / 2;
 
         spansRef.current.forEach((span) => {
-          if (!span) return;
+          if (!span) {return;}
 
           const rect = span.getBoundingClientRect();
           const charCenter = {
@@ -191,14 +191,14 @@ const TextPressure: React.FC<TextPressureProps> = ({
           flex ? "flex justify-between" : ""
         } ${stroke ? "stroke" : ""} uppercase text-center`}
         style={{
+          color: stroke ? undefined : textColor,
           fontFamily,
           fontSize: fontSize,
+          fontWeight: 100,
           lineHeight,
+          margin: 0,
           transform: `scale(1, ${scaleY})`,
           transformOrigin: "center top",
-          margin: 0,
-          fontWeight: 100,
-          color: stroke ? undefined : textColor,
         }}
       >
         {chars.map((char, i) => (

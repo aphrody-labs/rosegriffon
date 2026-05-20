@@ -35,11 +35,11 @@ interface UserLike {
  */
 export const isPatreonAdmin = cache(
 	async (user: UserLike | null): Promise<boolean> => {
-		if (!user) return false;
-		if (user.email?.toLowerCase() === PATREON_CREATOR_EMAIL) return true;
+		if (!user) {return false;}
+		if (user.email?.toLowerCase() === PATREON_CREATOR_EMAIL) {return true;}
 
 		const supabase = createAdminClient();
-		if (!supabase) return false;
+		if (!supabase) {return false;}
 
 		const { data: profile } = await supabase
 			.from("profiles")

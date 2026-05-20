@@ -74,11 +74,11 @@ export function MovesetList({ skills, maxSlots = 4, className }: MovesetListProp
                       className="object-contain"
                     />
                   </div>
-                ) : skill.isPassive ? (
+                ) : (skill.isPassive ? (
                   <Sparkles size={18} className="text-outline-variant" aria-hidden="true" />
                 ) : (
                   <CircleDot size={18} className="text-outline-variant" aria-hidden="true" />
-                )}
+                ))}
               </div>
 
               {/* Name & Level */}

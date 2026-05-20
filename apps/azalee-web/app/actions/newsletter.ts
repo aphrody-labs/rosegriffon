@@ -32,11 +32,11 @@ export async function subscribeNewsletter(
 
 	const normalizedEmail = email.trim().toLowerCase();
 	if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizedEmail)) {
-		return { success: false, error: "Adresse email invalide." };
+		return { error: "Adresse email invalide.", success: false };
 	}
 
 	// IMPORTANT : on récupère bien `categories` et `frequency` pour éviter
-	// l'écrasement silencieux des préférences existantes.
+	// L'écrasement silencieux des préférences existantes.
 	const { data: existing } = await client
 		.from("newsletter_subscriptions")
 		.select("id, user_id, categories, frequency")
@@ -47,17 +47,17 @@ export async function subscribeNewsletter(
 		const { error } = await client
 			.from("newsletter_subscriptions")
 			.update({
-				is_active: true,
 				categories: categories ?? existing.categories ?? [],
 				frequency: frequency ?? existing.frequency ?? "weekly",
-				user_id: session?.user?.id ?? existing.user_id ?? null,
+				is_active: true,
 				updated_at: new Date().toISOString(),
+				user_id: session?.user?.id ?? existing.user_id ?? null,
 			})
 			.eq("id", existing.id);
 
 		if (error) {
 			console.error("Newsletter update error:", error);
-			return { success: false, error: error.message };
+			return { error: error.message, success: false };
 		}
 
 		return { success: true };
@@ -65,19 +65,19 @@ export async function subscribeNewsletter(
 
 	const token = generateUnsubscribeToken();
 	const { error } = await client.from("newsletter_subscriptions").insert({
-		email: normalizedEmail,
-		user_id: session?.user?.id ?? null,
 		categories: categories ?? [],
+		created_at: new Date().toISOString(),
+		email: normalizedEmail,
 		frequency: frequency ?? "weekly",
 		is_active: true,
 		unsubscribe_token: token,
-		created_at: new Date().toISOString(),
 		updated_at: new Date().toISOString(),
+		user_id: session?.user?.id ?? null,
 	});
 
 	if (error) {
 		console.error("Newsletter insert error:", error);
-		return { success: false, error: error.message };
+		return { error: error.message, success: false };
 	}
 
 	return { success: true };
@@ -98,8 +98,8 @@ export async function unsubscribeNewsletter(
 
 	if (fetchError || !subscription) {
 		return {
-			success: false,
 			error: "Lien de désabonnement invalide ou expiré.",
+			success: false,
 		};
 	}
 
@@ -113,7 +113,7 @@ export async function unsubscribeNewsletter(
 
 	if (error) {
 		console.error("Newsletter unsubscribe error:", error);
-		return { success: false, error: error.message };
+		return { error: error.message, success: false };
 	}
 
 	return { success: true };
@@ -125,7 +125,7 @@ export async function updateNewsletterPreferences(
 ): Promise<{ success: boolean; error?: string }> {
 	const session = await getServerSession();
 	if (!session?.user) {
-		return { success: false, error: "Non authentifié." };
+		return { error: "Non authentifié.", success: false };
 	}
 
 	const supabase = await createClient();
@@ -133,7 +133,7 @@ export async function updateNewsletterPreferences(
 	const client = supabase as any;
 
 	// On vise la subscription la plus récente liée à ce user_id pour éviter
-	// d'écrire en masse si l'historique contient plusieurs lignes.
+	// D'écrire en masse si l'historique contient plusieurs lignes.
 	const { data: subscription } = await client
 		.from("newsletter_subscriptions")
 		.select("id")
@@ -145,8 +145,8 @@ export async function updateNewsletterPreferences(
 
 	if (!subscription) {
 		return {
-			success: false,
 			error: "Aucune subscription active trouvée pour cet utilisateur.",
+			success: false,
 		};
 	}
 
@@ -161,7 +161,7 @@ export async function updateNewsletterPreferences(
 
 	if (error) {
 		console.error("Newsletter preferences update error:", error);
-		return { success: false, error: error.message };
+		return { error: error.message, success: false };
 	}
 
 	return { success: true };
@@ -176,7 +176,7 @@ export async function getNewsletterStatus(): Promise<{
 	created_at: string;
 } | null> {
 	const session = await getServerSession();
-	if (!session?.user) return null;
+	if (!session?.user) {return null;}
 
 	const supabase = await createClient();
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any

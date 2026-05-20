@@ -25,21 +25,22 @@ import { DashboardStatsCard as StatsCard } from "@rosegriffon/ui";
 import { AdminDataGrid } from "@/components/admin/shared/AdminDataGrid";
 import { AdminPageHeader } from "@rosegriffon/ui";
 
-import { deleteTeamMember, type TeamMember, updateTeamMember } from "./actions";
+import { deleteTeamMember, updateTeamMember } from './actions';
+import type { TeamMember } from './actions';
 import { StaffMemberCard } from "./StaffMemberCard";
 import { TeamMemberDialog } from "./TeamMemberDialog";
 
 const TEAM_LABELS: Record<string, string> = {
-	bureauteam: "Bureau de l'Association",
+	achilleateam: "Équipe Achilléa",
 	assoteam: "Membres de l'Association",
-	loreteam: "Équipe Lore",
+	azaleeteam: "Équipe Azalée",
+	bureauteam: "Bureau de l'Association",
+	collabteam: "Partenaires & Collaborateurs",
 	dessinateurteam: "Équipe Dessinateur",
+	loreteam: "Équipe Lore",
+	mediationteam: "Cellule de Médiation",
 	productionteam: "Équipe Production",
 	socialteam: "Équipe Réseaux",
-	achilleateam: "Équipe Achilléa",
-	azaleeteam: "Équipe Azalée",
-	mediationteam: "Cellule de Médiation",
-	collabteam: "Partenaires & Collaborateurs",
 };
 
 interface StaffClientPageProps {
@@ -51,8 +52,7 @@ export function StaffClientPage({ initialMembers }: StaffClientPageProps) {
 	const [members, setMembers] = useState<TeamMember[]>(initialMembers);
 	const [dialogOpen, setDialogOpen] = useState(false);
 	const [selectedMember, setSelectedMember] = useState<TeamMember | undefined>(
-		undefined,
-	);
+		);
 	const [searchQuery, setSearchQuery] = useState("");
 	const [selectedTeam, setSelectedTeam] = useState<string>("all");
 	const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
@@ -77,12 +77,12 @@ export function StaffClientPage({ initialMembers }: StaffClientPageProps) {
 	};
 
 	const confirmDelete = (member: TeamMember) => {
-		setDeleteConfirmation({ open: true, member });
+		setDeleteConfirmation({ member, open: true });
 	};
 
 	const handleDelete = async () => {
-		if (!deleteConfirmation.member) return;
-		const member = deleteConfirmation.member;
+		if (!deleteConfirmation.member) {return;}
+		const {member} = deleteConfirmation;
 
 		const { error } = await deleteTeamMember(member.id);
 		if (error) {
@@ -127,7 +127,7 @@ export function StaffClientPage({ initialMembers }: StaffClientPageProps) {
 	};
 
 	// Distingue les imports Discord à valider (source='discord-sync')
-	// des staff désactivés volontairement (autres `is_active=false`).
+	// Des staff désactivés volontairement (autres `is_active=false`).
 	const inactiveMembers = members.filter((m) => m.is_active === false);
 	const pendingMembers = inactiveMembers.filter(
 		(m) => m.source === "discord-sync",
@@ -139,7 +139,7 @@ export function StaffClientPage({ initialMembers }: StaffClientPageProps) {
 	// Filtrer les membres actifs.
 	const q = searchQuery.toLowerCase().trim();
 	const activeMembers = members.filter((m) => {
-		if (m.is_active === false) return false;
+		if (m.is_active === false) {return false;}
 		const matchesSearch =
 			!q ||
 			m.name.toLowerCase().includes(q) ||
@@ -152,7 +152,7 @@ export function StaffClientPage({ initialMembers }: StaffClientPageProps) {
 	// Grouper par équipe.
 	const membersByTeam = activeMembers.reduce(
 		(acc, member) => {
-			if (!acc[member.team_id]) acc[member.team_id] = [];
+			if (!acc[member.team_id]) {acc[member.team_id] = [];}
 			acc[member.team_id]?.push(member);
 			return acc;
 		},
@@ -160,7 +160,7 @@ export function StaffClientPage({ initialMembers }: StaffClientPageProps) {
 	);
 
 	const sortMembers = (list: TeamMember[]) =>
-		[...list].sort((a, b) =>
+		[...list].toSorted((a, b) =>
 			sortMode === "name"
 				? a.name.localeCompare(b.name, "fr")
 				: (a.display_index ?? 999) - (b.display_index ?? 999),
@@ -286,7 +286,6 @@ export function StaffClientPage({ initialMembers }: StaffClientPageProps) {
 					data={sortMembers(pendingMembers)}
 					columns={[
 						{
-							header: "Photo",
 							cell: (member) => (
 								<div className="relative size-10 rounded-full overflow-hidden bg-muted">
 									{member.image_url ? (
@@ -304,22 +303,22 @@ export function StaffClientPage({ initialMembers }: StaffClientPageProps) {
 								</div>
 							),
 							className: "w-[60px]",
+							header: "Photo",
 						},
 						{
-							header: "Nom",
 							accessorKey: "name",
 							className: "font-medium",
+							header: "Nom",
 						},
 						{
-							header: "Rôle détecté",
 							accessorKey: "role",
+							header: "Rôle détecté",
 						},
 						{
-							header: "Équipe suggérée",
 							cell: (member) => TEAM_LABELS[member.team_id] || member.team_id,
+							header: "Équipe suggérée",
 						},
 						{
-							header: "Actions",
 							cell: (member) => (
 								<div className="flex justify-end gap-2">
 									<Button
@@ -348,6 +347,7 @@ export function StaffClientPage({ initialMembers }: StaffClientPageProps) {
 								</div>
 							),
 							className: "text-right w-[180px]",
+							header: "Actions",
 						},
 					]}
 				/>
@@ -369,7 +369,7 @@ export function StaffClientPage({ initialMembers }: StaffClientPageProps) {
 			) : (
 				viewMode === "list" &&
 				Object.entries(membersByTeam)
-					.sort((a, b) =>
+					.toSorted((a, b) =>
 						(TEAM_LABELS[a[0]] || a[0]).localeCompare(
 							TEAM_LABELS[b[0]] || b[0],
 							"fr",
@@ -382,7 +382,6 @@ export function StaffClientPage({ initialMembers }: StaffClientPageProps) {
 							data={sortMembers(teamMembers)}
 							columns={[
 								{
-									header: "Photo",
 									cell: (member) => (
 										<div className="relative size-10 rounded-full overflow-hidden bg-muted">
 											{member.image_url ? (
@@ -400,18 +399,18 @@ export function StaffClientPage({ initialMembers }: StaffClientPageProps) {
 										</div>
 									),
 									className: "w-[60px]",
+									header: "Photo",
 								},
 								{
-									header: "Nom",
 									accessorKey: "name",
 									className: "font-medium",
+									header: "Nom",
 								},
 								{
-									header: "Rôle",
 									accessorKey: "role",
+									header: "Rôle",
 								},
 								{
-									header: "Discord",
 									cell: (member) =>
 										member.discord_user_id ? (
 											<a
@@ -427,15 +426,15 @@ export function StaffClientPage({ initialMembers }: StaffClientPageProps) {
 											<span className="text-xs text-muted-foreground">—</span>
 										),
 									className: "hidden md:table-cell",
+									header: "Discord",
 								},
 								{
-									header: "Ordre",
 									accessorKey: "display_index",
 									cell: (member) => member.display_index ?? "-",
 									className: "w-[80px]",
+									header: "Ordre",
 								},
 								{
-									header: "Actions",
 									cell: (member) => (
 										<div className="flex justify-end gap-1">
 											<Button
@@ -465,6 +464,7 @@ export function StaffClientPage({ initialMembers }: StaffClientPageProps) {
 										</div>
 									),
 									className: "text-right w-[140px]",
+									header: "Actions",
 								},
 							]}
 						/>
@@ -478,7 +478,6 @@ export function StaffClientPage({ initialMembers }: StaffClientPageProps) {
 					data={sortMembers(deactivatedMembers)}
 					columns={[
 						{
-							header: "Photo",
 							cell: (member) => (
 								<div className="relative size-10 rounded-full overflow-hidden bg-muted opacity-60">
 									{member.image_url ? (
@@ -496,19 +495,19 @@ export function StaffClientPage({ initialMembers }: StaffClientPageProps) {
 								</div>
 							),
 							className: "w-[60px]",
+							header: "Photo",
 						},
 						{
-							header: "Nom",
 							accessorKey: "name",
 							className: "font-medium text-muted-foreground",
+							header: "Nom",
 						},
-						{ header: "Rôle", accessorKey: "role" },
+						{ accessorKey: "role", header: "Rôle" },
 						{
-							header: "Équipe",
 							cell: (member) => TEAM_LABELS[member.team_id] || member.team_id,
+							header: "Équipe",
 						},
 						{
-							header: "Actions",
 							cell: (member) => (
 								<div className="flex justify-end gap-1">
 									<Button
@@ -531,6 +530,7 @@ export function StaffClientPage({ initialMembers }: StaffClientPageProps) {
 								</div>
 							),
 							className: "text-right w-[180px]",
+							header: "Actions",
 						},
 					]}
 				/>
@@ -539,7 +539,7 @@ export function StaffClientPage({ initialMembers }: StaffClientPageProps) {
 			{/* Grid View Implementation */}
 			{viewMode === "grid" &&
 				Object.entries(membersByTeam)
-					.sort((a, b) =>
+					.toSorted((a, b) =>
 						(TEAM_LABELS[a[0]] || a[0]).localeCompare(
 							TEAM_LABELS[b[0]] || b[0],
 							"fr",

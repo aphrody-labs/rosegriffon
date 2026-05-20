@@ -8,7 +8,7 @@ import Stripe from "stripe";
 let cached: Stripe | null = null;
 
 export function getStripe(): Stripe {
-	if (cached) return cached;
+	if (cached) {return cached;}
 	const key = process.env.STRIPE_SECRET_KEY;
 	if (!key) {
 		throw new Error(
@@ -17,7 +17,7 @@ export function getStripe(): Stripe {
 	}
 	cached = new Stripe(key, {
 		// Latest Stripe API version (cf. skill stripe-best-practices). Pin explicite
-		// pour éviter drift silencieux à chaque release Stripe.
+		// Pour éviter drift silencieux à chaque release Stripe.
 		apiVersion: "2025-08-27.basil",
 		typescript: true,
 		// Auto-retry idempotent sur erreurs réseau / 5xx

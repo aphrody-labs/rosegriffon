@@ -29,13 +29,13 @@ export function ImageObjectSchema({
   const schema: WithContext<ImageObject> = {
     "@context": "https://schema.org",
     "@type": "ImageObject",
-    contentUrl: url,
-    name: name,
-    description: description,
-    author: author ? { "@type": "Person", name: author } : undefined,
-    datePublished: datePublished,
-    license: "https://rosegriffon.fr/mentions-legales",
     acquireLicensePage: "https://rosegriffon.fr/mentions-legales",
+    author: author ? { "@type": "Person", name: author } : undefined,
+    contentUrl: url,
+    datePublished: datePublished,
+    description: description,
+    license: "https://rosegriffon.fr/mentions-legales",
+    name: name,
   };
 
   return (
@@ -50,12 +50,15 @@ export function OrganizationSchema() {
   const schema: WithContext<Organization> = {
     "@context": "https://schema.org",
     "@type": "Organization",
-    name: "Rose Griffon",
-    url: "https://rosegriffon.fr",
-    logo: "https://rosegriffon.fr/RG_Logo_V2.5.webp",
+    address: {
+      "@type": "PostalAddress",
+      addressCountry: "FR",
+    },
     description:
       "Association française Inazuma Eleven. Rassemble la communauté, organise des événements et produit du contenu.",
     foundingDate: "2019",
+    logo: "https://rosegriffon.fr/RG_Logo_V2.5.webp",
+    name: "Rose Griffon",
     sameAs: [
       "https://x.com/rose_griffon",
       "https://discord.gg/TYzQvbByv4",
@@ -63,10 +66,7 @@ export function OrganizationSchema() {
       "https://www.youtube.com/@RoseGriffon",
       "https://www.instagram.com/rose_griffonfr",
     ],
-    address: {
-      "@type": "PostalAddress",
-      addressCountry: "FR",
-    },
+    url: "https://rosegriffon.fr",
   };
 
   return (
@@ -82,7 +82,6 @@ export function WebsiteSchema() {
     "@context": "https://schema.org",
     "@type": "WebSite",
     name: "Rose Griffon",
-    url: "https://rosegriffon.fr",
     potentialAction: {
       "@type": "SearchAction",
       target: {
@@ -91,6 +90,7 @@ export function WebsiteSchema() {
       },
       "query-input": "required name=search_term_string",
     } as any,
+    url: "https://rosegriffon.fr",
   };
 
   return (
@@ -125,27 +125,27 @@ export function ArticleSchema({
   const schema: WithContext<Article> = {
     "@context": "https://schema.org",
     "@type": "Article",
-    headline: title,
-    description: description,
-    image: image,
-    datePublished: datePublished,
-    dateModified: dateModified || datePublished,
     author: {
       "@type": "Person",
       name: authorName,
       url: authorUrl,
     },
+    dateModified: dateModified || datePublished,
+    datePublished: datePublished,
+    description: description,
+    headline: title,
+    image: image,
+    mainEntityOfPage: {
+      "@id": url,
+      "@type": "WebPage",
+    },
     publisher: {
       "@type": "Organization",
-      name: "Rose Griffon",
       logo: {
         "@type": "ImageObject",
         url: "https://rosegriffon.fr/RG_Logo_V2.5.webp",
       },
-    },
-    mainEntityOfPage: {
-      "@type": "WebPage",
-      "@id": url,
+      name: "Rose Griffon",
     },
   };
 
@@ -167,9 +167,9 @@ export function BreadcrumbSchema({ items }: BreadcrumbSchemaProps) {
     "@type": "BreadcrumbList",
     itemListElement: items.map((item, index) => ({
       "@type": "ListItem",
-      position: index + 1,
-      name: item.name,
       item: item.item.startsWith("http") ? item.item : `https://rosegriffon.fr${item.item}`,
+      name: item.name,
+      position: index + 1,
     })),
   };
 
@@ -203,12 +203,12 @@ export function ProfileSchema({
     "@type": "ProfilePage",
     mainEntity: {
       "@type": "Person",
-      name: name,
       alternateName: username,
-      image: image,
       description: description,
-      url: url,
+      image: image,
+      name: name,
       sameAs: sameAs,
+      url: url,
     },
   };
 
@@ -242,13 +242,11 @@ export function EventSchema({
   const schema: WithContext<Event> = {
     "@context": "https://schema.org",
     "@type": "Event",
-    name: name,
     description: description,
-    startDate: startDate,
     endDate: endDate,
-    image: image,
-    eventStatus: "https://schema.org/EventScheduled",
     eventAttendanceMode: "https://schema.org/OnlineEventAttendanceMode",
+    eventStatus: "https://schema.org/EventScheduled",
+    image: image,
     location:
       typeof location === "string"
         ? {
@@ -260,12 +258,14 @@ export function EventSchema({
             name: location?.name || "Online",
             address: location?.address,
           },
-    url: url,
+    name: name,
     organizer: {
       "@type": "Organization",
       name: "Rose Griffon",
       url: "https://rosegriffon.fr",
     },
+    startDate: startDate,
+    url: url,
   };
 
   return (

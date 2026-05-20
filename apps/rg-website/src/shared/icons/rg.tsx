@@ -1,11 +1,11 @@
 import Image from "next/image";
 
-type RGIconProps = {
+interface RGIconProps {
   width?: number;
   height?: number;
-};
+}
 
-// exporter l'image et la renommer RGicon
+// Exporter l'image et la renommer RGicon
 export default function RGIcon({ width, height }: RGIconProps) {
   return (
     <div className="flex items-center justify-center">

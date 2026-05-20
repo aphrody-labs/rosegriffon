@@ -25,18 +25,18 @@ async function calendarEventsHandler() {
       logger.info(`${dbEvents.length} event(s) retrieved from Supabase (DB Source)`);
 
       const mappedEvents: CalendarEvent[] = dbEvents.map((e) => ({
-        id: e.id,
-        summary: e.title,
         description: e.description,
+        end: {
+          dateTime: e.end_time, // Assumes ISO string stored in text column
+          timeZone: "Europe/Paris",
+        },
+        id: e.id,
         location: e.location,
         start: {
           dateTime: e.start_time, // Assumes ISO string stored in text column
           timeZone: "Europe/Paris",
         },
-        end: {
-          dateTime: e.end_time, // Assumes ISO string stored in text column
-          timeZone: "Europe/Paris",
-        },
+        summary: e.title,
       }));
 
       return apiSuccess({ events: mappedEvents });
@@ -60,5 +60,5 @@ async function calendarEventsHandler() {
 // Appliquer le rate limiting: 20 requêtes par minute
 export const GET = withRateLimit(calendarEventsHandler, {
   limit: 20,
-  windowMs: 60000,
+  windowMs: 60_000,
 });

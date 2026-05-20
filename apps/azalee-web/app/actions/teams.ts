@@ -12,22 +12,22 @@ export async function saveTeam(
   data: TeamData,
 ): Promise<{ id: string } | { error: string }> {
   const session = await getServerSession();
-  if (!session?.user) return { error: "Non authentifié" };
+  if (!session?.user) {return { error: "Non authentifié" };}
 
   const supabase = await createClient();
   const { data: result, error } = await (supabase as any)
     .from("user_teams")
     .insert({
-      user_id: session.user.id,
-      name,
-      formation_id: data.formationId,
       formation_data: data,
+      formation_id: data.formationId,
       is_public: false,
+      name,
+      user_id: session.user.id,
     })
     .select("id")
     .single();
 
-  if (error) return { error: error.message };
+  if (error) {return { error: error.message };}
   return { id: result.id };
 }
 
@@ -38,21 +38,21 @@ export async function updateTeam(
   data: TeamData,
 ): Promise<{ success: boolean } | { error: string }> {
   const session = await getServerSession();
-  if (!session?.user) return { error: "Non authentifié" };
+  if (!session?.user) {return { error: "Non authentifié" };}
 
   const supabase = await createClient();
   const { error } = await (supabase as any)
     .from("user_teams")
     .update({
-      name,
-      formation_id: data.formationId,
       formation_data: data,
+      formation_id: data.formationId,
+      name,
       updated_at: new Date().toISOString(),
     })
     .eq("id", teamId)
     .eq("user_id", session.user.id);
 
-  if (error) return { error: error.message };
+  if (error) {return { error: error.message };}
   return { success: true };
 }
 
@@ -61,7 +61,7 @@ export async function deleteTeam(
   teamId: string,
 ): Promise<{ success: boolean } | { error: string }> {
   const session = await getServerSession();
-  if (!session?.user) return { error: "Non authentifié" };
+  if (!session?.user) {return { error: "Non authentifié" };}
 
   const supabase = await createClient();
   const { error } = await (supabase as any)
@@ -70,14 +70,14 @@ export async function deleteTeam(
     .eq("id", teamId)
     .eq("user_id", session.user.id);
 
-  if (error) return { error: error.message };
+  if (error) {return { error: error.message };}
   return { success: true };
 }
 
 /** Get all teams for the current user */
 export async function getUserTeams(): Promise<SavedTeam[]> {
   const session = await getServerSession();
-  if (!session?.user) return [];
+  if (!session?.user) {return [];}
 
   const supabase = await createClient();
   const { data } = await (supabase as any)
@@ -101,7 +101,7 @@ export async function getTeam(teamId: string): Promise<SavedTeam | null> {
   }
 
   const { data } = await query.single();
-  if (!data) return null;
+  if (!data) {return null;}
 
   if (data.user_id !== session?.user?.id && !data.is_public) {
     return null;
@@ -115,7 +115,7 @@ export async function toggleTeamVisibility(
   teamId: string,
 ): Promise<{ is_public: boolean } | { error: string }> {
   const session = await getServerSession();
-  if (!session?.user) return { error: "Non authentifié" };
+  if (!session?.user) {return { error: "Non authentifié" };}
 
   const supabase = await createClient();
 
@@ -126,7 +126,7 @@ export async function toggleTeamVisibility(
     .eq("user_id", session.user.id)
     .single();
 
-  if (!team) return { error: "Équipe introuvable" };
+  if (!team) {return { error: "Équipe introuvable" };}
 
   const newValue = !team.is_public;
   const { error } = await (supabase as any)
@@ -135,7 +135,7 @@ export async function toggleTeamVisibility(
     .eq("id", teamId)
     .eq("user_id", session.user.id);
 
-  if (error) return { error: error.message };
+  if (error) {return { error: error.message };}
   return { is_public: newValue };
 }
 
@@ -152,7 +152,7 @@ export async function getCharacterSkills(charaId: string): Promise<MovesetSkill[
     .limit(1);
 
   const row = rows?.[0];
-  if (!row) return [];
+  if (!row) {return [];}
 
   // Try variant skills from DB
   const rawSkills: Array<{ skillId: string; learnLevel: number }> = Array.isArray(row.skills)
@@ -160,13 +160,13 @@ export async function getCharacterSkills(charaId: string): Promise<MovesetSkill[
     : [];
   const skillList = rawSkills
     .map((s: any) => {
-      if (typeof s === "string") return { skillId: s, learnLevel: 0 };
+      if (typeof s === "string") {return { skillId: s, learnLevel: 0 };}
       // Fix reversed mapping
-      const skillIdNum = typeof s.skillId === "string" ? parseInt(s.skillId, 16) : s.skillId;
-      const learnNum = typeof s.learnLevel === "number" ? s.learnLevel : parseInt(s.learnLevel, 10);
-      if (skillIdNum < 1000 && Math.abs(learnNum) > 1000000) {
+      const skillIdNum = typeof s.skillId === "string" ? Number.parseInt(s.skillId, 16) : s.skillId;
+      const learnNum = typeof s.learnLevel === "number" ? s.learnLevel : Number.parseInt(s.learnLevel, 10);
+      if (skillIdNum < 1000 && Math.abs(learnNum) > 1_000_000) {
         const hexSkillId = `0x${(learnNum >>> 0).toString(16).toUpperCase().padStart(8, "0")}`;
-        return { skillId: hexSkillId, learnLevel: skillIdNum };
+        return { learnLevel: skillIdNum, skillId: hexSkillId };
       }
       return s;
     })
@@ -178,7 +178,7 @@ export async function getCharacterSkills(charaId: string): Promise<MovesetSkill[
 
   const result: MovesetSkill[] = [];
   fetchedSkills.forEach((skill, index) => {
-    if (!skill) return;
+    if (!skill) {return;}
     const learnLevel = skillList[index]?.learnLevel || 0;
     const isPassive =
       skill.categoryName?.en?.toLowerCase() === "passive" ||
@@ -186,15 +186,15 @@ export async function getCharacterSkills(charaId: string): Promise<MovesetSkill[
       (skill as any).skillType === "passive";
 
     result.push({
+      category: skill.categoryName?.fr || "Spécial",
+      element: skill.elementName?.en?.toLowerCase(),
       id: (skill as any).skillId || (skill as any).skillID || (skill as any).skillIDStr,
+      imageUrl: skill.image,
+      isPassive,
+      learnLevel,
       name: skill.displayName || (skill as any).name_FR || (skill as any).name_EN || "???",
       power: skill.power_min ? `${skill.power_min}` : undefined,
       tension: (skill as any).consumeTp || (skill as any).tension_cost,
-      element: skill.elementName?.en?.toLowerCase(),
-      isPassive,
-      learnLevel,
-      imageUrl: skill.image,
-      category: skill.categoryName?.fr || "Spécial",
     });
   });
 
@@ -212,10 +212,10 @@ export async function getCharacterSkills(charaId: string): Promise<MovesetSkill[
       .filter(Boolean);
     const resolved = await Promise.all(moveNames.map((name: string) => wikiService.getSkill(name)));
     resolved.forEach((skill, i) => {
-      if (!skill) return;
+      if (!skill) {return;}
       result.push({
-        name: skill.displayName || (skill as any).name_FR || (skill as any).name_EN || moveNames[i],
         element: skill.elementName?.en?.toLowerCase(),
+        name: skill.displayName || (skill as any).name_FR || (skill as any).name_EN || moveNames[i],
         power: skill.power_min ? `${skill.power_min}` : undefined,
         slotNumber: result.length + 1,
       });

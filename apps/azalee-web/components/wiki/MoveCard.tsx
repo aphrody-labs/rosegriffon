@@ -11,46 +11,46 @@ import { cn } from "@/lib/utils";
 
 const ELEMENT_SPRITE: Record<string, SpriteCommonKey> = {
 	Feu: "fire",
-	Vent: "wind",
+	Fire: "fire",
+	Forest: "forest",
 	Forêt: "forest",
 	Montagne: "mountain",
-	Fire: "fire",
-	Wind: "wind",
-	Forest: "forest",
 	Mountain: "mountain",
+	Vent: "wind",
+	Wind: "wind",
 };
 
 const ELEMENT_ACCENT: Record<string, string> = {
 	Feu: "border-red-500/40",
-	Vent: "border-teal-500/40",
+	Fire: "border-red-500/40",
+	Forest: "border-green-500/40",
 	Forêt: "border-green-500/40",
 	Montagne: "border-amber-500/40",
-	Néant: "border-purple-500/40",
-	Fire: "border-red-500/40",
-	Wind: "border-teal-500/40",
-	Forest: "border-green-500/40",
 	Mountain: "border-amber-500/40",
+	Néant: "border-purple-500/40",
+	Vent: "border-teal-500/40",
 	Void: "border-purple-500/40",
+	Wind: "border-teal-500/40",
 };
 
 const CAT_LABEL: Record<string, string> = {
-	Tir: "TIR",
-	Dribble: "DRI",
-	Défense: "DEF",
 	Arrêt: "GAR",
-	Shoot: "TIR",
 	Block: "DEF",
 	Catch: "GAR",
+	Dribble: "DRI",
+	Défense: "DEF",
+	Shoot: "TIR",
+	Tir: "TIR",
 };
 
 const CAT_COLOR: Record<string, string> = {
-	Tir: "bg-red-600",
-	Dribble: "bg-emerald-600",
-	Défense: "bg-blue-600",
 	Arrêt: "bg-amber-500",
-	Shoot: "bg-red-600",
 	Block: "bg-blue-600",
 	Catch: "bg-amber-500",
+	Dribble: "bg-emerald-600",
+	Défense: "bg-blue-600",
+	Shoot: "bg-red-600",
+	Tir: "bg-red-600",
 };
 
 export interface MoveCardProps {

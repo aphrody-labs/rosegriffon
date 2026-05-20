@@ -5,9 +5,9 @@ import { apiClient } from "@/lib/api-client";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-	title: "Nous soutenir - Azalée",
 	description:
 		"Soutenez la communauté Inazuma Eleven en France. Découvrez comment aider Rose Griffon.",
+	title: "Nous soutenir - Azalée",
 };
 
 export default async function SoutenirPage() {

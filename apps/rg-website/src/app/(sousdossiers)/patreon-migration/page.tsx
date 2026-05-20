@@ -9,10 +9,10 @@ import { requireAdmin } from "@/lib/auth-helpers";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-	title: "Migration Patreon (preview admin) · Rose Griffon",
 	description:
 		"Page de prévisualisation interne — accès restreint au staff RG.",
-	robots: { index: false, follow: false, nocache: true },
+	robots: { follow: false, index: false, nocache: true },
+	title: "Migration Patreon (preview admin) · Rose Griffon",
 };
 
 export default async function PatreonMigrationPage() {
@@ -79,19 +79,19 @@ function PatreonMigrationPreview() {
 				<div className="grid gap-6 md:grid-cols-3">
 					{[
 						{
+							desc: "Patreon prend 8-12% + frais de paiement. Stripe direct = 1.4% + 0.25€. Plus de soutien réel pour la création.",
 							icon: Sparkles,
 							title: "Frais réduits",
-							desc: "Patreon prend 8-12% + frais de paiement. Stripe direct = 1.4% + 0.25€. Plus de soutien réel pour la création.",
 						},
 						{
+							desc: "Soutiens récurrents + achats one-shot (prints, packs, stickers) au même endroit, dans la même communauté.",
 							icon: Heart,
 							title: "Une vraie boutique",
-							desc: "Soutiens récurrents + achats one-shot (prints, packs, stickers) au même endroit, dans la même communauté.",
 						},
 						{
+							desc: "Votre rôle Discord est attribué automatiquement à la souscription. Pas d'intermédiaire, pas de bug.",
 							icon: Users,
 							title: "Discord auto-géré",
-							desc: "Votre rôle Discord est attribué automatiquement à la souscription. Pas d'intermédiaire, pas de bug.",
 						},
 					].map((card, i) => (
 						<div

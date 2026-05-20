@@ -6,7 +6,7 @@ import { Suspense } from "react";
 // ISR : HTML cached, regen toutes les 60s en arrière-plan.
 // Le user-menu et autres parties auth-aware vivent dans `client-layout.tsx`
 // (use client, hydraté côté client) — la home ne dépend que de settings + events
-// et `RealtimeSettingsListener` propage les updates settings via Supabase Realtime.
+// Et `RealtimeSettingsListener` propage les updates settings via Supabase Realtime.
 export const revalidate = 60;
 
 import { AchilleaBanner } from "@/components/home/AchilleaBanner";
@@ -55,7 +55,9 @@ const DiscordBlock = dynamicImport(
 );
 
 export const metadata: Metadata = {
-	title: "Rose Griffon - Association Inazuma Eleven France",
+	alternates: {
+		canonical: "https://rosegriffon.fr",
+	},
 	description:
 		"Association française Inazuma Eleven : événements, streaming et communauté passionnée depuis 2019. Rejoignez la communauté !",
 	keywords: [
@@ -69,13 +71,8 @@ export const metadata: Metadata = {
 		"RGTV",
 	],
 	openGraph: {
-		title: "Rose Griffon - Association Inazuma Eleven France",
 		description:
 			"Association française Inazuma Eleven : événements, streaming et communauté passionnée depuis 2019",
-		url: "https://rosegriffon.fr",
-		siteName: "Rose Griffon",
-		locale: "fr_FR",
-		type: "website",
 		images: [
 			{
 				url: "/og-image-home.webp",
@@ -84,28 +81,31 @@ export const metadata: Metadata = {
 				alt: "Rose Griffon - Association Inazuma Eleven",
 			},
 		],
-	},
-	twitter: {
-		card: "summary_large_image",
-		site: "@rose_griffon",
-		creator: "@rose_griffon",
+		locale: "fr_FR",
+		siteName: "Rose Griffon",
 		title: "Rose Griffon - Association Inazuma Eleven France",
-		description:
-			"Association française Inazuma Eleven : événements, streaming et communauté passionnée",
-	},
-	alternates: {
-		canonical: "https://rosegriffon.fr",
+		type: "website",
+		url: "https://rosegriffon.fr",
 	},
 	robots: {
-		index: true,
 		follow: true,
 		googleBot: {
-			index: true,
 			follow: true,
-			"max-video-preview": -1,
+			index: true,
 			"max-image-preview": "large",
 			"max-snippet": -1,
+			"max-video-preview": -1,
 		},
+		index: true,
+	},
+	title: "Rose Griffon - Association Inazuma Eleven France",
+	twitter: {
+		card: "summary_large_image",
+		creator: "@rose_griffon",
+		description:
+			"Association française Inazuma Eleven : événements, streaming et communauté passionnée",
+		site: "@rose_griffon",
+		title: "Rose Griffon - Association Inazuma Eleven France",
 	},
 };
 
@@ -207,9 +207,9 @@ export default async function Home() {
 		// Si pas de date de fin, utiliser la date de début
 		const targetDate = endDate
 			? new Date(endDate)
-			: startDate
+			: (startDate
 				? new Date(startDate)
-				: null;
+				: null);
 
 		return targetDate && targetDate >= now;
 	});
@@ -247,7 +247,7 @@ export default async function Home() {
 						{/* Affichage du prochain événement s'il existe */}
 						{nextEvent && <NextEventBanner event={nextEvent} />}
 
-						<FusionBlock isImageLeft={true} image={introImage}>
+						<FusionBlock isImageLeft image={introImage}>
 							<div className="space-y-2 sm:space-y-3 lg:space-y-4 flex flex-col justify-center h-full">
 								<h2
 									id="about-heading"

@@ -10,11 +10,7 @@ import { createClient } from "@/lib/supabase/server";
 import type { Insert } from "@rosegriffon/db";
 
 const eventSchema = z.object({
-  title: z.string().min(3, "Le titre doit contenir au moins 3 caractères"),
   description: z.string().optional(),
-  start_time: z.string().refine((val) => !Number.isNaN(Date.parse(val)), {
-    message: "Date de début invalide",
-  }),
   end_time: z
     .string()
     .optional()
@@ -22,15 +18,19 @@ const eventSchema = z.object({
     .refine((val) => !val || !Number.isNaN(Date.parse(val)), {
       message: "Date de fin invalide",
     }),
-  location: z.string().optional(),
   image_url: z.string().optional(),
+  location: z.string().optional(),
+  start_time: z.string().refine((val) => !Number.isNaN(Date.parse(val)), {
+    message: "Date de début invalide",
+  }),
+  title: z.string().min(3, "Le titre doit contenir au moins 3 caractères"),
 });
 
-type ActionState = {
+interface ActionState {
   message?: string;
   errors?: Record<string, string[]>;
   success?: boolean;
-};
+}
 
 export async function syncGoogleEvents() {
   const supabase = await createClient();
@@ -40,13 +40,13 @@ export async function syncGoogleEvents() {
   let skippedCount = 0;
 
   for (const event of googleEvents) {
-    if (!event.summary || !event.start) continue;
+    if (!event.summary || !event.start) {continue;}
 
     // Determine start/end time
     const startTime = event.start.dateTime || event.start.date;
     const endTime = event.end?.dateTime || event.end?.date;
 
-    if (!startTime) continue;
+    if (!startTime) {continue;}
 
     // Check for duplicates (fuzzy match by title and start time)
     // Ideally we would store the Google ID, but for now we check title + start
@@ -91,19 +91,19 @@ export async function syncGoogleEvents() {
   }
 
   revalidatePath("/admin/events");
-  return { success: true, imported: importedCount, skipped: skippedCount };
+  return { imported: importedCount, skipped: skippedCount, success: true };
 }
 
 export async function createEvent(_prevState: ActionState, formData: FormData) {
   const supabase = await createClient();
 
   const rawData = {
-    title: formData.get("title"),
     description: formData.get("description"),
-    start_time: formData.get("start_time"),
     end_time: formData.get("end_time") || null,
-    location: formData.get("location"),
     image_url: formData.get("image_url"),
+    location: formData.get("location"),
+    start_time: formData.get("start_time"),
+    title: formData.get("title"),
   };
 
   const validatedFields = eventSchema.safeParse(rawData);
@@ -118,12 +118,12 @@ export async function createEvent(_prevState: ActionState, formData: FormData) {
   // Casting validatedFields.data to Insert<"events"> to ensure compatibility
   // Zod schema should match DB schema but sometimes optional vs null can vary
   const eventData: Insert<"events"> = {
-    title: validatedFields.data.title,
     description: validatedFields.data.description,
-    start_time: validatedFields.data.start_time,
     end_time: validatedFields.data.end_time || validatedFields.data.start_time,
-    location: validatedFields.data.location,
     image_url: validatedFields.data.image_url,
+    location: validatedFields.data.location,
+    start_time: validatedFields.data.start_time,
+    title: validatedFields.data.title,
   };
 
   const { error } = await supabase.from("events").insert([eventData]);
@@ -148,12 +148,12 @@ export async function updateEvent(id: string, _prevState: ActionState, formData:
   const supabase = await createClient();
 
   const rawData = {
-    title: formData.get("title"),
     description: formData.get("description"),
-    start_time: formData.get("start_time"),
     end_time: formData.get("end_time") || null,
-    location: formData.get("location"),
     image_url: formData.get("image_url"),
+    location: formData.get("location"),
+    start_time: formData.get("start_time"),
+    title: formData.get("title"),
   };
 
   const validatedFields = eventSchema.safeParse(rawData);

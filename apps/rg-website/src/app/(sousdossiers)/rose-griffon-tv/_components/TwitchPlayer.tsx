@@ -11,16 +11,16 @@ import type { TwitchEmbedProps, TwitchPlayerProps } from "react-twitch-embed";
 import { useTwitch } from "../_context/twitch-context";
 
 const TwitchEmbed = dynamic(() => import("react-twitch-embed").then((mod) => mod.TwitchEmbed), {
-  ssr: false,
   loading: () => <Skeleton className="w-full h-full aspect-video" />,
+  ssr: false,
 }) as unknown as React.ComponentType<TwitchEmbedProps>;
 
 // This component is used for VODs
 const TwitchPlayerComponent = dynamic(
   () => import("react-twitch-embed").then((mod) => mod.TwitchPlayer),
   {
-    ssr: false,
     loading: () => <Skeleton className="w-full h-full aspect-video" />,
+    ssr: false,
   }
 ) as unknown as React.ComponentType<TwitchPlayerProps>;
 
@@ -81,7 +81,7 @@ export function TwitchPlayer() {
 
       {data.isLive ? (
         <TwitchEmbed channel={channel} withChat={false} height="100%" width="100%" />
-      ) : data.videoId ? (
+      ) : (data.videoId ? (
         <TwitchPlayerComponent video={data.videoId} height="100%" width="100%" />
       ) : (
         <div className="aspect-video w-full bg-linear-to-br from-slate-900/50 to-slate-800/50 flex flex-col items-center justify-center gap-4 border-2 border-dashed border-purple-500/30">
@@ -105,7 +105,7 @@ export function TwitchPlayer() {
             </a>
           </Button>
         </div>
-      )}
+      ))}
     </div>
   );
 }

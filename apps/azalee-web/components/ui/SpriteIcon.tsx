@@ -1,5 +1,6 @@
 import type React from "react";
-import { SPRITE_SHEET_SRC, SPRITES, type SpriteKey } from "@/config/sprites";
+import { SPRITE_SHEET_SRC, SPRITES } from '@/config/sprites';
+import type { SpriteKey } from '@/config/sprites';
 import { cn } from "@/lib/utils";
 import styles from "./SpriteIcon.module.css";
 
@@ -36,8 +37,8 @@ export const SpriteIcon = ({
     <div
       className={cn("relative inline-block override-icon-size", className)}
       style={{
-        width: displayW,
         height: displayH,
+        width: displayW,
         ...style,
       }}
       role="img"
@@ -48,10 +49,10 @@ export const SpriteIcon = ({
         className={cn(styles.sprite, styles[variant])}
         style={{
           backgroundImage: `url(${SPRITE_SHEET_SRC})`,
-          backgroundSize: `${SHEET_W * scale}px ${SHEET_H * scale}px`,
           backgroundPosition: `-${x * scale}px -${y * scale}px`,
-          width: `${displayW}px`,
+          backgroundSize: `${SHEET_W * scale}px ${SHEET_H * scale}px`,
           height: `${displayH}px`,
+          width: `${displayW}px`,
         }}
       />
     </div>

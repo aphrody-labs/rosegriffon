@@ -39,31 +39,31 @@ export interface PickerCharacter {
 
 const ELEMENT_SPRITE: Record<string, SpriteCommonKey> = {
   Fire: "fire",
-  Wind: "wind",
   Forest: "forest",
   Mountain: "mountain",
+  Wind: "wind",
 };
 
 const POSITIONS = [
-  { value: "FW", label: "ATT" },
-  { value: "MF", label: "MIL" },
-  { value: "DF", label: "DEF" },
-  { value: "GK", label: "GAR" },
+  { label: "ATT", value: "FW" },
+  { label: "MIL", value: "MF" },
+  { label: "DEF", value: "DF" },
+  { label: "GAR", value: "GK" },
 ];
 
 const ELEMENTS = [
-  { value: "Fire", label: "Feu" },
-  { value: "Wind", label: "Vent" },
-  { value: "Forest", label: "Forêt" },
-  { value: "Mountain", label: "Montagne" },
+  { label: "Feu", value: "Fire" },
+  { label: "Vent", value: "Wind" },
+  { label: "Forêt", value: "Forest" },
+  { label: "Montagne", value: "Mountain" },
 ];
 
 const RARITIES = [
-  { value: "BASARA", label: "BASARA", color: "#ec4899" },
-  { value: "Héros", label: "Héros", color: "#f59e0b" },
-  { value: "Émérite", label: "Émérite", color: "#8b5cf6" },
-  { value: "Expérimenté", label: "Expé.", color: "#3b82f6" },
-  { value: "Normal", label: "Normal", color: "#6b7280" },
+  { color: "#ec4899", label: "BASARA", value: "BASARA" },
+  { color: "#f59e0b", label: "Héros", value: "Héros" },
+  { color: "#8b5cf6", label: "Émérite", value: "Émérite" },
+  { color: "#3b82f6", label: "Expé.", value: "Expérimenté" },
+  { color: "#6b7280", label: "Normal", value: "Normal" },
 ];
 
 const PAGE_SIZE = 60;
@@ -82,18 +82,18 @@ function DraggableCharaCard({
   onTap?: (char: PickerCharacter) => void;
 }) {
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
-    id: `roster-${char.charaId}`,
     data: {
-      type: "player",
       character: char,
       origin: "roster",
+      type: "player",
     },
     disabled: isPlaced,
+    id: `roster-${char.charaId}`,
   });
 
   const style = {
-    transform: CSS.Translate.toString(transform),
     opacity: isDragging ? 0.3 : isPlaced ? 0.4 : 1,
+    transform: CSS.Translate.toString(transform),
   };
 
   const elSprite = ELEMENT_SPRITE[char.element];
@@ -217,13 +217,13 @@ export function CharacterPicker({
 
   const handleScroll = useCallback(() => {
     const el = scrollRef.current;
-    if (!el) return;
+    if (!el) {return;}
     if (el.scrollTop + el.clientHeight >= el.scrollHeight - 200) {
       setVisibleCount((prev) => Math.min(prev + PAGE_SIZE, filtered.length));
     }
   }, [filtered.length]);
 
-  const hasActiveFilters = !!filterPosition || !!filterElement || !!filterRarity || !!search;
+  const hasActiveFilters = Boolean(filterPosition) || Boolean(filterElement) || Boolean(filterRarity) || Boolean(search);
 
   return (
     <div className="flex flex-col h-full min-h-0">

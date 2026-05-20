@@ -26,9 +26,9 @@ interface ImageVariant {
  * - thumb  : miniatures sidebar/OG (max 400px, qualité 75)
  */
 const VARIANTS: ImageVariant[] = [
-  { suffix: "", width: 2400, quality: 85 },
-  { suffix: "_card", width: 800, quality: 80 },
-  { suffix: "_thumb", width: 400, quality: 75 },
+  { quality: 85, suffix: "", width: 2400 },
+  { quality: 80, suffix: "_card", width: 800 },
+  { quality: 75, suffix: "_thumb", width: 400 },
 ];
 
 export interface UploadResult {
@@ -43,7 +43,7 @@ export interface UploadResult {
 
 async function verifyEditorRole(): Promise<{ error?: string }> {
   const session = await getServerSession();
-  if (!session?.user) return { error: "Non authentifié" };
+  if (!session?.user) {return { error: "Non authentifié" };}
 
   const supabase = await createClient();
   const { data: profile } = await supabase
@@ -86,17 +86,17 @@ async function processAndUpload(
 
     const buffer = await sharp(inputBuffer)
       .resize({
+        fit: "inside",
         width: variant.width,
         withoutEnlargement: true,
-        fit: "inside",
       })
-      .webp({ quality: variant.quality, effort: 4 })
+      .webp({ effort: 4, quality: variant.quality })
       .toBuffer();
 
     const { error } = await supabase.storage.from(STORAGE_BUCKET).upload(filename, buffer, {
+      cacheControl: "public, max-age=31536000, immutable",
       contentType: "image/webp",
       upsert: false,
-      cacheControl: "public, max-age=31536000, immutable",
     });
 
     if (error) {
@@ -112,19 +112,19 @@ async function processAndUpload(
 
     // Dimensions de la variante principale (après resize)
     const resizedMeta = await sharp(inputBuffer)
-      .resize({ width: VARIANTS[0].width, withoutEnlargement: true, fit: "inside" })
+      .resize({ fit: "inside", width: VARIANTS[0].width, withoutEnlargement: true })
       .metadata();
 
     return {
-      url: fullUrl,
       cardUrl,
-      thumbUrl,
-      width: resizedMeta.width || metadata.width,
       height: resizedMeta.height || metadata.height,
+      thumbUrl,
+      url: fullUrl,
+      width: resizedMeta.width || metadata.width,
     };
-  } catch (err) {
-    console.error("Image processing failed:", err);
-    return { error: err instanceof Error ? err.message : "Échec du traitement de l'image" };
+  } catch (error) {
+    console.error("Image processing failed:", error);
+    return { error: error instanceof Error ? error.message : "Échec du traitement de l'image" };
   }
 }
 
@@ -137,13 +137,13 @@ async function processAndUpload(
 export async function uploadImage(formData: FormData): Promise<UploadResult | { error: string }> {
   try {
     const file = formData.get("file") as File;
-    if (!file) return { error: "Aucun fichier fourni" };
+    if (!file) {return { error: "Aucun fichier fourni" };}
 
     const validationError = validateFile(file);
-    if (validationError) return { error: validationError };
+    if (validationError) {return { error: validationError };}
 
     const authError = await verifyEditorRole();
-    if (authError.error) return { error: authError.error };
+    if (authError.error) {return { error: authError.error };}
 
     const buffer = Buffer.from(await file.arrayBuffer());
     const filenameBase = crypto.randomUUID();
@@ -165,22 +165,22 @@ export async function uploadImageWithCrop(
 ): Promise<UploadResult | { error: string }> {
   try {
     const file = formData.get("file") as File;
-    const cropX = parseFloat(formData.get("cropX") as string);
-    const cropY = parseFloat(formData.get("cropY") as string);
-    const cropWidth = parseFloat(formData.get("cropWidth") as string);
-    const cropHeight = parseFloat(formData.get("cropHeight") as string);
+    const cropX = Number.parseFloat(formData.get("cropX") as string);
+    const cropY = Number.parseFloat(formData.get("cropY") as string);
+    const cropWidth = Number.parseFloat(formData.get("cropWidth") as string);
+    const cropHeight = Number.parseFloat(formData.get("cropHeight") as string);
 
-    if (!file) return { error: "Aucun fichier fourni" };
+    if (!file) {return { error: "Aucun fichier fourni" };}
 
     const validationError = validateFile(file);
-    if (validationError) return { error: validationError };
+    if (validationError) {return { error: validationError };}
 
     if ([cropX, cropY, cropWidth, cropHeight].some(Number.isNaN)) {
       return { error: "Données de recadrage invalides" };
     }
 
     const authError = await verifyEditorRole();
-    if (authError.error) return { error: authError.error };
+    if (authError.error) {return { error: authError.error };}
 
     const buffer = Buffer.from(await file.arrayBuffer());
     const metadata = await sharp(buffer).metadata();
@@ -203,7 +203,7 @@ export async function uploadImageWithCrop(
 
     // Extraire la zone de crop
     const croppedBuffer = await sharp(buffer)
-      .extract({ left: safeLeft, top: safeTop, width: safeWidth, height: safeHeight })
+      .extract({ height: safeHeight, left: safeLeft, top: safeTop, width: safeWidth })
       .toBuffer();
 
     const filenameBase = crypto.randomUUID();

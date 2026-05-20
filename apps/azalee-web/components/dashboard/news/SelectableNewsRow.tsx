@@ -17,30 +17,30 @@ interface SelectableNewsRowProps {
 }
 
 const STATUS_LABELS: Record<string, { label: string; className: string }> = {
-	published: {
-		label: "Publié",
-		className: "bg-tertiary-container text-on-tertiary-container",
+	archived: {
+		className: "bg-surface-container-high text-on-surface-variant",
+		label: "Archivé",
 	},
 	draft: {
-		label: "Brouillon",
 		className: "bg-primary-container text-on-primary-container",
+		label: "Brouillon",
+	},
+	published: {
+		className: "bg-tertiary-container text-on-tertiary-container",
+		label: "Publié",
 	},
 	scheduled: {
-		label: "Programmé",
 		className:
 			"bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300",
-	},
-	archived: {
-		label: "Archivé",
-		className: "bg-surface-container-high text-on-surface-variant",
+		label: "Programmé",
 	},
 };
 
 const CATEGORY_LABELS: Record<string, string> = {
 	announcement: "Annonce",
-	event: "Événement",
-	critique: "Critique",
 	community: "Communauté",
+	critique: "Critique",
+	event: "Événement",
 };
 
 export function SelectableNewsRow({
@@ -114,7 +114,7 @@ export function SelectableNewsRow({
 								<Pin
 									size={14}
 									className="text-primary shrink-0"
-									aria-hidden={true}
+									aria-hidden
 								/>
 							</span>
 						)}

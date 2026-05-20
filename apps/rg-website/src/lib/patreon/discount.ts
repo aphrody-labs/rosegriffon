@@ -40,15 +40,15 @@ export async function getPatronDiscount(
 ): Promise<PatronDiscount> {
 	const empty: PatronDiscount = {
 		active: false,
+		currentlyEntitledCents: null,
+		patronStatus: null,
 		percent: PATRON_DISCOUNT_PERCENT,
 		stripeCouponId: PATRON_STRIPE_COUPON_ID,
-		patronStatus: null,
 		tierTitles: [],
-		currentlyEntitledCents: null,
 	};
 
 	const supabase = createAdminClient();
-	if (!supabase) return empty;
+	if (!supabase) {return empty;}
 
 	const { data, error } = await supabase
 		.from("patreon_memberships")
@@ -58,16 +58,16 @@ export async function getPatronDiscount(
 		.limit(1)
 		.maybeSingle();
 
-	if (error || !data) return empty;
+	if (error || !data) {return empty;}
 
 	return {
 		active: data.patron_status === "active_patron",
-		percent: PATRON_DISCOUNT_PERCENT,
-		stripeCouponId: PATRON_STRIPE_COUPON_ID,
-		patronStatus: data.patron_status ?? null,
-		tierTitles: (data.tier_titles ?? []) as string[],
 		currentlyEntitledCents:
 			(data.currently_entitled_cents as number | null) ?? null,
+		patronStatus: data.patron_status ?? null,
+		percent: PATRON_DISCOUNT_PERCENT,
+		stripeCouponId: PATRON_STRIPE_COUPON_ID,
+		tierTitles: (data.tier_titles ?? []) as string[],
 	};
 }
 

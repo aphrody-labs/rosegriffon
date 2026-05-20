@@ -9,32 +9,29 @@ import {
   getSkillImageUrl,
   resolveAssetUrl,
 } from "@/lib/images";
-import {
-  type GlobalSearchResult,
-  type SearchContext,
-  smartSearch,
-} from "@/lib/search/smart-search";
+import { smartSearch } from '@/lib/search/smart-search';
+import type { GlobalSearchResult, SearchContext } from '@/lib/search/smart-search';
 import { createClient } from "@/lib/supabase/server";
 import { TACTIC_FR, translateEffect } from "@/lib/translations";
 
 const TYPE_CONFIG: Record<string, { label: string; icon: string; urlPrefix: string }> = {
-  basara: { label: "Joueur BASARA", icon: "person", urlPrefix: "/chara" },
-  character: { label: "Personnage", icon: "person_outline", urlPrefix: "/chara" },
-  skill: { label: "Technique", icon: "sports_soccer", urlPrefix: "/skill" },
-  item: { label: "Objet", icon: "inventory_2", urlPrefix: "/item" },
-  keshin: { label: "Esprit Guerrier", icon: "auto_awesome", urlPrefix: "/aura/esprits-guerriers" },
-  soul: { label: "Totem", icon: "auto_awesome", urlPrefix: "/aura/totems" },
-  miximax: { label: "Miximax", icon: "auto_awesome", urlPrefix: "/aura/miximax" },
-  awakening: { label: "Éveil", icon: "auto_awesome", urlPrefix: "/aura/eveil" },
+  article: { icon: "newspaper", label: "Actualité", urlPrefix: "/news" },
+  aura: { icon: "auto_awesome", label: "Aura", urlPrefix: "/aura/autres" },
+  awakening: { icon: "auto_awesome", label: "Éveil", urlPrefix: "/aura/eveil" },
+  basara: { icon: "person", label: "Joueur BASARA", urlPrefix: "/chara" },
+  character: { icon: "person_outline", label: "Personnage", urlPrefix: "/chara" },
+  item: { icon: "inventory_2", label: "Objet", urlPrefix: "/item" },
+  keshin: { icon: "auto_awesome", label: "Esprit Guerrier", urlPrefix: "/aura/esprits-guerriers" },
+  miximax: { icon: "auto_awesome", label: "Miximax", urlPrefix: "/aura/miximax" },
   modechange: {
-    label: "Changement Mode",
     icon: "auto_awesome",
+    label: "Changement Mode",
     urlPrefix: "/aura/changement-mode",
   },
-  aura: { label: "Aura", icon: "auto_awesome", urlPrefix: "/aura/autres" },
-  tactic: { label: "Tactique", icon: "schema", urlPrefix: "/tactic" },
-  article: { label: "Actualité", icon: "newspaper", urlPrefix: "/news" },
-  patchnote: { label: "Patch Note", icon: "update", urlPrefix: "/patch-notes" },
+  patchnote: { icon: "update", label: "Patch Note", urlPrefix: "/patch-notes" },
+  skill: { icon: "sports_soccer", label: "Technique", urlPrefix: "/skill" },
+  soul: { icon: "auto_awesome", label: "Totem", urlPrefix: "/aura/totems" },
+  tactic: { icon: "schema", label: "Tactique", urlPrefix: "/tactic" },
 };
 
 /** Enhanced search result for frontend */
@@ -72,7 +69,7 @@ export async function searchGlobal(
   query: string,
   context?: SearchContext,
 ): Promise<EnhancedSearchResult[]> {
-  if (!query || query.length < 2) return [];
+  if (!query || query.length < 2) {return [];}
 
   const supabase = await createClient();
   // Sanitize query to prevent PostgREST filter injection
@@ -158,13 +155,13 @@ export async function searchGlobal(
   function matchRelevance(names: Array<string | null | undefined>): number {
     let best = 0;
     for (const raw of names) {
-      if (!raw) continue;
+      if (!raw) {continue;}
       const n = raw.toLowerCase();
-      if (n === queryLower) return 3; // exact match
-      if (n.startsWith(queryLower)) best = Math.max(best, 2); // prefix match
-      // word-start match (e.g. "mark" in "Endo Mark")
+      if (n === queryLower) {return 3;} // Exact match
+      if (n.startsWith(queryLower)) {best = Math.max(best, 2);} // Prefix match
+      // Word-start match (e.g. "mark" in "Endo Mark")
       if (best < 1.5 && n.split(/[\s_-]/).some((w) => w.startsWith(queryLower)))
-        best = Math.max(best, 1.5);
+        {best = Math.max(best, 1.5);}
     }
     return best;
   }
@@ -174,17 +171,17 @@ export async function searchGlobal(
     chars.data.forEach((c: any) => {
       let score = 1;
       score += matchRelevance([c.name_fr, c.name_en, c.name_ja]);
-      if (c.zukan_hash) score += 0.3; // has official image
-      if (c.stat_frappe) score += 0.2; // has stats
-      if (c.sheet_data) score += 0.1; // has community data
+      if (c.zukan_hash) {score += 0.3;} // Has official image
+      if (c.stat_frappe) {score += 0.2;} // Has stats
+      if (c.sheet_data) {score += 0.1;} // Has community data
       const isBasara = c.rarity_label === "BASARA";
-      if (isBasara) score += 0.2; // BASARA priority
+      if (isBasara) {score += 0.2;} // BASARA priority
       rawResults.push({
+        data: c,
         id: c.slug || c.id,
-        type: isBasara ? "basara" : "character",
         name: c.name_fr || c.name_en,
         score,
-        data: c,
+        type: isBasara ? "basara" : "character",
       });
     });
   }
@@ -194,14 +191,14 @@ export async function searchGlobal(
     skills.data.forEach((s: any) => {
       let score = 1;
       score += matchRelevance([s.name_fr, s.name_en, s.name_ja]);
-      if (s.video_url) score += 0.2;
-      if (s.sheet_data) score += 0.1;
+      if (s.video_url) {score += 0.2;}
+      if (s.sheet_data) {score += 0.1;}
       rawResults.push({
+        data: s,
         id: s.id,
-        type: "skill",
         name: s.name_fr || s.name_en,
         score,
-        data: s,
+        type: "skill",
       });
     });
   }
@@ -211,15 +208,15 @@ export async function searchGlobal(
     items.data.forEach((i: any) => {
       let score = 1;
       score += matchRelevance([i.name_fr, i.name_en, i.name_ja]);
-      if (i.sheet_data) score += 0.1;
-      if (i.price) score += 0.1;
+      if (i.sheet_data) {score += 0.1;}
+      if (i.price) {score += 0.1;}
       const isTactic = i.category === "special_tactics";
       rawResults.push({
+        data: i,
         id: i.id,
-        type: isTactic ? "tactic" : "item",
         name: i.name_fr || i.name_en,
         score,
-        data: i,
+        type: isTactic ? "tactic" : "item",
       });
     });
   }
@@ -232,11 +229,11 @@ export async function searchGlobal(
         let score = 0.9;
         score += matchRelevance([a.name_fr, a.name_en, a.name_ja]);
         rawResults.push({
+          data: a,
           id: a.id,
-          type: auraType,
           name: a.name_fr || a.name_en || a.name_ja || a.id,
           score,
-          data: a,
+          type: auraType,
         });
       });
     }
@@ -247,13 +244,13 @@ export async function searchGlobal(
     teams.data.forEach((t: any) => {
       let score = 0.8;
       score += matchRelevance([t.name_fr, t.name_en, t.name_ja]);
-      if (t.sheet_data) score += 0.1;
+      if (t.sheet_data) {score += 0.1;}
       rawResults.push({
+        data: t,
         id: t.id,
-        type: "team",
         name: t.name_fr || t.name_en || t.name_ja,
         score,
-        data: t,
+        type: "team",
       });
     });
   }
@@ -264,11 +261,11 @@ export async function searchGlobal(
       let score = 0.7;
       score += matchRelevance([a.title]);
       rawResults.push({
+        data: a,
         id: a.slug || a.id,
-        type: "article",
         name: a.title,
         score,
-        data: a,
+        type: "article",
       });
     });
   }
@@ -279,11 +276,11 @@ export async function searchGlobal(
       let score = 0.6;
       score += matchRelevance([p.title, p.title_fr]);
       rawResults.push({
+        data: p,
         id: p.id,
-        type: "patchnote",
         name: p.title_fr || p.title,
         score,
-        data: p,
+        type: "patchnote",
       });
     });
   }
@@ -291,8 +288,8 @@ export async function searchGlobal(
   // Apply smart search enhancements
   const smartResults = await smartSearch(query, rawResults, {
     context: context || "global",
-    limit: 20,
     enableSuggestions: true,
+    limit: 20,
     minScore: 0,
   });
 
@@ -300,21 +297,21 @@ export async function searchGlobal(
   if (smartResults.length === 1 && smartResults[0].suggestion) {
     return [
       {
-        id: "suggestion",
-        type: "suggestion",
-        title: smartResults[0].suggestion,
-        subtitle: "Vouliez-vous dire...",
         icon: "search",
-        url: "#",
-        suggestion: smartResults[0].suggestion,
+        id: "suggestion",
         score: 0,
+        subtitle: "Vouliez-vous dire...",
+        suggestion: smartResults[0].suggestion,
+        title: smartResults[0].suggestion,
+        type: "suggestion",
+        url: "#",
       },
     ];
   }
 
   // Transform for frontend consumption with image/rarity/element/position
   return smartResults.map((r) => {
-    const config = TYPE_CONFIG[r.type] || { label: "Autre", icon: "help", urlPrefix: "#" };
+    const config = TYPE_CONFIG[r.type] || { icon: "help", label: "Autre", urlPrefix: "#" };
     const d = (r.data || {}) as Record<string, any>;
 
     let url: string;
@@ -333,8 +330,8 @@ export async function searchGlobal(
     if (r.type === "character" || r.type === "basara") {
       imageUrl = getCharacterFaceUrl(d.internal_code || d.id);
       rarity = d.rarity_label;
-      element = d.element;
-      position = d.position;
+      ({ element } = d);
+      ({ position } = d);
     } else if (r.type === "skill") {
       imageUrl = d.image_url || getSkillImageUrl(d.id);
     } else if (r.type === "item" || r.type === "tactic") {
@@ -343,23 +340,23 @@ export async function searchGlobal(
       imageUrl = getAuraImageUrl(d.asset_code) || undefined;
     } else if (r.type === "team") {
       const emblemId = d.sheet_data?.binderTeamOrderType || d.sheet_data?.emblem;
-      if (emblemId) imageUrl = getEmblemImageUrl(emblemId) || undefined;
+      if (emblemId) {imageUrl = getEmblemImageUrl(emblemId) || undefined;}
     }
 
     return {
-      id: r.id,
-      type: r.type,
-      title: r.matchedName || r.name,
-      subtitle: config.label,
+      element,
       icon: config.icon,
-      url,
+      id: r.id,
+      imageUrl: imageUrl || undefined,
       matchedLanguage: r.matchedLanguage,
       matchedName: r.matchedName,
-      score: r.score,
-      imageUrl: imageUrl || undefined,
-      rarity,
-      element,
       position,
+      rarity,
+      score: r.score,
+      subtitle: config.label,
+      title: r.matchedName || r.name,
+      type: r.type,
+      url,
     };
   });
 }
@@ -387,7 +384,7 @@ export async function searchCompareCharacters(
   const hasFilters = filters?.element || filters?.position || filters?.rarity;
 
   // Need at least a text query or an active filter
-  if (!hasText && !hasFilters) return [];
+  if (!hasText && !hasFilters) {return [];}
 
   const supabase = await createClient();
   let dbQuery = (supabase as any)
@@ -432,7 +429,7 @@ export async function searchCompareCharacters(
     .order("stat_frappe", { ascending: false, nullsFirst: false })
     .limit(30);
 
-  if (!data) return [];
+  if (!data) {return [];}
 
   return (data as any[]).map((c) => {
     const total =
@@ -444,14 +441,14 @@ export async function searchCompareCharacters(
       (c.stat_agilite || 0) +
       (c.stat_intelligence || 0);
     return {
-      slug: c.slug || c.id,
-      name: c.name_fr || c.name_en || c.id,
       element: c.element || undefined,
+      imageUrl: getCharacterFaceUrl(c.internal_code || c.id),
+      name: c.name_fr || c.name_en || c.id,
       position: c.position || undefined,
       rarity: c.rarity_label || undefined,
-      imageUrl: getCharacterFaceUrl(c.internal_code || c.id),
-      zukanHash: c.zukan_hash || undefined,
+      slug: c.slug || c.id,
       totalStats: total,
+      zukanHash: c.zukan_hash || undefined,
     };
   });
 }
@@ -460,16 +457,16 @@ export async function searchCompareCharacters(
  * Get search suggestions based on query
  */
 export async function getSearchSuggestions(query: string): Promise<string[]> {
-  if (!query || query.length < 2) return [];
+  if (!query || query.length < 2) {return [];}
 
   const results = await searchGlobal(query);
   const suggestions = new Set<string>();
 
   for (const result of results) {
-    if (result.title) suggestions.add(result.title);
+    if (result.title) {suggestions.add(result.title);}
   }
 
-  return Array.from(suggestions).slice(0, 5);
+  return [...suggestions].slice(0, 5);
 }
 
 // ─── Meta suggestions for search landing page ──────────────────────────────
@@ -499,49 +496,49 @@ const SKILL_CATEGORY_FR: Record<string, string> = {
 };
 
 const POSITION_SHORT: Record<string, string> = {
-  FW: "ATT",
-  MF: "MIL",
   DF: "DEF",
+  FW: "ATT",
   GK: "GAR",
+  MF: "MIL",
 };
 
 const ELEMENT_SHORT: Record<string, string> = {
   Fire: "Feu",
-  Wind: "Vent",
   Forest: "Forêt",
   Mountain: "Montagne",
   Void: "Néant",
+  Wind: "Vent",
 };
 
 const ITEM_CATEGORY_FR: Record<string, string> = {
-  shoes: "Chaussures",
-  misanga: "Misanga",
   accessory: "Accessoire",
   consume: "Consommable",
-  special: "Spécial",
-  formation: "Formation",
-  performance: "Célébration",
   costume: "Costume",
-  fashion: "Mode",
   equip: "Équipement",
-  special_tactics: "Tactique",
-  special_skill: "Passif",
+  fashion: "Mode",
+  formation: "Formation",
   important: "Important",
+  misanga: "Misanga",
+  performance: "Célébration",
+  shoes: "Chaussures",
+  special: "Spécial",
+  special_skill: "Passif",
+  special_tactics: "Tactique",
 };
 
 const PASSIVE_BOOST_FR: Record<string, string> = {
-  Tir: "Tir",
-  Dribble: "Dribble",
-  Attaque: "Attaque",
-  Défense: "Défense",
-  Arrêt: "Arrêt",
-  Récupération: "Récupération",
-  Vitesse: "Vitesse",
-  Tension: "Tension",
-  Brèche: "Brèche",
   Affrontement: "Affrontement",
+  Arrêt: "Arrêt",
+  Attaque: "Attaque",
+  Brèche: "Brèche",
+  Dribble: "Dribble",
+  Défense: "Défense",
   Mixte: "Mixte",
+  Récupération: "Récupération",
   Spécial: "Spécial",
+  Tension: "Tension",
+  Tir: "Tir",
+  Vitesse: "Vitesse",
 };
 
 /**
@@ -616,9 +613,9 @@ export async function getMetaSuggestions(): Promise<MetaSuggestions> {
     const imageUrl = getCharacterFaceUrl(c.internal_code || c.id);
     return {
       id: c.id,
-      slug: c.slug || c.id,
-      name: c.name_fr || c.name_en || c.id,
       imageUrl,
+      name: c.name_fr || c.name_en || c.id,
+      slug: c.slug || c.id,
       subtitle: parts.join(" · "),
       url: `/chara/${c.slug || c.id}`,
     };
@@ -631,9 +628,9 @@ export async function getMetaSuggestions(): Promise<MetaSuggestions> {
     const parts = [cat, power].filter(Boolean);
     return {
       id: s.id,
-      slug: s.id,
-      name: s.name_fr || s.name_en || s.id,
       imageUrl: getSkillImageUrl(s.id),
+      name: s.name_fr || s.name_en || s.id,
+      slug: s.id,
       subtitle: parts.join(" · "),
       url: `/skill/${s.id}`,
     };
@@ -645,11 +642,11 @@ export async function getMetaSuggestions(): Promise<MetaSuggestions> {
     const effect = t.effect1 ? translateEffect(t.effect1) : "";
     return {
       id: t.name,
+      name: nameFr,
       slug: t.name
         .toLowerCase()
         .replaceAll(/[^a-z0-9]+/g, "-")
         .replaceAll(/^-+|-+$/g, ""),
-      name: nameFr,
       subtitle: effect,
       url: `/tactic/${t.name
         .toLowerCase()
@@ -665,9 +662,9 @@ export async function getMetaSuggestions(): Promise<MetaSuggestions> {
     const parts = [catFr, price].filter(Boolean);
     return {
       id: i.id,
-      slug: i.id,
-      name: i.name_fr || i.name_en || i.id,
       imageUrl: i.image_url ? resolveAssetUrl(i.image_url) || "" : getItemImageUrl(i.id),
+      name: i.name_fr || i.name_en || i.id,
+      slug: i.id,
       subtitle: parts.join(" · "),
       url: `/item/${i.id}`,
     };
@@ -677,16 +674,16 @@ export async function getMetaSuggestions(): Promise<MetaSuggestions> {
   const passives: MetaSuggestion[] = (passivesRes.data || []).map((p: any) => {
     const boostFr = PASSIVE_BOOST_FR[p.boost_type] || p.boost_type || "";
     const catFr =
-      p.category === "Joueur" ? "Joueur" : p.category === "Équipe" ? "Équipe" : p.category || "";
+      p.category === "Joueur" ? "Joueur" : (p.category === "Équipe" ? "Équipe" : p.category || "");
     const parts = [catFr, boostFr].filter(Boolean);
     return {
       id: p.id,
-      slug: p.id,
       name: p.name_fr || p.name_en || p.id,
+      slug: p.id,
       subtitle: parts.join(" · "),
       url: `/passive/${p.id}`,
     };
   });
 
-  return { players, skills, tactics, items, passives };
+  return { items, passives, players, skills, tactics };
 }

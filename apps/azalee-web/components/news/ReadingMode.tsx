@@ -32,9 +32,9 @@ export function ReadingMode({ children }: ReadingModeProps) {
       // Petit délai pour déclencher la transition CSS après le montage du portal
       const raf = requestAnimationFrame(() => setVisible(true));
       return () => cancelAnimationFrame(raf);
-    } else {
-      setVisible(false);
     }
+      setVisible(false);
+    
   }, [isOpen]);
 
   const open = () => {
@@ -51,10 +51,10 @@ export function ReadingMode({ children }: ReadingModeProps) {
 
   // Fermeture au clavier (Escape)
   useEffect(() => {
-    if (!isOpen) return;
+    if (!isOpen) {return;}
 
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") close();
+      if (e.key === "Escape") {close();}
     };
 
     document.addEventListener("keydown", handleKeyDown);

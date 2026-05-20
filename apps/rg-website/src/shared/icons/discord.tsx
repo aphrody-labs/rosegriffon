@@ -1,8 +1,8 @@
-type DiscordIconProps = {
+interface DiscordIconProps {
   width?: number;
   height?: number;
   className?: string;
-};
+}
 
 export default function DiscordIcon({ width, height, className }: DiscordIconProps) {
   return (

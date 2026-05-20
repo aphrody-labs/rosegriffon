@@ -38,11 +38,11 @@ export function UserEditDialog({ user }: UserEditDialogProps) {
   const router = useRouter();
 
   const form = useForm<UserEditFormValues>({
-    resolver: zodResolver(userEditSchema),
     defaultValues: {
       full_name: user.full_name || "",
       role: (user.role || "user") as "user" | "admin" | "moderator" | "staff",
     },
+    resolver: zodResolver(userEditSchema),
   });
 
   const onSubmit = async (values: UserEditFormValues) => {
@@ -53,21 +53,21 @@ export function UserEditDialog({ user }: UserEditDialogProps) {
 
       if (result.error) {
         toast.error("Erreur", {
-          id: toastId,
           description: result.error,
+          id: toastId,
         });
       } else {
         toast.success("Utilisateur mis à jour", {
-          id: toastId,
           description: `Le profil de ${user.email || "l'utilisateur"} a été mis à jour.`,
+          id: toastId,
         });
         setOpen(false);
         router.refresh();
       }
-    } catch (_error) {
+    } catch {
       toast.error("Erreur", {
-        id: toastId,
         description: "Une erreur est survenue.",
+        id: toastId,
       });
     }
   };

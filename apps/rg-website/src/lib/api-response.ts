@@ -27,8 +27,8 @@ export type ApiResponse<T = unknown> = ApiSuccessResponse<T> | ApiErrorResponse;
 export function apiSuccess<T>(data: T, status = 200) {
   return NextResponse.json<ApiSuccessResponse<T>>(
     {
-      success: true,
       data,
+      success: true,
     },
     { status }
   );
@@ -40,12 +40,12 @@ export function apiSuccess<T>(data: T, status = 200) {
 export function apiError(message: string, status = 500, code?: string, details?: unknown) {
   return NextResponse.json<ApiErrorResponse>(
     {
-      success: false,
       error: {
-        message,
         code,
         details: process.env.NODE_ENV === "development" ? details : undefined,
+        message,
       },
+      success: false,
     },
     { status }
   );

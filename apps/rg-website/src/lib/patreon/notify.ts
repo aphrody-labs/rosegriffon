@@ -5,13 +5,13 @@ import { createAdminClient } from "@/lib/supabase/server";
 export type ReminderStage = "announce" | "reminder1" | "reminder2" | "lastcall";
 
 const transporter = nodemailer.createTransport({
+	auth: {
+		pass: process.env.SMTP_PASSWORD,
+		user: process.env.SMTP_USER,
+	},
 	host: process.env.SMTP_HOST || "smtp.gmail.com",
 	port: Number(process.env.SMTP_PORT || "587"),
 	secure: process.env.SMTP_SECURE === "true",
-	auth: {
-		user: process.env.SMTP_USER,
-		pass: process.env.SMTP_PASSWORD,
-	},
 });
 
 const FROM = `"Rose Griffon" <${process.env.SMTP_USER}>`;
@@ -31,7 +31,7 @@ function buildContent(stage: ReminderStage, fullName?: string): MailContent {
 	const greeting = fullName ? `Bonjour ${fullName},` : "Bonjour,";
 	const link = migrationLink();
 	switch (stage) {
-		case "announce":
+		case "announce": {
 			return {
 				subject: "Rose Griffon prend son envol — important",
 				text:
@@ -46,7 +46,8 @@ function buildContent(stage: ReminderStage, fullName?: string): MailContent {
 					<p>Vous conservez le <strong>même prix pendant 12 mois</strong>. Merci pour votre soutien.</p>`,
 				),
 			};
-		case "reminder1":
+		}
+		case "reminder1": {
 			return {
 				subject: "Plus que 45 jours pour conserver votre rôle Discord",
 				text:
@@ -58,7 +59,8 @@ function buildContent(stage: ReminderStage, fullName?: string): MailContent {
 					<p><a href="${link}" class="cta">Réactiver mon soutien</a></p>`,
 				),
 			};
-		case "reminder2":
+		}
+		case "reminder2": {
 			return {
 				subject: "Plus que 15 jours — Rose Griffon",
 				text:
@@ -71,7 +73,8 @@ function buildContent(stage: ReminderStage, fullName?: string): MailContent {
 					<p><a href="${link}" class="cta">Réactiver maintenant</a></p>`,
 				),
 			};
-		case "lastcall":
+		}
+		case "lastcall": {
 			return {
 				subject: "Patreon ferme dans 48h",
 				text:
@@ -83,6 +86,7 @@ function buildContent(stage: ReminderStage, fullName?: string): MailContent {
 					<p><a href="${link}" class="cta">Je réactive en 2 clics</a></p>`,
 				),
 			};
+		}
 	}
 }
 
@@ -107,10 +111,10 @@ export async function sendReminder(
 	const content = buildContent(stage, fullName);
 	await transporter.sendMail({
 		from: FROM,
-		to: email,
+		html: content.html,
 		subject: content.subject,
 		text: content.text,
-		html: content.html,
+		to: email,
 	});
 }
 
@@ -126,14 +130,14 @@ export async function runReminderBatch(
 	stage: ReminderStage,
 ): Promise<ReminderRunSummary> {
 	const supabase = createAdminClient();
-	if (!supabase) throw new Error("no admin supabase client");
+	if (!supabase) {throw new Error("no admin supabase client");}
 
 	const minNotificationCount = (
 		{
 			announce: 0,
+			lastcall: 3,
 			reminder1: 1,
 			reminder2: 2,
-			lastcall: 3,
 		} as const
 	)[stage];
 
@@ -144,7 +148,7 @@ export async function runReminderBatch(
 		.lte("notification_count", minNotificationCount)
 		.not("email", "is", null)
 		.limit(500);
-	if (error) throw error;
+	if (error) {throw error;}
 
 	const candidates = data?.length ?? 0;
 	let sent = 0;
@@ -167,16 +171,16 @@ export async function runReminderBatch(
 			await supabase
 				.from("patreon_legacy_members")
 				.update({
-					notified_at: new Date().toISOString(),
 					notification_count: r.notification_count + 1,
+					notified_at: new Date().toISOString(),
 				})
 				.eq("patreon_member_id", r.patreon_member_id);
 			sent += 1;
-		} catch (e) {
-			console.error("[patreon/notify] mail failed", r.email, e);
+		} catch (error) {
+			console.error("[patreon/notify] mail failed", r.email, error);
 			failed += 1;
 		}
 	}
 
-	return { stage, candidates, sent, skipped, failed };
+	return { candidates, failed, sent, skipped, stage };
 }

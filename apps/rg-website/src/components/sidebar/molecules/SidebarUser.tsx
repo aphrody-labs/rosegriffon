@@ -41,7 +41,7 @@ export function SidebarUser() {
 		<div className="flex items-center gap-2">
 			{loading ? (
 				<Skeleton className="size-9 rounded-md" />
-			) : !user ? (
+			) : (!user ? (
 				<Link
 					href="/login"
 					aria-label="Se connecter"
@@ -109,7 +109,7 @@ export function SidebarUser() {
 						</DropdownMenuItem>
 					</DropdownMenuContent>
 				</DropdownMenu>
-			)}
+			))}
 
 			<div className="ml-auto">
 				<ThemeToggle />

@@ -40,9 +40,9 @@ export function PatreonAdminActions() {
 			toast.success(
 				`Export OK : ${json.summary?.exported} membres, ${json.summary?.tiersExported} tiers (${json.summary?.durationMs}ms)`,
 			);
-		} catch (e) {
+		} catch (error) {
 			toast.error(
-				`Erreur réseau : ${e instanceof Error ? e.message : String(e)}`,
+				`Erreur réseau : ${error instanceof Error ? error.message : String(error)}`,
 			);
 		} finally {
 			setBusy(null);
@@ -68,9 +68,9 @@ export function PatreonAdminActions() {
 			toast.success(
 				`Reconcile OK : ${json.summary?.byEmail} via email, ${json.summary?.byDiscord} via Discord, ${json.summary?.stillPending} restants`,
 			);
-		} catch (e) {
+		} catch (error) {
 			toast.error(
-				`Erreur réseau : ${e instanceof Error ? e.message : String(e)}`,
+				`Erreur réseau : ${error instanceof Error ? error.message : String(error)}`,
 			);
 		} finally {
 			setBusy(null);
@@ -84,13 +84,13 @@ export function PatreonAdminActions() {
 				"Marquer churn définitif tous les non-réactivés depuis 90 jours ?",
 			)
 		)
-			return;
+			{return;}
 		setBusy("churn");
 		try {
 			const res = await fetch("/api/admin/patreon/cleanup", {
-				method: "POST",
-				headers: { "content-type": "application/json" },
 				body: JSON.stringify({ daysSincePending: 90 }),
+				headers: { "content-type": "application/json" },
+				method: "POST",
 			});
 			const json = (await res.json()) as {
 				ok: boolean;
@@ -102,9 +102,9 @@ export function PatreonAdminActions() {
 				return;
 			}
 			toast.success(`${json.count ?? 0} membres marqués churn`);
-		} catch (e) {
+		} catch (error) {
 			toast.error(
-				`Erreur réseau : ${e instanceof Error ? e.message : String(e)}`,
+				`Erreur réseau : ${error instanceof Error ? error.message : String(error)}`,
 			);
 		} finally {
 			setBusy(null);

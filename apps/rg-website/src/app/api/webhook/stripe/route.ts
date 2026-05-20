@@ -1,4 +1,5 @@
-import { type NextRequest, NextResponse } from "next/server";
+import { NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
 
 import { createAdminClient } from "@/lib/supabase/server";
 import { getStripe } from "@/lib/shop/stripe";
@@ -39,15 +40,15 @@ export async function POST(req: NextRequest) {
 			case "checkout.session.completed": {
 				const session = event.data.object;
 				console.info("[stripe-webhook] checkout completed", {
-					id: session.id,
-					email: session.customer_details?.email,
 					amount: session.amount_total,
+					email: session.customer_details?.email,
+					id: session.id,
 					patron: session.metadata?.patron_discount,
 				});
 
 				// Persist le miroir local de la commande (table `orders`).
 				// Stripe reste la source de vérité — un échec d'upsert est loggué
-				// en ERROR (monitoring catch) mais ne fait pas planter le webhook.
+				// En ERROR (monitoring catch) mais ne fait pas planter le webhook.
 				let dbSync: "ok" | "skipped" | "failed" = "skipped";
 				const supabase = createAdminClient();
 				if (!supabase) {
@@ -58,11 +59,24 @@ export async function POST(req: NextRequest) {
 				} else {
 					const { error: upsertErr } = await supabase.from("orders").upsert(
 						{
-							user_id:
-								session.metadata?.user_id !== "anonymous"
-									? session.metadata?.user_id
-									: null,
-							stripe_session_id: session.id,
+							amount_discount_cents:
+								session.total_details?.amount_discount ?? 0,
+							amount_shipping_cents:
+								session.total_details?.amount_shipping ?? 0,
+							amount_subtotal_cents: session.amount_subtotal ?? 0,
+							amount_tax_cents: session.total_details?.amount_tax ?? 0,
+							amount_total_cents: session.amount_total ?? 0,
+							paid_at: new Date().toISOString(),
+							patron_discount_applied:
+								session.metadata?.patron_discount === "yes",
+							shipping_address:
+								session.collected_information?.shipping_details?.address ??
+								null,
+							shipping_email: session.customer_details?.email ?? null,
+							shipping_name:
+								session.collected_information?.shipping_details?.name ?? null,
+							shipping_phone: session.customer_details?.phone ?? null,
+							status: "paid",
 							stripe_customer_id:
 								typeof session.customer === "string"
 									? session.customer
@@ -71,47 +85,34 @@ export async function POST(req: NextRequest) {
 								typeof session.payment_intent === "string"
 									? session.payment_intent
 									: (session.payment_intent?.id ?? null),
-							amount_subtotal_cents: session.amount_subtotal ?? 0,
-							amount_discount_cents:
-								session.total_details?.amount_discount ?? 0,
-							amount_shipping_cents:
-								session.total_details?.amount_shipping ?? 0,
-							amount_tax_cents: session.total_details?.amount_tax ?? 0,
-							amount_total_cents: session.amount_total ?? 0,
-							patron_discount_applied:
-								session.metadata?.patron_discount === "yes",
-							shipping_address:
-								session.collected_information?.shipping_details?.address ??
-								null,
-							shipping_name:
-								session.collected_information?.shipping_details?.name ?? null,
-							shipping_email: session.customer_details?.email ?? null,
-							shipping_phone: session.customer_details?.phone ?? null,
-							status: "paid",
-							paid_at: new Date().toISOString(),
+							stripe_session_id: session.id,
+							user_id:
+								session.metadata?.user_id !== "anonymous"
+									? session.metadata?.user_id
+									: null,
 						},
 						{ onConflict: "stripe_session_id" },
 					);
 					if (upsertErr) {
 						dbSync = "failed";
 						console.error("[stripe-webhook] orders upsert FAILED", {
-							session_id: session.id,
 							amount: session.amount_total,
+							code: upsertErr.code,
 							email: session.customer_details?.email,
 							error: upsertErr.message,
-							code: upsertErr.code,
+							session_id: session.id,
 						});
 					} else {
 						dbSync = "ok";
 					}
 				}
-				return NextResponse.json({ received: true, db_sync: dbSync });
+				return NextResponse.json({ db_sync: dbSync, received: true });
 			}
 			case "charge.refunded": {
 				const charge = event.data.object;
 				console.info("[stripe-webhook] refund", {
-					id: charge.id,
 					amount: charge.amount_refunded,
+					id: charge.id,
 				});
 				break;
 			}
@@ -123,14 +124,15 @@ export async function POST(req: NextRequest) {
 				});
 				break;
 			}
-			default:
+			default: {
 				// Ignore other events silently
 				break;
+			}
 		}
 
 		return NextResponse.json({ received: true });
-	} catch (err) {
-		const msg = err instanceof Error ? err.message : String(err);
+	} catch (error) {
+		const msg = error instanceof Error ? error.message : String(error);
 		console.error("[stripe-webhook] signature verification failed:", msg);
 		return NextResponse.json(
 			{ error: `Webhook error: ${msg}` },

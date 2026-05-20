@@ -6,8 +6,8 @@ import { Button } from "@rosegriffon/ui";
 import { Card, CardContent } from "@rosegriffon/ui";
 
 const humane = localFont({
-  src: "../../public/fonts/Humane-Regular.otf",
   display: "swap",
+  src: "../../public/fonts/Humane-Regular.otf",
   variable: "--font-humane",
 });
 

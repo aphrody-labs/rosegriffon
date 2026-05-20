@@ -32,8 +32,8 @@ export async function updateSetting(
   // 2. Mise à jour
   const updateData: Record<string, unknown> = {
     key,
-    value,
     updated_at: new Date().toISOString(),
+    value,
   };
 
   if (description) {
@@ -47,7 +47,7 @@ export async function updateSetting(
   }
 
   // 3. Log de l'action
-  await logAdminAction("update", "settings", key, { value, description });
+  await logAdminAction("update", "settings", key, { description, value });
 
   revalidatePath("/admin/settings");
   revalidatePath("/"); // Revalidate home page as well

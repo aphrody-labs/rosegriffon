@@ -1,8 +1,8 @@
 export function SkipToContent() {
   const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault();
-    const main = document.getElementById("main-content");
-    if (main) {
+    const main = document.querySelector("#main-content");
+    if (main instanceof HTMLElement) {
       main.setAttribute("tabindex", "-1");
       main.focus();
       // Retirer tabindex après focus pour ne pas perturber la navigation au clavier

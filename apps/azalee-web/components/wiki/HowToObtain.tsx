@@ -102,7 +102,7 @@ export function HowToObtain({
                       </span>
                     </div>
                   ))
-                ) : constellation ? (
+                ) : (constellation ? (
                   <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-linear-to-r from-purple-100 to-indigo-100 dark:from-purple-900/30 dark:to-indigo-900/30 rounded-full border border-purple-200 dark:border-purple-700">
                     <Pin size={14} className="text-purple-500" aria-hidden="true" />
                     <span className="text-sm font-medium text-purple-700 dark:text-purple-300">
@@ -112,7 +112,7 @@ export function HowToObtain({
                         `Constellation ${constellation.index + 1}`}
                     </span>
                   </div>
-                ) : null}
+                ) : null)}
               </div>
             </div>
           )}
@@ -145,17 +145,17 @@ function SourceSection({ source }: SourceSectionProps) {
   const [isOpen, setIsOpen] = useState(false);
 
   const icons: Record<ObtainSource["type"], string> = {
-    "player-universe": "auto_awesome",
     chronicle: "menu_book",
     event: "celebration",
     gacha: "casino",
+    "player-universe": "auto_awesome",
   };
 
   const colors: Record<ObtainSource["type"], string> = {
-    "player-universe": "text-purple-500",
     chronicle: "text-blue-500",
     event: "text-amber-500",
     gacha: "text-pink-500",
+    "player-universe": "text-purple-500",
   };
 
   return (
@@ -197,35 +197,35 @@ function SourceSection({ source }: SourceSectionProps) {
 }
 
 const TIER_STYLES: Record<string, { bg: string; text: string; border: string }> = {
-  Normal: {
-    bg: "bg-slate-100 dark:bg-slate-800",
-    text: "text-slate-700 dark:text-slate-300",
-    border: "border-slate-200 dark:border-slate-700",
+  BASARA: {
+    bg: "bg-red-100 dark:bg-red-900/30",
+    border: "border-red-200 dark:border-red-700",
+    text: "text-red-700 dark:text-red-300",
   },
   "En progression": {
     bg: "bg-green-100 dark:bg-green-900/30",
-    text: "text-green-700 dark:text-green-300",
     border: "border-green-200 dark:border-green-700",
+    text: "text-green-700 dark:text-green-300",
   },
   Expérimenté: {
     bg: "bg-blue-100 dark:bg-blue-900/30",
-    text: "text-blue-700 dark:text-blue-300",
     border: "border-blue-200 dark:border-blue-700",
-  },
-  Émérite: {
-    bg: "bg-purple-100 dark:bg-purple-900/30",
-    text: "text-purple-700 dark:text-purple-300",
-    border: "border-purple-200 dark:border-purple-700",
+    text: "text-blue-700 dark:text-blue-300",
   },
   Héros: {
     bg: "bg-amber-100 dark:bg-amber-900/30",
-    text: "text-amber-700 dark:text-amber-300",
     border: "border-amber-200 dark:border-amber-700",
+    text: "text-amber-700 dark:text-amber-300",
   },
-  BASARA: {
-    bg: "bg-red-100 dark:bg-red-900/30",
-    text: "text-red-700 dark:text-red-300",
-    border: "border-red-200 dark:border-red-700",
+  Normal: {
+    bg: "bg-slate-100 dark:bg-slate-800",
+    border: "border-slate-200 dark:border-slate-700",
+    text: "text-slate-700 dark:text-slate-300",
+  },
+  Émérite: {
+    bg: "bg-purple-100 dark:bg-purple-900/30",
+    border: "border-purple-200 dark:border-purple-700",
+    text: "text-purple-700 dark:text-purple-300",
   },
 };
 
@@ -233,7 +233,7 @@ function SpiritExchangeSection({ entries }: { entries: SpiritExchangeEntry[] }) 
   // Group by shop
   const byShop = new Map<string, SpiritExchangeEntry[]>();
   for (const entry of entries) {
-    if (!byShop.has(entry.shop)) byShop.set(entry.shop, []);
+    if (!byShop.has(entry.shop)) {byShop.set(entry.shop, []);}
     byShop.get(entry.shop)!.push(entry);
   }
 

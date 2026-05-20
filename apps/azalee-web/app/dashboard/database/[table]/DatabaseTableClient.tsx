@@ -25,8 +25,8 @@ interface DatabaseTableClientProps {
 }
 
 function formatCellValue(value: unknown): string {
-  if (value === null || value === undefined) return "—";
-  if (typeof value === "object") return JSON.stringify(value);
+  if (value === null || value === undefined) {return "—";}
+  if (typeof value === "object") {return JSON.stringify(value);}
   return String(value);
 }
 
@@ -117,7 +117,7 @@ export function DatabaseTableClient({
     const params = new URLSearchParams();
     params.set("sort", col);
     params.set("dir", newDir);
-    if (pageNum > 1) params.set("page", String(pageNum));
+    if (pageNum > 1) {params.set("page", String(pageNum));}
     return `?${params.toString()}`;
   }
 

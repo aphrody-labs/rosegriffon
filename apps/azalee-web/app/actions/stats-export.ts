@@ -6,7 +6,7 @@ import { createClient } from "@/lib/supabase/server";
 // ─── Helpers CSV ──────────────────────────────────────────────────────────────
 
 function escapeCsvField(value: unknown): string {
-  if (value === null || value === undefined) return "";
+  if (value === null || value === undefined) {return "";}
   const str = String(value);
   if (str.includes(",") || str.includes('"') || str.includes("\n")) {
     return `"${str.replaceAll('"', '""')}"`;
@@ -128,7 +128,7 @@ export async function exportAuthorStatsCSV(): Promise<string> {
   const articleAuthor = new Map<string, string>();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   for (const a of articles as any[]) {
-    if (a.author_id) articleAuthor.set(a.id, a.author_id);
+    if (a.author_id) {articleAuthor.set(a.id, a.author_id);}
   }
 
   // Index profileId → nom affiché
@@ -146,12 +146,12 @@ export async function exportAuthorStatsCSV(): Promise<string> {
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   for (const a of articles as any[]) {
-    if (!a.author_id) continue;
+    if (!a.author_id) {continue;}
     const current = stats.get(a.author_id) ?? {
       article_count: 0,
-      total_views: 0,
-      total_reactions: 0,
       total_comments: 0,
+      total_reactions: 0,
+      total_views: 0,
     };
     current.article_count++;
     current.total_views += a.view_count ?? 0;
@@ -161,17 +161,17 @@ export async function exportAuthorStatsCSV(): Promise<string> {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   for (const r of (reactions ?? []) as any[]) {
     const authorId = articleAuthor.get(r.article_id);
-    if (!authorId) continue;
+    if (!authorId) {continue;}
     const current = stats.get(authorId);
-    if (current) current.total_reactions++;
+    if (current) {current.total_reactions++;}
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   for (const c of (comments ?? []) as any[]) {
     const authorId = articleAuthor.get(c.article_id);
-    if (!authorId) continue;
+    if (!authorId) {continue;}
     const current = stats.get(authorId);
-    if (current) current.total_comments++;
+    if (current) {current.total_comments++;}
   }
 
   const header = "author_name,article_count,total_views,total_reactions,total_comments";
@@ -222,7 +222,7 @@ export async function getAuthorDashboard(): Promise<{
   }>;
 } | null> {
   const session = await getServerSession();
-  if (!session?.user) return null;
+  if (!session?.user) {return null;}
 
   const userId = session.user.id;
   const supabase = await createClient();
@@ -245,9 +245,9 @@ export async function getAuthorDashboard(): Promise<{
   if (!articles || articles.length === 0) {
     return {
       articles: [],
-      total_views: 0,
-      most_popular: null,
       latest_comments: [],
+      most_popular: null,
+      total_views: 0,
     };
   }
 
@@ -290,15 +290,15 @@ export async function getAuthorDashboard(): Promise<{
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const enrichedArticles = (articles as any[]).map((a) => ({
+    bookmark_count: bookmarkCounts.get(a.id) ?? 0,
+    comment_count: commentCounts.get(a.id) ?? 0,
     id: a.id,
-    title: a.title,
+    published_at: a.published_at ?? null,
+    reaction_count: reactionCounts.get(a.id) ?? 0,
     slug: a.slug,
     status: a.status,
-    published_at: a.published_at ?? null,
+    title: a.title,
     view_count: a.view_count ?? 0,
-    reaction_count: reactionCounts.get(a.id) ?? 0,
-    comment_count: commentCounts.get(a.id) ?? 0,
-    bookmark_count: bookmarkCounts.get(a.id) ?? 0,
   }));
 
   const totalViews = enrichedArticles.reduce((sum, a) => sum + a.view_count, 0);
@@ -310,16 +310,16 @@ export async function getAuthorDashboard(): Promise<{
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const latestComments = ((comments ?? []) as any[]).slice(0, 5).map((c) => ({
-    id: c.id,
     article_id: c.article_id,
     article_title: articleTitles.get(c.article_id) ?? "",
     content: c.content,
     created_at: c.created_at,
+    id: c.id,
   }));
 
   return {
     articles: enrichedArticles,
-    total_views: totalViews,
+    latest_comments: latestComments,
     most_popular: mostPopular
       ? {
           id: mostPopular.id,
@@ -328,6 +328,6 @@ export async function getAuthorDashboard(): Promise<{
           view_count: mostPopular.view_count,
         }
       : null,
-    latest_comments: latestComments,
+    total_views: totalViews,
   };
 }

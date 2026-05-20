@@ -2,40 +2,41 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { searchTranslations, type TranslationResult } from "@/app/actions/translate";
+import { searchTranslations } from '@/app/actions/translate';
+import type { TranslationResult } from '@/app/actions/translate';
 import { Icon } from "@/components/ui/Icon";
 import { Skeleton } from "@rosegriffon/ui";
 import { cn } from "@/lib/utils";
 
 const ENTITY_TYPES = [
-  { value: undefined, label: "Tous" },
-  { value: "character", label: "Personnages" },
-  { value: "skill", label: "Techniques" },
-  { value: "item", label: "Objets" },
-  { value: "tactic", label: "Tactiques" },
-  { value: "team", label: "Équipes" },
-  { value: "keshin", label: "Esprits G." },
-  { value: "soul", label: "Totems" },
+  { label: "Tous", value: undefined },
+  { label: "Personnages", value: "character" },
+  { label: "Techniques", value: "skill" },
+  { label: "Objets", value: "item" },
+  { label: "Tactiques", value: "tactic" },
+  { label: "Équipes", value: "team" },
+  { label: "Esprits G.", value: "keshin" },
+  { label: "Totems", value: "soul" },
 ] as const;
 
 const LANGS = ["FR", "EN", "JA", "ROMA"] as const;
 type Lang = (typeof LANGS)[number];
 
 const LANG_LABELS: Record<Lang, string> = {
-  FR: "Français",
   EN: "English",
+  FR: "Français",
   JA: "日本語",
   ROMA: "Romaji",
 };
 
 const TYPE_COLORS: Record<string, string> = {
   character: "bg-blue-500/15 text-blue-400",
-  skill: "bg-amber-500/15 text-amber-400",
   item: "bg-emerald-500/15 text-emerald-400",
+  keshin: "bg-cyan-500/15 text-cyan-400",
+  skill: "bg-amber-500/15 text-amber-400",
+  soul: "bg-teal-500/15 text-teal-400",
   tactic: "bg-purple-500/15 text-purple-400",
   team: "bg-rose-500/15 text-rose-400",
-  keshin: "bg-cyan-500/15 text-cyan-400",
-  soul: "bg-teal-500/15 text-teal-400",
 };
 
 export function TranslatorClient() {
@@ -94,7 +95,7 @@ export function TranslatorClient() {
       setCopiedLang(lang);
       setTimeout(() => setCopiedLang(null), 1500);
     } catch {
-      /* silent */
+      /* Silent */
     }
   };
 
@@ -288,9 +289,9 @@ export function TranslatorClient() {
                                 "text-on-surface block truncate",
                                 lang === "JA"
                                   ? "text-lg sm:text-xl"
-                                  : lang === "ROMA"
+                                  : (lang === "ROMA"
                                     ? "text-base sm:text-lg italic text-on-surface-variant"
-                                    : "text-base sm:text-lg font-medium",
+                                    : "text-base sm:text-lg font-medium"),
                               )}
                             >
                               {name}

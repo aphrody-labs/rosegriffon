@@ -37,8 +37,8 @@ function getGoogleAuth() {
           "https://www.googleapis.com/auth/drive",
         ],
       });
-    } catch (e) {
-      console.error("Invalid GOOGLE_SERVICE_ACCOUNT JSON", e);
+    } catch (error) {
+      console.error("Invalid GOOGLE_SERVICE_ACCOUNT JSON", error);
     }
   }
 
@@ -53,7 +53,7 @@ function getGoogleAuth() {
 
 async function requireDocAdmin() {
   const session = await getServerSession();
-  if (!session?.user) return { error: "Non authentifié" as const, user: null };
+  if (!session?.user) {return { error: "Non authentifié" as const, user: null };}
 
   const supabase = await createClient();
   const { data: profile } = await supabase
@@ -72,19 +72,19 @@ async function requireDocAdmin() {
 export async function importGoogleDoc(docId: string) {
   try {
     const { error: authError, user } = await requireDocAdmin();
-    if (authError || !user) return { success: false, error: authError || "Non authentifié" };
+    if (authError || !user) {return { success: false, error: authError || "Non authentifié" };}
 
     const auth = getGoogleAuth();
     const docs = google.docs({
-      version: "v1",
       auth,
+      version: "v1",
     });
 
     const docResponse = await docs.documents.get({ documentId: docId });
     const doc = docResponse.data;
 
     if (!doc.title || !doc.body) {
-      return { success: false, error: "Document invalide ou vide" };
+      return { error: "Document invalide ou vide", success: false };
     }
 
     const htmlContent = convertGoogleDocToHtml(doc);
@@ -100,29 +100,29 @@ export async function importGoogleDoc(docId: string) {
     const { data, error } = await (supabase as any)
       .from("articles")
       .insert({
-        title: doc.title,
-        content: htmlContent,
         author_id: user.id,
-        status: "draft",
-        slug: slug,
         category: "Import Google Doc",
+        content: htmlContent,
         excerpt: "Importé depuis Google Docs",
+        slug: slug,
+        status: "draft",
+        title: doc.title,
       })
       .select()
       .single();
 
     if (error) {
       console.error("Supabase Insert Error:", error);
-      return { success: false, error: `Erreur base de données: ${error.message}` };
+      return { error: `Erreur base de données: ${error.message}`, success: false };
     }
 
     revalidatePath("/dashboard/news");
-    return { success: true, data };
+    return { data, success: true };
   } catch (error: unknown) {
     const err = error as { code?: number; message?: string };
     console.error("Google Import Error:", err);
-    if (err.code === 403) return { success: false, error: "Accès refusé. Document non public." };
-    return { success: false, error: err.message || "Erreur lors de l'import." };
+    if (err.code === 403) {return { success: false, error: "Accès refusé. Document non public." };}
+    return { error: err.message || "Erreur lors de l'import.", success: false };
   }
 }
 
@@ -132,35 +132,35 @@ export async function importGoogleDoc(docId: string) {
 export async function importDriveFolder() {
   try {
     const { error: authError } = await requireDocAdmin();
-    if (authError) return { success: false, error: authError };
+    if (authError) {return { success: false, error: authError };}
 
     const auth = getGoogleAuth();
-    const drive = google.drive({ version: "v3", auth });
+    const drive = google.drive({ auth, version: "v3" });
 
     // Lister les fichiers Google Docs dans le dossier
     const res = await drive.files.list({
-      q: `'${DRIVE_FOLDER_ID}' in parents and mimeType = 'application/vnd.google-apps.document' and trashed = false`,
       fields: "files(id, name)",
+      q: `'${DRIVE_FOLDER_ID}' in parents and mimeType = 'application/vnd.google-apps.document' and trashed = false`,
     });
 
     const files = res.data.files || [];
     if (files.length === 0)
-      return { success: true, message: "Aucun document trouvé dans le dossier." };
+      {return { success: true, message: "Aucun document trouvé dans le dossier." };}
 
     let importedCount = 0;
     for (const file of files) {
       if (file.id) {
         const result = await importGoogleDoc(file.id);
-        if (result.success) importedCount++;
+        if (result.success) {importedCount++;}
       }
     }
 
     revalidatePath("/dashboard/news");
-    return { success: true, message: `${importedCount} articles importés avec succès.` };
+    return { message: `${importedCount} articles importés avec succès.`, success: true };
   } catch (error: unknown) {
     const err = error as { message?: string };
     console.error("Drive Import Error:", err);
-    return { success: false, error: err.message || "Erreur lors de l'importation du dossier." };
+    return { error: err.message || "Erreur lors de l'importation du dossier.", success: false };
   }
 }
 
@@ -170,7 +170,7 @@ export async function importDriveFolder() {
 export async function exportToGoogleDrive(newsId: string) {
   try {
     const { error: authError } = await requireDocAdmin();
-    if (authError) return { success: false, error: authError };
+    if (authError) {return { success: false, error: authError };}
 
     const supabase = await createClient();
     const { data: news, error: fetchError } = await supabase
@@ -179,28 +179,28 @@ export async function exportToGoogleDrive(newsId: string) {
       .eq("id", newsId)
       .single();
 
-    if (fetchError || !news) return { success: false, error: "Article introuvable." };
+    if (fetchError || !news) {return { success: false, error: "Article introuvable." };}
 
     const item = news as any;
     const auth = getGoogleAuth();
-    const drive = google.drive({ version: "v3", auth });
+    const drive = google.drive({ auth, version: "v3" });
 
     const res = await drive.files.create({
-      requestBody: {
-        name: `[Export] ${item.title}`,
-        mimeType: "application/vnd.google-apps.document",
-        parents: [DRIVE_FOLDER_ID],
-      },
       media: {
-        mimeType: "text/html",
         body: item.content,
+        mimeType: "text/html",
+      },
+      requestBody: {
+        mimeType: "application/vnd.google-apps.document",
+        name: `[Export] ${item.title}`,
+        parents: [DRIVE_FOLDER_ID],
       },
     });
 
-    return { success: true, fileId: res.data.id };
+    return { fileId: res.data.id, success: true };
   } catch (error: unknown) {
     const err = error as { message?: string };
     console.error("Drive Export Error:", err);
-    return { success: false, error: err.message || "Erreur lors de l'exportation." };
+    return { error: err.message || "Erreur lors de l'exportation.", success: false };
   }
 }

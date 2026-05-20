@@ -19,8 +19,8 @@ export function CheckoutButton({ subtotalCents }: { subtotalCents: number }) {
 				throw new Error(data.error ?? "Erreur Stripe");
 			}
 			window.location.href = data.url;
-		} catch (err) {
-			setError(err instanceof Error ? err.message : "Erreur de checkout");
+		} catch (error) {
+			setError(error instanceof Error ? error.message : "Erreur de checkout");
 			setPending(false);
 		}
 	};

@@ -8,7 +8,7 @@ import { PlayersClient } from "./players-client";
 export async function generateMetadata({
   searchParams,
 }: {
-  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }): Promise<Metadata> {
   const rawParams = await searchParams;
   const { q, element, position, rarity, page } = parseSearchParams(rawParams);
@@ -16,39 +16,39 @@ export async function generateMetadata({
   let title = "Liste des Joueurs";
   const filters: string[] = [];
 
-  if (q) filters.push(`"${q}"`);
-  if (element) filters.push(element.toString());
-  if (position) filters.push(position.toString());
-  if (rarity) filters.push(rarity.toString());
+  if (q) {filters.push(`"${q}"`);}
+  if (element) {filters.push(element.toString());}
+  if (position) {filters.push(position.toString());}
+  if (rarity) {filters.push(rarity.toString());}
 
   if (filters.length > 0) {
     title += ` : ${filters.join(", ")}`;
   }
 
-  const pageNum = page ? parseInt(page.toString(), 10) : 1;
+  const pageNum = page ? Number.parseInt(page.toString(), 10) : 1;
   if (pageNum > 1) {
     title += ` (Page ${pageNum})`;
   }
 
   return {
-    title: `${title} | Inazuma Eleven Victory Road - Azalée`,
-    description: `Base de données des joueurs Inazuma Eleven: Victory Road. ${filters.length > 0 ? `Filtres : ${filters.join(", ")}. ` : ""}Retrouvez les stats, techniques et méthodes de recrutement de tous les personnages.`,
     alternates: {
       canonical: `/chara${rawParams ? `?${new URLSearchParams(rawParams as Record<string, string>).toString()}` : ""}`,
     },
+    description: `Base de données des joueurs Inazuma Eleven: Victory Road. ${filters.length > 0 ? `Filtres : ${filters.join(", ")}. ` : ""}Retrouvez les stats, techniques et méthodes de recrutement de tous les personnages.`,
     openGraph: {
-      title: `${title} | Azalée`,
       description: "Encyclopédie complète Inazuma Eleven Victory Road",
-      url: "/chara",
-      siteName: "Azalée - Inazuma Eleven Victory Road Wiki",
       locale: "fr_FR",
+      siteName: "Azalée - Inazuma Eleven Victory Road Wiki",
+      title: `${title} | Azalée`,
       type: "website",
+      url: "/chara",
     },
+    title: `${title} | Inazuma Eleven Victory Road - Azalée`,
   };
 }
 
 const DEFAULT_PER_PAGE = 200;
-const ALLOWED_PER_PAGE = [50, 200];
+const ALLOWED_PER_PAGE = new Set([50, 200]);
 
 export default async function PlayersPage({
   searchParams,
@@ -62,22 +62,22 @@ export default async function PlayersPage({
 
   const pageNumber = page ? parseInt(page.toString(), 10) : 1;
   const itemsPerPage =
-    perPage && ALLOWED_PER_PAGE.includes(Number(perPage)) ? Number(perPage) : DEFAULT_PER_PAGE;
+    perPage && ALLOWED_PER_PAGE.has(Number(perPage)) ? Number(perPage) : DEFAULT_PER_PAGE;
 
   // Data First: Fetch paginated data from DB
   const { data: characters, total } = await wikiService.getCharactersList({
-    q: q?.toString(),
     element: element?.toString(),
-    position: position?.toString(),
-    rarity: rarity?.toString(),
     gender: gender?.toString(),
-    team: team?.toString(),
+    limit: itemsPerPage,
+    page: pageNumber,
     playstyle: playstyle?.toString(),
+    position: position?.toString(),
+    q: q?.toString(),
+    rarity: rarity?.toString(),
+    role: role?.toString(),
     series: series?.toString(),
     status: status?.toString(),
-    role: role?.toString(),
-    page: pageNumber,
-    limit: itemsPerPage,
+    team: team?.toString(),
   });
 
   // Fetch filter options
@@ -86,21 +86,21 @@ export default async function PlayersPage({
   const collectionJsonLd = {
     "@context": "https://schema.org",
     "@type": "CollectionPage",
-    name: "Personnages - Inazuma Eleven: Victory Road",
     description: `Base de données de ${total.toLocaleString("fr-FR")} joueurs Inazuma Eleven: Victory Road.`,
-    url: "https://azalee.rosegriffon.fr/chara",
     isPartOf: { "@type": "WebSite", name: "Azalée", url: "https://azalee.rosegriffon.fr" },
-    numberOfItems: total,
     mainEntity: {
       "@type": "ItemList",
-      numberOfItems: total,
       itemListElement: characters.slice(0, 10).map((c, i) => ({
         "@type": "ListItem",
         position: (pageNumber - 1) * itemsPerPage + i + 1,
         url: `https://azalee.rosegriffon.fr/chara/${c.slug || c.charaId}`,
         name: c.names?.fr || c.names?.en || "Joueur",
       })),
+      numberOfItems: total,
     },
+    name: "Personnages - Inazuma Eleven: Victory Road",
+    numberOfItems: total,
+    url: "https://azalee.rosegriffon.fr/chara",
   };
 
   return (

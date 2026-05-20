@@ -6,9 +6,9 @@ import { useSearchParams } from "next/navigation";
 import { CATEGORIES } from "@/components/dashboard/news-editor/constants";
 
 const ALL_FILTERS = [
-  { value: "", label: "Tout" },
-  ...CATEGORIES.map((c) => ({ value: c.value, label: c.label })),
-  { value: "Tweet", label: "Tweets" },
+  { label: "Tout", value: "" },
+  ...CATEGORIES.map((c) => ({ label: c.label, value: c.value })),
+  { label: "Tweets", value: "Tweet" },
 ] as const;
 
 export function CategoryChips() {

@@ -21,8 +21,8 @@ export const useNostalgieCollage = () => {
     try {
       const collageDataUrl = await createCollageCanvas({
         ogImageSrc: ogImage,
-        vrImageSrc: vrImage,
         templateSrc: "/nostalgie.webp",
+        vrImageSrc: vrImage,
       });
 
       setFinalImage(collageDataUrl);
@@ -47,13 +47,13 @@ export const useNostalgieCollage = () => {
 
       try {
         await addWatermarkAndDownload({
-          imageSrc: croppedImage,
-          logoSrc: "/RG_Logo_V2.5.webp",
-          fileName: "nostalgie-rg",
-          watermarkEnabled,
-          watermarkPosition,
           exportFormat,
           exportQuality,
+          fileName: "nostalgie-rg",
+          imageSrc: croppedImage,
+          logoSrc: "/RG_Logo_V2.5.webp",
+          watermarkEnabled,
+          watermarkPosition,
         });
         toast.success("Montage téléchargé avec succès!", { id: downloadToast });
       } catch (error) {
@@ -112,24 +112,24 @@ export const useNostalgieCollage = () => {
   }, []);
 
   return {
-    finalImage,
-    showFinalCropDialog,
-    isProcessing,
-    watermarkEnabled,
-    watermarkPosition,
+    createCollage,
     exportFormat,
     exportQuality,
-    setWatermarkEnabled,
-    setWatermarkPosition,
+    finalImage,
+    handleCancelFinalCrop,
+    handleCopyLink,
+    handleFinalCropComplete,
+    handleShareDiscord,
+    handleShareInstagram,
+    handleShareTwitter,
+    isProcessing,
+    reset,
     setExportFormat,
     setExportQuality,
-    createCollage,
-    handleFinalCropComplete,
-    handleCancelFinalCrop,
-    handleShareTwitter,
-    handleShareInstagram,
-    handleShareDiscord,
-    handleCopyLink,
-    reset,
+    setWatermarkEnabled,
+    setWatermarkPosition,
+    showFinalCropDialog,
+    watermarkEnabled,
+    watermarkPosition,
   };
 };

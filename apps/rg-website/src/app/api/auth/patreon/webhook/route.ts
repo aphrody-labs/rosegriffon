@@ -1,11 +1,8 @@
 import { parseWebhookRequest } from "@rosegriffon/patreon-bun";
 import { NextResponse } from "next/server";
 
-import {
-	processPatreonEvent,
-	type PatreonTrigger,
-	type PatreonWebhookPayload,
-} from "@/lib/patreon/webhooks";
+import { processPatreonEvent } from '@/lib/patreon/webhooks';
+import type { PatreonTrigger, PatreonWebhookPayload } from '@/lib/patreon/webhooks';
 import { createAdminClient } from "@/lib/supabase/server";
 
 export const runtime = "nodejs";
@@ -30,7 +27,7 @@ export async function POST(req: Request) {
 	if (!secret) {
 		console.error("[patreon/webhook] PATREON_WEBHOOK_SECRET missing");
 		// Retourner 500 ici est OK : si le secret manque, on ne peut PAS valider
-		// l'origine — il faut alerter, et Patreon va re-essayer plus tard.
+		// L'origine — il faut alerter, et Patreon va re-essayer plus tard.
 		return new NextResponse("server misconfigured", { status: 500 });
 	}
 
@@ -42,15 +39,15 @@ export async function POST(req: Request) {
 	let parsed: Awaited<ReturnType<typeof parseWebhookRequest>>;
 	try {
 		parsed = await parseWebhookRequest(req, secret);
-	} catch (e) {
-		console.error("[patreon/webhook] parse failed", e);
+	} catch (error) {
+		console.error("[patreon/webhook] parse failed", error);
 		return new NextResponse("invalid request", { status: 400 });
 	}
 
 	if (!parsed.verified) {
 		// Signature invalide → vraie 401 (caller frauduleux). Patreon n'envoie
-		// que des messages signés, donc une 401 ici n'arrive jamais en runtime
-		// normal et ne déclenchera pas la désactivation.
+		// Que des messages signés, donc une 401 ici n'arrive jamais en runtime
+		// Normal et ne déclenchera pas la désactivation.
 		return new NextResponse("invalid signature", { status: 401 });
 	}
 
@@ -60,17 +57,17 @@ export async function POST(req: Request) {
 
 	if (!supabase) {
 		// Pas de DB → on log mais on rentre 200 quand même pour ne pas se faire
-		// désactiver. Patreon réenverra l'event manuellement via dashboard si
-		// l'admin le veut.
+		// Désactiver. Patreon réenverra l'event manuellement via dashboard si
+		// L'admin le veut.
 		console.error("[patreon/webhook] no admin supabase client");
-		return NextResponse.json({ ok: true, deferred: true });
+		return NextResponse.json({ deferred: true, ok: true });
 	}
 
 	const nowIso = new Date().toISOString();
 
 	// Idempotence : déjà 'done' OU 'pending' (en vol) → no-op, ack 200.
 	// Le check pending évite qu'un retry Patreon rapide ne lance un 2e
-	// processPatreonEvent() en parallèle (double-crédit / double webhook).
+	// ProcessPatreonEvent() en parallèle (double-crédit / double webhook).
 	const { data: existing } = await supabase
 		.from("patreon_webhook_events")
 		.select("id, status")
@@ -78,11 +75,11 @@ export async function POST(req: Request) {
 		.maybeSingle();
 	const existingStatus = (existing as { status?: string } | null)?.status;
 	if (existingStatus === "done" || existingStatus === "pending") {
-		await heartbeat(supabase, { eventId, trigger, success: true });
+		await heartbeat(supabase, { eventId, success: true, trigger });
 		return NextResponse.json({
 			deduped: true,
-			status: existingStatus,
 			ok: true,
+			status: existingStatus,
 		});
 	}
 
@@ -92,11 +89,11 @@ export async function POST(req: Request) {
 		.upsert(
 			{
 				id: eventId,
-				trigger,
 				payload: payload as unknown as Record<string, unknown>,
+				received_at: nowIso,
 				signature_valid: true,
 				status: "pending",
-				received_at: nowIso,
+				trigger,
 			},
 			{ onConflict: "id" },
 		)
@@ -111,27 +108,27 @@ export async function POST(req: Request) {
 	let errorDetail: string | null = null;
 	try {
 		await processPatreonEvent(payload, trigger);
-	} catch (e) {
+	} catch (error) {
 		success = false;
-		errorDetail = e instanceof Error ? e.message : String(e);
-		console.error("[patreon/webhook] process failed", trigger, eventId, e);
+		errorDetail = error instanceof Error ? error.message : String(error);
+		console.error("[patreon/webhook] process failed", trigger, eventId, error);
 	}
 
 	await Promise.all([
 		supabase
 			.from("patreon_webhook_events")
 			.update({
+				error: errorDetail,
 				processed_at: nowIso,
 				status: success ? "done" : "failed",
-				error: errorDetail,
 			})
 			.eq("id", eventId),
-		heartbeat(supabase, { eventId, trigger, success }),
+		heartbeat(supabase, { eventId, success, trigger }),
 	]);
 
 	// Critique : on rentre 200 même quand le processing interne a échoué.
 	// Patreon ne doit JAMAIS désactiver le webhook à cause d'une erreur métier
-	// chez nous (qu'on peut rejouer plus tard via /admin/patreon/replay-event).
+	// Chez nous (qu'on peut rejouer plus tard via /admin/patreon/replay-event).
 	return NextResponse.json({ ok: true, processed: success });
 }
 
@@ -147,8 +144,8 @@ async function heartbeat(
 ): Promise<void> {
 	const { error } = await supabase.rpc("patreon_heartbeat", {
 		p_event_id: opts.eventId,
-		p_trigger: opts.trigger,
 		p_success: opts.success,
+		p_trigger: opts.trigger,
 	});
 	if (error) {
 		console.error("[patreon/webhook] heartbeat rpc failed", error);

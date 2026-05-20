@@ -48,12 +48,12 @@ const ImageCropperDialog = nextDynamic(
 			default: mod.ImageCropperDialog,
 		})),
 	{
-		ssr: false,
 		loading: () => (
 			<div className="flex items-center justify-center p-4">
 				<Loader2 className="size-6 animate-spin" />
 			</div>
 		),
+		ssr: false,
 	},
 );
 
@@ -316,7 +316,7 @@ export default function NostalgieVR() {
 		ogUpload.handleCropComplete(croppedImage);
 		const img = new window.Image();
 		img.onload = () =>
-			setOgImageDimensions({ width: img.width, height: img.height });
+			setOgImageDimensions({ height: img.height, width: img.width });
 		img.src = croppedImage;
 	};
 
@@ -333,9 +333,9 @@ export default function NostalgieVR() {
 		<main className="flex flex-col min-h-screen bg-linear-to-b from-background via-background to-muted/20">
 			<BreadcrumbSchema
 				items={[
-					{ name: "Accueil", item: "/" },
-					{ name: "Projets", item: "/projets" },
-					{ name: "Nostalgie", item: "/projets/nostalgie" },
+					{ item: "/", name: "Accueil" },
+					{ item: "/projets", name: "Projets" },
+					{ item: "/projets/nostalgie", name: "Nostalgie" },
 				]}
 			/>
 			<Toaster richColors position="top-center" />
@@ -406,17 +406,17 @@ export default function NostalgieVR() {
 							year="2011"
 							colorClass="text-orange-600 dark:text-orange-400"
 							dragHandlers={{
-								onDrop: ogUpload.handleDrop,
 								onDragEnter: ogUpload.handleDragEnter,
 								onDragLeave: ogUpload.handleDragLeave,
 								onDragOver: ogUpload.handleDragOver,
+								onDrop: ogUpload.handleDrop,
 							}}
 							fileHandlers={{
 								onFileInput: ogUpload.handleFileInput,
 								onRemoveImage: ogUpload.handleRemoveImage,
 							}}
 							inputRef={ogUpload.inputRef}
-							showPreviewImage={true}
+							showPreviewImage
 						/>
 
 						<UploadArea
@@ -426,10 +426,10 @@ export default function NostalgieVR() {
 							year="2025"
 							colorClass="text-cyan-600 dark:text-cyan-400"
 							dragHandlers={{
-								onDrop: vrUpload.handleDrop,
 								onDragEnter: vrUpload.handleDragEnter,
 								onDragLeave: vrUpload.handleDragLeave,
 								onDragOver: vrUpload.handleDragOver,
+								onDrop: vrUpload.handleDrop,
 							}}
 							fileHandlers={{
 								onFileInput: vrUpload.handleFileInput,
@@ -513,10 +513,10 @@ export default function NostalgieVR() {
 										<Label>Position du filigrane</Label>
 										<div className="grid grid-cols-2 gap-2">
 											{[
-												{ value: "top-left", label: "Haut gauche" },
-												{ value: "top-right", label: "Haut droite" },
-												{ value: "bottom-left", label: "Bas gauche" },
-												{ value: "bottom-right", label: "Bas droite" },
+												{ label: "Haut gauche", value: "top-left" },
+												{ label: "Haut droite", value: "top-right" },
+												{ label: "Bas gauche", value: "bottom-left" },
+												{ label: "Bas droite", value: "bottom-right" },
 											].map((pos) => (
 												<Button
 													key={pos.value}
@@ -570,7 +570,7 @@ export default function NostalgieVR() {
 										value={[exportQuality]}
 										onValueChange={(value) => {
 											const val = value[0];
-											if (val !== undefined) setExportQuality(val);
+											if (val !== undefined) {setExportQuality(val);}
 										}}
 										min={0.5}
 										max={1}
@@ -672,7 +672,7 @@ export default function NostalgieVR() {
 											</p>
 										</div>
 									</div>
-								) : exampleImageUrl ? (
+								) : (exampleImageUrl ? (
 									<div className="relative w-full h-auto">
 										{/* eslint-disable-next-line @next/next/no-img-element */}
 										<img
@@ -688,7 +688,7 @@ export default function NostalgieVR() {
 											Impossible de charger l&apos;image d&apos;exemple
 										</p>
 									</div>
-								)}
+								))}
 							</CardContent>
 						</Card>
 					</div>

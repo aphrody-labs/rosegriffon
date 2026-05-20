@@ -5,13 +5,14 @@ import { logAdminAction } from "@/lib/admin-logger";
 import { getServerUser } from "@/lib/auth-helpers";
 import { createClient } from "@/lib/supabase/server";
 
-import { type ArticleInput, ArticleSchema } from "./schema";
+import { ArticleSchema } from './schema';
+import type { ArticleInput } from './schema';
 
 async function checkStaffPermission() {
   const supabase = await createClient();
   const user = await getServerUser();
 
-  if (!user) return { authorized: false, user: null };
+  if (!user) {return { authorized: false, user: null };}
 
   // Vérifier via la table profiles
   const { data: profile } = await supabase
@@ -31,14 +32,14 @@ export async function createChronicle(
     // 1. Validation
     const validation = ArticleSchema.safeParse(data);
     if (!validation.success) {
-      return { success: false, error: validation.error.issues[0]?.message };
+      return { error: validation.error.issues[0]?.message, success: false };
     }
 
     // 2. Check Auth & Permissions
     const { authorized, user } = await checkStaffPermission();
 
     if (!authorized || !user) {
-      return { success: false, error: "Non autorisé : Réservé au staff" };
+      return { error: "Non autorisé : Réservé au staff", success: false };
     }
 
     const supabase = await createClient();
@@ -52,23 +53,23 @@ export async function createChronicle(
       .single();
 
     if (existingSlug) {
-      return { success: false, error: "Ce slug est déjà utilisé" };
+      return { error: "Ce slug est déjà utilisé", success: false };
     }
 
     // 4. Insert
     const { data: newArticle, error } = await supabase
       .from("articles")
       .insert({
-        title: data.title,
-        slug: data.slug,
-        content: data.content,
-        excerpt: data.excerpt,
-        category: data.category,
-        featured_image_url: data.featured_image_url,
-        status: data.status,
-        author_id: user.id,
         app: "website",
+        author_id: user.id,
+        category: data.category,
+        content: data.content,
         created_at: new Date().toISOString(),
+        excerpt: data.excerpt,
+        featured_image_url: data.featured_image_url,
+        slug: data.slug,
+        status: data.status,
+        title: data.title,
         updated_at: new Date().toISOString(),
         view_count: 0,
       })
@@ -76,13 +77,13 @@ export async function createChronicle(
       .single();
 
     if (error) {
-      return { success: false, error: error.message };
+      return { error: error.message, success: false };
     }
 
     // 5. Log
     await logAdminAction("create", "article", newArticle.id, {
-      title: newArticle.title,
       slug: newArticle.slug,
+      title: newArticle.title,
     });
 
     // 6. Revalidate
@@ -90,10 +91,10 @@ export async function createChronicle(
     revalidatePath("/chroniques");
     revalidateTag("articles", "max");
 
-    return { success: true, data: newArticle };
+    return { data: newArticle, success: true };
   } catch (error) {
     console.error("Error creating chronicle:", error);
-    return { success: false, error: "Erreur lors de la création" };
+    return { error: "Erreur lors de la création", success: false };
   }
 }
 
@@ -105,14 +106,14 @@ export async function updateChronicle(
     // 1. Validation
     const validation = ArticleSchema.safeParse(data);
     if (!validation.success) {
-      return { success: false, error: validation.error.issues[0]?.message };
+      return { error: validation.error.issues[0]?.message, success: false };
     }
 
     // 2. Check Auth & Permissions
     const { authorized, user } = await checkStaffPermission();
 
     if (!authorized || !user) {
-      return { success: false, error: "Non autorisé : Réservé au staff" };
+      return { error: "Non autorisé : Réservé au staff", success: false };
     }
 
     const supabase = await createClient();
@@ -128,8 +129,8 @@ export async function updateChronicle(
 
     if (existingSlug) {
       return {
-        success: false,
         error: "Ce slug est déjà utilisé par un autre article",
+        success: false,
       };
     }
 
@@ -145,13 +146,13 @@ export async function updateChronicle(
       .single();
 
     if (error) {
-      return { success: false, error: error.message };
+      return { error: error.message, success: false };
     }
 
     // 5. Log
     await logAdminAction("update", "article", id, {
-      title: updatedArticle.title,
       status: updatedArticle.status,
+      title: updatedArticle.title,
     });
 
     // 6. Revalidate
@@ -160,10 +161,10 @@ export async function updateChronicle(
     revalidatePath(`/chroniques/${updatedArticle.slug}`);
     revalidateTag("articles", "max");
 
-    return { success: true, data: updatedArticle };
+    return { data: updatedArticle, success: true };
   } catch (error) {
     console.error("Error updating chronicle:", error);
-    return { success: false, error: "Erreur lors de la modification" };
+    return { error: "Erreur lors de la modification", success: false };
   }
 }
 
@@ -174,7 +175,7 @@ export async function toggleChronicleStatus(
   try {
     const { authorized, user } = await checkStaffPermission();
     if (!authorized || !user) {
-      return { success: false, error: "Non autorisé : Réservé au staff" };
+      return { error: "Non autorisé : Réservé au staff", success: false };
     }
 
     const supabase = await createClient();
@@ -189,7 +190,7 @@ export async function toggleChronicleStatus(
       .eq("id", id);
 
     if (error) {
-      return { success: false, error: error.message };
+      return { error: error.message, success: false };
     }
 
     await logAdminAction("update", "article", id, {
@@ -204,7 +205,7 @@ export async function toggleChronicleStatus(
     return { success: true };
   } catch (error) {
     console.error("Error toggling chronicle status:", error);
-    return { success: false, error: "Erreur lors du changement de statut" };
+    return { error: "Erreur lors du changement de statut", success: false };
   }
 }
 
@@ -212,14 +213,14 @@ export async function deleteChronicle(id: string): Promise<{ success: boolean; e
   try {
     const { authorized, user } = await checkStaffPermission();
     if (!authorized || !user) {
-      return { success: false, error: "Non autorisé : Réservé au staff" };
+      return { error: "Non autorisé : Réservé au staff", success: false };
     }
 
     const supabase = await createClient();
     const { error } = await supabase.from("articles").delete().eq("id", id);
 
     if (error) {
-      return { success: false, error: error.message };
+      return { error: error.message, success: false };
     }
 
     await logAdminAction("delete", "article", id, {});
@@ -232,6 +233,6 @@ export async function deleteChronicle(id: string): Promise<{ success: boolean; e
     return { success: true };
   } catch (error) {
     console.error("Error deleting chronicle:", error);
-    return { success: false, error: "Erreur lors de la suppression" };
+    return { error: "Erreur lors de la suppression", success: false };
   }
 }

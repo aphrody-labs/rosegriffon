@@ -14,7 +14,7 @@ interface LogEntry {
 
 class Logger {
   private context?: string;
-  private timers: Map<string, number> = new Map();
+  private timers = new Map<string, number>();
 
   constructor(context?: string) {
     this.context = context;
@@ -22,20 +22,20 @@ class Logger {
 
   private log(level: LogLevel, message: string, data?: unknown) {
     const entry: LogEntry = {
+      context: this.context,
+      data,
       level,
       message,
       timestamp: new Date().toISOString(),
-      context: this.context,
-      data,
     };
 
     // En développement, afficher les logs de manière lisible
     if (process.env.NODE_ENV === "development") {
       const emoji = {
+        debug: "🔍",
+        error: "❌",
         info: "ℹ️",
         warn: "⚠️",
-        error: "❌",
-        debug: "🔍",
       };
 
       const prefix = this.context ? `[${this.context}]` : "";
@@ -44,9 +44,7 @@ class Logger {
         console.error(`${emoji[level]} ${prefix} ${message}`, data || "");
       } else if (level === "warn") {
         console.warn(`${emoji[level]} ${prefix} ${message}`, data || "");
-      } else if (level === "info") {
-      } else if (level === "debug") {
-      }
+      } else if (level === "info") {} else if (level === "debug") {}
     } else {
       // En production, logger en JSON pour faciliter l'analyse (via stderr)
       console.error(JSON.stringify(entry));
@@ -104,7 +102,7 @@ class Logger {
    * Log HTTP request
    */
   http(method: string, path: string, statusCode: number, duration: number) {
-    this.info(`${method} ${path}`, { statusCode, duration: `${duration}ms` });
+    this.info(`${method} ${path}`, { duration: `${duration}ms`, statusCode });
   }
 }
 

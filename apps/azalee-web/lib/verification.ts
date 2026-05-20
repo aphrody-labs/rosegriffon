@@ -6,12 +6,12 @@ export interface VerificationResult {
 }
 
 // Legacy fields (`name_FR`, `desc_FR`) may still be present on data coming
-// from older inagle exports. The current types only know about
+// From older inagle exports. The current types only know about
 // `names.fr` / `descriptions.fr`, hence we read them via this loose shape.
-type LegacyLocalized = {
+interface LegacyLocalized {
   name_FR?: string;
   desc_FR?: string;
-};
+}
 
 export const verifier = {
   validateCharacter(char: BaseCharacter): VerificationResult {
@@ -28,6 +28,13 @@ export const verifier = {
     return { isValid: issues.length === 0, issues };
   },
 
+  validateItem(item: Item): VerificationResult {
+    const issues: string[] = [];
+    if (!item.names?.fr) issues.push("Nom français manquant");
+    if (!item.descriptions?.fr) issues.push("Description française manquante");
+    return { isValid: issues.length === 0, issues };
+  },
+
   validateSkill(skill: Skill): VerificationResult {
     const issues: string[] = [];
     // EnrichedSkill exposes `name_FR` / `desc_FR`. We also probe `names.fr` /
@@ -41,13 +48,6 @@ export const verifier = {
     if (!probe.name_FR && !probe.names?.fr) issues.push("Nom français manquant");
     if (!probe.desc_FR && !probe.descriptions?.fr) issues.push("Description française manquante");
 
-    return { isValid: issues.length === 0, issues };
-  },
-
-  validateItem(item: Item): VerificationResult {
-    const issues: string[] = [];
-    if (!item.names?.fr) issues.push("Nom français manquant");
-    if (!item.descriptions?.fr) issues.push("Description française manquante");
     return { isValid: issues.length === 0, issues };
   },
 

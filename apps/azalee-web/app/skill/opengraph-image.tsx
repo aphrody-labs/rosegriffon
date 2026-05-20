@@ -1,63 +1,63 @@
 import { ImageResponse } from "next/og";
 
 export const alt = "Techniques - Wiki Azalee";
-export const size = { width: 1200, height: 630 };
+export const size = { height: 630, width: 1200 };
 export const contentType = "image/png";
 
 const ACCENT = "#E53935";
 
 const CATEGORIES = [
-  { label: "Tir", color: "#E53935" },
-  { label: "Dribble", color: "#43A047" },
-  { label: "Defense", color: "#29B6F6" },
-  { label: "Arret", color: "#F9A825" },
+  { color: "#E53935", label: "Tir" },
+  { color: "#43A047", label: "Dribble" },
+  { color: "#29B6F6", label: "Defense" },
+  { color: "#F9A825", label: "Arret" },
 ];
 
 const ELEMENTS = [
-  { label: "Feu", color: "#E53935" },
-  { label: "Vent", color: "#43A047" },
-  { label: "Foret", color: "#1B5E20" },
-  { label: "Montagne", color: "#F9A825" },
+  { color: "#E53935", label: "Feu" },
+  { color: "#43A047", label: "Vent" },
+  { color: "#1B5E20", label: "Foret" },
+  { color: "#F9A825", label: "Montagne" },
 ];
 
 export default async function Image() {
   return new ImageResponse(
     <div
       style={{
-        width: "100%",
-        height: "100%",
-        display: "flex",
         background: "linear-gradient(135deg, #1A120D 0%, #2D1F14 50%, #1A120D 100%)",
         color: "white",
+        display: "flex",
         fontFamily: "sans-serif",
-        position: "relative",
+        height: "100%",
         overflow: "hidden",
+        position: "relative",
+        width: "100%",
       }}
     >
       {/* Top bar */}
       <div
         style={{
-          position: "absolute",
-          top: 0,
-          left: 0,
-          right: 0,
-          height: 4,
           background: `linear-gradient(90deg, ${CATEGORIES[0].color}, ${CATEGORIES[1].color}, ${CATEGORIES[2].color}, ${CATEGORIES[3].color})`,
           display: "flex",
+          height: 4,
+          left: 0,
+          position: "absolute",
+          right: 0,
+          top: 0,
         }}
       />
 
       {/* Background glow */}
       <div
         style={{
-          position: "absolute",
-          bottom: -150,
-          left: -100,
-          width: 500,
-          height: 500,
-          borderRadius: "50%",
           background: `radial-gradient(circle, ${ACCENT}10 0%, transparent 70%)`,
+          borderRadius: "50%",
+          bottom: -150,
           display: "flex",
+          height: 500,
+          left: -100,
+          position: "absolute",
+          width: 500,
         }}
       />
 
@@ -65,21 +65,21 @@ export default async function Image() {
       <div
         style={{
           display: "flex",
+          flex: 1,
           flexDirection: "column",
+          gap: 20,
           justifyContent: "center",
           padding: "60px 80px",
-          flex: 1,
-          gap: 20,
         }}
       >
         <div
           style={{
+            color: ACCENT,
+            display: "flex",
             fontSize: 16,
             fontWeight: 700,
-            color: ACCENT,
-            textTransform: "uppercase",
             letterSpacing: 4,
-            display: "flex",
+            textTransform: "uppercase",
           }}
         >
           Wiki Azalee
@@ -87,11 +87,11 @@ export default async function Image() {
 
         <div
           style={{
+            color: "white",
+            display: "flex",
             fontSize: 64,
             fontWeight: 900,
-            color: "white",
             lineHeight: 1.1,
-            display: "flex",
           }}
         >
           Techniques
@@ -99,10 +99,10 @@ export default async function Image() {
 
         <div
           style={{
-            fontSize: 24,
             color: "#A09080",
-            lineHeight: 1.4,
             display: "flex",
+            fontSize: 24,
+            lineHeight: 1.4,
             maxWidth: 600,
           }}
         >
@@ -115,14 +115,14 @@ export default async function Image() {
             <div
               key={c.label}
               style={{
-                display: "flex",
                 background: `${c.color}18`,
-                borderRadius: 20,
-                padding: "8px 18px",
                 border: `1px solid ${c.color}35`,
+                borderRadius: 20,
+                display: "flex",
+                padding: "8px 18px",
               }}
             >
-              <div style={{ fontSize: 15, fontWeight: 700, color: c.color, display: "flex" }}>
+              <div style={{ color: c.color, display: "flex", fontSize: 15, fontWeight: 700 }}>
                 {c.label}
               </div>
             </div>
@@ -135,15 +135,15 @@ export default async function Image() {
             <div
               key={e.label}
               style={{
-                display: "flex",
                 background: `${e.color}12`,
-                borderRadius: 20,
-                padding: "6px 16px",
                 border: `1px solid ${e.color}25`,
+                borderRadius: 20,
+                display: "flex",
+                padding: "6px 16px",
               }}
             >
               <div
-                style={{ fontSize: 13, fontWeight: 600, color: `${e.color}CC`, display: "flex" }}
+                style={{ color: `${e.color}CC`, display: "flex", fontSize: 13, fontWeight: 600 }}
               >
                 {e.label}
               </div>
@@ -155,43 +155,43 @@ export default async function Image() {
       {/* Right side decorative */}
       <div
         style={{
+          alignItems: "center",
           display: "flex",
           flexDirection: "column",
-          justifyContent: "center",
-          alignItems: "center",
-          width: 300,
           gap: 20,
+          justifyContent: "center",
           padding: "40px 60px 40px 0",
+          width: 300,
         }}
       >
         <div
           style={{
+            alignItems: "center",
+            background: "#3D2E2280",
+            border: "1px solid #5D4E4240",
+            borderRadius: 24,
             display: "flex",
             flexDirection: "column",
-            alignItems: "center",
             gap: 8,
-            background: "#3D2E2280",
-            borderRadius: 24,
             padding: "24px 32px",
-            border: "1px solid #5D4E4240",
           }}
         >
           <div
             style={{
+              color: "#A09080",
+              display: "flex",
               fontSize: 14,
               fontWeight: 700,
-              color: "#A09080",
-              textTransform: "uppercase",
               letterSpacing: 2,
-              display: "flex",
+              textTransform: "uppercase",
             }}
           >
             Puissance
           </div>
-          <div style={{ fontSize: 48, fontWeight: 900, color: "#F2A93B", display: "flex" }}>
+          <div style={{ color: "#F2A93B", display: "flex", fontSize: 48, fontWeight: 900 }}>
             ???
           </div>
-          <div style={{ fontSize: 13, color: "#6D5E50", display: "flex" }}>
+          <div style={{ color: "#6D5E50", display: "flex", fontSize: 13 }}>
             TP &bull; Element &bull; Type
           </div>
         </div>
@@ -200,12 +200,12 @@ export default async function Image() {
       {/* Branding */}
       <div
         style={{
-          position: "absolute",
-          bottom: 20,
-          left: 80,
-          display: "flex",
           alignItems: "center",
+          bottom: 20,
+          display: "flex",
           gap: 10,
+          left: 80,
+          position: "absolute",
         }}
       >
         <img
@@ -215,10 +215,10 @@ export default async function Image() {
           style={{ borderRadius: 7 }}
           alt="Logo Azalée"
         />
-        <div style={{ fontSize: 14, fontWeight: 700, color: "#F2A93B", display: "flex" }}>
+        <div style={{ color: "#F2A93B", display: "flex", fontSize: 14, fontWeight: 700 }}>
           azalee.rosegriffon.fr
         </div>
-        <div style={{ fontSize: 12, color: "#6D5E50", display: "flex" }}>
+        <div style={{ color: "#6D5E50", display: "flex", fontSize: 12 }}>
           Inazuma Eleven: Victory Road
         </div>
       </div>

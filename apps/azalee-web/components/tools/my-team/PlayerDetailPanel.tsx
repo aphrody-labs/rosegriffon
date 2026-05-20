@@ -7,7 +7,8 @@ import { CommonSpriteIcon } from "@/components/ui/CommonSpriteIcon";
 import { Icon } from "@/components/ui/Icon";
 import { RarityBadge } from "@/components/ui/rarity-badge";
 import { SafeImage } from "@/components/ui/SafeImage";
-import { MovesetList, type MovesetSkill } from "@/components/wiki/MovesetList";
+import { MovesetList } from '@/components/wiki/MovesetList';
+import type { MovesetSkill } from '@/components/wiki/MovesetList';
 import { MiniStatHeptagon } from "@/components/wiki/StatHeptagon";
 import type { SpriteCommonKey } from "@/config/sprites-common";
 import { ROLE_COLORS, ROLE_LABELS } from "@/lib/formations";
@@ -15,25 +16,25 @@ import type { TeamMember } from "@/lib/team-types";
 
 const ELEMENT_SPRITE: Record<string, SpriteCommonKey> = {
   Fire: "fire",
-  Wind: "wind",
   Forest: "forest",
   Mountain: "mountain",
+  Wind: "wind",
 };
 const ELEMENT_LABELS: Record<string, string> = {
   Fire: "Feu",
-  Wind: "Vent",
   Forest: "Forêt",
   Mountain: "Montagne",
+  Wind: "Vent",
 };
 
 const STAT_LABELS: Record<string, string> = {
-  kick: "Frappe",
-  control: "Contrôle",
-  technique: "Technique",
-  pressure: "Pression",
-  physical: "Physique",
   agility: "Agilité",
+  control: "Contrôle",
   intelligence: "Intelligence",
+  kick: "Frappe",
+  physical: "Physique",
+  pressure: "Pression",
+  technique: "Technique",
 };
 
 interface PlayerDetailPanelProps {
@@ -48,7 +49,7 @@ export function PlayerDetailPanel({ member, onClose, onRemove }: PlayerDetailPan
   const lastCharaId = useRef<string | null>(null);
 
   useEffect(() => {
-    if (lastCharaId.current === member.charaId) return;
+    if (lastCharaId.current === member.charaId) {return;}
     lastCharaId.current = member.charaId;
     let cancelled = false;
     setLoading(true);
@@ -165,13 +166,13 @@ export function PlayerDetailPanel({ member, onClose, onRemove }: PlayerDetailPan
               <div className="size-4 rounded-full border-2 border-current border-t-transparent animate-spin" />
               <span className="text-xs">Chargement des techniques...</span>
             </div>
-          ) : skills.length > 0 ? (
+          ) : (skills.length > 0 ? (
             <MovesetList skills={skills} maxSlots={skills.length} className="!max-w-none" />
           ) : (
             <p className="text-xs text-on-surface-variant/50 text-center py-2">
               Aucune technique trouvée
             </p>
-          )}
+          ))}
         </div>
 
         {/* Actions */}

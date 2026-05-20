@@ -17,30 +17,30 @@ const CATEGORY_COLORS: Record<
 > = {
   Conventions: {
     bg: "bg-purple-100 dark:bg-purple-900/30",
-    text: "text-purple-700 dark:text-purple-300",
     border: "border-purple-200 dark:border-purple-800",
+    text: "text-purple-700 dark:text-purple-300",
   },
   "Meet-up": {
     bg: "bg-blue-100 dark:bg-blue-900/30",
-    text: "text-blue-700 dark:text-blue-300",
     border: "border-blue-200 dark:border-blue-800",
+    text: "text-blue-700 dark:text-blue-300",
   },
   "Stand artiste RG": {
     bg: "bg-pink-100 dark:bg-pink-900/30",
-    text: "text-pink-700 dark:text-pink-300",
     border: "border-pink-200 dark:border-pink-800",
+    text: "text-pink-700 dark:text-pink-300",
   },
   "Stand associatif": {
     bg: "bg-emerald-100 dark:bg-emerald-900/30",
-    text: "text-emerald-700 dark:text-emerald-300",
     border: "border-emerald-200 dark:border-emerald-800",
+    text: "text-emerald-700 dark:text-emerald-300",
   },
 };
 
 const DEFAULT_COLOR = {
   bg: "bg-gray-100 dark:bg-gray-800",
-  text: "text-gray-700 dark:text-gray-300",
   border: "border-gray-200 dark:border-gray-700",
+  text: "text-gray-700 dark:text-gray-300",
 };
 
 function EventsList({ events, isLoading }: EventsListProps) {
@@ -69,9 +69,9 @@ function EventsList({ events, isLoading }: EventsListProps) {
     );
   }
 
-  const sortedEvents = [...events].sort((a, b) => {
-    if (a.type === "today" && b.type !== "today") return -1;
-    if (a.type !== "today" && b.type === "today") return 1;
+  const sortedEvents = [...events].toSorted((a, b) => {
+    if (a.type === "today" && b.type !== "today") {return -1;}
+    if (a.type !== "today" && b.type === "today") {return 1;}
     const aTime = new Date(a.startDate).getTime();
     const bTime = new Date(b.startDate).getTime();
     return Number.isNaN(aTime) || Number.isNaN(bTime) ? 0 : aTime - bTime;
@@ -97,9 +97,9 @@ function EventsList({ events, isLoading }: EventsListProps) {
                 "h-2 w-full",
                 event.type === "today"
                   ? "bg-blue-500"
-                  : event.type === "upcoming"
+                  : (event.type === "upcoming"
                     ? "bg-green-500"
-                    : "bg-gray-400"
+                    : "bg-gray-400")
               )}
             />
 

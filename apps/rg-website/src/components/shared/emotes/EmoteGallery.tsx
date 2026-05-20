@@ -30,10 +30,10 @@ export function EmoteGallery({ onSelect, className }: EmoteGalleryProps) {
               )}
               onClick={() =>
                 onSelect?.({
-                  type: "site",
-                  src: emote.path,
-                  name: emote.name,
                   alt: emote.alt,
+                  name: emote.name,
+                  src: emote.path,
+                  type: "site",
                 })
               }
               title={emote.alt}

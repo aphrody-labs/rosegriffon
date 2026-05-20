@@ -1,5 +1,6 @@
 import { getSessionCookie } from "better-auth/cookies";
-import { type NextRequest, NextResponse } from "next/server";
+import { NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
 import { get } from "@vercel/edge-config";
 
 const PROTECTED_PATHS = ["/dashboard", "/admin", "/profil/settings"];
@@ -21,7 +22,7 @@ export async function middleware(request: NextRequest) {
 
   const { pathname } = request.nextUrl;
   const isProtected = PROTECTED_PATHS.some((p) => pathname.startsWith(p));
-  if (!isProtected) return NextResponse.next();
+  if (!isProtected) {return NextResponse.next();}
 
   // 2. Optimistic Auth Check
   const sessionCookie = getSessionCookie(request);

@@ -2,8 +2,8 @@ import { createClient } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
 
-const TWITCH_CLIENT_ID = process.env.TWITCH_CLIENT_ID;
-const TWITCH_CLIENT_SECRET = process.env.TWITCH_CLIENT_SECRET;
+const {TWITCH_CLIENT_ID} = process.env;
+const {TWITCH_CLIENT_SECRET} = process.env;
 const DEFAULT_CHANNEL = "rose_griffontv";
 const ALLOWED_CHANNELS = new Set(["rose_griffontv", "achillea_ie"]);
 
@@ -17,8 +17,8 @@ let accessToken: string | null = null;
 let tokenExpiry: number = 0;
 
 async function getTwitchAccessToken(): Promise<string | null> {
-  if (accessToken && Date.now() < tokenExpiry) return accessToken;
-  if (!TWITCH_CLIENT_ID || !TWITCH_CLIENT_SECRET) return null;
+  if (accessToken && Date.now() < tokenExpiry) {return accessToken;}
+  if (!TWITCH_CLIENT_ID || !TWITCH_CLIENT_SECRET) {return null;}
 
   try {
     const params = new URLSearchParams({
@@ -31,11 +31,11 @@ async function getTwitchAccessToken(): Promise<string | null> {
       method: "POST",
     });
 
-    if (!response.ok) return null;
+    if (!response.ok) {return null;}
 
     const data: TwitchTokenResponse = await response.json();
     accessToken = data.access_token;
-    tokenExpiry = Date.now() + data.expires_in * 1000 - 60000;
+    tokenExpiry = Date.now() + data.expires_in * 1000 - 60_000;
     return accessToken;
   } catch {
     return null;
@@ -44,22 +44,22 @@ async function getTwitchAccessToken(): Promise<string | null> {
 
 function twitchHeaders(token: string) {
   return {
-    "Client-ID": TWITCH_CLIENT_ID!,
     Authorization: `Bearer ${token}`,
+    "Client-ID": TWITCH_CLIENT_ID!,
   };
 }
 
 async function twitchFetch(url: string, token: string) {
   const res = await fetch(url, { headers: twitchHeaders(token), next: { revalidate: 300 } });
-  if (!res.ok) return null;
+  if (!res.ok) {return null;}
   return res.json();
 }
 
 // ─── YouTube fallback (rediffs) ─────────────────────────────────────────
 // Pas d'API key requise — utilise le RSS feed natif (15 dernières vidéos).
 const YOUTUBE_CHANNEL_IDS: Record<string, string> = {
-  rose_griffontv: "UCleqt3V_yTgxY6XLZeEFV8g", // @rosegriffon
   achillea_ie: "UCh2FiAYaOfuvwTaBVs7CpFw", // @achillearg
+  rose_griffontv: "UCleqt3V_yTgxY6XLZeEFV8g", // @rosegriffon
 };
 
 interface YoutubeVideo {
@@ -75,20 +75,20 @@ interface YoutubeVideo {
 
 async function fetchYoutubeVideos(channel: string): Promise<YoutubeVideo[]> {
   const channelId = YOUTUBE_CHANNEL_IDS[channel];
-  if (!channelId) return [];
+  if (!channelId) {return [];}
   try {
     const res = await fetch(`https://www.youtube.com/feeds/videos.xml?channel_id=${channelId}`, {
       next: { revalidate: 600 },
     });
-    if (!res.ok) return [];
+    if (!res.ok) {return [];}
     const xml = await res.text();
     const decode = (s: string) =>
       s
-        .replace(/&amp;/g, "&")
-        .replace(/&quot;/g, '"')
-        .replace(/&#39;/g, "'")
-        .replace(/&lt;/g, "<")
-        .replace(/&gt;/g, ">");
+        .replaceAll(/&amp;/g, "&")
+        .replaceAll(/&quot;/g, '"')
+        .replaceAll(/&#39;/g, "'")
+        .replaceAll(/&lt;/g, "<")
+        .replaceAll(/&gt;/g, ">");
 
     const out: YoutubeVideo[] = [];
     const entryRe = /<entry>([\s\S]*?)<\/entry>/g;
@@ -102,14 +102,14 @@ async function fetchYoutubeVideos(channel: string): Promise<YoutubeVideo[]> {
       const views = block.match(/<media:statistics[^/]*views="([^"]+)"/)?.[1];
       if (id && title) {
         out.push({
-          id,
-          title: decode(title),
-          thumbnail_url: thumb ?? `https://i.ytimg.com/vi/${id}/hqdefault.jpg`,
-          view_count: views ? Number.parseInt(views, 10) : 0,
           created_at: published ?? "",
           duration: "",
-          url: `https://www.youtube.com/watch?v=${id}`,
+          id,
+          thumbnail_url: thumb ?? `https://i.ytimg.com/vi/${id}/hqdefault.jpg`,
+          title: decode(title),
           type: "youtube",
+          url: `https://www.youtube.com/watch?v=${id}`,
+          view_count: views ? Number.parseInt(views, 10) : 0,
         });
       }
       match = entryRe.exec(xml);
@@ -127,7 +127,7 @@ export async function GET(request: Request) {
   const isPrimaryChannel = channel === DEFAULT_CHANNEL;
 
   const token = await getTwitchAccessToken();
-  let liveData = { is_live: false, title: "", category: "", viewers: 0, started_at: "" };
+  let liveData = { category: "", is_live: false, started_at: "", title: "", viewers: 0 };
   let userId: string | null = null;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let videos: any[] = [];
@@ -155,11 +155,11 @@ export async function GET(request: Request) {
       const stream = streamData?.data?.[0];
       if (stream) {
         liveData = {
-          is_live: true,
-          title: stream.title,
           category: stream.game_name,
-          viewers: stream.viewer_count,
+          is_live: true,
           started_at: stream.started_at,
+          title: stream.title,
+          viewers: stream.viewer_count,
         };
       }
 
@@ -167,14 +167,14 @@ export async function GET(request: Request) {
         // 3. VODs : archive prioritaire, fallback highlight, puis upload (couvre tous les cas)
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const mapVideo = (v: any) => ({
-          id: v.id,
-          title: v.title,
-          thumbnail_url: v.thumbnail_url,
-          view_count: v.view_count,
           created_at: v.created_at,
           duration: v.duration,
-          url: v.url,
+          id: v.id,
+          thumbnail_url: v.thumbnail_url,
+          title: v.title,
           type: v.type as "archive" | "highlight" | "upload",
+          url: v.url,
+          view_count: v.view_count,
         });
         for (const type of ["archive", "highlight", "upload"] as const) {
           const data = await twitchFetch(
@@ -200,25 +200,25 @@ export async function GET(request: Request) {
         const MAX_CLIP_PAGES = 20; // 20 * 100 = 2000 clips max
         for (let i = 0; i < MAX_CLIP_PAGES; i++) {
           const params = new URLSearchParams({ broadcaster_id: userId, first: "100" });
-          if (cursor) params.set("after", cursor);
+          if (cursor) {params.set("after", cursor);}
           const page = await twitchFetch(
             `https://api.twitch.tv/helix/clips?${params.toString()}`,
             token
           );
-          if (!page?.data?.length) break;
+          if (!page?.data?.length) {break;}
           allClips.push(...page.data);
           cursor = page.pagination?.cursor;
-          if (!cursor) break;
+          if (!cursor) {break;}
         }
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         clips = allClips.map((c: any) => ({
-          id: c.id,
-          title: c.title,
-          thumbnail_url: c.thumbnail_url,
-          view_count: c.view_count,
           created_at: c.created_at,
           creator_name: c.creator_name,
+          id: c.id,
+          thumbnail_url: c.thumbnail_url,
+          title: c.title,
           url: c.url,
+          view_count: c.view_count,
         }));
 
         // 5. Followers count
@@ -232,16 +232,16 @@ export async function GET(request: Request) {
         const user = userData?.data?.[0];
         if (user) {
           channelInfo = {
-            description: user.description,
             broadcaster_language: "fr",
-            totalViews: user.view_count || 0,
-            profileImageUrl: user.profile_image_url,
             createdAt: user.created_at,
+            description: user.description,
+            profileImageUrl: user.profile_image_url,
+            totalViews: user.view_count || 0,
           };
         }
       }
-    } catch (e) {
-      console.error("Erreur API Twitch:", e);
+    } catch (error) {
+      console.error("Erreur API Twitch:", error);
     }
   }
 
@@ -266,7 +266,7 @@ export async function GET(request: Request) {
   }
 
   return Response.json({
-    channel: channel,
+    channel,
     url: `https://twitch.tv/${channel}`,
     live: liveData,
     videos,

@@ -2,7 +2,7 @@
  * Configuration Sentry pour le serveur Next.js
  */
 
-// import * as Sentry from "@sentry/nextjs";
+// Import * as Sentry from "@sentry/nextjs";
 
 if (process.env.NEXT_PUBLIC_SENTRY_DSN) {
   /*

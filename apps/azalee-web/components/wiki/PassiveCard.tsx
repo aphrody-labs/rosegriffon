@@ -44,120 +44,120 @@ export interface CoordinatorPassiveData {
 // ── Translations ──
 
 export const REQUIREMENT_FR: Record<string, string> = {
-  "For players of the same element": "Joueurs du même élément",
-  "For players of different elements": "Joueurs d'éléments différents",
-  "For players of the same positions": "Joueurs de la même position",
-  "For players of the same position": "Joueurs de la même position",
-  "For players of different positions": "Joueurs de positions différentes",
-  "For nearby players": "Joueurs à proximité",
-  "When a player of the same element is nearby": "Joueur du même élément à proximité",
-  "When a player of a different element is nearby": "Joueur d'élément différent à proximité",
-  "On your half of the pitch": "Sur votre moitié de terrain",
-  "On the opposition's half of the pitch": "Sur la moitié de terrain adverse",
-  "When outside the zone": "Hors de la zone",
-  "Non-Conditional": "Sans condition",
-  "When tied or behind in goals": "Score à égalité ou en retard",
-  "When at +15% or higher Breach Rate": "Taux de brèche +15% ou plus",
-  "When at 15% of higher Breach Rate": "Taux de brèche +15% ou plus",
-  "When opposition passes the ball out during Focus Battle":
-    "L'adversaire passe le ballon lors d'un affrontement",
-  "When winning a Focus or Scramble Battle": "En remportant un affrontement ou une mêlée",
-  "When at 50% or higher tension": "Tension à 50% ou plus",
-  "When at 50% of higher Tension": "Tension à 50% ou plus",
-  "When at 100% Tension": "Tension à 100%",
-  "On gaining possession (excluding catches) (15s)": "Récupération du ballon (hors arrêts) (15s)",
-  "On gaining possession(excluding catches) (15s)": "Récupération du ballon (hors arrêts) (15s)",
-  "When making a pass": "En faisant une passe",
-  "When at 20% of more Bond Power": "Puissance de lien à 20% ou plus",
-  "When at 20% or more Bond Power": "Puissance de lien à 20% ou plus",
-  "When losing a Scramble": "En perdant une mêlée",
-  "On Dash knockback": "Lors d'un plaquage en sprint",
-  "When the opposition commits a foul": "Quand l'adversaire commet une faute",
-  "Until you incur a foul": "Tant que vous ne commettez pas de faute",
   "After a substitution, for the player who comes on (15s)":
     "Après remplacement, joueur entrant (15s)",
-  "Upon being subbed in (15s)": "Après remplacement (15s)",
+  "For nearby players": "Joueurs à proximité",
+  "For players of different elements": "Joueurs d'éléments différents",
+  "For players of different positions": "Joueurs de positions différentes",
+  "For players of the same element": "Joueurs du même élément",
+  "For players of the same position": "Joueurs de la même position",
+  "For players of the same positions": "Joueurs de la même position",
   "For the first half": "En première mi-temps",
   "For the second half": "En seconde mi-temps",
+  "Non-Conditional": "Sans condition",
+  "On Dash knockback": "Lors d'un plaquage en sprint",
+  "On gaining possession (excluding catches) (15s)": "Récupération du ballon (hors arrêts) (15s)",
+  "On gaining possession(excluding catches) (15s)": "Récupération du ballon (hors arrêts) (15s)",
+  "On the opposition's half of the pitch": "Sur la moitié de terrain adverse",
+  "On your half of the pitch": "Sur votre moitié de terrain",
+  "Until you incur a foul": "Tant que vous ne commettez pas de faute",
+  "Upon being subbed in (15s)": "Après remplacement (15s)",
+  "When a player of a different element is nearby": "Joueur d'élément différent à proximité",
+  "When a player of the same element is nearby": "Joueur du même élément à proximité",
+  "When at +15% or higher Breach Rate": "Taux de brèche +15% ou plus",
+  "When at 100% Tension": "Tension à 100%",
+  "When at 15% of higher Breach Rate": "Taux de brèche +15% ou plus",
+  "When at 20% of more Bond Power": "Puissance de lien à 20% ou plus",
+  "When at 20% or more Bond Power": "Puissance de lien à 20% ou plus",
+  "When at 50% of higher Tension": "Tension à 50% ou plus",
+  "When at 50% or higher tension": "Tension à 50% ou plus",
+  "When losing a Scramble": "En perdant une mêlée",
+  "When making a pass": "En faisant une passe",
+  "When opposition passes the ball out during Focus Battle":
+    "L'adversaire passe le ballon lors d'un affrontement",
+  "When outside the zone": "Hors de la zone",
+  "When the opposition commits a foul": "Quand l'adversaire commet une faute",
+  "When tied or behind in goals": "Score à égalité ou en retard",
+  "When winning a Focus or Scramble Battle": "En remportant un affrontement ou une mêlée",
 };
 
 export const STAT_FR: Record<string, string> = {
-  "Shot AT": "ATT Tir",
-  "Focus AT & DF": "ATT & DEF Affrontement",
-  "Scramble AT & DF": "ATT & DEF Mêlée",
   "Castle Wall DF": "DEF Mur de défense",
-  "Own Shot AT": "ATT Tir (perso)",
+  "Drain Tension": "Drain de tension",
+  "Focus AT & DF": "ATT & DEF Affrontement",
+  "Own Castle Wall": "Mur de défense (perso)",
+  "Own Castle Wall DF": "DEF Mur de défense (perso)",
   "Own Focus AT & DF": "ATT & DEF Affrontement (perso)",
   "Own Scramble AT & DF": "ATT & DEF Mêlée (perso)",
-  "Own Castle Wall DF": "DEF Mur de défense (perso)",
-  "Own Castle Wall": "Mur de défense (perso)",
-  "Team Focus AT & DF": "ATT & DEF Affrontement (équipe)",
+  "Own Shot AT": "ATT Tir (perso)",
+  "Own Special Tactics Cooldown": "Cooldown Tactiques spé. (perso)",
+  "Scramble AT & DF": "ATT & DEF Mêlée",
+  "Shot AT": "ATT Tir",
+  "Team AT": "ATT (équipe)",
+  "Team AT & DF": "ATT & DEF (équipe)",
+  "Team Bond Power": "Puissance de lien (équipe)",
+  "Team Bond Power Loss": "Perte puissance de lien (équipe)",
   "Team Breach Rate": "Taux de brèche (équipe)",
+  "Team Castle Wall DF": "DEF Mur de défense (équipe)",
   "Team Castle Wall Pierce Rate": "Taux de percée (équipe)",
-  "Team Tension Breach Cost": "Coût tension brèche (équipe)",
-  "Drain Tension": "Drain de tension",
-  "Team Tension": "Tension (équipe)",
+  "Team DF": "DEF (équipe)",
+  "Team Dash Foul Rate": "Taux faute sprint (équipe)",
+  "Team Direct Shot AT": "ATT Tir direct (équipe)",
+  "Team Focus AT & DF": "ATT & DEF Affrontement (équipe)",
+  "Team Foul Rate": "Taux de faute (équipe)",
+  "Team Rough Attack AT & DF": "ATT & DEF Assaut (équipe)",
+  "Team Scramble AT & DF": "ATT & DEF Mêlée (équipe)",
   "Team Shot AT": "ATT Tir (équipe)",
-  "[MF] Focus AT & DF": "[MF] ATT & DEF Affrontement",
+  "Team Tension": "Tension (équipe)",
+  "Team Tension Breach Cost": "Coût tension brèche (équipe)",
   "[DF] Focus AT & DF": "[DF] ATT & DEF Affrontement",
   "[KP] KP": "[GK] Gardien",
-  "Team Rough Attack AT & DF": "ATT & DEF Assaut (équipe)",
-  "Team Bond Power": "Puissance de lien (équipe)",
-  "Team Scramble AT & DF": "ATT & DEF Mêlée (équipe)",
-  "Team Direct Shot AT": "ATT Tir direct (équipe)",
-  "Team Bond Power Loss": "Perte puissance de lien (équipe)",
-  "Team Dash Foul Rate": "Taux faute sprint (équipe)",
-  "Team Foul Rate": "Taux de faute (équipe)",
-  "Team AT & DF": "ATT & DEF (équipe)",
-  "Team AT": "ATT (équipe)",
-  "Team DF": "DEF (équipe)",
-  "Team Castle Wall DF": "DEF Mur de défense (équipe)",
+  "[MF] Focus AT & DF": "[MF] ATT & DEF Affrontement",
   "[Substitute Player] AT": "[Remplaçant] ATT",
   "[Substitute Player] DF": "[Remplaçant] DEF",
-  "Own Special Tactics Cooldown": "Cooldown Tactiques spé. (perso)",
 };
 
 export const PLAYSTYLE_FR: Record<string, string> = {
-  Breach: "Brèche",
-  Tension: "Tension",
-  Counter: "Contre-attaque",
   Bond: "Lien",
-  "Rough Play": "Jeu brutal",
+  Breach: "Brèche",
+  Counter: "Contre-attaque",
   Justice: "Justice",
+  "Rough Play": "Jeu brutal",
+  Tension: "Tension",
 };
 
 const PLAYSTYLE_SPRITES: Record<string, SpriteCommonKey> = {
-  Breach: "breche",
-  Tension: "tension",
-  Counter: "contre",
   Bond: "lien",
-  "Rough Play": "jeu_violent",
+  Breach: "breche",
+  Counter: "contre",
   Justice: "justice",
+  "Rough Play": "jeu_violent",
+  Tension: "tension",
 };
 
 const PLAYSTYLE_COLORS: Record<string, string> = {
-  Breach: "text-red-500",
-  Tension: "text-amber-500",
-  Counter: "text-blue-500",
   Bond: "text-pink-500",
-  "Rough Play": "text-orange-500",
+  Breach: "text-red-500",
+  Counter: "text-blue-500",
   Justice: "text-emerald-500",
+  "Rough Play": "text-orange-500",
+  Tension: "text-amber-500",
 };
 
 const RARITY_COLORS: Record<string, string> = {
+  advanced: "bg-blue-500/20 text-blue-600",
+  common: "bg-slate-500/20 text-slate-600",
+  growing: "bg-green-500/20 text-green-600",
   legendary: "bg-amber-500/20 text-amber-600",
   top: "bg-purple-500/20 text-purple-600",
-  advanced: "bg-blue-500/20 text-blue-600",
-  growing: "bg-green-500/20 text-green-600",
-  common: "bg-slate-500/20 text-slate-600",
 };
 
 const RARITY_LABELS: Record<string, string> = {
+  advanced: "Expérimenté",
+  common: "Normal",
+  growing: "En progression",
   legendary: "Normal",
   top: "Émérite",
-  advanced: "Expérimenté",
-  growing: "En progression",
-  common: "Normal",
 };
 
 // ── Player Passive Card ──
@@ -201,7 +201,7 @@ export function PlayerPassiveCard({ passive }: { passive: PlayerPassiveData }) {
       {/* Rarity values grid */}
       <div className="space-y-1">
         {rarities.map(({ key, values }) => {
-          if (!values.low && !values.high) return null;
+          if (!values.low && !values.high) {return null;}
           const display =
             values.low === values.high ? values.low : `${values.low} ~ ${values.high}`;
           return (
@@ -256,20 +256,20 @@ export function CoordinatorPassiveCard({ passive }: { passive: CoordinatorPassiv
 
   const roles = [
     {
+      color: "bg-amber-500/20 text-amber-600",
       label: "Manager (L)",
       value: passive.managerLegendary,
-      color: "bg-amber-500/20 text-amber-600",
     },
-    { label: "Manager (C)", value: passive.managerCommon, color: "bg-slate-500/20 text-slate-600" },
+    { color: "bg-slate-500/20 text-slate-600", label: "Manager (C)", value: passive.managerCommon },
     {
+      color: "bg-purple-500/20 text-purple-600",
       label: "Coord. (L)",
       value: passive.coordinatorLegendary,
-      color: "bg-purple-500/20 text-purple-600",
     },
     {
+      color: "bg-slate-500/20 text-slate-600",
       label: "Coord. (C)",
       value: passive.coordinatorCommon,
-      color: "bg-slate-500/20 text-slate-600",
     },
   ].filter((r) => r.value);
 

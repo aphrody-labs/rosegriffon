@@ -39,9 +39,9 @@ export default async function VersionsPage({ params }: VersionsPageProps) {
 		<div className="space-y-6 pb-24 sm:pb-8">
 			<DashboardPageHeader
 				breadcrumbs={[
-					{ label: "Tableau de bord", href: "/dashboard" },
-					{ label: "Actualités", href: "/dashboard/news" },
-					{ label: article.title, href: `/dashboard/news/${article.id}` },
+					{ href: "/dashboard", label: "Tableau de bord" },
+					{ href: "/dashboard/news", label: "Actualités" },
+					{ href: `/dashboard/news/${article.id}`, label: article.title },
 					{ label: "Versions" },
 				]}
 				title="Historique des versions"

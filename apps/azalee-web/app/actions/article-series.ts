@@ -50,7 +50,7 @@ export async function getSeries(slug: string): Promise<SeriesWithArticles | null
     .eq("slug", slug)
     .single();
 
-  if (error || !series) return null;
+  if (error || !series) {return null;}
 
   const { data: articles } = await supabase
     .from("articles")
@@ -59,8 +59,8 @@ export async function getSeries(slug: string): Promise<SeriesWithArticles | null
     .order("series_order", { ascending: true });
 
   return {
-    series,
     articles: articles || [],
+    series,
   };
 }
 
@@ -82,7 +82,7 @@ export async function getArticleSeries(
     .eq("id", articleId)
     .single();
 
-  if (articleError || !article || !article.series_id) return null;
+  if (articleError || !article || !article.series_id) {return null;}
 
   // Récupérer les infos de la série
   const { data: series, error: seriesError } = await supabase
@@ -91,7 +91,7 @@ export async function getArticleSeries(
     .eq("id", article.series_id)
     .single();
 
-  if (seriesError || !series) return null;
+  if (seriesError || !series) {return null;}
 
   // Récupérer tous les articles de la série
   const { data: articles } = await supabase
@@ -104,9 +104,9 @@ export async function getArticleSeries(
   const currentIndex = seriesArticles.findIndex((a) => a.id === articleId);
 
   return {
-    series,
     articles: seriesArticles,
     currentIndex: currentIndex >= 0 ? currentIndex : 0,
+    series,
   };
 }
 
@@ -120,7 +120,7 @@ export async function getAllSeries(): Promise<SeriesSummary[]> {
     .from("article_series")
     .select("id, title, slug, description, cover_image_url");
 
-  if (!data) return [];
+  if (!data) {return [];}
 
   // Récupérer le compte d'articles par série
   const counts = await Promise.all(
@@ -130,7 +130,7 @@ export async function getAllSeries(): Promise<SeriesSummary[]> {
         .from("articles")
         .select("id", { count: "exact", head: true })
         .eq("series_id", series.id);
-      return { id: series.id, count: count || 0 };
+      return { count: count || 0, id: series.id };
     }),
   );
 
@@ -138,12 +138,12 @@ export async function getAllSeries(): Promise<SeriesSummary[]> {
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return (data as any[]).map((series) => ({
-    id: series.id,
-    title: series.title,
-    slug: series.slug,
-    description: series.description,
-    cover_image_url: series.cover_image_url,
     article_count: countMap.get(series.id) || 0,
+    cover_image_url: series.cover_image_url,
+    description: series.description,
+    id: series.id,
+    slug: series.slug,
+    title: series.title,
   }));
 }
 
@@ -163,10 +163,10 @@ export async function createSeries(data: {
   const { data: created, error } = await supabase
     .from("article_series")
     .insert({
-      title: data.title,
-      slug: data.slug,
-      description: data.description ?? null,
       cover_image_url: data.cover_image_url ?? null,
+      description: data.description ?? null,
+      slug: data.slug,
+      title: data.title,
     })
     .select("id, title, slug, description, cover_image_url, author_id")
     .single();

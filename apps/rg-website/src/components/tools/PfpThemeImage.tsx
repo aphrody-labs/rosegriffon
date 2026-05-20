@@ -18,7 +18,7 @@ export default function PfpThemeImage() {
   const gaelleImage = "/avatarRG/tutoRouge.webp";
 
   // Si pas monté, afficher une image par défaut (Roy) pour éviter le layout shift
-  const currentImage = !mounted ? royImage : theme === "gaelle" ? gaelleImage : royImage;
+  const currentImage = !mounted ? royImage : (theme === "gaelle" ? gaelleImage : royImage);
 
   return (
     <div className="hidden lg:flex items-center justify-center relative h-[600px] w-full">

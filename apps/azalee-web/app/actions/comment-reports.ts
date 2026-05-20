@@ -49,7 +49,7 @@ export async function reportComment(
   details?: string,
 ): Promise<{ success: boolean }> {
   const session = await getServerSession();
-  if (!session?.user) throw new Error("Non authentifié");
+  if (!session?.user) {throw new Error("Non authentifié");}
 
   const userId = session.user.id;
   const supabase = await createClient();
@@ -81,11 +81,11 @@ export async function reportComment(
 
   const { error: insertError } = await client.from("comment_reports").insert({
     comment_id: commentId,
-    reporter_id: userId,
-    reason,
-    details: details?.trim() || null,
-    status: "pending",
     created_at: new Date().toISOString(),
+    details: details?.trim() || null,
+    reason,
+    reporter_id: userId,
+    status: "pending",
   });
 
   if (insertError) {
@@ -127,7 +127,7 @@ export async function getReports(status?: ReportStatus): Promise<CommentReport[]
     return [];
   }
 
-  if (!data) return [];
+  if (!data) {return [];}
 
   return (
     data as Array<{
@@ -152,11 +152,7 @@ export async function getReports(status?: ReportStatus): Promise<CommentReport[]
         avatar_url: string | null;
       } | null;
     }>
-  ).map((row) => {
-    // Récupérer l'auteur du commentaire séparément (reported_user)
-    // n'est pas joinable directement sans une seconde requête — on laisse null
-    // et on laisse le consommateur enrichir si nécessaire
-    return {
+  ).map((row) => ({
       id: row.id,
       comment_id: row.comment_id,
       reason: row.reason,
@@ -174,8 +170,7 @@ export async function getReports(status?: ReportStatus): Promise<CommentReport[]
         : null,
       reporter: row.reporter,
       reported_user: null,
-    };
-  });
+    }));
 }
 
 /**
@@ -195,9 +190,9 @@ export async function resolveReport(
   const { error } = await client
     .from("comment_reports")
     .update({
-      status,
-      reviewed_by: session.user.id,
       reviewed_at: new Date().toISOString(),
+      reviewed_by: session.user.id,
+      status,
     })
     .eq("id", reportId);
 
@@ -215,7 +210,7 @@ export async function resolveReport(
  */
 export async function hasUserReported(commentId: string): Promise<boolean> {
   const session = await getServerSession();
-  if (!session?.user) return false;
+  if (!session?.user) {return false;}
 
   const supabase = await createClient();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

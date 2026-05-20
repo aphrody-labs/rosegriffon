@@ -38,27 +38,27 @@ import { StatHeptagon } from "./StatHeptagon";
 // Position badge colors - matching game exactly
 const POSITION_COLORS: Record<string, string> = {
   ATT: "bg-[#e53935] text-white",
-  MIL: "bg-[#43a047] text-white",
   DEF: "bg-[#1e88e5] text-white",
   GAR: "bg-[#fdd835] text-[#5d4037]",
+  MIL: "bg-[#43a047] text-white",
 };
 
 // Element gradient backgrounds for hero header
 const ELEMENT_GRADIENTS: Record<string, string> = {
   Fire: "from-red-950 via-orange-900/90 to-amber-800/70",
-  Wind: "from-emerald-950 via-teal-900/90 to-cyan-800/70",
   Forest: "from-green-950 via-lime-900/90 to-emerald-800/70",
   Mountain: "from-amber-950 via-yellow-900/90 to-orange-800/70",
   Void: "from-slate-950 via-gray-900/90 to-zinc-800/70",
+  Wind: "from-emerald-950 via-teal-900/90 to-cyan-800/70",
 };
 
 // Element display names FR
 const ELEMENT_FR: Record<string, string> = {
   Fire: "Feu",
-  Wind: "Vent",
   Forest: "Forêt",
   Mountain: "Montagne",
   Void: "Néant",
+  Wind: "Vent",
 };
 
 // Rarity display names
@@ -66,22 +66,22 @@ const ELEMENT_FR: Record<string, string> = {
 
 // Position mapping
 const POSITION_MAP: Record<string, string> = {
-  FW: "ATT",
-  MF: "MIL",
-  DF: "DEF",
-  GK: "GAR",
   ATT: "ATT",
-  MIL: "MIL",
   DEF: "DEF",
+  DF: "DEF",
+  FW: "ATT",
   GAR: "GAR",
+  GK: "GAR",
+  MF: "MIL",
+  MIL: "MIL",
 };
 
 // Position FR full names
 const POSITION_FR: Record<string, string> = {
   ATT: "Attaquant",
-  MIL: "Milieu",
   DEF: "Défenseur",
   GAR: "Gardien",
+  MIL: "Milieu",
 };
 
 export interface CharacterSheetStats {
@@ -103,11 +103,11 @@ export interface SheetData {
 }
 
 const PLAYSTYLE_FR: Record<string, string> = {
-  Justice: "Justice",
   Bond: "Lien",
-  Counter: "Contre",
   Breach: "Brèche",
+  Counter: "Contre",
   Freedom: "Brèche",
+  Justice: "Justice",
   "Rough Play": "Jeu violent",
   Tension: "Tension",
 };
@@ -117,54 +117,54 @@ const PLAYSTYLE_COLOR: Record<
   string,
   { bg: string; text: string; border: string; gradient?: string }
 > = {
-  Justice: { bg: "rgba(217,119,6,0.15)", text: "#fbbf24", border: "rgba(217,119,6,0.35)" },
-  Bond: { bg: "rgba(234,179,8,0.15)", text: "#fde047", border: "rgba(234,179,8,0.35)" },
-  Counter: { bg: "rgba(148,163,184,0.12)", text: "#cbd5e1", border: "rgba(148,163,184,0.30)" },
+  Bond: { bg: "rgba(234,179,8,0.15)", border: "rgba(234,179,8,0.35)", text: "#fde047" },
   Breach: {
     bg: "transparent",
-    text: "#e2e8f0",
     border: "rgba(168,85,247,0.30)",
     gradient:
       "linear-gradient(135deg, rgba(239,68,68,0.12), rgba(245,158,11,0.12), rgba(234,179,8,0.12), rgba(16,185,129,0.12), rgba(59,130,246,0.12), rgba(139,92,246,0.12))",
+    text: "#e2e8f0",
   },
+  Counter: { bg: "rgba(148,163,184,0.12)", border: "rgba(148,163,184,0.30)", text: "#cbd5e1" },
   Freedom: {
     bg: "transparent",
-    text: "#e2e8f0",
     border: "rgba(168,85,247,0.30)",
     gradient:
       "linear-gradient(135deg, rgba(239,68,68,0.12), rgba(245,158,11,0.12), rgba(234,179,8,0.12), rgba(16,185,129,0.12), rgba(59,130,246,0.12), rgba(139,92,246,0.12))",
+    text: "#e2e8f0",
   },
-  "Rough Play": { bg: "rgba(16,185,129,0.15)", text: "#6ee7b7", border: "rgba(16,185,129,0.35)" },
-  Tension: { bg: "rgba(239,68,68,0.15)", text: "#fca5a5", border: "rgba(239,68,68,0.35)" },
+  Justice: { bg: "rgba(217,119,6,0.15)", border: "rgba(217,119,6,0.35)", text: "#fbbf24" },
+  "Rough Play": { bg: "rgba(16,185,129,0.15)", border: "rgba(16,185,129,0.35)", text: "#6ee7b7" },
+  Tension: { bg: "rgba(239,68,68,0.15)", border: "rgba(239,68,68,0.35)", text: "#fca5a5" },
 };
 
 const PLAYSTYLE_SPRITE: Record<string, SpriteCommonKey> = {
-  Justice: "justice",
   Bond: "lien",
-  Counter: "contre",
   Breach: "breche",
+  Counter: "contre",
   Freedom: "breche",
+  Justice: "justice",
   "Rough Play": "jeu_violent",
   Tension: "tension",
 };
 
 const PATH_TYPE_FR: Record<string, string> = {
-  Keep: "Arrêt",
-  Shoot: "Tir",
-  Offense: "Attaque",
   Defense: "Défense",
   Dribble: "Dribble",
+  Keep: "Arrêt",
+  Offense: "Attaque",
+  Shoot: "Tir",
 };
 
-const HERO_LABELS: Record<string, string> = { fire: "Feu", black: "Ombre", pink: "Rose" };
+const HERO_LABELS: Record<string, string> = { black: "Ombre", fire: "Feu", pink: "Rose" };
 const HERO_GRADIENTS: Record<string, string> = {
-  fire: "from-red-500 to-orange-400",
   black: "from-gray-700 to-gray-900",
+  fire: "from-red-500 to-orange-400",
   pink: "from-pink-400 to-rose-300",
 };
 const HERO_HOVER: Record<string, string> = {
-  fire: "text-red-300/70 hover:text-red-200 hover:bg-red-500/20",
   black: "text-gray-300/70 hover:text-gray-200 hover:bg-gray-500/20",
+  fire: "text-red-300/70 hover:text-red-200 hover:bg-red-500/20",
   pink: "text-pink-300/70 hover:text-pink-200 hover:bg-pink-500/20",
 };
 
@@ -309,9 +309,9 @@ export function CharacterSheet({
   // Position icon
   const positionCategoryMap: Record<string, string> = {
     ATT: "tir",
-    MIL: "dribble",
     DEF: "defense",
     GAR: "gardien",
+    MIL: "dribble",
   };
   const positionIcon = positionCategoryMap[displayPosition]
     ? getSkillCategoryIconUrl(positionCategoryMap[displayPosition])
@@ -482,7 +482,7 @@ export function CharacterSheet({
                       {hc.name}
                     </span>
                   ))
-                : constellation?.names?.fr
+                : (constellation?.names?.fr
                   ? (() => {
                       const psColor = sheetData?.playstyle
                         ? PLAYSTYLE_COLOR[sheetData.playstyle]
@@ -509,7 +509,7 @@ export function CharacterSheet({
                         </span>
                       );
                     })()
-                  : null}
+                  : null)}
             </div>
 
             {/* Form selector — visual thumbnails of all variants */}
@@ -729,7 +729,7 @@ export function CharacterSheet({
             {currentSkills.map((skill, i) => {
               const cat = (skill as any).category || (skill.isPassive ? "Talent" : "Special");
               const catIcon = getSkillCategoryIconUrl(cat);
-              const hasLink = !!(skill.href || skill.id);
+              const hasLink = Boolean(skill.href || skill.id);
               const Wrapper = hasLink ? NextLink : "div";
               const wrapperProps = hasLink ? { href: skill.href || `/skill/${skill.id}` } : {};
               return (
@@ -748,7 +748,7 @@ export function CharacterSheet({
                         height={18}
                         className="size-3.5 sm:size-[18px] object-contain"
                       />
-                    ) : skill.isPassive ? (
+                    ) : (skill.isPassive ? (
                       <Sparkles
                         size={14}
                         aria-hidden="true"
@@ -760,7 +760,7 @@ export function CharacterSheet({
                         aria-hidden="true"
                         className="sm:size-[18px] text-on-surface-variant/60"
                       />
-                    )}
+                    ))}
                   </div>
 
                   {/* Slot number badge */}
@@ -900,7 +900,7 @@ export function CharacterSheet({
                     );
                   })}
                 </div>
-              ) : sheetData.playstyle ? (
+              ) : (sheetData.playstyle ? (
                 (() => {
                   const color = PLAYSTYLE_COLOR[sheetData.playstyle];
                   return (
@@ -933,7 +933,7 @@ export function CharacterSheet({
                     </div>
                   );
                 })()
-              ) : null}
+              ) : null)}
               {sheetData.paths?.main && (
                 <div className="bg-surface-container rounded-2xl p-4 border border-outline-variant/20 group hover:border-primary/30 transition-colors">
                   <span className="text-[10px] font-black uppercase tracking-widest text-primary block mb-1.5">

@@ -1,45 +1,45 @@
 import { NextResponse } from "next/server";
 
 // Données 100% statiques (mascots, socials).
-export const revalidate = 86400;
+export const revalidate = 86_400;
 
 export async function GET() {
 	const info = {
-		name: "Rose Griffon",
-		slogan: "La communauté française dans ce qu'elle a d'entier.",
-		website: "https://www.rosegriffon.fr",
-		contact: "rosegriffonfr@gmail.com",
 		colors: {
 			primary: "#a14b3f", // Rouge Roy
 			secondary: "#2f6e9c", // Bleu Gaëlle
 		},
-		socials: {
-			twitter: "https://twitter.com/RoseGriffonFR",
-			discord: "https://discord.gg/rosegriffon", // À vérifier
-			twitch: "https://twitch.tv/rose_griffontv",
-			youtube: "https://youtube.com/@RoseGriffon",
-		},
+		contact: "rosegriffonfr@gmail.com",
 		mascots: {
-			roy: {
-				name: "Roy",
-				color: "#a14b3f",
-				description: "Mascotte masculine (cheveux rouges/bruns)",
-			},
 			gaelle: {
-				name: "Gaëlle",
 				color: "#2f6e9c",
 				description: "Mascotte féminine (cheveux bleus)",
+				name: "Gaëlle",
+			},
+			roy: {
+				color: "#a14b3f",
+				description: "Mascotte masculine (cheveux rouges/bruns)",
+				name: "Roy",
 			},
 		},
+		name: "Rose Griffon",
+		slogan: "La communauté française dans ce qu'elle a d'entier.",
+		socials: {
+			discord: "https://discord.gg/rosegriffon", // À vérifier
+			twitch: "https://twitch.tv/rose_griffontv",
+			twitter: "https://twitter.com/RoseGriffonFR",
+			youtube: "https://youtube.com/@RoseGriffon",
+		},
 		structure: {
-			rose_griffon: "Cœur / Communauté / Art",
 			achillea: "E-Sport / Compétition",
 			azalee: "Média / Actualités",
+			rose_griffon: "Cœur / Communauté / Art",
 		},
+		website: "https://www.rosegriffon.fr",
 	};
 
 	return NextResponse.json({
-		success: true,
 		data: info,
+		success: true,
 	});
 }

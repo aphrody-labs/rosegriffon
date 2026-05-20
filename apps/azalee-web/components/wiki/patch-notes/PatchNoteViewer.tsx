@@ -16,7 +16,7 @@ interface PatchNoteViewerProps {
  */
 function extractVersion(id: string): string | null {
   const match = id.match(/ver_(\d+(?:_\d+)*)/);
-  if (!match) return null;
+  if (!match) {return null;}
   return match[1].replaceAll('_', ".");
 }
 

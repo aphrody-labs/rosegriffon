@@ -125,7 +125,7 @@ export function generateId(length = 16): string {
 /**
  * Check if a value is empty (null, undefined, empty string, empty array, empty object)
  */
-export function isEmpty(value: unknown): boolean {
+export function isEmpty(value?: unknown): boolean {
 	if (value === null || value === undefined) return true;
 	if (typeof value === "string") return value.trim().length === 0;
 	if (Array.isArray(value)) return value.length === 0;

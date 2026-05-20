@@ -14,12 +14,8 @@ import {
 	CommandList,
 	CommandSeparator,
 } from "@rosegriffon/ui";
-import {
-	assoMenu,
-	contactMenu,
-	type MenuItem,
-	type SubMenuItem,
-} from "@/lib/sidebar-config";
+import { assoMenu, contactMenu } from '@/lib/sidebar-config';
+import type { MenuItem, SubMenuItem } from '@/lib/sidebar-config';
 
 interface SearchEntry {
 	url: string;
@@ -34,21 +30,21 @@ function flatten(section: string, items: MenuItem[]): SearchEntry[] {
 	for (const item of items) {
 		if (item.url) {
 			out.push({
-				url: item.url,
-				title: item.title,
 				description: item.description,
 				icon: item.icon,
 				section,
+				title: item.title,
+				url: item.url,
 			});
 		}
 		if (Array.isArray(item.items)) {
 			for (const sub of item.items as SubMenuItem[]) {
 				out.push({
-					url: sub.url,
-					title: sub.title,
 					description: sub.description,
 					icon: sub.icon,
 					section: `${section} · ${item.title}`,
+					title: sub.title,
+					url: sub.url,
 				});
 			}
 		}
@@ -58,17 +54,17 @@ function flatten(section: string, items: MenuItem[]): SearchEntry[] {
 
 const SHORTCUTS: SearchEntry[] = [
 	{
-		url: "/dashboard/account",
-		title: "Mon compte",
 		description: "Profil, adresse, sécurité",
 		icon: Search,
 		section: "Raccourcis",
+		title: "Mon compte",
+		url: "/dashboard/account",
 	},
 	{
-		url: "/login",
-		title: "Se connecter",
 		icon: Search,
 		section: "Raccourcis",
+		title: "Se connecter",
+		url: "/login",
 	},
 ];
 
@@ -102,7 +98,7 @@ export function SidebarSearch() {
 			list.push(entry);
 			map.set(entry.section, list);
 		}
-		return Array.from(map.entries());
+		return [...map.entries()];
 	}, [navEntries]);
 
 	const handleSelect = (url: string) => {

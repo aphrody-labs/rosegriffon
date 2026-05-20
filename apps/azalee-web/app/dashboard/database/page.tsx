@@ -37,7 +37,7 @@ export default async function DatabasePage() {
 
   const elementStats = Object.entries(elementCounts)
     .map(([name, value]) => ({ name, value }))
-    .sort((a, b) => b.value - a.value);
+    .toSorted((a, b) => b.value - a.value);
 
   const entities: Array<{
     name: string;
@@ -53,44 +53,44 @@ export default async function DatabasePage() {
     href: string;
   }> = [
     {
-      name: "Joueurs",
-      count: characters.length,
-      icon: User,
       color: "bg-primary",
-      textColor: "text-on-primary",
+      count: characters.length,
       href: "/dashboard/database/inagle_characters",
+      icon: User,
+      name: "Joueurs",
+      textColor: "text-on-primary",
     },
     {
-      name: "Techniques",
-      count: skills.length,
-      icon: Zap,
       color: "bg-secondary",
-      textColor: "text-on-secondary",
+      count: skills.length,
       href: "/dashboard/database/inagle_skills",
+      icon: Zap,
+      name: "Techniques",
+      textColor: "text-on-secondary",
     },
     {
-      name: "Équipes",
-      count: teams.length,
-      icon: Users,
       color: "bg-tertiary",
-      textColor: "text-on-tertiary",
+      count: teams.length,
       href: "/dashboard/database/inagle_teams",
+      icon: Users,
+      name: "Équipes",
+      textColor: "text-on-tertiary",
     },
     {
-      name: "Objets",
-      count: items.length,
-      icon: Backpack,
       color: "bg-emerald-500",
-      textColor: "text-white",
+      count: items.length,
       href: "/dashboard/database/inagle_items",
+      icon: Backpack,
+      name: "Objets",
+      textColor: "text-white",
     },
     {
-      name: "Keshins",
-      count: keshinsCount,
-      icon: Swords,
       color: "bg-amber-500",
-      textColor: "text-white",
+      count: keshinsCount,
       href: "/dashboard/database/inagle_keshins_clean",
+      icon: Swords,
+      name: "Keshins",
+      textColor: "text-white",
     },
   ];
 
@@ -98,7 +98,7 @@ export default async function DatabasePage() {
     <div className="space-y-6 sm:space-y-8 pb-24 sm:pb-8">
       <DashboardPageHeader
         breadcrumbs={[
-          { label: "Tableau de bord", href: "/dashboard" },
+          { href: "/dashboard", label: "Tableau de bord" },
           { label: "Base de données" },
         ]}
         title="Base de données"
@@ -132,7 +132,7 @@ export default async function DatabasePage() {
                 <div
                   className={`size-12 sm:size-16 rounded-[20px] sm:rounded-[24px] ${entity.color} ${entity.textColor} flex items-center justify-center shadow-md transition-transform group-hover:scale-105 duration-500`}
                 >
-                  <entity.icon size={28} fill="currentColor" aria-hidden={true} />
+                  <entity.icon size={28} fill="currentColor" aria-hidden />
                 </div>
                 <div className="space-y-0.5 sm:space-y-1">
                   <CardTitle className="font-black font-sans text-sm sm:text-lg uppercase tracking-tighter">

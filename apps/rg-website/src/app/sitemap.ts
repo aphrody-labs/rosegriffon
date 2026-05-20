@@ -6,46 +6,46 @@ export default function sitemap(): MetadataRoute.Sitemap {
 
   return [
     {
-      url: baseUrl,
-      lastModified: currentDate,
       changeFrequency: "weekly",
+      lastModified: currentDate,
       priority: 1,
+      url: baseUrl,
     },
     {
-      url: `${baseUrl}/projets/nostalgie`,
-      lastModified: currentDate,
       changeFrequency: "monthly",
+      lastModified: currentDate,
       priority: 0.9,
+      url: `${baseUrl}/projets/nostalgie`,
     },
     {
+      changeFrequency: "monthly",
+      lastModified: currentDate,
+      priority: 0.8,
       url: `${baseUrl}/association`,
-      lastModified: currentDate,
-      changeFrequency: "monthly",
-      priority: 0.8,
     },
     {
-      url: `${baseUrl}/apropos`,
-      lastModified: currentDate,
       changeFrequency: "monthly",
+      lastModified: currentDate,
       priority: 0.7,
+      url: `${baseUrl}/apropos`,
     },
     {
-      url: `${baseUrl}/evenements`,
-      lastModified: currentDate,
       changeFrequency: "weekly",
+      lastModified: currentDate,
       priority: 0.8,
+      url: `${baseUrl}/evenements`,
     },
     {
-      url: `${baseUrl}/contact`,
-      lastModified: currentDate,
       changeFrequency: "yearly",
+      lastModified: currentDate,
       priority: 0.5,
+      url: `${baseUrl}/contact`,
     },
     {
-      url: `${baseUrl}/llm.txt`,
-      lastModified: currentDate,
       changeFrequency: "weekly",
+      lastModified: currentDate,
       priority: 0.1,
+      url: `${baseUrl}/llm.txt`,
     },
   ];
 }

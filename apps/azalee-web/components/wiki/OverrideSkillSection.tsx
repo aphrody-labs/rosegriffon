@@ -159,7 +159,7 @@ function OverrideCard({
 }
 
 export function OverrideSkillSection({ overrides, currentSkillId }: OverrideSkillSectionProps) {
-  if (!overrides.length) return null;
+  if (overrides.length === 0) {return null;}
 
   // Separate: overrides where this skill is the RESULT vs where it's an INGREDIENT
   const asResult = overrides.filter((o) => o.id === currentSkillId);

@@ -67,26 +67,26 @@ const PLACE_NAME_TAGS: Record<
 	string,
 	{ en?: string; fr?: string; jp?: string }
 > = {
-	NAGUMOHARA: { en: "Nagumohara", fr: "Nagumohara", jp: "凪村原" },
-	SHIROSHIKA: { en: "White Deer", fr: "Cerf Blanc", jp: "白鹿" },
-	TEAMK: { en: "Team K", fr: "Team K", jp: "チームK" },
-	RAIMON: { en: "Raimon", fr: "Raimon", jp: "雷門" },
-	TEIKOKU: { en: "Royal Academy", fr: "Académie Royale", jp: "帝国" },
-	ZEUS: { en: "Zeus", fr: "Zeus", jp: "ゼウス" },
+	ALIEA: { en: "Aliea Academy", fr: "Académie Aliea", jp: "エイリア学園" },
 	INAZUMAJAPAN: {
 		en: "Inazuma Japan",
 		fr: "Inazuma Japon",
 		jp: "イナズマジャパン",
 	},
-	ALIEA: { en: "Aliea Academy", fr: "Académie Aliea", jp: "エイリア学園" },
-	ORPHEUS: { en: "Orpheus", fr: "Orpheus", jp: "オルフェウス" },
-	UNICORN: { en: "Unicorn", fr: "Unicorn", jp: "ユニコーン" },
-	THEKINGDOM: { en: "The Kingdom", fr: "The Kingdom", jp: "ザ・キングダム" },
 	LITTLEGIGANTS: {
 		en: "Little Gigant",
 		fr: "Little Gigant",
 		jp: "リトルギガント",
 	},
+	NAGUMOHARA: { en: "Nagumohara", fr: "Nagumohara", jp: "凪村原" },
+	ORPHEUS: { en: "Orpheus", fr: "Orpheus", jp: "オルフェウス" },
+	RAIMON: { en: "Raimon", fr: "Raimon", jp: "雷門" },
+	SHIROSHIKA: { en: "White Deer", fr: "Cerf Blanc", jp: "白鹿" },
+	TEAMK: { en: "Team K", fr: "Team K", jp: "チームK" },
+	TEIKOKU: { en: "Royal Academy", fr: "Académie Royale", jp: "帝国" },
+	THEKINGDOM: { en: "The Kingdom", fr: "The Kingdom", jp: "ザ・キングダム" },
+	UNICORN: { en: "Unicorn", fr: "Unicorn", jp: "ユニコーン" },
+	ZEUS: { en: "Zeus", fr: "Zeus", jp: "ゼウス" },
 };
 
 /**
@@ -127,16 +127,14 @@ export function formatDescription(
 	description: string | undefined | null,
 	lang: "en" | "fr" | "jp" | "ja" = "fr",
 ): string {
-	if (!description) return "";
+	if (!description) {return "";}
 
 	let result = description;
 
 	// Step 1: Resolve all name tags
 	// Pattern: <TYPE:NAME> where TYPE is FST/FLC/FLA/FUL/MNT
 	const tagPattern = /<(FST|FLC|FLA|FUL|MNT):([A-Z0-9_]+)>/gi;
-	result = result.replace(tagPattern, (_, tagType, tagName) => {
-		return resolveTag(tagType, tagName, lang);
-	});
+	result = result.replace(tagPattern, (_, tagType, tagName) => resolveTag(tagType, tagName, lang));
 
 	// Step 2: Remove furigana notation [kanji/reading] → keep kanji only
 	// Pattern: [漢字/ふりがな] → 漢字
@@ -151,7 +149,7 @@ export function formatDescription(
  * [漢字/ふりがな] → 漢字
  */
 export function formatJapaneseName(name: string | undefined | null): string {
-	if (!name) return "";
+	if (!name) {return "";}
 
 	// Remove furigana notation [kanji/reading] → keep kanji only
 	const furiganaPattern = /\[([^\]/]+)\/[^\]]+\]/g;

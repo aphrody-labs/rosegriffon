@@ -1,14 +1,8 @@
 "use client";
 
 import { Badge, Button, Input } from "@rosegriffon/ui";
-import {
-	type ColumnDef,
-	flexRender,
-	getCoreRowModel,
-	getSortedRowModel,
-	type SortingState,
-	useReactTable,
-} from "@tanstack/react-table";
+import { flexRender, getCoreRowModel, getSortedRowModel, useReactTable } from '@tanstack/react-table';
+import type { ColumnDef, SortingState } from '@tanstack/react-table';
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
@@ -32,6 +26,10 @@ type User = Database["public"]["Tables"]["profiles"]["Row"];
 const columns: ColumnDef<User>[] = [
 	{
 		accessorKey: "email",
+		cell: ({ row }) =>
+			row.getValue("email") || (
+				<span className="text-muted-foreground">N/A</span>
+			),
 		header: ({ column }) => (
 			<Button
 				variant="ghost"
@@ -41,22 +39,17 @@ const columns: ColumnDef<User>[] = [
 				<ArrowUpDown className="ml-2 size-4" />
 			</Button>
 		),
-		cell: ({ row }) =>
-			row.getValue("email") || (
-				<span className="text-muted-foreground">N/A</span>
-			),
 	},
 	{
 		accessorKey: "full_name",
-		header: "Nom Complet",
 		cell: ({ row }) =>
 			row.getValue("full_name") || (
 				<span className="text-muted-foreground">N/A</span>
 			),
+		header: "Nom Complet",
 	},
 	{
 		accessorKey: "role",
-		header: "Rôle",
 		cell: ({ row }) => {
 			const role = row.getValue("role") as string;
 			return (
@@ -65,18 +58,10 @@ const columns: ColumnDef<User>[] = [
 				</Badge>
 			);
 		},
+		header: "Rôle",
 	},
 	{
 		accessorKey: "created_at",
-		header: ({ column }) => (
-			<Button
-				variant="ghost"
-				onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-			>
-				Date
-				<ArrowUpDown className="ml-2 size-4" />
-			</Button>
-		),
 		cell: ({ row }) => {
 			const dateStr = row.getValue("created_at") as string | null;
 			if (!dateStr) return <span className="text-muted-foreground">N/A</span>;
@@ -87,10 +72,19 @@ const columns: ColumnDef<User>[] = [
 				day: "numeric",
 			});
 		},
+		header: ({ column }) => (
+			<Button
+				variant="ghost"
+				onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+			>
+				Date
+				<ArrowUpDown className="ml-2 size-4" />
+			</Button>
+		),
 	},
 	{
-		id: "actions",
 		cell: ({ row }) => <UserEditDialog user={row.original} />,
+		id: "actions",
 	},
 ];
 
@@ -109,7 +103,16 @@ export function UsersTable({ users: initialUsers }: UsersTableProps) {
 	}, [initialUsers]);
 
 	useTableBroadcast({
-		table: "profiles",
+		onDelete: (deletedProfile) => {
+			const profile = deletedProfile as User;
+			setData((prevData) => prevData.filter((u) => u.id !== profile.id));
+			toast.info("Utilisateur supprimé");
+		},
+		onInsert: (newProfile) => {
+			const profile = newProfile as User;
+			setData((prevData) => [...prevData, profile]);
+			toast.success("Nouvel utilisateur ajouté");
+		},
 		onUpdate: (updatedProfile) => {
 			const profile = updatedProfile as User;
 			setData((prevData) => {
@@ -123,21 +126,12 @@ export function UsersTable({ users: initialUsers }: UsersTableProps) {
 			});
 			toast.info("Utilisateur mis à jour en temps réel");
 		},
-		onInsert: (newProfile) => {
-			const profile = newProfile as User;
-			setData((prevData) => [...prevData, profile]);
-			toast.success("Nouvel utilisateur ajouté");
-		},
-		onDelete: (deletedProfile) => {
-			const profile = deletedProfile as User;
-			setData((prevData) => prevData.filter((u) => u.id !== profile.id));
-			toast.info("Utilisateur supprimé");
-		},
+		table: "profiles",
 	});
 
 	const table = useReactTable({
-		data,
 		columns,
+		data,
 		getCoreRowModel: getCoreRowModel(),
 		getSortedRowModel: getSortedRowModel(),
 		onSortingChange: setSorting,
@@ -166,7 +160,7 @@ export function UsersTable({ users: initialUsers }: UsersTableProps) {
 						placeholder="Rechercher par email..."
 						defaultValue={searchParams?.get("query")?.toString()}
 						onChange={(e) => {
-							const value = e.target.value;
+							const {value} = e.target;
 							const timeoutId = setTimeout(() => handleSearch(value), 300);
 							return () => clearTimeout(timeoutId);
 						}}

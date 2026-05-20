@@ -14,10 +14,10 @@ export interface PatreonViewerAccess {
 }
 
 const NO_ACCESS: PatreonViewerAccess = {
-	linked: false,
-	isActiveMember: false,
-	patronStatus: null,
 	currentlyEntitledCents: null,
+	isActiveMember: false,
+	linked: false,
+	patronStatus: null,
 	tierAmountsCents: [],
 };
 
@@ -32,10 +32,10 @@ const NO_ACCESS: PatreonViewerAccess = {
 export const getViewerPatreonAccess = cache(
 	async (): Promise<PatreonViewerAccess> => {
 		const user = await getServerUser();
-		if (!user) return NO_ACCESS;
+		if (!user) {return NO_ACCESS;}
 
 		const supabase = createAdminClient();
-		if (!supabase) return NO_ACCESS;
+		if (!supabase) {return NO_ACCESS;}
 
 		const { data: account } = await supabase
 			.from("account")
@@ -44,7 +44,7 @@ export const getViewerPatreonAccess = cache(
 			.eq("provider_id", "patreon")
 			.maybeSingle();
 
-		if (!account) return NO_ACCESS;
+		if (!account) {return NO_ACCESS;}
 
 		const { data: membership } = await supabase
 			.from("patreon_memberships")
@@ -54,10 +54,10 @@ export const getViewerPatreonAccess = cache(
 
 		const patronStatus = membership?.patron_status ?? null;
 		return {
-			linked: true,
-			isActiveMember: patronStatus === "active_patron",
-			patronStatus,
 			currentlyEntitledCents: membership?.currently_entitled_cents ?? null,
+			isActiveMember: patronStatus === "active_patron",
+			linked: true,
+			patronStatus,
 			tierAmountsCents: membership?.tier_amounts_cents ?? [],
 		};
 	},

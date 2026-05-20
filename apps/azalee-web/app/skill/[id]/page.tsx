@@ -23,22 +23,22 @@ export async function generateMetadata({
   const title = `${name} | Inazuma Eleven Victory Road - Azalée`;
 
   return {
-    title,
-    description,
     alternates: { canonical: `/skill/${id}` },
+    description,
     openGraph: {
-      title: `${name} | Azalée`,
       description,
-      url: `/skill/${id}`,
-      siteName: "Azalée - Inazuma Eleven Victory Road",
-      locale: "fr_FR",
-      type: "article",
       images: skill?.image ? [{ url: skill.image, alt: name }] : [],
+      locale: "fr_FR",
+      siteName: "Azalée - Inazuma Eleven Victory Road",
+      title: `${name} | Azalée`,
+      type: "article",
+      url: `/skill/${id}`,
     },
+    title,
     twitter: {
       card: "summary",
-      title: `${name} | Azalée`,
       description,
+      title: `${name} | Azalée`,
     },
   };
 }
@@ -67,12 +67,12 @@ export default async function MoveDetailPage({ params }: { params: Promise<{ id:
   const relatedSkills = sameCatSkills
     .filter((s: any) => s.internalCode !== currentCode)
     .map((s: any) => {
-      let score = 10; // same category guaranteed
-      if (skill.elementName?.en && s.elementName?.en === skill.elementName?.en) score += 5;
-      if (s.videoUrl) score += 20;
-      return { skill: s, score };
+      let score = 10; // Same category guaranteed
+      if (skill.elementName?.en && s.elementName?.en === skill.elementName?.en) {score += 5;}
+      if (s.videoUrl) {score += 20;}
+      return { score, skill: s };
     })
-    .sort((a, b) => b.score - a.score)
+    .toSorted((a, b) => b.score - a.score)
     .slice(0, 3)
     .map((item) => item.skill);
 
@@ -85,14 +85,14 @@ export default async function MoveDetailPage({ params }: { params: Promise<{ id:
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     itemListElement: [
-      { "@type": "ListItem", position: 1, name: "Accueil", item: "https://azalee.rosegriffon.fr" },
+      { "@type": "ListItem", item: "https://azalee.rosegriffon.fr", name: "Accueil", position: 1 },
       {
         "@type": "ListItem",
-        position: 2,
-        name: "Techniques",
         item: "https://azalee.rosegriffon.fr/skill",
+        name: "Techniques",
+        position: 2,
       },
-      { "@type": "ListItem", position: 3, name },
+      { "@type": "ListItem", name, position: 3 },
     ],
   };
 

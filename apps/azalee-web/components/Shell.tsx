@@ -15,7 +15,8 @@ import { NotificationBell } from "@/components/news/NotificationBell";
 import { AuthProvider, useAuth } from "@/components/providers/AuthProvider";
 import { useLanguage } from "@/components/providers/language-provider";
 import { PullToRefresh } from "@/components/ui/pull-to-refresh";
-import { SidebarInset, SidebarProvider, useSidebar } from "@rosegriffon/ui";
+import { BREAKPOINTS, SidebarInset, SidebarProvider, useBreakpoint, useSidebar } from "@rosegriffon/ui";
+import { AzaleeNavigationRail } from "@/components/navigation/AzaleeNavigationRail";
 import { GlobalSearch } from "@/components/wiki/GlobalSearch";
 import { cn } from "@/lib/utils";
 import type { AzaleeProfile, BetterAuthUser } from "./providers/AuthProvider";
@@ -73,20 +74,20 @@ function MobileHeader({ isHome }: { isHome: boolean }) {
   }, []);
 
   const getTitle = () => {
-    if (pathname === "/") return "";
-    if (pathname === "/wiki") return "header.wiki";
-    if (pathname.startsWith("/search")) return "header.wiki";
-    if (pathname.startsWith("/news")) return "header.news";
-    if (pathname.startsWith("/patch-notes")) return "header.patch_notes";
-    if (pathname.startsWith("/chara")) return "header.players";
-    if (pathname.startsWith("/skill")) return "header.skills";
-    if (pathname.startsWith("/item")) return "header.items";
-    if (pathname.startsWith("/aura")) return "header.hyper_skills";
-    if (pathname.startsWith("/passive")) return "header.passives";
-    if (pathname.startsWith("/tactic")) return "header.tactics";
-    if (pathname.startsWith("/team")) return "header.teams";
-    if (pathname.startsWith("/tools")) return "header.tools";
-    if (pathname.startsWith("/settings")) return "header.settings";
+    if (pathname === "/") {return "";}
+    if (pathname === "/wiki") {return "header.wiki";}
+    if (pathname.startsWith("/search")) {return "header.wiki";}
+    if (pathname.startsWith("/news")) {return "header.news";}
+    if (pathname.startsWith("/patch-notes")) {return "header.patch_notes";}
+    if (pathname.startsWith("/chara")) {return "header.players";}
+    if (pathname.startsWith("/skill")) {return "header.skills";}
+    if (pathname.startsWith("/item")) {return "header.items";}
+    if (pathname.startsWith("/aura")) {return "header.hyper_skills";}
+    if (pathname.startsWith("/passive")) {return "header.passives";}
+    if (pathname.startsWith("/tactic")) {return "header.tactics";}
+    if (pathname.startsWith("/team")) {return "header.teams";}
+    if (pathname.startsWith("/tools")) {return "header.tools";}
+    if (pathname.startsWith("/settings")) {return "header.settings";}
     return "";
   };
 
@@ -219,7 +220,7 @@ function DesktopAvatar({
       tabIndex={0}
       aria-label={label}
       onKeyDown={(e) => {
-        if (e.key === "Enter" || e.key === " ") onClick();
+        if (e.key === "Enter" || e.key === " ") {onClick();}
       }}
     >
       {showImg ? (
@@ -250,18 +251,18 @@ function DesktopTopBar() {
   const isHome = pathname === "/";
 
   const getTitle = () => {
-    if (pathname === "/") return "";
-    if (pathname.startsWith("/news")) return "Actualités";
-    if (pathname.startsWith("/patch-notes")) return "Patch Notes";
-    if (pathname.startsWith("/chara")) return "Joueurs";
-    if (pathname.startsWith("/skill")) return "Techniques";
-    if (pathname.startsWith("/item")) return "Objets";
-    if (pathname.startsWith("/aura")) return "Hyper Techniques";
-    if (pathname.startsWith("/passive")) return "Passifs";
-    if (pathname.startsWith("/tactic")) return "Tactiques";
-    if (pathname.startsWith("/wiki")) return "Encyclopédie";
-    if (pathname.startsWith("/search")) return "Encyclopédie";
-    if (pathname.startsWith("/tools")) return "Outils";
+    if (pathname === "/") {return "";}
+    if (pathname.startsWith("/news")) {return "Actualités";}
+    if (pathname.startsWith("/patch-notes")) {return "Patch Notes";}
+    if (pathname.startsWith("/chara")) {return "Joueurs";}
+    if (pathname.startsWith("/skill")) {return "Techniques";}
+    if (pathname.startsWith("/item")) {return "Objets";}
+    if (pathname.startsWith("/aura")) {return "Hyper Techniques";}
+    if (pathname.startsWith("/passive")) {return "Passifs";}
+    if (pathname.startsWith("/tactic")) {return "Tactiques";}
+    if (pathname.startsWith("/wiki")) {return "Encyclopédie";}
+    if (pathname.startsWith("/search")) {return "Encyclopédie";}
+    if (pathname.startsWith("/tools")) {return "Outils";}
     return "";
   };
 
@@ -377,6 +378,7 @@ function InstallBanner({ onDismiss, onInstall }: { onDismiss: () => void; onInst
 /**
  * MAIN SHELL COMPONENT
  */
+
 export function Shell({
   children,
   user,
@@ -389,6 +391,12 @@ export function Shell({
   defaultOpen?: boolean;
 }) {
   const pathname = usePathname();
+  const breakpoint = useBreakpoint();
+  
+  const isCompact = breakpoint === "compact";
+  const isMedium = breakpoint === "medium";
+  const isExpanded = breakpoint === "expanded" || breakpoint === "large";
+
   const isEditorPage =
     pathname.startsWith("/dashboard/news/") &&
     (pathname.includes("/new") || pathname.split("/").length > 3);
@@ -420,7 +428,7 @@ export function Shell({
 
   const handleInstall = useCallback(async () => {
     const prompt = deferredPromptRef.current;
-    if (!prompt) return;
+    if (!prompt) {return;}
     prompt.prompt();
     await prompt.userChoice;
     deferredPromptRef.current = null;
@@ -446,44 +454,64 @@ export function Shell({
         {/* Accessibilité: lien pour sauter au contenu principal */}
         <SkipToContent />
 
-        {/* Fixed Header - Standard Layout */}
-        <DesktopTopBar />
+        {/* Fixed Header - Standard Layout (Visible on Medium/Expanded) */}
+        {!isCompact && <DesktopTopBar />}
 
-        {/* Main Layout - Below fixed header */}
-        <div className="flex w-full bg-surface md:pt-14 min-h-screen">
-          {/* Sidebar - uses internal fixed positioning */}
+        {/* Main Layout - Adaptive based on screen size */}
+        <div className={cn(
+          "flex w-full bg-surface min-h-screen",
+          !isCompact && "pt-14"
+        )}>
+          {/* NAVIGATION RAIL (MEDIUM SCREENS) */}
+          {isMedium && <AzaleeNavigationRail />}
+
+          {/* SIDEBAR (EXPANDED SCREENS) */}
           <AppSidebar
             variant="sidebar"
-            className="hidden md:flex !top-14 !h-[calc(100vh-3.5rem)]"
+            className={cn(
+              "hidden",
+              isExpanded && "md:flex !h-[calc(100vh-3.5rem)]"
+            )}
           />
 
           {/* Content Area */}
-          <SidebarInset className="flex-1 min-w-0 bg-surface-container flex flex-col">
-            {/* Mobile Header (Only visible on mobile) */}
-            <MobileHeader isHome={pathname === "/"} />
+          <SidebarInset className={cn(
+            "flex-1 min-w-0 bg-surface-container flex flex-col transition-all duration-300",
+            isMedium && "md:ml-20", // Offset for Navigation Rail
+          )}>
+            {/* Mobile Header (Only visible on Compact) */}
+            {isCompact && <MobileHeader isHome={pathname === "/"} />}
 
             <main
               id="main-content"
-              className="flex-1 overflow-y-auto pt-16 md:pt-0 scrollbar-hide flex flex-col"
+              className={cn(
+                "flex-1 overflow-y-auto scrollbar-hide flex flex-col",
+                isCompact ? "pt-16" : "pt-0"
+              )}
             >
-              <div className="md:hidden">
+              <div className={cn(isCompact ? "block" : "hidden")}>
                 <PullToRefresh>
                   <div className="vt-page-content mx-auto w-full max-w-[1800px] px-4 pb-4 flex-1">
                     {children}
                   </div>
                 </PullToRefresh>
               </div>
-              <div className="hidden md:block vt-page-content mx-auto w-full max-w-[1800px] px-8 lg:px-12 pb-6 flex-1">
-                {children}
+              <div className={cn("flex-1", !isCompact ? "block" : "hidden")}>
+                <div className="vt-page-content mx-auto w-full max-w-[1800px] px-8 lg:px-12 pb-6 flex-1">
+                  {children}
+                </div>
               </div>
               <Footer />
             </main>
           </SidebarInset>
         </div>
 
-        <div className="fixed bottom-0 left-0 right-0 z-50 md:hidden">
-          <MaterialBottomNav />
-        </div>
+        {/* BOTTOM NAV (COMPACT SCREENS) */}
+        {isCompact && (
+          <div className="fixed bottom-0 left-0 right-0 z-50">
+            <MaterialBottomNav />
+          </div>
+        )}
 
         {showInstall && (
           <InstallBanner onDismiss={handleDismissInstall} onInstall={handleInstall} />

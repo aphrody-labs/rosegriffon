@@ -5,11 +5,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { useTransition } from "react";
 
-import {
-	type CartItemResolved,
-	removeFromCart,
-	updateQty,
-} from "@/lib/shop/cart";
+import { removeFromCart, updateQty } from '@/lib/shop/cart';
+import type { CartItemResolved } from '@/lib/shop/cart';
 import { formatEuros } from "@/lib/shop/products";
 
 export function CartLineItem({ item }: { item: CartItemResolved }) {

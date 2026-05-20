@@ -2,15 +2,11 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "Rose Griffon - Association Inazuma Eleven France",
-    short_name: "Rose Griffon",
+    background_color: "#ffffff",
+    categories: ["gaming", "social", "entertainment"],
     description:
       "Site officiel de l'association Rose Griffon, rassemblant la communauté Inazuma Eleven en France.",
-    start_url: "/",
     display: "standalone",
-    background_color: "#ffffff",
-    theme_color: "#a14b3f",
-    orientation: "portrait-primary",
     icons: [
       {
         src: "/RG_Logo_V2.5.webp",
@@ -24,7 +20,11 @@ export default function manifest(): MetadataRoute.Manifest {
         purpose: "maskable",
       },
     ],
-    categories: ["gaming", "social", "entertainment"],
     lang: "fr-FR",
+    name: "Rose Griffon - Association Inazuma Eleven France",
+    orientation: "portrait-primary",
+    short_name: "Rose Griffon",
+    start_url: "/",
+    theme_color: "#a14b3f",
   };
 }

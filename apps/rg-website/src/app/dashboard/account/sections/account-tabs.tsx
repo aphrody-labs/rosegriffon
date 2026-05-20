@@ -6,10 +6,10 @@ import { usePathname, useRouter } from "next/navigation";
 import * as React from "react";
 
 const TABS = [
-	{ value: "profile", label: "Profil", icon: UserCircle },
-	{ value: "address", label: "Adresse", icon: Truck },
-	{ value: "connections", label: "Connexions", icon: Link2 },
-	{ value: "security", label: "Sécurité", icon: KeyRound },
+	{ icon: UserCircle, label: "Profil", value: "profile" },
+	{ icon: Truck, label: "Adresse", value: "address" },
+	{ icon: Link2, label: "Connexions", value: "connections" },
+	{ icon: KeyRound, label: "Sécurité", value: "security" },
 ] as const;
 
 export type AccountTabValue = (typeof TABS)[number]["value"];
@@ -41,9 +41,9 @@ export function AccountTabs({
 	};
 
 	const slots: Record<AccountTabValue, React.ReactNode> = {
-		profile,
 		address,
 		connections,
+		profile,
 		security,
 	};
 

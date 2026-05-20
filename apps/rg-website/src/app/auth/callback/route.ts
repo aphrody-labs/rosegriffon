@@ -4,8 +4,8 @@ import { NextResponse } from "next/server";
 // Cette route est conservée pour compatibilité avec d'anciens liens.
 //
 // Fail fast au lieu de fallback vers localhost (qui ferait boucler le
-// browser sur un host inaccessible derrière nginx). Si aucune origin
-// publique n'est résolvable, retourner 500 pour signaler la config cassée.
+// Browser sur un host inaccessible derrière nginx). Si aucune origin
+// Publique n'est résolvable, retourner 500 pour signaler la config cassée.
 export async function GET(request: Request) {
 	const publicOrigin =
 		process.env.BETTER_AUTH_URL ||

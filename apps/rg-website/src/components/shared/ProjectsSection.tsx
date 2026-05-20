@@ -17,13 +17,13 @@ import {
 } from "@/lib/icons-config";
 import DiscordIcon from "@/shared/icons/discord";
 
-type SocialLink = {
+interface SocialLink {
   url: string;
   label: string;
   icon: "twitter" | "instagram" | "discord" | "site";
-};
+}
 
-type Project = {
+interface Project {
   title: string;
   description: string;
   icon: any; // Using any for simplicity as it's a component
@@ -33,50 +33,55 @@ type Project = {
   stats: string;
   external?: boolean;
   socials?: SocialLink[];
-};
+}
 
 const projects: Project[] = [
   {
-    title: "Nostalgie",
-    description: "Créez vos montages comparatifs 2011 vs Victory Road",
-    icon: ImageIcon,
-    href: "/projets/nostalgie",
-    image: "/roygaelle.webp",
     color: "from-blue-500 to-purple-600",
+    description: "Créez vos montages comparatifs 2011 vs Victory Road",
+    href: "/projets/nostalgie",
+    icon: ImageIcon,
+    image: "/roygaelle.webp",
     stats: "🎨 Outil ",
+    title: "Nostalgie",
   },
   {
-    title: "Avatar RG",
-    description: "Créez votre photo de profil aux couleurs de Rose Griffon",
-    icon: PfpIcon,
-    href: "/projets/outils/pfp",
-    image: "/avatarRG/avatarRG.webp",
     color: "from-pink-500 to-rose-500",
+    description: "Créez votre photo de profil aux couleurs de Rose Griffon",
+    href: "/projets/outils/pfp",
+    icon: PfpIcon,
+    image: "/avatarRG/avatarRG.webp",
     stats: "✨ Nouveau",
+    title: "Avatar RG",
   },
   {
-    title: "Communauté",
-    description: "Galerie des créations de la communauté",
-    icon: Users,
-    href: "/projets/muraux",
-    image: "/frsque.webp",
     color: "from-purple-500 to-pink-600",
+    description: "Galerie des créations de la communauté",
+    href: "/projets/muraux",
+    icon: Users,
+    image: "/frsque.webp",
     stats: "👥 Galerie",
+    title: "Communauté",
   },
 ];
 
 const getSocialIcon = (iconType: "twitter" | "instagram" | "discord" | "site") => {
   switch (iconType) {
-    case "twitter":
+    case "twitter": {
       return Twitter;
-    case "instagram":
+    }
+    case "instagram": {
       return Instagram;
-    case "discord":
+    }
+    case "discord": {
       return DiscordIcon;
-    case "site":
+    }
+    case "site": {
       return Globe;
-    default:
+    }
+    default: {
       return ExternalLink;
+    }
   }
 };
 
@@ -137,7 +142,7 @@ export default function ProjectsSection() {
                     <div className="absolute top-4 right-4">
                       <div className="px-3 py-1.5 rounded-full bg-black/40 backdrop-blur-xl border border-border shadow-lg">
                         <span className="text-xs font-bold text-white tracking-wide flex items-center gap-1.5">
-                          <span className={`w-1.5 h-1.5 rounded-full bg-white/80 animate-pulse`} />
+                          <span className="w-1.5 h-1.5 rounded-full bg-white/80 animate-pulse" />
                           {project.stats.split(" ").slice(1).join(" ") || project.stats}
                         </span>
                       </div>
@@ -154,7 +159,7 @@ export default function ProjectsSection() {
                     <div className="space-y-3 grow">
                       <div className="flex items-center gap-3">
                         <div
-                          className={`p-2.5 rounded-xl bg-gray-100 dark:bg-zinc-800 text-gray-900 dark:text-white group-hover:bg-[#a14b3f] group-hover:text-white transition-colors duration-300 shadow-sm`}
+                          className="p-2.5 rounded-xl bg-gray-100 dark:bg-zinc-800 text-gray-900 dark:text-white group-hover:bg-[#a14b3f] group-hover:text-white transition-colors duration-300 shadow-sm"
                         >
                           <IconComponent className="size-5" />
                         </div>

@@ -34,13 +34,13 @@ const EDIT_MAX_LENGTH = 2000;
 
 function timeAgo(date: string): string {
   const seconds = Math.floor((Date.now() - new Date(date).getTime()) / 1000);
-  if (seconds < 60) return "à l'instant";
+  if (seconds < 60) {return "à l'instant";}
   const minutes = Math.floor(seconds / 60);
-  if (minutes < 60) return `il y a ${minutes} min`;
+  if (minutes < 60) {return `il y a ${minutes} min`;}
   const hours = Math.floor(minutes / 60);
-  if (hours < 24) return `il y a ${hours}h`;
+  if (hours < 24) {return `il y a ${hours}h`;}
   const days = Math.floor(hours / 24);
-  if (days < 30) return `il y a ${days}j`;
+  if (days < 30) {return `il y a ${days}j`;}
   return format(new Date(date), "d MMM yyyy", { locale: fr });
 }
 
@@ -103,7 +103,7 @@ export function CommentItem({
   const handleReplyCreated = (reply: Comment) => {
     setReplies((prev) => [...prev, reply]);
     setReplyCount((c) => c + 1);
-    if (!repliesLoaded) setRepliesLoaded(true);
+    if (!repliesLoaded) {setRepliesLoaded(true);}
     setShowReplyForm(false);
   };
 
@@ -135,7 +135,7 @@ export function CommentItem({
   // Sauvegarde de l'édition
   const handleEditSave = () => {
     const trimmed = editContent.trim();
-    if (!trimmed || trimmed === comment.content || trimmed.length > EDIT_MAX_LENGTH) return;
+    if (!trimmed || trimmed === comment.content || trimmed.length > EDIT_MAX_LENGTH) {return;}
 
     startTransition(async () => {
       try {
@@ -275,9 +275,9 @@ export function CommentItem({
                     "text-xs tabular-nums",
                     editRemaining < 0
                       ? "text-red-500 font-medium"
-                      : editRemaining <= 100
+                      : (editRemaining <= 100
                         ? "text-amber-500"
-                        : "text-on-surface-variant/40",
+                        : "text-on-surface-variant/40"),
                   )}
                 >
                   {editRemaining}
@@ -359,9 +359,9 @@ export function CommentItem({
             />
             {repliesLoading
               ? "Chargement…"
-              : repliesLoaded
+              : (repliesLoaded
                 ? "Masquer les réponses"
-                : `Voir ${replyCount} réponse${replyCount > 1 ? "s" : ""}`}
+                : `Voir ${replyCount} réponse${replyCount > 1 ? "s" : ""}`)}
           </button>
         </div>
       )}

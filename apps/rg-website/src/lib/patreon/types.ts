@@ -189,22 +189,22 @@ export const TIER_MAPPING: Record<
 		grandfatheredCents: number;
 	}
 > = {
-	"𝙽𝚒𝚟𝚎𝚊𝚞 𝚁𝚘𝚢 🌹": {
-		rgPlanName: "niveau-roy",
-		discordRoleId: "1371177169216077864",
-		stripePriceEnv: "STRIPE_PRICE_NIVEAU_ROY",
-		grandfatheredCents: 250,
+	"𝙽𝚒𝚟𝚎𝚊𝚞 𝙴𝚟𝚊𝚗𝚜 🌹": {
+		discordRoleId: "1371176241213870131",
+		grandfatheredCents: 1450,
+		rgPlanName: "niveau-evans",
+		stripePriceEnv: "STRIPE_PRICE_NIVEAU_EVANS",
 	},
 	"𝙽𝚒𝚟𝚎𝚊𝚞 𝙶𝚊𝚎𝚕𝚕𝚎 🌹": {
-		rgPlanName: "niveau-gaelle",
 		discordRoleId: "1371176894791159819",
-		stripePriceEnv: "STRIPE_PRICE_NIVEAU_GAELLE",
 		grandfatheredCents: 750,
+		rgPlanName: "niveau-gaelle",
+		stripePriceEnv: "STRIPE_PRICE_NIVEAU_GAELLE",
 	},
-	"𝙽𝚒𝚟𝚎𝚊𝚞 𝙴𝚟𝚊𝚗𝚜 🌹": {
-		rgPlanName: "niveau-evans",
-		discordRoleId: "1371176241213870131",
-		stripePriceEnv: "STRIPE_PRICE_NIVEAU_EVANS",
-		grandfatheredCents: 1450,
+	"𝙽𝚒𝚟𝚎𝚊𝚞 𝚁𝚘𝚢 🌹": {
+		discordRoleId: "1371177169216077864",
+		grandfatheredCents: 250,
+		rgPlanName: "niveau-roy",
+		stripePriceEnv: "STRIPE_PRICE_NIVEAU_ROY",
 	},
 };

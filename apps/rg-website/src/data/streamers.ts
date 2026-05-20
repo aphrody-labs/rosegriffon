@@ -12,40 +12,40 @@ export interface Streamer {
 
 export const STREAMERS: readonly Streamer[] = [
   {
-    name: "Bri",
     file: "bri.webp",
-    slug: "bri",
     fullName: "Bri",
+    name: "Bri",
+    slug: "bri",
   },
   {
-    name: "Éthan",
     file: "ethan.webp",
-    slug: "ethan",
     fullName: "Éthan",
+    name: "Éthan",
+    slug: "ethan",
   },
   {
-    name: "Huzby",
     file: "huzby.webp",
-    slug: "huzby",
     fullName: "Huzby",
+    name: "Huzby",
+    slug: "huzby",
   },
   {
-    name: "Ishido",
     file: "ishido.webp",
-    slug: "ishido",
     fullName: "Ishido",
+    name: "Ishido",
+    slug: "ishido",
   },
   {
-    name: "Mathuze",
     file: "mathuze.webp",
-    slug: "mathuze",
     fullName: "Mathuze",
+    name: "Mathuze",
+    slug: "mathuze",
   },
   {
-    name: "Shozuma",
     file: "shozuma.webp",
-    slug: "shozuma",
     fullName: "Shozuma",
+    name: "Shozuma",
+    slug: "shozuma",
   },
 ] as const;
 

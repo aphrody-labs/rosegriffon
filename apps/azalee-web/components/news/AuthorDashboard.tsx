@@ -11,13 +11,13 @@ type DashboardData = Awaited<ReturnType<typeof getAuthorDashboard>>;
 
 function timeAgo(date: string): string {
   const seconds = Math.floor((Date.now() - new Date(date).getTime()) / 1000);
-  if (seconds < 60) return "à l'instant";
+  if (seconds < 60) {return "à l'instant";}
   const minutes = Math.floor(seconds / 60);
-  if (minutes < 60) return `il y a ${minutes} min`;
+  if (minutes < 60) {return `il y a ${minutes} min`;}
   const hours = Math.floor(minutes / 60);
-  if (hours < 24) return `il y a ${hours}h`;
+  if (hours < 24) {return `il y a ${hours}h`;}
   const days = Math.floor(hours / 24);
-  if (days < 7) return `il y a ${days}j`;
+  if (days < 7) {return `il y a ${days}j`;}
   return new Date(date).toLocaleDateString("fr-FR", {
     day: "numeric",
     month: "short",
@@ -26,8 +26,8 @@ function timeAgo(date: string): string {
 }
 
 function formatCount(n: number): string {
-  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
-  if (n >= 1_000) return `${(n / 1_000).toFixed(1)}k`;
+  if (n >= 1_000_000) {return `${(n / 1_000_000).toFixed(1)}M`;}
+  if (n >= 1000) {return `${(n / 1_000).toFixed(1)}k`;}
   return String(n);
 }
 
@@ -113,16 +113,16 @@ function StatCard({ label, value, icon, accent }: StatCardProps) {
 // ─── Composant principal ──────────────────────────────────────────────────────
 
 export function AuthorDashboard() {
-  const [data, setData] = useState<DashboardData | null | undefined>(undefined);
+  const [data, setData] = useState<DashboardData | null | undefined>();
 
   useEffect(() => {
     let cancelled = false;
     getAuthorDashboard()
       .then((result) => {
-        if (!cancelled) setData(result);
+        if (!cancelled) {setData(result);}
       })
       .catch(() => {
-        if (!cancelled) setData(null);
+        if (!cancelled) {setData(null);}
       });
     return () => {
       cancelled = true;
@@ -130,7 +130,7 @@ export function AuthorDashboard() {
   }, []);
 
   // Chargement
-  if (data === undefined) return <DashboardSkeleton />;
+  if (data === undefined) {return <DashboardSkeleton />;}
 
   // Non authentifié ou erreur
   if (data === null) {
@@ -163,7 +163,7 @@ export function AuthorDashboard() {
   const totalComments = data.articles.reduce((s, a) => s + a.comment_count, 0);
 
   // Données pour le graphique : vues par article (top 10 par vues)
-  const chartArticles = [...data.articles].sort((a, b) => b.view_count - a.view_count).slice(0, 10);
+  const chartArticles = [...data.articles].toSorted((a, b) => b.view_count - a.view_count).slice(0, 10);
   const maxViews = Math.max(...chartArticles.map((a) => a.view_count), 1);
 
   return (

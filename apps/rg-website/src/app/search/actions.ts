@@ -2,15 +2,15 @@
 
 import { createClient } from "@/lib/supabase/server";
 
-export type SearchResult = {
+export interface SearchResult {
   id: string;
   title: string;
   slug: string;
   type: "article" | "chronicle";
-};
+}
 
 export async function searchContent(query: string): Promise<SearchResult[]> {
-  if (!query || query.length < 2) return [];
+  if (!query || query.length < 2) {return [];}
 
   const supabase = await createClient();
 
@@ -29,8 +29,8 @@ export async function searchContent(query: string): Promise<SearchResult[]> {
     results.push(
       ...articles.map((a) => ({
         id: a.id,
-        title: a.title,
         slug: a.slug,
+        title: a.title,
         type: "article" as const,
       }))
     );

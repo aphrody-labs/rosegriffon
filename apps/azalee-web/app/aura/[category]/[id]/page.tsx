@@ -7,21 +7,21 @@ import { AuraDetail } from "@/components/wiki/AuraDetail";
 import { wikiService } from "@/lib/wiki-service";
 
 const SUBTYPE_INFO: Record<string, { label: string; icon: string; color: string }> = {
-  Keshin: { label: "Esprit Guerrier", icon: "flash_on", color: "text-primary" },
-  Soul: { label: "Totem", icon: "pets", color: "text-tertiary" },
-  Awakening: { label: "Éveil", icon: "wb_twilight", color: "text-secondary" },
-  ModeChange: { label: "Changement de Mode", icon: "transform", color: "text-error" },
-  Miximax: { label: "Miximax", icon: "group_work", color: "text-blue-500" },
-  Aura: { label: "Aura", icon: "wifi_tethering", color: "text-primary" },
+  Aura: { color: "text-primary", icon: "wifi_tethering", label: "Aura" },
+  Awakening: { color: "text-secondary", icon: "wb_twilight", label: "Éveil" },
+  Keshin: { color: "text-primary", icon: "flash_on", label: "Esprit Guerrier" },
+  Miximax: { color: "text-blue-500", icon: "group_work", label: "Miximax" },
+  ModeChange: { color: "text-error", icon: "transform", label: "Changement de Mode" },
+  Soul: { color: "text-tertiary", icon: "pets", label: "Totem" },
 };
 
 const CATEGORY_LABELS: Record<string, string> = {
-  "esprits-guerriers": "Esprits Guerriers",
-  totems: "Totems",
-  miximax: "Miximax",
-  eveil: "Éveil",
-  "changement-mode": "Changement de Mode",
   autres: "Autres",
+  "changement-mode": "Changement de Mode",
+  "esprits-guerriers": "Esprits Guerriers",
+  eveil: "Éveil",
+  miximax: "Miximax",
+  totems: "Totems",
 };
 
 export async function generateMetadata({
@@ -38,21 +38,21 @@ export async function generateMetadata({
   const title = `${name} | ${categoryLabel} - Azalée`;
 
   return {
-    title,
-    description,
     alternates: { canonical: `/aura/${category}/${id}` },
+    description,
     openGraph: {
-      title: `${name} | Azalée`,
       description,
-      url: `/aura/${category}/${id}`,
-      siteName: "Azalée - Inazuma Eleven Victory Road",
       locale: "fr_FR",
+      siteName: "Azalée - Inazuma Eleven Victory Road",
+      title: `${name} | Azalée`,
       type: "article",
+      url: `/aura/${category}/${id}`,
     },
+    title,
     twitter: {
       card: "summary",
-      title: `${name} | Azalée`,
       description,
+      title: `${name} | Azalée`,
     },
   };
 }
@@ -76,20 +76,20 @@ export default async function AuraDetailPage({
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     itemListElement: [
-      { "@type": "ListItem", position: 1, name: "Accueil", item: "https://azalee.rosegriffon.fr" },
+      { "@type": "ListItem", item: "https://azalee.rosegriffon.fr", name: "Accueil", position: 1 },
       {
         "@type": "ListItem",
-        position: 2,
-        name: "Hyper Techniques",
         item: "https://azalee.rosegriffon.fr/aura",
+        name: "Hyper Techniques",
+        position: 2,
       },
       {
         "@type": "ListItem",
-        position: 3,
-        name: categoryLabel,
         item: `https://azalee.rosegriffon.fr/aura/${category}`,
+        name: categoryLabel,
+        position: 3,
       },
-      { "@type": "ListItem", position: 4, name: aura.displayName },
+      { "@type": "ListItem", name: aura.displayName, position: 4 },
     ],
   };
 

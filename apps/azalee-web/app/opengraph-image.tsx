@@ -1,74 +1,74 @@
 import { ImageResponse } from "next/og";
 
 export const alt = "Azalée - Inazuma Eleven Victory Road Wiki";
-export const size = { width: 1200, height: 630 };
+export const size = { height: 630, width: 1200 };
 export const contentType = "image/png";
 
 export default async function Image() {
   return new ImageResponse(
     <div
       style={{
-        width: "100%",
-        height: "100%",
-        display: "flex",
-        flexDirection: "column",
         alignItems: "center",
-        justifyContent: "center",
         background: "linear-gradient(135deg, #1A120D 0%, #2D1F14 50%, #1A120D 100%)",
         color: "white",
+        display: "flex",
+        flexDirection: "column",
         fontFamily: "sans-serif",
-        position: "relative",
+        height: "100%",
+        justifyContent: "center",
         overflow: "hidden",
+        position: "relative",
+        width: "100%",
       }}
     >
       {/* Top bar */}
       <div
         style={{
-          position: "absolute",
-          top: 0,
-          left: 0,
-          right: 0,
-          height: 4,
           background: "linear-gradient(90deg, #F2A93B, #E53935, #43A047, #F9A825, #F2A93B)",
           display: "flex",
+          height: 4,
+          left: 0,
+          position: "absolute",
+          right: 0,
+          top: 0,
         }}
       />
 
       {/* Central content */}
       <div
         style={{
+          alignItems: "center",
           display: "flex",
           flexDirection: "column",
-          alignItems: "center",
           gap: 16,
         }}
       >
         <div
           style={{
-            fontSize: 72,
-            fontWeight: 900,
             color: "#F2A93B",
             display: "flex",
+            fontSize: 72,
+            fontWeight: 900,
           }}
         >
           Azalee
         </div>
         <div
           style={{
-            fontSize: 28,
-            fontWeight: 600,
             color: "#A09080",
             display: "flex",
+            fontSize: 28,
+            fontWeight: 600,
           }}
         >
           Inazuma Eleven: Victory Road
         </div>
         <div
           style={{
-            fontSize: 18,
             color: "#6D5E50",
-            marginTop: 8,
             display: "flex",
+            fontSize: 18,
+            marginTop: 8,
           }}
         >
           Base de donnees complete en francais
@@ -91,30 +91,30 @@ export default async function Image() {
           <div
             key={s.label}
             style={{
+              alignItems: "center",
               display: "flex",
               flexDirection: "column",
-              alignItems: "center",
               gap: 4,
             }}
           >
             <div
               style={{
-                fontSize: 32,
-                fontWeight: 900,
                 color: "#F2A93B",
                 display: "flex",
+                fontSize: 32,
+                fontWeight: 900,
               }}
             >
               {s.value}
             </div>
             <div
               style={{
-                fontSize: 14,
                 color: "#6D5E50",
-                fontWeight: 600,
-                textTransform: "uppercase",
-                letterSpacing: 2,
                 display: "flex",
+                fontSize: 14,
+                fontWeight: 600,
+                letterSpacing: 2,
+                textTransform: "uppercase",
               }}
             >
               {s.label}
@@ -126,17 +126,17 @@ export default async function Image() {
       {/* Branding */}
       <div
         style={{
-          position: "absolute",
+          alignItems: "center",
           bottom: 20,
           display: "flex",
-          alignItems: "center",
           gap: 8,
+          position: "absolute",
         }}
       >
-        <div style={{ fontSize: 14, fontWeight: 700, color: "#F2A93B", display: "flex" }}>
+        <div style={{ color: "#F2A93B", display: "flex", fontSize: 14, fontWeight: 700 }}>
           azalee.rosegriffon.fr
         </div>
-        <div style={{ fontSize: 12, color: "#6D5E50", display: "flex" }}>Rose Griffon</div>
+        <div style={{ color: "#6D5E50", display: "flex", fontSize: 12 }}>Rose Griffon</div>
       </div>
     </div>,
     { ...size },

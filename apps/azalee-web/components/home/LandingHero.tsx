@@ -29,7 +29,7 @@ export function LandingHero({ stats }: LandingHeroProps) {
 	const foregroundStyle = prefersReducedMotion ? undefined : { y: foregroundY };
 
 	const handleScrollToContent = () => {
-		const contentElement = document.getElementById("home-content");
+		const contentElement = document.querySelector("#home-content");
 		if (contentElement) {
 			contentElement.scrollIntoView({ behavior: "smooth", block: "start" });
 		}
@@ -37,9 +37,9 @@ export function LandingHero({ stats }: LandingHeroProps) {
 
 	const statPills = stats
 		? [
-				{ label: "joueurs", count: stats.characters },
-				{ label: "techniques", count: stats.skills },
-				{ label: "objets", count: stats.items },
+				{ count: stats.characters, label: "joueurs" },
+				{ count: stats.skills, label: "techniques" },
+				{ count: stats.items, label: "objets" },
 			].filter((s) => s.count > 0)
 		: [];
 
@@ -230,7 +230,7 @@ export function LandingHero({ stats }: LandingHeroProps) {
 				tabIndex={0}
 				aria-label="Défiler vers le contenu"
 				onKeyDown={(e) => {
-					if (e.key === "Enter" || e.key === " ") handleScrollToContent();
+					if (e.key === "Enter" || e.key === " ") {handleScrollToContent();}
 				}}
 			>
 				<div className="flex flex-col items-center gap-2 group animate-[gentleBounce_2s_ease-in-out_infinite]">

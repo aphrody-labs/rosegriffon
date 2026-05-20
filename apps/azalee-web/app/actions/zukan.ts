@@ -21,9 +21,9 @@ export async function searchZukan(searchParams: {
   const elementFilter = searchParams.element;
   const positionFilter = searchParams.position;
   const genderFilter = searchParams.gender;
-  // const rankFilter = searchParams.rank; // Unused
-  const page = parseInt(searchParams.page || "1", 10);
-  const limit = parseInt(searchParams.limit || "50", 10);
+  // Const rankFilter = searchParams.rank; // Unused
+  const page = Number.parseInt(searchParams.page || "1", 10);
+  const limit = Number.parseInt(searchParams.limit || "50", 10);
 
   // Perform search or get all characters
   let allItems: CharacterWithSpirit[] = [];
@@ -37,9 +37,9 @@ export async function searchZukan(searchParams: {
           ({
             ...v,
             charaId: base.charaId,
-            names: base.names,
             gender: base.gender,
             internalCode: base.internalCode,
+            names: base.names,
           }) as unknown as CharacterWithSpirit,
       ),
     );
@@ -52,9 +52,9 @@ export async function searchZukan(searchParams: {
           ({
             ...v,
             charaId: base.charaId,
-            names: base.names,
             gender: base.gender,
             internalCode: base.internalCode,
+            names: base.names,
           }) as unknown as CharacterWithSpirit,
       ),
     );
@@ -62,16 +62,16 @@ export async function searchZukan(searchParams: {
 
   // Apply filters manually since the search API doesn't support structured filtering yet
   const filtered = allItems.filter((char) => {
-    if (typeFilter && char.spirit?.type?.toLowerCase() !== typeFilter.toLowerCase()) return false;
-    if (elementFilter && char.element?.toLowerCase() !== elementFilter.toLowerCase()) return false;
+    if (typeFilter && char.spirit?.type?.toLowerCase() !== typeFilter.toLowerCase()) {return false;}
+    if (elementFilter && char.element?.toLowerCase() !== elementFilter.toLowerCase()) {return false;}
     if (positionFilter && char.position?.toLowerCase() !== positionFilter.toLowerCase())
-      return false;
+      {return false;}
     if (genderFilter) {
       const charGenderStr = char.gender === 1 ? "female" : "male";
-      if (charGenderStr !== genderFilter.toLowerCase()) return false;
+      if (charGenderStr !== genderFilter.toLowerCase()) {return false;}
     }
     // Rank filtering might require more complex logic depending on data structure
-    // if (rankFilter && char.rank !== rankFilter) return false;
+    // If (rankFilter && char.rank !== rankFilter) return false;
     return true;
   });
 

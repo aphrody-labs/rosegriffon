@@ -7,20 +7,20 @@ import { getServerUser } from "@/lib/auth-helpers";
 import { createClient } from "@/lib/supabase/server";
 
 const profileSchema = z.object({
+  address_line1: z.string().optional(),
+  address_line2: z.string().optional(),
+  banner_url: z.string().url("URL invalide").optional().or(z.literal("")),
+  bio: z.string().max(500).optional(),
+  city: z.string().optional(),
+  country: z.string().optional(),
+  full_name: z.string().optional(),
+  postal_code: z.string().optional(),
+  twitter_handle: z.string().optional(),
   username: z
     .string()
     .min(3, "Le nom d'utilisateur doit faire au moins 3 caractères.")
     .max(20, "Le nom d'utilisateur ne peut pas dépasser 20 caractères."),
-  full_name: z.string().optional(),
-  bio: z.string().max(500).optional(),
   website: z.string().url("URL invalide").optional().or(z.literal("")),
-  twitter_handle: z.string().optional(),
-  banner_url: z.string().url("URL invalide").optional().or(z.literal("")),
-  address_line1: z.string().optional(),
-  address_line2: z.string().optional(),
-  city: z.string().optional(),
-  postal_code: z.string().optional(),
-  country: z.string().optional(),
 });
 
 export async function updateProfile(formData: FormData) {
@@ -41,18 +41,18 @@ export async function updateProfile(formData: FormData) {
   const { error } = await supabase
     .from("profiles")
     .update({
-      username: validation.data.username,
-      full_name: validation.data.full_name,
-      bio: validation.data.bio,
-      website: validation.data.website,
-      twitter_handle: validation.data.twitter_handle,
-      banner_url: validation.data.banner_url,
       address_line1: validation.data.address_line1,
       address_line2: validation.data.address_line2,
+      banner_url: validation.data.banner_url,
+      bio: validation.data.bio,
       city: validation.data.city,
-      postal_code: validation.data.postal_code,
       country: validation.data.country,
+      full_name: validation.data.full_name,
+      postal_code: validation.data.postal_code,
+      twitter_handle: validation.data.twitter_handle,
       updated_at: new Date().toISOString(),
+      username: validation.data.username,
+      website: validation.data.website,
     })
     .eq("id", user.id);
 

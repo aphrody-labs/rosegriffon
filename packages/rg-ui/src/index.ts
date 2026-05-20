@@ -5,7 +5,7 @@
 export { cn } from "./lib/utils";
 
 // Hooks
-export { useIsMobile } from "./hooks/use-mobile";
+export { useIsMobile, useBreakpoint, BREAKPOINTS } from "./hooks/use-mobile";
 export { useMediaQuery } from "./hooks/use-media-query";
 export { useSwipe } from "./hooks/use-swipe";
 

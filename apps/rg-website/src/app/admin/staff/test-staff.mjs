@@ -28,12 +28,12 @@ async function testStaff() {
     } else {
       console.log("ℹ️  Aucun membre dans la base de données");
     }
-  } catch (err) {
-    console.error("❌ Erreur inattendue:", err);
+  } catch (error) {
+    console.error("❌ Erreur inattendue:", error);
   }
 }
 
 // Décommenter pour exécuter
-// testStaff();
+// TestStaff();
 
 export { testStaff };

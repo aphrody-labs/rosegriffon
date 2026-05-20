@@ -117,7 +117,7 @@ describe("generateId", () => {
 describe("isEmpty", () => {
   it("détecte null et undefined", () => {
     expect(isEmpty(null)).toBe(true);
-    expect(isEmpty(undefined)).toBe(true);
+    expect(isEmpty()).toBe(true);
   });
 
   it("détecte les chaînes vides", () => {

@@ -24,8 +24,8 @@ export default async function VerificationPage() {
     <div className="space-y-6 sm:space-y-8 pb-24 sm:pb-8">
       <DashboardPageHeader
         breadcrumbs={[
-          { label: "Tableau de bord", href: "/dashboard" },
-          { label: "Base de données", href: "/dashboard/database" },
+          { href: "/dashboard", label: "Tableau de bord" },
+          { href: "/dashboard/database", label: "Base de données" },
           { label: "Vérification" },
         ]}
         title="Vérification des données"

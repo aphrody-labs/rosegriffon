@@ -57,8 +57,6 @@ const nextConfig = {
 	],
 
 	experimental: {
-		serverSourceMaps: true,
-		turbopackFileSystemCacheForBuild: true,
 		optimizePackageImports: [
 			"lucide-react",
 			"date-fns",
@@ -88,6 +86,8 @@ const nextConfig = {
 		serverActions: {
 			bodySizeLimit: "5mb",
 		},
+		serverSourceMaps: true,
+		turbopackFileSystemCacheForBuild: true,
 	},
 
 	compiler: {
@@ -102,14 +102,14 @@ const nextConfig = {
 	async redirects() {
 		return [
 			{
-				source: "/azalee",
 				destination: "https://x.com/Azalee_IE",
 				permanent: true,
+				source: "/azalee",
 			},
 			{
-				source: "/a-propos/soutenir",
 				destination: "/nous-soutenir",
 				permanent: true,
+				source: "/a-propos/soutenir",
 			},
 		];
 	},
@@ -127,8 +127,8 @@ const nextConfig = {
 
 		return [
 			{
-				source: "/storage/v1/:path*",
 				destination,
+				source: "/storage/v1/:path*",
 			},
 		];
 	},
@@ -136,16 +136,15 @@ const nextConfig = {
 	async headers() {
 		return [
 			{
-				source: "/(.*)",
 				headers: [
 					{
 						key: "Cross-Origin-Opener-Policy",
 						value: "same-origin-allow-popups",
 					},
 				],
+				source: "/(.*)",
 			},
 			{
-				source: "/api/public/:path*",
 				headers: [
 					{ key: "Access-Control-Allow-Credentials", value: "true" },
 					{ key: "Access-Control-Allow-Origin", value: "*" },
@@ -159,15 +158,16 @@ const nextConfig = {
 							"X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version",
 					},
 				],
+				source: "/api/public/:path*",
 			},
 			{
-				source: "/_next/static/:path*",
 				headers: [
 					{
 						key: "Cache-Control",
 						value: "public, max-age=31536000, immutable",
 					},
 				],
+				source: "/_next/static/:path*",
 			},
 		];
 	},
@@ -179,14 +179,14 @@ const nextConfig = {
 			loaderFile: "./cdn-loader.js",
 		}),
 		remotePatterns: [
-			{ protocol: "https", hostname: "cdn.rosegriffon.fr" },
-			{ protocol: "https", hostname: "placehold.co" },
-			{ protocol: "https", hostname: "rosegriffon.fr" },
-			{ protocol: "https", hostname: "cdn.discordapp.com" },
-			{ protocol: "https", hostname: "static-cdn.jtvnw.net" },
-			{ protocol: "https", hostname: "pbs.twimg.com" },
-			{ protocol: "https", hostname: "abs.twimg.com" },
-			{ protocol: "https", hostname: "dxi4wb638ujep.cloudfront.net" },
+			{ hostname: "cdn.rosegriffon.fr", protocol: "https" },
+			{ hostname: "placehold.co", protocol: "https" },
+			{ hostname: "rosegriffon.fr", protocol: "https" },
+			{ hostname: "cdn.discordapp.com", protocol: "https" },
+			{ hostname: "static-cdn.jtvnw.net", protocol: "https" },
+			{ hostname: "pbs.twimg.com", protocol: "https" },
+			{ hostname: "abs.twimg.com", protocol: "https" },
+			{ hostname: "dxi4wb638ujep.cloudfront.net", protocol: "https" },
 		],
 		dangerouslyAllowSVG: true,
 		contentDispositionType: "attachment",

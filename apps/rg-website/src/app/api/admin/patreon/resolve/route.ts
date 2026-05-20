@@ -31,8 +31,8 @@ export async function POST(req: Request) {
 			"manual",
 		);
 		return NextResponse.json({ ok: true, result });
-	} catch (e) {
-		console.error("[admin/patreon/resolve]", e);
-		return NextResponse.json({ ok: false, error: String(e) }, { status: 500 });
+	} catch (error) {
+		console.error("[admin/patreon/resolve]", error);
+		return NextResponse.json({ ok: false, error: String(error) }, { status: 500 });
 	}
 }

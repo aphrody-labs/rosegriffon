@@ -8,17 +8,17 @@ import { getServerUser } from "@/lib/auth-helpers";
 import { createClient } from "@/lib/supabase/server";
 
 const scheduleSchema = z.object({
+  category: z.string().optional(),
   day_of_week: z.coerce.number().min(0).max(6),
-  streamer_name: z.string().min(1, "Le nom du streamer est requis"),
-  start_time: z.string().regex(/^\d{2}:\d{2}(:\d{2})?$/, "Format invalide (HH:MM)"),
   end_time: z
     .string()
     .regex(/^\d{2}:\d{2}(:\d{2})?$/, "Format invalide (HH:MM)")
     .optional()
     .nullable(),
-  category: z.string().optional(),
-  status: z.enum(["active", "inactive", "coming_soon"]).default("active"),
   notes: z.string().optional().nullable(),
+  start_time: z.string().regex(/^\d{2}:\d{2}(:\d{2})?$/, "Format invalide (HH:MM)"),
+  status: z.enum(["active", "inactive", "coming_soon"]).default("active"),
+  streamer_name: z.string().min(1, "Le nom du streamer est requis"),
 });
 
 export type ScheduleInput = z.infer<typeof scheduleSchema>;
@@ -27,7 +27,7 @@ async function checkAdmin() {
   const supabase = await createClient();
   const user = await getServerUser();
 
-  if (!user) return { error: "Non authentifié", user: null };
+  if (!user) {return { error: "Non authentifié", user: null };}
 
   const { data: profile } = await supabase
     .from("profiles")
@@ -44,11 +44,11 @@ async function checkAdmin() {
 
 export async function addSchedule(data: ScheduleInput) {
   const { error: authError, user } = await checkAdmin();
-  if (authError || !user) return { success: false, error: authError };
+  if (authError || !user) {return { success: false, error: authError };}
 
   const validation = scheduleSchema.safeParse(data);
   if (!validation.success) {
-    return { success: false, error: "Données invalides" };
+    return { error: "Données invalides", success: false };
   }
 
   const supabase = await createClient();
@@ -60,7 +60,7 @@ export async function addSchedule(data: ScheduleInput) {
     .single();
 
   if (error) {
-    return { success: false, error: error.message };
+    return { error: error.message, success: false };
   }
 
   await logAdminAction("create", "stream_schedule", newSchedule.id, data);
@@ -72,13 +72,13 @@ export async function addSchedule(data: ScheduleInput) {
 
 export async function updateSchedule(id: string, data: Partial<ScheduleInput>) {
   const { error: authError, user } = await checkAdmin();
-  if (authError || !user) return { success: false, error: authError };
+  if (authError || !user) {return { success: false, error: authError };}
 
   const supabase = await createClient();
   const { error } = await supabase.from("stream_schedules").update(data).eq("id", id);
 
   if (error) {
-    return { success: false, error: error.message };
+    return { error: error.message, success: false };
   }
 
   await logAdminAction("update", "stream_schedule", id, data);
@@ -90,13 +90,13 @@ export async function updateSchedule(id: string, data: Partial<ScheduleInput>) {
 
 export async function deleteSchedule(id: string) {
   const { error: authError, user } = await checkAdmin();
-  if (authError || !user) return { success: false, error: authError };
+  if (authError || !user) {return { success: false, error: authError };}
 
   const supabase = await createClient();
   const { error } = await supabase.from("stream_schedules").delete().eq("id", id);
 
   if (error) {
-    return { success: false, error: error.message };
+    return { error: error.message, success: false };
   }
 
   await logAdminAction("delete", "stream_schedule", id, {});
@@ -108,7 +108,7 @@ export async function deleteSchedule(id: string) {
 
 export async function syncWithGoogleCalendar() {
   const { error: authError, user } = await checkAdmin();
-  if (authError || !user) return { success: false, error: authError };
+  if (authError || !user) {return { success: false, error: authError };}
 
   try {
     const supabase = await createClient();
@@ -120,21 +120,21 @@ export async function syncWithGoogleCalendar() {
       .delete()
       .gte("day_of_week", 0);
 
-    if (deleteError) throw deleteError;
+    if (deleteError) {throw deleteError;}
 
     // Insérer le nouveau planning
     if (events.length > 0) {
       const { error: insertError } = await supabase.from("stream_schedules").insert(
         events.map((e) => ({
+          category: e.category,
           day_of_week: e.day_of_week,
           start_time: e.start_time!,
-          streamer_name: e.streamer_name,
-          category: e.category,
           status: "active",
+          streamer_name: e.streamer_name,
         }))
       );
 
-      if (insertError) throw insertError;
+      if (insertError) {throw insertError;}
     }
 
     await logAdminAction("sync", "stream_schedule", "google-calendar", {
@@ -143,12 +143,12 @@ export async function syncWithGoogleCalendar() {
 
     revalidatePath("/admin/stream-schedule");
     revalidatePath("/rose-griffon-tv");
-    return { success: true, count: events.length };
+    return { count: events.length, success: true };
   } catch (error) {
     console.error("Erreur sync Google Calendar:", error);
     return {
-      success: false,
       error: `Erreur lors de la synchronisation: ${error instanceof Error ? error.message : String(error)}`,
+      success: false,
     };
   }
 }

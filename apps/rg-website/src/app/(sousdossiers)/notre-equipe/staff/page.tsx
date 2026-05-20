@@ -5,9 +5,9 @@ import TeamsSection from "../_components/teams";
 import { TeamSectionSkeleton } from "./team-skeleton";
 
 export const metadata: Metadata = {
-  title: "Notre Équipe - Staff | Rose Griffon",
   description:
     "Découvrez les talents qui donnent vie à l'univers de Rose Griffon. Notre équipe passionnée de créateurs, artistes et producteurs.",
+  title: "Notre Équipe - Staff | Rose Griffon",
 };
 
 // ISR: Revalidate toutes les heures (équipe rarement modifiée)

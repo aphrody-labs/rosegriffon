@@ -5,7 +5,7 @@ import { createAdminClient } from "@/lib/supabase/server";
 
 export async function GET(req: Request) {
 	const auth = await requireApiAdmin();
-	if (!auth.ok) return auth.response;
+	if (!auth.ok) {return auth.response;}
 
 	try {
 		const supabase = createAdminClient();
@@ -35,22 +35,22 @@ export async function GET(req: Request) {
 			.order("created_at", { ascending: false })
 			.range(from, to);
 
-		if (error) throw error;
+		if (error) {throw error;}
 
 		return NextResponse.json({
-			success: true,
 			data: users ?? [],
 			pagination: {
-				page,
 				limit,
+				page,
 				total: count ?? 0,
 				totalPages: count ? Math.ceil(count / limit) : 1,
 			},
+			success: true,
 		});
 	} catch (error) {
 		console.error("Erreur GET utilisateurs:", error);
 		return NextResponse.json(
-			{ success: false, error: "Erreur lors du chargement des utilisateurs" },
+			{ error: "Erreur lors du chargement des utilisateurs", success: false },
 			{ status: 500 },
 		);
 	}

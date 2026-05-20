@@ -6,7 +6,7 @@ const TAG_LEN = 16;
 
 function getKey(): Buffer {
 	const raw = process.env.PATREON_ENCRYPTION_KEY;
-	if (!raw) throw new Error("PATREON_ENCRYPTION_KEY missing");
+	if (!raw) {throw new Error("PATREON_ENCRYPTION_KEY missing");}
 	const key = Buffer.from(raw, "hex");
 	if (key.length !== 32) {
 		throw new Error(
@@ -29,7 +29,7 @@ export function encryptToken(plaintext: string): string {
 
 export function decryptToken(encoded: string): string {
 	const buf = Buffer.from(encoded, "base64");
-	if (buf.length < IV_LEN + TAG_LEN) throw new Error("ciphertext too short");
+	if (buf.length < IV_LEN + TAG_LEN) {throw new Error("ciphertext too short");}
 	const iv = buf.subarray(0, IV_LEN);
 	const tag = buf.subarray(IV_LEN, IV_LEN + TAG_LEN);
 	const ciphertext = buf.subarray(IV_LEN + TAG_LEN);

@@ -51,7 +51,7 @@ export default function CharacterModelViewer({ hash, name }: CharacterModelViewe
   };
 
   const handlePointerMove = (e: React.PointerEvent) => {
-    if (!isDragging) return;
+    if (!isDragging) {return;}
 
     const deltaX = e.clientX - startX;
     // Sensitivity: 1 frame per 10px
@@ -59,7 +59,7 @@ export default function CharacterModelViewer({ hash, name }: CharacterModelViewe
 
     // Calculate new frame (wrapping around)
     let newFrame = (startFrame - frameDelta) % TOTAL_FRAMES;
-    if (newFrame < 0) newFrame += TOTAL_FRAMES;
+    if (newFrame < 0) {newFrame += TOTAL_FRAMES;}
 
     setFrame(newFrame);
   };

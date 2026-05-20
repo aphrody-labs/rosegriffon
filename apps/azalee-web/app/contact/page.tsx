@@ -1,12 +1,12 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-	title: "Contact - Azalée",
 	description:
 		"Contactez l'équipe Rose Griffon par email ou via notre serveur Discord.",
+	title: "Contact - Azalée",
 };
 
-export const revalidate = 86400;
+export const revalidate = 86_400;
 
 export default function ContactPage() {
 	return (

@@ -25,31 +25,31 @@ import { updateProfile } from "../actions";
 type Profile = Database["public"]["Tables"]["profiles"]["Row"];
 
 const schema = z.object({
-	username: z
-		.string()
-		.min(3, "Le nom d'utilisateur doit faire au moins 3 caractères.")
-		.max(20, "Le nom d'utilisateur ne peut pas dépasser 20 caractères."),
-	full_name: z.string().optional(),
+	banner_url: z.string().url("URL invalide").optional().or(z.literal("")),
 	bio: z
 		.string()
 		.max(500, "La bio ne peut pas dépasser 500 caractères.")
 		.optional(),
-	website: z.string().url("URL invalide").optional().or(z.literal("")),
+	full_name: z.string().optional(),
 	twitter_handle: z.string().optional(),
-	banner_url: z.string().url("URL invalide").optional().or(z.literal("")),
+	username: z
+		.string()
+		.min(3, "Le nom d'utilisateur doit faire au moins 3 caractères.")
+		.max(20, "Le nom d'utilisateur ne peut pas dépasser 20 caractères."),
+	website: z.string().url("URL invalide").optional().or(z.literal("")),
 });
 
 export function ProfileSection({ profile }: { profile: Profile | null }) {
 	const form = useForm<z.infer<typeof schema>>({
-		resolver: zodResolver(schema),
 		defaultValues: {
-			username: profile?.username || "",
-			full_name: profile?.full_name || "",
-			bio: profile?.bio || "",
-			website: profile?.website || "",
-			twitter_handle: profile?.twitter_handle || "",
 			banner_url: profile?.banner_url || "",
+			bio: profile?.bio || "",
+			full_name: profile?.full_name || "",
+			twitter_handle: profile?.twitter_handle || "",
+			username: profile?.username || "",
+			website: profile?.website || "",
 		},
+		resolver: zodResolver(schema),
 	});
 
 	const onSubmit = async (values: z.infer<typeof schema>) => {
@@ -71,14 +71,14 @@ export function ProfileSection({ profile }: { profile: Profile | null }) {
 		const res = await updateProfile(fd);
 		if (res.error) {
 			if (typeof res.error === "string") {
-				toast.error("Erreur", { id: t, description: res.error });
+				toast.error("Erreur", { description: res.error, id: t });
 			} else {
 				const errs = res.error as Record<string, string[]>;
 				if (errs.username)
-					form.setError("username", {
+					{form.setError("username", {
 						type: "manual",
 						message: errs.username[0],
-					});
+					});}
 				toast.error("Corrige les erreurs du formulaire.", { id: t });
 			}
 			return;

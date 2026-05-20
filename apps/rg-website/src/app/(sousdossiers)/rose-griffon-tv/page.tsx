@@ -26,7 +26,7 @@ export default async function RoseGriffonTvPage() {
       // Priorité: Google Calendar
       try {
         scheduleByDay = await getGoogleCalendarSchedulesByDay();
-        // console.log("✅ Planning chargé depuis Google Calendar");
+        // Console.log("✅ Planning chargé depuis Google Calendar");
       } catch (gcalError) {
         console.warn("⚠️ Google Calendar échoué, fallback sur Supabase", gcalError);
         // Fallback sur Supabase
@@ -35,22 +35,22 @@ export default async function RoseGriffonTvPage() {
     } else {
       // Pas de Google Calendar configuré, utiliser Supabase
       scheduleByDay = await getSchedulesByDay();
-      // console.log(
+      // Console.log(
       //   "📊 Planning chargé depuis Supabase (Google Calendar non configuré)"
       // );
     }
-  } catch (err) {
-    scheduleError = err;
+  } catch (error) {
+    scheduleError = error;
     scheduleByDay = {};
-    console.error("❌ Erreur chargement planning:", err);
+    console.error("❌ Erreur chargement planning:", error);
   }
 
   return (
     <>
       <BreadcrumbSchema
         items={[
-          { name: "Accueil", item: "/" },
-          { name: "Rose Griffon TV", item: "/rose-griffon-tv" },
+          { item: "/", name: "Accueil" },
+          { item: "/rose-griffon-tv", name: "Rose Griffon TV" },
         ]}
       />
       <RgtvPageClient

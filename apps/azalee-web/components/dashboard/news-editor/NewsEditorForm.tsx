@@ -111,7 +111,7 @@ export function NewsEditorForm({ initialData }: NewsEditorFormProps) {
 	const handleSlugChange = useCallback(
 		(newSlug: string) => {
 			setSlug(newSlug);
-			if (slugCheckTimerRef.current) clearTimeout(slugCheckTimerRef.current);
+			if (slugCheckTimerRef.current) {clearTimeout(slugCheckTimerRef.current);}
 			if (newSlug) {
 				slugCheckTimerRef.current = setTimeout(
 					() => checkSlugAvailability(newSlug),
@@ -127,18 +127,18 @@ export function NewsEditorForm({ initialData }: NewsEditorFormProps) {
 	// Auto-save to localStorage
 	const autoSaveToLocal = useCallback(() => {
 		const draftData = JSON.stringify({
-			title,
-			content,
-			slug,
 			category,
-			status,
+			content,
 			excerpt,
-			imageUrl,
 			imageAlt,
-			tags,
-			metaTitle,
+			imageUrl,
 			metaDescription,
+			metaTitle,
 			scheduledAt,
+			slug,
+			status,
+			tags,
+			title,
 		});
 		if (draftData !== lastSavedRef.current) {
 			localStorage.setItem(draftKey, draftData);
@@ -164,7 +164,7 @@ export function NewsEditorForm({ initialData }: NewsEditorFormProps) {
 
 	// Recover draft on mount
 	useEffect(() => {
-		if (initialData?.id) return;
+		if (initialData?.id) {return;}
 		const saved = localStorage.getItem(draftKey);
 		if (saved) {
 			try {
@@ -197,9 +197,9 @@ export function NewsEditorForm({ initialData }: NewsEditorFormProps) {
 
 	// Mark unsaved any time a tracked field changes — DOIT dépendre des champs
 	// (sinon `setHasUnsavedChanges(true)` ne s'exécute qu'au mount, et l'auto-save
-	// serveur s'arrête après le 1ᵉʳ snapshot localStorage qui repasse le flag à false).
+	// Serveur s'arrête après le 1ᵉʳ snapshot localStorage qui repasse le flag à false).
 	// On skippe le tout premier rendu via `mountedRef` pour ne pas marquer dirty
-	// sans modification utilisateur.
+	// Sans modification utilisateur.
 	const mountedRef = useRef(false);
 	useEffect(() => {
 		if (!mountedRef.current) {
@@ -224,9 +224,9 @@ export function NewsEditorForm({ initialData }: NewsEditorFormProps) {
 
 	// Auto-save every 30 seconds
 	useEffect(() => {
-		autoSaveTimerRef.current = setInterval(autoSaveToLocal, 30000);
+		autoSaveTimerRef.current = setInterval(autoSaveToLocal, 30_000);
 		return () => {
-			if (autoSaveTimerRef.current) clearInterval(autoSaveTimerRef.current);
+			if (autoSaveTimerRef.current) {clearInterval(autoSaveTimerRef.current);}
 		};
 	}, [autoSaveToLocal]);
 
@@ -249,7 +249,7 @@ export function NewsEditorForm({ initialData }: NewsEditorFormProps) {
 			const { silent = false, redirect: shouldRedirect = true } = options || {};
 
 			if (!title) {
-				if (!silent) toast.error("Le titre est obligatoire");
+				if (!silent) {toast.error("Le titre est obligatoire");}
 				return;
 			}
 			if (slugStatus === "taken") {
@@ -267,7 +267,7 @@ export function NewsEditorForm({ initialData }: NewsEditorFormProps) {
 				}
 				return;
 			}
-			if (loading || isSaving) return;
+			if (loading || isSaving) {return;}
 
 			if (silent) {
 				setIsSaving(true);
@@ -280,17 +280,17 @@ export function NewsEditorForm({ initialData }: NewsEditorFormProps) {
 			const finalSlug = slug || generateSlug(title);
 
 			const data: Record<string, unknown> = {
-				title,
-				slug: finalSlug,
-				content,
 				category,
-				status: finalStatus,
+				content,
 				excerpt,
-				featured_image_url: imageUrl,
 				featured_image_alt: imageAlt || null,
-				tags: tags.length > 0 ? tags : null,
-				meta_title: metaTitle || null,
+				featured_image_url: imageUrl,
 				meta_description: metaDescription || null,
+				meta_title: metaTitle || null,
+				slug: finalSlug,
+				status: finalStatus,
+				tags: tags.length > 0 ? tags : null,
+				title,
 				updated_at: now,
 			};
 
@@ -309,9 +309,9 @@ export function NewsEditorForm({ initialData }: NewsEditorFormProps) {
 
 			try {
 				// Snapshot avant update : on conserve l'historique pour TOUTE update
-				// d'article existant (sauf en mode silent — auto-save trop fréquent).
+				// D'article existant (sauf en mode silent — auto-save trop fréquent).
 				// L'ancienne logique excluait les drafts jamais publiés, perdant leur
-				// historique en cas de refonte avant 1ʳᵉ publication.
+				// Historique en cas de refonte avant 1ʳᵉ publication.
 				if (initialData?.id && !silent) {
 					try {
 						const { createArticleVersion } = await import(
@@ -326,7 +326,7 @@ export function NewsEditorForm({ initialData }: NewsEditorFormProps) {
 				// Sauvegarde via server action (bypass RLS, revalidation incluse)
 				const { saveArticle } = await import("@/app/actions/articles");
 				const result = await saveArticle(initialData?.id || null, data);
-				if (result.error) throw new Error(result.error);
+				if (result.error) {throw new Error(result.error);}
 
 				localStorage.removeItem(draftKey);
 				setHasUnsavedChanges(false);
@@ -343,10 +343,10 @@ export function NewsEditorForm({ initialData }: NewsEditorFormProps) {
 					try {
 						const { shareToDiscord } = await import("@/app/actions/articles");
 						await shareToDiscord({
-							title,
-							slug: finalSlug,
 							excerpt,
 							featured_image_url: imageUrl,
+							slug: finalSlug,
+							title,
 						});
 						toast.success("Article publié et partagé sur Discord !");
 					} catch {
@@ -384,11 +384,11 @@ export function NewsEditorForm({ initialData }: NewsEditorFormProps) {
 				} else {
 					router.refresh();
 				}
-			} catch (err: unknown) {
-				console.error("Error saving news:", err);
+			} catch (error: unknown) {
+				console.error("Error saving news:", error);
 				if (!silent) {
 					toast.error(
-						`Erreur: ${err instanceof Error ? err.message : String(err)}`,
+						`Erreur: ${error instanceof Error ? error.message : String(error)}`,
 					);
 				}
 			} finally {
@@ -421,17 +421,17 @@ export function NewsEditorForm({ initialData }: NewsEditorFormProps) {
 
 	// Auto-save serveur toutes les 60s pour les articles existants (brouillons)
 	useEffect(() => {
-		if (!initialData?.id || status === "published") return;
+		if (!initialData?.id || status === "published") {return;}
 
 		autoSaveServerTimerRef.current = setInterval(() => {
 			if (hasUnsavedChanges && title) {
-				handleSave(undefined, { silent: true, redirect: false });
+				handleSave(undefined, { redirect: false, silent: true });
 			}
-		}, 60000);
+		}, 60_000);
 
 		return () => {
 			if (autoSaveServerTimerRef.current)
-				clearInterval(autoSaveServerTimerRef.current);
+				{clearInterval(autoSaveServerTimerRef.current);}
 		};
 	}, [initialData?.id, status, hasUnsavedChanges, title, handleSave]);
 
@@ -466,7 +466,7 @@ export function NewsEditorForm({ initialData }: NewsEditorFormProps) {
 	// Image upload
 	const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
 		const file = e.target.files?.[0];
-		if (!file) return;
+		if (!file) {return;}
 
 		setIsUploading(true);
 		const formData = new FormData();
@@ -485,7 +485,7 @@ export function NewsEditorForm({ initialData }: NewsEditorFormProps) {
 			toast.error("Échec de l'upload");
 		} finally {
 			setIsUploading(false);
-			if (fileInputRef.current) fileInputRef.current.value = "";
+			if (fileInputRef.current) {fileInputRef.current.value = "";}
 		}
 	};
 
@@ -531,29 +531,16 @@ export function NewsEditorForm({ initialData }: NewsEditorFormProps) {
 
 	// Shared metadata props
 	const metadataProps = {
-		status,
-		category,
-		scheduledAt,
-		imageUrl,
-		imageAlt,
-		isUploading,
-		excerpt,
-		slug,
-		tags,
-		metaTitle,
-		metaDescription,
-		title,
 		articleId: initialData?.id,
-		slugStatus,
-		onStatusChange: setStatus,
+		category,
+		excerpt,
+		imageAlt,
+		imageUrl,
+		isUploading,
+		metaDescription,
+		metaTitle,
 		onCategoryChange: setCategory,
-		onScheduledAtChange: setScheduledAt,
-		onImageUploadClick: triggerFileInput,
-		onImageCropClick: handleImageCropClick,
-		onImageRemove: () => {
-			setImageUrl("");
-			setImageAlt("");
-		},
+		onExcerptChange: setExcerpt,
 		onFileDrop: async (file: File) => {
 			setIsUploading(true);
 			const formData = new FormData();
@@ -574,12 +561,25 @@ export function NewsEditorForm({ initialData }: NewsEditorFormProps) {
 			}
 		},
 		onImageAltChange: setImageAlt,
-		onExcerptChange: setExcerpt,
-		onSlugChange: handleSlugChange,
-		onTagsChange: setTags,
-		onMetaTitleChange: setMetaTitle,
+		onImageCropClick: handleImageCropClick,
+		onImageRemove: () => {
+			setImageUrl("");
+			setImageAlt("");
+		},
+		onImageUploadClick: triggerFileInput,
 		onMetaDescriptionChange: setMetaDescription,
+		onMetaTitleChange: setMetaTitle,
+		onScheduledAtChange: setScheduledAt,
+		onSlugChange: handleSlugChange,
+		onStatusChange: setStatus,
+		onTagsChange: setTags,
 		onTitleChange: setTitle,
+		scheduledAt,
+		slug,
+		slugStatus,
+		status,
+		tags,
+		title,
 	};
 
 	return (
@@ -623,7 +623,7 @@ export function NewsEditorForm({ initialData }: NewsEditorFormProps) {
 					const confirmed = window.confirm(
 						"Repasser cet article en brouillon ?\n\nIl ne sera plus visible publiquement.",
 					);
-					if (confirmed) handleSave("draft");
+					if (confirmed) {handleSave("draft");}
 				}}
 				onPublish={() => {
 					// Confirmation uniquement pour la première publication
@@ -631,7 +631,7 @@ export function NewsEditorForm({ initialData }: NewsEditorFormProps) {
 						const confirmed = window.confirm(
 							"Publier cet article ?\n\nIl sera visible par tous les utilisateurs et une notification sera envoyée.",
 						);
-						if (!confirmed) return;
+						if (!confirmed) {return;}
 					}
 					handleSave("published");
 				}}

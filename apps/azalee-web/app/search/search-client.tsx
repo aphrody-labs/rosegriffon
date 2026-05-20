@@ -4,7 +4,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { type EnhancedSearchResult, searchGlobal } from "@/app/actions/search";
+import { searchGlobal } from '@/app/actions/search';
+import type { EnhancedSearchResult } from '@/app/actions/search';
 import { CommonSpriteIcon } from "@/components/ui/CommonSpriteIcon";
 import { Icon } from "@/components/ui/Icon";
 import { SearchResultRow } from "@/components/wiki/SearchResultRow";
@@ -22,46 +23,46 @@ const WIKI_SECTIONS: Array<{
   accent: string;
 }> = [
   {
+    accent: "from-blue-500/20 to-cyan-500/5",
+    description: "5 900+ personnages",
     href: "/chara",
     sprite: "chara",
     title: "Joueurs",
-    description: "5 900+ personnages",
-    accent: "from-blue-500/20 to-cyan-500/5",
   },
   {
+    accent: "from-amber-500/20 to-orange-500/5",
+    description: "Tirs, dribbles, arrêts",
     href: "/skill",
     sprite: "skill",
     title: "Techniques",
-    description: "Tirs, dribbles, arrêts",
-    accent: "from-amber-500/20 to-orange-500/5",
   },
   {
+    accent: "from-purple-500/20 to-fuchsia-500/5",
+    description: "Esprits Guerriers, Totems",
     href: "/aura",
     sprite: "keshin",
     title: "Hyper Techniques",
-    description: "Esprits Guerriers, Totems",
-    accent: "from-purple-500/20 to-fuchsia-500/5",
   },
   {
+    accent: "from-emerald-500/20 to-green-500/5",
+    description: "Équipements, consommables",
     href: "/item",
     iconName: "backpack",
     title: "Objets",
-    description: "Équipements, consommables",
-    accent: "from-emerald-500/20 to-green-500/5",
   },
   {
+    accent: "from-rose-500/20 to-pink-500/5",
+    description: "Talents, coordinateurs",
     href: "/passive",
     sprite: "tension",
     title: "Passifs",
-    description: "Talents, coordinateurs",
-    accent: "from-rose-500/20 to-pink-500/5",
   },
   {
+    accent: "from-sky-500/20 to-indigo-500/5",
+    description: "Stratégies de match",
     href: "/tactic",
     iconName: "strategy",
     title: "Tactiques",
-    description: "Stratégies de match",
-    accent: "from-sky-500/20 to-indigo-500/5",
   },
 ];
 
@@ -90,9 +91,9 @@ function WikiGrid() {
               <div className="size-10 rounded-xl flex items-center justify-center shrink-0 bg-primary/8">
                 {section.sprite ? (
                   <CommonSpriteIcon name={section.sprite} scale={0.45} />
-                ) : section.iconName ? (
+                ) : (section.iconName ? (
                   <Icon name={section.iconName} size={20} className="text-primary" />
-                ) : null}
+                ) : null)}
               </div>
               <p className="type-label-large text-on-surface group-hover:text-primary transition-colors leading-tight">
                 {section.title}

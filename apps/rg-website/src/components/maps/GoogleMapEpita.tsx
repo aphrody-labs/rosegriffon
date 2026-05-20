@@ -10,7 +10,7 @@ export default function GoogleMapEpita() {
   const { isLoaded, error, loader } = useGoogleMaps();
 
   useEffect(() => {
-    if (!isLoaded || !mapRef.current) return;
+    if (!isLoaded || !mapRef.current) {return;}
 
     const initMap = async () => {
       try {
@@ -21,25 +21,25 @@ export default function GoogleMapEpita() {
 
         const map = new Map(mapRef.current as HTMLElement, {
           center: EPITA_COORDS,
-          zoom: 18, // Zoom élevé pour voir les bâtiments
-          mapId: GOOGLE_MAPS_ID,
           disableDefaultUI: false,
           gestureHandling: "cooperative", // Meilleure UX sur mobile
+          mapId: GOOGLE_MAPS_ID,
+          zoom: 18, // Zoom élevé pour voir les bâtiments
         });
 
         // Personnalisation du pin pour correspondre à l'identité visuelle (optionnel)
         const pin = new PinElement({
-          background: "#1d4ed8", // blue-700
-          borderColor: "#1e3a8a", // blue-900
+          background: "#1d4ed8", // Blue-700
+          borderColor: "#1e3a8a", // Blue-900
           glyphColor: "white",
         });
 
         // Création du marqueur avancé
         const marker = new AdvancedMarkerElement({
+          content: pin.element,
           map,
           position: EPITA_COORDS,
           title: "EPITA Kremlin-Bicêtre",
-          content: pin.element,
         });
 
         // Ajout d'un événement au clic pour ouvrir Google Maps avec le Place ID spécifique
@@ -47,8 +47,8 @@ export default function GoogleMapEpita() {
           const url = `https://www.google.com/maps/search/?api=1&query=EPITA&query_place_id=${EPITA_PLACE_ID}`;
           window.open(url, "_blank");
         });
-      } catch (e) {
-        console.error("Erreur lors du chargement de Google Maps:", e);
+      } catch (error) {
+        console.error("Erreur lors du chargement de Google Maps:", error);
       }
     };
 

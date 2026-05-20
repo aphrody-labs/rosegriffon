@@ -13,6 +13,6 @@ export default async function AuthLayout({
 	children: React.ReactNode;
 }) {
 	const user = await getServerUser();
-	if (user) redirect("/dashboard");
+	if (user) {redirect("/dashboard");}
 	return <>{children}</>;
 }

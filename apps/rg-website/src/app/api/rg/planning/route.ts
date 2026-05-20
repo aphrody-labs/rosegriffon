@@ -18,14 +18,14 @@ export async function GET() {
 
 	if (error) {
 		return NextResponse.json(
-			{ success: false, error: error.message },
+			{ error: error.message, success: false },
 			{ status: 500 },
 		);
 	}
 
 	return NextResponse.json({
-		success: true,
 		count: schedule.length,
 		data: schedule,
+		success: true,
 	});
 }

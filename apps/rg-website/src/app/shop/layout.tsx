@@ -6,35 +6,35 @@ import { getCart } from "@/lib/shop/cart";
 import { CartIconButton } from "./_components/cart-icon-button";
 
 export const metadata = {
-	title: "Boutique · Rose Griffon",
 	description:
 		"Stickers, prints, badges, t-shirts et packs personnage édition limitée illustrés par les artistes de la communauté Rose Griffon.",
 	openGraph: {
-		title: "Boutique Rose Griffon",
 		description:
 			"Produits collector Inazuma Eleven France — packs personnage, prints A5, stickers, badges, textile.",
 		images: ["/RG_Logo_V2.5_B.webp"],
+		title: "Boutique Rose Griffon",
 	},
+	title: "Boutique · Rose Griffon",
 };
 
 const organizationSchema = {
 	"@context": "https://schema.org",
 	"@type": "Organization",
-	name: "Association Rose Griffon",
-	url: "https://rosegriffon.fr",
+	contactPoint: {
+		"@type": "ContactPoint",
+		availableLanguage: ["French"],
+		contactType: "Customer Service",
+		email: "contact@rosegriffon.fr",
+	},
 	logo: "https://rosegriffon.fr/RG_Logo_V2.5_B.webp",
+	name: "Association Rose Griffon",
 	sameAs: [
 		"https://twitter.com/rosegriffon_fr",
 		"https://www.tiktok.com/@rosegriffon",
 		"https://discord.gg/rosegriffon",
 		"https://www.patreon.com/rosegriffon",
 	],
-	contactPoint: {
-		"@type": "ContactPoint",
-		email: "contact@rosegriffon.fr",
-		contactType: "Customer Service",
-		availableLanguage: ["French"],
-	},
+	url: "https://rosegriffon.fr",
 };
 
 export default async function ShopLayout({

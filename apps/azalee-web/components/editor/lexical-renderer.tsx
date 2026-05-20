@@ -50,9 +50,9 @@ function slugify(text: string): string {
 }
 
 function extractText(node: LexicalNode): string {
-	if (node?.text) return node.text as string;
+	if (node?.text) {return node.text as string;}
 	if (Array.isArray(node?.children))
-		return node.children.map(extractText).join("");
+		{return node.children.map(extractText).join("");}
 	return "";
 }
 
@@ -63,26 +63,26 @@ function toCamel(prop: string): string {
 function parseStyle(
 	style: string | undefined,
 ): Record<string, string> | undefined {
-	if (!style) return undefined;
+	if (!style) {return undefined;}
 	const out: Record<string, string> = {};
 	for (const decl of style.split(";")) {
 		const [k, v] = decl.split(":").map((s) => s.trim());
-		if (k && v) out[toCamel(k)] = v;
+		if (k && v) {out[toCamel(k)] = v;}
 	}
-	return Object.keys(out).length ? out : undefined;
+	return Object.keys(out).length > 0 ? out : undefined;
 }
 
 function renderText(node: LexicalNode, key: string | number): ReactNode {
 	let el: ReactNode = node.text ?? "";
 	const format = (node.format as number) || 0;
-	if (format & FMT_CODE) el = <code>{el}</code>;
-	if (format & FMT_HIGHLIGHT) el = <mark>{el}</mark>;
-	if (format & FMT_SUBSCRIPT) el = <sub>{el}</sub>;
-	if (format & FMT_SUPERSCRIPT) el = <sup>{el}</sup>;
-	if (format & FMT_STRIKETHROUGH) el = <s>{el}</s>;
-	if (format & FMT_UNDERLINE) el = <u>{el}</u>;
-	if (format & FMT_ITALIC) el = <em>{el}</em>;
-	if (format & FMT_BOLD) el = <strong>{el}</strong>;
+	if (format & FMT_CODE) {el = <code>{el}</code>;}
+	if (format & FMT_HIGHLIGHT) {el = <mark>{el}</mark>;}
+	if (format & FMT_SUBSCRIPT) {el = <sub>{el}</sub>;}
+	if (format & FMT_SUPERSCRIPT) {el = <sup>{el}</sup>;}
+	if (format & FMT_STRIKETHROUGH) {el = <s>{el}</s>;}
+	if (format & FMT_UNDERLINE) {el = <u>{el}</u>;}
+	if (format & FMT_ITALIC) {el = <em>{el}</em>;}
+	if (format & FMT_BOLD) {el = <strong>{el}</strong>;}
 	const styleObj = parseStyle(node.style as string | undefined);
 	if (styleObj) {
 		return (
@@ -98,7 +98,7 @@ function renderChildren(
 	children: LexicalNode[] | undefined,
 	ctx: SlugContext,
 ): ReactNode[] {
-	if (!Array.isArray(children)) return [];
+	if (!Array.isArray(children)) {return [];}
 	return children.map((c, i) => renderNode(c, i, ctx));
 }
 
@@ -117,14 +117,17 @@ function renderNode(
 	key: string | number,
 	ctx: SlugContext,
 ): ReactNode {
-	if (!node || typeof node !== "object") return null;
+	if (!node || typeof node !== "object") {return null;}
 	switch (node.type) {
-		case "text":
+		case "text": {
 			return renderText(node, key);
-		case "linebreak":
+		}
+		case "linebreak": {
 			return <br key={key} />;
-		case "paragraph":
+		}
+		case "paragraph": {
 			return <p key={key}>{renderChildren(node.children, ctx)}</p>;
+		}
 		case "heading": {
 			const tag = (node.tag as string) || "h2";
 			const Tag = tag as "h1" | "h2" | "h3" | "h4" | "h5" | "h6";
@@ -139,17 +142,19 @@ function renderNode(
 				</Tag>
 			);
 		}
-		case "quote":
+		case "quote": {
 			return (
 				<blockquote key={key}>{renderChildren(node.children, ctx)}</blockquote>
 			);
+		}
 		case "list": {
 			const Tag = node.listType === "number" ? "ol" : "ul";
 			return <Tag key={key}>{renderChildren(node.children, ctx)}</Tag>;
 		}
-		case "listitem":
+		case "listitem": {
 			return <li key={key}>{renderChildren(node.children, ctx)}</li>;
-		case "link":
+		}
+		case "link": {
 			return (
 				<a
 					key={key}
@@ -160,29 +165,33 @@ function renderNode(
 					{renderChildren(node.children, ctx)}
 				</a>
 			);
-		case "horizontalrule":
+		}
+		case "horizontalrule": {
 			return <hr key={key} />;
-		case "code":
+		}
+		case "code": {
 			return (
 				<pre key={key}>
 					<code>{renderChildren(node.children, ctx)}</code>
 				</pre>
 			);
+		}
 		case "image":
 		case "inline-image": {
 			const src = node.src as string | undefined;
 			const alt = (node.altText as string) || "";
-			if (!src) return null;
+			if (!src) {return null;}
 			// eslint-disable-next-line @next/next/no-img-element
 			return (
 				<img key={key} src={src} alt={alt} loading="lazy" decoding="async" />
 			);
 		}
-		default:
+		default: {
 			if (Array.isArray(node.children)) {
 				return <span key={key}>{renderChildren(node.children, ctx)}</span>;
 			}
 			return null;
+		}
 	}
 }
 
@@ -195,25 +204,25 @@ function injectHeadingIds(html: string): string {
 		/<(h[23])([^>]*)>(.*?)<\/h[23]>/gi,
 		(match, tag, attrs, inner) => {
 			const text = inner.replaceAll(/<[^>]+>/g, "").trim();
-			if (!text) return match;
+			if (!text) {return match;}
 			let slug = slugify(text);
 			const count = slugCounts.get(slug) || 0;
 			slugCounts.set(slug, count + 1);
-			if (count > 0) slug = `${slug}-${count}`;
-			if (/id\s*=\s*["']/i.test(attrs)) return match;
+			if (count > 0) {slug = `${slug}-${count}`;}
+			if (/id\s*=\s*["']/i.test(attrs)) {return match;}
 			return `<${tag}${attrs} id="${slug}">${inner}</${tag}>`;
 		},
 	);
 }
 
 function isLexicalShape(content: unknown): content is SerializedEditorState {
-	if (!content || typeof content !== "object") return false;
+	if (!content || typeof content !== "object") {return false;}
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	return Array.isArray((content as any)?.root?.children);
 }
 
 export function LexicalRenderer({ content, className }: LexicalRendererProps) {
-	if (!content) return null;
+	if (!content) {return null;}
 
 	let parsed: SerializedEditorState | null = null;
 	let legacyHtml: string | null = null;
@@ -223,8 +232,8 @@ export function LexicalRenderer({ content, className }: LexicalRendererProps) {
 		if (trimmed.startsWith("{")) {
 			try {
 				const obj = JSON.parse(trimmed);
-				if (isLexicalShape(obj)) parsed = obj;
-				else legacyHtml = content;
+				if (isLexicalShape(obj)) {parsed = obj;}
+				else {legacyHtml = content;}
 			} catch {
 				legacyHtml = content;
 			}

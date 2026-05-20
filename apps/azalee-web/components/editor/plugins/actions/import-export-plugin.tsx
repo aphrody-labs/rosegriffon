@@ -115,16 +115,16 @@ export function ImportExportPlugin() {
   };
 
   const handleImportHtmlFromFile = useCallback(() => {
-    if (!fileInputRef.current) return;
+    if (!fileInputRef.current) {return;}
     fileInputRef.current.accept = ".html,.htm";
     fileInputRef.current.onchange = (e) => {
       const file = (e.target as HTMLInputElement).files?.[0];
-      if (!file) return;
+      if (!file) {return;}
       const reader = new FileReader();
       reader.onload = () => {
         const htmlString = reader.result as string;
         insertHtml(htmlString);
-        if (fileInputRef.current) fileInputRef.current.value = "";
+        if (fileInputRef.current) {fileInputRef.current.value = "";}
       };
       reader.readAsText(file);
     };
@@ -132,16 +132,16 @@ export function ImportExportPlugin() {
   }, [insertHtml]);
 
   const handleImportMarkdownFromFile = useCallback(() => {
-    if (!fileInputRef.current) return;
+    if (!fileInputRef.current) {return;}
     fileInputRef.current.accept = ".md,.markdown,.txt";
     fileInputRef.current.onchange = (e) => {
       const file = (e.target as HTMLInputElement).files?.[0];
-      if (!file) return;
+      if (!file) {return;}
       const reader = new FileReader();
       reader.onload = () => {
         const mdString = reader.result as string;
         insertMarkdown(mdString);
-        if (fileInputRef.current) fileInputRef.current.value = "";
+        if (fileInputRef.current) {fileInputRef.current.value = "";}
       };
       reader.readAsText(file);
     };

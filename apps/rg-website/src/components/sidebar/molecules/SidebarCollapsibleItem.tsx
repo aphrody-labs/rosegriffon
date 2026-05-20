@@ -71,7 +71,7 @@ export const SidebarCollapsibleItem = React.forwardRef<
 
 		// Use sectionId if provided, otherwise use title as fallback
 		const sectionKey = useMemo(
-			() => sectionId || title.toLowerCase().replace(/\s+/g, "-"),
+			() => sectionId || title.toLowerCase().replaceAll(/\s+/g, "-"),
 			[sectionId, title],
 		);
 

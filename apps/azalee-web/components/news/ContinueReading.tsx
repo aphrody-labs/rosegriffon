@@ -4,8 +4,8 @@ import Link from "next/link";
 
 const CATEGORY_LABELS: Record<string, string> = {
   announcement: "Annonce",
-  event: "Événement",
   community: "Communauté",
+  event: "Événement",
 };
 
 interface ContinueReadingArticle {
@@ -23,7 +23,7 @@ interface ContinueReadingProps {
 }
 
 export function ContinueReading({ articles }: ContinueReadingProps) {
-  if (articles.length === 0) return null;
+  if (articles.length === 0) {return null;}
 
   return (
     <section>

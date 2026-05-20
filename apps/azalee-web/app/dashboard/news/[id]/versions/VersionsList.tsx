@@ -27,10 +27,10 @@ interface VersionsListProps {
 }
 
 const STATUS_LABELS: Record<string, { label: string; className: string }> = {
-  published: { label: "Publié", className: "bg-green-500/10 text-green-600" },
-  draft: { label: "Brouillon", className: "bg-amber-500/10 text-amber-600" },
-  scheduled: { label: "Programmé", className: "bg-blue-500/10 text-blue-600" },
-  archived: { label: "Archivé", className: "bg-stone-500/10 text-stone-600" },
+  archived: { className: "bg-stone-500/10 text-stone-600", label: "Archivé" },
+  draft: { className: "bg-amber-500/10 text-amber-600", label: "Brouillon" },
+  published: { className: "bg-green-500/10 text-green-600", label: "Publié" },
+  scheduled: { className: "bg-blue-500/10 text-blue-600", label: "Programmé" },
 };
 
 export function VersionsList({ versions, articleId, restoreAction }: VersionsListProps) {

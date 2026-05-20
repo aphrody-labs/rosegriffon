@@ -10,13 +10,13 @@ export async function logAudit(
 ) {
 	try {
 		await supabaseAdmin.from("audit_logs").insert({
-			user_id: userId,
 			action,
 			details: details || {},
 			ip_address: meta?.ipAddress || null,
 			user_agent: meta?.userAgent || null,
+			user_id: userId,
 		});
-	} catch (err) {
-		console.error("[Audit] Failed to log:", action, err);
+	} catch (error) {
+		console.error("[Audit] Failed to log:", action, error);
 	}
 }

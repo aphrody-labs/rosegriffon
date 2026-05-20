@@ -17,7 +17,7 @@ interface SidebarStore {
 // Debounce utility
 const debounce = <T extends (...args: any[]) => void>(fn: T, ms: number) => {
   let timeoutId: NodeJS.Timeout;
-  return function (this: unknown, ...args: Parameters<T>) {
+  return function  debounce(this: unknown, ...args: Parameters<T>) {
     clearTimeout(timeoutId);
     timeoutId = setTimeout(() => fn.apply(this, args), ms);
   };
@@ -25,7 +25,7 @@ const debounce = <T extends (...args: any[]) => void>(fn: T, ms: number) => {
 
 const debouncedSetItem = debounce((name: string, value: string) => {
   try {
-    if (typeof window === "undefined") return;
+    if (typeof window === "undefined") {return;}
     localStorage.setItem(name, value);
   } catch (error) {
     if (process.env.NODE_ENV === "development") {
@@ -49,7 +49,6 @@ const safeStorage = {
       return null;
     }
   },
-  setItem: debouncedSetItem,
   removeItem: (name: string): void => {
     try {
       if (typeof window === "undefined") return;
@@ -60,31 +59,17 @@ const safeStorage = {
       }
     }
   },
+  setItem: debouncedSetItem,
 };
 
 export const useSidebarStore = create<SidebarStore>()(
   persist(
     (set, get) => ({
+      error: null,
+      isHydrated: false,
       isOpen: true,
       openSections: [],
-      isHydrated: false,
-      error: null,
-
       setHydrated: (hydrated) => set({ isHydrated: hydrated }),
-
-      toggleSidebar: () => {
-        try {
-          set({ isOpen: !get().isOpen, error: null });
-        } catch (error) {
-          if (process.env.NODE_ENV === "development") {
-            console.error("Erreur lors du toggle sidebar:", error);
-          }
-          set({
-            error: error instanceof Error ? error.message : "Erreur inconnue",
-          });
-        }
-      },
-
       setSidebarOpen: (open) => {
         try {
           if (typeof open !== "boolean") {
@@ -103,7 +88,6 @@ export const useSidebarStore = create<SidebarStore>()(
           });
         }
       },
-
       toggleSection: (section) => {
         try {
           if (!section || typeof section !== "string") {
@@ -131,6 +115,18 @@ export const useSidebarStore = create<SidebarStore>()(
           });
         }
       },
+      toggleSidebar: () => {
+        try {
+          set({ isOpen: !get().isOpen, error: null });
+        } catch (error) {
+          if (process.env.NODE_ENV === "development") {
+            console.error("Erreur lors du toggle sidebar:", error);
+          }
+          set({
+            error: error instanceof Error ? error.message : "Erreur inconnue",
+          });
+        }
+      },
     }),
     {
       name: "sidebar-storage",
@@ -140,8 +136,7 @@ export const useSidebarStore = create<SidebarStore>()(
         isOpen: state.isOpen,
         openSections: state.openSections,
       }),
-      onRehydrateStorage: () => {
-        return (state) => {
+      onRehydrateStorage: () => (state) => {
           if (state) {
             state.setHydrated(true);
 
@@ -164,8 +159,7 @@ export const useSidebarStore = create<SidebarStore>()(
               state.openSections = [];
             }
           }
-        };
-      },
+        },
     }
   )
 );

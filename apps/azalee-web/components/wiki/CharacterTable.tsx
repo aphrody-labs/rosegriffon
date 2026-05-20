@@ -17,7 +17,8 @@ import {
 } from "@rosegriffon/ui";
 import type { SpriteCommonKey } from "@/config/sprites-common";
 import { formatDescription } from "@/lib/format-description";
-import { type GenderValue, isFemaleGender } from "@/lib/gender";
+import { isFemaleGender } from '@/lib/gender';
+import type { GenderValue } from '@/lib/gender';
 import { getCharacterImageUrl, getEmblemImageUrl, getSkillCategoryIconUrl } from "@/lib/images";
 import { TEAM_EMBLEM_MAP } from "@/lib/team-emblem-map";
 import { cn } from "@/lib/utils";
@@ -25,14 +26,14 @@ import CharacterModelViewer from "./CharacterModelViewer";
 import { CharacterStatsPopover } from "./CharacterStatsPopover";
 
 const ELEMENT_SPRITE_MAP: Record<string, SpriteCommonKey> = {
-  Fire: "fire",
   Feu: "fire",
-  Wind: "wind",
-  Vent: "wind",
+  Fire: "fire",
   Forest: "forest",
   Forêt: "forest",
-  Mountain: "mountain",
   Montagne: "mountain",
+  Mountain: "mountain",
+  Vent: "wind",
+  Wind: "wind",
 };
 
 export interface CharacterTableData {
@@ -74,18 +75,24 @@ export function CharacterTable({ characters, startIndex = 0 }: CharacterTablePro
 
   const getPositionName = (pos: string) => {
     switch (pos) {
-      case "Coach":
+      case "Coach": {
         return t("wiki.positions.coach");
-      case "GK":
+      }
+      case "GK": {
         return t("wiki.positions.gk_long");
-      case "DF":
+      }
+      case "DF": {
         return t("wiki.positions.df_long");
-      case "MF":
+      }
+      case "MF": {
         return t("wiki.positions.mf_long");
-      case "FW":
+      }
+      case "FW": {
         return t("wiki.positions.fw_long");
-      default:
+      }
+      default: {
         return pos;
+      }
     }
   };
 
@@ -93,22 +100,28 @@ export function CharacterTable({ characters, startIndex = 0 }: CharacterTablePro
     // Map DB/API values to translation keys
     switch (el) {
       case "Fire":
-      case "Feu":
+      case "Feu": {
         return t("wiki.elements.fire");
+      }
       case "Wind":
-      case "Vent":
+      case "Vent": {
         return t("wiki.elements.wind");
+      }
       case "Forest":
-      case "Forêt":
+      case "Forêt": {
         return t("wiki.elements.forest");
+      }
       case "Mountain":
-      case "Montagne":
+      case "Montagne": {
         return t("wiki.elements.mountain");
+      }
       case "Void":
-      case "Néant":
-        return "Néant"; // Optional
-      default:
+      case "Néant": {
+        return "Néant";
+      } // Optional
+      default: {
         return el;
+      }
     }
   };
 
@@ -164,9 +177,9 @@ export function CharacterTable({ characters, startIndex = 0 }: CharacterTablePro
             const name =
               (language === "ja"
                 ? character.names.ja
-                : language === "en"
+                : (language === "en"
                   ? character.names.en
-                  : character.names.fr) ||
+                  : character.names.fr)) ||
               character.names.fr ||
               character.names.en ||
               character.names.ja ||
@@ -180,10 +193,10 @@ export function CharacterTable({ characters, startIndex = 0 }: CharacterTablePro
 
             // Position
             const positionCategoryMap: Record<string, string> = {
-              GK: "gardien",
               DF: "defense",
-              MF: "dribble",
               FW: "tir",
+              GK: "gardien",
+              MF: "dribble",
             };
             const positionImage = positionCategoryMap[position]
               ? getSkillCategoryIconUrl(positionCategoryMap[position])
@@ -196,7 +209,7 @@ export function CharacterTable({ characters, startIndex = 0 }: CharacterTablePro
                 ? getSkillCategoryIconUrl(positionCategoryMap[subPos])
                 : null;
 
-            // rarity badge used in JSX below
+            // Rarity badge used in JSX below
 
             const isFemale = isFemaleGender(character.gender);
             const genderName = isFemale ? t("common.female") : t("common.male");
@@ -214,9 +227,9 @@ export function CharacterTable({ characters, startIndex = 0 }: CharacterTablePro
             const rawTeamName =
               (language === "ja"
                 ? teams[0]?.names?.ja
-                : language === "en"
+                : (language === "en"
                   ? teams[0]?.names?.en
-                  : teams[0]?.names?.fr) ||
+                  : teams[0]?.names?.fr)) ||
               teams[0]?.names?.fr ||
               "";
             const teamName = rawTeamName

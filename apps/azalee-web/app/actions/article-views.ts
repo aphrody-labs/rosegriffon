@@ -26,8 +26,8 @@ export async function trackArticleView(
 	const client = supabase as any;
 
 	// On vérifie que l'article appartient bien à l'app "azalee" avant
-	// d'incrémenter quoi que ce soit — un user qui devine un UUID rpb
-	// ou website ne peut pas booster un compteur étranger via cette route.
+	// D'incrémenter quoi que ce soit — un user qui devine un UUID rpb
+	// Ou website ne peut pas booster un compteur étranger via cette route.
 	const { data: row } = await client
 		.from("articles")
 		.select("id")
@@ -35,7 +35,7 @@ export async function trackArticleView(
 		.eq("app", "azalee")
 		.maybeSingle();
 
-	if (!row) return { success: false };
+	if (!row) {return { success: false };}
 
 	const { error } = await client.rpc("increment_article_views", {
 		article_id: articleId,

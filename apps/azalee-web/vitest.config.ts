@@ -10,12 +10,12 @@ export default defineConfig({
     },
   },
   test: {
-    include: ["**/*.{test,spec}.{ts,tsx}"],
-    exclude: ["**/node_modules/**", "**/dist/**", "**/.next/**"],
-    environment: "jsdom",
-    globals: true,
-    setupFiles: ["./tests/setup.ts"],
     clearMocks: true,
+    environment: "jsdom",
+    exclude: ["**/node_modules/**", "**/dist/**", "**/.next/**"],
+    globals: true,
+    include: ["**/*.{test,spec}.{ts,tsx}"],
     restoreMocks: true,
+    setupFiles: ["./tests/setup.ts"],
   },
 });

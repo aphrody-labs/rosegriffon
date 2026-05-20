@@ -46,8 +46,8 @@ export default function PresencesPage() {
     <div className="container mx-auto py-8 px-4 space-y-12">
       <BreadcrumbSchema
         items={[
-          { name: "Accueil", item: "/" },
-          { name: "Événements", item: "/evenements" },
+          { item: "/", name: "Accueil" },
+          { item: "/evenements", name: "Événements" },
         ]}
       />
       {/* Hero Section */}

@@ -61,9 +61,9 @@ export function ProfileProvider({ children }: { children: React.ReactNode }) {
 
       setProfile(data);
       setError(null);
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : "Erreur inconnue";
-      console.error("[ProfileProvider] Erreur inattendue:", err);
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : "Erreur inconnue";
+      console.error("[ProfileProvider] Erreur inattendue:", error);
       setError(errorMessage);
       setProfile(null);
     } finally {
@@ -78,13 +78,13 @@ export function ProfileProvider({ children }: { children: React.ReactNode }) {
 
   // Écouter les changements broadcast du profil
   useProfileSync({
-    userId: user?.id,
+    enabled: !!user?.id,
     onProfileChange: (updatedProfile) => {
       console.warn("[ProfileProvider] Profil mis à jour via broadcast:", updatedProfile);
       setProfile(updatedProfile);
       setError(null);
     },
-    enabled: !!user?.id,
+    userId: user?.id,
   });
 
   // Wrapper pour updateProfile avec gestion de l'état
@@ -105,13 +105,13 @@ export function ProfileProvider({ children }: { children: React.ReactNode }) {
           setError(result.error.message);
         } else if (result.data) {
           // La mise à jour sera automatiquement synchronisée via le broadcast
-          // mais on peut aussi la mettre à jour immédiatement
+          // Mais on peut aussi la mettre à jour immédiatement
           setProfile(result.data);
         }
 
         return result;
-      } catch (err) {
-        const errorMessage = err instanceof Error ? err.message : "Erreur inconnue";
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : "Erreur inconnue";
         setError(errorMessage);
         return { data: null, error: new Error(errorMessage) };
       }
@@ -120,11 +120,11 @@ export function ProfileProvider({ children }: { children: React.ReactNode }) {
   );
 
   const value: ProfileContextType = {
-    profile,
-    isLoading: authLoading || isLoading,
     error,
-    updateProfile: handleUpdateProfile,
+    isLoading: authLoading || isLoading,
+    profile,
     refreshProfile: fetchProfile,
+    updateProfile: handleUpdateProfile,
   };
 
   return <ProfileContext.Provider value={value}>{children}</ProfileContext.Provider>;

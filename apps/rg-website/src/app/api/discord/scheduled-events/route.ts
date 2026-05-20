@@ -13,7 +13,7 @@ import { NextResponse } from "next/server";
 export const runtime = "nodejs";
 export const revalidate = 300; // 5 min — burst protection vs rate-limit Discord
 
-type DiscordScheduledEventRaw = {
+interface DiscordScheduledEventRaw {
 	id: string;
 	name: string;
 	description: string | null;
@@ -29,7 +29,7 @@ type DiscordScheduledEventRaw = {
 	} | null;
 	user_count?: number;
 	image: string | null;
-};
+}
 
 export async function GET() {
 	const token = process.env.DISCORD_BOT_TOKEN;
@@ -38,9 +38,9 @@ export async function GET() {
 
 	if (!token || !guildId) {
 		return NextResponse.json({
-			success: true,
 			data: { events: [] },
 			reason: "discord_not_configured",
+			success: true,
 		});
 	}
 
@@ -57,19 +57,11 @@ export async function GET() {
 			console.warn(
 				`[discord/scheduled-events] discord api ${res.status} ${res.statusText}`,
 			);
-			return NextResponse.json({ success: true, data: { events: [] } });
+			return NextResponse.json({ data: { events: [] }, success: true });
 		}
 
 		const raw = (await res.json()) as DiscordScheduledEventRaw[];
 		const events = raw.map((e) => ({
-			id: e.id,
-			name: e.name,
-			description: e.description ?? "",
-			scheduledStartTime: e.scheduled_start_time,
-			scheduledEndTime: e.scheduled_end_time,
-			status: e.status,
-			entityType: e.entity_type,
-			entityMetadata: { location: e.entity_metadata?.location },
 			creator: e.creator
 				? {
 						id: e.creator.id,
@@ -77,15 +69,23 @@ export async function GET() {
 						avatar: e.creator.avatar ?? "",
 					}
 				: null,
-			userCount: e.user_count ?? 0,
+			description: e.description ?? "",
+			entityMetadata: { location: e.entity_metadata?.location },
+			entityType: e.entity_type,
+			id: e.id,
 			image: e.image
 				? `https://cdn.discordapp.com/guild-events/${e.id}/${e.image}.png?size=1024`
 				: null,
+			name: e.name,
+			scheduledEndTime: e.scheduled_end_time,
+			scheduledStartTime: e.scheduled_start_time,
+			status: e.status,
+			userCount: e.user_count ?? 0,
 		}));
 
-		return NextResponse.json({ success: true, data: { events } });
-	} catch (e) {
-		console.error("[discord/scheduled-events] fetch failed", e);
-		return NextResponse.json({ success: true, data: { events: [] } });
+		return NextResponse.json({ data: { events }, success: true });
+	} catch (error) {
+		console.error("[discord/scheduled-events] fetch failed", error);
+		return NextResponse.json({ data: { events: [] }, success: true });
 	}
 }

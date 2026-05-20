@@ -16,7 +16,7 @@ export default async function TweetsPage() {
   return (
     <div className="space-y-6 sm:space-y-8 pb-24 sm:pb-8">
       <DashboardPageHeader
-        breadcrumbs={[{ label: "Tableau de bord", href: "/dashboard" }, { label: "Tweets" }]}
+        breadcrumbs={[{ href: "/dashboard", label: "Tableau de bord" }, { label: "Tweets" }]}
         title="Tweets"
         subtitle="Gérer le feed Twitter (X)"
         icon="tag"

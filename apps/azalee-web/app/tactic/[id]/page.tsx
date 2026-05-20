@@ -18,17 +18,17 @@ export async function generateMetadata({
   const description = `${name} - Tactique spéciale Inazuma Eleven: Victory Road. Effets, durée, recharge et boutique.`;
 
   return {
-    title: `${name} | Inazuma Eleven Victory Road - Azalée`,
-    description,
     alternates: { canonical: `/tactic/${id}` },
+    description,
     openGraph: {
-      title: `${name} | Azalée`,
       description,
-      url: `/tactic/${id}`,
-      siteName: "Azalée - Inazuma Eleven Victory Road",
       locale: "fr_FR",
+      siteName: "Azalée - Inazuma Eleven Victory Road",
+      title: `${name} | Azalée`,
       type: "article",
+      url: `/tactic/${id}`,
     },
+    title: `${name} | Inazuma Eleven Victory Road - Azalée`,
   };
 }
 
@@ -44,14 +44,14 @@ export default async function TacticDetailPage({ params }: { params: Promise<{ i
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     itemListElement: [
-      { "@type": "ListItem", position: 1, name: "Accueil", item: "https://azalee.rosegriffon.fr" },
+      { "@type": "ListItem", item: "https://azalee.rosegriffon.fr", name: "Accueil", position: 1 },
       {
         "@type": "ListItem",
-        position: 2,
-        name: "Tactiques",
         item: "https://azalee.rosegriffon.fr/tactic",
+        name: "Tactiques",
+        position: 2,
       },
-      { "@type": "ListItem", position: 3, name: tactic.name_fr || tactic.name },
+      { "@type": "ListItem", name: tactic.name_fr || tactic.name, position: 3 },
     ],
   };
 

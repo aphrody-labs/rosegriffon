@@ -23,7 +23,7 @@ export async function getNotifications(limit = 20): Promise<
   }>
 > {
   const session = await getServerSession();
-  if (!session?.user) return [];
+  if (!session?.user) {return [];}
 
   const supabase = await createClient();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -39,7 +39,7 @@ export async function getNotifications(limit = 20): Promise<
 
 export async function getUnreadCount(): Promise<number> {
   const session = await getServerSession();
-  if (!session?.user) return 0;
+  if (!session?.user) {return 0;}
 
   const supabase = await createClient();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -54,7 +54,7 @@ export async function getUnreadCount(): Promise<number> {
 
 export async function markAsRead(notificationId: string): Promise<void> {
   const session = await getServerSession();
-  if (!session?.user) return;
+  if (!session?.user) {return;}
 
   const supabase = await createClient();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -67,7 +67,7 @@ export async function markAsRead(notificationId: string): Promise<void> {
 
 export async function markAllAsRead(): Promise<void> {
   const session = await getServerSession();
-  if (!session?.user) return;
+  if (!session?.user) {return;}
 
   const supabase = await createClient();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -83,16 +83,16 @@ export async function subscribeToPush(subscription: {
   keys: { p256dh: string; auth: string };
 }): Promise<{ success: boolean }> {
   const session = await getServerSession();
-  if (!session?.user) throw new Error("Non authentifié");
+  if (!session?.user) {throw new Error("Non authentifié");}
 
   const supabase = await createClient();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   await (supabase as any).from("push_subscriptions").upsert(
     {
-      user_id: session.user.id,
+      auth_key: subscription.keys.auth,
       endpoint: subscription.endpoint,
       p256dh: subscription.keys.p256dh,
-      auth_key: subscription.keys.auth,
+      user_id: session.user.id,
     },
     { onConflict: "user_id,endpoint" },
   );
@@ -102,7 +102,7 @@ export async function subscribeToPush(subscription: {
 
 export async function unsubscribeFromPush(endpoint: string): Promise<void> {
   const session = await getServerSession();
-  if (!session?.user) return;
+  if (!session?.user) {return;}
 
   const supabase = await createClient();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -128,23 +128,23 @@ export async function sendPushToAll(
     .select("endpoint, p256dh, auth_key, user_id");
 
   if (!subscriptions || subscriptions.length === 0) {
-    return { sent: 0, failed: 0 };
+    return { failed: 0, sent: 0 };
   }
 
   // Create in-app notifications for all unique users
   const userIds = [...new Set(subscriptions.map((s: { user_id: string }) => s.user_id))];
   const notifications = userIds.map((userId) => ({
-    user_id: userId,
-    type: "article",
-    title,
     body,
     data,
+    title,
+    type: "article",
+    user_id: userId,
   }));
 
   await client.from("notifications").insert(notifications);
 
   // Send push notifications
-  const payload = JSON.stringify({ title, body, data });
+  const payload = JSON.stringify({ body, data, title });
   let sent = 0;
   let failed = 0;
 
@@ -154,7 +154,7 @@ export async function sendPushToAll(
         await webpush.sendNotification(
           {
             endpoint: sub.endpoint,
-            keys: { p256dh: sub.p256dh, auth: sub.auth_key },
+            keys: { auth: sub.auth_key, p256dh: sub.p256dh },
           },
           payload,
         );
@@ -167,5 +167,5 @@ export async function sendPushToAll(
     }),
   );
 
-  return { sent, failed };
+  return { failed, sent };
 }

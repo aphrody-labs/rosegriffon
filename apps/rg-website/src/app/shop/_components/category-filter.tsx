@@ -3,7 +3,8 @@
 import { useRouter, useSearchParams } from "next/navigation";
 import { useTransition } from "react";
 
-import { CATEGORY_LABELS, type ProductCategory } from "@/lib/shop/products";
+import { CATEGORY_LABELS } from '@/lib/shop/products';
+import type { ProductCategory } from '@/lib/shop/products';
 
 const CATEGORIES: (ProductCategory | "all")[] = [
 	"all",
@@ -25,8 +26,8 @@ export function CategoryFilter({ active }: { active: string }) {
 
 	const set = (cat: string) => {
 		const params = new URLSearchParams(searchParams.toString());
-		if (cat === "all") params.delete("cat");
-		else params.set("cat", cat);
+		if (cat === "all") {params.delete("cat");}
+		else {params.set("cat", cat);}
 		startTransition(() => router.replace(`/shop?${params.toString()}`));
 	};
 

@@ -20,11 +20,11 @@ export async function updateProfile(formData: FormData) {
   const { error } = await supabase
     .from("profiles")
     .update({
-      username,
-      full_name,
       bio,
-      website,
+      full_name,
       updated_at: new Date().toISOString(),
+      username,
+      website,
     })
     .eq("id", session.user.id);
 
@@ -33,7 +33,7 @@ export async function updateProfile(formData: FormData) {
   }
 
   await logAudit(session.user.id, "profile_update", {
-    fields: { username, full_name, bio, website },
+    fields: { bio, full_name, username, website },
   });
 
   revalidatePath("/settings");

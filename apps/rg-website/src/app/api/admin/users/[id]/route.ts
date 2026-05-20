@@ -1,4 +1,5 @@
-import { type NextRequest, NextResponse } from "next/server";
+import { NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
 
 import { requireApiAdmin } from "@/lib/api-auth";
 import { createAdminClient } from "@/lib/supabase/server";
@@ -10,7 +11,7 @@ export async function PUT(
 	{ params }: { params: Promise<{ id: string }> },
 ) {
 	const auth = await requireApiAdmin();
-	if (!auth.ok) return auth.response;
+	if (!auth.ok) {return auth.response;}
 
 	try {
 		const { id } = await params;
@@ -19,19 +20,19 @@ export async function PUT(
 
 		if (role !== undefined && !VALID_ROLES.has(role)) {
 			return NextResponse.json(
-				{ success: false, error: "Rôle invalide" },
+				{ error: "Rôle invalide", success: false },
 				{ status: 400 },
 			);
 		}
 		if (full_name !== undefined && typeof full_name !== "string") {
 			return NextResponse.json(
-				{ success: false, error: "full_name invalide" },
+				{ error: "full_name invalide", success: false },
 				{ status: 400 },
 			);
 		}
 		if (full_name && full_name.length > 200) {
 			return NextResponse.json(
-				{ success: false, error: "full_name trop long" },
+				{ error: "full_name trop long", success: false },
 				{ status: 400 },
 			);
 		}
@@ -40,7 +41,7 @@ export async function PUT(
 			typeof email_notifications !== "boolean"
 		) {
 			return NextResponse.json(
-				{ success: false, error: "email_notifications invalide" },
+				{ error: "email_notifications invalide", success: false },
 				{ status: 400 },
 			);
 		}
@@ -67,22 +68,22 @@ export async function PUT(
 
 		if (error || !user) {
 			return NextResponse.json(
-				{ success: false, error: "Utilisateur non trouvé" },
+				{ error: "Utilisateur non trouvé", success: false },
 				{ status: 404 },
 			);
 		}
 
 		return NextResponse.json({
-			success: true,
-			message: "Utilisateur modifié avec succès",
 			data: user,
+			message: "Utilisateur modifié avec succès",
+			success: true,
 		});
 	} catch (error) {
 		console.error("Erreur PUT utilisateur:", error);
 		return NextResponse.json(
 			{
-				success: false,
 				error: "Erreur lors de la modification de l'utilisateur",
+				success: false,
 			},
 			{ status: 500 },
 		);
@@ -94,7 +95,7 @@ export async function DELETE(
 	{ params }: { params: Promise<{ id: string }> },
 ) {
 	const auth = await requireApiAdmin();
-	if (!auth.ok) return auth.response;
+	if (!auth.ok) {return auth.response;}
 
 	try {
 		const { id } = await params;
@@ -118,21 +119,21 @@ export async function DELETE(
 
 		if (error || !user) {
 			return NextResponse.json(
-				{ success: false, error: "Utilisateur non trouvé" },
+				{ error: "Utilisateur non trouvé", success: false },
 				{ status: 404 },
 			);
 		}
 
 		return NextResponse.json({
-			success: true,
 			message: "Utilisateur désactivé",
+			success: true,
 		});
 	} catch (error) {
 		console.error("Erreur DELETE utilisateur:", error);
 		return NextResponse.json(
 			{
-				success: false,
 				error: "Erreur lors de la désactivation de l'utilisateur",
+				success: false,
 			},
 			{ status: 500 },
 		);

@@ -3,7 +3,8 @@
 import { Lightbulb, Search, SearchX } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 import * as React from "react";
-import { type EnhancedSearchResult, searchGlobal } from "@/app/actions/search";
+import { searchGlobal } from '@/app/actions/search';
+import type { EnhancedSearchResult } from '@/app/actions/search';
 import { Button } from "@rosegriffon/ui";
 import {
   CommandDialog,
@@ -25,15 +26,15 @@ import { cn } from "@/lib/utils";
 function useSearchContext(): SearchContext {
   const pathname = usePathname();
 
-  if (pathname.startsWith("/chara")) return "chara";
-  if (pathname.startsWith("/skill")) return "skill";
-  if (pathname.startsWith("/aura")) return "aura";
-  if (pathname.startsWith("/passive")) return "passive";
-  if (pathname.startsWith("/tactic")) return "tactic";
-  if (pathname.startsWith("/team")) return "team";
-  if (pathname.startsWith("/item")) return "item";
-  if (pathname.startsWith("/news")) return "news";
-  if (pathname.startsWith("/patch-notes")) return "patchnotes";
+  if (pathname.startsWith("/chara")) {return "chara";}
+  if (pathname.startsWith("/skill")) {return "skill";}
+  if (pathname.startsWith("/aura")) {return "aura";}
+  if (pathname.startsWith("/passive")) {return "passive";}
+  if (pathname.startsWith("/tactic")) {return "tactic";}
+  if (pathname.startsWith("/team")) {return "team";}
+  if (pathname.startsWith("/item")) {return "item";}
+  if (pathname.startsWith("/news")) {return "news";}
+  if (pathname.startsWith("/patch-notes")) {return "patchnotes";}
 
   return "global";
 }

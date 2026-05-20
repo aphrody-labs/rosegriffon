@@ -134,13 +134,13 @@ import {
  * Tailles standardisées pour les icônes
  */
 export const iconSizes = {
-	xs: "w-3 h-3",
-	sm: "w-4 h-4",
-	md: "w-5 h-5",
 	lg: "w-6 h-6",
-	xl: "w-8 h-8",
+	md: "w-5 h-5",
 	responsive: "w-4 h-4 sm:w-[18px] sm:h-[18px]", // Standard pour sidebar
 	responsiveLg: "w-5 h-5 sm:w-6 sm:h-6", // Pour headers
+	sm: "w-4 h-4",
+	xl: "w-8 h-8",
+	xs: "w-3 h-3",
 } as const;
 
 /**
@@ -149,86 +149,86 @@ export const iconSizes = {
 export const icons = {
 	// Navigation
 	navigation: {
-		home: Home,
 		back: ArrowLeft,
-		forward: ArrowRight,
-		scrollTop: ArrowUp,
 		chevronDown: ChevronDown,
 		chevronRight: ChevronRight,
-		menu: Menu,
 		close: X,
-		search: Search,
 		externalLink: ExternalLink,
+		forward: ArrowRight,
+		home: Home,
+		menu: Menu,
+		scrollTop: ArrowUp,
+		search: Search,
 	},
 
 	// User & Authentication
 	user: {
+		admin: ShieldCheck,
+		login: LogIn,
+		logout: LogOut,
 		user: User,
 		userCircle: UserCircle,
 		userPlus: UserPlus,
 		users: Users,
 		usersGroup: Users2,
-		login: LogIn,
-		logout: LogOut,
-		admin: ShieldCheck,
 	},
 
 	// Association
 	association: {
 		building: Building,
-		partners: Handshake,
-		support: Heart,
+		calendar: CalendarDays,
 		camera: Camera,
-		location: MapPin,
 		charter: ScrollText,
 		contact: PencilLine,
+		location: MapPin,
 		mail: Mail,
-		calendar: CalendarDays,
+		partners: Handshake,
+		support: Heart,
 	},
 
 	// Store
 	store: {
 		bag: ShoppingBag,
 		cart: ShoppingCart,
+		creditCard: CreditCard,
 		package: Package,
 		packageOpen: PackageOpen,
-		creditCard: CreditCard,
 		tag: Tag,
 	},
 
 	// Admin
 	admin: {
-		settings: Settings,
-		database: Database,
 		analytics: BarChart3,
+		database: Database,
 		documents: FileText,
 		images: ImageIcon,
+		settings: Settings,
 		shield: ShieldCheck,
 	},
 
 	// Status & Notifications
 	status: {
+		alert: AlertCircle,
 		bell: Bell,
 		check: Check,
 		checkCircle: CheckCircle,
-		alert: AlertCircle,
-		warning: AlertTriangle,
 		info: Info,
 		loading: Loader2,
 		refresh: RefreshCw,
 		rotate: RotateCw,
+		warning: AlertTriangle,
 	},
 
 	// Actions
 	actions: {
-		edit: Edit,
-		delete: Trash2,
-		archive: Archive,
-		download: Download,
-		upload: Upload,
-		copy: Copy,
 		add: Plus,
+		archive: Archive,
 		close: X,
+		copy: Copy,
+		delete: Trash2,
+		download: Download,
+		edit: Edit,
+		upload: Upload,
 	},
 
 	// Theme
@@ -240,16 +240,16 @@ export const icons = {
 
 	// Social Media
 	social: {
-		twitch: Twitch,
-		youtube: Youtube,
-		twitter: Twitter,
-		instagram: Instagram,
 		globe: Globe,
-		messageCircle: MessageCircle,
-		tv: Tv,
 		image: ImageLucide,
+		instagram: Instagram,
+		messageCircle: MessageCircle,
 		newspaper: Newspaper,
 		trophy: Trophy,
+		tv: Tv,
+		twitch: Twitch,
+		twitter: Twitter,
+		youtube: Youtube,
 	},
 } as const;
 
@@ -257,17 +257,17 @@ export const icons = {
  * Props communes pour les icônes
  */
 export const iconProps = {
-	default: {
-		strokeWidth: 2,
+	bold: {
 		className: iconSizes.responsive,
+		strokeWidth: 2.5,
+	},
+	default: {
+		className: iconSizes.responsive,
+		strokeWidth: 2,
 	},
 	thin: {
+		className: iconSizes.responsive,
 		strokeWidth: 1.5,
-		className: iconSizes.responsive,
-	},
-	bold: {
-		strokeWidth: 2.5,
-		className: iconSizes.responsive,
 	},
 } as const;
 

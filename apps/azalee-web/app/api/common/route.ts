@@ -19,8 +19,13 @@ export async function GET() {
 
   const commonData = {
     app: "azalee",
-    version: "1.0.0",
     environment: process.env.NODE_ENV,
+    network: {
+      achillea: "https://achillea.rosegriffon.fr",
+      azalee: "https://azalee.rosegriffon.fr",
+      rgtv: "https://rosegriffon.fr/rose-griffon-tv",
+      rosegriffon: "https://rosegriffon.fr",
+    },
     user: user
       ? {
           id: user.id,
@@ -28,12 +33,7 @@ export async function GET() {
           ...profile,
         }
       : null,
-    network: {
-      rosegriffon: "https://rosegriffon.fr",
-      achillea: "https://achillea.rosegriffon.fr",
-      azalee: "https://azalee.rosegriffon.fr",
-      rgtv: "https://rosegriffon.fr/rose-griffon-tv",
-    },
+    version: "1.0.0",
   };
 
   return NextResponse.json(commonData);

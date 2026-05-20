@@ -6,7 +6,7 @@ import { Skeleton } from "@rosegriffon/ui";
 import { StorageImage } from "@rosegriffon/ui";
 
 // Image component with skeleton loader
-const ImageWithSkeleton = React.memo(function ImageWithSkeleton({
+const ImageWithSkeleton = React.memo(({
   src,
   alt,
   priority = false,
@@ -14,7 +14,7 @@ const ImageWithSkeleton = React.memo(function ImageWithSkeleton({
   src: string;
   alt: string;
   priority?: boolean;
-}) {
+}) => {
   const [isLoading, setIsLoading] = useState(true);
 
   return (

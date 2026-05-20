@@ -16,12 +16,12 @@ import { cn } from "@/lib/utils";
 const ITEMS_PER_PAGE = 48;
 
 const ELEMENTS = [
-  { value: "", label: "Tous", icon: "blur_on" },
-  { value: "Fire", label: "Feu", commonSprite: "fire" as SpriteCommonKey },
-  { value: "Wind", label: "Vent", commonSprite: "wind" as SpriteCommonKey },
-  { value: "Forest", label: "Forêt", commonSprite: "forest" as SpriteCommonKey },
-  { value: "Mountain", label: "Montagne", commonSprite: "mountain" as SpriteCommonKey },
-  { value: "Void", label: "Néant", icon: "blur_on" },
+  { icon: "blur_on", label: "Tous", value: "" },
+  { commonSprite: "fire" as SpriteCommonKey, label: "Feu", value: "Fire" },
+  { commonSprite: "wind" as SpriteCommonKey, label: "Vent", value: "Wind" },
+  { commonSprite: "forest" as SpriteCommonKey, label: "Forêt", value: "Forest" },
+  { commonSprite: "mountain" as SpriteCommonKey, label: "Montagne", value: "Mountain" },
+  { icon: "blur_on", label: "Néant", value: "Void" },
 ];
 
 interface AuraItem {
@@ -42,7 +42,7 @@ export function AuraList({ auras, category }: { auras: AuraItem[]; category: str
   const router = useRouter();
   const q = searchParams.get("q") || "";
   const element = searchParams.get("element") || "";
-  const currentPage = parseInt(searchParams.get("page") || "1", 10);
+  const currentPage = Number.parseInt(searchParams.get("page") || "1", 10);
 
   const updateElement = useCallback(
     (value: string) => {
@@ -110,9 +110,9 @@ export function AuraList({ auras, category }: { auras: AuraItem[]; category: str
               >
                 {f.commonSprite ? (
                   <CommonSpriteIcon name={f.commonSprite} scale={0.28} />
-                ) : f.icon === "blur_on" ? (
+                ) : (f.icon === "blur_on" ? (
                   <CircleDot size={18} aria-hidden="true" />
-                ) : null}
+                ) : null)}
                 <span>{f.label}</span>
               </button>
             );

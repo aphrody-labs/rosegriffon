@@ -1,18 +1,18 @@
 /** Shared translations for shops and tactics */
 
 export const SHOP_FR: Record<string, string> = {
-  "Vs Store": "Boutique VS",
-  "Spirit Market": "Marché des Esprits",
-  "Special Training Booth": "Stand d'entraînement spécial",
-  "Legendary Chest": "Coffre légendaire",
+  Chronicle: "Galerie Chronique",
   "Chronicle Department Store": "Galerie Chronique",
-  "Magic Moves (Odaiba Branch)": "Super Techniques (Succursale Odaiba)",
   "G-Mart (Arcade Branch)": "G-Mart (Succursale Arcade)",
   "G-Mart (Odaiba)": "G-Mart (Odaiba)",
   "Kool Kit (Odaiba Branch)": "Kool Kit (Succursale Odaiba)",
-  Chronicle: "Galerie Chronique",
+  "Legendary Chest": "Coffre légendaire",
+  "Magic Moves (Odaiba Branch)": "Super Techniques (Succursale Odaiba)",
+  "Special Training Booth": "Stand d'entraînement spécial",
   Spirit: "Marché des Esprits",
+  "Spirit Market": "Marché des Esprits",
   VS: "Boutique VS",
+  "Vs Store": "Boutique VS",
 };
 
 /** Tactic names EN→FR — extracted from game text files */
@@ -175,7 +175,7 @@ export const EFFECT_FR: Record<string, string> = {
 
 /** Translate an effect string — exact match from EFFECT_FR */
 export function translateEffect(effect: string): string {
-  if (!effect) return effect;
+  if (!effect) {return effect;}
   return EFFECT_FR[effect] || effect;
 }
 

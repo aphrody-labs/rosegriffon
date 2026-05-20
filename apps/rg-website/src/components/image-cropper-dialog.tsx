@@ -67,14 +67,14 @@ export function ImageCropperDialog({
   }, []);
 
   const handleCancel = React.useCallback(() => {
-    if (isProcessing) return;
+    if (isProcessing) {return;}
     setCropArea(null);
     setZoom(1);
     onClose();
   }, [isProcessing, onClose]);
 
   const handleCrop = React.useCallback(async () => {
-    if (!cropArea || !canvasRef.current || isProcessing || !image) return;
+    if (!cropArea || !canvasRef.current || isProcessing || !image) {return;}
 
     setIsProcessing(true);
 

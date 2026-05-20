@@ -32,7 +32,7 @@ export default async function UserProfilePage({
 		.eq("username", username)
 		.single();
 
-	if (error || !profile) notFound();
+	if (error || !profile) {notFound();}
 
 	const isOwnProfile = user?.id === profile.id;
 
@@ -87,9 +87,9 @@ export default async function UserProfilePage({
 		<main className="min-h-screen bg-background pb-20">
 			<BreadcrumbSchema
 				items={[
-					{ name: "Accueil", item: "/" },
-					{ name: "Profils", item: "/profil" },
-					{ name: profile.username, item: `/profil/${username}` },
+					{ item: "/", name: "Accueil" },
+					{ item: "/profil", name: "Profils" },
+					{ item: `/profil/${username}`, name: profile.username },
 				]}
 			/>
 			<ProfileSchema
@@ -128,7 +128,7 @@ export default async function UserProfilePage({
 						) : (
 							<PatreonConnectionCard
 								isLinked={patreonLinked}
-								hasDiscord={!!profile.discord_id}
+								hasDiscord={Boolean(profile.discord_id)}
 							/>
 						)}
 						<ProfileQuickLinks />

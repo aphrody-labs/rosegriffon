@@ -75,7 +75,7 @@ export async function getComments(
     return [];
   }
 
-  if (!rawComments || rawComments.length === 0) return [];
+  if (!rawComments || rawComments.length === 0) {return [];}
 
   const commentIds: string[] = rawComments.map((c: { id: string }) => c.id);
 
@@ -93,7 +93,7 @@ export async function getComments(
   }
 
   // Récupérer les likes (article_reactions avec reaction_type = 'comment_like'
-  // et article_id formaté comme `comment:{commentId}`)
+  // Et article_id formaté comme `comment:{commentId}`)
   const commentRefIds = commentIds.map((id) => `comment:${id}`);
 
   const { data: likesData } = await client
@@ -132,21 +132,21 @@ export async function getComments(
     }) => {
       const ref = `comment:${c.id}`;
       return {
-        id: c.id,
-        content: c.content,
-        is_edited: c.is_edited,
-        is_pinned: c.is_pinned,
-        created_at: c.created_at,
-        updated_at: c.updated_at,
-        parent_id: c.parent_id,
         author: {
+          avatar_url: c.profiles?.avatar_url ?? null,
+          full_name: c.profiles?.full_name ?? null,
           id: c.profiles?.id ?? "",
           username: c.profiles?.username ?? null,
-          full_name: c.profiles?.full_name ?? null,
-          avatar_url: c.profiles?.avatar_url ?? null,
         },
-        reply_count: replyCountMap.get(c.id) || 0,
+        content: c.content,
+        created_at: c.created_at,
+        id: c.id,
+        is_edited: c.is_edited,
+        is_pinned: c.is_pinned,
         likes: likesCountMap.get(ref) || 0,
+        parent_id: c.parent_id,
+        reply_count: replyCountMap.get(c.id) || 0,
+        updated_at: c.updated_at,
         user_liked: userLikedSet.has(ref),
       };
     },
@@ -155,7 +155,7 @@ export async function getComments(
   if (sortBy === "popular") {
     // Épinglés en premier, puis tri par likes décroissant
     comments.sort((a, b) => {
-      if (a.is_pinned !== b.is_pinned) return a.is_pinned ? -1 : 1;
+      if (a.is_pinned !== b.is_pinned) {return a.is_pinned ? -1 : 1;}
       return b.likes - a.likes;
     });
   }
@@ -185,7 +185,7 @@ export async function getReplies(parentId: string): Promise<Reply[]> {
     return [];
   }
 
-  if (!data) return [];
+  if (!data) {return [];}
 
   return (
     data as Array<{
@@ -204,19 +204,19 @@ export async function getReplies(parentId: string): Promise<Reply[]> {
       } | null;
     }>
   ).map((c) => ({
-    id: c.id,
-    content: c.content,
-    is_edited: c.is_edited,
-    is_pinned: c.is_pinned,
-    created_at: c.created_at,
-    updated_at: c.updated_at,
-    parent_id: c.parent_id,
     author: {
+      avatar_url: c.profiles?.avatar_url ?? null,
+      full_name: c.profiles?.full_name ?? null,
       id: c.profiles?.id ?? "",
       username: c.profiles?.username ?? null,
-      full_name: c.profiles?.full_name ?? null,
-      avatar_url: c.profiles?.avatar_url ?? null,
     },
+    content: c.content,
+    created_at: c.created_at,
+    id: c.id,
+    is_edited: c.is_edited,
+    is_pinned: c.is_pinned,
+    parent_id: c.parent_id,
+    updated_at: c.updated_at,
   }));
 }
 
@@ -229,10 +229,10 @@ export async function createComment(
   parentId?: string,
 ): Promise<Comment> {
   const session = await getServerSession();
-  if (!session?.user) throw new Error("Non authentifié");
+  if (!session?.user) {throw new Error("Non authentifié");}
 
   const trimmed = content.trim();
-  if (trimmed.length < 1 || trimmed.length > 2000) {
+  if (trimmed.length === 0 || trimmed.length > 2000) {
     throw new Error("Le commentaire doit contenir entre 1 et 2000 caractères");
   }
 
@@ -265,10 +265,10 @@ export async function createComment(
       article_id: articleId,
       author_id: userId,
       content: trimmed,
-      parent_id: parentId ?? null,
+      created_at: now,
       is_edited: false,
       is_pinned: false,
-      created_at: now,
+      parent_id: parentId ?? null,
       updated_at: now,
     })
     .select(
@@ -299,21 +299,21 @@ export async function createComment(
   };
 
   return {
-    id: c.id,
-    content: c.content,
-    is_edited: c.is_edited,
-    is_pinned: c.is_pinned,
-    created_at: c.created_at,
-    updated_at: c.updated_at,
-    parent_id: c.parent_id,
     author: {
+      avatar_url: c.profiles?.avatar_url ?? null,
+      full_name: c.profiles?.full_name ?? null,
       id: c.profiles?.id ?? "",
       username: c.profiles?.username ?? null,
-      full_name: c.profiles?.full_name ?? null,
-      avatar_url: c.profiles?.avatar_url ?? null,
     },
-    reply_count: 0,
+    content: c.content,
+    created_at: c.created_at,
+    id: c.id,
+    is_edited: c.is_edited,
+    is_pinned: c.is_pinned,
     likes: 0,
+    parent_id: c.parent_id,
+    reply_count: 0,
+    updated_at: c.updated_at,
     user_liked: false,
   };
 }
@@ -323,10 +323,10 @@ export async function createComment(
  */
 export async function updateComment(commentId: string, content: string): Promise<Comment> {
   const session = await getServerSession();
-  if (!session?.user) throw new Error("Non authentifié");
+  if (!session?.user) {throw new Error("Non authentifié");}
 
   const trimmed = content.trim();
-  if (trimmed.length < 1 || trimmed.length > 2000) {
+  if (trimmed.length === 0 || trimmed.length > 2000) {
     throw new Error("Le commentaire doit contenir entre 1 et 2000 caractères");
   }
 
@@ -391,21 +391,21 @@ export async function updateComment(commentId: string, content: string): Promise
   };
 
   return {
-    id: c.id,
-    content: c.content,
-    is_edited: c.is_edited,
-    is_pinned: c.is_pinned,
-    created_at: c.created_at,
-    updated_at: c.updated_at,
-    parent_id: c.parent_id,
     author: {
+      avatar_url: c.profiles?.avatar_url ?? null,
+      full_name: c.profiles?.full_name ?? null,
       id: c.profiles?.id ?? "",
       username: c.profiles?.username ?? null,
-      full_name: c.profiles?.full_name ?? null,
-      avatar_url: c.profiles?.avatar_url ?? null,
     },
-    reply_count: replyCount || 0,
+    content: c.content,
+    created_at: c.created_at,
+    id: c.id,
+    is_edited: c.is_edited,
+    is_pinned: c.is_pinned,
     likes: 0,
+    parent_id: c.parent_id,
+    reply_count: replyCount || 0,
+    updated_at: c.updated_at,
     user_liked: false,
   };
 }
@@ -416,7 +416,7 @@ export async function updateComment(commentId: string, content: string): Promise
  */
 export async function deleteComment(commentId: string): Promise<void> {
   const session = await getServerSession();
-  if (!session?.user) throw new Error("Non authentifié");
+  if (!session?.user) {throw new Error("Non authentifié");}
 
   const userId = session.user.id;
   const supabase = await createClient();
@@ -460,7 +460,7 @@ export async function deleteComment(commentId: string): Promise<void> {
  */
 export async function pinComment(commentId: string): Promise<{ is_pinned: boolean }> {
   const session = await getServerSession();
-  if (!session?.user) throw new Error("Non authentifié");
+  if (!session?.user) {throw new Error("Non authentifié");}
 
   const userId = session.user.id;
   const supabase = await createClient();
@@ -526,7 +526,7 @@ export async function getCommentCount(articleId: string): Promise<number> {
  * Utilisé sur le fil d'actualité pour afficher les compteurs sur les cartes.
  */
 export async function getCommentCounts(articleIds: string[]): Promise<Record<string, number>> {
-  if (articleIds.length === 0) return {};
+  if (articleIds.length === 0) {return {};}
 
   const supabase = await createClient();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -563,7 +563,7 @@ export async function toggleCommentLike(
   commentId: string,
 ): Promise<{ liked: boolean; count: number }> {
   const session = await getServerSession();
-  if (!session?.user) throw new Error("Non authentifié");
+  if (!session?.user) {throw new Error("Non authentifié");}
 
   const userId = session.user.id;
   const supabase = await createClient();
@@ -585,8 +585,8 @@ export async function toggleCommentLike(
   } else {
     await client.from("article_reactions").insert({
       article_id: reactionArticleId,
-      user_id: userId,
       reaction_type: "comment_like",
+      user_id: userId,
     });
   }
 
@@ -596,5 +596,5 @@ export async function toggleCommentLike(
     .eq("article_id", reactionArticleId)
     .eq("reaction_type", "comment_like");
 
-  return { liked: !existing, count: count || 0 };
+  return { count: count || 0, liked: !existing };
 }

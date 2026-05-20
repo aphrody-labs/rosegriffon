@@ -42,24 +42,24 @@ export function translatePassiveEffect(text: string): string {
 }
 
 export const HISSATSU_TYPE_FR: Record<string, string> = {
-  Keep: "Arrêt",
-  Shoot: "Tir",
-  Offense: "Attaque",
   Defense: "Défense",
   Dribble: "Dribble",
+  Keep: "Arrêt",
+  Offense: "Attaque",
+  Shoot: "Tir",
 };
 
 export const HISSATSU_ELEMENT_FR: Record<string, string> = {
-  "山 (Mountain)": "Montagne",
-  "風 (Wind)": "Vent",
-  "火 (Fire)": "Feu",
-  "林 (Forest)": "Forêt",
-  "無 (Void)": "Néant",
-  Mountain: "Montagne",
-  Wind: "Vent",
   Fire: "Feu",
   Forest: "Forêt",
+  Mountain: "Montagne",
   Void: "Néant",
+  Wind: "Vent",
+  "山 (Mountain)": "Montagne",
+  "林 (Forest)": "Forêt",
+  "火 (Fire)": "Feu",
+  "無 (Void)": "Néant",
+  "風 (Wind)": "Vent",
 };
 
 export const BUFF_EFFECT_FR: Record<string, string> = {

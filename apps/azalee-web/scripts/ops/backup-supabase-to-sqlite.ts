@@ -27,7 +27,7 @@ import { mkdir } from "node:fs/promises";
 import path from "node:path";
 import { Client } from "pg";
 
-const DATABASE_URL = process.env.DATABASE_URL;
+const {DATABASE_URL} = process.env;
 
 if (!DATABASE_URL) {
 	console.error(
@@ -56,19 +56,19 @@ const pageSize = Number(argMap.get("page") ?? "5000");
 await mkdir(path.dirname(outFile), { recursive: true });
 
 // --- Découverte tables + colonnes via pg ---
-type ColumnInfo = {
+interface ColumnInfo {
 	name: string;
 	pgType: string;
 	sqliteAffinity: "INTEGER" | "REAL" | "TEXT";
-};
-type TableInfo = { schema: string; name: string; columns: ColumnInfo[] };
+}
+interface TableInfo { schema: string; name: string; columns: ColumnInfo[] }
 
 function affinityFor(pgType: string): ColumnInfo["sqliteAffinity"] {
 	const t = pgType.toLowerCase();
 	if (t === "boolean" || t === "integer" || t === "bigint" || t === "smallint")
-		return "INTEGER";
+		{return "INTEGER";}
 	if (t === "numeric" || t === "real" || t === "double precision")
-		return "REAL";
+		{return "REAL";}
 	return "TEXT";
 }
 
@@ -90,8 +90,8 @@ await pg.connect();
 	);
 
 	let names = tblRes.rows.map((r) => ({
-		schema: r.table_schema,
 		name: r.table_name,
+		schema: r.table_schema,
 	}));
 	if (includeTablesArg) {
 		const allow = new Set(includeTablesArg.split(",").map((t) => t.trim()));
@@ -111,13 +111,13 @@ await pg.connect();
 			data_type: string;
 		}>(colQuery, [t.schema, t.name]);
 		tables.push({
-			schema: t.schema,
-			name: t.name,
 			columns: cols.rows.map((r) => ({
 				name: r.column_name,
 				pgType: r.data_type,
 				sqliteAffinity: affinityFor(r.data_type),
 			})),
+			name: t.name,
+			schema: t.schema,
 		});
 	}
 }
@@ -157,22 +157,22 @@ function coerce(
 	v: unknown,
 	affinity: ColumnInfo["sqliteAffinity"],
 ): string | number | null {
-	if (v === null || v === undefined) return null;
+	if (v === null || v === undefined) {return null;}
 	if (affinity === "INTEGER") {
-		if (typeof v === "boolean") return v ? 1 : 0;
-		if (typeof v === "bigint") return Number(v);
-		if (typeof v === "number") return v;
+		if (typeof v === "boolean") {return v ? 1 : 0;}
+		if (typeof v === "bigint") {return Number(v);}
+		if (typeof v === "number") {return v;}
 		const n = Number(v);
 		return Number.isFinite(n) ? n : String(v);
 	}
 	if (affinity === "REAL") {
-		if (typeof v === "number") return v;
+		if (typeof v === "number") {return v;}
 		const n = Number(v);
 		return Number.isFinite(n) ? n : String(v);
 	}
-	if (typeof v === "object") return JSON.stringify(v);
-	if (typeof v === "bigint") return String(v);
-	if (v instanceof Date) return v.toISOString();
+	if (typeof v === "object") {return JSON.stringify(v);}
+	if (typeof v === "bigint") {return String(v);}
+	if (v instanceof Date) {return v.toISOString();}
 	return String(v);
 }
 
@@ -197,7 +197,7 @@ for (const t of tables) {
 		for (const r of rows) {
 			const p: Record<string, string | number | null> = {};
 			for (const c of t.columns)
-				p[`$${c.name}`] = coerce(r[c.name], c.sqliteAffinity);
+				{p[`$${c.name}`] = coerce(r[c.name], c.sqliteAffinity);}
 			insert.run(p);
 		}
 	});
@@ -209,15 +209,15 @@ for (const t of tables) {
 			`SELECT * FROM ${tableId} ORDER BY ctid LIMIT $1 OFFSET $2`,
 			[pageSize, offset],
 		);
-		if (res.rows.length === 0) break;
+		if (res.rows.length === 0) {break;}
 		insertMany(res.rows);
 		count += res.rows.length;
-		if (res.rows.length < pageSize) break;
+		if (res.rows.length < pageSize) {break;}
 	}
 
 	const ms = Math.round(performance.now() - t0);
 	totalRows += count;
-	summary.push({ table: t.name, rows: count, ms });
+	summary.push({ ms, rows: count, table: t.name });
 	console.log(
 		`  ✓ ${t.name.padEnd(34)} ${String(count).padStart(7)} rows  (${ms}ms)`,
 	);
@@ -237,7 +237,7 @@ console.log(
 );
 console.log(
 	`  Top 5 tables: ${summary
-		.sort((a, b) => b.rows - a.rows)
+		.toSorted((a, b) => b.rows - a.rows)
 		.slice(0, 5)
 		.map((s) => `${s.table}=${s.rows}`)
 		.join(", ")}`,

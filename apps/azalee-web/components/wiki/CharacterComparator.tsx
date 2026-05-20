@@ -64,25 +64,25 @@ interface CharacterComparatorProps {
 
 const ELEMENT_SPRITE: Record<string, SpriteCommonKey> = {
   Fire: "fire",
-  Wind: "wind",
   Forest: "forest",
   Mountain: "mountain",
+  Wind: "wind",
 };
 
 const ELEMENT_GRADIENTS: Record<string, string> = {
   Fire: "from-red-950 via-orange-900/90 to-amber-800/70",
-  Wind: "from-emerald-950 via-teal-900/90 to-cyan-800/70",
   Forest: "from-green-950 via-lime-900/90 to-emerald-800/70",
   Mountain: "from-amber-950 via-yellow-900/90 to-orange-800/70",
   Void: "from-slate-950 via-gray-900/90 to-zinc-800/70",
+  Wind: "from-emerald-950 via-teal-900/90 to-cyan-800/70",
 };
 
-const POS_LABEL: Record<string, string> = { FW: "ATT", MF: "MIL", DF: "DEF", GK: "GAR" };
+const POS_LABEL: Record<string, string> = { DF: "DEF", FW: "ATT", GK: "GAR", MF: "MIL" };
 const POS_COLOR: Record<string, string> = {
-  FW: "bg-red-600",
-  MF: "bg-emerald-600",
   DF: "bg-blue-600",
+  FW: "bg-red-600",
   GK: "bg-amber-500",
+  MF: "bg-emerald-600",
 };
 
 // ---------- Helpers ----------
@@ -112,10 +112,10 @@ function totalStats(stats: CharacterStats): number {
 /** Prioritize zukanHash (3D render) > image > face icon fallback */
 function resolveImageUrl(char: CompareCharacter): string {
   if (char.zukanHash) {
-    const cleanHash = char.zukanHash.startsWith("/") ? char.zukanHash.substring(1) : char.zukanHash;
+    const cleanHash = char.zukanHash.startsWith("/") ? char.zukanHash.slice(1) : char.zukanHash;
     return `https://dxi4wb638ujep.cloudfront.net/1/${cleanHash}.png`;
   }
-  if (char.image) return char.image;
+  if (char.image) {return char.image;}
   return getCharacterImageUrl(char.internalCode) || "/ievr.webp";
 }
 
@@ -232,8 +232,8 @@ function StatComparisonBars({
   const wins = STAT_LABELS.reduce(
     (acc, { key }) => {
       const diff = stats1[key] - stats2[key];
-      if (diff > 0) acc.char1++;
-      else if (diff < 0) acc.char2++;
+      if (diff > 0) {acc.char1++;}
+      else if (diff < 0) {acc.char2++;}
       return acc;
     },
     { char1: 0, char2: 0 },
@@ -284,9 +284,9 @@ function StatComparisonBars({
                     "font-bold w-8 sm:w-10 text-right tabular-nums",
                     delta < 0
                       ? "text-on-surface"
-                      : delta > 0
+                      : (delta > 0
                         ? "text-on-surface/60"
-                        : "text-on-surface",
+                        : "text-on-surface"),
                   )}
                 >
                   {v1}
@@ -297,9 +297,9 @@ function StatComparisonBars({
                     "font-bold w-8 sm:w-10 tabular-nums",
                     delta > 0
                       ? "text-on-surface"
-                      : delta < 0
+                      : (delta < 0
                         ? "text-on-surface/60"
-                        : "text-on-surface",
+                        : "text-on-surface"),
                   )}
                 >
                   {v2}
@@ -312,7 +312,7 @@ function StatComparisonBars({
                     delta === 0 && "text-on-surface-variant/50",
                   )}
                 >
-                  {delta > 0 ? `+${delta}` : delta === 0 ? "=" : delta}
+                  {delta > 0 ? `+${delta}` : (delta === 0 ? "=" : delta)}
                 </span>
               </div>
             </div>
@@ -367,7 +367,7 @@ function StatComparisonBars({
                   d === 0 && "text-on-surface-variant/50",
                 )}
               >
-                {d > 0 ? `+${d}` : d === 0 ? "=" : d}
+                {d > 0 ? `+${d}` : (d === 0 ? "=" : d)}
               </span>
             );
           })()}
@@ -398,11 +398,11 @@ function SkillRow({ skill, isCommon }: { skill: SkillInfo; isCommon: boolean }) 
       <div className="w-8 sm:w-9 h-full flex items-center justify-center bg-surface-dim shrink-0">
         {catIcon ? (
           <Image src={catIcon} alt="" width={16} height={16} className="object-contain" />
-        ) : skill.isPassive ? (
+        ) : (skill.isPassive ? (
           <Icon name="auto_awesome" size={15} className="text-outline-variant" />
         ) : (
           <Icon name="blur_on" size={15} className="text-outline-variant" />
-        )}
+        ))}
       </div>
 
       {/* Name */}
@@ -522,9 +522,9 @@ export function CharacterComparator({ char1, char2 }: CharacterComparatorProps) 
       const params = new URLSearchParams();
       if (searchTarget === 1) {
         params.set("char1", slug);
-        if (char2) params.set("char2", char2.slug);
+        if (char2) {params.set("char2", char2.slug);}
       } else {
-        if (char1) params.set("char1", char1.slug);
+        if (char1) {params.set("char1", char1.slug);}
         params.set("char2", slug);
       }
       router.push(`/tools/compare?${params.toString()}`);
@@ -533,10 +533,10 @@ export function CharacterComparator({ char1, char2 }: CharacterComparatorProps) 
   );
 
   const handleSwap = useCallback(() => {
-    if (!char1 && !char2) return;
+    if (!char1 && !char2) {return;}
     const params = new URLSearchParams();
-    if (char2) params.set("char1", char2.slug);
-    if (char1) params.set("char2", char1.slug);
+    if (char2) {params.set("char1", char2.slug);}
+    if (char1) {params.set("char2", char1.slug);}
     router.push(`/tools/compare?${params.toString()}`);
   }, [char1, char2, router]);
 

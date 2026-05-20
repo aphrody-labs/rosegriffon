@@ -14,7 +14,7 @@ interface ShareButtonsProps {
 export function ShareButtons({ title, slug }: ShareButtonsProps) {
   const getUrl = () => {
     // Falls back to window.location if configured URL is missing,
-    // but constructing from slug is safer for SSR consistency if we know the base URL.
+    // But constructing from slug is safer for SSR consistency if we know the base URL.
     if (typeof window !== "undefined") {
       return window.location.href;
     }
@@ -24,9 +24,9 @@ export function ShareButtons({ title, slug }: ShareButtonsProps) {
   const handleShare = async () => {
     const url = getUrl();
     const shareData = {
-      title: title,
+      title,
       text: title,
-      url: url,
+      url,
     };
 
     try {
@@ -36,10 +36,10 @@ export function ShareButtons({ title, slug }: ShareButtonsProps) {
         await navigator.clipboard.writeText(url);
         toast.success("Lien copié dans le presse-papier !");
       }
-    } catch (err) {
-      console.error("Error sharing:", err);
+    } catch (error) {
+      console.error("Error sharing:", error);
       // Don't show error if user cancelled the share dialog
-      if (err instanceof Error && err.name !== "AbortError") {
+      if (error instanceof Error && error.name !== "AbortError") {
         toast.error("Impossible de partager le lien");
       }
     }

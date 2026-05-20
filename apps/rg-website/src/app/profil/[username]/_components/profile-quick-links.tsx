@@ -1,5 +1,6 @@
 import { Card, CardContent } from "@rosegriffon/ui";
-import { FileText, Palette, Settings, type LucideIcon } from "lucide-react";
+import { FileText, Palette, Settings } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
 import Link from "next/link";
 
 interface QuickLink {
@@ -12,25 +13,25 @@ interface QuickLink {
 
 const QUICK_LINKS: QuickLink[] = [
 	{
-		title: "Mon Compte",
+		accent: "text-sky-500",
 		description: "Avatar, bio, réseaux sociaux",
 		href: "/dashboard/account",
 		icon: Settings,
-		accent: "text-sky-500",
+		title: "Mon Compte",
 	},
 	{
-		title: "Avatar RG",
+		accent: "text-violet-500",
 		description: "Générateur de PFP officielle",
 		href: "/projets/outils/pfp",
 		icon: Palette,
-		accent: "text-violet-500",
+		title: "Avatar RG",
 	},
 	{
-		title: "Mes Articles",
+		accent: "text-emerald-500",
 		description: "Brouillons et publications",
 		href: "/dashboard/articles",
 		icon: FileText,
-		accent: "text-emerald-500",
+		title: "Mes Articles",
 	},
 ];
 

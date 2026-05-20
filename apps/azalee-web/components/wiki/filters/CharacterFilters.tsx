@@ -2,7 +2,8 @@ import { useLanguage } from "@/components/providers/language-provider";
 import { getSkillCategoryIconUrl } from "@/lib/images";
 import { FilterChips } from "../FilterChips";
 import { RarityFilterChips } from "./RarityFilterChips";
-import { TeamFilter, type TeamOption } from "./TeamFilter";
+import { TeamFilter } from './TeamFilter';
+import type { TeamOption } from './TeamFilter';
 
 interface CharacterFiltersProps {
   teams?: TeamOption[];
@@ -25,10 +26,10 @@ export function CharacterFilters({ teams = [] }: CharacterFiltersProps) {
             className="flex gap-1.5 md:gap-2"
             hideLabel
             options={[
-              { label: t("wiki.elements.fire"), value: "Fire", commonSprite: "fire" },
-              { label: t("wiki.elements.wind"), value: "Wind", commonSprite: "wind" },
-              { label: t("wiki.elements.forest"), value: "Forest", commonSprite: "forest" },
-              { label: t("wiki.elements.mountain"), value: "Mountain", commonSprite: "mountain" },
+              { commonSprite: "fire", label: t("wiki.elements.fire"), value: "Fire" },
+              { commonSprite: "wind", label: t("wiki.elements.wind"), value: "Wind" },
+              { commonSprite: "forest", label: t("wiki.elements.forest"), value: "Forest" },
+              { commonSprite: "mountain", label: t("wiki.elements.mountain"), value: "Mountain" },
             ]}
           />
         </section>
@@ -44,24 +45,24 @@ export function CharacterFilters({ teams = [] }: CharacterFiltersProps) {
             hideLabel
             options={[
               {
+                imageIcon: getSkillCategoryIconUrl("gardien"),
                 label: t("wiki.positions.gk"),
                 value: "GK",
-                imageIcon: getSkillCategoryIconUrl("gardien"),
               },
               {
+                imageIcon: getSkillCategoryIconUrl("defense"),
                 label: t("wiki.positions.df"),
                 value: "DF",
-                imageIcon: getSkillCategoryIconUrl("defense"),
               },
               {
+                imageIcon: getSkillCategoryIconUrl("dribble"),
                 label: t("wiki.positions.mf"),
                 value: "MF",
-                imageIcon: getSkillCategoryIconUrl("dribble"),
               },
               {
+                imageIcon: getSkillCategoryIconUrl("tir"),
                 label: t("wiki.positions.fw"),
                 value: "FW",
-                imageIcon: getSkillCategoryIconUrl("tir"),
               },
             ]}
           />
@@ -77,8 +78,8 @@ export function CharacterFilters({ teams = [] }: CharacterFiltersProps) {
             className="flex gap-1.5 md:gap-2"
             hideLabel
             options={[
-              { label: t("wiki.genders.male"), value: "1", commonSprite: "boy" },
-              { label: t("wiki.genders.female"), value: "2", commonSprite: "girl" },
+              { commonSprite: "boy", label: t("wiki.genders.male"), value: "1" },
+              { commonSprite: "girl", label: t("wiki.genders.female"), value: "2" },
             ]}
           />
         </section>
@@ -93,16 +94,16 @@ export function CharacterFilters({ teams = [] }: CharacterFiltersProps) {
             className="flex gap-1.5 md:gap-2"
             hideLabel
             options={[
-              { label: "Justice", value: "Justice", commonSprite: "justice" },
-              { label: t("wiki.playstyles.bond"), value: "Bond", commonSprite: "lien" },
-              { label: t("wiki.playstyles.counter"), value: "Counter", commonSprite: "contre" },
-              { label: t("wiki.playstyles.breach"), value: "Breach", commonSprite: "breche" },
+              { commonSprite: "justice", label: "Justice", value: "Justice" },
+              { commonSprite: "lien", label: t("wiki.playstyles.bond"), value: "Bond" },
+              { commonSprite: "contre", label: t("wiki.playstyles.counter"), value: "Counter" },
+              { commonSprite: "breche", label: t("wiki.playstyles.breach"), value: "Breach" },
               {
+                commonSprite: "jeu_violent",
                 label: t("wiki.playstyles.rough_play"),
                 value: "Rough Play",
-                commonSprite: "jeu_violent",
               },
-              { label: "Tension", value: "Tension", commonSprite: "tension" },
+              { commonSprite: "tension", label: "Tension", value: "Tension" },
             ]}
           />
         </section>

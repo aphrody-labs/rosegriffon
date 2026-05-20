@@ -33,40 +33,40 @@ export async function GET() {
       // If signed URL fails, return public URL as fallback
       console.warn(`Could not create signed URL for ${fileName}: ${signedError.message}`);
       return NextResponse.json({
-        success: true,
-        url: publicData.publicUrl,
-        type: "public",
         bucket: bucketName,
         file: fileName,
+        success: true,
+        type: "public",
+        url: publicData.publicUrl,
       });
     }
 
     // Return signed URL if available
     if (signedData?.signedUrl) {
       return NextResponse.json({
-        success: true,
-        url: signedData.signedUrl,
-        type: "signed",
         bucket: bucketName,
-        file: fileName,
         expiresIn: 300,
+        file: fileName,
+        success: true,
+        type: "signed",
+        url: signedData.signedUrl,
       });
     }
 
     // Fallback to public URL
     return NextResponse.json({
-      success: true,
-      url: publicData.publicUrl,
-      type: "public",
       bucket: bucketName,
       file: fileName,
+      success: true,
+      type: "public",
+      url: publicData.publicUrl,
     });
   } catch (error) {
     console.error("Error fetching example image URL:", error);
     return NextResponse.json(
       {
-        success: false,
         error: error instanceof Error ? error.message : "Failed to fetch image URL",
+        success: false,
       },
       { status: 500 }
     );

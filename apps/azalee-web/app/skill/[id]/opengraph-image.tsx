@@ -4,22 +4,22 @@ import { wikiService } from "@/lib/wiki-service";
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || "https://azalee.rosegriffon.fr";
 
 function absoluteUrl(url?: string | null): string | undefined {
-  if (!url) return undefined;
-  if (url.startsWith("http")) return url;
-  if (url.startsWith("/storage/")) return `${SUPABASE_URL}${url}`;
+  if (!url) {return undefined;}
+  if (url.startsWith("http")) {return url;}
+  if (url.startsWith("/storage/")) {return `${SUPABASE_URL}${url}`;}
   return `https://azalee.rosegriffon.fr${url}`;
 }
 
 export const alt = "Technique Inazuma Eleven Victory Road - Azalee";
-export const size = { width: 1200, height: 630 };
+export const size = { height: 630, width: 1200 };
 export const contentType = "image/png";
 
 const ELEMENT_COLORS: Record<string, string> = {
   Fire: "#E53935",
-  Wind: "#43A047",
   Forest: "#1B5E20",
   Mountain: "#F9A825",
   Void: "#78909C",
+  Wind: "#43A047",
 };
 
 export default async function Image({ params }: { params: Promise<{ id: string }> }) {
@@ -30,15 +30,15 @@ export default async function Image({ params }: { params: Promise<{ id: string }
     return new ImageResponse(
       <div
         style={{
-          width: "100%",
-          height: "100%",
-          display: "flex",
           alignItems: "center",
-          justifyContent: "center",
           background: "linear-gradient(135deg, #1A120D 0%, #2D1F14 100%)",
           color: "#F2A93B",
+          display: "flex",
           fontSize: 48,
           fontWeight: 700,
+          height: "100%",
+          justifyContent: "center",
+          width: "100%",
         }}
       >
         Technique introuvable
@@ -52,9 +52,9 @@ export default async function Image({ params }: { params: Promise<{ id: string }
   const element = skill.elementName?.en || "Void";
   const elementFr = skill.elementName?.fr || "";
   const power = skill.power_min
-    ? skill.power_max && skill.power_max !== skill.power_min
+    ? (skill.power_max && skill.power_max !== skill.power_min
       ? `${skill.power_min} - ${skill.power_max}`
-      : `${skill.power_min}`
+      : `${skill.power_min}`)
     : null;
   const tp = skill.consumeTp || null;
 
@@ -63,53 +63,53 @@ export default async function Image({ params }: { params: Promise<{ id: string }
   return new ImageResponse(
     <div
       style={{
-        width: "100%",
-        height: "100%",
-        display: "flex",
         background: "linear-gradient(135deg, #1A120D 0%, #2D1F14 50%, #1A120D 100%)",
         color: "white",
+        display: "flex",
         fontFamily: "sans-serif",
-        position: "relative",
+        height: "100%",
         overflow: "hidden",
+        position: "relative",
+        width: "100%",
       }}
     >
       {/* Top bar */}
       <div
         style={{
-          position: "absolute",
-          top: 0,
-          left: 0,
-          right: 0,
-          height: 4,
           background: `linear-gradient(90deg, #F2A93B, ${elementColor}, #F2A93B)`,
           display: "flex",
+          height: 4,
+          left: 0,
+          position: "absolute",
+          right: 0,
+          top: 0,
         }}
       />
 
       {/* Background glow */}
       <div
         style={{
+          background: `radial-gradient(circle, ${elementColor}10 0%, transparent 70%)`,
+          borderRadius: "50%",
+          display: "flex",
+          height: 500,
+          left: "50%",
           position: "absolute",
           top: "50%",
-          left: "50%",
-          width: 500,
-          height: 500,
-          borderRadius: "50%",
-          background: `radial-gradient(circle, ${elementColor}10 0%, transparent 70%)`,
           transform: "translate(-50%, -50%)",
-          display: "flex",
+          width: 500,
         }}
       />
 
       {/* Skill image */}
       <div
         style={{
-          display: "flex",
           alignItems: "center",
-          justifyContent: "center",
-          width: 300,
-          padding: "40px 20px 40px 60px",
+          display: "flex",
           flexShrink: 0,
+          justifyContent: "center",
+          padding: "40px 20px 40px 60px",
+          width: 300,
         }}
       >
         {absoluteUrl(skill.image) ? (
@@ -118,25 +118,25 @@ export default async function Image({ params }: { params: Promise<{ id: string }
             width={180}
             height={180}
             style={{
+              border: `2px solid ${elementColor}60`,
               borderRadius: 20,
               objectFit: "contain",
-              border: `2px solid ${elementColor}60`,
             }}
             alt={`Image de la technique ${name}`}
           />
         ) : (
           <div
             style={{
-              width: 180,
-              height: 180,
-              borderRadius: 20,
-              background: "#3D2E22",
-              display: "flex",
               alignItems: "center",
-              justifyContent: "center",
-              fontSize: 64,
-              color: elementColor,
+              background: "#3D2E22",
               border: `2px solid ${elementColor}60`,
+              borderRadius: 20,
+              color: elementColor,
+              display: "flex",
+              fontSize: 64,
+              height: 180,
+              justifyContent: "center",
+              width: 180,
             }}
           >
             ⚡
@@ -148,22 +148,22 @@ export default async function Image({ params }: { params: Promise<{ id: string }
       <div
         style={{
           display: "flex",
+          flex: 1,
           flexDirection: "column",
+          gap: 16,
           justifyContent: "center",
           padding: "40px 60px 40px 0",
-          flex: 1,
-          gap: 16,
         }}
       >
         {/* Category label */}
         <div
           style={{
+            color: "#A09080",
+            display: "flex",
             fontSize: 16,
             fontWeight: 700,
-            color: "#A09080",
-            textTransform: "uppercase",
             letterSpacing: 3,
-            display: "flex",
+            textTransform: "uppercase",
           }}
         >
           {category}
@@ -172,29 +172,29 @@ export default async function Image({ params }: { params: Promise<{ id: string }
         {/* Name */}
         <div
           style={{
+            color: "white",
+            display: "flex",
             fontSize: 52,
             fontWeight: 900,
-            color: "white",
             lineHeight: 1.1,
-            display: "flex",
           }}
         >
           {name}
         </div>
 
         {/* Badges */}
-        <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 12 }}>
           {elementFr && (
             <div
               style={{
-                display: "flex",
                 background: `${elementColor}20`,
+                border: `1px solid ${elementColor}40`,
                 borderRadius: 20,
-                padding: "8px 20px",
+                color: elementColor,
+                display: "flex",
                 fontSize: 18,
                 fontWeight: 700,
-                color: elementColor,
-                border: `1px solid ${elementColor}40`,
+                padding: "8px 20px",
               }}
             >
               {elementFr}
@@ -203,14 +203,14 @@ export default async function Image({ params }: { params: Promise<{ id: string }
           {power && (
             <div
               style={{
-                display: "flex",
                 background: "#3D2E22",
+                border: "1px solid #5D4E42",
                 borderRadius: 20,
-                padding: "8px 20px",
+                color: "#F2A93B",
+                display: "flex",
                 fontSize: 18,
                 fontWeight: 700,
-                color: "#F2A93B",
-                border: "1px solid #5D4E42",
+                padding: "8px 20px",
               }}
             >
               Puissance {power}
@@ -219,14 +219,14 @@ export default async function Image({ params }: { params: Promise<{ id: string }
           {tp && (
             <div
               style={{
-                display: "flex",
                 background: "#3D2E22",
+                border: "1px solid #5D4E42",
                 borderRadius: 20,
-                padding: "8px 20px",
+                color: "#29B6F6",
+                display: "flex",
                 fontSize: 18,
                 fontWeight: 700,
-                color: "#29B6F6",
-                border: "1px solid #5D4E42",
+                padding: "8px 20px",
               }}
             >
               {tp} TP
@@ -238,29 +238,29 @@ export default async function Image({ params }: { params: Promise<{ id: string }
       {/* Branding */}
       <div
         style={{
-          position: "absolute",
-          bottom: 20,
-          left: 60,
-          display: "flex",
           alignItems: "center",
+          bottom: 20,
+          display: "flex",
           gap: 8,
+          left: 60,
+          position: "absolute",
         }}
       >
         <div
           style={{
-            fontSize: 14,
-            fontWeight: 700,
             color: "#F2A93B",
             display: "flex",
+            fontSize: 14,
+            fontWeight: 700,
           }}
         >
           azalee.rosegriffon.fr
         </div>
         <div
           style={{
-            fontSize: 12,
             color: "#6D5E50",
             display: "flex",
+            fontSize: 12,
           }}
         >
           Inazuma Eleven: Victory Road

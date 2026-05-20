@@ -3,8 +3,8 @@ import { useEffect, useState } from "react";
 
 const loader = new Loader({
   apiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY as string,
-  version: "weekly",
   libraries: ["marker", "places"],
+  version: "weekly",
 });
 
 export const useGoogleMaps = () => {
@@ -15,8 +15,8 @@ export const useGoogleMaps = () => {
     loader
       .importLibrary("maps")
       .then(() => setIsLoaded(true))
-      .catch((err) => setError(err));
+      .catch((error) => setError(error));
   }, []);
 
-  return { isLoaded, error, loader };
+  return { error, isLoaded, loader };
 };

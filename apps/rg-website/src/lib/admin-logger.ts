@@ -11,15 +11,15 @@ export async function logAdminAction(
 ) {
   try {
     const user = await getServerUser();
-    if (!user) return;
+    if (!user) {return;}
 
     const admin = createAdminClient();
     await admin.from("admin_audit_log").insert({
-      user_id: user.id,
       action,
-      entity_type: targetType,
-      entity_id: targetId,
       details: details as unknown as Record<string, unknown>,
+      entity_id: targetId,
+      entity_type: targetType,
+      user_id: user.id,
     });
   } catch (error) {
     console.error("Failed to log admin action:", error);

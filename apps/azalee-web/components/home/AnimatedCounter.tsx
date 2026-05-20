@@ -15,7 +15,7 @@ export function AnimatedCounter({ value, duration = 1500, className }: AnimatedC
 
   useEffect(() => {
     const el = ref.current;
-    if (!el || hasAnimated.current) return;
+    if (!el || hasAnimated.current) {return;}
 
     // Respect prefers-reduced-motion
     const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -27,7 +27,7 @@ export function AnimatedCounter({ value, duration = 1500, className }: AnimatedC
 
     const observer = new IntersectionObserver(
       ([entry]) => {
-        if (!entry.isIntersecting || hasAnimated.current) return;
+        if (!entry.isIntersecting || hasAnimated.current) {return;}
         hasAnimated.current = true;
         observer.disconnect();
 
@@ -38,7 +38,7 @@ export function AnimatedCounter({ value, duration = 1500, className }: AnimatedC
           // Ease-out cubic
           const eased = 1 - (1 - progress) ** 3;
           setDisplay(Math.round(eased * value));
-          if (progress < 1) requestAnimationFrame(animate);
+          if (progress < 1) {requestAnimationFrame(animate);}
         };
         requestAnimationFrame(animate);
       },

@@ -43,8 +43,8 @@ export const getPublicArticles = async (page = 1, limit = 10) => {
 
   if (error) {
     console.error("Error fetching articles:", error);
-    return { data: [], count: 0 };
+    return { count: 0, data: [] };
   }
 
-  return { data, count };
+  return { count, data };
 };

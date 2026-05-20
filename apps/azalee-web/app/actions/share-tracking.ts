@@ -59,9 +59,9 @@ export async function trackShare(
 
 	const { error: insertError } = await client.from("article_shares").insert({
 		article_id: articleId,
-		user_id: userId,
-		platform,
 		created_at: new Date().toISOString(),
+		platform,
+		user_id: userId,
 	});
 
 	if (insertError) {
@@ -91,7 +91,7 @@ export async function trackShare(
 export async function getShareCounts(
 	articleIds: string[],
 ): Promise<Record<string, ShareCounts>> {
-	if (articleIds.length === 0) return {};
+	if (articleIds.length === 0) {return {};}
 
 	const supabase = await createClient();
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -99,7 +99,7 @@ export async function getShareCounts(
 
 	const result: Record<string, ShareCounts> = {};
 	for (const id of articleIds) {
-		result[id] = { total: 0, byPlatform: {} };
+		result[id] = { byPlatform: {}, total: 0 };
 	}
 
 	// Tentative via RPC
@@ -115,13 +115,13 @@ export async function getShareCounts(
 			total: number | string | null;
 		}>) {
 			const bucket = result[row.article_id] ?? {
-				total: 0,
 				byPlatform: {},
+				total: 0,
 			};
 			bucket.total =
 				typeof row.total === "number"
 					? row.total
-					: parseInt(String(row.total ?? "0"), 10) || 0;
+					: Number.parseInt(String(row.total ?? "0"), 10) || 0;
 			if (row.by_platform && typeof row.by_platform === "object") {
 				for (const [platform, count] of Object.entries(row.by_platform)) {
 					bucket.byPlatform[platform] = Number(count) || 0;
@@ -146,8 +146,8 @@ export async function getShareCounts(
 	if (data) {
 		for (const row of data as Array<{ article_id: string; platform: string }>) {
 			const bucket = result[row.article_id] ?? {
-				total: 0,
 				byPlatform: {},
+				total: 0,
 			};
 			bucket.byPlatform[row.platform] =
 				(bucket.byPlatform[row.platform] || 0) + 1;
@@ -181,7 +181,7 @@ export async function getArticleShareStats(
 
 	if (error) {
 		console.error("getArticleShareStats error:", error);
-		return { total: 0, byPlatform: {}, timeline: [] };
+		return { byPlatform: {}, timeline: [], total: 0 };
 	}
 
 	const rows = (data || []) as Array<{ platform: string; created_at: string }>;
@@ -195,13 +195,13 @@ export async function getArticleShareStats(
 		timelineMap.set(date, (timelineMap.get(date) || 0) + 1);
 	}
 
-	const timeline: ShareTimelineEntry[] = Array.from(timelineMap.entries())
-		.sort(([a], [b]) => a.localeCompare(b))
-		.map(([date, count]) => ({ date, count }));
+	const timeline: ShareTimelineEntry[] = [...timelineMap.entries()]
+		.toSorted(([a], [b]) => a.localeCompare(b))
+		.map(([date, count]) => ({ count, date }));
 
 	return {
-		total: rows.length,
 		byPlatform,
 		timeline,
+		total: rows.length,
 	};
 }

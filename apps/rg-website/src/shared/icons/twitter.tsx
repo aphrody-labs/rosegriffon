@@ -1,8 +1,8 @@
-type TwitterIconProps = {
+interface TwitterIconProps {
   width?: number;
   height?: number;
   className?: string;
-};
+}
 
 export default function TwitterIcon({ width, height, className }: TwitterIconProps) {
   return (

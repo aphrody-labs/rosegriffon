@@ -10,12 +10,12 @@
 export function sanitizeNewsSearchQuery(
 	raw: string | null | undefined,
 ): string | null {
-	if (!raw) return null;
+	if (!raw) {return null;}
 	const cleaned = raw
 		.trim()
 		.replaceAll(/[^\w\sÀ-ÿŒœ-]/g, "")
 		.split(/\s+/)
 		.filter(Boolean);
-	if (cleaned.length === 0) return null;
+	if (cleaned.length === 0) {return null;}
 	return cleaned.join(" & ");
 }

@@ -39,9 +39,9 @@ interface LatestNewsSectionProps {
 
 const CATEGORY_LABELS: Record<string, string> = {
 	announcement: "Annonce",
-	event: "Événement",
-	critique: "Critique",
 	community: "Communauté",
+	critique: "Critique",
+	event: "Événement",
 };
 
 function CategoryBadge({
@@ -304,7 +304,7 @@ export function LatestNewsSection({
 
 	useEffect(() => {
 		const container = carouselRef.current;
-		if (!container || !hasArticles) return;
+		if (!container || !hasArticles) {return;}
 
 		const cards = container.querySelectorAll("[data-slide]");
 		const observer = new IntersectionObserver(
@@ -312,7 +312,7 @@ export function LatestNewsSection({
 				for (const entry of entries) {
 					if (entry.isIntersecting) {
 						const idx = Number((entry.target as HTMLElement).dataset.slide);
-						if (!Number.isNaN(idx)) setActiveSlide(idx);
+						if (!Number.isNaN(idx)) {setActiveSlide(idx);}
 					}
 				}
 			},
@@ -323,7 +323,7 @@ export function LatestNewsSection({
 		return () => observer.disconnect();
 	}, [hasArticles]);
 
-	if (!hasArticles && !hasTweets) return null;
+	if (!hasArticles && !hasTweets) {return null;}
 
 	return (
 		<section className="relative">

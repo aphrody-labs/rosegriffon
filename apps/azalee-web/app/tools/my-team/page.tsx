@@ -6,10 +6,10 @@ import { wikiService } from "@/lib/wiki-service";
 import { TeamBuilderLoader } from "./TeamBuilderLoader";
 
 export const metadata: Metadata = {
-  title: "Mon Équipe | Inazuma Eleven Victory Road - Azalée",
+  alternates: { canonical: "/tools/my-team" },
   description:
     "Créez votre équipe Inazuma Eleven idéale. Glissez-déposez vos joueurs sur le terrain, choisissez votre formation et partagez votre équipe.",
-  alternates: { canonical: "/tools/my-team" },
+  title: "Mon Équipe | Inazuma Eleven Victory Road - Azalée",
 };
 
 export const dynamic = "force-dynamic";
@@ -18,7 +18,7 @@ function resolveImageUrl(char: any): string {
   const variant = char.variants?.[0] as any;
   const zukanHash = char.zukanHash || variant?.zukanHash;
   if (zukanHash) {
-    const clean = zukanHash.startsWith("/") ? zukanHash.substring(1) : zukanHash;
+    const clean = zukanHash.startsWith("/") ? zukanHash.slice(1) : zukanHash;
     return `https://dxi4wb638ujep.cloudfront.net/1/${clean}.png`;
   }
   return getCharacterImageUrl(char.internalCode);
@@ -26,7 +26,7 @@ function resolveImageUrl(char: any): string {
 
 export default async function MyTeamPage() {
   const session = await getServerSession();
-  const isAuthenticated = !!session?.user;
+  const isAuthenticated = Boolean(session?.user);
 
   const { data: rawChars } = await wikiService.getCharactersList({
     limit: 6000,
@@ -51,13 +51,13 @@ export default async function MyTeamPage() {
 
       return {
         charaId: char.charaId,
+        element,
+        imageUrl,
         name,
         position,
-        element,
         rarity,
-        imageUrl,
-        slug,
         series: (char as any).sheetData?.series,
+        slug,
         stats: statsLv99
           ? {
               kick: statsLv99.kick || 0,

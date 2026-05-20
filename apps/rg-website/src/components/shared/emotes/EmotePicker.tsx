@@ -4,7 +4,8 @@ import { Button, Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger
 import { Search, Smile } from "lucide-react";
 import { useState } from "react";
 
-import { EMOTES, type Emote } from "@/lib/emotes";
+import { EMOTES } from '@/lib/emotes';
+import type { Emote } from '@/lib/emotes';
 
 import RgEmote from "./RgEmote";
 
@@ -149,7 +150,7 @@ export default function EmotePicker({
                           animated
                         />
                         <span className="text-[10px] text-muted-foreground text-center line-clamp-2 group-hover:text-foreground transition-colors">
-                          {emote.name.replace(/-/g, " ")}
+                          {emote.name.replaceAll(/-/g, " ")}
                         </span>
                       </button>
                     ))}

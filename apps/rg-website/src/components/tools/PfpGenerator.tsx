@@ -57,11 +57,11 @@ export default function PfpGenerator() {
 
 	useEffect(() => {
 		const generatePfp = async () => {
-			if (!image || !canvasRef.current) return;
+			if (!image || !canvasRef.current) {return;}
 			setIsGenerating(true);
 
 			const ctx = canvasRef.current.getContext("2d");
-			if (!ctx) return;
+			if (!ctx) {return;}
 
 			const userImg = new Image();
 			const overlayImg = new Image();
@@ -127,7 +127,7 @@ export default function PfpGenerator() {
 	}, [image, selectedOverlay]);
 
 	const downloadPfp = () => {
-		if (!previewUrl) return;
+		if (!previewUrl) {return;}
 		const link = document.createElement("a");
 		link.download = "rose-griffon-pfp.png";
 		link.href = previewUrl;
@@ -135,14 +135,14 @@ export default function PfpGenerator() {
 	};
 
 	const handleUpdateProfile = async () => {
-		if (!user || !canvasRef.current) return;
+		if (!user || !canvasRef.current) {return;}
 		setIsUpdatingProfile(true);
 		try {
 			// 1. Convert Canvas to Blob
 			const blob = await new Promise<Blob | null>((resolve) =>
 				canvasRef.current?.toBlob(resolve, "image/png"),
 			);
-			if (!blob) throw new Error("Erreur lors de la génération de l'image");
+			if (!blob) {throw new Error("Erreur lors de la génération de l'image");}
 
 			// 2. Upload to Supabase Storage
 			const supabase = createClient();
@@ -151,7 +151,7 @@ export default function PfpGenerator() {
 				.from("avatars")
 				.upload(filePath, blob, { upsert: true });
 
-			if (uploadError) throw uploadError;
+			if (uploadError) {throw uploadError;}
 
 			// 3. Get Public URL
 			const {

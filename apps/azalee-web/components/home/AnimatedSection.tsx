@@ -15,10 +15,10 @@ interface AnimatedSectionProps {
 }
 
 const directionClass: Record<AnimationDirection, string> = {
-	up: "scroll-reveal-up",
 	left: "scroll-reveal-left",
 	right: "scroll-reveal-right",
 	scale: "scroll-reveal-scale",
+	up: "scroll-reveal-up",
 };
 
 // MD3 emphasized-decelerate easing
@@ -30,20 +30,20 @@ const initialByDirection: Record<
 	AnimationDirection,
 	{ opacity: number; x?: number; y?: number; scale?: number }
 > = {
-	up: { opacity: 0, y: 40 },
 	left: { opacity: 0, x: -40 },
 	right: { opacity: 0, x: 40 },
 	scale: { opacity: 0, scale: 0.92 },
+	up: { opacity: 0, y: 40 },
 };
 
 const visibleByDirection: Record<
 	AnimationDirection,
 	{ opacity: number; x?: number; y?: number; scale?: number }
 > = {
-	up: { opacity: 1, y: 0 },
 	left: { opacity: 1, x: 0 },
 	right: { opacity: 1, x: 0 },
 	scale: { opacity: 1, scale: 1 },
+	up: { opacity: 1, y: 0 },
 };
 
 export function AnimatedSection({
@@ -54,7 +54,7 @@ export function AnimatedSection({
 	stagger,
 }: AnimatedSectionProps) {
 	const ref = useRef<HTMLDivElement>(null);
-	const inView = useInView(ref, { once: true, margin: "-60px 0px -60px 0px" });
+	const inView = useInView(ref, { margin: "-60px 0px -60px 0px", once: true });
 	const prefersReducedMotion = useReducedMotion();
 
 	const initial = prefersReducedMotion
@@ -62,9 +62,9 @@ export function AnimatedSection({
 		: initialByDirection[direction];
 	const animate = prefersReducedMotion
 		? { opacity: 1 }
-		: inView
+		: (inView
 			? visibleByDirection[direction]
-			: initialByDirection[direction];
+			: initialByDirection[direction]);
 
 	// Stagger: wrap each direct child in a motion.div with incremental delay.
 	if (stagger && !prefersReducedMotion) {
@@ -83,8 +83,8 @@ export function AnimatedSection({
 							initial={initial}
 							animate={animate}
 							transition={{
-								duration: 0.7,
 								delay: delay + index * stagger,
+								duration: 0.7,
 								ease: EMPHASIZED_DECELERATE,
 							}}
 							className="scroll-stagger-child"
@@ -104,8 +104,8 @@ export function AnimatedSection({
 			initial={initial}
 			animate={animate}
 			transition={{
-				duration: 0.7,
 				delay,
+				duration: 0.7,
 				ease: EMPHASIZED_DECELERATE,
 			}}
 		>

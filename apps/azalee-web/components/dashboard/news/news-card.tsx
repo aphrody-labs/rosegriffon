@@ -39,16 +39,16 @@ export function NewsCard({ item }: { item: NewsItem }) {
                 className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider shadow-sm backdrop-blur-md border-none transition-colors duration-200 ease-[cubic-bezier(0.2,0,0,1)] ${
                   item.status === "published"
                     ? "bg-tertiary-container text-on-tertiary-container"
-                    : item.status === "archived"
+                    : (item.status === "archived"
                       ? "bg-surface-container-highest/80 text-on-surface-variant"
-                      : "bg-primary-container text-on-primary-container"
+                      : "bg-primary-container text-on-primary-container")
                 }`}
               >
                 {item.status === "published"
                   ? "Publié"
-                  : item.status === "archived"
+                  : (item.status === "archived"
                     ? "Archivé"
-                    : "Brouillon"}
+                    : "Brouillon")}
               </Badge>
             </div>
 

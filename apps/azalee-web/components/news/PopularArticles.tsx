@@ -5,8 +5,8 @@ import Link from "next/link";
 
 const CATEGORY_LABELS: Record<string, string> = {
   announcement: "Annonce",
-  event: "Événement",
   community: "Communauté",
+  event: "Événement",
 };
 
 interface PopularArticlesProps {
@@ -20,7 +20,7 @@ interface PopularArticlesProps {
 }
 
 export function PopularArticles({ articles }: PopularArticlesProps) {
-  if (articles.length === 0) return null;
+  if (articles.length === 0) {return null;}
 
   return (
     <div className="p-5 rounded-2xl bg-surface-container-low border border-outline-variant/10">

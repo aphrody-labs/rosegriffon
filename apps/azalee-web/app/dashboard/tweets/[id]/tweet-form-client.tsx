@@ -16,10 +16,10 @@ export function TweetFormClient({ initialData }: { initialData?: any }) {
     setLoading(true);
     try {
       const result = await saveTweet({
+        author_name: initialData?.author_name || "Rose Griffon",
+        author_username: initialData?.author_username || "RoseGriffon",
         id: initialData?.id,
         text,
-        author_username: initialData?.author_username || "RoseGriffon",
-        author_name: initialData?.author_name || "Rose Griffon",
       });
 
       if (!result.success) {
@@ -29,9 +29,9 @@ export function TweetFormClient({ initialData }: { initialData?: any }) {
       toast.success("Tweet enregistré");
       router.push("/dashboard/tweets");
       router.refresh();
-    } catch (e: any) {
-      console.error(e);
-      toast.error(e.message || "Erreur lors de l'enregistrement");
+    } catch (error: any) {
+      console.error(error);
+      toast.error(error.message || "Erreur lors de l'enregistrement");
     } finally {
       setLoading(false);
     }

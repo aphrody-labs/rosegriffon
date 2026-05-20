@@ -24,10 +24,10 @@ export function mintSupabaseJwt(userId: string): string {
 	}
 	return jwt.sign(
 		{
-			sub: userId,
-			role: "authenticated",
-			iss: "supabase",
 			aud: "authenticated",
+			iss: "supabase",
+			role: "authenticated",
+			sub: userId,
 		},
 		secret,
 		{ expiresIn: "1h" },

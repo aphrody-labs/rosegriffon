@@ -17,7 +17,7 @@ export default function GoogleMapEvents({ events, isLoading }: GoogleMapEventsPr
   const { isLoaded, loader } = useGoogleMaps();
 
   useEffect(() => {
-    if (!isLoaded || !mapRef.current) return;
+    if (!isLoaded || !mapRef.current) {return;}
 
     const initMap = async () => {
       try {
@@ -28,8 +28,8 @@ export default function GoogleMapEvents({ events, isLoading }: GoogleMapEventsPr
 
         const mapOptions = {
           center: { lat: 46.603354, lng: 1.888334 }, // Centre de la France
-          zoom: 5,
           mapId: GOOGLE_MAPS_ID, // Use the provided Map ID
+          zoom: 5,
         };
 
         const map = new Map(mapRef.current as HTMLElement, mapOptions);
@@ -37,25 +37,29 @@ export default function GoogleMapEvents({ events, isLoading }: GoogleMapEventsPr
         let hasValidMarkers = false;
 
         events.forEach((event) => {
-          if (!event.position) return;
+          if (!event.position) {return;}
 
           const markerColor =
-            event.type === "upcoming" ? "#22c55e" : event.type === "today" ? "#3b82f6" : "#ef4444";
+            event.type === "upcoming" ? "#22c55e" : (event.type === "today" ? "#3b82f6" : "#ef4444");
 
           let icon = "RG";
           switch (event.category) {
-            case "Meet-up":
+            case "Meet-up": {
               icon = "M";
               break;
-            case "Stand artiste RG":
+            }
+            case "Stand artiste RG": {
               icon = "A";
               break;
-            case "Stand associatif":
+            }
+            case "Stand associatif": {
               icon = "S";
               break;
-            case "Conventions":
+            }
+            case "Conventions": {
               icon = "C";
               break;
+            }
           }
 
           const markerElement = document.createElement("div");
@@ -67,9 +71,9 @@ export default function GoogleMapEvents({ events, isLoading }: GoogleMapEventsPr
           `;
 
           const marker = new AdvancedMarkerElement({
+            content: markerElement,
             map,
             position: event.position,
-            content: markerElement,
             title: event.name,
           });
 

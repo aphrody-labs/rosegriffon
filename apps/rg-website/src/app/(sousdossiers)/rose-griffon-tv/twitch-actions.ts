@@ -1,7 +1,7 @@
 "use server";
 
-const TWITCH_CLIENT_ID = process.env.TWITCH_CLIENT_ID;
-const TWITCH_CLIENT_SECRET = process.env.TWITCH_CLIENT_SECRET;
+const {TWITCH_CLIENT_ID} = process.env;
+const {TWITCH_CLIENT_SECRET} = process.env;
 const CHANNEL_NAME = "rose_griffontv";
 
 async function getTwitchAccessToken() {
@@ -39,8 +39,8 @@ export async function getChannelClips(
 ): Promise<{ success: boolean; clips?: TwitchClip[]; error?: string }> {
   if (!TWITCH_CLIENT_ID || !TWITCH_CLIENT_SECRET) {
     return {
-      success: false,
       error: "Twitch API credentials are not configured.",
+      success: false,
     };
   }
 
@@ -48,23 +48,23 @@ export async function getChannelClips(
     const accessToken = await getTwitchAccessToken();
     if (!accessToken) {
       return {
-        success: false,
         error: "Failed to retrieve Twitch access token.",
+        success: false,
       };
     }
 
     // 1. Get user ID from channel name
     const userResponse = await fetch(`https://api.twitch.tv/helix/users?login=${CHANNEL_NAME}`, {
       headers: {
-        "Client-ID": TWITCH_CLIENT_ID,
         Authorization: `Bearer ${accessToken}`,
+        "Client-ID": TWITCH_CLIENT_ID,
       },
     });
     const userData = await userResponse.json();
     const userId = userData.data?.[0]?.id;
 
     if (!userId) {
-      return { success: false, error: "Channel not found" };
+      return { error: "Channel not found", success: false };
     }
 
     // 2. Get clips
@@ -72,15 +72,15 @@ export async function getChannelClips(
       `https://api.twitch.tv/helix/clips?broadcaster_id=${userId}&first=${limit}`,
       {
         headers: {
-          "Client-ID": TWITCH_CLIENT_ID,
           Authorization: `Bearer ${accessToken}`,
+          "Client-ID": TWITCH_CLIENT_ID,
         },
       }
     );
     const clipsData = await clipsResponse.json();
 
     if (!clipsData.data) {
-      return { success: false, error: "Failed to fetch clips" };
+      return { error: "Failed to fetch clips", success: false };
     }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -101,10 +101,10 @@ export async function getChannelClips(
       };
     });
 
-    return { success: true, clips };
+    return { clips, success: true };
   } catch (error) {
     console.error("Error fetching clips:", error);
-    return { success: false, error: "Internal server error" };
+    return { error: "Internal server error", success: false };
   }
 }
 
@@ -112,5 +112,5 @@ export async function sendClipsToDiscord(
   _clips: TwitchClip[],
   _channelId: string
 ): Promise<{ success: boolean; error?: string }> {
-  return { success: false, error: "Not implemented" };
+  return { error: "Not implemented", success: false };
 }

@@ -19,8 +19,8 @@ export function PlatformBadge({ platform, className, showLabel = false }: Platfo
   if (p.includes("ps") || p.includes("playstation")) {
     iconSrc = "/icons/platforms/platform-ps.webp";
     bgClass = "bg-[#003087]/10 text-[#003087] dark:text-[#00439c] dark:bg-[#00439c]/20";
-    if (p.includes("5")) label = "PS5";
-    else if (p.includes("4")) label = "PS4";
+    if (p.includes("5")) {label = "PS5";}
+    else if (p.includes("4")) {label = "PS4";}
   }
 
   if (p.includes("steam") || p.includes("pc")) {

@@ -176,7 +176,7 @@ export async function deleteTeamMember(id: string): Promise<{
   try {
     const user = await getServerUser();
     if (!user) {
-      return { success: false, error: "Non authentifié" };
+      return { error: "Non authentifié", success: false };
     }
 
     const admin = createAdminClient();
@@ -187,14 +187,14 @@ export async function deleteTeamMember(id: string): Promise<{
       .single();
 
     if (profile?.role !== "admin") {
-      return { success: false, error: "Permissions insuffisantes" };
+      return { error: "Permissions insuffisantes", success: false };
     }
 
     const { error } = await admin.from("team_members").delete().eq("id", id);
 
     if (error) {
       console.error("Error deleting team member:", error);
-      return { success: false, error: error.message };
+      return { error: error.message, success: false };
     }
 
     await logAdminAction("delete", "team_member", id, {});
@@ -203,10 +203,10 @@ export async function deleteTeamMember(id: string): Promise<{
     revalidatePath("/notre-equipe/staff");
     revalidatePath("/admin/staff");
 
-    return { success: true, error: null };
+    return { error: null, success: true };
   } catch (error) {
     console.error("Unexpected error deleting team member:", error);
-    return { success: false, error: "Une erreur inattendue est survenue" };
+    return { error: "Une erreur inattendue est survenue", success: false };
   }
 }
 
@@ -220,7 +220,7 @@ export async function uploadTeamMemberImage(file: File): Promise<{
   try {
     const user = await getServerUser();
     if (!user) {
-      return { url: null, error: "Non authentifié" };
+      return { error: "Non authentifié", url: null };
     }
 
     const admin = createAdminClient();
@@ -231,11 +231,11 @@ export async function uploadTeamMemberImage(file: File): Promise<{
       .single();
 
     if (profile?.role !== "admin") {
-      return { url: null, error: "Permissions insuffisantes" };
+      return { error: "Permissions insuffisantes", url: null };
     }
 
     const fileExt = file.name.split(".").pop();
-    const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+    const fileName = `${Date.now()}-${Math.random().toString(36).slice(7)}.${fileExt}`;
     const filePath = `team-members/${fileName}`;
 
     const { error: uploadError } = await admin.storage.from("assets").upload(filePath, file, {
@@ -245,16 +245,16 @@ export async function uploadTeamMemberImage(file: File): Promise<{
 
     if (uploadError) {
       console.error("Error uploading image:", uploadError);
-      return { url: null, error: uploadError.message };
+      return { error: uploadError.message, url: null };
     }
 
     const {
       data: { publicUrl },
     } = admin.storage.from("assets").getPublicUrl(filePath);
 
-    return { url: publicUrl, error: null };
+    return { error: null, url: publicUrl };
   } catch (error) {
     console.error("Unexpected error uploading image:", error);
-    return { url: null, error: "Une erreur inattendue est survenue" };
+    return { error: "Une erreur inattendue est survenue", url: null };
   }
 }

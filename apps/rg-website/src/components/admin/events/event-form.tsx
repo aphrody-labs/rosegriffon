@@ -13,14 +13,14 @@ import { Label } from "@rosegriffon/ui";
 import { Loader2, Trash2 } from "@/lib/icons-config";
 import type { Tables } from "@rosegriffon/db";
 
-type EventFormProps = {
+interface EventFormProps {
   event?: Tables<"events">;
   isEditing?: boolean;
-};
+}
 
 const initialState: { message: string; errors?: Record<string, string[]> } = {
-  message: "",
   errors: {},
+  message: "",
 };
 
 export function EventForm({ event, isEditing = false }: EventFormProps) {
@@ -29,9 +29,9 @@ export function EventForm({ event, isEditing = false }: EventFormProps) {
 
   // Helper to format date for datetime-local input
   const formatDate = (dateString?: string) => {
-    if (!dateString) return "";
+    if (!dateString) {return "";}
     const date = new Date(dateString);
-    return new Date(date.getTime() - date.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+    return new Date(date.getTime() - date.getTimezoneOffset() * 60_000).toISOString().slice(0, 16);
   };
 
   const router = useRouter();
@@ -39,7 +39,7 @@ export function EventForm({ event, isEditing = false }: EventFormProps) {
   const [isDeleting, setIsDeleting] = useState(false);
 
   const handleDelete = async () => {
-    if (!event?.id) return;
+    if (!event?.id) {return;}
 
     setIsDeleting(true);
     try {

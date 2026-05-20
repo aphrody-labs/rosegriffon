@@ -12,12 +12,12 @@ import { Eye, Loader2, Save } from "@/lib/icons-config";
 import { createClient } from "@/lib/supabase/client";
 
 interface ArticleEditorProps {
-  categories: Array<{
+  categories: {
     id: string;
     name: string;
     slug: string;
     color: string | null;
-  }>;
+  }[];
   userId: string;
   initialData?: {
     id?: string;
@@ -37,13 +37,13 @@ export function ArticleEditor({ categories, userId, initialData }: ArticleEditor
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
-    title: initialData?.title || "",
-    excerpt: initialData?.excerpt || "",
-    content: initialData?.content || "",
     category: initialData?.category || "",
+    content: initialData?.content || "",
+    excerpt: initialData?.excerpt || "",
     featured_image_url: initialData?.featured_image_url || "",
-    meta_title: initialData?.meta_title || "",
     meta_description: initialData?.meta_description || "",
+    meta_title: initialData?.meta_title || "",
+    title: initialData?.title || "",
   });
 
   const handleSubmit = async (status: "draft" | "published") => {
@@ -61,19 +61,19 @@ export function ArticleEditor({ categories, userId, initialData }: ArticleEditor
         formData.title
           .toLowerCase()
           .normalize("NFD")
-          .replace(/[\u0300-\u036f]/g, "")
-          .replace(/[^a-z0-9\s-]/g, "")
-          .replace(/\s+/g, "-")
-          .replace(/-+/g, "-")
+          .replaceAll(/[\u0300-\u036F]/g, "")
+          .replaceAll(/[^a-z0-9\s-]/g, "")
+          .replaceAll(/\s+/g, "-")
+          .replaceAll(/-+/g, "-")
           .trim();
 
       const articleData = {
         ...formData,
+        app: "website",
+        author_id: userId,
+        published_at: status === "published" ? new Date().toISOString() : null,
         slug,
         status,
-        author_id: userId,
-        app: "website",
-        published_at: status === "published" ? new Date().toISOString() : null,
       };
 
       let result;
@@ -88,7 +88,7 @@ export function ArticleEditor({ categories, userId, initialData }: ArticleEditor
         result = await supabase.from("articles").insert(articleData).select().single();
       }
 
-      if (result.error) throw result.error;
+      if (result.error) {throw result.error;}
 
       toast.success(
         status === "published" ? "Chronique publiée avec succès !" : "Brouillon enregistré !"

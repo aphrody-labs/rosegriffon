@@ -17,14 +17,14 @@ if (process.env.NEXT_PUBLIC_SENTRY_DSN) {
     dsn: process.env.NEXT_PUBLIC_SENTRY_DSN,
 
     // Traces pour monitoring performance
-    tracesSampleRate: process.env.NODE_ENV === "production" ? 0.1 : 1.0,
+    tracesSampleRate: process.env.NODE_ENV === "production" ? 0.1 : 1,
 
     // Debug mode en développement
     debug: process.env.NODE_ENV === "development",
 
     // Replay pour session recording (optionnel)
     replaysSessionSampleRate: 0.1,
-    replaysOnErrorSampleRate: 1.0,
+    replaysOnErrorSampleRate: 1,
 
     // Environnement
     environment: process.env.NODE_ENV || "development",
@@ -38,7 +38,7 @@ if (process.env.NEXT_PUBLIC_SENTRY_DSN) {
 
       // Taguer les erreurs sidebar
       if (event.exception?.values?.[0]?.stacktrace?.frames) {
-        const frames = event.exception.values[0].stacktrace.frames;
+        const {frames} = event.exception.values[0].stacktrace;
         const isSidebarError = frames.some((frame) =>
           frame.filename?.includes("sidebar")
         );
@@ -54,8 +54,8 @@ if (process.env.NEXT_PUBLIC_SENTRY_DSN) {
     // Intégrations
     integrations: [
       Sentry.replayIntegration({
-        maskAllText: true,
         blockAllMedia: true,
+        maskAllText: true,
       }),
     ],
   });

@@ -46,7 +46,7 @@ export function MotionSection({
 			aria-labelledby={ariaLabelledBy}
 			initial={{ opacity: 0, y: 40 }}
 			whileInView={{ opacity: 1, y: 0 }}
-			viewport={{ once: true, margin: "-80px" }}
+			viewport={{ margin: "-80px", once: true }}
 			transition={{ duration: 0.6, ease: EMPHASIZED_DECELERATE }}
 		>
 			{children}

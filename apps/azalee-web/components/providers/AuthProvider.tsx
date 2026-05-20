@@ -1,7 +1,8 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { createContext, type ReactNode, useCallback, useContext, useEffect, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useState } from 'react';
+import type { ReactNode } from 'react';
 import { signOutAction } from "@/app/actions/auth";
 import { useSupabase } from "@/hooks/use-supabase";
 import { authClient } from "@/lib/auth-client";
@@ -109,7 +110,7 @@ export function AuthProvider({
       // Use server action to log audit + invalidate session + redirect
       await signOutAction();
     } catch {
-      // signOutAction calls redirect() which throws in Next.js - expected
+      // SignOutAction calls redirect() which throws in Next.js - expected
     }
     setLoading(false);
     router.refresh();
@@ -118,7 +119,7 @@ export function AuthProvider({
   const isAdmin = ADMIN_ROLES.includes(profile?.role as (typeof ADMIN_ROLES)[number]);
 
   return (
-    <AuthContext.Provider value={{ user, profile, loading, signOut, isAdmin, refreshProfile }}>
+    <AuthContext.Provider value={{ isAdmin, loading, profile, refreshProfile, signOut, user }}>
       {children}
     </AuthContext.Provider>
   );

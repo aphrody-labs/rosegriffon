@@ -32,9 +32,9 @@ export function GenericEditorForm({ table, initialData }: { table: string; initi
           try {
             payload[key] =
               typeof payload[key] === "string" ? JSON.parse(payload[key]) : payload[key];
-          } catch (e) {
+          } catch (error) {
             toast.error(`JSON invalide dans le champ ${key}`);
-            throw e;
+            throw error;
           }
         }
       });
@@ -44,13 +44,13 @@ export function GenericEditorForm({ table, initialData }: { table: string; initi
         .update(payload)
         .eq("id", initialData.id);
 
-      if (error) throw error;
+      if (error) {throw error;}
 
       toast.success("Enregistré !");
       router.refresh();
-    } catch (e: any) {
-      console.error(e);
-      toast.error(`Erreur: ${e.message}`);
+    } catch (error: any) {
+      console.error(error);
+      toast.error(`Erreur: ${error.message}`);
     } finally {
       setLoading(false);
     }
@@ -79,7 +79,7 @@ export function GenericEditorForm({ table, initialData }: { table: string; initi
                   }
                   onChange={(e) => handleChange(key, e.target.value)}
                 />
-              ) : isLong ? (
+              ) : (isLong ? (
                 <Textarea
                   value={formData[key] || ""}
                   onChange={(e) => handleChange(key, e.target.value)}
@@ -90,7 +90,7 @@ export function GenericEditorForm({ table, initialData }: { table: string; initi
                   onChange={(e) => handleChange(key, e.target.value)}
                   disabled={key === "id"} // Usually PK is immutable
                 />
-              )}
+              ))}
             </div>
           );
         })}

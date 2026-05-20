@@ -3,35 +3,35 @@ import localFont from "next/font/local";
 import type { ReactNode } from "react";
 
 const fraunces = Fraunces({
-	subsets: ["latin"],
-	display: "swap",
-	variable: "--font-display-ds",
 	axes: ["opsz", "SOFT", "WONK"],
+	display: "swap",
+	subsets: ["latin"],
+	variable: "--font-display-ds",
 });
 
 const jetbrains = JetBrains_Mono({
-	subsets: ["latin"],
 	display: "swap",
+	subsets: ["latin"],
 	variable: "--font-mono-ds",
 });
 
 const poppins = Poppins({
-	weight: ["400", "500", "600", "700"],
-	subsets: ["latin"],
 	display: "swap",
+	subsets: ["latin"],
 	variable: "--font-body-ds",
+	weight: ["400", "500", "600", "700"],
 });
 
 const superCartoon = localFont({
-	src: "../../../public/fonts/Super Cartoon.woff2",
 	display: "swap",
+	src: "../../../public/fonts/Super Cartoon.woff2",
 	variable: "--font-cartoon-ds",
 });
 
 export const metadata = {
-	title: "Design System — Rose Griffon",
 	description:
 		"Showcase du design system @rosegriffon/ui : 4 thèmes, tokens MD3, composants — DA Rose Griffon (manga / gaming / Inazuma).",
+	title: "Design System — Rose Griffon",
 };
 
 export default function DesignSystemLayout({

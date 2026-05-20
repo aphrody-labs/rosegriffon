@@ -136,32 +136,32 @@ export default async function RejoindreRGPage() {
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {[
           {
+            bg: "bg-blue-500/10",
+            color: "text-blue-500",
             icon: Users,
             label: "adherents",
             value: activeMembersCount,
-            color: "text-blue-500",
-            bg: "bg-blue-500/10",
           },
           {
+            bg: "bg-purple-500/10",
+            color: "text-purple-500",
             icon: MessageCircle,
             label: "Membres Discord",
             value: discordMemberCount,
-            color: "text-purple-500",
-            bg: "bg-purple-500/10",
           },
           {
+            bg: "bg-green-500/10",
+            color: "text-green-500",
             icon: MapPin,
             label: "Régions",
             value: "France",
-            color: "text-green-500",
-            bg: "bg-green-500/10",
           },
           {
+            bg: "bg-red-500/10",
+            color: "text-red-500",
             icon: Heart,
             label: "Passion",
             value: "100%",
-            color: "text-red-500",
-            bg: "bg-red-500/10",
           },
         ].map((stat, index) => (
           <Card
@@ -205,20 +205,20 @@ export default async function RejoindreRGPage() {
           <CardContent className="space-y-3 pt-4 grow">
             {[
               {
-                text: "Être majeur (18 ans révolus). Cette condition est stricte pour des raisons légales et organisationnelles.",
                 highlight: "18 ans minimum",
+                text: "Être majeur (18 ans révolus). Cette condition est stricte pour des raisons légales et organisationnelles.",
               },
               {
-                text: "Pour l'association Rose Griffon : Être mobile pour les événements IRL (conventions) ou avoir des compétences spécifiques (art, dev, musique).",
                 highlight: "Mobilité ou Compétences",
+                text: "Pour l'association Rose Griffon : Être mobile pour les événements IRL (conventions) ou avoir des compétences spécifiques (art, dev, musique).",
               },
               {
-                text: "Pour le média Azalée : Avoir une plume (Rédacteur), savoir gérer des réseaux (CM) ou créer des visuels (Graphiste).",
                 highlight: "Plume, Social ou Graphisme",
+                text: "Pour le média Azalée : Avoir une plume (Rédacteur), savoir gérer des réseaux (CM) ou créer des visuels (Graphiste).",
               },
               {
-                text: "Pour la Modération : Avoir de l'expérience dans la gestion de communautés Discord et faire preuve de sang-froid.",
                 highlight: "Expérience Discord",
+                text: "Pour la Modération : Avoir de l'expérience dans la gestion de communautés Discord et faire preuve de sang-froid.",
               },
             ].map((item, i) => (
               <div
@@ -304,28 +304,28 @@ export default async function RejoindreRGPage() {
 
           {[
             {
-              step: "01",
-              icon: Mail,
-              title: "Candidature",
-              description: "Remplissez le formulaire en ligne avec vos motivations.",
-              color: "text-blue-500",
               bg: "bg-blue-500/10",
+              color: "text-blue-500",
+              description: "Remplissez le formulaire en ligne avec vos motivations.",
+              icon: Mail,
+              step: "01",
+              title: "Candidature",
             },
             {
-              step: "02",
-              icon: Users,
-              title: "Entretien",
-              description: "Échange convivial avec un responsable pour faire connaissance.",
-              color: "text-purple-500",
               bg: "bg-purple-500/10",
+              color: "text-purple-500",
+              description: "Échange convivial avec un responsable pour faire connaissance.",
+              icon: Users,
+              step: "02",
+              title: "Entretien",
             },
             {
-              step: "03",
-              icon: Award,
-              title: "Intégration",
-              description: "Bienvenue ! Vous recevez vos accès et rejoignez l'équipe.",
-              color: "text-green-500",
               bg: "bg-green-500/10",
+              color: "text-green-500",
+              description: "Bienvenue ! Vous recevez vos accès et rejoignez l'équipe.",
+              icon: Award,
+              step: "03",
+              title: "Intégration",
             },
           ].map((item, index) => (
             <div key={index} className="relative z-10 group">

@@ -18,16 +18,16 @@ import { cn } from "@/lib/utils";
 
 const CATEGORY_LABELS: Record<string, string> = {
 	announcement: "Annonce",
-	event: "Événement",
-	critique: "Critique",
 	community: "Communauté",
+	critique: "Critique",
+	event: "Événement",
 };
 
 const CATEGORY_TONE: Record<string, string> = {
 	announcement: "bg-primary/10 text-primary",
-	event: "bg-tertiary-container/30 text-tertiary",
-	critique: "bg-rose-500/10 text-rose-600",
 	community: "bg-blue-500/10 text-blue-500",
+	critique: "bg-rose-500/10 text-rose-600",
+	event: "bg-tertiary-container/30 text-tertiary",
 };
 
 interface ArticleCardProps {
@@ -127,7 +127,7 @@ export function ArticleCard({
 	);
 
 	// Pas d'excerpt ou pas d'image → on n'enrichit pas le hover
-	if (!item.excerpt) return card;
+	if (!item.excerpt) {return card;}
 
 	return (
 		<HoverCard openDelay={350} closeDelay={120}>

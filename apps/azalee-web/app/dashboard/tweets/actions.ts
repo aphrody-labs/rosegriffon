@@ -5,11 +5,12 @@ import { getServerSession } from "@/lib/auth-helpers";
 import { isAdminRole } from "@/lib/auth-roles";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
-import { type TweetFormValues, TweetSchema } from "./schema";
+import { TweetSchema } from './schema';
+import type { TweetFormValues } from './schema';
 
 async function requireTweetAdmin() {
   const session = await getServerSession();
-  if (!session?.user) return { error: "Non authentifié" as const, session: null };
+  if (!session?.user) {return { error: "Non authentifié" as const, session: null };}
 
   const supabase = await createClient();
   const { data: profile } = await supabase
@@ -27,7 +28,7 @@ async function requireTweetAdmin() {
 
 export async function deleteTweet(id: string) {
   const { error: authError, session } = await requireTweetAdmin();
-  if (authError || !session) throw new Error(authError || "Non authentifié");
+  if (authError || !session) {throw new Error(authError || "Non authentifié");}
 
   const adminDb = createAdminClient();
   await adminDb.from("tweets").delete().eq("id", id);
@@ -37,17 +38,17 @@ export async function deleteTweet(id: string) {
 export async function saveTweet(data: TweetFormValues) {
   const parsed = TweetSchema.safeParse(data);
   if (!parsed.success) {
-    return { success: false, error: "Données invalides" };
+    return { error: "Données invalides", success: false };
   }
 
   const { error: authError, session } = await requireTweetAdmin();
-  if (authError || !session) return { success: false, error: authError || "Non authentifié" };
+  if (authError || !session) {return { success: false, error: authError || "Non authentifié" };}
 
   const adminDb = createAdminClient();
   const payload = {
-    text: parsed.data.text,
-    author_username: parsed.data.author_username,
     author_name: parsed.data.author_name,
+    author_username: parsed.data.author_username,
+    text: parsed.data.text,
     updated_at: new Date().toISOString(),
   };
 
@@ -59,12 +60,12 @@ export async function saveTweet(data: TweetFormValues) {
     const id = Date.now().toString(); // Simple ID generation
     ({ error } = await adminDb
       .from("tweets")
-      .insert([{ ...payload, id, created_at: new Date().toISOString() }]));
+      .insert([{ ...payload, created_at: new Date().toISOString(), id }]));
   }
 
   if (error) {
     console.error(error);
-    return { success: false, error: error.message };
+    return { error: error.message, success: false };
   }
 
   revalidatePath("/dashboard/tweets");

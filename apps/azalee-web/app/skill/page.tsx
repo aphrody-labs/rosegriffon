@@ -13,7 +13,7 @@ import { wikiService } from "@/lib/wiki-service";
 export async function generateMetadata({
   searchParams,
 }: {
-  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }): Promise<Metadata> {
   const rawParams = await searchParams;
   const { q, type: category, element, page } = parseSearchParams(rawParams);
@@ -23,55 +23,55 @@ export async function generateMetadata({
 
   if (category) {
     const catLabel = CATEGORY_FILTERS.find((c) => c.value === category)?.label;
-    if (catLabel) filters.push(catLabel);
+    if (catLabel) {filters.push(catLabel);}
   }
   if (element) {
     const elemLabel = ELEMENT_FILTERS.find(
       (e) => e.value.toLowerCase() === element.toString().toLowerCase(),
     )?.label;
-    if (elemLabel) filters.push(elemLabel);
+    if (elemLabel) {filters.push(elemLabel);}
   }
-  if (q) filters.push(`"${q}"`);
+  if (q) {filters.push(`"${q}"`);}
 
   if (filters.length > 0) {
     title += ` : ${filters.join(" ")}`;
   }
 
-  const pageNum = page ? parseInt(page.toString(), 10) : 1;
-  if (pageNum > 1) title += ` (Page ${pageNum})`;
+  const pageNum = page ? Number.parseInt(page.toString(), 10) : 1;
+  if (pageNum > 1) {title += ` (Page ${pageNum})`;}
 
   return {
-    title: `${title} | Inazuma Eleven Victory Road - Azalée`,
-    description: `Base de données des techniques spéciales (Hissatsu)${filters.length > 0 ? ` filtrée par ${filters.join(", ")}` : ""}. Puissance, tension et effets.`,
     alternates: {
       canonical: `/skill${rawParams ? `?${new URLSearchParams(rawParams as Record<string, string>).toString()}` : ""}`,
     },
+    description: `Base de données des techniques spéciales (Hissatsu)${filters.length > 0 ? ` filtrée par ${filters.join(", ")}` : ""}. Puissance, tension et effets.`,
+    title: `${title} | Inazuma Eleven Victory Road - Azalée`,
   };
 }
 
 const ITEMS_PER_PAGE = 60;
 
 const CATEGORY_FILTERS: Array<{ value: string; label: string; imageIcon?: string }> = [
-  { value: "", label: "Tout" },
-  { value: "shoot", label: "Tir", imageIcon: getSkillCategoryIconUrl("tir") },
-  { value: "block", label: "Défense", imageIcon: getSkillCategoryIconUrl("defense") },
-  { value: "dribble", label: "Dribble", imageIcon: getSkillCategoryIconUrl("dribble") },
-  { value: "catch", label: "Arrêt", imageIcon: getSkillCategoryIconUrl("gardien") },
+  { label: "Tout", value: "" },
+  { imageIcon: getSkillCategoryIconUrl("tir"), label: "Tir", value: "shoot" },
+  { imageIcon: getSkillCategoryIconUrl("defense"), label: "Défense", value: "block" },
+  { imageIcon: getSkillCategoryIconUrl("dribble"), label: "Dribble", value: "dribble" },
+  { imageIcon: getSkillCategoryIconUrl("gardien"), label: "Arrêt", value: "catch" },
 ];
 
 const ELEMENT_FILTERS = [
-  { value: "", label: "Tous", icon: "blur_on" },
-  { value: "Fire", label: "Feu", commonSprite: "fire" as const },
-  { value: "Wind", label: "Vent", commonSprite: "wind" as const },
-  { value: "Forest", label: "Forêt", commonSprite: "forest" as const },
-  { value: "Mountain", label: "Montagne", commonSprite: "mountain" as const },
-  { value: "Void", label: "Néant", icon: "blur_on" },
+  { icon: "blur_on", label: "Tous", value: "" },
+  { commonSprite: "fire" as const, label: "Feu", value: "Fire" },
+  { commonSprite: "wind" as const, label: "Vent", value: "Wind" },
+  { commonSprite: "forest" as const, label: "Forêt", value: "Forest" },
+  { commonSprite: "mountain" as const, label: "Montagne", value: "Mountain" },
+  { icon: "blur_on", label: "Néant", value: "Void" },
 ];
 
 export default async function SkillsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const rawParams = await searchParams;
   const params = parseSearchParams(rawParams);
@@ -88,21 +88,21 @@ export default async function SkillsPage({
     power_max,
   } = params;
 
-  const pageNumber = page ? parseInt(page.toString(), 10) : 1;
+  const pageNumber = page ? Number.parseInt(page.toString(), 10) : 1;
 
   // Data First: Fetch paginated from DB
   const { data: skills, total } = await wikiService.getSkillsList({
-    q: q?.toString(),
     category: category?.toString(),
     element: element?.toString(),
     has_video: has_video?.toString(),
-    show_aura: show_aura?.toString(),
-    overdrive: overdrive?.toString(),
-    sort: sort?.toString(),
-    power_min: power_min?.toString(),
-    power_max: power_max?.toString(),
-    page: pageNumber,
     limit: ITEMS_PER_PAGE,
+    overdrive: overdrive?.toString(),
+    page: pageNumber,
+    power_max: power_max?.toString(),
+    power_min: power_min?.toString(),
+    q: q?.toString(),
+    show_aura: show_aura?.toString(),
+    sort: sort?.toString(),
   });
 
   // Re-map for UI
@@ -112,21 +112,21 @@ export default async function SkillsPage({
   const collectionJsonLd = {
     "@context": "https://schema.org",
     "@type": "CollectionPage",
-    name: "Techniques Spéciales - Inazuma Eleven: Victory Road",
     description: `${total.toLocaleString("fr-FR")} techniques spéciales (Hissatsu) avec puissance, tension et vidéos.`,
-    url: "https://azalee.rosegriffon.fr/skill",
     isPartOf: { "@type": "WebSite", name: "Azalée", url: "https://azalee.rosegriffon.fr" },
-    numberOfItems: total,
     mainEntity: {
       "@type": "ItemList",
-      numberOfItems: total,
       itemListElement: skills.slice(0, 10).map((s: any, i: number) => ({
         "@type": "ListItem",
         position: (pageNumber - 1) * ITEMS_PER_PAGE + i + 1,
         url: `https://azalee.rosegriffon.fr/skill/${s.skillId}`,
         name: s.name_FR || s.name_EN || "Technique",
       })),
+      numberOfItems: total,
     },
+    name: "Techniques Spéciales - Inazuma Eleven: Victory Road",
+    numberOfItems: total,
+    url: "https://azalee.rosegriffon.fr/skill",
   };
 
   return (

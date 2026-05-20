@@ -23,9 +23,9 @@ export interface StatHeptagonProps {
 // Position sprites mapping
 const POSITION_SPRITES: Record<string, SpriteKey> = {
   ATT: "role-att-tag",
-  MIL: "role-mil-simple",
   DEF: "role-def-simple",
   GAR: "role-gar-simple",
+  MIL: "role-mil-simple",
 };
 
 // Stats configuration with labels and relevant positions
@@ -52,10 +52,10 @@ export function StatHeptagon({
   const [containerSize, setContainerSize] = useState(sizeProp);
 
   useEffect(() => {
-    if (!containerRef.current) return;
+    if (!containerRef.current) {return;}
     const observer = new ResizeObserver((entries) => {
       const width = entries[0]?.contentRect.width;
-      if (width) setContainerSize(Math.min(sizeProp, width));
+      if (width) {setContainerSize(Math.min(sizeProp, width));}
     });
     observer.observe(containerRef.current);
     return () => observer.disconnect();
@@ -79,22 +79,18 @@ export function StatHeptagon({
   );
 
   // Background heptagon points
-  const heptagonPoints = useMemo(() => {
-    return Array.from({ length: 7 }, (_, i) => {
+  const heptagonPoints = useMemo(() => Array.from({ length: 7 }, (_, i) => {
       const p = getPoint(i, radius);
       return `${p.x},${p.y}`;
-    }).join(" ");
-  }, [radius, getPoint]);
+    }).join(" "), [radius, getPoint]);
 
   // Inner grid rings
-  const innerRings = useMemo(() => {
-    return [0.25, 0.5, 0.75].map((scale) => {
+  const innerRings = useMemo(() => [0.25, 0.5, 0.75].map((scale) => {
       return Array.from({ length: 7 }, (_, i) => {
         const p = getPoint(i, radius * scale);
         return `${p.x},${p.y}`;
       }).join(" ");
-    });
-  }, [radius, getPoint]);
+    }), [radius, getPoint]);
 
   // Stat polygon points (normalized to max 999)
   const statPoints = useMemo(() => {
@@ -117,8 +113,7 @@ export function StatHeptagon({
   }, [stats, radius, getPoint]);
 
   // Label positions
-  const labelPositions = useMemo(() => {
-    return STATS_CONFIG.map((config, i) => {
+  const labelPositions = useMemo(() => STATS_CONFIG.map((config, i) => {
       const p = getPoint(i, labelRadius);
       const statValue = stats[config.key as keyof typeof stats];
       return {
@@ -127,14 +122,13 @@ export function StatHeptagon({
         y: p.y,
         value: statValue,
       };
-    });
-  }, [stats, labelRadius, getPoint]);
+    }), [stats, labelRadius, getPoint]);
 
   return (
     <div
       ref={containerRef}
       className={cn("relative w-full max-w-full", className)}
-      style={{ maxWidth: sizeProp, height: size }}
+      style={{ height: size, maxWidth: sizeProp }}
     >
       <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} className="absolute inset-0">
         {/* Definitions for gradients and patterns */}
@@ -303,21 +297,17 @@ export function MiniStatHeptagon({
     [center],
   );
 
-  const heptagonPoints = useMemo(() => {
-    return Array.from({ length: 7 }, (_, i) => {
+  const heptagonPoints = useMemo(() => Array.from({ length: 7 }, (_, i) => {
       const p = getPoint(i, radius);
       return `${p.x},${p.y}`;
-    }).join(" ");
-  }, [radius, getPoint]);
+    }).join(" "), [radius, getPoint]);
 
-  const innerRings = useMemo(() => {
-    return [0.33, 0.66].map((scale) => {
+  const innerRings = useMemo(() => [0.33, 0.66].map((scale) => {
       return Array.from({ length: 7 }, (_, i) => {
         const p = getPoint(i, radius * scale);
         return `${p.x},${p.y}`;
       }).join(" ");
-    });
-  }, [radius, getPoint]);
+    }), [radius, getPoint]);
 
   const statPoints = useMemo(() => {
     const statValues = [

@@ -16,7 +16,7 @@ export function AvatarUpload() {
   const userId = session?.user?.id ?? null;
   const supabase = createClient();
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: pas de dépendances nécessaires
+  // Biome-ignore lint/correctness/useExhaustiveDependencies: pas de dépendances nécessaires
   useEffect(() => {}, []);
 
   const uploadAvatar = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -54,7 +54,7 @@ export function AvatarUpload() {
 
       toast.success("Avatar updated successfully!");
       // Optionnel: rafraîchir les données utilisateur
-      // queryClient.invalidateQueries(['user-profile']);
+      // QueryClient.invalidateQueries(['user-profile']);
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : "Unknown error";
       toast.error(errorMessage);

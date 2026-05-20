@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Mentions légales - Azalée",
   description: "Mentions légales du site Azalée par l'association Rose Griffon.",
+  title: "Mentions légales - Azalée",
 };
 
 export default function MentionsLegalesPage() {

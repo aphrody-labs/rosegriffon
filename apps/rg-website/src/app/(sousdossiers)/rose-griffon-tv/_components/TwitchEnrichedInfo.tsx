@@ -44,7 +44,7 @@ export function TwitchEnrichedInfo() {
   // Format duration (ISO 8601 duration to readable)
   const formatDuration = (duration: string) => {
     const match = duration.match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/);
-    if (!match) return duration;
+    if (!match) {return duration;}
     const hours = match[1] ? `${match[1]}h` : "";
     const minutes = match[2] ? `${match[2]}m` : "";
     return `${hours}${minutes}`.trim() || "< 1m";
@@ -57,17 +57,17 @@ export function TwitchEnrichedInfo() {
     const diff = now.getTime() - date.getTime();
     const days = Math.floor(diff / (1000 * 60 * 60 * 24));
 
-    if (days === 0) return "Aujourd'hui";
-    if (days === 1) return "Hier";
-    if (days < 7) return `Il y a ${days} jours`;
-    if (days < 30) return `Il y a ${Math.floor(days / 7)} semaines`;
+    if (days === 0) {return "Aujourd'hui";}
+    if (days === 1) {return "Hier";}
+    if (days < 7) {return `Il y a ${days} jours`;}
+    if (days < 30) {return `Il y a ${Math.floor(days / 7)} semaines`;}
     return date.toLocaleDateString("fr-FR", { day: "numeric", month: "short" });
   };
 
   // Format views
   const formatViews = (count: number): string => {
-    if (count >= 1000000) return `${(count / 1000000).toFixed(1)}M`;
-    if (count >= 1000) return `${(count / 1000).toFixed(1)}K`;
+    if (count >= 1_000_000) {return `${(count / 1000000).toFixed(1)}M`;}
+    if (count >= 1000) {return `${(count / 1000).toFixed(1)}K`;}
     return `${count}`;
   };
 

@@ -26,14 +26,7 @@ export async function GET() {
 		.limit(50);
 
 	// Récupérer les profils auteurs en bloc (pas de FK déclarée → join manuel).
-	const authorIds = Array.from(
-		new Set(
-			(articles || [])
-				// eslint-disable-next-line @typescript-eslint/no-explicit-any
-				.map((a: any) => a.author_id)
-				.filter((id): id is string => Boolean(id)),
-		),
-	);
+	const authorIds = [...new Set((articles || []).map((a: any) => a.author_id).filter((id): id is string => Boolean(id)))];
 
 	let authorMap = new Map<string, { full_name: string | null }>();
 	if (authorIds.length > 0) {
@@ -106,8 +99,8 @@ ${items}
 
 	return new Response(rss, {
 		headers: {
-			"Content-Type": "application/rss+xml; charset=utf-8",
 			"Cache-Control": "s-maxage=3600, stale-while-revalidate=600",
+			"Content-Type": "application/rss+xml; charset=utf-8",
 		},
 	});
 }

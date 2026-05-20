@@ -1,9 +1,6 @@
 import type { Metadata } from "next";
-import {
-  CharacterComparator,
-  type CompareCharacter,
-  type SkillInfo,
-} from "@/components/wiki/CharacterComparator";
+import { CharacterComparator } from '@/components/wiki/CharacterComparator';
+import type { CompareCharacter, SkillInfo } from '@/components/wiki/CharacterComparator';
 import { createClient } from "@/lib/supabase/server";
 import { wikiService } from "@/lib/wiki-service";
 
@@ -15,15 +12,15 @@ const PHANTOM_SKILL_IDS = new Set(["0xDBEDB6B8"]);
 
 function mapSkill(skill: any) {
   return {
-    id: skill.skillId || skill.skillID || skill.skillIDStr || "",
-    name: skill.displayName || skill.name_FR || skill.name_EN || "???",
-    power: skill.power_min ? `${skill.power_min}` : undefined,
-    element: skill.elementName?.en?.toLowerCase(),
     category: skill.categoryName?.fr || "Spécial",
+    element: skill.elementName?.en?.toLowerCase(),
+    id: skill.skillId || skill.skillID || skill.skillIDStr || "",
     isPassive:
       skill.categoryName?.en?.toLowerCase() === "passive" ||
       skill.categoryName?.fr?.toLowerCase() === "talent" ||
       skill.skillType === "passive",
+    name: skill.displayName || skill.name_FR || skill.name_EN || "???",
+    power: skill.power_min ? `${skill.power_min}` : undefined,
     tension: skill.tp ?? skill.tension ?? undefined,
   };
 }
@@ -41,7 +38,7 @@ async function resolveSkillNames(raw: string): Promise<SkillInfo[]> {
     .filter(Boolean)
     .map((skill: any) => mapSkill(skill))
     .filter((s) => {
-      if (seen.has(s.name)) return false;
+      if (seen.has(s.name)) {return false;}
       seen.add(s.name);
       return true;
     });
@@ -57,7 +54,7 @@ async function inheritSkillsFromSibling(charaId: string, currentId: string): Pro
     .neq("id", currentId)
     .limit(5);
 
-  if (!siblings) return [];
+  if (!siblings) {return [];}
 
   for (const sib of siblings) {
     const sd = (sib.sheet_data as any) || {};
@@ -66,19 +63,19 @@ async function inheritSkillsFromSibling(charaId: string, currentId: string): Pro
     const moveSource = sd.firstMoves || sd.moveset;
     if (moveSource) {
       const resolved = await resolveSkillNames(moveSource);
-      if (resolved.length > 0) return resolved;
+      if (resolved.length > 0) {return resolved;}
     }
 
     // Try binary skills
     const rawSkills: any[] = Array.isArray(sib.skills) ? sib.skills : [];
     if (rawSkills.length > 0) {
       const skillList = rawSkills
-        .map((s: any) => (typeof s === "string" ? { skillId: s, learnLevel: 0 } : s))
+        .map((s: any) => (typeof s === "string" ? { learnLevel: 0, skillId: s } : s))
         .filter((s: any) => !PHANTOM_SKILL_IDS.has(s.skillId));
 
       const fetched = await Promise.all(skillList.map((s: any) => wikiService.getSkill(s.skillId)));
       const resolved = fetched.filter(Boolean).map((skill: any) => mapSkill(skill));
-      if (resolved.length > 0) return resolved;
+      if (resolved.length > 0) {return resolved;}
     }
   }
 
@@ -86,16 +83,16 @@ async function inheritSkillsFromSibling(charaId: string, currentId: string): Pro
 }
 
 async function resolveCharacter(idOrSlug: string | undefined): Promise<CompareCharacter | null> {
-  if (!idOrSlug) return null;
+  if (!idOrSlug) {return null;}
 
   let baseChar = await wikiService.getCharacter(idOrSlug);
   if (!baseChar) {
     baseChar = await wikiService.getCharacterBySlug(idOrSlug);
   }
-  if (!baseChar) return null;
+  if (!baseChar) {return null;}
 
   const variant = (baseChar.variants as any[])?.[0];
-  if (!variant) return null;
+  if (!variant) {return null;}
 
   const stats = variant.stats?.lv99 || {};
   const sd = variant.sheetData || (baseChar as any).sheetData || {};
@@ -111,7 +108,7 @@ async function resolveCharacter(idOrSlug: string | undefined): Promise<CompareCh
     // 1) Try binary skill IDs (filter out phantom slots)
     const rawSkills: Array<{ learnLevel: number; skillId: string }> | string[] = variant.skills || [];
     const skillList = rawSkills
-      .map((s: any) => (typeof s === "string" ? { skillId: s, learnLevel: 0 } : s))
+      .map((s: any) => (typeof s === "string" ? { learnLevel: 0, skillId: s } : s))
       .filter((s: any) => !PHANTOM_SKILL_IDS.has(s.skillId));
 
     if (skillList.length > 0) {
@@ -141,33 +138,33 @@ async function resolveCharacter(idOrSlug: string | undefined): Promise<CompareCh
   // Deduplicate skills by name (keep first occurrence)
   const seen = new Set<string>();
   skills = skills.filter((s) => {
-    if (seen.has(s.name)) return false;
+    if (seen.has(s.name)) {return false;}
     seen.add(s.name);
     return true;
   });
 
   return {
-    slug: (baseChar as any).slug || idOrSlug,
-    name: baseChar.names.fr || baseChar.names.en || "Inconnu",
-    nameJa: baseChar.names.ja || undefined,
-    nameEn: baseChar.names.en || undefined,
+    element: variant.element || "Void",
     image: baseChar.image || variant.image || null,
     internalCode: (baseChar as any).internalCode || (baseChar as any).charaId || undefined,
-    zukanHash: baseChar.zukanHash || variant.zukanHash || undefined,
+    name: baseChar.names.fr || baseChar.names.en || "Inconnu",
+    nameEn: baseChar.names.en || undefined,
+    nameJa: baseChar.names.ja || undefined,
     position: variant.position || "MF",
-    element: variant.element || "Void",
     rarity: variant.rarity || "Normal",
-    teamName: (baseChar as any).teamName || undefined,
-    stats: {
-      kick: stats.kick || 0,
-      control: stats.control || 0,
-      technique: stats.technique || 0,
-      pressure: stats.pressure || 0,
-      physical: stats.physical || 0,
-      agility: stats.agility || 0,
-      intelligence: stats.intelligence || 0,
-    },
     skills,
+    slug: (baseChar as any).slug || idOrSlug,
+    stats: {
+      agility: stats.agility || 0,
+      control: stats.control || 0,
+      intelligence: stats.intelligence || 0,
+      kick: stats.kick || 0,
+      physical: stats.physical || 0,
+      pressure: stats.pressure || 0,
+      technique: stats.technique || 0,
+    },
+    teamName: (baseChar as any).teamName || undefined,
+    zukanHash: baseChar.zukanHash || variant.zukanHash || undefined,
   };
 }
 
@@ -180,10 +177,10 @@ export async function generateMetadata({
 
   if (!char1 && !char2) {
     return {
-      title: "Comparateur de personnages | Azalée",
+      alternates: { canonical: "/tools/compare" },
       description:
         "Comparez deux personnages d'Inazuma Eleven: Victory Road côte à côte. Stats, techniques et bien plus.",
-      alternates: { canonical: "/tools/compare" },
+      title: "Comparateur de personnages | Azalée",
     };
   }
 
@@ -192,8 +189,8 @@ export async function generateMetadata({
   const names = [c1?.name, c2?.name].filter(Boolean).join(" vs ");
 
   return {
-    title: `${names || "Comparateur"} | Azalée`,
     description: `Comparaison ${names} dans Inazuma Eleven: Victory Road. Stats, techniques, éléments et positions.`,
+    title: `${names || "Comparateur"} | Azalée`,
   };
 }
 

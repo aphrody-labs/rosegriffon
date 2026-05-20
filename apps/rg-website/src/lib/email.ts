@@ -5,12 +5,12 @@ interface OrderConfirmationData {
   customerEmail: string;
   customerName?: string;
   totalAmount: number;
-  items: Array<{
+  items: {
     productName: string;
     variantName: string;
     quantity: number;
     price: number;
-  }>;
+  }[];
   shippingAddress?: {
     address_line1?: string;
     address_line2?: string;
@@ -22,13 +22,13 @@ interface OrderConfirmationData {
 
 // Créer le transporteur SMTP
 const transporter = nodemailer.createTransport({
+  auth: {
+    pass: process.env.SMTP_PASSWORD,
+    user: process.env.SMTP_USER,
+  },
   host: process.env.SMTP_HOST || "smtp.gmail.com",
   port: parseInt(process.env.SMTP_PORT || "587", 10),
-  secure: process.env.SMTP_SECURE === "true", // true pour 465, false pour 587
-  auth: {
-    user: process.env.SMTP_USER,
-    pass: process.env.SMTP_PASSWORD,
-  },
+  secure: process.env.SMTP_SECURE === "true", // true pour 465, false pour 587,
 });
 
 /**
@@ -136,14 +136,14 @@ export async function sendOrderConfirmationEmail(data: OrderConfirmationData) {
 
     const mailOptions = {
       from: process.env.SMTP_USER,
-      to: data.customerEmail,
-      subject: `🐉 Confirmation de commande #${data.orderId}`,
       html: htmlContent,
+      subject: `🐉 Confirmation de commande #${data.orderId}`,
+      to: data.customerEmail,
     };
 
     const info = await transporter.sendMail(mailOptions);
     // Email envoyé avec succès
-    return { success: true, messageId: info.messageId };
+    return { messageId: info.messageId, success: true };
   } catch (error) {
     console.error("Erreur lors de l'envoi de l'email:", error);
     throw error;
@@ -199,13 +199,13 @@ export async function sendShippingNotificationEmail(
 
     const mailOptions = {
       from: process.env.SMTP_USER,
-      to: customerEmail,
-      subject: `📦 Votre commande #${orderId} a été expédiée`,
       html: htmlContent,
+      subject: `📦 Votre commande #${orderId} a été expédiée`,
+      to: customerEmail,
     };
 
     const info = await transporter.sendMail(mailOptions);
-    return { success: true, messageId: info.messageId };
+    return { messageId: info.messageId, success: true };
   } catch (error) {
     console.error("Erreur lors de l'envoi de l'email d'expédition:", error);
     throw error;
@@ -251,13 +251,13 @@ export async function sendDeliveryConfirmationEmail(customerEmail: string, order
 
     const mailOptions = {
       from: process.env.SMTP_USER,
-      to: customerEmail,
-      subject: `✅ Votre commande #${orderId} a été livrée`,
       html: htmlContent,
+      subject: `✅ Votre commande #${orderId} a été livrée`,
+      to: customerEmail,
     };
 
     const info = await transporter.sendMail(mailOptions);
-    return { success: true, messageId: info.messageId };
+    return { messageId: info.messageId, success: true };
   } catch (error) {
     console.error("Erreur lors de l'envoi de l'email de livraison:", error);
     throw error;
@@ -311,13 +311,13 @@ export async function sendOrderCancellationEmail(
 
     const mailOptions = {
       from: process.env.SMTP_USER,
-      to: customerEmail,
-      subject: `❌ Votre commande #${orderId} a été annulée`,
       html: htmlContent,
+      subject: `❌ Votre commande #${orderId} a été annulée`,
+      to: customerEmail,
     };
 
     const info = await transporter.sendMail(mailOptions);
-    return { success: true, messageId: info.messageId };
+    return { messageId: info.messageId, success: true };
   } catch (error) {
     console.error("Erreur lors de l'envoi de l'email d'annulation:", error);
     throw error;

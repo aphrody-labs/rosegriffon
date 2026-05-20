@@ -28,14 +28,14 @@ function createTransporter() {
   const smtpPassword = getEnv("SMTP_PASSWORD");
 
   return nodemailer.createTransport({
-    service: "gmail",
+    auth: {
+      pass: smtpPassword,
+      user: smtpUser,
+    },
     host: "smtp.gmail.com",
     port: 587,
     secure: false,
-    auth: {
-      user: smtpUser,
-      pass: smtpPassword,
-    },
+    service: "gmail",
   });
 }
 
@@ -45,8 +45,8 @@ export async function sendContactEmail(formData: ContactFormValues) {
     const smtpUser = getEnv("SMTP_USER");
 
     logger.info("Envoi d'un email de contact", {
-      subject: formData.subject,
       hasFile: !!formData.file,
+      subject: formData.subject,
     });
 
     // Construire le contenu de l'email
@@ -54,15 +54,15 @@ export async function sendContactEmail(formData: ContactFormValues) {
       <h2>Titre : ${formData.title}</h2>
       <p><strong>Sujet :</strong> ${formData.subject}</p>
       <p><strong>Description :</strong></p>
-      <p>${formData.description.replace(/\n/g, "<br>")}</p>
+      <p>${formData.description.replaceAll(/\n/g, "<br>")}</p>
     `;
 
     // Préparer les options de l'email
     const mailOptions: NodemailerMailOptions = {
       from: smtpUser,
-      to: smtpUser,
-      subject: `[RG WEB] ${formData.subject} - ${formData.title}`,
       html: emailContent,
+      subject: `[RG WEB] ${formData.subject} - ${formData.title}`,
+      to: smtpUser,
     };
 
     // Ajouter la pièce jointe si elle existe
@@ -78,9 +78,9 @@ export async function sendContactEmail(formData: ContactFormValues) {
         const fileBuffer = await formData.file.arrayBuffer();
         mailOptions.attachments = [
           {
-            filename: formData.file.name,
             content: Buffer.from(fileBuffer),
             contentType: formData.file.type,
+            filename: formData.file.name,
           },
         ];
         logger.debug("Pièce jointe ajoutée", {
@@ -99,19 +99,19 @@ export async function sendContactEmail(formData: ContactFormValues) {
       logger.debug("Connexion SMTP vérifiée");
     } catch (error) {
       logger.error("La vérification SMTP a échoué", error);
-      return { success: false, error: "Erreur de configuration SMTP" };
+      return { error: "Erreur de configuration SMTP", success: false };
     }
 
     // Envoyer l'email
     const info = await transporter.sendMail(mailOptions);
     logger.info("Email envoyé avec succès", { messageId: info.messageId });
 
-    return { success: true, messageId: info.messageId };
+    return { messageId: info.messageId, success: true };
   } catch (error) {
     logger.error("Erreur lors de l'envoi de l'email", error);
     return {
-      success: false,
       error: error instanceof Error ? error.message : "Erreur inconnue",
+      success: false,
     };
   }
 }

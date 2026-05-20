@@ -8,16 +8,16 @@ import DiscordIcon from "@/shared/icons/discord";
 
 const DISCORD_GUILD_ID = "1072991720268111892";
 
-type DiscordMember = {
+interface DiscordMember {
   id: string;
   username: string;
   avatar?: string;
   avatar_url?: string;
   status: "online" | "idle" | "dnd" | "offline";
   game?: { name: string };
-};
+}
 
-type DiscordData = {
+interface DiscordData {
   name: string;
   icon: string | null;
   banner: string | null;
@@ -25,12 +25,12 @@ type DiscordData = {
   member_count: number;
   instant_invite: string;
   members: DiscordMember[];
-};
+}
 
-type DiscordBlockProps = {
+interface DiscordBlockProps {
   children: React.ReactNode;
   isWidgetLeft?: boolean;
-};
+}
 
 export default function DiscordBlock({ children, isWidgetLeft = false }: DiscordBlockProps) {
   const [discordData, setDiscordData] = useState<DiscordData | null>(null);
@@ -51,12 +51,10 @@ export default function DiscordBlock({ children, isWidgetLeft = false }: Discord
         if (response.ok) {
           const data = await response.json();
           setDiscordData({
-            name: data.name,
-            icon: null,
             banner: null,
-            presence_count: data.presence_count,
-            member_count: data.members?.length ?? 0,
+            icon: null,
             instant_invite: data.instant_invite,
+            member_count: data.members?.length ?? 0,
             members: (data.members ?? []).map((m: DiscordMember) => ({
               id: m.id,
               username: m.username,
@@ -65,6 +63,8 @@ export default function DiscordBlock({ children, isWidgetLeft = false }: Discord
               status: m.status || "offline",
               game: m.game,
             })),
+            name: data.name,
+            presence_count: data.presence_count,
           });
         } else {
           throw new Error("Impossible de récupérer les données Discord");
@@ -83,10 +83,10 @@ export default function DiscordBlock({ children, isWidgetLeft = false }: Discord
   // Composant pour afficher le statut
   const StatusIndicator = ({ status }: { status: string }) => {
     const statusColors = {
-      online: "bg-green-500",
-      idle: "bg-yellow-500",
       dnd: "bg-red-500",
+      idle: "bg-yellow-500",
       offline: "bg-gray-500",
+      online: "bg-green-500",
     };
 
     return (

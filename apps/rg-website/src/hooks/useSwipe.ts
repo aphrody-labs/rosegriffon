@@ -52,7 +52,7 @@ export function useSwipe({
   };
 
   const onTouchEnd = () => {
-    if (!touchStart.current || !touchEnd.current) return;
+    if (!touchStart.current || !touchEnd.current) {return;}
 
     const distanceX = touchStart.current.x - touchEnd.current.x;
     const distanceY = touchStart.current.y - touchEnd.current.y;
@@ -84,9 +84,9 @@ export function useSwipe({
   };
 
   return {
-    onTouchStart,
-    onTouchMove,
     onTouchEnd,
+    onTouchMove,
+    onTouchStart,
   };
 }
 
@@ -101,7 +101,7 @@ export function useSwipeElement(
 
   useEffect(() => {
     const element = elementRef.current;
-    if (!element) return;
+    if (!element) {return;}
 
     const handleTouchStart = (e: globalThis.TouchEvent) => {
       swipe.onTouchStart(e as unknown as TouchEvent);

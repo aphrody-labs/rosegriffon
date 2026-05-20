@@ -18,7 +18,8 @@ import {
   SidebarRail,
   useSidebar,
 } from "@rosegriffon/ui";
-import { dashboardItems, type NavItem, navigationItems } from "@/config/navigation";
+import { dashboardItems, navigationItems } from '@/config/navigation';
+import type { NavItem } from '@/config/navigation';
 import type { SpriteCommonKey } from "@/config/sprites-common";
 import { iconMap } from "@/lib/icons";
 import { cn } from "@/lib/utils";
@@ -38,7 +39,7 @@ export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
   }, []);
 
   const filteredNavItems = currentNavItems.filter((item) => {
-    if (item.adminOnly) return isAdmin;
+    if (item.adminOnly) {return isAdmin;}
     return true;
   });
 
@@ -144,7 +145,7 @@ function RecursiveNavItem({
   const { t } = useLanguage();
   const isActive =
     pathname === item.path || item.children?.some((child) => pathname.startsWith(child.path));
-  const [isOpen, setIsOpen] = React.useState(isActive || !!item.defaultOpen);
+  const [isOpen, setIsOpen] = React.useState(isActive || Boolean(item.defaultOpen));
   const { state, isMobile } = useSidebar();
   const isCollapsed = state === "collapsed" && !isMobile;
 
@@ -169,7 +170,7 @@ function RecursiveNavItem({
   const itemContent = (
     <>
       <div className={iconClass}>
-        <NavIcon item={item} isActive={!!isActive} isCollapsed={isCollapsed} depth={depth} />
+        <NavIcon item={item} isActive={Boolean(isActive)} isCollapsed={isCollapsed} depth={depth} />
       </div>
 
       {(!isCollapsed || depth > 0) && (
@@ -211,7 +212,7 @@ function RecursiveNavItem({
                 <div className={iconClass}>
                   <NavIcon
                     item={item}
-                    isActive={!!isActive}
+                    isActive={Boolean(isActive)}
                     isCollapsed={isCollapsed}
                     depth={depth}
                   />

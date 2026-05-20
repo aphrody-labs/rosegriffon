@@ -6,15 +6,13 @@ import { cache } from "react";
 
 import { auth } from "@/lib/auth";
 import { isPatreonAdmin } from "@/lib/patreon/admin-access";
-import { resolveProfile, isAdmin } from "@rosegriffon/auth";
+import { isAdmin, resolveProfile } from "@rosegriffon/auth";
 import { createAdminClient } from "@/lib/supabase/server";
 
 /**
  * Récupère la session Better Auth côté serveur (avec cache React par requête).
  */
-export const getServerSession = cache(async () => {
-	return auth.api.getSession({ headers: await headers() });
-});
+export const getServerSession = cache(async () => auth.api.getSession({ headers: await headers() }));
 
 /**
  * Récupère l'utilisateur authentifié ou null.
@@ -29,7 +27,7 @@ export const getServerUser = cache(async () => {
  */
 export async function requireAuth() {
 	const user = await getServerUser();
-	if (!user) redirect("/login");
+	if (!user) {redirect("/login");}
 	return user;
 }
 
@@ -39,18 +37,17 @@ export async function requireAuth() {
 export async function requireAdmin() {
 	const user = await requireAuth();
 	const supabase = createAdminClient();
-	// @ts-ignore - migration typing
 	const profile = await resolveProfile(supabase, user);
 
 	if (!profile || !isAdmin(profile.role)) {
 		console.warn("[requireAdmin] denied", {
-			userId: user.id,
 			resolvedRole: profile?.role,
+			userId: user.id,
 		});
 		redirect("/dashboard");
 	}
 
-	return { user, role: profile.role };
+	return { role: profile.role, user };
 }
 
 /**
@@ -61,8 +58,8 @@ export async function requirePatreonCreator() {
 	const allowed = await isPatreonAdmin(user);
 	if (!allowed) {
 		console.warn("[requirePatreonCreator] denied", {
-			userId: user.id,
 			email: user.email,
+			userId: user.id,
 		});
 		redirect("/dashboard");
 	}

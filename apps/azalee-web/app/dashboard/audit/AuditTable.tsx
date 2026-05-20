@@ -5,12 +5,12 @@ import Link from "next/link";
 import { Button } from "@rosegriffon/ui";
 
 const ACTION_LABELS: Record<string, { label: string; color: string }> = {
-  signup: { label: "Inscription", color: "bg-green-500/10 text-green-700" },
-  login: { label: "Connexion", color: "bg-blue-500/10 text-blue-700" },
-  logout: { label: "Déconnexion", color: "bg-gray-500/10 text-gray-700" },
-  profile_update: { label: "Profil modifié", color: "bg-yellow-500/10 text-yellow-700" },
-  session_revoke: { label: "Session révoquée", color: "bg-red-500/10 text-red-700" },
-  role_change: { label: "Rôle modifié", color: "bg-purple-500/10 text-purple-700" },
+  login: { color: "bg-blue-500/10 text-blue-700", label: "Connexion" },
+  logout: { color: "bg-gray-500/10 text-gray-700", label: "Déconnexion" },
+  profile_update: { color: "bg-yellow-500/10 text-yellow-700", label: "Profil modifié" },
+  role_change: { color: "bg-purple-500/10 text-purple-700", label: "Rôle modifié" },
+  session_revoke: { color: "bg-red-500/10 text-red-700", label: "Session révoquée" },
+  signup: { color: "bg-green-500/10 text-green-700", label: "Inscription" },
 };
 
 const ALL_ACTIONS = Object.keys(ACTION_LABELS);
@@ -25,11 +25,11 @@ interface AuditTableProps {
 function formatDate(date: string): string {
   return new Date(date).toLocaleDateString("fr-FR", {
     day: "numeric",
-    month: "short",
-    year: "numeric",
     hour: "2-digit",
     minute: "2-digit",
+    month: "short",
     second: "2-digit",
+    year: "numeric",
   });
 }
 
@@ -86,8 +86,8 @@ export function AuditTable({ logs, currentPage, totalPages, currentAction }: Aud
             <tbody className="divide-y divide-outline-variant/10">
               {logs.map((log: any) => {
                 const actionInfo = ACTION_LABELS[log.action] || {
-                  label: log.action,
                   color: "bg-surface-container-high text-on-surface",
+                  label: log.action,
                 };
                 return (
                   <tr key={log.id} className="hover:bg-surface-container-low/30 transition-colors">

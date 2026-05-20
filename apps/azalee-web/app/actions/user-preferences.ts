@@ -15,12 +15,12 @@ export interface Preferences {
 }
 
 const DEFAULT_PREFERENCES: Preferences = {
-  font_size: "medium",
-  reduced_motion: false,
-  reading_mode: false,
-  preferred_categories: [],
   email_notifications: true,
+  font_size: "medium",
+  preferred_categories: [],
   push_notifications: false,
+  reading_mode: false,
+  reduced_motion: false,
 };
 
 /**
@@ -29,7 +29,7 @@ const DEFAULT_PREFERENCES: Preferences = {
  */
 export async function getPreferences(): Promise<Preferences> {
   const session = await getServerSession();
-  if (!session?.user) throw new Error("Non authentifié");
+  if (!session?.user) {throw new Error("Non authentifié");}
 
   const supabase = await createClient();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -62,12 +62,12 @@ export async function getPreferences(): Promise<Preferences> {
   };
 
   return {
-    font_size: row.font_size ?? DEFAULT_PREFERENCES.font_size,
-    reduced_motion: row.reduced_motion ?? DEFAULT_PREFERENCES.reduced_motion,
-    reading_mode: row.reading_mode ?? DEFAULT_PREFERENCES.reading_mode,
-    preferred_categories: row.preferred_categories ?? DEFAULT_PREFERENCES.preferred_categories,
     email_notifications: row.email_notifications ?? DEFAULT_PREFERENCES.email_notifications,
+    font_size: row.font_size ?? DEFAULT_PREFERENCES.font_size,
+    preferred_categories: row.preferred_categories ?? DEFAULT_PREFERENCES.preferred_categories,
     push_notifications: row.push_notifications ?? DEFAULT_PREFERENCES.push_notifications,
+    reading_mode: row.reading_mode ?? DEFAULT_PREFERENCES.reading_mode,
+    reduced_motion: row.reduced_motion ?? DEFAULT_PREFERENCES.reduced_motion,
   };
 }
 
@@ -77,7 +77,7 @@ export async function getPreferences(): Promise<Preferences> {
  */
 export async function updatePreferences(updates: Partial<Preferences>): Promise<Preferences> {
   const session = await getServerSession();
-  if (!session?.user) throw new Error("Non authentifié");
+  if (!session?.user) {throw new Error("Non authentifié");}
 
   const supabase = await createClient();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -113,12 +113,12 @@ export async function updatePreferences(updates: Partial<Preferences>): Promise<
   };
 
   return {
-    font_size: row.font_size ?? DEFAULT_PREFERENCES.font_size,
-    reduced_motion: row.reduced_motion ?? DEFAULT_PREFERENCES.reduced_motion,
-    reading_mode: row.reading_mode ?? DEFAULT_PREFERENCES.reading_mode,
-    preferred_categories: row.preferred_categories ?? DEFAULT_PREFERENCES.preferred_categories,
     email_notifications: row.email_notifications ?? DEFAULT_PREFERENCES.email_notifications,
+    font_size: row.font_size ?? DEFAULT_PREFERENCES.font_size,
+    preferred_categories: row.preferred_categories ?? DEFAULT_PREFERENCES.preferred_categories,
     push_notifications: row.push_notifications ?? DEFAULT_PREFERENCES.push_notifications,
+    reading_mode: row.reading_mode ?? DEFAULT_PREFERENCES.reading_mode,
+    reduced_motion: row.reduced_motion ?? DEFAULT_PREFERENCES.reduced_motion,
   };
 }
 
@@ -128,7 +128,7 @@ export async function updatePreferences(updates: Partial<Preferences>): Promise<
  */
 export async function toggleReadingMode(): Promise<boolean> {
   const session = await getServerSession();
-  if (!session?.user) throw new Error("Non authentifié");
+  if (!session?.user) {throw new Error("Non authentifié");}
 
   const supabase = await createClient();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -148,9 +148,9 @@ export async function toggleReadingMode(): Promise<boolean> {
 
   const { error } = await client.from("user_preferences").upsert(
     {
-      user_id: session.user.id,
       reading_mode: newValue,
       updated_at: new Date().toISOString(),
+      user_id: session.user.id,
     },
     { onConflict: "user_id" },
   );

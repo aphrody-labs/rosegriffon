@@ -33,15 +33,15 @@ export async function requireApiAuth(): Promise<ApiAuthResult> {
 		};
 	}
 	return {
-		ok: true,
 		data: {
+			role: null,
 			user: {
-				id: session.user.id,
 				email: session.user.email,
+				id: session.user.id,
 				name: session.user.name,
 			},
-			role: null,
 		},
+		ok: true,
 	};
 }
 
@@ -52,7 +52,7 @@ export async function requireApiAuth(): Promise<ApiAuthResult> {
  */
 export async function requireApiAdmin(): Promise<ApiAuthResult> {
 	const authed = await requireApiAuth();
-	if (!authed.ok) return authed;
+	if (!authed.ok) {return authed;}
 
 	const supabase = createAdminClient();
 	if (!supabase) {
@@ -106,7 +106,7 @@ export async function requireApiAdmin(): Promise<ApiAuthResult> {
 		};
 	}
 
-	return { ok: true, data: { user, role } };
+	return { data: { role, user }, ok: true };
 }
 
 /**
@@ -116,7 +116,7 @@ export async function requireApiAdmin(): Promise<ApiAuthResult> {
  */
 export async function requireApiPatreonCreator(): Promise<ApiAuthResult> {
 	const authed = await requireApiAuth();
-	if (!authed.ok) return authed;
+	if (!authed.ok) {return authed;}
 	const allowed = await isPatreonAdmin(authed.data.user);
 	if (!allowed) {
 		return {

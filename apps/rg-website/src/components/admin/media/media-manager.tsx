@@ -31,7 +31,7 @@ import { createClient } from "@/lib/supabase/client";
 
 import { MediaUploader } from "./media-uploader";
 
-type FileObject = {
+interface FileObject {
   name: string;
   id: string | null;
   updated_at: string | null;
@@ -42,7 +42,7 @@ type FileObject = {
     mimetype: string;
     [key: string]: unknown;
   } | null;
-};
+}
 
 interface MediaManagerProps {
   initialFiles: FileObject[];
@@ -96,7 +96,7 @@ export function MediaManager({ initialFiles }: MediaManagerProps) {
   };
 
   const deleteFile = async (name: string, id: string | null) => {
-    if (!id || !confirm("Êtes-vous sûr de vouloir supprimer ce fichier ?")) return;
+    if (!id || !confirm("Êtes-vous sûr de vouloir supprimer ce fichier ?")) {return;}
 
     setDeletingId(id);
     const { error } = await supabase.storage.from("assets").remove([name]);
@@ -114,13 +114,13 @@ export function MediaManager({ initialFiles }: MediaManagerProps) {
   // Folder Logic
   const getFileTree = () => {
     const tree: { folders: string[]; files: FileObject[] } = {
-      folders: [],
       files: [],
+      folders: [],
     };
     const processedFolders = new Set<string>();
 
     files.forEach((file) => {
-      if (!file.name.startsWith(currentPath)) return;
+      if (!file.name.startsWith(currentPath)) {return;}
 
       const relativePath = file.name.slice(currentPath.length);
       // If currentPath is not empty, it ends with /, so relativePath is just the rest
@@ -253,8 +253,7 @@ export function MediaManager({ initialFiles }: MediaManagerProps) {
               <span className="text-sm font-medium truncate w-full text-center">{folder}</span>
             </Card>
           ))}
-          {currentFiles.map((file) => {
-            return (
+          {currentFiles.map((file) => (
               <Card key={file.id} className="group relative overflow-hidden">
                 <div className="aspect-square relative bg-muted">
                   <StorageImage src={file.name} alt={file.name} fill className="object-cover" />
@@ -286,8 +285,7 @@ export function MediaManager({ initialFiles }: MediaManagerProps) {
                   </p>
                 </div>
               </Card>
-            );
-          })}
+            ))}
         </div>
       ) : (
         <div className="rounded-md border">
