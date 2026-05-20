@@ -32,7 +32,7 @@ self.addEventListener("fetch", (event) => {
 	const { request } = event;
 
 	// Skip non-GET requests
-	if (request.method !== "GET") return;
+	if (request.method !== "GET") {return;}
 
 	// Navigation requests: NETWORK-ONLY (jamais en cache — évite stale HTML)
 	if (request.mode === "navigate") {
@@ -43,7 +43,7 @@ self.addEventListener("fetch", (event) => {
 	const url = new URL(request.url);
 
 	// Cache UNIQUEMENT les ressources versionnées /_next/static/ (immutables),
-	// que ce soit servi par l'origin Next OU par le CDN VPS (assetPrefix).
+	// Que ce soit servi par l'origin Next OU par le CDN VPS (assetPrefix).
 	const isStaticPath =
 		url.pathname.startsWith("/_next/static/") ||
 		url.pathname.includes("/_next/static/");
@@ -76,10 +76,10 @@ self.addEventListener("push", (event) => {
 	const data = event.data ? event.data.json() : {};
 	const title = data.title || "Azalee";
 	const options = {
-		body: data.body || "",
-		icon: "/icon.webp",
 		badge: "/icon.webp",
+		body: data.body || "",
 		data: data.data || {},
+		icon: "/icon.webp",
 		tag: data.tag || "default",
 	};
 	event.waitUntil(self.registration.showNotification(title, options));
@@ -90,7 +90,7 @@ self.addEventListener("notificationclick", (event) => {
 	const url = event.notification.data?.url || "/news";
 	event.waitUntil(
 		clients
-			.matchAll({ type: "window", includeUncontrolled: true })
+			.matchAll({ includeUncontrolled: true, type: "window" })
 			.then((clientList) => {
 				for (const client of clientList) {
 					if (client.url.includes(url) && "focus" in client) {

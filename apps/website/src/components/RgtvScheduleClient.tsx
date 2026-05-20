@@ -7,7 +7,7 @@ import { useTheme } from "@/contexts/theme-context";
 import { AlertCircle, CalendarDays, Clock, Zap } from "@/lib/icons-config";
 import { createLogger } from "@/lib/logger";
 import type { StreamSchedule } from "@rosegriffon/types";
-import type { Database, Tables, Insert, Update } from "@rosegriffon/db";
+import type { Database, Insert, Tables, Update } from "@rosegriffon/db";
 
 const logger = createLogger("RgtvSchedule");
 
@@ -63,7 +63,7 @@ function formatTimeRange(startTime: string | null, endTime: string | null): stri
 function sortDaysByOrder(days: string[]): string[] {
   logger.debug(`sortDaysByOrder: tri de ${days.length} jour(s)`, { days });
 
-  const sorted = days.sort((a, b) => {
+  const sorted = days.toSorted((a, b) => {
     const indexA = DAY_ORDER.indexOf(a);
     const indexB = DAY_ORDER.indexOf(b);
 
@@ -90,10 +90,10 @@ function sortDaysByOrder(days: string[]): string[] {
 function sortSchedulesByTime(schedules: StreamSchedule[]): StreamSchedule[] {
   logger.debug(`sortSchedulesByTime: tri de ${schedules.length} stream(s)`);
 
-  return schedules.sort((a, b) => {
+  return schedules.toSorted((a, b) => {
     // Si aucune heure de début, placer à la fin
-    if (!a.start_time) return 1;
-    if (!b.start_time) return -1;
+    if (!a.start_time) {return 1;}
+    if (!b.start_time) {return -1;}
 
     const [aH = 0, aM = 0] = a.start_time.split(":").map(Number);
     const [bH = 0, bM = 0] = b.start_time.split(":").map(Number);
@@ -117,8 +117,8 @@ export function RgtvScheduleClient({ scheduleByDay, error }: RgtvScheduleClientP
     <Card
       className="border-2 shadow-2xl relative overflow-hidden group hover:shadow-lg transition-all duration-500"
       style={{
-        borderColor: "#345182" + "80",
         backgroundColor: `${colors.background}F0`,
+        borderColor: "#345182" + "80",
       }}
     >
       {/* Effet de ligne d'énergie */}
@@ -137,9 +137,9 @@ export function RgtvScheduleClient({ scheduleByDay, error }: RgtvScheduleClientP
         <CardTitle
           className="text-2xl flex items-center gap-2"
           style={{
-            background: `linear-gradient(to right, #345182, #d63901, #345182)`,
             WebkitBackgroundClip: "text",
             WebkitTextFillColor: "transparent",
+            background: `linear-gradient(to right, #345182, #d63901, #345182)`,
             backgroundClip: "text",
           }}
         >
@@ -166,7 +166,7 @@ export function RgtvScheduleClient({ scheduleByDay, error }: RgtvScheduleClientP
               <p className="text-red-300/60 text-xs">Veuillez rafraîchir la page</p>
             </div>
           </div>
-        ) : isEmpty ? (
+        ) : (isEmpty ? (
           <div className="relative">
             <div
               className="absolute inset-0 opacity-10 bg-cover bg-center rounded-lg"
@@ -293,7 +293,7 @@ export function RgtvScheduleClient({ scheduleByDay, error }: RgtvScheduleClientP
               );
             })}
           </div>
-        )}
+        ))}
       </CardContent>
     </Card>
   );

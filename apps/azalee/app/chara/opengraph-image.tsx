@@ -1,56 +1,56 @@
 import { ImageResponse } from "next/og";
 
 export const alt = "Joueurs - Wiki Azalee";
-export const size = { width: 1200, height: 630 };
+export const size = { height: 630, width: 1200 };
 export const contentType = "image/png";
 
 const ACCENT = "#42A5F5";
 
 const POSITIONS = [
-  { label: "Attaquant", abbr: "FW", color: "#E53935" },
-  { label: "Milieu", abbr: "MF", color: "#43A047" },
-  { label: "Defenseur", abbr: "DF", color: "#29B6F6" },
-  { label: "Gardien", abbr: "GK", color: "#F9A825" },
+  { abbr: "FW", color: "#E53935", label: "Attaquant" },
+  { abbr: "MF", color: "#43A047", label: "Milieu" },
+  { abbr: "DF", color: "#29B6F6", label: "Defenseur" },
+  { abbr: "GK", color: "#F9A825", label: "Gardien" },
 ];
 
 export default async function Image() {
   return new ImageResponse(
     <div
       style={{
-        width: "100%",
-        height: "100%",
-        display: "flex",
         background: "linear-gradient(135deg, #1A120D 0%, #2D1F14 50%, #1A120D 100%)",
         color: "white",
+        display: "flex",
         fontFamily: "sans-serif",
-        position: "relative",
+        height: "100%",
         overflow: "hidden",
+        position: "relative",
+        width: "100%",
       }}
     >
       {/* Top bar */}
       <div
         style={{
-          position: "absolute",
-          top: 0,
-          left: 0,
-          right: 0,
-          height: 4,
           background: `linear-gradient(90deg, #F2A93B, ${ACCENT}, #F2A93B)`,
           display: "flex",
+          height: 4,
+          left: 0,
+          position: "absolute",
+          right: 0,
+          top: 0,
         }}
       />
 
       {/* Background glow */}
       <div
         style={{
-          position: "absolute",
-          top: -100,
-          right: -100,
-          width: 500,
-          height: 500,
-          borderRadius: "50%",
           background: `radial-gradient(circle, ${ACCENT}12 0%, transparent 70%)`,
+          borderRadius: "50%",
           display: "flex",
+          height: 500,
+          position: "absolute",
+          right: -100,
+          top: -100,
+          width: 500,
         }}
       />
 
@@ -58,21 +58,21 @@ export default async function Image() {
       <div
         style={{
           display: "flex",
+          flex: 1,
           flexDirection: "column",
+          gap: 20,
           justifyContent: "center",
           padding: "60px 80px",
-          flex: 1,
-          gap: 20,
         }}
       >
         <div
           style={{
+            color: ACCENT,
+            display: "flex",
             fontSize: 16,
             fontWeight: 700,
-            color: ACCENT,
-            textTransform: "uppercase",
             letterSpacing: 4,
-            display: "flex",
+            textTransform: "uppercase",
           }}
         >
           Wiki Azalee
@@ -80,11 +80,11 @@ export default async function Image() {
 
         <div
           style={{
+            color: "white",
+            display: "flex",
             fontSize: 64,
             fontWeight: 900,
-            color: "white",
             lineHeight: 1.1,
-            display: "flex",
           }}
         >
           Joueurs
@@ -92,10 +92,10 @@ export default async function Image() {
 
         <div
           style={{
-            fontSize: 24,
             color: "#A09080",
-            lineHeight: 1.4,
             display: "flex",
+            fontSize: 24,
+            lineHeight: 1.4,
             maxWidth: 600,
           }}
         >
@@ -108,20 +108,20 @@ export default async function Image() {
             <div
               key={p.abbr}
               style={{
-                display: "flex",
                 alignItems: "center",
-                gap: 8,
                 background: `${p.color}18`,
-                borderRadius: 20,
-                padding: "8px 18px",
                 border: `1px solid ${p.color}35`,
+                borderRadius: 20,
+                display: "flex",
+                gap: 8,
+                padding: "8px 18px",
               }}
             >
-              <div style={{ fontSize: 14, fontWeight: 800, color: p.color, display: "flex" }}>
+              <div style={{ color: p.color, display: "flex", fontSize: 14, fontWeight: 800 }}>
                 {p.abbr}
               </div>
               <div
-                style={{ fontSize: 14, fontWeight: 600, color: `${p.color}CC`, display: "flex" }}
+                style={{ color: `${p.color}CC`, display: "flex", fontSize: 14, fontWeight: 600 }}
               >
                 {p.label}
               </div>
@@ -133,48 +133,48 @@ export default async function Image() {
       {/* Right side stats preview */}
       <div
         style={{
+          alignItems: "center",
           display: "flex",
           flexDirection: "column",
-          justifyContent: "center",
-          alignItems: "center",
-          width: 320,
           gap: 16,
+          justifyContent: "center",
           padding: "40px 60px 40px 0",
+          width: 320,
         }}
       >
         {["Frappe", "Controle", "Technique", "Pression", "Physique", "Agilite", "Intelligence"].map(
           (s, i) => (
-            <div key={s} style={{ display: "flex", alignItems: "center", gap: 12, width: "100%" }}>
+            <div key={s} style={{ alignItems: "center", display: "flex", gap: 12, width: "100%" }}>
               <div
                 style={{
+                  color: "#6D5E50",
+                  display: "flex",
                   fontSize: 13,
                   fontWeight: 600,
-                  color: "#6D5E50",
-                  width: 90,
-                  textAlign: "right",
-                  display: "flex",
                   justifyContent: "flex-end",
+                  textAlign: "right",
+                  width: 90,
                 }}
               >
                 {s}
               </div>
               <div
                 style={{
+                  background: "#3D2E22",
+                  borderRadius: 4,
+                  display: "flex",
                   flex: 1,
                   height: 8,
-                  borderRadius: 4,
-                  background: "#3D2E22",
-                  display: "flex",
                   overflow: "hidden",
                 }}
               >
                 <div
                   style={{
-                    width: `${55 + i * 6}%`,
-                    height: "100%",
-                    borderRadius: 4,
                     background: `linear-gradient(90deg, ${ACCENT}80, ${ACCENT})`,
+                    borderRadius: 4,
                     display: "flex",
+                    height: "100%",
+                    width: `${55 + i * 6}%`,
                   }}
                 />
               </div>
@@ -186,12 +186,12 @@ export default async function Image() {
       {/* Branding */}
       <div
         style={{
-          position: "absolute",
-          bottom: 20,
-          left: 80,
-          display: "flex",
           alignItems: "center",
+          bottom: 20,
+          display: "flex",
           gap: 10,
+          left: 80,
+          position: "absolute",
         }}
       >
         <img
@@ -201,10 +201,10 @@ export default async function Image() {
           style={{ borderRadius: 7 }}
           alt="Logo Azalée"
         />
-        <div style={{ fontSize: 14, fontWeight: 700, color: "#F2A93B", display: "flex" }}>
+        <div style={{ color: "#F2A93B", display: "flex", fontSize: 14, fontWeight: 700 }}>
           azalee.rosegriffon.fr
         </div>
-        <div style={{ fontSize: 12, color: "#6D5E50", display: "flex" }}>
+        <div style={{ color: "#6D5E50", display: "flex", fontSize: 12 }}>
           Inazuma Eleven: Victory Road
         </div>
       </div>

@@ -10,7 +10,7 @@ const APP_SCOPE = "azalee";
 export async function revalidateNews(slug?: string) {
 	revalidatePath("/news", "page");
 	revalidatePath("/news/feed.xml", "page");
-	if (slug) revalidatePath(`/news/${slug}`, "page");
+	if (slug) {revalidatePath(`/news/${slug}`, "page");}
 }
 
 /**
@@ -25,8 +25,8 @@ export async function saveArticle(
 	let session;
 	try {
 		({ session } = await requireEditorOrFail());
-	} catch (e) {
-		return { id: articleId ?? "", error: (e as Error).message };
+	} catch (error) {
+		return { id: articleId ?? "", error: (error as Error).message };
 	}
 
 	const { createAdminClient } = await import("@/lib/supabase/admin");
@@ -41,7 +41,7 @@ export async function saveArticle(
 			.eq("id", articleId)
 			.eq("app", APP_SCOPE);
 
-		if (error) return { id: articleId, error: error.message };
+		if (error) {return { id: articleId, error: error.message };}
 
 		revalidateNews(data.slug as string | undefined);
 		return { id: articleId };
@@ -51,11 +51,11 @@ export async function saveArticle(
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	const { data: inserted, error } = await (supabase as any)
 		.from("articles")
-		.insert([{ ...data, author_id: session.user.id, app: APP_SCOPE }])
+		.insert([{ ...data, app: APP_SCOPE, author_id: session.user.id }])
 		.select("id")
 		.maybeSingle();
 
-	if (error) return { id: "", error: error.message };
+	if (error) {return { id: "", error: error.message };}
 
 	revalidateNews(data.slug as string | undefined);
 	return { id: inserted?.id || "" };
@@ -72,8 +72,8 @@ export async function updateArticleStatus(
 ): Promise<{ error?: string }> {
 	try {
 		await requireEditorOrFail();
-	} catch (e) {
-		return { error: (e as Error).message };
+	} catch (error) {
+		return { error: (error as Error).message };
 	}
 
 	const { createAdminClient } = await import("@/lib/supabase/admin");
@@ -98,7 +98,7 @@ export async function updateArticleStatus(
 		.eq("id", articleId)
 		.eq("app", APP_SCOPE);
 
-	if (error) return { error: error.message };
+	if (error) {return { error: error.message };}
 	revalidateNews();
 	return {};
 }
@@ -111,8 +111,8 @@ export async function deleteArticle(
 ): Promise<{ error?: string }> {
 	try {
 		await requireEditorOrFail();
-	} catch (e) {
-		return { error: (e as Error).message };
+	} catch (error) {
+		return { error: (error as Error).message };
 	}
 
 	const { createAdminClient } = await import("@/lib/supabase/admin");
@@ -125,7 +125,7 @@ export async function deleteArticle(
 		.eq("id", articleId)
 		.eq("app", APP_SCOPE);
 
-	if (error) return { error: error.message };
+	if (error) {return { error: error.message };}
 	revalidateNews();
 	return {};
 }
@@ -139,8 +139,8 @@ export async function toggleArticlePin(
 ): Promise<{ error?: string }> {
 	try {
 		await requireEditorOrFail();
-	} catch (e) {
-		return { error: (e as Error).message };
+	} catch (error) {
+		return { error: (error as Error).message };
 	}
 
 	const { createAdminClient } = await import("@/lib/supabase/admin");
@@ -153,7 +153,7 @@ export async function toggleArticlePin(
 		.eq("id", articleId)
 		.eq("app", APP_SCOPE);
 
-	if (error) return { error: error.message };
+	if (error) {return { error: error.message };}
 	revalidateNews();
 	return {};
 }
@@ -215,26 +215,26 @@ export async function shareToDiscord(article: {
 	const articleUrl = `https://azalee.rosegriffon.fr/news/${article.slug}`;
 
 	const embed = {
-		title: article.title,
-		description: article.excerpt || undefined,
-		url: articleUrl,
 		color: 0xf2a93b,
+		description: article.excerpt || undefined,
+		footer: { text: "Azalée — Rose Griffon" },
 		image: article.featured_image_url
 			? { url: article.featured_image_url }
 			: undefined,
-		footer: { text: "Azalée — Rose Griffon" },
 		timestamp: new Date().toISOString(),
+		title: article.title,
+		url: articleUrl,
 	};
 
 	const response = await fetch(
 		`https://discord.com/api/v10/channels/${channelId}/messages`,
 		{
-			method: "POST",
+			body: JSON.stringify({ embeds: [embed] }),
 			headers: {
 				Authorization: `Bot ${botToken}`,
 				"Content-Type": "application/json",
 			},
-			body: JSON.stringify({ embeds: [embed] }),
+			method: "POST",
 		},
 	);
 
@@ -255,8 +255,8 @@ export async function duplicateArticle(
 ): Promise<{ id: string } | { error: string }> {
 	try {
 		await requireEditorOrFail();
-	} catch (e) {
-		return { error: (e as Error).message };
+	} catch (error) {
+		return { error: (error as Error).message };
 	}
 
 	const { createAdminClient } = await import("@/lib/supabase/admin");
@@ -283,19 +283,19 @@ export async function duplicateArticle(
 		.insert([
 			{
 				app: APP_SCOPE,
-				title: `${original.title} (copie)`,
-				slug: newSlug,
-				content: original.content,
-				excerpt: original.excerpt,
-				category: original.category,
-				status: "draft",
-				featured_image_url: original.featured_image_url,
-				featured_image_alt: original.featured_image_alt,
-				meta_title: original.meta_title,
-				meta_description: original.meta_description,
-				tags: original.tags,
 				author_id: original.author_id,
+				category: original.category,
+				content: original.content,
 				created_at: now,
+				excerpt: original.excerpt,
+				featured_image_alt: original.featured_image_alt,
+				featured_image_url: original.featured_image_url,
+				meta_description: original.meta_description,
+				meta_title: original.meta_title,
+				slug: newSlug,
+				status: "draft",
+				tags: original.tags,
+				title: `${original.title} (copie)`,
 				updated_at: now,
 			},
 		])
@@ -333,7 +333,7 @@ export async function getPopularTags(
 			.eq("app", APP_SCOPE)
 			.not("tags", "is", null);
 
-		if (!articles) return [];
+		if (!articles) {return [];}
 
 		const tagCounts = new Map<string, number>();
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -345,9 +345,9 @@ export async function getPopularTags(
 			}
 		}
 
-		return Array.from(tagCounts.entries())
-			.map(([tag, count]) => ({ tag, count }))
-			.sort((a, b) => b.count - a.count)
+		return [...tagCounts.entries()]
+			.map(([tag, count]) => ({ count, tag }))
+			.toSorted((a, b) => b.count - a.count)
 			.slice(0, limit);
 	}
 
@@ -386,18 +386,18 @@ export async function getTrendingArticles(limit = 5): Promise<
 			)
 			.eq("status", "published")
 			.eq("app", APP_SCOPE)
-			.gte("published_at", new Date(Date.now() - 14 * 86400000).toISOString())
+			.gte("published_at", new Date(Date.now() - 14 * 86_400_000).toISOString())
 			.order("view_count", { ascending: false })
 			.limit(limit);
 
-		if (!articles) return [];
+		if (!articles) {return [];}
 		const now = Date.now();
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		return (articles as any[]).map((a) => {
 			const publishedAt = a.published_at
 				? new Date(a.published_at).getTime()
 				: now;
-			const ageDays = Math.max(1, (now - publishedAt) / 86400000);
+			const ageDays = Math.max(1, (now - publishedAt) / 86_400_000);
 			return {
 				...a,
 				trending_score: (a.view_count || 0) / ageDays,
@@ -453,7 +453,7 @@ export async function getRelatedArticles(
 	}>
 > {
 	const supabase = await createClient();
-	const results: Map<string, unknown> = new Map();
+	const results = new Map<string, unknown>();
 
 	// 1. Par tags communs
 	if (tags && tags.length > 0) {
@@ -521,7 +521,7 @@ export async function getRelatedArticles(
 		if (data) {
 			// eslint-disable-next-line @typescript-eslint/no-explicit-any
 			for (const item of data as any[]) {
-				if (results.size >= limit) break;
+				if (results.size >= limit) {break;}
 				if (!excludeIds.has(item.id)) {
 					results.set(item.id, item);
 				}
@@ -530,7 +530,7 @@ export async function getRelatedArticles(
 	}
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	return Array.from(results.values()) as any[];
+	return [...results.values()] as any[];
 }
 
 /**
@@ -541,12 +541,12 @@ export async function bulkUpdateArticles(
 	updates: { status?: string; category?: string; pinned?: boolean },
 ): Promise<{ success: boolean; count: number; error?: string }> {
 	if (ids.length === 0)
-		return { success: false, count: 0, error: "Aucun article sélectionné" };
+		{return { success: false, count: 0, error: "Aucun article sélectionné" };}
 
 	try {
 		await requireEditorOrFail();
-	} catch (e) {
-		return { success: false, count: 0, error: (e as Error).message };
+	} catch (error) {
+		return { success: false, count: 0, error: (error as Error).message };
 	}
 
 	const { createAdminClient } = await import("@/lib/supabase/admin");
@@ -561,23 +561,23 @@ export async function bulkUpdateArticles(
 
 	if (error) {
 		console.error("Bulk update error:", error);
-		return { success: false, count: 0, error: error.message };
+		return { count: 0, error: error.message, success: false };
 	}
 
 	revalidateNews();
-	return { success: true, count: ids.length };
+	return { count: ids.length, success: true };
 }
 
 export async function bulkDeleteArticles(
 	ids: string[],
 ): Promise<{ success: boolean; count: number; error?: string }> {
 	if (ids.length === 0)
-		return { success: false, count: 0, error: "Aucun article sélectionné" };
+		{return { success: false, count: 0, error: "Aucun article sélectionné" };}
 
 	try {
 		await requireEditorOrFail();
-	} catch (e) {
-		return { success: false, count: 0, error: (e as Error).message };
+	} catch (error) {
+		return { success: false, count: 0, error: (error as Error).message };
 	}
 
 	const { createAdminClient } = await import("@/lib/supabase/admin");
@@ -592,11 +592,11 @@ export async function bulkDeleteArticles(
 
 	if (error) {
 		console.error("Bulk delete error:", error);
-		return { success: false, count: 0, error: error.message };
+		return { count: 0, error: error.message, success: false };
 	}
 
 	revalidateNews();
-	return { success: true, count: ids.length };
+	return { count: ids.length, success: true };
 }
 
 /**
@@ -663,8 +663,8 @@ export async function getArticleStats(): Promise<{
 			.eq("status", "archived")
 			.eq("app", APP_SCOPE),
 		// SUM via une lecture des seules colonnes utiles. PostgREST n'expose pas
-		// d'agrégat SUM natif via supabase-js sans vue dédiée — on streame uniquement
-		// view_count (4 octets/ligne) côté serveur.
+		// D'agrégat SUM natif via supabase-js sans vue dédiée — on streame uniquement
+		// View_count (4 octets/ligne) côté serveur.
 		client
 			.from("articles")
 			.select("view_count")
@@ -691,14 +691,14 @@ export async function getArticleStats(): Promise<{
 	).reduce((sum, a) => sum + (a.view_count || 0), 0);
 
 	return {
-		totalArticles: totalArticles || 0,
-		totalPublished: totalPublished || 0,
-		totalDrafts: totalDrafts || 0,
-		totalScheduled: totalScheduled || 0,
-		totalArchived: totalArchived || 0,
-		totalViews,
-		topArticles: topArticles || [],
 		recentArticles: recentArticles || [],
+		topArticles: topArticles || [],
+		totalArchived: totalArchived || 0,
+		totalArticles: totalArticles || 0,
+		totalDrafts: totalDrafts || 0,
+		totalPublished: totalPublished || 0,
+		totalScheduled: totalScheduled || 0,
+		totalViews,
 	};
 }
 
@@ -710,8 +710,8 @@ export async function createArticleVersion(
 ): Promise<{ success: boolean; versionNumber?: number; error?: string }> {
 	try {
 		await requireEditorOrFail();
-	} catch (e) {
-		return { success: false, error: (e as Error).message };
+	} catch (error) {
+		return { success: false, error: (error as Error).message };
 	}
 
 	const { createAdminClient } = await import("@/lib/supabase/admin");
@@ -729,11 +729,11 @@ export async function createArticleVersion(
 		.single();
 
 	if (fetchErr || !article) {
-		return { success: false, error: "Article introuvable" };
+		return { error: "Article introuvable", success: false };
 	}
 
 	// Trouver le numéro de version suivant. `maybeSingle` évite le 406 quand
-	// aucun snapshot n'existe encore.
+	// Aucun snapshot n'existe encore.
 	const { data: lastVersion } = await client
 		.from("article_versions")
 		.select("version_number")
@@ -746,25 +746,25 @@ export async function createArticleVersion(
 
 	const { error: insertErr } = await client.from("article_versions").insert({
 		article_id: articleId,
-		version_number: nextVersion,
-		title: article.title,
+		category: article.category,
 		content:
 			typeof article.content === "object"
 				? JSON.stringify(article.content)
 				: article.content,
-		excerpt: article.excerpt,
-		category: article.category,
-		tags: article.tags,
-		status: article.status,
-		featured_image_url: article.featured_image_url,
-		meta_title: article.meta_title,
-		meta_description: article.meta_description,
 		created_by: article.author_id,
+		excerpt: article.excerpt,
+		featured_image_url: article.featured_image_url,
+		meta_description: article.meta_description,
+		meta_title: article.meta_title,
+		status: article.status,
+		tags: article.tags,
+		title: article.title,
+		version_number: nextVersion,
 	});
 
 	if (insertErr) {
 		console.error("Version create error:", insertErr);
-		return { success: false, error: insertErr.message };
+		return { error: insertErr.message, success: false };
 	}
 
 	return { success: true, versionNumber: nextVersion };
@@ -830,8 +830,8 @@ export async function restoreArticleVersion(
 ): Promise<{ success: boolean; error?: string }> {
 	try {
 		await requireEditorOrFail();
-	} catch (e) {
-		return { success: false, error: (e as Error).message };
+	} catch (error) {
+		return { success: false, error: (error as Error).message };
 	}
 
 	const { createAdminClient } = await import("@/lib/supabase/admin");
@@ -853,27 +853,27 @@ export async function restoreArticleVersion(
 		.maybeSingle();
 
 	if (fetchErr || !version) {
-		return { success: false, error: "Version introuvable pour cet article" };
+		return { error: "Version introuvable pour cet article", success: false };
 	}
 
 	const { error: updateErr } = await client
 		.from("articles")
 		.update({
-			title: version.title,
+			category: version.category,
 			content: version.content,
 			excerpt: version.excerpt,
-			category: version.category,
-			tags: version.tags,
 			featured_image_url: version.featured_image_url,
-			meta_title: version.meta_title,
 			meta_description: version.meta_description,
+			meta_title: version.meta_title,
+			tags: version.tags,
+			title: version.title,
 			updated_at: new Date().toISOString(),
 		})
 		.eq("id", articleId)
 		.eq("app", APP_SCOPE);
 
 	if (updateErr) {
-		return { success: false, error: updateErr.message };
+		return { error: updateErr.message, success: false };
 	}
 
 	revalidateNews();

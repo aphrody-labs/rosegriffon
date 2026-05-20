@@ -18,12 +18,12 @@ export interface TranslationResult {
 
 const ENTITY_TYPE_CONFIG: Record<string, { label: string; urlPrefix: string }> = {
   character: { label: "Personnage", urlPrefix: "/chara" },
-  skill: { label: "Technique", urlPrefix: "/skill" },
   item: { label: "Objet", urlPrefix: "/item" },
-  team: { label: "Équipe", urlPrefix: "/team" },
   keshin: { label: "Esprit Guerrier", urlPrefix: "/aura/esprits-guerriers" },
+  skill: { label: "Technique", urlPrefix: "/skill" },
   soul: { label: "Totem", urlPrefix: "/aura/totems" },
   tactic: { label: "Tactique", urlPrefix: "/tactic" },
+  team: { label: "Équipe", urlPrefix: "/team" },
 };
 
 /**
@@ -34,7 +34,7 @@ export async function searchTranslations(
   query: string,
   entityType?: string,
 ): Promise<TranslationResult[]> {
-  if (!query || query.length < 2) return [];
+  if (!query || query.length < 2) {return [];}
 
   const supabase = await createClient();
   const sanitized = query.replaceAll(/[%_,().*\\]/g, "");
@@ -70,12 +70,12 @@ export async function searchTranslations(
             for (const c of data) {
               results.push({
                 id: c.slug || c.id,
-                type: "character",
-                typeLabel: ENTITY_TYPE_CONFIG.character.label,
-                name_fr: c.name_fr,
                 name_en: c.name_en,
+                name_fr: c.name_fr,
                 name_ja: c.name_ja,
                 name_roma: c.name_roma || japaneseToRomaji(c.name_ja),
+                type: "character",
+                typeLabel: ENTITY_TYPE_CONFIG.character.label,
                 url: `/chara/${c.slug}`,
               });
             }
@@ -97,12 +97,12 @@ export async function searchTranslations(
             for (const s of data) {
               results.push({
                 id: s.id,
-                type: "skill",
-                typeLabel: ENTITY_TYPE_CONFIG.skill.label,
-                name_fr: s.name_fr,
                 name_en: s.name_en,
+                name_fr: s.name_fr,
                 name_ja: s.name_ja,
                 name_roma: japaneseToRomaji(s.name_ja),
+                type: "skill",
+                typeLabel: ENTITY_TYPE_CONFIG.skill.label,
                 url: `/skill/${s.id}`,
               });
             }
@@ -125,12 +125,12 @@ export async function searchTranslations(
             for (const i of data) {
               results.push({
                 id: i.id,
-                type: "item",
-                typeLabel: ENTITY_TYPE_CONFIG.item.label,
-                name_fr: i.name_fr,
                 name_en: i.name_en,
+                name_fr: i.name_fr,
                 name_ja: i.name_ja,
                 name_roma: japaneseToRomaji(i.name_ja),
+                type: "item",
+                typeLabel: ENTITY_TYPE_CONFIG.item.label,
                 url: `/item/${i.id}`,
               });
             }
@@ -153,12 +153,12 @@ export async function searchTranslations(
             for (const t of data) {
               results.push({
                 id: t.id,
-                type: "tactic",
-                typeLabel: ENTITY_TYPE_CONFIG.tactic.label,
-                name_fr: TACTIC_FR[t.name_en] || t.name_fr,
                 name_en: t.name_en,
+                name_fr: TACTIC_FR[t.name_en] || t.name_fr,
                 name_ja: t.name_ja,
                 name_roma: japaneseToRomaji(t.name_ja),
+                type: "tactic",
+                typeLabel: ENTITY_TYPE_CONFIG.tactic.label,
                 url: `/tactic/${t.id}`,
               });
             }
@@ -180,12 +180,12 @@ export async function searchTranslations(
             for (const t of data) {
               results.push({
                 id: t.id,
-                type: "team",
-                typeLabel: ENTITY_TYPE_CONFIG.team.label,
-                name_fr: t.name_fr,
                 name_en: t.name_en,
+                name_fr: t.name_fr,
                 name_ja: t.name_ja,
                 name_roma: japaneseToRomaji(t.name_ja),
+                type: "team",
+                typeLabel: ENTITY_TYPE_CONFIG.team.label,
                 url: `/team/${t.id}`,
               });
             }
@@ -207,12 +207,12 @@ export async function searchTranslations(
             for (const k of data) {
               results.push({
                 id: k.id,
-                type: "keshin",
-                typeLabel: ENTITY_TYPE_CONFIG.keshin.label,
-                name_fr: k.name_fr,
                 name_en: k.name_en,
+                name_fr: k.name_fr,
                 name_ja: k.name_ja,
                 name_roma: japaneseToRomaji(k.name_ja),
+                type: "keshin",
+                typeLabel: ENTITY_TYPE_CONFIG.keshin.label,
                 url: `/aura/esprits-guerriers/${k.id}`,
               });
             }
@@ -234,12 +234,12 @@ export async function searchTranslations(
             for (const s of data) {
               results.push({
                 id: s.id,
-                type: "soul",
-                typeLabel: ENTITY_TYPE_CONFIG.soul.label,
-                name_fr: s.name_fr,
                 name_en: s.name_en,
+                name_fr: s.name_fr,
                 name_ja: s.name_ja,
                 name_roma: japaneseToRomaji(s.name_ja),
+                type: "soul",
+                typeLabel: ENTITY_TYPE_CONFIG.soul.label,
                 url: `/aura/totems/${s.id}`,
               });
             }
@@ -255,10 +255,10 @@ export async function searchTranslations(
   results.sort((a, b) => {
     const scoreOf = (r: TranslationResult) => {
       for (const name of [r.name_fr, r.name_en, r.name_ja]) {
-        if (!name) continue;
+        if (!name) {continue;}
         const n = name.toLowerCase();
-        if (n === queryLower) return 3;
-        if (n.startsWith(queryLower)) return 2;
+        if (n === queryLower) {return 3;}
+        if (n.startsWith(queryLower)) {return 2;}
       }
       return 1;
     };

@@ -19,16 +19,16 @@ import { DriveImportButton } from "./drive-actions-client";
 import { NewsFilters } from "./NewsFilters";
 
 const STATUS_LABELS: Record<string, { plural: string; suffix: string }> = {
-	published: { plural: "publiés", suffix: "publié" },
-	draft: { plural: "brouillons", suffix: "en brouillon" },
-	scheduled: { plural: "programmés", suffix: "programmé" },
 	archived: { plural: "archivés", suffix: "archivé" },
+	draft: { plural: "brouillons", suffix: "en brouillon" },
+	published: { plural: "publiés", suffix: "publié" },
+	scheduled: { plural: "programmés", suffix: "programmé" },
 };
 
 export default async function NewsListPage({
 	searchParams,
 }: {
-	searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+	searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
 	const rawParams = await searchParams;
 	const params = parseSearchParams(rawParams);
@@ -71,9 +71,9 @@ export default async function NewsListPage({
 		} else if (q) {
 			q2 = q2.ilike("title", `%${q}%`);
 		}
-		if (statusFilter) q2 = q2.eq("status", statusFilter);
-		if (categoryFilter) q2 = q2.eq("category", categoryFilter);
-		if (authorParam) q2 = q2.eq("author_id", authorParam);
+		if (statusFilter) {q2 = q2.eq("status", statusFilter);}
+		if (categoryFilter) {q2 = q2.eq("category", categoryFilter);}
+		if (authorParam) {q2 = q2.eq("author_id", authorParam);}
 		return q2;
 	};
 
@@ -137,9 +137,9 @@ export default async function NewsListPage({
 		}));
 	}
 
-	const authorsList = Array.from(profileMap.values())
+	const authorsList = [...profileMap.values()]
 		.map((p) => ({ id: p.id, name: p.full_name || p.username || "Sans nom" }))
-		.sort((a, b) => a.name.localeCompare(b.name));
+		.toSorted((a, b) => a.name.localeCompare(b.name));
 
 	const isListView = view === "list";
 	const rangeStart = totalItems > 0 ? (currentPage - 1) * itemsPerPage + 1 : 0;
@@ -157,7 +157,7 @@ export default async function NewsListPage({
 		<div className="space-y-6 sm:space-y-8 pb-24 sm:pb-8">
 			<DashboardPageHeader
 				breadcrumbs={[
-					{ label: "Tableau de bord", href: "/dashboard" },
+					{ href: "/dashboard", label: "Tableau de bord" },
 					{ label: "Actualités" },
 				]}
 				title="Actualités"

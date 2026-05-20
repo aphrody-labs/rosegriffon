@@ -46,36 +46,36 @@ export function useAuthForm(isSignUp: boolean = false) {
    */
   const evaluatePasswordStrength = useCallback((pwd: string): PasswordStrengthFeedback => {
     const feedback: PasswordStrengthFeedback = {
-      score: 0,
       level: "very-weak",
-      suggestions: [],
       meetsRequirements: {
-        minLength: pwd.length >= 8,
-        hasUpperCase: /[A-Z]/.test(pwd),
         hasLowerCase: /[a-z]/.test(pwd),
         hasNumber: /\d/.test(pwd),
         hasSpecialChar: /[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/.test(pwd),
+        hasUpperCase: /[A-Z]/.test(pwd),
+        minLength: pwd.length >= 8,
       },
+      score: 0,
+      suggestions: [],
     };
 
     // Calculer le score
-    if (feedback.meetsRequirements.minLength) feedback.score += 20;
-    if (feedback.meetsRequirements.hasUpperCase) feedback.score += 20;
-    if (feedback.meetsRequirements.hasLowerCase) feedback.score += 20;
-    if (feedback.meetsRequirements.hasNumber) feedback.score += 20;
-    if (feedback.meetsRequirements.hasSpecialChar) feedback.score += 20;
+    if (feedback.meetsRequirements.minLength) {feedback.score += 20;}
+    if (feedback.meetsRequirements.hasUpperCase) {feedback.score += 20;}
+    if (feedback.meetsRequirements.hasLowerCase) {feedback.score += 20;}
+    if (feedback.meetsRequirements.hasNumber) {feedback.score += 20;}
+    if (feedback.meetsRequirements.hasSpecialChar) {feedback.score += 20;}
 
     // Bonus pour les mots de passe longs
-    if (pwd.length >= 12) feedback.score = Math.min(100, feedback.score + 10);
-    if (pwd.length >= 16) feedback.score = 100;
+    if (pwd.length >= 12) {feedback.score = Math.min(100, feedback.score + 10);}
+    if (pwd.length >= 16) {feedback.score = 100;}
 
     // Déterminer le niveau
-    if (feedback.score < 20) feedback.level = "very-weak";
-    else if (feedback.score < 40) feedback.level = "weak";
-    else if (feedback.score < 60) feedback.level = "fair";
-    else if (feedback.score < 80) feedback.level = "good";
-    else if (feedback.score < 100) feedback.level = "strong";
-    else feedback.level = "very-strong";
+    if (feedback.score < 20) {feedback.level = "very-weak";}
+    else if (feedback.score < 40) {feedback.level = "weak";}
+    else if (feedback.score < 60) {feedback.level = "fair";}
+    else if (feedback.score < 80) {feedback.level = "good";}
+    else if (feedback.score < 100) {feedback.level = "strong";}
+    else {feedback.level = "very-strong";}
 
     // Suggestions
     if (!feedback.meetsRequirements.minLength) {
@@ -102,9 +102,9 @@ export function useAuthForm(isSignUp: boolean = false) {
    */
   const validateForm = useCallback((): FormValidation => {
     const validation: FormValidation = {
+      confirmPassword: isSignUp ? confirmPassword.length >= 8 : true,
       email: validateEmail(email),
       password: password.length >= 8,
-      confirmPassword: isSignUp ? confirmPassword.length >= 8 : true,
       passwordsMatch: isSignUp ? password === confirmPassword : true,
     };
 

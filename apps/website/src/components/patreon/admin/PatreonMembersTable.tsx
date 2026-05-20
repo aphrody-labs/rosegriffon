@@ -32,31 +32,31 @@ interface Props {
 }
 
 const STATUS_LABELS: Record<string, { label: string; cls: string }> = {
-	pending: {
-		label: "En attente",
-		cls: "bg-amber-500/15 text-amber-700 dark:text-amber-300",
-	},
-	reactivated: {
-		label: "Réactivé",
-		cls: "bg-emerald-500/15 text-emerald-700 dark:text-emerald-300",
-	},
 	churned: {
-		label: "Churn",
 		cls: "bg-rose-500/15 text-rose-700 dark:text-rose-300",
+		label: "Churn",
 	},
 	grandfathered: {
-		label: "Grandfathered",
 		cls: "bg-sky-500/15 text-sky-700 dark:text-sky-300",
+		label: "Grandfathered",
+	},
+	pending: {
+		cls: "bg-amber-500/15 text-amber-700 dark:text-amber-300",
+		label: "En attente",
+	},
+	reactivated: {
+		cls: "bg-emerald-500/15 text-emerald-700 dark:text-emerald-300",
+		label: "Réactivé",
 	},
 };
 
 function formatEur(cents: number | null): string {
-	if (cents === null || cents === undefined) return "—";
-	return (cents / 100).toFixed(2).replace(".", ",") + " €";
+	if (cents === null || cents === undefined) {return "—";}
+	return `${(cents / 100).toFixed(2).replace(".", ",")  } €`;
 }
 
 function formatDate(iso: string | null): string {
-	if (!iso) return "—";
+	if (!iso) {return "—";}
 	try {
 		return format(new Date(iso), "d MMM yyyy", { locale: fr });
 	} catch {
@@ -73,9 +73,9 @@ export function PatreonMembersTable({ members, tierOptions }: Props) {
 	const filtered = useMemo(() => {
 		const needle = q.trim().toLowerCase();
 		return members.filter((m) => {
-			if (status !== "all" && m.rg_subscription_status !== status) return false;
-			if (tier !== "all" && !(m.tier_titles ?? []).includes(tier)) return false;
-			if (!needle) return true;
+			if (status !== "all" && m.rg_subscription_status !== status) {return false;}
+			if (tier !== "all" && !(m.tier_titles ?? []).includes(tier)) {return false;}
+			if (!needle) {return true;}
 			return (
 				(m.full_name ?? "").toLowerCase().includes(needle) ||
 				(m.email ?? "").toLowerCase().includes(needle) ||
@@ -88,9 +88,9 @@ export function PatreonMembersTable({ members, tierOptions }: Props) {
 		setBusyId(rowId);
 		try {
 			const res = await fetch("/api/admin/patreon/resync-member", {
-				method: "POST",
-				headers: { "content-type": "application/json" },
 				body: JSON.stringify({ memberId }),
+				headers: { "content-type": "application/json" },
+				method: "POST",
 			});
 			const json = (await res.json()) as { ok?: boolean; detail?: string };
 			if (!res.ok || !json.ok) {
@@ -99,8 +99,8 @@ export function PatreonMembersTable({ members, tierOptions }: Props) {
 				toast.success("Membre re-synchronisé");
 				setTimeout(() => window.location.reload(), 600);
 			}
-		} catch (e) {
-			toast.error(`Erreur : ${e instanceof Error ? e.message : String(e)}`);
+		} catch (error) {
+			toast.error(`Erreur : ${error instanceof Error ? error.message : String(error)}`);
 		} finally {
 			setBusyId(null);
 		}
@@ -110,9 +110,9 @@ export function PatreonMembersTable({ members, tierOptions }: Props) {
 		setBusyId(id);
 		try {
 			const res = await fetch("/api/admin/patreon/grandfather", {
-				method: "POST",
-				headers: { "content-type": "application/json" },
 				body: JSON.stringify({ id, status: newStatus }),
+				headers: { "content-type": "application/json" },
+				method: "POST",
 			});
 			const json = (await res.json()) as { ok?: boolean; detail?: string };
 			if (!res.ok || !json.ok) {
@@ -123,8 +123,8 @@ export function PatreonMembersTable({ members, tierOptions }: Props) {
 				);
 				setTimeout(() => window.location.reload(), 600);
 			}
-		} catch (e) {
-			toast.error(`Erreur : ${e instanceof Error ? e.message : String(e)}`);
+		} catch (error) {
+			toast.error(`Erreur : ${error instanceof Error ? error.message : String(error)}`);
 		} finally {
 			setBusyId(null);
 		}
@@ -186,8 +186,8 @@ export function PatreonMembersTable({ members, tierOptions }: Props) {
 					<tbody>
 						{filtered.map((m) => {
 							const statusCfg = STATUS_LABELS[m.rg_subscription_status] ?? {
-								label: m.rg_subscription_status,
 								cls: "bg-muted text-muted-foreground",
+								label: m.rg_subscription_status,
 							};
 							const isBusy = busyId === m.id;
 							return (

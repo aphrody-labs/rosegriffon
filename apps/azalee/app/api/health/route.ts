@@ -18,7 +18,7 @@ export async function GET() {
   const allOk = Object.values(checks).every((v) => v === "ok");
 
   return NextResponse.json(
-    { status: allOk ? "ok" : "degraded", checks, uptime: process.uptime() },
+    { checks, status: allOk ? "ok" : "degraded", uptime: process.uptime() },
     { status: allOk ? 200 : 503 }
   );
 }

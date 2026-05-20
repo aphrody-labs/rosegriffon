@@ -12,7 +12,7 @@ export interface RateLimitOptions {
  */
 export async function checkRateLimit(
   request: NextRequest,
-  options: RateLimitOptions = { limit: 10, windowMs: 60000 }
+  options: RateLimitOptions = { limit: 10, windowMs: 60_000 }
 ): Promise<{ allowed: boolean; remaining: number; resetTime: number }> {
   const ip = request.headers.get("x-forwarded-for") || "unknown";
   const key = `${ip}:${request.nextUrl.pathname}`;
@@ -50,8 +50,8 @@ export async function checkRateLimit(
   if (!entry || resetTime < now) {
     // Nouvelle entrée ou expirée
     await supabase.from("rate_limits").upsert({
-      key,
       count: 1,
+      key,
       last_request: new Date().toISOString(),
     });
     return {
@@ -90,21 +90,21 @@ export function withRateLimit(
     if (!allowed) {
       return new Response(
         JSON.stringify({
-          success: false,
           error: {
-            message: "Trop de requêtes. Veuillez réessayer plus tard.",
             code: "RATE_LIMIT_EXCEEDED",
+            message: "Trop de requêtes. Veuillez réessayer plus tard.",
           },
+          success: false,
         }),
         {
-          status: 429,
           headers: {
             "Content-Type": "application/json",
+            "Retry-After": Math.ceil((resetTime - Date.now()) / 1000).toString(),
             "X-RateLimit-Limit": options?.limit.toString() || "10",
             "X-RateLimit-Remaining": remaining.toString(),
             "X-RateLimit-Reset": resetTime.toString(),
-            "Retry-After": Math.ceil((resetTime - Date.now()) / 1000).toString(),
           },
+          status: 429,
         }
       );
     }

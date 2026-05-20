@@ -27,13 +27,13 @@ export default function EditChronicleClient({ article }: EditChronicleClientProp
   }) => {
     try {
       const result = await updateChronicle(article.id, {
-        title: data.title,
-        slug: data.slug,
-        excerpt: data.excerpt,
-        content: data.content,
         category: data.category,
+        content: data.content,
+        excerpt: data.excerpt,
         featured_image_url: data.featured_image,
+        slug: data.slug,
         status: data.published ? "published" : "draft",
+        title: data.title,
       });
 
       if (!result.success) {
@@ -60,10 +60,10 @@ export default function EditChronicleClient({ article }: EditChronicleClientProp
   // Map article data to editor format
   const initialData = {
     ...article,
+    category: article.category || "",
+    excerpt: article.excerpt || "",
     featured_image: article.featured_image_url || "",
     published: article.status === "published",
-    excerpt: article.excerpt || "",
-    category: article.category || "",
   };
 
   return (

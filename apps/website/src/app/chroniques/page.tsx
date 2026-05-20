@@ -25,19 +25,19 @@ export const dynamic = "force-dynamic";
 
 // Labels des catégories
 const categoryLabels: Record<string, string> = {
-	actualites: "Actualités",
-	projets: "Projets",
-	coulisses: "Coulisses",
-	communaute: "Communauté",
-	technique: "Technique",
-	loreteam: "Équipe Lore",
-	dessinateurteam: "Équipe Dessinateur",
-	productionteam: "Équipe Production",
-	socialteam: "Équipe Réseaux",
 	achilleateam: "Équipe Achilléa",
+	actualites: "Actualités",
 	azaleeteam: "Équipe Azalée",
-	mediationteam: "Médiation",
 	collabteam: "Partenaires",
+	communaute: "Communauté",
+	coulisses: "Coulisses",
+	dessinateurteam: "Équipe Dessinateur",
+	loreteam: "Équipe Lore",
+	mediationteam: "Médiation",
+	productionteam: "Équipe Production",
+	projets: "Projets",
+	socialteam: "Équipe Réseaux",
+	technique: "Technique",
 };
 
 // Génération des métadonnées SEO dynamiques
@@ -75,34 +75,34 @@ export async function generateMetadata({
 	}
 
 	const urlParams = new URLSearchParams();
-	if (query) urlParams.set("q", query);
-	if (category) urlParams.set("category", category);
-	if (page > 1) urlParams.set("page", page.toString());
+	if (query) {urlParams.set("q", query);}
+	if (category) {urlParams.set("category", category);}
+	if (page > 1) {urlParams.set("page", page.toString());}
 	const urlSuffix = urlParams.toString() ? `?${urlParams.toString()}` : "";
 
 	return {
-		title,
-		description,
-		openGraph: {
-			title,
-			description,
-			type: "website",
-			url: `https://rosegriffon.fr/chroniques${urlSuffix}`,
-			siteName: "Rose Griffon",
-			locale: "fr_FR",
-		},
-		twitter: {
-			card: "summary_large_image",
-			title,
-			description,
-			site: "@rose_griffon",
-		},
 		alternates: {
 			canonical: `https://rosegriffon.fr/chroniques${urlSuffix}`,
 		},
+		description,
+		openGraph: {
+			description,
+			locale: "fr_FR",
+			siteName: "Rose Griffon",
+			title,
+			type: "website",
+			url: `https://rosegriffon.fr/chroniques${urlSuffix}`,
+		},
 		robots: {
-			index: !query,
 			follow: true,
+			index: !query,
+		},
+		title,
+		twitter: {
+			card: "summary_large_image",
+			description,
+			site: "@rose_griffon",
+			title,
 		},
 	};
 }
@@ -137,7 +137,7 @@ export default async function ChroniquesListPage({
 	const isPatreonFilter = selectedCategory === "patreon";
 
 	// Fetch Patreon access en server uniquement si nécessaire (filtre actif ou
-	// pour décider si on affiche le filtre dans la barre).
+	// Pour décider si on affiche le filtre dans la barre).
 	const patreonFeed = await getPatreonFeedForViewer({
 		limit: isPatreonFilter ? 24 : 1,
 	});
@@ -147,11 +147,11 @@ export default async function ChroniquesListPage({
 	const { data: articles, meta } = isPatreonFilter
 		? { data: [], meta: { total: 0, totalPages: 0 } }
 		: await getArticles({
-				page,
-				limit: 12,
-				status: "published",
-				query,
 				category: selectedCategory || undefined,
+				limit: 12,
+				page,
+				query,
+				status: "published",
 			});
 
 	const patreonPosts = isPatreonFilter ? patreonFeed.posts : [];
@@ -177,9 +177,9 @@ export default async function ChroniquesListPage({
 	// Génération des URLs de pagination
 	const buildPageUrl = (pageNum: number) => {
 		const urlParams = new URLSearchParams();
-		if (query) urlParams.set("q", query);
-		if (selectedCategory) urlParams.set("category", selectedCategory);
-		if (pageNum > 1) urlParams.set("page", pageNum.toString());
+		if (query) {urlParams.set("q", query);}
+		if (selectedCategory) {urlParams.set("category", selectedCategory);}
+		if (pageNum > 1) {urlParams.set("page", pageNum.toString());}
 		return `/chroniques${urlParams.toString() ? `?${urlParams.toString()}` : ""}`;
 	};
 
@@ -187,8 +187,8 @@ export default async function ChroniquesListPage({
 		<main className="min-h-screen bg-background">
 			<BreadcrumbSchema
 				items={[
-					{ name: "Accueil", item: "/" },
-					{ name: "Chroniques", item: "/chroniques" },
+					{ item: "/", name: "Accueil" },
+					{ item: "/chroniques", name: "Chroniques" },
 				]}
 			/>
 
@@ -471,7 +471,7 @@ export default async function ChroniquesListPage({
 							)}
 						</div>
 					)
-				) : articles && articles.length > 0 ? (
+				) : (articles && articles.length > 0 ? (
 					<div
 						className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8 animate-in fade-in slide-in-from-bottom-4 duration-500"
 						style={{ animationDelay: "200ms" }}
@@ -577,7 +577,7 @@ export default async function ChroniquesListPage({
 							</Button>
 						)}
 					</div>
-				)}
+				))}
 
 				{/* Pagination */}
 				{meta && meta.totalPages > 1 && (
@@ -613,8 +613,8 @@ export default async function ChroniquesListPage({
 							{Array.from({ length: meta.totalPages }, (_, i) => i + 1)
 								.filter((p) => {
 									// Afficher: première, dernière, et 2 pages autour de la page courante
-									if (p === 1 || p === meta.totalPages) return true;
-									if (Math.abs(p - page) <= 1) return true;
+									if (p === 1 || p === meta.totalPages) {return true;}
+									if (Math.abs(p - page) <= 1) {return true;}
 									return false;
 								})
 								.map((p, idx, arr) => {

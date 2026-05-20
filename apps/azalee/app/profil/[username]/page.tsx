@@ -35,8 +35,8 @@ export async function generateMetadata({ params }: ProfilePageProps): Promise<Me
 
   const item = profile as any;
   return {
-    title: `${item.full_name || username} (@${username}) | Azalée`,
     description: item.bio || `Découvrez le profil de ${username} sur Azalée.`,
+    title: `${item.full_name || username} (@${username}) | Azalée`,
   };
 }
 
@@ -69,15 +69,15 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
 
   // Role badge config
   const roleConfig: Record<string, { label: string; color: string; icon: any }> = {
-    admin: { label: "Administrateur", color: "bg-error text-on-error", icon: Shield },
-    superadmin: { label: "Fondateur", color: "bg-primary text-on-primary", icon: Shield },
-    editor: { label: "Rédacteur", color: "bg-secondary text-on-secondary", icon: Edit },
-    moderator: { label: "Modérateur", color: "bg-tertiary text-on-tertiary", icon: Shield },
+    admin: { color: "bg-error text-on-error", icon: Shield, label: "Administrateur" },
     default: {
-      label: "Membre",
       color: "bg-surface-container-high text-on-surface-variant",
       icon: User,
+      label: "Membre",
     },
+    editor: { color: "bg-secondary text-on-secondary", icon: Edit, label: "Rédacteur" },
+    moderator: { color: "bg-tertiary text-on-tertiary", icon: Shield, label: "Modérateur" },
+    superadmin: { color: "bg-primary text-on-primary", icon: Shield, label: "Fondateur" },
   };
 
   const role = roleConfig[profile.role] || roleConfig.default;

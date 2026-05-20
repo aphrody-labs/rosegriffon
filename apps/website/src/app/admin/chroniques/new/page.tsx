@@ -23,13 +23,13 @@ export default function NewChroniclePage() {
   }) => {
     try {
       const result = await createChronicle({
-        title: data.title,
-        slug: data.slug,
-        excerpt: data.excerpt,
-        content: data.content,
         category: data.category,
+        content: data.content,
+        excerpt: data.excerpt,
         featured_image_url: data.featured_image,
+        slug: data.slug,
         status: data.published ? "published" : "draft",
+        title: data.title,
       });
 
       if (!result.success) {

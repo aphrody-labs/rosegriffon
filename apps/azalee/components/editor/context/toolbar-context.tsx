@@ -1,7 +1,8 @@
 "use client";
 
 import type { LexicalEditor } from "lexical";
-import { createContext, type JSX, useContext } from "react";
+import { createContext, useContext } from 'react';
+import type { JSX } from 'react';
 
 const Context = createContext<{
   activeEditor: LexicalEditor;
@@ -16,17 +17,17 @@ const Context = createContext<{
   isCode: boolean;
   isLink: boolean;
 }>({
-  activeEditor: {} as LexicalEditor,
   $updateToolbar: () => {},
+  activeEditor: {} as LexicalEditor,
   blockType: "paragraph",
+  isBold: false,
+  isCode: false,
+  isItalic: false,
+  isLink: false,
+  isStrikethrough: false,
+  isUnderline: false,
   setBlockType: () => {},
   showModal: () => {},
-  isBold: false,
-  isItalic: false,
-  isUnderline: false,
-  isStrikethrough: false,
-  isCode: false,
-  isLink: false,
 });
 
 export function ToolbarContext({
@@ -59,17 +60,17 @@ export function ToolbarContext({
   return (
     <Context.Provider
       value={{
-        activeEditor,
         $updateToolbar,
+        activeEditor,
         blockType,
+        isBold,
+        isCode,
+        isItalic,
+        isLink,
+        isStrikethrough,
+        isUnderline,
         setBlockType,
         showModal,
-        isBold,
-        isItalic,
-        isUnderline,
-        isStrikethrough,
-        isCode,
-        isLink,
       }}
     >
       {children}

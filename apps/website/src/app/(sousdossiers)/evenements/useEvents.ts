@@ -35,9 +35,9 @@ function getCategoryFromDescription(description: string): EventCategory {
     return "Stand artiste RG";
   } else if (lowerDesc.includes("stand associatif")) {
     return "Stand associatif";
-  } else {
-    return "Conventions";
   }
+    return "Conventions";
+  
 }
 
 // Fonction pour géocoder une adresse avec Nominatim (OpenStreetMap)
@@ -53,13 +53,13 @@ async function geocodeWithNominatim(address: string): Promise<{ lat: number; lng
       }
     );
 
-    if (!response.ok) return null;
+    if (!response.ok) {return null;}
 
     const data = await response.json();
     if (data && data.length > 0) {
       return {
-        lat: parseFloat(data[0].lat),
-        lng: parseFloat(data[0].lon),
+        lat: Number.parseFloat(data[0].lat),
+        lng: Number.parseFloat(data[0].lon),
       };
     }
     return null;
@@ -131,10 +131,10 @@ async function fetchGoogleCalendarEvents(): Promise<EventData[]> {
 
       const timeOptions: Intl.DateTimeFormatOptions = {
         day: "numeric",
-        month: "long",
-        year: "numeric",
         hour: "2-digit",
         minute: "2-digit",
+        month: "long",
+        year: "numeric",
       };
 
       // Gestion des erreurs de formatage de date
@@ -177,32 +177,32 @@ async function fetchGoogleCalendarEvents(): Promise<EventData[]> {
         : "Conventions";
 
       // Extraire les coordonnées de la description (format: lat:48.8566,lng:2.3522)
-      let lat = 46.603354; // Centre de la France par défaut
-      let lng = 1.888334;
+      let lat = 46.603_354; // Centre de la France par défaut
+      let lng = 1.888_334;
       let coordsFound = false;
 
       if (event.description) {
         const coordsMatch = event.description.match(/lat:([\d.-]+),lng:([\d.-]+)/);
         if (coordsMatch && coordsMatch.length >= 3 && coordsMatch[1] && coordsMatch[2]) {
-          lat = parseFloat(coordsMatch[1]);
-          lng = parseFloat(coordsMatch[2]);
+          lat = Number.parseFloat(coordsMatch[1]);
+          lng = Number.parseFloat(coordsMatch[2]);
           coordsFound = true;
         }
       }
 
       return {
-        name: event.summary || "Événement sans titre",
-        location: event.location || "Lieu non précisé",
-        date: formattedDate,
-        startDate: eventStart,
-        endDate: eventEnd,
-        startDateFormatted,
-        endDateFormatted,
-        description: event.description || "Pas de description disponible",
-        type,
         category: eventCategory,
-        position: { lat, lng },
+        date: formattedDate,
+        description: event.description || "Pas de description disponible",
+        endDate: eventEnd,
+        endDateFormatted,
+        location: event.location || "Lieu non précisé",
+        name: event.summary || "Événement sans titre",
         needsGeocoding: !coordsFound && !!event.location && event.location.trim() !== "",
+        position: { lat, lng },
+        startDate: eventStart,
+        startDateFormatted,
+        type,
       };
     });
   } catch (error) {
@@ -221,10 +221,10 @@ export function useEvents() {
   const [isGeocoding, setIsGeocoding] = useState(false);
 
   const { data, isLoading, error } = useQuery<EventData[]>({
-    queryKey: ["events"],
-    queryFn: fetchGoogleCalendarEvents,
-    staleTime: 1000 * 60 * 5,
     gcTime: 1000 * 60 * 30,
+    queryFn: fetchGoogleCalendarEvents,
+    queryKey: ["events"],
+    staleTime: 1000 * 60 * 5,
   });
 
   useEffect(() => {
@@ -239,14 +239,14 @@ export function useEvents() {
 
           for (let i = 0; i < updated.length; i++) {
             const current = updated[i];
-            if (!current) continue;
+            if (!current) {continue;}
             if (current.needsGeocoding) {
               // Rate limit for Nominatim
-              if (i > 0) await new Promise((r) => setTimeout(r, 1000));
+              if (i > 0) {await new Promise((r) => setTimeout(r, 1000));}
 
               const coords = await geocodeWithNominatim(current.location);
               if (coords) {
-                updated[i] = { ...current, position: coords, needsGeocoding: false };
+                updated[i] = { ...current, needsGeocoding: false, position: coords };
               }
             }
           }

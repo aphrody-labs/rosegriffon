@@ -4,17 +4,8 @@ import type React from "react";
 import { CommonSpriteIcon } from "@/components/ui/CommonSpriteIcon";
 import { FadeInItem, FadeInStagger } from "@/components/ui/fade-in";
 import { PassiveFilters } from "@/components/wiki/filters/PassiveFilters";
-import {
-  CoordinatorPassiveCard,
-  type CoordinatorPassiveData,
-  CustomPassiveCard,
-  type CustomPassiveData,
-  PLAYSTYLE_FR,
-  PlayerPassiveCard,
-  type PlayerPassiveData,
-  REQUIREMENT_FR,
-  STAT_FR,
-} from "@/components/wiki/PassiveCard";
+import { CoordinatorPassiveCard, CustomPassiveCard, PLAYSTYLE_FR, PlayerPassiveCard, REQUIREMENT_FR, STAT_FR } from '@/components/wiki/PassiveCard';
+import type { CoordinatorPassiveData, CustomPassiveData, PlayerPassiveData } from '@/components/wiki/PassiveCard';
 import { WikiSearchToolbar } from "@/components/wiki/WikiSearchToolbar";
 import type { SpriteCommonKey } from "@/config/sprites-common";
 import passiveData from "@/data/passive-sheets.json";
@@ -22,9 +13,9 @@ import { normalizeText } from "@/lib/search-utils";
 import { parseSearchParams } from "@/lib/validations";
 
 export const metadata: Metadata = {
-  title: "Talents & Passifs | Codex Stratégique - Azalée",
   description:
     "Guide complet des passifs : joueur, personnalisé, coordinateur et manager. Valeurs par rareté et style de jeu.",
+  title: "Talents & Passifs | Codex Stratégique - Azalée",
 };
 
 // ── Helpers ──
@@ -39,10 +30,10 @@ function passiveSearchText(p: { requirement: string; stat: string; playstyle?: s
 /** Map stat EN key to a filter category */
 function statCategory(stat: string): string {
   const s = stat.toLowerCase();
-  if (s.includes("shot")) return "shot";
-  if (s.includes("focus")) return "focus";
-  if (s.includes("scramble")) return "scramble";
-  if (s.includes("castle")) return "castle";
+  if (s.includes("shot")) {return "shot";}
+  if (s.includes("focus")) {return "focus";}
+  if (s.includes("scramble")) {return "scramble";}
+  if (s.includes("castle")) {return "castle";}
   if (
     s.startsWith("team") ||
     s.startsWith("[mf]") ||
@@ -50,8 +41,8 @@ function statCategory(stat: string): string {
     s.startsWith("[kp]") ||
     s.startsWith("[substitute")
   )
-    return "team";
-  if (s.startsWith("own")) return "own";
+    {return "team";}
+  if (s.startsWith("own")) {return "own";}
   return "";
 }
 
@@ -62,11 +53,11 @@ function matchesFilters(
   statCatFilter: string,
 ): boolean {
   // Text search
-  if (qNorm && !passiveSearchText(p).includes(qNorm)) return false;
+  if (qNorm && !passiveSearchText(p).includes(qNorm)) {return false;}
   // Playstyle filter
-  if (playstyleFilter !== null && (p.playstyle ?? "") !== playstyleFilter) return false;
+  if (playstyleFilter !== null && (p.playstyle ?? "") !== playstyleFilter) {return false;}
   // Stat category
-  if (statCatFilter && statCategory(p.stat) !== statCatFilter) return false;
+  if (statCatFilter && statCategory(p.stat) !== statCatFilter) {return false;}
   return true;
 }
 
@@ -79,19 +70,19 @@ const PLAYSTYLE_SECTIONS: Array<{
   sprite?: SpriteCommonKey;
   color: string;
 }> = [
-  { key: "", label: "Généraux", icon: SlidersHorizontal, color: "text-on-surface-variant" },
-  { key: "Breach", label: "Brèche", sprite: "breche", color: "text-red-500" },
-  { key: "Tension", label: "Tension", sprite: "tension", color: "text-amber-500" },
-  { key: "Counter", label: "Contre-attaque", sprite: "contre", color: "text-blue-500" },
-  { key: "Bond", label: "Lien", sprite: "lien", color: "text-pink-500" },
-  { key: "Rough Play", label: "Jeu brutal", sprite: "jeu_violent", color: "text-orange-500" },
-  { key: "Justice", label: "Justice", sprite: "justice", color: "text-emerald-500" },
+  { color: "text-on-surface-variant", icon: SlidersHorizontal, key: "", label: "Généraux" },
+  { color: "text-red-500", key: "Breach", label: "Brèche", sprite: "breche" },
+  { color: "text-amber-500", key: "Tension", label: "Tension", sprite: "tension" },
+  { color: "text-blue-500", key: "Counter", label: "Contre-attaque", sprite: "contre" },
+  { color: "text-pink-500", key: "Bond", label: "Lien", sprite: "lien" },
+  { color: "text-orange-500", key: "Rough Play", label: "Jeu brutal", sprite: "jeu_violent" },
+  { color: "text-emerald-500", key: "Justice", label: "Justice", sprite: "justice" },
 ];
 
 export default async function PassivesPage({
   searchParams,
 }: {
-  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const params = parseSearchParams(await searchParams);
   const { q, type: typeFilter, playstyle: playstyleFilter, category: statCatFilter } = params;
@@ -115,9 +106,9 @@ export default async function PassivesPage({
   );
 
   const typeCounts: Record<string, number> = {
-    player: playerFiltered.length,
-    custom: customFiltered.length,
     coordinator: coordFiltered.length,
+    custom: customFiltered.length,
+    player: playerFiltered.length,
   };
 
   // ── Apply type filter ──
@@ -234,7 +225,7 @@ export default async function PassivesPage({
                         </div>
                       ) : (
                         group.icon && (
-                          <group.icon size={20} className={group.color} aria-hidden={true} />
+                          <group.icon size={20} className={group.color} aria-hidden />
                         )
                       )}
                       <h3 className="text-lg font-bold text-on-surface">{group.label}</h3>
@@ -325,7 +316,7 @@ export default async function PassivesPage({
                         </div>
                       ) : (
                         group.icon && (
-                          <group.icon size={20} className={group.color} aria-hidden={true} />
+                          <group.icon size={20} className={group.color} aria-hidden />
                         )
                       )}
                       <h3 className="text-lg font-bold text-on-surface">{group.label}</h3>

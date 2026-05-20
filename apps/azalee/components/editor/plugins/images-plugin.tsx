@@ -9,34 +9,14 @@
  */
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
 import { $wrapNodeInElement, mergeRegister } from "@lexical/utils";
-import {
-	$createParagraphNode,
-	$createRangeSelection,
-	$getSelection,
-	$insertNodes,
-	$isNodeSelection,
-	$isRootOrShadowRoot,
-	$setSelection,
-	COMMAND_PRIORITY_EDITOR,
-	COMMAND_PRIORITY_HIGH,
-	COMMAND_PRIORITY_LOW,
-	createCommand,
-	DRAGOVER_COMMAND,
-	DRAGSTART_COMMAND,
-	DROP_COMMAND,
-	type LexicalCommand,
-	type LexicalEditor,
-	PASTE_COMMAND,
-} from "lexical";
-import { type JSX, useEffect, useRef, useState } from "react";
+import { $createParagraphNode, $createRangeSelection, $getSelection, $insertNodes, $isNodeSelection, $isRootOrShadowRoot, $setSelection, COMMAND_PRIORITY_EDITOR, COMMAND_PRIORITY_HIGH, COMMAND_PRIORITY_LOW, createCommand, DRAGOVER_COMMAND, DRAGSTART_COMMAND, DROP_COMMAND, PASTE_COMMAND } from 'lexical';
+import type { LexicalCommand, LexicalEditor } from 'lexical';
+import { useEffect, useRef, useState } from 'react';
+import type { JSX } from 'react';
 
 import { uploadImage } from "@/app/actions/image-upload";
-import {
-	$createImageNode,
-	$isImageNode,
-	ImageNode,
-	type ImagePayload,
-} from "@/components/editor/nodes/image-node";
+import { $createImageNode, $isImageNode, ImageNode } from '@/components/editor/nodes/image-node';
+import type { ImagePayload } from '@/components/editor/nodes/image-node';
 import { CAN_USE_DOM } from "@/components/editor/shared/can-use-dom";
 import { Button } from "@rosegriffon/ui";
 import { DialogFooter } from "@rosegriffon/ui";
@@ -110,7 +90,7 @@ export function InsertImageUploadedDialogBody({
 	const isDisabled = src === "" || isUploading;
 
 	const loadImage = async (files: FileList | null) => {
-		if (!files || files.length === 0) return;
+		if (!files || files.length === 0) {return;}
 
 		setIsUploading(true);
 		const formData = new FormData();
@@ -123,8 +103,8 @@ export function InsertImageUploadedDialogBody({
 				return;
 			}
 			setSrc(result.url);
-		} catch (e) {
-			console.error(e);
+		} catch (error) {
+			console.error(error);
 			alert("Upload failed");
 		} finally {
 			setIsUploading(false);
@@ -244,30 +224,22 @@ export function ImagesPlugin({
 			),
 			editor.registerCommand<DragEvent>(
 				DRAGSTART_COMMAND,
-				(event) => {
-					return $onDragStart(event);
-				},
+				(event) => $onDragStart(event),
 				COMMAND_PRIORITY_HIGH,
 			),
 			editor.registerCommand<DragEvent>(
 				DRAGOVER_COMMAND,
-				(event) => {
-					return $onDragover(event);
-				},
+				(event) => $onDragover(event),
 				COMMAND_PRIORITY_LOW,
 			),
 			editor.registerCommand<DragEvent>(
 				DROP_COMMAND,
-				(event) => {
-					return $onDrop(event, editor);
-				},
+				(event) => $onDrop(event, editor),
 				COMMAND_PRIORITY_HIGH,
 			),
 			editor.registerCommand<ClipboardEvent>(
 				PASTE_COMMAND,
-				(event) => {
-					return $onPaste(event, editor);
-				},
+				(event) => $onPaste(event, editor),
 				COMMAND_PRIORITY_HIGH,
 			),
 		);
@@ -281,7 +253,7 @@ function $onDragStart(event: DragEvent): boolean {
 	if (!node) {
 		return false;
 	}
-	const dataTransfer = event.dataTransfer;
+	const {dataTransfer} = event;
 	if (!dataTransfer) {
 		return false;
 	}
@@ -331,7 +303,7 @@ function $onDrop(event: DragEvent, editor: LexicalEditor): boolean {
 		event.preventDefault();
 		if (canDropImage(event)) {
 			const range = getDragSelection(event);
-			if (node) node.remove();
+			if (node) {node.remove();}
 			const rangeSelection = $createRangeSelection();
 			if (range !== null && range !== undefined) {
 				rangeSelection.applyDOMRange(range);
@@ -352,7 +324,7 @@ function $onDrop(event: DragEvent, editor: LexicalEditor): boolean {
 			// Use the range selection to know where to insert
 			const range = getDragSelection(event);
 			const rangeSelection = $createRangeSelection();
-			if (range) rangeSelection.applyDOMRange(range);
+			if (range) {rangeSelection.applyDOMRange(range);}
 			$setSelection(rangeSelection);
 
 			// Upload and optimize
@@ -430,13 +402,11 @@ declare global {
 }
 
 function canDropImage(event: DragEvent): boolean {
-	const target = event.target;
-	return !!(
-		target &&
+	const {target} = event;
+	return Boolean(target &&
 		target instanceof HTMLElement &&
 		!target.closest("code, span.editor-image") &&
-		target.parentElement?.closest("div.ContentEditable__root")
-	);
+		target.parentElement?.closest("div.ContentEditable__root"));
 }
 
 function getDragSelection(event: DragEvent): Range | null | undefined {
@@ -445,9 +415,9 @@ function getDragSelection(event: DragEvent): Range | null | undefined {
 	const targetWindow =
 		target == null
 			? null
-			: target.nodeType === 9
+			: (target.nodeType === 9
 				? (target as Document).defaultView
-				: (target as Element).ownerDocument.defaultView;
+				: (target as Element).ownerDocument.defaultView);
 	const domSelection = getDOMSelection(targetWindow);
 	if (document.caretRangeFromPoint) {
 		range = document.caretRangeFromPoint(event.clientX, event.clientY);
@@ -455,7 +425,7 @@ function getDragSelection(event: DragEvent): Range | null | undefined {
 		domSelection.collapse(event.rangeParent, event.rangeOffset || 0);
 		range = domSelection.getRangeAt(0);
 	} else {
-		throw Error("Cannot get the selection when dragging");
+		throw new Error("Cannot get the selection when dragging");
 	}
 
 	return range;

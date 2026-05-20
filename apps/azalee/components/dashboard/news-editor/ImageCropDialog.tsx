@@ -2,7 +2,8 @@
 
 import type * as React from "react";
 import { useCallback, useRef, useState } from "react";
-import RawReactCrop, { type Crop, type PixelCrop } from "react-image-crop";
+import RawReactCrop from 'react-image-crop';
+import type { Crop, PixelCrop } from 'react-image-crop';
 
 // React 19 / react-image-crop typings drift: cast to FC<any> (TS2607/TS2786).
 const ReactCrop = RawReactCrop as unknown as React.FC<any>;
@@ -46,20 +47,20 @@ export function ImageCropDialog({ open, imageUrl, onClose, onApply }: ImageCropD
         const y = (height - cropHeight) / 2;
 
         const percentCrop: Crop = {
+          height: (cropHeight / height) * 100,
           unit: "%",
+          width: (cropWidth / width) * 100,
           x: (x / width) * 100,
           y: (y / height) * 100,
-          width: (cropWidth / width) * 100,
-          height: (cropHeight / height) * 100,
         };
         setCrop(percentCrop);
       } else {
         setCrop({
+          height: 90,
           unit: "%",
+          width: 90,
           x: 5,
           y: 5,
-          width: 90,
-          height: 90,
         });
       }
     },
@@ -70,7 +71,7 @@ export function ImageCropDialog({ open, imageUrl, onClose, onApply }: ImageCropD
     setSelectedRatioIndex(index);
     const ratio = CROP_RATIO_PRESETS[index].value;
     const img = imgRef.current;
-    if (!img) return;
+    if (!img) {return;}
 
     const { width, height } = img;
     if (ratio) {
@@ -80,38 +81,38 @@ export function ImageCropDialog({ open, imageUrl, onClose, onApply }: ImageCropD
       const y = (height - cropHeight) / 2;
 
       setCrop({
+        height: (cropHeight / height) * 100,
         unit: "%",
+        width: (cropWidth / width) * 100,
         x: (x / width) * 100,
         y: (y / height) * 100,
-        width: (cropWidth / width) * 100,
-        height: (cropHeight / height) * 100,
       });
     } else {
       setCrop({
+        height: 90,
         unit: "%",
+        width: 90,
         x: 5,
         y: 5,
-        width: 90,
-        height: 90,
       });
     }
   };
 
   const handleApply = async () => {
-    if (!completedCrop || !imgRef.current) return;
+    if (!completedCrop || !imgRef.current) {return;}
 
     const img = imgRef.current;
-    const naturalWidth = img.naturalWidth;
-    const naturalHeight = img.naturalHeight;
+    const {naturalWidth} = img;
+    const {naturalHeight} = img;
     const scaleX = naturalWidth / img.width;
     const scaleY = naturalHeight / img.height;
 
     // Convert pixel crop to percentage of natural image dimensions
     const cropData: CropData = {
+      height: ((completedCrop.height * scaleY) / naturalHeight) * 100,
+      width: ((completedCrop.width * scaleX) / naturalWidth) * 100,
       x: ((completedCrop.x * scaleX) / naturalWidth) * 100,
       y: ((completedCrop.y * scaleY) / naturalHeight) * 100,
-      width: ((completedCrop.width * scaleX) / naturalWidth) * 100,
-      height: ((completedCrop.height * scaleY) / naturalHeight) * 100,
     };
 
     // Fetch the image as a file to re-upload with crop

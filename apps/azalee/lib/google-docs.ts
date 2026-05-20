@@ -5,7 +5,7 @@ type Table = docs_v1.Schema$Table;
 type TextRun = docs_v1.Schema$TextRun;
 
 export function convertGoogleDocToHtml(doc: docs_v1.Schema$Document): string {
-  if (!doc.body?.content) return "";
+  if (!doc.body?.content) {return "";}
 
   let html = "";
   let listState: { listId: string; nestingLevel: number } | null = null;
@@ -18,7 +18,7 @@ export function convertGoogleDocToHtml(doc: docs_v1.Schema$Document): string {
         const nestingLevel = element.paragraph.bullet.nestingLevel || 0;
 
         if (!listState || listState.listId !== listId) {
-          if (listState) html += "</ul>"; // Close previous list
+          if (listState) {html += "</ul>";} // Close previous list
           html += '<ul class="list-disc pl-6 mb-4 space-y-2">';
           listState = { listId, nestingLevel };
         }
@@ -56,30 +56,38 @@ function renderParagraph(paragraph: Paragraph, doc: docs_v1.Schema$Document): st
   const style = paragraph.paragraphStyle?.namedStyleType || "NORMAL_TEXT";
   const content = renderParagraphContent(paragraph, doc);
 
-  if (!content.trim() && !hasImage(paragraph)) return "";
+  if (!content.trim() && !hasImage(paragraph)) {return "";}
 
   switch (style) {
-    case "TITLE":
+    case "TITLE": {
       return `<h1 class="type-display-medium text-on-surface font-normal mb-6 mt-8">${content}</h1>`;
-    case "SUBTITLE":
+    }
+    case "SUBTITLE": {
       return `<p class="type-headline-small text-on-surface-variant mb-8">${content}</p>`;
-    case "HEADING_1":
+    }
+    case "HEADING_1": {
       return `<h2 class="type-headline-medium text-primary mt-10 mb-4 border-b border-outline-variant/50 pb-2">${content}</h2>`;
-    case "HEADING_2":
+    }
+    case "HEADING_2": {
       return `<h3 class="type-headline-small text-on-surface mt-8 mb-4 font-medium">${content}</h3>`;
-    case "HEADING_3":
+    }
+    case "HEADING_3": {
       return `<h4 class="type-title-large text-on-surface mt-6 mb-3 font-medium">${content}</h4>`;
-    case "HEADING_4":
+    }
+    case "HEADING_4": {
       return `<h5 class="type-title-medium text-on-surface mt-4 mb-2 font-bold">${content}</h5>`;
-    case "HEADING_5":
+    }
+    case "HEADING_5": {
       return `<h6 class="type-title-small text-on-surface mt-4 mb-2 font-bold uppercase tracking-wider opacity-80">${content}</h6>`;
-    default:
+    }
+    default: {
       return `<p class="type-body-large text-on-surface-variant mb-4 leading-relaxed">${content}</p>`;
+    }
   }
 }
 
 function renderParagraphContent(paragraph: Paragraph, doc: docs_v1.Schema$Document): string {
-  if (!paragraph.elements) return "";
+  if (!paragraph.elements) {return "";}
 
   return paragraph.elements
     .map((el) => {
@@ -94,7 +102,7 @@ function renderParagraphContent(paragraph: Paragraph, doc: docs_v1.Schema$Docume
 }
 
 function hasImage(paragraph: Paragraph): boolean {
-  return paragraph.elements?.some((el) => !!el.inlineObjectElement) ?? false;
+  return paragraph.elements?.some((el) => Boolean(el.inlineObjectElement)) ?? false;
 }
 
 function renderImage(
@@ -102,7 +110,7 @@ function renderImage(
   doc: docs_v1.Schema$Document,
 ): string {
   const objectId = element.inlineObjectId;
-  if (!objectId || !doc.inlineObjects) return "";
+  if (!objectId || !doc.inlineObjects) {return "";}
 
   const inlineObject = doc.inlineObjects[objectId];
   const embeddedObject = inlineObject?.inlineObjectProperties?.embeddedObject;
@@ -122,7 +130,7 @@ function formatTextRun(textRun: TextRun): string {
   text = text.replaceAll('\n', "<br>"); // Preserve line breaks within runs if needed, or remove them
 
   const style = textRun.textStyle;
-  if (!style) return text;
+  if (!style) {return text;}
 
   if (style.link?.url) {
     text = `<a href="${style.link.url}" target="_blank" rel="noopener noreferrer" class="text-primary hover:underline underline-offset-4 decoration-2 font-medium transition-colors">${text}</a>`;
@@ -144,7 +152,7 @@ function formatTextRun(textRun: TextRun): string {
 }
 
 function renderTable(table: Table, doc: docs_v1.Schema$Document): string {
-  if (!table.tableRows) return "";
+  if (!table.tableRows) {return "";}
 
   let html =
     '<div class="w-full overflow-auto my-6 rounded-[16px] border border-outline-variant/50"><table class="w-full caption-bottom text-sm border-collapse">';

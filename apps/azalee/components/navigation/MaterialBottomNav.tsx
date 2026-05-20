@@ -27,7 +27,7 @@ function NavItem({
       onClick={(e) => {
         if (isActive) {
           e.preventDefault();
-          window.scrollTo({ top: 0, behavior: "smooth" });
+          window.scrollTo({ behavior: "smooth", top: 0 });
           haptic("light");
         } else {
           haptic("light");
@@ -104,23 +104,23 @@ export function MaterialBottomNav() {
   const isDashboard = pathname.startsWith("/dashboard");
 
   const dashboardMobileItems = [
-    { label: "nav.dashboard.overview", path: "/dashboard", icon: "dashboard" },
+    { icon: "dashboard", label: "nav.dashboard.overview", path: "/dashboard" },
     {
+      icon: "article",
       label: "nav.dashboard.content.news",
       path: "/dashboard/news",
-      icon: "article",
     },
     {
-      label: "nav.dashboard.add",
-      path: "/dashboard/news/new",
       icon: "add",
       isAction: true,
+      label: "nav.dashboard.add",
+      path: "/dashboard/news/new",
     },
-    { label: "nav.dashboard.users", path: "/dashboard/users", icon: "group" },
+    { icon: "group", label: "nav.dashboard.users", path: "/dashboard/users" },
     {
+      icon: "settings",
       label: "nav.dashboard.settings",
       path: "/dashboard/settings",
-      icon: "settings",
     },
   ];
 

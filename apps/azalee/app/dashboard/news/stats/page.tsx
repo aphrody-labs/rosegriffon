@@ -27,8 +27,8 @@ export default async function NewsStatsPage() {
 		<div className="space-y-8 pb-24 sm:pb-8">
 			<DashboardPageHeader
 				breadcrumbs={[
-					{ label: "Tableau de bord", href: "/dashboard" },
-					{ label: "Actualités", href: "/dashboard/news" },
+					{ href: "/dashboard", label: "Tableau de bord" },
+					{ href: "/dashboard/news", label: "Actualités" },
 					{ label: "Statistiques" },
 				]}
 				title="Statistiques"
@@ -204,7 +204,7 @@ async function getCategoryBreakdown(): Promise<
 		.eq("status", "published")
 		.not("category", "is", null);
 
-	if (!data) return [];
+	if (!data) {return [];}
 
 	const counts = new Map<string, number>();
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -213,7 +213,7 @@ async function getCategoryBreakdown(): Promise<
 		counts.set(cat, (counts.get(cat) || 0) + 1);
 	}
 
-	return Array.from(counts.entries())
+	return [...counts.entries()]
 		.map(([category, count]) => ({ category, count }))
-		.sort((a, b) => b.count - a.count);
+		.toSorted((a, b) => b.count - a.count);
 }

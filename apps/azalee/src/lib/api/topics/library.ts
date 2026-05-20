@@ -4,8 +4,8 @@ import { fileURLToPath } from "node:url";
 import * as cheerio from "cheerio";
 
 // Get the directory of this file
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+const __filename = import.meta.filename;
+const __dirname = import.meta.dirname;
 
 // Data path relative to the API root (works in both local and Docker)
 // In Docker: /app/data/...
@@ -37,7 +37,7 @@ export class TopicsLibrary {
   }
 
   private loadData() {
-    if (this.initialized) return;
+    if (this.initialized) {return;}
 
     const indexPath = path.join(DATA_PATH, "index.html");
     if (!fs.existsSync(indexPath)) {
@@ -45,7 +45,7 @@ export class TopicsLibrary {
       return;
     }
 
-    const html = fs.readFileSync(indexPath, "utf-8");
+    const html = fs.readFileSync(indexPath, "utf8");
     const $ = cheerio.load(html);
 
     // Parse the topics list from the index.html
@@ -62,25 +62,25 @@ export class TopicsLibrary {
       const href = link.attr("href") || "";
       const title = link.text().trim();
 
-      if (!href || !title) return;
+      if (!href || !title) {return;}
 
       // Extract ID from href
       // Handle /victory-road/fr/topics/251223/ or just 251223/
       const parts = href.split("/").filter(Boolean);
-      const id = parts[parts.length - 1]; // e.g. "251223" or "inadai-202601"
+      const id = parts.at(-1); // E.g. "251223" or "inadai-202601"
 
-      if (!id) return;
+      if (!id) {return;}
 
       // Parse date from dt (e.g., "2025.12.23")
       const date = dt;
 
       this.topics.push({
-        id,
-        title,
-        date,
-        url: `https://www.inazuma.jp/victory-road/fr/topics/${id}/`,
         category: "General",
+        date,
+        id,
         thumbnail: null,
+        title,
+        url: `https://www.inazuma.jp/victory-road/fr/topics/${id}/`,
       });
     });
 
@@ -99,16 +99,16 @@ export class TopicsLibrary {
           const metaPath = path.join(DATA_PATH, dir, "meta.json");
           if (fs.existsSync(metaPath)) {
             try {
-              const meta = JSON.parse(fs.readFileSync(metaPath, "utf-8"));
+              const meta = JSON.parse(fs.readFileSync(metaPath, "utf8"));
               this.topics.push(meta);
-            } catch (e) {
-              console.error(`Failed to load meta for ${dir}`, e);
+            } catch (error) {
+              console.error(`Failed to load meta for ${dir}`, error);
             }
           }
         }
       }
-    } catch (e) {
-      console.error("Failed to scan directories", e);
+    } catch (error) {
+      console.error("Failed to scan directories", error);
     }
 
     // Sort by date descending
@@ -123,7 +123,7 @@ export class TopicsLibrary {
 
   public getById(id: string): LocalTopicDetail | null {
     const summary = this.topics.find((t) => t.id === id);
-    if (!summary) return null;
+    if (!summary) {return null;}
 
     const detailPath = path.join(DATA_PATH, id, "index.html");
     if (!fs.existsSync(detailPath)) {
@@ -131,7 +131,7 @@ export class TopicsLibrary {
       return null;
     }
 
-    const html = fs.readFileSync(detailPath, "utf-8");
+    const html = fs.readFileSync(detailPath, "utf8");
     const $ = cheerio.load(html);
 
     // Remove navigation, header, footer
@@ -169,14 +169,14 @@ export class TopicsLibrary {
 
     return {
       ...summary,
-      thumbnail,
       content_html: $content.html() || "",
       images,
+      thumbnail,
     };
   }
 
   public search(query: string): LocalTopicSummary[] {
-    if (!query) return this.topics;
+    if (!query) {return this.topics;}
     const q = query.toLowerCase();
     return this.topics.filter((t) => t.title.toLowerCase().includes(q) || t.id.includes(q));
   }

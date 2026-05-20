@@ -7,7 +7,7 @@ export const revalidate = 300;
 
 export async function GET(request: Request) {
 	const { searchParams } = new URL(request.url);
-	const limitRaw = parseInt(searchParams.get("limit") || "5", 10);
+	const limitRaw = Number.parseInt(searchParams.get("limit") || "5", 10);
 	const limit = Number.isFinite(limitRaw)
 		? Math.max(1, Math.min(limitRaw, 50))
 		: 5;
@@ -33,7 +33,7 @@ export async function GET(request: Request) {
 
 	if (error) {
 		return NextResponse.json(
-			{ success: false, error: error.message },
+			{ error: error.message, success: false },
 			{ status: 500 },
 		);
 	}
@@ -44,17 +44,17 @@ export async function GET(request: Request) {
 
 	const formattedArticles = articles.map((article) => ({
 		...article,
-		url: `${baseUrl}/chroniques/${article.slug}`,
 		featured_image_full_url: article.featured_image_url
 			? article.featured_image_url.startsWith("http")
 				? article.featured_image_url
 				: `${baseUrl}${article.featured_image_url}`
 			: null,
+		url: `${baseUrl}/chroniques/${article.slug}`,
 	}));
 
 	return NextResponse.json({
-		success: true,
 		count: formattedArticles.length,
 		data: formattedArticles,
+		success: true,
 	});
 }

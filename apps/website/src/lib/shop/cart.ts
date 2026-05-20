@@ -15,7 +15,8 @@
 
 import { cookies } from "next/headers";
 import { revalidatePath } from "next/cache";
-import { getProduct, getVariantPrice, type Product } from "./products";
+import { getProduct, getVariantPrice } from './products';
+import type { Product } from './products';
 
 const COOKIE_NAME = "rg_cart";
 const COOKIE_MAX_AGE = 60 * 60 * 24 * 30; // 30 jours
@@ -47,10 +48,10 @@ function makeId(slug: string, variantId?: string): string {
 async function readCart(): Promise<CartItem[]> {
 	const store = await cookies();
 	const raw = store.get(COOKIE_NAME)?.value;
-	if (!raw) return [];
+	if (!raw) {return [];}
 	try {
 		const parsed = JSON.parse(decodeURIComponent(raw));
-		if (!Array.isArray(parsed)) return [];
+		if (!Array.isArray(parsed)) {return [];}
 		return parsed.filter(
 			(i): i is CartItem =>
 				typeof i === "object" &&
@@ -72,10 +73,10 @@ async function writeCart(items: CartItem[]): Promise<void> {
 	}
 	store.set(COOKIE_NAME, encodeURIComponent(JSON.stringify(items)), {
 		httpOnly: true,
+		maxAge: COOKIE_MAX_AGE,
+		path: "/",
 		sameSite: "lax",
 		secure: process.env.NODE_ENV === "production",
-		path: "/",
-		maxAge: COOKIE_MAX_AGE,
 	});
 }
 
@@ -83,22 +84,22 @@ function resolveCart(items: CartItem[]): CartSnapshot {
 	const resolved: CartItemResolved[] = [];
 	for (const item of items) {
 		const product = getProduct(item.slug);
-		if (!product) continue;
+		if (!product) {continue;}
 		const unit = getVariantPrice(product, item.variantId);
 		const variantLabel = item.variantId
 			? product.variants?.find((v) => v.id === item.variantId)?.label
 			: undefined;
 		resolved.push({
 			...item,
-			product,
-			variantLabel,
-			unitPriceCents: unit,
 			lineTotalCents: unit * item.qty,
+			product,
+			unitPriceCents: unit,
+			variantLabel,
 		});
 	}
 	return {
-		items: resolved,
 		itemCount: resolved.reduce((acc, i) => acc + i.qty, 0),
+		items: resolved,
 		subtotalCents: resolved.reduce((acc, i) => acc + i.lineTotalCents, 0),
 	};
 }
@@ -114,7 +115,7 @@ export async function addToCart(
 	qty = 1,
 ): Promise<CartSnapshot> {
 	const product = getProduct(slug);
-	if (!product) throw new Error(`[cart] unknown product: ${slug}`);
+	if (!product) {throw new Error(`[cart] unknown product: ${slug}`);}
 	if (product.variants && !variantId) {
 		throw new Error(`[cart] ${slug} requires a variant`);
 	}
@@ -124,7 +125,7 @@ export async function addToCart(
 	if (existing) {
 		existing.qty = Math.min(existing.qty + qty, 10);
 	} else {
-		items.push({ id, slug, variantId, qty: Math.min(qty, 10) });
+		items.push({ id, qty: Math.min(qty, 10), slug, variantId });
 	}
 	await writeCart(items);
 	revalidatePath("/shop");

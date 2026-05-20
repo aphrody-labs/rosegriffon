@@ -45,7 +45,7 @@ export default async function ImageValidationPage({
   searchParams: Promise<{ filter?: string; page?: string }>;
 }) {
   const { filter = "multi_versions", page: pageStr = "1" } = await searchParams;
-  const page = Math.max(1, parseInt(pageStr, 10) || 1);
+  const page = Math.max(1, Number.parseInt(pageStr, 10) || 1);
   const perPage = 50;
 
   const supabase = await createClient();
@@ -121,7 +121,7 @@ export default async function ImageValidationPage({
   const grouped = new Map<string, CharRow[]>();
   for (const c of characters) {
     const key = c.chara_id || c.id;
-    if (!grouped.has(key)) grouped.set(key, []);
+    if (!grouped.has(key)) {grouped.set(key, []);}
     grouped.get(key)!.push(c);
   }
 
@@ -132,18 +132,18 @@ export default async function ImageValidationPage({
     label: string;
     icon: React.ComponentType<{ size?: number; className?: string; "aria-hidden"?: boolean }>;
   }> = [
-    { value: "multi_versions", label: "Multi-versions", icon: Users },
-    { value: "no_image", label: "Sans image", icon: ImageOff },
-    { value: "no_constellation", label: "Sans constellation", icon: Star },
-    { value: "all", label: "Tout", icon: List },
+    { icon: Users, label: "Multi-versions", value: "multi_versions" },
+    { icon: ImageOff, label: "Sans image", value: "no_image" },
+    { icon: Star, label: "Sans constellation", value: "no_constellation" },
+    { icon: List, label: "Tout", value: "all" },
   ];
 
   return (
     <div className="space-y-6 sm:space-y-8 pb-24 sm:pb-8">
       <DashboardPageHeader
         breadcrumbs={[
-          { label: "Tableau de bord", href: "/dashboard" },
-          { label: "Base de données", href: "/dashboard/database" },
+          { href: "/dashboard", label: "Tableau de bord" },
+          { href: "/dashboard/database", label: "Base de données" },
           { label: "Validation images" },
         ]}
         title={title}
@@ -163,7 +163,7 @@ export default async function ImageValidationPage({
                 : "bg-surface-container-high text-on-surface-variant hover:bg-surface-container-highest"
             }`}
           >
-            <f.icon size={16} aria-hidden={true} />
+            <f.icon size={16} aria-hidden />
             {f.label}
           </Link>
         ))}
@@ -183,9 +183,9 @@ export default async function ImageValidationPage({
               className={`rounded-[20px] border p-4 sm:p-6 space-y-3 ${
                 hasBasara
                   ? "border-purple-400/40 bg-purple-500/5"
-                  : missingImages.length > 0
+                  : (missingImages.length > 0
                     ? "border-amber-400/40 bg-amber-500/5"
-                    : "border-outline-variant/30 bg-surface-container-lowest"
+                    : "border-outline-variant/30 bg-surface-container-lowest")
               }`}
             >
               {/* Group Header */}
@@ -253,9 +253,9 @@ export default async function ImageValidationPage({
                             className={`text-[9px] font-bold ${
                               row.rarity >= 20
                                 ? "bg-purple-500/20 text-purple-400 border-purple-400/30"
-                                : row.rarity >= 10
+                                : (row.rarity >= 10
                                   ? "bg-amber-500/20 text-amber-600 border-amber-400/30"
-                                  : "bg-slate-500/10 text-on-surface-variant border-outline-variant/30"
+                                  : "bg-slate-500/10 text-on-surface-variant border-outline-variant/30")
                             }`}
                           >
                             {row.rarity_label || "N"}

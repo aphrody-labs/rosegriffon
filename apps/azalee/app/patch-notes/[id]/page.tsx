@@ -14,8 +14,8 @@ export async function generateMetadata({
   const note = await getPatchNoteDetail(id);
   const title = note?.title || "Patch Note";
   return {
-    title: `${title} | Azalée`,
     description: `Détail de la mise à jour : ${title}. Inazuma Eleven: Victory Road.`,
+    title: `${title} | Azalée`,
   };
 }
 
@@ -23,7 +23,7 @@ export default async function PatchNoteDetailPage({ params }: { params: Promise<
   const { id } = await params;
   const note = await getPatchNoteDetail(id);
 
-  if (!note) notFound();
+  if (!note) {notFound();}
 
   return (
     <div className="w-full pb-20 animate-in fade-in slide-in-from-bottom-4 duration-500">

@@ -29,21 +29,21 @@ interface EnhancedPasswordInputProps extends React.InputHTMLAttributes<HTMLInput
 }
 
 const strengthColors = {
-  "very-weak": "bg-red-600",
-  weak: "bg-red-500",
   fair: "bg-yellow-500",
   good: "bg-blue-500",
   strong: "bg-green-500",
   "very-strong": "bg-green-600",
+  "very-weak": "bg-red-600",
+  weak: "bg-red-500",
 };
 
 const strengthLabels = {
-  "very-weak": "Très faible",
-  weak: "Faible",
   fair: "Acceptable",
   good: "Bon",
   strong: "Fort",
   "very-strong": "Très fort",
+  "very-weak": "Très faible",
+  weak: "Faible",
 };
 
 /**
@@ -64,8 +64,7 @@ export const EnhancedPasswordInput = React.forwardRef<HTMLInputElement, Enhanced
       ...props
     },
     ref
-  ) => {
-    return (
+  ) => (
       <div className="space-y-2">
         {label && (
           <label className="block text-sm font-medium text-gray-900 dark:text-gray-100">
@@ -158,8 +157,7 @@ export const EnhancedPasswordInput = React.forwardRef<HTMLInputElement, Enhanced
         {/* Message d'erreur */}
         {error && <p className="text-sm text-red-600 dark:text-red-400">{error}</p>}
       </div>
-    );
-  }
+    )
 );
 
 EnhancedPasswordInput.displayName = "EnhancedPasswordInput";

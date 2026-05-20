@@ -3,21 +3,23 @@ export default function robots() {
   return {
     rules: [
       {
+        allow: "/",
+        disallow: ["/api/", "/admin/", "/_next/", "/dashboard/"],
         userAgent: "*",
-        allow: "/",
-        disallow: ["/api/", "/admin/", "/_next/", "/dashboard/"],
       },
       {
+        allow: "/",
+        disallow: ["/api/", "/admin/", "/_next/", "/dashboard/"],
         userAgent: "Googlebot",
-        allow: "/",
-        disallow: ["/api/", "/admin/", "/_next/", "/dashboard/"],
       },
       {
-        userAgent: "Googlebot-Image",
         allow: "/",
         disallow: ["/admin/", "/dashboard/"],
+        userAgent: "Googlebot-Image",
       },
       {
+        allow: "/",
+        disallow: ["/admin/", "/_next/", "/dashboard/"],
         userAgent: [
           "GPTBot",
           "ChatGPT-User",
@@ -31,8 +33,6 @@ export default function robots() {
           "Bytespider",
           "ImagesiftBot",
         ],
-        allow: "/",
-        disallow: ["/admin/", "/_next/", "/dashboard/"],
       },
     ],
     sitemap: `${baseUrl}/sitemap.xml`,

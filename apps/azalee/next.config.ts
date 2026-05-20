@@ -15,13 +15,19 @@ const nextConfig: NextConfig = {
 	// Nginx gere la compression (gzip) — desactiver ici pour eviter le double compress
 	compress: false,
 
-	// assetPrefix : Next préfixe TOUTES les URLs /_next/static/* avec CDN_URL.
+	// AssetPrefix : Next préfixe TOUTES les URLs /_next/static/* avec CDN_URL.
 	...(CDN_URL && { assetPrefix: CDN_URL }),
 
 	// React Compiler — memoization automatique (stable en Next.js 16)
 	reactCompiler: true,
 
 	images: {
+		contentDispositionType: "attachment",
+		deviceSizes: [768, 1024, 1920],
+		formats: ["image/avif", "image/webp"],
+		imageSizes: [96, 256, 384, 512],
+		minimumCacheTTL: 86400,
+		qualities: [75, 90, 100],
 		remotePatterns: [
 			{
 				protocol: "https",
@@ -74,12 +80,6 @@ const nextConfig: NextConfig = {
 				pathname: "/storage/**",
 			},
 		],
-		contentDispositionType: "attachment",
-		qualities: [75, 90, 100],
-		formats: ["image/avif", "image/webp"],
-		imageSizes: [96, 256, 384, 512],
-		deviceSizes: [768, 1024, 1920],
-		minimumCacheTTL: 86400,
 		...(CDN_LOADER && {
 			loader: "custom",
 			loaderFile: "./cdn-loader.js",
@@ -146,19 +146,19 @@ const nextConfig: NextConfig = {
 	async redirects() {
 		return [
 			{
-				source: "/dashboard/news/edit",
 				destination: "/dashboard/news/new",
 				permanent: true,
+				source: "/dashboard/news/edit",
 			},
 			{
-				source: "/compare",
 				destination: "/tools/compare",
 				permanent: true,
+				source: "/compare",
 			},
 			{
-				source: "/random-team",
 				destination: "/tools/random-team",
 				permanent: true,
+				source: "/random-team",
 			},
 		];
 	},
@@ -176,12 +176,12 @@ const nextConfig: NextConfig = {
 
 		return [
 			{
-				source: "/storage/v1/:path*",
 				destination,
+				source: "/storage/v1/:path*",
 			},
 			{
-				source: "/zukan/assets/:path*",
 				destination: "https://azalee.rosegriffon.fr/zukan-assets-mirror/:path*",
+				source: "/zukan/assets/:path*",
 			},
 		];
 	},
@@ -207,7 +207,6 @@ const nextConfig: NextConfig = {
 
 		return [
 			{
-				source: "/(.*)",
 				headers: [
 					{ key: "X-Content-Type-Options", value: "nosniff" },
 					{ key: "X-Frame-Options", value: "DENY" },
@@ -217,14 +216,12 @@ const nextConfig: NextConfig = {
 					{ key: "Content-Security-Policy", value: cspHeader },
 					{ key: "X-DNS-Prefetch-Control", value: "on" },
 				],
+				source: "/(.*)",
 			},
 		];
 	},
 
 	experimental: {
-		serverSourceMaps: true,
-		viewTransition: false,
-		turbopackFileSystemCacheForBuild: true,
 		optimizeCss: false,
 		optimizePackageImports: [
 			"lucide-react",
@@ -266,6 +263,9 @@ const nextConfig: NextConfig = {
 		serverActions: {
 			bodySizeLimit: "10mb",
 		},
+		serverSourceMaps: true,
+		turbopackFileSystemCacheForBuild: true,
+		viewTransition: false,
 	},
 };
 
@@ -273,6 +273,6 @@ export default withSentryConfig(nextConfig, {
 	org: "rose-griffon",
 	project: "rg-azalee",
 	silent: !process.env.CI,
-	widenClientFileUpload: true,
 	tunnelRoute: "/monitoring",
+	widenClientFileUpload: true,
 });

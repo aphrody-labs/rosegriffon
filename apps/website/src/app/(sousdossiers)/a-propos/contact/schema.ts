@@ -10,26 +10,6 @@ const MAX_FILE_SIZE = 5 * 1024 * 1024;
 
 // Schéma pour le formulaire de contact
 export const contactFormSchema = z.object({
-  title: z.string().min(2, {
-    message: "Le titre doit contenir au moins 2 caractères.",
-  }),
-  subject: z.enum(
-    [
-      "Information sur l'association",
-      "Collaboration",
-      "Don et soutien",
-      "Événements à venir",
-      "Adhésion",
-      "Bénévolat",
-      "Demande de presse",
-      "Témoignage",
-      "Support technique",
-      "Autres",
-    ],
-    {
-      message: "Veuillez sélectionner un sujet.",
-    }
-  ),
   description: z.string().min(10, {
     message: "La description doit contenir au moins 10 caractères.",
   }),
@@ -67,6 +47,26 @@ export const contactFormSchema = z.object({
         .nullable()
         .optional()
     : z.any().nullable().optional(),
+  subject: z.enum(
+    [
+      "Information sur l'association",
+      "Collaboration",
+      "Don et soutien",
+      "Événements à venir",
+      "Adhésion",
+      "Bénévolat",
+      "Demande de presse",
+      "Témoignage",
+      "Support technique",
+      "Autres",
+    ],
+    {
+      message: "Veuillez sélectionner un sujet.",
+    }
+  ),
+  title: z.string().min(2, {
+    message: "Le titre doit contenir au moins 2 caractères.",
+  }),
 });
 
 // Type du formulaire de contact

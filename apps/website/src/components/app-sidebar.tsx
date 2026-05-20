@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import type React from "react";
-import { lazy, Suspense } from "react";
+import { Suspense, lazy } from "react";
 
 import { SidebarSearch } from "@/components/sidebar/molecules/SidebarSearch";
 import { SidebarUser } from "@/components/sidebar/molecules/SidebarUser";

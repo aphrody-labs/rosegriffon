@@ -52,8 +52,8 @@ export function RecentUsers({ users }: { users: RecentUser[] }) {
 										@{u.username ?? "—"}
 										{u.created_at &&
 											` · ${formatDistanceToNow(new Date(u.created_at), {
-												locale: fr,
 												addSuffix: true,
+												locale: fr,
 											})}`}
 									</p>
 								</div>

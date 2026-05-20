@@ -23,25 +23,25 @@ export interface ItemCardProps {
 }
 
 const CATEGORY_ICONS: Record<string, string> = {
-	shoes: "steps",
-	misanga: "wrist_band",
 	accessory: "diamond",
-	kizuna_link: "link",
-	consume: "local_pharmacy",
-	special_tactics: "strategy",
-	special_skill: "auto_awesome",
-	super_tactics: "military_tech",
-	formation: "sports",
-	emblem: "shield",
-	costume: "apparel",
-	fashion: "styler",
-	title: "badge",
-	craft_obj: "construction",
 	animal: "pets",
+	consume: "local_pharmacy",
+	costume: "apparel",
+	craft_obj: "construction",
+	emblem: "shield",
+	fashion: "styler",
+	formation: "sports",
+	important: "priority_high",
+	kizuna_link: "link",
+	misanga: "wrist_band",
 	name_plate: "id_card",
 	performance: "music_note",
-	important: "priority_high",
+	shoes: "steps",
 	special: "star",
+	special_skill: "auto_awesome",
+	special_tactics: "strategy",
+	super_tactics: "military_tech",
+	title: "badge",
 };
 
 export function ItemCard({
@@ -69,7 +69,7 @@ export function ItemCard({
 		: [];
 	const topStat =
 		statEntries.length > 0
-			? statEntries.sort(([, a], [, b]) => b - a)[0]
+			? statEntries.toSorted(([, a], [, b]) => b - a)[0]
 			: null;
 
 	// Tactic effects
@@ -188,13 +188,13 @@ export function ItemCard({
 }
 
 const STAT_SHORT: Record<string, string> = {
-	kick: "TIR",
-	control: "CTR",
-	technique: "TEC",
-	pressure: "PRE",
-	physical: "PHY",
 	agility: "AGI",
+	control: "CTR",
 	intelligence: "INT",
+	kick: "TIR",
+	physical: "PHY",
+	pressure: "PRE",
+	technique: "TEC",
 };
 
 const LOCATION_FR: Record<string, string> = {

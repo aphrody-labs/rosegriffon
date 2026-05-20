@@ -22,11 +22,11 @@ export function MediaUploader({ onUploadComplete }: MediaUploaderProps) {
   }, []);
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
-    onDrop,
     accept: {
       "image/*": [".png", ".jpg", ".jpeg", ".gif", ".webp", ".svg"],
     },
     maxSize: 5 * 1024 * 1024, // 5MB
+    onDrop,
   });
 
   const removeFile = (index: number) => {
@@ -34,7 +34,7 @@ export function MediaUploader({ onUploadComplete }: MediaUploaderProps) {
   };
 
   const handleUpload = async () => {
-    if (files.length === 0) return;
+    if (files.length === 0) {return;}
 
     setUploading(true);
     const supabase = createClient();
@@ -44,7 +44,7 @@ export function MediaUploader({ onUploadComplete }: MediaUploaderProps) {
 
       const uploadPromises = files.map(async (file) => {
         const fileExt = file.name.split(".").pop()?.toLowerCase();
-        const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
+        const fileName = `${Date.now()}-${Math.random().toString(36).slice(2)}.${fileExt}`;
         const filePath = `chronicles/${fileName}`;
 
         const { error } = await supabase.storage.from("assets").upload(filePath, file, {

@@ -11,10 +11,10 @@ export const loadImage = (src: string): Promise<HTMLImageElement> =>
 
 export const compressImage = async (file: File): Promise<File> => {
   const options = {
+    fileType: "image/jpeg",
     maxSizeMB: 2,
     maxWidthOrHeight: 2048,
     useWebWorker: true,
-    fileType: "image/jpeg",
   };
 
   try {
@@ -51,7 +51,7 @@ export const createCollageCanvas = async ({
 
   const canvas = document.createElement("canvas");
   const ctx = canvas.getContext("2d");
-  if (!ctx) throw new Error("Canvas context unavailable");
+  if (!ctx) {throw new Error("Canvas context unavailable");}
 
   canvas.width = template.width;
   canvas.height = template.height;
@@ -107,7 +107,7 @@ export const addWatermarkAndDownload = async ({
 
   const canvas = document.createElement("canvas");
   const ctx = canvas.getContext("2d");
-  if (!ctx) throw new Error("Canvas context unavailable");
+  if (!ctx) {throw new Error("Canvas context unavailable");}
 
   canvas.width = mainImage.width;
   canvas.height = mainImage.height;
@@ -123,31 +123,35 @@ export const addWatermarkAndDownload = async ({
     let x: number, y: number;
 
     switch (watermarkPosition) {
-      case "bottom-right":
+      case "bottom-right": {
         x = canvas.width - watermarkWidth - margin;
         y = canvas.height - watermarkHeight - margin;
         break;
-      case "bottom-left":
+      }
+      case "bottom-left": {
         x = margin;
         y = canvas.height - watermarkHeight - margin;
         break;
-      case "top-right":
+      }
+      case "top-right": {
         x = canvas.width - watermarkWidth - margin;
         y = margin;
         break;
-      case "top-left":
+      }
+      case "top-left": {
         x = margin;
         y = margin;
         break;
+      }
     }
 
     ctx.globalAlpha = 0.8;
     ctx.drawImage(logoImage, x, y, watermarkWidth, watermarkHeight);
-    ctx.globalAlpha = 1.0;
+    ctx.globalAlpha = 1;
   }
 
   const mimeType =
-    exportFormat === "jpg" ? "image/jpeg" : exportFormat === "png" ? "image/png" : "image/webp";
+    exportFormat === "jpg" ? "image/jpeg" : (exportFormat === "png" ? "image/png" : "image/webp");
   const extension = exportFormat;
   const watermarkedImage = canvas.toDataURL(mimeType, exportQuality);
 

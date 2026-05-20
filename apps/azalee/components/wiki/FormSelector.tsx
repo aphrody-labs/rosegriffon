@@ -23,33 +23,33 @@ interface FormSelectorProps {
 }
 
 const POSITION_MAP: Record<string, string> = {
-  FW: "ATT",
-  MF: "MIL",
-  DF: "DEF",
-  GK: "GAR",
   ATT: "ATT",
-  MIL: "MIL",
   DEF: "DEF",
+  DF: "DEF",
+  FW: "ATT",
   GAR: "GAR",
+  GK: "GAR",
+  MF: "MIL",
+  MIL: "MIL",
 };
 
 const POSITION_FR: Record<string, string> = {
   ATT: "Attaquant",
-  MIL: "Milieu",
   DEF: "Defenseur",
   GAR: "Gardien",
+  MIL: "Milieu",
 };
 
 const ELEMENT_FR: Record<string, string> = {
   Fire: "Feu",
-  Wind: "Vent",
   Forest: "Foret",
   Mountain: "Montagne",
   Void: "Neant",
+  Wind: "Vent",
 };
 
 export function FormSelector({ forms, currentFormId }: FormSelectorProps) {
-  if (!forms || forms.length <= 1) return null;
+  if (!forms || forms.length <= 1) {return null;}
 
   return (
     <div className="space-y-1.5">
@@ -95,7 +95,7 @@ export function FormSelector({ forms, currentFormId }: FormSelectorProps) {
                 isHero && isCurrent && !form.heroType && "ring-2 ring-amber-400 shadow-amber-500/30",
               )}
               title={(() => {
-                const heroLabels: Record<string, string> = { fire: "Feu", black: "Ombre", pink: "Rose" };
+                const heroLabels: Record<string, string> = { black: "Ombre", fire: "Feu", pink: "Rose" };
                 const heroSuffix = form.heroType ? ` ${heroLabels[form.heroType] || form.heroType}` : "";
                 const raritySuffix = form.rarity !== "Normal" ? ` (${form.rarity}${heroSuffix})` : "";
                 return `${posLabel} ${elemLabel}${raritySuffix}`;

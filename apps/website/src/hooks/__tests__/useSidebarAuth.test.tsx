@@ -12,6 +12,14 @@ vi.mock("@/lib/supabase/client", () => ({
   createClient: vi.fn(),
 }));
 
+// Mock authClient
+const mockUseSession = vi.fn();
+vi.mock("@/lib/auth-client", () => ({
+  authClient: {
+    useSession: () => mockUseSession(),
+  },
+}));
+
 describe("useSidebarAuth", () => {
   let queryClient: QueryClient;
 
@@ -19,8 +27,6 @@ describe("useSidebarAuth", () => {
     <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
   );
 
-  const mockGetUser = vi.fn();
-  const mockOnAuthStateChange = vi.fn();
   const mockSelect = vi.fn();
   const mockFrom = vi.fn();
 
@@ -29,8 +35,8 @@ describe("useSidebarAuth", () => {
     queryClient = new QueryClient({
       defaultOptions: {
         queries: {
-          retry: false,
           gcTime: 0,
+          retry: false,
           staleTime: 0,
         },
       },
@@ -39,10 +45,6 @@ describe("useSidebarAuth", () => {
     // Setup default mock implementation
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (createClient as any).mockReturnValue({
-      auth: {
-        getUser: mockGetUser,
-        onAuthStateChange: mockOnAuthStateChange,
-      },
       from: mockFrom,
     });
 
@@ -52,26 +54,19 @@ describe("useSidebarAuth", () => {
 
     mockSelect.mockReturnValue({
       eq: vi.fn().mockReturnValue({
-        single: vi.fn().mockResolvedValue({ data: null, error: null }),
+        maybeSingle: vi.fn().mockResolvedValue({ data: null, error: null }),
       }),
-    });
-
-    mockOnAuthStateChange.mockReturnValue({
-      data: { subscription: { unsubscribe: vi.fn() } },
     });
   });
 
   it("should return initial loading state", () => {
-    mockGetUser.mockReturnValue(new Promise(() => {})); // Never resolves
+    mockUseSession.mockReturnValue({ data: null, isPending: true });
     const { result } = renderHook(() => useSidebarAuth(), { wrapper });
     expect(result.current.loading).toBe(true);
   });
 
   it("should handle unauthenticated user", async () => {
-    mockGetUser.mockResolvedValue({
-      data: { user: null },
-      error: { message: "Auth session missing!" },
-    });
+    mockUseSession.mockReturnValue({ data: null, isPending: false });
 
     const { result } = renderHook(() => useSidebarAuth(), { wrapper });
 
@@ -88,18 +83,15 @@ describe("useSidebarAuth", () => {
   });
 
   it("should handle authenticated user with profile", async () => {
-    const mockUser = { id: "user-123", email: "test@example.com" };
+    const mockUser = { email: "test@example.com", id: "user-123" };
     const mockProfile = { id: "user-123", username: "testuser" };
 
-    mockGetUser.mockResolvedValue({
-      data: { user: mockUser },
-      error: null,
-    });
+    mockUseSession.mockReturnValue({ data: { user: mockUser }, isPending: false });
 
     mockFrom.mockReturnValue({
       select: vi.fn().mockReturnValue({
         eq: vi.fn().mockReturnValue({
-          single: vi.fn().mockResolvedValue({ data: mockProfile, error: null }),
+          maybeSingle: vi.fn().mockResolvedValue({ data: mockProfile, error: null }),
         }),
       }),
     });
@@ -125,7 +117,16 @@ describe("useSidebarAuth", () => {
   });
 
   it("should handle error fetching user", async () => {
-    mockGetUser.mockRejectedValue(new Error("Network error"));
+    const mockUser = { email: "test@example.com", id: "user-123" };
+    mockUseSession.mockReturnValue({ data: { user: mockUser }, isPending: false });
+
+    mockFrom.mockReturnValue({
+      select: vi.fn().mockReturnValue({
+        eq: vi.fn().mockReturnValue({
+          maybeSingle: vi.fn().mockRejectedValue(new Error("Network error")),
+        }),
+      }),
+    });
 
     const { result } = renderHook(() => useSidebarAuth(), { wrapper });
 

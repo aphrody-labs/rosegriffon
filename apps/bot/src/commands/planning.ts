@@ -36,7 +36,7 @@ export class PlanningCommand {
 
       const sections = Object.keys(grouped)
         .map(Number)
-        .sort((a, b) => a - b)
+        .toSorted((a, b) => a - b)
         .map((d) => {
           const lines = grouped[d]!.map((r) => {
             const time =

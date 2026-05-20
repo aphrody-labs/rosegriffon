@@ -19,8 +19,7 @@ export interface SidebarMenuButtonProps
 export const SidebarMenuButton = forwardRef<
 	HTMLButtonElement,
 	SidebarMenuButtonProps
->(({ isActive = false, icon, children, className, ...props }, ref) => {
-	return (
+>(({ isActive = false, icon, children, className, ...props }, ref) => (
 		<button
 			ref={ref}
 			className={cn(
@@ -44,7 +43,6 @@ export const SidebarMenuButton = forwardRef<
 			)}
 			<span className="flex-1 truncate text-left">{children}</span>
 		</button>
-	);
-});
+	));
 
 SidebarMenuButton.displayName = "SidebarMenuButton";

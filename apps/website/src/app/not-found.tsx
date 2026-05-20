@@ -33,9 +33,9 @@ export default function NotFound() {
           text="404_-_HORS_JEU_!"
           fontFamily="Compressa VF"
           fontUrl="https://res.cloudinary.com/dr6lvwubh/raw/upload/v1529908256/CompressaPRO-GX.woff2"
-          flex={true}
-          weight={true}
-          italic={true}
+          flex
+          weight
+          italic
           scale={false}
           textColor="#a14b3f"
           strokeWidth={0}

@@ -23,9 +23,9 @@ type AuthMode = "login" | "signup" | "forgot-password";
  * Validate that returnTo is a safe relative path (no external redirects).
  */
 function sanitizeReturnTo(returnTo?: string): string {
-	if (!returnTo) return "/";
+	if (!returnTo) {return "/";}
 	// Must start with / and not be a protocol-relative URL
-	if (!returnTo.startsWith("/") || returnTo.startsWith("//")) return "/";
+	if (!returnTo.startsWith("/") || returnTo.startsWith("//")) {return "/";}
 	return returnTo;
 }
 
@@ -47,8 +47,8 @@ export function LoginForm({ onSuccess, returnTo }: LoginFormProps) {
 		try {
 			setLoading(true);
 			const { error } = await authClient.signIn.social({
-				provider,
 				callbackURL: returnTo ? safeReturnTo : "/dashboard",
+				provider,
 			});
 			if (error) {
 				console.error("Login error:", error);
@@ -65,7 +65,7 @@ export function LoginForm({ onSuccess, returnTo }: LoginFormProps) {
 
 	const handleEmailAuth = async (e: React.FormEvent) => {
 		e.preventDefault();
-		if (!email) return;
+		if (!email) {return;}
 
 		try {
 			setLoading(true);
@@ -85,29 +85,29 @@ export function LoginForm({ onSuccess, returnTo }: LoginFormProps) {
 				return;
 			}
 
-			if (!password) return;
+			if (!password) {return;}
 
 			if (mode === "signup") {
 				const { error } = await authClient.signUp.email({
 					email,
-					password,
 					name: name || email.split("@")[0],
+					password,
 				});
-				if (error) throw new Error(error.message);
+				if (error) {throw new Error(error.message);}
 				toast.success("Compte créé ! Tu es maintenant connecté.");
-				if (onSuccess) onSuccess();
+				if (onSuccess) {onSuccess();}
 				router.push(safeReturnTo);
 			} else {
 				const { error } = await authClient.signIn.email({
 					email,
 					password,
 				});
-				if (error) throw new Error(error.message);
+				if (error) {throw new Error(error.message);}
 				toast.success("Connexion réussie !");
-				if (onSuccess) onSuccess();
+				if (onSuccess) {onSuccess();}
 				// Les admins/éditeurs sont redirigés vers le dashboard par la page login (useEffect)
 				// Donc on push juste vers returnTo ou / — le useEffect dans login/page.tsx
-				// interceptera et redirigera vers /dashboard si admin
+				// Interceptera et redirigera vers /dashboard si admin
 				router.push(safeReturnTo);
 				router.refresh();
 			}

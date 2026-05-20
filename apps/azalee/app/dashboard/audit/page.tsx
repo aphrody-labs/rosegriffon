@@ -5,8 +5,8 @@ import { createClient } from "@/lib/supabase/server";
 import { AuditTable } from "./AuditTable";
 
 export const metadata: Metadata = {
-  title: "Audit Logs | Administration",
   description: "Journal des événements de sécurité.",
+  title: "Audit Logs | Administration",
 };
 
 export const dynamic = "force-dynamic";
@@ -21,7 +21,7 @@ export default async function AuditPage({ searchParams }: PageProps) {
   await requireAdmin();
 
   const params = await searchParams;
-  const page = Math.max(1, parseInt(params.page || "1", 10));
+  const page = Math.max(1, Number.parseInt(params.page || "1", 10));
   const actionFilter = params.action || "";
 
   const supabase = await createClient();
@@ -44,7 +44,7 @@ export default async function AuditPage({ searchParams }: PageProps) {
     <div className="space-y-6 sm:space-y-8 pb-24 sm:pb-8">
       <DashboardPageHeader
         breadcrumbs={[
-          { label: "Tableau de bord", href: "/dashboard" },
+          { href: "/dashboard", label: "Tableau de bord" },
           { label: "Journal d'audit" },
         ]}
         title="Journal d'audit"

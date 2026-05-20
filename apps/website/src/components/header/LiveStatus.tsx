@@ -42,16 +42,16 @@ export function LiveStatus() {
 
       const rawData = await response.json();
       setStatus({
-        isLive: rawData.live?.is_live || false,
-        title: rawData.live?.title,
         gameName: rawData.live?.category,
-        viewerCount: rawData.live?.viewers,
+        isLive: rawData.live?.is_live || false,
         startedAt: rawData.live?.started_at,
+        title: rawData.live?.title,
+        viewerCount: rawData.live?.viewers,
       });
       setRetryCount(0); // Reset retry count on success
     } catch (error) {
       console.error("Erreur récupération statut live:", error);
-      setStatus({ isLive: false, error: "Erreur de connexion" });
+      setStatus({ error: "Erreur de connexion", isLive: false });
 
       // Augmenter retry count pour backoff exponentiel
       setRetryCount((prev) => Math.min(prev + 1, 5));
@@ -65,7 +65,7 @@ export function LiveStatus() {
     fetchStatus();
 
     // Backoff exponentiel: 60s, 120s, 240s, etc.
-    const refreshInterval = 60000 * 2 ** Math.min(retryCount, 3);
+    const refreshInterval = 60_000 * 2 ** Math.min(retryCount, 3);
     const interval = setInterval(fetchStatus, refreshInterval);
 
     return () => clearInterval(interval);
@@ -189,7 +189,7 @@ function formatStreamDuration(startedAt: string): string {
   const start = new Date(startedAt);
   const now = new Date();
   const diffMs = now.getTime() - start.getTime();
-  const diffMins = Math.floor(diffMs / 60000);
+  const diffMins = Math.floor(diffMs / 60_000);
 
   if (diffMins < 60) {
     return `${diffMins} min`;

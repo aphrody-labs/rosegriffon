@@ -8,8 +8,8 @@ import { markAsRead } from "@/app/actions/notifications";
 import { cn } from "@/lib/utils";
 
 const TYPE_ICONS: Record<string, React.ElementType> = {
-  article: FileText,
   announcement: Megaphone,
+  article: FileText,
   default: Bell,
 };
 

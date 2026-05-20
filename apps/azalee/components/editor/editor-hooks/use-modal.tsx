@@ -1,7 +1,8 @@
 "use client";
 
 import * as DialogPrimitive from "@radix-ui/react-dialog";
-import { type JSX, useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from 'react';
+import type { JSX } from 'react';
 
 import { X } from "@/lib/icons-config";
 import { cn } from "@/lib/utils";
@@ -31,7 +32,7 @@ export function useEditorModal(): [
     }
     const { title, content } = modalContent;
     return (
-      <DialogPrimitive.Root open={true} onOpenChange={onClose}>
+      <DialogPrimitive.Root open onOpenChange={onClose}>
         <DialogPrimitive.Portal>
           <DialogPrimitive.Overlay className="fixed inset-0 z-[150] bg-black/80 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0" />
           <DialogPrimitive.Content

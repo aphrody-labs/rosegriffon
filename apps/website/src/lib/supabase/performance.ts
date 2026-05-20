@@ -17,7 +17,7 @@ const requestMetrics: RequestMetrics[] = [];
  */
 export function logRequestMetric(endpoint: string, startTime: number, cached: boolean = false) {
   const duration = Date.now() - startTime;
-  requestMetrics.push({ endpoint, startTime, duration, cached });
+  requestMetrics.push({ cached, duration, endpoint, startTime });
 
   if (duration > 500) {
     console.warn(`⚠️ Slow query detected: ${endpoint} took ${duration}ms`);
@@ -39,10 +39,10 @@ export function getRequestMetrics() {
   const cacheHitRate = (cachedCount / total) * 100;
 
   return {
-    total,
     avgDuration: Math.round(avgDuration),
-    cachedCount,
     cacheHitRate: Math.round(cacheHitRate),
+    cachedCount,
+    total,
   };
 }
 
@@ -65,7 +65,7 @@ export async function traceQuery<T>(
  * À utiliser en développement
  */
 export class N1QueryDetector {
-  private static queries: Map<string, number> = new Map();
+  private static queries = new Map<string, number>();
   private static threshold = 5;
 
   static reset() {
@@ -82,9 +82,9 @@ export class N1QueryDetector {
   }
 
   static getReport() {
-    return Array.from(N1QueryDetector.queries.entries())
-      .sort(([, a], [, b]) => b - a)
-      .map(([endpoint, count]) => ({ endpoint, count }));
+    return [...N1QueryDetector.queries.entries()]
+      .toSorted(([, a], [, b]) => b - a)
+      .map(([endpoint, count]) => ({ count, endpoint }));
   }
 }
 

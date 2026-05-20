@@ -8,7 +8,7 @@ export const dynamic = "force-dynamic";
 
 export async function POST(req: Request) {
 	const auth = await requireApiPatreonCreator();
-	if (!auth.ok) return auth.response;
+	if (!auth.ok) {return auth.response;}
 
 	let body: { memberId?: string } = {};
 	try {
@@ -24,7 +24,7 @@ export async function POST(req: Request) {
 	const result = await exportSingleMember(memberId);
 	if (!result.ok) {
 		return NextResponse.json(
-			{ error: "resync_failed", detail: result.error },
+			{ detail: result.error, error: "resync_failed" },
 			{ status: 500 },
 		);
 	}

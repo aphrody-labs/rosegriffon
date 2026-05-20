@@ -1,7 +1,7 @@
 import { ImageResponse } from "next/og";
 import { createClient } from "@/lib/supabase/server";
 
-export const size = { width: 1200, height: 630 };
+export const size = { height: 630, width: 1200 };
 export const contentType = "image/png";
 
 interface OgImageProps {
@@ -10,9 +10,9 @@ interface OgImageProps {
 
 const CATEGORY_LABELS: Record<string, string> = {
 	announcement: "Annonce",
-	event: "Événement",
-	critique: "Critique",
 	community: "Communauté",
+	critique: "Critique",
+	event: "Événement",
 };
 
 function formatDate(dateString: string): string {
@@ -63,39 +63,39 @@ export default async function Image({ params }: OgImageProps) {
 	return new ImageResponse(
 		<div
 			style={{
-				width: "100%",
-				height: "100%",
+				background: "linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)",
 				display: "flex",
 				flexDirection: "column",
-				position: "relative",
-				overflow: "hidden",
 				fontFamily: "sans-serif",
-				background: "linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)",
+				height: "100%",
+				overflow: "hidden",
+				position: "relative",
+				width: "100%",
 			}}
 		>
 			{/* Image de fond avec overlay */}
 			{featuredImageUrl && (
 				<>
-					{/* img natif requis pour ImageResponse — next/image non supporté dans Edge runtime */}
+					{/* Img natif requis pour ImageResponse — next/image non supporté dans Edge runtime */}
 					<img
 						src={featuredImageUrl}
 						alt=""
 						style={{
-							position: "absolute",
-							inset: 0,
-							width: "100%",
 							height: "100%",
+							inset: 0,
 							objectFit: "cover",
+							position: "absolute",
+							width: "100%",
 						}}
 					/>
 					{/* Overlay sombre 60% */}
 					<div
 						style={{
-							position: "absolute",
-							inset: 0,
 							background:
 								"linear-gradient(135deg, rgba(26,26,46,0.85) 0%, rgba(22,33,62,0.75) 50%, rgba(26,26,46,0.90) 100%)",
 							display: "flex",
+							inset: 0,
+							position: "absolute",
 						}}
 					/>
 				</>
@@ -104,48 +104,48 @@ export default async function Image({ params }: OgImageProps) {
 			{/* Contenu principal */}
 			<div
 				style={{
-					position: "relative",
-					zIndex: 1,
 					display: "flex",
 					flexDirection: "column",
-					justifyContent: "space-between",
-					width: "100%",
 					height: "100%",
+					justifyContent: "space-between",
 					padding: "48px 60px",
+					position: "relative",
+					width: "100%",
+					zIndex: 1,
 				}}
 			>
 				{/* En-tête : logo + badge catégorie */}
 				<div
 					style={{
-						display: "flex",
 						alignItems: "center",
+						display: "flex",
 						justifyContent: "space-between",
 					}}
 				>
 					<div
 						style={{
-							display: "flex",
 							alignItems: "center",
+							display: "flex",
 							gap: 10,
 						}}
 					>
 						<div
 							style={{
+								color: "#F2A93B",
+								display: "flex",
 								fontSize: 28,
 								fontWeight: 900,
-								color: "#F2A93B",
 								letterSpacing: "-0.5px",
-								display: "flex",
 							}}
 						>
 							Azalee
 						</div>
 						<div
 							style={{
-								fontSize: 13,
+								alignSelf: "flex-end",
 								color: "#8899aa",
 								display: "flex",
-								alignSelf: "flex-end",
+								fontSize: 13,
 								paddingBottom: 2,
 							}}
 						>
@@ -156,16 +156,16 @@ export default async function Image({ params }: OgImageProps) {
 					{categoryLabel && (
 						<div
 							style={{
-								display: "flex",
 								alignItems: "center",
-								padding: "6px 18px",
-								borderRadius: 99,
 								background: "rgba(242, 169, 59, 0.18)",
 								border: "1px solid rgba(242, 169, 59, 0.35)",
+								borderRadius: 99,
 								color: "#F2A93B",
+								display: "flex",
 								fontSize: 14,
 								fontWeight: 700,
 								letterSpacing: "0.5px",
+								padding: "6px 18px",
 								textTransform: "uppercase",
 							}}
 						>
@@ -185,14 +185,14 @@ export default async function Image({ params }: OgImageProps) {
 				>
 					<div
 						style={{
+							WebkitBoxOrient: "vertical",
+							WebkitLineClamp: 3,
+							color: "#ffffff",
+							display: "-webkit-box",
 							fontSize: title.length > 80 ? 42 : title.length > 50 ? 52 : 64,
 							fontWeight: 900,
-							color: "#ffffff",
-							lineHeight: 1.1,
 							letterSpacing: "-1px",
-							display: "-webkit-box",
-							WebkitLineClamp: 3,
-							WebkitBoxOrient: "vertical",
+							lineHeight: 1.1,
 							overflow: "hidden",
 						}}
 					>
@@ -203,36 +203,36 @@ export default async function Image({ params }: OgImageProps) {
 				{/* Pied de page : auteur + date + watermark */}
 				<div
 					style={{
-						display: "flex",
 						alignItems: "center",
+						display: "flex",
 						justifyContent: "space-between",
 					}}
 				>
-					<div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+					<div style={{ alignItems: "center", display: "flex", gap: 16 }}>
 						{/* Auteur */}
 						<div
 							style={{
-								display: "flex",
 								alignItems: "center",
-								gap: 8,
-								padding: "8px 16px",
-								borderRadius: 99,
 								background: "rgba(255,255,255,0.08)",
 								border: "1px solid rgba(255,255,255,0.12)",
+								borderRadius: 99,
+								display: "flex",
+								gap: 8,
+								padding: "8px 16px",
 							}}
 						>
 							<div
 								style={{
-									width: 28,
-									height: 28,
-									borderRadius: "50%",
-									background: "linear-gradient(135deg, #F2A93B, #E53935)",
-									display: "flex",
 									alignItems: "center",
-									justifyContent: "center",
+									background: "linear-gradient(135deg, #F2A93B, #E53935)",
+									borderRadius: "50%",
 									color: "white",
+									display: "flex",
 									fontSize: 14,
 									fontWeight: 700,
+									height: 28,
+									justifyContent: "center",
+									width: 28,
 								}}
 							>
 								{authorName.charAt(0).toUpperCase()}
@@ -240,9 +240,9 @@ export default async function Image({ params }: OgImageProps) {
 							<span
 								style={{
 									color: "#ccddee",
+									display: "flex",
 									fontSize: 15,
 									fontWeight: 600,
-									display: "flex",
 								}}
 							>
 								{authorName}
@@ -254,8 +254,8 @@ export default async function Image({ params }: OgImageProps) {
 							<div
 								style={{
 									color: "#8899aa",
-									fontSize: 14,
 									display: "flex",
+									fontSize: 14,
 								}}
 							>
 								{dateLabel}
@@ -264,13 +264,13 @@ export default async function Image({ params }: OgImageProps) {
 					</div>
 
 					{/* Watermark */}
-					<div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+					<div style={{ alignItems: "center", display: "flex", gap: 6 }}>
 						<div
 							style={{
-								fontSize: 13,
-								fontWeight: 700,
 								color: "#F2A93B",
 								display: "flex",
+								fontSize: 13,
+								fontWeight: 700,
 							}}
 						>
 							azalee.rosegriffon.fr

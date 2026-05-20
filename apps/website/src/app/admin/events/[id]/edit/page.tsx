@@ -7,9 +7,9 @@ import { EventForm } from "@/components/admin/events/event-form";
 
 import { createClient } from "@/lib/supabase/server";
 
-type PageProps = {
+interface PageProps {
   params: Promise<{ id: string }>;
-};
+}
 
 export default async function EditEventPage({ params }: PageProps) {
   const { id } = await params;

@@ -35,16 +35,16 @@ function parseScheduled(value: string): {
 	date: Date | undefined;
 	time: string;
 } {
-	if (!value) return { date: undefined, time: "09:00" };
+	if (!value) {return { date: undefined, time: "09:00" };}
 	const d = new Date(value);
-	if (Number.isNaN(d.getTime())) return { date: undefined, time: "09:00" };
+	if (Number.isNaN(d.getTime())) {return { date: undefined, time: "09:00" };}
 	const hh = String(d.getHours()).padStart(2, "0");
 	const mm = String(d.getMinutes()).padStart(2, "0");
 	return { date: d, time: `${hh}:${mm}` };
 }
 
 function combineDateTime(date: Date | undefined, time: string): string {
-	if (!date) return "";
+	if (!date) {return "";}
 	const [hh, mm] = time.split(":").map((s) => Number.parseInt(s, 10) || 0);
 	const d = new Date(date);
 	d.setHours(hh, mm, 0, 0);

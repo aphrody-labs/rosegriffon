@@ -1,4 +1,5 @@
-import { type NextRequest, NextResponse } from "next/server";
+import { NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
 
 import { createAdminClient } from "@/lib/supabase/server";
 
@@ -26,7 +27,7 @@ export function assertBotAuth(request: NextRequest): NextResponse | null {
  */
 export async function resolveDiscordToProfile(discordId: string) {
   const supabase = createAdminClient();
-  if (!supabase) return null;
+  if (!supabase) {return null;}
 
   const { data: account } = await supabase
     .from("account")
@@ -35,7 +36,7 @@ export async function resolveDiscordToProfile(discordId: string) {
     .eq("account_id", discordId)
     .maybeSingle();
 
-  if (!account) return null;
+  if (!account) {return null;}
 
   const { data: profile } = await supabase
     .from("profiles")
@@ -63,7 +64,7 @@ export async function authBotAndActor(
   opts: { adminOnly?: boolean } = {}
 ): Promise<NextResponse | BotPrincipal> {
   const denied = assertBotAuth(request);
-  if (denied) return denied;
+  if (denied) {return denied;}
 
   const discordId = request.headers.get("x-discord-id");
   if (!discordId) {
@@ -89,8 +90,8 @@ export async function authBotAndActor(
     return NextResponse.json({ error: "Strict admin required" }, { status: 403 });
   }
   return {
-    profile_id: (profile as unknown as { id: string }).id,
     discord_id: discordId,
+    profile_id: (profile as unknown as { id: string }).id,
     role,
     username: (profile as unknown as { username?: string | null }).username ?? null,
   };
@@ -108,15 +109,15 @@ export async function logBotAction(opts: {
 }): Promise<void> {
   try {
     const supabase = createAdminClient();
-    if (!supabase) return;
+    if (!supabase) {return;}
     await supabase.from("admin_audit_log").insert({
-      user_id: opts.principal.profile_id,
       action: opts.action,
-      entity_type: opts.entity_type ?? "bot-api",
+      details: { discord_id: opts.principal.discord_id, via: "bot-api", ...opts.details },
       entity_id: opts.entity_id ?? null,
-      details: { via: "bot-api", discord_id: opts.principal.discord_id, ...opts.details },
+      entity_type: opts.entity_type ?? "bot-api",
+      user_id: opts.principal.profile_id,
     });
-  } catch (err) {
-    console.error("[bot-api] audit log failed:", err);
+  } catch (error) {
+    console.error("[bot-api] audit log failed:", error);
   }
 }

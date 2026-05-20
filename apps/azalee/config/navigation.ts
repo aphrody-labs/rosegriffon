@@ -13,36 +13,32 @@ export interface NavItem {
 
 export const navigationItems: NavItem[] = [
 	{
+		icon: "home",
 		label: "nav.home",
 		path: "/",
-		icon: "home",
 	},
 	{
-		label: "nav.news",
-		path: "/news",
-		icon: "newspaper",
 		children: [
 			{ label: "nav.news.articles", path: "/news", icon: "feed" },
 			{ label: "nav.news.patch_notes", path: "/patch-notes", icon: "update" },
 		],
+		icon: "newspaper",
+		label: "nav.news",
+		path: "/news",
 	},
 	{
+		commonSprite: "chara",
+		icon: "groups",
 		label: "nav.wiki.players",
 		path: "/chara",
-		icon: "groups",
-		commonSprite: "chara",
 	},
 	{
+		commonSprite: "skill",
+		icon: "",
 		label: "nav.wiki.skills",
 		path: "/skill",
-		icon: "",
-		commonSprite: "skill",
 	},
 	{
-		label: "nav.wiki.hyper_skills",
-		path: "/aura",
-		icon: "",
-		defaultOpen: true,
 		children: [
 			{
 				label: "nav.wiki.auras.keshin",
@@ -75,27 +71,28 @@ export const navigationItems: NavItem[] = [
 				commonSprite: "mode_change",
 			},
 		],
+		defaultOpen: true,
+		icon: "",
+		label: "nav.wiki.hyper_skills",
+		path: "/aura",
 	},
 	{
+		icon: "backpack",
 		label: "nav.wiki.items",
 		path: "/item",
-		icon: "backpack",
 	},
 	{
+		icon: "strategy",
 		label: "nav.wiki.tactics",
 		path: "/tactic",
-		icon: "strategy",
 	},
 	{
+		commonSprite: "tension",
+		icon: "auto_awesome",
 		label: "nav.wiki.passives",
 		path: "/passive",
-		icon: "auto_awesome",
-		commonSprite: "tension",
 	},
 	{
-		label: "nav.tools",
-		path: "/tools",
-		icon: "build",
 		children: [
 			{
 				label: "nav.tools.compare",
@@ -114,20 +111,20 @@ export const navigationItems: NavItem[] = [
 				icon: "translate",
 			},
 		],
+		icon: "build",
+		label: "nav.tools",
+		path: "/tools",
 	},
 	{
+		icon: "settings",
 		label: "nav.settings",
 		path: "/settings",
-		icon: "settings",
 	},
 ];
 
 export const mobileNavItems: NavItem[] = [
-	{ label: "nav.home", path: "/", icon: "home" },
+	{ icon: "home", label: "nav.home", path: "/" },
 	{
-		label: "nav.wiki",
-		path: "/search",
-		icon: "search",
 		activePaths: [
 			"/chara",
 			"/skill",
@@ -138,38 +135,38 @@ export const mobileNavItems: NavItem[] = [
 			"/wiki",
 			"/search",
 		],
+		icon: "search",
+		label: "nav.wiki",
+		path: "/search",
 	},
 	{
+		activePaths: ["/news", "/patch-notes"],
+		icon: "newspaper",
 		label: "nav.news",
 		path: "/news",
-		icon: "newspaper",
-		activePaths: ["/news", "/patch-notes"],
 	},
 	{
+		activePaths: ["/tools"],
+		icon: "build",
 		label: "nav.tools",
 		path: "/tools",
-		icon: "build",
-		activePaths: ["/tools"],
 	},
 	{
+		activePaths: ["/settings"],
+		icon: "settings",
 		label: "nav.settings",
 		path: "/settings",
-		icon: "settings",
-		activePaths: ["/settings"],
 	},
 ];
 
 export const dashboardItems: NavItem[] = [
 	{
+		adminOnly: true,
+		icon: "dashboard",
 		label: "nav.dashboard.overview",
 		path: "/dashboard",
-		icon: "dashboard",
-		adminOnly: true,
 	},
 	{
-		label: "nav.dashboard.content",
-		path: "/dashboard/content",
-		icon: "edit_note",
 		adminOnly: true,
 		children: [
 			{
@@ -188,11 +185,11 @@ export const dashboardItems: NavItem[] = [
 				icon: "verified",
 			},
 		],
+		icon: "edit_note",
+		label: "nav.dashboard.content",
+		path: "/dashboard/content",
 	},
 	{
-		label: "nav.dashboard.social",
-		path: "/dashboard/social",
-		icon: "share",
 		adminOnly: true,
 		children: [
 			{
@@ -201,11 +198,11 @@ export const dashboardItems: NavItem[] = [
 				icon: "tag",
 			},
 		],
+		icon: "share",
+		label: "nav.dashboard.social",
+		path: "/dashboard/social",
 	},
 	{
-		label: "nav.dashboard.tools",
-		path: "/dashboard/tools",
-		icon: "build",
 		adminOnly: true,
 		children: [
 			{
@@ -219,11 +216,11 @@ export const dashboardItems: NavItem[] = [
 				icon: "table_chart",
 			},
 		],
+		icon: "build",
+		label: "nav.dashboard.tools",
+		path: "/dashboard/tools",
 	},
 	{
-		label: "nav.dashboard.security",
-		path: "/dashboard/security",
-		icon: "shield",
 		adminOnly: true,
 		children: [
 			{
@@ -232,17 +229,20 @@ export const dashboardItems: NavItem[] = [
 				icon: "policy",
 			},
 		],
+		icon: "shield",
+		label: "nav.dashboard.security",
+		path: "/dashboard/security",
 	},
 	{
+		adminOnly: true,
+		icon: "group",
 		label: "nav.dashboard.users",
 		path: "/dashboard/users",
-		icon: "group",
-		adminOnly: true,
 	},
 	{
+		adminOnly: true,
+		icon: "settings",
 		label: "nav.dashboard.settings",
 		path: "/dashboard/settings",
-		icon: "settings",
-		adminOnly: true,
 	},
 ];

@@ -17,7 +17,7 @@ export async function exportUserData(): Promise<{
 	user_preferences: unknown;
 } | null> {
 	const session = await getServerSession();
-	if (!session?.user) return null;
+	if (!session?.user) {return null;}
 
 	const userId = session.user.id;
 	const supabase = await createClient();
@@ -78,15 +78,15 @@ export async function exportUserData(): Promise<{
 	]);
 
 	return {
-		profiles: profile ?? null,
-		articles: articles ?? [],
+		article_bookmarks: bookmarks ?? [],
 		article_comments: comments ?? [],
 		article_reactions: reactions ?? [],
-		article_bookmarks: bookmarks ?? [],
-		reading_history: history ?? [],
-		notifications: notifications ?? [],
-		push_subscriptions: pushSubs ?? [],
+		articles: articles ?? [],
 		newsletter_subscriptions: newsletter ?? null,
+		notifications: notifications ?? [],
+		profiles: profile ?? null,
+		push_subscriptions: pushSubs ?? [],
+		reading_history: history ?? [],
 		user_preferences: preferences ?? null,
 	};
 }
@@ -97,18 +97,18 @@ export async function requestDataDeletion(): Promise<{
 }> {
 	const session = await getServerSession();
 	if (!session?.user) {
-		return { success: false, message: "Non authentifié." };
+		return { message: "Non authentifié.", success: false };
 	}
 
 	await logAudit(session.user.id, "gdpr_deletion_request", {
-		requested_at: new Date().toISOString(),
 		email: session.user.email ?? null,
+		requested_at: new Date().toISOString(),
 	});
 
 	return {
-		success: true,
 		message:
 			"Votre demande de suppression a été enregistrée. Un administrateur traitera votre demande dans les meilleurs délais (30 jours maximum conformément au RGPD).",
+		success: true,
 	};
 }
 
@@ -129,14 +129,14 @@ export async function deleteUserData(
 
 	// Supprimer dans l'ordre pour respecter les contraintes FK non-CASCADE
 	const tables: Array<{ table: string; column: string }> = [
-		{ table: "reading_history", column: "user_id" },
-		{ table: "article_reactions", column: "user_id" },
-		{ table: "article_bookmarks", column: "user_id" },
-		{ table: "article_comments", column: "user_id" },
-		{ table: "notifications", column: "user_id" },
-		{ table: "push_subscriptions", column: "user_id" },
-		{ table: "newsletter_subscriptions", column: "user_id" },
-		{ table: "user_preferences", column: "user_id" },
+		{ column: "user_id", table: "reading_history" },
+		{ column: "user_id", table: "article_reactions" },
+		{ column: "user_id", table: "article_bookmarks" },
+		{ column: "user_id", table: "article_comments" },
+		{ column: "user_id", table: "notifications" },
+		{ column: "user_id", table: "push_subscriptions" },
+		{ column: "user_id", table: "newsletter_subscriptions" },
+		{ column: "user_id", table: "user_preferences" },
 	];
 
 	for (const { table, column } of tables) {
@@ -184,10 +184,10 @@ export async function deleteUserData(
 		} else {
 			deletedEntities.auth_users = 1;
 		}
-	} catch (err) {
-		console.error("Admin client error:", err);
+	} catch (error) {
+		console.error("Admin client error:", error);
 		deletedEntities.auth_users = 0;
 	}
 
-	return { success: true, deletedEntities };
+	return { deletedEntities, success: true };
 }

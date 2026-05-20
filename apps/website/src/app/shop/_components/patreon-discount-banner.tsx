@@ -13,7 +13,7 @@ export async function PatreonDiscountBanner() {
 		const { data: auth } = await supabase.auth.getUser();
 		userId = auth.user?.id ?? null;
 	} catch {
-		// not logged in
+		// Not logged in
 	}
 
 	if (!userId) {

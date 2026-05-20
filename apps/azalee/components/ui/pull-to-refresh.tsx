@@ -15,7 +15,7 @@ export function PullToRefresh({ children }: { children: React.ReactNode }) {
 
   const onTouchStart = useCallback(
     (e: React.TouchEvent) => {
-      if (window.scrollY > 0 || isRefreshing) return;
+      if (window.scrollY > 0 || isRefreshing) {return;}
       startY.current = e.touches[0].clientY;
       setPulling(true);
     },
@@ -24,7 +24,7 @@ export function PullToRefresh({ children }: { children: React.ReactNode }) {
 
   const onTouchMove = useCallback(
     (e: React.TouchEvent) => {
-      if (!pulling || isRefreshing) return;
+      if (!pulling || isRefreshing) {return;}
       const dy = e.touches[0].clientY - startY.current;
       if (dy < 0) {
         setPulling(false);
@@ -37,7 +37,7 @@ export function PullToRefresh({ children }: { children: React.ReactNode }) {
   );
 
   const onTouchEnd = useCallback(() => {
-    if (!pulling) return;
+    if (!pulling) {return;}
     setPulling(false);
 
     if (pullDistance >= THRESHOLD) {

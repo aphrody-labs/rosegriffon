@@ -26,7 +26,7 @@ export default async function ChroniquePage({ params }: { params: Promise<{ slug
     .eq("app", "website")
     .single();
 
-  if (!articleData) notFound();
+  if (!articleData) {notFound();}
 
   const content = articleData;
 
@@ -47,9 +47,9 @@ export default async function ChroniquePage({ params }: { params: Promise<{ slug
     <div className="min-h-screen bg-linear-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
       <BreadcrumbSchema
         items={[
-          { name: "Accueil", item: "/" },
-          { name: "Chroniques", item: "/chroniques" },
-          { name: content.title, item: `/chroniques/${slug}` },
+          { item: "/", name: "Accueil" },
+          { item: "/chroniques", name: "Chroniques" },
+          { item: `/chroniques/${slug}`, name: content.title },
         ]}
       />
       <ArticleSchema

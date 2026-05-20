@@ -24,13 +24,13 @@ export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
 function formatEur(cents: number | null | undefined): string {
-	if (cents === null || cents === undefined || cents === 0) return "—";
+	if (cents === null || cents === undefined || cents === 0) {return "—";}
 	return `${(cents / 100).toFixed(2).replace(".", ",")} €`;
 }
 
 function formatEurCompact(cents: number): string {
 	const v = cents / 100;
-	if (v >= 1000) return `${(v / 1000).toFixed(1)} k€`;
+	if (v >= 1000) {return `${(v / 1000).toFixed(1)} k€`;}
 	return `${v.toFixed(0)} €`;
 }
 
@@ -56,7 +56,7 @@ export default async function AdminPatreonPage() {
 			.maybeSingle(),
 	]);
 
-	const creatorLinked = !!tokenRow;
+	const creatorLinked = Boolean(tokenRow);
 
 	const live = liveResult.ok ? liveResult.snapshot : null;
 	const liveActive = live
@@ -81,7 +81,7 @@ export default async function AdminPatreonPage() {
 		liveActive.length > 0 ? liveMonthlyCents / liveActive.length : 0;
 	const liveTotal = live?.members.length ?? 0;
 	const liveTierOptions = live
-		? Array.from(new Set(live.members.flatMap((m) => m.tier_titles))).sort()
+		? [...new Set(live.members.flatMap((m) => m.tier_titles))].toSorted()
 		: [];
 
 	const redirectUri = `${process.env.NEXT_PUBLIC_BASE_URL ?? "https://rosegriffon.fr"}/api/auth/oauth2/callback/patreon`;
@@ -253,7 +253,7 @@ export default async function AdminPatreonPage() {
 								<div className="space-y-2 text-sm">
 									{(live?.tiers ?? [])
 										.filter((t) => t.published !== false)
-										.sort(
+										.toSorted(
 											(a, b) => (b.patron_count ?? 0) - (a.patron_count ?? 0),
 										)
 										.slice(0, 5)

@@ -2,7 +2,7 @@
 // - quotes/semi/explicit-any/etc. — règles azalee historiques
 // - ignores : modules legacy/generated inagle, scripts/, data/, public/, etc.
 // - better-tailwindcss entryPoint = app/globals.css (PAS src/app/globals.css)
-//   sinon ~60 false positives sur tokens M3 custom (`bg-error-container`, …).
+//   Sinon ~60 false positives sur tokens M3 custom (`bg-error-container`, …).
 import { defineConfig, globalIgnores } from "eslint/config";
 import betterTailwindcss from "eslint-plugin-better-tailwindcss";
 import jsxA11y from "eslint-plugin-jsx-a11y";
@@ -18,21 +18,21 @@ const eslintConfig = defineConfig([
 	reactCompiler.configs.recommended,
 	{
 		rules: {
-			semi: ["error", "always"],
-			quotes: ["error", "double", { avoidEscape: true }],
-			"no-unused-vars": "off",
+			"@next/next/no-img-element": "error",
+			"@typescript-eslint/no-explicit-any": "warn",
 			"@typescript-eslint/no-unused-vars": [
 				"error",
 				{ args: "none", varsIgnorePattern: "^_", ignoreRestSiblings: true },
 			],
-			"@typescript-eslint/no-explicit-any": "warn",
-			"react-hooks/rules-of-hooks": "error",
-			"react-hooks/exhaustive-deps": "error",
-			"react-hooks/set-state-in-effect": "warn",
-			"@next/next/no-img-element": "error",
-			"react/no-unescaped-entities": ["error"],
-			"no-console": ["warn", { allow: ["warn", "error"] }],
 			"jsx-a11y/label-has-associated-control": ["error", { assert: "either" }],
+			"no-console": ["warn", { allow: ["warn", "error"] }],
+			"no-unused-vars": "off",
+			quotes: ["error", "double", { avoidEscape: true }],
+			"react-hooks/exhaustive-deps": "error",
+			"react-hooks/rules-of-hooks": "error",
+			"react-hooks/set-state-in-effect": "warn",
+			"react/no-unescaped-entities": ["error"],
+			semi: ["error", "always"],
 		},
 	},
 	globalIgnores([
@@ -62,13 +62,13 @@ const eslintConfig = defineConfig([
 	{
 		files: ["**/*.{ts,tsx,jsx}"],
 		plugins: { "better-tailwindcss": betterTailwindcss },
+		rules: {
+			...betterTailwindcss.configs["recommended-warn"].rules,
+		},
 		settings: {
 			"better-tailwindcss": {
 				entryPoint: "app/globals.css",
 			},
-		},
-		rules: {
-			...betterTailwindcss.configs["recommended-warn"].rules,
 		},
 	},
 	// Oxlint — disable ESLint rules already covered by oxlint (must be LAST)

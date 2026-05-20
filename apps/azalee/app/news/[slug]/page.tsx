@@ -41,14 +41,14 @@ import { extractTableOfContents } from "@/lib/lexical-utils";
 
 interface ArticlePageProps {
 	params: Promise<{ slug: string }>;
-	searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+	searchParams: Promise<Record<string, string | string[] | undefined>>;
 }
 
 const CATEGORY_LABELS: Record<string, string> = {
 	announcement: "Annonce",
-	event: "Événement",
-	critique: "Critique",
 	community: "Communauté",
+	critique: "Critique",
+	event: "Événement",
 };
 
 function estimateReadTime(content: string): number {
@@ -60,8 +60,8 @@ function estimateReadTime(content: string): number {
 		if (parsed?.root) {
 			// eslint-disable-next-line @typescript-eslint/no-explicit-any
 			const extractText = (node: any): string => {
-				if (node.text) return node.text;
-				if (node.children) return node.children.map(extractText).join(" ");
+				if (node.text) {return node.text;}
+				if (node.children) {return node.children.map(extractText).join(" ");}
 				return "";
 			};
 			// eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -89,7 +89,7 @@ function estimateReadTime(content: string): number {
 			return Math.max(1, wordMinutes + Math.ceil(imageSeconds / 60));
 		}
 	} catch {
-		// fallback
+		// Fallback
 	}
 	const stripped =
 		typeof content === "string" ? content.replaceAll(/<[^>]+>/g, "") : "";
@@ -112,7 +112,7 @@ async function getNews(slug: string, isPreview = false) {
 	}
 
 	const { data: news, error } = await query.maybeSingle();
-	if (error || !news) return null;
+	if (error || !news) {return null;}
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	if ((news as any).author_id) {
@@ -129,7 +129,7 @@ async function getNews(slug: string, isPreview = false) {
 
 	// Enrichit chaque co_author qui a un profile_id : ajoute profile_username
 	// (lien /profil/<username>) + privilegie le full_name/avatar_url du
-	// profile s'il existe (potentiellement plus a jour que le snapshot Discord).
+	// Profile s'il existe (potentiellement plus a jour que le snapshot Discord).
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	const co = (news as any).co_authors;
 	if (Array.isArray(co) && co.length > 0) {
@@ -157,8 +157,8 @@ async function getNews(slug: string, isPreview = false) {
 							profile_username: p.username ?? null,
 							name: p.full_name || c.name,
 							// Snapshot Discord (c.avatar_url) prioritaire — il est fraichement
-							// fetched a la creation du brouillon. Le profile.avatar_url peut
-							// etre stale (Kaen a change son avatar Discord depuis l'OAuth).
+							// Fetched a la creation du brouillon. Le profile.avatar_url peut
+							// Etre stale (Kaen a change son avatar Discord depuis l'OAuth).
 							avatar_url: c.avatar_url || p.avatar_url,
 						}
 					: c;
@@ -193,7 +193,7 @@ async function getNewsMeta(slug: string, isPreview = false) {
 	}
 
 	const { data: news, error } = await query.maybeSingle();
-	if (error || !news) return null;
+	if (error || !news) {return null;}
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	if ((news as any).author_id) {
@@ -224,7 +224,7 @@ async function isCurrentUserAdmin(): Promise<boolean> {
 		);
 		const { ADMIN_ROLES } = await import("@/lib/auth-roles");
 		const session = await getServerSession();
-		if (!session?.user) return false;
+		if (!session?.user) {return false;}
 
 		const { createAdminClient } = await import("@/lib/supabase/admin");
 		const supabase = createAdminClient();
@@ -235,7 +235,7 @@ async function isCurrentUserAdmin(): Promise<boolean> {
 			.eq("id", session.user.id)
 			.maybeSingle();
 
-		if (!profile) return false;
+		if (!profile) {return false;}
 		if (ADMIN_ROLES.includes(profile.role as (typeof ADMIN_ROLES)[number])) {
 			return true;
 		}
@@ -254,7 +254,7 @@ export async function generateMetadata({
 	const isPreview = sp.preview === "true";
 	const canPreview = isPreview ? await isCurrentUserAdmin() : false;
 	const news = await getNewsMeta(slug, canPreview);
-	if (!news) return { title: "Article introuvable - Azalee" };
+	if (!news) {return { title: "Article introuvable - Azalee" };}
 
 	const seoTitle = news.meta_title || news.title;
 	const seoDescription =
@@ -266,18 +266,11 @@ export async function generateMetadata({
 	const canonicalUrl = `https://azalee.rosegriffon.fr/news/${slug}`;
 
 	return {
-		title: `${seoTitle} - Azalee`,
-		description: seoDescription,
 		alternates: { canonical: canonicalUrl },
+		description: seoDescription,
 		openGraph: {
-			title: seoTitle,
-			description: seoDescription,
-			url: canonicalUrl,
-			siteName: "Azalée - Rose Griffon",
-			type: "article",
-			publishedTime: publishedDate,
-			modifiedTime: modifiedDate,
 			authors: news.author?.full_name ? [news.author.full_name] : undefined,
+			description: seoDescription,
 			images: news.featured_image_url
 				? [
 						{
@@ -289,16 +282,23 @@ export async function generateMetadata({
 					]
 				: [],
 			locale: "fr_FR",
+			modifiedTime: modifiedDate,
+			publishedTime: publishedDate,
+			siteName: "Azalée - Rose Griffon",
+			title: seoTitle,
+			type: "article",
+			url: canonicalUrl,
 		},
+		robots: { follow: true, index: news.status === "published" },
+		title: `${seoTitle} - Azalee`,
 		twitter: {
 			card: news.featured_image_url
 				? "summary_large_image"
 				: ("summary" as const),
-			title: seoTitle,
 			description: seoDescription,
 			images: news.featured_image_url ? [news.featured_image_url] : undefined,
+			title: seoTitle,
 		},
-		robots: { index: news.status === "published", follow: true },
 	};
 }
 
@@ -311,7 +311,7 @@ export default async function ArticlePage({
 	const isPreview = sp.preview === "true";
 	const canPreview = isPreview ? await isCurrentUserAdmin() : false;
 	const news = await getNews(slug, canPreview);
-	if (!news) notFound();
+	if (!news) {notFound();}
 
 	const publishedDate =
 		news.published_at || news.created_at || new Date().toISOString();
@@ -347,21 +347,21 @@ export default async function ArticlePage({
 	const articleJsonLd = {
 		"@context": "https://schema.org",
 		"@type": "Article",
-		headline: news.title,
-		description: news.excerpt || news.meta_description || "",
-		image: news.featured_image_url || undefined,
-		datePublished: publishedDate,
-		dateModified: news.updated_at || publishedDate,
 		author: { "@type": "Person", name: authorName },
+		dateModified: news.updated_at || publishedDate,
+		datePublished: publishedDate,
+		description: news.excerpt || news.meta_description || "",
+		headline: news.title,
+		image: news.featured_image_url || undefined,
+		mainEntityOfPage: { "@id": canonicalUrl, "@type": "WebPage" },
 		publisher: {
 			"@type": "Organization",
-			name: "Azalée - Rose Griffon",
 			logo: {
 				"@type": "ImageObject",
 				url: "https://azalee.rosegriffon.fr/icon.webp",
 			},
+			name: "Azalée - Rose Griffon",
 		},
-		mainEntityOfPage: { "@type": "WebPage", "@id": canonicalUrl },
 	};
 
 	const breadcrumbJsonLd = {
@@ -370,15 +370,15 @@ export default async function ArticlePage({
 		itemListElement: [
 			{
 				"@type": "ListItem",
-				position: 1,
-				name: "Actualités",
 				item: "https://azalee.rosegriffon.fr/news",
+				name: "Actualités",
+				position: 1,
 			},
 			{
 				"@type": "ListItem",
-				position: 2,
-				name: news.title,
 				item: canonicalUrl,
+				name: news.title,
+				position: 2,
 			},
 		],
 	};
@@ -387,11 +387,11 @@ export default async function ArticlePage({
 		.filter((item) => item.text.endsWith("?"))
 		.map((item) => ({
 			"@type": "Question",
-			name: item.text,
 			acceptedAnswer: {
 				"@type": "Answer",
 				text: "Voir l'article pour la réponse complète.",
 			},
+			name: item.text,
 		}));
 	const faqJsonLd =
 		faqItems.length > 0
@@ -427,9 +427,9 @@ export default async function ArticlePage({
 					Mode prévisualisation — cet article est en statut «{" "}
 					{news.status === "draft"
 						? "brouillon"
-						: news.status === "scheduled"
+						: (news.status === "scheduled"
 							? "programmé"
-							: news.status}{" "}
+							: news.status)}{" "}
 					»
 					<Link
 						href={`/dashboard/news/${news.id}`}

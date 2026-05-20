@@ -1,4 +1,5 @@
-import { type NextRequest, NextResponse } from "next/server";
+import { NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
 
 import { assertBotAuth, resolveDiscordToProfile } from "../_lib";
 
@@ -11,7 +12,7 @@ export const dynamic = "force-dynamic";
  */
 export async function GET(request: NextRequest) {
   const denied = assertBotAuth(request);
-  if (denied) return denied;
+  if (denied) {return denied;}
 
   const discordId = request.nextUrl.searchParams.get("discord_id");
   if (!discordId) {
@@ -22,12 +23,12 @@ export async function GET(request: NextRequest) {
   if (!profile) {
     return NextResponse.json(
       { linked: false, profile: null },
-      { status: 200, headers: { "cache-control": "private, max-age=10" } }
+      { headers: { "cache-control": "private, max-age=10" }, status: 200 }
     );
   }
 
   return NextResponse.json(
     { linked: true, profile },
-    { status: 200, headers: { "cache-control": "private, max-age=10" } }
+    { headers: { "cache-control": "private, max-age=10" }, status: 200 }
   );
 }

@@ -31,7 +31,8 @@ export function useSidebarAuth(): UseSidebarAuthReturn {
     isLoading: profileLoading,
     error: profileError,
   } = useQuery({
-    queryKey: ["auth", "profile", user?.id],
+    enabled: !!user?.id,
+    gcTime: 1000 * 60 * 60 * 24,
     queryFn: async () => {
       if (!user?.id) return null;
       // 3 stratégies de bridge (Better Auth user.id ≠ profiles.id legacy Supabase) :
@@ -65,10 +66,9 @@ export function useSidebarAuth(): UseSidebarAuthReturn {
       }
       return null;
     },
-    enabled: !!user?.id,
-    staleTime: 1000 * 60 * 15,
-    gcTime: 1000 * 60 * 60 * 24,
+    queryKey: ["auth", "profile", user?.id],
     retry: 1,
+    staleTime: 1000 * 60 * 15,
   });
 
   // Synchroniser le router quand la session change
@@ -79,9 +79,9 @@ export function useSidebarAuth(): UseSidebarAuthReturn {
   }, [sessionPending, queryClient]);
 
   return {
-    user,
-    profile: profile ?? null,
-    loading: sessionPending || (!!user && profileLoading),
     error: profileError ? (profileError as Error).message : null,
+    loading: sessionPending || (!!user && profileLoading),
+    profile: profile ?? null,
+    user,
   };
 }

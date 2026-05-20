@@ -29,7 +29,7 @@ export default async function ArticlesPage() {
   const supabase = await createClient();
 
   const user = await getServerUser();
-  if (!user) redirect("/login");
+  if (!user) {redirect("/login");}
 
   // Récupérer les articles de l'utilisateur
   const { data: articlesData } = await supabase
@@ -43,22 +43,26 @@ export default async function ArticlesPage() {
 
   // Statistiques
   const stats = {
-    total: articles.length || 0,
-    published: articles.filter((a) => a.status === "published").length || 0,
     drafts: articles.filter((a) => a.status === "draft").length || 0,
+    published: articles.filter((a) => a.status === "published").length || 0,
+    total: articles.length || 0,
     totalViews: articles.reduce((sum, a) => sum + (a.view_count || 0), 0) || 0,
   };
 
   const getStatusBadge = (status: string) => {
     switch (status) {
-      case "published":
+      case "published": {
         return <Badge className="bg-green-500">Publié</Badge>;
-      case "draft":
+      }
+      case "draft": {
         return <Badge variant="secondary">Brouillon</Badge>;
-      case "archived":
+      }
+      case "archived": {
         return <Badge variant="outline">Archivé</Badge>;
-      default:
+      }
+      default: {
         return <Badge>{status}</Badge>;
+      }
     }
   };
 

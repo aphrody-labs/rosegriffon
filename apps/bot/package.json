@@ -11,7 +11,7 @@
 		"type-check": "tsc --noEmit",
 		"lint": "oxlint src",
 		"lint:fix": "oxlint --fix src",
-		"test": "vitest run",
+		"test": "vitest run --passWithNoTests",
 		"smoke:admin": "bun src/scripts/smoke-admin.ts",
 		"smoke:canvas": "bun src/scripts/smoke-canvas.ts"
 	},

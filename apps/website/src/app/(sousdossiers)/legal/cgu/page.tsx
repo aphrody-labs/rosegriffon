@@ -2,9 +2,9 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Conditions Générales d'Utilisation | Rose Griffon",
   description:
     "Conditions générales d'utilisation des services de l'association Rose Griffon, conformes aux lois françaises.",
+  title: "Conditions Générales d'Utilisation | Rose Griffon",
 };
 
 export default function TermsOfServicePage() {

@@ -8,12 +8,12 @@ interface NextEventBannerProps {
 }
 
 export function NextEventBanner({ event }: NextEventBannerProps) {
-  if (!event?.start) return null;
+  if (!event?.start) {return null;}
 
   // Sécurisation des dates
   const startDateStr = event.start.dateTime || event.start.date;
 
-  if (!startDateStr) return null;
+  if (!startDateStr) {return null;}
 
   const startDate = new Date(startDateStr);
 

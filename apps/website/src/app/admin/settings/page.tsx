@@ -1,7 +1,5 @@
-import {
-	type Setting,
-	VisualSettingsEditor,
-} from "@/components/admin/settings/VisualSettingsEditor";
+import { VisualSettingsEditor } from '@/components/admin/settings/VisualSettingsEditor';
+import type { Setting } from '@/components/admin/settings/VisualSettingsEditor';
 import { createAdminClient } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
@@ -20,12 +18,12 @@ export default async function SettingsPage() {
 
 	// Transform data to match the Setting type (handle nulls if necessary)
 	const settings: Setting[] = (data || []).map((item) => ({
+		description: item.description || undefined,
 		key: item.key,
 		value:
 			typeof item.value === "string"
 				? item.value
 				: JSON.stringify(item.value || ""),
-		description: item.description || undefined,
 	}));
 
 	return (

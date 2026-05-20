@@ -42,9 +42,9 @@ interface NewsActionsProps {
 }
 
 const STATUS_OPTIONS = [
-  { value: "draft", label: "Brouillon", icon: FileText, color: "text-amber-500" },
-  { value: "published", label: "Publié", icon: CheckCircle, color: "text-green-500" },
-  { value: "archived", label: "Archivé", icon: Archive, color: "text-stone-500" },
+  { color: "text-amber-500", icon: FileText, label: "Brouillon", value: "draft" },
+  { color: "text-green-500", icon: CheckCircle, label: "Publié", value: "published" },
+  { color: "text-stone-500", icon: Archive, label: "Archivé", value: "archived" },
 ];
 
 export function NewsActions({
@@ -58,7 +58,7 @@ export function NewsActions({
   const [loading, setLoading] = useState(false);
 
   const handleStatusChange = async (newStatus: string) => {
-    if (newStatus === currentStatus) return;
+    if (newStatus === currentStatus) {return;}
     setLoading(true);
     try {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -76,7 +76,7 @@ export function NewsActions({
 
       const { updateArticleStatus } = await import("@/app/actions/articles");
       const result = await updateArticleStatus(newsId, newStatus, currentStatus);
-      if (result.error) throw new Error(result.error);
+      if (result.error) {throw new Error(result.error);}
 
       const label = STATUS_OPTIONS.find((s) => s.value === newStatus)?.label || newStatus;
       toast.success(`Statut changé en « ${label} »`);
@@ -97,8 +97,8 @@ export function NewsActions({
       } else {
         toast.error(`Erreur d'export : ${result.error}`);
       }
-    } catch (err) {
-      console.error("Export error:", err);
+    } catch (error) {
+      console.error("Export error:", error);
       toast.error("Erreur lors de l'exportation");
     } finally {
       setLoading(false);
@@ -127,12 +127,12 @@ export function NewsActions({
     try {
       const { deleteArticle } = await import("@/app/actions/articles");
       const result = await deleteArticle(newsId);
-      if (result.error) throw new Error(result.error);
+      if (result.error) {throw new Error(result.error);}
 
       toast.success("Article supprimé");
       router.refresh();
-    } catch (err) {
-      console.error("Error deleting news:", err);
+    } catch (error) {
+      console.error("Error deleting news:", error);
       toast.error("Erreur lors de la suppression");
     } finally {
       setLoading(false);
@@ -216,7 +216,7 @@ export function NewsActions({
             try {
               const { toggleArticlePin } = await import("@/app/actions/articles");
               const result = await toggleArticlePin(newsId, pinned);
-              if (result.error) throw new Error(result.error);
+              if (result.error) {throw new Error(result.error);}
               toast.success(pinned ? "Article retiré de la une" : "Article épinglé en une");
               router.refresh();
             } catch {

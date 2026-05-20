@@ -4,7 +4,8 @@ import { MessageSquare } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { getComments } from "@/app/actions/comments";
 import { CommentForm } from "@/components/news/CommentForm";
-import { type Comment, CommentItem } from "@/components/news/CommentItem";
+import { CommentItem } from '@/components/news/CommentItem';
+import type { Comment } from '@/components/news/CommentItem';
 import { cn } from "@/lib/utils";
 
 type SortOrder = "newest" | "oldest";
@@ -115,7 +116,7 @@ export function CommentSection({ articleId, initialCommentCount }: CommentSectio
       {/* Liste des commentaires */}
       {loading ? (
         <CommentSkeleton />
-      ) : comments.length === 0 ? (
+      ) : (comments.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-12 text-center">
           <MessageSquare className="size-10 text-on-surface-variant/30 mb-3" />
           <p className="text-on-surface-variant/60 text-sm">
@@ -135,7 +136,7 @@ export function CommentSection({ articleId, initialCommentCount }: CommentSectio
             />
           ))}
         </div>
-      )}
+      ))}
     </section>
   );
 }

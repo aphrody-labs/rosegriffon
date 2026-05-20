@@ -16,7 +16,7 @@ interface LegacyMember {
 
 export async function LegacyBanner({ userId }: Props) {
 	const supabase = createAdminClient();
-	if (!supabase) return null;
+	if (!supabase) {return null;}
 
 	const { data } = await supabase
 		.from("patreon_legacy_members")
@@ -25,7 +25,7 @@ export async function LegacyBanner({ userId }: Props) {
 		.eq("rg_subscription_status", "pending")
 		.maybeSingle();
 
-	if (!data) return null;
+	if (!data) {return null;}
 	const legacy = data as LegacyMember;
 
 	return (

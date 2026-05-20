@@ -10,9 +10,10 @@ import type {
   SerializedLexicalNode,
   Spread,
 } from "lexical";
-import { $applyNodeReplacement, createEditor, DecoratorNode } from "lexical";
+import { $applyNodeReplacement, DecoratorNode, createEditor } from "lexical";
 import * as React from "react";
-import { type JSX, Suspense } from "react";
+import { Suspense } from 'react';
+import type { JSX } from 'react';
 
 const ImageComponent = React.lazy(() => import("../editor-ui/image-component"));
 
@@ -180,7 +181,7 @@ export class ImageNode extends DecoratorNode<JSX.Element> {
 
   createDOM(config: EditorConfig): HTMLElement {
     const span = document.createElement("span");
-    const theme = config.theme;
+    const {theme} = config;
     const className = theme.image;
     if (className !== undefined) {
       span.className = className;
@@ -213,7 +214,7 @@ export class ImageNode extends DecoratorNode<JSX.Element> {
           showCaption={this.__showCaption}
           caption={this.__caption}
           captionsEnabled={this.__captionsEnabled}
-          resizable={true}
+          resizable
         />
       </Suspense>
     );

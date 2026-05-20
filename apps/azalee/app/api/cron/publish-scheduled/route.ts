@@ -1,4 +1,5 @@
-import { type NextRequest, NextResponse } from "next/server";
+import { NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
 import { createAdminClient } from "@/lib/supabase/admin";
 
 /**
@@ -42,9 +43,9 @@ export async function POST(request: NextRequest) {
 		const { error: updateError } = await (supabase as any)
 			.from("articles")
 			.update({
-				status: "published",
 				published_at: now,
 				scheduled_at: null,
+				status: "published",
 			})
 			.in("id", ids)
 			.eq("app", "azalee");
@@ -63,11 +64,6 @@ export async function POST(request: NextRequest) {
 					await fetch(
 						`https://discord.com/api/v10/channels/${channelId}/messages`,
 						{
-							method: "POST",
-							headers: {
-								Authorization: `Bot ${discordToken}`,
-								"Content-Type": "application/json",
-							},
 							body: JSON.stringify({
 								embeds: [
 									{
@@ -82,6 +78,11 @@ export async function POST(request: NextRequest) {
 									},
 								],
 							}),
+							headers: {
+								Authorization: `Bot ${discordToken}`,
+								"Content-Type": "application/json",
+							},
+							method: "POST",
 						},
 					);
 				} catch {
@@ -91,15 +92,15 @@ export async function POST(request: NextRequest) {
 		}
 
 		return NextResponse.json({
-			published: articles.length,
 			articles: articles.map((a: { id: string; title: string }) => ({
 				id: a.id,
 				title: a.title,
 			})),
+			published: articles.length,
 		});
-	} catch (err) {
+	} catch (error) {
 		return NextResponse.json(
-			{ error: err instanceof Error ? err.message : "Erreur interne" },
+			{ error: error instanceof Error ? error.message : "Erreur interne" },
 			{ status: 500 },
 		);
 	}

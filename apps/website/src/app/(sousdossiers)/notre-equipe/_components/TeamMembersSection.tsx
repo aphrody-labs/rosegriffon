@@ -7,20 +7,20 @@ import ImageWithSkeleton from "@/components/shared/ImageWithSkeleton";
 import { Skeleton } from "@rosegriffon/ui";
 import getTeamMembers from "@/lib/get-team-members";
 
-type TeamMember = {
+interface TeamMember {
   name: string;
   role: string;
   image?: string;
   index: number;
-};
+}
 
-type TeamMembersSectionProps = {
+interface TeamMembersSectionProps {
   queryKey: string;
   teamName: string;
   title: string;
   description: string;
   showRole?: boolean;
-};
+}
 
 function TeamMembersSection({
   queryKey,
@@ -30,7 +30,7 @@ function TeamMembersSection({
   showRole = false,
 }: TeamMembersSectionProps) {
   const { data: members, isLoading } = useQuery<TeamMember[]>({
-    queryKey: [queryKey],
+    gcTime: 30 * 60 * 1000, // 30 minutes
     queryFn: async () => {
       const response = await getTeamMembers(teamName);
       return response.map((member) => ({
@@ -40,8 +40,8 @@ function TeamMembersSection({
         image: member.url,
       }));
     },
+    queryKey: [queryKey],
     staleTime: 5 * 60 * 1000, // 5 minutes
-    gcTime: 30 * 60 * 1000, // 30 minutes
   });
 
   const loadingSkeletons = useMemo(
@@ -59,10 +59,10 @@ function TeamMembersSection({
   );
 
   const membersContent = useMemo(() => {
-    if (!members) return null;
+    if (!members) {return null;}
 
     return members
-      .sort((a, b) => a.index - b.index)
+      .toSorted((a, b) => a.index - b.index)
       .map((member: TeamMember, idx: number) => (
         <div
           key={`${member.name}-${idx}`}

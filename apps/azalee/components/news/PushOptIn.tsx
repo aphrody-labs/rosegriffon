@@ -13,21 +13,21 @@ export function PushOptIn() {
   const [isPending, startTransition] = useTransition();
 
   useEffect(() => {
-    if (!user) return;
+    if (!user) {return;}
     const check = async () => {
-      if (!("serviceWorker" in navigator) || !("PushManager" in window)) return;
+      if (!("serviceWorker" in navigator) || !("PushManager" in window)) {return;}
       setSupported(true);
 
       const reg = await navigator.serviceWorker.getRegistration("/sw.js");
       if (reg) {
         const sub = await reg.pushManager.getSubscription();
-        setSubscribed(!!sub);
+        setSubscribed(Boolean(sub));
       }
     };
     check();
   }, [user]);
 
-  if (!user || !supported) return null;
+  if (!user || !supported) {return null;}
 
   const handleToggle = () => {
     startTransition(async () => {
@@ -44,15 +44,15 @@ export function PushOptIn() {
         } else {
           const reg = await navigator.serviceWorker.register("/sw.js");
           const sub = await reg.pushManager.subscribe({
-            userVisibleOnly: true,
             applicationServerKey: process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY,
+            userVisibleOnly: true,
           });
           const json = sub.toJSON();
           await subscribeToPush({
             endpoint: sub.endpoint,
             keys: {
-              p256dh: json.keys?.p256dh || "",
               auth: json.keys?.auth || "",
+              p256dh: json.keys?.p256dh || "",
             },
           });
           setSubscribed(true);

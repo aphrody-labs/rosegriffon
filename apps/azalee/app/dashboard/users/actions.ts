@@ -10,7 +10,7 @@ import { createClient } from "@/lib/supabase/server";
 async function requireAdminSession() {
   const session = await getServerSession();
   if (!session?.user) {
-    return { error: "Non authentifié", session: null, role: null };
+    return { error: "Non authentifié", role: null, session: null };
   }
 
   const supabase = await createClient();
@@ -24,32 +24,32 @@ async function requireAdminSession() {
     !profile ||
     !USER_MANAGEMENT_ROLES.includes(profile.role as (typeof USER_MANAGEMENT_ROLES)[number])
   ) {
-    return { error: "Permissions insuffisantes", session: null, role: null };
+    return { error: "Permissions insuffisantes", role: null, session: null };
   }
 
-  return { error: null, session, role: profile.role as string };
+  return { error: null, role: profile.role as string, session };
 }
 
 export async function changeUserRole(targetUserId: string, newRole: string) {
   const { error: authError, session, role: currentUserRole } = await requireAdminSession();
   if (authError || !session) {
-    return { success: false, error: authError || "Non authentifié" };
+    return { error: authError || "Non authentifié", success: false };
   }
 
   // Validate role value
   const validRoles = ["member", "editor", "moderator", "admin"];
   if (!validRoles.includes(newRole)) {
-    return { success: false, error: "Rôle invalide" };
+    return { error: "Rôle invalide", success: false };
   }
 
   // Prevent self-modification
   if (targetUserId === session.user.id) {
-    return { success: false, error: "Vous ne pouvez pas modifier votre propre rôle" };
+    return { error: "Vous ne pouvez pas modifier votre propre rôle", success: false };
   }
 
   // Only superadmin can promote to admin
   if (newRole === "admin" && currentUserRole !== "superadmin") {
-    return { success: false, error: "Seul un superadmin peut promouvoir au rôle admin" };
+    return { error: "Seul un superadmin peut promouvoir au rôle admin", success: false };
   }
 
   // Check target isn't superadmin
@@ -61,11 +61,11 @@ export async function changeUserRole(targetUserId: string, newRole: string) {
     .single();
 
   if (!targetProfile) {
-    return { success: false, error: "Utilisateur introuvable" };
+    return { error: "Utilisateur introuvable", success: false };
   }
 
   if (targetProfile.role === "superadmin") {
-    return { success: false, error: "Impossible de modifier un superadmin" };
+    return { error: "Impossible de modifier un superadmin", success: false };
   }
 
   // Update role
@@ -76,14 +76,14 @@ export async function changeUserRole(targetUserId: string, newRole: string) {
 
   if (error) {
     console.error("Error changing role:", error);
-    return { success: false, error: "Erreur lors de la modification du rôle" };
+    return { error: "Erreur lors de la modification du rôle", success: false };
   }
 
   await logAudit(session.user.id, "role_change", {
+    newRole,
+    oldRole: targetProfile.role,
     targetUserId,
     targetUsername: targetProfile.username,
-    oldRole: targetProfile.role,
-    newRole,
   });
 
   revalidatePath("/dashboard/users");
@@ -93,12 +93,12 @@ export async function changeUserRole(targetUserId: string, newRole: string) {
 export async function banUser(targetUserId: string) {
   const { error: authError, session } = await requireAdminSession();
   if (authError || !session) {
-    return { success: false, error: authError || "Non authentifié" };
+    return { error: authError || "Non authentifié", success: false };
   }
 
   // Prevent self-ban
   if (targetUserId === session.user.id) {
-    return { success: false, error: "Vous ne pouvez pas vous bannir vous-même" };
+    return { error: "Vous ne pouvez pas vous bannir vous-même", success: false };
   }
 
   // Check target isn't superadmin or admin
@@ -110,11 +110,11 @@ export async function banUser(targetUserId: string) {
     .single();
 
   if (!targetProfile) {
-    return { success: false, error: "Utilisateur introuvable" };
+    return { error: "Utilisateur introuvable", success: false };
   }
 
   if (targetProfile.role === "superadmin" || targetProfile.role === "admin") {
-    return { success: false, error: "Impossible de bannir un administrateur" };
+    return { error: "Impossible de bannir un administrateur", success: false };
   }
 
   // Set role to banned
@@ -125,13 +125,13 @@ export async function banUser(targetUserId: string) {
 
   if (error) {
     console.error("Error banning user:", error);
-    return { success: false, error: "Erreur lors du bannissement" };
+    return { error: "Erreur lors du bannissement", success: false };
   }
 
   await logAudit(session.user.id, "user_ban", {
+    previousRole: targetProfile.role,
     targetUserId,
     targetUsername: targetProfile.username,
-    previousRole: targetProfile.role,
   });
 
   revalidatePath("/dashboard/users");

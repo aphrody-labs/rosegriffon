@@ -118,15 +118,15 @@ export default async function DashboardPage() {
     positionCounts.set(pos, (positionCounts.get(pos) || 0) + 1);
   }
   const positionLabels: Record<string, string> = {
-    GK: "Gardien",
-    FW: "Attaquant",
-    MF: "Milieu",
-    DF: "Défenseur",
     Coach: "Entraîneur",
+    DF: "Défenseur",
+    FW: "Attaquant",
+    GK: "Gardien",
+    MF: "Milieu",
   };
-  const positionStats = Array.from(positionCounts.entries())
-    .map(([pos, count]) => ({ code: pos, label: positionLabels[pos] || pos, count }))
-    .sort((a, b) => b.count - a.count);
+  const positionStats = [...positionCounts.entries()]
+    .map(([pos, count]) => ({ code: pos, count, label: positionLabels[pos] || pos }))
+    .toSorted((a, b) => b.count - a.count);
 
   // Characters by element
   const elementCounts = new Map<string, number>();
@@ -136,22 +136,22 @@ export default async function DashboardPage() {
     elementCounts.set(String(el), (elementCounts.get(String(el)) || 0) + 1);
   }
   const elementLabels: Record<string, { label: string; color: string }> = {
-    "1": { label: "Vent", color: "bg-emerald-500/15 text-emerald-600" },
-    "2": { label: "Forêt", color: "bg-green-500/15 text-green-600" },
-    "3": { label: "Feu", color: "bg-red-500/15 text-red-600" },
-    "4": { label: "Montagne", color: "bg-amber-500/15 text-amber-600" },
-    "0": { label: "Néant", color: "bg-purple-500/15 text-purple-600" },
-    "5": { label: "Néant", color: "bg-purple-500/15 text-purple-600" },
+    "0": { color: "bg-purple-500/15 text-purple-600", label: "Néant" },
+    "1": { color: "bg-emerald-500/15 text-emerald-600", label: "Vent" },
+    "2": { color: "bg-green-500/15 text-green-600", label: "Forêt" },
+    "3": { color: "bg-red-500/15 text-red-600", label: "Feu" },
+    "4": { color: "bg-amber-500/15 text-amber-600", label: "Montagne" },
+    "5": { color: "bg-purple-500/15 text-purple-600", label: "Néant" },
   };
-  const elementStats = Array.from(elementCounts.entries())
+  const elementStats = [...elementCounts.entries()]
     .filter(([el]) => el !== "null" && el !== "undefined")
     .map(([el, count]) => ({
-      id: el,
-      label: elementLabels[el]?.label || `Élément ${el}`,
       color: elementLabels[el]?.color || "bg-stone-500/15 text-stone-600",
       count,
+      id: el,
+      label: elementLabels[el]?.label || `Élément ${el}`,
     }))
-    .sort((a, b) => b.count - a.count);
+    .toSorted((a, b) => b.count - a.count);
 
   // Skills by category
   const skillCatCounts = new Map<string, number>();
@@ -161,17 +161,17 @@ export default async function DashboardPage() {
     skillCatCounts.set(cat, (skillCatCounts.get(cat) || 0) + 1);
   }
   const skillCatLabels: Record<string, string> = {
-    Shoot: "Tir",
-    Dribble: "Dribble",
     Block: "Défense",
     Catch: "Arrêt",
-    Special: "Spécial",
+    Dribble: "Dribble",
     Passive: "Passif",
+    Shoot: "Tir",
+    Special: "Spécial",
     "Stat Boost": "Boost Stats",
   };
-  const skillCatStats = Array.from(skillCatCounts.entries())
-    .map(([cat, count]) => ({ code: cat, label: skillCatLabels[cat] || cat, count }))
-    .sort((a, b) => b.count - a.count);
+  const skillCatStats = [...skillCatCounts.entries()]
+    .map(([cat, count]) => ({ code: cat, count, label: skillCatLabels[cat] || cat }))
+    .toSorted((a, b) => b.count - a.count);
 
   // Skills by element
   const skillElCounts = new Map<string, number>();
@@ -180,15 +180,15 @@ export default async function DashboardPage() {
     const el = row.element || "0";
     skillElCounts.set(String(el), (skillElCounts.get(String(el)) || 0) + 1);
   }
-  const skillElStats = Array.from(skillElCounts.entries())
+  const skillElStats = [...skillElCounts.entries()]
     .filter(([el]) => el !== "null" && el !== "undefined")
     .map(([el, count]) => ({
-      id: el,
-      label: elementLabels[el]?.label || `Élément ${el}`,
       color: elementLabels[el]?.color || "bg-stone-500/15 text-stone-600",
       count,
+      id: el,
+      label: elementLabels[el]?.label || `Élément ${el}`,
     }))
-    .sort((a, b) => b.count - a.count);
+    .toSorted((a, b) => b.count - a.count);
 
   // Fetch author names for recent articles
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -208,109 +208,124 @@ export default async function DashboardPage() {
 
   const quickLinks = [
     {
-      label: "Actualités",
       description: "Gérer les articles et publications",
-      icon: "newspaper",
       href: "/dashboard/news",
+      icon: "newspaper",
+      label: "Actualités",
     },
     {
-      label: "Base de données",
       description: "Explorer les tables Wiki",
-      icon: "database",
       href: "/dashboard/database",
+      icon: "database",
+      label: "Base de données",
     },
     {
-      label: "Utilisateurs",
       description: "Gérer la communauté",
-      icon: "group",
       href: "/dashboard/users",
+      icon: "group",
+      label: "Utilisateurs",
     },
     {
-      label: "Stats articles",
       description: "Vues, tendances et performances",
-      icon: "bar_chart",
       href: "/dashboard/news/stats",
+      icon: "bar_chart",
+      label: "Stats articles",
     },
     {
-      label: "Tweets",
       description: "Gérer le feed Twitter",
-      icon: "tag",
       href: "/dashboard/tweets",
+      icon: "tag",
+      label: "Tweets",
     },
     {
-      label: "Import Google Doc",
       description: "Convertir un document en article",
-      icon: "description",
       href: "/dashboard/import-google-doc",
+      icon: "description",
+      label: "Import Google Doc",
     },
     {
-      label: "Import Tableur",
       description: "Convertir Sheet ou CSV en tableau",
-      icon: "table_chart",
       href: "/dashboard/import-sheet",
+      icon: "table_chart",
+      label: "Import Tableur",
     },
     {
-      label: "Audit Zukan",
       description: "Vérifier les images des personnages",
-      icon: "image_search",
       href: "/dashboard/zukan-review",
+      icon: "image_search",
+      label: "Audit Zukan",
     },
     {
-      label: "Journal d'audit",
       description: "Historique des actions",
-      icon: "history",
       href: "/dashboard/audit",
+      icon: "history",
+      label: "Journal d'audit",
     },
     {
-      label: "Paramètres",
       description: "Configuration du dashboard",
-      icon: "settings",
       href: "/settings",
+      icon: "settings",
+      label: "Paramètres",
     },
   ];
 
   const statusLabel = (status: string) => {
     switch (status) {
-      case "published":
+      case "published": {
         return "Publié";
-      case "draft":
+      }
+      case "draft": {
         return "Brouillon";
-      case "scheduled":
+      }
+      case "scheduled": {
         return "Programmé";
-      case "archived":
+      }
+      case "archived": {
         return "Archivé";
-      default:
+      }
+      default: {
         return status;
+      }
     }
   };
 
   const statusIcon = (status: string) => {
     switch (status) {
-      case "published":
+      case "published": {
         return "check_circle";
-      case "draft":
+      }
+      case "draft": {
         return "edit_note";
-      case "scheduled":
+      }
+      case "scheduled": {
         return "schedule";
-      case "archived":
+      }
+      case "archived": {
         return "archive";
-      default:
+      }
+      default: {
         return "article";
+      }
     }
   };
 
   const statusColors = (status: string) => {
     switch (status) {
-      case "published":
+      case "published": {
         return "bg-tertiary-container/50 text-on-tertiary-container";
-      case "draft":
+      }
+      case "draft": {
         return "bg-primary-container/50 text-on-primary-container";
-      case "scheduled":
+      }
+      case "scheduled": {
         return "bg-blue-100/50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300";
-      case "archived":
+      }
+      case "archived": {
         return "bg-surface-container-high text-on-surface-variant";
-      default:
+      }
+      default: {
         return "bg-surface-container text-on-surface-variant";
+      }
     }
   };
 
@@ -360,28 +375,28 @@ export default async function DashboardPage() {
       <div className="grid gap-3 sm:gap-4 grid-cols-2 sm:grid-cols-4">
         {[
           {
-            label: "Publiés",
-            count: published.count || 0,
-            status: "published",
             color: "bg-green-500/15 text-green-600",
+            count: published.count || 0,
+            label: "Publiés",
+            status: "published",
           },
           {
-            label: "Brouillons",
-            count: drafts.count || 0,
-            status: "draft",
             color: "bg-amber-500/15 text-amber-600",
+            count: drafts.count || 0,
+            label: "Brouillons",
+            status: "draft",
           },
           {
-            label: "Programmés",
-            count: scheduled.count || 0,
-            status: "scheduled",
             color: "bg-blue-500/15 text-blue-600",
+            count: scheduled.count || 0,
+            label: "Programmés",
+            status: "scheduled",
           },
           {
-            label: "Archivés",
-            count: archived.count || 0,
-            status: "archived",
             color: "bg-stone-500/15 text-stone-600",
+            count: archived.count || 0,
+            label: "Archivés",
+            status: "archived",
           },
         ].map((item) => (
           <Link
@@ -547,40 +562,40 @@ export default async function DashboardPage() {
         <div className="grid gap-3 sm:gap-4 grid-cols-2 sm:grid-cols-3 lg:grid-cols-6">
           {[
             {
-              label: "Personnages",
               count: characters.count || 0,
-              icon: "person",
               href: "/dashboard/database/inagle_characters",
+              icon: "person",
+              label: "Personnages",
             },
             {
-              label: "Techniques",
               count: skills.count || 0,
-              icon: "flash_on",
               href: "/dashboard/database/inagle_skills",
+              icon: "flash_on",
+              label: "Techniques",
             },
             {
-              label: "Passifs",
               count: passives.count || 0,
-              icon: "shield",
               href: "/dashboard/database/inagle_passives",
+              icon: "shield",
+              label: "Passifs",
             },
             {
-              label: "Équipes",
               count: teams.count || 0,
-              icon: "groups",
               href: "/dashboard/database/inagle_teams",
+              icon: "groups",
+              label: "Équipes",
             },
             {
-              label: "Objets",
               count: items.count || 0,
-              icon: "inventory_2",
               href: "/dashboard/database/inagle_items",
+              icon: "inventory_2",
+              label: "Objets",
             },
             {
-              label: "Formations",
               count: formations.count || 0,
-              icon: "schema",
               href: "/dashboard/database/inagle_formations",
+              icon: "schema",
+              label: "Formations",
             },
           ].map((item) => (
             <Link

@@ -8,9 +8,9 @@ import { Skeleton } from "@rosegriffon/ui";
 import PartenairesSection from "./PartenairesSection";
 
 export const metadata: Metadata = {
-  title: "Nos Partenaires | Rose Griffon",
   description:
     "Découvrez les partenaires qui contribuent à enrichir l'univers de Rose Griffon. Notre équipe passionnée de créateurs, artistes et producteurs.",
+  title: "Nos Partenaires | Rose Griffon",
 };
 
 export default function CollaborateursPage() {

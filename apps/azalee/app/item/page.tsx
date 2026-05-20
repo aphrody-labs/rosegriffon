@@ -12,7 +12,7 @@ import { wikiService } from "@/lib/wiki-service";
 export async function generateMetadata({
   searchParams,
 }: {
-  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }): Promise<Metadata> {
   const rawParams = await searchParams;
   const { q, category, page } = parseSearchParams(rawParams) as any;
@@ -21,49 +21,49 @@ export async function generateMetadata({
   const categoryLabel = CATEGORIES.find((t) => t.value === activeCategory)?.label || "Équipements";
 
   let title = `${categoryLabel} - Objets`;
-  if (q) title += ` : "${q}"`;
+  if (q) {title += ` : "${q}"`;}
 
-  const pageNum = page ? parseInt(page.toString(), 10) : 1;
-  if (pageNum > 1) title += ` (Page ${pageNum})`;
+  const pageNum = page ? Number.parseInt(page.toString(), 10) : 1;
+  if (pageNum > 1) {title += ` (Page ${pageNum})`;}
 
   return {
-    title: `${title} | Inazuma Eleven Victory Road - Azalée`,
-    description: `Liste complète des ${categoryLabel.toLowerCase()} et objets dans Inazuma Eleven: Victory Road. Localisation, stats et effets.`,
     alternates: {
       canonical: `/item?category=${activeCategory}${page ? `&page=${page}` : ""}`,
     },
+    description: `Liste complète des ${categoryLabel.toLowerCase()} et objets dans Inazuma Eleven: Victory Road. Localisation, stats et effets.`,
+    title: `${title} | Inazuma Eleven Victory Road - Azalée`,
   };
 }
 
 const ITEMS_PER_PAGE = 48;
 
 const CATEGORIES = [
-  { value: "shoes", label: "Chaussures", icon: "steps" },
-  { value: "misanga", label: "Bracelets", icon: "watch" },
-  { value: "accessory", label: "Pendentifs", icon: "diamond" },
-  { value: "kizuna_link", label: "Lien Kizuna", icon: "link" },
-  { value: "consume", label: "Consommables", icon: "lunch_dining" },
-  { value: "special_tactics", label: "Tactiques Sp.", icon: "strategy" },
+  { icon: "steps", label: "Chaussures", value: "shoes" },
+  { icon: "watch", label: "Bracelets", value: "misanga" },
+  { icon: "diamond", label: "Pendentifs", value: "accessory" },
+  { icon: "link", label: "Lien Kizuna", value: "kizuna_link" },
+  { icon: "lunch_dining", label: "Consommables", value: "consume" },
+  { icon: "strategy", label: "Tactiques Sp.", value: "special_tactics" },
 ];
 
 export default async function ItemsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const rawParams = await searchParams;
   const params: any = parseSearchParams(rawParams);
   const { q, page, category } = params;
 
-  const pageNumber = page ? parseInt(page.toString(), 10) : 1;
+  const pageNumber = page ? Number.parseInt(page.toString(), 10) : 1;
   const activeCategory = (category as string) || "shoes";
 
   // Data First: Fetch paginated from DB
   const { data: items, total } = await wikiService.getItemsList({
-    q: q?.toString(),
     category: activeCategory,
-    page: pageNumber,
     limit: ITEMS_PER_PAGE,
+    page: pageNumber,
+    q: q?.toString(),
   });
 
   return (

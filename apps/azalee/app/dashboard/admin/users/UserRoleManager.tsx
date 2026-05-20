@@ -18,10 +18,10 @@ interface UserProfile {
 }
 
 const ROLES = [
-  { value: "member", label: "Membre", icon: UserIcon, color: "text-on-surface-variant" },
-  { value: "moderator", label: "Modérateur", icon: Shield, color: "text-blue-500" },
-  { value: "editor", label: "Éditeur", icon: ShieldCheck, color: "text-green-500" },
-  { value: "admin", label: "Admin", icon: Crown, color: "text-amber-500" },
+  { color: "text-on-surface-variant", icon: UserIcon, label: "Membre", value: "member" },
+  { color: "text-blue-500", icon: Shield, label: "Modérateur", value: "moderator" },
+  { color: "text-green-500", icon: ShieldCheck, label: "Éditeur", value: "editor" },
+  { color: "text-amber-500", icon: Crown, label: "Admin", value: "admin" },
 ] as const;
 
 export function UserRoleManager({ users }: { users: UserProfile[] }) {
@@ -33,7 +33,7 @@ export function UserRoleManager({ users }: { users: UserProfile[] }) {
   const [localUsers, setLocalUsers] = useState(users);
 
   const filtered = localUsers.filter((u) => {
-    if (!search) return true;
+    if (!search) {return true;}
     const q = search.toLowerCase();
     return (
       u.username?.toLowerCase().includes(q) ||
@@ -56,7 +56,7 @@ export function UserRoleManager({ users }: { users: UserProfile[] }) {
           .update({ role: newRole })
           .eq("id", userId);
 
-        if (error) throw error;
+        if (error) {throw error;}
 
         setLocalUsers((prev) => prev.map((u) => (u.id === userId ? { ...u, role: newRole } : u)));
         toast.success(`Rôle mis à jour : ${newRole}`);

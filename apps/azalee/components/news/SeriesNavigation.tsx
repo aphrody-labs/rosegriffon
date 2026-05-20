@@ -25,7 +25,7 @@ interface SeriesNavigationProps {
 
 export function SeriesNavigation({ series, articles, currentIndex }: SeriesNavigationProps) {
   const router = useRouter();
-  const sorted = [...articles].sort((a, b) => (a.series_order ?? 0) - (b.series_order ?? 0));
+  const sorted = [...articles].toSorted((a, b) => (a.series_order ?? 0) - (b.series_order ?? 0));
   const total = sorted.length;
   const prevArticle = currentIndex > 0 ? sorted[currentIndex - 1] : null;
   const nextArticle = currentIndex < total - 1 ? sorted[currentIndex + 1] : null;

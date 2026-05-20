@@ -3,20 +3,21 @@
 import { useState, useTransition } from "react";
 
 import { addToCart } from "@/lib/shop/cart";
-import { formatEuros, type Product } from "@/lib/shop/products";
+import { formatEuros } from '@/lib/shop/products';
+import type { Product } from '@/lib/shop/products';
 import { AddToCart } from "./add-to-cart";
 import { MobileStickyCta } from "./mobile-sticky-cta";
 
 export function VariantPickerWithCta({ product }: { product: Product }) {
 	const variants = product.variants ?? [];
-	const [selected, setSelected] = useState<string | undefined>(undefined);
+	const [selected, setSelected] = useState<string | undefined>();
 	const [, startTransition] = useTransition();
 	const selectedVariant = variants.find((v) => v.id === selected);
 	const displayPrice =
 		selectedVariant?.priceCentsOverride ?? product.priceCents;
 
 	const handleMobileAdd = () => {
-		if (variants.length > 0 && !selected) return;
+		if (variants.length > 0 && !selected) {return;}
 		startTransition(async () => {
 			await addToCart(product.slug, selected, 1);
 		});

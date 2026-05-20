@@ -16,11 +16,11 @@ export default function EdgeSwipeDetector() {
   const isEdgeSwipe = useRef<boolean>(false);
 
   useEffect(() => {
-    if (!isMobile) return;
+    if (!isMobile) {return;}
 
     const handleTouchStart = (e: TouchEvent) => {
       const touch = e.touches[0];
-      if (!touch) return;
+      if (!touch) {return;}
       touchStartX.current = touch.clientX;
       touchStartY.current = touch.clientY;
 
@@ -30,13 +30,13 @@ export default function EdgeSwipeDetector() {
 
     const handleTouchMove = (e: TouchEvent) => {
       const touch = e.touches[0];
-      if (!touch) return;
+      if (!touch) {return;}
       touchEndX.current = touch.clientX;
       touchEndY.current = touch.clientY;
     };
 
     const handleTouchEnd = () => {
-      if (!isEdgeSwipe.current) return;
+      if (!isEdgeSwipe.current) {return;}
 
       const deltaX = touchEndX.current - touchStartX.current;
       const deltaY = touchEndY.current - touchStartY.current;

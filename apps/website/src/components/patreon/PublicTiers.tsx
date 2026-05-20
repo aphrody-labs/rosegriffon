@@ -19,86 +19,86 @@ const PATREON_URL = "https://patreon.com/RoseGriffon";
 
 const FEATURED_TIERS: Tier[] = [
 	{
+		color: "#aac9d9",
+		cta: "Choisir Roy",
+		href: PATREON_URL,
 		key: "roy",
 		name: "𝙽𝚒𝚟𝚎𝚊𝚞 𝚁𝚘𝚢 🌹",
-		priceCents: 250,
-		color: "#aac9d9",
-		tagline: "Premier pas de soutien",
 		perks: [
 			"Rôle Discord dédié Roy",
 			"Mention au générique des chroniques",
 			"Accès aux annonces avant tout le monde",
 		],
-		href: PATREON_URL,
-		cta: "Choisir Roy",
+		priceCents: 250,
+		tagline: "Premier pas de soutien",
 	},
 	{
+		color: "#e54a4a",
+		cta: "Choisir Gaëlle",
+		href: PATREON_URL,
 		key: "gaelle",
 		name: "𝙽𝚒𝚟𝚎𝚊𝚞 𝙶𝚊𝚎𝚕𝚕𝚎 🌹",
-		priceCents: 750,
-		color: "#e54a4a",
-		tagline: "Soutien renforcé",
 		perks: [
 			"Tous les avantages Roy",
 			"Accès aux articles en avant-première",
 			"Vote sur les futurs sujets traités",
 		],
-		href: PATREON_URL,
-		cta: "Choisir Gaëlle",
+		priceCents: 750,
+		tagline: "Soutien renforcé",
 	},
 	{
+		color: "#5fa893",
+		cta: "Choisir Evans",
+		highlight: true,
+		href: PATREON_URL,
 		key: "evans",
 		name: "𝙽𝚒𝚟𝚎𝚊𝚞 𝙴𝚟𝚊𝚗𝚜 🌹",
-		priceCents: 1450,
-		color: "#5fa893",
-		tagline: "Tier-phare · Soutien complet",
+		patrons: 8,
 		perks: [
 			"Tous les avantages Gaëlle",
 			"Pack Personnage trimestriel offert (print A5 + marque-page + sticker + grand badge)",
 			"Salon Discord privé avec l'équipe",
 			"Cartes de licence Roy & Gaëlle exclusives (25 premiers)",
 		],
-		href: PATREON_URL,
-		cta: "Choisir Evans",
-		highlight: true,
-		patrons: 8,
+		priceCents: 1450,
+		tagline: "Tier-phare · Soutien complet",
 	},
 ];
 
 const SIDE_TIERS: Tier[] = [
 	{
+		color: "#5fa893",
+		cta: "Rejoindre Discord",
+		href: "https://discord.gg/8X8eQfBMkt",
 		key: "communaute",
 		name: "Communauté",
-		priceCents: 0,
-		color: "#5fa893",
-		tagline: "Gratuit · Rejoindre la communauté",
 		perks: [
 			"Accès au serveur Discord Rose Griffon",
 			"Newsletter occasionnelle",
 			"Suivi des chroniques et événements",
 		],
-		href: "https://discord.gg/8X8eQfBMkt",
-		cta: "Rejoindre Discord",
+		priceCents: 0,
+		tagline: "Gratuit · Rejoindre la communauté",
 	},
 	{
+		color: "#c9a958",
+		cta: "Devenir grand mécène",
+		href: PATREON_URL,
 		key: "route-victoire",
 		name: "𝚁𝚘𝚞𝚝𝚎 𝚅𝚒𝚌𝚝𝚘𝚒𝚛𝚎 🥀",
-		priceCents: 4900,
-		color: "#c9a958",
-		tagline: "Pour soutenir massivement",
 		perks: [
 			"Avantages identiques à Niveau Evans",
 			"Mention spéciale comme grand mécène",
 			"Réservé à celles et ceux qui veulent aller plus loin",
 		],
-		href: PATREON_URL,
-		cta: "Devenir grand mécène",
+		priceCents: 4900,
+		tagline: "Pour soutenir massivement",
 	},
 ];
 
 function formatPrice(cents: number | null): string {
-	if (cents === null) return "—";
-	if (cents === 0) return "Gratuit";
+	if (cents === null) {return "—";}
+	if (cents === 0) {return "Gratuit";}
 	return `${(cents / 100).toFixed(2).replace(".", ",")} €/mois`;
 }
 
@@ -155,9 +155,9 @@ function TierCard({ tier }: { tier: Tier }) {
 						"inline-flex w-full items-center justify-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold transition hover:scale-[1.02] active:scale-[0.98]",
 						tier.priceCents === 0
 							? "border border-border bg-muted text-foreground hover:bg-muted/70"
-							: tier.highlight
+							: (tier.highlight
 								? "bg-[#c9a958] text-[#0c1730] shadow-md hover:bg-[#dab86a]"
-								: "bg-[#FF424D] text-white hover:bg-[#e63b46]",
+								: "bg-[#FF424D] text-white hover:bg-[#e63b46]"),
 					)}
 				>
 					{tier.cta}

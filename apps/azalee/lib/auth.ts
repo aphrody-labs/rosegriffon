@@ -52,8 +52,8 @@ function createAuth() {
 		].filter(Boolean),
 
 		emailVerification: {
-			sendOnSignUp: true,
 			autoSignInAfterVerification: true,
+			sendOnSignUp: true,
 			sendVerificationEmail: async ({ user, url }) => {
 				void sendEmail({
 					to: user.email,
@@ -93,7 +93,6 @@ function createAuth() {
 
 		emailAndPassword: {
 			enabled: true,
-			requireEmailVerification: false,
 			password: {
 				verify: async ({ hash, password }) => {
 					if (hash.startsWith("$2a$") || hash.startsWith("$2b$")) {
@@ -103,6 +102,7 @@ function createAuth() {
 					return verifyPassword({ hash, password });
 				},
 			},
+			requireEmailVerification: false,
 			sendResetPassword: async ({ user, url }) => {
 				void sendEmail({
 					to: user.email,
@@ -146,22 +146,22 @@ function createAuth() {
 		},
 
 		socialProviders: {
-			google: {
-				clientId: process.env.GOOGLE_CLIENT_ID!,
-				clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
-			},
 			discord: {
 				clientId: process.env.DISCORD_CLIENT_ID!,
 				clientSecret: process.env.DISCORD_CLIENT_SECRET!,
+			},
+			google: {
+				clientId: process.env.GOOGLE_CLIENT_ID!,
+				clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
 			},
 		},
 
 		rateLimit: {
 			...commonAuthOptions.rateLimit,
 			customRules: {
-				"/sign-in/email": { window: 60, max: 10 },
-				"/sign-up/email": { window: 60, max: 5 },
-				"/forget-password": { window: 60, max: 3 },
+				"/forget-password": { max: 3, window: 60 },
+				"/sign-in/email": { max: 10, window: 60 },
+				"/sign-up/email": { max: 5, window: 60 },
 			},
 		},
 
@@ -181,6 +181,53 @@ function createAuth() {
 		},
 
 		databaseHooks: {
+			session: {
+				create: {
+					after: async (session) => {
+						const ip = session.ipAddress || "unknown";
+						const ipInfo = await getIPIntelligence(ip);
+
+						await logAudit(
+							session.userId,
+							"login",
+							{
+								geo: ipInfo
+									? {
+											city: ipInfo.city,
+											country: ipInfo.country,
+											privacy: ipInfo.privacy,
+											org: ipInfo.org,
+										}
+									: undefined,
+							},
+							{ ipAddress: ip },
+						);
+					},
+					before: async (session) => {
+						try {
+							const { data: profile } = await supabaseAdmin
+								.from("profiles")
+								.select("role")
+								.eq("id", session.userId)
+								.maybeSingle();
+
+							if (
+								profile &&
+								ADMIN_ROLES.includes(
+									profile.role as (typeof ADMIN_ROLES)[number],
+								)
+							) {
+								const tenYears = new Date();
+								tenYears.setFullYear(tenYears.getFullYear() + 10);
+								return { data: { ...session, expiresAt: tenYears } };
+							}
+						} catch {
+							// ignore
+						}
+						return { data: session };
+					},
+				},
+			},
 			user: {
 				create: {
 					after: async (user, ctx) => {
@@ -211,53 +258,6 @@ function createAuth() {
 					},
 				},
 			},
-			session: {
-				create: {
-					before: async (session) => {
-						try {
-							const { data: profile } = await supabaseAdmin
-								.from("profiles")
-								.select("role")
-								.eq("id", session.userId)
-								.maybeSingle();
-
-							if (
-								profile &&
-								ADMIN_ROLES.includes(
-									profile.role as (typeof ADMIN_ROLES)[number],
-								)
-							) {
-								const tenYears = new Date();
-								tenYears.setFullYear(tenYears.getFullYear() + 10);
-								return { data: { ...session, expiresAt: tenYears } };
-							}
-						} catch {
-							// ignore
-						}
-						return { data: session };
-					},
-					after: async (session) => {
-						const ip = session.ipAddress || "unknown";
-						const ipInfo = await getIPIntelligence(ip);
-
-						await logAudit(
-							session.userId,
-							"login",
-							{
-								geo: ipInfo
-									? {
-											city: ipInfo.city,
-											country: ipInfo.country,
-											privacy: ipInfo.privacy,
-											org: ipInfo.org,
-										}
-									: undefined,
-							},
-							{ ipAddress: ip },
-						);
-					},
-				},
-			},
 		},
 
 		plugins: [bearer(), nextCookies()],
@@ -269,21 +269,21 @@ type Auth = ReturnType<typeof createAuth>;
 function createAuthMock(): Auth {
 	const noSession = async () => null;
 	return {
+		$ERROR_CODES: {} as never,
+		$context: undefined as never,
 		api: { getSession: noSession },
 		handler: async () => new Response(null, { status: 503 }),
 		options: {} as never,
-		$context: undefined as never,
-		$ERROR_CODES: {} as never,
 	} as unknown as Auth;
 }
 
 let _auth: Auth | null = null;
 try {
 	_auth = createAuth();
-} catch (e) {
+} catch (error) {
 	console.error(
 		"[auth] betterAuth() init failed — falling back to mock:",
-		e instanceof Error ? e.message : String(e),
+		error instanceof Error ? error.message : String(error),
 	);
 	_auth = createAuthMock();
 }

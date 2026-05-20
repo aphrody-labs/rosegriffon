@@ -13,14 +13,14 @@ const SearchBar = React.forwardRef<HTMLDivElement, SearchBarProps>(
     const timerRef = React.useRef<ReturnType<typeof setTimeout>>(null);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-      const value = e.target.value;
-      if (timerRef.current) clearTimeout(timerRef.current);
+      const {value} = e.target;
+      if (timerRef.current) {clearTimeout(timerRef.current);}
       timerRef.current = setTimeout(() => onSearch?.(value), 400);
     };
 
     const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
       if (e.key === "Enter") {
-        if (timerRef.current) clearTimeout(timerRef.current);
+        if (timerRef.current) {clearTimeout(timerRef.current);}
         onSearch?.(e.currentTarget.value);
       }
     };

@@ -8,19 +8,19 @@ import { Skeleton } from "@rosegriffon/ui";
 import { useTeams } from "@/hooks/use-teams";
 
 // Rôle générique inséré par le sync Discord en attendant un libellé précis :
-// on l'affiche en "Membre" pour ne pas exposer le placeholder technique.
+// On l'affiche en "Membre" pour ne pas exposer le placeholder technique.
 const PLACEHOLDER_ROLE = "Staff";
 const PUBLIC_PLACEHOLDER_LABEL = "Membre";
 
 function TeamsSection() {
   const teamConfig: Record<string, string> = {
-    loreteam: "Équipe Lore",
-    dessinateurteam: "Équipe Dessinateur",
-    productionteam: "Équipe Production",
-    socialteam: "Équipe Réseaux",
     achilleateam: "Équipe Achilléa",
     azaleeteam: "Équipe Azalée",
+    dessinateurteam: "Équipe Dessinateur",
+    loreteam: "Équipe Lore",
     mediationteam: "Cellule de Médiation",
+    productionteam: "Équipe Production",
+    socialteam: "Équipe Réseaux",
   };
 
   const { teams, isLoading } = useTeams(teamConfig);

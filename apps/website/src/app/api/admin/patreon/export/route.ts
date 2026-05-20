@@ -11,8 +11,8 @@ export async function POST() {
 	try {
 		const summary = await exportPatreonMembers();
 		return NextResponse.json({ ok: true, summary });
-	} catch (e) {
-		console.error("[admin/patreon/export]", e);
-		return NextResponse.json({ ok: false, error: String(e) }, { status: 500 });
+	} catch (error) {
+		console.error("[admin/patreon/export]", error);
+		return NextResponse.json({ ok: false, error: String(error) }, { status: 500 });
 	}
 }

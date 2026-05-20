@@ -16,7 +16,7 @@ export function useInazumaCharacter(url?: string) {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!url) return;
+    if (!url) {return;}
 
     const fetchData = async () => {
       setLoading(true);
@@ -28,8 +28,8 @@ export function useInazumaCharacter(url?: string) {
         }
         const json = await res.json();
         setData(json);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "An error occurred");
+      } catch (error) {
+        setError(error instanceof Error ? error.message : "An error occurred");
       } finally {
         setLoading(false);
       }
@@ -38,5 +38,5 @@ export function useInazumaCharacter(url?: string) {
     fetchData();
   }, [url]);
 
-  return { data, loading, error };
+  return { data, error, loading };
 }

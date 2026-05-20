@@ -40,32 +40,32 @@ import {
 import { cn } from "@/lib/utils";
 
 const CATEGORY_OPTIONS = [
-	{ value: "_all", label: "Toutes catégories" },
-	{ value: "announcement", label: "Annonce" },
-	{ value: "event", label: "Événement" },
-	{ value: "critique", label: "Critique" },
-	{ value: "community", label: "Communauté" },
+	{ label: "Toutes catégories", value: "_all" },
+	{ label: "Annonce", value: "announcement" },
+	{ label: "Événement", value: "event" },
+	{ label: "Critique", value: "critique" },
+	{ label: "Communauté", value: "community" },
 ];
 
 const SORT_OPTIONS = [
-	{ value: "created_at", label: "Date de création" },
-	{ value: "published_at", label: "Date de publication" },
-	{ value: "updated_at", label: "Dernière modification" },
-	{ value: "view_count", label: "Nombre de vues" },
+	{ label: "Date de création", value: "created_at" },
+	{ label: "Date de publication", value: "published_at" },
+	{ label: "Dernière modification", value: "updated_at" },
+	{ label: "Nombre de vues", value: "view_count" },
 ];
 
 const PERPAGE_OPTIONS = [
-	{ value: "10", label: "10 / page" },
-	{ value: "20", label: "20 / page" },
-	{ value: "50", label: "50 / page" },
+	{ label: "10 / page", value: "10" },
+	{ label: "20 / page", value: "20" },
+	{ label: "50 / page", value: "50" },
 ];
 
 const STATUS_FILTERS = [
-	{ status: "", label: "Tous", icon: "filter_list" as const },
-	{ status: "published", label: "Publiés", icon: "check_circle" as const },
-	{ status: "draft", label: "Brouillons", icon: "edit_note" as const },
-	{ status: "scheduled", label: "Programmés", icon: "schedule" as const },
-	{ status: "archived", label: "Archivés", icon: "archive" as const },
+	{ icon: "filter_list" as const, label: "Tous", status: "" },
+	{ icon: "check_circle" as const, label: "Publiés", status: "published" },
+	{ icon: "edit_note" as const, label: "Brouillons", status: "draft" },
+	{ icon: "schedule" as const, label: "Programmés", status: "scheduled" },
+	{ icon: "archive" as const, label: "Archivés", status: "archived" },
 ];
 
 interface NewsFiltersProps {
@@ -140,7 +140,7 @@ export function NewsFilters({
 
 	const handleSearch = (value: string) => {
 		setSearchValue(value);
-		if (searchTimerRef.current) clearTimeout(searchTimerRef.current);
+		if (searchTimerRef.current) {clearTimeout(searchTimerRef.current);}
 		searchTimerRef.current = setTimeout(() => {
 			pushOverrides({ q: value || null });
 		}, 400);
@@ -334,7 +334,7 @@ export function NewsFilters({
 					<Tooltip>
 						<TooltipTrigger asChild>
 							<Link
-								href={buildHref({ category: null, author: null })}
+								href={buildHref({ author: null, category: null })}
 								className="flex h-8 items-center gap-1 rounded-full border border-error/20 bg-error/10 px-3 font-medium text-error text-xs transition-colors hover:bg-error/20"
 							>
 								<XIcon className="size-3" />

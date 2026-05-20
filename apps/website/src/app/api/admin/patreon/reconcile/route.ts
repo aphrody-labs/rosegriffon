@@ -10,8 +10,8 @@ export async function POST() {
 	try {
 		const summary = await reconcileAll();
 		return NextResponse.json({ ok: true, summary });
-	} catch (e) {
-		console.error("[admin/patreon/reconcile]", e);
-		return NextResponse.json({ ok: false, error: String(e) }, { status: 500 });
+	} catch (error) {
+		console.error("[admin/patreon/reconcile]", error);
+		return NextResponse.json({ ok: false, error: String(error) }, { status: 500 });
 	}
 }

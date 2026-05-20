@@ -1,15 +1,8 @@
 "use client";
 
 import { createClient } from "@supabase/supabase-js";
-import {
-  createContext,
-  type ReactNode,
-  useContext,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { createContext, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import type { ReactNode } from 'react';
 import type { Database } from "@rosegriffon/db";
 
 type SupabaseClient = ReturnType<typeof createClient<Database>>;
@@ -54,7 +47,7 @@ export function SupabaseProvider({
     }
 
     return () => {
-      if (refreshTimer.current) clearInterval(refreshTimer.current);
+      if (refreshTimer.current) {clearInterval(refreshTimer.current);}
     };
   }, [token]); // eslint-disable-line react-hooks/exhaustive-deps
 

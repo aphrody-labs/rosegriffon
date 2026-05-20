@@ -4,11 +4,8 @@ import { Badge } from "@rosegriffon/ui";
 import { Calendar, MapPin, Users } from "lucide-react";
 import Image from "next/image";
 
-import {
-  type DiscordScheduledEvent,
-  getEventStatusColor,
-  getEventStatusLabel,
-} from "../useDiscordEvents";
+import { getEventStatusColor, getEventStatusLabel } from '../useDiscordEvents';
+import type { DiscordScheduledEvent } from '../useDiscordEvents';
 
 interface DiscordEventsListProps {
   events: DiscordScheduledEvent[];
@@ -36,7 +33,7 @@ function DiscordEventsList({ events, isLoading }: DiscordEventsListProps) {
   }
 
   // Trier les événements par date de début
-  const sortedEvents = [...events].sort((a, b) => {
+  const sortedEvents = [...events].toSorted((a, b) => {
     const dateA = new Date(a.scheduledStartTime);
     const dateB = new Date(b.scheduledStartTime);
     return dateA.getTime() - dateB.getTime();
@@ -59,15 +56,13 @@ function DiscordEventCard({ event }: { event: DiscordScheduledEvent }) {
   const startDate = new Date(event.scheduledStartTime);
   const endDate = event.scheduledEndTime ? new Date(event.scheduledEndTime) : null;
 
-  const formatDate = (date: Date) => {
-    return date.toLocaleDateString("fr-FR", {
+  const formatDate = (date: Date) => date.toLocaleDateString("fr-FR", {
       day: "numeric",
       month: "long",
       year: "numeric",
       hour: "2-digit",
       minute: "2-digit",
     });
-  };
 
   return (
     <div className="group relative overflow-hidden rounded-xl border-2 border-purple-500/30 bg-linear-to-br from-purple-50/50 to-blue-50/50 dark:from-purple-950/20 dark:to-blue-950/20 p-6 shadow-lg hover:shadow-xl transition-all duration-300 hover:border-purple-500/60">

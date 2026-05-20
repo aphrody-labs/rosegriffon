@@ -1,6 +1,7 @@
 "use client";
 
-import Image, { type ImageProps } from "next/image";
+import Image from 'next/image';
+import type { ImageProps } from 'next/image';
 import { useEffect, useState } from "react";
 
 interface SafeImageProps extends ImageProps {
@@ -29,7 +30,7 @@ export function SafeImage({ src, zukanHash, alt, fallbackSrc, ...props }: SafeIm
 
     if (nextStage === 1 && zukanHash) {
       // Fallback 1 : essayer le zukan CDN avec .png
-      const cleanHash = zukanHash.startsWith("/") ? zukanHash.substring(1) : zukanHash;
+      const cleanHash = zukanHash.startsWith("/") ? zukanHash.slice(1) : zukanHash;
       setImgSrc(`https://dxi4wb638ujep.cloudfront.net/1/${cleanHash}.png`);
       return;
     }

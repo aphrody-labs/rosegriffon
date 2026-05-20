@@ -28,22 +28,22 @@ export async function generateMetadata({
 }: ProductPageProps): Promise<Metadata> {
 	const { slug } = await params;
 	const product = getProduct(slug);
-	if (!product) return { title: "Produit introuvable · Rose Griffon" };
+	if (!product) {return { title: "Produit introuvable · Rose Griffon" };}
 	return {
-		title: `${product.name} · Boutique Rose Griffon`,
 		description: product.tagline,
 		openGraph: {
-			title: product.name,
 			description: product.tagline,
 			images: [product.image],
+			title: product.name,
 		},
+		title: `${product.name} · Boutique Rose Griffon`,
 	};
 }
 
 export default async function ProductPage({ params }: ProductPageProps) {
 	const { slug } = await params;
 	const product = getProduct(slug);
-	if (!product) notFound();
+	if (!product) {notFound();}
 
 	const gallery = product.gallery ?? [product.image];
 	const related = PRODUCTS.filter(
@@ -53,12 +53,15 @@ export default async function ProductPage({ params }: ProductPageProps) {
 	const stockHintToAvailability = (hint: typeof product.stockHint): string => {
 		switch (hint) {
 			case "low-stock":
-			case "limited":
+			case "limited": {
 				return "https://schema.org/LimitedAvailability";
-			case "preorder":
+			}
+			case "preorder": {
 				return "https://schema.org/PreOrder";
-			default:
+			}
+			default: {
 				return "https://schema.org/InStock";
+			}
 		}
 	};
 
@@ -73,13 +76,12 @@ export default async function ProductPage({ params }: ProductPageProps) {
 	const offersSchema = product.variants
 		? {
 				"@type": "AggregateOffer",
-				priceCurrency: "EUR",
-				lowPrice: Math.min(
+				highPrice: Math.max(
 					...product.variants.map(
 						(v) => (v.priceCentsOverride ?? product.priceCents) / 100,
 					),
 				).toFixed(2),
-				highPrice: Math.max(
+				lowPrice: Math.min(
 					...product.variants.map(
 						(v) => (v.priceCentsOverride ?? product.priceCents) / 100,
 					),
@@ -100,30 +102,31 @@ export default async function ProductPage({ params }: ProductPageProps) {
 						name: "Association Rose Griffon",
 					},
 				})),
+				priceCurrency: "EUR",
 			}
 		: {
 				"@type": "Offer",
-				url: `${baseUrl}/shop/${product.slug}`,
-				priceCurrency: "EUR",
-				price: (product.priceCents / 100).toFixed(2),
 				availability: stockHintToAvailability(product.stockHint),
 				itemCondition: "https://schema.org/NewCondition",
+				price: (product.priceCents / 100).toFixed(2),
+				priceCurrency: "EUR",
 				seller: {
 					"@type": "Organization",
 					name: "Association Rose Griffon",
 				},
+				url: `${baseUrl}/shop/${product.slug}`,
 			};
 
 	const productSchema = {
 		"@context": "https://schema.org/",
 		"@type": "Product",
-		name: product.name,
-		description: product.description,
-		image: allImages,
-		sku: product.slug,
 		brand: { "@type": "Brand", name: "Rose Griffon" },
 		category: CATEGORY_LABELS[product.category],
+		description: product.description,
+		image: allImages,
+		name: product.name,
 		offers: offersSchema,
+		sku: product.slug,
 	};
 
 	const breadcrumbSchema = {
@@ -132,21 +135,21 @@ export default async function ProductPage({ params }: ProductPageProps) {
 		itemListElement: [
 			{
 				"@type": "ListItem",
-				position: 1,
-				name: "Accueil",
 				item: baseUrl,
+				name: "Accueil",
+				position: 1,
 			},
 			{
 				"@type": "ListItem",
-				position: 2,
-				name: "Boutique",
 				item: `${baseUrl}/shop`,
+				name: "Boutique",
+				position: 2,
 			},
 			{
 				"@type": "ListItem",
-				position: 3,
-				name: product.name,
 				item: `${baseUrl}/shop/${product.slug}`,
+				name: product.name,
+				position: 3,
 			},
 		],
 	};

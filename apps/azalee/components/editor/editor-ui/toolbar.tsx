@@ -53,40 +53,51 @@ export function Toolbar() {
 
   const onClick = (command: string) => {
     switch (command) {
-      case "bold":
+      case "bold": {
         activeEditor.dispatchCommand(FORMAT_TEXT_COMMAND, "bold");
         break;
-      case "italic":
+      }
+      case "italic": {
         activeEditor.dispatchCommand(FORMAT_TEXT_COMMAND, "italic");
         break;
-      case "underline":
+      }
+      case "underline": {
         activeEditor.dispatchCommand(FORMAT_TEXT_COMMAND, "underline");
         break;
-      case "strikethrough":
+      }
+      case "strikethrough": {
         activeEditor.dispatchCommand(FORMAT_TEXT_COMMAND, "strikethrough");
         break;
-      case "code":
+      }
+      case "code": {
         activeEditor.dispatchCommand(FORMAT_TEXT_COMMAND, "code");
         break;
-      case "left":
+      }
+      case "left": {
         activeEditor.dispatchCommand(FORMAT_ELEMENT_COMMAND, "left");
         break;
-      case "center":
+      }
+      case "center": {
         activeEditor.dispatchCommand(FORMAT_ELEMENT_COMMAND, "center");
         break;
-      case "right":
+      }
+      case "right": {
         activeEditor.dispatchCommand(FORMAT_ELEMENT_COMMAND, "right");
         break;
-      case "ul":
+      }
+      case "ul": {
         activeEditor.dispatchCommand(INSERT_UNORDERED_LIST_COMMAND, undefined);
         break;
-      case "ol":
+      }
+      case "ol": {
         activeEditor.dispatchCommand(INSERT_ORDERED_LIST_COMMAND, undefined);
         break;
-      case "checklist":
+      }
+      case "checklist": {
         activeEditor.dispatchCommand(INSERT_CHECK_LIST_COMMAND, undefined);
         break;
-      case "link":
+      }
+      case "link": {
         if (!isLink) {
           setLinkUrl("https://");
           setLinkDialogOpen(true);
@@ -94,6 +105,7 @@ export function Toolbar() {
           activeEditor.dispatchCommand(TOGGLE_LINK_COMMAND, null);
         }
         break;
+      }
     }
   };
 

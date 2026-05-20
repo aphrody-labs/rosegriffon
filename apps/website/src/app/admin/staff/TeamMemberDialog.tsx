@@ -11,12 +11,8 @@ import { ResponsiveDialog } from "@rosegriffon/ui";
 
 import { Switch } from "@rosegriffon/ui";
 
-import {
-	createTeamMember,
-	type TeamMember,
-	updateTeamMember,
-	uploadTeamMemberImage,
-} from "./actions";
+import { createTeamMember, updateTeamMember, uploadTeamMemberImage } from './actions';
+import type { TeamMember } from './actions';
 
 interface TeamMemberDialogProps {
 	open: boolean;
@@ -26,16 +22,16 @@ interface TeamMemberDialogProps {
 }
 
 const TEAM_OPTIONS = [
-	{ value: "bureauteam", label: "Bureau de l'Association" },
-	{ value: "assoteam", label: "Membres de l'Association" },
-	{ value: "loreteam", label: "Équipe Lore" },
-	{ value: "dessinateurteam", label: "Équipe Dessinateur" },
-	{ value: "productionteam", label: "Équipe Production" },
-	{ value: "socialteam", label: "Équipe Réseaux" },
-	{ value: "achilleateam", label: "Équipe Achilléa" },
-	{ value: "azaleeteam", label: "Équipe Azalée" },
-	{ value: "mediationteam", label: "Cellule de Médiation" },
-	{ value: "collabteam", label: "Partenaires & Collaborateurs" },
+	{ label: "Bureau de l'Association", value: "bureauteam" },
+	{ label: "Membres de l'Association", value: "assoteam" },
+	{ label: "Équipe Lore", value: "loreteam" },
+	{ label: "Équipe Dessinateur", value: "dessinateurteam" },
+	{ label: "Équipe Production", value: "productionteam" },
+	{ label: "Équipe Réseaux", value: "socialteam" },
+	{ label: "Équipe Achilléa", value: "achilleateam" },
+	{ label: "Équipe Azalée", value: "azaleeteam" },
+	{ label: "Cellule de Médiation", value: "mediationteam" },
+	{ label: "Partenaires & Collaborateurs", value: "collabteam" },
 ];
 
 export function TeamMemberDialog({
@@ -46,14 +42,14 @@ export function TeamMemberDialog({
 }: TeamMemberDialogProps) {
 	const [loading, setLoading] = useState(false);
 	const [formData, setFormData] = useState({
-		team_id: member?.team_id || "",
+		discord_user_id: member?.discord_user_id || "",
+		display_index: member?.display_index?.toString() || "",
+		image_url: member?.image_url || "",
+		is_active: member?.is_active ?? true,
+		member_link: member?.member_link || "",
 		name: member?.name || "",
 		role: member?.role || "",
-		image_url: member?.image_url || "",
-		display_index: member?.display_index?.toString() || "",
-		member_link: member?.member_link || "",
-		discord_user_id: member?.discord_user_id || "",
-		is_active: member?.is_active ?? true,
+		team_id: member?.team_id || "",
 	});
 	const [imageFile, setImageFile] = useState<File | null>(null);
 	const [previewUrl, setPreviewUrl] = useState<string>(member?.image_url || "");
@@ -62,14 +58,14 @@ export function TeamMemberDialog({
 	useEffect(() => {
 		if (open) {
 			setFormData({
-				team_id: member?.team_id || "",
+				discord_user_id: member?.discord_user_id || "",
+				display_index: member?.display_index?.toString() || "",
+				image_url: member?.image_url || "",
+				is_active: member?.is_active ?? true,
+				member_link: member?.member_link || "",
 				name: member?.name || "",
 				role: member?.role || "",
-				image_url: member?.image_url || "",
-				display_index: member?.display_index?.toString() || "",
-				member_link: member?.member_link || "",
-				discord_user_id: member?.discord_user_id || "",
-				is_active: member?.is_active ?? true,
+				team_id: member?.team_id || "",
 			});
 			setPreviewUrl(member?.image_url || "");
 			setImageFile(null);
@@ -119,17 +115,17 @@ export function TeamMemberDialog({
 				formData.team_id;
 
 			const memberData = {
-				team_id: formData.team_id,
-				team_name: teamName,
-				name: formData.name,
-				role: formData.role,
-				image_url: finalImageUrl,
+				discord_user_id: formData.discord_user_id || undefined,
 				display_index: formData.display_index
 					? parseInt(formData.display_index, 10)
 					: undefined,
-				member_link: formData.member_link || undefined,
-				discord_user_id: formData.discord_user_id || undefined,
+				image_url: finalImageUrl,
 				is_active: formData.is_active,
+				member_link: formData.member_link || undefined,
+				name: formData.name,
+				role: formData.role,
+				team_id: formData.team_id,
+				team_name: teamName,
 			};
 
 			if (member) {
@@ -352,7 +348,7 @@ export function TeamMemberDialog({
 						Annuler
 					</Button>
 					<Button type="submit" disabled={loading}>
-						{loading ? "Enregistrement..." : member ? "Mettre à jour" : "Créer"}
+						{loading ? "Enregistrement..." : (member ? "Mettre à jour" : "Créer")}
 					</Button>
 				</div>
 			</form>

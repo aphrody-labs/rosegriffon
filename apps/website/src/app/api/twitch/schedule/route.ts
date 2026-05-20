@@ -63,18 +63,18 @@ export async function GET() {
         const daysStreams = recurringSchedules.filter((s) => s.day_of_week === currentDayOfWeek);
 
         daysStreams.forEach((stream) => {
-          if (!stream.start_time) return;
+          if (!stream.start_time) {return;}
 
           // Combiner la date courante avec l'heure du stream
           const [hours = "0", minutes = "0"] = stream.start_time.split(":");
           const startDate = new Date(currentDate);
-          startDate.setHours(parseInt(hours, 10), parseInt(minutes, 10), 0, 0);
+          startDate.setHours(Number.parseInt(hours, 10), Number.parseInt(minutes, 10), 0, 0);
 
           // Calculer la date de fin (si end_time existe, sinon +2h par défaut)
           const endDate = new Date(startDate);
           if (stream.end_time) {
             const [endHours = "0", endMinutes = "0"] = stream.end_time.split(":");
-            endDate.setHours(parseInt(endHours, 10), parseInt(endMinutes, 10), 0, 0);
+            endDate.setHours(Number.parseInt(endHours, 10), Number.parseInt(endMinutes, 10), 0, 0);
             // Gérer le cas où la fin est le lendemain (ex: 23h -> 01h)
             if (endDate < startDate) {
               endDate.setDate(endDate.getDate() + 1);
@@ -84,11 +84,11 @@ export async function GET() {
           }
 
           segments.push({
+            end_time: endDate.toISOString(),
             id: `recurring-${stream.id}-${i}`,
             start_time: startDate.toISOString(),
-            end_time: endDate.toISOString(),
-            title: stream.category || "Stream RGTV",
             streamer: stream.streamer_name || "Rose Griffon TV",
+            title: stream.category || "Stream RGTV",
             type: "recurring",
           });
         });
@@ -100,18 +100,18 @@ export async function GET() {
       const start = event.start?.dateTime || event.start?.date;
       const end = event.end?.dateTime || event.end?.date;
 
-      if (!start) return;
+      if (!start) {return;}
 
       const startDate = new Date(start);
       const endDate = end ? new Date(end) : new Date(startDate.getTime() + 2 * 60 * 60 * 1000); // +2h par défaut
 
       if (startDate >= now && startDate <= nextWeek) {
         segments.push({
+          end_time: endDate.toISOString(),
           id: event.id || `cal-${Math.random()}`,
           start_time: startDate.toISOString(),
-          end_time: endDate.toISOString(),
-          title: event.summary || "Événement Spécial",
           streamer: "Event Spécial",
+          title: event.summary || "Événement Spécial",
           type: "special",
         });
       }
@@ -120,21 +120,21 @@ export async function GET() {
     // 3.5 Gestion des conflits : Les événements spéciaux (Google Cal) remplacent le planning récurrent
     // On filtre les événements récurrents qui chevauchent un événement spécial
     segments = segments.filter((segment) => {
-      if (segment.type === "special") return true; // On garde toujours les spéciaux
+      if (segment.type === "special") {return true;} // On garde toujours les spéciaux
 
       const segmentStart = new Date(segment.start_time).getTime();
       const segmentEnd = segment.end_time
         ? new Date(segment.end_time).getTime()
-        : segmentStart + 2 * 3600000;
+        : segmentStart + 2 * 3_600_000;
 
       // Chercher un conflit avec un événement spécial
       const hasConflict = segments.some((special) => {
-        if (special.type !== "special") return false;
+        if (special.type !== "special") {return false;}
 
         const specialStart = new Date(special.start_time).getTime();
         const specialEnd = special.end_time
           ? new Date(special.end_time).getTime()
-          : specialStart + 2 * 3600000;
+          : specialStart + 2 * 3_600_000;
 
         // Vérifier le chevauchement
         return segmentStart < specialEnd && segmentEnd > specialStart;
@@ -148,9 +148,9 @@ export async function GET() {
 
     // 5. Retourner la réponse formatée
     const headers = {
-      "Access-Control-Allow-Origin": "*",
-      "Access-Control-Allow-Methods": "GET, OPTIONS",
       "Access-Control-Allow-Headers": "Content-Type, Authorization",
+      "Access-Control-Allow-Methods": "GET, OPTIONS",
+      "Access-Control-Allow-Origin": "*",
     };
 
     return NextResponse.json(
@@ -168,9 +168,9 @@ export async function OPTIONS() {
     {},
     {
       headers: {
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Methods": "GET, OPTIONS",
         "Access-Control-Allow-Headers": "Content-Type, Authorization",
+        "Access-Control-Allow-Methods": "GET, OPTIONS",
+        "Access-Control-Allow-Origin": "*",
       },
     }
   );

@@ -2,9 +2,9 @@ import type { Metadata } from "next";
 import { Card, CardContent, CardHeader, CardTitle } from "@rosegriffon/ui";
 
 export const metadata: Metadata = {
-  title: "Charte d'engagements - Azalée",
   description:
     "Les valeurs et engagements de Rose Griffon : crédit, transparence, inclusion et respect.",
+  title: "Charte d'engagements - Azalée",
 };
 
 export default function CharteEngagementsPage() {

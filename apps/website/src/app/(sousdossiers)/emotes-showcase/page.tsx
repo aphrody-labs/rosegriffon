@@ -17,8 +17,8 @@ import { Separator } from "@rosegriffon/ui";
 import {
   useEmoteHistory,
   useEmoteRotation,
-  useEmotes,
   useEmoteValidation,
+  useEmotes,
 } from "@/hooks/useEmotes";
 import type { EMOTES, Emote } from "@/lib/emotes";
 
@@ -239,7 +239,7 @@ export default function EmotesShowcasePage() {
         {/* Tab: Hooks */}
         <TabsContent value="hooks" className="space-y-6">
           <div className="grid gap-6 md:grid-cols-2">
-            {/* useEmoteRotation */}
+            {/* UseEmoteRotation */}
             <Card>
               <CardHeader>
                 <CardTitle>useEmoteRotation</CardTitle>
@@ -259,7 +259,7 @@ export default function EmotesShowcasePage() {
               </CardContent>
             </Card>
 
-            {/* useEmotes */}
+            {/* UseEmotes */}
             <Card>
               <CardHeader>
                 <CardTitle>useEmotes</CardTitle>

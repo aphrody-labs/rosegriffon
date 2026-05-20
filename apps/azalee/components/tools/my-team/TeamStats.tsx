@@ -4,36 +4,37 @@ import { useMemo } from "react";
 import { CommonSpriteIcon } from "@/components/ui/CommonSpriteIcon";
 import { Icon } from "@/components/ui/Icon";
 import type { SpriteCommonKey } from "@/config/sprites-common";
-import { type Formation, ROLE_COLORS, ROLE_LABELS } from "@/lib/formations";
+import { ROLE_COLORS, ROLE_LABELS } from '@/lib/formations';
+import type { Formation } from '@/lib/formations';
 import type { TeamMember } from "@/lib/team-types";
 import { cn } from "@/lib/utils";
 
 const ELEMENT_SPRITE: Record<string, SpriteCommonKey> = {
   Fire: "fire",
-  Wind: "wind",
   Forest: "forest",
   Mountain: "mountain",
+  Wind: "wind",
 };
 const ELEMENT_COLORS: Record<string, string> = {
   Fire: "#ef4444",
-  Wind: "#22c55e",
   Forest: "#a855f7",
   Mountain: "#f59e0b",
+  Wind: "#22c55e",
 };
 const ELEMENT_LABELS: Record<string, string> = {
   Fire: "Feu",
-  Wind: "Vent",
   Forest: "Forêt",
   Mountain: "Montagne",
+  Wind: "Vent",
 };
 
 const RARITY_ORDER = ["BASARA", "Héros", "Émérite", "Expérimenté", "Normal"];
 const RARITY_COLORS: Record<string, string> = {
   BASARA: "#ec4899",
-  Héros: "#f59e0b",
-  Émérite: "#8b5cf6",
   Expérimenté: "#3b82f6",
+  Héros: "#f59e0b",
   Normal: "#6b7280",
+  Émérite: "#8b5cf6",
 };
 
 interface TeamStatsProps {
@@ -48,38 +49,38 @@ export function TeamStats({ members, formation }: TeamStatsProps) {
   const percent = Math.round((filledSlots / totalSlots) * 100);
 
   const elements = useMemo(() => {
-    const c: Record<string, number> = { Fire: 0, Wind: 0, Forest: 0, Mountain: 0 };
-    for (const m of memberList) if (c[m.element] !== undefined) c[m.element]++;
+    const c: Record<string, number> = { Fire: 0, Forest: 0, Mountain: 0, Wind: 0 };
+    for (const m of memberList) {if (c[m.element] !== undefined) c[m.element]++;}
     return c;
   }, [memberList]);
   const maxElement = Math.max(...Object.values(elements), 1);
 
   const positionCoverage = useMemo(() => {
-    const expected: Record<string, number> = { FW: 0, MF: 0, DF: 0, GK: 0 };
-    for (const p of formation.positions) expected[p.role]++;
-    const filled: Record<string, number> = { FW: 0, MF: 0, DF: 0, GK: 0 };
+    const expected: Record<string, number> = { DF: 0, FW: 0, GK: 0, MF: 0 };
+    for (const p of formation.positions) {expected[p.role]++;}
+    const filled: Record<string, number> = { DF: 0, FW: 0, GK: 0, MF: 0 };
     for (const m of memberList) {
-      if (m.slot.startsWith("field-") && filled[m.position] !== undefined) filled[m.position]++;
+      if (m.slot.startsWith("field-") && filled[m.position] !== undefined) {filled[m.position]++;}
     }
     return Object.entries(expected).map(([role, total]) => ({
+      filled: filled[role] || 0,
       role,
       total,
-      filled: filled[role] || 0,
     }));
   }, [memberList, formation.positions]);
 
   const rarities = useMemo(() => {
     const c: Record<string, number> = {};
-    for (const m of memberList) c[m.rarity] = (c[m.rarity] || 0) + 1;
-    return RARITY_ORDER.filter((r) => c[r]).map((r) => ({ rarity: r, count: c[r] }));
+    for (const m of memberList) {c[m.rarity] = (c[m.rarity] || 0) + 1;}
+    return RARITY_ORDER.filter((r) => c[r]).map((r) => ({ count: c[r], rarity: r }));
   }, [memberList]);
 
   const balance = useMemo(() => {
     const fw = memberList.filter((m) => m.position === "FW").length;
     const df = memberList.filter((m) => m.position === "DF").length;
-    if (fw > df + 1) return { label: "Offensif", icon: "trending_up", color: "text-red-500" };
-    if (df > fw + 1) return { label: "Défensif", icon: "shield", color: "text-blue-500" };
-    return { label: "Équilibré", icon: "balance", color: "text-emerald-500" };
+    if (fw > df + 1) {return { label: "Offensif", icon: "trending_up", color: "text-red-500" };}
+    if (df > fw + 1) {return { label: "Défensif", icon: "shield", color: "text-blue-500" };}
+    return { color: "text-emerald-500", icon: "balance", label: "Équilibré" };
   }, [memberList]);
 
   const circumference = 2 * Math.PI * 36;
@@ -171,7 +172,7 @@ export function TeamStats({ members, formation }: TeamStatsProps) {
                 <div className="flex-1 h-3 rounded-full bg-on-surface/5 overflow-hidden">
                   <div
                     className="h-full rounded-full transition-all duration-500 ease-out"
-                    style={{ width: `${pct}%`, backgroundColor: ELEMENT_COLORS[key] }}
+                    style={{ backgroundColor: ELEMENT_COLORS[key], width: `${pct}%` }}
                   />
                 </div>
                 <span className="text-xs font-bold text-on-surface w-5 text-right">{count}</span>

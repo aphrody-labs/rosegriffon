@@ -5,9 +5,9 @@ import { ADMIN_ROLES } from "@/lib/auth-roles";
 import { createClient } from "@/lib/supabase/server";
 
 export const metadata: Metadata = {
-	title: "Administration | Azalée",
 	description: "Espace de gestion pour l'équipe rédactionnelle.",
-	robots: { index: false, follow: false },
+	robots: { follow: false, index: false },
+	title: "Administration | Azalée",
 };
 
 export default async function DashboardLayout({

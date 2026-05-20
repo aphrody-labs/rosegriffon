@@ -41,12 +41,12 @@ export async function getPatchNotes(
   }
 
   let notes: PatchNoteSummary[] = ((data as any[]) || []).map((item) => ({
+    date: item.date || "",
+    featured_image: item.featured_image,
     id: item.id,
+    platform: Array.isArray(item.platform) ? item.platform : [],
     slug: item.id, // Use ID as slug
     title: item.title_fr || item.title,
-    date: item.date || "",
-    platform: Array.isArray(item.platform) ? item.platform : [],
-    featured_image: item.featured_image,
   }));
 
   // Filtrer par plateforme si spécifié
@@ -79,12 +79,12 @@ export async function getPatchNoteDetail(idOrSlug: string): Promise<PatchNoteDet
 
   const item = data as any;
   return {
+    content_html: item.content_html_fr || item.content_html || "",
+    date: item.date || "",
+    featured_image: item.featured_image,
     id: item.id,
+    platform: Array.isArray(item.platform) ? item.platform : [],
     slug: item.id,
     title: item.title_fr || item.title,
-    date: item.date || "",
-    platform: Array.isArray(item.platform) ? item.platform : [],
-    featured_image: item.featured_image,
-    content_html: item.content_html_fr || item.content_html || "",
   };
 }

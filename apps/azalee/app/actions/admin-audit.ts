@@ -40,19 +40,19 @@ export async function logAuditAction(
   details?: Record<string, unknown>,
 ): Promise<void> {
   const session = await getServerSession();
-  if (!session?.user) throw new Error("Non authentifié");
+  if (!session?.user) {throw new Error("Non authentifié");}
 
   const supabase = await createClient();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const client = supabase as any;
 
   const { error } = await client.from("admin_audit_log").insert({
-    user_id: session.user.id,
     action,
-    entity_type: entityType,
-    entity_id: entityId,
-    details: details ?? null,
     created_at: new Date().toISOString(),
+    details: details ?? null,
+    entity_id: entityId,
+    entity_type: entityType,
+    user_id: session.user.id,
   });
 
   if (error) {
@@ -99,7 +99,7 @@ export async function getAuditLog(options: GetAuditLogOptions = {}): Promise<Aud
     return [];
   }
 
-  if (!data) return [];
+  if (!data) {return [];}
 
   return (
     data as Array<{
@@ -117,12 +117,12 @@ export async function getAuditLog(options: GetAuditLogOptions = {}): Promise<Aud
       } | null;
     }>
   ).map((row) => ({
-    id: row.id,
     action: row.action,
-    entity_type: row.entity_type,
-    entity_id: row.entity_id,
-    details: row.details,
     created_at: row.created_at,
+    details: row.details,
+    entity_id: row.entity_id,
+    entity_type: row.entity_type,
+    id: row.id,
     user: row.profiles ?? null,
   }));
 }
@@ -194,7 +194,7 @@ export async function exportAuditLogCSV(options: ExportAuditLogOptions = {}): Pr
   ];
 
   const escapeCSV = (value: string | null | undefined): string => {
-    if (value === null || value === undefined) return "";
+    if (value === null || value === undefined) {return "";}
     const str = String(value);
     // Encadrer de guillemets si la valeur contient une virgule, un guillemet ou un saut de ligne
     if (str.includes(",") || str.includes('"') || str.includes("\n")) {

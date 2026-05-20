@@ -15,7 +15,7 @@ const VALID_STATUSES = new Set([
 
 export async function POST(req: Request) {
 	const auth = await requireApiPatreonCreator();
-	if (!auth.ok) return auth.response;
+	if (!auth.ok) {return auth.response;}
 
 	let body: { id?: string; status?: string } = {};
 	try {
@@ -42,7 +42,7 @@ export async function POST(req: Request) {
 	if (error) {
 		console.error("[admin/patreon/grandfather]", error);
 		return NextResponse.json(
-			{ error: "update_failed", detail: error.message },
+			{ detail: error.message, error: "update_failed" },
 			{ status: 500 },
 		);
 	}

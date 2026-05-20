@@ -35,8 +35,8 @@ export function PatreonWebhooksCard() {
 			} else {
 				setWebhooks(json.webhooks ?? []);
 			}
-		} catch (e) {
-			setError(e instanceof Error ? e.message : String(e));
+		} catch (error) {
+			setError(error instanceof Error ? error.message : String(error));
 		} finally {
 			setLoading(false);
 		}
@@ -102,7 +102,7 @@ export function PatreonWebhooksCard() {
 													<AlertTriangle className="size-3" />
 													En pause
 												</span>
-											) : failing ? (
+											) : (failing ? (
 												<span className="inline-flex items-center gap-1 rounded-full bg-rose-500/15 px-2 py-0.5 text-xs font-medium text-rose-700 dark:text-rose-300">
 													<AlertTriangle className="size-3" />
 													{w.num_consecutive_times_failed} échecs consécutifs
@@ -112,7 +112,7 @@ export function PatreonWebhooksCard() {
 													<CheckCircle2 className="size-3" />
 													Actif
 												</span>
-											)}
+											))}
 											<code className="truncate text-xs text-muted-foreground">
 												id:{w.id}
 											</code>

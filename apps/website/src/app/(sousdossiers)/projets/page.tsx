@@ -11,55 +11,55 @@ import { PfpIcon } from "@/components/sidebar/atoms/PfpIcon";
 import { ArrowRight, Palette, Smile, Sparkles, Users } from "@/lib/icons-config";
 
 export const metadata: Metadata = {
-  title: "Projets | Rose Griffon",
   description: "Découvrez les outils et initiatives créatives de la communauté Rose Griffon.",
+  title: "Projets | Rose Griffon",
 };
 
 export default function ProjetsPage() {
   const projects = [
     {
-      title: "Avatar RG",
+      badge: "Nouveau",
+      bgColor: "bg-primary/10",
+      color: "text-primary",
       description:
         "Créez votre photo de profil aux couleurs de Rose Griffon. Ajoutez le cadre officiel à votre avatar en quelques clics.",
+      emote: "gaelle-fiere" as const,
       href: "/projets/outils/pfp",
       icon: PfpIcon,
-      emote: "gaelle-fiere" as const,
-      color: "text-primary",
-      bgColor: "bg-primary/10",
-      badge: "Nouveau",
+      title: "Avatar RG",
     },
     {
-      title: "Nostalgie",
+      badge: "Outil Créatif",
+      bgColor: "bg-pink-500/10",
+      color: "text-pink-500",
       description:
         "Créez vos propres compositions Inazuma Eleven avec notre outil de collage avancé. Personnalisez, assemblez et partagez vos créations.",
+      emote: "gaelle-coeur" as const,
       href: "/projets/nostalgie",
       icon: Palette,
-      emote: "gaelle-coeur" as const,
-      color: "text-pink-500",
-      bgColor: "bg-pink-500/10",
-      badge: "Outil Créatif",
+      title: "Nostalgie",
     },
     {
-      title: "Muraux Communautaires",
+      badge: "Galerie",
+      bgColor: "bg-blue-500/10",
+      color: "text-blue-500",
       description:
         "Explorez les galeries collaboratives géantes rassemblant les créations et histoires de la communauté. Un univers étendu par les fans.",
+      emote: "rg-funny" as const,
       href: "/projets/muraux",
       icon: Users,
-      emote: "rg-funny" as const,
-      color: "text-blue-500",
-      bgColor: "bg-blue-500/10",
-      badge: "Galerie",
+      title: "Muraux Communautaires",
     },
     {
-      title: "Galerie d'Emotes",
+      badge: "Ressources",
+      bgColor: "bg-amber-500/10",
+      color: "text-amber-500",
       description:
         "Découvrez la collection complète des emotes officielles Rose Griffon. Gaëlle, Roy et bien plus encore.",
+      emote: "gaelle-surprise" as const,
       href: "/projets/emotes",
       icon: Smile,
-      emote: "gaelle-surprise" as const,
-      color: "text-amber-500",
-      bgColor: "bg-amber-500/10",
-      badge: "Ressources",
+      title: "Galerie d'Emotes",
     },
   ];
 
@@ -67,8 +67,8 @@ export default function ProjetsPage() {
     <div className="space-y-12 pb-12">
       <BreadcrumbSchema
         items={[
-          { name: "Accueil", item: "/" },
-          { name: "Projets", item: "/projets" },
+          { item: "/", name: "Accueil" },
+          { item: "/projets", name: "Projets" },
         ]}
       />
       {/* Hero Section */}

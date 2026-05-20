@@ -14,17 +14,17 @@ import { createLogger } from "@/lib/logger";
 
 const logger = createLogger("PartenairesSection");
 
-type TeamMember = {
+interface TeamMember {
   name: string;
   role: string;
   image?: string;
   index: number;
   link?: string;
-};
+}
 
 export default function PartenairesSection() {
   const { data: collaborateurs, isLoading } = useQuery<TeamMember[]>({
-    queryKey: ["collaborateurs"],
+    gcTime: 30 * 60 * 1000,
     queryFn: async () => {
       const response = await getTeamMembers("collabteam");
       logger.debug("Données des partenaires:", response);
@@ -36,8 +36,8 @@ export default function PartenairesSection() {
         image: member.url,
       }));
     },
+    queryKey: ["collaborateurs"],
     staleTime: 5 * 60 * 1000,
-    gcTime: 30 * 60 * 1000,
   });
 
   const loadingSkeletons = useMemo(
@@ -66,7 +66,7 @@ export default function PartenairesSection() {
     }
 
     return collaborateurs
-      .sort((a, b) => a.index - b.index)
+      .toSorted((a, b) => a.index - b.index)
       .map((member: TeamMember, idx: number) => (
         <div
           key={member.index}

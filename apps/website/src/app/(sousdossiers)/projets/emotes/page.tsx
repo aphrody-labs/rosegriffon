@@ -9,7 +9,8 @@ import { Toaster, toast } from "sonner";
 import RgEmote from "@/components/shared/emotes/RgEmote";
 import { BreadcrumbSchema, ImageObjectSchema } from "@/components/shared/StructuredData";
 
-import { EMOTES, type Emote } from "@/lib/emotes";
+import { EMOTES } from '@/lib/emotes';
+import type { Emote } from '@/lib/emotes';
 import { Copy, Smile } from "@/lib/icons-config";
 
 export default function EmotesPage() {
@@ -87,9 +88,9 @@ export default function EmotesPage() {
     <div className="min-h-screen bg-background pb-12">
       <BreadcrumbSchema
         items={[
-          { name: "Accueil", item: "/" },
-          { name: "Projets", item: "/projets" },
-          { name: "Galerie d'Emotes", item: "/projets/emotes" },
+          { item: "/", name: "Accueil" },
+          { item: "/projets", name: "Projets" },
+          { item: "/projets/emotes", name: "Galerie d'Emotes" },
         ]}
       />
       {Object.values(EMOTES).map((emote) => (

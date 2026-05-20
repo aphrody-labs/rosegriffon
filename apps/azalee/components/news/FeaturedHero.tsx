@@ -11,8 +11,8 @@ import { Badge } from "@rosegriffon/ui";
 
 const CATEGORY_LABELS: Record<string, string> = {
   announcement: "Annonce",
-  event: "Événement",
   community: "Communauté",
+  event: "Événement",
 };
 
 function FeaturedMain({ item }: { item: FeedItem }) {
@@ -98,7 +98,7 @@ function FeaturedSecondary({ item }: { item: FeedItem }) {
 }
 
 export function FeaturedHero({ articles }: { articles: FeedItem[] }) {
-  if (articles.length === 0) return null;
+  if (articles.length === 0) {return null;}
 
   const main = articles[0];
   const secondary = articles.slice(1, 3);

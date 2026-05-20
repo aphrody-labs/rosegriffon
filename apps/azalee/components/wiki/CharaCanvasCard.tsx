@@ -14,7 +14,7 @@ import {
 import useImage from "use-image";
 
 // React 19 / react-konva typings drift: cast each component once to FC<any>
-// to bypass TS2604/TS2786. Runtime behavior is unchanged.
+// To bypass TS2604/TS2786. Runtime behavior is unchanged.
 const Stage = RKStage as unknown as React.FC<any>;
 const Layer = RKLayer as unknown as React.FC<any>;
 const Rect = RKRect as unknown as React.FC<any>;
@@ -32,35 +32,35 @@ const DRAW_SIZE = 256;
 const SPRITE_SRC = "/icon_common.webp";
 
 const ELEMENT_SPRITE: Record<string, { x: number; y: number; width: number; height: number }> = {
-  Fire: { x: 840, y: 1084, width: 64, height: 64 },
-  Wind: { x: 910, y: 1090, width: 60, height: 60 },
-  Forest: { x: 496, y: 1088, width: 64, height: 64 },
-  Mountain: { x: 772, y: 1084, width: 64, height: 64 },
+  Fire: { height: 64, width: 64, x: 840, y: 1084 },
+  Forest: { height: 64, width: 64, x: 496, y: 1088 },
+  Mountain: { height: 64, width: 64, x: 772, y: 1084 },
+  Wind: { height: 60, width: 60, x: 910, y: 1090 },
 };
 
 const PLAYSTYLE_SPRITE: Record<string, { x: number; y: number; width: number; height: number }> = {
-  Justice: { x: 480, y: 144, width: 68, height: 79 },
-  Bond: { x: 484, y: 396, width: 80, height: 69 },
-  Counter: { x: 24, y: 408, width: 76, height: 80 },
-  Breach: { x: 151, y: 408, width: 78, height: 80 },
-  "Rough Play": { x: 752, y: 888, width: 40, height: 64 },
-  Tension: { x: 476, y: 872, width: 48, height: 48 },
+  Bond: { height: 69, width: 80, x: 484, y: 396 },
+  Breach: { height: 80, width: 78, x: 151, y: 408 },
+  Counter: { height: 80, width: 76, x: 24, y: 408 },
+  Justice: { height: 79, width: 68, x: 480, y: 144 },
+  "Rough Play": { height: 64, width: 40, x: 752, y: 888 },
+  Tension: { height: 48, width: 48, x: 476, y: 872 },
 };
 
 /* ── Colors ───────────────────────────────────────────────── */
 
 const POS_COLORS: Record<string, string> = {
-  FW: "rgb(220, 38, 38)",
-  MF: "rgb(16, 185, 129)",
   DF: "rgb(59, 130, 246)",
+  FW: "rgb(220, 38, 38)",
   GK: "rgb(217, 119, 6)",
+  MF: "rgb(16, 185, 129)",
 };
 
 const POS_LABEL: Record<string, string> = {
-  FW: "ATT",
-  MF: "MIL",
   DF: "DEF",
+  FW: "ATT",
   GK: "GAR",
+  MF: "MIL",
 };
 
 /* ── Components ───────────────────────────────────────────── */
@@ -71,7 +71,7 @@ const CharacterLayer = ({ imageUrl }: { imageUrl: string }) => {
   const [image, status] = useImage(imageUrl);
   const [fallback] = useImage(status === "failed" ? FALLBACK_IMAGE : "");
   const displayImage = status === "failed" ? fallback : image;
-  if (!displayImage) return null;
+  if (!displayImage) {return null;}
   return <KonvaImage image={displayImage} x={0} y={0} width={DRAW_SIZE} height={DRAW_SIZE} />;
 };
 
@@ -87,12 +87,12 @@ const BottomGradient = () => (
 );
 
 const RARITY_CANVAS: Record<string, { bg: string; text: string; label: string }> = {
-  BASARA: { bg: "rgb(219, 39, 119)", text: "rgb(255,255,255)", label: "BASARA" },
-  HERO: { bg: "rgb(109, 40, 217)", text: "rgb(196, 181, 253)", label: "HÉROS" },
-  SSR: { bg: "rgb(109, 40, 217)", text: "rgb(196, 181, 253)", label: "HÉROS" },
-  SR: { bg: "rgb(59, 130, 246)", text: "rgb(147, 197, 253)", label: "ÉMÉRITE" },
-  R: { bg: "rgb(6, 182, 212)", text: "rgb(165, 243, 252)", label: "EXPÉRIMENTÉ" },
-  N: { bg: "rgb(34, 197, 94)", text: "rgb(187, 247, 208)", label: "NORMAL" },
+  BASARA: { bg: "rgb(219, 39, 119)", label: "BASARA", text: "rgb(255,255,255)" },
+  HERO: { bg: "rgb(109, 40, 217)", label: "HÉROS", text: "rgb(196, 181, 253)" },
+  N: { bg: "rgb(34, 197, 94)", label: "NORMAL", text: "rgb(187, 247, 208)" },
+  R: { bg: "rgb(6, 182, 212)", label: "EXPÉRIMENTÉ", text: "rgb(165, 243, 252)" },
+  SR: { bg: "rgb(59, 130, 246)", label: "ÉMÉRITE", text: "rgb(147, 197, 253)" },
+  SSR: { bg: "rgb(109, 40, 217)", label: "HÉROS", text: "rgb(196, 181, 253)" },
 };
 
 const RarityBadge = ({ rarityKey }: { rarityKey: string }) => {
@@ -173,13 +173,13 @@ const ElementPositionBadges = ({ element, position }: { element: string; positio
 
 const PlaystyleIcons = ({ playstyles }: { playstyles?: string[] }) => {
   const [spriteSheet] = useImage(SPRITE_SRC);
-  if (!playstyles || playstyles.length === 0 || !spriteSheet) return null;
+  if (!playstyles || playstyles.length === 0 || !spriteSheet) {return null;}
   const iconSize = 20;
   return (
     <Group>
       {playstyles.map((ps, i) => {
         const sprite = PLAYSTYLE_SPRITE[ps];
-        if (!sprite) return null;
+        if (!sprite) {return null;}
         return (
           <KonvaImage
             key={ps}
@@ -205,7 +205,7 @@ const NameBar = ({ name }: { name: string }) => (
       fontStyle="900"
       fill="white"
       fontFamily="system-ui, -apple-system, sans-serif"
-      ellipsis={true}
+      ellipsis
       wrap="none"
       shadowColor="rgba(0,0,0,0.8)"
       shadowBlur={4}
@@ -245,17 +245,17 @@ export function CharaCanvasCard({
 
   const measureRef = useCallback((node: HTMLDivElement | null) => {
     nodeRef.current = node;
-    if (!node) return;
+    if (!node) {return;}
     const w = Math.round(node.getBoundingClientRect().width);
-    if (w > 0) setContainerWidth(w);
+    if (w > 0) {setContainerWidth(w);}
   }, []);
 
   useEffect(() => {
     const node = nodeRef.current;
-    if (!node) return;
+    if (!node) {return;}
     const ro = new ResizeObserver(([entry]) => {
       const w = Math.round(entry.contentRect.width);
-      if (w > 0) setContainerWidth(w);
+      if (w > 0) {setContainerWidth(w);}
     });
     ro.observe(node);
     return () => ro.disconnect();

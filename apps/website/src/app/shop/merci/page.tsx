@@ -29,7 +29,7 @@ export default async function ThankYouPage({ searchParams }: ThankYouProps) {
 			email = session.customer_details?.email ?? null;
 			lineCount = session.line_items?.data.length ?? 0;
 		} catch {
-			// session not found or env var manquante — fallback générique
+			// Session not found or env var manquante — fallback générique
 		}
 	}
 

@@ -31,7 +31,7 @@ export const useNostalgieUpload = () => {
       e.preventDefault();
       setIsDragging(false);
       const file = e.dataTransfer.files[0];
-      if (file) processFile(file);
+      if (file) {processFile(file);}
     },
     [processFile]
   );
@@ -53,7 +53,7 @@ export const useNostalgieUpload = () => {
   const handleFileInput = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       const file = e.target.files?.[0];
-      if (file) processFile(file);
+      if (file) {processFile(file);}
     },
     [processFile]
   );
@@ -68,12 +68,12 @@ export const useNostalgieUpload = () => {
   const handleCloseDialog = useCallback(() => {
     setTempImage(null);
     setShowCropDialog(false);
-    if (inputRef.current) inputRef.current.value = "";
+    if (inputRef.current) {inputRef.current.value = "";}
   }, []);
 
   const handleRemoveImage = useCallback(() => {
     setImage(null);
-    if (inputRef.current) inputRef.current.value = "";
+    if (inputRef.current) {inputRef.current.value = "";}
     toast.info("Image supprimée");
   }, []);
 
@@ -82,23 +82,23 @@ export const useNostalgieUpload = () => {
     setTempImage(null);
     setShowCropDialog(false);
     setIsDragging(false);
-    if (inputRef.current) inputRef.current.value = "";
+    if (inputRef.current) {inputRef.current.value = "";}
   }, []);
 
   return {
-    image,
-    tempImage,
-    showCropDialog,
-    isDragging,
-    inputRef,
-    handleDrop,
+    handleCloseDialog,
+    handleCropComplete,
     handleDragEnter,
     handleDragLeave,
     handleDragOver,
+    handleDrop,
     handleFileInput,
-    handleCropComplete,
-    handleCloseDialog,
     handleRemoveImage,
+    image,
+    inputRef,
+    isDragging,
     reset,
+    showCropDialog,
+    tempImage,
   };
 };

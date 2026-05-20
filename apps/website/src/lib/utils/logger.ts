@@ -7,6 +7,21 @@ const isDev = process.env.NODE_ENV === "development";
 
 export const logger = {
   /**
+   * Debug détaillé (seulement en dev avec flag debug)
+   */
+  debug: (_message: string, ..._args: unknown[]) => {
+    if (isDev && process.env.NEXT_PUBLIC_DEBUG === "true") {
+    }
+  },
+
+  /**
+   * Erreur (toujours affichée)
+   */
+  error: (message: string, ...args: unknown[]) => {
+    console.error(`❌ ${message}`, ...args);
+  },
+
+  /**
    * Log informatif (seulement en dev)
    */
   info: (_message: string, ..._args: unknown[]) => {
@@ -28,21 +43,6 @@ export const logger = {
   warn: (message: string, ...args: unknown[]) => {
     console.warn(`⚠️  ${message}`, ...args);
   },
-
-  /**
-   * Erreur (toujours affichée)
-   */
-  error: (message: string, ...args: unknown[]) => {
-    console.error(`❌ ${message}`, ...args);
-  },
-
-  /**
-   * Debug détaillé (seulement en dev avec flag debug)
-   */
-  debug: (_message: string, ..._args: unknown[]) => {
-    if (isDev && process.env.NEXT_PUBLIC_DEBUG === "true") {
-    }
-  },
 };
 
 /**
@@ -61,11 +61,11 @@ export const realtimeLogger = {
     logger.error(`[Realtime] Erreur sur le canal: ${channelName}`, error);
   },
 
-  reconnecting: (channelName: string, attempt: number) => {
-    logger.info(`[Realtime] Reconnexion au canal: ${channelName} (tentative ${attempt})`);
-  },
-
   event: (channelName: string, eventType: string, payload?: unknown) => {
     logger.debug(`[Realtime] Événement sur ${channelName}: ${eventType}`, payload);
+  },
+
+  reconnecting: (channelName: string, attempt: number) => {
+    logger.info(`[Realtime] Reconnexion au canal: ${channelName} (tentative ${attempt})`);
   },
 };

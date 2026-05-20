@@ -32,19 +32,19 @@ const PROVIDER_META: Record<
 	{ label: string; color: string; description: string }
 > = {
 	discord: {
-		label: "Discord",
 		color: "bg-[#5865F2] hover:bg-[#5865F2]/90",
 		description: "Connexion principale + sync rôles serveur RG.",
-	},
-	twitch: {
-		label: "Twitch",
-		color: "bg-[#9146FF] hover:bg-[#9146FF]/90",
-		description: "Sync follows + abonnements (usage futur).",
+		label: "Discord",
 	},
 	patreon: {
-		label: "Patreon",
 		color: "bg-[#FF424D] hover:bg-[#FF424D]/90",
 		description: "Sync membership + tier + réduction 20% boutique.",
+		label: "Patreon",
+	},
+	twitch: {
+		color: "bg-[#9146FF] hover:bg-[#9146FF]/90",
+		description: "Sync follows + abonnements (usage futur).",
+		label: "Twitch",
 	},
 };
 
@@ -62,16 +62,16 @@ export function ConnectionsSection({
 		setBusy("patreon");
 		try {
 			const res = await authClient.signIn.oauth2({
-				providerId: "patreon",
 				callbackURL: "/dashboard/account?tab=connections",
+				providerId: "patreon",
 			});
 			const err = (res as { error?: { message?: string } | null })?.error;
 			if (err) {
 				toast.error(err.message ?? "Erreur lors du link Patreon");
 				setBusy(null);
 			}
-		} catch (e) {
-			console.error(e);
+		} catch (error) {
+			console.error(error);
 			toast.error("Erreur lors du link Patreon");
 			setBusy(null);
 		}
@@ -81,11 +81,11 @@ export function ConnectionsSection({
 		setBusy("patreon-refresh");
 		try {
 			const res = await fetch("/api/auth/patreon/refresh", { method: "POST" });
-			if (!res.ok) throw new Error(`HTTP ${res.status}`);
+			if (!res.ok) {throw new Error(`HTTP ${res.status}`);}
 			toast.success("Patreon synchronisé");
 			window.location.reload();
-		} catch (e) {
-			console.error(e);
+		} catch (error) {
+			console.error(error);
 			toast.error("Erreur lors de la synchronisation");
 		} finally {
 			setBusy(null);
@@ -99,7 +99,7 @@ export function ConnectionsSection({
 				const res = await fetch("/api/auth/patreon/disconnect", {
 					method: "POST",
 				});
-				if (!res.ok) throw new Error(`HTTP ${res.status}`);
+				if (!res.ok) {throw new Error(`HTTP ${res.status}`);}
 			} else {
 				// Better Auth expose unlinkAccount via le client
 				const ba = authClient as unknown as {
@@ -108,17 +108,17 @@ export function ConnectionsSection({
 					}>;
 				};
 				const res = await ba.unlinkAccount({ providerId: provider });
-				if (res.error) throw new Error(res.error.message);
+				if (res.error) {throw new Error(res.error.message);}
 			}
 			toast.success(
 				`Compte ${PROVIDER_META[provider]?.label ?? provider} dissocié`,
 			);
 			window.location.reload();
-		} catch (e) {
-			console.error(e);
+		} catch (error) {
+			console.error(error);
 			const msg =
-				e instanceof Error
-					? e.message
+				error instanceof Error
+					? error.message
 					: "Impossible de dissocier ce compte (provider principal ?)";
 			toast.error(msg);
 		} finally {
@@ -193,7 +193,7 @@ export function ConnectionsSection({
 										size="sm"
 										onClick={linkPatreon}
 										disabled={busy !== null}
-										className={meta.color + " text-white"}
+										className={`${meta.color  } text-white`}
 									>
 										{busy === "patreon" ? (
 											<Loader2 className="mr-2 size-4 animate-spin" />
@@ -233,7 +233,7 @@ export function ConnectionsSection({
 				})}
 
 				<AlertDialog
-					open={!!confirmUnlink}
+					open={Boolean(confirmUnlink)}
 					onOpenChange={(o) => !o && setConfirmUnlink(null)}
 				>
 					<AlertDialogContent>
@@ -257,7 +257,7 @@ export function ConnectionsSection({
 							<AlertDialogAction
 								onClick={(e) => {
 									e.preventDefault();
-									if (confirmUnlink) unlink(confirmUnlink);
+									if (confirmUnlink) {unlink(confirmUnlink);}
 								}}
 								disabled={busy !== null}
 								className="bg-destructive text-destructive-foreground hover:bg-destructive/90"

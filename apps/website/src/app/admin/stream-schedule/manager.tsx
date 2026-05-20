@@ -11,24 +11,24 @@ import { AdminCard } from "@/components/admin/shared/AdminCard";
 import { Label } from "@rosegriffon/ui";
 
 import type { StreamSchedule } from "@rosegriffon/types";
-import type { Database, Tables, Insert, Update } from "@rosegriffon/db";
+import type { Database, Insert, Tables, Update } from "@rosegriffon/db";
 
 import { addSchedule, deleteSchedule, syncWithGoogleCalendar, updateSchedule } from "./actions";
 
 const DAYS = [
-  { value: "1", label: "Lundi" },
-  { value: "2", label: "Mardi" },
-  { value: "3", label: "Mercredi" },
-  { value: "4", label: "Jeudi" },
-  { value: "5", label: "Vendredi" },
-  { value: "6", label: "Samedi" },
-  { value: "0", label: "Dimanche" },
+  { label: "Lundi", value: "1" },
+  { label: "Mardi", value: "2" },
+  { label: "Mercredi", value: "3" },
+  { label: "Jeudi", value: "4" },
+  { label: "Vendredi", value: "5" },
+  { label: "Samedi", value: "6" },
+  { label: "Dimanche", value: "0" },
 ];
 
 const STATUSES = [
-  { value: "active", label: "Actif" },
-  { value: "inactive", label: "Inactif" },
-  { value: "coming_soon", label: "À venir" },
+  { label: "Actif", value: "active" },
+  { label: "Inactif", value: "inactive" },
+  { label: "À venir", value: "coming_soon" },
 ];
 
 interface StreamScheduleManagerProps {
@@ -42,13 +42,13 @@ export function StreamScheduleManager({ initialSchedules }: StreamScheduleManage
   const [editingId, setEditingId] = useState<string | null>(null);
 
   const [formData, setFormData] = useState({
-    day_of_week: "1",
-    streamer_name: "",
-    start_time: "20:00",
-    end_time: "23:00",
     category: "Gameplay",
-    status: "active" as "active" | "inactive" | "coming_soon",
+    day_of_week: "1",
+    end_time: "23:00",
     notes: "",
+    start_time: "20:00",
+    status: "active" as "active" | "inactive" | "coming_soon",
+    streamer_name: "",
   });
 
   // Update local state when props change
@@ -86,7 +86,7 @@ export function StreamScheduleManager({ initialSchedules }: StreamScheduleManage
       if (editingId) {
         const result = await updateSchedule(editingId, {
           ...formData,
-          day_of_week: parseInt(formData.day_of_week, 10),
+          day_of_week: Number.parseInt(formData.day_of_week, 10),
         });
         if (result.success) {
           toast.success("Horaire mis à jour");
@@ -99,7 +99,7 @@ export function StreamScheduleManager({ initialSchedules }: StreamScheduleManage
       } else {
         const result = await addSchedule({
           ...formData,
-          day_of_week: parseInt(formData.day_of_week, 10),
+          day_of_week: Number.parseInt(formData.day_of_week, 10),
         });
         if (result.success) {
           toast.success("Horaire ajouté");
@@ -116,7 +116,7 @@ export function StreamScheduleManager({ initialSchedules }: StreamScheduleManage
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm("Êtes-vous sûr de vouloir supprimer cet horaire ?")) return;
+    if (!confirm("Êtes-vous sûr de vouloir supprimer cet horaire ?")) {return;}
 
     try {
       const result = await deleteSchedule(id);
@@ -134,26 +134,26 @@ export function StreamScheduleManager({ initialSchedules }: StreamScheduleManage
 
   const handleEdit = (schedule: StreamSchedule) => {
     setFormData({
-      day_of_week: String(schedule.day_of_week),
-      streamer_name: schedule.streamer_name,
-      start_time: schedule.start_time ? schedule.start_time.slice(0, 5) : "20:00",
-      end_time: schedule.end_time ? schedule.end_time.slice(0, 5) : "23:00",
       category: schedule.category || "Gameplay",
-      status: (schedule.status as "active" | "inactive" | "coming_soon") || "active",
+      day_of_week: String(schedule.day_of_week),
+      end_time: schedule.end_time ? schedule.end_time.slice(0, 5) : "23:00",
       notes: schedule.notes || "",
+      start_time: schedule.start_time ? schedule.start_time.slice(0, 5) : "20:00",
+      status: (schedule.status as "active" | "inactive" | "coming_soon") || "active",
+      streamer_name: schedule.streamer_name,
     });
     setEditingId(schedule.id);
   };
 
   const resetForm = () => {
     setFormData({
-      day_of_week: "1",
-      streamer_name: "",
-      start_time: "20:00",
-      end_time: "23:00",
       category: "Gameplay",
-      status: "active",
+      day_of_week: "1",
+      end_time: "23:00",
       notes: "",
+      start_time: "20:00",
+      status: "active",
+      streamer_name: "",
     });
     setEditingId(null);
   };

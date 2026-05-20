@@ -3,8 +3,8 @@ import Link from "next/link";
 import { Button } from "@rosegriffon/ui";
 
 export const metadata: Metadata = {
-  title: "Erreur d'authentification - Azalée",
   robots: { index: false },
+  title: "Erreur d'authentification - Azalée",
 };
 
 export default function AuthCodeError() {

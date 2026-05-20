@@ -13,8 +13,8 @@ import { DiscordIcon, PatreonIcon } from "./_components/social-icons";
 type Provider = "discord" | "patreon";
 
 function safeRedirect(raw: string | null | undefined): string {
-	if (!raw) return "/dashboard";
-	if (!raw.startsWith("/") || raw.startsWith("//")) return "/dashboard";
+	if (!raw) {return "/dashboard";}
+	if (!raw.startsWith("/") || raw.startsWith("//")) {return "/dashboard";}
 	return raw;
 }
 
@@ -31,20 +31,20 @@ export function AuthForm() {
 			const res =
 				provider === "discord"
 					? await authClient.signIn.social({
-							provider: "discord",
 							callbackURL: redirectTo,
+							provider: "discord",
 						})
 					: await authClient.signIn.oauth2({
-							providerId: "patreon",
 							callbackURL: redirectTo,
+							providerId: "patreon",
 						});
 			const err = (res as { error?: { message?: string } | null })?.error;
 			if (err) {
 				setError(err.message ?? `Erreur lors de la connexion ${provider}.`);
 				setLoadingProvider(null);
 			}
-		} catch (e) {
-			console.error(`[auth-form] signIn ${provider}`, e);
+		} catch (error) {
+			console.error(`[auth-form] signIn ${provider}`, error);
 			setError(`Erreur lors de la connexion ${provider}. Réessaie.`);
 			setLoadingProvider(null);
 		}

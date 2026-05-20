@@ -85,19 +85,19 @@ interface Props {
 // ─── Constants ───────────────────────────────────────────────────────────────
 
 const SEVERITY_CONFIG: Record<string, { label: string; color: string; bg: string }> = {
-  critical: { label: "Critique", color: "text-red-400", bg: "bg-red-500/20" },
-  high: { label: "Élevé", color: "text-orange-400", bg: "bg-orange-500/20" },
-  medium: { label: "Moyen", color: "text-yellow-400", bg: "bg-yellow-500/20" },
-  low: { label: "Faible", color: "text-blue-400", bg: "bg-blue-500/20" },
+  critical: { bg: "bg-red-500/20", color: "text-red-400", label: "Critique" },
+  high: { bg: "bg-orange-500/20", color: "text-orange-400", label: "Élevé" },
+  low: { bg: "bg-blue-500/20", color: "text-blue-400", label: "Faible" },
+  medium: { bg: "bg-yellow-500/20", color: "text-yellow-400", label: "Moyen" },
 };
 
 const STAT_LABELS = ["Tir", "Ctrl", "Tech", "Pres", "Phys", "Agi", "Intel"];
 
 const ELEMENT_ICONS: Record<string, string> = {
   Fire: "local_fire_department",
-  Wind: "air",
   Forest: "forest",
   Mountain: "landscape",
+  Wind: "air",
 };
 
 const CLOUDFRONT_BASE = "https://dxi4wb638ujep.cloudfront.net/1/";
@@ -122,9 +122,9 @@ export function ZukanReviewClient({ issues, bySeverity, zukanCatalog, missingCha
   const [resolvedIssues, setResolvedIssues] = useState<Set<string>>(new Set());
 
   const filtered = issues.filter((i) => {
-    if (dismissed.has(i.code + i.hash)) return false;
-    if (resolvedIssues.has(i.code)) return false;
-    if (filter === "all") return true;
+    if (dismissed.has(i.code + i.hash)) {return false;}
+    if (resolvedIssues.has(i.code)) {return false;}
+    if (filter === "all") {return true;}
     return i.severity === filter;
   });
 
@@ -153,7 +153,7 @@ export function ZukanReviewClient({ issues, bySeverity, zukanCatalog, missingCha
         </button>
         {Object.entries(SEVERITY_CONFIG).map(([key, cfg]) => {
           const count = bySeverity[key] || 0;
-          if (count === 0) return null;
+          if (count === 0) {return null;}
           return (
             <button
               key={key}
@@ -459,9 +459,9 @@ function IssueCard({
                           "font-mono",
                           issue.statsCorrelation < 0
                             ? "text-red-400"
-                            : issue.statsCorrelation < 0.5
+                            : (issue.statsCorrelation < 0.5
                               ? "text-yellow-400"
-                              : "text-green-400",
+                              : "text-green-400"),
                         )}
                       >
                         {issue.statsCorrelation.toFixed(2)}
@@ -517,15 +517,15 @@ function CandidatePanel({
   const [gameFilter, setGameFilter] = useState("");
 
   const results = useMemo(() => {
-    if (!search.trim() && !posFilter && !elemFilter && !gameFilter) return [];
+    if (!search.trim() && !posFilter && !elemFilter && !gameFilter) {return [];}
     const q = search.toLowerCase().trim();
     return catalog
       .filter((c) => {
         if (q && !c.name.toLowerCase().includes(q) && !c.nickname.toLowerCase().includes(q))
-          return false;
-        if (posFilter && c.position !== posFilter) return false;
-        if (elemFilter && c.element !== elemFilter) return false;
-        if (gameFilter && c.game !== gameFilter) return false;
+          {return false;}
+        if (posFilter && c.position !== posFilter) {return false;}
+        if (elemFilter && c.element !== elemFilter) {return false;}
+        if (gameFilter && c.game !== gameFilter) {return false;}
         return true;
       })
       .slice(0, 50);
@@ -649,13 +649,13 @@ function CandidatePanel({
             );
           })}
         </div>
-      ) : search.trim() || posFilter || elemFilter || gameFilter ? (
+      ) : (search.trim() || posFilter || elemFilter || gameFilter ? (
         <p className="text-xs text-on-surface-variant py-4 text-center">Aucun résultat</p>
       ) : (
         <p className="text-xs text-on-surface-variant py-4 text-center">
           Tapez un nom pour chercher dans le catalogue
         </p>
-      )}
+      ))}
 
       {results.length >= 50 && (
         <p className="text-[10px] text-on-surface-variant/60 text-center">

@@ -33,9 +33,9 @@ export async function trackReading(articleId: string, progress: number): Promise
 
   const supabase = await createClient();
   await supabase.rpc("upsert_reading_progress", {
-    p_user_id: session.user.id,
     p_article_id: articleId,
     p_progress: progress,
+    p_user_id: session.user.id,
   });
 }
 
@@ -61,21 +61,21 @@ export async function getReadingHistory(limit = 10): Promise<ReadingHistoryEntry
     .order("last_read_at", { ascending: false })
     .limit(limit);
 
-  if (!data) return [];
+  if (!data) {return [];}
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return (data as any[])
     .filter((row) => row.articles !== null)
     .map((row) => ({
       article_id: row.article_id,
-      title: row.articles.title,
-      slug: row.articles.slug,
-      featured_image_url: row.articles.featured_image_url,
-      excerpt: row.articles.excerpt,
       category: row.articles.category,
-      progress: row.progress,
+      excerpt: row.articles.excerpt,
+      featured_image_url: row.articles.featured_image_url,
       last_read_at: row.last_read_at,
+      progress: row.progress,
       read_count: row.read_count,
+      slug: row.articles.slug,
+      title: row.articles.title,
     }));
 }
 
@@ -102,21 +102,21 @@ export async function getContinueReading(limit = 4): Promise<ReadingHistoryEntry
     .order("last_read_at", { ascending: false })
     .limit(limit);
 
-  if (!data) return [];
+  if (!data) {return [];}
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return (data as any[])
     .filter((row) => row.articles !== null)
     .map((row) => ({
       article_id: row.article_id,
-      title: row.articles.title,
-      slug: row.articles.slug,
-      featured_image_url: row.articles.featured_image_url,
-      excerpt: row.articles.excerpt,
       category: row.articles.category,
-      progress: row.progress,
+      excerpt: row.articles.excerpt,
+      featured_image_url: row.articles.featured_image_url,
       last_read_at: row.last_read_at,
+      progress: row.progress,
       read_count: row.read_count,
+      slug: row.articles.slug,
+      title: row.articles.title,
     }));
 }
 
@@ -171,8 +171,8 @@ export async function getReadingStats(): Promise<ReadingStats> {
   }
 
   return {
-    totalRead: totalRead || 0,
-    totalInProgress: totalInProgress || 0,
     streak,
+    totalInProgress: totalInProgress || 0,
+    totalRead: totalRead || 0,
   };
 }

@@ -10,20 +10,20 @@ import { ExternalLink, Info, Users } from "@/lib/icons-config";
 export default function MurauxPage() {
   const murals = [
     {
-      title: "Mural  1",
+      color: "from-[#a14b3f] to-orange-600",
       description:
         "Première galerie collaborative rassemblant des dizaines de créations originales et d'histoires développées autour des personnages inventés par la communauté (OC)",
       href: "https://app.mural.co/t/test07988/m/test07988/1697613494251/021f27cb0d01ff0ef10d8dd9a1d15104bf592c07",
-      color: "from-[#a14b3f] to-orange-600",
       image: "/mural1.webp",
+      title: "Mural  1",
     },
     {
-      title: "Mural  2",
+      color: "from-gaelle-blue to-purple-600",
       description:
         "Deuxième galerie collaborative formant un véritable univers alternatif d'Inazuma Eleven avec des créations de qualité exceptionnelle",
       href: "https://app.mural.co/t/rosegriffon0367/m/rosegriffon0367/1699660105968/d8ed3bf55dc33d4b7bf288fcdbed4bb1ff5bf992",
-      color: "from-gaelle-blue to-purple-600",
       image: "/mural2.webp",
+      title: "Mural  2",
     },
   ];
 
@@ -31,9 +31,9 @@ export default function MurauxPage() {
     <div className="min-h-screen bg-background">
       <BreadcrumbSchema
         items={[
-          { name: "Accueil", item: "/" },
-          { name: "Projets", item: "/projets" },
-          { name: "Muraux Communautaires", item: "/projets/muraux" },
+          { item: "/", name: "Accueil" },
+          { item: "/projets", name: "Projets" },
+          { item: "/projets/muraux", name: "Muraux Communautaires" },
         ]}
       />
       {murals.map((mural, index) => (

@@ -25,18 +25,18 @@ export interface SessionItem {
 }
 
 function detectDevice(ua: string | null): "mobile" | "desktop" {
-	if (!ua) return "desktop";
+	if (!ua) {return "desktop";}
 	return /Mobile|iPhone|iPad|Android/i.test(ua) ? "mobile" : "desktop";
 }
 
 function describeUserAgent(ua: string | null): string {
-	if (!ua) return "Appareil inconnu";
-	if (/iPhone/.test(ua)) return "iPhone";
-	if (/iPad/.test(ua)) return "iPad";
-	if (/Android/.test(ua)) return "Android";
-	if (/Mac OS X/.test(ua)) return "macOS";
-	if (/Windows/.test(ua)) return "Windows";
-	if (/Linux/.test(ua)) return "Linux";
+	if (!ua) {return "Appareil inconnu";}
+	if (/iPhone/.test(ua)) {return "iPhone";}
+	if (/iPad/.test(ua)) {return "iPad";}
+	if (/Android/.test(ua)) {return "Android";}
+	if (/Mac OS X/.test(ua)) {return "macOS";}
+	if (/Windows/.test(ua)) {return "Windows";}
+	if (/Linux/.test(ua)) {return "Linux";}
 	return "Appareil inconnu";
 }
 
@@ -49,8 +49,8 @@ export function SecuritySection({ sessions }: { sessions: SessionItem[] }) {
 			await authClient.revokeSession({ token: sessionId });
 			toast.success("Session révoquée");
 			window.location.reload();
-		} catch (e) {
-			console.error(e);
+		} catch (error) {
+			console.error(error);
 			toast.error("Erreur lors de la révocation");
 		} finally {
 			setBusy(null);
@@ -63,8 +63,8 @@ export function SecuritySection({ sessions }: { sessions: SessionItem[] }) {
 			await authClient.revokeOtherSessions();
 			toast.success("Toutes les autres sessions ont été révoquées");
 			window.location.reload();
-		} catch (e) {
-			console.error(e);
+		} catch (error) {
+			console.error(error);
 			toast.error("Erreur lors de la révocation");
 		} finally {
 			setBusy(null);
@@ -152,8 +152,8 @@ export function SecuritySection({ sessions }: { sessions: SessionItem[] }) {
 										<p className="mt-0.5 text-xs text-muted-foreground">
 											{s.ipAddress ?? "IP inconnue"} · Créée{" "}
 											{formatDistanceToNow(new Date(s.createdAt), {
-												locale: fr,
 												addSuffix: true,
+												locale: fr,
 											})}
 										</p>
 										<p className="text-xs text-muted-foreground">

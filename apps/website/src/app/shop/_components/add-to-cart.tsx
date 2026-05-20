@@ -34,8 +34,8 @@ export function AddToCart({
 				await addToCart(product.slug, variantId, 1);
 				setSuccess(true);
 				setTimeout(() => setSuccess(false), 2000);
-			} catch (err) {
-				setError(err instanceof Error ? err.message : "Erreur panier");
+			} catch (error) {
+				setError(error instanceof Error ? error.message : "Erreur panier");
 			}
 		});
 	};
@@ -55,7 +55,7 @@ export function AddToCart({
 					<Loader2
 						className={`animate-spin ${isLarge ? "size-5" : "size-4"}`}
 					/>
-				) : success ? (
+				) : (success ? (
 					<>
 						<Check className={isLarge ? "size-5" : "size-4"} />
 						<span>Ajouté !</span>
@@ -75,7 +75,7 @@ export function AddToCart({
 									: "Au panier"}
 						</span>
 					</>
-				)}
+				))}
 			</button>
 			{error && (
 				<p className="mt-2 text-xs font-semibold text-[#a14b3f]">{error}</p>

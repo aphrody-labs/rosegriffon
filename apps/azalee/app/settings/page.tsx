@@ -7,8 +7,8 @@ import { createClient } from "@/lib/supabase/server";
 import { SettingsClient } from "./SettingsClient";
 
 export const metadata: Metadata = {
-  title: "Paramètres | Azalée",
   description: "Gère ton compte et tes préférences.",
+  title: "Paramètres | Azalée",
 };
 
 export default async function SettingsPage() {

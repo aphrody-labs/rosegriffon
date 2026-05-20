@@ -19,17 +19,17 @@ import { resolveAssetUrl, resolveAuraTelopUrl } from "@/lib/images";
 // Lazy getter for Supabase to prevent top-level execution during build
 let _supabase: ReturnType<typeof createClient> | null = null;
 function getSupabase() {
-	if (_supabase) return _supabase;
+	if (_supabase) {return _supabase;}
 
 	const url =
 		typeof window === "undefined" &&
 		process.env.SUPABASE_INTERNAL_URL &&
 		process.env.SUPABASE_INTERNAL_URL.startsWith("http")
 			? process.env.SUPABASE_INTERNAL_URL
-			: process.env.NEXT_PUBLIC_SUPABASE_URL &&
+			: (process.env.NEXT_PUBLIC_SUPABASE_URL &&
 					process.env.NEXT_PUBLIC_SUPABASE_URL.startsWith("http")
 				? process.env.NEXT_PUBLIC_SUPABASE_URL
-				: "https://isbkaeltubqittywibeh.supabase.co";
+				: "https://isbkaeltubqittywibeh.supabase.co");
 
 	const key =
 		process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY &&
@@ -53,13 +53,13 @@ function mapToBaseCharacter(row: any): BaseCharacter {
 	const jsonStats = (char.stats as any)?.lv99 || {};
 	const stats: MultiLevelStats = {
 		lv99: {
-			kick: char.stat_frappe || jsonStats.kick || 0,
-			control: char.stat_controle || jsonStats.control || 0,
-			technique: char.stat_technique || jsonStats.technique || 0,
-			pressure: char.stat_pression || jsonStats.pressure || 0,
-			physical: char.stat_physique || jsonStats.physical || 0,
 			agility: char.stat_agilite || jsonStats.agility || 0,
+			control: char.stat_controle || jsonStats.control || 0,
 			intelligence: char.stat_intelligence || jsonStats.intelligence || 0,
+			kick: char.stat_frappe || jsonStats.kick || 0,
+			physical: char.stat_physique || jsonStats.physical || 0,
+			pressure: char.stat_pression || jsonStats.pressure || 0,
+			technique: char.stat_technique || jsonStats.technique || 0,
 		},
 	};
 
@@ -76,42 +76,42 @@ function mapToBaseCharacter(row: any): BaseCharacter {
 
 	const variant: CharacterVariant = {
 		charaParamId: char.id,
-		position: char.position || "MF",
-		positionRaw: 0,
 		element: char.element || "Void",
 		elementRaw: 0,
+		growthPattern: 0,
+		position: char.position || "MF",
+		positionRaw: 0,
 		rarity: char.rarity_label || "Normal",
 		rarityCode: char.rarity || 1,
-		growthPattern: 0,
 		skills: skills,
 		stats,
 		zukanHash,
 	};
 
 	return {
-		charaId: char.internal_code || char.id,
-		internalCode: char.internal_code || char.id,
-		names: {
-			fr: char.name_fr || undefined,
-			en: char.name_en || undefined,
-			ja: char.name_ja || undefined,
-		},
-		gender: char.gender === "F" ? 1 : 0,
-		variants: [variant],
 		bestRarity: char.rarity_label || "Normal",
 		bestRarityCode: char.rarity || 1,
+		charaId: char.internal_code || char.id,
+		gender: char.gender === "F" ? 1 : 0,
+		internalCode: char.internal_code || char.id,
 		isBasara: false, // simplified, real logic in data
-		zukanHash: zukanHash,
+		names: {
+			en: char.name_en || undefined,
+			fr: char.name_fr || undefined,
+			ja: char.name_ja || undefined,
+		},
 		slug: char.slug || undefined,
 		teamId: char.team_id,
 		teamName: undefined, // could be fetched if needed
+		variants: [variant],
+		zukanHash: zukanHash,
 	};
 }
 
 // --- Generic Fetcher ---
 async function fetchTable<T>(table: string): Promise<T[]> {
 	const { data, error } = await getSupabase().from(table).select("*");
-	if (error) return [];
+	if (error) {return [];}
 	return (data || []) as T[];
 }
 
@@ -133,8 +133,8 @@ const getRawCharacters = unstable_cache(
 				finished = true;
 			} else {
 				allData = allData.concat(data as InagleCharacter[]);
-				if (data.length < batchSize) finished = true;
-				else from += batchSize;
+				if (data.length < batchSize) {finished = true;}
+				else {from += batchSize;}
 			}
 		}
 		return allData;
@@ -149,20 +149,18 @@ const getCharacters = async (): Promise<BaseCharacter[]> => {
 };
 
 const getItems = unstable_cache(
-	async (): Promise<InagleItem[]> => {
-		return fetchTable<InagleItem>("inagle_items");
-	},
+	async (): Promise<InagleItem[]> => fetchTable<InagleItem>("inagle_items"),
 	["all-items"],
 	{ revalidate: CACHE_TTL, tags: ["items"] },
 );
 
 // Map raw aura DB row → EnrichedAuraSkill format
 const ELEMENT_NAMES: Record<number, { en: string; ja: string; fr: string }> = {
-	0: { ja: "なし", en: "Void", fr: "Néant" },
-	1: { ja: "風", en: "Wind", fr: "Vent" },
-	2: { ja: "林", en: "Forest", fr: "Forêt" },
-	3: { ja: "火", en: "Fire", fr: "Feu" },
-	4: { ja: "山", en: "Mountain", fr: "Montagne" },
+	0: { en: "Void", fr: "Néant", ja: "なし" },
+	1: { en: "Wind", fr: "Vent", ja: "風" },
+	2: { en: "Forest", fr: "Forêt", ja: "林" },
+	3: { en: "Fire", fr: "Feu", ja: "火" },
+	4: { en: "Mountain", fr: "Montagne", ja: "山" },
 };
 
 function mapAuraRow(row: any): any {
@@ -170,8 +168,13 @@ function mapAuraRow(row: any): any {
 		ELEMENT_NAMES[row.element_id as number] || ELEMENT_NAMES[0];
 	const sd = row.sheet_data || {};
 	return {
+		_file: "inagle_auras",
+		_source: "supabase",
+		assetCode: row.asset_code || sd.assetCode,
 		auraId: row.id,
 		auraIdStr: row.id,
+		desc_FR: row.description_fr || sd.desc_FR,
+		desc_JA: row.description_ja || sd.desc_JA,
 		displayName:
 			row.name_fr ||
 			row.name_en ||
@@ -179,11 +182,6 @@ function mapAuraRow(row: any): any {
 			sd.name_FR ||
 			sd.name_EN ||
 			"Inconnu",
-		name_FR: row.name_fr || sd.name_FR,
-		name_EN: row.name_en || sd.name_EN,
-		name_JA: row.name_ja || sd.name_JA,
-		desc_FR: row.description_fr || sd.desc_FR,
-		desc_JA: row.description_ja || sd.desc_JA,
 		element: row.element_id,
 		elementName: elementInfo,
 		image:
@@ -191,11 +189,11 @@ function mapAuraRow(row: any): any {
 			resolveAssetUrl(row.image_url) ||
 			sd.image ||
 			row.image_url,
-		assetCode: row.asset_code || sd.assetCode,
-		subType: row.sub_type || sd.subType || "Aura",
+		name_EN: row.name_en || sd.name_EN,
+		name_FR: row.name_fr || sd.name_FR,
+		name_JA: row.name_ja || sd.name_JA,
 		sheetData: normalizeAuraSheetData(row.sheet_data),
-		_source: "supabase",
-		_file: "inagle_auras",
+		subType: row.sub_type || sd.subType || "Aura",
 	};
 }
 
@@ -206,16 +204,16 @@ function mapAuraRow(row: any): any {
  * Fusionne le nested sheetData au top-level pour que AuraDetail puisse lire uniformément.
  */
 function normalizeAuraSheetData(sd: any): any {
-	if (!sd) return null;
+	if (!sd) {return null;}
 	const nested = sd.sheetData;
-	if (!nested || nested === "null") return sd;
+	if (!nested || nested === "null") {return sd;}
 	// Merge: nested community data takes priority, then top-level
 	return {
 		...sd,
-		passiveEffect: sd.passiveEffect || nested.passiveEffect,
-		hissatsu: sd.hissatsu || nested.hissatsu,
 		buff: sd.buff || nested.buff,
+		hissatsu: sd.hissatsu || nested.hissatsu,
 		matchedName: sd.matchedName || nested.matchedName,
+		passiveEffect: sd.passiveEffect || nested.passiveEffect,
 	};
 }
 
@@ -258,8 +256,8 @@ const getAuras = unstable_cache(
 			if (skills) {
 				for (const s of skills) {
 					skillVideoMap.set(s.id, {
-						video_url: s.video_url,
 						internal_code: s.internal_code,
+						video_url: s.video_url,
 					});
 				}
 			}
@@ -281,9 +279,7 @@ const getAuras = unstable_cache(
 );
 
 const getHissatsu = unstable_cache(
-	async (): Promise<InagleHissatsu[]> => {
-		return fetchTable<InagleHissatsu>("inagle_hissatsu");
-	},
+	async (): Promise<InagleHissatsu[]> => fetchTable<InagleHissatsu>("inagle_hissatsu"),
 	["all-hissatsu"],
 	{ revalidate: CACHE_TTL, tags: ["hissatsu"] },
 );
@@ -293,22 +289,22 @@ const getSkills = async (): Promise<Skill[]> => {
 	return hissatsu.map(
 		(h) =>
 			({
-				skillId: h.id?.toString() || "0",
+				categoryName: { en: h.type || undefined, fr: h.type || undefined },
+				displayName: h.name || "Inconnu",
+				element: 0,
+				elementName: { en: h.element || undefined, fr: h.element || undefined },
+				name_EN: h.name || "Inconnu",
+				name_FR: h.name || "Inconnu",
+				name_JA: h.name_jp || undefined,
 				names: {
-					fr: h.name || undefined,
 					en: h.name || undefined,
+					fr: h.name || undefined,
 					ja: h.name_jp || undefined,
 				},
-				displayName: h.name || "Inconnu",
-				name_FR: h.name || "Inconnu",
-				name_EN: h.name || "Inconnu",
-				name_JA: h.name_jp || undefined,
-				type: 1,
-				element: 0,
 				power: h.power,
+				skillId: h.id?.toString() || "0",
 				tpCost: h.tension,
-				categoryName: { fr: h.type || undefined, en: h.type || undefined },
-				elementName: { fr: h.element || undefined, en: h.element || undefined },
+				type: 1,
 			}) as any,
 	);
 };
@@ -326,66 +322,66 @@ function mapPassiveRow(row: any): any {
 	}
 	// Fallback: map flat columns
 	const scopeMap: Record<string, string> = {
-		Équipe: "team",
-		team: "team",
-		Joueur: "player",
-		player: "player",
 		Adversaire: "enemy",
-		enemy: "enemy",
 		Inconnu: "unknown",
+		Joueur: "player",
+		enemy: "enemy",
+		player: "player",
+		team: "team",
 		unknown: "unknown",
+		Équipe: "team",
 	};
 	const boostTypeMap: Record<string, string> = {
-		Tir: "shoot",
-		shoot: "shoot",
-		Dribble: "dribble",
-		dribble: "dribble",
-		Attaque: "attack",
-		attack: "attack",
-		Brèche: "breach",
-		breach: "breach",
-		Tension: "tension",
-		tension: "tension",
 		Affrontement: "confrontation",
-		confrontation: "confrontation",
-		Défense: "defense",
-		defense: "defense",
 		Arrêt: "catch",
-		block: "block",
-		catch: "catch",
-		Récupération: "recovery",
-		recovery: "recovery",
-		Vitesse: "speed",
-		speed: "speed",
-		Mixte: "mixed",
-		mixed: "mixed",
-		Spécial: "special",
-		special: "special",
+		Attaque: "attack",
+		Brèche: "breach",
+		Dribble: "dribble",
+		Défense: "defense",
 		Inconnu: "unknown",
+		Mixte: "mixed",
+		Récupération: "recovery",
+		Spécial: "special",
+		Tension: "tension",
+		Tir: "shoot",
+		Vitesse: "speed",
+		attack: "attack",
+		block: "block",
+		breach: "breach",
+		catch: "catch",
+		confrontation: "confrontation",
+		defense: "defense",
+		dribble: "dribble",
+		mixed: "mixed",
+		recovery: "recovery",
+		shoot: "shoot",
+		special: "special",
+		speed: "speed",
+		tension: "tension",
 		unknown: "unknown",
 	};
 	const scope = scopeMap[row.category] || "unknown";
 	const boostType = boostTypeMap[row.boost_type] || "unknown";
 	return {
-		passiveId: row.id,
-		displayName: row.name_fr || "Inconnu",
-		name_FR: row.name_fr,
-		name_JA: row.name_ja,
-		desc_FR: row.description_fr,
-		scope,
+		_file: "inagle_passives",
+		_source: "supabase",
 		boostType,
-		scopeName: {
-			en: scope.charAt(0).toUpperCase() + scope.slice(1),
-			fr: row.category || "Inconnu",
-		},
 		boostTypeName: {
 			en: boostType.charAt(0).toUpperCase() + boostType.slice(1),
 			fr: row.boost_type || "Inconnu",
 		},
-		rarity: row.effect_value ? Number(row.effect_value) : 0,
+		desc_FR: row.description_fr,
+		displayName: row.name_fr || "Inconnu",
 		effectValue: row.effect_value ? Number(row.effect_value) : undefined,
-		_source: "supabase",
-		_file: "inagle_passives",
+		name_FR: row.name_fr,
+		name_JA: row.name_ja,
+		passiveId: row.id,
+		rarity: row.effect_value ? Number(row.effect_value) : 0,
+		scope,
+		scopeName: {
+			en: scope.charAt(0).toUpperCase() + scope.slice(1),
+			fr: row.category || "Inconnu",
+		},
 	};
 }
 
@@ -427,20 +423,20 @@ export const apiClient = {
 				.filter((c) => c.names.fr?.toLowerCase().includes(q))
 				.slice(0, limit)
 				.map((c) => ({
-					type: "character",
 					id: c.charaId,
+					image: undefined,
 					name: c.names.fr,
 					slug: c.slug,
-					image: undefined,
+					type: "character",
 				}));
 			const itemResults = items
 				.filter((i) => i.name.toLowerCase().includes(q))
 				.slice(0, limit)
 				.map((i) => ({
-					type: "item",
 					id: i.name,
-					name: i.name,
 					image: undefined,
+					name: i.name,
+					type: "item",
 				}));
 			return [...charResults, ...itemResults].slice(0, limit);
 		},

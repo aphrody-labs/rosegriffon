@@ -1,6 +1,6 @@
 import { createAdminClient } from "@/lib/supabase/server";
 
-import type { RgSubscriptionStatus, ResolutionMethod } from "./types";
+import type { ResolutionMethod, RgSubscriptionStatus } from "./types";
 
 const STATUS_REACTIVATED: RgSubscriptionStatus = "reactivated";
 
@@ -23,22 +23,22 @@ export async function reconcileLegacyMember(
 	method: ResolutionMethod,
 ): Promise<ReconcileResult> {
 	const supabase = createAdminClient();
-	if (!supabase) throw new Error("no admin supabase client");
+	if (!supabase) {throw new Error("no admin supabase client");}
 	const { error } = await supabase
 		.from("patreon_legacy_members")
 		.update({
-			resolved_user_id: userId,
-			resolved_at: new Date().toISOString(),
 			resolution_method: method,
+			resolved_at: new Date().toISOString(),
+			resolved_user_id: userId,
 		})
 		.eq("patreon_member_id", patreonMemberId);
-	if (error) throw error;
-	return { method, memberId: patreonMemberId, userId };
+	if (error) {throw error;}
+	return { memberId: patreonMemberId, method, userId };
 }
 
 export async function reconcileAll(): Promise<ReconcileSummary> {
 	const supabase = createAdminClient();
-	if (!supabase) throw new Error("no admin supabase client");
+	if (!supabase) {throw new Error("no admin supabase client");}
 
 	let byEmail = 0;
 	let byDiscord = 0;
@@ -47,7 +47,7 @@ export async function reconcileAll(): Promise<ReconcileSummary> {
 		.from("patreon_legacy_members")
 		.select("patreon_member_id,email,discord_user_id")
 		.is("resolved_user_id", null);
-	if (pendingErr) throw pendingErr;
+	if (pendingErr) {throw pendingErr;}
 
 	for (const row of pending ?? []) {
 		const { patreon_member_id, email, discord_user_id } = row as {
@@ -102,10 +102,10 @@ export async function reconcileAll(): Promise<ReconcileSummary> {
 		.is("resolved_user_id", null);
 
 	return {
-		byEmail,
 		byDiscord,
-		totalLegacy: totalLegacy ?? 0,
+		byEmail,
 		stillPending: stillPending ?? 0,
+		totalLegacy: totalLegacy ?? 0,
 	};
 }
 
@@ -114,13 +114,13 @@ export async function markReactivated(
 	subscriptionRef?: string,
 ): Promise<number> {
 	const supabase = createAdminClient();
-	if (!supabase) return 0;
+	if (!supabase) {return 0;}
 	const { data, error } = await supabase
 		.from("patreon_legacy_members")
 		.update({
-			rg_subscription_status: STATUS_REACTIVATED,
-			rg_subscription_ref: subscriptionRef ?? null,
 			reactivated_at: new Date().toISOString(),
+			rg_subscription_ref: subscriptionRef ?? null,
+			rg_subscription_status: STATUS_REACTIVATED,
 		})
 		.eq("resolved_user_id", userId)
 		.neq("rg_subscription_status", STATUS_REACTIVATED)

@@ -48,7 +48,7 @@ export function ImportDocForm() {
   };
 
   const handleFolderImport = async () => {
-    if (!confirm("Voulez-vous importer tous les documents du dossier Drive configuré ?")) return;
+    if (!confirm("Voulez-vous importer tous les documents du dossier Drive configuré ?")) {return;}
 
     setLoading(true);
     try {

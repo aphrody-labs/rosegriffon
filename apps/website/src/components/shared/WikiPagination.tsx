@@ -23,7 +23,7 @@ export function WikiPagination({ totalItems, itemsPerPage, currentPage }: WikiPa
   const searchParams = useSearchParams();
   const totalPages = Math.ceil(totalItems / itemsPerPage);
 
-  if (totalPages <= 1) return null;
+  if (totalPages <= 1) {return null;}
 
   const createPageUrl = (pageNumber: number) => {
     const params = new URLSearchParams(searchParams.toString());
@@ -39,14 +39,14 @@ export function WikiPagination({ totalItems, itemsPerPage, currentPage }: WikiPa
     }
 
     pages.push(1);
-    if (currentPage > 3) pages.push("ellipsis");
+    if (currentPage > 3) {pages.push("ellipsis");}
 
     const start = Math.max(2, currentPage - 1);
     const end = Math.min(totalPages - 1, currentPage + 1);
-    for (let i = start; i <= end; i++) pages.push(i);
+    for (let i = start; i <= end; i++) {pages.push(i);}
 
-    if (currentPage < totalPages - 2) pages.push("ellipsis");
-    if (totalPages > 1) pages.push(totalPages);
+    if (currentPage < totalPages - 2) {pages.push("ellipsis");}
+    if (totalPages > 1) {pages.push(totalPages);}
 
     return pages;
   };

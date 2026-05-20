@@ -22,28 +22,28 @@ export function MigrationChart({
 
 	const segments = [
 		{
-			label: "Réactivés",
-			value: reactivated,
 			color: "#5fa893",
+			label: "Réactivés",
 			pct: (reactivated / total) * 100,
+			value: reactivated,
 		},
 		{
-			label: "Grandfathered",
-			value: grandfathered,
 			color: "#aac9d9",
+			label: "Grandfathered",
 			pct: (grandfathered / total) * 100,
+			value: grandfathered,
 		},
 		{
-			label: "En attente",
-			value: pending,
 			color: "#c9a958",
+			label: "En attente",
 			pct: (pending / total) * 100,
+			value: pending,
 		},
 		{
-			label: "Churn",
-			value: churned,
 			color: "#e54a4a",
+			label: "Churn",
 			pct: (churned / total) * 100,
+			value: churned,
 		},
 	].filter((s) => s.value > 0);
 
@@ -54,7 +54,7 @@ export function MigrationChart({
 					<div
 						key={s.label}
 						className="h-full transition-all"
-						style={{ width: `${s.pct}%`, backgroundColor: s.color }}
+						style={{ backgroundColor: s.color, width: `${s.pct}%` }}
 						title={`${s.label}: ${s.value} (${s.pct.toFixed(1)}%)`}
 					/>
 				))}

@@ -16,7 +16,7 @@ export function useProfileBroadcast(
   const channelRef = useRef<RealtimeChannel | null>(null);
 
   useEffect(() => {
-    if (!userId) return;
+    if (!userId) {return;}
 
     const supabase = createClient();
     const channel = supabase.channel(`profiles:${userId}`, {
@@ -28,15 +28,15 @@ export function useProfileBroadcast(
         "postgres_changes",
         {
           event: "*",
+          filter: `id=eq.${userId}`,
           schema: "public",
           table: "profiles",
-          filter: `id=eq.${userId}`,
         },
         (payload) => {
           const event: BroadcastProfileEvent = {
-            type: payload.eventType as "INSERT" | "UPDATE" | "DELETE",
             new: payload.new,
             old: payload.old,
+            type: payload.eventType as "INSERT" | "UPDATE" | "DELETE",
           };
           onProfileUpdate?.(event);
         }

@@ -16,12 +16,12 @@ export function SkillVideoActions({ videoUrl, skillName }: SkillVideoActionsProp
     if (typeof navigator !== "undefined" && navigator.share) {
       try {
         await navigator.share({
-          title: skillName,
           text: `Découvre la technique ${skillName} sur Azalée !`,
+          title: skillName,
           url: window.location.href,
         });
-      } catch (err) {
-        console.error("Error sharing:", err);
+      } catch (error) {
+        console.error("Error sharing:", error);
       }
     } else if (typeof navigator !== "undefined" && navigator.clipboard) {
       navigator.clipboard.writeText(window.location.href);
@@ -34,13 +34,13 @@ export function SkillVideoActions({ videoUrl, skillName }: SkillVideoActionsProp
 
   const handleDownload = async (e: React.MouseEvent) => {
     e.preventDefault();
-    if (!videoUrl) return;
+    if (!videoUrl) {return;}
 
     setIsDownloading(true);
     try {
       // Try to fetch as blob to force download
       const response = await fetch(videoUrl);
-      if (!response.ok) throw new Error("Network response was not ok");
+      if (!response.ok) {throw new Error("Network response was not ok");}
       const blob = await response.blob();
       const blobUrl = window.URL.createObjectURL(blob);
 
@@ -50,7 +50,7 @@ export function SkillVideoActions({ videoUrl, skillName }: SkillVideoActionsProp
       const link = document.createElement("a");
       link.href = blobUrl;
       link.download = `${skillName.replaceAll(/\s+/g, "_")}.${ext}`;
-      document.body.appendChild(link);
+      document.body.append(link);
       link.click();
       document.body.removeChild(link);
       window.URL.revokeObjectURL(blobUrl);

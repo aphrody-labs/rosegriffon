@@ -3,13 +3,8 @@
 import { useDroppable } from "@dnd-kit/core";
 import { Icon } from "@/components/ui/Icon";
 import { SafeImage } from "@/components/ui/SafeImage";
-import {
-  BENCH_SLOTS,
-  type Formation,
-  type PositionCoord,
-  ROLE_COLORS,
-  ROLE_LABELS,
-} from "@/lib/formations";
+import { BENCH_SLOTS, ROLE_COLORS, ROLE_LABELS } from '@/lib/formations';
+import type { Formation, PositionCoord } from '@/lib/formations';
 import type { TeamMember } from "@/lib/team-types";
 import { cn } from "@/lib/utils";
 import { PlayerSlot } from "./PlayerSlot";
@@ -184,8 +179,8 @@ function DroppableSlot({
   isSelected?: boolean;
 }) {
   const { isOver, setNodeRef } = useDroppable({
+    data: { role: coord.role, slotId, type: "field-position" },
     id: slotId,
-    data: { type: "field-position", slotId, role: coord.role },
   });
 
   const roleColor = ROLE_COLORS[coord.role] || ROLE_COLORS.MF;
@@ -203,7 +198,7 @@ function DroppableSlot({
         isOver && "z-30 scale-110",
         !isOver && member && "z-10",
       )}
-      style={{ top: `${scaledTop}%`, left: `${scaledLeft}%` }}
+      style={{ left: `${scaledLeft}%`, top: `${scaledTop}%` }}
     >
       {/* Drop glow */}
       {isOver && (
@@ -298,8 +293,8 @@ function StaffSlot({
   isSelected?: boolean;
 }) {
   const { isOver, setNodeRef } = useDroppable({
+    data: { slotId, type: "bench-position" },
     id: slotId,
-    data: { type: "bench-position", slotId },
   });
 
   return (
@@ -400,8 +395,8 @@ function BenchSlot({
   isSelected?: boolean;
 }) {
   const { isOver, setNodeRef } = useDroppable({
+    data: { slotId, type: "bench-position" },
     id: slotId,
-    data: { type: "bench-position", slotId },
   });
 
   return (
@@ -484,10 +479,10 @@ export function FormationField({
 
   // Staff data for bottom-of-pitch slots
   const staffSlots = [
-    { slotId: "manager-0", label: "COACH", icon: "sports", color: "rgb(217,119,6)" },
-    { slotId: "support-0", label: "COORD", icon: "support_agent", color: "rgb(59,130,246)" },
-    { slotId: "support-1", label: "COORD", icon: "support_agent", color: "rgb(59,130,246)" },
-    { slotId: "support-2", label: "COORD", icon: "support_agent", color: "rgb(59,130,246)" },
+    { color: "rgb(217,119,6)", icon: "sports", label: "COACH", slotId: "manager-0" },
+    { color: "rgb(59,130,246)", icon: "support_agent", label: "COORD", slotId: "support-0" },
+    { color: "rgb(59,130,246)", icon: "support_agent", label: "COORD", slotId: "support-1" },
+    { color: "rgb(59,130,246)", icon: "support_agent", label: "COORD", slotId: "support-2" },
   ];
 
   return (
@@ -511,7 +506,7 @@ export function FormationField({
               member={members[slotId]}
               onRemove={onRemoveMember}
               onSlotTap={onSlotTap}
-              isTargeted={!!selectedCharaId && !members[slotId]}
+              isTargeted={Boolean(selectedCharaId) && !members[slotId]}
               onMemberClick={onMemberClick}
               isSelected={selectedMemberSlot === slotId}
             />
@@ -530,7 +525,7 @@ export function FormationField({
                 onRemove={onRemoveMember}
                 color={staff.color}
                 onSlotTap={onSlotTap}
-                isTargeted={!!selectedCharaId && !members[staff.slotId]}
+                isTargeted={Boolean(selectedCharaId) && !members[staff.slotId]}
                 onMemberClick={onMemberClick}
                 isSelected={selectedMemberSlot === staff.slotId}
               />
@@ -578,7 +573,7 @@ export function FormationField({
                 onRemove={onRemoveMember}
                 color="rgb(16,185,129)"
                 onSlotTap={onSlotTap}
-                isTargeted={!!selectedCharaId && !members[`reserve-${i}`]}
+                isTargeted={Boolean(selectedCharaId) && !members[`reserve-${i}`]}
                 onMemberClick={onMemberClick}
                 isSelected={selectedMemberSlot === `reserve-${i}`}
               />

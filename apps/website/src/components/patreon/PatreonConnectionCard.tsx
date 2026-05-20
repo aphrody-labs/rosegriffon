@@ -31,10 +31,10 @@ export function PatreonConnectionCard({ isLinked, hasDiscord }: Props) {
 	const [promoOpen, setPromoOpen] = useState(false);
 
 	useEffect(() => {
-		if (isLinked || !hasDiscord) return;
-		if (typeof window === "undefined") return;
+		if (isLinked || !hasDiscord) {return;}
+		if (typeof window === "undefined") {return;}
 		const dismissed = window.localStorage.getItem(PROMO_DISMISSED_KEY);
-		if (dismissed === "1") return;
+		if (dismissed === "1") {return;}
 		const t = setTimeout(() => setPromoOpen(true), 800);
 		return () => clearTimeout(t);
 	}, [isLinked, hasDiscord]);
@@ -50,16 +50,16 @@ export function PatreonConnectionCard({ isLinked, hasDiscord }: Props) {
 		setBusy(true);
 		try {
 			const res = await authClient.signIn.oauth2({
-				providerId: "patreon",
 				callbackURL: window.location.pathname,
+				providerId: "patreon",
 			});
 			const err = (res as { error?: { message?: string } | null })?.error;
 			if (err) {
 				toast.error(err.message ?? "Erreur lors du link Patreon");
 				setBusy(false);
 			}
-		} catch (e) {
-			console.error(e);
+		} catch (error) {
+			console.error(error);
 			toast.error("Erreur lors du link Patreon");
 			setBusy(false);
 		}
@@ -71,11 +71,11 @@ export function PatreonConnectionCard({ isLinked, hasDiscord }: Props) {
 			const res = await fetch("/api/auth/patreon/disconnect", {
 				method: "POST",
 			});
-			if (!res.ok) throw new Error(`HTTP ${res.status}`);
+			if (!res.ok) {throw new Error(`HTTP ${res.status}`);}
 			toast.success("Compte Patreon déconnecté");
 			window.location.reload();
-		} catch (e) {
-			console.error(e);
+		} catch (error) {
+			console.error(error);
 			toast.error("Erreur lors de la déconnexion");
 			setBusy(false);
 		}
@@ -105,9 +105,9 @@ export function PatreonConnectionCard({ isLinked, hasDiscord }: Props) {
 							<p className="mt-1 text-sm text-muted-foreground">
 								{isLinked
 									? "Synchronisation automatique de votre tier Patreon."
-									: hasDiscord
+									: (hasDiscord
 										? "Liez votre Patreon pour récupérer votre tier et votre rôle Discord."
-										: "Liez votre Patreon pour synchroniser votre tier."}
+										: "Liez votre Patreon pour synchroniser votre tier.")}
 							</p>
 						</div>
 					</div>

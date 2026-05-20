@@ -86,13 +86,13 @@ export async function GET(request: Request) {
 
 		const baseUrl = url.origin;
 		const links = (users || []).map((u) => ({
-			username: u.username,
 			full_name: u.full_name,
-			role: u.role,
 			magic_link: `${baseUrl}/api/auth/magic-login?secret=${encodeURIComponent(secret)}&user=${u.id}`,
+			role: u.role,
+			username: u.username,
 		}));
 
-		return NextResponse.json({ users: links, total: links.length });
+		return NextResponse.json({ total: links.length, users: links });
 	}
 
 	// Trouver l'utilisateur cible
@@ -154,8 +154,8 @@ export async function GET(request: Request) {
 			targetUser.id,
 			"magic_login",
 			{
-				username: targetUser.username,
 				role: targetUser.role,
+				username: targetUser.username,
 			},
 			{ ipAddress: realIp },
 		);
@@ -172,8 +172,8 @@ export async function GET(request: Request) {
 		);
 
 		return response;
-	} catch (err) {
-		console.error("[Magic Login] Erreur:", err);
+	} catch (error) {
+		console.error("[Magic Login] Erreur:", error);
 		return NextResponse.json(
 			{ error: "Session creation failed" },
 			{ status: 500 },

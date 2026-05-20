@@ -1,6 +1,7 @@
 "use client";
 
-import { createContext, type ReactNode, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useState } from 'react';
+import type { ReactNode } from 'react';
 import useSWR from "swr";
 
 import type { TwitchData } from "@/types/twitch";
@@ -20,8 +21,7 @@ const TwitchContext = createContext<TwitchContextType | undefined>(undefined);
 const fetcher = (url: string) =>
   fetch(url)
     .then((res) => res.json())
-    .then((data) => {
-      return {
+    .then((data) => ({
         isLive: data.live?.is_live || false,
         videoId: null,
         followers: data.followers || 0,
@@ -38,8 +38,7 @@ const fetcher = (url: string) =>
         channelInfo: data.channelInfo || null,
         recentVideos: data.videos || [],
         topClips: data.clips || [],
-      } as TwitchData;
-    });
+      }));
 
 export function TwitchProvider({
   children,
@@ -52,10 +51,10 @@ export function TwitchProvider({
     `/api/public/rgtv/status?channel=${channel}`,
     fetcher,
     {
-      revalidateOnFocus: true,
-      revalidateOnReconnect: true,
       dedupingInterval: 60000, // Cache for 1 minute
       focusThrottleInterval: 300000, // Revalidate at most every 5 minutes when window focused
+      revalidateOnFocus: true,
+      revalidateOnReconnect: true,
     }
   );
 
@@ -85,7 +84,7 @@ export function TwitchProvider({
   }, [data]);
 
   return (
-    <TwitchContext.Provider value={{ data: data ?? null, isLoading, error, mutate, channel }}>
+    <TwitchContext.Provider value={{ channel, data: data ?? null, error, isLoading, mutate }}>
       {children}
     </TwitchContext.Provider>
   );

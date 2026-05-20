@@ -1,4 +1,5 @@
-import { type NextRequest, NextResponse } from "next/server";
+import { NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
 
 const BASE_ASSET_URL = "https://dxi4wb638ujep.cloudfront.net/1/k/5/a/";
 const HASH_REGEX = /dxi4wb638ujep\.cloudfront\.net\/1\/k\/5\/a\/([a-zA-Z0-9]+)/;
@@ -16,13 +17,13 @@ function isUrlAllowed(raw: string): URL | null {
 	} catch {
 		return null;
 	}
-	if (parsed.protocol !== "https:") return null;
-	if (!ALLOWED_HOSTS.has(parsed.hostname)) return null;
+	if (parsed.protocol !== "https:") {return null;}
+	if (!ALLOWED_HOSTS.has(parsed.hostname)) {return null;}
 	return parsed;
 }
 
 export async function GET(request: NextRequest) {
-	const searchParams = request.nextUrl.searchParams;
+	const {searchParams} = request.nextUrl;
 	const url = searchParams.get("url");
 
 	if (!url) {
@@ -45,8 +46,8 @@ export async function GET(request: NextRequest) {
 				"User-Agent":
 					"Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)",
 			},
-			signal: ctrl.signal,
 			redirect: "error",
+			signal: ctrl.signal,
 		});
 		clearTimeout(timeout);
 
@@ -71,20 +72,20 @@ export async function GET(request: NextRequest) {
 		const name = titleMatch?.[1]?.trim() ?? "Unknown Character";
 
 		const assets = {
-			portrait: Array.from(
-				{ length: 8 },
-				(_, i) => `${BASE_ASSET_URL}${hash}_r${i}.webp`,
-			),
 			fullbody: Array.from(
 				{ length: 8 },
 				(_, i) => `${BASE_ASSET_URL}${hash}_r${i}_fullbody.webp`,
 			),
+			portrait: Array.from(
+				{ length: 8 },
+				(_, i) => `${BASE_ASSET_URL}${hash}_r${i}.webp`,
+			),
 		};
 
 		return NextResponse.json({
-			name,
-			hash,
 			assets,
+			hash,
+			name,
 			sourceUrl: target.toString(),
 		});
 	} catch (error) {

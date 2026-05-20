@@ -6,17 +6,17 @@ const THEMES = [
 	{
 		id: "theme-azalee-light",
 		label: "Azalée Light",
-		swatch: "#F89C5A",
 		mode: "light",
+		swatch: "#F89C5A",
 	},
 	{
 		id: "theme-azalee-dark",
 		label: "Azalée Dark",
-		swatch: "#1C1B1F",
 		mode: "dark",
+		swatch: "#1C1B1F",
 	},
-	{ id: "theme-roy", label: "Roy", swatch: "#344E8C", mode: "light" },
-	{ id: "theme-gaelle", label: "Gaëlle", swatch: "#B03519", mode: "light" },
+	{ id: "theme-roy", label: "Roy", mode: "light", swatch: "#344E8C" },
+	{ id: "theme-gaelle", label: "Gaëlle", mode: "light", swatch: "#B03519" },
 ] as const;
 
 type ThemeId = (typeof THEMES)[number]["id"];
@@ -28,11 +28,10 @@ export function ThemeSwitcher() {
 		const root = document.documentElement.parentElement;
 		const container =
 			document.querySelector("[data-design-system-root]") ?? root;
-		if (!container) return;
-		for (const t of THEMES) container.classList.remove(t.id);
+		if (!container) {return;}
+		for (const t of THEMES) {container.classList.remove(t.id);}
 		container.classList.add(active);
-		if (active === "theme-azalee-dark") container.classList.add("dark");
-		else container.classList.remove("dark");
+		container.classList.toggle("dark", active === "theme-azalee-dark");
 	}, [active]);
 
 	return (

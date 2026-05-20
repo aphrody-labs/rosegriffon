@@ -11,9 +11,10 @@ import { RgtvScheduleClient } from "@/components/RgtvScheduleClient";
 import { useTheme } from "@/contexts/theme-context";
 import { Monitor, Radio, Users, Youtube } from "@/lib/icons-config";
 import type { StreamSchedule } from "@rosegriffon/types";
-import type { Database, Tables, Insert, Update } from "@rosegriffon/db";
+import type { Database, Insert, Tables, Update } from "@rosegriffon/db";
 
-import { type TwitchChannel, TwitchProvider, useTwitch } from "../_context/twitch-context";
+import { TwitchProvider, useTwitch } from '../_context/twitch-context';
+import type { TwitchChannel } from '../_context/twitch-context';
 import { RgtvAppShell } from "./RgtvAppShell";
 import { TwitchChat } from "./TwitchChat";
 import { TwitchEnrichedInfo } from "./TwitchEnrichedInfo";
@@ -173,7 +174,7 @@ function RgtvPageInner({
                 <motion.div
                   initial={{ opacity: 0, x: 20 }}
                   animate={{ opacity: 1, x: 0 }}
-                  transition={{ duration: 0.3, delay: 0.1 }}
+                  transition={{ delay: 0.1, duration: 0.3 }}
                 >
                   <TwitchChat channelName={twitchChannel} />
                 </motion.div>
@@ -208,7 +209,7 @@ function RgtvPageInner({
         <motion.section
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3, delay: 0.2 }}
+          transition={{ delay: 0.2, duration: 0.3 }}
           className="mt-12 sm:mt-16 md:mt-20 relative overflow-hidden"
           aria-labelledby="streamers-heading-rgtv"
         >
@@ -231,12 +232,12 @@ function RgtvPageInner({
 
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2 sm:gap-3 md:gap-4">
               {[
-                { name: "Bri", file: "bri.webp" },
-                { name: "Éthan", file: "ethan.webp" },
-                { name: "Huzby", file: "huzby.webp" },
-                { name: "Ishido", file: "ishido.webp" },
-                { name: "Mathuze", file: "mathuze.webp" },
-                { name: "Shozuma", file: "shozuma.webp" },
+                { file: "bri.webp", name: "Bri" },
+                { file: "ethan.webp", name: "Éthan" },
+                { file: "huzby.webp", name: "Huzby" },
+                { file: "ishido.webp", name: "Ishido" },
+                { file: "mathuze.webp", name: "Mathuze" },
+                { file: "shozuma.webp", name: "Shozuma" },
               ].map((streamer) => (
                 <div key={streamer.name} className="group flex justify-center">
                   <div className="relative w-full aspect-square flex items-center justify-center">

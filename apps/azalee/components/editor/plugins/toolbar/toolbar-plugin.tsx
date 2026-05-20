@@ -73,8 +73,7 @@ export function ToolbarPlugin({
     }
   }, [activeEditor]);
 
-  useEffect(() => {
-    return mergeRegister(
+  useEffect(() => mergeRegister(
       editor.registerUpdateListener(({ editorState }) => {
         editorState.read(() => {
           $updateToolbar();
@@ -89,8 +88,7 @@ export function ToolbarPlugin({
         },
         COMMAND_PRIORITY_CRITICAL,
       ),
-    );
-  }, [activeEditor, editor, $updateToolbar]);
+    ), [activeEditor, editor, $updateToolbar]);
 
   return (
     <ToolbarContext

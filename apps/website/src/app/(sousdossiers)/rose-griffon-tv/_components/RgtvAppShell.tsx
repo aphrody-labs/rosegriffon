@@ -69,9 +69,9 @@ export function RgtvAppShell({
 				toast.success("✅ Notifications activées !");
 				// Send test notification
 				new Notification("Rose Griffon TV", {
+					badge: "/rgtv/rgtv.webp",
 					body: "Vous serez prévenu des prochains streams !",
 					icon: "/rgtv/rgtv.webp",
-					badge: "/rgtv/rgtv.webp",
 				});
 			} else if (permission === "denied") {
 				toast.error(
@@ -88,13 +88,13 @@ export function RgtvAppShell({
 		if (navigator.share) {
 			try {
 				await navigator.share({
-					title: "Rose Griffon TV",
 					text: "Rejoins le stream 100% Inazuma Eleven !",
+					title: "Rose Griffon TV",
 					url: window.location.href,
 				});
 				toast.success("✅ Partagé avec succès !");
-			} catch (err) {
-				if ((err as Error).name !== "AbortError") {
+			} catch (error) {
+				if ((error as Error).name !== "AbortError") {
 					toast.error("Erreur lors du partage");
 				}
 			}
@@ -130,10 +130,10 @@ export function RgtvAppShell({
 			<motion.header
 				initial={false}
 				animate={{
+					backdropFilter: "blur(12px)",
 					backgroundColor: isScrolled
 						? `${colors.background}F5`
 						: `${colors.background}DD`,
-					backdropFilter: "blur(12px)",
 				}}
 				className="fixed top-0 left-0 right-0 z-50 border-b transition-colors"
 				style={{
@@ -170,8 +170,8 @@ export function RgtvAppShell({
 					{/* Live Indicator */}
 					{isLive && (
 						<motion.div
-							initial={{ scale: 0.9, opacity: 0 }}
-							animate={{ scale: 1, opacity: 1 }}
+							initial={{ opacity: 0, scale: 0.9 }}
+							animate={{ opacity: 1, scale: 1 }}
 							className="flex items-center gap-2 px-3 py-1.5 rounded-full"
 							style={{
 								backgroundColor: "#34518220",
@@ -180,7 +180,7 @@ export function RgtvAppShell({
 						>
 							<motion.div
 								animate={{ scale: [1, 1.2, 1] }}
-								transition={{ repeat: Infinity, duration: 2 }}
+								transition={{ duration: 2, repeat: Infinity }}
 								className="size-2 rounded-full"
 								style={{ backgroundColor: "#d63901" }}
 							/>
@@ -245,7 +245,7 @@ export function RgtvAppShell({
 							initial={{ x: "100%" }}
 							animate={{ x: 0 }}
 							exit={{ x: "100%" }}
-							transition={{ type: "spring", damping: 20 }}
+							transition={{ damping: 20, type: "spring" }}
 							className="fixed top-16 right-0 w-80 h-[calc(100vh-4rem)] bg-background border-l shadow-2xl z-40 overflow-y-auto"
 							style={{ borderColor: colors.primary }}
 						>
@@ -311,7 +311,7 @@ export function RgtvAppShell({
 							initial={{ x: "100%" }}
 							animate={{ x: 0 }}
 							exit={{ x: "100%" }}
-							transition={{ type: "spring", damping: 20 }}
+							transition={{ damping: 20, type: "spring" }}
 							className="fixed top-0 right-0 w-80 h-full bg-background shadow-2xl z-50"
 						>
 							<div className="p-6">

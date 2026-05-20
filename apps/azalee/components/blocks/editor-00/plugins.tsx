@@ -41,7 +41,7 @@ export function Plugins({ id }: { id?: string }) {
     <ToolbarPlugin>
       {() => (
         <div className="relative flex flex-col h-full bg-background rounded-none border-none">
-          {/* toolbar plugins */}
+          {/* Toolbar plugins */}
           <div className="border-b px-2 py-1 z-10 sticky top-0 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
             <Toolbar />
           </div>
@@ -60,7 +60,7 @@ export function Plugins({ id }: { id?: string }) {
               ErrorBoundary={LexicalErrorBoundary}
             />
 
-            {/* core editor plugins */}
+            {/* Core editor plugins */}
             <HistoryPlugin />
             <AutoFocusPlugin />
             <ListPlugin />
@@ -75,7 +75,7 @@ export function Plugins({ id }: { id?: string }) {
             <HorizontalRulePlugin />
             <TabIndentationPlugin />
 
-            {/* floating plugins */}
+            {/* Floating plugins */}
             {floatingAnchorElem && (
               <FloatingLinkEditorPlugin
                 anchorElem={floatingAnchorElem}
@@ -89,7 +89,7 @@ export function Plugins({ id }: { id?: string }) {
           <div className="mt-auto z-10 relative">
             <ActionsWrapper>
               <ImportExportPlugin />
-              <MaxLengthPlugin maxLength={30000} />
+              <MaxLengthPlugin maxLength={30_000} />
             </ActionsWrapper>
           </div>
         </div>

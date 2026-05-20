@@ -1,7 +1,7 @@
 "use client";
 
 import type * as React from "react";
-import { Cell, Pie as RcPie, PieChart, ResponsiveContainer, Tooltip as RcTooltip } from "recharts";
+import { Cell, PieChart, Pie as RcPie, Tooltip as RcTooltip, ResponsiveContainer } from "recharts";
 import { Card, CardContent, CardHeader, CardTitle } from "@rosegriffon/ui";
 
 // Cast to FC<any> to absorb React 19 / recharts 2.x typings drift (TS2607/TS2786).
@@ -10,11 +10,11 @@ const Pie = RcPie as unknown as React.FC<any>;
 const Tooltip = RcTooltip as unknown as React.FC<any>;
 
 const COLORS = {
+  Earth: "#FF9800", // Orange
+  Fire: "#F44336", // Red
+  Void: "#9C27B0", // Purple
   Wind: "#00BFA5", // Teal
   Wood: "#4CAF50", // Green
-  Fire: "#F44336", // Red
-  Earth: "#FF9800", // Orange
-  Void: "#9C27B0", // Purple
 };
 
 export function ElementChart({ data }: { data: Array<{ name: string; value: number }> }) {
@@ -48,8 +48,8 @@ export function ElementChart({ data }: { data: Array<{ name: string; value: numb
               </Pie>
               <Tooltip
                 contentStyle={{
-                  borderRadius: "12px",
                   border: "none",
+                  borderRadius: "12px",
                   boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
                 }}
                 itemStyle={{ color: "#000", fontWeight: "bold" }}

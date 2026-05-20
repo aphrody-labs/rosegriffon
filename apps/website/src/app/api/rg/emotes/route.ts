@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 import { EMOTES } from "@/lib/emotes";
 
 // Catalogue statique (change build-time uniquement).
-export const revalidate = 86400;
+export const revalidate = 86_400;
 
 export async function GET() {
 	// Convertir l'objet EMOTES en tableau pour l'API
@@ -15,8 +15,8 @@ export async function GET() {
 	}));
 
 	return NextResponse.json({
-		success: true,
 		count: emotesList.length,
 		data: emotesList,
+		success: true,
 	});
 }

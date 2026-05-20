@@ -26,20 +26,20 @@ const schema = z.object({
 	address_line1: z.string().optional(),
 	address_line2: z.string().optional(),
 	city: z.string().optional(),
-	postal_code: z.string().optional(),
 	country: z.string().optional(),
+	postal_code: z.string().optional(),
 });
 
 export function AddressSection({ profile }: { profile: Profile | null }) {
 	const form = useForm<z.infer<typeof schema>>({
-		resolver: zodResolver(schema),
 		defaultValues: {
 			address_line1: profile?.address_line1 || "",
 			address_line2: profile?.address_line2 || "",
 			city: profile?.city || "",
-			postal_code: profile?.postal_code || "",
 			country: profile?.country || "",
+			postal_code: profile?.postal_code || "",
 		},
+		resolver: zodResolver(schema),
 	});
 
 	const onSubmit = async (values: z.infer<typeof schema>) => {

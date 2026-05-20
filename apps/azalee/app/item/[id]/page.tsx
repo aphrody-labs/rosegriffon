@@ -22,22 +22,22 @@ export async function generateMetadata({
   const title = `${name} | Inazuma Eleven Victory Road - Azalée`;
 
   return {
-    title,
-    description,
     alternates: { canonical: `/item/${id}` },
+    description,
     openGraph: {
-      title: `${name} | Azalée`,
       description,
-      url: `/item/${id}`,
-      siteName: "Azalée - Inazuma Eleven Victory Road",
-      locale: "fr_FR",
-      type: "article",
       images: item?.imageUrl ? [{ url: item.imageUrl, alt: name }] : [],
+      locale: "fr_FR",
+      siteName: "Azalée - Inazuma Eleven Victory Road",
+      title: `${name} | Azalée`,
+      type: "article",
+      url: `/item/${id}`,
     },
+    title,
     twitter: {
       card: "summary",
-      title: `${name} | Azalée`,
       description,
+      title: `${name} | Azalée`,
     },
   };
 }
@@ -61,14 +61,14 @@ export default async function ItemDetailPage({ params }: { params: Promise<{ id:
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     itemListElement: [
-      { "@type": "ListItem", position: 1, name: "Accueil", item: "https://azalee.rosegriffon.fr" },
+      { "@type": "ListItem", item: "https://azalee.rosegriffon.fr", name: "Accueil", position: 1 },
       {
         "@type": "ListItem",
-        position: 2,
-        name: "Objets",
         item: "https://azalee.rosegriffon.fr/item",
+        name: "Objets",
+        position: 2,
       },
-      { "@type": "ListItem", position: 3, name: itemName },
+      { "@type": "ListItem", name: itemName, position: 3 },
     ],
   };
 

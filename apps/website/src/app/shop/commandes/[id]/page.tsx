@@ -11,13 +11,13 @@ export const metadata = {
 };
 
 const STATUS_LABEL = {
-	pending: "En attente",
-	paid: "Payée",
-	shipped: "Expédiée",
-	delivered: "Livrée",
-	refunded: "Remboursée",
-	failed: "Échec",
 	canceled: "Annulée",
+	delivered: "Livrée",
+	failed: "Échec",
+	paid: "Payée",
+	pending: "En attente",
+	refunded: "Remboursée",
+	shipped: "Expédiée",
 } as const;
 
 interface OrderDetail {
@@ -43,13 +43,13 @@ interface OrderDetail {
 	tracking_number: string | null;
 	tracking_carrier: string | null;
 	status: keyof typeof STATUS_LABEL;
-	items: Array<{
+	items: {
 		slug?: string;
 		variantId?: string;
 		qty?: number;
 		unit_amount_cents?: number;
 		label?: string;
-	}> | null;
+	}[] | null;
 	created_at: string;
 	paid_at: string | null;
 	shipped_at: string | null;
@@ -70,7 +70,7 @@ async function fetchOrder(
 			.eq("id", orderId)
 			.eq("user_id", userId)
 			.maybeSingle();
-		if (error || !data) return null;
+		if (error || !data) {return null;}
 		return data as unknown as OrderDetail;
 	} catch {
 		return null;
@@ -85,10 +85,10 @@ export default async function OrderDetailPage({
 	const { id } = await params;
 	const supabase = await createClient();
 	const { data: auth } = await supabase.auth.getUser();
-	if (!auth.user) redirect(`/login?next=/shop/commandes/${id}`);
+	if (!auth.user) {redirect(`/login?next=/shop/commandes/${id}`);}
 
 	const order = await fetchOrder(id, auth.user.id);
-	if (!order) notFound();
+	if (!order) {notFound();}
 
 	return (
 		<main className="mx-auto max-w-4xl px-4 pb-16 pt-10 md:px-8 md:pt-16">
@@ -113,10 +113,10 @@ export default async function OrderDetailPage({
 					Passée le{" "}
 					{new Date(order.created_at).toLocaleDateString("fr-FR", {
 						day: "2-digit",
-						month: "long",
-						year: "numeric",
 						hour: "2-digit",
 						minute: "2-digit",
+						month: "long",
+						year: "numeric",
 					})}
 				</p>
 			</header>

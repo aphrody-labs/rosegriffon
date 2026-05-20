@@ -10,41 +10,41 @@ const RG_BRIQUE = "#a14b3f";
 const RG_AZALEE = "#F89C5A";
 
 const M3_COLORS = [
-	{ name: "primary", bg: "bg-primary", text: "text-on-primary" },
+	{ bg: "bg-primary", name: "primary", text: "text-on-primary" },
 	{
-		name: "primary-container",
 		bg: "bg-primary-container",
+		name: "primary-container",
 		text: "text-on-primary-container",
 	},
-	{ name: "secondary", bg: "bg-secondary", text: "text-on-secondary" },
+	{ bg: "bg-secondary", name: "secondary", text: "text-on-secondary" },
 	{
-		name: "secondary-container",
 		bg: "bg-secondary-container",
+		name: "secondary-container",
 		text: "text-on-secondary-container",
 	},
-	{ name: "tertiary", bg: "bg-tertiary", text: "text-on-tertiary" },
+	{ bg: "bg-tertiary", name: "tertiary", text: "text-on-tertiary" },
 	{
-		name: "tertiary-container",
 		bg: "bg-tertiary-container",
+		name: "tertiary-container",
 		text: "text-on-tertiary-container",
 	},
-	{ name: "error", bg: "bg-error", text: "text-on-error" },
+	{ bg: "bg-error", name: "error", text: "text-on-error" },
 	{
-		name: "error-container",
 		bg: "bg-error-container",
+		name: "error-container",
 		text: "text-on-error-container",
 	},
 ] as const;
 
 const M3_SURFACES = [
-	{ name: "surface-dim", bg: "bg-surface-dim" },
-	{ name: "surface", bg: "bg-surface" },
-	{ name: "surface-bright", bg: "bg-surface-bright" },
-	{ name: "surface-container-lowest", bg: "bg-surface-container-lowest" },
-	{ name: "surface-container-low", bg: "bg-surface-container-low" },
-	{ name: "surface-container", bg: "bg-surface-container" },
-	{ name: "surface-container-high", bg: "bg-surface-container-high" },
-	{ name: "surface-container-highest", bg: "bg-surface-container-highest" },
+	{ bg: "bg-surface-dim", name: "surface-dim" },
+	{ bg: "bg-surface", name: "surface" },
+	{ bg: "bg-surface-bright", name: "surface-bright" },
+	{ bg: "bg-surface-container-lowest", name: "surface-container-lowest" },
+	{ bg: "bg-surface-container-low", name: "surface-container-low" },
+	{ bg: "bg-surface-container", name: "surface-container" },
+	{ bg: "bg-surface-container-high", name: "surface-container-high" },
+	{ bg: "bg-surface-container-highest", name: "surface-container-highest" },
 ] as const;
 
 const TYPESCALE = [
@@ -90,11 +90,11 @@ const HARD_SHADOW_LG = "6px 6px 0 0 rgba(0,0,0,0.65)";
 // Style chunk pour la typo cartoon : outline blanc + drop shadow rouge brique.
 // Utilisé sur tous les titres de section pour assurer la cohérence DA.
 const cartoonTitleStyle: React.CSSProperties = {
-	fontFamily: "var(--font-cartoon-ds), 'Super Cartoon', sans-serif",
 	WebkitTextStroke: "2px #ffffff",
 	color: RG_MARINE,
-	textShadow: `4px 4px 0 ${RG_BRIQUE}, 6px 6px 0 rgba(0,0,0,0.4)`,
+	fontFamily: "var(--font-cartoon-ds), 'Super Cartoon', sans-serif",
 	letterSpacing: "0.02em",
+	textShadow: `4px 4px 0 ${RG_BRIQUE}, 6px 6px 0 rgba(0,0,0,0.4)`,
 };
 
 export default function DesignSystemShowcase() {
@@ -103,8 +103,8 @@ export default function DesignSystemShowcase() {
 			data-design-system-root
 			className="theme-azalee-light relative isolate overflow-hidden"
 			style={{
-				fontFamily: "var(--font-body-ds), 'Poppins', system-ui, sans-serif",
 				backgroundColor: RG_MARINE,
+				fontFamily: "var(--font-body-ds), 'Poppins', system-ui, sans-serif",
 			}}
 		>
 			{/* Logo griffon en filigrane sur tout le document */}
@@ -156,11 +156,11 @@ export default function DesignSystemShowcase() {
 						<p
 							className="mb-8 inline-flex items-center gap-3 rounded-full border-2 px-4 py-1.5 text-[11px] uppercase tracking-[0.28em]"
 							style={{
-								borderColor: RG_OR,
-								color: RG_OR,
 								backgroundColor: "rgba(212,175,55,0.08)",
-								fontFamily: "var(--font-cartoon-ds), sans-serif",
+								borderColor: RG_OR,
 								boxShadow: HARD_SHADOW,
+								color: RG_OR,
+								fontFamily: "var(--font-cartoon-ds), sans-serif",
 							}}
 						>
 							<ZapIcon className="size-3" aria-hidden />
@@ -170,11 +170,11 @@ export default function DesignSystemShowcase() {
 							className="text-fluid-display-2xl leading-[0.9] text-balance"
 							style={{
 								...cartoonTitleStyle,
-								transform: "rotate(-2deg)",
-								transformOrigin: "left bottom",
+								WebkitTextStroke: `3px ${RG_MARINE}`,
 								color: "#fffdf5",
 								textShadow: `5px 5px 0 ${RG_BRIQUE}, 8px 8px 0 rgba(0,0,0,0.5)`,
-								WebkitTextStroke: `3px ${RG_MARINE}`,
+								transform: "rotate(-2deg)",
+								transformOrigin: "left bottom",
 							}}
 						>
 							ROSE
@@ -227,9 +227,9 @@ export default function DesignSystemShowcase() {
 									<dd
 										className="text-fluid-headline-xl leading-none"
 										style={{
-											fontFamily: "var(--font-cartoon-ds), sans-serif",
-											color: RG_OR,
 											WebkitTextStroke: "1.5px #fffdf5",
+											color: RG_OR,
+											fontFamily: "var(--font-cartoon-ds), sans-serif",
 											textShadow: `3px 3px 0 ${RG_BRIQUE}`,
 										}}
 									>
@@ -281,8 +281,8 @@ export default function DesignSystemShowcase() {
 					<div
 						className="pointer-events-none absolute top-8 right-4 z-20 hidden h-[180px] w-[120px] md:right-12 md:block md:h-[220px] md:w-[150px]"
 						style={{
-							transform: "rotate(8deg)",
 							filter: "drop-shadow(6px 6px 0 rgba(0,0,0,0.6))",
+							transform: "rotate(8deg)",
 						}}
 					>
 						<Image
@@ -315,8 +315,8 @@ export default function DesignSystemShowcase() {
 								<span
 									className="text-fluid-headline-xl leading-[0.9]"
 									style={{
-										fontFamily: "var(--font-cartoon-ds), sans-serif",
 										WebkitTextStroke: "1.5px currentColor",
+										fontFamily: "var(--font-cartoon-ds), sans-serif",
 									}}
 								>
 									Aa
@@ -372,11 +372,11 @@ export default function DesignSystemShowcase() {
 							className="text-fluid-display-xl leading-[0.95]"
 							style={{
 								...cartoonTitleStyle,
-								color: "#fffdf5",
 								WebkitTextStroke: `3px ${RG_MARINE}`,
+								color: "#fffdf5",
+								display: "inline-block",
 								textShadow: `5px 5px 0 ${RG_BRIQUE}, 8px 8px 0 rgba(0,0,0,0.5)`,
 								transform: "rotate(-1deg)",
-								display: "inline-block",
 							}}
 						>
 							Quelle est ta couleur ?
@@ -386,11 +386,11 @@ export default function DesignSystemShowcase() {
 					<ul
 						className="mt-12 divide-y rounded-[16px]"
 						style={{
-							borderColor: RG_OR,
-							borderWidth: "2px",
-							borderStyle: "solid",
-							boxShadow: HARD_SHADOW,
 							backgroundColor: "rgba(255,253,245,0.03)",
+							borderColor: RG_OR,
+							borderStyle: "solid",
+							borderWidth: "2px",
+							boxShadow: HARD_SHADOW,
 						}}
 					>
 						{TYPESCALE.map((t) => (
@@ -446,8 +446,8 @@ export default function DesignSystemShowcase() {
 								className="inline-flex h-11 items-center justify-center gap-2 rounded-full px-6 text-[13px] font-semibold uppercase tracking-wider transition-transform motion-safe:duration-200 hover:-translate-y-0.5"
 								style={{
 									backgroundColor: RG_OR,
-									color: RG_MARINE,
 									boxShadow: HARD_SHADOW,
+									color: RG_MARINE,
 									fontFamily: "var(--font-cartoon-ds), sans-serif",
 								}}
 							>
@@ -461,8 +461,8 @@ export default function DesignSystemShowcase() {
 								className="inline-flex h-11 items-center justify-center gap-2 rounded-full px-6 text-[13px] font-semibold uppercase tracking-wider transition-transform motion-safe:duration-200 hover:-translate-y-0.5"
 								style={{
 									backgroundColor: RG_BRIQUE,
-									color: "#fffdf5",
 									boxShadow: HARD_SHADOW,
+									color: "#fffdf5",
 									fontFamily: "var(--font-cartoon-ds), sans-serif",
 								}}
 							>
@@ -477,8 +477,8 @@ export default function DesignSystemShowcase() {
 								style={{
 									backgroundColor: "transparent",
 									border: `2px solid ${RG_OR}`,
-									color: RG_OR,
 									boxShadow: HARD_SHADOW,
+									color: RG_OR,
 									fontFamily: "var(--font-cartoon-ds), sans-serif",
 								}}
 							>
@@ -493,9 +493,9 @@ export default function DesignSystemShowcase() {
 								className="grid size-14 place-items-center rounded-full transition-transform motion-safe:duration-200 hover:rotate-90"
 								style={{
 									backgroundColor: RG_AZALEE,
-									color: RG_MARINE,
 									border: `2px solid ${RG_OR}`,
 									boxShadow: HARD_SHADOW_LG,
+									color: RG_MARINE,
 								}}
 							>
 								<PlusIcon className="size-6" aria-hidden />
@@ -508,9 +508,9 @@ export default function DesignSystemShowcase() {
 								className="inline-flex h-14 items-center gap-3 rounded-full px-5 text-[14px] font-semibold uppercase tracking-wider transition-transform motion-safe:duration-200 hover:-translate-y-1"
 								style={{
 									backgroundColor: RG_OR,
-									color: RG_MARINE,
 									border: `2px solid ${RG_MARINE}`,
 									boxShadow: HARD_SHADOW_LG,
+									color: RG_MARINE,
 									fontFamily: "var(--font-cartoon-ds), sans-serif",
 								}}
 							>
@@ -527,9 +527,9 @@ export default function DesignSystemShowcase() {
 									className="inline-flex items-center gap-1 rounded-full px-2.5 py-1"
 									style={{
 										backgroundColor: RG_OR,
-										color: RG_MARINE,
 										border: `1.5px solid ${RG_MARINE}`,
 										boxShadow: "2px 2px 0 0 rgba(0,0,0,0.5)",
+										color: RG_MARINE,
 									}}
 								>
 									<StarIcon className="size-3" aria-hidden /> Patron
@@ -538,9 +538,9 @@ export default function DesignSystemShowcase() {
 									className="rounded-full px-2.5 py-1"
 									style={{
 										backgroundColor: RG_BRIQUE,
-										color: "#fffdf5",
 										border: `1.5px solid ${RG_OR}`,
 										boxShadow: "2px 2px 0 0 rgba(0,0,0,0.5)",
+										color: "#fffdf5",
 									}}
 								>
 									Roy
@@ -549,9 +549,9 @@ export default function DesignSystemShowcase() {
 									className="rounded-full px-2.5 py-1"
 									style={{
 										backgroundColor: RG_AZALEE,
-										color: RG_MARINE,
 										border: `1.5px solid ${RG_OR}`,
 										boxShadow: "2px 2px 0 0 rgba(0,0,0,0.5)",
+										color: RG_MARINE,
 									}}
 								>
 									Azalée
@@ -560,8 +560,8 @@ export default function DesignSystemShowcase() {
 									className="rounded-full px-2.5 py-1"
 									style={{
 										backgroundColor: "transparent",
-										color: RG_OR,
 										border: `1.5px solid ${RG_OR}`,
+										color: RG_OR,
 									}}
 								>
 									IEVR
@@ -573,11 +573,11 @@ export default function DesignSystemShowcase() {
 					{/* Cards persos avec mascots */}
 					<div className="col-span-12 mt-16 grid grid-cols-1 gap-6 md:grid-cols-3">
 						{[
-							{ name: "Roy", asset: "/RG_roy_LC.webp", tint: RG_BRIQUE },
-							{ name: "Gaëlle", asset: "/RG_gaelle_LC.webp", tint: RG_OR },
+							{ asset: "/RG_roy_LC.webp", name: "Roy", tint: RG_BRIQUE },
+							{ asset: "/RG_gaelle_LC.webp", name: "Gaëlle", tint: RG_OR },
 							{
-								name: "Azalée",
 								asset: "/RG_Azalee-logo.webp",
+								name: "Azalée",
 								tint: RG_AZALEE,
 							},
 						].map((card, i) => (
@@ -604,8 +604,8 @@ export default function DesignSystemShowcase() {
 										className="grid size-8 place-items-center rounded-full"
 										style={{
 											backgroundColor: card.tint,
-											color: "#fffdf5",
 											border: `1.5px solid ${RG_OR}`,
+											color: "#fffdf5",
 										}}
 									>
 										<StarIcon className="size-4" aria-hidden />
@@ -623,9 +623,9 @@ export default function DesignSystemShowcase() {
 								<h4
 									className="text-fluid-headline-lg leading-tight"
 									style={{
-										fontFamily: "var(--font-cartoon-ds), sans-serif",
-										color: "#fffdf5",
 										WebkitTextStroke: `1.5px ${RG_MARINE}`,
+										color: "#fffdf5",
+										fontFamily: "var(--font-cartoon-ds), sans-serif",
 										textShadow: `3px 3px 0 ${card.tint}`,
 									}}
 								>
@@ -657,17 +657,17 @@ export default function DesignSystemShowcase() {
 									className="grid aspect-square w-full place-items-center transition-transform motion-safe:duration-200 group-hover:-translate-y-1 group-hover:rotate-3"
 									style={{
 										backgroundColor: RG_OR,
-										color: RG_MARINE,
 										border: `2px solid ${RG_MARINE}`,
-										boxShadow: HARD_SHADOW,
 										borderRadius: s.name === "full" ? "9999px" : `${s.value}px`,
+										boxShadow: HARD_SHADOW,
+										color: RG_MARINE,
 									}}
 								>
 									<span
 										className="text-[28px]"
 										style={{
-											fontFamily: "var(--font-cartoon-ds), sans-serif",
 											WebkitTextStroke: `1.5px ${RG_MARINE}`,
+											fontFamily: "var(--font-cartoon-ds), sans-serif",
 											textShadow: `2px 2px 0 ${RG_BRIQUE}`,
 										}}
 									>
@@ -730,9 +730,9 @@ export default function DesignSystemShowcase() {
 												className="flex-1 rounded-md px-2 py-3 text-center"
 												style={{
 													backgroundColor: RG_BRIQUE,
-													color: "#fffdf5",
 													border: `1.5px solid ${RG_OR}`,
 													boxShadow: "2px 2px 0 0 rgba(0,0,0,0.5)",
+													color: "#fffdf5",
 												}}
 											>
 												{ms}ms
@@ -756,24 +756,24 @@ export default function DesignSystemShowcase() {
 							<div className="space-y-3 text-[11px]">
 								{[
 									{
-										name: "standard",
 										curve: "cubic-bezier(.2,0,0,1)",
 										dur: "var(--md-sys-motion-duration-medium2)",
+										name: "standard",
 									},
 									{
-										name: "emphasized",
 										curve: "cubic-bezier(.3,0,0,1)",
 										dur: "var(--md-sys-motion-duration-medium4)",
+										name: "emphasized",
 									},
 									{
-										name: "standard-decel",
 										curve: "cubic-bezier(0,0,0,1)",
 										dur: "var(--md-sys-motion-duration-long1)",
+										name: "standard-decel",
 									},
 									{
-										name: "emphasized-decel",
 										curve: "cubic-bezier(.05,.7,.1,1)",
 										dur: "var(--md-sys-motion-duration-long2)",
+										name: "emphasized-decel",
 									},
 								].map((e) => (
 									<div
@@ -789,8 +789,8 @@ export default function DesignSystemShowcase() {
 											<span
 												className="uppercase tracking-[0.18em]"
 												style={{
-													fontFamily: "var(--font-cartoon-ds), sans-serif",
 													color: RG_OR,
+													fontFamily: "var(--font-cartoon-ds), sans-serif",
 												}}
 											>
 												{e.name}
@@ -806,9 +806,9 @@ export default function DesignSystemShowcase() {
 											style={{
 												backgroundColor: RG_AZALEE,
 												border: `1.5px solid ${RG_OR}`,
+												transitionDuration: e.dur,
 												transitionProperty: "transform",
 												transitionTimingFunction: e.curve,
-												transitionDuration: e.dur,
 											}}
 										/>
 									</div>
@@ -833,19 +833,19 @@ export default function DesignSystemShowcase() {
 									className="grid size-24 place-items-center rounded-[12px] transition-transform motion-safe:duration-300 hover:-translate-y-2"
 									style={{
 										backgroundColor: RG_OR,
-										color: RG_MARINE,
 										border: `2px solid ${RG_MARINE}`,
 										boxShadow:
 											i === 0
 												? "none"
 												: `${i + 1}px ${i + 1}px 0 0 rgba(0,0,0,0.55), ${(i + 1) * 2}px ${(i + 1) * 2}px 0 0 ${RG_BRIQUE}`,
+										color: RG_MARINE,
 									}}
 								>
 									<span
 										className="text-[28px]"
 										style={{
-											fontFamily: "var(--font-cartoon-ds), sans-serif",
 											WebkitTextStroke: `1.5px ${RG_MARINE}`,
+											fontFamily: "var(--font-cartoon-ds), sans-serif",
 										}}
 									>
 										{lvl}
@@ -887,9 +887,9 @@ export default function DesignSystemShowcase() {
 							<p
 								className="text-fluid-headline-md leading-tight"
 								style={{
-									fontFamily: "var(--font-cartoon-ds), sans-serif",
-									color: "#fffdf5",
 									WebkitTextStroke: `1.5px ${RG_MARINE}`,
+									color: "#fffdf5",
+									fontFamily: "var(--font-cartoon-ds), sans-serif",
 									textShadow: `3px 3px 0 ${RG_BRIQUE}`,
 								}}
 							>
@@ -931,9 +931,9 @@ export default function DesignSystemShowcase() {
 						<p
 							className="text-fluid-headline-md leading-tight"
 							style={{
-								fontFamily: "var(--font-cartoon-ds), sans-serif",
-								color: "#fffdf5",
 								WebkitTextStroke: `2px ${RG_MARINE}`,
+								color: "#fffdf5",
+								fontFamily: "var(--font-cartoon-ds), sans-serif",
 								textShadow: `4px 4px 0 ${RG_BRIQUE}, 6px 6px 0 rgba(0,0,0,0.4)`,
 							}}
 						>
@@ -996,12 +996,12 @@ function SectionLabel({ kicker, title }: { kicker: string; title: string }) {
 				className="col-span-12 text-fluid-display-lg leading-[0.95] md:col-span-9"
 				style={{
 					...cartoonTitleStyle,
-					color: "#fffdf5",
 					WebkitTextStroke: `3px ${RG_MARINE}`,
+					color: "#fffdf5",
+					display: "inline-block",
 					textShadow: `4px 4px 0 ${RG_BRIQUE}, 6px 6px 0 rgba(0,0,0,0.45)`,
 					transform: "rotate(-1deg)",
 					transformOrigin: "left",
-					display: "inline-block",
 				}}
 			>
 				{title}

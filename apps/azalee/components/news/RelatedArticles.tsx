@@ -7,8 +7,8 @@ import { Badge } from "@rosegriffon/ui";
 
 const CATEGORY_LABELS: Record<string, string> = {
   announcement: "Annonce",
-  event: "Événement",
   community: "Communauté",
+  event: "Événement",
 };
 
 interface RelatedArticle {
@@ -26,7 +26,7 @@ interface RelatedArticlesProps {
 }
 
 export function RelatedArticles({ articles }: RelatedArticlesProps) {
-  if (articles.length === 0) return null;
+  if (articles.length === 0) {return null;}
 
   return (
     <section className="border-t border-outline-variant/20 pt-8">

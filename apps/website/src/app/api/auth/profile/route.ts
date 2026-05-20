@@ -1,4 +1,5 @@
-import { type NextRequest, NextResponse } from "next/server";
+import { NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
 
 import { getServerUser } from "@/lib/auth-helpers";
 import { createClient } from "@/lib/supabase/server";
@@ -20,13 +21,13 @@ export async function GET() {
 			.eq("id", user.id)
 			.single();
 
-		if (error && error.code !== "PGRST116") throw error;
+		if (error && error.code !== "PGRST116") {throw error;}
 
 		return NextResponse.json({
 			profile: profile || {
-				id: user.id,
-				displayName: user.name || "",
 				bio: "",
+				displayName: user.name || "",
+				id: user.id,
 			},
 		});
 	} catch (error) {
@@ -73,9 +74,9 @@ export async function PUT(request: NextRequest) {
 		const supabase = await createClient();
 		const { error: profileError } = await supabase.from("profiles").upsert(
 			{
-				id: user.id,
-				full_name: displayName || user.name,
 				bio: bio || "",
+				full_name: displayName || user.name,
+				id: user.id,
 				updated_at: new Date().toISOString(),
 			},
 			{ onConflict: "id" },
@@ -87,7 +88,7 @@ export async function PUT(request: NextRequest) {
 
 		return NextResponse.json({
 			message: "Profil mis à jour avec succès",
-			profile: { id: user.id, displayName: displayName || user.name, bio },
+			profile: { bio, displayName: displayName || user.name, id: user.id },
 		});
 	} catch (error) {
 		console.error("Error updating profile:", error);

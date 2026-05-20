@@ -13,74 +13,74 @@ import type { Metadata } from "next";
 import { PublicTiers } from "@/components/patreon/PublicTiers";
 
 export const metadata: Metadata = {
-	title: "Nous soutenir · Rose Griffon",
 	description:
 		"Rose Griffon est porté par sa communauté. Soutenez l'association via Patreon (mensuel) ou PayPal (don ponctuel). Transparence garantie.",
+	title: "Nous soutenir · Rose Griffon",
 };
 
 export const dynamic = "force-dynamic";
 
 const SUPPORT_OPTIONS = [
 	{
-		key: "patreon",
-		title: "Soutien mensuel via Patreon",
-		subtitle: "Mécénat récurrent",
-		desc: "Rejoignez nos mécènes sur Patreon pour un soutien régulier. Accédez à des contenus exclusifs, des coulisses et participez activement à la vie de l'association.",
 		cta: "Devenir mécène",
-		href: "https://patreon.com/RoseGriffon",
+		desc: "Rejoignez nos mécènes sur Patreon pour un soutien régulier. Accédez à des contenus exclusifs, des coulisses et participez activement à la vie de l'association.",
 		external: true,
+		href: "https://patreon.com/RoseGriffon",
+		key: "patreon",
+		subtitle: "Mécénat récurrent",
+		title: "Soutien mensuel via Patreon",
 		variant: "primary" as const,
 	},
 	{
-		key: "paypal",
-		title: "Don ponctuel via PayPal",
-		subtitle: "Coup de main one-shot",
-		desc: "Vous souhaitez faire un don unique pour soutenir nos actions ? PayPal vous permet de contribuer facilement et en toute sécurité, quel que soit le montant.",
 		cta: "Faire un don",
-		href: "https://www.paypal.com/paypalme/rosegriffon",
+		desc: "Vous souhaitez faire un don unique pour soutenir nos actions ? PayPal vous permet de contribuer facilement et en toute sécurité, quel que soit le montant.",
 		external: true,
+		href: "https://www.paypal.com/paypalme/rosegriffon",
+		key: "paypal",
+		subtitle: "Coup de main one-shot",
+		title: "Don ponctuel via PayPal",
 		variant: "secondary" as const,
 	},
 ];
 
 const WHY_CARDS = [
 	{
+		desc: "Articles, chroniques, lives, événements — tout ce contenu est gratuit pour la communauté grâce à vos soutiens.",
 		icon: Megaphone,
 		title: "Faire vivre Inazuma Eleven en France",
-		desc: "Articles, chroniques, lives, événements — tout ce contenu est gratuit pour la communauté grâce à vos soutiens.",
 	},
 	{
+		desc: "Achilléa fait grandir l'e-sport IE en France. Tournois, coaching, format — tout ça coûte du temps et du matos.",
 		icon: Trophy,
 		title: "Une scène compétitive structurée",
-		desc: "Achilléa fait grandir l'e-sport IE en France. Tournois, coaching, format — tout ça coûte du temps et du matos.",
 	},
 	{
+		desc: "Tous les contributeurs RG sont bénévoles. Vos dons financent les outils, l'infra, le matos — pas les salaires.",
 		icon: Users,
 		title: "Une équipe de bénévoles",
-		desc: "Tous les contributeurs RG sont bénévoles. Vos dons financent les outils, l'infra, le matos — pas les salaires.",
 	},
 ];
 
 const TRANSPARENCY = [
 	{
+		desc: "Tournois, conventions, rencontres physiques. Coût matériel, lots, déplacements.",
 		icon: Trophy,
 		title: "Événements communautaires",
-		desc: "Tournois, conventions, rencontres physiques. Coût matériel, lots, déplacements.",
 	},
 	{
+		desc: "Azalée (chroniques + chaîne), Rose Griffon TV. Outils de prod, hébergement.",
 		icon: Sparkles,
 		title: "Projets médiatiques",
-		desc: "Azalée (chroniques + chaîne), Rose Griffon TV. Outils de prod, hébergement.",
 	},
 	{
+		desc: "Achilléa : scène compétitive structurée, tournois nationaux, coaching.",
 		icon: Trophy,
 		title: "Développement e-sport",
-		desc: "Achilléa : scène compétitive structurée, tournois nationaux, coaching.",
 	},
 	{
+		desc: "Serveurs, CDN, sites, bots Discord. Tout est self-hosted pour rester maître du data.",
 		icon: Eye,
 		title: "Infrastructure technique",
-		desc: "Serveurs, CDN, sites, bots Discord. Tout est self-hosted pour rester maître du data.",
 	},
 ];
 

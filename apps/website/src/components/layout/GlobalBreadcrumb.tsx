@@ -15,29 +15,29 @@ import {
 
 // Mapping des routes pour un affichage plus convivial
 const routeMapping: Record<string, string> = {
-  dashboard: "Tableau de bord",
-  account: "Mon Compte",
-  settings: "Paramètres",
-  admin: "Administration",
-  staff: "Équipe",
-  "notre-equipe": "Notre Équipe",
-  projets: "Projets",
-  nostalgie: "Nostalgie VR",
-  emotes: "Galerie d'Émotes",
-  muraux: "Muraux",
-  evenements: "Événements",
-  chroniques: "Chroniques",
   "a-propos": "À Propos",
-  contact: "Contact",
-  "rejoindre-rg": "Nous Rejoindre",
-  soutenir: "Nous Soutenir",
-  "rose-griffon-tv": "Rose Griffon TV",
-  "charte-engagements": "Charte et Engagements",
-  "cellule-de-mediation": "Médiation",
+  account: "Mon Compte",
+  admin: "Administration",
   association: "L'Association",
-  partenaires: "Partenaires",
+  "cellule-de-mediation": "Médiation",
+  "charte-engagements": "Charte et Engagements",
+  chroniques: "Chroniques",
+  contact: "Contact",
+  dashboard: "Tableau de bord",
+  emotes: "Galerie d'Émotes",
+  evenements: "Événements",
+  muraux: "Muraux",
+  nostalgie: "Nostalgie VR",
+  "notre-equipe": "Notre Équipe",
   outils: "Outils",
+  partenaires: "Partenaires",
   pfp: "Avatar RG",
+  projets: "Projets",
+  "rejoindre-rg": "Nous Rejoindre",
+  "rose-griffon-tv": "Rose Griffon TV",
+  settings: "Paramètres",
+  soutenir: "Nous Soutenir",
+  staff: "Équipe",
 };
 
 interface GlobalBreadcrumbProps {
@@ -69,8 +69,8 @@ export default function GlobalBreadcrumb({ mobileMode = false }: GlobalBreadcrum
 
   // Mode mobile : afficher uniquement le nom de la page courante
   if (mobileMode) {
-    const lastSegment = segments[segments.length - 1];
-    if (!lastSegment) return null;
+    const lastSegment = segments.at(-1);
+    if (!lastSegment) {return null;}
     const displayName = getDisplayName(lastSegment);
     return (
       <span className="font-semibold text-sm text-foreground truncate block">{displayName}</span>

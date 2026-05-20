@@ -59,7 +59,7 @@ export async function getArticles({
     console.error("Error fetching articles:", error);
     return {
       data: [],
-      meta: { total: 0, page, limit, totalPages: 0 },
+      meta: { limit, page, total: 0, totalPages: 0 },
     };
   }
 
@@ -68,9 +68,9 @@ export async function getArticles({
   return {
     data: data || [],
     meta: {
-      total,
-      page,
       limit,
+      page,
+      total,
       totalPages: Math.ceil(total / limit),
     },
   };
@@ -102,18 +102,18 @@ export async function getArticleStats() {
 
   if (error) {
     console.error("Error fetching article stats:", error);
-    return { total: 0, published: 0, draft: 0, categories: [] };
+    return { categories: [], draft: 0, published: 0, total: 0 };
   }
 
   const total = data.length;
   const published = data.filter((a) => a.status === "published").length;
   const draft = data.filter((a) => a.status === "draft").length;
-  const categories = Array.from(new Set(data.map((a) => a.category).filter(Boolean))) as string[];
+  const categories = [...new Set(data.map((a) => a.category).filter(Boolean))] as string[];
 
   return {
-    total,
-    published,
-    draft,
     categories,
+    draft,
+    published,
+    total,
   };
 }

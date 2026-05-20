@@ -4,7 +4,7 @@ import { google } from "googleapis";
 
 import { createLogger } from "@/lib/logger";
 import type { StreamSchedule } from "@rosegriffon/types";
-import type { Database, Tables, Insert, Update } from "@rosegriffon/db";
+import type { Database, Insert, Tables, Update } from "@rosegriffon/db";
 
 const logger = createLogger("google-calendar");
 
@@ -32,8 +32,8 @@ function getCalendarClient() {
   });
 
   return google.calendar({
-    version: "v3",
     auth,
+    version: "v3",
   });
 }
 
@@ -53,15 +53,15 @@ function parseEventTitle(title: string): {
 
   if (match) {
     return {
-      streamer_name: match[1]?.trim() ?? "Inconnu",
       category: match[2]?.trim() ?? "Stream",
+      streamer_name: match[1]?.trim() ?? "Inconnu",
     };
   }
 
   // Fallback: tout le titre comme streamer_name
   return {
-    streamer_name: title.replace(/Stream\s*/i, "").trim(),
     category: "Stream",
+    streamer_name: title.replace(/Stream\s*/i, "").trim(),
   };
 }
 
@@ -73,8 +73,8 @@ function transformEvent(event: unknown): StreamSchedule | null {
   try {
     if (!calendarEvent.start || !calendarEvent.end) {
       logger.warn("Événement sans dateTime, ignoré", {
-        summary: calendarEvent.summary,
         id: calendarEvent.id,
+        summary: calendarEvent.summary,
       });
       return null;
     }
@@ -84,8 +84,8 @@ function transformEvent(event: unknown): StreamSchedule | null {
 
     if (!startInfo.dateTime || !endInfo.dateTime) {
       logger.warn("Événement sans dateTime, ignoré", {
-        summary: calendarEvent.summary,
         id: calendarEvent.id,
+        summary: calendarEvent.summary,
       });
       return null;
     }
@@ -101,15 +101,15 @@ function transformEvent(event: unknown): StreamSchedule | null {
     // Formater les heures en HH:MM (fuseau horaire Europe/Paris)
     const start_time = startDate.toLocaleTimeString("fr-FR", {
       hour: "2-digit",
-      minute: "2-digit",
       hour12: false,
+      minute: "2-digit",
       timeZone: "Europe/Paris",
     });
 
     const end_time = endDate.toLocaleTimeString("fr-FR", {
       hour: "2-digit",
-      minute: "2-digit",
       hour12: false,
+      minute: "2-digit",
       timeZone: "Europe/Paris",
     });
 
@@ -119,20 +119,20 @@ function transformEvent(event: unknown): StreamSchedule | null {
     ).getDay();
 
     return {
-      id: (calendarEvent.id as string) || `gcal-${Date.now()}`,
-      day_of_week,
-      streamer_name,
-      start_time,
-      end_time,
       category,
-      status: "active",
-      notes: (calendarEvent.description as string) || null,
       created_at: (calendarEvent.created as string) || new Date().toISOString(),
+      day_of_week,
+      end_time,
+      id: (calendarEvent.id as string) || `gcal-${Date.now()}`,
+      notes: (calendarEvent.description as string) || null,
+      start_time,
+      status: "active",
+      streamer_name,
       updated_at: (calendarEvent.updated as string) || new Date().toISOString(),
     };
-  } catch (err) {
+  } catch (error) {
     logger.error("Erreur transformation événement", {
-      error: err instanceof Error ? err.message : String(err),
+      error: error instanceof Error ? error.message : String(error),
       event: calendarEvent.summary,
     });
     return null;
@@ -159,17 +159,17 @@ export async function fetchGoogleCalendarEvents(daysAhead: number = 7): Promise<
 
     logger.debug("Récupération événements Google Calendar", {
       calendarId: `${CALENDAR_ID.substring(0, 20)}...`,
-      timeMin,
       timeMax,
+      timeMin,
     });
 
     const response = await calendar.events.list({
       calendarId: CALENDAR_ID,
-      timeMin,
-      timeMax,
       maxResults: 50,
-      singleEvents: true,
       orderBy: "startTime",
+      singleEvents: true,
+      timeMax,
+      timeMin,
     });
 
     const events = response.data.items || [];
@@ -186,21 +186,21 @@ export async function fetchGoogleCalendarEvents(daysAhead: number = 7): Promise<
         uniqueSchedules.set(key, schedule);
       }
     });
-    schedules = Array.from(uniqueSchedules.values());
+    schedules = [...uniqueSchedules.values()];
 
     logger.debug(
       `${schedules.length} événement(s) transformé(s) avec succès (après déduplication)`
     );
 
     return schedules;
-  } catch (err) {
-    const errorMessage = err instanceof Error ? err.message : String(err);
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : String(error);
     logger.error("Erreur lors de la récupération Google Calendar", {
       error: errorMessage,
       code:
-        err instanceof Error && "code" in err ? (err as Record<string, unknown>).code : undefined,
+        error instanceof Error && "code" in error ? (error as Record<string, unknown>).code : undefined,
     });
-    throw err;
+    throw error;
   }
 }
 
@@ -225,7 +225,7 @@ export async function getGoogleCalendarSchedulesByDay(): Promise<Record<string, 
     // Trier chaque jour par heure de début
     Object.keys(groupedByDay).forEach((day) => {
       groupedByDay[day]?.sort((a, b) => {
-        if (!a.start_time || !b.start_time) return 0;
+        if (!a.start_time || !b.start_time) {return 0;}
         return a.start_time.localeCompare(b.start_time);
       });
     });
@@ -233,8 +233,8 @@ export async function getGoogleCalendarSchedulesByDay(): Promise<Record<string, 
     logger.info(`Planning groupé: ${Object.keys(groupedByDay).length} jour(s) avec streams`);
 
     return groupedByDay;
-  } catch (err) {
-    logger.error("Erreur dans getGoogleCalendarSchedulesByDay", err);
+  } catch (error) {
+    logger.error("Erreur dans getGoogleCalendarSchedulesByDay", error);
     return {};
   }
 }
@@ -243,5 +243,5 @@ export async function getGoogleCalendarSchedulesByDay(): Promise<Record<string, 
  * Vérifie si l'API Google Calendar est configurée (service account JSON présent)
  */
 export async function isGoogleCalendarConfigured(): Promise<boolean> {
-  return !!process.env.GOOGLE_APPLICATION_CREDENTIALS;
+  return Boolean(process.env.GOOGLE_APPLICATION_CREDENTIALS);
 }

@@ -21,10 +21,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const value: AuthContextType = {
-    user: session?.user ?? null,
-    isLoading: isPending,
     error: error ? String(error) : null,
+    isLoading: isPending,
     logout,
+    user: session?.user ?? null,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

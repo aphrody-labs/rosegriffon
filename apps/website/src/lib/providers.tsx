@@ -24,8 +24,8 @@ export function Providers({ children }: { children: React.ReactNode }) {
       storage: window.localStorage,
     });
     persistQueryClient({
-      queryClient,
       persister: localStoragePersister,
+      queryClient,
     });
   }, [queryClient]);
 

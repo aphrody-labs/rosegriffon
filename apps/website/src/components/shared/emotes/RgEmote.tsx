@@ -3,7 +3,8 @@
 import Image from "next/image";
 import { useState } from "react";
 
-import { EMOTES, type Emote } from "@/lib/emotes";
+import { EMOTES } from '@/lib/emotes';
+import type { Emote } from '@/lib/emotes';
 import { cn } from "@/lib/utils";
 
 interface RgEmoteProps extends React.HTMLAttributes<HTMLDivElement> {
@@ -61,7 +62,7 @@ export default function RgEmote({
           "hover:scale-110 hover:rotate-12 transition-transform duration-300 cursor-pointer",
         className
       )}
-      style={{ width: size, height: size }}
+      style={{ height: size, width: size }}
       title={emote.alt}
       role="img"
       aria-label={emote.alt}
@@ -88,7 +89,7 @@ export default function RgEmote({
  */
 interface RgEmoteLineProps extends React.HTMLAttributes<HTMLDivElement> {
   /** Noms des emotes à afficher */
-  emotes: Array<keyof typeof EMOTES>;
+  emotes: (keyof typeof EMOTES)[];
   /** Taille des emotes en pixels */
   size?: number;
   /** Espacement entre les emotes */
@@ -167,7 +168,7 @@ export function RgEmoteGrid({
         >
           <RgEmote name={emote.name as keyof typeof EMOTES} size={size} animated={animated} />
           <span className="text-xs text-muted-foreground text-center">
-            {emote.name.replace(/_/g, " ")}
+            {emote.name.replaceAll(/_/g, " ")}
           </span>
         </button>
       ))}

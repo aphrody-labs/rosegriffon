@@ -1,6 +1,6 @@
 import { IPinfoWrapper } from "node-ipinfo";
 
-const IPINFO_TOKEN = process.env.IPINFO_TOKEN;
+const {IPINFO_TOKEN} = process.env;
 
 // Initialize wrapper only if token is present
 const ipinfoWrapper = IPINFO_TOKEN ? new IPinfoWrapper(IPINFO_TOKEN) : null;
@@ -44,10 +44,10 @@ export async function getIPIntelligence(ip: string): Promise<IPIntelligenceData 
   // For local dev, return mock data.
   if (process.env.NODE_ENV === "development" && (ip === "::1" || ip === "127.0.0.1")) {
     return {
-      ip,
       city: "Localhost",
       country: "Devland",
-      privacy: { vpn: false, proxy: false, tor: false },
+      ip,
+      privacy: { proxy: false, tor: false, vpn: false },
     };
   }
 
@@ -62,14 +62,14 @@ export async function getIPIntelligence(ip: string): Promise<IPIntelligenceData 
 
     // Normalize data structure
     return {
-      ip: data.ip,
+      asn: data.asn,
       city: data.city,
-      region: data.region,
+      company: data.company,
       country: data.country,
+      ip: data.ip,
       loc: data.loc,
       org: data.org,
       postal: data.postal,
-      timezone: data.timezone,
       privacy: data.privacy
         ? {
             vpn: data.privacy.vpn || false,
@@ -79,8 +79,8 @@ export async function getIPIntelligence(ip: string): Promise<IPIntelligenceData 
             hosting: data.privacy.hosting || false,
           }
         : undefined,
-      asn: data.asn,
-      company: data.company,
+      region: data.region,
+      timezone: data.timezone,
     };
   } catch (error) {
     console.error(`Error looking up IP ${ip}:`, error);

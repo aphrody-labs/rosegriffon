@@ -6,10 +6,10 @@ import { isKana, toRomaji } from "wanakana";
  * Returns null if input is empty or contains no kana.
  */
 export function japaneseToRomaji(name: string | undefined | null): string | null {
-  if (!name) return null;
+  if (!name) {return null;}
 
   const hasKana = [...name].some((ch) => isKana(ch));
-  if (!hasKana) return null;
+  if (!hasKana) {return null;}
 
   const parts = name.split(/[・\s]+/).filter(Boolean);
   const romaji = parts

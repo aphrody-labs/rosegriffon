@@ -31,19 +31,19 @@ interface WebhooksPayload {
 
 export async function GET() {
 	const auth = await requireApiPatreonCreator();
-	if (!auth.ok) return auth.response;
+	if (!auth.ok) {return auth.response;}
 
 	let tokens;
 	try {
 		tokens = await loadCreatorTokens();
 		tokens = await ensureFreshAccessToken(tokens);
-	} catch (e) {
-		const msg = e instanceof Error ? e.message : String(e);
+	} catch (error) {
+		const msg = error instanceof Error ? error.message : String(error);
 		return NextResponse.json(
 			{
-				ok: false,
-				error: "Lier le compte créateur Patreon d'abord.",
 				detail: msg,
+				error: "Lier le compte créateur Patreon d'abord.",
+				ok: false,
 			},
 			{ status: 400 },
 		);
@@ -74,9 +74,9 @@ export async function GET() {
 				...w.attributes,
 			})),
 		});
-	} catch (e) {
-		const msg = e instanceof Error ? e.message : String(e);
-		console.error("[admin/patreon/webhooks] fetch failed", e);
-		return NextResponse.json({ ok: false, error: msg }, { status: 500 });
+	} catch (error) {
+		const msg = error instanceof Error ? error.message : String(error);
+		console.error("[admin/patreon/webhooks] fetch failed", error);
+		return NextResponse.json({ error: msg, ok: false }, { status: 500 });
 	}
 }

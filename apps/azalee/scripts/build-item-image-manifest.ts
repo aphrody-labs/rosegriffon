@@ -44,7 +44,7 @@ for (const dir of SCAN_DIRS) {
 		const glob = new Bun.Glob("*.png");
 		for await (const f of glob.scan({ cwd: `${MENU_ROOT}/${dir}` })) {
 			set.add(f);
-			if (!fileIndex.has(f)) fileIndex.set(f, `${dir}/${f}`);
+			if (!fileIndex.has(f)) {fileIndex.set(f, `${dir}/${f}`);}
 		}
 	} catch {
 		console.warn(`Skip missing dir: ${dir}`);
@@ -63,8 +63,8 @@ for (let offset = 0; ; offset += PAGE) {
 		`${SUPABASE_URL}/rest/v1/inagle_items?select=internal_code,image_url&limit=${PAGE}&offset=${offset}`,
 		{
 			headers: {
-				apikey: SUPABASE_KEY,
 				Authorization: `Bearer ${SUPABASE_KEY}`,
+				apikey: SUPABASE_KEY,
 			},
 		},
 	);
@@ -74,7 +74,7 @@ for (let offset = 0; ; offset += PAGE) {
 	}
 	const page: typeof items = await r.json();
 	items.push(...page);
-	if (page.length < PAGE) break;
+	if (page.length < PAGE) {break;}
 }
 console.log(`DB items: ${items.length}`);
 
@@ -87,7 +87,7 @@ const unresolvedSamples: string[] = [];
 
 for (const it of items) {
 	const code = it.internal_code;
-	if (!code) continue;
+	if (!code) {continue;}
 
 	// 1. DB image_url direct match.
 	if (it.image_url) {
@@ -135,10 +135,10 @@ for (const it of items) {
 			break;
 		}
 	}
-	if (manifest[code]) continue;
+	if (manifest[code]) {continue;}
 
 	unresolved++;
-	if (unresolvedSamples.length < 15) unresolvedSamples.push(code);
+	if (unresolvedSamples.length < 15) {unresolvedSamples.push(code);}
 }
 
 const out = "data/item-image-manifest.json";
@@ -150,7 +150,7 @@ console.log(`Resolved via DB image_url (no manifest needed): ${viaDirect}`);
 console.log(`Resolved via internal_code lookup: ${viaInternalCode}`);
 console.log(`Resolved via skill telop fallback: ${viaSkillTelop}`);
 console.log(`Unresolved: ${unresolved}`);
-if (unresolvedSamples.length) {
+if (unresolvedSamples.length > 0) {
 	console.log(`Unresolved samples: ${unresolvedSamples.join(", ")}`);
 }
 console.log(`Written: ${out}`);

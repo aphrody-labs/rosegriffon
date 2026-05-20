@@ -29,11 +29,11 @@ export default async function ChroniquesAdminPage({
 
   const [articlesRes, stats] = await Promise.all([
     getArticles({
-      page,
-      limit: 20, // Reduced from 50 to 20 for better pagination UX
-      status: statusFilter,
       category: categoryFilter,
+      limit: 20, // Reduced from 50 to 20 for better pagination UX
+      page,
       query,
+      status: statusFilter,
     }),
     getArticleStats(),
   ]);

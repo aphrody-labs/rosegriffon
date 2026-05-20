@@ -9,7 +9,7 @@ import { getPatreonFeedForViewer } from "@/lib/patreon/feed";
 export async function PatreonFeedSection() {
 	const { access, posts } = await getPatreonFeedForViewer({ limit: 6 });
 
-	if (!access.linked) return null;
+	if (!access.linked) {return null;}
 
 	return (
 		<section

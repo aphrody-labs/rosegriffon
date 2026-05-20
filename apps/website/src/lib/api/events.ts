@@ -1,4 +1,5 @@
-import { type calendar_v3, google } from "googleapis";
+import { google } from 'googleapis';
+import type { calendar_v3 } from 'googleapis';
 
 import type { CalendarEvent } from "@/types/api";
 
@@ -32,12 +33,12 @@ export async function getCalendarEvents(): Promise<CalendarEvent[]> {
     const auth = new google.auth.GoogleAuth({
       credentials: {
         client_email: clientEmail,
-        private_key: privateKey.replace(/\\n/g, "\n"),
+        private_key: privateKey.replaceAll(/\\n/g, "\n"),
       },
       scopes: SCOPES,
     });
 
-    const calendar = google.calendar({ version: "v3", auth });
+    const calendar = google.calendar({ auth, version: "v3" });
 
     // Set time range to include past events (from 2024)
     const now = new Date();
@@ -48,27 +49,27 @@ export async function getCalendarEvents(): Promise<CalendarEvent[]> {
     // Fetch events
     const response = await calendar.events.list({
       calendarId,
-      timeMin: startDate.toISOString(),
-      timeMax: oneYearFromNow.toISOString(),
-      singleEvents: true,
-      orderBy: "startTime",
       maxResults: 100, // Increase results to see history
+      orderBy: "startTime",
+      singleEvents: true,
+      timeMax: oneYearFromNow.toISOString(),
+      timeMin: startDate.toISOString(),
     });
 
     // Transform and return all events (filtering will be done by UI)
     const events =
       response.data.items?.map((event: calendar_v3.Schema$Event) => ({
-        id: event.id,
-        summary: event.summary,
-        location: event.location,
         description: event.description,
-        start: event.start,
         end: event.end,
         extendedProperties: event.extendedProperties,
+        id: event.id,
+        location: event.location,
+        start: event.start,
+        summary: event.summary,
       })) || [];
 
     return events;
-  } catch (_error) {
+  } catch {
     // Silent fail for missing configuration or API errors
     return [];
   }

@@ -1,6 +1,6 @@
 #!/usr/bin/env bun
 /**
- * create-draft.ts — Cree un brouillon dans le CMS azalee.
+ * Create-draft.ts — Cree un brouillon dans le CMS azalee.
  *
  * Wrapper HTTP autour de POST /api/admin/news/draft.
  * Auth via CLAUDE_API_KEY (env), defaut endpoint = https://azalee.rosegriffon.fr.
@@ -32,19 +32,17 @@
  *   --help
  */
 
-interface Args {
-	[k: string]: string | boolean | undefined;
-}
+type Args = Record<string, string | boolean | undefined>;
 
 function parseArgs(argv: string[]): Args {
 	const out: Args = {};
 	for (const raw of argv) {
-		if (raw === "--help" || raw === "-h") out.help = true;
-		else if (raw === "--stdin") out.stdin = true;
-		else if (raw === "--json") out.json = true;
+		if (raw === "--help" || raw === "-h") {out.help = true;}
+		else if (raw === "--stdin") {out.stdin = true;}
+		else if (raw === "--json") {out.json = true;}
 		else {
 			const m = raw.match(/^--([a-z-]+)=(.*)$/i);
-			if (m) out[m[1]] = m[2];
+			if (m) {out[m[1]] = m[2];}
 		}
 	}
 	return out;
@@ -89,7 +87,7 @@ Sortie:
 
 async function readStdin(): Promise<string> {
 	const chunks: Uint8Array[] = [];
-	for await (const chunk of Bun.stdin.stream()) chunks.push(chunk);
+	for await (const chunk of Bun.stdin.stream()) {chunks.push(chunk);}
 	return new TextDecoder().decode(Buffer.concat(chunks));
 }
 
@@ -120,11 +118,11 @@ async function main() {
 	}
 
 	let content: string | undefined;
-	if (args.stdin) content = (await readStdin()).trim();
+	if (args.stdin) {content = (await readStdin()).trim();}
 	else if (args["content-file"])
-		content = await Bun.file(args["content-file"] as string).text();
+		{content = await Bun.file(args["content-file"] as string).text();}
 	else if (args.content)
-		content = (args.content as string).replaceAll('\\n', "\n");
+		{content = (args.content as string).replaceAll('\\n', "\n");}
 
 	const tags =
 		typeof args.tags === "string"
@@ -135,30 +133,30 @@ async function main() {
 			: undefined;
 
 	const body: Record<string, unknown> = {
-		title: args.title,
-		slug: args.slug,
-		excerpt: args.excerpt,
-		content,
-		category: args.category,
-		tags,
-		featured_image_url: args["featured-image"],
-		featured_image_alt: args["featured-image-alt"],
-		meta_title: args["meta-title"],
-		meta_description: args["meta-description"],
-		author_id: args["author-id"],
 		author_email: args["author-email"],
+		author_id: args["author-id"],
 		author_username: args["author-username"],
+		category: args.category,
+		content,
+		excerpt: args.excerpt,
+		featured_image_alt: args["featured-image-alt"],
+		featured_image_url: args["featured-image"],
+		meta_description: args["meta-description"],
+		meta_title: args["meta-title"],
+		slug: args.slug,
+		tags,
+		title: args.title,
 	};
-	for (const k of Object.keys(body)) if (body[k] === undefined) delete body[k];
+	for (const k of Object.keys(body)) {if (body[k] === undefined) delete body[k];}
 
 	const url = `${endpoint.replace(/\/$/, "")}/api/admin/news/draft`;
 	const res = await fetch(url, {
-		method: "POST",
-		headers: {
-			"content-type": "application/json",
-			authorization: `Bearer ${apiKey}`,
-		},
 		body: JSON.stringify(body),
+		headers: {
+			authorization: `Bearer ${apiKey}`,
+			"content-type": "application/json",
+		},
+		method: "POST",
 	});
 
 	const json = (await res.json().catch(() => ({}))) as Record<string, unknown>;
@@ -181,7 +179,7 @@ async function main() {
 	}
 }
 
-main().catch((e) => {
-	console.error(`ERREUR: ${(e as Error).message}`);
+main().catch((error) => {
+	console.error(`ERREUR: ${(error as Error).message}`);
 	process.exit(1);
 });

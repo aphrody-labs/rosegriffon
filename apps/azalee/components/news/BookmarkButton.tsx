@@ -22,7 +22,7 @@ export function BookmarkButton({
   const [bookmarked, setBookmarked] = useState(initialBookmarked);
   const [isPending, startTransition] = useTransition();
 
-  if (!user) return null;
+  if (!user) {return null;}
 
   const handleToggle = () => {
     const newState = !bookmarked;

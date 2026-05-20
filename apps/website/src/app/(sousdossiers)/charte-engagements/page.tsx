@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@rosegriffon/ui";
 // Page statique avec ISR - Revalidate toutes les semaines (charte rarement modifiée)
-export const revalidate = 604800; // 1 semaine
+export const revalidate = 604_800; // 1 semaine
 
 export default function CharteEngagementsPage() {
   return (

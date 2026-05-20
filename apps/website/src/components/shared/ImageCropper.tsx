@@ -2,7 +2,8 @@
 
 import { Button, Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@rosegriffon/ui";
 import { useCallback, useState } from "react";
-import Cropper, { type Area } from "react-easy-crop";
+import Cropper from 'react-easy-crop';
+import type { Area } from 'react-easy-crop';
 
 import { Slider } from "@rosegriffon/ui";
 import getCroppedImg from "@/lib/canvasUtils";
@@ -43,8 +44,8 @@ export default function ImageCropper({
           onCropComplete(croppedImage);
           onOpenChange(false);
         }
-      } catch (e) {
-        console.error(e);
+      } catch (error) {
+        console.error(error);
       }
     }
   };
@@ -80,7 +81,7 @@ export default function ImageCropper({
               step={0.1}
               onValueChange={(v) => {
                 const val = v[0];
-                if (val !== undefined) setZoom(val);
+                if (val !== undefined) {setZoom(val);}
               }}
             />
           </div>
@@ -94,7 +95,7 @@ export default function ImageCropper({
               step={1}
               onValueChange={(v) => {
                 const val = v[0];
-                if (val !== undefined) setRotation(val);
+                if (val !== undefined) {setRotation(val);}
               }}
             />
           </div>

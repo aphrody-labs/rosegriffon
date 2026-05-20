@@ -38,22 +38,22 @@ interface SelectableNewsCardProps {
 
 const QUICK_STATUS = [
 	{
-		value: "draft",
-		label: "Brouillon",
-		icon: FileText,
 		color: "text-amber-500",
+		icon: FileText,
+		label: "Brouillon",
+		value: "draft",
 	},
 	{
-		value: "published",
-		label: "Publié",
-		icon: CheckCircle,
 		color: "text-green-500",
+		icon: CheckCircle,
+		label: "Publié",
+		value: "published",
 	},
 	{
-		value: "archived",
-		label: "Archivé",
-		icon: Archive,
 		color: "text-stone-500",
+		icon: Archive,
+		label: "Archivé",
+		value: "archived",
 	},
 ];
 
@@ -73,12 +73,12 @@ export function SelectableNewsCard({
 	};
 
 	const handleStatusChange = async (newStatus: string) => {
-		if (newStatus === item.status) return;
+		if (newStatus === item.status) {return;}
 		setBusy(true);
 		try {
 			const { updateArticleStatus } = await import("@/app/actions/articles");
 			const result = await updateArticleStatus(item.id, newStatus, item.status);
-			if (result.error) throw new Error(result.error);
+			if (result.error) {throw new Error(result.error);}
 			const label =
 				QUICK_STATUS.find((s) => s.value === newStatus)?.label || newStatus;
 			toast.success(`Statut changé en « ${label} »`);
@@ -114,12 +114,12 @@ export function SelectableNewsCard({
 				"Êtes-vous sûr de vouloir supprimer cet article ? Cette action est irréversible.",
 			)
 		)
-			return;
+			{return;}
 		setBusy(true);
 		try {
 			const { deleteArticle } = await import("@/app/actions/articles");
 			const result = await deleteArticle(item.id);
-			if (result.error) throw new Error(result.error);
+			if (result.error) {throw new Error(result.error);}
 			toast.success("Article supprimé");
 			router.refresh();
 		} catch {

@@ -13,7 +13,7 @@ function extractTitleAndBody(text: string): { title: string; body: string } {
 	const paragraphs = text.split(/\n\n+/).filter(Boolean);
 	const title = paragraphs[0]?.trim() || "";
 	const body = paragraphs.slice(1).join("\n\n").trim();
-	return { title, body };
+	return { body, title };
 }
 
 function estimateReadTime(text: string): number {
@@ -38,17 +38,17 @@ export async function generateMetadata({
 	const image = tweet?.media?.[0]?.url;
 
 	return {
-		title: `${title.slice(0, 60)} | Azalée`,
 		description,
 		openGraph: {
-			title: title.slice(0, 60),
 			description,
+			title: title.slice(0, 60),
 			...(image && { images: [{ url: image }] }),
 		},
+		title: `${title.slice(0, 60)} | Azalée`,
 		twitter: {
 			card: "summary_large_image",
-			site: "@Azalee_IE",
 			creator: "@Azalee_IE",
+			site: "@Azalee_IE",
 		},
 	};
 }
@@ -66,7 +66,7 @@ export default async function TweetPage({
 		.eq("id", id)
 		.single();
 
-	if (!tweet) notFound();
+	if (!tweet) {notFound();}
 
 	const { title, body } = extractTitleAndBody(tweet.text || "");
 	const heroImage = tweet.media?.[0]?.url;
@@ -79,16 +79,12 @@ export default async function TweetPage({
 		isThread && Array.isArray(tweet.raw_tweets) ? tweet.raw_tweets : [];
 
 	// Gather sections from raw_tweets (skip first paragraph which is the title)
-	type Section = { text: string; media: any[] };
+	interface Section { text: string; media: any[] }
 	let sections: Section[] = [];
 
 	if (rawTweets.length > 0) {
 		// Thread: each raw tweet is a section
 		sections = rawTweets.map((rt: any) => ({
-			text:
-				rt.fullText && rt.fullText.length > (rt.text?.length || 0)
-					? rt.fullText
-					: rt.text || "",
 			media: (rt.media || []).map((m: any) => {
 				// Match with downloaded media by finding the corresponding item
 				const downloaded = tweet.media?.find(
@@ -96,6 +92,10 @@ export default async function TweetPage({
 				);
 				return downloaded || m;
 			}),
+			text:
+				rt.fullText && rt.fullText.length > (rt.text?.length || 0)
+					? rt.fullText
+					: rt.text || "",
 		}));
 		// Remove the first section text from display since it's used as title
 		if (sections.length > 0) {
@@ -107,14 +107,14 @@ export default async function TweetPage({
 			sections = body
 				.split(/\n\n+/)
 				.filter(Boolean)
-				.map((p) => ({ text: p.trim(), media: [] }));
+				.map((p) => ({ media: [], text: p.trim() }));
 		}
 		// Attach remaining media (skip first which is hero) to first section
 		const remainingMedia = (tweet.media || []).slice(1);
 		if (remainingMedia.length > 0 && sections.length > 0) {
 			sections[0] = { ...sections[0], media: remainingMedia };
 		} else if (remainingMedia.length > 0) {
-			sections.push({ text: "", media: remainingMedia });
+			sections.push({ media: remainingMedia, text: "" });
 		}
 	}
 
@@ -234,9 +234,9 @@ export default async function TweetPage({
 											className={`relative overflow-hidden rounded-2xl border border-outline-variant/10 shadow-lg bg-surface-container ${
 												section.media.length === 1
 													? "aspect-video"
-													: section.media.length === 3 && j === 0
+													: (section.media.length === 3 && j === 0
 														? "col-span-2 aspect-video"
-														: "aspect-square"
+														: "aspect-square")
 											}`}
 										>
 											<Image

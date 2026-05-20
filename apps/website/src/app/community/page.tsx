@@ -38,7 +38,7 @@ const ITEMS_PER_PAGE = 24;
 
 function MemberCard({ member }: { member: DiscordMember }) {
   const isMedaille = member.roles?.includes(MEDAILLE_ROLE_ID);
-  const isBooster = !!member.premium_since;
+  const isBooster = Boolean(member.premium_since);
   const displayName = member.nickname || member.display_name || member.username;
 
   return (
@@ -158,7 +158,7 @@ function SectionTitle({
 export default async function CommunityPage({
   searchParams,
 }: {
-  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const params = await searchParams;
   const query = typeof params.q === "string" ? params.q : "";
@@ -171,7 +171,7 @@ export default async function CommunityPage({
   const roleMap = new Map<string, number>();
 
   // Default priorities if DB is empty or missing roles
-  roleMap.set(ADMIN_ROLE_ID, 10000);
+  roleMap.set(ADMIN_ROLE_ID, 10_000);
   roleMap.set(VICE_ADMIN_ROLE_ID, 9000);
   roleMap.set(MOD_RESP_ROLE_ID, 8000);
   roleMap.set(MEDAILLE_ROLE_ID, 5000);
@@ -196,7 +196,7 @@ export default async function CommunityPage({
 
   // 2. Sort by Highest Role Position
   const getHighestRole = (m: DiscordMember) => {
-    if (!m.roles || m.roles.length === 0) return 0;
+    if (!m.roles || m.roles.length === 0) {return 0;}
     return Math.max(...m.roles.map((r) => roleMap.get(r) || 0));
   };
 
@@ -204,7 +204,7 @@ export default async function CommunityPage({
     const rankA = getHighestRole(a);
     const rankB = getHighestRole(b);
 
-    if (rankA !== rankB) return rankB - rankA; // Descending (Higher position = Higher rank)
+    if (rankA !== rankB) {return rankB - rankA;} // Descending (Higher position = Higher rank)
 
     // Secondary sort: Joined At
     return new Date(b.joined_at || 0).getTime() - new Date(a.joined_at || 0).getTime();
@@ -225,8 +225,8 @@ export default async function CommunityPage({
     modsData = allMembers.filter((m) => m.roles?.includes(MOD_RESP_ROLE_ID));
     medailleData = allMembers.filter((m) => m.roles?.includes(MEDAILLE_ROLE_ID)); // Already sorted by role/join
     boostersData = allMembers
-      .filter((m) => !!m.premium_since)
-      .sort((a, b) => new Date(b.premium_since!).getTime() - new Date(a.premium_since!).getTime())
+      .filter((m) => Boolean(m.premium_since))
+      .toSorted((a, b) => new Date(b.premium_since!).getTime() - new Date(a.premium_since!).getTime())
       .slice(0, 12);
   }
 

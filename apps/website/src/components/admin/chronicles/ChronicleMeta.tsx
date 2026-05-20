@@ -45,7 +45,7 @@ export function ChronicleMeta({
 	const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
 		if (e.target.files && e.target.files.length > 0) {
 			const file = e.target.files[0];
-			if (!file) return;
+			if (!file) {return;}
 
 			if (file.size > 5 * 1024 * 1024) {
 				toast.error("L'image est trop volumineuse (max 5Mo)");
@@ -217,7 +217,7 @@ export function ChronicleMeta({
 									Upload en cours...
 								</span>
 							</div>
-						) : featuredImage ? (
+						) : (featuredImage ? (
 							<>
 								<Image
 									src={featuredImage}
@@ -282,7 +282,7 @@ export function ChronicleMeta({
 									Uploader & Recadrer
 								</Button>
 							</div>
-						)}
+						))}
 					</div>
 					<Input
 						value={featuredImage}

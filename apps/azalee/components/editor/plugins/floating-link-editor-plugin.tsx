@@ -3,20 +3,8 @@
 import { $createLinkNode, $isAutoLinkNode, $isLinkNode, TOGGLE_LINK_COMMAND } from "@lexical/link";
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
 import { $findMatchingParent, mergeRegister } from "@lexical/utils";
-import {
-  $getSelection,
-  $isLineBreakNode,
-  $isNodeSelection,
-  $isRangeSelection,
-  type BaseSelection,
-  CLICK_COMMAND,
-  COMMAND_PRIORITY_CRITICAL,
-  COMMAND_PRIORITY_HIGH,
-  COMMAND_PRIORITY_LOW,
-  KEY_ESCAPE_COMMAND,
-  type LexicalEditor,
-  SELECTION_CHANGE_COMMAND,
-} from "lexical";
+import { $getSelection, $isLineBreakNode, $isNodeSelection, $isRangeSelection, CLICK_COMMAND, COMMAND_PRIORITY_CRITICAL, COMMAND_PRIORITY_HIGH, COMMAND_PRIORITY_LOW, KEY_ESCAPE_COMMAND, SELECTION_CHANGE_COMMAND } from 'lexical';
+import type { BaseSelection, LexicalEditor } from 'lexical';
 import { Check, Pencil, Trash, X } from "lucide-react";
 /**
  * Copyright (c) Meta Platforms, Inc. and affiliates.
@@ -25,7 +13,8 @@ import { Check, Pencil, Trash, X } from "lucide-react";
  * LICENSE file in the root directory of this source tree.
  *
  */
-import { type Dispatch, type JSX, useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from 'react';
+import type { Dispatch, JSX } from 'react';
 import { createPortal } from "react-dom";
 
 import { getSelectedNode } from "@/components/editor/utils/get-selected-node";
@@ -74,7 +63,7 @@ function FloatingLinkEditor({
     }
     const editorElem = editorRef.current;
     const nativeSelection = window.getSelection();
-    const activeElement = document.activeElement;
+    const {activeElement} = document;
 
     if (editorElem === null) {
       return;
@@ -129,8 +118,7 @@ function FloatingLinkEditor({
     };
   }, [anchorElem.parentElement, editor, $updateLinkEditor]);
 
-  useEffect(() => {
-    return mergeRegister(
+  useEffect(() => mergeRegister(
       editor.registerUpdateListener(({ editorState }) => {
         editorState.read(() => {
           $updateLinkEditor();
@@ -156,8 +144,7 @@ function FloatingLinkEditor({
         },
         COMMAND_PRIORITY_HIGH,
       ),
-    );
-  }, [editor, $updateLinkEditor, setIsLink, isLink]);
+    ), [editor, $updateLinkEditor, setIsLink, isLink]);
 
   useEffect(() => {
     editor.getEditorState().read(() => {
@@ -212,7 +199,7 @@ function FloatingLinkEditor({
       role="dialog"
       aria-label="Éditeur de lien"
     >
-      {!isLink ? null : isLinkEditMode ? (
+      {!isLink ? null : (isLinkEditMode ? (
         <div className="flex items-center space-x-2 rounded-md border p-1 pl-2">
           <Input
             ref={inputRef}
@@ -277,7 +264,7 @@ function FloatingLinkEditor({
             </Button>
           </div>
         </div>
-      )}
+      ))}
     </div>
   );
 }

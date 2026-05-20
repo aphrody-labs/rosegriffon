@@ -19,7 +19,7 @@ import {
 } from "lucide-react";
 
 import { RGTVIcon } from "@/components/sidebar/atoms/RGTVIcon";
-export type SubMenuItem = {
+export interface SubMenuItem {
 	title: string;
 	url: string;
 	icon: React.ElementType;
@@ -31,9 +31,9 @@ export type SubMenuItem = {
 	description?: string; // Pour tooltips ou sous-titres
 	shortcut?: string; // Ex: "⌘K" pour accessibilité clavier
 	ariaLabel?: string; // Accessibilité améliorée
-};
+}
 
-export type MenuItem = {
+export interface MenuItem {
 	title: string;
 	url?: string;
 	icon: React.ElementType;
@@ -48,14 +48,14 @@ export type MenuItem = {
 	description?: string; // Pour tooltips
 	isExternal?: boolean; // Pour liens externes
 	ariaLabel?: string; // Accessibilité améliorée
-};
+}
 
-export type MenuSection = {
+export interface MenuSection {
 	label: string;
 	items: MenuItem[];
 	icon?: React.ElementType; // Icône optionnelle pour la section
 	collapsedByDefault?: boolean; // Pour sections pliables
-};
+}
 
 /**
  * Helper pour générer les classes CSS des badges de manière cohérente
@@ -68,31 +68,31 @@ export function getBadgeVariant(
 	const variants = {
 		// NOUVEAU - Thème Roy (Bleu élégant #344E8C)
 		new: {
-			bg: "bg-[#344E8C]/15 dark:bg-[#4088b8]/20",
-			text: "text-[#243d5b] dark:text-[#4088b8]",
-			border: "border-[#344E8C]/30 dark:border-[#4088b8]/40",
 			animation: "animate-pulse",
+			bg: "bg-[#344E8C]/15 dark:bg-[#4088b8]/20",
+			border: "border-[#344E8C]/30 dark:border-[#4088b8]/40",
+			text: "text-[#243d5b] dark:text-[#4088b8]",
 		},
 		// HOT - Thème Gaëlle (Vermillon passion #B03519)
 		hot: {
-			bg: "bg-[#B03519]/15 dark:bg-[#B03519]/20",
-			text: "text-[#770007] dark:text-[#FABBA2]",
-			border: "border-[#B03519]/30 dark:border-[#B03519]/40",
 			animation: "animate-pulse",
+			bg: "bg-[#B03519]/15 dark:bg-[#B03519]/20",
+			border: "border-[#B03519]/30 dark:border-[#B03519]/40",
+			text: "text-[#770007] dark:text-[#FABBA2]",
 		},
 		// BETA - Doré Roy (#FFC46E)
 		beta: {
-			bg: "bg-[#FFC46E]/20 dark:bg-[#FFC46E]/25",
-			text: "text-[#344E8C] dark:text-[#FFC46E]",
-			border: "border-[#FFC46E]/40 dark:border-[#FFC46E]/50",
 			animation: "",
+			bg: "bg-[#FFC46E]/20 dark:bg-[#FFC46E]/25",
+			border: "border-[#FFC46E]/40 dark:border-[#FFC46E]/50",
+			text: "text-[#344E8C] dark:text-[#FFC46E]",
 		},
 		// SOON - Beige Gaëlle (#FABBA2)
 		soon: {
-			bg: "bg-[#FABBA2]/20 dark:bg-[#FABBA2]/25",
-			text: "text-[#B03519] dark:text-[#FABBA2]",
-			border: "border-[#FABBA2]/40 dark:border-[#FABBA2]/50",
 			animation: "",
+			bg: "bg-[#FABBA2]/20 dark:bg-[#FABBA2]/25",
+			border: "border-[#FABBA2]/40 dark:border-[#FABBA2]/50",
+			text: "text-[#B03519] dark:text-[#FABBA2]",
 		},
 	};
 
@@ -103,12 +103,12 @@ export function getBadgeVariant(
  * Classes de transition pré-configurées pour cohérence
  */
 export const sidebarTransitions = {
-	item: "transition-all duration-200 ease-in-out",
-	hover: "hover:scale-105 hover:shadow-md",
-	focus:
-		"focus:outline-none focus:ring-2 focus:ring-primary/50 dark:focus:ring-primary/30",
 	activeIndicator: "border-l-4 border-primary",
 	badge: "transition-all duration-200 hover:scale-110",
+	focus:
+		"focus:outline-none focus:ring-2 focus:ring-primary/50 dark:focus:ring-primary/30",
+	hover: "hover:scale-105 hover:shadow-md",
+	item: "transition-all duration-200 ease-in-out",
 };
 
 /**
@@ -116,7 +116,6 @@ export const sidebarTransitions = {
  * Organisé par importance et fréquence d'utilisation
  */
 export const assoMenu: MenuSection = {
-	label: "L'association",
 	items: [
 		{
 			title: "Notre équipe",
@@ -176,14 +175,15 @@ export const assoMenu: MenuSection = {
 			ariaLabel: "Voir nos événements",
 		},
 	],
+	label: "L'association",
 };
 
 /**
  * Configuration du menu "Explorer"
  */
 export const exploreMenu: MenuSection = {
-	label: "Explorer",
 	items: [],
+	label: "Explorer",
 };
 
 /**
@@ -191,7 +191,6 @@ export const exploreMenu: MenuSection = {
  * Call-to-actions organisés par priorité
  */
 export const contactMenu: MenuSection = {
-	label: "Nous concernant",
 	items: [
 		{
 			title: "Nous rejoindre",
@@ -238,13 +237,14 @@ export const contactMenu: MenuSection = {
 			},
 		},
 	],
+	label: "Nous concernant",
 };
 
 /**
  * Validation utilitaire pour les items avec support des nouvelles propriétés
  */
 export function isValidMenuItem(item: unknown): item is MenuItem {
-	if (!item || typeof item !== "object") return false;
+	if (!item || typeof item !== "object") {return false;}
 	const m = item as Record<string, unknown>;
 	return (
 		typeof m.title === "string" &&
@@ -258,7 +258,7 @@ export function isValidMenuItem(item: unknown): item is MenuItem {
 }
 
 export function isValidSubMenuItem(item: unknown): item is SubMenuItem {
-	if (!item || typeof item !== "object") return false;
+	if (!item || typeof item !== "object") {return false;}
 	const m = item as Record<string, unknown>;
 	return (
 		typeof m.title === "string" &&

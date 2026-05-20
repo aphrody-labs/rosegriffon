@@ -1,13 +1,6 @@
 import { DashboardGrid, QuickActionCard } from "@rosegriffon/ui";
-import {
-	BookOpen,
-	Calendar,
-	Image as ImageIcon,
-	type LucideIcon,
-	Settings,
-	Shield,
-	Users,
-} from "lucide-react";
+import { BookOpen, Calendar, Image as ImageIcon, Settings, Shield, Users } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
 
 interface QuickAction {
 	title: string;
@@ -19,46 +12,46 @@ interface QuickAction {
 
 const ACTIONS: QuickAction[] = [
 	{
-		title: "Utilisateurs",
+		accent: "text-sky-500",
 		description: "Comptes, rôles, sanctions",
 		href: "/admin/users",
 		icon: Users,
-		accent: "text-sky-500",
+		title: "Utilisateurs",
 	},
 	{
-		title: "Chroniques",
+		accent: "text-violet-500",
 		description: "Articles, brouillons, séries",
 		href: "/admin/chroniques",
 		icon: BookOpen,
-		accent: "text-violet-500",
+		title: "Chroniques",
 	},
 	{
-		title: "Événements",
+		accent: "text-amber-500",
 		description: "Calendrier et planning streams",
 		href: "/admin/events",
 		icon: Calendar,
-		accent: "text-amber-500",
+		title: "Événements",
 	},
 	{
-		title: "Staff",
+		accent: "text-emerald-500",
 		description: "Membres équipe et rôles",
 		href: "/admin/staff",
 		icon: Shield,
-		accent: "text-emerald-500",
+		title: "Staff",
 	},
 	{
-		title: "Médias",
+		accent: "text-rose-500",
 		description: "Upload, galeries, modération",
 		href: "/admin/media",
 		icon: ImageIcon,
-		accent: "text-rose-500",
+		title: "Médias",
 	},
 	{
-		title: "Configuration",
+		accent: "text-muted-foreground",
 		description: "Site, intégrations, secrets",
 		href: "/admin/settings",
 		icon: Settings,
-		accent: "text-muted-foreground",
+		title: "Configuration",
 	},
 ];
 

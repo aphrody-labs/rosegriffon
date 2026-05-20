@@ -7,7 +7,7 @@
 export async function register() {
   // Désactivé temporairement - cause des erreurs avec Edge Runtime
   /*
-  if (process.env.NEXT_RUNTIME === "nodejs") {
+  If (process.env.NEXT_RUNTIME === "nodejs") {
     const { validateEnv } = await import("./lib/env");
     const { logger } = await import("./lib/logger");
 
@@ -48,7 +48,7 @@ export async function register() {
  * (Fonctions désactivées temporairement comme l'appel dans register)
  */
 /*
-async function checkServicesHealth(env: Record<string, unknown>) {
+Async function checkServicesHealth(env: Record<string, unknown>) {
   const { logger } = await import("./lib/logger");
 
   const checks = [checkSupabase(env)];
@@ -67,7 +67,7 @@ async function checkServicesHealth(env: Record<string, unknown>) {
  * Vérifier la connexion Supabase
  */
 /*
-async function checkSupabase(env: Record<string, unknown>) {
+Async function checkSupabase(env: Record<string, unknown>) {
   const { logger } = await import("./lib/logger");
 
   try {

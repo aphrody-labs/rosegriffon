@@ -41,9 +41,9 @@ export function useTableBroadcast<T = Record<string, unknown>>({
         "postgres_changes" as unknown as never,
         {
           event: "*",
+          filter,
           schema,
           table,
-          filter,
         },
         (payload: unknown) => {
           const typedPayload = payload as {
@@ -54,15 +54,18 @@ export function useTableBroadcast<T = Record<string, unknown>>({
           const event = typedPayload.eventType as "INSERT" | "UPDATE" | "DELETE";
 
           switch (event) {
-            case "INSERT":
+            case "INSERT": {
               onInsert?.(typedPayload.new as T);
               break;
-            case "UPDATE":
+            }
+            case "UPDATE": {
               onUpdate?.(typedPayload.new as T);
               break;
-            case "DELETE":
+            }
+            case "DELETE": {
               onDelete?.(typedPayload.old as T);
               break;
+            }
           }
         }
       )

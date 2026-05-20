@@ -4,18 +4,18 @@ import { iconMap } from "@/lib/icons";
 import { cn } from "@/lib/utils";
 
 const SPRITE_FOR_ICON: Record<string, SpriteCommonKey> = {
-  flash_on: "keshin",
+  air: "wind",
   bolt: "keshin",
+  change_circle: "mode_change",
+  cyclone: "wind",
   electric_bolt: "keshin",
+  flash_on: "keshin",
+  forest: "forest",
+  group_add: "miximax",
+  landscape: "mountain",
+  local_fire_department: "fire",
   pets: "soul",
   wb_twilight: "eveil",
-  change_circle: "mode_change",
-  group_add: "miximax",
-  local_fire_department: "fire",
-  forest: "forest",
-  air: "wind",
-  cyclone: "wind",
-  landscape: "mountain",
 };
 
 export interface IconProps {
@@ -41,7 +41,7 @@ export const Icon = ({
   }
 
   const LucideIcon = iconMap[name];
-  if (!LucideIcon) return null;
+  if (!LucideIcon) {return null;}
   return (
     <LucideIcon
       size={size}

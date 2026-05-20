@@ -1,5 +1,6 @@
 import { ADMIN_ROLES } from "@rosegriffon/types/roles";
-import { type NextRequest, NextResponse } from "next/server";
+import { NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
 import { createAdminClient } from "@/lib/supabase/admin";
 
 /**
@@ -121,36 +122,36 @@ interface LexicalHeading {
 
 function textNode(text: string): LexicalText {
 	return {
-		type: "text",
-		text,
-		format: 0,
-		style: "",
-		mode: "normal",
 		detail: 0,
+		format: 0,
+		mode: "normal",
+		style: "",
+		text,
+		type: "text",
 		version: 1,
 	};
 }
 
 function paragraph(text: string): LexicalParagraph {
 	return {
-		type: "paragraph",
+		children: text ? [textNode(text)] : [],
+		direction: null,
 		format: "",
 		indent: 0,
+		type: "paragraph",
 		version: 1,
-		direction: null,
-		children: text ? [textNode(text)] : [],
 	};
 }
 
 function heading(tag: "h1" | "h2" | "h3", text: string): LexicalHeading {
 	return {
-		type: "heading",
-		tag,
+		children: [textNode(text)],
+		direction: null,
 		format: "",
 		indent: 0,
+		tag,
+		type: "heading",
 		version: 1,
-		direction: null,
-		children: [textNode(text)],
 	};
 }
 
@@ -160,14 +161,14 @@ function buildLexical(content: string) {
 	for (const line of lines) {
 		const trimmed = line.trimEnd();
 		if (trimmed.startsWith("# "))
-			children.push(heading("h1", trimmed.slice(2)));
+			{children.push(heading("h1", trimmed.slice(2)));}
 		else if (trimmed.startsWith("## "))
-			children.push(heading("h2", trimmed.slice(3)));
+			{children.push(heading("h2", trimmed.slice(3)));}
 		else if (trimmed.startsWith("### "))
-			children.push(heading("h3", trimmed.slice(4)));
-		else children.push(paragraph(trimmed));
+			{children.push(heading("h3", trimmed.slice(4)));}
+		else {children.push(paragraph(trimmed));}
 	}
-	if (children.length === 0) children.push(paragraph(""));
+	if (children.length === 0) {children.push(paragraph(""));}
 	return {
 		root: {
 			children,
@@ -185,7 +186,7 @@ async function resolveAuthorId(
 	supabase: any,
 	body: DraftBody,
 ): Promise<string> {
-	if (body.author_id) return body.author_id;
+	if (body.author_id) {return body.author_id;}
 
 	if (body.author_email || body.author_username) {
 		const filter = body.author_email
@@ -196,9 +197,9 @@ async function resolveAuthorId(
 			.select("id")
 			.eq(filter.col, filter.val)
 			.maybeSingle();
-		if (error) throw new Error(`Profile lookup failed: ${error.message}`);
+		if (error) {throw new Error(`Profile lookup failed: ${error.message}`);}
 		if (!data?.id)
-			throw new Error(`Aucun profil avec ${filter.col}="${filter.val}"`);
+			{throw new Error(`Aucun profil avec ${filter.col}="${filter.val}"`);}
 		return data.id as string;
 	}
 
@@ -209,11 +210,11 @@ async function resolveAuthorId(
 		.order("updated_at", { ascending: true })
 		.limit(1)
 		.maybeSingle();
-	if (error) throw new Error(`Admin lookup failed: ${error.message}`);
+	if (error) {throw new Error(`Admin lookup failed: ${error.message}`);}
 	if (!data?.id)
-		throw new Error(
+		{throw new Error(
 			"Aucun admin/superadmin/editor/moderator trouvé — précise author_id.",
-		);
+		);}
 	return data.id as string;
 }
 
@@ -259,7 +260,7 @@ async function fetchCoAuthorsFromDiscordRole(
 	while (true) {
 		const u = new URL(`https://discord.com/api/v10/guilds/${guildId}/members`);
 		u.searchParams.set("limit", "1000");
-		if (after) u.searchParams.set("after", after);
+		if (after) {u.searchParams.set("after", after);}
 		const res = await fetch(u, { headers: { Authorization: `Bot ${token}` } });
 		if (!res.ok) {
 			throw new Error(
@@ -268,12 +269,14 @@ async function fetchCoAuthorsFromDiscordRole(
 		}
 		const batch = (await res.json()) as DiscordMember[];
 		all.push(...batch);
-		if (batch.length < 1000) break;
-		after = batch[batch.length - 1].user.id;
+		if (batch.length < 1000) {break;}
+		const lastMember = batch[batch.length - 1];
+		if (!lastMember) {break;}
+		after = lastMember.user.id;
 	}
 
 	const withRole = all.filter((m) => m.roles?.includes(roleId));
-	if (withRole.length === 0) return [];
+	if (withRole.length === 0) {return [];}
 
 	const discordIds = withRole.map((m) => m.user.id);
 	const { data: profiles } = await supabase
@@ -289,11 +292,11 @@ async function fetchCoAuthorsFromDiscordRole(
 	const out: CoAuthor[] = [];
 	for (const m of withRole) {
 		const profileId = profileByDiscord.get(m.user.id);
-		if (excludeProfileId && profileId === excludeProfileId) continue;
+		if (excludeProfileId && profileId === excludeProfileId) {continue;}
 		out.push({
-			name: m.nick || m.user.global_name || m.user.username,
 			avatar_url: discordAvatarUrl(m.user.id, m.user.avatar),
 			discord_id: m.user.id,
+			name: m.nick || m.user.global_name || m.user.username,
 			profile_id: profileId,
 		});
 	}
@@ -311,8 +314,8 @@ async function ensureUniqueSlug(supabase: any, base: string): Promise<string> {
 			.eq("app", APP_SCOPE)
 			.eq("slug", candidate)
 			.maybeSingle();
-		if (error) throw new Error(`Slug check failed: ${error.message}`);
-		if (!data) return candidate;
+		if (error) {throw new Error(`Slug check failed: ${error.message}`);}
+		if (!data) {return candidate;}
 		candidate = `${base}-${n}`;
 		n++;
 	}
@@ -404,20 +407,20 @@ export async function POST(request: NextRequest) {
 
 		const row = {
 			app: APP_SCOPE,
-			title: body.title,
-			slug,
-			content,
-			excerpt: body.excerpt ?? null,
-			category,
-			status: "draft",
-			featured_image_url: body.featured_image_url ?? null,
-			featured_image_alt: body.featured_image_alt ?? null,
-			meta_title: body.meta_title ?? body.title,
-			meta_description: body.meta_description ?? body.excerpt ?? null,
-			tags,
 			author_id: authorId,
+			category,
 			co_authors: coAuthors.length > 0 ? coAuthors : null,
+			content,
 			created_at: now,
+			excerpt: body.excerpt ?? null,
+			featured_image_alt: body.featured_image_alt ?? null,
+			featured_image_url: body.featured_image_url ?? null,
+			meta_description: body.meta_description ?? body.excerpt ?? null,
+			meta_title: body.meta_title ?? body.title,
+			slug,
+			status: "draft",
+			tags,
+			title: body.title,
 			updated_at: now,
 		};
 
@@ -437,16 +440,16 @@ export async function POST(request: NextRequest) {
 
 		return NextResponse.json(
 			{
-				id: data.id,
-				slug: data.slug,
 				authorId,
 				editUrl: `${ORIGIN}/dashboard/news/${data.id}`,
+				id: data.id,
 				previewUrl: `${ORIGIN}/news/${data.slug}?preview=true`,
+				slug: data.slug,
 			},
 			{ status: 201 },
 		);
-	} catch (e) {
-		const msg = (e as Error).message;
+	} catch (error) {
+		const msg = (error as Error).message;
 		const status = /introuvable|aucun/i.test(msg) ? 404 : 500;
 		return NextResponse.json({ error: msg }, { status });
 	}

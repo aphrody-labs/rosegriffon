@@ -38,15 +38,15 @@ export function useNostalgieExampleImage() {
         }
 
         setUrl(data.url);
-        // console.log("✅ Nostalgie example image loaded:", {
-        //   type: data.type,
-        //   bucket: data.bucket,
-        //   file: data.file,
-        //   expiresIn: data.expiresIn,
+        // Console.log("✅ Nostalgie example image loaded:", {
+        //   Type: data.type,
+        //   Bucket: data.bucket,
+        //   File: data.file,
+        //   ExpiresIn: data.expiresIn,
         // });
-      } catch (err) {
-        const error = err instanceof Error ? err : new Error(String(err));
-        setError(error);
+      } catch (error) {
+        const normalizedError = error instanceof Error ? error : new Error(String(error));
+        setError(normalizedError);
         console.error("❌ Error loading nostalgie example image:", error);
       } finally {
         setLoading(false);
@@ -56,5 +56,5 @@ export function useNostalgieExampleImage() {
     fetchImageUrl();
   }, []);
 
-  return { url, loading, error };
+  return { error, loading, url };
 }

@@ -66,10 +66,10 @@ async function fetchDiscordScheduledEvents(): Promise<DiscordScheduledEvent[]> {
  */
 export function useDiscordEvents() {
   const { data, isLoading, error } = useQuery<DiscordScheduledEvent[]>({
-    queryKey: ["discord-scheduled-events"],
-    queryFn: fetchDiscordScheduledEvents,
-    staleTime: 1000 * 60 * 5, // Considéré frais pendant 5 minutes
     gcTime: 1000 * 60 * 30, // Gardé en cache pendant 30 minutes
+    queryFn: fetchDiscordScheduledEvents,
+    queryKey: ["discord-scheduled-events"],
+    staleTime: 1000 * 60 * 5, // Considéré frais pendant 5 minutes
   });
 
   if (error) {
@@ -78,7 +78,7 @@ export function useDiscordEvents() {
 
   const events = Array.isArray(data) ? data : [];
 
-  return { events, isLoading, error: error as Error | null };
+  return { error: error as Error | null, events, isLoading };
 }
 
 /**
@@ -86,16 +86,21 @@ export function useDiscordEvents() {
  */
 export function getEventStatusLabel(status: DiscordEventStatus): string {
   switch (status) {
-    case 1:
+    case 1: {
       return "Programmé";
-    case 2:
+    }
+    case 2: {
       return "En cours";
-    case 3:
+    }
+    case 3: {
       return "Terminé";
-    case 4:
+    }
+    case 4: {
       return "Annulé";
-    default:
+    }
+    default: {
       return "Inconnu";
+    }
   }
 }
 
@@ -104,15 +109,20 @@ export function getEventStatusLabel(status: DiscordEventStatus): string {
  */
 export function getEventStatusColor(status: DiscordEventStatus): string {
   switch (status) {
-    case 1:
+    case 1: {
       return "blue";
-    case 2:
+    }
+    case 2: {
       return "green";
-    case 3:
+    }
+    case 3: {
       return "gray";
-    case 4:
+    }
+    case 4: {
       return "red";
-    default:
+    }
+    default: {
       return "gray";
+    }
   }
 }

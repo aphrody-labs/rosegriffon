@@ -8,14 +8,14 @@ function slugify(text: string): string {
   return text
     .toLowerCase()
     .normalize("NFD")
-    .replaceAll(/[\u0300-\u036f]/g, "")
+    .replaceAll(/[\u0300-\u036F]/g, "")
     .replaceAll(/[^a-z0-9]+/g, "-")
     .replaceAll(/^-+|-+$/g, "");
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function extractTextFromNode(node: any): string {
-  if (node.text) return node.text;
+  if (node.text) {return node.text;}
   if (node.children) {
     return node.children.map(extractTextFromNode).join("");
   }
@@ -30,11 +30,11 @@ export function extractTableOfContents(content: string): TocItem[] {
     const parsed =
       typeof content === "string" && content.startsWith("{")
         ? JSON.parse(content)
-        : typeof content === "object"
+        : (typeof content === "object"
           ? content
-          : null;
+          : null);
 
-    if (!parsed?.root?.children) return [];
+    if (!parsed?.root?.children) {return [];}
 
     const items: TocItem[] = [];
     const slugCounts = new Map<string, number>();
@@ -43,7 +43,7 @@ export function extractTableOfContents(content: string): TocItem[] {
     for (const node of parsed.root.children as any[]) {
       if (node.type === "heading" && (node.tag === "h2" || node.tag === "h3")) {
         const text = extractTextFromNode(node).trim();
-        if (!text) continue;
+        if (!text) {continue;}
 
         let slug = slugify(text);
 
@@ -56,8 +56,8 @@ export function extractTableOfContents(content: string): TocItem[] {
 
         items.push({
           id: slug,
-          text,
           level: node.tag === "h2" ? 2 : 3,
+          text,
         });
       }
     }

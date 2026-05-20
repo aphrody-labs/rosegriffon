@@ -7,22 +7,22 @@ export default function sitemap(): MetadataRoute.Sitemap {
 	const now = new Date();
 	return [
 		{
-			url: `${baseUrl}/shop`,
-			lastModified: now,
 			changeFrequency: "weekly",
+			lastModified: now,
 			priority: 0.9,
+			url: `${baseUrl}/shop`,
 		},
 		{
-			url: `${baseUrl}/shop/panier`,
-			lastModified: now,
 			changeFrequency: "never",
+			lastModified: now,
 			priority: 0.3,
+			url: `${baseUrl}/shop/panier`,
 		},
 		...PRODUCTS.map((p) => ({
-			url: `${baseUrl}/shop/${p.slug}`,
-			lastModified: now,
 			changeFrequency: "monthly" as const,
+			lastModified: now,
 			priority: p.stockHint === "limited" ? 0.95 : 0.7,
+			url: `${baseUrl}/shop/${p.slug}`,
 		})),
 	];
 }

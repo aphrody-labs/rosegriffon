@@ -37,7 +37,7 @@ export function PlayersClient({
   const router = useRouter();
   const searchParams = useSearchParams();
   const filterTransition = useFilterTransition();
-  const isPending = filterTransition.isPending;
+  const {isPending} = filterTransition;
   const startIndex = (currentPage - 1) * itemsPerPage;
 
   const toggleIncomplete = () => {

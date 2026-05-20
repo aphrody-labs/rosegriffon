@@ -11,7 +11,7 @@ const VALID_CATEGORIES = new Set([
 
 export async function GET(request: Request) {
 	const { searchParams } = new URL(request.url);
-	const page = Math.max(1, parseInt(searchParams.get("page") || "1", 10) || 1);
+	const page = Math.max(1, Number.parseInt(searchParams.get("page") || "1", 10) || 1);
 	const limit = 12;
 	const rawCategory = searchParams.get("category");
 	const category =
@@ -49,17 +49,17 @@ export async function GET(request: Request) {
 	const items = (data || []).map(
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		(a: any) => ({
-			id: a.id,
-			type: "article",
-			title: a.title,
-			slug: a.slug,
-			excerpt: a.excerpt,
-			date: a.published_at || a.created_at,
-			image: a.featured_image_url,
-			category: a.category,
 			author_id: a.author_id,
+			category: a.category,
+			date: a.published_at || a.created_at,
+			excerpt: a.excerpt,
+			id: a.id,
+			image: a.featured_image_url,
+			slug: a.slug,
+			title: a.title,
+			type: "article",
 		}),
 	);
 
-	return NextResponse.json({ items, hasMore: items.length === limit });
+	return NextResponse.json({ hasMore: items.length === limit, items });
 }

@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from "react";
 
-type AriaProps = { role?: string; "aria-label"?: string; "aria-labelledby"?: string };
+interface AriaProps { role?: string; "aria-label"?: string; "aria-labelledby"?: string }
 
 export function FadeInStagger({
   children,
@@ -20,7 +20,7 @@ export function FadeInStagger({
 
   useEffect(() => {
     const el = ref.current;
-    if (!el) return;
+    if (!el) {return;}
 
     const staggerMs = faster ? 30 : 50;
     const delayMs = delay * 1000;
@@ -59,7 +59,7 @@ export function FadeInItem({
 
   useEffect(() => {
     const el = ref.current;
-    if (!el) return;
+    if (!el) {return;}
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {

@@ -11,21 +11,21 @@ interface ElementIconProps {
 }
 
 const SIZES = {
-  sm: 16,
-  md: 24,
   lg: 32,
+  md: 24,
+  sm: 16,
 };
 
 export function ElementIcon({ element, size = "md", className }: ElementIconProps) {
   const px = SIZES[size];
   const iconUrl = getSkillIconUrl(element);
 
-  if (!iconUrl) return null;
+  if (!iconUrl) {return null;}
 
   return (
     <div
       className={cn("relative inline-flex items-center justify-center", className)}
-      style={{ width: px, height: px }}
+      style={{ height: px, width: px }}
     >
       <Image src={iconUrl} alt={element} width={px} height={px} className="object-contain" />
     </div>

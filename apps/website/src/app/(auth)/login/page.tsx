@@ -19,7 +19,7 @@ import {
 import { AuthForm } from "./auth-form";
 
 function safeDecode(value: string | null | undefined): string | null {
-	if (!value) return null;
+	if (!value) {return null;}
 	try {
 		return decodeURIComponent(value);
 	} catch {
@@ -29,21 +29,21 @@ function safeDecode(value: string | null | undefined): string | null {
 
 const SOCIAL_LINKS = [
 	{
-		label: "Discord",
-		href: "https://discord.gg/8X8eQfBMkt",
 		Icon: DiscordIcon,
+		href: "https://discord.gg/8X8eQfBMkt",
+		label: "Discord",
 	},
 	{
-		label: "Twitch",
-		href: "https://twitch.tv/rose_griffontv",
 		Icon: TwitchIcon,
+		href: "https://twitch.tv/rose_griffontv",
+		label: "Twitch",
 	},
 	{
-		label: "YouTube",
-		href: "https://youtube.com/@rosegriffon",
 		Icon: YouTubeIcon,
+		href: "https://youtube.com/@rosegriffon",
+		label: "YouTube",
 	},
-	{ label: "X / Twitter", href: "https://x.com/rosegriffon_fr", Icon: XIcon },
+	{ Icon: XIcon, href: "https://x.com/rosegriffon_fr", label: "X / Twitter" },
 ];
 
 function LoginPageContent() {

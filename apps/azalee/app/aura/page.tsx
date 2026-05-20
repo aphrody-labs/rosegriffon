@@ -8,50 +8,50 @@ import type { SpriteCommonKey } from "@/config/sprites-common";
 import { cn } from "@/lib/utils";
 
 export const metadata: Metadata = {
-  title: "Hyper Techniques - Azalée",
   description: "Explorez les Esprits Guerriers, Totems, Miximax et autres pouvoirs spéciaux.",
+  title: "Hyper Techniques - Azalée",
 };
 
 const CATEGORIES = [
   {
-    id: "esprits-guerriers",
-    title: "Esprits Guerriers",
+    color: "bg-amber-500/10 text-amber-600",
     description: "Invocations puissantes qui combattent aux côtés des joueurs.",
     icon: "swords",
+    id: "esprits-guerriers",
     sprite: "keshin" as SpriteCommonKey,
-    color: "bg-amber-500/10 text-amber-600",
+    title: "Esprits Guerriers",
   },
   {
-    id: "totems",
-    title: "Totems",
+    color: "bg-emerald-500/10 text-emerald-600",
     description: "La transformation de l'âme du joueur en créature.",
     icon: "pets",
+    id: "totems",
     sprite: "soul" as SpriteCommonKey,
-    color: "bg-emerald-500/10 text-emerald-600",
+    title: "Totems",
   },
   {
-    id: "miximax",
-    title: "Miximax",
+    color: "bg-pink-500/10 text-pink-600",
     description: "Fusion de l'aura de deux êtres pour décupler la puissance.",
     icon: "group_add",
+    id: "miximax",
     sprite: "miximax" as SpriteCommonKey,
-    color: "bg-pink-500/10 text-pink-600",
+    title: "Miximax",
   },
   {
-    id: "eveil",
-    title: "Éveil",
+    color: "bg-blue-500/10 text-blue-600",
     description: "Libération du potentiel caché d'un joueur.",
     icon: "bolt",
+    id: "eveil",
     sprite: "eveil" as SpriteCommonKey,
-    color: "bg-blue-500/10 text-blue-600",
+    title: "Éveil",
   },
   {
-    id: "changement-mode",
-    title: "Changement de Mode",
+    color: "bg-purple-500/10 text-purple-600",
     description: "Altération tactique des capacités en cours de match.",
     icon: "change_circle",
+    id: "changement-mode",
     sprite: "mode_change" as SpriteCommonKey,
-    color: "bg-purple-500/10 text-purple-600",
+    title: "Changement de Mode",
   },
 ];
 

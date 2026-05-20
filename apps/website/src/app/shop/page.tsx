@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 
-import { PRODUCTS, type ProductCategory } from "@/lib/shop/products";
+import { PRODUCTS } from '@/lib/shop/products';
+import type { ProductCategory } from '@/lib/shop/products';
 import { CategoryFilter } from "./_components/category-filter";
 import { PatreonDiscountBanner } from "./_components/patreon-discount-banner";
 import { ProductCard } from "./_components/product-card";

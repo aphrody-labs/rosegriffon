@@ -1,27 +1,28 @@
 import {
 	Activity,
 	BookOpen,
+	Calendar,
 	CalendarClock,
+	Eye,
 	FileText,
 	Heart,
 	LayoutDashboard,
 	MonitorSmartphone,
-	Users,
 	UserPlus,
-	Calendar,
-	Eye,
+	Users,
 } from "lucide-react";
 
 import {
 	AdminPageHeader,
-	DashboardStatsCard as StatsCard,
 	DashboardGrid,
 	RecentListCard,
+	DashboardStatsCard as StatsCard,
 } from "@rosegriffon/ui";
 import { createAdminClient } from "@/lib/supabase/server";
 
 import { QuickActions } from "./_components/quick-actions";
-import { type SignupPoint, SignupsChart } from "./_components/signups-chart";
+import { SignupsChart } from './_components/signups-chart';
+import type { SignupPoint } from './_components/signups-chart';
 
 function buildDailySignups(
 	rows: { created_at: string | null }[],
@@ -35,11 +36,11 @@ function buildDailySignups(
 		buckets.set(d.toISOString().slice(0, 10), 0);
 	}
 	for (const row of rows) {
-		if (!row.created_at) continue;
+		if (!row.created_at) {continue;}
 		const key = row.created_at.slice(0, 10);
-		if (buckets.has(key)) buckets.set(key, (buckets.get(key) ?? 0) + 1);
+		if (buckets.has(key)) {buckets.set(key, (buckets.get(key) ?? 0) + 1);}
 	}
-	return Array.from(buckets, ([date, count]) => ({ date, count }));
+	return Array.from(buckets, ([date, count]) => ({ count, date }));
 }
 
 export const dynamic = "force-dynamic";
@@ -234,10 +235,10 @@ export default async function AdminDashboardPage() {
 					icon={UserPlus}
 					accent="bg-sky-500/10 text-sky-600"
 					items={(recentUsersRes.data ?? []).map((u) => ({
-						id: u.id,
-						title: u.full_name || u.username || "Sans nom",
-						subtitle: u.role || "Utilisateur",
 						date: u.created_at || undefined,
+						id: u.id,
+						subtitle: u.role || "Utilisateur",
+						title: u.full_name || u.username || "Sans nom",
 					}))}
 				/>
 				<RecentListCard
@@ -246,10 +247,8 @@ export default async function AdminDashboardPage() {
 					icon={FileText}
 					accent="bg-violet-500/10 text-violet-600"
 					items={(recentArticlesRes.data ?? []).map((a) => ({
-						id: a.id,
-						title: a.title,
-						status: a.status !== "published" ? "Brouillon" : undefined,
 						date: (a.published_at || a.updated_at) ?? undefined,
+						id: a.id,
 						meta:
 							typeof a.view_count === "number" ? (
 								<span className="flex items-center gap-1">
@@ -257,6 +256,8 @@ export default async function AdminDashboardPage() {
 									{a.view_count}
 								</span>
 							) : undefined,
+						status: a.status !== "published" ? "Brouillon" : undefined,
+						title: a.title,
 					}))}
 				/>
 				<RecentListCard
@@ -265,10 +266,10 @@ export default async function AdminDashboardPage() {
 					icon={Calendar}
 					accent="bg-amber-500/10 text-amber-600"
 					items={(upcomingEventsListRes.data ?? []).map((e) => ({
-						id: e.id,
-						title: e.title,
-						subtitle: e.location || "Lieu non précisé",
 						date: e.start_time,
+						id: e.id,
+						subtitle: e.location || "Lieu non précisé",
+						title: e.title,
 					}))}
 				/>
 			</section>

@@ -14,11 +14,11 @@ const AURA_CATEGORIES = [
 ];
 
 const AURA_TYPE_MAP: Record<string, string> = {
-	"esprits-guerriers": "Keshin",
-	totems: "Soul",
-	miximax: "Miximax",
-	eveil: "Awakening",
 	"changement-mode": "ModeChange",
+	"esprits-guerriers": "Keshin",
+	eveil: "Awakening",
+	miximax: "Miximax",
+	totems: "Soul",
 };
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
@@ -67,67 +67,67 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
 	// Static pages
 	const staticPages = [
-		{ url: "/", priority: 1.0, changeFrequency: "daily" as const },
-		{ url: "/chara", priority: 0.9, changeFrequency: "weekly" as const },
-		{ url: "/skill", priority: 0.9, changeFrequency: "weekly" as const },
-		{ url: "/item", priority: 0.8, changeFrequency: "weekly" as const },
-		{ url: "/aura", priority: 0.8, changeFrequency: "weekly" as const },
-		{ url: "/passive", priority: 0.7, changeFrequency: "weekly" as const },
-		{ url: "/search", priority: 0.6, changeFrequency: "weekly" as const },
-		{ url: "/news", priority: 0.8, changeFrequency: "daily" as const },
-		{ url: "/patch-notes", priority: 0.7, changeFrequency: "weekly" as const },
-		{ url: "/tactic", priority: 0.7, changeFrequency: "weekly" as const },
-		{ url: "/tools", priority: 0.5, changeFrequency: "monthly" as const },
+		{ changeFrequency: "daily" as const, priority: 1.0, url: "/" },
+		{ changeFrequency: "weekly" as const, priority: 0.9, url: "/chara" },
+		{ changeFrequency: "weekly" as const, priority: 0.9, url: "/skill" },
+		{ changeFrequency: "weekly" as const, priority: 0.8, url: "/item" },
+		{ changeFrequency: "weekly" as const, priority: 0.8, url: "/aura" },
+		{ changeFrequency: "weekly" as const, priority: 0.7, url: "/passive" },
+		{ changeFrequency: "weekly" as const, priority: 0.6, url: "/search" },
+		{ changeFrequency: "daily" as const, priority: 0.8, url: "/news" },
+		{ changeFrequency: "weekly" as const, priority: 0.7, url: "/patch-notes" },
+		{ changeFrequency: "weekly" as const, priority: 0.7, url: "/tactic" },
+		{ changeFrequency: "monthly" as const, priority: 0.5, url: "/tools" },
 		{
+			changeFrequency: "monthly" as const,
+			priority: 0.6,
 			url: "/tools/compare",
-			priority: 0.6,
-			changeFrequency: "monthly" as const,
 		},
 		{
-			url: "/tools/random-team",
+			changeFrequency: "monthly" as const,
 			priority: 0.5,
-			changeFrequency: "monthly" as const,
+			url: "/tools/random-team",
 		},
 		{
-			url: "/tools/translator",
+			changeFrequency: "monthly" as const,
 			priority: 0.6,
-			changeFrequency: "monthly" as const,
+			url: "/tools/translator",
 		},
-		{ url: "/contact", priority: 0.3, changeFrequency: "yearly" as const },
-		{ url: "/soutenir", priority: 0.3, changeFrequency: "yearly" as const },
-		{ url: "/charte", priority: 0.2, changeFrequency: "yearly" as const },
+		{ changeFrequency: "yearly" as const, priority: 0.3, url: "/contact" },
+		{ changeFrequency: "yearly" as const, priority: 0.3, url: "/soutenir" },
+		{ changeFrequency: "yearly" as const, priority: 0.2, url: "/charte" },
 		{
+			changeFrequency: "yearly" as const,
+			priority: 0.1,
 			url: "/legal/cgu",
-			priority: 0.1,
-			changeFrequency: "yearly" as const,
 		},
 		{
+			changeFrequency: "yearly" as const,
+			priority: 0.1,
 			url: "/legal/confidentialite",
-			priority: 0.1,
-			changeFrequency: "yearly" as const,
 		},
 		{
-			url: "/legal/mentions-legales",
-			priority: 0.1,
 			changeFrequency: "yearly" as const,
+			priority: 0.1,
+			url: "/legal/mentions-legales",
 		},
 	];
 
 	// Aura category pages
 	for (const cat of AURA_CATEGORIES) {
 		staticPages.push({
-			url: `/aura/${cat}`,
-			priority: 0.7,
 			changeFrequency: "weekly" as const,
+			priority: 0.7,
+			url: `/aura/${cat}`,
 		});
 	}
 
 	for (const page of staticPages) {
 		entries.push({
-			url: `${BASE_URL}${page.url}`,
-			lastModified: new Date(),
 			changeFrequency: page.changeFrequency,
+			lastModified: new Date(),
 			priority: page.priority,
+			url: `${BASE_URL}${page.url}`,
 		});
 	}
 
@@ -135,10 +135,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 	if (characters.data) {
 		for (const c of characters.data) {
 			entries.push({
-				url: `${BASE_URL}/chara/${c.slug}`,
-				lastModified: c.updated_at ? new Date(c.updated_at) : new Date(),
 				changeFrequency: "monthly",
+				lastModified: c.updated_at ? new Date(c.updated_at) : new Date(),
 				priority: 0.8,
+				url: `${BASE_URL}/chara/${c.slug}`,
 			});
 		}
 	}
@@ -147,10 +147,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 	if (skills.data) {
 		for (const s of skills.data) {
 			entries.push({
-				url: `${BASE_URL}/skill/${s.id}`,
-				lastModified: s.created_at ? new Date(s.created_at) : new Date(),
 				changeFrequency: "monthly",
+				lastModified: s.created_at ? new Date(s.created_at) : new Date(),
 				priority: 0.7,
+				url: `${BASE_URL}/skill/${s.id}`,
 			});
 		}
 	}
@@ -159,10 +159,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 	if (items.data) {
 		for (const i of items.data) {
 			entries.push({
-				url: `${BASE_URL}/item/${i.id}`,
-				lastModified: i.created_at ? new Date(i.created_at) : new Date(),
 				changeFrequency: "monthly",
+				lastModified: i.created_at ? new Date(i.created_at) : new Date(),
 				priority: 0.6,
+				url: `${BASE_URL}/item/${i.id}`,
 			});
 		}
 	}
@@ -177,10 +177,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 		for (const a of auras.data) {
 			const category = typeToCategory[a.sub_type] || "esprits-guerriers";
 			entries.push({
-				url: `${BASE_URL}/aura/${category}/${a.id}`,
-				lastModified: a.created_at ? new Date(a.created_at) : new Date(),
 				changeFrequency: "monthly",
+				lastModified: a.created_at ? new Date(a.created_at) : new Date(),
 				priority: 0.6,
+				url: `${BASE_URL}/aura/${category}/${a.id}`,
 			});
 		}
 	}
@@ -189,10 +189,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 	if (tactics.data) {
 		for (const t of tactics.data) {
 			entries.push({
-				url: `${BASE_URL}/tactic/${t.id}`,
-				lastModified: t.created_at ? new Date(t.created_at) : new Date(),
 				changeFrequency: "monthly",
+				lastModified: t.created_at ? new Date(t.created_at) : new Date(),
 				priority: 0.6,
+				url: `${BASE_URL}/tactic/${t.id}`,
 			});
 		}
 	}
@@ -201,14 +201,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 	if (articles.data) {
 		for (const n of articles.data) {
 			entries.push({
-				url: `${BASE_URL}/news/${n.slug}`,
+				changeFrequency: "monthly",
 				lastModified: n.updated_at
 					? new Date(n.updated_at)
 					: n.published_at
 						? new Date(n.published_at)
 						: new Date(),
-				changeFrequency: "monthly",
 				priority: 0.7,
+				url: `${BASE_URL}/news/${n.slug}`,
 			});
 		}
 	}
@@ -225,10 +225,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 		}
 		for (const tag of uniqueTags) {
 			entries.push({
-				url: `${BASE_URL}/news/tag/${encodeURIComponent(tag)}`,
-				lastModified: new Date(),
 				changeFrequency: "weekly",
+				lastModified: new Date(),
 				priority: 0.5,
+				url: `${BASE_URL}/news/tag/${encodeURIComponent(tag)}`,
 			});
 		}
 	}

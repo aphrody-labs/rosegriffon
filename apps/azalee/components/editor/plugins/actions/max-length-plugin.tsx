@@ -9,8 +9,7 @@ export function MaxLengthPlugin({ maxLength }: { maxLength: number }) {
   const [editor] = useLexicalComposerContext();
   const [lastContentLength, setLastContentLength] = useState(0);
 
-  useEffect(() => {
-    return editor.registerNodeTransform(RootNode, (rootNode) => {
+  useEffect(() => editor.registerNodeTransform(RootNode, (rootNode) => {
       const textContent = rootNode.getTextContent();
       if (textContent.length > maxLength) {
         // Here we could try to truncate or just notify
@@ -18,8 +17,7 @@ export function MaxLengthPlugin({ maxLength }: { maxLength: number }) {
         // For simplicity, we just track length here for the UI part if needed.
       }
       setLastContentLength(textContent.length);
-    });
-  }, [editor, maxLength]);
+    }), [editor, maxLength]);
 
   const isOverLimit = lastContentLength > maxLength;
 
@@ -32,9 +30,9 @@ export function MaxLengthPlugin({ maxLength }: { maxLength: number }) {
         "text-[10px] font-medium px-2 py-0.5 rounded-full border transition-colors",
         isOverLimit
           ? "bg-error-container text-on-error-container border-error"
-          : lastContentLength > maxLength * 0.9
+          : (lastContentLength > maxLength * 0.9
             ? "bg-warning-container text-on-warning-container border-warning"
-            : "bg-surface-container-highest text-on-surface-variant border-outline-variant/30",
+            : "bg-surface-container-highest text-on-surface-variant border-outline-variant/30"),
       )}
     >
       {lastContentLength} / {maxLength}

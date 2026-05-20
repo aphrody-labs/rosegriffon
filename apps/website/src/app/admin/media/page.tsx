@@ -37,8 +37,8 @@ export default async function MediaPage({ searchParams }: MediaPageProps) {
 		.list(undefined, {
 			limit: limit + 1,
 			offset: offset,
-			sortBy: { column: "created_at", order: "desc" },
 			search: query,
+			sortBy: { column: "created_at", order: "desc" },
 		});
 
 	if (error) {

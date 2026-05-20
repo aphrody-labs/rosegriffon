@@ -12,41 +12,41 @@ interface Tier {
 
 const TIERS: Tier[] = [
 	{
-		name: "Niveau Roy 🌹",
-		priceCents: 250,
 		color: "#aac9d9",
+		name: "Niveau Roy 🌹",
 		perks: [
 			"Rôle Discord Roy",
 			"Newsletter exclusive",
 			"Mention dans le générique des chroniques",
 		],
+		priceCents: 250,
 	},
 	{
-		name: "Niveau Gaëlle 🌹",
-		priceCents: 750,
 		color: "#e54a4a",
+		name: "Niveau Gaëlle 🌹",
 		perks: [
 			"Tous les avantages Roy",
 			"Accès en avant-première aux articles",
 			"Vote sur les futurs sujets",
 		],
+		priceCents: 750,
 	},
 	{
-		name: "Niveau Evans 🌹",
-		priceCents: 1450,
 		color: "#5fa893",
+		highlight: true,
+		name: "Niveau Evans 🌹",
 		perks: [
 			"Tous les avantages Gaëlle",
 			"Pack Personnage trimestriel offert (print A5 + marque-page + sticker + badge)",
 			"Crédit boutique 5 €/mois",
 			"Discord chat privé avec l'équipe",
 		],
-		highlight: true,
+		priceCents: 1450,
 	},
 ];
 
 function formatPrice(cents: number): string {
-	return (cents / 100).toFixed(2).replace(".", ",") + " €";
+	return `${(cents / 100).toFixed(2).replace(".", ",")  } €`;
 }
 
 export function TierComparator() {

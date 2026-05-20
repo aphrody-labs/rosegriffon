@@ -18,7 +18,8 @@ import {
 } from "@rosegriffon/ui";
 
 import { sendContactEmail } from "./actions";
-import { type ContactFormValues, contactFormSchema } from "./schema";
+import { contactFormSchema } from './schema';
+import type { ContactFormValues } from './schema';
 
 // Taille maximale de fichier en octets (5MB)
 const MAX_FILE_SIZE = 5 * 1024 * 1024;
@@ -28,23 +29,38 @@ export default function ContactPage() {
   const [fileSize, setFileSize] = useState<number>(0);
 
   const form = useForm<ContactFormValues>({
-    resolver: zodResolver(contactFormSchema),
     defaultValues: {
-      title: "",
-      subject: undefined,
       description: "",
       file: null,
+      subject: undefined,
+      title: "",
     },
+    resolver: zodResolver(contactFormSchema),
   });
 
   // Utiliser TanStack Query pour la mutation
   const mutation = useMutation({
     mutationFn: sendContactEmail,
+    onError: (error) => {
+      console.error("Erreur lors de l'envoi du formulaire:", error);
+      // Mettre à jour le toast en erreur
+      if (toastIdRef.current) {
+        toast.error("Erreur lors de l'envoi", {
+          id: toastIdRef.current,
+          description:
+            "Une erreur est survenue lors de l'envoi de votre message. Veuillez réessayer.",
+        });
+      }
+    },
     onMutate: () => {
       // Afficher le toast de chargement
       toastIdRef.current = toast.loading("Envoi en cours...", {
         description: "Votre message est en cours d'envoi.",
       });
+    },
+    onSettled: () => {
+      // Réinitialiser la référence du toast
+      toastIdRef.current = null;
     },
     onSuccess: () => {
       // Mettre à jour le toast en succès
@@ -57,30 +73,15 @@ export default function ContactPage() {
       form.reset();
       setFileSize(0);
     },
-    onError: (error) => {
-      console.error("Erreur lors de l'envoi du formulaire:", error);
-      // Mettre à jour le toast en erreur
-      if (toastIdRef.current) {
-        toast.error("Erreur lors de l'envoi", {
-          id: toastIdRef.current,
-          description:
-            "Une erreur est survenue lors de l'envoi de votre message. Veuillez réessayer.",
-        });
-      }
-    },
-    onSettled: () => {
-      // Réinitialiser la référence du toast
-      toastIdRef.current = null;
-    },
   });
 
   // Formatter la taille du fichier en format lisible
   const formatFileSize = (bytes: number): string => {
-    if (bytes === 0) return "0 Bytes";
+    if (bytes === 0) {return "0 Bytes";}
     const k = 1024;
     const sizes = ["Bytes", "KB", "MB", "GB"];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return `${parseFloat((bytes / k ** i).toFixed(2))} ${sizes[i]}`;
+    return `${Number.parseFloat((bytes / k ** i).toFixed(2))} ${sizes[i]}`;
   };
 
   async function onSubmit(data: ContactFormValues) {

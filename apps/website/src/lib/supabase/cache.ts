@@ -11,14 +11,12 @@ export const cachedQuery = <T>(
   keys: string[],
   tags: string[] = [],
   revalidate: number = 3600 // 1 heure par défaut
-) => {
-  return cache(
+) => cache(
     unstable_cache(queryFn, keys, {
       tags,
       revalidate,
     })
   );
-};
 
 /**
  * Exemple d'utilisation :

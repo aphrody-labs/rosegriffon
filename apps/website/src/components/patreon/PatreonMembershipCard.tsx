@@ -87,23 +87,23 @@ const STATUS_BADGE: Record<NonNullable<PatronStatus>, string> = {
 };
 
 const RG_LEGACY_LABEL: Record<string, string> = {
-	pending: "En attente de réactivation",
-	reactivated: "Réabonné via la boutique",
 	churned: "N'a pas réactivé",
 	grandfathered: "Tarif garanti à vie",
+	pending: "En attente de réactivation",
+	reactivated: "Réabonné via la boutique",
 };
 
 function formatEur(cents: number | null | undefined): string {
-	if (cents == null) return "—";
+	if (cents == null) {return "—";}
 	return new Intl.NumberFormat("fr-FR", {
-		style: "currency",
 		currency: "EUR",
 		minimumFractionDigits: cents % 100 === 0 ? 0 : 2,
+		style: "currency",
 	}).format(cents / 100);
 }
 
 function formatDate(iso: string | null | undefined): string {
-	if (!iso) return "—";
+	if (!iso) {return "—";}
 	return format(new Date(iso), "d MMMM yyyy", { locale: fr });
 }
 
@@ -120,7 +120,7 @@ function formatDate(iso: string | null | undefined): string {
  */
 export async function PatreonMembershipCard({ userId }: { userId: string }) {
 	const supabase = createAdminClient();
-	if (!supabase) return null;
+	if (!supabase) {return null;}
 
 	const [liveRes, legacyRes] = await Promise.all([
 		supabase
@@ -146,13 +146,13 @@ export async function PatreonMembershipCard({ userId }: { userId: string }) {
 	const legacy = (legacyRes.data as LegacyRow | null) ?? null;
 
 	// Rien à afficher si l'utilisateur n'est ni lié ni connu en legacy.
-	if (!live && !legacy) return null;
+	if (!live && !legacy) {return null;}
 
 	const status: PatronStatus = (live?.patron_status as PatronStatus) ?? null;
 	const isActive = status === "active_patron";
 	const wasMember =
-		!!legacy ||
-		(!!status && (status === "former_patron" || status === "declined_patron"));
+		Boolean(legacy) ||
+		(Boolean(status) && (status === "former_patron" || status === "declined_patron"));
 
 	const tierTitle =
 		(live?.tier_titles && live.tier_titles[0]) ||
@@ -188,9 +188,9 @@ export async function PatreonMembershipCard({ userId }: { userId: string }) {
 
 	const accent = isActive
 		? "border-emerald-500/30 bg-linear-to-br from-emerald-500/5 via-card to-card"
-		: wasMember
+		: (wasMember
 			? "border-zinc-500/20 bg-card"
-			: "border-[#FF424D]/30 bg-card";
+			: "border-[#FF424D]/30 bg-card");
 
 	return (
 		<Card className={accent}>
@@ -228,11 +228,11 @@ export async function PatreonMembershipCard({ userId }: { userId: string }) {
 										live.patreon_email ||
 										"Voir sur Patreon"}
 								</a>
-							) : live?.patreon_email ? (
+							) : (live?.patreon_email ? (
 								<p className="mt-1 text-sm text-muted-foreground">
 									{live.patreon_full_name || live.patreon_email}
 								</p>
-							) : null}
+							) : null)}
 						</div>
 					</div>
 
@@ -304,8 +304,8 @@ export async function PatreonMembershipCard({ userId }: { userId: string }) {
 						value={
 							pledgeStart
 								? formatDistanceToNow(new Date(pledgeStart), {
-										locale: fr,
 										addSuffix: false,
+										locale: fr,
 									})
 								: "—"
 						}
@@ -323,7 +323,7 @@ export async function PatreonMembershipCard({ userId }: { userId: string }) {
 						icon={Gauge}
 						label="Cadence"
 						value={
-							cadence === 12 ? "Annuelle" : cadence === 1 ? "Mensuelle" : "—"
+							cadence === 12 ? "Annuelle" : (cadence === 1 ? "Mensuelle" : "—")
 						}
 					/>
 					{nextCharge && (
@@ -410,9 +410,9 @@ export async function PatreonMembershipCard({ userId }: { userId: string }) {
 									value={
 										legacy.resolution_method === "email"
 											? "email"
-											: legacy.resolution_method === "discord_id"
+											: (legacy.resolution_method === "discord_id"
 												? "Discord"
-												: "manuel"
+												: "manuel")
 									}
 								/>
 							)}
@@ -435,8 +435,8 @@ export async function PatreonMembershipCard({ userId }: { userId: string }) {
 							<Clock className="h-3.5 w-3.5" />
 							Dernière sync :{" "}
 							{formatDistanceToNow(new Date(fetchedAt), {
-								locale: fr,
 								addSuffix: true,
+								locale: fr,
 							})}
 						</span>
 					)}

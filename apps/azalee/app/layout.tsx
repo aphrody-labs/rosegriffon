@@ -6,8 +6,8 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 
-// next-themes < v1 + React 19 typings drift on `children` prop: cast once to
-// a permissive FC. Runtime behavior is unchanged.
+// Next-themes < v1 + React 19 typings drift on `children` prop: cast once to
+// A permissive FC. Runtime behavior is unchanged.
 const NextThemesProvider = RawNextThemesProvider as unknown as React.FC<{
 	children: React.ReactNode;
 	[k: string]: unknown;
@@ -22,74 +22,74 @@ import { mintSupabaseJwt } from "@/lib/supabase/jwt";
 import "./globals.css";
 
 const geistSans = Geist({
-	variable: "--font-geist-sans",
 	subsets: ["latin"],
+	variable: "--font-geist-sans",
 });
 
 const geistMono = Geist_Mono({
-	variable: "--font-geist-mono",
 	subsets: ["latin"],
+	variable: "--font-geist-mono",
 });
 
 import type { Metadata, Viewport } from "next";
 
 export const metadata: Metadata = {
-	metadataBase: new URL("https://azalee.rosegriffon.fr"),
-	title: {
-		default: "Azalée - Inazuma Eleven Victory Road Wiki",
-		template: "%s",
-	},
-	description:
-		"Base de données complète Inazuma Eleven: Victory Road. Personnages, techniques, objets et actualités en français.",
-	manifest: "/manifest.webmanifest",
-	icons: {
-		icon: "/icon.webp",
-		shortcut: "/icon.webp",
-		apple: "/icon.webp",
-	},
-	appleWebApp: {
-		capable: true,
-		statusBarStyle: "default",
-		title: "Azalée",
-		startupImage: ["/icon.webp"],
-	},
-	formatDetection: {
-		telephone: false,
-	},
-	openGraph: {
-		type: "website",
-		locale: "fr_FR",
-		siteName: "Azalée - Inazuma Eleven Victory Road",
-	},
-	twitter: {
-		card: "summary",
-		site: "@Azalee_IE",
-		creator: "@Azalee_IE",
-	},
-	robots: {
-		index: true,
-		follow: true,
-		googleBot: {
-			index: true,
-			follow: true,
-			"max-video-preview": -1,
-			"max-image-preview": "large",
-			"max-snippet": -1,
-		},
-	},
 	alternates: {
 		canonical: "/",
 		types: {
 			"application/rss+xml": "/news/feed.xml",
 		},
 	},
+	appleWebApp: {
+		capable: true,
+		startupImage: ["/icon.webp"],
+		statusBarStyle: "default",
+		title: "Azalée",
+	},
+	description:
+		"Base de données complète Inazuma Eleven: Victory Road. Personnages, techniques, objets et actualités en français.",
+	formatDetection: {
+		telephone: false,
+	},
+	icons: {
+		apple: "/icon.webp",
+		icon: "/icon.webp",
+		shortcut: "/icon.webp",
+	},
+	manifest: "/manifest.webmanifest",
+	metadataBase: new URL("https://azalee.rosegriffon.fr"),
+	openGraph: {
+		locale: "fr_FR",
+		siteName: "Azalée - Inazuma Eleven Victory Road",
+		type: "website",
+	},
+	robots: {
+		follow: true,
+		googleBot: {
+			follow: true,
+			index: true,
+			"max-image-preview": "large",
+			"max-snippet": -1,
+			"max-video-preview": -1,
+		},
+		index: true,
+	},
+	title: {
+		default: "Azalée - Inazuma Eleven Victory Road Wiki",
+		template: "%s",
+	},
+	twitter: {
+		card: "summary",
+		creator: "@Azalee_IE",
+		site: "@Azalee_IE",
+	},
 };
 
 export const viewport: Viewport = {
-	themeColor: "#FFB700",
-	width: "device-width",
 	initialScale: 1,
+	themeColor: "#FFB700",
 	viewportFit: "cover",
+	width: "device-width",
 };
 
 export default async function RootLayout({
@@ -98,7 +98,7 @@ export default async function RootLayout({
 	children: React.ReactNode;
 }>) {
 	const cookieStore = await cookies();
-	const cookieVal = cookieStore.get("sidebar:state")?.value;
+	const cookieVal = cookieStore.get("sidebar_state")?.value;
 	const defaultOpen = cookieVal ? cookieVal === "true" : true;
 
 	// Get Better Auth session
@@ -111,7 +111,7 @@ export default async function RootLayout({
 		const session = await auth.api.getSession({ headers: reqHeaders });
 
 		if (session?.user) {
-			user = session.user;
+			({ user } = session);
 			supabaseToken = mintSupabaseJwt(session.user.id);
 
 			// Fetch profile using service-role-like access via minted JWT
@@ -141,13 +141,13 @@ export default async function RootLayout({
 				profile = await ensureUserProfile(session.user);
 			}
 		}
-	} catch (e) {
+	} catch (error) {
 		// No session — log explicite pour debug runtime Vercel (msg complet)
 		if (process.env.NODE_ENV === "production") {
 			console.error(
 				"[layout] auth.api.getSession throw:",
-				e instanceof Error ? e.message : String(e),
-				e instanceof Error && e.stack ? e.stack.split("\n").slice(0, 3) : null,
+				error instanceof Error ? error.message : String(error),
+				error instanceof Error && error.stack ? error.stack.split("\n").slice(0, 3) : null,
 			);
 		}
 	}

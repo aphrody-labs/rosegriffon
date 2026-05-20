@@ -8,13 +8,13 @@ import { getServerSession, getServerUser } from "@/lib/auth-helpers";
 import { createAdminClient, createClient } from "@/lib/supabase/server";
 
 import { AddressSection } from "./sections/address-section";
-import { AccountTabs, type AccountTabValue } from "./sections/account-tabs";
-import {
-	ConnectionsSection,
-	type LinkedAccount,
-} from "./sections/connections-section";
+import { AccountTabs } from './sections/account-tabs';
+import type { AccountTabValue } from './sections/account-tabs';
+import { ConnectionsSection } from './sections/connections-section';
+import type { LinkedAccount } from './sections/connections-section';
 import { ProfileSection } from "./sections/profile-section";
-import { SecuritySection, type SessionItem } from "./sections/security-section";
+import { SecuritySection } from './sections/security-section';
+import type { SessionItem } from './sections/security-section';
 
 export const dynamic = "force-dynamic";
 
@@ -31,7 +31,7 @@ export default async function AccountPage({
 	searchParams: Promise<{ tab?: string }>;
 }) {
 	const user = await getServerUser();
-	if (!user) redirect("/login");
+	if (!user) {redirect("/login");}
 
 	const { tab: rawTab } = await searchParams;
 	const initialTab: AccountTabValue = (
@@ -61,8 +61,8 @@ export default async function AccountPage({
 			scope: string | null;
 		};
 		return {
-			provider: r.provider_id,
 			createdAt: r.created_at,
+			provider: r.provider_id,
 			scope: r.scope,
 		};
 	});
@@ -85,10 +85,10 @@ export default async function AccountPage({
 			user_agent: string | null;
 		};
 		return {
-			id: r.id,
-			currentSessionId: r.id === currentSessionId,
 			createdAt: r.created_at,
+			currentSessionId: r.id === currentSessionId,
 			expiresAt: r.expires_at,
+			id: r.id,
 			ipAddress: r.ip_address,
 			userAgent: r.user_agent,
 		};

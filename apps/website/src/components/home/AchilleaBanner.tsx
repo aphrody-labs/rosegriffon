@@ -7,8 +7,8 @@ import DiscordIcon from "@/shared/icons/discord";
 
 // Load local font
 const humane = localFont({
-  src: "../../../public/achillea/Humane-Regular.otf",
   display: "swap",
+  src: "../../../public/achillea/Humane-Regular.otf",
   variable: "--font-humane",
 });
 

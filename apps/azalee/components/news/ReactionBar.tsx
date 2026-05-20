@@ -8,11 +8,11 @@ import type { ReactionType } from "@/lib/reaction-types";
 import { cn } from "@/lib/utils";
 
 const REACTIONS: Array<{ type: ReactionType; emoji: string; label: string }> = [
-  { type: "like", emoji: "❤️", label: "J'aime" },
-  { type: "fire", emoji: "🔥", label: "Enflammé" },
-  { type: "clap", emoji: "👏", label: "Bravo" },
-  { type: "mind_blown", emoji: "🤯", label: "Époustouflant" },
-  { type: "sad", emoji: "😢", label: "Triste" },
+  { emoji: "❤️", label: "J'aime", type: "like" },
+  { emoji: "🔥", label: "Enflammé", type: "fire" },
+  { emoji: "👏", label: "Bravo", type: "clap" },
+  { emoji: "🤯", label: "Époustouflant", type: "mind_blown" },
+  { emoji: "😢", label: "Triste", type: "sad" },
 ];
 
 interface ReactionState {
@@ -43,7 +43,7 @@ export function ReactionBar({ articleId, initialReactions }: ReactionBarProps) {
       return;
     }
 
-    if (pending) return;
+    if (pending) {return;}
 
     const current = reactions[type];
     const newReacted = !current.userReacted;

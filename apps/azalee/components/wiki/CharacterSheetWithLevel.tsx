@@ -2,7 +2,8 @@
 
 import { useLanguage } from "@/components/providers/language-provider";
 import { formatDescription } from "@/lib/format-description";
-import { CharacterSheet, type CharacterSheetStats, type SheetData } from "./CharacterSheet";
+import { CharacterSheet } from './CharacterSheet';
+import type { CharacterSheetStats, SheetData } from './CharacterSheet';
 import type { MovesetSkill } from "./MovesetList";
 
 interface CharacterSheetWithLevelProps {
@@ -91,12 +92,12 @@ export function CharacterSheetWithLevel({
   const { getLocalized, language } = useLanguage();
 
   const displayName = names
-    ? getLocalized({ name_FR: names.fr, name_EN: names.en, name_JA: names.ja }, "name")
+    ? getLocalized({ name_EN: names.en, name_FR: names.fr, name_JA: names.ja }, "name")
     : name;
 
   const rawDesc = descriptions
     ? getLocalized(
-        { desc_FR: descriptions.fr, desc_EN: descriptions.en, desc_JA: descriptions.ja },
+        { desc_EN: descriptions.en, desc_FR: descriptions.fr, desc_JA: descriptions.ja },
         "desc",
       )
     : description;

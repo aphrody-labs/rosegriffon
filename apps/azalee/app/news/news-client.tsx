@@ -53,7 +53,7 @@ function TweetPost({ item }: { item: FeedItem }) {
 	const cleanSlug = (s: string) => {
 		if (s.startsWith("http")) {
 			const parts = s.split("/").filter(Boolean);
-			return parts[parts.length - 1];
+			return parts.at(-1);
 		}
 		return s;
 	};
@@ -63,12 +63,15 @@ function TweetPost({ item }: { item: FeedItem }) {
 
 	const getDateLocale = () => {
 		switch (language) {
-			case "en":
+			case "en": {
 				return enUS;
-			case "ja":
+			}
+			case "ja": {
 				return ja;
-			default:
+			}
+			default: {
 				return fr;
+			}
 		}
 	};
 
@@ -153,7 +156,7 @@ function EmptyState({
 	searchQuery?: string;
 	onReset: () => void;
 }) {
-	const isSearch = !!searchQuery?.trim();
+	const isSearch = Boolean(searchQuery?.trim());
 	return (
 		<Empty className="border-outline-variant/20 py-20">
 			<EmptyHeader>
@@ -247,7 +250,7 @@ export function NewsFeedClient({
 	);
 	const tweets = feedItems.filter((item) => item.type === "tweet");
 	const isTweetFilter = categoryFilter === "Tweet";
-	const isSearchActive = !!searchQuery?.trim();
+	const isSearchActive = Boolean(searchQuery?.trim());
 	const showFeatured =
 		currentPage === 1 &&
 		!categoryFilter &&

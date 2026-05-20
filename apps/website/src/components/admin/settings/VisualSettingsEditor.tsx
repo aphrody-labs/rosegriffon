@@ -15,11 +15,11 @@ import FusionBlock from "@/components/shared/FusionBlock";
 import { Label } from "@rosegriffon/ui";
 import { Separator } from "@rosegriffon/ui";
 
-export type Setting = {
+export interface Setting {
   key: string;
   value: string;
   description?: string;
-};
+}
 
 interface VisualSettingsEditorProps {
   settings: Setting[];
@@ -55,7 +55,7 @@ export function VisualSettingsEditor({ settings: initialSettings }: VisualSettin
       } else {
         toast.success("Enregistré !");
       }
-    } catch (_e) {
+    } catch {
       toast.error("Erreur inconnue");
     } finally {
       setLoading(null);
@@ -172,7 +172,7 @@ export function VisualSettingsEditor({ settings: initialSettings }: VisualSettin
             </Label>
             <div className="border rounded-3xl p-4 bg-muted/30 dark:bg-black/20 overflow-hidden">
               <FusionBlock
-                isImageLeft={true}
+                isImageLeft
                 image={getVal(settings, "home_intro_image", "/RG_screens_twitch_ethan.webp")}
               >
                 <div className="space-y-4 flex flex-col justify-center h-full p-4">

@@ -20,10 +20,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 import { Icon } from "@/components/ui/Icon";
-import {
-	type OverrideSkillData,
-	OverrideSkillSection,
-} from "@/components/wiki/OverrideSkillSection";
+import { OverrideSkillSection } from '@/components/wiki/OverrideSkillSection';
+import type { OverrideSkillData } from '@/components/wiki/OverrideSkillSection';
 import { SkillVideoActions } from "@/components/wiki/SkillVideoActions";
 import { getSkillIconUrl, getSkillImageUrl } from "@/lib/images";
 import { japaneseToRomaji } from "@/lib/japanese-romaji";
@@ -36,17 +34,17 @@ const SKILL_TYPE_FR: Record<string, string> = {
 };
 
 const SHEET_TYPE_FR: Record<string, string> = {
-	Keep: "Arrêt",
-	Shoot: "Tir",
-	Offense: "Attaque",
 	Defense: "Défense",
 	Dribble: "Dribble",
+	Keep: "Arrêt",
+	Offense: "Attaque",
+	Shoot: "Tir",
 };
 
 const SHEET_SUBTYPE_FR: Record<string, string> = {
+	"Counter Shoot": "Contre-tir",
 	"Long Shoot": "Tir longue distance",
 	"Shoot Block": "Contre-tir",
-	"Counter Shoot": "Contre-tir",
 };
 
 // SHOP_FR imported from @/lib/translations
@@ -75,7 +73,7 @@ interface SkillDetailProps {
 
 function SkillImage({ src, alt }: { src: string; alt: string }) {
 	const [error, setError] = useState(false);
-	if (error) return null;
+	if (error) {return null;}
 	return (
 		<Image
 			src={src}
@@ -89,10 +87,10 @@ function SkillImage({ src, alt }: { src: string; alt: string }) {
 }
 
 function getCategoryIcon(category: number | undefined): string {
-	if (category === 1) return "sports_soccer";
-	if (category === 4) return "front_hand";
-	if (category === 2) return "directions_run";
-	if (category === 3) return "shield";
+	if (category === 1) {return "sports_soccer";}
+	if (category === 4) {return "front_hand";}
+	if (category === 2) {return "directions_run";}
+	if (category === 3) {return "shield";}
 	return "auto_awesome";
 }
 
@@ -276,7 +274,7 @@ function MetaRow({
 	sheetData?: CommunitySheetData;
 }) {
 	const elementIconUrl = getSkillIconUrl(element);
-	const skillType = (skill as any).skillType;
+	const {skillType} = (skill as any);
 
 	return (
 		<div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -320,7 +318,7 @@ function MetaRow({
 						const isDuplicate =
 							translatedType.toLowerCase() === category.toLowerCase();
 						// Only show if it adds new information (different type or has a subType)
-						if (isDuplicate && !sheetData.subType) return null;
+						if (isDuplicate && !sheetData.subType) {return null;}
 						return (
 							<span className="px-2.5 py-1 rounded-full bg-tertiary-container/30 text-tertiary text-xs font-bold uppercase tracking-wide">
 								{isDuplicate ? "" : translatedType}

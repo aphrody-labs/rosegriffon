@@ -47,7 +47,7 @@ export function BulkActionsBar({
 		}
 	};
 
-	if (selectedCount === 0) return null;
+	if (selectedCount === 0) {return null;}
 
 	return (
 		<>

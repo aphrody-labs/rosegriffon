@@ -91,13 +91,13 @@ export function SeoSection({
               <>
                 Aperçu : <span className="font-mono">/{slug}</span>
               </>
-            ) : generatedSlug ? (
+            ) : (generatedSlug ? (
               <>
                 Auto : <span className="font-mono">/{generatedSlug}</span>
               </>
             ) : (
               "Entrez un titre pour générer automatiquement le slug"
-            )}
+            ))}
           </p>
         </div>
       </div>

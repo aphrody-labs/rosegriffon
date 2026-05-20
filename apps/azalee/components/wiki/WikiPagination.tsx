@@ -33,7 +33,7 @@ export function WikiPagination({
   const createPageUrl = (pageNumber: number, perPage?: number) => {
     const params = new URLSearchParams(searchParams.toString());
     params.set("page", pageNumber.toString());
-    if (perPage) params.set("perPage", perPage.toString());
+    if (perPage) {params.set("perPage", perPage.toString());}
     return `${pathname}?${params.toString()}`;
   };
 
@@ -57,11 +57,11 @@ export function WikiPagination({
     const end = Math.min(totalPages - 2, currentPage + windowSize);
 
     pages.push(1, 2);
-    if (start > 3) pages.push("ellipsis");
+    if (start > 3) {pages.push("ellipsis");}
 
-    for (let i = start; i <= end; i++) pages.push(i);
+    for (let i = start; i <= end; i++) {pages.push(i);}
 
-    if (end < totalPages - 2) pages.push("ellipsis");
+    if (end < totalPages - 2) {pages.push("ellipsis");}
     pages.push(totalPages - 1, totalPages);
 
     return pages;

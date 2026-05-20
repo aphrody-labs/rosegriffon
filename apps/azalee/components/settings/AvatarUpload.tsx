@@ -23,7 +23,7 @@ export function AvatarUpload({ currentAvatarUrl, username, userId }: AvatarUploa
   const handleUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     try {
       setUploading(true);
-      if (!event.target.files || event.target.files.length === 0) return;
+      if (!event.target.files || event.target.files.length === 0) {return;}
 
       const file = event.target.files[0];
       const fileExt = file.name.split(".").pop();
@@ -34,7 +34,7 @@ export function AvatarUpload({ currentAvatarUrl, username, userId }: AvatarUploa
         .from("avatars")
         .upload(filePath, file, { upsert: true });
 
-      if (uploadError) throw uploadError;
+      if (uploadError) {throw uploadError;}
 
       // Get public URL
       const {
@@ -43,7 +43,7 @@ export function AvatarUpload({ currentAvatarUrl, username, userId }: AvatarUploa
 
       // Update Profile
       const result = await updateAvatar(publicUrl);
-      if (result.error) throw new Error(result.error);
+      if (result.error) {throw new Error(result.error);}
 
       setPreviewUrl(publicUrl);
       toast.success("Avatar mis à jour !");

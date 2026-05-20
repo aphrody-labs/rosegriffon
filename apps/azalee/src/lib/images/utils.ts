@@ -74,12 +74,12 @@ function mapLegacyMenuPath(menuPath: string): string | null {
 export function resolveAssetUrl(
 	path: string | null | undefined,
 ): string | null {
-	if (!path) return null;
+	if (!path) {return null;}
 	if (path.startsWith(LEGACY_STORAGE_PREFIX)) {
 		const stripped = path.slice(LEGACY_STORAGE_PREFIX.length);
 		return mapLegacyMenuPath(stripped) || `${MENU_BASE}/${stripped}`;
 	}
-	if (path.startsWith("http") || path.startsWith("/")) return path;
+	if (path.startsWith("http") || path.startsWith("/")) {return path;}
 	return mapLegacyMenuPath(path) || `${MENU_BASE}/${path}`;
 }
 
@@ -93,7 +93,7 @@ export function getCharacterFaceUrl(
 	charaId: string | undefined | null,
 	_unused?: string | null,
 ): string {
-	if (!charaId) return PLACEHOLDERS.character;
+	if (!charaId) {return PLACEHOLDERS.character;}
 	// Strip _5000/_5100/etc. suffix — dump only has base code face icons
 	const baseCode = charaId.replace(/_\d{4}$/, "");
 	return `${CHR_DUMP_BASE}/face/${baseCode}_l_${baseCode}_1_l00.png`;
@@ -108,7 +108,7 @@ export const getCharacterImageUrl = getCharacterFaceUrl;
 export function getCharacterUniformUrl(
 	charaId: string | undefined | null,
 ): string {
-	if (!charaId) return "";
+	if (!charaId) {return "";}
 	const baseCode = charaId.replace(/_\d{4}$/, "");
 	const uniformCode = baseCode.startsWith("c")
 		? `u${baseCode.slice(1)}`
@@ -122,7 +122,7 @@ export function getCharacterUniformUrl(
 export function getCharacterUniformBackUrl(
 	charaId: string | undefined | null,
 ): string {
-	if (!charaId) return "";
+	if (!charaId) {return "";}
 	const baseCode = charaId.replace(/_\d{4}$/, "");
 	const uniformCode = baseCode.startsWith("c")
 		? `u${baseCode.slice(1)}`
@@ -138,7 +138,7 @@ export function getSkillImageUrl(
 	skillId: string | undefined | null,
 	_unused?: string | null,
 ): string {
-	if (!skillId) return "";
+	if (!skillId) {return "";}
 	const baseCode = skillId.replace(/_[a-z]+$/i, "");
 	return `${MENU_DUMP_BASE}/220_img/telop_waza/fr/${baseCode}_${baseCode}.png`;
 }
@@ -149,9 +149,9 @@ export function getSkillImageUrl(
  * Fallback : `200_icon/02_icon_item/{itemId}.png`.
  */
 export function getItemImageUrl(itemId: string): string {
-	if (!itemId) return "";
+	if (!itemId) {return "";}
 	const mapped = ITEM_IMAGE_MANIFEST[itemId];
-	if (mapped) return `${MENU_DUMP_BASE}/${mapped}.png`;
+	if (mapped) {return `${MENU_DUMP_BASE}/${mapped}.png`;}
 	return `${MENU_DUMP_BASE}/200_icon/02_icon_item/${itemId}.png`;
 }
 // Alias
@@ -164,18 +164,18 @@ export const getItemIconUrl = getItemImageUrl;
 export function getEmblemImageUrl(
 	emblemId: string | number | undefined | null,
 ): string {
-	if (!emblemId && emblemId !== 0) return "";
+	if (!emblemId && emblemId !== 0) {return "";}
 	const s = emblemId.toString();
 	let emCode: string | null = null;
 	if (s.startsWith("em")) {
 		emCode = s;
 	} else {
-		const num = parseInt(s, 10);
+		const num = Number.parseInt(s, 10);
 		if (!Number.isNaN(num) && num > 0) {
 			emCode = `em${String(num).padStart(4, "0")}`;
 		}
 	}
-	if (!emCode) return "";
+	if (!emCode) {return "";}
 	return `${MENU_DUMP_BASE}/200_icon/01_icon_emblem/${emCode}_${emCode}.png`;
 }
 // Alias
@@ -188,36 +188,36 @@ export const getTeamEmblemUrl = getEmblemImageUrl;
 export function getGenderIconUrl(
 	gender: number | string | undefined | null,
 ): string {
-	if (gender === undefined || gender === null) return "";
+	if (gender === undefined || gender === null) {return "";}
 	const g = gender.toString().toLowerCase();
 	const isFemale = g === "1" || g === "2" || g === "f" || g === "female";
 	return isFemale ? "/move/girl.webp" : "/move/boy.webp";
 }
 
 export function getSkillElementIconUrl(element: string | number): string {
-	if (!element) return "";
+	if (!element) {return "";}
 	const el = element.toString().toLowerCase();
 	const map: Record<string, string> = {
-		fire: "fire",
-		feu: "fire",
 		"1": "fire",
-		wind: "wind",
-		vent: "wind",
-		air: "wind",
 		"2": "wind",
-		wood: "forest",
-		forest: "forest",
-		forêt: "forest",
-		bois: "forest",
-		foret: "forest",
 		"3": "forest",
-		earth: "mountain",
-		mountain: "mountain",
-		montagne: "mountain",
 		"4": "mountain",
+		air: "wind",
+		bois: "forest",
+		earth: "mountain",
+		feu: "fire",
+		fire: "fire",
+		forest: "forest",
+		foret: "forest",
+		forêt: "forest",
+		montagne: "mountain",
+		mountain: "mountain",
+		vent: "wind",
+		wind: "wind",
+		wood: "forest",
 	};
 	const filename = map[el];
-	if (!filename) return "";
+	if (!filename) {return "";}
 	return `/spirit_type/${filename}.webp`;
 }
 // Parfois appelé getSkillIconUrl pour l'élément (contexte dépendant)
@@ -225,60 +225,60 @@ export function getSkillElementIconUrl(element: string | number): string {
 export const getSkillIconUrl = getSkillElementIconUrl;
 
 export function getSkillCategoryIconUrl(category: string | number): string {
-	if (!category) return "";
+	if (!category) {return "";}
 	const cat = category.toString().toLowerCase();
 	const map: Record<string, string> = {
+		"1": "tir",
+		"2": "dribble",
+		"3": "defense",
+		"4": "gardien",
+		arret: "gardien",
+		arrêt: "gardien",
+		block: "defense",
+		catch: "gardien",
+		def: "defense",
+		defense: "defense",
+		dribble: "dribble",
+		défense: "defense",
+		gardien: "gardien",
+		gk: "gardien",
+		keeper: "gardien",
+		save: "gardien",
 		shoot: "tir",
 		shot: "tir",
 		tir: "tir",
-		"1": "tir",
-		dribble: "dribble",
-		"2": "dribble",
-		block: "defense",
-		defense: "defense",
-		défense: "defense",
-		def: "defense",
-		"3": "defense",
-		catch: "gardien",
-		save: "gardien",
-		keeper: "gardien",
-		arrêt: "gardien",
-		arret: "gardien",
-		gardien: "gardien",
-		gk: "gardien",
-		"4": "gardien",
 	};
 	const filename = map[cat];
-	if (!filename) return "";
+	if (!filename) {return "";}
 	return `/move/${filename}.webp`;
 }
 
 export function getRarityIconUrl(
 	rarity: string | number | undefined | null,
 ): string {
-	if (rarity === undefined || rarity === null) return "";
+	if (rarity === undefined || rarity === null) {return "";}
 	const r = rarity.toString().toLowerCase();
 	const map: Record<string, string> = {
-		n: "normal.webp",
-		normal: "normal.webp",
 		"1": "normal.webp",
-		r: "experimente.webp",
-		rare: "experimente.webp",
 		"2": "experimente.webp",
-		sr: "emerite.webp",
-		super: "emerite.webp",
+		"20": "basara.webp",
 		"3": "emerite.webp",
-		ssr: "heros.webp",
 		"4": "heros.webp",
-		ur: "legendaire.webp",
-		légendaire: "legendaire.webp",
-		legendaire: "legendaire.webp",
 		"5": "legendaire.webp",
 		basara: "basara.webp",
-		"20": "basara.webp",
+		legendaire: "legendaire.webp",
+		légendaire: "legendaire.webp",
+		n: "normal.webp",
+		normal: "normal.webp",
+		r: "experimente.webp",
+		rare: "experimente.webp",
+		sr: "emerite.webp",
+		ssr: "heros.webp",
+		super: "emerite.webp",
+		ur: "legendaire.webp",
 	};
 	const file = map[r];
-	if (!file) return "";
+	if (!file) {return "";}
 	return `/rarity/${file}`;
 }
 
@@ -286,7 +286,7 @@ export function getRarityIconUrl(
  * URL pour les vidéos de techniques
  */
 export function getSkillVideoUrl(skillId: string | undefined | null): string {
-	if (!skillId) return "";
+	if (!skillId) {return "";}
 	// Les vidéos sont généralement hébergées ailleurs ou dans un dossier spécifique
 	// Pour l'instant, on pointe vers le CDN mirror si disponible
 	return `${CDN_URL}/zukan-assets-mirror/movies/${skillId}.mp4`;
@@ -307,7 +307,7 @@ export function getAuraImageUrl(
 	assetCode: string | undefined | null,
 	_subType?: string,
 ): string {
-	if (!assetCode) return "";
+	if (!assetCode) {return "";}
 
 	const buildAuraUrl = (folder: string, base: string): string =>
 		`${AURA_DUMP_BASE}/${folder}/${base}_l_${base}_l00.png`;
@@ -336,7 +336,7 @@ export function getAuraImageUrl(
  * Pattern fichier : `{base}_l_{base}_l00.png`.
  */
 export function getMiximaxIconUrl(iconCode: string | undefined | null): string {
-	if (!iconCode) return "";
+	if (!iconCode) {return "";}
 	return `${AURA_DUMP_BASE}/aura_mixi/${iconCode}_l_${iconCode}_l00.png`;
 }
 
@@ -357,7 +357,7 @@ export function getMiximaxIconUrl(iconCode: string | undefined | null): string {
 export function resolveAuraTelopUrl(
 	assetCode: string | undefined | null,
 ): string | null {
-	if (!assetCode) return null;
+	if (!assetCode) {return null;}
 
 	let bucketCode: string | null = null;
 
@@ -368,7 +368,7 @@ export function resolveAuraTelopUrl(
 	} else if (assetCode.startsWith("wmm")) {
 		// Miximax character-based: wmm{N} -> aura_mixi_c{charId}
 		const numStr = assetCode.replace(/^wmm/, "").replace(/_.*$/, "");
-		const num = parseInt(numStr, 10);
+		const num = Number.parseInt(numStr, 10);
 		if (!Number.isNaN(num)) {
 			if (numStr.length > 5) {
 				// Long code = direct character ID (e.g. wmm11010230 -> c11010230)
@@ -394,7 +394,7 @@ export function resolveAuraTelopUrl(
 		bucketCode = "aura_power01";
 	}
 
-	if (!bucketCode) return null;
+	if (!bucketCode) {return null;}
 
 	// Dump PNG dx11 brut. Pattern : `220_img/telop_waza/fr/{code}_{code}.png`.
 	return `${MENU_DUMP_BASE}/220_img/telop_waza/fr/${bucketCode}_${bucketCode}.png`;
@@ -422,8 +422,8 @@ export function getCharacterModel360Url(
  */
 export const PLACEHOLDERS = {
 	character: "/ievr.webp",
-	skill: "/ievr.webp",
 	item: "/ievr.webp",
+	skill: "/ievr.webp",
 } as const;
 
 /**
@@ -435,8 +435,8 @@ export function getOptimizedImageUrl(
 	width = 640,
 	quality = 80,
 ): string {
-	if (!url) return "";
-	if (url.startsWith("data:")) return url;
+	if (!url) {return "";}
+	if (url.startsWith("data:")) {return url;}
 
 	// Use Next.js image optimization endpoint
 	return `/_next/image?url=${encodeURIComponent(url)}&w=${width}&q=${quality}`;

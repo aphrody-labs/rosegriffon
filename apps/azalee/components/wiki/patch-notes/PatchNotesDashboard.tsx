@@ -4,12 +4,8 @@ import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { ChevronRight, Loader2, RefreshCw } from "lucide-react";
 import { useCallback, useEffect, useRef, useState, useTransition } from "react";
-import {
-	getPatchNoteDetail,
-	getPatchNotes,
-	type PatchNoteDetail,
-	type PatchNoteSummary,
-} from "@/app/actions/news";
+import { getPatchNoteDetail, getPatchNotes } from '@/app/actions/news';
+import type { PatchNoteDetail, PatchNoteSummary } from '@/app/actions/news';
 import { ScrollArea } from "@rosegriffon/ui";
 import { cn } from "@/lib/utils";
 import { PatchNoteViewer } from "./PatchNoteViewer";
@@ -25,7 +21,7 @@ interface PatchNotesDashboardProps {
  */
 function extractVersion(id: string): string | null {
 	const match = id.match(/ver_(\d+(?:_\d+)*)/);
-	if (!match) return null;
+	if (!match) {return null;}
 	return match[1].replaceAll("_", ".");
 }
 
@@ -126,8 +122,8 @@ export default function PatchNotesPageClient({
 				setList(notes);
 				// Auto-select le premier item
 				setSelectedId(notes.length > 0 ? notes[0].id : null);
-			} catch (e) {
-				console.error(e);
+			} catch (error) {
+				console.error(error);
 				setList([]);
 				setSelectedId(null);
 			} finally {
@@ -143,8 +139,8 @@ export default function PatchNotesPageClient({
 			if (detail) {
 				setDetailData(detail);
 			}
-		} catch (e) {
-			console.error(e);
+		} catch (error) {
+			console.error(error);
 			setDetailData(null);
 		} finally {
 			setLoadingDetail(false);
@@ -211,7 +207,7 @@ export default function PatchNotesPageClient({
 							<div className="flex justify-center py-12">
 								<Loader2 className="animate-spin text-primary size-6" />
 							</div>
-						) : list.length > 0 ? (
+						) : (list.length > 0 ? (
 							list.map((note) => (
 								<PatchNoteListItem
 									key={note.id}
@@ -224,7 +220,7 @@ export default function PatchNotesPageClient({
 							<div className="py-12 text-center text-sm text-on-surface-variant/50">
 								Aucun patch note pour cette plateforme.
 							</div>
-						)}
+						))}
 					</div>
 				</ScrollArea>
 			</div>
@@ -256,7 +252,7 @@ export default function PatchNotesPageClient({
 						<Loader2 className="size-8 animate-spin text-primary" />
 						<p className="text-sm animate-pulse">Chargement...</p>
 					</div>
-				) : detailData ? (
+				) : (detailData ? (
 					<PatchNoteViewer data={detailData} />
 				) : (
 					<div className="h-96 flex flex-col items-center justify-center text-on-surface-variant/50 gap-2">
@@ -265,7 +261,7 @@ export default function PatchNotesPageClient({
 							Selectionnez un patch note pour voir les details.
 						</p>
 					</div>
-				)}
+				))}
 			</div>
 		</div>
 	);

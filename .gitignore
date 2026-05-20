@@ -82,3 +82,7 @@ supabase/.temp/
 .sentryclirc
 .vercel
 .env*.local
+
+# Gemini
+.gemini/
+.antigravitycli/

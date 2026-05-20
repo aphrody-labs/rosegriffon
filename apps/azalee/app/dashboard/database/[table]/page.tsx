@@ -12,7 +12,7 @@ export default async function GenericTablePage({
 }) {
   const { table } = await params;
   const { page, sort, dir } = await searchParams;
-  const pageNum = parseInt(page || "1", 10);
+  const pageNum = Number.parseInt(page || "1", 10);
   const limit = 50;
   const sortCol = sort || "id";
   const sortDir = dir !== "desc";
@@ -55,8 +55,8 @@ export default async function GenericTablePage({
     <div className="space-y-6 sm:space-y-8 pb-24 sm:pb-8">
       <DashboardPageHeader
         breadcrumbs={[
-          { label: "Tableau de bord", href: "/dashboard" },
-          { label: "Base de données", href: "/dashboard/database" },
+          { href: "/dashboard", label: "Tableau de bord" },
+          { href: "/dashboard/database", label: "Base de données" },
           { label: table },
         ]}
         title={table}

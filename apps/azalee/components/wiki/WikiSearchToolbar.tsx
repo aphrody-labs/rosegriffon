@@ -58,14 +58,14 @@ export function WikiSearchToolbar({
   // Sync state with URL if URL changes externally (React bail-out sur set identique)
   useEffect(() => {
     const q = searchParams.get("q");
-    if (q !== null) setQuery(q);
+    if (q !== null) {setQuery(q);}
   }, [searchParams]);
 
   // Debounced Search Update
   useEffect(() => {
     const timer = setTimeout(() => {
       const currentQ = searchParams.get("q") || "";
-      if (query === currentQ) return;
+      if (query === currentQ) {return;}
 
       const params = new URLSearchParams(searchParams.toString());
 
@@ -90,7 +90,7 @@ export function WikiSearchToolbar({
   };
 
   // Count active filters (excluding 'q' and 'page')
-  const activeFilterCount = Array.from(searchParams.entries()).filter(
+  const activeFilterCount = [...searchParams.entries()].filter(
     ([key]) => key !== "q" && key !== "page",
   ).length;
 

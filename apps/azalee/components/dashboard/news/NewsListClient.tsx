@@ -45,8 +45,8 @@ export function NewsListClient({ items, isListView }: NewsListClientProps) {
 
   const handleBulkAction = useCallback(
     async (action: string, value?: string) => {
-      const ids = Array.from(selectedIds);
-      if (ids.length === 0) return;
+      const ids = [...selectedIds];
+      if (ids.length === 0) {return;}
 
       if (action === "status" && value) {
         const result = await bulkUpdateArticles(ids, { status: value });
@@ -113,9 +113,9 @@ export function NewsListClient({ items, isListView }: NewsListClientProps) {
               className={`size-4 rounded border transition-all flex items-center justify-center ${
                 allSelected
                   ? "bg-primary border-primary"
-                  : selectedIds.size > 0
+                  : (selectedIds.size > 0
                     ? "bg-primary/30 border-primary"
-                    : "border-outline-variant"
+                    : "border-outline-variant")
               }`}
             >
               {(allSelected || selectedIds.size > 0) && (

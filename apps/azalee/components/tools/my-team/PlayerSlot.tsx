@@ -16,18 +16,18 @@ interface PlayerSlotProps {
 
 export function PlayerSlot({ member, onRemove, compact }: PlayerSlotProps) {
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
-    id: `placed-${member.slot}`,
     data: {
-      type: "player",
       member,
       origin: member.slot.startsWith("field-") ? "field" : "bench",
       slotId: member.slot,
+      type: "player",
     },
+    id: `placed-${member.slot}`,
   });
 
   const style = {
-    transform: CSS.Translate.toString(transform),
     opacity: isDragging ? 0.3 : 1,
+    transform: CSS.Translate.toString(transform),
   };
 
   const roleColor = ROLE_COLORS[member.position] || ROLE_COLORS.MF;

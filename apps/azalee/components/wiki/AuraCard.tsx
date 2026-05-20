@@ -26,29 +26,29 @@ export interface AuraCardProps {
 }
 
 const SUBTYPE_COLORS: Record<string, string> = {
-  Keshin: "bg-primary/80 text-on-primary",
-  Soul: "bg-tertiary/80 text-on-tertiary",
-  Awakening: "bg-secondary/80 text-on-secondary",
-  ModeChange: "bg-error/80 text-white",
-  Miximax: "bg-primary/80 text-on-primary",
   Aura: "bg-blue-600/80 text-white",
+  Awakening: "bg-secondary/80 text-on-secondary",
+  Keshin: "bg-primary/80 text-on-primary",
+  Miximax: "bg-primary/80 text-on-primary",
+  ModeChange: "bg-error/80 text-white",
+  Soul: "bg-tertiary/80 text-on-tertiary",
 };
 
 const SUBTYPE_LABELS: Record<string, string> = {
-  Keshin: "Esprit Guerrier",
-  Soul: "Totem",
-  Awakening: "Éveil",
-  ModeChange: "Mode",
-  Miximax: "Miximax",
   Aura: "Aura",
+  Awakening: "Éveil",
+  Keshin: "Esprit Guerrier",
+  Miximax: "Miximax",
+  ModeChange: "Mode",
+  Soul: "Totem",
 };
 
 const SUBTYPE_SPRITES: Record<string, SpriteCommonKey> = {
-  Keshin: "keshin",
-  Soul: "soul",
   Awakening: "eveil",
-  ModeChange: "mode_change",
+  Keshin: "keshin",
   Miximax: "miximax",
+  ModeChange: "mode_change",
+  Soul: "soul",
 };
 
 export function AuraCard({

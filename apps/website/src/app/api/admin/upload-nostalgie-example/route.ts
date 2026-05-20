@@ -10,7 +10,7 @@ const ALLOWED_MIME = new Set(["image/jpeg", "image/png", "image/webp"]);
 
 export async function POST(req: NextRequest) {
 	const auth = await requireApiAdmin();
-	if (!auth.ok) return auth.response;
+	if (!auth.ok) {return auth.response;}
 
 	try {
 		const supabase = createClient<Database>(
@@ -53,9 +53,9 @@ export async function POST(req: NextRequest) {
 			.getPublicUrl("ogVR.jpg");
 
 		return NextResponse.json({
-			success: true,
 			path: data?.path,
 			publicUrl: publicUrlData?.publicUrl,
+			success: true,
 		});
 	} catch (error) {
 		console.error("API error:", error);

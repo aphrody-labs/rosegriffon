@@ -5,12 +5,8 @@ import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from "recharts";
 
-import {
-	type ChartConfig,
-	ChartContainer,
-	ChartTooltip,
-	ChartTooltipContent,
-} from "@rosegriffon/ui";
+import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@rosegriffon/ui';
+import type { ChartConfig } from '@rosegriffon/ui';
 
 export interface SignupPoint {
 	date: string;
@@ -19,8 +15,8 @@ export interface SignupPoint {
 
 const config = {
 	count: {
-		label: "Inscriptions",
 		color: "var(--chart-1)",
+		label: "Inscriptions",
 	},
 } satisfies ChartConfig;
 
@@ -28,7 +24,7 @@ export function SignupsChart({ data }: { data: SignupPoint[] }) {
 	const total = data.reduce((sum, d) => sum + d.count, 0);
 	const peak = data.reduce(
 		(max, d) => (d.count > max.count ? d : max),
-		data[0] ?? { date: "", count: 0 },
+		data[0] ?? { count: 0, date: "" },
 	);
 
 	return (
@@ -50,7 +46,7 @@ export function SignupsChart({ data }: { data: SignupPoint[] }) {
 				>
 					<AreaChart
 						data={data}
-						margin={{ top: 8, right: 12, bottom: 0, left: 12 }}
+						margin={{ bottom: 0, left: 12, right: 12, top: 8 }}
 					>
 						<defs>
 							<linearGradient id="signupsGradient" x1="0" y1="0" x2="0" y2="1">

@@ -15,15 +15,15 @@ const ITEMS_PER_PAGE = 12;
 
 interface TagPageProps {
   params: Promise<{ tag: string }>;
-  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }
 
 export async function generateMetadata({ params }: TagPageProps) {
   const { tag } = await params;
   const decodedTag = decodeURIComponent(tag);
   return {
-    title: `Articles tagués "${decodedTag}" - Azalée`,
     description: `Tous les articles avec le tag "${decodedTag}" sur Azalée.`,
+    title: `Articles tagués "${decodedTag}" - Azalée`,
   };
 }
 

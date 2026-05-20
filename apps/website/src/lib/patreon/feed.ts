@@ -2,7 +2,8 @@
 
 import { createAdminClient } from "@/lib/supabase/server";
 
-import { getViewerPatreonAccess, type PatreonViewerAccess } from "./viewer";
+import { getViewerPatreonAccess } from './viewer';
+import type { PatreonViewerAccess } from './viewer';
 
 export interface PatreonFeedImage {
 	storagePath: string;
@@ -39,10 +40,10 @@ export async function getPatreonFeedForViewer(opts?: {
 	limit?: number;
 }): Promise<{ access: PatreonViewerAccess; posts: PatreonFeedPost[] }> {
 	const access = await getViewerPatreonAccess();
-	if (!access.linked) return { access, posts: [] };
+	if (!access.linked) {return { access, posts: [] };}
 
 	const supabase = createAdminClient();
-	if (!supabase) return { access, posts: [] };
+	if (!supabase) {return { access, posts: [] };}
 
 	const limit = opts?.limit ?? 12;
 
@@ -87,9 +88,9 @@ export async function getPatreonFeedForViewer(opts?: {
 	for (const r of imageRows ?? []) {
 		const list = imagesByPost.get(r.patreon_post_id) ?? [];
 		list.push({
-			storagePath: r.storage_path,
-			signedUrl: signedUrlMap.get(r.storage_path) ?? null,
 			contentType: r.content_type,
+			signedUrl: signedUrlMap.get(r.storage_path) ?? null,
+			storagePath: r.storage_path,
 		});
 		imagesByPost.set(r.patreon_post_id, list);
 	}
@@ -97,15 +98,15 @@ export async function getPatreonFeedForViewer(opts?: {
 	const posts: PatreonFeedPost[] = rows.map((r) => {
 		const imgs = imagesByPost.get(r.patreon_post_id) ?? [];
 		return {
-			id: r.patreon_post_id,
-			title: r.title,
+			cover: imgs[0] ?? null,
 			excerpt: r.content_excerpt,
-			url: r.url,
-			publishedAt: r.published_at,
+			id: r.patreon_post_id,
+			images: imgs,
 			isPaid: r.is_paid ?? false,
 			isPublic: r.is_public ?? false,
-			cover: imgs[0] ?? null,
-			images: imgs,
+			publishedAt: r.published_at,
+			title: r.title,
+			url: r.url,
 		};
 	});
 

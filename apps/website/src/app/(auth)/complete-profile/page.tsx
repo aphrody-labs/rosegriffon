@@ -30,12 +30,12 @@ export default function CompleteProfilePage() {
     // Marquer le profil comme complété même si l'utilisateur passe
     try {
       await fetch("/api/auth/profile", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           displayName: user?.name || user?.email?.split("@")[0],
           bio: "",
         }),
+        headers: { "Content-Type": "application/json" },
+        method: "PUT",
       });
     } catch (error) {
       console.error("Error marking profile as complete:", error);
@@ -51,12 +51,12 @@ export default function CompleteProfilePage() {
     try {
       // Sauvegarder le profil utilisateur via une route API
       const response = await fetch("/api/auth/profile", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           displayName: displayName || user?.name,
           bio,
         }),
+        headers: { "Content-Type": "application/json" },
+        method: "PUT",
       });
 
       if (!response.ok) {
@@ -67,8 +67,8 @@ export default function CompleteProfilePage() {
       setTimeout(() => {
         router.push("/");
       }, 1500);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Une erreur est survenue");
+    } catch (error) {
+      setError(error instanceof Error ? error.message : "Une erreur est survenue");
     } finally {
       setIsLoading(false);
     }

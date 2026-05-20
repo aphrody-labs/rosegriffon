@@ -9,7 +9,7 @@ import { isKana, toKatakana } from "wanakana";
 /** Convert romaji to katakana, returning null if the result contains non-kana characters */
 function romajiToKatakanaCache(input: string): string | null {
   const kata = toKatakana(input);
-  if (kata.length === 0) return null;
+  if (kata.length === 0) {return null;}
   const allKana = [...kata].every((c) => isKana(c) || c === "ー");
   return allKana ? kata : null;
 }
@@ -22,8 +22,8 @@ export function levenshteinDistance(a: string, b: string): number {
   const aLen = a.length;
   const bLen = b.length;
 
-  if (aLen === 0) return bLen;
-  if (bLen === 0) return aLen;
+  if (aLen === 0) {return bLen;}
+  if (bLen === 0) {return aLen;}
 
   // Create distance matrix
   const matrix: number[][] = Array(aLen + 1)
@@ -31,17 +31,17 @@ export function levenshteinDistance(a: string, b: string): number {
     .map(() => Array(bLen + 1).fill(0));
 
   // Initialize first row and column
-  for (let i = 0; i <= aLen; i++) matrix[i][0] = i;
-  for (let j = 0; j <= bLen; j++) matrix[0][j] = j;
+  for (let i = 0; i <= aLen; i++) {matrix[i][0] = i;}
+  for (let j = 0; j <= bLen; j++) {matrix[0][j] = j;}
 
   // Calculate distances
   for (let i = 1; i <= aLen; i++) {
     for (let j = 1; j <= bLen; j++) {
       const cost = a[i - 1] === b[j - 1] ? 0 : 1;
       matrix[i][j] = Math.min(
-        matrix[i - 1][j] + 1, // deletion
-        matrix[i][j - 1] + 1, // insertion
-        matrix[i - 1][j - 1] + cost, // substitution
+        matrix[i - 1][j] + 1, // Deletion
+        matrix[i][j - 1] + 1, // Insertion
+        matrix[i - 1][j - 1] + cost, // Substitution
       );
     }
   }
@@ -72,7 +72,7 @@ export function isSimilar(a: string, b: string, threshold = 0.7): boolean {
 export function normalizeText(text: string): string {
   return text
     .normalize("NFD")
-    .replaceAll(/[\u0300-\u036f]/g, "") // Remove accents
+    .replaceAll(/[\u0300-\u036F]/g, "") // Remove accents
     .toLowerCase()
     .trim();
 }
@@ -128,20 +128,20 @@ export function detectMatchedLanguage(
 ): "FR" | "EN" | "JP" | null {
   const normalizedQuery = normalizeText(query);
 
-  if (names.fr && normalizeText(names.fr).includes(normalizedQuery)) return "FR";
-  if (names.en && normalizeText(names.en).includes(normalizedQuery)) return "EN";
-  if (names.ja && normalizeText(names.ja).includes(normalizedQuery)) return "JP";
+  if (names.fr && normalizeText(names.fr).includes(normalizedQuery)) {return "FR";}
+  if (names.en && normalizeText(names.en).includes(normalizedQuery)) {return "EN";}
+  if (names.ja && normalizeText(names.ja).includes(normalizedQuery)) {return "JP";}
 
   // Romaji → katakana: if query converts to valid kana that matches name_ja, it's a JP match
   if (names.ja && romajiToKatakanaCache) {
     const kata = romajiToKatakanaCache(normalizedQuery);
-    if (kata && names.ja.includes(kata)) return "JP";
+    if (kata && names.ja.includes(kata)) {return "JP";}
   }
 
   // Fuzzy match fallback
-  if (names.fr && isSimilar(normalizedQuery, normalizeText(names.fr))) return "FR";
-  if (names.en && isSimilar(normalizedQuery, normalizeText(names.en))) return "EN";
-  if (names.ja && isSimilar(normalizedQuery, normalizeText(names.ja))) return "JP";
+  if (names.fr && isSimilar(normalizedQuery, normalizeText(names.fr))) {return "FR";}
+  if (names.en && isSimilar(normalizedQuery, normalizeText(names.en))) {return "EN";}
+  if (names.ja && isSimilar(normalizedQuery, normalizeText(names.ja))) {return "JP";}
 
   return null;
 }
@@ -154,29 +154,29 @@ export function highlightMatches(
   text: string,
   query: string,
 ): Array<{ text: string; highlight: boolean }> {
-  if (!query) return [{ text, highlight: false }];
+  if (!query) {return [{ text, highlight: false }];}
 
   const normalizedText = normalizeText(text);
   const normalizedQuery = normalizeText(query);
 
   const index = normalizedText.indexOf(normalizedQuery);
-  if (index === -1) return [{ text, highlight: false }];
+  if (index === -1) {return [{ text, highlight: false }];}
 
   const parts: Array<{ text: string; highlight: boolean }> = [];
 
   if (index > 0) {
-    parts.push({ text: text.slice(0, index), highlight: false });
+    parts.push({ highlight: false, text: text.slice(0, index) });
   }
 
   parts.push({
-    text: text.slice(index, index + query.length),
     highlight: true,
+    text: text.slice(index, index + query.length),
   });
 
   if (index + query.length < text.length) {
     parts.push({
-      text: text.slice(index + query.length),
       highlight: false,
+      text: text.slice(index + query.length),
     });
   }
 

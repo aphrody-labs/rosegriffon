@@ -50,7 +50,7 @@ export function SettingsForm({ initialProfile, userEmail }: SettingsFormProps) {
   // Load settings from localStorage
   useEffect(() => {
     const storedNotifications = localStorage.getItem("azalee_notifications");
-    if (storedNotifications !== null) setNotifications(storedNotifications === "true");
+    if (storedNotifications !== null) {setNotifications(storedNotifications === "true");}
   }, []);
 
   // Save settings items
@@ -64,14 +64,14 @@ export function SettingsForm({ initialProfile, userEmail }: SettingsFormProps) {
       const { error } = await supabase
         .from("profiles")
         .update({
-          username,
-          full_name: fullName,
           bio,
+          full_name: fullName,
           updated_at: new Date().toISOString(),
+          username,
         })
         .eq("id", initialProfile.id);
 
-      if (error) throw error;
+      if (error) {throw error;}
 
       toast.success("Profil mis à jour avec succès");
       router.refresh();
@@ -84,12 +84,12 @@ export function SettingsForm({ initialProfile, userEmail }: SettingsFormProps) {
   };
 
   const handleChangeEmail = async () => {
-    if (!newEmail) return;
+    if (!newEmail) {return;}
 
     setEmailLoading(true);
     try {
       const { error } = await authClient.changeEmail({ newEmail });
-      if (error) throw new Error(error.message);
+      if (error) {throw new Error(error.message);}
       toast.success("Un email de confirmation a été envoyé à ta nouvelle adresse.");
       setNewEmail("");
     } catch (error) {
@@ -102,7 +102,7 @@ export function SettingsForm({ initialProfile, userEmail }: SettingsFormProps) {
   };
 
   const handleChangePassword = async () => {
-    if (!newPassword || !confirmPassword) return;
+    if (!newPassword || !confirmPassword) {return;}
 
     if (newPassword !== confirmPassword) {
       toast.error("Les mots de passe ne correspondent pas.");
@@ -117,10 +117,10 @@ export function SettingsForm({ initialProfile, userEmail }: SettingsFormProps) {
     setPasswordLoading(true);
     try {
       const { error } = await authClient.changePassword({
-        newPassword,
         currentPassword: "",
+        newPassword,
       });
-      if (error) throw new Error(error.message);
+      if (error) {throw new Error(error.message);}
       toast.success("Mot de passe modifié avec succès.");
       setNewPassword("");
       setConfirmPassword("");

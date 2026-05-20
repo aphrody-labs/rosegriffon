@@ -3,7 +3,7 @@
 import { getEnv } from "@/lib/env";
 import { createAdminClient } from "@/lib/supabase/server";
 
-export type TeamMemberResponse = {
+export interface TeamMemberResponse {
   metadata: {
     memberName: string;
     memberRole: string;
@@ -11,7 +11,7 @@ export type TeamMemberResponse = {
     memberLink: string;
   };
   url: string;
-};
+}
 
 /**
  * Fetches team members from Supabase based on the team ID
@@ -61,10 +61,10 @@ export default async function getTeamMembers(teamId: string): Promise<TeamMember
 
       return {
         metadata: {
-          memberName: member.name,
-          memberRole: member.role || "",
           memberIndex: member.display_index || 999,
           memberLink: member.member_link || "",
+          memberName: member.name,
+          memberRole: member.role || "",
         },
         url: imageUrl,
       };

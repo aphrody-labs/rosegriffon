@@ -2,14 +2,8 @@
 
 import { useCallback, useMemo, useState } from "react";
 
-import {
-  EMOTES,
-  type Emote,
-  getEmotesByCategory,
-  getEmotesByCharacter,
-  getRandomEmote,
-  getRandomEmoteByCharacter,
-} from "@/lib/emotes";
+import { EMOTES, getEmotesByCategory, getEmotesByCharacter, getRandomEmote, getRandomEmoteByCharacter } from '@/lib/emotes';
+import type { Emote } from '@/lib/emotes';
 
 /**
  * Hook pour utiliser les emotes Rose Griffon
@@ -39,31 +33,27 @@ export function useEmotes() {
     return emote;
   }, []);
 
-  const getByCharacter = useCallback((character: "gaelle" | "roy" | "rg") => {
-    return getEmotesByCharacter(character);
-  }, []);
+  const getByCharacter = useCallback((character: "gaelle" | "roy" | "rg") => getEmotesByCharacter(character), []);
 
-  const getByCategory = useCallback((category: "reaction" | "greeting" | "emotion") => {
-    return getEmotesByCategory(category);
-  }, []);
+  const getByCategory = useCallback((category: "reaction" | "greeting" | "emotion") => getEmotesByCategory(category), []);
 
   return {
     /** Toutes les emotes disponibles */
     allEmotes,
-    /** Emote actuellement sélectionnée */
-    selectedEmote,
-    /** Sélectionner une emote par son nom */
-    selectEmote,
-    /** Sélectionner une emote aléatoire */
-    selectRandomEmote,
-    /** Sélectionner une emote aléatoire d'un personnage */
-    selectRandomByCharacter,
-    /** Obtenir les emotes d'un personnage */
-    getByCharacter,
-    /** Obtenir les emotes d'une catégorie */
-    getByCategory,
     /** Réinitialiser la sélection */
     clearSelection: () => setSelectedEmote(null),
+    /** Obtenir les emotes d'une catégorie */
+    getByCategory,
+    /** Obtenir les emotes d'un personnage */
+    getByCharacter,
+    /** Sélectionner une emote par son nom */
+    selectEmote,
+    /** Sélectionner une emote aléatoire d'un personnage */
+    selectRandomByCharacter,
+    /** Sélectionner une emote aléatoire */
+    selectRandomEmote,
+    /** Emote actuellement sélectionnée */
+    selectedEmote,
   };
 }
 
@@ -91,12 +81,12 @@ export function useEmoteHistory(maxHistory: number = 10) {
   }, []);
 
   return {
-    /** Historique des emotes utilisées (les plus récentes en premier) */
-    history,
     /** Ajouter une emote à l'historique */
     addToHistory,
     /** Effacer l'historique */
     clearHistory,
+    /** Historique des emotes utilisées (les plus récentes en premier) */
+    history,
   };
 }
 
@@ -151,16 +141,16 @@ export function useEmoteValidation(text: string) {
     });
 
     return {
-      /** Emotes valides trouvées */
-      valid,
-      /** Emotes invalides (non trouvées dans EMOTES) */
-      invalid,
-      /** Le texte contient-il des emotes valides ? */
-      hasValidEmotes: valid.length > 0,
       /** Le texte contient-il des emotes invalides ? */
       hasInvalidEmotes: invalid.length > 0,
+      /** Le texte contient-il des emotes valides ? */
+      hasValidEmotes: valid.length > 0,
+      /** Emotes invalides (non trouvées dans EMOTES) */
+      invalid,
       /** Toutes les emotes sont-elles valides ? */
       isFullyValid: invalid.length === 0 && valid.length > 0,
+      /** Emotes valides trouvées */
+      valid,
     };
   }, [text]);
 

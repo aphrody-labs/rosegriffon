@@ -6,13 +6,13 @@ import Image from "next/image";
 import { useTheme } from "@/contexts/theme-context";
 
 const THEME_METADATA = {
-  roy: {
-    name: "Roy",
-    icon: "/emote/RG_Roy_salut.webp",
-  },
   gaelle: {
-    name: "Gaëlle",
     icon: "/emote/RG_Gaelle_salut.webp",
+    name: "Gaëlle",
+  },
+  roy: {
+    icon: "/emote/RG_Roy_salut.webp",
+    name: "Roy",
   },
 };
 

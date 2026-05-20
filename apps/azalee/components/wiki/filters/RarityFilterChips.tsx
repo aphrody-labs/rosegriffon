@@ -6,9 +6,9 @@ import { cn } from "@/lib/utils";
 
 // Seuls les 3 tiers pertinents pour le filtrage utilisateur
 const RARITY_OPTIONS = [
-  { value: "Normal",  rarity: "Normal" },
-  { value: "Héros",   rarity: "Héros" },
-  { value: "BASARA",  rarity: "BASARA" },
+  { rarity: "Normal",  value: "Normal" },
+  { rarity: "Héros",   value: "Héros" },
+  { rarity: "BASARA",  value: "BASARA" },
 ] as const;
 
 export function RarityFilterChips() {

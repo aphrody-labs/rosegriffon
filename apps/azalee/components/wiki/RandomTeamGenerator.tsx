@@ -16,26 +16,26 @@ import { cn } from "@/lib/utils";
 
 const ELEMENT_SPRITE: Record<string, SpriteCommonKey> = {
   Fire: "fire",
-  Wind: "wind",
   Forest: "forest",
   Mountain: "mountain",
+  Wind: "wind",
 };
 
-const POS_LABEL: Record<string, string> = { FW: "ATT", MF: "MIL", DF: "DEF", GK: "GAR" };
+const POS_LABEL: Record<string, string> = { DF: "DEF", FW: "ATT", GK: "GAR", MF: "MIL" };
 const POS_COLOR: Record<string, string> = {
-  FW: "bg-red-600",
-  MF: "bg-emerald-600",
   DF: "bg-blue-600",
+  FW: "bg-red-600",
   GK: "bg-amber-500",
+  MF: "bg-emerald-600",
 };
 
 const PLAYSTYLE_SPRITE: Record<string, SpriteCommonKey> = {
   Bond: "lien",
-  Justice: "justice",
   Breach: "breche",
-  Tension: "tension",
-  "Rough Play": "jeu_violent",
   Counter: "contre",
+  Justice: "justice",
+  "Rough Play": "jeu_violent",
+  Tension: "tension",
 };
 
 const PLAYSTYLES = [
@@ -48,10 +48,10 @@ const PLAYSTYLES = [
 ];
 
 const ELEMENTS = [
-  { value: "Fire", label: "Feu" },
-  { value: "Wind", label: "Vent" },
-  { value: "Forest", label: "Forêt" },
-  { value: "Mountain", label: "Montagne" },
+  { label: "Feu", value: "Fire" },
+  { label: "Vent", value: "Wind" },
+  { label: "Forêt", value: "Forest" },
+  { label: "Montagne", value: "Mountain" },
 ];
 
 interface Formation {
@@ -67,18 +67,18 @@ interface Formation {
 // Formations dédupliquées par distribution de joueurs (df-mf-fw)
 // Le GK (toujours 1) n'est pas compté dans le layout
 const FORMATIONS: Formation[] = [
-  { name: "4-4-2", layout: "4-4-2", df: 4, mf: 4, fw: 2, off: 3, def: 3 },
-  { name: "4-3-3", layout: "4-3-3", df: 4, mf: 3, fw: 3, off: 4, def: 2 },
-  { name: "3-4-3", layout: "3-4-3", df: 3, mf: 4, fw: 3, off: 4, def: 2 },
-  { name: "3-5-2", layout: "3-5-2", df: 3, mf: 5, fw: 2, off: 3, def: 3 },
-  { name: "4-5-1", layout: "4-5-1", df: 4, mf: 5, fw: 1, off: 2, def: 4 },
-  { name: "3-6-1", layout: "3-6-1", df: 3, mf: 6, fw: 1, off: 3, def: 3 },
-  { name: "5-4-1", layout: "5-4-1", df: 5, mf: 4, fw: 1, off: 2, def: 4 },
-  { name: "2-4-4", layout: "2-4-4", df: 2, mf: 4, fw: 4, off: 5, def: 1 },
-  { name: "2-5-3", layout: "2-5-3", df: 2, mf: 5, fw: 3, off: 4, def: 2 },
-  { name: "5-1-4", layout: "5-1-4", df: 5, mf: 1, fw: 4, off: 2, def: 4 },
-  { name: "3-3-4", layout: "3-3-4", df: 3, mf: 3, fw: 4, off: 1, def: 5 },
-  { name: "5-3-2", layout: "5-3-2", df: 5, mf: 3, fw: 2, off: 3, def: 3 },
+  { def: 3, df: 4, fw: 2, layout: "4-4-2", mf: 4, name: "4-4-2", off: 3 },
+  { def: 2, df: 4, fw: 3, layout: "4-3-3", mf: 3, name: "4-3-3", off: 4 },
+  { def: 2, df: 3, fw: 3, layout: "3-4-3", mf: 4, name: "3-4-3", off: 4 },
+  { def: 3, df: 3, fw: 2, layout: "3-5-2", mf: 5, name: "3-5-2", off: 3 },
+  { def: 4, df: 4, fw: 1, layout: "4-5-1", mf: 5, name: "4-5-1", off: 2 },
+  { def: 3, df: 3, fw: 1, layout: "3-6-1", mf: 6, name: "3-6-1", off: 3 },
+  { def: 4, df: 5, fw: 1, layout: "5-4-1", mf: 4, name: "5-4-1", off: 2 },
+  { def: 1, df: 2, fw: 4, layout: "2-4-4", mf: 4, name: "2-4-4", off: 5 },
+  { def: 2, df: 2, fw: 3, layout: "2-5-3", mf: 5, name: "2-5-3", off: 4 },
+  { def: 4, df: 5, fw: 4, layout: "5-1-4", mf: 1, name: "5-1-4", off: 2 },
+  { def: 5, df: 3, fw: 4, layout: "3-3-4", mf: 3, name: "3-3-4", off: 1 },
+  { def: 3, df: 5, fw: 2, layout: "5-3-2", mf: 3, name: "5-3-2", off: 3 },
 ];
 
 // ---------- Helpers ----------
@@ -98,7 +98,7 @@ function resolveImageUrl(char: BaseCharacter): string {
   const variant = char.variants?.[0] as any;
   const zukanHash = charAny.zukanHash || variant?.zukanHash;
   if (zukanHash) {
-    const clean = zukanHash.startsWith("/") ? zukanHash.substring(1) : zukanHash;
+    const clean = zukanHash.startsWith("/") ? zukanHash.slice(1) : zukanHash;
     return `https://dxi4wb638ujep.cloudfront.net/1/${clean}.png`;
   }
   return getCharacterImageUrl(char.internalCode);
@@ -181,8 +181,8 @@ function PlayerCard({
         animating ? "opacity-0 scale-95" : "opacity-100 scale-100",
       )}
       style={{
-        transitionDuration: "300ms",
         transitionDelay: animating ? "0ms" : `${animDelay}ms`,
+        transitionDuration: "300ms",
       }}
     >
       <Link
@@ -255,8 +255,8 @@ function PlayerCard({
 }
 
 function resolveCoordinatorImage(person: Coordinator): string | null {
-  if (!person.image) return null;
-  const clean = person.image.startsWith("/") ? person.image.substring(1) : person.image;
+  if (!person.image) {return null;}
+  const clean = person.image.startsWith("/") ? person.image.slice(1) : person.image;
   return `https://dxi4wb638ujep.cloudfront.net/1/${clean}.png`;
 }
 
@@ -405,7 +405,7 @@ export function RandomTeamGenerator({ pools, coordinators }: RandomTeamGenerator
           const ps = (c as any).sheetData?.playstyle || (c as any).playstyle;
           return ps && selectedPlaystyles.includes(ps);
         });
-        if (psFiltered.length >= minCount) filtered = psFiltered;
+        if (psFiltered.length >= minCount) {filtered = psFiltered;}
       }
 
       if (selectedElement) {
@@ -414,29 +414,29 @@ export function RandomTeamGenerator({ pools, coordinators }: RandomTeamGenerator
           const el = variant?.element || (c as any).element;
           return el === selectedElement;
         });
-        if (elFiltered.length >= minCount) filtered = elFiltered;
+        if (elFiltered.length >= minCount) {filtered = elFiltered;}
       }
 
       return filtered;
     };
 
     return {
-      gk: filterPool(pools.gk, 1),
       df: filterPool(pools.df, formation.df),
-      mf: filterPool(pools.mf, formation.mf),
       fw: filterPool(pools.fw, formation.fw),
+      gk: filterPool(pools.gk, 1),
+      mf: filterPool(pools.mf, formation.mf),
     };
   }, [pools, selectedPlaystyles, selectedElement, formation]);
 
   const generate = useCallback((): GeneratedTeam => {
     const p = filteredPools();
     return {
-      gk: pickRandom(p.gk, 1),
-      df: pickRandom(p.df, formation.df),
-      mf: pickRandom(p.mf, formation.mf),
-      fw: pickRandom(p.fw, formation.fw),
       coach: pickRandom(coordinators.coaches, 1)[0] || null,
+      df: pickRandom(p.df, formation.df),
+      fw: pickRandom(p.fw, formation.fw),
+      gk: pickRandom(p.gk, 1),
       managers: pickRandom(coordinators.managers, 3),
+      mf: pickRandom(p.mf, formation.mf),
     };
   }, [filteredPools, formation, coordinators]);
 
@@ -469,8 +469,8 @@ export function RandomTeamGenerator({ pools, coordinators }: RandomTeamGenerator
   const toggleLock = useCallback((key: string) => {
     setLocked((prev) => {
       const next = new Set(prev);
-      if (next.has(key)) next.delete(key);
-      else next.add(key);
+      if (next.has(key)) {next.delete(key);}
+      else {next.add(key);}
       return next;
     });
   }, []);
@@ -483,21 +483,19 @@ export function RandomTeamGenerator({ pools, coordinators }: RandomTeamGenerator
         const mergePosition = (
           position: "gk" | "df" | "mf" | "fw",
           freshArr: BaseCharacter[],
-        ): BaseCharacter[] => {
-          return freshArr.map((freshPlayer, i) => {
+        ): BaseCharacter[] => freshArr.map((freshPlayer, i) => {
             const key = `${position}-${i}`;
             if (locked.has(key) && prev[position][i]) {
               return prev[position][i];
             }
             return freshPlayer;
           });
-        };
         return {
           ...fresh,
-          gk: mergePosition("gk", fresh.gk),
           df: mergePosition("df", fresh.df),
-          mf: mergePosition("mf", fresh.mf),
           fw: mergePosition("fw", fresh.fw),
+          gk: mergePosition("gk", fresh.gk),
+          mf: mergePosition("mf", fresh.mf),
         };
       });
       setAnimating(false);
@@ -510,20 +508,20 @@ export function RandomTeamGenerator({ pools, coordinators }: RandomTeamGenerator
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch {
-      /* silent */
+      /* Silent */
     }
   }, []);
 
   const togglePlaystyle = (key: string) => {
     setSelectedPlaystyles((prev) => {
-      if (prev.includes(key)) return prev.filter((p) => p !== key);
-      if (prev.length >= 2) return [prev[1], key];
+      if (prev.includes(key)) {return prev.filter((p) => p !== key);}
+      if (prev.length >= 2) {return [prev[1], key];}
       return [...prev, key];
     });
   };
 
   const hasLocked = locked.size > 0;
-  const hasActiveFilters = selectedPlaystyles.length > 0 || !!selectedElement;
+  const hasActiveFilters = selectedPlaystyles.length > 0 || Boolean(selectedElement);
 
   // Staggered animation delay counter
   let slotIndex = 0;

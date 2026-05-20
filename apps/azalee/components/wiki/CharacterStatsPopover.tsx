@@ -12,19 +12,19 @@ interface CharacterStatsPopoverProps {
 }
 
 const STAT_LABELS = {
-  kick: { fr: "Frappe", color: "bg-red-500" },
-  control: { fr: "Maîtrise", color: "bg-blue-500" },
-  technique: { fr: "Technique", color: "bg-green-500" },
-  pressure: { fr: "Défense", color: "bg-purple-500" }, // "Block" / Pressure
-  physical: { fr: "Physique", color: "bg-orange-500" },
-  agility: { fr: "Vitesse", color: "bg-cyan-500" },
-  intelligence: { fr: "Intelligence", color: "bg-indigo-500" },
+  agility: { color: "bg-cyan-500", fr: "Vitesse" },
+  control: { color: "bg-blue-500", fr: "Maîtrise" },
+  intelligence: { color: "bg-indigo-500", fr: "Intelligence" },
+  kick: { color: "bg-red-500", fr: "Frappe" },
+  physical: { color: "bg-orange-500", fr: "Physique" },
+  pressure: { color: "bg-purple-500", fr: "Défense" }, // "Block" / Pressure
+  technique: { color: "bg-green-500", fr: "Technique" },
 };
 
 const MAX_STAT = 250; // Estimated max for lv50 visual scaling
 
 export function CharacterStatsPopover({ stats, name }: CharacterStatsPopoverProps) {
-  if (!stats) return null;
+  if (!stats) {return null;}
 
   return (
     <Popover>
@@ -51,7 +51,7 @@ export function CharacterStatsPopover({ stats, name }: CharacterStatsPopoverProp
           <div className="space-y-3">
             {Object.entries(stats).map(([key, value]) => {
               const config = STAT_LABELS[key as keyof typeof STAT_LABELS];
-              if (!config) return null;
+              if (!config) {return null;}
 
               const percentage = Math.min((value / MAX_STAT) * 100, 100);
 

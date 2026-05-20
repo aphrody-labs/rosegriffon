@@ -45,8 +45,8 @@ async function ensureFreshAccessToken(
 		.from("patreon_oauth_tokens")
 		.update({
 			access_token_enc: encryptToken(refreshed.access_token),
-			refresh_token_enc: encryptToken(refreshed.refresh_token),
 			expires_at: newExpiresAt,
+			refresh_token_enc: encryptToken(refreshed.refresh_token),
 			scope: refreshed.scope || row.scope,
 		})
 		.eq("id", row.id);
@@ -67,7 +67,7 @@ export async function refreshPatreonMembership(
 	userId: string,
 ): Promise<{ ok: boolean; reason?: string; identity?: ParsedIdentity }> {
 	const supabase = createAdminClient();
-	if (!supabase) return { ok: false, reason: "no_admin_client" };
+	if (!supabase) {return { ok: false, reason: "no_admin_client" };}
 
 	const { data: tokenRow } = await supabase
 		.from("patreon_oauth_tokens")
@@ -79,14 +79,14 @@ export async function refreshPatreonMembership(
 		.maybeSingle();
 
 	const row = tokenRow as TokenRow | null;
-	if (!row) return { ok: false, reason: "no_token" };
+	if (!row) {return { ok: false, reason: "no_token" };}
 
 	const accessToken = await ensureFreshAccessToken(supabase, row);
 	const resp = await fetchIdentity(accessToken, { withMemberships: true });
 	const identity = parseIdentityWithMemberships(resp);
 
 	const top =
-		[...identity.memberships].sort((a, b) => {
+		[...identity.memberships].toSorted((a, b) => {
 			const score = (s: string | null | undefined) =>
 				s === "active_patron" ? 0 : 1;
 			return score(a.attrs.patron_status) - score(b.attrs.patron_status);
@@ -94,46 +94,46 @@ export async function refreshPatreonMembership(
 
 	await supabase.from("patreon_memberships").upsert(
 		{
-			user_id: userId,
-			patreon_user_id: identity.patreonUserId,
-			patreon_member_id: top?.memberId ?? null,
+			address: top?.address ?? null,
 			campaign_id: top?.campaignId ?? null,
-			patreon_email: identity.user.email ?? null,
-			patreon_full_name: identity.user.full_name ?? null,
-			patreon_thumb_url: identity.user.thumb_url ?? null,
-			patreon_url: identity.user.url ?? null,
-			discord_user_id: identity.discordUserId,
-			patron_status: top?.attrs.patron_status ?? null,
-			last_charge_date: top?.attrs.last_charge_date ?? null,
-			last_charge_status: top?.attrs.last_charge_status ?? null,
 			currently_entitled_cents:
 				top?.attrs.currently_entitled_amount_cents ?? null,
+			discord_role_ids: top?.discordRoleIds ?? [],
+			discord_user_id: identity.discordUserId,
+			fetched_at: new Date().toISOString(),
+			is_free_trial: top?.attrs.is_free_trial ?? null,
+			is_gifted: top?.attrs.is_gifted ?? null,
+			last_charge_date: top?.attrs.last_charge_date ?? null,
+			last_charge_status: top?.attrs.last_charge_status ?? null,
 			lifetime_support_cents:
 				top?.attrs.campaign_lifetime_support_cents ??
 				top?.attrs.lifetime_support_cents ??
 				null,
-			pledge_start: top?.attrs.pledge_relationship_start ?? null,
-			pledge_cadence: top?.attrs.pledge_cadence ?? null,
-			will_pay_amount_cents: top?.attrs.will_pay_amount_cents ?? null,
-			next_charge_date: top?.attrs.next_charge_date ?? null,
-			is_free_trial: top?.attrs.is_free_trial ?? null,
-			is_gifted: top?.attrs.is_gifted ?? null,
 			member_email: top?.attrs.email ?? null,
+			next_charge_date: top?.attrs.next_charge_date ?? null,
 			note: top?.attrs.note ?? null,
-			address: top?.address ?? null,
-			tier_ids: top?.tierIds ?? [],
-			tier_titles: top?.tierTitles ?? [],
-			tier_amounts_cents: top?.tierAmountsCents ?? [],
-			tier_requires_shipping: top?.tierRequiresShipping ?? [],
-			discord_role_ids: top?.discordRoleIds ?? [],
+			patreon_email: identity.user.email ?? null,
+			patreon_full_name: identity.user.full_name ?? null,
+			patreon_member_id: top?.memberId ?? null,
+			patreon_thumb_url: identity.user.thumb_url ?? null,
+			patreon_url: identity.user.url ?? null,
+			patreon_user_id: identity.patreonUserId,
+			patron_status: top?.attrs.patron_status ?? null,
+			pledge_cadence: top?.attrs.pledge_cadence ?? null,
+			pledge_start: top?.attrs.pledge_relationship_start ?? null,
 			raw_identity: resp as unknown as Record<string, unknown>,
 			scope: row.scope || SCOPES_PATRON.join(" "),
-			fetched_at: new Date().toISOString(),
+			tier_amounts_cents: top?.tierAmountsCents ?? [],
+			tier_ids: top?.tierIds ?? [],
+			tier_requires_shipping: top?.tierRequiresShipping ?? [],
+			tier_titles: top?.tierTitles ?? [],
+			user_id: userId,
+			will_pay_amount_cents: top?.attrs.will_pay_amount_cents ?? null,
 		},
 		{ onConflict: "user_id,patreon_user_id" },
 	);
 
-	return { ok: true, identity };
+	return { identity, ok: true };
 }
 
 /**
@@ -146,7 +146,7 @@ export async function refreshAllMemberships(opts: {
 	limit?: number;
 }): Promise<{ refreshed: number; failed: number }> {
 	const supabase = createAdminClient();
-	if (!supabase) return { refreshed: 0, failed: 0 };
+	if (!supabase) {return { refreshed: 0, failed: 0 };}
 
 	const olderThan = new Date(
 		Date.now() - (opts.olderThanMs ?? 6 * 24 * 3600 * 1000),
@@ -164,12 +164,12 @@ export async function refreshAllMemberships(opts: {
 	for (const row of (data ?? []) as { user_id: string }[]) {
 		try {
 			const r = await refreshPatreonMembership(row.user_id);
-			if (r.ok) refreshed += 1;
-			else failed += 1;
-		} catch (e) {
-			console.error("[patreon/sync] refresh user failed", row.user_id, e);
+			if (r.ok) {refreshed += 1;}
+			else {failed += 1;}
+		} catch (error) {
+			console.error("[patreon/sync] refresh user failed", row.user_id, error);
 			failed += 1;
 		}
 	}
-	return { refreshed, failed };
+	return { failed, refreshed };
 }

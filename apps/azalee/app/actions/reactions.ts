@@ -1,7 +1,8 @@
 "use server";
 
 import { getServerSession } from "@/lib/auth-helpers";
-import { REACTION_TYPES, type ReactionType } from "@/lib/reaction-types";
+import { REACTION_TYPES } from '@/lib/reaction-types';
+import type { ReactionType } from '@/lib/reaction-types';
 import { createClient } from "@/lib/supabase/server";
 
 export async function toggleReaction(
@@ -34,7 +35,7 @@ export async function toggleReaction(
     // Add reaction
     await client
       .from("article_reactions")
-      .insert({ article_id: articleId, user_id: userId, reaction_type: reactionType });
+      .insert({ article_id: articleId, reaction_type: reactionType, user_id: userId });
   }
 
   // Get updated count
@@ -44,7 +45,7 @@ export async function toggleReaction(
     .eq("article_id", articleId)
     .eq("reaction_type", reactionType);
 
-  return { reacted: !existing, count: count || 0 };
+  return { count: count || 0, reacted: !existing };
 }
 
 /**
@@ -54,7 +55,7 @@ export async function getReactionCounts(
   articleIds: string[],
   reactionType = "like",
 ): Promise<Record<string, { count: number; userReacted: boolean }>> {
-  if (articleIds.length === 0) return {};
+  if (articleIds.length === 0) {return {};}
 
   const supabase = await createClient();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

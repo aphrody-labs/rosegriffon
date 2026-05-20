@@ -42,32 +42,32 @@ interface SettingsClientProps {
 }
 
 function parseUserAgent(ua?: string | null): { device: string; browser: string } {
-  if (!ua) return { device: "Inconnu", browser: "Inconnu" };
+  if (!ua) {return { device: "Inconnu", browser: "Inconnu" };}
   const isMobile = /Mobile|Android|iPhone/i.test(ua);
   const device = isMobile ? "Mobile" : "Desktop";
   let browser = "Navigateur inconnu";
-  if (ua.includes("Firefox")) browser = "Firefox";
-  else if (ua.includes("Edg")) browser = "Edge";
-  else if (ua.includes("Chrome")) browser = "Chrome";
-  else if (ua.includes("Safari")) browser = "Safari";
-  return { device, browser };
+  if (ua.includes("Firefox")) {browser = "Firefox";}
+  else if (ua.includes("Edg")) {browser = "Edge";}
+  else if (ua.includes("Chrome")) {browser = "Chrome";}
+  else if (ua.includes("Safari")) {browser = "Safari";}
+  return { browser, device };
 }
 
 function formatDate(date: string | Date | null): string {
-  if (!date) return "—";
+  if (!date) {return "—";}
   return new Date(date).toLocaleDateString("fr-FR", {
     day: "numeric",
-    month: "short",
-    year: "numeric",
     hour: "2-digit",
     minute: "2-digit",
+    month: "short",
+    year: "numeric",
   });
 }
 
 const PROVIDER_LABELS: Record<string, string> = {
+  credential: "Email / Mot de passe",
   discord: "Discord",
   google: "Google",
-  credential: "Email / Mot de passe",
 };
 
 export function SettingsClient({
@@ -98,7 +98,7 @@ export function SettingsClient({
 
   // App Settings State
   const [notifications, setNotifications] = useState(() => {
-    if (typeof window === "undefined") return true;
+    if (typeof window === "undefined") {return true;}
     const stored = localStorage.getItem("azalee_notifications");
     return stored !== null ? stored === "true" : true;
   });
@@ -134,7 +134,7 @@ export function SettingsClient({
   };
 
   const handleChangeEmail = async () => {
-    if (!newEmail) return;
+    if (!newEmail) {return;}
     setEmailLoading(true);
     try {
       const { error } = await authClient.changeEmail({ newEmail });
@@ -144,8 +144,8 @@ export function SettingsClient({
         toast.success("Vérifie ta nouvelle boîte mail !");
         setNewEmail("");
       }
-    } catch (err: unknown) {
-      toast.error(err instanceof Error ? err.message : "Erreur");
+    } catch (error: unknown) {
+      toast.error(error instanceof Error ? error.message : "Erreur");
     }
     setEmailLoading(false);
   };
@@ -158,8 +158,8 @@ export function SettingsClient({
     setPasswordLoading(true);
     try {
       const { error } = await authClient.changePassword({
-        newPassword,
         currentPassword: "",
+        newPassword,
       });
       if (error) {
         toast.error(error.message);
@@ -168,8 +168,8 @@ export function SettingsClient({
         setNewPassword("");
         setConfirmPassword("");
       }
-    } catch (err: unknown) {
-      toast.error(err instanceof Error ? err.message : "Erreur");
+    } catch (error: unknown) {
+      toast.error(error instanceof Error ? error.message : "Erreur");
     }
     setPasswordLoading(false);
   };
@@ -200,14 +200,14 @@ export function SettingsClient({
 
   const handleLinkProvider = async (provider: "discord" | "google") => {
     try {
-      await authClient.linkSocial({ provider, callbackURL: "/settings" });
+      await authClient.linkSocial({ callbackURL: "/settings", provider });
     } catch {
       toast.error(`Impossible de lier ${PROVIDER_LABELS[provider]}`);
     }
   };
 
   const handleDeleteAccount = async () => {
-    if (deleteConfirm !== "SUPPRIMER") return;
+    if (deleteConfirm !== "SUPPRIMER") {return;}
     setDeleteLoading(true);
     try {
       await authClient.deleteUser();

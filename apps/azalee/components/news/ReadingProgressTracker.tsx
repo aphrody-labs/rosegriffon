@@ -17,12 +17,12 @@ export function ReadingProgressTracker({ articleId }: ReadingProgressTrackerProp
   const endMarkerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (!user) return;
+    if (!user) {return;}
 
     const calculateProgress = (): number => {
       const scrollTop = window.scrollY;
       const docHeight = document.documentElement.scrollHeight - window.innerHeight;
-      if (docHeight <= 0) return 0;
+      if (docHeight <= 0) {return 0;}
       return Math.min(Math.round((scrollTop / docHeight) * 100), 99);
     };
 
@@ -40,7 +40,7 @@ export function ReadingProgressTracker({ articleId }: ReadingProgressTrackerProp
 
     const handleScroll = () => {
       const now = Date.now();
-      if (now - lastCallRef.current < 1000) return;
+      if (now - lastCallRef.current < 1000) {return;}
       lastCallRef.current = now;
       report(calculateProgress());
     };
@@ -74,12 +74,12 @@ export function ReadingProgressTracker({ articleId }: ReadingProgressTrackerProp
     };
   }, [user, articleId]);
 
-  if (!user) return null;
+  if (!user) {return null;}
 
   // Marqueur invisible placé en fin de contenu via un portail n'étant pas possible ici,
-  // on expose une ref pour que le parent puisse placer ce marqueur si besoin.
+  // On expose une ref pour que le parent puisse placer ce marqueur si besoin.
   // Par défaut on insère un élément de hauteur nulle en position fixed hors viewport
-  // que l'IntersectionObserver surveillera.
+  // Que l'IntersectionObserver surveillera.
   return (
     <div
       ref={endMarkerRef}

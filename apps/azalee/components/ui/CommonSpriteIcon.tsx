@@ -1,9 +1,6 @@
 import type React from "react";
-import {
-  SPRITE_SHEET_COMMON_SRC,
-  SPRITES_COMMON,
-  type SpriteCommonKey,
-} from "@/config/sprites-common";
+import { SPRITE_SHEET_COMMON_SRC, SPRITES_COMMON } from '@/config/sprites-common';
+import type { SpriteCommonKey } from '@/config/sprites-common';
 import { cn } from "@/lib/utils";
 import styles from "./SpriteIcon.module.css";
 
@@ -40,8 +37,8 @@ export const CommonSpriteIcon = ({
     <div
       className={cn("relative inline-block override-icon-size", className)}
       style={{
-        width: displayW,
         height: displayH,
+        width: displayW,
         ...style,
       }}
       role="img"
@@ -52,10 +49,10 @@ export const CommonSpriteIcon = ({
         className={cn(styles.sprite, styles[variant])}
         style={{
           backgroundImage: `url(${SPRITE_SHEET_COMMON_SRC})`,
-          backgroundSize: `${SHEET_W * scale}px ${SHEET_H * scale}px`,
           backgroundPosition: `-${x * scale}px -${y * scale}px`,
-          width: `${displayW}px`,
+          backgroundSize: `${SHEET_W * scale}px ${SHEET_H * scale}px`,
           height: `${displayH}px`,
+          width: `${displayW}px`,
         }}
       />
     </div>

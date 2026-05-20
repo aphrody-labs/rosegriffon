@@ -18,7 +18,6 @@ import {
   $setSelection,
   CLICK_COMMAND,
   COMMAND_PRIORITY_LOW,
-  createCommand,
   DRAGSTART_COMMAND,
   KEY_BACKSPACE_COMMAND,
   KEY_DELETE_COMMAND,
@@ -28,10 +27,12 @@ import {
   RootNode,
   SELECTION_CHANGE_COMMAND,
   TextNode,
+  createCommand,
 } from "lexical";
 import NextImage from "next/image";
 import type * as React from "react";
-import { type JSX, Suspense, useCallback, useEffect, useRef, useState } from "react";
+import { Suspense, useCallback, useEffect, useRef, useState } from 'react';
+import type { JSX } from 'react';
 import { ContentEditable } from "@/components/editor/editor-ui/content-editable";
 import { ImageResizer } from "@/components/editor/editor-ui/image-resizer";
 import { $isImageNode } from "@/components/editor/nodes/image-node";
@@ -107,13 +108,13 @@ function BrokenImage(): JSX.Element {
   return (
     <div
       style={{
-        height: 200,
-        opacity: 0.2,
-        width: 200,
+        alignItems: "center",
         backgroundColor: "#ccc",
         display: "flex",
-        alignItems: "center",
+        height: 200,
         justifyContent: "center",
+        opacity: 0.2,
+        width: 200,
       }}
     >
       <span>Image non disponible</span>

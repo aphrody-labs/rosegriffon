@@ -1,36 +1,36 @@
 import type { SerializedEditorState } from "lexical";
 
 export const CATEGORIES = [
-	{ value: "announcement", label: "Annonce", color: "bg-blue-500" },
-	{ value: "event", label: "Événement", color: "bg-amber-500" },
-	{ value: "critique", label: "Critique", color: "bg-rose-500" },
-	{ value: "community", label: "Communauté", color: "bg-purple-500" },
+	{ color: "bg-blue-500", label: "Annonce", value: "announcement" },
+	{ color: "bg-amber-500", label: "Événement", value: "event" },
+	{ color: "bg-rose-500", label: "Critique", value: "critique" },
+	{ color: "bg-purple-500", label: "Communauté", value: "community" },
 ] as const;
 
 export const STATUS_OPTIONS = [
 	{
-		value: "draft",
-		label: "Brouillon",
 		color: "bg-amber-500",
+		label: "Brouillon",
 		textColor: "text-amber-500",
+		value: "draft",
 	},
 	{
-		value: "scheduled",
-		label: "Programmé",
 		color: "bg-blue-500",
+		label: "Programmé",
 		textColor: "text-blue-500",
+		value: "scheduled",
 	},
 	{
-		value: "published",
-		label: "Publié",
 		color: "bg-green-500",
+		label: "Publié",
 		textColor: "text-green-500",
+		value: "published",
 	},
 	{
-		value: "archived",
-		label: "Archivé",
 		color: "bg-stone-500",
+		label: "Archivé",
 		textColor: "text-stone-500",
+		value: "archived",
 	},
 ] as const;
 

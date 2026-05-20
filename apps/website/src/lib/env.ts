@@ -88,7 +88,7 @@ export function validateEnv(): Env {
       const missing = error.issues.map((e) => e.path.join(".")).join(", ");
       throw new Error(
         `❌ Variables d'environnement manquantes ou invalides: ${missing}\n` +
-          `Vérifiez votre fichier .env.local`
+          `Vérifiez votre fichier .env.local`, { cause: error }
       );
     }
     throw error;

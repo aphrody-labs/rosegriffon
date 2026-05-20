@@ -7,23 +7,23 @@ import { CATEGORIES } from "@/components/dashboard/news-editor/constants";
 import { cn } from "@/lib/utils";
 
 const SORT_OPTIONS = [
-  { value: "recent", label: "Plus récents" },
-  { value: "popular", label: "Plus populaires" },
-  { value: "commented", label: "Plus commentés" },
-  { value: "trending", label: "Tendances" },
+  { label: "Plus récents", value: "recent" },
+  { label: "Plus populaires", value: "popular" },
+  { label: "Plus commentés", value: "commented" },
+  { label: "Tendances", value: "trending" },
 ] as const;
 
 const DATE_OPTIONS = [
-  { value: "", label: "Tout" },
-  { value: "week", label: "Cette semaine" },
-  { value: "month", label: "Ce mois" },
-  { value: "year", label: "Cette année" },
+  { label: "Tout", value: "" },
+  { label: "Cette semaine", value: "week" },
+  { label: "Ce mois", value: "month" },
+  { label: "Cette année", value: "year" },
 ] as const;
 
 const ALL_CATEGORIES = [
-  { value: "", label: "Toutes les catégories" },
-  ...CATEGORIES.map((c) => ({ value: c.value, label: c.label })),
-  { value: "Tweet", label: "Tweets" },
+  { label: "Toutes les catégories", value: "" },
+  ...CATEGORIES.map((c) => ({ label: c.label, value: c.value })),
+  { label: "Tweets", value: "Tweet" },
 ];
 
 interface AdvancedFiltersProps {
@@ -93,10 +93,10 @@ export function AdvancedFilters({
 
   const buildParams = useCallback(() => {
     const params = new URLSearchParams();
-    if (category) params.set("category", category);
-    if (selectedTags.length > 0) params.set("tag", selectedTags.join(","));
-    if (sort && sort !== "recent") params.set("sort", sort);
-    if (dateRange) params.set("date", dateRange);
+    if (category) {params.set("category", category);}
+    if (selectedTags.length > 0) {params.set("tag", selectedTags.join(","));}
+    if (sort && sort !== "recent") {params.set("sort", sort);}
+    if (dateRange) {params.set("date", dateRange);}
     return params;
   }, [category, selectedTags, sort, dateRange]);
 
@@ -121,9 +121,9 @@ export function AdvancedFilters({
 
   // Fermer avec Escape
   useEffect(() => {
-    if (!isExpanded) return;
+    if (!isExpanded) {return;}
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setIsExpanded(false);
+      if (e.key === "Escape") {setIsExpanded(false);}
     };
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);

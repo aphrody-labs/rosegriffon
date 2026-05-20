@@ -28,16 +28,16 @@ export async function generateMetadata({
   const name = baseChar.names.fr || baseChar.names.en || "Personnage";
   const variant = baseChar.variants?.[0];
   const posMap: Record<string, string> = {
-    GK: "Gardien",
     DF: "Défenseur",
-    MF: "Milieu",
     FW: "Attaquant",
+    GK: "Gardien",
+    MF: "Milieu",
   };
   const elemMap: Record<string, string> = {
     Fire: "Feu",
-    Wind: "Vent",
     Forest: "Forêt",
     Mountain: "Montagne",
+    Wind: "Vent",
   };
   const pos = variant?.position ? posMap[variant.position] || variant.position : "";
   const elem = variant?.element ? elemMap[variant.element] || variant.element : "";
@@ -45,10 +45,10 @@ export async function generateMetadata({
   const rarity = variant?.rarity || baseChar.bestRarity || "";
 
   const parts = [name];
-  if (pos) parts.push(pos);
-  if (elem) parts.push(elem);
-  if (team) parts.push(team);
-  if (rarity) parts.push(rarity);
+  if (pos) {parts.push(pos);}
+  if (elem) {parts.push(elem);}
+  if (team) {parts.push(team);}
+  if (rarity) {parts.push(rarity);}
 
   const charDesc = baseChar.descriptions?.fr || baseChar.descriptions?.en || "";
   const shortDesc = charDesc
@@ -60,21 +60,15 @@ export async function generateMetadata({
   ogImageUrl.searchParams.set("name", name);
   ogImageUrl.searchParams.set("element", variant?.element || "neutral");
   ogImageUrl.searchParams.set("rarity", rarity);
-  if (baseChar.image) ogImageUrl.searchParams.set("image", baseChar.image);
+  if (baseChar.image) {ogImageUrl.searchParams.set("image", baseChar.image);}
 
   return {
-    title: `${name} | Inazuma Eleven Victory Road - Azalée`,
-    description: shortDesc,
     alternates: {
       canonical: `/chara/${id}`,
     },
+    description: shortDesc,
     openGraph: {
-      title: `${name} | Azalée`,
       description: shortDesc,
-      url: `/chara/${id}`,
-      siteName: "Azalée - Inazuma Eleven Victory Road",
-      locale: "fr_FR",
-      type: "article",
       images: [
         {
           url: ogImageUrl.toString(),
@@ -83,12 +77,18 @@ export async function generateMetadata({
           alt: `${name} - Fiche personnage Azalée`,
         },
       ],
+      locale: "fr_FR",
+      siteName: "Azalée - Inazuma Eleven Victory Road",
+      title: `${name} | Azalée`,
+      type: "article",
+      url: `/chara/${id}`,
     },
+    title: `${name} | Inazuma Eleven Victory Road - Azalée`,
     twitter: {
       card: "summary_large_image",
-      title: `${name} | Azalée`,
       description: shortDesc,
       images: [ogImageUrl.toString()],
+      title: `${name} | Azalée`,
     },
   };
 }
@@ -98,9 +98,9 @@ export default async function PlayerDetailPage({ params }: { params: Promise<{ i
   // 1. base_slug (name-c0xxxxx) — canonical static URL
   let baseChar = await wikiService.getCharacterByBaseSlug(id);
   // 2. variant slug fallback (legacy: gamma-0xABCD)
-  if (!baseChar) baseChar = await wikiService.getCharacterBySlug(id);
+  if (!baseChar) {baseChar = await wikiService.getCharacterBySlug(id);}
   // 3. raw ID fallback
-  if (!baseChar) baseChar = await wikiService.getCharacter(id);
+  if (!baseChar) {baseChar = await wikiService.getCharacter(id);}
 
   if (!baseChar) {
     notFound();
@@ -116,12 +116,12 @@ export default async function PlayerDetailPage({ params }: { params: Promise<{ i
   // Merge Base and Variant data
   const player = {
     ...variant,
-    names: baseChar.names,
+    constellation: baseChar.constellation || variant.constellation,
     descriptions: baseChar.descriptions,
     internalCode: baseChar.internalCode,
-    constellation: baseChar.constellation || variant.constellation,
-    teamName: (baseChar as any).teams?.[0]?.names?.fr || (baseChar as any).teams?.[0]?.names?.en,
+    names: baseChar.names,
     teamId: (baseChar as any).teams?.[0]?.id as string | undefined,
+    teamName: (baseChar as any).teams?.[0]?.names?.fr || (baseChar as any).teams?.[0]?.names?.en,
   };
 
   // Fetch all distinct forms of this character (same chara_id, different pos/elem/rarity)
@@ -129,11 +129,11 @@ export default async function PlayerDetailPage({ params }: { params: Promise<{ i
 
   // Map position to UI expected format
   const positionMap: Record<string, string> = {
-    GK: "GAR",
-    FW: "ATT",
-    MF: "MIL",
-    DF: "DEF",
     Coach: "COA",
+    DF: "DEF",
+    FW: "ATT",
+    GK: "GAR",
+    MF: "MIL",
   };
   const displayPosition = positionMap[player.position] || player.position;
 
@@ -156,8 +156,8 @@ export default async function PlayerDetailPage({ params }: { params: Promise<{ i
       f.rarity === "Héros" && f.heroType
       && f.position === pos && f.element === elem,
     )
-    .map((f) => ({ type: f.heroType!, slug: f.slug }))
-    .sort((a, b) => {
+    .map((f) => ({ slug: f.slug, type: f.heroType! }))
+    .toSorted((a, b) => {
       const order = ["fire", "black", "pink"];
       return order.indexOf(a.type) - order.indexOf(b.type);
     }) || [];
@@ -176,36 +176,36 @@ export default async function PlayerDetailPage({ params }: { params: Promise<{ i
       const isPassive = skill?.categoryName?.fr?.toLowerCase() === "talent";
       if (skill) {
         result.push({
+          category: skill.categoryName?.fr || "Spécial",
+          element: skill.elementName?.en?.toLowerCase(),
+          growthType: (skill as any).growthType,
           id: (skill as any).skillId || skill.skillID || skill.skillIDStr,
+          imageUrl: skill.image,
+          isPassive,
           name: skill.displayName || skill.name_FR || skill.name_EN || "???",
           power: skill.power_min ? `${skill.power_min}` : undefined,
-          tension: (skill as any).consumeTp || (skill as any).tension_cost,
-          element: skill.elementName?.en?.toLowerCase(),
-          isPassive,
           slotNumber: index + 1,
-          imageUrl: skill.image,
+          tension: (skill as any).consumeTp || (skill as any).tension_cost,
           videoUrl: (skill as any).videoUrl,
-          category: skill.categoryName?.fr || "Spécial",
-          growthType: (skill as any).growthType,
         });
       } else {
         // Fallback: try as aura (Keeper's Grit, Burning Overdrive, etc.)
         const aura = await wikiService.findAuraByName(moveNames[index]);
         if (aura) {
           result.push({
+            category: "Hyper Technique",
+            href: `/aura/${aura.categorySlug || "autres"}/${aura.id}`,
             id: aura.id,
+            isPassive: false,
             name: aura.name_fr || aura.name_en || moveNames[index],
             slotNumber: index + 1,
-            category: "Hyper Technique",
-            isPassive: false,
-            href: `/aura/${aura.categorySlug || "autres"}/${aura.id}`,
           });
         } else {
           result.push({
+            category: "Hyper Technique",
             id: `unresolved-${index}`,
             name: moveNames[index],
             slotNumber: index + 1,
-            category: "Hyper Technique",
           });
         }
       }
@@ -216,7 +216,7 @@ export default async function PlayerDetailPage({ params }: { params: Promise<{ i
   // --- Helper: déduplique les skills et affiche le niveau d'évolution final ---
   // Si "Tornade de Feu" apparaît 3x → une seule ligne "Tornade de Feu 3"
   // 3 types : nombres (2,3), V (V2,V3), N (N2,N3)
-  // growthType 1,2 → nombres | growthType 3 → N | growthType 7 → V
+  // GrowthType 1,2 → nombres | growthType 3 → N | growthType 7 → V
   function collapseEvolutions(skills: MovesetSkill[]): MovesetSkill[] {
     const countMap = new Map<string, number>();
     const lastMap = new Map<string, MovesetSkill>();
@@ -229,7 +229,7 @@ export default async function PlayerDetailPage({ params }: { params: Promise<{ i
     const result: MovesetSkill[] = [];
     let slot = 1;
     for (const skill of skills) {
-      if (seen.has(skill.name)) continue;
+      if (seen.has(skill.name)) {continue;}
       seen.add(skill.name);
       const total = countMap.get(skill.name) || 1;
       const entry = { ...lastMap.get(skill.name)!, slotNumber: slot++ };
@@ -268,8 +268,8 @@ export default async function PlayerDetailPage({ params }: { params: Promise<{ i
 
   // Fallback: resolve binary skill IDs from chara_param
   // NOTE: mapDbCharacterToBase corrige déjà le mapping inversé du parser :
-  //   skillId = hash hex du skill (ex: "0xF9B80F86")
-  //   learnLevel = niveau d'apprentissage réel (ex: 1, 13, 20...)
+  //   SkillId = hash hex du skill (ex: "0xF9B80F86")
+  //   LearnLevel = niveau d'apprentissage réel (ex: 1, 13, 20...)
   if (moveset.length === 0) {
     const vAny = variant as any;
     const rawSkills: Array<{ learnLevel: number; skillId: string }> | string[] =
@@ -279,7 +279,7 @@ export default async function PlayerDetailPage({ params }: { params: Promise<{ i
     const PHANTOM_IDS = new Set(["0xDBEDB6B8"]);
     const skillList = rawSkills
       .map((s) => {
-        if (typeof s === "string") return { skillId: s, learnLevel: 0 };
+        if (typeof s === "string") {return { skillId: s, learnLevel: 0 };}
         return s;
       })
       .filter((s) => !PHANTOM_IDS.has(s.skillId));
@@ -289,7 +289,7 @@ export default async function PlayerDetailPage({ params }: { params: Promise<{ i
 
     const unsorted: MovesetSkill[] = [];
     fetchedSkills.forEach((skill, index) => {
-      if (!skill) return;
+      if (!skill) {return;}
       const learnLevel = skillList[index]?.learnLevel || 0;
       const isPassive =
         skill.categoryName?.en?.toLowerCase() === "passive" ||
@@ -297,17 +297,17 @@ export default async function PlayerDetailPage({ params }: { params: Promise<{ i
         (skill as any).skillType === "passive";
 
       unsorted.push({
+        category: skill.categoryName?.fr || "Spécial",
+        element: skill.elementName?.en?.toLowerCase(),
         id: (skill as any).skillId || skill.skillID || skill.skillIDStr,
+        imageUrl: skill.image,
+        isPassive,
+        learnLevel,
         name: skill.displayName || skill.name_FR || skill.name_EN || "???",
         power: skill.power_min ? `${skill.power_min}` : undefined,
-        tension: (skill as any).consumeTp || (skill as any).tension_cost,
-        element: skill.elementName?.en?.toLowerCase(),
-        isPassive,
         slotNumber: 0,
-        learnLevel,
-        imageUrl: skill.image,
+        tension: (skill as any).consumeTp || (skill as any).tension_cost,
         videoUrl: (skill as any).videoUrl,
-        category: skill.categoryName?.fr || "Spécial",
       });
     });
 
@@ -343,17 +343,17 @@ export default async function PlayerDetailPage({ params }: { params: Promise<{ i
   const charName = player.names.fr || player.names.en || player.names.ja || "Personnage";
 
   const POSITION_FR: Record<string, string> = {
-    GK: "Gardien",
-    DF: "Défenseur",
-    MF: "Milieu de terrain",
-    FW: "Attaquant",
     Coach: "Entraîneur",
+    DF: "Défenseur",
+    FW: "Attaquant",
+    GK: "Gardien",
+    MF: "Milieu de terrain",
   };
   const ELEMENT_FR: Record<string, string> = {
     Fire: "Feu",
-    Wind: "Vent",
     Forest: "Forêt",
     Mountain: "Montagne",
+    Wind: "Vent",
   };
 
   const skillNames = limitedMoveset.filter((s) => !s.isPassive).map((s) => s.name);
@@ -361,38 +361,38 @@ export default async function PlayerDetailPage({ params }: { params: Promise<{ i
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "Person",
-    name: charName,
+    additionalType: "https://schema.org/FictionalCharacter",
     alternateName: [player.names.en, player.names.ja].filter(Boolean),
     description:
       player.descriptions?.fr ||
       player.descriptions?.en ||
       `${charName} est un joueur ${POSITION_FR[player.position] || player.position} de type ${ELEMENT_FR[player.element] || player.element} dans Inazuma Eleven: Victory Road.`,
-    url: `https://azalee.rosegriffon.fr/chara/${baseChar.slug || id}`,
+    genre: (baseChar as any).series || undefined,
     image: baseChar.image || undefined,
-    jobTitle: POSITION_FR[player.position] || player.position,
-    memberOf: player.teamName ? { "@type": "SportsTeam", name: player.teamName } : undefined,
-    knowsAbout: skillNames.length > 0 ? skillNames : undefined,
-    additionalType: "https://schema.org/FictionalCharacter",
     isPartOf: {
       "@type": "VideoGame",
       name: "Inazuma Eleven: Victory Road",
       publisher: { "@type": "Organization", name: "Level-5" },
     },
-    genre: (baseChar as any).series || undefined,
+    jobTitle: POSITION_FR[player.position] || player.position,
+    knowsAbout: skillNames.length > 0 ? skillNames : undefined,
+    memberOf: player.teamName ? { "@type": "SportsTeam", name: player.teamName } : undefined,
+    name: charName,
+    url: `https://azalee.rosegriffon.fr/chara/${baseChar.slug || id}`,
   };
 
   const breadcrumbJsonLd = {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     itemListElement: [
-      { "@type": "ListItem", position: 1, name: "Accueil", item: "https://azalee.rosegriffon.fr" },
+      { "@type": "ListItem", item: "https://azalee.rosegriffon.fr", name: "Accueil", position: 1 },
       {
         "@type": "ListItem",
-        position: 2,
-        name: "Joueurs",
         item: "https://azalee.rosegriffon.fr/chara",
+        name: "Joueurs",
+        position: 2,
       },
-      { "@type": "ListItem", position: 3, name: charName },
+      { "@type": "ListItem", name: charName, position: 3 },
     ],
   };
 
@@ -444,13 +444,13 @@ export default async function PlayerDetailPage({ params }: { params: Promise<{ i
         series={(baseChar as any).series}
         gender={(baseChar as any).gender === 1 ? "F" : "M"}
         stats={{
-          kick: stats.kick,
-          control: stats.control,
-          technique: stats.technique,
-          pressure: stats.pressure,
-          physical: stats.physical,
           agility: stats.agility,
+          control: stats.control,
           intelligence: stats.intelligence || 0,
+          kick: stats.kick,
+          physical: stats.physical,
+          pressure: stats.pressure,
+          technique: stats.technique,
         }}
         skills={limitedMoveset}
         altSkills={_isBasara && limitedAltMoveset.length > 0 ? limitedAltMoveset : undefined}
@@ -480,13 +480,13 @@ export default async function PlayerDetailPage({ params }: { params: Promise<{ i
         currentHeroType={currentHeroType}
         isControllable={(player as any).isControllable || (baseChar as any).isControllable}
         statsLv1={player.stats.lv1 ? {
-          kick: player.stats.lv1.kick,
-          control: player.stats.lv1.control,
-          technique: player.stats.lv1.technique,
-          pressure: player.stats.lv1.pressure,
-          physical: player.stats.lv1.physical,
           agility: player.stats.lv1.agility,
+          control: player.stats.lv1.control,
           intelligence: player.stats.lv1.intelligence || 0,
+          kick: player.stats.lv1.kick,
+          physical: player.stats.lv1.physical,
+          pressure: player.stats.lv1.pressure,
+          technique: player.stats.lv1.technique,
         } : undefined}
       />
 
@@ -520,9 +520,7 @@ export default async function PlayerDetailPage({ params }: { params: Promise<{ i
             <div className="flex flex-wrap gap-1 sm:gap-1.5">
               {(baseChar as any).gameAppearances.map((g: string) => {
                 const labels: Record<string, string> = {
-                  ie1: "IE 1", ie2: "IE 2", ie3: "IE 3",
-                  go1: "GO", go2: "Chrono Stone", go3: "Galaxy",
-                  ars: "Ares", ori: "Orion", vic: "Victory Road",
+                  ars: "Ares", go1: "GO", go2: "Chrono Stone", go3: "Galaxy", ie1: "IE 1", ie2: "IE 2", ie3: "IE 3", ori: "Orion", vic: "Victory Road",
                 };
                 return (
                   <span

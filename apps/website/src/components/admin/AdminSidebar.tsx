@@ -1,36 +1,37 @@
 "use client";
 
-import { Home, Shield, BookOpen, Users, Calendar, Image as ImageIcon, Heart, Settings } from "lucide-react";
-import { AdminSidebar as SharedAdminSidebar, NavItem } from "@rosegriffon/ui";
+import { BookOpen, Calendar, Heart, Home, Image as ImageIcon, Settings, Shield, Users } from "lucide-react";
+import type { NavItem } from "@rosegriffon/ui";
+import { AdminSidebar as SharedAdminSidebar } from "@rosegriffon/ui";
 import Link from "next/link";
 
 const adminNavItems: NavItem[] = [
-	{ title: "Tableau de bord", href: "/admin", icon: Home, exact: true },
-	{ title: "Utilisateurs", href: "/admin/users", icon: Users },
+	{ exact: true, href: "/admin", icon: Home, title: "Tableau de bord" },
+	{ href: "/admin/users", icon: Users, title: "Utilisateurs" },
 	{
-		title: "Chroniques du bouquet",
+		badge: "Journal de bord",
 		href: "/admin/chroniques",
 		icon: BookOpen,
-		badge: "Journal de bord",
+		title: "Chroniques du bouquet",
 	},
-	{ title: "Staff", href: "/admin/staff", icon: Shield },
+	{ href: "/admin/staff", icon: Shield, title: "Staff" },
 	{
-		title: "Événements",
 		href: "/admin/events",
 		icon: Calendar,
 		submenu: [
 			{ title: "Calendrier", href: "/admin/events" },
 			{ title: "Planning Streams", href: "/admin/stream-schedule" },
 		],
+		title: "Événements",
 	},
-	{ title: "Médias", href: "/admin/media", icon: ImageIcon },
+	{ href: "/admin/media", icon: ImageIcon, title: "Médias" },
 	{
-		title: "Patreon",
+		creatorOnly: true,
 		href: "/admin/patreon",
 		icon: Heart,
-		creatorOnly: true,
+		title: "Patreon",
 	},
-	{ title: "Configuration", href: "/admin/settings", icon: Settings },
+	{ href: "/admin/settings", icon: Settings, title: "Configuration" },
 ];
 
 export default function AdminSidebar({

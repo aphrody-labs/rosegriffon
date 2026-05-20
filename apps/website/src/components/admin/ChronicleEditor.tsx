@@ -27,10 +27,10 @@ const ReactQuill = dynamic(
 		return mod.default || mod;
 	},
 	{
-		ssr: false,
 		loading: () => (
 			<div className="h-[500px] bg-muted animate-pulse rounded-md" />
 		),
+		ssr: false,
 	},
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 ) as any; // Cast as any because dynamic import typing is complex with react-quill-new
@@ -106,9 +106,9 @@ export function ChronicleEditor({
 			const generatedSlug = value
 				.toLowerCase()
 				.normalize("NFD")
-				.replace(/[\u0300-\u036f]/g, "")
-				.replace(/[^a-z0-9]+/g, "-")
-				.replace(/^-|-$/g, "");
+				.replaceAll(/[\u0300-\u036F]/g, "")
+				.replaceAll(/[^a-z0-9]+/g, "-")
+				.replaceAll(/^-|-$/g, "");
 			setSlug(generatedSlug);
 		}
 	};
@@ -142,9 +142,9 @@ export function ChronicleEditor({
 	const validateForm = (): boolean => {
 		const newErrors: string[] = [];
 
-		if (!title.trim()) newErrors.push("Le titre est requis");
-		if (!slug.trim()) newErrors.push("Le slug est requis");
-		if (!excerpt.trim()) newErrors.push("Le résumé est requis");
+		if (!title.trim()) {newErrors.push("Le titre est requis");}
+		if (!slug.trim()) {newErrors.push("Le slug est requis");}
+		if (!excerpt.trim()) {newErrors.push("Le résumé est requis");}
 
 		if (!content || content === "<p><br></p>" || content.trim().length === 0) {
 			newErrors.push("Le contenu est requis");
@@ -155,19 +155,19 @@ export function ChronicleEditor({
 	};
 
 	const handleSaveDraft = async () => {
-		if (!validateForm()) return;
+		if (!validateForm()) {return;}
 
 		setIsSaving(true);
 		setErrors([]);
 		try {
 			await onSave({
-				title,
-				slug,
-				excerpt,
-				content,
 				category,
+				content,
+				excerpt,
 				featured_image: featuredImage,
 				published: false,
+				slug,
+				title,
 			});
 		} catch (error) {
 			console.error("Erreur lors de l'enregistrement:", error);
@@ -178,19 +178,19 @@ export function ChronicleEditor({
 	};
 
 	const handlePublish = async () => {
-		if (!validateForm()) return;
+		if (!validateForm()) {return;}
 
 		setIsSaving(true);
 		setErrors([]);
 		try {
 			await onSave({
-				title,
-				slug,
-				excerpt,
-				content,
 				category,
+				content,
+				excerpt,
 				featured_image: featuredImage,
 				published: true,
+				slug,
+				title,
 			});
 		} catch (error) {
 			console.error("Erreur lors de la publication:", error);
@@ -415,7 +415,7 @@ export function ChronicleEditor({
 				open={isMediaDialogOpen}
 				onOpenChange={(open) => {
 					setIsMediaDialogOpen(open);
-					if (!open) setIsUploadingFeaturedImage(false);
+					if (!open) {setIsUploadingFeaturedImage(false);}
 				}}
 				onInsert={handleMediaInsert}
 			/>

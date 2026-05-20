@@ -17,7 +17,7 @@ export function NotificationBell() {
   const mountedRef = useRef(false);
 
   const fetchUnread = useCallback(async () => {
-    if (!user) return;
+    if (!user) {return;}
     const count = await getUnreadCount();
     setUnreadCount(count);
   }, [user]);
@@ -46,7 +46,7 @@ export function NotificationBell() {
     setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
   };
 
-  if (!user) return null;
+  if (!user) {return null;}
 
   return (
     <Popover open={open} onOpenChange={handleOpen}>

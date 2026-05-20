@@ -5,9 +5,9 @@ import PfpGenerator from "@/components/tools/PfpGenerator";
 import PfpThemeImage from "@/components/tools/PfpThemeImage";
 
 export const metadata: Metadata = {
-  title: "Avatar RG | Rose Griffon",
   description:
     "Créez votre photo de profil aux couleurs de Rose Griffon avec notre outil de personnalisation d'avatar.",
+  title: "Avatar RG | Rose Griffon",
 };
 
 export default function PfpPage() {
@@ -15,9 +15,9 @@ export default function PfpPage() {
     <div className="container py-12 md:py-20 relative">
       <BreadcrumbSchema
         items={[
-          { name: "Accueil", item: "/" },
-          { name: "Projets", item: "/projets" },
-          { name: "Avatar RG", item: "/projets/outils/pfp" },
+          { item: "/", name: "Accueil" },
+          { item: "/projets", name: "Projets" },
+          { item: "/projets/outils/pfp", name: "Avatar RG" },
         ]}
       />
       {/* Background elements */}

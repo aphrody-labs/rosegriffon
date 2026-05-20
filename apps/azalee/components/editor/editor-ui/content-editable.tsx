@@ -3,11 +3,11 @@
 import { ContentEditable as LexicalContentEditable } from "@lexical/react/LexicalContentEditable";
 import type { JSX } from "react";
 
-type Props = {
+interface Props {
   placeholder: React.ReactNode;
   className?: string;
   placeholderClassName?: string;
-};
+}
 
 export function ContentEditable({
   placeholder,

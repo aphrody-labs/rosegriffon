@@ -24,7 +24,7 @@ export function RealtimeSettingsListener() {
           // Refresh the current route server components
           router.refresh();
           // Optional: Show a toast to indicate live update (can be removed if too noisy)
-          // toast.info("Contenu mis à jour en temps réel");
+          // Toast.info("Contenu mis à jour en temps réel");
         }
       )
       .subscribe();

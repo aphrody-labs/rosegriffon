@@ -18,7 +18,7 @@ export async function updateUserProfile(userId: string, values: UserEditValues) 
   const supabase = await createClient();
   const user = await getServerUser();
 
-  if (!user) return { error: "Non authentifié" };
+  if (!user) {return { error: "Non authentifié" };}
 
   const { data: currentUserProfile } = await supabase
     .from("profiles")
@@ -41,7 +41,7 @@ export async function updateUserProfile(userId: string, values: UserEditValues) 
 
   // 3. Update target user using Admin Client
   const adminClient = createAdminClient();
-  if (!adminClient) return { error: "Erreur configuration serveur" };
+  if (!adminClient) {return { error: "Erreur configuration serveur" };}
 
   const { error } = await adminClient
     .from("profiles")

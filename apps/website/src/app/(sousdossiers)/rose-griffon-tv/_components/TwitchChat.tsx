@@ -8,7 +8,8 @@ import { toast } from "sonner";
 import { Avatar, AvatarFallback, AvatarImage } from "@rosegriffon/ui";
 
 import { useTheme } from "@/contexts/theme-context";
-import { authClient, type ClientSession } from "@/lib/auth-client";
+import { authClient } from '@/lib/auth-client';
+import type { ClientSession } from '@/lib/auth-client';
 import { Bell, BellOff, LogIn, LogOut, MessageSquare } from "@/lib/icons-config";
 
 type SessionUser = ClientSession["user"];
@@ -65,28 +66,28 @@ export function TwitchChat({ channelName = "rose_griffontv" }: TwitchChatProps) 
       try {
         const { data } = await authClient.getSession();
         const sessionUser = data?.user ?? null;
-        if (cancelled) return;
+        if (cancelled) {return;}
         setUser(sessionUser);
 
         if (sessionUser) {
           // Better Auth expose name / image / email — on les utilise pour le UI minimal.
           // Pour les vraies infos Twitch (follows, sub) on appellera l'API Twitch côté serveur
-          // avec le token stocké dans `account` quand nécessaire.
+          // Avec le token stocké dans `account` quand nécessaire.
           const username =
             (sessionUser.name as string | undefined) ?? sessionUser.email?.split("@")[0] ?? "user";
           setTwitchUsername(username);
           setTwitchUserData({
+            broadcaster_type: "",
+            created_at: sessionUser.createdAt ? new Date(sessionUser.createdAt).toISOString() : "",
+            description: "",
+            display_name: (sessionUser.name as string | undefined) ?? username,
+            email: sessionUser.email ?? undefined,
             id: sessionUser.id,
             login: username,
-            display_name: (sessionUser.name as string | undefined) ?? username,
-            type: "",
-            broadcaster_type: "",
-            description: "",
-            profile_image_url: (sessionUser.image as string | undefined) ?? "",
             offline_image_url: "",
+            profile_image_url: (sessionUser.image as string | undefined) ?? "",
+            type: "",
             view_count: 0,
-            email: sessionUser.email ?? undefined,
-            created_at: sessionUser.createdAt ? new Date(sessionUser.createdAt).toISOString() : "",
           });
           checkSubscriptionStatus(sessionUser.id);
         } else {
@@ -94,7 +95,7 @@ export function TwitchChat({ channelName = "rose_griffontv" }: TwitchChatProps) 
           setTwitchUserData(null);
         }
       } finally {
-        if (!cancelled) setIsLoading(false);
+        if (!cancelled) {setIsLoading(false);}
       }
     };
 
@@ -111,8 +112,8 @@ export function TwitchChat({ channelName = "rose_griffontv" }: TwitchChatProps) 
   const handleTwitchLogin = async () => {
     try {
       await authClient.signIn.social({
-        provider: "twitch",
         callbackURL: "/rose-griffon-tv",
+        provider: "twitch",
       });
     } catch (error) {
       console.error("Error logging in:", error);
@@ -152,9 +153,9 @@ export function TwitchChat({ channelName = "rose_griffontv" }: TwitchChatProps) 
 
           // Send welcome notification
           new Notification("🎮 Rose Griffon TV", {
+            badge: "/rgtv/rgtv.webp",
             body: `Bienvenue ${twitchUsername} ! Vous serez notifié des streams.`,
             icon: twitchUserData?.profile_image_url || "/rgtv/rgtv.webp",
-            badge: "/rgtv/rgtv.webp",
           });
 
           toast.success("🔔 Notifications activées !");
@@ -169,7 +170,7 @@ export function TwitchChat({ channelName = "rose_griffontv" }: TwitchChatProps) 
   };
 
   const handleSubscribe = async () => {
-    if (!twitchUserData) return;
+    if (!twitchUserData) {return;}
 
     try {
       // Simulate subscription (would need Twitch API in real implementation)
@@ -330,8 +331,8 @@ export function TwitchChat({ channelName = "rose_griffontv" }: TwitchChatProps) 
         ) : (
           <div className="flex flex-col items-center justify-center h-full p-6 text-center">
             <motion.div
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.3 }}
             >
               <div
