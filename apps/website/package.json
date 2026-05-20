@@ -10,7 +10,7 @@
 		"test": "vitest",
 		"test:ui": "vitest --ui",
 		"test:run": "vitest run",
-		"build": "next build",
+		"build": "node --no-deprecation ../../node_modules/next/dist/bin/next build",
 		"start": "bun run --bun next start",
 		"lint": "oxlint -W all .",
 		"lint:fix": "oxlint -W all --fix .",

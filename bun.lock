@@ -56,7 +56,7 @@
         "@rosegriffon/assets": "workspace:*",
         "@rosegriffon/auth": "workspace:*",
         "@rosegriffon/db": "workspace:*",
-        "@rosegriffon/inagle": "https://registry.npmjs.org/@rosegriffon/inagle/-/inagle-1.2.0.tgz",
+        "@rosegriffon/inagle": "^1.2.0",
         "@rosegriffon/types": "workspace:*",
         "@rosegriffon/ui": "workspace:*",
         "@sentry/nextjs": "^10.53.1",
@@ -396,6 +396,9 @@
         "react-dom": "catalog:",
       },
     },
+  },
+  "patchedDependencies": {
+    "@rosegriffon/inagle@1.2.0": "patches/@rosegriffon%2Finagle@1.2.0.patch",
   },
   "catalog": {
     "@next/bundle-analyzer": "^16.2.6",
@@ -1171,7 +1174,7 @@
 
     "@rosegriffon/db": ["@rosegriffon/db@workspace:packages/db"],
 
-    "@rosegriffon/inagle": ["@rosegriffon/inagle@https://registry.npmjs.org/@rosegriffon/inagle/-/inagle-1.2.0.tgz", { "dependencies": { "@leeoniya/ufuzzy": "^1.0.19", "@streamparser/json": "^0.0.22", "@supabase/supabase-js": "^2.89.0", "cheerio": "^1.2.0", "commander": "^14.0.3", "fengari": "^0.1.5", "hono": "^4.12.14", "jsonwebtoken": "^9.0.3", "kuroshiro": "^1.2.0", "kuroshiro-analyzer-kuromoji": "^1.1.0", "picocolors": "^1.1.1", "web-tree-sitter": "^0.26.8", "zod": "^4.3.6", "zod-to-json-schema": "^3.25.2" }, "bin": { "inagle": "./dist/cli.js" } }],
+    "@rosegriffon/inagle": ["@rosegriffon/inagle@1.2.0", "", { "dependencies": { "@leeoniya/ufuzzy": "^1.0.19", "@streamparser/json": "^0.0.22", "@supabase/supabase-js": "^2.89.0", "cheerio": "^1.2.0", "commander": "^14.0.3", "fengari": "^0.1.5", "hono": "^4.12.14", "jsonwebtoken": "^9.0.3", "kuroshiro": "^1.2.0", "kuroshiro-analyzer-kuromoji": "^1.1.0", "picocolors": "^1.1.1", "web-tree-sitter": "^0.26.8", "zod": "^4.3.6", "zod-to-json-schema": "^3.25.2" }, "bin": { "inagle": "dist/cli.js" } }, "sha512-gLeJ8QD3AmjD+T7LqNN0BmnB5WkpgwVaeUL50WvVsQDVhwFkWU231rhmkRKnZZwsC8ZSTN6I6gkeh3TD2Zu31Q=="],
 
     "@rosegriffon/patreon-bun": ["@rosegriffon/patreon-bun@workspace:packages/patreon-bun"],
 

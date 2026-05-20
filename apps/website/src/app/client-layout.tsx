@@ -2,28 +2,35 @@
 
 import "./globals.css";
 
+import { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
-import { BREAKPOINTS, SidebarInset, SidebarProvider, Toaster, useBreakpoint } from "@rosegriffon/ui";
+import { BREAKPOINTS, SidebarInset, SidebarProvider, Toaster, useBreakpoint, useSidebar } from "@rosegriffon/ui";
 import { WebsiteNavigationRail } from "@/components/layout/WebsiteNavigationRail";
-import { Menu, ChevronLeft } from "lucide-react";
+import { Menu, ChevronLeft, ChevronRight } from "lucide-react";
 
 function CustomSidebarTrigger() {
-	const { isOpen, toggleSidebar } = useSidebarStore();
+	const { open, toggleSidebar } = useSidebar();
+	const [mounted, setMounted] = useState(false);
+
+	useEffect(() => {
+		setMounted(true);
+	}, []);
+
+	if (!mounted) return null;
+
 	return (
 		<button
 			onClick={toggleSidebar}
 			className={cn(
-				"fixed top-4 z-50 rounded-full flex items-center justify-center transition-all duration-300",
-				"size-8 text-foreground/75 hover:bg-black/10 dark:hover:bg-white/10 hover:text-foreground",
-				"bg-transparent border border-border/10 shadow-sm backdrop-blur-xs",
-				"focus-visible:outline-hidden cursor-pointer",
-				isOpen 
-					? "left-[calc(var(--sidebar-width)+12px)]" 
-					: "left-4"
+				"fixed top-[26px] z-50 rounded-full flex items-center justify-center transition-all duration-300 ease-in-out",
+				"size-5 text-foreground/50 hover:text-foreground hover:bg-foreground/10 active:bg-foreground/20 cursor-pointer",
+				"bg-background/80 backdrop-blur-xs border border-border/40 shadow-xs",
+				"opacity-60 hover:opacity-100 hover:scale-105 active:scale-95",
+				open ? "left-[214px]" : "left-3"
 			)}
-			aria-label={isOpen ? "Fermer le menu" : "Ouvrir le menu"}
+			aria-label={open ? "Fermer le menu" : "Ouvrir le menu"}
 		>
-			{isOpen ? <ChevronLeft size={16} /> : <Menu size={16} />}
+			{open ? <ChevronLeft size={12} /> : <ChevronRight size={12} />}
 		</button>
 	);
 }
@@ -68,6 +75,7 @@ export default function ClientLayout({
 }: Readonly<{
 	children: React.ReactNode;
 }>) {
+	const { isOpen } = useSidebarStore();
 	const breakpoint = useBreakpoint();
 	const isCompact = breakpoint === "compact";
 	const isMedium = breakpoint === "medium";
@@ -94,21 +102,18 @@ export default function ClientLayout({
 								<AppSidebar 
 									className={cn(
 										"hidden",
-										isExpanded && "flex"
+										isExpanded && "block"
 									)}
 								/>
 							)}
 
-							{!shouldHideSidebar && isExpanded && (
-								<CustomSidebarTrigger />
-							)}
-
 							<SidebarNavigationHandler />
 							<EdgeSwipeDetector />
+							
 							<SidebarInset className={cn(
-								"transition-all duration-300",
+								"transition-all duration-300 min-w-0",
 								isMedium && "ml-20",
-								isExpanded && "ml-[var(--sidebar-width)] peer-data-[state=collapsed]:ml-0"
+								isExpanded && isOpen && "ml-[224px]"
 							)}>
 								<div
 									className={cn(
@@ -130,6 +135,10 @@ export default function ClientLayout({
 									{isCompact && !shouldHideSidebar && <MobileBottomNavigation />}
 								</div>
 							</SidebarInset>
+
+							{!shouldHideSidebar && isExpanded && (
+								<CustomSidebarTrigger />
+							)}
 						</SidebarWrapper>
 						<Toaster richColors position="top-right" />
 					</ProfileProvider>

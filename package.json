@@ -88,5 +88,8 @@
 		"prettier": "catalog:",
 		"turbo": "^2.9.14",
 		"typescript": "catalog:"
+	},
+	"patchedDependencies": {
+		"@rosegriffon/inagle@1.2.0": "patches/@rosegriffon%2Finagle@1.2.0.patch"
 	}
 }
