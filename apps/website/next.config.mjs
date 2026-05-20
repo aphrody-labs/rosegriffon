@@ -14,7 +14,6 @@ const IS_VERCEL = process.env.VERCEL === "1";
 /** @type {import('next').NextConfig} */
 const nextConfig = {
 	reactCompiler: true,
-	cacheComponents: true,
 
 	...(IS_VERCEL
 		? {
