@@ -31,7 +31,6 @@ export default function FusionBlock({
         style={imageStyle}
         priority={isPriority}
         loading={isPriority ? undefined : "lazy"}
-        unoptimized
       />
       {imageOverlay && (
         <div className="absolute inset-0 flex items-center justify-center">{imageOverlay}</div>

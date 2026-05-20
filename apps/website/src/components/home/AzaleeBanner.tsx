@@ -40,7 +40,6 @@ export function AzaleeBanner({
               alt={`Bannière ${title}`}
               fill
               className="object-cover object-center transition-transform duration-700 group-hover:scale-105 group-hover:rotate-1"
-              priority
               sizes="(max-width: 768px) 100vw, 50vw"
             />
           </div>

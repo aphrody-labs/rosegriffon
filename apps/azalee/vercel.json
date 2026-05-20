@@ -1,6 +1,7 @@
 {
 	"$schema": "https://openapi.vercel.sh/vercel.json",
 	"framework": "nextjs",
+	"bunVersion": "1.x",
 	"installCommand": "cd ../.. && bun install --no-save --frozen-lockfile",
 	"ignoreCommand": "cd ../.. && npx turbo-ignore @rosegriffon/azalee",
 	"buildCommand": "cd ../.. && turbo run build --filter=@rosegriffon/azalee... --cache=remote:rw",

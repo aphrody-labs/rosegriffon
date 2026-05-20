@@ -89,14 +89,33 @@ export async function ensureUserProfile(
 			.eq("id", user.id)
 			.maybeSingle();
 
+		// Fetch linked accounts to sync provider IDs
+		const { data: accounts } = await db
+			.from("account")
+			.select("provider_id, account_id")
+			.eq("user_id", user.id);
+
+		const discordAccount = accounts?.find((a) => a.provider_id === "discord");
+		const patreonAccount = accounts?.find((a) => a.provider_id === "patreon");
+
+		const discordId = discordAccount?.account_id || null;
+		const patreonId = patreonAccount?.account_id || null;
+
 		if (existing) {
-			// Update avatar/name if changed
-			if (user.image !== existing.avatar_url || user.name !== existing.full_name) {
+			// Update avatar/name/provider IDs if changed
+			const hasAvatarChanged = user.image !== existing.avatar_url;
+			const hasNameChanged = user.name !== existing.full_name;
+			const hasDiscordChanged = discordId && discordId !== existing.discord_id;
+			const hasPatreonChanged = patreonId && patreonId !== existing.patreon_id;
+
+			if (hasAvatarChanged || hasNameChanged || hasDiscordChanged || hasPatreonChanged) {
 				await db
 					.from("profiles")
 					.update({
 						avatar_url: user.image || existing.avatar_url,
 						full_name: user.name || existing.full_name,
+						discord_id: discordId || existing.discord_id,
+						patreon_id: patreonId || existing.patreon_id,
 						updated_at: new Date().toISOString(),
 					})
 					.eq("id", user.id);
@@ -122,6 +141,8 @@ export async function ensureUserProfile(
 					full_name: user.name || "",
 					avatar_url: user.image || null,
 					role: options.defaultRole || "member",
+					discord_id: discordId,
+					patreon_id: patreonId,
 					updated_at: new Date().toISOString(),
 				},
 				{ onConflict: "id" },
@@ -192,6 +213,9 @@ export const commonAuthOptions = {
 	},
 	advanced: {
 		useSecureCookies: true,
+		crossSubDomainCookies: {
+			enabled: true,
+		},
 		ipAddress: {
 			ipAddressHeaders: ["x-forwarded-for", "x-real-ip"] as string[],
 		},

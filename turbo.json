@@ -27,7 +27,7 @@
 				"!.next/cache/**",
 				"!coverage/**"
 			],
-			"outputs": [".next/**", "!.next/cache/**", "dist/**", "build/**"],
+			"outputs": [".next/**", "dist/**", "build/**"],
 			"env": [
 				"DATABASE_URL",
 				"DISCORD_CLIENT_ID",

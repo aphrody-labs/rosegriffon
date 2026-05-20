@@ -2,7 +2,7 @@ import crypto from "node:crypto";
 import { createClient as createSupabaseAdmin } from "@supabase/supabase-js";
 import { betterAuth } from "better-auth";
 import { nextCookies } from "better-auth/next-js";
-import { bearer, genericOAuth } from "better-auth/plugins";
+import { bearer, genericOAuth, oAuthProxy } from "better-auth/plugins";
 import { Pool } from "pg";
 
 import { commonAuthOptions, ensureUserProfile } from "@rosegriffon/auth";
@@ -139,10 +139,12 @@ export const auth = betterAuth({
 		"https://rg-website.vercel.app",
 		"https://rg-website-aphrody.vercel.app",
 		"https://rg-website-git-main-aphrody.vercel.app",
+		"https://rg-website-*-aphrody.vercel.app",
 		process.env.BETTER_AUTH_URL ?? "https://rosegriffon.fr",
+		process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "",
 		"http://localhost:3000",
 		"http://localhost:3001",
-	].filter((v, i, a) => a.indexOf(v) === i),
+	].filter((v, i, a) => v && a.indexOf(v) === i),
 
 	advanced: {
 		...commonAuthOptions.advanced,
@@ -200,6 +202,9 @@ export const auth = betterAuth({
 
 	plugins: [
 		bearer(),
+		oAuthProxy({
+			productionURL: "https://rosegriffon.fr",
+		}),
 		genericOAuth({
 			config: [
 				{
