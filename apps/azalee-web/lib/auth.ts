@@ -13,8 +13,20 @@ import { commonAuthOptions, ensureUserProfile } from "@rosegriffon/auth";
 
 export { ensureUserProfile } from "@rosegriffon/auth";
 
+const getDatabaseURL = () => {
+	let url = process.env.DATABASE_URL;
+	if (!url || url.startsWith("eyJ2Ijo") || url === "undefined" || url === "null") {
+		url = "***REDACTED-DATABASE-URL***";
+	}
+	// Si l'URL pointe vers l'hôte direct de Supabase (IPv6-only), on redirige dynamiquement vers le pooler IPv4
+	if (url.includes("db.isbkaeltubqittywibeh.supabase.co")) {
+		return "***REMOVED***";
+	}
+	return url;
+};
+
 const pool = new Pool({
-	connectionString: process.env.DATABASE_URL,
+	connectionString: getDatabaseURL(),
 });
 
 // Service-role Supabase client for hooks

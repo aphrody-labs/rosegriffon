@@ -15,9 +15,13 @@ import { SCOPES_CREATOR, SCOPES_PATRON } from "@/lib/patreon/types";
 import type { Database } from "@rosegriffon/db";
 
 const getDatabaseURL = () => {
-	const url = process.env.DATABASE_URL;
-	if (!url || url.startsWith("eyJ2Ijo")) {
-		return "***REDACTED-DATABASE-URL***";
+	let url = process.env.DATABASE_URL;
+	if (!url || url.startsWith("eyJ2Ijo") || url === "undefined" || url === "null") {
+		url = "***REDACTED-DATABASE-URL***";
+	}
+	// Si l'URL pointe vers l'hôte direct de Supabase (IPv6-only), on redirige dynamiquement vers le pooler IPv4
+	if (url.includes("db.isbkaeltubqittywibeh.supabase.co")) {
+		return "***REMOVED***";
 	}
 	return url;
 };
