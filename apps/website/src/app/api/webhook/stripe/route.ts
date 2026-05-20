@@ -64,8 +64,9 @@ export async function POST(req: NextRequest) {
 						});
 						items = lineItems.data.map((item) => {
 							const product = item.price?.product;
-							const meta = typeof product === "object" && product ? product.metadata : {};
-							const images = typeof product === "object" && product ? product.images : [];
+							const isProduct = typeof product === "object" && product && !("deleted" in product);
+							const meta = isProduct ? product.metadata : {};
+							const images = isProduct ? product.images : [];
 							return {
 								label: item.description,
 								qty: item.quantity,
