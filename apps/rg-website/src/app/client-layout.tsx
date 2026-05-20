@@ -75,8 +75,10 @@ export default function ClientLayout({
 	
 	const pathname = usePathname();
 	const isAdminPage = pathname?.startsWith("/admin");
+	const isShopPage = pathname?.startsWith("/shop");
+	const isAuthPage = pathname?.startsWith("/login") || pathname?.startsWith("/register") || pathname?.startsWith("/auth");
 
-	const shouldHideSidebar = isAdminPage;
+	const shouldHideSidebar = isAdminPage || isShopPage || isAuthPage;
 
 	return (
 		<ThemeProvider>
@@ -124,8 +126,8 @@ export default function ClientLayout({
 									</div>
 									<Footer />
 									<MobileWatermark />
-									{/* Affiche la barre de nav du bas uniquement sur mobile */}
-									{isCompact && <MobileBottomNavigation />}
+									{/* Affiche la barre de nav du bas uniquement sur mobile, hors shop/auth/admin */}
+									{isCompact && !shouldHideSidebar && <MobileBottomNavigation />}
 								</div>
 							</SidebarInset>
 						</SidebarWrapper>
