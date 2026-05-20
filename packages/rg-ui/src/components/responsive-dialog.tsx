@@ -1,5 +1,6 @@
 "use client";
 
+import * as React from "react";
 import {
 	Dialog,
 	DialogContent,
@@ -38,7 +39,16 @@ export function ResponsiveDialog({
 	footer,
 	contentClassName,
 }: ResponsiveDialogProps) {
+	const [mounted, setMounted] = React.useState(false);
 	const isDesktop = useMediaQuery("(min-width: 768px)");
+
+	React.useEffect(() => {
+		setMounted(true);
+	}, []);
+
+	if (!mounted) {
+		return null;
+	}
 
 	if (isDesktop) {
 		return (

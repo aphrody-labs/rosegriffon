@@ -7,17 +7,15 @@ import { NextResponse } from "next/server";
 // Browser sur un host inaccessible derrière nginx). Si aucune origin
 // Publique n'est résolvable, retourner 500 pour signaler la config cassée.
 export async function GET(request: Request) {
-	const publicOrigin =
+	let publicOrigin =
 		process.env.BETTER_AUTH_URL ||
 		process.env.NEXT_PUBLIC_URL ||
 		publicOriginFromHeaders(request);
 
-	if (!publicOrigin) {
-		console.error(
-			"[auth/callback] no public origin resolvable (BETTER_AUTH_URL/NEXT_PUBLIC_URL missing + no x-forwarded-host)",
-		);
-		return new NextResponse("auth callback misconfigured", { status: 500 });
+	if (!publicOrigin || publicOrigin.startsWith("eyJ2Ijo") || publicOrigin === "undefined" || publicOrigin === "null" || !publicOrigin.startsWith("http")) {
+		publicOrigin = "https://rosegriffon.fr";
 	}
+
 	return NextResponse.redirect(`${publicOrigin}/dashboard`);
 }
 

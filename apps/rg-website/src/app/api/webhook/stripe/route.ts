@@ -57,6 +57,31 @@ export async function POST(req: NextRequest) {
 						{ session_id: session.id },
 					);
 				} else {
+					let items: any[] = [];
+					try {
+						const lineItems = await stripe.checkout.sessions.listLineItems(session.id, {
+							expand: ["data.price.product"],
+						});
+						items = lineItems.data.map((item) => {
+							const product = item.price?.product;
+							const meta = typeof product === "object" && product ? product.metadata : {};
+							const images = typeof product === "object" && product ? product.images : [];
+							return {
+								label: item.description,
+								qty: item.quantity,
+								slug: meta.slug || null,
+								unit_amount_cents: item.price?.unit_amount || 0,
+								variantId: meta.variantId || null,
+								image: images && images.length > 0 ? images[0] : null,
+							};
+						});
+					} catch (stripeErr) {
+						console.error("[stripe-webhook] failed to fetch session line items", {
+							error: stripeErr instanceof Error ? stripeErr.message : String(stripeErr),
+							session_id: session.id,
+						});
+					}
+
 					const { error: upsertErr } = await supabase.from("orders").upsert(
 						{
 							amount_discount_cents:
@@ -90,6 +115,7 @@ export async function POST(req: NextRequest) {
 								session.metadata?.user_id !== "anonymous"
 									? session.metadata?.user_id
 									: null,
+							items: items,
 						},
 						{ onConflict: "stripe_session_id" },
 					);

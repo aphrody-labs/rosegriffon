@@ -235,8 +235,7 @@ function createAuth() {
 			user: {
 				create: {
 					after: async (user, ctx) => {
-						// @ts-ignore - migration typing
-						await ensureUserProfile(supabaseAdmin, user);
+						await ensureUserProfile(user, supabaseAdmin);
 
 						const ip =
 							ctx?.headers?.get("x-forwarded-for")?.split(",")[0]?.trim() ||

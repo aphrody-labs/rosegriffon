@@ -196,13 +196,13 @@ export function RgtvScheduleClient({ scheduleByDay, error }: RgtvScheduleClientP
                 if (!schedule.start_time || !schedule.end_time) return acc;
                 const [startH = 0, startM = 0] = schedule.start_time.split(":").map(Number);
                 const [endH = 0, endM = 0] = schedule.end_time.split(":").map(Number);
-                return acc + (endH * 60 + endM - (startH * 60 + startM));
+                let diff = (endH * 60 + endM) - (startH * 60 + startM);
+                if (diff < 0) {
+                  diff += 1440; // Gère le passage à la journée suivante (24h * 60m)
+                }
+                return acc + diff;
               }, 0);
               const hoursStreamed = (totalMinutesStreamed / 60).toFixed(1);
-
-              logger.debug(
-                `RgtvSchedule: jour=${day}, streams=${schedules.length}, heures=${hoursStreamed}`
-              );
 
               return (
                 <div key={day} className="group/day">

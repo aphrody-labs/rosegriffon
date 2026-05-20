@@ -2,8 +2,9 @@ import { ArrowRight, PackageOpen, ShoppingBag } from "lucide-react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
-import { createAdminClient, createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/server";
 import { formatEuros } from "@/lib/shop/products";
+import { getServerUser } from "@/lib/auth-helpers";
 
 export const metadata = {
 	title: "Mes commandes · Boutique Rose Griffon",
@@ -23,9 +24,9 @@ const STATUS_TONE = {
 	canceled: "bg-zinc-200 text-zinc-900 border-zinc-400",
 	delivered: "bg-emerald-100 text-emerald-900 border-emerald-400",
 	failed: "bg-red-200 text-red-900 border-red-500",
-	paid: "bg-sky-100 text-sky-900 border-sky-400",
-	pending: "bg-amber-100 text-amber-900 border-amber-400",
-	refunded: "bg-rose-100 text-rose-900 border-rose-400",
+	paid: "bg-blue-100 text-blue-900 border-blue-400",
+	pending: "bg-yellow-100 text-yellow-900 border-yellow-400",
+	refunded: "bg-purple-100 text-purple-900 border-purple-400",
 	shipped: "bg-indigo-100 text-indigo-900 border-indigo-400",
 } as const;
 
@@ -62,13 +63,12 @@ async function fetchOrders(userId: string): Promise<OrderRow[]> {
 }
 
 export default async function OrdersPage() {
-	const supabase = await createClient();
-	const { data: auth } = await supabase.auth.getUser();
-	if (!auth.user) {
+	const user = await getServerUser();
+	if (!user) {
 		redirect("/login?next=/shop/commandes");
 	}
 
-	const orders = await fetchOrders(auth.user.id);
+	const orders = await fetchOrders(user.id);
 
 	return (
 		<main className="mx-auto max-w-5xl px-4 pb-16 pt-10 md:px-8 md:pt-16">

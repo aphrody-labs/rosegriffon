@@ -2,10 +2,10 @@ import { randomUUID } from "node:crypto";
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
-import { createClient } from "@/lib/supabase/server";
 import { getStripeCouponForUser } from "@/lib/patreon/discount";
 import { getStripe } from "@/lib/shop/stripe";
 import { getCart } from "@/lib/shop/cart";
+import { getServerUser } from "@/lib/auth-helpers";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -21,23 +21,14 @@ export async function POST(req: NextRequest) {
 	let userId: string | null = null;
 	let userEmail: string | undefined;
 	try {
-		const supabase = await createClient();
-		if (!supabase) {
-			console.warn(
-				"[checkout] createClient() returned null — anonymous checkout (no Patron discount)",
-			);
-		} else {
-			const { data: auth, error: authErr } = await supabase.auth.getUser();
-			if (authErr) {
-				console.warn("[checkout] auth.getUser() failed", authErr.message);
-			} else {
-				userId = auth.user?.id ?? null;
-				userEmail = auth.user?.email ?? undefined;
-			}
+		const user = await getServerUser();
+		if (user) {
+			userId = user.id;
+			userEmail = user.email ?? undefined;
 		}
 	} catch (error) {
 		console.warn(
-			"[checkout] supabase init threw — anonymous checkout",
+			"[checkout] Better Auth session retrieval failed — anonymous checkout",
 			error instanceof Error ? error.message : String(error),
 		);
 	}

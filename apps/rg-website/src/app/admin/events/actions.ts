@@ -6,8 +6,22 @@ import { z } from "zod";
 import { logAdminAction } from "@/lib/admin-logger";
 import { getCalendarEvents } from "@/lib/api/events";
 import { getServerUser } from "@/lib/auth-helpers";
-import { createClient } from "@/lib/supabase/server";
+import { createAdminClient, createClient } from "@/lib/supabase/server";
+import { resolveProfile, isAdmin } from "@rosegriffon/auth";
 import type { Insert } from "@rosegriffon/db";
+
+async function ensureAdmin() {
+  const user = await getServerUser();
+  if (!user) {
+    throw new Error("Non authentifié");
+  }
+  const adminClient = createAdminClient();
+  const profile = await resolveProfile(adminClient, user);
+  if (!profile || !isAdmin(profile.role)) {
+    throw new Error("Accès refusé");
+  }
+  return user;
+}
 
 const eventSchema = z.object({
   description: z.string().optional(),
@@ -33,6 +47,7 @@ interface ActionState {
 }
 
 export async function syncGoogleEvents() {
+  await ensureAdmin();
   const supabase = await createClient();
   const googleEvents = await getCalendarEvents();
 
@@ -95,6 +110,13 @@ export async function syncGoogleEvents() {
 }
 
 export async function createEvent(_prevState: ActionState, formData: FormData) {
+  try {
+    await ensureAdmin();
+  } catch (err) {
+    return {
+      message: "Accès refusé",
+    };
+  }
   const supabase = await createClient();
 
   const rawData = {
@@ -145,6 +167,13 @@ export async function createEvent(_prevState: ActionState, formData: FormData) {
 }
 
 export async function updateEvent(id: string, _prevState: ActionState, formData: FormData) {
+  try {
+    await ensureAdmin();
+  } catch (err) {
+    return {
+      message: "Accès refusé",
+    };
+  }
   const supabase = await createClient();
 
   const rawData = {
@@ -190,6 +219,14 @@ export async function updateEvent(id: string, _prevState: ActionState, formData:
 }
 
 export async function deleteEvent(id: string) {
+  try {
+    await ensureAdmin();
+  } catch (err) {
+    return {
+      message: "Accès refusé",
+      success: false,
+    };
+  }
   const supabase = await createClient();
 
   const { error } = await supabase.from("events").delete().eq("id", id);
