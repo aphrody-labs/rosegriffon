@@ -10,7 +10,7 @@
 		"test": "vitest",
 		"test:ui": "vitest --ui",
 		"test:run": "vitest run",
-		"build": "bun run --bun next build",
+		"build": "next build",
 		"start": "bun run --bun next start",
 		"lint": "oxlint -W all .",
 		"lint:fix": "oxlint -W all --fix .",

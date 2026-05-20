@@ -96,6 +96,26 @@ export default function RootLayout({
 				/>
 				<link rel="preconnect" href="https://cdn.discordapp.com" />
 				<link rel="dns-prefetch" href="https://cdn.discordapp.com" />
+				<script
+					type="speculationrules"
+					dangerouslySetInnerHTML={{
+						__html: JSON.stringify({
+							prefetch: [
+								{
+									where: {
+										and: [
+											{ href_matches: "/*" },
+											{ not: { href_matches: "/admin/*" } },
+											{ not: { href_matches: "/api/*" } },
+											{ not: { selector_matches: "[rel~=nofollow]" } }
+										]
+									},
+									eagerness: "moderate"
+								}
+							]
+						})
+					}}
+				/>
 			</head>
 			<body
 				className={`${geistSans.variable} ${roboto.className} ${roboto.variable} ${poppins.variable} ${notoSans.variable} ${lato.variable}`}

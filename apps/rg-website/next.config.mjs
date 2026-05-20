@@ -13,19 +13,25 @@ const IS_VERCEL = process.env.VERCEL === "1";
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+	reactCompiler: true,
+	cacheComponents: true,
+
 	...(IS_VERCEL
-		? {}
+		? {
+				turbopack: {
+					root: path.resolve(process.cwd(), "../../"),
+				},
+			}
 		: {
 				output: "standalone",
-				outputFileTracingRoot: path.join(process.cwd(), "../../"),
+				outputFileTracingRoot: path.resolve(process.cwd(), "../../"),
+				turbopack: {
+					root: path.resolve(process.cwd(), "../../"),
+				},
 			}),
 
 	compress: false,
 	...(CDN_URL && { assetPrefix: CDN_URL }),
-
-	turbopack: {
-		root: path.resolve(process.cwd(), "../../"),
-	},
 	transpilePackages: [
 		"@rosegriffon/ui",
 		"@rosegriffon/db",
@@ -88,6 +94,8 @@ const nextConfig = {
 		},
 		serverSourceMaps: true,
 		turbopackFileSystemCacheForBuild: true,
+		turbopackFileSystemCacheForDev: true,
+		cssChunking: true,
 	},
 
 	compiler: {

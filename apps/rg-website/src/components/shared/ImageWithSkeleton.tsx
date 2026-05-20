@@ -30,7 +30,6 @@ const ImageWithSkeleton = React.memo(({
         loading={priority ? "eager" : "lazy"}
         sizes="(max-width: 768px) 100px, 144px"
         quality={70}
-        unoptimized
       />
     </>
   );

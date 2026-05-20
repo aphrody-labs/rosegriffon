@@ -3,7 +3,7 @@
 import "./globals.css";
 
 import { usePathname } from "next/navigation";
-import { BREAKPOINTS, SidebarInset, SidebarProvider, Toaster, useBreakpoint } from "@rosegriffon/ui";
+import { BREAKPOINTS, SidebarInset, SidebarProvider, SidebarTrigger, Toaster, useBreakpoint } from "@rosegriffon/ui";
 import { WebsiteNavigationRail } from "@/components/layout/WebsiteNavigationRail";
 
 import { AppSidebar } from "@/components/app-sidebar";
@@ -27,9 +27,8 @@ function SidebarWrapper({ children }: { children: React.ReactNode }) {
 	const isMedium = breakpoint === "medium";
 	const isExpanded = breakpoint === "expanded" || breakpoint === "large";
 
-	// Sur desktop avec mode offcanvas, forcer la sidebar à être toujours ouverte
-	// En mode Medium (Rail), elle peut être fermée/ouverte via toggle
-	const sidebarOpen = isCompact || isMedium ? isOpen : true;
+	// Utilise l'état local/persisté pour toutes les tailles d'écran afin de permettre le masquage sur desktop
+	const sidebarOpen = isOpen;
 
 	const handleOpenChange = (open: boolean) => {
 		setSidebarOpen(open);
@@ -71,17 +70,21 @@ export default function ClientLayout({
 								<AppSidebar 
 									className={cn(
 										"hidden",
-										isExpanded && "lg:flex"
+										isExpanded && "flex"
 									)}
 								/>
+							)}
+
+							{!shouldHideSidebar && isExpanded && (
+								<SidebarTrigger className="fixed top-4 left-4 z-50 rounded-lg border bg-background/80 shadow-md backdrop-blur-xs transition-[left] duration-200 peer-data-[state=expanded]:left-[calc(var(--sidebar-width)+16px)]" />
 							)}
 
 							<SidebarNavigationHandler />
 							<EdgeSwipeDetector />
 							<SidebarInset className={cn(
 								"transition-all duration-300",
-								isMedium && "md:ml-20",
-								isExpanded && "lg:ml-0" // Sidebar handles its own gap
+								isMedium && "ml-20",
+								isExpanded && "ml-0" // Sidebar handles its own gap
 							)}>
 								<div
 									className={cn(

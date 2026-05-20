@@ -3,7 +3,7 @@ import { createSupabaseServiceClient } from "@rosegriffon/db/service";
 import bcrypt from "bcryptjs";
 import { betterAuth } from "better-auth";
 import { nextCookies } from "better-auth/next-js";
-import { bearer } from "better-auth/plugins";
+import { bearer, oAuthProxy } from "better-auth/plugins";
 import { Pool } from "pg";
 import { logAudit } from "@/lib/audit";
 import { ADMIN_ROLES } from "@/lib/auth-roles";
@@ -44,12 +44,16 @@ function createAuth() {
 		...commonAuthOptions,
 
 		trustedOrigins: [
-			process.env.BETTER_AUTH_URL || "https://azalee.rosegriffon.fr",
 			"https://azalee.rosegriffon.fr",
 			"https://rg-azalee.vercel.app",
 			"https://rg-azalee-aphrody.vercel.app",
 			"https://rg-azalee-git-main-aphrody.vercel.app",
-		].filter(Boolean),
+			"https://rg-azalee-*-aphrody.vercel.app",
+			process.env.BETTER_AUTH_URL ?? "https://azalee.rosegriffon.fr",
+			process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "",
+			"http://localhost:3000",
+			"http://localhost:3001",
+		].filter((v, i, a) => v && a.indexOf(v) === i),
 
 		emailVerification: {
 			autoSignInAfterVerification: true,
@@ -260,7 +264,13 @@ function createAuth() {
 			},
 		},
 
-		plugins: [bearer(), nextCookies()],
+		plugins: [
+			bearer(),
+			oAuthProxy({
+				productionURL: "https://azalee.rosegriffon.fr",
+			}),
+			nextCookies(),
+		],
 	});
 }
 

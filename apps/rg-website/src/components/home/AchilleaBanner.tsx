@@ -41,7 +41,6 @@ export function AchilleaBanner({
               alt="Bannière Achillea"
               fill
               className="object-cover object-center transition-transform duration-700 group-hover:scale-105"
-              priority
               sizes="(max-width: 768px) 100vw, 50vw"
             />
           </div>
@@ -72,7 +71,6 @@ export function AchilleaBanner({
                     alt="ACHILLEA"
                     fill
                     className="object-contain object-left drop-shadow-[0_2px_10px_rgba(223,255,87,0.3)]"
-                    priority
                   />
                 </div>
                 <div className="h-1 w-24 bg-linear-to-r from-[#6d00ce] to-transparent rounded-full opacity-80" />

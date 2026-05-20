@@ -23,19 +23,11 @@ import {
 	WebsiteSchema,
 } from "@/components/shared/StructuredData";
 
+import FusionBlock from "@/components/shared/FusionBlock";
 import { getCalendarEvents } from "@/lib/api/events";
 import { getPublicSetting } from "@/lib/api/settings";
 
 // Lazy loading pour composants lourds (below-the-fold)
-const FusionBlock = dynamicImport(
-	() => import("@/components/shared/FusionBlock"),
-	{
-		loading: () => (
-			<div className="h-[280px] md:h-80 lg:h-[380px] animate-pulse bg-linear-to-r from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-700 rounded-3xl" />
-		),
-	},
-);
-
 const ProjectsSection = dynamicImport(
 	() => import("@/components/shared/ProjectsSection"),
 	{
@@ -247,7 +239,7 @@ export default async function Home() {
 						{/* Affichage du prochain événement s'il existe */}
 						{nextEvent && <NextEventBanner event={nextEvent} />}
 
-						<FusionBlock isImageLeft image={introImage}>
+						<FusionBlock isImageLeft image={introImage} isPriority>
 							<div className="space-y-2 sm:space-y-3 lg:space-y-4 flex flex-col justify-center h-full">
 								<h2
 									id="about-heading"
