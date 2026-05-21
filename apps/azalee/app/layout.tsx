@@ -168,7 +168,7 @@ export default async function RootLayout({
 					<ThemeProvider
 						attribute="class"
 						defaultTheme="azalee-dark"
-						enableSystem
+						enableSystem={false}
 						disableTransitionOnChange
 					>
 						<SupabaseProvider initialToken={supabaseToken}>
