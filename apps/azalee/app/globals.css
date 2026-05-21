@@ -19,6 +19,30 @@
  * de @rosegriffon/ui exposent la même palette pour usage par d'autres apps du monorepo. */
 @import "@rosegriffon/ui/styles.css";
 
+/* ── Largeur du Sidebar @rosegriffon/ui (fix bulletproof) ──────────────────
+ * Tailwind ne génère pas de façon fiable les utilitaires `w-(--sidebar-width)`
+ * du package scanné (hors root-directory Vercel). Sans largeur, le sidebar-gap
+ * reste à 0 et le sidebar fixe recouvre le contenu au lieu de le pousser.
+ * On force ici la largeur via les data-slot, en suivant l'état data-collapsible.
+ * Mobile (Sheet) n'a pas ces slots → non affecté. */
+[data-slot="sidebar-gap"],
+[data-slot="sidebar-container"] {
+	width: var(--sidebar-width);
+}
+[data-collapsible="icon"] [data-slot="sidebar-gap"],
+[data-collapsible="icon"] [data-slot="sidebar-container"] {
+	width: var(--sidebar-width-icon);
+}
+[data-collapsible="offcanvas"] [data-slot="sidebar-gap"] {
+	width: 0;
+}
+[data-collapsible="offcanvas"][data-side="left"] [data-slot="sidebar-container"] {
+	left: calc(var(--sidebar-width) * -1);
+}
+[data-collapsible="offcanvas"][data-side="right"] [data-slot="sidebar-container"] {
+	right: calc(var(--sidebar-width) * -1);
+}
+
 @custom-variant dark (&:is(.dark, .dark *));
 
 /* ── Font Faces ────────────────────────────────────────── */
