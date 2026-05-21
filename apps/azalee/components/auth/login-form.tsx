@@ -22,9 +22,13 @@ type AuthMode = "login" | "signup" | "forgot-password";
  * Validate that returnTo is a safe relative path (no external redirects).
  */
 function sanitizeReturnTo(returnTo?: string): string {
-	if (!returnTo) {return "/";}
+	if (!returnTo) {
+		return "/";
+	}
 	// Must start with / and not be a protocol-relative URL
-	if (!returnTo.startsWith("/") || returnTo.startsWith("//")) {return "/";}
+	if (!returnTo.startsWith("/") || returnTo.startsWith("//")) {
+		return "/";
+	}
 	return returnTo;
 }
 
@@ -36,6 +40,10 @@ interface LoginFormProps {
 export function LoginForm({ onSuccess, returnTo }: LoginFormProps) {
 	const router = useRouter();
 	const safeReturnTo = sanitizeReturnTo(returnTo);
+	// Résolveur serveur : décide /dashboard (admin) vs returnTo selon le rôle réel.
+	const postLoginUrl = returnTo
+		? `/auth/post-login?returnTo=${encodeURIComponent(safeReturnTo)}`
+		: "/auth/post-login";
 	const [email, setEmail] = useState("");
 	const [password, setPassword] = useState("");
 	const [name, setName] = useState("");
@@ -46,7 +54,7 @@ export function LoginForm({ onSuccess, returnTo }: LoginFormProps) {
 		try {
 			setLoading(true);
 			const { error } = await authClient.signIn.social({
-				callbackURL: returnTo ? safeReturnTo : "/dashboard",
+				callbackURL: postLoginUrl,
 				provider,
 			});
 			if (error) {
@@ -64,7 +72,9 @@ export function LoginForm({ onSuccess, returnTo }: LoginFormProps) {
 
 	const handleEmailAuth = async (e: React.FormEvent) => {
 		e.preventDefault();
-		if (!email) {return;}
+		if (!email) {
+			return;
+		}
 
 		try {
 			setLoading(true);
@@ -84,7 +94,9 @@ export function LoginForm({ onSuccess, returnTo }: LoginFormProps) {
 				return;
 			}
 
-			if (!password) {return;}
+			if (!password) {
+				return;
+			}
 
 			if (mode === "signup") {
 				const { error } = await authClient.signUp.email({
@@ -92,23 +104,29 @@ export function LoginForm({ onSuccess, returnTo }: LoginFormProps) {
 					name: name || email.split("@")[0],
 					password,
 				});
-				if (error) {throw new Error(error.message);}
+				if (error) {
+					throw new Error(error.message);
+				}
 				toast.success("Compte créé ! Tu es maintenant connecté.");
-				if (onSuccess) {onSuccess();}
+				if (onSuccess) {
+					onSuccess();
+				}
 				router.push(safeReturnTo);
 			} else {
 				const { error } = await authClient.signIn.email({
 					email,
 					password,
 				});
-				if (error) {throw new Error(error.message);}
+				if (error) {
+					throw new Error(error.message);
+				}
 				toast.success("Connexion réussie !");
-				if (onSuccess) {onSuccess();}
-				// Les admins/éditeurs sont redirigés vers le dashboard par la page login (useEffect)
-				// Donc on push juste vers returnTo ou / — le useEffect dans login/page.tsx
-				// Interceptera et redirigera vers /dashboard si admin
-				router.push(safeReturnTo);
-				router.refresh();
+				if (onSuccess) {
+					onSuccess();
+				}
+				// Résolveur serveur : navigation complète (cookies envoyés) → /dashboard si
+				// admin, sinon returnTo. Évite la race du isAdmin client de la page /login.
+				window.location.href = postLoginUrl;
 			}
 		} catch (error: unknown) {
 			console.error("Auth error:", error);
