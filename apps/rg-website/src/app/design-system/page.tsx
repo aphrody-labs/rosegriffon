@@ -99,7 +99,7 @@ const cartoonTitleStyle: React.CSSProperties = {
 
 export default function DesignSystemShowcase() {
 	return (
-		<main
+		<div
 			data-design-system-root
 			className="theme-azalee-light relative isolate overflow-hidden"
 			style={{
@@ -976,7 +976,7 @@ export default function DesignSystemShowcase() {
 					</div>
 				</div>
 			</footer>
-		</main>
+		</div>
 	);
 }
 

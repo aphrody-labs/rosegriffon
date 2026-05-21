@@ -14,9 +14,9 @@ export default async function AdminLayout({
 	return (
 		<div className="flex min-h-screen bg-muted/30">
 			<AdminSidebar showPatreon={showPatreon} />
-			<main className="flex-1 overflow-x-hidden pt-16 pb-20 lg:pt-0 lg:pb-0">
+			<div className="flex-1 overflow-x-hidden pt-16 pb-20 lg:pt-0 lg:pb-0">
 				{children}
-			</main>
+			</div>
 		</div>
 	);
 }

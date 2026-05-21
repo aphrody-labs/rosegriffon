@@ -24,7 +24,7 @@ export default async function CartPage() {
 
 	if (cart.items.length === 0) {
 		return (
-			<main className="mx-auto flex min-h-[60vh] max-w-2xl flex-col items-center justify-center px-4 py-16 text-center">
+			<div className="mx-auto flex min-h-[60vh] max-w-2xl flex-col items-center justify-center px-4 py-16 text-center">
 				<ShoppingBag className="size-16 text-[#d4af37]" />
 				<h1 className="mt-6 text-3xl font-extrabold text-white">
 					Ton panier est vide
@@ -40,12 +40,12 @@ export default async function CartPage() {
 					<ArrowLeft className="size-4" />
 					Voir le catalogue
 				</Link>
-			</main>
+			</div>
 		);
 	}
 
 	return (
-		<main className="mx-auto max-w-6xl px-4 pb-16 pt-10 md:px-8 md:pt-16">
+		<div className="mx-auto max-w-6xl px-4 pb-16 pt-10 md:px-8 md:pt-16">
 			<nav className="mb-6">
 				<Link
 					href="/shop"
@@ -156,7 +156,7 @@ export default async function CartPage() {
 					</div>
 				</aside>
 			</div>
-		</main>
+		</div>
 	);
 }
 

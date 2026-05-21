@@ -1,6 +1,15 @@
 "use client";
 
-import { Alert, AlertDescription, Button, Card, CardContent, CardDescription, CardHeader, CardTitle } from "@rosegriffon/ui";
+import {
+	Alert,
+	AlertDescription,
+	Button,
+	Card,
+	CardContent,
+	CardDescription,
+	CardHeader,
+	CardTitle,
+} from "@rosegriffon/ui";
 import Image from "next/image";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
@@ -19,7 +28,9 @@ import {
 import { AuthForm } from "./auth-form";
 
 function safeDecode(value: string | null | undefined): string | null {
-	if (!value) {return null;}
+	if (!value) {
+		return null;
+	}
 	try {
 		return decodeURIComponent(value);
 	} catch {
@@ -53,7 +64,7 @@ function LoginPageContent() {
 	const success = searchParams?.get("success");
 
 	return (
-		<main className="flex min-h-svh w-full items-center justify-center bg-linear-to-br from-muted/40 via-background to-muted/40 p-4 pb-24 sm:pb-4">
+		<div className="flex min-h-svh w-full items-center justify-center bg-linear-to-br from-muted/40 via-background to-muted/40 p-4 pb-24 sm:pb-4">
 			<Card className="w-full max-w-5xl overflow-hidden shadow-2xl">
 				<div className="grid grid-cols-1 lg:grid-cols-2">
 					<div className="flex flex-col justify-center p-6 sm:p-10">
@@ -172,7 +183,7 @@ function LoginPageContent() {
 					</aside>
 				</div>
 			</Card>
-		</main>
+		</div>
 	);
 }
 

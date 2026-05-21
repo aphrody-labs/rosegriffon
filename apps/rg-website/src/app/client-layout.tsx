@@ -4,7 +4,14 @@ import "./globals.css";
 
 import { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
-import { BREAKPOINTS, SidebarInset, SidebarProvider, Toaster, useBreakpoint, useSidebar } from "@rosegriffon/ui";
+import {
+	BREAKPOINTS,
+	SidebarInset,
+	SidebarProvider,
+	Toaster,
+	useBreakpoint,
+	useSidebar,
+} from "@rosegriffon/ui";
 import { WebsiteNavigationRail } from "@/components/layout/WebsiteNavigationRail";
 import { Menu, ChevronLeft, ChevronRight } from "lucide-react";
 
@@ -26,7 +33,7 @@ function CustomSidebarTrigger() {
 				"size-5 text-foreground/50 hover:text-foreground hover:bg-foreground/10 active:bg-foreground/20 cursor-pointer",
 				"bg-background/80 backdrop-blur-xs border border-border/40 shadow-xs",
 				"opacity-60 hover:opacity-100 hover:scale-105 active:scale-95",
-				open ? "left-[214px]" : "left-3"
+				open ? "left-[214px]" : "left-3",
 			)}
 			aria-label={open ? "Fermer le menu" : "Ouvrir le menu"}
 		>
@@ -35,6 +42,7 @@ function CustomSidebarTrigger() {
 	);
 }
 
+import { SkipToContent } from "@/components/accessibility/SkipToContent";
 import { AppSidebar } from "@/components/app-sidebar";
 import Footer from "@/components/layout/footer";
 import { Header } from "@/components/layout/Header";
@@ -80,11 +88,14 @@ export default function ClientLayout({
 	const isCompact = breakpoint === "compact";
 	const isMedium = breakpoint === "medium";
 	const isExpanded = breakpoint === "expanded" || breakpoint === "large";
-	
+
 	const pathname = usePathname();
 	const isAdminPage = pathname?.startsWith("/admin");
 	const isShopPage = pathname?.startsWith("/shop");
-	const isAuthPage = pathname?.startsWith("/login") || pathname?.startsWith("/register") || pathname?.startsWith("/auth");
+	const isAuthPage =
+		pathname?.startsWith("/login") ||
+		pathname?.startsWith("/register") ||
+		pathname?.startsWith("/auth");
 
 	const shouldHideSidebar = isAdminPage || isShopPage || isAuthPage;
 
@@ -94,27 +105,27 @@ export default function ClientLayout({
 				<AuthProvider>
 					<ProfileProvider>
 						<SidebarWrapper>
+							{/* Accessibilité: lien pour sauter au contenu principal */}
+							<SkipToContent />
+
 							{/* NAVIGATION RAIL (MEDIUM SCREENS) */}
 							{isMedium && !shouldHideSidebar && <WebsiteNavigationRail />}
 
 							{/* SIDEBAR (EXPANDED SCREENS) */}
 							{!shouldHideSidebar && (
-								<AppSidebar 
-									className={cn(
-										"hidden",
-										isExpanded && "block"
-									)}
-								/>
+								<AppSidebar className={cn("hidden", isExpanded && "block")} />
 							)}
 
 							<SidebarNavigationHandler />
 							<EdgeSwipeDetector />
-							
-							<SidebarInset className={cn(
-								"transition-all duration-300 min-w-0",
-								isMedium && "ml-20",
-								isExpanded && isOpen && "ml-[224px]"
-							)}>
+
+							<SidebarInset
+								className={cn(
+									"transition-all duration-300 min-w-0",
+									isMedium && "ml-20",
+									isExpanded && isOpen && "ml-[224px]",
+								)}
+							>
 								<div
 									className={cn(
 										"flex flex-col min-h-[100dvh] w-full",
@@ -126,19 +137,21 @@ export default function ClientLayout({
 									)}
 									<div className="flex-1 w-full">
 										<div className="min-h-full w-full overflow-x-hidden">
-											<div className="flex-1 w-full">{children}</div>
+											<main id="main-content" className="flex-1 w-full">
+												{children}
+											</main>
 										</div>
 									</div>
 									<Footer />
 									<MobileWatermark />
 									{/* Affiche la barre de nav du bas uniquement sur mobile, hors shop/auth/admin */}
-									{isCompact && !shouldHideSidebar && <MobileBottomNavigation />}
+									{isCompact && !shouldHideSidebar && (
+										<MobileBottomNavigation />
+									)}
 								</div>
 							</SidebarInset>
 
-							{!shouldHideSidebar && isExpanded && (
-								<CustomSidebarTrigger />
-							)}
+							{!shouldHideSidebar && isExpanded && <CustomSidebarTrigger />}
 						</SidebarWrapper>
 						<Toaster richColors position="top-right" />
 					</ProfileProvider>

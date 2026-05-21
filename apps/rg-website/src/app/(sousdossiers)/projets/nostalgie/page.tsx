@@ -330,7 +330,7 @@ export default function NostalgieVR() {
 	const canCreateCollage = ogUpload.image && vrUpload.image && !isProcessing;
 
 	return (
-		<main className="flex flex-col min-h-screen bg-linear-to-b from-background via-background to-muted/20">
+		<div className="flex flex-col min-h-screen bg-linear-to-b from-background via-background to-muted/20">
 			<BreadcrumbSchema
 				items={[
 					{ item: "/", name: "Accueil" },
@@ -749,6 +749,6 @@ export default function NostalgieVR() {
 					</Button>
 				}
 			/>
-		</main>
+		</div>
 	);
 }

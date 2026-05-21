@@ -32,7 +32,9 @@ export default async function UserProfilePage({
 		.eq("username", username)
 		.single();
 
-	if (error || !profile) {notFound();}
+	if (error || !profile) {
+		notFound();
+	}
 
 	const isOwnProfile = user?.id === profile.id;
 
@@ -84,7 +86,7 @@ export default async function UserProfilePage({
 	}
 
 	return (
-		<main className="min-h-screen bg-background pb-20">
+		<div className="min-h-screen bg-background pb-20">
 			<BreadcrumbSchema
 				items={[
 					{ item: "/", name: "Accueil" },
@@ -149,6 +151,6 @@ export default async function UserProfilePage({
 					</div>
 				</div>
 			</div>
-		</main>
+		</div>
 	);
 }
