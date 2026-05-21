@@ -15,8 +15,14 @@ export { ensureUserProfile } from "@rosegriffon/auth";
 
 const getDatabaseURL = () => {
 	let url = process.env.DATABASE_URL;
-	if (!url || url.startsWith("eyJ2Ijo") || url === "undefined" || url === "null") {
-		url = "***REDACTED-DATABASE-URL***";
+	if (
+		!url ||
+		url.startsWith("eyJ2Ijo") ||
+		url === "undefined" ||
+		url === "null"
+	) {
+		url =
+			"***REDACTED-DATABASE-URL***";
 	}
 	// Si l'URL pointe vers l'hôte direct de Supabase (IPv6-only), on redirige dynamiquement vers le pooler IPv4
 	if (url.includes("db.isbkaeltubqittywibeh.supabase.co")) {
@@ -277,9 +283,14 @@ function createAuth() {
 
 		plugins: [
 			bearer(),
-			oAuthProxy({
-				productionURL: "https://azalee.rosegriffon.fr",
-			}),
+			// oAuthProxy UNIQUEMENT sur les déploiements preview Vercel : il proxifie
+			// le callback OAuth via le domaine de prod (dont l'URL de redirection est
+			// la seule enregistrée chez Discord/Google). Sur le domaine de prod lui-même,
+			// ce round-trip + encrypt/decrypt s'interpose dans le flow et empêche le
+			// set-cookie de session → session non persistée après login. cf. docs better-auth.
+			...(process.env.VERCEL_ENV === "preview"
+				? [oAuthProxy({ productionURL: "https://azalee.rosegriffon.fr" })]
+				: []),
 			nextCookies(),
 		],
 	});
