@@ -1,7 +1,7 @@
 import { Suspense } from "react";
 
-import { PRODUCTS } from '@/lib/shop/products';
-import type { ProductCategory } from '@/lib/shop/products';
+import { PRODUCTS } from "@/lib/shop/products";
+import type { ProductCategory } from "@/lib/shop/products";
 import { CategoryFilter } from "./_components/category-filter";
 import { PatreonDiscountBanner } from "./_components/patreon-discount-banner";
 import { ProductCard } from "./_components/product-card";
@@ -18,7 +18,7 @@ export default async function ShopIndexPage({ searchParams }: ShopPageProps) {
 			: PRODUCTS;
 
 	return (
-		<main className="mx-auto max-w-7xl px-4 pb-16 pt-10 md:px-8 md:pt-16">
+		<div className="mx-auto max-w-7xl px-4 pb-16 pt-10 md:px-8 md:pt-16">
 			{/* Hero */}
 			<section className="mb-12 grid gap-6 md:mb-16 md:grid-cols-12 md:items-end">
 				<header className="md:col-span-8">
@@ -69,7 +69,7 @@ export default async function ShopIndexPage({ searchParams }: ShopPageProps) {
 					))}
 				</section>
 			)}
-		</main>
+		</div>
 	);
 }
 

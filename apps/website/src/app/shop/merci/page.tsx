@@ -34,7 +34,7 @@ export default async function ThankYouPage({ searchParams }: ThankYouProps) {
 	}
 
 	return (
-		<main className="mx-auto flex min-h-[70vh] max-w-2xl flex-col items-center justify-center px-4 py-16 text-center">
+		<div className="mx-auto flex min-h-[70vh] max-w-2xl flex-col items-center justify-center px-4 py-16 text-center">
 			<div className="grid size-20 place-items-center rounded-full bg-[#d4af37] shadow-[0_4px_0_0_rgba(0,0,0,0.5)]">
 				<Check className="size-10 text-[#0c1730]" strokeWidth={3} />
 			</div>
@@ -99,6 +99,6 @@ export default async function ThankYouPage({ searchParams }: ThankYouProps) {
 					Retour au site
 				</Link>
 			</div>
-		</main>
+		</div>
 	);
 }

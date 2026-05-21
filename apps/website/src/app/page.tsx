@@ -199,9 +199,9 @@ export default async function Home() {
 		// Si pas de date de fin, utiliser la date de début
 		const targetDate = endDate
 			? new Date(endDate)
-			: (startDate
+			: startDate
 				? new Date(startDate)
-				: null);
+				: null;
 
 		return targetDate && targetDate >= now;
 	});
@@ -220,7 +220,7 @@ export default async function Home() {
 			<OrganizationSchema />
 			<WebsiteSchema />
 			<RealtimeSettingsListener />
-			<main className="flex flex-col min-h-screen">
+			<div className="flex flex-col min-h-screen">
 				<a
 					href="#main-content"
 					className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-background focus:text-foreground focus:rounded-lg focus:shadow-lg focus:outline-hidden focus:ring-2 focus:ring-primary"
@@ -405,7 +405,7 @@ export default async function Home() {
 
 					{/* Section Dernière Chronique */}
 				</div>
-			</main>
+			</div>
 		</>
 	);
 }

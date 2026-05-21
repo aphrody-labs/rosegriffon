@@ -57,7 +57,10 @@ async function fetchOrders(userId: string): Promise<OrderRow[]> {
 		}
 		return (data ?? []) as OrderRow[];
 	} catch (error) {
-		console.warn("[shop/commandes] table orders absente ou indisponible:", error);
+		console.warn(
+			"[shop/commandes] table orders absente ou indisponible:",
+			error,
+		);
 		return [];
 	}
 }
@@ -71,7 +74,7 @@ export default async function OrdersPage() {
 	const orders = await fetchOrders(user.id);
 
 	return (
-		<main className="mx-auto max-w-5xl px-4 pb-16 pt-10 md:px-8 md:pt-16">
+		<div className="mx-auto max-w-5xl px-4 pb-16 pt-10 md:px-8 md:pt-16">
 			<header className="mb-10 flex flex-wrap items-end justify-between gap-4">
 				<div>
 					<p className="mb-2 inline-flex items-center gap-2 rounded-full border-2 border-[#d4af37] bg-[#0c1730] px-3 py-1 text-[10px] font-bold uppercase tracking-[0.24em] text-[#d4af37]">
@@ -141,7 +144,7 @@ export default async function OrdersPage() {
 					))}
 				</ul>
 			)}
-		</main>
+		</div>
 	);
 }
 

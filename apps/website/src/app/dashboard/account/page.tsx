@@ -8,13 +8,13 @@ import { getServerSession, getServerUser } from "@/lib/auth-helpers";
 import { createAdminClient, createClient } from "@/lib/supabase/server";
 
 import { AddressSection } from "./sections/address-section";
-import { AccountTabs } from './sections/account-tabs';
-import type { AccountTabValue } from './sections/account-tabs';
-import { ConnectionsSection } from './sections/connections-section';
-import type { LinkedAccount } from './sections/connections-section';
+import { AccountTabs } from "./sections/account-tabs";
+import type { AccountTabValue } from "./sections/account-tabs";
+import { ConnectionsSection } from "./sections/connections-section";
+import type { LinkedAccount } from "./sections/connections-section";
 import { ProfileSection } from "./sections/profile-section";
-import { SecuritySection } from './sections/security-section';
-import type { SessionItem } from './sections/security-section';
+import { SecuritySection } from "./sections/security-section";
+import type { SessionItem } from "./sections/security-section";
 
 export const dynamic = "force-dynamic";
 
@@ -31,7 +31,9 @@ export default async function AccountPage({
 	searchParams: Promise<{ tab?: string }>;
 }) {
 	const user = await getServerUser();
-	if (!user) {redirect("/login");}
+	if (!user) {
+		redirect("/login");
+	}
 
 	const { tab: rawTab } = await searchParams;
 	const initialTab: AccountTabValue = (
@@ -102,7 +104,7 @@ export default async function AccountPage({
 		: "/";
 
 	return (
-		<main className="min-h-screen bg-muted/30">
+		<div className="min-h-screen bg-muted/30">
 			<div className="container mx-auto max-w-5xl p-4 sm:p-6 lg:p-8">
 				<nav aria-label="Retour" className="mb-4">
 					<Button variant="ghost" size="sm" asChild className="-ml-2">
@@ -131,6 +133,6 @@ export default async function AccountPage({
 					security={<SecuritySection sessions={sessions} />}
 				/>
 			</div>
-		</main>
+		</div>
 	);
 }

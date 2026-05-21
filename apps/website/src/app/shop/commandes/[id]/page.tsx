@@ -48,13 +48,15 @@ interface OrderDetail {
 	paid_at: string | null;
 	shipped_at: string | null;
 	delivered_at: string | null;
-	items: {
-		slug?: string;
-		label?: string;
-		qty?: number;
-		unit_amount_cents?: number;
-		variantId?: string;
-	}[] | null;
+	items:
+		| {
+				slug?: string;
+				label?: string;
+				qty?: number;
+				unit_amount_cents?: number;
+				variantId?: string;
+		  }[]
+		| null;
 }
 
 async function fetchOrder(
@@ -69,7 +71,9 @@ async function fetchOrder(
 			.eq("id", orderId)
 			.eq("user_id", userId)
 			.maybeSingle();
-		if (error || !data) {return null;}
+		if (error || !data) {
+			return null;
+		}
 		return data as unknown as OrderDetail;
 	} catch {
 		return null;
@@ -83,13 +87,17 @@ export default async function OrderDetailPage({
 }) {
 	const { id } = await params;
 	const user = await getServerUser();
-	if (!user) {redirect(`/login?next=/shop/commandes/${id}`);}
+	if (!user) {
+		redirect(`/login?next=/shop/commandes/${id}`);
+	}
 
 	const order = await fetchOrder(id, user.id);
-	if (!order) {notFound();}
+	if (!order) {
+		notFound();
+	}
 
 	return (
-		<main className="mx-auto max-w-4xl px-4 pb-16 pt-10 md:px-8 md:pt-16">
+		<div className="mx-auto max-w-4xl px-4 pb-16 pt-10 md:px-8 md:pt-16">
 			<nav className="mb-6">
 				<Link
 					href="/shop/commandes"
@@ -241,7 +249,7 @@ export default async function OrderDetailPage({
 					)}
 				</aside>
 			</div>
-		</main>
+		</div>
 	);
 }
 

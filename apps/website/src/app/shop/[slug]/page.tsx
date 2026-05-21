@@ -28,7 +28,9 @@ export async function generateMetadata({
 }: ProductPageProps): Promise<Metadata> {
 	const { slug } = await params;
 	const product = getProduct(slug);
-	if (!product) {return { title: "Produit introuvable · Rose Griffon" };}
+	if (!product) {
+		return { title: "Produit introuvable · Rose Griffon" };
+	}
 	return {
 		description: product.tagline,
 		openGraph: {
@@ -43,7 +45,9 @@ export async function generateMetadata({
 export default async function ProductPage({ params }: ProductPageProps) {
 	const { slug } = await params;
 	const product = getProduct(slug);
-	if (!product) {notFound();}
+	if (!product) {
+		notFound();
+	}
 
 	const gallery = product.gallery ?? [product.image];
 	const related = PRODUCTS.filter(
@@ -155,7 +159,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
 	};
 
 	return (
-		<main className="mx-auto max-w-7xl px-4 pb-16 pt-8 md:px-8 md:pt-12">
+		<div className="mx-auto max-w-7xl px-4 pb-16 pt-8 md:px-8 md:pt-12">
 			<script
 				type="application/ld+json"
 				dangerouslySetInnerHTML={{ __html: JSON.stringify(productSchema) }}
@@ -306,6 +310,6 @@ export default async function ProductPage({ params }: ProductPageProps) {
 					</div>
 				</section>
 			)}
-		</main>
+		</div>
 	);
 }

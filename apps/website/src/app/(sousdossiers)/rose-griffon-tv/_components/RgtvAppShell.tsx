@@ -375,7 +375,7 @@ export function RgtvAppShell({
 			</AnimatePresence>
 
 			{/* Main Content */}
-			<main className="pt-16 pb-20 md:pb-4">{children}</main>
+			<div className="pt-16 pb-20 md:pb-4">{children}</div>
 		</div>
 	);
 }

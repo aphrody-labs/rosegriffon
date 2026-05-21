@@ -75,9 +75,15 @@ export async function generateMetadata({
 	}
 
 	const urlParams = new URLSearchParams();
-	if (query) {urlParams.set("q", query);}
-	if (category) {urlParams.set("category", category);}
-	if (page > 1) {urlParams.set("page", page.toString());}
+	if (query) {
+		urlParams.set("q", query);
+	}
+	if (category) {
+		urlParams.set("category", category);
+	}
+	if (page > 1) {
+		urlParams.set("page", page.toString());
+	}
 	const urlSuffix = urlParams.toString() ? `?${urlParams.toString()}` : "";
 
 	return {
@@ -177,14 +183,20 @@ export default async function ChroniquesListPage({
 	// Génération des URLs de pagination
 	const buildPageUrl = (pageNum: number) => {
 		const urlParams = new URLSearchParams();
-		if (query) {urlParams.set("q", query);}
-		if (selectedCategory) {urlParams.set("category", selectedCategory);}
-		if (pageNum > 1) {urlParams.set("page", pageNum.toString());}
+		if (query) {
+			urlParams.set("q", query);
+		}
+		if (selectedCategory) {
+			urlParams.set("category", selectedCategory);
+		}
+		if (pageNum > 1) {
+			urlParams.set("page", pageNum.toString());
+		}
 		return `/chroniques${urlParams.toString() ? `?${urlParams.toString()}` : ""}`;
 	};
 
 	return (
-		<main className="min-h-screen bg-background">
+		<div className="min-h-screen bg-background">
 			<BreadcrumbSchema
 				items={[
 					{ item: "/", name: "Accueil" },
@@ -448,10 +460,7 @@ export default async function ChroniquesListPage({
 					) : (
 						<div className="text-center py-16">
 							<div className="size-20 mx-auto mb-6 rounded-full bg-[#FF424D]/10 flex items-center justify-center">
-								<Heart
-									className="size-10 text-[#FF424D]"
-									aria-hidden="true"
-								/>
+								<Heart className="size-10 text-[#FF424D]" aria-hidden="true" />
 							</div>
 							<h2 className="text-2xl font-bold text-foreground mb-2">
 								Aucun post Patreon visible
@@ -471,7 +480,7 @@ export default async function ChroniquesListPage({
 							)}
 						</div>
 					)
-				) : (articles && articles.length > 0 ? (
+				) : articles && articles.length > 0 ? (
 					<div
 						className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8 animate-in fade-in slide-in-from-bottom-4 duration-500"
 						style={{ animationDelay: "200ms" }}
@@ -577,7 +586,7 @@ export default async function ChroniquesListPage({
 							</Button>
 						)}
 					</div>
-				))}
+				)}
 
 				{/* Pagination */}
 				{meta && meta.totalPages > 1 && (
@@ -613,8 +622,12 @@ export default async function ChroniquesListPage({
 							{Array.from({ length: meta.totalPages }, (_, i) => i + 1)
 								.filter((p) => {
 									// Afficher: première, dernière, et 2 pages autour de la page courante
-									if (p === 1 || p === meta.totalPages) {return true;}
-									if (Math.abs(p - page) <= 1) {return true;}
+									if (p === 1 || p === meta.totalPages) {
+										return true;
+									}
+									if (Math.abs(p - page) <= 1) {
+										return true;
+									}
 									return false;
 								})
 								.map((p, idx, arr) => {
@@ -681,6 +694,6 @@ export default async function ChroniquesListPage({
 					</p>
 				)}
 			</section>
-		</main>
+		</div>
 	);
 }
