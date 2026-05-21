@@ -1,5 +1,6 @@
 import type { BaseCharacter, Item, Skill, Team } from "@rosegriffon/inagle";
-import { ElementNames, CATEGORY_NAMES as CategoryNames } from "@rosegriffon/inagle";
+import { ElementNames } from "@rosegriffon/inagle/core/types";
+import { CATEGORY_NAMES as CategoryNames } from "@rosegriffon/inagle/skills/types";
 import type { Database } from "@rosegriffon/db";
 import {
 	getAuraImageUrl,
