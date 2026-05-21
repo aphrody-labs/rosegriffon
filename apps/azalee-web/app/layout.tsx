@@ -148,7 +148,7 @@ export default async function RootLayout({
 	}
 
 	return (
-		<html lang="fr" suppressHydrationWarning>
+		<html lang="fr" className="dark" suppressHydrationWarning>
 			<head>
 				{/* Material Symbols: self-hosted in globals.css, no external CSS needed */}
 				<link rel="preconnect" href="https://www.googletagmanager.com" />
@@ -169,6 +169,7 @@ export default async function RootLayout({
 						attribute="class"
 						defaultTheme="dark"
 						themes={["light", "dark"]}
+						storageKey="azalee-theme"
 						enableSystem={false}
 						disableTransitionOnChange
 					>
