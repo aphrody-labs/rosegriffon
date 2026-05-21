@@ -108,7 +108,12 @@ export async function ensureUserProfile(
 			const hasDiscordChanged = discordId && discordId !== existing.discord_id;
 			const hasPatreonChanged = patreonId && patreonId !== existing.patreon_id;
 
-			if (hasAvatarChanged || hasNameChanged || hasDiscordChanged || hasPatreonChanged) {
+			if (
+				hasAvatarChanged ||
+				hasNameChanged ||
+				hasDiscordChanged ||
+				hasPatreonChanged
+			) {
 				await db
 					.from("profiles")
 					.update({
@@ -151,13 +156,19 @@ export async function ensureUserProfile(
 			.single();
 
 		if (error) {
-			console.error(`[@rosegriffon/auth] Failed to create profile for user ${user.id}:`, error.message);
+			console.error(
+				`[@rosegriffon/auth] Failed to create profile for user ${user.id}:`,
+				error.message,
+			);
 			return null;
 		}
 
 		return newProfile;
 	} catch (err) {
-		console.error(`[@rosegriffon/auth] Exception in ensureUserProfile for ${user.id}:`, err);
+		console.error(
+			`[@rosegriffon/auth] Exception in ensureUserProfile for ${user.id}:`,
+			err,
+		);
 		return null;
 	}
 }
@@ -212,7 +223,10 @@ export const commonAuthOptions = {
 		},
 	},
 	advanced: {
-		useSecureCookies: true,
+		// Cookies Secure uniquement en prod : en dev local (http://localhost),
+		// un cookie Secure n'est jamais renvoyé par le navigateur → login cassé.
+		// Sur Vercel (preview + prod), NODE_ENV vaut toujours "production".
+		useSecureCookies: process.env.NODE_ENV === "production",
 		crossSubDomainCookies: {
 			enabled: true,
 		},
@@ -221,7 +235,7 @@ export const commonAuthOptions = {
 		},
 		defaultCookieAttributes: {
 			httpOnly: true,
-			secure: true,
+			secure: process.env.NODE_ENV === "production",
 			sameSite: "lax" as const,
 		},
 	},

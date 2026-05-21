@@ -86,3 +86,6 @@ supabase/.temp/
 # Gemini
 .gemini/
 .antigravitycli/
+
+# Espace de travail jetable (peut contenir des secrets extraits) — jamais committé
+scratch/

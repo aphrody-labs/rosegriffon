@@ -1,5 +1,21 @@
 import { createAuthClient } from "better-auth/react";
 
+const getBaseURL = () => {
+	if (typeof window !== "undefined") {
+		return window.location.origin;
+	}
+	const url = process.env.BETTER_AUTH_URL;
+	if (
+		!url ||
+		url === "undefined" ||
+		url === "null" ||
+		!url.startsWith("http")
+	) {
+		return "https://azalee.rosegriffon.fr";
+	}
+	return url;
+};
+
 export const authClient = createAuthClient({
-  baseURL: typeof window !== "undefined" ? window.location.origin : process.env.BETTER_AUTH_URL,
+	baseURL: getBaseURL(),
 });
