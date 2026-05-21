@@ -188,9 +188,14 @@ export const commonAuthOptions = {
 	session: {
 		expiresIn: 60 * 60 * 24 * 30, // 30 days
 		updateAge: 60 * 60 * 24, // 1 day
+		// cookieCache DÉSACTIVÉ : le cache stocke session+user signés dans un cookie.
+		// Avec un user Discord (avatar/email) + le rewrite expiresAt(+10ans) admin du
+		// hook session.create.before, le payload peut dépasser 4096 o (droppé par le
+		// navigateur) ou échouer la validation à la relecture → get-session renvoie null
+		// après le callback OAuth = session non persistée. Désactivé, get-session lit
+		// toujours la DB via le session_token (robuste). cf. docs better-auth.
 		cookieCache: {
-			enabled: true,
-			maxAge: 5 * 60, // 5 min
+			enabled: false,
 		},
 		fields: {
 			userId: "user_id",
