@@ -167,7 +167,8 @@ export default async function RootLayout({
 				<LanguageProvider>
 					<ThemeProvider
 						attribute="class"
-						defaultTheme="azalee-dark"
+						defaultTheme="dark"
+						themes={["light", "dark"]}
 						enableSystem={false}
 						disableTransitionOnChange
 					>

@@ -313,9 +313,9 @@ export function SettingsClient({
 										</div>
 									</div>
 									<Switch
-										checked={theme !== "azalee-light"}
+										checked={theme !== "light"}
 										onCheckedChange={(checked) =>
-											setTheme(checked ? "azalee-dark" : "azalee-light")
+											setTheme(checked ? "dark" : "light")
 										}
 										className="data-[state=checked]:bg-primary"
 									/>

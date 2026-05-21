@@ -234,13 +234,13 @@ function ThemeToggle({ className }: { className?: string }) {
 		);
 	}
 
-	// Thèmes azalee unifiés (@rosegriffon/ui) : "azalee-light" / "azalee-dark".
-	// Défaut = "azalee-dark" → tout ce qui n'est pas explicitement light est dark.
-	const isDark = theme !== "azalee-light";
+	// azalee pilote son palette via la classe `dark` (globals.css `:root.dark`),
+	// PAS via des noms de thème custom. Défaut = "dark".
+	const isDark = theme !== "light";
 
 	return (
 		<button
-			onClick={() => setTheme(isDark ? "azalee-light" : "azalee-dark")}
+			onClick={() => setTheme(isDark ? "light" : "dark")}
 			className={cn(
 				"relative size-12 rounded-full flex items-center justify-center text-on-surface-variant",
 				"hover:bg-on-surface/[0.08] active:bg-on-surface/[0.12] transition-all duration-300",
