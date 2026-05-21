@@ -227,8 +227,13 @@ export const commonAuthOptions = {
 		// un cookie Secure n'est jamais renvoyé par le navigateur → login cassé.
 		// Sur Vercel (preview + prod), NODE_ENV vaut toujours "production".
 		useSecureCookies: process.env.NODE_ENV === "production",
+		// crossSubDomainCookies DÉSACTIVÉ : website (rosegriffon.fr) et azalee
+		// (azalee.rosegriffon.fr) ont des instances Better Auth séparées (tables
+		// users + secrets distincts) → aucune session partagée possible. Activé,
+		// il forçait Domain=<host> sur les cookies et cassait la lecture de session
+		// après le callback OAuth → boucle de redirection vers /login. Host-only = OK.
 		crossSubDomainCookies: {
-			enabled: true,
+			enabled: false,
 		},
 		ipAddress: {
 			ipAddressHeaders: ["x-forwarded-for", "x-real-ip"] as string[],
