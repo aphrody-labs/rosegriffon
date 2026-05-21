@@ -209,9 +209,13 @@ export const auth = betterAuth({
 
 	plugins: [
 		bearer(),
-		oAuthProxy({
-			productionURL: "https://rosegriffon.fr",
-		}),
+		// oAuthProxy UNIQUEMENT sur les déploiements preview Vercel : sur le domaine
+		// de prod il s'interpose dans le callback OAuth (round-trip + encrypt/decrypt)
+		// et empêche le set-cookie de session → session non persistée après login,
+		// admin/dashboard inaccessible. cf. docs better-auth (oAuthProxy = preview/dev).
+		...(process.env.VERCEL_ENV === "preview"
+			? [oAuthProxy({ productionURL: "https://rosegriffon.fr" })]
+			: []),
 		genericOAuth({
 			config: [
 				{
