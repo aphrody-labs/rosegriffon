@@ -1,6 +1,6 @@
 "use client";
 
-import { Button } from "@rosegriffon/ui";
+import { Button, Separator } from "@rosegriffon/ui";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -9,7 +9,6 @@ import { LiveStatus } from "@/components/header/LiveStatus";
 import { GlobalSearch } from "@/components/search/global-search";
 import { ThemeToggle } from "@/components/shared/ThemeToggle";
 
-import { Separator } from "@rosegriffon/ui";
 import { useSidebarAuth } from "@/hooks/useSidebarAuth";
 import { Home, ShieldCheck } from "@/lib/icons-config";
 import { cn } from "@/lib/utils";

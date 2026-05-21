@@ -4,8 +4,7 @@ import { CheckCircle, KeyRound, Loader2, Lock } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useState } from "react";
 import { toast } from "sonner";
-import { Button } from "@rosegriffon/ui";
-import { Input } from "@rosegriffon/ui";
+import { Button, Input } from "@rosegriffon/ui";
 import { authClient } from "@/lib/auth-client";
 
 function ResetPasswordContent() {

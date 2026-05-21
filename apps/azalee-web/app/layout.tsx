@@ -1,17 +1,10 @@
 import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import { cookies, headers } from "next/headers";
 import Script from "next/script";
-import { ThemeProvider as RawNextThemesProvider } from "next-themes";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 
-// Next-themes < v1 + React 19 typings drift on `children` prop: cast once to
-// A permissive FC. Runtime behavior is unchanged.
-const NextThemesProvider = RawNextThemesProvider as unknown as React.FC<{
-	children: React.ReactNode;
-	[k: string]: unknown;
-}>;
 import { LanguageProvider } from "@/components/providers/language-provider";
 import { SupabaseProvider } from "@/components/providers/SupabaseProvider";
 import { ThemeProvider } from "@/components/providers/theme-provider";
@@ -147,7 +140,9 @@ export default async function RootLayout({
 			console.error(
 				"[layout] auth.api.getSession throw:",
 				error instanceof Error ? error.message : String(error),
-				error instanceof Error && error.stack ? error.stack.split("\n").slice(0, 3) : null,
+				error instanceof Error && error.stack
+					? error.stack.split("\n").slice(0, 3)
+					: null,
 			);
 		}
 	}

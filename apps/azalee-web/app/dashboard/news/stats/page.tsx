@@ -1,9 +1,7 @@
 import { Eye, Newspaper, TrendingUp } from "lucide-react";
 import Link from "next/link";
 import { getArticleStats } from "@/app/actions/articles";
-import { DashboardStatsCard as DashboardMetricCard } from "@rosegriffon/ui";
-import { AdminPageHeader as DashboardPageHeader } from "@rosegriffon/ui";
-import { Badge } from "@rosegriffon/ui";
+import { DashboardStatsCard as DashboardMetricCard, AdminPageHeader as DashboardPageHeader, Badge } from "@rosegriffon/ui";
 import { Icon } from "@/components/ui/Icon";
 import { createClient } from "@/lib/supabase/server";
 

@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { isAdmin, resolveProfile } from "@rosegriffon/auth";
-import { ADMIN_ROLES, MEDAILLE_AZALEE_ROLE_ID } from "@rosegriffon/types";
+import { MEDAILLE_AZALEE_ROLE_ID } from "@rosegriffon/types";
 
 /**
  * Get the current Better Auth session server-side.

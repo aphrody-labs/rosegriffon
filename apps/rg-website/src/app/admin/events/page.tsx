@@ -1,11 +1,9 @@
-import { Button, Card, CardContent, CardHeader, CardTitle } from "@rosegriffon/ui";
+import { Button, Card, CardContent, CardHeader, CardTitle, AdminPageHeader, PaginationControls } from "@rosegriffon/ui";
 import { Calendar, Plus } from "lucide-react";
 import Link from "next/link";
 
 import { SyncEventsButton } from "@/components/admin/events/sync-button";
-import { AdminPageHeader } from "@rosegriffon/ui";
 
-import { PaginationControls } from "@rosegriffon/ui";
 import { createAdminClient } from "@/lib/supabase/server";
 import type { Tables } from "@rosegriffon/db";
 

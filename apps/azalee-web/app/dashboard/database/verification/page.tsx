@@ -1,15 +1,6 @@
 import { Pencil } from "lucide-react";
 import Link from "next/link";
-import { AdminPageHeader as DashboardPageHeader } from "@rosegriffon/ui";
-import { Badge } from "@rosegriffon/ui";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@rosegriffon/ui";
+import { AdminPageHeader as DashboardPageHeader, Badge, Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@rosegriffon/ui";
 import { apiClient } from "@/lib/api-client";
 import { verifier } from "@/lib/verification";
 

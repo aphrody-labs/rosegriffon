@@ -1,11 +1,10 @@
 "use client";
 
-import { Card } from "@rosegriffon/ui";
+import { Card, AdminPageHeader } from "@rosegriffon/ui";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
 import { ChronicleEditor } from "@/components/admin/ChronicleEditor";
-import { AdminPageHeader } from "@rosegriffon/ui";
 
 import { createChronicle } from "../actions";
 

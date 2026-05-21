@@ -1,19 +1,10 @@
 "use client";
 
-import { Button } from "@rosegriffon/ui";
+import { Button, CommandDialog, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList, CommandSeparator } from "@rosegriffon/ui";
 import { Search } from "lucide-react";
 import { useRouter } from "next/navigation";
 import * as React from "react";
 
-import {
-	CommandDialog,
-	CommandEmpty,
-	CommandGroup,
-	CommandInput,
-	CommandItem,
-	CommandList,
-	CommandSeparator,
-} from "@rosegriffon/ui";
 import { assoMenu, contactMenu } from '@/lib/sidebar-config';
 import type { MenuItem, SubMenuItem } from '@/lib/sidebar-config';
 

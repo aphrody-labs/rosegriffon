@@ -1,14 +1,10 @@
-import { Badge, Button, Card, CardContent, CardHeader, CardTitle, Input, Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@rosegriffon/ui";
+import { Badge, Button, Card, CardContent, CardHeader, CardTitle, Input, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, DashboardStatsCard as StatsCard, AdminPageHeader, PaginationControls, StorageImage } from "@rosegriffon/ui";
 import { BarChart3, Calendar, Eye, FileText, Filter, Plus, Search } from "lucide-react";
 import Link from "next/link";
 
 import { ChronicleActions } from "@/components/admin/chronicles/chronicle-actions";
-import { DashboardStatsCard as StatsCard } from "@rosegriffon/ui";
-import { AdminPageHeader } from "@rosegriffon/ui";
 
-import { PaginationControls } from "@rosegriffon/ui";
 
-import { StorageImage } from "@rosegriffon/ui";
 import { getArticleStats, getArticles } from "@/lib/api/articles";
 
 export default async function ChroniquesAdminPage({
