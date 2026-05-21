@@ -5,6 +5,11 @@
 @source "../hooks";
 @source "../config";
 @source "../src";
+/* Scanne les composants @rosegriffon/ui pour générer leurs utilitaires propres
+ * (ex: w-(--sidebar-width), w-(--sidebar-width-icon)) que l'app n'utilise pas
+ * directement — sans ça le sidebar-gap reste à width:0 et le sidebar recouvre
+ * le contenu au lieu de le décaler. source(none) impose ce @source explicite. */
+@source "../../../packages/ui/src";
 @plugin "tailwindcss-animate";
 @plugin "@tailwindcss/typography";
 
