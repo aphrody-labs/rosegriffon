@@ -6,18 +6,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import * as React from "react";
 import { useLanguage } from "@/components/providers/language-provider";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@rosegriffon/ui";
-import {
-  Sidebar,
-  SidebarContent,
-  SidebarGroup,
-  SidebarGroupContent,
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
-  SidebarRail,
-  useSidebar,
-} from "@rosegriffon/ui";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger, Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarRail, useSidebar } from "@rosegriffon/ui";
 import { dashboardItems, navigationItems } from '@/config/navigation';
 import type { NavItem } from '@/config/navigation';
 import type { SpriteCommonKey } from "@/config/sprites-common";

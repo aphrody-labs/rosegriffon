@@ -1,10 +1,9 @@
 "use client";
 
-import { Button } from "@rosegriffon/ui";
+import { Button, Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@rosegriffon/ui";
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@rosegriffon/ui";
 import { Tv, Users, Video } from "@/lib/icons-config";
 import { cn } from "@/lib/utils";
 

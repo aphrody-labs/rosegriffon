@@ -2,8 +2,7 @@ import { Zap } from "lucide-react";
 import localFont from "next/font/local";
 import Image from "next/image";
 
-import { Button } from "@rosegriffon/ui";
-import { Card, CardContent } from "@rosegriffon/ui";
+import { Button, Card, CardContent } from "@rosegriffon/ui";
 
 const humane = localFont({
   display: "swap",

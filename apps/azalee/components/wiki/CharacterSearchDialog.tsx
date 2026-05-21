@@ -5,15 +5,7 @@ import Image from "next/image";
 import * as React from "react";
 import { searchCompareCharacters } from '@/app/actions/search';
 import type { CompareSearchResult } from '@/app/actions/search';
-import {
-	CommandDialog,
-	CommandEmpty,
-	CommandGroup,
-	CommandInput,
-	CommandItem,
-	CommandList,
-} from "@rosegriffon/ui";
-import { Skeleton } from "@rosegriffon/ui";
+import { CommandDialog, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList, Skeleton } from "@rosegriffon/ui";
 import { getSkillCategoryIconUrl, getSkillElementIconUrl } from "@/lib/images";
 import { cn } from "@/lib/utils";
 

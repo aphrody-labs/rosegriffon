@@ -3,10 +3,9 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useLanguage } from "@/components/providers/language-provider";
-import { mobileNavItems } from "@/config/navigation";
+import { dashboardItems, navigationItems } from "@/config/navigation";
 import { iconMap } from "@/lib/icons";
 import { NavigationRail, NavigationRailItem } from "@rosegriffon/ui";
-import { dashboardItems, navigationItems } from "@/config/navigation";
 import { useAuth } from "@/components/providers/AuthProvider";
 
 export function AzaleeNavigationRail() {

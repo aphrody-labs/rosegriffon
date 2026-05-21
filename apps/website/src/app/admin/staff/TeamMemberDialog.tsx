@@ -1,15 +1,12 @@
 "use client";
 
-import { Button, Input, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, Tabs, TabsContent, TabsList, TabsTrigger } from "@rosegriffon/ui";
+import { Button, Input, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, Tabs, TabsContent, TabsList, TabsTrigger, Label, ResponsiveDialog, Switch } from "@rosegriffon/ui";
 import { Upload, X } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
-import { Label } from "@rosegriffon/ui";
-import { ResponsiveDialog } from "@rosegriffon/ui";
 
-import { Switch } from "@rosegriffon/ui";
 
 import { createTeamMember, updateTeamMember, uploadTeamMemberImage } from './actions';
 import type { TeamMember } from './actions';

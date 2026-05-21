@@ -1,4 +1,4 @@
-import { Button, Input, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, Textarea } from "@rosegriffon/ui";
+import { Button, Input, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, Textarea, Label } from "@rosegriffon/ui";
 import { Crop, ImageIcon, Loader2, Trash2, Upload } from "lucide-react";
 import Image from "next/image";
 import { useRef, useState } from "react";
@@ -6,7 +6,6 @@ import { toast } from "sonner";
 
 import ImageCropper from "@/components/shared/ImageCropper";
 
-import { Label } from "@rosegriffon/ui";
 
 import { createClient } from "@/lib/supabase/client";
 

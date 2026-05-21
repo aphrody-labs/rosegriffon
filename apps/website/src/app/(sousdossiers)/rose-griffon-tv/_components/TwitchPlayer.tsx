@@ -1,9 +1,8 @@
 "use client";
 
-import { Button } from "@rosegriffon/ui";
+import { Button, Skeleton } from "@rosegriffon/ui";
 import dynamic from "next/dynamic";
 
-import { Skeleton } from "@rosegriffon/ui";
 import { AlertCircle, Play, Radio } from "@/lib/icons-config";
 
 import type { TwitchEmbedProps, TwitchPlayerProps } from "react-twitch-embed";

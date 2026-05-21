@@ -1,22 +1,11 @@
 "use client";
 
-import {
-	Alert,
-	AlertDescription,
-	Button,
-	Card,
-	CardContent,
-	CardDescription,
-	CardHeader,
-	CardTitle,
-} from "@rosegriffon/ui";
+import { Alert, AlertDescription, Button, Card, CardContent, CardDescription, CardHeader, CardTitle, Separator, Skeleton } from "@rosegriffon/ui";
 import Image from "next/image";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { Suspense } from "react";
 
-import { Separator } from "@rosegriffon/ui";
-import { Skeleton } from "@rosegriffon/ui";
 import { AlertCircle, CheckCircle } from "@/lib/icons-config";
 
 import {

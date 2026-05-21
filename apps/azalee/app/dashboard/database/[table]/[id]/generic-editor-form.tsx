@@ -3,9 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
-import { Button } from "@rosegriffon/ui";
-import { Input } from "@rosegriffon/ui";
-import { Textarea } from "@rosegriffon/ui";
+import { Button, Input, Textarea } from "@rosegriffon/ui";
 import { createClient } from "@/lib/supabase/client";
 
 export function GenericEditorForm({ table, initialData }: { table: string; initialData: any }) {

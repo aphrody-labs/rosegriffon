@@ -25,12 +25,7 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { updateProfile } from "@/app/settings/actions";
 import { AvatarUpload } from "@/components/settings/AvatarUpload";
-import { Button } from "@rosegriffon/ui";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@rosegriffon/ui";
-import { Input } from "@rosegriffon/ui";
-import { Label } from "@rosegriffon/ui";
-import { Switch } from "@rosegriffon/ui";
-import { Textarea } from "@rosegriffon/ui";
+import { Button, Card, CardContent, CardDescription, CardHeader, CardTitle, Input, Label, Switch, Textarea } from "@rosegriffon/ui";
 import { authClient } from "@/lib/auth-client";
 
 interface SettingsClientProps {

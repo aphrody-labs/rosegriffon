@@ -15,7 +15,7 @@ import { NotificationBell } from "@/components/news/NotificationBell";
 import { AuthProvider, useAuth } from "@/components/providers/AuthProvider";
 import { useLanguage } from "@/components/providers/language-provider";
 import { PullToRefresh } from "@/components/ui/pull-to-refresh";
-import { BREAKPOINTS, SidebarInset, SidebarProvider, useBreakpoint, useSidebar } from "@rosegriffon/ui";
+import { SidebarInset, SidebarProvider, useBreakpoint, useSidebar } from "@rosegriffon/ui";
 import { AzaleeNavigationRail } from "@/components/navigation/AzaleeNavigationRail";
 import { GlobalSearch } from "@/components/wiki/GlobalSearch";
 import { cn } from "@/lib/utils";

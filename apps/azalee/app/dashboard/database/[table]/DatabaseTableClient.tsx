@@ -2,16 +2,8 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { Button } from "@rosegriffon/ui";
+import { Button, Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@rosegriffon/ui";
 import { Icon } from "@/components/ui/Icon";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@rosegriffon/ui";
 
 interface DatabaseTableClientProps {
   table: string;

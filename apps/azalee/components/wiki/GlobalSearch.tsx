@@ -5,16 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import * as React from "react";
 import { searchGlobal } from '@/app/actions/search';
 import type { EnhancedSearchResult } from '@/app/actions/search';
-import { Button } from "@rosegriffon/ui";
-import {
-  CommandDialog,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from "@rosegriffon/ui";
-import { Skeleton } from "@rosegriffon/ui";
+import { Button, Skeleton, CommandDialog, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@rosegriffon/ui";
 import { SearchResultRow } from "@/components/wiki/SearchResultRow";
 import { TYPE_LABELS_PLURAL } from "@/lib/search/search-ui-config";
 import type { SearchContext } from "@/lib/search/smart-search";

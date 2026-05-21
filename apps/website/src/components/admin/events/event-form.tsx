@@ -1,6 +1,6 @@
 "use client";
 
-import { Button, Card, CardContent, CardFooter, CardHeader, CardTitle, Input, Textarea } from "@rosegriffon/ui";
+import { Button, Card, CardContent, CardFooter, CardHeader, CardTitle, Input, Textarea, Label } from "@rosegriffon/ui";
 import { useRouter } from "next/navigation";
 import { useActionState, useState } from "react";
 import { toast } from "sonner";
@@ -8,7 +8,6 @@ import { toast } from "sonner";
 import { createEvent, deleteEvent, updateEvent } from "@/app/admin/events/actions";
 import { ConfirmationDialog } from "@/components/admin/confirmation-dialog";
 
-import { Label } from "@rosegriffon/ui";
 
 import { Loader2, Trash2 } from "@/lib/icons-config";
 import type { Tables } from "@rosegriffon/db";

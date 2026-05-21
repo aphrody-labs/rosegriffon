@@ -1,15 +1,6 @@
 import Link from "next/link";
-import { AdminPageHeader as DashboardPageHeader } from "@rosegriffon/ui";
+import { AdminPageHeader as DashboardPageHeader, Button, Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@rosegriffon/ui";
 import { NewsListClient } from "@/components/dashboard/news/NewsListClient";
-import { Button } from "@rosegriffon/ui";
-import {
-	Empty,
-	EmptyContent,
-	EmptyDescription,
-	EmptyHeader,
-	EmptyMedia,
-	EmptyTitle,
-} from "@rosegriffon/ui";
 import { Icon } from "@/components/ui/Icon";
 import { WikiPagination } from "@/components/wiki/WikiPagination";
 import { sanitizeNewsSearchQuery } from "@/lib/news-search";

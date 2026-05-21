@@ -1,4 +1,5 @@
 import { Sparkles } from "lucide-react";
+import Link from "next/link";
 
 import {
 	PATRON_DISCOUNT_PERCENT,
@@ -29,12 +30,12 @@ export async function PatreonDiscountBanner() {
 						</strong>{" "}
 						sur toute la boutique. Connecte-toi à ton compte pour appliquer la
 						remise automatiquement au checkout — ou rejoins le Patreon depuis{" "}
-						<a
+						<Link
 							href="/nous-soutenir"
 							className="font-semibold underline decoration-[#d4af37] decoration-2 underline-offset-4 hover:text-[#d4af37]"
 						>
 							/nous-soutenir
-						</a>
+						</Link>
 						.
 					</span>
 				</p>
@@ -54,12 +55,12 @@ export async function PatreonDiscountBanner() {
 					<span>
 						Tu n'as pas (encore) lié ton Patreon, ou ton tier n'est plus actif.
 						Active ton soutien sur{" "}
-						<a
+						<Link
 							href="/nous-soutenir"
 							className="font-semibold underline decoration-[#d4af37] decoration-2 underline-offset-4 hover:text-[#d4af37]"
 						>
 							/nous-soutenir
-						</a>{" "}
+						</Link>{" "}
 						pour débloquer{" "}
 						<strong className="font-extrabold text-[#d4af37]">
 							{PATRON_DISCOUNT_PERCENT}% sur la boutique

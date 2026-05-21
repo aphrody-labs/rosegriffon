@@ -13,15 +13,7 @@ import { PopularArticles } from "@/components/news/PopularArticles";
 import { TagCloud } from "@/components/news/TagCloud";
 import { TrendingArticles } from "@/components/news/TrendingArticles";
 import { useLanguage } from "@/components/providers/language-provider";
-import { Button } from "@rosegriffon/ui";
-import {
-	Empty,
-	EmptyContent,
-	EmptyDescription,
-	EmptyHeader,
-	EmptyMedia,
-	EmptyTitle,
-} from "@rosegriffon/ui";
+import { Button, Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@rosegriffon/ui";
 import { SearchBar } from "@/components/ui/search-bar";
 import { WikiPagination } from "@/components/wiki/WikiPagination";
 import { ExternalLink, Newspaper, Twitter, X } from "@/lib/icons-config";
