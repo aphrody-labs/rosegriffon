@@ -16,8 +16,14 @@ import type { Database } from "@rosegriffon/db";
 
 const getDatabaseURL = () => {
 	let url = process.env.DATABASE_URL;
-	if (!url || url.startsWith("eyJ2Ijo") || url === "undefined" || url === "null") {
-		url = "***REDACTED-DATABASE-URL***";
+	if (
+		!url ||
+		url.startsWith("eyJ2Ijo") ||
+		url === "undefined" ||
+		url === "null"
+	) {
+		url =
+			"***REDACTED-DATABASE-URL***";
 	}
 	// Si l'URL pointe vers l'hôte direct de Supabase (IPv6-only), on redirige dynamiquement vers le pooler IPv4
 	if (url.includes("db.isbkaeltubqittywibeh.supabase.co")) {
@@ -37,8 +43,10 @@ const pool = new Pool({
 let _supabaseAdmin: ReturnType<typeof createSupabaseAdmin<Database>> | null =
 	null;
 function getSupabaseAdmin() {
-	if (_supabaseAdmin) {return _supabaseAdmin;}
- 
+	if (_supabaseAdmin) {
+		return _supabaseAdmin;
+	}
+
 	const url =
 		process.env.NEXT_PUBLIC_SUPABASE_URL &&
 		process.env.NEXT_PUBLIC_SUPABASE_URL !== "undefined" &&
@@ -46,29 +54,31 @@ function getSupabaseAdmin() {
 		!process.env.NEXT_PUBLIC_SUPABASE_URL.startsWith("eyJ2Ijo")
 			? process.env.NEXT_PUBLIC_SUPABASE_URL
 			: "https://isbkaeltubqittywibeh.supabase.co";
- 
+
 	const key =
 		process.env.SUPABASE_SERVICE_ROLE_KEY &&
 		!process.env.SUPABASE_SERVICE_ROLE_KEY.startsWith("{") &&
 		!process.env.SUPABASE_SERVICE_ROLE_KEY.startsWith("eyJ2Ijo")
 			? process.env.SUPABASE_SERVICE_ROLE_KEY
 			: "***REDACTED-SERVICE-ROLE***";
- 
+
 	_supabaseAdmin = createSupabaseAdmin<Database>(url, key);
 	return _supabaseAdmin;
 }
- 
+
 /**
  * Détecte si un account Patreon a été autorisé avec les scopes créateur.
  */
 function detectCreatorScopes(scope: string | null | undefined): boolean {
-	if (!scope) {return false;}
+	if (!scope) {
+		return false;
+	}
 	const parts = scope.split(/[\s,]+/).filter(Boolean);
 	return parts.some(
 		(s) => s === "campaigns.members" || s === "w:campaigns.webhook",
 	);
 }
- 
+
 const getBetterAuthURL = () => {
 	const url = process.env.BETTER_AUTH_URL;
 	if (
@@ -123,11 +133,7 @@ export const auth = betterAuth({
 		},
 	},
 
-	rateLimit: {
-		enabled: true,
-		max: 100,
-		window: 10,
-	},
+	// rateLimit hérité de commonAuthOptions (enabled, window 10s, max 100).
 
 	account: {
 		...commonAuthOptions.account,
@@ -188,8 +194,7 @@ export const auth = betterAuth({
 						.select("id, name, image, email")
 						.eq("id", session.userId)
 						.maybeSingle();
-					if (user)
-						await ensureUserProfile(user, getSupabaseAdmin());
+					if (user) await ensureUserProfile(user, getSupabaseAdmin());
 				},
 			},
 		},
@@ -263,7 +268,9 @@ async function syncPatreonAccount(
 	},
 	opts: { isCreator?: boolean } = {},
 ) {
-	if (!account.accessToken || !account.refreshToken) {return;}
+	if (!account.accessToken || !account.refreshToken) {
+		return;
+	}
 	const isCreator = opts.isCreator === true;
 	const fallbackScopes = (isCreator ? SCOPES_CREATOR : SCOPES_PATRON).join(" ");
 	try {

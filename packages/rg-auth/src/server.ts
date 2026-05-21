@@ -9,10 +9,23 @@ import type { Database } from "@rosegriffon/db";
  */
 
 /**
+ * Surface minimale d'une instance Better Auth requise par les guards :
+ * seul `api.getSession` est consommé ici. Évite le couplage au type complet
+ * (qui diffère entre apps selon les plugins activés).
+ */
+interface AuthInstanceLike {
+	api: {
+		getSession: (args: { headers: Headers }) => Promise<{
+			user?: { id: string; email?: string | null } | null;
+		} | null>;
+	};
+}
+
+/**
  * Assure l'authentification admin — redirige si non autorisé.
  */
 export async function createAdminGuard(
-	authInstance: any,
+	authInstance: AuthInstanceLike,
 	supabase: SupabaseClient<Database>,
 	options: { redirectTo?: string; fallbackRole?: string } = {},
 ) {
@@ -41,7 +54,7 @@ export async function createAdminGuard(
  * Assure l'authentification avec un rôle spécifique.
  */
 export async function createRoleGuard(
-	authInstance: any,
+	authInstance: AuthInstanceLike,
 	supabase: SupabaseClient<Database>,
 	allowedRoles: string[],
 	options: { redirectTo?: string } = {},
