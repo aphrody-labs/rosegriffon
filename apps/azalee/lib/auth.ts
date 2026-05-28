@@ -171,6 +171,10 @@ function createAuth() {
 			discord: {
 				clientId: process.env.DISCORD_CLIENT_ID!,
 				clientSecret: process.env.DISCORD_CLIENT_SECRET!,
+				// Better Auth force `prompt=none` par défaut sur Discord → tout user non
+				// déjà autorisé est rejeté (consent_required) avant le callback. `consent`
+				// affiche l'écran d'autorisation et marche pour tout le monde.
+				prompt: "consent",
 			},
 			google: {
 				clientId: process.env.GOOGLE_CLIENT_ID!,

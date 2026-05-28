@@ -107,6 +107,14 @@ export const auth = betterAuth({
 			clientId: process.env.DISCORD_CLIENT_ID!,
 			clientSecret: process.env.DISCORD_CLIENT_SECRET!,
 			overrideUserInfoOnSignIn: true,
+			// Better Auth force `prompt=none` par défaut sur Discord
+			// (cf. @better-auth/core discord.mjs : `prompt=${options.prompt || "none"}`).
+			// `none` = "aucun écran de consentement, échoue si une interaction est
+			// requise" → tout user non déjà autorisé (nouveau / re-auth après scope
+			// change) est rejeté par Discord (error=consent_required) avant même le
+			// callback = login impossible. `consent` affiche l'écran d'autorisation et
+			// fonctionne pour tout le monde.
+			prompt: "consent",
 		},
 		twitch: {
 			clientId:
@@ -189,12 +197,20 @@ export const auth = betterAuth({
 		session: {
 			create: {
 				after: async (session) => {
-					const { data: user } = await getSupabaseAdmin()
-						.from("user")
-						.select("id, name, image, email")
-						.eq("id", session.userId)
-						.maybeSingle();
-					if (user) await ensureUserProfile(user, getSupabaseAdmin());
+					// Isolé en try/catch : une exception ici (réseau Supabase, clé
+					// service-role expirée…) abortait le callback OAuth → pas de
+					// Set-Cookie → session non persistée. Le sync profil est best-effort,
+					// il ne doit jamais casser la connexion.
+					try {
+						const { data: user } = await getSupabaseAdmin()
+							.from("user")
+							.select("id, name, image, email")
+							.eq("id", session.userId)
+							.maybeSingle();
+						if (user) await ensureUserProfile(user, getSupabaseAdmin());
+					} catch (e) {
+						console.error("[auth] session.create.after profile sync failed", e);
+					}
 				},
 			},
 		},
