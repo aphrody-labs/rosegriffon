@@ -108,6 +108,16 @@ const nextConfig = {
 
 	async redirects() {
 		return [
+			// www → apex : l'auth-client force baseURL=https://rosegriffon.fr (apex) pour
+			// que le cookie OAuth `state` et le callback soient sur le même domaine. Sur
+			// www.rosegriffon.fr, l'appel /api/auth part donc en cross-origin → bloqué
+			// par CORS (« Failed to fetch » au login). On force tout le monde sur l'apex.
+			{
+				destination: "https://rosegriffon.fr/:path*",
+				has: [{ type: "host", value: "www.rosegriffon.fr" }],
+				permanent: true,
+				source: "/:path*",
+			},
 			{
 				destination: "https://x.com/Azalee_IE",
 				permanent: true,
