@@ -183,7 +183,7 @@ function HeroTypeSelector({
           <span
             key={hf.type}
             className={cn(
-              "px-3 py-1 rounded-full text-[11px] font-bold bg-linear-to-r text-white shadow-sm",
+              "px-4 py-2 sm:px-3 sm:py-1 rounded-full text-xs sm:text-[11px] font-bold bg-linear-to-r text-white shadow-sm flex items-center justify-center min-h-9 sm:min-h-0",
               HERO_GRADIENTS[hf.type],
             )}
           >
@@ -195,7 +195,7 @@ function HeroTypeSelector({
             href={`/chara/${hf.slug}`}
             prefetch
             className={cn(
-              "px-3 py-1 rounded-full text-[11px] font-bold transition-all",
+              "px-4 py-2 sm:px-3 sm:py-1 rounded-full text-xs sm:text-[11px] font-bold transition-all flex items-center justify-center min-h-9 sm:min-h-0",
               HERO_HOVER[hf.type],
             )}
           >
@@ -522,8 +522,9 @@ export function CharacterSheet({
               {prevCharacterHref && (
                 <NextLink
                   href={prevCharacterHref}
-                  className="flex items-center justify-center size-8 rounded-full bg-white/10 hover:bg-white/20 transition-colors text-white/80"
+                  className="flex items-center justify-center size-11 sm:size-8 rounded-full bg-white/10 hover:bg-white/20 transition-colors text-white/80"
                   title="Précédent"
+                  aria-label="Personnage précédent"
                 >
                   <ChevronLeft size={18} aria-hidden="true" />
                 </NextLink>
@@ -532,8 +533,9 @@ export function CharacterSheet({
               {nextCharacterHref && (
                 <NextLink
                   href={nextCharacterHref}
-                  className="flex items-center justify-center size-8 rounded-full bg-white/10 hover:bg-white/20 transition-colors text-white/80"
+                  className="flex items-center justify-center size-11 sm:size-8 rounded-full bg-white/10 hover:bg-white/20 transition-colors text-white/80"
                   title="Suivant"
+                  aria-label="Personnage suivant"
                 >
                   <ChevronRight size={18} aria-hidden="true" />
                 </NextLink>
@@ -542,7 +544,7 @@ export function CharacterSheet({
               {slug && (
                 <NextLink
                   href={`/tools/compare?char1=${slug}`}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/10 hover:bg-white/20 transition-colors text-white/80 hover:text-white text-xs font-bold ml-auto"
+                  className="inline-flex items-center gap-1.5 px-4 py-2 sm:px-3 sm:py-1.5 rounded-full bg-white/10 hover:bg-white/20 transition-colors text-white/80 hover:text-white text-xs font-bold ml-auto min-h-11 sm:min-h-0"
                   title="Comparer avec un autre personnage"
                 >
                   <ArrowLeftRight size={16} aria-hidden="true" />
@@ -569,7 +571,7 @@ export function CharacterSheet({
                 <button
                   onClick={() => setUniformSide("front")}
                   className={cn(
-                    "px-1.5 py-0.5 sm:px-2 rounded-full text-[8px] sm:text-[10px] font-bold transition-all",
+                    "px-3 py-1 sm:px-2 sm:py-0.5 rounded-full text-[10px] font-bold transition-all min-h-8 sm:min-h-0",
                     uniformSide === "front"
                       ? "bg-white text-slate-900"
                       : "text-white/60 hover:text-white/90",
@@ -580,7 +582,7 @@ export function CharacterSheet({
                 <button
                   onClick={() => setUniformSide("back")}
                   className={cn(
-                    "px-1.5 py-0.5 sm:px-2 rounded-full text-[8px] sm:text-[10px] font-bold transition-all",
+                    "px-3 py-1 sm:px-2 sm:py-0.5 rounded-full text-[10px] font-bold transition-all min-h-8 sm:min-h-0",
                     uniformSide === "back"
                       ? "bg-white text-slate-900"
                       : "text-white/60 hover:text-white/90",
@@ -663,12 +665,12 @@ export function CharacterSheet({
                     <NextLink
                       href={`/chara/${normalFormSlug}`}
                       prefetch
-                      className="px-3 py-1 rounded-full text-[11px] font-bold text-white/60 hover:text-white/90 hover:bg-white/10 transition-all"
+                      className="px-4 py-2 sm:px-3 sm:py-1 rounded-full text-xs sm:text-[11px] font-bold text-white/60 hover:text-white/90 hover:bg-white/10 transition-all flex items-center justify-center min-h-9 sm:min-h-0"
                     >
                       Normal
                     </NextLink>
                   ) : (
-                    <span className="px-3 py-1 rounded-full text-[11px] font-bold bg-surface-container-highest text-on-surface shadow-sm">
+                    <span className="px-4 py-2 sm:px-3 sm:py-1 rounded-full text-xs sm:text-[11px] font-bold bg-surface-container-highest text-on-surface shadow-sm flex items-center justify-center min-h-9 sm:min-h-0">
                       Normal
                     </span>
                   )}
@@ -676,12 +678,12 @@ export function CharacterSheet({
                     <NextLink
                       href={`/chara/${basaraFormSlug}`}
                       prefetch
-                      className="px-3 py-1 rounded-full text-[11px] font-bold text-purple-300/70 hover:text-purple-200 hover:bg-purple-500/20 transition-all"
+                      className="px-4 py-2 sm:px-3 sm:py-1 rounded-full text-xs sm:text-[11px] font-bold text-purple-300/70 hover:text-purple-200 hover:bg-purple-500/20 transition-all flex items-center justify-center min-h-9 sm:min-h-0"
                     >
                       BASARA
                     </NextLink>
                   ) : (
-                    <span className="px-3 py-1 rounded-full text-[11px] font-bold bg-linear-to-r from-[#4facfe] via-[#7367f0] to-[#9733ee] text-white shadow-sm shadow-purple-500/30">
+                    <span className="px-4 py-2 sm:px-3 sm:py-1 rounded-full text-xs sm:text-[11px] font-bold bg-linear-to-r from-[#4facfe] via-[#7367f0] to-[#9733ee] text-white shadow-sm shadow-purple-500/30 flex items-center justify-center min-h-9 sm:min-h-0">
                       BASARA
                     </span>
                   )}
@@ -703,7 +705,7 @@ export function CharacterSheet({
                 <button
                   onClick={() => setActiveMoveset("default")}
                   className={cn(
-                    "px-4 py-1.5 rounded-full text-xs font-bold transition-all",
+                    "px-4 py-2 sm:px-4 sm:py-1.5 rounded-full text-sm sm:text-xs font-bold transition-all min-h-10 sm:min-h-0",
                     activeMoveset === "default"
                       ? "bg-primary text-on-primary shadow-sm"
                       : "text-on-surface-variant hover:bg-surface-container-highest",
@@ -714,7 +716,7 @@ export function CharacterSheet({
                 <button
                   onClick={() => setActiveMoveset("alt")}
                   className={cn(
-                    "px-4 py-1.5 rounded-full text-xs font-bold transition-all",
+                    "px-4 py-2 sm:px-4 sm:py-1.5 rounded-full text-sm sm:text-xs font-bold transition-all min-h-10 sm:min-h-0",
                     activeMoveset === "alt"
                       ? "bg-primary text-on-primary shadow-sm"
                       : "text-on-surface-variant hover:bg-surface-container-highest",

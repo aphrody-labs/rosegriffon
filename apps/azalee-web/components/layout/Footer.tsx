@@ -179,10 +179,19 @@ export function Footer() {
           </div>
         </div>
 
-        <div className="mt-6 pt-6 border-t border-outline-variant/10 text-center">
-          <p className="text-xs text-on-surface-variant">
+        <div className="mt-6 pt-6 border-t border-outline-variant/10 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-on-surface-variant">
+          <p>
             Rose Griffon © 2026 - Association loi 1901. Tous droits réservés.
           </p>
+          <a
+            href="https://deerflow.tech"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="opacity-40 hover:opacity-100 transition-opacity hover:text-primary inline-flex items-center gap-1"
+            title="Créé par Deerflow"
+          >
+            <span>✦ Deerflow</span>
+          </a>
         </div>
       </div>
     </footer>

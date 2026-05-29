@@ -59,13 +59,14 @@ export function FilterChips({
 						key={option.value}
 						onClick={() => toggleFilter(option.value)}
 						title={option.label}
+						aria-pressed={isSelected}
 						className={cn(
 							// MD3 Filter Chip styling
 							"inline-flex items-center gap-1.5 transition-all duration-200 ease-[cubic-bezier(0.2,0,0,1)]",
 							"focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-primary/50",
 							isImageOnly
-								? "p-0 bg-transparent border-none hover:scale-110 active:scale-95"
-								: "px-4 py-2 rounded-full text-sm font-medium border",
+								? "p-1 bg-transparent border-none hover:scale-110 active:scale-95 min-h-11 min-w-11 justify-center"
+								: "px-4 py-2 rounded-full text-sm font-medium border min-h-11 sm:min-h-0",
 							!isImageOnly &&
 								(isSelected
 									? "bg-secondary-container text-on-secondary-container border-transparent"

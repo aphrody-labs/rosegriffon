@@ -197,7 +197,7 @@ function RecursiveNavItem({
               tooltip={t(item.label)}
               className={cn(buttonClass, "flex-1 min-w-0 !pr-0")}
             >
-              <Link href={item.path}>
+              <Link href={item.path} aria-current={isActive ? "page" : undefined}>
                 <div className={iconClass}>
                   <NavIcon
                     item={item}
@@ -251,7 +251,7 @@ function RecursiveNavItem({
         tooltip={t(item.label)}
         className={buttonClass}
       >
-        <Link href={item.path}>{itemContent}</Link>
+        <Link href={item.path} aria-current={isActive ? "page" : undefined}>{itemContent}</Link>
       </SidebarMenuButton>
     </SidebarMenuItem>
   );

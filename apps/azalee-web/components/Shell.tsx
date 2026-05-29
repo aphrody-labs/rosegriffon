@@ -50,7 +50,7 @@ function MobileAvatar({
 
 	return (
 		<button
-			className="size-10 rounded-full bg-primary/10 flex items-center justify-center overflow-hidden shrink-0"
+			className="size-12 rounded-full bg-primary/10 flex items-center justify-center overflow-hidden shrink-0 active:scale-95 transition-transform"
 			onClick={onClick}
 			aria-label="Mon compte"
 		>
@@ -58,13 +58,13 @@ function MobileAvatar({
 				<Image
 					src={profile!.avatar_url!}
 					alt=""
-					width={40}
-					height={40}
+					width={48}
+					height={48}
 					className="w-full h-full object-cover"
 					onError={() => setImgError(true)}
 				/>
 			) : (
-				<User size={18} className="text-primary" aria-hidden="true" />
+				<User size={24} className="text-primary" aria-hidden="true" />
 			)}
 		</button>
 	);
@@ -75,7 +75,7 @@ function MobileAvatar({
  */
 function MobileHeader({ isHome }: { isHome: boolean }) {
 	const router = useRouter();
-	const { toggleSidebar } = useSidebar();
+	const { toggleSidebar, openMobile } = useSidebar();
 	const { t } = useLanguage();
 	const { user, profile, isAdmin } = useAuth();
 	const [isScrolled, setIsScrolled] = useState(false);
@@ -149,6 +149,7 @@ function MobileHeader({ isHome }: { isHome: boolean }) {
 				onClick={toggleSidebar}
 				className="size-12 flex items-center justify-center text-on-surface hover:bg-on-surface/[0.08] rounded-full transition-colors -ml-1"
 				aria-label="Ouvrir le menu"
+				aria-expanded={openMobile}
 			>
 				<Menu size={24} aria-hidden="true" />
 			</button>
@@ -177,14 +178,14 @@ function MobileHeader({ isHome }: { isHome: boolean }) {
 				{isAdmin && (
 					<Link
 						href="/dashboard"
-						className="size-10 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-on-surface/[0.08] transition-colors"
+						className="size-12 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-on-surface/[0.08] active:bg-on-surface/[0.12] transition-colors"
 						aria-label="Administration"
 					>
-						<LayoutDashboard size={20} aria-hidden="true" />
+						<LayoutDashboard size={24} aria-hidden="true" />
 					</Link>
 				)}
-				<NotificationBell />
-				<ThemeToggle />
+				<NotificationBell className="size-12" />
+				<ThemeToggle className="size-12" />
 
 				<div className="ml-1">
 					{user ? (
@@ -195,10 +196,10 @@ function MobileHeader({ isHome }: { isHome: boolean }) {
 					) : (
 						<LoginDialog>
 							<button
-								className="size-10 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-on-surface/[0.08] transition-colors"
+								className="size-12 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-on-surface/[0.08] active:bg-on-surface/[0.12] transition-colors"
 								aria-label="Se connecter"
 							>
-								<CircleUser size={20} aria-hidden="true" />
+								<CircleUser size={24} aria-hidden="true" />
 							</button>
 						</LoginDialog>
 					)}
@@ -225,11 +226,11 @@ function ThemeToggle({ className }: { className?: string }) {
 		return (
 			<div
 				className={cn(
-					"size-12 rounded-full flex items-center justify-center text-on-surface-variant/20",
+					"size-12 md:size-10 rounded-full flex items-center justify-center text-on-surface-variant/20",
 					className,
 				)}
 			>
-				<Moon size={24} aria-hidden="true" />
+				<Moon className="size-6 md:size-5" aria-hidden="true" />
 			</div>
 		);
 	}
@@ -242,7 +243,7 @@ function ThemeToggle({ className }: { className?: string }) {
 		<button
 			onClick={() => setTheme(isDark ? "light" : "dark")}
 			className={cn(
-				"relative size-12 rounded-full flex items-center justify-center text-on-surface-variant",
+				"relative size-12 md:size-10 rounded-full flex items-center justify-center text-on-surface-variant",
 				"hover:bg-on-surface/[0.08] active:bg-on-surface/[0.12] transition-all duration-300",
 				className,
 			)}
@@ -250,9 +251,9 @@ function ThemeToggle({ className }: { className?: string }) {
 			title={isDark ? t("theme.light") : t("theme.dark")}
 		>
 			{isDark ? (
-				<Sun size={24} aria-hidden="true" />
+				<Sun className="size-6 md:size-5" aria-hidden="true" />
 			) : (
-				<Moon size={24} aria-hidden="true" />
+				<Moon className="size-6 md:size-5" aria-hidden="true" />
 			)}
 		</button>
 	);
@@ -310,7 +311,7 @@ function DesktopTopBar() {
 	const router = useRouter();
 	const { user, profile, isAdmin } = useAuth();
 	const { t } = useLanguage();
-	const { toggleSidebar } = useSidebar();
+	const { toggleSidebar, open } = useSidebar();
 	const isHome = pathname === "/";
 
 	const getTitle = () => {
@@ -363,6 +364,7 @@ function DesktopTopBar() {
 					onClick={toggleSidebar}
 					className="size-10 rounded-full flex items-center justify-center text-on-surface hover:bg-on-surface/[0.08] active:bg-on-surface/[0.12] transition-colors"
 					aria-label="Ouvrir le menu"
+					aria-expanded={open}
 				>
 					<Menu size={24} aria-hidden="true" />
 				</button>

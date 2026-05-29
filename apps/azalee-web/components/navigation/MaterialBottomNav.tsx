@@ -24,6 +24,7 @@ function NavItem({
   return (
     <Link
       href={path}
+      aria-current={isActive ? "page" : undefined}
       onClick={(e) => {
         if (isActive) {
           e.preventDefault();
