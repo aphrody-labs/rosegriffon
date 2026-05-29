@@ -1,4 +1,4 @@
-import { Database } from "bun:sqlite";
+import type { Database } from "bun:sqlite";
 import { readdirSync } from "node:fs";
 import path from "node:path";
 
@@ -39,7 +39,12 @@ function getSqliteDb(): Database {
 	if (!dbPath) {
 		throw new Error("No SQLite database backup found");
 	}
-	_sqliteDb = new Database(dbPath, { readonly: true });
+	if (typeof Bun === "undefined") {
+		throw new Error("[SQLite Client] bun:sqlite is only available when running under Bun");
+	}
+	// eslint-disable-next-line @typescript-eslint/no-require-imports -- dynamic require needed for bun:sqlite lazy load inside Bun guard
+	const { Database: DBConstructor } = require("bun:sqlite");
+	_sqliteDb = new DBConstructor(dbPath, { readonly: true }) as Database;
 	_sqliteDb.exec("PRAGMA journal_mode = WAL");
 	_sqliteDb.exec("PRAGMA temp_store = MEMORY");
 	return _sqliteDb;
