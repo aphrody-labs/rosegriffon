@@ -44,8 +44,8 @@ class Logger {
 				console.error(`${emoji[level]} ${prefix} ${message}`, data || "");
 			} else if (level === "warn") {
 				console.warn(`${emoji[level]} ${prefix} ${message}`, data || "");
-			} else if (level === "info") {
-			} else if (level === "debug") {
+			} else {
+				console.info(`${emoji[level]} ${prefix} ${message}`, data || "");
 			}
 		} else {
 			// En production, logger en JSON pour faciliter l'analyse (via stderr)
