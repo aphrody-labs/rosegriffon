@@ -1,6 +1,6 @@
 @import "tailwindcss";
 @import "tw-animate-css";
-@import "@rosegriffon/ui/styles.css";
+@import "@rose-griffon/ui/styles.css";
 
 /* Font Faces from Supabase Assets */
 @font-face {
