@@ -15,7 +15,7 @@ out/
 dist/
 build/
 *.tsbuildinfo
-bin/azalee
+bin/azalee*
 
 
 # Test coverage

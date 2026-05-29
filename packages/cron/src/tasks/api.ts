@@ -135,10 +135,16 @@ export async function warmCaches(): Promise<{ success: boolean }> {
 	return { success: true };
 }
 
-export async function triggerGithubPublishWorkflow(): Promise<{ success: boolean; error?: string }> {
+export async function triggerGithubPublishWorkflow(): Promise<{
+	success: boolean;
+	error?: string;
+}> {
 	const token = process.env.GITHUB_TOKEN || process.env.NODE_AUTH_TOKEN;
 	if (!token) {
-		return { success: false, error: "La variable d'environnement GITHUB_TOKEN ou NODE_AUTH_TOKEN est manquante." };
+		return {
+			success: false,
+			error: "La variable d'environnement GITHUB_TOKEN ou NODE_AUTH_TOKEN est manquante.",
+		};
 	}
 
 	const owner = "rose-griffon";
@@ -175,4 +181,3 @@ export async function triggerGithubPublishWorkflow(): Promise<{ success: boolean
 		return { success: false, error: err.message || String(err) };
 	}
 }
-

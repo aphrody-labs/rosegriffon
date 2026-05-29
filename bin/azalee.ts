@@ -148,19 +148,44 @@ program
 			(a, b) => b[0].length - a[0].length
 		);
 
-		const replacements = isJa ? jpReplacements : enReplacements;
+		const replacements = (isJa ? jpReplacements : enReplacements).map(([term, frVal]) => ({
+			term,
+			lowerTerm: term.toLowerCase(),
+			frVal,
+		}));
 
 		let processedText = text;
 		const placeholderMap = new Map<string, string>();
 		let placeholderIndex = 0;
 
-		for (const [term, frVal] of replacements) {
+		const regexCache = new Map<string, RegExp>();
+		const globalRegexCache = new Map<string, RegExp>();
+		const getRegex = (t: string) => {
+			let r = regexCache.get(t);
+			if (!r) {
+				r = new RegExp("\\b" + escapeRegExp(t) + "\\b", "i");
+				regexCache.set(t, r);
+			}
+			return r;
+		};
+		const getGlobalRegex = (t: string) => {
+			let r = globalRegexCache.get(t);
+			if (!r) {
+				r = new RegExp("\\b" + escapeRegExp(t) + "\\b", "gi");
+				globalRegexCache.set(t, r);
+			}
+			return r;
+		};
+
+		for (const { term, lowerTerm, frVal } of replacements) {
 			let matches = false;
 			if (isJa) {
 				matches = processedText.includes(term);
 			} else {
-				const regex = new RegExp("\\b" + escapeRegExp(term) + "\\b", "i");
-				matches = regex.test(processedText);
+				if (processedText.toLowerCase().includes(lowerTerm)) {
+					const regex = getRegex(term);
+					matches = regex.test(processedText);
+				}
 			}
 
 			if (matches) {
@@ -170,7 +195,7 @@ program
 				if (isJa) {
 					processedText = processedText.replaceAll(term, placeholder);
 				} else {
-					const regex = new RegExp("\\b" + escapeRegExp(term) + "\\b", "gi");
+					const regex = getGlobalRegex(term);
 					processedText = processedText.replace(regex, placeholder);
 				}
 				placeholderIndex++;

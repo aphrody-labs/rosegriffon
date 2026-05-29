@@ -64,7 +64,7 @@
 		"format": "oxfmt .",
 		"format:check": "oxfmt --check .",
 		"azalee": "bun bin/azalee.ts",
-		"azalee:compile": "bun build bin/azalee.ts --compile --minify --outfile bin/azalee",
+		"azalee:compile": "bun build bin/azalee.ts --compile --minify --sourcemap --bytecode --outfile bin/azalee",
 		"azalee:dev": "bun --filter @rose-griffon/azalee dev",
 		"website:dev": "bun --filter @rose-griffon/website dev",
 		"bot:dev": "bun --filter @rose-griffon/bot dev",

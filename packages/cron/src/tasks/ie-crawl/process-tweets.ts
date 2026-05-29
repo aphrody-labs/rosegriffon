@@ -42,7 +42,7 @@ async function translateWithGlossary(
 	text: string,
 	from: string,
 	to: string,
-	replacements: [string, string][]
+	replacements: { term: string; lowerTerm: string; frVal: string }[]
 ): Promise<string> {
 	if (!text.trim()) return "";
 	if (replacements.length === 0) {
@@ -54,13 +54,34 @@ async function translateWithGlossary(
 	const placeholderMap = new Map<string, string>();
 	let placeholderIndex = 0;
 
-	for (const [term, frVal] of replacements) {
+	const regexCache = new Map<string, RegExp>();
+	const globalRegexCache = new Map<string, RegExp>();
+	const getRegex = (t: string) => {
+		let r = regexCache.get(t);
+		if (!r) {
+			r = new RegExp("\\b" + escapeRegExp(t) + "\\b", "i");
+			regexCache.set(t, r);
+		}
+		return r;
+	};
+	const getGlobalRegex = (t: string) => {
+		let r = globalRegexCache.get(t);
+		if (!r) {
+			r = new RegExp("\\b" + escapeRegExp(t) + "\\b", "gi");
+			globalRegexCache.set(t, r);
+		}
+		return r;
+	};
+
+	for (const { term, lowerTerm, frVal } of replacements) {
 		let matches = false;
 		if (from === "ja") {
 			matches = processedText.includes(term);
 		} else {
-			const regex = new RegExp("\\b" + escapeRegExp(term) + "\\b", "i");
-			matches = regex.test(processedText);
+			if (processedText.toLowerCase().includes(lowerTerm)) {
+				const regex = getRegex(term);
+				matches = regex.test(processedText);
+			}
 		}
 
 		if (matches) {
@@ -70,7 +91,7 @@ async function translateWithGlossary(
 			if (from === "ja") {
 				processedText = processedText.replaceAll(term, placeholder);
 			} else {
-				const regex = new RegExp("\\b" + escapeRegExp(term) + "\\b", "gi");
+				const regex = getGlobalRegex(term);
 				processedText = processedText.replace(regex, placeholder);
 			}
 			placeholderIndex++;
@@ -177,8 +198,12 @@ export async function processTweets() {
 	}
 
 	// Sort replacements by length descending to replace longer phrases first
-	const jpReplacements = Array.from(jpToFrMap.entries()).sort((a, b) => b[0].length - a[0].length);
-	const enReplacements = Array.from(enToFrMap.entries()).sort((a, b) => b[0].length - a[0].length);
+	const jpReplacements = Array.from(jpToFrMap.entries())
+		.sort((a, b) => b[0].length - a[0].length)
+		.map(([term, frVal]) => ({ term, lowerTerm: term.toLowerCase(), frVal }));
+	const enReplacements = Array.from(enToFrMap.entries())
+		.sort((a, b) => b[0].length - a[0].length)
+		.map(([term, frVal]) => ({ term, lowerTerm: term.toLowerCase(), frVal }));
 
 	let updatedCount = 0;
 

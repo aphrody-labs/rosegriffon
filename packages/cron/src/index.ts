@@ -357,7 +357,17 @@ const server = Bun.serve({
 		// 4. Liste des tâches
 		if (url.pathname === "/tasks" && req.method === "GET") {
 			return Response.json({
-				tasks: ["db", "cdn", "crawl", "rag", "publish", "github-publish", "patreon", "reminders", "warm"],
+				tasks: [
+					"db",
+					"cdn",
+					"crawl",
+					"rag",
+					"publish",
+					"github-publish",
+					"patreon",
+					"reminders",
+					"warm",
+				],
 				schedules: {
 					publish: "*/15 * * * *",
 					warm: "*/30 * * * *",

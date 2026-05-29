@@ -13,18 +13,23 @@ function extractNouns(json: any) {
 		if (!node) return;
 		if (node.name && node.name.startsWith("NOUN_INFO_") && node.name !== "NOUN_INFO_BEGIN_0") {
 			const vars = node.variables || [];
-			const ints = vars.filter((v: any) => v.type === "Int");
-			const strings = vars.filter((v: any) => v.type === "String");
+			let hash: any = null;
+			let subId: any = null;
+			let textVal = "";
+			let intCount = 0;
 
-			if (ints.length >= 2) {
-				const hash = ints[0].value;
-				const subId = ints[1].value;
-				const key = `${hash}_${subId}`;
-
-				const textVal = strings.find((v: any) => v.value && v.value.trim())?.value || "";
-				if (textVal) {
-					map.set(key, textVal.trim());
+			for (const v of vars) {
+				if (v.type === "Int") {
+					if (intCount === 0) hash = v.value;
+					else if (intCount === 1) subId = v.value;
+					intCount++;
+				} else if (v.type === "String" && v.value && v.value.trim()) {
+					if (!textVal) textVal = v.value.trim();
 				}
+			}
+
+			if (intCount >= 2 && textVal) {
+				map.set(`${hash}_${subId}`, textVal);
 			}
 		}
 		if (Array.isArray(node.children)) {
@@ -63,11 +68,12 @@ export async function main() {
 		if (!cleanJa && !en && !fr) return;
 
 		// De-duplicate on JA name to keep glossary lookup deterministic
-		if (cleanJa && seenJa.has(cleanJa.toLowerCase())) {
-			return;
-		}
 		if (cleanJa) {
-			seenJa.add(cleanJa.toLowerCase());
+			const lowerJa = cleanJa.toLowerCase();
+			if (seenJa.has(lowerJa)) {
+				return;
+			}
+			seenJa.add(lowerJa);
 		}
 
 		list.push({
@@ -141,15 +147,17 @@ export async function main() {
 		const enFile = Bun.file(enPath);
 		const frFile = Bun.file(frPath);
 
-		if ((await jaFile.exists()) && (await enFile.exists()) && (await frFile.exists())) {
-			console.log(`- Parsing binary ${file.name}...`);
-			const ja = await jaFile.json();
-			const en = await enFile.json();
-			const fr = await frFile.json();
+		const [jaExists, enExists, frExists] = await Promise.all([
+			jaFile.exists(),
+			enFile.exists(),
+			frFile.exists(),
+		]);
 
-			const jaMap = extractNouns(ja);
-			const enMap = extractNouns(en);
-			const frMap = extractNouns(fr);
+		if (jaExists && enExists && frExists) {
+			console.log(`- Parsing binary ${file.name}...`);
+			const [ja, en, fr] = await Promise.all([jaFile.json(), enFile.json(), frFile.json()]);
+
+			const [jaMap, enMap, frMap] = [extractNouns(ja), extractNouns(en), extractNouns(fr)];
 
 			for (const [key, jaVal] of jaMap.entries()) {
 				const enVal = enMap.get(key) || "";
@@ -169,9 +177,11 @@ export async function main() {
 	const jaLocaleFile = Bun.file(join(localesDir, "ja.json"));
 
 	if (await frLocaleFile.exists()) {
-		const frLocale = await frLocaleFile.json();
-		const enLocale = await enLocaleFile.json();
-		const jaLocale = await jaLocaleFile.json();
+		const [frLocale, enLocale, jaLocale] = await Promise.all([
+			frLocaleFile.json(),
+			enLocaleFile.json(),
+			jaLocaleFile.json(),
+		]);
 
 		for (const [key, frVal] of Object.entries(frLocale)) {
 			const enVal = enLocale[key] || "";
