@@ -147,6 +147,7 @@ export default async function NewsFeedPage({
 							count: "exact",
 						}
 					)
+					.in("author_username", ["AkihiroHino", "LEVEL5_times", "inazuma_project"])
 					.order("created_at", { ascending: false })
 					.range(articleRangeStart, articleRangeEnd)) as any;
 				if (error) {
