@@ -309,6 +309,7 @@
       "version": "0.1.0",
       "dependencies": {
         "@aphrody-code/bxc": "^0.5.2",
+        "@rose-griffon/auth": "workspace:*",
         "@rose-griffon/db": "workspace:*",
         "@rose-griffon/inagle": "workspace:*",
         "@rose-griffon/types": "workspace:*",
