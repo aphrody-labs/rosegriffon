@@ -43,7 +43,7 @@ function RgButton({ link, buttonText }: { link: string; buttonText: string }) {
   return (
     <Button
       asChild
-      className="bg-white text-[#8B5023] hover:bg-white/90 font-black rounded-xl shadow-[4px_4px_0px_0px_#6b3d1b] hover:translate-y-[2px] hover:shadow-[2px_2px_0px_0px_#6b3d1b] transition-all duration-200 border-2 border-white"
+      className="bg-white text-[#8B5023] hover:bg-white/90 font-black rounded-xl shadow-[4px_4px_0px_0px_#6b3d1b] hover:translate-y-[2px] hover:shadow-[2px_2px_0px_0px_#6b3d1b] transition-all duration-200 border-2 border-white cursor-pointer"
     >
       <a href={link} target="_blank" rel="noopener noreferrer">
         <Image

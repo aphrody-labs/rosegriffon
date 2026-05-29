@@ -32,13 +32,11 @@ function EsportBadge({ variant }: { variant: "mobile" | "desktop" }) {
   const isMobile = variant === "mobile";
   return (
     <div
-      className={`inline-flex items-center gap-2 rounded-full font-bold uppercase tracking-wide ${
-        isMobile
-          ? "px-3 py-1 bg-[#6d00ce]/20 border border-[#6d00ce]/40 text-white text-[10px]"
-          : "px-4 py-1.5 bg-[#6d00ce]/10 border border-[#6d00ce]/30 text-[#6d00ce] text-xs shadow-sm"
+      className={`inline-flex items-center gap-2 rounded-full font-bold uppercase tracking-wide px-3.5 py-1.5 bg-[#6d00ce]/25 border border-[#6d00ce]/45 text-white ${
+        isMobile ? "text-[10px]" : "text-xs shadow-md"
       }`}
     >
-      <Zap className={`size-3 ${isMobile ? "fill-[#DFFF57] text-[#DFFF57]" : "fill-[#6d00ce]"}`} />
+      <Zap className="size-3 fill-[#DFFF57] text-[#DFFF57] animate-pulse" />
       E-Sport
     </div>
   );
@@ -52,7 +50,7 @@ function AchilleaLogo({ size }: { size: "sm" | "lg" }) {
         src="/achillea/logo1.svg"
         alt="Logo Achillea"
         fill
-        className="object-contain drop-shadow-[0_0_8px_rgba(223,255,87,0.6)]"
+        className="object-contain drop-shadow-[0_0_12px_rgba(223,255,87,0.7)]"
       />
     </div>
   );
@@ -65,7 +63,7 @@ function AchilleaTitle({ className }: { className: string }) {
         src="/achillea/achillea site titre transparent-2.webp"
         alt="ACHILLEA"
         fill
-        className="object-contain object-left drop-shadow-[0_2px_10px_rgba(223,255,87,0.3)]"
+        className="object-contain object-left drop-shadow-[0_2px_12px_rgba(223,255,87,0.4)]"
       />
     </div>
   );
@@ -86,7 +84,7 @@ function AchilleaButtons({
       <Button
         asChild
         size={isMobile ? "default" : "lg"}
-        className={`bg-[#6d00ce] hover:bg-[#5a00ab] text-white font-black rounded-xl shadow-[0_0_20px_-5px_rgba(223,255,87,0.6)] transition-all duration-300 border border-[#DFFF57] ${
+        className={`bg-[#6d00ce] hover:bg-[#5a00ab] text-white font-black rounded-xl shadow-[0_0_20px_-5px_rgba(223,255,87,0.6)] transition-all duration-300 border border-[#DFFF57] cursor-pointer ${
           isMobile ? "flex-1" : "hover:shadow-[0_0_25px_-5px_rgba(223,255,87,0.8)] px-8"
         }`}
       >
@@ -98,10 +96,8 @@ function AchilleaButtons({
         asChild
         variant="outline"
         size={isMobile ? "default" : "lg"}
-        className={`font-bold rounded-xl transition-all duration-300 backdrop-blur-md ${
-          isMobile
-            ? "flex-1 bg-white/10 text-white border-white/20 hover:bg-white/20"
-            : "bg-white/40 text-black border-black/10 hover:bg-black/5 hover:border-[#6d00ce]/50 hover:text-[#6d00ce]"
+        className={`font-bold rounded-xl transition-all duration-300 backdrop-blur-md bg-white/10 text-white border-white/20 hover:bg-white/20 hover:border-white/30 cursor-pointer ${
+          isMobile ? "flex-1" : "px-8"
         }`}
       >
         <a href={discordLink} target="_blank" rel="noopener noreferrer">
@@ -149,9 +145,9 @@ export function AchilleaBanner({
       </div>
 
       {/* ── Desktop: side-by-side grid ── */}
-      <Card className="hidden md:block overflow-hidden border-transparent shadow-[0_0_30px_-10px_rgba(223,255,87,0.3)] bg-[#D9D9D9] relative group rounded-[32px] p-0">
+      <Card className="hidden md:block overflow-hidden border border-[#6d00ce]/10 shadow-[0_0_40px_-10px_rgba(109,0,206,0.3)] bg-[#100720] relative group rounded-[32px] p-0">
         <div className="absolute inset-0 bg-[url('/noise.svg')] opacity-10 mix-blend-overlay pointer-events-none" />
-        <div className="absolute -right-20 -top-20 size-96 bg-[#6d00ce] rounded-full blur-[128px] opacity-20 pointer-events-none" />
+        <div className="absolute -right-20 -top-20 size-96 bg-[#6d00ce] rounded-full blur-[128px] opacity-25 pointer-events-none" />
         <div className="absolute -left-20 -bottom-20 size-96 bg-[#DFFF57] rounded-full blur-[128px] opacity-10 pointer-events-none" />
 
         <div className="grid md:grid-cols-2 gap-0 relative z-20">
@@ -165,7 +161,7 @@ export function AchilleaBanner({
             />
           </div>
 
-          <CardContent className="p-8 md:p-12 flex flex-col justify-center space-y-6 bg-transparent relative text-black">
+          <CardContent className="p-8 md:p-12 flex flex-col justify-center space-y-6 bg-transparent relative text-white">
             <div className="space-y-5">
               <div className="flex items-center justify-between w-full">
                 <EsportBadge variant="desktop" />
@@ -176,7 +172,7 @@ export function AchilleaBanner({
                 <div className="h-1 w-24 bg-linear-to-r from-[#6d00ce] to-transparent rounded-full opacity-80" />
               </div>
             </div>
-            <p className="text-gray-700 text-lg leading-relaxed max-w-md font-medium border-l-2 border-[#6d00ce]/30 pl-4">
+            <p className="text-white/80 text-lg leading-relaxed max-w-md font-medium border-l-2 border-[#6d00ce]/40 pl-4">
               {description}
             </p>
             <AchilleaButtons link={link} discordLink={discordLink} variant="desktop" />
