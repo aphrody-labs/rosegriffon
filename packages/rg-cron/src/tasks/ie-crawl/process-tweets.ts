@@ -152,7 +152,7 @@ export async function processTweets() {
 	const enToFrMap = new Map<string, string>();
 
 	if (glossary) {
-		const categories = ["characters", "techniques", "auras", "passives", "teams", "items"];
+		const categories = ["characters", "techniques", "auras", "passives", "teams", "items", "terms"];
 		for (const cat of categories) {
 			const list = glossary[cat] || [];
 			for (const entry of list) {
