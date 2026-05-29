@@ -233,8 +233,10 @@ _API universelle et parses de données de jeu Inazuma Eleven_
 
 ### Phase 2 : Optimisation et robustesse du Crawler et RAG (@rose-griffon/cron)
 
-1. **Résilience réseau** : Intégrer un système de rotation de proxies dans `@rose-griffon/cron` pour prémunir le crawl officiel Zukan, Level-5 et X/Twitter contre les blocages d'IP.
-2. **Qualité RAG** : Améliorer le chunking des documents récoltés pour affiner la pertinence des résultats de recherche sémantique.
+1. ✅ **Fiabilisation de la connexion Redis** : Correction des déconnexions intempestives Redis (`ERR_REDIS_CONNECTION_CLOSED`) lors du RAG Sync en ajustant le cycle de vie du socket de Bun.
+2. ✅ **Amélioration du crawler Twitter et rendu UI** : Extraction des entités média distantes sur X, reconstruction ordonnée des threads, et structuration complète des colonnes `media` et `raw_tweets` pour le rendu dynamique des threads dans l'UI d'Azalée.
+3. **Résilience réseau** : Intégrer un système de rotation de proxies dans `@rose-griffon/cron` pour prémunir le crawl officiel Zukan, Level-5 et X/Twitter contre les blocages d'IP.
+4. **Qualité RAG** : Améliorer le chunking des documents récoltés pour affiner la pertinence des résultats de recherche sémantique.
 
 ### Phase 3 : Nouvelles fonctionnalités applicatives
 
