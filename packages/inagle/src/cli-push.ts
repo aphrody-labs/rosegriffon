@@ -110,10 +110,11 @@ class PostgresAdapter implements DataAdapter {
 
     const updateSet = keys.map((k) => `"${k}" = EXCLUDED."${k}"`).join(", ");
 
+    const conflictCols = onConflict.split(",").map((c) => `"${c.trim()}"`).join(", ");
     const query = `
             INSERT INTO "${table}" (${keys.map((k) => `"${k}"`).join(", ")})
             VALUES ${rows.join(", ")}
-            ON CONFLICT ("${onConflict}") DO UPDATE SET ${updateSet}
+            ON CONFLICT (${conflictCols}) DO UPDATE SET ${updateSet}
         `;
 
     try {
@@ -737,7 +738,7 @@ async function importExpTable(db: DataAdapter) {
     "../data/all-gamedata/exp_table.json",
   );
   const rows: { level: number; need_exp: number }[] = await Bun.file(dataPath).json();
-  const records = rows.map((r) => ({ level: r.level, need_exp: r.need_exp }));
+  const records = rows.map((r: any) => ({ level: r.level, need_exp: r.needExp ?? r.need_exp }));
   const { error } = await db.upsert("inagle_exp_table", records, "level");
   if (error) console.error("❌ Error exp_table:", error.message || error);
   else console.log(`✅ Exp Table imported (${records.length} levels).`);

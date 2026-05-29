@@ -60,62 +60,70 @@ function resolveLibPath(): string {
   return found;
 }
 
-const lib = dlopen(resolveLibPath(), {
-  // Lifecycle
-  iecode_version: { args: [], returns: T.cstring },
-  iecode_free: { args: [T.ptr], returns: T.void },
+let lib: any = null;
+let S: any = null;
 
-  // CPK reader
-  iecode_cpk_open_file: { args: [T.cstring], returns: T.ptr },
-  iecode_cpk_count: { args: [T.ptr], returns: T.u32 },
-  iecode_cpk_filename: { args: [T.ptr, T.u32], returns: T.cstring },
-  iecode_cpk_find_entry: { args: [T.ptr, T.cstring], returns: T.i32 },
-  iecode_cpk_entry_size: { args: [T.ptr, T.u32], returns: T.u32 },
-  iecode_cpk_entry_extract_size: { args: [T.ptr, T.u32], returns: T.u32 },
-  iecode_cpk_read_file: { args: [T.ptr, T.cstring, T.ptr], returns: T.ptr },
-  iecode_cpk_extract: { args: [T.ptr, T.i32, T.ptr], returns: T.ptr },
-  iecode_cpk_entry_directory: { args: [T.ptr, T.i32], returns: T.cstring },
-  iecode_cpk_free: { args: [T.ptr], returns: T.void },
+function ensureLib() {
+  if (!lib) {
+    lib = dlopen(resolveLibPath(), {
+      // Lifecycle
+      iecode_version: { args: [], returns: T.cstring },
+      iecode_free: { args: [T.ptr], returns: T.void },
 
-  // cfg.bin parser
-  iecode_cfgbin_parse: { args: [T.ptr, T.u32], returns: T.ptr },
-  iecode_result_json: { args: [T.ptr], returns: T.cstring },
-  iecode_result_free: { args: [T.ptr], returns: T.void },
+      // CPK reader
+      iecode_cpk_open_file: { args: [T.cstring], returns: T.ptr },
+      iecode_cpk_count: { args: [T.ptr], returns: T.u32 },
+      iecode_cpk_filename: { args: [T.ptr, T.u32], returns: T.cstring },
+      iecode_cpk_find_entry: { args: [T.ptr, T.cstring], returns: T.i32 },
+      iecode_cpk_entry_size: { args: [T.ptr, T.u32], returns: T.u32 },
+      iecode_cpk_entry_extract_size: { args: [T.ptr, T.u32], returns: T.u32 },
+      iecode_cpk_read_file: { args: [T.ptr, T.cstring, T.ptr], returns: T.ptr },
+      iecode_cpk_extract: { args: [T.ptr, T.i32, T.ptr], returns: T.ptr },
+      iecode_cpk_entry_directory: { args: [T.ptr, T.i32], returns: T.cstring },
+      iecode_cpk_free: { args: [T.ptr], returns: T.void },
 
-  // G4TX texture
-  iecode_g4tx_parse: { args: [T.ptr, T.u32], returns: T.ptr },
-  iecode_g4tx_count: { args: [T.ptr], returns: T.i32 },
-  iecode_g4tx_info: { args: [T.ptr, T.i32], returns: T.cstring },
-  iecode_g4tx_export_png: {
-    args: [T.ptr, T.i32, T.cstring],
-    returns: T.i32,
-  },
-  iecode_g4tx_export_webp_ex: {
-    args: [T.ptr, T.i32, T.cstring, T.i32, T.i32],
-    returns: T.i32,
-  },
-  iecode_g4tx_encode_webp: {
-    args: [T.ptr, T.i32, T.i32, T.i32, T.ptr],
-    returns: T.ptr,
-  },
-  iecode_g4tx_encode_webp_resize: {
-    args: [T.ptr, T.i32, T.i32, T.i32, T.i32, T.ptr],
-    returns: T.ptr,
-  },
-  iecode_g4tx_decode_rgba: {
-    args: [T.ptr, T.i32, T.ptr, T.ptr],
-    returns: T.ptr,
-  },
-  iecode_g4tx_free: { args: [T.ptr], returns: T.void },
+      // cfg.bin parser
+      iecode_cfgbin_parse: { args: [T.ptr, T.u32], returns: T.ptr },
+      iecode_result_json: { args: [T.ptr], returns: T.cstring },
+      iecode_result_free: { args: [T.ptr], returns: T.void },
 
-  // Decompression Level-5 auto-detect (optionnel pour data brutes compressees)
-  iecode_level5_decompress: {
-    args: [T.ptr, T.u32, T.ptr],
-    returns: T.ptr,
-  },
-});
+      // G4TX texture
+      iecode_g4tx_parse: { args: [T.ptr, T.u32], returns: T.ptr },
+      iecode_g4tx_count: { args: [T.ptr], returns: T.i32 },
+      iecode_g4tx_info: { args: [T.ptr, T.i32], returns: T.cstring },
+      iecode_g4tx_export_png: {
+        args: [T.ptr, T.i32, T.cstring],
+        returns: T.i32,
+      },
+      iecode_g4tx_export_webp_ex: {
+        args: [T.ptr, T.i32, T.cstring, T.i32, T.i32],
+        returns: T.i32,
+      },
+      iecode_g4tx_encode_webp: {
+        args: [T.ptr, T.i32, T.i32, T.i32, T.ptr],
+        returns: T.ptr,
+      },
+      iecode_g4tx_encode_webp_resize: {
+        args: [T.ptr, T.i32, T.i32, T.i32, T.i32, T.ptr],
+        returns: T.ptr,
+      },
+      iecode_g4tx_decode_rgba: {
+        args: [T.ptr, T.i32, T.ptr, T.ptr],
+        returns: T.ptr,
+      },
+      iecode_g4tx_free: { args: [T.ptr], returns: T.void },
 
-const S = lib.symbols;
+      // Decompression Level-5 auto-detect (optionnel pour data brutes compressees)
+      iecode_level5_decompress: {
+        args: [T.ptr, T.u32, T.ptr],
+        returns: T.ptr,
+      },
+    });
+    S = lib.symbols;
+  }
+  return S;
+}
+
 const enc = new TextEncoder();
 
 function cstr(s: string): Uint8Array {
@@ -137,7 +145,7 @@ function takeOwnedBytes(p: Pointer | null, size: number): Uint8Array {
   // Copie pour devenir indépendant de la libération en aval.
   const owned = new Uint8Array(size);
   owned.set(view);
-  S.iecode_free(p);
+  ensureLib().iecode_free(p);
   return owned;
 }
 
@@ -149,7 +157,7 @@ function readU32At(buf: Uint8Array): number {
 // ── API publique ──────────────────────────────────────────────────────
 
 export function ffiVersion(): string {
-  const cs = S.iecode_version();
+  const cs = ensureLib().iecode_version();
   return cs ? String(cs) : "?";
 }
 
@@ -159,19 +167,19 @@ export class CpkHandle {
     this.h = handle;
   }
   static open(path: string): CpkHandle {
-    const h = S.iecode_cpk_open_file(cstr(path)) as Pointer | null;
+    const h = ensureLib().iecode_cpk_open_file(cstr(path)) as Pointer | null;
     if (!h) throw new Error(`cpk_open_file echec: ${path}`);
     return new CpkHandle(h);
   }
   get count(): number {
-    return Number(S.iecode_cpk_count(this.h));
+    return Number(ensureLib().iecode_cpk_count(this.h));
   }
   filename(i: number): string {
-    const cs = S.iecode_cpk_filename(this.h, i);
+    const cs = ensureLib().iecode_cpk_filename(this.h, i);
     return cs ? String(cs) : "";
   }
   directory(i: number): string {
-    const cs = S.iecode_cpk_entry_directory(this.h, i);
+    const cs = ensureLib().iecode_cpk_entry_directory(this.h, i);
     return cs ? String(cs) : "";
   }
   /** Chemin interne complet (directory/filename) — utilisable avec readFile/findEntry. */
@@ -181,12 +189,12 @@ export class CpkHandle {
     return dir ? `${dir}/${name}` : name;
   }
   findEntry(internalPath: string): number {
-    return Number(S.iecode_cpk_find_entry(this.h, cstr(internalPath)));
+    return Number(ensureLib().iecode_cpk_find_entry(this.h, cstr(internalPath)));
   }
   /** Extrait un fichier interne du CPK et retourne ses bytes (deja decompresse/dechiffre). */
   readFile(internalPath: string): Uint8Array {
     const sizeBuf = new Uint8Array(4);
-    const p = S.iecode_cpk_read_file(this.h, cstr(internalPath), ptr(sizeBuf)) as Pointer | null;
+    const p = ensureLib().iecode_cpk_read_file(this.h, cstr(internalPath), ptr(sizeBuf)) as Pointer | null;
     const size = readU32At(sizeBuf);
     if (!p || size === 0) throw new Error(`cpk_read_file vide: ${internalPath}`);
     return takeOwnedBytes(p, size);
@@ -194,59 +202,59 @@ export class CpkHandle {
   /** Variante par index direct (evite la double resolution path → idx). */
   extract(idx: number): Uint8Array {
     const sizeBuf = new Uint8Array(4);
-    const p = S.iecode_cpk_extract(this.h, idx, ptr(sizeBuf)) as Pointer | null;
+    const p = ensureLib().iecode_cpk_extract(this.h, idx, ptr(sizeBuf)) as Pointer | null;
     const size = readU32At(sizeBuf);
     if (!p || size === 0) throw new Error(`cpk_extract(${idx}) vide`);
     return takeOwnedBytes(p, size);
   }
   close(): void {
-    S.iecode_cpk_free(this.h);
+    ensureLib().iecode_cpk_free(this.h);
   }
 }
 
 /** Parse un cfg.bin et retourne le JSON. */
 export function parseCfgBinNative(data: Uint8Array): unknown {
-  const handle = S.iecode_cfgbin_parse(ptr(data), data.byteLength) as Pointer | null;
+  const handle = ensureLib().iecode_cfgbin_parse(ptr(data), data.byteLength) as Pointer | null;
   if (!handle) throw new Error("cfgbin_parse echec");
   try {
-    const cs = S.iecode_result_json(handle);
+    const cs = ensureLib().iecode_result_json(handle);
     if (!cs) throw new Error("cfgbin_parse: result_json null");
     return JSON.parse(String(cs));
   } finally {
-    S.iecode_result_free(handle);
+    ensureLib().iecode_result_free(handle);
   }
 }
 
 export class G4txHandle {
   constructor(private h: Pointer) {}
   static parse(data: Uint8Array): G4txHandle {
-    const h = S.iecode_g4tx_parse(ptr(data), data.byteLength) as Pointer | null;
+    const h = ensureLib().iecode_g4tx_parse(ptr(data), data.byteLength) as Pointer | null;
     if (!h) throw new Error("g4tx_parse echec");
     return new G4txHandle(h);
   }
   get count(): number {
-    return Number(S.iecode_g4tx_count(this.h));
+    return Number(ensureLib().iecode_g4tx_count(this.h));
   }
   info(idx: number): { width: number; height: number; format: string } {
-    const cs = S.iecode_g4tx_info(this.h, idx);
+    const cs = ensureLib().iecode_g4tx_info(this.h, idx);
     return cs ? JSON.parse(String(cs)) : { width: 0, height: 0, format: "?" };
   }
   /** Ecrit la texture sur disque en PNG (lossless). Retourne true si OK. */
   exportPng(idx: number, outPath: string): boolean {
-    return Number(S.iecode_g4tx_export_png(this.h, idx, cstr(outPath))) !== 0;
+    return Number(ensureLib().iecode_g4tx_export_png(this.h, idx, cstr(outPath))) !== 0;
   }
   /** Ecrit la texture sur disque en WebP. lossless=true → preserve tous les pixels. */
   exportWebp(idx: number, outPath: string, quality = 100, lossless = true): boolean {
     return (
       Number(
-        S.iecode_g4tx_export_webp_ex(this.h, idx, cstr(outPath), quality, lossless ? 1 : 0),
+        ensureLib().iecode_g4tx_export_webp_ex(this.h, idx, cstr(outPath), quality, lossless ? 1 : 0),
       ) !== 0
     );
   }
   /** Encode la texture en WebP entierement en memoire (sans tmpfile). */
   encodeWebp(idx: number, quality = 100, lossless = true): Uint8Array {
     const sizeBuf = new Uint8Array(4);
-    const p = S.iecode_g4tx_encode_webp(
+    const p = ensureLib().iecode_g4tx_encode_webp(
       this.h,
       idx,
       quality,
@@ -265,7 +273,7 @@ export class G4txHandle {
    */
   encodeWebpResize(idx: number, targetWidth: number, quality = 100, lossless = true): Uint8Array {
     const sizeBuf = new Uint8Array(4);
-    const p = S.iecode_g4tx_encode_webp_resize(
+    const p = ensureLib().iecode_g4tx_encode_webp_resize(
       this.h,
       idx,
       targetWidth,
@@ -283,7 +291,7 @@ export class G4txHandle {
   decodeRgba(idx: number): { rgba: Uint8Array; width: number; height: number } {
     const wBuf = new Uint8Array(4);
     const hBuf = new Uint8Array(4);
-    const p = S.iecode_g4tx_decode_rgba(this.h, idx, ptr(wBuf), ptr(hBuf)) as Pointer | null;
+    const p = ensureLib().iecode_g4tx_decode_rgba(this.h, idx, ptr(wBuf), ptr(hBuf)) as Pointer | null;
     const width = readU32At(wBuf);
     const height = readU32At(hBuf);
     const size = width * height * 4;
@@ -292,14 +300,14 @@ export class G4txHandle {
     return { rgba, width, height };
   }
   close(): void {
-    S.iecode_g4tx_free(this.h);
+    ensureLib().iecode_g4tx_free(this.h);
   }
 }
 
 /** Decompresse des bytes Level-5 (auto-detect LZ10/LZ4/CRILAYLA/Huffman/RLE/ZLib). */
 export function decompressLevel5Native(data: Uint8Array): Uint8Array {
   const sizeBuf = new Uint8Array(4);
-  const p = S.iecode_level5_decompress(ptr(data), data.byteLength, ptr(sizeBuf)) as Pointer | null;
+  const p = ensureLib().iecode_level5_decompress(ptr(data), data.byteLength, ptr(sizeBuf)) as Pointer | null;
   const size = readU32At(sizeBuf);
   if (!p || size === 0) throw new Error("decompress_level5 echec");
   return takeOwnedBytes(p, size);
