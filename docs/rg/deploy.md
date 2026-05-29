@@ -285,6 +285,53 @@ Dans Discord, taper `/sync` (commande admin) → doit répondre "Sync terminé :
 
 ---
 
+## Déploiement Self-Host sur le VPS (Port 3003) pour @rose-griffon/azalee
+
+Bien que le workflow initial prévoyait un déploiement sur Vercel, l'application `@rose-griffon/azalee` est actuellement hébergée sur le VPS de production, écoutant sur le port local `3003` derrière un reverse-proxy Nginx.
+
+### Procédure de mise en production (en une commande)
+
+Pour compiler, préparer les assets autonomes, redémarrer le service systemd et valider l'état du serveur web, lancez le script automatisé depuis la racine du monorepo :
+
+```bash
+bash scripts/ship-azalee.sh
+```
+
+### Détail des étapes sous-jacentes
+
+Si vous devez débugger ou exécuter les étapes manuellement :
+
+1. **Build de l'application Next.js 16** (avec Turbopack en mode standalone) :
+   ```bash
+   cd apps/azalee
+   bun --env-file=../../.env.local run build --turbopack
+   ```
+   *Note : Le build standalone génère les fichiers traces optimisés dans `.next/standalone`.*
+
+2. **Copie des dossiers exclus du tracing Next.js** (publics, statiques et VFS de données) via le script local :
+   ```bash
+   bash scripts/deploy-azalee.sh
+   ```
+   *Ce script pré-crée également `.next/cache` et `.bun-cache` à l'emplacement standalone pour éviter des erreurs système de type EROFS/EACCES.*
+
+3. **Redémarrage du service systemd** :
+   ```bash
+   sudo systemctl restart azalee-web.service
+   ```
+   *Pour consulter l'état du service et les logs live :*
+   ```bash
+   sudo systemctl status azalee-web.service
+   journalctl -u azalee-web.service -f -n 50
+   ```
+
+4. **Vérification du Healthcheck** :
+   Vérifiez que le serveur local répond bien sur son port interne :
+   ```bash
+   curl -I http://127.0.0.1:3003/
+   ```
+
+---
+
 ## Checklist finale (à cocher dans l'ordre)
 
 - [ ] Preview deploy azalee (rg-azalee) : URL accessible, build vert, smoke test OK
