@@ -152,7 +152,7 @@ _Couche d'accès à la base de données unifiée_
   - ✅ Clients dédiés : `createBrowserClient`, `createServerClient` et `createSupabaseServiceClient`.
   - ✅ Client Redis (`redis.ts`) avec support vectoriel pour le RAG et cache générique.
   - ✅ Module helper pour le bucket de stockage Supabase.
-  - ⏳ Remplacement du typage `Record<string, unknown>` de `CookieStore` par `CookieOptions` de `@supabase/ssr`.
+  - ✅ Remplacement du typage `Record<string, unknown>` de `CookieStore` par `CookieOptions` de `@supabase/ssr`.
   - ⏳ Découplage complet des dépendances Bun dans les composants côté browser.
 
 ### 🔑 @rose-griffon/auth
