@@ -51,7 +51,7 @@ export class SqliteQueryBuilder {
 	private table: string;
 	private selects: string = "*";
 	private wheres: string[] = [];
-	private params: (string | number | boolean | null)[] = [];
+	private params: Array<string | number | boolean | null> = [];
 	private limitValue: number | null = null;
 	private offsetValue: number | null = null;
 	private orders: string[] = [];
@@ -130,7 +130,7 @@ export class SqliteQueryBuilder {
 		return this;
 	}
 
-	in(col: string, arr: (string | number | boolean | null)[]) {
+	in(col: string, arr: Array<string | number | boolean | null>) {
 		if (!arr || arr.length === 0) {
 			this.wheres.push("1 = 0");
 			return this;
@@ -145,12 +145,12 @@ export class SqliteQueryBuilder {
 	or(orString: string) {
 		const parts = orString.split(",");
 		const conditions: string[] = [];
-		const orParams: (string | number | boolean | null)[] = [];
+		const orParams: Array<string | number | boolean | null> = [];
 
 		for (const part of parts) {
 			const match = part.match(/(.+?)\.(ilike|eq)\.(.+)/);
 			if (match) {
-				let [, col, op, val] = match;
+				const [, col, op, val] = match;
 				const column = this.cleanCol(col);
 
 				if (op === "ilike") {
@@ -204,7 +204,7 @@ export class SqliteQueryBuilder {
 
 	// Make the class then-able (Promise-like)
 	async then<TResult1 = unknown>(
-		onfulfilled?: ((value: { data: Record<string, unknown> | Record<string, unknown>[] | null; error: Error | null; count: number | null }) => TResult1 | PromiseLike<TResult1>) | undefined | null
+		onfulfilled?: ((value: { data: Record<string, unknown> | Array<Record<string, unknown>> | null; error: Error | null; count: number | null }) => TResult1 | PromiseLike<TResult1>) | undefined | null
 	) {
 		try {
 			const data = await this.execute();
@@ -253,10 +253,10 @@ export class SqliteQueryBuilder {
 		return sql;
 	}
 
-	private async execute(): Promise<Record<string, unknown> | Record<string, unknown>[] | null> {
+	private async execute(): Promise<Record<string, unknown> | Array<Record<string, unknown>> | null> {
 		const sql = this.compileSelect();
 		const stmt = this.db.prepare(sql);
-		const rawRows = stmt.all(...this.params) as Record<string, unknown>[];
+		const rawRows = stmt.all(...this.params) as Array<Record<string, unknown>>;
 
 		const parsedRows = rawRows.map((r) => this.parseRow(r));
 
