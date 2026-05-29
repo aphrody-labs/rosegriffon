@@ -55,6 +55,21 @@ export async function crawlZukanOrder(): Promise<{
 			try {
 				await safeGoto(page, url);
 				await page.waitForSelector("ul.charaListBox", 15000).catch(() => {});
+				// Attendre le rendu complet côté client des personnages (plus de 2 li)
+				try {
+					let retries = 24; // 24 * 250ms = 6s max
+					while (retries > 0) {
+						const count = await page.evaluate(() => (globalThis as any).document.querySelectorAll("ul.charaListBox > li").length);
+						if (count > 2) {
+							break;
+						}
+						await new Promise((r) => setTimeout(r, 250));
+						retries--;
+					}
+				} catch (e) {
+					console.warn("[Crawl Zukan] page.evaluate failed, falling back to static sleep", e);
+					await new Promise((r) => setTimeout(r, 4000));
+				}
 				const html = await page.content();
 				const $ = cheerio.load(html);
 

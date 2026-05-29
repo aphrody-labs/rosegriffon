@@ -38,6 +38,84 @@ async function translateWithGoogle(text: string, from: string, to: string): Prom
 	return text;
 }
 
+// Translation with pre-translation glossary mapping using placeholders
+async function translateWithGlossary(
+	text: string,
+	from: string,
+	to: string,
+	replacements: [string, string][]
+): Promise<string> {
+	if (!text.trim()) return "";
+	if (replacements.length === 0) {
+		return translateWithGoogle(text, from, to);
+	}
+
+	// 1. Identify and replace terms with placeholders
+	let processedText = text;
+	const placeholderMap = new Map<string, string>();
+	let placeholderIndex = 0;
+
+	for (const [term, frVal] of replacements) {
+		let matches = false;
+		if (from === "ja") {
+			matches = processedText.includes(term);
+		} else {
+			const regex = new RegExp("\\b" + escapeRegExp(term) + "\\b", "i");
+			matches = regex.test(processedText);
+		}
+
+		if (matches) {
+			const placeholder = ` [[T${placeholderIndex}]] `;
+			placeholderMap.set(placeholder.trim(), frVal);
+
+			if (from === "ja") {
+				processedText = processedText.replaceAll(term, placeholder);
+			} else {
+				const regex = new RegExp("\\b" + escapeRegExp(term) + "\\b", "gi");
+				processedText = processedText.replace(regex, placeholder);
+			}
+			placeholderIndex++;
+		}
+	}
+
+	// 2. Translate text containing placeholders
+	let translated = await translateWithGoogle(processedText, from, to);
+
+	// 3. Replace placeholders back with French values with extra robustness
+	for (const [placeholder, frVal] of placeholderMap.entries()) {
+		const cleanPlaceholder = placeholder.replace("[[", "").replace("]]", "").trim().toLowerCase();
+		const num = cleanPlaceholder.replace("t", "");
+
+		// 3.1. Double brackets: [[T0]]
+		const dblRegex = new RegExp("\\[\\s*\\[\\s*[tT]\\s*" + num + "\\s*\\]\\s*\\]", "g");
+		translated = translated.replace(dblRegex, frVal);
+
+		// 3.2. Single brackets: [T0]
+		const sglRegex = new RegExp("\\[\\s*[tT]\\s*" + num + "\\s*\\]", "g");
+		translated = translated.replace(sglRegex, frVal);
+
+		// 3.3. Raw tokens: T0 or T 0 (word boundary)
+		const rawRegex = new RegExp("\\b[tT]\\s*" + num + "\\b", "g");
+		translated = translated.replace(rawRegex, frVal);
+	}
+
+	// Fallback cleanup
+	for (const [placeholder, frVal] of placeholderMap.entries()) {
+		if (translated.includes(placeholder)) {
+			translated = translated.replaceAll(placeholder, frVal);
+		}
+		const rawPlaceholder = placeholder.trim();
+		if (translated.includes(rawPlaceholder)) {
+			translated = translated.replaceAll(rawPlaceholder, frVal);
+		}
+	}
+
+	// Normalise multiple whitespace to a single space
+	translated = translated.replace(/\s+/g, " ");
+
+	return translated.trim();
+}
+
 export async function processTweets() {
 	console.log("=== Starting Tweet Processing (Media, Translation, Classification) ===");
 	const supabase = createSupabaseServiceClient();
@@ -173,26 +251,55 @@ export async function processTweets() {
 				}
 			}
 
-			// Update raw_tweets media references as well
+			// Update raw_tweets media references and translate thread replies
 			let updatedRawTweets = tweet.raw_tweets;
-			if (needsUpdate && Array.isArray(updatedRawTweets)) {
-				updatedRawTweets = updatedRawTweets.map((rt: any) => {
-					if (rt && Array.isArray(rt.media)) {
-						const newRtMedia = rt.media.map((m: any) => {
-							if (m && typeof m.url === "string") {
-								const match = updatedMedia.find(
-									(um) => um.original_url === m.url || um.url === m.url
-								);
-								if (match) {
-									return { ...m, url: match.url };
+			if (Array.isArray(updatedRawTweets)) {
+				let rawTweetsChanged = false;
+				updatedRawTweets = await Promise.all(
+					updatedRawTweets.map(async (rt: any) => {
+						if (!rt) return rt;
+						const updatedRt = { ...rt };
+
+						// 1. Update media URLs
+						if (Array.isArray(updatedRt.media)) {
+							updatedRt.media = updatedRt.media.map((m: any) => {
+								if (m && typeof m.url === "string") {
+									const match = updatedMedia.find(
+										(um) => um.original_url === m.url || um.url === m.url
+									);
+									if (match) {
+										return { ...m, url: match.url };
+									}
 								}
+								return m;
+							});
+						}
+
+						// 2. Translate thread reply text if missing
+						if (typeof updatedRt.text === "string" && !updatedRt.translation) {
+							if (tweet.author_username === "Azalee_IE") {
+								updatedRt.translation = updatedRt.text;
+							} else {
+								const rtIsJa = containsJapanese(updatedRt.text);
+								const rtSourceLang = rtIsJa ? "ja" : "en";
+								const rtReplacements = rtIsJa ? jpReplacements : enReplacements;
+								updatedRt.translation = await translateWithGlossary(
+									updatedRt.text,
+									rtSourceLang,
+									"fr",
+									rtReplacements
+								);
 							}
-							return m;
-						});
-						return { ...rt, media: newRtMedia };
-					}
-					return rt;
-				});
+							rawTweetsChanged = true;
+						}
+
+						return updatedRt;
+					})
+				);
+
+				if (rawTweetsChanged || needsUpdate) {
+					needsUpdate = true;
+				}
 			}
 
 			// 2. Translate text if missing or update
@@ -208,19 +315,8 @@ export async function processTweets() {
 					console.log(`[Translation] Translating tweet text...`);
 					const isJa = containsJapanese(originalText);
 					const sourceLang = isJa ? "ja" : "en";
-					let translated = await translateWithGoogle(originalText, sourceLang, "fr");
-
-					// Apply glossary corrections
-					if (isJa) {
-						for (const [jpTerm, frTerm] of jpReplacements) {
-							translated = translated.replaceAll(jpTerm, frTerm);
-						}
-					} else {
-						for (const [enTerm, frTerm] of enReplacements) {
-							const regex = new RegExp("\\b" + escapeRegExp(enTerm) + "\\b", "gi");
-							translated = translated.replace(regex, frTerm);
-						}
-					}
+					const replacements = isJa ? jpReplacements : enReplacements;
+					let translated = await translateWithGlossary(originalText, sourceLang, "fr", replacements);
 
 					translation = translated;
 					needsUpdate = true;
