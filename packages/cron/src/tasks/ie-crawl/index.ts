@@ -11,8 +11,10 @@ import { crawlCross } from "./cross";
 import { crawlLevel5 } from "./level5";
 import { crawlLevel5Blog } from "./level5-blog";
 import { crawlTwitter } from "./twitter";
+import { crawlExternalDocs } from "./external-docs";
 import { runRagSync } from "./rag";
 import { withProxyRotation } from "../../lib/proxy";
+import { processTweets } from "./process-tweets";
 
 export async function runIeCrawl(): Promise<{ success: boolean; error?: string }> {
 	console.log("==================================================================");
@@ -74,6 +76,20 @@ export async function runIeCrawl(): Promise<{ success: boolean; error?: string }
 			console.error("[ie-crawl] Échec du crawl Twitter :", twitterRes.error);
 		} else {
 			console.log(`[ie-crawl] Crawl Twitter complété : ${twitterRes.count} tweets synchronisés.`);
+			// Traiter, traduire et classifier les tweets
+			try {
+				await processTweets();
+			} catch (tweetProcessErr) {
+				console.error("[ie-crawl] Échec du traitement/traduction des tweets :", tweetProcessErr);
+			}
+		}
+
+		// 5c. Crawl documentations externes (Markdown & Bun.markdown)
+		const externalRes = await crawlExternalDocs();
+		if (!externalRes.success) {
+			console.error("[ie-crawl] Échec du crawl des documentations externes :", externalRes.error);
+		} else {
+			console.log("[ie-crawl] Crawl des documentations externes complété.");
 		}
 
 		// 6. Synchronisation sémantique / vectorisation pour le RAG
@@ -84,7 +100,8 @@ export async function runIeCrawl(): Promise<{ success: boolean; error?: string }
 			crossRes.success ||
 			level5Res.success ||
 			level5BlogRes.success ||
-			twitterRes.success;
+			twitterRes.success ||
+			externalRes.success;
 		if (anyNewsCrawlSuccess) {
 			const ragRes = await runRagSync();
 			ragSuccess = ragRes.success;
@@ -105,6 +122,7 @@ export async function runIeCrawl(): Promise<{ success: boolean; error?: string }
 			level5Res.success &&
 			level5BlogRes.success &&
 			twitterRes.success &&
+			externalRes.success &&
 			ragSuccess;
 		return {
 			success,

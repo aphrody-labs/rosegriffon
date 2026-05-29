@@ -67,6 +67,7 @@ export default async function HomePage() {
 		supabase
 			.from("tweets")
 			.select("id, text, created_at, author_username, author_name, media")
+			.eq("author_username", "Azalee_IE")
 			.order("created_at", { ascending: false })
 			.limit(6),
 		supabase.from("inagle_characters").select("id", { count: "exact", head: true }),
