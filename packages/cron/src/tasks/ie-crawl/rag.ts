@@ -391,67 +391,61 @@ function collectScrapedItems(): ScrapedItem[] {
 }
 
 /**
- * Découpe un texte long en blocs (chunks) sémantiques.
+ * Découpe un texte long en blocs (chunks) sémantiques récursifs.
  */
 function chunkText(text: string, chunkSize = 800, chunkOverlap = 150): string[] {
-	if (text.length <= chunkSize) {
-		return [text];
+	const separators = ["\n\n", "\n", " ", ""];
+
+	function splitText(txt: string, separator: string): string[] {
+		return txt.split(separator);
 	}
 
-	const chunks: string[] = [];
-	let startIndex = 0;
+	function recurse(txt: string, currentSeparatorIndex: number): string[] {
+		if (txt.length <= chunkSize) {
+			return [txt];
+		}
 
-	while (startIndex < text.length) {
-		let endIndex = startIndex + chunkSize;
-
-		if (endIndex < text.length) {
-			// Tenter de couper sur une ponctuation ou un retour à la ligne dans la fenêtre
-			const searchWindow = text.slice(
-				Math.max(startIndex, endIndex - 100),
-				Math.min(text.length, endIndex + 100)
-			);
-			const punctuationMatch = [...searchWindow.matchAll(/[.!?。\n]/g)];
-
-			if (punctuationMatch.length > 0) {
-				let bestOffset = 100;
-				let chosenIndex = endIndex;
-				const relativeMiddle = endIndex - Math.max(startIndex, endIndex - 100);
-
-				for (const match of punctuationMatch) {
-					if (match.index !== undefined) {
-						const offset = Math.abs(match.index - relativeMiddle);
-						if (offset < bestOffset) {
-							bestOffset = offset;
-							chosenIndex = Math.max(startIndex, endIndex - 100) + match.index + 1;
-						}
-					}
-				}
-				endIndex = chosenIndex;
+		const separator = separators[currentSeparatorIndex];
+		if (separator === undefined) {
+			const chunks: string[] = [];
+			const step = chunkSize - chunkOverlap;
+			for (let i = 0; i < txt.length; i += step > 0 ? step : chunkSize) {
+				chunks.push(txt.slice(i, i + chunkSize));
 			}
-		} else {
-			endIndex = text.length;
+			return chunks;
 		}
 
-		const chunk = text.slice(startIndex, endIndex).trim();
-		if (chunk.length > 30) {
-			chunks.push(chunk);
+		const splits = splitText(txt, separator);
+		const chunks: string[] = [];
+		let currentChunk = "";
+
+		for (const split of splits) {
+			if (split.length > chunkSize) {
+				if (currentChunk) {
+					chunks.push(currentChunk.trim());
+					currentChunk = "";
+				}
+				const subChunks = recurse(split, currentSeparatorIndex + 1);
+				chunks.push(...subChunks);
+			} else if (currentChunk.length + split.length + separator.length > chunkSize) {
+				if (currentChunk) {
+					chunks.push(currentChunk.trim());
+				}
+				const overlapStart = Math.max(0, currentChunk.length - chunkOverlap);
+				currentChunk = currentChunk.slice(overlapStart) + (currentChunk ? separator : "") + split;
+			} else {
+				currentChunk += (currentChunk ? separator : "") + split;
+			}
 		}
 
-		startIndex = endIndex - chunkOverlap;
-		if (startIndex >= text.length || endIndex === text.length) {
-			break;
+		if (currentChunk) {
+			chunks.push(currentChunk.trim());
 		}
-		if (
-			startIndex < 0 ||
-			(startIndex === endIndex - chunkOverlap &&
-				chunks.length > 0 &&
-				chunks[chunks.length - 1] === chunk)
-		) {
-			startIndex = endIndex;
-		}
+
+		return chunks.filter((c) => c.length > 30);
 	}
 
-	return chunks;
+	return recurse(text, 0);
 }
 
 /**
