@@ -1,6 +1,7 @@
 import { runInaglePush } from "./tasks/db";
 import { syncCdnAssets } from "./tasks/cdn";
 import { runIeCrawl } from "./tasks/ie-crawl";
+import { runRagSync, queryRag } from "./tasks/ie-crawl/rag";
 import {
   triggerPublishScheduled,
   triggerPatreonRefresh,
@@ -26,6 +27,23 @@ if (args.includes("--run")) {
     await syncCdnAssets();
   } else if (task === "crawl") {
     await runIeCrawl();
+  } else if (task === "rag") {
+    await runRagSync();
+  } else if (task === "query") {
+    const question = args.slice(taskIdx + 1).join(" ");
+    if (!question) {
+      console.error("❌ Veuillez spécifier une question sémantique. Exemple: bun start --run query 'Victory Road release date'");
+    } else {
+      const results = await queryRag(question);
+      console.log(`\n🔍 Résultats RAG pour : "${question}"\n`);
+      for (const res of results) {
+        console.log(`[Score: ${res.score.toFixed(4)}] ${res.title} (${res.type})`);
+        console.log(`URL: ${res.url}`);
+        console.log(`Date: ${res.date}`);
+        console.log(`Extrait: ${res.text.slice(0, 300)}...\n`);
+        console.log("------------------------------------------------------------------");
+      }
+    }
   } else if (task === "publish") {
     await triggerPublishScheduled();
   } else if (task === "patreon") {
@@ -46,7 +64,7 @@ if (args.includes("--run")) {
     await triggerPatreonReminders("announce");
   } else {
     console.error(
-      `❌ Tâche inconnue : ${task}. Choisissez parmi : db, cdn, crawl, publish, patreon, reminders, warm, all.`
+      `❌ Tâche inconnue : ${task}. Choisissez parmi : db, cdn, crawl, rag, query, publish, patreon, reminders, warm, all.`
     );
   }
   process.exit(0);
