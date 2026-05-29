@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Browser, Page } from "@aphrody-code/bxc";
+import { Browser, Page, type NavigationResponse } from "@aphrody-code/bxc";
 import { mkdir, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 
@@ -13,6 +13,15 @@ const DATA_ROOT = "/home/ubuntu/rg/data/inazuma.jp/re";
 interface RePageTarget {
 	lang: string;
 	url: string;
+}
+
+async function safeGoto(page: Page, url: string, timeout = 30000): Promise<NavigationResponse> {
+	return Promise.race([
+		page.goto(url),
+		new Promise<never>((_, reject) =>
+			setTimeout(() => reject(new Error(`Navigation timeout (${timeout}ms) pour ${url}`)), timeout)
+		),
+	]);
 }
 
 export async function crawlRe(): Promise<{ success: boolean; error?: string }> {
@@ -34,7 +43,7 @@ export async function crawlRe(): Promise<{ success: boolean; error?: string }> {
 
 			console.log(`[Crawl RE] Scraping page ${target.lang} : ${target.url}`);
 			try {
-				const response = await page.goto(target.url);
+				const response = await safeGoto(page, target.url);
 				// On vérifie le code HTTP de la réponse si disponible
 				const status = response ? response.status : 200;
 				if (status >= 400) {

@@ -25,6 +25,7 @@ import {
 import { SearchBar } from "@/components/ui/search-bar";
 import { WikiPagination } from "@/components/wiki/WikiPagination";
 import { ExternalLink, Newspaper, Twitter, X } from "@/lib/icons-config";
+import { getAuthorInfo } from "@/lib/author";
 
 export interface FeedItem {
 	id: string;
@@ -36,6 +37,8 @@ export interface FeedItem {
 	image: string | null;
 	category: string;
 	author_id: string;
+	author_name?: string | null;
+	author_username?: string | null;
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	media?: any[];
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -125,14 +128,29 @@ function TweetPost({ item }: { item: FeedItem }) {
 
 					<div className="flex items-center justify-between pt-1">
 						<div className="flex items-center gap-2">
-							<div className="size-5 rounded-full overflow-hidden relative bg-surface-container-high">
-								<Image src="/icon.webp" alt="Azalée" fill className="object-cover" />
-							</div>
-							<span className="text-xs text-on-surface-variant/50">
+							{(() => {
+								const authorInfo = getAuthorInfo(item.author_username || item.author_id, item.author_name);
+								return authorInfo.avatar ? (
+									<div className="size-5 rounded-full overflow-hidden relative bg-surface-container-high shrink-0">
+										<Image src={authorInfo.avatar} alt={authorInfo.name} fill className="object-cover" />
+									</div>
+								) : (
+									<div className={`size-5 rounded-full flex items-center justify-center text-white text-[8px] font-bold shrink-0 ${authorInfo.color}`}>
+										{authorInfo.initials}
+									</div>
+								);
+							})()}
+							<span className="text-xs text-on-surface-variant/70 font-semibold max-w-[120px] truncate">
+								{(() => {
+									const authorInfo = getAuthorInfo(item.author_username || item.author_id, item.author_name);
+									return authorInfo.name;
+								})()}
+							</span>
+							<span className="text-xs text-on-surface-variant/50 shrink-0">
 								{formatDistanceToNow(date, { addSuffix: true, locale })}
 							</span>
 						</div>
-						<span className="inline-flex items-center gap-1 text-xs text-[#1DA1F2]/70 font-medium group-hover:text-[#1DA1F2] transition-colors">
+						<span className="inline-flex items-center gap-1 text-xs text-[#1DA1F2]/70 font-medium group-hover:text-[#1DA1F2] transition-colors shrink-0">
 							Lire
 							<ExternalLink className="size-3 transition-transform group-hover:translate-x-0.5" />
 						</span>

@@ -22,6 +22,15 @@ export interface ZukanCharacter {
 	order: number;
 }
 
+async function safeGoto(page: Page, url: string, timeout = 30000): Promise<unknown> {
+	return Promise.race([
+		page.goto(url),
+		new Promise((_, reject) =>
+			setTimeout(() => reject(new Error(`Navigation timeout (${timeout}ms) pour ${url}`)), timeout)
+		),
+	]);
+}
+
 export async function crawlZukanOrder(): Promise<{
 	success: boolean;
 	count: number;
@@ -41,7 +50,7 @@ export async function crawlZukanOrder(): Promise<{
 			console.log(`[Crawl Zukan] Navigation vers page ${pageNum} : ${url}`);
 
 			try {
-				await page.goto(url);
+				await safeGoto(page, url);
 				await page.waitForSelector("ul.charaListBox", 15000).catch(() => {});
 				const html = await page.content();
 				const $ = cheerio.load(html);

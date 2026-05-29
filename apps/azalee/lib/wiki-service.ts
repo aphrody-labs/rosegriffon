@@ -279,6 +279,56 @@ export const wikiService = {
 		}));
 	},
 
+	async getCharacterAuras(
+		charaId: string,
+		charaParamId: string
+	): Promise<Array<{
+		id: string;
+		name: string;
+		type: string;
+		categorySlug: string;
+		imageUrl: string | null;
+		assetCode: string | null;
+		subType: string;
+		element?: { en?: string; ja?: string; fr?: string };
+	}>> {
+		const supabase = await createClient();
+		const results: any[] = [];
+		const tables = [
+			{ table: "inagle_keshins", slug: "esprits-guerriers", subType: "Keshin" },
+			{ table: "inagle_souls", slug: "totems", subType: "Soul" },
+			{ table: "inagle_miximax", slug: "miximax", subType: "Miximax" },
+		] as const;
+
+		const cleanCharaId = sanitizeFilter(charaId);
+		const cleanParamId = sanitizeFilter(charaParamId);
+
+		const searchPromises = tables.map(async ({ table, slug, subType }) => {
+			const { data } = await supabase
+				.from(table as any)
+				.select("id, name_fr, name_en, name_ja, image_url, asset_code, element_id, data, owner_chara_id")
+				.or(`owner_chara_id.eq.${cleanCharaId},owner_chara_id.eq.${cleanParamId},data->>ownerCharaParamId.eq.${cleanCharaId},data->>ownerCharaParamId.eq.${cleanParamId}`);
+
+			if (data) {
+				for (const a of data as any[]) {
+					results.push({
+						id: a.id,
+						name: a.name_fr || a.name_en || a.name_ja || "Inconnu",
+						type: subType.toLowerCase(),
+						categorySlug: slug,
+						imageUrl: a.image_url,
+						assetCode: a.asset_code,
+						subType,
+						element: ElementNames[a.element_id as keyof typeof ElementNames] || undefined,
+					});
+				}
+			}
+		});
+
+		await Promise.all(searchPromises);
+		return results;
+	},
+
 	async getAura(id: string, typeSlug: string): Promise<any | undefined> {
 		const supabase = await createClient();
 

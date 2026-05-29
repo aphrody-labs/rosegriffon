@@ -1,0 +1,177 @@
+<!DOCTYPE html><html lang="en"><head>
+    <!-- Google Tag Manager -->
+<script type="text/javascript" async="" src="https://www.google-analytics.com/analytics.js"></script><script type="text/javascript" async="" src="https://www.googletagmanager.com/gtag/js?id=G-CDF2V2EKNR&amp;cx=c&amp;gtm=4e65r2"></script><script async="" src="https://www.googletagmanager.com/gtm.js?id=GTM-TCB894P"></script><script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-TCB894P');</script>
+<!-- End Google Tag Manager -->    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <title>Five-Star Workshop Devlog</title>
+    <meta name="description" content="This is a development blog where we share updates about the game's progress.">
+<!-- OGP -->
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://www.level5.co.jp/blog/en/">
+<meta property="og:site_name" content="Five-Star Workshop Devlog">
+<meta property="og:title" content="Five-Star Workshop Devlog">
+<meta property="og:description" content="This is a development blog where we share updates about the game's progress.">
+<meta property="og:image" content="https://www.level5.co.jp/blog/en/assets/img/shared/ogp_2025.jpg">
+<meta name="twitter:site" content="@AkihiroHino">
+<meta name="twitter:card" content="summary_large_image">
+    <!-- WEB FONT -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+
+        <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;500;700;900&amp;family=Noto+Serif:wght@400;500;700;900&amp;display=swap" rel="stylesheet">
+            <meta name="viewport" content="width=device-width,initial-scale=1">
+<!-- ALTERNATE -->
+<link rel="alternate" href="https://www.level5.co.jp/blog/" hreflang="ja">
+<link rel="alternate" href="https://www.level5.co.jp/blog/en/" hreflang="en">
+<link rel="alternate" href="https://www.level5.co.jp/blog/zh-tw/" hreflang="zh-cmn-Hant">
+<link rel="alternate" href="https://www.level5.co.jp/blog/zh-cn/" hreflang="zh-cmn-Hans">
+<!-- CSS -->
+<link rel="stylesheet" href="/blog/assets/css/base.css">
+<link rel="stylesheet" href="/blog/assets/css/shared.css">
+<link rel="stylesheet" href="/blog/assets/css/colorbox.css">
+<link rel="stylesheet" href="/blog/assets/css/slick-theme.css">
+<link rel="stylesheet" href="/blog/assets/css/slick.css">
+<!-- JS -->
+<script src="/blog/assets/js/jquery-3.6.0.min.js" charset="utf-8" defer=""></script>
+<script src="/blog/assets/js/picturefill.js" charset="utf-8" defer=""></script>
+<script src="/blog/assets/js/jquery.colorbox-min.js" charset="utf-8" defer=""></script>
+<script src="/blog/assets/js/slick.min.js" charset="utf-8" defer=""></script>
+<script src="/blog/assets/js/anchor.js" charset="utf-8" defer=""></script>
+<script src="/blog/assets/js/shared.js" charset="utf-8" defer=""></script>
+    <style>
+      header .langBox ul li:nth-child(n + 2) {
+        display: none !important;
+      }
+    </style>
+      </head>
+
+  <body id="blog" class="en">
+    <!-- Google Tag Manager (noscript) -->
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-TCB894P"
+height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+<!-- End Google Tag Manager (noscript) -->    <header>
+  <div class="inner">
+    <p class="logo">
+      <a href="https://www.level5.co.jp/" target="_blank"><img src="/blog/assets/img/shared/img_logo_l5.svg" alt="LEVEL5"></a>
+    </p>
+    <div class="rBox">
+      <p class="x">
+        <a href="https://x.com/AkihiroHino" target="_blank"><img src="/blog/assets/img/shared/btn_x.svg" alt="X"></a>
+      </p>
+      <div class="langBox">
+        <p></p>
+        <ul>
+          <li class="ja">
+            <a href="">日本語</a>
+          </li>
+          <li class="en">
+            <a href="en/">English</a>
+          </li>
+          <li class="zh-tw">
+            <a href="zh-tw/">繁體中文</a>
+          </li>
+          <li class="zh-cn">
+            <a href="zh-cn/">简体中文</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</header>
+    <div id="wrap">
+      <div id="visual">
+  <h1>
+    <a href="/blog/en/">
+      <img src="/blog/en/assets/img/shared/logo_blog.png" alt="Five-Star Workshop Devlog">
+    </a>
+  </h1>
+</div>
+      <div id="content">
+        <div class="inner">
+          <article>
+            <h2>
+              <dl>
+                <dt>2025.12.28</dt>
+                <dd class="tagNone">
+                  On the Recent AI Controversy                </dd>
+              </dl>
+            </h2>
+            <p class="writer">Akihiro Hino, LEVEL5</p>
+
+            <section class="all">
+              <div class="inner">
+                <p class="txt">
+                  I typically focus on the games themselves, but today I'd like to address the ongoing discussion surrounding AI.<br>
+ <br>
+As many of you may have heard, a game developer recently had an award revoked in connection with the use of AI tools. In the wake of that news, LEVEL5's past comments about using AI to improve development efficiency have resurfaced and become a topic of debate. I'd like to clarify our position.<br>
+ <br>
+First, I believe many game companies are already incorporating AI into their development workflows to improve efficiency. The main difference is simply whether they choose to disclose it publicly.<br>
+ <br>
+That said, the claim that LEVEL5 has AI write "80–90%" of our program code is a huge misunderstanding. Here is what actually happened: in an unreleased title we're working on that explores AI as a theme, one programmer deliberately experimented with using AI for the programming as well, as part of that exploration. That naturally led to a broader discussion about whether this could be the kind of era the future is heading toward, and the conversation expanded from there.<br>
+<br>
+If we truly could produce a complete game with AI generating 80–90% of the code, that in itself would be an extraordinary achievement. One that would naturally attract significant attention in the AI community. Safe to say, we are not at that stage.<br>
+<br>
+However, it is true that AI has already delivered meaningful time savings in certain areas, and I believe it has the potential to reshape conventional assumptions about game development. Today, the AAA games many players want often take five to ten years to build. Over time, AI may help shorten those timelines, perhaps even to the point where major titles can reach players more frequently, even in as little as two years.<br>
+<br>
+AI is sometimes treated as synonymous with plagiarism, but that is an oversimplification. A knife can be used to cook a delicious meal or to cause harm; a computer can be used to create enjoyable games or to commit cybercrime. AI, too, is a tool, and its impact depends on how it is used. Like any technology, it can be misused. But when applied responsibly, it can also enrich creative work.<br>
+<br>
+I want to see games evolve further in my lifetime. I want to see, and help create, experiences that go beyond today's AAA standards: games that are even more ambitious, imaginative, and dreamlike than what is currently possible. If the notion that "using AI is inherently wrong" becomes widespread, we risk discouraging responsible innovation and slowing the progress of digital technology.<br>
+<br>
+I hope creators and audiences alike can understand AI for what it is: a tool that supports human creativity when used responsibly, and I sincerely hope that advances in various technologies will further drive the growth of the game industry.                </p>
+              </div>
+            </section>
+          </article>
+          <aside>
+  <section id="recent">
+    <div class="in">
+      <h2>Latest Articles</h2>
+      <ul>
+        <li class="item" data-group="all">
+  <a href="/blog/en/">
+    <dl>
+      <dt>2025.12.28</dt>
+      <dd>
+        On the Recent AI Controversy      </dd>
+    </dl>
+  </a>
+</li>
+
+<li class="item" data-group="fli iev">
+  <a href="/blog/en/250303/">
+    <dl>
+      <dt>2025.3.3</dt>
+      <dd>
+        Here We Go! The Final Stretch‼      </dd>
+    </dl>
+  </a>
+</li>
+      </ul>
+    </div>
+  </section>
+  <div id="bnrNews">
+    <a href="/blog_inazuma/en/" target="_blank">
+      <dl>
+        <dt>
+          INAZUMA ELEVEN:<br>
+Victory Road        </dt>
+        <dd>Notice Regarding<br>
+the "Development Blog"</dd>
+      </dl>
+      <p>Future development updates on Inazuma Eleven will be shared on this Five-Star Workshop Devlog instead of the previous Development Blog.</p>
+      <span>Development Blog</span>
+    </a>
+  </div>
+</aside>
+        </div>
+      </div>
+    </div>
+    <footer>
+  <small>©LEVEL5 Inc.</small>
+</footer>
+      
+
+</body></html>

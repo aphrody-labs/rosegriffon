@@ -134,3 +134,12 @@ export type {
 	TeamsDatabase,
 } from "./teams/api.js";
 export { buildTeamsDatabase, createTeamsAPI } from "./teams/api.js";
+
+// Romaji & Transliteration
+export {
+	initRomaji,
+	toRomaji,
+	toRomajiTitleCase,
+	toKana,
+} from "./utils/romaji.js";
+

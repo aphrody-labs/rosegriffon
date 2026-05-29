@@ -6,6 +6,7 @@ import { ArrowRight, AtSign, Newspaper } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
+import { getAuthorInfo } from "@/lib/author";
 
 interface Article {
 	id: string;
@@ -162,6 +163,8 @@ function TweetCard({ tweet, variant }: { tweet: Tweet; variant: "chip" | "full" 
 	const excerpt = paragraphs.slice(1, 3).join(" ").trim();
 	const heroImage = tweet.media?.[0]?.url;
 
+	const authorInfo = getAuthorInfo(tweet.author_username, tweet.author_name);
+
 	if (variant === "chip") {
 		return (
 			<Link
@@ -172,9 +175,13 @@ function TweetCard({ tweet, variant }: { tweet: Tweet; variant: "chip" | "full" 
 					<div className="size-10 rounded-lg overflow-hidden relative bg-surface-container-high shrink-0">
 						<Image src={heroImage} alt="" fill sizes="40px" className="object-cover" />
 					</div>
-				) : (
+				) : authorInfo.avatar ? (
 					<div className="size-7 rounded-full overflow-hidden relative bg-surface-container-high shrink-0">
-						<Image src="/icon.webp" alt="Azalée" fill sizes="28px" className="object-cover" />
+						<Image src={authorInfo.avatar} alt={authorInfo.name} fill sizes="28px" className="object-cover" />
+					</div>
+				) : (
+					<div className={`size-7 rounded-full flex items-center justify-center text-white text-[10px] font-bold shrink-0 ${authorInfo.color}`}>
+						{authorInfo.initials}
 					</div>
 				)}
 				<div className="min-w-0">
@@ -227,9 +234,16 @@ function TweetCard({ tweet, variant }: { tweet: Tweet; variant: "chip" | "full" 
 				)}
 				<div className="flex items-center justify-between mt-auto pt-2 border-t border-outline-variant/10">
 					<div className="flex items-center gap-2">
-						<div className="size-5 rounded-full overflow-hidden relative bg-surface-container-high">
-							<Image src="/icon.webp" alt="Azalée" fill className="object-cover" />
-						</div>
+						{authorInfo.avatar ? (
+							<div className="size-5 rounded-full overflow-hidden relative bg-surface-container-high shrink-0">
+								<Image src={authorInfo.avatar} alt={authorInfo.name} fill className="object-cover" />
+							</div>
+						) : (
+							<div className={`size-5 rounded-full flex items-center justify-center text-white text-[8px] font-bold shrink-0 ${authorInfo.color}`}>
+								{authorInfo.initials}
+							</div>
+						)}
+						<span className="text-[11px] text-on-surface-variant/70 font-semibold max-w-[100px] truncate">{authorInfo.name}</span>
 						<span className="text-[11px] text-on-surface-variant/50">{timeAgo}</span>
 					</div>
 					<span className="inline-flex items-center gap-1 text-[11px] text-[#1DA1F2]/60 font-medium group-hover:text-[#1DA1F2] transition-colors">
