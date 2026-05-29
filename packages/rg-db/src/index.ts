@@ -5,4 +5,5 @@ export * from "./server";
 export * from "./service";
 export * from "./storage";
 export * from "./services/stats";
+export * from "./redis";
 export type * from "./types";

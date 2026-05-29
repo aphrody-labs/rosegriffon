@@ -8,6 +8,7 @@
     "./browser": "./src/browser.ts",
     "./server": "./src/server.ts",
     "./service": "./src/service.ts",
+    "./redis": "./src/redis.ts",
     "./types": "./src/types.ts"
   },
   "scripts": {

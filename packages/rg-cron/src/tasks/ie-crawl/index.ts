@@ -6,6 +6,7 @@
 
 import { crawlZukanOrder } from "./zukan";
 import { crawlNews } from "./news";
+import { runRagSync } from "./rag";
 
 export async function runIeCrawl(): Promise<{ success: boolean; error?: string }> {
   console.log("==================================================================");
@@ -29,13 +30,26 @@ export async function runIeCrawl(): Promise<{ success: boolean; error?: string }
       console.log("[ie-crawl] Crawl des actualités complété.");
     }
 
-    const success = (zukanRes.success && newsRes.success);
+    // 3. Synchronisation sémantique / vectorisation pour le RAG
+    let ragSuccess = true;
+    if (newsRes.success) {
+      const ragRes = await runRagSync();
+      ragSuccess = ragRes.success;
+      if (!ragRes.success) {
+        console.error("[ie-crawl] Échec de la synchronisation vectorielle RAG.");
+      } else {
+        console.log(`[ie-crawl] RAG Sync complété : ${ragRes.processed} nouveaux documents indexés.`);
+      }
+    }
+
+    const success = (zukanRes.success && newsRes.success && ragSuccess);
     return {
       success,
-      error: success ? undefined : "Certaines tâches de crawl ont échoué."
+      error: success ? undefined : "Certaines tâches de crawl ou RAG ont échoué."
     };
   } catch (err: any) {
     console.error("[ie-crawl] Erreur critique lors de l'exécution du crawl :", err);
     return { success: false, error: err.message || String(err) };
   }
 }
+

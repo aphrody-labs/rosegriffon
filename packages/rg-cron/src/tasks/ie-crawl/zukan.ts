@@ -5,7 +5,7 @@
  */
 
 import { Browser } from "@aphrody-code/bxc";
-import { createSupabaseServiceClient } from "@rose-griffon/db";
+import { createSupabaseServiceClient, cache } from "@rose-griffon/db";
 import * as cheerio from "cheerio";
 
 const PER_PAGE = 200;
@@ -85,7 +85,26 @@ export async function crawlZukanOrder(): Promise<{ success: boolean; count: numb
       return { success: true, count: 0 };
     }
 
-    console.log(`[Crawl Zukan] Fin du crawl. ${allCharacters.length} personnages trouvés. Mise à jour de la base de données...`);
+    console.log(`[Crawl Zukan] Fin du crawl. ${allCharacters.length} personnages trouvés. Vérification des changements via Redis...`);
+
+    const orderMapObj: Record<string, number> = {};
+    for (const char of allCharacters) {
+      if (char.zukanHash) {
+        orderMapObj[char.zukanHash] = char.order;
+      }
+    }
+
+    const cacheKey = "crawl:zukan:orders";
+    const cachedOrders = await cache.get<Record<string, number>>(cacheKey);
+
+    const hasChanged = !cachedOrders || JSON.stringify(cachedOrders) !== JSON.stringify(orderMapObj);
+
+    if (!hasChanged) {
+      console.log("[Crawl Zukan] L'ordre des personnages n'a pas changé par rapport au dernier crawl. Synchronisation sautée.");
+      return { success: true, count: allCharacters.length };
+    }
+
+    console.log("[Crawl Zukan] Des changements d'ordre ont été détectés. Mise à jour de Supabase...");
 
     // Mise à jour de la table inagle_characters dans Supabase
     let updatedCount = 0;
@@ -102,9 +121,10 @@ export async function crawlZukanOrder(): Promise<{ success: boolean; count: numb
     if (dbChars && dbChars.length > 0) {
       // Créer une map hash -> order
       const hashToOrder = new Map<string, number>();
-      for (const char of allCharacters) {
-        if (char.zukanHash) {
-          hashToOrder.set(char.zukanHash, char.order);
+      for (const key of Object.keys(orderMapObj)) {
+        const val = orderMapObj[key];
+        if (val !== undefined) {
+          hashToOrder.set(key, val);
         }
       }
 
@@ -126,6 +146,9 @@ export async function crawlZukanOrder(): Promise<{ success: boolean; count: numb
         }
       }
     }
+
+    // Sauvegarder les nouveaux ordres dans Redis
+    await cache.set(cacheKey, orderMapObj, 86400 * 7); // Expiration de 7 jours
 
     console.log(`[Crawl Zukan] Base de données mise à jour. ${updatedCount} personnages synchronisés.`);
     return { success: true, count: allCharacters.length };
