@@ -32,26 +32,26 @@ function getSqlitePath(): string | null {
 	return null;
 }
 
-let _sqliteDb: any = null;
-function getSqliteDb(): any {
+let _sqliteDb: Database | null = null;
+function getSqliteDb(): Database {
 	if (_sqliteDb) return _sqliteDb;
 	const dbPath = getSqlitePath();
 	if (!dbPath) {
 		throw new Error("No SQLite database backup found");
 	}
 	const { Database: BunDatabase } = require("bun:sqlite");
-	_sqliteDb = new BunDatabase(dbPath, { readonly: true });
+	_sqliteDb = new BunDatabase(dbPath, { readonly: true }) as Database;
 	_sqliteDb.exec("PRAGMA journal_mode = WAL");
 	_sqliteDb.exec("PRAGMA temp_store = MEMORY");
 	return _sqliteDb;
 }
 
 export class SqliteQueryBuilder {
-	private db: any;
+	private db: Database;
 	private table: string;
 	private selects: string = "*";
 	private wheres: string[] = [];
-	private params: any[] = [];
+	private params: (string | number | boolean | null)[] = [];
 	private limitValue: number | null = null;
 	private offsetValue: number | null = null;
 	private orders: string[] = [];
@@ -59,7 +59,7 @@ export class SqliteQueryBuilder {
 	private isMaybeSingle: boolean = false;
 	private countOption: string | null = null;
 
-	constructor(db: any, table: string) {
+	constructor(db: Database, table: string) {
 		this.db = db;
 		this.table = table;
 	}
@@ -80,7 +80,7 @@ export class SqliteQueryBuilder {
 		return `"${col}"`;
 	}
 
-	eq(col: string, val: any) {
+	eq(col: string, val: string | number | boolean | null) {
 		const column = this.cleanCol(col);
 		if (val === null) {
 			this.wheres.push(`${column} IS NULL`);
@@ -91,7 +91,7 @@ export class SqliteQueryBuilder {
 		return this;
 	}
 
-	not(col: string, op: string, val: any) {
+	not(col: string, op: string, val: string | number | boolean | null) {
 		const column = this.cleanCol(col);
 		if (op === "is" && val === null) {
 			this.wheres.push(`${column} IS NOT NULL`);
@@ -109,21 +109,21 @@ export class SqliteQueryBuilder {
 		return this;
 	}
 
-	gte(col: string, val: any) {
+	gte(col: string, val: string | number | boolean | null) {
 		const column = this.cleanCol(col);
 		this.wheres.push(`${column} >= ?`);
 		this.params.push(typeof val === "boolean" ? (val ? 1 : 0) : val);
 		return this;
 	}
 
-	lte(col: string, val: any) {
+	lte(col: string, val: string | number | boolean | null) {
 		const column = this.cleanCol(col);
 		this.wheres.push(`${column} <= ?`);
 		this.params.push(typeof val === "boolean" ? (val ? 1 : 0) : val);
 		return this;
 	}
 
-	in(col: string, arr: any[]) {
+	in(col: string, arr: (string | number | boolean | null)[]) {
 		if (!arr || arr.length === 0) {
 			this.wheres.push("1 = 0");
 			return this;
@@ -138,7 +138,7 @@ export class SqliteQueryBuilder {
 	or(orString: string) {
 		const parts = orString.split(",");
 		const conditions: string[] = [];
-		const orParams: any[] = [];
+		const orParams: (string | number | boolean | null)[] = [];
 
 		for (const part of parts) {
 			const match = part.match(/(.+?)\.(ilike|eq)\.(.+)/);
@@ -196,22 +196,29 @@ export class SqliteQueryBuilder {
 	}
 
 	// Make the class then-able (Promise-like)
-	async then(onfulfilled?: (value: any) => any) {
+	async then<TResult1 = unknown>(
+		onfulfilled?: ((value: { data: Record<string, unknown> | Record<string, unknown>[] | null; error: Error | null; count: number | null }) => TResult1 | PromiseLike<TResult1>) | undefined | null
+	) {
 		try {
 			const data = await this.execute();
 			const count = this.countOption ? await this.executeCount() : null;
 
-			const response: any = { data, error: null };
-			if (this.countOption !== null) {
-				response.count = count;
-			}
+			const response = {
+				data,
+				error: null as Error | null,
+				count
+			};
 
 			if (onfulfilled) {
 				return onfulfilled(response);
 			}
 			return response;
-		} catch (err: any) {
-			const response = { data: null, error: err, count: null };
+		} catch (err) {
+			const response = {
+				data: null,
+				error: err instanceof Error ? err : new Error(String(err)),
+				count: null
+			};
 			if (onfulfilled) {
 				return onfulfilled(response);
 			}
@@ -236,12 +243,12 @@ export class SqliteQueryBuilder {
 		return sql;
 	}
 
-	private async execute(): Promise<any> {
+	private async execute(): Promise<Record<string, unknown> | Record<string, unknown>[] | null> {
 		const sql = this.compileSelect();
 		const stmt = this.db.prepare(sql);
-		const rawRows = stmt.all(...this.params);
+		const rawRows = stmt.all(...this.params) as Record<string, unknown>[];
 
-		const parsedRows = rawRows.map((r: any) => this.parseRow(r));
+		const parsedRows = rawRows.map((r) => this.parseRow(r));
 
 		if (this.isSingle) {
 			if (parsedRows.length === 0) {
@@ -267,9 +274,8 @@ export class SqliteQueryBuilder {
 		return result?.count ?? 0;
 	}
 
-	private parseRow(row: any): any {
-		if (!row) return row;
-		const parsed: any = {};
+	private parseRow(row: Record<string, unknown>): Record<string, unknown> {
+		const parsed: Record<string, unknown> = {};
 		for (const [key, val] of Object.entries(row)) {
 			if (typeof val === "string" && (val.startsWith("{") || val.startsWith("["))) {
 				try {
