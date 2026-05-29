@@ -290,25 +290,16 @@ export const wikiService = {
 		const tablesToSearch =
 			typeSlug === "eveil" ? [table, "inagle_auras"] : [table];
 
-		// Try exact match by ID first, then by asset_code, across all candidate tables
-		let row: any = null;
-		for (const t of tablesToSearch) {
-			if (row) break;
-			const { data: idRow } = await (supabase as any)
+		// Try match by ID or asset_code across all candidate tables in parallel
+		const searchPromises = tablesToSearch.map((t) =>
+			(supabase as any)
 				.from(t)
 				.select("*")
-				.eq("id", id)
-				.maybeSingle();
-			row = idRow;
-			if (!row) {
-				const { data: assetRow } = await (supabase as any)
-					.from(t)
-					.select("*")
-					.eq("asset_code", id)
-					.maybeSingle();
-				row = assetRow;
-			}
-		}
+				.or(`id.eq.${id},asset_code.eq.${id}`)
+				.maybeSingle()
+		);
+		const searchResults = await Promise.all(searchPromises);
+		const row = searchResults.find((res) => res.data)?.data || null;
 
 		if (!row) return undefined;
 
@@ -318,65 +309,79 @@ export const wikiService = {
 			ElementNames[0];
 		const sd = normalizeAuraSheetData(a.sheet_data) || {};
 
-		// Fetch linked skill video if skill_id exists
+		// Fetch linked skill video and owner in parallel
 		let skillVideoUrl: string | null = null;
 		let skillInternalCode: string | null = null;
 		let skillNameFR: string | null = null;
+		let ownerName: string | undefined;
+		let ownerSlug: string | undefined;
 
-		const fetchSkill = async (query: any) => {
-			const { data: skill } = await query;
-			if (skill) {
-				skillVideoUrl = skillVideoUrl || skill.video_url;
-				skillInternalCode = skillInternalCode || skill.internal_code;
-				skillNameFR = skill.name_fr || skill.name_en || null;
-			}
-			return !!skill;
-		};
+		const rawSd = (a.sheet_data || {}) as any;
+		const config = rawSd.config || {};
+		const possibleSkillIds = [config.skillId1, config.skillId2].filter(
+			(sid: string) => sid && sid !== "0x00000000",
+		);
 
+		const parallelPromises: PromiseLike<any>[] = [];
+
+		// Push skill queries
 		if (a.skill_id) {
-			await fetchSkill(
+			parallelPromises.push(
 				supabase
 					.from("inagle_skills")
 					.select("video_url, internal_code, name_fr, name_en")
 					.eq("id", a.skill_id)
-					.maybeSingle(),
+					.maybeSingle()
+					.then(({ data }) => ({ type: "skill", data }))
+			);
+		}
+		for (const sid of possibleSkillIds) {
+			parallelPromises.push(
+				supabase
+					.from("inagle_skills")
+					.select("video_url, internal_code, name_fr, name_en")
+					.or(`data->>skillID.eq.${sid},sheet_data->>skillID.eq.${sid}`)
+					.limit(1)
+					.maybeSingle()
+					.then(({ data }) => ({ type: "skill", data }))
 			);
 		}
 
-		// Fallback: resolve skill from sheet_data config.skillId1/skillId2 (hex hash)
-		if (!skillNameFR) {
-			const rawSd = (a.sheet_data || {}) as any;
-			const config = rawSd.config || {};
-			const possibleSkillIds = [config.skillId1, config.skillId2].filter(
-				(sid: string) => sid && sid !== "0x00000000",
-			);
-			for (const sid of possibleSkillIds) {
-				const found = await fetchSkill(
-					supabase
-						.from("inagle_skills")
-						.select("video_url, internal_code, name_fr, name_en")
-						.or(`data->>skillID.eq.${sid},sheet_data->>skillID.eq.${sid}`)
-						.limit(1)
-						.maybeSingle(),
-				);
-				if (found) break;
-			}
-		}
-
-		// Resolve owner character name if owner_chara_id exists
-		let ownerName: string | undefined;
-		let ownerSlug: string | undefined;
+		// Push owner query
 		const ownerCharaId = a.owner_chara_id || (a.data as any)?.ownerCharaParamId;
 		if (ownerCharaId) {
-			const { data: ownerRow } = await supabase
-				.from("inagle_characters")
-				.select("name_fr, name_en, slug, base_slug")
-				.eq("id", ownerCharaId)
-				.maybeSingle();
-			if (ownerRow) {
-				ownerName = ownerRow.name_fr || ownerRow.name_en || undefined;
+			parallelPromises.push(
+				supabase
+					.from("inagle_characters")
+					.select("name_fr, name_en, slug, base_slug")
+					.eq("id", ownerCharaId)
+					.maybeSingle()
+					.then(({ data }) => ({ type: "owner", data }))
+			);
+		}
+
+		if (parallelPromises.length > 0) {
+			const results = await Promise.all(parallelPromises);
+
+			// Process skill results
+			const skillResults = results
+				.filter((r) => r.type === "skill" && r.data)
+				.map((r) => r.data);
+			const foundSkill = skillResults.find((s) => s && (s.name_fr || s.name_en));
+			const fallbackSkill = skillResults.find((s) => s);
+			const targetSkill = foundSkill || fallbackSkill;
+			if (targetSkill) {
+				skillVideoUrl = targetSkill.video_url;
+				skillInternalCode = targetSkill.internal_code;
+				skillNameFR = targetSkill.name_fr || targetSkill.name_en || null;
+			}
+
+			// Process owner result
+			const ownerResult = results.find((r) => r.type === "owner" && r.data)?.data;
+			if (ownerResult) {
+				ownerName = ownerResult.name_fr || ownerResult.name_en || undefined;
 				ownerSlug =
-					ownerRow.base_slug || ownerRow.slug || ownerCharaId || undefined;
+					ownerResult.base_slug || ownerResult.slug || ownerCharaId || undefined;
 			}
 		}
 
