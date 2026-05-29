@@ -114,13 +114,14 @@ _Daemon de planification, crawling et RAG (VPS simple process)_
   - ✅ Tâches planifiées et implémentées :
     - ✅ **db** (`db.ts`) : Pousser les données parsed par `inagle` dans la base Supabase.
     - ✅ **cdn** (`cdn.ts`) : Synchroniser les médias et ressources vers le CDN statique.
-    - ✅ **zukan** (`zukan.ts`) : Crawling stealth de l'ordre officiel des personnages du zukan.
-    - ✅ **news** (`news.ts`) : Récupération des topics FR et patch notes officiels (Steam, Switch, Xbox).
-    - ✅ **re** (`re.ts`) : Collecte des informations de Inazuma Eleven RE.
-    - ✅ **cross** (`cross.ts`) : Extraction de données pour Inazuma Eleven Cross.
-    - ✅ **level5** (`level5.ts`) : Veille sur les annonces Level-5 Corporate.
-    - ✅ **twitter** (`twitter.ts`) : Synchronisation de `@Azalee_IE`, filtrage des RTs et reconstruction des threads.
-    - ✅ **rag** (`rag.ts`) : Vectorisation automatique du contenu extrait et indexation dans Redis.
+    - ✅ zukan (`zukan.ts`) : Crawling stealth de l'ordre officiel des personnages du zukan avec support de `waitForSelector`.
+    - ✅ news (`news.ts`) : Récupération multi-langues des topics (FR, EN, JA, ES, DE, IT, ZH-TW, ZH-CN, PT-BR) et patch notes officiels (EN, JA pour Steam, Switch, Xbox).
+    - ✅ re (`re.ts`) : Collecte des informations de Inazuma Eleven RE (FR, EN, JA).
+    - ✅ cross (`cross.ts`) : Extraction de données pour Inazuma Eleven Cross (FR, EN, JA).
+    - ✅ level5 (`level5.ts`) : Veille sur les annonces LEVEL-5 Corporate liées à Inazuma Eleven.
+    - ✅ level5Blog (`level5-blog.ts`) : Crawling du blog de développement LEVEL-5 (5つ星工房日記 / Five-Star Workshop) en JA, EN, ZH-TW, ZH-CN.
+    - ✅ twitter (`twitter.ts`) : Synchronisation de `@Azalee_IE`, filtrage des RTs et reconstruction des threads.
+    - ✅ rag (`rag.ts`) : Vectorisation automatique du contenu extrait de l'ensemble des locales de topics et de blogs pour indexation dans Redis.
     - ✅ **publish** (`api.ts`) : Publication des articles programmés.
     - ✅ **patreon** (`api.ts`) : Synchronisation des tiers d'abonnements Patreon.
     - ✅ **warm** (`api.ts`) : Chauffage régulier du cache ISR Next.js des applications.
