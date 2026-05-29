@@ -261,6 +261,6 @@ _API universelle et parses de données de jeu Inazuma Eleven_
 
 ### Phase 5 : Sécurité & Stratégie de Sauvegarde Externe
 
-1. **Script de backup PG18 automatisé** :
-   - Mettre en place un script cron de sauvegarde globale (schéma + rôles + données) via le Supabase CLI (`supabase db dump`) découpé en trois fichiers (`roles.sql`, `schema.sql`, `data.sql`).
+1. ✅ **Script de backup PG18 automatisé** :
+   - Mettre en place un script de sauvegarde globale (schéma + rôles + données) via pg_dump / pg_dumpall natifs, découpé en trois fichiers (`roles.sql`, `schema.sql`, `data.sql`) et compressé.
    - Exporter ces sauvegardes logiques PostgreSQL 18 vers un espace de stockage externe (type AWS S3 ou serveur froid externe) pour se prémunir de toute perte de données dynamique (utilisateurs, logs, profils).
