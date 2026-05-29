@@ -143,6 +143,111 @@ function collectScrapedItems(): ScrapedItem[] {
     }
   }
 
+  // 3. Collecter les pages Inazuma Eleven RE (re)
+  const reDir = "/home/ubuntu/rg/data/inazuma.jp/re";
+  if (existsSync(reDir)) {
+    const subDirs = readdirSync(reDir, { withFileTypes: true })
+      .filter(dirent => dirent.isDirectory())
+      .map(dirent => dirent.name);
+
+    for (const dir of subDirs) {
+      const dirPath = join(reDir, dir);
+      const metaPath = join(dirPath, "meta.json");
+      const htmlPath = join(dirPath, "index.html");
+
+      if (existsSync(metaPath) && existsSync(htmlPath)) {
+        try {
+          const meta = JSON.parse(readFileSync(metaPath, "utf-8"));
+          items.push({
+            id: `re-${dir}`,
+            type: "re" as any,
+            title: meta.title || "Inazuma Eleven RE",
+            url: meta.url || "",
+            date: meta.date || "",
+            htmlPath,
+            metadata: {
+              id: dir,
+              category: meta.category || "RE Remake",
+              language: meta.language || dir
+            }
+          });
+        } catch (err) {
+          console.error(`[RAG Sync] Erreur de lecture de meta pour RE ${dir} :`, err);
+        }
+      }
+    }
+  }
+
+  // 4. Collecter les pages Inazuma Eleven: Cross (cross)
+  const crossDir = "/home/ubuntu/rg/data/inazuma-cross.jp";
+  if (existsSync(crossDir)) {
+    const subDirs = readdirSync(crossDir, { withFileTypes: true })
+      .filter(dirent => dirent.isDirectory())
+      .map(dirent => dirent.name);
+
+    for (const dir of subDirs) {
+      const dirPath = join(crossDir, dir);
+      const metaPath = join(dirPath, "meta.json");
+      const htmlPath = join(dirPath, "index.html");
+
+      if (existsSync(metaPath) && existsSync(htmlPath)) {
+        try {
+          const meta = JSON.parse(readFileSync(metaPath, "utf-8"));
+          items.push({
+            id: `cross-${dir}`,
+            type: "cross" as any,
+            title: meta.title || "Inazuma Eleven: Cross",
+            url: meta.url || "",
+            date: meta.date || "",
+            htmlPath,
+            metadata: {
+              id: dir,
+              category: meta.category || "Cross Mobile",
+              language: meta.language || dir
+            }
+          });
+        } catch (err) {
+          console.error(`[RAG Sync] Erreur de lecture de meta pour Cross ${dir} :`, err);
+        }
+      }
+    }
+  }
+
+  // 5. Collecter les articles LEVEL-5 (level5)
+  const level5Dir = "/home/ubuntu/rg/data/level5.co.jp/inazuma";
+  if (existsSync(level5Dir)) {
+    const subDirs = readdirSync(level5Dir, { withFileTypes: true })
+      .filter(dirent => dirent.isDirectory())
+      .map(dirent => dirent.name);
+
+    for (const dir of subDirs) {
+      const dirPath = join(level5Dir, dir);
+      const metaPath = join(dirPath, "meta.json");
+      const htmlPath = join(dirPath, "index.html");
+
+      if (existsSync(metaPath) && existsSync(htmlPath)) {
+        try {
+          const meta = JSON.parse(readFileSync(metaPath, "utf-8"));
+          items.push({
+            id: `level5-${dir}`,
+            type: "level5" as any,
+            title: meta.title || "LEVEL-5 Announcement",
+            url: meta.url || "",
+            date: meta.date || "",
+            htmlPath,
+            metadata: {
+              id: dir,
+              category: meta.category || "LEVEL-5 Press Release",
+              language: meta.language || "ja"
+            }
+          });
+        } catch (err) {
+          console.error(`[RAG Sync] Erreur de lecture de meta pour Level5 ${dir} :`, err);
+        }
+      }
+    }
+  }
+
   return items;
 }
 

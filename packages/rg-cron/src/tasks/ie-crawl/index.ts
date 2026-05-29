@@ -6,6 +6,9 @@
 
 import { crawlZukanOrder } from "./zukan";
 import { crawlNews } from "./news";
+import { crawlRe } from "./re";
+import { crawlCross } from "./cross";
+import { crawlLevel5 } from "./level5";
 import { runRagSync } from "./rag";
 
 export async function runIeCrawl(): Promise<{ success: boolean; error?: string }> {
@@ -30,9 +33,34 @@ export async function runIeCrawl(): Promise<{ success: boolean; error?: string }
       console.log("[ie-crawl] Crawl des actualités complété.");
     }
 
-    // 3. Synchronisation sémantique / vectorisation pour le RAG
+    // 3. Crawl Inazuma Eleven RE (Remake)
+    const reRes = await crawlRe();
+    if (!reRes.success) {
+      console.error("[ie-crawl] Échec du crawl Inazuma Eleven RE :", reRes.error);
+    } else {
+      console.log("[ie-crawl] Crawl Inazuma Eleven RE complété.");
+    }
+
+    // 4. Crawl Inazuma Eleven: Cross (Mobile)
+    const crossRes = await crawlCross();
+    if (!crossRes.success) {
+      console.error("[ie-crawl] Échec du crawl Inazuma Eleven: Cross :", crossRes.error);
+    } else {
+      console.log("[ie-crawl] Crawl Inazuma Eleven: Cross complété.");
+    }
+
+    // 5. Crawl LEVEL-5 Corporate News (filtered for Inazuma)
+    const level5Res = await crawlLevel5();
+    if (!level5Res.success) {
+      console.error("[ie-crawl] Échec du crawl LEVEL-5 :", level5Res.error);
+    } else {
+      console.log("[ie-crawl] Crawl LEVEL-5 complété.");
+    }
+
+    // 6. Synchronisation sémantique / vectorisation pour le RAG
     let ragSuccess = true;
-    if (newsRes.success) {
+    const anyNewsCrawlSuccess = newsRes.success || reRes.success || crossRes.success || level5Res.success;
+    if (anyNewsCrawlSuccess) {
       const ragRes = await runRagSync();
       ragSuccess = ragRes.success;
       if (!ragRes.success) {
@@ -42,7 +70,7 @@ export async function runIeCrawl(): Promise<{ success: boolean; error?: string }
       }
     }
 
-    const success = (zukanRes.success && newsRes.success && ragSuccess);
+    const success = (zukanRes.success && newsRes.success && reRes.success && crossRes.success && level5Res.success && ragSuccess);
     return {
       success,
       error: success ? undefined : "Certaines tâches de crawl ou RAG ont échoué."

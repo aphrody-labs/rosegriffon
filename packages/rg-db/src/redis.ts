@@ -19,7 +19,7 @@ export function getRedisClient(): RedisClient {
     try {
       clientInstance = new RedisClient(REDIS_URL, {
         connectionTimeout: 5000,
-        idleTimeout: 60000,
+        idleTimeout: 300000, // 5 minutes to avoid idle timeouts during crawls
         autoReconnect: true,
         maxRetries: 10,
         enableOfflineQueue: true,
@@ -36,6 +36,7 @@ export function getRedisClient(): RedisClient {
         } else {
           console.log("[Redis] Connexion fermée proprement.");
         }
+        clientInstance = null; // reset the instance to trigger reconnection on next use
       };
     } catch (err) {
       console.error("[Redis] Erreur critique d'initialisation :", err);
