@@ -51,53 +51,83 @@ export async function syncGoogleEvents() {
   const supabase = await createClient();
   const googleEvents = await getCalendarEvents();
 
-  let importedCount = 0;
+  const validEvents = googleEvents.filter((event) => event.summary && event.start);
+  if (validEvents.length === 0) {
+    return { imported: 0, skipped: 0, success: true };
+  }
+
+  // Extract all start times
+  const startTimes = validEvents
+    .map((event) => event.start?.dateTime || event.start?.date)
+    .filter(Boolean) as string[];
+
+  if (startTimes.length === 0) {
+    return { imported: 0, skipped: 0, success: true };
+  }
+
+  // Sort to get min and max boundary for query optimization
+  const sortedTimes = [...startTimes].sort();
+  const minTime = sortedTimes[0];
+  const maxTime = sortedTimes[sortedTimes.length - 1];
+
+  // Fetch all existing events within this time boundary
+  const { data: existingEvents, error: fetchError } = await supabase
+    .from("events")
+    .select("id, title, start_time")
+    .gte("start_time", minTime)
+    .lte("start_time", maxTime);
+
+  if (fetchError) {
+    console.error("Error fetching existing events:", fetchError);
+    return { imported: 0, skipped: 0, success: false };
+  }
+
+  const existingSet = new Set(
+    (existingEvents || []).map((e) => `${e.title}|${e.start_time}`),
+  );
+
+  const eventsToInsert: Insert<"events">[] = [];
   let skippedCount = 0;
 
-  for (const event of googleEvents) {
-    if (!event.summary || !event.start) {continue;}
-
-    // Determine start/end time
-    const startTime = event.start.dateTime || event.start.date;
+  for (const event of validEvents) {
+    const startTime = event.start?.dateTime || event.start?.date;
     const endTime = event.end?.dateTime || event.end?.date;
 
-    if (!startTime) {continue;}
-
-    // Check for duplicates (fuzzy match by title and start time)
-    // Ideally we would store the Google ID, but for now we check title + start
-    const { data: existing } = await supabase
-      .from("events")
-      .select("id")
-      .eq("title", event.summary)
-      .eq("start_time", startTime)
-      .single();
-
-    if (existing) {
+    if (!startTime) {
       skippedCount++;
       continue;
     }
 
-    const eventData: Insert<"events"> = {
-      title: event.summary,
+    const key = `${event.summary}|${startTime}`;
+    if (existingSet.has(key)) {
+      skippedCount++;
+      continue;
+    }
+
+    eventsToInsert.push({
+      title: event.summary!,
       description: event.description || "",
       location: event.location || "",
       start_time: startTime,
       end_time: endTime || startTime,
-      // Default image if not present (could extract from description if you had logic for that)
       image_url: null,
-    };
+    });
+  }
 
-    const { error } = await supabase.from("events").insert([eventData]);
+  let importedCount = 0;
+  if (eventsToInsert.length > 0) {
+    const { error: insertError } = await supabase
+      .from("events")
+      .insert(eventsToInsert);
 
-    if (!error) {
-      importedCount++;
-    } else {
-      console.error("Error importing event:", error);
+    if (insertError) {
+      console.error("Error batch inserting events:", insertError);
+      return { imported: 0, skipped: skippedCount, success: false };
     }
+    importedCount = eventsToInsert.length;
   }
 
   const user = await getServerUser();
-
   if (user) {
     await logAdminAction("sync", "events", undefined, {
       imported: importedCount,

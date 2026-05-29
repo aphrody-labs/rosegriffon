@@ -13,7 +13,10 @@ rg/
 ├── packages/
 │   ├── ui/            # Composants shadcn partagés (57 composants new-york style)
 │   ├── db/            # Client Supabase + types Database générés
+│   ├── auth/          # Logique d'authentification et guards partagés (better-auth)
 │   ├── types/         # Zod schemas + types métier partagés site/bot
+│   ├── patreon-bun/   # Client API Patreon v2 typé pour Bun
+│   ├── assets/        # Assets statiques partagés
 │   └── config/        # tsconfig / eslint / oxlint / tailwind presets
 ├── docs/              # Documentation technique
 ├── infra/             # Configs systemd/nginx (bot uniquement)

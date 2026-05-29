@@ -7,9 +7,9 @@ Wants=network-online.target
 Type=simple
 User=ubuntu
 Group=ubuntu
-# Workspace racine — workspace deps + catalog: résolues automatiquement par Bun.
-WorkingDirectory=/home/ubuntu/rg/apps/bot
-EnvironmentFile=/home/ubuntu/rg/apps/bot/.env
+# Run from isolated production directory
+WorkingDirectory=/home/ubuntu/rg-bot-prod
+EnvironmentFile=/home/ubuntu/rg-bot-prod/.env
 Environment=NODE_ENV=production
 ExecStart=/home/ubuntu/.bun/bin/bun run src/index.ts
 Restart=on-failure
@@ -33,7 +33,7 @@ OOMScoreAdjust=-300
 # ── Hardening systemd (MemoryDenyWriteExecute INTERDIT — casse Bun/V8 JIT) ──
 ProtectSystem=strict
 ProtectHome=read-only
-ReadWritePaths=/home/ubuntu/rg /tmp
+ReadWritePaths=/home/ubuntu/rg-bot-prod /tmp
 PrivateTmp=true
 PrivateDevices=true
 ProtectKernelTunables=true
