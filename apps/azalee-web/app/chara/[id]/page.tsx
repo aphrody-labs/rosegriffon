@@ -7,6 +7,7 @@ import { notFound } from "next/navigation";
 import { CharacterSheetWithLevel } from "@/components/wiki/CharacterSheetWithLevel";
 import { HowToObtain } from "@/components/wiki/HowToObtain";
 import type { MovesetSkill } from "@/components/wiki/MovesetList";
+import { AuraCard } from "@/components/wiki/AuraCard";
 import { formatDescription, formatJapaneseName } from "@/lib/format-description";
 import { wikiService } from "@/lib/wiki-service";
 
@@ -150,6 +151,7 @@ export default async function PlayerDetailPage({ params }: { params: Promise<{ i
 	// Fetch all distinct forms of this character (same chara_id, different pos/elem/rarity)
 	const sheetId = (player as any).sheetData?.sheetId;
 	const forms = await wikiService.getCharacterForms(baseChar.charaId, sheetId);
+	const auras = await wikiService.getCharacterAuras(baseChar.charaId, variant.charaParamId);
 
 	// Map position to UI expected format
 	const positionMap: Record<string, string> = {
@@ -597,6 +599,32 @@ export default async function PlayerDetailPage({ params }: { params: Promise<{ i
 							</div>
 						</div>
 					))}
+				</div>
+			)}
+
+			{/* Auras & Esprits Guerriers Section */}
+			{auras && auras.length > 0 && (
+				<div className="bg-surface-container-low rounded-[20px] sm:rounded-[24px] border border-outline-variant/30 px-4 py-5 sm:px-8 sm:py-8 space-y-4">
+					<h3 className="text-lg sm:text-2xl font-bold font-grade-high text-on-surface border-b-2 border-primary/20 pb-1.5 sm:pb-2 inline-block">
+						Auras & Invocations associées
+					</h3>
+					<p className="text-sm text-on-surface-variant/80 font-medium">
+						Ces Esprits Guerriers, Totems ou Miximax sont spécifiquement liés à {charName} dans les données du jeu.
+					</p>
+					<div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 pt-2">
+						{auras.map((aura) => (
+							<AuraCard
+								key={aura.id}
+								id={aura.id}
+								name={aura.name}
+								category={aura.categorySlug}
+								subType={aura.subType}
+								element={aura.element}
+								assetCode={aura.assetCode || undefined}
+								image={aura.imageUrl || undefined}
+							/>
+						))}
+					</div>
 				</div>
 			)}
 

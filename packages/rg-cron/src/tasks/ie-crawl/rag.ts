@@ -393,7 +393,7 @@ export async function runRagSync(): Promise<{
 				}
 
 				// Ajout d'une entête descriptive pour enrichir le contexte RAG
-				const formattedDocumentText = `Titre: ${item.title}\nDate: ${item.date}\nType: ${item.type}\nContenu:\n${cleanText}`;
+				const formattedDocumentText = `Titre: ${item.title}\nDate: ${item.date}\nLangue: ${item.metadata.language || "unknown"}\nType: ${item.type}\nContenu:\n${cleanText}`;
 				const contentHash = computeStringHash(formattedDocumentText);
 
 				const shouldSync = await crawlerTracker.shouldProcess(item.id, contentHash);
@@ -405,11 +405,12 @@ export async function runRagSync(): Promise<{
 
 				console.log(`[RAG Sync] Vectorisation de : ${item.title} (${item.type})`);
 
-				// Supprimer préventivement l'ancien document et tous les chunks possibles (jusqu'à 50 chunks)
-				await vectorStore.deleteDocument("inazuma-news", item.id);
+				// Supprimer préventivement l'ancien document et tous les chunks possibles en une seule opération
+				const idsToDelete = [item.id];
 				for (let i = 0; i < 50; i++) {
-					await vectorStore.deleteDocument("inazuma-news", `${item.id}#chunk-${i}`);
+					idsToDelete.push(`${item.id}#chunk-${i}`);
 				}
+				await vectorStore.deleteDocuments("inazuma-news", idsToDelete);
 
 				// Découper le texte nettoyé en chunks
 				const textChunks = chunkText(cleanText, 800, 150);
@@ -417,7 +418,7 @@ export async function runRagSync(): Promise<{
 
 				for (let i = 0; i < textChunks.length; i++) {
 					const chunkTextContent = textChunks[i] || "";
-					const formattedChunkText = `Titre: ${item.title}\nDate: ${item.date}\nType: ${item.type} [Partie ${i + 1}/${textChunks.length}]\nContenu:\n${chunkTextContent}`;
+					const formattedChunkText = `Titre: ${item.title}\nDate: ${item.date}\nLangue: ${item.metadata.language || "unknown"}\nType: ${item.type} [Partie ${i + 1}/${textChunks.length}]\nContenu:\n${chunkTextContent}`;
 
 					// Génération de l'embedding pour le chunk
 					const embedding = await getEmbedding(formattedChunkText);

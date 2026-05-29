@@ -37,7 +37,7 @@ export function getRedisClient(): RedisClient {
 				} else {
 					console.log("[Redis] Connexion fermée proprement.");
 				}
-				// Ne pas nullifier l'instance pour laisser autoReconnect et enableOfflineQueue de Bun fonctionner
+				clientInstance = null; // Recreate on next call to recover from connection drops
 			};
 		} catch (err) {
 			console.error("[Redis] Erreur critique d'initialisation :", err);
@@ -45,6 +45,18 @@ export function getRedisClient(): RedisClient {
 		}
 	}
 	return clientInstance;
+}
+
+/**
+ * Réinitialise le client Redis global s'il est en erreur ou déconnecté.
+ */
+export function resetRedisClient(): void {
+	if (clientInstance) {
+		try {
+			clientInstance.close();
+		} catch (_) {}
+		clientInstance = null;
+	}
 }
 
 /**
@@ -63,6 +75,7 @@ export const cache = {
 			return JSON.parse(data) as T;
 		} catch (err) {
 			console.warn(`[Redis Cache] Échec get pour la clé "${key}":`, err);
+			resetRedisClient();
 			return null;
 		}
 	},
@@ -78,6 +91,7 @@ export const cache = {
 			return true;
 		} catch (err) {
 			console.warn(`[Redis Cache] Échec set pour la clé "${key}":`, err);
+			resetRedisClient();
 			return false;
 		}
 	},
@@ -92,6 +106,7 @@ export const cache = {
 			return true;
 		} catch (err) {
 			console.warn(`[Redis Cache] Échec del pour la clé "${key}":`, err);
+			resetRedisClient();
 			return false;
 		}
 	},
@@ -128,6 +143,7 @@ export const crawlerTracker = {
 			return lastHash !== currentHash;
 		} catch (err) {
 			console.warn(`[Redis Crawler] Erreur lors du check de hash pour ${url} :`, err);
+			resetRedisClient();
 			return true; // En cas de doute, on traite
 		}
 	},
@@ -142,6 +158,7 @@ export const crawlerTracker = {
 			await redis.set(key, currentHash, "EX", ttlSeconds);
 		} catch (err) {
 			console.warn(`[Redis Crawler] Impossible de sauvegarder le hash pour ${url} :`, err);
+			resetRedisClient();
 		}
 	},
 };
@@ -181,6 +198,7 @@ export const vectorStore = {
 			await redis.sadd(`vector:collection:${collection}`, doc.id);
 		} catch (err) {
 			console.error(`[Redis Vector] Erreur de sauvegarde du document ${doc.id} :`, err);
+			resetRedisClient();
 			throw err;
 		}
 	},
@@ -196,6 +214,26 @@ export const vectorStore = {
 			await redis.srem(`vector:collection:${collection}`, id);
 		} catch (err) {
 			console.error(`[Redis Vector] Erreur de suppression du document ${id} :`, err);
+			resetRedisClient();
+		}
+	},
+
+	/**
+	 * Supprime plusieurs documents vectoriels en une seule opération (batch).
+	 */
+	async deleteDocuments(collection: string, ids: string[]): Promise<void> {
+		if (ids.length === 0) return;
+		const redis = getRedisClient();
+		const keys = ids.map((id) => `vector:${collection}:${id}`);
+		try {
+			await redis.del(...keys);
+			await redis.srem(`vector:collection:${collection}`, ...ids);
+		} catch (err) {
+			console.error(
+				`[Redis Vector] Erreur de suppression en lot pour ${ids.length} documents :`,
+				err
+			);
+			resetRedisClient();
 		}
 	},
 
@@ -228,6 +266,7 @@ export const vectorStore = {
 				`[Redis Vector] Erreur lors de la récupération de la collection ${collection} :`,
 				err
 			);
+			resetRedisClient();
 			return [];
 		}
 	},

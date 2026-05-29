@@ -12,6 +12,15 @@ import { existsSync } from "node:fs";
 
 const DATA_ROOT = "/home/ubuntu/rg/data/inazuma.jp/victory-road";
 
+async function safeGoto(page: Page, url: string, timeout = 30000): Promise<unknown> {
+	return Promise.race([
+		page.goto(url),
+		new Promise((_, reject) =>
+			setTimeout(() => reject(new Error(`Navigation timeout (${timeout}ms) pour ${url}`)), timeout)
+		),
+	]);
+}
+
 export async function crawlNews(): Promise<{ success: boolean; error?: string }> {
 	console.log(
 		"[Crawl News] Démarrage du crawl des actualités (Topics et Patch Notes) multi-langues..."
@@ -36,7 +45,7 @@ export async function crawlNews(): Promise<{ success: boolean; error?: string }>
 
 			console.log(`[Crawl News] Scraping Topics index [${locale}] : ${url}`);
 			try {
-				await page.goto(url);
+				await safeGoto(page, url);
 				await page.waitForSelector("body", 15000).catch(() => {});
 				const topicsIndexHtml = await page.content();
 				await writeFile(join(topicsDir, "index.html"), topicsIndexHtml);
@@ -79,7 +88,7 @@ export async function crawlNews(): Promise<{ success: boolean; error?: string }>
 					await mkdir(detailDir, { recursive: true });
 
 					try {
-						await page.goto(topic.url);
+						await safeGoto(page, topic.url);
 						await page.waitForSelector("body", 15000).catch(() => {});
 						const detailHtml = await page.content();
 						await writeFile(detailPath, detailHtml);
@@ -130,7 +139,7 @@ export async function crawlNews(): Promise<{ success: boolean; error?: string }>
 				);
 
 				try {
-					await page.goto(platformUrl);
+					await safeGoto(page, platformUrl);
 					await page.waitForSelector("body", 15000).catch(() => {});
 					const platformHtml = await page.content();
 
@@ -177,7 +186,7 @@ export async function crawlNews(): Promise<{ success: boolean; error?: string }>
 						await mkdir(patchDetailDir, { recursive: true });
 
 						try {
-							await page.goto(patch.url);
+							await safeGoto(page, patch.url);
 							await page.waitForSelector("body", 15000).catch(() => {});
 							const patchHtml = await page.content();
 							await writeFile(patchDetailPath, patchHtml);

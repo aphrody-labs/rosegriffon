@@ -6,6 +6,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { getAuthorInfo } from "@/lib/author";
 
 export const dynamic = "force-dynamic";
 
@@ -29,7 +30,7 @@ export async function generateMetadata({
 	const supabase = await createClient();
 	const { data: tweet } = await (supabase as any)
 		.from("tweets")
-		.select("text, author_username, media")
+		.select("text, author_username, author_name, media")
 		.eq("id", id)
 		.single();
 
@@ -47,8 +48,8 @@ export async function generateMetadata({
 		title: `${title.slice(0, 60)} | Azalée`,
 		twitter: {
 			card: "summary_large_image",
-			creator: "@Azalee_IE",
-			site: "@Azalee_IE",
+			creator: tweet?.author_username ? `@${tweet.author_username}` : "@Azalee_IE",
+			site: tweet?.author_username ? `@${tweet.author_username}` : "@Azalee_IE",
 		},
 	};
 }
@@ -61,6 +62,8 @@ export default async function TweetPage({ params }: { params: Promise<{ id: stri
 	if (!tweet) {
 		notFound();
 	}
+
+	const authorInfo = getAuthorInfo(tweet.author_username, tweet.author_name);
 
 	const { title, body } = extractTitleAndBody(tweet.text || "");
 	const heroImage = tweet.media?.[0]?.url;
@@ -164,10 +167,16 @@ export default async function TweetPage({ params }: { params: Promise<{ id: stri
 					<div className="flex flex-wrap items-center gap-3 sm:gap-4 text-xs sm:text-sm text-on-surface-variant">
 						{/* Author */}
 						<div className="flex items-center gap-2">
-							<div className="size-8 sm:size-9 rounded-full bg-surface-container-high overflow-hidden relative shrink-0 ring-2 ring-background">
-								<Image src="/icon.webp" alt="Azalée" fill sizes="36px" className="object-cover" />
-							</div>
-							<span className="font-semibold text-on-surface">Azalée 🌸</span>
+							{authorInfo.avatar ? (
+								<div className="size-8 sm:size-9 rounded-full bg-surface-container-high overflow-hidden relative shrink-0 ring-2 ring-background">
+									<Image src={authorInfo.avatar} alt={authorInfo.name} fill sizes="36px" className="object-cover" />
+								</div>
+							) : (
+								<div className={`size-8 sm:size-9 rounded-full flex items-center justify-center text-white text-xs font-bold ring-2 ring-background shrink-0 ${authorInfo.color}`}>
+									{authorInfo.initials}
+								</div>
+							)}
+							<span className="font-semibold text-on-surface">{authorInfo.name}</span>
 							<span className="text-on-surface-variant/60">@{tweet.author_username}</span>
 						</div>
 
@@ -240,19 +249,26 @@ export default async function TweetPage({ params }: { params: Promise<{ id: stri
 				<div className="mt-8 pt-6 border-t border-outline-variant/15">
 					<div className="flex items-center justify-between">
 						<div className="flex items-center gap-3">
-							<div className="size-12 rounded-full bg-surface-container-high overflow-hidden relative border border-outline-variant/10">
-								<Image src="/icon.webp" alt="Azalée" fill className="object-cover" />
-							</div>
+							{authorInfo.avatar ? (
+								<div className="size-12 rounded-full bg-surface-container-high overflow-hidden relative border border-outline-variant/10 shrink-0">
+									<Image src={authorInfo.avatar} alt={authorInfo.name} fill className="object-cover" />
+								</div>
+							) : (
+								<div className={`size-12 rounded-full flex items-center justify-center text-white text-sm font-bold border border-outline-variant/10 shrink-0 ${authorInfo.color}`}>
+									{authorInfo.initials}
+								</div>
+							)}
 							<div>
-								<p className="font-bold text-on-surface">Azalée 🌸 | Inazuma Eleven FR</p>
+								<p className="font-bold text-on-surface">{authorInfo.name}</p>
 								<p className="text-sm text-on-surface-variant/60">@{tweet.author_username}</p>
+								<p className="text-xs text-on-surface-variant/70 mt-1 max-w-[500px]">{authorInfo.bio}</p>
 							</div>
 						</div>
 						<a
-							href={`https://x.com/Azalee_IE/status/${tweet.id}`}
+							href={`https://x.com/${tweet.author_username}/status/${tweet.id}`}
 							target="_blank"
 							rel="noopener noreferrer"
-							className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#1DA1F2]/10 text-[#1DA1F2] text-sm font-bold hover:bg-[#1DA1F2]/20 transition-colors"
+							className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#1DA1F2]/10 text-[#1DA1F2] text-sm font-bold hover:bg-[#1DA1F2]/20 transition-colors shrink-0"
 						>
 							<Twitter className="size-4 fill-current" />
 							Voir sur X

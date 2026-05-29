@@ -141,7 +141,7 @@ export default async function NewsFeedPage({
 				// eslint-disable-next-line @typescript-eslint/no-explicit-any
 				const { data, count, error } = (await (supabase as any)
 					.from("tweets")
-					.select("id, text, created_at, author_username, media, quoted_tweets, raw_tweets", {
+					.select("id, text, created_at, author_username, author_name, media, quoted_tweets, raw_tweets", {
 						count: "exact",
 					})
 					.order("created_at", { ascending: false })
@@ -154,6 +154,8 @@ export default async function NewsFeedPage({
 					// eslint-disable-next-line @typescript-eslint/no-explicit-any
 					(t: any) => ({
 						author_id: t.author_username,
+						author_name: t.author_name,
+						author_username: t.author_username,
 						category: "Tweet",
 						date: t.created_at,
 						excerpt: t.text,
