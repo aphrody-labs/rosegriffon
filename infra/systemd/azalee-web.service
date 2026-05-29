@@ -17,9 +17,9 @@ WorkingDirectory=/home/ubuntu/rg/apps/azalee
 EnvironmentFile=-/home/ubuntu/rg/apps/azalee/.env
 Environment=NODE_ENV=production
 Environment=PORT=3003
-# Bind loopback only — nginx (azalee.rosegriffon.fr) reverse-proxy devant. Le serveur
-# standalone écoute 0.0.0.0 par défaut sinon.
-Environment=HOSTNAME=127.0.0.1
+# Bind to all interfaces to allow direct IP verification (http://51.77.147.152:3003/).
+# Nginx reverse-proxy still sits in front on port 80/443.
+Environment=HOSTNAME=0.0.0.0
 # DB locale via unix socket (peer auth ubuntu) — latence < 1 ms
 Environment=PGHOST=/var/run/postgresql
 Environment=PGDATABASE=rose_griffon
