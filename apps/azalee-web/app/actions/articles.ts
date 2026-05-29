@@ -48,6 +48,17 @@ export async function saveArticle(
 		}
 
 		revalidateNews(data.slug as string | undefined);
+		if (data.status === "published") {
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any
+			const { data: art } = await (supabase as any)
+				.from("articles")
+				.select("title, slug, excerpt, featured_image_url")
+				.eq("id", articleId)
+				.maybeSingle();
+			if (art) {
+				void triggerDiscordAnnouncement({ ...art, type: "wiki" });
+			}
+		}
 		return { id: articleId };
 	}
 
@@ -64,6 +75,17 @@ export async function saveArticle(
 	}
 
 	revalidateNews(data.slug as string | undefined);
+	if (data.status === "published") {
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		const { data: art } = await (supabase as any)
+			.from("articles")
+			.select("title, slug, excerpt, featured_image_url")
+			.eq("id", inserted?.id || "")
+			.maybeSingle();
+		if (art) {
+			void triggerDiscordAnnouncement({ ...art, type: "wiki" });
+		}
+	}
 	return { id: inserted?.id || "" };
 }
 
@@ -107,6 +129,19 @@ export async function updateArticleStatus(
 	if (error) {
 		return { error: error.message };
 	}
+
+	if (newStatus === "published" && currentStatus !== "published") {
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		const { data: art } = await (supabase as any)
+			.from("articles")
+			.select("title, slug, excerpt, featured_image_url")
+			.eq("id", articleId)
+			.maybeSingle();
+		if (art) {
+			void triggerDiscordAnnouncement({ ...art, type: "wiki" });
+		}
+	}
+
 	revalidateNews();
 	return {};
 }
@@ -871,4 +906,37 @@ export async function restoreArticleVersion(
 
 	revalidateNews();
 	return { success: true };
+}
+
+async function triggerDiscordAnnouncement(article: {
+	title: string;
+	slug: string;
+	excerpt?: string | null;
+	featured_image_url?: string | null;
+	type: "wiki" | "website";
+}) {
+	const secret = process.env.DISCORD_ANNOUNCE_SECRET || "default-secret-key-12345";
+	try {
+		const res = await fetch("http://localhost:3006/announce", {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
+				Authorization: `Bearer ${secret}`,
+			},
+			body: JSON.stringify({
+				type: article.type,
+				title: article.title,
+				slug: article.slug,
+				excerpt: article.excerpt || "",
+				featured_image_url: article.featured_image_url || "",
+			}),
+		});
+		if (!res.ok) {
+			console.warn(`[Discord Announcement] Failed to announce: ${res.status} ${await res.text()}`);
+		} else {
+			console.log(`[Discord Announcement] Announcement triggered successfully for ${article.slug}`);
+		}
+	} catch (err) {
+		console.warn("[Discord Announcement] Error triggering announcement:", err);
+	}
 }
