@@ -17,6 +17,7 @@ import {
 import { ServerWebSocket } from "bun";
 import { createSupabaseServiceClient } from "@rose-griffon/db/service";
 import { resolveProfile, isAdmin } from "@rose-griffon/auth";
+import { getOpenApiDocument, getSwaggerHtml } from "./lib/openapi";
 
 // ─── LOGGER GLOBALE INTERCEPTION ET STREAMING WEBSOCKET ──────────────────────
 const wsConnections = new Set<ServerWebSocket<any>>();
@@ -231,6 +232,18 @@ const server = Bun.serve({
     // 3. Prometheus / Custom Metrics
     if (url.pathname === "/metrics") {
       return Response.json(metrics);
+    }
+
+    // 3b. OpenAPI JSON Spec
+    if (url.pathname === "/openapi.json" && req.method === "GET") {
+      return Response.json(getOpenApiDocument());
+    }
+
+    // 3c. Swagger UI HTML
+    if (url.pathname === "/swagger" && req.method === "GET") {
+      return new Response(getSwaggerHtml(), {
+        headers: { "Content-Type": "text/html; charset=utf-8" },
+      });
     }
 
     // Helper pour extraire les cookies de la requête
