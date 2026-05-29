@@ -63,76 +63,88 @@ function computeStringHash(str: string): string {
 function collectScrapedItems(): ScrapedItem[] {
 	const items: ScrapedItem[] = [];
 
-	// 1. Collecter les Topics (fr/topics)
-	const topicsDir = join(DATA_ROOT, "fr/topics");
-	if (existsSync(topicsDir)) {
-		const subDirs = readdirSync(topicsDir, { withFileTypes: true })
-			.filter((dirent) => dirent.isDirectory())
-			.map((dirent) => dirent.name);
+	// 1. Collecter les Topics (fr/topics, en/topics, ja/topics, es/topics, etc.)
+	const topicLocales = ["fr", "en", "ja", "es", "de", "it", "zh-tw", "zh-cn", "pt-br"] as const;
+	for (const locale of topicLocales) {
+		const topicsDir = join(DATA_ROOT, locale, "topics");
+		if (existsSync(topicsDir)) {
+			const subDirs = readdirSync(topicsDir, { withFileTypes: true })
+				.filter((dirent) => dirent.isDirectory())
+				.map((dirent) => dirent.name);
 
-		for (const dir of subDirs) {
-			const dirPath = join(topicsDir, dir);
-			const metaPath = join(dirPath, "meta.json");
-			const htmlPath = join(dirPath, "index.html");
+			for (const dir of subDirs) {
+				const dirPath = join(topicsDir, dir);
+				const metaPath = join(dirPath, "meta.json");
+				const htmlPath = join(dirPath, "index.html");
 
-			if (existsSync(metaPath) && existsSync(htmlPath)) {
-				try {
-					const meta = JSON.parse(readFileSync(metaPath, "utf-8"));
-					items.push({
-						id: `topic-${dir}`,
-						type: "topic",
-						title: meta.title || "Topic",
-						url: meta.url || "",
-						date: meta.date || "",
-						htmlPath,
-						metadata: {
-							id: dir,
-							category: meta.category || "General",
-							language: "fr",
-						},
-					});
-				} catch (err) {
-					console.error(`[RAG Sync] Erreur de lecture de meta pour topic ${dir} :`, err);
+				if (existsSync(metaPath) && existsSync(htmlPath)) {
+					try {
+						const meta = JSON.parse(readFileSync(metaPath, "utf-8"));
+						items.push({
+							id: `topic-${locale}-${dir}`,
+							type: "topic",
+							title: meta.title || "Topic",
+							url: meta.url || "",
+							date: meta.date || "",
+							htmlPath,
+							metadata: {
+								id: dir,
+								category: meta.category || "General",
+								language: locale,
+							},
+						});
+					} catch (err) {
+						console.error(
+							`[RAG Sync] Erreur de lecture de meta pour topic ${dir} [${locale}] :`,
+							err
+						);
+					}
 				}
 			}
 		}
 	}
 
-	// 2. Collecter les Patch Notes (en/patchnote)
-	const patchNotesDir = join(DATA_ROOT, "en/patchnote");
-	if (existsSync(patchNotesDir)) {
-		const platforms = ["ps-steam", "switch", "xbox"];
-		for (const platform of platforms) {
-			const platformDir = join(patchNotesDir, platform);
-			if (!existsSync(platformDir)) continue;
+	// 2. Collecter les Patch Notes (en/patchnote, ja/patchnote)
+	const patchLocales = ["en", "ja"] as const;
+	const platforms = ["ps-steam", "switch", "xbox"];
+	for (const locale of patchLocales) {
+		const patchNotesDir = join(DATA_ROOT, locale, "patchnote");
+		if (existsSync(patchNotesDir)) {
+			for (const platform of platforms) {
+				const platformDir = join(patchNotesDir, platform);
+				if (!existsSync(platformDir)) continue;
 
-			const subDirs = readdirSync(platformDir, { withFileTypes: true })
-				.filter((dirent) => dirent.isDirectory())
-				.map((dirent) => dirent.name);
+				const subDirs = readdirSync(platformDir, { withFileTypes: true })
+					.filter((dirent) => dirent.isDirectory())
+					.map((dirent) => dirent.name);
 
-			for (const dir of subDirs) {
-				const dirPath = join(platformDir, dir);
-				const dataPath = join(dirPath, "data.json");
-				const htmlPath = join(dirPath, "index.html");
+				for (const dir of subDirs) {
+					const dirPath = join(platformDir, dir);
+					const dataPath = join(dirPath, "data.json");
+					const htmlPath = join(dirPath, "index.html");
 
-				if (existsSync(dataPath) && existsSync(htmlPath)) {
-					try {
-						const data = JSON.parse(readFileSync(dataPath, "utf-8"));
-						items.push({
-							id: `patchnote-${platform}-${dir}`,
-							type: "patchnote",
-							title: data.title || "Patch Note",
-							url: data.url || "",
-							date: data.date || "",
-							htmlPath,
-							metadata: {
-								id: dir,
-								platform: data.platform || [platform],
-								language: "en",
-							},
-						});
-					} catch (err) {
-						console.error(`[RAG Sync] Erreur de lecture de data pour patch ${dir} :`, err);
+					if (existsSync(dataPath) && existsSync(htmlPath)) {
+						try {
+							const data = JSON.parse(readFileSync(dataPath, "utf-8"));
+							items.push({
+								id: `patchnote-${locale}-${platform}-${dir}`,
+								type: "patchnote",
+								title: data.title || "Patch Note",
+								url: data.url || "",
+								date: data.date || "",
+								htmlPath,
+								metadata: {
+									id: dir,
+									platform: data.platform || [platform],
+									language: locale,
+								},
+							});
+						} catch (err) {
+							console.error(
+								`[RAG Sync] Erreur de lecture de data pour patch ${dir} [${locale}] :`,
+								err
+							);
+						}
 					}
 				}
 			}
@@ -239,6 +251,48 @@ function collectScrapedItems(): ScrapedItem[] {
 					});
 				} catch (err) {
 					console.error(`[RAG Sync] Erreur de lecture de meta pour Level5 ${dir} :`, err);
+				}
+			}
+		}
+	}
+
+	// 6. Collecter les articles du blog LEVEL-5 (ja/en/zh-tw/zh-cn)
+	const blogDir = "/home/ubuntu/rg/data/level5.co.jp/blog";
+	const blogLocales = ["ja", "en", "zh-tw", "zh-cn"] as const;
+	for (const locale of blogLocales) {
+		const localeBlogDir = join(blogDir, locale);
+		if (existsSync(localeBlogDir)) {
+			const subDirs = readdirSync(localeBlogDir, { withFileTypes: true })
+				.filter((dirent) => dirent.isDirectory())
+				.map((dirent) => dirent.name);
+
+			for (const dir of subDirs) {
+				const dirPath = join(localeBlogDir, dir);
+				const metaPath = join(dirPath, "meta.json");
+				const htmlPath = join(dirPath, "index.html");
+
+				if (existsSync(metaPath) && existsSync(htmlPath)) {
+					try {
+						const meta = JSON.parse(readFileSync(metaPath, "utf-8"));
+						items.push({
+							id: `level5-blog-${locale}-${dir}`,
+							type: "level5" as any,
+							title: meta.title || "LEVEL-5 Blog Post",
+							url: meta.url || "",
+							date: meta.date || "",
+							htmlPath,
+							metadata: {
+								id: dir,
+								category: meta.category || "LEVEL-5 Developer Blog",
+								language: locale,
+							},
+						});
+					} catch (err) {
+						console.error(
+							`[RAG Sync] Erreur de lecture de meta pour LEVEL-5 Blog ${dir} [${locale}] :`,
+							err
+						);
+					}
 				}
 			}
 		}

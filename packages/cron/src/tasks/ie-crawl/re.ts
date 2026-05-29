@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Browser } from "@aphrody-code/bxc";
+import { Browser, Page } from "@aphrody-code/bxc";
 import { mkdir, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 
@@ -25,7 +25,7 @@ export async function crawlRe(): Promise<{ success: boolean; error?: string }> {
 	];
 
 	try {
-		const page = await Browser.newPage({ profile: "stealth" });
+		const page = (await Browser.newPage({ profile: "stealth" })) as Page;
 		let crawlCount = 0;
 
 		for (const target of targets) {
@@ -42,6 +42,7 @@ export async function crawlRe(): Promise<{ success: boolean; error?: string }> {
 					continue;
 				}
 
+				await page.waitForSelector("body", 15000).catch(() => {});
 				const html = await page.content();
 				if (html.length < 500) {
 					console.warn(`[Crawl RE] Page trop courte ou vide pour ${target.lang}, abandon.`);

@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Browser } from "@aphrody-code/bxc";
+import { Browser, Page } from "@aphrody-code/bxc";
 import * as cheerio from "cheerio";
 import { existsSync } from "node:fs";
 import { mkdir, writeFile } from "node:fs/promises";
@@ -23,10 +23,11 @@ export async function crawlLevel5(): Promise<{ success: boolean; error?: string 
 	console.log("[Crawl Level5] Démarrage du crawl des actualités LEVEL-5...");
 
 	try {
-		const page = await Browser.newPage({ profile: "stealth" });
+		const page = (await Browser.newPage({ profile: "stealth" })) as Page;
 
 		console.log("[Crawl Level5] Navigation vers https://www.level5.co.jp/news/");
 		await page.goto("https://www.level5.co.jp/news/");
+		await page.waitForSelector("body", 15000).catch(() => {});
 		const indexHtml = await page.content();
 
 		const $ = cheerio.load(indexHtml);
@@ -71,6 +72,7 @@ export async function crawlLevel5(): Promise<{ success: boolean; error?: string 
 			console.log(`[Crawl Level5] Inspection de l'article : ${art.title} (${art.url})`);
 			try {
 				await page.goto(art.url);
+				await page.waitForSelector("body", 15000).catch(() => {});
 				const detailHtml = await page.content();
 
 				// On vérifie si l'article parle de Inazuma Eleven (イナズマ or Inazuma)
