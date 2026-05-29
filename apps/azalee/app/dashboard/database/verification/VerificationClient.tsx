@@ -193,7 +193,7 @@ export function VerificationClient({
 					</div>
 					<h3 className="text-lg font-bold text-on-surface">Tout est en ordre !</h3>
 					<p className="text-sm text-on-surface-variant max-w-md mx-auto mt-2">
-						Aucune anomalie de traduction ou de données manquantes n'a été détectée dans cette
+						Aucune anomalie de traduction ou de données manquantes n&apos;a été détectée dans cette
 						catégorie.
 					</p>
 				</div>

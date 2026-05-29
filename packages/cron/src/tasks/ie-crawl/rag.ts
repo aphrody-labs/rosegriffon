@@ -8,6 +8,16 @@ import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import * as cheerio from "cheerio";
 import { vectorStore, getEmbedding, crawlerTracker, cache } from "@rose-griffon/db/redis";
+import { createSupabaseServiceClient } from "@rose-griffon/db/service";
+
+interface DBTweetRow {
+	id: string;
+	author_username: string | null;
+	author_name: string | null;
+	text: string | null;
+	created_at: string | null;
+}
+
 
 const DATA_ROOT = "/home/ubuntu/rg/data/inazuma.jp/victory-road";
 
@@ -445,6 +455,101 @@ export async function runRagSync(): Promise<{
 				processed++;
 			} catch (err) {
 				console.error(`[RAG Sync] Erreur lors de la vectorisation de ${item.title} :`, err);
+				errors++;
+			}
+		}
+
+		// 7. Collecter et synchroniser les tweets depuis Supabase
+		console.log("[RAG Sync] Récupération des tweets depuis la base de données...");
+		let dbTweets: DBTweetRow[] = [];
+		try {
+			const supabase = createSupabaseServiceClient();
+			const { data, error } = await supabase
+				.from("tweets")
+				.select("id, author_username, author_name, text, created_at");
+			if (error) {
+				console.error("[RAG Sync] Erreur lors de la récupération des tweets :", error);
+				errors++;
+			} else if (data) {
+				dbTweets = data as DBTweetRow[];
+			}
+		} catch (err) {
+			console.error("[RAG Sync] Exception lors de la récupération des tweets :", err);
+			errors++;
+		}
+
+		console.log(`[RAG Sync] ${dbTweets.length} tweets trouvés dans la base de données.`);
+
+		for (const tweet of dbTweets) {
+			try {
+				const username = tweet.author_username || "unknown";
+				const displayName = tweet.author_name || username;
+				const text = tweet.text || "";
+
+				if (text.length < 20) {
+					// Tweet trop court, pas besoin de l'indexer
+					continue;
+				}
+
+				// Ajout d'une entête descriptive pour enrichir le contexte RAG
+				const title = `Tweet de ${displayName} (@${username})`;
+				const url = `https://x.com/${username}/status/${tweet.id}`;
+				const date = tweet.created_at || "";
+				
+				const formattedTweetText = `Auteur: @${username} (${displayName})\nDate: ${date}\nType: tweet\nContenu:\n${text}`;
+				const contentHash = computeStringHash(formattedTweetText);
+
+				const itemId = `tweet-${tweet.id}`;
+				const shouldSync = await crawlerTracker.shouldProcess(itemId, contentHash);
+
+				if (!shouldSync) {
+					// Déjà indexé avec ce contenu exact
+					continue;
+				}
+
+				console.log(`[RAG Sync] Vectorisation du tweet : @${username} - ${tweet.id}`);
+
+				// Supprimer préventivement l'ancien document et tous les chunks possibles
+				const idsToDelete = [itemId];
+				for (let i = 0; i < 50; i++) {
+					idsToDelete.push(`${itemId}#chunk-${i}`);
+				}
+				await vectorStore.deleteDocuments("inazuma-news", idsToDelete);
+
+				// Découper le texte du tweet en chunks (normalement 1 seul chunk pour la plupart des tweets)
+				const textChunks = chunkText(text, 800, 150);
+				console.log(`[RAG Sync] -> Tweet découpé en ${textChunks.length} chunks.`);
+
+				for (let i = 0; i < textChunks.length; i++) {
+					const chunkTextContent = textChunks[i] || "";
+					const formattedChunkText = `Auteur: @${username} (${displayName})\nDate: ${date}\nType: tweet [Partie ${i + 1}/${textChunks.length}]\nContenu:\n${chunkTextContent}`;
+
+					// Génération de l'embedding pour le chunk
+					const embedding = await getEmbedding(formattedChunkText);
+
+					// Sauvegarde dans le vectorStore Redis
+					await vectorStore.saveDocument("inazuma-news", {
+						id: `${itemId}#chunk-${i}`,
+						text: formattedChunkText,
+						embedding,
+						metadata: {
+							title,
+							url,
+							date,
+							type: "tweet",
+							chunkIndex: i,
+							totalChunks: textChunks.length,
+							author_username: username,
+							author_name: displayName,
+						},
+					});
+				}
+
+				// Enregistrer le hash du document global pour marquer le document comme traité
+				await crawlerTracker.markProcessed(itemId, contentHash);
+				processed++;
+			} catch (err) {
+				console.error(`[RAG Sync] Erreur lors de la vectorisation du tweet ${tweet.id} :`, err);
 				errors++;
 			}
 		}

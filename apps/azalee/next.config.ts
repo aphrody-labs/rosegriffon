@@ -172,7 +172,7 @@ const nextConfig: NextConfig = {
 		// Safety check: ensure destination starts with https://
 		const destination = supabaseUrl.startsWith("http")
 			? `${supabaseUrl}/storage/v1/:path*`
-			: `https://isbkaeltubqittywibeh.supabase.co/storage/v1/:path*`;
+			: "https://isbkaeltubqittywibeh.supabase.co/storage/v1/:path*";
 
 		return [
 			{
