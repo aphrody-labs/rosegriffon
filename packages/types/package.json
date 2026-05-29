@@ -13,13 +13,16 @@
 		"./visitor": "./src/visitor.ts",
 		"./event": "./src/event.ts",
 		"./stream": "./src/stream.ts",
-		"./team": "./src/team.ts"
+		"./team": "./src/team.ts",
+		"./schemas": "./src/schemas.ts"
 	},
 	"publishConfig": {
 		"access": "restricted",
 		"registry": "https://npm.pkg.github.com"
 	},
-	"dependencies": {},
+	"dependencies": {
+		"zod": "catalog:"
+	},
 	"devDependencies": {
 		"@rose-griffon/config": "workspace:*",
 		"typescript": "catalog:"

@@ -1,10 +1,6 @@
-import { z } from "zod";
+import { tweetSchema } from "@rose-griffon/types/schemas";
+import type { TweetInput } from "@rose-griffon/types/schemas";
 
-export const TweetSchema = z.object({
-	author_name: z.string().min(1, "Nom requis"),
-	author_username: z.string().min(1, "Nom d'utilisateur requis"),
-	id: z.string().optional(),
-	text: z.string().min(1, "Le contenu ne peut pas être vide"),
-});
+export const TweetSchema = tweetSchema;
+export type TweetFormValues = TweetInput;
 
-export type TweetFormValues = z.infer<typeof TweetSchema>;

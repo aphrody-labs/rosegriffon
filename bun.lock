@@ -370,6 +370,9 @@
     "packages/types": {
       "name": "@rose-griffon/types",
       "version": "0.1.0",
+      "dependencies": {
+        "zod": "catalog:",
+      },
       "devDependencies": {
         "@rose-griffon/config": "workspace:*",
         "typescript": "catalog:",

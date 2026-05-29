@@ -93,6 +93,10 @@ export async function createChronicle(
 		revalidatePath("/chroniques");
 		revalidateTag("articles", "max");
 
+		if (newArticle.status === "published") {
+			void triggerDiscordAnnouncement({ ...newArticle, type: "website" });
+		}
+
 		return { data: newArticle, success: true };
 	} catch (error) {
 		console.error("Error creating chronicle:", error);
@@ -163,6 +167,10 @@ export async function updateChronicle(
 		revalidatePath(`/chroniques/${updatedArticle.slug}`);
 		revalidateTag("articles", "max");
 
+		if (updatedArticle.status === "published") {
+			void triggerDiscordAnnouncement({ ...updatedArticle, type: "website" });
+		}
+
 		return { data: updatedArticle, success: true };
 	} catch (error) {
 		console.error("Error updating chronicle:", error);
@@ -183,13 +191,15 @@ export async function toggleChronicleStatus(
 		const supabase = await createClient();
 		const newStatus = currentStatus ? "draft" : "published";
 
-		const { error } = await supabase
+		const { data: updatedArticle, error } = await supabase
 			.from("articles")
 			.update({
 				status: newStatus,
 				updated_at: new Date().toISOString(),
 			})
-			.eq("id", id);
+			.eq("id", id)
+			.select()
+			.single();
 
 		if (error) {
 			return { error: error.message, success: false };
@@ -198,6 +208,10 @@ export async function toggleChronicleStatus(
 		await logAdminAction("update", "article", id, {
 			status: newStatus,
 		});
+
+		if (newStatus === "published" && updatedArticle) {
+			void triggerDiscordAnnouncement({ ...updatedArticle, type: "website" });
+		}
 
 		revalidatePath("/admin/chroniques");
 		revalidatePath("/chroniques");
@@ -236,5 +250,38 @@ export async function deleteChronicle(id: string): Promise<{ success: boolean; e
 	} catch (error) {
 		console.error("Error deleting chronicle:", error);
 		return { error: "Erreur lors de la suppression", success: false };
+	}
+}
+
+async function triggerDiscordAnnouncement(article: {
+	title: string;
+	slug: string;
+	excerpt?: string | null;
+	featured_image_url?: string | null;
+	type: "wiki" | "website";
+}) {
+	const secret = process.env.DISCORD_ANNOUNCE_SECRET || "default-secret-key-12345";
+	try {
+		const res = await fetch("http://localhost:3006/announce", {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
+				Authorization: `Bearer ${secret}`,
+			},
+			body: JSON.stringify({
+				type: article.type,
+				title: article.title,
+				slug: article.slug,
+				excerpt: article.excerpt || "",
+				featured_image_url: article.featured_image_url || "",
+			}),
+		});
+		if (!res.ok) {
+			console.warn(`[Discord Announcement] Failed to announce: ${res.status} ${await res.text()}`);
+		} else {
+			console.log(`[Discord Announcement] Announcement triggered successfully for ${article.slug}`);
+		}
+	} catch (err) {
+		console.warn("[Discord Announcement] Error triggering announcement:", err);
 	}
 }

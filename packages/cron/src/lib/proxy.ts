@@ -43,19 +43,34 @@ export function clearProxy(): void {
 }
 
 /**
- * Exécute une fonction asynchrone avec un proxy configuré, puis nettoie à la fin.
+ * Exécute une fonction asynchrone avec un proxy configuré.
+ * En cas d'erreur de connexion/réseau, tente avec le proxy suivant (rotation automatique).
  */
 export async function withProxyRotation<T>(fn: () => Promise<T>): Promise<T> {
-	const proxy = getNextProxy();
-	if (!proxy) {
-		// Pas de proxy configuré, on exécute normalement
+	if (PROXIES_LIST.length === 0) {
 		return fn();
 	}
 
-	applyProxy(proxy);
-	try {
-		return await fn();
-	} finally {
-		clearProxy();
+	const maxRetries = Math.min(3, PROXIES_LIST.length);
+	let lastError: unknown;
+
+	for (let attempt = 0; attempt < maxRetries; attempt++) {
+		const proxy = getNextProxy();
+		if (!proxy) {
+			return fn();
+		}
+
+		applyProxy(proxy);
+		try {
+			return await fn();
+		} catch (error) {
+			lastError = error;
+			console.warn(`[Proxy Rotator] Échec avec le proxy ${proxy} :`, error);
+			console.warn(`[Proxy Rotator] Tentative ${attempt + 1}/${maxRetries} échouée. Rotation vers le proxy suivant...`);
+		} finally {
+			clearProxy();
+		}
 	}
+
+	throw lastError || new Error("Proxy rotation failed after maximum retries");
 }
