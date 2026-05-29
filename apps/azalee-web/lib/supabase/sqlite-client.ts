@@ -1,4 +1,4 @@
-import type { Database } from "bun:sqlite";
+import { Database } from "bun:sqlite";
 import { readdirSync } from "node:fs";
 import path from "node:path";
 
@@ -39,8 +39,7 @@ function getSqliteDb(): Database {
 	if (!dbPath) {
 		throw new Error("No SQLite database backup found");
 	}
-	const { Database: BunDatabase } = require("bun:sqlite");
-	_sqliteDb = new BunDatabase(dbPath, { readonly: true }) as Database;
+	_sqliteDb = new Database(dbPath, { readonly: true });
 	_sqliteDb.exec("PRAGMA journal_mode = WAL");
 	_sqliteDb.exec("PRAGMA temp_store = MEMORY");
 	return _sqliteDb;
@@ -246,7 +245,7 @@ export class SqliteQueryBuilder {
 			sql += ` WHERE ${this.wheres.join(" AND ")}`;
 		}
 		if (this.needsGrouping) {
-			sql += ` GROUP BY "name_fr"`;
+			sql += ' GROUP BY "name_fr"';
 		}
 		if (this.orders.length > 0) {
 			sql += ` ORDER BY ${this.orders.join(", ")}`;
