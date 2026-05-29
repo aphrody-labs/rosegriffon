@@ -1,4 +1,5 @@
 import { Badge, Button, Avatar, AvatarFallback, AvatarImage } from "@rose-griffon/ui";
+import type { LucideIcon } from "lucide-react";
 import { Edit, ExternalLink, Crown, Star, ShieldCheck, Heart, Sparkles } from "lucide-react";
 import Link from "next/link";
 
@@ -16,7 +17,7 @@ interface ProfileIdentityProps {
 	badges?: string[] | null;
 }
 
-const BADGE_MAP: Record<string, { label: string; icon: any; color: string }> = {
+const BADGE_MAP: Record<string, { label: string; icon: LucideIcon; color: string }> = {
 	founder: {
 		label: "Fondateur",
 		icon: Crown,

@@ -120,7 +120,7 @@ const TextPressure: React.FC<TextPressureProps> = ({
 		setSize();
 		window.addEventListener("resize", setSize);
 		return () => window.removeEventListener("resize", setSize);
-	}, [setSize]); // eslint-disable-line react-hooks/exhaustive-deps
+	}, [setSize]);
 
 	useEffect(() => {
 		let rafId: number;
