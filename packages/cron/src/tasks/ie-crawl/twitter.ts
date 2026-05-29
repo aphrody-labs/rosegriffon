@@ -103,6 +103,41 @@ export async function crawlTwitter(): Promise<{ success: boolean; count?: number
       for (const t of filteredGroup) {
         const createdAtIso = t.created_at ? new Date(t.created_at).toISOString() : new Date().toISOString();
         
+        // Extraire les médias de t
+        const tMedia = (t.media || []).map((m: any) => ({
+          id: m.id,
+          type: m.type,
+          url: m.url,
+          original_url: m.url,
+        }));
+
+        // Collecter l'union de tous les médias du thread (en mettant ceux de t en premier)
+        const allThreadMedia: any[] = [];
+        const seenMediaUrls = new Set<string>();
+
+        for (const m of tMedia) {
+          if (m.url) {
+            allThreadMedia.push(m);
+            seenMediaUrls.add(m.url);
+          }
+        }
+
+        for (const item of filteredGroup) {
+          if (item.id === t.id) continue;
+          const itemMedia = (item.media || []).map((m: any) => ({
+            id: m.id,
+            type: m.type,
+            url: m.url,
+            original_url: m.url,
+          }));
+          for (const m of itemMedia) {
+            if (m.url && !seenMediaUrls.has(m.url)) {
+              allThreadMedia.push(m);
+              seenMediaUrls.add(m.url);
+            }
+          }
+        }
+
         // Préparer l'objet pour la base de données
         const tweetRow = {
           id: t.id,
@@ -120,13 +155,17 @@ export async function crawlTwitter(): Promise<{ success: boolean; count?: number
             quote_count: t.quote_count,
             view_count: t.view_count,
           },
-          media: null,
+          media: allThreadMedia,
           quoted_tweets: t.quoted_tweet ? JSON.parse(JSON.stringify(t.quoted_tweet)) : null,
           raw_tweets: filteredGroup.map(item => ({
             id: item.id,
             text: item.text,
+            fullText: item.text,
             created_at: item.created_at,
-            in_reply_to_status_id: item.in_reply_to_status_id
+            in_reply_to_status_id: item.in_reply_to_status_id,
+            media: (item.media || []).map((m: any) => ({
+              url: m.url,
+            })),
           })),
           updated_at: new Date().toISOString(),
         };
