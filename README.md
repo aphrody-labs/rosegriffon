@@ -60,7 +60,7 @@ bun run bot:dev         # bot Discord en mode dev (hot reload)
 
 Le `catalog:` du `package.json` racine est la source unique de vérité pour les versions des deps majeures (next, react, ts, tailwind, zod, supabase, etc.). Tout ajout dans une app doit passer par le catalog si la dep est partagée.
 
-Imports internes : `@rosegriffon/ui`, `@rosegriffon/db`, `@rosegriffon/types`, `@rosegriffon/config/*`.
+Imports internes : `@rose-griffon/ui`, `@rose-griffon/db`, `@rose-griffon/types`, `@rose-griffon/config/*`.
 
 ## Migration depuis vps-monorepo
 
@@ -75,7 +75,7 @@ Historique migration : voir [`docs/migration-from-vps.md`](docs/migration-from-v
 | azalee | `rose-griffon/rg` (root: `apps/azalee`) | `azalee` | `azalee.rosegriffon.fr` |
 | website | `rose-griffon/rg` (root: `apps/website`) | `rosegriffon` | `rosegriffon.fr` |
 
-Root directory dans Vercel : `apps/azalee` / `apps/website`. Build command : `cd ../.. && bun run build --filter=@rosegriffon/<app>`.
+Root directory dans Vercel : `apps/azalee` / `apps/website`. Build command : `cd ../.. && bun run build --filter=@rose-griffon/<app>`.
 
 ## Bot Discord (VPS only)
 

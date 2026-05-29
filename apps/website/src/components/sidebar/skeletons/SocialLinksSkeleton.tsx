@@ -1,6 +1,6 @@
 "use client";
 
-import { Skeleton } from "@rosegriffon/ui";
+import { Skeleton } from "@rose-griffon/ui";
 
 /**
  * Social Links Skeleton - Loading placeholder

@@ -7,7 +7,7 @@
  *
  * @example
  * ```typescript
- * import { createTeamsAPI } from '@rosegriffon/inagle/teams';
+ * import { createTeamsAPI } from '@rose-griffon/inagle/teams';
  *
  * const teams = createTeamsAPI();
  *

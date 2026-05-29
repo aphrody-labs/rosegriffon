@@ -2,11 +2,11 @@
 
 ## Synthèse
 
-Le monorepo présente un niveau de type-safety solide pour un projet en développement actif. La génération de types Supabase est correcte et les helpers DB propagent bien `Database`. Les trois points les plus urgents sont : (1) le type `CookieStore.set` / `setAll` dans `@rosegriffon/db/server` est incompatible avec `SetCookie`/`SetAllCookies` de `@supabase/ssr` — le callsite du website le contourne avec `as Record<string, unknown>` ; (2) `tsyringe` est déclaré en dépendance du bot mais n'est pas utilisé (dead dep) ; (3) `ignoreDeprecations: "6.0"` masque activement des erreurs TS 6.0 qui devront être adressées lors du prochain cycle.
+Le monorepo présente un niveau de type-safety solide pour un projet en développement actif. La génération de types Supabase est correcte et les helpers DB propagent bien `Database`. Les trois points les plus urgents sont : (1) le type `CookieStore.set` / `setAll` dans `@rose-griffon/db/server` est incompatible avec `SetCookie`/`SetAllCookies` de `@supabase/ssr` — le callsite du website le contourne avec `as Record<string, unknown>` ; (2) `tsyringe` est déclaré en dépendance du bot mais n'est pas utilisé (dead dep) ; (3) `ignoreDeprecations: "6.0"` masque activement des erreurs TS 6.0 qui devront être adressées lors du prochain cycle.
 
 ---
 
-## @rosegriffon/db
+## @rose-griffon/db
 
 ### Strengths
 
@@ -14,11 +14,11 @@ Le monorepo présente un niveau de type-safety solide pour un projet en dévelop
 
 - **Helpers typés strictement.** `createBrowserClient<Database>`, `createClient<Database>`, `createServerClient<Database>` propagent tous le type générique. `ReturnType<typeof createBrowserClient<Database>>` pour le singleton est correct — le type du client est inféré précisément depuis le générique.
 
-- **Exports map propre.** Le `package.json` expose cinq entries (`"."`, `"./browser"`, `"./server"`, `"./service"`, `"./types"`) alignées sur les fichiers sources. Les apps peuvent importer `@rosegriffon/db/service` sans embarquer le SSR runtime Next.
+- **Exports map propre.** Le `package.json` expose cinq entries (`"."`, `"./browser"`, `"./server"`, `"./service"`, `"./types"`) alignées sur les fichiers sources. Les apps peuvent importer `@rose-griffon/db/service` sans embarquer le SSR runtime Next.
 
 - **`Tables<"tablename">`, `TablesInsert<>`, `TablesUpdate<>`, `Enums<>`, `CompositeTypes<>`** sont toutes exportées depuis `types.ts`. Ces utilitaires couvrent 100 % des accès colonne-safe que les app peuvent vouloir dériver.
 
-- **Singleton `cachedClient` dans `service.ts`** : sûr pour le bot (processus Bun long-running). Pour le contexte Next.js, la documentation du package précise « Fluid compute friendly : nouveau client à chaque appel » dans le wrapper `createAdminClient()` du website — le singleton reste dans `@rosegriffon/db` mais le wrapper website appelle `createSupabaseServiceClient()` à chaque fois, ce qui re-retourne le singleton déjà initialisé (comportement correct, pas de risque HMR côté bot).
+- **Singleton `cachedClient` dans `service.ts`** : sûr pour le bot (processus Bun long-running). Pour le contexte Next.js, la documentation du package précise « Fluid compute friendly : nouveau client à chaque appel » dans le wrapper `createAdminClient()` du website — le singleton reste dans `@rose-griffon/db` mais le wrapper website appelle `createSupabaseServiceClient()` à chaque fois, ce qui re-retourne le singleton déjà initialisé (comportement correct, pas de risque HMR côté bot).
 
 ### Issues
 
@@ -49,7 +49,7 @@ type SetAllCookies = (cookies: { name: string; value: string; options: CookieOpt
 
 **[LOW] `db` package tsconfig hérite de `tsconfig-base.json` (pas `tsconfig-bun.json`) mais déclare `"types": ["bun"]`.**
 
-`process.env` dans `browser.ts`, `server.ts`, `service.ts` est résolu via le type `bun` (qui ré-exporte `NodeJS.ProcessEnv`). C'est cohérent. Mais `browser.ts` est sensé tourner côté browser Next.js, où `process.env` vient de webpack/Next (`@types/node`). Le type `bun` inclut `process`, donc ça compile — mais le package `@rosegriffon/db` pourrait un jour être consommé dans un contexte sans Bun. Risque faible, mais à noter si le package devient public.
+`process.env` dans `browser.ts`, `server.ts`, `service.ts` est résolu via le type `bun` (qui ré-exporte `NodeJS.ProcessEnv`). C'est cohérent. Mais `browser.ts` est sensé tourner côté browser Next.js, où `process.env` vient de webpack/Next (`@types/node`). Le type `bun` inclut `process`, donc ça compile — mais le package `@rose-griffon/db` pourrait un jour être consommé dans un contexte sans Bun. Risque faible, mais à noter si le package devient public.
 
 **[INFO] Singleton `cachedClient` dans `browser.ts` — HMR Next.js.**
 
@@ -69,7 +69,7 @@ setAll(cookiesToSet: Array<{ name: string; value: string; options?: CookieOption
 ```
 Ceci élimine le `as Record<string, unknown>` dans le wrapper website.
 
-2. Envisager d'exporter `CookieStore` depuis `@rosegriffon/db/server` pour que les callers puissent typer leur cookieStore local sans reimporter `@supabase/ssr`.
+2. Envisager d'exporter `CookieStore` depuis `@rose-griffon/db/server` pour que les callers puissent typer leur cookieStore local sans reimporter `@supabase/ssr`.
 
 ---
 
@@ -200,17 +200,17 @@ Requis pour que `emitDecoratorMetadata` fonctionne correctement (les field initi
 
 **`noUncheckedIndexedAccess` et `exactOptionalPropertyTypes` absents de `tsconfig-base.json`.**
 
-`packages/patreon-bun` les active dans son propre tsconfig (ils sont opt-in). Le bot et `@rosegriffon/db` ne les ont pas. Sans `noUncheckedIndexedAccess`, `array[i]` retourne `T` au lieu de `T | undefined`, ce qui masque des bugs d'index out-of-bounds. Les accès `members[i]!` dans `cards.ts` et `rows[0]!` dans les services existent précisément parce que le flag est absent — avec le flag activé, ils seraient correctement reportés par le compilateur.
+`packages/patreon-bun` les active dans son propre tsconfig (ils sont opt-in). Le bot et `@rose-griffon/db` ne les ont pas. Sans `noUncheckedIndexedAccess`, `array[i]` retourne `T` au lieu de `T | undefined`, ce qui masque des bugs d'index out-of-bounds. Les accès `members[i]!` dans `cards.ts` et `rows[0]!` dans les services existent précisément parce que le flag est absent — avec le flag activé, ils seraient correctement reportés par le compilateur.
 
 **TypeScript 6.0 — `verbatimModuleSyntax` non activé.**
 
-`verbatimModuleSyntax: false` (défaut implicite). L'activer forcerait l'utilisation de `import type` systématiquement pour les imports purement de types. Recommandation pour le bot : **ne pas l'activer**. Le bot utilise `emitDecoratorMetadata` qui nécessite que les types de paramètres soient émis via `Reflect.metadata("design:paramtypes", ...)`. Avec `verbatimModuleSyntax: true`, les imports marqués `import type` sont élidés à la transpilation, ce qui peut briser la chaîne de métadonnées dans certains edge-cases. Pour `@rosegriffon/db` et les apps Next.js, l'activation est sans risque et recommandée.
+`verbatimModuleSyntax: false` (défaut implicite). L'activer forcerait l'utilisation de `import type` systématiquement pour les imports purement de types. Recommandation pour le bot : **ne pas l'activer**. Le bot utilise `emitDecoratorMetadata` qui nécessite que les types de paramètres soient émis via `Reflect.metadata("design:paramtypes", ...)`. Avec `verbatimModuleSyntax: true`, les imports marqués `import type` sont élidés à la transpilation, ce qui peut briser la chaîne de métadonnées dans certains edge-cases. Pour `@rose-griffon/db` et les apps Next.js, l'activation est sans risque et recommandée.
 
 ---
 
 ## Top 5 Action Items
 
-### 1. Corriger `CookieStore` dans `@rosegriffon/db/server.ts`
+### 1. Corriger `CookieStore` dans `@rose-griffon/db/server.ts`
 
 **Fichier :** `/home/ubuntu/rg/packages/db/src/server.ts`
 

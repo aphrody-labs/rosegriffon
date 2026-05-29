@@ -1,5 +1,5 @@
 {
-	"name": "@rosegriffon/azalee",
+	"name": "@rose-griffon/azalee",
 	"version": "0.1.0",
 	"private": true,
 	"scripts": {
@@ -11,7 +11,7 @@
 		"lint:ox": "oxlint .",
 		"lint:eslint": "bun x eslint .",
 		"type-check": "tsc --noEmit",
-		"test": "vitest",
+		"test": "vitest run",
 		"test:run": "vitest run",
 		"create-draft": "bun scripts/create-draft.ts",
 		"backup:supabase": "bun scripts/ops/backup-supabase-to-sqlite.ts"
@@ -52,12 +52,12 @@
 		"@radix-ui/react-toggle": "^1.1.10",
 		"@radix-ui/react-toggle-group": "^1.1.11",
 		"@radix-ui/react-tooltip": "^1.2.8",
-		"@rosegriffon/assets": "workspace:*",
-		"@rosegriffon/auth": "workspace:*",
-		"@rosegriffon/db": "workspace:*",
-		"@rosegriffon/inagle": "workspace:*",
-		"@rosegriffon/types": "workspace:*",
-		"@rosegriffon/ui": "workspace:*",
+		"@rose-griffon/assets": "workspace:*",
+		"@rose-griffon/auth": "workspace:*",
+		"@rose-griffon/db": "workspace:*",
+		"@rose-griffon/inagle": "workspace:*",
+		"@rose-griffon/types": "workspace:*",
+		"@rose-griffon/ui": "workspace:*",
 		"@sentry/nextjs": "^10.53.1",
 		"@supabase/supabase-js": "catalog:",
 		"@types/nodemailer": "^8.0.0",
@@ -110,7 +110,7 @@
 	],
 	"devDependencies": {
 		"@next/bundle-analyzer": "catalog:",
-		"@rosegriffon/config": "workspace:*",
+		"@rose-griffon/config": "workspace:*",
 		"@tailwindcss/postcss": "catalog:",
 		"@tailwindcss/typography": "catalog:",
 		"@testing-library/jest-dom": "catalog:",

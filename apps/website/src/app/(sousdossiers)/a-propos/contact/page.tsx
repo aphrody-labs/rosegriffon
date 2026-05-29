@@ -1,6 +1,6 @@
 "use client";
 
-import { Button, Input, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, Textarea, Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@rosegriffon/ui";
+import { Button, Input, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, Textarea, Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@rose-griffon/ui";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
 import { useRef, useState } from "react";

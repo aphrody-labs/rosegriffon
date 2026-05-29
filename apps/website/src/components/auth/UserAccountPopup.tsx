@@ -1,6 +1,6 @@
 "use client";
 
-import { Button, DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger, Avatar, AvatarFallback, AvatarImage, Skeleton } from "@rosegriffon/ui";
+import { Button, DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger, Avatar, AvatarFallback, AvatarImage, Skeleton } from "@rose-griffon/ui";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -8,7 +8,7 @@ import { useState } from "react";
 
 import { authClient } from "@/lib/auth-client";
 import { LogOut, Settings, UserCircle } from "@/lib/icons-config";
-import type { Database } from "@rosegriffon/db";
+import type { Database } from "@rose-griffon/db";
 
 type Profile = Database["public"]["Tables"]["profiles"]["Row"];
 

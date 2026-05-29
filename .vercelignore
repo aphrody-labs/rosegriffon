@@ -1,0 +1,10 @@
+# Ignore node_modules and builds
+node_modules
+.next
+.turbo
+.git
+dist
+build
+.gemini
+scratch
+apps/bot

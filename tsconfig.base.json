@@ -23,11 +23,11 @@
 		"baseUrl": ".",
 		"ignoreDeprecations": "6.0",
 		"paths": {
-			"@rosegriffon/ui": ["./packages/ui/src/index.ts"],
-			"@rosegriffon/ui/*": ["./packages/ui/src/*"],
-			"@rosegriffon/db": ["./packages/db/src/index.ts"],
-			"@rosegriffon/db/*": ["./packages/db/src/*"],
-			"@rosegriffon/config/*": ["./packages/config/*"]
+			"@rose-griffon/ui": ["./packages/ui/src/index.ts"],
+			"@rose-griffon/ui/*": ["./packages/ui/src/*"],
+			"@rose-griffon/db": ["./packages/db/src/index.ts"],
+			"@rose-griffon/db/*": ["./packages/db/src/*"],
+			"@rose-griffon/config/*": ["./packages/config/*"]
 		}
 	},
 	"exclude": ["node_modules", ".next", "dist", "build", ".turbo", "coverage"]

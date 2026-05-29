@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Card, CardContent, CardHeader, CardTitle } from "@rosegriffon/ui";
+import { Card, CardContent, CardHeader, CardTitle } from "@rose-griffon/ui";
 
 export const metadata: Metadata = {
   description:

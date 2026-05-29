@@ -2,7 +2,7 @@
 
 export const dynamic = "force-dynamic";
 
-import { Alert, AlertDescription, Button, Card, CardContent, CardDescription, CardHeader, CardTitle } from "@rosegriffon/ui";
+import { Alert, AlertDescription, Button, Card, CardContent, CardDescription, CardHeader, CardTitle } from "@rose-griffon/ui";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 

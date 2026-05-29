@@ -4,7 +4,7 @@ const SMTP_HOST = process.env.SMTP_HOST || "ssl0.ovh.net";
 const SMTP_PORT = Number.parseInt(process.env.SMTP_PORT || "465", 10);
 const {SMTP_USER} = process.env;
 const {SMTP_PASSWORD} = process.env;
-const SMTP_FROM = process.env.SMTP_FROM || '"Azalée" <azalee@rosegriffon.fr>';
+const SMTP_FROM = process.env.SMTP_FROM || '"Azalée" <azalee@rose-griffon.fr>';
 
 interface SendEmailOptions {
   to: string;

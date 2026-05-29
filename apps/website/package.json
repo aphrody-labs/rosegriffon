@@ -1,5 +1,5 @@
 {
-	"name": "@rosegriffon/website",
+	"name": "@rose-griffon/website",
 	"version": "1.4.0",
 	"private": true,
 	"engines": {
@@ -7,7 +7,7 @@
 	},
 	"scripts": {
 		"dev": "bun run --bun next dev",
-		"test": "vitest",
+		"test": "vitest run",
 		"test:ui": "vitest --ui",
 		"test:run": "vitest run",
 		"build": "node --no-deprecation ../../node_modules/next/dist/bin/next build",
@@ -53,12 +53,12 @@
 		"@radix-ui/react-toggle": "^1.1.10",
 		"@radix-ui/react-toggle-group": "^1.1.11",
 		"@radix-ui/react-tooltip": "^1.2.8",
-		"@rosegriffon/assets": "workspace:*",
-		"@rosegriffon/auth": "workspace:*",
-		"@rosegriffon/db": "workspace:*",
-		"@rosegriffon/patreon-bun": "workspace:*",
-		"@rosegriffon/types": "workspace:*",
-		"@rosegriffon/ui": "workspace:*",
+		"@rose-griffon/assets": "workspace:*",
+		"@rose-griffon/auth": "workspace:*",
+		"@rose-griffon/db": "workspace:*",
+		"@rose-griffon/patreon-bun": "workspace:*",
+		"@rose-griffon/types": "workspace:*",
+		"@rose-griffon/ui": "workspace:*",
 		"@sentry/nextjs": "^10.49.0",
 		"@stripe/stripe-js": "^5.0.0",
 		"@supabase/ssr": "catalog:",
@@ -118,7 +118,7 @@
 	"devDependencies": {
 		"@next/bundle-analyzer": "catalog:",
 		"@next/eslint-plugin-next": "catalog:",
-		"@rosegriffon/config": "workspace:*",
+		"@rose-griffon/config": "workspace:*",
 		"@tailwindcss/postcss": "catalog:",
 		"@testing-library/jest-dom": "catalog:",
 		"@testing-library/react": "^16.3.0",

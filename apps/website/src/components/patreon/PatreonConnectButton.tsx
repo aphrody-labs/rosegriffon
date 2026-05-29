@@ -1,7 +1,7 @@
 "use client";
 
-import { Button } from "@rosegriffon/ui";
-import { PatreonOauthScope } from "@rosegriffon/patreon-bun";
+import { Button } from "@rose-griffon/ui";
+import { PatreonOauthScope } from "@rose-griffon/patreon-bun";
 import { Heart, Link2, Loader2 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";

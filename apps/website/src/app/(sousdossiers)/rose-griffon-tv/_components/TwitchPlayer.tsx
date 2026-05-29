@@ -1,6 +1,6 @@
 "use client";
 
-import { Button, Skeleton } from "@rosegriffon/ui";
+import { Button, Skeleton } from "@rose-griffon/ui";
 import dynamic from "next/dynamic";
 
 import { AlertCircle, Play, Radio } from "@/lib/icons-config";

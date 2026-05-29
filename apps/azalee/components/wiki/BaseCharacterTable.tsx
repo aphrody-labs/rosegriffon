@@ -1,6 +1,6 @@
 "use client";
 
-import type { BaseCharacter } from "@rosegriffon/inagle";
+import type { BaseCharacter } from "@rose-griffon/inagle";
 import { CircleDot, Sparkles } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -15,7 +15,7 @@ import {
 	TableHead,
 	TableHeader,
 	TableRow,
-} from "@rosegriffon/ui";
+} from "@rose-griffon/ui";
 import type { SpriteCommonKey } from "@/config/sprites-common";
 import { isFemaleGender } from "@/lib/gender";
 import { getCharacterImageUrl, getSkillCategoryIconUrl } from "@/lib/images";

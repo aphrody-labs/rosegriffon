@@ -1,4 +1,4 @@
-import { Badge, Card, CardContent, StorageImage } from "@rosegriffon/ui";
+import { Badge, Card, CardContent, StorageImage } from "@rose-griffon/ui";
 import { ArrowLeft, Calendar, Eye } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";

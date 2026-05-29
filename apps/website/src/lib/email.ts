@@ -117,7 +117,7 @@ export async function sendOrderConfirmationEmail(data: OrderConfirmationData) {
               </p>
               
               <p style="margin-top: 20px;">
-                Si vous avez des questions, n'hésitez pas à nous contacter à <a href="mailto:contact@rosegriffon.com">contact@rosegriffon.com</a>
+                Si vous avez des questions, n'hésitez pas à nous contacter à <a href="mailto:contact@rose-griffon.com">contact@rose-griffon.com</a>
               </p>
               
               <p style="margin-top: 20px;">

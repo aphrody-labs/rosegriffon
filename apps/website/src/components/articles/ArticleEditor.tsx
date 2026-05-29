@@ -1,6 +1,6 @@
 "use client";
 
-import { Button, Input, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, Textarea, Label } from "@rosegriffon/ui";
+import { Button, Input, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, Textarea, Label } from "@rose-griffon/ui";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useState } from "react";

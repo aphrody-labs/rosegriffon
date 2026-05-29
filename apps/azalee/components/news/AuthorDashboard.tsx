@@ -4,7 +4,7 @@ import { BookOpen, Eye, MessageCircle, Star, ThumbsUp, Trophy } from "lucide-rea
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { getAuthorDashboard } from "@/app/actions/stats-export";
-import { Skeleton } from "@rosegriffon/ui";
+import { Skeleton } from "@rose-griffon/ui";
 import { cn } from "@/lib/utils";
 
 type DashboardData = Awaited<ReturnType<typeof getAuthorDashboard>>;

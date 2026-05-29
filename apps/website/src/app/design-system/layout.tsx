@@ -30,7 +30,7 @@ const superCartoon = localFont({
 
 export const metadata = {
 	description:
-		"Showcase du design system @rosegriffon/ui : 4 thèmes, tokens MD3, composants — DA Rose Griffon (manga / gaming / Inazuma).",
+		"Showcase du design system @rose-griffon/ui : 4 thèmes, tokens MD3, composants — DA Rose Griffon (manga / gaming / Inazuma).",
 	title: "Design System — Rose Griffon",
 };
 

@@ -18,7 +18,7 @@ import { uploadImage } from "@/app/actions/image-upload";
 import { $createImageNode, $isImageNode, ImageNode } from '@/components/editor/nodes/image-node';
 import type { ImagePayload } from '@/components/editor/nodes/image-node';
 import { CAN_USE_DOM } from "@/components/editor/shared/can-use-dom";
-import { Button, DialogFooter, Input, Label, Tabs, TabsContent, TabsList, TabsTrigger } from "@rosegriffon/ui";
+import { Button, DialogFooter, Input, Label, Tabs, TabsContent, TabsList, TabsTrigger } from "@rose-griffon/ui";
 
 export type InsertImagePayload = Readonly<ImagePayload>;
 

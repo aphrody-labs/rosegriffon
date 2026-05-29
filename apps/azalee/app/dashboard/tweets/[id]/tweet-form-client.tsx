@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
-import { Button, Textarea } from "@rosegriffon/ui";
+import { Button, Textarea } from "@rose-griffon/ui";
 import { saveTweet } from "../actions";
 
 export function TweetFormClient({ initialData }: { initialData?: any }) {

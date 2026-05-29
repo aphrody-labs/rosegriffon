@@ -1,7 +1,7 @@
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { Calendar, Mail, MessageSquare, Shield, UserX } from "lucide-react";
-import { AdminPageHeader as DashboardPageHeader, Avatar, AvatarFallback, AvatarImage, Badge, Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@rosegriffon/ui";
+import { AdminPageHeader as DashboardPageHeader, Avatar, AvatarFallback, AvatarImage, Badge, Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@rose-griffon/ui";
 import { Icon } from "@/components/ui/Icon";
 import { WikiPagination } from "@/components/wiki/WikiPagination";
 import { createClient } from "@/lib/supabase/server";

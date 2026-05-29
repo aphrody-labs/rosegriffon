@@ -1,6 +1,6 @@
 "use client";
 
-import { Button } from "@rosegriffon/ui";
+import { Button } from "@rose-griffon/ui";
 import { useEffect } from "react";
 
 import { AlertTriangle } from "@/lib/icons-config";

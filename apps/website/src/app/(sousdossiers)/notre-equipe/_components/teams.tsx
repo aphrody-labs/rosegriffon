@@ -4,7 +4,7 @@ import Link from "next/link";
 import React, { useMemo } from "react";
 
 import ImageWithSkeleton from "@/components/shared/ImageWithSkeleton";
-import { Skeleton } from "@rosegriffon/ui";
+import { Skeleton } from "@rose-griffon/ui";
 import { useTeams } from "@/hooks/use-teams";
 
 // Rôle générique inséré par le sync Discord en attendant un libellé précis :

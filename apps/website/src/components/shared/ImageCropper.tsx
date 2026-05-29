@@ -1,6 +1,6 @@
 "use client";
 
-import { Button, Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, Slider } from "@rosegriffon/ui";
+import { Button, Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, Slider } from "@rose-griffon/ui";
 import { useCallback, useState } from "react";
 import Cropper from 'react-easy-crop';
 import type { Area } from 'react-easy-crop';

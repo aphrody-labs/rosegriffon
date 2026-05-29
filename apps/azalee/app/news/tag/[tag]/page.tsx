@@ -5,7 +5,7 @@ import { fr } from "date-fns/locale";
 import { ArrowLeft, Tag } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { Badge, Button } from "@rosegriffon/ui";
+import { Badge, Button } from "@rose-griffon/ui";
 import { WikiPagination } from "@/components/wiki/WikiPagination";
 import { createClient } from "@/lib/supabase/server";
 import { parseSearchParams } from "@/lib/validations";

@@ -2,7 +2,7 @@ import { format, formatDistanceToNow } from "date-fns";
 import { fr } from "date-fns/locale";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { DashboardStatsCard as DashboardMetricCard, AdminPageHeader as DashboardPageHeader } from "@rosegriffon/ui";
+import { DashboardStatsCard as DashboardMetricCard, AdminPageHeader as DashboardPageHeader } from "@rose-griffon/ui";
 import { Icon } from "@/components/ui/Icon";
 import { getServerSession } from "@/lib/auth-helpers";
 import { createClient } from "@/lib/supabase/server";

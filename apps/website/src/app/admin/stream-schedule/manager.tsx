@@ -1,6 +1,6 @@
 "use client";
 
-import { Alert, AlertDescription, AlertTitle, Button, Input, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, Label } from "@rosegriffon/ui";
+import { Alert, AlertDescription, AlertTitle, Button, Input, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, Label } from "@rose-griffon/ui";
 import { Calendar, Edit2, Plus, RefreshCw, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -9,8 +9,8 @@ import { toast } from "sonner";
 import { AdminCard } from "@/components/admin/shared/AdminCard";
 
 
-import type { StreamSchedule } from "@rosegriffon/types";
-import type { Database, Insert, Tables, Update } from "@rosegriffon/db";
+import type { StreamSchedule } from "@rose-griffon/types";
+import type { Database, Insert, Tables, Update } from "@rose-griffon/db";
 
 import { addSchedule, deleteSchedule, syncWithGoogleCalendar, updateSchedule } from "./actions";
 

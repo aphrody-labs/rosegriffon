@@ -1,5 +1,5 @@
 {
-  "name": "@rosegriffon/db",
+  "name": "@rose-griffon/db",
   "version": "0.1.0",
   "type": "module",
   "description": "Client Supabase partagé + Database types générés (site + bot)",
@@ -16,7 +16,7 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@rosegriffon/types": "workspace:*",
+    "@rose-griffon/types": "workspace:*",
     "@supabase/supabase-js": "catalog:",
     "@supabase/ssr": "catalog:"
   },

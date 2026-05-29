@@ -3,7 +3,7 @@ import type {
 	CharacterVariant,
 	MultiLevelStats,
 	Skill,
-} from "@rosegriffon/inagle";
+} from "@rose-griffon/inagle";
 import type {
 	InagleCharacter,
 	InagleDrop,
@@ -11,7 +11,7 @@ import type {
 	InagleItem,
 	InagleKizunaItem,
 	InagleTactic,
-} from "@rosegriffon/inagle/types/database";
+} from "@rose-griffon/inagle/types/database";
 import { createClient } from "@supabase/supabase-js";
 import { unstable_cache } from "next/cache";
 import { resolveAssetUrl, resolveAuraTelopUrl } from "@/lib/images";

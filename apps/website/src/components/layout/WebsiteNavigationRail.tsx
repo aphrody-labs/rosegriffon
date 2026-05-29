@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { NavigationRail, NavigationRailItem, useSidebar } from "@rosegriffon/ui";
+import { NavigationRail, NavigationRailItem, useSidebar } from "@rose-griffon/ui";
 import { Home, Menu, Sparkles, Users } from "@/lib/icons-config";
 import { RGTVIcon } from "@/components/sidebar/atoms/RGTVIcon";
 

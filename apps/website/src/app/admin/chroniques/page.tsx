@@ -1,4 +1,4 @@
-import { Badge, Button, Card, CardContent, CardHeader, CardTitle, Input, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, DashboardStatsCard as StatsCard, AdminPageHeader, PaginationControls, StorageImage } from "@rosegriffon/ui";
+import { Badge, Button, Card, CardContent, CardHeader, CardTitle, Input, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, DashboardStatsCard as StatsCard, AdminPageHeader, PaginationControls, StorageImage } from "@rose-griffon/ui";
 import { BarChart3, Calendar, Eye, FileText, Filter, Plus, Search } from "lucide-react";
 import Link from "next/link";
 

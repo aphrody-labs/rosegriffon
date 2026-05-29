@@ -13,7 +13,7 @@ import {
 	Input,
 	Label,
 	Switch,
-} from "@rosegriffon/ui";
+} from "@rose-griffon/ui";
 import { useSupabase } from "@/hooks/use-supabase";
 import { authClient } from "@/lib/auth-client";
 

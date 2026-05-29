@@ -5,7 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { persistQueryClient } from "@tanstack/react-query-persist-client";
 import React from "react";
 
-import { SidebarProvider } from "@rosegriffon/ui";
+import { SidebarProvider } from "@rose-griffon/ui";
 
 export function Providers({ children }: { children: React.ReactNode }) {
   const [queryClient] = React.useState(

@@ -1,7 +1,7 @@
 /* eslint-disable no-console */
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
-import { PATHS } from "@rosegriffon/inagle/core/index.ts";
+import { PATHS } from "@rose-griffon/inagle/core/index.ts";
 
 const path = join(PATHS.soccer, "soccer_team_passive_config_0.00.00.cfg.bin.json");
 

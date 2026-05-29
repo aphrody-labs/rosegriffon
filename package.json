@@ -1,5 +1,5 @@
 {
-	"name": "@rosegriffon/monorepo",
+	"name": "@rose-griffon/monorepo",
 	"version": "0.1.0",
 	"private": true,
 	"type": "module",
@@ -74,10 +74,10 @@
 		"test": "turbo run test",
 		"clean": "turbo run clean && rm -rf node_modules .turbo",
 		"format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\" --ignore-path .gitignore",
-		"azalee:dev": "bun --filter @rosegriffon/azalee dev",
-		"website:dev": "bun --filter @rosegriffon/website dev",
-		"bot:dev": "bun --filter @rosegriffon/bot dev",
-		"bot:start": "bun --filter @rosegriffon/bot start"
+		"azalee:dev": "bun --filter @rose-griffon/azalee dev",
+		"website:dev": "bun --filter @rose-griffon/website dev",
+		"bot:dev": "bun --filter @rose-griffon/bot dev",
+		"bot:start": "bun --filter @rose-griffon/bot start"
 	},
 	"devDependencies": {
 		"@types/bun": "catalog:",

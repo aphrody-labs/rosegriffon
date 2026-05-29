@@ -1,6 +1,6 @@
 "use client";
 
-import { Button, Skeleton } from "@rosegriffon/ui";
+import { Button, Skeleton } from "@rose-griffon/ui";
 import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import { useMemo } from "react";

@@ -1,4 +1,4 @@
-import { Badge, Card, CardContent, CardHeader, CardTitle } from "@rosegriffon/ui";
+import { Badge, Card, CardContent, CardHeader, CardTitle } from "@rose-griffon/ui";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { ArrowRight, Eye, FileText } from "lucide-react";

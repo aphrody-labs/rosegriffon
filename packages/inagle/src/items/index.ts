@@ -3,7 +3,7 @@
  *
  * @example
  * ```typescript
- * import { createItemsAPI } from '@rosegriffon/inagle/items';
+ * import { createItemsAPI } from '@rose-griffon/inagle/items';
  *
  * const items = createItemsAPI();
  *

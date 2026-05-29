@@ -6,7 +6,7 @@ import { OnChangePlugin } from "@lexical/react/LexicalOnChangePlugin";
 import type { EditorState, SerializedEditorState } from "lexical";
 
 import { editorTheme } from "@/components/editor/themes/editor-theme";
-import { TooltipProvider } from "@rosegriffon/ui";
+import { TooltipProvider } from "@rose-griffon/ui";
 import { cn } from "@/lib/utils";
 import { nodes } from "./nodes";
 import { Plugins } from "./plugins";

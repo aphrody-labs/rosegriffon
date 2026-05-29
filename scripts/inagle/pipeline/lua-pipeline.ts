@@ -9,8 +9,8 @@
 import { execSync } from "node:child_process";
 import { existsSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import { basename, join } from "node:path";
-import { extractStrings, parseLuaBytecode } from "@rosegriffon/inagle/core/lua-bytecode.ts";
-import { crc32StringHex } from "@rosegriffon/inagle/parsers/hash/crc32.ts";
+import { extractStrings, parseLuaBytecode } from "@rose-griffon/inagle/core/lua-bytecode.ts";
+import { crc32StringHex } from "@rose-griffon/inagle/parsers/hash/crc32.ts";
 
 const DATA_ROOT = process.env.DATA_PATH ?? join(import.meta.dirname, "../../../data");
 const LUA_DIR = join(DATA_ROOT, "lua_scripts");

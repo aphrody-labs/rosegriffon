@@ -1,4 +1,4 @@
-# @rosegriffon/db
+# @rose-griffon/db
 
 Package database partagé pour l'écosystème Rose Griffon.
 
@@ -12,7 +12,7 @@ Package database partagé pour l'écosystème Rose Griffon.
 ## Utilisation
 
 ```typescript
-import { createSupabaseServiceClient } from "@rosegriffon/db/service";
+import { createSupabaseServiceClient } from "@rose-griffon/db/service";
 
 const supabase = createSupabaseServiceClient();
 const { data } = await supabase.from("profiles").select("*");

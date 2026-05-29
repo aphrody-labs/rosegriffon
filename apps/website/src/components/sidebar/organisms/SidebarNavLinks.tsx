@@ -10,7 +10,7 @@ import {
 	SidebarGroupLabel,
 	SidebarMenu,
 	SidebarMenuItem,
-} from "@rosegriffon/ui";
+} from "@rose-griffon/ui";
 import type { MenuItem } from "@/lib/sidebar-config";
 
 interface SidebarNavLinksProps {

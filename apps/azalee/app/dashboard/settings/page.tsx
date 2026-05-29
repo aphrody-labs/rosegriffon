@@ -1,4 +1,4 @@
-import { AdminPageHeader as DashboardPageHeader } from "@rosegriffon/ui";
+import { AdminPageHeader as DashboardPageHeader } from "@rose-griffon/ui";
 import { SettingsForm } from "@/components/dashboard/settings-form";
 import { getServerSession } from "@/lib/auth-helpers";
 import { createClient } from "@/lib/supabase/server";

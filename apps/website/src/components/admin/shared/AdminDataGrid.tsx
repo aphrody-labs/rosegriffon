@@ -1,4 +1,4 @@
-import { Card, CardContent, CardHeader, CardTitle, Skeleton, Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@rosegriffon/ui";
+import { Card, CardContent, CardHeader, CardTitle, Skeleton, Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@rose-griffon/ui";
 import type { ReactNode } from "react";
 
 import { cn } from "@/lib/utils";

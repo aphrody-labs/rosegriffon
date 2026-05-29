@@ -6,7 +6,7 @@
  *
  * @example RPC Usage
  * ```typescript
- * import { createHonoApp, type InagleApp } from '@rosegriffon/inagle/adapters/hono-rpc'
+ * import { createHonoApp, type InagleApp } from '@rose-griffon/inagle/adapters/hono-rpc'
  * import { hc } from 'hono/client'
  *
  * const app = createHonoApp({ characters, skills })

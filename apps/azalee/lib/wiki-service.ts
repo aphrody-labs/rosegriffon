@@ -1,7 +1,7 @@
-import type { BaseCharacter, Item, Skill, Team } from "@rosegriffon/inagle";
-import { ElementNames } from "@rosegriffon/inagle/core/types";
-import { CATEGORY_NAMES as CategoryNames } from "@rosegriffon/inagle/skills/types";
-import type { Database } from "@rosegriffon/db";
+import type { BaseCharacter, Item, Skill, Team } from "@rose-griffon/inagle";
+import { ElementNames } from "@rose-griffon/inagle/core/types";
+import { CATEGORY_NAMES as CategoryNames } from "@rose-griffon/inagle/skills/types";
+import type { Database } from "@rose-griffon/db";
 import {
 	getAuraImageUrl,
 	getMiximaxIconUrl,

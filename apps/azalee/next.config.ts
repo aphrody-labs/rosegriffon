@@ -101,17 +101,17 @@ const nextConfig: NextConfig = {
 				},
 			}),
 	transpilePackages: [
-		"@rosegriffon/ui",
-		"@rosegriffon/db",
-		"@rosegriffon/types",
-		"@rosegriffon/config",
-		"@rosegriffon/auth",
-		"@rosegriffon/assets",
+		"@rose-griffon/ui",
+		"@rose-griffon/db",
+		"@rose-griffon/types",
+		"@rose-griffon/config",
+		"@rose-griffon/auth",
+		"@rose-griffon/assets",
 	],
 
 	// Packages Node.js natifs exclus du bundling serveur
 	serverExternalPackages: [
-		"@rosegriffon/inagle",
+		"@rose-griffon/inagle",
 		"better-auth",
 		"pg",
 		"sharp",

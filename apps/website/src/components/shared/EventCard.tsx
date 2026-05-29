@@ -1,6 +1,6 @@
 "use client";
 
-import { Button, Card } from "@rosegriffon/ui";
+import { Button, Card } from "@rose-griffon/ui";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import Link from "next/link";

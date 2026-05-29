@@ -2,8 +2,8 @@
  * Characters module - Public API exports
  *
  * For internal/tooling use (CFG.BIN parsing), import directly:
- * - import { ... } from '@rosegriffon/inagle/characters/mapper.js'
- * - import { ... } from '@rosegriffon/inagle/characters/mapper-v3.js'
+ * - import { ... } from '@rose-griffon/inagle/characters/mapper.js'
+ * - import { ... } from '@rose-griffon/inagle/characters/mapper-v3.js'
  */
 
 // Primary API - uses pre-extracted JSON entities

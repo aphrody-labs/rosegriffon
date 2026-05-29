@@ -8,7 +8,7 @@
 
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { DATA_ROOT } from "@rosegriffon/inagle/core/paths.ts";
+import { DATA_ROOT } from "@rose-griffon/inagle/core/paths.ts";
 
 const CROSS_REF_PATH = resolve(DATA_ROOT, "asset-cross-reference.json");
 

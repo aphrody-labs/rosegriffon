@@ -1,5 +1,5 @@
 /**
- * Zod Schemas for @rosegriffon/inagle
+ * Zod Schemas for @rose-griffon/inagle
  *
  * Schema definitions for runtime validation and TypeScript inference.
  */

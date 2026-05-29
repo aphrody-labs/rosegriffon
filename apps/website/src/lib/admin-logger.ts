@@ -1,6 +1,6 @@
 "use server";
 
-import { resolveProfile, isAdmin } from "@rosegriffon/auth";
+import { resolveProfile, isAdmin } from "@rose-griffon/auth";
 import { getServerUser } from "@/lib/auth-helpers";
 import { createAdminClient } from "@/lib/supabase/server";
 

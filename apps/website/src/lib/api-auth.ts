@@ -4,7 +4,7 @@ import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { isPatreonAdmin } from "@/lib/patreon/admin-access";
 import { createAdminClient } from "@/lib/supabase/server";
-import type { Database } from "@rosegriffon/db";
+import type { Database } from "@rose-griffon/db";
 
 type Profile = Database["public"]["Tables"]["profiles"]["Row"];
 type Role = "admin" | "staff" | "user" | "premium" | "banned" | null;

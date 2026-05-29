@@ -1,4 +1,4 @@
-import { parseWebhookRequest } from "@rosegriffon/patreon-bun";
+import { parseWebhookRequest } from "@rose-griffon/patreon-bun";
 import { NextResponse } from "next/server";
 
 import { processPatreonEvent } from '@/lib/patreon/webhooks';

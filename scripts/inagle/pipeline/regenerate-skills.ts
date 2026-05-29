@@ -1,6 +1,6 @@
 import { mkdirSync, writeFileSync } from "node:fs";
 import { dirname } from "node:path";
-import { buildSkillDatabase } from "@rosegriffon/inagle/skills/mapper.ts";
+import { buildSkillDatabase } from "@rose-griffon/inagle/skills/mapper.ts";
 
 async function main() {
   console.log("Regenerating skills database...");

@@ -1,6 +1,6 @@
 "use client";
 
-import { Button, Card, CardContent, CardFooter, Tabs, TabsContent, TabsList, TabsTrigger } from "@rosegriffon/ui";
+import { Button, Card, CardContent, CardFooter, Tabs, TabsContent, TabsList, TabsTrigger } from "@rose-griffon/ui";
 import { motion } from "motion/react";
 import Image from "next/image";
 import Link from "next/link";
@@ -10,8 +10,8 @@ import { RgtvScheduleClient } from "@/components/RgtvScheduleClient";
 
 import { useTheme } from "@/contexts/theme-context";
 import { Monitor, Radio, Users, Youtube } from "@/lib/icons-config";
-import type { StreamSchedule } from "@rosegriffon/types";
-import type { Database, Insert, Tables, Update } from "@rosegriffon/db";
+import type { StreamSchedule } from "@rose-griffon/types";
+import type { Database, Insert, Tables, Update } from "@rose-griffon/db";
 
 import { TwitchProvider, useTwitch } from '../_context/twitch-context';
 import type { TwitchChannel } from '../_context/twitch-context';
@@ -154,7 +154,7 @@ function RgtvPageInner({
                           </Button>
                           <Button asChild variant="outline" className="flex-1">
                             <Link
-                              href="https://youtube.com/@rosegriffon"
+                              href="https://youtube.com/@rose-griffon"
                               target="_blank"
                               rel="noopener noreferrer"
                             >

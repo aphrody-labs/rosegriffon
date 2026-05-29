@@ -1,4 +1,4 @@
-import { Badge, Button, Input } from "@rosegriffon/ui";
+import { Badge, Button, Input } from "@rose-griffon/ui";
 import { formatDistanceToNow } from "date-fns";
 import { fr } from "date-fns/locale";
 import { Crown, Search, ShieldCheck, Sparkles, Zap } from "lucide-react";

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { Button, Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@rosegriffon/ui";
+import { Button, Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@rose-griffon/ui";
 import { Icon } from "@/components/ui/Icon";
 
 interface DatabaseTableClientProps {

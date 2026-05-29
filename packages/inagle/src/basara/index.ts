@@ -3,7 +3,7 @@
  *
  * @example
  * ```typescript
- * import { createBasaraAPI } from '@rosegriffon/inagle/basara';
+ * import { createBasaraAPI } from '@rose-griffon/inagle/basara';
  *
  * const basara = createBasaraAPI();
  *

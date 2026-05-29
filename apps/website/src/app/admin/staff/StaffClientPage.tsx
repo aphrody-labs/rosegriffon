@@ -1,6 +1,6 @@
 "use client";
 
-import { Button, Card, CardContent, CardHeader, CardTitle, Input, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, DashboardStatsCard as StatsCard, AdminPageHeader } from "@rosegriffon/ui";
+import { Button, Card, CardContent, CardHeader, CardTitle, Input, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, DashboardStatsCard as StatsCard, AdminPageHeader } from "@rose-griffon/ui";
 import {
 	ArrowDownAZ,
 	ArrowUp01,

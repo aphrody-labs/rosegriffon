@@ -29,7 +29,7 @@ import {
 	SidebarProvider,
 	useBreakpoint,
 	useSidebar,
-} from "@rosegriffon/ui";
+} from "@rose-griffon/ui";
 import { AzaleeNavigationRail } from "@/components/navigation/AzaleeNavigationRail";
 import { GlobalSearch } from "@/components/wiki/GlobalSearch";
 import { cn } from "@/lib/utils";

@@ -2,7 +2,7 @@
 
 import { createLogger } from "@/lib/logger";
 import { createClient } from "@/lib/supabase/server";
-import type { StreamSchedule } from "@rosegriffon/types";
+import type { StreamSchedule } from "@rose-griffon/types";
 
 const logger = createLogger("stream-schedule");
 

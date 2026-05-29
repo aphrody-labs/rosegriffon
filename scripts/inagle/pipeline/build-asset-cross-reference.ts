@@ -15,7 +15,7 @@
 
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { DATA_ROOT } from "@rosegriffon/inagle/core/paths.ts";
+import { DATA_ROOT } from "@rose-griffon/inagle/core/paths.ts";
 
 // ---------------------------------------------------------------------------
 // Types

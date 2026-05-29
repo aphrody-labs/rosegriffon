@@ -3,7 +3,7 @@ import { fr } from "date-fns/locale";
 import { Newspaper } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { Badge } from "@rosegriffon/ui";
+import { Badge } from "@rose-griffon/ui";
 
 const CATEGORY_LABELS: Record<string, string> = {
   announcement: "Annonce",

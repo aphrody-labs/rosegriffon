@@ -36,7 +36,7 @@ import {
 	Label,
 	Switch,
 	Textarea,
-} from "@rosegriffon/ui";
+} from "@rose-griffon/ui";
 import { authClient } from "@/lib/auth-client";
 
 interface SettingsClientProps {

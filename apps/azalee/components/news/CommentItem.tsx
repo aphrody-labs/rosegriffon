@@ -9,7 +9,7 @@ import { toast } from "sonner";
 import { deleteComment, getReplies, updateComment } from "@/app/actions/comments";
 import { CommentForm } from "@/components/news/CommentForm";
 import { useAuth } from "@/components/providers/AuthProvider";
-import { Badge, Button } from "@rosegriffon/ui";
+import { Badge, Button } from "@rose-griffon/ui";
 import { cn } from "@/lib/utils";
 
 export interface Comment {

@@ -1,6 +1,6 @@
 "use client";
 
-import { Input, Label } from "@rosegriffon/ui";
+import { Input, Label } from "@rose-griffon/ui";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 

@@ -11,7 +11,7 @@ import {
 	Toaster,
 	useBreakpoint,
 	useSidebar,
-} from "@rosegriffon/ui";
+} from "@rose-griffon/ui";
 import { WebsiteNavigationRail } from "@/components/layout/WebsiteNavigationRail";
 import { Menu, ChevronLeft, ChevronRight } from "lucide-react";
 

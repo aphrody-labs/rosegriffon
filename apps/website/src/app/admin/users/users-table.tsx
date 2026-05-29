@@ -1,6 +1,6 @@
 "use client";
 
-import { Badge, Button, Input, Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@rosegriffon/ui";
+import { Badge, Button, Input, Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@rose-griffon/ui";
 import { flexRender, getCoreRowModel, getSortedRowModel, useReactTable } from '@tanstack/react-table';
 import type { ColumnDef, SortingState } from '@tanstack/react-table';
 import { useRouter, useSearchParams } from "next/navigation";
@@ -9,7 +9,7 @@ import { toast } from "sonner";
 
 import { useTableBroadcast } from "@/hooks";
 import { ArrowUpDown, Search } from "@/lib/icons-config";
-import type { Database } from "@rosegriffon/db";
+import type { Database } from "@rose-griffon/db";
 
 import { UserEditDialog } from "./user-edit-dialog";
 

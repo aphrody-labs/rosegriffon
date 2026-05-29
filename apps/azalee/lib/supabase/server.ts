@@ -2,7 +2,7 @@ import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
 import { mintSupabaseJwt } from "@/lib/supabase/jwt";
-import type { Database } from "@rosegriffon/db";
+import type { Database } from "@rose-griffon/db";
 
 const PLACEHOLDER_URL = "https://isbkaeltubqittywibeh.supabase.co";
 const PLACEHOLDER_ANON_JWT =

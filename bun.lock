@@ -16,7 +16,7 @@
       },
     },
     "apps/azalee": {
-      "name": "@rosegriffon/azalee",
+      "name": "@rose-griffon/azalee",
       "version": "0.1.0",
       "dependencies": {
         "@dnd-kit/core": "^6.3.1",
@@ -54,12 +54,12 @@
         "@radix-ui/react-toggle": "^1.1.10",
         "@radix-ui/react-toggle-group": "^1.1.11",
         "@radix-ui/react-tooltip": "^1.2.8",
-        "@rosegriffon/assets": "workspace:*",
-        "@rosegriffon/auth": "workspace:*",
-        "@rosegriffon/db": "workspace:*",
-        "@rosegriffon/inagle": "workspace:*",
-        "@rosegriffon/types": "workspace:*",
-        "@rosegriffon/ui": "workspace:*",
+        "@rose-griffon/assets": "workspace:*",
+        "@rose-griffon/auth": "workspace:*",
+        "@rose-griffon/db": "workspace:*",
+        "@rose-griffon/inagle": "workspace:*",
+        "@rose-griffon/types": "workspace:*",
+        "@rose-griffon/ui": "workspace:*",
         "@sentry/nextjs": "^10.53.1",
         "@supabase/supabase-js": "catalog:",
         "@types/nodemailer": "^8.0.0",
@@ -109,7 +109,7 @@
       },
       "devDependencies": {
         "@next/bundle-analyzer": "catalog:",
-        "@rosegriffon/config": "workspace:*",
+        "@rose-griffon/config": "workspace:*",
         "@tailwindcss/postcss": "catalog:",
         "@tailwindcss/typography": "catalog:",
         "@testing-library/jest-dom": "catalog:",
@@ -138,12 +138,12 @@
       },
     },
     "apps/bot": {
-      "name": "@rosegriffon/bot",
+      "name": "@rose-griffon/bot",
       "version": "0.1.0",
       "dependencies": {
         "@aphrody-code/canvas": "0.1.99-fork.4",
-        "@rosegriffon/db": "workspace:*",
-        "@rosegriffon/types": "workspace:*",
+        "@rose-griffon/db": "workspace:*",
+        "@rose-griffon/types": "workspace:*",
         "@rpbey/discordx": "catalog:",
         "@supabase/supabase-js": "catalog:",
         "discord.js": "catalog:",
@@ -151,7 +151,7 @@
         "zod": "catalog:",
       },
       "devDependencies": {
-        "@rosegriffon/config": "workspace:*",
+        "@rose-griffon/config": "workspace:*",
         "@types/bun": "catalog:",
         "oxlint": "catalog:",
         "typescript": "catalog:",
@@ -159,7 +159,7 @@
       },
     },
     "apps/website": {
-      "name": "@rosegriffon/website",
+      "name": "@rose-griffon/website",
       "version": "1.4.0",
       "dependencies": {
         "@googlemaps/js-api-loader": "^1.16.10",
@@ -191,12 +191,12 @@
         "@radix-ui/react-toggle": "^1.1.10",
         "@radix-ui/react-toggle-group": "^1.1.11",
         "@radix-ui/react-tooltip": "^1.2.8",
-        "@rosegriffon/assets": "workspace:*",
-        "@rosegriffon/auth": "workspace:*",
-        "@rosegriffon/db": "workspace:*",
-        "@rosegriffon/patreon-bun": "workspace:*",
-        "@rosegriffon/types": "workspace:*",
-        "@rosegriffon/ui": "workspace:*",
+        "@rose-griffon/assets": "workspace:*",
+        "@rose-griffon/auth": "workspace:*",
+        "@rose-griffon/db": "workspace:*",
+        "@rose-griffon/patreon-bun": "workspace:*",
+        "@rose-griffon/types": "workspace:*",
+        "@rose-griffon/ui": "workspace:*",
         "@sentry/nextjs": "^10.49.0",
         "@stripe/stripe-js": "^5.0.0",
         "@supabase/ssr": "catalog:",
@@ -256,7 +256,7 @@
       "devDependencies": {
         "@next/bundle-analyzer": "catalog:",
         "@next/eslint-plugin-next": "catalog:",
-        "@rosegriffon/config": "workspace:*",
+        "@rose-griffon/config": "workspace:*",
         "@tailwindcss/postcss": "catalog:",
         "@testing-library/jest-dom": "catalog:",
         "@testing-library/react": "^16.3.0",
@@ -281,15 +281,15 @@
       },
     },
     "packages/assets": {
-      "name": "@rosegriffon/assets",
+      "name": "@rose-griffon/assets",
       "version": "0.1.0",
     },
     "packages/auth": {
-      "name": "@rosegriffon/auth",
+      "name": "@rose-griffon/auth",
       "version": "0.1.0",
       "dependencies": {
-        "@rosegriffon/db": "workspace:*",
-        "@rosegriffon/types": "workspace:*",
+        "@rose-griffon/db": "workspace:*",
+        "@rose-griffon/types": "workspace:*",
         "better-auth": "catalog:",
       },
       "devDependencies": {
@@ -301,14 +301,14 @@
       },
     },
     "packages/config": {
-      "name": "@rosegriffon/config",
+      "name": "@rose-griffon/config",
       "version": "0.1.0",
     },
     "packages/db": {
-      "name": "@rosegriffon/db",
+      "name": "@rose-griffon/db",
       "version": "0.1.0",
       "dependencies": {
-        "@rosegriffon/types": "workspace:*",
+        "@rose-griffon/types": "workspace:*",
         "@supabase/ssr": "catalog:",
         "@supabase/supabase-js": "catalog:",
       },
@@ -319,7 +319,7 @@
       },
     },
     "packages/inagle": {
-      "name": "@rosegriffon/inagle",
+      "name": "@rose-griffon/inagle",
       "version": "1.2.0",
       "bin": {
         "inagle": "./dist/cli.js",
@@ -350,7 +350,7 @@
       },
     },
     "packages/patreon-bun": {
-      "name": "@rosegriffon/patreon-bun",
+      "name": "@rose-griffon/patreon-bun",
       "version": "0.20.1",
       "devDependencies": {
         "@types/bun": "^1.1.13",
@@ -361,15 +361,15 @@
       },
     },
     "packages/types": {
-      "name": "@rosegriffon/types",
+      "name": "@rose-griffon/types",
       "version": "0.1.0",
       "devDependencies": {
-        "@rosegriffon/config": "workspace:*",
+        "@rose-griffon/config": "workspace:*",
         "typescript": "catalog:",
       },
     },
     "packages/ui": {
-      "name": "@rosegriffon/ui",
+      "name": "@rose-griffon/ui",
       "version": "0.1.0",
       "dependencies": {
         "@radix-ui/react-accordion": "^1.2.12",
@@ -1191,27 +1191,27 @@
 
     "@rollup/rollup-win32-x64-msvc": ["@rollup/rollup-win32-x64-msvc@4.60.4", "", { "os": "win32", "cpu": "x64" }, "sha512-QVTUovf40zgTqlFVrKA1uXMVvU2QWEFWfAH8Wdc48IxLvrJMQVMBRjuQyUpzZCDkakImib9eVazbWlC6ksWtJw=="],
 
-    "@rosegriffon/assets": ["@rosegriffon/assets@workspace:packages/assets"],
+    "@rose-griffon/assets": ["@rose-griffon/assets@workspace:packages/assets"],
 
-    "@rosegriffon/auth": ["@rosegriffon/auth@workspace:packages/auth"],
+    "@rose-griffon/auth": ["@rose-griffon/auth@workspace:packages/auth"],
 
-    "@rosegriffon/azalee": ["@rosegriffon/azalee@workspace:apps/azalee"],
+    "@rose-griffon/azalee": ["@rose-griffon/azalee@workspace:apps/azalee"],
 
-    "@rosegriffon/bot": ["@rosegriffon/bot@workspace:apps/bot"],
+    "@rose-griffon/bot": ["@rose-griffon/bot@workspace:apps/bot"],
 
-    "@rosegriffon/config": ["@rosegriffon/config@workspace:packages/config"],
+    "@rose-griffon/config": ["@rose-griffon/config@workspace:packages/config"],
 
-    "@rosegriffon/db": ["@rosegriffon/db@workspace:packages/db"],
+    "@rose-griffon/db": ["@rose-griffon/db@workspace:packages/db"],
 
-    "@rosegriffon/inagle": ["@rosegriffon/inagle@workspace:packages/inagle"],
+    "@rose-griffon/inagle": ["@rose-griffon/inagle@workspace:packages/inagle"],
 
-    "@rosegriffon/patreon-bun": ["@rosegriffon/patreon-bun@workspace:packages/patreon-bun"],
+    "@rose-griffon/patreon-bun": ["@rose-griffon/patreon-bun@workspace:packages/patreon-bun"],
 
-    "@rosegriffon/types": ["@rosegriffon/types@workspace:packages/types"],
+    "@rose-griffon/types": ["@rose-griffon/types@workspace:packages/types"],
 
-    "@rosegriffon/ui": ["@rosegriffon/ui@workspace:packages/ui"],
+    "@rose-griffon/ui": ["@rose-griffon/ui@workspace:packages/ui"],
 
-    "@rosegriffon/website": ["@rosegriffon/website@workspace:apps/website"],
+    "@rose-griffon/website": ["@rose-griffon/website@workspace:apps/website"],
 
     "@rpbey/di": ["@rpbey/di@0.1.1", "https://npm.pkg.github.com/download/@rpbey/di/0.1.1/59577ca17abaa842dcfc1563e3a023eb815cfefd", { "dependencies": { "tsyringe": "^4.10.0", "typedi": "^0.10.0" } }, "sha512-mqowgfXFGihMCnBO96T9bh4qr1XtZDzXa8Rx+PedaoDzfrmlAXCl0DM5hyJiK0AfmL+XsvjdtVJ72dlfBZFZbA=="],
 
@@ -3343,11 +3343,11 @@
 
     "@rollup/pluginutils/estree-walker": ["estree-walker@2.0.2", "", {}, "sha512-Rfkk/Mp/DL7JVje3u18FxFujQlTNR2q6QfMSMB7AvCBx91NGj/ba3kCfza0f6dVDbw7YlRf/nDrn7pQrCCyQ/w=="],
 
-    "@rosegriffon/ui/recharts": ["recharts@3.8.0", "", { "dependencies": { "@reduxjs/toolkit": "^1.9.0 || 2.x.x", "clsx": "^2.1.1", "decimal.js-light": "^2.5.1", "es-toolkit": "^1.39.3", "eventemitter3": "^5.0.1", "immer": "^10.1.1", "react-redux": "8.x.x || 9.x.x", "reselect": "5.1.1", "tiny-invariant": "^1.3.3", "use-sync-external-store": "^1.2.2", "victory-vendor": "^37.0.2" }, "peerDependencies": { "react": "^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0", "react-dom": "^16.0.0 || ^17.0.0 || ^18.0.0 || ^19.0.0", "react-is": "^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0" } }, "sha512-Z/m38DX3L73ExO4Tpc9/iZWHmHnlzWG4njQbxsF5aSjwqmHNDDIm0rdEBArkwsBvR8U6EirlEHiQNYWCVh9sGQ=="],
+    "@rose-griffon/ui/recharts": ["recharts@3.8.0", "", { "dependencies": { "@reduxjs/toolkit": "^1.9.0 || 2.x.x", "clsx": "^2.1.1", "decimal.js-light": "^2.5.1", "es-toolkit": "^1.39.3", "eventemitter3": "^5.0.1", "immer": "^10.1.1", "react-redux": "8.x.x || 9.x.x", "reselect": "5.1.1", "tiny-invariant": "^1.3.3", "use-sync-external-store": "^1.2.2", "victory-vendor": "^37.0.2" }, "peerDependencies": { "react": "^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0", "react-dom": "^16.0.0 || ^17.0.0 || ^18.0.0 || ^19.0.0", "react-is": "^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0" } }, "sha512-Z/m38DX3L73ExO4Tpc9/iZWHmHnlzWG4njQbxsF5aSjwqmHNDDIm0rdEBArkwsBvR8U6EirlEHiQNYWCVh9sGQ=="],
 
-    "@rosegriffon/website/googleapis": ["googleapis@150.0.1", "", { "dependencies": { "google-auth-library": "^10.0.0-rc.1", "googleapis-common": "^8.0.2-rc.0" } }, "sha512-9Wa9vm3WtDpss0VFBHsbZWcoRccpOSWdpz7YIfb1LBXopZJEg/Zc8ymmaSgvDkP4FhN+pqPS9nZjO7REAJWSUg=="],
+    "@rose-griffon/website/googleapis": ["googleapis@150.0.1", "", { "dependencies": { "google-auth-library": "^10.0.0-rc.1", "googleapis-common": "^8.0.2-rc.0" } }, "sha512-9Wa9vm3WtDpss0VFBHsbZWcoRccpOSWdpz7YIfb1LBXopZJEg/Zc8ymmaSgvDkP4FhN+pqPS9nZjO7REAJWSUg=="],
 
-    "@rosegriffon/website/recharts": ["recharts@3.8.0", "", { "dependencies": { "@reduxjs/toolkit": "^1.9.0 || 2.x.x", "clsx": "^2.1.1", "decimal.js-light": "^2.5.1", "es-toolkit": "^1.39.3", "eventemitter3": "^5.0.1", "immer": "^10.1.1", "react-redux": "8.x.x || 9.x.x", "reselect": "5.1.1", "tiny-invariant": "^1.3.3", "use-sync-external-store": "^1.2.2", "victory-vendor": "^37.0.2" }, "peerDependencies": { "react": "^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0", "react-dom": "^16.0.0 || ^17.0.0 || ^18.0.0 || ^19.0.0", "react-is": "^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0" } }, "sha512-Z/m38DX3L73ExO4Tpc9/iZWHmHnlzWG4njQbxsF5aSjwqmHNDDIm0rdEBArkwsBvR8U6EirlEHiQNYWCVh9sGQ=="],
+    "@rose-griffon/website/recharts": ["recharts@3.8.0", "", { "dependencies": { "@reduxjs/toolkit": "^1.9.0 || 2.x.x", "clsx": "^2.1.1", "decimal.js-light": "^2.5.1", "es-toolkit": "^1.39.3", "eventemitter3": "^5.0.1", "immer": "^10.1.1", "react-redux": "8.x.x || 9.x.x", "reselect": "5.1.1", "tiny-invariant": "^1.3.3", "use-sync-external-store": "^1.2.2", "victory-vendor": "^37.0.2" }, "peerDependencies": { "react": "^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0", "react-dom": "^16.0.0 || ^17.0.0 || ^18.0.0 || ^19.0.0", "react-is": "^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0" } }, "sha512-Z/m38DX3L73ExO4Tpc9/iZWHmHnlzWG4njQbxsF5aSjwqmHNDDIm0rdEBArkwsBvR8U6EirlEHiQNYWCVh9sGQ=="],
 
     "@sentry/cli/https-proxy-agent": ["https-proxy-agent@5.0.1", "", { "dependencies": { "agent-base": "6", "debug": "4" } }, "sha512-dFcAjpTQFgoLMzC2VwU+C/CbS7uRL0lWmxDITmqm7C+7F0Odmj6s9l6alZc6AELXhrnggM2CeWSXHGOdX2YtwA=="],
 
@@ -3565,15 +3565,15 @@
 
     "@prisma/instrumentation/@opentelemetry/instrumentation/import-in-the-middle": ["import-in-the-middle@2.0.6", "", { "dependencies": { "acorn": "^8.15.0", "acorn-import-attributes": "^1.9.5", "cjs-module-lexer": "^2.2.0", "module-details-from-path": "^1.0.4" } }, "sha512-3vZV3jX0XRFW3EJDTwzWoZa+RH1b8eTTx6YOCjglrLyPuepwoBti1k3L2dKwdCUrnVEfc5CuRuGstaC/uQJJaw=="],
 
-    "@rosegriffon/ui/recharts/eventemitter3": ["eventemitter3@5.0.4", "", {}, "sha512-mlsTRyGaPBjPedk6Bvw+aqbsXDtoAyAzm5MO7JgU+yVRyMQ5O8bD4Kcci7BS85f93veegeCPkL8R4GLClnjLFw=="],
+    "@rose-griffon/ui/recharts/eventemitter3": ["eventemitter3@5.0.4", "", {}, "sha512-mlsTRyGaPBjPedk6Bvw+aqbsXDtoAyAzm5MO7JgU+yVRyMQ5O8bD4Kcci7BS85f93veegeCPkL8R4GLClnjLFw=="],
 
-    "@rosegriffon/ui/recharts/victory-vendor": ["victory-vendor@37.3.6", "", { "dependencies": { "@types/d3-array": "^3.0.3", "@types/d3-ease": "^3.0.0", "@types/d3-interpolate": "^3.0.1", "@types/d3-scale": "^4.0.2", "@types/d3-shape": "^3.1.0", "@types/d3-time": "^3.0.0", "@types/d3-timer": "^3.0.0", "d3-array": "^3.1.6", "d3-ease": "^3.0.1", "d3-interpolate": "^3.0.1", "d3-scale": "^4.0.2", "d3-shape": "^3.1.0", "d3-time": "^3.0.0", "d3-timer": "^3.0.1" } }, "sha512-SbPDPdDBYp+5MJHhBCAyI7wKM3d5ivekigc2Dk2s7pgbZ9wIgIBYGVw4zGHBml/qTFbexrofXW6Gu4noGxrOwQ=="],
+    "@rose-griffon/ui/recharts/victory-vendor": ["victory-vendor@37.3.6", "", { "dependencies": { "@types/d3-array": "^3.0.3", "@types/d3-ease": "^3.0.0", "@types/d3-interpolate": "^3.0.1", "@types/d3-scale": "^4.0.2", "@types/d3-shape": "^3.1.0", "@types/d3-time": "^3.0.0", "@types/d3-timer": "^3.0.0", "d3-array": "^3.1.6", "d3-ease": "^3.0.1", "d3-interpolate": "^3.0.1", "d3-scale": "^4.0.2", "d3-shape": "^3.1.0", "d3-time": "^3.0.0", "d3-timer": "^3.0.1" } }, "sha512-SbPDPdDBYp+5MJHhBCAyI7wKM3d5ivekigc2Dk2s7pgbZ9wIgIBYGVw4zGHBml/qTFbexrofXW6Gu4noGxrOwQ=="],
 
-    "@rosegriffon/website/googleapis/googleapis-common": ["googleapis-common@8.0.2-rc.0", "", { "dependencies": { "extend": "^3.0.2", "gaxios": "^7.0.0-rc.4", "google-auth-library": "^10.0.0-rc.1", "qs": "^6.7.0", "url-template": "^2.0.8" } }, "sha512-JTcxRvmFa9Ec1uyfMEimEMeeKq1sHNZX3vn2qmoUMtnvixXXvcqTcbDZvEZXkEWpGlPlOf4joyep6/qs0BrLyg=="],
+    "@rose-griffon/website/googleapis/googleapis-common": ["googleapis-common@8.0.2-rc.0", "", { "dependencies": { "extend": "^3.0.2", "gaxios": "^7.0.0-rc.4", "google-auth-library": "^10.0.0-rc.1", "qs": "^6.7.0", "url-template": "^2.0.8" } }, "sha512-JTcxRvmFa9Ec1uyfMEimEMeeKq1sHNZX3vn2qmoUMtnvixXXvcqTcbDZvEZXkEWpGlPlOf4joyep6/qs0BrLyg=="],
 
-    "@rosegriffon/website/recharts/eventemitter3": ["eventemitter3@5.0.4", "", {}, "sha512-mlsTRyGaPBjPedk6Bvw+aqbsXDtoAyAzm5MO7JgU+yVRyMQ5O8bD4Kcci7BS85f93veegeCPkL8R4GLClnjLFw=="],
+    "@rose-griffon/website/recharts/eventemitter3": ["eventemitter3@5.0.4", "", {}, "sha512-mlsTRyGaPBjPedk6Bvw+aqbsXDtoAyAzm5MO7JgU+yVRyMQ5O8bD4Kcci7BS85f93veegeCPkL8R4GLClnjLFw=="],
 
-    "@rosegriffon/website/recharts/victory-vendor": ["victory-vendor@37.3.6", "", { "dependencies": { "@types/d3-array": "^3.0.3", "@types/d3-ease": "^3.0.0", "@types/d3-interpolate": "^3.0.1", "@types/d3-scale": "^4.0.2", "@types/d3-shape": "^3.1.0", "@types/d3-time": "^3.0.0", "@types/d3-timer": "^3.0.0", "d3-array": "^3.1.6", "d3-ease": "^3.0.1", "d3-interpolate": "^3.0.1", "d3-scale": "^4.0.2", "d3-shape": "^3.1.0", "d3-time": "^3.0.0", "d3-timer": "^3.0.1" } }, "sha512-SbPDPdDBYp+5MJHhBCAyI7wKM3d5ivekigc2Dk2s7pgbZ9wIgIBYGVw4zGHBml/qTFbexrofXW6Gu4noGxrOwQ=="],
+    "@rose-griffon/website/recharts/victory-vendor": ["victory-vendor@37.3.6", "", { "dependencies": { "@types/d3-array": "^3.0.3", "@types/d3-ease": "^3.0.0", "@types/d3-interpolate": "^3.0.1", "@types/d3-scale": "^4.0.2", "@types/d3-shape": "^3.1.0", "@types/d3-time": "^3.0.0", "@types/d3-timer": "^3.0.0", "d3-array": "^3.1.6", "d3-ease": "^3.0.1", "d3-interpolate": "^3.0.1", "d3-scale": "^4.0.2", "d3-shape": "^3.1.0", "d3-time": "^3.0.0", "d3-timer": "^3.0.1" } }, "sha512-SbPDPdDBYp+5MJHhBCAyI7wKM3d5ivekigc2Dk2s7pgbZ9wIgIBYGVw4zGHBml/qTFbexrofXW6Gu4noGxrOwQ=="],
 
     "@sentry/cli/https-proxy-agent/agent-base": ["agent-base@6.0.2", "", { "dependencies": { "debug": "4" } }, "sha512-RZNwNclF7+MS/8bDg70amg32dyeZGZxiDuQmZxKLAlQjr3jGyLx+4Kkk58UO7D2QdgFIQCovuSuZESne6RG6XQ=="],
 

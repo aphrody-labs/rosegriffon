@@ -1,6 +1,6 @@
 "use client";
 
-import { Button, Skeleton } from "@rosegriffon/ui";
+import { Button, Skeleton } from "@rose-griffon/ui";
 import Link from "next/link";
 
 import { UserAccountPopup } from "@/components/auth/UserAccountPopup";

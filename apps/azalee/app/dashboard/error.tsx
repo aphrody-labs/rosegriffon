@@ -2,7 +2,7 @@
 
 import { AlertCircle } from "lucide-react";
 import { useEffect } from "react";
-import { Button } from "@rosegriffon/ui";
+import { Button } from "@rose-griffon/ui";
 
 export default function DashboardError({
   error,

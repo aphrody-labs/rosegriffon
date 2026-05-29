@@ -1,4 +1,4 @@
-import { Button } from "@rosegriffon/ui";
+import { Button } from "@rose-griffon/ui";
 import type { Metadata } from "next";
 import dynamicImport from "next/dynamic";
 import { Suspense } from "react";

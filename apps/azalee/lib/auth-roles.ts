@@ -1,6 +1,6 @@
 /**
- * Re-export depuis @rosegriffon/types — backward-compat pour les imports existants
- * `@/lib/auth-roles` (~30 fichiers azalee). Source canonique = @rosegriffon/types/roles.
+ * Re-export depuis @rose-griffon/types — backward-compat pour les imports existants
+ * `@/lib/auth-roles` (~30 fichiers azalee). Source canonique = @rose-griffon/types/roles.
  */
 export {
 	ADMIN_ROLES,
@@ -9,5 +9,5 @@ export {
 	isUserManagementRole,
 	type AdminRole,
 	type UserManagementRole,
-} from "@rosegriffon/types/roles";
-export { MEDAILLE_AZALEE_ROLE_ID } from "@rosegriffon/types/discord";
+} from "@rose-griffon/types/roles";
+export { MEDAILLE_AZALEE_ROLE_ID } from "@rose-griffon/types/discord";

@@ -1,6 +1,6 @@
 "use client";
 
-import type { Item } from "@rosegriffon/inagle";
+import type { Item } from "@rose-griffon/inagle";
 import { ArrowRightLeft, Backpack, Coins, MapPin, ShoppingBag, Star, Store } from "lucide-react";
 import Image from "next/image";
 import { useState } from "react";
