@@ -30,11 +30,11 @@ export async function generateMetadata({
 	const supabase = await createClient();
 	const { data: tweet } = await (supabase as any)
 		.from("tweets")
-		.select("text, author_username, author_name, media")
+		.select("text, translation, author_username, author_name, media")
 		.eq("id", id)
 		.single();
 
-	const { title } = extractTitleAndBody(tweet?.text || "");
+	const { title } = extractTitleAndBody(tweet?.translation || tweet?.text || "");
 	const description = title.slice(0, 160);
 	const image = tweet?.media?.[0]?.url;
 
@@ -65,9 +65,9 @@ export default async function TweetPage({ params }: { params: Promise<{ id: stri
 
 	const authorInfo = getAuthorInfo(tweet.author_username, tweet.author_name);
 
-	const { title, body } = extractTitleAndBody(tweet.text || "");
+	const { title, body } = extractTitleAndBody(tweet.translation || tweet.text || "");
 	const heroImage = tweet.media?.[0]?.url;
-	const readTime = estimateReadTime(tweet.text || "");
+	const readTime = estimateReadTime(tweet.translation || tweet.text || "");
 	const isThread = tweet.is_thread && tweet.tweet_count > 1;
 	const publishedDate = tweet.created_at;
 
@@ -92,7 +92,7 @@ export default async function TweetPage({ params }: { params: Promise<{ id: stri
 				return downloaded || m;
 			}),
 			text:
-				rt.fullText && rt.fullText.length > (rt.text?.length || 0) ? rt.fullText : rt.text || "",
+				rt.translation || rt.fullText || rt.text || "",
 		}));
 		// Remove the first section text from display since it's used as title
 		if (sections.length > 0) {

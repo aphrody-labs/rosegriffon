@@ -27,6 +27,7 @@ interface Article {
 interface Tweet {
 	id: string;
 	text: string;
+	translation?: string | null;
 	created_at: string;
 	author_username: string;
 	author_name: string;
@@ -158,7 +159,7 @@ function TweetCard({ tweet, variant }: { tweet: Tweet; variant: "chip" | "full" 
 		addSuffix: true,
 		locale: fr,
 	});
-	const paragraphs = tweet.text.split(/\n\n+/).filter(Boolean);
+	const paragraphs = (tweet.translation || tweet.text || "").split(/\n\n+/).filter(Boolean);
 	const title = paragraphs[0]?.trim() || "";
 	const excerpt = paragraphs.slice(1, 3).join(" ").trim();
 	const heroImage = tweet.media?.[0]?.url;

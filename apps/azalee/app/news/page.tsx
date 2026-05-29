@@ -142,7 +142,7 @@ export default async function NewsFeedPage({
 				const { data, count, error } = (await (supabase as any)
 					.from("tweets")
 					.select(
-						"id, text, created_at, author_username, author_name, media, quoted_tweets, raw_tweets",
+						"id, text, translation, created_at, author_username, author_name, media, quoted_tweets, raw_tweets",
 						{
 							count: "exact",
 						}
@@ -162,7 +162,7 @@ export default async function NewsFeedPage({
 						author_username: t.author_username,
 						category: "Tweet",
 						date: t.created_at,
-						excerpt: t.text,
+						excerpt: t.translation || t.text,
 						id: t.id,
 						image: t.media && t.media.length > 0 ? t.media[0].url : null,
 						media: t.media || [],
