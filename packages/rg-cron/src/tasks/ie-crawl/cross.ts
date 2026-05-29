@@ -34,7 +34,9 @@ export async function crawlCross(): Promise<{ success: boolean; error?: string }
 	];
 
 	try {
-		const page = (await Browser.newPage({ profile: "stealth" })) as Page;
+		const page = (await Browser.newPage({
+			profile: (process.env.BXC_PROFILE as "stealth" | "max" | "ghost" | "static" | "fast" | "http") || "stealth",
+		})) as Page;
 		let crawlCount = 0;
 
 		for (const target of targets) {

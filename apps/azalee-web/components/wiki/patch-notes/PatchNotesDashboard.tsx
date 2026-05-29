@@ -19,6 +19,8 @@ interface PatchNotesDashboardProps {
  * Ex: "ps-steam_ver_3_1_1" → "3.1.1"
  *     "switch_ver_3_0_0" → "3.0.0"
  */
+const NOW = Date.now();
+
 function extractVersion(id: string): string | null {
 	const match = id.match(/ver_(\d+(?:_\d+)*)/);
 	if (!match) {
@@ -37,7 +39,7 @@ function PatchNoteListItem({
 	onClick: () => void;
 }) {
 	const dateObj = note.date ? new Date(note.date) : null;
-	const isNew = dateObj && Date.now() - dateObj.getTime() < 1000 * 60 * 60 * 24 * 7;
+	const isNew = dateObj && NOW - dateObj.getTime() < 1000 * 60 * 60 * 24 * 7;
 	const version = extractVersion(note.id);
 
 	return (

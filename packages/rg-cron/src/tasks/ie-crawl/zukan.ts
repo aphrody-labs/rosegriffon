@@ -43,7 +43,9 @@ export async function crawlZukanOrder(): Promise<{
 	let globalIndex = 0;
 
 	try {
-		const page = (await Browser.newPage({ profile: "stealth" })) as Page;
+		const page = (await Browser.newPage({
+			profile: (process.env.BXC_PROFILE as "stealth" | "max" | "ghost" | "static" | "fast" | "http") || "stealth",
+		})) as Page;
 
 		for (let pageNum = 1; pageNum <= MAX_PAGES; pageNum++) {
 			const url = `https://zukan.inazuma.jp/en/chara_param/?page=${pageNum}&per_page=${PER_PAGE}`;

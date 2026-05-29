@@ -75,39 +75,33 @@ export function NewsEditorForm({ initialData }: NewsEditorFormProps) {
 	const draftKey = initialData?.id ? `draft_news_${initialData.id}` : "draft_news_new";
 
 	// Slug validation with debounce
-	const checkSlugAvailability = useCallback(
-		async (slugToCheck: string) => {
-			if (!slugToCheck) {
-				setSlugStatus("idle");
-				return;
-			}
-			setSlugStatus("checking");
-			try {
-				const { checkSlugAvailability: checkSlug } = await import("@/app/actions/articles");
-				const result = await checkSlug(slugToCheck, initialData?.id);
-				setSlugStatus(result.available ? "available" : "taken");
-			} catch {
-				setSlugStatus("idle");
-			}
-		},
-		[initialData?.id]
-	);
+	const checkSlugAvailability = async (slugToCheck: string) => {
+		if (!slugToCheck) {
+			setSlugStatus("idle");
+			return;
+		}
+		setSlugStatus("checking");
+		try {
+			const { checkSlugAvailability: checkSlug } = await import("@/app/actions/articles");
+			const result = await checkSlug(slugToCheck, initialData?.id);
+			setSlugStatus(result.available ? "available" : "taken");
+		} catch {
+			setSlugStatus("idle");
+		}
+	};
 
 	// Debounced slug check
-	const handleSlugChange = useCallback(
-		(newSlug: string) => {
-			setSlug(newSlug);
-			if (slugCheckTimerRef.current) {
-				clearTimeout(slugCheckTimerRef.current);
-			}
-			if (newSlug) {
-				slugCheckTimerRef.current = setTimeout(() => checkSlugAvailability(newSlug), 500);
-			} else {
-				setSlugStatus("idle");
-			}
-		},
-		[checkSlugAvailability]
-	);
+	const handleSlugChange = (newSlug: string) => {
+		setSlug(newSlug);
+		if (slugCheckTimerRef.current) {
+			clearTimeout(slugCheckTimerRef.current);
+		}
+		if (newSlug) {
+			slugCheckTimerRef.current = setTimeout(() => checkSlugAvailability(newSlug), 500);
+		} else {
+			setSlugStatus("idle");
+		}
+	};
 
 	// Auto-save to localStorage
 	const autoSaveToLocal = useCallback(() => {

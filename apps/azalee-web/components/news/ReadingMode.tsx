@@ -62,8 +62,7 @@ export function ReadingMode({ children }: ReadingModeProps) {
 
 		document.addEventListener("keydown", handleKeyDown);
 		return () => document.removeEventListener("keydown", handleKeyDown);
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [isOpen, close]);
+	}, [isOpen]);
 
 	// Bloquer le scroll du body quand l'overlay est ouvert
 	useEffect(() => {
