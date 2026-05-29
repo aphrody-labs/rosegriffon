@@ -177,10 +177,18 @@ function TweetCard({ tweet, variant }: { tweet: Tweet; variant: "chip" | "full" 
 					</div>
 				) : authorInfo.avatar ? (
 					<div className="size-7 rounded-full overflow-hidden relative bg-surface-container-high shrink-0">
-						<Image src={authorInfo.avatar} alt={authorInfo.name} fill sizes="28px" className="object-cover" />
+						<Image
+							src={authorInfo.avatar}
+							alt={authorInfo.name}
+							fill
+							sizes="28px"
+							className="object-cover"
+						/>
 					</div>
 				) : (
-					<div className={`size-7 rounded-full flex items-center justify-center text-white text-[10px] font-bold shrink-0 ${authorInfo.color}`}>
+					<div
+						className={`size-7 rounded-full flex items-center justify-center text-white text-[10px] font-bold shrink-0 ${authorInfo.color}`}
+					>
 						{authorInfo.initials}
 					</div>
 				)}
@@ -236,14 +244,23 @@ function TweetCard({ tweet, variant }: { tweet: Tweet; variant: "chip" | "full" 
 					<div className="flex items-center gap-2">
 						{authorInfo.avatar ? (
 							<div className="size-5 rounded-full overflow-hidden relative bg-surface-container-high shrink-0">
-								<Image src={authorInfo.avatar} alt={authorInfo.name} fill className="object-cover" />
+								<Image
+									src={authorInfo.avatar}
+									alt={authorInfo.name}
+									fill
+									className="object-cover"
+								/>
 							</div>
 						) : (
-							<div className={`size-5 rounded-full flex items-center justify-center text-white text-[8px] font-bold shrink-0 ${authorInfo.color}`}>
+							<div
+								className={`size-5 rounded-full flex items-center justify-center text-white text-[8px] font-bold shrink-0 ${authorInfo.color}`}
+							>
 								{authorInfo.initials}
 							</div>
 						)}
-						<span className="text-[11px] text-on-surface-variant/70 font-semibold max-w-[100px] truncate">{authorInfo.name}</span>
+						<span className="text-[11px] text-on-surface-variant/70 font-semibold max-w-[100px] truncate">
+							{authorInfo.name}
+						</span>
 						<span className="text-[11px] text-on-surface-variant/50">{timeAgo}</span>
 					</div>
 					<span className="inline-flex items-center gap-1 text-[11px] text-[#1DA1F2]/60 font-medium group-hover:text-[#1DA1F2] transition-colors">

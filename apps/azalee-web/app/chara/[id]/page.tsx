@@ -609,7 +609,8 @@ export default async function PlayerDetailPage({ params }: { params: Promise<{ i
 						Auras & Invocations associées
 					</h3>
 					<p className="text-sm text-on-surface-variant/80 font-medium">
-						Ces Esprits Guerriers, Totems ou Miximax sont spécifiquement liés à {charName} dans les données du jeu.
+						Ces Esprits Guerriers, Totems ou Miximax sont spécifiquement liés à {charName} dans les
+						données du jeu.
 					</p>
 					<div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 pt-2">
 						{auras.map((aura) => (

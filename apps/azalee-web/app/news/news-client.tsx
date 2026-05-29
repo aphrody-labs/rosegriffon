@@ -129,20 +129,33 @@ function TweetPost({ item }: { item: FeedItem }) {
 					<div className="flex items-center justify-between pt-1">
 						<div className="flex items-center gap-2">
 							{(() => {
-								const authorInfo = getAuthorInfo(item.author_username || item.author_id, item.author_name);
+								const authorInfo = getAuthorInfo(
+									item.author_username || item.author_id,
+									item.author_name
+								);
 								return authorInfo.avatar ? (
 									<div className="size-5 rounded-full overflow-hidden relative bg-surface-container-high shrink-0">
-										<Image src={authorInfo.avatar} alt={authorInfo.name} fill className="object-cover" />
+										<Image
+											src={authorInfo.avatar}
+											alt={authorInfo.name}
+											fill
+											className="object-cover"
+										/>
 									</div>
 								) : (
-									<div className={`size-5 rounded-full flex items-center justify-center text-white text-[8px] font-bold shrink-0 ${authorInfo.color}`}>
+									<div
+										className={`size-5 rounded-full flex items-center justify-center text-white text-[8px] font-bold shrink-0 ${authorInfo.color}`}
+									>
 										{authorInfo.initials}
 									</div>
 								);
 							})()}
 							<span className="text-xs text-on-surface-variant/70 font-semibold max-w-[120px] truncate">
 								{(() => {
-									const authorInfo = getAuthorInfo(item.author_username || item.author_id, item.author_name);
+									const authorInfo = getAuthorInfo(
+										item.author_username || item.author_id,
+										item.author_name
+									);
 									return authorInfo.name;
 								})()}
 							</span>

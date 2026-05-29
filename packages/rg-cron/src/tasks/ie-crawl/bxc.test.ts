@@ -10,22 +10,24 @@ describe("BXC Engine Integration Tests", () => {
 	it("should boot browser with max profile and fetch example.com content", async () => {
 		const profile = process.env.BXC_PROFILE || "stealth";
 		console.log(`[Test BXC] Démarrage du navigateur (Profil: ${profile})...`);
-		
+
 		const page = (await Browser.newPage({
-			profile: (profile as "stealth" | "max" | "ghost" | "static" | "fast" | "http"),
+			profile: profile as "stealth" | "max" | "static" | "fast" | "http",
 		})) as Page;
-		
+
 		expect(page).toBeDefined();
 
 		try {
 			console.log("[Test BXC] Navigation vers https://example.com...");
 			await page.goto("https://example.com");
 			await page.waitForSelector("h1", 10000).catch(() => {});
-			
+
 			const content = await page.content();
 			expect(content).toContain("Example Domain");
-			
-			const title = await page.evaluate(() => document.title);
+
+			const title = await page.evaluate(
+				() => (globalThis as unknown as { document: { title: string } }).document.title
+			);
 			console.log(`[Test BXC] Titre récupéré avec succès : "${title}"`);
 			expect(title).toBe("Example Domain");
 		} finally {
