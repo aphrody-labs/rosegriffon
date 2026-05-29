@@ -39,7 +39,8 @@
 		"**/build/**",
 		"**/.turbo/**",
 		"**/coverage/**",
-		"**/*.d.ts"
+		"**/*.d.ts",
+		"packages/patreon-bun/docs/examples/**"
 	],
 	"overrides": [
 		{

@@ -2,10 +2,12 @@ import next from "@next/eslint-plugin-next";
 import reactCompiler from "eslint-plugin-react-compiler";
 import jsxA11y from "eslint-plugin-jsx-a11y";
 import betterTailwindcss from "eslint-plugin-better-tailwindcss";
+import nextTs from "eslint-config-next/typescript";
 import base from "./eslint-base.mjs";
 
 export default [
 	...base,
+	...nextTs,
 	{
 		files: ["**/*.{ts,tsx}"],
 		plugins: {
