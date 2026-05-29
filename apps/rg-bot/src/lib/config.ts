@@ -23,3 +23,8 @@ export function requireEnv(key: string): string {
 export const DISCORD_TOKEN = requireEnv(
 	Bun.env.DISCORD_BOT_TOKEN ? "DISCORD_BOT_TOKEN" : "DISCORD_TOKEN",
 );
+
+export const RG_BRAND_HEX = "#a14b3f" as const;
+export const RG_COLOR = Number.parseInt(RG_BRAND_HEX.slice(1), 16);
+export const RG_FOOTER = "rosegriffon.fr";
+export const RG_BASE_URL = Bun.env.WEBSITE_URL ?? "https://rosegriffon.fr";

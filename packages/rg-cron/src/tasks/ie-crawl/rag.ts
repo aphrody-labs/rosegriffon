@@ -252,6 +252,65 @@ function collectScrapedItems(): ScrapedItem[] {
 }
 
 /**
+ * Découpe un texte long en blocs (chunks) sémantiques.
+ */
+function chunkText(text: string, chunkSize = 800, chunkOverlap = 150): string[] {
+  if (text.length <= chunkSize) {
+    return [text];
+  }
+
+  const chunks: string[] = [];
+  let startIndex = 0;
+
+  while (startIndex < text.length) {
+    let endIndex = startIndex + chunkSize;
+
+    if (endIndex < text.length) {
+      // Tenter de couper sur une ponctuation ou un retour à la ligne dans la fenêtre
+      const searchWindow = text.slice(
+        Math.max(startIndex, endIndex - 100),
+        Math.min(text.length, endIndex + 100)
+      );
+      const punctuationMatch = [...searchWindow.matchAll(/[.!?。\n]/g)];
+
+      if (punctuationMatch.length > 0) {
+        let bestOffset = 100;
+        let chosenIndex = endIndex;
+        const relativeMiddle = endIndex - Math.max(startIndex, endIndex - 100);
+
+        for (const match of punctuationMatch) {
+          if (match.index !== undefined) {
+            const offset = Math.abs(match.index - relativeMiddle);
+            if (offset < bestOffset) {
+              bestOffset = offset;
+              chosenIndex = Math.max(startIndex, endIndex - 100) + match.index + 1;
+            }
+          }
+        }
+        endIndex = chosenIndex;
+      }
+    } else {
+      endIndex = text.length;
+    }
+
+    const chunk = text.slice(startIndex, endIndex).trim();
+    if (chunk.length > 30) {
+      chunks.push(chunk);
+    }
+
+    startIndex = endIndex - chunkOverlap;
+    if (startIndex >= text.length || endIndex === text.length) {
+      break;
+    }
+    if (startIndex < 0 || startIndex === endIndex - chunkOverlap && chunks.length > 0 && chunks[chunks.length - 1] === chunk) {
+      startIndex = endIndex;
+    }
+  }
+
+  return chunks;
+}
+
+/**
  * Synchronise et vectorise tous les nouveaux documents ou documents modifiés dans Redis.
  */
 export async function runRagSync(): Promise<{ success: boolean; processed: number; errors: number }> {
@@ -287,24 +346,41 @@ export async function runRagSync(): Promise<{ success: boolean; processed: numbe
 
         console.log(`[RAG Sync] Vectorisation de : ${item.title} (${item.type})`);
         
-        // Génération de l'embedding (OpenAI ou Fallback déterministe)
-        const embedding = await getEmbedding(formattedDocumentText);
-        
-        // Sauvegarde dans le vectorStore Redis
-        await vectorStore.saveDocument("inazuma-news", {
-          id: item.id,
-          text: formattedDocumentText,
-          embedding,
-          metadata: {
-            title: item.title,
-            url: item.url,
-            date: item.date,
-            type: item.type,
-            ...item.metadata
-          }
-        });
+        // Supprimer préventivement l'ancien document et tous les chunks possibles (jusqu'à 50 chunks)
+        await vectorStore.deleteDocument("inazuma-news", item.id);
+        for (let i = 0; i < 50; i++) {
+          await vectorStore.deleteDocument("inazuma-news", `${item.id}#chunk-${i}`);
+        }
 
-        // Enregistrer le hash
+        // Découper le texte nettoyé en chunks
+        const textChunks = chunkText(cleanText, 800, 150);
+        console.log(`[RAG Sync] -> Découpé en ${textChunks.length} chunks.`);
+
+        for (let i = 0; i < textChunks.length; i++) {
+          const chunkTextContent = textChunks[i] || "";
+          const formattedChunkText = `Titre: ${item.title}\nDate: ${item.date}\nType: ${item.type} [Partie ${i + 1}/${textChunks.length}]\nContenu:\n${chunkTextContent}`;
+          
+          // Génération de l'embedding pour le chunk
+          const embedding = await getEmbedding(formattedChunkText);
+
+          // Sauvegarde dans le vectorStore Redis
+          await vectorStore.saveDocument("inazuma-news", {
+            id: `${item.id}#chunk-${i}`,
+            text: formattedChunkText,
+            embedding,
+            metadata: {
+              title: item.title,
+              url: item.url,
+              date: item.date,
+              type: item.type,
+              chunkIndex: i,
+              totalChunks: textChunks.length,
+              ...item.metadata
+            }
+          });
+        }
+
+        // Enregistrer le hash du document global pour marquer le document comme traité
         await crawlerTracker.markProcessed(item.id, contentHash);
         processed++;
       } catch (err) {

@@ -1,9 +1,5 @@
 import { EmbedBuilder } from "discord.js";
-
-export const RG_BRAND_HEX = "#a14b3f" as const;
-export const RG_COLOR = Number.parseInt(RG_BRAND_HEX.slice(1), 16);
-export const RG_FOOTER = "rosegriffon.fr";
-export const RG_BASE_URL = Bun.env.WEBSITE_URL ?? "https://rosegriffon.fr";
+import { RG_BRAND_HEX, RG_COLOR, RG_FOOTER, RG_BASE_URL } from "./config";
 
 export function rgEmbed(): EmbedBuilder {
 	return new EmbedBuilder().setColor(RG_COLOR).setFooter({ text: RG_FOOTER });

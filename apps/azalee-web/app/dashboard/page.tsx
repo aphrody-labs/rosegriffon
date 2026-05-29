@@ -261,6 +261,12 @@ export default async function DashboardPage() {
       label: "Journal d'audit",
     },
     {
+      description: "Traductions et corrections en masse",
+      href: "/dashboard/database/verification",
+      icon: "verified",
+      label: "Modération en masse",
+    },
+    {
       description: "Configuration du dashboard",
       href: "/settings",
       icon: "settings",
