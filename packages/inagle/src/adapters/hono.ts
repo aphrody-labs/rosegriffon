@@ -7,7 +7,7 @@
  * - Next.js Route Handlers
  */
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
+import type { ItemCategory } from "../parsers/item-config.js";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { createInagleService } from "../service.js";
@@ -91,7 +91,7 @@ export async function createInagleAppAsync() {
     const limit = Math.min(Number(c.req.query("limit")) || 50, 500);
     const offset = Number(c.req.query("offset")) || 0;
     const cat = c.req.query("category");
-    const data = cat ? items.byCategory(cat as any) : items.allItems();
+    const data = cat ? items.byCategory(cat as ItemCategory) : items.allItems();
     return c.json({
       total: data.length,
       data: data.slice(offset, offset + limit),

@@ -59,7 +59,7 @@ export function loadJsonStream<T>(path: string): Promise<T> {
     const parser = new JSONParser();
     const stream = Bun.file(path).stream();
 
-    let result: any;
+    let result: unknown;
 
     parser.onValue = (event) => {
       // The parser emits 'onValue' for every completed value (leaves and nodes).

@@ -15,7 +15,21 @@ export const EntityExporters = {
   /**
    * Generates a clean Markdown card
    */
-  toMarkdown: (entity: any, type: string) => {
+  toMarkdown: (
+    entity: {
+      name?: string;
+      names?: { fr?: string; en?: string; ja?: string };
+      description?: string;
+      descriptions?: { fr?: string; en?: string };
+      attributes?: Record<string, string | number | undefined>;
+      position?: string;
+      element?: string | number;
+      bestRarity?: string;
+      teamName?: string;
+      [key: string]: any;
+    },
+    type: string,
+  ) => {
     // Handle name resolution from localized names if present
     let displayName = entity.name;
     if (!displayName && entity.names) {

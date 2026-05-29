@@ -299,7 +299,7 @@ export interface BaseCharacter {
   wikiSections?: { title: string; content: string }[];
 
   /** Sheet Data (Enriched) */
-  sheetData?: any;
+  sheetData?: Record<string, unknown>;
 
   /** Series/game this character belongs to */
   series?: {
@@ -417,7 +417,7 @@ export interface Character {
   descriptions?: LocalizedNames;
 
   /** Sheet Data */
-  sheetData?: any;
+  sheetData?: Record<string, unknown>;
 
   /** Series/game this character belongs to */
   series?: string;
