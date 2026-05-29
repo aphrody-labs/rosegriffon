@@ -55,7 +55,7 @@ _Wiki Inazuma Eleven Victory Road (déployé sur `azalee.rosegriffon.fr` via Ver
   - ✅ Module de tri et gestion de l'ordre d'affichage des listes avec `@dnd-kit/core`.
   - ✅ Outil de découpe et de compression d'images côté client.
   - ✅ Suivi de production complet avec Sentry, Vercel Speed Insights, Analytics et Google APIs.
-  - ⏳ Outils de modération en masse pour les administrateurs et réviseurs du wiki.
+  - ✅ Outils de modération et de traduction en masse pour les administrateurs et réviseurs du wiki.
   - ⏳ Optimisation de la mise en cache ISR (Incremental Static Regeneration) pour le Zukan.
   - ⏳ Système de recherche hybride combinant recherche floue (uFuzzy) et vectorielle (RAG).
 
@@ -69,10 +69,7 @@ _Site principal communautaire et portail membres (déployé sur `rosegriffon.fr`
   - ✅ Gestion d'articles, actualités et patch-notes via l'éditeur TipTap.
   - ✅ Section équipe ("Équipe") et page "Rose Griffon TV" pour la diffusion de streams.
   - ✅ Module de boutique et paiements sécurisés via Stripe.
-  - ✅ Synchronisation des adhésions et gestion des contributeurs Patreon.
-  - ✅ Intégration d'un sélecteur géographique avec `@googlemaps/js-api-loader`.
-  - ✅ Gestion de session et cookies compatibles avec `@supabase/ssr` via `@rose-griffon/auth`.
-  - ⏳ Espace profil membre étendu avec personnalisation (badges, bannières).
+  - ✅ Espace profil membre étendu avec personnalisation (badges, bannières).
   - ⏳ Boutique en ligne avec gestion de paniers persistants en Redis.
   - ⏳ Module de commentaires en temps réel sous les articles et flux de diffusion.
 
@@ -240,5 +237,5 @@ _API universelle et parses de données de jeu Inazuma Eleven_
 
 ### Phase 3 : Nouvelles fonctionnalités applicatives
 
-1. **Profils membres** : Activer l'espace membre personnalisé sur le site avec gestion de cosmétiques.
-2. **Dashboard Wiki** : Mettre en ligne les outils d'édition et de modération en masse pour Azalée.
+1. ✅ **Profils membres** : Espace membre personnalisé sur le site avec gestion de cosmétiques (choix de bannières prédéfinies et jusqu'à 3 badges avec icônes dynamiques).
+2. ✅ **Dashboard Wiki** : Mise en ligne des outils d'édition et de modération en masse pour Azalée (interface interactive de traduction en masse pour les personnages, techniques, équipes et objets).

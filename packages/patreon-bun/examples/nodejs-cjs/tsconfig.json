@@ -1,6 +1,5 @@
 {
     "compilerOptions": {
-    "ignoreDeprecations": "6.0",
         "checkJs": true,
         "allowJs": true,
         "outDir": "dist",

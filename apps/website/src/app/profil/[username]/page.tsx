@@ -12,6 +12,7 @@ import { createAdminClient, createClient } from "@/lib/supabase/server";
 
 import { ProfileAbout } from "./_components/profile-about";
 import { ProfileActivity } from "./_components/profile-activity";
+import { ProfileBanner } from "./_components/profile-banner";
 import { ProfileIdentity } from "./_components/profile-identity";
 import { ProfileQuickLinks } from "./_components/profile-quick-links";
 
@@ -107,6 +108,9 @@ export default async function UserProfilePage({
 				}
 			/>
 
+			{/* Bannière de profil personnalisé */}
+			<ProfileBanner src={profile.banner_url} />
+
 			<div className="container mx-auto px-4 pt-8 sm:px-6 sm:pt-10 lg:px-8">
 				<ProfileIdentity
 					username={profile.username}
@@ -117,6 +121,7 @@ export default async function UserProfilePage({
 					website={profile.website}
 					twitterHandle={profile.twitter_handle}
 					isOwnProfile={isOwnProfile}
+					badges={(profile as any).badges}
 				/>
 
 				{isOwnProfile && (

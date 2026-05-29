@@ -11,6 +11,7 @@ import { crawlCross } from "./cross";
 import { crawlLevel5 } from "./level5";
 import { crawlTwitter } from "./twitter";
 import { runRagSync } from "./rag";
+import { withProxyRotation } from "../../lib/proxy";
 
 export async function runIeCrawl(): Promise<{ success: boolean; error?: string }> {
   console.log("==================================================================");
@@ -19,7 +20,7 @@ export async function runIeCrawl(): Promise<{ success: boolean; error?: string }
 
   try {
     // 1. Crawl de l'ordre officiel des personnages Zukan
-    const zukanRes = await crawlZukanOrder();
+    const zukanRes = await withProxyRotation(() => crawlZukanOrder());
     if (!zukanRes.success) {
       console.error("[ie-crawl] Échec du crawl Zukan :", zukanRes.error);
     } else {
@@ -27,7 +28,7 @@ export async function runIeCrawl(): Promise<{ success: boolean; error?: string }
     }
 
     // 2. Crawl des actualités (Topics FR & Patch Notes EN)
-    const newsRes = await crawlNews();
+    const newsRes = await withProxyRotation(() => crawlNews());
     if (!newsRes.success) {
       console.error("[ie-crawl] Échec du crawl des actualités :", newsRes.error);
     } else {
@@ -35,7 +36,7 @@ export async function runIeCrawl(): Promise<{ success: boolean; error?: string }
     }
 
     // 3. Crawl Inazuma Eleven RE (Remake)
-    const reRes = await crawlRe();
+    const reRes = await withProxyRotation(() => crawlRe());
     if (!reRes.success) {
       console.error("[ie-crawl] Échec du crawl Inazuma Eleven RE :", reRes.error);
     } else {
@@ -43,7 +44,7 @@ export async function runIeCrawl(): Promise<{ success: boolean; error?: string }
     }
 
     // 4. Crawl Inazuma Eleven: Cross (Mobile)
-    const crossRes = await crawlCross();
+    const crossRes = await withProxyRotation(() => crawlCross());
     if (!crossRes.success) {
       console.error("[ie-crawl] Échec du crawl Inazuma Eleven: Cross :", crossRes.error);
     } else {
@@ -51,7 +52,7 @@ export async function runIeCrawl(): Promise<{ success: boolean; error?: string }
     }
 
     // 5. Crawl LEVEL-5 Corporate News (filtered for Inazuma)
-    const level5Res = await crawlLevel5();
+    const level5Res = await withProxyRotation(() => crawlLevel5());
     if (!level5Res.success) {
       console.error("[ie-crawl] Échec du crawl LEVEL-5 :", level5Res.error);
     } else {
@@ -59,7 +60,7 @@ export async function runIeCrawl(): Promise<{ success: boolean; error?: string }
     }
 
     // 5b. Crawl Twitter @Azalee_IE
-    const twitterRes = await crawlTwitter();
+    const twitterRes = await withProxyRotation(() => crawlTwitter());
     if (!twitterRes.success) {
       console.error("[ie-crawl] Échec du crawl Twitter :", twitterRes.error);
     } else {

@@ -38,11 +38,14 @@ export async function updateProfile(formData: FormData) {
     return { error: validation.error.flatten().fieldErrors };
   }
 
+  const badges = formData.getAll("badges") as string[];
+
   const { error } = await supabase
     .from("profiles")
     .update({
       address_line1: validation.data.address_line1,
       address_line2: validation.data.address_line2,
+      badges,
       banner_url: validation.data.banner_url,
       bio: validation.data.bio,
       city: validation.data.city,
@@ -66,6 +69,7 @@ export async function updateProfile(formData: FormData) {
   }
 
   revalidatePath("/dashboard/account");
+  revalidatePath(`/profil/${validation.data.username}`);
   return { success: true };
 }
 
@@ -80,5 +84,15 @@ export async function updateUserAvatar(userId: string, avatarUrl: string) {
     throw new Error("Could not update avatar URL.");
   }
   revalidatePath("/dashboard/account");
-  revalidatePath(`/profil/${userId}`); // Invalider aussi la page de profil publique
+
+  // Récupérer le username pour invalider le cache du profil public
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("username")
+    .eq("id", userId)
+    .maybeSingle();
+
+  if (profile?.username) {
+    revalidatePath(`/profil/${profile.username}`);
+  }
 }

@@ -3233,6 +3233,7 @@ export type Database = {
           address_line1: string | null
           address_line2: string | null
           avatar_url: string | null
+          badges: string[] | null
           banner_url: string | null
           bio: string | null
           city: string | null
@@ -3253,6 +3254,7 @@ export type Database = {
           address_line1?: string | null
           address_line2?: string | null
           avatar_url?: string | null
+          badges?: string[] | null
           banner_url?: string | null
           bio?: string | null
           city?: string | null
@@ -3273,6 +3275,7 @@ export type Database = {
           address_line1?: string | null
           address_line2?: string | null
           avatar_url?: string | null
+          badges?: string[] | null
           banner_url?: string | null
           bio?: string | null
           city?: string | null

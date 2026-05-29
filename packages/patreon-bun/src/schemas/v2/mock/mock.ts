@@ -377,11 +377,10 @@ export class PatreonMock {
 			// E.g campaign members, campaign posts
 			const cached =
 				id && useCache
-					? // @ts-expect-error resource included campaign, but is not available for list responses.
-						this.cache.getRelatedToResource(
+					? this.cache.getRelatedToResource(
 							path.mainResource ?? Type.Campaign,
 							id,
-							path.resource,
+							path.resource as any,
 						)
 					: null;
 

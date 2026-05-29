@@ -1,7 +1,7 @@
 import { resolve } from "node:path";
 import { GlobalFonts } from "@aphrody-code/canvas";
 
-import { RG_BRAND_HEX } from "../embeds";
+import { RG_BRAND_HEX } from "../config";
 
 const WEBSITE_FONTS = resolve(
 	import.meta.dir,
