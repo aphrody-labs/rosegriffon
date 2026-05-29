@@ -108,8 +108,8 @@ export const createClient = async (): Promise<SupabaseClient> => {
 					if (table.startsWith("inagle_")) {
 						try {
 							return sqliteClient.from(table);
-						} catch (e: any) {
-							const msg = e?.message || String(e);
+						} catch (e: unknown) {
+							const msg = e instanceof Error ? e.message : String(e);
 							if (msg.includes("Cannot find module 'bun:sqlite'") || msg.includes("Failed to load external module bun:sqlite")) {
 								if (!_hasWarnedMissingBun) {
 									console.log("[SQLite Cache] SQLite database cache is unavailable in this environment (falling back to Postgres).");

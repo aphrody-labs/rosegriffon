@@ -11,9 +11,9 @@ export async function runInaglePush(): Promise<{ success: boolean; error?: strin
     await $`bun run --filter @rose-griffon/inagle push`.cwd("/home/ubuntu/rg");
     console.log("[Cron DB] Synchronisation réussie.");
     return { success: true };
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error("[Cron DB] Erreur lors du push d'Inagle :", err);
-    return { success: false, error: err.message || String(err) };
+    return { success: false, error: err instanceof Error ? err.message : String(err) };
   }
 }
 
@@ -26,9 +26,9 @@ export async function runSQLiteBackup(): Promise<{ success: boolean; error?: str
     await $`bun run --filter @rose-griffon/azalee backup:supabase`.cwd("/home/ubuntu/rg");
     console.log("[Cron DB] Sauvegarde SQLite réussie.");
     return { success: true };
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error("[Cron DB] Erreur lors de la sauvegarde SQLite :", err);
-    return { success: false, error: err.message || String(err) };
+    return { success: false, error: err instanceof Error ? err.message : String(err) };
   }
 }
 
@@ -41,9 +41,9 @@ export async function runPostgresBackup(): Promise<{ success: boolean; error?: s
     await $`bash scripts/ops/backup-postgres.sh`.cwd("/home/ubuntu/rg");
     console.log("[Cron DB] Sauvegarde PostgreSQL réussie.");
     return { success: true };
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error("[Cron DB] Erreur lors de la sauvegarde PostgreSQL :", err);
-    return { success: false, error: err.message || String(err) };
+    return { success: false, error: err instanceof Error ? err.message : String(err) };
   }
 }
 
