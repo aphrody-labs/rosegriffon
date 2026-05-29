@@ -23,13 +23,13 @@ fi
 mkdir -p "$BACKUP_DIR"
 
 echo "▸ [1/3] Sauvegarde des rôles..."
-supabase db dump --db-url "$DATABASE_URL" -f "$BACKUP_DIR/roles.sql" --role-only
+pg_dumpall --globals-only --dbname="$DATABASE_URL" --file="$BACKUP_DIR/roles.sql"
 
 echo "▸ [2/3] Sauvegarde du schéma..."
-supabase db dump --db-url "$DATABASE_URL" -f "$BACKUP_DIR/schema.sql"
+pg_dump "$DATABASE_URL" --schema-only --file="$BACKUP_DIR/schema.sql"
 
 echo "▸ [3/3] Sauvegarde des données..."
-supabase db dump --db-url "$DATABASE_URL" -f "$BACKUP_DIR/data.sql" --use-copy --data-only
+pg_dump "$DATABASE_URL" --data-only --file="$BACKUP_DIR/data.sql"
 
 echo "✓ Sauvegarde Postgres complétée dans : $BACKUP_DIR"
 
