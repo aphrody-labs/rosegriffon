@@ -66,7 +66,7 @@ export class InagleError extends Error {
   public readonly code: InagleErrorCodeType;
   public readonly details?: InagleErrorDetails;
   public readonly timestamp: Date;
-  public readonly cause?: Error;
+  public override readonly cause?: Error;
 
   constructor(
     code: InagleErrorCodeType,
