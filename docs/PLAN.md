@@ -43,7 +43,7 @@ graph TD
 
 ### 📱 @rose-griffon/azalee
 
-_Wiki Inazuma Eleven Victory Road (déployé sur `azalee.rosegriffon.fr` via Vercel)_
+_Wiki Inazuma Eleven Victory Road (déployé sur `azalee.rosegriffon.fr` via le VPS port 3003 / Nginx)_
 
 - **Description** : Moteur de wiki communautaire et base de données de jeu interactive.
 - **État d'avancement** :
@@ -56,6 +56,11 @@ _Wiki Inazuma Eleven Victory Road (déployé sur `azalee.rosegriffon.fr` via Ver
   - ✅ Outil de découpe et de compression d'images côté client.
   - ✅ Suivi de production complet avec Sentry, Vercel Speed Insights, Analytics et Google APIs.
   - ✅ Outils de modération et de traduction en masse pour les administrateurs et réviseurs du wiki.
+  - ✅ **Résolution du doublon Mark Evans** : Regroupement dynamique par `sheetId` issu de `sheet_data` (fusionnant les différentes versions de personnages issues des fichiers du jeu) et exclusion des personnages non jouables ou incomplets de la recherche par défaut.
+  - ✅ **Optimisation drastique des latences du Wiki** : Parallelisation des requêtes multi-tables pour les auras et de la résolution des noms de techniques (`Promise.all`), et consolidation des requêtes de repli de `getSkill` en une unique requête SQL `.or()`. Latence divisée par 30 (< 100ms par page).
+  - ✅ **Résolution du flou de rendu visuel** : Suppression des animations et transitions de type `filter: blur(...)` et des propriétés `will-change` dans `globals.css` qui désactivaient l'antialiasing sous-pixel du navigateur sur les cartes et la section statistiques de la page d'accueil.
+  - ✅ **Centrage mobile de la bannière Achillea** : Correction de l'image de titre via flexbox (`justify-center md:justify-start`) et remplacement de l'image absolue par un composant image responsive.
+  - ✅ **Centrage mobile du FormSelector** : Centrage horizontal des vignettes de formulaires et élargissement automatique du conteneur de fiches de personnage (`w-full sm:flex-1`) sur mobile.
   - ⏳ Optimisation de la mise en cache ISR (Incremental Static Regeneration) pour le Zukan.
   - ⏳ Système de recherche hybride combinant recherche floue (uFuzzy) et vectorielle (RAG).
 
@@ -199,7 +204,7 @@ _Client API Patreon V2 typé pour Bun_
 
 _Ressources graphiques et statiques partagées_
 
-- **Description** : Package centralisant les images, polices et logos pour les apps Next.js et le bot.
+- **Description** Centralisation des images, polices et logos pour les apps Next.js et le bot.
 - **État d'avancement** :
   - ✅ Structure d'exportation de fichiers statiques prête.
   - ⏳ Pipeline de compression automatisé pour réduire le poids des images.
@@ -239,3 +244,18 @@ _API universelle et parses de données de jeu Inazuma Eleven_
 
 1. ✅ **Profils membres** : Espace membre personnalisé sur le site avec gestion de cosmétiques (choix de bannières prédéfinies et jusqu'à 3 badges avec icônes dynamiques).
 2. ✅ **Dashboard Wiki** : Mise en ligne des outils d'édition et de modération en masse pour Azalée (interface interactive de traduction en masse pour les personnages, techniques, équipes et objets).
+
+### Phase 4 : Optimisation Base de Données et Cache Hybride (Azalée)
+
+1. **Intégration du cache SQLite local pour les lectures du wiki** :
+   - Modifier `apps/azalee/lib/api-client.ts` pour brancher les requêtes de lecture statiques (personnages, objets, techniques) sur le fichier SQLite local généré par `bun run backup:supabase`.
+   - Laisser les écritures utilisateur (authentification Better Auth, profils, logs d'audit) connectées à Supabase Cloud Postgres.
+   - **Bénéfice** : Latence réseau ramenée à 0ms sur les pages de données de jeu et économie massive de requêtes/egress sur Supabase.
+2. **Automatisation du cycle de vie du cache** :
+   - Ajouter une routine automatique dans `@rose-griffon/cron` pour relancer `backup-supabase-to-sqlite.ts` à intervalles réguliers ou lors d'une détection de changement de données de jeu.
+
+### Phase 5 : Sécurité & Stratégie de Sauvegarde Externe
+
+1. **Script de backup PG18 automatisé** :
+   - Mettre en place un script cron de sauvegarde globale (schéma + rôles + données) via le Supabase CLI (`supabase db dump`) découpé en trois fichiers (`roles.sql`, `schema.sql`, `data.sql`).
+   - Exporter ces sauvegardes logiques PostgreSQL 18 vers un espace de stockage externe (type AWS S3 ou serveur froid externe) pour se prémunir de toute perte de données dynamique (utilisateurs, logs, profils).
