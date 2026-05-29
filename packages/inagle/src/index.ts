@@ -87,8 +87,7 @@ export * from "./menu/index.js";
 export * from "./rag/index.js";
 // APIs
 export * from "./service.js";
-// VFS streaming (CPK natif, sans dump)
-export { createVfs, getVfs, IevrVfs, type VfsConfig, type VfsResolvedAsset } from "./vfs/index.js";
+
 // Stat Calculator
 export * from "./stat-calculator.js";
 export * from "./zukan/index.js";
