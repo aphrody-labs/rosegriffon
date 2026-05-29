@@ -1,5 +1,5 @@
 {
-  "name": "@rosegriffon/config",
+  "name": "@rose-griffon/config",
   "version": "0.1.0",
   "type": "module",
   "description": "Configs partagées : tsconfig, eslint, oxlint, tailwind preset",

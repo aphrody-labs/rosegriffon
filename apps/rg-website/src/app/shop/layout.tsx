@@ -24,13 +24,13 @@ const organizationSchema = {
 		"@type": "ContactPoint",
 		availableLanguage: ["French"],
 		contactType: "Customer Service",
-		email: "contact@rosegriffon.fr",
+		email: "contact@rose-griffon.fr",
 	},
 	logo: "https://rosegriffon.fr/RG_Logo_V2.5_B.webp",
 	name: "Association Rose Griffon",
 	sameAs: [
 		"https://twitter.com/rosegriffon_fr",
-		"https://www.tiktok.com/@rosegriffon",
+		"https://www.tiktok.com/@rose-griffon",
 		"https://discord.gg/rosegriffon",
 		"https://www.patreon.com/rosegriffon",
 	],
@@ -131,10 +131,10 @@ export default async function ShopLayout({
 							<dt>Support</dt>
 							<dd className="text-white">
 								<a
-									href="mailto:contact@rosegriffon.fr"
+									href="mailto:contact@rose-griffon.fr"
 									className="text-[#d4af37] underline decoration-2 underline-offset-2"
 								>
-									contact@rosegriffon.fr
+									contact@rose-griffon.fr
 								</a>
 							</dd>
 						</dl>

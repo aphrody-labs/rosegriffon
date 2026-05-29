@@ -1,4 +1,4 @@
-import { PatreonOauthScope } from "@rosegriffon/patreon-bun";
+import { PatreonOauthScope } from "@rose-griffon/patreon-bun";
 
 export const PATREON_API_BASE = "https://www.patreon.com/api/oauth2/v2";
 export const PATREON_AUTHORIZE = "https://www.patreon.com/oauth2/authorize";

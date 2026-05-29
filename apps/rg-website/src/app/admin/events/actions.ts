@@ -7,8 +7,8 @@ import { logAdminAction } from "@/lib/admin-logger";
 import { getCalendarEvents } from "@/lib/api/events";
 import { getServerUser } from "@/lib/auth-helpers";
 import { createAdminClient, createClient } from "@/lib/supabase/server";
-import { resolveProfile, isAdmin } from "@rosegriffon/auth";
-import type { Insert } from "@rosegriffon/db";
+import { resolveProfile, isAdmin } from "@rose-griffon/auth";
+import type { Insert } from "@rose-griffon/db";
 
 async function ensureAdmin() {
   const user = await getServerUser();

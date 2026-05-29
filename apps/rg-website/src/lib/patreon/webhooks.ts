@@ -1,4 +1,4 @@
-import { verify as patreonVerify } from "@rosegriffon/patreon-bun";
+import { verify as patreonVerify } from "@rose-griffon/patreon-bun";
 
 import type {
 	JsonApiResource,
@@ -56,7 +56,7 @@ export interface PatreonPostAttrs {
 }
 
 /**
- * HMAC-MD5 verification via @rosegriffon/patreon-bun.
+ * HMAC-MD5 verification via @rose-griffon/patreon-bun.
  * Constant-time + safe edge cases (null/empty/length mismatch).
  */
 export function verifySignature(rawBody: string, signature: string): boolean {

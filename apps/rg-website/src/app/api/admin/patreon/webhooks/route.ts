@@ -1,4 +1,4 @@
-import { QueryBuilder } from "@rosegriffon/patreon-bun";
+import { QueryBuilder } from "@rose-griffon/patreon-bun";
 import { NextResponse } from "next/server";
 
 import { requireApiPatreonCreator } from "@/lib/api-auth";

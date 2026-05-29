@@ -1,4 +1,4 @@
-import { StorageImage } from "@rosegriffon/ui";
+import { StorageImage } from "@rose-griffon/ui";
 
 export function ProfileBanner({ src }: { src: string | null }) {
 	return (

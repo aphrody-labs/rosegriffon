@@ -1,6 +1,6 @@
 "use client";
 
-import { Button } from "@rosegriffon/ui";
+import { Button } from "@rose-griffon/ui";
 import React from "react";
 
 import { AlertTriangle, RefreshCw } from "@/lib/icons-config";

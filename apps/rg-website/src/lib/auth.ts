@@ -5,14 +5,14 @@ import { nextCookies } from "better-auth/next-js";
 import { bearer, genericOAuth, oAuthProxy } from "better-auth/plugins";
 import { Pool } from "pg";
 
-import { commonAuthOptions, ensureUserProfile } from "@rosegriffon/auth";
+import { commonAuthOptions, ensureUserProfile } from "@rose-griffon/auth";
 import {
 	fetchIdentity,
 	parseIdentityWithMemberships,
 } from "@/lib/patreon/client";
 import { encryptToken } from "@/lib/patreon/encryption";
 import { SCOPES_CREATOR, SCOPES_PATRON } from "@/lib/patreon/types";
-import type { Database } from "@rosegriffon/db";
+import type { Database } from "@rose-griffon/db";
 
 const getDatabaseURL = () => {
 	let url = process.env.DATABASE_URL;

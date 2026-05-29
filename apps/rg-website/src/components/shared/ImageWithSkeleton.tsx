@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 
-import { Skeleton, StorageImage } from "@rosegriffon/ui";
+import { Skeleton, StorageImage } from "@rose-griffon/ui";
 
 // Image component with skeleton loader
 const ImageWithSkeleton = React.memo(({

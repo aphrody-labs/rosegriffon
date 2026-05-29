@@ -20,7 +20,7 @@ export function createSupabaseServiceClient() {
 		serviceKey ?? (isBuildPhase() ? getSupabasePublishableKey() : null);
 
 	if (!key) {
-		throw new Error("[@rosegriffon/db] Missing SUPABASE_SERVICE_ROLE_KEY");
+		throw new Error("[@rose-griffon/db] Missing SUPABASE_SERVICE_ROLE_KEY");
 	}
 
 	cachedClient = createClient<Database>(url, key, {

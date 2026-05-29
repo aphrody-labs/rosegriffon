@@ -76,10 +76,10 @@ export default async function ThankYouPage({ searchParams }: ThankYouProps) {
 			<p className="mt-8 max-w-md text-sm text-white/70">
 				On prépare ton colis sous 3 à 5 jours ouvrés. Une question ?{" "}
 				<a
-					href="mailto:contact@rosegriffon.fr"
+					href="mailto:contact@rose-griffon.fr"
 					className="font-semibold text-[#d4af37] underline decoration-2 underline-offset-4"
 				>
-					contact@rosegriffon.fr
+					contact@rose-griffon.fr
 				</a>
 			</p>
 

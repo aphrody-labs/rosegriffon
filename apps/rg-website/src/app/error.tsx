@@ -1,6 +1,6 @@
 "use client";
 
-import { Button } from "@rosegriffon/ui";
+import { Button } from "@rose-griffon/ui";
 import { useEffect } from "react";
 
 export default function Error({

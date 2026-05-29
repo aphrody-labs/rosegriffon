@@ -3,7 +3,7 @@ import {
 	getArticleVersions,
 	restoreArticleVersion,
 } from "@/app/actions/articles";
-import { AdminPageHeader as DashboardPageHeader } from "@rosegriffon/ui";
+import { AdminPageHeader as DashboardPageHeader } from "@rose-griffon/ui";
 import { createClient } from "@/lib/supabase/server";
 import { VersionsList } from "./VersionsList";
 

@@ -3,7 +3,7 @@ import {
 	AccordionContent,
 	AccordionItem,
 	AccordionTrigger,
-} from "@rosegriffon/ui";
+} from "@rose-griffon/ui";
 
 const ITEMS = [
 	{

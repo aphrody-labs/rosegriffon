@@ -1,6 +1,6 @@
 "use client";
 
-import { Button } from "@rosegriffon/ui";
+import { Button } from "@rose-griffon/ui";
 import { Loader2 } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";

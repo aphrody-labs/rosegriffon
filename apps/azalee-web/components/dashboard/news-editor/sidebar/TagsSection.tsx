@@ -2,7 +2,7 @@
 
 import { X } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Input } from "@rosegriffon/ui";
+import { Input } from "@rose-griffon/ui";
 
 interface TagsSectionProps {
   tags: string[];

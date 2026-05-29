@@ -1,4 +1,4 @@
-import { createSupabaseServiceClient } from "@rosegriffon/db/service";
+import { createSupabaseServiceClient } from "@rose-griffon/db/service";
 
 const supabaseAdmin = createSupabaseServiceClient();
 

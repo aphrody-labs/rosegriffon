@@ -1,6 +1,6 @@
 "use client";
 
-import type { BaseCharacter } from "@rosegriffon/inagle";
+import type { BaseCharacter } from "@rose-griffon/inagle";
 import Image from "next/image";
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";

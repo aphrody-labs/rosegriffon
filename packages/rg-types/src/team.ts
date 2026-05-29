@@ -1,4 +1,4 @@
-import type { Database } from "@rosegriffon/db";
+import type { Database } from "@rose-griffon/db";
 
 /** Membre de l'équipe Rose Griffon. */
 export type TeamMember = Database["public"]["Tables"]["team_members"]["Row"];

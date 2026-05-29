@@ -28,10 +28,10 @@ export default function ContactPage() {
 						Pour les demandes formelles, partenariats ou questions spécifiques :
 					</p>
 					<a
-						href="mailto:contact@rosegriffon.fr"
+						href="mailto:contact@rose-griffon.fr"
 						className="text-primary font-bold text-xl hover:underline"
 					>
-						contact@rosegriffon.fr
+						contact@rose-griffon.fr
 					</a>
 				</div>
 

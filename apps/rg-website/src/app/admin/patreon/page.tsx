@@ -1,4 +1,4 @@
-import { Badge, Card, CardContent, Tabs, TabsContent, TabsList, TabsTrigger, DashboardStatsCard as StatsCard, AdminPageHeader } from "@rosegriffon/ui";
+import { Badge, Card, CardContent, Tabs, TabsContent, TabsList, TabsTrigger, DashboardStatsCard as StatsCard, AdminPageHeader } from "@rose-griffon/ui";
 import {
 	AlertCircle,
 	BarChart3,

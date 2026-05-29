@@ -145,7 +145,7 @@ export default function DesignSystemShowcase() {
 							fontFamily: "var(--font-cartoon-ds), sans-serif",
 						}}
 					>
-						<span className="block">@rosegriffon/ui</span>
+						<span className="block">@rose-griffon/ui</span>
 						<span className="block">Design System · v0.1.0</span>
 					</div>
 					<ThemeSwitcher />
@@ -210,7 +210,7 @@ export default function DesignSystemShowcase() {
 							style={{ color: "#f5e9d4" }}
 						>
 							Catalogue vivant des 55 composants{" "}
-							<strong style={{ color: RG_OR }}>@rosegriffon/ui</strong>, palette{" "}
+							<strong style={{ color: RG_OR }}>@rose-griffon/ui</strong>, palette{" "}
 							<strong style={{ color: RG_OR }}>MD3</strong> et 4 thèmes — Roy,
 							Gaëlle, Azalée light & dark.
 						</p>
@@ -950,7 +950,7 @@ export default function DesignSystemShowcase() {
 						>
 							<div>
 								<dt className="block opacity-60">Package</dt>
-								<dd style={{ color: RG_OR }}>@rosegriffon/ui</dd>
+								<dd style={{ color: RG_OR }}>@rose-griffon/ui</dd>
 							</div>
 							<div>
 								<dt className="block opacity-60">Version</dt>

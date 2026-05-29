@@ -1,6 +1,6 @@
 "use client";
 
-import { Alert, AlertDescription, Button, Card, CardContent, CardDescription, CardHeader, CardTitle, Separator, Skeleton } from "@rosegriffon/ui";
+import { Alert, AlertDescription, Button, Card, CardContent, CardDescription, CardHeader, CardTitle, Separator, Skeleton } from "@rose-griffon/ui";
 import Image from "next/image";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
@@ -40,7 +40,7 @@ const SOCIAL_LINKS = [
 	},
 	{
 		Icon: YouTubeIcon,
-		href: "https://youtube.com/@rosegriffon",
+		href: "https://youtube.com/@rose-griffon",
 		label: "YouTube",
 	},
 	{ Icon: XIcon, href: "https://x.com/rosegriffon_fr", label: "X / Twitter" },

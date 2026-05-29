@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { AdminPageHeader as DashboardPageHeader, Button, Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@rosegriffon/ui";
+import { AdminPageHeader as DashboardPageHeader, Button, Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@rose-griffon/ui";
 import { NewsListClient } from "@/components/dashboard/news/NewsListClient";
 import { Icon } from "@/components/ui/Icon";
 import { WikiPagination } from "@/components/wiki/WikiPagination";

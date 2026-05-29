@@ -1,6 +1,6 @@
 "use client";
 
-import { Alert, AlertDescription, Button } from "@rosegriffon/ui";
+import { Alert, AlertDescription, Button } from "@rose-griffon/ui";
 import "react-quill-new/dist/quill.snow.css";
 
 import { AlertCircle, Eye, Save, Send } from "lucide-react";

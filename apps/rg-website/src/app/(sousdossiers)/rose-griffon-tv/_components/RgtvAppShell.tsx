@@ -1,6 +1,6 @@
 "use client";
 
-import { Button } from "@rosegriffon/ui";
+import { Button } from "@rose-griffon/ui";
 import { AnimatePresence, motion } from "motion/react";
 import Image from "next/image";
 import { useEffect, useState } from "react";

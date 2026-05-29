@@ -9,7 +9,7 @@ import { LanguageProvider } from "@/components/providers/language-provider";
 import { SupabaseProvider } from "@/components/providers/SupabaseProvider";
 import { ThemeProvider } from "@/components/providers/theme-provider";
 import { Shell } from "@/components/Shell";
-import { Toaster } from "@rosegriffon/ui";
+import { Toaster } from "@rose-griffon/ui";
 import { auth, ensureUserProfile } from "@/lib/auth";
 import { mintSupabaseJwt } from "@/lib/supabase/jwt";
 import "./globals.css";

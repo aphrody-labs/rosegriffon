@@ -1,6 +1,6 @@
 "use client";
 
-import type { MultiLevelStats } from "@rosegriffon/inagle";
+import type { MultiLevelStats } from "@rose-griffon/inagle";
 import { CircleDot } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -14,7 +14,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@rosegriffon/ui";
+} from "@rose-griffon/ui";
 import type { SpriteCommonKey } from "@/config/sprites-common";
 import { formatDescription } from "@/lib/format-description";
 import { isFemaleGender } from '@/lib/gender';

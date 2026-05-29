@@ -1,6 +1,6 @@
 "use client";
 
-import { Button, Card, CardContent, CardDescription, CardHeader, CardTitle, Tabs, TabsContent, TabsList, TabsTrigger, Textarea, Separator } from "@rosegriffon/ui";
+import { Button, Card, CardContent, CardDescription, CardHeader, CardTitle, Tabs, TabsContent, TabsList, TabsTrigger, Textarea, Separator } from "@rose-griffon/ui";
 import { Sparkles } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";

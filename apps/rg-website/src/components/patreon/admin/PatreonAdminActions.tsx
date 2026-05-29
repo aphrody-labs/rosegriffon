@@ -1,6 +1,6 @@
 "use client";
 
-import { Button } from "@rosegriffon/ui";
+import { Button } from "@rose-griffon/ui";
 import { Loader2, RefreshCw, Shuffle, XCircle } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";

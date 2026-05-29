@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { DashboardStatsCard as DashboardMetricCard, AdminPageHeader as DashboardPageHeader } from "@rosegriffon/ui";
+import { DashboardStatsCard as DashboardMetricCard, AdminPageHeader as DashboardPageHeader } from "@rose-griffon/ui";
 import { requireAdmin } from "@/lib/auth-helpers";
 import { createClient } from "@/lib/supabase/server";
 import { ZukanReviewClient } from './ZukanReviewClient';

@@ -1,4 +1,4 @@
-import { Button, Card } from "@rosegriffon/ui";
+import { Button, Card } from "@rose-griffon/ui";
 import Image from "next/image";
 import Link from "next/link";
 

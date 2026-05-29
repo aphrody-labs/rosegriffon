@@ -1,6 +1,6 @@
 "use client";
 
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Tabs, TabsContent, TabsList, TabsTrigger, ScrollArea } from "@rosegriffon/ui";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Tabs, TabsContent, TabsList, TabsTrigger, ScrollArea } from "@rose-griffon/ui";
 import { Loader2, Smile, Upload } from "lucide-react";
 import { useRef, useState } from "react";
 import { toast } from "sonner";

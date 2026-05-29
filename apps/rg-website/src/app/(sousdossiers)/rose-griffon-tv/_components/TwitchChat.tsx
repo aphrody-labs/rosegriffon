@@ -1,6 +1,6 @@
 "use client";
 
-import { Badge, Button, Card, CardContent, CardHeader, Avatar, AvatarFallback, AvatarImage } from "@rosegriffon/ui";
+import { Badge, Button, Card, CardContent, CardHeader, Avatar, AvatarFallback, AvatarImage } from "@rose-griffon/ui";
 import { AnimatePresence, motion } from "motion/react";
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";

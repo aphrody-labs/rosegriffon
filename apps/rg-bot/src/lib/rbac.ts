@@ -1,7 +1,7 @@
 import type { ChatInputCommandInteraction } from "discord.js";
 import { MessageFlags } from "discord.js";
 
-import { isBotAdminRole, type RgRole } from "@rosegriffon/types/roles";
+import { isBotAdminRole, type RgRole } from "@rose-griffon/types/roles";
 
 import { cached, invalidate } from "./cache.ts";
 import { sql } from "./db.ts";

@@ -1,8 +1,8 @@
 "use client";
 
 import { BookOpen, Calendar, Heart, Home, Image as ImageIcon, Settings, Shield, Users } from "lucide-react";
-import type { NavItem } from "@rosegriffon/ui";
-import { AdminSidebar as SharedAdminSidebar } from "@rosegriffon/ui";
+import type { NavItem } from "@rose-griffon/ui";
+import { AdminSidebar as SharedAdminSidebar } from "@rose-griffon/ui";
 import Link from "next/link";
 
 const adminNavItems: NavItem[] = [

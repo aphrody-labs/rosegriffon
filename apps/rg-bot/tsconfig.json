@@ -1,5 +1,5 @@
 {
-	"extends": "@rosegriffon/config/tsconfig-bun.json",
+	"extends": "@rose-griffon/config/tsconfig-bun.json",
 	"compilerOptions": {
 		"paths": {
 			"@/*": ["./src/*"]

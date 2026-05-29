@@ -59,7 +59,7 @@ async function twitchFetch(url: string, token: string) {
 // Pas d'API key requise — utilise le RSS feed natif (15 dernières vidéos).
 const YOUTUBE_CHANNEL_IDS: Record<string, string> = {
   achillea_ie: "UCh2FiAYaOfuvwTaBVs7CpFw", // @achillearg
-  rose_griffontv: "UCleqt3V_yTgxY6XLZeEFV8g", // @rosegriffon
+  rose_griffontv: "UCleqt3V_yTgxY6XLZeEFV8g", // @rose-griffon
 };
 
 interface YoutubeVideo {

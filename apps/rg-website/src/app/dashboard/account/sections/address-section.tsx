@@ -14,14 +14,14 @@ import {
 	FormItem,
 	FormLabel,
 	FormMessage,
-} from "@rosegriffon/ui";
+} from "@rose-griffon/ui";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Truck } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
 
-import type { Database } from "@rosegriffon/db";
+import type { Database } from "@rose-griffon/db";
 
 import { updateProfile } from "../actions";
 

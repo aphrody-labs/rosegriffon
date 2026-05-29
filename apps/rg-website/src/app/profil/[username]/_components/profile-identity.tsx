@@ -1,4 +1,4 @@
-import { Badge, Button, Avatar, AvatarFallback, AvatarImage } from "@rosegriffon/ui";
+import { Badge, Button, Avatar, AvatarFallback, AvatarImage } from "@rose-griffon/ui";
 import { Edit, ExternalLink } from "lucide-react";
 import Link from "next/link";
 

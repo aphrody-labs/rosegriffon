@@ -2,7 +2,7 @@
 
 export const dynamic = "force-dynamic";
 
-import { Badge, Button, Card, CardContent, CardDescription, CardHeader, CardTitle, Tabs, TabsList, TabsTrigger, Label, Separator, Slider, StorageImage, Switch } from "@rosegriffon/ui";
+import { Badge, Button, Card, CardContent, CardDescription, CardHeader, CardTitle, Tabs, TabsList, TabsTrigger, Label, Separator, Slider, StorageImage, Switch } from "@rose-griffon/ui";
 import {
 	CheckCircle2,
 	CloudUpload,

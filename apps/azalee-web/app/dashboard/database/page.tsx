@@ -1,7 +1,7 @@
 import { Backpack, BadgeCheck, ScanSearch, Swords, User, Users, Zap } from "lucide-react";
 import Link from "next/link";
 import type React from "react";
-import { AdminPageHeader as DashboardPageHeader, Card, CardContent, CardTitle } from "@rosegriffon/ui";
+import { AdminPageHeader as DashboardPageHeader, Card, CardContent, CardTitle } from "@rose-griffon/ui";
 import { ElementChartLoader } from "./ElementChartLoader";
 import { apiClient } from "@/lib/api-client";
 import { createClient } from "@/lib/supabase/server";

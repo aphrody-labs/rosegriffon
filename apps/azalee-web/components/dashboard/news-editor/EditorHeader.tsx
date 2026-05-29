@@ -18,7 +18,7 @@ import {
 	Type,
 } from "lucide-react";
 import Link from "next/link";
-import { Button, TabsList, TabsTrigger, DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@rosegriffon/ui";
+import { Button, TabsList, TabsTrigger, DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@rose-griffon/ui";
 import { cn } from "@/lib/utils";
 import { STATUS_OPTIONS } from "./constants";
 

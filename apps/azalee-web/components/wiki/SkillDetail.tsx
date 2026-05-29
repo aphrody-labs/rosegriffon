@@ -1,6 +1,6 @@
 "use client";
 
-import type { Skill } from "@rosegriffon/inagle";
+import type { Skill } from "@rose-griffon/inagle";
 import {
 	AlertCircle,
 	ArrowLeft,

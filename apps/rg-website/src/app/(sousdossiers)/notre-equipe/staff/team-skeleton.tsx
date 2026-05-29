@@ -1,4 +1,4 @@
-import { Skeleton } from "@rosegriffon/ui";
+import { Skeleton } from "@rose-griffon/ui";
 
 export function TeamSectionSkeleton() {
   return (

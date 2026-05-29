@@ -3,8 +3,8 @@
 	"framework": "nextjs",
 	"bunVersion": "1.x",
 	"installCommand": "cd ../.. && bun install --no-save --frozen-lockfile",
-	"ignoreCommand": "cd ../.. && npx turbo-ignore @rosegriffon/website",
-	"buildCommand": "cd ../.. && turbo run build --filter=@rosegriffon/website... --cache=remote:rw",
+	"ignoreCommand": "cd ../.. && npx turbo-ignore @rose-griffon/website",
+	"buildCommand": "cd ../.. && turbo run build --filter=@rose-griffon/website... --cache=remote:rw",
 	"env": {
 		"NEXT_PUBLIC_SUPABASE_URL": "https://isbkaeltubqittywibeh.supabase.co"
 	},

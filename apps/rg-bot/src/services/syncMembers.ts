@@ -1,5 +1,5 @@
 import type { Guild, GuildMember, User } from "discord.js";
-import type { DiscordMember as MemberRow } from "@rosegriffon/types";
+import type { DiscordMember as MemberRow } from "@rose-griffon/types";
 
 import { sql } from "../lib/db.ts";
 

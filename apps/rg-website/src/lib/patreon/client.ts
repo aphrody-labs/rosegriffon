@@ -1,5 +1,5 @@
-import { PatreonCreatorClient } from '@rosegriffon/patreon-bun';
-import type { Oauth2StoredToken } from '@rosegriffon/patreon-bun';
+import { PatreonCreatorClient } from '@rose-griffon/patreon-bun';
+import type { Oauth2StoredToken } from '@rose-griffon/patreon-bun';
 
 import type {
 	JsonApiResource,

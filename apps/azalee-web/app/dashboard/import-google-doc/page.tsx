@@ -1,4 +1,4 @@
-import { AdminPageHeader as DashboardPageHeader } from "@rosegriffon/ui";
+import { AdminPageHeader as DashboardPageHeader } from "@rose-griffon/ui";
 import { ImportDocForm } from "./ImportDocForm";
 
 export default function ImportGoogleDocPage() {
