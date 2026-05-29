@@ -11,7 +11,7 @@ upstream azalee_web { server 127.0.0.1:3003; keepalive 32; }
 
 server {
     listen 80;
-    server_name azalee.rosegriffon.fr;
+    server_name azalee.rosegriffon.fr 51.77.147.152;
 
     location /.well-known/acme-challenge/ { root /var/www/html; }
 
