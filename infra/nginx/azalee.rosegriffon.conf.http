@@ -1,0 +1,30 @@
+# azalee.rosegriffon.fr — bootstrap HTTP-only (Next.js standalone :3003).
+# Installé au cutover AVANT certbot : permet le challenge ACME HTTP-01 + sert le
+# site en clair le temps d'obtenir le cert. `certbot --nginx -d azalee.rosegriffon.fr`
+# réécrit ensuite ce fichier pour ajouter le 443/SSL + la redirection.
+map $http_upgrade $connection_upgrade {
+    default upgrade;
+    ''      close;
+}
+
+upstream azalee_web { server 127.0.0.1:3003; keepalive 32; }
+
+server {
+    listen 80;
+    server_name azalee.rosegriffon.fr;
+
+    location /.well-known/acme-challenge/ { root /var/www/html; }
+
+    location / {
+        proxy_pass http://azalee_web;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection $connection_upgrade;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_read_timeout 60s;
+        proxy_buffering off;
+    }
+}

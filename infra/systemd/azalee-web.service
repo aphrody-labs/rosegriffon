@@ -1,0 +1,84 @@
+# azalee-web.service — site Next.js 16 (monorepo rg) self-host VPS
+# Reverse-proxy nginx azalee.rosegriffon.fr -> 127.0.0.1:3003.
+# Prérequis : build présent (~/rg/apps/azalee/.next) + .env reconstitué.
+[Unit]
+Description=Azalee Web (Next.js 16, Bun runtime)
+After=network.target network-online.target postgresql@18-main.service redis-server.service
+Wants=network-online.target postgresql@18-main.service
+StartLimitBurst=5
+StartLimitIntervalSec=60
+
+[Service]
+Type=simple
+User=ubuntu
+Group=ubuntu
+WorkingDirectory=/home/ubuntu/rg/apps/azalee
+
+EnvironmentFile=-/home/ubuntu/rg/apps/azalee/.env
+Environment=NODE_ENV=production
+Environment=PORT=3003
+# Bind loopback only — nginx (azalee.rosegriffon.fr) reverse-proxy devant. Le serveur
+# standalone écoute 0.0.0.0 par défaut sinon.
+Environment=HOSTNAME=127.0.0.1
+# DB locale via unix socket (peer auth ubuntu) — latence < 1 ms
+Environment=PGHOST=/var/run/postgresql
+Environment=PGDATABASE=rose_griffon
+Environment=PGUSER=ubuntu
+Environment=BUN_RUNTIME_TRANSPILER_CACHE_PATH=/home/ubuntu/rg/apps/azalee/.bun-cache
+
+# Build `output: "standalone"` (!VERCEL) : serveur autonome, PAS `next start`.
+# Prérequis deploy (runbook cutover) après `next build` :
+#   cp -r .next/static   .next/standalone/apps/azalee/.next/static
+#   cp -r public         .next/standalone/apps/azalee/public
+# Le serveur standalone lit PORT/HOSTNAME depuis l'env (PORT=3003 ci-dessus).
+ExecStart=/home/ubuntu/.bun/bin/bun .next/standalone/apps/azalee/server.js
+
+TimeoutStopSec=60
+KillMode=mixed
+KillSignal=SIGTERM
+Restart=always
+RestartSec=3
+
+# Ressources (Next SSR/ISR — RSS attendu ~400-800 MiB)
+MemoryMax=1536M
+MemoryHigh=1152M
+MemoryLow=256M
+TasksMax=2048
+OOMScoreAdjust=-200
+CPUWeight=150
+IOWeight=150
+
+# Hardening (JIT-safe — PAS de MemoryDenyWriteExecute, casse le JIT Bun/V8)
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=read-only
+PrivateTmp=true
+PrivateDevices=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectKernelLogs=true
+ProtectControlGroups=true
+ProtectHostname=true
+ProtectClock=true
+ProtectProc=invisible
+ProcSubset=pid
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+RestrictNamespaces=true
+RestrictSUIDSGID=true
+RestrictRealtime=true
+LockPersonality=true
+CapabilityBoundingSet=
+AmbientCapabilities=
+SystemCallArchitectures=native
+SystemCallFilter=@system-service
+SystemCallFilter=~@obsolete @privileged
+# Next écrit le cache ISR/fetch dans .next/cache ; socket PG dans /run
+ReadWritePaths=/home/ubuntu/rg/apps/azalee/.next /home/ubuntu/rg/apps/azalee/.bun-cache
+
+LimitNOFILE=131072
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=azalee-web
+
+[Install]
+WantedBy=multi-user.target
