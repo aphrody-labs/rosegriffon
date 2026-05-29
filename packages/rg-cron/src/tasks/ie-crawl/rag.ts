@@ -473,12 +473,28 @@ export async function runRagSync(): Promise<{
 
 		for (const item of items) {
 			try {
-				let fileContent = readFileSync(item.htmlPath, "utf-8");
+				const fileContent = readFileSync(item.htmlPath, "utf-8");
+				let cleanText = "";
 				if (item.type === "doc") {
 					const { content } = parseFrontmatter(fileContent);
-					fileContent = Bun.markdown.html(content);
+					cleanText = Bun.markdown
+						.render(content, {
+							heading: (children: string) => children + "\n",
+							paragraph: (children: string) => children + "\n",
+							strong: (children: string) => children,
+							emphasis: (children: string) => children,
+							link: (children: string) => children,
+							image: () => "",
+							code: (children: string) => children,
+							codespan: (children: string) => children,
+							list: (children: string) => children + "\n",
+							listItem: (children: string) => "- " + children + "\n",
+						})
+						.trim()
+						.replace(/\s+/g, " ");
+				} else {
+					cleanText = cleanHtml(fileContent);
 				}
-				const cleanText = cleanHtml(fileContent);
 
 				if (cleanText.length < 50) {
 					// Document vide ou invalide
@@ -657,7 +673,7 @@ export async function queryRag(question: string, limit = 4) {
 	const questionEmbedding = await getEmbedding(question);
 
 	// Rechercher dans la collection
-	const results = await vectorStore.search("inazuma-news", questionEmbedding, limit);
+	const results = await vectorStore.search("inazuma-news", questionEmbedding, limit, question);
 
 	return results.map((r) => ({
 		id: r.document.id,

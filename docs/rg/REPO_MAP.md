@@ -28,8 +28,8 @@ Applications autonomes prêtes à être déployées :
   - `bun run start` : `bun run --bun next start`
   - `bun run lint` : `oxlint .`
   - `bun run lint:fix` : `oxlint --fix .`
-  - `bun run lint:ox` : `oxlint .`
-  - `bun run lint:eslint` : `bun x eslint .`
+  - `bun run format` : `oxfmt .`
+  - `bun run format:check` : `oxfmt --check .`
   - `bun run type-check` : `tsc --noEmit`
   - `bun run test` : `vitest run`
   - `bun run test:run` : `vitest run`
@@ -38,7 +38,7 @@ Applications autonomes prêtes à être déployées :
 
 - **Dépendances internes & externes :**
   - **Dependencies :** `@dnd-kit/core`, `@dnd-kit/sortable`, `@dnd-kit/utilities`, `@envelop/graphql-jit`, `@graphql-yoga/plugin-response-cache`, `@lexical/code`, `@lexical/file`, `@lexical/html`, `@lexical/link`, `@lexical/list`, `@lexical/markdown`, `@lexical/react`, `@lexical/rich-text`, `@lexical/table`, `@lexical/utils`, `@markdoc/markdoc`, `@radix-ui/react-accordion`, `@radix-ui/react-alert-dialog`, `@radix-ui/react-avatar`, `@radix-ui/react-checkbox`, `@radix-ui/react-collapsible`, `@radix-ui/react-dialog`, `@radix-ui/react-dropdown-menu`, `@radix-ui/react-label`, `@radix-ui/react-popover`, `@radix-ui/react-progress`, `@radix-ui/react-radio-group`, `@radix-ui/react-select`, `@radix-ui/react-separator`, `@radix-ui/react-slider`, `@radix-ui/react-slot`, `@radix-ui/react-switch`, `@radix-ui/react-tabs`, `@radix-ui/react-toggle`, `@radix-ui/react-toggle-group`, `@radix-ui/react-tooltip`, `@rose-griffon/assets`, `@rose-griffon/auth`, `@rose-griffon/db`, `@rose-griffon/inagle`, `@rose-griffon/types`, `@rose-griffon/ui`, `@sentry/nextjs`, `@supabase/supabase-js`, `@types/nodemailer`, `@vercel/analytics`, `@vercel/og`, `@vercel/speed-insights`, `bcryptjs`, `better-auth`, `cheerio`, `class-variance-authority`, `clsx`, `cmdk`, `csv-parse`, `date-fns`, `embla-carousel-react`, `googleapis`, `graphql`, `graphql-yoga`, `html-to-image`, `input-otp`, `jsonwebtoken`, `lexical`, `lucide-react`, `motion`, `next`, `next-themes`, `node-ipinfo`, `nodemailer`, `pg`, `radix-ui`, `react`, `react-day-picker`, `react-dom`, `react-hook-form`, `react-image-crop`, `react-konva`, `react-resizable-panels`, `recharts`, `sharp`, `sonner`, `tailwind-merge`, `use-image`, `vaul`, `wanakana`, `web-push`, `zod`
-  - **DevDependencies :** `@next/bundle-analyzer`, `@rose-griffon/config`, `@tailwindcss/postcss`, `@tailwindcss/typography`, `@testing-library/jest-dom`, `@types/bun`, `@types/jsonwebtoken`, `@types/node`, `@types/pg`, `@types/react`, `@types/react-dom`, `@types/web-push`, `@vitejs/plugin-react`, `babel-plugin-react-compiler`, `eslint`, `eslint-config-next`, `eslint-plugin-better-tailwindcss`, `eslint-plugin-jsx-a11y`, `eslint-plugin-oxlint`, `eslint-plugin-react-compiler`, `jsdom`, `oxlint`, `tailwindcss`, `tailwindcss-animate`, `turbo`, `typescript`, `vitest`
+  - **DevDependencies :** `@next/bundle-analyzer`, `@rose-griffon/config`, `@tailwindcss/postcss`, `@tailwindcss/typography`, `@testing-library/jest-dom`, `@types/bun`, `@types/jsonwebtoken`, `@types/node`, `@types/pg`, `@types/react`, `@types/react-dom`, `@types/web-push`, `@vitejs/plugin-react`, `babel-plugin-react-compiler`, `jsdom`, `oxlint`, `tailwindcss`, `tailwindcss-animate`, `turbo`, `typescript`, `vitest`
 
 ---
 
@@ -82,8 +82,8 @@ Applications autonomes prêtes à être déployées :
   - `bun run start` : `bun run --bun next start`
   - `bun run lint` : `oxlint .`
   - `bun run lint:fix` : `oxlint --fix .`
-  - `bun run lint:ox` : `oxlint .`
-  - `bun run lint:eslint` : `bun x eslint .`
+  - `bun run format` : `oxfmt .`
+  - `bun run format:check` : `oxfmt --check .`
   - `bun run analyze` : `ANALYZE=true next build`
   - `bun run type-check` : `tsc --noEmit`
   - `bun run clean` : `rm -rf .next .turbo dist`
@@ -93,7 +93,7 @@ Applications autonomes prêtes à être déployées :
 
 - **Dépendances internes & externes :**
   - **Dependencies :** `@googlemaps/js-api-loader`, `@hookform/resolvers`, `@origin-space/image-cropper`, `@radix-ui/react-accordion`, `@radix-ui/react-alert-dialog`, `@radix-ui/react-aspect-ratio`, `@radix-ui/react-avatar`, `@radix-ui/react-checkbox`, `@radix-ui/react-collapsible`, `@radix-ui/react-context-menu`, `@radix-ui/react-dialog`, `@radix-ui/react-dropdown-menu`, `@radix-ui/react-hover-card`, `@radix-ui/react-label`, `@radix-ui/react-menubar`, `@radix-ui/react-navigation-menu`, `@radix-ui/react-popover`, `@radix-ui/react-progress`, `@radix-ui/react-radio-group`, `@radix-ui/react-scroll-area`, `@radix-ui/react-select`, `@radix-ui/react-separator`, `@radix-ui/react-slider`, `@radix-ui/react-slot`, `@radix-ui/react-switch`, `@radix-ui/react-tabs`, `@radix-ui/react-toggle`, `@radix-ui/react-toggle-group`, `@radix-ui/react-tooltip`, `@rose-griffon/assets`, `@rose-griffon/auth`, `@rose-griffon/db`, `@rose-griffon/patreon-bun`, `@rose-griffon/types`, `@rose-griffon/ui`, `@sentry/nextjs`, `@stripe/stripe-js`, `@supabase/ssr`, `@supabase/supabase-js`, `@tanstack/query-sync-storage-persister`, `@tanstack/react-query`, `@tanstack/react-query-persist-client`, `@tanstack/react-table`, `@tiptap/core`, `@tiptap/extension-placeholder`, `@tiptap/starter-kit`, `@types/nodemailer`, `@types/pg`, `@types/pica`, `@vercel/analytics`, `@vercel/edge-config`, `@vercel/speed-insights`, `better-auth`, `browser-image-compression`, `class-variance-authority`, `clsx`, `cmdk`, `date-fns`, `discord-api-types`, `discord.js`, `embla-carousel-react`, `googleapis`, `input-otp`, `lucide-react`, `motion`, `next`, `nodemailer`, `pg`, `pica`, `react`, `react-day-picker`, `react-dom`, `react-dropzone`, `react-easy-crop`, `react-hook-form`, `react-icons`, `react-quill-new`, `react-resizable-panels`, `react-tweet`, `react-twitch-embed`, `recharts`, `schema-dts`, `sonner`, `stripe`, `swr`, `tailwind-merge`, `tw-animate-css`, `vaul`, `zod`, `zustand`
-  - **DevDependencies :** `@next/bundle-analyzer`, `@next/eslint-plugin-next`, `@rose-griffon/config`, `@tailwindcss/postcss`, `@testing-library/jest-dom`, `@testing-library/react`, `@types/google.maps`, `@types/node`, `@types/react`, `@types/react-dom`, `@vitejs/plugin-react`, `eslint`, `eslint-config-next`, `eslint-plugin-better-tailwindcss`, `eslint-plugin-jsx-a11y`, `eslint-plugin-oxlint`, `eslint-plugin-react-compiler`, `jsdom`, `oxlint`, `shadcn`, `sharp`, `tailwindcss`, `typescript`, `vitest`
+  - **DevDependencies :** `@next/bundle-analyzer`, `@rose-griffon/config`, `@tailwindcss/postcss`, `@testing-library/jest-dom`, `@testing-library/react`, `@types/google.maps`, `@types/node`, `@types/react`, `@types/react-dom`, `@vitejs/plugin-react`, `jsdom`, `oxlint`, `shadcn`, `sharp`, `tailwindcss`, `typescript`, `vitest`
 
 ---
 

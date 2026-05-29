@@ -1,5 +1,4 @@
 import { createSupabaseServiceClient } from "@rose-griffon/db/service";
-import { readFileSync, existsSync } from "node:fs";
 import { join } from "node:path";
 
 interface MediaItem {
@@ -27,7 +26,7 @@ async function translateWithGoogle(text: string, from: string, to: string): Prom
 		const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=${from}&tl=${to}&dt=t&q=${encodeURIComponent(text)}`;
 		const res = await fetch(url);
 		if (res.ok) {
-			const data = await res.json() as any;
+			const data = (await res.json()) as any;
 			if (data && data[0]) {
 				return data[0].map((x: any) => x[0]).join("");
 			}
@@ -123,22 +122,23 @@ export async function processTweets() {
 	// Load Glossary for corrections
 	let glossary: any = null;
 	const glossaryPath = join(process.cwd(), "data", "glossary.json");
-	if (existsSync(glossaryPath)) {
+	const glossaryFile = Bun.file(glossaryPath);
+	if (await glossaryFile.exists()) {
 		try {
-			glossary = JSON.parse(readFileSync(glossaryPath, "utf-8"));
+			glossary = await glossaryFile.json();
 			console.log(`[Glossary] Loaded glossary with ${glossary._meta?.counts?.total || 0} entries.`);
 		} catch (e) {
 			console.error("[Glossary] Failed to parse glossary.json:", e);
 		}
 	} else {
-		console.warn("[Glossary] glossary.json not found. Translation will proceed without glossary corrections.");
+		console.warn(
+			"[Glossary] glossary.json not found. Translation will proceed without glossary corrections."
+		);
 	}
 
 	// Fetch all tweets
 	console.log("[DB] Fetching tweets...");
-	const { data: tweets, error: fetchErr } = await supabase
-		.from("tweets")
-		.select("*");
+	const { data: tweets, error: fetchErr } = await supabase.from("tweets").select("*");
 
 	if (fetchErr) {
 		console.error("[DB] Failed to fetch tweets:", fetchErr);
@@ -161,7 +161,10 @@ export async function processTweets() {
 
 				if (entry.ja && entry.ja.trim()) {
 					// Clean ja from furigana / brackets
-					const cleanJa = entry.ja.split(" ")[0].replaceAll(/[\[\]]/g, "").trim();
+					const cleanJa = entry.ja
+						.split(" ")[0]
+						.replaceAll(/[\[\]]/g, "")
+						.trim();
 					if (cleanJa.length > 1) {
 						jpToFrMap.set(cleanJa, frVal);
 					}
@@ -316,11 +319,18 @@ export async function processTweets() {
 					const isJa = containsJapanese(originalText);
 					const sourceLang = isJa ? "ja" : "en";
 					const replacements = isJa ? jpReplacements : enReplacements;
-					let translated = await translateWithGlossary(originalText, sourceLang, "fr", replacements);
+					let translated = await translateWithGlossary(
+						originalText,
+						sourceLang,
+						"fr",
+						replacements
+					);
 
 					translation = translated;
 					needsUpdate = true;
-					console.log(`[Translation] Translated: "${originalText.slice(0, 40)}..." -> "${translation.slice(0, 40)}..."`);
+					console.log(
+						`[Translation] Translated: "${originalText.slice(0, 40)}..." -> "${translation.slice(0, 40)}..."`
+					);
 				}
 			}
 
@@ -329,14 +339,16 @@ export async function processTweets() {
 			if (!category) {
 				console.log(`[Classification] Classifying tweet...`);
 				const lowerText = originalText.toLowerCase() + " " + (translation || "").toLowerCase();
-				
+
 				if (/leak|rumeur|leaké|corocoro leak|scans corocoro|famitsu leak/i.test(lowerText)) {
 					category = "leak";
 				} else if (/patch|version|mise à jour|maj|patch note|ver\.|ver_/i.test(lowerText)) {
 					category = "patch-note";
 				} else if (/fan|communauté|fan-art|dessin|concours|création/i.test(lowerText)) {
 					category = "fan-content";
-				} else if (/trailer|pv|vidéo|scan|média|teaser|illustration|image|screenshot/i.test(lowerText)) {
+				} else if (
+					/trailer|pv|vidéo|scan|média|teaser|illustration|image|screenshot/i.test(lowerText)
+				) {
 					category = "media";
 				} else {
 					category = "news";
