@@ -39,6 +39,16 @@ const typeDefs = `
     image: String
     variants: [CharacterVariant]
     sheetData: JSON
+    auras: [Aura]
+  }
+
+  type Tweet {
+    id: ID!
+    text: String
+    createdAt: String
+    authorUsername: String
+    authorName: String
+    media: JSON
   }
 
   type Item {
@@ -82,10 +92,28 @@ const typeDefs = `
     skills(page: Int, limit: Int, q: String, category: String, element: String): [Skill]
     skill(id: ID!): Skill
     auras(page: Int, limit: Int, q: String, element: String, typeSlug: String!): [Aura]
+    tweets(limit: Int): [Tweet]
+    tweet(id: ID!): Tweet
   }
 `;
 
 const resolvers = {
+	Character: {
+		auras: async (c: any) => {
+			const paramId = c.variants?.[0]?.charaParamId || c.id;
+			const results = await wikiService.getCharacterAuras(c.id, paramId);
+			return results.map((a: any) => ({
+				id: a.id,
+				name: a.name,
+				passive: null,
+				hissatsu: null,
+				element: a.element?.fr || a.element?.en,
+				image: a.imageUrl,
+				type: a.type,
+				sheetData: null,
+			}));
+		},
+	},
 	Query: {
 		auras: async (_: any, args: any) => {
 			const { data } = await wikiService.getAurasList(args);
@@ -191,6 +219,29 @@ const resolvers = {
 				tension: s.consumeTp,
 				image: s.image,
 				sheetData: s.sheetData,
+			}));
+		},
+		tweet: async (_: any, { id }: any) => {
+			const t = await wikiService.getTweetById(id);
+			if (!t) return null;
+			return {
+				id: t.id,
+				text: t.text,
+				createdAt: t.created_at,
+				authorUsername: t.author_username,
+				authorName: t.author_name,
+				media: t.media,
+			};
+		},
+		tweets: async (_: any, { limit }: any) => {
+			const data = await wikiService.getTweets(limit || 20);
+			return data.map((t: any) => ({
+				id: t.id,
+				text: t.text,
+				createdAt: t.created_at,
+				authorUsername: t.author_username,
+				authorName: t.author_name,
+				media: t.media,
 			}));
 		},
 	},
