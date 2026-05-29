@@ -20,16 +20,17 @@ program
 	.description("CLI d'Azalée pour Inazuma Eleven: Victory Road")
 	.version("1.0.0");
 
-// Helper ANSI colors for console styling
+// Helper ANSI colors for console styling (disabled automatically if not in a TTY or if NO_COLOR is set)
+const isColorEnabled = process.stdout.isTTY && !process.env.NO_COLOR;
 const colors = {
-	reset: "\x1b[0m",
-	green: "\x1b[32m",
-	yellow: "\x1b[33m",
-	blue: "\x1b[34m",
-	magenta: "\x1b[35m",
-	cyan: "\x1b[36m",
-	red: "\x1b[31m",
-	bold: "\x1b[1m",
+	reset: isColorEnabled ? "\x1b[0m" : "",
+	green: isColorEnabled ? "\x1b[32m" : "",
+	yellow: isColorEnabled ? "\x1b[33m" : "",
+	blue: isColorEnabled ? "\x1b[34m" : "",
+	magenta: isColorEnabled ? "\x1b[35m" : "",
+	cyan: isColorEnabled ? "\x1b[36m" : "",
+	red: isColorEnabled ? "\x1b[31m" : "",
+	bold: isColorEnabled ? "\x1b[1m" : "",
 };
 
 // ─── UTILS ───────────────────────────────────────────────────────────
@@ -211,11 +212,17 @@ program
 program
 	.command("search <query>")
 	.description("Fuzzy search ultra-rapide sur l'ensemble des entités du jeu (Inagle)")
-	.action(async (query: string) => {
-		console.log(`${colors.cyan}Recherche Inagle pour : "${query}"...${colors.reset}`);
+	.option("-j, --json", "Format de sortie en JSON brute")
+	.action(async (query: string, options: { json?: boolean }) => {
 		const svc = await createInagleService();
 		const results = svc.search.global(query, { limit: 15 });
 
+		if (options.json) {
+			console.log(JSON.stringify(results, null, 2));
+			return;
+		}
+
+		console.log(`${colors.cyan}Recherche Inagle pour : "${query}"...${colors.reset}`);
 		if (results.length === 0) {
 			console.log(`${colors.yellow}Aucun résultat trouvé.${colors.reset}`);
 			return;
@@ -314,17 +321,41 @@ program
 program
 	.command("audit")
 	.description("Audit et diagnostics sur l'intégrité des traductions et de la base de données")
-	.action(async () => {
-		console.log(`${colors.cyan}Démarrage de l'audit de base de données...${colors.reset}`);
+	.option("-j, --json", "Format de sortie en JSON brute")
+	.action(async (options: { json?: boolean }) => {
 		const svc = await createInagleService();
 		const chars = svc.characters.all();
 		const skills = svc.skills.all();
 
-		console.log(`\n${colors.bold}${colors.blue}Diagnostics Characters :${colors.reset}`);
 		const missingName = chars.filter((c) => !c.names?.fr && !c.names?.en);
 		const missingImg = chars.filter((c) => !c.image_url && !c.zukan_hash);
 		const missingStats = chars.filter((c) => !c.stats || Object.keys(c.stats).length === 0);
+		const missingSkillName = skills.filter((s) => !s.name_FR && !s.name_EN);
 
+		if (options.json) {
+			console.log(
+				JSON.stringify(
+					{
+						characters: {
+							total: chars.length,
+							missingNameFrEn: missingName.length,
+							missingImage: missingImg.length,
+							missingStats: missingStats.length,
+						},
+						skills: {
+							total: skills.length,
+							missingNameFrEn: missingSkillName.length,
+						},
+					},
+					null,
+					2
+				)
+			);
+			return;
+		}
+
+		console.log(`${colors.cyan}Démarrage de l'audit de base de données...${colors.reset}`);
+		console.log(`\n${colors.bold}${colors.blue}Diagnostics Characters :${colors.reset}`);
 		console.log(`- Total Characters : ${chars.length}`);
 		console.log(
 			`- Sans nom FR/EN   : ${missingName.length === 0 ? colors.green + "0 (Excellent)" : colors.red + missingName.length} ${colors.reset}`
@@ -337,7 +368,6 @@ program
 		);
 
 		console.log(`\n${colors.bold}${colors.blue}Diagnostics Skills/Techniques :${colors.reset}`);
-		const missingSkillName = skills.filter((s) => !s.name_FR && !s.name_EN);
 		console.log(`- Total Skills     : ${skills.length}`);
 		console.log(
 			`- Sans nom FR/EN   : ${missingSkillName.length === 0 ? colors.green + "0 (Excellent)" : colors.red + missingSkillName.length} ${colors.reset}`
