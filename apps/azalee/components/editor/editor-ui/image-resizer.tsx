@@ -147,6 +147,7 @@ export function ImageResizer({
 			document.addEventListener("pointerup", handlePointerUp);
 		}
 	};
+	/* eslint-disable react-compiler/react-compiler -- imperative pointer-event handler mutates positioningRef.current intentionally */
 	const handlePointerMove = (event: PointerEvent) => {
 		const image = imageRef.current;
 		const positioning = positioningRef.current;
@@ -187,6 +188,7 @@ export function ImageResizer({
 			}
 		}
 	};
+	/* eslint-enable react-compiler/react-compiler */
 	const handlePointerUp = () => {
 		const image = imageRef.current;
 		const positioning = positioningRef.current;

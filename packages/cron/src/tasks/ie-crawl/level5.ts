@@ -32,7 +32,9 @@ export async function crawlLevel5(): Promise<{ success: boolean; error?: string 
 	console.log("[Crawl Level5] Démarrage du crawl des actualités LEVEL-5...");
 
 	try {
-		const page = (await Browser.newPage({ profile: "stealth" })) as Page;
+		const page = (await Browser.newPage({
+			profile: (process.env.BXC_PROFILE as "stealth" | "max" | "ghost" | "static" | "fast" | "http") || "stealth",
+		})) as Page;
 
 		console.log("[Crawl Level5] Navigation vers https://www.level5.co.jp/news/");
 		await safeGoto(page, "https://www.level5.co.jp/news/");

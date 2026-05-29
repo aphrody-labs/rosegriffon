@@ -39,7 +39,9 @@ export async function crawlLevel5Blog(): Promise<{
 	);
 
 	try {
-		const page = (await Browser.newPage({ profile: "stealth" })) as Page;
+		const page = (await Browser.newPage({
+			profile: (process.env.BXC_PROFILE as "stealth" | "max" | "ghost" | "static" | "fast" | "http") || "stealth",
+		})) as Page;
 		const articles: BlogArticle[] = [];
 
 		// 1. Scraping du Blog Japonais, Anglais et Chinois (Traditionnel & Simplifié)
