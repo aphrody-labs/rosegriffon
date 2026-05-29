@@ -28,20 +28,6 @@ export interface StaffPhotoSyncReport {
   durationMs: number;
 }
 
-function avatarUrl(
-  user: { id: string; avatar: string | null; discriminator: string },
-  size = 256,
-): string {
-  if (user.avatar) {
-    const ext = user.avatar.startsWith("a_") ? "gif" : "webp";
-    return `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.${ext}?size=${size}`;
-  }
-  const idx =
-    user.discriminator === "0"
-      ? Number(BigInt(user.id) >> 22n) % 6
-      : Number(user.discriminator) % 5;
-  return `https://cdn.discordapp.com/embed/avatars/${idx}.png`;
-}
 
 export async function syncStaffPhotos(client: Client): Promise<StaffPhotoSyncReport> {
   const start = Date.now();
@@ -60,10 +46,7 @@ export async function syncStaffPhotos(client: Client): Promise<StaffPhotoSyncRep
     try {
       // discord.js fetch avec cache + rate-limit auto + retry intégré
       const user = await client.users.fetch(row.discord_user_id, { force: true });
-      const newWebp = avatarUrl(
-        { id: user.id, avatar: user.avatar, discriminator: user.discriminator },
-        256,
-      );
+      const newWebp = user.displayAvatarURL({ size: 256, extension: "webp" });
 
       if (row.current_image === newWebp) {
         unchanged++;
