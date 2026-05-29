@@ -9,8 +9,9 @@ export const logger = {
 	/**
 	 * Debug détaillé (seulement en dev avec flag debug)
 	 */
-	debug: (_message: string, ..._args: unknown[]) => {
+	debug: (message: string, ...args: unknown[]) => {
 		if (isDev && process.env.NEXT_PUBLIC_DEBUG === "true") {
+			console.info(`🐛 ${message}`, ...args);
 		}
 	},
 
@@ -24,16 +25,18 @@ export const logger = {
 	/**
 	 * Log informatif (seulement en dev)
 	 */
-	info: (_message: string, ..._args: unknown[]) => {
+	info: (message: string, ...args: unknown[]) => {
 		if (isDev) {
+			console.info(`ℹ️  ${message}`, ...args);
 		}
 	},
 
 	/**
 	 * Log de succès (seulement en dev)
 	 */
-	success: (_message: string, ..._args: unknown[]) => {
+	success: (message: string, ...args: unknown[]) => {
 		if (isDev) {
+			console.info(`✅ ${message}`, ...args);
 		}
 	},
 

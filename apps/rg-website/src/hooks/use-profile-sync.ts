@@ -58,6 +58,7 @@ export function useProfileSync({ userId, onProfileChange, enabled = true }: UseP
 						},
 						(payload) => {
 							if (process.env.NODE_ENV === "development") {
+								console.info("[useProfileSync] Changement reçu:", payload.eventType);
 							}
 
 							// Appeler le callback si fourni
@@ -74,11 +75,13 @@ export function useProfileSync({ userId, onProfileChange, enabled = true }: UseP
 					)
 					.subscribe((status, err) => {
 						if (process.env.NODE_ENV === "development") {
+							console.info(`[useProfileSync] Statut du canal: ${status}`, err ?? "");
 						}
 
 						switch (status) {
 							case "SUBSCRIBED": {
 								if (process.env.NODE_ENV === "development") {
+									console.info(`[useProfileSync] ✅ Abonné au profil ${userId}`);
 								}
 								break;
 							}
@@ -113,6 +116,7 @@ export function useProfileSync({ userId, onProfileChange, enabled = true }: UseP
 
 							case "CLOSED": {
 								if (process.env.NODE_ENV === "development") {
+									console.info("[useProfileSync] Canal fermé");
 								}
 								break;
 							}
@@ -182,6 +186,7 @@ export function useUpdateProfile() {
 				}
 
 				if (process.env.NODE_ENV === "development") {
+					console.info(`[useUpdateProfile] Mise à jour du profil ${userId}`, updates);
 				}
 
 				const { data, error } = await supabase
@@ -197,6 +202,7 @@ export function useUpdateProfile() {
 				}
 
 				if (process.env.NODE_ENV === "development") {
+					console.info(`[useUpdateProfile] ✅ Profil ${userId} mis à jour`);
 				}
 
 				// Le trigger DB enverra automatiquement la mise à jour à tous les abonnés
