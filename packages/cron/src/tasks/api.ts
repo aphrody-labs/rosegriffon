@@ -7,8 +7,8 @@ export async function triggerPublishScheduled(): Promise<{ success: boolean; err
   if (!secret) {
     return { success: false, error: "La variable d'environnement CRON_SECRET est manquante." };
   }
-  const azaleeUrl = process.env.AZALEE_URL || "https://azalee.rosegriffon.fr";
-  const url = `${azaleeUrl}/api/cron/publish-scheduled`;
+  const apiUrl = process.env.API_URL || "https://api.rosegriffon.fr";
+  const url = `${apiUrl}/api/cron/publish-scheduled`;
 
   console.log(`[Cron API] Déclenchement de la publication programmée (Azalée) : ${url}...`);
   try {
@@ -40,8 +40,8 @@ export async function triggerPatreonRefresh(): Promise<{ success: boolean; error
   if (!secret) {
     return { success: false, error: "La variable d'environnement CRON_SECRET est manquante." };
   }
-  const websiteUrl = process.env.WEBSITE_URL || "https://rosegriffon.fr";
-  const url = `${websiteUrl}/api/cron/patreon-refresh`;
+  const apiUrl = process.env.API_URL || "https://api.rosegriffon.fr";
+  const url = `${apiUrl}/api/cron/patreon-refresh`;
 
   console.log(`[Cron API] Déclenchement du rafraîchissement Patreon (Website) : ${url}...`);
   try {
@@ -73,8 +73,8 @@ export async function triggerPatreonReminders(stage = "announce"): Promise<{ suc
   if (!secret) {
     return { success: false, error: "La variable d'environnement CRON_SECRET est manquante." };
   }
-  const websiteUrl = process.env.WEBSITE_URL || "https://rosegriffon.fr";
-  const url = `${websiteUrl}/api/cron/patreon-reminders?stage=${stage}`;
+  const apiUrl = process.env.API_URL || "https://api.rosegriffon.fr";
+  const url = `${apiUrl}/api/cron/patreon-reminders?stage=${stage}`;
 
   console.log(`[Cron API] Déclenchement des rappels Patreon (${stage}) (Website) : ${url}...`);
   try {
@@ -104,6 +104,8 @@ export async function triggerPatreonReminders(stage = "announce"): Promise<{ suc
 export async function warmCaches(): Promise<{ success: boolean }> {
   const azaleeUrl = process.env.AZALEE_URL || "https://azalee.rosegriffon.fr";
   const websiteUrl = process.env.WEBSITE_URL || "https://rosegriffon.fr";
+  const apiUrl = process.env.API_URL || "https://api.rosegriffon.fr";
+  const cdnUrl = process.env.CDN_URL || "https://cdn.rosegriffon.fr";
 
   const paths = [
     `${azaleeUrl}/`,
@@ -113,6 +115,9 @@ export async function warmCaches(): Promise<{ success: boolean }> {
     `${websiteUrl}/articles`,
     `${websiteUrl}/notre-equipe`,
     `${websiteUrl}/notre-equipe/staff`,
+    `${apiUrl}/health`, // Vérifier l'état de l'API
+    `${cdnUrl}/static/azalee/public/logo-og.png`, // Vérifier que le CDN répond correctement
+    `${cdnUrl}/static/website/public/favicon.ico`,
   ];
 
   console.log("[Cron Cache] Pré-chauffage des caches ISR...");

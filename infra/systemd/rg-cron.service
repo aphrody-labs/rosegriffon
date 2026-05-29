@@ -13,6 +13,8 @@ EnvironmentFile=/home/ubuntu/rg/apps/website/.env.production.local
 Environment=NODE_ENV=production
 Environment=AZALEE_URL=https://azalee.rosegriffon.fr
 Environment=WEBSITE_URL=https://rosegriffon.fr
+Environment=API_URL=https://api.rosegriffon.fr
+Environment=CDN_URL=https://cdn.rosegriffon.fr
 ExecStart=/home/ubuntu/rg/packages/cron/dist/rg-cron
 Restart=on-failure
 RestartSec=10s
