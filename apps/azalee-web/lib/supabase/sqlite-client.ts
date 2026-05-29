@@ -59,9 +59,16 @@ export class SqliteQueryBuilder {
 	private isMaybeSingle: boolean = false;
 	private countOption: string | null = null;
 
+	private needsGrouping: boolean = false;
+
 	constructor(db: Database, table: string) {
 		this.db = db;
-		this.table = table;
+		if (table.endsWith("_clean")) {
+			this.table = table.replace("_clean", "");
+			this.needsGrouping = true;
+		} else {
+			this.table = table;
+		}
 	}
 
 	select(fields: string = "*", options?: { count?: string }) {
@@ -231,6 +238,9 @@ export class SqliteQueryBuilder {
 		if (this.wheres.length > 0) {
 			sql += ` WHERE ${this.wheres.join(" AND ")}`;
 		}
+		if (this.needsGrouping) {
+			sql += ` GROUP BY "name_fr"`;
+		}
 		if (this.orders.length > 0) {
 			sql += ` ORDER BY ${this.orders.join(", ")}`;
 		}
@@ -265,7 +275,9 @@ export class SqliteQueryBuilder {
 	}
 
 	private async executeCount(): Promise<number> {
-		let sql = `SELECT COUNT(*) as count FROM "${this.table}"`;
+		let sql = this.needsGrouping
+			? `SELECT COUNT(DISTINCT "name_fr") as count FROM "${this.table}"`
+			: `SELECT COUNT(*) as count FROM "${this.table}"`;
 		if (this.wheres.length > 0) {
 			sql += ` WHERE ${this.wheres.join(" AND ")}`;
 		}
