@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowLeftRight, Eye, EyeOff, Gamepad2, Loader2 } from "lucide-react";
+import { ArrowLeftRight, Eye, EyeOff, Gamepad2, Loader2, X } from "lucide-react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useLanguage } from "@/components/providers/language-provider";
@@ -66,16 +66,111 @@ export function PlayersClient({
     });
   };
 
+  const removeFilter = (key: string) => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.delete(key);
+    params.delete("page");
+    filterTransition.startTransition(() => {
+      router.replace(`?${params.toString()}`, { scroll: false });
+    });
+  };
+
+  const clearAllFilters = () => {
+    const params = new URLSearchParams(searchParams.toString());
+    const filterKeys = ["element", "position", "rarity", "gender", "playstyle", "series", "team", "role"];
+    filterKeys.forEach((key) => params.delete(key));
+    params.delete("page");
+    filterTransition.startTransition(() => {
+      router.replace(`?${params.toString()}`, { scroll: false });
+    });
+  };
+
+  const getFilterLabel = (key: string, value: string) => {
+    switch (key) {
+      case "element": {
+        if (value === "Fire") return t("wiki.elements.fire");
+        if (value === "Wind") return t("wiki.elements.wind");
+        if (value === "Forest") return t("wiki.elements.forest");
+        if (value === "Mountain") return t("wiki.elements.mountain");
+        return value;
+      }
+      case "position": {
+        if (value === "GK") return t("wiki.positions.gk");
+        if (value === "DF") return t("wiki.positions.df");
+        if (value === "MF") return t("wiki.positions.mf");
+        if (value === "FW") return t("wiki.positions.fw");
+        return value;
+      }
+      case "gender": {
+        return value === "1" ? t("wiki.genders.male") : t("wiki.genders.female");
+      }
+      case "playstyle": {
+        if (value === "Bond") return t("wiki.playstyles.bond");
+        if (value === "Counter") return t("wiki.playstyles.counter");
+        if (value === "Breach") return t("wiki.playstyles.breach");
+        if (value === "Rough Play") return t("wiki.playstyles.rough_play");
+        return value;
+      }
+      case "role": {
+        return value === "Coordinator" ? "Coordinateur" : "Entraîneur";
+      }
+      case "team": {
+        return teams?.find((t) => t.id === value)?.name || value;
+      }
+      default:
+        return value;
+    }
+  };
+
+  const filterKeys = ["element", "position", "rarity", "gender", "playstyle", "series", "team", "role"];
+  const activeFilters = filterKeys
+    .map((key) => {
+      const value = searchParams.get(key);
+      if (!value) return null;
+      return { key, value, label: getFilterLabel(key, value) };
+    })
+    .filter(Boolean) as { key: string; value: string; label: string }[];
+
   return (
     <FilterTransitionContext.Provider value={filterTransition}>
       <div className="space-y-6">
-        <div className="space-y-4">
-          <WikiSearchToolbar
-            placeholder={t("wiki.players.search_placeholder")}
-            filterKeys={["element", "position", "rarity", "gender", "playstyle", "series", "team", "role"]}
-            showFilters={false}
-          />
-          <CharacterFilters teams={teams} />
+        <div className="flex flex-col gap-3">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+            <WikiSearchToolbar
+              placeholder={t("wiki.players.search_placeholder")}
+              filterKeys={filterKeys}
+              showFilters={true}
+              containerClassName="max-w-md w-full"
+            >
+              <CharacterFilters teams={teams} />
+            </WikiSearchToolbar>
+          </div>
+
+          {activeFilters.length > 0 && (
+            <div className="flex flex-wrap items-center gap-1.5 px-1 animate-in fade-in slide-in-from-top-1 duration-200">
+              <span className="text-[11px] font-bold text-on-surface-variant/60 uppercase tracking-wider mr-1">
+                Filtres actifs :
+              </span>
+              {activeFilters.map((filter) => (
+                <button
+                  key={filter.key}
+                  onClick={() => removeFilter(filter.key)}
+                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-secondary-container text-on-secondary-container hover:bg-secondary-container/80 transition-colors"
+                >
+                  <span>{filter.label}</span>
+                  <X size={12} className="opacity-75 hover:opacity-100" />
+                </button>
+              ))}
+              {activeFilters.length > 1 && (
+                <button
+                  onClick={clearAllFilters}
+                  className="text-[11px] font-bold text-primary hover:text-primary/80 transition-colors ml-1 px-1 py-0.5 rounded hover:bg-primary/5"
+                >
+                  Tout effacer
+                </button>
+              )}
+            </div>
+          )}
         </div>
 
         <div className="flex flex-wrap items-center gap-2 md:gap-3 text-xs font-medium text-on-surface-variant px-1">

@@ -757,12 +757,26 @@ export const wikiService = {
 			);
 		}
 		if (params.element) {
-			// Filter by exact text code ("Fire", "Wind")
-			query = query.eq("element", params.element);
+			// Filter by exact text code ("Fire", "Wind"). DB columns are in French.
+			const elementMap: Record<string, string> = {
+				Fire: "Feu",
+				Wind: "Vent",
+				Forest: "Forêt",
+				Mountain: "Montagne",
+			};
+			const dbElement = elementMap[params.element] || params.element;
+			query = query.eq("element", dbElement);
 		}
 		if (params.position) {
-			// Filter by exact text code ("GK", "FW")
-			query = query.eq("position", params.position);
+			// Filter by exact text code ("GK", "FW"). DB columns are in French.
+			const positionMap: Record<string, string> = {
+				GK: "Gardien",
+				DF: "Défenseur",
+				MF: "Milieu",
+				FW: "Attaquant",
+			};
+			const dbPosition = positionMap[params.position] || params.position;
+			query = query.eq("position", dbPosition);
 		}
 		if (params.rarity) {
 			query = query.eq("rarity_label", params.rarity);
