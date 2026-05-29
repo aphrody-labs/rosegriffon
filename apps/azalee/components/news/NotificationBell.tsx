@@ -6,8 +6,9 @@ import { getNotifications, getUnreadCount, markAllAsRead } from "@/app/actions/n
 import { NotificationItem } from "@/components/news/NotificationItem";
 import { useAuth } from "@/components/providers/AuthProvider";
 import { Popover, PopoverContent, PopoverTrigger } from "@rose-griffon/ui";
+import { cn } from "@/lib/utils";
 
-export function NotificationBell() {
+export function NotificationBell({ className }: { className?: string }) {
   const { user } = useAuth();
   const [unreadCount, setUnreadCount] = useState(0);
   const [notifications, setNotifications] = useState<Awaited<ReturnType<typeof getNotifications>>>(
@@ -52,10 +53,13 @@ export function NotificationBell() {
     <Popover open={open} onOpenChange={handleOpen}>
       <PopoverTrigger asChild>
         <button
-          className="relative size-10 rounded-full flex items-center justify-center hover:bg-surface-container-high transition-colors"
+          className={cn(
+            "relative size-12 md:size-10 rounded-full flex items-center justify-center hover:bg-surface-container-high transition-colors",
+            className,
+          )}
           aria-label="Notifications"
         >
-          <Bell className="size-5 text-on-surface-variant" />
+          <Bell className="size-6 md:size-5 text-on-surface-variant" />
           {unreadCount > 0 && (
             <span className="absolute top-0.5 right-0.5 size-4 rounded-full bg-error text-on-error text-[10px] font-bold flex items-center justify-center">
               {unreadCount > 9 ? "9+" : unreadCount}

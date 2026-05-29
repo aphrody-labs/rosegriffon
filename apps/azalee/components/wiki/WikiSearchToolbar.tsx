@@ -86,7 +86,7 @@ export function WikiSearchToolbar({
       variant={activeFilterCount > 0 ? "secondary" : "ghost"}
       size="sm"
       className={cn(
-        "rounded-full gap-2 px-4 transition-all h-9",
+        "rounded-full gap-2 px-4 transition-all h-10 md:h-9",
         activeFilterCount > 0 && "font-bold",
       )}
     >
@@ -138,7 +138,7 @@ export function WikiSearchToolbar({
             size="icon"
             onClick={handleClear}
             aria-label="Effacer la recherche"
-            className="size-8 rounded-full text-on-surface-variant hover:bg-surface-container-highest"
+            className="size-10 md:size-8 rounded-full text-on-surface-variant hover:bg-surface-container-highest"
           >
             <X size={18} aria-hidden="true" />
           </Button>
