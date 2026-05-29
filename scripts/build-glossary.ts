@@ -238,6 +238,7 @@ export async function main() {
 	console.log(`- Teams: ${glossary._meta.counts.teams}`);
 	console.log(`- Items: ${glossary._meta.counts.items}`);
 	console.log(`- Terms: ${glossary._meta.counts.terms}`);
+	return glossary._meta.counts;
 }
 
 if (import.meta.main) {
