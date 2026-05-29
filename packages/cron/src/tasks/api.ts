@@ -134,3 +134,45 @@ export async function warmCaches(): Promise<{ success: boolean }> {
 	}
 	return { success: true };
 }
+
+export async function triggerGithubPublishWorkflow(): Promise<{ success: boolean; error?: string }> {
+	const token = process.env.GITHUB_TOKEN || process.env.NODE_AUTH_TOKEN;
+	if (!token) {
+		return { success: false, error: "La variable d'environnement GITHUB_TOKEN ou NODE_AUTH_TOKEN est manquante." };
+	}
+
+	const owner = "rose-griffon";
+	const repo = "rg";
+	const workflowId = "publish.yml";
+	const url = `https://api.github.com/repos/${owner}/${repo}/actions/workflows/${workflowId}/dispatches`;
+
+	console.log(`[Cron API] Déclenchement du workflow GitHub Actions : ${workflowId}...`);
+	try {
+		const res = await fetch(url, {
+			method: "POST",
+			headers: {
+				Accept: "application/vnd.github+json",
+				Authorization: `Bearer ${token}`,
+				"X-GitHub-Api-Version": "2022-11-28",
+				"User-Agent": "Rose-Griffon-Cron",
+			},
+			body: JSON.stringify({
+				ref: "vps", // Branche de production sur le VPS
+			}),
+		});
+
+		if (res.status === 204) {
+			console.log("[Cron API] Workflow GitHub Actions déclenché avec succès (204 No Content).");
+			return { success: true };
+		} else {
+			const text = await res.text();
+			const err = `HTTP ${res.status}: ${text}`;
+			console.error("[Cron API] Échec du déclenchement du workflow GitHub Actions :", err);
+			return { success: false, error: err };
+		}
+	} catch (err: any) {
+		console.error("[Cron API] Erreur lors du déclenchement du workflow GitHub Actions :", err);
+		return { success: false, error: err.message || String(err) };
+	}
+}
+
