@@ -1,0 +1,16 @@
+{
+	"extends": "../config/tsconfig-base.json",
+	"compilerOptions": {
+		"outDir": "dist",
+		"noEmit": true,
+		"declaration": false,
+		"strict": false,
+		"strictNullChecks": false,
+		"noImplicitAny": false,
+		"noImplicitOverride": false,
+		"noUncheckedIndexedAccess": false,
+		"types": ["bun"]
+	},
+	"include": ["src/**/*.ts"],
+	"exclude": ["node_modules", "dist"]
+}

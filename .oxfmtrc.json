@@ -1,0 +1,11 @@
+{
+	"ignorePatterns": [
+		"**/*.generated.ts",
+		"**/dist/**",
+		"**/.next/**",
+		"**/.turbo/**",
+		"**/node_modules/**",
+		"**/data/**",
+		"**/*.min.js"
+	]
+}

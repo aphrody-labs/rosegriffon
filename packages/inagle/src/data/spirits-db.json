@@ -1,0 +1,2990 @@
+[
+  {
+    "id": "0x1D68BDEF",
+    "name": "Lancelot, le spadassin héroïque",
+    "description": "Le spadassin héroïque, un esprit du feu.\\nAssaille le but adverse l'épée en avant.",
+    "kp": 30,
+    "effect": {
+      "value": 40
+    }
+  },
+  {
+    "id": "0x04738CAE",
+    "name": "Maestro Virtuoso",
+    "description": "Maestro Virtuoso, un esprit de la forêt. Chef\\nd'orchestre des victoires de l'équipe.",
+    "kp": 30,
+    "effect": {
+      "value": 40
+    }
+  },
+  {
+    "id": "0x4B321A69",
+    "name": "Apollon, dieu du soleil",
+    "description": "Le dieu du soleil, un esprit du feu. Ses\\ntirs emplis d'énergie touchent au sublime.",
+    "kp": 30,
+    "effect": {
+      "value": 40
+    }
+  },
+  {
+    "id": "0x52292B28",
+    "name": "Musashi, le samouraï vaillant",
+    "description": "Le samouraï vaillant, un esprit de la\\nmontagne. Maître d'armes sans égal.",
+    "kp": 30,
+    "effect": {
+      "value": 40
+    }
+  },
+  {
+    "id": "0xE7875565",
+    "name": "Chioné, reine des neiges",
+    "description": "La nymphe des neiges, un esprit du vent.\\nGèle les buts adverses d'un souffle glacé.",
+    "kp": 30,
+    "effect": {
+      "value": 40
+    }
+  },
+  {
+    "id": "0x2E9CB55A",
+    "name": "Surt, géant du feu",
+    "description": "Le géant du feu, un esprit du feu. Né des\\nflammes, son poing est dévastateur.",
+    "kp": 30,
+    "effect": {
+      "value": 40
+    }
+  },
+  {
+    "id": "0x1CAAD7D8",
+    "name": "Faucon de tonnerre surnaturel",
+    "description": "Faucon de tonnerre surnaturel, un esprit\\ndu vent. Se défend toujours bec et ongles.",
+    "kp": 30,
+    "effect": {
+      "value": 40
+    }
+  },
+  {
+    "id": "0x05B1E699",
+    "name": "Poséidon, dieu des sept mers",
+    "description": "Le dieu des sept mers, un esprit du vent.\\nArmé de son trident, rien ne l'arrête.",
+    "kp": 30,
+    "effect": {
+      "value": 40
+    }
+  },
+  {
+    "id": "0x4AF0705E",
+    "name": "Trickster, Grand magicien",
+    "description": "Le grand magicien, un esprit de la forêt.\\nDispose de plus d'un tour dans son sac.",
+    "kp": 30,
+    "effect": {
+      "value": 40
+    }
+  },
+  {
+    "id": "0xFF5E0E13",
+    "name": "Cavalier blanc, destrier cuirassé",
+    "description": "Le destrier cuirassé, un esprit de la montagne.\\nSe rue sur le but adverse à corps perdu.",
+    "kp": 30,
+    "effect": {
+      "value": 40
+    }
+  },
+  {
+    "id": "0x1EEC6981",
+    "name": "Reine blanche, enchanteresse royale",
+    "description": "L'enchanteresse royale, un esprit de la forêt.\\nSes tirs d'énergie sont redoutables.",
+    "kp": 30,
+    "effect": {
+      "value": 40
+    }
+  },
+  {
+    "id": "0x48B6CE07",
+    "name": "Arthur, le paladin sacré",
+    "description": "Le paladin sacré, un esprit du néant. Peut\\nannihiler toute vie d'un seul coup d'épée.",
+    "kp": 30,
+    "effect": {
+      "value": 40
+    }
+  },
+  {
+    "id": "0xE403810B",
+    "name": "Fléau obscur, seigneur des ténèbres",
+    "description": "Le seigneur des ténèbres, un esprit de\\nla forêt. Sa hache ne sert pas qu'à déboiser.",
+    "kp": 30,
+    "effect": {
+      "value": 40
+    }
+  },
+  {
+    "id": "0xFD18B04A",
+    "name": "Astral, dragon de l'aube",
+    "description": "Le dragon de l'aube, un esprit du vent.\\nSon souffle rase tout sur son passage.",
+    "kp": 30,
+    "effect": {
+      "value": 40
+    }
+  },
+  {
+    "id": "0x2D186134",
+    "name": "Griffon, seigneur du règne animal",
+    "description": "Le seigneur du règne animal, un esprit du\\nfeu. Peut matérialiser un sabre ardent.",
+    "kp": 30,
+    "effect": {
+      "value": 40
+    }
+  },
+  {
+    "id": "0x34035075",
+    "name": "Corvus, le corbeau des ténèbres",
+    "description": "Le corbeau des ténèbres, un esprit de la\\nmontagne. Ses puissants tirs rasent le sol.",
+    "kp": 30,
+    "effect": {
+      "value": 40
+    }
+  },
+  {
+    "id": "0x063532F7",
+    "name": "Archi Pégase, le cheval des dieux",
+    "description": "Le cheval des dieux, un esprit du vent.\\nSème la tempête en battant des ailes.",
+    "kp": 30,
+    "effect": {
+      "value": 40
+    }
+  },
+  {
+    "id": "0x552083F4",
+    "name": "Neptune, seigneur des mers",
+    "description": "Le seigneur des mers, un esprit du vent.\\nPeut déchaîner les océans en un instant.",
+    "kp": 30,
+    "effect": {
+      "value": 40
+    }
+  },
+  {
+    "id": "0x4DF9D882",
+    "name": "Pendragon, le suprême chevalier mystérieux",
+    "description": "Le suprême chevalier mystérieux, un\\nesprit du néant. Sa colère est sans fin.",
+    "kp": 30,
+    "effect": {
+      "value": 40
+    }
+  },
+  {
+    "id": "0x32C8929E",
+    "name": "Fenghuang, le roi des cieux",
+    "description": "Le roi des cieux, un esprit du feu. Il n'a\\npas d'égal en matière de combat aérien.",
+    "kp": 30,
+    "effect": {
+      "value": 40
+    }
+  },
+  {
+    "id": "0x00FEF01C",
+    "name": "Athéna, déesse de la guerre",
+    "description": "La déesse de la guerre, un esprit du vent.\\nOn la dit sévère, mais juste.",
+    "kp": 30,
+    "effect": {
+      "value": 40
+    }
+  },
+  {
+    "id": "0xFA111896",
+    "name": "Zodiac, prince du plan astral",
+    "description": "Le prince du plan astral, un esprit de la\\nmontagne. Il nourrit de noirs desseins.",
+    "kp": 30,
+    "effect": {
+      "value": 40
+    }
+  },
+  {
+    "id": "0x1827AB6A",
+    "name": "Ombre de plasma TIR, monstre artificiel",
+    "description": "Le monstre artificiel, un esprit du feu.\\nBinaire, mais redoutable.",
+    "kp": 30,
+    "effect": {
+      "value": 40
+    }
+  },
+  {
+    "id": "0x7C4B6E6E",
+    "name": "Sir Lapin, chevalier supersonique",
+    "description": "Le chevalier supersonique, un esprit de\\nla forêt. Son intelligence est un atout.",
+    "kp": 30,
+    "effect": {
+      "value": 40
+    }
+  },
+  {
+    "id": "0xE2C843E0",
+    "name": "Les amoureux ♀, esprits unis par le destin",
+    "description": "Une âme contrariée, esprit du vent. Ne dévoile\\nson plein potentiel qu'aux côtés de son amoureux.",
+    "kp": 30,
+    "effect": {
+      "value": 40
+    }
+  },
+  {
+    "id": "0x214D8ED5",
+    "name": "Evera, seigneur des démons",
+    "description": "Le seigneur des démons, un esprit de la\\nmontagne. Un guerrier dangereux et instable.",
+    "kp": 30,
+    "effect": {
+      "value": 40
+    }
+  },
+  {
+    "id": "0xE8566EEA",
+    "name": "Les amoureux ♂, esprits unis par le destin",
+    "description": "Une âme contrariée, un esprit de la montagne. Ne dévoile son plein\\npotentiel qu'aux côtés de son amoureuse.",
+    "kp": 30,
+    "effect": {
+      "value": 40
+    }
+  },
+  {
+    "id": "0x42512CCC",
+    "name": "Pégase, l'étalon ailé",
+    "description": "L'étalon ailé, un esprit du vent. Balaie les\\nadversaires de ses ailes puissantes.",
+    "kp": 30,
+    "effect": {
+      "value": 40
+    }
+  },
+  {
+    "id": "0x8A88A6C4",
+    "name": "Superstrato, guerrier hypersonique",
+    "description": "Le guerrier hypersonique, un esprit du\\nvent. Sa vitesse est incomparable.",
+    "kp": 30,
+    "effect": {
+      "value": 40
+    }
+  },
+  {
+    "id": "0x27FF83FF",
+    "name": "Garas, maîtresse des illusions",
+    "description": "La maîtresse des illusions, un esprit de\\nla forêt. Fige l'ennemi et passe à l'attaque.",
+    "kp": 30,
+    "effect": {
+      "value": 40
+    }
+  },
+  {
+    "id": "0x9251FDB2",
+    "name": "Blanc, guerrier de la ligne de front",
+    "description": "Le guerrier de la ligne de front, un esprit\\ndu feu. Petit mais costaud.",
+    "kp": 30,
+    "effect": {
+      "value": 40
+    }
+  },
+  {
+    "id": "0x3D6066D0",
+    "name": "Noir, guerrier de la ligne de front",
+    "description": "Le guerrier de la ligne de front, un esprit\\ndu feu. Petit mais costaud.",
+    "kp": 30,
+    "effect": {
+      "value": 40
+    }
+  },
+  {
+    "id": "0x3BABA43B",
+    "name": "Belette féroce, la faucheuse du vent",
+    "description": "La faucheuse du vent, un esprit du vent.\\nElle se déplace à une vitesse ahurissante.",
+    "kp": 30,
+    "effect": {
+      "value": 40
+    }
+  },
+  {
+    "id": "0x971EEB37",
+    "name": "Lycaon, le loup maudit",
+    "description": "Le loup maudit, un esprit de la forêt. Quand\\nil grogne, il est prudent de s'éloigner.",
+    "kp": 30,
+    "effect": {
+      "value": 40
+    }
+  },
+  {
+    "id": "0x1B34591C",
+    "name": "Ombre de plasma ATT, monstre artificiel",
+    "description": "Le monstre artificiel, un esprit de la montagne.\\nProgrammé pour gagner.",
+    "kp": 30,
+    "effect": {
+      "value": 40
+    }
+  },
+  {
+    "id": "0x4C427D74",
+    "name": "Ignis, molosse du brasier",
+    "description": "Le molosse du brasier, un esprit du feu.\\nIl a toujours une pêche d'enfer.",
+    "kp": 30,
+    "effect": {
+      "value": 40
+    }
+  },
+  {
+    "id": "0x676F2EB7",
+    "name": "Fulgur, héraut du tonnerre",
+    "description": "Le héraut du tonnerre, un esprit de la\\nmontagne. Surnommé « le soleil de minuit ».",
+    "kp": 30,
+    "effect": {
+      "value": 40
+    }
+  },
+  {
+    "id": "0x32093920",
+    "name": "Fou blanc, messager sacré",
+    "description": "Le messager sacré, un esprit de la forêt.\\nDupe l'adversaire et lui prend le ballon.",
+    "kp": 30,
+    "effect": {
+      "value": 40
+    }
+  },
+  {
+    "id": "0x2B120861",
+    "name": "Tour blanche, sentinelle royale",
+    "description": "La sentinelle royale, un esprit de la montagne.\\nAbrite une quantité d'énergie colossale.",
+    "kp": 30,
+    "effect": {
+      "value": 40
+    }
+  },
+  {
+    "id": "0x01FD3195",
+    "name": "Drake, le chevalier dragon",
+    "description": "Le chevalier dragon, un esprit du vent.\\nDéblaie le terrain à coups de tornades.",
+    "kp": 30,
+    "effect": {
+      "value": 40
+    }
+  },
+  {
+    "id": "0x7C8AC5D0",
+    "name": "Tour noire, sentinelle royale",
+    "description": "La sentinelle royale, un esprit de la montagne.\\nAbrite une quantité d'énergie colossale.",
+    "kp": 30,
+    "effect": {
+      "value": 40
+    }
+  },
+  {
+    "id": "0x487765B9",
+    "name": "Brunehilde, la walkyrie porte-drapeau",
+    "description": "La walkyrie porte-drapeau, un esprit de\\nla forêt. Donne de l'espoir à tous ses alliés.",
+    "kp": 30,
+    "effect": {
+      "value": 40
+    }
+  },
+  {
+    "id": "0x7A41073B",
+    "name": "Xuanwu, le guerrier du Nord",
+    "description": "Le guerrier du Nord, un esprit de la montagne.\\nOn l'appelle parfois « la tortue noire ».",
+    "kp": 30,
+    "effect": {
+      "value": 40
+    }
+  },
+  {
+    "id": "0x34C2FBCB",
+    "name": "Amaterasu, magicienne de l'aurore",
+    "description": "La magicienne de l'aurore, un esprit du\\nfeu. Ses flèches sèment la confusion.",
+    "kp": 30,
+    "effect": {
+      "value": 40
+    }
+  },
+  {
+    "id": "0x2DD9CA8A",
+    "name": "Jaguar, guerrier préhistorique",
+    "description": "Le guerrier préhistorique, un esprit du\\nvent. Ne plaisantez jamais sur son âge.",
+    "kp": 30,
+    "effect": {
+      "value": 40
+    }
+  },
+  {
+    "id": "0xE8FAF865",
+    "name": "Ombre de plasma DÉF, monstre artificiel",
+    "description": "Le monstre artificiel, un esprit du vent.\\nCapable de réagir en une nanoseconde.",
+    "kp": 30,
+    "effect": {
+      "value": 40
+    }
+  },
+  {
+    "id": "0x5BF279F2",
+    "name": "Éris, agent de la discorde",
+    "description": "L'agent de la discorde, un esprit du vent.\\nDéterminée, retorse et manipulatrice.",
+    "kp": 30,
+    "effect": {
+      "value": 40
+    }
+  },
+  {
+    "id": "0xD80204ED",
+    "name": "Titan, le géant",
+    "description": "Titan géant, un esprit de la montagne. Protège\\nles buts jusqu'à son dernier souffle.",
+    "kp": 30,
+    "effect": {
+      "value": 40
+    }
+  },
+  {
+    "id": "0x9743922A",
+    "name": "Goliath, le géant",
+    "description": "Le géant, un esprit du vent. Met sa\\nstature à profit pour défendre les buts.",
+    "kp": 30,
+    "effect": {
+      "value": 40
+    }
+  },
+  {
+    "id": "0x8E58A36B",
+    "name": "Dédé, le roi des dés",
+    "description": "Le roi des dés, un esprit de la montagne. Ses\\nlancers influent sur l'issue des matchs.",
+    "kp": 30,
+    "effect": {
+      "value": 40
+    }
+  },
+  {
+    "id": "0xE872D836",
+    "name": "Roi blanc, monarque de la sagesse",
+    "description": "Le monarque de la sagesse, un esprit du\\nfeu. Ses flammes consument tout.",
+    "kp": 30,
+    "effect": {
+      "value": 40
+    }
+  },
+  {
+    "id": "0xBE287FB0",
+    "name": "Atlas, protecteur de la Terre",
+    "description": "Le protecteur de la Terre, un esprit de la\\nmontagne. Garde les buts impassiblement.",
+    "kp": 30,
+    "effect": {
+      "value": 40
+    }
+  },
+  {
+    "id": "0xECFFA484",
+    "name": "Baron, colosse de métal",
+    "description": "Le colosse de métal, un esprit de la montagne.\\nEst constitué d'un alliage inaltérable.",
+    "kp": 30,
+    "effect": {
+      "value": 40
+    }
+  },
+  {
+    "id": "0x918850C1",
+    "name": "Gargantua, géant de métal",
+    "description": "Le géant de métal, un esprit de la montagne.\\nInébranlable comme une muraille d'acier.",
+    "kp": 30,
+    "effect": {
+      "value": 40
+    }
+  },
+  {
+    "id": "0xDF0BAC31",
+    "name": "Éminent, le génie Majin",
+    "description": "Le grand génie, un esprit de la montagne.\\nLégende traversant les générations.",
+    "kp": 30,
+    "effect": {
+      "value": 40
+    }
+  },
+  {
+    "id": "0x920C84AF",
+    "name": "Opale, protectrice céleste",
+    "description": "La protectrice céleste, un esprit de la forêt.\\nMieux vaut ne pas la mettre en colère.",
+    "kp": 30,
+    "effect": {
+      "value": 40
+    }
+  },
+  {
+    "id": "0x6EAB7A26",
+    "name": "Ombre de plasma GAR, monstre artificiel",
+    "description": "Le monstre artificiel, un esprit de la forêt.\\nCalcule chaque arrêt avec précision.",
+    "kp": 30,
+    "effect": {
+      "value": 40
+    }
+  },
+  {
+    "id": "0x8AD5DFD9",
+    "name": "Atlanticus, bête des abysses",
+    "description": "La bête des abysses, un esprit du vent.\\nS'il a trop faim, il dévore le terrain.",
+    "kp": 30,
+    "effect": {
+      "value": 40
+    }
+  },
+  {
+    "id": "0x1456F257",
+    "name": "Lova, déesse explosive",
+    "description": "La déesse explosive, un esprit de la forêt.\\nSon mauvais caractère est légendaire.",
+    "kp": 30,
+    "effect": {
+      "value": 40
+    }
+  },
+  {
+    "id": "0xB7617564",
+    "name": "Clearbunny, la lance sacrée",
+    "description": "La lance sacrée, un esprit du feu.\\nFrappe une fois, et c'est déjà fini.",
+    "kp": 30,
+    "effect": {
+      "value": 40
+    }
+  },
+  {
+    "id": "0xB7617564",
+    "name": "Clearbunny, la lance sacrée",
+    "description": "La lance sacrée, un esprit du feu.\\nFrappe une fois, et c'est déjà fini.",
+    "kp": 0,
+    "effect": {
+      "value": 40
+    }
+  },
+  {
+    "id": "0xB31F430B",
+    "name": "Proto-humoriste",
+    "description": "Encore en cours, mais déborde de potentiel.\\nRecentrez votre cœur, et tout deviendra possible.",
+    "kp": 0,
+    "effect": {
+      "value": 40
+    }
+  },
+  {
+    "id": "0xDA6E86C5",
+    "name": "Humoriste",
+    "description": "L'humoriste, un esprit de la forêt.\\nNé de la cohésion, et vit pour transmettre la bonne humeur.",
+    "kp": 30,
+    "effect": {
+      "value": 40
+    }
+  },
+  {
+    "id": "0xDA6E86C5",
+    "name": "Humoriste",
+    "description": "L'humoriste, un esprit de la forêt.\\nNé de la cohésion, et vit pour transmettre la bonne humeur.",
+    "kp": 0,
+    "effect": {
+      "value": 40
+    }
+  },
+  {
+    "id": "0xFFE8E0C1",
+    "name": "Warborg, le titan des murailles",
+    "description": "Le titan des murailles, un esprit de la montagne. Titille les attaquants\\njusqu'à ce qu'ils attaquent, et réduit leurs espoirs en pierre.",
+    "kp": 30,
+    "effect": {
+      "value": 40
+    }
+  },
+  {
+    "id": "0xFFE8E0C1",
+    "name": "Warborg, le titan des murailles",
+    "description": "Le titan des murailles, un esprit de la montagne. Titille les attaquants\\njusqu'à ce qu'ils attaquent, et réduit leurs espoirs en pierre.",
+    "kp": 0,
+    "effect": {
+      "value": 40
+    }
+  },
+  {
+    "id": "0xF820E3A3",
+    "name": "Sir Lapin, chevalier supersonique",
+    "description": "Le chevalier supersonique, un esprit de la forêt.\\nS'approche à toute vitesse de ses rivaux et leur fait mordre la poussière.",
+    "kp": 30,
+    "effect": {
+      "value": 40
+    }
+  },
+  {
+    "id": "0xD30DB060",
+    "name": "Victorieux, le génie Majin",
+    "description": "Victorieux le génie, un esprit du feu.\\nSurpasse ses adversaires de ses flammes pures et sans pitié.",
+    "kp": 30,
+    "effect": {
+      "value": 40
+    }
+  },
+  {
+    "id": "0xD30DB060",
+    "name": "Victorieux, le génie Majin",
+    "description": "Victorieux le génie, un esprit du feu.\\nSurpasse ses adversaires de ses flammes pures et sans pitié.",
+    "kp": 0,
+    "effect": {
+      "value": 40
+    }
+  },
+  {
+    "id": "0xB918E2A1",
+    "name": "Lancelot, le spadassin héroïque",
+    "description": "Porte un Keshin comme une armure\\npour déchaîner un immense pouvoir.",
+    "kp": 30,
+    "effect": {
+      "value": 20
+    }
+  },
+  {
+    "id": "0xA003D3E0",
+    "name": "Maestro Virtuoso",
+    "description": "Porte un Keshin comme une armure\\npour déchaîner un immense pouvoir.",
+    "kp": 30,
+    "effect": {
+      "value": 20
+    }
+  },
+  {
+    "id": "0xEF424527",
+    "name": "Apollon, dieu du soleil",
+    "description": "Porte un Keshin comme une armure\\npour déchaîner un immense pouvoir.",
+    "kp": 30,
+    "effect": {
+      "value": 20
+    }
+  },
+  {
+    "id": "0xF6597466",
+    "name": "Musashi, le samouraï vaillant",
+    "description": "Porte un Keshin comme une armure\\npour déchaîner un immense pouvoir.",
+    "kp": 30,
+    "effect": {
+      "value": 20
+    }
+  },
+  {
+    "id": "0x5968EF04",
+    "name": "Astral, dragon de l'aube",
+    "description": "Porte un Keshin comme une armure\\npour déchaîner un immense pouvoir.",
+    "kp": 30,
+    "effect": {
+      "value": 20
+    }
+  },
+  {
+    "id": "0xA2456DB9",
+    "name": "Archi Pégase, le cheval des dieux",
+    "description": "Porte un Keshin comme une armure\\npour déchaîner un immense pouvoir.",
+    "kp": 30,
+    "effect": {
+      "value": 20
+    }
+  },
+  {
+    "id": "0xE98987CC",
+    "name": "Pendragon, le suprême chevalier mystérieux",
+    "description": "Porte un Keshin comme une armure\\npour déchaîner un immense pouvoir.",
+    "kp": 30,
+    "effect": {
+      "value": 20
+    }
+  },
+  {
+    "id": "0x96B8CDD0",
+    "name": "Fenghuang, le roi des cieux",
+    "description": "Porte un Keshin comme une armure\\npour déchaîner un immense pouvoir.",
+    "kp": 30,
+    "effect": {
+      "value": 20
+    }
+  },
+  {
+    "id": "0xA48EAF52",
+    "name": "Athéna, déesse de la guerre",
+    "description": "Porte un Keshin comme une armure\\npour déchaîner un immense pouvoir.",
+    "kp": 30,
+    "effect": {
+      "value": 20
+    }
+  },
+  {
+    "id": "0x5E6147D8",
+    "name": "Zodiac, prince du plan astral",
+    "description": "Porte un Keshin comme une armure\\npour déchaîner un immense pouvoir.",
+    "kp": 30,
+    "effect": {
+      "value": 20
+    }
+  },
+  {
+    "id": "0xBC57F424",
+    "name": "Ombre de plasma TIR, monstre artificiel",
+    "description": "Porte un Keshin comme une armure\\npour déchaîner un immense pouvoir.",
+    "kp": 30,
+    "effect": {
+      "value": 20
+    }
+  },
+  {
+    "id": "0xBC57F424",
+    "name": "Ombre de plasma TIR, monstre artificiel",
+    "description": "Porte un Keshin comme une armure\\npour déchaîner un immense pouvoir.",
+    "kp": 30,
+    "effect": {
+      "value": 20
+    }
+  },
+  {
+    "id": "0xBC57F424",
+    "name": "Ombre de plasma TIR, monstre artificiel",
+    "description": "Porte un Keshin comme une armure\\npour déchaîner un immense pouvoir.",
+    "kp": 30,
+    "effect": {
+      "value": 20
+    }
+  },
+  {
+    "id": "0xBC57F424",
+    "name": "Ombre de plasma TIR, monstre artificiel",
+    "description": "Porte un Keshin comme une armure\\npour déchaîner un immense pouvoir.",
+    "kp": 30,
+    "effect": {
+      "value": 20
+    }
+  },
+  {
+    "id": "0xBC57F424",
+    "name": "Ombre de plasma TIR, monstre artificiel",
+    "description": "Porte un Keshin comme une armure\\npour déchaîner un immense pouvoir.",
+    "kp": 30,
+    "effect": {
+      "value": 20
+    }
+  },
+  {
+    "id": "0xBC57F424",
+    "name": "Ombre de plasma TIR, monstre artificiel",
+    "description": "Porte un Keshin comme une armure\\npour déchaîner un immense pouvoir.",
+    "kp": 30,
+    "effect": {
+      "value": 20
+    }
+  },
+  {
+    "id": "0xBC57F424",
+    "name": "Ombre de plasma TIR, monstre artificiel",
+    "description": "Porte un Keshin comme une armure\\npour déchaîner un immense pouvoir.",
+    "kp": 30,
+    "effect": {
+      "value": 20
+    }
+  },
+  {
+    "id": "0xD83B3120",
+    "name": "Sir Lapin, chevalier supersonique",
+    "description": "Porte un Keshin comme une armure\\npour déchaîner un immense pouvoir.",
+    "kp": 30,
+    "effect": {
+      "value": 20
+    }
+  },
+  {
+    "id": "0x853DD19B",
+    "name": "Evera, seigneur des démons",
+    "description": "Porte un Keshin comme une armure\\npour déchaîner un immense pouvoir.",
+    "kp": 30,
+    "effect": {
+      "value": 20
+    }
+  },
+  {
+    "id": "0xBF440652",
+    "name": "Ombre de plasma ATT, monstre artificiel",
+    "description": "Porte un Keshin comme une armure\\npour déchaîner un immense pouvoir.",
+    "kp": 30,
+    "effect": {
+      "value": 20
+    }
+  },
+  {
+    "id": "0xBF440652",
+    "name": "Ombre de plasma ATT, monstre artificiel",
+    "description": "Porte un Keshin comme une armure\\npour déchaîner un immense pouvoir.",
+    "kp": 30,
+    "effect": {
+      "value": 20
+    }
+  },
+  {
+    "id": "0xBF440652",
+    "name": "Ombre de plasma ATT, monstre artificiel",
+    "description": "Porte un Keshin comme une armure\\npour déchaîner un immense pouvoir.",
+    "kp": 30,
+    "effect": {
+      "value": 20
+    }
+  },
+  {
+    "id": "0xBF440652",
+    "name": "Ombre de plasma ATT, monstre artificiel",
+    "description": "Porte un Keshin comme une armure\\npour déchaîner un immense pouvoir.",
+    "kp": 30,
+    "effect": {
+      "value": 20
+    }
+  },
+  {
+    "id": "0xBF440652",
+    "name": "Ombre de plasma ATT, monstre artificiel",
+    "description": "Porte un Keshin comme une armure\\npour déchaîner un immense pouvoir.",
+    "kp": 30,
+    "effect": {
+      "value": 20
+    }
+  },
+  {
+    "id": "0xBF440652",
+    "name": "Ombre de plasma ATT, monstre artificiel",
+    "description": "Porte un Keshin comme une armure\\npour déchaîner un immense pouvoir.",
+    "kp": 30,
+    "effect": {
+      "value": 20
+    }
+  },
+  {
+    "id": "0xBF440652",
+    "name": "Ombre de plasma ATT, monstre artificiel",
+    "description": "Porte un Keshin comme une armure\\npour déchaîner un immense pouvoir.",
+    "kp": 30,
+    "effect": {
+      "value": 20
+    }
+  },
+  {
+    "id": "0xBF440652",
+    "name": "Ombre de plasma ATT, monstre artificiel",
+    "description": "Porte un Keshin comme une armure\\npour déchaîner un immense pouvoir.",
+    "kp": 30,
+    "effect": {
+      "value": 20
+    }
+  },
+  {
+    "id": "0xBF440652",
+    "name": "Ombre de plasma ATT, monstre artificiel",
+    "description": "Porte un Keshin comme une armure\\npour déchaîner un immense pouvoir.",
+    "kp": 30,
+    "effect": {
+      "value": 20
+    }
+  },
+  {
+    "id": "0xBF440652",
+    "name": "Ombre de plasma ATT, monstre artificiel",
+    "description": "Porte un Keshin comme une armure\\npour déchaîner un immense pouvoir.",
+    "kp": 30,
+    "effect": {
+      "value": 20
+    }
+  },
+  {
+    "id": "0xBF440652",
+    "name": "Ombre de plasma ATT, monstre artificiel",
+    "description": "Porte un Keshin comme une armure\\npour déchaîner un immense pouvoir.",
+    "kp": 30,
+    "effect": {
+      "value": 20
+    }
+  },
+  {
+    "id": "0xBF440652",
+    "name": "Ombre de plasma ATT, monstre artificiel",
+    "description": "Porte un Keshin comme une armure\\npour déchaîner un immense pouvoir.",
+    "kp": 30,
+    "effect": {
+      "value": 20
+    }
+  },
+  {
+    "id": "0xEC073AF7",
+    "name": "Brunehilde, la walkyrie porte-drapeau",
+    "description": "Porte un Keshin comme une armure\\npour déchaîner un immense pouvoir.",
+    "kp": 30,
+    "effect": {
+      "value": 20
+    }
+  },
+  {
+    "id": "0x90B2A485",
+    "name": "Amaterasu, magicienne de l'aurore",
+    "description": "Porte un Keshin comme une armure\\npour déchaîner un immense pouvoir.",
+    "kp": 30,
+    "effect": {
+      "value": 20
+    }
+  },
+  {
+    "id": "0x89A995C4",
+    "name": "Jaguar, guerrier préhistorique",
+    "description": "Porte un Keshin comme une armure\\npour déchaîner un immense pouvoir.",
+    "kp": 30,
+    "effect": {
+      "value": 20
+    }
+  },
+  {
+    "id": "0x4C8AA72B",
+    "name": "Ombre de plasma DÉF, monstre artificiel",
+    "description": "Porte un Keshin comme une armure\\npour déchaîner un immense pouvoir.",
+    "kp": 30,
+    "effect": {
+      "value": 20
+    }
+  },
+  {
+    "id": "0x4C8AA72B",
+    "name": "Ombre de plasma DÉF, monstre artificiel",
+    "description": "Porte un Keshin comme une armure\\npour déchaîner un immense pouvoir.",
+    "kp": 30,
+    "effect": {
+      "value": 20
+    }
+  },
+  {
+    "id": "0x4C8AA72B",
+    "name": "Ombre de plasma DÉF, monstre artificiel",
+    "description": "Porte un Keshin comme une armure\\npour déchaîner un immense pouvoir.",
+    "kp": 30,
+    "effect": {
+      "value": 20
+    }
+  },
+  {
+    "id": "0x4C8AA72B",
+    "name": "Ombre de plasma DÉF, monstre artificiel",
+    "description": "Porte un Keshin comme une armure\\npour déchaîner un immense pouvoir.",
+    "kp": 30,
+    "effect": {
+      "value": 20
+    }
+  },
+  {
+    "id": "0x4C8AA72B",
+    "name": "Ombre de plasma DÉF, monstre artificiel",
+    "description": "Porte un Keshin comme une armure\\npour déchaîner un immense pouvoir.",
+    "kp": 30,
+    "effect": {
+      "value": 20
+    }
+  },
+  {
+    "id": "0x4C8AA72B",
+    "name": "Ombre de plasma DÉF, monstre artificiel",
+    "description": "Porte un Keshin comme une armure\\npour déchaîner un immense pouvoir.",
+    "kp": 30,
+    "effect": {
+      "value": 20
+    }
+  },
+  {
+    "id": "0x4C8AA72B",
+    "name": "Ombre de plasma DÉF, monstre artificiel",
+    "description": "Porte un Keshin comme une armure\\npour déchaîner un immense pouvoir.",
+    "kp": 30,
+    "effect": {
+      "value": 20
+    }
+  },
+  {
+    "id": "0x4C8AA72B",
+    "name": "Ombre de plasma DÉF, monstre artificiel",
+    "description": "Porte un Keshin comme une armure\\npour déchaîner un immense pouvoir.",
+    "kp": 30,
+    "effect": {
+      "value": 20
+    }
+  },
+  {
+    "id": "0xFF8226BC",
+    "name": "Éris, agent de la discorde",
+    "description": "Porte un Keshin comme une armure\\npour déchaîner un immense pouvoir.",
+    "kp": 30,
+    "effect": {
+      "value": 20
+    }
+  },
+  {
+    "id": "0x1A5820FE",
+    "name": "Atlas, protecteur de la Terre",
+    "description": "Porte un Keshin comme une armure\\npour déchaîner un immense pouvoir.",
+    "kp": 30,
+    "effect": {
+      "value": 20
+    }
+  },
+  {
+    "id": "0xCADB2568",
+    "name": "Ombre de plasma GAR, monstre artificiel",
+    "description": "Porte un Keshin comme une armure\\npour déchaîner un immense pouvoir.",
+    "kp": 30,
+    "effect": {
+      "value": 20
+    }
+  },
+  {
+    "id": "0xCADB2568",
+    "name": "Ombre de plasma GAR, monstre artificiel",
+    "description": "Porte un Keshin comme une armure\\npour déchaîner un immense pouvoir.",
+    "kp": 30,
+    "effect": {
+      "value": 20
+    }
+  },
+  {
+    "id": "0xCADB2568",
+    "name": "Ombre de plasma GAR, monstre artificiel",
+    "description": "Porte un Keshin comme une armure\\npour déchaîner un immense pouvoir.",
+    "kp": 30,
+    "effect": {
+      "value": 20
+    }
+  },
+  {
+    "id": "0xCADB2568",
+    "name": "Ombre de plasma GAR, monstre artificiel",
+    "description": "Porte un Keshin comme une armure\\npour déchaîner un immense pouvoir.",
+    "kp": 30,
+    "effect": {
+      "value": 20
+    }
+  },
+  {
+    "id": "0xE6217382",
+    "name": "Pégase, l'étalon ailé",
+    "description": "Porte un Keshin comme une armure\\npour déchaîner un immense pouvoir.",
+    "kp": 30,
+    "effect": {
+      "value": 20
+    }
+  },
+  {
+    "id": "0x553D00E5",
+    "name": "Archi Pégase R, le cheval des dieux",
+    "description": "Porte un Keshin comme une armure\\npour déchaîner un immense pouvoir.",
+    "kp": 30,
+    "effect": {
+      "value": 20
+    }
+  },
+  {
+    "id": "0x89683E7A",
+    "name": "Griffon, seigneur du règne animal",
+    "description": "Porte un Keshin comme une armure\\npour déchaîner un immense pouvoir.",
+    "kp": 30,
+    "effect": {
+      "value": 20
+    }
+  },
+  {
+    "id": "0xFE6F0EEC",
+    "name": "Unknown Spirit (0xFE6F0EEC)",
+    "description": "Porte un Keshin comme une armure\\npour déchaîner un immense pouvoir.",
+    "kp": 30,
+    "effect": {
+      "value": 20
+    }
+  },
+  {
+    "id": "0x67665F56",
+    "name": "Unknown Spirit (0x67665F56)",
+    "description": "Porte un Keshin comme une armure\\npour déchaîner un immense pouvoir.",
+    "kp": 30,
+    "effect": {
+      "value": 20
+    }
+  },
+  {
+    "id": "0x9FDBFB75",
+    "name": "Belette féroce, la faucheuse du vent",
+    "description": "Porte un Keshin comme une armure\\npour déchaîner un immense pouvoir.",
+    "kp": 30,
+    "effect": {
+      "value": 20
+    }
+  },
+  {
+    "id": "0xB8DA8896",
+    "name": "Faucon de tonnerre surnaturel",
+    "description": "Porte un Keshin comme une armure\\npour déchaîner un immense pouvoir.",
+    "kp": 30,
+    "effect": {
+      "value": 20
+    }
+  },
+  {
+    "id": "0x3333CD64",
+    "name": "Goliath, le géant",
+    "description": "Porte un Keshin comme une armure\\npour déchaîner un immense pouvoir.",
+    "kp": 30,
+    "effect": {
+      "value": 20
+    }
+  },
+  {
+    "id": "0xEE802F10",
+    "name": "Trickster, Grand magicien",
+    "description": "Porte un Keshin comme une armure\\npour déchaîner un immense pouvoir.",
+    "kp": 30,
+    "effect": {
+      "value": 20
+    }
+  },
+  {
+    "id": "0xA58D6EDB",
+    "name": "Drake, le chevalier dragon",
+    "description": "Porte un Keshin comme une armure\\npour déchaîner un immense pouvoir.",
+    "kp": 30,
+    "effect": {
+      "value": 20
+    }
+  },
+  {
+    "id": "0x90730F3B",
+    "name": "Corvus, le corbeau des ténèbres",
+    "description": "Porte un Keshin comme une armure\\npour déchaîner un immense pouvoir.",
+    "kp": 30,
+    "effect": {
+      "value": 20
+    }
+  },
+  {
+    "id": "0xE7743FAD",
+    "name": "Unknown Spirit (0xE7743FAD)",
+    "description": "Porte un Keshin comme une armure\\npour déchaîner un immense pouvoir.",
+    "kp": 30,
+    "effect": {
+      "value": 20
+    }
+  },
+  {
+    "id": "0x9910399E",
+    "name": "Noir, guerrier de la ligne de front",
+    "description": "Porte un Keshin comme une armure\\npour déchaîner un immense pouvoir.",
+    "kp": 30,
+    "effect": {
+      "value": 20
+    }
+  },
+  {
+    "id": "0xEE170908",
+    "name": "Unknown Spirit (0xEE170908)",
+    "description": "Porte un Keshin comme une armure\\npour déchaîner un immense pouvoir.",
+    "kp": 30,
+    "effect": {
+      "value": 20
+    }
+  },
+  {
+    "id": "0x771E58B2",
+    "name": "Unknown Spirit (0x771E58B2)",
+    "description": "Porte un Keshin comme une armure\\npour déchaîner un immense pouvoir.",
+    "kp": 30,
+    "effect": {
+      "value": 20
+    }
+  },
+  {
+    "id": "0x3621A2FC",
+    "name": "Blanc, guerrier de la ligne de front",
+    "description": "Porte un Keshin comme une armure\\npour déchaîner un immense pouvoir.",
+    "kp": 30,
+    "effect": {
+      "value": 20
+    }
+  },
+  {
+    "id": "0x4126926A",
+    "name": "Unknown Spirit (0x4126926A)",
+    "description": "Porte un Keshin comme une armure\\npour déchaîner un immense pouvoir.",
+    "kp": 30,
+    "effect": {
+      "value": 20
+    }
+  },
+  {
+    "id": "0xD82FC3D0",
+    "name": "Unknown Spirit (0xD82FC3D0)",
+    "description": "Porte un Keshin comme une armure\\npour déchaîner un immense pouvoir.",
+    "kp": 30,
+    "effect": {
+      "value": 20
+    }
+  },
+  {
+    "id": "0xAF28F346",
+    "name": "Unknown Spirit (0xAF28F346)",
+    "description": "Porte un Keshin comme une armure\\npour déchaîner un immense pouvoir.",
+    "kp": 30,
+    "effect": {
+      "value": 20
+    }
+  },
+  {
+    "id": "0x314C66E5",
+    "name": "Unknown Spirit (0x314C66E5)",
+    "description": "Porte un Keshin comme une armure\\npour déchaîner un immense pouvoir.",
+    "kp": 30,
+    "effect": {
+      "value": 20
+    }
+  },
+  {
+    "id": "0x464B5673",
+    "name": "Unknown Spirit (0x464B5673)",
+    "description": "Porte un Keshin comme une armure\\npour déchaîner un immense pouvoir.",
+    "kp": 30,
+    "effect": {
+      "value": 20
+    }
+  },
+  {
+    "id": "0x2EF8F98A",
+    "name": "Superstrato, guerrier hypersonique",
+    "description": "Porte un Keshin comme une armure\\npour déchaîner un immense pouvoir.",
+    "kp": 30,
+    "effect": {
+      "value": 20
+    }
+  },
+  {
+    "id": "0xA1C1B9D7",
+    "name": "Poséidon, dieu des sept mers",
+    "description": "Porte un Keshin comme une armure\\npour déchaîner un immense pouvoir.",
+    "kp": 30,
+    "effect": {
+      "value": 20
+    }
+  },
+  {
+    "id": "0xA1C1B9D7",
+    "name": "Poséidon, dieu des sept mers",
+    "description": "Porte un Keshin comme une armure\\npour déchaîner un immense pouvoir.",
+    "kp": 30,
+    "effect": {
+      "value": 20
+    }
+  },
+  {
+    "id": "0x7C725BA3",
+    "name": "Titan, le géant",
+    "description": "Porte un Keshin comme une armure\\npour déchaîner un immense pouvoir.",
+    "kp": 30,
+    "effect": {
+      "value": 20
+    }
+  },
+  {
+    "id": "0xA0C2785E",
+    "name": "Berserker, le combattant sauvage",
+    "description": "Porte un Keshin comme une armure\\npour déchaîner un immense pouvoir.",
+    "kp": 30,
+    "effect": {
+      "value": 20
+    }
+  },
+  {
+    "id": "0xD7C548C8",
+    "name": "Unknown Spirit (0xD7C548C8)",
+    "description": "Porte un Keshin comme une armure\\npour déchaîner un immense pouvoir.",
+    "kp": 30,
+    "effect": {
+      "value": 20
+    }
+  },
+  {
+    "id": "0x43F70A2B",
+    "name": "Chioné, reine des neiges",
+    "description": "Porte un Keshin comme une armure\\npour déchaîner un immense pouvoir.",
+    "kp": 30,
+    "effect": {
+      "value": 20
+    }
+  },
+  {
+    "id": "0x488FFBCA",
+    "name": "Baron, colosse de métal",
+    "description": "Porte un Keshin comme une armure\\npour déchaîner un immense pouvoir.",
+    "kp": 30,
+    "effect": {
+      "value": 20
+    }
+  },
+  {
+    "id": "0xB07BD404",
+    "name": "Léo, seigneur de la savane",
+    "description": "Porte un Keshin comme une armure\\npour déchaîner un immense pouvoir.",
+    "kp": 30,
+    "effect": {
+      "value": 20
+    }
+  },
+  {
+    "id": "0xC77CE492",
+    "name": "Unknown Spirit (0xC77CE492)",
+    "description": "Porte un Keshin comme une armure\\npour déchaîner un immense pouvoir.",
+    "kp": 30,
+    "effect": {
+      "value": 20
+    }
+  },
+  {
+    "id": "0x5B2E515D",
+    "name": "Cavalier blanc, destrier cuirassé",
+    "description": "Porte un Keshin comme une armure\\npour déchaîner un immense pouvoir.",
+    "kp": 30,
+    "effect": {
+      "value": 20
+    }
+  },
+  {
+    "id": "0x5B2E515D",
+    "name": "Cavalier blanc, destrier cuirassé",
+    "description": "Porte un Keshin comme une armure\\npour déchaîner un immense pouvoir.",
+    "kp": 30,
+    "effect": {
+      "value": 20
+    }
+  },
+  {
+    "id": "0x5B2E515D",
+    "name": "Cavalier blanc, destrier cuirassé",
+    "description": "Porte un Keshin comme une armure\\npour déchaîner un immense pouvoir.",
+    "kp": 30,
+    "effect": {
+      "value": 20
+    }
+  },
+  {
+    "id": "0x5B2E515D",
+    "name": "Cavalier blanc, destrier cuirassé",
+    "description": "Porte un Keshin comme une armure\\npour déchaîner un immense pouvoir.",
+    "kp": 30,
+    "effect": {
+      "value": 20
+    }
+  },
+  {
+    "id": "0xF41FCA3F",
+    "name": "Cavalier noir, destrier cuirassé",
+    "description": "Porte un Keshin comme une armure\\npour déchaîner un immense pouvoir.",
+    "kp": 30,
+    "effect": {
+      "value": 20
+    }
+  },
+  {
+    "id": "0x8318FAA9",
+    "name": "Unknown Spirit (0x8318FAA9)",
+    "description": "Porte un Keshin comme une armure\\npour déchaîner un immense pouvoir.",
+    "kp": 30,
+    "effect": {
+      "value": 20
+    }
+  },
+  {
+    "id": "0x1A11AB13",
+    "name": "Unknown Spirit (0x1A11AB13)",
+    "description": "Porte un Keshin comme une armure\\npour déchaîner un immense pouvoir.",
+    "kp": 30,
+    "effect": {
+      "value": 20
+    }
+  },
+  {
+    "id": "0x6D169B85",
+    "name": "Unknown Spirit (0x6D169B85)",
+    "description": "Porte un Keshin comme une armure\\npour déchaîner un immense pouvoir.",
+    "kp": 30,
+    "effect": {
+      "value": 20
+    }
+  },
+  {
+    "id": "0x2A28FC25",
+    "name": "Dédé, le roi des dés",
+    "description": "Porte un Keshin comme une armure\\npour déchaîner un immense pouvoir.",
+    "kp": 30,
+    "effect": {
+      "value": 20
+    }
+  },
+  {
+    "id": "0x838FDCB1",
+    "name": "Garas, maîtresse des illusions",
+    "description": "Porte un Keshin comme une armure\\npour déchaîner un immense pouvoir.",
+    "kp": 30,
+    "effect": {
+      "value": 20
+    }
+  },
+  {
+    "id": "0xE84BEDFB",
+    "name": "Zanni, le baladin burlesque",
+    "description": "Porte un Keshin comme une armure\\npour déchaîner un immense pouvoir.",
+    "kp": 30,
+    "effect": {
+      "value": 20
+    }
+  },
+  {
+    "id": "0x9F4CDD6D",
+    "name": "Unknown Spirit (0x9F4CDD6D)",
+    "description": "Porte un Keshin comme une armure\\npour déchaîner un immense pouvoir.",
+    "kp": 30,
+    "effect": {
+      "value": 20
+    }
+  },
+  {
+    "id": "0xA6C8110B",
+    "name": "Sandman, le marchand de sable",
+    "description": "Porte un Keshin comme une armure\\npour déchaîner un immense pouvoir.",
+    "kp": 30,
+    "effect": {
+      "value": 20
+    }
+  },
+  {
+    "id": "0xD1CF219D",
+    "name": "Unknown Spirit (0xD1CF219D)",
+    "description": "Porte un Keshin comme une armure\\npour déchaîner un immense pouvoir.",
+    "kp": 30,
+    "effect": {
+      "value": 20
+    }
+  },
+  {
+    "id": "0x35F80F8F",
+    "name": "Gargantua, géant de métal",
+    "description": "Porte un Keshin comme une armure\\npour déchaîner un immense pouvoir.",
+    "kp": 30,
+    "effect": {
+      "value": 20
+    }
+  },
+  {
+    "id": "0xF150DCBA",
+    "name": "Neptune, seigneur des mers",
+    "description": "Porte un Keshin comme une armure\\npour déchaîner un immense pouvoir.",
+    "kp": 30,
+    "effect": {
+      "value": 20
+    }
+  },
+  {
+    "id": "0xB7727CD8",
+    "name": "Milady, la femme fatale",
+    "description": "Porte un Keshin comme une armure\\npour déchaîner un immense pouvoir.",
+    "kp": 30,
+    "effect": {
+      "value": 20
+    }
+  },
+  {
+    "id": "0xC0754C4E",
+    "name": "Unknown Spirit (0xC0754C4E)",
+    "description": "Porte un Keshin comme une armure\\npour déchaîner un immense pouvoir.",
+    "kp": 30,
+    "effect": {
+      "value": 20
+    }
+  },
+  {
+    "id": "0x30EA6017",
+    "name": "Hadron, champion du continuum",
+    "description": "Porte un Keshin comme une armure\\npour déchaîner un immense pouvoir.",
+    "kp": 30,
+    "effect": {
+      "value": 20
+    }
+  },
+  {
+    "id": "0x47ED5081",
+    "name": "Unknown Spirit (0x47ED5081)",
+    "description": "Porte un Keshin comme une armure\\npour déchaîner un immense pouvoir.",
+    "kp": 30,
+    "effect": {
+      "value": 20
+    }
+  },
+  {
+    "id": "0x8AECEA14",
+    "name": "Surt, géant du feu",
+    "description": "Porte un Keshin comme une armure\\npour déchaîner un immense pouvoir.",
+    "kp": 30,
+    "effect": {
+      "value": 20
+    }
+  },
+  {
+    "id": "0x4C028778",
+    "name": "Roi blanc, monarque de la sagesse",
+    "description": "Porte un Keshin comme une armure\\npour déchaîner un immense pouvoir.",
+    "kp": 30,
+    "effect": {
+      "value": 20
+    }
+  },
+  {
+    "id": "0xBA9C36CF",
+    "name": "Reine blanche, enchanteresse royale",
+    "description": "Porte un Keshin comme une armure\\npour déchaîner un immense pouvoir.",
+    "kp": 30,
+    "effect": {
+      "value": 20
+    }
+  },
+  {
+    "id": "0x41B1B472",
+    "name": "Reine noire, enchanteresse royale",
+    "description": "Porte un Keshin comme une armure\\npour déchaîner un immense pouvoir.",
+    "kp": 30,
+    "effect": {
+      "value": 20
+    }
+  },
+  {
+    "id": "0x36B684E4",
+    "name": "Unknown Spirit (0x36B684E4)",
+    "description": "Porte un Keshin comme une armure\\npour déchaîner un immense pouvoir.",
+    "kp": 30,
+    "effect": {
+      "value": 20
+    }
+  },
+  {
+    "id": "0x8F62572F",
+    "name": "Tour blanche, sentinelle royale",
+    "description": "Porte un Keshin comme une armure\\npour déchaîner un immense pouvoir.",
+    "kp": 30,
+    "effect": {
+      "value": 20
+    }
+  },
+  {
+    "id": "0xF86567B9",
+    "name": "Unknown Spirit (0xF86567B9)",
+    "description": "Porte un Keshin comme une armure\\npour déchaîner un immense pouvoir.",
+    "kp": 30,
+    "effect": {
+      "value": 20
+    }
+  },
+  {
+    "id": "0x9679666E",
+    "name": "Fou blanc, messager sacré",
+    "description": "Porte un Keshin comme une armure\\npour déchaîner un immense pouvoir.",
+    "kp": 30,
+    "effect": {
+      "value": 20
+    }
+  },
+  {
+    "id": "0xE17E56F8",
+    "name": "Unknown Spirit (0xE17E56F8)",
+    "description": "Porte un Keshin comme une armure\\npour déchaîner un immense pouvoir.",
+    "kp": 30,
+    "effect": {
+      "value": 20
+    }
+  },
+  {
+    "id": "0xC1E1ABDF",
+    "name": "Fou noir, messager sacré",
+    "description": "Porte un Keshin comme une armure\\npour déchaîner un immense pouvoir.",
+    "kp": 30,
+    "effect": {
+      "value": 20
+    }
+  },
+  {
+    "id": "0xB6E69B49",
+    "name": "Unknown Spirit (0xB6E69B49)",
+    "description": "Porte un Keshin comme une armure\\npour déchaîner un immense pouvoir.",
+    "kp": 30,
+    "effect": {
+      "value": 20
+    }
+  },
+  {
+    "id": "0x2FEFCAF3",
+    "name": "Unknown Spirit (0x2FEFCAF3)",
+    "description": "Porte un Keshin comme une armure\\npour déchaîner un immense pouvoir.",
+    "kp": 30,
+    "effect": {
+      "value": 20
+    }
+  },
+  {
+    "id": "0x4073DE45",
+    "name": "Fléau obscur, seigneur des ténèbres",
+    "description": "Porte un Keshin comme une armure\\npour déchaîner un immense pouvoir.",
+    "kp": 30,
+    "effect": {
+      "value": 20
+    }
+  },
+  {
+    "id": "0xECC69149",
+    "name": "Arthur, le paladin sacré",
+    "description": "Porte un Keshin comme une armure\\npour déchaîner un immense pouvoir.",
+    "kp": 30,
+    "effect": {
+      "value": 20
+    }
+  },
+  {
+    "id": "0x9BC1A1DF",
+    "name": "Unknown Spirit (0x9BC1A1DF)",
+    "description": "Porte un Keshin comme une armure\\npour déchaîner un immense pouvoir.",
+    "kp": 30,
+    "effect": {
+      "value": 20
+    }
+  },
+  {
+    "id": "0xD8FA9A9E",
+    "name": "Tour noire, sentinelle royale",
+    "description": "Porte un Keshin comme une armure\\npour déchaîner un immense pouvoir.",
+    "kp": 30,
+    "effect": {
+      "value": 20
+    }
+  },
+  {
+    "id": "0xAFFDAA08",
+    "name": "Unknown Spirit (0xAFFDAA08)",
+    "description": "Porte un Keshin comme une armure\\npour déchaîner un immense pouvoir.",
+    "kp": 30,
+    "effect": {
+      "value": 20
+    }
+  },
+  {
+    "id": "0xB72F05C5",
+    "name": "Roi noir, monarque de la sagesse",
+    "description": "Porte un Keshin comme une armure\\npour déchaîner un immense pouvoir.",
+    "kp": 30,
+    "effect": {
+      "value": 20
+    }
+  },
+  {
+    "id": "0xC0283553",
+    "name": "Unknown Spirit (0xC0283553)",
+    "description": "Porte un Keshin comme une armure\\npour déchaîner un immense pouvoir.",
+    "kp": 30,
+    "effect": {
+      "value": 20
+    }
+  },
+  {
+    "id": "0x7B7BF37F",
+    "name": "Éminent, le génie Majin",
+    "description": "Porte un Keshin comme une armure\\npour déchaîner un immense pouvoir.",
+    "kp": 30,
+    "effect": {
+      "value": 20
+    }
+  },
+  {
+    "id": "0xB2601340",
+    "name": "Las Vega, le maître du jeu",
+    "description": "Porte un Keshin comme une armure\\npour déchaîner un immense pouvoir.",
+    "kp": 30,
+    "effect": {
+      "value": 20
+    }
+  },
+  {
+    "id": "0xC56723D6",
+    "name": "Unknown Spirit (0xC56723D6)",
+    "description": "Porte un Keshin comme une armure\\npour déchaîner un immense pouvoir.",
+    "kp": 30,
+    "effect": {
+      "value": 20
+    }
+  },
+  {
+    "id": "0xADED99F7",
+    "name": "Opale, protectrice céleste",
+    "description": "Porte un Keshin comme une armure\\npour déchaîner un immense pouvoir.",
+    "kp": 30,
+    "effect": {
+      "value": 20
+    }
+  },
+  {
+    "id": "0x336EB479",
+    "name": "Lycaon, le loup maudit",
+    "description": "Porte un Keshin comme une armure\\npour déchaîner un immense pouvoir.",
+    "kp": 30,
+    "effect": {
+      "value": 20
+    }
+  },
+  {
+    "id": "0x953C19BE",
+    "name": "Rokh, l'oiseau légendaire",
+    "description": "Porte un Keshin comme une armure\\npour déchaîner un immense pouvoir.",
+    "kp": 30,
+    "effect": {
+      "value": 20
+    }
+  },
+  {
+    "id": "0xDE315875",
+    "name": "Xuanwu, le guerrier du Nord",
+    "description": "Porte un Keshin comme une armure\\npour déchaîner un immense pouvoir.",
+    "kp": 30,
+    "effect": {
+      "value": 20
+    }
+  },
+  {
+    "id": "0x8C2728FF",
+    "name": "Hawk, le faucon de feu",
+    "description": "Porte un Keshin comme une armure\\npour déchaîner un immense pouvoir.",
+    "kp": 30,
+    "effect": {
+      "value": 20
+    }
+  },
+  {
+    "id": "0x2EA58097",
+    "name": "Atlanticus, bête des abysses",
+    "description": "Porte un Keshin comme une armure\\npour déchaîner un immense pouvoir.",
+    "kp": 30,
+    "effect": {
+      "value": 20
+    }
+  },
+  {
+    "id": "0x4A2C58F1",
+    "name": "Zhuque, l'oiseau vermillon",
+    "description": "Porte un Keshin comme une armure\\npour déchaîner un immense pouvoir.",
+    "kp": 30,
+    "effect": {
+      "value": 20
+    }
+  },
+  {
+    "id": "0x46B81CAE",
+    "name": "Les amoureux ♀, esprits unis par le destin",
+    "description": "Porte un Keshin comme une armure\\npour déchaîner un immense pouvoir.",
+    "kp": 30,
+    "effect": {
+      "value": 20
+    }
+  },
+  {
+    "id": "0x4C2631A4",
+    "name": "Les amoureux ♂, esprits unis par le destin",
+    "description": "Porte un Keshin comme une armure\\npour déchaîner un immense pouvoir.",
+    "kp": 30,
+    "effect": {
+      "value": 20
+    }
+  },
+  {
+    "id": "0xE9F0480D",
+    "name": "Baihu, le tigre blanc",
+    "description": "Porte un Keshin comme une armure\\npour déchaîner un immense pouvoir.",
+    "kp": 30,
+    "effect": {
+      "value": 20
+    }
+  },
+  {
+    "id": "0xB026AD19",
+    "name": "Lova, déesse explosive",
+    "description": "Porte un Keshin comme une armure\\npour déchaîner un immense pouvoir.",
+    "kp": 30,
+    "effect": {
+      "value": 20
+    }
+  },
+  {
+    "id": "0xF0EB794C",
+    "name": "Qinglong, le dragon azur",
+    "description": "Porte un Keshin comme une armure\\npour déchaîner un immense pouvoir.",
+    "kp": 30,
+    "effect": {
+      "value": 20
+    }
+  },
+  {
+    "id": "0x0F16FE5E",
+    "name": "Tourment, le gardien éternel",
+    "description": "Porte un Keshin comme une armure\\npour déchaîner un immense pouvoir.",
+    "kp": 30,
+    "effect": {
+      "value": 20
+    }
+  },
+  {
+    "id": "0xD938F0A9",
+    "name": "Bazooka, le destructeur noir",
+    "description": "Porte un Keshin comme une armure\\npour déchaîner un immense pouvoir.",
+    "kp": 30,
+    "effect": {
+      "value": 20
+    }
+  },
+  {
+    "id": "0xDBC62A8F",
+    "name": "Mahes, le lion sauvage",
+    "description": "Porte un Keshin comme une armure\\npour déchaîner un immense pouvoir.",
+    "kp": 30,
+    "effect": {
+      "value": 20
+    }
+  },
+  {
+    "id": "0x6260C23E",
+    "name": "Korogon, le dragon immortel",
+    "description": "Porte un Keshin comme une armure\\npour déchaîner un immense pouvoir.",
+    "kp": 30,
+    "effect": {
+      "value": 20
+    }
+  },
+  {
+    "id": "0xB0C3B07B",
+    "name": "Kukulkan, le serpent à plumes",
+    "description": "Porte un Keshin comme une armure\\npour déchaîner un immense pouvoir.",
+    "kp": 30,
+    "effect": {
+      "value": 20
+    }
+  },
+  {
+    "id": "0xE832223A",
+    "name": "Ignis, molosse du brasier",
+    "description": "Porte un Keshin comme une armure\\npour déchaîner un immense pouvoir.",
+    "kp": 30,
+    "effect": {
+      "value": 20
+    }
+  },
+  {
+    "id": "0xD367761D",
+    "name": "Asura, le triomphateur",
+    "description": "Porte un Keshin comme une armure\\npour déchaîner un immense pouvoir.",
+    "kp": 30,
+    "effect": {
+      "value": 20
+    }
+  },
+  {
+    "id": "0x3175733D",
+    "name": "Gorgo, le seigneur démon",
+    "description": "Porte un Keshin comme une armure\\npour déchaîner un immense pouvoir.",
+    "kp": 30,
+    "effect": {
+      "value": 20
+    }
+  },
+  {
+    "id": "0xA81AEB0D",
+    "name": "Raiden, le porteur de tempête",
+    "description": "Porte un Keshin comme une armure\\npour déchaîner un immense pouvoir.",
+    "kp": 30,
+    "effect": {
+      "value": 20
+    }
+  },
+  {
+    "id": "0xC31F71F9",
+    "name": "Fulgur, héraut du tonnerre",
+    "description": "Porte un Keshin comme une armure\\npour déchaîner un immense pouvoir.",
+    "kp": 30,
+    "effect": {
+      "value": 20
+    }
+  },
+  {
+    "id": "0x4DE45B93",
+    "name": "Gerda, souveraine d'argent",
+    "description": "Porte un Keshin comme une armure\\npour déchaîner un immense pouvoir.",
+    "kp": 30,
+    "effect": {
+      "value": 20
+    }
+  },
+  {
+    "id": "0x3D209CDC",
+    "name": "Varitra, l'impitoyable reptile",
+    "description": "Porte un Keshin comme une armure\\npour déchaîner un immense pouvoir.",
+    "kp": 30,
+    "effect": {
+      "value": 20
+    }
+  },
+  {
+    "id": "0xC3A71586",
+    "name": "Tribun, le juge infaillible",
+    "description": "Porte un Keshin comme une armure\\npour déchaîner un immense pouvoir.",
+    "kp": 30,
+    "effect": {
+      "value": 20
+    }
+  },
+  {
+    "id": "0xCBBE2D6B",
+    "name": "Astaroth, avatar du chaos",
+    "description": "Porte un Keshin comme une armure\\npour déchaîner un immense pouvoir.",
+    "kp": 30,
+    "effect": {
+      "value": 20
+    }
+  },
+  {
+    "id": "0x17CFA528",
+    "name": "Papa Pap, le roi de la papeterie",
+    "description": "Porte un Keshin comme une armure\\npour déchaîner un immense pouvoir.",
+    "kp": 30,
+    "effect": {
+      "value": 20
+    }
+  },
+  {
+    "id": "0x5056A0BC",
+    "name": "Aléa, prince du hasard",
+    "description": "Porte un Keshin comme une armure\\npour déchaîner un immense pouvoir.",
+    "kp": 30,
+    "effect": {
+      "value": 20
+    }
+  },
+  {
+    "id": "0x5968EF04",
+    "name": "Astral, dragon de l'aube",
+    "description": "Porte un Keshin comme une armure\\npour déchaîner un immense pouvoir.",
+    "kp": 30,
+    "effect": {
+      "value": 20
+    }
+  },
+  {
+    "id": "0x6C49B8FD",
+    "name": "Transfo. Miximax : T-Rex",
+    "description": "Fusionne avec une aura pour se transformer\\net utiliser leurs pouvoirs combinés.",
+    "kp": 20,
+    "effect": {
+      "value": 50
+    }
+  },
+  {
+    "id": "0x4764EB3E",
+    "name": "Transfo. Miximax : <FLC:TSURUGI>",
+    "description": "Fusionne avec une aura pour se transformer\\net utiliser leurs pouvoirs combinés.",
+    "kp": 20,
+    "effect": {
+      "value": 50
+    }
+  },
+  {
+    "id": "0x4764EB3E",
+    "name": "Transfo. Miximax : <FLC:TSURUGI>",
+    "description": "Fusionne avec une aura pour se transformer\\net utiliser leurs pouvoirs combinés.",
+    "kp": 20,
+    "effect": {
+      "value": 50
+    }
+  },
+  {
+    "id": "0x5E7FDA7F",
+    "name": "Transfo. Miximax : <FUL:SYU>",
+    "description": "Fusionne avec une aura pour se transformer\\net utiliser leurs pouvoirs combinés.",
+    "kp": 20,
+    "effect": {
+      "value": 50
+    }
+  },
+  {
+    "id": "0x113E4CB8",
+    "name": "Transfo. Miximax : Nobunaga",
+    "description": "Fusionne avec une aura pour se transformer\\net utiliser leurs pouvoirs combinés.",
+    "kp": 20,
+    "effect": {
+      "value": 50
+    }
+  },
+  {
+    "id": "0x08257DF9",
+    "name": "Transfo. Miximax : Z. Liang",
+    "description": "Fusionne avec une aura pour se transformer\\net utiliser leurs pouvoirs combinés.",
+    "kp": 20,
+    "effect": {
+      "value": 50
+    }
+  },
+  {
+    "id": "0x08257DF9",
+    "name": "Transfo. Miximax : Z. Liang",
+    "description": "Fusionne avec une aura pour se transformer\\net utiliser leurs pouvoirs combinés.",
+    "kp": 20,
+    "effect": {
+      "value": 50
+    }
+  },
+  {
+    "id": "0x23082E3A",
+    "name": "Transfo. Miximax : <FLC:OKITA>",
+    "description": "Fusionne avec une aura pour se transformer\\net utiliser leurs pouvoirs combinés.",
+    "kp": 20,
+    "effect": {
+      "value": 50
+    }
+  },
+  {
+    "id": "0x3A131F7B",
+    "name": "Transfo. Miximax : Big",
+    "description": "Fusionne avec une aura pour se transformer\\net utiliser leurs pouvoirs combinés.",
+    "kp": 20,
+    "effect": {
+      "value": 50
+    }
+  },
+  {
+    "id": "0xBD8B03B4",
+    "name": "Transfo. Miximax : Zeta",
+    "description": "Fusionne avec une aura pour se transformer\\net utiliser leurs pouvoirs combinés.",
+    "kp": 20,
+    "effect": {
+      "value": 50
+    }
+  },
+  {
+    "id": "0xA49032F5",
+    "name": "Transfo. Miximax : <FLC:SAKAMOTO>",
+    "description": "Fusionne avec une aura pour se transformer\\net utiliser leurs pouvoirs combinés.",
+    "kp": 20,
+    "effect": {
+      "value": 50
+    }
+  },
+  {
+    "id": "0x7490E38B",
+    "name": "Transfo. Miximax : Arthur",
+    "description": "Fusionne avec une aura pour se transformer\\net utiliser leurs pouvoirs combinés.",
+    "kp": 20,
+    "effect": {
+      "value": 50
+    }
+  },
+  {
+    "id": "0x6D8BD2CA",
+    "name": "Transfo. Miximax : Jeanne",
+    "description": "Fusionne avec une aura pour se transformer\\net utiliser leurs pouvoirs combinés.",
+    "kp": 20,
+    "effect": {
+      "value": 50
+    }
+  },
+  {
+    "id": "0x46A68109",
+    "name": "Transfo Miximax : R. Dragons",
+    "description": "Fusionne avec une aura pour se transformer\\net utiliser leurs pouvoirs combinés.",
+    "kp": 20,
+    "effect": {
+      "value": 50
+    }
+  },
+  {
+    "id": "0x5FBDB048",
+    "name": "Transfo. Miximax : Cao Cao",
+    "description": "Fusionne avec une aura pour se transformer\\net utiliser leurs pouvoirs combinés.",
+    "kp": 20,
+    "effect": {
+      "value": 50
+    }
+  },
+  {
+    "id": "0x10FC268F",
+    "name": "Transfo. Miximax : Pa",
+    "description": "Fusionne avec une aura pour se transformer\\net utiliser leurs pouvoirs combinés.",
+    "kp": 20,
+    "effect": {
+      "value": 50
+    }
+  },
+  {
+    "id": "0x09E717CE",
+    "name": "Transfo. Miximax : Liu Bei",
+    "description": "Fusionne avec une aura pour se transformer\\net utiliser leurs pouvoirs combinés.",
+    "kp": 20,
+    "effect": {
+      "value": 50
+    }
+  },
+  {
+    "id": "0xBC496983",
+    "name": "Transfo. Miximax : Gène S",
+    "description": "Fusionne avec une aura pour se transformer\\net utiliser leurs pouvoirs combinés.",
+    "kp": 20,
+    "effect": {
+      "value": 50
+    }
+  },
+  {
+    "id": "0xE995F628",
+    "name": "Transfo. Miximax : Raika",
+    "description": "Fusionne avec une aura pour se transformer\\net utiliser leurs pouvoirs combinés.",
+    "kp": 20,
+    "effect": {
+      "value": 50
+    }
+  },
+  {
+    "id": "0xE995F628",
+    "name": "Transfo. Miximax : Raika",
+    "description": "Fusionne avec une aura pour se transformer\\net utiliser leurs pouvoirs combinés.",
+    "kp": 0,
+    "effect": {
+      "value": 50
+    }
+  },
+  {
+    "id": "0xA714E69B",
+    "name": "Transfo. Miximax : <FUL:G GENE>",
+    "description": "Fusionne avec une aura pour se transformer\\net utiliser leurs pouvoirs combinés.",
+    "kp": 20,
+    "effect": {
+      "value": 50
+    }
+  },
+  {
+    "id": "0x771437E5",
+    "name": "Transfo. Miximax : <FUL:V GENE>",
+    "description": "Fusionne avec une aura pour se transformer\\net utiliser leurs pouvoirs combinés.",
+    "kp": 20,
+    "effect": {
+      "value": 50
+    }
+  },
+  {
+    "id": "0x6E0F06A4",
+    "name": "Transfo. Miximax : Rose noire",
+    "description": "Fusionne avec une aura pour se transformer\\net utiliser leurs pouvoirs combinés.",
+    "kp": 20,
+    "effect": {
+      "value": 50
+    }
+  },
+  {
+    "id": "0x6FCD6C93",
+    "name": "Miximax <FLC:TENMA>",
+    "description": "Fusionne avec une aura pour se transformer\\net utiliser leurs pouvoirs combinés.",
+    "kp": 20,
+    "effect": {
+      "value": 50
+    }
+  },
+  {
+    "id": "0x18CA5C05",
+    "name": "Miximax <FLC:TSURUGI>",
+    "description": "Fusionne avec une aura pour se transformer\\net utiliser leurs pouvoirs combinés.",
+    "kp": 20,
+    "effect": {
+      "value": 50
+    }
+  },
+  {
+    "id": "0x44E03F50",
+    "name": "Miximax <FLC:ENDO>",
+    "description": "Fusionne avec une aura pour se transformer\\net utiliser leurs pouvoirs combinés.",
+    "kp": 20,
+    "effect": {
+      "value": 50
+    }
+  },
+  {
+    "id": "0x33E70FC6",
+    "name": "Miximax <FLC:TENMA>",
+    "description": "Fusionne avec une aura pour se transformer\\net utiliser leurs pouvoirs combinés.",
+    "kp": 20,
+    "effect": {
+      "value": 50
+    }
+  },
+  {
+    "id": "0x5DFB0E11",
+    "name": "Miximax <FLC:TSURUGI>",
+    "description": "Fusionne avec une aura pour se transformer\\net utiliser leurs pouvoirs combinés.",
+    "kp": 20,
+    "effect": {
+      "value": 50
+    }
+  },
+  {
+    "id": "0x2AFC3E87",
+    "name": "Miximax <FUL:HAKURYU>",
+    "description": "Fusionne avec une aura pour se transformer\\net utiliser leurs pouvoirs combinés.",
+    "kp": 20,
+    "effect": {
+      "value": 50
+    }
+  },
+  {
+    "id": "0x12BA98D6",
+    "name": "Miximax <FLC:SHINDO>",
+    "description": "Fusionne avec une aura pour se transformer\\net utiliser leurs pouvoirs combinés.",
+    "kp": 20,
+    "effect": {
+      "value": 50
+    }
+  },
+  {
+    "id": "0x65BDA840",
+    "name": "Miximax <FLC:KIRINO>",
+    "description": "Fusionne avec une aura pour se transformer\\net utiliser leurs pouvoirs combinés.",
+    "kp": 20,
+    "effect": {
+      "value": 50
+    }
+  },
+  {
+    "id": "0x0BA1A997",
+    "name": "Miximax <FLC:KARIYA>",
+    "description": "Fusionne avec une aura pour se transformer\\net utiliser leurs pouvoirs combinés.",
+    "kp": 20,
+    "effect": {
+      "value": 50
+    }
+  },
+  {
+    "id": "0x7CA69901",
+    "name": "Miximax <FLC:KIRINO>",
+    "description": "Fusionne avec une aura pour se transformer\\net utiliser leurs pouvoirs combinés.",
+    "kp": 20,
+    "effect": {
+      "value": 50
+    }
+  },
+  {
+    "id": "0x208CFA54",
+    "name": "Miximax <FUL:SYU>",
+    "description": "Fusionne avec une aura pour se transformer\\net utiliser leurs pouvoirs combinés.",
+    "kp": 20,
+    "effect": {
+      "value": 50
+    }
+  },
+  {
+    "id": "0x578BCAC2",
+    "name": "Miximax <FUL:HAKURYU>",
+    "description": "Fusionne avec une aura pour se transformer\\net utiliser leurs pouvoirs combinés.",
+    "kp": 20,
+    "effect": {
+      "value": 50
+    }
+  },
+  {
+    "id": "0x3997CB15",
+    "name": "Miximax <FLC:FUBUKI>",
+    "description": "Fusionne avec une aura pour se transformer\\net utiliser leurs pouvoirs combinés.",
+    "kp": 20,
+    "effect": {
+      "value": 50
+    }
+  },
+  {
+    "id": "0x4E90FB83",
+    "name": "Miximax <FLC:GOENJI>",
+    "description": "Fusionne avec une aura pour se transformer\\net utiliser leurs pouvoirs combinés.",
+    "kp": 20,
+    "effect": {
+      "value": 50
+    }
+  },
+  {
+    "id": "0xBE0FD7DA",
+    "name": "Miximax <FLC:YUTO>",
+    "description": "Fusionne avec une aura pour se transformer\\net utiliser leurs pouvoirs combinés.",
+    "kp": 20,
+    "effect": {
+      "value": 50
+    }
+  },
+  {
+    "id": "0xC908E74C",
+    "name": "Miximax <FLC:FUDO>",
+    "description": "Fusionne avec une aura pour se transformer\\net utiliser leurs pouvoirs combinés.",
+    "kp": 20,
+    "effect": {
+      "value": 50
+    }
+  },
+  {
+    "id": "0x49596F46",
+    "name": "Totem loup",
+    "description": "Un chasseur-né qui attrape sa proie grâce à ses\\ncrocs acérés et ses attaques fulgurantes et coordonnées.",
+    "kp": 30,
+    "effect": {
+      "value": -992181094
+    }
+  },
+  {
+    "id": "0x50425E07",
+    "name": "Totem faucon",
+    "description": "Un faucon en plein vol, qui déchire\\nle ciel pour plonger à pic. Il est aussi\\nincroyablement précis qu'il est rapide.",
+    "kp": 30,
+    "effect": {
+      "value": -992181094
+    }
+  },
+  {
+    "id": "0x0618F981",
+    "name": "Totem lion",
+    "description": "Le puissant maître des plaines à la crinière\\nmajestueuse, craint et respecté comme le Roi des Bêtes.",
+    "kp": 30,
+    "effect": {
+      "value": -992181094
+    }
+  },
+  {
+    "id": "0x342E9B03",
+    "name": "Totem Gooma",
+    "description": "Une créature rouge vif de Silica qui évite l'eau\\net frappe à toute vitesse une fois au sec.",
+    "kp": 30,
+    "effect": {
+      "value": -992181094
+    }
+  },
+  {
+    "id": "0x61F0E8EB",
+    "name": "Totem Doruga",
+    "description": "Un terrible reptile de Falàm Orbius\\nqui écrase tout sur son passage\\ngrâce à ses crocs qu'on dit indestructibles.",
+    "kp": 30,
+    "effect": {
+      "value": -992181094
+    }
+  },
+  {
+    "id": "0x1C871CAE",
+    "name": "Totem Belion",
+    "description": "Une féroce sous-espèce de Pelion\\noriginaire de Falàm Orbius, qui attaque\\navec une brutalité impitoyable.",
+    "kp": 30,
+    "effect": {
+      "value": -992181094
+    }
+  },
+  {
+    "id": "0x2EB17E2C",
+    "name": "Totem Ixaal",
+    "description": "Une créature cosmique humanoïde qui flotte\\nétrangement dans les airs et chasse\\nà l'aide de ses tentacules agrippants.",
+    "kp": 30,
+    "effect": {
+      "value": -992181094
+    }
+  },
+  {
+    "id": "0x37AA4F6D",
+    "name": "Totem Begiran",
+    "description": "Un insectoïde noir à deux queues\\nqui file au sol à une vitesse fulgurante.",
+    "kp": 30,
+    "effect": {
+      "value": -992181094
+    }
+  },
+  {
+    "id": "0x045E47D8",
+    "name": "Totem Dragnova",
+    "description": "Un prédateur à la peau renforcée de Falàm Orbius.\\nIl déchiquète ses proies avec ses griffes\\nacérées et sa queue destructrice.",
+    "kp": 30,
+    "effect": {
+      "value": -992181094
+    }
+  },
+  {
+    "id": "0x2F73141B",
+    "name": "Totem Goliger",
+    "description": "Un prédateur noir et jaune de Nomor qui utilise\\nles griffes acérées de ses pattes arrières\\npour grimper les falaises les plus escarpées.",
+    "kp": 30,
+    "effect": {
+      "value": -992181094
+    }
+  },
+  {
+    "id": "0xA8EB08D4",
+    "name": "Totem du Loup Argenté",
+    "description": "Un loup argenté solitaire à la fourrure mystique\\net à l'esprit fougueux.\\nIl se déplace seul.",
+    "kp": 30,
+    "effect": {
+      "value": -992181094
+    }
+  },
+  {
+    "id": "0x7C66A518",
+    "name": "Totem Pygargue",
+    "description": "Un oiseau de proie majestueux qui règne\\nsur les cieux grâce à sa vision parfaite\\net ses serres acérées.",
+    "kp": 30,
+    "effect": {
+      "value": -992181094
+    }
+  },
+  {
+    "id": "0x657D9459",
+    "name": "Totem Pelion",
+    "description": "Bête à deux queues venue de Falàm Orbius,\\nil pourchasse sa proie avec agilité et précision.",
+    "kp": 30,
+    "effect": {
+      "value": -992181094
+    }
+  },
+  {
+    "id": "0x4E50C79A",
+    "name": "Totem Vairaas",
+    "description": "Un inquiétant être blanc de Falàm Orbius,\\nses huit tentacules peuvent s'étirer\\net atteindre dix fois leur longueur originale.",
+    "kp": 30,
+    "effect": {
+      "value": -992181094
+    }
+  },
+  {
+    "id": "0x1660FE65",
+    "name": "Totem cheval",
+    "description": "Un animal rapide et puissant qui frappe\\npuissamment le sol de ses sabots\\nen s'élançant vers l'avant.",
+    "kp": 30,
+    "effect": {
+      "value": -992181094
+    }
+  },
+  {
+    "id": "0x592168A2",
+    "name": "Totem Dohma",
+    "description": "Une créature reptilienne venue de Silica.\\nElle se terre dans le sable\\net se nourrit de pierres souterraines.",
+    "kp": 30,
+    "effect": {
+      "value": -992181094
+    }
+  },
+  {
+    "id": "0x3C8FC791",
+    "name": "Totem paon",
+    "description": "Un oiseau éblouissant, captivant par son plumage\\nvif et sa queue gracieusement déployée.",
+    "kp": 30,
+    "effect": {
+      "value": -992181094
+    }
+  },
+  {
+    "id": "0x6AD56017",
+    "name": "Totem biche",
+    "description": "Une chèvre des montagnes qui peut aisément\\nfranchir les crevasses d'un bond.",
+    "kp": 30,
+    "effect": {
+      "value": -992181094
+    }
+  },
+  {
+    "id": "0x73CE5156",
+    "name": "Totem grizzly",
+    "description": "Un énorme ours terrifiant, il utilise ses pattes\\npuissantes pour frapper sans relâche.",
+    "kp": 30,
+    "effect": {
+      "value": -992181094
+    }
+  },
+  {
+    "id": "0xC6602F1B",
+    "name": "Totem Phoenichias",
+    "description": "Une merveille ailée venue de Falàm Orbius.\\nElle traverse gracieusement les cieux\\navec une beauté cosmique sans pareil.",
+    "kp": 30,
+    "effect": {
+      "value": -992181094
+    }
+  },
+  {
+    "id": "0x3EC979C8",
+    "name": "Totem Gusfii",
+    "description": "Un natif de Fertilia. Ses cornes donnent des fruits,\\néquilibre singulier entre plante et animal.",
+    "kp": 30,
+    "effect": {
+      "value": -992181094
+    }
+  },
+  {
+    "id": "0xC4269142",
+    "name": "Totem Redio",
+    "description": "Une créature mignonne,\\naux grands yeux et grandes oreilles,\\ncapable de comprendre le langage humain.",
+    "kp": 30,
+    "effect": {
+      "value": -992181094
+    }
+  },
+  {
+    "id": "0x1426403C",
+    "name": "Totem Gryphbang",
+    "description": "Une créature immense venue de Nomor.\\nSes ailes puissantes lui permettent\\nde traverser les nuages.",
+    "kp": 30,
+    "effect": {
+      "value": -992181094
+    }
+  },
+  {
+    "id": "0x3F0B13FF",
+    "name": "Totem Univolt",
+    "description": "Une créature équine venue de Nomor,\\nqui utilise sa corne pour frapper\\nses ennemis de plein fouet.",
+    "kp": 30,
+    "effect": {
+      "value": -992181094
+    }
+  },
+  {
+    "id": "0x235F343B",
+    "name": "Totem Pamerio",
+    "description": "Une créature omnivoyante au regard prophétique.\\nElle sait se tenir loin du danger.",
+    "kp": 30,
+    "effect": {
+      "value": -992181094
+    }
+  },
+  {
+    "id": "0x6C1EA2FC",
+    "name": "Totem Brachias",
+    "description": "Un prédateur draconique de Falàm Orbius\\nqui attaque tout ce qui l'approche.",
+    "kp": 30,
+    "effect": {
+      "value": -992181094
+    }
+  },
+  {
+    "id": "0x750593BD",
+    "name": "Totem Ours lunaire",
+    "description": "Un ours des forêts puissant.\\nSur son poitrail, sa fourrure blanche\\nforme un croissant de lune.",
+    "kp": 30,
+    "effect": {
+      "value": -992181094
+    }
+  },
+  {
+    "id": "0x5E28C07E",
+    "name": "Totem Zooma",
+    "description": "Un grand prédateur reptilien venu de Silica.\\nIl traverse le sol à une vitesse impressionnante.",
+    "kp": 30,
+    "effect": {
+      "value": -992181094
+    }
+  },
+  {
+    "id": "0x74C7F98A",
+    "name": "Totem Pégase cramoisi",
+    "description": "Un pégase rouge feu à la crinière noire,\\nil traverse le ciel en brûlant tout sur son passage.",
+    "kp": 30,
+    "effect": {
+      "value": -992181094
+    }
+  },
+  {
+    "id": "0x5FEAAA49",
+    "name": "Totem Pégase",
+    "description": "Une créature légendaire qui traverse le ciel,\\nportée par ses ailes blanc pur.",
+    "kp": 30,
+    "effect": {
+      "value": -992181094
+    }
+  },
+  {
+    "id": "0x01D0FAE3",
+    "name": "Totem renard",
+    "description": "Un chasseur des forêts à la vue perçante,\\naussi curieux qu'il est prudent.",
+    "kp": 30,
+    "effect": {
+      "value": -992181094
+    }
+  },
+  {
+    "id": "0xAD65B5EF",
+    "name": "Totem grand-duc",
+    "description": "Un hibou des forêts facilement reconnaissable\\ngrâce à ses « cornes » de plume.",
+    "kp": 30,
+    "effect": {
+      "value": -992181094
+    }
+  },
+  {
+    "id": "0x7D656491",
+    "name": "Totem buffle",
+    "description": "Un imposant animal de troupeau,\\ndont les puissantes cornes et la force brute\\nen font un adversaire redoutable.",
+    "kp": 30,
+    "effect": {
+      "value": -992181094
+    }
+  },
+  {
+    "id": "0x3224F256",
+    "name": "Totem Ratel",
+    "description": "Un prédateur sans peur\\nqui utilise ses énormes griffes acérées\\ncontre ses ennemis.",
+    "kp": 30,
+    "effect": {
+      "value": -992181094
+    }
+  },
+  {
+    "id": "0x2B3FC317",
+    "name": "Totem Gandoran",
+    "description": "Un colosse cuirassé venu de Falàm Orbius.\\nSa peau est si épaisse qu'il résiste à presque tout.",
+    "kp": 30,
+    "effect": {
+      "value": -992181094
+    }
+  },
+  {
+    "id": "0xB5BCEE99",
+    "name": "Totem Garius",
+    "description": "Un prédateur à écailles de Magmavia.\\nIl se recroqueville et frappe\\navec sa peau dure et cuirassée.",
+    "kp": 30,
+    "effect": {
+      "value": -992181094
+    }
+  },
+  {
+    "id": "0xB7FA50C0",
+    "name": "Totem Kulupe",
+    "description": "Un amphibien tacheté dont les grands yeux\\nservent à intimider ses proies\\nqui restent immobiles de peur.",
+    "kp": 30,
+    "effect": {
+      "value": -992181094
+    }
+  },
+  {
+    "id": "0x4CD7D27D",
+    "name": "Totem Flamey",
+    "description": "Une créature rappelant un renard, venue de Nomor.\\nSon corps devient brûlant à l'approche du danger.",
+    "kp": 30,
+    "effect": {
+      "value": -992181094
+    }
+  },
+  {
+    "id": "0x28BB1779",
+    "name": "Totem Dandrol",
+    "description": "Un prédateur massif et cuirassé de\\nFalam Orbius. Il se propulse vers l'avant\\navec assez de force pour briser la roche.",
+    "kp": 30,
+    "effect": {
+      "value": -992181094
+    }
+  },
+  {
+    "id": "0x2DF401FC",
+    "name": "Totem du hibou",
+    "description": "Un sage oiseau des forêts au regard perçant\\nqui lui permet de naviguer\\nà travers les bois les plus sombres.",
+    "kp": 30,
+    "effect": {
+      "value": -992181094
+    }
+  },
+  {
+    "id": "0xAA6C1D33",
+    "name": "Totem Gyorom",
+    "description": "Un cyclope à la vision étonnamment bonne.\\nIl est capable de voir à travers la matière.",
+    "kp": 30,
+    "effect": {
+      "value": -992181094
+    }
+  },
+  {
+    "id": "0xB3772C72",
+    "name": "Totem Gyrius",
+    "description": "Un prédateur blindé de Magmavia qui frappe\\nles points vitaux de son bec extrêmement pointu.",
+    "kp": 30,
+    "effect": {
+      "value": -992181094
+    }
+  },
+  {
+    "id": "0x9528E705",
+    "name": "Totem Delpinus",
+    "description": "Un prédateur marin de Naiadi qui\\nétourdit ses proies à l'aide d'ondes\\nultrasoniques surpuissantes.",
+    "kp": 30,
+    "effect": {
+      "value": -992181094
+    }
+  },
+  {
+    "id": "0xBE05B4C6",
+    "name": "Totem mammouth",
+    "description": "Une bête colossale mais éteinte\\nqui écrase tout sur son passage.",
+    "kp": 30,
+    "effect": {
+      "value": -992181094
+    }
+  },
+  {
+    "id": "0x976E595C",
+    "name": "Totem Gorius",
+    "description": "Un colosse aux écailles rouges de Magmavia.\\nCapable de briser la roche avec sa queue puissante.",
+    "kp": 30,
+    "effect": {
+      "value": -992181094
+    }
+  },
+  {
+    "id": "0xBC430A9F",
+    "name": "Totem Mossfii",
+    "description": "Une créature au long museau de Fertilia.\\nLe fruit qui pousse sur sa corne dépend de son humeur.",
+    "kp": 30,
+    "effect": {
+      "value": -992181094
+    }
+  },
+  {
+    "id": "0xEA19AD19",
+    "name": "Totem Angydra",
+    "description": "Prédateur à trois têtes de Falàm Orbius.\\nIl balance ses cornes pour intimider ses ennemis.",
+    "kp": 30,
+    "effect": {
+      "value": -992181094
+    }
+  },
+  {
+    "id": "0x96AC336B",
+    "name": "Totem Gigiras",
+    "description": "Brute énorme maniant quatre tentacules semblables\\nà des fouets, pour écraser ses ennemis.",
+    "kp": 30,
+    "effect": {
+      "value": -992181094
+    }
+  },
+  {
+    "id": "0xF2C0F66F",
+    "name": "Totem Magnatas",
+    "description": "Une bête trapue à quatre pattes de Nomor.\\nSon dos cuirassé la protège du danger.",
+    "kp": 30,
+    "effect": {
+      "value": -992181094
+    }
+  },
+  {
+    "id": "0x5E75B963",
+    "name": "Totem Saranarja",
+    "description": "Prédateur à trois têtes de la famille d'Angydra.\\nNatif de Falàm Orbius, il frappe\\navec une précision venimeuse.",
+    "kp": 30,
+    "effect": {
+      "value": -992181094
+    }
+  },
+  {
+    "id": "0x92214FD9",
+    "name": "Totem Dolmega",
+    "description": "Un prédateur doté d'une carapace\\nqui écrase ses proies sous son poids et ses pics.",
+    "kp": 30,
+    "effect": {
+      "value": -992181094
+    }
+  },
+  {
+    "id": "0xB90C1C1A",
+    "name": "Totem Grimron",
+    "description": "Un prédateur à forme de mollusque\\nqui relâche de la fumée noire s'il se sent menacé.",
+    "kp": 30,
+    "effect": {
+      "value": -992181094
+    }
+  },
+  {
+    "id": "0xF3D4542C",
+    "name": "Transformation de lien",
+    "description": "S'empare d'une aura liée et se transforme\\ncomplètement en cette personne.",
+    "kp": 30,
+    "effect": {
+      "value": 10
+    }
+  },
+  {
+    "id": "0xF3D4542C",
+    "name": "Transformation de lien",
+    "description": "S'empare d'une aura liée et se transforme\\ncomplètement en cette personne.",
+    "kp": 30,
+    "effect": {
+      "value": 10
+    }
+  },
+  {
+    "id": "0xF3D4542C",
+    "name": "Transformation de lien",
+    "description": "S'empare d'une aura liée et se transforme\\ncomplètement en cette personne.",
+    "kp": 30,
+    "effect": {
+      "value": 10
+    }
+  },
+  {
+    "id": "0xB67276BC",
+    "name": "Éveil",
+    "description": "Description de Awakening Power.",
+    "kp": 30,
+    "effect": {
+      "value": 30
+    }
+  },
+  {
+    "id": "0xC201A57E",
+    "name": "Passion ardente",
+    "description": "La passion de l'attaquant s'enflamme,\\net éveille son vrai pouvoir.",
+    "kp": 30,
+    "effect": {
+      "value": 30
+    }
+  },
+  {
+    "id": "0x5B08F4C4",
+    "name": "Ténacité du gardien",
+    "description": "Assumant le poids de son rôle, le gardien\\ncreuse profondément et ressort au bon moment.",
+    "kp": 30,
+    "effect": {
+      "value": 30
+    }
+  },
+  {
+    "id": "0x2C0FC452",
+    "name": "Défense cuirassée",
+    "description": "Porté par sa volonté de protéger, le joueur\\nen défense devient un mur incassable.",
+    "kp": 30,
+    "effect": {
+      "value": 30
+    }
+  },
+  {
+    "id": "0xB26B51F1",
+    "name": "Catalyste élémentaire",
+    "description": "Le joueur puise dans son potentiel,\\net débloque une puissance élémentaire encore plus grande.",
+    "kp": 30,
+    "effect": {
+      "value": 30
+    }
+  },
+  {
+    "id": "0xC56C6167",
+    "name": "Boost chrono",
+    "description": "Au top de sa concentration, le joueur\\ntraverse le terrain à toute vitesse.",
+    "kp": 30,
+    "effect": {
+      "value": 30
+    }
+  },
+  {
+    "id": "0xB67276BC",
+    "name": "Éveil",
+    "description": "Description de Awakening Power.",
+    "kp": 0,
+    "effect": {
+      "value": 30
+    }
+  },
+  {
+    "id": "0x07B58D91",
+    "name": "Désactivation des limiteurs",
+    "description": "Description de Limiter Release.",
+    "kp": 30,
+    "effect": {
+      "value": 30
+    }
+  },
+  {
+    "id": "0x9EBCDC2B",
+    "name": "Esprit Miximax",
+    "description": "Description de Ghost Miximax.",
+    "kp": 30,
+    "effect": {
+      "value": 30
+    }
+  },
+  {
+    "id": "0xE9BBECBD",
+    "name": "Fiole d'aura",
+    "description": "Description de Ampule Enhancement.",
+    "kp": 30,
+    "effect": {
+      "value": 30
+    }
+  },
+  {
+    "id": "0x606465E6",
+    "name": "Mode Malveillance",
+    "description": "Une fois acculé,\\nson côté impitoyable se révèle.",
+    "kp": 90,
+    "effect": {
+      "value": 40
+    }
+  },
+  {
+    "id": "0x55833FD7",
+    "name": "Mode Forme A",
+    "description": "Afin d'atteindre la perfection qu'il lui a promise, il se glisse dans la peau\\nde son frère défunt.",
+    "kp": 90,
+    "effect": {
+      "value": 40
+    }
+  },
+  {
+    "id": "0x6625B62B",
+    "name": "Mode Fini de jouer",
+    "description": "Il a mis de côté sa malice pour se concentrer,\\net laissé sa détermination pure créer une nouvelle force.",
+    "kp": 90,
+    "effect": {
+      "value": 40
+    }
+  },
+  {
+    "id": "0x144C9F6D",
+    "name": "Mode Furie",
+    "description": "Une fois son traumatisme surmonté, il contrôle désormais\\nsa colère pour la transformer en force.",
+    "kp": 90,
+    "effect": {
+      "value": 40
+    }
+  },
+  {
+    "id": "0xB60884DA",
+    "name": "Mode Roi de la savane",
+    "description": "La passion du combat déclenche ses instincts primaires,\\ntel un lion enragé.",
+    "kp": 90,
+    "effect": {
+      "value": 40
+    }
+  },
+  {
+    "id": "0x4F77E821",
+    "name": "Mode Sourire camouflant",
+    "description": "Son doux sourire cache sa vraie nature\\npour garder les autres à distance.",
+    "kp": 90,
+    "effect": {
+      "value": 40
+    }
+  },
+  {
+    "id": "0x3ACF3D59",
+    "name": "Mode Souveraine",
+    "description": "Elle cesse de paraître mignonne pour mieux s'enflammer,\\ndominer le terrain, et passer en mode attaque.",
+    "kp": 90,
+    "effect": {
+      "value": 40
+    }
+  },
+  {
+    "id": "0x48590131",
+    "name": "Mode Aphrody",
+    "description": "Déborde d'admiration pour Aphrody,\\npeut adopter sa forme à l'identique.",
+    "kp": 90,
+    "effect": {
+      "value": 80
+    }
+  },
+  {
+    "id": "0x544B5A18",
+    "name": "Changement d'éveil",
+    "description": "Description de Awakening Transformation.",
+    "kp": 0,
+    "effect": {
+      "value": 50
+    }
+  }
+]
