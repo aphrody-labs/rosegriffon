@@ -36,7 +36,7 @@ export function getRedisClient(): RedisClient {
         } else {
           console.log("[Redis] Connexion fermée proprement.");
         }
-        clientInstance = null; // reset the instance to trigger reconnection on next use
+        // Ne pas nullifier l'instance pour laisser autoReconnect et enableOfflineQueue de Bun fonctionner
       };
     } catch (err) {
       console.error("[Redis] Erreur critique d'initialisation :", err);
