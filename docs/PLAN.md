@@ -56,12 +56,12 @@ _Wiki Inazuma Eleven Victory Road (déployé sur `azalee.rosegriffon.fr` via le 
   - ✅ Outil de découpe et de compression d'images côté client.
   - ✅ Suivi de production complet avec Sentry, Vercel Speed Insights, Analytics et Google APIs.
   - ✅ Outils de modération et de traduction en masse pour les administrateurs et réviseurs du wiki.
-  - ✅ **Résolution du doublon Mark Evans** : Regroupement dynamique par `sheetId` issu de `sheet_data` (fusionnant les différentes versions de personnages issues des fichiers du jeu) et exclusion des personnages non jouables ou incomplets de la recherche par défaut.
+  - ✅ **Résolution du doublon Mark Evans et variantes** : Regroupement dynamique par `charaId` (fusionnant toutes les versions et loadouts d'un même avatar de personnage de façon unique) et dédoublonnement interne des variantes par position/élément/rareté avec préservation des données de fiche enrichie (`sheetData`).
   - ✅ **Optimisation drastique des latences du Wiki** : Parallelisation des requêtes multi-tables pour les auras et de la résolution des noms de techniques (`Promise.all`), et consolidation des requêtes de repli de `getSkill` en une unique requête SQL `.or()`. Latence divisée par 30 (< 100ms par page).
   - ✅ **Résolution du flou de rendu visuel** : Suppression des animations et transitions de type `filter: blur(...)` et des propriétés `will-change` dans `globals.css` qui désactivaient l'antialiasing sous-pixel du navigateur sur les cartes et la section statistiques de la page d'accueil.
   - ✅ **Centrage mobile de la bannière Achillea** : Correction de l'image de titre via flexbox (`justify-center md:justify-start`) et remplacement de l'image absolue par un composant image responsive.
   - ✅ **Centrage mobile du FormSelector** : Centrage horizontal des vignettes de formulaires et élargissement automatique du conteneur de fiches de personnage (`w-full sm:flex-1`) sur mobile.
-  - ⏳ Optimisation de la mise en cache ISR (Incremental Static Regeneration) pour le Zukan.
+  - ✅ **Optimisation de la mise en cache ISR (Incremental Static Regeneration) pour le Zukan** : Pré-génération statique via `generateStaticParams()` pour les 1 051 fiches de personnages à la compilation, éliminant les requêtes à la base de données en production.
   - ⏳ Système de recherche hybride combinant recherche floue (uFuzzy) et vectorielle (RAG).
 
 ### 🌐 @rose-griffon/website
@@ -90,10 +90,10 @@ _Bot Discord de modération et d'animation (déployé sous systemd sur le VPS)_
   - ✅ Synchronisation des membres et des photos de l'équipe vers la base de données.
   - ✅ Système d'autorisation RBAC avec `withRgAdmin` et `isAdmin` partagés.
   - ✅ Utilisation de `sql` (Bun.SQL) pour les requêtes de base de données ultra-rapides et du client Supabase pour le query-building.
-  - ⏳ Nettoyage de la dépendance inutilisée `tsyringe` (dead dep).
-  - ⏳ Centralisation de la configuration environnementale (guild ID, rôles, couleurs) dans `src/lib/config.ts`.
+  - ✅ **Nettoyage de la dépendance inutilisée `tsyringe` (dead dep)** : Retiré avec succès des dépendances du bot.
+  - ✅ **Centralisation de la configuration environnementale** : Toutes les variables (GUILD_ID, thèmes, etc.) centralisées dans `src/lib/config.ts`.
   - ⏳ Système d'annonces automatiques sur Discord lors de la mise à jour du Wiki ou du site.
-  - ⏳ Migration vers le helper natif `avatarURL` de discord.js au lieu de la réimplémentation locale.
+  - ✅ **Migration vers le helper natif `avatarURL` de discord.js** : Intégration complète de `user.displayAvatarURL()` pour la synchronisation automatique des photos de profil.
 
 ---
 
@@ -186,7 +186,7 @@ _Outils de qualité de code et configurations partagées_
   - ✅ Presets TypeScript standardisés (`tsconfig-base.json`, `tsconfig-bun.json`, `tsconfig-nextjs.json`).
   - ✅ Règles de validation avec ESLint et Oxlint (`eslint-base.mjs`, `oxlintrc.json`).
   - ✅ Configuration unifiée de presets pour Tailwind CSS.
-  - ⏳ Résolution des dépréciations signalées sous TypeScript 6.0 (`ignoreDeprecations`).
+  - ✅ **Résolution des dépréciations signalées sous TypeScript 6.0** : Retrait du flag `ignoreDeprecations` de tous les fichiers TSConfig et correction des types.
   - ⏳ Migration globale de toutes les configurations ESLint vers le format de configuration plat (Flat Config).
 
 ### 🎟️ @rose-griffon/patreon-bun
@@ -229,9 +229,9 @@ _API universelle et parses de données de jeu Inazuma Eleven_
 
 ### Phase 1 : Consolidation des fondations TypeScript & Config
 
-1. **[db] Typage de CookieStore** : Remplacer `Record<string, unknown>` par `CookieOptions` dans `packages/db/src/server.ts` pour éliminer le cast d'options de cookie dans le site web.
-2. **[bot] Nettoyage des dépendances** : Retirer `tsyringe` de `apps/bot/package.json` et centraliser les variables de configuration (GUILD_ID, thèmes, etc.) dans `apps/bot/src/lib/config.ts`.
-3. **[config] TS 6.0 Warnings** : Corriger les avertissements de dépréciation masqués par `ignoreDeprecations: "6.0"` dans la configuration TypeScript commune.
+1. ✅ **[db] Typage de CookieStore** : Remplacé par `CookieOptions` dans `packages/db/src/server.ts` pour éliminer le cast d'options de cookie dans le site web.
+2. ✅ **[bot] Nettoyage des dépendances** : Retiré `tsyringe` de `apps/bot/package.json` et centralisé les variables de configuration (GUILD_ID, thèmes, etc.) dans `apps/bot/src/lib/config.ts`.
+3. ✅ **[config] TS 6.0 Warnings** : Retrait du flag `ignoreDeprecations: "6.0"` dans la configuration TypeScript commune.
 
 ### Phase 2 : Optimisation et robustesse du Crawler et RAG (@rose-griffon/cron)
 
@@ -247,12 +247,12 @@ _API universelle et parses de données de jeu Inazuma Eleven_
 
 ### Phase 4 : Optimisation Base de Données et Cache Hybride (Azalée)
 
-1. **Intégration du cache SQLite local pour les lectures du wiki** :
-   - Modifier `apps/azalee/lib/api-client.ts` pour brancher les requêtes de lecture statiques (personnages, objets, techniques) sur le fichier SQLite local généré par `bun run backup:supabase`.
-   - Laisser les écritures utilisateur (authentification Better Auth, profils, logs d'audit) connectées à Supabase Cloud Postgres.
-   - **Bénéfice** : Latence réseau ramenée à 0ms sur les pages de données de jeu et économie massive de requêtes/egress sur Supabase.
-2. **Automatisation du cycle de vie du cache** :
-   - Ajouter une routine automatique dans `@rose-griffon/cron` pour relancer `backup-supabase-to-sqlite.ts` à intervalles réguliers ou lors d'une détection de changement de données de jeu.
+1. ✅ **Intégration du cache SQLite local pour les lectures du wiki** :
+   - Branché sur les requêtes de lecture statiques (dans `server.ts` et `api-client.ts`) sur le fichier SQLite local généré par `backup:supabase`.
+   - Les écritures utilisateur (authentification Better Auth, profils, logs d'audit) restent connectées à Supabase Cloud Postgres.
+   - **Bénéfice** : Latence réseau de 0ms sur les pages de données de jeu et économie massive de requêtes sur Supabase.
+2. ✅ **Automatisation du cycle de vie du cache** :
+   - Routine automatique en tâche cron configurée dans `@rose-griffon/cron` (exécution quotidienne à 2h UTC pour la synchronisation Inagle et la sauvegarde SQLite).
 
 ### Phase 5 : Sécurité & Stratégie de Sauvegarde Externe
 

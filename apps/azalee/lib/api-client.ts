@@ -16,9 +16,13 @@ import { createClient } from "@supabase/supabase-js";
 import { unstable_cache } from "next/cache";
 import { resolveAssetUrl, resolveAuraTelopUrl } from "@/lib/images";
 
+import { createSqliteClient } from "./supabase/sqlite-client";
+
 // Lazy getter for Supabase to prevent top-level execution during build
 let _supabase: ReturnType<typeof createClient> | null = null;
-function getSupabase() {
+let _hasWarnedMissingBun = false;
+
+function getSupabase(): ReturnType<typeof createClient> {
 	if (_supabase) {return _supabase;}
 
 	const url =
@@ -37,7 +41,40 @@ function getSupabase() {
 			? process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 			: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlzYmthZWx0dWJxaXR0eXdpYmVoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDYwNjk0MzAsImV4cCI6MjA2MTY0NTQzMH0.N4l07k3V_X5I8iW0n_D6K9-O4v5l7l6s6MYGpJIXRW_rB8zc45k7chqi8Ljl_CLiLc=";
 
-	_supabase = createClient(url, key);
+	const baseClient = createClient(url, key);
+	const sqliteClient = createSqliteClient();
+
+	_supabase = new Proxy(baseClient, {
+		get(target, prop, receiver) {
+			if (prop === "from") {
+				return (table: string) => {
+					if (table.startsWith("inagle_")) {
+						try {
+							return sqliteClient.from(table);
+						} catch (e: unknown) {
+							const msg = e instanceof Error ? e.message : String(e);
+							if (
+								msg.includes("Cannot find module 'bun:sqlite'") ||
+								msg.includes("Failed to load external module bun:sqlite") ||
+								msg.includes("No SQLite database backup found")
+							) {
+								if (!_hasWarnedMissingBun) {
+									console.log("[api-client] SQLite database cache is unavailable (falling back to Postgres).");
+									_hasWarnedMissingBun = true;
+								}
+							} else {
+								console.warn(`[api-client] Fallback to Postgres for table ${table}:`, e);
+							}
+							return target.from(table);
+						}
+					}
+					return target.from(table);
+				};
+			}
+			return Reflect.get(target, prop, receiver);
+		}
+	}) as unknown as ReturnType<typeof createClient>;
+
 	return _supabase;
 }
 
