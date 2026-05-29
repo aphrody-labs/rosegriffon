@@ -92,7 +92,7 @@ _Bot Discord de modération et d'animation (déployé sous systemd sur le VPS)_
   - ✅ Utilisation de `sql` (Bun.SQL) pour les requêtes de base de données ultra-rapides et du client Supabase pour le query-building.
   - ✅ **Nettoyage de la dépendance inutilisée `tsyringe` (dead dep)** : Retiré avec succès des dépendances du bot.
   - ✅ **Centralisation de la configuration environnementale** : Toutes les variables (GUILD_ID, thèmes, etc.) centralisées dans `src/lib/config.ts`.
-  - ⏳ Système d'annonces automatiques sur Discord lors de la mise à jour du Wiki ou du site.
+  - ✅ Système d'annonces automatiques sur Discord lors de la mise à jour du Wiki ou du site.
   - ✅ **Migration vers le helper natif `avatarURL` de discord.js** : Intégration complète de `user.displayAvatarURL()` pour la synchronisation automatique des photos de profil.
 
 ---
@@ -125,7 +125,7 @@ _Daemon de planification, crawling et RAG (VPS simple process)_
     - ✅ **publish** (`api.ts`) : Publication des articles programmés.
     - ✅ **patreon** (`api.ts`) : Synchronisation des tiers d'abonnements Patreon.
     - ✅ **warm** (`api.ts`) : Chauffage régulier du cache ISR Next.js des applications.
-  - ⏳ Rotation automatique de proxies pour contourner les limitations d'API et anti-bots (X/Level-5).
+  - ✅ Rotation automatique de proxies pour contourner les limitations d'API et anti-bots (X/Level-5) avec repli résilient.
   - ⏳ Amélioration du chunking sémantique des documents pour le RAG.
   - ⏳ Sources additionnelles pour le crawling (Reddit, Discord).
 
@@ -176,7 +176,7 @@ _Schémas de validation et types métier communs_
 - **État d'avancement** :
   - ✅ Union types pour les rôles utilisateur (`RgRole`).
   - ✅ Types définis pour les articles, visiteurs, flux de streaming, événements et équipes.
-  - ⏳ Regroupement de tous les schémas de validation Zod sous un unique module.
+  - ✅ Regroupement de tous les schémas de validation Zod sous un unique module.
 
 ### 🛠️ @rose-griffon/config
 
@@ -238,7 +238,7 @@ _API universelle et parses de données de jeu Inazuma Eleven_
 
 1. ✅ **Fiabilisation de la connexion Redis** : Correction des déconnexions intempestives Redis (`ERR_REDIS_CONNECTION_CLOSED`) lors du RAG Sync en ajustant le cycle de vie du socket de Bun.
 2. ✅ **Amélioration du crawler Twitter et rendu UI** : Extraction des entités média distantes sur X, reconstruction ordonnée des threads, et structuration complète des colonnes `media` et `raw_tweets` pour le rendu dynamique des threads dans l'UI d'Azalée.
-3. **Résilience réseau** : Intégrer un système de rotation de proxies dans `@rose-griffon/cron` pour prémunir le crawl officiel Zukan, Level-5 et X/Twitter contre les blocages d'IP.
+3. ✅ **Résilience réseau** : Intégrer un système de rotation de proxies dans `@rose-griffon/cron` pour prémunir le crawl officiel Zukan, Level-5 et X/Twitter contre les blocages d'IP (avec retry-loop et injection de flag chrome).
 4. **Qualité RAG** : Améliorer le chunking des documents récoltés pour affiner la pertinence des résultats de recherche sémantique.
 
 ### Phase 3 : Nouvelles fonctionnalités applicatives
