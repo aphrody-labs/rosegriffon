@@ -48,7 +48,9 @@ export async function crawlTwitter(): Promise<{
 	error?: string;
 }> {
 	const screenNames = ["Azalee_IE", "AkihiroHino", "LEVEL5_times", "inazuma_project"];
-	console.log(`[Crawl Twitter] Démarrage de la synchronisation des tweets de : ${screenNames.join(", ")}...`);
+	console.log(
+		`[Crawl Twitter] Démarrage de la synchronisation des tweets de : ${screenNames.join(", ")}...`
+	);
 
 	let totalCount = 0;
 	let hasErrors = false;
@@ -72,7 +74,9 @@ export async function crawlTwitter(): Promise<{
 				console.log(`[Crawl Twitter] Récupération des tweets récents de @${screenName}...`);
 				const timeline = await client.userTweets(user.id, 40);
 				const fetchedTweets = timeline.tweets || [];
-				console.log(`[Crawl Twitter] ${fetchedTweets.length} tweets récupérés pour @${screenName}.`);
+				console.log(
+					`[Crawl Twitter] ${fetchedTweets.length} tweets récupérés pour @${screenName}.`
+				);
 
 				const nonRetweets = fetchedTweets.filter((t) => !t.text.startsWith("RT @"));
 				console.log(`[Crawl Twitter] ${nonRetweets.length} tweets après filtrage des RTs.`);
@@ -109,7 +113,8 @@ export async function crawlTwitter(): Promise<{
 								);
 								const headTweet = await client.getTweet(convId);
 								if (headTweet) {
-									isUserThread = headTweet.author.username.toLowerCase() === screenName.toLowerCase();
+									isUserThread =
+										headTweet.author.username.toLowerCase() === screenName.toLowerCase();
 								}
 							} catch (apiErr) {
 								console.warn(
@@ -155,12 +160,14 @@ export async function crawlTwitter(): Promise<{
 
 						for (const item of filteredGroup) {
 							if (item.id === t.id) continue;
-							const itemMedia = (item.media || []).map((m: { id: string; type: string; url?: string }) => ({
-								id: m.id,
-								type: m.type,
-								url: m.url,
-								original_url: m.url,
-							}));
+							const itemMedia = (item.media || []).map(
+								(m: { id: string; type: string; url?: string }) => ({
+									id: m.id,
+									type: m.type,
+									url: m.url,
+									original_url: m.url,
+								})
+							);
 							for (const m of itemMedia) {
 								if (m.url && !seenMediaUrls.has(m.url)) {
 									allThreadMedia.push(m);
@@ -205,7 +212,9 @@ export async function crawlTwitter(): Promise<{
 				}
 
 				if (finalTweetsToUpsert.length > 0) {
-					console.log(`[Crawl Twitter] Envoi de ${finalTweetsToUpsert.length} tweets pour @${screenName}...`);
+					console.log(
+						`[Crawl Twitter] Envoi de ${finalTweetsToUpsert.length} tweets pour @${screenName}...`
+					);
 					const { error } = await supabase.from("tweets").upsert(finalTweetsToUpsert);
 					if (error) {
 						console.error(`[Crawl Twitter] Erreur d'upsert pour @${screenName} :`, error);
@@ -217,7 +226,10 @@ export async function crawlTwitter(): Promise<{
 					console.log(`[Crawl Twitter] Aucun nouveau tweet à synchroniser pour @${screenName}.`);
 				}
 			} catch (profileErr) {
-				console.error(`[Crawl Twitter] Erreur lors de la synchronisation de @${screenName} :`, profileErr);
+				console.error(
+					`[Crawl Twitter] Erreur lors de la synchronisation de @${screenName} :`,
+					profileErr
+				);
 				hasErrors = true;
 			}
 		}

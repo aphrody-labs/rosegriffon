@@ -21,14 +21,14 @@ async function getDirPackages(parentDir: string): Promise<PackageMeta[]> {
 		const entries = await readdir(parentDir, { withFileTypes: true });
 		for (const entry of entries) {
 			if (!entry.isDirectory()) continue;
-			
+
 			const pkgPath = join(parentDir, entry.name);
 			const pkgJsonPath = join(pkgPath, "package.json");
-			
+
 			try {
 				const raw = await readFile(pkgJsonPath, "utf-8");
 				const parsed = JSON.parse(raw);
-				
+
 				// Trouver les entrypoints typiques
 				const entrypoints: string[] = [];
 				const possibleEntries = [
@@ -38,9 +38,9 @@ async function getDirPackages(parentDir: string): Promise<PackageMeta[]> {
 					"src/main.js",
 					"app/page.tsx",
 					"app/route.ts",
-					"src/tasks/ie-crawl/index.ts"
+					"src/tasks/ie-crawl/index.ts",
 				];
-				
+
 				for (const p of possibleEntries) {
 					try {
 						const exists = await readFile(join(pkgPath, p), "utf-8");
@@ -58,7 +58,7 @@ async function getDirPackages(parentDir: string): Promise<PackageMeta[]> {
 					dependencies: Object.keys(parsed.dependencies || {}),
 					devDependencies: Object.keys(parsed.devDependencies || {}),
 					scripts: parsed.scripts || {},
-					entrypoints
+					entrypoints,
 				});
 			} catch {}
 		}
@@ -96,15 +96,19 @@ Applications autonomes prêtes à être déployées :
 * **Chemin :** \`${app.path}\`
 * **Description :** ${app.description}
 * **Version :** \`${app.version}\`
-${app.entrypoints.length > 0 ? `* **Points d'entrée clés :**\n${app.entrypoints.map(e => `  - [\`${e}\`](file:///${app.path}/${e})`).join("\n")}\n` : ""}
+${app.entrypoints.length > 0 ? `* **Points d'entrée clés :**\n${app.entrypoints.map((e) => `  - [\`${e}\`](file:///${app.path}/${e})`).join("\n")}\n` : ""}
 * **Scripts disponibles :**
-${Object.keys(app.scripts).length > 0 
-	? Object.entries(app.scripts).map(([name, cmd]) => `  - \`bun run ${name}\` : \`${cmd}\``).join("\n")
-	: "  - Aucun script disponible."}
+${
+	Object.keys(app.scripts).length > 0
+		? Object.entries(app.scripts)
+				.map(([name, cmd]) => `  - \`bun run ${name}\` : \`${cmd}\``)
+				.join("\n")
+		: "  - Aucun script disponible."
+}
 
 * **Dépendances internes & externes :**
-  - **Dependencies :** ${app.dependencies.length > 0 ? app.dependencies.map(d => `\`${d}\``).join(", ") : "Aucune"}
-  - **DevDependencies :** ${app.devDependencies.length > 0 ? app.devDependencies.map(d => `\`${d}\``).join(", ") : "Aucune"}
+  - **Dependencies :** ${app.dependencies.length > 0 ? app.dependencies.map((d) => `\`${d}\``).join(", ") : "Aucune"}
+  - **DevDependencies :** ${app.devDependencies.length > 0 ? app.devDependencies.map((d) => `\`${d}\``).join(", ") : "Aucune"}
 
 ---
 
@@ -122,15 +126,19 @@ Packages partagés consommés par les applications :
 * **Chemin :** \`${pkg.path}\`
 * **Description :** ${pkg.description}
 * **Version :** \`${pkg.version}\`
-${pkg.entrypoints.length > 0 ? `* **Points d'entrée clés :**\n${pkg.entrypoints.map(e => `  - [\`${e}\`](file:///${pkg.path}/${e})`).join("\n")}\n` : ""}
+${pkg.entrypoints.length > 0 ? `* **Points d'entrée clés :**\n${pkg.entrypoints.map((e) => `  - [\`${e}\`](file:///${pkg.path}/${e})`).join("\n")}\n` : ""}
 * **Scripts disponibles :**
-${Object.keys(pkg.scripts).length > 0 
-	? Object.entries(pkg.scripts).map(([name, cmd]) => `  - \`bun run ${name}\` : \`${cmd}\``).join("\n")
-	: "  - Aucun script disponible."}
+${
+	Object.keys(pkg.scripts).length > 0
+		? Object.entries(pkg.scripts)
+				.map(([name, cmd]) => `  - \`bun run ${name}\` : \`${cmd}\``)
+				.join("\n")
+		: "  - Aucun script disponible."
+}
 
 * **Dépendances internes & externes :**
-  - **Dependencies :** ${pkg.dependencies.length > 0 ? pkg.dependencies.map(d => `\`${d}\``).join(", ") : "Aucune"}
-  - **DevDependencies :** ${pkg.devDependencies.length > 0 ? pkg.devDependencies.map(d => `\`${d}\``).join(", ") : "Aucune"}
+  - **Dependencies :** ${pkg.dependencies.length > 0 ? pkg.dependencies.map((d) => `\`${d}\``).join(", ") : "Aucune"}
+  - **DevDependencies :** ${pkg.devDependencies.length > 0 ? pkg.devDependencies.map((d) => `\`${d}\``).join(", ") : "Aucune"}
 
 ---
 
@@ -147,7 +155,9 @@ graph TD
 
 	const all = [...apps, ...packages];
 	for (const item of all) {
-		const workspaceDeps = item.dependencies.filter(d => d.startsWith("@rose-griffon/") || d.startsWith("@aphrody-code/"));
+		const workspaceDeps = item.dependencies.filter(
+			(d) => d.startsWith("@rose-griffon/") || d.startsWith("@aphrody-code/")
+		);
 		for (const dep of workspaceDeps) {
 			md += `    ${item.name.replace(/[@/-]/g, "_")} --> ${dep.replace(/[@/-]/g, "_")}\n`;
 		}

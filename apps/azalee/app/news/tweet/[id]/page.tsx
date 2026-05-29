@@ -169,10 +169,18 @@ export default async function TweetPage({ params }: { params: Promise<{ id: stri
 						<div className="flex items-center gap-2">
 							{authorInfo.avatar ? (
 								<div className="size-8 sm:size-9 rounded-full bg-surface-container-high overflow-hidden relative shrink-0 ring-2 ring-background">
-									<Image src={authorInfo.avatar} alt={authorInfo.name} fill sizes="36px" className="object-cover" />
+									<Image
+										src={authorInfo.avatar}
+										alt={authorInfo.name}
+										fill
+										sizes="36px"
+										className="object-cover"
+									/>
 								</div>
 							) : (
-								<div className={`size-8 sm:size-9 rounded-full flex items-center justify-center text-white text-xs font-bold ring-2 ring-background shrink-0 ${authorInfo.color}`}>
+								<div
+									className={`size-8 sm:size-9 rounded-full flex items-center justify-center text-white text-xs font-bold ring-2 ring-background shrink-0 ${authorInfo.color}`}
+								>
 									{authorInfo.initials}
 								</div>
 							)}
@@ -251,17 +259,26 @@ export default async function TweetPage({ params }: { params: Promise<{ id: stri
 						<div className="flex items-center gap-3">
 							{authorInfo.avatar ? (
 								<div className="size-12 rounded-full bg-surface-container-high overflow-hidden relative border border-outline-variant/10 shrink-0">
-									<Image src={authorInfo.avatar} alt={authorInfo.name} fill className="object-cover" />
+									<Image
+										src={authorInfo.avatar}
+										alt={authorInfo.name}
+										fill
+										className="object-cover"
+									/>
 								</div>
 							) : (
-								<div className={`size-12 rounded-full flex items-center justify-center text-white text-sm font-bold border border-outline-variant/10 shrink-0 ${authorInfo.color}`}>
+								<div
+									className={`size-12 rounded-full flex items-center justify-center text-white text-sm font-bold border border-outline-variant/10 shrink-0 ${authorInfo.color}`}
+								>
 									{authorInfo.initials}
 								</div>
 							)}
 							<div>
 								<p className="font-bold text-on-surface">{authorInfo.name}</p>
 								<p className="text-sm text-on-surface-variant/60">@{tweet.author_username}</p>
-								<p className="text-xs text-on-surface-variant/70 mt-1 max-w-[500px]">{authorInfo.bio}</p>
+								<p className="text-xs text-on-surface-variant/70 mt-1 max-w-[500px]">
+									{authorInfo.bio}
+								</p>
 							</div>
 						</div>
 						<a

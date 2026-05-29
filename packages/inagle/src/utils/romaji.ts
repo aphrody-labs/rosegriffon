@@ -69,7 +69,7 @@ export async function toRomaji(
  */
 export async function toRomajiTitleCase(text: string): Promise<string> {
 	const rawRomaji = await toRomaji(text, { mode: "spaced" });
-	
+
 	// Split by space or dot and capitalize each part
 	return rawRomaji
 		.split(/[・\s]+/)

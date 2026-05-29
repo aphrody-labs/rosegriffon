@@ -434,7 +434,11 @@ export function calculateTeamSynergy(
 					value: 5 * count,
 				});
 			}
-		} else if (nameLower.includes("mur") || nameLower.includes("wall") || nameLower.includes("défense")) {
+		} else if (
+			nameLower.includes("mur") ||
+			nameLower.includes("wall") ||
+			nameLower.includes("défense")
+		) {
 			const dfCount = loadedPlayers.filter((pl) => pl.positionOnField === "DF").length;
 			if (dfCount >= 3) {
 				activeSynergies.push({
@@ -467,7 +471,10 @@ export function calculateTeamSynergy(
 	}
 
 	const passiveBonusSum = activeSynergies
-		.filter((s) => s.bonusType.startsWith("Boost Élémentaire") || s.bonusType.startsWith("Boost Positionnel"))
+		.filter(
+			(s) =>
+				s.bonusType.startsWith("Boost Élémentaire") || s.bonusType.startsWith("Boost Positionnel")
+		)
 		.reduce((sum, s) => sum + s.value, 0);
 
 	synergyScore += Math.min(20, passiveBonusSum);

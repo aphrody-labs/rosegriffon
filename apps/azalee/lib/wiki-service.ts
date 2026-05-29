@@ -282,16 +282,18 @@ export const wikiService = {
 	async getCharacterAuras(
 		charaId: string,
 		charaParamId: string
-	): Promise<Array<{
-		id: string;
-		name: string;
-		type: string;
-		categorySlug: string;
-		imageUrl: string | null;
-		assetCode: string | null;
-		subType: string;
-		element?: { en?: string; ja?: string; fr?: string };
-	}>> {
+	): Promise<
+		Array<{
+			id: string;
+			name: string;
+			type: string;
+			categorySlug: string;
+			imageUrl: string | null;
+			assetCode: string | null;
+			subType: string;
+			element?: { en?: string; ja?: string; fr?: string };
+		}>
+	> {
 		const supabase = await createClient();
 		const results: any[] = [];
 		const tables = [
@@ -306,8 +308,12 @@ export const wikiService = {
 		const searchPromises = tables.map(async ({ table, slug, subType }) => {
 			const { data } = await supabase
 				.from(table as any)
-				.select("id, name_fr, name_en, name_ja, image_url, asset_code, element_id, data, owner_chara_id")
-				.or(`owner_chara_id.eq.${cleanCharaId},owner_chara_id.eq.${cleanParamId},data->>ownerCharaParamId.eq.${cleanCharaId},data->>ownerCharaParamId.eq.${cleanParamId}`);
+				.select(
+					"id, name_fr, name_en, name_ja, image_url, asset_code, element_id, data, owner_chara_id"
+				)
+				.or(
+					`owner_chara_id.eq.${cleanCharaId},owner_chara_id.eq.${cleanParamId},data->>ownerCharaParamId.eq.${cleanCharaId},data->>ownerCharaParamId.eq.${cleanParamId}`
+				);
 
 			if (data) {
 				for (const a of data as any[]) {
@@ -1768,11 +1774,7 @@ export const wikiService = {
 
 	async getTweetById(id: string): Promise<any | null> {
 		const supabase = await createClient();
-		const { data } = await supabase
-			.from("tweets")
-			.select("*")
-			.eq("id", id)
-			.maybeSingle();
+		const { data } = await supabase.from("tweets").select("*").eq("id", id).maybeSingle();
 		return data;
 	},
 };

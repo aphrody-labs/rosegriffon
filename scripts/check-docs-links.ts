@@ -26,7 +26,7 @@ async function verifyPath(filePath: string): Promise<boolean> {
 
 async function checkLinks() {
 	console.log("🔗 Vérification des liens de documentation...");
-	
+
 	const files = await getFiles(DOCS_DIR);
 	let totalLinks = 0;
 	let brokenLinks = 0;
@@ -46,12 +46,16 @@ async function checkLinks() {
 
 		while ((match = linkRegex.exec(content)) !== null) {
 			const linkUrl = match[1].trim();
-			
+
 			// Ignorer les liens externes
-			if (linkUrl.startsWith("http://") || linkUrl.startsWith("https://") || linkUrl.startsWith("mailto:")) {
+			if (
+				linkUrl.startsWith("http://") ||
+				linkUrl.startsWith("https://") ||
+				linkUrl.startsWith("mailto:")
+			) {
 				continue;
 			}
-			
+
 			// Ignorer les ancres de même page (#...)
 			if (linkUrl.startsWith("#")) {
 				continue;
@@ -74,7 +78,9 @@ async function checkLinks() {
 
 			const exists = await verifyPath(targetPath);
 			if (!exists) {
-				console.error(`❌ Lien cassé dans [${relativeFile}] : "${linkUrl}" (Cible non trouvée: ${targetPath})`);
+				console.error(
+					`❌ Lien cassé dans [${relativeFile}] : "${linkUrl}" (Cible non trouvée: ${targetPath})`
+				);
 				brokenLinks++;
 			}
 		}

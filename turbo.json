@@ -70,7 +70,6 @@
 			"inputs": [
 				"$TURBO_DEFAULT$",
 				".oxlintrc.json",
-				"eslint.config.*",
 				"!**/*.md",
 				"!.next/**",
 				"!dist/**",

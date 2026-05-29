@@ -18,17 +18,59 @@ interface DBTweetRow {
 	created_at: string | null;
 }
 
-
 const DATA_ROOT = "/home/ubuntu/rg/data/inazuma.jp/victory-road";
+
+function parseFrontmatter(fileContent: string): {
+	data: Record<string, string[] | string>;
+	content: string;
+} {
+	const frontmatterRegex = /^---\r?\n([\s\S]*?)\r?\n---\r?\n/;
+	const match = fileContent.match(frontmatterRegex);
+
+	if (!match) {
+		return { data: {}, content: fileContent };
+	}
+
+	const yamlBlock = match[1] || "";
+	const content = fileContent.replace(frontmatterRegex, "");
+	const data: Record<string, string[] | string> = {};
+
+	const lines = yamlBlock.split("\n");
+	for (const line of lines) {
+		const colonIdx = line.indexOf(":");
+		if (colonIdx === -1) continue;
+
+		const key = line.slice(0, colonIdx).trim();
+		let val = line.slice(colonIdx + 1).trim();
+
+		if (val.startsWith('"') && val.endsWith('"')) {
+			val = val.slice(1, -1);
+		} else if (val.startsWith("'") && val.endsWith("'")) {
+			val = val.slice(1, -1);
+		}
+
+		if (val.startsWith("[") && val.endsWith("]")) {
+			data[key] = val
+				.slice(1, -1)
+				.split(",")
+				.map((s) => s.trim().replace(/^['"]|['"]$/g, ""))
+				.filter(Boolean);
+		} else {
+			data[key] = val;
+		}
+	}
+
+	return { data, content };
+}
 
 interface ScrapedItem {
 	id: string;
-	type: "topic" | "patchnote";
+	type: "topic" | "patchnote" | "re" | "cross" | "level5" | "doc";
 	title: string;
 	url: string;
 	date: string;
 	htmlPath: string;
-	metadata: Record<string, any>;
+	metadata: Record<string, string[] | string | number | boolean>;
 }
 
 /**
@@ -308,6 +350,43 @@ function collectScrapedItems(): ScrapedItem[] {
 		}
 	}
 
+	// 7. Collecter les documentations du monorepo (docs/*.md)
+	const docsDir = "/home/ubuntu/rg/docs";
+	if (existsSync(docsDir)) {
+		const files = readdirSync(docsDir, { withFileTypes: true })
+			.filter(
+				(dirent) =>
+					!dirent.isDirectory() && (dirent.name.endsWith(".md") || dirent.name.endsWith(".mdx"))
+			)
+			.map((dirent) => dirent.name);
+
+		for (const file of files) {
+			if (file === "llms.txt" || file === "llms-full.txt") continue;
+
+			const filePath = join(docsDir, file);
+			try {
+				const rawContent = readFileSync(filePath, "utf-8");
+				const { data } = parseFrontmatter(rawContent);
+
+				items.push({
+					id: `doc-${file}`,
+					type: "doc",
+					title: (data.title as string) || file,
+					url: `file:///docs/${file}`,
+					date: (data.last_updated as string) || "",
+					htmlPath: filePath,
+					metadata: {
+						id: file,
+						category: data.scope ? (data.scope as string[]).join(", ") : "Monorepo Doc",
+						language: "fr",
+					},
+				});
+			} catch (err) {
+				console.error(`[RAG Sync] Erreur de lecture de doc ${file} :`, err);
+			}
+		}
+	}
+
 	return items;
 }
 
@@ -394,8 +473,12 @@ export async function runRagSync(): Promise<{
 
 		for (const item of items) {
 			try {
-				const html = readFileSync(item.htmlPath, "utf-8");
-				const cleanText = cleanHtml(html);
+				let fileContent = readFileSync(item.htmlPath, "utf-8");
+				if (item.type === "doc") {
+					const { content } = parseFrontmatter(fileContent);
+					fileContent = Bun.markdown.html(content);
+				}
+				const cleanText = cleanHtml(fileContent);
 
 				if (cleanText.length < 50) {
 					// Document vide ou invalide
@@ -495,7 +578,7 @@ export async function runRagSync(): Promise<{
 				const title = `Tweet de ${displayName} (@${username})`;
 				const url = `https://x.com/${username}/status/${tweet.id}`;
 				const date = tweet.created_at || "";
-				
+
 				const formattedTweetText = `Auteur: @${username} (${displayName})\nDate: ${date}\nType: tweet\nContenu:\n${text}`;
 				const contentHash = computeStringHash(formattedTweetText);
 

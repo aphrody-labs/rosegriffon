@@ -5,6 +5,7 @@
 	"useTabs": true,
 	"semi": true,
 	"singleQuote": false,
+	"jsxSingleQuote": false,
 	"trailingComma": "es5",
 	"arrowParens": "always",
 	"bracketSpacing": true,
@@ -16,6 +17,8 @@
 		"**/.turbo/**",
 		"**/node_modules/**",
 		"**/data/**",
-		"**/*.min.js"
+		"**/*.min.js",
+		"**/patches/**",
+		"**/scratch/**"
 	]
 }
