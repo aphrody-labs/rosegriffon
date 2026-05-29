@@ -117,7 +117,7 @@ export default async function UserProfilePage({
 					website={profile.website}
 					twitterHandle={profile.twitter_handle}
 					isOwnProfile={isOwnProfile}
-					badges={(profile as any).badges}
+					badges={profile.badges}
 				/>
 
 				{isOwnProfile && (

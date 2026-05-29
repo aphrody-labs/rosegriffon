@@ -1,5 +1,6 @@
 "use client";
 
+import type { ComponentType, SVGProps } from "react";
 import { Card, CardContent } from "@rose-griffon/ui";
 import Image from "next/image";
 import Link from "next/link";
@@ -26,7 +27,7 @@ interface SocialLink {
 interface Project {
 	title: string;
 	description: string;
-	icon: any; // Using any for simplicity as it's a component
+	icon: ComponentType<SVGProps<SVGSVGElement> & { className?: string }>;
 	href: string;
 	image: string;
 	color: string;

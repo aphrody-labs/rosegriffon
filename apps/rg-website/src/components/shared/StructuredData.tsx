@@ -82,6 +82,7 @@ export function WebsiteSchema() {
 		"@context": "https://schema.org",
 		"@type": "WebSite",
 		name: "Rose Griffon",
+		/* eslint-disable @typescript-eslint/no-explicit-any -- schema-dts SearchAction not directly assignable */
 		potentialAction: {
 			"@type": "SearchAction",
 			target: {
@@ -89,7 +90,7 @@ export function WebsiteSchema() {
 				urlTemplate: "https://rosegriffon.fr/search?q={search_term_string}",
 			},
 			"query-input": "required name=search_term_string",
-		} as any,
+		} as any /* eslint-enable @typescript-eslint/no-explicit-any */,
 		url: "https://rosegriffon.fr",
 	};
 

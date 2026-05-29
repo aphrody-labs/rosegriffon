@@ -15,6 +15,7 @@ interface SidebarStore {
 }
 
 // Debounce utility
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- debounce generic constraint requires any[] for correct parameter inference
 const debounce = <T extends (...args: any[]) => void>(fn: T, ms: number) => {
 	let timeoutId: NodeJS.Timeout;
 	return function debounce(this: unknown, ...args: Parameters<T>) {

@@ -56,7 +56,15 @@ export async function POST(req: NextRequest) {
 						session_id: session.id,
 					});
 				} else {
-					let items: any[] = [];
+					type OrderItem = {
+						label: string | null;
+						qty: number | null;
+						slug: string | null;
+						unit_amount_cents: number;
+						variantId: string | null;
+						image: string | null;
+					};
+					let items: OrderItem[] = [];
 					try {
 						const lineItems = await stripe.checkout.sessions.listLineItems(session.id, {
 							expand: ["data.price.product"],
@@ -72,7 +80,7 @@ export async function POST(req: NextRequest) {
 								slug: meta.slug || null,
 								unit_amount_cents: item.price?.unit_amount || 0,
 								variantId: meta.variantId || null,
-								image: images && images.length > 0 ? images[0] : null,
+								image: (images && images.length > 0 ? images[0] : null) ?? null,
 							};
 						});
 					} catch (stripeErr) {

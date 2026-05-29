@@ -124,7 +124,7 @@ export function ProfileSection({ profile }: { profile: Profile | null }) {
 			twitter_handle: profile?.twitter_handle || "",
 			username: profile?.username || "",
 			website: profile?.website || "",
-			badges: (profile as any)?.badges || [],
+			badges: profile?.badges ?? [],
 		},
 		resolver: zodResolver(schema),
 	});
