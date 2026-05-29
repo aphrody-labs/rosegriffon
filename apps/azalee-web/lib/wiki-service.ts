@@ -1755,4 +1755,24 @@ export const wikiService = {
 
 		return base;
 	},
+
+	async getTweets(limit: number = 20): Promise<any[]> {
+		const supabase = await createClient();
+		const { data } = await supabase
+			.from("tweets")
+			.select("*")
+			.order("created_at", { ascending: false })
+			.limit(limit);
+		return data || [];
+	},
+
+	async getTweetById(id: string): Promise<any | null> {
+		const supabase = await createClient();
+		const { data } = await supabase
+			.from("tweets")
+			.select("*")
+			.eq("id", id)
+			.maybeSingle();
+		return data;
+	},
 };
