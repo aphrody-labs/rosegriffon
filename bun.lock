@@ -312,6 +312,7 @@
         "@rose-griffon/db": "workspace:*",
         "@rose-griffon/inagle": "workspace:*",
         "@rose-griffon/types": "workspace:*",
+        "cheerio": "^1.2.0",
       },
       "devDependencies": {
         "@types/bun": "catalog:",

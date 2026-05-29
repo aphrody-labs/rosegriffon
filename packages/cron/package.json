@@ -17,7 +17,8 @@
     "@aphrody-code/bxc": "^0.5.2",
     "@rose-griffon/db": "workspace:*",
     "@rose-griffon/inagle": "workspace:*",
-    "@rose-griffon/types": "workspace:*"
+    "@rose-griffon/types": "workspace:*",
+    "cheerio": "^1.2.0"
   },
   "devDependencies": {
     "@types/bun": "catalog:",
