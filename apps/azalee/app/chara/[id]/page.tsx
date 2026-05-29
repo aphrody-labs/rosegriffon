@@ -10,6 +10,15 @@ import type { MovesetSkill } from "@/components/wiki/MovesetList";
 import { formatDescription, formatJapaneseName } from "@/lib/format-description";
 import { wikiService } from "@/lib/wiki-service";
 
+export async function generateStaticParams() {
+  try {
+    return await wikiService.getAllBaseSlugParams();
+  } catch (err) {
+    console.error("Error generating static params for characters:", err);
+    return [];
+  }
+}
+
 export async function generateMetadata({
   params,
 }: {
