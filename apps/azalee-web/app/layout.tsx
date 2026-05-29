@@ -1,5 +1,3 @@
-import { createClient as createSupabaseClient } from "@supabase/supabase-js";
-import { cookies, headers } from "next/headers";
 import Script from "next/script";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Analytics } from "@vercel/analytics/react";
@@ -10,8 +8,6 @@ import { SupabaseProvider } from "@/components/providers/SupabaseProvider";
 import { ThemeProvider } from "@/components/providers/theme-provider";
 import { Shell } from "@/components/Shell";
 import { Toaster } from "@rose-griffon/ui";
-import { auth, ensureUserProfile } from "@/lib/auth";
-import { mintSupabaseJwt } from "@/lib/supabase/jwt";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -85,67 +81,15 @@ export const viewport: Viewport = {
 	width: "device-width",
 };
 
-export default async function RootLayout({
+export default function RootLayout({
 	children,
 }: Readonly<{
 	children: React.ReactNode;
 }>) {
-	const cookieStore = await cookies();
-	const cookieVal = cookieStore.get("sidebar_state")?.value;
-	const defaultOpen = cookieVal ? cookieVal === "true" : true;
-
-	// Get Better Auth session
-	const reqHeaders = await headers();
-	let user = null;
-	let profile = null;
-	let supabaseToken: string | null = null;
-
-	try {
-		const session = await auth.api.getSession({ headers: reqHeaders });
-
-		if (session?.user) {
-			({ user } = session);
-			supabaseToken = mintSupabaseJwt(session.user.id);
-
-			// Fetch profile using service-role-like access via minted JWT
-			const supabaseUrl =
-				process.env.SUPABASE_INTERNAL_URL ||
-				process.env.NEXT_PUBLIC_SUPABASE_URL!;
-			const supabase = createSupabaseClient(
-				supabaseUrl,
-				process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-				{
-					global: { headers: { Authorization: `Bearer ${supabaseToken}` } },
-				},
-			);
-
-			const { data } = await supabase
-				.from("profiles")
-				.select("*")
-				.eq("id", session.user.id)
-				.maybeSingle();
-			profile = data;
-
-			// Self-healing: If profile is missing but user exists, create it now
-			if (!profile) {
-				console.warn(
-					`[Self-Healing] Profile missing for user ${session.user.id}, attempting repair...`,
-				);
-				profile = await ensureUserProfile(session.user);
-			}
-		}
-	} catch (error) {
-		// No session — log explicite pour debug runtime Vercel (msg complet)
-		if (process.env.NODE_ENV === "production") {
-			console.error(
-				"[layout] auth.api.getSession throw:",
-				error instanceof Error ? error.message : String(error),
-				error instanceof Error && error.stack
-					? error.stack.split("\n").slice(0, 3)
-					: null,
-			);
-		}
-	}
+	const defaultOpen = true;
+	const user = null;
+	const profile = null;
+	const supabaseToken: string | null = null;
 
 	return (
 		<html lang="fr" className="dark" suppressHydrationWarning>

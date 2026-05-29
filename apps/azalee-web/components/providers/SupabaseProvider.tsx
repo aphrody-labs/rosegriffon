@@ -25,6 +25,26 @@ export function SupabaseProvider({
   const [token, setToken] = useState(initialToken || null);
   const refreshTimer = useRef<ReturnType<typeof setInterval> | null>(null);
 
+  // Fetch token on mount if not provided (allows static/ISR pages)
+  useEffect(() => {
+    if (!initialToken) {
+      const initToken = async () => {
+        try {
+          const res = await fetch("/api/supabase-token");
+          if (res.ok) {
+            const data = await res.json();
+            if (data.token) {
+              setToken(data.token);
+            }
+          }
+        } catch {
+          // Silent fail
+        }
+      };
+      initToken();
+    }
+  }, [initialToken]);
+
   // Refresh the Supabase JWT every 50 minutes (token lasts 1h)
   useEffect(() => {
     const refresh = async () => {
@@ -47,9 +67,11 @@ export function SupabaseProvider({
     }
 
     return () => {
-      if (refreshTimer.current) {clearInterval(refreshTimer.current);}
+      if (refreshTimer.current) {
+        clearInterval(refreshTimer.current);
+      }
     };
-  }, [token]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [token]);
 
   const client = useMemo(() => {
     const opts: Parameters<typeof createClient>[2] = token

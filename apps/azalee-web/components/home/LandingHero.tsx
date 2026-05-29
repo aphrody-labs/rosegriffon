@@ -94,6 +94,7 @@ export function LandingHero({ stats }: LandingHeroProps) {
 								width={300}
 								height={375}
 								sizes="80vw"
+								priority
 								className="object-contain opacity-25 dark:opacity-20"
 							/>
 						</div>
@@ -111,6 +112,7 @@ export function LandingHero({ stats }: LandingHeroProps) {
 							alt="Inazuma Eleven Logo"
 							width={280}
 							height={160}
+							priority
 							className="h-14 object-contain drop-shadow-[0_0_25px_rgba(240,125,125,0.4)] animate-[gentleFloat_4s_ease-in-out_infinite]"
 						/>
 
@@ -162,6 +164,7 @@ export function LandingHero({ stats }: LandingHeroProps) {
 						alt="Inazuma Eleven Logo"
 						width={320}
 						height={180}
+						priority
 						className="h-28 lg:h-32 object-contain mb-4 drop-shadow-[0_0_30px_rgba(240,125,125,0.5)] animate-[gentleFloat_4s_ease-in-out_infinite]"
 					/>
 
@@ -216,6 +219,7 @@ export function LandingHero({ stats }: LandingHeroProps) {
 							width={420}
 							height={540}
 							sizes="(max-width: 1024px) 320px, 420px"
+							priority
 							className="w-full h-full object-contain relative z-10 drop-shadow-[0_10px_40px_rgba(0,0,0,0.4)]"
 						/>
 					</div>
