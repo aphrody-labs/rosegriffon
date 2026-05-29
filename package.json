@@ -73,7 +73,12 @@
 		"azalee:dev": "bun --filter @rose-griffon/azalee dev",
 		"website:dev": "bun --filter @rose-griffon/website dev",
 		"bot:dev": "bun --filter @rose-griffon/bot dev",
-		"bot:start": "bun --filter @rose-griffon/bot start"
+		"bot:start": "bun --filter @rose-griffon/bot start",
+		"docs:map": "bun scripts/generate-repo-map.ts",
+		"docs:bundle": "bun scripts/bundle-llms-docs.ts",
+		"docs:check-links": "bun scripts/check-docs-links.ts",
+		"docs:lint": "bunx markdownlint-cli2 \"docs/**/*.md\"",
+		"docs:build": "bun run docs:map && bun run docs:bundle && bun run docs:check-links && bun run docs:lint"
 	},
 	"devDependencies": {
 		"@types/bun": "catalog:",
