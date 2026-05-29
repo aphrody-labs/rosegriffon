@@ -52,34 +52,22 @@ export function AddToCart({
 				aria-label={`Ajouter ${product.name} au panier`}
 			>
 				{pending ? (
-					<Loader2
-						className={`animate-spin ${isLarge ? "size-5" : "size-4"}`}
-					/>
-				) : (success ? (
+					<Loader2 className={`animate-spin ${isLarge ? "size-5" : "size-4"}`} />
+				) : success ? (
 					<>
 						<Check className={isLarge ? "size-5" : "size-4"} />
 						<span>Ajouté !</span>
 					</>
 				) : (
 					<>
-						{isLarge ? (
-							<ShoppingBag className="size-5" />
-						) : (
-							<Plus className="size-4" />
-						)}
+						{isLarge ? <ShoppingBag className="size-5" /> : <Plus className="size-4" />}
 						<span>
-							{disabled
-								? "Choisis une option"
-								: isLarge
-									? "Ajouter au panier"
-									: "Au panier"}
+							{disabled ? "Choisis une option" : isLarge ? "Ajouter au panier" : "Au panier"}
 						</span>
 					</>
-				))}
+				)}
 			</button>
-			{error && (
-				<p className="mt-2 text-xs font-semibold text-[#a14b3f]">{error}</p>
-			)}
+			{error && <p className="mt-2 text-xs font-semibold text-[#a14b3f]">{error}</p>}
 		</div>
 	);
 }

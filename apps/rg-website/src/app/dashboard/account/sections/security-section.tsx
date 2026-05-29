@@ -1,15 +1,17 @@
 "use client";
 
-import { Badge, Button, Card, CardContent, CardDescription, CardHeader, CardTitle } from "@rose-griffon/ui";
+import {
+	Badge,
+	Button,
+	Card,
+	CardContent,
+	CardDescription,
+	CardHeader,
+	CardTitle,
+} from "@rose-griffon/ui";
 import { format, formatDistanceToNow } from "date-fns";
 import { fr } from "date-fns/locale";
-import {
-	Loader2,
-	LogOut,
-	Monitor,
-	ShieldCheck,
-	Smartphone,
-} from "lucide-react";
+import { Loader2, LogOut, Monitor, ShieldCheck, Smartphone } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
@@ -25,18 +27,34 @@ export interface SessionItem {
 }
 
 function detectDevice(ua: string | null): "mobile" | "desktop" {
-	if (!ua) {return "desktop";}
+	if (!ua) {
+		return "desktop";
+	}
 	return /Mobile|iPhone|iPad|Android/i.test(ua) ? "mobile" : "desktop";
 }
 
 function describeUserAgent(ua: string | null): string {
-	if (!ua) {return "Appareil inconnu";}
-	if (/iPhone/.test(ua)) {return "iPhone";}
-	if (/iPad/.test(ua)) {return "iPad";}
-	if (/Android/.test(ua)) {return "Android";}
-	if (/Mac OS X/.test(ua)) {return "macOS";}
-	if (/Windows/.test(ua)) {return "Windows";}
-	if (/Linux/.test(ua)) {return "Linux";}
+	if (!ua) {
+		return "Appareil inconnu";
+	}
+	if (/iPhone/.test(ua)) {
+		return "iPhone";
+	}
+	if (/iPad/.test(ua)) {
+		return "iPad";
+	}
+	if (/Android/.test(ua)) {
+		return "Android";
+	}
+	if (/Mac OS X/.test(ua)) {
+		return "macOS";
+	}
+	if (/Windows/.test(ua)) {
+		return "Windows";
+	}
+	if (/Linux/.test(ua)) {
+		return "Linux";
+	}
 	return "Appareil inconnu";
 }
 
@@ -80,9 +98,8 @@ export function SecuritySection({ sessions }: { sessions: SessionItem[] }) {
 						Double authentification (2FA)
 					</CardTitle>
 					<CardDescription>
-						Bientôt disponible. Active la 2FA via une app TOTP (Google
-						Authenticator, Authy, 1Password) pour renforcer la sécurité de ton
-						compte.
+						Bientôt disponible. Active la 2FA via une app TOTP (Google Authenticator, Authy,
+						1Password) pour renforcer la sécurité de ton compte.
 					</CardDescription>
 				</CardHeader>
 				<CardContent>
@@ -98,8 +115,8 @@ export function SecuritySection({ sessions }: { sessions: SessionItem[] }) {
 						<div>
 							<CardTitle>Sessions actives</CardTitle>
 							<CardDescription>
-								Tu peux révoquer une session à distance si tu te connectes
-								depuis un appareil que tu ne reconnais pas.
+								Tu peux révoquer une session à distance si tu te connectes depuis un appareil que tu
+								ne reconnais pas.
 							</CardDescription>
 						</div>
 						{sessions.length > 1 && (
@@ -122,13 +139,11 @@ export function SecuritySection({ sessions }: { sessions: SessionItem[] }) {
 				<CardContent className="space-y-3">
 					{sessions.length === 0 && (
 						<p className="text-sm text-muted-foreground">
-							Aucune session active. (Tu ne devrais pas voir ce message —
-							recharge la page.)
+							Aucune session active. (Tu ne devrais pas voir ce message — recharge la page.)
 						</p>
 					)}
 					{sessions.map((s) => {
-						const Icon =
-							detectDevice(s.userAgent) === "mobile" ? Smartphone : Monitor;
+						const Icon = detectDevice(s.userAgent) === "mobile" ? Smartphone : Monitor;
 						return (
 							<div
 								key={s.id}

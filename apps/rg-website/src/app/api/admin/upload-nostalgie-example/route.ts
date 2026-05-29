@@ -10,12 +10,14 @@ const ALLOWED_MIME = new Set(["image/jpeg", "image/png", "image/webp"]);
 
 export async function POST(req: NextRequest) {
 	const auth = await requireApiAdmin();
-	if (!auth.ok) {return auth.response;}
+	if (!auth.ok) {
+		return auth.response;
+	}
 
 	try {
 		const supabase = createClient<Database>(
 			process.env.NEXT_PUBLIC_SUPABASE_URL || "",
-			process.env.SUPABASE_SERVICE_ROLE_KEY || "",
+			process.env.SUPABASE_SERVICE_ROLE_KEY || ""
 		);
 
 		const formData = await req.formData();
@@ -28,10 +30,7 @@ export async function POST(req: NextRequest) {
 			return NextResponse.json({ error: "File too large" }, { status: 413 });
 		}
 		if (!ALLOWED_MIME.has(file.type)) {
-			return NextResponse.json(
-				{ error: "Unsupported media type" },
-				{ status: 415 },
-			);
+			return NextResponse.json({ error: "Unsupported media type" }, { status: 415 });
 		}
 
 		const buffer = await file.arrayBuffer();
@@ -59,9 +58,6 @@ export async function POST(req: NextRequest) {
 		});
 	} catch (error) {
 		console.error("API error:", error);
-		return NextResponse.json(
-			{ error: "Internal server error" },
-			{ status: 500 },
-		);
+		return NextResponse.json({ error: "Internal server error" }, { status: 500 });
 	}
 }

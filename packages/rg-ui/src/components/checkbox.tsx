@@ -6,16 +6,13 @@ import type * as React from "react";
 import { Check } from "lucide-react";
 import { cn } from "../lib/utils";
 
-function Checkbox({
-	className,
-	...props
-}: React.ComponentProps<typeof CheckboxPrimitive.Root>) {
+function Checkbox({ className, ...props }: React.ComponentProps<typeof CheckboxPrimitive.Root>) {
 	return (
 		<CheckboxPrimitive.Root
 			data-slot="checkbox"
 			className={cn(
 				"peer size-4 shrink-0 rounded-sm border border-primary focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] outline-hidden disabled:cursor-not-allowed disabled:opacity-50 data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground",
-				className,
+				className
 			)}
 			{...props}
 		>

@@ -6,22 +6,14 @@ import { bearer, genericOAuth, oAuthProxy } from "better-auth/plugins";
 import { Pool } from "pg";
 
 import { commonAuthOptions, ensureUserProfile } from "@rose-griffon/auth";
-import {
-	fetchIdentity,
-	parseIdentityWithMemberships,
-} from "@/lib/patreon/client";
+import { fetchIdentity, parseIdentityWithMemberships } from "@/lib/patreon/client";
 import { encryptToken } from "@/lib/patreon/encryption";
 import { SCOPES_CREATOR, SCOPES_PATRON } from "@/lib/patreon/types";
 import type { Database } from "@rose-griffon/db";
 
 const getDatabaseURL = () => {
 	let url = process.env.DATABASE_URL;
-	if (
-		!url ||
-		url.startsWith("eyJ2Ijo") ||
-		url === "undefined" ||
-		url === "null"
-	) {
+	if (!url || url.startsWith("eyJ2Ijo") || url === "undefined" || url === "null") {
 		url =
 			"***REDACTED-DATABASE-URL***";
 	}
@@ -40,8 +32,7 @@ const pool = new Pool({
 });
 
 // Lazy getter for Supabase admin to prevent top-level execution during build
-let _supabaseAdmin: ReturnType<typeof createSupabaseAdmin<Database>> | null =
-	null;
+let _supabaseAdmin: ReturnType<typeof createSupabaseAdmin<Database>> | null = null;
 function getSupabaseAdmin() {
 	if (_supabaseAdmin) {
 		return _supabaseAdmin;
@@ -74,9 +65,7 @@ function detectCreatorScopes(scope: string | null | undefined): boolean {
 		return false;
 	}
 	const parts = scope.split(/[\s,]+/).filter(Boolean);
-	return parts.some(
-		(s) => s === "campaigns.members" || s === "w:campaigns.webhook",
-	);
+	return parts.some((s) => s === "campaigns.members" || s === "w:campaigns.webhook");
 }
 
 const getBetterAuthURL = () => {
@@ -117,11 +106,8 @@ export const auth = betterAuth({
 			prompt: "consent",
 		},
 		twitch: {
-			clientId:
-				process.env.TWITCH_AUTH_CLIENT_ID ?? process.env.TWITCH_CLIENT_ID!,
-			clientSecret:
-				process.env.TWITCH_AUTH_CLIENT_SECRET ??
-				process.env.TWITCH_CLIENT_SECRET!,
+			clientId: process.env.TWITCH_AUTH_CLIENT_ID ?? process.env.TWITCH_CLIENT_ID!,
+			clientSecret: process.env.TWITCH_AUTH_CLIENT_SECRET ?? process.env.TWITCH_CLIENT_SECRET!,
 			mapProfileToUser: (profile) => {
 				const p = profile as unknown as Record<string, unknown>;
 				return {
@@ -133,11 +119,7 @@ export const auth = betterAuth({
 					image: (p.profile_image_url as string) ?? undefined,
 				};
 			},
-			scope: [
-				"user:read:email",
-				"user:read:follows",
-				"user:read:subscriptions",
-			],
+			scope: ["user:read:email", "user:read:follows", "user:read:subscriptions"],
 		},
 	},
 
@@ -239,8 +221,7 @@ export const auth = betterAuth({
 					clientId: process.env.PATREON_CLIENT_ID!,
 					clientSecret: process.env.PATREON_CLIENT_SECRET!,
 					getUserInfo: async (tokens: unknown) => {
-						const accessToken = (tokens as { accessToken?: string })
-							.accessToken;
+						const accessToken = (tokens as { accessToken?: string }).accessToken;
 						if (!accessToken) return null;
 						try {
 							const resp = await fetchIdentity(accessToken, {
@@ -249,9 +230,7 @@ export const auth = betterAuth({
 							const identity = parseIdentityWithMemberships(resp);
 							return {
 								id: identity.patreonUserId,
-								email:
-									identity.user.email ??
-									`patreon-${identity.patreonUserId}@noemail.local`,
+								email: identity.user.email ?? `patreon-${identity.patreonUserId}@noemail.local`,
 								emailVerified: !!identity.user.email,
 								name: identity.user.full_name ?? "Utilisateur Patreon",
 								image: identity.user.thumb_url ?? undefined,
@@ -286,7 +265,7 @@ async function syncPatreonAccount(
 		accessTokenExpiresAt?: Date | null;
 		scope?: string | null;
 	},
-	opts: { isCreator?: boolean } = {},
+	opts: { isCreator?: boolean } = {}
 ) {
 	if (!account.accessToken || !account.refreshToken) {
 		return;
@@ -300,8 +279,7 @@ async function syncPatreonAccount(
 		const identity = parseIdentityWithMemberships(resp);
 		const top =
 			[...identity.memberships].toSorted((a, b) => {
-				const score = (s: string | null | undefined) =>
-					s === "active_patron" ? 0 : 1;
+				const score = (s: string | null | undefined) => (s === "active_patron" ? 0 : 1);
 				return score(a.attrs.patron_status) - score(b.attrs.patron_status);
 			})[0] ?? null;
 
@@ -322,7 +300,7 @@ async function syncPatreonAccount(
 						scope: account.scope ?? fallbackScopes,
 						user_id: account.userId,
 					},
-					{ onConflict: "user_id,patreon_user_id" },
+					{ onConflict: "user_id,patreon_user_id" }
 				),
 			getSupabaseAdmin()
 				.from("patreon_memberships")
@@ -330,8 +308,7 @@ async function syncPatreonAccount(
 					{
 						address: (top?.address ?? null) as never,
 						campaign_id: top?.campaignId ?? null,
-						currently_entitled_cents:
-							top?.attrs.currently_entitled_amount_cents ?? null,
+						currently_entitled_cents: top?.attrs.currently_entitled_amount_cents ?? null,
 						discord_role_ids: top?.discordRoleIds ?? [],
 						discord_user_id: identity.discordUserId,
 						fetched_at: new Date().toISOString(),
@@ -364,7 +341,7 @@ async function syncPatreonAccount(
 						user_id: account.userId,
 						will_pay_amount_cents: top?.attrs.will_pay_amount_cents ?? null,
 					},
-					{ onConflict: "user_id,patreon_user_id" },
+					{ onConflict: "user_id,patreon_user_id" }
 				),
 			getSupabaseAdmin()
 				.from("profiles")

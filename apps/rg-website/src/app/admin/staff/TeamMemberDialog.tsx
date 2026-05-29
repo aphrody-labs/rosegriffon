@@ -1,15 +1,28 @@
 "use client";
 
-import { Button, Input, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, Tabs, TabsContent, TabsList, TabsTrigger, Label, ResponsiveDialog, Switch } from "@rose-griffon/ui";
+import {
+	Button,
+	Input,
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+	Tabs,
+	TabsContent,
+	TabsList,
+	TabsTrigger,
+	Label,
+	ResponsiveDialog,
+	Switch,
+} from "@rose-griffon/ui";
 import { Upload, X } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
-
-
-import { createTeamMember, updateTeamMember, uploadTeamMemberImage } from './actions';
-import type { TeamMember } from './actions';
+import { createTeamMember, updateTeamMember, uploadTeamMemberImage } from "./actions";
+import type { TeamMember } from "./actions";
 
 interface TeamMemberDialogProps {
 	open: boolean;
@@ -31,12 +44,7 @@ const TEAM_OPTIONS = [
 	{ label: "Partenaires & Collaborateurs", value: "collabteam" },
 ];
 
-export function TeamMemberDialog({
-	open,
-	onOpenChange,
-	member,
-	onSuccess,
-}: TeamMemberDialogProps) {
+export function TeamMemberDialog({ open, onOpenChange, member, onSuccess }: TeamMemberDialogProps) {
 	const [loading, setLoading] = useState(false);
 	const [formData, setFormData] = useState({
 		discord_user_id: member?.discord_user_id || "",
@@ -108,14 +116,11 @@ export function TeamMemberDialog({
 			}
 
 			const teamName =
-				TEAM_OPTIONS.find((t) => t.value === formData.team_id)?.label ||
-				formData.team_id;
+				TEAM_OPTIONS.find((t) => t.value === formData.team_id)?.label || formData.team_id;
 
 			const memberData = {
 				discord_user_id: formData.discord_user_id || undefined,
-				display_index: formData.display_index
-					? parseInt(formData.display_index, 10)
-					: undefined,
+				display_index: formData.display_index ? parseInt(formData.display_index, 10) : undefined,
 				image_url: finalImageUrl,
 				is_active: formData.is_active,
 				member_link: formData.member_link || undefined,
@@ -181,9 +186,7 @@ export function TeamMemberDialog({
 							</Label>
 							<Select
 								value={formData.team_id}
-								onValueChange={(value) =>
-									setFormData({ ...formData, team_id: value })
-								}
+								onValueChange={(value) => setFormData({ ...formData, team_id: value })}
 							>
 								<SelectTrigger>
 									<SelectValue placeholder="Sélectionnez une équipe" />
@@ -206,9 +209,7 @@ export function TeamMemberDialog({
 							<Input
 								id="name"
 								value={formData.name}
-								onChange={(e) =>
-									setFormData({ ...formData, name: e.target.value })
-								}
+								onChange={(e) => setFormData({ ...formData, name: e.target.value })}
 								placeholder="Ex: Jean Dupont"
 								required
 							/>
@@ -222,9 +223,7 @@ export function TeamMemberDialog({
 							<Input
 								id="role"
 								value={formData.role}
-								onChange={(e) =>
-									setFormData({ ...formData, role: e.target.value })
-								}
+								onChange={(e) => setFormData({ ...formData, role: e.target.value })}
 								placeholder="Ex: Développeur, Dessinateur..."
 								required
 							/>
@@ -235,13 +234,9 @@ export function TeamMemberDialog({
 							<Switch
 								id="is_active"
 								checked={formData.is_active}
-								onCheckedChange={(checked) =>
-									setFormData({ ...formData, is_active: checked })
-								}
+								onCheckedChange={(checked) => setFormData({ ...formData, is_active: checked })}
 							/>
-							<Label htmlFor="is_active">
-								Membre actif (visible sur le site)
-							</Label>
+							<Label htmlFor="is_active">Membre actif (visible sur le site)</Label>
 						</div>
 					</TabsContent>
 
@@ -296,9 +291,7 @@ export function TeamMemberDialog({
 									id="display_index"
 									type="number"
 									value={formData.display_index}
-									onChange={(e) =>
-										setFormData({ ...formData, display_index: e.target.value })
-									}
+									onChange={(e) => setFormData({ ...formData, display_index: e.target.value })}
 									placeholder="1"
 								/>
 							</div>
@@ -326,9 +319,7 @@ export function TeamMemberDialog({
 								id="member_link"
 								type="url"
 								value={formData.member_link}
-								onChange={(e) =>
-									setFormData({ ...formData, member_link: e.target.value })
-								}
+								onChange={(e) => setFormData({ ...formData, member_link: e.target.value })}
 								placeholder="https://..."
 							/>
 						</div>
@@ -345,7 +336,7 @@ export function TeamMemberDialog({
 						Annuler
 					</Button>
 					<Button type="submit" disabled={loading}>
-						{loading ? "Enregistrement..." : (member ? "Mettre à jour" : "Créer")}
+						{loading ? "Enregistrement..." : member ? "Mettre à jour" : "Créer"}
 					</Button>
 				</div>
 			</form>

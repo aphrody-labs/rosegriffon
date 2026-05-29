@@ -29,36 +29,40 @@ const NO_ACCESS: PatreonViewerAccess = {
  *
  * Renvoie l'objet "no access" pour les visiteurs anonymes.
  */
-export const getViewerPatreonAccess = cache(
-	async (): Promise<PatreonViewerAccess> => {
-		const user = await getServerUser();
-		if (!user) {return NO_ACCESS;}
+export const getViewerPatreonAccess = cache(async (): Promise<PatreonViewerAccess> => {
+	const user = await getServerUser();
+	if (!user) {
+		return NO_ACCESS;
+	}
 
-		const supabase = createAdminClient();
-		if (!supabase) {return NO_ACCESS;}
+	const supabase = createAdminClient();
+	if (!supabase) {
+		return NO_ACCESS;
+	}
 
-		const { data: account } = await supabase
-			.from("account")
-			.select("user_id")
-			.eq("user_id", user.id)
-			.eq("provider_id", "patreon")
-			.maybeSingle();
+	const { data: account } = await supabase
+		.from("account")
+		.select("user_id")
+		.eq("user_id", user.id)
+		.eq("provider_id", "patreon")
+		.maybeSingle();
 
-		if (!account) {return NO_ACCESS;}
+	if (!account) {
+		return NO_ACCESS;
+	}
 
-		const { data: membership } = await supabase
-			.from("patreon_memberships")
-			.select("patron_status, currently_entitled_cents, tier_amounts_cents")
-			.eq("user_id", user.id)
-			.maybeSingle();
+	const { data: membership } = await supabase
+		.from("patreon_memberships")
+		.select("patron_status, currently_entitled_cents, tier_amounts_cents")
+		.eq("user_id", user.id)
+		.maybeSingle();
 
-		const patronStatus = membership?.patron_status ?? null;
-		return {
-			currentlyEntitledCents: membership?.currently_entitled_cents ?? null,
-			isActiveMember: patronStatus === "active_patron",
-			linked: true,
-			patronStatus,
-			tierAmountsCents: membership?.tier_amounts_cents ?? [],
-		};
-	},
-);
+	const patronStatus = membership?.patron_status ?? null;
+	return {
+		currentlyEntitledCents: membership?.currently_entitled_cents ?? null,
+		isActiveMember: patronStatus === "active_patron",
+		linked: true,
+		patronStatus,
+		tierAmountsCents: membership?.tier_amounts_cents ?? [],
+	};
+});

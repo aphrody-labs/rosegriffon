@@ -1,69 +1,69 @@
 {
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["import", "typescript", "react", "jsx-a11y", "nextjs", "unicorn"],
-  "env": {
-    "browser": true,
-    "node": true
-  },
-  "settings": {
-    "react": {
-      "version": "19"
-    },
-    "next": {
-      "rootDir": "."
-    }
-  },
-  "rules": {
-    "eqeqeq": "warn",
-    "no-console": ["warn", { "allow": ["warn", "error"] }],
-    "no-debugger": "error",
-    "no-unused-vars": "warn",
-    "no-var": "error",
-    "prefer-const": "warn",
-    "no-eval": "error",
+	"$schema": "./node_modules/oxlint/configuration_schema.json",
+	"plugins": ["import", "typescript", "react", "jsx-a11y", "nextjs", "unicorn"],
+	"env": {
+		"browser": true,
+		"node": true
+	},
+	"settings": {
+		"react": {
+			"version": "19"
+		},
+		"next": {
+			"rootDir": "."
+		}
+	},
+	"rules": {
+		"eqeqeq": "warn",
+		"no-console": ["warn", { "allow": ["warn", "error"] }],
+		"no-debugger": "error",
+		"no-unused-vars": "warn",
+		"no-var": "error",
+		"prefer-const": "warn",
+		"no-eval": "error",
 
-    "typescript/no-explicit-any": "warn",
-    "typescript/no-non-null-assertion": "warn",
-    "typescript/consistent-type-imports": "warn",
+		"typescript/no-explicit-any": "warn",
+		"typescript/no-non-null-assertion": "warn",
+		"typescript/consistent-type-imports": "warn",
 
-    "react/no-danger": "off",
-    "react/self-closing-comp": "error",
-    "react/no-unknown-property": "error",
-    "react/jsx-no-target-blank": "error",
-    "react/rules-of-hooks": "error",
-    "react/exhaustive-deps": "warn",
+		"react/no-danger": "off",
+		"react/self-closing-comp": "error",
+		"react/no-unknown-property": "error",
+		"react/jsx-no-target-blank": "error",
+		"react/rules-of-hooks": "error",
+		"react/exhaustive-deps": "warn",
 
-    "jsx-a11y/alt-text": "warn",
-    "jsx-a11y/anchor-is-valid": "off",
+		"jsx-a11y/alt-text": "warn",
+		"jsx-a11y/anchor-is-valid": "off",
 
-    "import/no-cycle": "error",
-    "import/no-self-import": "error",
-    "import/no-duplicates": "error",
+		"import/no-cycle": "error",
+		"import/no-self-import": "error",
+		"import/no-duplicates": "error",
 
-    "nextjs/no-img-element": "warn",
-    "nextjs/no-html-link-for-pages": "error",
+		"nextjs/no-img-element": "warn",
+		"nextjs/no-html-link-for-pages": "error",
 
-    "unicorn/no-null": "off",
-    "unicorn/prefer-node-protocol": "warn"
-  },
-  "ignorePatterns": [
-    ".next/**",
-    "out/**",
-    "build/**",
-    "dist/**",
-    "node_modules/**",
-    "coverage/**",
-    "public/**",
-    "scripts/**",
-    "**/*.min.js"
-  ],
-  "overrides": [
-    {
-      "files": ["**/*.test.ts", "**/*.test.tsx", "**/*.spec.ts", "**/*.spec.tsx"],
-      "rules": {
-        "typescript/no-explicit-any": "off",
-        "no-console": "off"
-      }
-    }
-  ]
+		"unicorn/no-null": "off",
+		"unicorn/prefer-node-protocol": "warn"
+	},
+	"ignorePatterns": [
+		".next/**",
+		"out/**",
+		"build/**",
+		"dist/**",
+		"node_modules/**",
+		"coverage/**",
+		"public/**",
+		"scripts/**",
+		"**/*.min.js"
+	],
+	"overrides": [
+		{
+			"files": ["**/*.test.ts", "**/*.test.tsx", "**/*.spec.ts", "**/*.spec.tsx"],
+			"rules": {
+				"typescript/no-explicit-any": "off",
+				"no-console": "off"
+			}
+		}
+	]
 }

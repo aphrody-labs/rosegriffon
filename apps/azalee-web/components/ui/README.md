@@ -5,14 +5,17 @@
 ## 🚀 Démarrage rapide
 
 ### Installation
+
 Les composants sont déjà installés et prêts à l'emploi.
 
 ### Import
+
 ```tsx
 import { Badge, Chip, ElementBadge, PositionChip } from "@/components/ui";
 ```
 
 ### Usage basique
+
 ```tsx
 // Badge
 <Badge variant="large" color="error">3</Badge>
@@ -32,6 +35,7 @@ import { Badge, Chip, ElementBadge, PositionChip } from "@/components/ui";
 ## 📦 Composants disponibles
 
 ### Badge
+
 Indicateurs visuels pour notifications et statuts
 
 - ✨ 3 variantes: `large`, `small`, `inline`
@@ -40,6 +44,7 @@ Indicateurs visuels pour notifications et statuts
 - 🎬 Animations: apparition + pulse
 
 ### Chip
+
 Éléments interactifs pour filtres et tags
 
 - ✨ 6 variantes MD3: `assist`, `filter`, `input`, `suggestion`, `elevated`, `filled`
@@ -62,26 +67,28 @@ Indicateurs visuels pour notifications et statuts
 
 ## 📚 Documentation
 
-| Fichier | Description |
-|---------|-------------|
-| [BADGE-CHIP-README.fr.md](./BADGE-CHIP-README.fr.md) | 🇫🇷 Guide utilisateur complet en français |
-| [QUICK-REFERENCE.md](./QUICK-REFERENCE.md) | ⚡ Référence rapide (cheat sheet) |
-| [badge-chip-examples.md](./badge-chip-examples.md) | 📖 Exemples détaillés avec code |
-| [README-BADGE-CHIP.md](./README-BADGE-CHIP.md) | 🔧 Guide technique d'intégration |
-| [IMPLEMENTATION-SUMMARY.md](./IMPLEMENTATION-SUMMARY.md) | 📋 Résumé de l'implémentation |
-| [CHANGELOG-BADGE-CHIP.md](./CHANGELOG-BADGE-CHIP.md) | 📝 Historique des versions |
+| Fichier                                                  | Description                              |
+| -------------------------------------------------------- | ---------------------------------------- |
+| [BADGE-CHIP-README.fr.md](./BADGE-CHIP-README.fr.md)     | 🇫🇷 Guide utilisateur complet en français |
+| [QUICK-REFERENCE.md](./QUICK-REFERENCE.md)               | ⚡ Référence rapide (cheat sheet)        |
+| [badge-chip-examples.md](./badge-chip-examples.md)       | 📖 Exemples détaillés avec code          |
+| [README-BADGE-CHIP.md](./README-BADGE-CHIP.md)           | 🔧 Guide technique d'intégration         |
+| [IMPLEMENTATION-SUMMARY.md](./IMPLEMENTATION-SUMMARY.md) | 📋 Résumé de l'implémentation            |
+| [CHANGELOG-BADGE-CHIP.md](./CHANGELOG-BADGE-CHIP.md)     | 📝 Historique des versions               |
 
 ---
 
 ## 🎨 Démos interactives
 
 Lancer le serveur de développement:
+
 ```bash
 cd apps/azalee
 pnpm dev
 ```
 
 Puis visiter:
+
 - **`/badge-chip-demo`** - Composants de base
 - **`/inazuma-badges-demo`** - Variantes Inazuma Eleven
 
@@ -90,12 +97,14 @@ Puis visiter:
 ## 🧪 Tests
 
 Lancer les tests unitaires:
+
 ```bash
 cd apps/azalee
 pnpm test badge-chip
 ```
 
 Coverage:
+
 - ✅ Toutes les variantes
 - ✅ États (selected, disabled)
 - ✅ Interactions (click, close)
@@ -106,40 +115,47 @@ Coverage:
 ## 💡 Exemples rapides
 
 ### Badge sur icône
+
 ```tsx
 <div className="relative">
-  <button><BellIcon /></button>
-  <Badge variant="large" position="top-right" color="error">5</Badge>
+	<button>
+		<BellIcon />
+	</button>
+	<Badge variant="large" position="top-right" color="error">
+		5
+	</Badge>
 </div>
 ```
 
 ### Filter chips
+
 ```tsx
 <ChipGroup>
-  <Chip variant="filter" selected={filters.attaque} onClick={toggle}>
-    Attaque
-  </Chip>
-  <Chip variant="filter" selected={filters.defense} onClick={toggle}>
-    Défense
-  </Chip>
+	<Chip variant="filter" selected={filters.attaque} onClick={toggle}>
+		Attaque
+	</Chip>
+	<Chip variant="filter" selected={filters.defense} onClick={toggle}>
+		Défense
+	</Chip>
 </ChipGroup>
 ```
 
 ### Carte de personnage
+
 ```tsx
 <div className="character-card">
-  <h3>Mark Evans</h3>
+	<h3>Mark Evans</h3>
 
-  <div className="badges">
-    <PositionBadge position="gardien" />
-    <ElementBadge element="montagne" showIcon />
-    <RarityBadge rarity="legendaire" />
-  </div>
+	<div className="badges">
+		<PositionBadge position="gardien" />
+		<ElementBadge element="montagne" showIcon />
+		<RarityBadge rarity="legendaire" />
+	</div>
 
-  <div className="stats">
-    <StatBadge stat="tp" value={150} />
-    <StatBadge stat="garde" value={98} />
-  </div>
+	<div className="stats">
+		<StatBadge stat="tp" value={150} />
+		<StatBadge stat="garde" value={98} />
+	</div>
 </div>
 ```
 
@@ -170,11 +186,13 @@ Ces composants respectent les spécifications MD3:
 ## ♿ Accessibilité
 
 ### Badge
+
 - Utilise `<span>` sémantique
 - Support dark mode
 - Respecte `prefers-reduced-motion`
 
 ### Chip
+
 - Support clavier complet
 - Focus ring MD3
 - ARIA labels

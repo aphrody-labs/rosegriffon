@@ -1,25 +1,25 @@
 {
-  "name": "@rose-griffon/config",
-  "version": "0.1.0",
-  "type": "module",
-  "description": "Configs partagées : tsconfig, eslint, oxlint, tailwind preset",
-  "exports": {
-    "./tsconfig-base.json": "./tsconfig-base.json",
-    "./tsconfig-nextjs.json": "./tsconfig-nextjs.json",
-    "./tsconfig-bun.json": "./tsconfig-bun.json",
-    "./eslint-base.mjs": "./eslint-base.mjs",
-    "./eslint-nextjs.mjs": "./eslint-nextjs.mjs",
-    "./oxlintrc.json": "./oxlintrc.json",
-    "./tailwind-preset.ts": "./tailwind-preset.ts"
-  },
-  "files": [
-    "tsconfig-*.json",
-    "eslint-*.mjs",
-    "oxlintrc.json",
-    "tailwind-preset.ts"
-  ],
-  "publishConfig": {
-    "registry": "https://npm.pkg.github.com",
-    "access": "restricted"
-  }
+	"name": "@rose-griffon/config",
+	"version": "0.1.0",
+	"description": "Configs partagées : tsconfig, eslint, oxlint, tailwind preset",
+	"files": [
+		"tsconfig-*.json",
+		"eslint-*.mjs",
+		"oxlintrc.json",
+		"tailwind-preset.ts"
+	],
+	"type": "module",
+	"exports": {
+		"./tsconfig-base.json": "./tsconfig-base.json",
+		"./tsconfig-nextjs.json": "./tsconfig-nextjs.json",
+		"./tsconfig-bun.json": "./tsconfig-bun.json",
+		"./eslint-base.mjs": "./eslint-base.mjs",
+		"./eslint-nextjs.mjs": "./eslint-nextjs.mjs",
+		"./oxlintrc.json": "./oxlintrc.json",
+		"./tailwind-preset.ts": "./tailwind-preset.ts"
+	},
+	"publishConfig": {
+		"access": "restricted",
+		"registry": "https://npm.pkg.github.com"
+	}
 }

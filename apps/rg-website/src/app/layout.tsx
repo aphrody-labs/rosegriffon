@@ -107,13 +107,13 @@ export default function RootLayout({
 											{ href_matches: "/*" },
 											{ not: { href_matches: "/admin/*" } },
 											{ not: { href_matches: "/api/*" } },
-											{ not: { selector_matches: "[rel~=nofollow]" } }
-										]
+											{ not: { selector_matches: "[rel~=nofollow]" } },
+										],
 									},
-									eagerness: "moderate"
-								}
-							]
-						})
+									eagerness: "moderate",
+								},
+							],
+						}),
 					}}
 				/>
 			</head>

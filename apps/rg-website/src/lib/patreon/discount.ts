@@ -15,8 +15,7 @@ export const PATRON_DISCOUNT_PERCENT = 20;
  *
  * Surcharger via `STRIPE_COUPON_PATRON` si l'ID Stripe diffère par environnement.
  */
-export const PATRON_STRIPE_COUPON_ID =
-	process.env.STRIPE_COUPON_PATRON ?? "kVTx74qC";
+export const PATRON_STRIPE_COUPON_ID = process.env.STRIPE_COUPON_PATRON ?? "kVTx74qC";
 
 export interface PatronDiscount {
 	active: boolean;
@@ -35,9 +34,7 @@ export interface PatronDiscount {
  * - On retourne aussi le tier et le montant pour permettre à l'UI d'afficher
  *   un badge contextuel ("Patron Niveau Evans → -20%").
  */
-export async function getPatronDiscount(
-	userId: string,
-): Promise<PatronDiscount> {
+export async function getPatronDiscount(userId: string): Promise<PatronDiscount> {
 	const empty: PatronDiscount = {
 		active: false,
 		currentlyEntitledCents: null,
@@ -48,7 +45,9 @@ export async function getPatronDiscount(
 	};
 
 	const supabase = createAdminClient();
-	if (!supabase) {return empty;}
+	if (!supabase) {
+		return empty;
+	}
 
 	const { data, error } = await supabase
 		.from("patreon_memberships")
@@ -58,12 +57,13 @@ export async function getPatronDiscount(
 		.limit(1)
 		.maybeSingle();
 
-	if (error || !data) {return empty;}
+	if (error || !data) {
+		return empty;
+	}
 
 	return {
 		active: data.patron_status === "active_patron",
-		currentlyEntitledCents:
-			(data.currently_entitled_cents as number | null) ?? null,
+		currentlyEntitledCents: (data.currently_entitled_cents as number | null) ?? null,
 		patronStatus: data.patron_status ?? null,
 		percent: PATRON_DISCOUNT_PERCENT,
 		stripeCouponId: PATRON_STRIPE_COUPON_ID,
@@ -76,9 +76,7 @@ export async function getPatronDiscount(
  * Stripe. Renvoie l'ID coupon à passer à `stripe.checkout.sessions.create`,
  * ou `null` si pas de réduction.
  */
-export async function getStripeCouponForUser(
-	userId: string,
-): Promise<string | null> {
+export async function getStripeCouponForUser(userId: string): Promise<string | null> {
 	const d = await getPatronDiscount(userId);
 	return d.active ? d.stripeCouponId : null;
 }

@@ -1,5 +1,5 @@
-import { NextResponse } from 'next/server';
-import type { NextRequest } from 'next/server';
+import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 /**
@@ -61,30 +61,27 @@ export async function POST(request: NextRequest) {
 		if (discordToken && channelId) {
 			for (const article of articles) {
 				try {
-					await fetch(
-						`https://discord.com/api/v10/channels/${channelId}/messages`,
-						{
-							body: JSON.stringify({
-								embeds: [
-									{
-										title: article.title,
-										description: article.excerpt || "",
-										url: `https://azalee.rosegriffon.fr/news/${article.slug}`,
-										color: 0xf2a93b,
-										image: article.featured_image_url
-											? { url: article.featured_image_url }
-											: undefined,
-										footer: { text: "Azalée — Rose Griffon" },
-									},
-								],
-							}),
-							headers: {
-								Authorization: `Bot ${discordToken}`,
-								"Content-Type": "application/json",
-							},
-							method: "POST",
+					await fetch(`https://discord.com/api/v10/channels/${channelId}/messages`, {
+						body: JSON.stringify({
+							embeds: [
+								{
+									title: article.title,
+									description: article.excerpt || "",
+									url: `https://azalee.rosegriffon.fr/news/${article.slug}`,
+									color: 0xf2a93b,
+									image: article.featured_image_url
+										? { url: article.featured_image_url }
+										: undefined,
+									footer: { text: "Azalée — Rose Griffon" },
+								},
+							],
+						}),
+						headers: {
+							Authorization: `Bot ${discordToken}`,
+							"Content-Type": "application/json",
 						},
-					);
+						method: "POST",
+					});
 				} catch {
 					// Discord share failure is not critical
 				}
@@ -101,7 +98,7 @@ export async function POST(request: NextRequest) {
 	} catch (error) {
 		return NextResponse.json(
 			{ error: error instanceof Error ? error.message : "Erreur interne" },
-			{ status: 500 },
+			{ status: 500 }
 		);
 	}
 }

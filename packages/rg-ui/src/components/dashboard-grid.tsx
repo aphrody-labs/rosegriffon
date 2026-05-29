@@ -47,11 +47,7 @@ interface DashboardGridProps {
 /**
  * Responsive grid for Dashboard sections.
  */
-export function DashboardGrid({
-	children,
-	title,
-	className,
-}: DashboardGridProps) {
+export function DashboardGrid({ children, title, className }: DashboardGridProps) {
 	return (
 		<section className="space-y-3">
 			{title && (
@@ -59,14 +55,7 @@ export function DashboardGrid({
 					{title}
 				</h2>
 			)}
-			<div
-				className={cn(
-					"grid gap-4 sm:grid-cols-2 lg:grid-cols-4",
-					className,
-				)}
-			>
-				{children}
-			</div>
+			<div className={cn("grid gap-4 sm:grid-cols-2 lg:grid-cols-4", className)}>{children}</div>
 		</section>
 	);
 }

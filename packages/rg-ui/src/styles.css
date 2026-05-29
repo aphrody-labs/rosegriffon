@@ -74,26 +74,26 @@
 	 * via `clamp(min, preferred, max)`. Évite les cascades sm:/md:/lg: dans le
 	 * markup. À utiliser sur les titres hero, landing, design-system, shop.
 	 * Min = mobile lisible · Preferred = fluide vw · Max = desktop majestueux. */
-	--text-fluid-display-2xl: clamp(3rem, 7vw + 1rem, 9.75rem);   /* 48 → 156 */
+	--text-fluid-display-2xl: clamp(3rem, 7vw + 1rem, 9.75rem); /* 48 → 156 */
 	--text-fluid-display-xl: clamp(2.5rem, 5.5vw + 1rem, 7.5rem); /* 40 → 120 */
-	--text-fluid-display-lg: clamp(2.25rem, 4vw + 1rem, 5rem);    /* 36 → 80 */
+	--text-fluid-display-lg: clamp(2.25rem, 4vw + 1rem, 5rem); /* 36 → 80 */
 	--text-fluid-headline-xl: clamp(1.75rem, 3vw + 0.5rem, 3.5rem); /* 28 → 56 */
-	--text-fluid-headline-lg: clamp(1.5rem, 2vw + 0.5rem, 2.5rem);  /* 24 → 40 */
+	--text-fluid-headline-lg: clamp(1.5rem, 2vw + 0.5rem, 2.5rem); /* 24 → 40 */
 	--text-fluid-headline-md: clamp(1.25rem, 1.2vw + 0.5rem, 2rem); /* 20 → 32 */
-	--text-fluid-body-lg: clamp(1rem, 0.5vw + 0.875rem, 1.25rem);   /* 16 → 20 */
+	--text-fluid-body-lg: clamp(1rem, 0.5vw + 0.875rem, 1.25rem); /* 16 → 20 */
 	--text-fluid-body-md: clamp(0.9375rem, 0.25vw + 0.875rem, 1rem); /* 15 → 16 */
 
 	/* Spacing fluide section padding-block (mobile généreux → desktop spacieux) */
-	--space-fluid-section-y: clamp(3rem, 6vw + 1rem, 8rem);  /* 48 → 128 */
+	--space-fluid-section-y: clamp(3rem, 6vw + 1rem, 8rem); /* 48 → 128 */
 	--space-fluid-section-x: clamp(1rem, 3vw + 0.5rem, 5rem); /* 16 → 80 */
 
 	/* ─── M3 Elevation ───────────────────────────────────────────────────── */
 	--md-sys-elevation-level0: none;
-	--md-sys-elevation-level1: 0 1px 2px 0 rgb(0 0 0 / 0.30), 0 1px 3px 1px rgb(0 0 0 / 0.15);
-	--md-sys-elevation-level2: 0 1px 2px 0 rgb(0 0 0 / 0.30), 0 2px 6px 2px rgb(0 0 0 / 0.15);
-	--md-sys-elevation-level3: 0 1px 3px 0 rgb(0 0 0 / 0.30), 0 4px 8px 3px rgb(0 0 0 / 0.15);
-	--md-sys-elevation-level4: 0 2px 3px 0 rgb(0 0 0 / 0.30), 0 6px 10px 4px rgb(0 0 0 / 0.15);
-	--md-sys-elevation-level5: 0 4px 4px 0 rgb(0 0 0 / 0.30), 0 8px 12px 6px rgb(0 0 0 / 0.15);
+	--md-sys-elevation-level1: 0 1px 2px 0 rgb(0 0 0 / 0.3), 0 1px 3px 1px rgb(0 0 0 / 0.15);
+	--md-sys-elevation-level2: 0 1px 2px 0 rgb(0 0 0 / 0.3), 0 2px 6px 2px rgb(0 0 0 / 0.15);
+	--md-sys-elevation-level3: 0 1px 3px 0 rgb(0 0 0 / 0.3), 0 4px 8px 3px rgb(0 0 0 / 0.15);
+	--md-sys-elevation-level4: 0 2px 3px 0 rgb(0 0 0 / 0.3), 0 6px 10px 4px rgb(0 0 0 / 0.15);
+	--md-sys-elevation-level5: 0 4px 4px 0 rgb(0 0 0 / 0.3), 0 8px 12px 6px rgb(0 0 0 / 0.15);
 
 	/* ─── Pont MD3 → utilities Tailwind v4 ───────────────────────────────── */
 	/* Expose chaque rôle MD3 comme utility Tailwind (`bg-primary-container`,
@@ -139,123 +139,135 @@
 }
 
 @keyframes accordion-down {
-	from { height: 0; }
-	to { height: var(--radix-accordion-content-height); }
+	from {
+		height: 0;
+	}
+	to {
+		height: var(--radix-accordion-content-height);
+	}
 }
 
 @keyframes accordion-up {
-	from { height: var(--radix-accordion-content-height); }
-	to { height: 0; }
+	from {
+		height: var(--radix-accordion-content-height);
+	}
+	to {
+		height: 0;
+	}
 }
 
 @layer base {
 	:root {
 		/* Rose Griffon — branding tokens (seed M3) */
-		--rg-marine: oklch(0.20 0.05 264);   /* #0c1730 — neutral dark */
-		--rg-rose: oklch(0.65 0.22 0);       /* #e91e63 — primary seed */
-		--rg-griffon: oklch(0.78 0.13 90);   /* #d4af37 — tertiary seed */
+		--rg-marine: oklch(0.2 0.05 264); /* #0c1730 — neutral dark */
+		--rg-rose: oklch(0.65 0.22 0); /* #e91e63 — primary seed */
+		--rg-griffon: oklch(0.78 0.13 90); /* #d4af37 — tertiary seed */
 
 		/* ─── M3 sys-color — LIGHT scheme (35 tokens) ────────────────────── */
-		--md-sys-color-primary: oklch(0.50 0.22 0);
-		--md-sys-color-on-primary: oklch(1.00 0 0);
-		--md-sys-color-primary-container: oklch(0.90 0.08 0);
-		--md-sys-color-on-primary-container: oklch(0.20 0.18 0);
-		--md-sys-color-secondary: oklch(0.50 0.08 0);
-		--md-sys-color-on-secondary: oklch(1.00 0 0);
-		--md-sys-color-secondary-container: oklch(0.90 0.04 0);
-		--md-sys-color-on-secondary-container: oklch(0.20 0.06 0);
-		--md-sys-color-tertiary: oklch(0.50 0.13 90);
-		--md-sys-color-on-tertiary: oklch(1.00 0 0);
-		--md-sys-color-tertiary-container: oklch(0.90 0.06 90);
-		--md-sys-color-on-tertiary-container: oklch(0.20 0.10 90);
-		--md-sys-color-error: oklch(0.50 0.22 27);
-		--md-sys-color-on-error: oklch(1.00 0 0);
-		--md-sys-color-error-container: oklch(0.90 0.06 27);
-		--md-sys-color-on-error-container: oklch(0.20 0.18 27);
+		--md-sys-color-primary: oklch(0.5 0.22 0);
+		--md-sys-color-on-primary: oklch(1 0 0);
+		--md-sys-color-primary-container: oklch(0.9 0.08 0);
+		--md-sys-color-on-primary-container: oklch(0.2 0.18 0);
+		--md-sys-color-secondary: oklch(0.5 0.08 0);
+		--md-sys-color-on-secondary: oklch(1 0 0);
+		--md-sys-color-secondary-container: oklch(0.9 0.04 0);
+		--md-sys-color-on-secondary-container: oklch(0.2 0.06 0);
+		--md-sys-color-tertiary: oklch(0.5 0.13 90);
+		--md-sys-color-on-tertiary: oklch(1 0 0);
+		--md-sys-color-tertiary-container: oklch(0.9 0.06 90);
+		--md-sys-color-on-tertiary-container: oklch(0.2 0.1 90);
+		--md-sys-color-error: oklch(0.5 0.22 27);
+		--md-sys-color-on-error: oklch(1 0 0);
+		--md-sys-color-error-container: oklch(0.9 0.06 27);
+		--md-sys-color-on-error-container: oklch(0.2 0.18 27);
 		--md-sys-color-background: oklch(0.99 0.003 264);
-		--md-sys-color-on-background: oklch(0.20 0.02 264);
+		--md-sys-color-on-background: oklch(0.2 0.02 264);
 		--md-sys-color-surface: oklch(0.99 0.003 264);
-		--md-sys-color-on-surface: oklch(0.20 0.02 264);
-		--md-sys-color-surface-variant: oklch(0.90 0.01 264);
-		--md-sys-color-on-surface-variant: oklch(0.30 0.02 264);
-		--md-sys-color-outline: oklch(0.50 0.01 264);
-		--md-sys-color-outline-variant: oklch(0.80 0.01 264);
+		--md-sys-color-on-surface: oklch(0.2 0.02 264);
+		--md-sys-color-surface-variant: oklch(0.9 0.01 264);
+		--md-sys-color-on-surface-variant: oklch(0.3 0.02 264);
+		--md-sys-color-outline: oklch(0.5 0.01 264);
+		--md-sys-color-outline-variant: oklch(0.8 0.01 264);
 		--md-sys-color-scrim: oklch(0 0 0);
 		--md-sys-color-shadow: oklch(0 0 0);
-		--md-sys-color-inverse-surface: oklch(0.20 0.02 264);
+		--md-sys-color-inverse-surface: oklch(0.2 0.02 264);
 		--md-sys-color-inverse-on-surface: oklch(0.95 0.005 264);
-		--md-sys-color-inverse-primary: oklch(0.80 0.15 0);
+		--md-sys-color-inverse-primary: oklch(0.8 0.15 0);
 		--md-sys-color-surface-dim: oklch(0.87 0.005 264);
 		--md-sys-color-surface-bright: oklch(0.99 0.003 264);
-		--md-sys-color-surface-container-lowest: oklch(1.00 0 0);
+		--md-sys-color-surface-container-lowest: oklch(1 0 0);
 		--md-sys-color-surface-container-low: oklch(0.96 0.004 264);
 		--md-sys-color-surface-container: oklch(0.94 0.005 264);
 		--md-sys-color-surface-container-high: oklch(0.92 0.006 264);
-		--md-sys-color-surface-container-highest: oklch(0.90 0.007 264);
+		--md-sys-color-surface-container-highest: oklch(0.9 0.007 264);
 	}
 
-	:root.dark, .dark {
-		--md-sys-color-primary: oklch(0.80 0.15 0);
-		--md-sys-color-on-primary: oklch(0.20 0.18 0);
-		--md-sys-color-primary-container: oklch(0.30 0.18 0);
-		--md-sys-color-on-primary-container: oklch(0.90 0.08 0);
-		--md-sys-color-secondary: oklch(0.80 0.04 0);
-		--md-sys-color-on-secondary: oklch(0.20 0.06 0);
-		--md-sys-color-secondary-container: oklch(0.30 0.06 0);
-		--md-sys-color-on-secondary-container: oklch(0.90 0.04 0);
-		--md-sys-color-tertiary: oklch(0.80 0.10 90);
-		--md-sys-color-on-tertiary: oklch(0.20 0.10 90);
-		--md-sys-color-tertiary-container: oklch(0.30 0.10 90);
-		--md-sys-color-on-tertiary-container: oklch(0.90 0.06 90);
-		--md-sys-color-error: oklch(0.80 0.15 27);
-		--md-sys-color-on-error: oklch(0.20 0.18 27);
-		--md-sys-color-error-container: oklch(0.30 0.18 27);
-		--md-sys-color-on-error-container: oklch(0.90 0.06 27);
+	:root.dark,
+	.dark {
+		--md-sys-color-primary: oklch(0.8 0.15 0);
+		--md-sys-color-on-primary: oklch(0.2 0.18 0);
+		--md-sys-color-primary-container: oklch(0.3 0.18 0);
+		--md-sys-color-on-primary-container: oklch(0.9 0.08 0);
+		--md-sys-color-secondary: oklch(0.8 0.04 0);
+		--md-sys-color-on-secondary: oklch(0.2 0.06 0);
+		--md-sys-color-secondary-container: oklch(0.3 0.06 0);
+		--md-sys-color-on-secondary-container: oklch(0.9 0.04 0);
+		--md-sys-color-tertiary: oklch(0.8 0.1 90);
+		--md-sys-color-on-tertiary: oklch(0.2 0.1 90);
+		--md-sys-color-tertiary-container: oklch(0.3 0.1 90);
+		--md-sys-color-on-tertiary-container: oklch(0.9 0.06 90);
+		--md-sys-color-error: oklch(0.8 0.15 27);
+		--md-sys-color-on-error: oklch(0.2 0.18 27);
+		--md-sys-color-error-container: oklch(0.3 0.18 27);
+		--md-sys-color-on-error-container: oklch(0.9 0.06 27);
 		--md-sys-color-background: oklch(0.13 0.02 264);
-		--md-sys-color-on-background: oklch(0.90 0.01 264);
+		--md-sys-color-on-background: oklch(0.9 0.01 264);
 		--md-sys-color-surface: oklch(0.13 0.02 264);
-		--md-sys-color-on-surface: oklch(0.90 0.01 264);
-		--md-sys-color-surface-variant: oklch(0.30 0.02 264);
-		--md-sys-color-on-surface-variant: oklch(0.80 0.01 264);
-		--md-sys-color-outline: oklch(0.60 0.01 264);
-		--md-sys-color-outline-variant: oklch(0.30 0.02 264);
+		--md-sys-color-on-surface: oklch(0.9 0.01 264);
+		--md-sys-color-surface-variant: oklch(0.3 0.02 264);
+		--md-sys-color-on-surface-variant: oklch(0.8 0.01 264);
+		--md-sys-color-outline: oklch(0.6 0.01 264);
+		--md-sys-color-outline-variant: oklch(0.3 0.02 264);
 		--md-sys-color-scrim: oklch(0 0 0);
 		--md-sys-color-shadow: oklch(0 0 0);
-		--md-sys-color-inverse-surface: oklch(0.90 0.01 264);
-		--md-sys-color-inverse-on-surface: oklch(0.20 0.02 264);
-		--md-sys-color-inverse-primary: oklch(0.50 0.22 0);
+		--md-sys-color-inverse-surface: oklch(0.9 0.01 264);
+		--md-sys-color-inverse-on-surface: oklch(0.2 0.02 264);
+		--md-sys-color-inverse-primary: oklch(0.5 0.22 0);
 		--md-sys-color-surface-dim: oklch(0.13 0.02 264);
 		--md-sys-color-surface-bright: oklch(0.27 0.02 264);
-		--md-sys-color-surface-container-lowest: oklch(0.10 0.02 264);
+		--md-sys-color-surface-container-lowest: oklch(0.1 0.02 264);
 		--md-sys-color-surface-container-low: oklch(0.16 0.02 264);
 		--md-sys-color-surface-container: oklch(0.18 0.02 264);
 		--md-sys-color-surface-container-high: oklch(0.22 0.02 264);
 		--md-sys-color-surface-container-highest: oklch(0.27 0.02 264);
 	}
 
-	:root.theme-roy, .theme-roy, :root.roy, .roy {
+	:root.theme-roy,
+	.theme-roy,
+	:root.roy,
+	.roy {
 		--md-sys-color-primary: oklch(0.45 0.12 250);
 		--md-sys-color-on-primary: oklch(0.985 0 0);
 		--md-sys-color-primary-container: oklch(0.85 0.08 250);
-		--md-sys-color-on-primary-container: oklch(0.18 0.10 250);
+		--md-sys-color-on-primary-container: oklch(0.18 0.1 250);
 		--md-sys-color-secondary: oklch(0.8 0.1 80);
 		--md-sys-color-on-secondary: oklch(0.2 0.05 250);
 		--md-sys-color-secondary-container: oklch(0.92 0.06 80);
-		--md-sys-color-on-secondary-container: oklch(0.20 0.08 80);
-		--md-sys-color-tertiary: oklch(0.55 0.10 240);
+		--md-sys-color-on-secondary-container: oklch(0.2 0.08 80);
+		--md-sys-color-tertiary: oklch(0.55 0.1 240);
 		--md-sys-color-on-tertiary: oklch(1 0 0);
 		--md-sys-color-tertiary-container: oklch(0.88 0.06 240);
 		--md-sys-color-on-tertiary-container: oklch(0.18 0.08 240);
 		--md-sys-color-error: oklch(0.577 0.245 27.325);
 		--md-sys-color-on-error: oklch(1 0 0);
 		--md-sys-color-error-container: oklch(0.92 0.06 27);
-		--md-sys-color-on-error-container: oklch(0.20 0.18 27);
+		--md-sys-color-on-error-container: oklch(0.2 0.18 27);
 		--md-sys-color-background: oklch(0.97 0.01 80);
 		--md-sys-color-on-background: oklch(0.2 0.05 250);
 		--md-sys-color-surface: oklch(0.97 0.01 80);
 		--md-sys-color-on-surface: oklch(0.2 0.05 250);
 		--md-sys-color-surface-variant: oklch(0.92 0.02 250);
-		--md-sys-color-on-surface-variant: oklch(0.40 0.04 250);
+		--md-sys-color-on-surface-variant: oklch(0.4 0.04 250);
 		--md-sys-color-outline: oklch(0.55 0.04 250);
 		--md-sys-color-outline-variant: oklch(0.85 0.02 250);
 		--md-sys-color-surface-dim: oklch(0.88 0.01 80);
@@ -267,7 +279,7 @@
 		--md-sys-color-surface-container-highest: oklch(0.91 0.014 80);
 		--md-sys-color-inverse-surface: oklch(0.25 0.05 250);
 		--md-sys-color-inverse-on-surface: oklch(0.96 0.01 80);
-		--md-sys-color-inverse-primary: oklch(0.75 0.10 250);
+		--md-sys-color-inverse-primary: oklch(0.75 0.1 250);
 		--background: oklch(0.97 0.01 80);
 		--foreground: oklch(0.2 0.05 250);
 		--card: oklch(1 0 0);
@@ -301,29 +313,32 @@
 		--sidebar-ring: rgba(255, 196, 110, 0.4);
 	}
 
-	:root.theme-gaelle, .theme-gaelle, :root.gaelle, .gaelle {
+	:root.theme-gaelle,
+	.theme-gaelle,
+	:root.gaelle,
+	.gaelle {
 		--md-sys-color-primary: oklch(0.5 0.18 25);
 		--md-sys-color-on-primary: oklch(0.985 0 0);
 		--md-sys-color-primary-container: oklch(0.88 0.08 25);
-		--md-sys-color-on-primary-container: oklch(0.20 0.15 25);
+		--md-sys-color-on-primary-container: oklch(0.2 0.15 25);
 		--md-sys-color-secondary: oklch(0.8 0.12 50);
 		--md-sys-color-on-secondary: oklch(0.25 0.15 25);
 		--md-sys-color-secondary-container: oklch(0.92 0.06 50);
-		--md-sys-color-on-secondary-container: oklch(0.20 0.10 50);
+		--md-sys-color-on-secondary-container: oklch(0.2 0.1 50);
 		--md-sys-color-tertiary: oklch(0.6 0.15 35);
 		--md-sys-color-on-tertiary: oklch(1 0 0);
-		--md-sys-color-tertiary-container: oklch(0.90 0.06 35);
-		--md-sys-color-on-tertiary-container: oklch(0.20 0.10 35);
+		--md-sys-color-tertiary-container: oklch(0.9 0.06 35);
+		--md-sys-color-on-tertiary-container: oklch(0.2 0.1 35);
 		--md-sys-color-error: oklch(0.35 0.2 15);
 		--md-sys-color-on-error: oklch(1 0 0);
-		--md-sys-color-error-container: oklch(0.90 0.10 15);
+		--md-sys-color-error-container: oklch(0.9 0.1 15);
 		--md-sys-color-on-error-container: oklch(0.18 0.18 15);
 		--md-sys-color-background: oklch(0.95 0.03 40);
 		--md-sys-color-on-background: oklch(0.25 0.15 25);
 		--md-sys-color-surface: oklch(0.95 0.03 40);
 		--md-sys-color-on-surface: oklch(0.25 0.15 25);
-		--md-sys-color-surface-variant: oklch(0.90 0.04 30);
-		--md-sys-color-on-surface-variant: oklch(0.40 0.08 25);
+		--md-sys-color-surface-variant: oklch(0.9 0.04 30);
+		--md-sys-color-on-surface-variant: oklch(0.4 0.08 25);
 		--md-sys-color-outline: oklch(0.55 0.06 25);
 		--md-sys-color-outline-variant: oklch(0.85 0.04 30);
 		--md-sys-color-surface-dim: oklch(0.88 0.03 40);
@@ -332,7 +347,7 @@
 		--md-sys-color-surface-container-low: oklch(0.96 0.025 40);
 		--md-sys-color-surface-container: oklch(0.94 0.03 40);
 		--md-sys-color-surface-container-high: oklch(0.92 0.035 40);
-		--md-sys-color-surface-container-highest: oklch(0.90 0.04 40);
+		--md-sys-color-surface-container-highest: oklch(0.9 0.04 40);
 		--md-sys-color-inverse-surface: oklch(0.25 0.05 25);
 		--md-sys-color-inverse-on-surface: oklch(0.96 0.02 40);
 		--md-sys-color-inverse-primary: oklch(0.75 0.12 25);
@@ -369,7 +384,10 @@
 		--sidebar-ring: rgba(255, 196, 110, 0.4);
 	}
 
-	:root.theme-azalee-light, .theme-azalee-light, :root.azalee-light, .azalee-light {
+	:root.theme-azalee-light,
+	.theme-azalee-light,
+	:root.azalee-light,
+	.azalee-light {
 		--md-sys-color-primary: #f2a93b;
 		--md-sys-color-on-primary: #2a1519;
 		--md-sys-color-primary-container: #ffe08b;
@@ -435,7 +453,10 @@
 		--sidebar-ring: var(--md-sys-color-primary);
 	}
 
-	:root.theme-azalee-dark, .theme-azalee-dark, :root.azalee-dark, .azalee-dark {
+	:root.theme-azalee-dark,
+	.theme-azalee-dark,
+	:root.azalee-dark,
+	.azalee-dark {
 		--md-sys-color-primary: #ffc66c;
 		--md-sys-color-on-primary: #412d00;
 		--md-sys-color-primary-container: #5d4200;
@@ -508,7 +529,11 @@
 		-moz-osx-font-smoothing: grayscale;
 	}
 
-	body { font-feature-settings: "rlig" 1, "calt" 1; }
+	body {
+		font-feature-settings:
+			"rlig" 1,
+			"calt" 1;
+	}
 
 	:focus-visible {
 		outline: 2px solid var(--rg-rose);
@@ -517,23 +542,64 @@
 }
 
 @layer components {
-	.type-display-large { font: 400 57px/64px var(--font-sans); letter-spacing: -0.25px; }
-	.type-display-medium { font: 400 45px/52px var(--font-sans); }
-	.type-display-small { font: 400 36px/44px var(--font-sans); }
-	.type-headline-large { font: 400 32px/40px var(--font-sans); }
-	.type-headline-medium { font: 400 28px/36px var(--font-sans); }
-	.type-headline-small { font: 400 24px/32px var(--font-sans); }
-	.type-title-large { font: 400 22px/28px var(--font-sans); }
-	.type-title-medium { font: 500 16px/24px var(--font-sans); letter-spacing: 0.15px; }
-	.type-title-small { font: 500 14px/20px var(--font-sans); letter-spacing: 0.1px; }
-	.type-body-large { font: 400 16px/24px var(--font-sans); letter-spacing: 0.5px; }
-	.type-body-medium { font: 400 14px/20px var(--font-sans); letter-spacing: 0.25px; }
-	.type-body-small { font: 400 12px/16px var(--font-sans); letter-spacing: 0.4px; }
-	.type-label-large { font: 500 14px/20px var(--font-sans); letter-spacing: 0.1px; }
-	.type-label-medium { font: 500 12px/16px var(--font-sans); letter-spacing: 0.5px; }
-	.type-label-small { font: 500 11px/16px var(--font-sans); letter-spacing: 0.5px; }
+	.type-display-large {
+		font: 400 57px/64px var(--font-sans);
+		letter-spacing: -0.25px;
+	}
+	.type-display-medium {
+		font: 400 45px/52px var(--font-sans);
+	}
+	.type-display-small {
+		font: 400 36px/44px var(--font-sans);
+	}
+	.type-headline-large {
+		font: 400 32px/40px var(--font-sans);
+	}
+	.type-headline-medium {
+		font: 400 28px/36px var(--font-sans);
+	}
+	.type-headline-small {
+		font: 400 24px/32px var(--font-sans);
+	}
+	.type-title-large {
+		font: 400 22px/28px var(--font-sans);
+	}
+	.type-title-medium {
+		font: 500 16px/24px var(--font-sans);
+		letter-spacing: 0.15px;
+	}
+	.type-title-small {
+		font: 500 14px/20px var(--font-sans);
+		letter-spacing: 0.1px;
+	}
+	.type-body-large {
+		font: 400 16px/24px var(--font-sans);
+		letter-spacing: 0.5px;
+	}
+	.type-body-medium {
+		font: 400 14px/20px var(--font-sans);
+		letter-spacing: 0.25px;
+	}
+	.type-body-small {
+		font: 400 12px/16px var(--font-sans);
+		letter-spacing: 0.4px;
+	}
+	.type-label-large {
+		font: 500 14px/20px var(--font-sans);
+		letter-spacing: 0.1px;
+	}
+	.type-label-medium {
+		font: 500 12px/16px var(--font-sans);
+		letter-spacing: 0.5px;
+	}
+	.type-label-small {
+		font: 500 11px/16px var(--font-sans);
+		letter-spacing: 0.5px;
+	}
 
-	.state-layer { position: relative; }
+	.state-layer {
+		position: relative;
+	}
 	.state-layer::before {
 		content: "";
 		position: absolute;
@@ -544,7 +610,13 @@
 		pointer-events: none;
 		border-radius: inherit;
 	}
-	.state-layer:hover::before { opacity: 0.08; }
-	.state-layer:focus-visible::before { opacity: 0.12; }
-	.state-layer:active::before { opacity: 0.12; }
+	.state-layer:hover::before {
+		opacity: 0.08;
+	}
+	.state-layer:focus-visible::before {
+		opacity: 0.12;
+	}
+	.state-layer:active::before {
+		opacity: 0.12;
+	}
 }

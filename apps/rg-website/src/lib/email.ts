@@ -1,44 +1,44 @@
 import nodemailer from "nodemailer";
 
 interface OrderConfirmationData {
-  orderId: string;
-  customerEmail: string;
-  customerName?: string;
-  totalAmount: number;
-  items: {
-    productName: string;
-    variantName: string;
-    quantity: number;
-    price: number;
-  }[];
-  shippingAddress?: {
-    address_line1?: string;
-    address_line2?: string;
-    city?: string;
-    postal_code?: string;
-    country?: string;
-  };
+	orderId: string;
+	customerEmail: string;
+	customerName?: string;
+	totalAmount: number;
+	items: {
+		productName: string;
+		variantName: string;
+		quantity: number;
+		price: number;
+	}[];
+	shippingAddress?: {
+		address_line1?: string;
+		address_line2?: string;
+		city?: string;
+		postal_code?: string;
+		country?: string;
+	};
 }
 
 // Créer le transporteur SMTP
 const transporter = nodemailer.createTransport({
-  auth: {
-    pass: process.env.SMTP_PASSWORD,
-    user: process.env.SMTP_USER,
-  },
-  host: process.env.SMTP_HOST || "smtp.gmail.com",
-  port: parseInt(process.env.SMTP_PORT || "587", 10),
-  secure: process.env.SMTP_SECURE === "true", // true pour 465, false pour 587,
+	auth: {
+		pass: process.env.SMTP_PASSWORD,
+		user: process.env.SMTP_USER,
+	},
+	host: process.env.SMTP_HOST || "smtp.gmail.com",
+	port: parseInt(process.env.SMTP_PORT || "587", 10),
+	secure: process.env.SMTP_SECURE === "true", // true pour 465, false pour 587,
 });
 
 /**
  * Envoyer un email de confirmation de commande
  */
 export async function sendOrderConfirmationEmail(data: OrderConfirmationData) {
-  try {
-    const itemsHtml = data.items
-      .map(
-        (item) => `
+	try {
+		const itemsHtml = data.items
+			.map(
+				(item) => `
       <tr>
         <td style="padding: 12px; border-bottom: 1px solid #e0e0e0;">${item.productName}</td>
         <td style="padding: 12px; border-bottom: 1px solid #e0e0e0;">${item.variantName}</td>
@@ -47,11 +47,11 @@ export async function sendOrderConfirmationEmail(data: OrderConfirmationData) {
         <td style="padding: 12px; border-bottom: 1px solid #e0e0e0; text-align: right;">${(item.price * item.quantity).toFixed(2)}€</td>
       </tr>
     `
-      )
-      .join("");
+			)
+			.join("");
 
-    const addressHtml = data.shippingAddress
-      ? `
+		const addressHtml = data.shippingAddress
+			? `
       <p style="margin: 8px 0;">
         <strong>Adresse de livraison:</strong><br/>
         ${data.shippingAddress.address_line1 || ""}<br/>
@@ -60,9 +60,9 @@ export async function sendOrderConfirmationEmail(data: OrderConfirmationData) {
         ${data.shippingAddress.country || ""}
       </p>
     `
-      : "";
+			: "";
 
-    const htmlContent = `
+		const htmlContent = `
       <!DOCTYPE html>
       <html>
         <head>
@@ -134,36 +134,36 @@ export async function sendOrderConfirmationEmail(data: OrderConfirmationData) {
       </html>
     `;
 
-    const mailOptions = {
-      from: process.env.SMTP_USER,
-      html: htmlContent,
-      subject: `🐉 Confirmation de commande #${data.orderId}`,
-      to: data.customerEmail,
-    };
+		const mailOptions = {
+			from: process.env.SMTP_USER,
+			html: htmlContent,
+			subject: `🐉 Confirmation de commande #${data.orderId}`,
+			to: data.customerEmail,
+		};
 
-    const info = await transporter.sendMail(mailOptions);
-    // Email envoyé avec succès
-    return { messageId: info.messageId, success: true };
-  } catch (error) {
-    console.error("Erreur lors de l'envoi de l'email:", error);
-    throw error;
-  }
+		const info = await transporter.sendMail(mailOptions);
+		// Email envoyé avec succès
+		return { messageId: info.messageId, success: true };
+	} catch (error) {
+		console.error("Erreur lors de l'envoi de l'email:", error);
+		throw error;
+	}
 }
 
 /**
  * Envoyer un email d'avis d'expédition
  */
 export async function sendShippingNotificationEmail(
-  customerEmail: string,
-  orderId: string,
-  trackingNumber?: string
+	customerEmail: string,
+	orderId: string,
+	trackingNumber?: string
 ) {
-  try {
-    const trackingHtml = trackingNumber
-      ? `<p><strong>Numéro de suivi:</strong> ${trackingNumber}</p>`
-      : "";
+	try {
+		const trackingHtml = trackingNumber
+			? `<p><strong>Numéro de suivi:</strong> ${trackingNumber}</p>`
+			: "";
 
-    const htmlContent = `
+		const htmlContent = `
       <!DOCTYPE html>
       <html>
         <head>
@@ -197,27 +197,27 @@ export async function sendShippingNotificationEmail(
       </html>
     `;
 
-    const mailOptions = {
-      from: process.env.SMTP_USER,
-      html: htmlContent,
-      subject: `📦 Votre commande #${orderId} a été expédiée`,
-      to: customerEmail,
-    };
+		const mailOptions = {
+			from: process.env.SMTP_USER,
+			html: htmlContent,
+			subject: `📦 Votre commande #${orderId} a été expédiée`,
+			to: customerEmail,
+		};
 
-    const info = await transporter.sendMail(mailOptions);
-    return { messageId: info.messageId, success: true };
-  } catch (error) {
-    console.error("Erreur lors de l'envoi de l'email d'expédition:", error);
-    throw error;
-  }
+		const info = await transporter.sendMail(mailOptions);
+		return { messageId: info.messageId, success: true };
+	} catch (error) {
+		console.error("Erreur lors de l'envoi de l'email d'expédition:", error);
+		throw error;
+	}
 }
 
 /**
  * Envoyer un email de confirmation de livraison
  */
 export async function sendDeliveryConfirmationEmail(customerEmail: string, orderId: string) {
-  try {
-    const htmlContent = `
+	try {
+		const htmlContent = `
       <!DOCTYPE html>
       <html>
         <head>
@@ -249,33 +249,33 @@ export async function sendDeliveryConfirmationEmail(customerEmail: string, order
       </html>
     `;
 
-    const mailOptions = {
-      from: process.env.SMTP_USER,
-      html: htmlContent,
-      subject: `✅ Votre commande #${orderId} a été livrée`,
-      to: customerEmail,
-    };
+		const mailOptions = {
+			from: process.env.SMTP_USER,
+			html: htmlContent,
+			subject: `✅ Votre commande #${orderId} a été livrée`,
+			to: customerEmail,
+		};
 
-    const info = await transporter.sendMail(mailOptions);
-    return { messageId: info.messageId, success: true };
-  } catch (error) {
-    console.error("Erreur lors de l'envoi de l'email de livraison:", error);
-    throw error;
-  }
+		const info = await transporter.sendMail(mailOptions);
+		return { messageId: info.messageId, success: true };
+	} catch (error) {
+		console.error("Erreur lors de l'envoi de l'email de livraison:", error);
+		throw error;
+	}
 }
 
 /**
  * Envoyer un email d'annulation de commande
  */
 export async function sendOrderCancellationEmail(
-  customerEmail: string,
-  orderId: string,
-  reason?: string
+	customerEmail: string,
+	orderId: string,
+	reason?: string
 ) {
-  try {
-    const reasonHtml = reason ? `<p><strong>Raison:</strong> ${reason}</p>` : "";
+	try {
+		const reasonHtml = reason ? `<p><strong>Raison:</strong> ${reason}</p>` : "";
 
-    const htmlContent = `
+		const htmlContent = `
       <!DOCTYPE html>
       <html>
         <head>
@@ -309,17 +309,17 @@ export async function sendOrderCancellationEmail(
       </html>
     `;
 
-    const mailOptions = {
-      from: process.env.SMTP_USER,
-      html: htmlContent,
-      subject: `❌ Votre commande #${orderId} a été annulée`,
-      to: customerEmail,
-    };
+		const mailOptions = {
+			from: process.env.SMTP_USER,
+			html: htmlContent,
+			subject: `❌ Votre commande #${orderId} a été annulée`,
+			to: customerEmail,
+		};
 
-    const info = await transporter.sendMail(mailOptions);
-    return { messageId: info.messageId, success: true };
-  } catch (error) {
-    console.error("Erreur lors de l'envoi de l'email d'annulation:", error);
-    throw error;
-  }
+		const info = await transporter.sendMail(mailOptions);
+		return { messageId: info.messageId, success: true };
+	} catch (error) {
+		console.error("Erreur lors de l'envoi de l'email d'annulation:", error);
+		throw error;
+	}
 }

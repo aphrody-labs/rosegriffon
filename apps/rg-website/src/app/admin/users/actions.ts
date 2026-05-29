@@ -7,58 +7,62 @@ import { getServerUser } from "@/lib/auth-helpers";
 import { createAdminClient, createClient } from "@/lib/supabase/server";
 
 const userEditSchema = z.object({
-  full_name: z.string().optional(),
-  role: z.enum(["user", "admin", "moderator", "staff"]),
+	full_name: z.string().optional(),
+	role: z.enum(["user", "admin", "moderator", "staff"]),
 });
 
 type UserEditValues = z.infer<typeof userEditSchema>;
 
 export async function updateUserProfile(userId: string, values: UserEditValues) {
-  // 1. Check if current user is admin
-  const supabase = await createClient();
-  const user = await getServerUser();
+	// 1. Check if current user is admin
+	const supabase = await createClient();
+	const user = await getServerUser();
 
-  if (!user) {return { error: "Non authentifié" };}
+	if (!user) {
+		return { error: "Non authentifié" };
+	}
 
-  const { data: currentUserProfile } = await supabase
-    .from("profiles")
-    .select("role")
-    .eq("id", user.id)
-    .single();
+	const { data: currentUserProfile } = await supabase
+		.from("profiles")
+		.select("role")
+		.eq("id", user.id)
+		.single();
 
-  // Cast explicite pour éviter l'erreur de type
-  const role = (currentUserProfile as unknown as { role: string } | null)?.role;
+	// Cast explicite pour éviter l'erreur de type
+	const role = (currentUserProfile as unknown as { role: string } | null)?.role;
 
-  if (role !== "admin") {
-    return { error: "Non autorisé" };
-  }
+	if (role !== "admin") {
+		return { error: "Non autorisé" };
+	}
 
-  // 2. Validate input
-  const validation = userEditSchema.safeParse(values);
-  if (!validation.success) {
-    return { error: "Données invalides" };
-  }
+	// 2. Validate input
+	const validation = userEditSchema.safeParse(values);
+	if (!validation.success) {
+		return { error: "Données invalides" };
+	}
 
-  // 3. Update target user using Admin Client
-  const adminClient = createAdminClient();
-  if (!adminClient) {return { error: "Erreur configuration serveur" };}
+	// 3. Update target user using Admin Client
+	const adminClient = createAdminClient();
+	if (!adminClient) {
+		return { error: "Erreur configuration serveur" };
+	}
 
-  const { error } = await adminClient
-    .from("profiles")
-    .update({
-      full_name: validation.data.full_name,
-      role: validation.data.role,
-      updated_at: new Date().toISOString(),
-    })
-    .eq("id", userId);
+	const { error } = await adminClient
+		.from("profiles")
+		.update({
+			full_name: validation.data.full_name,
+			role: validation.data.role,
+			updated_at: new Date().toISOString(),
+		})
+		.eq("id", userId);
 
-  if (error) {
-    console.error("Error updating user:", error);
-    return { error: "Erreur lors de la mise à jour" };
-  }
+	if (error) {
+		console.error("Error updating user:", error);
+		return { error: "Erreur lors de la mise à jour" };
+	}
 
-  await logAdminAction("update", "user", userId, values);
+	await logAdminAction("update", "user", userId, values);
 
-  revalidatePath("/admin/users");
-  return { success: true };
+	revalidatePath("/admin/users");
+	return { success: true };
 }

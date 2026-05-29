@@ -30,8 +30,7 @@ const STATUS_LABELS: Record<string, { label: string; className: string }> = {
 		label: "Publié",
 	},
 	scheduled: {
-		className:
-			"bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300",
+		className: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300",
 		label: "Programmé",
 	},
 };
@@ -43,11 +42,7 @@ const CATEGORY_LABELS: Record<string, string> = {
 	event: "Événement",
 };
 
-export function SelectableNewsRow({
-	item,
-	selected,
-	onToggle,
-}: SelectableNewsRowProps) {
+export function SelectableNewsRow({ item, selected, onToggle }: SelectableNewsRowProps) {
 	const statusInfo = STATUS_LABELS[item.status] || STATUS_LABELS.draft;
 	const categoryLabel = CATEGORY_LABELS[item.category] || item.category;
 	const viewCount = item.view_count as number | undefined;
@@ -68,17 +63,11 @@ export function SelectableNewsRow({
 			>
 				<div
 					className={`size-5 rounded border transition-all flex items-center justify-center ${
-						selected
-							? "bg-primary border-primary"
-							: "border-outline-variant hover:border-primary"
+						selected ? "bg-primary border-primary" : "border-outline-variant hover:border-primary"
 					}`}
 				>
 					{selected && (
-						<svg
-							className="size-3 text-on-primary"
-							viewBox="0 0 12 12"
-							fill="none"
-						>
+						<svg className="size-3 text-on-primary" viewBox="0 0 12 12" fill="none">
 							<path
 								d="M2 6L5 9L10 3"
 								stroke="currentColor"
@@ -111,11 +100,7 @@ export function SelectableNewsRow({
 					<h3 className="text-sm sm:text-base font-bold text-on-surface group-hover:text-primary transition-colors truncate flex items-center gap-2">
 						{item.pinned && (
 							<span title="Épinglé en une">
-								<Pin
-									size={14}
-									className="text-primary shrink-0"
-									aria-hidden
-								/>
+								<Pin size={14} className="text-primary shrink-0" aria-hidden />
 							</span>
 						)}
 						{item.title}
@@ -124,20 +109,14 @@ export function SelectableNewsRow({
 						<span>{item.author?.full_name || "Azalée"}</span>
 						<span className="size-1 rounded-full bg-outline-variant" />
 						<span>
-							{format(
-								new Date(item.updated_at || item.created_at || new Date()),
-								"d MMM yyyy",
-								{
-									locale: fr,
-								},
-							)}
+							{format(new Date(item.updated_at || item.created_at || new Date()), "d MMM yyyy", {
+								locale: fr,
+							})}
 						</span>
 						{categoryLabel && (
 							<>
 								<span className="size-1 rounded-full bg-outline-variant" />
-								<span className="text-on-surface-variant/70">
-									{categoryLabel}
-								</span>
+								<span className="text-on-surface-variant/70">{categoryLabel}</span>
 							</>
 						)}
 						{viewCount != null && viewCount > 0 && (
@@ -162,9 +141,7 @@ export function SelectableNewsRow({
 								</span>
 							))}
 							{tags.length > 3 && (
-								<span className="text-[10px] text-on-surface-variant/50">
-									+{tags.length - 3}
-								</span>
+								<span className="text-[10px] text-on-surface-variant/50">+{tags.length - 3}</span>
 							)}
 						</div>
 					)}

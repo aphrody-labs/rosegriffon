@@ -26,16 +26,11 @@ export function UpcomingEvents({ events }: { events: UpcomingEvent[] }) {
 			</CardHeader>
 			<CardContent>
 				{events.length === 0 ? (
-					<p className="text-sm text-muted-foreground">
-						Aucun événement à venir.
-					</p>
+					<p className="text-sm text-muted-foreground">Aucun événement à venir.</p>
 				) : (
 					<ul className="divide-y divide-border">
 						{events.map((e) => (
-							<li
-								key={e.id}
-								className="flex items-start gap-3 py-3 first:pt-0 last:pb-0"
-							>
+							<li key={e.id} className="flex items-start gap-3 py-3 first:pt-0 last:pb-0">
 								<div
 									className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400"
 									aria-hidden="true"
@@ -43,9 +38,7 @@ export function UpcomingEvents({ events }: { events: UpcomingEvent[] }) {
 									<CalendarClock className="size-4" />
 								</div>
 								<div className="min-w-0 flex-1">
-									<p className="truncate text-sm font-medium text-foreground">
-										{e.title}
-									</p>
+									<p className="truncate text-sm font-medium text-foreground">{e.title}</p>
 									<p className="mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs text-muted-foreground">
 										<span>
 											{format(new Date(e.start_time), "d MMM · HH:mm", {

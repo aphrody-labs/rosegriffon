@@ -21,11 +21,7 @@ export async function FrenchTweet({ id }: { id: string }) {
 		const tweet = await getTweet(id);
 
 		if (!tweet) {
-			return (
-				<div className="p-4 text-center text-muted-foreground">
-					Tweet introuvable
-				</div>
-			);
+			return <div className="p-4 text-center text-muted-foreground">Tweet introuvable</div>;
 		}
 
 		// Gestion des médias (Photos)
@@ -72,11 +68,7 @@ export async function FrenchTweet({ id }: { id: string }) {
 							>
 								{tweet.user.name}
 							</Link>
-							<Link
-								href={userUrl}
-								target="_blank"
-								className="block text-sm text-muted-foreground"
-							>
+							<Link href={userUrl} target="_blank" className="block text-sm text-muted-foreground">
 								@{tweet.user.screen_name}
 							</Link>
 						</div>

@@ -5,12 +5,7 @@ interface Props {
 	grandfathered?: number;
 }
 
-export function MigrationChart({
-	pending,
-	reactivated,
-	churned,
-	grandfathered = 0,
-}: Props) {
+export function MigrationChart({ pending, reactivated, churned, grandfathered = 0 }: Props) {
 	const total = pending + reactivated + churned + grandfathered;
 	if (total === 0) {
 		return (

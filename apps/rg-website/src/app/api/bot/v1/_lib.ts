@@ -1,5 +1,5 @@
-import { NextResponse } from 'next/server';
-import type { NextRequest } from 'next/server';
+import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
 
 import { createAdminClient } from "@/lib/supabase/server";
 
@@ -10,15 +10,15 @@ const TOKEN = process.env.BOT_API_TOKEN;
  * Returns null on success, an error NextResponse otherwise.
  */
 export function assertBotAuth(request: NextRequest): NextResponse | null {
-  if (!TOKEN) {
-    return NextResponse.json({ error: "BOT_API_TOKEN not configured on server" }, { status: 503 });
-  }
-  const auth = request.headers.get("authorization") ?? "";
-  const provided = auth.startsWith("Bearer ") ? auth.slice(7).trim() : null;
-  if (!provided || provided !== TOKEN) {
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-  }
-  return null;
+	if (!TOKEN) {
+		return NextResponse.json({ error: "BOT_API_TOKEN not configured on server" }, { status: 503 });
+	}
+	const auth = request.headers.get("authorization") ?? "";
+	const provided = auth.startsWith("Bearer ") ? auth.slice(7).trim() : null;
+	if (!provided || provided !== TOKEN) {
+		return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+	}
+	return null;
 }
 
 /**
@@ -26,32 +26,36 @@ export function assertBotAuth(request: NextRequest): NextResponse | null {
  * Returns null if no link exists.
  */
 export async function resolveDiscordToProfile(discordId: string) {
-  const supabase = createAdminClient();
-  if (!supabase) {return null;}
+	const supabase = createAdminClient();
+	if (!supabase) {
+		return null;
+	}
 
-  const { data: account } = await supabase
-    .from("account")
-    .select("user_id")
-    .eq("provider_id", "discord")
-    .eq("account_id", discordId)
-    .maybeSingle();
+	const { data: account } = await supabase
+		.from("account")
+		.select("user_id")
+		.eq("provider_id", "discord")
+		.eq("account_id", discordId)
+		.maybeSingle();
 
-  if (!account) {return null;}
+	if (!account) {
+		return null;
+	}
 
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("id, username, full_name, email, role, avatar_url, discord_id")
-    .eq("id", (account as { user_id: string }).user_id)
-    .maybeSingle();
+	const { data: profile } = await supabase
+		.from("profiles")
+		.select("id, username, full_name, email, role, avatar_url, discord_id")
+		.eq("id", (account as { user_id: string }).user_id)
+		.maybeSingle();
 
-  return profile;
+	return profile;
 }
 
 export interface BotPrincipal {
-  profile_id: string;
-  discord_id: string;
-  role: string;
-  username: string | null;
+	profile_id: string;
+	discord_id: string;
+	role: string;
+	username: string | null;
 }
 
 /**
@@ -60,64 +64,68 @@ export interface BotPrincipal {
  * Returns either a NextResponse (denied) or the principal.
  */
 export async function authBotAndActor(
-  request: NextRequest,
-  opts: { adminOnly?: boolean } = {}
+	request: NextRequest,
+	opts: { adminOnly?: boolean } = {}
 ): Promise<NextResponse | BotPrincipal> {
-  const denied = assertBotAuth(request);
-  if (denied) {return denied;}
+	const denied = assertBotAuth(request);
+	if (denied) {
+		return denied;
+	}
 
-  const discordId = request.headers.get("x-discord-id");
-  if (!discordId) {
-    return NextResponse.json(
-      { error: "Missing x-discord-id header (actor identity required)" },
-      { status: 400 }
-    );
-  }
-  const profile = (await resolveDiscordToProfile(discordId)) as
-    | (BotPrincipal & { id?: string })
-    | null;
-  if (!profile) {
-    return NextResponse.json(
-      { error: `Discord user ${discordId} not linked to any RG profile` },
-      { status: 404 }
-    );
-  }
-  const role = (profile as unknown as { role?: string }).role ?? "user";
-  if (role !== "admin" && role !== "staff") {
-    return NextResponse.json({ error: `Insufficient role: ${role}` }, { status: 403 });
-  }
-  if (opts.adminOnly && role !== "admin") {
-    return NextResponse.json({ error: "Strict admin required" }, { status: 403 });
-  }
-  return {
-    discord_id: discordId,
-    profile_id: (profile as unknown as { id: string }).id,
-    role,
-    username: (profile as unknown as { username?: string | null }).username ?? null,
-  };
+	const discordId = request.headers.get("x-discord-id");
+	if (!discordId) {
+		return NextResponse.json(
+			{ error: "Missing x-discord-id header (actor identity required)" },
+			{ status: 400 }
+		);
+	}
+	const profile = (await resolveDiscordToProfile(discordId)) as
+		| (BotPrincipal & { id?: string })
+		| null;
+	if (!profile) {
+		return NextResponse.json(
+			{ error: `Discord user ${discordId} not linked to any RG profile` },
+			{ status: 404 }
+		);
+	}
+	const role = (profile as unknown as { role?: string }).role ?? "user";
+	if (role !== "admin" && role !== "staff") {
+		return NextResponse.json({ error: `Insufficient role: ${role}` }, { status: 403 });
+	}
+	if (opts.adminOnly && role !== "admin") {
+		return NextResponse.json({ error: "Strict admin required" }, { status: 403 });
+	}
+	return {
+		discord_id: discordId,
+		profile_id: (profile as unknown as { id: string }).id,
+		role,
+		username: (profile as unknown as { username?: string | null }).username ?? null,
+	};
 }
 
 /**
  * Insert a row into `admin_audit_log` with `details.via='bot-api'`.
  */
 export async function logBotAction(opts: {
-  principal: BotPrincipal;
-  action: string;
-  entity_type?: string;
-  entity_id?: string | null;
-  details?: Record<string, unknown>;
+	principal: BotPrincipal;
+	action: string;
+	entity_type?: string;
+	entity_id?: string | null;
+	details?: Record<string, unknown>;
 }): Promise<void> {
-  try {
-    const supabase = createAdminClient();
-    if (!supabase) {return;}
-    await supabase.from("admin_audit_log").insert({
-      action: opts.action,
-      details: { discord_id: opts.principal.discord_id, via: "bot-api", ...opts.details },
-      entity_id: opts.entity_id ?? null,
-      entity_type: opts.entity_type ?? "bot-api",
-      user_id: opts.principal.profile_id,
-    });
-  } catch (error) {
-    console.error("[bot-api] audit log failed:", error);
-  }
+	try {
+		const supabase = createAdminClient();
+		if (!supabase) {
+			return;
+		}
+		await supabase.from("admin_audit_log").insert({
+			action: opts.action,
+			details: { discord_id: opts.principal.discord_id, via: "bot-api", ...opts.details },
+			entity_id: opts.entity_id ?? null,
+			entity_type: opts.entity_type ?? "bot-api",
+			user_id: opts.principal.profile_id,
+		});
+	} catch (error) {
+		console.error("[bot-api] audit log failed:", error);
+	}
 }

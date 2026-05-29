@@ -1,30 +1,30 @@
 {
-  "name": "@rose-griffon/auth",
-  "version": "0.1.0",
-  "type": "module",
-  "description": "Shared authentication logic and guards for Rose Griffon apps",
-  "exports": {
-    ".": "./src/index.ts",
-    "./server": "./src/server.ts"
-  },
-  "scripts": {
-    "type-check": "tsc --noEmit",
-    "test": "vitest run"
-  },
-  "dependencies": {
-    "@rose-griffon/db": "workspace:*",
-    "@rose-griffon/types": "workspace:*",
-    "better-auth": "catalog:"
-  },
-  "devDependencies": {
-    "@types/bun": "catalog:",
-    "next": "catalog:",
-    "react": "catalog:",
-    "typescript": "catalog:",
-    "vitest": "catalog:"
-  },
-  "publishConfig": {
-    "registry": "https://npm.pkg.github.com",
-    "access": "restricted"
-  }
+	"name": "@rose-griffon/auth",
+	"version": "0.1.0",
+	"description": "Shared authentication logic and guards for Rose Griffon apps",
+	"type": "module",
+	"exports": {
+		".": "./src/index.ts",
+		"./server": "./src/server.ts"
+	},
+	"publishConfig": {
+		"access": "restricted",
+		"registry": "https://npm.pkg.github.com"
+	},
+	"scripts": {
+		"type-check": "tsc --noEmit",
+		"test": "vitest run"
+	},
+	"dependencies": {
+		"@rose-griffon/db": "workspace:*",
+		"@rose-griffon/types": "workspace:*",
+		"better-auth": "catalog:"
+	},
+	"devDependencies": {
+		"@types/bun": "catalog:",
+		"next": "catalog:",
+		"react": "catalog:",
+		"typescript": "catalog:",
+		"vitest": "catalog:"
+	}
 }

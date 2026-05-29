@@ -127,12 +127,10 @@ async function archiveOne(img: ImgRef): Promise<{
 		};
 	}
 
-	const { error: upErr } = await supabase.storage
-		.from(BUCKET)
-		.upload(storage_path, buf, {
-			contentType: mime ?? "application/octet-stream",
-			upsert: true,
-		});
+	const { error: upErr } = await supabase.storage.from(BUCKET).upload(storage_path, buf, {
+		contentType: mime ?? "application/octet-stream",
+		upsert: true,
+	});
 	if (upErr) {
 		return { skipped: true, reason: `storage: ${upErr.message}` };
 	}
@@ -147,7 +145,7 @@ async function archiveOne(img: ImgRef): Promise<{
 			size_bytes: buf.byteLength,
 			sha256: sha,
 		},
-		{ onConflict: "patreon_post_id,sha256", ignoreDuplicates: false },
+		{ onConflict: "patreon_post_id,sha256", ignoreDuplicates: false }
 	);
 	if (dbErr) {
 		return { skipped: true, reason: `db: ${dbErr.message}` };
@@ -164,9 +162,7 @@ async function archiveOne(img: ImgRef): Promise<{
 
 async function main() {
 	const start = Date.now();
-	console.log(
-		`[patreon-images-sync] dry=${dryRun} force=${force} limit=${limit ?? "∞"}`,
-	);
+	console.log(`[patreon-images-sync] dry=${dryRun} force=${force} limit=${limit ?? "∞"}`);
 
 	const { data: posts, error } = await supabase
 		.from("patreon_post_events")
@@ -182,7 +178,7 @@ async function main() {
 
 	const slice = limit ? allImages.slice(0, limit) : allImages;
 	console.log(
-		`[scan] ${posts?.length} posts → ${allImages.length} images Patreon (${slice.length} dans cette run)`,
+		`[scan] ${posts?.length} posts → ${allImages.length} images Patreon (${slice.length} dans cette run)`
 	);
 
 	let archived = 0;
@@ -201,14 +197,14 @@ async function main() {
 			archived++;
 			totalBytes += r.size ?? 0;
 			console.log(
-				`  ✓ ${img.postId}/${r.sha?.slice(0, 8)}…${r.mime ? ` ${r.mime}` : ""} ${r.size ? `(${(r.size / 1024).toFixed(1)} KB)` : ""}`,
+				`  ✓ ${img.postId}/${r.sha?.slice(0, 8)}…${r.mime ? ` ${r.mime}` : ""} ${r.size ? `(${(r.size / 1024).toFixed(1)} KB)` : ""}`
 			);
 		}
 	}
 
 	const ms = Date.now() - start;
 	console.log(
-		`[done] archived=${archived} skipped=${skipped} failures=${failures.length} total=${(totalBytes / 1024).toFixed(1)} KB · ${ms}ms`,
+		`[done] archived=${archived} skipped=${skipped} failures=${failures.length} total=${(totalBytes / 1024).toFixed(1)} KB · ${ms}ms`
 	);
 	if (failures.length > 0) {
 		console.log("[failures]");

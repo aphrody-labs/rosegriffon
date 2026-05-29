@@ -11,9 +11,7 @@ export const revalidate = 600; // 10 min — pas critique de l'avoir frais
 export async function GET(request: Request) {
 	const { searchParams } = new URL(request.url);
 	const limitRaw = Number.parseInt(searchParams.get("limit") || "15", 10);
-	const limit = Number.isFinite(limitRaw)
-		? Math.max(1, Math.min(limitRaw, 50))
-		: 15;
+	const limit = Number.isFinite(limitRaw) ? Math.max(1, Math.min(limitRaw, 50)) : 15;
 
 	const supabase = await createClient();
 
@@ -31,11 +29,15 @@ export async function GET(request: Request) {
 
 	const counts = new Map<string, number>();
 	for (const row of data ?? []) {
-		const {tags} = (row as { tags?: string[] | null });
-		if (!Array.isArray(tags)) {continue;}
+		const { tags } = row as { tags?: string[] | null };
+		if (!Array.isArray(tags)) {
+			continue;
+		}
 		for (const raw of tags) {
 			const tag = typeof raw === "string" ? raw.trim() : "";
-			if (!tag) {continue;}
+			if (!tag) {
+				continue;
+			}
 			counts.set(tag, (counts.get(tag) ?? 0) + 1);
 		}
 	}

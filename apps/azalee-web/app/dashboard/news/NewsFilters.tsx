@@ -3,7 +3,28 @@
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList, Popover, PopoverContent, PopoverTrigger, Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue, ToggleGroup, ToggleGroupItem, Tooltip, TooltipContent, TooltipTrigger } from "@rose-griffon/ui";
+import {
+	Command,
+	CommandEmpty,
+	CommandGroup,
+	CommandInput,
+	CommandItem,
+	CommandList,
+	Popover,
+	PopoverContent,
+	PopoverTrigger,
+	Select,
+	SelectContent,
+	SelectGroup,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+	ToggleGroup,
+	ToggleGroupItem,
+	Tooltip,
+	TooltipContent,
+	TooltipTrigger,
+} from "@rose-griffon/ui";
 import { Icon } from "@/components/ui/Icon";
 import {
 	Check as CheckIcon,
@@ -49,12 +70,7 @@ interface NewsFiltersProps {
 	authors?: Array<{ id: string; name: string }>;
 }
 
-export function NewsFilters({
-	totalItems,
-	rangeStart,
-	rangeEnd,
-	authors = [],
-}: NewsFiltersProps) {
+export function NewsFilters({ totalItems, rangeStart, rangeEnd, authors = [] }: NewsFiltersProps) {
 	const searchParams = useSearchParams();
 	const router = useRouter();
 	const currentStatus = searchParams.get("status") || "";
@@ -72,7 +88,7 @@ export function NewsFilters({
 
 	const currentAuthorName = useMemo(
 		() => authors.find((a) => a.id === currentAuthor)?.name,
-		[authors, currentAuthor],
+		[authors, currentAuthor]
 	);
 
 	useEffect(() => {
@@ -114,7 +130,9 @@ export function NewsFilters({
 
 	const handleSearch = (value: string) => {
 		setSearchValue(value);
-		if (searchTimerRef.current) {clearTimeout(searchTimerRef.current);}
+		if (searchTimerRef.current) {
+			clearTimeout(searchTimerRef.current);
+		}
 		searchTimerRef.current = setTimeout(() => {
 			pushOverrides({ q: value || null });
 		}, 400);
@@ -126,9 +144,7 @@ export function NewsFilters({
 		inputRef.current?.focus();
 	};
 
-	const activeAdvancedFilters = [currentCategory, currentAuthor].filter(
-		Boolean,
-	).length;
+	const activeAdvancedFilters = [currentCategory, currentAuthor].filter(Boolean).length;
 
 	return (
 		<div className="flex flex-col gap-3">
@@ -208,16 +224,14 @@ export function NewsFilters({
 				{/* Category */}
 				<Select
 					value={currentCategory || "_all"}
-					onValueChange={(value) =>
-						pushOverrides({ category: value === "_all" ? null : value })
-					}
+					onValueChange={(value) => pushOverrides({ category: value === "_all" ? null : value })}
 				>
 					<SelectTrigger
 						size="sm"
 						aria-label="Filtrer par catégorie"
 						className={cn(
 							"h-8 gap-1.5 rounded-full border-outline-variant/40 bg-surface-container-low text-xs",
-							currentCategory && "border-primary/30 bg-primary/10 text-primary",
+							currentCategory && "border-primary/30 bg-primary/10 text-primary"
 						)}
 					>
 						<Icon name="category" size={14} className="opacity-70" />
@@ -244,8 +258,7 @@ export function NewsFilters({
 								aria-expanded={authorOpen}
 								className={cn(
 									"flex h-8 items-center gap-1.5 rounded-full border border-outline-variant/40 bg-surface-container-low px-3 font-medium text-xs transition-colors hover:bg-surface-container",
-									currentAuthor &&
-										"border-primary/30 bg-primary/10 text-primary",
+									currentAuthor && "border-primary/30 bg-primary/10 text-primary"
 								)}
 							>
 								<Icon name="person" size={14} className="opacity-70" />
@@ -269,10 +282,7 @@ export function NewsFilters({
 											}}
 										>
 											<CheckIcon
-												className={cn(
-													"mr-2 size-4",
-													!currentAuthor ? "opacity-100" : "opacity-0",
-												)}
+												className={cn("mr-2 size-4", !currentAuthor ? "opacity-100" : "opacity-0")}
 											/>
 											Tous les auteurs
 										</CommandItem>
@@ -288,9 +298,7 @@ export function NewsFilters({
 												<CheckIcon
 													className={cn(
 														"mr-2 size-4",
-														currentAuthor === a.id
-															? "opacity-100"
-															: "opacity-0",
+														currentAuthor === a.id ? "opacity-100" : "opacity-0"
 													)}
 												/>
 												{a.name}
@@ -324,9 +332,7 @@ export function NewsFilters({
 				{/* Sort */}
 				<Select
 					value={currentSort}
-					onValueChange={(value) =>
-						pushOverrides({ sort: value === "created_at" ? null : value })
-					}
+					onValueChange={(value) => pushOverrides({ sort: value === "created_at" ? null : value })}
 				>
 					<SelectTrigger
 						size="sm"
@@ -352,9 +358,7 @@ export function NewsFilters({
 				{/* Per page */}
 				<Select
 					value={currentPerPage}
-					onValueChange={(value) =>
-						pushOverrides({ perPage: value === "20" ? null : value })
-					}
+					onValueChange={(value) => pushOverrides({ perPage: value === "20" ? null : value })}
 				>
 					<SelectTrigger
 						size="sm"
@@ -375,9 +379,7 @@ export function NewsFilters({
 				</Select>
 
 				<span className="ml-auto text-on-surface-variant/70 text-xs">
-					{totalItems > 0
-						? `${rangeStart}–${rangeEnd} sur ${totalItems}`
-						: "Aucun résultat"}
+					{totalItems > 0 ? `${rangeStart}–${rangeEnd} sur ${totalItems}` : "Aucun résultat"}
 				</span>
 			</div>
 		</div>

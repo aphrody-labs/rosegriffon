@@ -13,138 +13,138 @@ import { parseSearchParams } from "@/lib/validations";
 const ITEMS_PER_PAGE = 12;
 
 interface TagPageProps {
-  params: Promise<{ tag: string }>;
-  searchParams: Promise<Record<string, string | string[] | undefined>>;
+	params: Promise<{ tag: string }>;
+	searchParams: Promise<Record<string, string | string[] | undefined>>;
 }
 
 export async function generateMetadata({ params }: TagPageProps) {
-  const { tag } = await params;
-  const decodedTag = decodeURIComponent(tag);
-  return {
-    description: `Tous les articles avec le tag "${decodedTag}" sur Azalée.`,
-    title: `Articles tagués "${decodedTag}" - Azalée`,
-  };
+	const { tag } = await params;
+	const decodedTag = decodeURIComponent(tag);
+	return {
+		description: `Tous les articles avec le tag "${decodedTag}" sur Azalée.`,
+		title: `Articles tagués "${decodedTag}" - Azalée`,
+	};
 }
 
 export default async function TagPage({ params, searchParams }: TagPageProps) {
-  const { tag } = await params;
-  const decodedTag = decodeURIComponent(tag);
-  const { page: currentPage } = parseSearchParams(await searchParams);
-  const supabase = await createClient();
+	const { tag } = await params;
+	const decodedTag = decodeURIComponent(tag);
+	const { page: currentPage } = parseSearchParams(await searchParams);
+	const supabase = await createClient();
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const client = supabase as any;
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	const client = supabase as any;
 
-  // Count
-  const { count } = await client
-    .from("articles")
-    .select("*", { count: "exact", head: true })
-    .eq("status", "published")
-    .eq("app", "azalee")
-    .contains("tags", [decodedTag]);
+	// Count
+	const { count } = await client
+		.from("articles")
+		.select("*", { count: "exact", head: true })
+		.eq("status", "published")
+		.eq("app", "azalee")
+		.contains("tags", [decodedTag]);
 
-  const totalItems = count || 0;
+	const totalItems = count || 0;
 
-  // Data
-  const { data: articles } = await client
-    .from("articles")
-    .select("id, title, slug, excerpt, published_at, featured_image_url, category, tags, author_id")
-    .eq("status", "published")
-    .eq("app", "azalee")
-    .contains("tags", [decodedTag])
-    .order("published_at", { ascending: false })
-    .range((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE - 1);
+	// Data
+	const { data: articles } = await client
+		.from("articles")
+		.select("id, title, slug, excerpt, published_at, featured_image_url, category, tags, author_id")
+		.eq("status", "published")
+		.eq("app", "azalee")
+		.contains("tags", [decodedTag])
+		.order("published_at", { ascending: false })
+		.range((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE - 1);
 
-  return (
-    <div className="space-y-8 pb-16">
-      {/* Header */}
-      <div className="bg-surface-container-low rounded-b-[32px] px-4 md:px-8 pt-12 lg:pt-20 pb-8">
-        <Link href="/news">
-          <Button variant="ghost" size="sm" className="rounded-full mb-4 text-on-surface-variant">
-            <ArrowLeft className="mr-2 size-4" /> Retour aux actualités
-          </Button>
-        </Link>
-        <div className="flex items-center gap-3">
-          <div className="size-12 rounded-2xl bg-secondary-container flex items-center justify-center">
-            <Tag className="size-5 text-on-secondary-container" />
-          </div>
-          <div>
-            <h1 className="text-2xl md:text-3xl font-black font-sans tracking-tight text-on-surface">
-              {decodedTag}
-            </h1>
-            <p className="text-sm text-on-surface-variant">
-              {totalItems} article{totalItems !== 1 ? "s" : ""}
-            </p>
-          </div>
-        </div>
-      </div>
+	return (
+		<div className="space-y-8 pb-16">
+			{/* Header */}
+			<div className="bg-surface-container-low rounded-b-[32px] px-4 md:px-8 pt-12 lg:pt-20 pb-8">
+				<Link href="/news">
+					<Button variant="ghost" size="sm" className="rounded-full mb-4 text-on-surface-variant">
+						<ArrowLeft className="mr-2 size-4" /> Retour aux actualités
+					</Button>
+				</Link>
+				<div className="flex items-center gap-3">
+					<div className="size-12 rounded-2xl bg-secondary-container flex items-center justify-center">
+						<Tag className="size-5 text-on-secondary-container" />
+					</div>
+					<div>
+						<h1 className="text-2xl md:text-3xl font-black font-sans tracking-tight text-on-surface">
+							{decodedTag}
+						</h1>
+						<p className="text-sm text-on-surface-variant">
+							{totalItems} article{totalItems !== 1 ? "s" : ""}
+						</p>
+					</div>
+				</div>
+			</div>
 
-      {/* Articles grid */}
-      {articles && articles.length > 0 ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 px-4 md:px-8">
-          {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-          {(articles as any[]).map((article: any) => (
-            <Link
-              key={article.id}
-              href={`/news/${article.slug}`}
-              className="group rounded-2xl overflow-hidden bg-surface-container-lowest border border-outline-variant/20 hover:shadow-lg transition-all duration-300"
-            >
-              <div className="relative aspect-[16/9] bg-surface-container">
-                <Image
-                  src={article.featured_image_url || "/images/placeholder-news.svg"}
-                  alt={article.title}
-                  fill
-                  className="object-cover group-hover:scale-105 transition-transform duration-500"
-                />
-              </div>
-              <div className="p-4 space-y-2">
-                <div className="flex items-center gap-2">
-                  {article.category && (
-                    <Badge className="bg-primary/10 text-primary border-none text-[10px] rounded-lg">
-                      {article.category}
-                    </Badge>
-                  )}
-                  <span className="text-[10px] text-on-surface-variant">
-                    {article.published_at &&
-                      format(new Date(article.published_at), "d MMM yyyy", { locale: fr })}
-                  </span>
-                </div>
-                <h2 className="text-sm font-bold text-on-surface group-hover:text-primary transition-colors line-clamp-2">
-                  {article.title}
-                </h2>
-                {article.excerpt && (
-                  <p className="text-xs text-on-surface-variant line-clamp-2">{article.excerpt}</p>
-                )}
-                {/* Tags */}
-                {article.tags && article.tags.length > 0 && (
-                  <div className="flex flex-wrap gap-1 pt-1">
-                    {article.tags.slice(0, 3).map((t: string) => (
-                      <span
-                        key={t}
-                        className="text-[10px] px-2 py-0.5 rounded-md bg-surface-container-high text-on-surface-variant"
-                      >
-                        {t}
-                      </span>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </Link>
-          ))}
-        </div>
-      ) : (
-        <div className="text-center py-20 text-on-surface-variant">
-          <p>Aucun article avec ce tag.</p>
-        </div>
-      )}
+			{/* Articles grid */}
+			{articles && articles.length > 0 ? (
+				<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 px-4 md:px-8">
+					{/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+					{(articles as any[]).map((article: any) => (
+						<Link
+							key={article.id}
+							href={`/news/${article.slug}`}
+							className="group rounded-2xl overflow-hidden bg-surface-container-lowest border border-outline-variant/20 hover:shadow-lg transition-all duration-300"
+						>
+							<div className="relative aspect-[16/9] bg-surface-container">
+								<Image
+									src={article.featured_image_url || "/images/placeholder-news.svg"}
+									alt={article.title}
+									fill
+									className="object-cover group-hover:scale-105 transition-transform duration-500"
+								/>
+							</div>
+							<div className="p-4 space-y-2">
+								<div className="flex items-center gap-2">
+									{article.category && (
+										<Badge className="bg-primary/10 text-primary border-none text-[10px] rounded-lg">
+											{article.category}
+										</Badge>
+									)}
+									<span className="text-[10px] text-on-surface-variant">
+										{article.published_at &&
+											format(new Date(article.published_at), "d MMM yyyy", { locale: fr })}
+									</span>
+								</div>
+								<h2 className="text-sm font-bold text-on-surface group-hover:text-primary transition-colors line-clamp-2">
+									{article.title}
+								</h2>
+								{article.excerpt && (
+									<p className="text-xs text-on-surface-variant line-clamp-2">{article.excerpt}</p>
+								)}
+								{/* Tags */}
+								{article.tags && article.tags.length > 0 && (
+									<div className="flex flex-wrap gap-1 pt-1">
+										{article.tags.slice(0, 3).map((t: string) => (
+											<span
+												key={t}
+												className="text-[10px] px-2 py-0.5 rounded-md bg-surface-container-high text-on-surface-variant"
+											>
+												{t}
+											</span>
+										))}
+									</div>
+								)}
+							</div>
+						</Link>
+					))}
+				</div>
+			) : (
+				<div className="text-center py-20 text-on-surface-variant">
+					<p>Aucun article avec ce tag.</p>
+				</div>
+			)}
 
-      <div className="px-4 md:px-8">
-        <WikiPagination
-          totalItems={totalItems}
-          itemsPerPage={ITEMS_PER_PAGE}
-          currentPage={currentPage}
-        />
-      </div>
-    </div>
-  );
+			<div className="px-4 md:px-8">
+				<WikiPagination
+					totalItems={totalItems}
+					itemsPerPage={ITEMS_PER_PAGE}
+					currentPage={currentPage}
+				/>
+			</div>
+		</div>
+	);
 }

@@ -32,14 +32,12 @@ export default async function MediaPage({ searchParams }: MediaPageProps) {
 		);
 	}
 
-	const { data: files, error } = await supabase.storage
-		.from("assets")
-		.list(undefined, {
-			limit: limit + 1,
-			offset: offset,
-			search: query,
-			sortBy: { column: "created_at", order: "desc" },
-		});
+	const { data: files, error } = await supabase.storage.from("assets").list(undefined, {
+		limit: limit + 1,
+		offset: offset,
+		search: query,
+		sortBy: { column: "created_at", order: "desc" },
+	});
 
 	if (error) {
 		console.error("Error fetching media:", error);
@@ -65,22 +63,13 @@ export default async function MediaPage({ searchParams }: MediaPageProps) {
 						<div className="text-sm text-muted-foreground">Page {page}</div>
 						<div className="flex gap-2">
 							<Button variant="outline" size="sm" disabled={page <= 1} asChild>
-								<Link
-									href={`/admin/media?page=${page - 1}${query ? `&query=${query}` : ""}`}
-								>
+								<Link href={`/admin/media?page=${page - 1}${query ? `&query=${query}` : ""}`}>
 									<ChevronLeft className="size-4 mr-2" />
 									Précédent
 								</Link>
 							</Button>
-							<Button
-								variant="outline"
-								size="sm"
-								disabled={!hasNextPage}
-								asChild
-							>
-								<Link
-									href={`/admin/media?page=${page + 1}${query ? `&query=${query}` : ""}`}
-								>
+							<Button variant="outline" size="sm" disabled={!hasNextPage} asChild>
+								<Link href={`/admin/media?page=${page + 1}${query ? `&query=${query}` : ""}`}>
 									Suivant
 									<ChevronRight className="size-4 ml-2" />
 								</Link>

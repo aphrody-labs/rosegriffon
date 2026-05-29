@@ -16,10 +16,7 @@
  * - FUL: Full name → Use nameEn/nameJp
  * - MNT: Place/Team name → Custom mapping
  */
-const CHARACTER_NAME_TAGS: Record<
-	string,
-	{ en?: string; fr?: string; jp?: string }
-> = {
+const CHARACTER_NAME_TAGS: Record<string, { en?: string; fr?: string; jp?: string }> = {
 	// Main protagonists - Inazuma Eleven GO series
 	TENMA: { en: "Arion", fr: "Arion", jp: "Tenma" },
 	TSURUGI: { en: "Victor", fr: "Victor", jp: "Kyosuke" },
@@ -63,10 +60,7 @@ const CHARACTER_NAME_TAGS: Record<
 /**
  * Place/Team name mappings for MNT tags
  */
-const PLACE_NAME_TAGS: Record<
-	string,
-	{ en?: string; fr?: string; jp?: string }
-> = {
+const PLACE_NAME_TAGS: Record<string, { en?: string; fr?: string; jp?: string }> = {
 	ALIEA: { en: "Aliea Academy", fr: "Académie Aliea", jp: "エイリア学園" },
 	INAZUMAJAPAN: {
 		en: "Inazuma Japan",
@@ -95,7 +89,7 @@ const PLACE_NAME_TAGS: Record<
 function resolveTag(
 	_tagType: string,
 	tagName: string,
-	lang: "en" | "fr" | "jp" | "ja" = "fr",
+	lang: "en" | "fr" | "jp" | "ja" = "fr"
 ): string {
 	const upperName = tagName.toUpperCase();
 	const normalizedLang = lang === "ja" ? "jp" : lang;
@@ -125,9 +119,11 @@ function resolveTag(
  */
 export function formatDescription(
 	description: string | undefined | null,
-	lang: "en" | "fr" | "jp" | "ja" = "fr",
+	lang: "en" | "fr" | "jp" | "ja" = "fr"
 ): string {
-	if (!description) {return "";}
+	if (!description) {
+		return "";
+	}
 
 	let result = description;
 
@@ -149,7 +145,9 @@ export function formatDescription(
  * [漢字/ふりがな] → 漢字
  */
 export function formatJapaneseName(name: string | undefined | null): string {
-	if (!name) {return "";}
+	if (!name) {
+		return "";
+	}
 
 	// Remove furigana notation [kanji/reading] → keep kanji only
 	const furiganaPattern = /\[([^\]/]+)\/[^\]]+\]/g;

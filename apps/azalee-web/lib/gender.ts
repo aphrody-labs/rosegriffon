@@ -10,15 +10,7 @@
 /**
  * Type union pour les valeurs de genre possibles
  */
-export type GenderValue =
-	| number
-	| string
-	| "M"
-	| "F"
-	| "Male"
-	| "Female"
-	| undefined
-	| null;
+export type GenderValue = number | string | "M" | "F" | "Male" | "Female" | undefined | null;
 
 /**
  * Vérifie si le genre est féminin
@@ -31,8 +23,12 @@ export type GenderValue =
  * isFemaleGender("Female") // true
  */
 export function isFemaleGender(gender: GenderValue): boolean {
-	if (gender === undefined || gender === null) {return false;}
-	if (typeof gender === "number") {return gender === 1;}
+	if (gender === undefined || gender === null) {
+		return false;
+	}
+	if (typeof gender === "number") {
+		return gender === 1;
+	}
 	const g = String(gender).toLowerCase();
 	return g === "f" || g === "female" || g === "1";
 }
@@ -41,8 +37,12 @@ export function isFemaleGender(gender: GenderValue): boolean {
  * Vérifie si le genre est masculin
  */
 export function isMaleGender(gender: GenderValue): boolean {
-	if (gender === undefined || gender === null) {return true;} // Default to male
-	if (typeof gender === "number") {return gender === 0;}
+	if (gender === undefined || gender === null) {
+		return true;
+	} // Default to male
+	if (typeof gender === "number") {
+		return gender === 0;
+	}
 	const g = String(gender).toLowerCase();
 	return g === "m" || g === "male" || g === "0";
 }

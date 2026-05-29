@@ -2,20 +2,14 @@ import { NextResponse } from "next/server";
 import { sanitizeNewsSearchQuery } from "@/lib/news-search";
 import { createClient } from "@/lib/supabase/server";
 
-const VALID_CATEGORIES = new Set([
-	"announcement",
-	"event",
-	"critique",
-	"community",
-]);
+const VALID_CATEGORIES = new Set(["announcement", "event", "critique", "community"]);
 
 export async function GET(request: Request) {
 	const { searchParams } = new URL(request.url);
 	const page = Math.max(1, Number.parseInt(searchParams.get("page") || "1", 10) || 1);
 	const limit = 12;
 	const rawCategory = searchParams.get("category");
-	const category =
-		rawCategory && VALID_CATEGORIES.has(rawCategory) ? rawCategory : null;
+	const category = rawCategory && VALID_CATEGORIES.has(rawCategory) ? rawCategory : null;
 	const q = sanitizeNewsSearchQuery(searchParams.get("q"));
 
 	const supabase = await createClient();
@@ -25,7 +19,7 @@ export async function GET(request: Request) {
 	let query = (supabase as any)
 		.from("articles")
 		.select(
-			"id, title, slug, excerpt, created_at, published_at, featured_image_url, category, author_id",
+			"id, title, slug, excerpt, created_at, published_at, featured_image_url, category, author_id"
 		)
 		.eq("status", "published")
 		.eq("app", "azalee")
@@ -58,7 +52,7 @@ export async function GET(request: Request) {
 			slug: a.slug,
 			title: a.title,
 			type: "article",
-		}),
+		})
 	);
 
 	return NextResponse.json({ hasMore: items.length === limit, items });

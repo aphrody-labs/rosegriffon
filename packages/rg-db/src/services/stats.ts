@@ -11,14 +11,14 @@ interface CountResult {
  * Optimized for performance using head-only queries for counts.
  */
 export async function getDashboardStats(
-	supabase: SupabaseClient<Database>,
+	supabase: SupabaseClient<Database>
 ): Promise<DashboardStats> {
 	const yesterday = new Date(Date.now() - 24 * 3600 * 1000).toISOString();
 	const now = new Date().toISOString();
 
 	async function count<T extends keyof Database["public"]["Tables"]>(
 		table: T,
-		filter?: (q: any) => any,
+		filter?: (q: any) => any
 	): Promise<number> {
 		let q = supabase.from(table).select("*", { count: "exact", head: true });
 
@@ -28,10 +28,7 @@ export async function getDashboardStats(
 
 		const { count: c, error } = await q;
 		if (error) {
-			console.error(
-				`[getDashboardStats] Error counting ${table}:`,
-				error.message,
-			);
+			console.error(`[getDashboardStats] Error counting ${table}:`, error.message);
 			return 0;
 		}
 		return c ?? 0;

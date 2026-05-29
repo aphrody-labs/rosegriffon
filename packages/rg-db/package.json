@@ -1,33 +1,33 @@
 {
-  "name": "@rose-griffon/db",
-  "version": "0.1.0",
-  "type": "module",
-  "description": "Client Supabase partagé + Database types générés (site + bot)",
-  "exports": {
-    ".": "./src/index.ts",
-    "./browser": "./src/browser.ts",
-    "./server": "./src/server.ts",
-    "./service": "./src/service.ts",
-    "./redis": "./src/redis.ts",
-    "./types": "./src/types.ts"
-  },
-  "scripts": {
-    "types:gen": "supabase gen types typescript --project-id isbkaeltubqittywibeh > src/types.gen.ts",
-    "type-check": "tsc --noEmit",
-    "test": "vitest run"
-  },
-  "dependencies": {
-    "@rose-griffon/types": "workspace:*",
-    "@supabase/supabase-js": "catalog:",
-    "@supabase/ssr": "catalog:"
-  },
-  "devDependencies": {
-    "@types/bun": "catalog:",
-    "typescript": "catalog:",
-    "vitest": "catalog:"
-  },
-  "publishConfig": {
-    "registry": "https://npm.pkg.github.com",
-    "access": "restricted"
-  }
+	"name": "@rose-griffon/db",
+	"version": "0.1.0",
+	"description": "Client Supabase partagé + Database types générés (site + bot)",
+	"type": "module",
+	"exports": {
+		".": "./src/index.ts",
+		"./browser": "./src/browser.ts",
+		"./server": "./src/server.ts",
+		"./service": "./src/service.ts",
+		"./redis": "./src/redis.ts",
+		"./types": "./src/types.ts"
+	},
+	"publishConfig": {
+		"access": "restricted",
+		"registry": "https://npm.pkg.github.com"
+	},
+	"scripts": {
+		"types:gen": "supabase gen types typescript --project-id isbkaeltubqittywibeh > src/types.gen.ts",
+		"type-check": "tsc --noEmit",
+		"test": "vitest run"
+	},
+	"dependencies": {
+		"@rose-griffon/types": "workspace:*",
+		"@supabase/ssr": "catalog:",
+		"@supabase/supabase-js": "catalog:"
+	},
+	"devDependencies": {
+		"@types/bun": "catalog:",
+		"typescript": "catalog:",
+		"vitest": "catalog:"
+	}
 }

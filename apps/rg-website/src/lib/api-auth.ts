@@ -26,10 +26,7 @@ export async function requireApiAuth(): Promise<ApiAuthResult> {
 	if (!session?.user) {
 		return {
 			ok: false,
-			response: NextResponse.json(
-				{ error: "Non authentifié" },
-				{ status: 401 },
-			),
+			response: NextResponse.json({ error: "Non authentifié" }, { status: 401 }),
 		};
 	}
 	return {
@@ -52,22 +49,21 @@ export async function requireApiAuth(): Promise<ApiAuthResult> {
  */
 export async function requireApiAdmin(): Promise<ApiAuthResult> {
 	const authed = await requireApiAuth();
-	if (!authed.ok) {return authed;}
+	if (!authed.ok) {
+		return authed;
+	}
 
 	const supabase = createAdminClient();
 	if (!supabase) {
 		return {
 			ok: false,
-			response: NextResponse.json(
-				{ error: "Service indisponible" },
-				{ status: 503 },
-			),
+			response: NextResponse.json({ error: "Service indisponible" }, { status: 503 }),
 		};
 	}
 
 	const tryFetch = async (
 		column: keyof Profile,
-		value: string,
+		value: string
 	): Promise<Pick<Profile, "role"> | null> => {
 		const { data } = await supabase
 			.from("profiles")
@@ -116,7 +112,9 @@ export async function requireApiAdmin(): Promise<ApiAuthResult> {
  */
 export async function requireApiPatreonCreator(): Promise<ApiAuthResult> {
 	const authed = await requireApiAuth();
-	if (!authed.ok) {return authed;}
+	if (!authed.ok) {
+		return authed;
+	}
 	const allowed = await isPatreonAdmin(authed.data.user);
 	if (!allowed) {
 		return {

@@ -8,11 +8,15 @@ import { NextResponse } from "next/server";
 // Publique n'est résolvable, retourner 500 pour signaler la config cassée.
 export async function GET(request: Request) {
 	let publicOrigin =
-		process.env.BETTER_AUTH_URL ||
-		process.env.NEXT_PUBLIC_URL ||
-		publicOriginFromHeaders(request);
+		process.env.BETTER_AUTH_URL || process.env.NEXT_PUBLIC_URL || publicOriginFromHeaders(request);
 
-	if (!publicOrigin || publicOrigin.startsWith("eyJ2Ijo") || publicOrigin === "undefined" || publicOrigin === "null" || !publicOrigin.startsWith("http")) {
+	if (
+		!publicOrigin ||
+		publicOrigin.startsWith("eyJ2Ijo") ||
+		publicOrigin === "undefined" ||
+		publicOrigin === "null" ||
+		!publicOrigin.startsWith("http")
+	) {
 		publicOrigin = "https://rosegriffon.fr";
 	}
 
@@ -20,8 +24,7 @@ export async function GET(request: Request) {
 }
 
 function publicOriginFromHeaders(request: Request): string | null {
-	const host =
-		request.headers.get("x-forwarded-host") ?? request.headers.get("host");
+	const host = request.headers.get("x-forwarded-host") ?? request.headers.get("host");
 	const proto = request.headers.get("x-forwarded-proto") ?? "https";
 	if (!host || host.startsWith("localhost") || host.startsWith("127.")) {
 		return null;

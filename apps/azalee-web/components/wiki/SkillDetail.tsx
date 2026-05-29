@@ -20,8 +20,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 import { Icon } from "@/components/ui/Icon";
-import { OverrideSkillSection } from '@/components/wiki/OverrideSkillSection';
-import type { OverrideSkillData } from '@/components/wiki/OverrideSkillSection';
+import { OverrideSkillSection } from "@/components/wiki/OverrideSkillSection";
+import type { OverrideSkillData } from "@/components/wiki/OverrideSkillSection";
 import { SkillVideoActions } from "@/components/wiki/SkillVideoActions";
 import { getSkillIconUrl, getSkillImageUrl } from "@/lib/images";
 import { japaneseToRomaji } from "@/lib/japanese-romaji";
@@ -73,7 +73,9 @@ interface SkillDetailProps {
 
 function SkillImage({ src, alt }: { src: string; alt: string }) {
 	const [error, setError] = useState(false);
-	if (error) {return null;}
+	if (error) {
+		return null;
+	}
 	return (
 		<Image
 			src={src}
@@ -87,10 +89,18 @@ function SkillImage({ src, alt }: { src: string; alt: string }) {
 }
 
 function getCategoryIcon(category: number | undefined): string {
-	if (category === 1) {return "sports_soccer";}
-	if (category === 4) {return "front_hand";}
-	if (category === 2) {return "directions_run";}
-	if (category === 3) {return "shield";}
+	if (category === 1) {
+		return "sports_soccer";
+	}
+	if (category === 4) {
+		return "front_hand";
+	}
+	if (category === 2) {
+		return "directions_run";
+	}
+	if (category === 3) {
+		return "shield";
+	}
 	return "auto_awesome";
 }
 
@@ -137,9 +147,7 @@ export function SkillDetail({
 						{(nameEN || nameJA) && (
 							<div className="flex flex-wrap gap-x-4 gap-y-1 mt-1">
 								{nameEN && nameEN !== name && (
-									<span className="text-sm text-on-surface-variant/70 italic">
-										{nameEN}
-									</span>
+									<span className="text-sm text-on-surface-variant/70 italic">{nameEN}</span>
 								)}
 								{nameJA && (
 									<span className="text-sm text-on-surface-variant/50 font-light">
@@ -179,11 +187,7 @@ export function SkillDetail({
 					{overrideSkills && overrideSkills.length > 0 && (
 						<OverrideSkillSection
 							overrides={overrideSkills}
-							currentSkillId={
-								(skill as any).skillId ||
-								(skill as any).skillID ||
-								skill.skillIDStr
-							}
+							currentSkillId={(skill as any).skillId || (skill as any).skillID || skill.skillIDStr}
 						/>
 					)}
 
@@ -201,15 +205,7 @@ export function SkillDetail({
 	);
 }
 
-function VideoSection({
-	skill,
-	name,
-	imageUrl,
-}: {
-	skill: Skill;
-	name: string;
-	imageUrl: string;
-}) {
+function VideoSection({ skill, name, imageUrl }: { skill: Skill; name: string; imageUrl: string }) {
 	const [videoError, setVideoError] = useState(false);
 	const [skillImgError, setSkillImgError] = useState(false);
 
@@ -242,16 +238,8 @@ function VideoSection({
 						</div>
 					) : (
 						<>
-							<Icon
-								name={getCategoryIcon(skill.category)}
-								size={96}
-								className="sm:hidden"
-							/>
-							<Icon
-								name={getCategoryIcon(skill.category)}
-								size={144}
-								className="hidden sm:block"
-							/>
+							<Icon name={getCategoryIcon(skill.category)} size={96} className="sm:hidden" />
+							<Icon name={getCategoryIcon(skill.category)} size={144} className="hidden sm:block" />
 						</>
 					)}
 				</div>
@@ -274,7 +262,7 @@ function MetaRow({
 	sheetData?: CommunitySheetData;
 }) {
 	const elementIconUrl = getSkillIconUrl(element);
-	const {skillType} = (skill as any);
+	const { skillType } = skill as any;
 
 	return (
 		<div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -289,18 +277,12 @@ function MetaRow({
 							className="object-contain"
 						/>
 					) : (
-						<CircleDot
-							size={18}
-							className="text-on-surface-variant"
-							aria-hidden="true"
-						/>
+						<CircleDot size={18} className="text-on-surface-variant" aria-hidden="true" />
 					)}
 				</div>
 				<div className="flex flex-col">
 					<span className="text-sm font-bold text-on-surface">{category}</span>
-					<span className="text-xs text-on-surface-variant">
-						{element || "Élément inconnu"}
-					</span>
+					<span className="text-xs text-on-surface-variant">{element || "Élément inconnu"}</span>
 				</div>
 
 				{/* Skill Type Badge (main/sub) */}
@@ -313,12 +295,12 @@ function MetaRow({
 				{/* Sheet type/subType badges — skip if type already matches the displayed category */}
 				{sheetData?.type &&
 					(() => {
-						const translatedType =
-							SHEET_TYPE_FR[sheetData.type] || sheetData.type;
-						const isDuplicate =
-							translatedType.toLowerCase() === category.toLowerCase();
+						const translatedType = SHEET_TYPE_FR[sheetData.type] || sheetData.type;
+						const isDuplicate = translatedType.toLowerCase() === category.toLowerCase();
 						// Only show if it adds new information (different type or has a subType)
-						if (isDuplicate && !sheetData.subType) {return null;}
+						if (isDuplicate && !sheetData.subType) {
+							return null;
+						}
 						return (
 							<span className="px-2.5 py-1 rounded-full bg-tertiary-container/30 text-tertiary text-xs font-bold uppercase tracking-wide">
 								{isDuplicate ? "" : translatedType}
@@ -358,14 +340,9 @@ function DescriptionBox({
 	sheetData?: CommunitySheetData;
 }) {
 	// Collect all shops (from skill + sheetData) and deduplicate
-	const existingShops = new Set(
-		(skill.shops?.fr || []).map((s: string) => s.toLowerCase()),
-	);
-	const sheetShop = sheetData?.shop
-		? SHOP_FR[sheetData.shop] || sheetData.shop
-		: null;
-	const sheetShopIsNew =
-		sheetShop && !existingShops.has(sheetShop.toLowerCase());
+	const existingShops = new Set((skill.shops?.fr || []).map((s: string) => s.toLowerCase()));
+	const sheetShop = sheetData?.shop ? SHOP_FR[sheetData.shop] || sheetData.shop : null;
+	const sheetShopIsNew = sheetShop && !existingShops.has(sheetShop.toLowerCase());
 
 	return (
 		<div className="bg-surface-container-high/50 hover:bg-surface-container-high transition-colors rounded-xl p-4 cursor-default">
@@ -376,57 +353,35 @@ function DescriptionBox({
 				</span>
 				{skill.foulRate !== undefined && skill.foulRate > 0 && (
 					<span className="inline-flex items-center gap-1.5">
-						<AlertCircle
-							size={16}
-							className="text-tertiary"
-							aria-hidden="true"
-						/>
+						<AlertCircle size={16} className="text-tertiary" aria-hidden="true" />
 						{skill.foulRate}% Faute
 					</span>
 				)}
 				{sheetData?.duration != null && (
 					<span className="inline-flex items-center gap-1.5">
-						<Hourglass
-							size={16}
-							className="text-on-surface-variant"
-							aria-hidden="true"
-						/>
+						<Hourglass size={16} className="text-on-surface-variant" aria-hidden="true" />
 						{sheetData.duration} sec.
 					</span>
 				)}
 				{skill.growthType !== undefined && (
 					<span className="inline-flex items-center gap-1.5">
-						<TrendingUp
-							size={16}
-							className="text-secondary"
-							aria-hidden="true"
-						/>
+						<TrendingUp size={16} className="text-secondary" aria-hidden="true" />
 						{skill.growthSpeed} Évolution
 					</span>
 				)}
 				{skill.partnerCount !== undefined && skill.partnerCount > 0 && (
 					<span className="inline-flex items-center gap-1.5">
-						<Users
-							size={16}
-							className="text-on-surface-variant"
-							aria-hidden="true"
-						/>
+						<Users size={16} className="text-on-surface-variant" aria-hidden="true" />
 						{skill.partnerCount + 1} Joueurs
 					</span>
 				)}
 				{skill.recastTime !== undefined && skill.recastTime > 0 && (
 					<span className="inline-flex items-center gap-1.5">
-						<Timer
-							size={16}
-							className="text-on-surface-variant"
-							aria-hidden="true"
-						/>
+						<Timer size={16} className="text-on-surface-variant" aria-hidden="true" />
 						{skill.recastTime} Recharge
 					</span>
 				)}
-				<span className="opacity-40 font-mono font-normal">
-					#{skill.skillIDStr}
-				</span>
+				<span className="opacity-40 font-mono font-normal">#{skill.skillIDStr}</span>
 			</div>
 
 			{/* Description FR */}
@@ -469,21 +424,15 @@ function DescriptionBox({
 
 			{/* Obtention — Exchange Recipes or Shops */}
 			{(() => {
-				const recipes = (skill as any).exchangeRecipes as
-					| Array<{
-							shop: string;
-							costs: Array<{ name: string; code: string; quantity: number }>;
-					  }>
-					| null;
+				const recipes = (skill as any).exchangeRecipes as Array<{
+					shop: string;
+					costs: Array<{ name: string; code: string; quantity: number }>;
+				}> | null;
 				if (recipes && recipes.length > 0) {
 					return (
 						<div className="border-t border-outline-variant/20 pt-3 mt-3">
 							<div className="flex items-center gap-1.5 mb-2">
-								<Store
-									size={16}
-									className="text-secondary"
-									aria-hidden="true"
-								/>
+								<Store size={16} className="text-secondary" aria-hidden="true" />
 								<span className="text-xs font-bold text-on-surface-variant uppercase tracking-wide">
 									Obtention
 								</span>
@@ -503,9 +452,7 @@ function DescriptionBox({
 													key={j}
 													className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-primary/10 text-primary text-[11px] font-bold border border-primary/20"
 												>
-													<span className="text-on-surface font-black">
-														{cost.quantity}x
-													</span>
+													<span className="text-on-surface font-black">{cost.quantity}x</span>
 													{cost.name}
 												</span>
 											))}
@@ -520,11 +467,7 @@ function DescriptionBox({
 					return (
 						<div className="border-t border-outline-variant/20 pt-3 mt-3">
 							<div className="flex items-center gap-1.5 mb-2">
-								<Store
-									size={16}
-									className="text-secondary"
-									aria-hidden="true"
-								/>
+								<Store size={16} className="text-secondary" aria-hidden="true" />
 								<span className="text-xs font-bold text-on-surface-variant uppercase tracking-wide">
 									Obtention
 								</span>
@@ -604,8 +547,7 @@ function RelatedSkillItem({ skill }: { skill: Skill }) {
 				</h4>
 				<div className="mt-1 text-xs text-on-surface-variant flex flex-col gap-0.5">
 					<span>
-						{skill.categoryName?.fr || "Spécial"} •{" "}
-						{skill.elementName?.fr || "Néant"}
+						{skill.categoryName?.fr || "Spécial"} • {skill.elementName?.fr || "Néant"}
 					</span>
 					<div className="flex items-center gap-2">
 						<span className="bg-surface-container-high px-1.5 rounded text-[10px]">

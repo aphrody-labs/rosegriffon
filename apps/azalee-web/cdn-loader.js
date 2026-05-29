@@ -16,8 +16,12 @@
  */
 export default function cdnLoader({ src, width, quality }) {
 	const cdn = process.env.NEXT_PUBLIC_CDN_URL;
-	if (!cdn) {return src;}
-	if (/^https?:\/\//i.test(src)) {return src;}
+	if (!cdn) {
+		return src;
+	}
+	if (/^https?:\/\//i.test(src)) {
+		return src;
+	}
 	const path = src.startsWith("/") ? src : `/${src}`;
 	const q = quality ?? 75;
 	return `${cdn}/public${path}?w=${width}&q=${q}`;

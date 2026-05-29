@@ -3,9 +3,17 @@
 import { SearchX, User } from "lucide-react";
 import Image from "next/image";
 import * as React from "react";
-import { searchCompareCharacters } from '@/app/actions/search';
-import type { CompareSearchResult } from '@/app/actions/search';
-import { CommandDialog, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList, Skeleton } from "@rose-griffon/ui";
+import { searchCompareCharacters } from "@/app/actions/search";
+import type { CompareSearchResult } from "@/app/actions/search";
+import {
+	CommandDialog,
+	CommandEmpty,
+	CommandGroup,
+	CommandInput,
+	CommandItem,
+	CommandList,
+	Skeleton,
+} from "@rose-griffon/ui";
 import { getSkillCategoryIconUrl, getSkillElementIconUrl } from "@/lib/images";
 import { cn } from "@/lib/utils";
 
@@ -58,12 +66,8 @@ export function CharacterSearchDialog({
 	const [query, setQuery] = React.useState("");
 	const [results, setResults] = React.useState<CompareSearchResult[]>([]);
 	const [isSearching, setIsSearching] = React.useState(false);
-	const [elementFilter, setElementFilter] = React.useState<
-		string | undefined
-	>();
-	const [positionFilter, setPositionFilter] = React.useState<
-		string | undefined
-	>();
+	const [elementFilter, setElementFilter] = React.useState<string | undefined>();
+	const [positionFilter, setPositionFilter] = React.useState<string | undefined>();
 	const [rarityFilter, setRarityFilter] = React.useState<string | undefined>();
 	const abortRef = React.useRef<AbortController | null>(null);
 
@@ -73,7 +77,7 @@ export function CharacterSearchDialog({
 			position: positionFilter,
 			rarity: rarityFilter,
 		}),
-		[elementFilter, positionFilter, rarityFilter],
+		[elementFilter, positionFilter, rarityFilter]
 	);
 
 	const hasActiveFilters = elementFilter || positionFilter || rarityFilter;
@@ -82,7 +86,9 @@ export function CharacterSearchDialog({
 
 	// Debounced search — triggers on text query OR filter-only browse
 	React.useEffect(() => {
-		if (abortRef.current) {abortRef.current.abort();}
+		if (abortRef.current) {
+			abortRef.current.abort();
+		}
 
 		if (!canSearch) {
 			setResults([]);
@@ -106,7 +112,7 @@ export function CharacterSearchDialog({
 					setIsSearching(false);
 				}
 			},
-			hasText ? 250 : 100,
+			hasText ? 250 : 100
 		);
 
 		return () => {
@@ -126,7 +132,7 @@ export function CharacterSearchDialog({
 
 	const toggleFilter = (
 		setter: React.Dispatch<React.SetStateAction<string | undefined>>,
-		value: string,
+		value: string
 	) => {
 		setter((prev) => (prev === value ? undefined : value));
 	};
@@ -161,7 +167,7 @@ export function CharacterSearchDialog({
 								"inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-bold transition-all",
 								elementFilter === value
 									? "bg-[var(--md-sys-color-primary)] text-[var(--md-sys-color-on-primary)]"
-									: "bg-[var(--md-sys-color-surface-container-high)] text-[var(--md-sys-color-on-surface-variant)] hover:bg-[var(--md-sys-color-surface-container-highest)]",
+									: "bg-[var(--md-sys-color-surface-container-high)] text-[var(--md-sys-color-on-surface-variant)] hover:bg-[var(--md-sys-color-surface-container-highest)]"
 							)}
 						>
 							{getSkillElementIconUrl(value) && (
@@ -193,7 +199,7 @@ export function CharacterSearchDialog({
 								"inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-bold transition-all",
 								positionFilter === value
 									? "bg-[var(--md-sys-color-primary)] text-[var(--md-sys-color-on-primary)]"
-									: "bg-[var(--md-sys-color-surface-container-high)] text-[var(--md-sys-color-on-surface-variant)] hover:bg-[var(--md-sys-color-surface-container-highest)]",
+									: "bg-[var(--md-sys-color-surface-container-high)] text-[var(--md-sys-color-on-surface-variant)] hover:bg-[var(--md-sys-color-surface-container-highest)]"
 							)}
 						>
 							{getSkillCategoryIconUrl(icon) && (
@@ -225,7 +231,7 @@ export function CharacterSearchDialog({
 								"inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-bold transition-all",
 								rarityFilter === value
 									? "bg-[var(--md-sys-color-primary)] text-[var(--md-sys-color-on-primary)]"
-									: "bg-[var(--md-sys-color-surface-container-high)] text-[var(--md-sys-color-on-surface-variant)] hover:bg-[var(--md-sys-color-surface-container-highest)]",
+									: "bg-[var(--md-sys-color-surface-container-high)] text-[var(--md-sys-color-on-surface-variant)] hover:bg-[var(--md-sys-color-surface-container-highest)]"
 							)}
 						>
 							{label}
@@ -302,9 +308,7 @@ export function CharacterSearchDialog({
 						className="[&_[cmdk-group-heading]]:text-[var(--md-sys-color-primary)] [&_[cmdk-group-heading]]:font-semibold [&_[cmdk-group-heading]]:text-xs [&_[cmdk-group-heading]]:uppercase"
 					>
 						{results.map((result) => {
-							const elemIcon = result.element
-								? getSkillElementIconUrl(result.element)
-								: null;
+							const elemIcon = result.element ? getSkillElementIconUrl(result.element) : null;
 							return (
 								<CommandItem
 									key={result.slug}
@@ -316,7 +320,7 @@ export function CharacterSearchDialog({
 									className={cn(
 										"flex items-center gap-3 py-2.5 px-2 rounded-xl cursor-pointer",
 										"data-[selected=true]:bg-[var(--md-sys-color-secondary-container)]/20",
-										"transition-all duration-200",
+										"transition-all duration-200"
 									)}
 								>
 									{/* Character icon */}
@@ -329,7 +333,7 @@ export function CharacterSearchDialog({
 												className="object-contain"
 												unoptimized
 											/>
-										) : (result.imageUrl ? (
+										) : result.imageUrl ? (
 											<Image
 												src={result.imageUrl}
 												alt=""
@@ -346,7 +350,7 @@ export function CharacterSearchDialog({
 												aria-hidden="true"
 												className="text-[var(--md-sys-color-on-surface-variant)] m-auto"
 											/>
-										))}
+										)}
 									</div>
 
 									<div className="flex-1 min-w-0">
@@ -360,18 +364,10 @@ export function CharacterSearchDialog({
 												</span>
 											)}
 											{elemIcon && (
-												<Image
-													src={elemIcon}
-													alt=""
-													width={10}
-													height={10}
-													className="size-2.5"
-												/>
+												<Image src={elemIcon} alt="" width={10} height={10} className="size-2.5" />
 											)}
 											{result.element && (
-												<span>
-													{ELEMENT_FR[result.element] || result.element}
-												</span>
+												<span>{ELEMENT_FR[result.element] || result.element}</span>
 											)}
 											{result.rarity && result.rarity !== "Normal" && (
 												<span
@@ -380,7 +376,7 @@ export function CharacterSearchDialog({
 														result.rarity === "BASARA" && "text-pink-400",
 														result.rarity === "Héros" && "text-violet-400",
 														result.rarity === "Émérite" && "text-blue-300",
-														result.rarity === "Expérimenté" && "text-cyan-400",
+														result.rarity === "Expérimenté" && "text-cyan-400"
 													)}
 												>
 													{result.rarity}

@@ -5,8 +5,7 @@ import React from "react";
 
 import { cn } from "@/lib/utils";
 
-export interface SidebarIconButtonProps
-	extends React.AnchorHTMLAttributes<HTMLAnchorElement> {
+export interface SidebarIconButtonProps extends React.AnchorHTMLAttributes<HTMLAnchorElement> {
 	href: string;
 	icon: React.ReactNode;
 	label: string;
@@ -26,14 +25,8 @@ export interface SidebarIconButtonProps
  *   color="blue"
  * />
  */
-export const SidebarIconButton = React.forwardRef<
-	HTMLAnchorElement,
-	SidebarIconButtonProps
->(
-	(
-		{ href, icon, label, ariaLabel, color = "gray", className, ...props },
-		ref,
-	) => {
+export const SidebarIconButton = React.forwardRef<HTMLAnchorElement, SidebarIconButtonProps>(
+	({ href, icon, label, ariaLabel, color = "gray", className, ...props }, ref) => {
 		const colorClasses = {
 			blue: "hover:text-sky-300",
 			gray: "hover:text-sidebar-foreground",
@@ -57,7 +50,7 @@ export const SidebarIconButton = React.forwardRef<
 					"hover:bg-sidebar-accent",
 					"active:scale-95",
 					colorClasses[color],
-					className,
+					className
 				)}
 				aria-label={ariaLabel || label}
 				title={label}
@@ -66,7 +59,7 @@ export const SidebarIconButton = React.forwardRef<
 				{icon}
 			</Link>
 		);
-	},
+	}
 );
 
 SidebarIconButton.displayName = "SidebarIconButton";

@@ -25,26 +25,29 @@ const MEMBER_FIELDS = [
 ].join(",");
 
 const USER_FIELDS = "email,full_name,social_connections,thumb_url,url";
-const TIER_FIELDS =
-	"title,amount_cents,description,discord_role_ids,patron_count,published";
+const TIER_FIELDS = "title,amount_cents,description,discord_role_ids,patron_count,published";
 const ADDRESS_FIELDS = "line_1,line_2,city,state,country,postal_code,addressee";
 
 function pickIncluded<T = Record<string, unknown>>(
 	included: JsonApiResource[] | undefined,
 	type: string,
-	id: string,
+	id: string
 ): JsonApiResource<T> | null {
-	if (!included) {return null;}
+	if (!included) {
+		return null;
+	}
 	const found = included.find((r) => r.type === type && r.id === id);
 	return (found as JsonApiResource<T>) ?? null;
 }
 
-function discordIdFromConnections(
-	conn: PatreonUserAttrs["social_connections"],
-): string | null {
-	if (!conn) {return null;}
-	const {discord} = conn;
-	if (!discord || typeof discord !== "object") {return null;}
+function discordIdFromConnections(conn: PatreonUserAttrs["social_connections"]): string | null {
+	if (!conn) {
+		return null;
+	}
+	const { discord } = conn;
+	if (!discord || typeof discord !== "object") {
+		return null;
+	}
 	return discord.user_id ?? null;
 }
 
@@ -57,7 +60,9 @@ export interface CreatorTokens {
 
 export async function loadCreatorTokens(): Promise<CreatorTokens> {
 	const supabase = createAdminClient();
-	if (!supabase) {throw new Error("no admin supabase client");}
+	if (!supabase) {
+		throw new Error("no admin supabase client");
+	}
 	const { data, error } = await supabase
 		.from("patreon_oauth_tokens")
 		.select("id,access_token_enc,refresh_token_enc,expires_at")
@@ -65,15 +70,15 @@ export async function loadCreatorTokens(): Promise<CreatorTokens> {
 		.order("updated_at", { ascending: false })
 		.limit(1)
 		.maybeSingle();
-	if (error) {throw error;}
+	if (error) {
+		throw error;
+	}
 	if (!data) {
 		// Fallback aux env vars (premier setup avant OAuth creator)
 		const accessToken = process.env.PATREON_CREATOR_ACCESS_TOKEN;
 		const refreshToken = process.env.PATREON_CREATOR_REFRESH_TOKEN;
 		if (!accessToken || !refreshToken) {
-			throw new Error(
-				"No creator OAuth row and no PATREON_CREATOR_*_TOKEN env fallback",
-			);
+			throw new Error("No creator OAuth row and no PATREON_CREATOR_*_TOKEN env fallback");
 		}
 		return {
 			accessToken,
@@ -96,11 +101,11 @@ export async function loadCreatorTokens(): Promise<CreatorTokens> {
 	};
 }
 
-export async function ensureFreshAccessToken(
-	tokens: CreatorTokens,
-): Promise<CreatorTokens> {
+export async function ensureFreshAccessToken(tokens: CreatorTokens): Promise<CreatorTokens> {
 	const skewMs = 60 * 1000;
-	if (tokens.expiresAt.getTime() - Date.now() > skewMs) {return tokens;}
+	if (tokens.expiresAt.getTime() - Date.now() > skewMs) {
+		return tokens;
+	}
 
 	const refreshed = await refreshAccessToken(tokens.refreshToken);
 	const newTokens: CreatorTokens = {
@@ -111,7 +116,9 @@ export async function ensureFreshAccessToken(
 	};
 
 	const supabase = createAdminClient();
-	if (!supabase) {return newTokens;}
+	if (!supabase) {
+		return newTokens;
+	}
 
 	if (tokens.tokenRowId === "env") {
 		// Promote env fallback to a real DB row so subsequent refreshes persist
@@ -161,10 +168,14 @@ export async function exportPatreonMembers(): Promise<ExportSummary> {
 	tokens = await ensureFreshAccessToken(tokens);
 
 	const supabase = createAdminClient();
-	if (!supabase) {throw new Error("no admin supabase client");}
+	if (!supabase) {
+		throw new Error("no admin supabase client");
+	}
 
 	const campaignId = process.env.PATREON_CAMPAIGN_ID;
-	if (!campaignId) {throw new Error("PATREON_CAMPAIGN_ID missing");}
+	if (!campaignId) {
+		throw new Error("PATREON_CAMPAIGN_ID missing");
+	}
 
 	await syncTiers(tokens.accessToken, campaignId);
 
@@ -182,12 +193,14 @@ export async function exportPatreonMembers(): Promise<ExportSummary> {
 			include: "currently_entitled_tiers,user,address",
 			"page[count]": "1000",
 		};
-		if (cursor) {query["page[cursor]"] = cursor;}
+		if (cursor) {
+			query["page[cursor]"] = cursor;
+		}
 
 		const res: JsonApiResponse<PatreonMemberAttrs> = await patreonFetch(
 			tokens.accessToken,
 			`/campaigns/${campaignId}/members`,
-			query,
+			query
 		);
 
 		const members = Array.isArray(res.data) ? res.data : [res.data];
@@ -207,14 +220,12 @@ export async function exportPatreonMembers(): Promise<ExportSummary> {
 			const tierTitles = tierIds
 				.map(
 					(id) =>
-						pickIncluded<PatreonTierAttrs>(res.included, "tier", id)?.attributes
-							?.title ?? null,
+						pickIncluded<PatreonTierAttrs>(res.included, "tier", id)?.attributes?.title ?? null
 				)
 				.filter((t): t is string => Boolean(t));
 
 			const addressRel = member.relationships?.address?.data;
-			const addressId =
-				addressRel && !Array.isArray(addressRel) ? addressRel.id : null;
+			const addressId = addressRel && !Array.isArray(addressRel) ? addressRel.id : null;
 			const addressResource = addressId
 				? pickIncluded<PatreonAddressAttrs>(res.included, "address", addressId)
 				: null;
@@ -222,9 +233,7 @@ export async function exportPatreonMembers(): Promise<ExportSummary> {
 			const { error } = await supabase.from("patreon_legacy_members").upsert(
 				{
 					currently_entitled_cents: attrs.currently_entitled_amount_cents ?? 0,
-					discord_user_id: discordIdFromConnections(
-						userAttrs?.social_connections,
-					),
+					discord_user_id: discordIdFromConnections(userAttrs?.social_connections),
 					email: attrs.email ?? userAttrs?.email ?? null,
 					full_name: attrs.full_name ?? userAttrs?.full_name ?? null,
 					last_charge_date: attrs.last_charge_date ?? null,
@@ -240,14 +249,19 @@ export async function exportPatreonMembers(): Promise<ExportSummary> {
 					tier_ids: tierIds,
 					tier_titles: tierTitles,
 				},
-				{ onConflict: "patreon_member_id" },
+				{ onConflict: "patreon_member_id" }
 			);
-			if (!error) {upserted += 1;}
-			else {console.error("[patreon/export] upsert member failed", error);}
+			if (!error) {
+				upserted += 1;
+			} else {
+				console.error("[patreon/export] upsert member failed", error);
+			}
 		}
 
 		cursor = res.meta?.pagination?.cursors?.next ?? null;
-		if (cursor) {await Bun.sleep(50);}
+		if (cursor) {
+			await Bun.sleep(50);
+		}
 	} while (cursor);
 
 	return {
@@ -260,14 +274,16 @@ export async function exportPatreonMembers(): Promise<ExportSummary> {
 }
 
 export async function exportSingleMember(
-	memberId: string,
+	memberId: string
 ): Promise<{ ok: boolean; member?: unknown; error?: string }> {
 	try {
 		let tokens = await loadCreatorTokens();
 		tokens = await ensureFreshAccessToken(tokens);
 
 		const supabase = createAdminClient();
-		if (!supabase) {return { ok: false, error: "no admin client" };}
+		if (!supabase) {
+			return { ok: false, error: "no admin client" };
+		}
 
 		const res: JsonApiResponse<PatreonMemberAttrs> = await patreonFetch(
 			tokens.accessToken,
@@ -278,11 +294,13 @@ export async function exportSingleMember(
 				"fields[tier]": TIER_FIELDS,
 				"fields[user]": USER_FIELDS,
 				include: "currently_entitled_tiers,user,address",
-			},
+			}
 		);
 
 		const member = Array.isArray(res.data) ? res.data[0] : res.data;
-		if (!member) {return { ok: false, error: "member not found" };}
+		if (!member) {
+			return { ok: false, error: "member not found" };
+		}
 
 		const attrs = member.attributes;
 		const userRel = member.relationships?.user?.data;
@@ -296,15 +314,12 @@ export async function exportSingleMember(
 		const tierIds = Array.isArray(tierRels) ? tierRels.map((r) => r.id) : [];
 		const tierTitles = tierIds
 			.map(
-				(id) =>
-					pickIncluded<PatreonTierAttrs>(res.included, "tier", id)?.attributes
-						?.title ?? null,
+				(id) => pickIncluded<PatreonTierAttrs>(res.included, "tier", id)?.attributes?.title ?? null
 			)
 			.filter((t): t is string => Boolean(t));
 
 		const addressRel = member.relationships?.address?.data;
-		const addressId =
-			addressRel && !Array.isArray(addressRel) ? addressRel.id : null;
+		const addressId = addressRel && !Array.isArray(addressRel) ? addressRel.id : null;
 		const addressResource = addressId
 			? pickIncluded<PatreonAddressAttrs>(res.included, "address", addressId)
 			: null;
@@ -312,9 +327,7 @@ export async function exportSingleMember(
 		const { error } = await supabase.from("patreon_legacy_members").upsert(
 			{
 				currently_entitled_cents: attrs.currently_entitled_amount_cents ?? 0,
-				discord_user_id: discordIdFromConnections(
-					userAttrs?.social_connections,
-				),
+				discord_user_id: discordIdFromConnections(userAttrs?.social_connections),
 				email: attrs.email ?? userAttrs?.email ?? null,
 				full_name: attrs.full_name ?? userAttrs?.full_name ?? null,
 				last_charge_date: attrs.last_charge_date ?? null,
@@ -330,9 +343,11 @@ export async function exportSingleMember(
 				tier_ids: tierIds,
 				tier_titles: tierTitles,
 			},
-			{ onConflict: "patreon_member_id" },
+			{ onConflict: "patreon_member_id" }
 		);
-		if (error) {return { ok: false, error: error.message };}
+		if (error) {
+			return { ok: false, error: error.message };
+		}
 		return { member, ok: true };
 	} catch (error) {
 		return { ok: false, error: error instanceof Error ? error.message : String(error) };
@@ -341,37 +356,32 @@ export async function exportSingleMember(
 
 async function countTiers(): Promise<number> {
 	const supabase = createAdminClient();
-	if (!supabase) {return 0;}
+	if (!supabase) {
+		return 0;
+	}
 	const { count } = await supabase
 		.from("patreon_legacy_tiers")
 		.select("*", { count: "exact", head: true });
 	return count ?? 0;
 }
 
-export async function syncTiers(
-	accessToken: string,
-	campaignId: string,
-): Promise<void> {
+export async function syncTiers(accessToken: string, campaignId: string): Promise<void> {
 	const supabase = createAdminClient();
-	if (!supabase) {return;}
+	if (!supabase) {
+		return;
+	}
 
-	const res = await patreonFetch<PatreonTierAttrs>(
-		accessToken,
-		`/campaigns/${campaignId}`,
-		{
-			"fields[tier]": TIER_FIELDS,
-			include: "tiers",
-		},
-	);
+	const res = await patreonFetch<PatreonTierAttrs>(accessToken, `/campaigns/${campaignId}`, {
+		"fields[tier]": TIER_FIELDS,
+		include: "tiers",
+	});
 
 	const tiers = (res.included ?? []).filter((r) => r.type === "tier");
 	for (const tier of tiers) {
 		const attrs = tier.attributes as PatreonTierAttrs;
 		const title = attrs.title ?? "Untitled tier";
 		const mapping = TIER_MAPPING[title];
-		const rgPriceId = mapping
-			? (process.env[mapping.stripePriceEnv] ?? null)
-			: null;
+		const rgPriceId = mapping ? (process.env[mapping.stripePriceEnv] ?? null) : null;
 		await supabase.from("patreon_legacy_tiers").upsert(
 			{
 				amount_cents: attrs.amount_cents ?? 0,
@@ -384,7 +394,7 @@ export async function syncTiers(
 				rg_price_id: rgPriceId,
 				title,
 			},
-			{ onConflict: "patreon_tier_id" },
+			{ onConflict: "patreon_tier_id" }
 		);
 	}
 }

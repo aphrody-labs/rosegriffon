@@ -12,13 +12,15 @@ import { refreshPatreonMembership } from "@/lib/patreon/sync";
  */
 export async function POST() {
 	const user = await getServerUser();
-	if (!user) {return new NextResponse("unauthorized", { status: 401 });}
+	if (!user) {
+		return new NextResponse("unauthorized", { status: 401 });
+	}
 
 	const result = await refreshPatreonMembership(user.id);
 	if (!result.ok) {
 		return NextResponse.json(
 			{ ok: false, reason: result.reason },
-			{ status: result.reason === "no_token" ? 404 : 500 },
+			{ status: result.reason === "no_token" ? 404 : 500 }
 		);
 	}
 	return NextResponse.json({

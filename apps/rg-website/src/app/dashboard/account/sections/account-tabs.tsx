@@ -67,11 +67,7 @@ export function AccountTabs({
 			</TabsList>
 
 			{TABS.map(({ value: v }) => (
-				<TabsContent
-					key={v}
-					value={v}
-					className="mt-6 focus-visible:outline-hidden"
-				>
+				<TabsContent key={v} value={v} className="mt-6 focus-visible:outline-hidden">
 					{slots[v]}
 				</TabsContent>
 			))}

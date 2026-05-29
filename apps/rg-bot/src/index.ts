@@ -34,10 +34,7 @@ client.once("ready", async () => {
 	try {
 		await client.initApplicationCommands();
 	} catch (err) {
-		console.error(
-			"✗ initApplicationCommands failed:",
-			err instanceof Error ? err.message : err,
-		);
+		console.error("✗ initApplicationCommands failed:", err instanceof Error ? err.message : err);
 	}
 	console.log(`✓ Logged in as ${client.user?.tag}`);
 });
@@ -48,15 +45,11 @@ client.on("interactionCreate", async (interaction) => {
 	} catch (err) {
 		console.error(
 			"✗ executeInteraction threw:",
-			err instanceof Error ? (err.stack ?? err.message) : err,
+			err instanceof Error ? (err.stack ?? err.message) : err
 		);
 	}
 
-	if (
-		interaction.isRepliable() &&
-		!interaction.replied &&
-		!interaction.deferred
-	) {
+	if (interaction.isRepliable() && !interaction.replied && !interaction.deferred) {
 		try {
 			await interaction.reply({
 				content:

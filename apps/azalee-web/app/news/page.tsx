@@ -1,16 +1,12 @@
-import {
-	getPopularArticles,
-	getPopularTags,
-	getTrendingArticles,
-} from "@/app/actions/articles";
+import { getPopularArticles, getPopularTags, getTrendingArticles } from "@/app/actions/articles";
 import { getCommentCounts } from "@/app/actions/comments";
 import { getReactionCounts } from "@/app/actions/reactions";
 import { getContinueReading } from "@/app/actions/reading-history";
 import { sanitizeNewsSearchQuery } from "@/lib/news-search";
 import { createClient } from "@/lib/supabase/server";
 import { parseSearchParams } from "@/lib/validations";
-import { NewsFeedClient } from './news-client';
-import type { FeedItem } from './news-client';
+import { NewsFeedClient } from "./news-client";
+import type { FeedItem } from "./news-client";
 
 export const dynamic = "force-dynamic";
 
@@ -21,13 +17,7 @@ export const metadata = {
 
 const ITEMS_PER_PAGE = 12;
 
-const VALID_CATEGORIES = new Set([
-	"announcement",
-	"event",
-	"critique",
-	"community",
-	"Tweet",
-]);
+const VALID_CATEGORIES = new Set(["announcement", "event", "critique", "community", "Tweet"]);
 
 export default async function NewsFeedPage({
 	searchParams,
@@ -38,8 +28,7 @@ export default async function NewsFeedPage({
 	const { page: currentPage } = parseSearchParams(searchParamsValue);
 	const supabase = await createClient();
 	const rawCategory = searchParamsValue.category as string | undefined;
-	const categoryFilter =
-		rawCategory && VALID_CATEGORIES.has(rawCategory) ? rawCategory : undefined;
+	const categoryFilter = rawCategory && VALID_CATEGORIES.has(rawCategory) ? rawCategory : undefined;
 	const rawQuery = (searchParamsValue.q as string | undefined) || "";
 	const searchQuery = sanitizeNewsSearchQuery(rawQuery);
 
@@ -53,7 +42,7 @@ export default async function NewsFeedPage({
 		const { data: featured } = await (supabase as any)
 			.from("articles")
 			.select(
-				"id, title, slug, excerpt, created_at, published_at, featured_image_url, category, author_id",
+				"id, title, slug, excerpt, created_at, published_at, featured_image_url, category, author_id"
 			)
 			.eq("status", "published")
 			.eq("app", "azalee")
@@ -101,7 +90,7 @@ export default async function NewsFeedPage({
 					.from("articles")
 					.select(
 						"id, title, slug, excerpt, created_at, published_at, featured_image_url, category, author_id",
-						{ count: "exact" },
+						{ count: "exact" }
 					)
 					.eq("status", "published")
 					.eq("app", "azalee")
@@ -141,7 +130,7 @@ export default async function NewsFeedPage({
 						slug: a.slug,
 						title: a.title,
 						type: "article",
-					}),
+					})
 				);
 				return { items, total: count || 0 };
 			})()
@@ -152,10 +141,9 @@ export default async function NewsFeedPage({
 				// eslint-disable-next-line @typescript-eslint/no-explicit-any
 				const { data, count, error } = (await (supabase as any)
 					.from("tweets")
-					.select(
-						"id, text, created_at, author_username, media, quoted_tweets, raw_tweets",
-						{ count: "exact" },
-					)
+					.select("id, text, created_at, author_username, media, quoted_tweets, raw_tweets", {
+						count: "exact",
+					})
 					.order("created_at", { ascending: false })
 					.range(articleRangeStart, articleRangeEnd)) as any;
 				if (error) {
@@ -177,22 +165,17 @@ export default async function NewsFeedPage({
 						threadTweets: t.raw_tweets || [],
 						title: "",
 						type: "tweet",
-					}),
+					})
 				);
 				return { items, total: count || 0 };
 			})()
 		: Promise.resolve({ items: [] as FeedItem[], total: 0 });
 
-	const [articlesRes, tweetsRes] = await Promise.all([
-		articlesPromise,
-		tweetsPromise,
-	]);
+	const [articlesRes, tweetsRes] = await Promise.all([articlesPromise, tweetsPromise]);
 
 	const feedItems: FeedItem[] = [...articlesRes.items, ...tweetsRes.items];
 	// Tri stable global pour l'affichage (chaque section sera ré-extraite côté client).
-	feedItems.sort(
-		(a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
-	);
+	feedItems.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
 	// Le total pour la pagination correspond à la source dominante : si on filtre
 	// "Tweet" → total tweets, sinon → total articles (les tweets sont une bande
@@ -214,20 +197,12 @@ export default async function NewsFeedPage({
 		commentCounts,
 		continueReadingArticles,
 	] = await Promise.all([
-		currentPage === 1 && !searchQuery
-			? getPopularTags(20)
-			: Promise.resolve([]),
+		currentPage === 1 && !searchQuery ? getPopularTags(20) : Promise.resolve([]),
 		articleIds.length > 0 ? getReactionCounts(articleIds) : Promise.resolve({}),
-		currentPage === 1 && !searchQuery
-			? getPopularArticles(5)
-			: Promise.resolve([]),
-		currentPage === 1 && !searchQuery
-			? getTrendingArticles(5)
-			: Promise.resolve([]),
+		currentPage === 1 && !searchQuery ? getPopularArticles(5) : Promise.resolve([]),
+		currentPage === 1 && !searchQuery ? getTrendingArticles(5) : Promise.resolve([]),
 		articleIds.length > 0 ? getCommentCounts(articleIds) : Promise.resolve({}),
-		currentPage === 1 && !searchQuery
-			? getContinueReading(4)
-			: Promise.resolve([]),
+		currentPage === 1 && !searchQuery ? getContinueReading(4) : Promise.resolve([]),
 	]);
 
 	return (

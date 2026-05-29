@@ -14,8 +14,12 @@ export function generateSlug(title: string): string {
 export function countWords(content: SerializedEditorState): number {
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	function extractText(node: any): string {
-		if (node.text) {return node.text;}
-		if (node.children) {return node.children.map(extractText).join(" ");}
+		if (node.text) {
+			return node.text;
+		}
+		if (node.children) {
+			return node.children.map(extractText).join(" ");
+		}
 		return "";
 	}
 	const text = extractText(content.root);
@@ -32,10 +36,14 @@ export function estimateReadTime(wordCount: number): number {
 
 export function parseInitialContent(
 	content: string | SerializedEditorState | null | undefined,
-	emptyContent: SerializedEditorState,
+	emptyContent: SerializedEditorState
 ): SerializedEditorState {
-	if (!content) {return emptyContent;}
-	if (typeof content === "object") {return content;}
+	if (!content) {
+		return emptyContent;
+	}
+	if (typeof content === "object") {
+		return content;
+	}
 	try {
 		return JSON.parse(content);
 	} catch {
@@ -52,9 +60,13 @@ export function parseInitialContent(
  * en local. On rebase ici sur l'offset du fuseau du navigateur.
  */
 export function isoToDatetimeLocal(iso: string | null | undefined): string {
-	if (!iso) {return "";}
+	if (!iso) {
+		return "";
+	}
 	const d = new Date(iso);
-	if (Number.isNaN(d.getTime())) {return "";}
+	if (Number.isNaN(d.getTime())) {
+		return "";
+	}
 	const offsetMs = d.getTimezoneOffset() * 60_000;
 	return new Date(d.getTime() - offsetMs).toISOString().slice(0, 16);
 }
@@ -63,11 +75,13 @@ export function isoToDatetimeLocal(iso: string | null | undefined): string {
  * Inverse de `isoToDatetimeLocal` : prend la valeur du `<input type="datetime-local">`
  * (heure locale), produit l'ISO UTC à stocker en DB.
  */
-export function datetimeLocalToIso(
-	value: string | null | undefined,
-): string | null {
-	if (!value) {return null;}
+export function datetimeLocalToIso(value: string | null | undefined): string | null {
+	if (!value) {
+		return null;
+	}
 	const d = new Date(value);
-	if (Number.isNaN(d.getTime())) {return null;}
+	if (Number.isNaN(d.getTime())) {
+		return null;
+	}
 	return d.toISOString();
 }

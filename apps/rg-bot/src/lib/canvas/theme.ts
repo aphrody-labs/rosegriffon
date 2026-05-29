@@ -3,27 +3,15 @@ import { GlobalFonts } from "@aphrody-code/canvas";
 
 import { RG_BRAND_HEX } from "../config";
 
-const WEBSITE_FONTS = resolve(
-	import.meta.dir,
-	"../../../../website/public/fonts",
-);
+const WEBSITE_FONTS = resolve(import.meta.dir, "../../../../website/public/fonts");
 
 let fontsLoaded = false;
 export function ensureFonts(): void {
 	if (fontsLoaded) return;
 	try {
-		GlobalFonts.registerFromPath(
-			`${WEBSITE_FONTS}/Super Cartoon.ttf`,
-			"SuperCartoon",
-		);
-		GlobalFonts.registerFromPath(
-			`${WEBSITE_FONTS}/DEFAULT_BradBunR.ttf`,
-			"BradBunR",
-		);
-		GlobalFonts.registerFromPath(
-			`${WEBSITE_FONTS}/Autre police/aklatan.ttf`,
-			"Aklatan",
-		);
+		GlobalFonts.registerFromPath(`${WEBSITE_FONTS}/Super Cartoon.ttf`, "SuperCartoon");
+		GlobalFonts.registerFromPath(`${WEBSITE_FONTS}/DEFAULT_BradBunR.ttf`, "BradBunR");
+		GlobalFonts.registerFromPath(`${WEBSITE_FONTS}/Autre police/aklatan.ttf`, "Aklatan");
 	} catch (err) {
 		console.warn("[canvas] font registration failed:", err);
 	}

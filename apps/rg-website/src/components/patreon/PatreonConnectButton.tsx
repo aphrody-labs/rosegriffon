@@ -55,8 +55,7 @@ export function PatreonConnectButton({
 	const handleClick = async () => {
 		setLoading(true);
 		try {
-			const callbackURL =
-				redirect ?? (variant === "creator-link" ? "/admin/patreon" : "/profil");
+			const callbackURL = redirect ?? (variant === "creator-link" ? "/admin/patreon" : "/profil");
 			const res = await authClient.signIn.oauth2({
 				callbackURL,
 				providerId: "patreon",
@@ -81,16 +80,16 @@ export function PatreonConnectButton({
 			size="lg"
 			className={cn(
 				"gap-2 bg-[#c9a958] text-[#0c1730] hover:bg-[#dab86a] font-semibold",
-				className,
+				className
 			)}
 		>
 			{loading ? (
 				<Loader2 className="size-4 animate-spin" />
-			) : (variant === "reactivate" ? (
+			) : variant === "reactivate" ? (
 				<Heart className="size-4" />
 			) : (
 				<Link2 className="size-4" />
-			))}
+			)}
 			{label ?? LABELS[variant]}
 		</Button>
 	);

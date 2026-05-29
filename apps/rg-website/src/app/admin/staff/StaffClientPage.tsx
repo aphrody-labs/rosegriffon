@@ -1,6 +1,20 @@
 "use client";
 
-import { Button, Card, CardContent, CardHeader, CardTitle, Input, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, DashboardStatsCard as StatsCard, AdminPageHeader } from "@rose-griffon/ui";
+import {
+	Button,
+	Card,
+	CardContent,
+	CardHeader,
+	CardTitle,
+	Input,
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+	DashboardStatsCard as StatsCard,
+	AdminPageHeader,
+} from "@rose-griffon/ui";
 import {
 	ArrowDownAZ,
 	ArrowUp01,
@@ -23,8 +37,8 @@ import { toast } from "sonner";
 import { ConfirmationDialog } from "@/components/admin/confirmation-dialog";
 import { AdminDataGrid } from "@/components/admin/shared/AdminDataGrid";
 
-import { deleteTeamMember, updateTeamMember } from './actions';
-import type { TeamMember } from './actions';
+import { deleteTeamMember, updateTeamMember } from "./actions";
+import type { TeamMember } from "./actions";
 import { StaffMemberCard } from "./StaffMemberCard";
 import { TeamMemberDialog } from "./TeamMemberDialog";
 
@@ -49,8 +63,7 @@ export function StaffClientPage({ initialMembers }: StaffClientPageProps) {
 	const router = useRouter();
 	const [members, setMembers] = useState<TeamMember[]>(initialMembers);
 	const [dialogOpen, setDialogOpen] = useState(false);
-	const [selectedMember, setSelectedMember] = useState<TeamMember | undefined>(
-		);
+	const [selectedMember, setSelectedMember] = useState<TeamMember | undefined>();
 	const [searchQuery, setSearchQuery] = useState("");
 	const [selectedTeam, setSelectedTeam] = useState<string>("all");
 	const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
@@ -79,8 +92,10 @@ export function StaffClientPage({ initialMembers }: StaffClientPageProps) {
 	};
 
 	const handleDelete = async () => {
-		if (!deleteConfirmation.member) {return;}
-		const {member} = deleteConfirmation;
+		if (!deleteConfirmation.member) {
+			return;
+		}
+		const { member } = deleteConfirmation;
 
 		const { error } = await deleteTeamMember(member.id);
 		if (error) {
@@ -99,26 +114,18 @@ export function StaffClientPage({ initialMembers }: StaffClientPageProps) {
 			is_active: isActive,
 		});
 		if (error) {
-			toast.error(
-				isActive
-					? "Erreur lors de la réactivation"
-					: "Erreur lors de la désactivation",
-				{
-					description: error,
-				},
-			);
+			toast.error(isActive ? "Erreur lors de la réactivation" : "Erreur lors de la désactivation", {
+				description: error,
+			});
 			return;
 		}
 		toast.success(isActive ? "Membre réactivé" : "Membre désactivé");
-		setMembers((prev) =>
-			prev.map((m) => (m.id === member.id ? { ...m, is_active: isActive } : m)),
-		);
+		setMembers((prev) => prev.map((m) => (m.id === member.id ? { ...m, is_active: isActive } : m)));
 		router.refresh();
 	};
 
 	const handleApprove = (member: TeamMember) => handleSetActive(member, true);
-	const handleDeactivate = (member: TeamMember) =>
-		handleSetActive(member, false);
+	const handleDeactivate = (member: TeamMember) => handleSetActive(member, false);
 
 	const handleSuccess = () => {
 		router.refresh();
@@ -127,17 +134,15 @@ export function StaffClientPage({ initialMembers }: StaffClientPageProps) {
 	// Distingue les imports Discord à valider (source='discord-sync')
 	// Des staff désactivés volontairement (autres `is_active=false`).
 	const inactiveMembers = members.filter((m) => m.is_active === false);
-	const pendingMembers = inactiveMembers.filter(
-		(m) => m.source === "discord-sync",
-	);
-	const deactivatedMembers = inactiveMembers.filter(
-		(m) => m.source !== "discord-sync",
-	);
+	const pendingMembers = inactiveMembers.filter((m) => m.source === "discord-sync");
+	const deactivatedMembers = inactiveMembers.filter((m) => m.source !== "discord-sync");
 
 	// Filtrer les membres actifs.
 	const q = searchQuery.toLowerCase().trim();
 	const activeMembers = members.filter((m) => {
-		if (m.is_active === false) {return false;}
+		if (m.is_active === false) {
+			return false;
+		}
 		const matchesSearch =
 			!q ||
 			m.name.toLowerCase().includes(q) ||
@@ -150,22 +155,24 @@ export function StaffClientPage({ initialMembers }: StaffClientPageProps) {
 	// Grouper par équipe.
 	const membersByTeam = activeMembers.reduce(
 		(acc, member) => {
-			if (!acc[member.team_id]) {acc[member.team_id] = [];}
+			if (!acc[member.team_id]) {
+				acc[member.team_id] = [];
+			}
 			acc[member.team_id]?.push(member);
 			return acc;
 		},
-		{} as Record<string, TeamMember[]>,
+		{} as Record<string, TeamMember[]>
 	);
 
 	const sortMembers = (list: TeamMember[]) =>
 		[...list].toSorted((a, b) =>
 			sortMode === "name"
 				? a.name.localeCompare(b.name, "fr")
-				: (a.display_index ?? 999) - (b.display_index ?? 999),
+				: (a.display_index ?? 999) - (b.display_index ?? 999)
 		);
 
 	const populatedTeamsCount = new Set(
-		members.filter((m) => m.is_active !== false).map((m) => m.team_id),
+		members.filter((m) => m.is_active !== false).map((m) => m.team_id)
 	).size;
 
 	return (
@@ -190,12 +197,7 @@ export function StaffClientPage({ initialMembers }: StaffClientPageProps) {
 					icon={UsersIcon}
 					accent="emerald"
 				/>
-				<StatsCard
-					title="À valider"
-					value={pendingMembers.length}
-					icon={Check}
-					accent="amber"
-				/>
+				<StatsCard title="À valider" value={pendingMembers.length} icon={Check} accent="amber" />
 				<StatsCard
 					title="Désactivés"
 					value={deactivatedMembers.length}
@@ -244,9 +246,7 @@ export function StaffClientPage({ initialMembers }: StaffClientPageProps) {
 								: "Tri A-Z (cliquer pour ordre)"
 						}
 						className="rounded-none size-10"
-						onClick={() =>
-							setSortMode((s) => (s === "order" ? "name" : "order"))
-						}
+						onClick={() => setSortMode((s) => (s === "order" ? "name" : "order"))}
 					>
 						{sortMode === "order" ? (
 							<ArrowUp01 className="size-4" />
@@ -287,12 +287,7 @@ export function StaffClientPage({ initialMembers }: StaffClientPageProps) {
 							cell: (member) => (
 								<div className="relative size-10 rounded-full overflow-hidden bg-muted">
 									{member.image_url ? (
-										<Image
-											src={member.image_url}
-											alt={member.name}
-											fill
-											className="object-cover"
-										/>
+										<Image src={member.image_url} alt={member.name} fill className="object-cover" />
 									) : (
 										<div className="w-full h-full flex items-center justify-center text-muted-foreground">
 											<UsersIcon className="size-5" />
@@ -328,18 +323,10 @@ export function StaffClientPage({ initialMembers }: StaffClientPageProps) {
 										<Check className="size-4 mr-1" />
 										Valider
 									</Button>
-									<Button
-										variant="ghost"
-										size="icon"
-										onClick={() => handleEdit(member)}
-									>
+									<Button variant="ghost" size="icon" onClick={() => handleEdit(member)}>
 										<Edit className="size-4" />
 									</Button>
-									<Button
-										variant="ghost"
-										size="icon"
-										onClick={() => confirmDelete(member)}
-									>
+									<Button variant="ghost" size="icon" onClick={() => confirmDelete(member)}>
 										<Trash2 className="size-4 text-red-500" />
 									</Button>
 								</div>
@@ -352,8 +339,7 @@ export function StaffClientPage({ initialMembers }: StaffClientPageProps) {
 			)}
 
 			{/* Liste par équipe */}
-			{Object.keys(membersByTeam).length === 0 &&
-			pendingMembers.length === 0 ? (
+			{Object.keys(membersByTeam).length === 0 && pendingMembers.length === 0 ? (
 				<Card>
 					<CardContent className="py-12 text-center">
 						<UsersIcon className="size-12 mx-auto mb-4 text-muted-foreground" />
@@ -368,10 +354,7 @@ export function StaffClientPage({ initialMembers }: StaffClientPageProps) {
 				viewMode === "list" &&
 				Object.entries(membersByTeam)
 					.toSorted((a, b) =>
-						(TEAM_LABELS[a[0]] || a[0]).localeCompare(
-							TEAM_LABELS[b[0]] || b[0],
-							"fr",
-						),
+						(TEAM_LABELS[a[0]] || a[0]).localeCompare(TEAM_LABELS[b[0]] || b[0], "fr")
 					)
 					.map(([teamId, teamMembers]) => (
 						<AdminDataGrid
@@ -479,12 +462,7 @@ export function StaffClientPage({ initialMembers }: StaffClientPageProps) {
 							cell: (member) => (
 								<div className="relative size-10 rounded-full overflow-hidden bg-muted opacity-60">
 									{member.image_url ? (
-										<Image
-											src={member.image_url}
-											alt={member.name}
-											fill
-											className="object-cover"
-										/>
+										<Image src={member.image_url} alt={member.name} fill className="object-cover" />
 									) : (
 										<div className="w-full h-full flex items-center justify-center text-muted-foreground">
 											<UsersIcon className="size-5" />
@@ -538,16 +516,10 @@ export function StaffClientPage({ initialMembers }: StaffClientPageProps) {
 			{viewMode === "grid" &&
 				Object.entries(membersByTeam)
 					.toSorted((a, b) =>
-						(TEAM_LABELS[a[0]] || a[0]).localeCompare(
-							TEAM_LABELS[b[0]] || b[0],
-							"fr",
-						),
+						(TEAM_LABELS[a[0]] || a[0]).localeCompare(TEAM_LABELS[b[0]] || b[0], "fr")
 					)
 					.map(([teamId, teamMembers]) => (
-						<Card
-							key={teamId}
-							className="bg-transparent border-none shadow-none"
-						>
+						<Card key={teamId} className="bg-transparent border-none shadow-none">
 							<CardHeader className="px-0 pt-6">
 								<CardTitle className="text-xl flex items-center gap-2">
 									{TEAM_LABELS[teamId] || teamId}

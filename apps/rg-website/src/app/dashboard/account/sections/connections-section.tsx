@@ -1,13 +1,28 @@
 "use client";
 
-import { Badge, Button, Card, CardContent, CardDescription, CardHeader, CardTitle, AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@rose-griffon/ui";
+import {
+	Badge,
+	Button,
+	Card,
+	CardContent,
+	CardDescription,
+	CardHeader,
+	CardTitle,
+	AlertDialog,
+	AlertDialogAction,
+	AlertDialogCancel,
+	AlertDialogContent,
+	AlertDialogDescription,
+	AlertDialogFooter,
+	AlertDialogHeader,
+	AlertDialogTitle,
+} from "@rose-griffon/ui";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { Heart, Loader2, X } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 import { toast } from "sonner";
-
 
 import { authClient } from "@/lib/auth-client";
 
@@ -17,10 +32,7 @@ export interface LinkedAccount {
 	scope: string | null;
 }
 
-const PROVIDER_META: Record<
-	string,
-	{ label: string; color: string; description: string }
-> = {
+const PROVIDER_META: Record<string, { label: string; color: string; description: string }> = {
 	discord: {
 		color: "bg-[#5865F2] hover:bg-[#5865F2]/90",
 		description: "Connexion principale + sync rôles serveur RG.",
@@ -38,11 +50,7 @@ const PROVIDER_META: Record<
 	},
 };
 
-export function ConnectionsSection({
-	accounts,
-}: {
-	accounts: LinkedAccount[];
-}) {
+export function ConnectionsSection({ accounts }: { accounts: LinkedAccount[] }) {
 	const [busy, setBusy] = useState<string | null>(null);
 	const [confirmUnlink, setConfirmUnlink] = useState<string | null>(null);
 
@@ -71,7 +79,9 @@ export function ConnectionsSection({
 		setBusy("patreon-refresh");
 		try {
 			const res = await fetch("/api/auth/patreon/refresh", { method: "POST" });
-			if (!res.ok) {throw new Error(`HTTP ${res.status}`);}
+			if (!res.ok) {
+				throw new Error(`HTTP ${res.status}`);
+			}
 			toast.success("Patreon synchronisé");
 			window.location.reload();
 		} catch (error) {
@@ -89,7 +99,9 @@ export function ConnectionsSection({
 				const res = await fetch("/api/auth/patreon/disconnect", {
 					method: "POST",
 				});
-				if (!res.ok) {throw new Error(`HTTP ${res.status}`);}
+				if (!res.ok) {
+					throw new Error(`HTTP ${res.status}`);
+				}
 			} else {
 				// Better Auth expose unlinkAccount via le client
 				const ba = authClient as unknown as {
@@ -98,11 +110,11 @@ export function ConnectionsSection({
 					}>;
 				};
 				const res = await ba.unlinkAccount({ providerId: provider });
-				if (res.error) {throw new Error(res.error.message);}
+				if (res.error) {
+					throw new Error(res.error.message);
+				}
 			}
-			toast.success(
-				`Compte ${PROVIDER_META[provider]?.label ?? provider} dissocié`,
-			);
+			toast.success(`Compte ${PROVIDER_META[provider]?.label ?? provider} dissocié`);
 			window.location.reload();
 		} catch (error) {
 			console.error(error);
@@ -122,8 +134,8 @@ export function ConnectionsSection({
 			<CardHeader>
 				<CardTitle>Comptes connectés</CardTitle>
 				<CardDescription>
-					Liez vos comptes externes pour synchroniser vos rôles, abonnements et
-					avantages. Le dernier compte actif ne peut pas être dissocié.
+					Liez vos comptes externes pour synchroniser vos rôles, abonnements et avantages. Le
+					dernier compte actif ne peut pas être dissocié.
 				</CardDescription>
 			</CardHeader>
 			<CardContent className="space-y-3">
@@ -151,9 +163,7 @@ export function ConnectionsSection({
 										</Badge>
 									)}
 								</div>
-								<p className="mt-1 text-xs text-muted-foreground">
-									{meta.description}
-								</p>
+								<p className="mt-1 text-xs text-muted-foreground">{meta.description}</p>
 								{account?.createdAt && (
 									<p className="mt-1 text-xs text-muted-foreground">
 										Lié le{" "}
@@ -183,7 +193,7 @@ export function ConnectionsSection({
 										size="sm"
 										onClick={linkPatreon}
 										disabled={busy !== null}
-										className={`${meta.color  } text-white`}
+										className={`${meta.color} text-white`}
 									>
 										{busy === "patreon" ? (
 											<Loader2 className="mr-2 size-4 animate-spin" />
@@ -229,32 +239,26 @@ export function ConnectionsSection({
 					<AlertDialogContent>
 						<AlertDialogHeader>
 							<AlertDialogTitle>
-								Dissocier{" "}
-								{confirmUnlink
-									? PROVIDER_META[confirmUnlink]?.label
-									: "ce compte"}{" "}
-								?
+								Dissocier {confirmUnlink ? PROVIDER_META[confirmUnlink]?.label : "ce compte"} ?
 							</AlertDialogTitle>
 							<AlertDialogDescription>
-								Vous pourrez relier ce compte à tout moment. Vos données Patreon
-								seront conservées en base mais plus rafraîchies.
+								Vous pourrez relier ce compte à tout moment. Vos données Patreon seront conservées
+								en base mais plus rafraîchies.
 							</AlertDialogDescription>
 						</AlertDialogHeader>
 						<AlertDialogFooter>
-							<AlertDialogCancel disabled={busy !== null}>
-								Annuler
-							</AlertDialogCancel>
+							<AlertDialogCancel disabled={busy !== null}>Annuler</AlertDialogCancel>
 							<AlertDialogAction
 								onClick={(e) => {
 									e.preventDefault();
-									if (confirmUnlink) {unlink(confirmUnlink);}
+									if (confirmUnlink) {
+										unlink(confirmUnlink);
+									}
 								}}
 								disabled={busy !== null}
 								className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
 							>
-								{busy ? (
-									<Loader2 className="mr-2 size-4 animate-spin" />
-								) : null}
+								{busy ? <Loader2 className="mr-2 size-4 animate-spin" /> : null}
 								Dissocier
 							</AlertDialogAction>
 						</AlertDialogFooter>

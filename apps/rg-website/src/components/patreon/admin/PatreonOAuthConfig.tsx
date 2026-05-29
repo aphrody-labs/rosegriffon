@@ -30,14 +30,10 @@ export function PatreonOAuthConfig({ redirectUri, clientIdMasked }: Props) {
 					Configuration OAuth Patreon
 				</h2>
 				<p className="mb-4 text-sm text-muted-foreground">
-					Cette URL doit être déclarée dans <strong>Redirect URIs</strong> du
-					client OAuth Rose Griffon sur le portail Patreon. Sans elle, toute
-					tentative de connexion renvoie{" "}
-					<code className="rounded bg-muted px-1 py-0.5 text-xs">
-						invalid_request
-					</code>
-					. Le link créateur ajoute les scopes campagne à la volée — pas de
-					second redirect URI nécessaire.
+					Cette URL doit être déclarée dans <strong>Redirect URIs</strong> du client OAuth Rose
+					Griffon sur le portail Patreon. Sans elle, toute tentative de connexion renvoie{" "}
+					<code className="rounded bg-muted px-1 py-0.5 text-xs">invalid_request</code>. Le link
+					créateur ajoute les scopes campagne à la volée — pas de second redirect URI nécessaire.
 				</p>
 
 				<div className="space-y-3">
@@ -49,12 +45,7 @@ export function PatreonOAuthConfig({ redirectUri, clientIdMasked }: Props) {
 							<code className="flex-1 break-all font-mono text-sm text-foreground">
 								{redirectUri}
 							</code>
-							<Button
-								variant="outline"
-								size="sm"
-								onClick={copy}
-								className="shrink-0"
-							>
+							<Button variant="outline" size="sm" onClick={copy} className="shrink-0">
 								{copied ? (
 									<>
 										<Check className="mr-1.5 h-3.5 w-3.5 text-emerald-500" />
@@ -75,9 +66,7 @@ export function PatreonOAuthConfig({ redirectUri, clientIdMasked }: Props) {
 							<div className="mb-1 text-xs font-medium uppercase tracking-wide text-muted-foreground">
 								Client ID
 							</div>
-							<code className="font-mono text-sm text-foreground">
-								{clientIdMasked}
-							</code>
+							<code className="font-mono text-sm text-foreground">{clientIdMasked}</code>
 						</div>
 					)}
 
@@ -99,16 +88,13 @@ export function PatreonOAuthConfig({ redirectUri, clientIdMasked }: Props) {
 					</summary>
 					<ol className="mt-3 list-decimal space-y-1.5 pl-5 text-sm text-muted-foreground">
 						<li>Ouvrir le portail Patreon Developer (lien ci-dessus).</li>
+						<li>Sélectionner le client OAuth de Rose Griffon (créateur du client).</li>
 						<li>
-							Sélectionner le client OAuth de Rose Griffon (créateur du client).
+							Coller l'URL ci-dessus dans le champ <strong>Redirect URIs</strong>.
 						</li>
 						<li>
-							Coller l'URL ci-dessus dans le champ{" "}
-							<strong>Redirect URIs</strong>.
-						</li>
-						<li>
-							Sauvegarder. La modification est instantanée — relancer la
-							connexion Patreon depuis l'app.
+							Sauvegarder. La modification est instantanée — relancer la connexion Patreon depuis
+							l'app.
 						</li>
 					</ol>
 				</details>

@@ -53,20 +53,14 @@ export async function generateMetadata({
 	};
 }
 
-export default async function TweetPage({
-	params,
-}: {
-	params: Promise<{ id: string }>;
-}) {
+export default async function TweetPage({ params }: { params: Promise<{ id: string }> }) {
 	const { id } = await params;
 	const supabase = await createClient();
-	const { data: tweet } = await (supabase as any)
-		.from("tweets")
-		.select("*")
-		.eq("id", id)
-		.single();
+	const { data: tweet } = await (supabase as any).from("tweets").select("*").eq("id", id).single();
 
-	if (!tweet) {notFound();}
+	if (!tweet) {
+		notFound();
+	}
 
 	const { title, body } = extractTitleAndBody(tweet.text || "");
 	const heroImage = tweet.media?.[0]?.url;
@@ -75,11 +69,13 @@ export default async function TweetPage({
 	const publishedDate = tweet.created_at;
 
 	// Build sections: for threads, pair each raw_tweet with its media
-	const rawTweets: any[] =
-		isThread && Array.isArray(tweet.raw_tweets) ? tweet.raw_tweets : [];
+	const rawTweets: any[] = isThread && Array.isArray(tweet.raw_tweets) ? tweet.raw_tweets : [];
 
 	// Gather sections from raw_tweets (skip first paragraph which is the title)
-	interface Section { text: string; media: any[] }
+	interface Section {
+		text: string;
+		media: any[];
+	}
 	let sections: Section[] = [];
 
 	if (rawTweets.length > 0) {
@@ -88,14 +84,12 @@ export default async function TweetPage({
 			media: (rt.media || []).map((m: any) => {
 				// Match with downloaded media by finding the corresponding item
 				const downloaded = tweet.media?.find(
-					(dm: any) => dm.original_url === m.url || dm.url === m.url,
+					(dm: any) => dm.original_url === m.url || dm.url === m.url
 				);
 				return downloaded || m;
 			}),
 			text:
-				rt.fullText && rt.fullText.length > (rt.text?.length || 0)
-					? rt.fullText
-					: rt.text || "",
+				rt.fullText && rt.fullText.length > (rt.text?.length || 0) ? rt.fullText : rt.text || "",
 		}));
 		// Remove the first section text from display since it's used as title
 		if (sections.length > 0) {
@@ -171,23 +165,13 @@ export default async function TweetPage({
 						{/* Author */}
 						<div className="flex items-center gap-2">
 							<div className="size-8 sm:size-9 rounded-full bg-surface-container-high overflow-hidden relative shrink-0 ring-2 ring-background">
-								<Image
-									src="/icon.webp"
-									alt="Azalée"
-									fill
-									sizes="36px"
-									className="object-cover"
-								/>
+								<Image src="/icon.webp" alt="Azalée" fill sizes="36px" className="object-cover" />
 							</div>
 							<span className="font-semibold text-on-surface">Azalée 🌸</span>
-							<span className="text-on-surface-variant/60">
-								@{tweet.author_username}
-							</span>
+							<span className="text-on-surface-variant/60">@{tweet.author_username}</span>
 						</div>
 
-						<span className="text-on-surface-variant/30 hidden sm:inline">
-							|
-						</span>
+						<span className="text-on-surface-variant/30 hidden sm:inline">|</span>
 
 						{/* Date */}
 						<div className="flex items-center gap-1.5">
@@ -221,9 +205,7 @@ export default async function TweetPage({
 				>
 					{sections.map((section, i) => (
 						<div key={i}>
-							{section.text && (
-								<p className="whitespace-pre-wrap">{section.text}</p>
-							)}
+							{section.text && <p className="whitespace-pre-wrap">{section.text}</p>}
 							{section.media.length > 0 && (
 								<div
 									className={`not-prose my-6 ${section.media.length === 1 ? "" : "grid grid-cols-2 gap-3"}`}
@@ -234,9 +216,9 @@ export default async function TweetPage({
 											className={`relative overflow-hidden rounded-2xl border border-outline-variant/10 shadow-lg bg-surface-container ${
 												section.media.length === 1
 													? "aspect-video"
-													: (section.media.length === 3 && j === 0
+													: section.media.length === 3 && j === 0
 														? "col-span-2 aspect-video"
-														: "aspect-square")
+														: "aspect-square"
 											}`}
 										>
 											<Image
@@ -259,20 +241,11 @@ export default async function TweetPage({
 					<div className="flex items-center justify-between">
 						<div className="flex items-center gap-3">
 							<div className="size-12 rounded-full bg-surface-container-high overflow-hidden relative border border-outline-variant/10">
-								<Image
-									src="/icon.webp"
-									alt="Azalée"
-									fill
-									className="object-cover"
-								/>
+								<Image src="/icon.webp" alt="Azalée" fill className="object-cover" />
 							</div>
 							<div>
-								<p className="font-bold text-on-surface">
-									Azalée 🌸 | Inazuma Eleven FR
-								</p>
-								<p className="text-sm text-on-surface-variant/60">
-									@{tweet.author_username}
-								</p>
+								<p className="font-bold text-on-surface">Azalée 🌸 | Inazuma Eleven FR</p>
+								<p className="text-sm text-on-surface-variant/60">@{tweet.author_username}</p>
 							</div>
 						</div>
 						<a

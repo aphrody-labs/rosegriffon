@@ -1,6 +1,14 @@
 "use client";
 
-import { Button, Input, Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@rose-griffon/ui";
+import {
+	Button,
+	Input,
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from "@rose-griffon/ui";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { CheckCircle2, Loader2, RefreshCw, Search, Star } from "lucide-react";
@@ -51,12 +59,16 @@ const STATUS_LABELS: Record<string, { label: string; cls: string }> = {
 };
 
 function formatEur(cents: number | null): string {
-	if (cents === null || cents === undefined) {return "—";}
-	return `${(cents / 100).toFixed(2).replace(".", ",")  } €`;
+	if (cents === null || cents === undefined) {
+		return "—";
+	}
+	return `${(cents / 100).toFixed(2).replace(".", ",")} €`;
 }
 
 function formatDate(iso: string | null): string {
-	if (!iso) {return "—";}
+	if (!iso) {
+		return "—";
+	}
 	try {
 		return format(new Date(iso), "d MMM yyyy", { locale: fr });
 	} catch {
@@ -73,9 +85,15 @@ export function PatreonMembersTable({ members, tierOptions }: Props) {
 	const filtered = useMemo(() => {
 		const needle = q.trim().toLowerCase();
 		return members.filter((m) => {
-			if (status !== "all" && m.rg_subscription_status !== status) {return false;}
-			if (tier !== "all" && !(m.tier_titles ?? []).includes(tier)) {return false;}
-			if (!needle) {return true;}
+			if (status !== "all" && m.rg_subscription_status !== status) {
+				return false;
+			}
+			if (tier !== "all" && !(m.tier_titles ?? []).includes(tier)) {
+				return false;
+			}
+			if (!needle) {
+				return true;
+			}
 			return (
 				(m.full_name ?? "").toLowerCase().includes(needle) ||
 				(m.email ?? "").toLowerCase().includes(needle) ||
@@ -118,9 +136,7 @@ export function PatreonMembersTable({ members, tierOptions }: Props) {
 			if (!res.ok || !json.ok) {
 				toast.error(`Mise à jour échouée : ${json.detail ?? res.status}`);
 			} else {
-				toast.success(
-					`Statut → ${STATUS_LABELS[newStatus]?.label ?? newStatus}`,
-				);
+				toast.success(`Statut → ${STATUS_LABELS[newStatus]?.label ?? newStatus}`);
 				setTimeout(() => window.location.reload(), 600);
 			}
 		} catch (error) {
@@ -202,9 +218,7 @@ export function PatreonMembersTable({ members, tierOptions }: Props) {
 												<CheckCircle2 className="ml-1 inline h-3.5 w-3.5 text-emerald-500" />
 											)}
 										</div>
-										<div className="text-xs text-muted-foreground">
-											{m.email ?? "—"}
-										</div>
+										<div className="text-xs text-muted-foreground">{m.email ?? "—"}</div>
 										{m.discord_user_id && (
 											<div className="text-[10px] font-mono text-muted-foreground/60">
 												discord:{m.discord_user_id}
@@ -235,9 +249,7 @@ export function PatreonMembersTable({ members, tierOptions }: Props) {
 										{formatEur(m.lifetime_support_cents)}
 									</td>
 									<td className="px-4 py-3 text-xs">
-										<div className="text-foreground">
-											{formatDate(m.last_charge_date)}
-										</div>
+										<div className="text-foreground">{formatDate(m.last_charge_date)}</div>
 										{m.last_charge_status && (
 											<div
 												className={
@@ -287,9 +299,7 @@ export function PatreonMembersTable({ members, tierOptions }: Props) {
 													<SelectItem value="pending">En attente</SelectItem>
 													<SelectItem value="reactivated">Réactivé</SelectItem>
 													<SelectItem value="churned">Churn</SelectItem>
-													<SelectItem value="grandfathered">
-														Grandfathered
-													</SelectItem>
+													<SelectItem value="grandfathered">Grandfathered</SelectItem>
 												</SelectContent>
 											</Select>
 										</div>
@@ -299,10 +309,7 @@ export function PatreonMembersTable({ members, tierOptions }: Props) {
 						})}
 						{filtered.length === 0 && (
 							<tr>
-								<td
-									colSpan={8}
-									className="px-4 py-8 text-center text-muted-foreground"
-								>
+								<td colSpan={8} className="px-4 py-8 text-center text-muted-foreground">
 									Aucun membre trouvé pour ces filtres.
 								</td>
 							</tr>

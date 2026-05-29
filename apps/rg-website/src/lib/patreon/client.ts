@@ -1,5 +1,5 @@
-import { PatreonCreatorClient } from '@rose-griffon/patreon-bun';
-import type { Oauth2StoredToken } from '@rose-griffon/patreon-bun';
+import { PatreonCreatorClient } from "@rose-griffon/patreon-bun";
+import type { Oauth2StoredToken } from "@rose-griffon/patreon-bun";
 
 import type {
 	JsonApiResource,
@@ -17,7 +17,7 @@ export class PatreonApiError extends Error {
 	constructor(
 		message: string,
 		public status: number,
-		public body: unknown,
+		public body: unknown
 	) {
 		super(message);
 		this.name = "PatreonApiError";
@@ -63,11 +63,7 @@ export async function exchangeCode(params: {
 	});
 	const token = await c.oauth.getOauthTokenFromCode({ code: params.code });
 	if (!token) {
-		throw new PatreonApiError(
-			"getOauthTokenFromCode returned undefined",
-			0,
-			null,
-		);
+		throw new PatreonApiError("getOauthTokenFromCode returned undefined", 0, null);
 	}
 	return toLegacyTokenShape(token);
 }
@@ -75,9 +71,7 @@ export async function exchangeCode(params: {
 /**
  * Renouvelle un access token via le refresh token stocké.
  */
-export async function refreshAccessToken(
-	refreshToken: string,
-): Promise<PatreonTokenResponse> {
+export async function refreshAccessToken(refreshToken: string): Promise<PatreonTokenResponse> {
 	const c = new PatreonCreatorClient({ oauth: clientCreds() });
 	const refreshed = await c.oauth.refreshToken(refreshToken);
 	return toLegacyTokenShape(refreshed);
@@ -120,11 +114,13 @@ export function getCreatorClient(accessToken: string): PatreonCreatorClient {
 export async function patreonFetch<T = Record<string, unknown>>(
 	accessToken: string,
 	path: string,
-	query?: Record<string, string>,
+	query?: Record<string, string>
 ): Promise<JsonApiResponse<T>> {
 	const url = new URL(`https://www.patreon.com/api/oauth2/v2${path}`);
 	if (query) {
-		for (const [k, v] of Object.entries(query)) {url.searchParams.set(k, v);}
+		for (const [k, v] of Object.entries(query)) {
+			url.searchParams.set(k, v);
+		}
 	}
 
 	for (let attempt = 0; attempt < 5; attempt++) {
@@ -135,7 +131,9 @@ export async function patreonFetch<T = Record<string, unknown>>(
 			},
 		});
 
-		if (res.ok) {return (await res.json()) as JsonApiResponse<T>;}
+		if (res.ok) {
+			return (await res.json()) as JsonApiResponse<T>;
+		}
 
 		const retryable = res.status === 429 || res.status >= 500;
 		if (retryable && attempt < 4) {
@@ -147,11 +145,7 @@ export async function patreonFetch<T = Record<string, unknown>>(
 			continue;
 		}
 
-		throw new PatreonApiError(
-			`Patreon ${path} ${res.status}`,
-			res.status,
-			await res.text(),
-		);
+		throw new PatreonApiError(`Patreon ${path} ${res.status}`, res.status, await res.text());
 	}
 	throw new PatreonApiError(`Patreon ${path} exhausted retries`, 0, null);
 }
@@ -165,7 +159,7 @@ export async function patreonFetch<T = Record<string, unknown>>(
  */
 export async function fetchIdentity(
 	accessToken: string,
-	opts: { withMemberships?: boolean } = {},
+	opts: { withMemberships?: boolean } = {}
 ): Promise<JsonApiResponse> {
 	const query: Record<string, string> = {
 		"fields[user]": "email,full_name,thumb_url,url,social_connections",
@@ -230,65 +224,59 @@ export async function fetchIdentity(
  * Cette structure est ensuite consommée par le callback OAuth + le webhook
  * `members:create/update` pour upserter `patreon_memberships`.
  */
-export function parseIdentityWithMemberships(
-	response: JsonApiResponse,
-): ParsedIdentity {
+export function parseIdentityWithMemberships(response: JsonApiResponse): ParsedIdentity {
 	const data = Array.isArray(response.data) ? response.data[0] : response.data;
-	if (!data) {throw new PatreonApiError("identity returned no data", 0, null);}
+	if (!data) {
+		throw new PatreonApiError("identity returned no data", 0, null);
+	}
 
 	const userAttrs = data.attributes as PatreonUserAttrs;
-	const discordUserId =
-		userAttrs.social_connections?.discord?.user_id?.toString() ?? null;
+	const discordUserId = userAttrs.social_connections?.discord?.user_id?.toString() ?? null;
 
 	const included = response.included ?? [];
 	const membersIncluded = included.filter(
-		(r) => r.type === "member",
+		(r) => r.type === "member"
 	) as unknown as JsonApiResource<PatreonMemberAttrs>[];
 	const tiersIncluded = included.filter(
-		(r) => r.type === "tier",
+		(r) => r.type === "tier"
 	) as unknown as JsonApiResource<PatreonTierAttrs>[];
 	const addressesIncluded = included.filter(
-		(r) => r.type === "address",
+		(r) => r.type === "address"
 	) as unknown as JsonApiResource<PatreonAddressAttrs>[];
 	const tiersById = new Map<string, JsonApiResource<PatreonTierAttrs>>(
-		tiersIncluded.map((r) => [r.id, r]),
+		tiersIncluded.map((r) => [r.id, r])
 	);
 	const addressesById = new Map<string, JsonApiResource<PatreonAddressAttrs>>(
-		addressesIncluded.map((r) => [r.id, r]),
+		addressesIncluded.map((r) => [r.id, r])
 	);
 
 	// Filtre les memberships référencés par le user (relationships.memberships)
 	const userMembershipIds = new Set<string>(
 		(() => {
 			const rel = data.relationships?.memberships?.data;
-			if (!rel) {return [];}
+			if (!rel) {
+				return [];
+			}
 			const arr = Array.isArray(rel) ? rel : [rel];
 			return arr.map((r) => r.id);
-		})(),
+		})()
 	);
 
 	const memberships: ParsedMembership[] = membersIncluded
 		.filter((m) => userMembershipIds.has(m.id))
 		.map((m) => {
 			const campaignRel = m.relationships?.campaign?.data;
-			const campaignId =
-				campaignRel && !Array.isArray(campaignRel) ? campaignRel.id : null;
+			const campaignId = campaignRel && !Array.isArray(campaignRel) ? campaignRel.id : null;
 
 			const tierRel = m.relationships?.currently_entitled_tiers?.data;
-			const tierRefs = Array.isArray(tierRel)
-				? tierRel
-				: (tierRel
-					? [tierRel]
-					: []);
+			const tierRefs = Array.isArray(tierRel) ? tierRel : tierRel ? [tierRel] : [];
 			const tiers = tierRefs
 				.map((ref) => tiersById.get(ref.id))
 				.filter((t): t is JsonApiResource<PatreonTierAttrs> => Boolean(t));
 
 			const addressRel = m.relationships?.address?.data;
-			const addressId =
-				addressRel && !Array.isArray(addressRel) ? addressRel.id : null;
-			const address =
-				(addressId && addressesById.get(addressId)?.attributes) || null;
+			const addressId = addressRel && !Array.isArray(addressRel) ? addressRel.id : null;
+			const address = (addressId && addressesById.get(addressId)?.attributes) || null;
 
 			return {
 				address,
@@ -300,12 +288,8 @@ export function parseIdentityWithMemberships(
 				memberId: m.id,
 				tierAmountsCents: tiers.map((t) => t.attributes.amount_cents ?? 0),
 				tierIds: tiers.map((t) => t.id),
-				tierRequiresShipping: tiers.map(
-					(t) => t.attributes.requires_shipping ?? false,
-				),
-				tierTitles: tiers
-					.map((t) => t.attributes.title)
-					.filter((s): s is string => Boolean(s)),
+				tierRequiresShipping: tiers.map((t) => t.attributes.requires_shipping ?? false),
+				tierTitles: tiers.map((t) => t.attributes.title).filter((s): s is string => Boolean(s)),
 			};
 		});
 

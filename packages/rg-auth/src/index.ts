@@ -10,12 +10,9 @@ type Profile = Database["public"]["Tables"]["profiles"]["Row"];
  */
 export async function resolveProfile(
 	supabase: SupabaseClient<Database>,
-	user: { id: string; email?: string | null },
+	user: { id: string; email?: string | null }
 ): Promise<Profile | null> {
-	const tryFetch = async (
-		column: keyof Profile,
-		value: string,
-	): Promise<Profile | null> => {
+	const tryFetch = async (column: keyof Profile, value: string): Promise<Profile | null> => {
 		const { data } = await supabase
 			.from("profiles")
 			.select("*")
@@ -79,7 +76,7 @@ export async function ensureUserProfile(
 		image?: string | null;
 	},
 	supabase?: SupabaseClient<Database>,
-	options: { defaultRole?: string; appName?: string } = {},
+	options: { defaultRole?: string; appName?: string } = {}
 ) {
 	const db = supabase || createSupabaseServiceClient();
 	try {
@@ -108,12 +105,7 @@ export async function ensureUserProfile(
 			const hasDiscordChanged = discordId && discordId !== existing.discord_id;
 			const hasPatreonChanged = patreonId && patreonId !== existing.patreon_id;
 
-			if (
-				hasAvatarChanged ||
-				hasNameChanged ||
-				hasDiscordChanged ||
-				hasPatreonChanged
-			) {
+			if (hasAvatarChanged || hasNameChanged || hasDiscordChanged || hasPatreonChanged) {
 				await db
 					.from("profiles")
 					.update({
@@ -150,7 +142,7 @@ export async function ensureUserProfile(
 					patreon_id: patreonId,
 					updated_at: new Date().toISOString(),
 				},
-				{ onConflict: "id" },
+				{ onConflict: "id" }
 			)
 			.select()
 			.single();
@@ -158,17 +150,14 @@ export async function ensureUserProfile(
 		if (error) {
 			console.error(
 				`[@rose-griffon/auth] Failed to create profile for user ${user.id}:`,
-				error.message,
+				error.message
 			);
 			return null;
 		}
 
 		return newProfile;
 	} catch (err) {
-		console.error(
-			`[@rose-griffon/auth] Exception in ensureUserProfile for ${user.id}:`,
-			err,
-		);
+		console.error(`[@rose-griffon/auth] Exception in ensureUserProfile for ${user.id}:`, err);
 		return null;
 	}
 }

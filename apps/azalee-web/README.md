@@ -37,35 +37,35 @@
 
 ## Stack
 
-| Couche | Technologie |
-|:--|:--|
-| Framework | **[Next.js 16](https://nextjs.org/docs)** (App Router, Turbopack, standalone Docker) |
-| UI | **[React 19](https://react.dev)**, [Tailwind CSS v4](https://tailwindcss.com/docs), **Material Design 3** (Shadcn/ui + Radix) |
-| Auth | **[Better Auth 1.4](https://www.better-auth.com/docs)** (OAuth Google + Discord, pont JWT Supabase) |
-| Base de données | **[Supabase](https://supabase.com/docs)** (PostgreSQL, 23 tables, RLS 23/23) |
-| Données jeu | `@rose-griffon/inagle` (parser binaire Victory Road) |
-| Éditeur | **[Lexical](https://lexical.dev/docs/intro)** (articles, patch notes) |
-| Canvas | **[Konva](https://konvajs.org/docs/)** + React-Konva (outils visuels) |
-| Recherche | **[uFuzzy](https://github.com/leeoniya/uFuzzy)** + **[cmdk](https://cmdk.paco.me/)** (palette de commandes) |
-| Notifications | **Web Push** (VAPID) |
-| Images | **[Sharp](https://sharp.pixelplumbing.com/)** + CloudFront (zukan) |
-| Japonais | **[Wanakana](https://wanakana.com/docs/global.html)** (romaji ↔ kana) |
+| Couche          | Technologie                                                                                                                   |
+| :-------------- | :---------------------------------------------------------------------------------------------------------------------------- |
+| Framework       | **[Next.js 16](https://nextjs.org/docs)** (App Router, Turbopack, standalone Docker)                                          |
+| UI              | **[React 19](https://react.dev)**, [Tailwind CSS v4](https://tailwindcss.com/docs), **Material Design 3** (Shadcn/ui + Radix) |
+| Auth            | **[Better Auth 1.4](https://www.better-auth.com/docs)** (OAuth Google + Discord, pont JWT Supabase)                           |
+| Base de données | **[Supabase](https://supabase.com/docs)** (PostgreSQL, 23 tables, RLS 23/23)                                                  |
+| Données jeu     | `@rose-griffon/inagle` (parser binaire Victory Road)                                                                          |
+| Éditeur         | **[Lexical](https://lexical.dev/docs/intro)** (articles, patch notes)                                                         |
+| Canvas          | **[Konva](https://konvajs.org/docs/)** + React-Konva (outils visuels)                                                         |
+| Recherche       | **[uFuzzy](https://github.com/leeoniya/uFuzzy)** + **[cmdk](https://cmdk.paco.me/)** (palette de commandes)                   |
+| Notifications   | **Web Push** (VAPID)                                                                                                          |
+| Images          | **[Sharp](https://sharp.pixelplumbing.com/)** + CloudFront (zukan)                                                            |
+| Japonais        | **[Wanakana](https://wanakana.com/docs/global.html)** (romaji ↔ kana)                                                         |
 
 ## Pages principales
 
-| Route | Description |
-|:--|:--|
-| `/` | Accueil (hero, carousel wiki, actualités) |
-| `/chara/[id]` | Fiche personnage (stats, techniques, rareté, zukan) |
-| `/skill/[id]` | Fiche technique (vidéo, description FR/EN/JA) |
-| `/item/[id]` | Fiche objet (stats, recettes d'échange) |
-| `/aura/[category]/[id]` | Fiche aura (Esprits Guerriers, Souls, MixiMax) |
-| `/tactic/[id]` | Fiche tactique |
-| `/teams` | Liste des équipes |
-| `/search` | Recherche globale avec filtres |
-| `/tools/*` | Comparateur, équipe aléatoire, traducteur |
-| `/news` | Actualités, patch notes traduits |
-| `/dashboard/*` | Admin (articles, import, zukan review) |
+| Route                   | Description                                         |
+| :---------------------- | :-------------------------------------------------- |
+| `/`                     | Accueil (hero, carousel wiki, actualités)           |
+| `/chara/[id]`           | Fiche personnage (stats, techniques, rareté, zukan) |
+| `/skill/[id]`           | Fiche technique (vidéo, description FR/EN/JA)       |
+| `/item/[id]`            | Fiche objet (stats, recettes d'échange)             |
+| `/aura/[category]/[id]` | Fiche aura (Esprits Guerriers, Souls, MixiMax)      |
+| `/tactic/[id]`          | Fiche tactique                                      |
+| `/teams`                | Liste des équipes                                   |
+| `/search`               | Recherche globale avec filtres                      |
+| `/tools/*`              | Comparateur, équipe aléatoire, traducteur           |
+| `/news`                 | Actualités, patch notes traduits                    |
+| `/dashboard/*`          | Admin (articles, import, zukan review)              |
 
 ## Pipeline de données
 
@@ -122,18 +122,18 @@ VAPID_PRIVATE_KEY=
 
 ## Commandes
 
-| Commande | Description |
-|:--|:--|
-| `pnpm dev` | Serveur de dev (Turbopack) |
-| `pnpm build` | Build production |
-| `pnpm lint` | ESLint (`eslint .`, pas `next lint`) |
-| `pnpm type-check` | Vérification TypeScript |
-| `pnpm test` | Tests unitaires (Vitest) |
-| `pnpm sync:inagle` | Sync données inagle vers Supabase |
-| `pnpm crawl:topics` | Crawler topics communautaires |
-| `pnpm crawl:patch-notes` | Crawler patch notes du jeu |
-| `pnpm crawl:zukan` | Crawler données zukan |
-| `pnpm docker:build` | Build image Docker |
+| Commande                 | Description                          |
+| :----------------------- | :----------------------------------- |
+| `pnpm dev`               | Serveur de dev (Turbopack)           |
+| `pnpm build`             | Build production                     |
+| `pnpm lint`              | ESLint (`eslint .`, pas `next lint`) |
+| `pnpm type-check`        | Vérification TypeScript              |
+| `pnpm test`              | Tests unitaires (Vitest)             |
+| `pnpm sync:inagle`       | Sync données inagle vers Supabase    |
+| `pnpm crawl:topics`      | Crawler topics communautaires        |
+| `pnpm crawl:patch-notes` | Crawler patch notes du jeu           |
+| `pnpm crawl:zukan`       | Crawler données zukan                |
+| `pnpm docker:build`      | Build image Docker                   |
 
 ## Déploiement
 

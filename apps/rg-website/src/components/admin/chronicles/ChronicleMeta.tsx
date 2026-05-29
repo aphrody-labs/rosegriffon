@@ -1,11 +1,20 @@
-import { Button, Input, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, Textarea, Label } from "@rose-griffon/ui";
+import {
+	Button,
+	Input,
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+	Textarea,
+	Label,
+} from "@rose-griffon/ui";
 import { Crop, ImageIcon, Loader2, Trash2, Upload } from "lucide-react";
 import Image from "next/image";
 import { useRef, useState } from "react";
 import { toast } from "sonner";
 
 import ImageCropper from "@/components/shared/ImageCropper";
-
 
 import { createClient } from "@/lib/supabase/client";
 
@@ -44,7 +53,9 @@ export function ChronicleMeta({
 	const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
 		if (e.target.files && e.target.files.length > 0) {
 			const file = e.target.files[0];
-			if (!file) {return;}
+			if (!file) {
+				return;
+			}
 
 			if (file.size > 5 * 1024 * 1024) {
 				toast.error("L'image est trop volumineuse (max 5Mo)");
@@ -94,9 +105,7 @@ export function ChronicleMeta({
 		} catch (error) {
 			console.error("Erreur upload:", error);
 			const errorMessage =
-				error instanceof Error
-					? error.message
-					: "Erreur lors de l'upload de l'image";
+				error instanceof Error ? error.message : "Erreur lors de l'upload de l'image";
 			toast.error(errorMessage);
 		} finally {
 			setIsUploading(false);
@@ -181,16 +190,12 @@ export function ChronicleMeta({
 							<SelectItem value="communaute">Communauté</SelectItem>
 							<SelectItem value="technique">Technique</SelectItem>
 							<SelectItem value="loreteam">Équipe Lore</SelectItem>
-							<SelectItem value="dessinateurteam">
-								Équipe Dessinateur
-							</SelectItem>
+							<SelectItem value="dessinateurteam">Équipe Dessinateur</SelectItem>
 							<SelectItem value="productionteam">Équipe Production</SelectItem>
 							<SelectItem value="socialteam">Équipe Réseaux</SelectItem>
 							<SelectItem value="achilleateam">Équipe Achilléa</SelectItem>
 							<SelectItem value="azaleeteam">Équipe Azalée</SelectItem>
-							<SelectItem value="mediationteam">
-								Cellule de Médiation
-							</SelectItem>
+							<SelectItem value="mediationteam">Cellule de Médiation</SelectItem>
 							<SelectItem value="collabteam">Partenaires</SelectItem>
 						</SelectContent>
 					</Select>
@@ -212,11 +217,9 @@ export function ChronicleMeta({
 						{isUploading ? (
 							<div className="absolute inset-0 flex flex-col items-center justify-center bg-muted/30">
 								<Loader2 className="size-8 animate-spin text-rg-primary" />
-								<span className="text-sm text-muted-foreground mt-2">
-									Upload en cours...
-								</span>
+								<span className="text-sm text-muted-foreground mt-2">Upload en cours...</span>
 							</div>
-						) : (featuredImage ? (
+						) : featuredImage ? (
 							<>
 								<Image
 									src={featuredImage}
@@ -281,7 +284,7 @@ export function ChronicleMeta({
 									Uploader & Recadrer
 								</Button>
 							</div>
-						))}
+						)}
 					</div>
 					<Input
 						value={featuredImage}

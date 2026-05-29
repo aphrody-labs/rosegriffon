@@ -7,16 +7,17 @@ import { cache } from "react";
  * et React cache pour la déduplication par requête.
  */
 export const cachedQuery = <T>(
-  queryFn: () => Promise<T>,
-  keys: string[],
-  tags: string[] = [],
-  revalidate: number = 3600 // 1 heure par défaut
-) => cache(
-    unstable_cache(queryFn, keys, {
-      tags,
-      revalidate,
-    })
-  );
+	queryFn: () => Promise<T>,
+	keys: string[],
+	tags: string[] = [],
+	revalidate: number = 3600 // 1 heure par défaut
+) =>
+	cache(
+		unstable_cache(queryFn, keys, {
+			tags,
+			revalidate,
+		})
+	);
 
 /**
  * Exemple d'utilisation :

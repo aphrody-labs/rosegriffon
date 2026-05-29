@@ -21,8 +21,7 @@ interface PaginationControlsProps {
 	}>;
 }
 
-const defaultPageLabel = (current: number, total: number) =>
-	`Page ${current} sur ${total}`;
+const defaultPageLabel = (current: number, total: number) => `Page ${current} sur ${total}`;
 
 export function PaginationControls({
 	currentPage,
@@ -43,9 +42,7 @@ export function PaginationControls({
 
 	return (
 		<div className="flex items-center justify-between">
-			<p className="text-sm text-muted-foreground">
-				{pageLabel(currentPage, totalPages)}
-			</p>
+			<p className="text-sm text-muted-foreground">{pageLabel(currentPage, totalPages)}</p>
 			<div className="flex gap-2">
 				<Button variant="outline" size="sm" disabled={currentPage <= 1} asChild>
 					<LinkComponent href={createPageUrl(currentPage - 1)}>
@@ -53,12 +50,7 @@ export function PaginationControls({
 						{previousLabel}
 					</LinkComponent>
 				</Button>
-				<Button
-					variant="outline"
-					size="sm"
-					disabled={currentPage >= totalPages}
-					asChild
-				>
+				<Button variant="outline" size="sm" disabled={currentPage >= totalPages} asChild>
 					<LinkComponent href={createPageUrl(currentPage + 1)}>
 						{nextLabel}
 						<ChevronRight className="size-4 ml-2" />

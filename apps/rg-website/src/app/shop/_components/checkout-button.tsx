@@ -45,11 +45,7 @@ export function CheckoutButton({ subtotalCents }: { subtotalCents: number }) {
 					</>
 				)}
 			</button>
-			{error && (
-				<p className="text-center text-xs font-semibold text-[#a14b3f]">
-					{error}
-				</p>
-			)}
+			{error && <p className="text-center text-xs font-semibold text-[#a14b3f]">{error}</p>}
 			<p className="text-center text-[10px] uppercase tracking-widest text-white/50">
 				Paiement sécurisé Stripe · CB / Apple Pay / Google Pay
 			</p>

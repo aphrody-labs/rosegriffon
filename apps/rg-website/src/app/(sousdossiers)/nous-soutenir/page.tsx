@@ -94,12 +94,7 @@ function CtaButton({ option }: { option: (typeof SUPPORT_OPTIONS)[number] }) {
 	const className = `${baseClass} ${variants[option.variant]}`;
 
 	return (
-		<a
-			href={option.href}
-			target="_blank"
-			rel="noopener noreferrer"
-			className={className}
-		>
+		<a href={option.href} target="_blank" rel="noopener noreferrer" className={className}>
 			{option.cta} <ExternalLink className="size-4" />
 		</a>
 	);
@@ -128,11 +123,8 @@ export default function NousSoutenirPage() {
 					</h1>
 					<p className="mx-auto mt-6 max-w-2xl text-lg text-muted-foreground">
 						Rose Griffon est{" "}
-						<strong className="text-foreground">
-							une association à but non lucratif
-						</strong>{" "}
-						portée par une équipe de bénévoles. Vos soutiens financent les
-						projets, pas les salaires.
+						<strong className="text-foreground">une association à but non lucratif</strong> portée
+						par une équipe de bénévoles. Vos soutiens financent les projets, pas les salaires.
 					</p>
 					<div className="mt-10 flex flex-wrap items-center justify-center gap-3">
 						<a
@@ -152,22 +144,18 @@ export default function NousSoutenirPage() {
 			</section>
 
 			{/* Tiers Patreon — remontés en haut, chaque pack a son bouton dédié */}
-			<section
-				id="tiers"
-				className="mx-auto max-w-6xl px-6 pb-8 pt-4 scroll-mt-16 sm:pt-8"
-			>
+			<section id="tiers" className="mx-auto max-w-6xl px-6 pb-8 pt-4 scroll-mt-16 sm:pt-8">
 				<div className="mb-10 text-center">
 					<h2 className="text-3xl font-bold">Les paliers de mécénat</h2>
 					<p className="mt-3 text-muted-foreground">
-						3 paliers principaux sur Patreon — Roy, Gaëlle, Evans. Chaque palier
-						a son propre bouton pour choisir directement.
+						3 paliers principaux sur Patreon — Roy, Gaëlle, Evans. Chaque palier a son propre bouton
+						pour choisir directement.
 					</p>
 				</div>
 				<PublicTiers />
 				<p className="mx-auto mt-8 max-w-2xl text-center text-xs text-muted-foreground">
-					Patreon prélève une commission de 8 à 12% + frais de paiement. Pour
-					maximiser le soutien net à l'association, un don unique PayPal est
-					plus efficace côté frais.
+					Patreon prélève une commission de 8 à 12% + frais de paiement. Pour maximiser le soutien
+					net à l'association, un don unique PayPal est plus efficace côté frais.
 				</p>
 			</section>
 
@@ -219,8 +207,8 @@ export default function NousSoutenirPage() {
 				<div className="mb-10 text-center">
 					<h2 className="text-3xl font-bold">Où va votre soutien ?</h2>
 					<p className="mt-3 text-muted-foreground">
-						Bilan financier annuel partagé en assemblée générale. Pour toute
-						question, contactez-nous.
+						Bilan financier annuel partagé en assemblée générale. Pour toute question,
+						contactez-nous.
 					</p>
 				</div>
 				<div className="grid gap-6 md:grid-cols-2">

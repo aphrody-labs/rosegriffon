@@ -20,7 +20,9 @@ export async function LatestChroniqueSection() {
 		.limit(1)
 		.single();
 
-	if (!latestChronique) {return null;}
+	if (!latestChronique) {
+		return null;
+	}
 
 	const article = latestChronique;
 
@@ -60,10 +62,7 @@ export async function LatestChroniqueSection() {
 							<div className="w-full md:w-1/3 shrink-0">
 								<div className="relative aspect-video md:aspect-auto md:h-full min-h-[200px] rounded-xl overflow-hidden shadow-lg">
 									<Image
-										src={
-											article.featured_image_url ||
-											"/images/placeholder-chronicle.svg"
-										}
+										src={article.featured_image_url || "/images/placeholder-chronicle.svg"}
 										alt={article.title}
 										fill
 										sizes="(max-width: 768px) 100vw, 33vw"
@@ -77,10 +76,7 @@ export async function LatestChroniqueSection() {
 							<div className="flex-1 space-y-4">
 								{/* Catégorie */}
 								{article.category && (
-									<Badge
-										variant="outline"
-										className="border-[#a14b3f] text-[#a14b3f]"
-									>
+									<Badge variant="outline" className="border-[#a14b3f] text-[#a14b3f]">
 										{article.category}
 									</Badge>
 								)}
@@ -101,17 +97,11 @@ export async function LatestChroniqueSection() {
 								<div className="flex flex-wrap items-center gap-4 text-sm text-gray-500 dark:text-gray-500">
 									<div className="flex items-center gap-2">
 										<Calendar className="size-4" />
-										<time
-											dateTime={
-												article.published_at || article.created_at || ""
-											}
-										>
+										<time dateTime={article.published_at || article.created_at || ""}>
 											{format(
-												new Date(
-													article.published_at || article.created_at || "",
-												),
+												new Date(article.published_at || article.created_at || ""),
 												"d MMMM yyyy",
-												{ locale: fr },
+												{ locale: fr }
 											)}
 										</time>
 									</div>

@@ -1,27 +1,23 @@
 "use client";
 
-import { Badge, Button, Input, Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@rose-griffon/ui";
+import {
+	Badge,
+	Button,
+	Input,
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from "@rose-griffon/ui";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-import {
-	ChevronDown,
-	ChevronRight,
-	ExternalLink,
-	MapPin,
-	Search,
-	Star,
-} from "lucide-react";
+import { ChevronDown, ChevronRight, ExternalLink, MapPin, Search, Star } from "lucide-react";
 import { useMemo, useState } from "react";
 
 import type { LiveMember } from "@/lib/patreon/live";
 
-type StatusFilter =
-	| "all"
-	| "active"
-	| "former"
-	| "declined"
-	| "former_paid"
-	| "no_status";
+type StatusFilter = "all" | "active" | "former" | "declined" | "former_paid" | "no_status";
 
 interface Props {
 	members: LiveMember[];
@@ -51,12 +47,16 @@ const STATUS_LABEL: Record<string, StatusCfg> = {
 };
 
 function formatEur(cents: number | null | undefined): string {
-	if (cents === null || cents === undefined || cents === 0) {return "—";}
-	return `${(cents / 100).toFixed(2).replace(".", ",")  } €`;
+	if (cents === null || cents === undefined || cents === 0) {
+		return "—";
+	}
+	return `${(cents / 100).toFixed(2).replace(".", ",")} €`;
 }
 
 function formatDate(iso: string | null | undefined): string {
-	if (!iso) {return "—";}
+	if (!iso) {
+		return "—";
+	}
 	try {
 		return format(new Date(iso), "d MMM yyyy", { locale: fr });
 	} catch {
@@ -65,7 +65,9 @@ function formatDate(iso: string | null | undefined): string {
 }
 
 function formatAddress(addr: LiveMember["address"]): string | null {
-	if (!addr) {return null;}
+	if (!addr) {
+		return null;
+	}
 	const candidates: (string | null | undefined)[] = [
 		addr.addressee,
 		addr.line_1,
@@ -74,9 +76,7 @@ function formatAddress(addr: LiveMember["address"]): string | null {
 		addr.state,
 		addr.country,
 	];
-	const parts = candidates.filter(
-		(s): s is string => typeof s === "string" && s.trim().length > 0,
-	);
+	const parts = candidates.filter((s): s is string => typeof s === "string" && s.trim().length > 0);
 	return parts.length > 0 ? parts.join(" · ") : null;
 }
 
@@ -92,27 +92,40 @@ export function PatreonLiveMembersTable({ members, tierOptions }: Props) {
 		const needle = q.trim().toLowerCase();
 		return members.filter((m) => {
 			if (status !== "all") {
-				if (status === "active" && m.patron_status !== "active_patron")
-					{return false;}
-				if (status === "former" && m.patron_status !== "former_patron")
-					{return false;}
-				if (status === "declined" && m.patron_status !== "declined_patron")
-					{return false;}
+				if (status === "active" && m.patron_status !== "active_patron") {
+					return false;
+				}
+				if (status === "former" && m.patron_status !== "former_patron") {
+					return false;
+				}
+				if (status === "declined" && m.patron_status !== "declined_patron") {
+					return false;
+				}
 				if (
 					status === "former_paid" &&
 					!(
-						(m.patron_status === "former_patron" ||
-							m.patron_status === "declined_patron") &&
+						(m.patron_status === "former_patron" || m.patron_status === "declined_patron") &&
 						m.lifetime_support_cents > 0
 					)
-				)
-					{return false;}
-				if (status === "no_status" && m.patron_status !== null) {return false;}
+				) {
+					return false;
+				}
+				if (status === "no_status" && m.patron_status !== null) {
+					return false;
+				}
 			}
-			if (tier !== "all" && !m.tier_titles.includes(tier)) {return false;}
-			if (withAddress && !m.address) {return false;}
-			if (withDiscord && !m.discord_user_id) {return false;}
-			if (!needle) {return true;}
+			if (tier !== "all" && !m.tier_titles.includes(tier)) {
+				return false;
+			}
+			if (withAddress && !m.address) {
+				return false;
+			}
+			if (withDiscord && !m.discord_user_id) {
+				return false;
+			}
+			if (!needle) {
+				return true;
+			}
 			return (
 				(m.full_name ?? "").toLowerCase().includes(needle) ||
 				(m.email ?? "").toLowerCase().includes(needle) ||
@@ -129,15 +142,19 @@ export function PatreonLiveMembersTable({ members, tierOptions }: Props) {
 		let formerPaid = 0;
 		let totalLifetime = 0;
 		for (const m of members) {
-			if (m.patron_status === "active_patron") {active++;}
-			else if (m.patron_status === "former_patron") {former++;}
-			else if (m.patron_status === "declined_patron") {declined++;}
+			if (m.patron_status === "active_patron") {
+				active++;
+			} else if (m.patron_status === "former_patron") {
+				former++;
+			} else if (m.patron_status === "declined_patron") {
+				declined++;
+			}
 			if (
-				(m.patron_status === "former_patron" ||
-					m.patron_status === "declined_patron") &&
+				(m.patron_status === "former_patron" || m.patron_status === "declined_patron") &&
 				m.lifetime_support_cents > 0
-			)
-				{formerPaid++;}
+			) {
+				formerPaid++;
+			}
 			totalLifetime += m.lifetime_support_cents;
 		}
 		return { active, declined, former, formerPaid, totalLifetime };
@@ -148,15 +165,9 @@ export function PatreonLiveMembersTable({ members, tierOptions }: Props) {
 			<div className="flex flex-wrap items-center gap-2 text-xs">
 				<Badge className={STATUS_ACTIVE.cls}>{counts.active} actifs</Badge>
 				<Badge className={STATUS_FORMER.cls}>{counts.former} anciens</Badge>
-				<Badge className={STATUS_DECLINED.cls}>
-					{counts.declined} déclinés
-				</Badge>
-				<Badge variant="outline">
-					{counts.formerPaid} anciens ayant déjà payé
-				</Badge>
-				<span className="text-muted-foreground">
-					LTV total : {formatEur(counts.totalLifetime)}
-				</span>
+				<Badge className={STATUS_DECLINED.cls}>{counts.declined} déclinés</Badge>
+				<Badge variant="outline">{counts.formerPaid} anciens ayant déjà payé</Badge>
+				<span className="text-muted-foreground">LTV total : {formatEur(counts.totalLifetime)}</span>
 			</div>
 
 			<div className="flex flex-col gap-3 sm:flex-row">
@@ -169,10 +180,7 @@ export function PatreonLiveMembersTable({ members, tierOptions }: Props) {
 						className="pl-10"
 					/>
 				</div>
-				<Select
-					value={status}
-					onValueChange={(v) => setStatus(v as StatusFilter)}
-				>
+				<Select value={status} onValueChange={(v) => setStatus(v as StatusFilter)}>
 					<SelectTrigger className="w-full sm:w-[200px]">
 						<SelectValue placeholder="Statut" />
 					</SelectTrigger>
@@ -181,9 +189,7 @@ export function PatreonLiveMembersTable({ members, tierOptions }: Props) {
 						<SelectItem value="active">Actifs</SelectItem>
 						<SelectItem value="former">Anciens</SelectItem>
 						<SelectItem value="declined">Déclinés</SelectItem>
-						<SelectItem value="former_paid">
-							Ont déjà payé (LTV {">"} 0)
-						</SelectItem>
+						<SelectItem value="former_paid">Ont déjà payé (LTV {">"} 0)</SelectItem>
 						<SelectItem value="no_status">Sans statut</SelectItem>
 					</SelectContent>
 				</Select>
@@ -239,9 +245,7 @@ export function PatreonLiveMembersTable({ members, tierOptions }: Props) {
 					</thead>
 					<tbody>
 						{filtered.map((m) => {
-							const statusCfg = m.patron_status
-								? STATUS_LABEL[m.patron_status]
-								: null;
+							const statusCfg = m.patron_status ? STATUS_LABEL[m.patron_status] : null;
 							const isExpanded = expanded === m.id;
 							const addrLine = formatAddress(m.address);
 							return (
@@ -277,12 +281,8 @@ export function PatreonLiveMembersTable({ members, tierOptions }: Props) {
 													<div className="size-8 shrink-0 rounded-full bg-muted" />
 												)}
 												<div className="min-w-0">
-													<div className="font-medium text-foreground">
-														{m.full_name ?? "—"}
-													</div>
-													<div className="text-xs text-muted-foreground">
-														{m.email ?? "—"}
-													</div>
+													<div className="font-medium text-foreground">{m.full_name ?? "—"}</div>
+													<div className="text-xs text-muted-foreground">{m.email ?? "—"}</div>
 													{m.patreon_url && (
 														<a
 															href={m.patreon_url}
@@ -300,9 +300,7 @@ export function PatreonLiveMembersTable({ members, tierOptions }: Props) {
 										<td className="px-4 py-3 text-xs">
 											{m.discord_user_id ? (
 												<div>
-													<div className="font-mono text-foreground">
-														{m.discord_user_id}
-													</div>
+													<div className="font-mono text-foreground">{m.discord_user_id}</div>
 													{m.discord_role_ids.length > 0 && (
 														<div className="mt-0.5 text-[10px] text-muted-foreground">
 															{m.discord_role_ids.length} rôle
@@ -338,9 +336,7 @@ export function PatreonLiveMembersTable({ members, tierOptions }: Props) {
 											{formatEur(m.lifetime_support_cents)}
 										</td>
 										<td className="px-4 py-3 text-xs">
-											<div className="text-foreground">
-												{formatDate(m.last_charge_date)}
-											</div>
+											<div className="text-foreground">{formatDate(m.last_charge_date)}</div>
 											{m.last_charge_status && (
 												<div
 													className={
@@ -391,24 +387,17 @@ export function PatreonLiveMembersTable({ members, tierOptions }: Props) {
 											<td colSpan={8} className="px-4 py-4">
 												<div className="grid gap-4 text-xs sm:grid-cols-2 lg:grid-cols-3">
 													<DetailBlock title="Identité Patreon">
-														<DetailRow
-															label="Patreon user ID"
-															value={m.patreon_user_id}
-															mono
-														/>
+														<DetailRow label="Patreon user ID" value={m.patreon_user_id} mono />
 														<DetailRow label="Member ID" value={m.id} mono />
-														<DetailRow
-															label="Pledge depuis"
-															value={formatDate(m.pledge_start)}
-														/>
+														<DetailRow label="Pledge depuis" value={formatDate(m.pledge_start)} />
 														<DetailRow
 															label="Cadence"
 															value={
 																m.pledge_cadence === 1
 																	? "mensuelle"
-																	: (m.pledge_cadence === 12
+																	: m.pledge_cadence === 12
 																		? "annuelle"
-																		: "—")
+																		: "—"
 															}
 														/>
 														<DetailRow
@@ -422,26 +411,17 @@ export function PatreonLiveMembersTable({ members, tierOptions }: Props) {
 													</DetailBlock>
 
 													<DetailBlock title="Discord">
-														<DetailRow
-															label="User ID"
-															value={m.discord_user_id}
-															mono
-														/>
+														<DetailRow label="User ID" value={m.discord_user_id} mono />
 														<div>
 															<div className="text-muted-foreground">
 																Rôles tier ({m.discord_role_ids.length})
 															</div>
 															<div className="mt-1 space-y-0.5">
 																{m.discord_role_ids.length === 0 ? (
-																	<span className="text-muted-foreground/50">
-																		—
-																	</span>
+																	<span className="text-muted-foreground/50">—</span>
 																) : (
 																	m.discord_role_ids.map((r) => (
-																		<div
-																			key={r}
-																			className="font-mono text-[10px] text-foreground"
-																		>
+																		<div key={r} className="font-mono text-[10px] text-foreground">
 																			{r}
 																		</div>
 																	))
@@ -453,40 +433,16 @@ export function PatreonLiveMembersTable({ members, tierOptions }: Props) {
 													<DetailBlock title="Adresse">
 														{m.address ? (
 															<>
-																<DetailRow
-																	label="Destinataire"
-																	value={m.address.addressee}
-																/>
-																<DetailRow
-																	label="Ligne 1"
-																	value={m.address.line_1}
-																/>
+																<DetailRow label="Destinataire" value={m.address.addressee} />
+																<DetailRow label="Ligne 1" value={m.address.line_1} />
 																{m.address.line_2 && (
-																	<DetailRow
-																		label="Ligne 2"
-																		value={m.address.line_2}
-																	/>
+																	<DetailRow label="Ligne 2" value={m.address.line_2} />
 																)}
-																<DetailRow
-																	label="Code postal"
-																	value={m.address.postal_code}
-																/>
-																<DetailRow
-																	label="Ville"
-																	value={m.address.city}
-																/>
-																<DetailRow
-																	label="Région"
-																	value={m.address.state}
-																/>
-																<DetailRow
-																	label="Pays"
-																	value={m.address.country}
-																/>
-																<DetailRow
-																	label="Téléphone"
-																	value={m.address.phone_number}
-																/>
+																<DetailRow label="Code postal" value={m.address.postal_code} />
+																<DetailRow label="Ville" value={m.address.city} />
+																<DetailRow label="Région" value={m.address.state} />
+																<DetailRow label="Pays" value={m.address.country} />
+																<DetailRow label="Téléphone" value={m.address.phone_number} />
 															</>
 														) : (
 															<span className="text-muted-foreground/50">
@@ -497,9 +453,7 @@ export function PatreonLiveMembersTable({ members, tierOptions }: Props) {
 
 													{m.note && (
 														<DetailBlock title="Note Patreon" full>
-															<p className="whitespace-pre-wrap text-foreground/80">
-																{m.note}
-															</p>
+															<p className="whitespace-pre-wrap text-foreground/80">{m.note}</p>
 														</DetailBlock>
 													)}
 												</div>
@@ -511,10 +465,7 @@ export function PatreonLiveMembersTable({ members, tierOptions }: Props) {
 						})}
 						{filtered.length === 0 && (
 							<tr>
-								<td
-									colSpan={9}
-									className="px-4 py-8 text-center text-muted-foreground"
-								>
+								<td colSpan={9} className="px-4 py-8 text-center text-muted-foreground">
 									Aucun membre ne correspond à ces filtres.
 								</td>
 							</tr>
@@ -566,9 +517,7 @@ function DetailRow({
 	return (
 		<div className="flex items-baseline justify-between gap-3">
 			<span className="text-muted-foreground">{label}</span>
-			<span
-				className={`text-right text-foreground ${mono ? "font-mono text-[10px]" : ""}`}
-			>
+			<span className={`text-right text-foreground ${mono ? "font-mono text-[10px]" : ""}`}>
 				{value ?? "—"}
 			</span>
 		</div>

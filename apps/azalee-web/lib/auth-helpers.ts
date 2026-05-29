@@ -46,7 +46,9 @@ export async function requireAuthOrFail() {
  */
 export async function requireAdmin() {
 	const user = await requireAuth();
-	if (!user) {redirect("/login");}
+	if (!user) {
+		redirect("/login");
+	}
 
 	const supabase = await createClient();
 	const profile = await resolveProfile(supabase, user);
@@ -67,7 +69,9 @@ export async function requireAdmin() {
  */
 export async function requireAdminOrFail() {
 	const user = await requireAuth();
-	if (!user) {throw new Error("Non autorisé");}
+	if (!user) {
+		throw new Error("Non autorisé");
+	}
 
 	const supabase = await createClient();
 	const profile = await resolveProfile(supabase, user);
@@ -83,9 +87,11 @@ export async function requireAdminOrFail() {
  * True if the user with the given Discord ID owns the Médaille Azalée role.
  */
 export async function hasMedailleAzaleeRole(
-	discordId: string | null | undefined,
+	discordId: string | null | undefined
 ): Promise<boolean> {
-	if (!discordId) {return false;}
+	if (!discordId) {
+		return false;
+	}
 	const supabase = await createClient();
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	const { data } = (await (supabase as any)
@@ -94,7 +100,9 @@ export async function hasMedailleAzaleeRole(
 		.eq("discord_id", discordId)
 		.single()) as { data: { roles: unknown } | null };
 
-	if (!data?.roles) {return false;}
+	if (!data?.roles) {
+		return false;
+	}
 
 	const roles = Array.isArray(data.roles)
 		? (data.roles as string[])
@@ -114,12 +122,16 @@ export async function hasMedailleAzaleeRole(
  */
 export async function requireEditorOrFail() {
 	const session = await getServerSession();
-	if (!session?.user) {throw new Error("Non autorisé");}
+	if (!session?.user) {
+		throw new Error("Non autorisé");
+	}
 
 	const supabase = await createClient();
 	const profile = await resolveProfile(supabase, session.user);
 
-	if (!profile) {throw new Error("Profil introuvable");}
+	if (!profile) {
+		throw new Error("Profil introuvable");
+	}
 
 	if (isAdmin(profile.role)) {
 		return {

@@ -20,8 +20,7 @@ import { createClient } from "@supabase/supabase-js";
 
 const SUPABASE_URL = process.env.SUPABASE_URL;
 const SERVICE_ROLE = process.env.SUPABASE_SERVICE_ROLE_KEY;
-const TOKEN =
-	process.env.PATREON_CREATOR_ACCESS_TOKEN ?? process.env.PATREON_ACCESS_TOKEN;
+const TOKEN = process.env.PATREON_CREATOR_ACCESS_TOKEN ?? process.env.PATREON_ACCESS_TOKEN;
 const CAMPAIGN_ID = process.env.PATREON_CAMPAIGN_ID;
 
 if (!SUPABASE_URL || !SERVICE_ROLE) {
@@ -32,8 +31,7 @@ if (!CAMPAIGN_ID) throw new Error("PATREON_CAMPAIGN_ID manquant");
 
 const args = new Set(process.argv.slice(2));
 const dryRun = args.has("--dry-run");
-const userIdFilter =
-	process.argv.find((a) => a.startsWith("--user-id="))?.split("=")[1] ?? null;
+const userIdFilter = process.argv.find((a) => a.startsWith("--user-id="))?.split("=")[1] ?? null;
 
 const supabase = createClient(SUPABASE_URL, SERVICE_ROLE, {
 	auth: { persistSession: false },
@@ -97,17 +95,11 @@ const MEMBER_FIELDS = [
 	"is_gifted",
 	"note",
 ].join(",");
-const USER_FIELDS = [
-	"full_name",
-	"email",
-	"thumb_url",
-	"url",
-	"social_connections",
-].join(",");
+const USER_FIELDS = ["full_name", "email", "thumb_url", "url", "social_connections"].join(",");
 const TIER_FIELDS = "title,amount_cents";
 
 function discordIdFromConnections(
-	conns: UserAttrs["social_connections"] | undefined | null,
+	conns: UserAttrs["social_connections"] | undefined | null
 ): string | null {
 	if (!conns) return null;
 	const d = conns.discord;
@@ -135,8 +127,7 @@ async function fetchAllMembers(): Promise<{
 		const res = await fetch(url, {
 			headers: { Authorization: `Bearer ${TOKEN}` },
 		});
-		if (!res.ok)
-			throw new Error(`Patreon API ${res.status}: ${await res.text()}`);
+		if (!res.ok) throw new Error(`Patreon API ${res.status}: ${await res.text()}`);
 		const data = (await res.json()) as {
 			data: JsonApiResource<MemberAttrs>[];
 			included?: JsonApiResource[];
@@ -155,7 +146,7 @@ async function fetchAllMembers(): Promise<{
 async function resolveRgUserId(
 	patreonUserId: string,
 	email: string | null,
-	discordId: string | null,
+	discordId: string | null
 ): Promise<{ userId: string; via: string } | null> {
 	const { data: tok } = await supabase
 		.from("patreon_oauth_tokens")
@@ -170,8 +161,7 @@ async function resolveRgUserId(
 		.select("user_id")
 		.eq("patreon_user_id", patreonUserId)
 		.maybeSingle();
-	if (tokCreator?.user_id)
-		return { userId: tokCreator.user_id, via: "oauth_token_creator" };
+	if (tokCreator?.user_id) return { userId: tokCreator.user_id, via: "oauth_token_creator" };
 
 	if (discordId) {
 		const { data: p } = await supabase
@@ -196,18 +186,14 @@ async function resolveRgUserId(
 
 async function main() {
 	const start = Date.now();
-	console.log(
-		`[patreon-memberships-sync] dry=${dryRun} user-filter=${userIdFilter ?? "none"}`,
-	);
+	console.log(`[patreon-memberships-sync] dry=${dryRun} user-filter=${userIdFilter ?? "none"}`);
 
 	const { members, included } = await fetchAllMembers();
 	const tiersById = new Map<string, TierAttrs>();
 	const usersById = new Map<string, UserAttrs>();
 	for (const inc of included) {
-		if (inc.type === "tier")
-			tiersById.set(inc.id, inc.attributes as unknown as TierAttrs);
-		else if (inc.type === "user")
-			usersById.set(inc.id, inc.attributes as unknown as UserAttrs);
+		if (inc.type === "tier") tiersById.set(inc.id, inc.attributes as unknown as TierAttrs);
+		else if (inc.type === "user") usersById.set(inc.id, inc.attributes as unknown as UserAttrs);
 	}
 
 	let upserted = 0;
@@ -216,8 +202,7 @@ async function main() {
 
 	for (const m of members) {
 		const userRel = m.relationships?.user?.data;
-		const patreonUserId =
-			userRel && !Array.isArray(userRel) ? userRel.id : null;
+		const patreonUserId = userRel && !Array.isArray(userRel) ? userRel.id : null;
 		if (!patreonUserId) continue;
 
 		const userAttrs = usersById.get(patreonUserId) ?? null;
@@ -237,14 +222,10 @@ async function main() {
 
 		const tierRels = m.relationships?.currently_entitled_tiers?.data;
 		const tierIds = Array.isArray(tierRels) ? tierRels.map((r) => r.id) : [];
-		const tiers = tierIds
-			.map((id) => tiersById.get(id))
-			.filter((t): t is TierAttrs => t != null);
+		const tiers = tierIds.map((id) => tiersById.get(id)).filter((t): t is TierAttrs => t != null);
 
 		const lifetimeCents =
-			m.attributes.campaign_lifetime_support_cents ??
-			m.attributes.lifetime_support_cents ??
-			null;
+			m.attributes.campaign_lifetime_support_cents ?? m.attributes.lifetime_support_cents ?? null;
 
 		const row = {
 			user_id: match.userId,
@@ -259,8 +240,7 @@ async function main() {
 			patron_status: m.attributes.patron_status,
 			last_charge_date: m.attributes.last_charge_date,
 			last_charge_status: m.attributes.last_charge_status,
-			currently_entitled_cents:
-				m.attributes.currently_entitled_amount_cents ?? 0,
+			currently_entitled_cents: m.attributes.currently_entitled_amount_cents ?? 0,
 			lifetime_support_cents: lifetimeCents ?? 0,
 			pledge_start: m.attributes.pledge_relationship_start,
 			pledge_cadence: m.attributes.pledge_cadence,
@@ -277,7 +257,7 @@ async function main() {
 		};
 
 		console.log(
-			`  ${dryRun ? "[dry]" : "  ✓"} ${match.userId.slice(0, 8)} via ${match.via} | ${m.attributes.patron_status ?? "—"} | last=${m.attributes.last_charge_date?.slice(0, 10) ?? "—"} | lifetime=${(lifetimeCents ?? 0) / 100}€`,
+			`  ${dryRun ? "[dry]" : "  ✓"} ${match.userId.slice(0, 8)} via ${match.via} | ${m.attributes.patron_status ?? "—"} | last=${m.attributes.last_charge_date?.slice(0, 10) ?? "—"} | lifetime=${(lifetimeCents ?? 0) / 100}€`
 		);
 
 		if (dryRun) {
@@ -294,7 +274,7 @@ async function main() {
 
 	const ms = Date.now() - start;
 	console.log(
-		`[done] upserted=${upserted} no-match=${skippedNoMatch} filtered-out=${skippedFiltered} · ${ms}ms`,
+		`[done] upserted=${upserted} no-match=${skippedNoMatch} filtered-out=${skippedFiltered} · ${ms}ms`
 	);
 }
 

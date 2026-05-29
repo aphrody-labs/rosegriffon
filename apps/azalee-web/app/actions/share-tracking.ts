@@ -44,7 +44,7 @@ const VALID_PLATFORMS: ReadonlySet<SharePlatform> = new Set([
  */
 export async function trackShare(
 	articleId: string,
-	platform: SharePlatform,
+	platform: SharePlatform
 ): Promise<{ success: boolean }> {
 	if (!articleId || !VALID_PLATFORMS.has(platform)) {
 		return { success: false };
@@ -88,10 +88,10 @@ export async function trackShare(
  * mapping en conséquence (le code historique lisait `platform`/`count`, qui
  * n'existent pas, et produisait des `NaN`).
  */
-export async function getShareCounts(
-	articleIds: string[],
-): Promise<Record<string, ShareCounts>> {
-	if (articleIds.length === 0) {return {};}
+export async function getShareCounts(articleIds: string[]): Promise<Record<string, ShareCounts>> {
+	if (articleIds.length === 0) {
+		return {};
+	}
 
 	const supabase = await createClient();
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -103,10 +103,9 @@ export async function getShareCounts(
 	}
 
 	// Tentative via RPC
-	const { data: rpcData, error: rpcError } = await client.rpc(
-		"get_share_counts",
-		{ p_article_ids: articleIds },
-	);
+	const { data: rpcData, error: rpcError } = await client.rpc("get_share_counts", {
+		p_article_ids: articleIds,
+	});
 
 	if (!rpcError && rpcData) {
 		for (const row of rpcData as Array<{
@@ -149,8 +148,7 @@ export async function getShareCounts(
 				byPlatform: {},
 				total: 0,
 			};
-			bucket.byPlatform[row.platform] =
-				(bucket.byPlatform[row.platform] || 0) + 1;
+			bucket.byPlatform[row.platform] = (bucket.byPlatform[row.platform] || 0) + 1;
 			bucket.total += 1;
 			result[row.article_id] = bucket;
 		}
@@ -163,9 +161,7 @@ export async function getShareCounts(
  * Retourne les statistiques détaillées de partage pour un article :
  * total, répartition par plateforme, et timeline des 30 derniers jours.
  */
-export async function getArticleShareStats(
-	articleId: string,
-): Promise<ArticleShareStats> {
+export async function getArticleShareStats(articleId: string): Promise<ArticleShareStats> {
 	const supabase = await createClient();
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	const client = supabase as any;

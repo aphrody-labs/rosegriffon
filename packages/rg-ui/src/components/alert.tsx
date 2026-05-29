@@ -11,16 +11,14 @@ const alertVariants = cva(
 				default: "bg-background text-foreground",
 				destructive:
 					"border-destructive/50 text-destructive dark:border-destructive [&>svg]:text-destructive",
-				success:
-					"border-success/50 text-success dark:border-success [&>svg]:text-success",
-				warning:
-					"border-warning/50 text-warning dark:border-warning [&>svg]:text-warning",
+				success: "border-success/50 text-success dark:border-success [&>svg]:text-success",
+				warning: "border-warning/50 text-warning dark:border-warning [&>svg]:text-warning",
 			},
 		},
 		defaultVariants: {
 			variant: "default",
 		},
-	},
+	}
 );
 
 function Alert({
@@ -39,10 +37,7 @@ function Alert({
 	);
 }
 
-function AlertTitle({
-	className,
-	...props
-}: React.HTMLAttributes<HTMLHeadingElement>) {
+function AlertTitle({ className, ...props }: React.HTMLAttributes<HTMLHeadingElement>) {
 	return (
 		<h5
 			data-slot="alert-title"
@@ -52,10 +47,7 @@ function AlertTitle({
 	);
 }
 
-function AlertDescription({
-	className,
-	...props
-}: React.HTMLAttributes<HTMLParagraphElement>) {
+function AlertDescription({ className, ...props }: React.HTMLAttributes<HTMLParagraphElement>) {
 	return (
 		<div
 			data-slot="alert-description"

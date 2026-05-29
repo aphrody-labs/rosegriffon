@@ -2,8 +2,8 @@
 
 import { createAdminClient } from "@/lib/supabase/server";
 
-import { getViewerPatreonAccess } from './viewer';
-import type { PatreonViewerAccess } from './viewer';
+import { getViewerPatreonAccess } from "./viewer";
+import type { PatreonViewerAccess } from "./viewer";
 
 export interface PatreonFeedImage {
 	storagePath: string;
@@ -40,18 +40,20 @@ export async function getPatreonFeedForViewer(opts?: {
 	limit?: number;
 }): Promise<{ access: PatreonViewerAccess; posts: PatreonFeedPost[] }> {
 	const access = await getViewerPatreonAccess();
-	if (!access.linked) {return { access, posts: [] };}
+	if (!access.linked) {
+		return { access, posts: [] };
+	}
 
 	const supabase = createAdminClient();
-	if (!supabase) {return { access, posts: [] };}
+	if (!supabase) {
+		return { access, posts: [] };
+	}
 
 	const limit = opts?.limit ?? 12;
 
 	let query = supabase
 		.from("patreon_post_events")
-		.select(
-			"patreon_post_id, title, content_excerpt, url, published_at, is_paid, is_public",
-		)
+		.select("patreon_post_id, title, content_excerpt, url, published_at, is_paid, is_public")
 		.order("published_at", { ascending: false, nullsFirst: false })
 		.limit(limit);
 

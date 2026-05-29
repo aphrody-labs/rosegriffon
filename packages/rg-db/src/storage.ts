@@ -8,12 +8,7 @@
  */
 export function getAssetUrl(path: string): string {
 	if (!path) return "";
-	if (
-		path.startsWith("http") ||
-		path.startsWith("data:") ||
-		path.startsWith("blob:")
-	)
-		return path;
+	if (path.startsWith("http") || path.startsWith("data:") || path.startsWith("blob:")) return path;
 
 	const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 	if (!supabaseUrl) return path;

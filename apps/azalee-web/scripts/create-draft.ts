@@ -37,12 +37,17 @@ type Args = Record<string, string | boolean | undefined>;
 function parseArgs(argv: string[]): Args {
 	const out: Args = {};
 	for (const raw of argv) {
-		if (raw === "--help" || raw === "-h") {out.help = true;}
-		else if (raw === "--stdin") {out.stdin = true;}
-		else if (raw === "--json") {out.json = true;}
-		else {
+		if (raw === "--help" || raw === "-h") {
+			out.help = true;
+		} else if (raw === "--stdin") {
+			out.stdin = true;
+		} else if (raw === "--json") {
+			out.json = true;
+		} else {
 			const m = raw.match(/^--([a-z-]+)=(.*)$/i);
-			if (m) {out[m[1]] = m[2];}
+			if (m) {
+				out[m[1]] = m[2];
+			}
 		}
 	}
 	return out;
@@ -87,7 +92,9 @@ Sortie:
 
 async function readStdin(): Promise<string> {
 	const chunks: Uint8Array[] = [];
-	for await (const chunk of Bun.stdin.stream()) {chunks.push(chunk);}
+	for await (const chunk of Bun.stdin.stream()) {
+		chunks.push(chunk);
+	}
 	return new TextDecoder().decode(Buffer.concat(chunks));
 }
 
@@ -99,30 +106,26 @@ async function main() {
 	}
 
 	if (!args.title) {
-		console.error(
-			"ERREUR: --title est requis. Lance avec --help pour l'usage.",
-		);
+		console.error("ERREUR: --title est requis. Lance avec --help pour l'usage.");
 		process.exit(1);
 	}
 
 	const endpoint =
-		(args.endpoint as string) ||
-		process.env.AZALEE_BASE_URL ||
-		"https://azalee.rosegriffon.fr";
+		(args.endpoint as string) || process.env.AZALEE_BASE_URL || "https://azalee.rosegriffon.fr";
 	const apiKey = (args["api-key"] as string) || process.env.CLAUDE_API_KEY;
 	if (!apiKey) {
-		console.error(
-			"ERREUR: API key manquante. Précise --api-key=<…> ou définit $CLAUDE_API_KEY.",
-		);
+		console.error("ERREUR: API key manquante. Précise --api-key=<…> ou définit $CLAUDE_API_KEY.");
 		process.exit(1);
 	}
 
 	let content: string | undefined;
-	if (args.stdin) {content = (await readStdin()).trim();}
-	else if (args["content-file"])
-		{content = await Bun.file(args["content-file"] as string).text();}
-	else if (args.content)
-		{content = (args.content as string).replaceAll('\\n', "\n");}
+	if (args.stdin) {
+		content = (await readStdin()).trim();
+	} else if (args["content-file"]) {
+		content = await Bun.file(args["content-file"] as string).text();
+	} else if (args.content) {
+		content = (args.content as string).replaceAll("\\n", "\n");
+	}
 
 	const tags =
 		typeof args.tags === "string"
@@ -147,7 +150,9 @@ async function main() {
 		tags,
 		title: args.title,
 	};
-	for (const k of Object.keys(body)) {if (body[k] === undefined) delete body[k];}
+	for (const k of Object.keys(body)) {
+		if (body[k] === undefined) delete body[k];
+	}
 
 	const url = `${endpoint.replace(/\/$/, "")}/api/admin/news/draft`;
 	const res = await fetch(url, {
@@ -162,9 +167,7 @@ async function main() {
 	const json = (await res.json().catch(() => ({}))) as Record<string, unknown>;
 
 	if (!res.ok) {
-		console.error(
-			`ERREUR ${res.status}: ${(json.error as string) ?? "réponse non-JSON"}`,
-		);
+		console.error(`ERREUR ${res.status}: ${(json.error as string) ?? "réponse non-JSON"}`);
 		process.exit(1);
 	}
 

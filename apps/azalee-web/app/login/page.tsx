@@ -62,12 +62,8 @@ function LoginContent() {
 							</div>
 
 							{/* Title */}
-							<h2 className="type-headline-small text-on-surface mb-1">
-								Connexion
-							</h2>
-							<p className="type-body-medium text-on-surface-variant">
-								Accède à ton compte Azalée
-							</p>
+							<h2 className="type-headline-small text-on-surface mb-1">Connexion</h2>
+							<p className="type-body-medium text-on-surface-variant">Accède à ton compte Azalée</p>
 						</div>
 					</div>
 

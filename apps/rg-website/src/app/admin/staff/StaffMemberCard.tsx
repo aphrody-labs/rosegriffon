@@ -1,14 +1,19 @@
 "use client";
 
-import { Button, Card, CardContent, CardFooter, CardHeader, DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@rose-griffon/ui";
 import {
-	Check,
-	Edit,
-	EyeOff,
-	MoreHorizontal,
-	Trash2,
-	Users as UsersIcon,
-} from "lucide-react";
+	Button,
+	Card,
+	CardContent,
+	CardFooter,
+	CardHeader,
+	DropdownMenu,
+	DropdownMenuContent,
+	DropdownMenuItem,
+	DropdownMenuLabel,
+	DropdownMenuSeparator,
+	DropdownMenuTrigger,
+} from "@rose-griffon/ui";
+import { Check, Edit, EyeOff, MoreHorizontal, Trash2, Users as UsersIcon } from "lucide-react";
 import Image from "next/image";
 
 import type { TeamMember } from "./actions";
@@ -73,10 +78,7 @@ export function StaffMemberCard({
 							<DropdownMenuContent align="end">
 								<DropdownMenuLabel>Actions</DropdownMenuLabel>
 								{onApprove && (
-									<DropdownMenuItem
-										onClick={() => onApprove(member)}
-										className="text-green-600"
-									>
+									<DropdownMenuItem onClick={() => onApprove(member)} className="text-green-600">
 										<Check className="mr-2 size-4" />
 										Valider
 									</DropdownMenuItem>

@@ -3,7 +3,22 @@
 import { Archive, Check, FileText, Pin, PinOff, Trash2, X } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, Button, Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@rose-griffon/ui";
+import {
+	AlertDialog,
+	AlertDialogAction,
+	AlertDialogCancel,
+	AlertDialogContent,
+	AlertDialogDescription,
+	AlertDialogFooter,
+	AlertDialogHeader,
+	AlertDialogTitle,
+	Button,
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from "@rose-griffon/ui";
 
 interface BulkActionsBarProps {
 	selectedCount: number;
@@ -30,7 +45,9 @@ export function BulkActionsBar({
 		}
 	};
 
-	if (selectedCount === 0) {return null;}
+	if (selectedCount === 0) {
+		return null;
+	}
 
 	return (
 		<>
@@ -43,10 +60,7 @@ export function BulkActionsBar({
 					<div className="h-5 w-px bg-inverse-on-surface/20" />
 
 					{/* Status change */}
-					<Select
-						onValueChange={(val) => handleAction("status", val)}
-						disabled={loading}
-					>
+					<Select onValueChange={(val) => handleAction("status", val)} disabled={loading}>
 						<SelectTrigger className="h-8 w-auto gap-1.5 border-none bg-inverse-on-surface/10 text-inverse-on-surface text-xs rounded-full px-3">
 							<SelectValue placeholder="Statut" />
 						</SelectTrigger>
@@ -73,10 +87,7 @@ export function BulkActionsBar({
 					</Select>
 
 					{/* Category change */}
-					<Select
-						onValueChange={(val) => handleAction("category", val)}
-						disabled={loading}
-					>
+					<Select onValueChange={(val) => handleAction("category", val)} disabled={loading}>
 						<SelectTrigger className="h-8 w-auto gap-1.5 border-none bg-inverse-on-surface/10 text-inverse-on-surface text-xs rounded-full px-3">
 							<SelectValue placeholder="Catégorie" />
 						</SelectTrigger>
@@ -148,14 +159,12 @@ export function BulkActionsBar({
 							Supprimer {selectedCount} article{selectedCount > 1 ? "s" : ""} ?
 						</AlertDialogTitle>
 						<AlertDialogDescription className="text-on-surface-variant">
-							Cette action est irréversible. Les articles sélectionnés seront
-							définitivement supprimés.
+							Cette action est irréversible. Les articles sélectionnés seront définitivement
+							supprimés.
 						</AlertDialogDescription>
 					</AlertDialogHeader>
 					<AlertDialogFooter>
-						<AlertDialogCancel className="rounded-full">
-							Annuler
-						</AlertDialogCancel>
+						<AlertDialogCancel className="rounded-full">Annuler</AlertDialogCancel>
 						<AlertDialogAction
 							onClick={() => handleAction("delete")}
 							className="rounded-full bg-red-600 hover:bg-red-700 text-white"

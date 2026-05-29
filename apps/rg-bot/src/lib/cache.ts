@@ -50,11 +50,7 @@ function k(key: string): string {
 	return PREFIX + key;
 }
 
-export async function cached<T>(
-	key: string,
-	ttlMs: number,
-	fn: () => Promise<T>,
-): Promise<T> {
+export async function cached<T>(key: string, ttlMs: number, fn: () => Promise<T>): Promise<T> {
 	const full = k(key);
 	const ttlSec = Math.max(Math.floor(ttlMs / 1000), 1);
 	const redis = getRedis();
@@ -122,10 +118,7 @@ export function invalidatePrefix(prefix: string): void {
 		redis
 			.send("SCAN", ["0", "MATCH", `${fullPrefix}*`, "COUNT", "200"])
 			.then(async (res: unknown) => {
-				const arr =
-					Array.isArray(res) && Array.isArray(res[1])
-						? (res[1] as string[])
-						: [];
+				const arr = Array.isArray(res) && Array.isArray(res[1]) ? (res[1] as string[]) : [];
 				if (arr.length > 0) {
 					await redis.send("DEL", arr).catch((err) => {
 						metrics.errors++;

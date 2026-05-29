@@ -31,6 +31,6 @@ export async function GET() {
 			...(dbError ? { dbNote: dbError } : {}),
 			uptime: process.uptime(),
 		},
-		{ status: allOk ? 200 : 503 },
+		{ status: allOk ? 200 : 503 }
 	);
 }

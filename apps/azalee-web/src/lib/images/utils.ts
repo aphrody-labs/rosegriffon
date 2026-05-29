@@ -7,8 +7,7 @@ import itemImageManifest from "@/data/item-image-manifest.json";
 const ITEM_IMAGE_MANIFEST = itemImageManifest as Record<string, string>;
 
 // Constantes globales
-export const CDN_URL =
-	process.env.NEXT_PUBLIC_ASSET_URL || "https://azalee.rosegriffon.fr";
+export const CDN_URL = process.env.NEXT_PUBLIC_ASSET_URL || "https://azalee.rosegriffon.fr";
 export const CDN_ASSETS = CDN_URL; // Alias pour compatibilité
 // CDN local cdn.rosegriffon.fr/static/azalee/menu/ (Phase 2026-05).
 // URL publique fixe : pas d'env (prerender Next peut ne pas voir NEXT_PUBLIC_*).
@@ -27,9 +26,7 @@ const LEGACY_STORAGE_PREFIX = "/storage/v1/object/public/menu/";
  * vers le dump PNG dx11 quand un mapping est connu.
  */
 function mapLegacyMenuPath(menuPath: string): string | null {
-	const chrMatch = menuPath.match(
-		/^200_icon\/10_icon_chr\/([^/]+)\/([^/]+?)_l(?:_[^.]+)?\.webp$/,
-	);
+	const chrMatch = menuPath.match(/^200_icon\/10_icon_chr\/([^/]+)\/([^/]+?)_l(?:_[^.]+)?\.webp$/);
 	if (chrMatch) {
 		const folder = chrMatch[1];
 		const base = chrMatch[2];
@@ -44,9 +41,7 @@ function mapLegacyMenuPath(menuPath: string): string | null {
 		}
 		return null;
 	}
-	const emMatch = menuPath.match(
-		/^200_icon\/01_icon_emblem\/(em[0-9]+)\.webp$/,
-	);
+	const emMatch = menuPath.match(/^200_icon\/01_icon_emblem\/(em[0-9]+)\.webp$/);
 	if (emMatch) {
 		const code = emMatch[1];
 		return `${MENU_DUMP_BASE}/200_icon/01_icon_emblem/${code}_${code}.png`;
@@ -55,9 +50,7 @@ function mapLegacyMenuPath(menuPath: string): string | null {
 	if (itemMatch) {
 		return `${MENU_DUMP_BASE}/200_icon/02_icon_item/${itemMatch[1]}.png`;
 	}
-	const telopMatch = menuPath.match(
-		/^220_img\/telop_waza\/(fr|en)\/([^/]+)\.webp$/,
-	);
+	const telopMatch = menuPath.match(/^220_img\/telop_waza\/(fr|en)\/([^/]+)\.webp$/);
 	if (telopMatch) {
 		const lang = telopMatch[1];
 		const raw = telopMatch[2];
@@ -71,15 +64,17 @@ function mapLegacyMenuPath(menuPath: string): string | null {
 }
 
 /** Resolve a potentially relative asset path to a full URL. */
-export function resolveAssetUrl(
-	path: string | null | undefined,
-): string | null {
-	if (!path) {return null;}
+export function resolveAssetUrl(path: string | null | undefined): string | null {
+	if (!path) {
+		return null;
+	}
 	if (path.startsWith(LEGACY_STORAGE_PREFIX)) {
 		const stripped = path.slice(LEGACY_STORAGE_PREFIX.length);
 		return mapLegacyMenuPath(stripped) || `${MENU_BASE}/${stripped}`;
 	}
-	if (path.startsWith("http") || path.startsWith("/")) {return path;}
+	if (path.startsWith("http") || path.startsWith("/")) {
+		return path;
+	}
 	return mapLegacyMenuPath(path) || `${MENU_BASE}/${path}`;
 }
 
@@ -91,9 +86,11 @@ const CHR_DUMP_BASE = "https://cdn.rosegriffon.fr/dx11/menu/icon_chr";
 
 export function getCharacterFaceUrl(
 	charaId: string | undefined | null,
-	_unused?: string | null,
+	_unused?: string | null
 ): string {
-	if (!charaId) {return PLACEHOLDERS.character;}
+	if (!charaId) {
+		return PLACEHOLDERS.character;
+	}
 	// Strip _5000/_5100/etc. suffix — dump only has base code face icons
 	const baseCode = charaId.replace(/_\d{4}$/, "");
 	return `${CHR_DUMP_BASE}/face/${baseCode}_l_${baseCode}_1_l00.png`;
@@ -105,28 +102,24 @@ export const getCharacterImageUrl = getCharacterFaceUrl;
  * URL d'un uniforme de personnage (vue de face).
  * Pattern fichier : `icon_chr/uniform/u{NNN}_l_u{NNN}_1.png` (préfixe `c` → `u`).
  */
-export function getCharacterUniformUrl(
-	charaId: string | undefined | null,
-): string {
-	if (!charaId) {return "";}
+export function getCharacterUniformUrl(charaId: string | undefined | null): string {
+	if (!charaId) {
+		return "";
+	}
 	const baseCode = charaId.replace(/_\d{4}$/, "");
-	const uniformCode = baseCode.startsWith("c")
-		? `u${baseCode.slice(1)}`
-		: baseCode;
+	const uniformCode = baseCode.startsWith("c") ? `u${baseCode.slice(1)}` : baseCode;
 	return `${CHR_DUMP_BASE}/uniform/${uniformCode}_l_${uniformCode}_1.png`;
 }
 
 /**
  * URL du dos de l'uniforme (variant 2).
  */
-export function getCharacterUniformBackUrl(
-	charaId: string | undefined | null,
-): string {
-	if (!charaId) {return "";}
+export function getCharacterUniformBackUrl(charaId: string | undefined | null): string {
+	if (!charaId) {
+		return "";
+	}
 	const baseCode = charaId.replace(/_\d{4}$/, "");
-	const uniformCode = baseCode.startsWith("c")
-		? `u${baseCode.slice(1)}`
-		: baseCode;
+	const uniformCode = baseCode.startsWith("c") ? `u${baseCode.slice(1)}` : baseCode;
 	return `${CHR_DUMP_BASE}/uniform/${uniformCode}_l_${uniformCode}_2.png`;
 }
 
@@ -136,9 +129,11 @@ export function getCharacterUniformBackUrl(
  */
 export function getSkillImageUrl(
 	skillId: string | undefined | null,
-	_unused?: string | null,
+	_unused?: string | null
 ): string {
-	if (!skillId) {return "";}
+	if (!skillId) {
+		return "";
+	}
 	const baseCode = skillId.replace(/_[a-z]+$/i, "");
 	return `${MENU_DUMP_BASE}/220_img/telop_waza/fr/${baseCode}_${baseCode}.png`;
 }
@@ -149,9 +144,13 @@ export function getSkillImageUrl(
  * Fallback : `200_icon/02_icon_item/{itemId}.png`.
  */
 export function getItemImageUrl(itemId: string): string {
-	if (!itemId) {return "";}
+	if (!itemId) {
+		return "";
+	}
 	const mapped = ITEM_IMAGE_MANIFEST[itemId];
-	if (mapped) {return `${MENU_DUMP_BASE}/${mapped}.png`;}
+	if (mapped) {
+		return `${MENU_DUMP_BASE}/${mapped}.png`;
+	}
 	return `${MENU_DUMP_BASE}/200_icon/02_icon_item/${itemId}.png`;
 }
 // Alias
@@ -161,10 +160,10 @@ export const getItemIconUrl = getItemImageUrl;
  * URL d'un emblème d'équipe — dump dx11 brut.
  * Pattern : `200_icon/01_icon_emblem/em{N}_em{N}.png`.
  */
-export function getEmblemImageUrl(
-	emblemId: string | number | undefined | null,
-): string {
-	if (!emblemId && emblemId !== 0) {return "";}
+export function getEmblemImageUrl(emblemId: string | number | undefined | null): string {
+	if (!emblemId && emblemId !== 0) {
+		return "";
+	}
 	const s = emblemId.toString();
 	let emCode: string | null = null;
 	if (s.startsWith("em")) {
@@ -175,7 +174,9 @@ export function getEmblemImageUrl(
 			emCode = `em${String(num).padStart(4, "0")}`;
 		}
 	}
-	if (!emCode) {return "";}
+	if (!emCode) {
+		return "";
+	}
 	return `${MENU_DUMP_BASE}/200_icon/01_icon_emblem/${emCode}_${emCode}.png`;
 }
 // Alias
@@ -185,17 +186,19 @@ export const getTeamEmblemUrl = getEmblemImageUrl;
  * Helpers pour les icônes UI (Genre, Élément, Rareté, Catégorie)
  */
 
-export function getGenderIconUrl(
-	gender: number | string | undefined | null,
-): string {
-	if (gender === undefined || gender === null) {return "";}
+export function getGenderIconUrl(gender: number | string | undefined | null): string {
+	if (gender === undefined || gender === null) {
+		return "";
+	}
 	const g = gender.toString().toLowerCase();
 	const isFemale = g === "1" || g === "2" || g === "f" || g === "female";
 	return isFemale ? "/move/girl.webp" : "/move/boy.webp";
 }
 
 export function getSkillElementIconUrl(element: string | number): string {
-	if (!element) {return "";}
+	if (!element) {
+		return "";
+	}
 	const el = element.toString().toLowerCase();
 	const map: Record<string, string> = {
 		"1": "fire",
@@ -217,7 +220,9 @@ export function getSkillElementIconUrl(element: string | number): string {
 		wood: "forest",
 	};
 	const filename = map[el];
-	if (!filename) {return "";}
+	if (!filename) {
+		return "";
+	}
 	return `/spirit_type/${filename}.webp`;
 }
 // Parfois appelé getSkillIconUrl pour l'élément (contexte dépendant)
@@ -225,7 +230,9 @@ export function getSkillElementIconUrl(element: string | number): string {
 export const getSkillIconUrl = getSkillElementIconUrl;
 
 export function getSkillCategoryIconUrl(category: string | number): string {
-	if (!category) {return "";}
+	if (!category) {
+		return "";
+	}
 	const cat = category.toString().toLowerCase();
 	const map: Record<string, string> = {
 		"1": "tir",
@@ -249,14 +256,16 @@ export function getSkillCategoryIconUrl(category: string | number): string {
 		tir: "tir",
 	};
 	const filename = map[cat];
-	if (!filename) {return "";}
+	if (!filename) {
+		return "";
+	}
 	return `/move/${filename}.webp`;
 }
 
-export function getRarityIconUrl(
-	rarity: string | number | undefined | null,
-): string {
-	if (rarity === undefined || rarity === null) {return "";}
+export function getRarityIconUrl(rarity: string | number | undefined | null): string {
+	if (rarity === undefined || rarity === null) {
+		return "";
+	}
 	const r = rarity.toString().toLowerCase();
 	const map: Record<string, string> = {
 		"1": "normal.webp",
@@ -278,7 +287,9 @@ export function getRarityIconUrl(
 		ur: "legendaire.webp",
 	};
 	const file = map[r];
-	if (!file) {return "";}
+	if (!file) {
+		return "";
+	}
 	return `/rarity/${file}`;
 }
 
@@ -286,7 +297,9 @@ export function getRarityIconUrl(
  * URL pour les vidéos de techniques
  */
 export function getSkillVideoUrl(skillId: string | undefined | null): string {
-	if (!skillId) {return "";}
+	if (!skillId) {
+		return "";
+	}
 	// Les vidéos sont généralement hébergées ailleurs ou dans un dossier spécifique
 	// Pour l'instant, on pointe vers le CDN mirror si disponible
 	return `${CDN_URL}/zukan-assets-mirror/movies/${skillId}.mp4`;
@@ -303,11 +316,10 @@ export function getSkillVideoUrl(skillId: string | undefined | null): string {
  */
 const AURA_DUMP_BASE = CHR_DUMP_BASE;
 
-export function getAuraImageUrl(
-	assetCode: string | undefined | null,
-	_subType?: string,
-): string {
-	if (!assetCode) {return "";}
+export function getAuraImageUrl(assetCode: string | undefined | null, _subType?: string): string {
+	if (!assetCode) {
+		return "";
+	}
 
 	const buildAuraUrl = (folder: string, base: string): string =>
 		`${AURA_DUMP_BASE}/${folder}/${base}_l_${base}_l00.png`;
@@ -318,10 +330,7 @@ export function getAuraImageUrl(
 			return buildAuraUrl("aura_fs", `k${num.padStart(6, "0")}`);
 		}
 	}
-	if (
-		assetCode.startsWith("ws") ||
-		(assetCode.startsWith("wa") && !assetCode.startsWith("wap"))
-	) {
+	if (assetCode.startsWith("ws") || (assetCode.startsWith("wa") && !assetCode.startsWith("wap"))) {
 		const num = assetCode.replace(/^w[sa][a-z]/, "").replace(/_\d+$/, "");
 		if (num && /^\d+$/.test(num)) {
 			return buildAuraUrl("aura_soul", `a${num.padStart(6, "0")}`);
@@ -336,7 +345,9 @@ export function getAuraImageUrl(
  * Pattern fichier : `{base}_l_{base}_l00.png`.
  */
 export function getMiximaxIconUrl(iconCode: string | undefined | null): string {
-	if (!iconCode) {return "";}
+	if (!iconCode) {
+		return "";
+	}
 	return `${AURA_DUMP_BASE}/aura_mixi/${iconCode}_l_${iconCode}_l00.png`;
 }
 
@@ -354,10 +365,10 @@ export function getMiximaxIconUrl(iconCode: string | undefined | null): string {
  * - Miximax wmm (short ≤5 digits): wmm000XX -> aura_mixi_c05028{XXX}
  * - Miximax wmm (long charId): wmm{charId} -> aura_mixi_c{charId}
  */
-export function resolveAuraTelopUrl(
-	assetCode: string | undefined | null,
-): string | null {
-	if (!assetCode) {return null;}
+export function resolveAuraTelopUrl(assetCode: string | undefined | null): string | null {
+	if (!assetCode) {
+		return null;
+	}
 
 	let bucketCode: string | null = null;
 
@@ -394,7 +405,9 @@ export function resolveAuraTelopUrl(
 		bucketCode = "aura_power01";
 	}
 
-	if (!bucketCode) {return null;}
+	if (!bucketCode) {
+		return null;
+	}
 
 	// Dump PNG dx11 brut. Pattern : `220_img/telop_waza/fr/{code}_{code}.png`.
 	return `${MENU_DUMP_BASE}/220_img/telop_waza/fr/${bucketCode}_${bucketCode}.png`;
@@ -406,7 +419,7 @@ export function resolveAuraTelopUrl(
 export function getCharacterModel360Url(
 	hash: string,
 	frame: number,
-	full: boolean = false,
+	full: boolean = false
 ): string {
 	// Format Zukan: https://zukan.inazuma.jp/3d/{hash}/{type}/{frame}.webp
 	// Notre miroir: /zukan-assets-mirror/3d/{hash}/{type}/{frame}.webp
@@ -433,10 +446,14 @@ export const PLACEHOLDERS = {
 export function getOptimizedImageUrl(
 	url: string | null | undefined,
 	width = 640,
-	quality = 80,
+	quality = 80
 ): string {
-	if (!url) {return "";}
-	if (url.startsWith("data:")) {return url;}
+	if (!url) {
+		return "";
+	}
+	if (url.startsWith("data:")) {
+		return url;
+	}
 
 	// Use Next.js image optimization endpoint
 	return `/_next/image?url=${encodeURIComponent(url)}&w=${width}&q=${quality}`;

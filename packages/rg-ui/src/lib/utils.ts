@@ -62,7 +62,7 @@ export function truncate(str: string, length: number): string {
  */
 export function debounce<T extends (...args: unknown[]) => unknown>(
 	fn: T,
-	delay: number,
+	delay: number
 ): (...args: Parameters<T>) => void {
 	let timeoutId: ReturnType<typeof setTimeout>;
 	return (...args: Parameters<T>) => {
@@ -76,7 +76,7 @@ export function debounce<T extends (...args: unknown[]) => unknown>(
  */
 export function throttle<T extends (...args: unknown[]) => unknown>(
 	fn: T,
-	limit: number,
+	limit: number
 ): (...args: Parameters<T>) => void {
 	let inThrottle: boolean;
 	return (...args: Parameters<T>) => {
@@ -92,11 +92,7 @@ export function throttle<T extends (...args: unknown[]) => unknown>(
  * Format a number as currency
  * Note: uses replace for NBSP normalization to match tests if needed
  */
-export function formatCurrency(
-	amount: number,
-	currency = "EUR",
-	locale = "fr-FR",
-): string {
+export function formatCurrency(amount: number, currency = "EUR", locale = "fr-FR"): string {
 	return new Intl.NumberFormat(locale, {
 		style: "currency",
 		currency,

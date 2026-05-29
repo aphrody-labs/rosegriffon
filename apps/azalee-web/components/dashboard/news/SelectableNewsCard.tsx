@@ -57,11 +57,7 @@ const QUICK_STATUS = [
 	},
 ];
 
-export function SelectableNewsCard({
-	item,
-	selected,
-	onToggle,
-}: SelectableNewsCardProps) {
+export function SelectableNewsCard({ item, selected, onToggle }: SelectableNewsCardProps) {
 	const router = useRouter();
 	const [busy, setBusy] = useState(false);
 	const slug = item.slug || "";
@@ -73,14 +69,17 @@ export function SelectableNewsCard({
 	};
 
 	const handleStatusChange = async (newStatus: string) => {
-		if (newStatus === item.status) {return;}
+		if (newStatus === item.status) {
+			return;
+		}
 		setBusy(true);
 		try {
 			const { updateArticleStatus } = await import("@/app/actions/articles");
 			const result = await updateArticleStatus(item.id, newStatus, item.status);
-			if (result.error) {throw new Error(result.error);}
-			const label =
-				QUICK_STATUS.find((s) => s.value === newStatus)?.label || newStatus;
+			if (result.error) {
+				throw new Error(result.error);
+			}
+			const label = QUICK_STATUS.find((s) => s.value === newStatus)?.label || newStatus;
 			toast.success(`Statut changé en « ${label} »`);
 			router.refresh();
 		} catch {
@@ -110,16 +109,17 @@ export function SelectableNewsCard({
 
 	const handleDelete = async () => {
 		if (
-			!confirm(
-				"Êtes-vous sûr de vouloir supprimer cet article ? Cette action est irréversible.",
-			)
-		)
-			{return;}
+			!confirm("Êtes-vous sûr de vouloir supprimer cet article ? Cette action est irréversible.")
+		) {
+			return;
+		}
 		setBusy(true);
 		try {
 			const { deleteArticle } = await import("@/app/actions/articles");
 			const result = await deleteArticle(item.id);
-			if (result.error) {throw new Error(result.error);}
+			if (result.error) {
+				throw new Error(result.error);
+			}
 			toast.success("Article supprimé");
 			router.refresh();
 		} catch {
@@ -132,9 +132,7 @@ export function SelectableNewsCard({
 	return (
 		<ContextMenu>
 			<ContextMenuTrigger asChild>
-				<div
-					className={cn("relative", busy && "pointer-events-none opacity-60")}
-				>
+				<div className={cn("relative", busy && "pointer-events-none opacity-60")}>
 					{/* Checkbox overlay */}
 					<button
 						type="button"
@@ -149,7 +147,7 @@ export function SelectableNewsCard({
 						<div
 							className={cn(
 								"flex size-4 items-center justify-center rounded transition-all",
-								selected && "bg-primary",
+								selected && "bg-primary"
 							)}
 						>
 							{selected && (
@@ -175,8 +173,7 @@ export function SelectableNewsCard({
 					<div
 						className={cn(
 							"rounded-[26px] transition-all duration-200",
-							selected &&
-								"ring-2 ring-primary ring-offset-2 ring-offset-background",
+							selected && "ring-2 ring-primary ring-offset-2 ring-offset-background"
 						)}
 					>
 						<NewsCard item={item} />
@@ -204,11 +201,7 @@ export function SelectableNewsCard({
 						className="rounded-xl font-bold focus:bg-primary/10 focus:text-primary"
 					>
 						<Link
-							href={
-								item.status === "published"
-									? `/news/${slug}`
-									: `/news/${slug}?preview=true`
-							}
+							href={item.status === "published" ? `/news/${slug}` : `/news/${slug}?preview=true`}
 							target="_blank"
 						>
 							<ExternalLink /> Voir l&apos;aperçu
@@ -233,9 +226,7 @@ export function SelectableNewsCard({
 								<opt.icon className={cn("mr-1", opt.color)} />
 								{opt.label}
 								{opt.value === item.status && (
-									<ContextMenuShortcut className="opacity-60">
-										actuel
-									</ContextMenuShortcut>
+									<ContextMenuShortcut className="opacity-60">actuel</ContextMenuShortcut>
 								)}
 							</ContextMenuItem>
 						))}

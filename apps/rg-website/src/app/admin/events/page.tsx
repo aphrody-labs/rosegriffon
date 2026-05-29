@@ -1,4 +1,12 @@
-import { Button, Card, CardContent, CardHeader, CardTitle, AdminPageHeader, PaginationControls } from "@rose-griffon/ui";
+import {
+	Button,
+	Card,
+	CardContent,
+	CardHeader,
+	CardTitle,
+	AdminPageHeader,
+	PaginationControls,
+} from "@rose-griffon/ui";
 import { Calendar, Plus } from "lucide-react";
 import Link from "next/link";
 
@@ -26,10 +34,7 @@ export default async function EventsPage({ searchParams }: EventsPageProps) {
 	if (!supabase) {
 		return (
 			<div className="p-6">
-				<AdminPageHeader
-					title="Événements"
-					description="Service indisponible."
-				/>
+				<AdminPageHeader title="Événements" description="Service indisponible." />
 			</div>
 		);
 	}
@@ -92,11 +97,7 @@ export default async function EventsPage({ searchParams }: EventsPageProps) {
 				)}
 			</div>
 
-			<PaginationControls
-				currentPage={page}
-				totalPages={totalPages}
-				baseUrl="/admin/events"
-			/>
+			<PaginationControls currentPage={page} totalPages={totalPages} baseUrl="/admin/events" />
 		</div>
 	);
 }

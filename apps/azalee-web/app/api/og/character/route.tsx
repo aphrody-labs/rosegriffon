@@ -23,16 +23,14 @@ export async function GET(request: NextRequest) {
 			wood: "#22c55e",
 		};
 
-		const accentColor =
-			elementColors[element.toLowerCase()] || elementColors.neutral;
+		const accentColor = elementColors[element.toLowerCase()] || elementColors.neutral;
 
 		return new ImageResponse(
 			<div
 				style={{
 					alignItems: "center",
 					backgroundColor: "#1a120d",
-					backgroundImage:
-						"radial-gradient(circle at 50% 50%, #2d1f14 0%, #1a120d 100%)",
+					backgroundImage: "radial-gradient(circle at 50% 50%, #2d1f14 0%, #1a120d 100%)",
 					display: "flex",
 					flexDirection: "column",
 					fontFamily: "sans-serif",
@@ -139,8 +137,8 @@ export async function GET(request: NextRequest) {
 								margin: 0,
 							}}
 						>
-							Découvrez les statistiques, techniques et talents de {name} sur
-							Azalée, le wiki francophone de Victory Road.
+							Découvrez les statistiques, techniques et talents de {name} sur Azalée, le wiki
+							francophone de Victory Road.
 						</p>
 					</div>
 				</div>
@@ -162,15 +160,13 @@ export async function GET(request: NextRequest) {
 							width: "40px",
 						}}
 					/>
-					<span style={{ color: "#6b5d52", fontSize: "16px" }}>
-						rosegriffon.fr
-					</span>
+					<span style={{ color: "#6b5d52", fontSize: "16px" }}>rosegriffon.fr</span>
 				</div>
 			</div>,
 			{
 				height: 630,
 				width: 1200,
-			},
+			}
 		);
 	} catch (error: any) {
 		console.error(`[OG Error] ${error.message}`);

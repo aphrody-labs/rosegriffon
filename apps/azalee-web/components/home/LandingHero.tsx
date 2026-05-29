@@ -1,12 +1,7 @@
 "use client";
 
 import { ArrowDown } from "lucide-react";
-import {
-	motion,
-	useReducedMotion,
-	useScroll,
-	useTransform,
-} from "motion/react";
+import { motion, useReducedMotion, useScroll, useTransform } from "motion/react";
 import Image from "next/image";
 import { GlobalSearch } from "@/components/wiki/GlobalSearch";
 import type { WikiSectionStats } from "./WikiCarousel";
@@ -46,10 +41,7 @@ export function LandingHero({ stats }: LandingHeroProps) {
 	return (
 		<section className="relative h-[90svh] min-h-[520px] md:h-[75vh] md:min-h-[520px] md:max-h-[700px] overflow-hidden bg-black w-auto -mx-4 md:-mx-8 lg:-mx-12">
 			{/* Background Image with parallax wrapper (layer 1 — deepest, -300px) */}
-			<motion.div
-				style={bgStyle}
-				className="absolute inset-0 will-change-transform"
-			>
+			<motion.div style={bgStyle} className="absolute inset-0 will-change-transform">
 				<Image
 					src="/sky.webp"
 					alt=""
@@ -65,10 +57,7 @@ export function LandingHero({ stats }: LandingHeroProps) {
 			<div className="absolute inset-0 z-0 bg-linear-to-r from-black/30 via-transparent to-black/20 hidden md:block" />
 
 			{/* CSS Particles */}
-			<div
-				className="absolute inset-0 z-10 overflow-hidden pointer-events-none"
-				aria-hidden="true"
-			>
+			<div className="absolute inset-0 z-10 overflow-hidden pointer-events-none" aria-hidden="true">
 				<div className="hero-particle hero-particle-1" />
 				<div className="hero-particle hero-particle-2" />
 				<div className="hero-particle hero-particle-3" />
@@ -182,14 +171,10 @@ export function LandingHero({ stats }: LandingHeroProps) {
 							{statPills.map((pill, i) => (
 								<span key={pill.label}>
 									<span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/15 text-white/90 text-sm font-bold shadow-lg">
-										<span className="text-[#F4D03F]">
-											{pill.count.toLocaleString("fr-FR")}+
-										</span>{" "}
+										<span className="text-[#F4D03F]">{pill.count.toLocaleString("fr-FR")}+</span>{" "}
 										{pill.label}
 									</span>
-									{i < statPills.length - 1 && (
-										<span className="mx-1 text-white/20">·</span>
-									)}
+									{i < statPills.length - 1 && <span className="mx-1 text-white/20">·</span>}
 								</span>
 							))}
 						</div>
@@ -234,7 +219,9 @@ export function LandingHero({ stats }: LandingHeroProps) {
 				tabIndex={0}
 				aria-label="Défiler vers le contenu"
 				onKeyDown={(e) => {
-					if (e.key === "Enter" || e.key === " ") {handleScrollToContent();}
+					if (e.key === "Enter" || e.key === " ") {
+						handleScrollToContent();
+					}
 				}}
 			>
 				<div className="flex flex-col items-center gap-2 group animate-[gentleBounce_2s_ease-in-out_infinite]">

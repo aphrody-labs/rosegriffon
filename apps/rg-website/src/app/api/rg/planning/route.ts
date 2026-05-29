@@ -17,10 +17,7 @@ export async function GET() {
 		.order("start_time", { ascending: true });
 
 	if (error) {
-		return NextResponse.json(
-			{ error: error.message, success: false },
-			{ status: 500 },
-		);
+		return NextResponse.json({ error: error.message, success: false }, { status: 500 });
 	}
 
 	return NextResponse.json({

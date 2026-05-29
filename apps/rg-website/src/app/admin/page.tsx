@@ -21,12 +21,10 @@ import {
 import { createAdminClient } from "@/lib/supabase/server";
 
 import { QuickActions } from "./_components/quick-actions";
-import { SignupsChart } from './_components/signups-chart';
-import type { SignupPoint } from './_components/signups-chart';
+import { SignupsChart } from "./_components/signups-chart";
+import type { SignupPoint } from "./_components/signups-chart";
 
-function buildDailySignups(
-	rows: { created_at: string | null }[],
-): SignupPoint[] {
+function buildDailySignups(rows: { created_at: string | null }[]): SignupPoint[] {
 	const today = new Date();
 	today.setUTCHours(0, 0, 0, 0);
 	const buckets = new Map<string, number>();
@@ -36,9 +34,13 @@ function buildDailySignups(
 		buckets.set(d.toISOString().slice(0, 10), 0);
 	}
 	for (const row of rows) {
-		if (!row.created_at) {continue;}
+		if (!row.created_at) {
+			continue;
+		}
 		const key = row.created_at.slice(0, 10);
-		if (buckets.has(key)) {buckets.set(key, (buckets.get(key) ?? 0) + 1);}
+		if (buckets.has(key)) {
+			buckets.set(key, (buckets.get(key) ?? 0) + 1);
+		}
 	}
 	return Array.from(buckets, ([date, count]) => ({ count, date }));
 }
@@ -89,23 +91,14 @@ export default async function AdminDashboardPage() {
 			.from("profiles")
 			.select("*", { count: "exact", head: true })
 			.gt("created_at", sevenDaysAgo.toISOString()),
-		supabase
-			.from("articles")
-			.select("*", { count: "exact", head: true })
-			.eq("status", "published"),
+		supabase.from("articles").select("*", { count: "exact", head: true }).eq("status", "published"),
 		supabase
 			.from("articles")
 			.select("*", { count: "exact", head: true })
 			.neq("status", "published"),
 		supabase.from("events").select("*", { count: "exact", head: true }),
-		supabase
-			.from("events")
-			.select("*", { count: "exact", head: true })
-			.gt("start_time", nowIso),
-		supabase
-			.from("session")
-			.select("id", { count: "exact", head: true })
-			.gt("expires_at", nowIso),
+		supabase.from("events").select("*", { count: "exact", head: true }).gt("start_time", nowIso),
+		supabase.from("session").select("id", { count: "exact", head: true }).gt("expires_at", nowIso),
 		supabase
 			.from("account")
 			.select("user_id", { count: "exact", head: true })
@@ -222,10 +215,7 @@ export default async function AdminDashboardPage() {
 
 			<SignupsChart data={signupsTimeline} />
 
-			<section
-				aria-labelledby="recent-title"
-				className="grid gap-6 lg:grid-cols-3"
-			>
+			<section aria-labelledby="recent-title" className="grid gap-6 lg:grid-cols-3">
 				<h2 id="recent-title" className="sr-only">
 					Activité récente
 				</h2>

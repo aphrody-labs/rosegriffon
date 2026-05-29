@@ -8,14 +8,7 @@ import { useLanguage } from "@/components/providers/language-provider";
 import { CommonSpriteIcon } from "@/components/ui/CommonSpriteIcon";
 import { RarityBadge } from "@/components/ui/rarity-badge";
 import { SafeImage } from "@/components/ui/SafeImage";
-import {
-	Table,
-	TableBody,
-	TableCell,
-	TableHead,
-	TableHeader,
-	TableRow,
-} from "@rose-griffon/ui";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@rose-griffon/ui";
 import type { SpriteCommonKey } from "@/config/sprites-common";
 import { isFemaleGender } from "@/lib/gender";
 import { getCharacterImageUrl, getSkillCategoryIconUrl } from "@/lib/images";
@@ -61,25 +54,21 @@ interface BaseCharacterTableProps {
 /**
  * Row component for a single base character with variant switching
  */
-function BaseCharacterRow({
-	character,
-	rowIndex,
-}: {
-	character: BaseCharacter;
-	rowIndex: number;
-}) {
+function BaseCharacterRow({ character, rowIndex }: { character: BaseCharacter; rowIndex: number }) {
 	const { t, language } = useLanguage();
 	const variants = character.variants || [];
 	const activeVariant = variants[0];
 
-	if (!activeVariant) {return null;}
+	if (!activeVariant) {
+		return null;
+	}
 
 	const name =
 		(language === "ja"
 			? character.names.ja
-			: (language === "en"
+			: language === "en"
 				? character.names.en
-				: character.names.fr)) ||
+				: character.names.fr) ||
 		character.names.fr ||
 		character.names.en ||
 		character.names.ja ||
@@ -191,12 +180,11 @@ function BaseCharacterRow({
 
 	const charAny = character as any;
 	const variantAny = activeVariant as any;
-	const playstyle = (variantAny.sheetData?.playstyle ||
-		charAny.sheetData?.playstyle) as string | undefined;
+	const playstyle = (variantAny.sheetData?.playstyle || charAny.sheetData?.playstyle) as
+		| string
+		| undefined;
 	const playstyleSprite = playstyle ? PLAYSTYLE_SPRITE[playstyle] : undefined;
-	const playstyleLabel = playstyle
-		? PLAYSTYLE_LABEL[playstyle] || playstyle
-		: null;
+	const playstyleLabel = playstyle ? PLAYSTYLE_LABEL[playstyle] || playstyle : null;
 
 	const isFemale = isFemaleGender(character.gender);
 	const genderName = isFemale ? t("common.female") : t("common.male");
@@ -240,11 +228,7 @@ function BaseCharacterRow({
 									className="flex items-center justify-center size-4 rounded-full bg-linear-to-br from-[#4facfe] via-[#7367f0] to-[#9733ee] shadow-sm animate-pulse"
 									title="Personnage BASARA"
 								>
-									<Sparkles
-										size={10}
-										aria-hidden="true"
-										className="text-white scale-90"
-									/>
+									<Sparkles size={10} aria-hidden="true" className="text-white scale-90" />
 								</div>
 							)}
 							{!character.isBasara && character.bestRarityCode >= 10 && (
@@ -302,15 +286,9 @@ function BaseCharacterRow({
 					{elementSprite ? (
 						<CommonSpriteIcon name={elementSprite} scale={0.35} />
 					) : (
-						<CircleDot
-							size={20}
-							aria-hidden="true"
-							className="text-on-surface-variant"
-						/>
+						<CircleDot size={20} aria-hidden="true" className="text-on-surface-variant" />
 					)}
-					<span className="text-xs text-on-surface-variant hidden sm:inline">
-						{elementFr}
-					</span>
+					<span className="text-xs text-on-surface-variant hidden sm:inline">{elementFr}</span>
 				</div>
 			</TableCell>
 
@@ -333,7 +311,7 @@ function BaseCharacterRow({
 								"inline-flex items-center px-2 py-0.5 rounded text-xs font-medium",
 								activeVariant.position === "Coach"
 									? "bg-amber-100 text-amber-700"
-									: "bg-gray-100 text-gray-600",
+									: "bg-gray-100 text-gray-600"
 							)}
 						>
 							{positionFr}
@@ -341,10 +319,7 @@ function BaseCharacterRow({
 					)}
 
 					{subPositionImage && (
-						<div
-							className="relative size-4 opacity-70"
-							title={activeVariant.subPosition || ""}
-						>
+						<div className="relative size-4 opacity-70" title={activeVariant.subPosition || ""}>
 							<Image
 								src={subPositionImage}
 								alt={activeVariant.subPosition || ""}
@@ -366,14 +341,9 @@ function BaseCharacterRow({
 			{/* Style de jeu */}
 			<TableCell className="text-center hidden md:table-cell">
 				{playstyleSprite ? (
-					<div
-						className="inline-flex items-center gap-1.5"
-						title={playstyleLabel || ""}
-					>
+					<div className="inline-flex items-center gap-1.5" title={playstyleLabel || ""}>
 						<CommonSpriteIcon name={playstyleSprite} scale={0.3} />
-						<span className="text-xs text-on-surface-variant">
-							{playstyleLabel}
-						</span>
+						<span className="text-xs text-on-surface-variant">{playstyleLabel}</span>
 					</div>
 				) : (
 					<span className="text-on-surface-variant/40 text-xs">—</span>
@@ -384,10 +354,7 @@ function BaseCharacterRow({
 			<TableCell className="text-center p-0 hidden sm:table-cell">
 				<div className="flex items-center justify-center gap-2 pr-2">
 					{activeVariant.stats?.lv99 && (
-						<CharacterStatsPopover
-							stats={activeVariant.stats.lv99}
-							name={name}
-						/>
+						<CharacterStatsPopover stats={activeVariant.stats.lv99} name={name} />
 					)}
 				</div>
 			</TableCell>
@@ -399,10 +366,7 @@ function BaseCharacterRow({
  * Table component that displays base characters with variant switching
  * Each row represents one unique character with all their variants accessible
  */
-export function BaseCharacterTable({
-	characters,
-	startIndex = 0,
-}: BaseCharacterTableProps) {
+export function BaseCharacterTable({ characters, startIndex = 0 }: BaseCharacterTableProps) {
 	const { t } = useLanguage();
 
 	return (

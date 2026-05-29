@@ -5,8 +5,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { useTransition } from "react";
 
-import { removeFromCart, updateQty } from '@/lib/shop/cart';
-import type { CartItemResolved } from '@/lib/shop/cart';
+import { removeFromCart, updateQty } from "@/lib/shop/cart";
+import type { CartItemResolved } from "@/lib/shop/cart";
 import { formatEuros } from "@/lib/shop/products";
 
 export function CartLineItem({ item }: { item: CartItemResolved }) {
@@ -50,9 +50,7 @@ export function CartLineItem({ item }: { item: CartItemResolved }) {
 					{item.product.name}
 				</Link>
 				{item.variantLabel && (
-					<p className="mt-0.5 truncate text-xs text-white/60">
-						{item.variantLabel}
-					</p>
+					<p className="mt-0.5 truncate text-xs text-white/60">{item.variantLabel}</p>
 				)}
 				<div className="mt-2 inline-flex items-center gap-1 rounded-full border-2 border-[#d4af37]/40 bg-[#0c1730]">
 					<button
@@ -64,9 +62,7 @@ export function CartLineItem({ item }: { item: CartItemResolved }) {
 					>
 						<Minus className="size-3.5" />
 					</button>
-					<span className="min-w-6 text-center text-xs font-bold text-white">
-						{item.qty}
-					</span>
+					<span className="min-w-6 text-center text-xs font-bold text-white">{item.qty}</span>
 					<button
 						type="button"
 						onClick={() => update(+1)}

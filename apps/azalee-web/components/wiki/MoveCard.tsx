@@ -100,7 +100,7 @@ export function MoveCard({
 				"hover:shadow-lg hover:-translate-y-0.5 active:scale-[0.98]",
 				"bg-surface-container-highest",
 				borderAccent,
-				className,
+				className
 			)}
 		>
 			{/* Thumbnail image (poster > telop fallback) */}
@@ -112,7 +112,7 @@ export function MoveCard({
 						fill
 						className={cn(
 							"object-cover transition-transform duration-300",
-							"group-hover:scale-105",
+							"group-hover:scale-105"
 						)}
 						sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
 						onError={() => setImgError(true)}
@@ -120,9 +120,7 @@ export function MoveCard({
 					/>
 				) : (
 					<div className="absolute inset-0 flex items-center justify-center">
-						<span className="text-on-surface/20 text-3xl font-black">
-							{catLabel}
-						</span>
+						<span className="text-on-surface/20 text-3xl font-black">{catLabel}</span>
 					</div>
 				)}
 
@@ -134,14 +132,10 @@ export function MoveCard({
 								"flex items-center justify-center size-10 sm:w-12 sm:h-12 rounded-full",
 								"bg-black/50 backdrop-blur-sm border border-white/20",
 								"transition-all duration-200",
-								"group-hover:bg-black/70 group-hover:scale-110",
+								"group-hover:bg-black/70 group-hover:scale-110"
 							)}
 						>
-							<svg
-								viewBox="0 0 24 24"
-								fill="white"
-								className="size-5 sm:w-6 sm:h-6 ml-0.5"
-							>
+							<svg viewBox="0 0 24 24" fill="white" className="size-5 sm:w-6 sm:h-6 ml-0.5">
 								<path d="M8 5v14l11-7z" />
 							</svg>
 						</div>
@@ -153,7 +147,7 @@ export function MoveCard({
 					<span
 						className={cn(
 							"px-1.5 py-0.5 rounded-sm text-[8px] font-black text-on-surface leading-none tracking-wide",
-							catColor,
+							catColor
 						)}
 					>
 						{catLabel}
@@ -192,14 +186,8 @@ export function MoveCard({
 				</div>
 				{shop && (
 					<div className="flex items-center gap-1 min-w-0">
-						<Store
-							size={10}
-							className="text-on-surface/30"
-							aria-hidden="true"
-						/>
-						<span className="text-[9px] text-on-surface/40 truncate leading-tight">
-							{shop}
-						</span>
+						<Store size={10} className="text-on-surface/30" aria-hidden="true" />
+						<span className="text-[9px] text-on-surface/40 truncate leading-tight">{shop}</span>
 					</div>
 				)}
 			</div>

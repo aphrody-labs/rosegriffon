@@ -23,18 +23,11 @@ const ALLOWED_IPS = new Set([
  * Falls back to a substring of BETTER_AUTH_SECRET if MAGIC_LOGIN_SECRET is not set.
  */
 function getMagicSecret(): string {
-	return (
-		process.env.MAGIC_LOGIN_SECRET ||
-		process.env.BETTER_AUTH_SECRET?.slice(0, 16) ||
-		""
-	);
+	return process.env.MAGIC_LOGIN_SECRET || process.env.BETTER_AUTH_SECRET?.slice(0, 16) || "";
 }
 
 function signCookieValue(value: string, secret: string): string {
-	const signature = crypto
-		.createHmac("sha256", secret)
-		.update(value)
-		.digest("base64");
+	const signature = crypto.createHmac("sha256", secret).update(value).digest("base64");
 	return encodeURIComponent(`${value}.${signature}`);
 }
 
@@ -108,10 +101,7 @@ export async function GET(request: Request) {
 			.single();
 
 		if (error || !data) {
-			return NextResponse.json(
-				{ error: "User not found or not admin" },
-				{ status: 404 },
-			);
+			return NextResponse.json({ error: "User not found or not admin" }, { status: 404 });
 		}
 		targetUser = data;
 	} else {
@@ -124,30 +114,20 @@ export async function GET(request: Request) {
 			.single();
 
 		if (error || !data) {
-			return NextResponse.json(
-				{ error: "No admin user found" },
-				{ status: 404 },
-			);
+			return NextResponse.json({ error: "No admin user found" }, { status: 404 });
 		}
 		targetUser = data;
 	}
 
 	try {
 		const ctx = await auth.$context;
-		const session = await ctx.internalAdapter.createSession(
-			targetUser.id,
-			false,
-			{
-				ipAddress: realIp,
-				userAgent: reqHeaders.get("user-agent") || "Magic Login",
-			},
-		);
+		const session = await ctx.internalAdapter.createSession(targetUser.id, false, {
+			ipAddress: realIp,
+			userAgent: reqHeaders.get("user-agent") || "Magic Login",
+		});
 
 		if (!session?.token) {
-			return NextResponse.json(
-				{ error: "Failed to create session" },
-				{ status: 500 },
-			);
+			return NextResponse.json({ error: "Failed to create session" }, { status: 500 });
 		}
 
 		await logAudit(
@@ -157,7 +137,7 @@ export async function GET(request: Request) {
 				role: targetUser.role,
 				username: targetUser.username,
 			},
-			{ ipAddress: realIp },
+			{ ipAddress: realIp }
 		);
 
 		const response = NextResponse.redirect(new URL("/dashboard", request.url));
@@ -168,15 +148,12 @@ export async function GET(request: Request) {
 
 		response.headers.append(
 			"set-cookie",
-			`${cookieName}=${signedToken}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=${maxAge}`,
+			`${cookieName}=${signedToken}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=${maxAge}`
 		);
 
 		return response;
 	} catch (error) {
 		console.error("[Magic Login] Erreur:", error);
-		return NextResponse.json(
-			{ error: "Session creation failed" },
-			{ status: 500 },
-		);
+		return NextResponse.json({ error: "Session creation failed" }, { status: 500 });
 	}
 }

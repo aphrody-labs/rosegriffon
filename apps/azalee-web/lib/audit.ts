@@ -6,7 +6,7 @@ export async function logAudit(
 	userId: string,
 	action: string,
 	details?: Record<string, any>,
-	meta?: { ipAddress?: string; userAgent?: string },
+	meta?: { ipAddress?: string; userAgent?: string }
 ) {
 	try {
 		await supabaseAdmin.from("audit_logs").insert({

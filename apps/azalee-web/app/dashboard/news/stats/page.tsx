@@ -1,7 +1,11 @@
 import { Eye, Newspaper, TrendingUp } from "lucide-react";
 import Link from "next/link";
 import { getArticleStats } from "@/app/actions/articles";
-import { DashboardStatsCard as DashboardMetricCard, AdminPageHeader as DashboardPageHeader, Badge } from "@rose-griffon/ui";
+import {
+	DashboardStatsCard as DashboardMetricCard,
+	AdminPageHeader as DashboardPageHeader,
+	Badge,
+} from "@rose-griffon/ui";
 import { Icon } from "@/components/ui/Icon";
 import { createClient } from "@/lib/supabase/server";
 
@@ -10,16 +14,11 @@ export const metadata = {
 };
 
 export default async function NewsStatsPage() {
-	const [stats, categoryData] = await Promise.all([
-		getArticleStats(),
-		getCategoryBreakdown(),
-	]);
+	const [stats, categoryData] = await Promise.all([getArticleStats(), getCategoryBreakdown()]);
 
 	// Calculate avg views per article
 	const avgViews =
-		stats.totalPublished > 0
-			? Math.round(stats.totalViews / stats.totalPublished)
-			: 0;
+		stats.totalPublished > 0 ? Math.round(stats.totalViews / stats.totalPublished) : 0;
 
 	return (
 		<div className="space-y-8 pb-24 sm:pb-8">
@@ -84,16 +83,12 @@ export default async function NewsStatsPage() {
 								className="flex items-center gap-3 p-3 rounded-2xl bg-surface-container-low border border-outline-variant/10"
 							>
 								<div className="flex-1 min-w-0">
-									<p className="text-sm font-medium text-on-surface truncate">
-										{cat.category}
-									</p>
+									<p className="text-sm font-medium text-on-surface truncate">{cat.category}</p>
 									<p className="text-xs text-on-surface-variant/60">
 										{cat.count} article{cat.count !== 1 ? "s" : ""}
 									</p>
 								</div>
-								<span className="text-lg font-bold text-on-surface-variant/40">
-									{cat.count}
-								</span>
+								<span className="text-lg font-bold text-on-surface-variant/40">{cat.count}</span>
 							</div>
 						))}
 					</div>
@@ -126,10 +121,7 @@ export default async function NewsStatsPage() {
 								<span className="flex-1 text-sm text-on-surface group-hover:text-primary transition-colors truncate">
 									{article.title}
 								</span>
-								<Badge
-									variant="outline"
-									className="shrink-0 rounded-lg text-[10px]"
-								>
+								<Badge variant="outline" className="shrink-0 rounded-lg text-[10px]">
 									<Eye className="size-3 mr-1" />
 									{article.view_count.toLocaleString("fr-FR")}
 								</Badge>
@@ -167,13 +159,10 @@ export default async function NewsStatsPage() {
 										{article.view_count.toLocaleString("fr-FR")}
 									</Badge>
 									<span className="text-[10px] text-on-surface-variant">
-										{new Date(article.published_at).toLocaleDateString(
-											"fr-FR",
-											{
-												day: "numeric",
-												month: "short",
-											},
-										)}
+										{new Date(article.published_at).toLocaleDateString("fr-FR", {
+											day: "numeric",
+											month: "short",
+										})}
 									</span>
 								</div>
 							</Link>
@@ -190,9 +179,7 @@ export default async function NewsStatsPage() {
 	);
 }
 
-async function getCategoryBreakdown(): Promise<
-	Array<{ category: string; count: number }>
-> {
+async function getCategoryBreakdown(): Promise<Array<{ category: string; count: number }>> {
 	const supabase = await createClient();
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	const { data } = await supabase
@@ -202,7 +189,9 @@ async function getCategoryBreakdown(): Promise<
 		.eq("status", "published")
 		.not("category", "is", null);
 
-	if (!data) {return [];}
+	if (!data) {
+		return [];
+	}
 
 	const counts = new Map<string, number>();
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any

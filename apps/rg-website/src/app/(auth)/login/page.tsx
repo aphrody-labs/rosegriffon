@@ -1,6 +1,17 @@
 "use client";
 
-import { Alert, AlertDescription, Button, Card, CardContent, CardDescription, CardHeader, CardTitle, Separator, Skeleton } from "@rose-griffon/ui";
+import {
+	Alert,
+	AlertDescription,
+	Button,
+	Card,
+	CardContent,
+	CardDescription,
+	CardHeader,
+	CardTitle,
+	Separator,
+	Skeleton,
+} from "@rose-griffon/ui";
 import Image from "next/image";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
@@ -8,12 +19,7 @@ import { Suspense } from "react";
 
 import { AlertCircle, CheckCircle } from "@/lib/icons-config";
 
-import {
-	DiscordIcon,
-	TwitchIcon,
-	XIcon,
-	YouTubeIcon,
-} from "./_components/social-icons";
+import { DiscordIcon, TwitchIcon, XIcon, YouTubeIcon } from "./_components/social-icons";
 import { AuthForm } from "./auth-form";
 
 function safeDecode(value: string | null | undefined): string | null {
@@ -74,8 +80,7 @@ function LoginPageContent() {
 							</Link>
 							<CardTitle className="text-2xl font-bold">Rose Griffon</CardTitle>
 							<CardDescription>
-								Connecte-toi avec Discord ou lie ton compte Patreon pour accéder
-								à ton espace.
+								Connecte-toi avec Discord ou lie ton compte Patreon pour accéder à ton espace.
 							</CardDescription>
 						</CardHeader>
 
@@ -98,9 +103,7 @@ function LoginPageContent() {
 							<div className="space-y-3 pt-4">
 								<div className="flex items-center gap-3">
 									<Separator className="flex-1" />
-									<span className="text-xs text-muted-foreground">
-										Suis Rose Griffon
-									</span>
+									<span className="text-xs text-muted-foreground">Suis Rose Griffon</span>
 									<Separator className="flex-1" />
 								</div>
 								<div className="flex items-center justify-center gap-2">
@@ -112,12 +115,7 @@ function LoginPageContent() {
 											asChild
 											className="size-10 rounded-full"
 										>
-											<a
-												href={href}
-												target="_blank"
-												rel="noopener noreferrer"
-												aria-label={label}
-											>
+											<a href={href} target="_blank" rel="noopener noreferrer" aria-label={label}>
 												<Icon size={16} />
 											</a>
 										</Button>
@@ -156,12 +154,10 @@ function LoginPageContent() {
 							</div>
 
 							<div className="space-y-3">
-								<h2 className="text-2xl font-bold tracking-tight">
-									Personnalise ton identité
-								</h2>
+								<h2 className="text-2xl font-bold tracking-tight">Personnalise ton identité</h2>
 								<p className="text-sm leading-relaxed text-muted-foreground">
-									Rejoins la communauté et utilise notre générateur d'avatar
-									exclusif pour créer ta photo de profil officielle.
+									Rejoins la communauté et utilise notre générateur d'avatar exclusif pour créer ta
+									photo de profil officielle.
 								</p>
 							</div>
 

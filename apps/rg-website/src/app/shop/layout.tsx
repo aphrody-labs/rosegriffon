@@ -37,11 +37,7 @@ const organizationSchema = {
 	url: "https://rosegriffon.fr",
 };
 
-export default async function ShopLayout({
-	children,
-}: {
-	children: ReactNode;
-}) {
+export default async function ShopLayout({ children }: { children: ReactNode }) {
 	const cart = await getCart();
 
 	return (
@@ -82,9 +78,7 @@ export default async function ShopLayout({
 							<span className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#d4af37]">
 								Boutique
 							</span>
-							<span className="text-base font-extrabold text-white">
-								Rose Griffon
-							</span>
+							<span className="text-base font-extrabold text-white">Rose Griffon</span>
 						</span>
 					</Link>
 
@@ -110,8 +104,8 @@ export default async function ShopLayout({
 								Association Rose Griffon
 							</p>
 							<p className="mt-2 max-w-md text-sm text-white/70">
-								Inazuma Eleven France — illustrations originales, packs
-								collector et goodies imprimés en France. Soutiens-nous via{" "}
+								Inazuma Eleven France — illustrations originales, packs collector et goodies
+								imprimés en France. Soutiens-nous via{" "}
 								<Link
 									href="/nous-soutenir"
 									className="font-semibold text-[#d4af37] underline decoration-[#d4af37] decoration-2 underline-offset-4"

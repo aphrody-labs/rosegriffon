@@ -4,8 +4,7 @@ import { NextResponse } from "next/server";
 export const revalidate = 86_400;
 
 export async function GET() {
-	const baseUrl =
-		process.env.NEXT_PUBLIC_SITE_URL || "https://www.rosegriffon.fr";
+	const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://www.rosegriffon.fr";
 
 	return NextResponse.json({
 		documentation:

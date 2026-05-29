@@ -50,20 +50,15 @@ export function DashboardStatsCard({
 		<div
 			className={cn(
 				"group relative overflow-hidden rounded-xl border border-border bg-card p-6 transition-all hover:shadow-md",
-				className,
+				className
 			)}
 		>
 			<div className="flex items-center justify-between">
 				<div
-					className={cn(
-						"rounded-lg p-2.5",
-						accentVariants[finalAccent] || accentVariants.primary,
-					)}
+					className={cn("rounded-lg p-2.5", accentVariants[finalAccent] || accentVariants.primary)}
 				>
 					{typeof Icon === "string" ? (
-						<span className="material-icons size-5 text-center leading-none">
-							{Icon}
-						</span>
+						<span className="material-icons size-5 text-center leading-none">{Icon}</span>
 					) : (
 						<Icon className="size-5" />
 					)}
@@ -72,7 +67,7 @@ export function DashboardStatsCard({
 					<span
 						className={cn(
 							"text-xs font-medium",
-							trend.value > 0 ? "text-emerald-600" : "text-rose-600",
+							trend.value > 0 ? "text-emerald-600" : "text-rose-600"
 						)}
 					>
 						{trend.value > 0 ? "+" : ""}
@@ -81,15 +76,11 @@ export function DashboardStatsCard({
 				)}
 			</div>
 			<div className="mt-4">
-				<p className="text-sm font-medium text-muted-foreground">
-					{displayTitle}
-				</p>
+				<p className="text-sm font-medium text-muted-foreground">{displayTitle}</p>
 				<h3 className="text-2xl font-bold tracking-tight text-foreground">
 					{typeof value === "number" ? value.toLocaleString("fr-FR") : value}
 				</h3>
-				{description && (
-					<p className="mt-1 text-xs text-muted-foreground">{description}</p>
-				)}
+				{description && <p className="mt-1 text-xs text-muted-foreground">{description}</p>}
 			</div>
 		</div>
 	);

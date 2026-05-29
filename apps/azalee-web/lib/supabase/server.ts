@@ -11,28 +11,22 @@ const PLACEHOLDER_ANON_JWT =
 
 function isValidHttpUrl(v: string | undefined | null): v is string {
 	return Boolean(
-		v &&
-			v !== "undefined" &&
-			v !== "null" &&
-			v.startsWith("http") &&
-			!v.startsWith("eyJ2Ijo"),
+		v && v !== "undefined" && v !== "null" && v.startsWith("http") && !v.startsWith("eyJ2Ijo")
 	);
 }
 
 function isValidKey(v: string | undefined | null): v is string {
 	return Boolean(
-		v &&
-			v !== "undefined" &&
-			v !== "null" &&
-			!v.startsWith("{") &&
-			!v.startsWith("eyJ2Ijo"),
+		v && v !== "undefined" && v !== "null" && !v.startsWith("{") && !v.startsWith("eyJ2Ijo")
 	);
 }
 
 function pickUrl(...keys: string[]): string {
 	for (const k of keys) {
 		const v = process.env[k];
-		if (isValidHttpUrl(v)) {return v;}
+		if (isValidHttpUrl(v)) {
+			return v;
+		}
 	}
 	return PLACEHOLDER_URL;
 }
@@ -40,7 +34,9 @@ function pickUrl(...keys: string[]): string {
 function pickKey(...keys: string[]): string {
 	for (const k of keys) {
 		const v = process.env[k];
-		if (isValidKey(v)) {return v;}
+		if (isValidKey(v)) {
+			return v;
+		}
 	}
 	return PLACEHOLDER_ANON_JWT;
 }
@@ -48,22 +44,20 @@ function pickKey(...keys: string[]): string {
 const supabaseUrl = pickUrl(
 	"SUPABASE_INTERNAL_URL",
 	"NEXT_PUBLIC_SUPABASE_URL",
-	"NEXT_PUBLIC_SUPABASE_PUBLISHABLE_URL",
+	"NEXT_PUBLIC_SUPABASE_PUBLISHABLE_URL"
 );
 const supabaseAnonKey = pickKey(
 	"NEXT_PUBLIC_SUPABASE_ANON_KEY",
-	"NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY",
+	"NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY"
 );
 
 // Skip the Better Auth -> Supabase JWT bridge when the local SUPABASE_JWT_SECRET
 // Is desynchronized from Supabase Cloud (minted JWTs rejected with PGRST301).
 // Lectures publiques via anon + GRANT SELECT sur schema public (appliqué 2026-04-20).
 // Défaut: true. Pour réactiver le bridge après avoir resyncé le secret: DISABLE_SUPABASE_JWT_BRIDGE=false.
-const DISABLE_SUPABASE_JWT_BRIDGE =
-	process.env.DISABLE_SUPABASE_JWT_BRIDGE !== "false";
+const DISABLE_SUPABASE_JWT_BRIDGE = process.env.DISABLE_SUPABASE_JWT_BRIDGE !== "false";
 
 let _hasWarnedMissingBun = false;
-
 
 /**
  * Creates a Supabase server client.
@@ -96,7 +90,10 @@ export const createClient = async (): Promise<SupabaseClient> => {
 			},
 		}) as unknown as SupabaseClient;
 	} else {
-		pgClient = createSupabaseClient<Database>(supabaseUrl, supabaseAnonKey) as unknown as SupabaseClient;
+		pgClient = createSupabaseClient<Database>(
+			supabaseUrl,
+			supabaseAnonKey
+		) as unknown as SupabaseClient;
 	}
 
 	const sqliteClient = createSqliteClient();
@@ -110,9 +107,14 @@ export const createClient = async (): Promise<SupabaseClient> => {
 							return sqliteClient.from(table);
 						} catch (e: unknown) {
 							const msg = e instanceof Error ? e.message : String(e);
-							if (msg.includes("Cannot find module 'bun:sqlite'") || msg.includes("Failed to load external module bun:sqlite")) {
+							if (
+								msg.includes("Cannot find module 'bun:sqlite'") ||
+								msg.includes("Failed to load external module bun:sqlite")
+							) {
 								if (!_hasWarnedMissingBun) {
-									console.log("[SQLite Cache] SQLite database cache is unavailable in this environment (falling back to Postgres).");
+									console.log(
+										"[SQLite Cache] SQLite database cache is unavailable in this environment (falling back to Postgres)."
+									);
 									_hasWarnedMissingBun = true;
 								}
 							} else {
@@ -125,6 +127,6 @@ export const createClient = async (): Promise<SupabaseClient> => {
 				};
 			}
 			return Reflect.get(target, prop, receiver);
-		}
+		},
 	}) as unknown as SupabaseClient;
 };

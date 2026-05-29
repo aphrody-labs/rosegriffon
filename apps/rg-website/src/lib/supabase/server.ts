@@ -9,8 +9,8 @@
 // Vague avec types stricts opt-in.
 import { createSupabaseServerClient } from "@rose-griffon/db/server";
 import { createSupabaseServiceClient } from "@rose-griffon/db/service";
-import { createClient as createSupabaseClient } from '@supabase/supabase-js';
-import type { SupabaseClient } from '@supabase/supabase-js';
+import { createClient as createSupabaseClient } from "@supabase/supabase-js";
+import type { SupabaseClient } from "@supabase/supabase-js";
 import { cookies } from "next/headers";
 
 export async function createClient(): Promise<SupabaseClient> {
@@ -24,15 +24,24 @@ export async function createClient(): Promise<SupabaseClient> {
 export function createPublicClient(): SupabaseClient {
 	let supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 	let supabaseAnonKey =
-		process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ||
-		process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+		process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
 	// Safety: Vercel might pass encrypted JSON or empty string during build.
-	if (!supabaseUrl || supabaseUrl === "undefined" || supabaseUrl === "null" || !supabaseUrl.startsWith("http") || supabaseUrl.startsWith("eyJ2Ijo")) {
+	if (
+		!supabaseUrl ||
+		supabaseUrl === "undefined" ||
+		supabaseUrl === "null" ||
+		!supabaseUrl.startsWith("http") ||
+		supabaseUrl.startsWith("eyJ2Ijo")
+	) {
 		supabaseUrl = "https://isbkaeltubqittywibeh.supabase.co";
 	}
 
-	if (!supabaseAnonKey || supabaseAnonKey.startsWith("{") || supabaseAnonKey.startsWith("eyJ2Ijo")) {
+	if (
+		!supabaseAnonKey ||
+		supabaseAnonKey.startsWith("{") ||
+		supabaseAnonKey.startsWith("eyJ2Ijo")
+	) {
 		supabaseAnonKey =
 			"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlzYmthZWx0dWJxaXR0eXdpYmVoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY1NDYyNzUsImV4cCI6MjA5MjEyMjI3NX0.eAyJfqREb8Kh5F_yLf5Jp43S2qOil4qUcqFTLQiExx0";
 	}

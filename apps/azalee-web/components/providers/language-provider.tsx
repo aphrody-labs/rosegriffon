@@ -1,7 +1,7 @@
 "use client";
 
-import { createContext, useContext, useEffect, useState } from 'react';
-import type { ReactNode } from 'react';
+import { createContext, useContext, useEffect, useState } from "react";
+import type { ReactNode } from "react";
 // Import default locale directly to prevent hydration mismatch and flash of keys
 import frDictionary from "@/public/locales/fr.json";
 
@@ -16,15 +16,13 @@ interface LanguageContextType {
 	isLoading: boolean;
 }
 
-const LanguageContext = createContext<LanguageContextType | undefined>(
-	undefined,
-);
+const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
 export function LanguageProvider({ children }: { children: ReactNode }) {
 	const [language, setLanguageState] = useState<Language>("fr");
 	// Initialize with static FR dictionary
 	const [dictionary, setDictionary] = useState<Record<string, string>>(
-		frDictionary as Record<string, string>,
+		frDictionary as Record<string, string>
 	);
 	const [isLoading, setIsLoading] = useState(false);
 
@@ -67,33 +65,41 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
 	}, [language]);
 
 	const t = (hash: string | number | undefined | null) => {
-		if (hash === undefined || hash === null) {return "";}
+		if (hash === undefined || hash === null) {
+			return "";
+		}
 		const key = hash.toString();
 		return dictionary[key] || key;
 	};
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	const getLocalized = (obj: any, fieldPrefix: string = "name") => {
-		if (!obj) {return "";}
+		if (!obj) {
+			return "";
+		}
 
 		const langSuffix = language.toUpperCase(); // FR, EN, JA
 		const targetKey = `${fieldPrefix}_${langSuffix}`;
 
-		if (obj[targetKey]) {return obj[targetKey];}
+		if (obj[targetKey]) {
+			return obj[targetKey];
+		}
 
 		// Fallback to FR
-		if (obj[`${fieldPrefix}_FR`]) {return obj[`${fieldPrefix}_FR`];}
+		if (obj[`${fieldPrefix}_FR`]) {
+			return obj[`${fieldPrefix}_FR`];
+		}
 
 		// Fallback to plain field or EN
-		if (obj[fieldPrefix]) {return obj[fieldPrefix];}
+		if (obj[fieldPrefix]) {
+			return obj[fieldPrefix];
+		}
 
 		return "";
 	};
 
 	return (
-		<LanguageContext.Provider
-			value={{ getLocalized, isLoading, language, setLanguage, t }}
-		>
+		<LanguageContext.Provider value={{ getLocalized, isLoading, language, setLanguage, t }}>
 			{children}
 		</LanguageContext.Provider>
 	);
@@ -101,7 +107,8 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
 
 export const useLanguage = () => {
 	const context = useContext(LanguageContext);
-	if (!context)
-		{throw new Error("useLanguage must be used within a LanguageProvider");}
+	if (!context) {
+		throw new Error("useLanguage must be used within a LanguageProvider");
+	}
 	return context;
 };

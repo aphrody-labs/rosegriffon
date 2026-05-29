@@ -1,5 +1,14 @@
 import Link from "next/link";
-import { AdminPageHeader as DashboardPageHeader, Button, Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@rose-griffon/ui";
+import {
+	AdminPageHeader as DashboardPageHeader,
+	Button,
+	Empty,
+	EmptyContent,
+	EmptyDescription,
+	EmptyHeader,
+	EmptyMedia,
+	EmptyTitle,
+} from "@rose-griffon/ui";
 import { NewsListClient } from "@/components/dashboard/news/NewsListClient";
 import { Icon } from "@/components/ui/Icon";
 import { WikiPagination } from "@/components/wiki/WikiPagination";
@@ -24,8 +33,7 @@ export default async function NewsListPage({
 	const rawParams = await searchParams;
 	const params = parseSearchParams(rawParams);
 	const { q, page: currentPage, status, view, sort, category } = params;
-	const authorParam =
-		typeof rawParams.author === "string" ? rawParams.author : null;
+	const authorParam = typeof rawParams.author === "string" ? rawParams.author : null;
 	const itemsPerPage = (params.perPage as number | undefined) ?? 20;
 	const supabase = createAdminClient();
 
@@ -35,18 +43,11 @@ export default async function NewsListPage({
 
 	// Validate category filter
 	const validCategories = ["announcement", "event", "critique", "community"];
-	const categoryFilter =
-		category && validCategories.includes(category) ? category : null;
+	const categoryFilter = category && validCategories.includes(category) ? category : null;
 
 	// Sort config — support all 4 sort options
-	const validSortFields = [
-		"created_at",
-		"published_at",
-		"updated_at",
-		"view_count",
-	];
-	const sortField =
-		sort && validSortFields.includes(sort) ? sort : "created_at";
+	const validSortFields = ["created_at", "published_at", "updated_at", "view_count"];
+	const sortField = sort && validSortFields.includes(sort) ? sort : "created_at";
 	const ascending = false;
 
 	// Search term : full-text si on a des tokens utilisables, sinon ilike
@@ -62,27 +63,26 @@ export default async function NewsListPage({
 		} else if (q) {
 			q2 = q2.ilike("title", `%${q}%`);
 		}
-		if (statusFilter) {q2 = q2.eq("status", statusFilter);}
-		if (categoryFilter) {q2 = q2.eq("category", categoryFilter);}
-		if (authorParam) {q2 = q2.eq("author_id", authorParam);}
+		if (statusFilter) {
+			q2 = q2.eq("status", statusFilter);
+		}
+		if (categoryFilter) {
+			q2 = q2.eq("category", categoryFilter);
+		}
+		if (authorParam) {
+			q2 = q2.eq("author_id", authorParam);
+		}
 		return q2;
 	};
 
 	const [countResult, dataResult, authorsResult] = await Promise.all([
 		applyFilters(
-			client
-				.from("articles")
-				.select("*", { count: "exact", head: true })
-				.eq("app", "azalee"),
+			client.from("articles").select("*", { count: "exact", head: true }).eq("app", "azalee")
 		),
 		applyFilters(client.from("articles").select("*").eq("app", "azalee"))
 			.order(sortField, { ascending })
 			.range((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage - 1),
-		client
-			.from("articles")
-			.select("author_id")
-			.eq("app", "azalee")
-			.not("author_id", "is", null),
+		client.from("articles").select("author_id").eq("app", "azalee").not("author_id", "is", null),
 	]);
 
 	const totalItems = countResult.count || 0;
@@ -98,23 +98,18 @@ export default async function NewsListPage({
 			(authorsResult.data || [])
 				// eslint-disable-next-line @typescript-eslint/no-explicit-any
 				.map((a: any) => a.author_id)
-				.filter(Boolean),
+				.filter(Boolean)
 		),
 	] as string[];
 
-	let profileMap = new Map<
-		string,
-		{ id: string; username: string; full_name: string }
-	>();
+	let profileMap = new Map<string, { id: string; username: string; full_name: string }>();
 	if (allAuthorIds.length > 0) {
 		const { data: profiles } = await client
 			.from("profiles")
 			.select("id, username, full_name")
 			.in("id", allAuthorIds);
 		profileMap = new Map(
-			(profiles || []).map(
-				(p: { id: string; username: string; full_name: string }) => [p.id, p],
-			),
+			(profiles || []).map((p: { id: string; username: string; full_name: string }) => [p.id, p])
 		);
 	}
 
@@ -147,10 +142,7 @@ export default async function NewsListPage({
 	return (
 		<div className="space-y-6 sm:space-y-8 pb-24 sm:pb-8">
 			<DashboardPageHeader
-				breadcrumbs={[
-					{ href: "/dashboard", label: "Tableau de bord" },
-					{ label: "Actualités" },
-				]}
+				breadcrumbs={[{ href: "/dashboard", label: "Tableau de bord" }, { label: "Actualités" }]}
 				title="Actualités"
 				subtitle={headerSubtitle}
 				icon="newspaper"
@@ -188,11 +180,7 @@ export default async function NewsListPage({
 							variant="icon"
 							className="size-16 rounded-[24px] bg-surface-container-high shadow-inner sm:size-20 sm:rounded-[32px]"
 						>
-							<Icon
-								name="description"
-								size={36}
-								className="text-on-surface-variant/50"
-							/>
+							<Icon name="description" size={36} className="text-on-surface-variant/50" />
 						</EmptyMedia>
 						<EmptyTitle className="text-on-surface text-xl sm:text-2xl">
 							Aucun article pour le moment

@@ -5,13 +5,7 @@ import type { MetadataRoute } from "next";
 
 const BASE_URL = "https://azalee.rosegriffon.fr";
 
-const AURA_CATEGORIES = [
-	"esprits-guerriers",
-	"totems",
-	"miximax",
-	"eveil",
-	"changement-mode",
-];
+const AURA_CATEGORIES = ["esprits-guerriers", "totems", "miximax", "eveil", "changement-mode"];
 
 const AURA_TYPE_MAP: Record<string, string> = {
 	"changement-mode": "ModeChange",
@@ -25,43 +19,42 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 	const supabase = getSupabaseClient();
 
 	// Fetch all IDs in parallel — using correct column names
-	const [characters, skills, items, auras, tactics, articles, tags] =
-		await Promise.all([
-			supabase
-				.from("inagle_characters")
-				.select("slug, updated_at")
-				.not("slug", "is", null)
-				.order("updated_at", { ascending: false }),
-			supabase
-				.from("inagle_skills")
-				.select("id, created_at")
-				.order("created_at", { ascending: false }),
-			supabase
-				.from("inagle_items")
-				.select("id, created_at")
-				.order("created_at", { ascending: false }),
-			supabase
-				.from("inagle_keshins")
-				.select("id, sub_type, created_at")
-				.order("created_at", { ascending: false }),
-			supabase
-				.from("inagle_items")
-				.select("id, created_at")
-				.eq("category", "special_tactics")
-				.order("created_at", { ascending: false }),
-			supabase
-				.from("articles")
-				.select("slug, updated_at, published_at")
-				.eq("status", "published")
-				.eq("app", "azalee")
-				.order("published_at", { ascending: false }),
-			supabase
-				.from("articles")
-				.select("tags")
-				.eq("status", "published")
-				.eq("app", "azalee")
-				.not("tags", "is", null),
-		]);
+	const [characters, skills, items, auras, tactics, articles, tags] = await Promise.all([
+		supabase
+			.from("inagle_characters")
+			.select("slug, updated_at")
+			.not("slug", "is", null)
+			.order("updated_at", { ascending: false }),
+		supabase
+			.from("inagle_skills")
+			.select("id, created_at")
+			.order("created_at", { ascending: false }),
+		supabase
+			.from("inagle_items")
+			.select("id, created_at")
+			.order("created_at", { ascending: false }),
+		supabase
+			.from("inagle_keshins")
+			.select("id, sub_type, created_at")
+			.order("created_at", { ascending: false }),
+		supabase
+			.from("inagle_items")
+			.select("id, created_at")
+			.eq("category", "special_tactics")
+			.order("created_at", { ascending: false }),
+		supabase
+			.from("articles")
+			.select("slug, updated_at, published_at")
+			.eq("status", "published")
+			.eq("app", "azalee")
+			.order("published_at", { ascending: false }),
+		supabase
+			.from("articles")
+			.select("tags")
+			.eq("status", "published")
+			.eq("app", "azalee")
+			.not("tags", "is", null),
+	]);
 
 	const entries: MetadataRoute.Sitemap = [];
 

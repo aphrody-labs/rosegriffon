@@ -2,8 +2,7 @@
 
 import { createAdminClient } from "@/lib/supabase/admin";
 
-const UUID_RE =
-	/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 /**
  * Incrémente le compteur de vues d'un article via le RPC dédié, mais en
@@ -14,9 +13,7 @@ const UUID_RE =
  * Le déduplication par sessionStorage côté client reste en place pour limiter
  * le double-comptage par bounce.
  */
-export async function trackArticleView(
-	articleId: string,
-): Promise<{ success: boolean }> {
+export async function trackArticleView(articleId: string): Promise<{ success: boolean }> {
 	if (!articleId || !UUID_RE.test(articleId)) {
 		return { success: false };
 	}
@@ -35,7 +32,9 @@ export async function trackArticleView(
 		.eq("app", "azalee")
 		.maybeSingle();
 
-	if (!row) {return { success: false };}
+	if (!row) {
+		return { success: false };
+	}
 
 	const { error } = await client.rpc("increment_article_views", {
 		article_id: articleId,

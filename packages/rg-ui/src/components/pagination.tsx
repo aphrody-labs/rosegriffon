@@ -1,8 +1,4 @@
-import {
-	ChevronLeftIcon,
-	ChevronRightIcon,
-	MoreHorizontalIcon,
-} from "lucide-react";
+import { ChevronLeftIcon, ChevronRightIcon, MoreHorizontalIcon } from "lucide-react";
 import type * as React from "react";
 
 import { type Button, buttonVariants } from "./button";
@@ -19,10 +15,7 @@ function Pagination({ className, ...props }: React.ComponentProps<"nav">) {
 	);
 }
 
-function PaginationContent({
-	className,
-	...props
-}: React.ComponentProps<"ul">) {
+function PaginationContent({ className, ...props }: React.ComponentProps<"ul">) {
 	return (
 		<ul
 			data-slot="pagination-content"
@@ -41,12 +34,7 @@ type PaginationLinkProps = {
 } & Pick<React.ComponentProps<typeof Button>, "size"> &
 	React.ComponentProps<"a">;
 
-function PaginationLink({
-	className,
-	isActive,
-	size = "icon",
-	...props
-}: PaginationLinkProps) {
+function PaginationLink({ className, isActive, size = "icon", ...props }: PaginationLinkProps) {
 	return (
 		<a
 			aria-current={isActive ? "page" : undefined}
@@ -57,7 +45,7 @@ function PaginationLink({
 					variant: isActive ? "outline" : "ghost",
 					size,
 				}),
-				className,
+				className
 			)}
 			{...props}
 		/>
@@ -97,8 +85,7 @@ function PaginationNext({
 	nextAria = "Aller à la page suivante",
 	nextLabel = "Suivant",
 	...props
-}: React.ComponentProps<typeof PaginationLink> &
-	Pick<PaginationLabels, "nextAria" | "nextLabel">) {
+}: React.ComponentProps<typeof PaginationLink> & Pick<PaginationLabels, "nextAria" | "nextLabel">) {
 	return (
 		<PaginationLink
 			aria-label={nextAria}

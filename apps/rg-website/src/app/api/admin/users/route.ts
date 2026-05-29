@@ -5,15 +5,14 @@ import { createAdminClient } from "@/lib/supabase/server";
 
 export async function GET(req: Request) {
 	const auth = await requireApiAdmin();
-	if (!auth.ok) {return auth.response;}
+	if (!auth.ok) {
+		return auth.response;
+	}
 
 	try {
 		const supabase = createAdminClient();
 		if (!supabase) {
-			return NextResponse.json(
-				{ error: "Service indisponible" },
-				{ status: 503 },
-			);
+			return NextResponse.json({ error: "Service indisponible" }, { status: 503 });
 		}
 
 		const url = new URL(req.url);
@@ -35,7 +34,9 @@ export async function GET(req: Request) {
 			.order("created_at", { ascending: false })
 			.range(from, to);
 
-		if (error) {throw error;}
+		if (error) {
+			throw error;
+		}
 
 		return NextResponse.json({
 			data: users ?? [],
@@ -51,7 +52,7 @@ export async function GET(req: Request) {
 		console.error("Erreur GET utilisateurs:", error);
 		return NextResponse.json(
 			{ error: "Erreur lors du chargement des utilisateurs", success: false },
-			{ status: 500 },
+			{ status: 500 }
 		);
 	}
 }

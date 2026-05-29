@@ -37,13 +37,13 @@ export function DashboardMetric({
 		<div
 			className={cn(
 				"flex items-center gap-4 p-4 sm:p-5 rounded-[24px] bg-card border border-border transition-all duration-300 hover:shadow-md hover:bg-accent/5 group",
-				className,
+				className
 			)}
 		>
 			<div
 				className={cn(
 					"size-12 sm:size-14 rounded-[16px] flex items-center justify-center shrink-0 transition-transform group-hover:scale-105 duration-300",
-					iconBg,
+					iconBg
 				)}
 			>
 				{typeof icon === "function" ? (
@@ -63,7 +63,7 @@ export function DashboardMetric({
 						<span
 							className={cn(
 								"inline-flex items-center gap-0.5 text-xs font-medium",
-								trend.value > 0 ? "text-emerald-600" : "text-rose-600",
+								trend.value > 0 ? "text-emerald-600" : "text-rose-600"
 							)}
 						>
 							{trend.value > 0 ? "+" : ""}
@@ -71,11 +71,7 @@ export function DashboardMetric({
 						</span>
 					)}
 				</div>
-				{description && (
-					<p className="text-xs text-muted-foreground/70 mt-0.5">
-						{description}
-					</p>
-				)}
+				{description && <p className="text-xs text-muted-foreground/70 mt-0.5">{description}</p>}
 			</div>
 			{href && (
 				<ArrowRight className="size-5 text-muted-foreground/50 group-hover:text-foreground transition-colors shrink-0" />

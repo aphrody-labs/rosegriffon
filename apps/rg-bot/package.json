@@ -2,8 +2,8 @@
 	"name": "@rose-griffon/bot",
 	"version": "0.1.0",
 	"private": true,
+	"description": "Bot Discord Rose Griffon — slash commands public + admin, sync members, canvas cards",
 	"type": "module",
-	"description": "Bot Discord Rose Griffon \u2014 slash commands public + admin, sync members, canvas cards",
 	"scripts": {
 		"dev": "bun --watch src/index.ts",
 		"start": "bun src/index.ts",

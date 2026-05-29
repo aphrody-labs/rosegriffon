@@ -52,9 +52,7 @@ export function AdminSidebar({
 	const [openSubmenu, setOpenSubmenu] = React.useState<string | null>(null);
 	const [isDrawerOpen, setIsDrawerOpen] = React.useState(false);
 
-	const navItems = items.filter(
-		(item) => !item.creatorOnly || showCreatorItems,
-	);
+	const navItems = items.filter((item) => !item.creatorOnly || showCreatorItems);
 
 	const toggleSubmenu = (title: string) => {
 		setOpenSubmenu(openSubmenu === title ? null : title);
@@ -64,9 +62,7 @@ export function AdminSidebar({
 		exact ? pathname === href : (pathname || "").startsWith(href);
 
 	const NavContent = ({ mobile = false }: { mobile?: boolean }) => (
-		<nav
-			className={cn("flex-1 space-y-1 overflow-y-auto p-3", mobile && "px-0")}
-		>
+		<nav className={cn("flex-1 space-y-1 overflow-y-auto p-3", mobile && "px-0")}>
 			{navItems.map((item) => {
 				const Icon = item.icon;
 				const active = isActive(item.href, item.exact);
@@ -82,7 +78,7 @@ export function AdminSidebar({
 									"flex w-full items-center justify-between gap-3 rounded-lg px-3 py-2.5 text-sm transition-colors",
 									active
 										? "bg-sidebar-accent text-sidebar-accent-foreground font-medium"
-										: "text-sidebar-foreground/80 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground",
+										: "text-sidebar-foreground/80 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground"
 								)}
 							>
 								<div className="flex items-center gap-3">
@@ -90,10 +86,7 @@ export function AdminSidebar({
 									<span>{item.title}</span>
 								</div>
 								<ChevronDown
-									className={cn(
-										"h-3.5 w-3.5 transition-transform",
-										submenuOpen && "rotate-180",
-									)}
+									className={cn("h-3.5 w-3.5 transition-transform", submenuOpen && "rotate-180")}
 								/>
 							</button>
 						) : (
@@ -104,7 +97,7 @@ export function AdminSidebar({
 									"group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-colors",
 									active
 										? "bg-sidebar-accent text-sidebar-accent-foreground font-medium shadow-sm"
-										: "text-sidebar-foreground/80 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground",
+										: "text-sidebar-foreground/80 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground"
 								)}
 							>
 								<Icon className="size-4 shrink-0" />
@@ -128,7 +121,7 @@ export function AdminSidebar({
 											"block rounded-md px-3 py-2 text-sm transition-colors",
 											pathname === subitem.href
 												? "bg-sidebar-accent text-sidebar-accent-foreground font-medium"
-												: "text-sidebar-foreground/70 hover:bg-sidebar-accent/40 hover:text-sidebar-foreground",
+												: "text-sidebar-foreground/70 hover:bg-sidebar-accent/40 hover:text-sidebar-foreground"
 										)}
 									>
 										{subitem.title}
@@ -164,21 +157,15 @@ export function AdminSidebar({
 							</div>
 						)}
 						<div className="min-w-0">
-							<h2 className="truncate font-semibold text-sidebar-foreground">
-								{title}
-							</h2>
-							<p className="truncate text-xs text-sidebar-foreground/80">
-								{subtitle}
-							</p>
+							<h2 className="truncate font-semibold text-sidebar-foreground">{title}</h2>
+							<p className="truncate text-xs text-sidebar-foreground/80">{subtitle}</p>
 						</div>
 					</Link>
 				</div>
 
 				<NavContent />
 
-				{footer && (
-					<div className="border-t border-sidebar-border p-3">{footer}</div>
-				)}
+				{footer && <div className="border-t border-sidebar-border p-3">{footer}</div>}
 			</aside>
 
 			{/* Mobile Bottom Navigation (optional, app can use its own) */}
@@ -187,16 +174,14 @@ export function AdminSidebar({
 					href="/admin"
 					className={cn(
 						"flex flex-col items-center gap-1 rounded-lg p-2 transition-colors",
-						pathname === "/admin"
-							? "text-sidebar-foreground"
-							: "text-sidebar-foreground/80",
+						pathname === "/admin" ? "text-sidebar-foreground" : "text-sidebar-foreground/80"
 					)}
 				>
 					<Home className="size-5" />
 					<span className="text-[11px] font-medium leading-none">Accueil</span>
 				</Link>
 				{/* The app can provide more items or we can auto-pick the first 2-3 items from 'items' prop */}
-				
+
 				<Drawer open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
 					<DrawerTrigger asChild>
 						<button className="flex flex-col items-center gap-1 rounded-lg p-2 text-sidebar-foreground/80 transition-colors hover:text-sidebar-foreground">
@@ -211,11 +196,7 @@ export function AdminSidebar({
 						</DrawerHeader>
 						<div className="overflow-y-auto px-4 pb-8">
 							<NavContent mobile={true} />
-							{footer && (
-								<div className="mt-2 border-t border-border p-3">
-									{footer}
-								</div>
-							)}
+							{footer && <div className="mt-2 border-t border-border p-3">{footer}</div>}
 						</div>
 					</DrawerContent>
 				</Drawer>

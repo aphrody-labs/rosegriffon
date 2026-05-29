@@ -10,21 +10,15 @@ function Sheet({ ...props }: React.ComponentProps<typeof SheetPrimitive.Root>) {
 	return <SheetPrimitive.Root data-slot="sheet" {...props} />;
 }
 
-function SheetTrigger({
-	...props
-}: React.ComponentProps<typeof SheetPrimitive.Trigger>) {
+function SheetTrigger({ ...props }: React.ComponentProps<typeof SheetPrimitive.Trigger>) {
 	return <SheetPrimitive.Trigger data-slot="sheet-trigger" {...props} />;
 }
 
-function SheetClose({
-	...props
-}: React.ComponentProps<typeof SheetPrimitive.Close>) {
+function SheetClose({ ...props }: React.ComponentProps<typeof SheetPrimitive.Close>) {
 	return <SheetPrimitive.Close data-slot="sheet-close" {...props} />;
 }
 
-function SheetPortal({
-	...props
-}: React.ComponentProps<typeof SheetPrimitive.Portal>) {
+function SheetPortal({ ...props }: React.ComponentProps<typeof SheetPrimitive.Portal>) {
 	return <SheetPrimitive.Portal data-slot="sheet-portal" {...props} />;
 }
 
@@ -37,7 +31,7 @@ function SheetOverlay({
 			data-slot="sheet-overlay"
 			className={cn(
 				"motion-safe:data-[state=open]:animate-in motion-safe:data-[state=closed]:animate-out motion-safe:data-[state=closed]:fade-out-0 motion-safe:data-[state=open]:fade-in-0 fixed inset-0 z-50 bg-black/50 starting:opacity-0",
-				className,
+				className
 			)}
 			{...props}
 		/>
@@ -67,7 +61,7 @@ function SheetContent({
 						"motion-safe:data-[state=closed]:slide-out-to-top motion-safe:data-[state=open]:slide-in-from-top inset-x-0 top-0 h-auto border-b",
 					side === "bottom" &&
 						"motion-safe:data-[state=closed]:slide-out-to-bottom motion-safe:data-[state=open]:slide-in-from-bottom inset-x-0 bottom-0 h-auto border-t",
-					className,
+					className
 				)}
 				{...props}
 			>
@@ -85,10 +79,7 @@ function SheetHeader({ className, ...props }: React.ComponentProps<"div">) {
 	return (
 		<div
 			data-slot="sheet-header"
-			className={cn(
-				"flex flex-col gap-1.5 p-4 @md/sheet:items-start",
-				className,
-			)}
+			className={cn("flex flex-col gap-1.5 p-4 @md/sheet:items-start", className)}
 			{...props}
 		/>
 	);
@@ -100,17 +91,14 @@ function SheetFooter({ className, ...props }: React.ComponentProps<"div">) {
 			data-slot="sheet-footer"
 			className={cn(
 				"mt-auto flex flex-col gap-2 p-4 @md/sheet:flex-row @md/sheet:justify-end",
-				className,
+				className
 			)}
 			{...props}
 		/>
 	);
 }
 
-function SheetTitle({
-	className,
-	...props
-}: React.ComponentProps<typeof SheetPrimitive.Title>) {
+function SheetTitle({ className, ...props }: React.ComponentProps<typeof SheetPrimitive.Title>) {
 	return (
 		<SheetPrimitive.Title
 			data-slot="sheet-title"

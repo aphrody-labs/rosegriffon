@@ -77,13 +77,7 @@ interface AuraDetailProps {
 	nextAura: AuraData | null;
 }
 
-export function AuraDetail({
-	aura,
-	category,
-	subTypeInfo,
-	prevAura,
-	nextAura,
-}: AuraDetailProps) {
+export function AuraDetail({ aura, category, subTypeInfo, prevAura, nextAura }: AuraDetailProps) {
 	const [imgError, setImgError] = useState(false);
 	const imageUrl = resolveAssetUrl(aura.image);
 	const nameEN = (aura as any).name_EN;
@@ -129,11 +123,7 @@ export function AuraDetail({
 					{/* Type Badge */}
 					<div className="flex flex-wrap justify-center gap-3 w-full">
 						<div className="flex items-center gap-2 px-4 py-2 rounded-full bg-surface-container-highest border border-outline-variant/10 w-full justify-center">
-							<Icon
-								name={subTypeInfo.icon}
-								size={20}
-								className={subTypeInfo.color}
-							/>
+							<Icon name={subTypeInfo.icon} size={20} className={subTypeInfo.color} />
 							<span className="text-sm font-bold text-on-surface uppercase tracking-wider">
 								{subTypeInfo.label}
 							</span>
@@ -155,9 +145,7 @@ export function AuraDetail({
 								className="flex items-center gap-2 px-4 py-2 rounded-full bg-surface-container-highest border border-outline-variant/10 w-full justify-center hover:bg-surface-container-high transition-colors"
 							>
 								<CircleDot size={16} className="text-primary" />
-								<span className="text-sm font-bold text-on-surface">
-									{aura.ownerName}
-								</span>
+								<span className="text-sm font-bold text-on-surface">{aura.ownerName}</span>
 							</Link>
 						)}
 					</div>
@@ -173,9 +161,7 @@ export function AuraDetail({
 						{(nameEN || nameJA) && (
 							<div className="flex flex-wrap gap-x-4 gap-y-1 mb-4">
 								{nameEN && nameEN !== aura.displayName && (
-									<span className="text-sm text-on-surface-variant/70 italic">
-										{nameEN}
-									</span>
+									<span className="text-sm text-on-surface-variant/70 italic">{nameEN}</span>
 								)}
 								{nameJA && (
 									<span className="text-sm text-on-surface-variant/50 font-light">
@@ -205,11 +191,7 @@ export function AuraDetail({
 					{aura.sheetData?.passiveEffect && (
 						<div className="bg-tertiary/5 border border-tertiary/10 rounded-2xl p-4">
 							<div className="flex items-center gap-2 mb-2">
-								<Sparkles
-									size={18}
-									className="text-tertiary"
-									aria-hidden="true"
-								/>
+								<Sparkles size={18} className="text-tertiary" aria-hidden="true" />
 								<span className="text-[10px] font-bold text-tertiary uppercase tracking-wider">
 									Effet Passif
 								</span>
@@ -221,19 +203,13 @@ export function AuraDetail({
 					)}
 
 					{/* Hissatsu + Buff */}
-					{(aura.sheetData?.hissatsu ||
-						aura.skillNameFR ||
-						aura.sheetData?.buff) && (
+					{(aura.sheetData?.hissatsu || aura.skillNameFR || aura.sheetData?.buff) && (
 						<div className="space-y-4">
 							{(aura.sheetData?.hissatsu || aura.skillNameFR) && (
 								<div className="bg-primary/5 border border-primary/10 rounded-2xl p-4">
 									<div className="flex items-center justify-between mb-3">
 										<div className="flex items-center gap-2">
-											<CircleDot
-												size={18}
-												className="text-primary"
-												aria-hidden="true"
-											/>
+											<CircleDot size={18} className="text-primary" aria-hidden="true" />
 											<span className="text-[10px] font-bold text-primary uppercase tracking-wider">
 												Technique Spéciale
 											</span>
@@ -261,15 +237,13 @@ export function AuraDetail({
 														aura.sheetData.hissatsu.type}
 												</span>
 											)}
-											{aura.sheetData?.hissatsu?.type &&
-												aura.sheetData?.hissatsu?.element && (
-													<span className="text-on-surface-variant/40">|</span>
-												)}
+											{aura.sheetData?.hissatsu?.type && aura.sheetData?.hissatsu?.element && (
+												<span className="text-on-surface-variant/40">|</span>
+											)}
 											{aura.sheetData?.hissatsu?.element && (
 												<span className="font-medium">
-													{HISSATSU_ELEMENT_FR[
-														aura.sheetData.hissatsu.element
-													] || aura.sheetData.hissatsu.element}
+													{HISSATSU_ELEMENT_FR[aura.sheetData.hissatsu.element] ||
+														aura.sheetData.hissatsu.element}
 												</span>
 											)}
 											{aura.sheetData?.hissatsu?.power && (
@@ -300,11 +274,7 @@ export function AuraDetail({
 							{aura.sheetData?.buff && (
 								<div className="bg-secondary/5 border border-secondary/10 rounded-2xl p-4">
 									<div className="flex items-center gap-2 mb-3">
-										<TrendingUp
-											size={18}
-											className="text-secondary"
-											aria-hidden="true"
-										/>
+										<TrendingUp size={18} className="text-secondary" aria-hidden="true" />
 										<span className="text-[10px] font-bold text-secondary uppercase tracking-wider">
 											Bonus d&apos;Activation
 										</span>
@@ -315,8 +285,7 @@ export function AuraDetail({
 										</span>
 									)}
 									<p className="text-sm font-medium whitespace-pre-line">
-										{BUFF_EFFECT_FR[aura.sheetData?.buff.effect] ||
-											aura.sheetData?.buff.effect}
+										{BUFF_EFFECT_FR[aura.sheetData?.buff.effect] || aura.sheetData?.buff.effect}
 									</p>
 								</div>
 							)}
@@ -327,11 +296,7 @@ export function AuraDetail({
 					{(aura.sheetData as any)?.shopAvailability &&
 						(aura.sheetData as any).shopAvailability.length > 0 && (
 							<div className="flex items-center gap-2 p-3 rounded-xl bg-surface-container-low border border-outline-variant/10">
-								<Store
-									size={18}
-									className="text-on-surface-variant shrink-0"
-									aria-hidden="true"
-								/>
+								<Store size={18} className="text-on-surface-variant shrink-0" aria-hidden="true" />
 								<span className="text-sm font-medium text-on-surface">
 									{(aura.sheetData as any).shopAvailability.join(", ")}
 								</span>
@@ -412,9 +377,7 @@ export function AuraDetail({
 					className="flex items-center gap-2 px-3 py-2 sm:px-6 sm:py-3 rounded-full bg-surface-container-high hover:bg-surface-container-highest transition-all border border-outline-variant/20 hover:shadow-md shrink-0"
 				>
 					<LayoutGrid size={20} aria-hidden="true" />
-					<span className="text-xs sm:text-sm font-bold hidden sm:inline">
-						Retour à la liste
-					</span>
+					<span className="text-xs sm:text-sm font-bold hidden sm:inline">Retour à la liste</span>
 				</Link>
 
 				{nextAura ? (

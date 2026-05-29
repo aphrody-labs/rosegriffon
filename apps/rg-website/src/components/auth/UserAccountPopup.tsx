@@ -1,10 +1,22 @@
 "use client";
 
-import { Button, DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger, Avatar, AvatarFallback, AvatarImage, Skeleton } from "@rose-griffon/ui";
+import {
+	Button,
+	DropdownMenu,
+	DropdownMenuContent,
+	DropdownMenuGroup,
+	DropdownMenuItem,
+	DropdownMenuLabel,
+	DropdownMenuSeparator,
+	DropdownMenuTrigger,
+	Avatar,
+	AvatarFallback,
+	AvatarImage,
+	Skeleton,
+} from "@rose-griffon/ui";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-
 
 import { authClient } from "@/lib/auth-client";
 import { LogOut, Settings, UserCircle } from "@/lib/icons-config";
@@ -21,11 +33,7 @@ interface UserAccountPopupProps {
 	loading?: boolean;
 }
 
-export function UserAccountPopup({
-	user,
-	profile,
-	loading = false,
-}: UserAccountPopupProps) {
+export function UserAccountPopup({ user, profile, loading = false }: UserAccountPopupProps) {
 	const [isLoggingOut, setIsLoggingOut] = useState(false);
 	const router = useRouter();
 
@@ -46,8 +54,7 @@ export function UserAccountPopup({
 		return <Skeleton className="size-14 rounded-full" />;
 	}
 
-	const displayName =
-		profile?.full_name || user.email?.split("@")[0] || "Utilisateur";
+	const displayName = profile?.full_name || user.email?.split("@")[0] || "Utilisateur";
 	const avatarUrl = profile?.avatar_url;
 	const initials = displayName
 		.split(" ")
@@ -71,21 +78,12 @@ export function UserAccountPopup({
 					</Avatar>
 				</Button>
 			</DropdownMenuTrigger>
-			<DropdownMenuContent
-				className="w-56"
-				align="end"
-				alignOffset={-5}
-				sideOffset={8}
-			>
+			<DropdownMenuContent className="w-56" align="end" alignOffset={-5} sideOffset={8}>
 				{/* Header avec info utilisateur */}
 				<DropdownMenuLabel className="font-normal">
 					<div className="flex flex-col space-y-1">
-						<p className="text-sm font-medium leading-none truncate">
-							{displayName}
-						</p>
-						<p className="text-xs text-muted-foreground truncate">
-							{user.email}
-						</p>
+						<p className="text-sm font-medium leading-none truncate">{displayName}</p>
+						<p className="text-xs text-muted-foreground truncate">{user.email}</p>
 					</div>
 				</DropdownMenuLabel>
 
@@ -94,20 +92,14 @@ export function UserAccountPopup({
 				{/* Navigation principale */}
 				<DropdownMenuGroup>
 					<DropdownMenuItem asChild>
-						<Link
-							href="/profil"
-							className="flex items-center gap-2 cursor-pointer"
-						>
+						<Link href="/profil" className="flex items-center gap-2 cursor-pointer">
 							<UserCircle className="size-4" />
 							<span>Mon Profil</span>
 						</Link>
 					</DropdownMenuItem>
 
 					<DropdownMenuItem asChild>
-						<Link
-							href="/dashboard/account"
-							className="flex items-center gap-2 cursor-pointer"
-						>
+						<Link href="/dashboard/account" className="flex items-center gap-2 cursor-pointer">
 							<Settings className="size-4" />
 							<span>Paramètres</span>
 						</Link>

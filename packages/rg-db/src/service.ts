@@ -16,8 +16,7 @@ export function createSupabaseServiceClient() {
 
 	const url = getSupabaseUrl(true);
 	const serviceKey = getSupabaseServiceRoleKey();
-	const key =
-		serviceKey ?? (isBuildPhase() ? getSupabasePublishableKey() : null);
+	const key = serviceKey ?? (isBuildPhase() ? getSupabasePublishableKey() : null);
 
 	if (!key) {
 		throw new Error("[@rose-griffon/db] Missing SUPABASE_SERVICE_ROLE_KEY");

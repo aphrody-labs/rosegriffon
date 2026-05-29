@@ -10,11 +10,7 @@ export const metadata: Metadata = {
 	title: "Administration | Azalée",
 };
 
-export default async function DashboardLayout({
-	children,
-}: {
-	children: React.ReactNode;
-}) {
+export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
 	const session = await getServerSession();
 	if (!session?.user) {
 		redirect("/login");
@@ -32,19 +28,12 @@ export default async function DashboardLayout({
 		redirect("/");
 	}
 
-	const isAdmin = ADMIN_ROLES.includes(
-		profile.role as (typeof ADMIN_ROLES)[number],
-	);
-	const isMedailleMember =
-		!isAdmin && (await hasMedailleAzaleeRole(profile.discord_id));
+	const isAdmin = ADMIN_ROLES.includes(profile.role as (typeof ADMIN_ROLES)[number]);
+	const isMedailleMember = !isAdmin && (await hasMedailleAzaleeRole(profile.discord_id));
 
 	if (!isAdmin && !isMedailleMember) {
 		redirect("/");
 	}
 
-	return (
-		<div className="flex flex-col h-full min-h-[calc(100vh-4rem)]">
-			{children}
-		</div>
-	);
+	return <div className="flex flex-col h-full min-h-[calc(100vh-4rem)]">{children}</div>;
 }

@@ -37,9 +37,7 @@ export function MobileStickyCta({
 		<div
 			aria-hidden={!visible}
 			className={`fixed inset-x-0 bottom-0 z-40 border-t-2 border-[#d4af37] bg-[#0c1730]/95 px-4 pb-[max(env(safe-area-inset-bottom),0.75rem)] pt-3 shadow-[0_-4px_20px_rgba(0,0,0,0.5)] backdrop-blur md:hidden ${
-				visible
-					? "translate-y-0 opacity-100"
-					: "pointer-events-none translate-y-full opacity-0"
+				visible ? "translate-y-0 opacity-100" : "pointer-events-none translate-y-full opacity-0"
 			} transition-all motion-safe:duration-300`}
 		>
 			<div className="mx-auto flex max-w-md items-center justify-between gap-3">

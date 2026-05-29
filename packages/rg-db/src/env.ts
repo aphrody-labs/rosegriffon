@@ -39,7 +39,7 @@ export function isBuildPhase(): boolean {
 
 export function getSupabaseUrl(preferInternal = false): string {
 	const url = preferInternal
-		? process.env.SUPABASE_INTERNAL_URL ?? process.env.NEXT_PUBLIC_SUPABASE_URL
+		? (process.env.SUPABASE_INTERNAL_URL ?? process.env.NEXT_PUBLIC_SUPABASE_URL)
 		: process.env.NEXT_PUBLIC_SUPABASE_URL;
 
 	if (isValidHttpUrl(url)) return url;
