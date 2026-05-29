@@ -235,12 +235,12 @@ const server = Bun.serve({
     }
 
     // 3b. OpenAPI JSON Spec
-    if (url.pathname === "/openapi.json" && req.method === "GET") {
+    if (url.pathname === "/openapi.json") {
       return Response.json(getOpenApiDocument());
     }
 
     // 3c. Swagger UI HTML
-    if (url.pathname === "/swagger" && req.method === "GET") {
+    if (url.pathname === "/swagger") {
       return new Response(getSwaggerHtml(), {
         headers: { "Content-Type": "text/html; charset=utf-8" },
       });
