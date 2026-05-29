@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Browser } from "@aphrody-code/bxc";
+import { Browser, Page } from "@aphrody-code/bxc";
 import { createSupabaseServiceClient, cache } from "@rose-griffon/db";
 import * as cheerio from "cheerio";
 
@@ -34,7 +34,7 @@ export async function crawlZukanOrder(): Promise<{
 	let globalIndex = 0;
 
 	try {
-		const page = await Browser.newPage({ profile: "stealth" });
+		const page = (await Browser.newPage({ profile: "stealth" })) as Page;
 
 		for (let pageNum = 1; pageNum <= MAX_PAGES; pageNum++) {
 			const url = `https://zukan.inazuma.jp/en/chara_param/?page=${pageNum}&per_page=${PER_PAGE}`;
@@ -42,6 +42,7 @@ export async function crawlZukanOrder(): Promise<{
 
 			try {
 				await page.goto(url);
+				await page.waitForSelector("ul.charaListBox", 15000).catch(() => {});
 				const html = await page.content();
 				const $ = cheerio.load(html);
 

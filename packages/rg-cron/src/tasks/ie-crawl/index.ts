@@ -9,6 +9,7 @@ import { crawlNews } from "./news";
 import { crawlRe } from "./re";
 import { crawlCross } from "./cross";
 import { crawlLevel5 } from "./level5";
+import { crawlLevel5Blog } from "./level5-blog";
 import { crawlTwitter } from "./twitter";
 import { runRagSync } from "./rag";
 import { withProxyRotation } from "../../lib/proxy";
@@ -59,6 +60,14 @@ export async function runIeCrawl(): Promise<{ success: boolean; error?: string }
 			console.log("[ie-crawl] Crawl LEVEL-5 complété.");
 		}
 
+		// 5c. Crawl LEVEL-5 Blog (Akihiro Hino / Five-Star Workshop)
+		const level5BlogRes = await withProxyRotation(() => crawlLevel5Blog());
+		if (!level5BlogRes.success) {
+			console.error("[ie-crawl] Échec du crawl LEVEL-5 Blog :", level5BlogRes.error);
+		} else {
+			console.log("[ie-crawl] Crawl LEVEL-5 Blog complété.");
+		}
+
 		// 5b. Crawl Twitter @Azalee_IE
 		const twitterRes = await withProxyRotation(() => crawlTwitter());
 		if (!twitterRes.success) {
@@ -74,6 +83,7 @@ export async function runIeCrawl(): Promise<{ success: boolean; error?: string }
 			reRes.success ||
 			crossRes.success ||
 			level5Res.success ||
+			level5BlogRes.success ||
 			twitterRes.success;
 		if (anyNewsCrawlSuccess) {
 			const ragRes = await runRagSync();
@@ -93,6 +103,7 @@ export async function runIeCrawl(): Promise<{ success: boolean; error?: string }
 			reRes.success &&
 			crossRes.success &&
 			level5Res.success &&
+			level5BlogRes.success &&
 			twitterRes.success &&
 			ragSuccess;
 		return {
