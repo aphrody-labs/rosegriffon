@@ -15,6 +15,8 @@ import {
   warmCaches,
 } from "./tasks/api";
 import { ServerWebSocket } from "bun";
+import { createSupabaseServiceClient } from "@rose-griffon/db/service";
+import { resolveProfile, isAdmin } from "@rose-griffon/auth";
 
 // ─── LOGGER GLOBALE INTERCEPTION ET STREAMING WEBSOCKET ──────────────────────
 const wsConnections = new Set<ServerWebSocket<any>>();
@@ -205,7 +207,7 @@ const PORT = Number(process.env.CRON_PORT) || 3005;
 
 const server = Bun.serve({
   port: PORT,
-  fetch(req, server) {
+  async fetch(req, server) {
     const url = new URL(req.url);
 
     // 1. WebSocket upgrade
@@ -231,11 +233,54 @@ const server = Bun.serve({
       return Response.json(metrics);
     }
 
-    // Sécurisation par CRON_SECRET pour les routes privilégiées
+    // Helper pour extraire les cookies de la requête
+    function getCookie(request: Request, name: string): string | null {
+      const cookieHeader = request.headers.get("Cookie");
+      if (!cookieHeader) return null;
+      const cookies = cookieHeader.split(";");
+      for (const cookie of cookies) {
+        const [key, value] = cookie.trim().split("=");
+        if (key === name) return value ? decodeURIComponent(value) : "";
+      }
+      return null;
+    }
+
+    // Sécurisation par CRON_SECRET ou authentification par Cookie Admin (Better Auth)
     const authHeader = req.headers.get("Authorization");
     const cronSecret = process.env.CRON_SECRET;
-    
-    if (cronSecret && authHeader !== `Bearer ${cronSecret}`) {
+    let isAuthorized = false;
+
+    // 1. Autorisation via Token d'automatisation
+    if (cronSecret && authHeader === `Bearer ${cronSecret}`) {
+      isAuthorized = true;
+    }
+
+    // 2. Autorisation via Session Cookie Administrateur
+    if (!isAuthorized) {
+      const sessionToken = getCookie(req, "better-auth.session-token");
+      if (sessionToken) {
+        try {
+          const supabase = createSupabaseServiceClient();
+          const { data: session } = await supabase
+            .from("session")
+            .select("user_id, expires_at")
+            .eq("token", sessionToken)
+            .maybeSingle();
+
+          if (session && new Date(session.expires_at) > new Date()) {
+            const profile = await resolveProfile(supabase, { id: session.user_id });
+            if (profile && isAdmin(profile.role)) {
+              isAuthorized = true;
+              console.log(`[Cron Auth] Accès autorisé pour l'administrateur : ${profile.username}`);
+            }
+          }
+        } catch (authErr) {
+          console.warn("[Cron Auth] Échec de l'authentification par session cookie :", authErr);
+        }
+      }
+    }
+
+    if (!isAuthorized) {
       return new Response("Non autorisé", { status: 401 });
     }
 
