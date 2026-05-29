@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { runInaglePush } from "./tasks/db";
+import { runInaglePush, runSQLiteBackup, runPostgresBackup } from "./tasks/db";
 import { syncCdnAssets } from "./tasks/cdn";
 import { runIeCrawl } from "./tasks/ie-crawl";
 import { runRagSync, queryRag } from "./tasks/ie-crawl/rag";
@@ -116,7 +116,10 @@ if (args.includes("--run")) {
   console.log(`🏃 Exécution manuelle de la tâche : ${task}`);
 
   if (task === "db") {
-    await executeTask("db", runInaglePush);
+    await executeTask("db:sync", runInaglePush);
+    await executeTask("db:sqlite-backup", runSQLiteBackup);
+  } else if (task === "backup:postgres" || task === "backup:pg") {
+    await executeTask("db:postgres-backup", runPostgresBackup);
   } else if (task === "cdn") {
     await executeTask("cdn", syncCdnAssets);
   } else if (task === "crawl") {
@@ -151,14 +154,16 @@ if (args.includes("--run")) {
     console.log("🏃 Exécution de toutes les tâches...");
     await executeTask("publish", triggerPublishScheduled);
     await executeTask("warm", warmCaches);
-    await executeTask("db", runInaglePush);
+    await executeTask("db:sync", runInaglePush);
+    await executeTask("db:sqlite-backup", runSQLiteBackup);
+    await executeTask("db:postgres-backup", runPostgresBackup);
     await executeTask("patreon", triggerPatreonRefresh);
     await executeTask("cdn", syncCdnAssets);
     await executeTask("crawl", runIeCrawl);
     await executeTask("reminders", () => triggerPatreonReminders("announce"));
   } else {
     console.error(
-      `❌ Tâche inconnue : ${task}. Choisissez parmi : db, cdn, crawl, rag, query, publish, patreon, reminders, warm, all.`
+      `❌ Tâche inconnue : ${task}. Choisissez parmi : db, cdn, crawl, rag, query, publish, patreon, reminders, warm, backup:postgres, backup:pg, all.`
     );
   }
   process.exit(0);
@@ -176,9 +181,15 @@ Bun.cron("*/30 * * * *", async () => {
   await executeTask("warm", warmCaches);
 });
 
-// 3. Synchronisation Inagle DB : tous les jours à 2h00 UTC
+// 3. Synchronisation Inagle DB & SQLite Backup : tous les jours à 2h00 UTC
 Bun.cron("0 2 * * *", async () => {
-  await executeTask("db", runInaglePush);
+  await executeTask("db:sync", runInaglePush);
+  await executeTask("db:sqlite-backup", runSQLiteBackup);
+});
+
+// 3b. Sauvegarde logique PostgreSQL Supabase : tous les jours à 2h45 UTC
+Bun.cron("45 2 * * *", async () => {
+  await executeTask("db:postgres-backup", runPostgresBackup);
 });
 
 // 4. Rafraîchissement Patreon Website : tous les jours à 3h00 UTC
