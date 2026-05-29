@@ -304,6 +304,19 @@
       "name": "@rose-griffon/config",
       "version": "0.1.0",
     },
+    "packages/cron": {
+      "name": "@rose-griffon/cron",
+      "version": "0.1.0",
+      "dependencies": {
+        "@rose-griffon/db": "workspace:*",
+        "@rose-griffon/inagle": "workspace:*",
+        "@rose-griffon/types": "workspace:*",
+      },
+      "devDependencies": {
+        "@types/bun": "catalog:",
+        "typescript": "catalog:",
+      },
+    },
     "packages/db": {
       "name": "@rose-griffon/db",
       "version": "0.1.0",
@@ -1200,6 +1213,8 @@
     "@rose-griffon/bot": ["@rose-griffon/bot@workspace:apps/bot"],
 
     "@rose-griffon/config": ["@rose-griffon/config@workspace:packages/config"],
+
+    "@rose-griffon/cron": ["@rose-griffon/cron@workspace:packages/cron"],
 
     "@rose-griffon/db": ["@rose-griffon/db@workspace:packages/db"],
 

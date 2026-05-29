@@ -1,0 +1,44 @@
+[Unit]
+Description=Rose Griffon Cron Daemon (Bun + Bun.cron)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=ubuntu
+Group=ubuntu
+WorkingDirectory=/home/ubuntu/rg
+# Charge les variables d'env décryptées de production (DATABASE_URL, SUPABASE_SERVICE_ROLE_KEY, CRON_SECRET, etc.)
+EnvironmentFile=/home/ubuntu/rg/apps/website/.env.production.local
+Environment=NODE_ENV=production
+Environment=AZALEE_URL=https://azalee.rosegriffon.fr
+Environment=WEBSITE_URL=https://rosegriffon.fr
+ExecStart=/home/ubuntu/.bun/bin/bun run --filter @rose-griffon/cron start
+Restart=on-failure
+RestartSec=10s
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=rg-cron
+
+# Resource limits (cohérent avec rg-bot.service)
+LimitNOFILE=65536
+MemoryMax=1G
+MemoryHigh=768M
+CPUWeight=200
+
+# Hardening systemd
+ProtectSystem=strict
+ProtectHome=read-only
+ReadWritePaths=/var/www/cdn/static/azalee/public /var/www/cdn/static/website/public /tmp /home/ubuntu/rg
+PrivateTmp=true
+PrivateDevices=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictNamespaces=true
+RestrictSUIDSGID=true
+LockPersonality=true
+NoNewPrivileges=true
+
+[Install]
+WantedBy=multi-user.target
