@@ -9,6 +9,7 @@
   },
   "scripts": {
     "start": "bun src/index.ts",
+    "build": "bun build src/index.ts --compile --minify --sourcemap --bytecode --format esm --outfile dist/rg-cron",
     "type-check": "tsc --noEmit",
     "lint": "bunx oxlint -c ../../.oxlintrc.json src"
   },
