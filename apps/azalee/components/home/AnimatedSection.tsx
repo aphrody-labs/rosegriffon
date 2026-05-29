@@ -72,7 +72,7 @@ export function AnimatedSection({
 		return (
 			<div
 				ref={ref}
-				className={`${directionClass[direction]} ${className || ""}`}
+				className={`${directionClass[direction]} ${inView ? "scroll-reveal-visible" : ""} ${className || ""}`}
 			>
 				{childrenArray.map((child, index) => {
 					const key =
@@ -100,7 +100,7 @@ export function AnimatedSection({
 	return (
 		<motion.div
 			ref={ref}
-			className={`${directionClass[direction]} ${className || ""}`}
+			className={`${directionClass[direction]} ${inView || prefersReducedMotion ? "scroll-reveal-visible" : ""} ${className || ""}`}
 			initial={initial}
 			animate={animate}
 			transition={{

@@ -590,7 +590,7 @@ export function Shell({
 						<main
 							id="main-content"
 							className={cn(
-								"flex-1 overflow-y-auto scrollbar-hide flex flex-col",
+								"flex-1 overflow-y-auto overflow-x-hidden scrollbar-hide flex flex-col",
 								isCompact ? "pt-16" : "pt-0",
 							)}
 						>

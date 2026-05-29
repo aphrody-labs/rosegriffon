@@ -10,13 +10,22 @@ const PLACEHOLDER_ANON_JWT =
 
 function isValidHttpUrl(v: string | undefined | null): v is string {
 	return Boolean(
-		v && v !== "undefined" && v !== "null" && v.startsWith("http"),
+		v &&
+			v !== "undefined" &&
+			v !== "null" &&
+			v.startsWith("http") &&
+			!v.startsWith("eyJ2Ijo"),
 	);
 }
 
 function isValidKey(v: string | undefined | null): v is string {
-	// Anon key Supabase = JWT (starts with eyJ). Reject only undefined/null/empty/JSON blobs.
-	return Boolean(v && v !== "undefined" && v !== "null" && !v.startsWith("{"));
+	return Boolean(
+		v &&
+			v !== "undefined" &&
+			v !== "null" &&
+			!v.startsWith("{") &&
+			!v.startsWith("eyJ2Ijo"),
+	);
 }
 
 function pickUrl(...keys: string[]): string {

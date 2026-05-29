@@ -11,7 +11,7 @@ interface SafeImageProps extends ImageProps {
 }
 
 /** Placeholder par défaut pour les personnages sans image */
-const DEFAULT_PLACEHOLDER = "/ie.webp";
+const DEFAULT_PLACEHOLDER = "/ievr.webp";
 
 export function SafeImage({ src, zukanHash, alt, fallbackSrc, ...props }: SafeImageProps) {
   const [imgSrc, setImgSrc] = useState(src);
@@ -28,21 +28,25 @@ export function SafeImage({ src, zukanHash, alt, fallbackSrc, ...props }: SafeIm
     const nextStage = fallbackStage + 1;
     setFallbackStage(nextStage);
 
-    if (nextStage === 1 && zukanHash) {
-      // Fallback 1 : essayer le zukan CDN avec .png
-      const cleanHash = zukanHash.startsWith("/") ? zukanHash.slice(1) : zukanHash;
-      setImgSrc(`https://dxi4wb638ujep.cloudfront.net/1/${cleanHash}.png`);
+    // URL zukan propre
+    const zukanUrl = zukanHash
+      ? `https://dxi4wb638ujep.cloudfront.net/1/${zukanHash.startsWith("/") ? zukanHash.slice(1) : zukanHash}.png`
+      : null;
+
+    if (nextStage === 1 && zukanUrl && imgSrc !== zukanUrl) {
+      setImgSrc(zukanUrl);
       return;
     }
 
     if (nextStage <= 2) {
-      // Fallback 2 : retirer le suffixe _5000/_5100 du face URL
-      const srcStr = typeof src === "string" ? src : "";
-      const suffixMatch = srcStr.match(/\/face\/(.+?)_\d{4}_l_/);
-      if (suffixMatch) {
-        const baseUrl = srcStr.replace(/_\d{4}_l_.*$/, (m) => m.replace(/_\d{4}/, ""));
-        setImgSrc(baseUrl);
-        return;
+      // Retirer proprement tous les suffixes _5000/_5100 du face URL
+      const srcStr = typeof imgSrc === "string" ? imgSrc : "";
+      if (srcStr.includes("/face/")) {
+        const cleanUrl = srcStr.replaceAll(/_\d{4}/g, "");
+        if (cleanUrl !== srcStr) {
+          setImgSrc(cleanUrl);
+          return;
+        }
       }
     }
 
