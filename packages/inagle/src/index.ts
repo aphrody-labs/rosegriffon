@@ -82,6 +82,7 @@ export {
 	loadAllCharacters,
 	loadBaseCharacters,
 	loadFilteredCharacters,
+	preloadCharacterEnrichment,
 } from "./entities/character.js";
 export * from "./menu/index.js";
 export * from "./rag/index.js";
@@ -89,6 +90,7 @@ export * from "./rag/index.js";
 export * from "./service.js";
 
 // Stat Calculator
+export * from "./analysis/index.js";
 export * from "./stat-calculator.js";
 export * from "./zukan/index.js";
 

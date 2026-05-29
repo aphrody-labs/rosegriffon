@@ -327,8 +327,8 @@ interface GrowthTableFile {
  * Load main growth table
  */
 export function loadGrowthTableMain(): GrowthTableEntry[] {
-	const file = loadGamedata<GrowthTableFile>("growthTableMain.json");
-	return file.data;
+	const file = loadGamedata<{ main: GrowthTableEntry[] }>("growth_tables.json");
+	return file.main || [];
 }
 
 /**
