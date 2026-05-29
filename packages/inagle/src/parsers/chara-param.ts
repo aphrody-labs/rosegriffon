@@ -102,10 +102,16 @@ function parseParamNode(node: ConfigNode): ParsedCharaParam | null {
 		const levelIdx = 10 + i * 2;
 
 		if (levelIdx < values.length && values[skillIdx] !== 0) {
-			skills.push({
-				skillId: toHex(values[skillIdx]),
-				learnLevel: values[levelIdx],
-			});
+			const skillIdNum = values[skillIdx];
+			const learnLevel = values[levelIdx];
+
+			// Skip placeholders (IDs < 16) and corrupted/negative learn levels
+			if (skillIdNum >= 16 && learnLevel >= 0 && learnLevel <= 99) {
+				skills.push({
+					skillId: toHex(skillIdNum),
+					learnLevel: learnLevel,
+				});
+			}
 		}
 	}
 

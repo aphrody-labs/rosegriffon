@@ -161,25 +161,33 @@ export class SqliteQueryBuilder {
 	}
 
 	or(orString: string) {
-		const parts = orString.split(",");
+		const regex = /([a-zA-Z0-9_>\-]+)\.(eq|ilike|cs)\.((?:[^\s,]+|\[[^\]]+\]|\{[^}]+\})+)/g;
+		let match;
 		const conditions: string[] = [];
 		const orParams: Array<string | number | boolean | null> = [];
 
-		for (const part of parts) {
-			const match = part.match(/(.+?)\.(ilike|eq)\.(.+)/);
-			if (match) {
-				const [, col, op, val] = match;
-				const column = this.cleanCol(col);
+		while ((match = regex.exec(orString)) !== null) {
+			const [, col, op, val] = match;
+			const column = this.cleanCol(col);
 
-				if (op === "ilike") {
-					let cleanVal = val;
-					if (cleanVal.startsWith("%")) cleanVal = cleanVal.slice(1);
-					if (cleanVal.endsWith("%")) cleanVal = cleanVal.slice(0, -1);
-					conditions.push(`${column} LIKE ?`);
-					orParams.push(`%${cleanVal}%`);
-				} else if (op === "eq") {
-					conditions.push(`${column} = ?`);
-					orParams.push(val === "true" ? 1 : val === "false" ? 0 : val);
+			if (op === "ilike") {
+				let cleanVal = val;
+				if (cleanVal.startsWith("%")) cleanVal = cleanVal.slice(1);
+				if (cleanVal.endsWith("%")) cleanVal = cleanVal.slice(0, -1);
+				conditions.push(`${column} LIKE ?`);
+				orParams.push(`%${cleanVal}%`);
+			} else if (op === "eq") {
+				conditions.push(`${column} = ?`);
+				orParams.push(val === "true" ? 1 : val === "false" ? 0 : val);
+			} else if (op === "cs") {
+				try {
+					const parsed = JSON.parse(val);
+					if (Array.isArray(parsed) && parsed[0]?.id) {
+						conditions.push(`EXISTS (SELECT 1 FROM json_each(${column}) WHERE json_each.value->>'id' = ?)`);
+						orParams.push(parsed[0].id);
+					}
+				} catch {
+					// fallback if JSON parsing fails
 				}
 			}
 		}

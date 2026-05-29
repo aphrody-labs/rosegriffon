@@ -20,7 +20,7 @@ import { buildOverrideSkillDatabase } from "@rose-griffon/inagle/parsers/overrid
 import { createInagleService } from "@rose-griffon/inagle/service.ts";
 
 const __dirname = import.meta.dir;
-const ENTRIES_DIR = path.resolve(__dirname, "../entries");
+const ENTRIES_DIR = path.resolve(__dirname, "../../../packages/inagle/src/entries");
 
 async function main() {
 	console.log("Pre-loading enrichment data (ctrl-chara, growth lv1)...");

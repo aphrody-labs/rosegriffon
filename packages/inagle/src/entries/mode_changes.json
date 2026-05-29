@@ -1,263 +1,263 @@
 [
-	{
-		"auraId": "0x03D98821",
-		"auraIdStr": "modechange_0x03D98821",
-		"element": 0,
-		"name_FR": "Mode Aphrody",
-		"name_EN": "Lord Aphrody Mode",
-		"name_JA": "アフロディモード",
-		"desc_FR": "Déborde d'admiration pour Aphrody,\npeut adopter sa forme à l'identique.",
-		"desc_JA": "あまりにも強く　崇拝する気持ちが爆発し\nアフロディそのものの姿へ変化する。",
-		"assetCode": "mode_change_c11150120",
-		"subType": "ModeChange",
-		"config": {
-			"val4": 90,
-			"val5": 90,
-			"skillId1": "0x03D98821",
-			"val9": 8,
-			"val11": 1,
-			"buffId": "0x2B0F90CE",
-			"rank": 7010
-		},
-		"_source": "AURA_CMD_INFO",
-		"_file": "aura_skill_config",
-		"displayName": "Mode Aphrody",
-		"elementName": {
-			"en": "None",
-			"ja": "なし",
-			"fr": "Aucun"
-		}
-	},
-	{
-		"auraId": "0x925B9AA5",
-		"auraIdStr": "modechange_0x925B9AA5",
-		"element": 0,
-		"name_FR": "Mode Fini de jouer",
-		"name_EN": "All-Out Mode",
-		"name_JA": "本気モード",
-		"desc_FR": "Il a mis de côté sa malice pour se concentrer,\net laissé sa détermination pure créer une nouvelle force.",
-		"desc_JA": "イタズラは封印し　本気で勝負に挑む。\nひたむきな心は　新たな力へと変わる。",
-		"assetCode": "mode_change_c02023520",
-		"subType": "ModeChange",
-		"config": {
-			"val4": 90,
-			"val5": 90,
-			"skillId1": "0x925B9AA5",
-			"val9": 8,
-			"val11": 1,
-			"buffId": "0x2B0F90CE",
-			"rank": 7003
-		},
-		"_source": "AURA_CMD_INFO",
-		"_file": "aura_skill_config",
-		"displayName": "Mode Fini de jouer",
-		"elementName": {
-			"en": "None",
-			"ja": "なし",
-			"fr": "Aucun"
-		}
-	},
-	{
-		"auraId": "0x74E055EB",
-		"auraIdStr": "modechange_0x74E055EB",
-		"element": 0,
-		"name_FR": "Mode Forme A",
-		"name_EN": "Aspect A Mode",
-		"name_JA": "アツヤモード",
-		"desc_FR": "Afin d'atteindre la perfection qu'il lui a promise, il se glisse dans la peau\nde son frère défunt.",
-		"desc_JA": "完璧になるという約束を　叶えるために\n亡き弟の人格へと　豹変する。",
-		"assetCode": "mode_change_c02023290",
-		"subType": "ModeChange",
-		"config": {
-			"val4": 90,
-			"val5": 90,
-			"skillId1": "0x74E055EB",
-			"val9": 8,
-			"val11": 1,
-			"buffId": "0x2B0F90CE",
-			"rank": 7002
-		},
-		"_source": "AURA_CMD_INFO",
-		"_file": "aura_skill_config",
-		"displayName": "Mode Forme A",
-		"elementName": {
-			"en": "None",
-			"ja": "なし",
-			"fr": "Aucun"
-		}
-	},
-	{
-		"auraId": "0x2B663F07",
-		"auraIdStr": "modechange_0x2B663F07",
-		"element": 0,
-		"name_FR": "Mode Furie",
-		"name_EN": "Burning Rage Mode",
-		"name_JA": "怒髪天モード",
-		"desc_FR": "Une fois son traumatisme surmonté, il contrôle désormais\nsa colère pour la transformer en force.",
-		"desc_JA": "昔のトラウマを乗り越え　怒りを制御し\n強くありたいと願う心で　自ら怒髪天になる。",
-		"assetCode": "mode_change_c06030060",
-		"subType": "ModeChange",
-		"config": {
-			"val4": 90,
-			"val5": 90,
-			"skillId1": "0x2B663F07",
-			"val9": 8,
-			"val11": 1,
-			"buffId": "0x2B0F90CE",
-			"rank": 7007
-		},
-		"_source": "AURA_CMD_INFO",
-		"_file": "aura_skill_config",
-		"displayName": "Mode Furie",
-		"elementName": {
-			"en": "None",
-			"ja": "なし",
-			"fr": "Aucun"
-		}
-	},
-	{
-		"auraId": "0xE820D133",
-		"auraIdStr": "modechange_0xE820D133",
-		"element": 0,
-		"name_FR": "Mode Imposteur céleste",
-		"name_EN": "Graceful Guise Mode",
-		"name_JA": "偽天使モード",
-		"desc_FR": "Garder un visage calme et presque divin,\navant de vous déplacer avec finesse pour\nfaire tomber l'adversaire dans votre piège.",
-		"desc_JA": "神々しくも　落ち着いた顔つきに変化。\n巧みに立ち回り　相手を罠にかける。",
-		"assetCode": "mode_change_c08030032",
-		"subType": "ModeChange",
-		"config": {
-			"val4": 90,
-			"val5": 90,
-			"skillId1": "0xE820D133",
-			"val9": 8,
-			"val11": 1,
-			"buffId": "0x2B0F90CE",
-			"rank": 7008
-		},
-		"_source": "AURA_CMD_INFO",
-		"_file": "aura_skill_config",
-		"displayName": "Mode Imposteur céleste",
-		"elementName": {
-			"en": "None",
-			"ja": "なし",
-			"fr": "Aucun"
-		}
-	},
-	{
-		"auraId": "0x0312FC4D",
-		"auraIdStr": "modechange_0x0312FC4D",
-		"element": 0,
-		"name_FR": "Mode Malveillance",
-		"name_EN": "Brutal Persona Mode",
-		"name_JA": "凶悪モード",
-		"desc_FR": "Une fois acculé,\nson côté impitoyable se révèle.",
-		"desc_JA": "予想外の事態に追い込まれた時\n裏に隠されていた　凶悪な一面が顔を出す。",
-		"assetCode": "mode_change_c11801040",
-		"subType": "ModeChange",
-		"config": {
-			"val4": 90,
-			"val5": 90,
-			"skillId1": "0x0312FC4D",
-			"val9": 8,
-			"val11": 1,
-			"buffId": "0x2B0F90CE",
-			"rank": 7001
-		},
-		"_source": "AURA_CMD_INFO",
-		"_file": "aura_skill_config",
-		"displayName": "Mode Malveillance",
-		"elementName": {
-			"en": "None",
-			"ja": "なし",
-			"fr": "Aucun"
-		}
-	},
-	{
-		"auraId": "0x03204C39",
-		"auraIdStr": "modechange_0x03204C39",
-		"element": 0,
-		"name_FR": "Mode Roi de la savane",
-		"name_EN": "Wild Lion Mode",
-		"name_JA": "荒獅子モード",
-		"desc_FR": "La passion du combat déclenche ses instincts primaires,\ntel un lion enragé.",
-		"desc_JA": "戦いの熱気が　狩りの衝動をあおり\n内に秘めた　獅子の本能をむき出しにする。",
-		"assetCode": "mode_change_c03030430",
-		"subType": "ModeChange",
-		"config": {
-			"val4": 90,
-			"val5": 90,
-			"skillId1": "0x03204C39",
-			"val9": 8,
-			"val11": 1,
-			"buffId": "0x2B0F90CE",
-			"rank": 7004
-		},
-		"_source": "AURA_CMD_INFO",
-		"_file": "aura_skill_config",
-		"displayName": "Mode Roi de la savane",
-		"elementName": {
-			"en": "None",
-			"ja": "なし",
-			"fr": "Aucun"
-		}
-	},
-	{
-		"auraId": "0xD1B66D0A",
-		"auraIdStr": "modechange_0xD1B66D0A",
-		"element": 0,
-		"name_FR": "Mode Sourire camouflant",
-		"name_EN": "Sweet Mask Mode",
-		"name_JA": "猫かぶりモード",
-		"desc_FR": "Son doux sourire cache sa vraie nature\npour garder les autres à distance.",
-		"desc_JA": "にっこりと微笑んで　本性を隠すことで\n他人との間に一線を引く。",
-		"assetCode": "mode_change_c04000150",
-		"subType": "ModeChange",
-		"config": {
-			"val4": 90,
-			"val5": 90,
-			"skillId1": "0xD1B66D0A",
-			"val9": 8,
-			"val11": 1,
-			"buffId": "0x2B0F90CE",
-			"rank": 7005
-		},
-		"_source": "AURA_CMD_INFO",
-		"_file": "aura_skill_config",
-		"displayName": "Mode Sourire camouflant",
-		"elementName": {
-			"en": "None",
-			"ja": "なし",
-			"fr": "Aucun"
-		}
-	},
-	{
-		"auraId": "0x74FBBD29",
-		"auraIdStr": "modechange_0x74FBBD29",
-		"element": 0,
-		"name_FR": "Mode Souveraine",
-		"name_EN": "Queen Mode",
-		"name_JA": "女王様モード",
-		"desc_FR": "Elle cesse de paraître mignonne pour mieux s'enflammer,\ndominer le terrain, et passer en mode attaque.",
-		"desc_JA": "ぶりっ子から　残虐で荒々しい性格に豹変。\nプレイスタイルも攻撃型に変化する。",
-		"assetCode": "mode_change_c05020700",
-		"subType": "ModeChange",
-		"config": {
-			"val4": 90,
-			"val5": 90,
-			"skillId1": "0x74FBBD29",
-			"val9": 8,
-			"val11": 1,
-			"buffId": "0x2B0F90CE",
-			"rank": 7006
-		},
-		"_source": "AURA_CMD_INFO",
-		"_file": "aura_skill_config",
-		"displayName": "Mode Souveraine",
-		"elementName": {
-			"en": "None",
-			"ja": "なし",
-			"fr": "Aucun"
-		}
-	}
+  {
+    "auraId": "0x03D98821",
+    "auraIdStr": "modechange_0x03D98821",
+    "element": 0,
+    "name_FR": "Mode Aphrody",
+    "name_EN": "Lord Aphrody Mode",
+    "name_JA": "アフロディモード",
+    "desc_FR": "Déborde d'admiration pour Aphrody,\npeut adopter sa forme à l'identique.",
+    "desc_JA": "あまりにも強く　崇拝する気持ちが爆発し\nアフロディそのものの姿へ変化する。",
+    "assetCode": "mode_change_c11150120",
+    "subType": "ModeChange",
+    "config": {
+      "val4": 90,
+      "val5": 90,
+      "skillId1": "0x03D98821",
+      "val9": 8,
+      "val11": 1,
+      "buffId": "0x2B0F90CE",
+      "rank": 7010
+    },
+    "_source": "AURA_CMD_INFO",
+    "_file": "aura_skill_config",
+    "displayName": "Mode Aphrody",
+    "elementName": {
+      "en": "None",
+      "ja": "なし",
+      "fr": "Aucun"
+    }
+  },
+  {
+    "auraId": "0x925B9AA5",
+    "auraIdStr": "modechange_0x925B9AA5",
+    "element": 0,
+    "name_FR": "Mode Fini de jouer",
+    "name_EN": "All-Out Mode",
+    "name_JA": "本気モード",
+    "desc_FR": "Il a mis de côté sa malice pour se concentrer,\net laissé sa détermination pure créer une nouvelle force.",
+    "desc_JA": "イタズラは封印し　本気で勝負に挑む。\nひたむきな心は　新たな力へと変わる。",
+    "assetCode": "mode_change_c02023520",
+    "subType": "ModeChange",
+    "config": {
+      "val4": 90,
+      "val5": 90,
+      "skillId1": "0x925B9AA5",
+      "val9": 8,
+      "val11": 1,
+      "buffId": "0x2B0F90CE",
+      "rank": 7003
+    },
+    "_source": "AURA_CMD_INFO",
+    "_file": "aura_skill_config",
+    "displayName": "Mode Fini de jouer",
+    "elementName": {
+      "en": "None",
+      "ja": "なし",
+      "fr": "Aucun"
+    }
+  },
+  {
+    "auraId": "0x74E055EB",
+    "auraIdStr": "modechange_0x74E055EB",
+    "element": 0,
+    "name_FR": "Mode Forme A",
+    "name_EN": "Aspect A Mode",
+    "name_JA": "アツヤモード",
+    "desc_FR": "Afin d'atteindre la perfection qu'il lui a promise, il se glisse dans la peau\nde son frère défunt.",
+    "desc_JA": "完璧になるという約束を　叶えるために\n亡き弟の人格へと　豹変する。",
+    "assetCode": "mode_change_c02023290",
+    "subType": "ModeChange",
+    "config": {
+      "val4": 90,
+      "val5": 90,
+      "skillId1": "0x74E055EB",
+      "val9": 8,
+      "val11": 1,
+      "buffId": "0x2B0F90CE",
+      "rank": 7002
+    },
+    "_source": "AURA_CMD_INFO",
+    "_file": "aura_skill_config",
+    "displayName": "Mode Forme A",
+    "elementName": {
+      "en": "None",
+      "ja": "なし",
+      "fr": "Aucun"
+    }
+  },
+  {
+    "auraId": "0x2B663F07",
+    "auraIdStr": "modechange_0x2B663F07",
+    "element": 0,
+    "name_FR": "Mode Furie",
+    "name_EN": "Burning Rage Mode",
+    "name_JA": "怒髪天モード",
+    "desc_FR": "Une fois son traumatisme surmonté, il contrôle désormais\nsa colère pour la transformer en force.",
+    "desc_JA": "昔のトラウマを乗り越え　怒りを制御し\n強くありたいと願う心で　自ら怒髪天になる。",
+    "assetCode": "mode_change_c06030060",
+    "subType": "ModeChange",
+    "config": {
+      "val4": 90,
+      "val5": 90,
+      "skillId1": "0x2B663F07",
+      "val9": 8,
+      "val11": 1,
+      "buffId": "0x2B0F90CE",
+      "rank": 7007
+    },
+    "_source": "AURA_CMD_INFO",
+    "_file": "aura_skill_config",
+    "displayName": "Mode Furie",
+    "elementName": {
+      "en": "None",
+      "ja": "なし",
+      "fr": "Aucun"
+    }
+  },
+  {
+    "auraId": "0xE820D133",
+    "auraIdStr": "modechange_0xE820D133",
+    "element": 0,
+    "name_FR": "Mode Imposteur céleste",
+    "name_EN": "Graceful Guise Mode",
+    "name_JA": "偽天使モード",
+    "desc_FR": "Garder un visage calme et presque divin,\navant de vous déplacer avec finesse pour\nfaire tomber l'adversaire dans votre piège.",
+    "desc_JA": "神々しくも　落ち着いた顔つきに変化。\n巧みに立ち回り　相手を罠にかける。",
+    "assetCode": "mode_change_c08030032",
+    "subType": "ModeChange",
+    "config": {
+      "val4": 90,
+      "val5": 90,
+      "skillId1": "0xE820D133",
+      "val9": 8,
+      "val11": 1,
+      "buffId": "0x2B0F90CE",
+      "rank": 7008
+    },
+    "_source": "AURA_CMD_INFO",
+    "_file": "aura_skill_config",
+    "displayName": "Mode Imposteur céleste",
+    "elementName": {
+      "en": "None",
+      "ja": "なし",
+      "fr": "Aucun"
+    }
+  },
+  {
+    "auraId": "0x0312FC4D",
+    "auraIdStr": "modechange_0x0312FC4D",
+    "element": 0,
+    "name_FR": "Mode Malveillance",
+    "name_EN": "Brutal Persona Mode",
+    "name_JA": "凶悪モード",
+    "desc_FR": "Une fois acculé,\nson côté impitoyable se révèle.",
+    "desc_JA": "予想外の事態に追い込まれた時\n裏に隠されていた　凶悪な一面が顔を出す。",
+    "assetCode": "mode_change_c11801040",
+    "subType": "ModeChange",
+    "config": {
+      "val4": 90,
+      "val5": 90,
+      "skillId1": "0x0312FC4D",
+      "val9": 8,
+      "val11": 1,
+      "buffId": "0x2B0F90CE",
+      "rank": 7001
+    },
+    "_source": "AURA_CMD_INFO",
+    "_file": "aura_skill_config",
+    "displayName": "Mode Malveillance",
+    "elementName": {
+      "en": "None",
+      "ja": "なし",
+      "fr": "Aucun"
+    }
+  },
+  {
+    "auraId": "0x03204C39",
+    "auraIdStr": "modechange_0x03204C39",
+    "element": 0,
+    "name_FR": "Mode Roi de la savane",
+    "name_EN": "Wild Lion Mode",
+    "name_JA": "荒獅子モード",
+    "desc_FR": "La passion du combat déclenche ses instincts primaires,\ntel un lion enragé.",
+    "desc_JA": "戦いの熱気が　狩りの衝動をあおり\n内に秘めた　獅子の本能をむき出しにする。",
+    "assetCode": "mode_change_c03030430",
+    "subType": "ModeChange",
+    "config": {
+      "val4": 90,
+      "val5": 90,
+      "skillId1": "0x03204C39",
+      "val9": 8,
+      "val11": 1,
+      "buffId": "0x2B0F90CE",
+      "rank": 7004
+    },
+    "_source": "AURA_CMD_INFO",
+    "_file": "aura_skill_config",
+    "displayName": "Mode Roi de la savane",
+    "elementName": {
+      "en": "None",
+      "ja": "なし",
+      "fr": "Aucun"
+    }
+  },
+  {
+    "auraId": "0xD1B66D0A",
+    "auraIdStr": "modechange_0xD1B66D0A",
+    "element": 0,
+    "name_FR": "Mode Sourire camouflant",
+    "name_EN": "Sweet Mask Mode",
+    "name_JA": "猫かぶりモード",
+    "desc_FR": "Son doux sourire cache sa vraie nature\npour garder les autres à distance.",
+    "desc_JA": "にっこりと微笑んで　本性を隠すことで\n他人との間に一線を引く。",
+    "assetCode": "mode_change_c04000150",
+    "subType": "ModeChange",
+    "config": {
+      "val4": 90,
+      "val5": 90,
+      "skillId1": "0xD1B66D0A",
+      "val9": 8,
+      "val11": 1,
+      "buffId": "0x2B0F90CE",
+      "rank": 7005
+    },
+    "_source": "AURA_CMD_INFO",
+    "_file": "aura_skill_config",
+    "displayName": "Mode Sourire camouflant",
+    "elementName": {
+      "en": "None",
+      "ja": "なし",
+      "fr": "Aucun"
+    }
+  },
+  {
+    "auraId": "0x74FBBD29",
+    "auraIdStr": "modechange_0x74FBBD29",
+    "element": 0,
+    "name_FR": "Mode Souveraine",
+    "name_EN": "Queen Mode",
+    "name_JA": "女王様モード",
+    "desc_FR": "Elle cesse de paraître mignonne pour mieux s'enflammer,\ndominer le terrain, et passer en mode attaque.",
+    "desc_JA": "ぶりっ子から　残虐で荒々しい性格に豹変。\nプレイスタイルも攻撃型に変化する。",
+    "assetCode": "mode_change_c05020700",
+    "subType": "ModeChange",
+    "config": {
+      "val4": 90,
+      "val5": 90,
+      "skillId1": "0x74FBBD29",
+      "val9": 8,
+      "val11": 1,
+      "buffId": "0x2B0F90CE",
+      "rank": 7006
+    },
+    "_source": "AURA_CMD_INFO",
+    "_file": "aura_skill_config",
+    "displayName": "Mode Souveraine",
+    "elementName": {
+      "en": "None",
+      "ja": "なし",
+      "fr": "Aucun"
+    }
+  }
 ]

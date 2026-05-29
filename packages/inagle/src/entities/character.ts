@@ -128,11 +128,26 @@ function getGrowthLv1(): GrowthTableLv1[] {
 
 function findGrowthLv1(mainPos: number, subPos: number, playStyle: number): GrowthTableLv1 | null {
 	const lv1 = getGrowthLv1();
-	return (
-		lv1.find(
-			(e) => e.mainPosition === mainPos && e.subPosition === subPos && e.playStyle === playStyle
-		) ?? null
+	
+	// 1. Try exact match (position + subposition + playstyle)
+	const exact = lv1.find(
+		(e) => e.mainPosition === mainPos && e.subPosition === subPos && e.playStyle === playStyle
 	);
+	if (exact) return exact;
+
+	// 2. Fallback 1: Try position + subposition
+	const fallback1 = lv1.find((e) => e.mainPosition === mainPos && e.subPosition === subPos);
+	if (fallback1) return fallback1;
+
+	// 3. Fallback 2: Try position + playstyle
+	const fallback2 = lv1.find((e) => e.mainPosition === mainPos && e.playStyle === playStyle);
+	if (fallback2) return fallback2;
+
+	// 4. Fallback 3: Try just position
+	const fallback3 = lv1.find((e) => e.mainPosition === mainPos);
+	if (fallback3) return fallback3;
+
+	return null;
 }
 
 let growthTableCache: Map<string, GrowthTableEntry> | null = null;
