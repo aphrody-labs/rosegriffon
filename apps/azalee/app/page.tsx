@@ -8,7 +8,7 @@ import { LatestNewsSection } from "@/components/home/LatestNewsSection";
 import { RgtvBanner } from "@/components/home/RgtvBanner";
 import { WikiCarousel } from "@/components/home/WikiCarousel";
 import type { WikiSectionStats } from "@/components/home/WikiCarousel";
-import { createPublicClient } from "@/lib/supabase/public";
+import { createClient } from "@/lib/supabase/server";
 
 export const metadata: Metadata = {
 	description:
@@ -36,7 +36,7 @@ export const metadata: Metadata = {
 export const revalidate = 300; // Cache for 5 minutes
 
 export default async function HomePage() {
-	const supabase = createPublicClient();
+	const supabase = await createClient();
 
 	// Fetch pinned articles, latest articles, tweets, and wiki counts in parallel
 	const [

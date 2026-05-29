@@ -102,10 +102,24 @@ export class SqliteQueryBuilder {
 		return this;
 	}
 
+	neq(col: string, val: string | number | boolean | null) {
+		const column = this.cleanCol(col);
+		if (val === null) {
+			this.wheres.push(`${column} IS NOT NULL`);
+		} else {
+			this.wheres.push(`${column} != ?`);
+			this.params.push(typeof val === "boolean" ? (val ? 1 : 0) : val);
+		}
+		return this;
+	}
+
 	not(col: string, op: string, val: string | number | boolean | null) {
 		const column = this.cleanCol(col);
 		if (op === "is" && val === null) {
 			this.wheres.push(`${column} IS NOT NULL`);
+		} else if (op === "like" || op === "ilike") {
+			this.wheres.push(`${column} NOT LIKE ?`);
+			this.params.push(val);
 		} else {
 			this.wheres.push(`${column} != ?`);
 			this.params.push(typeof val === "boolean" ? (val ? 1 : 0) : val);

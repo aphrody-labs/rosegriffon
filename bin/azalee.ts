@@ -684,7 +684,7 @@ program
 					sqliteStatus.tables = tablesResult.count;
 
 					try {
-						const charResult = db.query("SELECT count(*) as count FROM characters").get() as {
+						const charResult = db.query("SELECT count(*) as count FROM inagle_characters").get() as {
 							count: number;
 						};
 						sqliteStatus.characterCount = charResult.count;
