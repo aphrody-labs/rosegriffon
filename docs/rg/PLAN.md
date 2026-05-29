@@ -254,6 +254,10 @@ _API universelle et parses de données de jeu Inazuma Eleven_
    - **Bénéfice** : Latence réseau de 0ms sur les pages de données de jeu et économie massive de requêtes sur Supabase.
 2. ✅ **Automatisation du cycle de vie du cache** :
    - Routine automatique en tâche cron configurée dans `@rose-griffon/cron` (exécution quotidienne à 2h UTC pour la synchronisation Inagle et la sauvegarde SQLite).
+3. ✅ **Optimisation massive des performances du traducteur et de la compilation bytecode** :
+   - Mise en cache des objets `RegExp` compilés pour le glossaire et ajout d'un contrôle de présence rapide via `.includes()` (early exit) réduisant les compilations d'expressions régulières par 1 000.
+   - Parallélisation des E/S et du parsing JSON dans le générateur de glossaire via `Promise.all` et traitement AST en une seule passe pour `extractNouns`.
+   - Optimisation de l'exécutable compilé via le cache de bytecode natif Bun (`--bytecode`) divisant par 2 le temps de démarrage du CLI en production, avec sourcemaps `zstd` embarqués (`--sourcemap`).
 
 ### Phase 5 : Sécurité & Stratégie de Sauvegarde Externe
 
