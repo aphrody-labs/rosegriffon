@@ -53,24 +53,30 @@ interface ListResult<T> {
 
 // Helpers — returns all matching element IDs (Void maps to both 0 and 5)
 function getElementIds(name: string): number[] {
-	if (!name) {return [];}
+	if (!name) {
+		return [];
+	}
 	const n = name.toLowerCase();
 	const ids: number[] = [];
 	for (const [id, val] of Object.entries(ElementNames)) {
 		const v = val as any;
-		if (v.en?.toLowerCase() === n || v.fr?.toLowerCase() === n)
-			{ids.push(Number(id));}
+		if (v.en?.toLowerCase() === n || v.fr?.toLowerCase() === n) {
+			ids.push(Number(id));
+		}
 	}
 	return ids;
 }
 
 function getCategoryId(name: string): number | undefined {
-	if (!name) {return undefined;}
+	if (!name) {
+		return undefined;
+	}
 	const n = name.toLowerCase();
 	for (const [id, val] of Object.entries(CategoryNames)) {
 		const v = val as any;
-		if (v.en?.toLowerCase() === n || v.fr?.toLowerCase() === n)
-			{return Number(id);}
+		if (v.en?.toLowerCase() === n || v.fr?.toLowerCase() === n) {
+			return Number(id);
+		}
 	}
 	return undefined;
 }
@@ -109,7 +115,9 @@ const HERO_BASE_CODES: Record<string, string> = {
 };
 
 function normalizeAuraSheetData(sd: any): any {
-	if (!sd) {return null;}
+	if (!sd) {
+		return null;
+	}
 	const nested = sd.sheetData;
 	const base = nested && nested !== "null" ? { ...sd, ...nested } : sd;
 	return {
@@ -124,9 +132,7 @@ function normalizeAuraSheetData(sd: any): any {
 
 export const wikiService = {
 	/** Get all distinct constellations for a character (by name — heroes appear in multiple constellations via different chara_ids) */
-	async _getHeroConstellations(
-		row: any,
-	): Promise<Array<{ name: string; index: number }>> {
+	async _getHeroConstellations(row: any): Promise<Array<{ name: string; index: number }>> {
 		const name = row?.name_en;
 		if (!name) return [];
 		const supabase = await createClient();
@@ -234,12 +240,9 @@ export const wikiService = {
 		const { data: exact } = await supabase
 			.from("inagle_auras")
 			.select("id, name_en, name_fr, sub_type")
-			.or(
-				`name_en.eq.${sanitizeFilter(name)},name_fr.eq.${sanitizeFilter(name)}`,
-			)
+			.or(`name_en.eq.${sanitizeFilter(name)},name_fr.eq.${sanitizeFilter(name)}`)
 			.limit(1);
-		if (exact && exact.length > 0)
-			return { ...exact[0], categorySlug: "autres" } as any;
+		if (exact && exact.length > 0) return { ...exact[0], categorySlug: "autres" } as any;
 		return null;
 	},
 
@@ -293,16 +296,11 @@ export const wikiService = {
 		if (!table) return undefined;
 
 		// For "éveil", also search in inagle_auras (generic auras used as awakenings)
-		const tablesToSearch =
-			typeSlug === "eveil" ? [table, "inagle_auras"] : [table];
+		const tablesToSearch = typeSlug === "eveil" ? [table, "inagle_auras"] : [table];
 
 		// Try match by ID or asset_code across all candidate tables in parallel
 		const searchPromises = tablesToSearch.map((t) =>
-			(supabase as any)
-				.from(t)
-				.select("*")
-				.or(`id.eq.${id},asset_code.eq.${id}`)
-				.maybeSingle()
+			(supabase as any).from(t).select("*").or(`id.eq.${id},asset_code.eq.${id}`).maybeSingle()
 		);
 		const searchResults = await Promise.all(searchPromises);
 		const row = searchResults.find((res) => res.data)?.data || null;
@@ -310,9 +308,7 @@ export const wikiService = {
 		if (!row) return undefined;
 
 		const a = row as any;
-		const elementInfo =
-			ElementNames[a.element_id as keyof typeof ElementNames] ||
-			ElementNames[0];
+		const elementInfo = ElementNames[a.element_id as keyof typeof ElementNames] || ElementNames[0];
 		const sd = normalizeAuraSheetData(a.sheet_data) || {};
 
 		// Fetch linked skill video and owner in parallel
@@ -325,7 +321,7 @@ export const wikiService = {
 		const rawSd = (a.sheet_data || {}) as any;
 		const config = rawSd.config || {};
 		const possibleSkillIds = [config.skillId1, config.skillId2].filter(
-			(sid: string) => sid && sid !== "0x00000000",
+			(sid: string) => sid && sid !== "0x00000000"
 		);
 
 		const parallelPromises: Array<PromiseLike<any>> = [];
@@ -370,9 +366,7 @@ export const wikiService = {
 			const results = await Promise.all(parallelPromises);
 
 			// Process skill results
-			const skillResults = results
-				.filter((r) => r.type === "skill" && r.data)
-				.map((r) => r.data);
+			const skillResults = results.filter((r) => r.type === "skill" && r.data).map((r) => r.data);
 			const foundSkill = skillResults.find((s) => s && (s.name_fr || s.name_en));
 			const fallbackSkill = skillResults.find((s) => s);
 			const targetSkill = foundSkill || fallbackSkill;
@@ -386,8 +380,7 @@ export const wikiService = {
 			const ownerResult = results.find((r) => r.type === "owner" && r.data)?.data;
 			if (ownerResult) {
 				ownerName = ownerResult.name_fr || ownerResult.name_en || undefined;
-				ownerSlug =
-					ownerResult.base_slug || ownerResult.slug || ownerCharaId || undefined;
+				ownerSlug = ownerResult.base_slug || ownerResult.slug || ownerCharaId || undefined;
 			}
 		}
 
@@ -395,12 +388,7 @@ export const wikiService = {
 			auraId: a.id,
 			auraIdStr: a.id,
 			displayName:
-				a.name_fr ||
-				a.name_en ||
-				sd.displayName ||
-				sd.name_FR ||
-				sd.name_EN ||
-				"Inconnu",
+				a.name_fr || a.name_en || sd.displayName || sd.name_FR || sd.name_EN || "Inconnu",
 			name_FR: a.name_fr || sd.name_FR,
 			name_EN: a.name_en || sd.name_EN,
 			name_JA: a.name_ja || sd.name_JA,
@@ -438,9 +426,7 @@ export const wikiService = {
 		};
 	},
 
-	async getAurasList(
-		params: ListParams & { typeSlug: string },
-	): Promise<ListResult<any>> {
+	async getAurasList(params: ListParams & { typeSlug: string }): Promise<ListResult<any>> {
 		const supabase = await createClient();
 		const page = params.page || 1;
 		const limit = params.limit || 50;
@@ -467,7 +453,7 @@ export const wikiService = {
 				if (params.q) {
 					const sq = sanitizeFilter(params.q);
 					q = q.or(
-						`name_fr.ilike.%${sq}%,name_en.ilike.%${sq}%,sheet_data->>name_FR.ilike.%${sq}%,sheet_data->>name_EN.ilike.%${sq}%`,
+						`name_fr.ilike.%${sq}%,name_en.ilike.%${sq}%,sheet_data->>name_FR.ilike.%${sq}%,sheet_data->>name_EN.ilike.%${sq}%`
 					);
 				}
 				if (params.element) {
@@ -484,28 +470,19 @@ export const wikiService = {
 			]);
 
 			const combined = [...(awakenings || []), ...(auras || [])];
-			combined.sort((a: any, b: any) =>
-				(a.name_fr || "").localeCompare(b.name_fr || "", "fr"),
-			);
+			combined.sort((a: any, b: any) => (a.name_fr || "").localeCompare(b.name_fr || "", "fr"));
 			const total = combined.length;
 			const paged = combined.slice(from, to + 1);
 
 			const results = (paged as unknown as DbAura[]).map((a) => {
 				const elementInfo =
-					ElementNames[a.element_id as keyof typeof ElementNames] ||
-					ElementNames[0];
+					ElementNames[a.element_id as keyof typeof ElementNames] || ElementNames[0];
 				const sd = (a.sheet_data || {}) as any;
 				const assetCode = (a as any).asset_code || sd.assetCode || null;
 				return {
 					id: a.id,
 					auraId: a.id,
-					name:
-						a.name_fr ||
-						a.name_en ||
-						sd.displayName ||
-						sd.name_FR ||
-						sd.name_EN ||
-						"Inconnu",
+					name: a.name_fr || a.name_en || sd.displayName || sd.name_FR || sd.name_EN || "Inconnu",
 					passive: a.description_fr || sd.desc_FR,
 					hissatsu_name: sd?.hissatsu?.name || sd?.sheetData?.hissatsu?.name,
 					element: elementInfo.en,
@@ -528,16 +505,14 @@ export const wikiService = {
 
 		// Filter out Keshin Armed (wa*) and Link Transformations (wkt*) from Keshin list to avoid duplicates
 		if (view === "inagle_keshins_clean") {
-			query = query
-				.not("asset_code", "ilike", "wa%")
-				.not("asset_code", "ilike", "wkt%");
+			query = query.not("asset_code", "ilike", "wa%").not("asset_code", "ilike", "wkt%");
 		}
 
 		if (params.q) {
 			const sq = sanitizeFilter(params.q);
 			// Search in both DB columns and sheet_data names (some auras only have names in sheet_data)
 			query = query.or(
-				`name_fr.ilike.%${sq}%,name_en.ilike.%${sq}%,sheet_data->>name_FR.ilike.%${sq}%,sheet_data->>name_EN.ilike.%${sq}%`,
+				`name_fr.ilike.%${sq}%,name_en.ilike.%${sq}%,sheet_data->>name_FR.ilike.%${sq}%,sheet_data->>name_EN.ilike.%${sq}%`
 			);
 		}
 		if (params.element) {
@@ -561,8 +536,7 @@ export const wikiService = {
 
 		const results = (data as unknown as DbAura[]).map((a) => {
 			const elementInfo =
-				ElementNames[a.element_id as keyof typeof ElementNames] ||
-				ElementNames[0];
+				ElementNames[a.element_id as keyof typeof ElementNames] || ElementNames[0];
 			const sd = (a.sheet_data || {}) as any;
 			// asset_code n'est pas présent dans toutes les views (ex: inagle_souls_clean)
 			// — fallback vers sheet_data.assetCode
@@ -570,13 +544,7 @@ export const wikiService = {
 			return {
 				id: a.id, // auraId
 				auraId: a.id,
-				name:
-					a.name_fr ||
-					a.name_en ||
-					sd.displayName ||
-					sd.name_FR ||
-					sd.name_EN ||
-					"Inconnu",
+				name: a.name_fr || a.name_en || sd.displayName || sd.name_FR || sd.name_EN || "Inconnu",
 				passive: a.description_fr || sd.desc_FR,
 				hissatsu_name: sd?.hissatsu?.name || sd?.sheetData?.hissatsu?.name,
 				element: elementInfo.en,
@@ -612,17 +580,14 @@ export const wikiService = {
 		if (base) {
 			await this._inheritConstellation(base, row);
 			if ((row as any)?.rarity_label === "Héros") {
-				(base as any).heroConstellations =
-					await this._getHeroConstellations(row);
+				(base as any).heroConstellations = await this._getHeroConstellations(row);
 			}
 		}
 		return base;
 	},
 
 	/** Fetch character by base_slug (name_en + internal_code) — returns best variant as BaseCharacter */
-	async getCharacterByBaseSlug(
-		baseSlug: string,
-	): Promise<BaseCharacter | undefined> {
+	async getCharacterByBaseSlug(baseSlug: string): Promise<BaseCharacter | undefined> {
 		const supabase = await createClient();
 		// Fetch all variants sharing this base_slug, ordered by rarity DESC
 		const { data: rows } = await supabase
@@ -637,8 +602,7 @@ export const wikiService = {
 		if (base) {
 			await this._inheritConstellation(base, mainRow);
 			if (mainRow?.rarity_label === "Héros") {
-				(base as any).heroConstellations =
-					await this._getHeroConstellations(mainRow);
+				(base as any).heroConstellations = await this._getHeroConstellations(mainRow);
 			}
 		}
 		return base;
@@ -655,8 +619,7 @@ export const wikiService = {
 		if (base) {
 			await this._inheritConstellation(base, row);
 			if ((row as any)?.rarity_label === "Héros") {
-				(base as any).heroConstellations =
-					await this._getHeroConstellations(row);
+				(base as any).heroConstellations = await this._getHeroConstellations(row);
 			}
 		}
 		return base;
@@ -665,7 +628,7 @@ export const wikiService = {
 	/** Get all distinct forms/variants of a character (same chara_id, different pos/elem/rarity) */
 	async getCharacterForms(
 		charaId: string,
-		sheetId?: string,
+		sheetId?: string
 	): Promise<
 		Array<{
 			id: string;
@@ -683,7 +646,7 @@ export const wikiService = {
 		let query = supabase
 			.from("inagle_characters")
 			.select(
-				"id, slug, position, element, rarity_label, rarity, zukan_hash, internal_code, stat_frappe, hero_type",
+				"id, slug, position, element, rarity_label, rarity, zukan_hash, internal_code, stat_frappe, hero_type"
 			);
 		if (sheetId) {
 			query = query.eq("sheet_data->>sheetId", sheetId);
@@ -744,14 +707,8 @@ export const wikiService = {
 		return results;
 	},
 
-	async getCharactersList(
-		params: ListParams,
-	): Promise<ListResult<BaseCharacter>> {
-		if (
-			params.position === "COACH" ||
-			params.role === "Coordinator" ||
-			params.role === "Coach"
-		) {
+	async getCharactersList(params: ListParams): Promise<ListResult<BaseCharacter>> {
+		if (params.position === "COACH" || params.role === "Coordinator" || params.role === "Coach") {
 			return this.getCoordinatorsList(params);
 		}
 
@@ -761,13 +718,11 @@ export const wikiService = {
 		const from = (page - 1) * limit;
 		const to = from + limit - 1;
 
-		let query = supabase
-			.from("inagle_characters")
-			.select("*", { count: "exact" });
+		let query = supabase.from("inagle_characters").select("*", { count: "exact" });
 
 		if (params.q) {
 			query = query.or(
-				`name_fr.ilike.%${sanitizeFilter(params.q)}%,name_en.ilike.%${sanitizeFilter(params.q)}%`,
+				`name_fr.ilike.%${sanitizeFilter(params.q)}%,name_en.ilike.%${sanitizeFilter(params.q)}%`
 			);
 		}
 		if (params.element) {
@@ -815,9 +770,7 @@ export const wikiService = {
 			// Use parameterized .eq() for team_id and separate JSONB containment
 			// (avoid string-interpolating values with quotes into the filter)
 			const safeTeam = sanitizeFilter(params.team);
-			query = query.or(
-				`team_id.eq.${safeTeam},teams.cs.${JSON.stringify([{ id: safeTeam }])}`,
-			);
+			query = query.or(`team_id.eq.${safeTeam},teams.cs.${JSON.stringify([{ id: safeTeam }])}`);
 		}
 		if (params.gender) {
 			// FilterChips: "1" = male, "2" = female; DB column: "M" / "F"
@@ -860,9 +813,7 @@ export const wikiService = {
 		}
 
 		// Map to BaseCharacter — chaque variante est une carte distincte (pas de groupement)
-		const mapped = (data as any[])
-			.map((char) => this.mapDbCharacterToBase(char)!)
-			.filter(Boolean);
+		const mapped = (data as any[]).map((char) => this.mapDbCharacterToBase(char)!).filter(Boolean);
 
 		// Regrouper les variantes de rareté d'un même personnage (Normal + Héros = 1 carte)
 		const deduped = this.groupVariants(mapped);
@@ -891,25 +842,19 @@ export const wikiService = {
 		const rows = data || [];
 		// DB "Manager" + "Coach" = coachs in-game, DB "Coordinator" = manageuses
 		return {
-			coaches: rows.filter(
-				(r: any) => r.role === "Manager" || r.role === "Coach",
-			),
+			coaches: rows.filter((r: any) => r.role === "Manager" || r.role === "Coach"),
 			managers: rows.filter((r: any) => r.role === "Coordinator"),
 		};
 	},
 
-	async getCoordinatorsList(
-		params: ListParams,
-	): Promise<ListResult<BaseCharacter>> {
+	async getCoordinatorsList(params: ListParams): Promise<ListResult<BaseCharacter>> {
 		const supabase = await createClient();
 		const page = params.page || 1;
 		const limit = params.limit || 50;
 		const from = (page - 1) * limit;
 		const to = from + limit - 1;
 
-		let query = supabase
-			.from("inagle_coordinators")
-			.select("*", { count: "exact" });
+		let query = supabase.from("inagle_coordinators").select("*", { count: "exact" });
 
 		if (params.q) {
 			const q = sanitizeFilter(params.q);
@@ -937,9 +882,7 @@ export const wikiService = {
 			if (kanji) query = query.eq("element", kanji);
 		}
 
-		const { data, count, error } = await query
-			.range(from, to)
-			.order("name_localised");
+		const { data, count, error } = await query.range(from, to).order("name_localised");
 
 		if (error) {
 			console.error("Error fetching coordinators:", error);
@@ -1021,9 +964,7 @@ export const wikiService = {
 			};
 			const elEn = revMap[c.element] || "Void";
 			const zukanHash = COORD_ZUKAN[c.id] || undefined;
-			const imageUrl = zukanHash
-				? `https://dxi4wb638ujep.cloudfront.net/1/${zukanHash}.png`
-				: null;
+			const imageUrl = zukanHash ? `https://dxi4wb638ujep.cloudfront.net/1/${zukanHash}.png` : null;
 
 			return {
 				charaId: `coord_${c.id}`,
@@ -1135,7 +1076,7 @@ export const wikiService = {
 
 		if (params.q) {
 			query = query.or(
-				`name_fr.ilike.%${sanitizeFilter(params.q)}%,name_en.ilike.%${sanitizeFilter(params.q)}%`,
+				`name_fr.ilike.%${sanitizeFilter(params.q)}%,name_en.ilike.%${sanitizeFilter(params.q)}%`
 			);
 		}
 		if (params.category) {
@@ -1198,7 +1139,7 @@ export const wikiService = {
 				const conditions = override.conditions as any[];
 				if (!conditions) return false;
 				return conditions.some((c: any) =>
-					c.required_skills?.some((rs: any) => rs.skill_id === skillId),
+					c.required_skills?.some((rs: any) => rs.skill_id === skillId)
 				);
 			}),
 		].filter((row: any) => {
@@ -1235,15 +1176,11 @@ export const wikiService = {
 				.not("stat_frappe", "is", null)
 				.not("zukan_hash", "is", null);
 			if (playstyles && playstyles.length > 0) {
-				const filter = playstyles
-					.map((p) => `sheet_data->>playstyle.eq.${p}`)
-					.join(",");
+				const filter = playstyles.map((p) => `sheet_data->>playstyle.eq.${p}`).join(",");
 				query = query.or(filter);
 			}
 			const { data } = await query.limit(limit);
-			return ((data as any[]) || [])
-				.map((c: any) => this.mapDbCharacterToBase(c)!)
-				.filter(Boolean);
+			return ((data as any[]) || []).map((c: any) => this.mapDbCharacterToBase(c)!).filter(Boolean);
 		};
 		const [gk, df, mf, fw] = await Promise.all([
 			fetchPool("GK", 200),
@@ -1281,11 +1218,9 @@ export const wikiService = {
 		if (row) {
 			const h = row as unknown as DbSkill;
 			const elementInfo =
-				ElementNames[h.element_id as keyof typeof ElementNames] ||
-				ElementNames[0];
+				ElementNames[h.element_id as keyof typeof ElementNames] || ElementNames[0];
 			const categoryInfo =
-				CategoryNames[h.category_id as keyof typeof CategoryNames] ||
-				CategoryNames[0];
+				CategoryNames[h.category_id as keyof typeof CategoryNames] || CategoryNames[0];
 			const sd = (h.sheet_data || {}) as any;
 
 			return {
@@ -1342,7 +1277,7 @@ export const wikiService = {
 
 		if (params.q) {
 			query = query.or(
-				`name_fr.ilike.%${sanitizeFilter(params.q)}%,name_en.ilike.%${sanitizeFilter(params.q)}%`,
+				`name_fr.ilike.%${sanitizeFilter(params.q)}%,name_en.ilike.%${sanitizeFilter(params.q)}%`
 			);
 		}
 		if (params.element) {
@@ -1412,11 +1347,9 @@ export const wikiService = {
 
 		const results = (data as unknown as DbSkill[]).map((h) => {
 			const elementInfo =
-				ElementNames[h.element_id as keyof typeof ElementNames] ||
-				ElementNames[0];
+				ElementNames[h.element_id as keyof typeof ElementNames] || ElementNames[0];
 			const categoryInfo =
-				CategoryNames[h.category_id as keyof typeof CategoryNames] ||
-				CategoryNames[0];
+				CategoryNames[h.category_id as keyof typeof CategoryNames] || CategoryNames[0];
 
 			return {
 				skillId: h.id,
@@ -1551,7 +1484,7 @@ export const wikiService = {
 						cooldown: t.cooldown,
 					},
 					shops: t.shop ? [t.shop] : [],
-				}) as any,
+				}) as any
 		);
 
 		return {
@@ -1595,12 +1528,14 @@ export const wikiService = {
 						existing.wikiSections = char.wikiSections;
 					}
 					(existing as unknown as Record<string, unknown>).baseSlug =
-						(char as unknown as Record<string, unknown>).baseSlug || (existing as unknown as Record<string, unknown>).baseSlug;
+						(char as unknown as Record<string, unknown>).baseSlug ||
+						(existing as unknown as Record<string, unknown>).baseSlug;
 				} else {
 					existing.sheetData = existing.sheetData || char.sheetData;
 					existing.zukanHash = existing.zukanHash || char.zukanHash;
 					(existing as unknown as Record<string, unknown>).baseSlug =
-						(existing as unknown as Record<string, unknown>).baseSlug || (char as unknown as Record<string, unknown>).baseSlug;
+						(existing as unknown as Record<string, unknown>).baseSlug ||
+						(char as unknown as Record<string, unknown>).baseSlug;
 					if (
 						(!existing.wikiSections || existing.wikiSections.length === 0) &&
 						char.wikiSections &&
@@ -1668,12 +1603,9 @@ export const wikiService = {
 			const skillIdRaw = s.skillId;
 			// Detect reversed mapping: if skillId is a small number (< 100 decimal from hex)
 			// and learnLevel is a large number, they're swapped
-			const skillIdNum =
-				typeof skillIdRaw === "string" ? parseInt(skillIdRaw, 16) : skillIdRaw;
+			const skillIdNum = typeof skillIdRaw === "string" ? parseInt(skillIdRaw, 16) : skillIdRaw;
 			const learnNum =
-				typeof learnLevelRaw === "number"
-					? learnLevelRaw
-					: parseInt(learnLevelRaw, 10);
+				typeof learnLevelRaw === "number" ? learnLevelRaw : parseInt(learnLevelRaw, 10);
 			if (skillIdNum < 1000 && Math.abs(learnNum) > 1000000) {
 				// Swapped: learnLevel is actually the skill hash, skillId is the learn level
 				const hexSkillId = `0x${(learnNum >>> 0).toString(16).toUpperCase().padStart(8, "0")}`;
@@ -1701,9 +1633,7 @@ export const wikiService = {
 		// For Héros with unique codes, use base character code for face icon fallback
 		const originalCode = char.internal_code || char.id;
 		const isHero = char.rarity_label === "Héros";
-		const faceCode = isHero
-			? HERO_BASE_CODES[originalCode] || originalCode
-			: originalCode;
+		const faceCode = isHero ? HERO_BASE_CODES[originalCode] || originalCode : originalCode;
 
 		// Stats lv1: from lv1 columns or stats JSONB
 		const jsonStatsLv1 = (char.stats as any)?.lv1 || {};
@@ -1716,8 +1646,7 @@ export const wikiService = {
 					pressure: char.stat_lv1_pression || jsonStatsLv1.pressure || 0,
 					physical: char.stat_lv1_physique || jsonStatsLv1.physical || 0,
 					agility: char.stat_lv1_agilite || jsonStatsLv1.agility || 0,
-					intelligence:
-						char.stat_lv1_intelligence || jsonStatsLv1.intelligence || 0,
+					intelligence: char.stat_lv1_intelligence || jsonStatsLv1.intelligence || 0,
 				}
 			: undefined;
 

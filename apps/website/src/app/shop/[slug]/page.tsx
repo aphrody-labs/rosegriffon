@@ -5,12 +5,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 
-import {
-	CATEGORY_LABELS,
-	PRODUCTS,
-	formatEuros,
-	getProduct,
-} from "@/lib/shop/products";
+import { CATEGORY_LABELS, PRODUCTS, formatEuros, getProduct } from "@/lib/shop/products";
 import { PatreonDiscountBanner } from "../_components/patreon-discount-banner";
 import { ProductCard } from "../_components/product-card";
 import { VariantPickerWithCta } from "../_components/variant-picker";
@@ -23,9 +18,7 @@ export async function generateStaticParams() {
 	return PRODUCTS.map((p) => ({ slug: p.slug }));
 }
 
-export async function generateMetadata({
-	params,
-}: ProductPageProps): Promise<Metadata> {
+export async function generateMetadata({ params }: ProductPageProps): Promise<Metadata> {
 	const { slug } = await params;
 	const product = getProduct(slug);
 	if (!product) {
@@ -51,7 +44,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
 
 	const gallery = product.gallery ?? [product.image];
 	const related = PRODUCTS.filter(
-		(p) => p.category === product.category && p.slug !== product.slug,
+		(p) => p.category === product.category && p.slug !== product.slug
 	).slice(0, 4);
 
 	const stockHintToAvailability = (hint: typeof product.stockHint): string => {
@@ -81,23 +74,17 @@ export default async function ProductPage({ params }: ProductPageProps) {
 		? {
 				"@type": "AggregateOffer",
 				highPrice: Math.max(
-					...product.variants.map(
-						(v) => (v.priceCentsOverride ?? product.priceCents) / 100,
-					),
+					...product.variants.map((v) => (v.priceCentsOverride ?? product.priceCents) / 100)
 				).toFixed(2),
 				lowPrice: Math.min(
-					...product.variants.map(
-						(v) => (v.priceCentsOverride ?? product.priceCents) / 100,
-					),
+					...product.variants.map((v) => (v.priceCentsOverride ?? product.priceCents) / 100)
 				).toFixed(2),
 				offerCount: product.variants.length,
 				offers: product.variants.map((v) => ({
 					"@type": "Offer",
 					name: v.label,
 					priceCurrency: "EUR",
-					price: ((v.priceCentsOverride ?? product.priceCents) / 100).toFixed(
-						2,
-					),
+					price: ((v.priceCentsOverride ?? product.priceCents) / 100).toFixed(2),
 					availability: stockHintToAvailability(product.stockHint),
 					itemCondition: "https://schema.org/NewCondition",
 					url: `${baseUrl}/shop/${product.slug}`,
@@ -249,10 +236,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
 								</h2>
 								<ul className="space-y-2">
 									{product.highlights.map((h) => (
-										<li
-											key={h}
-											className="flex items-start gap-3 text-sm text-white/85"
-										>
+										<li key={h} className="flex items-start gap-3 text-sm text-white/85">
 											<Check className="mt-0.5 size-4 shrink-0 text-[#d4af37]" />
 											<span>{h}</span>
 										</li>
@@ -263,9 +247,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
 
 						<div className="grid grid-cols-2 gap-3 border-t-2 border-[#d4af37]/30 pt-5 text-xs uppercase tracking-widest text-white/60">
 							<span>Prix</span>
-							<span className="text-right text-white">
-								{formatEuros(product.priceCents)}
-							</span>
+							<span className="text-right text-white">{formatEuros(product.priceCents)}</span>
 							<span>Livraison FR</span>
 							<span className="text-right text-white">4,90 €</span>
 							<span>Délai</span>

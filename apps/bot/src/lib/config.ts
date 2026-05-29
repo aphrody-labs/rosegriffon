@@ -6,9 +6,7 @@ import { resolveGuildId } from "@rose-griffon/types/discord";
 
 export const GUILD_ID = resolveGuildId(Bun.env as Record<string, string | undefined>);
 
-export const SYNC_INTERVAL_MS = Number(
-	Bun.env.SYNC_INTERVAL_MS ?? 30 * 60 * 1000,
-);
+export const SYNC_INTERVAL_MS = Number(Bun.env.SYNC_INTERVAL_MS ?? 30 * 60 * 1000);
 
 export const REDIS_URL = Bun.env.REDIS_URL ?? "redis://127.0.0.1:6379/1";
 
@@ -21,7 +19,7 @@ export function requireEnv(key: string): string {
 }
 
 export const DISCORD_TOKEN = requireEnv(
-	Bun.env.DISCORD_BOT_TOKEN ? "DISCORD_BOT_TOKEN" : "DISCORD_TOKEN",
+	Bun.env.DISCORD_BOT_TOKEN ? "DISCORD_BOT_TOKEN" : "DISCORD_TOKEN"
 );
 
 export const RG_BRAND_HEX = "#a14b3f" as const;

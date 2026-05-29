@@ -1,22 +1,20 @@
-import { afterAll, afterEach, beforeAll } from 'bun:test'
+import { afterAll, afterEach, beforeAll } from "bun:test";
 
-import { setupServer } from 'msw/node'
+import { setupServer } from "msw/node";
 
-import { apiHandlers } from './server/handlers'
+import { apiHandlers } from "./server/handlers";
 
-const server = setupServer(...[
-    ...apiHandlers,
-])
+const server = setupServer(...[...apiHandlers]);
 
-server.events.on('request:start', ({ request }) => {
-    console.log('Outgoing:', request.method, request.url)
-})
+server.events.on("request:start", ({ request }) => {
+	console.log("Outgoing:", request.method, request.url);
+});
 
 beforeAll(() => {
-    server.listen({
-        onUnhandledRequest: 'error',
-    })
-})
+	server.listen({
+		onUnhandledRequest: "error",
+	});
+});
 
-afterAll(() => server.close())
-afterEach(() => server.resetHandlers())
+afterAll(() => server.close());
+afterEach(() => server.resetHandlers());

@@ -1,18 +1,14 @@
-import { PatreonMock } from 'patreon-api.ts'
+import { PatreonMock } from "patreon-api.ts";
 
 const mock = new PatreonMock({
-    validation: {
-        query: true,
-        headers: [
-            'User-Agent',
-            'Content-Type',
-            'Authorization',
-        ],
-    },
-})
+	validation: {
+		query: true,
+		headers: ["User-Agent", "Content-Type", "Authorization"],
+	},
+});
 
 try {
-    mock.getMockAgentReplyCallback()
+	mock.getMockAgentReplyCallback();
 } catch (err) {
-    console.log('Invalid request: ' + err)
+	console.log("Invalid request: " + err);
 }

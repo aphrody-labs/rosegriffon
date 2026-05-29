@@ -57,9 +57,7 @@ export function ItemCard({
 	stats,
 	className,
 }: ItemCardProps) {
-	const imageSrc =
-		resolveAssetUrl(icon) ||
-		(internalCode ? getItemIconUrl(internalCode) : null);
+	const imageSrc = resolveAssetUrl(icon) || (internalCode ? getItemIconUrl(internalCode) : null);
 	const [imgError, setImgError] = useState(false);
 	const catIcon = CATEGORY_ICONS[category] || "backpack";
 
@@ -67,17 +65,12 @@ export function ItemCard({
 	const statEntries = stats
 		? Object.entries(stats).filter(([, v]) => typeof v === "number" && v > 0)
 		: [];
-	const topStat =
-		statEntries.length > 0
-			? statEntries.toSorted(([, a], [, b]) => b - a)[0]
-			: null;
+	const topStat = statEntries.length > 0 ? statEntries.toSorted(([, a], [, b]) => b - a)[0] : null;
 
 	// Tactic effects
 	const isTactic = category === "special_tactics";
 	const effects =
-		isTactic && stats
-			? [stats.effect1, stats.effect2, stats.effect3].filter(Boolean)
-			: [];
+		isTactic && stats ? [stats.effect1, stats.effect2, stats.effect3].filter(Boolean) : [];
 
 	return (
 		<Link
@@ -87,7 +80,7 @@ export function ItemCard({
 				"hover:shadow-lg hover:-translate-y-0.5",
 				"border border-outline-variant/30 bg-surface-container-low hover:bg-surface-container",
 				"rounded-2xl",
-				className,
+				className
 			)}
 		>
 			<div className="p-4 flex gap-4">
@@ -104,11 +97,7 @@ export function ItemCard({
 							onError={() => setImgError(true)}
 						/>
 					) : (
-						<Icon
-							name={catIcon}
-							size={24}
-							className="text-on-surface-variant/30"
-						/>
+						<Icon name={catIcon} size={24} className="text-on-surface-variant/30" />
 					)}
 				</div>
 

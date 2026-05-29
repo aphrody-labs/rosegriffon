@@ -27,10 +27,7 @@ import {
 
 import { findAPIPath, type PatreonMockRouteId } from "./paths";
 
-import {
-	PatreonMockWebhooks,
-	type PatreonMockWebhooksOptions,
-} from "./webhooks";
+import { PatreonMockWebhooks, type PatreonMockWebhooksOptions } from "./webhooks";
 
 import type { If } from "../../../utils/";
 
@@ -152,11 +149,7 @@ export class PatreonMock {
 				? options.data
 				: new PatreonMockData(options.data);
 
-		this.webhooks = new PatreonMockWebhooks(
-			options.webhooks ?? {},
-			this.data,
-			this.cache,
-		);
+		this.webhooks = new PatreonMockWebhooks(options.webhooks ?? {}, this.data, this.cache);
 	}
 
 	/**
@@ -197,21 +190,17 @@ export class PatreonMock {
 		options?: {
 			includeOrigin?: boolean;
 			query?: string;
-		},
+		}
 	): string {
 		return (
 			(options?.includeOrigin ? PatreonMock.origin : "") +
 			PatreonMock.path +
 			path +
-			(options?.query
-				? (!options.query.startsWith("?") ? "?" : "") + options.query
-				: "")
+			(options?.query ? (!options.query.startsWith("?") ? "?" : "") + options.query : "")
 		);
 	}
 
-	private static isWriteResourceType(
-		type: Type | ItemType,
-	): type is WriteResourceType {
+	private static isWriteResourceType(type: Type | ItemType): type is WriteResourceType {
 		return [Type.Live, Type.Webhook].includes(<Type>type);
 	}
 
@@ -222,27 +211,22 @@ export class PatreonMock {
 			typeof headers.entries === "function"
 				? [...headers.entries()].reduce<Record<string, string>>(
 						(obj, [key, value]) => ({ ...obj, [key]: value }),
-						{},
+						{}
 					)
 				: (headers as Record<string, string>);
 
-		const missing = (
-			Array.isArray(validation) ? validation : Object.keys(validation)
-		).filter(
-			(name) => !headersRecord[name] && !headersRecord[name.toLowerCase()],
+		const missing = (Array.isArray(validation) ? validation : Object.keys(validation)).filter(
+			(name) => !headersRecord[name] && !headersRecord[name.toLowerCase()]
 		);
 
 		if (missing.length > 0) {
-			throw new Error(
-				"Missing required header on mocked request: " + missing.join(","),
-			);
+			throw new Error("Missing required header on mocked request: " + missing.join(","));
 		}
 
 		if (!Array.isArray(validation)) {
 			for (const [name, value] of Object.entries(validation)) {
 				const header = headersRecord[name] ?? headersRecord[name.toLowerCase()];
-				if (header !== value)
-					throw new Error("Invalid header on mocked request: " + name);
+				if (header !== value) throw new Error("Invalid header on mocked request: " + name);
 			}
 		}
 	}
@@ -251,33 +235,22 @@ export class PatreonMock {
 		const { properties } = QueryBuilder["getResource"](key);
 
 		if (!attributes.every((a) => !properties.includes(<never>a))) {
-			throw new Error(
-				"Invalid properties found on " + key + ":" + attributes.join(","),
-			);
+			throw new Error("Invalid properties found on " + key + ":" + attributes.join(","));
 		}
 	}
 
 	private parseQuery<T extends ItemType>(
 		params: URLSearchParams,
-		resource: T,
-	): PatreonMockDataQuery<
-		T,
-		RelationshipFields<T>,
-		RelationshipMap<T, RelationshipFields<T>>
-	> {
+		resource: T
+	): PatreonMockDataQuery<T, RelationshipFields<T>, RelationshipMap<T, RelationshipFields<T>>> {
 		const include: string[] = params.get("include")?.split(",") ?? [];
 		const { relationships } = QueryBuilder["getResource"](resource);
 		const includedKeys: ItemType[] = include
 			.map((key) => relationships.find((r) => r.name === key)?.resource)
 			.filter((n): n is NonNullable<typeof n> => n != undefined);
 
-		if (
-			this.options.validation?.query &&
-			includedKeys.some((k) => k == undefined)
-		) {
-			throw new Error(
-				"Unable to find relationships in query params: " + include.join(","),
-			);
+		if (this.options.validation?.query && includedKeys.some((k) => k == undefined)) {
+			throw new Error("Unable to find relationships in query params: " + include.join(","));
 		}
 
 		const count = params.get("page[count]"),
@@ -286,31 +259,26 @@ export class PatreonMock {
 			.get("sort")
 			?.split(",")
 			.map((key) =>
-				key.startsWith("-")
-					? { key: key.slice(1), descending: true }
-					: { key, descending: false },
+				key.startsWith("-") ? { key: key.slice(1), descending: true } : { key, descending: false }
 			);
 
 		return {
 			includes: <RelationshipFields<T>[]>include,
-			attributes: includedKeys
-				.concat(resource)
-				.reduce<RelationshipMap<T, RelationshipFields<T>>>(
-					(obj, key) => {
-						const attributes: string[] =
-							params.get(`fields[${key}]`)?.split(",") ?? [];
+			attributes: includedKeys.concat(resource).reduce<RelationshipMap<T, RelationshipFields<T>>>(
+				(obj, key) => {
+					const attributes: string[] = params.get(`fields[${key}]`)?.split(",") ?? [];
 
-						if (this.options.validation?.query) {
-							this.validateProperties(key, attributes);
-						}
+					if (this.options.validation?.query) {
+						this.validateProperties(key, attributes);
+					}
 
-						return {
-							...obj,
-							[key]: attributes,
-						};
-					},
-					{} as RelationshipMap<T, RelationshipFields<T>>,
-				),
+					return {
+						...obj,
+						[key]: attributes,
+					};
+				},
+				{} as RelationshipMap<T, RelationshipFields<T>>
+			),
 			requestOptions: {
 				...(count ? { count: +count } : {}),
 				...(cursor ? { cursor } : {}),
@@ -321,16 +289,14 @@ export class PatreonMock {
 
 	private getDefaultResponseStatus(route: Route, method?: string) {
 		const options = route.methods.find((m) => {
-			return (
-				m.method.toLowerCase() === (method ?? RequestMethod.Get).toLowerCase()
-			);
+			return m.method.toLowerCase() === (method ?? RequestMethod.Get).toLowerCase();
 		});
 
 		return options && "responseStatus" in options
 			? options.responseStatus
 			: "response" in route &&
-					"status" in route.response &&
-					typeof route.response.status === "number"
+				  "status" in route.response &&
+				  typeof route.response.status === "number"
 				? route.response.status
 				: 200;
 	}
@@ -341,8 +307,7 @@ export class PatreonMock {
 		const apiPath = findAPIPath(pathname, {
 			apiPath: PatreonMock.path,
 		});
-		if (apiPath == undefined)
-			throw new Error("No API route found to mock for: " + url);
+		if (apiPath == undefined) throw new Error("No API route found to mock for: " + url);
 
 		return {
 			...apiPath,
@@ -354,7 +319,7 @@ export class PatreonMock {
 		route: ParsedRoute,
 		options?: PatreonMockHandlerOptions & {
 			resourceId?: string;
-		},
+		}
 	): string {
 		const { param, path, searchParams } = route;
 
@@ -380,7 +345,7 @@ export class PatreonMock {
 					? this.cache.getRelatedToResource(
 							path.mainResource ?? Type.Campaign,
 							id,
-							path.resource as any,
+							path.resource as any
 						)
 					: null;
 
@@ -389,16 +354,14 @@ export class PatreonMock {
 					items: cached.map(({ id, type }) => {
 						// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 						const { item, relationships } = this.cache.get(type, id)!;
-						const included = this.cache
-							.getRelationships(type, relationships)
-							.items.map(
-								(item) =>
-									<never>{
-										id: item.id,
-										type: item.type,
-										attributes: item.item.item,
-									},
-							);
+						const included = this.cache.getRelationships(type, relationships).items.map(
+							(item) =>
+								<never>{
+									id: item.id,
+									type: item.type,
+									attributes: item.item.item,
+								}
+						);
 
 						return {
 							item: {
@@ -422,43 +385,32 @@ export class PatreonMock {
 				return JSON.stringify(payload);
 			} else return unknownCacheResponse;
 		} else {
-			const cached =
-				id && useCache ? this.cache.getResource(path.resource, id) : null;
+			const cached = id && useCache ? this.cache.getResource(path.resource, id) : null;
 
 			if (id && cached) {
-				const payload = this.data.getSingleResponsePayload(
-					path.resource,
-					query,
-					{
-						id,
-						item: cached.data.attributes,
-						relatedItems: cached.included as never[],
-					},
-				);
+				const payload = this.data.getSingleResponsePayload(path.resource, query, {
+					id,
+					item: cached.data.attributes,
+					relatedItems: cached.included as never[],
+				});
 
 				return JSON.stringify(payload);
 			} else if (useRandom) {
 				const id = this.data.createId(path.resource);
 				const attributes = this.data.random[path.resource](id);
 
-				const payload = this.data.getSingleResponsePayload(
-					path.resource,
-					query,
-					{
-						id,
-						item: attributes,
-						relatedItems: this.data.createRelatedItems(path.resource),
-					},
-				);
+				const payload = this.data.getSingleResponsePayload(path.resource, query, {
+					id,
+					item: attributes,
+					relatedItems: this.data.createRelatedItems(path.resource),
+				});
 
 				return JSON.stringify(payload);
 			} else return unknownCacheResponse;
 		}
 	}
 
-	private getResponseHeaders(
-		headers?: Record<string, string>,
-	): Record<string, string> {
+	private getResponseHeaders(headers?: Record<string, string>): Record<string, string> {
 		return {
 			...this.data.createHeaders(),
 			...(this.options.responseOptions?.headers ?? {}),
@@ -474,14 +426,12 @@ export class PatreonMock {
 			body: string | null;
 		},
 		options: PatreonMockHandlerOptions,
-		transform: (response: PatreonMockHandlerDefaultResponse) => T,
+		transform: (response: PatreonMockHandlerDefaultResponse) => T
 	): T {
 		this.validateHeaders(request.headers);
 		const route = this.parseAPIPath(request.url);
 		const headers = this.getResponseHeaders(options.headers);
-		const status =
-			options.statusCode ??
-			this.getDefaultResponseStatus(route.path, request.method);
+		const status = options.statusCode ?? this.getDefaultResponseStatus(route.path, request.method);
 
 		const resourceType = route.path.resource;
 		// If no id is found in the route:
@@ -505,7 +455,7 @@ export class PatreonMock {
 					resource: resourceType,
 					id: resourceId,
 					mockAttributes,
-				},
+				}
 			);
 		}
 
@@ -535,21 +485,16 @@ export class PatreonMock {
 			});
 		} else {
 			const requestMethod = request.method.toUpperCase() as RequestMethod;
-			const requestBody = parseRequestBody<
-				WriteResourcePayload<WriteResourceType, RequestMethod>
-			>(request.body);
-			const mockedResponseBody:
-				| WriteResourceResponse<WriteResourceType>
-				| undefined = requestBody
+			const requestBody = parseRequestBody<WriteResourcePayload<WriteResourceType, RequestMethod>>(
+				request.body
+			);
+			const mockedResponseBody: WriteResourceResponse<WriteResourceType> | undefined = requestBody
 				? mockAttributes[requestMethod]?.(requestBody)
 				: undefined;
 
 			return transform({
 				// TODO: the response body should be different from the request body, right?
-				body:
-					(mockedResponseBody
-						? JSON.stringify(mockedResponseBody)
-						: undefined) ?? request.body,
+				body: (mockedResponseBody ? JSON.stringify(mockedResponseBody) : undefined) ?? request.body,
 				headers,
 				status,
 			});
@@ -577,16 +522,14 @@ export class PatreonMock {
 					body: callbackOptions.body?.toString() ?? null,
 					headers: (callbackOptions.headers ?? {}) as Record<string, string>,
 					method: callbackOptions.method,
-					url:
-						(callbackOptions.origin ?? PatreonMock.origin) +
-						callbackOptions.path,
+					url: (callbackOptions.origin ?? PatreonMock.origin) + callbackOptions.path,
 				},
 				options ?? {},
 				({ body, headers, status }) => ({
 					statusCode: status,
 					...(body ? { data: body } : {}),
 					responseOptions: { headers },
-				}),
+				})
 			);
 		}) satisfies import("undici-types/mock-interceptor").MockInterceptor.MockReplyOptionsCallback;
 	}
@@ -605,58 +548,44 @@ export class PatreonMock {
 	 * @see https://patreon-api.pages.dev/guide/features/sandbox#msw
 	 * @returns Handlers for each route that returns a successful response.
 	 */
-	public getMockHandlers<
-		R = PatreonMockHandlerDefaultResponse,
-		T extends boolean = false,
-	>(
+	public getMockHandlers<R = PatreonMockHandlerDefaultResponse, T extends boolean = false>(
 		options?: PatreonMockHandlerOptions & {
 			pathParam?: string;
 			includeOrigin?: boolean;
 			transformResponse?: (response: PatreonMockHandlerDefaultResponse) => R;
 			transformToResponse?: T;
-		},
+		}
 	) {
-		const {
-			pathParam,
-			includeOrigin,
-			transformResponse,
-			transformToResponse,
-			...handlerOptions
-		} = options ?? {};
+		const { pathParam, includeOrigin, transformResponse, transformToResponse, ...handlerOptions } =
+			options ?? {};
 
-		type Handlers = Record<
-			PatreonMockRouteId,
-			PatreonMockHandler<If<T, Response, R>>
-		>;
+		type Handlers = Record<PatreonMockRouteId, PatreonMockHandler<If<T, Response, R>>>;
 
 		return paths.reduce<Handlers>((handlers, route) => {
 			return {
 				...handlers,
 				...route.methods.reduce<Handlers>((obj, { method, id }) => {
-					const handler: PatreonMockHandler<If<T, Response, R>>["handler"] =
-						async (request) => {
-							return this.handleMockRequest(
-								{
-									body: shouldIncludeRequestBody(
-										method.toUpperCase() as RequestMethod,
-									)
-										? ((await request.text?.()) ?? null)
-										: null,
-									headers: request.headers,
-									url: request.url,
-									method,
-								},
-								handlerOptions,
-								(data): If<T, Response, R> => {
-									return <If<T, Response, R>>(transformToResponse
-										? new Response(data.body, {
-												headers: data.headers,
-												status: data.status,
-											})
-										: (transformResponse?.(data) ?? <R>data));
-								},
-							);
-						};
+					const handler: PatreonMockHandler<If<T, Response, R>>["handler"] = async (request) => {
+						return this.handleMockRequest(
+							{
+								body: shouldIncludeRequestBody(method.toUpperCase() as RequestMethod)
+									? ((await request.text?.()) ?? null)
+									: null,
+								headers: request.headers,
+								url: request.url,
+								method,
+							},
+							handlerOptions,
+							(data): If<T, Response, R> => {
+								return <If<T, Response, R>>(transformToResponse
+									? new Response(data.body, {
+											headers: data.headers,
+											status: data.status,
+										})
+									: (transformResponse?.(data) ?? <R>data));
+							}
+						);
+					};
 
 					return {
 						...obj,

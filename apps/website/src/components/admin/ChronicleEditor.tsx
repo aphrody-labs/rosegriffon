@@ -27,11 +27,9 @@ const ReactQuill = dynamic(
 		return mod.default || mod;
 	},
 	{
-		loading: () => (
-			<div className="h-[500px] bg-muted animate-pulse rounded-md" />
-		),
+		loading: () => <div className="h-[500px] bg-muted animate-pulse rounded-md" />,
 		ssr: false,
-	},
+	}
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 ) as any; // Cast as any because dynamic import typing is complex with react-quill-new
 
@@ -57,27 +55,18 @@ interface ChronicleEditorProps {
 	onCancel: () => void;
 }
 
-export function ChronicleEditor({
-	initialData,
-	onSave,
-	onCancel,
-}: ChronicleEditorProps) {
+export function ChronicleEditor({ initialData, onSave, onCancel }: ChronicleEditorProps) {
 	const [title, setTitle] = useState(initialData?.title || "");
 	const [slug, setSlug] = useState(initialData?.slug || "");
 	const [excerpt, setExcerpt] = useState(initialData?.excerpt || "");
-	const [category, setCategory] = useState(
-		initialData?.category || "actualites",
-	);
-	const [featuredImage, setFeaturedImage] = useState(
-		initialData?.featured_image || "",
-	);
+	const [category, setCategory] = useState(initialData?.category || "actualites");
+	const [featuredImage, setFeaturedImage] = useState(initialData?.featured_image || "");
 	const [content, setContent] = useState(initialData?.content || "");
 	const [published] = useState(initialData?.published || false);
 	const [isSaving, setIsSaving] = useState(false);
 	const [isPreview, setIsPreview] = useState(false);
 	const [isMediaDialogOpen, setIsMediaDialogOpen] = useState(false);
-	const [isUploadingFeaturedImage, setIsUploadingFeaturedImage] =
-		useState(false);
+	const [isUploadingFeaturedImage, setIsUploadingFeaturedImage] = useState(false);
 	const [errors, setErrors] = useState<string[]>([]);
 	const [hasDraft, setHasDraft] = useState(false);
 
@@ -142,9 +131,15 @@ export function ChronicleEditor({
 	const validateForm = (): boolean => {
 		const newErrors: string[] = [];
 
-		if (!title.trim()) {newErrors.push("Le titre est requis");}
-		if (!slug.trim()) {newErrors.push("Le slug est requis");}
-		if (!excerpt.trim()) {newErrors.push("Le résumé est requis");}
+		if (!title.trim()) {
+			newErrors.push("Le titre est requis");
+		}
+		if (!slug.trim()) {
+			newErrors.push("Le slug est requis");
+		}
+		if (!excerpt.trim()) {
+			newErrors.push("Le résumé est requis");
+		}
 
 		if (!content || content === "<p><br></p>" || content.trim().length === 0) {
 			newErrors.push("Le contenu est requis");
@@ -155,7 +150,9 @@ export function ChronicleEditor({
 	};
 
 	const handleSaveDraft = async () => {
-		if (!validateForm()) {return;}
+		if (!validateForm()) {
+			return;
+		}
 
 		setIsSaving(true);
 		setErrors([]);
@@ -178,7 +175,9 @@ export function ChronicleEditor({
 	};
 
 	const handlePublish = async () => {
-		if (!validateForm()) {return;}
+		if (!validateForm()) {
+			return;
+		}
 
 		setIsSaving(true);
 		setErrors([]);
@@ -250,8 +249,7 @@ export function ChronicleEditor({
 					<AlertCircle className="size-4 text-sky-600 dark:text-sky-400" />
 					<AlertDescription className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
 						<span className="text-sm text-foreground">
-							Un brouillon non enregistré a été trouvé. Voulez-vous le restaurer
-							?
+							Un brouillon non enregistré a été trouvé. Voulez-vous le restaurer ?
 						</span>
 						<div className="flex gap-2">
 							<Button
@@ -392,19 +390,14 @@ export function ChronicleEditor({
 
 					{/* Infos de publication */}
 					<div className="bg-muted/30 p-3 sm:p-4 rounded-lg border space-y-2 sm:space-y-3">
-						<h3 className="font-semibold text-sm text-foreground/80">
-							État de publication
-						</h3>
+						<h3 className="font-semibold text-sm text-foreground/80">État de publication</h3>
 						<div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-xs sm:text-sm">
 							<span className="text-muted-foreground">
 								Statut:{" "}
-								<span className="font-medium">
-									{published ? "🟢 Publié" : "🟡 Brouillon"}
-								</span>
+								<span className="font-medium">{published ? "🟢 Publié" : "🟡 Brouillon"}</span>
 							</span>
 							<span className="text-muted-foreground">
-								Caractères:{" "}
-								<span className="font-medium">{content.length}</span>
+								Caractères: <span className="font-medium">{content.length}</span>
 							</span>
 						</div>
 					</div>
@@ -415,7 +408,9 @@ export function ChronicleEditor({
 				open={isMediaDialogOpen}
 				onOpenChange={(open) => {
 					setIsMediaDialogOpen(open);
-					if (!open) {setIsUploadingFeaturedImage(false);}
+					if (!open) {
+						setIsUploadingFeaturedImage(false);
+					}
 				}}
 				onInsert={handleMediaInsert}
 			/>

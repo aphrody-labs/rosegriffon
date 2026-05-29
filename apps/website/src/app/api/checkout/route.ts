@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
-import { NextResponse } from 'next/server';
-import type { NextRequest } from 'next/server';
+import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
 
 import { getStripeCouponForUser } from "@/lib/patreon/discount";
 import { getStripe } from "@/lib/shop/stripe";
@@ -29,22 +29,19 @@ export async function POST(req: NextRequest) {
 	} catch (error) {
 		console.warn(
 			"[checkout] Better Auth session retrieval failed — anonymous checkout",
-			error instanceof Error ? error.message : String(error),
+			error instanceof Error ? error.message : String(error)
 		);
 	}
 
 	const couponId = userId ? await getStripeCouponForUser(userId) : null;
 
 	const origin =
-		req.headers.get("origin") ??
-		process.env.NEXT_PUBLIC_SITE_URL ??
-		"https://rosegriffon.fr";
+		req.headers.get("origin") ?? process.env.NEXT_PUBLIC_SITE_URL ?? "https://rosegriffon.fr";
 
 	// Idempotency key par requête — protège contre double-clic / retry réseau.
 	// Inclut l'identifiant user + signature du panier pour différencier des
 	// Tentatives légitimement distinctes.
-	const idempotencyKey =
-		req.headers.get("x-idempotency-key") ?? `co_${randomUUID()}`;
+	const idempotencyKey = req.headers.get("x-idempotency-key") ?? `co_${randomUUID()}`;
 
 	const session = await stripe.checkout.sessions.create(
 		{
@@ -60,19 +57,7 @@ export async function POST(req: NextRequest) {
 			billing_address_collection: "required",
 			phone_number_collection: { enabled: true },
 			shipping_address_collection: {
-				allowed_countries: [
-					"FR",
-					"BE",
-					"CH",
-					"LU",
-					"DE",
-					"ES",
-					"IT",
-					"NL",
-					"PT",
-					"GB",
-					"CA",
-				],
+				allowed_countries: ["FR", "BE", "CH", "LU", "DE", "ES", "IT", "NL", "PT", "GB", "CA"],
 			},
 			shipping_options: [
 				{
@@ -119,9 +104,7 @@ export async function POST(req: NextRequest) {
 			})),
 			discounts: couponId ? [{ coupon: couponId }] : undefined,
 			metadata: {
-				cart_signature: cart.items
-					.map((i) => `${i.slug}:${i.variantId ?? "_"}x${i.qty}`)
-					.join("|"),
+				cart_signature: cart.items.map((i) => `${i.slug}:${i.variantId ?? "_"}x${i.qty}`).join("|"),
 				patron_discount: couponId ? "yes" : "no",
 				source: "rosegriffon.fr/shop",
 				user_id: userId ?? "anonymous",
@@ -129,7 +112,7 @@ export async function POST(req: NextRequest) {
 			success_url: `${origin}/shop/merci?session_id={CHECKOUT_SESSION_ID}`,
 			cancel_url: `${origin}/shop/panier`,
 		},
-		{ idempotencyKey },
+		{ idempotencyKey }
 	);
 
 	return NextResponse.json({ url: session.url });

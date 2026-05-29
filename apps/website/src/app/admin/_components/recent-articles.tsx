@@ -50,10 +50,7 @@ export function RecentArticles({ articles }: { articles: RecentArticle[] }) {
 													{a.title}
 												</p>
 												{isDraft && (
-													<Badge
-														variant="outline"
-														className="shrink-0 text-xs"
-													>
+													<Badge variant="outline" className="shrink-0 text-xs">
 														Brouillon
 													</Badge>
 												)}

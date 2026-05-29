@@ -1,17 +1,17 @@
 {
-  "extends": "../config/tsconfig-base.json",
-  "compilerOptions": {
-    "outDir": "dist",
-    "rootDir": "src",
-    "noEmit": false,
-    "declaration": true,
-    "strict": true,
-    "strictNullChecks": true,
-    "noImplicitAny": true,
-    "noImplicitOverride": true,
-    "noUncheckedIndexedAccess": false,
-    "types": ["bun"]
-  },
-  "include": ["src/**/*.ts"],
-  "exclude": ["node_modules", "dist", "src/**/*.test.ts"]
+	"extends": "../config/tsconfig-base.json",
+	"compilerOptions": {
+		"outDir": "dist",
+		"rootDir": "src",
+		"noEmit": false,
+		"declaration": true,
+		"strict": true,
+		"strictNullChecks": true,
+		"noImplicitAny": true,
+		"noImplicitOverride": true,
+		"noUncheckedIndexedAccess": false,
+		"types": ["bun"]
+	},
+	"include": ["src/**/*.ts"],
+	"exclude": ["node_modules", "dist", "src/**/*.test.ts"]
 }

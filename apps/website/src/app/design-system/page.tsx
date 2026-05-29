@@ -205,19 +205,13 @@ export default function DesignSystemShowcase() {
 								priority
 							/>
 						</div>
-						<p
-							className="text-fluid-body-lg leading-relaxed"
-							style={{ color: "#f5e9d4" }}
-						>
+						<p className="text-fluid-body-lg leading-relaxed" style={{ color: "#f5e9d4" }}>
 							Catalogue vivant des 55 composants{" "}
 							<strong style={{ color: RG_OR }}>@rose-griffon/ui</strong>, palette{" "}
-							<strong style={{ color: RG_OR }}>MD3</strong> et 4 thèmes — Roy,
-							Gaëlle, Azalée light & dark.
+							<strong style={{ color: RG_OR }}>MD3</strong> et 4 thèmes — Roy, Gaëlle, Azalée light
+							& dark.
 						</p>
-						<dl
-							className="grid grid-cols-3 gap-3 border-t-2 pt-6"
-							style={{ borderColor: RG_OR }}
-						>
+						<dl className="grid grid-cols-3 gap-3 border-t-2 pt-6" style={{ borderColor: RG_OR }}>
 							{[
 								{ k: "Composants", v: "58" },
 								{ k: "Tokens", v: "212" },
@@ -649,10 +643,7 @@ export default function DesignSystemShowcase() {
 					<SectionLabel kicker="04 · Shape" title="CORNER SCALE" />
 					<div className="mt-12 grid grid-cols-2 gap-4 sm:grid-cols-4 lg:grid-cols-7">
 						{SHAPE_SCALE.map((s) => (
-							<div
-								key={s.name}
-								className="group flex flex-col items-center gap-3"
-							>
+							<div key={s.name} className="group flex flex-col items-center gap-3">
 								<div
 									className="grid aspect-square w-full place-items-center transition-transform motion-safe:duration-200 group-hover:-translate-y-1 group-hover:rotate-3"
 									style={{
@@ -718,10 +709,7 @@ export default function DesignSystemShowcase() {
 										className="flex items-center gap-3 text-[11px]"
 										style={{ fontFamily: "var(--font-cartoon-ds), sans-serif" }}
 									>
-										<span
-											className="w-20 uppercase tracking-[0.16em]"
-											style={{ color: RG_OR }}
-										>
+										<span className="w-20 uppercase tracking-[0.16em]" style={{ color: RG_OR }}>
 											{row.tier}
 										</span>
 										{row.values.map((ms) => (
@@ -795,11 +783,7 @@ export default function DesignSystemShowcase() {
 											>
 												{e.name}
 											</span>
-											<span
-												style={{ color: "#f5e9d4", fontFamily: "monospace" }}
-											>
-												{e.curve}
-											</span>
+											<span style={{ color: "#f5e9d4", fontFamily: "monospace" }}>{e.curve}</span>
 										</div>
 										<span
 											className="block size-4 rounded-full motion-safe:group-hover:translate-x-24"
@@ -895,14 +879,10 @@ export default function DesignSystemShowcase() {
 							>
 								Avatars chibi · style maison
 							</p>
-							<p
-								className="mt-3 text-fluid-body-md"
-								style={{ color: "#f5e9d4" }}
-							>
-								Toute l&apos;identité RG repose sur des mascots illustrés à la
-								main (Roy, Gaëlle, Mark, Achillea…). Le design system étend ce
-								langage aux composants : bordures dorées 2px, dropshadows durs,
-								palette marine / or / brique.
+							<p className="mt-3 text-fluid-body-md" style={{ color: "#f5e9d4" }}>
+								Toute l&apos;identité RG repose sur des mascots illustrés à la main (Roy, Gaëlle,
+								Mark, Achillea…). Le design system étend ce langage aux composants : bordures dorées
+								2px, dropshadows durs, palette marine / or / brique.
 							</p>
 						</div>
 					</div>
@@ -1010,13 +990,7 @@ function SectionLabel({ kicker, title }: { kicker: string; title: string }) {
 	);
 }
 
-function ComponentTile({
-	title,
-	children,
-}: {
-	title: string;
-	children: React.ReactNode;
-}) {
+function ComponentTile({ title, children }: { title: string; children: React.ReactNode }) {
 	return (
 		<div className="flex flex-col gap-4">
 			<span

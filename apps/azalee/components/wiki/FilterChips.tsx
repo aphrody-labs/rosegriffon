@@ -22,12 +22,7 @@ export interface FilterChipsProps {
 	hideLabel?: boolean;
 }
 
-export function FilterChips({
-	paramName,
-	options,
-	className,
-	hideLabel,
-}: FilterChipsProps) {
+export function FilterChips({ paramName, options, className, hideLabel }: FilterChipsProps) {
 	const { isPending, navigate, searchParams } = useFilterNavigation();
 	const currentValue = searchParams.get(paramName);
 
@@ -46,13 +41,12 @@ export function FilterChips({
 			className={cn(
 				"flex flex-wrap gap-2",
 				isPending && "pointer-events-none opacity-70",
-				className,
+				className
 			)}
 		>
 			{options.map((option) => {
 				const isSelected = currentValue === option.value;
-				const isImageOnly =
-					hideLabel && (option.imageIcon || option.commonSprite || option.icon);
+				const isImageOnly = hideLabel && (option.imageIcon || option.commonSprite || option.icon);
 
 				return (
 					<button
@@ -73,16 +67,11 @@ export function FilterChips({
 									: "bg-surface text-on-surface-variant border-outline-variant hover:bg-on-surface/[0.08]"),
 							isImageOnly &&
 								isSelected &&
-								"brightness-125 scale-110 drop-shadow-[0_0_8px_rgba(var(--md-sys-color-primary-rgb),0.5)]",
+								"brightness-125 scale-110 drop-shadow-[0_0_8px_rgba(var(--md-sys-color-primary-rgb),0.5)]"
 						)}
 					>
 						{option.imageIcon ? (
-							<div
-								className={cn(
-									"relative",
-									isImageOnly ? "size-10" : "size-6",
-								)}
-							>
+							<div className={cn("relative", isImageOnly ? "size-10" : "size-6")}>
 								<Image
 									src={option.imageIcon}
 									fill

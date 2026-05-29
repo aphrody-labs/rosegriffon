@@ -45,6 +45,7 @@ Tolère les fautes de frappe et propose des corrections.
 **Algorithme**: Calcule la distance entre chaînes et suggère les correspondances avec score > 0.6
 
 **Implémentation**:
+
 - `levenshteinDistance()` - Calcul de distance
 - `findClosestMatch()` - Recherche du meilleur match
 
@@ -91,18 +92,18 @@ const abortController = new AbortController();
 import { searchGlobal } from "@/app/actions/search";
 
 export default async function Page() {
-  const results = await searchGlobal("Endou", "chara");
+	const results = await searchGlobal("Endou", "chara");
 
-  return (
-    <ul>
-      {results.map(r => (
-        <li key={r.id}>
-          {r.title}
-          {r.matchedLanguage && <span>{r.matchedLanguage}</span>}
-        </li>
-      ))}
-    </ul>
-  );
+	return (
+		<ul>
+			{results.map((r) => (
+				<li key={r.id}>
+					{r.title}
+					{r.matchedLanguage && <span>{r.matchedLanguage}</span>}
+				</li>
+			))}
+		</ul>
+	);
 }
 ```
 
@@ -114,12 +115,12 @@ export default async function Page() {
 import { GlobalSearch } from "@/components/wiki/GlobalSearch";
 
 export default function Layout({ children }) {
-  return (
-    <div>
-      <GlobalSearch />
-      {children}
-    </div>
-  );
+	return (
+		<div>
+			<GlobalSearch />
+			{children}
+		</div>
+	);
 }
 ```
 
@@ -131,7 +132,7 @@ Dans `GlobalSearch.tsx`, ligne 119:
 
 ```tsx
 const timer = setTimeout(async () => {
-  // ...
+	// ...
 }, 300); // 300ms par défaut
 ```
 
@@ -149,7 +150,7 @@ Dans `fuzzy-match.ts`, `isSimilar()`:
 
 ```tsx
 export function isSimilar(a: string, b: string, threshold = 0.7): boolean {
-  return similarityScore(a, b) >= threshold;
+	return similarityScore(a, b) >= threshold;
 }
 ```
 
@@ -158,37 +159,46 @@ export function isSimilar(a: string, b: string, threshold = 0.7): boolean {
 ### `fuzzy-match.ts`
 
 #### `levenshteinDistance(a: string, b: string): number`
+
 Calcule la distance de Levenshtein entre deux chaînes.
 
 #### `similarityScore(a: string, b: string): number`
+
 Retourne un score de similarité (0-1).
 
 #### `detectMatchedLanguage(query: string, names: Names): "FR" | "EN" | "JP" | null`
+
 Détecte quelle langue a matché la requête.
 
 #### `highlightMatches(text: string, query: string): HighlightPart[]`
+
 Retourne les parties de texte avec highlights (pour le rendu UI).
 
 ### `smart-search.ts`
 
 #### `smartSearch(query: string, rawResults: GlobalSearchResult[], config?: SmartSearchConfig): Promise<SmartSearchResult[]>`
+
 Service de recherche intelligent avec toutes les améliorations.
 
 **Config options**:
+
 - `context`: "chara" | "skill" | "aura" | "passive" | "team" | "global"
 - `limit`: nombre max de résultats (défaut: 20)
 - `enableSuggestions`: activer "Vouliez-vous dire..." (défaut: true)
 - `minScore`: score minimum pour filtrer (défaut: 0)
 
 #### `clearSearchCache(): void`
+
 Vide le cache manuellement.
 
 ### `search.ts` (Server Actions)
 
 #### `searchGlobal(query: string, context?: SearchContext): Promise<EnhancedSearchResult[]>`
+
 Server Action principale pour la recherche.
 
 #### `getSearchSuggestions(query: string): Promise<string[]>`
+
 Retourne des suggestions d'autocomplétion.
 
 ## Material Design 3 Integration
@@ -197,24 +207,24 @@ Le composant `GlobalSearch.tsx` utilise les tokens MD3:
 
 ```tsx
 // Couleurs
---md-sys-color-primary
---md-sys-color-on-surface
---md-sys-color-secondary-container
+--md - sys - color - primary;
+--md - sys - color - on - surface;
+--md - sys - color - secondary - container;
 
 // Motion
---md-sys-motion-duration-short2
---md-sys-motion-easing-standard
+--md - sys - motion - duration - short2;
+--md - sys - motion - easing - standard;
 
 // State layers
-hover:bg-on-surface/[0.08]  // 8% opacity
+hover: bg - on - surface / [0.08]; // 8% opacity
 ```
 
 ### Badges de Langue
 
 ```tsx
-FR: tertiary-container   (Teal)
-EN: secondary-container  (Red)
-JP: primary-container    (Gold)
+FR: tertiary - container(Teal);
+EN: secondary - container(Red);
+JP: primary - container(Gold);
 ```
 
 ## Performance

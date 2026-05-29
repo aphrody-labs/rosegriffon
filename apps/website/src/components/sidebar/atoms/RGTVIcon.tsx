@@ -8,11 +8,11 @@ import { cn } from "@/lib/utils";
  * Simplifié pour utiliser width/height pour une taille fixe.
  */
 export const RGTVIcon = ({ className }: { className?: string }) => (
-    <Image
-      src="/rgtv/rgtv.webp"
-      alt="Rose Griffon TV"
-      width={24} // Corresponds à la classe w-6
-      height={24} // Corresponds à la classe h-6
-      className={cn("rounded-sm", className)}
-    />
-  );
+	<Image
+		src="/rgtv/rgtv.webp"
+		alt="Rose Griffon TV"
+		width={24} // Corresponds à la classe w-6
+		height={24} // Corresponds à la classe h-6
+		className={cn("rounded-sm", className)}
+	/>
+);

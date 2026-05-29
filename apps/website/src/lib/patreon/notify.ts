@@ -43,7 +43,7 @@ function buildContent(stage: ReminderStage, fullName?: string): MailContent {
 					greeting,
 					`<p>Nous quittons Patreon. Pour ne rien perdre (rôle Discord, mentions, contenus), liez votre compte Patreon à Rose Griffon en 2 clics.</p>
 					<p><a href="${link}" class="cta">Lier mon compte → ${link.replace("https://", "")}</a></p>
-					<p>Vous conservez le <strong>même prix pendant 12 mois</strong>. Merci pour votre soutien.</p>`,
+					<p>Vous conservez le <strong>même prix pendant 12 mois</strong>. Merci pour votre soutien.</p>`
 				),
 			};
 		}
@@ -56,7 +56,7 @@ function buildContent(stage: ReminderStage, fullName?: string): MailContent {
 				html: htmlWrap(
 					greeting,
 					`<p>Il vous reste <strong>45 jours</strong> pour réactiver votre soutien et conserver votre rôle Discord + le même tarif Patreon.</p>
-					<p><a href="${link}" class="cta">Réactiver mon soutien</a></p>`,
+					<p><a href="${link}" class="cta">Réactiver mon soutien</a></p>`
 				),
 			};
 		}
@@ -70,7 +70,7 @@ function buildContent(stage: ReminderStage, fullName?: string): MailContent {
 					greeting,
 					`<p>Dans <strong>15 jours</strong>, nous arrêtons définitivement Patreon.</p>
 					<p><strong>1 mois offert</strong> pour toute réactivation avant ce délai.</p>
-					<p><a href="${link}" class="cta">Réactiver maintenant</a></p>`,
+					<p><a href="${link}" class="cta">Réactiver maintenant</a></p>`
 				),
 			};
 		}
@@ -83,7 +83,7 @@ function buildContent(stage: ReminderStage, fullName?: string): MailContent {
 				html: htmlWrap(
 					greeting,
 					`<p>Dernière chance de conserver votre rôle Discord et votre tarif Patreon.</p>
-					<p><a href="${link}" class="cta">Je réactive en 2 clics</a></p>`,
+					<p><a href="${link}" class="cta">Je réactive en 2 clics</a></p>`
 				),
 			};
 		}
@@ -106,7 +106,7 @@ function htmlWrap(greeting: string, body: string): string {
 export async function sendReminder(
 	email: string,
 	stage: ReminderStage,
-	fullName?: string,
+	fullName?: string
 ): Promise<void> {
 	const content = buildContent(stage, fullName);
 	await transporter.sendMail({
@@ -126,11 +126,11 @@ export interface ReminderRunSummary {
 	failed: number;
 }
 
-export async function runReminderBatch(
-	stage: ReminderStage,
-): Promise<ReminderRunSummary> {
+export async function runReminderBatch(stage: ReminderStage): Promise<ReminderRunSummary> {
 	const supabase = createAdminClient();
-	if (!supabase) {throw new Error("no admin supabase client");}
+	if (!supabase) {
+		throw new Error("no admin supabase client");
+	}
 
 	const minNotificationCount = (
 		{
@@ -148,7 +148,9 @@ export async function runReminderBatch(
 		.lte("notification_count", minNotificationCount)
 		.not("email", "is", null)
 		.limit(500);
-	if (error) {throw error;}
+	if (error) {
+		throw error;
+	}
 
 	const candidates = data?.length ?? 0;
 	let sent = 0;

@@ -1,5 +1,5 @@
-import { NextResponse } from 'next/server';
-import type { NextRequest } from 'next/server';
+import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
 
 import { getServerUser } from "@/lib/auth-helpers";
 import { createClient } from "@/lib/supabase/server";
@@ -21,7 +21,9 @@ export async function GET() {
 			.eq("id", user.id)
 			.single();
 
-		if (error && error.code !== "PGRST116") {throw error;}
+		if (error && error.code !== "PGRST116") {
+			throw error;
+		}
 
 		return NextResponse.json({
 			profile: profile || {
@@ -34,7 +36,7 @@ export async function GET() {
 		console.error("Error fetching profile:", error);
 		return NextResponse.json(
 			{ error: "Erreur lors de la récupération du profil" },
-			{ status: 500 },
+			{ status: 500 }
 		);
 	}
 }
@@ -59,16 +61,10 @@ export async function PUT(request: NextRequest) {
 			return NextResponse.json({ error: "Données invalides" }, { status: 400 });
 		}
 		if (displayName && displayName.length > 100) {
-			return NextResponse.json(
-				{ error: "displayName trop long (max 100)" },
-				{ status: 400 },
-			);
+			return NextResponse.json({ error: "displayName trop long (max 100)" }, { status: 400 });
 		}
 		if (bio && bio.length > 2000) {
-			return NextResponse.json(
-				{ error: "bio trop longue (max 2000)" },
-				{ status: 400 },
-			);
+			return NextResponse.json({ error: "bio trop longue (max 2000)" }, { status: 400 });
 		}
 
 		const supabase = await createClient();
@@ -79,7 +75,7 @@ export async function PUT(request: NextRequest) {
 				id: user.id,
 				updated_at: new Date().toISOString(),
 			},
-			{ onConflict: "id" },
+			{ onConflict: "id" }
 		);
 
 		if (profileError && profileError.code !== "42P01") {
@@ -92,9 +88,6 @@ export async function PUT(request: NextRequest) {
 		});
 	} catch (error) {
 		console.error("Error updating profile:", error);
-		return NextResponse.json(
-			{ error: "Erreur lors de la mise à jour du profil" },
-			{ status: 500 },
-		);
+		return NextResponse.json({ error: "Erreur lors de la mise à jour du profil" }, { status: 500 });
 	}
 }

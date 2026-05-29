@@ -1,9 +1,4 @@
-import {
-	Accordion,
-	AccordionContent,
-	AccordionItem,
-	AccordionTrigger,
-} from "@rose-griffon/ui";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@rose-griffon/ui";
 
 const ITEMS = [
 	{

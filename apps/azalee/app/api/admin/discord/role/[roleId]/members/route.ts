@@ -1,5 +1,5 @@
-import { NextResponse } from 'next/server';
-import type { NextRequest } from 'next/server';
+import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
 
 /**
  * GET /api/admin/discord/role/[roleId]/members
@@ -41,29 +41,30 @@ function avatarUrl(userId: string, hash: string | null | undefined): string {
 	return `https://cdn.discordapp.com/avatars/${userId}/${hash}.${ext}?size=256`;
 }
 
-async function fetchAllMembers(
-	guildId: string,
-	token: string,
-): Promise<DiscordMember[]> {
+async function fetchAllMembers(guildId: string, token: string): Promise<DiscordMember[]> {
 	const all: DiscordMember[] = [];
 	let after: string | undefined;
 	while (true) {
 		const u = new URL(`https://discord.com/api/v10/guilds/${guildId}/members`);
 		u.searchParams.set("limit", "1000");
-		if (after) {u.searchParams.set("after", after);}
+		if (after) {
+			u.searchParams.set("after", after);
+		}
 		const res = await fetch(u, {
 			headers: { Authorization: `Bot ${token}` },
 		});
 		if (!res.ok) {
-			throw new Error(
-				`Discord ${res.status}: ${(await res.text()).slice(0, 200)}`,
-			);
+			throw new Error(`Discord ${res.status}: ${(await res.text()).slice(0, 200)}`);
 		}
 		const batch = (await res.json()) as DiscordMember[];
 		all.push(...batch);
-		if (batch.length < 1000) {break;}
+		if (batch.length < 1000) {
+			break;
+		}
 		const lastMember = batch[batch.length - 1];
-		if (!lastMember) {break;}
+		if (!lastMember) {
+			break;
+		}
 		after = lastMember.user.id;
 	}
 	return all;
@@ -71,13 +72,13 @@ async function fetchAllMembers(
 
 export async function GET(
 	request: NextRequest,
-	{ params }: { params: Promise<{ roleId: string }> },
+	{ params }: { params: Promise<{ roleId: string }> }
 ) {
 	const apiKey = process.env.CLAUDE_API_KEY;
 	if (!apiKey) {
 		return NextResponse.json(
 			{ error: "CLAUDE_API_KEY non configuré côté serveur" },
-			{ status: 500 },
+			{ status: 500 }
 		);
 	}
 	if (request.headers.get("authorization") !== `Bearer ${apiKey}`) {
@@ -86,10 +87,7 @@ export async function GET(
 
 	const { roleId } = await params;
 	if (!/^\d{17,20}$/.test(roleId)) {
-		return NextResponse.json(
-			{ error: "roleId Discord invalide" },
-			{ status: 400 },
-		);
+		return NextResponse.json({ error: "roleId Discord invalide" }, { status: 400 });
 	}
 
 	const token = process.env.DISCORD_BOT_TOKEN;
@@ -97,7 +95,7 @@ export async function GET(
 	if (!token || !guildId) {
 		return NextResponse.json(
 			{ error: "DISCORD_BOT_TOKEN/DISCORD_GUILD_ID non configurés" },
-			{ status: 500 },
+			{ status: 500 }
 		);
 	}
 
@@ -126,7 +124,7 @@ export async function GET(
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	const profileByDiscord = new Map<string, any>(
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		((profiles ?? []) as any[]).map((p) => [p.discord_id, p]),
+		((profiles ?? []) as any[]).map((p) => [p.discord_id, p])
 	);
 
 	const out = withRole.map((m) => {

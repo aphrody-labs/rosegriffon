@@ -6,8 +6,8 @@ import { AnimatedSection } from "@/components/home/AnimatedSection";
 import { LandingHero } from "@/components/home/LandingHero";
 import { LatestNewsSection } from "@/components/home/LatestNewsSection";
 import { RgtvBanner } from "@/components/home/RgtvBanner";
-import { WikiCarousel } from '@/components/home/WikiCarousel';
-import type { WikiSectionStats } from '@/components/home/WikiCarousel';
+import { WikiCarousel } from "@/components/home/WikiCarousel";
+import type { WikiSectionStats } from "@/components/home/WikiCarousel";
 import { createPublicClient } from "@/lib/supabase/public";
 
 export const metadata: Metadata = {
@@ -69,20 +69,12 @@ export default async function HomePage() {
 			.select("id, text, created_at, author_username, author_name, media")
 			.order("created_at", { ascending: false })
 			.limit(6),
-		supabase
-			.from("inagle_characters")
-			.select("id", { count: "exact", head: true }),
+		supabase.from("inagle_characters").select("id", { count: "exact", head: true }),
 		supabase.from("inagle_skills").select("id", { count: "exact", head: true }),
 		supabase.from("inagle_items").select("id", { count: "exact", head: true }),
-		supabase
-			.from("inagle_keshins_clean")
-			.select("id", { count: "exact", head: true }),
-		supabase
-			.from("inagle_souls_clean")
-			.select("id", { count: "exact", head: true }),
-		supabase
-			.from("inagle_passives")
-			.select("id", { count: "exact", head: true }),
+		supabase.from("inagle_keshins_clean").select("id", { count: "exact", head: true }),
+		supabase.from("inagle_souls_clean").select("id", { count: "exact", head: true }),
+		supabase.from("inagle_passives").select("id", { count: "exact", head: true }),
 	]);
 
 	// Merge: pinned first, then fill remaining slots with latest (up to 3 total)
@@ -114,8 +106,7 @@ export default async function HomePage() {
 				"query-input": "required name=search_term_string",
 				target: {
 					"@type": "EntryPoint",
-					urlTemplate:
-						"https://azalee.rosegriffon.fr/search?q={search_term_string}",
+					urlTemplate: "https://azalee.rosegriffon.fr/search?q={search_term_string}",
 				},
 			},
 			publisher: {
@@ -175,31 +166,17 @@ export default async function HomePage() {
 				<AnimatedSection direction="up">
 					<section className="md:px-8 lg:px-12">
 						<Suspense
-							fallback={
-								<div className="h-96 animate-pulse bg-surface-container rounded-3xl" />
-							}
+							fallback={<div className="h-96 animate-pulse bg-surface-container rounded-3xl" />}
 						>
-							<LatestNewsSection
-								articles={standardNews}
-								tweets={recentTweets}
-							/>
+							<LatestNewsSection articles={standardNews} tweets={recentTweets} />
 						</Suspense>
 					</section>
 				</AnimatedSection>
 
 				{/* Section Divider */}
-				<div
-					className="flex items-center gap-4 px-8 md:hidden"
-					aria-hidden="true"
-				>
+				<div className="flex items-center gap-4 px-8 md:hidden" aria-hidden="true">
 					<div className="flex-1 h-px bg-outline-variant/20" />
-					<Image
-						src="/logo.webp"
-						alt=""
-						width={20}
-						height={20}
-						className="size-5 opacity-30"
-					/>
+					<Image src="/logo.webp" alt="" width={20} height={20} className="size-5 opacity-30" />
 					<div className="flex-1 h-px bg-outline-variant/20" />
 				</div>
 

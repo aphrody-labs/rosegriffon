@@ -21,23 +21,23 @@ import { DATA_ROOT } from "../core/paths.js";
 // ============================================================================
 
 export interface ParsedSceneArchive extends ExportableEntity {
-  sceneId: string;
-  category: number;
-  titleTextId: string;
-  explainTextId: string;
-  eventIdText: string;
-  chapterNo: number;
-  isFullScreen: boolean;
-  thumbnailPath: string;
-  condition: string;
+	sceneId: string;
+	category: number;
+	titleTextId: string;
+	explainTextId: string;
+	eventIdText: string;
+	chapterNo: number;
+	isFullScreen: boolean;
+	thumbnailPath: string;
+	condition: string;
 }
 
 export interface SceneArchiveDatabase {
-  scenes: ParsedSceneArchive[];
-  byId: Map<string, ParsedSceneArchive>;
-  byCategory: Map<number, ParsedSceneArchive[]>;
-  toMarkdown: (id: string) => string | null;
-  toReact: (id: string) => any | null;
+	scenes: ParsedSceneArchive[];
+	byId: Map<string, ParsedSceneArchive>;
+	byCategory: Map<number, ParsedSceneArchive[]>;
+	toMarkdown: (id: string) => string | null;
+	toReact: (id: string) => any | null;
 }
 
 // ============================================================================
@@ -46,7 +46,7 @@ export interface SceneArchiveDatabase {
 
 /** Extract clean image name from full texture path */
 function extractImageName(texturePath: string): string {
-  return texturePath.replace("#/menu/220_img/", "").replace(".g4tx", "");
+	return texturePath.replace("#/menu/220_img/", "").replace(".g4tx", "");
 }
 
 // ============================================================================
@@ -54,36 +54,36 @@ function extractImageName(texturePath: string): string {
 // ============================================================================
 
 function parseContent(content: any): ParsedSceneArchive[] {
-  const scenes: ParsedSceneArchive[] = [];
-  if (!content?.lists) return scenes;
+	const scenes: ParsedSceneArchive[] = [];
+	if (!content?.lists) return scenes;
 
-  for (const list of content.lists) {
-    if (list.name === "m_sceneArchiveDataList") {
-      for (const val of list.values) {
-        const thumbPath = extractImageName(val.thumbnail_texture_path || "");
-        scenes.push({
-          id: val.id,
-          name: val.event_id_text || val.id,
-          sceneId: val.id,
-          category: val.category ?? 0,
-          titleTextId: val.text_id_title || "0x00000000",
-          explainTextId: val.text_id_explain || "0x00000000",
-          eventIdText: val.event_id_text || "",
-          chapterNo: val.chapter_no ?? 0,
-          isFullScreen: val.is_full_screen_view ?? false,
-          thumbnailPath: thumbPath,
-          condition: val.condition || "",
-          attributes: {
-            Category: val.category,
-            Chapter: val.chapter_no,
-            Event: val.event_id_text,
-            Image: thumbPath,
-          },
-        });
-      }
-    }
-  }
-  return scenes;
+	for (const list of content.lists) {
+		if (list.name === "m_sceneArchiveDataList") {
+			for (const val of list.values) {
+				const thumbPath = extractImageName(val.thumbnail_texture_path || "");
+				scenes.push({
+					id: val.id,
+					name: val.event_id_text || val.id,
+					sceneId: val.id,
+					category: val.category ?? 0,
+					titleTextId: val.text_id_title || "0x00000000",
+					explainTextId: val.text_id_explain || "0x00000000",
+					eventIdText: val.event_id_text || "",
+					chapterNo: val.chapter_no ?? 0,
+					isFullScreen: val.is_full_screen_view ?? false,
+					thumbnailPath: thumbPath,
+					condition: val.condition || "",
+					attributes: {
+						Category: val.category,
+						Chapter: val.chapter_no,
+						Event: val.event_id_text,
+						Image: thumbPath,
+					},
+				});
+			}
+		}
+	}
+	return scenes;
 }
 
 // ============================================================================
@@ -91,41 +91,41 @@ function parseContent(content: any): ParsedSceneArchive[] {
 // ============================================================================
 
 export async function loadSceneArchiveConfigAsync(
-  dataPath: string = DATA_ROOT,
+	dataPath: string = DATA_ROOT
 ): Promise<ParsedSceneArchive[] | null> {
-  const filename = findConfigFile("scene_archive", "scene_archive_config");
-  if (!filename) return null;
+	const filename = findConfigFile("scene_archive", "scene_archive_config");
+	if (!filename) return null;
 
-  const path = join(dataPath, "common/gamedata/scene_archive", filename);
-  const content = await loadJsonAsync<any>(path);
-  return content ? parseContent(content) : null;
+	const path = join(dataPath, "common/gamedata/scene_archive", filename);
+	const content = await loadJsonAsync<any>(path);
+	return content ? parseContent(content) : null;
 }
 
 export async function buildSceneArchiveDatabase(
-  dataPath: string = DATA_ROOT,
+	dataPath: string = DATA_ROOT
 ): Promise<SceneArchiveDatabase> {
-  const scenes = (await loadSceneArchiveConfigAsync(dataPath)) || [];
-  const byId = new Map<string, ParsedSceneArchive>();
-  const byCategory = new Map<number, ParsedSceneArchive[]>();
+	const scenes = (await loadSceneArchiveConfigAsync(dataPath)) || [];
+	const byId = new Map<string, ParsedSceneArchive>();
+	const byCategory = new Map<number, ParsedSceneArchive[]>();
 
-  for (const s of scenes) {
-    byId.set(s.sceneId, s);
-    const cat = byCategory.get(s.category) || [];
-    cat.push(s);
-    byCategory.set(s.category, cat);
-  }
+	for (const s of scenes) {
+		byId.set(s.sceneId, s);
+		const cat = byCategory.get(s.category) || [];
+		cat.push(s);
+		byCategory.set(s.category, cat);
+	}
 
-  return {
-    scenes,
-    byId,
-    byCategory,
-    toMarkdown: (id: string) => {
-      const s = byId.get(id);
-      return s ? EntityExporters.toMarkdown(s, "Scene") : null;
-    },
-    toReact: (id: string) => {
-      const s = byId.get(id);
-      return s ? EntityExporters.toReact(s) : null;
-    },
-  };
+	return {
+		scenes,
+		byId,
+		byCategory,
+		toMarkdown: (id: string) => {
+			const s = byId.get(id);
+			return s ? EntityExporters.toMarkdown(s, "Scene") : null;
+		},
+		toReact: (id: string) => {
+			const s = byId.get(id);
+			return s ? EntityExporters.toReact(s) : null;
+		},
+	};
 }

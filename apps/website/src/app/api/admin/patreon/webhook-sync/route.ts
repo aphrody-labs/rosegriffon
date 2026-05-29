@@ -58,22 +58,15 @@ export async function POST(req: Request) {
 		.limit(1)
 		.maybeSingle();
 	if (!tokenRow) {
-		return NextResponse.json(
-			{ ok: false, reason: "no_creator_token" },
-			{ status: 400 },
-		);
+		return NextResponse.json({ ok: false, reason: "no_creator_token" }, { status: 400 });
 	}
-	const creatorToken = decryptToken(
-		(tokenRow as { access_token_enc: string }).access_token_enc,
-	);
+	const creatorToken = decryptToken((tokenRow as { access_token_enc: string }).access_token_enc);
 
 	// 2. Récupère le campaign_id du créateur (via /campaigns)
 	let campaignId: string | null = null;
 	try {
 		const campaigns = await patreonFetch(creatorToken, "/campaigns");
-		const data = Array.isArray(campaigns.data)
-			? campaigns.data[0]
-			: campaigns.data;
+		const data = Array.isArray(campaigns.data) ? campaigns.data[0] : campaigns.data;
 		campaignId = data?.id ?? null;
 	} catch (error) {
 		console.error("[admin/webhook-sync] fetch campaigns failed", error);
@@ -83,14 +76,11 @@ export async function POST(req: Request) {
 				reason: "fetch_campaign_failed",
 				detail: error instanceof Error ? error.message : String(error),
 			},
-			{ status: 500 },
+			{ status: 500 }
 		);
 	}
 	if (!campaignId) {
-		return NextResponse.json(
-			{ ok: false, reason: "no_campaign" },
-			{ status: 400 },
-		);
+		return NextResponse.json({ ok: false, reason: "no_campaign" }, { status: 400 });
 	}
 
 	// 3. Liste les webhooks existants pour cette campaign
@@ -98,7 +88,7 @@ export async function POST(req: Request) {
 	try {
 		const list = await patreonFetch(creatorToken, "/webhooks");
 		const arr = (Array.isArray(list.data) ? list.data : [list.data]).filter(
-			Boolean,
+			Boolean
 		) as unknown as PatreonWebhookResource[];
 		const ours = arr.find((w) => w.attributes?.uri === targetUri);
 		existingId = ours?.id ?? null;
@@ -142,11 +132,7 @@ export async function POST(req: Request) {
 		});
 		if (!res.ok) {
 			const text = await res.text();
-			throw new PatreonApiError(
-				`webhook ${method} ${res.status}`,
-				res.status,
-				text,
-			);
+			throw new PatreonApiError(`webhook ${method} ${res.status}`, res.status, text);
 		}
 		const json = (await res.json()) as { data: PatreonWebhookResource };
 		result = json.data;
@@ -163,7 +149,7 @@ export async function POST(req: Request) {
 							? error.message
 							: String(error),
 			},
-			{ status: 500 },
+			{ status: 500 }
 		);
 	}
 
@@ -173,8 +159,7 @@ export async function POST(req: Request) {
 			.from("patreon_webhook_state")
 			.update({
 				last_attempted_at: result.attributes.last_attempted_at,
-				num_consecutive_times_failed:
-					result.attributes.num_consecutive_times_failed,
+				num_consecutive_times_failed: result.attributes.num_consecutive_times_failed,
 				patreon_webhook_id: result.id,
 				paused: result.attributes.paused,
 				triggers: result.attributes.triggers,
@@ -194,8 +179,7 @@ export async function POST(req: Request) {
 					uri: result.attributes.uri,
 					triggers: result.attributes.triggers,
 					paused: result.attributes.paused,
-					num_consecutive_times_failed:
-						result.attributes.num_consecutive_times_failed,
+					num_consecutive_times_failed: result.attributes.num_consecutive_times_failed,
 				}
 			: null,
 	});
@@ -219,19 +203,14 @@ export async function GET() {
 		.limit(1)
 		.maybeSingle();
 	if (!tokenRow) {
-		return NextResponse.json(
-			{ ok: false, reason: "no_creator_token" },
-			{ status: 400 },
-		);
+		return NextResponse.json({ ok: false, reason: "no_creator_token" }, { status: 400 });
 	}
-	const creatorToken = decryptToken(
-		(tokenRow as { access_token_enc: string }).access_token_enc,
-	);
+	const creatorToken = decryptToken((tokenRow as { access_token_enc: string }).access_token_enc);
 
 	try {
 		const list = await patreonFetch(creatorToken, "/webhooks");
 		const arr = (Array.isArray(list.data) ? list.data : [list.data]).filter(
-			Boolean,
+			Boolean
 		) as unknown as PatreonWebhookResource[];
 		return NextResponse.json({
 			ok: true,
@@ -252,7 +231,7 @@ export async function GET() {
 				reason: "patreon_api_failed",
 				detail: error instanceof Error ? error.message : String(error),
 			},
-			{ status: 500 },
+			{ status: 500 }
 		);
 	}
 }

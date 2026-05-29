@@ -74,11 +74,7 @@
 				"type": "server",
 				"status": "modified",
 				"coverage": 90,
-				"exports": [
-					"searchGlobal",
-					"getSearchSuggestions",
-					"EnhancedSearchResult"
-				]
+				"exports": ["searchGlobal", "getSearchSuggestions", "EnhancedSearchResult"]
 			}
 		],
 

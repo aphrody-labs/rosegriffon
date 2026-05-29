@@ -10,10 +10,7 @@ export default async function StreamSchedulePage() {
 	if (!supabase) {
 		return (
 			<div className="p-6">
-				<AdminPageHeader
-					title="Planning Streams"
-					description="Service indisponible."
-				/>
+				<AdminPageHeader title="Planning Streams" description="Service indisponible." />
 			</div>
 		);
 	}

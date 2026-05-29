@@ -3,10 +3,7 @@ import { notFound } from "next/navigation";
 import { LegacyBanner } from "@/components/patreon/LegacyBanner";
 import { PatreonConnectionCard } from "@/components/patreon/PatreonConnectionCard";
 import { PatreonMembershipCard } from "@/components/patreon/PatreonMembershipCard";
-import {
-	BreadcrumbSchema,
-	ProfileSchema,
-} from "@/components/shared/StructuredData";
+import { BreadcrumbSchema, ProfileSchema } from "@/components/shared/StructuredData";
 import { getServerUser } from "@/lib/auth-helpers";
 import { createAdminClient, createClient } from "@/lib/supabase/server";
 
@@ -81,8 +78,7 @@ export default async function UserProfilePage({
 					.eq("resolved_user_id", profile.id),
 			]);
 			patreonLinked = (tokensCount.count ?? 0) > 0;
-			hasPatreonHistory =
-				(membershipsCount.count ?? 0) > 0 || (legacyCount.count ?? 0) > 0;
+			hasPatreonHistory = (membershipsCount.count ?? 0) > 0 || (legacyCount.count ?? 0) > 0;
 		}
 	}
 
@@ -125,10 +121,7 @@ export default async function UserProfilePage({
 				/>
 
 				{isOwnProfile && (
-					<section
-						aria-label="Mon espace personnel"
-						className="mb-10 space-y-6"
-					>
+					<section aria-label="Mon espace personnel" className="mb-10 space-y-6">
 						<LegacyBanner userId={profile.id} />
 						{hasPatreonHistory ? (
 							<PatreonMembershipCard userId={profile.id} />

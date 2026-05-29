@@ -4,11 +4,11 @@ const BASE_URL = "https://azalee.rosegriffon.fr";
 
 function escapeXml(str: string): string {
 	return str
-		.replaceAll('&', "&amp;")
-		.replaceAll('<', "&lt;")
-		.replaceAll('>', "&gt;")
+		.replaceAll("&", "&amp;")
+		.replaceAll("<", "&lt;")
+		.replaceAll(">", "&gt;")
 		.replaceAll('"', "&quot;")
-		.replaceAll('\'', "&apos;");
+		.replaceAll("'", "&apos;");
 }
 
 export async function GET() {
@@ -17,7 +17,7 @@ export async function GET() {
 	const { data: articles } = await supabase
 		.from("articles")
 		.select(
-			"id, title, slug, excerpt, published_at, created_at, category, featured_image_url, author_id",
+			"id, title, slug, excerpt, published_at, created_at, category, featured_image_url, author_id"
 		)
 		.eq("status", "published")
 		.eq("app", "azalee")
@@ -26,7 +26,11 @@ export async function GET() {
 		.limit(50);
 
 	// Récupérer les profils auteurs en bloc (pas de FK déclarée → join manuel).
-	const authorIds = [...new Set((articles || []).map((a: any) => a.author_id).filter((id): id is string => Boolean(id)))];
+	const authorIds = [
+		...new Set(
+			(articles || []).map((a: any) => a.author_id).filter((id): id is string => Boolean(id))
+		),
+	];
 
 	let authorMap = new Map<string, { full_name: string | null }>();
 	if (authorIds.length > 0) {
@@ -38,11 +42,8 @@ export async function GET() {
 		authorMap = new Map(
 			(profiles || []).map(
 				// eslint-disable-next-line @typescript-eslint/no-explicit-any
-				(p: any) => [
-					p.id as string,
-					{ full_name: p.full_name as string | null },
-				],
-			),
+				(p: any) => [p.id as string, { full_name: p.full_name as string | null }]
+			)
 		);
 	}
 

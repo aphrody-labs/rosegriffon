@@ -279,6 +279,6 @@ export default async function Image({ params }: OgImageProps) {
 				</div>
 			</div>
 		</div>,
-		{ ...size },
+		{ ...size }
 	);
 }

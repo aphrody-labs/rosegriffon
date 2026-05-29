@@ -21,15 +21,15 @@ import { FILES, PATHS } from "../core/paths.js";
 import { loadBasaraConfig } from "./basara-config.js";
 
 export interface StarSignCharaInfo {
-  charaParamId: string;
-  charaRarity: number;
-  charaRateDefault: number;
-  charaRateBoostA: number;
-  charaRateBoostB: number;
-  charaRateBoostC: number;
-  charaRateBoostD: number;
-  isRemarkable: boolean;
-  enableCond: string;
+	charaParamId: string;
+	charaRarity: number;
+	charaRateDefault: number;
+	charaRateBoostA: number;
+	charaRateBoostB: number;
+	charaRateBoostC: number;
+	charaRateBoostD: number;
+	isRemarkable: boolean;
+	enableCond: string;
 }
 
 let starSignCache: Map<string, StarSignCharaInfo> | null = null;
@@ -38,30 +38,30 @@ let starSignCache: Map<string, StarSignCharaInfo> | null = null;
  * Load BASARA character IDs from basaraBuildInfo.json or config
  */
 function loadBasaraCharaIds(): Set<string> {
-  const ids = new Set<string>();
-  const filePath = join(PATHS.allGamedata, "basaraBuildInfo.json");
+	const ids = new Set<string>();
+	const filePath = join(PATHS.allGamedata, "basaraBuildInfo.json");
 
-  if (existsSync(filePath)) {
-    try {
-      const data = JSON.parse(readFileSync(filePath, "utf-8"));
-      for (const entry of data.data || []) {
-        ids.add(entry.charaParamId);
-      }
-      return ids;
-    } catch (e) {
-      console.warn("Failed to load basaraBuildInfo.json", e);
-    }
-  }
+	if (existsSync(filePath)) {
+		try {
+			const data = JSON.parse(readFileSync(filePath, "utf-8"));
+			for (const entry of data.data || []) {
+				ids.add(entry.charaParamId);
+			}
+			return ids;
+		} catch (e) {
+			console.warn("Failed to load basaraBuildInfo.json", e);
+		}
+	}
 
-  // Fallback to raw config
-  const config = loadBasaraConfig();
-  if (config) {
-    for (const info of config.buildInfos) {
-      ids.add(info.charaId);
-    }
-  }
+	// Fallback to raw config
+	const config = loadBasaraConfig();
+	if (config) {
+		for (const info of config.buildInfos) {
+			ids.add(info.charaId);
+		}
+	}
 
-  return ids;
+	return ids;
 }
 
 /**
@@ -71,35 +71,35 @@ function loadBasaraCharaIds(): Set<string> {
  * Fallback: legacy starSignCharaInfo.json (all-gamedata)
  */
 export function loadStarSignCharaInfo(): StarSignCharaInfo[] {
-  // Primary: read from players_universe_config
-  const puPath = join(PATHS.playersUniverse, FILES.playersUniverseConfig);
-  if (existsSync(puPath)) {
-    try {
-      const data = JSON.parse(readFileSync(puPath, "utf-8"));
-      if (data.lists) {
-        const list = data.lists.find((l: { name: string }) => l.name === "m_starSignCharaInfoList");
-        if (list?.values?.length > 0) {
-          return list.values as StarSignCharaInfo[];
-        }
-      }
-    } catch (e) {
-      console.warn("[star-sign] Failed to read players_universe_config:", e);
-    }
-  }
+	// Primary: read from players_universe_config
+	const puPath = join(PATHS.playersUniverse, FILES.playersUniverseConfig);
+	if (existsSync(puPath)) {
+		try {
+			const data = JSON.parse(readFileSync(puPath, "utf-8"));
+			if (data.lists) {
+				const list = data.lists.find((l: { name: string }) => l.name === "m_starSignCharaInfoList");
+				if (list?.values?.length > 0) {
+					return list.values as StarSignCharaInfo[];
+				}
+			}
+		} catch (e) {
+			console.warn("[star-sign] Failed to read players_universe_config:", e);
+		}
+	}
 
-  // Fallback: legacy extracted JSON
-  const legacyPath = join(PATHS.allGamedata, "starSignCharaInfo.json");
-  if (existsSync(legacyPath)) {
-    try {
-      const data = JSON.parse(readFileSync(legacyPath, "utf-8"));
-      return data.data || [];
-    } catch (e) {
-      console.warn("[star-sign] Failed to read legacy starSignCharaInfo.json:", e);
-    }
-  }
+	// Fallback: legacy extracted JSON
+	const legacyPath = join(PATHS.allGamedata, "starSignCharaInfo.json");
+	if (existsSync(legacyPath)) {
+		try {
+			const data = JSON.parse(readFileSync(legacyPath, "utf-8"));
+			return data.data || [];
+		} catch (e) {
+			console.warn("[star-sign] Failed to read legacy starSignCharaInfo.json:", e);
+		}
+	}
 
-  console.warn("[star-sign] No rarity data found — all characters will default to Normal");
-  return [];
+	console.warn("[star-sign] No rarity data found — all characters will default to Normal");
+	return [];
 }
 
 /**
@@ -107,55 +107,55 @@ export function loadStarSignCharaInfo(): StarSignCharaInfo[] {
  * Includes both starSign entries and BASARA characters
  */
 export function buildStarSignMap(): Map<string, StarSignCharaInfo> {
-  if (starSignCache) return starSignCache;
+	if (starSignCache) return starSignCache;
 
-  const entries = loadStarSignCharaInfo();
-  starSignCache = new Map();
+	const entries = loadStarSignCharaInfo();
+	starSignCache = new Map();
 
-  for (const entry of entries) {
-    starSignCache.set(entry.charaParamId, entry);
-  }
+	for (const entry of entries) {
+		starSignCache.set(entry.charaParamId, entry);
+	}
 
-  // Add BASARA characters with rarity 20
-  const basaraIds = loadBasaraCharaIds();
-  for (const id of basaraIds) {
-    if (!starSignCache.has(id)) {
-      starSignCache.set(id, {
-        charaParamId: id,
-        charaRarity: 20,
-        charaRateDefault: 0,
-        charaRateBoostA: 0,
-        charaRateBoostB: 0,
-        charaRateBoostC: 0,
-        charaRateBoostD: 0,
-        isRemarkable: true,
-        enableCond: "",
-      });
-    }
-  }
+	// Add BASARA characters with rarity 20
+	const basaraIds = loadBasaraCharaIds();
+	for (const id of basaraIds) {
+		if (!starSignCache.has(id)) {
+			starSignCache.set(id, {
+				charaParamId: id,
+				charaRarity: 20,
+				charaRateDefault: 0,
+				charaRateBoostA: 0,
+				charaRateBoostB: 0,
+				charaRateBoostC: 0,
+				charaRateBoostD: 0,
+				isRemarkable: true,
+				enableCond: "",
+			});
+		}
+	}
 
-  const nonNormal = [...starSignCache.values()].filter((e) => e.charaRarity !== 0).length;
-  console.log(`[star-sign] Loaded ${starSignCache.size} entries (${nonNormal} non-Normal)`);
+	const nonNormal = [...starSignCache.values()].filter((e) => e.charaRarity !== 0).length;
+	console.log(`[star-sign] Loaded ${starSignCache.size} entries (${nonNormal} non-Normal)`);
 
-  return starSignCache;
+	return starSignCache;
 }
 
 /**
  * Get rarity for a charaParamId
  */
 export function getRarity(charaParamId: string): number {
-  const map = buildStarSignMap();
-  const entry = map.get(charaParamId);
-  return entry?.charaRarity ?? 0;
+	const map = buildStarSignMap();
+	const entry = map.get(charaParamId);
+	return entry?.charaRarity ?? 0;
 }
 
 /**
  * Check if a character is remarkable (special/featured)
  */
 export function isRemarkable(charaParamId: string): boolean {
-  const map = buildStarSignMap();
-  const entry = map.get(charaParamId);
-  return entry?.isRemarkable ?? false;
+	const map = buildStarSignMap();
+	const entry = map.get(charaParamId);
+	return entry?.isRemarkable ?? false;
 }
 
 /**
@@ -181,27 +181,27 @@ export function isRemarkable(charaParamId: string): boolean {
  * characters with hero upgrade paths (Fire/Black/Pink).
  */
 export function rarityCodeToName(code: number): string {
-  switch (code) {
-    case 0:
-    case 1:
-      return "Normal";
-    case 2:
-      return "Expérimenté";
-    case 3:
-      return "Émérite";
-    case 4:
-      return "Normal";
-    case 5:
-    case 6:
-    case 7:
-      return "Légendaire";
-    case 10:
-      return "Héros";
-    case 20:
-      return "BASARA";
-    default:
-      return `Rank${code}`;
-  }
+	switch (code) {
+		case 0:
+		case 1:
+			return "Normal";
+		case 2:
+			return "Expérimenté";
+		case 3:
+			return "Émérite";
+		case 4:
+			return "Normal";
+		case 5:
+		case 6:
+		case 7:
+			return "Légendaire";
+		case 10:
+			return "Héros";
+		case 20:
+			return "BASARA";
+		default:
+			return `Rank${code}`;
+	}
 }
 
 /**
@@ -210,26 +210,26 @@ export function rarityCodeToName(code: number): string {
  * starSignCharaInfo uses: 0=N, 2=R, 5=UR, 6=LR, 7=Legend
  */
 export function rarityToGrowthRank(code: number): number {
-  // Growth table ranks: 0, 1, 2, 3, 4, 5
-  // starSign codes: 0=N, 2=R, 5=UR, 6=LR, 7=Legend, 20=BASARA
-  switch (code) {
-    case 0:
-      return 0; // N -> rank 0
-    case 2:
-      return 2; // R -> rank 2
-    case 3:
-      return 3; // SR -> rank 3
-    case 4:
-      return 4; // SSR -> rank 4
-    case 5:
-      return 5; // UR -> rank 5
-    case 6:
-      return 5; // LR -> use UR stats
-    case 7:
-      return 5; // Legend -> use UR stats
-    case 20:
-      return 5; // BASARA -> use UR stats
-    default:
-      return code <= 5 ? code : 5;
-  }
+	// Growth table ranks: 0, 1, 2, 3, 4, 5
+	// starSign codes: 0=N, 2=R, 5=UR, 6=LR, 7=Legend, 20=BASARA
+	switch (code) {
+		case 0:
+			return 0; // N -> rank 0
+		case 2:
+			return 2; // R -> rank 2
+		case 3:
+			return 3; // SR -> rank 3
+		case 4:
+			return 4; // SSR -> rank 4
+		case 5:
+			return 5; // UR -> rank 5
+		case 6:
+			return 5; // LR -> use UR stats
+		case 7:
+			return 5; // Legend -> use UR stats
+		case 20:
+			return 5; // BASARA -> use UR stats
+		default:
+			return code <= 5 ? code : 5;
+	}
 }

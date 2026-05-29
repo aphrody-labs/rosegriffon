@@ -18,12 +18,7 @@ import type { SessionItem } from "./sections/security-section";
 
 export const dynamic = "force-dynamic";
 
-const VALID_TABS: readonly AccountTabValue[] = [
-	"profile",
-	"address",
-	"connections",
-	"security",
-];
+const VALID_TABS: readonly AccountTabValue[] = ["profile", "address", "connections", "security"];
 
 export default async function AccountPage({
 	searchParams,
@@ -36,25 +31,16 @@ export default async function AccountPage({
 	}
 
 	const { tab: rawTab } = await searchParams;
-	const initialTab: AccountTabValue = (
-		VALID_TABS as readonly string[]
-	).includes(rawTab ?? "")
+	const initialTab: AccountTabValue = (VALID_TABS as readonly string[]).includes(rawTab ?? "")
 		? (rawTab as AccountTabValue)
 		: "profile";
 
 	const supabase = await createClient();
-	const { data: profile } = await supabase
-		.from("profiles")
-		.select("*")
-		.eq("id", user.id)
-		.single();
+	const { data: profile } = await supabase.from("profiles").select("*").eq("id", user.id).single();
 
 	const admin = createAdminClient();
 	const accountsRes = admin
-		? await admin
-				.from("account")
-				.select("provider_id, created_at, scope")
-				.eq("user_id", user.id)
+		? await admin.from("account").select("provider_id, created_at, scope").eq("user_id", user.id)
 		: { data: null };
 	const accounts: LinkedAccount[] = (accountsRes.data ?? []).map((row) => {
 		const r = row as {
@@ -99,9 +85,7 @@ export default async function AccountPage({
 	void auth;
 
 	const profileTyped = profile as { username?: string } | null;
-	const backHref = profileTyped?.username
-		? `/profil/${profileTyped.username}`
-		: "/";
+	const backHref = profileTyped?.username ? `/profil/${profileTyped.username}` : "/";
 
 	return (
 		<div className="min-h-screen bg-muted/30">
@@ -120,8 +104,7 @@ export default async function AccountPage({
 						Paramètres du compte
 					</h1>
 					<p className="text-sm text-muted-foreground">
-						Connecté en tant que{" "}
-						<span className="font-medium text-foreground">{user.email}</span>
+						Connecté en tant que <span className="font-medium text-foreground">{user.email}</span>
 					</p>
 				</header>
 

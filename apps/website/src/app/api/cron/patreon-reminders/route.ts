@@ -1,17 +1,12 @@
 import { NextResponse } from "next/server";
 
-import { runReminderBatch } from '@/lib/patreon/notify';
-import type { ReminderStage } from '@/lib/patreon/notify';
+import { runReminderBatch } from "@/lib/patreon/notify";
+import type { ReminderStage } from "@/lib/patreon/notify";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-const VALID_STAGES = new Set<ReminderStage>([
-	"announce",
-	"reminder1",
-	"reminder2",
-	"lastcall",
-]);
+const VALID_STAGES = new Set<ReminderStage>(["announce", "reminder1", "reminder2", "lastcall"]);
 
 function isAuthorized(req: Request): boolean {
 	const secret = process.env.CRON_SECRET;

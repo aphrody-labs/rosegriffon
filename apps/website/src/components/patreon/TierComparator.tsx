@@ -14,11 +14,7 @@ const TIERS: Tier[] = [
 	{
 		color: "#aac9d9",
 		name: "Niveau Roy 🌹",
-		perks: [
-			"Rôle Discord Roy",
-			"Newsletter exclusive",
-			"Mention dans le générique des chroniques",
-		],
+		perks: ["Rôle Discord Roy", "Newsletter exclusive", "Mention dans le générique des chroniques"],
 		priceCents: 250,
 	},
 	{
@@ -46,7 +42,7 @@ const TIERS: Tier[] = [
 ];
 
 function formatPrice(cents: number): string {
-	return `${(cents / 100).toFixed(2).replace(".", ",")  } €`;
+	return `${(cents / 100).toFixed(2).replace(".", ",")} €`;
 }
 
 export function TierComparator() {
@@ -59,7 +55,7 @@ export function TierComparator() {
 						"relative rounded-2xl border p-6 transition",
 						tier.highlight
 							? "border-[#c9a958] bg-card shadow-[0_0_24px_rgba(201,169,88,0.2)]"
-							: "border-border bg-card",
+							: "border-border bg-card"
 					)}
 				>
 					{tier.highlight && (
@@ -79,17 +75,12 @@ export function TierComparator() {
 					<h3 className="text-lg font-bold text-foreground">{tier.name}</h3>
 					<p className="mb-4 mt-1 text-2xl font-bold text-[#a08540] dark:text-[#c9a958]">
 						{formatPrice(tier.priceCents)}
-						<span className="text-sm font-normal text-muted-foreground">
-							/mois
-						</span>
+						<span className="text-sm font-normal text-muted-foreground">/mois</span>
 					</p>
 					<ul className="space-y-2 text-sm text-foreground/85">
 						{tier.perks.map((perk, i) => (
 							<li key={i} className="flex gap-2">
-								<Check
-									className="mt-0.5 size-4 shrink-0"
-									style={{ color: tier.color }}
-								/>
+								<Check className="mt-0.5 size-4 shrink-0" style={{ color: tier.color }} />
 								<span>{perk}</span>
 							</li>
 						))}

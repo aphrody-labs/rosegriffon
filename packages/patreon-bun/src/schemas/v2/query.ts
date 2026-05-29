@@ -27,7 +27,7 @@ export interface QueryRequestOptions {
 function getResource<T extends Type | ItemType>(t: T) {
 	// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 	return Object.values(SchemaResourcesData).find(
-		(d) => d.resource === t,
+		(d) => d.resource === t
 	)! as (typeof SchemaResourcesData)[keyof typeof SchemaResourcesData] extends infer D
 		? D extends (typeof SchemaResourcesData)[keyof typeof SchemaResourcesData]
 			? D["resource"] extends T
@@ -51,11 +51,10 @@ function createCompleteQueryOptions<T extends Type>(t: T) {
 					...obj,
 					// TODO: throw on unknown resource
 					[n.resource]:
-						Object.values(SchemaResourcesData).find(
-							(d) => d.resource === n.resource,
-						)?.properties ?? [],
+						Object.values(SchemaResourcesData).find((d) => d.resource === n.resource)?.properties ??
+						[],
 				}),
-				{},
+				{}
 			),
 		} as RelationshipMap<T, RelationshipFields<T>>,
 	};
@@ -91,10 +90,12 @@ export type PatreonQuery<
 	_payload_type: RequestPayload<T, Includes, Attributes, Listing>;
 };
 
-export type BasePatreonQueryType<
-	T extends Type,
-	Listing extends boolean,
-> = PatreonQuery<T, never, never, Listing>;
+export type BasePatreonQueryType<T extends Type, Listing extends boolean> = PatreonQuery<
+	T,
+	never,
+	never,
+	Listing
+>;
 
 type PayloadFromQuery<
 	T extends Type,
@@ -109,18 +110,9 @@ export type GetResponsePayload<Query extends BasePatreonQuery> =
 		? PayloadFromQuery<T, I, A, L, Query>
 		: never;
 
-export type QueryDefault<
-	IncludeAll extends boolean,
-	T extends Type,
-	L extends boolean,
-> = If<
+export type QueryDefault<IncludeAll extends boolean, T extends Type, L extends boolean> = If<
 	IncludeAll,
-	PatreonQuery<
-		T,
-		RelationshipFields<T>,
-		RelationshipMap<T, RelationshipFields<T>>,
-		L
-	>,
+	PatreonQuery<T, RelationshipFields<T>, RelationshipMap<T, RelationshipFields<T>>, L>,
 	PatreonQuery<T, never, never, L>
 >;
 
@@ -130,8 +122,7 @@ export class QueryBuilder<
 	Relationships extends RelationshipFields<T> = never,
 	// eslint-disable-next-line @typescript-eslint/no-empty-object-type
 	Attributes extends RelationshipMap<T, Relationships> = {},
-> implements BasePatreonQueryType<T, Listing>
-{
+> implements BasePatreonQueryType<T, Listing> {
 	/**
 	 * The options for the request, e.g. pagination and sorting.
 	 */
@@ -146,12 +137,7 @@ export class QueryBuilder<
 	 *
 	 * Do not use as the actual payload as it is an empty string and will not contain the actual payload.
 	 */
-	public readonly _payload_type: RequestPayload<
-		T,
-		Relationships,
-		Attributes,
-		Listing
-	> = <never>"";
+	public readonly _payload_type: RequestPayload<T, Relationships, Attributes, Listing> = <never>"";
 
 	public constructor(
 		/**
@@ -163,20 +149,20 @@ export class QueryBuilder<
 		 * Whether this query is for listing the {@link resource} or only for for getting a single item of the resource.
 		 */
 		// eslint-disable-next-line @typescript-eslint/no-unused-vars
-		private readonly _isListing: Listing,
+		private readonly _isListing: Listing
 	) {
 		this.schema = getResource(resource);
 	}
 
 	protected getRelationshipResourceName<R extends RelationshipFields<T>>(
-		relationship: R,
+		relationship: R
 	): RelationshipFieldToFieldType<T, R> {
 		const relationMap = QueryBuilder.getRelationMap(this.schema);
 		const relationType = relationMap[relationship];
 
 		if (!relationType)
 			throw new Error(
-				`Unable to find relationship '${relationship}' on resource '${this.resource}'`,
+				`Unable to find relationship '${relationship}' on resource '${this.resource}'`
 			);
 		return relationType as RelationshipFieldToFieldType<T, R>;
 	}
@@ -193,9 +179,7 @@ export class QueryBuilder<
 					}
 				: {}),
 			...Object.keys(this._attributes).reduce((params, key) => {
-				const keys = <string[] | undefined>(
-					this._attributes[<keyof Attributes>key]
-				);
+				const keys = <string[] | undefined>this._attributes[<keyof Attributes>key];
 				if (keys == undefined) return params;
 
 				return {
@@ -243,9 +227,7 @@ export class QueryBuilder<
 	 * In the Patreon documentation, see the list of relations on a resource.
 	 */
 	public get schemaRelationships(): ReadonlyArray<RelationshipFields<T>> {
-		return this.schema.relationships.map(
-			(rel) => rel.name as RelationshipFields<T>,
-		);
+		return this.schema.relationships.map((rel) => rel.name as RelationshipFields<T>);
 	}
 
 	/**
@@ -263,13 +245,10 @@ export class QueryBuilder<
 	 * @throws {Error} When using an invalid relationship for the current resource
 	 */
 	public attributesFor<R extends Relationships>(
-		relationship: R,
+		relationship: R
 	): Attributes[RelationshipFieldToFieldType<T, R>] | undefined {
 		// Can be undefined for relationships without attributes added
-		return (
-			this._attributes[this.getRelationshipResourceName(relationship)] ??
-			undefined
-		);
+		return this._attributes[this.getRelationshipResourceName(relationship)] ?? undefined;
 	}
 
 	/**
@@ -297,9 +276,7 @@ export class QueryBuilder<
 	 * Include all relationships and attributes for the main resource.
 	 */
 	public includeAll() {
-		const { include, attributes } = QueryBuilder.createCompleteOptions(
-			this.resource,
-		);
+		const { include, attributes } = QueryBuilder.createCompleteOptions(this.resource);
 
 		this._relationships = include;
 		this._attributes = attributes as Attributes;
@@ -312,9 +289,7 @@ export class QueryBuilder<
 		>;
 	}
 
-	public setAttributes<A extends RelationshipMap<T, Relationships>>(
-		attributes: A,
-	) {
+	public setAttributes<A extends RelationshipMap<T, Relationships>>(attributes: A) {
 		this._attributes = {
 			...this._attributes,
 			...attributes,
@@ -326,12 +301,7 @@ export class QueryBuilder<
 	public addRelationships<R extends RelationshipFields<T>>(relationships: R[]) {
 		this._relationships.push(...relationships);
 
-		return this as unknown as QueryBuilder<
-			T,
-			Listing,
-			R | Relationships,
-			Attributes
-		>;
+		return this as unknown as QueryBuilder<T, Listing, R | Relationships, Attributes>;
 	}
 
 	public setRelationships<R extends RelationshipFields<T>>(relationships: R[]) {
@@ -343,10 +313,10 @@ export class QueryBuilder<
 	public addRelationshipAttributes<
 		R extends RelationshipFields<T>,
 		A extends NonNullable<
-			Pick<
-				RelationshipMap<T, R>,
-				RelationshipFieldToFieldType<T, R>
-			>[RelationshipFieldToFieldType<T, R>]
+			Pick<RelationshipMap<T, R>, RelationshipFieldToFieldType<T, R>>[RelationshipFieldToFieldType<
+				T,
+				R
+			>]
 		>,
 	>(relationship: R, attributes: A) {
 		if (!this._relationships.includes(relationship)) {
@@ -378,10 +348,10 @@ export class QueryBuilder<
 	public setRelationshipAttributes<
 		R extends RelationshipFields<T>,
 		A extends NonNullable<
-			Pick<
-				RelationshipMap<T, R>,
-				RelationshipFieldToFieldType<T, R>
-			>[RelationshipFieldToFieldType<T, R>]
+			Pick<RelationshipMap<T, R>, RelationshipFieldToFieldType<T, R>>[RelationshipFieldToFieldType<
+				T,
+				R
+			>]
 		>,
 	>(relationship: R, attributes: A) {
 		if (!this._relationships.includes(relationship)) {
@@ -389,8 +359,7 @@ export class QueryBuilder<
 		}
 
 		// @ts-expect-error Weird TS typing stuff
-		this._attributes[this.getRelationshipResourceName(relationship)] =
-			attributes;
+		this._attributes[this.getRelationshipResourceName(relationship)] = attributes;
 
 		return this as unknown as QueryBuilder<
 			T,
@@ -459,14 +428,12 @@ export class QueryBuilder<
 	 * @param builder The query builder to convert
 	 */
 	private static createFunctionBuilder<T extends Type, Listing extends boolean>(
-		builder: QueryBuilder<T, Listing>,
+		builder: QueryBuilder<T, Listing>
 	) {
-		return function <Includes extends RelationshipFields<`${T}`> = never>(
-			include?: Includes[],
-		) {
+		return function <Includes extends RelationshipFields<`${T}`> = never>(include?: Includes[]) {
 			return function <Attributes extends RelationshipMap<T, Includes>>(
 				attributes?: Attributes,
-				options?: QueryRequestOptions,
+				options?: QueryRequestOptions
 			): QueryBuilder<T, Listing, Includes, Attributes> {
 				if (options != undefined) {
 					builder.setRequestOptions(options);
@@ -496,10 +463,10 @@ export class QueryBuilder<
 	 * @param relation The name of the relationship to find the resource name of
 	 * @throws {Error} When using an invalid type
 	 */
-	public static convertRelationToType<
-		T extends ItemType,
-		R extends RelationshipFields<T>,
-	>(type: T, relation: R): RelationshipFieldToFieldType<T, R> {
+	public static convertRelationToType<T extends ItemType, R extends RelationshipFields<T>>(
+		type: T,
+		relation: R
+	): RelationshipFieldToFieldType<T, R> {
 		return this.createRelationMap(type)[relation];
 	}
 
@@ -509,27 +476,22 @@ export class QueryBuilder<
 	 * @param relationType The resource name of the relationship to find the relationship name of
 	 * @throws {Error} When using an invalid type or unknown relation type
 	 */
-	public static convertTypeToRelation<
-		T extends ItemType,
-		R extends RelationshipTypeFields<T>,
-	>(type: T, relationType: R): RelationshipTypeToRelationshipField<T, R> {
+	public static convertTypeToRelation<T extends ItemType, R extends RelationshipTypeFields<T>>(
+		type: T,
+		relationType: R
+	): RelationshipTypeToRelationshipField<T, R> {
 		const map = this.createRelationMap(type);
 
 		const key = (Object.keys(map) as RelationshipFields<T>[]).find(
-			(name) => map[name] === relationType,
+			(name) => map[name] === relationType
 		);
 		if (!key)
-			throw new Error(
-				"No relationship with type " +
-					relationType +
-					"found on resource: " +
-					type,
-			);
+			throw new Error("No relationship with type " + relationType + "found on resource: " + type);
 		return key;
 	}
 
 	public static fromParams<Q extends BasePatreonQueryType<Type, boolean>>(
-		params: URLSearchParams,
+		params: URLSearchParams
 	): Q {
 		return {
 			params,
@@ -540,7 +502,7 @@ export class QueryBuilder<
 	}
 
 	protected static getRelationMap<T extends Type | ItemType>(
-		resource: ReturnType<typeof QueryBuilder.getResource<T>>,
+		resource: ReturnType<typeof QueryBuilder.getResource<T>>
 	) {
 		return resource.relationships.reduce(
 			(obj, relation) => ({
@@ -549,7 +511,7 @@ export class QueryBuilder<
 			}),
 			{} as {
 				[R in RelationshipFields<T>]: RelationshipFieldToFieldType<T, R>;
-			},
+			}
 		);
 	}
 
@@ -569,16 +531,12 @@ export class QueryBuilder<
 	 * @param options the request options
 	 * @returns the parameters options
 	 */
-	protected static resolveQueryOptions(
-		options?: QueryRequestOptions,
-	): Record<string, string> {
+	protected static resolveQueryOptions(options?: QueryRequestOptions): Record<string, string> {
 		const params: Record<string, string> = {};
 
-		if (options?.count != undefined)
-			params["page[count]"] = options.count.toString();
+		if (options?.count != undefined) params["page[count]"] = options.count.toString();
 		if (options?.cursor != undefined) params["page[cursor]"] = options.cursor;
-		if (options?.sort != undefined)
-			params["sort"] = this.resolveSortOptions(options.sort);
+		if (options?.sort != undefined) params["sort"] = this.resolveSortOptions(options.sort);
 
 		return params;
 	}
@@ -588,9 +546,7 @@ export class QueryBuilder<
 	 * @param options the sort options
 	 * @returns the parameter to include in the query
 	 */
-	protected static resolveSortOptions(
-		options: NonNullable<QueryRequestOptions["sort"]>,
-	): string {
+	protected static resolveSortOptions(options: NonNullable<QueryRequestOptions["sort"]>): string {
 		return (Array.isArray(options) ? options : [options])
 			.map((option) => {
 				return typeof option === "string"

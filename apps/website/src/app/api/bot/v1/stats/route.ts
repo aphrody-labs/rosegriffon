@@ -1,5 +1,5 @@
-import { NextResponse } from 'next/server';
-import type { NextRequest } from 'next/server';
+import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
 
 import { createAdminClient } from "@/lib/supabase/server";
 import { assertBotAuth } from "../_lib";
@@ -14,7 +14,9 @@ export const dynamic = "force-dynamic";
  */
 export async function GET(request: NextRequest) {
 	const denied = assertBotAuth(request);
-	if (denied) {return denied;}
+	if (denied) {
+		return denied;
+	}
 
 	const supabase = createAdminClient();
 	if (!supabase) {
@@ -32,7 +34,7 @@ export async function GET(request: NextRequest) {
 	} catch (error) {
 		return NextResponse.json(
 			{ error: error instanceof Error ? error.message : "Failed to fetch stats" },
-			{ status: 500 },
+			{ status: 500 }
 		);
 	}
 }

@@ -73,13 +73,7 @@
 	},
 	"overrides": [
 		{
-			"files": [
-				"*.test.ts",
-				"*.test.tsx",
-				"*.spec.ts",
-				"*.spec.tsx",
-				"tests/**"
-			],
+			"files": ["*.test.ts", "*.test.tsx", "*.spec.ts", "*.spec.tsx", "tests/**"],
 			"rules": {
 				"typescript/no-explicit-any": "off",
 				"typescript/no-non-null-assertion": "off",
@@ -88,12 +82,7 @@
 			}
 		},
 		{
-			"files": [
-				"app/api/og/**",
-				"app/api/share/**",
-				"app/og-image/**",
-				"app/**/opengraph-image.*"
-			],
+			"files": ["app/api/og/**", "app/api/share/**", "app/og-image/**", "app/**/opengraph-image.*"],
 			"rules": {
 				"nextjs/no-img-element": "off"
 			}

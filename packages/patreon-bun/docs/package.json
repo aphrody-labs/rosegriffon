@@ -1,31 +1,31 @@
 {
-  "name": "@patreon-api.ts/docs",
-  "description": "The documentation site for the patreon-api.ts",
-  "private": true,
-  "type": "module",
-  "bugs": {
-    "url": "https://github.com/ghostrider-05/patreon-api.ts/issues/"
-  },
-  "homepage": "https://patreon-api.pages.dev",
-  "license": "MIT",
-  "scripts": {
-    "predocs": "typedoc",
-    "docs:dev": "vitepress dev",
-    "docs:build": "vitepress build",
-    "docs:preview": "vitepress preview"
-  },
-  "dependencies": {
-    "patreon-api.ts": "../"
-  },
-  "devDependencies": {
-    "@shikijs/vitepress-twoslash": "^4.0.0",
-    "@vueuse/core": "^14.2.0",
-    "msw": "^2.12.7",
-    "typedoc": "^0.28.3",
-    "typedoc-plugin-markdown": "^4.11.0",
-    "typedoc-vitepress-theme": "^1.1.2",
-    "vitepress": "^2.0.0-alpha.17",
-    "vue": "^3.5.13",
-    "vuetify": "^4.0.0"
-  }
+	"name": "@patreon-api.ts/docs",
+	"private": true,
+	"description": "The documentation site for the patreon-api.ts",
+	"homepage": "https://patreon-api.pages.dev",
+	"bugs": {
+		"url": "https://github.com/ghostrider-05/patreon-api.ts/issues/"
+	},
+	"license": "MIT",
+	"type": "module",
+	"scripts": {
+		"predocs": "typedoc",
+		"docs:dev": "vitepress dev",
+		"docs:build": "vitepress build",
+		"docs:preview": "vitepress preview"
+	},
+	"dependencies": {
+		"patreon-api.ts": "../"
+	},
+	"devDependencies": {
+		"@shikijs/vitepress-twoslash": "^4.0.0",
+		"@vueuse/core": "^14.2.0",
+		"msw": "^2.12.7",
+		"typedoc": "^0.28.3",
+		"typedoc-plugin-markdown": "^4.11.0",
+		"typedoc-vitepress-theme": "^1.1.2",
+		"vitepress": "^2.0.0-alpha.17",
+		"vue": "^3.5.13",
+		"vuetify": "^4.0.0"
+	}
 }

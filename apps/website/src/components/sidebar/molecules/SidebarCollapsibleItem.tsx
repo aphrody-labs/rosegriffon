@@ -3,12 +3,7 @@
 import { ChevronRight } from "lucide-react";
 import React, { useEffect, useMemo } from "react";
 
-import {
-	Tooltip,
-	TooltipContent,
-	TooltipProvider,
-	TooltipTrigger,
-} from "@rose-griffon/ui";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@rose-griffon/ui";
 import { getBadgeVariant, sidebarTransitions } from "@/lib/sidebar-config";
 import { cn } from "@/lib/utils";
 import { useSidebarStore } from "@/stores/sidebar-store";
@@ -45,10 +40,7 @@ export interface SidebarCollapsibleItemProps {
  * @param {string} [description] - Description pour le tooltip.
  * @param {React.ReactNode} children - Les sous-items du menu.
  */
-export const SidebarCollapsibleItem = React.forwardRef<
-	HTMLDivElement,
-	SidebarCollapsibleItemProps
->(
+export const SidebarCollapsibleItem = React.forwardRef<HTMLDivElement, SidebarCollapsibleItemProps>(
 	(
 		{
 			title,
@@ -62,7 +54,7 @@ export const SidebarCollapsibleItem = React.forwardRef<
 			isCollapsedByDefault = false,
 			onExpandChange,
 		},
-		ref,
+		ref
 	) => {
 		// Use Zustand store for state persistence
 		const toggleSection = useSidebarStore((state) => state.toggleSection);
@@ -72,7 +64,7 @@ export const SidebarCollapsibleItem = React.forwardRef<
 		// Use sectionId if provided, otherwise use title as fallback
 		const sectionKey = useMemo(
 			() => sectionId || title.toLowerCase().replaceAll(/\s+/g, "-"),
-			[sectionId, title],
+			[sectionId, title]
 		);
 
 		// Local state for open/closed to ensure hydration match
@@ -123,9 +115,7 @@ export const SidebarCollapsibleItem = React.forwardRef<
 				isActive={isActive}
 				icon={icon}
 				aria-expanded={isOpen}
-				aria-label={
-					ariaLabel || `${isOpen ? "Réduire" : "Développer"} ${title}`
-				}
+				aria-label={ariaLabel || `${isOpen ? "Réduire" : "Développer"} ${title}`}
 				className={cn("group relative", sidebarTransitions.focus)}
 				role="button"
 				tabIndex={0}
@@ -142,7 +132,7 @@ export const SidebarCollapsibleItem = React.forwardRef<
 								badgeStyles.bg,
 								badgeStyles.text,
 								badgeStyles.border,
-								badgeStyles.animation,
+								badgeStyles.animation
 							)}
 							aria-label={`Badge: ${badge.text}`}
 						>
@@ -156,7 +146,7 @@ export const SidebarCollapsibleItem = React.forwardRef<
 					className={cn(
 						"w-3.5 h-3.5 sm:w-4 sm:h-4 transition-transform duration-200 shrink-0",
 						"text-sidebar-foreground/70",
-						isOpen && "rotate-90",
+						isOpen && "rotate-90"
 					)}
 					aria-hidden="true"
 				/>
@@ -187,7 +177,7 @@ export const SidebarCollapsibleItem = React.forwardRef<
 							"border-l border-sidebar-border",
 							"ml-3 mt-0 pl-3",
 							"space-y-0",
-							"animate-in fade-in-50 slide-in-from-top-2 duration-200 ease-out",
+							"animate-in fade-in-50 slide-in-from-top-2 duration-200 ease-out"
 						)}
 						role="region"
 						aria-label={`Contenu de ${title}`}
@@ -197,7 +187,7 @@ export const SidebarCollapsibleItem = React.forwardRef<
 				)}
 			</div>
 		);
-	},
+	}
 );
 
 SidebarCollapsibleItem.displayName = "SidebarCollapsibleItem";

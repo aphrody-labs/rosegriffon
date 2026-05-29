@@ -16,7 +16,9 @@ interface LegacyMember {
 
 export async function LegacyBanner({ userId }: Props) {
 	const supabase = createAdminClient();
-	if (!supabase) {return null;}
+	if (!supabase) {
+		return null;
+	}
 
 	const { data } = await supabase
 		.from("patreon_legacy_members")
@@ -25,7 +27,9 @@ export async function LegacyBanner({ userId }: Props) {
 		.eq("rg_subscription_status", "pending")
 		.maybeSingle();
 
-	if (!data) {return null;}
+	if (!data) {
+		return null;
+	}
 	const legacy = data as LegacyMember;
 
 	return (
@@ -46,8 +50,7 @@ export async function LegacyBanner({ userId }: Props) {
 						🌹
 					</p>
 					<p className="mt-1 text-sm text-muted-foreground">
-						Lancez votre soutien direct et conservez votre tarif pendant 12
-						mois.
+						Lancez votre soutien direct et conservez votre tarif pendant 12 mois.
 					</p>
 				</div>
 				<PatreonConnectButton variant="reactivate" redirect="/dashboard" />

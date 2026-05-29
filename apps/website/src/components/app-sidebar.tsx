@@ -12,9 +12,7 @@ import { SocialLinksSkeleton } from "@/components/sidebar/skeletons/SocialLinksS
 import { Separator, Sidebar, SidebarContent, SidebarFooter, SidebarHeader } from "@rose-griffon/ui";
 import { assoMenu, contactMenu, exploreMenu } from "@/lib/sidebar-config";
 
-const SocialLinks = lazy(
-	() => import("@/components/sidebar/organisms/SocialLinks"),
-);
+const SocialLinks = lazy(() => import("@/components/sidebar/organisms/SocialLinks"));
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 	const showExplore = exploreMenu.items.length > 0;
@@ -51,18 +49,12 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 					{showExplore && (
 						<>
 							<Separator className="mx-3 my-2 bg-sidebar-border/40" />
-							<SidebarNavLinks
-								title={exploreMenu.label}
-								items={exploreMenu.items}
-							/>
+							<SidebarNavLinks title={exploreMenu.label} items={exploreMenu.items} />
 						</>
 					)}
 
 					<Separator className="mx-3 my-2 bg-sidebar-border/40" />
-					<SidebarNavLinks
-						title={contactMenu.label}
-						items={contactMenu.items}
-					/>
+					<SidebarNavLinks title={contactMenu.label} items={contactMenu.items} />
 
 					<div className="px-3 pt-1">
 						<Suspense fallback={<SocialLinksSkeleton />}>

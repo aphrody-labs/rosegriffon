@@ -37,17 +37,11 @@ export const ADMIN_ROLES = [
 export type AdminRole = (typeof ADMIN_ROLES)[number];
 
 /** Roles qui peuvent gérer les utilisateurs (changer rôle, bannir). */
-export const USER_MANAGEMENT_ROLES = [
-	"admin",
-	"superadmin",
-] as const satisfies readonly RgRole[];
+export const USER_MANAGEMENT_ROLES = ["admin", "superadmin"] as const satisfies readonly RgRole[];
 export type UserManagementRole = (typeof USER_MANAGEMENT_ROLES)[number];
 
 /** Roles autorisés à exécuter les slash commands admin du bot Discord. */
-export const BOT_ADMIN_ROLES = [
-	"admin",
-	"staff",
-] as const satisfies readonly RgRole[];
+export const BOT_ADMIN_ROLES = ["admin", "staff"] as const satisfies readonly RgRole[];
 export type BotAdminRole = (typeof BOT_ADMIN_ROLES)[number];
 
 /** Roles "modérateurs" — accès commentaires, signalements (commun bot + web). */
@@ -61,33 +55,22 @@ export type ModeratorRole = (typeof MODERATOR_ROLES)[number];
 // --- Helpers --------------------------------------------------------------
 
 export function isRgRole(value: unknown): value is RgRole {
-	return (
-		typeof value === "string" &&
-		(ALL_ROLES as readonly string[]).includes(value)
-	);
+	return typeof value === "string" && (ALL_ROLES as readonly string[]).includes(value);
 }
 
-export function isAdminRole(
-	role: string | null | undefined,
-): role is AdminRole {
+export function isAdminRole(role: string | null | undefined): role is AdminRole {
 	return !!role && (ADMIN_ROLES as readonly string[]).includes(role);
 }
 
-export function isUserManagementRole(
-	role: string | null | undefined,
-): role is UserManagementRole {
+export function isUserManagementRole(role: string | null | undefined): role is UserManagementRole {
 	return !!role && (USER_MANAGEMENT_ROLES as readonly string[]).includes(role);
 }
 
-export function isBotAdminRole(
-	role: string | null | undefined,
-): role is BotAdminRole {
+export function isBotAdminRole(role: string | null | undefined): role is BotAdminRole {
 	return !!role && (BOT_ADMIN_ROLES as readonly string[]).includes(role);
 }
 
-export function isModeratorRole(
-	role: string | null | undefined,
-): role is ModeratorRole {
+export function isModeratorRole(role: string | null | undefined): role is ModeratorRole {
 	return !!role && (MODERATOR_ROLES as readonly string[]).includes(role);
 }
 

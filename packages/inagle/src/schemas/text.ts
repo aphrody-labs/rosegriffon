@@ -21,9 +21,9 @@
  * - variables[2].value: text (String) - Localized text content
  */
 export interface TextInfo {
-  hashId: number;
-  index: number;
-  text: string;
+	hashId: number;
+	index: number;
+	text: string;
 }
 
 /**
@@ -39,9 +39,9 @@ export interface TextInfo {
  * - variables[10-14]: int flags
  */
 export interface NounInfo {
-  hashId: number;
-  nameType: number;
-  name: string;
+	hashId: number;
+	nameType: number;
+	name: string;
 }
 
 /**
@@ -54,15 +54,15 @@ export type AvailableLocale = (typeof AvailableLocales)[number];
  * All locales defined in dump structure
  */
 export const AllLocales = [
-  "ja", // Japanese
-  "en", // English
-  "fr", // French
-  "de", // German
-  "es", // Spanish
-  "it", // Italian
-  "pt", // Portuguese
-  "zh_hans", // Simplified Chinese
-  "zh_hant", // Traditional Chinese
+	"ja", // Japanese
+	"en", // English
+	"fr", // French
+	"de", // German
+	"es", // Spanish
+	"it", // Italian
+	"pt", // Portuguese
+	"zh_hans", // Simplified Chinese
+	"zh_hant", // Traditional Chinese
 ] as const;
 export type Locale = (typeof AllLocales)[number];
 
@@ -71,50 +71,50 @@ export type Locale = (typeof AllLocales)[number];
  * Based on: dump/data/common/text/fr/*.cfg.bin.json
  */
 export const TextFileTypes = [
-  "ai_text",
-  "chara_add_info_text",
-  "chara_description_text",
-  "chara_text",
-  "chara_text_roma",
-  "chat_text",
-  "craft_text",
-  "data_file_text",
-  "extend_story_text",
-  "formation_text",
-  "help_list_text",
-  "inacode_text",
-  "item_text",
-  "item_explain_text",
-  "map_text",
-  "map_text_roma",
-  "medal_text",
-  "menu_text",
-  "mission_text",
-  "music_name_text",
-  "players_universe_text",
-  "post_text",
-  "quest_purpose_text",
-  "quest_title_text",
-  "rpg_battle_cmd_text",
-  "rpg_battle_message_text",
-  "rpg_battle_text",
-  "scene_archive_text",
-  "scout_phase_text",
-  "search_word_text",
-  "setting_text",
-  "shop_text",
-  "skill_text",
-  "soccer_common_text",
-  "soccer_game_title",
-  "soccer_history_check_text",
-  "soccer_quick_action_text",
-  "soccer_suggest_text",
-  "soccer_team_passive_text",
-  "soccer_technic_text",
-  "staffroll_text",
-  "system_text",
-  "team_text",
-  "theater_text",
-  "trophy_text",
+	"ai_text",
+	"chara_add_info_text",
+	"chara_description_text",
+	"chara_text",
+	"chara_text_roma",
+	"chat_text",
+	"craft_text",
+	"data_file_text",
+	"extend_story_text",
+	"formation_text",
+	"help_list_text",
+	"inacode_text",
+	"item_text",
+	"item_explain_text",
+	"map_text",
+	"map_text_roma",
+	"medal_text",
+	"menu_text",
+	"mission_text",
+	"music_name_text",
+	"players_universe_text",
+	"post_text",
+	"quest_purpose_text",
+	"quest_title_text",
+	"rpg_battle_cmd_text",
+	"rpg_battle_message_text",
+	"rpg_battle_text",
+	"scene_archive_text",
+	"scout_phase_text",
+	"search_word_text",
+	"setting_text",
+	"shop_text",
+	"skill_text",
+	"soccer_common_text",
+	"soccer_game_title",
+	"soccer_history_check_text",
+	"soccer_quick_action_text",
+	"soccer_suggest_text",
+	"soccer_team_passive_text",
+	"soccer_technic_text",
+	"staffroll_text",
+	"system_text",
+	"team_text",
+	"theater_text",
+	"trophy_text",
 ] as const;
 export type TextFileType = (typeof TextFileTypes)[number];

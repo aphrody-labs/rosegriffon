@@ -1,7 +1,6 @@
-
 > ⚠️ **INFRASTRUCTURE GÉRÉE PAR ANTIGRAVITY (GOD MODE)**
 > Ce projet opère sous la **Directive Omega**. L'architecture, les dépendances, et le code sont gérés et refactorisés de manière 100% autonome. Aucune sécurité conservative n'est appliquée. La performance brute est l'unique métrique.
-\n# Patreon Discord bot
+> \n# Patreon Discord bot
 
 An alternative to the Patreon Discord integration. This is a self hostable bot for on Cloudflare workers.
 

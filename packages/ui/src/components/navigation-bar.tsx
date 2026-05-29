@@ -11,17 +11,13 @@ import type * as React from "react";
 
 import { cn } from "../lib/utils";
 
-function NavigationBar({
-	className,
-	children,
-	...props
-}: React.ComponentProps<"nav">) {
+function NavigationBar({ className, children, ...props }: React.ComponentProps<"nav">) {
 	return (
 		<nav
 			data-slot="navigation-bar"
 			className={cn(
 				"flex min-h-20 w-full items-center justify-around bg-surface-container px-2 pt-3 pb-4 text-on-surface",
-				className,
+				className
 			)}
 			{...props}
 		>
@@ -57,7 +53,7 @@ function NavigationBarItem({
 			aria-current={active ? "page" : undefined}
 			className={cn(
 				"group/nav-bar-item relative flex min-h-12 min-w-12 flex-1 cursor-pointer flex-col items-center justify-center gap-1 px-2 py-1 text-on-surface-variant transition-colors duration-(--md-sys-motion-duration-short4) ease-(--md-sys-motion-easing-emphasized) disabled:pointer-events-none disabled:opacity-50 outline-hidden focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] data-[active=true]:text-on-secondary-container",
-				className,
+				className
 			)}
 			{...props}
 		>
@@ -66,7 +62,7 @@ function NavigationBarItem({
 				className={cn(
 					"relative flex h-8 w-16 items-center justify-center rounded-(--md-sys-shape-corner-full) transition-[background-color,transform] duration-(--md-sys-motion-duration-medium2) ease-(--md-sys-motion-easing-emphasized)",
 					"group-data-[active=true]/nav-bar-item:bg-secondary-container",
-					"[&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-6",
+					"[&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-6"
 				)}
 			>
 				{icon}
@@ -77,7 +73,7 @@ function NavigationBarItem({
 					"text-xs font-medium leading-4 tracking-[0.5px]",
 					labelOnActive
 						? "opacity-0 group-data-[active=true]/nav-bar-item:opacity-100"
-						: "opacity-100",
+						: "opacity-100"
 				)}
 			>
 				{label}

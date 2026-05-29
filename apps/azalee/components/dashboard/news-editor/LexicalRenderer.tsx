@@ -26,20 +26,38 @@ type LexicalNode = any;
 function renderText(node: LexicalNode, key: string | number): ReactNode {
 	let el: ReactNode = node.text ?? "";
 	const format = (node.format as number) || 0;
-	if (format & FMT_CODE) {el = <code>{el}</code>;}
-	if (format & FMT_HIGHLIGHT) {el = <mark>{el}</mark>;}
-	if (format & FMT_SUBSCRIPT) {el = <sub>{el}</sub>;}
-	if (format & FMT_SUPERSCRIPT) {el = <sup>{el}</sup>;}
-	if (format & FMT_STRIKETHROUGH) {el = <s>{el}</s>;}
-	if (format & FMT_UNDERLINE) {el = <u>{el}</u>;}
-	if (format & FMT_ITALIC) {el = <em>{el}</em>;}
-	if (format & FMT_BOLD) {el = <strong>{el}</strong>;}
+	if (format & FMT_CODE) {
+		el = <code>{el}</code>;
+	}
+	if (format & FMT_HIGHLIGHT) {
+		el = <mark>{el}</mark>;
+	}
+	if (format & FMT_SUBSCRIPT) {
+		el = <sub>{el}</sub>;
+	}
+	if (format & FMT_SUPERSCRIPT) {
+		el = <sup>{el}</sup>;
+	}
+	if (format & FMT_STRIKETHROUGH) {
+		el = <s>{el}</s>;
+	}
+	if (format & FMT_UNDERLINE) {
+		el = <u>{el}</u>;
+	}
+	if (format & FMT_ITALIC) {
+		el = <em>{el}</em>;
+	}
+	if (format & FMT_BOLD) {
+		el = <strong>{el}</strong>;
+	}
 	const style = node.style as string | undefined;
 	if (style) {
 		const styleObj: Record<string, string> = {};
 		for (const decl of style.split(";")) {
 			const [k, v] = decl.split(":").map((s) => s.trim());
-			if (k && v) {styleObj[toCamel(k)] = v;}
+			if (k && v) {
+				styleObj[toCamel(k)] = v;
+			}
 		}
 		return (
 			<span key={key} style={styleObj}>
@@ -55,12 +73,16 @@ function toCamel(prop: string): string {
 }
 
 function renderChildren(children: LexicalNode[] | undefined): ReactNode[] {
-	if (!Array.isArray(children)) {return [];}
+	if (!Array.isArray(children)) {
+		return [];
+	}
 	return children.map((c, i) => renderNode(c, i));
 }
 
 function renderNode(node: LexicalNode, key: string | number): ReactNode {
-	if (!node || typeof node !== "object") {return null;}
+	if (!node || typeof node !== "object") {
+		return null;
+	}
 	switch (node.type) {
 		case "text": {
 			return renderText(node, key);
@@ -111,11 +133,11 @@ function renderNode(node: LexicalNode, key: string | number): ReactNode {
 		case "image": {
 			const src = node.src as string | undefined;
 			const alt = (node.altText as string) || "";
-			if (!src) {return null;}
+			if (!src) {
+				return null;
+			}
 			// eslint-disable-next-line @next/next/no-img-element
-			return (
-				<img key={key} src={src} alt={alt} loading="lazy" decoding="async" />
-			);
+			return <img key={key} src={src} alt={alt} loading="lazy" decoding="async" />;
 		}
 		default: {
 			// fallback : si le node a des children, on les rend dans un fragment
@@ -132,6 +154,8 @@ export function LexicalRenderer({
 }: {
 	content: SerializedEditorState | null | undefined;
 }) {
-	if (!content?.root) {return null;}
+	if (!content?.root) {
+		return null;
+	}
 	return <>{renderChildren(content.root.children as LexicalNode[])}</>;
 }

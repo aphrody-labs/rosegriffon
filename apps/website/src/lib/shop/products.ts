@@ -162,11 +162,7 @@ export const PRODUCTS: Product[] = [
 		category: "badge",
 		description:
 			"Grand badge brodé reprenant le logo Rose Griffon (silhouette griffon + éclair Inazuma + rose). Brodage 7 couleurs, dos sécurité, finition propre.",
-		highlights: [
-			"Diamètre 56 mm",
-			"Brodage 7 couleurs",
-			"Dos sécurité plastique",
-		],
+		highlights: ["Diamètre 56 mm", "Brodage 7 couleurs", "Dos sécurité plastique"],
 		image: "/mark.webp",
 		name: "Grand Badge brodé · Rose Griffon",
 		priceCents: 390,
@@ -205,11 +201,7 @@ export const PRODUCTS: Product[] = [
 		description:
 			"Affiche A2 célébrant la rencontre des deux pôles Rose Griffon (la maison mère) et Achillea (l'e-sport Inazuma Eleven). Illustration originale, papier 200g semi-mat.",
 		gallery: ["/mural1.webp", "/mural2.webp"],
-		highlights: [
-			"Format A2 (420 × 594 mm)",
-			"Papier 200g semi-mat",
-			"Édition tirage 100 ex",
-		],
+		highlights: ["Format A2 (420 × 594 mm)", "Papier 200g semi-mat", "Édition tirage 100 ex"],
 		image: "/mural1.webp",
 		name: "Affiche A2 · Achillea × Rose Griffon",
 		priceCents: 1990,
@@ -222,12 +214,7 @@ export const PRODUCTS: Product[] = [
 		category: "carte",
 		description:
 			"Reproduction officielle de la carte trading Roy Fonteneau en version foil holographique. Format carte à jouer 63×88mm, vernis sélectif sur la diagonale jaune.",
-		highlights: [
-			"Format 63 × 88 mm",
-			"Foil holographique",
-			"Vernis sélectif",
-			"Sleeve incluse",
-		],
+		highlights: ["Format 63 × 88 mm", "Foil holographique", "Vernis sélectif", "Sleeve incluse"],
 		image: "/RG_roy_LC.webp",
 		name: "Carte Trading · Roy Fonteneau (Foil)",
 		priceCents: 490,
@@ -278,7 +265,9 @@ export function getProduct(slug: string): Product | undefined {
 }
 
 export function getVariantPrice(product: Product, variantId?: string): number {
-	if (!variantId || !product.variants) {return product.priceCents;}
+	if (!variantId || !product.variants) {
+		return product.priceCents;
+	}
 	const v = product.variants.find((v) => v.id === variantId);
 	return v?.priceCentsOverride ?? product.priceCents;
 }

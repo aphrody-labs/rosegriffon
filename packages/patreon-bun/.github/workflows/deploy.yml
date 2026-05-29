@@ -1,16 +1,16 @@
 name: Deploy
 on:
   push:
-    paths: 
+    paths:
       # Examples
-      - 'examples/cloudflare-webhook/**'
+      - "examples/cloudflare-webhook/**"
       # Documentation
-      - 'docs/**' 
-      - 'apps/worker-docs/**'
+      - "docs/**"
+      - "apps/worker-docs/**"
       # Trigger when this file is updated
-      - '.github/workflows/deploy.yml'
+      - ".github/workflows/deploy.yml"
       # Trigger a new deploy when a release is made
-      - '.release-please-manifest.json'
+      - ".release-please-manifest.json"
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -45,7 +45,7 @@ jobs:
 
       - name: Deploy cloudflare-webhook
         uses: cloudflare/wrangler-action@v3.6.0
-        env: 
+        env:
           DISCORD_WEBHOOK_URL: ${{ secrets.CW_DISCORD_WEBHOOK_URL }}
           HTML_MD_KEY: ${{ secrets.CW_HTML_MD_KEY }}
           PATREON_WEBHOOK_SECRET: ${{ secrets.CW_PATREON_WEBHOOK_SECRET }}
@@ -107,7 +107,7 @@ jobs:
       - name: Install worker dependencies
         run: bun install
         working-directory: ./apps/worker-docs
-      
+
       - name: Deploy patreon-docs worker
         uses: cloudflare/wrangler-action@v3.6.0
         if: ${{ github.actor != 'dependabot[bot]' }}

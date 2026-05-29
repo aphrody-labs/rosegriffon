@@ -105,9 +105,6 @@
 		"web-push": "^3.6.7",
 		"zod": "catalog:"
 	},
-	"browserslist": [
-		"defaults and supports es6-module"
-	],
 	"devDependencies": {
 		"@next/bundle-analyzer": "catalog:",
 		"@rose-griffon/config": "workspace:*",
@@ -136,5 +133,8 @@
 		"turbo": "^2.9.14",
 		"typescript": "catalog:",
 		"vitest": "catalog:"
-	}
+	},
+	"browserslist": [
+		"defaults and supports es6-module"
+	]
 }

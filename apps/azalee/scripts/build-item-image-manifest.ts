@@ -14,22 +14,15 @@
  * Run : `bun scripts/build-item-image-manifest.ts`
  */
 const MENU_ROOT =
-	process.env.IEVR_MENU_ROOT ??
-	"/home/ubuntu/.local/share/Steam/steamcmd/inazuma/data/dx11/menu";
+	process.env.IEVR_MENU_ROOT ?? "/home/ubuntu/.local/share/Steam/steamcmd/inazuma/data/dx11/menu";
 
-const SCAN_DIRS = [
-	"200_icon/02_icon_item",
-	"220_img/telop_waza/fr",
-	"220_img/telop_waza/en",
-];
+const SCAN_DIRS = ["200_icon/02_icon_item", "220_img/telop_waza/fr", "220_img/telop_waza/en"];
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
 if (!SUPABASE_URL || !SUPABASE_KEY) {
-	console.error(
-		"Missing NEXT_PUBLIC_SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY",
-	);
+	console.error("Missing NEXT_PUBLIC_SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY");
 	process.exit(1);
 }
 
@@ -44,7 +37,9 @@ for (const dir of SCAN_DIRS) {
 		const glob = new Bun.Glob("*.png");
 		for await (const f of glob.scan({ cwd: `${MENU_ROOT}/${dir}` })) {
 			set.add(f);
-			if (!fileIndex.has(f)) {fileIndex.set(f, `${dir}/${f}`);}
+			if (!fileIndex.has(f)) {
+				fileIndex.set(f, `${dir}/${f}`);
+			}
 		}
 	} catch {
 		console.warn(`Skip missing dir: ${dir}`);
@@ -55,8 +50,7 @@ for (const dir of SCAN_DIRS) {
 console.log(`Total unique filenames: ${fileIndex.size}`);
 
 // Pagination Supabase.
-const items: Array<{ internal_code: string | null; image_url: string | null }> =
-	[];
+const items: Array<{ internal_code: string | null; image_url: string | null }> = [];
 const PAGE = 1000;
 for (let offset = 0; ; offset += PAGE) {
 	const r = await fetch(
@@ -66,7 +60,7 @@ for (let offset = 0; ; offset += PAGE) {
 				Authorization: `Bearer ${SUPABASE_KEY}`,
 				apikey: SUPABASE_KEY,
 			},
-		},
+		}
 	);
 	if (!r.ok) {
 		console.error(`Supabase fetch failed: ${r.status} ${await r.text()}`);
@@ -74,7 +68,9 @@ for (let offset = 0; ; offset += PAGE) {
 	}
 	const page: typeof items = await r.json();
 	items.push(...page);
-	if (page.length < PAGE) {break;}
+	if (page.length < PAGE) {
+		break;
+	}
 }
 console.log(`DB items: ${items.length}`);
 
@@ -87,13 +83,13 @@ const unresolvedSamples: string[] = [];
 
 for (const it of items) {
 	const code = it.internal_code;
-	if (!code) {continue;}
+	if (!code) {
+		continue;
+	}
 
 	// 1. DB image_url direct match.
 	if (it.image_url) {
-		const dbFilename = it.image_url
-			.replace(/^.*\//, "")
-			.replace(/\.webp$/, ".png");
+		const dbFilename = it.image_url.replace(/^.*\//, "").replace(/\.webp$/, ".png");
 		// Tente toutes les dirs scannées dans l'ordre.
 		const matchedDir = SCAN_DIRS.find((d) => dirIndexes[d]?.has(dbFilename));
 		if (matchedDir) {
@@ -135,10 +131,14 @@ for (const it of items) {
 			break;
 		}
 	}
-	if (manifest[code]) {continue;}
+	if (manifest[code]) {
+		continue;
+	}
 
 	unresolved++;
-	if (unresolvedSamples.length < 15) {unresolvedSamples.push(code);}
+	if (unresolvedSamples.length < 15) {
+		unresolvedSamples.push(code);
+	}
 }
 
 const out = "data/item-image-manifest.json";

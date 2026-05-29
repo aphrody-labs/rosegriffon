@@ -20,19 +20,13 @@ function findRelation<
 	Type extends ItemType,
 	Fields extends RelationshipFields<Type>,
 	Map extends RelationshipMap<Type, Fields>,
->(
-	relationship: RelationshipData<Type, Fields>,
-	included: RelationshipItem<Type, Fields, Map>[],
-) {
+>(relationship: RelationshipData<Type, Fields>, included: RelationshipItem<Type, Fields, Map>[]) {
 	if (relationship == null) return null;
 
-	function searchRelation(
-		data: Exclude<RelationshipData<Type, Fields>, null | unknown[]>,
-	) {
+	function searchRelation(data: Exclude<RelationshipData<Type, Fields>, null | unknown[]>) {
 		const { id, type } = data;
 		const incl = included.find((f) => f.id === id && f.type === type);
-		if (!incl)
-			throw new NormalizedError("No included field for resource: " + id);
+		if (!incl) throw new NormalizedError("No included field for resource: " + id);
 
 		return {
 			...incl.attributes,
@@ -54,21 +48,16 @@ export function findRelationships<
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	_type: Type,
 	relationships: Relationship<Type, Fields>["relationships"] | undefined,
-	included: RelationshipItem<Type, Fields, Map>[] | undefined,
+	included: RelationshipItem<Type, Fields, Map>[] | undefined
 ) {
 	if (relationships == undefined || included == undefined) return {};
-	const keys: Fields[] = Object.keys(
-		relationships,
-	) as keyof typeof relationships;
+	const keys: Fields[] = Object.keys(relationships) as keyof typeof relationships;
 
 	return keys.reduce(
 		(found, key) => ({
 			...found,
-			[key]: findRelation<Type, Fields, Map>(
-				relationships[key]["data"],
-				included,
-			),
+			[key]: findRelation<Type, Fields, Map>(relationships[key]["data"], included),
 		}),
-		{} as Record<Fields, NormalizedRelationshipItem<Type, Fields, Map>>,
+		{} as Record<Fields, NormalizedRelationshipItem<Type, Fields, Map>>
 	);
 }

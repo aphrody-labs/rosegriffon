@@ -1,12 +1,12 @@
 #!/usr/bin/env node
 import { Command } from "commander";
 import {
-  registerCharacterCommand,
-  registerItemsCommand,
-  registerSearchCommand,
-  registerSkillsCommand,
-  registerStatsCommand,
-  registerTeamsCommand,
+	registerCharacterCommand,
+	registerItemsCommand,
+	registerSearchCommand,
+	registerSkillsCommand,
+	registerStatsCommand,
+	registerTeamsCommand,
 } from "./cli-commands.js";
 import { registerMenuCommand } from "./cli-menu.js";
 import { registerPushCommand } from "./cli-push.js";

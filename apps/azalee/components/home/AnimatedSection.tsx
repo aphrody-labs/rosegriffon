@@ -22,9 +22,7 @@ const directionClass: Record<AnimationDirection, string> = {
 };
 
 // MD3 emphasized-decelerate easing
-const EMPHASIZED_DECELERATE: [number, number, number, number] = [
-	0.05, 0.7, 0.1, 1,
-];
+const EMPHASIZED_DECELERATE: [number, number, number, number] = [0.05, 0.7, 0.1, 1];
 
 const initialByDirection: Record<
 	AnimationDirection,
@@ -57,14 +55,12 @@ export function AnimatedSection({
 	const inView = useInView(ref, { margin: "-60px 0px -60px 0px", once: true });
 	const prefersReducedMotion = useReducedMotion();
 
-	const initial = prefersReducedMotion
-		? { opacity: 1 }
-		: initialByDirection[direction];
+	const initial = prefersReducedMotion ? { opacity: 1 } : initialByDirection[direction];
 	const animate = prefersReducedMotion
 		? { opacity: 1 }
-		: (inView
+		: inView
 			? visibleByDirection[direction]
-			: initialByDirection[direction]);
+			: initialByDirection[direction];
 
 	// Stagger: wrap each direct child in a motion.div with incremental delay.
 	if (stagger && !prefersReducedMotion) {
@@ -75,8 +71,7 @@ export function AnimatedSection({
 				className={`${directionClass[direction]} ${inView ? "scroll-reveal-visible" : ""} ${className || ""}`}
 			>
 				{childrenArray.map((child, index) => {
-					const key =
-						isValidElement(child) && child.key != null ? child.key : index;
+					const key = isValidElement(child) && child.key != null ? child.key : index;
 					return (
 						<motion.div
 							key={key}

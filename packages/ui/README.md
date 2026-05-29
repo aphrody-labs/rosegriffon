@@ -11,9 +11,9 @@ Déjà câblé dans le monorepo via `workspace:*`. Pour une nouvelle app :
 ```jsonc
 // apps/<app>/package.json
 {
-  "dependencies": {
-    "@rose-griffon/ui": "workspace:*"
-  }
+	"dependencies": {
+		"@rose-griffon/ui": "workspace:*",
+	},
 }
 ```
 
@@ -42,12 +42,12 @@ import { useIsMobile, useMediaQuery, useSwipe } from "@rose-griffon/ui";
 
 ## Thèmes (4)
 
-| Classe | Mode | Seed | Usage |
-|---|---|---|---|
-| `theme-roy` | light | bleu/doré | personnage Inazuma Roy |
-| `theme-gaelle` | light | vermillon/orange | personnage Inazuma Gaelle |
-| `theme-azalee-light` | light | `#F89C5A` (orange) | wiki Azalée par défaut |
-| `theme-azalee-dark` | dark | `#F89C5A` inversé | wiki Azalée mode sombre |
+| Classe               | Mode  | Seed               | Usage                     |
+| -------------------- | ----- | ------------------ | ------------------------- |
+| `theme-roy`          | light | bleu/doré          | personnage Inazuma Roy    |
+| `theme-gaelle`       | light | vermillon/orange   | personnage Inazuma Gaelle |
+| `theme-azalee-light` | light | `#F89C5A` (orange) | wiki Azalée par défaut    |
+| `theme-azalee-dark`  | dark  | `#F89C5A` inversé  | wiki Azalée mode sombre   |
 
 Application :
 
@@ -73,12 +73,10 @@ Chaque thème expose 35 tokens MD3 + 24 vars shadcn (pont automatique). Les comp
 
 ```tsx
 <div className="bg-surface text-on-surface">
-  <h2 className="text-primary">Titre</h2>
-  <p className="text-on-surface-variant">Texte secondaire</p>
-  <button className="bg-primary-container text-on-primary-container">
-    Action
-  </button>
-  <span className="border border-outline-variant">Border subtle</span>
+	<h2 className="text-primary">Titre</h2>
+	<p className="text-on-surface-variant">Texte secondaire</p>
+	<button className="bg-primary-container text-on-primary-container">Action</button>
+	<span className="border border-outline-variant">Border subtle</span>
 </div>
 ```
 
@@ -88,7 +86,8 @@ Chaque thème expose 35 tokens MD3 + 24 vars shadcn (pont automatique). Les comp
 
 ```tsx
 <div className="rounded-(--md-sys-shape-corner-large)">
-  rounded-extra-small (4px) · small (8px) · medium (12px) · large (16px) · extra-large (28px) · full (9999px)
+	rounded-extra-small (4px) · small (8px) · medium (12px) · large (16px) · extra-large (28px) · full
+	(9999px)
 </div>
 ```
 
@@ -96,11 +95,11 @@ Chaque thème expose 35 tokens MD3 + 24 vars shadcn (pont automatique). Les comp
 
 ```tsx
 <div
-  className="transition-all"
-  style={{
-    transitionDuration: "var(--md-sys-motion-duration-medium2)", // 300ms
-    transitionTimingFunction: "var(--md-sys-motion-easing-emphasized)",
-  }}
+	className="transition-all"
+	style={{
+		transitionDuration: "var(--md-sys-motion-duration-medium2)", // 300ms
+		transitionTimingFunction: "var(--md-sys-motion-easing-emphasized)",
+	}}
 />
 ```
 
@@ -110,10 +109,7 @@ Chaque thème expose 35 tokens MD3 + 24 vars shadcn (pont automatique). Les comp
 ### Elevation
 
 ```tsx
-<div
-  className="bg-surface-container"
-  style={{ boxShadow: "var(--md-sys-elevation-level2)" }}
-/>
+<div className="bg-surface-container" style={{ boxShadow: "var(--md-sys-elevation-level2)" }} />
 ```
 
 Levels 0 à 5 (none / 1dp / 3dp / 6dp / 8dp / 12dp).
@@ -131,7 +127,7 @@ Levels 0 à 5 (none / 1dp / 3dp / 6dp / 8dp / 12dp).
 
 ```tsx
 <button className="state-layer bg-primary-container">
-  Hover/focus/press overlay automatique (8% / 12% / 12%)
+	Hover/focus/press overlay automatique (8% / 12% / 12%)
 </button>
 ```
 
@@ -140,30 +136,39 @@ Levels 0 à 5 (none / 1dp / 3dp / 6dp / 8dp / 12dp).
 ## Composants (55+)
 
 ### Foundations
+
 `Button` · `Card` · `Badge` · `Separator` · `Skeleton` · `Spinner`
 
 ### Forms
+
 `Input` · `Textarea` · `Label` · `Checkbox` · `RadioGroup` · `Switch` · `Slider` · `Select` · `InputOTP` · `Form` · `Field` · `InputGroup` · `ButtonGroup`
 
 ### Navigation
+
 `Tabs` · `Pagination` · `PaginationControls` · `Breadcrumb` · `NavigationMenu` · `Menubar` · `Sidebar`
 
 ### Overlays
+
 `Dialog` · `AlertDialog` · `Sheet` · `Drawer` · `Popover` · `HoverCard` · `Tooltip` · `DropdownMenu` · `ContextMenu` · `ResponsiveDialog`
 
 ### Data
+
 `Table` · `Avatar` · `Calendar` · `Chart` · `Command`
 
 ### Feedback
+
 `Alert` · `Toaster` (sonner + next-themes) · `Progress`
 
 ### Layout
+
 `Accordion` · `Collapsible` · `ScrollArea` · `AspectRatio` · `Resizable` · `Carousel` · `Empty` · `Item` · `Kbd`
 
 ### Hooks
+
 `useIsMobile` · `useMediaQuery` · `useSwipe`
 
 Tous les composants suivent le pattern moderne shadcn :
+
 - Function components (pas `forwardRef`)
 - `data-slot` attribute pour styling global ciblé
 - Focus-visible cohérent : `focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] outline-hidden`

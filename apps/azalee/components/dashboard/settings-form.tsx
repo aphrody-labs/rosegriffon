@@ -103,16 +103,11 @@ export function SettingsForm({ initialProfile, userEmail }: SettingsFormProps) {
 			if (error) {
 				throw new Error(error.message);
 			}
-			toast.success(
-				"Un email de confirmation a été envoyé à ta nouvelle adresse.",
-			);
+			toast.success("Un email de confirmation a été envoyé à ta nouvelle adresse.");
 			setNewEmail("");
 		} catch (error) {
 			console.error("Error changing email:", error);
-			const msg =
-				error instanceof Error
-					? error.message
-					: "Erreur lors du changement d'email";
+			const msg = error instanceof Error ? error.message : "Erreur lors du changement d'email";
 			toast.error(msg);
 		} finally {
 			setEmailLoading(false);
@@ -149,9 +144,7 @@ export function SettingsForm({ initialProfile, userEmail }: SettingsFormProps) {
 		} catch (error) {
 			console.error("Error changing password:", error);
 			const msg =
-				error instanceof Error
-					? error.message
-					: "Erreur lors du changement de mot de passe";
+				error instanceof Error ? error.message : "Erreur lors du changement de mot de passe";
 			toast.error(msg);
 		} finally {
 			setPasswordLoading(false);
@@ -259,9 +252,7 @@ export function SettingsForm({ initialProfile, userEmail }: SettingsFormProps) {
 							<p className="text-[10px] font-black uppercase tracking-widest text-on-surface-variant mb-1">
 								Email actuel
 							</p>
-							<p className="type-body-large font-bold text-on-surface break-all">
-								{userEmail}
-							</p>
+							<p className="type-body-large font-bold text-on-surface break-all">{userEmail}</p>
 						</div>
 					)}
 					<div className="space-y-2 sm:space-y-3">
@@ -281,8 +272,8 @@ export function SettingsForm({ initialProfile, userEmail }: SettingsFormProps) {
 						/>
 					</div>
 					<p className="type-body-small text-on-surface-variant">
-						Un email de confirmation sera envoyé à ta nouvelle adresse. Le
-						changement ne sera effectif qu&apos;après confirmation.
+						Un email de confirmation sera envoyé à ta nouvelle adresse. Le changement ne sera
+						effectif qu&apos;après confirmation.
 					</p>
 					<Button
 						onClick={handleChangeEmail}
@@ -383,18 +374,14 @@ export function SettingsForm({ initialProfile, userEmail }: SettingsFormProps) {
 				<CardContent className="p-4 sm:p-8 space-y-4 sm:space-y-6">
 					<div className="flex items-start sm:items-center justify-between gap-4 group">
 						<div className="space-y-0.5 sm:space-y-1 min-w-0 flex-1">
-							<Label className="text-sm sm:text-base font-bold text-on-surface">
-								Mode Sombre
-							</Label>
+							<Label className="text-sm sm:text-base font-bold text-on-surface">Mode Sombre</Label>
 							<p className="text-xs sm:text-sm text-on-surface-variant font-medium opacity-70">
 								Basculer entre les thèmes clair et sombre
 							</p>
 						</div>
 						<Switch
 							checked={theme !== "light"}
-							onCheckedChange={(checked) =>
-								setTheme(checked ? "dark" : "light")
-							}
+							onCheckedChange={(checked) => setTheme(checked ? "dark" : "light")}
 							className="data-[state=checked]:bg-primary shrink-0"
 						/>
 					</div>

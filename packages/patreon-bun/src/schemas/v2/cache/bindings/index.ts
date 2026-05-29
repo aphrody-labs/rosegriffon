@@ -1,1 +1,1 @@
-export { default as CacheStoreBindingMemory } from './memory'
+export { default as CacheStoreBindingMemory } from "./memory";

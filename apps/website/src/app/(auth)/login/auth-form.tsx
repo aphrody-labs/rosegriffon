@@ -13,8 +13,12 @@ import { DiscordIcon, PatreonIcon } from "./_components/social-icons";
 type Provider = "discord" | "patreon";
 
 function safeRedirect(raw: string | null | undefined): string {
-	if (!raw) {return "/dashboard";}
-	if (!raw.startsWith("/") || raw.startsWith("//")) {return "/dashboard";}
+	if (!raw) {
+		return "/dashboard";
+	}
+	if (!raw.startsWith("/") || raw.startsWith("//")) {
+		return "/dashboard";
+	}
 	return raw;
 }
 
@@ -75,9 +79,7 @@ export function AuthForm() {
 				) : (
 					<DiscordIcon />
 				)}
-				{loadingProvider === "discord"
-					? "Connexion en cours…"
-					: "Se connecter avec Discord"}
+				{loadingProvider === "discord" ? "Connexion en cours…" : "Se connecter avec Discord"}
 			</Button>
 
 			<Button
@@ -92,9 +94,7 @@ export function AuthForm() {
 				) : (
 					<PatreonIcon />
 				)}
-				{loadingProvider === "patreon"
-					? "Redirection…"
-					: "Lier mon compte Patreon"}
+				{loadingProvider === "patreon" ? "Redirection…" : "Lier mon compte Patreon"}
 			</Button>
 
 			<p className="pt-1 text-center text-xs text-muted-foreground">

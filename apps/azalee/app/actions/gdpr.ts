@@ -17,7 +17,9 @@ export async function exportUserData(): Promise<{
 	user_preferences: unknown;
 } | null> {
 	const session = await getServerSession();
-	if (!session?.user) {return null;}
+	if (!session?.user) {
+		return null;
+	}
 
 	const userId = session.user.id;
 	const supabase = await createClient();
@@ -49,10 +51,7 @@ export async function exportUserData(): Promise<{
 			.from("article_reactions")
 			.select("id, article_id, reaction_type, created_at")
 			.eq("user_id", userId),
-		client
-			.from("article_bookmarks")
-			.select("id, article_id, created_at")
-			.eq("user_id", userId),
+		client.from("article_bookmarks").select("id, article_id, created_at").eq("user_id", userId),
 		client
 			.from("reading_history")
 			.select("id, article_id, last_read_at, read_count, progress")
@@ -61,20 +60,13 @@ export async function exportUserData(): Promise<{
 			.from("notifications")
 			.select("id, type, title, body, read, created_at")
 			.eq("user_id", userId),
-		client
-			.from("push_subscriptions")
-			.select("id, endpoint, created_at")
-			.eq("user_id", userId),
+		client.from("push_subscriptions").select("id, endpoint, created_at").eq("user_id", userId),
 		client
 			.from("newsletter_subscriptions")
 			.select("id, email, categories, frequency, is_active, created_at")
 			.eq("user_id", userId)
 			.maybeSingle(),
-		client
-			.from("user_preferences")
-			.select("*")
-			.eq("user_id", userId)
-			.maybeSingle(),
+		client.from("user_preferences").select("*").eq("user_id", userId).maybeSingle(),
 	]);
 
 	return {
@@ -112,9 +104,7 @@ export async function requestDataDeletion(): Promise<{
 	};
 }
 
-export async function deleteUserData(
-	userId: string,
-): Promise<{
+export async function deleteUserData(userId: string): Promise<{
 	success: boolean;
 	deletedEntities: Record<string, number>;
 	error?: string;
@@ -140,10 +130,7 @@ export async function deleteUserData(
 	];
 
 	for (const { table, column } of tables) {
-		const { count, error } = await client
-			.from(table)
-			.delete({ count: "exact" })
-			.eq(column, userId);
+		const { count, error } = await client.from(table).delete({ count: "exact" }).eq(column, userId);
 
 		if (error) {
 			console.error(`Delete error on ${table}:`, error);
@@ -155,19 +142,13 @@ export async function deleteUserData(
 	// Anonymiser les articles plutôt que les supprimer (préservation du contenu éditorial)
 	const { count: articlesCount } = await client
 		.from("articles")
-		.update(
-			{ author_id: null, updated_at: new Date().toISOString() },
-			{ count: "exact" },
-		)
+		.update({ author_id: null, updated_at: new Date().toISOString() }, { count: "exact" })
 		.eq("author_id", userId);
 
 	deletedEntities.articles_anonymized = articlesCount ?? 0;
 
 	// Supprimer le profil
-	const { error: profileError } = await client
-		.from("profiles")
-		.delete()
-		.eq("id", userId);
+	const { error: profileError } = await client.from("profiles").delete().eq("id", userId);
 
 	deletedEntities.profiles = profileError ? 0 : 1;
 
@@ -175,8 +156,7 @@ export async function deleteUserData(
 	try {
 		const { createSupabaseServiceClient } = await import("@rose-griffon/db/service");
 		const adminClient = createSupabaseServiceClient();
-		const { error: authError } =
-			await adminClient.auth.admin.deleteUser(userId);
+		const { error: authError } = await adminClient.auth.admin.deleteUser(userId);
 
 		if (authError) {
 			console.error("Auth user delete error:", authError);

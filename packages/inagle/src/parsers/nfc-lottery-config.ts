@@ -24,24 +24,24 @@ import { DATA_ROOT } from "../core/paths.js";
 // ============================================================================
 
 export interface NfcLotteryItem {
-  itemId: string;
-  type: number;
-  weight: number;
+	itemId: string;
+	type: number;
+	weight: number;
 }
 
 export interface NfcLotteryTable {
-  tableId: string;
-  items: NfcLotteryItem[];
+	tableId: string;
+	items: NfcLotteryItem[];
 }
 
 export interface NfcLottery {
-  lotteryId: number;
-  tables: NfcLotteryTable[];
+	lotteryId: number;
+	tables: NfcLotteryTable[];
 }
 
 export interface NfcLotteryDatabase {
-  lotteries: NfcLottery[];
-  byLotteryId: Map<number, NfcLottery>;
+	lotteries: NfcLottery[];
+	byLotteryId: Map<number, NfcLottery>;
 }
 
 // ============================================================================
@@ -49,57 +49,57 @@ export interface NfcLotteryDatabase {
 // ============================================================================
 
 function parseIntVar(v: { type: string; value: string }): number {
-  return Number.parseInt(v.value, 10);
+	return Number.parseInt(v.value, 10);
 }
 
 function parseEntries(entries: ConfigNode[]): NfcLottery[] {
-  const lotteries: NfcLottery[] = [];
+	const lotteries: NfcLottery[] = [];
 
-  for (const entry of entries) {
-    if (!entry.name.startsWith("NFC_LOTTERY_INFO_LIST_BEG")) continue;
-    const children = entry.children || [];
+	for (const entry of entries) {
+		if (!entry.name.startsWith("NFC_LOTTERY_INFO_LIST_BEG")) continue;
+		const children = entry.children || [];
 
-    for (const lotteryNode of children) {
-      if (!lotteryNode.name.match(/^NFC_LOTTERY_INFO_\d+$/)) continue;
-      const lotteryId =
-        lotteryNode.variables.length > 0 ? parseIntVar(lotteryNode.variables[0]) : 0;
+		for (const lotteryNode of children) {
+			if (!lotteryNode.name.match(/^NFC_LOTTERY_INFO_\d+$/)) continue;
+			const lotteryId =
+				lotteryNode.variables.length > 0 ? parseIntVar(lotteryNode.variables[0]) : 0;
 
-      const tables: NfcLotteryTable[] = [];
+			const tables: NfcLotteryTable[] = [];
 
-      for (const tableListNode of lotteryNode.children || []) {
-        if (!tableListNode.name.startsWith("NFC_LOTTERY_INFO_TABLE_LIST_BEG")) continue;
+			for (const tableListNode of lotteryNode.children || []) {
+				if (!tableListNode.name.startsWith("NFC_LOTTERY_INFO_TABLE_LIST_BEG")) continue;
 
-        for (const tableNode of tableListNode.children || []) {
-          if (!tableNode.name.match(/^NFC_LOTTERY_INFO_TABLE_\d+$/)) continue;
-          const tableId =
-            tableNode.variables.length > 0
-              ? toHex(parseIntVar(tableNode.variables[0]))
-              : "0x00000000";
+				for (const tableNode of tableListNode.children || []) {
+					if (!tableNode.name.match(/^NFC_LOTTERY_INFO_TABLE_\d+$/)) continue;
+					const tableId =
+						tableNode.variables.length > 0
+							? toHex(parseIntVar(tableNode.variables[0]))
+							: "0x00000000";
 
-          const items: NfcLotteryItem[] = [];
+					const items: NfcLotteryItem[] = [];
 
-          for (const itemListNode of tableNode.children || []) {
-            if (!itemListNode.name.startsWith("NFC_LOTTERY_INFO_TABLE_ITEM_LIST_BEG")) continue;
+					for (const itemListNode of tableNode.children || []) {
+						if (!itemListNode.name.startsWith("NFC_LOTTERY_INFO_TABLE_ITEM_LIST_BEG")) continue;
 
-            for (const itemNode of itemListNode.children || []) {
-              if (!itemNode.name.startsWith("NFC_LOTTERY_INFO_TABLE_ITEM_")) continue;
-              const vars = itemNode.variables;
-              if (vars.length < 3) continue;
+						for (const itemNode of itemListNode.children || []) {
+							if (!itemNode.name.startsWith("NFC_LOTTERY_INFO_TABLE_ITEM_")) continue;
+							const vars = itemNode.variables;
+							if (vars.length < 3) continue;
 
-              items.push({
-                itemId: toHex(parseIntVar(vars[0])),
-                type: parseIntVar(vars[1]),
-                weight: parseIntVar(vars[2]),
-              });
-            }
-          }
-          tables.push({ tableId, items });
-        }
-      }
-      lotteries.push({ lotteryId, tables });
-    }
-  }
-  return lotteries;
+							items.push({
+								itemId: toHex(parseIntVar(vars[0])),
+								type: parseIntVar(vars[1]),
+								weight: parseIntVar(vars[2]),
+							});
+						}
+					}
+					tables.push({ tableId, items });
+				}
+			}
+			lotteries.push({ lotteryId, tables });
+		}
+	}
+	return lotteries;
 }
 
 // ============================================================================
@@ -107,18 +107,18 @@ function parseEntries(entries: ConfigNode[]): NfcLottery[] {
 // ============================================================================
 
 export async function loadNfcLotteryConfigAsync(dataPath: string = DATA_ROOT) {
-  const path = join(dataPath, "common/gamedata/nfc", "nfc_lottery_config.cfg.bin.json");
-  const content = await loadJsonAsync<{ entries: ConfigNode[] }>(path);
-  if (!content?.entries) return null;
-  return parseEntries(content.entries);
+	const path = join(dataPath, "common/gamedata/nfc", "nfc_lottery_config.cfg.bin.json");
+	const content = await loadJsonAsync<{ entries: ConfigNode[] }>(path);
+	if (!content?.entries) return null;
+	return parseEntries(content.entries);
 }
 
 export async function buildNfcLotteryDatabase(
-  dataPath: string = DATA_ROOT,
+	dataPath: string = DATA_ROOT
 ): Promise<NfcLotteryDatabase> {
-  const lotteries = (await loadNfcLotteryConfigAsync(dataPath)) || [];
-  const byLotteryId = new Map<number, NfcLottery>();
-  for (const l of lotteries) byLotteryId.set(l.lotteryId, l);
+	const lotteries = (await loadNfcLotteryConfigAsync(dataPath)) || [];
+	const byLotteryId = new Map<number, NfcLottery>();
+	for (const l of lotteries) byLotteryId.set(l.lotteryId, l);
 
-  return { lotteries, byLotteryId };
+	return { lotteries, byLotteryId };
 }

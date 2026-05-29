@@ -22,30 +22,30 @@ import { DATA_ROOT } from "../core/paths.js";
 // ============================================================================
 
 export interface UniformModelInfo {
-  uniformFielderModelIdCrc: string;
-  uniformKeeperModelIdCrc: string;
-  uniformDirectorModelIdCrc: string;
-  uniformManagerModelIdCrc: string;
-  shoesFielderModelIdCrc: string;
-  shoesKeeperModelIdCrc: string;
-  gloveModelIdCrc: string;
-  typeId: number;
-  shoesModelAttr: number;
-  uniformNgModelAttr: number;
-  shoesModelIdLocked: boolean;
+	uniformFielderModelIdCrc: string;
+	uniformKeeperModelIdCrc: string;
+	uniformDirectorModelIdCrc: string;
+	uniformManagerModelIdCrc: string;
+	shoesFielderModelIdCrc: string;
+	shoesKeeperModelIdCrc: string;
+	gloveModelIdCrc: string;
+	typeId: number;
+	shoesModelAttr: number;
+	uniformNgModelAttr: number;
+	shoesModelIdLocked: boolean;
 }
 
 export interface UniformInfo {
-  [key: string]: any;
+	[key: string]: any;
 }
 
 export interface UniformDatabase {
-  models: UniformModelInfo[];
-  uniforms: UniformInfo[];
-  exModels: any[];
-  exUniforms: any[];
-  charaExUniforms: any[];
-  byTypeId: Map<number, UniformModelInfo[]>;
+	models: UniformModelInfo[];
+	uniforms: UniformInfo[];
+	exModels: any[];
+	exUniforms: any[];
+	charaExUniforms: any[];
+	byTypeId: Map<number, UniformModelInfo[]>;
 }
 
 // ============================================================================
@@ -53,42 +53,42 @@ export interface UniformDatabase {
 // ============================================================================
 
 function parseContent(content: any) {
-  const models: UniformModelInfo[] = [];
-  const uniforms: UniformInfo[] = [];
-  const exModels: any[] = [];
-  const exUniforms: any[] = [];
-  const charaExUniforms: any[] = [];
+	const models: UniformModelInfo[] = [];
+	const uniforms: UniformInfo[] = [];
+	const exModels: any[] = [];
+	const exUniforms: any[] = [];
+	const charaExUniforms: any[] = [];
 
-  if (!content?.lists) return { models, uniforms, exModels, exUniforms, charaExUniforms };
+	if (!content?.lists) return { models, uniforms, exModels, exUniforms, charaExUniforms };
 
-  for (const list of content.lists) {
-    if (list.name === "m_UniformModelInfoList") {
-      for (const val of list.values) {
-        models.push({
-          uniformFielderModelIdCrc: val.uniformFielderModelIdCrc,
-          uniformKeeperModelIdCrc: val.uniformKeeperModelIdCrc,
-          uniformDirectorModelIdCrc: val.uniformDirectorModelIdCrc,
-          uniformManagerModelIdCrc: val.uniformManagerModelIdCrc,
-          shoesFielderModelIdCrc: val.shoesFielderModelIdCrc,
-          shoesKeeperModelIdCrc: val.shoesKeeperModelIdCrc,
-          gloveModelIdCrc: val.gloveModelIdCrc,
-          typeId: val.typeId,
-          shoesModelAttr: val.shoesModelAttr,
-          uniformNgModelAttr: val.uniformNgModelAttr,
-          shoesModelIdLocked: val.shoesModelIdLocked,
-        });
-      }
-    } else if (list.name === "m_UniformInfoList") {
-      for (const val of list.values) uniforms.push(val);
-    } else if (list.name === "m_UniformExModelInfoList") {
-      for (const val of list.values) exModels.push(val);
-    } else if (list.name === "m_UniformExInfoList") {
-      for (const val of list.values) exUniforms.push(val);
-    } else if (list.name === "m_CharaUniformExInfoList") {
-      for (const val of list.values) charaExUniforms.push(val);
-    }
-  }
-  return { models, uniforms, exModels, exUniforms, charaExUniforms };
+	for (const list of content.lists) {
+		if (list.name === "m_UniformModelInfoList") {
+			for (const val of list.values) {
+				models.push({
+					uniformFielderModelIdCrc: val.uniformFielderModelIdCrc,
+					uniformKeeperModelIdCrc: val.uniformKeeperModelIdCrc,
+					uniformDirectorModelIdCrc: val.uniformDirectorModelIdCrc,
+					uniformManagerModelIdCrc: val.uniformManagerModelIdCrc,
+					shoesFielderModelIdCrc: val.shoesFielderModelIdCrc,
+					shoesKeeperModelIdCrc: val.shoesKeeperModelIdCrc,
+					gloveModelIdCrc: val.gloveModelIdCrc,
+					typeId: val.typeId,
+					shoesModelAttr: val.shoesModelAttr,
+					uniformNgModelAttr: val.uniformNgModelAttr,
+					shoesModelIdLocked: val.shoesModelIdLocked,
+				});
+			}
+		} else if (list.name === "m_UniformInfoList") {
+			for (const val of list.values) uniforms.push(val);
+		} else if (list.name === "m_UniformExModelInfoList") {
+			for (const val of list.values) exModels.push(val);
+		} else if (list.name === "m_UniformExInfoList") {
+			for (const val of list.values) exUniforms.push(val);
+		} else if (list.name === "m_CharaUniformExInfoList") {
+			for (const val of list.values) charaExUniforms.push(val);
+		}
+	}
+	return { models, uniforms, exModels, exUniforms, charaExUniforms };
 }
 
 // ============================================================================
@@ -96,28 +96,28 @@ function parseContent(content: any) {
 // ============================================================================
 
 export async function loadUniformConfigAsync(dataPath: string = DATA_ROOT) {
-  const filename = findConfigFile("character", "uniform_config");
-  if (!filename) return null;
+	const filename = findConfigFile("character", "uniform_config");
+	if (!filename) return null;
 
-  const path = join(dataPath, "common/gamedata/character", filename);
-  const content = await loadJsonAsync<any>(path);
-  return content ? parseContent(content) : null;
+	const path = join(dataPath, "common/gamedata/character", filename);
+	const content = await loadJsonAsync<any>(path);
+	return content ? parseContent(content) : null;
 }
 
 export async function buildUniformDatabase(dataPath: string = DATA_ROOT): Promise<UniformDatabase> {
-  const result = await loadUniformConfigAsync(dataPath);
-  const models = result?.models || [];
-  const uniforms = result?.uniforms || [];
-  const exModels = result?.exModels || [];
-  const exUniforms = result?.exUniforms || [];
-  const charaExUniforms = result?.charaExUniforms || [];
+	const result = await loadUniformConfigAsync(dataPath);
+	const models = result?.models || [];
+	const uniforms = result?.uniforms || [];
+	const exModels = result?.exModels || [];
+	const exUniforms = result?.exUniforms || [];
+	const charaExUniforms = result?.charaExUniforms || [];
 
-  const byTypeId = new Map<number, UniformModelInfo[]>();
-  for (const m of models) {
-    const arr = byTypeId.get(m.typeId) || [];
-    arr.push(m);
-    byTypeId.set(m.typeId, arr);
-  }
+	const byTypeId = new Map<number, UniformModelInfo[]>();
+	for (const m of models) {
+		const arr = byTypeId.get(m.typeId) || [];
+		arr.push(m);
+		byTypeId.set(m.typeId, arr);
+	}
 
-  return { models, uniforms, exModels, exUniforms, charaExUniforms, byTypeId };
+	return { models, uniforms, exModels, exUniforms, charaExUniforms, byTypeId };
 }

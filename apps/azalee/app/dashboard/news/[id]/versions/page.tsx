@@ -1,8 +1,5 @@
 import { notFound } from "next/navigation";
-import {
-	getArticleVersions,
-	restoreArticleVersion,
-} from "@/app/actions/articles";
+import { getArticleVersions, restoreArticleVersion } from "@/app/actions/articles";
 import { AdminPageHeader as DashboardPageHeader } from "@rose-griffon/ui";
 import { createClient } from "@/lib/supabase/server";
 import { VersionsList } from "./VersionsList";
@@ -57,9 +54,7 @@ export default async function VersionsPage({ params }: VersionsPageProps) {
 				/>
 			) : (
 				<div className="text-center py-20">
-					<p className="text-on-surface-variant">
-						Aucune version enregistrée pour cet article.
-					</p>
+					<p className="text-on-surface-variant">Aucune version enregistrée pour cet article.</p>
 					<p className="text-xs text-on-surface-variant/60 mt-2">
 						Les versions sont créées automatiquement à chaque sauvegarde.
 					</p>

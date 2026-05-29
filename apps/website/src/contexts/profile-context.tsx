@@ -9,13 +9,13 @@ import type { Database } from "@rose-griffon/db";
 type Profile = Database["public"]["Tables"]["profiles"]["Row"];
 
 interface ProfileContextType {
-  profile: Profile | null;
-  isLoading: boolean;
-  error: string | null;
-  updateProfile: (
-    updates: Partial<Profile>
-  ) => Promise<{ data: Profile | null; error: Error | null }>;
-  refreshProfile: () => Promise<void>;
+	profile: Profile | null;
+	isLoading: boolean;
+	error: string | null;
+	updateProfile: (
+		updates: Partial<Profile>
+	) => Promise<{ data: Profile | null; error: Error | null }>;
+	refreshProfile: () => Promise<void>;
 }
 
 const ProfileContext = createContext<ProfileContextType | undefined>(undefined);
@@ -25,120 +25,120 @@ const ProfileContext = createContext<ProfileContextType | undefined>(undefined);
  * Écoute les changements broadcast du profil
  */
 export function ProfileProvider({ children }: { children: React.ReactNode }) {
-  const { user, isLoading: authLoading } = useAuth();
-  const { updateProfile: updateProfileAPI } = useUpdateProfile();
-  const [profile, setProfile] = useState<Profile | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+	const { user, isLoading: authLoading } = useAuth();
+	const { updateProfile: updateProfileAPI } = useUpdateProfile();
+	const [profile, setProfile] = useState<Profile | null>(null);
+	const [isLoading, setIsLoading] = useState(true);
+	const [error, setError] = useState<string | null>(null);
 
-  // Récupérer le profil initial
-  const fetchProfile = useCallback(async () => {
-    if (!user) {
-      setProfile(null);
-      setIsLoading(false);
-      return;
-    }
+	// Récupérer le profil initial
+	const fetchProfile = useCallback(async () => {
+		if (!user) {
+			setProfile(null);
+			setIsLoading(false);
+			return;
+		}
 
-    try {
-      setIsLoading(true);
-      setError(null);
+		try {
+			setIsLoading(true);
+			setError(null);
 
-      const { createClient } = await import("@/lib/supabase/client");
-      const supabase = createClient();
+			const { createClient } = await import("@/lib/supabase/client");
+			const supabase = createClient();
 
-      const { data, error: fetchError } = await supabase
-        .from("profiles")
-        .select("*")
-        .eq("id", user.id)
-        .single();
+			const { data, error: fetchError } = await supabase
+				.from("profiles")
+				.select("*")
+				.eq("id", user.id)
+				.single();
 
-      if (fetchError) {
-        console.error("[ProfileProvider] Erreur lors de la récupération:", fetchError);
-        setError(fetchError.message);
-        setProfile(null);
-        return;
-      }
+			if (fetchError) {
+				console.error("[ProfileProvider] Erreur lors de la récupération:", fetchError);
+				setError(fetchError.message);
+				setProfile(null);
+				return;
+			}
 
-      setProfile(data);
-      setError(null);
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : "Erreur inconnue";
-      console.error("[ProfileProvider] Erreur inattendue:", error);
-      setError(errorMessage);
-      setProfile(null);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [user]);
+			setProfile(data);
+			setError(null);
+		} catch (error) {
+			const errorMessage = error instanceof Error ? error.message : "Erreur inconnue";
+			console.error("[ProfileProvider] Erreur inattendue:", error);
+			setError(errorMessage);
+			setProfile(null);
+		} finally {
+			setIsLoading(false);
+		}
+	}, [user]);
 
-  // Charger le profil au montage et quand l'utilisateur change
-  useEffect(() => {
-    fetchProfile();
-  }, [fetchProfile]);
+	// Charger le profil au montage et quand l'utilisateur change
+	useEffect(() => {
+		fetchProfile();
+	}, [fetchProfile]);
 
-  // Écouter les changements broadcast du profil
-  useProfileSync({
-    enabled: !!user?.id,
-    onProfileChange: (updatedProfile) => {
-      console.warn("[ProfileProvider] Profil mis à jour via broadcast:", updatedProfile);
-      setProfile(updatedProfile);
-      setError(null);
-    },
-    userId: user?.id,
-  });
+	// Écouter les changements broadcast du profil
+	useProfileSync({
+		enabled: !!user?.id,
+		onProfileChange: (updatedProfile) => {
+			console.warn("[ProfileProvider] Profil mis à jour via broadcast:", updatedProfile);
+			setProfile(updatedProfile);
+			setError(null);
+		},
+		userId: user?.id,
+	});
 
-  // Wrapper pour updateProfile avec gestion de l'état
-  const handleUpdateProfile = useCallback(
-    async (updates: Partial<Profile>) => {
-      if (!user?.id) {
-        return {
-          data: null,
-          error: new Error("Utilisateur non connecté"),
-        };
-      }
+	// Wrapper pour updateProfile avec gestion de l'état
+	const handleUpdateProfile = useCallback(
+		async (updates: Partial<Profile>) => {
+			if (!user?.id) {
+				return {
+					data: null,
+					error: new Error("Utilisateur non connecté"),
+				};
+			}
 
-      try {
-        setError(null);
-        const result = await updateProfileAPI(user.id, updates);
+			try {
+				setError(null);
+				const result = await updateProfileAPI(user.id, updates);
 
-        if (result.error) {
-          setError(result.error.message);
-        } else if (result.data) {
-          // La mise à jour sera automatiquement synchronisée via le broadcast
-          // Mais on peut aussi la mettre à jour immédiatement
-          setProfile(result.data);
-        }
+				if (result.error) {
+					setError(result.error.message);
+				} else if (result.data) {
+					// La mise à jour sera automatiquement synchronisée via le broadcast
+					// Mais on peut aussi la mettre à jour immédiatement
+					setProfile(result.data);
+				}
 
-        return result;
-      } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : "Erreur inconnue";
-        setError(errorMessage);
-        return { data: null, error: new Error(errorMessage) };
-      }
-    },
-    [user?.id, updateProfileAPI]
-  );
+				return result;
+			} catch (error) {
+				const errorMessage = error instanceof Error ? error.message : "Erreur inconnue";
+				setError(errorMessage);
+				return { data: null, error: new Error(errorMessage) };
+			}
+		},
+		[user?.id, updateProfileAPI]
+	);
 
-  const value: ProfileContextType = {
-    error,
-    isLoading: authLoading || isLoading,
-    profile,
-    refreshProfile: fetchProfile,
-    updateProfile: handleUpdateProfile,
-  };
+	const value: ProfileContextType = {
+		error,
+		isLoading: authLoading || isLoading,
+		profile,
+		refreshProfile: fetchProfile,
+		updateProfile: handleUpdateProfile,
+	};
 
-  return <ProfileContext.Provider value={value}>{children}</ProfileContext.Provider>;
+	return <ProfileContext.Provider value={value}>{children}</ProfileContext.Provider>;
 }
 
 /**
  * Hook pour accéder au contexte du profil
  */
 export function useProfile(): ProfileContextType {
-  const context = useContext(ProfileContext);
+	const context = useContext(ProfileContext);
 
-  if (context === undefined) {
-    throw new Error("useProfile doit être utilisé dans un ProfileProvider");
-  }
+	if (context === undefined) {
+		throw new Error("useProfile doit être utilisé dans un ProfileProvider");
+	}
 
-  return context;
+	return context;
 }

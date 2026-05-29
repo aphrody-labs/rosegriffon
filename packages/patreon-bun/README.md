@@ -1,7 +1,6 @@
-
 > ⚠️ **INFRASTRUCTURE GÉRÉE PAR ANTIGRAVITY (GOD MODE)**
 > Ce projet opère sous la **Directive Omega**. L'architecture, les dépendances, et le code sont gérés et refactorisés de manière 100% autonome. Aucune sécurité conservative n'est appliquée. La performance brute est l'unique métrique.
-\n# @rose-griffon/patreon-bun
+> \n# @rose-griffon/patreon-bun
 
 [![npm](https://img.shields.io/npm/v/@rose-griffon/patreon-bun)](https://www.npmjs.com/package/@rose-griffon/patreon-bun)
 [![Bun](https://img.shields.io/badge/runtime-bun-fbf0df)](https://bun.sh)
@@ -32,43 +31,43 @@ bun add @rose-griffon/patreon-bun
 
 ```ts
 import {
-  PatreonOauthClient,
-  PatreonCreatorClient,
-  parseWebhookRequest,
-  Type,
-} from '@rose-griffon/patreon-bun'
+	PatreonOauthClient,
+	PatreonCreatorClient,
+	parseWebhookRequest,
+	Type,
+} from "@rose-griffon/patreon-bun";
 
 const client = new PatreonCreatorClient({
-  oauth: {
-    clientId: Bun.env.PATREON_CLIENT_ID!,
-    clientSecret: Bun.env.PATREON_CLIENT_SECRET!,
-    accessToken: Bun.env.PATREON_CREATOR_ACCESS_TOKEN!,
-    refreshToken: Bun.env.PATREON_CREATOR_REFRESH_TOKEN!,
-  },
-})
+	oauth: {
+		clientId: Bun.env.PATREON_CLIENT_ID!,
+		clientSecret: Bun.env.PATREON_CLIENT_SECRET!,
+		accessToken: Bun.env.PATREON_CREATOR_ACCESS_TOKEN!,
+		refreshToken: Bun.env.PATREON_CREATOR_REFRESH_TOKEN!,
+	},
+});
 
-const campaigns = await client.fetchCampaigns()
-console.log(campaigns)
+const campaigns = await client.fetchCampaigns();
+console.log(campaigns);
 ```
 
 ## Webhook server with `Bun.serve`
 
 ```ts
-import { parseWebhookRequest } from '@rose-griffon/patreon-bun'
+import { parseWebhookRequest } from "@rose-griffon/patreon-bun";
 
 Bun.serve({
-  port: 3000,
-  async fetch(req) {
-    const url = new URL(req.url)
-    if (url.pathname === '/webhook' && req.method === 'POST') {
-      const result = await parseWebhookRequest(req, Bun.env.PATREON_WEBHOOK_SECRET!)
-      if (!result.verified) return new Response('Unauthorized', { status: 401 })
-      console.log(result.event, result.payload)
-      return new Response('OK')
-    }
-    return new Response('Not Found', { status: 404 })
-  },
-})
+	port: 3000,
+	async fetch(req) {
+		const url = new URL(req.url);
+		if (url.pathname === "/webhook" && req.method === "POST") {
+			const result = await parseWebhookRequest(req, Bun.env.PATREON_WEBHOOK_SECRET!);
+			if (!result.verified) return new Response("Unauthorized", { status: 401 });
+			console.log(result.event, result.payload);
+			return new Response("OK");
+		}
+		return new Response("Not Found", { status: 404 });
+	},
+});
 ```
 
 ## Roadmap

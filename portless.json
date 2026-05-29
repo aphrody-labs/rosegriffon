@@ -1,14 +1,14 @@
 {
-  "apps": [
-    {
-      "name": "website",
-      "port": 3000,
-      "domain": "rg-website.local"
-    },
-    {
-      "name": "azalee",
-      "port": 3001,
-      "domain": "rg-azalee.local"
-    }
-  ]
+	"apps": [
+		{
+			"name": "website",
+			"port": 3000,
+			"domain": "rg-website.local"
+		},
+		{
+			"name": "azalee",
+			"port": 3001,
+			"domain": "rg-azalee.local"
+		}
+	]
 }

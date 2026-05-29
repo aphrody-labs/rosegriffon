@@ -1,7 +1,17 @@
 "use client";
 
-import { closestCenter, DndContext, DragOverlay, KeyboardSensor, PointerSensor, pointerWithin, TouchSensor, useSensor, useSensors } from '@dnd-kit/core';
-import type { CollisionDetection, DragEndEvent, DragStartEvent } from '@dnd-kit/core';
+import {
+	closestCenter,
+	DndContext,
+	DragOverlay,
+	KeyboardSensor,
+	PointerSensor,
+	pointerWithin,
+	TouchSensor,
+	useSensor,
+	useSensors,
+} from "@dnd-kit/core";
+import type { CollisionDetection, DragEndEvent, DragStartEvent } from "@dnd-kit/core";
 import { sortableKeyboardCoordinates } from "@dnd-kit/sortable";
 import { toPng } from "html-to-image";
 import Image from "next/image";
@@ -10,12 +20,12 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import { deleteTeam, saveTeam, updateTeam } from "@/app/actions/teams";
 import { Icon } from "@/components/ui/Icon";
-import { FORMATIONS, ROLE_COLORS } from '@/lib/formations';
-import type { Formation } from '@/lib/formations';
+import { FORMATIONS, ROLE_COLORS } from "@/lib/formations";
+import type { Formation } from "@/lib/formations";
 import type { SavedTeam, TeamData, TeamMember } from "@/lib/team-types";
 import { cn } from "@/lib/utils";
-import { CharacterPicker, CharacterPickerOverlay } from './CharacterPicker';
-import type { PickerCharacter } from './CharacterPicker';
+import { CharacterPicker, CharacterPickerOverlay } from "./CharacterPicker";
+import type { PickerCharacter } from "./CharacterPicker";
 import { FormationField } from "./FormationField";
 import { PlayerDetailPanel } from "./PlayerDetailPanel";
 import { PlayerSlotOverlay } from "./PlayerSlot";
@@ -36,7 +46,9 @@ type DragData =
 
 const customCollision: CollisionDetection = (args) => {
 	const pointer = pointerWithin(args);
-	if (pointer.length > 0) {return pointer;}
+	if (pointer.length > 0) {
+		return pointer;
+	}
 	return closestCenter(args);
 };
 
@@ -51,7 +63,9 @@ function loadFromLocalStorage(): {
 } | null {
 	try {
 		const raw = localStorage.getItem(LS_KEY);
-		if (!raw) {return null;}
+		if (!raw) {
+			return null;
+		}
 		return JSON.parse(raw);
 	} catch {
 		return null;
@@ -61,13 +75,10 @@ function loadFromLocalStorage(): {
 function saveToLocalStorage(
 	formationIdx: number,
 	members: Record<string, TeamMember>,
-	teamName: string,
+	teamName: string
 ) {
 	try {
-		localStorage.setItem(
-			LS_KEY,
-			JSON.stringify({ formationIdx, members, teamName }),
-		);
+		localStorage.setItem(LS_KEY, JSON.stringify({ formationIdx, members, teamName }));
 	} catch {
 		/* Quota */
 	}
@@ -75,10 +86,7 @@ function saveToLocalStorage(
 
 /* ── URL share encoding ───────────────────────────────────── */
 
-function encodeTeamToURL(
-	formationId: string,
-	members: Record<string, TeamMember>,
-): string {
+function encodeTeamToURL(formationId: string, members: Record<string, TeamMember>): string {
 	const parts = [formationId];
 	for (const m of Object.values(members)) {
 		parts.push(`${m.slot}:${m.charaId}`);
@@ -88,14 +96,16 @@ function encodeTeamToURL(
 
 function decodeTeamFromURL(
 	encoded: string,
-	characters: PickerCharacter[],
+	characters: PickerCharacter[]
 ): { formationIdx: number; members: Record<string, TeamMember> } | null {
 	try {
 		const decoded = atob(encoded);
 		const parts = decoded.split("|");
 		const formationId = parts[0];
 		const formationIdx = FORMATIONS.findIndex((f) => f.id === formationId);
-		if (formationIdx === -1) {return null;}
+		if (formationIdx === -1) {
+			return null;
+		}
 
 		const charMap = new Map(characters.map((c) => [c.charaId, c]));
 		const members: Record<string, TeamMember> = {};
@@ -188,11 +198,7 @@ interface TeamBuilderProps {
 	isAuthenticated?: boolean;
 }
 
-export function TeamBuilder({
-	characters,
-	initialTeam,
-	isAuthenticated,
-}: TeamBuilderProps) {
+export function TeamBuilder({ characters, initialTeam, isAuthenticated }: TeamBuilderProps) {
 	// ── Init from URL > initialTeam > localStorage ─────
 	const [formationIdx, setFormationIdx] = useState(() => {
 		if (typeof window !== "undefined") {
@@ -200,13 +206,13 @@ export function TeamBuilder({
 			const t = params.get("t");
 			if (t) {
 				const decoded = decodeTeamFromURL(t, characters);
-				if (decoded) {return decoded.formationIdx;}
+				if (decoded) {
+					return decoded.formationIdx;
+				}
 			}
 		}
 		if (initialTeam) {
-			const idx = FORMATIONS.findIndex(
-				(f) => f.id === initialTeam.formation_id,
-			);
+			const idx = FORMATIONS.findIndex((f) => f.id === initialTeam.formation_id);
 			return Math.max(idx, 0);
 		}
 		const ls = loadFromLocalStorage();
@@ -219,13 +225,17 @@ export function TeamBuilder({
 			const t = params.get("t");
 			if (t) {
 				const decoded = decodeTeamFromURL(t, characters);
-				if (decoded) {return decoded.members;}
+				if (decoded) {
+					return decoded.members;
+				}
 			}
 		}
 		if (initialTeam?.formation_data) {
 			const data = initialTeam.formation_data as TeamData;
 			const map: Record<string, TeamMember> = {};
-			for (const m of data.members || []) {map[m.slot] = m;}
+			for (const m of data.members || []) {
+				map[m.slot] = m;
+			}
 			return map;
 		}
 		const ls = loadFromLocalStorage();
@@ -233,7 +243,9 @@ export function TeamBuilder({
 	});
 
 	const [teamName, setTeamName] = useState(() => {
-		if (initialTeam?.name) {return initialTeam.name;}
+		if (initialTeam?.name) {
+			return initialTeam.name;
+		}
 		const ls = loadFromLocalStorage();
 		return ls?.teamName ?? "";
 	});
@@ -241,13 +253,9 @@ export function TeamBuilder({
 	const [teamId, setTeamId] = useState(initialTeam?.id || null);
 	const [saving, setSaving] = useState(false);
 	const [activeDrag, setActiveDrag] = useState<DragData | null>(null);
-	const [mobilePanel, setMobilePanel] = useState<"field" | "roster" | "stats">(
-		"field",
-	);
+	const [mobilePanel, setMobilePanel] = useState<"field" | "roster" | "stats">("field");
 	const [selectedCharaId, setSelectedCharaId] = useState<string | null>(null);
-	const [selectedMemberSlot, setSelectedMemberSlot] = useState<string | null>(
-		null,
-	);
+	const [selectedMemberSlot, setSelectedMemberSlot] = useState<string | null>(null);
 
 	// ── Undo history ───────────────────────────────────
 	const [history, setHistory] = useState<Array<Record<string, TeamMember>>>([]);
@@ -263,9 +271,13 @@ export function TeamBuilder({
 
 	const handleSlotTap = useCallback(
 		(slotId: string) => {
-			if (!selectedCharaId) {return;}
+			if (!selectedCharaId) {
+				return;
+			}
 			const char = characters.find((c) => c.charaId === selectedCharaId);
-			if (!char) {return;}
+			if (!char) {
+				return;
+			}
 
 			pushHistory({ ...members });
 			setMembers((prev) => ({
@@ -284,12 +296,14 @@ export function TeamBuilder({
 			}));
 			setSelectedCharaId(null);
 		},
-		[selectedCharaId, characters, members, pushHistory],
+		[selectedCharaId, characters, members, pushHistory]
 	);
 
 	const undo = useCallback(() => {
 		setHistory((prev) => {
-			if (prev.length === 0) {return prev;}
+			if (prev.length === 0) {
+				return prev;
+			}
 			const newHistory = [...prev];
 			const last = newHistory.pop()!;
 			setMembers(last);
@@ -335,10 +349,7 @@ export function TeamBuilder({
 	const sensors = useSensors(pointerSensor, touchSensor, keyboardSensor);
 
 	// ── Placed IDs ─────────────────────────────────────
-	const placedIds = useMemo(
-		() => new Set(Object.values(members).map((m) => m.charaId)),
-		[members],
-	);
+	const placedIds = useMemo(() => new Set(Object.values(members).map((m) => m.charaId)), [members]);
 
 	// ── Drag handlers ──────────────────────────────────
 	const handleDragStart = useCallback((event: DragStartEvent) => {
@@ -349,11 +360,15 @@ export function TeamBuilder({
 		(event: DragEndEvent) => {
 			const { active, over } = event;
 			setActiveDrag(null);
-			if (!over) {return;}
+			if (!over) {
+				return;
+			}
 
 			const dragData = active.data.current as DragData;
 			const dropId = over.id as string;
-			if (!over.data.current) {return;}
+			if (!over.data.current) {
+				return;
+			}
 
 			// Save to undo before mutation
 			pushHistory({ ...members });
@@ -376,25 +391,30 @@ export function TeamBuilder({
 				}));
 			}
 
-			if (
-				(dragData.origin === "field" || dragData.origin === "bench") &&
-				"member" in dragData
-			) {
+			if ((dragData.origin === "field" || dragData.origin === "bench") && "member" in dragData) {
 				const fromSlot = dragData.slotId;
-				if (fromSlot === dropId) {return;}
+				if (fromSlot === dropId) {
+					return;
+				}
 				setMembers((prev) => {
 					const next = { ...prev };
 					const from = prev[fromSlot];
 					const to = prev[dropId];
-					if (from) {next[dropId] = { ...from, slot: dropId };}
-					else {delete next[dropId];}
-					if (to) {next[fromSlot] = { ...to, slot: fromSlot };}
-					else {delete next[fromSlot];}
+					if (from) {
+						next[dropId] = { ...from, slot: dropId };
+					} else {
+						delete next[dropId];
+					}
+					if (to) {
+						next[fromSlot] = { ...to, slot: fromSlot };
+					} else {
+						delete next[fromSlot];
+					}
 					return next;
 				});
 			}
 		},
-		[members, pushHistory],
+		[members, pushHistory]
 	);
 
 	// ── Member click (open detail panel) ────────────────
@@ -412,12 +432,14 @@ export function TeamBuilder({
 				return n;
 			});
 		},
-		[members, pushHistory],
+		[members, pushHistory]
 	);
 
 	// ── Clear all ──────────────────────────────────────
 	const handleClearAll = useCallback(() => {
-		if (Object.keys(members).length === 0) {return;}
+		if (Object.keys(members).length === 0) {
+			return;
+		}
 		pushHistory({ ...members });
 		setMembers({});
 	}, [members, pushHistory]);
@@ -430,12 +452,14 @@ export function TeamBuilder({
 			setMembers((prev) => {
 				const next: Record<string, TeamMember> = {};
 				for (const [slot, member] of Object.entries(prev)) {
-					if (!slot.startsWith("field-")) {next[slot] = member;}
+					if (!slot.startsWith("field-")) {
+						next[slot] = member;
+					}
 				}
 				return next;
 			});
 		},
-		[members, pushHistory],
+		[members, pushHistory]
 	);
 
 	// ── Auto-fill ──────────────────────────────────────
@@ -445,9 +469,7 @@ export function TeamBuilder({
 		const available = characters.filter((c) => !placed.has(c.charaId));
 
 		// Sort by rarity (best first)
-		available.sort(
-			(a, b) => (RARITY_SCORE[b.rarity] || 0) - (RARITY_SCORE[a.rarity] || 0),
-		);
+		available.sort((a, b) => (RARITY_SCORE[b.rarity] || 0) - (RARITY_SCORE[a.rarity] || 0));
 
 		setMembers((prev) => {
 			const next = { ...prev };
@@ -456,10 +478,10 @@ export function TeamBuilder({
 			// Fill field positions
 			for (const pos of formation.positions) {
 				const slotId = `field-${pos.index}`;
-				if (next[slotId]) {continue;}
-				const match = available.find(
-					(c) => c.position === pos.role && !usedNow.has(c.charaId),
-				);
+				if (next[slotId]) {
+					continue;
+				}
+				const match = available.find((c) => c.position === pos.role && !usedNow.has(c.charaId));
 				if (match) {
 					next[slotId] = {
 						charaId: match.charaId,
@@ -479,7 +501,9 @@ export function TeamBuilder({
 			// Fill reserves
 			for (let i = 0; i < 5; i++) {
 				const slotId = `reserve-${i}`;
-				if (next[slotId]) {continue;}
+				if (next[slotId]) {
+					continue;
+				}
 				const match = available.find((c) => !usedNow.has(c.charaId));
 				if (match) {
 					next[slotId] = {
@@ -513,12 +537,16 @@ export function TeamBuilder({
 		try {
 			if (teamId) {
 				const result = await updateTeam(teamId, name, data);
-				if ("error" in result) {toast.error(result.error);}
-				else {toast.success("Équipe mise à jour");}
+				if ("error" in result) {
+					toast.error(result.error);
+				} else {
+					toast.success("Équipe mise à jour");
+				}
 			} else {
 				const result = await saveTeam(name, data);
-				if ("error" in result) {toast.error(result.error);}
-				else {
+				if ("error" in result) {
+					toast.error(result.error);
+				} else {
 					setTeamId(result.id);
 					toast.success("Équipe sauvegardée");
 				}
@@ -531,10 +559,13 @@ export function TeamBuilder({
 
 	// ── Delete ─────────────────────────────────────────
 	const handleDelete = useCallback(async () => {
-		if (!teamId || !window.confirm("Supprimer cette équipe ?")) {return;}
+		if (!teamId || !window.confirm("Supprimer cette équipe ?")) {
+			return;
+		}
 		const result = await deleteTeam(teamId);
-		if ("error" in result) {toast.error(result.error);}
-		else {
+		if ("error" in result) {
+			toast.error(result.error);
+		} else {
 			setTeamId(null);
 			setMembers({});
 			setTeamName("");
@@ -544,7 +575,9 @@ export function TeamBuilder({
 
 	// ── Export ─────────────────────────────────────────
 	const handleExport = useCallback(async () => {
-		if (!fieldRef.current) {return;}
+		if (!fieldRef.current) {
+			return;
+		}
 		try {
 			const dataUrl = await toPng(fieldRef.current, {
 				backgroundColor: "#064e3b",
@@ -605,9 +638,7 @@ export function TeamBuilder({
 								className="inline-flex items-center gap-2 h-11 sm:h-12 px-5 sm:px-6 rounded-2xl bg-primary text-on-primary font-bold text-sm elevation-2 hover:elevation-3 active:scale-[0.97] transition-all disabled:opacity-50 shrink-0"
 							>
 								<Icon name={teamId ? "save" : "add"} size={18} />
-								<span className="hidden sm:inline">
-									{teamId ? "Sauvegarder" : "Créer"}
-								</span>
+								<span className="hidden sm:inline">{teamId ? "Sauvegarder" : "Créer"}</span>
 							</button>
 						)}
 					</div>
@@ -685,9 +716,7 @@ export function TeamBuilder({
 				{/* Selected character banner */}
 				{selectedCharaId &&
 					(() => {
-						const selChar = characters.find(
-							(c) => c.charaId === selectedCharaId,
-						);
+						const selChar = characters.find((c) => c.charaId === selectedCharaId);
 						return (
 							<div className="flex items-center gap-3 p-2.5 rounded-2xl bg-primary-container/90 backdrop-blur-sm elevation-2">
 								{selChar && (
@@ -740,9 +769,7 @@ export function TeamBuilder({
 
 				{/* Formation picker — horizontal scroll on all sizes */}
 				<div>
-					<p className="type-label-medium text-on-surface-variant mb-1.5">
-						Formation
-					</p>
+					<p className="type-label-medium text-on-surface-variant mb-1.5">Formation</p>
 					<div className="flex gap-1.5 overflow-x-auto pb-1 -mx-1 px-1 scrollbar-hide">
 						{FORMATIONS.map((f, i) => {
 							const isActive = i === formationIdx;
@@ -756,7 +783,7 @@ export function TeamBuilder({
 										"inline-flex items-center gap-1.5 h-10 pl-1.5 pr-3 rounded-xl text-xs font-bold transition-all shrink-0",
 										isActive
 											? "bg-secondary-container text-on-secondary-container elevation-1"
-											: "border border-outline/40 text-on-surface-variant hover:bg-on-surface/[0.08]",
+											: "border border-outline/40 text-on-surface-variant hover:bg-on-surface/[0.08]"
 									)}
 								>
 									<FormationMiniPreview formation={f} />
@@ -775,8 +802,7 @@ export function TeamBuilder({
 				>
 					{/* Animated pill indicator */}
 					{(() => {
-						const tabIndex =
-							mobilePanel === "field" ? 0 : (mobilePanel === "roster" ? 1 : 2);
+						const tabIndex = mobilePanel === "field" ? 0 : mobilePanel === "roster" ? 1 : 2;
 						return (
 							<div
 								className="absolute top-1 bottom-1 rounded-xl bg-primary transition-all duration-300 ease-[cubic-bezier(0.2,0,0,1)]"
@@ -800,9 +826,7 @@ export function TeamBuilder({
 							aria-label={`Afficher le panneau ${tab.label}`}
 							className={cn(
 								"relative z-10 flex-1 flex items-center justify-center gap-1.5 rounded-xl text-xs font-bold transition-colors duration-200",
-								mobilePanel === tab.key
-									? "text-on-primary"
-									: "text-on-surface-variant",
+								mobilePanel === tab.key ? "text-on-primary" : "text-on-surface-variant"
 							)}
 						>
 							<Icon name={tab.icon} size={16} />
@@ -818,7 +842,7 @@ export function TeamBuilder({
 						className={cn(
 							"w-full lg:w-[55%] xl:w-[50%] shrink-0 space-y-3",
 							mobilePanel === "roster" && "hidden lg:block",
-							mobilePanel === "stats" && "hidden lg:block",
+							mobilePanel === "stats" && "hidden lg:block"
 						)}
 					>
 						{/* Edge-to-edge pitch on mobile */}
@@ -859,7 +883,7 @@ export function TeamBuilder({
 							"flex-1 min-w-0 bg-surface-container rounded-2xl elevation-1 overflow-hidden",
 							"lg:max-h-[calc(100vh-200px)] lg:sticky lg:top-20",
 							mobilePanel !== "roster" && "hidden lg:flex lg:flex-col",
-							mobilePanel === "roster" && "flex flex-col",
+							mobilePanel === "roster" && "flex flex-col"
 						)}
 					>
 						<CharacterPicker
@@ -901,9 +925,7 @@ export function TeamBuilder({
 				)}
 				{activeDrag &&
 					(activeDrag.origin === "field" || activeDrag.origin === "bench") &&
-					"member" in activeDrag && (
-						<PlayerSlotOverlay member={activeDrag.member} />
-					)}
+					"member" in activeDrag && <PlayerSlotOverlay member={activeDrag.member} />}
 			</DragOverlay>
 		</DndContext>
 	);

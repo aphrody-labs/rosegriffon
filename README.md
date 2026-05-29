@@ -70,10 +70,10 @@ Historique migration : voir [`docs/migration-from-vps.md`](docs/migration-from-v
 
 ## Vercel
 
-| App | Repo source | Projet Vercel | Domaine |
-|---|---|---|---|
-| azalee | `rose-griffon/rg` (root: `apps/azalee`) | `rg-azalee` | `azalee.rosegriffon.fr` |
-| website | `rose-griffon/rg` (root: `apps/website`) | `rg-website` | `rosegriffon.fr` |
+| App     | Repo source                              | Projet Vercel | Domaine                 |
+| ------- | ---------------------------------------- | ------------- | ----------------------- |
+| azalee  | `rose-griffon/rg` (root: `apps/azalee`)  | `rg-azalee`   | `azalee.rosegriffon.fr` |
+| website | `rose-griffon/rg` (root: `apps/website`) | `rg-website`  | `rosegriffon.fr`        |
 
 Root directory dans Vercel : `apps/azalee` / `apps/website`. Build command : `cd ../.. && bun run build --filter=@rose-griffon/<app>`.
 

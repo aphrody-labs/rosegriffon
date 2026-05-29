@@ -41,12 +41,7 @@ export function StorageImage({
 	const imageUrl = hasError ? fallback : getAssetUrl(src);
 
 	return (
-		<div
-			className={cn(
-				"relative overflow-hidden",
-				props.fill ? "w-full h-full" : "",
-			)}
-		>
+		<div className={cn("relative overflow-hidden", props.fill ? "w-full h-full" : "")}>
 			{/* Skeleton loader */}
 			{showSkeleton && isLoading && !hasError && (
 				<div className="absolute inset-0 bg-linear-to-r from-muted via-muted/80 to-muted animate-pulse z-10" />
@@ -58,7 +53,7 @@ export function StorageImage({
 				className={cn(
 					"transition-all duration-500",
 					isLoading ? "opacity-0 scale-105" : "opacity-100 scale-100",
-					className,
+					className
 				)}
 				width={width}
 				height={height}

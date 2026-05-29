@@ -46,7 +46,7 @@ async function fetchOrders(userId: string): Promise<OrderRow[]> {
 		const { data, error } = await supabase
 			.from("orders")
 			.select(
-				"id, stripe_session_id, amount_total_cents, patron_discount_applied, status, created_at, items",
+				"id, stripe_session_id, amount_total_cents, patron_discount_applied, status, created_at, items"
 			)
 			.eq("user_id", userId)
 			.order("created_at", { ascending: false })
@@ -57,10 +57,7 @@ async function fetchOrders(userId: string): Promise<OrderRow[]> {
 		}
 		return (data ?? []) as OrderRow[];
 	} catch (error) {
-		console.warn(
-			"[shop/commandes] table orders absente ou indisponible:",
-			error,
-		);
+		console.warn("[shop/commandes] table orders absente ou indisponible:", error);
 		return [];
 	}
 }
@@ -152,12 +149,10 @@ function EmptyOrders() {
 	return (
 		<div className="grid place-items-center rounded-3xl border-2 border-dashed border-[#d4af37]/40 bg-[#0c1730]/40 px-6 py-20 text-center">
 			<PackageOpen className="size-14 text-[#d4af37]" />
-			<h2 className="mt-6 text-2xl font-extrabold text-white">
-				Aucune commande pour le moment
-			</h2>
+			<h2 className="mt-6 text-2xl font-extrabold text-white">Aucune commande pour le moment</h2>
 			<p className="mt-2 max-w-md text-sm text-white/70">
-				Quand tu auras commandé, tes commandes apparaîtront ici avec le statut
-				d'expédition et le suivi.
+				Quand tu auras commandé, tes commandes apparaîtront ici avec le statut d'expédition et le
+				suivi.
 			</p>
 			<Link
 				href="/shop"

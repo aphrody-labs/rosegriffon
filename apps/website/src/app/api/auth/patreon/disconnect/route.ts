@@ -10,10 +10,7 @@ export async function POST() {
 		return NextResponse.json({ error: "no_admin_client" }, { status: 500 });
 	}
 
-	const { error } = await supabase
-		.from("patreon_oauth_tokens")
-		.delete()
-		.eq("user_id", user.id);
+	const { error } = await supabase.from("patreon_oauth_tokens").delete().eq("user_id", user.id);
 
 	if (error) {
 		console.error("[patreon/disconnect] delete failed", error);

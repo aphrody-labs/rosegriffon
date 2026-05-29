@@ -16,10 +16,10 @@
  */
 
 export type {
-  GlobalSearchAPI,
-  GlobalSearchResult,
-  SearchableType,
-  SearchConfig,
-  SearchResult,
+	GlobalSearchAPI,
+	GlobalSearchResult,
+	SearchableType,
+	SearchConfig,
+	SearchResult,
 } from "./fuzzy.js";
 export { createGlobalSearch, createSearchIndex } from "./fuzzy.js";

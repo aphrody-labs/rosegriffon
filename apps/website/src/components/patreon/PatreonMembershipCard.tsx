@@ -18,11 +18,7 @@ import {
 import { PATRON_DISCOUNT_PERCENT } from "@/lib/patreon/discount";
 import { createAdminClient } from "@/lib/supabase/server";
 
-type PatronStatus =
-	| "active_patron"
-	| "declined_patron"
-	| "former_patron"
-	| null;
+type PatronStatus = "active_patron" | "declined_patron" | "former_patron" | null;
 
 interface PatreonAddress {
 	line_1?: string | null;
@@ -94,7 +90,9 @@ const RG_LEGACY_LABEL: Record<string, string> = {
 };
 
 function formatEur(cents: number | null | undefined): string {
-	if (cents == null) {return "—";}
+	if (cents == null) {
+		return "—";
+	}
 	return new Intl.NumberFormat("fr-FR", {
 		currency: "EUR",
 		minimumFractionDigits: cents % 100 === 0 ? 0 : 2,
@@ -103,7 +101,9 @@ function formatEur(cents: number | null | undefined): string {
 }
 
 function formatDate(iso: string | null | undefined): string {
-	if (!iso) {return "—";}
+	if (!iso) {
+		return "—";
+	}
 	return format(new Date(iso), "d MMMM yyyy", { locale: fr });
 }
 
@@ -120,13 +120,15 @@ function formatDate(iso: string | null | undefined): string {
  */
 export async function PatreonMembershipCard({ userId }: { userId: string }) {
 	const supabase = createAdminClient();
-	if (!supabase) {return null;}
+	if (!supabase) {
+		return null;
+	}
 
 	const [liveRes, legacyRes] = await Promise.all([
 		supabase
 			.from("patreon_memberships")
 			.select(
-				"patron_status, patreon_email, patreon_full_name, patreon_thumb_url, patreon_url, last_charge_date, last_charge_status, currently_entitled_cents, lifetime_support_cents, pledge_start, pledge_cadence, will_pay_amount_cents, next_charge_date, is_free_trial, is_gifted, member_email, address, tier_titles, tier_amounts_cents, tier_requires_shipping, discord_role_ids, scope, fetched_at, created_at",
+				"patron_status, patreon_email, patreon_full_name, patreon_thumb_url, patreon_url, last_charge_date, last_charge_status, currently_entitled_cents, lifetime_support_cents, pledge_start, pledge_cadence, will_pay_amount_cents, next_charge_date, is_free_trial, is_gifted, member_email, address, tier_titles, tier_amounts_cents, tier_requires_shipping, discord_role_ids, scope, fetched_at, created_at"
 			)
 			.eq("user_id", userId)
 			.order("currently_entitled_cents", { ascending: false })
@@ -135,7 +137,7 @@ export async function PatreonMembershipCard({ userId }: { userId: string }) {
 		supabase
 			.from("patreon_legacy_members")
 			.select(
-				"patron_status, currently_entitled_cents, lifetime_support_cents, tier_titles, last_charge_date, last_charge_status, pledge_start, rg_subscription_status, resolution_method, resolved_at",
+				"patron_status, currently_entitled_cents, lifetime_support_cents, tier_titles, last_charge_date, last_charge_status, pledge_start, rg_subscription_status, resolution_method, resolved_at"
 			)
 			.eq("resolved_user_id", userId)
 			.order("lifetime_support_cents", { ascending: false })
@@ -146,7 +148,9 @@ export async function PatreonMembershipCard({ userId }: { userId: string }) {
 	const legacy = (legacyRes.data as LegacyRow | null) ?? null;
 
 	// Rien à afficher si l'utilisateur n'est ni lié ni connu en legacy.
-	if (!live && !legacy) {return null;}
+	if (!live && !legacy) {
+		return null;
+	}
 
 	const status: PatronStatus = (live?.patron_status as PatronStatus) ?? null;
 	const isActive = status === "active_patron";
@@ -163,34 +167,29 @@ export async function PatreonMembershipCard({ userId }: { userId: string }) {
 		live?.currently_entitled_cents ??
 		legacy?.currently_entitled_cents ??
 		null;
-	const lifetimeCents =
-		live?.lifetime_support_cents ?? legacy?.lifetime_support_cents ?? null;
+	const lifetimeCents = live?.lifetime_support_cents ?? legacy?.lifetime_support_cents ?? null;
 	const pledgeStart = live?.pledge_start ?? legacy?.pledge_start ?? null;
-	const lastChargeDate =
-		live?.last_charge_date ?? legacy?.last_charge_date ?? null;
-	const lastChargeStatus =
-		live?.last_charge_status ?? legacy?.last_charge_status ?? null;
+	const lastChargeDate = live?.last_charge_date ?? legacy?.last_charge_date ?? null;
+	const lastChargeStatus = live?.last_charge_status ?? legacy?.last_charge_status ?? null;
 	const cadence = live?.pledge_cadence;
 	const willPay = live?.will_pay_amount_cents ?? null;
 	const nextCharge = live?.next_charge_date ?? null;
 	const isFreeTrial = live?.is_free_trial === true;
 	const isGifted = live?.is_gifted === true;
-	const requiresShipping =
-		live?.tier_requires_shipping?.some((b) => b === true) ?? false;
+	const requiresShipping = live?.tier_requires_shipping?.some((b) => b === true) ?? false;
 	const address = live?.address ?? null;
 	const rolesCount = live?.discord_role_ids?.length ?? 0;
 	const fetchedAt = live?.fetched_at ?? null;
 	const linkedAt = live?.created_at ?? null;
 	const legacyStatusLabel = legacy
-		? (RG_LEGACY_LABEL[legacy.rg_subscription_status] ??
-			legacy.rg_subscription_status)
+		? (RG_LEGACY_LABEL[legacy.rg_subscription_status] ?? legacy.rg_subscription_status)
 		: null;
 
 	const accent = isActive
 		? "border-emerald-500/30 bg-linear-to-br from-emerald-500/5 via-card to-card"
-		: (wasMember
+		: wasMember
 			? "border-zinc-500/20 bg-card"
-			: "border-[#FF424D]/30 bg-card");
+			: "border-[#FF424D]/30 bg-card";
 
 	return (
 		<Card className={accent}>
@@ -224,23 +223,20 @@ export async function PatreonMembershipCard({ userId }: { userId: string }) {
 									rel="noopener noreferrer"
 									className="mt-1 block text-sm text-muted-foreground underline-offset-2 hover:text-foreground hover:underline"
 								>
-									{live.patreon_full_name ||
-										live.patreon_email ||
-										"Voir sur Patreon"}
+									{live.patreon_full_name || live.patreon_email || "Voir sur Patreon"}
 								</a>
-							) : (live?.patreon_email ? (
+							) : live?.patreon_email ? (
 								<p className="mt-1 text-sm text-muted-foreground">
 									{live.patreon_full_name || live.patreon_email}
 								</p>
-							) : null)}
+							) : null}
 						</div>
 					</div>
 
 					<div className="flex flex-wrap items-center gap-2">
 						{isActive && (
 							<Badge className="bg-emerald-500/15 text-emerald-700 hover:bg-emerald-500/20 dark:text-emerald-300">
-								<Sparkles className="mr-1 size-3" />-{PATRON_DISCOUNT_PERCENT}%
-								sur la boutique
+								<Sparkles className="mr-1 size-3" />-{PATRON_DISCOUNT_PERCENT}% sur la boutique
 							</Badge>
 						)}
 						{isFreeTrial && (
@@ -262,9 +258,7 @@ export async function PatreonMembershipCard({ userId }: { userId: string }) {
 						<div className="flex flex-wrap items-center justify-between gap-3">
 							<div className="flex items-center gap-2">
 								<Crown className="size-4 text-amber-500" />
-								<span className="font-semibold text-foreground">
-									{tierTitle}
-								</span>
+								<span className="font-semibold text-foreground">{tierTitle}</span>
 							</div>
 							<div className="text-right">
 								<p className="font-mono text-base font-semibold text-foreground">
@@ -292,12 +286,7 @@ export async function PatreonMembershipCard({ userId }: { userId: string }) {
 
 				{/* Stats */}
 				<div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-					<Stat
-						icon={Trophy}
-						label="Soutien total"
-						value={formatEur(lifetimeCents)}
-						highlight
-					/>
+					<Stat icon={Trophy} label="Soutien total" value={formatEur(lifetimeCents)} highlight />
 					<Stat
 						icon={CalendarClock}
 						label="Patron depuis"
@@ -322,9 +311,7 @@ export async function PatreonMembershipCard({ userId }: { userId: string }) {
 					<Stat
 						icon={Gauge}
 						label="Cadence"
-						value={
-							cadence === 12 ? "Annuelle" : (cadence === 1 ? "Mensuelle" : "—")
-						}
+						value={cadence === 12 ? "Annuelle" : cadence === 1 ? "Mensuelle" : "—"}
 					/>
 					{nextCharge && (
 						<Stat
@@ -383,14 +370,9 @@ export async function PatreonMembershipCard({ userId }: { userId: string }) {
 							Historique pré-migration RG
 						</div>
 						<dl className="grid gap-1 text-xs text-muted-foreground sm:grid-cols-2">
-							{legacyStatusLabel && (
-								<DescItem label="Statut" value={legacyStatusLabel} />
-							)}
+							{legacyStatusLabel && <DescItem label="Statut" value={legacyStatusLabel} />}
 							{legacy.tier_titles?.[0] && (
-								<DescItem
-									label="Tier d'origine"
-									value={legacy.tier_titles[0]}
-								/>
+								<DescItem label="Tier d'origine" value={legacy.tier_titles[0]} />
 							)}
 							{legacy.lifetime_support_cents != null && (
 								<DescItem
@@ -399,10 +381,7 @@ export async function PatreonMembershipCard({ userId }: { userId: string }) {
 								/>
 							)}
 							{legacy.resolved_at && (
-								<DescItem
-									label="Compte rapproché le"
-									value={formatDate(legacy.resolved_at)}
-								/>
+								<DescItem label="Compte rapproché le" value={formatDate(legacy.resolved_at)} />
 							)}
 							{legacy.resolution_method && (
 								<DescItem
@@ -410,9 +389,9 @@ export async function PatreonMembershipCard({ userId }: { userId: string }) {
 									value={
 										legacy.resolution_method === "email"
 											? "email"
-											: (legacy.resolution_method === "discord_id"
+											: legacy.resolution_method === "discord_id"
 												? "Discord"
-												: "manuel")
+												: "manuel"
 									}
 								/>
 							)}
@@ -463,9 +442,7 @@ function Stat({
 				<Icon className="h-3.5 w-3.5" />
 				{label}
 			</div>
-			<p
-				className={`mt-1 font-semibold ${highlight ? "text-foreground" : "text-foreground/90"}`}
-			>
+			<p className={`mt-1 font-semibold ${highlight ? "text-foreground" : "text-foreground/90"}`}>
 				{value}
 			</p>
 		</div>

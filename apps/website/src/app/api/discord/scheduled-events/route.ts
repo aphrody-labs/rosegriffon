@@ -33,8 +33,7 @@ interface DiscordScheduledEventRaw {
 
 export async function GET() {
 	const token = process.env.DISCORD_BOT_TOKEN;
-	const guildId =
-		process.env.DISCORD_GUILD_ID || process.env.NEXT_PUBLIC_DISCORD_GUILD_ID;
+	const guildId = process.env.DISCORD_GUILD_ID || process.env.NEXT_PUBLIC_DISCORD_GUILD_ID;
 
 	if (!token || !guildId) {
 		return NextResponse.json({
@@ -50,13 +49,11 @@ export async function GET() {
 			{
 				headers: { Authorization: `Bot ${token}` },
 				next: { revalidate: 300 },
-			},
+			}
 		);
 
 		if (!res.ok) {
-			console.warn(
-				`[discord/scheduled-events] discord api ${res.status} ${res.statusText}`,
-			);
+			console.warn(`[discord/scheduled-events] discord api ${res.status} ${res.statusText}`);
 			return NextResponse.json({ data: { events: [] }, success: true });
 		}
 

@@ -1,5 +1,5 @@
-import { NextResponse } from 'next/server';
-import type { NextRequest } from 'next/server';
+import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
 
 const BASE_ASSET_URL = "https://dxi4wb638ujep.cloudfront.net/1/k/5/a/";
 const HASH_REGEX = /dxi4wb638ujep\.cloudfront\.net\/1\/k\/5\/a\/([a-zA-Z0-9]+)/;
@@ -17,20 +17,21 @@ function isUrlAllowed(raw: string): URL | null {
 	} catch {
 		return null;
 	}
-	if (parsed.protocol !== "https:") {return null;}
-	if (!ALLOWED_HOSTS.has(parsed.hostname)) {return null;}
+	if (parsed.protocol !== "https:") {
+		return null;
+	}
+	if (!ALLOWED_HOSTS.has(parsed.hostname)) {
+		return null;
+	}
 	return parsed;
 }
 
 export async function GET(request: NextRequest) {
-	const {searchParams} = request.nextUrl;
+	const { searchParams } = request.nextUrl;
 	const url = searchParams.get("url");
 
 	if (!url) {
-		return NextResponse.json(
-			{ error: "URL parameter is required" },
-			{ status: 400 },
-		);
+		return NextResponse.json({ error: "URL parameter is required" }, { status: 400 });
 	}
 
 	const target = isUrlAllowed(url);
@@ -43,8 +44,7 @@ export async function GET(request: NextRequest) {
 		const timeout = setTimeout(() => ctrl.abort(), 5000);
 		const response = await fetch(target.toString(), {
 			headers: {
-				"User-Agent":
-					"Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)",
+				"User-Agent": "Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)",
 			},
 			redirect: "error",
 			signal: ctrl.signal,
@@ -52,19 +52,13 @@ export async function GET(request: NextRequest) {
 		clearTimeout(timeout);
 
 		if (!response.ok) {
-			return NextResponse.json(
-				{ error: `Upstream HTTP ${response.status}` },
-				{ status: 502 },
-			);
+			return NextResponse.json({ error: `Upstream HTTP ${response.status}` }, { status: 502 });
 		}
 		const html = await response.text();
 
 		const match = html.match(HASH_REGEX);
 		if (!match?.[1]) {
-			return NextResponse.json(
-				{ error: "Character hash not found in page" },
-				{ status: 404 },
-			);
+			return NextResponse.json({ error: "Character hash not found in page" }, { status: 404 });
 		}
 
 		const hash = match[1];
@@ -72,14 +66,8 @@ export async function GET(request: NextRequest) {
 		const name = titleMatch?.[1]?.trim() ?? "Unknown Character";
 
 		const assets = {
-			fullbody: Array.from(
-				{ length: 8 },
-				(_, i) => `${BASE_ASSET_URL}${hash}_r${i}_fullbody.webp`,
-			),
-			portrait: Array.from(
-				{ length: 8 },
-				(_, i) => `${BASE_ASSET_URL}${hash}_r${i}.webp`,
-			),
+			fullbody: Array.from({ length: 8 }, (_, i) => `${BASE_ASSET_URL}${hash}_r${i}_fullbody.webp`),
+			portrait: Array.from({ length: 8 }, (_, i) => `${BASE_ASSET_URL}${hash}_r${i}.webp`),
 		};
 
 		return NextResponse.json({
@@ -90,9 +78,6 @@ export async function GET(request: NextRequest) {
 		});
 	} catch (error) {
 		console.error("Error fetching Inazuma character:", error);
-		return NextResponse.json(
-			{ error: "Failed to fetch character data" },
-			{ status: 502 },
-		);
+		return NextResponse.json({ error: "Failed to fetch character data" }, { status: 502 });
 	}
 }

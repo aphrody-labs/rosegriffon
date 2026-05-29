@@ -33,7 +33,7 @@ function CustomSidebarTrigger() {
 				"size-5 text-foreground/50 hover:text-foreground hover:bg-foreground/10 active:bg-foreground/20 cursor-pointer",
 				"bg-background/80 backdrop-blur-xs border border-border/40 shadow-xs",
 				"opacity-60 hover:opacity-100 hover:scale-105 active:scale-95",
-				open ? "left-[214px]" : "left-3",
+				open ? "left-[214px]" : "left-3"
 			)}
 			aria-label={open ? "Fermer le menu" : "Ouvrir le menu"}
 		>
@@ -112,9 +112,7 @@ export default function ClientLayout({
 							{isMedium && !shouldHideSidebar && <WebsiteNavigationRail />}
 
 							{/* SIDEBAR (EXPANDED SCREENS) */}
-							{!shouldHideSidebar && (
-								<AppSidebar className={cn("hidden", isExpanded && "block")} />
-							)}
+							{!shouldHideSidebar && <AppSidebar className={cn("hidden", isExpanded && "block")} />}
 
 							<SidebarNavigationHandler />
 							<EdgeSwipeDetector />
@@ -123,18 +121,16 @@ export default function ClientLayout({
 								className={cn(
 									"transition-all duration-300 min-w-0",
 									isMedium && "ml-20",
-									isExpanded && isOpen && "ml-[224px]",
+									isExpanded && isOpen && "ml-[224px]"
 								)}
 							>
 								<div
 									className={cn(
 										"flex flex-col min-h-[100dvh] w-full",
-										"pb-[calc(4rem+env(safe-area-inset-bottom))] lg:pb-0",
+										"pb-[calc(4rem+env(safe-area-inset-bottom))] lg:pb-0"
 									)}
 								>
-									{isCompact && (
-										<Header isMobile showSearch={false} showCart={false} />
-									)}
+									{isCompact && <Header isMobile showSearch={false} showCart={false} />}
 									<div className="flex-1 w-full">
 										<div className="min-h-full w-full overflow-x-hidden">
 											<main id="main-content" className="flex-1 w-full">
@@ -145,9 +141,7 @@ export default function ClientLayout({
 									<Footer />
 									<MobileWatermark />
 									{/* Affiche la barre de nav du bas uniquement sur mobile, hors shop/auth/admin */}
-									{isCompact && !shouldHideSidebar && (
-										<MobileBottomNavigation />
-									)}
+									{isCompact && !shouldHideSidebar && <MobileBottomNavigation />}
 								</div>
 							</SidebarInset>
 

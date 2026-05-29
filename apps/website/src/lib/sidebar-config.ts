@@ -62,9 +62,7 @@ export interface MenuSection {
  * Adapté aux thèmes Roy (#344E8C bleu) et Gaëlle (#B03519 vermillon)
  * Retourne un objet avec bg, text, border et animation
  */
-export function getBadgeVariant(
-	variant: "new" | "hot" | "beta" | "soon" = "new",
-) {
+export function getBadgeVariant(variant: "new" | "hot" | "beta" | "soon" = "new") {
 	const variants = {
 		// NOUVEAU - Thème Roy (Bleu élégant #344E8C)
 		new: {
@@ -105,8 +103,7 @@ export function getBadgeVariant(
 export const sidebarTransitions = {
 	activeIndicator: "border-l-4 border-primary",
 	badge: "transition-all duration-200 hover:scale-110",
-	focus:
-		"focus:outline-none focus:ring-2 focus:ring-primary/50 dark:focus:ring-primary/30",
+	focus: "focus:outline-none focus:ring-2 focus:ring-primary/50 dark:focus:ring-primary/30",
 	hover: "hover:scale-105 hover:shadow-md",
 	item: "transition-all duration-200 ease-in-out",
 };
@@ -244,7 +241,9 @@ export const contactMenu: MenuSection = {
  * Validation utilitaire pour les items avec support des nouvelles propriétés
  */
 export function isValidMenuItem(item: unknown): item is MenuItem {
-	if (!item || typeof item !== "object") {return false;}
+	if (!item || typeof item !== "object") {
+		return false;
+	}
 	const m = item as Record<string, unknown>;
 	return (
 		typeof m.title === "string" &&
@@ -258,7 +257,9 @@ export function isValidMenuItem(item: unknown): item is MenuItem {
 }
 
 export function isValidSubMenuItem(item: unknown): item is SubMenuItem {
-	if (!item || typeof item !== "object") {return false;}
+	if (!item || typeof item !== "object") {
+		return false;
+	}
 	const m = item as Record<string, unknown>;
 	return (
 		typeof m.title === "string" &&

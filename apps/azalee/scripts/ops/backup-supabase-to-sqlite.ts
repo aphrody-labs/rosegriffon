@@ -27,11 +27,11 @@ import { mkdir } from "node:fs/promises";
 import path from "node:path";
 import { Client } from "pg";
 
-const {DATABASE_URL} = process.env;
+const { DATABASE_URL } = process.env;
 
 if (!DATABASE_URL) {
 	console.error(
-		"❌ Manque DATABASE_URL (postgres connection string requise pour la découverte dynamique)",
+		"❌ Manque DATABASE_URL (postgres connection string requise pour la découverte dynamique)"
 	);
 	process.exit(1);
 }
@@ -44,12 +44,8 @@ for (const a of args) {
 }
 
 const stamp = new Date().toISOString().replaceAll(/[:.]/g, "-").slice(0, 19);
-const outFile = path.resolve(
-	argMap.get("output") ?? `data/backups/supabase-${stamp}.sqlite`,
-);
-const schemas = (argMap.get("schema") ?? "public")
-	.split(",")
-	.map((s) => s.trim());
+const outFile = path.resolve(argMap.get("output") ?? `data/backups/supabase-${stamp}.sqlite`);
+const schemas = (argMap.get("schema") ?? "public").split(",").map((s) => s.trim());
 const includeTablesArg = argMap.get("tables");
 const pageSize = Number(argMap.get("page") ?? "5000");
 
@@ -61,14 +57,20 @@ interface ColumnInfo {
 	pgType: string;
 	sqliteAffinity: "INTEGER" | "REAL" | "TEXT";
 }
-interface TableInfo { schema: string; name: string; columns: ColumnInfo[] }
+interface TableInfo {
+	schema: string;
+	name: string;
+	columns: ColumnInfo[];
+}
 
 function affinityFor(pgType: string): ColumnInfo["sqliteAffinity"] {
 	const t = pgType.toLowerCase();
-	if (t === "boolean" || t === "integer" || t === "bigint" || t === "smallint")
-		{return "INTEGER";}
-	if (t === "numeric" || t === "real" || t === "double precision")
-		{return "REAL";}
+	if (t === "boolean" || t === "integer" || t === "bigint" || t === "smallint") {
+		return "INTEGER";
+	}
+	if (t === "numeric" || t === "real" || t === "double precision") {
+		return "REAL";
+	}
 	return "TEXT";
 }
 
@@ -84,10 +86,7 @@ await pg.connect();
 		  AND table_type = 'BASE TABLE'
 		ORDER BY table_schema, table_name
 	`;
-	const tblRes = await pg.query<{ table_schema: string; table_name: string }>(
-		tblQuery,
-		[schemas],
-	);
+	const tblRes = await pg.query<{ table_schema: string; table_name: string }>(tblQuery, [schemas]);
 
 	let names = tblRes.rows.map((r) => ({
 		name: r.table_name,
@@ -135,9 +134,7 @@ db.exec("PRAGMA cache_size = -64000"); // 64 MB
 db.exec("PRAGMA temp_store = MEMORY");
 
 db.exec(`CREATE TABLE IF NOT EXISTS _meta (key TEXT PRIMARY KEY, value TEXT)`);
-const meta = db.prepare(
-	"INSERT OR REPLACE INTO _meta (key, value) VALUES (?, ?)",
-);
+const meta = db.prepare("INSERT OR REPLACE INTO _meta (key, value) VALUES (?, ?)");
 meta.run("source", "pg:DATABASE_URL");
 meta.run("backup_stamp", stamp);
 meta.run("backup_started_at", new Date().toISOString());
@@ -146,33 +143,44 @@ meta.run("schemas", schemas.join(","));
 meta.run("tables_count", String(tables.length));
 
 console.log(`📦 Backup Supabase → ${outFile}`);
-console.log(
-	`   ${tables.length} tables, page size ${pageSize}, schemas=${schemas.join(",")}`,
-);
+console.log(`   ${tables.length} tables, page size ${pageSize}, schemas=${schemas.join(",")}`);
 
 let totalRows = 0;
 const summary: Array<{ table: string; rows: number; ms: number }> = [];
 
-function coerce(
-	v: unknown,
-	affinity: ColumnInfo["sqliteAffinity"],
-): string | number | null {
-	if (v === null || v === undefined) {return null;}
+function coerce(v: unknown, affinity: ColumnInfo["sqliteAffinity"]): string | number | null {
+	if (v === null || v === undefined) {
+		return null;
+	}
 	if (affinity === "INTEGER") {
-		if (typeof v === "boolean") {return v ? 1 : 0;}
-		if (typeof v === "bigint") {return Number(v);}
-		if (typeof v === "number") {return v;}
+		if (typeof v === "boolean") {
+			return v ? 1 : 0;
+		}
+		if (typeof v === "bigint") {
+			return Number(v);
+		}
+		if (typeof v === "number") {
+			return v;
+		}
 		const n = Number(v);
 		return Number.isFinite(n) ? n : String(v);
 	}
 	if (affinity === "REAL") {
-		if (typeof v === "number") {return v;}
+		if (typeof v === "number") {
+			return v;
+		}
 		const n = Number(v);
 		return Number.isFinite(n) ? n : String(v);
 	}
-	if (typeof v === "object") {return JSON.stringify(v);}
-	if (typeof v === "bigint") {return String(v);}
-	if (v instanceof Date) {return v.toISOString();}
+	if (typeof v === "object") {
+		return JSON.stringify(v);
+	}
+	if (typeof v === "bigint") {
+		return String(v);
+	}
+	if (v instanceof Date) {
+		return v.toISOString();
+	}
 	return String(v);
 }
 
@@ -181,23 +189,20 @@ for (const t of tables) {
 	const sqliteName = t.schema === "public" ? t.name : `${t.schema}__${t.name}`;
 	const t0 = performance.now();
 
-	const colsDecl = t.columns
-		.map((c) => `"${c.name}" ${c.sqliteAffinity}`)
-		.join(", ");
+	const colsDecl = t.columns.map((c) => `"${c.name}" ${c.sqliteAffinity}`).join(", ");
 	db.exec(`DROP TABLE IF EXISTS "${sqliteName}"`);
 	db.exec(`CREATE TABLE "${sqliteName}" (${colsDecl})`);
 
 	const colNames = t.columns.map((c) => `"${c.name}"`).join(", ");
 	const placeholders = t.columns.map((c) => `$${c.name}`).join(", ");
-	const insert = db.prepare(
-		`INSERT INTO "${sqliteName}" (${colNames}) VALUES (${placeholders})`,
-	);
+	const insert = db.prepare(`INSERT INTO "${sqliteName}" (${colNames}) VALUES (${placeholders})`);
 
 	const insertMany = db.transaction((rows: Array<Record<string, unknown>>) => {
 		for (const r of rows) {
 			const p: Record<string, string | number | null> = {};
-			for (const c of t.columns)
-				{p[`$${c.name}`] = coerce(r[c.name], c.sqliteAffinity);}
+			for (const c of t.columns) {
+				p[`$${c.name}`] = coerce(r[c.name], c.sqliteAffinity);
+			}
 			insert.run(p);
 		}
 	});
@@ -207,20 +212,22 @@ for (const t of tables) {
 	for (let offset = 0; ; offset += pageSize) {
 		const res = await pg.query<Record<string, unknown>>(
 			`SELECT * FROM ${tableId} ORDER BY ctid LIMIT $1 OFFSET $2`,
-			[pageSize, offset],
+			[pageSize, offset]
 		);
-		if (res.rows.length === 0) {break;}
+		if (res.rows.length === 0) {
+			break;
+		}
 		insertMany(res.rows);
 		count += res.rows.length;
-		if (res.rows.length < pageSize) {break;}
+		if (res.rows.length < pageSize) {
+			break;
+		}
 	}
 
 	const ms = Math.round(performance.now() - t0);
 	totalRows += count;
 	summary.push({ ms, rows: count, table: t.name });
-	console.log(
-		`  ✓ ${t.name.padEnd(34)} ${String(count).padStart(7)} rows  (${ms}ms)`,
-	);
+	console.log(`  ✓ ${t.name.padEnd(34)} ${String(count).padStart(7)} rows  (${ms}ms)`);
 }
 
 await pg.end();
@@ -232,18 +239,16 @@ db.close();
 
 const stat = await Bun.file(outFile).stat();
 const mb = (stat.size / 1024 / 1024).toFixed(2);
-console.log(
-	`\n✓ Done: ${totalRows.toLocaleString()} rows → ${outFile} (${mb} MB)`,
-);
+console.log(`\n✓ Done: ${totalRows.toLocaleString()} rows → ${outFile} (${mb} MB)`);
 console.log(
 	`  Top 5 tables: ${summary
 		.toSorted((a, b) => b.rows - a.rows)
 		.slice(0, 5)
 		.map((s) => `${s.table}=${s.rows}`)
-		.join(", ")}`,
+		.join(", ")}`
 );
 
 // Hint pour usage offline (lecture seule)
 console.log(
-	`\nQuery example:\n  bun -e 'import { Database } from "bun:sqlite"; const d = new Database("${outFile}"); console.log(d.prepare("SELECT name FROM sqlite_master WHERE type=\\"table\\" LIMIT 5").all())'`,
+	`\nQuery example:\n  bun -e 'import { Database } from "bun:sqlite"; const d = new Database("${outFile}"); console.log(d.prepare("SELECT name FROM sqlite_master WHERE type=\\"table\\" LIMIT 5").all())'`
 );

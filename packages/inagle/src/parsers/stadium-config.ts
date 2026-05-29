@@ -19,17 +19,17 @@ import { DATA_ROOT } from "../core/paths.js";
 // ============================================================================
 
 export interface ParsedStadium extends ExportableEntity {
-  fieldId: string;
-  index: number;
-  imagePath: string;
-  condition: string;
+	fieldId: string;
+	index: number;
+	imagePath: string;
+	condition: string;
 }
 
 export interface StadiumDatabase {
-  stadiums: ParsedStadium[];
-  byId: Map<string, ParsedStadium>;
-  toMarkdown: (id: string) => string | null;
-  toReact: (id: string) => any | null;
+	stadiums: ParsedStadium[];
+	byId: Map<string, ParsedStadium>;
+	toMarkdown: (id: string) => string | null;
+	toReact: (id: string) => any | null;
 }
 
 // ============================================================================
@@ -37,12 +37,12 @@ export interface StadiumDatabase {
 // ============================================================================
 
 function toHex(value: number | string): string {
-  const num = typeof value === "string" ? parseInt(value, 10) : value;
-  return `0x${(num >>> 0).toString(16).toUpperCase().padStart(8, "0")}`;
+	const num = typeof value === "string" ? parseInt(value, 10) : value;
+	return `0x${(num >>> 0).toString(16).toUpperCase().padStart(8, "0")}`;
 }
 
 function extractImageName(texturePath: string): string {
-  return texturePath.replace("#/menu/220_img/", "").replace(".g4tx", "");
+	return texturePath.replace("#/menu/220_img/", "").replace(".g4tx", "");
 }
 
 // ============================================================================
@@ -50,64 +50,64 @@ function extractImageName(texturePath: string): string {
 // ============================================================================
 
 function parseFieldEntry(child: any): ParsedStadium | null {
-  const vars = child.variables || [];
-  let imagePath = "";
-  let condition = "";
-  let fieldIdRaw = 0;
-  let index = 0;
+	const vars = child.variables || [];
+	let imagePath = "";
+	let condition = "";
+	let fieldIdRaw = 0;
+	let index = 0;
 
-  for (let i = 0; i < vars.length; i++) {
-    const v = vars[i];
-    if (v.type === "String" && typeof v.value === "string") {
-      if (v.value.includes("220_img/stadium/")) {
-        imagePath = extractImageName(v.value);
-      } else if (v.value.length > 20) {
-        condition = v.value;
-      }
-    } else if (v.type === "Int" && i === 0) {
-      fieldIdRaw = parseInt(v.value, 10);
-    } else if (v.type === "Int" && i === 1) {
-      index = parseInt(v.value, 10);
-    }
-  }
+	for (let i = 0; i < vars.length; i++) {
+		const v = vars[i];
+		if (v.type === "String" && typeof v.value === "string") {
+			if (v.value.includes("220_img/stadium/")) {
+				imagePath = extractImageName(v.value);
+			} else if (v.value.length > 20) {
+				condition = v.value;
+			}
+		} else if (v.type === "Int" && i === 0) {
+			fieldIdRaw = parseInt(v.value, 10);
+		} else if (v.type === "Int" && i === 1) {
+			index = parseInt(v.value, 10);
+		}
+	}
 
-  if (!imagePath) return null;
+	if (!imagePath) return null;
 
-  const fieldId = toHex(fieldIdRaw);
-  return {
-    id: fieldId,
-    name: imagePath.split("/").pop() || fieldId,
-    fieldId,
-    index,
-    imagePath,
-    condition,
-    attributes: {
-      Index: index,
-      Image: imagePath,
-    },
-  };
+	const fieldId = toHex(fieldIdRaw);
+	return {
+		id: fieldId,
+		name: imagePath.split("/").pop() || fieldId,
+		fieldId,
+		index,
+		imagePath,
+		condition,
+		attributes: {
+			Index: index,
+			Image: imagePath,
+		},
+	};
 }
 
 function parseContent(content: any): ParsedStadium[] {
-  const stadiums: ParsedStadium[] = [];
-  if (!content?.entries) return stadiums;
+	const stadiums: ParsedStadium[] = [];
+	if (!content?.entries) return stadiums;
 
-  for (const entry of content.entries) {
-    // Direct FIELD_INFO entries (flat format)
-    if (entry.name?.startsWith("SOCCER_OPTION_FIELD_INFO_") && !entry.name.includes("_LIST_")) {
-      const s = parseFieldEntry(entry);
-      if (s) stadiums.push(s);
-    }
+	for (const entry of content.entries) {
+		// Direct FIELD_INFO entries (flat format)
+		if (entry.name?.startsWith("SOCCER_OPTION_FIELD_INFO_") && !entry.name.includes("_LIST_")) {
+			const s = parseFieldEntry(entry);
+			if (s) stadiums.push(s);
+		}
 
-    // Nested inside LIST_BEG (children format)
-    if (entry.name?.startsWith("SOCCER_OPTION_FIELD_INFO_LIST_BEG_")) {
-      for (const child of entry.children || []) {
-        const s = parseFieldEntry(child);
-        if (s) stadiums.push(s);
-      }
-    }
-  }
-  return stadiums;
+		// Nested inside LIST_BEG (children format)
+		if (entry.name?.startsWith("SOCCER_OPTION_FIELD_INFO_LIST_BEG_")) {
+			for (const child of entry.children || []) {
+				const s = parseFieldEntry(child);
+				if (s) stadiums.push(s);
+			}
+		}
+	}
+	return stadiums;
 }
 
 // ============================================================================
@@ -115,28 +115,28 @@ function parseContent(content: any): ParsedStadium[] {
 // ============================================================================
 
 export async function loadStadiumConfigAsync(
-  dataPath: string = DATA_ROOT,
+	dataPath: string = DATA_ROOT
 ): Promise<ParsedStadium[] | null> {
-  const path = join(dataPath, "common/gamedata/soccer/soccer_game_option.cfg.bin.json");
-  const content = await loadJsonAsync<any>(path);
-  return content ? parseContent(content) : null;
+	const path = join(dataPath, "common/gamedata/soccer/soccer_game_option.cfg.bin.json");
+	const content = await loadJsonAsync<any>(path);
+	return content ? parseContent(content) : null;
 }
 
 export async function buildStadiumDatabase(dataPath: string = DATA_ROOT): Promise<StadiumDatabase> {
-  const stadiums = (await loadStadiumConfigAsync(dataPath)) || [];
-  const byId = new Map<string, ParsedStadium>();
-  for (const s of stadiums) byId.set(s.fieldId, s);
+	const stadiums = (await loadStadiumConfigAsync(dataPath)) || [];
+	const byId = new Map<string, ParsedStadium>();
+	for (const s of stadiums) byId.set(s.fieldId, s);
 
-  return {
-    stadiums,
-    byId,
-    toMarkdown: (id: string) => {
-      const s = byId.get(id);
-      return s ? EntityExporters.toMarkdown(s, "Stade") : null;
-    },
-    toReact: (id: string) => {
-      const s = byId.get(id);
-      return s ? EntityExporters.toReact(s) : null;
-    },
-  };
+	return {
+		stadiums,
+		byId,
+		toMarkdown: (id: string) => {
+			const s = byId.get(id);
+			return s ? EntityExporters.toMarkdown(s, "Stade") : null;
+		},
+		toReact: (id: string) => {
+			const s = byId.get(id);
+			return s ? EntityExporters.toReact(s) : null;
+		},
+	};
 }

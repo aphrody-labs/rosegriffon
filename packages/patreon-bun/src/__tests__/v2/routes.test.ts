@@ -1,41 +1,41 @@
-import { expect, describe, test } from 'bun:test'
+import { expect, describe, test } from "bun:test";
 
-import { Routes } from '../../v2'
+import { Routes } from "../../v2";
 
-describe('routes', () => {
-    test('identity', () => {
-        expect(Routes.identity()).toEqual('/identity')
-    })
+describe("routes", () => {
+	test("identity", () => {
+		expect(Routes.identity()).toEqual("/identity");
+	});
 
-    test('campaign', () => {
-        expect(Routes.campaign('test')).toEqual('/campaigns/test')
-    })
+	test("campaign", () => {
+		expect(Routes.campaign("test")).toEqual("/campaigns/test");
+	});
 
-    test('campaigns', () => {
-        expect(Routes.campaigns()).toEqual('/campaigns')
-    })
+	test("campaigns", () => {
+		expect(Routes.campaigns()).toEqual("/campaigns");
+	});
 
-    test('campaign members', () => {
-        expect(Routes.campaignMembers('test')).toEqual('/campaigns/test/members')
-    })
+	test("campaign members", () => {
+		expect(Routes.campaignMembers("test")).toEqual("/campaigns/test/members");
+	});
 
-    test('campaign posts', () => {
-        expect(Routes.campaignPosts('test')).toEqual('/campaigns/test/posts')
-    })
+	test("campaign posts", () => {
+		expect(Routes.campaignPosts("test")).toEqual("/campaigns/test/posts");
+	});
 
-    test('member', () => {
-        expect(Routes.member('user')).toEqual('/members/user')
-    })
+	test("member", () => {
+		expect(Routes.member("user")).toEqual("/members/user");
+	});
 
-    test('post', () => {
-        expect(Routes.post('post')).toEqual('/posts/post')
-    })
+	test("post", () => {
+		expect(Routes.post("post")).toEqual("/posts/post");
+	});
 
-    test('webhook', () => {
-        expect(Routes.webhook('hook')).toEqual('/webhooks/hook')
-    })
+	test("webhook", () => {
+		expect(Routes.webhook("hook")).toEqual("/webhooks/hook");
+	});
 
-    test('webhooks', () => {
-        expect(Routes.webhooks()).toEqual('/webhooks')
-    })
-})
+	test("webhooks", () => {
+		expect(Routes.webhooks()).toEqual("/webhooks");
+	});
+});

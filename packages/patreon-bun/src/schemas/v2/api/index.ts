@@ -1,6 +1,3 @@
-import { APIErrorCodes, APIErrors } from './components/errors'
+import { APIErrorCodes, APIErrors } from "./components/errors";
 
-export {
-    APIErrorCodes,
-    APIErrors,
-}
+export { APIErrorCodes, APIErrors };

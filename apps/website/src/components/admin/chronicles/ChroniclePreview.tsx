@@ -32,12 +32,8 @@ export function ChroniclePreview({
 				<span className="inline-block px-3 py-1 bg-rg-primary/10 text-rg-primary text-sm rounded-full mb-4">
 					{category}
 				</span>
-				<h1 className="text-4xl font-bold text-rg-primary mb-4">
-					{title || "Sans titre"}
-				</h1>
-				<p className="text-lg text-muted-foreground mb-8">
-					{excerpt || "Pas de résumé"}
-				</p>
+				<h1 className="text-4xl font-bold text-rg-primary mb-4">{title || "Sans titre"}</h1>
+				<p className="text-lg text-muted-foreground mb-8">{excerpt || "Pas de résumé"}</p>
 			</div>
 
 			<div className="h-px bg-muted" />

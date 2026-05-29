@@ -18,7 +18,7 @@ export async function GET() {
 	if (!user) {
 		return NextResponse.json(
 			{ active: false, percent: 0, reason: "not_authenticated" },
-			{ status: 200 },
+			{ status: 200 }
 		);
 	}
 	const discount = await getPatronDiscount(user.id);

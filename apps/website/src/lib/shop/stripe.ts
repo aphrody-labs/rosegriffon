@@ -8,12 +8,12 @@ import Stripe from "stripe";
 let cached: Stripe | null = null;
 
 export function getStripe(): Stripe {
-	if (cached) {return cached;}
+	if (cached) {
+		return cached;
+	}
 	const key = process.env.STRIPE_SECRET_KEY;
 	if (!key) {
-		throw new Error(
-			"[shop] STRIPE_SECRET_KEY missing — voir .env.example pour la config Stripe.",
-		);
+		throw new Error("[shop] STRIPE_SECRET_KEY missing — voir .env.example pour la config Stripe.");
 	}
 	cached = new Stripe(key, {
 		// Latest Stripe API version (cf. skill stripe-best-practices). Pin explicite

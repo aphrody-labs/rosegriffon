@@ -11,7 +11,7 @@ function getSqlitePath(): string | null {
 	const dirs = [
 		path.resolve(process.cwd(), "data/backups"),
 		path.resolve(process.cwd(), "apps/azalee/data/backups"),
-		"/home/ubuntu/rg/apps/azalee/data/backups"
+		"/home/ubuntu/rg/apps/azalee/data/backups",
 	];
 
 	for (const dir of dirs) {
@@ -19,7 +19,7 @@ function getSqlitePath(): string | null {
 			const files = readdirSync(dir);
 			// Filter for supabase-*.sqlite files and sort descending (latest first)
 			const sqliteFiles = files
-				.filter(f => f.startsWith("supabase-") && f.endsWith(".sqlite"))
+				.filter((f) => f.startsWith("supabase-") && f.endsWith(".sqlite"))
 				.sort((a, b) => b.localeCompare(a));
 
 			if (sqliteFiles.length > 0) {
@@ -138,7 +138,7 @@ export class SqliteQueryBuilder {
 		const column = this.cleanCol(col);
 		const placeholders = arr.map(() => "?").join(", ");
 		this.wheres.push(`${column} IN (${placeholders})`);
-		this.params.push(...arr.map(val => typeof val === "boolean" ? (val ? 1 : 0) : val));
+		this.params.push(...arr.map((val) => (typeof val === "boolean" ? (val ? 1 : 0) : val)));
 		return this;
 	}
 
@@ -204,7 +204,14 @@ export class SqliteQueryBuilder {
 
 	// Make the class then-able (Promise-like)
 	async then<TResult1 = unknown>(
-		onfulfilled?: ((value: { data: Record<string, unknown> | Array<Record<string, unknown>> | null; error: Error | null; count: number | null }) => TResult1 | PromiseLike<TResult1>) | undefined | null
+		onfulfilled?:
+			| ((value: {
+					data: Record<string, unknown> | Array<Record<string, unknown>> | null;
+					error: Error | null;
+					count: number | null;
+			  }) => TResult1 | PromiseLike<TResult1>)
+			| undefined
+			| null
 	) {
 		try {
 			const data = await this.execute();
@@ -213,7 +220,7 @@ export class SqliteQueryBuilder {
 			const response = {
 				data,
 				error: null as Error | null,
-				count
+				count,
 			};
 
 			if (onfulfilled) {
@@ -224,7 +231,7 @@ export class SqliteQueryBuilder {
 			const response = {
 				data: null,
 				error: err instanceof Error ? err : new Error(String(err)),
-				count: null
+				count: null,
 			};
 			if (onfulfilled) {
 				return onfulfilled(response);
@@ -253,7 +260,9 @@ export class SqliteQueryBuilder {
 		return sql;
 	}
 
-	private async execute(): Promise<Record<string, unknown> | Array<Record<string, unknown>> | null> {
+	private async execute(): Promise<
+		Record<string, unknown> | Array<Record<string, unknown>> | null
+	> {
 		const sql = this.compileSelect();
 		const stmt = this.db.prepare(sql);
 		const rawRows = stmt.all(...this.params) as Array<Record<string, unknown>>;
@@ -308,6 +317,6 @@ export function createSqliteClient() {
 		from(table: string) {
 			const db = getSqliteDb();
 			return new SqliteQueryBuilder(db, table);
-		}
+		},
 	};
 }

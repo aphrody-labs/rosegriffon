@@ -57,9 +57,7 @@ export default async function ThankYouPage({ searchParams }: ThankYouProps) {
 					{lineCount > 0 && (
 						<>
 							<dt className="text-left text-white/60">Articles</dt>
-							<dd className="text-right font-semibold text-white">
-								{lineCount}
-							</dd>
+							<dd className="text-right font-semibold text-white">{lineCount}</dd>
 						</>
 					)}
 					{total !== null && (

@@ -21,14 +21,14 @@
 export type { BasaraAPI, BasaraIndexes, EnrichedBasara } from "./api.js";
 export { buildBasaraDatabase, createBasaraAPI } from "./api.js";
 export type {
-  BasaraBuild,
-  BasaraCharacter,
-  BasaraDatabase,
-  BasaraIcons,
-  BasaraStats,
-  Element,
-  HeroVariants,
-  MultilingualName,
-  Position,
+	BasaraBuild,
+	BasaraCharacter,
+	BasaraDatabase,
+	BasaraIcons,
+	BasaraStats,
+	Element,
+	HeroVariants,
+	MultilingualName,
+	Position,
 } from "./types.js";
 export { ELEMENT_NAMES, POSITION_MAP, POSITION_NAMES } from "./types.js";

@@ -13,161 +13,163 @@ import { existsSync } from "node:fs";
 const DATA_ROOT = "/home/ubuntu/rg/data/inazuma.jp/victory-road";
 
 export async function crawlNews(): Promise<{ success: boolean; error?: string }> {
-  console.log("[Crawl News] Démarrage du crawl des actualités (Topics et Patch Notes)...");
-  
-  try {
-    const page = await Browser.newPage({ profile: "stealth" });
+	console.log("[Crawl News] Démarrage du crawl des actualités (Topics et Patch Notes)...");
 
-    // ==========================================
-    // 1. CRAWL TOPICS (FR)
-    // ==========================================
-    const topicsDir = join(DATA_ROOT, "fr/topics");
-    await mkdir(topicsDir, { recursive: true });
+	try {
+		const page = await Browser.newPage({ profile: "stealth" });
 
-    console.log("[Crawl News] Scraping Topics list index...");
-    await page.goto("https://www.inazuma.jp/victory-road/fr/topics/");
-    const topicsIndexHtml = await page.content();
-    await writeFile(join(topicsDir, "index.html"), topicsIndexHtml);
+		// ==========================================
+		// 1. CRAWL TOPICS (FR)
+		// ==========================================
+		const topicsDir = join(DATA_ROOT, "fr/topics");
+		await mkdir(topicsDir, { recursive: true });
 
-    const $topics = cheerio.load(topicsIndexHtml);
-    const topicLinks: { id: string; url: string; title: string; date: string }[] = [];
+		console.log("[Crawl News] Scraping Topics list index...");
+		await page.goto("https://www.inazuma.jp/victory-road/fr/topics/");
+		const topicsIndexHtml = await page.content();
+		await writeFile(join(topicsDir, "index.html"), topicsIndexHtml);
 
-    // Récupère les liens de topics
-    $topics("ul.list li").each((_, el) => {
-      const dt = $topics(el).find("dt").text().trim();
-      const dd = $topics(el).find("dd");
-      const link = dd.find("a");
-      const href = link.attr("href") || "";
-      const title = link.text().trim();
+		const $topics = cheerio.load(topicsIndexHtml);
+		const topicLinks: { id: string; url: string; title: string; date: string }[] = [];
 
-      if (!href || !title) return;
+		// Récupère les liens de topics
+		$topics("ul.list li").each((_, el) => {
+			const dt = $topics(el).find("dt").text().trim();
+			const dd = $topics(el).find("dd");
+			const link = dd.find("a");
+			const href = link.attr("href") || "";
+			const title = link.text().trim();
 
-      const absoluteUrl = href.startsWith("http")
-        ? href
-        : `https://www.inazuma.jp${href}`;
+			if (!href || !title) return;
 
-      const id = absoluteUrl.split("/").filter(Boolean).pop() || "";
-      if (id && id !== "topics" && id !== "fr") {
-        topicLinks.push({ id, url: absoluteUrl, title, date: dt });
-      }
-    });
+			const absoluteUrl = href.startsWith("http") ? href : `https://www.inazuma.jp${href}`;
 
-    console.log(`[Crawl News] ${topicLinks.length} topics trouvés. Traitement des détails...`);
+			const id = absoluteUrl.split("/").filter(Boolean).pop() || "";
+			if (id && id !== "topics" && id !== "fr") {
+				topicLinks.push({ id, url: absoluteUrl, title, date: dt });
+			}
+		});
 
-    for (const topic of topicLinks) {
-      const detailDir = join(topicsDir, topic.id);
-      const detailPath = join(detailDir, "index.html");
+		console.log(`[Crawl News] ${topicLinks.length} topics trouvés. Traitement des détails...`);
 
-      if (existsSync(detailPath)) {
-        // Déjà scrapé, on passe
-        continue;
-      }
+		for (const topic of topicLinks) {
+			const detailDir = join(topicsDir, topic.id);
+			const detailPath = join(detailDir, "index.html");
 
-      console.log(`[Crawl News] Scraping topic detail: ${topic.title} (${topic.url})`);
-      await mkdir(detailDir, { recursive: true });
+			if (existsSync(detailPath)) {
+				// Déjà scrapé, on passe
+				continue;
+			}
 
-      try {
-        await page.goto(topic.url);
-        const detailHtml = await page.content();
-        await writeFile(detailPath, detailHtml);
+			console.log(`[Crawl News] Scraping topic detail: ${topic.title} (${topic.url})`);
+			await mkdir(detailDir, { recursive: true });
 
-        // Sauvegarde de meta.json
-        const meta = {
-          id: topic.id,
-          title: topic.title,
-          date: topic.date,
-          url: topic.url,
-          category: "General",
-          thumbnail: null
-        };
-        await writeFile(join(detailDir, "meta.json"), JSON.stringify(meta, null, 2));
-      } catch (err) {
-        console.error(`[Crawl News] Erreur lors du scraping de topic ${topic.id} :`, err);
-      }
-    }
+			try {
+				await page.goto(topic.url);
+				const detailHtml = await page.content();
+				await writeFile(detailPath, detailHtml);
 
-    // ==========================================
-    // 2. CRAWL PATCH NOTES (EN)
-    // ==========================================
-    const patchNotesDir = join(DATA_ROOT, "en/patchnote");
-    const platforms = ["ps-steam", "switch", "xbox"] as const;
+				// Sauvegarde de meta.json
+				const meta = {
+					id: topic.id,
+					title: topic.title,
+					date: topic.date,
+					url: topic.url,
+					category: "General",
+					thumbnail: null,
+				};
+				await writeFile(join(detailDir, "meta.json"), JSON.stringify(meta, null, 2));
+			} catch (err) {
+				console.error(`[Crawl News] Erreur lors du scraping de topic ${topic.id} :`, err);
+			}
+		}
 
-    for (const platform of platforms) {
-      const platformDir = join(patchNotesDir, platform);
-      await mkdir(platformDir, { recursive: true });
+		// ==========================================
+		// 2. CRAWL PATCH NOTES (EN)
+		// ==========================================
+		const patchNotesDir = join(DATA_ROOT, "en/patchnote");
+		const platforms = ["ps-steam", "switch", "xbox"] as const;
 
-      const platformUrl = `https://www.inazuma.jp/victory-road/en/patchnote/${platform}/`;
-      console.log(`[Crawl News] Scraping Patch Notes index pour la plateforme ${platform} : ${platformUrl}`);
-      
-      try {
-        await page.goto(platformUrl);
-        const platformHtml = await page.content();
-        
-        const $patch = cheerio.load(platformHtml);
-        const patchLinks: { id: string; url: string; title: string; date: string }[] = [];
+		for (const platform of platforms) {
+			const platformDir = join(patchNotesDir, platform);
+			await mkdir(platformDir, { recursive: true });
 
-        $patch("a").each((_, el) => {
-          const href = $patch(el).attr("href");
-          if (!href || !href.includes("/ver_")) return;
+			const platformUrl = `https://www.inazuma.jp/victory-road/en/patchnote/${platform}/`;
+			console.log(
+				`[Crawl News] Scraping Patch Notes index pour la plateforme ${platform} : ${platformUrl}`
+			);
 
-          const fullText = $patch(el).text().trim();
-          const dateMatch = fullText.match(/(\d{4}\.\d{1,2}\.\d{1,2})/);
-          const date = dateMatch ? dateMatch[0] : "";
-          const title = fullText.replace(date, "").replace("[JST]", "").replace(/\s+/g, " ").trim();
+			try {
+				await page.goto(platformUrl);
+				const platformHtml = await page.content();
 
-          const absoluteUrl = href.startsWith("http") ? href : `https://www.inazuma.jp${href}`;
-          const id = absoluteUrl.split("/").filter(Boolean).pop() || "";
+				const $patch = cheerio.load(platformHtml);
+				const patchLinks: { id: string; url: string; title: string; date: string }[] = [];
 
-          if (id && !patchLinks.find(p => p.id === id)) {
-            patchLinks.push({ id, url: absoluteUrl, title: title || "Patch Note", date });
-          }
-        });
+				$patch("a").each((_, el) => {
+					const href = $patch(el).attr("href");
+					if (!href || !href.includes("/ver_")) return;
 
-        // Sauvegarde de index.json pour la plateforme
-        await writeFile(join(platformDir, "index.json"), JSON.stringify(patchLinks, null, 2));
+					const fullText = $patch(el).text().trim();
+					const dateMatch = fullText.match(/(\d{4}\.\d{1,2}\.\d{1,2})/);
+					const date = dateMatch ? dateMatch[0] : "";
+					const title = fullText.replace(date, "").replace("[JST]", "").replace(/\s+/g, " ").trim();
 
-        console.log(`[Crawl News] Platform ${platform} : ${patchLinks.length} patch notes trouvés.`);
+					const absoluteUrl = href.startsWith("http") ? href : `https://www.inazuma.jp${href}`;
+					const id = absoluteUrl.split("/").filter(Boolean).pop() || "";
 
-        for (const patch of patchLinks) {
-          const patchDetailDir = join(platformDir, patch.id);
-          const patchDetailPath = join(patchDetailDir, "index.html");
+					if (id && !patchLinks.find((p) => p.id === id)) {
+						patchLinks.push({ id, url: absoluteUrl, title: title || "Patch Note", date });
+					}
+				});
 
-          if (existsSync(patchDetailPath)) {
-            continue;
-          }
+				// Sauvegarde de index.json pour la plateforme
+				await writeFile(join(platformDir, "index.json"), JSON.stringify(patchLinks, null, 2));
 
-          console.log(`[Crawl News] Scraping patch note detail: ${patch.title} (${patch.url})`);
-          await mkdir(patchDetailDir, { recursive: true });
+				console.log(
+					`[Crawl News] Platform ${platform} : ${patchLinks.length} patch notes trouvés.`
+				);
 
-          try {
-            await page.goto(patch.url);
-            const patchHtml = await page.content();
-            await writeFile(patchDetailPath, patchHtml);
+				for (const patch of patchLinks) {
+					const patchDetailDir = join(platformDir, patch.id);
+					const patchDetailPath = join(patchDetailDir, "index.html");
 
-            // Sauvegarde de data.json
-            const data = {
-              id: patch.id,
-              title: patch.title,
-              date: patch.date,
-              url: patch.url,
-              platform: platform === "ps-steam" ? ["ps4", "ps5", "steam"] : [platform],
-              featured_image: null
-            };
-            await writeFile(join(patchDetailDir, "data.json"), JSON.stringify(data, null, 2));
-          } catch (err) {
-            console.error(`[Crawl News] Erreur lors du scraping du patch note ${patch.id} :`, err);
-          }
-        }
-      } catch (err) {
-        console.error(`[Crawl News] Erreur de chargement pour la plateforme ${platform} :`, err);
-      }
-    }
+					if (existsSync(patchDetailPath)) {
+						continue;
+					}
 
-    await page.close();
-    console.log("[Crawl News] Synchronisation des actualités terminée avec succès.");
-    return { success: true };
-  } catch (err: any) {
-    console.error("[Crawl News] Erreur critique lors du crawl des actualités :", err);
-    return { success: false, error: err.message || String(err) };
-  }
+					console.log(`[Crawl News] Scraping patch note detail: ${patch.title} (${patch.url})`);
+					await mkdir(patchDetailDir, { recursive: true });
+
+					try {
+						await page.goto(patch.url);
+						const patchHtml = await page.content();
+						await writeFile(patchDetailPath, patchHtml);
+
+						// Sauvegarde de data.json
+						const data = {
+							id: patch.id,
+							title: patch.title,
+							date: patch.date,
+							url: patch.url,
+							platform: platform === "ps-steam" ? ["ps4", "ps5", "steam"] : [platform],
+							featured_image: null,
+						};
+						await writeFile(join(patchDetailDir, "data.json"), JSON.stringify(data, null, 2));
+					} catch (err) {
+						console.error(`[Crawl News] Erreur lors du scraping du patch note ${patch.id} :`, err);
+					}
+				}
+			} catch (err) {
+				console.error(`[Crawl News] Erreur de chargement pour la plateforme ${platform} :`, err);
+			}
+		}
+
+		await page.close();
+		console.log("[Crawl News] Synchronisation des actualités terminée avec succès.");
+		return { success: true };
+	} catch (err: any) {
+		console.error("[Crawl News] Erreur critique lors du crawl des actualités :", err);
+		return { success: false, error: err.message || String(err) };
+	}
 }

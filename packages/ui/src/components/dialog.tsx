@@ -6,27 +6,19 @@ import type * as React from "react";
 import { X } from "lucide-react";
 import { cn } from "../lib/utils";
 
-function Dialog({
-	...props
-}: React.ComponentProps<typeof DialogPrimitive.Root>) {
+function Dialog({ ...props }: React.ComponentProps<typeof DialogPrimitive.Root>) {
 	return <DialogPrimitive.Root data-slot="dialog" {...props} />;
 }
 
-function DialogTrigger({
-	...props
-}: React.ComponentProps<typeof DialogPrimitive.Trigger>) {
+function DialogTrigger({ ...props }: React.ComponentProps<typeof DialogPrimitive.Trigger>) {
 	return <DialogPrimitive.Trigger data-slot="dialog-trigger" {...props} />;
 }
 
-function DialogPortal({
-	...props
-}: React.ComponentProps<typeof DialogPrimitive.Portal>) {
+function DialogPortal({ ...props }: React.ComponentProps<typeof DialogPrimitive.Portal>) {
 	return <DialogPrimitive.Portal data-slot="dialog-portal" {...props} />;
 }
 
-function DialogClose({
-	...props
-}: React.ComponentProps<typeof DialogPrimitive.Close>) {
+function DialogClose({ ...props }: React.ComponentProps<typeof DialogPrimitive.Close>) {
 	return <DialogPrimitive.Close data-slot="dialog-close" {...props} />;
 }
 
@@ -39,7 +31,7 @@ function DialogOverlay({
 			data-slot="dialog-overlay"
 			className={cn(
 				"fixed inset-0 z-50 bg-black/80 motion-safe:data-[state=open]:animate-in motion-safe:data-[state=closed]:animate-out motion-safe:data-[state=closed]:fade-out-0 motion-safe:data-[state=open]:fade-in-0 starting:opacity-0",
-				className,
+				className
 			)}
 			{...props}
 		/>
@@ -61,7 +53,7 @@ function DialogContent({
 				data-slot="dialog-content"
 				className={cn(
 					"@container/dialog fixed left-[50%] top-[50%] z-50 grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 border bg-background p-6 shadow-lg motion-safe:duration-200 motion-safe:data-[state=open]:animate-in motion-safe:data-[state=closed]:animate-out motion-safe:data-[state=closed]:fade-out-0 motion-safe:data-[state=open]:fade-in-0 motion-safe:data-[state=closed]:zoom-out-95 motion-safe:data-[state=open]:zoom-in-95 motion-safe:data-[state=closed]:slide-out-to-left-1/2 motion-safe:data-[state=closed]:slide-out-to-top-[48%] motion-safe:data-[state=open]:slide-in-from-left-1/2 motion-safe:data-[state=open]:slide-in-from-top-[48%] sm:rounded-lg",
-					className,
+					className
 				)}
 				{...props}
 			>
@@ -77,49 +69,37 @@ function DialogContent({
 	);
 }
 
-function DialogHeader({
-	className,
-	...props
-}: React.HTMLAttributes<HTMLDivElement>) {
+function DialogHeader({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
 	return (
 		<div
 			data-slot="dialog-header"
 			className={cn(
 				"flex flex-col space-y-1.5 text-center sm:text-left @md/dialog:flex-row @md/dialog:items-start @md/dialog:gap-4 @md/dialog:space-y-0",
-				className,
+				className
 			)}
 			{...props}
 		/>
 	);
 }
 
-function DialogFooter({
-	className,
-	...props
-}: React.HTMLAttributes<HTMLDivElement>) {
+function DialogFooter({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
 	return (
 		<div
 			data-slot="dialog-footer"
 			className={cn(
 				"flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2 @md/dialog:flex-row @md/dialog:justify-end @md/dialog:space-x-2",
-				className,
+				className
 			)}
 			{...props}
 		/>
 	);
 }
 
-function DialogTitle({
-	className,
-	...props
-}: React.ComponentProps<typeof DialogPrimitive.Title>) {
+function DialogTitle({ className, ...props }: React.ComponentProps<typeof DialogPrimitive.Title>) {
 	return (
 		<DialogPrimitive.Title
 			data-slot="dialog-title"
-			className={cn(
-				"text-lg font-semibold leading-none tracking-tight",
-				className,
-			)}
+			className={cn("text-lg font-semibold leading-none tracking-tight", className)}
 			{...props}
 		/>
 	);

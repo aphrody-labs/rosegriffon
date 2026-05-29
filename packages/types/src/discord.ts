@@ -37,9 +37,7 @@ export const DISCORD_CHANNELS = {
 export const MEDAILLE_AZALEE_ROLE_ID = DISCORD_ROLES.MEDAILLE_AZALEE;
 
 /** Helper : résout le guild ID depuis env avec fallback constant. */
-export function resolveGuildId(
-	env: Record<string, string | undefined>,
-): string {
+export function resolveGuildId(env: Record<string, string | undefined>): string {
 	const fromEnv = env.GUILD_ID || env.DISCORD_GUILD_ID;
 	// Filtre les valeurs qui ressemblent à $VAR non-expanded (Bun .env piège)
 	if (fromEnv && !fromEnv.startsWith("$")) return fromEnv;

@@ -31,9 +31,9 @@ export default async function ShopIndexPage({ searchParams }: ShopPageProps) {
 						La boutique <span className="text-[#d4af37]">Rose Griffon</span>.
 					</h1>
 					<p className="mt-5 max-w-2xl text-base text-white/80 md:text-lg">
-						Stickers, prints A5, badges brodés, marque-pages, textile et packs
-						collector édités avec les artistes de l'association — tirages
-						limités, imprimés en France, expédiés sous 3 à 10 jours.
+						Stickers, prints A5, badges brodés, marque-pages, textile et packs collector édités avec
+						les artistes de l'association — tirages limités, imprimés en France, expédiés sous 3 à
+						10 jours.
 					</p>
 				</header>
 

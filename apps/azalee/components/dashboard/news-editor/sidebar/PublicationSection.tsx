@@ -3,7 +3,19 @@
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { useState } from "react";
-import { Button, Calendar, Input, Popover, PopoverContent, PopoverTrigger, Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@rose-griffon/ui";
+import {
+	Button,
+	Calendar,
+	Input,
+	Popover,
+	PopoverContent,
+	PopoverTrigger,
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from "@rose-griffon/ui";
 import { CalendarClock } from "@/lib/icons-config";
 import { cn } from "@/lib/utils";
 import { CATEGORIES, STATUS_OPTIONS } from "../constants";
@@ -21,16 +33,22 @@ function parseScheduled(value: string): {
 	date: Date | undefined;
 	time: string;
 } {
-	if (!value) {return { date: undefined, time: "09:00" };}
+	if (!value) {
+		return { date: undefined, time: "09:00" };
+	}
 	const d = new Date(value);
-	if (Number.isNaN(d.getTime())) {return { date: undefined, time: "09:00" };}
+	if (Number.isNaN(d.getTime())) {
+		return { date: undefined, time: "09:00" };
+	}
 	const hh = String(d.getHours()).padStart(2, "0");
 	const mm = String(d.getMinutes()).padStart(2, "0");
 	return { date: d, time: `${hh}:${mm}` };
 }
 
 function combineDateTime(date: Date | undefined, time: string): string {
-	if (!date) {return "";}
+	if (!date) {
+		return "";
+	}
 	const [hh, mm] = time.split(":").map((s) => Number.parseInt(s, 10) || 0);
 	const d = new Date(date);
 	d.setHours(hh, mm, 0, 0);
@@ -84,10 +102,7 @@ export function PublicationSection({
 						{STATUS_OPTIONS.map((opt) => (
 							<SelectItem key={opt.value} value={opt.value}>
 								<div className="flex items-center gap-2">
-									<div
-										className={cn("size-2 rounded-full", opt.color)}
-										aria-hidden="true"
-									/>
+									<div className={cn("size-2 rounded-full", opt.color)} aria-hidden="true" />
 									{opt.label}
 								</div>
 							</SelectItem>
@@ -116,13 +131,11 @@ export function PublicationSection({
 									aria-labelledby="article-scheduled-at-label"
 									className={cn(
 										"h-10 flex-1 justify-start rounded-xl border-none bg-surface-container-high font-normal text-xs",
-										!date && "text-muted-foreground",
+										!date && "text-muted-foreground"
 									)}
 								>
 									<CalendarClock className="mr-2 size-3.5 opacity-70" />
-									{date
-										? format(date, "EEEE d MMMM yyyy", { locale: fr })
-										: "Choisir une date"}
+									{date ? format(date, "EEEE d MMMM yyyy", { locale: fr }) : "Choisir une date"}
 								</Button>
 							</PopoverTrigger>
 							<PopoverContent className="w-auto p-0" align="start">
@@ -184,10 +197,7 @@ export function PublicationSection({
 						{CATEGORIES.map((cat) => (
 							<SelectItem key={cat.value} value={cat.value}>
 								<div className="flex items-center gap-2">
-									<div
-										className={cn("size-2.5 rounded-full", cat.color)}
-										aria-hidden="true"
-									/>
+									<div className={cn("size-2.5 rounded-full", cat.color)} aria-hidden="true" />
 									{cat.label}
 								</div>
 							</SelectItem>

@@ -42,16 +42,12 @@ export default async function SoutenirPage() {
 								</div>
 							)}
 							<div className="p-6">
-								<h3 className="type-title-medium font-bold text-on-surface mb-2">
-									{product.name}
-								</h3>
+								<h3 className="type-title-medium font-bold text-on-surface mb-2">{product.name}</h3>
 								<p className="type-body-medium text-on-surface-variant mb-4">
 									{product.description}
 								</p>
 								<div className="flex items-center justify-between mt-auto">
-									<span className="type-title-large text-primary">
-										{product.price} €
-									</span>
+									<span className="type-title-large text-primary">{product.price} €</span>
 									<button className="px-4 py-2 bg-primary text-on-primary rounded-full type-label-large font-medium hover:brightness-110">
 										Commander
 									</button>
@@ -62,9 +58,7 @@ export default async function SoutenirPage() {
 				</div>
 			) : (
 				<div className="text-center py-12 bg-surface-container/50 rounded-2xl border border-dashed border-outline/30">
-					<p className="text-on-surface-variant">
-						Aucun produit disponible pour le moment.
-					</p>
+					<p className="text-on-surface-variant">Aucun produit disponible pour le moment.</p>
 				</div>
 			)}
 		</div>

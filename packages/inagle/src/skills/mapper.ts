@@ -17,42 +17,42 @@ import { findConfigFile, sanitizeText } from "../core/data-loader.js";
 import { DATA_ROOT } from "../core/index.js";
 import { loadShopConfig } from "../parsers/shop-config.js";
 import type {
-  CfgBinEntry,
-  CfgBinFile,
-  SkillConfigFile,
-  SkillDatabase,
-  UnifiedSkill,
+	CfgBinEntry,
+	CfgBinFile,
+	SkillConfigFile,
+	SkillDatabase,
+	UnifiedSkill,
 } from "./types.js";
 import { CATEGORY_NAMES, ELEMENT_NAMES } from "./types.js";
 
 /** Parse JSON file safely */
 function loadJson<T>(path: string): T {
-  const content = readFileSync(path, "utf-8");
-  return JSON.parse(content) as T;
+	const content = readFileSync(path, "utf-8");
+	return JSON.parse(content) as T;
 }
 
 /** Convert signed int to unsigned for hash comparison */
 function toUnsigned(n: number): number {
-  return n >>> 0;
+	return n >>> 0;
 }
 
 /** Extract integer value from CfgBin variable */
 function getInt(entry: CfgBinEntry, index: number): number {
-  const v = entry.variables[index];
-  if (!v) return 0;
-  return Number.parseInt(String(v.value), 10);
+	const v = entry.variables[index];
+	if (!v) return 0;
+	return Number.parseInt(String(v.value), 10);
 }
 
 /** Extract string value from CfgBin variable */
 function getString(entry: CfgBinEntry, index: number): string {
-  const v = entry.variables[index];
-  if (!v) return "";
-  return String(v.value);
+	const v = entry.variables[index];
+	if (!v) return "";
+	return String(v.value);
 }
 
 interface TextMaps {
-  names: Map<number, string>;
-  descriptions: Map<number, string>;
+	names: Map<number, string>;
+	descriptions: Map<number, string>;
 }
 
 /**
@@ -63,225 +63,225 @@ interface TextMaps {
  * - TEXT_INFO: variables[0]=hash, variables[2]=description
  */
 function parseSkillText(filePath: string): TextMaps {
-  if (!existsSync(filePath)) {
-    console.warn(`  File not found: ${filePath}`);
-    return { names: new Map(), descriptions: new Map() };
-  }
-  const data = loadJson<CfgBinFile>(filePath);
+	if (!existsSync(filePath)) {
+		console.warn(`  File not found: ${filePath}`);
+		return { names: new Map(), descriptions: new Map() };
+	}
+	const data = loadJson<CfgBinFile>(filePath);
 
-  const names = new Map<number, string>();
-  const descriptions = new Map<number, string>();
+	const names = new Map<number, string>();
+	const descriptions = new Map<number, string>();
 
-  for (const entry of data.entries) {
-    if (entry.name.startsWith("NOUN_INFO_BEGIN")) {
-      for (const child of entry.children) {
-        if (child.name.startsWith("NOUN_INFO_")) {
-          const hash = toUnsigned(getInt(child, 0));
-          // Try index 5 first (standard), then 2 (sometimes used)
-          let name = getString(child, 5);
-          if (!name) name = getString(child, 2);
+	for (const entry of data.entries) {
+		if (entry.name.startsWith("NOUN_INFO_BEGIN")) {
+			for (const child of entry.children) {
+				if (child.name.startsWith("NOUN_INFO_")) {
+					const hash = toUnsigned(getInt(child, 0));
+					// Try index 5 first (standard), then 2 (sometimes used)
+					let name = getString(child, 5);
+					if (!name) name = getString(child, 2);
 
-          if (hash !== 0 && name) {
-            names.set(hash, sanitizeText(name));
-          }
-        }
-      }
-    } else if (entry.name.startsWith("TEXT_INFO_BEGIN")) {
-      for (const child of entry.children) {
-        if (child.name.startsWith("TEXT_INFO_")) {
-          const hash = toUnsigned(getInt(child, 0));
-          const desc = getString(child, 2);
-          if (hash !== 0 && desc) {
-            descriptions.set(hash, sanitizeText(desc));
-          }
-        }
-      }
-    }
-  }
+					if (hash !== 0 && name) {
+						names.set(hash, sanitizeText(name));
+					}
+				}
+			}
+		} else if (entry.name.startsWith("TEXT_INFO_BEGIN")) {
+			for (const child of entry.children) {
+				if (child.name.startsWith("TEXT_INFO_")) {
+					const hash = toUnsigned(getInt(child, 0));
+					const desc = getString(child, 2);
+					if (hash !== 0 && desc) {
+						descriptions.set(hash, sanitizeText(desc));
+					}
+				}
+			}
+		}
+	}
 
-  console.log(`  Found ${names.size} names, ${descriptions.size} descriptions`);
-  return { names, descriptions };
+	console.log(`  Found ${names.size} names, ${descriptions.size} descriptions`);
+	return { names, descriptions };
 }
 
 /**
  * Build unified skill database
  */
 export function buildSkillDatabase(options?: { dataRoot?: string }): SkillDatabase {
-  const root = options?.dataRoot || DATA_ROOT;
-  const skillConfigName =
-    findConfigFile("skill", "skill_config_4") ||
-    findConfigFile("skill", "skill_config_3") ||
-    findConfigFile("skill", "skill_config_2") ||
-    "skill_config_2.00.19.00.cfg.bin.json";
+	const root = options?.dataRoot || DATA_ROOT;
+	const skillConfigName =
+		findConfigFile("skill", "skill_config_4") ||
+		findConfigFile("skill", "skill_config_3") ||
+		findConfigFile("skill", "skill_config_2") ||
+		"skill_config_2.00.19.00.cfg.bin.json";
 
-  const paths = {
-    skillConfig: join(root, "common/gamedata/skill", skillConfigName),
-    skillTextEn: join(root, "common/text/en/skill_text.cfg.bin.json"),
-    skillTextFr: join(root, "common/text/fr/skill_text.cfg.bin.json"),
-    skillTextJa: join(root, "common/text/ja/skill_text.cfg.bin.json"),
-    shopTextEn: join(root, "common/text/en/shop_text.cfg.bin.json"),
-    shopTextFr: join(root, "common/text/fr/shop_text.cfg.bin.json"),
-  };
+	const paths = {
+		skillConfig: join(root, "common/gamedata/skill", skillConfigName),
+		skillTextEn: join(root, "common/text/en/skill_text.cfg.bin.json"),
+		skillTextFr: join(root, "common/text/fr/skill_text.cfg.bin.json"),
+		skillTextJa: join(root, "common/text/ja/skill_text.cfg.bin.json"),
+		shopTextEn: join(root, "common/text/en/shop_text.cfg.bin.json"),
+		shopTextFr: join(root, "common/text/fr/shop_text.cfg.bin.json"),
+	};
 
-  // Load text maps for EN, FR and JA
-  const textEn = parseSkillText(paths.skillTextEn);
-  const textFr = parseSkillText(paths.skillTextFr);
-  const textJa = parseSkillText(paths.skillTextJa);
+	// Load text maps for EN, FR and JA
+	const textEn = parseSkillText(paths.skillTextEn);
+	const textFr = parseSkillText(paths.skillTextFr);
+	const textJa = parseSkillText(paths.skillTextJa);
 
-  // Load shop data
-  const shops = loadShopConfig(root);
-  const shopTextEn = parseSkillText(paths.shopTextEn);
-  const shopTextFr = parseSkillText(paths.shopTextFr);
+	// Load shop data
+	const shops = loadShopConfig(root);
+	const shopTextEn = parseSkillText(paths.shopTextEn);
+	const shopTextFr = parseSkillText(paths.shopTextFr);
 
-  // Build map: ItemId -> { en: string[], fr: string[] }
-  const itemShops = new Map<number, { en: string[]; fr: string[] }>();
+	// Build map: ItemId -> { en: string[], fr: string[] }
+	const itemShops = new Map<number, { en: string[]; fr: string[] }>();
 
-  for (const shop of shops) {
-    const shopNameEn = shopTextEn.names.get(shop.nameHash);
-    const shopNameFr = shopTextFr.names.get(shop.nameHash);
+	for (const shop of shops) {
+		const shopNameEn = shopTextEn.names.get(shop.nameHash);
+		const shopNameFr = shopTextFr.names.get(shop.nameHash);
 
-    if (shopNameEn && shopNameFr) {
-      for (const itemId of shop.items) {
-        if (!itemShops.has(itemId)) {
-          itemShops.set(itemId, { en: [], fr: [] });
-        }
-        const entry = itemShops.get(itemId)!;
-        if (!entry.en.includes(shopNameEn)) entry.en.push(shopNameEn);
-        if (!entry.fr.includes(shopNameFr)) entry.fr.push(shopNameFr);
-      }
-    }
-  }
-  console.log(`  Mapped shops for ${itemShops.size} items`);
+		if (shopNameEn && shopNameFr) {
+			for (const itemId of shop.items) {
+				if (!itemShops.has(itemId)) {
+					itemShops.set(itemId, { en: [], fr: [] });
+				}
+				const entry = itemShops.get(itemId)!;
+				if (!entry.en.includes(shopNameEn)) entry.en.push(shopNameEn);
+				if (!entry.fr.includes(shopNameFr)) entry.fr.push(shopNameFr);
+			}
+		}
+	}
+	console.log(`  Mapped shops for ${itemShops.size} items`);
 
-  // Load skill config
-  const skillConfig = loadJson<SkillConfigFile>(paths.skillConfig);
+	// Load skill config
+	const skillConfig = loadJson<SkillConfigFile>(paths.skillConfig);
 
-  // Find m_skillInfoList
-  const skillList = skillConfig.lists.find((l) => l.name === "m_skillInfoList");
-  if (!skillList) {
-    throw new Error("m_skillInfoList not found in skill config");
-  }
+	// Find m_skillInfoList
+	const skillList = skillConfig.lists.find((l) => l.name === "m_skillInfoList");
+	if (!skillList) {
+		throw new Error("m_skillInfoList not found in skill config");
+	}
 
-  console.log(`  Found ${skillList.values.length} skills`);
+	console.log(`  Found ${skillList.values.length} skills`);
 
-  // Build unified skills
-  const skills: UnifiedSkill[] = [];
-  const stats = {
-    totalSkills: 0,
-    withNameEn: 0,
-    withNameFr: 0,
-    withNameJa: 0,
-    withDescEn: 0,
-    withDescFr: 0,
-    withDescJa: 0,
-    byElement: {} as Record<string, number>,
-    byCategory: {} as Record<string, number>,
-  };
+	// Build unified skills
+	const skills: UnifiedSkill[] = [];
+	const stats = {
+		totalSkills: 0,
+		withNameEn: 0,
+		withNameFr: 0,
+		withNameJa: 0,
+		withDescEn: 0,
+		withDescFr: 0,
+		withDescJa: 0,
+		byElement: {} as Record<string, number>,
+		byCategory: {} as Record<string, number>,
+	};
 
-  for (let i = 0; i < skillList.values.length; i++) {
-    const raw = skillList.values[i];
+	for (let i = 0; i < skillList.values.length; i++) {
+		const raw = skillList.values[i];
 
-    // Skip empty entries
-    if (!raw?.skillIDStr || raw.skillIDStr === "") continue;
+		// Skip empty entries
+		if (!raw?.skillIDStr || raw.skillIDStr === "") continue;
 
-    const nameHash = Number.parseInt(raw.skillNameId, 16);
-    const descHash = Number.parseInt(raw.skillDescId, 16);
-    const skillHashId = Number.parseInt(raw.skillID, 16);
+		const nameHash = Number.parseInt(raw.skillNameId, 16);
+		const descHash = Number.parseInt(raw.skillDescId, 16);
+		const skillHashId = Number.parseInt(raw.skillID, 16);
 
-    const nameEn = textEn.names.get(nameHash);
-    const nameFr = textFr.names.get(nameHash);
-    const nameJa = textJa.names.get(nameHash);
-    const descEn = textEn.descriptions.get(descHash);
-    const descFr = textFr.descriptions.get(descHash);
-    const descJa = textJa.descriptions.get(descHash);
+		const nameEn = textEn.names.get(nameHash);
+		const nameFr = textFr.names.get(nameHash);
+		const nameJa = textJa.names.get(nameHash);
+		const descEn = textEn.descriptions.get(descHash);
+		const descFr = textFr.descriptions.get(descHash);
+		const descJa = textJa.descriptions.get(descHash);
 
-    // Lookup shops (using skillHashId as itemId)
-    const shopInfo = itemShops.get(skillHashId);
+		// Lookup shops (using skillHashId as itemId)
+		const shopInfo = itemShops.get(skillHashId);
 
-    const element = ELEMENT_NAMES[raw?.element ?? 0] ?? {
-      en: "Unknown",
-      ja: "不明",
-    };
-    const category = CATEGORY_NAMES[raw?.category ?? 0] ?? {
-      en: "Unknown",
-      ja: "不明",
-    };
+		const element = ELEMENT_NAMES[raw?.element ?? 0] ?? {
+			en: "Unknown",
+			ja: "不明",
+		};
+		const category = CATEGORY_NAMES[raw?.category ?? 0] ?? {
+			en: "Unknown",
+			ja: "不明",
+		};
 
-    const skill: UnifiedSkill = {
-      id: i,
-      hashId: skillHashId,
-      internalCode: raw.skillIDStr,
-      eventName: raw.eventIDName,
-      image: `${raw.skillIDStr}.png`,
-      names: {
-        en: nameEn,
-        fr: nameFr,
-        ja: nameJa,
-      },
-      descriptions: {
-        en: descEn,
-        fr: descFr,
-        ja: descJa,
-      },
-      shops: shopInfo
-        ? {
-            en: shopInfo.en,
-            fr: shopInfo.fr,
-          }
-        : undefined,
-      stats: {
-        powerMin: raw.power_min,
-        powerMax: raw.power_max,
-        tensionCost: raw.consumeTp, // Game uses "Tension" bar
-        recastTime: raw.recastTime,
-        growthType: raw.growthType,
-        foulRate: raw.foulRate,
-        skillEffectBitFlag: raw.skillEffectBitFlag,
-      },
-      element: {
-        id: raw.element,
-        nameEn: element.en,
-        nameJa: element.ja,
-      },
-      category: {
-        id: raw.category,
-        nameEn: category.en,
-        nameJa: category.ja,
-      },
-      partnerType: raw.partnerType,
-      isEldorado: raw.eldorado,
-    };
+		const skill: UnifiedSkill = {
+			id: i,
+			hashId: skillHashId,
+			internalCode: raw.skillIDStr,
+			eventName: raw.eventIDName,
+			image: `${raw.skillIDStr}.png`,
+			names: {
+				en: nameEn,
+				fr: nameFr,
+				ja: nameJa,
+			},
+			descriptions: {
+				en: descEn,
+				fr: descFr,
+				ja: descJa,
+			},
+			shops: shopInfo
+				? {
+						en: shopInfo.en,
+						fr: shopInfo.fr,
+					}
+				: undefined,
+			stats: {
+				powerMin: raw.power_min,
+				powerMax: raw.power_max,
+				tensionCost: raw.consumeTp, // Game uses "Tension" bar
+				recastTime: raw.recastTime,
+				growthType: raw.growthType,
+				foulRate: raw.foulRate,
+				skillEffectBitFlag: raw.skillEffectBitFlag,
+			},
+			element: {
+				id: raw.element,
+				nameEn: element.en,
+				nameJa: element.ja,
+			},
+			category: {
+				id: raw.category,
+				nameEn: category.en,
+				nameJa: category.ja,
+			},
+			partnerType: raw.partnerType,
+			isEldorado: raw.eldorado,
+		};
 
-    skills.push(skill);
+		skills.push(skill);
 
-    // Update stats
-    stats.totalSkills++;
-    if (nameEn) stats.withNameEn++;
-    if (nameFr) stats.withNameFr++;
-    if (nameJa) stats.withNameJa++;
-    if (descEn) stats.withDescEn++;
-    if (descFr) stats.withDescFr++;
-    if (descJa) stats.withDescJa++;
+		// Update stats
+		stats.totalSkills++;
+		if (nameEn) stats.withNameEn++;
+		if (nameFr) stats.withNameFr++;
+		if (nameJa) stats.withNameJa++;
+		if (descEn) stats.withDescEn++;
+		if (descFr) stats.withDescFr++;
+		if (descJa) stats.withDescJa++;
 
-    const elementKey = element.en;
-    stats.byElement[elementKey] = (stats.byElement[elementKey] || 0) + 1;
+		const elementKey = element.en;
+		stats.byElement[elementKey] = (stats.byElement[elementKey] || 0) + 1;
 
-    const categoryKey = category.en;
-    stats.byCategory[categoryKey] = (stats.byCategory[categoryKey] || 0) + 1;
-  }
+		const categoryKey = category.en;
+		stats.byCategory[categoryKey] = (stats.byCategory[categoryKey] || 0) + 1;
+	}
 
-  // Sort by internal code
-  skills.sort((a, b) => a.internalCode.localeCompare(b.internalCode));
+	// Sort by internal code
+	skills.sort((a, b) => a.internalCode.localeCompare(b.internalCode));
 
-  return {
-    generatedAt: new Date().toISOString(),
-    sources: {
-      skillConfig: skillConfigName,
-      skillTextEn: "en/skill_text.cfg.bin.json",
-      skillTextFr: "fr/skill_text.cfg.bin.json",
-      skillTextJa: "ja/skill_text.cfg.bin.json",
-    },
-    stats,
-    skills,
-  };
+	return {
+		generatedAt: new Date().toISOString(),
+		sources: {
+			skillConfig: skillConfigName,
+			skillTextEn: "en/skill_text.cfg.bin.json",
+			skillTextFr: "fr/skill_text.cfg.bin.json",
+			skillTextJa: "ja/skill_text.cfg.bin.json",
+		},
+		stats,
+		skills,
+	};
 }

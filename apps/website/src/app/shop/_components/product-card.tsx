@@ -1,8 +1,8 @@
 import Image from "next/image";
 import Link from "next/link";
 
-import { formatEuros, CATEGORY_LABELS } from '@/lib/shop/products';
-import type { Product } from '@/lib/shop/products';
+import { formatEuros, CATEGORY_LABELS } from "@/lib/shop/products";
+import type { Product } from "@/lib/shop/products";
 
 const STOCK_LABEL = {
 	"in-stock": "En stock",
@@ -56,9 +56,7 @@ export function ProductCard({ product }: { product: Product }) {
 			{/* Content */}
 			<div className="flex flex-1 flex-col gap-3 p-5">
 				<div>
-					<h3 className="font-bold leading-tight text-white text-lg">
-						{product.name}
-					</h3>
+					<h3 className="font-bold leading-tight text-white text-lg">{product.name}</h3>
 					<p className="mt-1 text-sm text-white/70">{product.tagline}</p>
 				</div>
 

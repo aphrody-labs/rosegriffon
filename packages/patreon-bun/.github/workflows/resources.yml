@@ -2,8 +2,8 @@ name: Resource schemas
 on:
   push:
     paths:
-      - 'src/schemas/v2/resources/*'
-      - 'src/schemas/v2/relationships.ts'
+      - "src/schemas/v2/resources/*"
+      - "src/schemas/v2/relationships.ts"
 permissions:
   contents: write
 env:

@@ -1,39 +1,37 @@
-import { sleep } from './counter'
+import { sleep } from "./counter";
 
-const parseToInt = (input: string | number) => typeof input === 'string' ? parseInt(input) : input
+const parseToInt = (input: string | number) =>
+	typeof input === "string" ? parseInt(input) : input;
 
 export class RatelimitManager {
-    private limitedUntil: Date | null = null
+	private limitedUntil: Date | null = null;
 
-    public get limited () {
-        return this.limitedUntil != null
-    }
+	public get limited() {
+		return this.limitedUntil != null;
+	}
 
-    public clear (): void {
-        this.limitedUntil = null
-    }
+	public clear(): void {
+		this.limitedUntil = null;
+	}
 
-    public async wait (): Promise<number> {
-        if (this.limitedUntil == null) return 0
+	public async wait(): Promise<number> {
+		if (this.limitedUntil == null) return 0;
 
-        const offset = Date.now() - this.limitedUntil.getTime()
+		const offset = Date.now() - this.limitedUntil.getTime();
 
-        await sleep(offset)
-        this.clear()
+		await sleep(offset);
+		this.clear();
 
-        return offset
-    }
+		return offset;
+	}
 
-    public applyTimeout (
-        response: number | string | undefined,
-        timeout: number,
-    ): Date | null {
-        const retryTimeout = (parseToInt(response ?? 0) * 1000) + timeout
+	public applyTimeout(response: number | string | undefined, timeout: number): Date | null {
+		const retryTimeout = parseToInt(response ?? 0) * 1000 + timeout;
 
-        if (retryTimeout > 0) {
-            this.limitedUntil = new Date(Date.now() + retryTimeout)
-        }
+		if (retryTimeout > 0) {
+			this.limitedUntil = new Date(Date.now() + retryTimeout);
+		}
 
-        return this.limitedUntil
-    }
+		return this.limitedUntil;
+	}
 }

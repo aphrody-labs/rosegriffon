@@ -8,15 +8,15 @@ import { fileURLToPath } from "node:url";
 
 /** Sync existence check sans node:fs — Bun.Glob.scanSync sert de stat shim. */
 function existsSync(p: string): boolean {
-  try {
-    const gen = new Bun.Glob(basename(p)).scanSync({
-      cwd: dirname(p),
-      onlyFiles: false,
-    });
-    return !gen.next().done;
-  } catch {
-    return false;
-  }
+	try {
+		const gen = new Bun.Glob(basename(p)).scanSync({
+			cwd: dirname(p),
+			onlyFiles: false,
+		});
+		return !gen.next().done;
+	} catch {
+		return false;
+	}
 }
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -26,25 +26,25 @@ const PACKAGE_ROOT = resolve(__dirname, "../..");
  * Resolve valid data root
  */
 function resolveDataRoot(): string {
-  // 1. Try environment variable
-  if (process.env.DATA_PATH) {
-    return resolve(process.env.DATA_PATH);
-  }
+	// 1. Try environment variable
+	if (process.env.DATA_PATH) {
+		return resolve(process.env.DATA_PATH);
+	}
 
-  // 2. Try local package data (packages/inagle/data) — primary location since data/ move
-  const localData = resolve(PACKAGE_ROOT, "data");
-  if (existsSync(localData) && existsSync(join(localData, "common"))) {
-    return localData;
-  }
+	// 2. Try local package data (packages/inagle/data) — primary location since data/ move
+	const localData = resolve(PACKAGE_ROOT, "data");
+	if (existsSync(localData) && existsSync(join(localData, "common"))) {
+		return localData;
+	}
 
-  // 4. Fallback to cwd/data (used by Next.js and scripts)
-  const cwdData = resolve(process.cwd(), "data");
-  if (existsSync(cwdData) && existsSync(join(cwdData, "common"))) {
-    return cwdData;
-  }
+	// 4. Fallback to cwd/data (used by Next.js and scripts)
+	const cwdData = resolve(process.cwd(), "data");
+	if (existsSync(cwdData) && existsSync(join(cwdData, "common"))) {
+		return cwdData;
+	}
 
-  // 5. Ultimate fallback
-  return cwdData;
+	// 5. Ultimate fallback
+	return cwdData;
 }
 
 export const CDN_URL = process.env.NEXT_PUBLIC_ASSET_URL || "https://azalee.rosegriffon.fr";
@@ -56,150 +56,150 @@ export const CDN_URL = process.env.NEXT_PUBLIC_ASSET_URL || "https://azalee.rose
 export const DATA_ROOT = resolveDataRoot();
 
 export const PATHS = {
-  /** Root data folder */
-  root: DATA_ROOT,
+	/** Root data folder */
+	root: DATA_ROOT,
 
-  /** Pre-processed JSON files for quick access */
-  allGamedata: existsSync(join(DATA_ROOT, "all-gamedata"))
-    ? join(DATA_ROOT, "all-gamedata")
-    : join(DATA_ROOT, "entities", "all-gamedata"),
+	/** Pre-processed JSON files for quick access */
+	allGamedata: existsSync(join(DATA_ROOT, "all-gamedata"))
+		? join(DATA_ROOT, "all-gamedata")
+		: join(DATA_ROOT, "entities", "all-gamedata"),
 
-  /** Raw config files from game */
-  common: join(DATA_ROOT, "common"),
-  gamedata: join(DATA_ROOT, "common/gamedata"),
+	/** Raw config files from game */
+	common: join(DATA_ROOT, "common"),
+	gamedata: join(DATA_ROOT, "common/gamedata"),
 
-  /** Character-related config files */
-  character: join(DATA_ROOT, "common/gamedata/character"),
+	/** Character-related config files */
+	character: join(DATA_ROOT, "common/gamedata/character"),
 
-  /** Skill-related config files */
-  skill: join(DATA_ROOT, "common/gamedata/skill"),
+	/** Skill-related config files */
+	skill: join(DATA_ROOT, "common/gamedata/skill"),
 
-  /** Team-related config files */
-  team: join(DATA_ROOT, "common/gamedata/team"),
+	/** Team-related config files */
+	team: join(DATA_ROOT, "common/gamedata/team"),
 
-  /** Formation data */
-  formation: join(DATA_ROOT, "common/gamedata/formation"),
+	/** Formation data */
+	formation: join(DATA_ROOT, "common/gamedata/formation"),
 
-  /** Item data */
-  item: join(DATA_ROOT, "common/gamedata/item"),
+	/** Item data */
+	item: join(DATA_ROOT, "common/gamedata/item"),
 
-  /** Players Universe data */
-  playersUniverse: join(DATA_ROOT, "common/gamedata/players_universe"),
+	/** Players Universe data */
+	playersUniverse: join(DATA_ROOT, "common/gamedata/players_universe"),
 
-  /** Quest data */
-  quest: join(DATA_ROOT, "common/gamedata/quest"),
+	/** Quest data */
+	quest: join(DATA_ROOT, "common/gamedata/quest"),
 
-  /** Soccer battle data */
-  soccer: join(DATA_ROOT, "common/gamedata/soccer"),
+	/** Soccer battle data */
+	soccer: join(DATA_ROOT, "common/gamedata/soccer"),
 
-  /** Localized text files */
-  textRoot: join(DATA_ROOT, "common/text"),
+	/** Localized text files */
+	textRoot: join(DATA_ROOT, "common/text"),
 
-  /** Decompiled Lua scripts */
-  lua: join(DATA_ROOT, "lua-decompiled"),
-  luaScripts: join(DATA_ROOT, "lua-decompiled/lua-scripts"),
-  luaCommon: join(DATA_ROOT, "lua-decompiled/common"),
+	/** Decompiled Lua scripts */
+	lua: join(DATA_ROOT, "lua-decompiled"),
+	luaScripts: join(DATA_ROOT, "lua-decompiled/lua-scripts"),
+	luaCommon: join(DATA_ROOT, "lua-decompiled/common"),
 
-  /** Pre-extracted entities (legacy) */
-  entities: join(DATA_ROOT, "entities"),
+	/** Pre-extracted entities (legacy) */
+	entities: join(DATA_ROOT, "entities"),
 
-  /** Image assets */
-  images: join(DATA_ROOT, "images"),
+	/** Image assets */
+	images: join(DATA_ROOT, "images"),
 
-  /** Gallery data */
-  gallery: join(DATA_ROOT, "common/gamedata/gallery"),
+	/** Gallery data */
+	gallery: join(DATA_ROOT, "common/gamedata/gallery"),
 
-  /** Dictionary data */
-  dictionary: join(DATA_ROOT, "common/gamedata/dictionary"),
+	/** Dictionary data */
+	dictionary: join(DATA_ROOT, "common/gamedata/dictionary"),
 
-  /** Extended story data */
-  extendStory: join(DATA_ROOT, "common/gamedata/extend_story"),
+	/** Extended story data */
+	extendStory: join(DATA_ROOT, "common/gamedata/extend_story"),
 
-  /** Capsule (gacha) data */
-  capsule: join(DATA_ROOT, "common/gamedata/capsule"),
+	/** Capsule (gacha) data */
+	capsule: join(DATA_ROOT, "common/gamedata/capsule"),
 
-  /** NFC lottery data */
-  nfc: join(DATA_ROOT, "common/gamedata/nfc"),
+	/** NFC lottery data */
+	nfc: join(DATA_ROOT, "common/gamedata/nfc"),
 
-  /** Inacode (social/stamps) data */
-  inacode: join(DATA_ROOT, "common/gamedata/inacode"),
+	/** Inacode (social/stamps) data */
+	inacode: join(DATA_ROOT, "common/gamedata/inacode"),
 
-  /** Party config data */
-  party: join(DATA_ROOT, "common/gamedata/party"),
+	/** Party config data */
+	party: join(DATA_ROOT, "common/gamedata/party"),
 
-  /** Boost group data */
-  boostGrp: join(DATA_ROOT, "common/gamedata/boost_grp"),
+	/** Boost group data */
+	boostGrp: join(DATA_ROOT, "common/gamedata/boost_grp"),
 } as const;
 
 /**
  * Key game data files
  */
 export const FILES = {
-  // Character files
-  charaBase: "chara_base_1.03.98.00.cfg.bin.json",
-  charaParam: "chara_param_1.03.66.00.cfg.bin.json",
-  charaDetails: "chara_details_config_0.00.00.00.cfg.bin.json",
-  charaText: "chara_text.cfg.bin.json",
-  charaTextRoma: "chara_text_roma.cfg.bin.json",
-  charaDescFr: "chara_description_text.cfg.bin.json",
-  basaraConfig: "basara_chara_config_0.00.00.00.cfg.bin.json",
+	// Character files
+	charaBase: "chara_base_1.03.98.00.cfg.bin.json",
+	charaParam: "chara_param_1.03.66.00.cfg.bin.json",
+	charaDetails: "chara_details_config_0.00.00.00.cfg.bin.json",
+	charaText: "chara_text.cfg.bin.json",
+	charaTextRoma: "chara_text_roma.cfg.bin.json",
+	charaDescFr: "chara_description_text.cfg.bin.json",
+	basaraConfig: "basara_chara_config_0.00.00.00.cfg.bin.json",
 
-  // Skill files (v4 = base, v5 = DLC Orion supplement)
-  skillBase: "skill_base_1.03.95.00.cfg.bin.json",
-  skillText: "skill_text.cfg.bin.json",
-  skillConfigV4: "skill_config_4.00.17.00.cfg.bin.json",
-  skillConfigV5: "skill_config_5.00.07.00.cfg.bin.json",
-  passiveSkillConfigV5: "passive_skill_config_5.00.07.00.cfg.bin.json",
-  passiveSkillRarityTable: "passive_skill_rarity_table_config_4.00.14.00.cfg.bin.json",
-  overrideSkillConfig: "override_skill_config_3.00.21.00.cfg.bin.json",
-  teamBuildConfig: "team_build_config_5.00.23.cfg.bin.json",
-  specialTacticsConfig: "special_tactics_config_1.04.09.10.cfg.bin.json",
-  auraSkillConfig: "aura_skill_config_1.04.09.00.cfg.bin.json",
+	// Skill files (v4 = base, v5 = DLC Orion supplement)
+	skillBase: "skill_base_1.03.95.00.cfg.bin.json",
+	skillText: "skill_text.cfg.bin.json",
+	skillConfigV4: "skill_config_4.00.17.00.cfg.bin.json",
+	skillConfigV5: "skill_config_5.00.07.00.cfg.bin.json",
+	passiveSkillConfigV5: "passive_skill_config_5.00.07.00.cfg.bin.json",
+	passiveSkillRarityTable: "passive_skill_rarity_table_config_4.00.14.00.cfg.bin.json",
+	overrideSkillConfig: "override_skill_config_3.00.21.00.cfg.bin.json",
+	teamBuildConfig: "team_build_config_5.00.23.cfg.bin.json",
+	specialTacticsConfig: "special_tactics_config_1.04.09.10.cfg.bin.json",
+	auraSkillConfig: "aura_skill_config_1.04.09.00.cfg.bin.json",
 
-  // Team files
-  teamConfig: "team_config.cfg.bin.json",
-  teamConfigVersioned: "team_config_1.04.06.00.cfg.bin.json",
+	// Team files
+	teamConfig: "team_config.cfg.bin.json",
+	teamConfigVersioned: "team_config_1.04.06.00.cfg.bin.json",
 
-  // VS Route files (v5 = DLC Orion)
-  chronicleVsRouteV5: "chronicle_vs_route_config_5.00.30.cfg.bin.json",
+	// VS Route files (v5 = DLC Orion)
+	chronicleVsRouteV5: "chronicle_vs_route_config_5.00.30.cfg.bin.json",
 
-  // Scene Archive (DLC Orion)
-  sceneArchiveConfig: "scene_archive_config_4.00.18.00.cfg.bin.json",
+	// Scene Archive (DLC Orion)
+	sceneArchiveConfig: "scene_archive_config_4.00.18.00.cfg.bin.json",
 
-  // Players Universe
-  playersUniverseConfig: "players_universe_config_1.03.59.00.cfg.bin.json",
+	// Players Universe
+	playersUniverseConfig: "players_universe_config_1.03.59.00.cfg.bin.json",
 
-  // Lua scripts
-  progBase: "prog_base_0.00.00.00.lua",
-  progCommon: "prog_common_1.04.32.00.lua",
+	// Lua scripts
+	progBase: "prog_base_0.00.00.00.lua",
+	progCommon: "prog_common_1.04.32.00.lua",
 
-  // Character (extended)
-  charaExpTable: "chara_exp_table_config_0.00.00.00.cfg.bin.json",
-  growthTableConfig: "growth_table_config_0.00.00.00.cfg.bin.json",
-  charaCostume: "chara_costume_1.02.28.00.cfg.bin.json",
-  uniformConfig: "uniform_config_1.03.52.00.cfg.bin.json",
+	// Character (extended)
+	charaExpTable: "chara_exp_table_config_0.00.00.00.cfg.bin.json",
+	growthTableConfig: "growth_table_config_0.00.00.00.cfg.bin.json",
+	charaCostume: "chara_costume_1.02.28.00.cfg.bin.json",
+	uniformConfig: "uniform_config_1.03.52.00.cfg.bin.json",
 
-  // Skill (extended)
-  skillTechnicConfig: "skill_technic_config_1.01.34.00.cfg.bin.json",
-  realSkillConfig: "real_skill_config_1.03.74.00.cfg.bin.json",
-  changeAuraSkillConfig: "change_aura_skill_config_1.01.73.00.cfg.bin.json",
-  trickConfig: "trick_config.cfg.bin.json",
-  passiveSkillEffectConfig: "passive_skill_effect_config.cfg.bin.json",
-  superTacticsBaseConfig: "super_tactics_config_0.08.86.cfg.bin.json",
+	// Skill (extended)
+	skillTechnicConfig: "skill_technic_config_1.01.34.00.cfg.bin.json",
+	realSkillConfig: "real_skill_config_1.03.74.00.cfg.bin.json",
+	changeAuraSkillConfig: "change_aura_skill_config_1.01.73.00.cfg.bin.json",
+	trickConfig: "trick_config.cfg.bin.json",
+	passiveSkillEffectConfig: "passive_skill_effect_config.cfg.bin.json",
+	superTacticsBaseConfig: "super_tactics_config_0.08.86.cfg.bin.json",
 
-  // Team (extended)
-  opponentTeamConfig: "opponent_team_config_1.03.05.00.cfg.bin.json",
-  enjoyModeTeamConfig: "enjoy_mode_team_config_1.04.02.00.cfg.bin.json",
+	// Team (extended)
+	opponentTeamConfig: "opponent_team_config_1.03.05.00.cfg.bin.json",
+	enjoyModeTeamConfig: "enjoy_mode_team_config_1.04.02.00.cfg.bin.json",
 
-  // Other configs
-  galleryConfig: "gallery_config_1.03.71.00.cfg.bin.json",
-  dictionaryConfig: "dictionary_config_0.00.00.cfg.bin.json",
-  extendStoryConfig: "extend_story_data_config_0.00.02.00.cfg.bin.json",
-  capsuleConfig: "capsule_config_0.00.00.cfg.bin.json",
-  nfcLotteryConfig: "nfc_lottery_config.cfg.bin.json",
-  inacodeConfig: "inacode_config_1.01.57.00.cfg.bin.json",
-  ctrlCharaConfig: "ctrl_chara_config_1.04.17.00.cfg.bin.json",
-  boostPlayerGroupConfig: "boost_player_group_config_0.00.00.cfg.bin.json",
+	// Other configs
+	galleryConfig: "gallery_config_1.03.71.00.cfg.bin.json",
+	dictionaryConfig: "dictionary_config_0.00.00.cfg.bin.json",
+	extendStoryConfig: "extend_story_data_config_0.00.02.00.cfg.bin.json",
+	capsuleConfig: "capsule_config_0.00.00.cfg.bin.json",
+	nfcLotteryConfig: "nfc_lottery_config.cfg.bin.json",
+	inacodeConfig: "inacode_config_1.01.57.00.cfg.bin.json",
+	ctrlCharaConfig: "ctrl_chara_config_1.04.17.00.cfg.bin.json",
+	boostPlayerGroupConfig: "boost_player_group_config_0.00.00.cfg.bin.json",
 } as const;
 
 export type DataPath = keyof typeof PATHS;

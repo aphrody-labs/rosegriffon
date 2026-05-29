@@ -58,7 +58,7 @@ export function RecentListCard({
 									<div
 										className={cn(
 											"flex size-9 shrink-0 items-center justify-center rounded-lg",
-											accent,
+											accent
 										)}
 										aria-hidden="true"
 									>
@@ -83,9 +83,7 @@ export function RecentListCard({
 													})}
 												</span>
 											)}
-											{item.subtitle && (
-												<span className="truncate">{item.subtitle}</span>
-											)}
+											{item.subtitle && <span className="truncate">{item.subtitle}</span>}
 											{item.meta}
 										</div>
 									</div>

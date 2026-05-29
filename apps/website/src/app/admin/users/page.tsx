@@ -56,14 +56,8 @@ export default async function UsersPage({ searchParams }: UsersPageProps) {
 		{ count: newUsersCount },
 	] = await Promise.all([
 		usersQuery,
-		supabase
-			.from("profiles")
-			.select("*", { count: "exact", head: true })
-			.eq("role", "admin"),
-		supabase
-			.from("profiles")
-			.select("*", { count: "exact", head: true })
-			.eq("role", "moderator"),
+		supabase.from("profiles").select("*", { count: "exact", head: true }).eq("role", "admin"),
+		supabase.from("profiles").select("*", { count: "exact", head: true }).eq("role", "moderator"),
 		supabase
 			.from("profiles")
 			.select("*", { count: "exact", head: true })
@@ -94,11 +88,7 @@ export default async function UsersPage({ searchParams }: UsersPageProps) {
 
 			<UsersTable users={users} />
 
-			<PaginationControls
-				currentPage={page}
-				totalPages={totalPages}
-				baseUrl="/admin/users"
-			/>
+			<PaginationControls currentPage={page} totalPages={totalPages} baseUrl="/admin/users" />
 		</div>
 	);
 }

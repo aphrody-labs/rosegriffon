@@ -1,6 +1,15 @@
 "use client";
 
-import { BookOpen, Calendar, Heart, Home, Image as ImageIcon, Settings, Shield, Users } from "lucide-react";
+import {
+	BookOpen,
+	Calendar,
+	Heart,
+	Home,
+	Image as ImageIcon,
+	Settings,
+	Shield,
+	Users,
+} from "lucide-react";
 import type { NavItem } from "@rose-griffon/ui";
 import { AdminSidebar as SharedAdminSidebar } from "@rose-griffon/ui";
 import Link from "next/link";
@@ -34,11 +43,7 @@ const adminNavItems: NavItem[] = [
 	{ href: "/admin/settings", icon: Settings, title: "Configuration" },
 ];
 
-export default function AdminSidebar({
-	showPatreon = false,
-}: {
-	showPatreon?: boolean;
-}) {
+export default function AdminSidebar({ showPatreon = false }: { showPatreon?: boolean }) {
 	return (
 		<SharedAdminSidebar
 			items={adminNavItems}

@@ -1,9 +1,4 @@
-import type {
-	BaseCharacter,
-	CharacterVariant,
-	MultiLevelStats,
-	Skill,
-} from "@rose-griffon/inagle";
+import type { BaseCharacter, CharacterVariant, MultiLevelStats, Skill } from "@rose-griffon/inagle";
 import type {
 	InagleCharacter,
 	InagleDrop,
@@ -23,17 +18,19 @@ let _supabase: ReturnType<typeof createClient> | null = null;
 let _hasWarnedMissingBun = false;
 
 function getSupabase(): ReturnType<typeof createClient> {
-	if (_supabase) {return _supabase;}
+	if (_supabase) {
+		return _supabase;
+	}
 
 	const url =
 		typeof window === "undefined" &&
 		process.env.SUPABASE_INTERNAL_URL &&
 		process.env.SUPABASE_INTERNAL_URL.startsWith("http")
 			? process.env.SUPABASE_INTERNAL_URL
-			: (process.env.NEXT_PUBLIC_SUPABASE_URL &&
-					process.env.NEXT_PUBLIC_SUPABASE_URL.startsWith("http")
+			: process.env.NEXT_PUBLIC_SUPABASE_URL &&
+				  process.env.NEXT_PUBLIC_SUPABASE_URL.startsWith("http")
 				? process.env.NEXT_PUBLIC_SUPABASE_URL
-				: "https://isbkaeltubqittywibeh.supabase.co");
+				: "https://isbkaeltubqittywibeh.supabase.co";
 
 	const key =
 		process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY &&
@@ -59,7 +56,9 @@ function getSupabase(): ReturnType<typeof createClient> {
 								msg.includes("No SQLite database backup found")
 							) {
 								if (!_hasWarnedMissingBun) {
-									console.log("[api-client] SQLite database cache is unavailable (falling back to Postgres).");
+									console.log(
+										"[api-client] SQLite database cache is unavailable (falling back to Postgres)."
+									);
 									_hasWarnedMissingBun = true;
 								}
 							} else {
@@ -72,7 +71,7 @@ function getSupabase(): ReturnType<typeof createClient> {
 				};
 			}
 			return Reflect.get(target, prop, receiver);
-		}
+		},
 	}) as unknown as ReturnType<typeof createClient>;
 
 	return _supabase;
@@ -148,7 +147,9 @@ function mapToBaseCharacter(row: any): BaseCharacter {
 // --- Generic Fetcher ---
 async function fetchTable<T>(table: string): Promise<T[]> {
 	const { data, error } = await getSupabase().from(table).select("*");
-	if (error) {return [];}
+	if (error) {
+		return [];
+	}
 	return (data || []) as T[];
 }
 
@@ -170,14 +171,17 @@ const getRawCharacters = unstable_cache(
 				finished = true;
 			} else {
 				allData = allData.concat(data as InagleCharacter[]);
-				if (data.length < batchSize) {finished = true;}
-				else {from += batchSize;}
+				if (data.length < batchSize) {
+					finished = true;
+				} else {
+					from += batchSize;
+				}
 			}
 		}
 		return allData;
 	},
 	["all-raw-characters"],
-	{ revalidate: CACHE_TTL, tags: ["characters"] },
+	{ revalidate: CACHE_TTL, tags: ["characters"] }
 );
 
 const getCharacters = async (): Promise<BaseCharacter[]> => {
@@ -188,7 +192,7 @@ const getCharacters = async (): Promise<BaseCharacter[]> => {
 const getItems = unstable_cache(
 	async (): Promise<InagleItem[]> => fetchTable<InagleItem>("inagle_items"),
 	["all-items"],
-	{ revalidate: CACHE_TTL, tags: ["items"] },
+	{ revalidate: CACHE_TTL, tags: ["items"] }
 );
 
 // Map raw aura DB row → EnrichedAuraSkill format
@@ -201,8 +205,7 @@ const ELEMENT_NAMES: Record<number, { en: string; ja: string; fr: string }> = {
 };
 
 function mapAuraRow(row: any): any {
-	const elementInfo =
-		ELEMENT_NAMES[row.element_id as number] || ELEMENT_NAMES[0];
+	const elementInfo = ELEMENT_NAMES[row.element_id as number] || ELEMENT_NAMES[0];
 	const sd = row.sheet_data || {};
 	return {
 		_file: "inagle_auras",
@@ -213,12 +216,7 @@ function mapAuraRow(row: any): any {
 		desc_FR: row.description_fr || sd.desc_FR,
 		desc_JA: row.description_ja || sd.desc_JA,
 		displayName:
-			row.name_fr ||
-			row.name_en ||
-			sd.displayName ||
-			sd.name_FR ||
-			sd.name_EN ||
-			"Inconnu",
+			row.name_fr || row.name_en || sd.displayName || sd.name_FR || sd.name_EN || "Inconnu",
 		element: row.element_id,
 		elementName: elementInfo,
 		image:
@@ -241,9 +239,13 @@ function mapAuraRow(row: any): any {
  * Fusionne le nested sheetData au top-level pour que AuraDetail puisse lire uniformément.
  */
 function normalizeAuraSheetData(sd: any): any {
-	if (!sd) {return null;}
+	if (!sd) {
+		return null;
+	}
 	const nested = sd.sheetData;
-	if (!nested || nested === "null") {return sd;}
+	if (!nested || nested === "null") {
+		return sd;
+	}
 	// Merge: nested community data takes priority, then top-level
 	return {
 		...sd,
@@ -266,15 +268,11 @@ const AURA_TABLES = [
 
 const getAuras = unstable_cache(
 	async (): Promise<any[]> => {
-		const results = await Promise.all(
-			AURA_TABLES.map((t) => fetchTable<any>(t)),
-		);
+		const results = await Promise.all(AURA_TABLES.map((t) => fetchTable<any>(t)));
 		const allRows = results.flat();
 
 		// Collect skill_ids to fetch video URLs in one batch
-		const skillIds = [
-			...new Set(allRows.map((r) => r.skill_id).filter(Boolean)),
-		] as string[];
+		const skillIds = [...new Set(allRows.map((r) => r.skill_id).filter(Boolean))] as string[];
 		const skillVideoMap = new Map<
 			string,
 			{ video_url: string | null; internal_code: string | null }
@@ -312,13 +310,13 @@ const getAuras = unstable_cache(
 		});
 	},
 	["all-auras"],
-	{ revalidate: CACHE_TTL, tags: ["auras"] },
+	{ revalidate: CACHE_TTL, tags: ["auras"] }
 );
 
 const getHissatsu = unstable_cache(
 	async (): Promise<InagleHissatsu[]> => fetchTable<InagleHissatsu>("inagle_hissatsu"),
 	["all-hissatsu"],
-	{ revalidate: CACHE_TTL, tags: ["hissatsu"] },
+	{ revalidate: CACHE_TTL, tags: ["hissatsu"] }
 );
 
 const getSkills = async (): Promise<Skill[]> => {
@@ -342,7 +340,7 @@ const getSkills = async (): Promise<Skill[]> => {
 				skillId: h.id?.toString() || "0",
 				tpCost: h.tension,
 				type: 1,
-			}) as any,
+			}) as any
 	);
 };
 
@@ -353,8 +351,7 @@ function mapPassiveRow(row: any): any {
 		return {
 			...row.data,
 			// Ensure rarity from effect_value if not in data
-			rarity:
-				row.data.rarity ?? (row.effect_value ? Number(row.effect_value) : 0),
+			rarity: row.data.rarity ?? (row.effect_value ? Number(row.effect_value) : 0),
 		};
 	}
 	// Fallback: map flat columns
@@ -446,9 +443,7 @@ export const apiClient = {
 			const q = query.toLowerCase();
 			return chars
 				.filter(
-					(c) =>
-						c.names.fr?.toLowerCase().includes(q) ||
-						c.names.ja?.toLowerCase().includes(q),
+					(c) => c.names.fr?.toLowerCase().includes(q) || c.names.ja?.toLowerCase().includes(q)
 				)
 				.slice(0, limit);
 		},

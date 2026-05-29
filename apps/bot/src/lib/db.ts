@@ -20,7 +20,7 @@ export const supabase = createSupabaseServiceClient();
 const databaseUrl = Bun.env.DATABASE_URL;
 if (!databaseUrl) {
 	throw new Error(
-		"[bot/db] DATABASE_URL is required (Supabase Postgres pooler URL — voir .env.example)",
+		"[bot/db] DATABASE_URL is required (Supabase Postgres pooler URL — voir .env.example)"
 	);
 }
 

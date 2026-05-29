@@ -19,7 +19,7 @@ export function createSupabaseServerClient(cookies: CookieStore) {
 					name: string;
 					value: string;
 					options?: CookieOptions;
-				}>,
+				}>
 			) {
 				try {
 					for (const { name, value, options } of cookiesToSet) {

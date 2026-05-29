@@ -1,23 +1,17 @@
 {
-    "extends": "../tsconfig.json",
-    "compilerOptions": {
-        "target": "ES2022",
-        "module": "ES2022",
-        "moduleResolution": "Bundler",
-        "noUnusedLocals": true,
-        "noUnusedParameters": true,
-        "allowUnusedLabels": true,
-        "noUncheckedIndexedAccess": false,
-        "paths": {
-            "patreon-api.ts": ["../"]
-        }
-    },
-    "include": [
-        ".vitepress/**/*.ts",
-        "./examples/**/*.ts"
-    ],
-    "exclude": [
-        ".vitepress/cache",
-        ".vitepress/dist"
-    ]
+	"extends": "../tsconfig.json",
+	"compilerOptions": {
+		"target": "ES2022",
+		"module": "ES2022",
+		"moduleResolution": "Bundler",
+		"noUnusedLocals": true,
+		"noUnusedParameters": true,
+		"allowUnusedLabels": true,
+		"noUncheckedIndexedAccess": false,
+		"paths": {
+			"patreon-api.ts": ["../"]
+		}
+	},
+	"include": [".vitepress/**/*.ts", "./examples/**/*.ts"],
+	"exclude": [".vitepress/cache", ".vitepress/dist"]
 }

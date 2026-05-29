@@ -1,17 +1,16 @@
-import { NextResponse } from 'next/server';
-import type { NextRequest } from 'next/server';
+import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
 
 import { requireApiAdmin } from "@/lib/api-auth";
 import { createAdminClient } from "@/lib/supabase/server";
 
 const VALID_ROLES = new Set(["admin", "staff", "user", "premium", "banned"]);
 
-export async function PUT(
-	request: NextRequest,
-	{ params }: { params: Promise<{ id: string }> },
-) {
+export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
 	const auth = await requireApiAdmin();
-	if (!auth.ok) {return auth.response;}
+	if (!auth.ok) {
+		return auth.response;
+	}
 
 	try {
 		const { id } = await params;
@@ -19,39 +18,24 @@ export async function PUT(
 		const { role, full_name, email_notifications } = body ?? {};
 
 		if (role !== undefined && !VALID_ROLES.has(role)) {
-			return NextResponse.json(
-				{ error: "Rôle invalide", success: false },
-				{ status: 400 },
-			);
+			return NextResponse.json({ error: "Rôle invalide", success: false }, { status: 400 });
 		}
 		if (full_name !== undefined && typeof full_name !== "string") {
-			return NextResponse.json(
-				{ error: "full_name invalide", success: false },
-				{ status: 400 },
-			);
+			return NextResponse.json({ error: "full_name invalide", success: false }, { status: 400 });
 		}
 		if (full_name && full_name.length > 200) {
-			return NextResponse.json(
-				{ error: "full_name trop long", success: false },
-				{ status: 400 },
-			);
+			return NextResponse.json({ error: "full_name trop long", success: false }, { status: 400 });
 		}
-		if (
-			email_notifications !== undefined &&
-			typeof email_notifications !== "boolean"
-		) {
+		if (email_notifications !== undefined && typeof email_notifications !== "boolean") {
 			return NextResponse.json(
 				{ error: "email_notifications invalide", success: false },
-				{ status: 400 },
+				{ status: 400 }
 			);
 		}
 
 		const supabase = createAdminClient();
 		if (!supabase) {
-			return NextResponse.json(
-				{ error: "Service indisponible" },
-				{ status: 503 },
-			);
+			return NextResponse.json({ error: "Service indisponible" }, { status: 503 });
 		}
 
 		const { data: user, error } = await supabase
@@ -69,7 +53,7 @@ export async function PUT(
 		if (error || !user) {
 			return NextResponse.json(
 				{ error: "Utilisateur non trouvé", success: false },
-				{ status: 404 },
+				{ status: 404 }
 			);
 		}
 
@@ -85,26 +69,25 @@ export async function PUT(
 				error: "Erreur lors de la modification de l'utilisateur",
 				success: false,
 			},
-			{ status: 500 },
+			{ status: 500 }
 		);
 	}
 }
 
 export async function DELETE(
 	_request: NextRequest,
-	{ params }: { params: Promise<{ id: string }> },
+	{ params }: { params: Promise<{ id: string }> }
 ) {
 	const auth = await requireApiAdmin();
-	if (!auth.ok) {return auth.response;}
+	if (!auth.ok) {
+		return auth.response;
+	}
 
 	try {
 		const { id } = await params;
 		const supabase = createAdminClient();
 		if (!supabase) {
-			return NextResponse.json(
-				{ error: "Service indisponible" },
-				{ status: 503 },
-			);
+			return NextResponse.json({ error: "Service indisponible" }, { status: 503 });
 		}
 
 		const { data: user, error } = await supabase
@@ -120,7 +103,7 @@ export async function DELETE(
 		if (error || !user) {
 			return NextResponse.json(
 				{ error: "Utilisateur non trouvé", success: false },
-				{ status: 404 },
+				{ status: 404 }
 			);
 		}
 
@@ -135,7 +118,7 @@ export async function DELETE(
 				error: "Erreur lors de la désactivation de l'utilisateur",
 				success: false,
 			},
-			{ status: 500 },
+			{ status: 500 }
 		);
 	}
 }

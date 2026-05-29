@@ -51,7 +51,7 @@ export function Header({
 		"shadow-sm",
 		"transition-all duration-300 ease-in-out",
 		"header-safe",
-		className,
+		className
 	);
 
 	if (isMobile) {
@@ -59,7 +59,7 @@ export function Header({
 			<header
 				className={cn(
 					baseClasses,
-					"pt-[env(safe-area-inset-top)]", // Safe area for notch
+					"pt-[env(safe-area-inset-top)]" // Safe area for notch
 				)}
 			>
 				<div className="flex items-center gap-2 px-3 py-2 min-h-[3.5rem]">
@@ -160,10 +160,7 @@ export function Header({
 					{showLiveStatus && (
 						<>
 							<LiveStatus />
-							<Separator
-								orientation="vertical"
-								className="h-6 hidden md:block"
-							/>
+							<Separator orientation="vertical" className="h-6 hidden md:block" />
 						</>
 					)}
 
@@ -172,10 +169,7 @@ export function Header({
 					{showUserMenu && (
 						<>
 							{showThemeToggle && (
-								<Separator
-									orientation="vertical"
-									className="h-6 hidden md:block"
-								/>
+								<Separator orientation="vertical" className="h-6 hidden md:block" />
 							)}
 							<HeaderUserMenu />
 						</>

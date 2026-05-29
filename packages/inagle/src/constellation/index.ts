@@ -5,10 +5,10 @@
  */
 
 export {
-  buildConstellationDatabase,
-  type Constellation,
-  type ConstellationAPI,
-  type ConstellationDatabase,
-  type ConstellationMapping,
-  createConstellationAPI,
+	buildConstellationDatabase,
+	type Constellation,
+	type ConstellationAPI,
+	type ConstellationDatabase,
+	type ConstellationMapping,
+	createConstellationAPI,
 } from "./api.js";

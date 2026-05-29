@@ -10,7 +10,9 @@ const APP_SCOPE = "azalee";
 export async function revalidateNews(slug?: string) {
 	revalidatePath("/news", "page");
 	revalidatePath("/news/feed.xml", "page");
-	if (slug) {revalidatePath(`/news/${slug}`, "page");}
+	if (slug) {
+		revalidatePath(`/news/${slug}`, "page");
+	}
 }
 
 /**
@@ -20,7 +22,7 @@ export async function revalidateNews(slug?: string) {
  */
 export async function saveArticle(
 	articleId: string | null,
-	data: Record<string, unknown>,
+	data: Record<string, unknown>
 ): Promise<{ id: string; error?: string }> {
 	let session;
 	try {
@@ -41,7 +43,9 @@ export async function saveArticle(
 			.eq("id", articleId)
 			.eq("app", APP_SCOPE);
 
-		if (error) {return { id: articleId, error: error.message };}
+		if (error) {
+			return { id: articleId, error: error.message };
+		}
 
 		revalidateNews(data.slug as string | undefined);
 		return { id: articleId };
@@ -55,7 +59,9 @@ export async function saveArticle(
 		.select("id")
 		.maybeSingle();
 
-	if (error) {return { id: "", error: error.message };}
+	if (error) {
+		return { id: "", error: error.message };
+	}
 
 	revalidateNews(data.slug as string | undefined);
 	return { id: inserted?.id || "" };
@@ -68,7 +74,7 @@ export async function saveArticle(
 export async function updateArticleStatus(
 	articleId: string,
 	newStatus: string,
-	currentStatus?: string,
+	currentStatus?: string
 ): Promise<{ error?: string }> {
 	try {
 		await requireEditorOrFail();
@@ -98,7 +104,9 @@ export async function updateArticleStatus(
 		.eq("id", articleId)
 		.eq("app", APP_SCOPE);
 
-	if (error) {return { error: error.message };}
+	if (error) {
+		return { error: error.message };
+	}
 	revalidateNews();
 	return {};
 }
@@ -106,9 +114,7 @@ export async function updateArticleStatus(
 /**
  * Supprime un article.
  */
-export async function deleteArticle(
-	articleId: string,
-): Promise<{ error?: string }> {
+export async function deleteArticle(articleId: string): Promise<{ error?: string }> {
 	try {
 		await requireEditorOrFail();
 	} catch (error) {
@@ -125,7 +131,9 @@ export async function deleteArticle(
 		.eq("id", articleId)
 		.eq("app", APP_SCOPE);
 
-	if (error) {return { error: error.message };}
+	if (error) {
+		return { error: error.message };
+	}
 	revalidateNews();
 	return {};
 }
@@ -135,7 +143,7 @@ export async function deleteArticle(
  */
 export async function toggleArticlePin(
 	articleId: string,
-	pinned: boolean,
+	pinned: boolean
 ): Promise<{ error?: string }> {
 	try {
 		await requireEditorOrFail();
@@ -153,7 +161,9 @@ export async function toggleArticlePin(
 		.eq("id", articleId)
 		.eq("app", APP_SCOPE);
 
-	if (error) {return { error: error.message };}
+	if (error) {
+		return { error: error.message };
+	}
 	revalidateNews();
 	return {};
 }
@@ -163,7 +173,7 @@ export async function toggleArticlePin(
  */
 export async function checkSlugAvailability(
 	slug: string,
-	excludeId?: string,
+	excludeId?: string
 ): Promise<{ available: boolean; suggestion?: string }> {
 	const supabase = await createClient();
 
@@ -218,25 +228,20 @@ export async function shareToDiscord(article: {
 		color: 0xf2a93b,
 		description: article.excerpt || undefined,
 		footer: { text: "Azalée — Rose Griffon" },
-		image: article.featured_image_url
-			? { url: article.featured_image_url }
-			: undefined,
+		image: article.featured_image_url ? { url: article.featured_image_url } : undefined,
 		timestamp: new Date().toISOString(),
 		title: article.title,
 		url: articleUrl,
 	};
 
-	const response = await fetch(
-		`https://discord.com/api/v10/channels/${channelId}/messages`,
-		{
-			body: JSON.stringify({ embeds: [embed] }),
-			headers: {
-				Authorization: `Bot ${botToken}`,
-				"Content-Type": "application/json",
-			},
-			method: "POST",
+	const response = await fetch(`https://discord.com/api/v10/channels/${channelId}/messages`, {
+		body: JSON.stringify({ embeds: [embed] }),
+		headers: {
+			Authorization: `Bot ${botToken}`,
+			"Content-Type": "application/json",
 		},
-	);
+		method: "POST",
+	});
 
 	if (!response.ok) {
 		const errorText = await response.text();
@@ -251,7 +256,7 @@ export async function shareToDiscord(article: {
  * Duplique un article comme nouveau brouillon (scopé app=azalee).
  */
 export async function duplicateArticle(
-	articleId: string,
+	articleId: string
 ): Promise<{ id: string } | { error: string }> {
 	try {
 		await requireEditorOrFail();
@@ -314,9 +319,7 @@ export async function duplicateArticle(
 /**
  * Récupère les tags populaires (scope public).
  */
-export async function getPopularTags(
-	limit = 30,
-): Promise<Array<{ tag: string; count: number }>> {
+export async function getPopularTags(limit = 30): Promise<Array<{ tag: string; count: number }>> {
 	const supabase = await createClient();
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -333,7 +336,9 @@ export async function getPopularTags(
 			.eq("app", APP_SCOPE)
 			.not("tags", "is", null);
 
-		if (!articles) {return [];}
+		if (!articles) {
+			return [];
+		}
 
 		const tagCounts = new Map<string, number>();
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -381,22 +386,20 @@ export async function getTrendingArticles(limit = 5): Promise<
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		const { data: articles } = await (supabase as any)
 			.from("articles")
-			.select(
-				"id, title, slug, excerpt, featured_image_url, category, view_count, published_at",
-			)
+			.select("id, title, slug, excerpt, featured_image_url, category, view_count, published_at")
 			.eq("status", "published")
 			.eq("app", APP_SCOPE)
 			.gte("published_at", new Date(Date.now() - 14 * 86_400_000).toISOString())
 			.order("view_count", { ascending: false })
 			.limit(limit);
 
-		if (!articles) {return [];}
+		if (!articles) {
+			return [];
+		}
 		const now = Date.now();
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		return (articles as any[]).map((a) => {
-			const publishedAt = a.published_at
-				? new Date(a.published_at).getTime()
-				: now;
+			const publishedAt = a.published_at ? new Date(a.published_at).getTime() : now;
 			const ageDays = Math.max(1, (now - publishedAt) / 86_400_000);
 			return {
 				...a,
@@ -440,7 +443,7 @@ export async function getRelatedArticles(
 	articleId: string,
 	category: string | null,
 	tags: string[] | null,
-	limit = 4,
+	limit = 4
 ): Promise<
 	Array<{
 		id: string;
@@ -460,9 +463,7 @@ export async function getRelatedArticles(
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		const { data } = await (supabase as any)
 			.from("articles")
-			.select(
-				"id, title, slug, excerpt, featured_image_url, published_at, category",
-			)
+			.select("id, title, slug, excerpt, featured_image_url, published_at, category")
 			.eq("status", "published")
 			.eq("app", APP_SCOPE)
 			.neq("id", articleId)
@@ -483,9 +484,7 @@ export async function getRelatedArticles(
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		const { data } = await (supabase as any)
 			.from("articles")
-			.select(
-				"id, title, slug, excerpt, featured_image_url, published_at, category",
-			)
+			.select("id, title, slug, excerpt, featured_image_url, published_at, category")
 			.eq("status", "published")
 			.eq("app", APP_SCOPE)
 			.eq("category", category)
@@ -510,9 +509,7 @@ export async function getRelatedArticles(
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		const { data } = await (supabase as any)
 			.from("articles")
-			.select(
-				"id, title, slug, excerpt, featured_image_url, published_at, category",
-			)
+			.select("id, title, slug, excerpt, featured_image_url, published_at, category")
 			.eq("status", "published")
 			.eq("app", APP_SCOPE)
 			.order("published_at", { ascending: false })
@@ -521,7 +518,9 @@ export async function getRelatedArticles(
 		if (data) {
 			// eslint-disable-next-line @typescript-eslint/no-explicit-any
 			for (const item of data as any[]) {
-				if (results.size >= limit) {break;}
+				if (results.size >= limit) {
+					break;
+				}
 				if (!excludeIds.has(item.id)) {
 					results.set(item.id, item);
 				}
@@ -538,10 +537,11 @@ export async function getRelatedArticles(
  */
 export async function bulkUpdateArticles(
 	ids: string[],
-	updates: { status?: string; category?: string; pinned?: boolean },
+	updates: { status?: string; category?: string; pinned?: boolean }
 ): Promise<{ success: boolean; count: number; error?: string }> {
-	if (ids.length === 0)
-		{return { success: false, count: 0, error: "Aucun article sélectionné" };}
+	if (ids.length === 0) {
+		return { success: false, count: 0, error: "Aucun article sélectionné" };
+	}
 
 	try {
 		await requireEditorOrFail();
@@ -569,10 +569,11 @@ export async function bulkUpdateArticles(
 }
 
 export async function bulkDeleteArticles(
-	ids: string[],
+	ids: string[]
 ): Promise<{ success: boolean; count: number; error?: string }> {
-	if (ids.length === 0)
-		{return { success: false, count: 0, error: "Aucun article sélectionné" };}
+	if (ids.length === 0) {
+		return { success: false, count: 0, error: "Aucun article sélectionné" };
+	}
 
 	try {
 		await requireEditorOrFail();
@@ -638,10 +639,7 @@ export async function getArticleStats(): Promise<{
 		{ data: topArticles },
 		{ data: recentArticles },
 	] = await Promise.all([
-		client
-			.from("articles")
-			.select("*", { count: "exact", head: true })
-			.eq("app", APP_SCOPE),
+		client.from("articles").select("*", { count: "exact", head: true }).eq("app", APP_SCOPE),
 		client
 			.from("articles")
 			.select("*", { count: "exact", head: true })
@@ -665,11 +663,7 @@ export async function getArticleStats(): Promise<{
 		// SUM via une lecture des seules colonnes utiles. PostgREST n'expose pas
 		// D'agrégat SUM natif via supabase-js sans vue dédiée — on streame uniquement
 		// View_count (4 octets/ligne) côté serveur.
-		client
-			.from("articles")
-			.select("view_count")
-			.eq("status", "published")
-			.eq("app", APP_SCOPE),
+		client.from("articles").select("view_count").eq("status", "published").eq("app", APP_SCOPE),
 		client
 			.from("articles")
 			.select("id, title, slug, view_count")
@@ -686,9 +680,10 @@ export async function getArticleStats(): Promise<{
 			.limit(10),
 	]);
 
-	const totalViews = (
-		(viewsAgg.data as Array<{ view_count: number | null }>) || []
-	).reduce((sum, a) => sum + (a.view_count || 0), 0);
+	const totalViews = ((viewsAgg.data as Array<{ view_count: number | null }>) || []).reduce(
+		(sum, a) => sum + (a.view_count || 0),
+		0
+	);
 
 	return {
 		recentArticles: recentArticles || [],
@@ -706,7 +701,7 @@ export async function getArticleStats(): Promise<{
  * Crée un snapshot de la version actuelle d'un article.
  */
 export async function createArticleVersion(
-	articleId: string,
+	articleId: string
 ): Promise<{ success: boolean; versionNumber?: number; error?: string }> {
 	try {
 		await requireEditorOrFail();
@@ -722,7 +717,7 @@ export async function createArticleVersion(
 	const { data: article, error: fetchErr } = await client
 		.from("articles")
 		.select(
-			"title, content, excerpt, category, tags, status, featured_image_url, meta_title, meta_description, author_id",
+			"title, content, excerpt, category, tags, status, featured_image_url, meta_title, meta_description, author_id"
 		)
 		.eq("id", articleId)
 		.eq("app", APP_SCOPE)
@@ -748,9 +743,7 @@ export async function createArticleVersion(
 		article_id: articleId,
 		category: article.category,
 		content:
-			typeof article.content === "object"
-				? JSON.stringify(article.content)
-				: article.content,
+			typeof article.content === "object" ? JSON.stringify(article.content) : article.content,
 		created_by: article.author_id,
 		excerpt: article.excerpt,
 		featured_image_url: article.featured_image_url,
@@ -826,7 +819,7 @@ export async function getArticleVersion(versionId: string): Promise<{
  */
 export async function restoreArticleVersion(
 	articleId: string,
-	versionId: string,
+	versionId: string
 ): Promise<{ success: boolean; error?: string }> {
 	try {
 		await requireEditorOrFail();
@@ -846,7 +839,7 @@ export async function restoreArticleVersion(
 	const { data: version, error: fetchErr } = await client
 		.from("article_versions")
 		.select(
-			"title, content, excerpt, category, tags, featured_image_url, meta_title, meta_description, article_id",
+			"title, content, excerpt, category, tags, featured_image_url, meta_title, meta_description, article_id"
 		)
 		.eq("id", versionId)
 		.eq("article_id", articleId)

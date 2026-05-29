@@ -25,23 +25,23 @@ import { DATA_ROOT } from "../core/paths.js";
 // ============================================================================
 
 export interface ParsedChatEmote extends ExportableEntity {
-  emoteId: string;
-  flagIdx: number;
-  sortId: number;
-  type: number;
-  textId: string;
-  stampIdx: number;
-  motionId: string;
-  motionLoop: boolean;
-  enableCond: string;
+	emoteId: string;
+	flagIdx: number;
+	sortId: number;
+	type: number;
+	textId: string;
+	stampIdx: number;
+	motionId: string;
+	motionLoop: boolean;
+	enableCond: string;
 }
 
 export interface ChatEmoteDatabase {
-  emotes: ParsedChatEmote[];
-  byId: Map<string, ParsedChatEmote>;
-  byType: Map<number, ParsedChatEmote[]>;
-  toMarkdown: (id: string) => string | null;
-  toReact: (id: string) => any | null;
+	emotes: ParsedChatEmote[];
+	byId: Map<string, ParsedChatEmote>;
+	byType: Map<number, ParsedChatEmote[]>;
+	toMarkdown: (id: string) => string | null;
+	toReact: (id: string) => any | null;
 }
 
 // ============================================================================
@@ -49,34 +49,34 @@ export interface ChatEmoteDatabase {
 // ============================================================================
 
 function parseContent(content: any): ParsedChatEmote[] {
-  const emotes: ParsedChatEmote[] = [];
-  if (!content?.lists) return emotes;
+	const emotes: ParsedChatEmote[] = [];
+	if (!content?.lists) return emotes;
 
-  for (const list of content.lists) {
-    if (list.name === "m_ChatEmoteInfoList") {
-      for (const val of list.values) {
-        emotes.push({
-          id: val.id,
-          name: val.id,
-          emoteId: val.id,
-          flagIdx: val.flag_idx ?? 0,
-          sortId: val.sort_id ?? 0,
-          type: val.type ?? 0,
-          textId: val.text_id || "0x00000000",
-          stampIdx: val.stamp_idx ?? 0,
-          motionId: val.motion_id || "0x00000000",
-          motionLoop: val.motion_loop ?? false,
-          enableCond: val.enable_cond || "",
-          attributes: {
-            Type: val.type,
-            SortId: val.sort_id,
-            StampIdx: val.stamp_idx,
-          },
-        });
-      }
-    }
-  }
-  return emotes;
+	for (const list of content.lists) {
+		if (list.name === "m_ChatEmoteInfoList") {
+			for (const val of list.values) {
+				emotes.push({
+					id: val.id,
+					name: val.id,
+					emoteId: val.id,
+					flagIdx: val.flag_idx ?? 0,
+					sortId: val.sort_id ?? 0,
+					type: val.type ?? 0,
+					textId: val.text_id || "0x00000000",
+					stampIdx: val.stamp_idx ?? 0,
+					motionId: val.motion_id || "0x00000000",
+					motionLoop: val.motion_loop ?? false,
+					enableCond: val.enable_cond || "",
+					attributes: {
+						Type: val.type,
+						SortId: val.sort_id,
+						StampIdx: val.stamp_idx,
+					},
+				});
+			}
+		}
+	}
+	return emotes;
 }
 
 // ============================================================================
@@ -84,41 +84,41 @@ function parseContent(content: any): ParsedChatEmote[] {
 // ============================================================================
 
 export async function loadChatEmoteConfigAsync(
-  dataPath: string = DATA_ROOT,
+	dataPath: string = DATA_ROOT
 ): Promise<ParsedChatEmote[] | null> {
-  const filename = findConfigFile("chat_emote", "chat_emote_config");
-  if (!filename) return null;
+	const filename = findConfigFile("chat_emote", "chat_emote_config");
+	if (!filename) return null;
 
-  const path = join(dataPath, "common/gamedata/chat_emote", filename);
-  const content = await loadJsonAsync<any>(path);
-  return content ? parseContent(content) : null;
+	const path = join(dataPath, "common/gamedata/chat_emote", filename);
+	const content = await loadJsonAsync<any>(path);
+	return content ? parseContent(content) : null;
 }
 
 export async function buildChatEmoteDatabase(
-  dataPath: string = DATA_ROOT,
+	dataPath: string = DATA_ROOT
 ): Promise<ChatEmoteDatabase> {
-  const emotes = (await loadChatEmoteConfigAsync(dataPath)) || [];
-  const byId = new Map<string, ParsedChatEmote>();
-  const byType = new Map<number, ParsedChatEmote[]>();
+	const emotes = (await loadChatEmoteConfigAsync(dataPath)) || [];
+	const byId = new Map<string, ParsedChatEmote>();
+	const byType = new Map<number, ParsedChatEmote[]>();
 
-  for (const e of emotes) {
-    byId.set(e.emoteId, e);
-    const t = byType.get(e.type) || [];
-    t.push(e);
-    byType.set(e.type, t);
-  }
+	for (const e of emotes) {
+		byId.set(e.emoteId, e);
+		const t = byType.get(e.type) || [];
+		t.push(e);
+		byType.set(e.type, t);
+	}
 
-  return {
-    emotes,
-    byId,
-    byType,
-    toMarkdown: (id: string) => {
-      const e = byId.get(id);
-      return e ? EntityExporters.toMarkdown(e, "Emote") : null;
-    },
-    toReact: (id: string) => {
-      const e = byId.get(id);
-      return e ? EntityExporters.toReact(e) : null;
-    },
-  };
+	return {
+		emotes,
+		byId,
+		byType,
+		toMarkdown: (id: string) => {
+			const e = byId.get(id);
+			return e ? EntityExporters.toMarkdown(e, "Emote") : null;
+		},
+		toReact: (id: string) => {
+			const e = byId.get(id);
+			return e ? EntityExporters.toReact(e) : null;
+		},
+	};
 }

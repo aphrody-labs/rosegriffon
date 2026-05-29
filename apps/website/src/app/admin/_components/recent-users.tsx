@@ -1,9 +1,16 @@
-import { Card, CardContent, CardHeader, CardTitle, Avatar, AvatarFallback, AvatarImage } from "@rose-griffon/ui";
+import {
+	Card,
+	CardContent,
+	CardHeader,
+	CardTitle,
+	Avatar,
+	AvatarFallback,
+	AvatarImage,
+} from "@rose-griffon/ui";
 import { formatDistanceToNow } from "date-fns";
 import { fr } from "date-fns/locale";
 import { ArrowRight } from "lucide-react";
 import Link from "next/link";
-
 
 interface RecentUser {
 	id: string;
@@ -33,10 +40,7 @@ export function RecentUsers({ users }: { users: RecentUser[] }) {
 				) : (
 					<ul className="divide-y divide-border">
 						{users.map((u) => (
-							<li
-								key={u.id}
-								className="flex items-center gap-3 py-3 first:pt-0 last:pb-0"
-							>
+							<li key={u.id} className="flex items-center gap-3 py-3 first:pt-0 last:pb-0">
 								<Avatar className="size-9">
 									<AvatarImage src={u.avatar_url ?? ""} alt="" />
 									<AvatarFallback className="text-xs">

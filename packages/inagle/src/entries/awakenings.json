@@ -1,83 +1,83 @@
 [
-  {
-    "auraId": "0xEB013582",
-    "auraIdStr": "awakening_0xEB013582",
-    "element": 0,
-    "name_FR": "Changement d'éveil",
-    "name_EN": "Awakening Change",
-    "name_JA": "覚醒変化",
-    "desc_FR": "Description de Awakening Transformation.",
-    "desc_JA": "覚醒変化説明テキスト",
-    "assetCode": "awakening_change",
-    "subType": "Awakening",
-    "config": {
-      "val9": 8,
-      "val11": 1,
-      "buffId": "0x93B3F7AB",
-      "rank": 5000
-    },
-    "_source": "AURA_CMD_INFO",
-    "_file": "aura_skill_config",
-    "displayName": "Changement d'éveil",
-    "elementName": {
-      "en": "None",
-      "ja": "なし",
-      "fr": "Aucun"
-    }
-  },
-  {
-    "auraId": "0x52B2CACA",
-    "auraIdStr": "awakening_0x52B2CACA",
-    "element": 0,
-    "name_FR": "Éveil",
-    "name_EN": "Awakening",
-    "name_JA": "覚醒パワー",
-    "desc_FR": "Description de Awakening Power.",
-    "desc_JA": "覚醒パワー説明テキスト",
-    "assetCode": "test_awakening_power",
-    "subType": "Awakening",
-    "config": {
-      "val4": 30,
-      "val5": 60,
-      "val9": 8,
-      "val11": 1,
-      "buffId": "0x93B3F7AB",
-      "rank": 3800
-    },
-    "_source": "AURA_CMD_INFO",
-    "_file": "aura_skill_config",
-    "displayName": "Éveil",
-    "elementName": {
-      "en": "None",
-      "ja": "なし",
-      "fr": "Aucun"
-    }
-  },
-  {
-    "auraId": "0x8D1A57CD",
-    "auraIdStr": "awakening_0x8D1A57CD",
-    "element": 0,
-    "name_FR": "Éveil",
-    "name_EN": "Awakening",
-    "name_JA": "覚醒パワー",
-    "desc_FR": "Description de Awakening Power.",
-    "desc_JA": "覚醒パワー説明テキスト",
-    "assetCode": "awakening_power_st0301",
-    "subType": "Awakening",
-    "config": {
-      "val5": 60,
-      "val9": 8,
-      "val11": 1,
-      "buffId": "0x93B3F7AB",
-      "rank": 3006
-    },
-    "_source": "AURA_CMD_INFO",
-    "_file": "aura_skill_config",
-    "displayName": "Éveil",
-    "elementName": {
-      "en": "None",
-      "ja": "なし",
-      "fr": "Aucun"
-    }
-  }
+	{
+		"auraId": "0xEB013582",
+		"auraIdStr": "awakening_0xEB013582",
+		"element": 0,
+		"name_FR": "Changement d'éveil",
+		"name_EN": "Awakening Change",
+		"name_JA": "覚醒変化",
+		"desc_FR": "Description de Awakening Transformation.",
+		"desc_JA": "覚醒変化説明テキスト",
+		"assetCode": "awakening_change",
+		"subType": "Awakening",
+		"config": {
+			"val9": 8,
+			"val11": 1,
+			"buffId": "0x93B3F7AB",
+			"rank": 5000
+		},
+		"_source": "AURA_CMD_INFO",
+		"_file": "aura_skill_config",
+		"displayName": "Changement d'éveil",
+		"elementName": {
+			"en": "None",
+			"ja": "なし",
+			"fr": "Aucun"
+		}
+	},
+	{
+		"auraId": "0x52B2CACA",
+		"auraIdStr": "awakening_0x52B2CACA",
+		"element": 0,
+		"name_FR": "Éveil",
+		"name_EN": "Awakening",
+		"name_JA": "覚醒パワー",
+		"desc_FR": "Description de Awakening Power.",
+		"desc_JA": "覚醒パワー説明テキスト",
+		"assetCode": "test_awakening_power",
+		"subType": "Awakening",
+		"config": {
+			"val4": 30,
+			"val5": 60,
+			"val9": 8,
+			"val11": 1,
+			"buffId": "0x93B3F7AB",
+			"rank": 3800
+		},
+		"_source": "AURA_CMD_INFO",
+		"_file": "aura_skill_config",
+		"displayName": "Éveil",
+		"elementName": {
+			"en": "None",
+			"ja": "なし",
+			"fr": "Aucun"
+		}
+	},
+	{
+		"auraId": "0x8D1A57CD",
+		"auraIdStr": "awakening_0x8D1A57CD",
+		"element": 0,
+		"name_FR": "Éveil",
+		"name_EN": "Awakening",
+		"name_JA": "覚醒パワー",
+		"desc_FR": "Description de Awakening Power.",
+		"desc_JA": "覚醒パワー説明テキスト",
+		"assetCode": "awakening_power_st0301",
+		"subType": "Awakening",
+		"config": {
+			"val5": 60,
+			"val9": 8,
+			"val11": 1,
+			"buffId": "0x93B3F7AB",
+			"rank": 3006
+		},
+		"_source": "AURA_CMD_INFO",
+		"_file": "aura_skill_config",
+		"displayName": "Éveil",
+		"elementName": {
+			"en": "None",
+			"ja": "なし",
+			"fr": "Aucun"
+		}
+	}
 ]

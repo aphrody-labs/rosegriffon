@@ -20,9 +20,7 @@ interface ReconcileSummary {
 }
 
 export function PatreonAdminActions() {
-	const [busy, setBusy] = useState<null | "export" | "reconcile" | "churn">(
-		null,
-	);
+	const [busy, setBusy] = useState<null | "export" | "reconcile" | "churn">(null);
 
 	const runExport = async () => {
 		setBusy("export");
@@ -38,12 +36,10 @@ export function PatreonAdminActions() {
 				return;
 			}
 			toast.success(
-				`Export OK : ${json.summary?.exported} membres, ${json.summary?.tiersExported} tiers (${json.summary?.durationMs}ms)`,
+				`Export OK : ${json.summary?.exported} membres, ${json.summary?.tiersExported} tiers (${json.summary?.durationMs}ms)`
 			);
 		} catch (error) {
-			toast.error(
-				`Erreur réseau : ${error instanceof Error ? error.message : String(error)}`,
-			);
+			toast.error(`Erreur réseau : ${error instanceof Error ? error.message : String(error)}`);
 		} finally {
 			setBusy(null);
 			window.location.reload();
@@ -66,12 +62,10 @@ export function PatreonAdminActions() {
 				return;
 			}
 			toast.success(
-				`Reconcile OK : ${json.summary?.byEmail} via email, ${json.summary?.byDiscord} via Discord, ${json.summary?.stillPending} restants`,
+				`Reconcile OK : ${json.summary?.byEmail} via email, ${json.summary?.byDiscord} via Discord, ${json.summary?.stillPending} restants`
 			);
 		} catch (error) {
-			toast.error(
-				`Erreur réseau : ${error instanceof Error ? error.message : String(error)}`,
-			);
+			toast.error(`Erreur réseau : ${error instanceof Error ? error.message : String(error)}`);
 		} finally {
 			setBusy(null);
 			window.location.reload();
@@ -79,12 +73,9 @@ export function PatreonAdminActions() {
 	};
 
 	const markChurnDefinitive = async () => {
-		if (
-			!confirm(
-				"Marquer churn définitif tous les non-réactivés depuis 90 jours ?",
-			)
-		)
-			{return;}
+		if (!confirm("Marquer churn définitif tous les non-réactivés depuis 90 jours ?")) {
+			return;
+		}
 		setBusy("churn");
 		try {
 			const res = await fetch("/api/admin/patreon/cleanup", {
@@ -103,9 +94,7 @@ export function PatreonAdminActions() {
 			}
 			toast.success(`${json.count ?? 0} membres marqués churn`);
 		} catch (error) {
-			toast.error(
-				`Erreur réseau : ${error instanceof Error ? error.message : String(error)}`,
-			);
+			toast.error(`Erreur réseau : ${error instanceof Error ? error.message : String(error)}`);
 		} finally {
 			setBusy(null);
 			window.location.reload();
@@ -116,12 +105,7 @@ export function PatreonAdminActions() {
 		<section className="rounded-2xl border border-border bg-card p-6">
 			<h2 className="mb-4 font-semibold text-foreground">Outils de migration</h2>
 			<div className="flex flex-wrap gap-3">
-				<Button
-					onClick={runExport}
-					disabled={busy !== null}
-					variant="outline"
-					className="gap-2"
-				>
+				<Button onClick={runExport} disabled={busy !== null} variant="outline" className="gap-2">
 					{busy === "export" ? (
 						<Loader2 className="size-4 animate-spin" />
 					) : (
@@ -129,12 +113,7 @@ export function PatreonAdminActions() {
 					)}
 					Lancer export complet
 				</Button>
-				<Button
-					onClick={runReconcile}
-					disabled={busy !== null}
-					variant="outline"
-					className="gap-2"
-				>
+				<Button onClick={runReconcile} disabled={busy !== null} variant="outline" className="gap-2">
 					{busy === "reconcile" ? (
 						<Loader2 className="size-4 animate-spin" />
 					) : (
@@ -157,8 +136,8 @@ export function PatreonAdminActions() {
 				</Button>
 			</div>
 			<p className="mt-3 text-xs text-muted-foreground/70">
-				Export : récupère tous les membres et tiers depuis l'API Patreon (max ~5
-				min). Reconcile : tente le match email puis Discord ID sur les pending.
+				Export : récupère tous les membres et tiers depuis l'API Patreon (max ~5 min). Reconcile :
+				tente le match email puis Discord ID sur les pending.
 			</p>
 		</section>
 	);

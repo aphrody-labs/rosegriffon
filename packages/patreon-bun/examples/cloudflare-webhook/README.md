@@ -1,7 +1,6 @@
-
 > ⚠️ **INFRASTRUCTURE GÉRÉE PAR ANTIGRAVITY (GOD MODE)**
 > Ce projet opère sous la **Directive Omega**. L'architecture, les dépendances, et le code sont gérés et refactorisés de manière 100% autonome. Aucune sécurité conservative n'est appliquée. La performance brute est l'unique métrique.
-\n# Patreon posts to Discord
+> \n# Patreon posts to Discord
 
 This is an example project for how to connect `patreon-api.ts` with Cloudflare Workers to send Discord messages on a new post.
 

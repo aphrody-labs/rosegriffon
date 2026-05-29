@@ -1,10 +1,27 @@
 "use client";
 
-import { Button, Card, CardContent, Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@rose-griffon/ui";
+import {
+	Button,
+	Card,
+	CardContent,
+	Dialog,
+	DialogContent,
+	DialogDescription,
+	DialogFooter,
+	DialogHeader,
+	DialogTitle,
+	AlertDialog,
+	AlertDialogAction,
+	AlertDialogCancel,
+	AlertDialogContent,
+	AlertDialogDescription,
+	AlertDialogFooter,
+	AlertDialogHeader,
+	AlertDialogTitle,
+} from "@rose-griffon/ui";
 import { Heart, Link2, Loader2, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-
 
 import { authClient } from "@/lib/auth-client";
 
@@ -21,10 +38,16 @@ export function PatreonConnectionCard({ isLinked, hasDiscord }: Props) {
 	const [promoOpen, setPromoOpen] = useState(false);
 
 	useEffect(() => {
-		if (isLinked || !hasDiscord) {return;}
-		if (typeof window === "undefined") {return;}
+		if (isLinked || !hasDiscord) {
+			return;
+		}
+		if (typeof window === "undefined") {
+			return;
+		}
 		const dismissed = window.localStorage.getItem(PROMO_DISMISSED_KEY);
-		if (dismissed === "1") {return;}
+		if (dismissed === "1") {
+			return;
+		}
 		const t = setTimeout(() => setPromoOpen(true), 800);
 		return () => clearTimeout(t);
 	}, [isLinked, hasDiscord]);
@@ -61,7 +84,9 @@ export function PatreonConnectionCard({ isLinked, hasDiscord }: Props) {
 			const res = await fetch("/api/auth/patreon/disconnect", {
 				method: "POST",
 			});
-			if (!res.ok) {throw new Error(`HTTP ${res.status}`);}
+			if (!res.ok) {
+				throw new Error(`HTTP ${res.status}`);
+			}
 			toast.success("Compte Patreon déconnecté");
 			window.location.reload();
 		} catch (error) {
@@ -95,9 +120,9 @@ export function PatreonConnectionCard({ isLinked, hasDiscord }: Props) {
 							<p className="mt-1 text-sm text-muted-foreground">
 								{isLinked
 									? "Synchronisation automatique de votre tier Patreon."
-									: (hasDiscord
+									: hasDiscord
 										? "Liez votre Patreon pour récupérer votre tier et votre rôle Discord."
-										: "Liez votre Patreon pour synchroniser votre tier.")}
+										: "Liez votre Patreon pour synchroniser votre tier."}
 							</p>
 						</div>
 					</div>
@@ -134,8 +159,8 @@ export function PatreonConnectionCard({ isLinked, hasDiscord }: Props) {
 					<AlertDialogHeader>
 						<AlertDialogTitle>Déconnecter Patreon ?</AlertDialogTitle>
 						<AlertDialogDescription>
-							Votre tier ne sera plus synchronisé automatiquement. Vous pourrez
-							relier le compte à tout moment.
+							Votre tier ne sera plus synchronisé automatiquement. Vous pourrez relier le compte à
+							tout moment.
 						</AlertDialogDescription>
 					</AlertDialogHeader>
 					<AlertDialogFooter>
@@ -163,9 +188,8 @@ export function PatreonConnectionCard({ isLinked, hasDiscord }: Props) {
 						</div>
 						<DialogTitle>Liez votre Patreon</DialogTitle>
 						<DialogDescription>
-							Votre compte Discord est déjà connecté. Reliez votre Patreon en
-							deux clics : votre tier sera synchronisé automatiquement et votre
-							rôle Discord conservé.
+							Votre compte Discord est déjà connecté. Reliez votre Patreon en deux clics : votre
+							tier sera synchronisé automatiquement et votre rôle Discord conservé.
 						</DialogDescription>
 					</DialogHeader>
 					<DialogFooter className="gap-2 sm:gap-2">

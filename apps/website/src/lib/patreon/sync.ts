@@ -28,7 +28,7 @@ interface TokenRow {
 async function ensureFreshAccessToken(
 	supabase: AdminClient,
 	row: TokenRow,
-	marginMs = 5 * 60 * 1000,
+	marginMs = 5 * 60 * 1000
 ): Promise<string> {
 	const expiresAt = new Date(row.expires_at).getTime();
 	if (expiresAt - Date.now() > marginMs) {
@@ -37,9 +37,7 @@ async function ensureFreshAccessToken(
 
 	const refresh = decryptToken(row.refresh_token_enc);
 	const refreshed = await refreshAccessToken(refresh);
-	const newExpiresAt = new Date(
-		Date.now() + refreshed.expires_in * 1000,
-	).toISOString();
+	const newExpiresAt = new Date(Date.now() + refreshed.expires_in * 1000).toISOString();
 
 	await supabase
 		.from("patreon_oauth_tokens")
@@ -64,22 +62,24 @@ async function ensureFreshAccessToken(
  *  - admin /api/admin/patreon/refresh-all
  */
 export async function refreshPatreonMembership(
-	userId: string,
+	userId: string
 ): Promise<{ ok: boolean; reason?: string; identity?: ParsedIdentity }> {
 	const supabase = createAdminClient();
-	if (!supabase) {return { ok: false, reason: "no_admin_client" };}
+	if (!supabase) {
+		return { ok: false, reason: "no_admin_client" };
+	}
 
 	const { data: tokenRow } = await supabase
 		.from("patreon_oauth_tokens")
-		.select(
-			"id, user_id, patreon_user_id, access_token_enc, refresh_token_enc, expires_at, scope",
-		)
+		.select("id, user_id, patreon_user_id, access_token_enc, refresh_token_enc, expires_at, scope")
 		.eq("user_id", userId)
 		.eq("is_creator", false)
 		.maybeSingle();
 
 	const row = tokenRow as TokenRow | null;
-	if (!row) {return { ok: false, reason: "no_token" };}
+	if (!row) {
+		return { ok: false, reason: "no_token" };
+	}
 
 	const accessToken = await ensureFreshAccessToken(supabase, row);
 	const resp = await fetchIdentity(accessToken, { withMemberships: true });
@@ -87,8 +87,7 @@ export async function refreshPatreonMembership(
 
 	const top =
 		[...identity.memberships].toSorted((a, b) => {
-			const score = (s: string | null | undefined) =>
-				s === "active_patron" ? 0 : 1;
+			const score = (s: string | null | undefined) => (s === "active_patron" ? 0 : 1);
 			return score(a.attrs.patron_status) - score(b.attrs.patron_status);
 		})[0] ?? null;
 
@@ -96,8 +95,7 @@ export async function refreshPatreonMembership(
 		{
 			address: top?.address ?? null,
 			campaign_id: top?.campaignId ?? null,
-			currently_entitled_cents:
-				top?.attrs.currently_entitled_amount_cents ?? null,
+			currently_entitled_cents: top?.attrs.currently_entitled_amount_cents ?? null,
 			discord_role_ids: top?.discordRoleIds ?? [],
 			discord_user_id: identity.discordUserId,
 			fetched_at: new Date().toISOString(),
@@ -106,9 +104,7 @@ export async function refreshPatreonMembership(
 			last_charge_date: top?.attrs.last_charge_date ?? null,
 			last_charge_status: top?.attrs.last_charge_status ?? null,
 			lifetime_support_cents:
-				top?.attrs.campaign_lifetime_support_cents ??
-				top?.attrs.lifetime_support_cents ??
-				null,
+				top?.attrs.campaign_lifetime_support_cents ?? top?.attrs.lifetime_support_cents ?? null,
 			member_email: top?.attrs.email ?? null,
 			next_charge_date: top?.attrs.next_charge_date ?? null,
 			note: top?.attrs.note ?? null,
@@ -130,7 +126,7 @@ export async function refreshPatreonMembership(
 			user_id: userId,
 			will_pay_amount_cents: top?.attrs.will_pay_amount_cents ?? null,
 		},
-		{ onConflict: "user_id,patreon_user_id" },
+		{ onConflict: "user_id,patreon_user_id" }
 	);
 
 	return { identity, ok: true };
@@ -146,11 +142,11 @@ export async function refreshAllMemberships(opts: {
 	limit?: number;
 }): Promise<{ refreshed: number; failed: number }> {
 	const supabase = createAdminClient();
-	if (!supabase) {return { refreshed: 0, failed: 0 };}
+	if (!supabase) {
+		return { refreshed: 0, failed: 0 };
+	}
 
-	const olderThan = new Date(
-		Date.now() - (opts.olderThanMs ?? 6 * 24 * 3600 * 1000),
-	).toISOString();
+	const olderThan = new Date(Date.now() - (opts.olderThanMs ?? 6 * 24 * 3600 * 1000)).toISOString();
 	const limit = opts.limit ?? 200;
 
 	const { data } = await supabase
@@ -164,8 +160,11 @@ export async function refreshAllMemberships(opts: {
 	for (const row of (data ?? []) as { user_id: string }[]) {
 		try {
 			const r = await refreshPatreonMembership(row.user_id);
-			if (r.ok) {refreshed += 1;}
-			else {failed += 1;}
+			if (r.ok) {
+				refreshed += 1;
+			} else {
+				failed += 1;
+			}
 		} catch (error) {
 			console.error("[patreon/sync] refresh user failed", row.user_id, error);
 			failed += 1;

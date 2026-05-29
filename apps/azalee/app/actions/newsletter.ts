@@ -13,7 +13,7 @@ type NewsletterFrequency = (typeof VALID_FREQUENCIES)[number];
 
 function normalizeFrequency(
 	value: string | undefined,
-	fallback: NewsletterFrequency = "weekly",
+	fallback: NewsletterFrequency = "weekly"
 ): NewsletterFrequency {
 	return VALID_FREQUENCIES.includes(value as NewsletterFrequency)
 		? (value as NewsletterFrequency)
@@ -23,7 +23,7 @@ function normalizeFrequency(
 export async function subscribeNewsletter(
 	email: string,
 	categories?: string[],
-	frequency?: NewsletterFrequency,
+	frequency?: NewsletterFrequency
 ): Promise<{ success: boolean; error?: string }> {
 	const session = await getServerSession();
 	const supabase = await createClient();
@@ -84,7 +84,7 @@ export async function subscribeNewsletter(
 }
 
 export async function unsubscribeNewsletter(
-	token: string,
+	token: string
 ): Promise<{ success: boolean; error?: string }> {
 	const supabase = await createClient();
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -121,7 +121,7 @@ export async function unsubscribeNewsletter(
 
 export async function updateNewsletterPreferences(
 	categories: string[],
-	frequency: string,
+	frequency: string
 ): Promise<{ success: boolean; error?: string }> {
 	const session = await getServerSession();
 	if (!session?.user) {
@@ -176,7 +176,9 @@ export async function getNewsletterStatus(): Promise<{
 	created_at: string;
 } | null> {
 	const session = await getServerSession();
-	if (!session?.user) {return null;}
+	if (!session?.user) {
+		return null;
+	}
 
 	const supabase = await createClient();
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any

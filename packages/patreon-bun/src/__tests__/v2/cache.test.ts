@@ -1,365 +1,403 @@
-import EventEmitter from 'node:events'
+import EventEmitter from "node:events";
 
-import { describe, expect, test } from 'bun:test'
+import { describe, expect, test } from "bun:test";
 
 import {
-    CacheItem,
-    CacheStore,
-    CacheStoreEventMap,
-    CacheStoreShared,
-    CacheTokenStore,
-    RequestMethod,
-    Type,
-} from '../../v2'
+	CacheItem,
+	CacheStore,
+	CacheStoreEventMap,
+	CacheStoreShared,
+	CacheTokenStore,
+	RequestMethod,
+	Type,
+} from "../../v2";
 
-import { DefaultBinding } from '../../schemas/v2/cache/bindings/memory'
-import { RelationshipsUtils } from '../../schemas/v2/cache/base'
+import { DefaultBinding } from "../../schemas/v2/cache/bindings/memory";
+import { RelationshipsUtils } from "../../schemas/v2/cache/base";
 
-describe('relationships util', () => {
-    const original = {
-        benefits: { data: null },
-        tiers: { data: [{ id: 'tier_id', type: <const>Type.Tier }] },
-        creator: { data: { id: 'creator_id', type: <const>Type.User }, links: { related: '' } },
-    }
+describe("relationships util", () => {
+	const original = {
+		benefits: { data: null },
+		tiers: { data: [{ id: "tier_id", type: <const>Type.Tier }] },
+		creator: { data: { id: "creator_id", type: <const>Type.User }, links: { related: "" } },
+	};
 
-    const stringified = {
-        benefits: null,
-        tiers: ['tier_id'],
-        creator: 'creator_id',
-    }
+	const stringified = {
+		benefits: null,
+		tiers: ["tier_id"],
+		creator: "creator_id",
+	};
 
-    test('stringify', () => {
-        expect(RelationshipsUtils.stringify<'campaign', 'benefits' | 'creator' | 'tiers'>(original)).toEqual(stringified)
-    })
+	test("stringify", () => {
+		expect(
+			RelationshipsUtils.stringify<"campaign", "benefits" | "creator" | "tiers">(original)
+		).toEqual(stringified);
+	});
 
-    test('parse', () => {
-        expect(RelationshipsUtils.parse('campaign', stringified).relationships).toEqual(original)
-    })
-})
+	test("parse", () => {
+		expect(RelationshipsUtils.parse("campaign", stringified).relationships).toEqual(original);
+	});
+});
 
-describe('shared cache', () => {
-    const syncCache = new CacheStoreShared<false, string>(false, undefined, {})
+describe("shared cache", () => {
+	const syncCache = new CacheStoreShared<false, string>(false, undefined, {});
 
-    test('options', () => {
-        expect(syncCache.options.patchUnknownItem).toEqual(false)
-    })
+	test("options", () => {
+		expect(syncCache.options.patchUnknownItem).toEqual(false);
+	});
 
-    test('cache factory', () => {
-        class CustomCache<IsAsync extends boolean> extends CacheStoreShared<IsAsync, { value: string }> {}
+	test("cache factory", () => {
+		class CustomCache<IsAsync extends boolean> extends CacheStoreShared<
+			IsAsync,
+			{ value: string }
+		> {}
 
-        const sync = CacheStoreShared.createSync(CustomCache<false>)
-        const async = CacheStoreShared.createAsync(CustomCache<true>)
-    
-        expect(sync).toBeInstanceOf(CustomCache)
-        expect(async).toBeInstanceOf(CustomCache)
-    })
+		const sync = CacheStoreShared.createSync(CustomCache<false>);
+		const async = CacheStoreShared.createAsync(CustomCache<true>);
 
-    test('item read', () => {
-        const id = '_id', value = 'cached value'
+		expect(sync).toBeInstanceOf(CustomCache);
+		expect(async).toBeInstanceOf(CustomCache);
+	});
 
-        syncCache.put(id, value)
-        expect(syncCache.get(id)).toEqual(value)
-        expect(syncCache.get('unknown_value')).toBeUndefined()
-    })
+	test("item read", () => {
+		const id = "_id",
+			value = "cached value";
 
-    test('item edit', () => {
-        const id = '_id'
+		syncCache.put(id, value);
+		expect(syncCache.get(id)).toEqual(value);
+		expect(syncCache.get("unknown_value")).toBeUndefined();
+	});
 
-        expect(syncCache.edit(id, 'new value')).toEqual('new value')
-        expect(syncCache.get(id)).toEqual('new value')
-    })
+	test("item edit", () => {
+		const id = "_id";
 
-    test('item delete', () => {
-        const id = '_id'
+		expect(syncCache.edit(id, "new value")).toEqual("new value");
+		expect(syncCache.get(id)).toEqual("new value");
+	});
 
-        syncCache.put(id, 'new value')
-        syncCache.delete(id)
-        expect(syncCache.get(id)).toBeUndefined()
-    })
+	test("item delete", () => {
+		const id = "_id";
 
-    test('bulk operations', () => {
-        const pairs = Array.from({ length: 10 }, (_, i) => ({
-            key: i.toString(),
-            value: i.toString(),
-        }))
+		syncCache.put(id, "new value");
+		syncCache.delete(id);
+		expect(syncCache.get(id)).toBeUndefined();
+	});
 
-        const keys = pairs.map(p => ({ key: p.key }))
+	test("bulk operations", () => {
+		const pairs = Array.from({ length: 10 }, (_, i) => ({
+			key: i.toString(),
+			value: i.toString(),
+		}));
 
-        syncCache.bulkPut(pairs)
+		const keys = pairs.map((p) => ({ key: p.key }));
 
-        syncCache.bulkPut([])
-        expect(syncCache.bulkDelete([])).toBeUndefined()
-        expect(syncCache.bulkGet([])).toEqual([])
+		syncCache.bulkPut(pairs);
 
-        expect(syncCache.bulkGet(keys)).toEqual(pairs)
-        syncCache.bulkDelete(keys)
-        expect(syncCache.bulkGet(keys)).toEqual(keys.map(() => undefined))
-    })
+		syncCache.bulkPut([]);
+		expect(syncCache.bulkDelete([])).toBeUndefined();
+		expect(syncCache.bulkGet([])).toEqual([]);
 
-    test('bulk operations: no binding methods', () => {
-        const syncCache = new CacheStoreShared<false, string>(false, new DefaultBinding<false, string>(), {})
+		expect(syncCache.bulkGet(keys)).toEqual(pairs);
+		syncCache.bulkDelete(keys);
+		expect(syncCache.bulkGet(keys)).toEqual(keys.map(() => undefined));
+	});
 
-        const pairs = Array.from({ length: 10 }, (_, i) => ({
-            key: i.toString(),
-            value: i.toString(),
-        }))
+	test("bulk operations: no binding methods", () => {
+		const syncCache = new CacheStoreShared<false, string>(
+			false,
+			new DefaultBinding<false, string>(),
+			{}
+		);
 
-        const keys = pairs.map(p => ({ key: p.key }))
+		const pairs = Array.from({ length: 10 }, (_, i) => ({
+			key: i.toString(),
+			value: i.toString(),
+		}));
 
-        syncCache.bulkPut(pairs)
+		const keys = pairs.map((p) => ({ key: p.key }));
 
-        syncCache.bulkPut([])
-        expect(syncCache.bulkDelete([])).toBeUndefined()
-        expect(syncCache.bulkGet([])).toEqual([])
+		syncCache.bulkPut(pairs);
 
-        expect(syncCache.bulkGet(keys)).toEqual(pairs)
-        syncCache.bulkDelete(keys)
-        expect(syncCache.bulkGet(keys)).toEqual(keys.map(() => undefined))
-    })
+		syncCache.bulkPut([]);
+		expect(syncCache.bulkDelete([])).toBeUndefined();
+		expect(syncCache.bulkGet([])).toEqual([]);
 
-    test('bulk operations: delete all', () => {
-        const binding = new CacheStoreShared<false, string>(false)
-        const limitedBinding = new CacheStoreShared<false, string>(false, new DefaultBinding<false, string>(), {})
+		expect(syncCache.bulkGet(keys)).toEqual(pairs);
+		syncCache.bulkDelete(keys);
+		expect(syncCache.bulkGet(keys)).toEqual(keys.map(() => undefined));
+	});
 
-        const pairs = Array.from({ length: 10 }, (_, i) => ({
-            key: i.toString(),
-            value: i.toString(),
-        }))
+	test("bulk operations: delete all", () => {
+		const binding = new CacheStoreShared<false, string>(false);
+		const limitedBinding = new CacheStoreShared<false, string>(
+			false,
+			new DefaultBinding<false, string>(),
+			{}
+		);
 
-        const keys = pairs.map(p => ({ key: p.key }))
+		const pairs = Array.from({ length: 10 }, (_, i) => ({
+			key: i.toString(),
+			value: i.toString(),
+		}));
 
-        binding.bulkPut(pairs)
-        limitedBinding.bulkPut(pairs)
+		const keys = pairs.map((p) => ({ key: p.key }));
 
-        binding.deleteAll()
-        limitedBinding.deleteAll()
+		binding.bulkPut(pairs);
+		limitedBinding.bulkPut(pairs);
 
-        expect(limitedBinding.bulkGet(keys)).toEqual(pairs)
-        expect(binding.bulkGet(keys)).toEqual(keys.map(() => undefined))
-    })
-})
+		binding.deleteAll();
+		limitedBinding.deleteAll();
 
-describe('token cache', () => {
-    test('read a token', () => {
-        const cache = new CacheTokenStore(true)
+		expect(limitedBinding.bulkGet(keys)).toEqual(pairs);
+		expect(binding.bulkGet(keys)).toEqual(keys.map(() => undefined));
+	});
+});
 
-        expect(cache.get('creator_token')).toBeUndefined()
-    })
-})
+describe("token cache", () => {
+	test("read a token", () => {
+		const cache = new CacheTokenStore(true);
 
-describe('item cache', () => {
-    test('with initial items', async () => {
-        let isReady = false
+		expect(cache.get("creator_token")).toBeUndefined();
+	});
+});
 
-        const events = new EventEmitter<CacheStoreEventMap>()
-        events.on('ready', () => { isReady = true })
+describe("item cache", () => {
+	test("with initial items", async () => {
+		let isReady = false;
 
-        const store = new CacheStore(true, undefined, {
-            events,
-            initial: [{
-                id: 'id',
-                type: 'campaign',
-                relationships: {},
-                item: {
-                    is_monthly: true,
-                },
-            }]
-        })
+		const events = new EventEmitter<CacheStoreEventMap>();
+		events.on("ready", () => {
+			isReady = true;
+		});
 
-        while (!isReady) {
-            await Bun.sleep(10)
-        }
+		const store = new CacheStore(true, undefined, {
+			events,
+			initial: [
+				{
+					id: "id",
+					type: "campaign",
+					relationships: {},
+					item: {
+						is_monthly: true,
+					},
+				},
+			],
+		});
 
-        expect(await store.get('campaign', 'id')).toBeDefined()
-        expect(await store.bulkGet([{ id: 'id', type: 'campaign' }])).toEqual([{
-            key: 'campaign/id',
-            value: {
-                id: 'id',
-                type: 'campaign',
-                item: {
-                    is_monthly: true,
-                },
-                relationships: {},
-            },
-        }])
-    })
+		while (!isReady) {
+			await Bun.sleep(10);
+		}
 
-    describe('shared binding methods', () => {
-        const cache = new CacheStore(true)
+		expect(await store.get("campaign", "id")).toBeDefined();
+		expect(await store.bulkGet([{ id: "id", type: "campaign" }])).toEqual([
+			{
+				key: "campaign/id",
+				value: {
+					id: "id",
+					type: "campaign",
+					item: {
+						is_monthly: true,
+					},
+					relationships: {},
+				},
+			},
+		]);
+	});
 
-        test('edit', async () => {
-            await cache.put('campaign', 'campaign_id', {
-                item: { is_monthly: true, patron_count: 1 },
-                relationships: {
-                    benefits: null,
-                    creator: 'user_id',
-                },
-            })
+	describe("shared binding methods", () => {
+		const cache = new CacheStore(true);
 
-            const result = await cache.edit('campaign', 'campaign_id', {
-                is_monthly: false,
-                is_charged_immediately: true,
-            })
+		test("edit", async () => {
+			await cache.put("campaign", "campaign_id", {
+				item: { is_monthly: true, patron_count: 1 },
+				relationships: {
+					benefits: null,
+					creator: "user_id",
+				},
+			});
 
-            expect(result).toEqual({
-                item: {
-                    is_monthly: false,
-                    is_charged_immediately: true,
-                    patron_count: 1,
-                },
-                relationships: {
-                    benefits: null,
-                    creator: 'user_id',
-                },
-            })
-        })
-    })
+			const result = await cache.edit("campaign", "campaign_id", {
+				is_monthly: false,
+				is_charged_immediately: true,
+			});
 
-    describe('Sync methods', () => {
-        const cache = new CacheStore(true, undefined, {
-            initial: [{
-                id: 'campaign_id',
-                type: 'campaign',
-                item: { is_monthly: true },
-                relationships: { creator: 'user_id' },
-            }],
-        })
+			expect(result).toEqual({
+				item: {
+					is_monthly: false,
+					is_charged_immediately: true,
+					patron_count: 1,
+				},
+				relationships: {
+					benefits: null,
+					creator: "user_id",
+				},
+			});
+		});
+	});
 
-        test('sync resource', async () => {
-            await cache.syncResource({
-                type: 'campaign',
-                id: 'campaign_id',
-                attributes: { is_charged_immediately: true },
-                relationships: { benefits: { data: null } },
-            })
+	describe("Sync methods", () => {
+		const cache = new CacheStore(true, undefined, {
+			initial: [
+				{
+					id: "campaign_id",
+					type: "campaign",
+					item: { is_monthly: true },
+					relationships: { creator: "user_id" },
+				},
+			],
+		});
 
-            const resource = await cache.getResource('campaign', 'campaign_id')
-            expect(resource).toEqual({
-                data: {
-                    attributes: {
-                        is_monthly: true,
-                        is_charged_immediately: true,
-                    },
-                    relationships: {
-                        benefits: { data: null },
-                        creator: { 
-                            data: { type: 'user', id: 'user_id' },
-                            links: { related: '' },
-                        },
-                    },
-                },
-                included: [],
-            })
-        })
+		test("sync resource", async () => {
+			await cache.syncResource({
+				type: "campaign",
+				id: "campaign_id",
+				attributes: { is_charged_immediately: true },
+				relationships: { benefits: { data: null } },
+			});
 
-        test('sync resource with relationship', async () => {
-            await cache.syncResource({
-                type: 'campaign',
-                id: 'campaign_id',
-                attributes: { is_charged_immediately: true },
-                relationships: { benefits: { data: null } },
-            })
+			const resource = await cache.getResource("campaign", "campaign_id");
+			expect(resource).toEqual({
+				data: {
+					attributes: {
+						is_monthly: true,
+						is_charged_immediately: true,
+					},
+					relationships: {
+						benefits: { data: null },
+						creator: {
+							data: { type: "user", id: "user_id" },
+							links: { related: "" },
+						},
+					},
+				},
+				included: [],
+			});
+		});
 
-            await cache.syncResource({
-                type: 'user',
-                id: 'user_id',
-                attributes: { is_creator: true },
-            })
+		test("sync resource with relationship", async () => {
+			await cache.syncResource({
+				type: "campaign",
+				id: "campaign_id",
+				attributes: { is_charged_immediately: true },
+				relationships: { benefits: { data: null } },
+			});
 
-            const resource = await cache.getResource('campaign', 'campaign_id')
-            expect(resource).toEqual({
-                data: {
-                    attributes: {
-                        is_monthly: true,
-                        is_charged_immediately: true,
-                    },
-                    relationships: {
-                        benefits: { data: null },
-                        creator: { 
-                            data: { type: 'user', id: 'user_id' },
-                            links: { related: '' },
-                        },
-                    },
-                },
-                included: [{
-                    type: 'user',
-                    id: 'user_id',
-                    item: {
-                        item: { is_creator: true },
-                        relationships: {},
-                    } satisfies CacheItem<'user'>
-                }],
-            })
-        })
+			await cache.syncResource({
+				type: "user",
+				id: "user_id",
+				attributes: { is_creator: true },
+			});
 
-        test('sync request: GET request', async () => {
-            await cache.syncRequest(
-                { body: null, method: RequestMethod.Get },
-                { id: 'webhook_id', resource: Type.Webhook }
-            )
+			const resource = await cache.getResource("campaign", "campaign_id");
+			expect(resource).toEqual({
+				data: {
+					attributes: {
+						is_monthly: true,
+						is_charged_immediately: true,
+					},
+					relationships: {
+						benefits: { data: null },
+						creator: {
+							data: { type: "user", id: "user_id" },
+							links: { related: "" },
+						},
+					},
+				},
+				included: [
+					{
+						type: "user",
+						id: "user_id",
+						item: {
+							item: { is_creator: true },
+							relationships: {},
+						} satisfies CacheItem<"user">,
+					},
+				],
+			});
+		});
 
-            const item = await cache.get('webhook', 'webhook_id')
-            expect(item).toBeUndefined()
-        })
+		test("sync request: GET request", async () => {
+			await cache.syncRequest(
+				{ body: null, method: RequestMethod.Get },
+				{ id: "webhook_id", resource: Type.Webhook }
+			);
 
-        test('sync request: POST request with no body', async () => {
-            await expect(async () => await cache.syncRequest(
-                { body: null, method: RequestMethod.Post },
-                { id: 'webhook_id', resource: Type.Webhook }
-            )).rejects.toThrow('Missing request body to sync with cache')
-        })
+			const item = await cache.get("webhook", "webhook_id");
+			expect(item).toBeUndefined();
+		});
 
-        test('sync request: POST request with no id', async () => {
-            await expect(async () => await cache.syncRequest(
-                { body: null, method: RequestMethod.Post },
-                { id: <never>null, resource: Type.Webhook }
-            )).rejects.toThrow('Missing id of resource webhook to update in cache')
-        })
+		test("sync request: POST request with no body", async () => {
+			await expect(
+				async () =>
+					await cache.syncRequest(
+						{ body: null, method: RequestMethod.Post },
+						{ id: "webhook_id", resource: Type.Webhook }
+					)
+			).rejects.toThrow("Missing request body to sync with cache");
+		});
 
-        test('sync request: POST request with no mocked attributes', async () => {
-            const cache = new CacheStore(true, undefined, {
-                requestSyncOptions: {
-                    requireMockAttributes: true,
-                },
-            })
+		test("sync request: POST request with no id", async () => {
+			await expect(
+				async () =>
+					await cache.syncRequest(
+						{ body: null, method: RequestMethod.Post },
+						{ id: <never>null, resource: Type.Webhook }
+					)
+			).rejects.toThrow("Missing id of resource webhook to update in cache");
+		});
 
-            await expect(async () => await cache.syncRequest(
-                { body: { data: {
-                    type: Type.Webhook,
-                    attributes: {
-                        triggers: [],
-                        uri: 'https://mywebsite.com',
-                    },
-                    relationships: {
-                        campaign: {
-                            data: {
-                                id: 'campaign_id',
-                                type: Type.Campaign,
-                            }
-                        }
-                    }
-                } }, method: RequestMethod.Post },
-                { id: 'webhook_id', resource: Type.Webhook }
-            )).rejects.toThrow('Failed to find mocked attributes for resource: webhook')
-        })
+		test("sync request: POST request with no mocked attributes", async () => {
+			const cache = new CacheStore(true, undefined, {
+				requestSyncOptions: {
+					requireMockAttributes: true,
+				},
+			});
 
-        test('sync request: DELETE request', async () => {
-            await cache.syncResource({
-                type: 'webhook',
-                id: 'webhook_id_1',
-                attributes: { secret: 'secret' },
-            })
+			await expect(
+				async () =>
+					await cache.syncRequest(
+						{
+							body: {
+								data: {
+									type: Type.Webhook,
+									attributes: {
+										triggers: [],
+										uri: "https://mywebsite.com",
+									},
+									relationships: {
+										campaign: {
+											data: {
+												id: "campaign_id",
+												type: Type.Campaign,
+											},
+										},
+									},
+								},
+							},
+							method: RequestMethod.Post,
+						},
+						{ id: "webhook_id", resource: Type.Webhook }
+					)
+			).rejects.toThrow("Failed to find mocked attributes for resource: webhook");
+		});
 
-            const resource = await cache.get('webhook', 'webhook_id_1')
-            expect(resource).toBeDefined()
+		test("sync request: DELETE request", async () => {
+			await cache.syncResource({
+				type: "webhook",
+				id: "webhook_id_1",
+				attributes: { secret: "secret" },
+			});
 
-            await cache.syncRequest(
-                { body: null, method: RequestMethod.Delete },
-                { id: 'webhook_id_1', resource: Type.Webhook }
-            )
+			const resource = await cache.get("webhook", "webhook_id_1");
+			expect(resource).toBeDefined();
 
-            const item = await cache.get('webhook', 'webhook_id_1')
-            expect(item).toBeUndefined()
-        })
-    })
-})
+			await cache.syncRequest(
+				{ body: null, method: RequestMethod.Delete },
+				{ id: "webhook_id_1", resource: Type.Webhook }
+			);
+
+			const item = await cache.get("webhook", "webhook_id_1");
+			expect(item).toBeUndefined();
+		});
+	});
+});

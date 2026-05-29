@@ -12,7 +12,9 @@ import { createAdminClient } from "@/lib/supabase/server";
 /**
  * Récupère la session Better Auth côté serveur (avec cache React par requête).
  */
-export const getServerSession = cache(async () => auth.api.getSession({ headers: await headers() }));
+export const getServerSession = cache(async () =>
+	auth.api.getSession({ headers: await headers() })
+);
 
 /**
  * Récupère l'utilisateur authentifié ou null.
@@ -27,7 +29,9 @@ export const getServerUser = cache(async () => {
  */
 export async function requireAuth() {
 	const user = await getServerUser();
-	if (!user) {redirect("/login");}
+	if (!user) {
+		redirect("/login");
+	}
 	return user;
 }
 

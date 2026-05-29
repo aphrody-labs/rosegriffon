@@ -6,72 +6,72 @@ import { wikiService } from "@/lib/wiki-service";
 import { TeamBuilderLoader } from "./TeamBuilderLoader";
 
 export const metadata: Metadata = {
-  alternates: { canonical: "/tools/my-team" },
-  description:
-    "Créez votre équipe Inazuma Eleven idéale. Glissez-déposez vos joueurs sur le terrain, choisissez votre formation et partagez votre équipe.",
-  title: "Mon Équipe | Inazuma Eleven Victory Road - Azalée",
+	alternates: { canonical: "/tools/my-team" },
+	description:
+		"Créez votre équipe Inazuma Eleven idéale. Glissez-déposez vos joueurs sur le terrain, choisissez votre formation et partagez votre équipe.",
+	title: "Mon Équipe | Inazuma Eleven Victory Road - Azalée",
 };
 
 export const dynamic = "force-dynamic";
 
 function resolveImageUrl(char: any): string {
-  const variant = char.variants?.[0] as any;
-  const zukanHash = char.zukanHash || variant?.zukanHash;
-  if (zukanHash) {
-    const clean = zukanHash.startsWith("/") ? zukanHash.slice(1) : zukanHash;
-    return `https://dxi4wb638ujep.cloudfront.net/1/${clean}.png`;
-  }
-  return getCharacterImageUrl(char.internalCode);
+	const variant = char.variants?.[0] as any;
+	const zukanHash = char.zukanHash || variant?.zukanHash;
+	if (zukanHash) {
+		const clean = zukanHash.startsWith("/") ? zukanHash.slice(1) : zukanHash;
+		return `https://dxi4wb638ujep.cloudfront.net/1/${clean}.png`;
+	}
+	return getCharacterImageUrl(char.internalCode);
 }
 
 export default async function MyTeamPage() {
-  const session = await getServerSession();
-  const isAuthenticated = Boolean(session?.user);
+	const session = await getServerSession();
+	const isAuthenticated = Boolean(session?.user);
 
-  const { data: rawChars } = await wikiService.getCharactersList({
-    limit: 6000,
-    page: 1,
-    status: "all",
-  });
+	const { data: rawChars } = await wikiService.getCharactersList({
+		limit: 6000,
+		page: 1,
+		status: "all",
+	});
 
-  // Group variants and deduplicate
-  const grouped = wikiService.groupVariants(rawChars);
+	// Group variants and deduplicate
+	const grouped = wikiService.groupVariants(rawChars);
 
-  // Map to picker-friendly format (with stats for detail panel)
-  const characters: PickerCharacter[] = grouped
-    .map((char) => {
-      const variant = char.variants?.[0] as any;
-      const name = char.names?.fr || char.names?.en || char.names?.ja || "?";
-      const position = variant?.position || "MF";
-      const element = variant?.element || "Void";
-      const rarity = (char as any).bestRarity || variant?.rarity || "Normal";
-      const imageUrl = resolveImageUrl(char);
-      const slug = (char as any).slug || variant?.slug || char.charaId;
-      const statsLv99 = variant?.stats?.lv99;
+	// Map to picker-friendly format (with stats for detail panel)
+	const characters: PickerCharacter[] = grouped
+		.map((char) => {
+			const variant = char.variants?.[0] as any;
+			const name = char.names?.fr || char.names?.en || char.names?.ja || "?";
+			const position = variant?.position || "MF";
+			const element = variant?.element || "Void";
+			const rarity = (char as any).bestRarity || variant?.rarity || "Normal";
+			const imageUrl = resolveImageUrl(char);
+			const slug = (char as any).slug || variant?.slug || char.charaId;
+			const statsLv99 = variant?.stats?.lv99;
 
-      return {
-        charaId: char.charaId,
-        element,
-        imageUrl,
-        name,
-        position,
-        rarity,
-        series: (char as any).sheetData?.series,
-        slug,
-        stats: statsLv99
-          ? {
-              kick: statsLv99.kick || 0,
-              control: statsLv99.control || 0,
-              technique: statsLv99.technique || 0,
-              pressure: statsLv99.pressure || 0,
-              physical: statsLv99.physical || 0,
-              agility: statsLv99.agility || 0,
-              intelligence: statsLv99.intelligence || 0,
-            }
-          : undefined,
-      };
-    })
-    .filter((c) => c.imageUrl);
+			return {
+				charaId: char.charaId,
+				element,
+				imageUrl,
+				name,
+				position,
+				rarity,
+				series: (char as any).sheetData?.series,
+				slug,
+				stats: statsLv99
+					? {
+							kick: statsLv99.kick || 0,
+							control: statsLv99.control || 0,
+							technique: statsLv99.technique || 0,
+							pressure: statsLv99.pressure || 0,
+							physical: statsLv99.physical || 0,
+							agility: statsLv99.agility || 0,
+							intelligence: statsLv99.intelligence || 0,
+						}
+					: undefined,
+			};
+		})
+		.filter((c) => c.imageUrl);
 
-  return <TeamBuilderLoader characters={characters} isAuthenticated={isAuthenticated} />;
+	return <TeamBuilderLoader characters={characters} isAuthenticated={isAuthenticated} />;
 }

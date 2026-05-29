@@ -26,10 +26,13 @@ export function ThemeSwitcher() {
 
 	useEffect(() => {
 		const root = document.documentElement.parentElement;
-		const container =
-			document.querySelector("[data-design-system-root]") ?? root;
-		if (!container) {return;}
-		for (const t of THEMES) {container.classList.remove(t.id);}
+		const container = document.querySelector("[data-design-system-root]") ?? root;
+		if (!container) {
+			return;
+		}
+		for (const t of THEMES) {
+			container.classList.remove(t.id);
+		}
 		container.classList.add(active);
 		container.classList.toggle("dark", active === "theme-azalee-dark");
 	}, [active]);
@@ -50,9 +53,7 @@ export function ThemeSwitcher() {
 						aria-checked={isActive}
 						onClick={() => setActive(t.id)}
 						className={`group flex items-center gap-2 rounded-full px-3 py-1.5 transition-all motion-safe:duration-200 outline-hidden focus-visible:ring-[3px] focus-visible:ring-ring/50 ${
-							isActive
-								? "bg-on-surface text-surface"
-								: "text-on-surface hover:bg-on-surface/10"
+							isActive ? "bg-on-surface text-surface" : "text-on-surface hover:bg-on-surface/10"
 						}`}
 					>
 						<span

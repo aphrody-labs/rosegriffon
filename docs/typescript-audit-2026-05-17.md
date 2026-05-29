@@ -25,6 +25,7 @@ Le monorepo présente un niveau de type-safety solide pour un projet en dévelop
 **[MEDIUM] `CookieStore.set` et `setAll` — options typées trop largement.**
 
 Dans `src/server.ts` :
+
 ```ts
 interface CookieStore {
   getAll: () => Array<{ name: string; value: string }>;
@@ -35,6 +36,7 @@ setAll(cookiesToSet: Array<{ ...; options?: Record<string, unknown> }>) { ... }
 ```
 
 `@supabase/ssr@0.6.1` définit :
+
 ```ts
 type CookieOptions = Partial<SerializeOptions>; // from package "cookie"
 type SetCookie = (name: string, value: string, options: CookieOptions) => void;
@@ -58,6 +60,7 @@ Le singleton module-level `let cachedClient` dans `browser.ts` peut survivre un 
 ### Recommendations
 
 1. Remplacer `Record<string, unknown>` dans `CookieStore` par `CookieOptions` importé depuis `@supabase/ssr` :
+
 ```ts
 import type { CookieOptions } from "@supabase/ssr";
 interface CookieStore {
@@ -67,6 +70,7 @@ interface CookieStore {
 // setAll param :
 setAll(cookiesToSet: Array<{ name: string; value: string; options?: CookieOptions }>)
 ```
+
 Ceci élimine le `as Record<string, unknown>` dans le wrapper website.
 
 2. Envisager d'exporter `CookieStore` depuis `@rose-griffon/db/server` pour que les callers puissent typer leur cookieStore local sans reimporter `@supabase/ssr`.
@@ -105,17 +109,19 @@ Ceci élimine le `as Record<string, unknown>` dans le wrapper website.
 
 ```ts
 export interface SettingRow {
-  value: unknown;  // JSONB
+	value: unknown; // JSONB
 }
 ```
 
 Dans `commands/admin/settings.ts`, `fmtValue(row.value)` convertit `unknown` en string via `JSON.stringify` — OK. Mais `setSetting(key, parsed, description)` avec `parsed: unknown` puis `JSON.stringify(value)::jsonb` fonctionne. Le problème est que les callers de `getSetting<T>` dans `services/website.ts` utilisent le générique sans validation :
+
 ```ts
 export async function getSetting<T = unknown>(key: string): Promise<T | null> {
-  const rows = await sql<{ value: T }[]>`SELECT value FROM settings WHERE key = ${key} LIMIT 1`;
-  return rows[0]?.value ?? null;
+	const rows = await sql<{ value: T }[]>`SELECT value FROM settings WHERE key = ${key} LIMIT 1`;
+	return rows[0]?.value ?? null;
 }
 ```
+
 Le `T` est un paramètre fantôme — `Bun.SQL` ne valide pas le shape au runtime. `getSetting<number>("max_articles")` retourne en fait `unknown` casté en `number` sans vérification. Acceptable si le DB schema est la source de vérité, mais trompeur.
 
 **[MEDIUM] `GUILD_ID` dupliqué dans 3 fichiers.**
@@ -138,6 +144,7 @@ return row!;
 ```
 
 Cette query retourne exactement une ligne (10 sous-requêtes scalaires sans FROM), donc `row!` est correct. Mais l'assertion silencieuse masque un bug potentiel si la query était modifiée. Un throw explicite serait plus robuste :
+
 ```ts
 if (!row) throw new Error("[admin] stats query returned no rows");
 return row;
@@ -150,7 +157,10 @@ return row;
 **[LOW] `teamPhotos.ts` — fonction `avatarUrl` réimplémentée localement.**
 
 ```ts
-function avatarUrl(user: { id: string; avatar: string | null; discriminator: string }, size = 256): string
+function avatarUrl(
+	user: { id: string; avatar: string | null; discriminator: string },
+	size = 256
+): string;
 ```
 
 discord.js expose `user.avatarURL({ size, extension: "webp" })` qui gère cela nativement (y compris les avatars animés `a_*`). `syncMembers.ts` utilise bien `member.avatarURL(...)`. `teamPhotos.ts` réimplémente la logique manuellement via `client.users.fetch()` puis accède à `user.avatar` (hash brut). La réimplémentation est correcte mais introduit de la divergence : si Discord change son CDN URL pattern, il faudra patcher à deux endroits.
@@ -170,11 +180,17 @@ Pattern standard pour un client HTTP interne. Acceptable si l'API website est so
 
 1. Retirer `tsyringe` des dependencies de `apps/bot/package.json` (dead dep).
 2. Créer `src/lib/config.ts` avec les constantes d'env fail-fast :
+
 ```ts
-export const GUILD_ID = Bun.env.GUILD_ID ?? (() => { throw new Error("GUILD_ID required") })();
+export const GUILD_ID =
+	Bun.env.GUILD_ID ??
+	(() => {
+		throw new Error("GUILD_ID required");
+	})();
 // ou en optional si le bot peut tourner sans guild :
 export const GUILD_ID = Bun.env.GUILD_ID;
 ```
+
 3. Simplifier `cache.ts` ligne 59 : `JSON.parse(raw) as T` (pas de double cast).
 4. Unifier `RG_COLOR` et `RG_THEME.brand` — soit `RG_COLOR = parseInt(RG_THEME.brand.slice(1), 16)` ou `RG_THEME.brand = "#" + RG_COLOR.toString(16)`.
 
@@ -185,6 +201,7 @@ export const GUILD_ID = Bun.env.GUILD_ID;
 **`ignoreDeprecations: "6.0"` dans `tsconfig-base.json`.**
 
 Ce flag dit au compilateur "ignore les erreurs marquées deprecated depuis TS 6.0". Les deprecations TS 6.0 concernaient principalement :
+
 - `--target` + `--lib` combinaisons obsolètes
 - `moduleResolution: "bundler"` interaction avec certaines options
 
@@ -248,9 +265,9 @@ Supprimer la ligne `"tsyringe": "catalog:"` des `dependencies`. Dead dep confirm
 export const GUILD_ID = Bun.env.GUILD_ID; // optional — bot peut tourner sans guild
 
 export function requireEnv(key: string): string {
-  const v = Bun.env[key];
-  if (!v) throw new Error(`[config] ${key} is required`);
-  return v;
+	const v = Bun.env[key];
+	if (!v) throw new Error(`[config] ${key} is required`);
+	return v;
 }
 ```
 
@@ -274,9 +291,9 @@ return JSON.parse(raw) as T;
 
 ```json
 {
-  "compilerOptions": {
-    "noUncheckedIndexedAccess": true
-  }
+	"compilerOptions": {
+		"noUncheckedIndexedAccess": true
+	}
 }
 ```
 
@@ -284,4 +301,4 @@ Ceci remontera des `T | undefined` sur tous les accès par index. Les `rows[0]!`
 
 ---
 
-*Audit LECTURE SEULE — aucun fichier modifié. Périmètre : `packages/db/src/` + `apps/bot/src/`. Hors périmètre : `packages/ui/`, `apps/azalee/`, `apps/website/`.*
+_Audit LECTURE SEULE — aucun fichier modifié. Périmètre : `packages/db/src/` + `apps/bot/src/`. Hors périmètre : `packages/ui/`, `apps/azalee/`, `apps/website/`._

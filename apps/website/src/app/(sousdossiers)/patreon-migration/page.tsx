@@ -9,8 +9,7 @@ import { requireAdmin } from "@/lib/auth-helpers";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-	description:
-		"Page de prévisualisation interne — accès restreint au staff RG.",
+	description: "Page de prévisualisation interne — accès restreint au staff RG.",
 	robots: { follow: false, index: false, nocache: true },
 	title: "Migration Patreon (preview admin) · Rose Griffon",
 };
@@ -28,9 +27,8 @@ function PatreonMigrationPreview() {
 				<div className="mx-auto flex max-w-5xl items-center gap-3 text-sm text-amber-700 dark:text-amber-200">
 					<EyeOff className="size-4 shrink-0" />
 					<span>
-						<strong>Preview interne staff RG</strong> — page non publiée. Aucune
-						communication tant que l'annonce migration Patreon n'est pas
-						validée.
+						<strong>Preview interne staff RG</strong> — page non publiée. Aucune communication tant
+						que l'annonce migration Patreon n'est pas validée.
 					</span>
 				</div>
 			</div>
@@ -54,8 +52,8 @@ function PatreonMigrationPreview() {
 						</span>
 					</h1>
 					<p className="mx-auto mt-6 max-w-2xl text-lg text-muted-foreground">
-						Nous quittons Patreon pour notre propre plateforme. Liez votre
-						compte en 2 clics, gardez votre rôle Discord, et conservez le
+						Nous quittons Patreon pour notre propre plateforme. Liez votre compte en 2 clics, gardez
+						votre rôle Discord, et conservez le
 						<strong className="text-[#a08540] dark:text-[#c9a958]">
 							{" "}
 							même tarif pendant 12 mois
@@ -64,10 +62,7 @@ function PatreonMigrationPreview() {
 					</p>
 					<div className="mt-10 flex flex-wrap items-center justify-center gap-4">
 						<PatreonConnectButton variant="patron-link" />
-						<a
-							href="#tiers"
-							className="text-sm text-muted-foreground hover:text-foreground"
-						>
+						<a href="#tiers" className="text-sm text-muted-foreground hover:text-foreground">
 							Voir les paliers ↓
 						</a>
 					</div>
@@ -122,8 +117,8 @@ function PatreonMigrationPreview() {
 				<div className="rounded-3xl border border-[#c9a958]/40 bg-card p-10 text-card-foreground">
 					<h2 className="text-2xl font-bold">Prêt·e à basculer ?</h2>
 					<p className="mt-3 text-muted-foreground">
-						En 2 clics : OAuth Patreon → choix du palier → paiement Stripe. Le
-						rôle Discord arrive dans la minute.
+						En 2 clics : OAuth Patreon → choix du palier → paiement Stripe. Le rôle Discord arrive
+						dans la minute.
 					</p>
 					<div className="mt-6">
 						<PatreonConnectButton variant="patron-link" />
@@ -133,9 +128,7 @@ function PatreonMigrationPreview() {
 
 			{/* FAQ */}
 			<section className="mx-auto max-w-3xl px-6 py-16">
-				<h2 className="mb-8 text-center text-3xl font-bold">
-					Questions fréquentes
-				</h2>
+				<h2 className="mb-8 text-center text-3xl font-bold">Questions fréquentes</h2>
 				<MigrationFAQ />
 			</section>
 		</div>

@@ -19,36 +19,36 @@ import { DATA_ROOT } from "../core/paths.js";
 // ============================================================================
 
 export interface RealSkillShootCourse {
-  targetRate: number;
-  isGroundTarget: boolean;
-  targetHeightOffset: number;
-  targetHoriOffset: number;
-  curveRate: number;
-  curveHeightRate: number;
-  curveAngle: number;
-  moveTimeRate: number;
+	targetRate: number;
+	isGroundTarget: boolean;
+	targetHeightOffset: number;
+	targetHoriOffset: number;
+	curveRate: number;
+	curveHeightRate: number;
+	curveAngle: number;
+	moveTimeRate: number;
 }
 
 export interface RealSkillInfo {
-  id: string;
-  loseType: number;
-  formationType: number;
-  formationCharaLen: number;
-  shootLimitBallHeightAttr: number;
-  shootGroundingEffectName: string;
-  shootGroundingEffectIntervalTime: number;
-  shootGroundingEffectScale: number;
-  shootGroundingEffectScatteringPos: number;
-  /** [startIndex, count] ref to courses */
-  shootCourseInfoRef: [number, number];
+	id: string;
+	loseType: number;
+	formationType: number;
+	formationCharaLen: number;
+	shootLimitBallHeightAttr: number;
+	shootGroundingEffectName: string;
+	shootGroundingEffectIntervalTime: number;
+	shootGroundingEffectScale: number;
+	shootGroundingEffectScatteringPos: number;
+	/** [startIndex, count] ref to courses */
+	shootCourseInfoRef: [number, number];
 }
 
 export interface RealSkillDatabase {
-  courses: RealSkillShootCourse[];
-  skills: RealSkillInfo[];
-  bySkillId: Map<string, RealSkillInfo>;
-  /** Get courses for a given skill */
-  getCoursesForSkill: (skillId: string) => RealSkillShootCourse[];
+	courses: RealSkillShootCourse[];
+	skills: RealSkillInfo[];
+	bySkillId: Map<string, RealSkillInfo>;
+	/** Get courses for a given skill */
+	getCoursesForSkill: (skillId: string) => RealSkillShootCourse[];
 }
 
 // ============================================================================
@@ -56,43 +56,43 @@ export interface RealSkillDatabase {
 // ============================================================================
 
 function parseContent(content: any) {
-  const courses: RealSkillShootCourse[] = [];
-  const skills: RealSkillInfo[] = [];
+	const courses: RealSkillShootCourse[] = [];
+	const skills: RealSkillInfo[] = [];
 
-  if (!content?.lists) return { courses, skills };
+	if (!content?.lists) return { courses, skills };
 
-  for (const list of content.lists) {
-    if (list.name === "m_RealSkillShootCourseInfoList") {
-      for (const val of list.values) {
-        courses.push({
-          targetRate: val.targetRate,
-          isGroundTarget: val.isGroundTarget,
-          targetHeightOffset: val.targetHeightOffset,
-          targetHoriOffset: val.targetHoriOffset,
-          curveRate: val.curveRate,
-          curveHeightRate: val.curveHeightRate,
-          curveAngle: val.curveAngle,
-          moveTimeRate: val.moveTimeRate,
-        });
-      }
-    } else if (list.name === "m_RealSkillInfoList") {
-      for (const val of list.values) {
-        skills.push({
-          id: val.id,
-          loseType: val.loseType,
-          formationType: val.formationType,
-          formationCharaLen: val.formationCharaLen,
-          shootLimitBallHeightAttr: val.shootLimitBallHeightAttr,
-          shootGroundingEffectName: val.shootGroundingEffectName,
-          shootGroundingEffectIntervalTime: val.shootGroundingEffectIntervalTime,
-          shootGroundingEffectScale: val.shootGroundingEffectScale,
-          shootGroundingEffectScatteringPos: val.shootGroundingEffectScatteringPos,
-          shootCourseInfoRef: val.shootCourseInfoRef,
-        });
-      }
-    }
-  }
-  return { courses, skills };
+	for (const list of content.lists) {
+		if (list.name === "m_RealSkillShootCourseInfoList") {
+			for (const val of list.values) {
+				courses.push({
+					targetRate: val.targetRate,
+					isGroundTarget: val.isGroundTarget,
+					targetHeightOffset: val.targetHeightOffset,
+					targetHoriOffset: val.targetHoriOffset,
+					curveRate: val.curveRate,
+					curveHeightRate: val.curveHeightRate,
+					curveAngle: val.curveAngle,
+					moveTimeRate: val.moveTimeRate,
+				});
+			}
+		} else if (list.name === "m_RealSkillInfoList") {
+			for (const val of list.values) {
+				skills.push({
+					id: val.id,
+					loseType: val.loseType,
+					formationType: val.formationType,
+					formationCharaLen: val.formationCharaLen,
+					shootLimitBallHeightAttr: val.shootLimitBallHeightAttr,
+					shootGroundingEffectName: val.shootGroundingEffectName,
+					shootGroundingEffectIntervalTime: val.shootGroundingEffectIntervalTime,
+					shootGroundingEffectScale: val.shootGroundingEffectScale,
+					shootGroundingEffectScatteringPos: val.shootGroundingEffectScatteringPos,
+					shootCourseInfoRef: val.shootCourseInfoRef,
+				});
+			}
+		}
+	}
+	return { courses, skills };
 }
 
 // ============================================================================
@@ -100,33 +100,33 @@ function parseContent(content: any) {
 // ============================================================================
 
 export async function loadRealSkillConfigAsync(dataPath: string = DATA_ROOT) {
-  const filename = findConfigFile("skill", "real_skill_config");
-  if (!filename) return null;
+	const filename = findConfigFile("skill", "real_skill_config");
+	if (!filename) return null;
 
-  const path = join(dataPath, "common/gamedata/skill", filename);
-  const content = await loadJsonAsync<any>(path);
-  return content ? parseContent(content) : null;
+	const path = join(dataPath, "common/gamedata/skill", filename);
+	const content = await loadJsonAsync<any>(path);
+	return content ? parseContent(content) : null;
 }
 
 export async function buildRealSkillDatabase(
-  dataPath: string = DATA_ROOT,
+	dataPath: string = DATA_ROOT
 ): Promise<RealSkillDatabase> {
-  const result = await loadRealSkillConfigAsync(dataPath);
-  const courses = result?.courses || [];
-  const skills = result?.skills || [];
+	const result = await loadRealSkillConfigAsync(dataPath);
+	const courses = result?.courses || [];
+	const skills = result?.skills || [];
 
-  const bySkillId = new Map<string, RealSkillInfo>();
-  for (const s of skills) bySkillId.set(s.id, s);
+	const bySkillId = new Map<string, RealSkillInfo>();
+	for (const s of skills) bySkillId.set(s.id, s);
 
-  return {
-    courses,
-    skills,
-    bySkillId,
-    getCoursesForSkill: (skillId: string) => {
-      const skill = bySkillId.get(skillId);
-      if (!skill) return [];
-      const [start, count] = skill.shootCourseInfoRef;
-      return courses.slice(start, start + count);
-    },
-  };
+	return {
+		courses,
+		skills,
+		bySkillId,
+		getCoursesForSkill: (skillId: string) => {
+			const skill = bySkillId.get(skillId);
+			if (!skill) return [];
+			const [start, count] = skill.shootCourseInfoRef;
+			return courses.slice(start, start + count);
+		},
+	};
 }

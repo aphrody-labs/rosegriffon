@@ -25,17 +25,17 @@ import { DATA_ROOT } from "../core/paths.js";
 // ============================================================================
 
 export interface ParsedTrophyReward extends ExportableEntity {
-  trophyIdRaw: number;
-  trophyIdHex: string;
-  reward: number;
+	trophyIdRaw: number;
+	trophyIdHex: string;
+	reward: number;
 }
 
 export interface ActivityPhotoDatabase {
-  basePath: string;
-  rewards: ParsedTrophyReward[];
-  byId: Map<string, ParsedTrophyReward>;
-  toMarkdown: (id: string) => string | null;
-  toReact: (id: string) => any | null;
+	basePath: string;
+	rewards: ParsedTrophyReward[];
+	byId: Map<string, ParsedTrophyReward>;
+	toMarkdown: (id: string) => string | null;
+	toReact: (id: string) => any | null;
 }
 
 // ============================================================================
@@ -43,7 +43,7 @@ export interface ActivityPhotoDatabase {
 // ============================================================================
 
 function toHex(value: number): string {
-  return `0x${(value >>> 0).toString(16).toUpperCase().padStart(8, "0")}`;
+	return `0x${(value >>> 0).toString(16).toUpperCase().padStart(8, "0")}`;
 }
 
 // ============================================================================
@@ -51,46 +51,46 @@ function toHex(value: number): string {
 // ============================================================================
 
 function parseContent(content: any): { basePath: string; rewards: ParsedTrophyReward[] } {
-  let basePath = "";
-  const rewards: ParsedTrophyReward[] = [];
+	let basePath = "";
+	const rewards: ParsedTrophyReward[] = [];
 
-  if (!content?.entries) return { basePath, rewards };
+	if (!content?.entries) return { basePath, rewards };
 
-  for (const entry of content.entries) {
-    // Extract base path
-    if (entry.name === "TEXTURE_BASE_PATH_0") {
-      const strVar = entry.variables?.find((v: any) => v.type === "String");
-      if (strVar) {
-        basePath = strVar.value.replace("#/menu/", "").replace("<LG>", "fr");
-      }
-    }
+	for (const entry of content.entries) {
+		// Extract base path
+		if (entry.name === "TEXTURE_BASE_PATH_0") {
+			const strVar = entry.variables?.find((v: any) => v.type === "String");
+			if (strVar) {
+				basePath = strVar.value.replace("#/menu/", "").replace("<LG>", "fr");
+			}
+		}
 
-    // Extract trophy rewards
-    if (entry.name === "TROPHY_REWARD_LIST_BEG_0") {
-      for (const child of entry.children || []) {
-        if (!child.name?.startsWith("TROPHY_REWARD_")) continue;
-        const vars = child.variables || [];
-        if (vars.length < 2) continue;
+		// Extract trophy rewards
+		if (entry.name === "TROPHY_REWARD_LIST_BEG_0") {
+			for (const child of entry.children || []) {
+				if (!child.name?.startsWith("TROPHY_REWARD_")) continue;
+				const vars = child.variables || [];
+				if (vars.length < 2) continue;
 
-        const trophyIdRaw = parseInt(vars[0].value, 10);
-        const reward = parseInt(vars[1].value, 10);
-        const hex = toHex(trophyIdRaw);
+				const trophyIdRaw = parseInt(vars[0].value, 10);
+				const reward = parseInt(vars[1].value, 10);
+				const hex = toHex(trophyIdRaw);
 
-        rewards.push({
-          id: hex,
-          name: hex,
-          trophyIdRaw,
-          trophyIdHex: hex,
-          reward,
-          attributes: {
-            Reward: reward,
-          },
-        });
-      }
-    }
-  }
+				rewards.push({
+					id: hex,
+					name: hex,
+					trophyIdRaw,
+					trophyIdHex: hex,
+					reward,
+					attributes: {
+						Reward: reward,
+					},
+				});
+			}
+		}
+	}
 
-  return { basePath, rewards };
+	return { basePath, rewards };
 }
 
 // ============================================================================
@@ -98,37 +98,37 @@ function parseContent(content: any): { basePath: string; rewards: ParsedTrophyRe
 // ============================================================================
 
 export async function loadActivityPhotoConfigAsync(
-  dataPath: string = DATA_ROOT,
+	dataPath: string = DATA_ROOT
 ): Promise<{ basePath: string; rewards: ParsedTrophyReward[] } | null> {
-  const filename = findConfigFile("trophy", "trophy_config");
-  if (!filename) return null;
+	const filename = findConfigFile("trophy", "trophy_config");
+	if (!filename) return null;
 
-  const path = join(dataPath, "common/gamedata/trophy", filename);
-  const content = await loadJsonAsync<any>(path);
-  return content ? parseContent(content) : null;
+	const path = join(dataPath, "common/gamedata/trophy", filename);
+	const content = await loadJsonAsync<any>(path);
+	return content ? parseContent(content) : null;
 }
 
 export async function buildActivityPhotoDatabase(
-  dataPath: string = DATA_ROOT,
+	dataPath: string = DATA_ROOT
 ): Promise<ActivityPhotoDatabase> {
-  const result = await loadActivityPhotoConfigAsync(dataPath);
-  const basePath = result?.basePath || "220_img/activity_photo/fr/";
-  const rewards = result?.rewards || [];
+	const result = await loadActivityPhotoConfigAsync(dataPath);
+	const basePath = result?.basePath || "220_img/activity_photo/fr/";
+	const rewards = result?.rewards || [];
 
-  const byId = new Map<string, ParsedTrophyReward>();
-  for (const r of rewards) byId.set(r.trophyIdHex, r);
+	const byId = new Map<string, ParsedTrophyReward>();
+	for (const r of rewards) byId.set(r.trophyIdHex, r);
 
-  return {
-    basePath,
-    rewards,
-    byId,
-    toMarkdown: (id: string) => {
-      const r = byId.get(id);
-      return r ? EntityExporters.toMarkdown(r, "Trophee") : null;
-    },
-    toReact: (id: string) => {
-      const r = byId.get(id);
-      return r ? EntityExporters.toReact(r) : null;
-    },
-  };
+	return {
+		basePath,
+		rewards,
+		byId,
+		toMarkdown: (id: string) => {
+			const r = byId.get(id);
+			return r ? EntityExporters.toMarkdown(r, "Trophee") : null;
+		},
+		toReact: (id: string) => {
+			const r = byId.get(id);
+			return r ? EntityExporters.toReact(r) : null;
+		},
+	};
 }

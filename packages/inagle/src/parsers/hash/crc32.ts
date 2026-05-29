@@ -13,17 +13,17 @@ const CRC32_POLYNOMIAL = 0xedb88320;
 
 // Pre-computed CRC32 lookup table
 const crc32Table: Uint32Array = (() => {
-  const table = new Uint32Array(256);
+	const table = new Uint32Array(256);
 
-  for (let i = 0; i < 256; i++) {
-    let crc = i;
-    for (let j = 0; j < 8; j++) {
-      crc = crc & 1 ? (crc >>> 1) ^ CRC32_POLYNOMIAL : crc >>> 1;
-    }
-    table[i] = crc >>> 0; // Ensure unsigned
-  }
+	for (let i = 0; i < 256; i++) {
+		let crc = i;
+		for (let j = 0; j < 8; j++) {
+			crc = crc & 1 ? (crc >>> 1) ^ CRC32_POLYNOMIAL : crc >>> 1;
+		}
+		table[i] = crc >>> 0; // Ensure unsigned
+	}
 
-  return table;
+	return table;
 })();
 
 /**
@@ -34,13 +34,13 @@ const crc32Table: Uint32Array = (() => {
  * @returns 32-bit CRC32 hash
  */
 export function crc32(data: Uint8Array): number {
-  let crc = 0xffffffff;
+	let crc = 0xffffffff;
 
-  for (let i = 0; i < data.length; i++) {
-    crc = (crc >>> 8) ^ crc32Table[(crc ^ data[i]) & 0xff];
-  }
+	for (let i = 0; i < data.length; i++) {
+		crc = (crc >>> 8) ^ crc32Table[(crc ^ data[i]) & 0xff];
+	}
 
-  return ~crc >>> 0; // Ensure unsigned
+	return ~crc >>> 0; // Ensure unsigned
 }
 
 /**
@@ -49,8 +49,8 @@ export function crc32(data: Uint8Array): number {
  * @returns 32-bit CRC32 hash
  */
 export function crc32String(str: string): number {
-  const encoder = new TextEncoder();
-  return crc32(encoder.encode(str));
+	const encoder = new TextEncoder();
+	return crc32(encoder.encode(str));
 }
 
 /**
@@ -59,7 +59,7 @@ export function crc32String(str: string): number {
  * @returns Hex string (e.g., "0x12345678")
  */
 export function crc32Hex(data: Uint8Array): string {
-  return `0x${crc32(data).toString(16).toUpperCase().padStart(8, "0")}`;
+	return `0x${crc32(data).toString(16).toUpperCase().padStart(8, "0")}`;
 }
 
 /**
@@ -68,7 +68,7 @@ export function crc32Hex(data: Uint8Array): string {
  * @returns Hex string (e.g., "0x12345678")
  */
 export function crc32StringHex(str: string): string {
-  return `0x${crc32String(str).toString(16).toUpperCase().padStart(8, "0")}`;
+	return `0x${crc32String(str).toString(16).toUpperCase().padStart(8, "0")}`;
 }
 
 export default crc32;

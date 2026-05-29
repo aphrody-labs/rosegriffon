@@ -82,7 +82,7 @@ jobs:
       contents: read
       pull-requests: write
     steps:
-    - uses: actions/labeler@v6
-      with:
-        repo-token: '${{ secrets.GITHUB_TOKEN }}'
-        sync-labels: true
+      - uses: actions/labeler@v6
+        with:
+          repo-token: "${{ secrets.GITHUB_TOKEN }}"
+          sync-labels: true

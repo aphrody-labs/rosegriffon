@@ -22,28 +22,28 @@ import { DATA_ROOT } from "../core/paths.js";
 // ============================================================================
 
 export interface CharaExpEntry {
-  /** Character level (1-99) */
-  level: number;
-  /** XP required to reach this level */
-  needExp: number;
+	/** Character level (1-99) */
+	level: number;
+	/** XP required to reach this level */
+	needExp: number;
 }
 
 /** Multiplicateur XP par growthRank (index = growthRank 0-8) */
 export interface ExpRarityRate {
-  rarity: number;
-  rate: number;
+	rarity: number;
+	rate: number;
 }
 
 export interface CharaExpTableDatabase {
-  expTable: CharaExpEntry[];
-  /** Multiplicateurs XP par growthRank */
-  rarityRates: ExpRarityRate[];
-  /** Get XP needed for a specific level */
-  getExpForLevel: (level: number) => number | null;
-  /** Get cumulative XP needed to reach a level from level 1 */
-  getCumulativeExp: (level: number) => number;
-  /** Get XP multiplier for a given growthRank (0-8) */
-  getRarityRate: (growthRank: number) => number;
+	expTable: CharaExpEntry[];
+	/** Multiplicateurs XP par growthRank */
+	rarityRates: ExpRarityRate[];
+	/** Get XP needed for a specific level */
+	getExpForLevel: (level: number) => number | null;
+	/** Get cumulative XP needed to reach a level from level 1 */
+	getCumulativeExp: (level: number) => number;
+	/** Get XP multiplier for a given growthRank (0-8) */
+	getRarityRate: (growthRank: number) => number;
 }
 
 // ============================================================================
@@ -51,22 +51,22 @@ export interface CharaExpTableDatabase {
 // ============================================================================
 
 function parseContent(content: any): { expTable: CharaExpEntry[]; rarityRates: ExpRarityRate[] } {
-  const expTable: CharaExpEntry[] = [];
-  const rarityRates: ExpRarityRate[] = [];
-  if (!content?.lists) return { expTable, rarityRates };
+	const expTable: CharaExpEntry[] = [];
+	const rarityRates: ExpRarityRate[] = [];
+	if (!content?.lists) return { expTable, rarityRates };
 
-  for (const list of content.lists) {
-    if (list.name === "m_charaExpTableList") {
-      for (const val of list.values) {
-        expTable.push({ level: val.level, needExp: val.needExp });
-      }
-    } else if (list.name === "m_expRarityRateList") {
-      for (const val of list.values) {
-        rarityRates.push({ rarity: val.rarity, rate: val.rate });
-      }
-    }
-  }
-  return { expTable, rarityRates };
+	for (const list of content.lists) {
+		if (list.name === "m_charaExpTableList") {
+			for (const val of list.values) {
+				expTable.push({ level: val.level, needExp: val.needExp });
+			}
+		} else if (list.name === "m_expRarityRateList") {
+			for (const val of list.values) {
+				rarityRates.push({ rarity: val.rarity, rate: val.rate });
+			}
+		}
+	}
+	return { expTable, rarityRates };
 }
 
 // ============================================================================
@@ -74,45 +74,45 @@ function parseContent(content: any): { expTable: CharaExpEntry[]; rarityRates: E
 // ============================================================================
 
 export async function loadCharaExpTableAsync(
-  dataPath: string = DATA_ROOT,
+	dataPath: string = DATA_ROOT
 ): Promise<{ expTable: CharaExpEntry[]; rarityRates: ExpRarityRate[] } | null> {
-  const filename = findConfigFile("character", "chara_exp_table_config");
-  if (!filename) return null;
+	const filename = findConfigFile("character", "chara_exp_table_config");
+	if (!filename) return null;
 
-  const path = join(dataPath, "common/gamedata/character", filename);
-  const content = await loadJsonAsync<any>(path);
-  return content ? parseContent(content) : null;
+	const path = join(dataPath, "common/gamedata/character", filename);
+	const content = await loadJsonAsync<any>(path);
+	return content ? parseContent(content) : null;
 }
 
 export async function buildCharaExpTableDatabase(
-  dataPath: string = DATA_ROOT,
+	dataPath: string = DATA_ROOT
 ): Promise<CharaExpTableDatabase> {
-  const parsed = await loadCharaExpTableAsync(dataPath);
-  const expTable = parsed?.expTable ?? [];
-  const rarityRates = parsed?.rarityRates ?? [];
+	const parsed = await loadCharaExpTableAsync(dataPath);
+	const expTable = parsed?.expTable ?? [];
+	const rarityRates = parsed?.rarityRates ?? [];
 
-  const byLevel = new Map<number, number>();
-  for (const entry of expTable) {
-    byLevel.set(entry.level, entry.needExp);
-  }
+	const byLevel = new Map<number, number>();
+	for (const entry of expTable) {
+		byLevel.set(entry.level, entry.needExp);
+	}
 
-  const byRarity = new Map<number, number>();
-  for (const r of rarityRates) {
-    byRarity.set(r.rarity, r.rate);
-  }
+	const byRarity = new Map<number, number>();
+	for (const r of rarityRates) {
+		byRarity.set(r.rarity, r.rate);
+	}
 
-  return {
-    expTable,
-    rarityRates,
-    getExpForLevel: (level: number) => byLevel.get(level) ?? null,
-    getRarityRate: (growthRank: number) => byRarity.get(growthRank) ?? 1,
-    getCumulativeExp: (targetLevel: number) => {
-      let total = 0;
-      for (const entry of expTable) {
-        if (entry.level >= targetLevel) break;
-        total += entry.needExp;
-      }
-      return total;
-    },
-  };
+	return {
+		expTable,
+		rarityRates,
+		getExpForLevel: (level: number) => byLevel.get(level) ?? null,
+		getRarityRate: (growthRank: number) => byRarity.get(growthRank) ?? 1,
+		getCumulativeExp: (targetLevel: number) => {
+			let total = 0;
+			for (const entry of expTable) {
+				if (entry.level >= targetLevel) break;
+				total += entry.needExp;
+			}
+			return total;
+		},
+	};
 }

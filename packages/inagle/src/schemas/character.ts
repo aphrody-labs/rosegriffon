@@ -12,8 +12,8 @@
  * Defines build types available for BASARA (FABLED) rarity characters
  */
 export interface BasaraBuildType {
-  type: number; // Build type ID (0-5)
-  boardId: string; // hex e.g. "0x8F8C55E6"
+	type: number; // Build type ID (0-5)
+	boardId: string; // hex e.g. "0x8F8C55E6"
 }
 
 /**
@@ -21,13 +21,13 @@ export interface BasaraBuildType {
  * Defines HERO variant availability for characters
  */
 export interface SoccerCharaUniqueRarity {
-  charaId: string; // hex - base character ID
-  isHeroFire: boolean; // Has Fire HERO variant
-  charaParamIdHeroFire: string; // hex - Fire HERO param ID
-  isHeroBlack: boolean; // Has Black HERO variant
-  charaParamIdHeroBlack: string; // hex - Black HERO param ID
-  isHeroPink: boolean; // Has Pink HERO variant
-  charaParamIdHeroPink: string; // hex - Pink HERO param ID
+	charaId: string; // hex - base character ID
+	isHeroFire: boolean; // Has Fire HERO variant
+	charaParamIdHeroFire: string; // hex - Fire HERO param ID
+	isHeroBlack: boolean; // Has Black HERO variant
+	charaParamIdHeroBlack: string; // hex - Black HERO param ID
+	isHeroPink: boolean; // Has Pink HERO variant
+	charaParamIdHeroPink: string; // hex - Pink HERO param ID
 }
 
 /**
@@ -39,18 +39,18 @@ export interface SoccerCharaUniqueRarity {
  * - [5] name (String) - The actual name
  */
 export interface CharacterName {
-  hashId: number;
-  nameType: number; // 0=full name, 11=surname only
-  name: string;
+	hashId: number;
+	nameType: number; // 0=full name, 11=surname only
+	name: string;
 }
 
 /**
  * Character text info from TEXT_INFO entries
  */
 export interface CharacterTextInfo {
-  hashId: number;
-  index: number;
-  text: string;
+	hashId: number;
+	index: number;
+	text: string;
 }
 
 /**
@@ -62,13 +62,13 @@ export interface CharacterTextInfo {
  *   FR: Normal / En progression / Expérimenté / Émérite / Légendaire / Héros / BASARA
  */
 export const Rarity = {
-  Normal: 0,
-  EnProgression: 1,
-  Experimente: 2,
-  Emerite: 3,
-  Legendaire: 5,
-  Hero: 10,
-  Basara: 20,
+	Normal: 0,
+	EnProgression: 1,
+	Experimente: 2,
+	Emerite: 3,
+	Legendaire: 5,
+	Hero: 10,
+	Basara: 20,
 } as const;
 export type Rarity = (typeof Rarity)[keyof typeof Rarity];
 
@@ -76,26 +76,26 @@ export type Rarity = (typeof Rarity)[keyof typeof Rarity];
  * basara_chara_config document structure
  */
 export interface BasaraCharaConfigDocument {
-  version: 100;
-  lists: [
-    {
-      name: "m_basaraBuildTypeList";
-      typeName: "BASARA_BUILD_TYPE";
-      values: BasaraBuildType[];
-    },
-  ];
+	version: 100;
+	lists: [
+		{
+			name: "m_basaraBuildTypeList";
+			typeName: "BASARA_BUILD_TYPE";
+			values: BasaraBuildType[];
+		},
+	];
 }
 
 /**
  * soccer_chara_unique_rarity_config document structure
  */
 export interface SoccerCharaUniqueRarityConfigDocument {
-  version: 100;
-  lists: [
-    {
-      name: "m_soccerCharaUniqueRarityList";
-      typeName: "SOCCER_CHARA_UNIQUE_RARITY";
-      values: SoccerCharaUniqueRarity[];
-    },
-  ];
+	version: 100;
+	lists: [
+		{
+			name: "m_soccerCharaUniqueRarityList";
+			typeName: "SOCCER_CHARA_UNIQUE_RARITY";
+			values: SoccerCharaUniqueRarity[];
+		},
+	];
 }

@@ -31,15 +31,10 @@ interface ArticleCardProps {
 	commentCount?: number;
 }
 
-export function ArticleCard({
-	item,
-	reactionData,
-	commentCount,
-}: ArticleCardProps) {
+export function ArticleCard({ item, reactionData, commentCount }: ArticleCardProps) {
 	const date = new Date(item.date);
 	const categoryLabel = CATEGORY_LABELS[item.category] || item.category;
-	const categoryTone =
-		CATEGORY_TONE[item.category] || "bg-primary/10 text-primary";
+	const categoryTone = CATEGORY_TONE[item.category] || "bg-primary/10 text-primary";
 	const [imgError, setImgError] = useState(false);
 	const href = `/news/${item.slug}`;
 
@@ -49,11 +44,7 @@ export function ArticleCard({
 				{/* Cover image */}
 				<div className="relative aspect-video overflow-hidden bg-surface-container">
 					<Image
-						src={
-							imgError || !item.image
-								? "/images/placeholder-news.svg"
-								: item.image
-						}
+						src={imgError || !item.image ? "/images/placeholder-news.svg" : item.image}
 						alt={item.title}
 						fill
 						className="object-cover transition-transform duration-500 group-hover:scale-105"
@@ -70,7 +61,7 @@ export function ArticleCard({
 						<Badge
 							className={cn(
 								"rounded-md border-none px-2 py-0.5 font-bold text-[10px] uppercase tracking-wider",
-								categoryTone,
+								categoryTone
 							)}
 						>
 							{categoryLabel}
@@ -122,7 +113,9 @@ export function ArticleCard({
 	);
 
 	// Pas d'excerpt ou pas d'image → on n'enrichit pas le hover
-	if (!item.excerpt) {return card;}
+	if (!item.excerpt) {
+		return card;
+	}
 
 	return (
 		<HoverCard openDelay={350} closeDelay={120}>
@@ -135,18 +128,12 @@ export function ArticleCard({
 			>
 				{item.image && !imgError && (
 					<div className="relative aspect-video">
-						<Image
-							src={item.image}
-							alt=""
-							fill
-							className="object-cover"
-							sizes="320px"
-						/>
+						<Image src={item.image} alt="" fill className="object-cover" sizes="320px" />
 						<div className="absolute inset-0 bg-linear-to-t from-black/60 to-transparent" />
 						<Badge
 							className={cn(
 								"absolute top-3 left-3 rounded-md border-none px-2 py-0.5 font-bold text-[10px] uppercase tracking-wider",
-								categoryTone,
+								categoryTone
 							)}
 						>
 							{categoryLabel}
@@ -154,9 +141,7 @@ export function ArticleCard({
 					</div>
 				)}
 				<div className="flex flex-col gap-2 p-4">
-					<h4 className="font-bold text-on-surface text-sm leading-snug">
-						{item.title}
-					</h4>
+					<h4 className="font-bold text-on-surface text-sm leading-snug">{item.title}</h4>
 					<p className="line-clamp-4 text-on-surface-variant text-xs leading-relaxed">
 						{item.excerpt}
 					</p>

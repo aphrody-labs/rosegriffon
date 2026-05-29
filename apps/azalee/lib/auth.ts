@@ -15,12 +15,7 @@ export { ensureUserProfile } from "@rose-griffon/auth";
 
 const getDatabaseURL = () => {
 	let url = process.env.DATABASE_URL;
-	if (
-		!url ||
-		url.startsWith("eyJ2Ijo") ||
-		url === "undefined" ||
-		url === "null"
-	) {
+	if (!url || url.startsWith("eyJ2Ijo") || url === "undefined" || url === "null") {
 		url =
 			"***REDACTED-DATABASE-URL***";
 	}
@@ -40,12 +35,7 @@ const supabaseAdmin = createSupabaseServiceClient();
 
 const getBetterAuthURL = () => {
 	const url = process.env.BETTER_AUTH_URL;
-	if (
-		!url ||
-		url === "undefined" ||
-		url === "null" ||
-		!url.startsWith("http")
-	) {
+	if (!url || url === "undefined" || url === "null" || !url.startsWith("http")) {
 		return "https://azalee.rosegriffon.fr";
 	}
 	return url;
@@ -226,7 +216,7 @@ function createAuth() {
 										}
 									: undefined,
 							},
-							{ ipAddress: ip },
+							{ ipAddress: ip }
 						);
 					},
 					before: async (session) => {
@@ -237,12 +227,7 @@ function createAuth() {
 								.eq("id", session.userId)
 								.maybeSingle();
 
-							if (
-								profile &&
-								ADMIN_ROLES.includes(
-									profile.role as (typeof ADMIN_ROLES)[number],
-								)
-							) {
+							if (profile && ADMIN_ROLES.includes(profile.role as (typeof ADMIN_ROLES)[number])) {
 								const tenYears = new Date();
 								tenYears.setFullYear(tenYears.getFullYear() + 10);
 								return { data: { ...session, expiresAt: tenYears } };
@@ -259,9 +244,7 @@ function createAuth() {
 					after: async (user, ctx) => {
 						await ensureUserProfile(user, supabaseAdmin);
 
-						const ip =
-							ctx?.headers?.get("x-forwarded-for")?.split(",")[0]?.trim() ||
-							"unknown";
+						const ip = ctx?.headers?.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
 						const ipInfo = await getIPIntelligence(ip);
 
 						await logAudit(
@@ -278,7 +261,7 @@ function createAuth() {
 										}
 									: undefined,
 							},
-							{ ipAddress: ip },
+							{ ipAddress: ip }
 						);
 					},
 				},
@@ -319,7 +302,7 @@ try {
 } catch (error) {
 	console.error(
 		"[auth] betterAuth() init failed — falling back to mock:",
-		error instanceof Error ? error.message : String(error),
+		error instanceof Error ? error.message : String(error)
 	);
 	_auth = createAuthMock();
 }

@@ -18,10 +18,7 @@ export default [
 			...next.configs.recommended.rules,
 			...next.configs["core-web-vitals"].rules,
 			"react-compiler/react-compiler": "warn",
-			"better-tailwindcss/enforce-consistent-line-wrapping": [
-				"warn",
-				{ printWidth: 120 },
-			],
+			"better-tailwindcss/enforce-consistent-line-wrapping": ["warn", { printWidth: 120 }],
 			"better-tailwindcss/no-unregistered-classes": "off",
 		},
 		settings: {

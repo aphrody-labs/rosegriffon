@@ -27,9 +27,7 @@ function sanitizeReturnTo(returnTo: string | null): string {
 }
 
 export async function GET(request: NextRequest) {
-	const returnTo = sanitizeReturnTo(
-		request.nextUrl.searchParams.get("returnTo"),
-	);
+	const returnTo = sanitizeReturnTo(request.nextUrl.searchParams.get("returnTo"));
 
 	let session: Awaited<ReturnType<typeof auth.api.getSession>> = null;
 	try {

@@ -27,7 +27,7 @@ interface AuthInstanceLike {
 export async function createAdminGuard(
 	authInstance: AuthInstanceLike,
 	supabase: SupabaseClient<Database>,
-	options: { redirectTo?: string; fallbackRole?: string } = {},
+	options: { redirectTo?: string; fallbackRole?: string } = {}
 ) {
 	const session = await authInstance.api.getSession({
 		headers: await headers(),
@@ -57,7 +57,7 @@ export async function createRoleGuard(
 	authInstance: AuthInstanceLike,
 	supabase: SupabaseClient<Database>,
 	allowedRoles: string[],
-	options: { redirectTo?: string } = {},
+	options: { redirectTo?: string } = {}
 ) {
 	const session = await authInstance.api.getSession({
 		headers: await headers(),

@@ -28,24 +28,21 @@ const TOOLS: Array<{
 	},
 	{
 		container: "bg-secondary-container text-on-secondary-container",
-		description:
-			"11 joueurs, 1 coach, 3 manageuses. Filtrez par élément ou style de jeu.",
+		description: "11 joueurs, 1 coach, 3 manageuses. Filtrez par élément ou style de jeu.",
 		href: "/tools/random-team",
 		icon: "casino",
 		title: "Équipe aléatoire",
 	},
 	{
 		container: "bg-tertiary-container text-on-tertiary-container",
-		description:
-			"Trouvez les noms français, anglais et japonais de toutes les entités du jeu.",
+		description: "Trouvez les noms français, anglais et japonais de toutes les entités du jeu.",
 		href: "/tools/translator",
 		icon: "translate",
 		title: "Traducteur",
 	},
 	{
 		container: "bg-primary-container text-on-primary-container",
-		description:
-			"Composez votre équipe idéale en glissant-déposant vos joueurs sur le terrain.",
+		description: "Composez votre équipe idéale en glissant-déposant vos joueurs sur le terrain.",
 		href: "/tools/my-team",
 		icon: "stadium",
 		title: "Mon Équipe",
@@ -70,7 +67,7 @@ export default function ToolsPage() {
 						<div
 							className={cn(
 								"relative h-28 sm:h-32 flex items-center justify-center",
-								tool.container,
+								tool.container
 							)}
 						>
 							<div className="transition-transform duration-300 group-hover:scale-110">

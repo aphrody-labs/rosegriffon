@@ -1,127 +1,127 @@
-import { DefaultTheme, defineConfig } from 'vitepress'
+import { DefaultTheme, defineConfig } from "vitepress";
 
-import { transformerTwoslash } from '@shikijs/vitepress-twoslash'
+import { transformerTwoslash } from "@shikijs/vitepress-twoslash";
 
-import type { GitHubStatsComponentProps } from '../components/GitHubStat.vue'
+import type { GitHubStatsComponentProps } from "../components/GitHubStat.vue";
 
-import * as shared from './shared'
-
-import {
-    author,
-    bugs,
-    description,
-    funding,
-    license,
-    name,
-    repository,
-    version,
-} from '../../../package.json'
+import * as shared from "./shared";
 
 import {
-    homepage,
-} from '../../package.json'
+	author,
+	bugs,
+	description,
+	funding,
+	license,
+	name,
+	repository,
+	version,
+} from "../../../package.json";
 
-import typedocSidebar from '../../api/typedoc-sidebar.json'
+import { homepage } from "../../package.json";
 
-const repoUrl = repository.url.slice(4, -4), branch = 'main'
+import typedocSidebar from "../../api/typedoc-sidebar.json";
 
-const createSidebarItems = () => [
-    shared.createGuideItem(true),
-    shared.createLinksItem({
-        branch,
-        bugsUrl: bugs.url,
-        fundingUrl: funding,
-        repoUrl,
-        version,
-    }),
-] as DefaultTheme.SidebarItem[]
+const repoUrl = repository.url.slice(4, -4),
+	branch = "main";
+
+const createSidebarItems = () =>
+	[
+		shared.createGuideItem(true),
+		shared.createLinksItem({
+			branch,
+			bugsUrl: bugs.url,
+			fundingUrl: funding,
+			repoUrl,
+			version,
+		}),
+	] as DefaultTheme.SidebarItem[];
 
 export default defineConfig({
-    title: name,
-    description,
+	title: name,
+	description,
 
-    cleanUrls: true,
-    lastUpdated: true,
+	cleanUrls: true,
+	lastUpdated: true,
 
-    markdown: {
-        codeTransformers: [
-            transformerTwoslash({
-                twoslashOptions: {
-                    compilerOptions: {
-                        paths: {
-                            'patreon-api.ts': ['../']
-                        }
-                    }
-                }
-            }),
-        ],
-        languages: ['js', 'ts'],
-    },
+	markdown: {
+		codeTransformers: [
+			transformerTwoslash({
+				twoslashOptions: {
+					compilerOptions: {
+						paths: {
+							"patreon-api.ts": ["../"],
+						},
+					},
+				},
+			}),
+		],
+		languages: ["js", "ts"],
+	},
 
-    vite: {
-        ssr: {
-            noExternal: [ /\.css$/, /^vuetify/ ],
-        },
-        build: {
-            chunkSizeWarningLimit: 800,
-        },
-    },
+	vite: {
+		ssr: {
+			noExternal: [/\.css$/, /^vuetify/],
+		},
+		build: {
+			chunkSizeWarningLimit: 800,
+		},
+	},
 
-    sitemap: {
-        hostname: homepage,
-    },
+	sitemap: {
+		hostname: homepage,
+	},
 
-    themeConfig: {
-        nav: [
-            shared.createGuideItem(false),
-            { text: 'Reference', link: '/api/', activeMatch: '/api/' },
-            { text: 'API Reference', link: 'https://patreon.apidocumentation.com/v2-stable/reference', },
-            shared.createLinksItem({
-                branch,
-                bugsUrl: bugs.url,
-                fundingUrl: funding,
-                repoUrl,
-                version,
-            }),
-            {
-                component: 'GitHubStat',
-                props: {
-                    label: 'GitHub stars',
-                    iconClass: 'vpi-social-github',
-                    repo: 'ghostrider-05/patreon-api.ts',
-                    keyName: 'stargazers_count',
-                } satisfies GitHubStatsComponentProps,
-            },
-        ] as DefaultTheme.NavItem[],
-        sidebar: {
-            '/guide/': createSidebarItems(),
-            '/apps/': createSidebarItems(),
-            '/api/': typedocSidebar,
-        },
+	themeConfig: {
+		nav: [
+			shared.createGuideItem(false),
+			{ text: "Reference", link: "/api/", activeMatch: "/api/" },
+			{ text: "API Reference", link: "https://patreon.apidocumentation.com/v2-stable/reference" },
+			shared.createLinksItem({
+				branch,
+				bugsUrl: bugs.url,
+				fundingUrl: funding,
+				repoUrl,
+				version,
+			}),
+			{
+				component: "GitHubStat",
+				props: {
+					label: "GitHub stars",
+					iconClass: "vpi-social-github",
+					repo: "ghostrider-05/patreon-api.ts",
+					keyName: "stargazers_count",
+				} satisfies GitHubStatsComponentProps,
+			},
+		] as DefaultTheme.NavItem[],
+		sidebar: {
+			"/guide/": createSidebarItems(),
+			"/apps/": createSidebarItems(),
+			"/api/": typedocSidebar,
+		},
 
-        externalLinkIcon: true,
-        editLink: {
-            text: 'Edit this page on GitHub',
-            pattern: `${repoUrl}/edit/${branch}/docs/:path`,
-        },
-        socialLinks: [
-            {
-                icon: 'github',
-                link: repoUrl,
-            },
-        ],
+		externalLinkIcon: true,
+		editLink: {
+			text: "Edit this page on GitHub",
+			pattern: `${repoUrl}/edit/${branch}/docs/:path`,
+		},
+		socialLinks: [
+			{
+				icon: "github",
+				link: repoUrl,
+			},
+		],
 
-        outline: 'deep',
-        search: {
-            provider: 'local',
-            options: {
-                detailedView: true,
-            },
-        },
+		outline: "deep",
+		search: {
+			provider: "local",
+			options: {
+				detailedView: true,
+			},
+		},
 
-        footer: {
-            message: `Released under <a href="${repoUrl}/blob/${branch}/LICENSE">the ${license} License</a>.`,
-            copyright: `Copyright © 2023 - present | ${author.name}`,
-        },
-    },
-})
+		footer: {
+			message: `Released under <a href="${repoUrl}/blob/${branch}/LICENSE">the ${license} License</a>.`,
+			copyright: `Copyright © 2023 - present | ${author.name}`,
+		},
+	},
+});

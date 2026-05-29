@@ -43,8 +43,7 @@ export function CommentForm({
 	const isEmpty = content.trim().length === 0;
 
 	const avatarSrc = profile?.avatar_url ?? user?.image ?? null;
-	const displayName =
-		profile?.full_name ?? profile?.username ?? user?.name ?? null;
+	const displayName = profile?.full_name ?? profile?.username ?? user?.name ?? null;
 
 	const autoResize = (el: HTMLTextAreaElement) => {
 		el.style.height = "auto";
@@ -61,15 +60,13 @@ export function CommentForm({
 
 	const handleSubmit = (e: React.FormEvent) => {
 		e.preventDefault();
-		if (isEmpty || isOverLimit || isPending) {return;}
+		if (isEmpty || isOverLimit || isPending) {
+			return;
+		}
 
 		startTransition(async () => {
 			try {
-				const comment = await createComment(
-					articleId,
-					content.trim(),
-					parentId,
-				);
+				const comment = await createComment(articleId, content.trim(), parentId);
 				setContent("");
 				if (textareaRef.current) {
 					textareaRef.current.style.height = "auto";
@@ -77,8 +74,7 @@ export function CommentForm({
 				onSubmit(comment);
 				toast.success(isReply ? "Réponse publiée" : "Commentaire publié");
 			} catch (error) {
-				const message =
-					error instanceof Error ? error.message : "Erreur lors de la publication";
+				const message = error instanceof Error ? error.message : "Erreur lors de la publication";
 				toast.error(message);
 			}
 		});
@@ -125,15 +121,13 @@ export function CommentForm({
 			{/* Zone de saisie */}
 			<div className="flex-1 space-y-2">
 				{displayName && (
-					<p className="text-xs font-medium text-on-surface-variant">
-						{displayName}
-					</p>
+					<p className="text-xs font-medium text-on-surface-variant">{displayName}</p>
 				)}
 
 				<div
 					className={cn(
 						"relative bg-surface-container-low border rounded-2xl transition-colors focus-within:border-primary/40",
-						isOverLimit ? "border-red-500/40" : "border-outline-variant/10",
+						isOverLimit ? "border-red-500/40" : "border-outline-variant/10"
 					)}
 				>
 					<textarea
@@ -153,9 +147,9 @@ export function CommentForm({
 								"text-xs tabular-nums",
 								isOverLimit
 									? "text-red-500 font-medium"
-									: (remaining <= 100
+									: remaining <= 100
 										? "text-amber-500"
-										: "text-on-surface-variant/40"),
+										: "text-on-surface-variant/40"
 							)}
 						>
 							{remaining}
@@ -179,7 +173,7 @@ export function CommentForm({
 								disabled={isEmpty || isOverLimit || isPending}
 								className="h-7 px-3 text-xs rounded-xl"
 							>
-								{isPending ? "…" : (isReply ? "Répondre" : "Commenter")}
+								{isPending ? "…" : isReply ? "Répondre" : "Commenter"}
 							</Button>
 						</div>
 					</div>

@@ -1,6 +1,15 @@
 "use client";
 
-import { Button, Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle, Input } from "@rose-griffon/ui";
+import {
+	Button,
+	Card,
+	CardContent,
+	CardDescription,
+	CardFooter,
+	CardHeader,
+	CardTitle,
+	Input,
+} from "@rose-griffon/ui";
 import { Download, Image as ImageIcon, User as UserIcon } from "lucide-react";
 import NextImage from "next/image";
 import { useEffect, useRef, useState } from "react";
@@ -27,8 +36,7 @@ const DiscordIcon = (props: React.SVGProps<SVGSVGElement>) => (
 export default function PfpGenerator() {
 	const [image, setImage] = useState<string | null>(null);
 	const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-	const [selectedOverlay, setSelectedOverlay] =
-		useState<string>("/overlay.webp");
+	const [selectedOverlay, setSelectedOverlay] = useState<string>("/overlay.webp");
 	const canvasRef = useRef<HTMLCanvasElement>(null);
 	const [isGenerating, setIsGenerating] = useState(false);
 	const fileInputRef = useRef<HTMLInputElement>(null);
@@ -57,11 +65,15 @@ export default function PfpGenerator() {
 
 	useEffect(() => {
 		const generatePfp = async () => {
-			if (!image || !canvasRef.current) {return;}
+			if (!image || !canvasRef.current) {
+				return;
+			}
 			setIsGenerating(true);
 
 			const ctx = canvasRef.current.getContext("2d");
-			if (!ctx) {return;}
+			if (!ctx) {
+				return;
+			}
 
 			const userImg = new Image();
 			const overlayImg = new Image();
@@ -92,7 +104,7 @@ export default function PfpGenerator() {
 				// Calculate scaling to cover the square
 				const scale = Math.max(
 					canvasRef.current.width / userImg.width,
-					canvasRef.current.height / userImg.height,
+					canvasRef.current.height / userImg.height
 				);
 				const x = (canvasRef.current.width - userImg.width * scale) / 2;
 				const y = (canvasRef.current.height - userImg.height * scale) / 2;
@@ -101,13 +113,7 @@ export default function PfpGenerator() {
 				ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
 
 				// Draw user image centered and scaled
-				ctx.drawImage(
-					userImg,
-					x,
-					y,
-					userImg.width * scale,
-					userImg.height * scale,
-				);
+				ctx.drawImage(userImg, x, y, userImg.width * scale, userImg.height * scale);
 
 				// Draw overlay
 				ctx.drawImage(overlayImg, 0, 0);
@@ -127,7 +133,9 @@ export default function PfpGenerator() {
 	}, [image, selectedOverlay]);
 
 	const downloadPfp = () => {
-		if (!previewUrl) {return;}
+		if (!previewUrl) {
+			return;
+		}
 		const link = document.createElement("a");
 		link.download = "rose-griffon-pfp.png";
 		link.href = previewUrl;
@@ -135,14 +143,18 @@ export default function PfpGenerator() {
 	};
 
 	const handleUpdateProfile = async () => {
-		if (!user || !canvasRef.current) {return;}
+		if (!user || !canvasRef.current) {
+			return;
+		}
 		setIsUpdatingProfile(true);
 		try {
 			// 1. Convert Canvas to Blob
 			const blob = await new Promise<Blob | null>((resolve) =>
-				canvasRef.current?.toBlob(resolve, "image/png"),
+				canvasRef.current?.toBlob(resolve, "image/png")
 			);
-			if (!blob) {throw new Error("Erreur lors de la génération de l'image");}
+			if (!blob) {
+				throw new Error("Erreur lors de la génération de l'image");
+			}
 
 			// 2. Upload to Supabase Storage
 			const supabase = createClient();
@@ -151,7 +163,9 @@ export default function PfpGenerator() {
 				.from("avatars")
 				.upload(filePath, blob, { upsert: true });
 
-			if (uploadError) {throw uploadError;}
+			if (uploadError) {
+				throw uploadError;
+			}
 
 			// 3. Get Public URL
 			const {
@@ -175,14 +189,9 @@ export default function PfpGenerator() {
 	const shareUrl = typeof window !== "undefined" ? window.location.href : "";
 
 	const shareOnX = () => {
-		const text = encodeURIComponent(
-			"Je viens de personnaliser mon avatar Rose Griffon ! 🎨✨",
-		);
+		const text = encodeURIComponent("Je viens de personnaliser mon avatar Rose Griffon ! 🎨✨");
 		const url = encodeURIComponent(shareUrl);
-		window.open(
-			`https://twitter.com/intent/tweet?text=${text}&url=${url}`,
-			"_blank",
-		);
+		window.open(`https://twitter.com/intent/tweet?text=${text}&url=${url}`, "_blank");
 	};
 
 	const copyLink = (platform: string) => {
@@ -208,11 +217,7 @@ export default function PfpGenerator() {
 							{previewUrl ? (
 								<div className="relative rounded-full overflow-hidden shadow-2xl border-[6px] border-background ring-4 ring-primary/20 transition-transform hover:scale-105 duration-500">
 									{/* eslint-disable-next-line @next/next/no-img-element */}
-									<img
-										src={previewUrl}
-										alt="Aperçu"
-										className="size-64 object-cover"
-									/>
+									<img src={previewUrl} alt="Aperçu" className="size-64 object-cover" />
 								</div>
 							) : (
 								<div
@@ -227,9 +232,7 @@ export default function PfpGenerator() {
 									/>
 									<div className="relative z-10 flex flex-col items-center justify-center gap-2 bg-background/80 p-4 rounded-xl backdrop-blur-sm shadow-sm">
 										<ImageIcon className="size-8 text-primary" />
-										<span className="text-sm font-bold text-primary">
-											Cliquez pour ajouter
-										</span>
+										<span className="text-sm font-bold text-primary">Cliquez pour ajouter</span>
 									</div>
 								</div>
 							)}
@@ -345,9 +348,7 @@ export default function PfpGenerator() {
 					</div>
 				</CardContent>
 				<CardFooter className="flex flex-col gap-4 border-t border-primary/10 pt-6">
-					<span className="text-sm text-muted-foreground font-medium">
-						Partager l'outil :
-					</span>
+					<span className="text-sm text-muted-foreground font-medium">Partager l'outil :</span>
 					<div className="flex gap-3">
 						<Button
 							variant="outline"

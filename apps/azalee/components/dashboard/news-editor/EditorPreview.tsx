@@ -32,15 +32,8 @@ export function EditorPreview({
 	return (
 		<div className="fixed inset-0 z-50 bg-background overflow-y-auto">
 			<div className="sticky top-0 z-10 bg-background/80 backdrop-blur-xl border-b border-outline-variant/30 px-6 py-3 flex items-center justify-between">
-				<h2 className="text-sm font-bold text-on-surface">
-					Aperçu de l&apos;article
-				</h2>
-				<Button
-					variant="ghost"
-					size="icon"
-					className="rounded-full"
-					onClick={onClose}
-				>
+				<h2 className="text-sm font-bold text-on-surface">Aperçu de l&apos;article</h2>
+				<Button variant="ghost" size="icon" className="rounded-full" onClick={onClose}>
 					<X className="size-5" />
 				</Button>
 			</div>
@@ -63,9 +56,7 @@ export function EditorPreview({
 					<h1 className="text-4xl font-black tracking-tight leading-tight">
 						{title || "Sans titre"}
 					</h1>
-					{excerpt && (
-						<p className="text-lg text-muted-foreground">{excerpt}</p>
-					)}
+					{excerpt && <p className="text-lg text-muted-foreground">{excerpt}</p>}
 				</div>
 				<div className="flex items-center gap-3 text-sm text-muted-foreground border-y border-outline-variant/20 py-3">
 					<span>{wordCount} mots</span>
@@ -76,8 +67,7 @@ export function EditorPreview({
 						<LexicalRenderer content={content} />
 					) : (
 						<p className="text-muted-foreground italic">
-							Le contenu est vide pour l&apos;instant. Commencez à rédiger dans
-							l&apos;éditeur.
+							Le contenu est vide pour l&apos;instant. Commencez à rédiger dans l&apos;éditeur.
 						</p>
 					)}
 				</div>

@@ -23,7 +23,7 @@ jobs:
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version: latest
-          registry-url: 'https://registry.npmjs.org'
+          registry-url: "https://registry.npmjs.org"
         if: ${{ steps.release.outputs.release_created }}
       - run: bun install --frozen-lockfile
         if: ${{ steps.release.outputs.release_created }}

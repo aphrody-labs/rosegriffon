@@ -3,8 +3,8 @@
 import { useState, useTransition } from "react";
 
 import { addToCart } from "@/lib/shop/cart";
-import { formatEuros } from '@/lib/shop/products';
-import type { Product } from '@/lib/shop/products';
+import { formatEuros } from "@/lib/shop/products";
+import type { Product } from "@/lib/shop/products";
 import { AddToCart } from "./add-to-cart";
 import { MobileStickyCta } from "./mobile-sticky-cta";
 
@@ -13,11 +13,12 @@ export function VariantPickerWithCta({ product }: { product: Product }) {
 	const [selected, setSelected] = useState<string | undefined>();
 	const [, startTransition] = useTransition();
 	const selectedVariant = variants.find((v) => v.id === selected);
-	const displayPrice =
-		selectedVariant?.priceCentsOverride ?? product.priceCents;
+	const displayPrice = selectedVariant?.priceCentsOverride ?? product.priceCents;
 
 	const handleMobileAdd = () => {
-		if (variants.length > 0 && !selected) {return;}
+		if (variants.length > 0 && !selected) {
+			return;
+		}
 		startTransition(async () => {
 			await addToCart(product.slug, selected, 1);
 		});
@@ -26,14 +27,9 @@ export function VariantPickerWithCta({ product }: { product: Product }) {
 	if (variants.length === 0) {
 		return (
 			<div className="flex flex-col gap-4">
-				<p className="text-3xl font-extrabold text-white">
-					{formatEuros(product.priceCents)}
-				</p>
+				<p className="text-3xl font-extrabold text-white">{formatEuros(product.priceCents)}</p>
 				<AddToCart product={product} size="lg" />
-				<MobileStickyCta
-					priceCents={product.priceCents}
-					onAdd={handleMobileAdd}
-				/>
+				<MobileStickyCta priceCents={product.priceCents} onAdd={handleMobileAdd} />
 			</div>
 		);
 	}
@@ -65,9 +61,7 @@ export function VariantPickerWithCta({ product }: { product: Product }) {
 										: "border-[#d4af37]/30 bg-[#0c1730]/40 hover:border-[#d4af37]/60"
 								}`}
 							>
-								<span className="text-sm font-semibold text-white">
-									{v.label}
-								</span>
+								<span className="text-sm font-semibold text-white">{v.label}</span>
 								<span
 									className={`text-sm font-bold ${isActive ? "text-[#d4af37]" : "text-white/70"}`}
 								>

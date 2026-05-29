@@ -97,8 +97,12 @@ const SIDE_TIERS: Tier[] = [
 ];
 
 function formatPrice(cents: number | null): string {
-	if (cents === null) {return "—";}
-	if (cents === 0) {return "Gratuit";}
+	if (cents === null) {
+		return "—";
+	}
+	if (cents === 0) {
+		return "Gratuit";
+	}
 	return `${(cents / 100).toFixed(2).replace(".", ",")} €/mois`;
 }
 
@@ -109,7 +113,7 @@ function TierCard({ tier }: { tier: Tier }) {
 				"relative flex flex-col rounded-2xl border p-6 transition",
 				tier.highlight
 					? "border-[#c9a958] bg-card shadow-[0_0_24px_rgba(201,169,88,0.2)] lg:scale-[1.02]"
-					: "border-border bg-card",
+					: "border-border bg-card"
 			)}
 		>
 			{tier.highlight && (
@@ -133,10 +137,7 @@ function TierCard({ tier }: { tier: Tier }) {
 			<ul className="space-y-2 text-sm text-foreground/85">
 				{tier.perks.map((perk, i) => (
 					<li key={i} className="flex gap-2">
-						<Check
-							className="mt-0.5 size-4 shrink-0"
-							style={{ color: tier.color }}
-						/>
+						<Check className="mt-0.5 size-4 shrink-0" style={{ color: tier.color }} />
 						<span>{perk}</span>
 					</li>
 				))}
@@ -155,9 +156,9 @@ function TierCard({ tier }: { tier: Tier }) {
 						"inline-flex w-full items-center justify-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold transition hover:scale-[1.02] active:scale-[0.98]",
 						tier.priceCents === 0
 							? "border border-border bg-muted text-foreground hover:bg-muted/70"
-							: (tier.highlight
+							: tier.highlight
 								? "bg-[#c9a958] text-[#0c1730] shadow-md hover:bg-[#dab86a]"
-								: "bg-[#FF424D] text-white hover:bg-[#e63b46]"),
+								: "bg-[#FF424D] text-white hover:bg-[#e63b46]"
 					)}
 				>
 					{tier.cta}

@@ -1,15 +1,6 @@
 "use client";
 
-import {
-	CircleUser,
-	Download,
-	LayoutDashboard,
-	Menu,
-	Moon,
-	Sun,
-	User,
-	X,
-} from "lucide-react";
+import { CircleUser, Download, LayoutDashboard, Menu, Moon, Sun, User, X } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -24,12 +15,7 @@ import { NotificationBell } from "@/components/news/NotificationBell";
 import { AuthProvider, useAuth } from "@/components/providers/AuthProvider";
 import { useLanguage } from "@/components/providers/language-provider";
 import { PullToRefresh } from "@/components/ui/pull-to-refresh";
-import {
-	SidebarInset,
-	SidebarProvider,
-	useBreakpoint,
-	useSidebar,
-} from "@rose-griffon/ui";
+import { SidebarInset, SidebarProvider, useBreakpoint, useSidebar } from "@rose-griffon/ui";
 import { AzaleeNavigationRail } from "@/components/navigation/AzaleeNavigationRail";
 import { GlobalSearch } from "@/components/wiki/GlobalSearch";
 import { cn } from "@/lib/utils";
@@ -140,9 +126,7 @@ function MobileHeader({ isHome }: { isHome: boolean }) {
 			className={cn(
 				"fixed top-0 left-0 right-0 z-40 flex h-16 items-center gap-2 px-4 pt-safe md:hidden",
 				"transition-[background-color,box-shadow] duration-300 motion-standard",
-				isScrolled
-					? "bg-surface-container/90 backdrop-blur-xl elevation-1"
-					: "bg-surface",
+				isScrolled ? "bg-surface-container/90 backdrop-blur-xl elevation-1" : "bg-surface"
 			)}
 		>
 			<button
@@ -157,20 +141,12 @@ function MobileHeader({ isHome }: { isHome: boolean }) {
 			{isHome || !title ? (
 				<Link href="/" className="flex items-center gap-1.5 shrink-0 ml-1">
 					<div className="relative size-7">
-						<Image
-							src="/logo.webp"
-							fill
-							sizes="28px"
-							alt="Azalée"
-							className="object-contain"
-						/>
+						<Image src="/logo.webp" fill sizes="28px" alt="Azalée" className="object-contain" />
 					</div>
 					<span className="type-title-large text-on-surface">Azalée</span>
 				</Link>
 			) : (
-				<span className="type-title-large text-on-surface truncate ml-1">
-					{t(title)}
-				</span>
+				<span className="type-title-large text-on-surface truncate ml-1">{t(title)}</span>
 			)}
 
 			<div className="flex-1" />
@@ -189,10 +165,7 @@ function MobileHeader({ isHome }: { isHome: boolean }) {
 
 				<div className="ml-1">
 					{user ? (
-						<MobileAvatar
-							profile={profile}
-							onClick={() => router.push("/settings")}
-						/>
+						<MobileAvatar profile={profile} onClick={() => router.push("/settings")} />
 					) : (
 						<LoginDialog>
 							<button
@@ -227,7 +200,7 @@ function ThemeToggle({ className }: { className?: string }) {
 			<div
 				className={cn(
 					"size-12 md:size-10 rounded-full flex items-center justify-center text-on-surface-variant/20",
-					className,
+					className
 				)}
 			>
 				<Moon className="size-6 md:size-5" aria-hidden="true" />
@@ -245,7 +218,7 @@ function ThemeToggle({ className }: { className?: string }) {
 			className={cn(
 				"relative size-12 md:size-10 rounded-full flex items-center justify-center text-on-surface-variant",
 				"hover:bg-on-surface/[0.08] active:bg-on-surface/[0.12] transition-all duration-300",
-				className,
+				className
 			)}
 			aria-label={isDark ? t("theme.toggle_light") : t("theme.toggle_dark")}
 			title={isDark ? t("theme.light") : t("theme.dark")}
@@ -370,13 +343,7 @@ function DesktopTopBar() {
 				</button>
 				<Link href="/" className="flex items-center gap-2 group px-3">
 					<div className="relative size-7 shrink-0 transition-transform group-hover:scale-105">
-						<Image
-							src="/logo.webp"
-							fill
-							sizes="28px"
-							alt="Azalée"
-							className="object-contain"
-						/>
+						<Image src="/logo.webp" fill sizes="28px" alt="Azalée" className="object-contain" />
 					</div>
 					<span className="font-expressive-title text-xl text-on-surface transition-all duration-500 group-hover:text-primary group-hover:font-width-expanded">
 						Azalée
@@ -441,13 +408,7 @@ function DesktopTopBar() {
 /**
  * PWA INSTALL BANNER
  */
-function InstallBanner({
-	onDismiss,
-	onInstall,
-}: {
-	onDismiss: () => void;
-	onInstall: () => void;
-}) {
+function InstallBanner({ onDismiss, onInstall }: { onDismiss: () => void; onInstall: () => void }) {
 	return (
 		<div className="fixed bottom-24 left-4 right-4 z-[60] md:left-auto md:right-6 md:bottom-6 md:w-80 animate-in slide-in-from-bottom-4 duration-300">
 			<div className="flex items-center gap-3 p-4 rounded-2xl bg-primary-container text-on-primary-container shadow-level-3">
@@ -561,29 +522,21 @@ export function Shell({
 				{!isCompact && <DesktopTopBar />}
 
 				{/* Main Layout - Adaptive based on screen size */}
-				<div
-					className={cn(
-						"flex w-full bg-surface min-h-screen",
-						!isCompact && "pt-14",
-					)}
-				>
+				<div className={cn("flex w-full bg-surface min-h-screen", !isCompact && "pt-14")}>
 					{/* NAVIGATION RAIL (MEDIUM SCREENS) */}
 					{isMedium && <AzaleeNavigationRail />}
 
 					{/* SIDEBAR (EXPANDED SCREENS) */}
 					<AppSidebar
 						variant="sidebar"
-						className={cn(
-							"hidden",
-							isExpanded && "md:flex !h-[calc(100vh-3.5rem)]",
-						)}
+						className={cn("hidden", isExpanded && "md:flex !h-[calc(100vh-3.5rem)]")}
 					/>
 
 					{/* Content Area */}
 					<SidebarInset
 						className={cn(
 							"flex-1 min-w-0 bg-surface-container flex flex-col transition-all duration-300",
-							isMedium && "md:ml-20", // Offset for Navigation Rail
+							isMedium && "md:ml-20" // Offset for Navigation Rail
 						)}
 					>
 						{/* Mobile Header (Only visible on Compact) */}
@@ -593,7 +546,7 @@ export function Shell({
 							id="main-content"
 							className={cn(
 								"flex-1 overflow-y-auto overflow-x-hidden scrollbar-hide flex flex-col",
-								isCompact ? "pt-16" : "pt-0",
+								isCompact ? "pt-16" : "pt-0"
 							)}
 						>
 							<div className={cn(isCompact ? "block" : "hidden")}>
@@ -621,10 +574,7 @@ export function Shell({
 				)}
 
 				{showInstall && (
-					<InstallBanner
-						onDismiss={handleDismissInstall}
-						onInstall={handleInstall}
-					/>
+					<InstallBanner onDismiss={handleDismissInstall} onInstall={handleInstall} />
 				)}
 			</SidebarProvider>
 		</AuthProvider>

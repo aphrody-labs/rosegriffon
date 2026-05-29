@@ -21,20 +21,20 @@ import { DATA_ROOT } from "../core/paths.js";
 // ============================================================================
 
 export interface PassiveSkillEffectRange {
-  rangeType: number;
+	rangeType: number;
 }
 
 export interface PassiveSkillEffect {
-  effectId: string;
-  params: number[];
+	effectId: string;
+	params: number[];
 }
 
 export interface PassiveSkillEffectDatabase {
-  effects: PassiveSkillEffect[];
-  ranges: PassiveSkillEffectRange[];
-  byEffectId: Map<string, PassiveSkillEffect>;
-  /** Get effect parameters by ID */
-  getEffect: (effectId: string) => PassiveSkillEffect | null;
+	effects: PassiveSkillEffect[];
+	ranges: PassiveSkillEffectRange[];
+	byEffectId: Map<string, PassiveSkillEffect>;
+	/** Get effect parameters by ID */
+	getEffect: (effectId: string) => PassiveSkillEffect | null;
 }
 
 // ============================================================================
@@ -42,35 +42,35 @@ export interface PassiveSkillEffectDatabase {
 // ============================================================================
 
 function parseContent(content: any) {
-  const effects: PassiveSkillEffect[] = [];
-  const ranges: PassiveSkillEffectRange[] = [];
+	const effects: PassiveSkillEffect[] = [];
+	const ranges: PassiveSkillEffectRange[] = [];
 
-  if (!content?.lists) return { effects, ranges };
+	if (!content?.lists) return { effects, ranges };
 
-  for (const list of content.lists) {
-    if (list.name === "m_soccerPassiveSkillEffectRangeList") {
-      for (const val of list.values) {
-        ranges.push({ rangeType: val.rangeType });
-      }
-    } else if (list.name === "m_soccerPassiveSkillEffectList") {
-      for (const val of list.values) {
-        effects.push({
-          effectId: val.effectId,
-          params: [
-            val.effectParam1,
-            val.effectParam2,
-            val.effectParam3,
-            val.effectParam4,
-            val.effectParam5,
-            val.effectParam6,
-            val.effectParam7,
-            val.effectParam8,
-          ],
-        });
-      }
-    }
-  }
-  return { effects, ranges };
+	for (const list of content.lists) {
+		if (list.name === "m_soccerPassiveSkillEffectRangeList") {
+			for (const val of list.values) {
+				ranges.push({ rangeType: val.rangeType });
+			}
+		} else if (list.name === "m_soccerPassiveSkillEffectList") {
+			for (const val of list.values) {
+				effects.push({
+					effectId: val.effectId,
+					params: [
+						val.effectParam1,
+						val.effectParam2,
+						val.effectParam3,
+						val.effectParam4,
+						val.effectParam5,
+						val.effectParam6,
+						val.effectParam7,
+						val.effectParam8,
+					],
+				});
+			}
+		}
+	}
+	return { effects, ranges };
 }
 
 // ============================================================================
@@ -78,28 +78,28 @@ function parseContent(content: any) {
 // ============================================================================
 
 export async function loadPassiveSkillEffectConfigAsync(dataPath: string = DATA_ROOT) {
-  const filename = findConfigFile("skill", "passive_skill_effect_config");
-  if (!filename) return null;
+	const filename = findConfigFile("skill", "passive_skill_effect_config");
+	if (!filename) return null;
 
-  const path = join(dataPath, "common/gamedata/skill", filename);
-  const content = await loadJsonAsync<any>(path);
-  return content ? parseContent(content) : null;
+	const path = join(dataPath, "common/gamedata/skill", filename);
+	const content = await loadJsonAsync<any>(path);
+	return content ? parseContent(content) : null;
 }
 
 export async function buildPassiveSkillEffectDatabase(
-  dataPath: string = DATA_ROOT,
+	dataPath: string = DATA_ROOT
 ): Promise<PassiveSkillEffectDatabase> {
-  const result = await loadPassiveSkillEffectConfigAsync(dataPath);
-  const effects = result?.effects || [];
-  const ranges = result?.ranges || [];
+	const result = await loadPassiveSkillEffectConfigAsync(dataPath);
+	const effects = result?.effects || [];
+	const ranges = result?.ranges || [];
 
-  const byEffectId = new Map<string, PassiveSkillEffect>();
-  for (const e of effects) byEffectId.set(e.effectId, e);
+	const byEffectId = new Map<string, PassiveSkillEffect>();
+	for (const e of effects) byEffectId.set(e.effectId, e);
 
-  return {
-    effects,
-    ranges,
-    byEffectId,
-    getEffect: (effectId: string) => byEffectId.get(effectId) ?? null,
-  };
+	return {
+		effects,
+		ranges,
+		byEffectId,
+		getEffect: (effectId: string) => byEffectId.get(effectId) ?? null,
+	};
 }

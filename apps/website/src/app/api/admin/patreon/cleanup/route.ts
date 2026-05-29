@@ -13,10 +13,7 @@ export async function POST(req: Request) {
 	await requirePatreonCreator();
 	const supabase = createAdminClient();
 	if (!supabase) {
-		return NextResponse.json(
-			{ error: "no admin client", ok: false },
-			{ status: 500 },
-		);
+		return NextResponse.json({ error: "no admin client", ok: false }, { status: 500 });
 	}
 	let body: Body = {};
 	try {
@@ -25,9 +22,7 @@ export async function POST(req: Request) {
 		// Body optional
 	}
 	const days = Math.max(1, Math.floor(body.daysSincePending ?? 90));
-	const cutoff = new Date(
-		Date.now() - days * 24 * 60 * 60 * 1000,
-	).toISOString();
+	const cutoff = new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString();
 
 	const { data, error } = await supabase
 		.from("patreon_legacy_members")
@@ -38,10 +33,7 @@ export async function POST(req: Request) {
 
 	if (error) {
 		console.error("[admin/patreon/cleanup]", error);
-		return NextResponse.json(
-			{ error: error.message, ok: false },
-			{ status: 500 },
-		);
+		return NextResponse.json({ error: error.message, ok: false }, { status: 500 });
 	}
 
 	const expiredCount = await archiveExpiredTokens(supabase);
@@ -54,7 +46,7 @@ export async function POST(req: Request) {
 }
 
 async function archiveExpiredTokens(
-	supabase: NonNullable<ReturnType<typeof createAdminClient>>,
+	supabase: NonNullable<ReturnType<typeof createAdminClient>>
 ): Promise<number> {
 	const cutoff = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
 	const { data, error } = await supabase

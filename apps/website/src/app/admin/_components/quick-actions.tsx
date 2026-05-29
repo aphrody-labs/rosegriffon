@@ -1,6 +1,6 @@
 import { DashboardGrid, QuickActionCard } from "@rose-griffon/ui";
-import { BookOpen, Calendar, Image as ImageIcon, Settings, Shield, Users } from 'lucide-react';
-import type { LucideIcon } from 'lucide-react';
+import { BookOpen, Calendar, Image as ImageIcon, Settings, Shield, Users } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 
 interface QuickAction {
 	title: string;

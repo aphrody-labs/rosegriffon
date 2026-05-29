@@ -45,7 +45,7 @@ let _listStmt: ReturnType<Database["prepare"]> | null = null;
  * Returns the configured DB path (env override or default).
  */
 export function cfgbinDbPath(): string {
-  return process.env.IEVR_CFGBIN_DB ?? DEFAULT_DB_PATH;
+	return process.env.IEVR_CFGBIN_DB ?? DEFAULT_DB_PATH;
 }
 
 /**
@@ -53,18 +53,18 @@ export function cfgbinDbPath(): string {
  * Uses Bun.Glob.scanSync as a sync stat shim (Bun.file().exists() is async-only).
  */
 export function cfgbinDbAvailable(): boolean {
-  if (_enabled !== null) return _enabled;
-  const p = cfgbinDbPath();
-  try {
-    const gen = new Bun.Glob(basename(p)).scanSync({
-      cwd: dirname(p),
-      onlyFiles: true,
-    });
-    _enabled = !gen.next().done;
-  } catch {
-    _enabled = false;
-  }
-  return _enabled;
+	if (_enabled !== null) return _enabled;
+	const p = cfgbinDbPath();
+	try {
+		const gen = new Bun.Glob(basename(p)).scanSync({
+			cwd: dirname(p),
+			onlyFiles: true,
+		});
+		_enabled = !gen.next().done;
+	} catch {
+		_enabled = false;
+	}
+	return _enabled;
 }
 
 /**
@@ -72,43 +72,43 @@ export function cfgbinDbAvailable(): boolean {
  * Subsequent calls reuse the same handle.
  */
 function getDb(): Database | null {
-  if (_db) return _db;
-  if (!cfgbinDbAvailable()) return null;
-  _db = new Database(cfgbinDbPath(), { readonly: true });
-  _db.exec("PRAGMA journal_mode=WAL");
-  _db.exec("PRAGMA temp_store=MEMORY");
-  _db.exec("PRAGMA cache_size=-65536");
-  return _db;
+	if (_db) return _db;
+	if (!cfgbinDbAvailable()) return null;
+	_db = new Database(cfgbinDbPath(), { readonly: true });
+	_db.exec("PRAGMA journal_mode=WAL");
+	_db.exec("PRAGMA temp_store=MEMORY");
+	_db.exec("PRAGMA cache_size=-65536");
+	return _db;
 }
 
 function findStmt(db: Database) {
-  if (!_findStmt) {
-    _findStmt = db.prepare<{ path: string }, [string]>(
-      `SELECT path FROM cfgbin
+	if (!_findStmt) {
+		_findStmt = db.prepare<{ path: string }, [string]>(
+			`SELECT path FROM cfgbin
        WHERE path LIKE ? AND parsed = 1
        ORDER BY path DESC
-       LIMIT 1`,
-    );
-  }
-  return _findStmt;
+       LIMIT 1`
+		);
+	}
+	return _findStmt;
 }
 
 function loadStmt(db: Database) {
-  if (!_loadStmt) {
-    _loadStmt = db.prepare<{ json: string | null; error: string | null }, [string]>(
-      `SELECT json, error FROM cfgbin WHERE path = ?`,
-    );
-  }
-  return _loadStmt;
+	if (!_loadStmt) {
+		_loadStmt = db.prepare<{ json: string | null; error: string | null }, [string]>(
+			`SELECT json, error FROM cfgbin WHERE path = ?`
+		);
+	}
+	return _loadStmt;
 }
 
 function listStmt(db: Database) {
-  if (!_listStmt) {
-    _listStmt = db.prepare<{ path: string }, [string]>(
-      `SELECT path FROM cfgbin WHERE path LIKE ? AND parsed = 1`,
-    );
-  }
-  return _listStmt;
+	if (!_listStmt) {
+		_listStmt = db.prepare<{ path: string }, [string]>(
+			`SELECT path FROM cfgbin WHERE path LIKE ? AND parsed = 1`
+		);
+	}
+	return _listStmt;
 }
 
 /**
@@ -116,8 +116,8 @@ function listStmt(db: Database) {
  * Strips `.json` since the DB stores the original `.cfg.bin` paths.
  */
 export function cfgbinDbPathFor(category: string, filename: string): string {
-  const stripped = filename.endsWith(".json") ? filename.slice(0, -".json".length) : filename;
-  return `data/common/gamedata/${category}/${stripped}`;
+	const stripped = filename.endsWith(".json") ? filename.slice(0, -".json".length) : filename;
+	return `data/common/gamedata/${category}/${stripped}`;
 }
 
 /**
@@ -126,8 +126,8 @@ export function cfgbinDbPathFor(category: string, filename: string): string {
  *   DB:     data/common/text/<locale>/chara_text.cfg.bin
  */
 export function cfgbinDbTextPathFor(locale: string, filename: string): string {
-  const stripped = filename.endsWith(".json") ? filename.slice(0, -".json".length) : filename;
-  return `data/common/text/${locale}/${stripped}`;
+	const stripped = filename.endsWith(".json") ? filename.slice(0, -".json".length) : filename;
+	return `data/common/text/${locale}/${stripped}`;
 }
 
 /**
@@ -138,15 +138,15 @@ export function cfgbinDbTextPathFor(locale: string, filename: string): string {
  * Returns null if DB unavailable or no match.
  */
 export function cfgbinDbFindLatest(category: string, prefix: string): string | null {
-  const db = getDb();
-  if (!db) return null;
-  // Pattern : data/common/gamedata/<category>/<prefix>%cfg.bin
-  const pattern = `data/common/gamedata/${category}/${prefix}%cfg.bin`;
-  const row = findStmt(db).get(pattern) as { path: string } | null;
-  if (!row) return null;
-  // Reconstruct filename + .json suffix to stay compatible with loadConfig() callers
-  const base = row.path.split("/").pop() ?? "";
-  return base ? `${base}.json` : null;
+	const db = getDb();
+	if (!db) return null;
+	// Pattern : data/common/gamedata/<category>/<prefix>%cfg.bin
+	const pattern = `data/common/gamedata/${category}/${prefix}%cfg.bin`;
+	const row = findStmt(db).get(pattern) as { path: string } | null;
+	if (!row) return null;
+	// Reconstruct filename + .json suffix to stay compatible with loadConfig() callers
+	const base = row.path.split("/").pop() ?? "";
+	return base ? `${base}.json` : null;
 }
 
 /**
@@ -154,18 +154,18 @@ export function cfgbinDbFindLatest(category: string, prefix: string): string | n
  * Throws if the row is absent OR if parsed=0 (the DB knows it failed).
  */
 export function cfgbinDbLoad(category: string, filename: string): unknown {
-  const db = getDb();
-  if (!db) throw new Error("cfgbin-db: DB unavailable");
-  const path = cfgbinDbPathFor(category, filename);
-  const row = loadStmt(db).get(path) as {
-    json: string | null;
-    error: string | null;
-  } | null;
-  if (!row) throw new Error(`cfgbin-db: row not found '${path}'`);
-  if (row.json === null) {
-    throw new Error(`cfgbin-db: parse failed '${path}': ${row.error ?? "?"}`);
-  }
-  return JSON.parse(row.json);
+	const db = getDb();
+	if (!db) throw new Error("cfgbin-db: DB unavailable");
+	const path = cfgbinDbPathFor(category, filename);
+	const row = loadStmt(db).get(path) as {
+		json: string | null;
+		error: string | null;
+	} | null;
+	if (!row) throw new Error(`cfgbin-db: row not found '${path}'`);
+	if (row.json === null) {
+		throw new Error(`cfgbin-db: parse failed '${path}': ${row.error ?? "?"}`);
+	}
+	return JSON.parse(row.json);
 }
 
 /**
@@ -178,23 +178,23 @@ export function cfgbinDbLoad(category: string, filename: string): unknown {
  * `IEVR_CFGBIN_DB_TEXT=1`.
  */
 export function cfgbinDbLoadText(locale: string, filename: string): unknown {
-  if (!process.env.IEVR_CFGBIN_DB_TEXT) {
-    throw new Error(
-      "cfgbin-db: text loading disabled (parser bug). Set IEVR_CFGBIN_DB_TEXT=1 to opt in.",
-    );
-  }
-  const db = getDb();
-  if (!db) throw new Error("cfgbin-db: DB unavailable");
-  const path = cfgbinDbTextPathFor(locale, filename);
-  const row = loadStmt(db).get(path) as {
-    json: string | null;
-    error: string | null;
-  } | null;
-  if (!row) throw new Error(`cfgbin-db: row not found '${path}'`);
-  if (row.json === null) {
-    throw new Error(`cfgbin-db: parse failed '${path}': ${row.error ?? "?"}`);
-  }
-  return JSON.parse(row.json);
+	if (!process.env.IEVR_CFGBIN_DB_TEXT) {
+		throw new Error(
+			"cfgbin-db: text loading disabled (parser bug). Set IEVR_CFGBIN_DB_TEXT=1 to opt in."
+		);
+	}
+	const db = getDb();
+	if (!db) throw new Error("cfgbin-db: DB unavailable");
+	const path = cfgbinDbTextPathFor(locale, filename);
+	const row = loadStmt(db).get(path) as {
+		json: string | null;
+		error: string | null;
+	} | null;
+	if (!row) throw new Error(`cfgbin-db: row not found '${path}'`);
+	if (row.json === null) {
+		throw new Error(`cfgbin-db: parse failed '${path}': ${row.error ?? "?"}`);
+	}
+	return JSON.parse(row.json);
 }
 
 /**
@@ -202,17 +202,17 @@ export function cfgbinDbLoadText(locale: string, filename: string): unknown {
  * don't fit the (category, filename) shape (e.g., direct `data/common/...`).
  */
 export function cfgbinDbLoadByPath(internalPath: string): unknown {
-  const db = getDb();
-  if (!db) throw new Error("cfgbin-db: DB unavailable");
-  const row = loadStmt(db).get(internalPath) as {
-    json: string | null;
-    error: string | null;
-  } | null;
-  if (!row) throw new Error(`cfgbin-db: row not found '${internalPath}'`);
-  if (row.json === null) {
-    throw new Error(`cfgbin-db: parse failed '${internalPath}': ${row.error ?? "?"}`);
-  }
-  return JSON.parse(row.json);
+	const db = getDb();
+	if (!db) throw new Error("cfgbin-db: DB unavailable");
+	const row = loadStmt(db).get(internalPath) as {
+		json: string | null;
+		error: string | null;
+	} | null;
+	if (!row) throw new Error(`cfgbin-db: row not found '${internalPath}'`);
+	if (row.json === null) {
+		throw new Error(`cfgbin-db: parse failed '${internalPath}': ${row.error ?? "?"}`);
+	}
+	return JSON.parse(row.json);
 }
 
 /**
@@ -220,10 +220,10 @@ export function cfgbinDbLoadByPath(internalPath: string): unknown {
  * `chara_param_*.cfg.bin` for a category.
  */
 export function cfgbinDbList(pathPattern: string): string[] {
-  const db = getDb();
-  if (!db) return [];
-  const rows = listStmt(db).all(pathPattern) as { path: string }[];
-  return rows.map((r) => r.path);
+	const db = getDb();
+	if (!db) return [];
+	const rows = listStmt(db).all(pathPattern) as { path: string }[];
+	return rows.map((r) => r.path);
 }
 
 /**
@@ -231,11 +231,11 @@ export function cfgbinDbList(pathPattern: string): string[] {
  * mais utile pour les tests.
  */
 export function cfgbinDbClose(): void {
-  if (_db) {
-    _db.close();
-    _db = null;
-    _findStmt = null;
-    _loadStmt = null;
-    _listStmt = null;
-  }
+	if (_db) {
+		_db.close();
+		_db = null;
+		_findStmt = null;
+		_loadStmt = null;
+		_listStmt = null;
+	}
 }

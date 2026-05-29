@@ -21,20 +21,20 @@ import { DATA_ROOT } from "../core/paths.js";
 // ============================================================================
 
 export interface SkillTechnicInfo {
-  id: string;
-  winSubMotionNameCrc: string;
-  loseSubMotionNameCrc: string;
-  loseType: number;
-  formationType: number;
-  formationCharaLen: number;
-  shootCurveMidRate: number;
-  shootCurveHeightRate: number;
-  shootCurveAngle: number;
+	id: string;
+	winSubMotionNameCrc: string;
+	loseSubMotionNameCrc: string;
+	loseType: number;
+	formationType: number;
+	formationCharaLen: number;
+	shootCurveMidRate: number;
+	shootCurveHeightRate: number;
+	shootCurveAngle: number;
 }
 
 export interface SkillTechnicDatabase {
-  technics: SkillTechnicInfo[];
-  bySkillId: Map<string, SkillTechnicInfo>;
+	technics: SkillTechnicInfo[];
+	bySkillId: Map<string, SkillTechnicInfo>;
 }
 
 // ============================================================================
@@ -42,27 +42,27 @@ export interface SkillTechnicDatabase {
 // ============================================================================
 
 function parseContent(content: any): SkillTechnicInfo[] {
-  const technics: SkillTechnicInfo[] = [];
-  if (!content?.lists) return technics;
+	const technics: SkillTechnicInfo[] = [];
+	if (!content?.lists) return technics;
 
-  for (const list of content.lists) {
-    if (list.name === "m_SkillTechnicInfoList") {
-      for (const val of list.values) {
-        technics.push({
-          id: val.id,
-          winSubMotionNameCrc: val.winSubMotionNameCrc,
-          loseSubMotionNameCrc: val.loseSubMotionNameCrc,
-          loseType: val.loseType,
-          formationType: val.formationType,
-          formationCharaLen: val.formationCharaLen,
-          shootCurveMidRate: val.shootCurveMidRate,
-          shootCurveHeightRate: val.shootCurveHeightRate,
-          shootCurveAngle: val.shootCurveAngle,
-        });
-      }
-    }
-  }
-  return technics;
+	for (const list of content.lists) {
+		if (list.name === "m_SkillTechnicInfoList") {
+			for (const val of list.values) {
+				technics.push({
+					id: val.id,
+					winSubMotionNameCrc: val.winSubMotionNameCrc,
+					loseSubMotionNameCrc: val.loseSubMotionNameCrc,
+					loseType: val.loseType,
+					formationType: val.formationType,
+					formationCharaLen: val.formationCharaLen,
+					shootCurveMidRate: val.shootCurveMidRate,
+					shootCurveHeightRate: val.shootCurveHeightRate,
+					shootCurveAngle: val.shootCurveAngle,
+				});
+			}
+		}
+	}
+	return technics;
 }
 
 // ============================================================================
@@ -70,20 +70,20 @@ function parseContent(content: any): SkillTechnicInfo[] {
 // ============================================================================
 
 export async function loadSkillTechnicConfigAsync(dataPath: string = DATA_ROOT) {
-  const filename = findConfigFile("skill", "skill_technic_config");
-  if (!filename) return null;
+	const filename = findConfigFile("skill", "skill_technic_config");
+	if (!filename) return null;
 
-  const path = join(dataPath, "common/gamedata/skill", filename);
-  const content = await loadJsonAsync<any>(path);
-  return content ? parseContent(content) : null;
+	const path = join(dataPath, "common/gamedata/skill", filename);
+	const content = await loadJsonAsync<any>(path);
+	return content ? parseContent(content) : null;
 }
 
 export async function buildSkillTechnicDatabase(
-  dataPath: string = DATA_ROOT,
+	dataPath: string = DATA_ROOT
 ): Promise<SkillTechnicDatabase> {
-  const technics = (await loadSkillTechnicConfigAsync(dataPath)) || [];
-  const bySkillId = new Map<string, SkillTechnicInfo>();
-  for (const t of technics) bySkillId.set(t.id, t);
+	const technics = (await loadSkillTechnicConfigAsync(dataPath)) || [];
+	const bySkillId = new Map<string, SkillTechnicInfo>();
+	for (const t of technics) bySkillId.set(t.id, t);
 
-  return { technics, bySkillId };
+	return { technics, bySkillId };
 }

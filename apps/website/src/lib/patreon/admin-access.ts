@@ -33,39 +33,37 @@ interface UserLike {
  * - Discord ID ∈ whitelist → ✓
  * - Sinon → ✗
  */
-export const isPatreonAdmin = cache(
-	async (user: UserLike | null): Promise<boolean> => {
-		if (!user) {return false;}
-		if (user.email?.toLowerCase() === PATREON_CREATOR_EMAIL) {return true;}
-
-		const supabase = createAdminClient();
-		if (!supabase) {return false;}
-
-		const { data: profile } = await supabase
-			.from("profiles")
-			.select("discord_id")
-			.eq("id", user.id)
-			.maybeSingle();
-		if (
-			profile?.discord_id &&
-			PATREON_ADMIN_DISCORD_WHITELIST.has(profile.discord_id)
-		) {
-			return true;
-		}
-
-		const { data: account } = await supabase
-			.from("account")
-			.select("account_id")
-			.eq("user_id", user.id)
-			.eq("provider_id", "discord")
-			.maybeSingle();
-		if (
-			account?.account_id &&
-			PATREON_ADMIN_DISCORD_WHITELIST.has(account.account_id)
-		) {
-			return true;
-		}
-
+export const isPatreonAdmin = cache(async (user: UserLike | null): Promise<boolean> => {
+	if (!user) {
 		return false;
-	},
-);
+	}
+	if (user.email?.toLowerCase() === PATREON_CREATOR_EMAIL) {
+		return true;
+	}
+
+	const supabase = createAdminClient();
+	if (!supabase) {
+		return false;
+	}
+
+	const { data: profile } = await supabase
+		.from("profiles")
+		.select("discord_id")
+		.eq("id", user.id)
+		.maybeSingle();
+	if (profile?.discord_id && PATREON_ADMIN_DISCORD_WHITELIST.has(profile.discord_id)) {
+		return true;
+	}
+
+	const { data: account } = await supabase
+		.from("account")
+		.select("account_id")
+		.eq("user_id", user.id)
+		.eq("provider_id", "discord")
+		.maybeSingle();
+	if (account?.account_id && PATREON_ADMIN_DISCORD_WHITELIST.has(account.account_id)) {
+		return true;
+	}
+
+	return false;
+});

@@ -12,9 +12,7 @@ interface MotionSectionProps {
 }
 
 // MD3 emphasized-decelerate easing
-const EMPHASIZED_DECELERATE: [number, number, number, number] = [
-	0.05, 0.7, 0.1, 1,
-];
+const EMPHASIZED_DECELERATE: [number, number, number, number] = [0.05, 0.7, 0.1, 1];
 
 export function MotionSection({
 	children,
@@ -27,12 +25,7 @@ export function MotionSection({
 
 	if (prefersReducedMotion) {
 		return (
-			<section
-				id={id}
-				className={className}
-				style={style}
-				aria-labelledby={ariaLabelledBy}
-			>
+			<section id={id} className={className} style={style} aria-labelledby={ariaLabelledBy}>
 				{children}
 			</section>
 		);

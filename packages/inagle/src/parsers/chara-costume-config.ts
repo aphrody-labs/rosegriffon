@@ -20,16 +20,16 @@ import { DATA_ROOT } from "../core/paths.js";
 // ============================================================================
 
 export interface CharaCostume {
-  index: number;
-  type: number;
-  modelRef: string;
-  flag1: number;
-  flag2: number;
+	index: number;
+	type: number;
+	modelRef: string;
+	flag1: number;
+	flag2: number;
 }
 
 export interface CharaCostumeDatabase {
-  costumes: CharaCostume[];
-  byIndex: Map<number, CharaCostume>;
+	costumes: CharaCostume[];
+	byIndex: Map<number, CharaCostume>;
 }
 
 // ============================================================================
@@ -37,27 +37,27 @@ export interface CharaCostumeDatabase {
 // ============================================================================
 
 function parseEntries(entries: ConfigNode[]): CharaCostume[] {
-  const costumes: CharaCostume[] = [];
+	const costumes: CharaCostume[] = [];
 
-  for (const entry of entries) {
-    if (!entry.name.startsWith("CHARA_COSTUME_MODEL_LIST_BEG")) continue;
-    const children = entry.children || [];
+	for (const entry of entries) {
+		if (!entry.name.startsWith("CHARA_COSTUME_MODEL_LIST_BEG")) continue;
+		const children = entry.children || [];
 
-    for (let i = 0; i < children.length; i++) {
-      const child = children[i];
-      if (!child.name.startsWith("CHARA_COSTUME_MODEL_")) continue;
-      const vars = child.variables;
-      if (vars.length < 4) continue;
+		for (let i = 0; i < children.length; i++) {
+			const child = children[i];
+			if (!child.name.startsWith("CHARA_COSTUME_MODEL_")) continue;
+			const vars = child.variables;
+			if (vars.length < 4) continue;
 
-      const type = Number.parseInt(vars[0].value, 10);
-      const modelRef = toHex(Number.parseInt(vars[1].value, 10));
-      const flag1 = Number.parseInt(vars[2].value, 10);
-      const flag2 = Number.parseInt(vars[3].value, 10);
+			const type = Number.parseInt(vars[0].value, 10);
+			const modelRef = toHex(Number.parseInt(vars[1].value, 10));
+			const flag1 = Number.parseInt(vars[2].value, 10);
+			const flag2 = Number.parseInt(vars[3].value, 10);
 
-      costumes.push({ index: i, type, modelRef, flag1, flag2 });
-    }
-  }
-  return costumes;
+			costumes.push({ index: i, type, modelRef, flag1, flag2 });
+		}
+	}
+	return costumes;
 }
 
 // ============================================================================
@@ -65,18 +65,18 @@ function parseEntries(entries: ConfigNode[]): CharaCostume[] {
 // ============================================================================
 
 export async function loadCharaCostumeConfigAsync(dataPath: string = DATA_ROOT) {
-  const path = join(dataPath, "common/gamedata/character", "chara_costume_1.02.28.00.cfg.bin.json");
-  const content = await loadJsonAsync<{ entries: ConfigNode[] }>(path);
-  if (!content?.entries) return null;
-  return parseEntries(content.entries);
+	const path = join(dataPath, "common/gamedata/character", "chara_costume_1.02.28.00.cfg.bin.json");
+	const content = await loadJsonAsync<{ entries: ConfigNode[] }>(path);
+	if (!content?.entries) return null;
+	return parseEntries(content.entries);
 }
 
 export async function buildCharaCostumeDatabase(
-  dataPath: string = DATA_ROOT,
+	dataPath: string = DATA_ROOT
 ): Promise<CharaCostumeDatabase> {
-  const costumes = (await loadCharaCostumeConfigAsync(dataPath)) || [];
-  const byIndex = new Map<number, CharaCostume>();
-  for (const c of costumes) byIndex.set(c.index, c);
+	const costumes = (await loadCharaCostumeConfigAsync(dataPath)) || [];
+	const byIndex = new Map<number, CharaCostume>();
+	for (const c of costumes) byIndex.set(c.index, c);
 
-  return { costumes, byIndex };
+	return { costumes, byIndex };
 }

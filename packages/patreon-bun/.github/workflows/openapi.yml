@@ -1,11 +1,11 @@
 name: OpenAPI
-on: 
+on:
   workflow_dispatch:
   push:
     paths:
-      - '**/schemas/v2/api/**'
-      - '**/schemas/v2/resources/**'
-      - '**/scripts/v2/openapi/**'
+      - "**/schemas/v2/api/**"
+      - "**/schemas/v2/resources/**"
+      - "**/scripts/v2/openapi/**"
     branches:
       - main
 jobs:

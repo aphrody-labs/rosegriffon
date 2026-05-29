@@ -5,26 +5,31 @@
 ### Fonctionnalités Principales
 
 #### 1. Recherche Multilingue
+
 - ✅ Support FR, EN, JP simultané
 - ✅ Détection automatique de la langue matchée
 - ✅ Badges de langue colorés (FR: Teal, EN: Red, JP: Gold)
 - ✅ Recherche dans tous les champs de noms
 
 **Fichiers**:
+
 - `fuzzy-match.ts` - `detectMatchedLanguage()`
 - `GlobalSearch.tsx` - Affichage des badges
 
 #### 2. Fuzzy Matching avec Levenshtein
+
 - ✅ Algorithme de distance de Levenshtein
 - ✅ Score de similarité (0-1)
 - ✅ Seuil configurable (défaut: 0.7)
 - ✅ Suggestions "Vouliez-vous dire..."
 
 **Fichiers**:
+
 - `fuzzy-match.ts` - Tous les algorithmes
 - `smart-search.ts` - `generateSuggestions()`
 
 **Exemples**:
+
 ```
 "Endou" → "Endoh" (1 substitution)
 "Axl" → "Axel" (1 insertion)
@@ -32,11 +37,13 @@
 ```
 
 #### 3. Détection de Contexte Automatique
+
 - ✅ Détection via `usePathname()`
 - ✅ Priorisation des résultats par type
 - ✅ Mapping page → types de données
 
 **Contextes supportés**:
+
 - `/chara` → BASARA, Characters
 - `/skill` → Skills
 - `/aura` → Auras
@@ -45,19 +52,23 @@
 - Global (défaut)
 
 **Fichiers**:
+
 - `GlobalSearch.tsx` - `useSearchContext()`
 - `smart-search.ts` - `CONTEXT_PRIORITY`
 
 #### 4. Système de Cache (5 min TTL)
+
 - ✅ Cache en mémoire avec TTL
 - ✅ Clé: `query:context:limit`
 - ✅ Nettoyage automatique (max 100 entrées)
 - ✅ API pour vider manuellement
 
 **Fichiers**:
+
 - `smart-search.ts` - `getCachedResults()`, `cacheResults()`
 
 **Stats**:
+
 ```typescript
 {
   size: 42,
@@ -68,49 +79,60 @@
 ```
 
 #### 5. Annulation de Requêtes
+
 - ✅ Utilise `AbortController`
 - ✅ Annule les requêtes obsolètes
 - ✅ Évite les race conditions
 
 **Fichiers**:
+
 - `GlobalSearch.tsx` - `abortControllerRef`
 
 #### 6. Debounce (300ms)
+
 - ✅ Réduit le nombre de requêtes
 - ✅ Timeout configurable
 - ✅ Cleanup automatique
 
 **Fichiers**:
+
 - `GlobalSearch.tsx` - Timer dans `useEffect`
 
 #### 7. Highlighting des Matches
+
 - ✅ Surlignage du texte matché
 - ✅ Normalisation (accents, case)
 - ✅ Composant réutilisable
 - ✅ Styling Material Design 3
 
 **Fichiers**:
+
 - `fuzzy-match.ts` - `highlightMatches()`
 - `SearchResultHighlight.tsx` - Composant UI
 
 #### 8. Groupement par Type
+
 - ✅ Résultats groupés (Personnages, Techniques, etc.)
 - ✅ Sections avec en-têtes
 - ✅ Tri par score dans chaque groupe
 
 **Fichiers**:
+
 - `GlobalSearch.tsx` - `groupResultsByType()`
 
 #### 9. États UI Complets
+
 - ✅ Loading skeleton (3 items)
 - ✅ Empty state (icône + texte)
 - ✅ Suggestion state (lightbulb + bouton)
 - ✅ Results state (grouped)
 
 **Fichiers**:
+
 - `GlobalSearch.tsx` - Tous les états
 
 #### 10. Material Design 3 Integration
+
 - ✅ Tokens MD3 (`--md-sys-color-*`)
 - ✅ Motion tokens (`--md-sys-motion-*`)
 - ✅ State layers (8% hover)
@@ -119,6 +141,7 @@
 - ✅ Responsive (compact/medium/expanded)
 
 **Fichiers**:
+
 - `GlobalSearch.tsx` - Tous les styles
 - `MD3-INTEGRATION.md` - Documentation complète
 
@@ -227,13 +250,13 @@ interface EnhancedSearchResult {
 
 #### Benchmarks
 
-| Opération | Temps Moyen | Notes |
-|-----------|-------------|-------|
-| Recherche simple | 5-10ms | Cache hit <1ms |
-| Recherche fuzzy | 15-30ms | Avec suggestions |
-| Levenshtein (x100) | ~2ms | Optimisé |
-| Cache lookup | <1ms | Map lookup |
-| Highlight | <1ms | Regex simple |
+| Opération          | Temps Moyen | Notes            |
+| ------------------ | ----------- | ---------------- |
+| Recherche simple   | 5-10ms      | Cache hit <1ms   |
+| Recherche fuzzy    | 15-30ms     | Avec suggestions |
+| Levenshtein (x100) | ~2ms        | Optimisé         |
+| Cache lookup       | <1ms        | Map lookup       |
+| Highlight          | <1ms        | Regex simple     |
 
 #### Optimisations
 
@@ -312,6 +335,7 @@ Aucun (v1.0.0)
 #### De l'ancienne version
 
 **Avant**:
+
 ```typescript
 import { searchGlobal } from "@/app/actions/search";
 
@@ -320,6 +344,7 @@ const results = await searchGlobal("Endou");
 ```
 
 **Après**:
+
 ```typescript
 import { searchGlobal } from "@/app/actions/search";
 
@@ -331,11 +356,11 @@ const results = await searchGlobal("Endou", "chara");
 
 ```typescript
 interface EnhancedSearchResult {
-  // ... anciens champs
-  matchedLanguage?: "FR" | "EN" | "JP";  // NOUVEAU
-  matchedName?: string;                   // NOUVEAU
-  suggestion?: string;                    // NOUVEAU
-  score: number;                          // NOUVEAU
+	// ... anciens champs
+	matchedLanguage?: "FR" | "EN" | "JP"; // NOUVEAU
+	matchedName?: string; // NOUVEAU
+	suggestion?: string; // NOUVEAU
+	score: number; // NOUVEAU
 }
 ```
 
@@ -380,9 +405,9 @@ Aucun
 
 ```json
 {
-  "@leeoniya/ufuzzy": "^1.0.14",    // Fuzzy search (inagle)
-  "next": "^16.0.0",                // Server Actions
-  "react": "^19.0.0"                // Hooks
+	"@leeoniya/ufuzzy": "^1.0.14", // Fuzzy search (inagle)
+	"next": "^16.0.0", // Server Actions
+	"react": "^19.0.0" // Hooks
 }
 ```
 
@@ -390,8 +415,8 @@ Aucun
 
 ```json
 {
-  "vitest": "^2.0.0",               // Tests
-  "typescript": "^5.0.0"            // Types
+	"vitest": "^2.0.0", // Tests
+	"typescript": "^5.0.0" // Types
 }
 ```
 

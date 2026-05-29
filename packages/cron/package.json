@@ -1,31 +1,31 @@
 {
-  "name": "@rose-griffon/cron",
-  "version": "0.1.0",
-  "type": "module",
-  "description": "Daemon de tâches planifiées (cron) pour la maintenance DB, CDN et API",
-  "main": "./src/index.ts",
-  "exports": {
-    ".": "./src/index.ts"
-  },
-  "scripts": {
-    "start": "bun src/index.ts",
-    "build": "bun build src/index.ts --compile --minify --sourcemap --bytecode --format esm --outfile dist/rg-cron",
-    "type-check": "tsc --noEmit",
-    "lint": "bunx oxlint -c ../../.oxlintrc.json src"
-  },
-  "dependencies": {
-    "@aphrody-code/bxc": "^0.5.2",
-    "@aphrody-code/x": "file:/home/ubuntu/aphrody/packages/x",
-    "@asteasolutions/zod-to-openapi": "^8.5.0",
-    "@rose-griffon/auth": "workspace:*",
-    "@rose-griffon/db": "workspace:*",
-    "@rose-griffon/inagle": "workspace:*",
-    "@rose-griffon/types": "workspace:*",
-    "cheerio": "^1.2.0",
-    "zod": "catalog:"
-  },
-  "devDependencies": {
-    "@types/bun": "catalog:",
-    "typescript": "catalog:"
-  }
+	"name": "@rose-griffon/cron",
+	"version": "0.1.0",
+	"description": "Daemon de tâches planifiées (cron) pour la maintenance DB, CDN et API",
+	"type": "module",
+	"main": "./src/index.ts",
+	"exports": {
+		".": "./src/index.ts"
+	},
+	"scripts": {
+		"start": "bun src/index.ts",
+		"build": "bun build src/index.ts --compile --minify --sourcemap --bytecode --format esm --outfile dist/rg-cron",
+		"type-check": "tsc --noEmit",
+		"lint": "bunx oxlint -c ../../.oxlintrc.json src"
+	},
+	"dependencies": {
+		"@aphrody-code/bxc": "^0.5.2",
+		"@aphrody-code/x": "file:/home/ubuntu/aphrody/packages/x",
+		"@asteasolutions/zod-to-openapi": "^8.5.0",
+		"@rose-griffon/auth": "workspace:*",
+		"@rose-griffon/db": "workspace:*",
+		"@rose-griffon/inagle": "workspace:*",
+		"@rose-griffon/types": "workspace:*",
+		"cheerio": "^1.2.0",
+		"zod": "catalog:"
+	},
+	"devDependencies": {
+		"@types/bun": "catalog:",
+		"typescript": "catalog:"
+	}
 }

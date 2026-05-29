@@ -20,10 +20,12 @@ export interface ReconcileSummary {
 export async function reconcileLegacyMember(
 	patreonMemberId: string,
 	userId: string,
-	method: ResolutionMethod,
+	method: ResolutionMethod
 ): Promise<ReconcileResult> {
 	const supabase = createAdminClient();
-	if (!supabase) {throw new Error("no admin supabase client");}
+	if (!supabase) {
+		throw new Error("no admin supabase client");
+	}
 	const { error } = await supabase
 		.from("patreon_legacy_members")
 		.update({
@@ -32,13 +34,17 @@ export async function reconcileLegacyMember(
 			resolved_user_id: userId,
 		})
 		.eq("patreon_member_id", patreonMemberId);
-	if (error) {throw error;}
+	if (error) {
+		throw error;
+	}
 	return { memberId: patreonMemberId, method, userId };
 }
 
 export async function reconcileAll(): Promise<ReconcileSummary> {
 	const supabase = createAdminClient();
-	if (!supabase) {throw new Error("no admin supabase client");}
+	if (!supabase) {
+		throw new Error("no admin supabase client");
+	}
 
 	let byEmail = 0;
 	let byDiscord = 0;
@@ -47,7 +53,9 @@ export async function reconcileAll(): Promise<ReconcileSummary> {
 		.from("patreon_legacy_members")
 		.select("patreon_member_id,email,discord_user_id")
 		.is("resolved_user_id", null);
-	if (pendingErr) {throw pendingErr;}
+	if (pendingErr) {
+		throw pendingErr;
+	}
 
 	for (const row of pending ?? []) {
 		const { patreon_member_id, email, discord_user_id } = row as {
@@ -64,11 +72,7 @@ export async function reconcileAll(): Promise<ReconcileSummary> {
 				.eq("email", email)
 				.maybeSingle();
 			if (profile) {
-				await reconcileLegacyMember(
-					patreon_member_id,
-					(profile as { id: string }).id,
-					"email",
-				);
+				await reconcileLegacyMember(patreon_member_id, (profile as { id: string }).id, "email");
 				byEmail += 1;
 				continue;
 			}
@@ -85,7 +89,7 @@ export async function reconcileAll(): Promise<ReconcileSummary> {
 				await reconcileLegacyMember(
 					patreon_member_id,
 					(profile as { id: string }).id,
-					"discord_id",
+					"discord_id"
 				);
 				byDiscord += 1;
 				continue;
@@ -109,12 +113,11 @@ export async function reconcileAll(): Promise<ReconcileSummary> {
 	};
 }
 
-export async function markReactivated(
-	userId: string,
-	subscriptionRef?: string,
-): Promise<number> {
+export async function markReactivated(userId: string, subscriptionRef?: string): Promise<number> {
 	const supabase = createAdminClient();
-	if (!supabase) {return 0;}
+	if (!supabase) {
+		return 0;
+	}
 	const { data, error } = await supabase
 		.from("patreon_legacy_members")
 		.update({

@@ -1,13 +1,13 @@
 {
-  "name": "@rose-griffon/assets",
-  "version": "0.1.0",
-  "description": "Shared static assets for Rose Griffon apps",
-  "exports": {
-    ".": "./package.json",
-    "./public/*": "./public/*"
-  },
-  "publishConfig": {
-    "registry": "https://npm.pkg.github.com",
-    "access": "restricted"
-  }
+	"name": "@rose-griffon/assets",
+	"version": "0.1.0",
+	"description": "Shared static assets for Rose Griffon apps",
+	"exports": {
+		".": "./package.json",
+		"./public/*": "./public/*"
+	},
+	"publishConfig": {
+		"access": "restricted",
+		"registry": "https://npm.pkg.github.com"
+	}
 }

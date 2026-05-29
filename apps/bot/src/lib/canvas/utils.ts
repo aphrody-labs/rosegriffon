@@ -1,8 +1,4 @@
-import {
-	type Image,
-	loadImage,
-	type SKRSContext2D,
-} from "@aphrody-code/canvas";
+import { type Image, loadImage, type SKRSContext2D } from "@aphrody-code/canvas";
 
 export function roundedRect(
 	ctx: SKRSContext2D,
@@ -10,7 +6,7 @@ export function roundedRect(
 	y: number,
 	w: number,
 	h: number,
-	r: number,
+	r: number
 ): void {
 	const radius = Math.min(r, w / 2, h / 2);
 	ctx.beginPath();
@@ -33,7 +29,7 @@ export function fillRoundedRect(
 	w: number,
 	h: number,
 	r: number,
-	fill: string,
+	fill: string
 ): void {
 	ctx.save();
 	ctx.fillStyle = fill;
@@ -50,7 +46,7 @@ export function strokeRoundedRect(
 	h: number,
 	r: number,
 	stroke: string,
-	lineWidth = 1,
+	lineWidth = 1
 ): void {
 	ctx.save();
 	ctx.strokeStyle = stroke;
@@ -67,11 +63,7 @@ export interface WrapOptions {
 	ellipsis?: string;
 }
 
-export function wrapText(
-	ctx: SKRSContext2D,
-	text: string,
-	opts: WrapOptions,
-): string[] {
+export function wrapText(ctx: SKRSContext2D, text: string, opts: WrapOptions): string[] {
 	const words = (text ?? "").split(/\s+/).filter(Boolean);
 	if (words.length === 0) return [];
 	const lines: string[] = [];
@@ -92,10 +84,7 @@ export function wrapText(
 	if (opts.maxLines && lines.length >= opts.maxLines) {
 		const ellipsis = opts.ellipsis ?? "…";
 		let last = lines[opts.maxLines - 1] ?? "";
-		while (
-			last.length > 0 &&
-			ctx.measureText(`${last}${ellipsis}`).width > opts.maxWidth
-		) {
+		while (last.length > 0 && ctx.measureText(`${last}${ellipsis}`).width > opts.maxWidth) {
 			last = last.slice(0, -1);
 		}
 		lines[opts.maxLines - 1] = `${last.trimEnd()}${ellipsis}`;
@@ -109,7 +98,7 @@ export function fillWrappedText(
 	text: string,
 	x: number,
 	y: number,
-	opts: WrapOptions,
+	opts: WrapOptions
 ): number {
 	const lines = wrapText(ctx, text, opts);
 	for (let i = 0; i < lines.length; i++) {
@@ -122,7 +111,7 @@ export function ellipsize(
 	ctx: SKRSContext2D,
 	text: string,
 	maxWidth: number,
-	ellipsis = "…",
+	ellipsis = "…"
 ): string {
 	if (ctx.measureText(text).width <= maxWidth) return text;
 	let s = text;
@@ -137,7 +126,7 @@ export async function drawCircularImage(
 	src: string,
 	cx: number,
 	cy: number,
-	radius: number,
+	radius: number
 ): Promise<boolean> {
 	try {
 		const img = await loadImage(src);
@@ -161,7 +150,7 @@ export async function drawCoveredImage(
 	y: number,
 	w: number,
 	h: number,
-	radius = 0,
+	radius = 0
 ): Promise<boolean> {
 	try {
 		const img = await loadImage(src);

@@ -9,7 +9,9 @@ import { getPatreonFeedForViewer } from "@/lib/patreon/feed";
 export async function PatreonFeedSection() {
 	const { access, posts } = await getPatreonFeedForViewer({ limit: 6 });
 
-	if (!access.linked) {return null;}
+	if (!access.linked) {
+		return null;
+	}
 
 	return (
 		<section
@@ -23,10 +25,7 @@ export async function PatreonFeedSection() {
 							<Heart className="size-5" />
 						</div>
 						<div>
-							<h2
-								id="patreon-feed-title"
-								className="text-xl font-bold text-foreground sm:text-2xl"
-							>
+							<h2 id="patreon-feed-title" className="text-xl font-bold text-foreground sm:text-2xl">
 								Vos posts Patreon
 							</h2>
 							<p className="text-sm text-muted-foreground">
@@ -42,11 +41,7 @@ export async function PatreonFeedSection() {
 						size="sm"
 						className="gap-1.5 border-[#FF424D]/40 text-[#FF424D] hover:bg-[#FF424D]/10 hover:text-[#FF424D]"
 					>
-						<a
-							href="https://patreon.com/RoseGriffon"
-							target="_blank"
-							rel="noopener noreferrer"
-						>
+						<a href="https://patreon.com/RoseGriffon" target="_blank" rel="noopener noreferrer">
 							Voir sur Patreon
 							<ExternalLink className="h-3.5 w-3.5" />
 						</a>
@@ -77,11 +72,7 @@ function EmptyState({ isActive }: { isActive: boolean }) {
 						: "Pour accéder aux posts réservés aux mécènes, soutenez l'association sur Patreon."}
 				</p>
 				{!isActive && (
-					<Button
-						asChild
-						className="bg-[#FF424D] text-white hover:bg-[#e63b46]"
-						size="sm"
-					>
+					<Button asChild className="bg-[#FF424D] text-white hover:bg-[#e63b46]" size="sm">
 						<Link href="/nous-soutenir#tiers">Voir les paliers</Link>
 					</Button>
 				)}

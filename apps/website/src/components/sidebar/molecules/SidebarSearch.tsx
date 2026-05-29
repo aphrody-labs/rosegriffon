@@ -1,12 +1,21 @@
 "use client";
 
-import { Button, CommandDialog, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList, CommandSeparator } from "@rose-griffon/ui";
+import {
+	Button,
+	CommandDialog,
+	CommandEmpty,
+	CommandGroup,
+	CommandInput,
+	CommandItem,
+	CommandList,
+	CommandSeparator,
+} from "@rose-griffon/ui";
 import { Search } from "lucide-react";
 import { useRouter } from "next/navigation";
 import * as React from "react";
 
-import { assoMenu, contactMenu } from '@/lib/sidebar-config';
-import type { MenuItem, SubMenuItem } from '@/lib/sidebar-config';
+import { assoMenu, contactMenu } from "@/lib/sidebar-config";
+import type { MenuItem, SubMenuItem } from "@/lib/sidebar-config";
 
 interface SearchEntry {
 	url: string;
@@ -79,7 +88,7 @@ export function SidebarSearch() {
 			...flatten(assoMenu.label, assoMenu.items),
 			...flatten(contactMenu.label, contactMenu.items),
 		],
-		[],
+		[]
 	);
 
 	const grouped = React.useMemo(() => {

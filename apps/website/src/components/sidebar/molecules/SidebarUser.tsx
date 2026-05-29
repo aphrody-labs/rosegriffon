@@ -1,6 +1,17 @@
 "use client";
 
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger, Avatar, AvatarFallback, AvatarImage, Skeleton } from "@rose-griffon/ui";
+import {
+	DropdownMenu,
+	DropdownMenuContent,
+	DropdownMenuItem,
+	DropdownMenuLabel,
+	DropdownMenuSeparator,
+	DropdownMenuTrigger,
+	Avatar,
+	AvatarFallback,
+	AvatarImage,
+	Skeleton,
+} from "@rose-griffon/ui";
 import { ChevronUp, LogIn, LogOut, ShieldCheck, User } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -21,13 +32,10 @@ export function SidebarUser() {
 	const { user, profile, loading } = useSidebarAuth();
 	const router = useRouter();
 
-	const displayName =
-		profile?.username || user?.name || user?.email || "Membre";
+	const displayName = profile?.username || user?.name || user?.email || "Membre";
 	const handle = profile?.username ? `@${profile.username}` : user?.email;
 	const avatarSrc = profile?.avatar_url || user?.image || "";
-	const profileHref = profile?.username
-		? `/profil/${profile.username}`
-		: "/dashboard/account";
+	const profileHref = profile?.username ? `/profil/${profile.username}` : "/dashboard/account";
 	const isAdmin = profile?.role === "admin";
 
 	const signOut = async () => {
@@ -39,7 +47,7 @@ export function SidebarUser() {
 		<div className="flex items-center gap-2">
 			{loading ? (
 				<Skeleton className="size-9 rounded-md" />
-			) : (!user ? (
+			) : !user ? (
 				<Link
 					href="/login"
 					aria-label="Se connecter"
@@ -107,7 +115,7 @@ export function SidebarUser() {
 						</DropdownMenuItem>
 					</DropdownMenuContent>
 				</DropdownMenu>
-			))}
+			)}
 
 			<div className="ml-auto">
 				<ThemeToggle />

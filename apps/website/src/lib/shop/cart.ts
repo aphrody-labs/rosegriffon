@@ -15,8 +15,8 @@
 
 import { cookies } from "next/headers";
 import { revalidatePath } from "next/cache";
-import { getProduct, getVariantPrice } from './products';
-import type { Product } from './products';
+import { getProduct, getVariantPrice } from "./products";
+import type { Product } from "./products";
 
 const COOKIE_NAME = "rg_cart";
 const COOKIE_MAX_AGE = 60 * 60 * 24 * 30; // 30 jours
@@ -48,17 +48,21 @@ function makeId(slug: string, variantId?: string): string {
 async function readCart(): Promise<CartItem[]> {
 	const store = await cookies();
 	const raw = store.get(COOKIE_NAME)?.value;
-	if (!raw) {return [];}
+	if (!raw) {
+		return [];
+	}
 	try {
 		const parsed = JSON.parse(decodeURIComponent(raw));
-		if (!Array.isArray(parsed)) {return [];}
+		if (!Array.isArray(parsed)) {
+			return [];
+		}
 		return parsed.filter(
 			(i): i is CartItem =>
 				typeof i === "object" &&
 				i !== null &&
 				typeof i.slug === "string" &&
 				typeof i.qty === "number" &&
-				i.qty > 0,
+				i.qty > 0
 		);
 	} catch {
 		return [];
@@ -84,7 +88,9 @@ function resolveCart(items: CartItem[]): CartSnapshot {
 	const resolved: CartItemResolved[] = [];
 	for (const item of items) {
 		const product = getProduct(item.slug);
-		if (!product) {continue;}
+		if (!product) {
+			continue;
+		}
 		const unit = getVariantPrice(product, item.variantId);
 		const variantLabel = item.variantId
 			? product.variants?.find((v) => v.id === item.variantId)?.label
@@ -109,13 +115,11 @@ export async function getCart(): Promise<CartSnapshot> {
 	return resolveCart(items);
 }
 
-export async function addToCart(
-	slug: string,
-	variantId?: string,
-	qty = 1,
-): Promise<CartSnapshot> {
+export async function addToCart(slug: string, variantId?: string, qty = 1): Promise<CartSnapshot> {
 	const product = getProduct(slug);
-	if (!product) {throw new Error(`[cart] unknown product: ${slug}`);}
+	if (!product) {
+		throw new Error(`[cart] unknown product: ${slug}`);
+	}
 	if (product.variants && !variantId) {
 		throw new Error(`[cart] ${slug} requires a variant`);
 	}
@@ -132,15 +136,10 @@ export async function addToCart(
 	return resolveCart(items);
 }
 
-export async function updateQty(
-	itemId: string,
-	qty: number,
-): Promise<CartSnapshot> {
+export async function updateQty(itemId: string, qty: number): Promise<CartSnapshot> {
 	const items = await readCart();
 	const next = items
-		.map((i) =>
-			i.id === itemId ? { ...i, qty: Math.max(0, Math.min(qty, 10)) } : i,
-		)
+		.map((i) => (i.id === itemId ? { ...i, qty: Math.max(0, Math.min(qty, 10)) } : i))
 		.filter((i) => i.qty > 0);
 	await writeCart(next);
 	revalidatePath("/shop");

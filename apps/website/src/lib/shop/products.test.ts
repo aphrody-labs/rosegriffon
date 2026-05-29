@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
-import { CATEGORY_LABELS, PRODUCTS, formatEuros, getProduct, getVariantPrice } from './products';
-import type { Product } from './products';
+import { CATEGORY_LABELS, PRODUCTS, formatEuros, getProduct, getVariantPrice } from "./products";
+import type { Product } from "./products";
 
 describe("formatEuros", () => {
 	const norm = (s: string) => s.replaceAll(/\s+/g, " ");
@@ -49,9 +49,7 @@ describe("getVariantPrice", () => {
 	});
 
 	it("fallback prix base si variantId inconnu", () => {
-		expect(getVariantPrice(product!, "ghost-variant")).toBe(
-			product!.priceCents,
-		);
+		expect(getVariantPrice(product!, "ghost-variant")).toBe(product!.priceCents);
 	});
 });
 
@@ -86,22 +84,21 @@ describe("Catalogue PRODUCTS — invariants", () => {
 
 	it("a des variantes avec id unique par produit", () => {
 		for (const p of PRODUCTS) {
-			if (!p.variants) {continue;}
+			if (!p.variants) {
+				continue;
+			}
 			const ids = p.variants.map((v) => v.id);
-			expect(new Set(ids).size, `${p.slug} variants ids unique`).toBe(
-				ids.length,
-			);
+			expect(new Set(ids).size, `${p.slug} variants ids unique`).toBe(ids.length);
 		}
 	});
 
 	it("a des variantes avec un label non vide", () => {
 		for (const p of PRODUCTS) {
-			if (!p.variants) {continue;}
+			if (!p.variants) {
+				continue;
+			}
 			for (const v of p.variants) {
-				expect(
-					v.label.trim().length,
-					`${p.slug}/${v.id} label`,
-				).toBeGreaterThan(0);
+				expect(v.label.trim().length, `${p.slug}/${v.id} label`).toBeGreaterThan(0);
 			}
 		}
 	});

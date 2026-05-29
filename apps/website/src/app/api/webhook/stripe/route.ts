@@ -1,5 +1,5 @@
-import { NextResponse } from 'next/server';
-import type { NextRequest } from 'next/server';
+import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
 
 import { createAdminClient } from "@/lib/supabase/server";
 import { getStripe } from "@/lib/shop/stripe";
@@ -52,10 +52,9 @@ export async function POST(req: NextRequest) {
 				let dbSync: "ok" | "skipped" | "failed" = "skipped";
 				const supabase = createAdminClient();
 				if (!supabase) {
-					console.error(
-						"[stripe-webhook] no admin supabase client — order NOT mirrored",
-						{ session_id: session.id },
-					);
+					console.error("[stripe-webhook] no admin supabase client — order NOT mirrored", {
+						session_id: session.id,
+					});
 				} else {
 					let items: any[] = [];
 					try {
@@ -85,22 +84,16 @@ export async function POST(req: NextRequest) {
 
 					const { error: upsertErr } = await supabase.from("orders").upsert(
 						{
-							amount_discount_cents:
-								session.total_details?.amount_discount ?? 0,
-							amount_shipping_cents:
-								session.total_details?.amount_shipping ?? 0,
+							amount_discount_cents: session.total_details?.amount_discount ?? 0,
+							amount_shipping_cents: session.total_details?.amount_shipping ?? 0,
 							amount_subtotal_cents: session.amount_subtotal ?? 0,
 							amount_tax_cents: session.total_details?.amount_tax ?? 0,
 							amount_total_cents: session.amount_total ?? 0,
 							paid_at: new Date().toISOString(),
-							patron_discount_applied:
-								session.metadata?.patron_discount === "yes",
-							shipping_address:
-								session.collected_information?.shipping_details?.address ??
-								null,
+							patron_discount_applied: session.metadata?.patron_discount === "yes",
+							shipping_address: session.collected_information?.shipping_details?.address ?? null,
 							shipping_email: session.customer_details?.email ?? null,
-							shipping_name:
-								session.collected_information?.shipping_details?.name ?? null,
+							shipping_name: session.collected_information?.shipping_details?.name ?? null,
 							shipping_phone: session.customer_details?.phone ?? null,
 							status: "paid",
 							stripe_customer_id:
@@ -112,13 +105,10 @@ export async function POST(req: NextRequest) {
 									? session.payment_intent
 									: (session.payment_intent?.id ?? null),
 							stripe_session_id: session.id,
-							user_id:
-								session.metadata?.user_id !== "anonymous"
-									? session.metadata?.user_id
-									: null,
+							user_id: session.metadata?.user_id !== "anonymous" ? session.metadata?.user_id : null,
 							items: items,
 						},
-						{ onConflict: "stripe_session_id" },
+						{ onConflict: "stripe_session_id" }
 					);
 					if (upsertErr) {
 						dbSync = "failed";
@@ -161,9 +151,6 @@ export async function POST(req: NextRequest) {
 	} catch (error) {
 		const msg = error instanceof Error ? error.message : String(error);
 		console.error("[stripe-webhook] signature verification failed:", msg);
-		return NextResponse.json(
-			{ error: `Webhook error: ${msg}` },
-			{ status: 400 },
-		);
+		return NextResponse.json({ error: `Webhook error: ${msg}` }, { status: 400 });
 	}
 }

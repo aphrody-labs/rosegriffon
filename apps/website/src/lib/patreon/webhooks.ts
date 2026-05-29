@@ -61,7 +61,9 @@ export interface PatreonPostAttrs {
  */
 export function verifySignature(rawBody: string, signature: string): boolean {
 	const secret = process.env.PATREON_WEBHOOK_SECRET;
-	if (!secret) {return false;}
+	if (!secret) {
+		return false;
+	}
 	try {
 		return patreonVerify(secret, signature, rawBody);
 	} catch {
@@ -75,7 +77,7 @@ export function verifySignature(rawBody: string, signature: string): boolean {
  */
 function parseTiers(
 	member: JsonApiResource<PatreonMemberAttrs>,
-	included: JsonApiResource[],
+	included: JsonApiResource[]
 ): {
 	tierIds: string[];
 	tierTitles: string[];
@@ -84,12 +86,12 @@ function parseTiers(
 	discordRoleIds: string[];
 } {
 	const tierRel = member.relationships?.currently_entitled_tiers?.data;
-	const refs = Array.isArray(tierRel) ? tierRel : (tierRel ? [tierRel] : []);
+	const refs = Array.isArray(tierRel) ? tierRel : tierRel ? [tierRel] : [];
 	const tiers = refs
 		.map((r) =>
 			(included as unknown as JsonApiResource<PatreonTierAttrs>[]).find(
-				(i) => i.type === "tier" && i.id === r.id,
-			),
+				(i) => i.type === "tier" && i.id === r.id
+			)
 		)
 		.filter((t): t is JsonApiResource<PatreonTierAttrs> => Boolean(t));
 
@@ -99,12 +101,8 @@ function parseTiers(
 			.filter((s): s is string => Boolean(s)),
 		tierAmountsCents: tiers.map((t) => t.attributes.amount_cents ?? 0),
 		tierIds: tiers.map((t) => t.id),
-		tierRequiresShipping: tiers.map(
-			(t) => t.attributes.requires_shipping ?? false,
-		),
-		tierTitles: tiers
-			.map((t) => t.attributes.title)
-			.filter((s): s is string => Boolean(s)),
+		tierRequiresShipping: tiers.map((t) => t.attributes.requires_shipping ?? false),
+		tierTitles: tiers.map((t) => t.attributes.title).filter((s): s is string => Boolean(s)),
 	};
 }
 
@@ -113,14 +111,16 @@ function parseTiers(
  */
 function parseAddress(
 	member: JsonApiResource<PatreonMemberAttrs>,
-	included: JsonApiResource[],
+	included: JsonApiResource[]
 ): PatreonAddressAttrs | null {
 	const rel = member.relationships?.address?.data;
 	const id = rel && !Array.isArray(rel) ? rel.id : null;
-	if (!id) {return null;}
-	const addr = (
-		included as unknown as JsonApiResource<PatreonAddressAttrs>[]
-	).find((r) => r.type === "address" && r.id === id);
+	if (!id) {
+		return null;
+	}
+	const addr = (included as unknown as JsonApiResource<PatreonAddressAttrs>[]).find(
+		(r) => r.type === "address" && r.id === id
+	);
 	return addr?.attributes ?? null;
 }
 
@@ -131,9 +131,11 @@ function parseAddress(
  */
 async function resolveRgUserId(
 	supabase: ReturnType<typeof createAdminClient>,
-	patreonUserId: string,
+	patreonUserId: string
 ): Promise<string | null> {
-	if (!supabase) {return null;}
+	if (!supabase) {
+		return null;
+	}
 	const { data } = await supabase
 		.from("patreon_oauth_tokens")
 		.select("user_id")
@@ -150,10 +152,12 @@ async function resolveRgUserId(
  */
 export async function processPatreonEvent(
 	payload: PatreonWebhookPayload,
-	trigger: PatreonTrigger,
+	trigger: PatreonTrigger
 ): Promise<void> {
 	const supabase = createAdminClient();
-	if (!supabase) {throw new Error("no admin supabase client");}
+	if (!supabase) {
+		throw new Error("no admin supabase client");
+	}
 
 	if (trigger.startsWith("posts:")) {
 		await processPostEvent(payload, trigger);
@@ -168,10 +172,12 @@ export async function processPatreonEvent(
  */
 async function processPostEvent(
 	payload: PatreonWebhookPayload,
-	trigger: PatreonTrigger,
+	trigger: PatreonTrigger
 ): Promise<void> {
 	const supabase = createAdminClient();
-	if (!supabase) {return;}
+	if (!supabase) {
+		return;
+	}
 
 	const post = payload.data as JsonApiResource<PatreonPostAttrs>;
 	const attrs = post.attributes;
@@ -185,14 +191,13 @@ async function processPostEvent(
 				trigger,
 				updated_at: new Date().toISOString(),
 			},
-			{ onConflict: "patreon_post_id" },
+			{ onConflict: "patreon_post_id" }
 		);
 		return;
 	}
 
 	const campaignRel = post.relationships?.campaign?.data;
-	const campaignId =
-		campaignRel && !Array.isArray(campaignRel) ? campaignRel.id : null;
+	const campaignId = campaignRel && !Array.isArray(campaignRel) ? campaignRel.id : null;
 
 	const teaser =
 		attrs.teaser_text ??
@@ -215,7 +220,7 @@ async function processPostEvent(
 			trigger,
 			url: attrs.url ?? null,
 		},
-		{ onConflict: "patreon_post_id" },
+		{ onConflict: "patreon_post_id" }
 	);
 }
 
@@ -224,10 +229,12 @@ async function processPostEvent(
  */
 async function processMemberEvent(
 	payload: PatreonWebhookPayload,
-	trigger: PatreonTrigger,
+	trigger: PatreonTrigger
 ): Promise<void> {
 	const supabase = createAdminClient();
-	if (!supabase) {throw new Error("no admin supabase client");}
+	if (!supabase) {
+		throw new Error("no admin supabase client");
+	}
 
 	const member = payload.data as JsonApiResource<PatreonMemberAttrs>;
 	const attrs = member.attributes;
@@ -238,8 +245,7 @@ async function processMemberEvent(
 	const patreonUserId = userRel && !Array.isArray(userRel) ? userRel.id : "";
 
 	const campaignRel = member.relationships?.campaign?.data;
-	const campaignId =
-		campaignRel && !Array.isArray(campaignRel) ? campaignRel.id : null;
+	const campaignId = campaignRel && !Array.isArray(campaignRel) ? campaignRel.id : null;
 
 	// === DELETE / pledge:delete : patron_status → former_patron côté legacy + memberships
 	if (trigger === "members:delete") {
@@ -304,7 +310,7 @@ async function processMemberEvent(
 			tier_ids: tiers.tierIds,
 			tier_titles: tiers.tierTitles,
 		},
-		{ onConflict: "patreon_member_id" },
+		{ onConflict: "patreon_member_id" }
 	);
 
 	// 2. Live memberships — uniquement si on connaît le user RG
@@ -321,9 +327,7 @@ async function processMemberEvent(
 				last_charge_date: attrs.last_charge_date ?? null,
 				last_charge_status: attrs.last_charge_status ?? null,
 				lifetime_support_cents:
-					attrs.campaign_lifetime_support_cents ??
-					attrs.lifetime_support_cents ??
-					null,
+					attrs.campaign_lifetime_support_cents ?? attrs.lifetime_support_cents ?? null,
 				member_email: attrs.email ?? null,
 				next_charge_date: attrs.next_charge_date ?? null,
 				note: attrs.note ?? null,
@@ -334,10 +338,7 @@ async function processMemberEvent(
 				patron_status: attrs.patron_status ?? null,
 				pledge_cadence: attrs.pledge_cadence ?? null,
 				pledge_start: attrs.pledge_relationship_start ?? null,
-				raw_identity: { trigger, payload } as unknown as Record<
-					string,
-					unknown
-				>,
+				raw_identity: { trigger, payload } as unknown as Record<string, unknown>,
 				tier_amounts_cents: tiers.tierAmountsCents,
 				tier_ids: tiers.tierIds,
 				tier_requires_shipping: tiers.tierRequiresShipping,
@@ -345,7 +346,7 @@ async function processMemberEvent(
 				user_id: rgUserId,
 				will_pay_amount_cents: attrs.will_pay_amount_cents ?? null,
 			},
-			{ onConflict: "user_id,patreon_user_id" },
+			{ onConflict: "user_id,patreon_user_id" }
 		);
 	}
 }

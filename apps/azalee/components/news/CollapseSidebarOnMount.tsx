@@ -13,7 +13,9 @@ import { useSidebar } from "@rose-griffon/ui";
 export function CollapseSidebarOnMount() {
 	const { setOpen, isMobile } = useSidebar();
 	useEffect(() => {
-		if (isMobile) {return;}
+		if (isMobile) {
+			return;
+		}
 		setOpen(false);
 	}, [setOpen, isMobile]);
 	return null;

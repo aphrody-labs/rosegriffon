@@ -25,8 +25,8 @@ export type CfgBinVariableType = "Int" | "Float" | "String";
  * Found in: chara_text, skill_text, chara_base, etc.
  */
 export interface CfgBinVariable {
-  type: CfgBinVariableType;
-  value: string | number;
+	type: CfgBinVariableType;
+	value: string | number;
 }
 
 /**
@@ -34,9 +34,9 @@ export interface CfgBinVariable {
  * Found in: item_config, team_config, capsule_config, etc.
  */
 export interface CfgBinNamedVariable {
-  Name: string;
-  Type: CfgBinVariableType;
-  Value: string | number;
+	Name: string;
+	Type: CfgBinVariableType;
+	Value: string | number;
 }
 
 /**
@@ -44,9 +44,9 @@ export interface CfgBinNamedVariable {
  * Found in: chara_text.cfg.bin.json, skill_text.cfg.bin.json
  */
 export interface CfgBinEntry {
-  name: string;
-  variables: CfgBinVariable[];
-  children: CfgBinEntry[];
+	name: string;
+	variables: CfgBinVariable[];
+	children: CfgBinEntry[];
 }
 
 /**
@@ -54,10 +54,10 @@ export interface CfgBinEntry {
  * Found in: item_config, team_config, capsule_config
  */
 export interface CfgBinNamedEntry {
-  Name: string;
-  EndTerminator: boolean;
-  Variables: CfgBinNamedVariable[];
-  Children?: CfgBinNamedEntry[];
+	Name: string;
+	EndTerminator: boolean;
+	Variables: CfgBinNamedVariable[];
+	Children?: CfgBinNamedEntry[];
 }
 
 /**
@@ -65,7 +65,7 @@ export interface CfgBinNamedEntry {
  * Example: chara_text.cfg.bin.json, chara_base_1.03.98.00.cfg.bin.json
  */
 export interface CfgBinDocument {
-  entries: CfgBinEntry[];
+	entries: CfgBinEntry[];
 }
 
 /**
@@ -73,8 +73,8 @@ export interface CfgBinDocument {
  * Example: item_config_1.03.65.00.json, team_config_1.04.06.00.json
  */
 export interface CfgBinNamedDocument {
-  Encoding?: string; // 'utf-8' | 'shift_jis'
-  Entries: CfgBinNamedEntry[];
+	Encoding?: string; // 'utf-8' | 'shift_jis'
+	Entries: CfgBinNamedEntry[];
 }
 
 // ============================================================================
@@ -86,9 +86,9 @@ export interface CfgBinNamedDocument {
  * Generic typed list structure
  */
 export interface TypedList<T = Record<string, unknown>> {
-  name: string; // e.g. "m_skillInfoList", "m_soccerCharaUniqueRarityList"
-  typeName: string; // e.g. "SKILL_INFO", "SOCCER_CHARA_UNIQUE_RARITY"
-  values: T[];
+	name: string; // e.g. "m_skillInfoList", "m_soccerCharaUniqueRarityList"
+	typeName: string; // e.g. "SKILL_INFO", "SOCCER_CHARA_UNIQUE_RARITY"
+	values: T[];
 }
 
 /**
@@ -96,6 +96,6 @@ export interface TypedList<T = Record<string, unknown>> {
  * Example: skill_config_2.00.19.00.cfg.bin.json
  */
 export interface TypedDocument<T = Record<string, unknown>> {
-  version: number; // Always 100
-  lists: TypedList<T>[];
+	version: number; // Always 100
+	lists: TypedList<T>[];
 }

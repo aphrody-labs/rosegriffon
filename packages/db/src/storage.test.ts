@@ -26,13 +26,13 @@ describe("getAssetUrl", () => {
 
 	it("should construct Supabase storage URL for relative paths", () => {
 		expect(getAssetUrl("logo.png")).toBe(
-			"https://test.supabase.co/storage/v1/object/public/assets/logo.png",
+			"https://test.supabase.co/storage/v1/object/public/assets/logo.png"
 		);
 	});
 
 	it("should handle leading slashes in relative paths", () => {
 		expect(getAssetUrl("/avatars/user.png")).toBe(
-			"https://test.supabase.co/storage/v1/object/public/assets/avatars/user.png",
+			"https://test.supabase.co/storage/v1/object/public/assets/avatars/user.png"
 		);
 	});
 

@@ -25,10 +25,7 @@ interface SidebarNavLinksProps {
  * @param {string} title - Le titre du groupe (affiché en label).
  * @param {MenuItem[]} items - La liste des items de menu à afficher.
  */
-export const SidebarNavLinks = React.memo(({
-	title,
-	items,
-}: SidebarNavLinksProps) => {
+export const SidebarNavLinks = React.memo(({ title, items }: SidebarNavLinksProps) => {
 	// Protection si items est vide ou invalide
 	if (!items || !Array.isArray(items) || items.length === 0) {
 		return null;
@@ -48,9 +45,7 @@ export const SidebarNavLinks = React.memo(({
 						return (
 							<SidebarMenuItem key={`${item.title}-${index}`}>
 								{/* Collapsible items */}
-								{item.collapsible &&
-								Array.isArray(item.items) &&
-								item.items.length > 0 ? (
+								{item.collapsible && Array.isArray(item.items) && item.items.length > 0 ? (
 									<SidebarCollapsibleItem
 										title={item.title}
 										icon={

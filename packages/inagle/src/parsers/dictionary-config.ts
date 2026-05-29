@@ -23,26 +23,26 @@ import { DATA_ROOT } from "../core/paths.js";
 // ============================================================================
 
 export interface DictionaryHabitat {
-  habitatId: string;
-  mapId: string;
-  mapNameId: string;
-  fileName: string;
-  textureNameCrc: string;
-  isShowAreaTexture: boolean;
+	habitatId: string;
+	mapId: string;
+	mapNameId: string;
+	fileName: string;
+	textureNameCrc: string;
+	isShowAreaTexture: boolean;
 }
 
 export interface DictionaryObservation {
-  [key: string]: any;
+	[key: string]: any;
 }
 
 export interface DictionaryDatabase {
-  habitats: DictionaryHabitat[];
-  observations: DictionaryObservation[];
-  params: any[];
-  actionIds: any[];
-  actionPlays: any[];
-  actionData: any[];
-  byHabitatId: Map<string, DictionaryHabitat>;
+	habitats: DictionaryHabitat[];
+	observations: DictionaryObservation[];
+	params: any[];
+	actionIds: any[];
+	actionPlays: any[];
+	actionData: any[];
+	byHabitatId: Map<string, DictionaryHabitat>;
 }
 
 // ============================================================================
@@ -50,41 +50,41 @@ export interface DictionaryDatabase {
 // ============================================================================
 
 function parseContent(content: any) {
-  const habitats: DictionaryHabitat[] = [];
-  const observations: DictionaryObservation[] = [];
-  const params: any[] = [];
-  const actionIds: any[] = [];
-  const actionPlays: any[] = [];
-  const actionData: any[] = [];
+	const habitats: DictionaryHabitat[] = [];
+	const observations: DictionaryObservation[] = [];
+	const params: any[] = [];
+	const actionIds: any[] = [];
+	const actionPlays: any[] = [];
+	const actionData: any[] = [];
 
-  if (!content?.lists)
-    return { habitats, observations, params, actionIds, actionPlays, actionData };
+	if (!content?.lists)
+		return { habitats, observations, params, actionIds, actionPlays, actionData };
 
-  for (const list of content.lists) {
-    if (list.name === "m_HabitatList") {
-      for (const val of list.values) {
-        habitats.push({
-          habitatId: val.habitatID,
-          mapId: val.mapID,
-          mapNameId: val.mapNameID,
-          fileName: val.fileName,
-          textureNameCrc: val.textureNameCrc,
-          isShowAreaTexture: val.isShowAreaTexture,
-        });
-      }
-    } else if (list.name === "m_ObservationDataList") {
-      for (const val of list.values) observations.push(val);
-    } else if (list.name === "m_ParamList") {
-      for (const val of list.values) params.push(val);
-    } else if (list.name === "m_ObservationActionIdList") {
-      for (const val of list.values) actionIds.push(val);
-    } else if (list.name === "m_ObservationActionPlayList") {
-      for (const val of list.values) actionPlays.push(val);
-    } else if (list.name === "m_ObservationActionDataList") {
-      for (const val of list.values) actionData.push(val);
-    }
-  }
-  return { habitats, observations, params, actionIds, actionPlays, actionData };
+	for (const list of content.lists) {
+		if (list.name === "m_HabitatList") {
+			for (const val of list.values) {
+				habitats.push({
+					habitatId: val.habitatID,
+					mapId: val.mapID,
+					mapNameId: val.mapNameID,
+					fileName: val.fileName,
+					textureNameCrc: val.textureNameCrc,
+					isShowAreaTexture: val.isShowAreaTexture,
+				});
+			}
+		} else if (list.name === "m_ObservationDataList") {
+			for (const val of list.values) observations.push(val);
+		} else if (list.name === "m_ParamList") {
+			for (const val of list.values) params.push(val);
+		} else if (list.name === "m_ObservationActionIdList") {
+			for (const val of list.values) actionIds.push(val);
+		} else if (list.name === "m_ObservationActionPlayList") {
+			for (const val of list.values) actionPlays.push(val);
+		} else if (list.name === "m_ObservationActionDataList") {
+			for (const val of list.values) actionData.push(val);
+		}
+	}
+	return { habitats, observations, params, actionIds, actionPlays, actionData };
 }
 
 // ============================================================================
@@ -92,27 +92,27 @@ function parseContent(content: any) {
 // ============================================================================
 
 export async function loadDictionaryConfigAsync(dataPath: string = DATA_ROOT) {
-  const filename = findConfigFile("dictionary", "dictionary_config");
-  if (!filename) return null;
+	const filename = findConfigFile("dictionary", "dictionary_config");
+	if (!filename) return null;
 
-  const path = join(dataPath, "common/gamedata/dictionary", filename);
-  const content = await loadJsonAsync<any>(path);
-  return content ? parseContent(content) : null;
+	const path = join(dataPath, "common/gamedata/dictionary", filename);
+	const content = await loadJsonAsync<any>(path);
+	return content ? parseContent(content) : null;
 }
 
 export async function buildDictionaryDatabase(
-  dataPath: string = DATA_ROOT,
+	dataPath: string = DATA_ROOT
 ): Promise<DictionaryDatabase> {
-  const result = await loadDictionaryConfigAsync(dataPath);
-  const habitats = result?.habitats || [];
-  const observations = result?.observations || [];
-  const params = result?.params || [];
-  const actionIds = result?.actionIds || [];
-  const actionPlays = result?.actionPlays || [];
-  const actionData = result?.actionData || [];
+	const result = await loadDictionaryConfigAsync(dataPath);
+	const habitats = result?.habitats || [];
+	const observations = result?.observations || [];
+	const params = result?.params || [];
+	const actionIds = result?.actionIds || [];
+	const actionPlays = result?.actionPlays || [];
+	const actionData = result?.actionData || [];
 
-  const byHabitatId = new Map<string, DictionaryHabitat>();
-  for (const h of habitats) byHabitatId.set(h.habitatId, h);
+	const byHabitatId = new Map<string, DictionaryHabitat>();
+	for (const h of habitats) byHabitatId.set(h.habitatId, h);
 
-  return { habitats, observations, params, actionIds, actionPlays, actionData, byHabitatId };
+	return { habitats, observations, params, actionIds, actionPlays, actionData, byHabitatId };
 }

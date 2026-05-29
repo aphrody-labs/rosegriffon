@@ -52,9 +52,9 @@ describe("resolveProfile", () => {
 		// 3. Email fetch succeeds
 		mockSupabase.maybeSingle.mockResolvedValueOnce({ data: mockProfile });
 
-		const result = await resolveProfile(mockSupabase, { 
-			id: "user-123", 
-			email: "test@example.com" 
+		const result = await resolveProfile(mockSupabase, {
+			id: "user-123",
+			email: "test@example.com",
 		});
 
 		expect(result).toEqual(mockProfile);

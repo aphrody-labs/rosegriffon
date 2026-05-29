@@ -1,11 +1,4 @@
-import {
-	ArrowLeft,
-	Lock,
-	RefreshCw,
-	ShoppingBag,
-	Sparkles,
-	Truck,
-} from "lucide-react";
+import { ArrowLeft, Lock, RefreshCw, ShoppingBag, Sparkles, Truck } from "lucide-react";
 import Link from "next/link";
 import { Suspense } from "react";
 
@@ -26,12 +19,10 @@ export default async function CartPage() {
 		return (
 			<div className="mx-auto flex min-h-[60vh] max-w-2xl flex-col items-center justify-center px-4 py-16 text-center">
 				<ShoppingBag className="size-16 text-[#d4af37]" />
-				<h1 className="mt-6 text-3xl font-extrabold text-white">
-					Ton panier est vide
-				</h1>
+				<h1 className="mt-6 text-3xl font-extrabold text-white">Ton panier est vide</h1>
 				<p className="mt-3 max-w-md text-base text-white/70">
-					Pas encore d'articles. Découvre nos packs personnage édition limitée,
-					nos prints A5 et nos stickers chibi.
+					Pas encore d'articles. Découvre nos packs personnage édition limitée, nos prints A5 et nos
+					stickers chibi.
 				</p>
 				<Link
 					href="/shop"
@@ -80,20 +71,14 @@ export default async function CartPage() {
 							Récapitulatif
 						</h2>
 
-						<Suspense
-							fallback={
-								<div className="h-20 animate-pulse rounded-xl bg-[#0c1730]/60" />
-							}
-						>
+						<Suspense fallback={<div className="h-20 animate-pulse rounded-xl bg-[#0c1730]/60" />}>
 							<PatreonDiscountBanner />
 						</Suspense>
 
 						<dl className="space-y-2 border-t border-[#d4af37]/20 pt-4 text-sm">
 							<div className="flex items-center justify-between text-white/80">
 								<dt>Sous-total</dt>
-								<dd className="font-semibold text-white">
-									{formatEuros(cart.subtotalCents)}
-								</dd>
+								<dd className="font-semibold text-white">{formatEuros(cart.subtotalCents)}</dd>
 							</div>
 							<div className="flex items-center justify-between text-white/60">
 								<dt>Livraison</dt>
@@ -131,11 +116,7 @@ export default async function CartPage() {
 								label="Retours 14j"
 								sub="Satisfait ou remboursé"
 							/>
-							<TrustItem
-								icon={<Truck className="size-3.5" />}
-								label="Expédié FR"
-								sub="3-7 jours"
-							/>
+							<TrustItem icon={<Truck className="size-3.5" />} label="Expédié FR" sub="3-7 jours" />
 							<TrustItem
 								icon={<Sparkles className="size-3.5" />}
 								label="Édité par RG"
@@ -145,9 +126,7 @@ export default async function CartPage() {
 
 						{/* Urgency badge limited items */}
 						{cart.items.some(
-							(i) =>
-								i.product.stockHint === "limited" ||
-								i.product.stockHint === "low-stock",
+							(i) => i.product.stockHint === "limited" || i.product.stockHint === "low-stock"
 						) && (
 							<p className="rounded-xl border border-[#a14b3f] bg-[#a14b3f]/15 px-3 py-2 text-[11px] font-bold text-[#fbcfca]">
 								⚡ Édition limitée dans ton panier — réserve avant rupture.
@@ -160,24 +139,14 @@ export default async function CartPage() {
 	);
 }
 
-function TrustItem({
-	icon,
-	label,
-	sub,
-}: {
-	icon: React.ReactNode;
-	label: string;
-	sub: string;
-}) {
+function TrustItem({ icon, label, sub }: { icon: React.ReactNode; label: string; sub: string }) {
 	return (
 		<li className="flex items-start gap-2">
 			<span className="grid size-7 shrink-0 place-items-center rounded-full bg-[#d4af37]/15 text-[#d4af37]">
 				{icon}
 			</span>
 			<span>
-				<span className="block font-bold uppercase tracking-wider text-white">
-					{label}
-				</span>
+				<span className="block font-bold uppercase tracking-wider text-white">{label}</span>
 				<span className="block text-[10px] text-white/55">{sub}</span>
 			</span>
 		</li>

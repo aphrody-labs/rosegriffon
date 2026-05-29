@@ -125,16 +125,7 @@ export const navigationItems: NavItem[] = [
 export const mobileNavItems: NavItem[] = [
 	{ icon: "home", label: "nav.home", path: "/" },
 	{
-		activePaths: [
-			"/chara",
-			"/skill",
-			"/item",
-			"/aura",
-			"/passive",
-			"/tactic",
-			"/wiki",
-			"/search",
-		],
+		activePaths: ["/chara", "/skill", "/item", "/aura", "/passive", "/tactic", "/wiki", "/search"],
 		icon: "search",
 		label: "nav.wiki",
 		path: "/search",

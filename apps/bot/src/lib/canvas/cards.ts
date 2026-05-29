@@ -21,7 +21,7 @@ interface HeaderOptions {
 
 function drawHeader(
 	ctx: ReturnType<ReturnType<typeof createCanvas>["getContext"]>,
-	opts: HeaderOptions,
+	opts: HeaderOptions
 ): number {
 	const headerH = 110;
 	fillRoundedRect(ctx, 0, 0, W, headerH, 0, T.brand);
@@ -57,7 +57,7 @@ function drawHeader(
 function drawFooter(
 	ctx: ReturnType<ReturnType<typeof createCanvas>["getContext"]>,
 	height: number,
-	text = "rosegriffon.fr",
+	text = "rosegriffon.fr"
 ): void {
 	ctx.fillStyle = T.fgMuted;
 	ctx.font = `18px ${T.fontBody}`;
@@ -70,7 +70,7 @@ function drawCardShell(
 	x: number,
 	y: number,
 	w: number,
-	h: number,
+	h: number
 ): void {
 	fillRoundedRect(ctx, x, y, w, h, T.radiusMd, T.card);
 	strokeRoundedRect(ctx, x, y, w, h, T.radiusMd, T.cardBorder, 1);
@@ -82,7 +82,7 @@ async function drawAvatarOrInitial(
 	cx: number,
 	cy: number,
 	r: number,
-	name: string,
+	name: string
 ): Promise<void> {
 	let drawn = false;
 	if (src) drawn = await drawCircularImage(ctx, src, cx, cy, r);
@@ -117,7 +117,7 @@ export interface TeamCardData {
 export async function renderTeamGrid(
 	members: TeamCardData[],
 	title: string,
-	subtitle?: string,
+	subtitle?: string
 ): Promise<Buffer> {
 	ensureFonts();
 	const cols = members.length <= 4 ? 2 : 3;
@@ -148,14 +148,7 @@ export async function renderTeamGrid(
 
 		drawCardShell(ctx, x, y, cardW, cardH);
 
-		await drawAvatarOrInitial(
-			ctx,
-			m.image_url,
-			x + 70,
-			y + cardH / 2,
-			50,
-			m.name,
-		);
+		await drawAvatarOrInitial(ctx, m.image_url, x + 70, y + cardH / 2, 50, m.name);
 
 		ctx.textBaseline = "alphabetic";
 		ctx.fillStyle = T.fg;
@@ -210,16 +203,7 @@ export async function renderProfileCard(p: ProfileCardData): Promise<Buffer> {
 	// Card body
 	const bodyY = bannerH - 40;
 	fillRoundedRect(ctx, 40, bodyY, W - 80, H - bodyY - 40, T.radiusLg, T.card);
-	strokeRoundedRect(
-		ctx,
-		40,
-		bodyY,
-		W - 80,
-		H - bodyY - 40,
-		T.radiusLg,
-		T.cardBorder,
-		1,
-	);
+	strokeRoundedRect(ctx, 40, bodyY, W - 80, H - bodyY - 40, T.radiusLg, T.cardBorder, 1);
 
 	// Avatar overlapping
 	await drawAvatarOrInitial(
@@ -228,7 +212,7 @@ export async function renderProfileCard(p: ProfileCardData): Promise<Buffer> {
 		140,
 		bodyY + 0,
 		80,
-		p.full_name ?? p.username ?? "?",
+		p.full_name ?? p.username ?? "?"
 	);
 
 	// Name + username
@@ -327,15 +311,7 @@ export async function renderEventList(events: EventCardData[]): Promise<Buffer> 
 		drawCardShell(ctx, x, y, w, cardH);
 
 		if (e.image_url) {
-			await drawCoveredImage(
-				ctx,
-				e.image_url,
-				x + 16,
-				y + 16,
-				200,
-				cardH - 32,
-				12,
-			);
+			await drawCoveredImage(ctx, e.image_url, x + 16, y + 16, 200, cardH - 32, 12);
 		} else {
 			fillRoundedRect(ctx, x + 16, y + 16, 200, cardH - 32, 12, T.surfaceMuted);
 			ctx.fillStyle = T.brand;
@@ -358,11 +334,7 @@ export async function renderEventList(events: EventCardData[]): Promise<Buffer> 
 		if (e.location) {
 			ctx.fillStyle = T.fgMuted;
 			ctx.font = `18px ${T.fontBody}`;
-			ctx.fillText(
-				`📍 ${ellipsize(ctx, e.location, w - 350)}`,
-				x + 232,
-				y + 108,
-			);
+			ctx.fillText(`📍 ${ellipsize(ctx, e.location, w - 350)}`, x + 232, y + 108);
 		}
 
 		if (e.description) {
@@ -394,7 +366,7 @@ export interface ChroniqueCardData {
 
 export async function renderChroniqueList(
 	rows: ChroniqueCardData[],
-	filterLabel?: string,
+	filterLabel?: string
 ): Promise<Buffer> {
 	ensureFonts();
 	const headerH = 110;
@@ -423,15 +395,7 @@ export async function renderChroniqueList(
 		drawCardShell(ctx, x, y, w, cardH);
 
 		if (c.featured_image) {
-			await drawCoveredImage(
-				ctx,
-				c.featured_image,
-				x + 16,
-				y + 16,
-				240,
-				cardH - 32,
-				12,
-			);
+			await drawCoveredImage(ctx, c.featured_image, x + 16, y + 16, 240, cardH - 32, 12);
 		} else {
 			fillRoundedRect(ctx, x + 16, y + 16, 240, cardH - 32, 12, T.surfaceMuted);
 		}
@@ -466,7 +430,7 @@ export async function renderChroniqueList(
 		ctx.fillText(
 			`${date.toLocaleDateString("fr-FR")} · 👁 ${c.views_count ?? 0}`,
 			x + 272,
-			y + cardH - 22,
+			y + cardH - 22
 		);
 	}
 
@@ -516,42 +480,29 @@ export async function renderMemberList(rows: MemberCardData[]): Promise<Buffer> 
 			x + 50,
 			y + rowH / 2,
 			32,
-			m.display_name ?? m.username,
+			m.display_name ?? m.username
 		);
 
 		ctx.fillStyle = T.fg;
 		ctx.font = `bold 22px "${T.fontTitle}", ${T.fontFallback}`;
-		ctx.fillText(
-			ellipsize(ctx, m.display_name ?? m.username, w - 250),
-			x + 100,
-			y + 36,
-		);
+		ctx.fillText(ellipsize(ctx, m.display_name ?? m.username, w - 250), x + 100, y + 36);
 
 		ctx.fillStyle = T.fgMuted;
 		ctx.font = `16px ${T.fontBody}`;
 		const tag = m.display_name ? `@${m.username}` : "";
 		const joined =
 			m.joined_at &&
-			(typeof m.joined_at === "string" ? new Date(m.joined_at) : m.joined_at)
-				.toLocaleDateString("fr-FR");
-		const meta = [tag, joined ? `Rejoint ${joined}` : null]
-			.filter(Boolean)
-			.join(" · ");
+			(typeof m.joined_at === "string" ? new Date(m.joined_at) : m.joined_at).toLocaleDateString(
+				"fr-FR"
+			);
+		const meta = [tag, joined ? `Rejoint ${joined}` : null].filter(Boolean).join(" · ");
 		if (meta) ctx.fillText(ellipsize(ctx, meta, w - 250), x + 100, y + 62);
 
 		// Roles count badge
 		ctx.font = `bold 14px ${T.fontBody}`;
 		const rb = `${m.roles_count} rôle${m.roles_count > 1 ? "s" : ""}`;
 		const rbw = ctx.measureText(rb).width + 18;
-		fillRoundedRect(
-			ctx,
-			x + w - rbw - 16,
-			y + rowH / 2 - 14,
-			rbw,
-			28,
-			14,
-			T.surfaceMuted,
-		);
+		fillRoundedRect(ctx, x + w - rbw - 16, y + rowH / 2 - 14, rbw, 28, 14, T.surfaceMuted);
 		ctx.fillStyle = T.brand;
 		ctx.textBaseline = "middle";
 		ctx.fillText(rb, x + w - rbw - 16 + 9, y + rowH / 2 + 1);

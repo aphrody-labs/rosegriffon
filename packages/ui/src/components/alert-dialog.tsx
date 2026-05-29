@@ -6,26 +6,18 @@ import type * as React from "react";
 import { buttonVariants } from "./button";
 import { cn } from "../lib/utils";
 
-function AlertDialog({
-	...props
-}: React.ComponentProps<typeof AlertDialogPrimitive.Root>) {
+function AlertDialog({ ...props }: React.ComponentProps<typeof AlertDialogPrimitive.Root>) {
 	return <AlertDialogPrimitive.Root data-slot="alert-dialog" {...props} />;
 }
 
 function AlertDialogTrigger({
 	...props
 }: React.ComponentProps<typeof AlertDialogPrimitive.Trigger>) {
-	return (
-		<AlertDialogPrimitive.Trigger data-slot="alert-dialog-trigger" {...props} />
-	);
+	return <AlertDialogPrimitive.Trigger data-slot="alert-dialog-trigger" {...props} />;
 }
 
-function AlertDialogPortal({
-	...props
-}: React.ComponentProps<typeof AlertDialogPrimitive.Portal>) {
-	return (
-		<AlertDialogPrimitive.Portal data-slot="alert-dialog-portal" {...props} />
-	);
+function AlertDialogPortal({ ...props }: React.ComponentProps<typeof AlertDialogPrimitive.Portal>) {
+	return <AlertDialogPrimitive.Portal data-slot="alert-dialog-portal" {...props} />;
 }
 
 function AlertDialogOverlay({
@@ -37,7 +29,7 @@ function AlertDialogOverlay({
 			data-slot="alert-dialog-overlay"
 			className={cn(
 				"fixed inset-0 z-50 bg-black/80 motion-safe:data-[state=open]:animate-in motion-safe:data-[state=closed]:animate-out motion-safe:data-[state=closed]:fade-out-0 motion-safe:data-[state=open]:fade-in-0",
-				className,
+				className
 			)}
 			{...props}
 		/>
@@ -55,7 +47,7 @@ function AlertDialogContent({
 				data-slot="alert-dialog-content"
 				className={cn(
 					"fixed left-[50%] top-[50%] z-50 grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 border bg-background p-6 shadow-lg motion-safe:duration-200 motion-safe:data-[state=open]:animate-in motion-safe:data-[state=closed]:animate-out motion-safe:data-[state=closed]:fade-out-0 motion-safe:data-[state=open]:fade-in-0 motion-safe:data-[state=closed]:zoom-out-95 motion-safe:data-[state=open]:zoom-in-95 motion-safe:data-[state=closed]:slide-out-to-left-1/2 motion-safe:data-[state=closed]:slide-out-to-top-[48%] motion-safe:data-[state=open]:slide-in-from-left-1/2 motion-safe:data-[state=open]:slide-in-from-top-[48%] sm:rounded-lg",
-					className,
+					className
 				)}
 				{...props}
 			/>
@@ -63,33 +55,21 @@ function AlertDialogContent({
 	);
 }
 
-function AlertDialogHeader({
-	className,
-	...props
-}: React.HTMLAttributes<HTMLDivElement>) {
+function AlertDialogHeader({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
 	return (
 		<div
 			data-slot="alert-dialog-header"
-			className={cn(
-				"flex flex-col space-y-2 text-center sm:text-left",
-				className,
-			)}
+			className={cn("flex flex-col space-y-2 text-center sm:text-left", className)}
 			{...props}
 		/>
 	);
 }
 
-function AlertDialogFooter({
-	className,
-	...props
-}: React.HTMLAttributes<HTMLDivElement>) {
+function AlertDialogFooter({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
 	return (
 		<div
 			data-slot="alert-dialog-footer"
-			className={cn(
-				"flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2",
-				className,
-			)}
+			className={cn("flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2", className)}
 			{...props}
 		/>
 	);
@@ -141,11 +121,7 @@ function AlertDialogCancel({
 	return (
 		<AlertDialogPrimitive.Cancel
 			data-slot="alert-dialog-cancel"
-			className={cn(
-				buttonVariants({ variant: "outline" }),
-				"mt-2 sm:mt-0",
-				className,
-			)}
+			className={cn(buttonVariants({ variant: "outline" }), "mt-2 sm:mt-0", className)}
 			{...props}
 		/>
 	);

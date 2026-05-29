@@ -1,18 +1,14 @@
-export * from './routes'
-export * from './scopes'
+export * from "./routes";
+export * from "./scopes";
 export {
-    PatreonOauthClient,
-    type PatreonOauthClientOptions,
-    type Oauth2RedirectOptions,
-    type Oauth2CreatorToken,
-    type Oauth2StoredToken,
-    type Oauth2Token,
-} from './client'
+	PatreonOauthClient,
+	type PatreonOauthClientOptions,
+	type Oauth2RedirectOptions,
+	type Oauth2CreatorToken,
+	type Oauth2StoredToken,
+	type Oauth2Token,
+} from "./client";
 
-export {
-    PatreonStore,
-    type PatreonStoreKVStorage,
-    type PatreonTokenFetchOptions,
-} from './store'
+export { PatreonStore, type PatreonStoreKVStorage, type PatreonTokenFetchOptions } from "./store";
 
-export * from './rest/'
+export * from "./rest/";

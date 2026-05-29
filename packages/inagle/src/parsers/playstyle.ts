@@ -20,87 +20,87 @@ import type { ConfigNode } from "../core/config-parser.js";
 import { loadCharaParam, toHex } from "../core/data-loader.js";
 
 export interface PlaystyleEntry {
-  charaParamId: string;
-  playStyle: number;
-  playStyleEn: string;
-  playStyleFr: string;
+	charaParamId: string;
+	playStyle: number;
+	playStyleEn: string;
+	playStyleFr: string;
 }
 
 const PLAYSTYLE_EN: Record<number, string> = {
-  0: "Counter",
-  1: "Bond",
-  2: "Tension",
-  3: "Rough Play",
-  4: "Justice",
-  5: "Freedom",
+	0: "Counter",
+	1: "Bond",
+	2: "Tension",
+	3: "Rough Play",
+	4: "Justice",
+	5: "Freedom",
 };
 
 const PLAYSTYLE_FR: Record<number, string> = {
-  0: "Contre",
-  1: "Lien",
-  2: "Tension",
-  3: "Jeu violent",
-  4: "Justice",
-  5: "Liberté",
+	0: "Contre",
+	1: "Lien",
+	2: "Tension",
+	3: "Jeu violent",
+	4: "Justice",
+	5: "Liberté",
 };
 
 export function playstyleIdToEn(id: number): string {
-  return PLAYSTYLE_EN[id] ?? `PlayStyle${id}`;
+	return PLAYSTYLE_EN[id] ?? `PlayStyle${id}`;
 }
 
 export function playstyleIdToFr(id: number): string {
-  return PLAYSTYLE_FR[id] ?? `PlayStyle${id}`;
+	return PLAYSTYLE_FR[id] ?? `PlayStyle${id}`;
 }
 
 function parsePlaystyleNode(node: ConfigNode): PlaystyleEntry | null {
-  const vars = node.variables;
-  const values: number[] = [];
-  for (const v of vars) {
-    if (v.type === "Int") values.push(Number.parseInt(v.value, 10));
-  }
-  if (values.length < 6) return null;
+	const vars = node.variables;
+	const values: number[] = [];
+	for (const v of vars) {
+		if (v.type === "Int") values.push(Number.parseInt(v.value, 10));
+	}
+	if (values.length < 6) return null;
 
-  const playStyle = values[5] ?? 0;
-  return {
-    charaParamId: toHex(values[0]),
-    playStyle,
-    playStyleEn: playstyleIdToEn(playStyle),
-    playStyleFr: playstyleIdToFr(playStyle),
-  };
+	const playStyle = values[5] ?? 0;
+	return {
+		charaParamId: toHex(values[0]),
+		playStyle,
+		playStyleEn: playstyleIdToEn(playStyle),
+		playStyleFr: playstyleIdToFr(playStyle),
+	};
 }
 
 /**
  * Parse all playstyle entries from chara_param
  */
 export function parseAllPlaystyles(): PlaystyleEntry[] {
-  const config = loadCharaParam();
-  const results: PlaystyleEntry[] = [];
+	const config = loadCharaParam();
+	const results: PlaystyleEntry[] = [];
 
-  function traverse(node: ConfigNode) {
-    if (
-      node.name.startsWith("CHARA_PARAM_INFO_") &&
-      !node.name.includes("LIST") &&
-      !node.name.includes("BEG")
-    ) {
-      const parsed = parsePlaystyleNode(node);
-      if (parsed) results.push(parsed);
-    }
-    if (node.children) {
-      for (const child of node.children) traverse(child);
-    }
-  }
+	function traverse(node: ConfigNode) {
+		if (
+			node.name.startsWith("CHARA_PARAM_INFO_") &&
+			!node.name.includes("LIST") &&
+			!node.name.includes("BEG")
+		) {
+			const parsed = parsePlaystyleNode(node);
+			if (parsed) results.push(parsed);
+		}
+		if (node.children) {
+			for (const child of node.children) traverse(child);
+		}
+	}
 
-  for (const entry of config.children) traverse(entry);
-  return results;
+	for (const entry of config.children) traverse(entry);
+	return results;
 }
 
 /**
  * Build a map of charaParamId → PlaystyleEntry
  */
 export function buildPlaystyleMap(): Map<string, PlaystyleEntry> {
-  const map = new Map<string, PlaystyleEntry>();
-  for (const entry of parseAllPlaystyles()) {
-    map.set(entry.charaParamId, entry);
-  }
-  return map;
+	const map = new Map<string, PlaystyleEntry>();
+	for (const entry of parseAllPlaystyles()) {
+		map.set(entry.charaParamId, entry);
+	}
+	return map;
 }

@@ -63,8 +63,7 @@ export function AddressSection({ profile }: { profile: Profile | null }) {
 		const t = toast.loading("Enregistrement de l'adresse...");
 		const res = await updateProfile(fd);
 		if (res.error) {
-			const msg =
-				typeof res.error === "string" ? res.error : "Adresse invalide";
+			const msg = typeof res.error === "string" ? res.error : "Adresse invalide";
 			toast.error(msg, { id: t });
 			return;
 		}
@@ -79,8 +78,8 @@ export function AddressSection({ profile }: { profile: Profile | null }) {
 					Adresse de livraison
 				</CardTitle>
 				<CardDescription>
-					Utilisée pour les commandes de la boutique RG (merch, récompenses
-					patron). Privée — jamais affichée publiquement.
+					Utilisée pour les commandes de la boutique RG (merch, récompenses patron). Privée — jamais
+					affichée publiquement.
 				</CardDescription>
 			</CardHeader>
 			<CardContent>
@@ -93,11 +92,7 @@ export function AddressSection({ profile }: { profile: Profile | null }) {
 								<FormItem>
 									<FormLabel>Adresse (ligne 1)</FormLabel>
 									<FormControl>
-										<Input
-											placeholder="123 rue Inazuma"
-											autoComplete="address-line1"
-											{...field}
-										/>
+										<Input placeholder="123 rue Inazuma" autoComplete="address-line1" {...field} />
 									</FormControl>
 									<FormMessage />
 								</FormItem>
@@ -128,11 +123,7 @@ export function AddressSection({ profile }: { profile: Profile | null }) {
 									<FormItem>
 										<FormLabel>Code postal</FormLabel>
 										<FormControl>
-											<Input
-												placeholder="75001"
-												autoComplete="postal-code"
-												{...field}
-											/>
+											<Input placeholder="75001" autoComplete="postal-code" {...field} />
 										</FormControl>
 										<FormMessage />
 									</FormItem>
@@ -145,11 +136,7 @@ export function AddressSection({ profile }: { profile: Profile | null }) {
 									<FormItem>
 										<FormLabel>Ville</FormLabel>
 										<FormControl>
-											<Input
-												placeholder="Paris"
-												autoComplete="address-level2"
-												{...field}
-											/>
+											<Input placeholder="Paris" autoComplete="address-level2" {...field} />
 										</FormControl>
 										<FormMessage />
 									</FormItem>
@@ -163,20 +150,14 @@ export function AddressSection({ profile }: { profile: Profile | null }) {
 								<FormItem>
 									<FormLabel>Pays</FormLabel>
 									<FormControl>
-										<Input
-											placeholder="France"
-											autoComplete="country-name"
-											{...field}
-										/>
+										<Input placeholder="France" autoComplete="country-name" {...field} />
 									</FormControl>
 									<FormMessage />
 								</FormItem>
 							)}
 						/>
 						<Button type="submit" disabled={form.formState.isSubmitting}>
-							{form.formState.isSubmitting
-								? "Enregistrement..."
-								: "Enregistrer l'adresse"}
+							{form.formState.isSubmitting ? "Enregistrement..." : "Enregistrer l'adresse"}
 						</Button>
 					</form>
 				</Form>

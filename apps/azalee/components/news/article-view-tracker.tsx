@@ -9,19 +9,20 @@ interface ArticleViewTrackerProps {
 	initialViewCount: number;
 }
 
-export function ArticleViewTracker({
-	articleId,
-	initialViewCount,
-}: ArticleViewTrackerProps) {
+export function ArticleViewTracker({ articleId, initialViewCount }: ArticleViewTrackerProps) {
 	const hasTracked = useRef(false);
 
 	useEffect(() => {
-		if (hasTracked.current) {return;}
+		if (hasTracked.current) {
+			return;
+		}
 		hasTracked.current = true;
 
 		const trackView = async () => {
 			const viewedKey = `viewed_${articleId}`;
-			if (sessionStorage.getItem(viewedKey)) {return;}
+			if (sessionStorage.getItem(viewedKey)) {
+				return;
+			}
 
 			try {
 				const result = await trackArticleView(articleId);

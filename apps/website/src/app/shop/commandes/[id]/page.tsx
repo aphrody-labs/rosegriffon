@@ -59,10 +59,7 @@ interface OrderDetail {
 		| null;
 }
 
-async function fetchOrder(
-	orderId: string,
-	userId: string,
-): Promise<OrderDetail | null> {
+async function fetchOrder(orderId: string, userId: string): Promise<OrderDetail | null> {
 	try {
 		const supabase = createAdminClient();
 		const { data, error } = await supabase
@@ -80,11 +77,7 @@ async function fetchOrder(
 	}
 }
 
-export default async function OrderDetailPage({
-	params,
-}: {
-	params: Promise<{ id: string }>;
-}) {
+export default async function OrderDetailPage({ params }: { params: Promise<{ id: string }> }) {
 	const { id } = await params;
 	const user = await getServerUser();
 	if (!user) {
@@ -169,14 +162,10 @@ export default async function OrderDetailPage({
 										<p className="truncate text-sm font-bold text-white">
 											{item.label ?? product?.name ?? "Produit"}
 										</p>
-										<p className="mt-0.5 text-xs text-white/60">
-											Quantité {item.qty ?? 1}
-										</p>
+										<p className="mt-0.5 text-xs text-white/60">Quantité {item.qty ?? 1}</p>
 									</div>
 									<span className="text-base font-extrabold text-white">
-										{formatEuros(
-											(item.unit_amount_cents ?? 0) * (item.qty ?? 1),
-										)}
+										{formatEuros((item.unit_amount_cents ?? 0) * (item.qty ?? 1))}
 									</span>
 								</li>
 							);
@@ -201,9 +190,7 @@ export default async function OrderDetailPage({
 							{order.amount_shipping_cents > 0 && (
 								<Row label="Livraison" value={order.amount_shipping_cents} />
 							)}
-							{order.amount_tax_cents > 0 && (
-								<Row label="TVA" value={order.amount_tax_cents} />
-							)}
+							{order.amount_tax_cents > 0 && <Row label="TVA" value={order.amount_tax_cents} />}
 						</dl>
 						<div className="flex items-end justify-between gap-3 border-t-2 border-[#d4af37]/30 pt-4">
 							<span className="text-xs font-bold uppercase tracking-widest text-[#d4af37]">
@@ -222,27 +209,18 @@ export default async function OrderDetailPage({
 							</h2>
 							<address className="not-italic text-sm text-white/85">
 								{order.shipping_name && (
-									<p className="font-semibold text-white">
-										{order.shipping_name}
-									</p>
+									<p className="font-semibold text-white">{order.shipping_name}</p>
 								)}
-								{order.shipping_address.line1 && (
-									<p>{order.shipping_address.line1}</p>
-								)}
-								{order.shipping_address.line2 && (
-									<p>{order.shipping_address.line2}</p>
-								)}
+								{order.shipping_address.line1 && <p>{order.shipping_address.line1}</p>}
+								{order.shipping_address.line2 && <p>{order.shipping_address.line2}</p>}
 								<p>
-									{order.shipping_address.postal_code}{" "}
-									{order.shipping_address.city}
+									{order.shipping_address.postal_code} {order.shipping_address.city}
 								</p>
 								<p className="font-semibold uppercase tracking-wider">
 									{order.shipping_address.country}
 								</p>
 								{order.shipping_email && (
-									<p className="mt-2 text-xs text-white/60">
-										{order.shipping_email}
-									</p>
+									<p className="mt-2 text-xs text-white/60">{order.shipping_email}</p>
 								)}
 							</address>
 						</div>
@@ -253,23 +231,11 @@ export default async function OrderDetailPage({
 	);
 }
 
-function Row({
-	label,
-	value,
-	highlight,
-}: {
-	label: string;
-	value: number;
-	highlight?: boolean;
-}) {
+function Row({ label, value, highlight }: { label: string; value: number; highlight?: boolean }) {
 	return (
 		<div className="flex items-center justify-between text-white/80">
 			<dt>{label}</dt>
-			<dd
-				className={
-					highlight ? "font-bold text-[#d4af37]" : "font-semibold text-white"
-				}
-			>
+			<dd className={highlight ? "font-bold text-[#d4af37]" : "font-semibold text-white"}>
 				{formatEuros(value)}
 			</dd>
 		</div>

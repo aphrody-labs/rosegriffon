@@ -14,7 +14,7 @@
 		"declarationMap": true,
 		"sourceMap": true,
 		"outDir": "dist",
-    "rootDir": "src",
+		"rootDir": "src",
 		"noEmit": false,
 		"types": ["bun"],
 		"alwaysStrict": true,
@@ -36,11 +36,5 @@
 		"preserveConstEnums": true
 	},
 	"include": ["src/**/*.ts"],
-	"exclude": [
-		"node_modules",
-		"dist",
-		"coverage",
-		"src/__tests__/**/*",
-		"src/scripts/**/*"
-	]
+	"exclude": ["node_modules", "dist", "coverage", "src/__tests__/**/*", "src/scripts/**/*"]
 }

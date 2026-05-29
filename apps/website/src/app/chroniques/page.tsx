@@ -66,10 +66,7 @@ export async function generateMetadata({
 	}
 
 	if (page > 1 && !query) {
-		const categoryPart =
-			category && categoryLabels[category]
-				? ` ${categoryLabels[category]}`
-				: "";
+		const categoryPart = category && categoryLabels[category] ? ` ${categoryLabels[category]}` : "";
 		title = `Chroniques${categoryPart} - Page ${page} | Rose Griffon`;
 		description = `Page ${page} de nos chroniques${categoryPart.toLowerCase()}.`;
 	}
@@ -165,10 +162,7 @@ export default async function ChroniquesListPage({
 	// Counts par catégorie pour masquer les filtres vides — bypass RLS pour stats agrégées
 	const adminClient = createAdminClient();
 	const { data: categoryRows } = adminClient
-		? await adminClient
-				.from("articles")
-				.select("category")
-				.eq("status", "published")
+		? await adminClient.from("articles").select("category").eq("status", "published")
 		: { data: null };
 	const categoryCounts = new Map<string, number>();
 	for (const row of categoryRows ?? []) {
@@ -177,7 +171,7 @@ export default async function ChroniquesListPage({
 	}
 	const totalPublished = categoryRows?.length ?? 0;
 	const visibleCategories = categories.filter(
-		(cat) => cat.value === "" || (categoryCounts.get(cat.value) ?? 0) > 0,
+		(cat) => cat.value === "" || (categoryCounts.get(cat.value) ?? 0) > 0
 	);
 
 	// Génération des URLs de pagination
@@ -218,9 +212,7 @@ export default async function ChroniquesListPage({
 						{/* Badge */}
 						<div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/15 border border-primary/30">
 							<Newspaper className="size-4 text-primary" aria-hidden="true" />
-							<span className="text-sm font-semibold text-primary">
-								Journal de bord
-							</span>
+							<span className="text-sm font-semibold text-primary">Journal de bord</span>
 						</div>
 
 						{/* Titre */}
@@ -230,17 +222,12 @@ export default async function ChroniquesListPage({
 
 						{/* Description */}
 						<p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto">
-							Actualités, annonces et coulisses de l&apos;association Rose
-							Griffon. Découvrez les dernières nouvelles de notre communauté
-							Inazuma Eleven.
+							Actualités, annonces et coulisses de l&apos;association Rose Griffon. Découvrez les
+							dernières nouvelles de notre communauté Inazuma Eleven.
 						</p>
 
 						{/* Barre de recherche */}
-						<form
-							action="/chroniques"
-							method="GET"
-							className="max-w-xl mx-auto mt-8"
-						>
+						<form action="/chroniques" method="GET" className="max-w-xl mx-auto mt-8">
 							<div className="relative">
 								<label htmlFor="chroniques-search" className="sr-only">
 									Rechercher une chronique
@@ -258,11 +245,7 @@ export default async function ChroniquesListPage({
 									className="w-full h-12 pl-12 pr-4 rounded-full border-2 border-border/50 bg-background/80 backdrop-blur-sm focus:border-primary/50 text-base"
 								/>
 								{selectedCategory && (
-									<input
-										type="hidden"
-										name="category"
-										value={selectedCategory}
-									/>
+									<input type="hidden" name="category" value={selectedCategory} />
 								)}
 							</div>
 						</form>
@@ -287,28 +270,18 @@ export default async function ChroniquesListPage({
 								}`}
 								aria-current={isPatreonFilter ? "page" : undefined}
 							>
-								<Heart
-									className="w-3.5 h-3.5 fill-current"
-									aria-hidden="true"
-								/>
+								<Heart className="w-3.5 h-3.5 fill-current" aria-hidden="true" />
 								Patreon
 							</Link>
 						)}
 						{visibleCategories.map((cat) => {
-							const isActive =
-								!isPatreonFilter && selectedCategory === cat.value;
+							const isActive = !isPatreonFilter && selectedCategory === cat.value;
 							const count =
-								cat.value === ""
-									? totalPublished
-									: (categoryCounts.get(cat.value) ?? 0);
+								cat.value === "" ? totalPublished : (categoryCounts.get(cat.value) ?? 0);
 							return (
 								<Link
 									key={cat.value}
-									href={
-										cat.value
-											? `/chroniques?category=${cat.value}`
-											: "/chroniques"
-									}
+									href={cat.value ? `/chroniques?category=${cat.value}` : "/chroniques"}
 									aria-current={isActive ? "page" : undefined}
 									className={`
                     shrink-0 inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium transition-all duration-200
@@ -349,14 +322,9 @@ export default async function ChroniquesListPage({
 						)}
 						{isPatreonFilter ? (
 							<Badge className="border-0 bg-[#FF424D]/15 text-sm font-medium text-[#FF424D]">
-								<Heart
-									className="mr-1 size-3 fill-current"
-									aria-hidden="true"
-								/>
+								<Heart className="mr-1 size-3 fill-current" aria-hidden="true" />
 								Patreon
-								{patreonFeed.access.isActiveMember
-									? " · membre actif"
-									: " · publics"}
+								{patreonFeed.access.isActiveMember ? " · membre actif" : " · publics"}
 							</Badge>
 						) : (
 							selectedCategory &&
@@ -369,10 +337,7 @@ export default async function ChroniquesListPage({
 								</Badge>
 							)
 						)}
-						<Link
-							href="/chroniques"
-							className="text-sm text-primary font-medium hover:underline"
-						>
+						<Link href="/chroniques" className="text-sm text-primary font-medium hover:underline">
 							Effacer les filtres
 						</Link>
 					</div>
@@ -433,17 +398,10 @@ export default async function ChroniquesListPage({
 												)}
 												<div className="flex items-center gap-4 text-xs text-muted-foreground mt-auto pt-3 border-t border-border/30">
 													<div className="flex items-center gap-1.5">
-														<Calendar
-															className="w-3.5 h-3.5"
-															aria-hidden="true"
-														/>
+														<Calendar className="w-3.5 h-3.5" aria-hidden="true" />
 														{post.publishedAt ? (
 															<time dateTime={post.publishedAt}>
-																{format(
-																	new Date(post.publishedAt),
-																	"d MMM yyyy",
-																	{ locale: fr },
-																)}
+																{format(new Date(post.publishedAt), "d MMM yyyy", { locale: fr })}
 															</time>
 														) : (
 															<span>—</span>
@@ -471,10 +429,7 @@ export default async function ChroniquesListPage({
 									: "Devenez mécène pour accéder à tous les posts."}
 							</p>
 							{!patreonFeed.access.isActiveMember && (
-								<Button
-									asChild
-									className="bg-[#FF424D] text-white hover:bg-[#e63b46]"
-								>
+								<Button asChild className="bg-[#FF424D] text-white hover:bg-[#e63b46]">
 									<Link href="/nous-soutenir#tiers">Voir les paliers</Link>
 								</Button>
 							)}
@@ -496,10 +451,7 @@ export default async function ChroniquesListPage({
 									{/* Image — ratio 16:9 */}
 									<div className="relative aspect-video overflow-hidden">
 										<Image
-											src={
-												article.featured_image_url ||
-												"/images/placeholder-chronicle.svg"
-											}
+											src={article.featured_image_url || "/images/placeholder-chronicle.svg"}
 											alt={article.title}
 											fill
 											sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
@@ -536,17 +488,11 @@ export default async function ChroniquesListPage({
 										<div className="flex items-center gap-4 text-xs text-muted-foreground mt-auto pt-3 border-t border-border/30">
 											<div className="flex items-center gap-1.5">
 												<Calendar className="w-3.5 h-3.5" />
-												<time
-													dateTime={
-														article.published_at || article.created_at || ""
-													}
-												>
+												<time dateTime={article.published_at || article.created_at || ""}>
 													{format(
-														new Date(
-															article.published_at || article.created_at || "",
-														),
+														new Date(article.published_at || article.created_at || ""),
 														"d MMM yyyy",
-														{ locale: fr },
+														{ locale: fr }
 													)}
 												</time>
 											</div>
@@ -572,9 +518,7 @@ export default async function ChroniquesListPage({
 						<div className="size-20 mx-auto mb-6 rounded-full bg-muted/50 flex items-center justify-center">
 							<Newspaper className="size-10 text-muted-foreground/50" />
 						</div>
-						<h2 className="text-2xl font-bold text-foreground mb-2">
-							Aucune chronique trouvée
-						</h2>
+						<h2 className="text-2xl font-bold text-foreground mb-2">Aucune chronique trouvée</h2>
 						<p className="text-muted-foreground mb-6">
 							{query
 								? `Aucun résultat pour "${query}"`
@@ -604,10 +548,7 @@ export default async function ChroniquesListPage({
 							className="rounded-full"
 						>
 							{page > 1 ? (
-								<Link
-									href={buildPageUrl(page - 1)}
-									aria-label="Page précédente"
-								>
+								<Link href={buildPageUrl(page - 1)} aria-label="Page précédente">
 									<ChevronLeft className="size-4" />
 								</Link>
 							) : (
@@ -633,8 +574,7 @@ export default async function ChroniquesListPage({
 								.map((p, idx, arr) => {
 									// Ajouter des ellipsis
 									const prevPage = arr[idx - 1];
-									const showEllipsisBefore =
-										idx > 0 && prevPage !== undefined && p - prevPage > 1;
+									const showEllipsisBefore = idx > 0 && prevPage !== undefined && p - prevPage > 1;
 									return (
 										<span key={p} className="flex items-center">
 											{showEllipsisBefore && (
@@ -645,9 +585,7 @@ export default async function ChroniquesListPage({
 												size="icon"
 												asChild={p !== page}
 												className={`rounded-full size-10 ${
-													p === page
-														? "bg-linear-to-r from-[#a14b3f] to-[#344E8C] border-0"
-														: ""
+													p === page ? "bg-linear-to-r from-[#a14b3f] to-[#344E8C] border-0" : ""
 												}`}
 											>
 												{p !== page ? (

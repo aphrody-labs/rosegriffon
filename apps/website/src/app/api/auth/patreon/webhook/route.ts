@@ -1,8 +1,8 @@
 import { parseWebhookRequest } from "@rose-griffon/patreon-bun";
 import { NextResponse } from "next/server";
 
-import { processPatreonEvent } from '@/lib/patreon/webhooks';
-import type { PatreonTrigger, PatreonWebhookPayload } from '@/lib/patreon/webhooks';
+import { processPatreonEvent } from "@/lib/patreon/webhooks";
+import type { PatreonTrigger, PatreonWebhookPayload } from "@/lib/patreon/webhooks";
 import { createAdminClient } from "@/lib/supabase/server";
 
 export const runtime = "nodejs";
@@ -95,7 +95,7 @@ export async function POST(req: Request) {
 				status: "pending",
 				trigger,
 			},
-			{ onConflict: "id" },
+			{ onConflict: "id" }
 		)
 		.then((res) => {
 			if (res.error) {
@@ -140,7 +140,7 @@ export async function POST(req: Request) {
  */
 async function heartbeat(
 	supabase: NonNullable<ReturnType<typeof createAdminClient>>,
-	opts: { eventId: string; trigger: PatreonTrigger; success: boolean },
+	opts: { eventId: string; trigger: PatreonTrigger; success: boolean }
 ): Promise<void> {
 	const { error } = await supabase.rpc("patreon_heartbeat", {
 		p_event_id: opts.eventId,
@@ -164,7 +164,7 @@ export async function GET() {
 	const { data } = await supabase
 		.from("patreon_webhook_state")
 		.select(
-			"last_received_at, last_event_id, last_trigger, total_received, total_failed, paused, num_consecutive_times_failed",
+			"last_received_at, last_event_id, last_trigger, total_received, total_failed, paused, num_consecutive_times_failed"
 		)
 		.eq("id", 1)
 		.maybeSingle();

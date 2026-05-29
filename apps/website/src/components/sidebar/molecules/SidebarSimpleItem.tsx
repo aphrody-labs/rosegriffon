@@ -5,12 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import React from "react";
 
-import {
-	Tooltip,
-	TooltipContent,
-	TooltipProvider,
-	TooltipTrigger,
-} from "@rose-griffon/ui";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@rose-griffon/ui";
 import { getBadgeVariant, sidebarTransitions } from "@/lib/sidebar-config";
 import { cn } from "@/lib/utils";
 
@@ -46,10 +41,7 @@ export interface SidebarSimpleItemProps {
  * @param {string} [description] - Description pour le tooltip.
  * @param {boolean} [isExternal] - Si true, ouvre dans un nouvel onglet.
  */
-export const SidebarSimpleItem = React.forwardRef<
-	HTMLAnchorElement,
-	SidebarSimpleItemProps
->(
+export const SidebarSimpleItem = React.forwardRef<HTMLAnchorElement, SidebarSimpleItemProps>(
 	(
 		{
 			href,
@@ -64,14 +56,12 @@ export const SidebarSimpleItem = React.forwardRef<
 			rel,
 			onClick,
 		},
-		ref,
+		ref
 	) => {
 		const pathname = usePathname();
 
 		// Determine if this item is active
-		const isActive = pathname
-			? pathname === href || pathname.startsWith(`${href}/`)
-			: false;
+		const isActive = pathname ? pathname === href || pathname.startsWith(`${href}/`) : false;
 
 		// Handle external links
 		const linkTarget = isExternal ? "_blank" : target;
@@ -95,10 +85,7 @@ export const SidebarSimpleItem = React.forwardRef<
 					icon={icon}
 					onClick={onClick}
 					aria-label={ariaLabel || label}
-					className={cn(
-						"cursor-pointer group relative w-full",
-						sidebarTransitions.focus,
-					)}
+					className={cn("cursor-pointer group relative w-full", sidebarTransitions.focus)}
 				>
 					<span className="flex-1 flex items-center gap-2">
 						{label}
@@ -118,7 +105,7 @@ export const SidebarSimpleItem = React.forwardRef<
 								badgeStyles.bg,
 								badgeStyles.text,
 								badgeStyles.border,
-								badgeStyles.animation,
+								badgeStyles.animation
 							)}
 							aria-label={`Badge: ${badge.text}`}
 						>
@@ -146,8 +133,7 @@ export const SidebarSimpleItem = React.forwardRef<
 							<p className="text-sm">{description}</p>
 							{shortcut && (
 								<p className="text-xs text-muted-foreground mt-1">
-									Raccourci:{" "}
-									<kbd className="px-1 py-0.5 bg-muted rounded">{shortcut}</kbd>
+									Raccourci: <kbd className="px-1 py-0.5 bg-muted rounded">{shortcut}</kbd>
 								</p>
 							)}
 						</TooltipContent>
@@ -157,7 +143,7 @@ export const SidebarSimpleItem = React.forwardRef<
 		}
 
 		return menuButton;
-	},
+	}
 );
 
 SidebarSimpleItem.displayName = "SidebarSimpleItem";
