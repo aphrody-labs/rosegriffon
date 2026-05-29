@@ -92,7 +92,7 @@ interface WikiCarouselProps {
 export function WikiCarousel({ stats }: WikiCarouselProps) {
 	return (
 		<section className="w-full">
-			<div className="mb-5 md:mb-6 px-4 md:px-8 lg:px-12">
+			<div className="mb-5 md:mb-6 px-0 md:px-8 lg:px-12">
 				<h2 className="text-xl md:text-3xl font-black text-on-surface font-expressive-title flex items-center gap-3">
 					<span className="w-2 h-8 rounded-full bg-secondary" />
 					Encyclopédie

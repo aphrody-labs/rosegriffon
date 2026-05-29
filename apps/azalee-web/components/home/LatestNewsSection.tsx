@@ -329,7 +329,7 @@ export function LatestNewsSection({
 		<section className="relative">
 			{/* ── Mobile Layout ── */}
 			<div className="md:hidden">
-				<div className="flex items-center justify-between mb-4 px-4">
+				<div className="flex items-center justify-between mb-4 px-0">
 					<SectionHeader size="sm" />
 					<Link href="/news" className="text-xs font-bold text-primary">
 						Voir tout
@@ -398,7 +398,7 @@ export function LatestNewsSection({
 
 				{hasTweets && (
 					<div className={hasArticles ? "mt-5" : ""}>
-						<div className="flex items-center gap-1.5 mb-3 px-4">
+						<div className="flex items-center gap-1.5 mb-3 px-0">
 							<AtSign size={14} aria-hidden="true" className="text-[#1DA1F2]" />
 							<span className="text-[11px] font-bold text-on-surface-variant uppercase tracking-wider">
 								@Azalee_IE
@@ -412,7 +412,7 @@ export function LatestNewsSection({
 					</div>
 				)}
 
-				<div className="mt-5 px-4">
+				<div className="mt-5 px-0">
 					<Link
 						href="/news"
 						className="flex items-center justify-center w-full gap-2 text-sm font-bold text-primary px-5 py-3 rounded-xl bg-surface-container-high hover:bg-primary hover:text-on-primary transition-all"
