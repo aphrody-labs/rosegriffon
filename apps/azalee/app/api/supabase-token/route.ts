@@ -9,7 +9,7 @@ export async function GET() {
     const session = await auth.api.getSession({ headers: reqHeaders });
 
     if (!session?.user?.id) {
-      return NextResponse.json({ token: null }, { status: 401 });
+      return NextResponse.json({ token: null }, { status: 200 });
     }
 
     const token = mintSupabaseJwt(session.user.id);

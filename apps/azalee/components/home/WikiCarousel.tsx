@@ -1,5 +1,8 @@
 import Link from "next/link";
 import { AnimatedCounter } from "./AnimatedCounter";
+import { Icon } from "@/components/ui/Icon";
+import { CommonSpriteIcon } from "@/components/ui/CommonSpriteIcon";
+import type { SpriteCommonKey } from "@/config/sprites-common";
 
 export interface WikiSectionStats {
 	characters: number;
@@ -106,10 +109,10 @@ export function WikiCarousel({ stats }: WikiCarouselProps) {
 						<Link
 							key={section.href}
 							href={section.href}
-							className="shrink-0 min-w-[110px] snap-start md:min-w-0 md:snap-align-none group flex flex-col rounded-2xl bg-surface-container overflow-hidden transition-colors active:bg-surface-container-high md:transition-all md:duration-200 md:hover:bg-surface-container-high md:hover:shadow-md md:hover:-translate-y-1"
+							className="shrink-0 min-w-[140px] snap-start md:min-w-0 md:snap-align-none group flex flex-col rounded-2xl bg-surface-container overflow-hidden transition-colors active:bg-surface-container-high md:transition-all md:duration-200 md:hover:bg-surface-container-high md:hover:shadow-md md:hover:-translate-y-1 relative"
 						>
 							<div className={`h-[3px] w-full ${section.gradientColors}`} />
-							<div className="p-3 md:p-5 flex flex-col gap-1 md:gap-1.5">
+							<div className="p-3 md:p-5 flex flex-col gap-1 md:gap-1.5 flex-1 relative z-10">
 								<h3 className="text-xs md:text-sm lg:text-base font-bold text-on-surface leading-tight md:group-hover:text-primary md:transition-colors">
 									{section.title}
 								</h3>
@@ -122,6 +125,23 @@ export function WikiCarousel({ stats }: WikiCarouselProps) {
 								<p className="text-[10px] md:text-xs text-on-surface-variant/70 md:text-on-surface-variant leading-snug line-clamp-1 md:line-clamp-none md:opacity-70 md:group-hover:opacity-100 md:transition-opacity">
 									{section.description}
 								</p>
+							</div>
+
+							{/* Floating subtle icon/sprite watermark in bottom-right corner */}
+							<div className="absolute bottom-2 right-2 opacity-5 dark:opacity-10 group-hover:opacity-15 group-hover:scale-110 transition-all duration-300 pointer-events-none select-none z-0">
+								{section.sprite ? (
+									<CommonSpriteIcon
+										name={section.sprite as SpriteCommonKey}
+										scale={0.7}
+										className="filter grayscale contrast-125 brightness-75 dark:brightness-125"
+									/>
+								) : section.icon ? (
+									<Icon
+										name={section.icon}
+										size={42}
+										className="text-on-surface"
+									/>
+								) : null}
 							</div>
 						</Link>
 					);
