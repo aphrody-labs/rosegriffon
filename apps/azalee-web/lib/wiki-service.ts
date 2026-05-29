@@ -1570,29 +1570,78 @@ export const wikiService = {
 	groupVariants(characters: BaseCharacter[]): BaseCharacter[] {
 		const grouped = new Map<string, BaseCharacter>();
 		for (const char of characters) {
-			const key = (char.sheetData as any)?.sheetId || char.charaId;
+			const key = char.charaId;
 			const existing = grouped.get(key);
 			if (existing) {
 				existing.variants.push(...char.variants);
-				const existingCode = (existing as any).bestRarityCode || 0;
-				const newCode = (char as any).bestRarityCode || 0;
-				if (newCode > existingCode) {
+
+				const existingHasSheet = !!existing.sheetData;
+				const newHasSheet = !!char.sheetData;
+
+				const charBestRarityCode = char.bestRarityCode;
+				const existingBestRarityCode = existing.bestRarityCode;
+
+				if (
+					(newHasSheet && !existingHasSheet) ||
+					(newHasSheet === existingHasSheet && charBestRarityCode > existingBestRarityCode)
+				) {
 					existing.bestRarity = char.bestRarity;
-					(existing as any).bestRarityCode = newCode;
-					(existing as any).image =
-						(char as any).image || (existing as any).image;
-					(existing as any).slug = char.slug || existing.slug;
-					(existing as any).zukanHash =
-						(char as any).zukanHash || (existing as any).zukanHash;
+					existing.bestRarityCode = char.bestRarityCode;
+					existing.image = char.image || existing.image;
+					existing.slug = char.slug || existing.slug;
+					existing.zukanHash = char.zukanHash || existing.zukanHash;
+					existing.sheetData = char.sheetData;
+					if (char.wikiSections && char.wikiSections.length > 0) {
+						existing.wikiSections = char.wikiSections;
+					}
+					(existing as unknown as Record<string, unknown>).baseSlug =
+						(char as unknown as Record<string, unknown>).baseSlug || (existing as unknown as Record<string, unknown>).baseSlug;
+				} else {
+					existing.sheetData = existing.sheetData || char.sheetData;
+					existing.zukanHash = existing.zukanHash || char.zukanHash;
+					(existing as unknown as Record<string, unknown>).baseSlug =
+						(existing as unknown as Record<string, unknown>).baseSlug || (char as unknown as Record<string, unknown>).baseSlug;
+					if (
+						(!existing.wikiSections || existing.wikiSections.length === 0) &&
+						char.wikiSections &&
+						char.wikiSections.length > 0
+					) {
+						existing.wikiSections = char.wikiSections;
+					}
 				}
+
 				existing.isBasara = existing.isBasara || char.isBasara;
-				// Propager constellation si manquante
-				(existing as any).constellation =
-					(existing as any).constellation || (char as any).constellation;
+				existing.constellation = existing.constellation || char.constellation;
 			} else {
 				grouped.set(key, char);
 			}
 		}
+
+		// Deduplicate variants inside each character to avoid duplicates in variants list and clean nulls
+		for (const char of grouped.values()) {
+			const seenVariants = new Set<string>();
+			const dedupedVariants: typeof char.variants = [];
+			for (const v of char.variants) {
+				const vKey = `${v.position}|${v.element}|${v.rarity}`;
+				if (!seenVariants.has(vKey)) {
+					seenVariants.add(vKey);
+					dedupedVariants.push(v);
+				} else {
+					const idx = dedupedVariants.findIndex(
+						(x) => `${x.position}|${x.element}|${x.rarity}` === vKey
+					);
+					if (
+						idx !== -1 &&
+						!(dedupedVariants[idx] as unknown as { sheetData?: unknown }).sheetData &&
+						(v as unknown as { sheetData?: unknown }).sheetData
+					) {
+						dedupedVariants[idx] = v;
+					}
+				}
+			}
+			char.variants = dedupedVariants;
+		}
+
 		return Array.from(grouped.values());
 	},
 
