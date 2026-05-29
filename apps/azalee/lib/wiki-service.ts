@@ -328,7 +328,7 @@ export const wikiService = {
 			(sid: string) => sid && sid !== "0x00000000",
 		);
 
-		const parallelPromises: PromiseLike<any>[] = [];
+		const parallelPromises: Array<PromiseLike<any>> = [];
 
 		// Push skill queries
 		if (a.skill_id) {

@@ -129,7 +129,7 @@ export function PlayersClient({
       if (!value) return null;
       return { key, value, label: getFilterLabel(key, value) };
     })
-    .filter(Boolean) as { key: string; value: string; label: string }[];
+    .filter(Boolean) as Array<{ key: string; value: string; label: string }>;
 
   return (
     <FilterTransitionContext.Provider value={filterTransition}>
