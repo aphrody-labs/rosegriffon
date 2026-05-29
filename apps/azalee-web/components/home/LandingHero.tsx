@@ -44,7 +44,7 @@ export function LandingHero({ stats }: LandingHeroProps) {
 		: [];
 
 	return (
-		<section className="relative h-[90svh] min-h-[520px] md:h-[75vh] md:min-h-[520px] md:max-h-[700px] overflow-hidden bg-black -mx-4 w-[calc(100%+2rem)] md:-mx-8 md:w-[calc(100%+4rem)] lg:-mx-12 lg:w-[calc(100%+6rem)]">
+		<section className="relative h-[90svh] min-h-[520px] md:h-[75vh] md:min-h-[520px] md:max-h-[700px] overflow-hidden bg-black w-auto -mx-4 md:-mx-8 lg:-mx-12">
 			{/* Background Image with parallax wrapper (layer 1 — deepest, -300px) */}
 			<motion.div
 				style={bgStyle}

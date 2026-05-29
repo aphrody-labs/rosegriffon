@@ -132,7 +132,7 @@ export function GlobalSearch({
   const hasSuggestion = results.length === 1 && results[0].type === "suggestion";
 
   const SearchDialog = (
-    <CommandDialog open={open} onOpenChange={setOpen}>
+    <CommandDialog open={open} onOpenChange={setOpen} shouldFilter={false}>
       <CommandInput
         placeholder="Rechercher personnages, techniques, auras, équipes..."
         value={query}
