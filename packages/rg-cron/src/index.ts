@@ -13,6 +13,7 @@ import {
 	triggerPatreonRefresh,
 	triggerPatreonReminders,
 	warmCaches,
+	triggerGithubPublishWorkflow,
 } from "./tasks/api";
 import { ServerWebSocket } from "bun";
 import { createSupabaseServiceClient } from "@rose-griffon/db/service";
@@ -181,6 +182,8 @@ if (args.includes("--run")) {
 		}
 	} else if (task === "publish") {
 		await executeTask("publish", triggerPublishScheduled);
+	} else if (task === "github-publish" || task === "gh-publish") {
+		await executeTask("github-publish", triggerGithubPublishWorkflow);
 	} else if (task === "patreon") {
 		await executeTask("patreon", triggerPatreonRefresh);
 	} else if (task === "reminders") {
@@ -201,7 +204,7 @@ if (args.includes("--run")) {
 		await executeTask("reminders", () => triggerPatreonReminders("announce"));
 	} else {
 		console.error(
-			`❌ Tâche inconnue : ${task}. Choisissez parmi : db, cdn, crawl, rag, query, publish, patreon, reminders, warm, backup:postgres, backup:pg, all.`
+			`❌ Tâche inconnue : ${task}. Choisissez parmi : db, cdn, crawl, rag, query, publish, github-publish, patreon, reminders, warm, backup:postgres, backup:pg, all.`
 		);
 	}
 	process.exit(0);
@@ -240,7 +243,12 @@ Bun.cron("0 4 * * *", async () => {
 	await executeTask("cdn", syncCdnAssets);
 });
 
-// 5b. Crawl officiel Inazuma Eleven & RAG Sync : tous les jours à 5h00 UTC
+// 5b. Publication automatique des packages sur GitHub Packages : tous les jours à 4h30 UTC
+Bun.cron("30 4 * * *", async () => {
+	await executeTask("github-publish", triggerGithubPublishWorkflow);
+});
+
+// 5c. Crawl officiel Inazuma Eleven & RAG Sync : tous les jours à 5h00 UTC
 Bun.cron("0 5 * * *", async () => {
 	await executeTask("crawl", runIeCrawl);
 });
@@ -349,13 +357,14 @@ const server = Bun.serve({
 		// 4. Liste des tâches
 		if (url.pathname === "/tasks" && req.method === "GET") {
 			return Response.json({
-				tasks: ["db", "cdn", "crawl", "rag", "publish", "patreon", "reminders", "warm"],
+				tasks: ["db", "cdn", "crawl", "rag", "publish", "github-publish", "patreon", "reminders", "warm"],
 				schedules: {
 					publish: "*/15 * * * *",
 					warm: "*/30 * * * *",
 					db: "0 2 * * *",
 					patreon: "0 3 * * *",
 					cdn: "0 4 * * *",
+					"github-publish": "30 4 * * *",
 					crawl: "0 5 * * *",
 					reminders: "0 8 * * *",
 				},
@@ -376,6 +385,7 @@ const server = Bun.serve({
 				crawl: runIeCrawl,
 				rag: runRagSync,
 				publish: triggerPublishScheduled,
+				"github-publish": triggerGithubPublishWorkflow,
 				patreon: triggerPatreonRefresh,
 				reminders: () => triggerPatreonReminders("announce"),
 				warm: warmCaches,
