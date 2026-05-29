@@ -52,9 +52,9 @@ export function FormSelector({ forms, currentFormId }: FormSelectorProps) {
   if (!forms || forms.length <= 1) {return null;}
 
   return (
-    <div className="space-y-1.5">
-      <span className="text-[10px] font-black uppercase tracking-widest text-white/40">Formes</span>
-      <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
+    <div className="space-y-1.5 text-center sm:text-left w-full">
+      <span className="text-[10px] font-black uppercase tracking-widest text-white/40 block">Formes</span>
+      <div className="flex items-center justify-center sm:justify-start gap-2 overflow-x-auto pb-1 scrollbar-none w-full">
         {forms.map((form) => {
           const isCurrent = form.id === currentFormId;
           const pos = POSITION_MAP[form.position] || form.position;
