@@ -15,6 +15,7 @@
   },
   "dependencies": {
     "@aphrody-code/bxc": "^0.5.2",
+    "@aphrody-code/x": "file:/home/ubuntu/aphrody/packages/x",
     "@asteasolutions/zod-to-openapi": "^8.5.0",
     "@rose-griffon/auth": "workspace:*",
     "@rose-griffon/db": "workspace:*",

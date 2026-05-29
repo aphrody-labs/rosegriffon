@@ -9,6 +9,7 @@ import { crawlNews } from "./news";
 import { crawlRe } from "./re";
 import { crawlCross } from "./cross";
 import { crawlLevel5 } from "./level5";
+import { crawlTwitter } from "./twitter";
 import { runRagSync } from "./rag";
 
 export async function runIeCrawl(): Promise<{ success: boolean; error?: string }> {
@@ -57,9 +58,17 @@ export async function runIeCrawl(): Promise<{ success: boolean; error?: string }
       console.log("[ie-crawl] Crawl LEVEL-5 complété.");
     }
 
+    // 5b. Crawl Twitter @Azalee_IE
+    const twitterRes = await crawlTwitter();
+    if (!twitterRes.success) {
+      console.error("[ie-crawl] Échec du crawl Twitter :", twitterRes.error);
+    } else {
+      console.log(`[ie-crawl] Crawl Twitter complété : ${twitterRes.count} tweets synchronisés.`);
+    }
+
     // 6. Synchronisation sémantique / vectorisation pour le RAG
     let ragSuccess = true;
-    const anyNewsCrawlSuccess = newsRes.success || reRes.success || crossRes.success || level5Res.success;
+    const anyNewsCrawlSuccess = newsRes.success || reRes.success || crossRes.success || level5Res.success || twitterRes.success;
     if (anyNewsCrawlSuccess) {
       const ragRes = await runRagSync();
       ragSuccess = ragRes.success;
@@ -70,7 +79,7 @@ export async function runIeCrawl(): Promise<{ success: boolean; error?: string }
       }
     }
 
-    const success = (zukanRes.success && newsRes.success && reRes.success && crossRes.success && level5Res.success && ragSuccess);
+    const success = (zukanRes.success && newsRes.success && reRes.success && crossRes.success && level5Res.success && twitterRes.success && ragSuccess);
     return {
       success,
       error: success ? undefined : "Certaines tâches de crawl ou RAG ont échoué."
