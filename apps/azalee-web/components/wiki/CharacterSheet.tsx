@@ -371,7 +371,7 @@ export function CharacterSheet({
           </div>
 
           {/* Character Info */}
-          <div className="flex-1 min-w-0 text-center sm:text-left space-y-2 sm:space-y-3">
+          <div className="w-full sm:flex-1 min-w-0 text-center sm:text-left space-y-2 sm:space-y-3">
             {/* Name */}
             <div className="space-y-0.5">
               <div className="flex items-center justify-center sm:justify-start gap-2 sm:gap-3">

@@ -125,7 +125,8 @@ export default async function PlayerDetailPage({ params }: { params: Promise<{ i
   };
 
   // Fetch all distinct forms of this character (same chara_id, different pos/elem/rarity)
-  const forms = await wikiService.getCharacterForms(baseChar.charaId);
+  const sheetId = (player as any).sheetData?.sheetId;
+  const forms = await wikiService.getCharacterForms(baseChar.charaId, sheetId);
 
   // Map position to UI expected format
   const positionMap: Record<string, string> = {
@@ -169,10 +170,19 @@ export default async function PlayerDetailPage({ params }: { params: Promise<{ i
       .split(separator)
       .map((s) => s.trim())
       .filter((s) => s && !s.startsWith("#N/A") && !s.startsWith("Mix "));
-    const resolved = await Promise.all(moveNames.map((name) => wikiService.getSkill(name)));
+    
+    const resolvedSkills = await Promise.all(moveNames.map((name) => wikiService.getSkill(name)));
+    
+    // Parallelize any aura searches for missing skills
+    const auraPromises = resolvedSkills.map((skill, index) => {
+      if (skill) return Promise.resolve(null);
+      return wikiService.findAuraByName(moveNames[index]);
+    });
+    const resolvedAuras = await Promise.all(auraPromises);
+
     const result: MovesetSkill[] = [];
-    for (let index = 0; index < resolved.length; index++) {
-      const skill = resolved[index];
+    for (let index = 0; index < resolvedSkills.length; index++) {
+      const skill = resolvedSkills[index];
       const isPassive = skill?.categoryName?.fr?.toLowerCase() === "talent";
       if (skill) {
         result.push({
@@ -189,8 +199,7 @@ export default async function PlayerDetailPage({ params }: { params: Promise<{ i
           videoUrl: (skill as any).videoUrl,
         });
       } else {
-        // Fallback: try as aura (Keeper's Grit, Burning Overdrive, etc.)
-        const aura = await wikiService.findAuraByName(moveNames[index]);
+        const aura = resolvedAuras[index];
         if (aura) {
           result.push({
             category: "Hyper Technique",

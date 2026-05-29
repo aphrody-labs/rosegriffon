@@ -216,13 +216,19 @@ export const wikiService = {
 			{ table: "inagle_auras", slug: "autres" },
 		] as const;
 		const safeCleanName = sanitizeFilter(cleanName);
-		for (const { table, slug } of tables) {
-			const { data } = await (supabase as any)
+		const searchPromises = tables.map(({ table }) =>
+			(supabase as any)
 				.from(table)
 				.select("id, name_en, name_fr, sub_type")
 				.or(`name_en.ilike.%${safeCleanName}%,name_fr.ilike.%${safeCleanName}%`)
-				.limit(1);
-			if (data && data.length > 0) return { ...data[0], categorySlug: slug };
+				.limit(1)
+		);
+		const results = await Promise.all(searchPromises);
+		for (let i = 0; i < tables.length; i++) {
+			const data = results[i].data;
+			if (data && data.length > 0) {
+				return { ...data[0], categorySlug: tables[i].slug };
+			}
 		}
 		// Exact match: use parameterized .eq() to avoid filter injection
 		const { data: exact } = await supabase
@@ -657,7 +663,10 @@ export const wikiService = {
 	},
 
 	/** Get all distinct forms/variants of a character (same chara_id, different pos/elem/rarity) */
-	async getCharacterForms(charaId: string): Promise<
+	async getCharacterForms(
+		charaId: string,
+		sheetId?: string,
+	): Promise<
 		Array<{
 			id: string;
 			slug: string;
@@ -671,12 +680,17 @@ export const wikiService = {
 		}>
 	> {
 		const supabase = await createClient();
-		const { data } = await supabase
+		let query = supabase
 			.from("inagle_characters")
 			.select(
 				"id, slug, position, element, rarity_label, rarity, zukan_hash, internal_code, stat_frappe, hero_type",
-			)
-			.eq("chara_id", charaId)
+			);
+		if (sheetId) {
+			query = query.eq("sheet_data->>sheetId", sheetId);
+		} else {
+			query = query.eq("chara_id", charaId);
+		}
+		const { data } = await query
 			.order("rarity", { ascending: false })
 			.order("position")
 			.order("element");
@@ -818,6 +832,9 @@ export const wikiService = {
 			} else {
 				query = query.eq("sheet_data->>playstyle", params.playstyle);
 			}
+		}
+		if (params.status !== "all") {
+			query = query.or("sheet_data.not.is.null,is_controllable.eq.true");
 		}
 		if (params.status === "jouable") {
 			query = query.eq("is_controllable", true);
@@ -1241,33 +1258,24 @@ export const wikiService = {
 		const supabase = await createClient();
 		const safeId = sanitizeFilter(id);
 
-		// Search by id or internal_code
-		let { data: row } = await supabase
-			.from("inagle_skills")
-			.select("*")
-			.or(`id.eq.${safeId},internal_code.eq.${safeId}`)
-			.maybeSingle();
+		let row: any = null;
 
-		// Fallback: search by hex skillID in sheet_data (character skills use this format)
-		if (!row && id.startsWith("0x")) {
-			const { data: hexRow } = await supabase
+		if (id.startsWith("0x")) {
+			const { data } = await supabase
 				.from("inagle_skills")
 				.select("*")
-				.eq("sheet_data->>skillID", id)
+				.or(`id.eq.${safeId},sheet_data->>skillID.eq.${safeId}`)
+				.limit(1)
 				.maybeSingle();
-			row = hexRow;
-		}
-
-		// Fallback: search by English or French name (for sheetData.firstMoves which uses skill names)
-		// Use limit(1) since some names have duplicates (e.g. "Majin the Hand")
-		if (!row && !id.startsWith("0x")) {
-			const safeName = sanitizeFilter(id);
-			const { data: nameRows } = await supabase
+			row = data;
+		} else {
+			const { data } = await supabase
 				.from("inagle_skills")
 				.select("*")
-				.or(`name_en.eq.${safeName},name_fr.eq.${safeName}`)
-				.limit(1);
-			row = nameRows?.[0] ?? null;
+				.or(`internal_code.eq.${safeId},name_en.eq.${safeId},name_fr.eq.${safeId}`)
+				.limit(1)
+				.maybeSingle();
+			row = data;
 		}
 
 		if (row) {
@@ -1562,7 +1570,7 @@ export const wikiService = {
 	groupVariants(characters: BaseCharacter[]): BaseCharacter[] {
 		const grouped = new Map<string, BaseCharacter>();
 		for (const char of characters) {
-			const key = char.charaId;
+			const key = (char.sheetData as any)?.sheetId || char.charaId;
 			const existing = grouped.get(key);
 			if (existing) {
 				existing.variants.push(...char.variants);

@@ -58,12 +58,13 @@ function AchilleaLogo({ size }: { size: "sm" | "lg" }) {
 
 function AchilleaTitle({ className }: { className: string }) {
   return (
-    <div className={`relative w-full ${className}`}>
+    <div className={`relative flex items-center justify-center md:justify-start ${className}`}>
       <Image
         src="/achillea/achillea site titre transparent-2.webp"
         alt="ACHILLEA"
-        fill
-        className="object-contain object-left drop-shadow-[0_2px_12px_rgba(223,255,87,0.4)]"
+        width={380}
+        height={96}
+        className="h-full w-auto object-contain drop-shadow-[0_2px_12px_rgba(223,255,87,0.4)]"
       />
     </div>
   );
@@ -131,16 +132,18 @@ export function AchilleaBanner({
         <div className="absolute -right-10 -top-10 size-48 bg-[#6d00ce] rounded-full blur-[80px] opacity-20 pointer-events-none" />
         <div className="absolute -left-10 -bottom-10 size-48 bg-[#DFFF57] rounded-full blur-[80px] opacity-10 pointer-events-none" />
 
-        <div className="relative z-10 p-5 flex flex-col gap-4">
-          <div className="flex items-center justify-between">
+        <div className="relative z-10 p-5 flex flex-col items-center text-center gap-4">
+          <div className="flex items-center gap-3 justify-center">
             <EsportBadge variant="mobile" />
             <AchilleaLogo size="sm" />
           </div>
-          <AchilleaTitle className="h-14 max-w-[260px]" />
-          <p className="text-white/80 text-sm leading-relaxed font-medium line-clamp-2 max-w-[300px]">
+          <AchilleaTitle className="h-14 max-w-[260px] mx-auto" />
+          <p className="text-white/80 text-sm leading-relaxed font-medium line-clamp-2 max-w-[300px] mx-auto">
             {description}
           </p>
-          <AchilleaButtons link={link} discordLink={discordLink} variant="mobile" />
+          <div className="w-full">
+            <AchilleaButtons link={link} discordLink={discordLink} variant="mobile" />
+          </div>
         </div>
       </div>
 
