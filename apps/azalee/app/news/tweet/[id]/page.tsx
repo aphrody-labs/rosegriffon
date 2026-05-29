@@ -91,8 +91,7 @@ export default async function TweetPage({ params }: { params: Promise<{ id: stri
 				);
 				return downloaded || m;
 			}),
-			text:
-				rt.translation || rt.fullText || rt.text || "",
+			text: rt.translation || rt.fullText || rt.text || "",
 		}));
 		// Remove the first section text from display since it's used as title
 		if (sections.length > 0) {

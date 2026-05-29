@@ -59,7 +59,9 @@ export async function crawlZukanOrder(): Promise<{
 				try {
 					let retries = 24; // 24 * 250ms = 6s max
 					while (retries > 0) {
-						const count = await page.evaluate(() => (globalThis as any).document.querySelectorAll("ul.charaListBox > li").length);
+						const count = await page.evaluate(
+							() => (globalThis as any).document.querySelectorAll("ul.charaListBox > li").length
+						);
 						if (count > 2) {
 							break;
 						}

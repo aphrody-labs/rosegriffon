@@ -277,13 +277,55 @@ export const vectorStore = {
 	async search<M = Record<string, unknown>>(
 		collection: string,
 		queryEmbedding: number[],
-		limit = 5
+		limit = 5,
+		queryText?: string
 	): Promise<{ document: Omit<VectorDocument<M>, "embedding">; score: number }[]> {
 		const docs = await this.getCollection<M>(collection);
 		if (docs.length === 0) return [];
 
 		const scored = docs.map((doc) => {
-			const score = cosineSimilarity(queryEmbedding, doc.embedding);
+			const cosineScore = cosineSimilarity(queryEmbedding, doc.embedding);
+			let keywordScore = 0;
+
+			if (queryText) {
+				const queryWords = queryText
+					.toLowerCase()
+					.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, " ")
+					.split(/\s+/)
+					.filter(
+						(w) =>
+							w.length > 2 &&
+							![
+								"pour",
+								"avec",
+								"dans",
+								"les",
+								"des",
+								"une",
+								"dans",
+								"sur",
+								"the",
+								"and",
+								"for",
+								"with",
+							].includes(w)
+					);
+
+				if (queryWords.length > 0) {
+					const docTextLower = doc.text.toLowerCase().replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, " ");
+					let matches = 0;
+					for (const word of queryWords) {
+						if (docTextLower.includes(word)) {
+							matches++;
+						}
+					}
+					keywordScore = matches / queryWords.length;
+				}
+			}
+
+			// Recherche hybride : 70% similarité cosinus, 30% correspondance de mot-clé
+			const score = queryText ? cosineScore * 0.7 + keywordScore * 0.3 : cosineScore;
+
 			// Supprimer l'embedding de la réponse pour économiser de la bande passante
 			const { embedding, ...documentWithoutEmbedding } = doc;
 			return {
@@ -372,7 +414,11 @@ export async function getEmbedding(text: string): Promise<number[]> {
 
 	// Fallback : Feature Hashing Vectorizer (dimension 1536) L2-normalisé
 	const vector = new Array<number>(dimension).fill(0);
-	const words = text.toLowerCase().split(/\s+/);
+	const words = text
+		.toLowerCase()
+		.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()\[\]]/g, " ")
+		.split(/\s+/)
+		.filter(Boolean);
 
 	for (const word of words) {
 		if (word.length > 0) {

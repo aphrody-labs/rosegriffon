@@ -39,12 +39,15 @@ async function checkLinks() {
 		const relativeFile = file.replace(ROOT_DIR, "").replace(/^\//, "");
 		const fileDir = dirname(file);
 
+		// Retirer les blocs de code (fenced et inline) pour éviter de valider de faux liens dans des exemples de code
+		const cleanContent = content.replace(/```[\s\S]*?```/g, "").replace(/`[^`\n]+`/g, "");
+
 		// Regex pour capturer les liens Markdown [texte](url)
 		// Ignorer les URLs externes commençant par http/https/mailto
 		const linkRegex = /\[[^\]]*?\]\(([^)]+?)\)/g;
 		let match;
 
-		while ((match = linkRegex.exec(content)) !== null) {
+		while ((match = linkRegex.exec(cleanContent)) !== null) {
 			const linkUrl = match[1].trim();
 
 			// Ignorer les liens externes

@@ -10,8 +10,8 @@
 
 import { writeFileSync } from "node:fs";
 import { join } from "node:path";
-import { DATA_ROOT } from "@rose-griffon/inagle/core/paths.ts";
-import { createInagleService } from "@rose-griffon/inagle/service.ts";
+import { DATA_ROOT } from "../../../packages/inagle/src/core/paths.ts";
+import { createInagleService } from "../../../packages/inagle/src/service.ts";
 
 async function main() {
 	console.log("Chargement du service inagle...");
