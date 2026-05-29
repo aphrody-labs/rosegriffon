@@ -1,5 +1,6 @@
 import { runInaglePush } from "./tasks/db";
 import { syncCdnAssets } from "./tasks/cdn";
+import { runIeCrawl } from "./tasks/ie-crawl";
 import {
   triggerPublishScheduled,
   triggerPatreonRefresh,
@@ -23,6 +24,8 @@ if (args.includes("--run")) {
     await runInaglePush();
   } else if (task === "cdn") {
     await syncCdnAssets();
+  } else if (task === "crawl") {
+    await runIeCrawl();
   } else if (task === "publish") {
     await triggerPublishScheduled();
   } else if (task === "patreon") {
@@ -39,10 +42,11 @@ if (args.includes("--run")) {
     await runInaglePush();
     await triggerPatreonRefresh();
     await syncCdnAssets();
+    await runIeCrawl();
     await triggerPatreonReminders("announce");
   } else {
     console.error(
-      `❌ Tâche inconnue : ${task}. Choisissez parmi : db, cdn, publish, patreon, reminders, warm, all.`
+      `❌ Tâche inconnue : ${task}. Choisissez parmi : db, cdn, crawl, publish, patreon, reminders, warm, all.`
     );
   }
   process.exit(0);
@@ -87,6 +91,15 @@ Bun.cron("0 4 * * *", async () => {
   const result = await syncCdnAssets();
   if (!result.success) {
     console.error("[Cron] Échec de la synchronisation CDN:", result.error);
+  }
+});
+
+// 5b. Crawl officiel Inazuma Eleven (Zukan & Actus) : tous les jours à 5h00 UTC
+Bun.cron("0 5 * * *", async () => {
+  console.log(`[Cron] Exécution tâche: Crawl Inazuma Eleven (${new Date().toISOString()})`);
+  const result = await runIeCrawl();
+  if (!result.success) {
+    console.error("[Cron] Échec du crawl Inazuma Eleven:", result.error);
   }
 });
 
