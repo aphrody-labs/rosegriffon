@@ -20,36 +20,87 @@ interface TokenRow {
 	scope: string;
 }
 
+const refreshLocks = new Map<string, Promise<string>>();
+
 /**
  * Si le token expire dans moins de `marginMs`, on le rafraîchit via OAuth
  * `grant_type=refresh_token` et on stocke la nouvelle paire chiffrée.
  * Renvoie l'access token clair (toujours valide) à utiliser pour le fetch.
+ *
+ * Cette fonction est protégée contre les race conditions :
+ * 1. Un verrou local (in-memory lock via Map de Promises) empêche les appels concurrents dans le même processus.
+ * 2. Un verrou optimiste sur la base de données (PostgREST match sur refresh_token_enc) empêche les conflits multi-processus.
  */
 async function ensureFreshAccessToken(
 	supabase: AdminClient,
 	row: TokenRow,
 	marginMs = 5 * 60 * 1000
 ): Promise<string> {
-	const expiresAt = new Date(row.expires_at).getTime();
-	if (expiresAt - Date.now() > marginMs) {
-		return decryptToken(row.access_token_enc);
+	// 1. Verrou local en mémoire pour fusionner les requêtes concurrentes du même process
+	const activeRefresh = refreshLocks.get(row.id);
+	if (activeRefresh) {
+		return activeRefresh;
 	}
 
-	const refresh = decryptToken(row.refresh_token_enc);
-	const refreshed = await refreshAccessToken(refresh);
-	const newExpiresAt = new Date(Date.now() + refreshed.expires_in * 1000).toISOString();
+	const refreshPromise = (async () => {
+		try {
+			// Lire la version la plus fraîche du token depuis la base de données dans la section critique
+			const { data: latestToken } = await supabase
+				.from("patreon_oauth_tokens")
+				.select("id, access_token_enc, refresh_token_enc, expires_at, scope")
+				.eq("id", row.id)
+				.single();
 
-	await supabase
-		.from("patreon_oauth_tokens")
-		.update({
-			access_token_enc: encryptToken(refreshed.access_token),
-			expires_at: newExpiresAt,
-			refresh_token_enc: encryptToken(refreshed.refresh_token),
-			scope: refreshed.scope || row.scope,
-		})
-		.eq("id", row.id);
+			if (!latestToken) {
+				throw new Error("Patreon token row not found in database");
+			}
 
-	return refreshed.access_token;
+			const expiresAt = new Date(latestToken.expires_at).getTime();
+			// Si un appel concurrent a déjà rafraîchi le token avec succès entre-temps
+			if (expiresAt - Date.now() > marginMs) {
+				return decryptToken(latestToken.access_token_enc);
+			}
+
+			// Lancer le rafraîchissement effectif auprès de l'API Patreon
+			const refresh = decryptToken(latestToken.refresh_token_enc);
+			const refreshed = await refreshAccessToken(refresh);
+			const newExpiresAt = new Date(Date.now() + refreshed.expires_in * 1000).toISOString();
+
+			// Mise à jour optimiste : on ne met à jour que si le token n'a pas bougé en DB
+			const { data, error } = await supabase
+				.from("patreon_oauth_tokens")
+				.update({
+					access_token_enc: encryptToken(refreshed.access_token),
+					expires_at: newExpiresAt,
+					refresh_token_enc: encryptToken(refreshed.refresh_token),
+					scope: refreshed.scope || latestToken.scope,
+				})
+				.eq("id", latestToken.id)
+				.eq("refresh_token_enc", latestToken.refresh_token_enc)
+				.select("access_token_enc");
+
+			if (error || !data || data.length === 0) {
+				// Conflit détecté (déjà mis à jour par un autre processus). On récupère la valeur fraîche.
+				const { data: finalToken } = await supabase
+					.from("patreon_oauth_tokens")
+					.select("access_token_enc")
+					.eq("id", latestToken.id)
+					.single();
+				if (finalToken) {
+					return decryptToken(finalToken.access_token_enc);
+				}
+				throw new Error("Patreon token refreshed concurrently but final token could not be retrieved");
+			}
+
+			return refreshed.access_token;
+		} finally {
+			// Libérer le verrou
+			refreshLocks.delete(row.id);
+		}
+	})();
+
+	refreshLocks.set(row.id, refreshPromise);
+	return refreshPromise;
 }
 
 /**
