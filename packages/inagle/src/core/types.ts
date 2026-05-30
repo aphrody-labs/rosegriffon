@@ -324,6 +324,15 @@ export interface BaseCharacter {
 
 	/** Whether any variant is controllable in story mode */
 	isControllable?: boolean;
+
+	/** Personality type (1-11) */
+	personalityType?: number;
+	/** Localized self-pronoun */
+	firstPerson?: LocalizedNames;
+	/** Localized address-pronoun for males */
+	secondPersonMale?: LocalizedNames;
+	/** Localized address-pronoun for females */
+	secondPersonFemale?: LocalizedNames;
 }
 
 // ============================================================================
@@ -435,6 +444,12 @@ export interface Character {
 
 	/** Personality type (1-11) */
 	personalityType?: number;
+	/** Localized self-pronoun */
+	firstPerson?: LocalizedNames;
+	/** Localized address-pronoun for males */
+	secondPersonMale?: LocalizedNames;
+	/** Localized address-pronoun for females */
+	secondPersonFemale?: LocalizedNames;
 
 	/** Constellation (Players Universe star sign) */
 	constellation?: {

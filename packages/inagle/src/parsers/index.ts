@@ -436,4 +436,20 @@ export {
 	type ParsedCharaResource,
 } from "./chara-menu-resource-config.js";
 
+// Story text parser (dialogues, map NPCs, goals, phases)
+export {
+	buildStoryTextDatabase,
+	parseAllEventDialogues,
+	parseAllMapNpcDialogues,
+	parseAllStoryGoals,
+	parseAllChapterPhases,
+	type StoryEvent,
+	type StoryDialogueLine,
+	type ResolvedSpeaker,
+	type MapNpcDialogue,
+	type StoryGoal,
+	type ChapterPhase,
+} from "./story-text-parser.js";
+
+
 

@@ -40,6 +40,8 @@ import { type GrowthTableLv1, loadGrowthTableConfigAsync } from "../parsers/grow
 import { loadHeroConfig } from "../parsers/hero-config.js";
 import { buildStarSignMap, rarityCodeToName, rarityToGrowthRank } from "../parsers/star-sign.js";
 import { loadZukanCharacters } from "./chara-json.js";
+import { parseCharaDetails } from "../parsers/chara-details.js";
+import { loadUniversalText } from "../parsers/universal-text.js";
 
 // ============================================================================
 // Series from Internal Code
@@ -413,6 +415,21 @@ export function loadAllCharacters(): Character[] {
 	// Load hero variant config (Fire/Black/Pink)
 	const heroConfig = loadHeroConfig();
 
+	const charaDetailsMap = parseCharaDetails();
+	const charaTextMap = loadUniversalText("chara_text");
+
+	const resolvePronoun = (hash: string | undefined): LocalizedNames | undefined => {
+		if (!hash || hash === "0X00000000" || hash === "0x00000000") return undefined;
+		const norm = hash.toUpperCase().replace("0X", "0x");
+		const ja = charaTextMap.maps.get("ja")?.get(norm);
+		const en = charaTextMap.maps.get("en")?.get(norm);
+		const fr = charaTextMap.maps.get("fr")?.get(norm);
+		if (ja || en || fr) {
+			return { ja, en, fr };
+		}
+		return undefined;
+	};
+
 	//console.log("[Character] Building character entities...");
 	const characters: Character[] = [];
 
@@ -486,6 +503,14 @@ export function loadAllCharacters(): Character[] {
 		if (ctrlChara) {
 			character.isControllable = true;
 			character.controlType = ctrlChara.controlType;
+		}
+
+		const details = charaDetailsMap.get(param.charaBaseId.toUpperCase());
+		if (details) {
+			character.personalityType = details.personalityType;
+			character.firstPerson = resolvePronoun(details.firstPerson);
+			character.secondPersonMale = resolvePronoun(details.secondPersonMale);
+			character.secondPersonFemale = resolvePronoun(details.secondPersonFemale);
 		}
 
 		// Add lv1 stats from growth_table_config (independent of growthTableMain)
@@ -826,6 +851,21 @@ export function loadBaseCharacters(): BaseCharacter[] {
 	const zukanMapping = loadZukanMapping?.() || {};
 	const zukanStats = loadZukanCharacters();
 
+	const charaDetailsMap = parseCharaDetails();
+	const charaTextMap = loadUniversalText("chara_text");
+
+	const resolvePronoun = (hash: string | undefined): LocalizedNames | undefined => {
+		if (!hash || hash === "0X00000000" || hash === "0x00000000") return undefined;
+		const norm = hash.toUpperCase().replace("0X", "0x");
+		const ja = charaTextMap.maps.get("ja")?.get(norm);
+		const en = charaTextMap.maps.get("en")?.get(norm);
+		const fr = charaTextMap.maps.get("fr")?.get(norm);
+		if (ja || en || fr) {
+			return { ja, en, fr };
+		}
+		return undefined;
+	};
+
 	const results: BaseCharacter[] = [];
 
 	for (const [charaId, params] of baseToParams) {
@@ -947,6 +987,8 @@ export function loadBaseCharacters(): BaseCharacter[] {
 		// Check if this base character is controllable (ctrl_chara uses charaId)
 		const isControllable = getCtrlCharaMapSync().has(charaId);
 
+		const details = charaDetailsMap.get(charaId.toUpperCase());
+
 		results.push({
 			charaId,
 			internalCode: base.internalCode,
@@ -963,6 +1005,10 @@ export function loadBaseCharacters(): BaseCharacter[] {
 			teamName,
 			constellation,
 			series,
+			personalityType: details?.personalityType,
+			firstPerson: resolvePronoun(details?.firstPerson),
+			secondPersonMale: resolvePronoun(details?.secondPersonMale),
+			secondPersonFemale: resolvePronoun(details?.secondPersonFemale),
 		});
 	}
 

@@ -83,18 +83,18 @@ async function main() {
 	const teams = svc.teams.allTeams() as any[];
 	const teamNames: string[] = [];
 	for (const t of teams) {
-		if (t.names?.fr) teamNames.push(t.names.fr);
+		if (t.name_FR) teamNames.push(t.name_FR);
 	}
 
-	// ─── Items ────────────────��──────────────────────────────────────
+	// ─── Items ───────────────────────────────────────────────────────
 	const items = svc.items.allItems() as any[];
 	const itemNames: string[] = [];
 	for (const i of items) {
-		const name = (i as any).name_FR;
+		const name = i.names?.fr || i.name;
 		if (name && !name.includes("<CHARA_NAME>")) itemNames.push(name);
 	}
 
-	// ─── Générer le glossaire ─────���──────────────────────────────────
+	// ─── Générer le glossaire ────────────────────────────────────────
 	const glossary: Record<string, any> = {
 		_meta: {
 			generatedAt: new Date().toISOString(),

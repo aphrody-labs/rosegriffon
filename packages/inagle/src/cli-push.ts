@@ -234,6 +234,9 @@ export function registerPushCommand(program: Command) {
 				await importExpTable(adapter);
 				await importGrowthTables(adapter);
 
+				// Story text static export
+				await exportStoryTextDatabase();
+
 				console.log("🎉 Data push completed successfully!");
 			} catch (error) {
 				console.error("Fatal error during push:", error);
@@ -904,3 +907,17 @@ async function importCapsules(_service: any, db: DataAdapter) {
 	}
 	console.log(`✅ Capsules imported (${successCount}).`);
 }
+
+async function exportStoryTextDatabase() {
+	console.log("🔄 Exporting Story Text Database...");
+	const { buildStoryTextDatabase } = await import("./parsers/story-text-parser.js");
+	const db = buildStoryTextDatabase();
+
+	const { PATHS } = await import("./core/paths.js");
+	const { writeFileSync } = await import("node:fs");
+
+	const storyTextPath = path.join(PATHS.allGamedata, "story_text_database.json");
+	writeFileSync(storyTextPath, JSON.stringify(db, null, 2), "utf-8");
+	console.log(`✅ Story Text Database written to ${storyTextPath}`);
+}
+

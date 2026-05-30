@@ -46,6 +46,43 @@ interface DbRow {
 	stat_intelligence: number | null;
 }
 
+const POS_MAP: Record<string, string> = {
+	FW: "FW",
+	MF: "MF",
+	DF: "DF",
+	GK: "GK",
+	Attaquant: "FW",
+	Milieu: "MF",
+	Défenseur: "DF",
+	Defenseur: "DF",
+	Gardien: "GK",
+};
+
+const ELEM_MAP: Record<string, string> = {
+	Fire: "Fire",
+	Wind: "Wind",
+	Forest: "Forest",
+	Mountain: "Mountain",
+	Void: "Void",
+	Feu: "Fire",
+	Vent: "Wind",
+	Forêt: "Forest",
+	Foret: "Forest",
+	Montagne: "Mountain",
+	Néant: "Void",
+	Neant: "Void",
+};
+
+function normPos(p: string | undefined): string | null {
+	if (!p) return null;
+	return POS_MAP[p] || p || null;
+}
+
+function normElem(e: string | undefined): string | null {
+	if (!e) return null;
+	return ELEM_MAP[e] || e || null;
+}
+
 const ERAS: Record<string, string> = {
 	"Inazuma Eleven": "OG",
 	"Inazuma Eleven 2": "OG",
@@ -212,10 +249,10 @@ async function main() {
 			dbNameEn.includes(zukanFirst);
 
 		// Position mismatch
-		const posMismatch = z.position && db.position && z.position !== db.position;
+		const posMismatch = z.position && db.position && normPos(z.position) !== normPos(db.position);
 
 		// Element mismatch (ignore for MixiMax since it can change)
-		const elemMismatch = !isMixiMax && z.element && db.element && z.element !== db.element;
+		const elemMismatch = !isMixiMax && z.element && db.element && normElem(z.element) !== normElem(db.element);
 
 		// Gender mismatch
 		const zGender = z.gender === "Male" ? "M" : z.gender === "Female" ? "F" : null;

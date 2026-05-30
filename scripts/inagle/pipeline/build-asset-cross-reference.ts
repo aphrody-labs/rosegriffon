@@ -15,6 +15,7 @@
 
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+import { existsSync } from "node:fs";
 import { DATA_ROOT } from "@rose-griffon/inagle/core/paths.ts";
 
 // ---------------------------------------------------------------------------
@@ -55,7 +56,7 @@ interface CrossReferenceOutput {
 // ---------------------------------------------------------------------------
 
 const __dirname = import.meta.dir;
-const ENTRIES_DIR = join(__dirname, "../entries");
+const ENTRIES_DIR = join(__dirname, "../../../packages/inagle/src/entries");
 const ALL_GAMEDATA_DIR = join(DATA_ROOT, "all-gamedata");
 const LUA_STRINGS_FILE = join(DATA_ROOT, "lua_scripts/analysis/all-strings.json");
 const OUTPUT_FILE = join(DATA_ROOT, "asset-cross-reference.json");
@@ -181,7 +182,7 @@ async function scanEntries(assetMap: Map<string, AssetEntry>): Promise<void> {
 	];
 
 	for (const { dir, label } of entriesSources) {
-		const dirExists = await Bun.file(dir).exists();
+		const dirExists = existsSync(dir);
 		if (!dirExists) {
 			console.warn(`  [WARN] ${dir} introuvable, skip`);
 			continue;
