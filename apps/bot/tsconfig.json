@@ -1,6 +1,9 @@
 {
 	"extends": "@rose-griffon/config/tsconfig-bun.json",
 	"compilerOptions": {
+		"experimentalDecorators": true,
+		"emitDecoratorMetadata": true,
+		"useDefineForClassFields": false,
 		"paths": {
 			"@/*": ["./src/*"]
 		},
