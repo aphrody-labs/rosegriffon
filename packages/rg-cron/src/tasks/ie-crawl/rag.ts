@@ -74,6 +74,26 @@ interface ScrapedItem {
 }
 
 /**
+ * Normalise les espaces et retours à la ligne en évitant de tout aplatir.
+ * Conserve un saut de ligne vide maximum (\n\n) pour le découpage sémantique du RAG.
+ */
+function normalizeText(text: string): string {
+	return text
+		.replace(/\r\n/g, "\n")
+		.split("\n")
+		.map((line) => line.trim().replace(/[ \t]+/g, " "))
+		.filter((line, index, arr) => {
+			if (line === "") {
+				// Garder au maximum une seule ligne vide consécutive
+				return index > 0 && arr[index - 1] !== "";
+			}
+			return true;
+		})
+		.join("\n")
+		.trim();
+}
+
+/**
  * Nettoie le contenu HTML pour en extraire le texte brut utile au RAG.
  */
 function cleanHtml(html: string): string {
@@ -88,13 +108,16 @@ function cleanHtml(html: string): string {
 		contentArea = $("body");
 	}
 
-	// Extraire le texte propre
-	const text = contentArea
-		.text()
-		.replace(/\s+/g, " ") // normaliser les espaces/retours à la ligne
-		.trim();
+	// Remplacer les <br> par des sauts de ligne
+	contentArea.find("br").replaceWith("\n");
 
-	return text;
+	// Ajouter des sauts de ligne autour des éléments de bloc pour préserver la structure
+	contentArea.find("p, div, li, h1, h2, h3, h4, h5, h6, tr, section, article").each((_, elem) => {
+		$(elem).before("\n").after("\n");
+	});
+
+	// Extraire le texte propre normalisé
+	return normalizeText(contentArea.text());
 }
 
 /**
@@ -471,21 +494,20 @@ export async function runRagSync(): Promise<{
 				let cleanText = "";
 				if (item.type === "doc") {
 					const { content } = parseFrontmatter(fileContent);
-					cleanText = Bun.markdown
+					const rawMarkdownText = Bun.markdown
 						.render(content, {
-							heading: (children: string) => children + "\n",
-							paragraph: (children: string) => children + "\n",
+							heading: (children: string) => "\n\n" + children + "\n\n",
+							paragraph: (children: string) => "\n\n" + children + "\n\n",
 							strong: (children: string) => children,
 							emphasis: (children: string) => children,
 							link: (children: string) => children,
 							image: () => "",
-							code: (children: string) => children,
+							code: (children: string) => "\n\n" + children + "\n\n",
 							codespan: (children: string) => children,
-							list: (children: string) => children + "\n",
+							list: (children: string) => "\n\n" + children + "\n\n",
 							listItem: (children: string) => "- " + children + "\n",
-						})
-						.trim()
-						.replace(/\s+/g, " ");
+						});
+					cleanText = normalizeText(rawMarkdownText);
 				} else {
 					cleanText = cleanHtml(fileContent);
 				}
