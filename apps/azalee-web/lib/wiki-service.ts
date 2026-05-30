@@ -1631,6 +1631,18 @@ export const wikiService = {
 				}
 			}
 			char.variants = dedupedVariants;
+
+			// Update canonical zukanHash to be the one from the variant with the lowest zukanOrder
+			const variantsWithHash = dedupedVariants.filter((v: any) => v.zukanHash);
+			if (variantsWithHash.length > 0) {
+				variantsWithHash.sort((a: any, b: any) => {
+					const orderA = a.zukanOrder ?? 999999;
+					const orderB = b.zukanOrder ?? 999999;
+					if (orderA !== orderB) return orderA - orderB;
+					return a.rarityCode - b.rarityCode;
+				});
+				char.zukanHash = variantsWithHash[0].zukanHash;
+			}
 		}
 
 		return Array.from(grouped.values());
@@ -1743,6 +1755,7 @@ export const wikiService = {
 			sheetData: char.sheet_data,
 			slug: char.slug,
 			zukanHash,
+			zukanOrder: char.zukan_order,
 		};
 
 		const isBasara = char.rarity_label === "BASARA";
