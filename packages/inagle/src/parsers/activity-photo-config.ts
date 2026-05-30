@@ -67,6 +67,7 @@ function parseContent(content: any): { basePath: string; rewards: ParsedTrophyRe
 
 		// Extract trophy rewards
 		if (entry.name === "TROPHY_REWARD_LIST_BEG_0") {
+			const rewardMap = new Map<string, ParsedTrophyReward>();
 			for (const child of entry.children || []) {
 				if (!child.name?.startsWith("TROPHY_REWARD_")) continue;
 				const vars = child.variables || [];
@@ -76,17 +77,21 @@ function parseContent(content: any): { basePath: string; rewards: ParsedTrophyRe
 				const reward = parseInt(vars[1].value, 10);
 				const hex = toHex(trophyIdRaw);
 
-				rewards.push({
-					id: hex,
-					name: hex,
-					trophyIdRaw,
-					trophyIdHex: hex,
-					reward,
-					attributes: {
-						Reward: reward,
-					},
-				});
+				const existing = rewardMap.get(hex);
+				if (!existing || reward > existing.reward) {
+					rewardMap.set(hex, {
+						id: hex,
+						name: hex,
+						trophyIdRaw,
+						trophyIdHex: hex,
+						reward,
+						attributes: {
+							Reward: reward,
+						},
+					});
+				}
 			}
+			rewards.push(...rewardMap.values());
 		}
 	}
 

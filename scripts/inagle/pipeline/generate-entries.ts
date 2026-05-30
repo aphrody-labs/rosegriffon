@@ -15,7 +15,15 @@ import {
 	buildGrowthTableDatabase,
 	buildOpponentTeamDatabase,
 	buildTrickDatabase,
-} from "@rose-griffon/inagle/parsers/index.ts";
+	buildActivityPhotoDatabase,
+	buildChatEmoteDatabase,
+	buildNameplateDatabase,
+	buildPerformanceDatabase,
+	buildPhaseTitleDatabase,
+	buildSceneArchiveDatabase,
+	buildStadiumDatabase,
+	buildCharaMenuResourceDatabase,
+} from "@rose-griffon/inagle/parsers/index.js";
 import { buildOverrideSkillDatabase } from "@rose-griffon/inagle/parsers/override-skill-config.ts";
 import { createInagleService } from "@rose-griffon/inagle/service.ts";
 
@@ -237,6 +245,14 @@ async function main() {
 			opponents,
 			enjoyTeams,
 			dictionary,
+			activityPhotos,
+			chatEmotes,
+			nameplates,
+			performances,
+			phaseTitles,
+			sceneArchives,
+			stadiums,
+			charaMenuResource,
 		] = await Promise.all([
 			buildCharaExpTableDatabase(DATA_ROOT),
 			buildGrowthTableDatabase(DATA_ROOT),
@@ -249,6 +265,14 @@ async function main() {
 			buildOpponentTeamDatabase(DATA_ROOT),
 			buildEnjoyModeTeamDatabase(DATA_ROOT),
 			buildDictionaryDatabase(DATA_ROOT),
+			buildActivityPhotoDatabase(DATA_ROOT),
+			buildChatEmoteDatabase(DATA_ROOT),
+			buildNameplateDatabase(DATA_ROOT),
+			buildPerformanceDatabase(DATA_ROOT),
+			buildPhaseTitleDatabase(DATA_ROOT),
+			buildSceneArchiveDatabase(DATA_ROOT),
+			buildStadiumDatabase(DATA_ROOT),
+			buildCharaMenuResourceDatabase(DATA_ROOT),
 		]);
 
 		await fs.writeFile(
@@ -356,6 +380,62 @@ async function main() {
 		console.log(
 			`Saved dictionary (${dictionary.habitats.length} habitats, ${dictionary.observations.length} observations).`
 		);
+
+		await fs.writeFile(
+			path.join(ENTRIES_DIR, "activity_photos.json"),
+			JSON.stringify(activityPhotos.rewards, null, 2)
+		);
+		console.log(`Saved ${activityPhotos.rewards.length} activity photo rewards.`);
+
+		await fs.writeFile(
+			path.join(ENTRIES_DIR, "chat_emotes.json"),
+			JSON.stringify(chatEmotes.emotes, null, 2)
+		);
+		console.log(`Saved ${chatEmotes.emotes.length} chat emotes.`);
+
+		await fs.writeFile(
+			path.join(ENTRIES_DIR, "nameplates.json"),
+			JSON.stringify(nameplates.nameplates, null, 2)
+		);
+		console.log(`Saved ${nameplates.nameplates.length} nameplates.`);
+
+		await fs.writeFile(
+			path.join(ENTRIES_DIR, "performances.json"),
+			JSON.stringify(performances.performances, null, 2)
+		);
+		console.log(`Saved ${performances.performances.length} performances.`);
+
+		await fs.writeFile(
+			path.join(ENTRIES_DIR, "phase_titles.json"),
+			JSON.stringify(phaseTitles.titles, null, 2)
+		);
+		console.log(`Saved ${phaseTitles.titles.length} phase titles.`);
+
+		await fs.writeFile(
+			path.join(ENTRIES_DIR, "scene_archives.json"),
+			JSON.stringify(sceneArchives.scenes, null, 2)
+		);
+		console.log(`Saved ${sceneArchives.scenes.length} scene archives.`);
+
+		await fs.writeFile(
+			path.join(ENTRIES_DIR, "stadiums.json"),
+			JSON.stringify(stadiums.stadiums, null, 2)
+		);
+		console.log(`Saved ${stadiums.stadiums.length} stadiums.`);
+
+		await fs.writeFile(
+			path.join(ENTRIES_DIR, "chara_menu_resource.json"),
+			JSON.stringify(
+				{
+					basePath: charaMenuResource.basePath,
+					template: charaMenuResource.template,
+					overrides: charaMenuResource.overrides,
+				},
+				null,
+				2
+			)
+		);
+		console.log(`Saved ${charaMenuResource.overrides.length} character menu resources.`);
 	} catch (e) {
 		console.error("Failed to generate new parser entries:", e);
 	}

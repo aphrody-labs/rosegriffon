@@ -394,3 +394,46 @@ export {
 	type UniversalTextAPI,
 	type UniversalTextDatabase,
 } from "./universal-text.js";
+
+// Additional config parsers
+export {
+	buildActivityPhotoDatabase,
+	type ActivityPhotoDatabase,
+	type ParsedTrophyReward,
+} from "./activity-photo-config.js";
+export {
+	buildChatEmoteDatabase,
+	type ChatEmoteDatabase,
+	type ParsedChatEmote,
+} from "./chat-emote-config.js";
+export {
+	buildNameplateDatabase,
+	type NameplateDatabase,
+	type ParsedNameplate,
+} from "./nameplate-config.js";
+export {
+	buildPerformanceDatabase,
+	type PerformanceDatabase,
+	type ParsedPerformance,
+} from "./performance-config.js";
+export {
+	buildPhaseTitleDatabase,
+	type PhaseTitleDatabase,
+	type ParsedPhaseTitle,
+} from "./phase-title-config.js";
+export {
+	buildSceneArchiveDatabase,
+	type SceneArchiveDatabase,
+	type ParsedSceneArchive,
+} from "./scene-archive-config.js";
+export {
+	buildStadiumDatabase,
+	type StadiumDatabase,
+	type ParsedStadium,
+} from "./stadium-config.js";
+export {
+	buildCharaMenuResourceDatabase,
+	type ParsedCharaResource,
+} from "./chara-menu-resource-config.js";
+
+
