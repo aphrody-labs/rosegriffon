@@ -37,6 +37,9 @@ async function main() {
 	// 4. Build asset cross-reference definitions
 	const assetOk = await runScript(resolve(root, "scripts/inagle/pipeline/build-asset-cross-reference.ts"));
 	
+	// 5. Sync Patch Notes
+	const patchNotesOk = await runScript(resolve(root, "scripts/inagle/pipeline/sync-patch-notes.ts"));
+	
 	console.log("\n======================================================");
 	console.log("🎉 WAVE COMPLETED!");
 	console.log(`Results:`);
@@ -44,6 +47,7 @@ async function main() {
 	console.log(`  - Series DB Align & Audit: ${seriesOk ? "SUCCESS" : "FAILED"}`);
 	console.log(`  - Glossary Generation: ${glossaryOk ? "SUCCESS" : "FAILED"}`);
 	console.log(`  - Asset Cross-Reference: ${assetOk ? "SUCCESS" : "FAILED"}`);
+	console.log(`  - Patch Notes Sync: ${patchNotesOk ? "SUCCESS" : "FAILED"}`);
 	console.log("======================================================\n");
 }
 
