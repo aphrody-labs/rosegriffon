@@ -4,6 +4,9 @@
   "workspaces": {
     "": {
       "name": "@rosegriffon/monorepo",
+      "dependencies": {
+        "@streamparser/json": "^0.0.22",
+      },
       "devDependencies": {
         "@types/bun": "catalog:",
         "@vercel/edge-config": "^1.4.3",

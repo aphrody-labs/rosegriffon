@@ -88,5 +88,8 @@
 	"engines": {
 		"bun": ">=1.3.14"
 	},
-	"packageManager": "bun@1.3.14"
+	"packageManager": "bun@1.3.14",
+	"dependencies": {
+		"@streamparser/json": "^0.0.22"
+	}
 }

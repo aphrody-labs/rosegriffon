@@ -9,9 +9,12 @@
  */
 
 import { Command } from "commander";
-import { existsSync, readdirSync, readFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync, appendFileSync } from "node:fs";
 import path from "node:path";
 import dotenv from "dotenv";
+import { createInagleService } from "../packages/inagle/src/service.ts";
+import { getRedisClient, cache } from "../packages/db/src/redis.ts";
+import { queryRag } from "../packages/cron/src/tasks/ie-crawl/rag.ts";
 
 // Load environment variables
 dotenv.config({ path: path.resolve(process.cwd(), ".env.local") });
@@ -255,6 +258,194 @@ function renderCharaProfile(chara: any, svc: any): string {
 	return lines.join("\n");
 }
 
+let isReplMode = false;
+let pendingSelection: {
+	type: "chara" | "skill" | "item" | "team";
+	matches: any[];
+} | null = null;
+let activeRl: any = null;
+
+function renderSkillProfile(skill: any, svc: any): string {
+	const lines: string[] = [];
+	const displayName = skill.displayName || skill.name_FR || skill.name_EN || "N/A";
+	const typeStr = (skill.skillType || "Technique").toUpperCase();
+	const idStr = skill.skillIDStr || skill.auraId || skill.passiveId || "N/A";
+	
+	lines.push(`┌──────────────────────────────────────────────────────────────────────────────┐`);
+	lines.push(`│ [${colors.bold}${colors.green}${typeStr}${colors.reset}] ${colors.bold}${displayName.padEnd(50)}${colors.reset} │ ${colors.cyan}ID: ${idStr.padEnd(10)}${colors.reset} │`);
+	
+	if (skill.desc_FR || skill.description_FR || skill.desc_EN) {
+		const desc = skill.desc_FR || skill.description_FR || skill.desc_EN;
+		lines.push(`├──────────────────────────────────────────────────────────────────────────────┤`);
+		lines.push(`│ ${colors.bold}Description :${colors.reset}${" ".repeat(63)} │`);
+		const words = desc.split(" ");
+		let currentLine = "│   ";
+		for (const word of words) {
+			if ((currentLine + word).length > 74) {
+				lines.push(currentLine.padEnd(79) + "│");
+				currentLine = "│   " + word + " ";
+			} else {
+				currentLine += word + " ";
+			}
+		}
+		if (currentLine !== "│   ") {
+			lines.push(currentLine.padEnd(79) + "│");
+		}
+	}
+	
+	if (skill.power_max !== undefined) {
+		lines.push(`├──────────────────────────────────────────────────────────────────────────────┤`);
+		const power = skill.power_max;
+		const cost = skill.cost || 0;
+		const element = skill.elementName?.fr || "N/A";
+		const category = skill.categoryName?.fr || "N/A";
+		lines.push(`│ Puissance Max : ${power.toString().padEnd(10)} | Coût : ${cost.toString().padEnd(8)} | Élément : ${element.padEnd(10)} | Cat : ${category.padEnd(8)} │`);
+	}
+	lines.push(`└──────────────────────────────────────────────────────────────────────────────┘`);
+	return lines.join("\n");
+}
+
+const ITEM_CATEGORY_DISPLAY_NAMES: Record<string, string> = {
+	consume: "Consommable",
+	shoes: "Chaussures",
+	misanga: "Bracelet",
+	accessory: "Accessoire",
+	special: "Spécial",
+	formation: "Formation",
+	special_tactics: "Tactique spéciale",
+	super_tactics: "Super tactique",
+	special_skill: "Compétence spéciale",
+	title: "Titre",
+	fashion: "Mode",
+	costume: "Costume",
+	emblem: "Emblème",
+	unique: "Unique",
+	craft_obj: "Matériau",
+	animal: "Animal",
+	kizuna_link: "Lien Kizuna",
+	name_plate: "Plaque",
+	performance: "Performance",
+	important: "Objet clé",
+};
+
+function renderItemProfile(item: any): string {
+	const lines: string[] = [];
+	const nameFr = item.names?.fr || item.name || "N/A";
+	const nameEn = item.names?.en || "N/A";
+	const nameJa = item.names?.ja || "N/A";
+	const code = item.internalCode || "N/A";
+	const cat = ITEM_CATEGORY_DISPLAY_NAMES[item.category] || item.category || "N/A";
+	const priceStr = item.price ? `${item.price} Ptz` : "N/A";
+
+	lines.push(`┌──────────────────────────────────────────────────────────────────────────────┐`);
+	lines.push(`│ ${colors.bold}${colors.green}${nameFr.padEnd(40)}${colors.reset} │ ${colors.cyan}ID: ${item.itemId.padEnd(28)}${colors.reset} │`);
+	lines.push(`│ ${colors.yellow}Anglais: ${nameEn.padEnd(31)}${colors.reset} │ ${colors.yellow}Japonais: ${nameJa.padEnd(29)}${colors.reset} │`);
+	lines.push(`│ ${colors.yellow}Code: ${code.padEnd(34)}${colors.reset} │ ${colors.yellow}Catégorie: ${cat.padEnd(28)}${colors.reset} │`);
+	lines.push(`├──────────────────────────────────────────────────────────────────────────────┤`);
+	lines.push(`│ Prix d'achat: ${priceStr.padEnd(64)} │`);
+
+	if (item.stats) {
+		lines.push(`│ ${colors.bold}Statistiques octroyées :${colors.reset}${" ".repeat(53)} │`);
+		lines.push(`│   Stat 1: ${String(item.stats.stat1).padEnd(10)} | Stat 2: ${String(item.stats.stat2).padEnd(44)} │`);
+	}
+
+	if (item.shops && (item.shops.fr?.length > 0 || item.shops.en?.length > 0)) {
+		const shops = item.shops.fr || item.shops.en;
+		lines.push(`│ Disponibilité : ${shops.join(", ").substring(0, 58).padEnd(60)} │`);
+	}
+
+	if (item.descriptions?.fr || item.descriptions?.en) {
+		const desc = item.descriptions.fr || item.descriptions.en;
+		lines.push(`├──────────────────────────────────────────────────────────────────────────────┤`);
+		lines.push(`│ ${colors.bold}Description :${colors.reset}${" ".repeat(63)} │`);
+		const words = desc.split(" ");
+		let currentLine = "│   ";
+		for (const word of words) {
+			if ((currentLine + word).length > 74) {
+				lines.push(currentLine.padEnd(79) + "│");
+				currentLine = "│   " + word + " ";
+			} else {
+				currentLine += word + " ";
+			}
+		}
+		if (currentLine !== "│   ") {
+			lines.push(currentLine.padEnd(79) + "│");
+		}
+	}
+
+	lines.push(`└──────────────────────────────────────────────────────────────────────────────┘`);
+	return lines.join("\n");
+}
+
+function renderTeamProfile(team: any): string {
+	const lines: string[] = [];
+	const nameFr = team.name_FR || team.displayName || team.name || "N/A";
+	const nameEn = team.name_EN || "N/A";
+	const nameJa = team.name_JA || "N/A";
+	const id = team.teamId || "N/A";
+	const code = team.teamIdStr || "N/A";
+
+	lines.push(`┌──────────────────────────────────────────────────────────────────────────────┐`);
+	lines.push(`│ ${colors.bold}${colors.green}${nameFr.padEnd(40)}${colors.reset} │ ${colors.cyan}ID: ${id.padEnd(28)}${colors.reset} │`);
+	lines.push(`│ ${colors.yellow}Anglais: ${nameEn.padEnd(31)}${colors.reset} │ ${colors.yellow}Japonais: ${nameJa.padEnd(29)}${colors.reset} │`);
+	lines.push(`│ ${colors.yellow}Code: ${code.padEnd(34)}${colors.reset} │${" ".repeat(30)} │`);
+	lines.push(`├──────────────────────────────────────────────────────────────────────────────┤`);
+
+	if (team.uniforms && team.uniforms.length > 0) {
+		lines.push(`│ ${colors.bold}Kits / Uniformes (${team.uniforms.length}) :${colors.reset}${" ".repeat(53)} │`);
+		for (const [idx, u] of team.uniforms.slice(0, 5).entries()) {
+			const kitId = u.uniformId || "N/A";
+			const modelName = u.modelName || "N/A";
+			lines.push(`│   [${idx + 1}] ID Uniforme: ${String(kitId).padEnd(10)} | Modèle: ${modelName.padEnd(34)} │`);
+		}
+		if (team.uniforms.length > 5) {
+			lines.push(`│   ... et ${team.uniforms.length - 5} autres kits.                                              │`);
+		}
+	}
+
+	if (team.seasons && team.seasons.length > 0) {
+		lines.push(`│ Saisons / Événements: ${team.seasons.join(", ").substring(0, 56).padEnd(58)} │`);
+	}
+
+	lines.push(`└──────────────────────────────────────────────────────────────────────────────┘`);
+	return lines.join("\n");
+}
+
+function parseReplArgs(line: string): string[] {
+	const args: string[] = [];
+	let current = "";
+	let inQuotes = false;
+	let quoteChar = "";
+
+	for (let i = 0; i < line.length; i++) {
+		const char = line[i];
+		if (inQuotes) {
+			if (char === quoteChar) {
+				inQuotes = false;
+			} else {
+				current += char;
+			}
+		} else {
+			if (char === '"' || char === "'") {
+				inQuotes = true;
+				quoteChar = char;
+			} else if (/\s/.test(char)) {
+				if (current) {
+					args.push(current);
+					current = "";
+				}
+			} else {
+				current += char;
+			}
+		}
+	}
+	if (current) {
+		args.push(current);
+	}
+	return args;
+}
+
+
 // Reusable translation helper
 async function translateTextHelper(inputText: string): Promise<string> {
 	if (!inputText.trim()) return "";
@@ -439,7 +630,6 @@ async function runStatusDiagnosticInline() {
 		error: undefined as string | undefined,
 	};
 	try {
-		const { getRedisClient } = require("../packages/db/src/redis.ts");
 		const redis = getRedisClient();
 		const start = performance.now();
 		await redis.get("status:ping");
@@ -550,7 +740,6 @@ program
 				return;
 			}
 
-			const { createInagleService } = require("../packages/inagle/src/service.ts");
 			const svc = await createInagleService();
 			const results = svc.search.global(inputQuery, { limit: 15 });
 
@@ -685,7 +874,7 @@ program
 	.action(async (cmd: string, key: string, val: string | undefined, options: { json?: boolean }) => {
 		suppressLogs(!!options.json);
 		try {
-			const { cache } = require("../packages/db/src/redis.ts");
+
 
 			if (cmd === "get") {
 				const res = await cache.get(key);
@@ -747,7 +936,7 @@ program
 				console.error(`${colors.red}Erreur Redis : ${e.message}${colors.reset}`);
 			}
 		} finally {
-			process.exit(0);
+			if (!isReplMode) process.exit(0);
 		}
 	});
 
@@ -790,7 +979,6 @@ program
 	.action(async (options: { json?: boolean }) => {
 		suppressLogs(!!options.json);
 		try {
-			const { createInagleService } = require("../packages/inagle/src/service.ts");
 			const svc = await createInagleService();
 			const chars = svc.characters.all();
 			const skills = svc.skills.all();
@@ -878,7 +1066,6 @@ program
 			}
 
 			const limitVal = parseInt(options.limit, 10) || 4;
-			const { queryRag } = require("../packages/cron/src/tasks/ie-crawl/rag.ts");
 			const results = await queryRag(inputQuery, limitVal);
 
 			restoreLogs(!!options.json);
@@ -908,7 +1095,7 @@ program
 				console.error(`${colors.red}Erreur RAG : ${e.message}${colors.reset}`);
 			}
 		} finally {
-			process.exit(0);
+			if (!isReplMode) process.exit(0);
 		}
 	});
 
@@ -962,7 +1149,6 @@ program
 				error: undefined as string | undefined,
 			};
 			try {
-				const { getRedisClient } = require("../packages/db/src/redis.ts");
 				const redis = getRedisClient();
 				const start = performance.now();
 				await redis.get("status:ping");
@@ -1080,7 +1266,7 @@ program
 				);
 			}
 		} finally {
-			process.exit(0);
+			if (!isReplMode) process.exit(0);
 		}
 	});
 
@@ -1117,7 +1303,7 @@ program
 				stderr: "inherit",
 			});
 			const code = await proc.exited;
-			process.exit(code);
+			if (!isReplMode) process.exit(code);
 		}
 	});
 
@@ -1192,7 +1378,7 @@ program
 				stderr: "inherit",
 			});
 			const code = await proc.exited;
-			process.exit(code);
+			if (!isReplMode) process.exit(code);
 		} else if (options.json) {
 			console.log(`${colors.cyan}Synchronisation de la base locale vers le fichier characters.json...${colors.reset}`);
 			const proc = spawn(["bun", "scripts/inagle/pipeline/sync-db-to-json.ts"], {
@@ -1200,7 +1386,7 @@ program
 				stderr: "inherit",
 			});
 			const code = await proc.exited;
-			process.exit(code);
+			if (!isReplMode) process.exit(code);
 		} else {
 			console.log(`${colors.yellow}Veuillez spécifier une option: --push ou --json.${colors.reset}`);
 		}
@@ -1225,7 +1411,6 @@ program
 				return;
 			}
 
-			const { createInagleService } = require("../packages/inagle/src/service.ts");
 			const svc = await createInagleService();
 			const chars = svc.characters.baseCharacters();
 
@@ -1256,9 +1441,19 @@ program
 				if (options.json) {
 					console.log(JSON.stringify(matches.map((m: any) => ({ id: m.charaId, name: m.names.fr || m.names.en || m.names.ja })), null, 2));
 				} else {
-					console.log(`${colors.yellow}Plusieurs joueurs correspondent à votre recherche :${colors.reset}`);
-					for (const m of matches) {
-						console.log(`  - ${colors.bold}${m.names.fr || m.names.en}${colors.reset} (ID: ${m.charaId} | Code: ${m.internalCode})`);
+					if (activeRl) {
+						console.log(`${colors.yellow}Plusieurs joueurs correspondent à votre recherche :${colors.reset}`);
+						for (const [idx, m] of matches.entries()) {
+							console.log(`  [${colors.bold}${idx + 1}${colors.reset}] ${colors.bold}${m.names.fr || m.names.en}${colors.reset} (ID: ${m.charaId} | Code: ${m.internalCode})`);
+						}
+						pendingSelection = { type: "chara", matches };
+						activeRl.setPrompt(`${colors.bold}${colors.yellow}Choisissez [1-${matches.length}] ou tapez une commande > ${colors.reset}`);
+						activeRl.prompt();
+					} else {
+						console.log(`${colors.yellow}Plusieurs joueurs correspondent à votre recherche :${colors.reset}`);
+						for (const m of matches) {
+							console.log(`  - ${colors.bold}${m.names.fr || m.names.en}${colors.reset} (ID: ${m.charaId} | Code: ${m.internalCode})`);
+						}
 					}
 				}
 				return;
@@ -1391,7 +1586,6 @@ program
 				return;
 			}
 			
-			const { createInagleService } = require("../packages/inagle/src/service.ts");
 			const svc = await createInagleService();
 			
 			// Try by ID directly first
@@ -1422,10 +1616,21 @@ program
 					if (options.json) {
 						console.log(JSON.stringify(matches, null, 2));
 					} else {
-						console.log(`${colors.yellow}Plusieurs techniques correspondent :${colors.reset}`);
-						for (const m of matches) {
-							const typeStr = m.skillType.toUpperCase();
-							console.log(`  - [${colors.bold}${colors.green}${typeStr}${colors.reset}] ${colors.bold}${m.displayName || m.name_FR}${colors.reset} (ID: ${m.skillIDStr || m.auraId || m.passiveId || "N/A"})`);
+						if (activeRl) {
+							console.log(`${colors.yellow}Plusieurs techniques correspondent :${colors.reset}`);
+							for (const [idx, m] of matches.entries()) {
+								const typeStr = m.skillType.toUpperCase();
+								console.log(`  [${colors.bold}${idx + 1}${colors.reset}] [${colors.bold}${colors.green}${typeStr}${colors.reset}] ${colors.bold}${m.displayName || m.name_FR}${colors.reset} (ID: ${m.skillIDStr || m.auraId || m.passiveId || "N/A"})`);
+							}
+							pendingSelection = { type: "skill", matches };
+							activeRl.setPrompt(`${colors.bold}${colors.yellow}Choisissez [1-${matches.length}] ou tapez une commande > ${colors.reset}`);
+							activeRl.prompt();
+						} else {
+							console.log(`${colors.yellow}Plusieurs techniques correspondent :${colors.reset}`);
+							for (const m of matches) {
+								const typeStr = m.skillType.toUpperCase();
+								console.log(`  - [${colors.bold}${colors.green}${typeStr}${colors.reset}] ${colors.bold}${m.displayName || m.name_FR}${colors.reset} (ID: ${m.skillIDStr || m.auraId || m.passiveId || "N/A"})`);
+							}
 						}
 					}
 					return;
@@ -1438,40 +1643,7 @@ program
 			if (options.json) {
 				console.log(JSON.stringify(skill, null, 2));
 			} else {
-				console.log(`┌──────────────────────────────────────────────────────────────────────────────┐`);
-				const displayName = (skill as any).displayName || (skill as any).name_FR || (skill as any).name_EN || "N/A";
-				const typeStr = ((skill as any).skillType || "Technique").toUpperCase();
-				const idStr = (skill as any).skillIDStr || (skill as any).auraId || (skill as any).passiveId || "N/A";
-				console.log(`│ [${colors.bold}${colors.green}${typeStr}${colors.reset}] ${colors.bold}${displayName.padEnd(50)}${colors.reset} │ ${colors.cyan}ID: ${idStr.padEnd(10)}${colors.reset} │`);
-				
-				if ((skill as any).desc_FR || (skill as any).description_FR || (skill as any).desc_EN) {
-					const desc = (skill as any).desc_FR || (skill as any).description_FR || (skill as any).desc_EN;
-					console.log(`├──────────────────────────────────────────────────────────────────────────────┤`);
-					console.log(`│ ${colors.bold}Description :${colors.reset}${" ".repeat(63)} │`);
-					const words = desc.split(" ");
-					let currentLine = "│   ";
-					for (const word of words) {
-						if ((currentLine + word).length > 74) {
-							console.log(currentLine.padEnd(79) + "│");
-							currentLine = "│   " + word + " ";
-						} else {
-							currentLine += word + " ";
-						}
-					}
-					if (currentLine !== "│   ") {
-						console.log(currentLine.padEnd(79) + "│");
-					}
-				}
-				
-				if ((skill as any).power_max !== undefined) {
-					console.log(`├──────────────────────────────────────────────────────────────────────────────┤`);
-					const power = (skill as any).power_max;
-					const cost = (skill as any).cost || 0;
-					const element = (skill as any).elementName?.fr || "N/A";
-					const category = (skill as any).categoryName?.fr || "N/A";
-					console.log(`│ Puissance Max : ${power.toString().padEnd(10)} | Coût : ${cost.toString().padEnd(8)} | Élément : ${element.padEnd(10)} | Cat : ${category.padEnd(8)} │`);
-				}
-				console.log(`└──────────────────────────────────────────────────────────────────────────────┘`);
+				console.log(renderSkillProfile(skill, svc));
 			}
 		} catch (e: any) {
 			restoreLogs(!!options.json);
@@ -1483,7 +1655,165 @@ program
 		}
 	});
 
-// 15. shell command
+// 15. item command
+program
+	.command("item [query]")
+	.description("Affiche les détails d'un objet (consommable, équipement, cosmétique)")
+	.option("-j, --json", "Format de sortie en JSON brute")
+	.action(async (query: string | undefined, options: { json?: boolean }) => {
+		suppressLogs(!!options.json);
+		try {
+			const inputQuery = await getOrReadInput(query);
+			if (!inputQuery.trim()) {
+				restoreLogs(!!options.json);
+				if (options.json) {
+					console.log(JSON.stringify({ error: "Aucun objet spécifié" }));
+				} else {
+					console.error(`${colors.red}Erreur: Spécifiez un nom ou un ID d'objet (ex: Bottes).${colors.reset}`);
+				}
+				return;
+			}
+
+			const svc = await createInagleService();
+			
+			// Try by ID directly first
+			let item = svc.items.getItem(inputQuery);
+			
+			// If not found, search by name
+			if (!item) {
+				const matches = svc.items.searchItems(inputQuery, { limit: 15 });
+				
+				if (matches.length === 0) {
+					restoreLogs(!!options.json);
+					if (options.json) {
+						console.log(JSON.stringify([], null, 2));
+					} else {
+						console.log(`${colors.yellow}Aucun objet trouvé pour : "${inputQuery}"${colors.reset}`);
+					}
+					return;
+				}
+				
+				if (matches.length > 1) {
+					restoreLogs(!!options.json);
+					if (options.json) {
+						console.log(JSON.stringify(matches.map(m => ({ id: m.itemId, name: m.names?.fr || m.name })), null, 2));
+					} else {
+						if (activeRl) {
+							console.log(`${colors.yellow}Plusieurs objets correspondent à votre recherche :${colors.reset}`);
+							for (const [idx, m] of matches.entries()) {
+								console.log(`  [${colors.bold}${idx + 1}${colors.reset}] ${colors.bold}${m.names?.fr || m.name}${colors.reset} (ID: ${m.itemId} | Code: ${m.internalCode})`);
+							}
+							pendingSelection = { type: "item", matches };
+							activeRl.setPrompt(`${colors.bold}${colors.yellow}Choisissez [1-${matches.length}] ou tapez une commande > ${colors.reset}`);
+							activeRl.prompt();
+						} else {
+							console.log(`${colors.yellow}Plusieurs objets correspondent à votre recherche :${colors.reset}`);
+							for (const m of matches) {
+								console.log(`  - ${colors.bold}${m.names?.fr || m.name}${colors.reset} (ID: ${m.itemId} | Code: ${m.internalCode})`);
+							}
+						}
+					}
+					return;
+				}
+				item = matches[0];
+			}
+
+			restoreLogs(!!options.json);
+			if (options.json) {
+				console.log(JSON.stringify(item, null, 2));
+			} else {
+				console.log(renderItemProfile(item));
+			}
+		} catch (e: any) {
+			restoreLogs(!!options.json);
+			if (options.json) {
+				console.log(JSON.stringify({ error: e.message }));
+			} else {
+				console.error(`${colors.red}Erreur item : ${e.message}${colors.reset}`);
+			}
+		}
+	});
+
+// 16. team command
+program
+	.command("team [query]")
+	.description("Affiche les détails d'une équipe (nom, uniformes, saisons)")
+	.option("-j, --json", "Format de sortie en JSON brute")
+	.action(async (query: string | undefined, options: { json?: boolean }) => {
+		suppressLogs(!!options.json);
+		try {
+			const inputQuery = await getOrReadInput(query);
+			if (!inputQuery.trim()) {
+				restoreLogs(!!options.json);
+				if (options.json) {
+					console.log(JSON.stringify({ error: "Aucune équipe spécifiée" }));
+				} else {
+					console.error(`${colors.red}Erreur: Spécifiez un nom ou un ID d'équipe (ex: Raimon).${colors.reset}`);
+				}
+				return;
+			}
+
+			const svc = await createInagleService();
+			
+			// Try by ID directly first
+			let team = svc.teams.getTeam(inputQuery);
+			
+			// If not found, search by name
+			if (!team) {
+				const matches = svc.teams.searchTeams(inputQuery);
+				
+				if (matches.length === 0) {
+					restoreLogs(!!options.json);
+					if (options.json) {
+						console.log(JSON.stringify([], null, 2));
+					} else {
+						console.log(`${colors.yellow}Aucune équipe trouvée pour : "${inputQuery}"${colors.reset}`);
+					}
+					return;
+				}
+				
+				if (matches.length > 1) {
+					restoreLogs(!!options.json);
+					if (options.json) {
+						console.log(JSON.stringify(matches.map(m => ({ id: m.teamId, name: m.name })), null, 2));
+					} else {
+						if (activeRl) {
+							console.log(`${colors.yellow}Plusieurs équipes correspondent à votre recherche :${colors.reset}`);
+							for (const [idx, m] of matches.entries()) {
+								console.log(`  [${colors.bold}${idx + 1}${colors.reset}] ${colors.bold}${m.name}${colors.reset} (ID: ${m.teamId})`);
+							}
+							pendingSelection = { type: "team", matches };
+							activeRl.setPrompt(`${colors.bold}${colors.yellow}Choisissez [1-${matches.length}] ou tapez une commande > ${colors.reset}`);
+							activeRl.prompt();
+						} else {
+							console.log(`${colors.yellow}Plusieurs équipes correspondent à votre recherche :${colors.reset}`);
+							for (const m of matches) {
+								console.log(`  - ${colors.bold}${m.name}${colors.reset} (ID: ${m.teamId})`);
+							}
+						}
+					}
+					return;
+				}
+				team = matches[0];
+			}
+
+			restoreLogs(!!options.json);
+			if (options.json) {
+				console.log(JSON.stringify(team, null, 2));
+			} else {
+				console.log(renderTeamProfile(team));
+			}
+		} catch (e: any) {
+			restoreLogs(!!options.json);
+			if (options.json) {
+				console.log(JSON.stringify({ error: e.message }));
+			} else {
+				console.error(`${colors.red}Erreur team : ${e.message}${colors.reset}`);
+			}
+		}
+	});
+
+// 17. shell command
 program
 	.command("shell")
 	.aliases(["repl"])
@@ -1493,20 +1823,83 @@ program
 		console.log(`
 ${colors.bold}${colors.magenta}🌸=======================================================🌸
     Bienvenue dans le shell interactif AZALÉE CLI !
-    Version 1.0.0 (Bun Runtime)
+    Version 1.1.0 (Bun Runtime)
 =======================================================🌸${colors.reset}
 Entrez une commande pour interagir avec le projet (ou 'help').
 Tapez '${colors.bold}exit${colors.reset}' ou '${colors.bold}quit${colors.reset}' pour quitter.
 `);
 
-		const { createInagleService } = require("../packages/inagle/src/service.ts");
 		const readline = require("node:readline");
+		
+		let svc: any = null;
+		let characterCache: string[] = [];
+		let skillCache: string[] = [];
+		let itemCache: string[] = [];
+		let teamCache: string[] = [];
+
+		try {
+			svc = await createInagleService();
+			characterCache = svc.characters.baseCharacters().map((c: any) => c.names?.fr || c.names?.en || c.charaId).filter(Boolean);
+			skillCache = svc.skills.all().map((s: any) => s.displayName || s.name_FR || s.name_EN || s.skillIDStr).filter(Boolean);
+			itemCache = svc.items.allItems().map((i: any) => i.names?.fr || i.names?.en || i.itemId).filter(Boolean);
+			teamCache = svc.teams.allTeams().map((t: any) => t.name || t.displayName || t.teamId).filter(Boolean);
+		} catch (e) {
+			// ignore fallback
+		}
+
+		const commands = ['help', 'chara', 'search', 'translate', 'dialogue', 'skill', 'item', 'team', 'db', 'status', 'audit', 'wave', 'sync', 'repair', 'redis', 'glossary-rebuild', 'exit', 'quit'];
+		
+		function completer(line: string) {
+			const trimmed = line.trim();
+			if (!trimmed) {
+				return [commands, line];
+			}
+			const parts = trimmed.split(/\s+/);
+			const cmd = parts[0].toLowerCase();
+			if (parts.length === 1) {
+				const hits = commands.filter((c) => c.startsWith(cmd));
+				return [hits.length ? hits : commands, line];
+			}
+			const query = parts.slice(1).join(" ").toLowerCase();
+			if (cmd === 'chara' || cmd === 'c') {
+				const hits = characterCache.filter(name => name.toLowerCase().startsWith(query));
+				return [hits.map(name => `${cmd} "${name}"`), line];
+			}
+			if (cmd === 'skill' || cmd === 'k') {
+				const hits = skillCache.filter(name => name.toLowerCase().startsWith(query));
+				return [hits.map(name => `${cmd} "${name}"`), line];
+			}
+			if (cmd === 'item' || cmd === 'i') {
+				const hits = itemCache.filter(name => name.toLowerCase().startsWith(query));
+				return [hits.map(name => `${cmd} "${name}"`), line];
+			}
+			if (cmd === 'team' || cmd === 't') {
+				const hits = teamCache.filter(name => name.toLowerCase().startsWith(query));
+				return [hits.map(name => `${cmd} "${name}"`), line];
+			}
+			return [[], line];
+		}
+
+		const historyPath = path.resolve(process.cwd(), ".azalee_history");
+		let history: string[] = [];
+		if (existsSync(historyPath)) {
+			try {
+				history = readFileSync(historyPath, "utf-8").split("\n").filter(Boolean);
+			} catch {}
+		}
+
 		const rl = readline.createInterface({
 			input: process.stdin,
 			output: process.stdout,
 			prompt: `${colors.bold}${colors.green}azalee 🌸 > ${colors.reset}`,
+			completer: completer,
 		});
 
+		if (history.length > 0) {
+			rl.history = history.reverse();
+		}
+		
+		activeRl = rl;
 		rl.prompt();
 
 		rl.on("line", async (line: string) => {
@@ -1516,9 +1909,55 @@ Tapez '${colors.bold}exit${colors.reset}' ou '${colors.bold}quit${colors.reset}'
 				return;
 			}
 
-			const parts = input.split(/\s+/);
+			// Save to history file
+			try {
+				const fs = require("node:fs");
+				fs.appendFileSync(historyPath, input + "\n");
+			} catch {}
+
+			// Check pending selection
+			if (pendingSelection) {
+				const index = parseInt(input, 10) - 1;
+				if (!isNaN(index) && index >= 0 && index < pendingSelection.matches.length) {
+					const match = pendingSelection.matches[index];
+					rl.pause();
+					try {
+						if (!svc) svc = await createInagleService();
+						if (pendingSelection.type === "chara") {
+							console.log(renderCharaProfile(match, svc));
+						} else if (pendingSelection.type === "skill") {
+							console.log(renderSkillProfile(match, svc));
+						} else if (pendingSelection.type === "item") {
+							console.log(renderItemProfile(match));
+						} else if (pendingSelection.type === "team") {
+							console.log(renderTeamProfile(match));
+						}
+					} catch (e: any) {
+						console.error(`${colors.red}Erreur d'affichage : ${e.message}${colors.reset}`);
+					}
+					pendingSelection = null;
+					rl.setPrompt(`${colors.bold}${colors.green}azalee 🌸 > ${colors.reset}`);
+					rl.resume();
+					rl.prompt();
+					return;
+				} else {
+					if (/^\d+$/.test(input)) {
+						console.log(`${colors.yellow}Sélection invalide (index hors limites). Sélection annulée.${colors.reset}`);
+						pendingSelection = null;
+						rl.setPrompt(`${colors.bold}${colors.green}azalee 🌸 > ${colors.reset}`);
+						rl.prompt();
+						return;
+					} else {
+						console.log(`${colors.yellow}Sélection annulée.${colors.reset}`);
+						pendingSelection = null;
+						rl.setPrompt(`${colors.bold}${colors.green}azalee 🌸 > ${colors.reset}`);
+						// Fall through to run input as a command immediately
+					}
+				}
+			}
+
+			const parts = parseReplArgs(input);
 			const cmd = parts[0].toLowerCase();
-			const args = parts.slice(1);
 
 			if (cmd === "exit" || cmd === "quit" || cmd === "q") {
 				console.log(`\nAu revoir ! 🌸`);
@@ -1534,221 +1973,43 @@ Commandes disponibles :
   ${colors.bold}translate${colors.reset} <text>   Traduit du texte via glossaire consolidé
   ${colors.bold}dialogue${colors.reset} <query>   Recherche dans les répliques et dialogues narratifs
   ${colors.bold}skill${colors.reset} <query>      Détails d'une technique / compétence / passive
+  ${colors.bold}item${colors.reset} <query>       Détails d'un objet (consommable, équipement, etc.)
+  ${colors.bold}team${colors.reset} <query>       Détails d'une équipe (kits, saisons, etc.)
   ${colors.bold}db${colors.reset} <sql>          Exécute une requête SQL PostgreSQL
   ${colors.bold}status${colors.reset}            Diagnostic de santé système et services
   ${colors.bold}audit${colors.reset}             Audit de cohérence de la base
+  ${colors.bold}wave${colors.reset} [--cycle]    Lance une vague de traitement de données
+  ${colors.bold}sync${colors.reset} [--push]     Synchronise les données locales vers PostgreSQL
+  ${colors.bold}repair${colors.reset}            Répare les permissions et privilèges PostgreSQL
   ${colors.bold}exit${colors.reset}, ${colors.bold}quit${colors.reset}        Quitte le shell
 `);
 				rl.prompt();
 				return;
 			}
 
-			// Pause readline interface during async execution
+			// Pause readline during async command execution
 			rl.pause();
 
 			try {
-				if (cmd === "chara" || cmd === "c") {
-					if (args.length === 0) {
-						console.log(`${colors.red}Erreur: Spécifiez une recherche (ex: chara Mark).${colors.reset}`);
-					} else {
-						const queryStr = args.join(" ");
-						const svc = await createInagleService();
-						const chars = svc.characters.baseCharacters();
-						const matches = chars.filter((c: any) => {
-							const q = queryStr.toLowerCase().trim();
-							if (c.charaId.toLowerCase() === q || c.internalCode?.toLowerCase() === q) return true;
-							const nameFr = c.names?.fr?.toLowerCase() || "";
-							const nameEn = c.names?.en?.toLowerCase() || "";
-							const nameJa = c.names?.ja?.toLowerCase() || "";
-							const slug = c.slug?.toLowerCase() || "";
-							return nameFr.includes(q) || nameEn.includes(q) || nameJa.includes(q) || slug.includes(q);
-						});
-
-						if (matches.length === 0) {
-							console.log(`${colors.yellow}Aucun joueur trouvé pour : "${queryStr}"${colors.reset}`);
-						} else if (matches.length > 1) {
-							console.log(`${colors.yellow}Plusieurs joueurs correspondent :${colors.reset}`);
-							for (const m of matches) {
-								console.log(`  - ${colors.bold}${m.names.fr || m.names.en}${colors.reset} (ID: ${m.charaId} | Code: ${m.internalCode})`);
-							}
-						} else {
-							console.log(renderCharaProfile(matches[0], svc));
-						}
-					}
-				} else if (cmd === "search" || cmd === "s") {
-					if (args.length === 0) {
-						console.log(`${colors.red}Erreur: Spécifiez une requête.${colors.reset}`);
-					} else {
-						const svc = await createInagleService();
-						const results = svc.search.global(args.join(" "), { limit: 10 });
-						if (results.length === 0) {
-							console.log(`${colors.yellow}Aucun résultat trouvé.${colors.reset}`);
-						} else {
-							console.log(`\n${colors.bold}${colors.blue}Résultats de la recherche :${colors.reset}`);
-							console.log("─".repeat(80));
-							for (const r of results) {
-								const typeLabel = r.type.toUpperCase().padEnd(10);
-								const nameLabel = `${colors.bold}${r.name}${colors.reset}`.padEnd(45);
-								const idLabel = `${colors.yellow}(ID: ${r.id})${colors.reset}`;
-								console.log(`[${colors.green}${typeLabel}${colors.reset}] ${nameLabel} ${idLabel}`);
-							}
-							console.log("─".repeat(80));
-						}
-					}
-				} else if (cmd === "translate" || cmd === "t") {
-					if (args.length === 0) {
-						console.log(`${colors.red}Erreur: Entrez un texte à traduire.${colors.reset}`);
-					} else {
-						const text = args.join(" ");
-						const result = await translateTextHelper(text);
-						console.log(`\n${colors.bold}${colors.green}Traduction :${colors.reset}`);
-						console.log(result);
-					}
-				} else if (cmd === "dialogue" || cmd === "d") {
-					if (args.length === 0) {
-						console.log(`${colors.red}Erreur: Spécifiez un texte à chercher dans les dialogues.${colors.reset}`);
-					} else {
-						const q = args.join(" ");
-						const dbPath = "/home/ubuntu/data/all-gamedata/story_text_database.json";
-						if (!existsSync(dbPath)) {
-							console.error(`${colors.red}Erreur: Base de dialogues introuvable. Exécutez 'azalee sync --push' d'abord.${colors.reset}`);
-						} else {
-							const data = JSON.parse(readFileSync(dbPath, "utf-8"));
-							const events = data.events || [];
-							const matches: any[] = [];
-							const textQ = q.toLowerCase().trim();
-							
-							outerLoop:
-							for (const ev of events) {
-								for (const d of ev.dialogues) {
-									const textFr = d.text?.fr?.toLowerCase() || "";
-									const textEn = d.text?.en?.toLowerCase() || "";
-									const textJa = d.text?.ja?.toLowerCase() || "";
-									if (textFr.includes(textQ) || textEn.includes(textQ) || textJa.includes(textQ)) {
-										matches.push({
-											eventId: ev.eventId,
-											dialogueId: d.dialogueId,
-											speaker: d.speaker?.names?.fr || d.speaker?.names?.en || d.speaker?.names?.ja || d.speaker?.charaId,
-											text: d.text
-										});
-										if (matches.length >= 5) break outerLoop;
-									}
-								}
-							}
-							
-							if (matches.length === 0) {
-								console.log(`${colors.yellow}Aucun dialogue trouvé.${colors.reset}`);
-							} else {
-								for (const m of matches) {
-									console.log(`[${colors.bold}${colors.green}${m.speaker}${colors.reset}] (${m.eventId} | ${m.dialogueId})`);
-									if (m.text?.fr) console.log(`  FR: ${m.text.fr}`);
-									if (m.text?.en) console.log(`  EN: ${m.text.en}`);
-									console.log("─".repeat(80));
-								}
-							}
-						}
-					}
-				} else if (cmd === "skill" || cmd === "k") {
-					if (args.length === 0) {
-						console.log(`${colors.red}Erreur: Spécifiez une technique (ex: skill Tornado).${colors.reset}`);
-					} else {
-						const svc = await createInagleService();
-						const q = args.join(" ");
-						let s = svc.skills.get(q) || svc.skills.passiveGet(q) || svc.skills.auraGet(q);
-						
-						if (!s) {
-							const mainMatches = svc.skills.search(q, { limit: 5 });
-							const auraMatches = svc.skills.auraSearch(q).slice(0, 5);
-							const matches = [
-								...mainMatches.map((x: any) => ({ ...x, skillType: "main" as const })),
-								...auraMatches.map((x: any) => ({ ...x, skillType: "aura" as const, displayName: x.displayName || x.name_FR || x.name_EN }))
-							];
-							
-							if (matches.length === 0) {
-								console.log(`${colors.yellow}Aucune technique trouvée pour: "${q}"${colors.reset}`);
-							} else if (matches.length > 1) {
-								console.log(`${colors.yellow}Plusieurs techniques correspondent :${colors.reset}`);
-								for (const m of matches) {
-									console.log(`  - [${m.skillType.toUpperCase()}] ${m.displayName || m.name_FR} (ID: ${m.skillIDStr || m.auraId || m.passiveId})`);
-								}
-							} else {
-								s = matches[0] as any;
-							}
-						}
-						
-						if (s) {
-							const displayName = (s as any).displayName || (s as any).name_FR || (s as any).name_EN || "N/A";
-							const typeStr = ((s as any).skillType || "Technique").toUpperCase();
-							console.log(`┌──────────────────────────────────────────────────────────────────────────────┐`);
-							console.log(`│ [${colors.bold}${colors.green}${typeStr}${colors.reset}] ${colors.bold}${displayName.padEnd(50)}${colors.reset} │`);
-							
-							if ((s as any).desc_FR || (s as any).description_FR || (s as any).desc_EN) {
-								const desc = (s as any).desc_FR || (s as any).description_FR || (s as any).desc_EN;
-								console.log(`├──────────────────────────────────────────────────────────────────────────────┤`);
-								const words = desc.split(" ");
-								let currentLine = "│   ";
-								for (const word of words) {
-									if ((currentLine + word).length > 74) {
-										console.log(currentLine.padEnd(79) + "│");
-										currentLine = "│   " + word + " ";
-									} else {
-										currentLine += word + " ";
-									}
-								}
-								if (currentLine !== "│   ") {
-									console.log(currentLine.padEnd(79) + "│");
-								}
-							}
-							console.log(`└──────────────────────────────────────────────────────────────────────────────┘`);
-						}
-					}
-				} else if (cmd === "db") {
-					if (args.length === 0) {
-						console.log(`${colors.red}Erreur: Spécifiez une requête SQL.${colors.reset}`);
-					} else {
-						const sql = args.join(" ");
-						const dbUrl = process.env.DATABASE_URL;
-						if (!dbUrl) {
-							console.error(`${colors.red}Erreur: DATABASE_URL non définie.${colors.reset}`);
-						} else {
-							const pg = require("pg");
-							const client = new pg.Client({ connectionString: dbUrl });
-							await client.connect();
-							const res = await client.query(sql);
-							await client.end();
-							console.log(renderAsciiTable(res.rows));
-						}
-					}
-				} else if (cmd === "status") {
-					await runStatusDiagnosticInline();
-				} else if (cmd === "audit") {
-					const svc = await createInagleService();
-					const chars = svc.characters.all();
-					const skills = svc.skills.all();
-
-					const missingName = chars.filter((c: any) => !c.names?.fr && !c.names?.en);
-					const missingImg = chars.filter((c: any) => !c.image_url && !c.zukan_hash);
-					const missingStats = chars.filter((c: any) => !c.stats || Object.keys(c.stats).length === 0);
-					const missingSkillName = skills.filter((s: any) => !s.name_FR && !s.name_EN);
-
-					console.log(`\n${colors.bold}${colors.blue}Diagnostics Characters :${colors.reset}`);
-					console.log(`- Total Characters : ${chars.length}`);
-					console.log(`- Sans nom FR/EN   : ${missingName.length === 0 ? colors.green + "0 (Excellent)" : colors.red + missingName.length} ${colors.reset}`);
-					console.log(`- Sans image       : ${missingImg.length === 0 ? colors.green + "0 (Excellent)" : colors.yellow + missingImg.length} ${colors.reset}`);
-					console.log(`- Sans stats       : ${missingStats.length === 0 ? colors.green + "0 (Excellent)" : colors.red + missingStats.length} ${colors.reset}`);
-					console.log(`\n${colors.bold}${colors.blue}Diagnostics Skills/Techniques :${colors.reset}`);
-					console.log(`- Total Skills     : ${skills.length}`);
-					console.log(`- Sans nom FR/EN   : ${missingSkillName.length === 0 ? colors.green + "0 (Excellent)" : colors.red + missingSkillName.length} ${colors.reset}`);
-				} else {
+				program.exitOverride();
+				isReplMode = true;
+				
+				// Prepend dummy argv elements for commander
+				const argv = ["bun", "azalee", ...parts];
+				await program.parseAsync(argv);
+			} catch (err: any) {
+				if (err.code === "commander.helpDisplayed" || err.code === "commander.help") {
+					// Handled
+				} else if (err.code === "commander.unknownCommand") {
 					console.log(`${colors.red}Commande inconnue: '${cmd}'. Tapez 'help' pour voir la liste.${colors.reset}`);
+				} else {
+					console.error(`${colors.red}Erreur d'exécution: ${err.message}${colors.reset}`);
 				}
-			} catch (e: any) {
-				console.error(`${colors.red}Erreur d'exécution: ${e.message}${colors.reset}`);
+			} finally {
+				isReplMode = false;
+				rl.resume();
+				rl.prompt();
 			}
-
-			// Resume reading stdin and prompt again
-			rl.resume();
-			rl.prompt();
 		});
 	});
 
