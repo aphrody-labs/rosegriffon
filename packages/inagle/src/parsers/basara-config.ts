@@ -26,14 +26,14 @@ function parseContent(content: any) {
 	if (content.lists) {
 		for (const list of content.lists) {
 			if (list.name === "m_basaraBuildInfoList") {
-				for (const val of list.values) {
+				for (const val of list.values || []) {
 					buildInfos.push({
 						charaId: val.charaParamId,
 						buildTypeIndices: val.typeInfo,
 					});
 				}
 			} else if (list.name === "m_basaraBuildTypeList") {
-				for (const val of list.values) {
+				for (const val of list.values || []) {
 					buildTypes.push({
 						type: val.type,
 						boardId: val.boardId,

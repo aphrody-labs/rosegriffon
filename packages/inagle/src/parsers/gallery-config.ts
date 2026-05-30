@@ -46,7 +46,7 @@ function parseContent(content: any): ParsedGallery[] {
 
 	for (const list of content.lists) {
 		if (list.name === "m_GalleryInfoList") {
-			for (const val of list.values) {
+			for (const val of list.values || []) {
 				galleries.push({
 					id: val.galleryId,
 					name: val.imgPath,

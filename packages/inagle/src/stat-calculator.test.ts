@@ -196,7 +196,7 @@ describe("calculateStats", () => {
 		expect(stats.Pr).toBe(110);
 	});
 
-	it("should throw error when growth data not found", () => {
+	it("should return default stats when growth data not found", () => {
 		const invalidParams: CharacterGrowthParams = {
 			mainPosition: 99, // Invalid position
 			subPosition: 1,
@@ -204,7 +204,10 @@ describe("calculateStats", () => {
 			charaRank: 5,
 		};
 
-		expect(() => calculateStats(mockTables, invalidParams, 50)).toThrow("Growth data not found");
+		const stats = calculateStats(mockTables, invalidParams, 50);
+		expect(stats.Kc).toBe(0);
+		expect(stats.Cr).toBe(0);
+		expect(stats.Tc).toBe(0);
 	});
 });
 

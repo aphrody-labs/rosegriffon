@@ -50,14 +50,14 @@ function parseContent(content: any) {
 
 	for (const list of content.lists) {
 		if (list.name === "m_ChangeAuraSkillDataList") {
-			for (const val of list.values) {
+			for (const val of list.values || []) {
 				data.push({
 					id: val.id,
 					charaParamId: val.charaParamId,
 				});
 			}
 		} else if (list.name === "m_ChangeAuraSkillInfoList") {
-			for (const val of list.values) {
+			for (const val of list.values || []) {
 				info.push(val);
 			}
 		}

@@ -62,7 +62,7 @@ function parseContent(content: any) {
 
 	for (const list of content.lists) {
 		if (list.name === "m_HabitatList") {
-			for (const val of list.values) {
+			for (const val of list.values || []) {
 				habitats.push({
 					habitatId: val.habitatID,
 					mapId: val.mapID,
@@ -73,15 +73,15 @@ function parseContent(content: any) {
 				});
 			}
 		} else if (list.name === "m_ObservationDataList") {
-			for (const val of list.values) observations.push(val);
+			for (const val of list.values || []) observations.push(val);
 		} else if (list.name === "m_ParamList") {
-			for (const val of list.values) params.push(val);
+			for (const val of list.values || []) params.push(val);
 		} else if (list.name === "m_ObservationActionIdList") {
-			for (const val of list.values) actionIds.push(val);
+			for (const val of list.values || []) actionIds.push(val);
 		} else if (list.name === "m_ObservationActionPlayList") {
-			for (const val of list.values) actionPlays.push(val);
+			for (const val of list.values || []) actionPlays.push(val);
 		} else if (list.name === "m_ObservationActionDataList") {
-			for (const val of list.values) actionData.push(val);
+			for (const val of list.values || []) actionData.push(val);
 		}
 	}
 	return { habitats, observations, params, actionIds, actionPlays, actionData };

@@ -155,12 +155,36 @@ export function findLv1Entry(
 	tables: GrowthTables,
 	params: CharacterGrowthParams
 ): GrowthTableLv1Entry | undefined {
-	return tables.lv1.find(
+	let entry = tables.lv1.find(
 		(e) =>
 			e.mainPosition === params.mainPosition &&
 			e.subPosition === params.subPosition &&
 			e.playStyle === (params.playStyle ?? 0)
 	);
+
+	if (!entry && params.playStyle !== undefined && params.playStyle !== 0) {
+		entry = tables.lv1.find(
+			(e) =>
+				e.mainPosition === params.mainPosition &&
+				e.subPosition === params.subPosition &&
+				e.playStyle === 0
+		);
+	}
+
+	if (!entry && params.subPosition !== 0) {
+		entry = tables.lv1.find(
+			(e) =>
+				e.mainPosition === params.mainPosition &&
+				e.subPosition === 0 &&
+				e.playStyle === 0
+		);
+	}
+
+	if (!entry) {
+		entry = tables.lv1.find((e) => e.mainPosition === params.mainPosition);
+	}
+
+	return entry;
 }
 
 export function findLv30Entry(
@@ -187,6 +211,32 @@ export function findLv30Entry(
 				e.growthPattern === 0 &&
 				e.charaRank === growthRank
 		);
+	}
+
+	// Fallback: subPosition = 0
+	if (!entry && params.subPosition !== 0) {
+		entry = tables.lv30.find(
+			(e) =>
+				e.mainPosition === params.mainPosition &&
+				e.subPosition === 0 &&
+				e.growthPattern === 0 &&
+				e.charaRank === growthRank
+		);
+	}
+
+	// Fallback: charaRank = 0 (Normal)
+	if (!entry && growthRank !== 0) {
+		entry = tables.lv30.find(
+			(e) =>
+				e.mainPosition === params.mainPosition &&
+				e.subPosition === 0 &&
+				e.growthPattern === 0 &&
+				e.charaRank === 0
+		);
+	}
+
+	if (!entry) {
+		entry = tables.lv30.find((e) => e.mainPosition === params.mainPosition);
 	}
 
 	return entry;
@@ -216,6 +266,20 @@ export function findMainEntry(
 		);
 	}
 
+	// Fallback: charaRank = 0 (Normal)
+	if (!entry && growthRank !== 0) {
+		entry = tables.main.find(
+			(e) =>
+				e.mainPosition === params.mainPosition &&
+				e.growthPattern === 0 &&
+				e.charaRank === 0
+		);
+	}
+
+	if (!entry) {
+		entry = tables.main.find((e) => e.mainPosition === params.mainPosition);
+	}
+
 	return entry;
 }
 
@@ -232,7 +296,8 @@ export function calculateStats(
 	const main = findMainEntry(tables, params);
 
 	if (!lv1 || !lv30 || !main) {
-		throw new Error(`Growth data not found for params: ${JSON.stringify(params)}`);
+		console.warn(`[StatCalculator] Growth data not found for params: ${JSON.stringify(params)}. Using default 0 stats.`);
+		return { Kc: 0, Cr: 0, Tc: 0, Pr: 0, Ps: 0, Ag: 0, It: 0 };
 	}
 
 	return {
