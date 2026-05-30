@@ -258,6 +258,11 @@ _API universelle et parses de données de jeu Inazuma Eleven_
    - Mise en cache des objets `RegExp` compilés pour le glossaire et ajout d'un contrôle de présence rapide via `.includes()` (early exit) réduisant les compilations d'expressions régulières par 1 000.
    - Parallélisation des E/S et du parsing JSON dans le générateur de glossaire via `Promise.all` et traitement AST en une seule passe pour `extractNouns`.
    - Optimisation de l'exécutable compilé via le cache de bytecode natif Bun (`--bytecode`) divisant par 2 le temps de démarrage du CLI en production, avec sourcemaps `zstd` embarqués (`--sourcemap`).
+4. ✅ **Résolution du fallback d'API Skills et indexation par IDs hexadécimaux** :
+   - Redirection automatique du chargeur de Skills API vers les entrées précompilées locales (`packages/inagle/src/entries`) quand le dossier de données de production `/home/ubuntu/data/entities` n'existe pas.
+   - Suppression définitive de l'avertissement de module manquant `@streamparser/json` à l'exécution de l'exécutable standalone compilé.
+   - Indexation bidirectionnelle des techniques par identifiant textuel (`skillIDStr`) et par adresse hexadécimale (`skillID`), résolvant l'affichage des noms des Super Moves dans les fiches de personnages.
+   - Amélioration de l'interaction utilisateur dans le REPL interactif en autorisant l'exécution immédiate des commandes lors de l'annulation d'un prompt de sélection multiple.
 
 ### Phase 5 : Sécurité & Stratégie de Sauvegarde Externe
 
