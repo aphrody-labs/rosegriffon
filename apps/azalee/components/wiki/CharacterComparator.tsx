@@ -294,24 +294,24 @@ function StatComparisonBars({
 							<div className="flex items-center gap-1 sm:gap-2 flex-1 justify-end">
 								<span
 									className={cn(
-										"font-bold w-8 sm:w-10 text-right tabular-nums",
+										"font-bold w-8 sm:w-10 text-right tabular-nums transition-colors",
 										delta < 0
-											? "text-on-surface"
+											? "text-primary font-extrabold"
 											: delta > 0
-												? "text-on-surface/60"
+												? "text-on-surface/50 font-normal"
 												: "text-on-surface"
 									)}
 								>
 									{v1}
 								</span>
-								<span className="text-on-surface-variant text-[10px] sm:text-xs">vs</span>
+								<span className="text-on-surface-variant/40 text-[10px] sm:text-xs">vs</span>
 								<span
 									className={cn(
-										"font-bold w-8 sm:w-10 tabular-nums",
+										"font-bold w-8 sm:w-10 tabular-nums transition-colors",
 										delta > 0
-											? "text-on-surface"
+											? "text-tertiary font-extrabold"
 											: delta < 0
-												? "text-on-surface/60"
+												? "text-on-surface/50 font-normal"
 												: "text-on-surface"
 									)}
 								>

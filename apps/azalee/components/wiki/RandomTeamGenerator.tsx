@@ -179,7 +179,7 @@ function PlayerCard({
 		<div
 			className={cn(
 				"relative group w-full transition-all",
-				animating ? "opacity-0 scale-95" : "opacity-100 scale-100"
+				animating ? "opacity-60 scale-95 blur-[2px]" : "opacity-100 scale-100"
 			)}
 			style={{
 				transitionDelay: animating ? "0ms" : `${animDelay}ms`,
@@ -486,8 +486,13 @@ export function RandomTeamGenerator({ pools, coordinators }: RandomTeamGenerator
 	}, []);
 
 	const regenerate = useCallback(() => {
+		if (animating) return;
 		setAnimating(true);
-		setTimeout(() => {
+		
+		let ticks = 0;
+		const maxTicks = 5;
+		
+		const interval = setInterval(() => {
 			setTeam((prev) => {
 				const fresh = generate();
 				const mergePosition = (
@@ -509,9 +514,14 @@ export function RandomTeamGenerator({ pools, coordinators }: RandomTeamGenerator
 					mf: mergePosition("mf", fresh.mf),
 				};
 			});
-			setAnimating(false);
-		}, 300);
-	}, [generate, locked]);
+			
+			ticks++;
+			if (ticks >= maxTicks) {
+				clearInterval(interval);
+				setAnimating(false);
+			}
+		}, 90);
+	}, [generate, locked, animating]);
 
 	const handleCopyLink = useCallback(async () => {
 		try {
@@ -599,7 +609,7 @@ export function RandomTeamGenerator({ pools, coordinators }: RandomTeamGenerator
 						aria-label="Régénérer l'équipe"
 						className="inline-flex items-center gap-2 h-14 px-4 rounded-2xl bg-primary-container text-on-primary-container font-bold text-sm elevation-3 hover:elevation-4 active:elevation-2 active:scale-[0.98] transition-all disabled:opacity-50"
 					>
-						<Icon name="casino" size={20} />
+						<Icon name="casino" size={20} className={cn(animating && "animate-spin")} />
 						<span className="hidden sm:inline">Régénérer</span>
 					</button>
 				</div>
