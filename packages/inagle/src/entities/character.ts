@@ -866,6 +866,7 @@ export function loadBaseCharacters(): BaseCharacter[] {
 					variant.zukanHash = zukanInfo;
 				} else {
 					variant.zukanHash = zukanInfo.hash;
+					variant.zukanOrder = zukanInfo.order;
 				}
 			}
 
@@ -895,14 +896,18 @@ export function loadBaseCharacters(): BaseCharacter[] {
 			}
 		}
 
-		// Find best zukan hash (prefer variants with hash)
+		// Find best zukan hash (prefer variants with hash, sorted by zukanOrder ascending)
 		let zukanHash: string | undefined;
 
-		// Sort variants to prioritize having a zukan hash for the base image
-		// Then by rarity
-		const bestVariantWithHash = variants.find((v) => v.zukanHash);
-		if (bestVariantWithHash) {
-			zukanHash = bestVariantWithHash.zukanHash;
+		const variantsWithHash = variants.filter((v) => v.zukanHash);
+		if (variantsWithHash.length > 0) {
+			variantsWithHash.sort((a, b) => {
+				const orderA = a.zukanOrder ?? 999999;
+				const orderB = b.zukanOrder ?? 999999;
+				if (orderA !== orderB) return orderA - orderB;
+				return a.rarityCode - b.rarityCode;
+			});
+			zukanHash = variantsWithHash[0].zukanHash;
 		}
 
 		// Find constellation (common to all variants of a base character usually)

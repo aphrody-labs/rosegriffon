@@ -203,6 +203,8 @@ export interface CharacterVariant {
 	charaParamId: string;
 	/** Zukan Hash */
 	zukanHash?: string;
+	/** Zukan Order */
+	zukanOrder?: number;
 
 	/** Position code (GK/FW/MF/DF/Coach) */
 	position: "Coach" | "GK" | "FW" | "MF" | "DF";

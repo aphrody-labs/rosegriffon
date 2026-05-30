@@ -410,8 +410,62 @@ async function importSkills(service: any, db: DataAdapter) {
 
 async function importItems(service: any, db: DataAdapter) {
 	console.log("🔄 Importing Items...");
+	
+	// Clean existing items first to remove leftover fake/null entries from previous syncs
+	console.log("  Cleaning existing items in database...");
+	await db.deleteAllExcept("inagle_items", "id", "0x00000000");
+
 	let items = service.items.allItems();
-	items = items.filter((item: any) => item.itemId || item.id);
+	items = items.filter((item: any) => {
+		const id = item.itemId || item.id;
+		if (!id || id === "0x00000000" || id === "0x00000002" || id === "null") return false;
+		
+		const name = item.name || "";
+		if (
+			name.includes("_0x") ||
+			name.startsWith("consume_") ||
+			name.startsWith("shoes_") ||
+			name.startsWith("misanga_") ||
+			name.startsWith("accessory_") ||
+			name.startsWith("special_") ||
+			name.startsWith("fashion_") ||
+			name.startsWith("badge_") ||
+			name.startsWith("coin_") ||
+			name.startsWith("gacha_ticket_")
+		) {
+			return false;
+		}
+
+		// Must have at least one name in FR or EN
+		const hasName = getLoc(item, "fr") || getLoc(item, "en");
+		if (!hasName) return false;
+
+		return true;
+	});
+
+	// Deduplicate items by category + normalized name (preferring records with internalCode / descriptions)
+	const uniqueMap = new Map<string, any>();
+	for (const item of items) {
+		const name = (getLoc(item, "fr") || getLoc(item, "en") || "").toLowerCase().trim();
+		const key = `${item.category}_${name}`;
+		const existing = uniqueMap.get(key);
+		if (!existing) {
+			uniqueMap.set(key, item);
+		} else {
+			const existingHasCode = !!existing.internalCode;
+			const itemHasCode = !!item.internalCode;
+			const existingHasDesc = !!getDesc(existing, "fr");
+			const itemHasDesc = !!getDesc(item, "fr");
+
+			if (
+				(!existingHasCode && itemHasCode) ||
+				(existingHasCode === itemHasCode && !existingHasDesc && itemHasDesc)
+			) {
+				uniqueMap.set(key, item);
+			}
+		}
+	}
+	items = Array.from(uniqueMap.values());
 
 	const BATCH_SIZE = 100;
 	let successCount = 0;
