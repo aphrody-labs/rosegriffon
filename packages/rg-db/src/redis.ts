@@ -323,8 +323,35 @@ export const vectorStore = {
 				}
 			}
 
-			// Recherche hybride : 70% similarité cosinus, 30% correspondance de mot-clé
-			const score = queryText ? cosineScore * 0.7 + keywordScore * 0.3 : cosineScore;
+			// Recherche hybride : 60% similarité cosinus, 40% correspondance de mot-clé
+			let score = queryText ? cosineScore * 0.6 + keywordScore * 0.4 : cosineScore;
+
+			// Exact phrase match boost
+			if (queryText) {
+				const queryLower = queryText.toLowerCase();
+				const textLower = doc.text.toLowerCase();
+				const titleLower = ((doc.metadata as any)?.title || "").toLowerCase();
+
+				if (titleLower.includes(queryLower)) {
+					score += 0.25; // Significant boost for exact title match
+				} else if (textLower.includes(queryLower)) {
+					score += 0.12; // Moderate boost for exact text match
+				}
+			}
+
+			// Language weights (favoring French and English, penalizing others)
+			let langWeight = 1.0;
+			const lang = (doc.metadata as any)?.language;
+			if (lang === "fr") {
+				langWeight = 1.35;
+			} else if (lang === "en") {
+				langWeight = 1.1;
+			} else if (lang === "ja") {
+				langWeight = 0.95;
+			} else if (lang) {
+				langWeight = 0.4;
+			}
+			score *= langWeight;
 
 			// Supprimer l'embedding de la réponse pour économiser de la bande passante
 			const { embedding, ...documentWithoutEmbedding } = doc;
