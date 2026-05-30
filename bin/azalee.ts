@@ -11,6 +11,11 @@
 import { Command } from "commander";
 import { existsSync, readdirSync } from "node:fs";
 import path from "node:path";
+import dotenv from "dotenv";
+
+// Load environment variables
+dotenv.config({ path: path.resolve(process.cwd(), ".env.local") });
+dotenv.config({ path: path.resolve(process.cwd(), ".env") });
 
 const program = new Command();
 
@@ -61,6 +66,42 @@ function cleanJapanese(text: string): string {
 
 function escapeRegExp(str: string) {
 	return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+function renderAsciiTable(rows: any[]): string {
+	if (!rows || rows.length === 0) return "Aucun résultat (0 ligne).";
+	const keys = Object.keys(rows[0]);
+	
+	const stringifiedRows = rows.map(row => {
+		const newRow: Record<string, string> = {};
+		for (const key of keys) {
+			const val = row[key];
+			if (val === null || val === undefined) {
+				newRow[key] = "NULL";
+			} else if (typeof val === "object") {
+				newRow[key] = JSON.stringify(val);
+			} else {
+				newRow[key] = String(val);
+			}
+			if (newRow[key].length > 45) {
+				newRow[key] = newRow[key].substring(0, 42) + "...";
+			}
+		}
+		return newRow;
+	});
+
+	const colWidths = keys.map(k => Math.max(k.length, ...stringifiedRows.map(r => r[k].length)));
+	
+	const topBorder = "┌─" + colWidths.map(w => "─".repeat(w)).join("─┬─") + "─┐";
+	const headerLine = "│ " + keys.map((k, i) => k.padEnd(colWidths[i])).join(" │ ") + " │";
+	const midBorder = "├─" + colWidths.map(w => "─".repeat(w)).join("─┼─") + "─┤";
+	const bottomBorder = "└─" + colWidths.map(w => "─".repeat(w)).join("─┴─") + "─┘";
+	
+	const formattedRows = stringifiedRows.map(r => 
+		"│ " + keys.map((k, i) => r[k].padEnd(colWidths[i])).join(" │ ") + " │"
+	);
+
+	return [topBorder, headerLine, midBorder, ...formattedRows, bottomBorder].join("\n");
 }
 
 const containsJapanese = (text: string) =>
@@ -363,9 +404,10 @@ program
 // 3. db query
 program
 	.command("db [sql]")
-	.description("Exécute une requête SQL sur le cache local SQLite")
+	.description("Exécute une requête SQL (sur PostgreSQL par défaut, ou sur SQLite avec --sqlite)")
+	.option("-s, --sqlite", "Exécute sur la base SQLite de sauvegarde locale")
 	.option("-j, --json", "Format de sortie en JSON brute")
-	.action(async (sql: string | undefined, options: { json?: boolean }) => {
+	.action(async (sql: string | undefined, options: { sqlite?: boolean; json?: boolean }) => {
 		suppressLogs(!!options.json);
 		try {
 			const inputSql = await getOrReadInput(sql);
@@ -379,35 +421,68 @@ program
 				return;
 			}
 
-			const dbPath = getSqlitePath();
-			if (!dbPath) {
+			if (options.sqlite) {
+				const dbPath = getSqlitePath();
+				if (!dbPath) {
+					restoreLogs(!!options.json);
+					if (options.json) {
+						console.log(JSON.stringify({ error: "Aucune base de données SQLite localisée" }));
+					} else {
+						console.error(
+							`${colors.red}Erreur: Aucune base de données SQLite localisée.${colors.reset}`
+						);
+					}
+					return;
+				}
+
+				if (!options.json) {
+					console.log(`${colors.cyan}SQLite DB utilisé : ${dbPath}${colors.reset}`);
+				}
+				const { Database: DBConstructor } = require("bun:sqlite");
+
+				const db = new DBConstructor(dbPath, { readonly: true });
+				const results = db.query(inputSql).all();
+
 				restoreLogs(!!options.json);
 				if (options.json) {
-					console.log(JSON.stringify({ error: "Aucune base de données SQLite localisée" }));
+					console.log(JSON.stringify(results, null, 2));
 				} else {
-					console.error(
-						`${colors.red}Erreur: Aucune base de données SQLite localisée.${colors.reset}`
-					);
+					console.log(`\n${colors.green}Résultats SQLite (${results.length} lignes) :${colors.reset}`);
+					console.log(renderAsciiTable(results));
 				}
-				return;
-			}
-
-			if (!options.json) {
-				console.log(`${colors.cyan}SQLite DB utilisé : ${dbPath}${colors.reset}`);
-			}
-			const { Database: DBConstructor } = require("bun:sqlite");
-
-			const db = new DBConstructor(dbPath, { readonly: true });
-			const results = db.query(inputSql).all();
-
-			if (options.json) {
-				restoreLogs(true);
-				console.log(JSON.stringify(results, null, 2));
+				db.close();
 			} else {
-				console.log(`\n${colors.green}Résultats (${results.length} lignes) :${colors.reset}`);
-				console.log(JSON.stringify(results, null, 2));
+				// PostgreSQL (default)
+				const dbUrl = process.env.DATABASE_URL;
+				if (!dbUrl) {
+					restoreLogs(!!options.json);
+					if (options.json) {
+						console.log(JSON.stringify({ error: "DATABASE_URL non définie dans l'environnement" }));
+					} else {
+						console.error(
+							`${colors.red}Erreur: DATABASE_URL non définie dans l'environnement.${colors.reset}`
+						);
+					}
+					return;
+				}
+
+				if (!options.json) {
+					console.log(`${colors.cyan}PostgreSQL DB utilisé : ${dbUrl}${colors.reset}`);
+				}
+				const pg = require("pg");
+				const client = new pg.Client({ connectionString: dbUrl });
+				await client.connect();
+				const res = await client.query(inputSql);
+				await client.end();
+
+				restoreLogs(!!options.json);
+				if (options.json) {
+					console.log(JSON.stringify(res.rows, null, 2));
+				} else {
+					console.log(`\n${colors.green}Résultats PostgreSQL (${res.rowCount} lignes) :${colors.reset}`);
+					console.log(renderAsciiTable(res.rows));
+				}
 			}
-			db.close();
 		} catch (e: any) {
 			restoreLogs(!!options.json);
 			if (options.json) {
@@ -822,6 +897,128 @@ program
 			}
 		} finally {
 			process.exit(0);
+		}
+	});
+
+// 9. wave command
+program
+	.command("wave")
+	.description("Lance une vague d'enrichissement, d'analyse et de traitement de données (zukan, glossary, asset xref)")
+	.option("-c, --cycle", "Lance le runner de cycle complet (avec sync characters, compilation Next.js et restart du service)")
+	.option("-l, --loop", "Lance la boucle continue de vagues toutes les 30 secondes")
+	.action(async (options: { cycle?: boolean; loop?: boolean }) => {
+		const { spawn } = require("bun");
+		const scriptPath = options.cycle 
+			? path.resolve(process.cwd(), "scripts/inagle/pipeline/run-wave-cycle.sh")
+			: path.resolve(process.cwd(), "scripts/inagle/pipeline/wave-processing.ts");
+
+		if (options.loop) {
+			console.log(`${colors.cyan}Lancement de la boucle infinie de vagues de traitement toutes les 30 secondes...${colors.reset}`);
+			console.log(`${colors.yellow}Appuyez sur Ctrl+C pour arrêter.${colors.reset}\n`);
+			
+			while (true) {
+				console.log(`\n🌊 [${new Date().toISOString()}] Début de la vague de traitement...`);
+				const proc = spawn([options.cycle ? scriptPath : "bun", options.cycle ? "" : scriptPath].filter(Boolean), {
+					stdout: "inherit",
+					stderr: "inherit",
+				});
+				await proc.exited;
+				console.log(`💤 En attente de 30 secondes avant la prochaine vague...`);
+				await new Promise(resolve => setTimeout(resolve, 30000));
+			}
+		} else {
+			console.log(`${colors.cyan}Lancement de la vague de traitement...${colors.reset}`);
+			const proc = spawn([options.cycle ? scriptPath : "bun", options.cycle ? "" : scriptPath].filter(Boolean), {
+				stdout: "inherit",
+				stderr: "inherit",
+			});
+			const code = await proc.exited;
+			process.exit(code);
+		}
+	});
+
+// 10. repair command
+program
+	.command("repair")
+	.description("Diagnostique et répare la base de données locale (RLS, privilèges)")
+	.action(async () => {
+		console.log(`${colors.cyan}Diagnostics et réparation de la base de données...${colors.reset}`);
+		const { Client } = require("pg");
+		const dbUrl = process.env.DATABASE_URL;
+		if (!dbUrl) {
+			console.error(`${colors.red}Erreur: DATABASE_URL non définie dans l'environnement.${colors.reset}`);
+			return;
+		}
+
+		console.log(`Connexion à la base via : ${dbUrl}`);
+		try {
+			const client = new Client({ connectionString: dbUrl });
+			await client.connect();
+			
+			const { rows: tables } = await client.query(
+				`SELECT table_name FROM information_schema.tables 
+				 WHERE table_schema = 'public' AND table_name LIKE 'inagle_%'`
+			);
+			
+			console.log(`  Trouvé ${tables.length} tables Inagle. Désactivation RLS et attribution des droits...`);
+			
+			for (const t of tables) {
+				const tableName = t.table_name;
+				try {
+					await client.query(`ALTER TABLE "${tableName}" DISABLE ROW LEVEL SECURITY;`);
+					await client.query(`GRANT ALL PRIVILEGES ON TABLE "${tableName}" TO ubuntu;`);
+					console.log(`  ✓ Table "${tableName}" réparée.`);
+				} catch (e: any) {
+					console.log(`  ⚠ Impossible de réparer "${tableName}" directement: ${e.message}. Tentative via sudo...`);
+					const { execSync } = require("node:child_process");
+					execSync(`sudo -u postgres psql -d rose_griffon -c 'ALTER TABLE "${tableName}" DISABLE ROW LEVEL SECURITY; GRANT ALL PRIVILEGES ON TABLE "${tableName}" TO ubuntu;'`);
+					console.log(`  ✓ Table "${tableName}" réparée via sudo postgres.`);
+				}
+			}
+			
+			try {
+				await client.query(`ALTER TABLE patch_notes DISABLE ROW LEVEL SECURITY;`);
+				await client.query(`GRANT ALL PRIVILEGES ON TABLE patch_notes TO ubuntu;`);
+				console.log(`  ✓ Table "patch_notes" réparée.`);
+			} catch (e: any) {
+				const { execSync } = require("node:child_process");
+				execSync(`sudo -u postgres psql -d rose_griffon -c 'ALTER TABLE patch_notes DISABLE ROW LEVEL SECURITY; GRANT ALL PRIVILEGES ON TABLE patch_notes TO ubuntu;'`);
+				console.log(`  ✓ Table "patch_notes" réparée via sudo postgres.`);
+			}
+
+			await client.end();
+			console.log(`\n${colors.bold}${colors.green}Base de données locale réparée avec succès !${colors.reset}`);
+		} catch (e: any) {
+			console.error(`${colors.red}Erreur de connexion / privilèges : ${e.message}${colors.reset}`);
+		}
+	});
+
+// 11. sync command
+program
+	.command("sync")
+	.description("Synchronise les fichiers locaux de données avec la base PostgreSQL locale")
+	.option("-p, --push", "Pousse les données Inagle locales vers PostgreSQL (inagle push)")
+	.option("-j, --json", "Synchronise les corrections SQL vers characters.json (sync-db-to-json)")
+	.action(async (options: { push?: boolean; json?: boolean }) => {
+		const { spawn } = require("bun");
+		if (options.push) {
+			console.log(`${colors.cyan}Exécution de inagle push pour synchroniser les configs de données...${colors.reset}`);
+			const proc = spawn(["bun", "packages/inagle/src/cli-push.ts"], {
+				stdout: "inherit",
+				stderr: "inherit",
+			});
+			const code = await proc.exited;
+			process.exit(code);
+		} else if (options.json) {
+			console.log(`${colors.cyan}Synchronisation de la base locale vers le fichier characters.json...${colors.reset}`);
+			const proc = spawn(["bun", "scripts/inagle/pipeline/sync-db-to-json.ts"], {
+				stdout: "inherit",
+				stderr: "inherit",
+			});
+			const code = await proc.exited;
+			process.exit(code);
+		} else {
+			console.log(`${colors.yellow}Veuillez spécifier une option: --push ou --json.${colors.reset}`);
 		}
 	});
 
