@@ -62,7 +62,7 @@ _Wiki Inazuma Eleven Victory Road (déployé sur `azalee.rosegriffon.fr` via le 
   - ✅ **Centrage mobile de la bannière Achillea** : Correction de l'image de titre via flexbox (`justify-center md:justify-start`) et remplacement de l'image absolue par un composant image responsive.
   - ✅ **Centrage mobile du FormSelector** : Centrage horizontal des vignettes de formulaires et élargissement automatique du conteneur de fiches de personnage (`w-full sm:flex-1`) sur mobile.
   - ✅ **Optimisation de la mise en cache ISR (Incremental Static Regeneration) pour le Zukan** : Pré-génération statique via `generateStaticParams()` pour les 1 051 fiches de personnages à la compilation, éliminant les requêtes à la base de données en production.
-  - ⏳ Système de recherche hybride combinant recherche floue (uFuzzy) et vectorielle (RAG).
+  - ✅ Système de recherche hybride combinant recherche floue (uFuzzy) et vectorielle (RAG).
 
 ### 🌐 @rose-griffon/website
 
@@ -153,7 +153,7 @@ _Couche d'accès à la base de données unifiée_
   - ✅ Client Redis (`redis.ts`) avec support vectoriel pour le RAG et cache générique.
   - ✅ Module helper pour le bucket de stockage Supabase.
   - ✅ Remplacement du typage `Record<string, unknown>` de `CookieStore` par `CookieOptions` de `@supabase/ssr`.
-  - ⏳ Découplage complet des dépendances Bun dans les composants côté browser.
+  - ✅ Découplage complet des dépendances Bun dans les composants côté browser.
 
 ### 🔑 @rose-griffon/auth
 
