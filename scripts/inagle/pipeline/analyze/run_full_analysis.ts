@@ -106,6 +106,10 @@ function runFullAnalysis() {
   const basara = loadEntryJson<BasaraEntry[]>("basara.json");
   const auras = loadEntryJson<AuraEntry[]>("auras.json");
   const miximax = loadEntryJson<MiximaxEntry[]>("miximax.json");
+  const keshins = loadEntryJson<AuraEntry[]>("keshins.json");
+  const souls = loadEntryJson<AuraEntry[]>("souls.json");
+  const awakenings = loadEntryJson<AuraEntry[]>("awakenings.json");
+  const modeChanges = loadEntryJson<AuraEntry[]>("mode_changes.json");
 
   console.log(`Loaded ${characters.length} characters.`);
   console.log(`Loaded ${skills.length} skills.`);
@@ -114,8 +118,20 @@ function runFullAnalysis() {
   console.log(`Loaded ${basara.length} basara entries.`);
   console.log(`Loaded ${auras.length} auras.`);
   console.log(`Loaded ${miximax.length} miximax entries.`);
+  console.log(`Loaded ${keshins.length} keshins.`);
+  console.log(`Loaded ${souls.length} souls.`);
+  console.log(`Loaded ${awakenings.length} awakenings.`);
+  console.log(`Loaded ${modeChanges.length} mode changes.`);
 
-  const skillIds = new Set(skills.map(s => s.skillID.toLowerCase()));
+  const skillIds = new Set([
+    ...skills.map(s => s.skillID.toLowerCase()),
+    ...keshins.map(s => (s.auraId || "").toLowerCase()),
+    ...souls.map(s => (s.auraId || "").toLowerCase()),
+    ...miximax.map(s => (s.auraId || "").toLowerCase()),
+    ...awakenings.map(s => (s.auraId || "").toLowerCase()),
+    ...modeChanges.map(s => (s.auraId || "").toLowerCase()),
+    ...auras.map(s => (s.auraId || "").toLowerCase()),
+  ].filter(Boolean));
   const teamIds = new Set(teams.map(t => t.teamId.toLowerCase()));
   const charaParamIds = new Set(characters.map(c => c.charaParamId.toLowerCase()));
   const charaIds = new Set(characters.map(c => c.charaId.toLowerCase()));

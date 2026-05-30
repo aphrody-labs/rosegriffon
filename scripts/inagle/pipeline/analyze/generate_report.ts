@@ -2,7 +2,7 @@ import { readFileSync, writeFileSync, mkdirSync } from "node:fs";
 import { resolve, dirname } from "node:path";
 
 const RESULTS_PATH = resolve(import.meta.dirname, "detailed_audit_results.json");
-const REPORT_PATH = "/home/ubuntu/.gemini/antigravity-cli/brain/ac6c0d98-2d7e-4a47-9ce2-8485be99bd90/data_classification_report.md";
+const REPORT_PATH = "/home/ubuntu/.gemini/antigravity-cli/brain/b366ff64-d97d-4b74-ae7a-fb1283070909/database_audit_report.md";
 
 interface AuditData {
   counts: {

@@ -436,13 +436,13 @@
   },
   {
     "override_skill_id": "0x36758428",
-    "name_fr": null,
-    "name_en": null,
-    "name_ja": null,
-    "element_id": 0,
-    "category_id": 0,
-    "power_min": 0,
-    "power_max": 0,
+    "name_fr": "Attaque cosmique",
+    "name_en": "Cosmic Blaster",
+    "name_ja": "コズミックブラスター",
+    "element_id": 2,
+    "category_id": 1,
+    "power_min": 160,
+    "power_max": 880,
     "conditions": [
       {
         "condition_type": 2,
@@ -455,8 +455,8 @@
           },
           {
             "skill_id": "0x7601AF96",
-            "name_fr": null,
-            "name_en": null,
+            "name_fr": "Météore géant A",
+            "name_en": "Meteor Blade A",
             "num": 1
           }
         ]
@@ -494,13 +494,13 @@
   },
   {
     "override_skill_id": "0x040CE0BB",
-    "name_fr": null,
-    "name_en": null,
-    "name_ja": null,
-    "element_id": 0,
-    "category_id": 0,
-    "power_min": 0,
-    "power_max": 0,
+    "name_fr": "Manchot empereur nº 2 avec requin",
+    "name_en": "Emperor Penguin No. 2 feat. Shark",
+    "name_ja": "皇帝ペンギン２号　ｆｅａｔ．シャーク",
+    "element_id": 2,
+    "category_id": 1,
+    "power_min": 160,
+    "power_max": 880,
     "conditions": [
       {
         "condition_type": 2,
@@ -523,13 +523,13 @@
   },
   {
     "override_skill_id": "0xCCEC6FCB",
-    "name_fr": null,
-    "name_en": null,
-    "name_ja": null,
-    "element_id": 0,
-    "category_id": 0,
-    "power_min": 0,
-    "power_max": 0,
+    "name_fr": "Poussière de flocon",
+    "name_en": "Icebreaker",
+    "name_ja": "氷結のグングニル",
+    "element_id": 1,
+    "category_id": 1,
+    "power_min": 160,
+    "power_max": 880,
     "conditions": [
       {
         "condition_type": 2,
@@ -610,13 +610,13 @@
   },
   {
     "override_skill_id": "0x5E2FCAC1",
-    "name_fr": null,
-    "name_en": null,
-    "name_ja": null,
-    "element_id": 0,
-    "category_id": 0,
-    "power_min": 0,
-    "power_max": 0,
+    "name_fr": "Triangle de la mort ultime",
+    "name_en": "Final Death Zone",
+    "name_ja": "ラスト・デスゾーン",
+    "element_id": 2,
+    "category_id": 1,
+    "power_min": 160,
+    "power_max": 880,
     "conditions": [
       {
         "condition_type": 0,
@@ -685,13 +685,13 @@
   },
   {
     "override_skill_id": "0x687DA020",
-    "name_fr": null,
-    "name_en": null,
-    "name_ja": null,
-    "element_id": 0,
-    "category_id": 0,
-    "power_min": 0,
-    "power_max": 0,
+    "name_fr": "Passage en force 3",
+    "name_en": "Foul Offence 3",
+    "name_ja": "ジャッジスルー３",
+    "element_id": 3,
+    "category_id": 2,
+    "power_min": 140,
+    "power_max": 800,
     "conditions": [
       {
         "condition_type": 0,
@@ -714,13 +714,13 @@
   },
   {
     "override_skill_id": "0x3164B69D",
-    "name_fr": null,
-    "name_en": null,
-    "name_ja": null,
-    "element_id": 0,
-    "category_id": 0,
-    "power_min": 0,
-    "power_max": 0,
+    "name_fr": "Roue combinée",
+    "name_en": "Rolling Hell",
+    "name_ja": "地獄車",
+    "element_id": 4,
+    "category_id": 2,
+    "power_min": 120,
+    "power_max": 720,
     "conditions": [
       {
         "condition_type": 0,
@@ -789,13 +789,13 @@
   },
   {
     "override_skill_id": "0xB7F5CD3F",
-    "name_fr": null,
-    "name_en": null,
-    "name_ja": null,
-    "element_id": 0,
-    "category_id": 0,
-    "power_min": 0,
-    "power_max": 0,
+    "name_fr": "Double cyclone",
+    "name_en": "Double Cyclone",
+    "name_ja": "ダブルサイクロン",
+    "element_id": 1,
+    "category_id": 3,
+    "power_min": 120,
+    "power_max": 720,
     "conditions": [
       {
         "condition_type": 0,
@@ -812,13 +812,13 @@
   },
   {
     "override_skill_id": "0x450DD255",
-    "name_fr": null,
-    "name_en": null,
-    "name_ja": null,
-    "element_id": 0,
-    "category_id": 0,
-    "power_min": 0,
-    "power_max": 0,
+    "name_fr": "Danse du bambou",
+    "name_en": "Bamboo Pattern",
+    "name_ja": "かごめかごめ",
+    "element_id": 4,
+    "category_id": 3,
+    "power_min": 120,
+    "power_max": 720,
     "conditions": [
       {
         "condition_type": 0,
@@ -863,8 +863,8 @@
     "name_ja": "ＫＡＭＡＫＵＲＡ　Ｄ",
     "element_id": 2,
     "category_id": 4,
-    "power_min": 45,
-    "power_max": 45,
+    "power_min": 140,
+    "power_max": 800,
     "conditions": [
       {
         "condition_type": 0,
@@ -883,8 +883,8 @@
           },
           {
             "skill_id": "0x7601AF96",
-            "name_fr": null,
-            "name_en": null,
+            "name_fr": "Météore géant A",
+            "name_en": "Meteor Blade A",
             "num": 1
           }
         ]

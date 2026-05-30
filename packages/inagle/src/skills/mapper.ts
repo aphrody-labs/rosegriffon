@@ -19,6 +19,7 @@ import { loadShopConfig } from "../parsers/shop-config.js";
 import type {
 	CfgBinEntry,
 	CfgBinFile,
+	RawSkillConfigInfo,
 	SkillConfigFile,
 	SkillDatabase,
 	UnifiedSkill,
@@ -108,14 +109,20 @@ function parseSkillText(filePath: string): TextMaps {
  */
 export function buildSkillDatabase(options?: { dataRoot?: string }): SkillDatabase {
 	const root = options?.dataRoot || DATA_ROOT;
-	const skillConfigName =
-		findConfigFile("skill", "skill_config_4") ||
-		findConfigFile("skill", "skill_config_3") ||
-		findConfigFile("skill", "skill_config_2") ||
-		"skill_config_2.00.19.00.cfg.bin.json";
+	
+	// Find all available skill configs (prefers highest versions, supports merging them)
+	const skillConfigFiles: string[] = [];
+	for (const version of [1, 2, 3, 4, 5]) {
+		const found = findConfigFile("skill", `skill_config_${version}`);
+		if (found) {
+			skillConfigFiles.push(found);
+		}
+	}
+	if (skillConfigFiles.length === 0) {
+		skillConfigFiles.push("skill_config_2.00.19.00.cfg.bin.json");
+	}
 
 	const paths = {
-		skillConfig: join(root, "common/gamedata/skill", skillConfigName),
 		skillTextEn: join(root, "common/text/en/skill_text.cfg.bin.json"),
 		skillTextFr: join(root, "common/text/fr/skill_text.cfg.bin.json"),
 		skillTextJa: join(root, "common/text/ja/skill_text.cfg.bin.json"),
@@ -153,16 +160,31 @@ export function buildSkillDatabase(options?: { dataRoot?: string }): SkillDataba
 	}
 	console.log(`  Mapped shops for ${itemShops.size} items`);
 
-	// Load skill config
-	const skillConfig = loadJson<SkillConfigFile>(paths.skillConfig);
+	// Merge all config files to get complete skills list (later versions override earlier versions)
+	const allRawSkillsMap = new Map<string, RawSkillConfigInfo>();
 
-	// Find m_skillInfoList
-	const skillList = skillConfig.lists.find((l) => l.name === "m_skillInfoList");
-	if (!skillList) {
-		throw new Error("m_skillInfoList not found in skill config");
+	for (const filename of skillConfigFiles) {
+		const filePath = join(root, "common/gamedata/skill", filename);
+		if (!existsSync(filePath)) {
+			console.warn(`  File not found: ${filePath}`);
+			continue;
+		}
+		try {
+			const config = loadJson<SkillConfigFile>(filePath);
+			const skillList = config.lists.find((l) => l.name === "m_skillInfoList");
+			if (skillList) {
+				console.log(`  Loaded ${skillList.values.length} skills from ${filename}`);
+				for (const raw of skillList.values) {
+					if (!raw?.skillIDStr || raw.skillIDStr === "") continue;
+					allRawSkillsMap.set(raw.skillIDStr, raw);
+				}
+			}
+		} catch (e) {
+			console.error(`  Failed to load skill config from ${filename}`, e);
+		}
 	}
 
-	console.log(`  Found ${skillList.values.length} skills`);
+	console.log(`  Merged ${allRawSkillsMap.size} unique skills across ${skillConfigFiles.length} config files`);
 
 	// Build unified skills
 	const skills: UnifiedSkill[] = [];
@@ -178,12 +200,8 @@ export function buildSkillDatabase(options?: { dataRoot?: string }): SkillDataba
 		byCategory: {} as Record<string, number>,
 	};
 
-	for (let i = 0; i < skillList.values.length; i++) {
-		const raw = skillList.values[i];
-
-		// Skip empty entries
-		if (!raw?.skillIDStr || raw.skillIDStr === "") continue;
-
+	let idx = 0;
+	for (const raw of allRawSkillsMap.values()) {
 		const nameHash = Number.parseInt(raw.skillNameId, 16);
 		const descHash = Number.parseInt(raw.skillDescId, 16);
 		const skillHashId = Number.parseInt(raw.skillID, 16);
@@ -208,7 +226,7 @@ export function buildSkillDatabase(options?: { dataRoot?: string }): SkillDataba
 		};
 
 		const skill: UnifiedSkill = {
-			id: i,
+			id: idx++,
 			hashId: skillHashId,
 			internalCode: raw.skillIDStr,
 			eventName: raw.eventIDName,
@@ -276,7 +294,7 @@ export function buildSkillDatabase(options?: { dataRoot?: string }): SkillDataba
 	return {
 		generatedAt: new Date().toISOString(),
 		sources: {
-			skillConfig: skillConfigName,
+			skillConfig: skillConfigFiles.join(", "),
 			skillTextEn: "en/skill_text.cfg.bin.json",
 			skillTextFr: "fr/skill_text.cfg.bin.json",
 			skillTextJa: "ja/skill_text.cfg.bin.json",
