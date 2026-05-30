@@ -11,6 +11,7 @@ import { SafeImage } from "@/components/ui/SafeImage";
 import type { SpriteCommonKey } from "@/config/sprites-common";
 import { getCharacterImageUrl } from "@/lib/images";
 import { cn } from "@/lib/utils";
+import { RagAssistant } from "@/components/wiki/RagAssistant";
 
 // ---------- Constants ----------
 
@@ -768,6 +769,17 @@ export function RandomTeamGenerator({ pools, coordinators }: RandomTeamGenerator
 					<StaffSlot key={m.id} person={m} role="Manager" />
 				))}
 			</div>
+
+			{/* RAG Tactical Assistant */}
+			<RagAssistant
+				suggestions={[
+					"Conseils tactiques",
+					selectedElement ? `Élément ${selectedElement}` : "Élément Feu",
+					selectedPlaystyles.length > 0 ? `Style ${selectedPlaystyles[0]}` : "Style Percée",
+					team.coach ? team.coach.name_localised : "Coach"
+				].filter(Boolean)}
+				className="mt-6"
+			/>
 		</div>
 	);
 }

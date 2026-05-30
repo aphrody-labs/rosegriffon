@@ -30,6 +30,7 @@ import { FormationField } from "./FormationField";
 import { PlayerDetailPanel } from "./PlayerDetailPanel";
 import { PlayerSlotOverlay } from "./PlayerSlot";
 import { TeamStats } from "./TeamStats";
+import { RagAssistant } from "@/components/wiki/RagAssistant";
 
 /* ── Types ────────────────────────────────────────────────── */
 
@@ -219,6 +220,8 @@ export function TeamBuilder({ characters, initialTeam, isAuthenticated }: TeamBu
 		return ls?.formationIdx ?? 0;
 	});
 
+	const formation = FORMATIONS[formationIdx];
+
 	const [members, setMembers] = useState<Record<string, TeamMember>>(() => {
 		if (typeof window !== "undefined") {
 			const params = new URLSearchParams(window.location.search);
@@ -262,6 +265,30 @@ export function TeamBuilder({ characters, initialTeam, isAuthenticated }: TeamBu
 	const pushHistory = useCallback((state: Record<string, TeamMember>) => {
 		setHistory((prev) => [...prev.slice(-19), state]);
 	}, []);
+
+	const ragSuggestions = useMemo(() => {
+		const list: string[] = [];
+		const placedMembers = Object.values(members);
+		
+		if (placedMembers.length > 0) {
+			const sample1 = placedMembers[0];
+			list.push(sample1.name);
+			list.push(`Techniques de ${sample1.name}`);
+			if (placedMembers.length > 1) {
+				const sample2 = placedMembers[1];
+				list.push(sample2.name);
+			}
+		}
+		
+		list.push(`Formation ${formation.name}`);
+		
+		if (list.length < 4) {
+			list.push("Meilleurs attaquants");
+			list.push("Style de jeu");
+		}
+		
+		return Array.from(new Set(list)).slice(0, 5);
+	}, [members, formation]);
 
 	// ── Tap-to-select (mobile) ─────────────────────────
 	const handleCharaTap = useCallback((char: PickerCharacter) => {
@@ -323,7 +350,6 @@ export function TeamBuilder({ characters, initialTeam, isAuthenticated }: TeamBu
 		return () => window.removeEventListener("keydown", handler);
 	}, [undo, history.length]);
 
-	const formation = FORMATIONS[formationIdx];
 	const fieldRef = useRef<HTMLDivElement>(null);
 
 	// ── Auto-save to localStorage ──────────────────────
@@ -916,6 +942,12 @@ export function TeamBuilder({ characters, initialTeam, isAuthenticated }: TeamBu
 						</div>
 					)}
 				</div>
+
+				{/* RAG Tactical Assistant */}
+				<RagAssistant
+					suggestions={ragSuggestions}
+					className="mt-6"
+				/>
 			</div>
 
 			{/* Drag Overlay */}

@@ -766,3 +766,31 @@ export async function getMetaSuggestions(): Promise<MetaSuggestions> {
 
 	return { items, passives, players, skills, tactics };
 }
+
+/**
+ * Perform a RAG-only semantic search using the Redis vector store.
+ */
+export async function searchRagOnly(query: string): Promise<any[]> {
+	if (!query || query.length < 2) {
+		return [];
+	}
+	try {
+		const { getEmbedding, vectorStore } = require("@rose-griffon/db/redis");
+		const sanitized = query.replaceAll(/[%_,().*\\]/g, "");
+		const questionEmbedding = await getEmbedding(sanitized);
+		const results = await vectorStore.search("inazuma-news", questionEmbedding, 10, sanitized);
+		return results.map((r: any) => ({
+			id: r.document.id,
+			title: r.document.metadata?.title || r.document.text.substring(0, 50),
+			date: r.document.metadata?.date || "",
+			url: r.document.metadata?.url || "#",
+			type: r.document.metadata?.type || "article",
+			text: r.document.text,
+			score: r.score,
+		}));
+	} catch (e) {
+		console.warn("RAG search failed:", e);
+		return [];
+	}
+}
+
