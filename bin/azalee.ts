@@ -9,7 +9,7 @@
  */
 
 import { Command } from "commander";
-import { existsSync, readdirSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync } from "node:fs";
 import path from "node:path";
 import dotenv from "dotenv";
 
@@ -161,6 +161,323 @@ async function getOrReadInput(arg: string | undefined): Promise<string> {
 	return "";
 }
 
+// Helper to get skill name from ID
+function getSkillName(svc: any, skillId: string): string {
+	if (!skillId) return "N/A";
+	const s = svc.skills.get(skillId) || svc.skills.passiveGet(skillId) || svc.skills.auraGet(skillId);
+	return s ? (s.displayName || s.name_FR || s.name_EN || s.name_JA || skillId) : skillId;
+}
+
+const PERSONALITY_NAMES: Record<number, string> = {
+	0: "Inconnu",
+	1: "Doux",
+	2: "Cool",
+	3: "Passionné",
+	4: "Timide",
+	5: "Mature",
+	6: "Joyeux",
+	7: "Sérieux",
+	8: "Sauvage",
+	9: "Mystérieux",
+	10: "Élégant",
+	11: "Espiègle",
+};
+
+// Helper to render character profiler card
+function renderCharaProfile(chara: any, svc: any): string {
+	const lines: string[] = [];
+	const nameFr = chara.names?.fr || "N/A";
+	const nameEn = chara.names?.en || "N/A";
+	const nameJa = chara.names?.ja || "N/A";
+	const roma = chara.romanized?.full || "N/A";
+	const genderStr = chara.gender === 1 ? "Féminin" : "Masculin";
+	const controllableStr = chara.isControllable ? "Oui" : "Non";
+	
+	const personality = chara.personalityType !== undefined 
+		? (PERSONALITY_NAMES[chara.personalityType] || `Type ${chara.personalityType}`)
+		: "Inconnu";
+		
+	const firstPerson = chara.firstPerson?.ja || chara.firstPerson?.fr || "N/A";
+	const secondPerson = chara.secondPersonMale?.ja || chara.secondPersonMale?.fr || "N/A";
+	
+	lines.push(`┌──────────────────────────────────────────────────────────────────────────────┐`);
+	lines.push(`│ ${colors.bold}${colors.green}${nameFr.padEnd(40)}${colors.reset} │ ${colors.cyan}ID: ${chara.charaId.padEnd(28)}${colors.reset} │`);
+	lines.push(`│ ${colors.yellow}Anglais: ${nameEn.padEnd(31)}${colors.reset} │ ${colors.yellow}Japonais: ${nameJa.padEnd(29)}${colors.reset} │`);
+	lines.push(`│ ${colors.yellow}Romanisé: ${roma.padEnd(30)}${colors.reset} │ ${colors.yellow}Genre: ${genderStr.padEnd(32)}${colors.reset} │`);
+	lines.push(`├──────────────────────────────────────────────────────────────────────────────┤`);
+	lines.push(`│ ${colors.bold}Affiliation :${colors.reset} ${(chara.teamName || "Aucune").padEnd(61)} │`);
+	lines.push(`│ ${colors.bold}Contrôlable :${colors.reset} ${controllableStr.padEnd(14)} │ ${colors.bold}Personnalité :${colors.reset} ${personality.padEnd(30)} │`);
+	lines.push(`│ ${colors.bold}Je :${colors.reset} ${firstPerson.padEnd(22)} │ ${colors.bold}Tu (Masc) :${colors.reset} ${secondPerson.padEnd(33)} │`);
+	lines.push(`├──────────────────────────────────────────────────────────────────────────────┤`);
+	
+	if (chara.descriptions?.fr || chara.descriptions?.en) {
+		const desc = chara.descriptions.fr || chara.descriptions.en;
+		lines.push(`│ ${colors.bold}Description :${colors.reset}${" ".repeat(63)} │`);
+		const words = desc.split(" ");
+		let currentLine = "│   ";
+		for (const word of words) {
+			if ((currentLine + word).length > 74) {
+				lines.push(currentLine.padEnd(79) + "│");
+				currentLine = "│   " + word + " ";
+			} else {
+				currentLine += word + " ";
+			}
+		}
+		if (currentLine !== "│   ") {
+			lines.push(currentLine.padEnd(79) + "│");
+		}
+		lines.push(`├──────────────────────────────────────────────────────────────────────────────┤`);
+	}
+
+	if (chara.variants && chara.variants.length > 0) {
+		lines.push(`│ ${colors.bold}${colors.magenta}Variantes de cartes (${chara.variants.length}) :${colors.reset}${" ".repeat(47)} │`);
+		for (const [idx, v] of chara.variants.entries()) {
+			const el = v.element || "N/A";
+			const pos = v.position || "N/A";
+			const rar = v.rarity || "N/A";
+			
+			lines.push(`│   [${idx + 1}] Element: ${el.padEnd(10)} | Position: ${pos.padEnd(4)} | Rareté: ${rar.padEnd(14)}        │`);
+			if (v.stats?.lv99) {
+				const s = v.stats.lv99;
+				lines.push(`│       ${colors.cyan}Kick: ${s.kick.toString().padEnd(4)} Dribble: ${s.control.toString().padEnd(4)} Block: ${s.pressure.toString().padEnd(4)} Catch: ${s.technique.toString().padEnd(4)} Speed: ${s.agility.toString().padEnd(4)}${colors.reset} │`);
+			}
+			if (v.skills && v.skills.length > 0) {
+				const skillNames = v.skills.map((sk: any) => {
+					const name = getSkillName(svc, sk.skillId);
+					return `${name} (Lv.${sk.learnLevel})`;
+				}).join(", ");
+				lines.push(`│       ${colors.blue}Super Moves:${colors.reset} ${skillNames.substring(0, 58)}${skillNames.length > 58 ? "..." : ""} │`);
+			}
+		}
+	}
+	
+	lines.push(`└──────────────────────────────────────────────────────────────────────────────┘`);
+	return lines.join("\n");
+}
+
+// Reusable translation helper
+async function translateTextHelper(inputText: string): Promise<string> {
+	if (!inputText.trim()) return "";
+	const isJa = containsJapanese(inputText);
+	const from = isJa ? "ja" : "en";
+
+	const glossaryPath = path.join(process.cwd(), "data", "glossary.json");
+	const jpToFrMap = new Map<string, string>();
+	const enToFrMap = new Map<string, string>();
+
+	const glossaryFile = Bun.file(glossaryPath);
+	if (await glossaryFile.exists()) {
+		try {
+			const glossary = await glossaryFile.json();
+			const categories = [
+				"characters",
+				"techniques",
+				"auras",
+				"passives",
+				"teams",
+				"items",
+				"terms",
+			];
+			for (const cat of categories) {
+				const list = glossary[cat] || [];
+				for (const entry of list) {
+					const frVal = entry.fr || entry.name_FR;
+					if (!frVal) continue;
+
+					if (entry.ja && entry.ja.trim()) {
+						const cleanJa = cleanJapanese(entry.ja);
+						if (cleanJa.length > 1) {
+							jpToFrMap.set(cleanJa, frVal);
+						}
+					}
+					if (entry.en && entry.en.trim() && entry.en.toLowerCase() !== frVal.toLowerCase()) {
+						enToFrMap.set(entry.en.trim(), frVal);
+					}
+				}
+			}
+		} catch (e) {
+			// ignore
+		}
+	}
+
+	const jpReplacements = Array.from(jpToFrMap.entries()).sort(
+		(a, b) => b[0].length - a[0].length
+	);
+	const enReplacements = Array.from(enToFrMap.entries()).sort(
+		(a, b) => b[0].length - a[0].length
+	);
+
+	const replacements = (isJa ? jpReplacements : enReplacements).map(([term, frVal]) => ({
+		term,
+		lowerTerm: term.toLowerCase(),
+		frVal,
+	}));
+
+	let processedText = inputText;
+	const placeholderMap = new Map<string, string>();
+	let placeholderIndex = 0;
+
+	const regexCache = new Map<string, RegExp>();
+	const globalRegexCache = new Map<string, RegExp>();
+	const getRegex = (t: string) => {
+		let r = regexCache.get(t);
+		if (!r) {
+			r = new RegExp("\\b" + escapeRegExp(t) + "\\b", "i");
+			regexCache.set(t, r);
+		}
+		return r;
+	};
+	const getGlobalRegex = (t: string) => {
+		let r = globalRegexCache.get(t);
+		if (!r) {
+			r = new RegExp("\\b" + escapeRegExp(t) + "\\b", "gi");
+			globalRegexCache.set(t, r);
+		}
+		return r;
+	};
+
+	for (const { term, lowerTerm, frVal } of replacements) {
+		let matches = false;
+		if (isJa) {
+			matches = processedText.includes(term);
+		} else {
+			if (processedText.toLowerCase().includes(lowerTerm)) {
+				const regex = getRegex(term);
+				matches = regex.test(processedText);
+			}
+		}
+
+		if (matches) {
+			const placeholder = ` [[T${placeholderIndex}]] `;
+			placeholderMap.set(placeholder.trim(), frVal);
+
+			if (isJa) {
+				processedText = processedText.replaceAll(term, placeholder);
+			} else {
+				const regex = getGlobalRegex(term);
+				processedText = processedText.replace(regex, placeholder);
+			}
+			placeholderIndex++;
+		}
+	}
+
+	let translated = await translateWithGoogle(processedText, from, "fr");
+
+	for (const [placeholder, frVal] of placeholderMap.entries()) {
+		const cleanPlaceholder = placeholder
+			.replace("[[", "")
+			.replace("]]", "")
+			.trim()
+			.toLowerCase();
+		const num = cleanPlaceholder.replace("t", "");
+
+		const dblRegex = new RegExp("\\[\\s*\\[\\s*[tT]\\s*" + num + "\\s*\\]\\s*\\]", "g");
+		translated = translated.replace(dblRegex, frVal);
+
+		const sglRegex = new RegExp("\\[\\s*[tT]\\s*" + num + "\\s*\\]", "g");
+		translated = translated.replace(sglRegex, frVal);
+
+		const rawRegex = new RegExp("\\b[tT]\\s*" + num + "\\b", "g");
+		translated = translated.replace(rawRegex, frVal);
+	}
+
+	for (const [placeholder, frVal] of placeholderMap.entries()) {
+		if (translated.includes(placeholder)) {
+			translated = translated.replaceAll(placeholder, frVal);
+		}
+		const rawPlaceholder = placeholder.trim();
+		if (translated.includes(rawPlaceholder)) {
+			translated = translated.replaceAll(rawPlaceholder, frVal);
+		}
+	}
+
+	translated = translated.replace(/\s+/g, " ").trim();
+	return translated;
+}
+
+// Inline status diagnostic
+async function runStatusDiagnosticInline() {
+	const dbPath = getSqlitePath();
+	let sqliteStatus = {
+		healthy: false,
+		path: dbPath || "non trouvé",
+		fileSize: "N/A",
+		tables: 0,
+		characterCount: 0,
+		error: undefined as string | undefined,
+	};
+
+	if (dbPath) {
+		try {
+			const { Database: DBConstructor } = require("bun:sqlite");
+			const db = new DBConstructor(dbPath, { readonly: true });
+			const stat = require("node:fs").statSync(dbPath);
+			sqliteStatus.fileSize = (stat.size / (1024 * 1024)).toFixed(2) + " MB";
+
+			const tablesResult = db.query(
+				"SELECT count(*) as count FROM sqlite_master WHERE type='table'"
+			).get() as { count: number };
+			sqliteStatus.tables = tablesResult.count;
+
+			try {
+				const charResult = db.query("SELECT count(*) as count FROM inagle_characters").get() as {
+					count: number;
+				};
+				sqliteStatus.characterCount = charResult.count;
+			} catch {}
+
+			sqliteStatus.healthy = true;
+			db.close();
+		} catch (e: any) {
+			sqliteStatus.error = e.message;
+		}
+	}
+
+	let redisStatus = {
+		healthy: false,
+		latency: "N/A",
+		error: undefined as string | undefined,
+	};
+	try {
+		const { getRedisClient } = require("../packages/db/src/redis.ts");
+		const redis = getRedisClient();
+		const start = performance.now();
+		await redis.get("status:ping");
+		const end = performance.now();
+		redisStatus.healthy = true;
+		redisStatus.latency = (end - start).toFixed(2) + "ms";
+	} catch (e: any) {
+		redisStatus.error = e.message;
+	}
+
+	console.log(`${colors.cyan}=== Diagnostic de santé Azalée ===${colors.reset}\n`);
+
+	console.log(`${colors.bold}${colors.blue}[SQLite]${colors.reset}`);
+	if (sqliteStatus.healthy) {
+		console.log(`  Statut     : ${colors.green}Disponible${colors.reset}`);
+		console.log(`  Base       : ${sqliteStatus.path}`);
+		console.log(`  Taille     : ${sqliteStatus.fileSize}`);
+		console.log(`  Tables     : ${sqliteStatus.tables}`);
+		console.log(`  Personnages: ${sqliteStatus.characterCount}`);
+	} else {
+		console.log(`  Statut     : ${colors.red}Hors-ligne / Erreur${colors.reset}`);
+		if (sqliteStatus.error) {
+			console.log(`  Erreur     : ${sqliteStatus.error}`);
+		}
+	}
+
+	console.log(`\n${colors.bold}${colors.blue}[Redis]${colors.reset}`);
+	if (redisStatus.healthy) {
+		console.log(`  Statut     : ${colors.green}Disponible${colors.reset}`);
+		console.log(`  Latence    : ${redisStatus.latency}`);
+	} else {
+		console.log(`  Statut     : ${colors.red}Hors-ligne / Erreur${colors.reset}`);
+		if (redisStatus.error) {
+			console.log(`  Erreur     : ${redisStatus.error}`);
+		}
+	}
+}
+
 // ─── COMMANDS ────────────────────────────────────────────────────────
 
 // 1. translate
@@ -183,146 +500,13 @@ program
 			}
 
 			const isJa = containsJapanese(inputText);
-			const from = isJa ? "ja" : "en";
 			if (!options.json) {
 				console.log(
 					`${colors.cyan}Langue source détectée : ${isJa ? "Japonais" : "Anglais"}${colors.reset}`
 				);
 			}
 
-			const glossaryPath = path.join(process.cwd(), "data", "glossary.json");
-			const jpToFrMap = new Map<string, string>();
-			const enToFrMap = new Map<string, string>();
-
-			const glossaryFile = Bun.file(glossaryPath);
-			if (await glossaryFile.exists()) {
-				try {
-					const glossary = await glossaryFile.json();
-					const categories = [
-						"characters",
-						"techniques",
-						"auras",
-						"passives",
-						"teams",
-						"items",
-						"terms",
-					];
-					for (const cat of categories) {
-						const list = glossary[cat] || [];
-						for (const entry of list) {
-							const frVal = entry.fr || entry.name_FR;
-							if (!frVal) continue;
-
-							if (entry.ja && entry.ja.trim()) {
-								const cleanJa = cleanJapanese(entry.ja);
-								if (cleanJa.length > 1) {
-									jpToFrMap.set(cleanJa, frVal);
-								}
-							}
-							if (entry.en && entry.en.trim() && entry.en.toLowerCase() !== frVal.toLowerCase()) {
-								enToFrMap.set(entry.en.trim(), frVal);
-							}
-						}
-					}
-				} catch (e) {
-					if (!options.json) {
-						console.error("Glossary parse error:", e);
-					}
-				}
-			}
-
-			const jpReplacements = Array.from(jpToFrMap.entries()).sort(
-				(a, b) => b[0].length - a[0].length
-			);
-			const enReplacements = Array.from(enToFrMap.entries()).sort(
-				(a, b) => b[0].length - a[0].length
-			);
-
-			const replacements = (isJa ? jpReplacements : enReplacements).map(([term, frVal]) => ({
-				term,
-				lowerTerm: term.toLowerCase(),
-				frVal,
-			}));
-
-			let processedText = inputText;
-			const placeholderMap = new Map<string, string>();
-			let placeholderIndex = 0;
-
-			const regexCache = new Map<string, RegExp>();
-			const globalRegexCache = new Map<string, RegExp>();
-			const getRegex = (t: string) => {
-				let r = regexCache.get(t);
-				if (!r) {
-					r = new RegExp("\\b" + escapeRegExp(t) + "\\b", "i");
-					regexCache.set(t, r);
-				}
-				return r;
-			};
-			const getGlobalRegex = (t: string) => {
-				let r = globalRegexCache.get(t);
-				if (!r) {
-					r = new RegExp("\\b" + escapeRegExp(t) + "\\b", "gi");
-					globalRegexCache.set(t, r);
-				}
-				return r;
-			};
-
-			for (const { term, lowerTerm, frVal } of replacements) {
-				let matches = false;
-				if (isJa) {
-					matches = processedText.includes(term);
-				} else {
-					if (processedText.toLowerCase().includes(lowerTerm)) {
-						const regex = getRegex(term);
-						matches = regex.test(processedText);
-					}
-				}
-
-				if (matches) {
-					const placeholder = ` [[T${placeholderIndex}]] `;
-					placeholderMap.set(placeholder.trim(), frVal);
-
-					if (isJa) {
-						processedText = processedText.replaceAll(term, placeholder);
-					} else {
-						const regex = getGlobalRegex(term);
-						processedText = processedText.replace(regex, placeholder);
-					}
-					placeholderIndex++;
-				}
-			}
-
-			let translated = await translateWithGoogle(processedText, from, "fr");
-
-			for (const [placeholder, frVal] of placeholderMap.entries()) {
-				const cleanPlaceholder = placeholder
-					.replace("[[", "")
-					.replace("]]", "")
-					.trim()
-					.toLowerCase();
-				const num = cleanPlaceholder.replace("t", "");
-
-				const dblRegex = new RegExp("\\[\\s*\\[\\s*[tT]\\s*" + num + "\\s*\\]\\s*\\]", "g");
-				translated = translated.replace(dblRegex, frVal);
-
-				const sglRegex = new RegExp("\\[\\s*[tT]\\s*" + num + "\\s*\\]", "g");
-				translated = translated.replace(sglRegex, frVal);
-
-				const rawRegex = new RegExp("\\b[tT]\\s*" + num + "\\b", "g");
-				translated = translated.replace(rawRegex, frVal);
-			}
-
-			for (const [placeholder, frVal] of placeholderMap.entries()) {
-				if (translated.includes(placeholder)) {
-					translated = translated.replaceAll(placeholder, frVal);
-				}
-				const rawPlaceholder = placeholder.trim();
-				if (translated.includes(rawPlaceholder)) {
-					translated = translated.replaceAll(rawPlaceholder, frVal);
-				}
-			}
-
-			translated = translated.replace(/\s+/g, " ").trim();
+			const translated = await translateTextHelper(inputText);
 
 			if (options.json) {
 				restoreLogs(true);
@@ -1022,4 +1206,551 @@ program
 		}
 	});
 
+// 12. chara command
+program
+	.command("chara [query]")
+	.description("Affiche les détails d'un joueur d'Inazuma Eleven (profil, stats, techniques, variants)")
+	.option("-j, --json", "Format de sortie en JSON brute")
+	.action(async (query: string | undefined, options: { json?: boolean }) => {
+		suppressLogs(!!options.json);
+		try {
+			const inputQuery = await getOrReadInput(query);
+			if (!inputQuery.trim()) {
+				restoreLogs(!!options.json);
+				if (options.json) {
+					console.log(JSON.stringify({ error: "Aucun joueur spécifié" }));
+				} else {
+					console.error(`${colors.red}Erreur: Spécifiez un nom ou un ID de joueur (ex: Mark).${colors.reset}`);
+				}
+				return;
+			}
+
+			const { createInagleService } = require("../packages/inagle/src/service.ts");
+			const svc = await createInagleService();
+			const chars = svc.characters.baseCharacters();
+
+			const matches = chars.filter((c: any) => {
+				const q = inputQuery.toLowerCase().trim();
+				if (c.charaId.toLowerCase() === q || c.internalCode?.toLowerCase() === q) {
+					return true;
+				}
+				const nameFr = c.names?.fr?.toLowerCase() || "";
+				const nameEn = c.names?.en?.toLowerCase() || "";
+				const nameJa = c.names?.ja?.toLowerCase() || "";
+				const slug = c.slug?.toLowerCase() || "";
+				return nameFr.includes(q) || nameEn.includes(q) || nameJa.includes(q) || slug.includes(q);
+			});
+
+			restoreLogs(!!options.json);
+
+			if (matches.length === 0) {
+				if (options.json) {
+					console.log(JSON.stringify([], null, 2));
+				} else {
+					console.log(`${colors.yellow}Aucun joueur trouvé pour : "${inputQuery}"${colors.reset}`);
+				}
+				return;
+			}
+
+			if (matches.length > 1) {
+				if (options.json) {
+					console.log(JSON.stringify(matches.map((m: any) => ({ id: m.charaId, name: m.names.fr || m.names.en || m.names.ja })), null, 2));
+				} else {
+					console.log(`${colors.yellow}Plusieurs joueurs correspondent à votre recherche :${colors.reset}`);
+					for (const m of matches) {
+						console.log(`  - ${colors.bold}${m.names.fr || m.names.en}${colors.reset} (ID: ${m.charaId} | Code: ${m.internalCode})`);
+					}
+				}
+				return;
+			}
+
+			if (options.json) {
+				console.log(JSON.stringify(matches[0], null, 2));
+			} else {
+				console.log(renderCharaProfile(matches[0], svc));
+			}
+		} catch (e: any) {
+			restoreLogs(!!options.json);
+			if (options.json) {
+				console.log(JSON.stringify({ error: e.message }));
+			} else {
+				console.error(`${colors.red}Erreur chara : ${e.message}${colors.reset}`);
+			}
+		}
+	});
+
+// 13. dialogue command
+program
+	.command("dialogue [query]")
+	.description("Recherche dans les dialogues narratifs et de chronique du jeu")
+	.option("-s, --speaker <speaker>", "Filtre par locuteur/personnage")
+	.option("-j, --json", "Format de sortie en JSON brute")
+	.option("-l, --limit <limit>", "Nombre de résultats max", "10")
+	.action(async (query: string | undefined, options: { speaker?: string; json?: boolean; limit: string }) => {
+		suppressLogs(!!options.json);
+		try {
+			const inputQuery = await getOrReadInput(query);
+			const speakerQuery = options.speaker;
+			const limitVal = parseInt(options.limit, 10) || 10;
+			
+			const dbPath = "/home/ubuntu/data/all-gamedata/story_text_database.json";
+			if (!existsSync(dbPath)) {
+				restoreLogs(!!options.json);
+				if (options.json) {
+					console.log(JSON.stringify({ error: "Story text database not found" }));
+				} else {
+					console.error(`${colors.red}Erreur: Base de dialogues introuvable. Exécutez 'azalee sync --push' d'abord.${colors.reset}`);
+				}
+				return;
+			}
+			
+			const data = JSON.parse(readFileSync(dbPath, "utf-8"));
+			const events = data.events || [];
+			const matches: any[] = [];
+			
+			const textQ = inputQuery.toLowerCase().trim();
+			const speakerQ = speakerQuery?.toLowerCase().trim();
+			
+			outerLoop:
+			for (const ev of events) {
+				const eventId = ev.eventId;
+				for (const d of ev.dialogues) {
+					let matchesText = true;
+					let matchesSpeaker = true;
+					
+					if (textQ) {
+						const textFr = d.text?.fr?.toLowerCase() || "";
+						const textEn = d.text?.en?.toLowerCase() || "";
+						const textJa = d.text?.ja?.toLowerCase() || "";
+						matchesText = textFr.includes(textQ) || textEn.includes(textQ) || textJa.includes(textQ);
+					}
+					
+					if (speakerQ) {
+						const spNameFr = d.speaker?.names?.fr?.toLowerCase() || "";
+						const spNameEn = d.speaker?.names?.en?.toLowerCase() || "";
+						const spNameJa = d.speaker?.names?.ja?.toLowerCase() || "";
+						matchesSpeaker = spNameFr.includes(speakerQ) || spNameEn.includes(speakerQ) || spNameJa.includes(speakerQ) || d.speaker?.charaId?.toLowerCase() === speakerQ;
+					}
+					
+					if (matchesText && matchesSpeaker) {
+						matches.push({
+							eventId,
+							dialogueId: d.dialogueId,
+							speaker: d.speaker?.names?.fr || d.speaker?.names?.en || d.speaker?.names?.ja || d.speaker?.charaId,
+							text: d.text
+						});
+						if (matches.length >= limitVal) break outerLoop;
+					}
+				}
+			}
+			
+			restoreLogs(!!options.json);
+			if (options.json) {
+				console.log(JSON.stringify(matches, null, 2));
+			} else {
+				console.log(`${colors.cyan}Recherche de dialogues pour : "${textQ}"${speakerQ ? ` (par ${speakerQ})` : ""}...${colors.reset}\n`);
+				if (matches.length === 0) {
+					console.log(`${colors.yellow}Aucun dialogue trouvé.${colors.reset}`);
+					return;
+				}
+				
+				for (const m of matches) {
+					console.log(`[${colors.bold}${colors.green}${m.speaker}${colors.reset}] (${colors.yellow}${m.eventId}${colors.reset} | ${colors.yellow}${m.dialogueId}${colors.reset})`);
+					if (m.text?.fr) console.log(`  FR: ${m.text.fr}`);
+					if (m.text?.en) console.log(`  EN: ${m.text.en}`);
+					if (m.text?.ja) console.log(`  JA: ${m.text.ja}`);
+					console.log("─".repeat(80));
+				}
+			}
+		} catch (e: any) {
+			restoreLogs(!!options.json);
+			if (options.json) {
+				console.log(JSON.stringify({ error: e.message }));
+			} else {
+				console.error(`${colors.red}Erreur dialogue : ${e.message}${colors.reset}`);
+			}
+		}
+	});
+
+// 14. skill command
+program
+	.command("skill [query]")
+	.description("Affiche les détails d'une technique / compétence / passive")
+	.option("-j, --json", "Format de sortie en JSON brute")
+	.action(async (query: string | undefined, options: { json?: boolean }) => {
+		suppressLogs(!!options.json);
+		try {
+			const inputQuery = await getOrReadInput(query);
+			if (!inputQuery.trim()) {
+				restoreLogs(!!options.json);
+				if (options.json) {
+					console.log(JSON.stringify({ error: "Aucun mot-clé spécifié" }));
+				} else {
+					console.error(`${colors.red}Erreur: Spécifiez un nom ou un ID de move (ex: Fire Tornado).${colors.reset}`);
+				}
+				return;
+			}
+			
+			const { createInagleService } = require("../packages/inagle/src/service.ts");
+			const svc = await createInagleService();
+			
+			// Try by ID directly first
+			let skill = svc.skills.get(inputQuery) || svc.skills.passiveGet(inputQuery) || svc.skills.auraGet(inputQuery);
+			
+			// If not found by ID, search by name
+			if (!skill) {
+				const mainMatches = svc.skills.search(inputQuery, { limit: 5 });
+				const auraMatches = svc.skills.auraSearch(inputQuery).slice(0, 5);
+				
+				const matches = [
+					...mainMatches.map((s: any) => ({ ...s, skillType: "main" as const })),
+					...auraMatches.map((a: any) => ({ ...a, skillType: "aura" as const, displayName: a.displayName || a.name_FR || a.name_EN }))
+				];
+				
+				if (matches.length === 0) {
+					restoreLogs(!!options.json);
+					if (options.json) {
+						console.log(JSON.stringify([], null, 2));
+					} else {
+						console.log(`${colors.yellow}Aucune technique trouvée pour: "${inputQuery}"${colors.reset}`);
+					}
+					return;
+				}
+				
+				if (matches.length > 1) {
+					restoreLogs(!!options.json);
+					if (options.json) {
+						console.log(JSON.stringify(matches, null, 2));
+					} else {
+						console.log(`${colors.yellow}Plusieurs techniques correspondent :${colors.reset}`);
+						for (const m of matches) {
+							const typeStr = m.skillType.toUpperCase();
+							console.log(`  - [${colors.bold}${colors.green}${typeStr}${colors.reset}] ${colors.bold}${m.displayName || m.name_FR}${colors.reset} (ID: ${m.skillIDStr || m.auraId || m.passiveId || "N/A"})`);
+						}
+					}
+					return;
+				}
+				
+				skill = matches[0] as any;
+			}
+			
+			restoreLogs(!!options.json);
+			if (options.json) {
+				console.log(JSON.stringify(skill, null, 2));
+			} else {
+				console.log(`┌──────────────────────────────────────────────────────────────────────────────┐`);
+				const displayName = (skill as any).displayName || (skill as any).name_FR || (skill as any).name_EN || "N/A";
+				const typeStr = ((skill as any).skillType || "Technique").toUpperCase();
+				const idStr = (skill as any).skillIDStr || (skill as any).auraId || (skill as any).passiveId || "N/A";
+				console.log(`│ [${colors.bold}${colors.green}${typeStr}${colors.reset}] ${colors.bold}${displayName.padEnd(50)}${colors.reset} │ ${colors.cyan}ID: ${idStr.padEnd(10)}${colors.reset} │`);
+				
+				if ((skill as any).desc_FR || (skill as any).description_FR || (skill as any).desc_EN) {
+					const desc = (skill as any).desc_FR || (skill as any).description_FR || (skill as any).desc_EN;
+					console.log(`├──────────────────────────────────────────────────────────────────────────────┤`);
+					console.log(`│ ${colors.bold}Description :${colors.reset}${" ".repeat(63)} │`);
+					const words = desc.split(" ");
+					let currentLine = "│   ";
+					for (const word of words) {
+						if ((currentLine + word).length > 74) {
+							console.log(currentLine.padEnd(79) + "│");
+							currentLine = "│   " + word + " ";
+						} else {
+							currentLine += word + " ";
+						}
+					}
+					if (currentLine !== "│   ") {
+						console.log(currentLine.padEnd(79) + "│");
+					}
+				}
+				
+				if ((skill as any).power_max !== undefined) {
+					console.log(`├──────────────────────────────────────────────────────────────────────────────┤`);
+					const power = (skill as any).power_max;
+					const cost = (skill as any).cost || 0;
+					const element = (skill as any).elementName?.fr || "N/A";
+					const category = (skill as any).categoryName?.fr || "N/A";
+					console.log(`│ Puissance Max : ${power.toString().padEnd(10)} | Coût : ${cost.toString().padEnd(8)} | Élément : ${element.padEnd(10)} | Cat : ${category.padEnd(8)} │`);
+				}
+				console.log(`└──────────────────────────────────────────────────────────────────────────────┘`);
+			}
+		} catch (e: any) {
+			restoreLogs(!!options.json);
+			if (options.json) {
+				console.log(JSON.stringify({ error: e.message }));
+			} else {
+				console.error(`${colors.red}Erreur skill : ${e.message}${colors.reset}`);
+			}
+		}
+	});
+
+// 15. shell command
+program
+	.command("shell")
+	.aliases(["repl"])
+	.description("Démarre le terminal interactif Azalée (mode REPL)")
+	.action(async () => {
+		console.clear();
+		console.log(`
+${colors.bold}${colors.magenta}🌸=======================================================🌸
+    Bienvenue dans le shell interactif AZALÉE CLI !
+    Version 1.0.0 (Bun Runtime)
+=======================================================🌸${colors.reset}
+Entrez une commande pour interagir avec le projet (ou 'help').
+Tapez '${colors.bold}exit${colors.reset}' ou '${colors.bold}quit${colors.reset}' pour quitter.
+`);
+
+		const { createInagleService } = require("../packages/inagle/src/service.ts");
+		const readline = require("node:readline");
+		const rl = readline.createInterface({
+			input: process.stdin,
+			output: process.stdout,
+			prompt: `${colors.bold}${colors.green}azalee 🌸 > ${colors.reset}`,
+		});
+
+		rl.prompt();
+
+		rl.on("line", async (line: string) => {
+			const input = line.trim();
+			if (!input) {
+				rl.prompt();
+				return;
+			}
+
+			const parts = input.split(/\s+/);
+			const cmd = parts[0].toLowerCase();
+			const args = parts.slice(1);
+
+			if (cmd === "exit" || cmd === "quit" || cmd === "q") {
+				console.log(`\nAu revoir ! 🌸`);
+				process.exit(0);
+			}
+
+			if (cmd === "help" || cmd === "h") {
+				console.log(`
+Commandes disponibles :
+  ${colors.bold}help${colors.reset}, ${colors.bold}h${colors.reset}          Affiche cette aide
+  ${colors.bold}chara${colors.reset} <query>     Détails d'un personnage (nom, stats, techniques)
+  ${colors.bold}search${colors.reset} <query>    Recherche globale d'entités (joueurs, items, techniques)
+  ${colors.bold}translate${colors.reset} <text>   Traduit du texte via glossaire consolidé
+  ${colors.bold}dialogue${colors.reset} <query>   Recherche dans les répliques et dialogues narratifs
+  ${colors.bold}skill${colors.reset} <query>      Détails d'une technique / compétence / passive
+  ${colors.bold}db${colors.reset} <sql>          Exécute une requête SQL PostgreSQL
+  ${colors.bold}status${colors.reset}            Diagnostic de santé système et services
+  ${colors.bold}audit${colors.reset}             Audit de cohérence de la base
+  ${colors.bold}exit${colors.reset}, ${colors.bold}quit${colors.reset}        Quitte le shell
+`);
+				rl.prompt();
+				return;
+			}
+
+			// Pause readline interface during async execution
+			rl.pause();
+
+			try {
+				if (cmd === "chara" || cmd === "c") {
+					if (args.length === 0) {
+						console.log(`${colors.red}Erreur: Spécifiez une recherche (ex: chara Mark).${colors.reset}`);
+					} else {
+						const queryStr = args.join(" ");
+						const svc = await createInagleService();
+						const chars = svc.characters.baseCharacters();
+						const matches = chars.filter((c: any) => {
+							const q = queryStr.toLowerCase().trim();
+							if (c.charaId.toLowerCase() === q || c.internalCode?.toLowerCase() === q) return true;
+							const nameFr = c.names?.fr?.toLowerCase() || "";
+							const nameEn = c.names?.en?.toLowerCase() || "";
+							const nameJa = c.names?.ja?.toLowerCase() || "";
+							const slug = c.slug?.toLowerCase() || "";
+							return nameFr.includes(q) || nameEn.includes(q) || nameJa.includes(q) || slug.includes(q);
+						});
+
+						if (matches.length === 0) {
+							console.log(`${colors.yellow}Aucun joueur trouvé pour : "${queryStr}"${colors.reset}`);
+						} else if (matches.length > 1) {
+							console.log(`${colors.yellow}Plusieurs joueurs correspondent :${colors.reset}`);
+							for (const m of matches) {
+								console.log(`  - ${colors.bold}${m.names.fr || m.names.en}${colors.reset} (ID: ${m.charaId} | Code: ${m.internalCode})`);
+							}
+						} else {
+							console.log(renderCharaProfile(matches[0], svc));
+						}
+					}
+				} else if (cmd === "search" || cmd === "s") {
+					if (args.length === 0) {
+						console.log(`${colors.red}Erreur: Spécifiez une requête.${colors.reset}`);
+					} else {
+						const svc = await createInagleService();
+						const results = svc.search.global(args.join(" "), { limit: 10 });
+						if (results.length === 0) {
+							console.log(`${colors.yellow}Aucun résultat trouvé.${colors.reset}`);
+						} else {
+							console.log(`\n${colors.bold}${colors.blue}Résultats de la recherche :${colors.reset}`);
+							console.log("─".repeat(80));
+							for (const r of results) {
+								const typeLabel = r.type.toUpperCase().padEnd(10);
+								const nameLabel = `${colors.bold}${r.name}${colors.reset}`.padEnd(45);
+								const idLabel = `${colors.yellow}(ID: ${r.id})${colors.reset}`;
+								console.log(`[${colors.green}${typeLabel}${colors.reset}] ${nameLabel} ${idLabel}`);
+							}
+							console.log("─".repeat(80));
+						}
+					}
+				} else if (cmd === "translate" || cmd === "t") {
+					if (args.length === 0) {
+						console.log(`${colors.red}Erreur: Entrez un texte à traduire.${colors.reset}`);
+					} else {
+						const text = args.join(" ");
+						const result = await translateTextHelper(text);
+						console.log(`\n${colors.bold}${colors.green}Traduction :${colors.reset}`);
+						console.log(result);
+					}
+				} else if (cmd === "dialogue" || cmd === "d") {
+					if (args.length === 0) {
+						console.log(`${colors.red}Erreur: Spécifiez un texte à chercher dans les dialogues.${colors.reset}`);
+					} else {
+						const q = args.join(" ");
+						const dbPath = "/home/ubuntu/data/all-gamedata/story_text_database.json";
+						if (!existsSync(dbPath)) {
+							console.error(`${colors.red}Erreur: Base de dialogues introuvable. Exécutez 'azalee sync --push' d'abord.${colors.reset}`);
+						} else {
+							const data = JSON.parse(readFileSync(dbPath, "utf-8"));
+							const events = data.events || [];
+							const matches: any[] = [];
+							const textQ = q.toLowerCase().trim();
+							
+							outerLoop:
+							for (const ev of events) {
+								for (const d of ev.dialogues) {
+									const textFr = d.text?.fr?.toLowerCase() || "";
+									const textEn = d.text?.en?.toLowerCase() || "";
+									const textJa = d.text?.ja?.toLowerCase() || "";
+									if (textFr.includes(textQ) || textEn.includes(textQ) || textJa.includes(textQ)) {
+										matches.push({
+											eventId: ev.eventId,
+											dialogueId: d.dialogueId,
+											speaker: d.speaker?.names?.fr || d.speaker?.names?.en || d.speaker?.names?.ja || d.speaker?.charaId,
+											text: d.text
+										});
+										if (matches.length >= 5) break outerLoop;
+									}
+								}
+							}
+							
+							if (matches.length === 0) {
+								console.log(`${colors.yellow}Aucun dialogue trouvé.${colors.reset}`);
+							} else {
+								for (const m of matches) {
+									console.log(`[${colors.bold}${colors.green}${m.speaker}${colors.reset}] (${m.eventId} | ${m.dialogueId})`);
+									if (m.text?.fr) console.log(`  FR: ${m.text.fr}`);
+									if (m.text?.en) console.log(`  EN: ${m.text.en}`);
+									console.log("─".repeat(80));
+								}
+							}
+						}
+					}
+				} else if (cmd === "skill" || cmd === "k") {
+					if (args.length === 0) {
+						console.log(`${colors.red}Erreur: Spécifiez une technique (ex: skill Tornado).${colors.reset}`);
+					} else {
+						const svc = await createInagleService();
+						const q = args.join(" ");
+						let s = svc.skills.get(q) || svc.skills.passiveGet(q) || svc.skills.auraGet(q);
+						
+						if (!s) {
+							const mainMatches = svc.skills.search(q, { limit: 5 });
+							const auraMatches = svc.skills.auraSearch(q).slice(0, 5);
+							const matches = [
+								...mainMatches.map((x: any) => ({ ...x, skillType: "main" as const })),
+								...auraMatches.map((x: any) => ({ ...x, skillType: "aura" as const, displayName: x.displayName || x.name_FR || x.name_EN }))
+							];
+							
+							if (matches.length === 0) {
+								console.log(`${colors.yellow}Aucune technique trouvée pour: "${q}"${colors.reset}`);
+							} else if (matches.length > 1) {
+								console.log(`${colors.yellow}Plusieurs techniques correspondent :${colors.reset}`);
+								for (const m of matches) {
+									console.log(`  - [${m.skillType.toUpperCase()}] ${m.displayName || m.name_FR} (ID: ${m.skillIDStr || m.auraId || m.passiveId})`);
+								}
+							} else {
+								s = matches[0] as any;
+							}
+						}
+						
+						if (s) {
+							const displayName = (s as any).displayName || (s as any).name_FR || (s as any).name_EN || "N/A";
+							const typeStr = ((s as any).skillType || "Technique").toUpperCase();
+							console.log(`┌──────────────────────────────────────────────────────────────────────────────┐`);
+							console.log(`│ [${colors.bold}${colors.green}${typeStr}${colors.reset}] ${colors.bold}${displayName.padEnd(50)}${colors.reset} │`);
+							
+							if ((s as any).desc_FR || (s as any).description_FR || (s as any).desc_EN) {
+								const desc = (s as any).desc_FR || (s as any).description_FR || (s as any).desc_EN;
+								console.log(`├──────────────────────────────────────────────────────────────────────────────┤`);
+								const words = desc.split(" ");
+								let currentLine = "│   ";
+								for (const word of words) {
+									if ((currentLine + word).length > 74) {
+										console.log(currentLine.padEnd(79) + "│");
+										currentLine = "│   " + word + " ";
+									} else {
+										currentLine += word + " ";
+									}
+								}
+								if (currentLine !== "│   ") {
+									console.log(currentLine.padEnd(79) + "│");
+								}
+							}
+							console.log(`└──────────────────────────────────────────────────────────────────────────────┘`);
+						}
+					}
+				} else if (cmd === "db") {
+					if (args.length === 0) {
+						console.log(`${colors.red}Erreur: Spécifiez une requête SQL.${colors.reset}`);
+					} else {
+						const sql = args.join(" ");
+						const dbUrl = process.env.DATABASE_URL;
+						if (!dbUrl) {
+							console.error(`${colors.red}Erreur: DATABASE_URL non définie.${colors.reset}`);
+						} else {
+							const pg = require("pg");
+							const client = new pg.Client({ connectionString: dbUrl });
+							await client.connect();
+							const res = await client.query(sql);
+							await client.end();
+							console.log(renderAsciiTable(res.rows));
+						}
+					}
+				} else if (cmd === "status") {
+					await runStatusDiagnosticInline();
+				} else if (cmd === "audit") {
+					const svc = await createInagleService();
+					const chars = svc.characters.all();
+					const skills = svc.skills.all();
+
+					const missingName = chars.filter((c: any) => !c.names?.fr && !c.names?.en);
+					const missingImg = chars.filter((c: any) => !c.image_url && !c.zukan_hash);
+					const missingStats = chars.filter((c: any) => !c.stats || Object.keys(c.stats).length === 0);
+					const missingSkillName = skills.filter((s: any) => !s.name_FR && !s.name_EN);
+
+					console.log(`\n${colors.bold}${colors.blue}Diagnostics Characters :${colors.reset}`);
+					console.log(`- Total Characters : ${chars.length}`);
+					console.log(`- Sans nom FR/EN   : ${missingName.length === 0 ? colors.green + "0 (Excellent)" : colors.red + missingName.length} ${colors.reset}`);
+					console.log(`- Sans image       : ${missingImg.length === 0 ? colors.green + "0 (Excellent)" : colors.yellow + missingImg.length} ${colors.reset}`);
+					console.log(`- Sans stats       : ${missingStats.length === 0 ? colors.green + "0 (Excellent)" : colors.red + missingStats.length} ${colors.reset}`);
+					console.log(`\n${colors.bold}${colors.blue}Diagnostics Skills/Techniques :${colors.reset}`);
+					console.log(`- Total Skills     : ${skills.length}`);
+					console.log(`- Sans nom FR/EN   : ${missingSkillName.length === 0 ? colors.green + "0 (Excellent)" : colors.red + missingSkillName.length} ${colors.reset}`);
+				} else {
+					console.log(`${colors.red}Commande inconnue: '${cmd}'. Tapez 'help' pour voir la liste.${colors.reset}`);
+				}
+			} catch (e: any) {
+				console.error(`${colors.red}Erreur d'exécution: ${e.message}${colors.reset}`);
+			}
+
+			// Resume reading stdin and prompt again
+			rl.resume();
+			rl.prompt();
+		});
+	});
+
 program.parse();
+
