@@ -17,6 +17,8 @@ import { cookies } from "next/headers";
 import { revalidatePath } from "next/cache";
 import { getProduct, getVariantPrice } from "./products";
 import type { Product } from "./products";
+import { getServerUser } from "@/lib/auth-helpers";
+import { cache as redisCache } from "@rose-griffon/db/redis";
 
 const COOKIE_NAME = "rg_cart";
 const COOKIE_MAX_AGE = 60 * 60 * 24 * 30; // 30 jours
@@ -45,7 +47,7 @@ function makeId(slug: string, variantId?: string): string {
 	return `${slug}::${variantId ?? "default"}`;
 }
 
-async function readCart(): Promise<CartItem[]> {
+async function readCookieCart(): Promise<CartItem[]> {
 	const store = await cookies();
 	const raw = store.get(COOKIE_NAME)?.value;
 	if (!raw) {
@@ -69,7 +71,7 @@ async function readCart(): Promise<CartItem[]> {
 	}
 }
 
-async function writeCart(items: CartItem[]): Promise<void> {
+async function writeCookieCart(items: CartItem[]): Promise<void> {
 	const store = await cookies();
 	if (items.length === 0) {
 		store.delete(COOKIE_NAME);
@@ -82,6 +84,56 @@ async function writeCart(items: CartItem[]): Promise<void> {
 		sameSite: "lax",
 		secure: process.env.NODE_ENV === "production",
 	});
+}
+
+async function readRedisCart(userId: string): Promise<CartItem[]> {
+	const key = `cart:${userId}`;
+	const items = await redisCache.get<CartItem[]>(key);
+	return items ?? [];
+}
+
+async function writeRedisCart(userId: string, items: CartItem[]): Promise<void> {
+	const key = `cart:${userId}`;
+	if (items.length === 0) {
+		await redisCache.del(key);
+	} else {
+		await redisCache.set(key, items, COOKIE_MAX_AGE);
+	}
+}
+
+async function readCart(): Promise<CartItem[]> {
+	const user = await getServerUser();
+	const cookieItems = await readCookieCart();
+
+	if (user) {
+		const redisItems = await readRedisCart(user.id);
+		if (cookieItems.length > 0) {
+			const merged = [...redisItems];
+			for (const cookieItem of cookieItems) {
+				const existing = merged.find((i) => i.id === cookieItem.id);
+				if (existing) {
+					existing.qty = Math.min(existing.qty + cookieItem.qty, 10);
+				} else {
+					merged.push(cookieItem);
+				}
+			}
+			await writeRedisCart(user.id, merged);
+			await writeCookieCart([]);
+			return merged;
+		}
+		return redisItems;
+	}
+
+	return cookieItems;
+}
+
+async function writeCart(items: CartItem[]): Promise<void> {
+	const user = await getServerUser();
+	if (user) {
+		await writeRedisCart(user.id, items);
+	} else {
+		await writeCookieCart(items);
+	}
 }
 
 function resolveCart(items: CartItem[]): CartSnapshot {
