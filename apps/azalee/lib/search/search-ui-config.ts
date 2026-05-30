@@ -22,6 +22,12 @@ export const TYPE_LABELS: Record<string, string> = {
 	soul: "Totem",
 	tactic: "Tactique",
 	team: "Équipe",
+	tweet: "Tweet X",
+	re: "IE RE (Remake)",
+	cross: "IE Cross",
+	level5: "Info LEVEL-5",
+	topic: "Info LEVEL-5",
+	doc: "Documentation",
 };
 
 /** Plural labels — used in group headings */
@@ -41,6 +47,12 @@ export const TYPE_LABELS_PLURAL: Record<string, string> = {
 	soul: "Totems",
 	tactic: "Tactiques",
 	team: "Équipes",
+	tweet: "Tweets X",
+	re: "Infos IE RE",
+	cross: "Infos IE Cross",
+	level5: "Infos LEVEL-5",
+	topic: "Infos LEVEL-5",
+	doc: "Documentations",
 };
 
 /** Language badge colors (Material Design 3 tokens) */

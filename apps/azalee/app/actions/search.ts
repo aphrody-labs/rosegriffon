@@ -32,6 +32,12 @@ const TYPE_CONFIG: Record<string, { label: string; icon: string; urlPrefix: stri
 	skill: { icon: "sports_soccer", label: "Technique", urlPrefix: "/skill" },
 	soul: { icon: "auto_awesome", label: "Totem", urlPrefix: "/aura/totems" },
 	tactic: { icon: "schema", label: "Tactique", urlPrefix: "/tactic" },
+	tweet: { icon: "forum", label: "Tweet X", urlPrefix: "#" },
+	re: { icon: "auto_fix_high", label: "IE RE (Remake)", urlPrefix: "#" },
+	cross: { icon: "compare_arrows", label: "IE Cross", urlPrefix: "#" },
+	level5: { icon: "menu_book", label: "Info LEVEL-5", urlPrefix: "#" },
+	topic: { icon: "feed", label: "Info LEVEL-5", urlPrefix: "#" },
+	doc: { icon: "description", label: "Documentation", urlPrefix: "#" },
 };
 
 /** Enhanced search result for frontend */
@@ -99,8 +105,19 @@ export async function searchGlobal(
 		.order("stat_frappe", { ascending: false, nullsFirst: false })
 		.limit(15);
 
+	const getRagPromise = async () => {
+		try {
+			const { getEmbedding, vectorStore } = require("@rose-griffon/db/redis");
+			const questionEmbedding = await getEmbedding(sanitized);
+			return await vectorStore.search("inazuma-news", questionEmbedding, 10, sanitized);
+		} catch (e) {
+			console.warn("RAG search failed or Redis not configured:", e);
+			return [];
+		}
+	};
+
 	// Parallel search across ALL tables
-	const [chars, skills, items, ...auraResults] = await Promise.all([
+	const [chars, skills, items, ragDocs, ...auraResults] = await Promise.all([
 		// Characters: include enrichment fields for scoring & display
 		charQuery,
 		// Skills: include image/video fields
@@ -118,6 +135,8 @@ export async function searchGlobal(
 			.select("id, name_fr, name_en, name_ja, image_url, category, price, sheet_data")
 			.or(orFilter)
 			.limit(10),
+		// RAG documents
+		getRagPromise(),
 		// All aura tables
 		...AURA_TABLES.map(({ table }) =>
 			(supabase as any)
@@ -312,6 +331,27 @@ export async function searchGlobal(
 		});
 	}
 
+	// RAG documents
+	if (ragDocs && Array.isArray(ragDocs)) {
+		ragDocs.forEach((r: any) => {
+			const doc = r.document;
+			const type = doc.metadata.type || "article";
+			const title = doc.metadata.title || doc.text.substring(0, 50);
+			rawResults.push({
+				data: {
+					...doc.metadata,
+					id: doc.id,
+					text: doc.text,
+					url: doc.metadata.url,
+				},
+				id: doc.id,
+				name: title,
+				score: r.score * 1.5, // Match normal score range
+				type: type as any,
+			});
+		});
+	}
+
 	// Apply smart search enhancements
 	const smartResults = await smartSearch(query, rawResults, {
 		context: context || "global",
@@ -342,7 +382,9 @@ export async function searchGlobal(
 		const d = (r.data || {}) as Record<string, any>;
 
 		let url: string;
-		if (config.urlPrefix !== "#") {
+		if (d.url) {
+			url = d.url;
+		} else if (config.urlPrefix !== "#") {
 			url = `${config.urlPrefix}/${r.id}`;
 		} else {
 			url = "#";

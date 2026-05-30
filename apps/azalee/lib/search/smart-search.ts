@@ -26,7 +26,13 @@ export type SearchableType =
 	| "team"
 	| "article"
 	| "patchnote"
-	| "passive";
+	| "passive"
+	| "tweet"
+	| "re"
+	| "cross"
+	| "level5"
+	| "topic"
+	| "doc";
 
 export interface GlobalSearchResult {
 	id: string;
@@ -154,11 +160,17 @@ const CONTEXT_PRIORITY: Record<SearchContext, SearchableType[]> = {
 		"team",
 		"article",
 		"patchnote",
+		"tweet",
+		"re",
+		"cross",
+		"level5",
+		"topic",
+		"doc",
 	],
 	item: ["item", "tactic"],
-	news: ["article", "patchnote"],
+	news: ["article", "patchnote", "tweet", "level5", "topic"],
 	passive: ["passive"],
-	patchnotes: ["patchnote", "article"],
+	patchnotes: ["patchnote", "article", "tweet", "topic"],
 	skill: ["skill"],
 	tactic: ["tactic", "item"],
 	team: ["team", "character", "basara"],
