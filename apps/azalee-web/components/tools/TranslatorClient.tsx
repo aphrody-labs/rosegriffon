@@ -1,12 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { searchTranslations } from "@/app/actions/translate";
 import type { TranslationResult } from "@/app/actions/translate";
 import { Icon } from "@/components/ui/Icon";
 import { Skeleton } from "@rose-griffon/ui";
 import { cn } from "@/lib/utils";
+import { RagAssistant } from "@/components/wiki/RagAssistant";
 
 const ENTITY_TYPES = [
 	{ label: "Tous", value: undefined },
@@ -100,6 +101,19 @@ export function TranslatorClient() {
 	};
 
 	const active = selectedResult;
+
+	const ragSuggestions = useMemo(() => {
+		const list: string[] = [];
+		if (active) {
+			if (active.name_fr) list.push(active.name_fr);
+			if (active.name_en) list.push(active.name_en);
+			if (active.name_ja) list.push(active.name_ja);
+		} else if (query.trim().length >= 2) {
+			list.push(query);
+		}
+		list.push("Esprits Guerriers", "Victory Road", "Chroniques");
+		return Array.from(new Set(list)).slice(0, 5);
+	}, [active, query]);
 
 	return (
 		<div className="w-full space-y-4 sm:space-y-5">
@@ -375,6 +389,13 @@ export function TranslatorClient() {
 					</div>
 				</div>
 			)}
+
+			{/* RAG Tactical Assistant */}
+			<RagAssistant
+				initialQuery={active ? active.name_fr || active.name_en || "" : ""}
+				suggestions={ragSuggestions}
+				className="mt-6"
+			/>
 		</div>
 	);
 }

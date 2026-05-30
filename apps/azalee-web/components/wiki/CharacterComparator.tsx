@@ -9,6 +9,7 @@ import { Icon } from "@/components/ui/Icon";
 import { RarityBadge } from "@/components/ui/rarity-badge";
 import { CharacterSearchDialog } from "@/components/wiki/CharacterSearchDialog";
 import { StatHeptagon } from "@/components/wiki/StatHeptagon";
+import { RagAssistant } from "@/components/wiki/RagAssistant";
 import type { SpriteCommonKey } from "@/config/sprites-common";
 import {
 	getCharacterImageUrl,
@@ -644,6 +645,26 @@ export function CharacterComparator({ char1, char2 }: CharacterComparatorProps) 
 	const currentStats1 = useMemo(() => interpolateStats(char1, level), [char1, level]);
 	const currentStats2 = useMemo(() => interpolateStats(char2, level), [char2, level]);
 
+	const ragSuggestions = useMemo(() => {
+		const list: string[] = [];
+		if (char1) {
+			list.push(char1.name);
+			list.push(`Techniques de ${char1.name}`);
+		}
+		if (char2) {
+			list.push(char2.name);
+			list.push(`Techniques de ${char2.name}`);
+		}
+		if (char1 && char2) {
+			list.push(`${char1.name} vs ${char2.name}`);
+		}
+		if (list.length < 4) {
+			list.push("Meilleurs joueurs");
+			list.push("Stats des éléments");
+		}
+		return list.slice(0, 5);
+	}, [char1, char2]);
+
 	return (
 		<div className="w-full space-y-5 sm:space-y-8">
 			{/* Header */}
@@ -793,6 +814,12 @@ export function CharacterComparator({ char1, char2 }: CharacterComparatorProps) 
 					</div>
 				</div>
 			)}
+
+			{/* RAG Tactical Assistant */}
+			<RagAssistant
+				suggestions={ragSuggestions}
+				className="mt-6"
+			/>
 
 			{/* Search dialog */}
 			<CharacterSearchDialog
