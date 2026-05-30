@@ -530,6 +530,32 @@ export default async function PlayerDetailPage({ params }: { params: Promise<{ i
 							}
 						: undefined
 				}
+				statsLv30={
+					player.stats.lv30
+						? {
+								agility: player.stats.lv30.agility,
+								control: player.stats.lv30.control,
+								intelligence: player.stats.lv30.intelligence || 0,
+								kick: player.stats.lv30.kick,
+								physical: player.stats.lv30.physical,
+								pressure: player.stats.lv30.pressure,
+								technique: player.stats.lv30.technique,
+							}
+						: undefined
+				}
+				statsLv50={
+					player.stats.lv50
+						? {
+								agility: player.stats.lv50.agility,
+								control: player.stats.lv50.control,
+								intelligence: player.stats.lv50.intelligence || 0,
+								kick: player.stats.lv50.kick,
+								physical: player.stats.lv50.physical,
+								pressure: player.stats.lv50.pressure,
+								technique: player.stats.lv50.technique,
+							}
+						: undefined
+				}
 			/>
 
 			{/* Info Panel — Series, Apparitions */}

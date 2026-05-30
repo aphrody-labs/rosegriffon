@@ -52,6 +52,9 @@ export interface CompareCharacter {
 	rarity: string;
 	teamName?: string;
 	stats: CharacterStats;
+	statsLv1?: CharacterStats;
+	statsLv30?: CharacterStats;
+	statsLv50?: CharacterStats;
 	skills: SkillInfo[];
 }
 
@@ -121,12 +124,18 @@ function resolveImageUrl(char: CompareCharacter): string {
 	return getCharacterImageUrl(char.internalCode) || "/ievr.webp";
 }
 
-// ---------- Compare Card (compact, zukan image + element gradient) ----------
-
-function CompareCard({ char, onClick }: { char: CompareCharacter; onClick: () => void }) {
+function CompareCard({
+	char,
+	currentStats,
+	onClick,
+}: {
+	char: CompareCharacter;
+	currentStats: CharacterStats;
+	onClick: () => void;
+}) {
 	const imageUrl = resolveImageUrl(char);
 	const elSprite = ELEMENT_SPRITE[char.element];
-	const total = totalStats(char.stats);
+	const total = totalStats(currentStats);
 	const gradient = ELEMENT_GRADIENTS[char.element] || ELEMENT_GRADIENTS.Void;
 
 	return (
@@ -509,11 +518,77 @@ function SkillsComparison({
 
 // ---------- Main component ----------
 
+function interpolateStats(char: CompareCharacter | null | undefined, level: number): CharacterStats {
+	const defaultStats = {
+		kick: 0,
+		control: 0,
+		technique: 0,
+		pressure: 0,
+		physical: 0,
+		agility: 0,
+		intelligence: 0,
+	};
+	if (!char) {
+		return defaultStats;
+	}
+	const stats = char.stats;
+	const statsLv1 = char.statsLv1;
+	const statsLv30 = char.statsLv30;
+	const statsLv50 = char.statsLv50;
+
+	if (level === 99) return stats;
+	if (level === 1 && statsLv1) return statsLv1;
+
+	const hasCompleteData = statsLv1 && statsLv30 && statsLv50;
+	if (!hasCompleteData) {
+		const startStats = statsLv1 || stats;
+		const endStats = stats;
+		const t = (level - 1) / 98;
+		const lerp = (start: number, end: number) => Math.floor(start + (end - start) * t);
+		
+		return {
+			kick: lerp(startStats.kick, endStats.kick),
+			control: lerp(startStats.control, endStats.control),
+			technique: lerp(startStats.technique, endStats.technique),
+			pressure: lerp(startStats.pressure, endStats.pressure),
+			physical: lerp(startStats.physical, endStats.physical),
+			agility: lerp(startStats.agility, endStats.agility),
+			intelligence: lerp(startStats.intelligence, endStats.intelligence),
+		};
+	}
+
+	const getInterpolatedStat = (key: keyof CharacterStats) => {
+		const s1 = statsLv1[key];
+		const s30 = statsLv30[key];
+		const s50 = statsLv50[key];
+		const s99 = stats[key];
+
+		if (level <= 30) {
+			return Math.floor(s1 + (s30 - s1) * ((level - 1) / 29));
+		}
+		if (level <= 50) {
+			return Math.floor(s30 + (s50 - s30) * ((level - 30) / 20));
+		}
+		return Math.floor(s50 + (s99 - s50) * ((level - 50) / 49));
+	};
+
+	return {
+		kick: getInterpolatedStat("kick"),
+		control: getInterpolatedStat("control"),
+		technique: getInterpolatedStat("technique"),
+		pressure: getInterpolatedStat("pressure"),
+		physical: getInterpolatedStat("physical"),
+		agility: getInterpolatedStat("agility"),
+		intelligence: getInterpolatedStat("intelligence"),
+	};
+}
+
 export function CharacterComparator({ char1, char2 }: CharacterComparatorProps) {
 	const router = useRouter();
 	const [searchOpen, setSearchOpen] = useState(false);
 	const [searchTarget, setSearchTarget] = useState<1 | 2>(1);
 	const [copied, setCopied] = useState(false);
+	const [level, setLevel] = useState<number>(99);
 
 	const openSearch = (target: 1 | 2) => {
 		setSearchTarget(target);
@@ -566,6 +641,9 @@ export function CharacterComparator({ char1, char2 }: CharacterComparatorProps) 
 	const bothSelected = char1 && char2;
 	const anySelected = char1 || char2;
 
+	const currentStats1 = useMemo(() => interpolateStats(char1, level), [char1, level]);
+	const currentStats2 = useMemo(() => interpolateStats(char2, level), [char2, level]);
+
 	return (
 		<div className="w-full space-y-5 sm:space-y-8">
 			{/* Header */}
@@ -609,7 +687,7 @@ export function CharacterComparator({ char1, char2 }: CharacterComparatorProps) 
 			<div className="relative grid grid-cols-2 gap-3 sm:gap-6">
 				<div className="transition-all duration-300">
 					{char1 ? (
-						<CompareCard char={char1} onClick={() => openSearch(1)} />
+						<CompareCard char={char1} currentStats={currentStats1} onClick={() => openSearch(1)} />
 					) : (
 						<EmptySlot side={1} onChoose={() => openSearch(1)} />
 					)}
@@ -630,7 +708,7 @@ export function CharacterComparator({ char1, char2 }: CharacterComparatorProps) 
 
 				<div className="transition-all duration-300">
 					{char2 ? (
-						<CompareCard char={char2} onClick={() => openSearch(2)} />
+						<CompareCard char={char2} currentStats={currentStats2} onClick={() => openSearch(2)} />
 					) : (
 						<EmptySlot side={2} onChoose={() => openSearch(2)} />
 					)}
@@ -640,6 +718,37 @@ export function CharacterComparator({ char1, char2 }: CharacterComparatorProps) 
 			{/* Comparison sections */}
 			{bothSelected && (
 				<div className="space-y-5 sm:space-y-8 animate-in fade-in slide-in-from-bottom-3 duration-500">
+					{/* Level Slider */}
+					<div className="bg-surface-container rounded-xl elevation-1 p-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
+						<div className="space-y-1">
+							<h3 className="type-title-small text-on-surface font-bold">Ajuster le niveau</h3>
+							<p className="text-xs text-on-surface-variant/70">
+								Modifiez le niveau pour comparer les statistiques interpolées en temps réel
+							</p>
+						</div>
+						<div className="flex-1 max-w-md w-full space-y-2">
+							<div className="flex items-center justify-between text-xs font-bold uppercase tracking-wider text-on-surface-variant">
+								<span>Niveau</span>
+								<span className="text-sm font-black text-primary bg-primary/10 px-2.5 py-0.5 rounded-md">
+									Niv. {level}
+								</span>
+							</div>
+							<input
+								type="range"
+								min="1"
+								max="99"
+								value={level}
+								onChange={(e) => setLevel(Number(e.target.value))}
+								className="w-full h-1.5 bg-surface-container-highest rounded-lg appearance-none cursor-pointer accent-primary focus:outline-hidden"
+							/>
+							<div className="flex justify-between text-[10px] text-on-surface-variant/50 font-bold">
+								<span>NIV. 1</span>
+								<span>NIV. 50</span>
+								<span>NIV. 99</span>
+							</div>
+						</div>
+					</div>
+
 					{/* Radar charts */}
 					<div className="bg-surface-container rounded-xl elevation-1 p-3 sm:p-6">
 						<h3 className="type-title-small text-on-surface mb-3 sm:mb-4">Radar des stats</h3>
@@ -658,16 +767,16 @@ export function CharacterComparator({ char1, char2 }: CharacterComparatorProps) 
 							</div>
 						</div>
 						<div className="grid grid-cols-2 gap-2 sm:gap-4 justify-items-center">
-							<StatHeptagon stats={char1.stats} size={160} />
-							<StatHeptagon stats={char2.stats} size={160} />
+							<StatHeptagon stats={currentStats1} size={160} />
+							<StatHeptagon stats={currentStats2} size={160} />
 						</div>
 					</div>
 
 					{/* Stat bars */}
 					<div className="bg-surface-container rounded-xl elevation-1 p-3 sm:p-6">
 						<StatComparisonBars
-							stats1={char1.stats}
-							stats2={char2.stats}
+							stats1={currentStats1}
+							stats2={currentStats2}
 							name1={char1.name}
 							name2={char2.name}
 						/>

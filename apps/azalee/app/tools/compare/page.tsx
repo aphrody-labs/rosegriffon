@@ -180,6 +180,39 @@ async function resolveCharacter(idOrSlug: string | undefined): Promise<CompareCh
 			pressure: stats.pressure || 0,
 			technique: stats.technique || 0,
 		},
+		statsLv1: variant.stats?.lv1
+			? {
+					agility: variant.stats.lv1.agility || 0,
+					control: variant.stats.lv1.control || 0,
+					intelligence: variant.stats.lv1.intelligence || 0,
+					kick: variant.stats.lv1.kick || 0,
+					physical: variant.stats.lv1.physical || 0,
+					pressure: variant.stats.lv1.pressure || 0,
+					technique: variant.stats.lv1.technique || 0,
+				}
+			: undefined,
+		statsLv30: variant.stats?.lv30
+			? {
+					agility: variant.stats.lv30.agility || 0,
+					control: variant.stats.lv30.control || 0,
+					intelligence: variant.stats.lv30.intelligence || 0,
+					kick: variant.stats.lv30.kick || 0,
+					physical: variant.stats.lv30.physical || 0,
+					pressure: variant.stats.lv30.pressure || 0,
+					technique: variant.stats.lv30.technique || 0,
+				}
+			: undefined,
+		statsLv50: variant.stats?.lv50
+			? {
+					agility: variant.stats.lv50.agility || 0,
+					control: variant.stats.lv50.control || 0,
+					intelligence: variant.stats.lv50.intelligence || 0,
+					kick: variant.stats.lv50.kick || 0,
+					physical: variant.stats.lv50.physical || 0,
+					pressure: variant.stats.lv50.pressure || 0,
+					technique: variant.stats.lv50.technique || 0,
+				}
+			: undefined,
 		teamName: (baseChar as any).teamName || undefined,
 		zukanHash: baseChar.zukanHash || variant.zukanHash || undefined,
 	};

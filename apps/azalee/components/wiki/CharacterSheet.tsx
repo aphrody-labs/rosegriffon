@@ -14,7 +14,7 @@ import {
 } from "lucide-react";
 import NextImage from "next/image";
 import NextLink from "next/link";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useLanguage } from "@/components/providers/language-provider";
 import { CommonSpriteIcon } from "@/components/ui/CommonSpriteIcon";
 import { RarityBadge } from "@/components/ui/rarity-badge";
@@ -248,6 +248,8 @@ export interface CharacterSheetProps {
 	currentHeroType?: string;
 	isControllable?: boolean;
 	statsLv1?: CharacterSheetStats;
+	statsLv30?: CharacterSheetStats;
+	statsLv50?: CharacterSheetStats;
 }
 
 export function CharacterSheet({
@@ -281,12 +283,65 @@ export function CharacterSheet({
 	currentHeroType,
 	isControllable,
 	statsLv1,
+	statsLv30,
+	statsLv50,
 }: CharacterSheetProps) {
 	const displayPosition = POSITION_MAP[position] || "MIL";
 	const { t: _t } = useLanguage();
 	const [activeMoveset, setActiveMoveset] = useState<"default" | "alt">("default");
 	const [uniformSide, setUniformSide] = useState<"front" | "back">("front");
 	const [uniformError, setUniformError] = useState(false);
+	const [level, setLevel] = useState<number>(99);
+
+	// Dynamic stats interpolation
+	const currentStats = useMemo(() => {
+		if (level === 99) return stats;
+		if (level === 1 && statsLv1) return statsLv1;
+
+		const hasCompleteData = statsLv1 && statsLv30 && statsLv50;
+		if (!hasCompleteData) {
+			const startStats = statsLv1 || stats;
+			const endStats = stats;
+			const t = (level - 1) / 98;
+			const lerp = (start: number, end: number) => Math.floor(start + (end - start) * t);
+			
+			return {
+				kick: lerp(startStats.kick, endStats.kick),
+				control: lerp(startStats.control, endStats.control),
+				technique: lerp(startStats.technique, endStats.technique),
+				pressure: lerp(startStats.pressure, endStats.pressure),
+				physical: lerp(startStats.physical, endStats.physical),
+				agility: lerp(startStats.agility, endStats.agility),
+				intelligence: lerp(startStats.intelligence, endStats.intelligence),
+			};
+		}
+
+		// 3-segment interpolation matching official game design
+		const getInterpolatedStat = (key: keyof CharacterSheetStats) => {
+			const s1 = statsLv1[key];
+			const s30 = statsLv30[key];
+			const s50 = statsLv50[key];
+			const s99 = stats[key];
+
+			if (level <= 30) {
+				return Math.floor(s1 + (s30 - s1) * ((level - 1) / 29));
+			}
+			if (level <= 50) {
+				return Math.floor(s30 + (s50 - s30) * ((level - 30) / 20));
+			}
+			return Math.floor(s50 + (s99 - s50) * ((level - 50) / 49));
+		};
+
+		return {
+			kick: getInterpolatedStat("kick"),
+			control: getInterpolatedStat("control"),
+			technique: getInterpolatedStat("technique"),
+			pressure: getInterpolatedStat("pressure"),
+			physical: getInterpolatedStat("physical"),
+			agility: getInterpolatedStat("agility"),
+			intelligence: getInterpolatedStat("intelligence"),
+		};
+	}, [level, stats, statsLv1, statsLv30, statsLv50]);
 
 	// IEVR : toujours 6 techniques par moveset
 	const isHero = rarity === "Héros";
@@ -333,13 +388,13 @@ export function CharacterSheet({
 
 	// Total stats
 	const totalStats =
-		stats.kick +
-		stats.control +
-		stats.technique +
-		stats.pressure +
-		stats.physical +
-		stats.agility +
-		(stats.intelligence || 0);
+		currentStats.kick +
+		currentStats.control +
+		currentStats.technique +
+		currentStats.pressure +
+		currentStats.physical +
+		currentStats.agility +
+		(currentStats.intelligence || 0);
 
 	return (
 		<div className={cn("w-full max-w-7xl mx-auto space-y-6", className)}>
@@ -622,38 +677,74 @@ export function CharacterSheet({
 							</span>
 						</div>
 					</div>
-					<div className="p-3 sm:p-6 flex flex-col items-center">
-						<StatHeptagon stats={stats} size={280} showLabels />
-						{/* Stats lv1 comparison */}
+					<div className="p-4 sm:p-6 flex flex-col items-center w-full">
+						{/* Heptagone SVG (dynamique) */}
+						<StatHeptagon stats={currentStats} size={280} showLabels />
+
+						{/* Niveau Slider */}
 						{statsLv1 && (
-							<div className="mt-4 w-full max-w-xs">
-								<p className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant/50 text-center mb-2">
-									Stats Niv. 1
-								</p>
-								<div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
-									{(
-										[
-											["Frappe", statsLv1.kick, stats.kick],
-											["Controle", statsLv1.control, stats.control],
-											["Technique", statsLv1.technique, stats.technique],
-											["Pression", statsLv1.pressure, stats.pressure],
-											["Physique", statsLv1.physical, stats.physical],
-											["Agilite", statsLv1.agility, stats.agility],
-											["Intel.", statsLv1.intelligence, stats.intelligence],
-										] as Array<[string, number, number]>
-									).map(([label, lv1, lv99]) => (
-										<div key={label} className="flex justify-between text-on-surface-variant/70">
-											<span className="font-medium">{label}</span>
-											<span className="tabular-nums">
-												<span className="text-on-surface-variant/40">{lv1}</span>
-												<span className="mx-0.5 text-on-surface-variant/20">/</span>
-												<span className="font-bold text-on-surface">{lv99}</span>
-											</span>
-										</div>
-									))}
+							<div className="w-full max-w-xs px-2 mt-4 mb-6 space-y-2">
+								<div className="flex items-center justify-between text-xs font-bold uppercase tracking-wider text-on-surface-variant">
+									<span>Niveau</span>
+									<span className="text-sm font-black text-primary bg-primary/10 px-2.5 py-0.5 rounded-md">
+										Niv. {level}
+									</span>
+								</div>
+								<input
+									type="range"
+									min="1"
+									max="99"
+									value={level}
+									onChange={(e) => setLevel(Number(e.target.value))}
+									className="w-full h-1.5 bg-surface-container-highest rounded-lg appearance-none cursor-pointer accent-primary focus:outline-hidden"
+								/>
+								<div className="flex justify-between text-[10px] text-on-surface-variant/50 font-bold">
+									<span>NIV. 1</span>
+									<span>NIV. 50</span>
+									<span>NIV. 99</span>
 								</div>
 							</div>
 						)}
+
+						{/* Stats Detail with Progressive Progress Bars */}
+						<div className="w-full max-w-xs space-y-3 mt-2">
+							{(
+								[
+									["Frappe", currentStats.kick, statsLv1?.kick, stats.kick],
+									["Contrôle", currentStats.control, statsLv1?.control, stats.control],
+									["Technique", currentStats.technique, statsLv1?.technique, stats.technique],
+									["Pression", currentStats.pressure, statsLv1?.pressure, stats.pressure],
+									["Physique", currentStats.physical, statsLv1?.physical, stats.physical],
+									["Agilité", currentStats.agility, statsLv1?.agility, stats.agility],
+									["Intelligence", currentStats.intelligence, statsLv1?.intelligence, stats.intelligence],
+								] as Array<[string, number, number | undefined, number]>
+							).map(([label, current, lv1, lv99]) => {
+								const percentage = Math.min(100, Math.max(0, (current / 999) * 100));
+								return (
+									<div key={label} className="space-y-1">
+										<div className="flex justify-between text-xs">
+											<span className="font-bold text-on-surface-variant">{label}</span>
+											<div className="flex items-center gap-1.5">
+												<span className="font-black text-primary text-sm tabular-nums">
+													{current}
+												</span>
+												{lv1 !== undefined && (
+													<span className="text-[10px] text-on-surface-variant/40 tabular-nums">
+														({lv1} → {lv99})
+													</span>
+												)}
+											</div>
+										</div>
+										<div className="h-1.5 w-full bg-surface-container-high rounded-full overflow-hidden">
+											<div
+												className="h-full bg-linear-to-r from-amber-500 to-primary rounded-full transition-all duration-150"
+												style={{ width: `${percentage}%` }}
+											/>
+										</div>
+									</div>
+								);
+							})}
+						</div>
 					</div>
 				</section>
 
