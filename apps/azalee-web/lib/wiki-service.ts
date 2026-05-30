@@ -1706,6 +1706,28 @@ export const wikiService = {
 				}
 			: undefined;
 
+		const jsonStatsLv30 = (char.stats as any)?.lv30 || {};
+		const statsLv30 = {
+			kick: jsonStatsLv30.kick || 0,
+			control: jsonStatsLv30.control || 0,
+			technique: jsonStatsLv30.technique || 0,
+			pressure: jsonStatsLv30.pressure || 0,
+			physical: jsonStatsLv30.physical || 0,
+			agility: jsonStatsLv30.agility || 0,
+			intelligence: jsonStatsLv30.intelligence || 0,
+		};
+
+		const jsonStatsLv50 = (char.stats as any)?.lv50 || {};
+		const statsLv50 = {
+			kick: jsonStatsLv50.kick || 0,
+			control: jsonStatsLv50.control || 0,
+			technique: jsonStatsLv50.technique || 0,
+			pressure: jsonStatsLv50.pressure || 0,
+			physical: jsonStatsLv50.physical || 0,
+			agility: jsonStatsLv50.agility || 0,
+			intelligence: jsonStatsLv50.intelligence || 0,
+		};
+
 		const variant = {
 			charaParamId: char.id,
 			position: char.position || "MF",
@@ -1715,7 +1737,7 @@ export const wikiService = {
 			elementRaw: 0,
 			rarity: char.rarity_label || "Normal",
 			rarityCode,
-			stats: { lv99: statsLv99, lv1: statsLv1 },
+			stats: { lv99: statsLv99, lv1: statsLv1, lv30: statsLv30, lv50: statsLv50 },
 			skills: skills,
 			image: imageUrl,
 			sheetData: char.sheet_data,

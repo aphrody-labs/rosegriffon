@@ -49,6 +49,8 @@ interface CharacterSheetWithLevelProps {
 	currentHeroType?: string;
 	isControllable?: boolean;
 	statsLv1?: CharacterSheetStats;
+	statsLv30?: CharacterSheetStats;
+	statsLv50?: CharacterSheetStats;
 }
 
 /**
@@ -88,6 +90,8 @@ export function CharacterSheetWithLevel({
 	currentHeroType,
 	isControllable,
 	statsLv1,
+	statsLv30,
+	statsLv50,
 }: CharacterSheetWithLevelProps) {
 	const { getLocalized, language } = useLanguage();
 
@@ -137,6 +141,8 @@ export function CharacterSheetWithLevel({
 				currentHeroType={currentHeroType}
 				isControllable={isControllable}
 				statsLv1={statsLv1}
+				statsLv30={statsLv30}
+				statsLv50={statsLv50}
 			/>
 		</div>
 	);
