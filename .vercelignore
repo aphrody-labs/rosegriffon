@@ -7,4 +7,8 @@ dist
 build
 .gemini
 scratch
+bin
 apps/bot
+*.sqlite
+data/backups
+**/data/backups

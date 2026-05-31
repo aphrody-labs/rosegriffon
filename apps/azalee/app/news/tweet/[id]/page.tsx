@@ -32,7 +32,8 @@ export async function generateMetadata({
 		.from("tweets")
 		.select("text, translation, author_username, author_name, media")
 		.eq("id", id)
-		.single();
+		.eq("author_username", "Azalee_IE")
+		.maybeSingle();
 
 	const { title } = extractTitleAndBody(tweet?.translation || tweet?.text || "");
 	const description = title.slice(0, 160);
@@ -57,7 +58,12 @@ export async function generateMetadata({
 export default async function TweetPage({ params }: { params: Promise<{ id: string }> }) {
 	const { id } = await params;
 	const supabase = await createClient();
-	const { data: tweet } = await (supabase as any).from("tweets").select("*").eq("id", id).single();
+	const { data: tweet } = await (supabase as any)
+		.from("tweets")
+		.select("*")
+		.eq("id", id)
+		.eq("author_username", "Azalee_IE")
+		.maybeSingle();
 
 	if (!tweet) {
 		notFound();
