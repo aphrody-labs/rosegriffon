@@ -3,7 +3,12 @@
 	"compilerOptions": {
 		"outDir": "dist",
 		"noEmit": true,
-		"declaration": false
+		"declaration": false,
+		"baseUrl": ".",
+		"paths": {
+			"@rose-griffon/db": ["../db/src/index.ts"],
+			"@rose-griffon/db/*": ["../db/src/*"]
+		}
 	},
 	"include": ["src/**/*.ts"],
 	"exclude": ["node_modules", "dist"]

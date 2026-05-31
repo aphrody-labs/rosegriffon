@@ -4,7 +4,7 @@
 	"private": true,
 	"scripts": {
 		"dev": "bun run --bun next dev",
-		"build": "node --no-deprecation ../../node_modules/next/dist/bin/next build",
+		"build": "NODE_OPTIONS='--no-deprecation' next build",
 		"start": "bun run --bun next start",
 		"lint": "oxlint .",
 		"lint:fix": "oxlint --fix .",
@@ -68,6 +68,7 @@
 		"@vercel/speed-insights": "^2.0.0",
 		"bcryptjs": "^3.0.3",
 		"better-auth": "catalog:",
+		"kysely": "0.28.2",
 		"cheerio": "^1.1.2",
 		"class-variance-authority": "catalog:",
 		"clsx": "catalog:",
@@ -130,6 +131,9 @@
 		"turbo": "^2.9.14",
 		"typescript": "catalog:",
 		"vitest": "catalog:"
+	},
+	"overrides": {
+		"kysely": "0.28.2"
 	},
 	"browserslist": [
 		"defaults and supports es6-module"

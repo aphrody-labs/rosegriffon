@@ -49,6 +49,7 @@ test.describe("Visual Regression - Static Pages", () => {
 		{ name: "tools-translator", path: "/tools/translator" },
 		{ name: "tools-random-team", path: "/tools/random-team" },
 		{ name: "tools-compare", path: "/tools/compare" },
+		{ name: "tools-my-team", path: "/tools/my-team" },
 		{ name: "tactic-list", path: "/tactic" },
 		{ name: "chara-list", path: "/chara" },
 		{ name: "charte", path: "/charte" },

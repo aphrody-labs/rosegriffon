@@ -10,6 +10,8 @@ import type { MovesetSkill } from "@/components/wiki/MovesetList";
 import { AuraCard } from "@/components/wiki/AuraCard";
 import { formatDescription, formatJapaneseName } from "@/lib/format-description";
 import { wikiService } from "@/lib/wiki-service";
+import { compareVariants } from "@rose-griffon/inagle";
+import { CharaVariantsComparison } from "@/components/wiki/CharaVariantsComparison";
 
 export async function generateStaticParams() {
 	try {
@@ -153,6 +155,29 @@ export default async function PlayerDetailPage({ params }: { params: Promise<{ i
 	const sheetId = (player as any).sheetData?.sheetId;
 	const forms = await wikiService.getCharacterForms(baseChar.charaId, sheetId);
 	const auras = await wikiService.getCharacterAuras(baseChar.charaId, variant.charaParamId);
+
+	// Build a map of skillId -> skillName for variant comparisons
+	const variantSkillIds = new Set<string>();
+	for (const v of baseChar.variants) {
+		for (const sk of v.skills || []) {
+			if (sk.skillId) variantSkillIds.add(sk.skillId);
+		}
+	}
+	const skillPromises = Array.from(variantSkillIds).map(async (skillId) => {
+		const sk = await wikiService.getSkill(skillId);
+		return { id: skillId, name: sk?.displayName || sk?.name_FR || sk?.name_EN || skillId };
+	});
+	const resolvedSkillsList = await Promise.all(skillPromises);
+	const skillsMap = new Map<string, string>();
+	for (const s of resolvedSkillsList) {
+		skillsMap.set(s.id, s.name);
+	}
+
+	// Calculate comparisons against the youngest base variant
+	const baseVariant = baseChar.variants[0];
+	const comparisons = baseChar.variants.map((v) => {
+		return compareVariants(baseVariant as any, v as any, skillsMap);
+	});
 
 	// Map position to UI expected format
 	const positionMap: Record<string, string> = {
@@ -558,6 +583,8 @@ export default async function PlayerDetailPage({ params }: { params: Promise<{ i
 						: undefined
 				}
 			/>
+
+			<CharaVariantsComparison comparisons={comparisons} baseName={charName} />
 
 			{/* Info Panel — Series, Apparitions */}
 			<div className="bg-surface-container-low rounded-[20px] sm:rounded-[24px] border border-outline-variant/30 px-4 py-3 sm:px-6 sm:py-5 space-y-3 sm:space-y-5">
