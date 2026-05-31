@@ -19,6 +19,8 @@ export interface TeamMember {
 	imageUrl: string;
 	slug: string;
 	stats?: TeamMemberStats;
+	internalCode?: string;
+	zukanHash?: string;
 }
 
 export interface TeamData {

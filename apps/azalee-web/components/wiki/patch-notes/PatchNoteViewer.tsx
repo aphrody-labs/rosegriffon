@@ -3,7 +3,7 @@
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import Image from "next/image";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import type { PatchNoteDetail } from "@/app/actions/news";
 import { PlatformBadge } from "./PlatformBadge";
 
@@ -24,6 +24,7 @@ function extractVersion(id: string): string | null {
 
 export function PatchNoteViewer({ data }: PatchNoteViewerProps) {
 	const contentRef = useRef<HTMLDivElement>(null);
+	const [imgError, setImgError] = useState(false);
 	const dateObj = data.date ? new Date(data.date) : null;
 	const version = extractVersion(data.id);
 
@@ -31,13 +32,14 @@ export function PatchNoteViewer({ data }: PatchNoteViewerProps) {
 		<article className="animate-in fade-in slide-in-from-bottom-4 duration-500">
 			{/* Header Banner */}
 			<div className="relative rounded-[32px] overflow-hidden bg-surface-container-low border border-outline-variant/10 mb-8 p-1 group">
-				{data.featured_image ? (
+				{data.featured_image && !imgError ? (
 					<div className="absolute inset-0">
 						<Image
 							src={data.featured_image}
 							alt=""
 							fill
 							className="object-cover opacity-90 transition-transform duration-700 group-hover:scale-105"
+							onError={() => setImgError(true)}
 						/>
 						<div className="absolute inset-0 bg-linear-to-t from-background/95 via-background/60 to-background/30" />
 					</div>
@@ -46,7 +48,7 @@ export function PatchNoteViewer({ data }: PatchNoteViewerProps) {
 				)}
 
 				{/* Decorator */}
-				{!data.featured_image && (
+				{(!data.featured_image || imgError) && (
 					<div className="absolute top-0 right-0 p-32 bg-primary/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
 				)}
 

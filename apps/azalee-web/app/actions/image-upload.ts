@@ -1,8 +1,7 @@
 "use server";
 
 import sharp from "sharp";
-import { getServerSession } from "@/lib/auth-helpers";
-import { isAdminRole } from "@/lib/auth-roles";
+import { requireEditorOrFail } from "@/lib/auth-helpers";
 import { createClient } from "@/lib/supabase/server";
 
 // --- Configuration ---
@@ -42,22 +41,12 @@ export interface UploadResult {
 // --- Helpers internes ---
 
 async function verifyEditorRole(): Promise<{ error?: string }> {
-	const session = await getServerSession();
-	if (!session?.user) {
-		return { error: "Non authentifié" };
+	try {
+		await requireEditorOrFail();
+		return {};
+	} catch (error) {
+		return { error: (error as Error).message };
 	}
-
-	const supabase = await createClient();
-	const { data: profile } = await supabase
-		.from("profiles")
-		.select("role")
-		.eq("id", session.user.id)
-		.single();
-
-	if (!isAdminRole(profile?.role)) {
-		return { error: "Accès refusé : rôle éditeur requis" };
-	}
-	return {};
 }
 
 function validateFile(file: File): string | null {

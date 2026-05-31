@@ -8,8 +8,8 @@ import { Icon } from "@/components/ui/Icon";
 import { RarityBadge } from "@/components/ui/rarity-badge";
 import { SafeImage } from "@/components/ui/SafeImage";
 import type { SpriteCommonKey } from "@/config/sprites-common";
-import { ROLE_COLORS, ROLE_LABELS } from "@/lib/formations";
 import { cn } from "@/lib/utils";
+import { getCharacterImageUrl } from "@/lib/images";
 
 /* ── Types ────────────────────────────────────────────────── */
 
@@ -33,6 +33,8 @@ export interface PickerCharacter {
 	slug: string;
 	series?: string;
 	stats?: PickerCharacterStats;
+	internalCode?: string;
+	zukanHash?: string;
 }
 
 /* ── Constants ────────────────────────────────────────────── */
@@ -44,11 +46,31 @@ const ELEMENT_SPRITE: Record<string, SpriteCommonKey> = {
 	Wind: "wind",
 };
 
+const PICKER_ROLE_COLORS: Record<string, string> = {
+	DF: "rgb(59, 130, 246)",
+	FW: "rgb(220, 38, 38)",
+	GK: "rgb(217, 119, 6)",
+	MF: "rgb(16, 185, 129)",
+	COACH: "rgb(217, 119, 6)",
+	COORD: "rgb(59, 130, 246)",
+};
+
+const PICKER_ROLE_LABELS: Record<string, string> = {
+	DF: "DEF",
+	FW: "ATT",
+	GK: "GAR",
+	MF: "MIL",
+	COACH: "ENTR",
+	COORD: "COORD",
+};
+
 const POSITIONS = [
 	{ label: "ATT", value: "FW" },
 	{ label: "MIL", value: "MF" },
 	{ label: "DEF", value: "DF" },
 	{ label: "GAR", value: "GK" },
+	{ label: "ENTR", value: "COACH" },
+	{ label: "COORD", value: "COORD" },
 ];
 
 const ELEMENTS = [
@@ -96,9 +118,9 @@ function DraggableCharaCard({
 		transform: CSS.Translate.toString(transform),
 	};
 
-	const elSprite = ELEMENT_SPRITE[char.element];
-	const roleColor = ROLE_COLORS[char.position] || ROLE_COLORS.MF;
-	const roleLabel = ROLE_LABELS[char.position] || char.position;
+	const elSprite = char.element !== "Void" ? ELEMENT_SPRITE[char.element] : null;
+	const roleColor = PICKER_ROLE_COLORS[char.position] || PICKER_ROLE_COLORS.MF;
+	const roleLabel = PICKER_ROLE_LABELS[char.position] || char.position;
 
 	return (
 		<div
@@ -107,7 +129,7 @@ function DraggableCharaCard({
 			{...listeners}
 			{...attributes}
 			role="listitem"
-			aria-label={`${char.name} — ${ROLE_LABELS[char.position] || char.position}, ${char.element}, ${char.rarity}${isPlaced ? " (déjà placé)" : ""}`}
+			aria-label={`${char.name} — ${PICKER_ROLE_LABELS[char.position] || char.position}, ${char.element}, ${char.rarity}${isPlaced ? " (déjà placé)" : ""}`}
 			onClick={(e) => {
 				if (!isPlaced && onTap) {
 					e.preventDefault();
@@ -127,6 +149,8 @@ function DraggableCharaCard({
 			<div className="relative w-full aspect-square overflow-hidden">
 				<SafeImage
 					src={char.imageUrl}
+					zukanHash={char.zukanHash}
+					fallbackSrc={char.internalCode ? getCharacterImageUrl(char.internalCode) : undefined}
 					alt={char.name}
 					fill
 					sizes="(max-width: 640px) 20vw, 80px"
@@ -180,6 +204,7 @@ interface CharacterPickerProps {
 	placedIds: Set<string>;
 	selectedCharaId?: string | null;
 	onCharaTap?: (char: PickerCharacter) => void;
+	activeSlotId?: string | null;
 }
 
 export function CharacterPicker({
@@ -187,6 +212,7 @@ export function CharacterPicker({
 	placedIds,
 	selectedCharaId,
 	onCharaTap,
+	activeSlotId,
 }: CharacterPickerProps) {
 	const [search, setSearch] = useState("");
 	const [filterPosition, setFilterPosition] = useState<string | null>(null);
@@ -195,8 +221,41 @@ export function CharacterPicker({
 	const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
 	const scrollRef = useRef<HTMLDivElement>(null);
 
+	// Auto-filter when activeSlotId changes
+	const [prevSlotId, setPrevSlotId] = useState<string | null>(null);
+	if (activeSlotId !== prevSlotId) {
+		setPrevSlotId(activeSlotId || null);
+		if (activeSlotId) {
+			if (activeSlotId.startsWith("manager-")) {
+				setFilterPosition("COACH");
+			} else if (activeSlotId.startsWith("support-")) {
+				setFilterPosition("COORD");
+			} else {
+				// Clear filter if it was COACH or COORD
+				setFilterPosition((prev) => (prev === "COACH" || prev === "COORD" ? null : prev));
+			}
+			setVisibleCount(PAGE_SIZE);
+		}
+	}
+
 	const filtered = useMemo(() => {
 		let list = characters;
+
+		if (activeSlotId) {
+			if (activeSlotId.startsWith("manager-")) {
+				list = list.filter((c) => c.position === "COACH");
+			} else if (activeSlotId.startsWith("support-")) {
+				list = list.filter((c) => c.position === "COORD");
+			} else {
+				list = list.filter((c) => c.position !== "COACH" && c.position !== "COORD");
+			}
+		} else {
+			// By default, hide coach and coordinator from general player list unless explicitly filtered
+			if (filterPosition !== "COACH" && filterPosition !== "COORD") {
+				list = list.filter((c) => c.position !== "COACH" && c.position !== "COORD");
+			}
+		}
+
 		if (search) {
 			const q = search.toLowerCase();
 			list = list.filter((c) => c.name.toLowerCase().includes(q));
@@ -211,7 +270,7 @@ export function CharacterPicker({
 			list = list.filter((c) => c.rarity === filterRarity);
 		}
 		return list;
-	}, [characters, search, filterPosition, filterElement, filterRarity]);
+	}, [characters, search, filterPosition, filterElement, filterRarity, activeSlotId]);
 
 	const visible = useMemo(() => filtered.slice(0, visibleCount), [filtered, visibleCount]);
 
@@ -245,8 +304,8 @@ export function CharacterPicker({
 							setSearch(e.target.value);
 							setVisibleCount(PAGE_SIZE);
 						}}
-						placeholder="Rechercher un joueur..."
-						aria-label="Rechercher un joueur par nom"
+						placeholder="Rechercher..."
+						aria-label="Rechercher par nom"
 						className="w-full h-11 pl-10 pr-3 rounded-2xl bg-surface-container-high border-none text-sm text-on-surface placeholder:text-on-surface-variant/50 focus:outline-hidden focus:ring-2 focus:ring-primary/50"
 					/>
 				</div>
@@ -255,7 +314,7 @@ export function CharacterPicker({
 			{/* Filters */}
 			<div className="px-3 pb-2 space-y-1.5">
 				{/* Position */}
-				<div className="flex gap-1.5" role="group" aria-label="Filtrer par position">
+				<div className="flex flex-wrap gap-1" role="group" aria-label="Filtrer par position">
 					{POSITIONS.map(({ value, label }) => (
 						<button
 							key={value}
@@ -266,12 +325,12 @@ export function CharacterPicker({
 							aria-pressed={filterPosition === value}
 							aria-label={`Filtrer par position ${label}`}
 							className={cn(
-								"flex-1 h-8 rounded-xl text-xs font-bold transition-all",
+								"flex-1 min-w-[50px] h-8 rounded-xl text-[10px] font-bold transition-all",
 								filterPosition === value
 									? "text-white elevation-1"
 									: "border border-outline/30 text-on-surface-variant hover:bg-on-surface/[0.08]"
 							)}
-							style={filterPosition === value ? { backgroundColor: ROLE_COLORS[value] } : undefined}
+							style={filterPosition === value ? { backgroundColor: PICKER_ROLE_COLORS[value] } : undefined}
 						>
 							{label}
 						</button>
@@ -343,7 +402,7 @@ export function CharacterPicker({
 			{/* Count */}
 			<div className="px-3 pb-1.5 flex items-center justify-between">
 				<p className="text-[10px] text-on-surface-variant">
-					{filtered.length} joueur{filtered.length > 1 ? "s" : ""}
+					{filtered.length} disponible{filtered.length > 1 ? "s" : ""}
 				</p>
 				{placedIds.size > 0 && (
 					<p className="text-[10px] text-primary font-bold">
@@ -396,14 +455,16 @@ export function CharacterPicker({
 /* ── Export overlay version for DragOverlay ────────────────── */
 
 export function CharacterPickerOverlay({ char }: { char: PickerCharacter }) {
-	const roleColor = ROLE_COLORS[char.position] || ROLE_COLORS.MF;
-	const roleLabel = ROLE_LABELS[char.position] || char.position;
+	const roleColor = PICKER_ROLE_COLORS[char.position] || PICKER_ROLE_COLORS.MF;
+	const roleLabel = PICKER_ROLE_LABELS[char.position] || char.position;
 
 	return (
 		<div className="size-16 sm:w-20 sm:h-20 rounded-lg overflow-hidden bg-neutral-900 shadow-2xl ring-2 ring-primary pointer-events-none">
 			<div className="relative w-full h-full">
 				<SafeImage
 					src={char.imageUrl}
+					zukanHash={char.zukanHash}
+					fallbackSrc={char.internalCode ? getCharacterImageUrl(char.internalCode) : undefined}
 					alt={char.name}
 					fill
 					sizes="80px"

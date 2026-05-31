@@ -45,11 +45,11 @@ Pass an options object as the second argument to configure the parser:
 
 ```ts
 const html = Bun.markdown.html("some markdown", {
-	tables: true, // GFM tables (default: true)
-	strikethrough: true, // GFM strikethrough (default: true)
-	tasklists: true, // GFM task lists (default: true)
-	tagFilter: true, // GFM tag filter for disallowed HTML tags
-	autolinks: true, // Autolink URLs, emails, and www. links
+  tables: true, // GFM tables (default: true)
+  strikethrough: true, // GFM strikethrough (default: true)
+  tasklists: true, // GFM task lists (default: true)
+  tagFilter: true, // GFM tag filter for disallowed HTML tags
+  autolinks: true, // Autolink URLs, emails, and www. links
 });
 ```
 
@@ -83,7 +83,7 @@ Bun.markdown.html("Visit www.example.com", { autolinks: true });
 
 // Enable only specific types
 Bun.markdown.html("Visit www.example.com", {
-	autolinks: { url: true, www: true },
+  autolinks: { url: true, www: true },
 });
 ```
 
@@ -109,9 +109,9 @@ Parse Markdown and render it using custom JavaScript callbacks. This gives you f
 
 ```ts
 const result = Bun.markdown.render("# Hello **world**", {
-	heading: (children, { level }) => `<h${level} class="title">${children}</h${level}>`,
-	strong: (children) => `<b>${children}</b>`,
-	paragraph: (children) => `<p>${children}</p>`,
+  heading: (children, { level }) => `<h${level} class="title">${children}</h${level}>`,
+  strong: children => `<b>${children}</b>`,
+  paragraph: children => `<p>${children}</p>`,
 });
 // '<h1 class="title">Hello <b>world</b></h1>'
 ```
@@ -172,10 +172,9 @@ The `listItem` callback receives everything needed to render markers directly:
 
 ```ts
 const html = Bun.markdown.render("# Title\n\nHello **world**", {
-	heading: (children, { level }) =>
-		`<h${level} class="heading heading-${level}">${children}</h${level}>`,
-	paragraph: (children) => `<p class="body">${children}</p>`,
-	strong: (children) => `<strong class="bold">${children}</strong>`,
+  heading: (children, { level }) => `<h${level} class="heading heading-${level}">${children}</h${level}>`,
+  paragraph: children => `<p class="body">${children}</p>`,
+  strong: children => `<strong class="bold">${children}</strong>`,
 });
 ```
 
@@ -183,14 +182,14 @@ const html = Bun.markdown.render("# Title\n\nHello **world**", {
 
 ```ts
 const plaintext = Bun.markdown.render("# Hello **world**", {
-	heading: (children) => children,
-	paragraph: (children) => children,
-	strong: (children) => children,
-	emphasis: (children) => children,
-	link: (children) => children,
-	image: () => "",
-	code: (children) => children,
-	codespan: (children) => children,
+  heading: children => children,
+  paragraph: children => children,
+  strong: children => children,
+  emphasis: children => children,
+  link: children => children,
+  image: () => "",
+  code: children => children,
+  codespan: children => children,
 });
 // "Hello world"
 ```
@@ -201,9 +200,9 @@ Return `null` or `undefined` to remove an element from the output:
 
 ```ts
 const result = Bun.markdown.render("# Title\n\n![logo](img.png)\n\nHello", {
-	image: () => null, // Remove all images
-	heading: (children) => children,
-	paragraph: (children) => children + "\n",
+  image: () => null, // Remove all images
+  heading: children => children,
+  paragraph: children => children + "\n",
 });
 // "Title\nHello\n"
 ```
@@ -212,10 +211,10 @@ const result = Bun.markdown.render("# Title\n\n![logo](img.png)\n\nHello", {
 
 ```ts
 const ansi = Bun.markdown.render("# Hello\n\nThis is **bold** and *italic*", {
-	heading: (children, { level }) => `\x1b[1;4m${children}\x1b[0m\n`,
-	paragraph: (children) => children + "\n",
-	strong: (children) => `\x1b[1m${children}\x1b[22m`,
-	emphasis: (children) => `\x1b[3m${children}\x1b[23m`,
+  heading: (children, { level }) => `\x1b[1;4m${children}\x1b[0m\n`,
+  paragraph: children => children + "\n",
+  strong: children => `\x1b[1m${children}\x1b[22m`,
+  emphasis: children => `\x1b[3m${children}\x1b[23m`,
 });
 ```
 
@@ -225,20 +224,20 @@ The `listItem` callback receives everything needed to render markers directly â€
 
 ```ts
 const result = Bun.markdown.render("1. first\n   1. sub-a\n   2. sub-b\n2. second", {
-	listItem: (children, { index, depth, ordered, start }) => {
-		const n = (start ?? 1) + index;
-		// 1. 2. 3. at depth 0, a. b. c. at depth 1, i. ii. iii. at depth 2
-		const marker = !ordered
-			? "-"
-			: depth === 0
-				? `${n}.`
-				: depth === 1
-					? `${String.fromCharCode(96 + n)}.`
-					: `${toRoman(n)}.`;
-		return "  ".repeat(depth) + marker + " " + children.trimEnd() + "\n";
-	},
-	// Prepend a newline so nested lists are separated from their parent item's text
-	list: (children) => "\n" + children,
+  listItem: (children, { index, depth, ordered, start }) => {
+    const n = (start ?? 1) + index;
+    // 1. 2. 3. at depth 0, a. b. c. at depth 1, i. ii. iii. at depth 2
+    const marker = !ordered
+      ? "-"
+      : depth === 0
+        ? `${n}.`
+        : depth === 1
+          ? `${String.fromCharCode(96 + n)}.`
+          : `${toRoman(n)}.`;
+    return "  ".repeat(depth) + marker + " " + children.trimEnd() + "\n";
+  },
+  // Prepend a newline so nested lists are separated from their parent item's text
+  list: children => "\n" + children,
 });
 // 1. first
 //   a. sub-a
@@ -250,10 +249,10 @@ const result = Bun.markdown.render("1. first\n   1. sub-a\n   2. sub-b\n2. secon
 
 ````ts
 const result = Bun.markdown.render("```js\nconsole.log('hi')\n```", {
-	code: (children, meta) => {
-		const lang = meta?.language ?? "";
-		return `<pre><code class="language-${lang}">${children}</code></pre>`;
-	},
+  code: (children, meta) => {
+    const lang = meta?.language ?? "";
+    return `<pre><code class="language-${lang}">${children}</code></pre>`;
+  },
 });
 ````
 
@@ -263,12 +262,12 @@ Parser options are passed as a separate third argument:
 
 ```ts
 const result = Bun.markdown.render(
-	"Visit www.example.com",
-	{
-		link: (children, { href }) => `[${children}](${href})`,
-		paragraph: (children) => children,
-	},
-	{ autolinks: true }
+  "Visit www.example.com",
+  {
+    link: (children, { href }) => `[${children}](${href})`,
+    paragraph: children => children,
+  },
+  { autolinks: true },
 );
 ```
 
@@ -280,7 +279,7 @@ Render Markdown directly to React elements. Returns a `<Fragment>` that you can 
 
 ```tsx
 function Markdown({ text }: { text: string }) {
-	return Bun.markdown.react(text);
+  return Bun.markdown.react(text);
 }
 ```
 
@@ -301,37 +300,37 @@ Replace any HTML element with a custom React component by passing it in the seco
 
 ```tsx
 function Code({ language, children }) {
-	return (
-		<pre data-language={language}>
-			<code>{children}</code>
-		</pre>
-	);
+  return (
+    <pre data-language={language}>
+      <code>{children}</code>
+    </pre>
+  );
 }
 
 function Link({ href, title, children }) {
-	return (
-		<a href={href} title={title} target="_blank" rel="noopener noreferrer">
-			{children}
-		</a>
-	);
+  return (
+    <a href={href} title={title} target="_blank" rel="noopener noreferrer">
+      {children}
+    </a>
+  );
 }
 
 function Heading({ id, children }) {
-	return (
-		<h2 id={id}>
-			<a href={`#${id}`}>{children}</a>
-		</h2>
-	);
+  return (
+    <h2 id={id}>
+      <a href={`#${id}`}>{children}</a>
+    </h2>
+  );
 }
 
 const el = Bun.markdown.react(
-	content,
-	{
-		pre: Code,
-		a: Link,
-		h2: Heading,
-	},
-	{ headings: { ids: true } }
+  content,
+  {
+    pre: Code,
+    a: Link,
+    h2: Heading,
+  },
+  { headings: { ids: true } },
 );
 ```
 
@@ -369,7 +368,7 @@ By default, elements use `Symbol.for('react.transitional.element')` as the `$$ty
 
 ```tsx
 function Markdown({ text }: { text: string }) {
-	return Bun.markdown.react(text, undefined, { reactVersion: 18 });
+  return Bun.markdown.react(text, undefined, { reactVersion: 18 });
 }
 ```
 
@@ -379,7 +378,7 @@ All [parser options](#options) are passed as the third argument:
 
 ```tsx
 const el = Bun.markdown.react("## Hello World", undefined, {
-	headings: { ids: true },
-	autolinks: true,
+  headings: { ids: true },
+  autolinks: true,
 });
 ```

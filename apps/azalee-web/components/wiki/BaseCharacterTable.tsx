@@ -211,6 +211,7 @@ function BaseCharacterRow({ character, rowIndex }: { character: BaseCharacter; r
 						<SafeImage
 							src={imageUrl}
 							zukanHash={character.zukanHash}
+							fallbackSrc={getCharacterImageUrl(character.internalCode)}
 							alt={name}
 							fill
 							className="object-cover object-top group-hover:scale-110 transition-transform"

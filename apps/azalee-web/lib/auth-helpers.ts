@@ -92,7 +92,8 @@ export async function hasMedailleAzaleeRole(
 	if (!discordId) {
 		return false;
 	}
-	const supabase = await createClient();
+	const { createSupabaseServiceClient } = await import("@rose-griffon/db/service");
+	const supabase = createSupabaseServiceClient();
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	const { data } = (await (supabase as any)
 		.from("discord_members")

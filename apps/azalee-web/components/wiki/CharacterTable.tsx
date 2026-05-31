@@ -4,6 +4,7 @@ import type { MultiLevelStats } from "@rose-griffon/inagle";
 import { CircleDot } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { SafeImage } from "@/components/ui/SafeImage";
 import { useLanguage } from "@/components/providers/language-provider";
 import { CommonSpriteIcon } from "@/components/ui/CommonSpriteIcon";
 import { RarityBadge } from "@/components/ui/rarity-badge";
@@ -252,12 +253,15 @@ export function CharacterTable({ characters, startIndex = 0 }: CharacterTablePro
 										className="flex items-center gap-3 group"
 									>
 										<div className="relative size-12 rounded-lg overflow-hidden bg-surface-container-highest shrink-0 ring-1 ring-outline-variant/30">
-											<Image
-												src={getCharacterImageUrl(character.internalCode)}
+											<SafeImage
+												src={character.zukanHash ? `https://dxi4wb638ujep.cloudfront.net/1/${character.zukanHash}.png` : getCharacterImageUrl(character.internalCode)}
+												zukanHash={character.zukanHash}
+												fallbackSrc={getCharacterImageUrl(character.internalCode)}
 												alt={name}
 												fill
 												className="object-cover object-top group-hover:scale-110 transition-transform"
 												sizes="48px"
+												unoptimized
 											/>
 										</div>
 										<div className="flex flex-col">

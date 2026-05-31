@@ -540,7 +540,10 @@ function interpolateStats(char: CompareCharacter | null | undefined, level: numb
 	if (level === 99) return stats;
 	if (level === 1 && statsLv1) return statsLv1;
 
-	const hasCompleteData = statsLv1 && statsLv30 && statsLv50;
+	const hasCompleteData = statsLv1 && statsLv30 && statsLv50 &&
+		Object.values(statsLv30).some(v => v > 0) &&
+		Object.values(statsLv50).some(v => v > 0);
+
 	if (!hasCompleteData) {
 		const startStats = statsLv1 || stats;
 		const endStats = stats;
@@ -738,9 +741,9 @@ export function CharacterComparator({ char1, char2 }: CharacterComparatorProps) 
 
 			{/* Comparison sections */}
 			{bothSelected && (
-				<div className="space-y-5 sm:space-y-8 animate-in fade-in slide-in-from-bottom-3 duration-500">
+				<div className="space-y-6 sm:space-y-8 animate-in fade-in slide-in-from-bottom-3 duration-500">
 					{/* Level Slider */}
-					<div className="bg-surface-container rounded-xl elevation-1 p-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
+					<div className="bg-surface-container rounded-2xl border border-outline-variant/10 p-5 flex flex-col md:flex-row md:items-center justify-between gap-6 shadow-md transition-all duration-300">
 						<div className="space-y-1">
 							<h3 className="type-title-small text-on-surface font-bold">Ajuster le niveau</h3>
 							<p className="text-xs text-on-surface-variant/70">
@@ -771,30 +774,32 @@ export function CharacterComparator({ char1, char2 }: CharacterComparatorProps) 
 					</div>
 
 					{/* Radar charts */}
-					<div className="bg-surface-container rounded-xl elevation-1 p-3 sm:p-6">
-						<h3 className="type-title-small text-on-surface mb-3 sm:mb-4">Radar des stats</h3>
-						<div className="flex items-center justify-center gap-3 sm:gap-4 mb-2 sm:mb-3 flex-wrap">
-							<div className="flex items-center gap-1.5 sm:gap-2">
+					<div className="bg-surface-container rounded-2xl border border-outline-variant/10 p-4 sm:p-6 shadow-md transition-all duration-300 hover:shadow-lg">
+						<h3 className="type-title-small text-on-surface mb-3 sm:mb-4 flex items-center gap-2">
+							<Icon name="insights" className="text-primary" /> Radar des stats
+						</h3>
+						<div className="flex items-center justify-center gap-3 sm:gap-4 mb-4 flex-wrap">
+							<div className="flex items-center gap-1.5 sm:gap-2 bg-primary/5 px-2.5 py-1 rounded-full border border-primary/10">
 								<div className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-[var(--md-sys-color-primary)]" />
-								<span className="text-[11px] sm:text-xs font-medium truncate max-w-[100px] sm:max-w-none">
+								<span className="text-[11px] sm:text-xs font-semibold text-on-surface-variant truncate max-w-[100px] sm:max-w-none">
 									{char1.name}
 								</span>
 							</div>
-							<div className="flex items-center gap-1.5 sm:gap-2">
+							<div className="flex items-center gap-1.5 sm:gap-2 bg-tertiary/5 px-2.5 py-1 rounded-full border border-tertiary/10">
 								<div className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-[var(--md-sys-color-tertiary)]" />
-								<span className="text-[11px] sm:text-xs font-medium truncate max-w-[100px] sm:max-w-none">
+								<span className="text-[11px] sm:text-xs font-semibold text-on-surface-variant truncate max-w-[100px] sm:max-w-none">
 									{char2.name}
 								</span>
 							</div>
 						</div>
-						<div className="grid grid-cols-2 gap-2 sm:gap-4 justify-items-center">
-							<StatHeptagon stats={currentStats1} size={160} />
-							<StatHeptagon stats={currentStats2} size={160} />
+						<div className="grid grid-cols-2 gap-4 sm:gap-6 justify-items-center">
+							<StatHeptagon stats={currentStats1} size={240} />
+							<StatHeptagon stats={currentStats2} size={240} />
 						</div>
 					</div>
 
 					{/* Stat bars */}
-					<div className="bg-surface-container rounded-xl elevation-1 p-3 sm:p-6">
+					<div className="bg-surface-container rounded-2xl border border-outline-variant/10 p-4 sm:p-6 shadow-md transition-all duration-300 hover:shadow-lg">
 						<StatComparisonBars
 							stats1={currentStats1}
 							stats2={currentStats2}
@@ -804,7 +809,7 @@ export function CharacterComparator({ char1, char2 }: CharacterComparatorProps) 
 					</div>
 
 					{/* Skills */}
-					<div className="bg-surface-container rounded-xl elevation-1 p-3 sm:p-6">
+					<div className="bg-surface-container rounded-2xl border border-outline-variant/10 p-4 sm:p-6 shadow-md transition-all duration-300 hover:shadow-lg">
 						<SkillsComparison
 							skills1={char1.skills}
 							skills2={char2.skills}

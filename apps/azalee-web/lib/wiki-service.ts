@@ -1224,11 +1224,18 @@ export const wikiService = {
 		fw: BaseCharacter[];
 	}> {
 		const supabase = await createClient();
+		const positionMap: Record<string, string> = {
+			GK: "Gardien",
+			DF: "Défenseur",
+			MF: "Milieu",
+			FW: "Attaquant",
+		};
 		const fetchPool = async (position: string, limit: number) => {
+			const dbPosition = positionMap[position] || position;
 			let query = supabase
 				.from("inagle_characters")
 				.select("*")
-				.eq("position", position)
+				.eq("position", dbPosition)
 				.not("stat_frappe", "is", null)
 				.not("zukan_hash", "is", null);
 			if (playstyles && playstyles.length > 0) {

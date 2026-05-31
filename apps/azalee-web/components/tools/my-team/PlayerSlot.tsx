@@ -7,6 +7,7 @@ import { SafeImage } from "@/components/ui/SafeImage";
 import { ROLE_COLORS, ROLE_LABELS } from "@/lib/formations";
 import type { TeamMember } from "@/lib/team-types";
 import { cn } from "@/lib/utils";
+import { getCharacterImageUrl } from "@/lib/images";
 
 interface PlayerSlotProps {
 	member: TeamMember;
@@ -48,6 +49,8 @@ export function PlayerSlot({ member, onRemove, compact }: PlayerSlotProps) {
 			{/* Character image */}
 			<SafeImage
 				src={member.imageUrl}
+				zukanHash={member.zukanHash}
+				fallbackSrc={member.internalCode ? getCharacterImageUrl(member.internalCode) : undefined}
 				alt={member.name}
 				fill
 				sizes={compact ? "60px" : "100px"}
@@ -108,6 +111,8 @@ export function PlayerSlotOverlay({ member }: { member: TeamMember }) {
 			<div className="relative w-full h-full">
 				<SafeImage
 					src={member.imageUrl}
+					zukanHash={member.zukanHash}
+					fallbackSrc={member.internalCode ? getCharacterImageUrl(member.internalCode) : undefined}
 					alt={member.name}
 					fill
 					sizes="100px"

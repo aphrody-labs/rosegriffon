@@ -1,7 +1,11 @@
 import { ImageResponse } from "next/og";
 import { wikiService } from "@/lib/wiki-service";
 
-const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || "https://azalee.rosegriffon.fr";
+const SUPABASE_URL =
+	process.env.NEXT_PUBLIC_SUPABASE_URL &&
+	process.env.NEXT_PUBLIC_SUPABASE_URL.startsWith("http")
+		? process.env.NEXT_PUBLIC_SUPABASE_URL
+		: "https://azalee.rosegriffon.fr";
 
 function absoluteUrl(url?: string | null): string | undefined {
 	if (!url) {

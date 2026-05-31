@@ -4,6 +4,7 @@ import bcrypt from "bcryptjs";
 import { betterAuth } from "better-auth";
 import { nextCookies } from "better-auth/next-js";
 import { bearer, oAuthProxy } from "better-auth/plugins";
+import { agentAuth } from "@better-auth/agent-auth";
 import { Pool } from "pg";
 import { logAudit } from "@/lib/audit";
 import { ADMIN_ROLES } from "@/lib/auth-roles";
@@ -269,6 +270,65 @@ function createAuth() {
 		},
 
 		plugins: [
+			agentAuth({
+				providerName: "Azalée",
+				providerDescription: "Azalée project and wiki APIs for AI agents.",
+				modes: ["delegated", "autonomous"],
+				capabilities: [
+					{
+						name: "list_articles",
+						description: "List news and wiki articles from Azalée.",
+						input: {
+							type: "object",
+							properties: {
+								limit: { type: "integer", minimum: 1, maximum: 100 },
+							},
+						},
+					},
+					{
+						name: "get_article",
+						description: "Get the content of a specific news or wiki article.",
+						input: {
+							type: "object",
+							properties: {
+								slug: { type: "string" },
+							},
+							required: ["slug"],
+						},
+					},
+				],
+				async onExecute({ capability, arguments: args }) {
+					const supabase = createSupabaseServiceClient();
+
+					switch (capability) {
+						case "list_articles": {
+							const limit = (args?.limit as number) || 20;
+							const { data, error } = await supabase
+								.from("articles")
+								.select("id, title, slug, excerpt, status, published_at")
+								.eq("app", "azalee")
+								.eq("status", "published")
+								.order("published_at", { ascending: false })
+								.limit(limit);
+							if (error) throw new Error(error.message);
+							return data;
+						}
+						case "get_article": {
+							const { data, error } = await supabase
+								.from("articles")
+								.select("id, title, slug, content_html, published_at")
+								.eq("app", "azalee")
+								.eq("slug", args?.slug as string)
+								.maybeSingle();
+							if (error) throw new Error(error.message);
+							if (!data) throw new Error("Article not found");
+							return data;
+						}
+						default:
+							throw new Error(`Unsupported capability: ${capability}`);
+					}
+				},
+			}),
 			bearer(),
 			// oAuthProxy UNIQUEMENT sur les déploiements preview Vercel : il proxifie
 			// le callback OAuth via le domaine de prod (dont l'URL de redirection est

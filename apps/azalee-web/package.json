@@ -17,6 +17,7 @@
 		"backup:supabase": "bun scripts/ops/backup-supabase-to-sqlite.ts"
 	},
 	"dependencies": {
+		"@better-auth/agent-auth": "^0.5.1",
 		"@dnd-kit/core": "^6.3.1",
 		"@dnd-kit/sortable": "^10.0.0",
 		"@dnd-kit/utilities": "^3.2.2",
@@ -108,6 +109,7 @@
 	},
 	"devDependencies": {
 		"@next/bundle-analyzer": "catalog:",
+		"@playwright/test": "^1.60.0",
 		"@rose-griffon/config": "workspace:*",
 		"@tailwindcss/postcss": "catalog:",
 		"@tailwindcss/typography": "catalog:",

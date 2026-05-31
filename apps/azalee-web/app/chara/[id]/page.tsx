@@ -146,6 +146,7 @@ export default async function PlayerDetailPage({ params }: { params: Promise<{ i
 		names: baseChar.names,
 		teamId: (baseChar as any).teams?.[0]?.id as string | undefined,
 		teamName: (baseChar as any).teams?.[0]?.names?.fr || (baseChar as any).teams?.[0]?.names?.en,
+		zukanHash: baseChar.zukanHash || variant.zukanHash,
 	};
 
 	// Fetch all distinct forms of this character (same chara_id, different pos/elem/rarity)

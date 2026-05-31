@@ -161,7 +161,7 @@ export class SqliteQueryBuilder {
 	}
 
 	or(orString: string) {
-		const regex = /([a-zA-Z0-9_>\-]+)\.(eq|ilike|cs)\.((?:[^\s,]+|\[[^\]]+\]|\{[^}]+\})+)/g;
+		const regex = /([a-zA-Z0-9_>-]+)\.(eq|ilike|cs)\.((?:[^\s,]+|\[[^\]]+\]|\{[^}]+\})+)/g;
 		let match;
 		const conditions: string[] = [];
 		const orParams: Array<string | number | boolean | null> = [];

@@ -7,7 +7,17 @@ import { BENCH_SLOTS, ROLE_COLORS, ROLE_LABELS } from "@/lib/formations";
 import type { Formation, PositionCoord } from "@/lib/formations";
 import type { TeamMember } from "@/lib/team-types";
 import { cn } from "@/lib/utils";
+import { getCharacterImageUrl } from "@/lib/images";
 import { PlayerSlot } from "./PlayerSlot";
+import { getPositionMatchFactor } from "@/lib/team-rules";
+import type { ElementLink } from "@/lib/team-rules";
+
+const ELEMENT_COLORS: Record<string, string> = {
+	Fire: "#ef4444",
+	Forest: "#a855f7",
+	Mountain: "#f59e0b",
+	Wind: "#22c55e",
+};
 
 /* ── Realistic Pitch SVG ──────────────────────────────────── */
 
@@ -168,6 +178,7 @@ function DroppableSlot({
 	isTargeted,
 	onMemberClick,
 	isSelected,
+	formation,
 }: {
 	slotId: string;
 	coord: PositionCoord;
@@ -177,6 +188,7 @@ function DroppableSlot({
 	isTargeted?: boolean;
 	onMemberClick?: (slotId: string) => void;
 	isSelected?: boolean;
+	formation: Formation;
 }) {
 	const { isOver, setNodeRef } = useDroppable({
 		data: { role: coord.role, slotId, type: "field-position" },
@@ -188,6 +200,8 @@ function DroppableSlot({
 
 	const scaledTop = coord.top;
 	const scaledLeft = coord.left;
+
+	const { status } = getPositionMatchFactor(member?.position || "", slotId, formation);
 
 	return (
 		<div
@@ -234,6 +248,18 @@ function DroppableSlot({
 					<PlayerSlot member={member} onRemove={() => onRemove(slotId)} />
 					{isSelected && (
 						<div className="absolute inset-0 bg-primary/10 pointer-events-none rounded-xl" />
+					)}
+					{/* Position Mismatch Badge */}
+					{status !== "match" && status !== "none" && (
+						<div
+							className={cn(
+								"absolute top-1 left-1 z-20 flex items-center justify-center size-4 sm:size-5 rounded-full border border-black/35 shadow-md",
+								status === "adjacent" ? "bg-amber-500 text-black" : "bg-red-500 text-white"
+							)}
+							title={status === "adjacent" ? "Malus de position : -15% de stats" : "Malus de position : -35% de stats"}
+						>
+							<Icon name={status === "adjacent" ? "warning" : "error"} size={10} className="sm:size-3" />
+						</div>
 					)}
 				</div>
 			) : (
@@ -317,6 +343,8 @@ function StaffSlot({
 					<div className="relative w-full h-full">
 						<SafeImage
 							src={member.imageUrl}
+							zukanHash={member.zukanHash}
+							fallbackSrc={member.internalCode ? getCharacterImageUrl(member.internalCode) : undefined}
 							alt={member.name}
 							fill
 							sizes="60px"
@@ -462,6 +490,8 @@ interface FormationFieldProps {
 	selectedCharaId?: string | null;
 	onMemberClick?: (slotId: string) => void;
 	selectedMemberSlot?: string | null;
+	links?: ElementLink[];
+	activeSlotId?: string | null;
 }
 
 export function FormationField({
@@ -474,6 +504,8 @@ export function FormationField({
 	selectedCharaId,
 	onMemberClick,
 	selectedMemberSlot,
+	links = [],
+	activeSlotId,
 }: FormationFieldProps) {
 	const reserveCount = Object.keys(members).filter((k) => k.startsWith("reserve-")).length;
 
@@ -495,9 +527,56 @@ export function FormationField({
 				<div className="absolute inset-0 bg-linear-to-b from-emerald-900 via-emerald-700 to-emerald-900" />
 				<PitchSVG />
 
+				{/* Glowing element synergy links layer */}
+				{links.length > 0 && (
+					<svg className="absolute inset-0 w-full h-full pointer-events-none z-5">
+						<defs>
+							{Object.entries(ELEMENT_COLORS).map(([el, color]) => (
+								<linearGradient id={`glow-${el}`} key={el} x1="0%" y1="0%" x2="100%" y2="100%">
+									<stop offset="0%" stopColor={color} stopOpacity="0.8" />
+									<stop offset="50%" stopColor="#ffffff" stopOpacity="0.9" />
+									<stop offset="100%" stopColor={color} stopOpacity="0.8" />
+								</linearGradient>
+							))}
+						</defs>
+						{links.map((link, idx) => (
+							<g key={idx}>
+								{/* Blur glow line */}
+								<line
+									x1={`${link.coordA.left + 9.5}%`}
+									y1={`${link.coordA.top + 7.2}%`}
+									x2={`${link.coordB.left + 9.5}%`}
+									y2={`${link.coordB.top + 7.2}%`}
+									stroke={ELEMENT_COLORS[link.element]}
+									strokeWidth="6"
+									opacity="0.3"
+									strokeLinecap="round"
+									className="blur-xs"
+								/>
+								{/* Direct connection line */}
+								<line
+									x1={`${link.coordA.left + 9.5}%`}
+									y1={`${link.coordA.top + 7.2}%`}
+									x2={`${link.coordB.left + 9.5}%`}
+									y2={`${link.coordB.top + 7.2}%`}
+									stroke={`url(#glow-${link.element})`}
+									strokeWidth="3"
+									strokeDasharray="8 6"
+									strokeLinecap="round"
+									opacity="0.95"
+									style={{
+										animation: "dash 25s linear infinite"
+									}}
+								/>
+							</g>
+						))}
+					</svg>
+				)}
+
 				{/* Field players (11 positions) */}
 				{formation.positions.map((coord) => {
 					const slotId = `field-${coord.index}`;
+					const isSlotSelected = selectedMemberSlot === slotId || activeSlotId === slotId;
 					return (
 						<DroppableSlot
 							key={slotId}
@@ -506,31 +585,35 @@ export function FormationField({
 							member={members[slotId]}
 							onRemove={onRemoveMember}
 							onSlotTap={onSlotTap}
-							isTargeted={Boolean(selectedCharaId) && !members[slotId]}
+							isTargeted={(Boolean(selectedCharaId) && !members[slotId]) || activeSlotId === slotId}
 							onMemberClick={onMemberClick}
-							isSelected={selectedMemberSlot === slotId}
+							isSelected={isSlotSelected}
+							formation={formation}
 						/>
 					);
 				})}
 
 				{/* Staff row — bottom of pitch (opponent half, sideline zone) */}
 				<div className="absolute bottom-[16%] inset-x-[4%] flex items-center justify-center gap-[3%]">
-					{staffSlots.map((staff) => (
-						<div key={staff.slotId} className="w-[15%]">
-							<StaffSlot
-								slotId={staff.slotId}
-								label={staff.label}
-								icon={staff.icon}
-								member={members[staff.slotId]}
-								onRemove={onRemoveMember}
-								color={staff.color}
-								onSlotTap={onSlotTap}
-								isTargeted={Boolean(selectedCharaId) && !members[staff.slotId]}
-								onMemberClick={onMemberClick}
-								isSelected={selectedMemberSlot === staff.slotId}
-							/>
-						</div>
-					))}
+					{staffSlots.map((staff) => {
+						const isSlotSelected = selectedMemberSlot === staff.slotId || activeSlotId === staff.slotId;
+						return (
+							<div key={staff.slotId} className="w-[15%]">
+								<StaffSlot
+									slotId={staff.slotId}
+									label={staff.label}
+									icon={staff.icon}
+									member={members[staff.slotId]}
+									onRemove={onRemoveMember}
+									color={staff.color}
+									onSlotTap={onSlotTap}
+									isTargeted={(Boolean(selectedCharaId) && !members[staff.slotId]) || activeSlotId === staff.slotId}
+									onMemberClick={onMemberClick}
+									isSelected={isSlotSelected}
+								/>
+							</div>
+						);
+					})}
 				</div>
 
 				{/* Staff label */}
@@ -564,20 +647,24 @@ export function FormationField({
 						</span>
 					</div>
 					<div className="grid grid-cols-5 gap-1.5">
-						{Array.from({ length: BENCH_SLOTS.reserves }, (_, i) => (
-							<BenchSlot
-								key={`reserve-${i}`}
-								slotId={`reserve-${i}`}
-								label="RES"
-								member={members[`reserve-${i}`]}
-								onRemove={onRemoveMember}
-								color="rgb(16,185,129)"
-								onSlotTap={onSlotTap}
-								isTargeted={Boolean(selectedCharaId) && !members[`reserve-${i}`]}
-								onMemberClick={onMemberClick}
-								isSelected={selectedMemberSlot === `reserve-${i}`}
-							/>
-						))}
+						{Array.from({ length: BENCH_SLOTS.reserves }, (_, i) => {
+							const slotId = `reserve-${i}`;
+							const isSlotSelected = selectedMemberSlot === slotId || activeSlotId === slotId;
+							return (
+								<BenchSlot
+									key={slotId}
+									slotId={slotId}
+									label="RES"
+									member={members[slotId]}
+									onRemove={onRemoveMember}
+									color="rgb(16,185,129)"
+									onSlotTap={onSlotTap}
+									isTargeted={(Boolean(selectedCharaId) && !members[slotId]) || activeSlotId === slotId}
+									onMemberClick={onMemberClick}
+									isSelected={isSlotSelected}
+								/>
+							);
+						})}
 					</div>
 				</div>
 			</div>

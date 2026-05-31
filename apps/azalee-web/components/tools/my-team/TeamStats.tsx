@@ -8,6 +8,7 @@ import { ROLE_COLORS, ROLE_LABELS } from "@/lib/formations";
 import type { Formation } from "@/lib/formations";
 import type { TeamMember } from "@/lib/team-types";
 import { cn } from "@/lib/utils";
+import { recalculateMemberStats, calculateElementSynergies } from "@/lib/team-rules";
 
 const ELEMENT_SPRITE: Record<string, SpriteCommonKey> = {
 	Fire: "fire",
@@ -40,13 +41,48 @@ const RARITY_COLORS: Record<string, string> = {
 interface TeamStatsProps {
 	members: Record<string, TeamMember>;
 	formation: Formation;
+	level?: number;
 }
 
-export function TeamStats({ members, formation }: TeamStatsProps) {
+export function TeamStats({ members, formation, level = 99 }: TeamStatsProps) {
 	const memberList = useMemo(() => Object.values(members), [members]);
+	const fieldMembers = useMemo(() => memberList.filter(m => m.slot.startsWith("field-")), [memberList]);
 	const totalSlots = 20;
 	const filledSlots = memberList.length;
 	const percent = Math.round((filledSlots / totalSlots) * 100);
+
+	// Get synergies
+	const { dominantElement, hasHarmony, links } = useMemo(() => {
+		return calculateElementSynergies(members, formation);
+	}, [members, formation]);
+
+	// Recalculate stats for all field members
+	const statsAvg = useMemo(() => {
+		if (fieldMembers.length === 0) return null;
+		const totals = { kick: 0, control: 0, technique: 0, pressure: 0, physical: 0, agility: 0, intelligence: 0, combatPower: 0 };
+		for (const m of fieldMembers) {
+			const res = recalculateMemberStats(m, level, m.slot, formation, dominantElement, hasHarmony);
+			totals.kick += res.kick;
+			totals.control += res.control;
+			totals.technique += res.technique;
+			totals.pressure += res.pressure;
+			totals.physical += res.physical;
+			totals.agility += res.agility;
+			totals.intelligence += res.intelligence;
+			totals.combatPower += res.combatPower;
+		}
+		const count = fieldMembers.length;
+		return {
+			kick: Math.round(totals.kick / count),
+			control: Math.round(totals.control / count),
+			technique: Math.round(totals.technique / count),
+			pressure: Math.round(totals.pressure / count),
+			physical: Math.round(totals.physical / count),
+			agility: Math.round(totals.agility / count),
+			intelligence: Math.round(totals.intelligence / count),
+			combatPower: Math.round(totals.combatPower),
+		};
+	}, [fieldMembers, level, formation, dominantElement, hasHarmony]);
 
 	const elements = useMemo(() => {
 		const c: Record<string, number> = { Fire: 0, Forest: 0, Mountain: 0, Wind: 0 };
@@ -145,15 +181,25 @@ export function TeamStats({ members, formation }: TeamStatsProps) {
 					</div>
 				</div>
 				<div className="flex-1 min-w-0 space-y-2.5">
-					<div
-						className={cn(
-							"inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-surface-container-high",
-							balance.color
+					<div className="flex flex-wrap gap-1.5">
+						<div
+							className={cn(
+								"inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-surface-container-high",
+								balance.color
+							)}
+						>
+							<Icon name={balance.icon} size={16} />
+							<span className="text-xs font-bold">{balance.label}</span>
+						</div>
+
+						{statsAvg && (
+							<div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary-container text-on-primary-container">
+								<Icon name="bolt" size={16} />
+								<span className="text-xs font-bold">CP: {statsAvg.combatPower}</span>
+							</div>
 						)}
-					>
-						<Icon name={balance.icon} size={16} />
-						<span className="text-xs font-bold">{balance.label}</span>
 					</div>
+
 					{rarities.length > 0 && (
 						<div className="flex flex-wrap gap-1">
 							{rarities.map(({ rarity, count }) => (
@@ -168,6 +214,82 @@ export function TeamStats({ members, formation }: TeamStatsProps) {
 						</div>
 					)}
 				</div>
+			</div>
+
+			{/* Average team stats bars */}
+			{statsAvg && (
+				<div className="border-t border-b border-outline-variant/20 py-3.5 space-y-2">
+					<p className="text-xs font-bold text-on-surface-variant">Statistiques Moyennes (Niv. {level})</p>
+					<div className="grid grid-cols-2 gap-x-4 gap-y-2">
+						{[
+							{ label: "Frappe", val: statsAvg.kick, color: "bg-red-500" },
+							{ label: "Contrôle", val: statsAvg.control, color: "bg-blue-500" },
+							{ label: "Technique", val: statsAvg.technique, color: "bg-yellow-500" },
+							{ label: "Pression", val: statsAvg.pressure, color: "bg-amber-500" },
+							{ label: "Physique", val: statsAvg.physical, color: "bg-purple-500" },
+							{ label: "Agilité", val: statsAvg.agility, color: "bg-teal-500" },
+						].map((st, i) => (
+							<div key={i} className="space-y-1">
+								<div className="flex justify-between text-[10px] font-bold text-on-surface-variant">
+									<span>{st.label}</span>
+									<span>{st.val}</span>
+								</div>
+								<div className="h-1.5 w-full bg-on-surface/5 rounded-full overflow-hidden">
+									<div
+										className={cn("h-full rounded-full", st.color)}
+										style={{ width: `${Math.min(100, (st.val / 160) * 100)}%` }}
+									/>
+								</div>
+							</div>
+						))}
+					</div>
+				</div>
+			)}
+
+			{/* Synergies display */}
+			<div className="space-y-2.5">
+				<p className="text-xs font-bold text-on-surface-variant">Synergies Actives</p>
+				<div className="grid grid-cols-2 gap-2 text-xs">
+					<div className={cn(
+						"p-2.5 rounded-xl border flex flex-col justify-between h-16 transition-all",
+						dominantElement 
+							? "border-primary/25 bg-primary/5 text-primary" 
+							: "border-outline-variant/30 bg-surface-container-high/40 opacity-60"
+					)}>
+						<span className="font-bold flex items-center gap-1">
+							<Icon name="stars" size={14} /> Dominance
+						</span>
+						<span className="text-[10px] text-on-surface-variant">
+							{dominantElement ? `${ELEMENT_LABELS[dominantElement]} (+5% techniques)` : "Inactif (min. 4)"}
+						</span>
+					</div>
+
+					<div className={cn(
+						"p-2.5 rounded-xl border flex flex-col justify-between h-16 transition-all",
+						hasHarmony 
+							? "border-emerald-500/20 bg-emerald-500/5 text-emerald-400" 
+							: "border-outline-variant/30 bg-surface-container-high/40 opacity-60"
+					)}>
+						<span className="font-bold flex items-center gap-1">
+							<Icon name="blur_on" size={14} /> Harmonie
+						</span>
+						<span className="text-[10px] text-on-surface-variant">
+							{hasHarmony ? "Active (+3% toutes stats)" : "Inactif (4 éléments requis)"}
+						</span>
+					</div>
+				</div>
+
+				{links.length > 0 && (
+					<div className="p-2.5 rounded-xl border border-primary/10 bg-surface-container-high flex items-center gap-2 text-xs">
+						<Icon name="share" size={16} className="text-primary animate-pulse" />
+						<div className="flex-1 min-w-0">
+							<p className="font-bold text-on-surface">{links.length} liens élémentaires</p>
+							<p className="text-[10px] text-on-surface-variant">
+								Glows dash-lines connectent vos joueurs.
+							</p>
+						</div>
+					</div>
+				)}
 			</div>
 
 			{/* Elements */}

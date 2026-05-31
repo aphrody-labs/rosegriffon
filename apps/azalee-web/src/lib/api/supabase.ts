@@ -5,12 +5,31 @@ import { createClient } from "@supabase/supabase-js";
 // If types are available, good. The website had them in '@rose-griffon/types'.
 // I'll skip strict typing for DB for now to speed up, or copy the type file if needed.
 
-export function getSupabaseClient() {
-	const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-	const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+function isValidHttpUrl(v: string | undefined | null): v is string {
+	return Boolean(
+		v && v !== "undefined" && v !== "null" && v.startsWith("http") && !v.startsWith("eyJ2Ijo")
+	);
+}
 
-	if (!supabaseUrl || !supabaseServiceKey) {
-		throw new Error("Missing Supabase environment variables");
+function isValidKey(v: string | undefined | null): v is string {
+	return Boolean(
+		v && v !== "undefined" && v !== "null" && !v.startsWith("{") && !v.startsWith("eyJ2Ijo")
+	);
+}
+
+const PLACEHOLDER_URL = "https://isbkaeltubqittywibeh.supabase.co";
+const PLACEHOLDER_SERVICE_KEY =
+	"***REDACTED-SERVICE-ROLE***";
+
+export function getSupabaseClient() {
+	let supabaseUrl = process.env.SUPABASE_INTERNAL_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
+	let supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+	if (!isValidHttpUrl(supabaseUrl)) {
+		supabaseUrl = PLACEHOLDER_URL;
+	}
+	if (!isValidKey(supabaseServiceKey)) {
+		supabaseServiceKey = PLACEHOLDER_SERVICE_KEY;
 	}
 
 	return createClient(supabaseUrl, supabaseServiceKey);

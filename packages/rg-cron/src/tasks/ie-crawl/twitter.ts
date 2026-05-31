@@ -212,15 +212,19 @@ export async function crawlTwitter(): Promise<{
 				}
 
 				if (finalTweetsToUpsert.length > 0) {
-					console.log(
-						`[Crawl Twitter] Envoi de ${finalTweetsToUpsert.length} tweets pour @${screenName}...`
+					// Deduplicate by ID to prevent ON CONFLICT DO UPDATE constraints error
+					const uniqueTweets = Array.from(
+						new Map(finalTweetsToUpsert.map((item) => [item.id, item])).values()
 					);
-					const { error } = await supabase.from("tweets").upsert(finalTweetsToUpsert);
+					console.log(
+						`[Crawl Twitter] Envoi de ${uniqueTweets.length} tweets uniques pour @${screenName} (total brut: ${finalTweetsToUpsert.length})...`
+					);
+					const { error } = await supabase.from("tweets").upsert(uniqueTweets);
 					if (error) {
 						console.error(`[Crawl Twitter] Erreur d'upsert pour @${screenName} :`, error);
 						hasErrors = true;
 					} else {
-						totalCount += finalTweetsToUpsert.length;
+						totalCount += uniqueTweets.length;
 					}
 				} else {
 					console.log(`[Crawl Twitter] Aucun nouveau tweet à synchroniser pour @${screenName}.`);
