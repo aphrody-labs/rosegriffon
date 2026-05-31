@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useMemo } from "react";
 import { getCharacterSkills } from "@/app/actions/teams";
 import { CommonSpriteIcon } from "@/components/ui/CommonSpriteIcon";
 import { Icon } from "@/components/ui/Icon";
@@ -12,7 +12,10 @@ import type { MovesetSkill } from "@/components/wiki/MovesetList";
 import { MiniStatHeptagon } from "@/components/wiki/StatHeptagon";
 import type { SpriteCommonKey } from "@/config/sprites-common";
 import { ROLE_COLORS, ROLE_LABELS } from "@/lib/formations";
+import type { Formation } from "@/lib/formations";
 import type { TeamMember } from "@/lib/team-types";
+import { getCharacterImageUrl } from "@/lib/images";
+import { getPositionMatchFactor, recalculateMemberStats } from "@/lib/team-rules";
 
 const ELEMENT_SPRITE: Record<string, SpriteCommonKey> = {
 	Fire: "fire",
@@ -41,9 +44,11 @@ interface PlayerDetailPanelProps {
 	member: TeamMember;
 	onClose: () => void;
 	onRemove: (slot: string) => void;
+	level?: number;
+	formation?: Formation | null;
 }
 
-export function PlayerDetailPanel({ member, onClose, onRemove }: PlayerDetailPanelProps) {
+export function PlayerDetailPanel({ member, onClose, onRemove, level = 99, formation }: PlayerDetailPanelProps) {
 	const [skills, setSkills] = useState<MovesetSkill[]>([]);
 	const [loading, setLoading] = useState(true);
 	const lastCharaId = useRef<string | null>(null);
@@ -71,7 +76,20 @@ export function PlayerDetailPanel({ member, onClose, onRemove }: PlayerDetailPan
 	const elSprite = ELEMENT_SPRITE[member.element];
 	const elLabel = ELEMENT_LABELS[member.element] || member.element;
 	const hasStats = member.stats && Object.values(member.stats).some((v) => v > 0);
-	const statTotal = hasStats ? Object.values(member.stats!).reduce((a, b) => a + b, 0) : 0;
+
+	// Position match checking
+	const posInfo = useMemo(() => {
+		if (!formation) return { factor: 1.0, status: "none" as const };
+		return getPositionMatchFactor(member.position, member.slot, formation);
+	}, [member.position, member.slot, formation]);
+
+	// Recalculated stats based on level and slot role
+	const finalStats = useMemo(() => {
+		if (!hasStats || !formation) return null;
+		return recalculateMemberStats(member, level, member.slot, formation);
+	}, [member, level, formation, hasStats]);
+
+	const statTotal = finalStats ? finalStats.combatPower : 0;
 
 	return (
 		<div className="rounded-2xl bg-surface-container elevation-2 overflow-hidden animate-in slide-in-from-right-4 duration-200">
@@ -80,6 +98,8 @@ export function PlayerDetailPanel({ member, onClose, onRemove }: PlayerDetailPan
 				<div className="absolute inset-0 bg-linear-to-br from-surface-container-highest to-surface-container-high" />
 				<SafeImage
 					src={member.imageUrl}
+					zukanHash={member.zukanHash}
+					fallbackSrc={member.internalCode ? getCharacterImageUrl(member.internalCode) : undefined}
 					alt={member.name}
 					fill
 					sizes="300px"
@@ -102,6 +122,8 @@ export function PlayerDetailPanel({ member, onClose, onRemove }: PlayerDetailPan
 					<div className="relative size-16 rounded-xl overflow-hidden ring-2 ring-outline/20 shrink-0 elevation-2">
 						<SafeImage
 							src={member.imageUrl}
+							zukanHash={member.zukanHash}
+							fallbackSrc={member.internalCode ? getCharacterImageUrl(member.internalCode) : undefined}
 							alt={member.name}
 							fill
 							sizes="64px"
@@ -111,7 +133,7 @@ export function PlayerDetailPanel({ member, onClose, onRemove }: PlayerDetailPan
 					</div>
 					<div className="flex-1 min-w-0 pb-0.5">
 						<p className="font-bold text-on-surface text-sm truncate">{member.name}</p>
-						<div className="flex items-center gap-1.5 mt-0.5">
+						<div className="flex items-center gap-1.5 mt-0.5 font-bold">
 							<span
 								className="text-[9px] font-black px-1.5 py-0.5 rounded text-white"
 								style={{ backgroundColor: roleColor }}
@@ -132,30 +154,43 @@ export function PlayerDetailPanel({ member, onClose, onRemove }: PlayerDetailPan
 
 			{/* Content */}
 			<div className="p-3 space-y-3">
+				{/* Warning banner for position malus */}
+				{posInfo.status !== "match" && posInfo.status !== "none" && (
+					<div className="p-2.5 rounded-xl border border-red-500/20 bg-red-500/5 text-red-400 text-xs flex items-center gap-2 font-medium">
+						<Icon name="error" size={16} />
+						<span>
+							Malus de position ({posInfo.status === "adjacent" ? "-15%" : "-35%"} de stats). Placez ce joueur à un poste adapté pour restaurer ses capacités.
+						</span>
+					</div>
+				)}
+
 				{/* Stats */}
-				{hasStats && (
+				{hasStats && finalStats && (
 					<div>
 						<div className="flex items-center justify-between mb-2">
 							<p className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">
-								Stats Niv. 99
+								Stats Recalculées (Niv. {level})
 							</p>
 							<span className="text-[10px] font-bold text-on-surface-variant">
 								Total: {statTotal}
 							</span>
 						</div>
 						<div className="flex items-start gap-3">
-							<MiniStatHeptagon stats={member.stats!} size={72} />
+							<MiniStatHeptagon stats={finalStats} size={72} />
 							<div className="flex-1 grid grid-cols-2 gap-x-3 gap-y-1">
-								{Object.entries(member.stats!).map(([key, value]) => (
-									<div key={key} className="flex items-center justify-between">
-										<span className="text-[9px] text-on-surface-variant truncate">
-											{STAT_LABELS[key] || key}
-										</span>
-										<span className="text-[10px] font-bold text-on-surface tabular-nums">
-											{value}
-										</span>
-									</div>
-								))}
+								{Object.entries(finalStats).map(([key, value]) => {
+									if (key === "combatPower") return null;
+									return (
+										<div key={key} className="flex items-center justify-between">
+											<span className="text-[9px] text-on-surface-variant truncate">
+												{STAT_LABELS[key] || key}
+											</span>
+											<span className="text-[10px] font-bold text-on-surface tabular-nums">
+												{value}
+											</span>
+										</div>
+									);
+								})}
 							</div>
 						</div>
 					</div>

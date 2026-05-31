@@ -79,6 +79,7 @@ interface AuraDetailProps {
 
 export function AuraDetail({ aura, category, subTypeInfo, prevAura, nextAura }: AuraDetailProps) {
 	const [imgError, setImgError] = useState(false);
+	const [telopError, setTelopError] = useState(false);
 	const imageUrl = resolveAssetUrl(aura.image);
 	const nameEN = (aura as any).name_EN;
 	const nameJA = (aura as any).name_JA || (aura as any).name_ja;
@@ -334,7 +335,7 @@ export function AuraDetail({ aura, category, subTypeInfo, prevAura, nextAura }: 
 			</div>
 
 			{/* Telop banner — bandeau d'annonce de technique 1728x352 (4.9:1) */}
-			{aura.telopUrl && (
+			{aura.telopUrl && !telopError && (
 				<div className="relative w-full aspect-[1728/352] rounded-2xl overflow-hidden bg-surface-container border border-outline-variant/20 shadow-sm">
 					<Image
 						src={aura.telopUrl}
@@ -343,6 +344,7 @@ export function AuraDetail({ aura, category, subTypeInfo, prevAura, nextAura }: 
 						className="object-cover"
 						sizes="(max-width: 768px) 100vw, 1024px"
 						unoptimized
+						onError={() => setTelopError(true)}
 					/>
 				</div>
 			)}

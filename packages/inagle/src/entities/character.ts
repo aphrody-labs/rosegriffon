@@ -759,6 +759,17 @@ function buildVariant(
 	const elementNames = elementIdToNames(param.element);
 	const stats = calculateMultiLevelStats(param, charaRank);
 
+	const lv1Entry = findGrowthLv1(param.mainPosition, param.subPosition, param.growthPattern);
+	const lv1Stats = lv1Entry ? {
+		kick: lv1Entry.Kc_1,
+		control: lv1Entry.Cr_1,
+		technique: lv1Entry.Tc_1,
+		physical: lv1Entry.Pr_1,
+		pressure: lv1Entry.Ps_1,
+		agility: lv1Entry.Ag_1,
+		intelligence: lv1Entry.It_1,
+	} : undefined;
+
 	const variant: CharacterVariant = {
 		charaParamId: param.charaParamId,
 		position: positionCode ?? "MF",
@@ -770,26 +781,11 @@ function buildVariant(
 		rarityCode: charaRank,
 		growthPattern: param.growthPattern,
 		skills: param.skills || [],
-		stats: stats ?? {
-			lv50: {
-				kick: 0,
-				control: 0,
-				technique: 0,
-				physical: 0,
-				pressure: 0,
-				agility: 0,
-				intelligence: 0,
-			},
-			lv99: {
-				kick: 0,
-				control: 0,
-				technique: 0,
-				physical: 0,
-				pressure: 0,
-				agility: 0,
-				intelligence: 0,
-			},
-		},
+		stats: {
+			lv50: stats?.lv50 ?? { kick: 0, control: 0, technique: 0, physical: 0, pressure: 0, agility: 0, intelligence: 0 },
+			lv99: stats?.lv99 ?? { kick: 0, control: 0, technique: 0, physical: 0, pressure: 0, agility: 0, intelligence: 0 },
+			lv1: lv1Stats
+		} as any,
 	};
 
 	if (constellationMapping) {

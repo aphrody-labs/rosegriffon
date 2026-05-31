@@ -418,6 +418,7 @@ export function CharacterSheet({
 						<SafeImage
 							src={finalImageSrc}
 							zukanHash={zukanHash}
+							fallbackSrc={avatarUrl ? (avatarUrl.startsWith("/") || avatarUrl.startsWith("http") ? avatarUrl : getCharacterFaceUrl(avatarUrl)) : undefined}
 							alt={name}
 							fill
 							unoptimized

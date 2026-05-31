@@ -2,6 +2,24 @@
 
 Toutes les évolutions notables du monorepo `rg`. Format : [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/) + [SemVer](https://semver.org/lang/fr/).
 
+## [0.2.0] — 2026-05-31
+
+### Ajouté
+
+- **Intégration & Rendu Premium des actualités X (Azalée)** :
+  - Synchronisation et importation complète du thread de 26 tweets de @Azalee_IE (`2061064712393982247`).
+  - Téléchargement et hébergement local sur Supabase Storage de tous les médias associés (photos et vidéos).
+  - Lettrine (Drop Cap) stylisée sur le premier paragraphe de l'article pour un look éditorial haut de gamme.
+  - Mise en forme automatique des blocs de citation (Blockquotes) pour les passages entre guillemets.
+  - Intégration de la police *Super Cartoon* sur le titre et les sous-titres de l'article.
+  - Ajout d'overlays avec icônes de lecture (Play buttons) sur les vidéos et GIFs animés dans la galerie.
+  - Alignement à gauche du texte pour éviter les rivières de blancs inesthétiques issues du texte justifié.
+- **Cache local SQLite (Azalée)** :
+  - Proxy transparent SQLite pour le wiki réduisant les latences à moins de 100ms.
+- **Sécurité et robustesse (Cron)** :
+  - Rotation de proxies pour contourner les limitations et protections d'API.
+  - Sauvegarde logique PostgreSQL 18 automatisée (`roles.sql`, `schema.sql`, `data.sql`).
+
 ## [0.1.0] — 2026-05-17
 
 ### Ajouté

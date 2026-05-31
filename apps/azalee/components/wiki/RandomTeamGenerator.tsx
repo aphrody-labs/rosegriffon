@@ -126,6 +126,7 @@ interface Coordinator {
 	playstyle?: string;
 	element?: string;
 	image?: string;
+	buff?: string;
 }
 
 interface RandomTeamGeneratorProps {
@@ -179,10 +180,10 @@ function PlayerCard({
 		<div
 			className={cn(
 				"relative group w-full transition-all",
-				animating ? "opacity-60 scale-95 blur-[2px]" : "opacity-100 scale-100"
+				animating && !locked ? "animate-slot-roll" : "opacity-100 scale-100"
 			)}
 			style={{
-				transitionDelay: animating ? "0ms" : `${animDelay}ms`,
+				animationDelay: animating && !locked ? `${animDelay}ms` : undefined,
 				transitionDuration: "300ms",
 			}}
 		>
@@ -193,6 +194,8 @@ function PlayerCard({
 				<div className="relative w-full aspect-square overflow-hidden">
 					<SafeImage
 						src={imageUrl}
+						zukanHash={(player as any).zukanHash || player.variants?.[0]?.zukanHash}
+						fallbackSrc={getCharacterImageUrl(player.internalCode)}
 						alt={name}
 						fill
 						sizes="(max-width: 640px) 20vw, 140px"
@@ -263,38 +266,84 @@ function resolveCoordinatorImage(person: Coordinator): string | null {
 	return `https://dxi4wb638ujep.cloudfront.net/1/${clean}.png`;
 }
 
-function StaffSlot({ person, role }: { person: Coordinator; role: string }) {
+const COORD_ELEMENT_MAP: Record<string, string> = {
+	"火": "Fire",
+	"風": "Wind",
+	"林": "Forest",
+	"山": "Mountain",
+	"無": "Void",
+};
+
+function StaffSlot({ person, role, team }: { person: Coordinator; role: string; team: GeneratedTeam }) {
 	const imageUrl = resolveCoordinatorImage(person);
+	const [imgError, setImgError] = useState(false);
+
+	const coordElement = COORD_ELEMENT_MAP[person.element || ""] || person.element;
+	const elSprite = coordElement ? ELEMENT_SPRITE[coordElement] : null;
+
+	const players = [...team.gk, ...team.df, ...team.mf, ...team.fw];
+	const compatibility = players.filter((p) => {
+		const variant = p.variants?.[0] as any;
+		const el = variant?.element || (p as any).element;
+		const ps = (p as any).sheetData?.playstyle || (p as any).playstyle;
+		return el === coordElement || ps === person.playstyle;
+	}).length;
 
 	return (
-		<div className="flex items-center gap-2 px-2 py-1.5 rounded-xl bg-surface-container elevation-1">
-			<div className="size-8 sm:w-10 sm:h-10 rounded-full bg-surface-container-high flex items-center justify-center shrink-0 overflow-hidden">
-				{imageUrl ? (
-					<Image
-						src={imageUrl}
-						alt={person.name_localised || person.name_romaji}
-						width={40}
-						height={40}
-						className="object-cover w-full h-full"
-						unoptimized
-					/>
-				) : (
-					<Icon
-						name={role === "Coach" ? "sports" : "person"}
-						size={18}
-						className="text-on-surface-variant"
-					/>
-				)}
+		<div className="flex flex-col gap-2 p-3 rounded-2xl bg-surface-container hover:bg-surface-container-high border border-outline/5 transition-all">
+			<div className="flex items-center gap-2 px-1">
+				<div className="size-10 sm:w-12 sm:h-12 rounded-full bg-surface-container-high flex items-center justify-center shrink-0 overflow-hidden border border-outline/10 shadow-inner">
+					{imageUrl && !imgError ? (
+						<Image
+							src={imageUrl}
+							alt={person.name_localised || person.name_romaji}
+							width={48}
+							height={48}
+							className="object-cover w-full h-full"
+							unoptimized
+							onError={() => setImgError(true)}
+						/>
+					) : (
+						<Icon
+							name={role === "Coach" ? "sports" : "person"}
+							size={20}
+							className="text-on-surface-variant"
+						/>
+					)}
+				</div>
+				<div className="min-w-0 flex-1">
+					<p className="text-xs sm:text-sm font-bold text-on-surface truncate">
+						{person.name_localised || person.name_romaji}
+					</p>
+					<div className="flex items-center gap-1 mt-0.5">
+						<span className="text-[9px] font-semibold text-on-surface-variant uppercase tracking-wider">
+							{role === "Coach" ? "Coach" : "Manager"}
+						</span>
+						{elSprite && <CommonSpriteIcon name={elSprite} scale={0.2} />}
+					</div>
+				</div>
 			</div>
-			<div className="min-w-0 flex-1">
-				<p className="text-[11px] sm:text-sm font-bold text-on-surface truncate">
-					{person.name_localised || person.name_romaji}
-				</p>
-				<p className="text-[10px] sm:text-[11px] text-on-surface-variant truncate">
-					{role === "Coach" ? "Coach" : "Manageuse"}
-					{person.playstyle
-						? ` · ${PLAYSTYLES.find((p) => p.key === person.playstyle)?.label || person.playstyle}`
-						: ""}
+
+			<div className="mt-1 pt-1.5 border-t border-outline/5 space-y-1 text-[10px] text-on-surface-variant">
+				{person.playstyle && (
+					<p className="flex justify-between">
+						<span>Style :</span>
+						<span className="font-semibold text-on-surface">
+							{PLAYSTYLES.find((p) => p.key === person.playstyle)?.label || person.playstyle}
+						</span>
+					</p>
+				)}
+				{person.buff && (
+					<p className="flex justify-between">
+						<span>Buff :</span>
+						<span className="font-bold text-primary">{person.buff}</span>
+					</p>
+				)}
+				<p className="flex justify-between">
+					<span>Affinité :</span>
+					<span className="font-semibold text-on-surface">
+						{compatibility} joueur{compatibility > 1 ? "s" : ""}
+					</span>
 				</p>
 			</div>
 		</div>
@@ -316,7 +365,7 @@ function FormationPicker({
 
 	return (
 		<div>
-			<p className="type-label-medium text-on-surface-variant mb-1.5">Formation</p>
+			<p className="type-label-medium text-on-surface-variant mb-1.5 font-bold">Formation</p>
 
 			{/* Mobile: native select */}
 			<div className="sm:hidden">
@@ -362,13 +411,13 @@ function FormationPicker({
 							aria-label={`Formation ${f.name}`}
 							aria-pressed={isActive}
 							className={cn(
-								"inline-flex items-center gap-1 h-8 px-3 rounded-lg text-xs font-bold transition-all",
+								"inline-flex items-center gap-1.5 h-8 px-3 rounded-full text-xs font-bold transition-all",
 								isActive
-									? "bg-secondary-container text-on-secondary-container elevation-1"
+									? "bg-secondary-container text-on-secondary-container elevation-1 shadow-sm"
 									: "border border-outline text-on-surface-variant hover:bg-on-surface/[0.08]"
 							)}
 						>
-							{isActive && <Icon name="check" size={16} />}
+							{isActive && <Icon name="check" size={14} />}
 							<span>{f.name}</span>
 							<span
 								className={cn(
@@ -385,6 +434,136 @@ function FormationPicker({
 		</div>
 	);
 }
+
+// ---------- Stat Progress Bar Helper ----------
+
+function StatBar({ label, value, max = 150 }: { label: string; value: number; max?: number }) {
+	const percentage = Math.min(100, Math.round((value / max) * 100));
+	return (
+		<div className="space-y-1">
+			<div className="flex justify-between text-[11px] font-semibold text-on-surface-variant">
+				<span>{label}</span>
+				<span className="font-bold text-on-surface">{value}</span>
+			</div>
+			<div className="h-1.5 w-full rounded-full bg-surface-container-high overflow-hidden">
+				<div
+					className="h-full rounded-full bg-linear-to-r from-primary/75 to-primary transition-all duration-500"
+					style={{ width: `${percentage}%` }}
+				/>
+			</div>
+		</div>
+	);
+}
+
+// ---------- Stats Extraction Helper ----------
+
+const getPlayerStats = (player: BaseCharacter) => {
+	const variant = player.variants?.[0];
+	const dbStats = variant?.stats?.lv99;
+	const sd = (player as any).sheetData || (variant as any)?.sheetData;
+	const sdStats = sd?.stats;
+	
+	return {
+		kick: dbStats?.kick || sdStats?.kick || 0,
+		control: dbStats?.control || sdStats?.control || 0,
+		technique: dbStats?.technique || sdStats?.technique || 0,
+		pressure: dbStats?.pressure || sdStats?.pressure || 0,
+		physical: dbStats?.physical || sdStats?.physical || 0,
+		agility: dbStats?.agility || sdStats?.agility || 0,
+		intelligence: dbStats?.intelligence || sdStats?.intelligence || 0,
+	};
+};
+
+const getTeamAverageStats = (team: GeneratedTeam) => {
+	const players = [
+		...team.gk,
+		...team.df,
+		...team.mf,
+		...team.fw
+	];
+	
+	const total = {
+		kick: 0,
+		control: 0,
+		technique: 0,
+		pressure: 0,
+		physical: 0,
+		agility: 0,
+		intelligence: 0
+	};
+	
+	for (const p of players) {
+		const stats = getPlayerStats(p);
+		total.kick += stats.kick;
+		total.control += stats.control;
+		total.technique += stats.technique;
+		total.pressure += stats.pressure;
+		total.physical += stats.physical;
+		total.agility += stats.agility;
+		total.intelligence += stats.intelligence;
+	}
+	
+	const count = players.length || 1;
+	return {
+		kick: Math.round(total.kick / count),
+		control: Math.round(total.control / count),
+		technique: Math.round(total.technique / count),
+		pressure: Math.round(total.pressure / count),
+		physical: Math.round(total.physical / count),
+		agility: Math.round(total.agility / count),
+		intelligence: Math.round(total.intelligence / count),
+	};
+};
+
+const getTeamSynergies = (team: GeneratedTeam) => {
+	const players = [
+		...team.gk,
+		...team.df,
+		...team.mf,
+		...team.fw
+	];
+	
+	const elementCounts: Record<string, number> = {
+		Fire: 0,
+		Wind: 0,
+		Forest: 0,
+		Mountain: 0,
+		Void: 0
+	};
+	
+	const playstyleCounts: Record<string, number> = {
+		Bond: 0,
+		Justice: 0,
+		Breach: 0,
+		Tension: 0,
+		"Rough Play": 0,
+		Counter: 0
+	};
+	
+	for (const p of players) {
+		const variant = p.variants?.[0] as any;
+		const el = variant?.element || (p as any).element || "Void";
+		if (elementCounts[el] !== undefined) {
+			elementCounts[el]++;
+		}
+		
+		const ps = (p as any).sheetData?.playstyle || (p as any).playstyle;
+		if (ps && playstyleCounts[ps] !== undefined) {
+			playstyleCounts[ps]++;
+		}
+	}
+	
+	// Synergies list
+	const list: Array<{ element: string; count: number; boost: number }> = [];
+	for (const [el, count] of Object.entries(elementCounts)) {
+		if (count >= 3) {
+			const boost = count >= 6 ? 15 : count >= 4 ? 10 : 5;
+			list.push({ element: el, count, boost });
+		}
+	}
+	
+	return { elementCounts, playstyleCounts, list };
+};
 
 // ---------- Main component ----------
 
@@ -490,7 +669,7 @@ export function RandomTeamGenerator({ pools, coordinators }: RandomTeamGenerator
 		setAnimating(true);
 		
 		let ticks = 0;
-		const maxTicks = 5;
+		const maxTicks = 6;
 		
 		const interval = setInterval(() => {
 			setTeam((prev) => {
@@ -520,7 +699,7 @@ export function RandomTeamGenerator({ pools, coordinators }: RandomTeamGenerator
 				clearInterval(interval);
 				setAnimating(false);
 			}
-		}, 90);
+		}, 80);
 	}, [generate, locked, animating]);
 
 	const handleCopyLink = useCallback(async () => {
@@ -554,7 +733,7 @@ export function RandomTeamGenerator({ pools, coordinators }: RandomTeamGenerator
 	const renderRow = (position: "gk" | "df" | "mf" | "fw", players: BaseCharacter[]) =>
 		players.map((p, i) => {
 			const key = `${position}-${i}`;
-			const delay = slotIndex++ * 30;
+			const delay = slotIndex++ * 40;
 			return (
 				<PlayerCard
 					key={`${key}-${p.charaId}`}
@@ -567,8 +746,38 @@ export function RandomTeamGenerator({ pools, coordinators }: RandomTeamGenerator
 			);
 		});
 
+	// Calculate metrics for stats, element synergy and dominant playstyle
+	const synergies = getTeamSynergies(team);
+	const averageStats = getTeamAverageStats(team);
+
+	// Find MVP (highest stat player)
+	const allPlayersList = [...team.gk, ...team.df, ...team.mf, ...team.fw];
+	let mvpPlayer = allPlayersList[0];
+	let maxSingleStat = 0;
+	for (const p of allPlayersList) {
+		const s = getPlayerStats(p);
+		const max = Math.max(s.kick, s.control, s.technique, s.pressure, s.physical, s.agility, s.intelligence);
+		if (max > maxSingleStat) {
+			maxSingleStat = max;
+			mvpPlayer = p;
+		}
+	}
+
 	return (
 		<div className="w-full space-y-4 sm:space-y-6">
+			{/* CSS slot-machine roll animation */}
+			<style>{`
+				@keyframes slot-machine {
+					0% { transform: translateY(0); filter: blur(0px); opacity: 1; }
+					25% { transform: translateY(-16px); filter: blur(1.5px); opacity: 0.5; }
+					30% { transform: translateY(16px); filter: blur(1.5px); opacity: 0; }
+					100% { transform: translateY(0); filter: blur(0px); opacity: 1; }
+				}
+				.animate-slot-roll {
+					animation: slot-machine 0.22s cubic-bezier(0.25, 0.46, 0.45, 0.94) infinite;
+				}
+			`}</style>
+
 			{/* Header: title + actions */}
 			<div className="flex items-center justify-between gap-2">
 				<div className="min-w-0">
@@ -583,7 +792,7 @@ export function RandomTeamGenerator({ pools, coordinators }: RandomTeamGenerator
 					{hasLocked && (
 						<button
 							onClick={() => setLocked(new Set())}
-							className="p-2.5 rounded-full bg-surface-container-high state-layer relative overflow-hidden text-on-surface-variant transition-all"
+							className="p-2.5 rounded-full bg-surface-container-high state-layer relative overflow-hidden text-on-surface-variant transition-all hover:bg-surface-container-highest"
 							aria-label="Débloquer tous les joueurs"
 							title="Tout débloquer"
 						>
@@ -592,7 +801,7 @@ export function RandomTeamGenerator({ pools, coordinators }: RandomTeamGenerator
 					)}
 					<button
 						onClick={handleCopyLink}
-						className="p-2.5 rounded-full bg-surface-container-high state-layer relative overflow-hidden text-on-surface-variant transition-all"
+						className="p-2.5 rounded-full bg-surface-container-high state-layer relative overflow-hidden text-on-surface-variant transition-all hover:bg-surface-container-highest"
 						aria-label="Copier le lien"
 						title="Copier le lien"
 					>
@@ -607,7 +816,7 @@ export function RandomTeamGenerator({ pools, coordinators }: RandomTeamGenerator
 						onClick={regenerate}
 						disabled={animating}
 						aria-label="Régénérer l'équipe"
-						className="inline-flex items-center gap-2 h-14 px-4 rounded-2xl bg-primary-container text-on-primary-container font-bold text-sm elevation-3 hover:elevation-4 active:elevation-2 active:scale-[0.98] transition-all disabled:opacity-50"
+						className="inline-flex items-center gap-2 h-14 px-5 rounded-2xl bg-primary-container text-on-primary-container font-bold text-sm shadow-md active:scale-[0.98] transition-all disabled:opacity-50 hover:bg-primary-container-highest"
 					>
 						<Icon name="casino" size={20} className={cn(animating && "animate-spin")} />
 						<span className="hidden sm:inline">Régénérer</span>
@@ -639,14 +848,13 @@ export function RandomTeamGenerator({ pools, coordinators }: RandomTeamGenerator
 				<div
 					className={cn(
 						"space-y-3 sm:space-y-3",
-						// Mobile: collapsible
 						"sm:block",
 						filtersOpen ? "block mt-2" : "hidden"
 					)}
 				>
 					{/* Element filter — Filter Chips MD3 */}
 					<div>
-						<p className="type-label-medium text-on-surface-variant mb-1.5">Élément</p>
+						<p className="type-label-medium text-on-surface-variant mb-1.5 font-bold">Élément</p>
 						<div className="flex flex-wrap gap-1.5">
 							{ELEMENTS.map(({ value, label }) => {
 								const isActive = selectedElement === value;
@@ -659,13 +867,13 @@ export function RandomTeamGenerator({ pools, coordinators }: RandomTeamGenerator
 										aria-label={`Filtrer par élément ${label}`}
 										aria-pressed={isActive}
 										className={cn(
-											"inline-flex items-center gap-1 h-8 px-3 rounded-lg text-xs font-bold transition-all",
+											"inline-flex items-center gap-1.5 h-8 px-3 rounded-full text-xs font-bold transition-all",
 											isActive
-												? "bg-secondary-container text-on-secondary-container elevation-1"
+												? "bg-secondary-container text-on-secondary-container elevation-1 shadow-sm"
 												: "border border-outline text-on-surface-variant hover:bg-on-surface/[0.08]"
 										)}
 									>
-										{isActive && <Icon name="check" size={16} />}
+										{isActive && <Icon name="check" size={14} />}
 										<CommonSpriteIcon name={ELEMENT_SPRITE[value]} scale={0.25} />
 										{label}
 									</button>
@@ -674,7 +882,7 @@ export function RandomTeamGenerator({ pools, coordinators }: RandomTeamGenerator
 							{selectedElement && (
 								<button
 									onClick={() => setSelectedElement(undefined)}
-									className="type-label-large text-primary px-3 py-2 rounded-full state-layer relative overflow-hidden"
+									className="type-label-large text-primary px-3 py-2 rounded-full hover:bg-primary/[0.08] transition-all"
 								>
 									Effacer
 								</button>
@@ -684,7 +892,7 @@ export function RandomTeamGenerator({ pools, coordinators }: RandomTeamGenerator
 
 					{/* Playstyle filter — Filter Chips MD3 */}
 					<div>
-						<p className="type-label-medium text-on-surface-variant mb-1.5">Style de jeu (max 2)</p>
+						<p className="type-label-medium text-on-surface-variant mb-1.5 font-bold">Style de jeu (max 2)</p>
 						<div className="flex flex-wrap gap-1.5">
 							{PLAYSTYLES.map((ps) => {
 								const active = selectedPlaystyles.includes(ps.key);
@@ -696,13 +904,13 @@ export function RandomTeamGenerator({ pools, coordinators }: RandomTeamGenerator
 										aria-label={`Filtrer par style ${ps.label}`}
 										aria-pressed={active}
 										className={cn(
-											"inline-flex items-center gap-1 h-8 px-3 rounded-lg text-xs font-bold transition-all",
+											"inline-flex items-center gap-1.5 h-8 px-3 rounded-full text-xs font-bold transition-all",
 											active
-												? "bg-secondary-container text-on-secondary-container elevation-1"
+												? "bg-secondary-container text-on-secondary-container elevation-1 shadow-sm"
 												: "border border-outline text-on-surface-variant hover:bg-on-surface/[0.08]"
 										)}
 									>
-										{active && <Icon name="check" size={16} />}
+										{active && <Icon name="check" size={14} />}
 										{sprite && <CommonSpriteIcon name={sprite} scale={0.25} />}
 										{ps.label}
 									</button>
@@ -711,7 +919,7 @@ export function RandomTeamGenerator({ pools, coordinators }: RandomTeamGenerator
 							{selectedPlaystyles.length > 0 && (
 								<button
 									onClick={() => setSelectedPlaystyles([])}
-									className="type-label-large text-primary px-3 py-2 rounded-full state-layer relative overflow-hidden"
+									className="type-label-large text-primary px-3 py-2 rounded-full hover:bg-primary/[0.08] transition-all"
 								>
 									Effacer
 								</button>
@@ -721,63 +929,145 @@ export function RandomTeamGenerator({ pools, coordinators }: RandomTeamGenerator
 				</div>
 			</div>
 
-			{/* Formation field */}
-			<div className="bg-surface-container rounded-xl elevation-1 p-1.5 sm:p-4 lg:p-6">
-				{/* FW */}
-				{team.fw.length > 0 && (
-					<div
-						className="mx-auto mb-1 sm:mb-3 gap-1 sm:gap-2 grid"
-						style={{
-							gridTemplateColumns: `repeat(${formation.fw}, 1fr)`,
-							maxWidth: `${Math.min(100, formation.fw * 22)}%`,
-						}}
-					>
-						{renderRow("fw", team.fw)}
+			{/* Main Grid: Pitch + Info Column */}
+			<div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+				{/* Beautiful Soccer Field Preview */}
+				<div className="lg:col-span-2 relative w-full bg-linear-to-b from-emerald-950 via-emerald-900 to-emerald-950 rounded-3xl border border-emerald-800/80 overflow-hidden shadow-2xl p-4 sm:p-6 flex flex-col justify-between gap-4 sm:gap-6 min-h-[450px] sm:min-h-[580px]">
+					{/* Pitch markings background */}
+					<div className="absolute inset-0 pointer-events-none opacity-15 m-2 sm:m-4 border border-white rounded-lg">
+						{/* Center line */}
+						<div className="absolute inset-x-0 top-1/2 h-px bg-white -translate-y-1/2" />
+						{/* Center circle */}
+						<div className="absolute top-1/2 left-1/2 w-20 h-20 sm:w-28 sm:h-28 border border-white rounded-full -translate-x-1/2 -translate-y-1/2" />
+						{/* Penalty box top */}
+						<div className="absolute top-0 left-1/2 -translate-x-1/2 w-1/2 h-[15%] border-b border-x border-white" />
+						{/* Goal area top */}
+						<div className="absolute top-0 left-1/2 -translate-x-1/2 w-1/4 h-[5%] border-b border-x border-white" />
+						{/* Penalty box bottom */}
+						<div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-1/2 h-[15%] border-t border-x border-white" />
+						{/* Goal area bottom */}
+						<div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-1/4 h-[5%] border-t border-x border-white" />
 					</div>
-				)}
 
-				{/* MF */}
-				<div
-					className="mx-auto mb-1 sm:mb-3 gap-1 sm:gap-2 grid"
-					style={{
-						gridTemplateColumns: `repeat(${formation.mf}, 1fr)`,
-						maxWidth: `${Math.min(100, formation.mf * 20)}%`,
-					}}
-				>
-					{renderRow("mf", team.mf)}
+					{/* Field contents: Players */}
+					<div className="relative z-10 w-full h-full flex flex-col justify-between gap-4 sm:gap-6">
+						{/* FW */}
+						{team.fw.length > 0 && (
+							<div
+								className="mx-auto gap-1 sm:gap-2 grid w-full"
+								style={{
+									gridTemplateColumns: `repeat(${formation.fw}, minmax(0, 1fr))`,
+									maxWidth: `${Math.min(100, formation.fw * 22)}%`,
+								}}
+							>
+								{renderRow("fw", team.fw)}
+							</div>
+						)}
+
+						{/* MF */}
+						<div
+							className="mx-auto gap-1 sm:gap-2 grid w-full"
+							style={{
+								gridTemplateColumns: `repeat(${formation.mf}, minmax(0, 1fr))`,
+								maxWidth: `${Math.min(100, formation.mf * 20)}%`,
+							}}
+						>
+							{renderRow("mf", team.mf)}
+						</div>
+
+						{/* DF */}
+						<div
+							className="mx-auto gap-1 sm:gap-2 grid w-full"
+							style={{
+								gridTemplateColumns: `repeat(${formation.df}, minmax(0, 1fr))`,
+								maxWidth: `${Math.min(100, formation.df * 20)}%`,
+							}}
+						>
+							{renderRow("df", team.df)}
+						</div>
+
+						{/* GK */}
+						<div className="w-[20%] sm:w-1/6 mx-auto">
+							{renderRow("gk", team.gk)}
+						</div>
+					</div>
 				</div>
 
-				{/* DF */}
-				<div
-					className="mx-auto mb-1 sm:mb-3 gap-1 sm:gap-2 grid"
-					style={{
-						gridTemplateColumns: `repeat(${formation.df}, 1fr)`,
-						maxWidth: `${Math.min(100, formation.df * 20)}%`,
-					}}
-				>
-					{renderRow("df", team.df)}
-				</div>
+				{/* Info Column: Stats + Synergies */}
+				<div className="space-y-6">
+					{/* Team Average Stats */}
+					<div className="p-4 rounded-3xl bg-surface-container border border-outline/5 space-y-4">
+						<h2 className="text-sm font-bold text-on-surface uppercase tracking-wider">
+							Statistiques Moyennes (Lv 99)
+						</h2>
+						<div className="space-y-3">
+							<StatBar label="Frappe (Kick)" value={averageStats.kick} />
+							<StatBar label="Contrôle" value={averageStats.control} />
+							<StatBar label="Technique" value={averageStats.technique} />
+							<StatBar label="Physique" value={averageStats.physical} />
+							<StatBar label="Pression (Defense)" value={averageStats.pressure} />
+							<StatBar label="Agilité" value={averageStats.agility} />
+							<StatBar label="Intelligence" value={averageStats.intelligence} />
+						</div>
+						
+						{mvpPlayer && (
+							<div className="pt-2 border-t border-outline/5">
+								<p className="text-[11px] text-on-surface-variant">
+									Meilleure Stat Single :{" "}
+									<span className="font-bold text-primary">
+										{getCharName(mvpPlayer)} ({maxSingleStat})
+									</span>
+								</p>
+							</div>
+						)}
+					</div>
 
-				{/* GK */}
-				<div className="w-[18%] sm:w-1/6 mx-auto">{renderRow("gk", team.gk)}</div>
-
-				{/* Formation label */}
-				<div className="text-center mt-1.5 sm:mt-3 space-y-0.5">
-					<span className="block text-[10px] sm:text-xs font-bold text-on-surface-variant/80">
-						{formation.name}
-					</span>
-					<span className="block text-[9px] sm:text-[10px] text-on-surface-variant/50 tracking-widest">
-						{formation.layout} · ATT {formation.off} · DEF {formation.def}
-					</span>
+					{/* Synergies Panel */}
+					<div className="p-4 rounded-3xl bg-surface-container border border-outline/5 space-y-4">
+						<h2 className="text-sm font-bold text-on-surface uppercase tracking-wider">
+							Synergies d'Éléments
+						</h2>
+						<div className="space-y-3">
+							{synergies.list.length > 0 ? (
+								<div className="flex flex-col gap-2">
+									{synergies.list.map((syn) => (
+										<div
+											key={syn.element}
+											className="flex items-center justify-between p-2 rounded-xl bg-surface-container-high border border-outline/5"
+										>
+											<div className="flex items-center gap-2">
+												<CommonSpriteIcon name={ELEMENT_SPRITE[syn.element]} scale={0.25} />
+												<span className="text-xs font-bold text-on-surface">
+													{ELEMENTS.find((el) => el.value === syn.element)?.label || syn.element}
+												</span>
+											</div>
+											<span className="text-xs font-bold text-primary">
+												x{syn.count} (+{syn.boost}% boost)
+											</span>
+										</div>
+									))}
+								</div>
+							) : (
+								<p className="text-xs text-on-surface-variant/70 italic">
+									Aucune synergie active (minimum 3 joueurs du même élément)
+								</p>
+							)}
+						</div>
+					</div>
 				</div>
 			</div>
 
-			{/* Staff */}
-			<div className="grid grid-cols-2 gap-1.5 sm:grid-cols-4 sm:gap-2">
-				{team.coach && <StaffSlot person={team.coach} role="Coach" />}
-				{team.managers.map((m) => (
-					<StaffSlot key={m.id} person={m} role="Manager" />
-				))}
+			{/* Staff Section */}
+			<div className="space-y-3">
+				<h2 className="text-sm font-bold text-on-surface uppercase tracking-wider px-1">
+					Staff Technique
+				</h2>
+				<div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+					{team.coach && <StaffSlot person={team.coach} role="Coach" team={team} />}
+					{team.managers.map((m) => (
+						<StaffSlot key={m.id} person={m} role="Manager" team={team} />
+					))}
+				</div>
 			</div>
 
 			{/* RAG Tactical Assistant */}

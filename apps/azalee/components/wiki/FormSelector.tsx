@@ -126,6 +126,7 @@ export function FormSelector({ forms, currentFormId }: FormSelectorProps) {
 								<SafeImage
 									src={imageUrl}
 									zukanHash={form.zukanHash}
+									fallbackSrc={form.internalCode ? getCharacterFaceUrl(form.internalCode) : undefined}
 									alt={`${posLabel} ${elemLabel}`}
 									fill
 									unoptimized

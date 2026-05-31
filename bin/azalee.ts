@@ -12,6 +12,7 @@ import { Command } from "commander";
 import { existsSync, readdirSync, readFileSync, appendFileSync } from "node:fs";
 import path from "node:path";
 import dotenv from "dotenv";
+import { isKana, toKatakana, toHiragana, toRomaji } from "wanakana";
 import { createInagleService } from "../packages/inagle/src/service.ts";
 import { getRedisClient, cache } from "../packages/db/src/redis.ts";
 import { queryRag } from "../packages/cron/src/tasks/ie-crawl/rag.ts";
@@ -170,6 +171,75 @@ function getSkillName(svc: any, skillId: string): string {
 	const s = svc.skills.get(skillId) || svc.skills.passiveGet(skillId) || svc.skills.auraGet(skillId);
 	return s ? (s.displayName || s.name_FR || s.name_EN || s.name_JA || skillId) : skillId;
 }
+
+// Helper to get full skill details
+function getSkillDetails(svc: any, skillId: string) {
+	const s = svc.skills.get(skillId) || svc.skills.passiveGet(skillId) || svc.skills.auraGet(skillId);
+	if (!s) return { id: skillId, name: skillId };
+	return {
+		id: skillId,
+		name: s.displayName || s.name_FR || s.name_EN || s.name_JA || skillId,
+		power: s.power_max ?? s.power ?? undefined,
+		cost: s.cost ?? s.tp ?? undefined,
+		element: s.elementName?.fr || s.elementName?.en || undefined,
+		category: s.categoryName?.fr || s.categoryName?.en || undefined,
+	};
+}
+
+// Helper to get interpolated stats
+function getInterpolatedStats(variant: any, level: number) {
+	const stats = variant.stats?.lv99 || { kick: 0, control: 0, technique: 0, pressure: 0, physical: 0, agility: 0, intelligence: 0 };
+	const statsLv1 = variant.stats?.lv1;
+	const statsLv30 = variant.stats?.lv30;
+	const statsLv50 = variant.stats?.lv50;
+
+	if (level === 99) return stats;
+	if (level === 1 && statsLv1) return statsLv1;
+
+	const hasCompleteData = statsLv1 && statsLv30 && statsLv50;
+	if (!hasCompleteData) {
+		const startStats = statsLv1 || stats;
+		const endStats = stats;
+		const t = (level - 1) / 98;
+		const lerp = (start: number, end: number) => Math.floor(start + (end - start) * t);
+		
+		return {
+			kick: lerp(startStats.kick, endStats.kick),
+			control: lerp(startStats.control, endStats.control),
+			technique: lerp(startStats.technique, endStats.technique),
+			pressure: lerp(startStats.pressure, endStats.pressure),
+			physical: lerp(startStats.physical, endStats.physical),
+			agility: lerp(startStats.agility, endStats.agility),
+			intelligence: lerp(startStats.intelligence, endStats.intelligence),
+		};
+	}
+
+	const getInterpolatedStat = (key: string) => {
+		const s1 = statsLv1[key] || 0;
+		const s30 = statsLv30[key] || 0;
+		const s50 = statsLv50[key] || 0;
+		const s99 = stats[key] || 0;
+
+		if (level <= 30) {
+			return Math.floor(s1 + (s30 - s1) * ((level - 1) / 29));
+		}
+		if (level <= 50) {
+			return Math.floor(s30 + (s50 - s30) * ((level - 30) / 20));
+		}
+		return Math.floor(s50 + (s99 - s50) * ((level - 50) / 49));
+	};
+
+	return {
+		kick: getInterpolatedStat("kick"),
+		control: getInterpolatedStat("control"),
+		technique: getInterpolatedStat("technique"),
+		pressure: getInterpolatedStat("pressure"),
+		physical: getInterpolatedStat("physical"),
+		agility: getInterpolatedStat("agility"),
+		intelligence: getInterpolatedStat("intelligence"),
+	};
+}
+
 
 const PERSONALITY_NAMES: Record<number, string> = {
 	0: "Inconnu",
@@ -670,6 +740,304 @@ async function runStatusDiagnosticInline() {
 
 // ─── COMMANDS ────────────────────────────────────────────────────────
 
+function wanakanaToRomaji(name: string): string | null {
+	if (!name) return null;
+	const hasKana = [...name].some((ch) => isKana(ch));
+	if (!hasKana) return null;
+	const parts = name.split(/[・\s]+/).filter(Boolean);
+	return parts
+		.map((p) => {
+			const r = toRomaji(p);
+			return r.charAt(0).toUpperCase() + r.slice(1);
+		})
+		.join(" ");
+}
+
+async function searchDatabaseTranslate(query: string): Promise<any[]> {
+	const sanitized = query.replaceAll(/[%_,().*\\]/g, "").trim();
+	if (!sanitized) return [];
+
+	const q = `%${sanitized}%`;
+
+	const hira = toHiragana(sanitized.toLowerCase());
+	const kata = toKatakana(sanitized.toLowerCase());
+	const isValidHira = hira.length > 0 && [...hira].every((c) => isKana(c) || c === "ー");
+	const isValidKata = kata.length > 0 && [...kata].every((c) => isKana(c) || c === "ー");
+
+	// Try PostgreSQL first
+	const dbUrl = process.env.DATABASE_URL;
+	if (dbUrl) {
+		try {
+			const pg = require("pg");
+			const client = new pg.Client({ connectionString: dbUrl });
+			await client.connect();
+
+			const results: any[] = [];
+
+			// Characters
+			let charSql = `
+				SELECT slug as id, 'character' as type, 'Personnage' as "typeLabel", 
+				       name_fr, name_en, name_ja, name_roma, ('/chara/' || slug) as url
+				FROM inagle_characters
+				WHERE name_fr ILIKE $1 OR name_en ILIKE $1 OR name_ja ILIKE $1 OR name_roma ILIKE $1
+				  AND internal_code NOT LIKE '%_5000'
+				ORDER BY name_fr ASC LIMIT 10
+			`;
+			let charParams: any[] = [q];
+			if (isValidHira && hira !== sanitized.toLowerCase()) {
+				charSql = charSql.replace("OR name_roma ILIKE $1", `OR name_roma ILIKE $1 OR name_ja ILIKE $2`);
+				charParams.push(`%${hira}%`);
+			}
+			if (isValidKata && kata !== sanitized.toLowerCase()) {
+				const paramIndex = charParams.length + 1;
+				charSql = charSql.replace("OR name_ja ILIKE $2", `OR name_ja ILIKE $2 OR name_ja ILIKE $${paramIndex}`);
+				charParams.push(`%${kata}%`);
+			}
+
+			const charRes = await client.query(charSql, charParams);
+			results.push(...charRes.rows);
+
+			// Skills
+			const skillRes = await client.query(`
+				SELECT id::text, 'skill' as type, 'Technique' as "typeLabel", 
+				       name_fr, name_en, name_ja, NULL as name_roma, ('/skill/' || id) as url
+				FROM inagle_skills
+				WHERE name_fr ILIKE $1 OR name_en ILIKE $1 OR name_ja ILIKE $1
+				ORDER BY name_fr ASC LIMIT 10
+			`, [q]);
+			results.push(...skillRes.rows);
+
+			// Teams
+			const teamRes = await client.query(`
+				SELECT id::text, 'team' as type, 'Équipe' as "typeLabel", 
+				       name_fr, name_en, name_ja, NULL as name_roma, ('/team/' || id) as url
+				FROM inagle_teams
+				WHERE name_fr ILIKE $1 OR name_en ILIKE $1 OR name_ja ILIKE $1
+				ORDER BY name_fr ASC LIMIT 10
+			`, [q]);
+			results.push(...teamRes.rows);
+
+			// Items
+			const itemRes = await client.query(`
+				SELECT id::text, 'item' as type, 'Objet' as "typeLabel", 
+				       name_fr, name_en, name_ja, NULL as name_roma, ('/item/' || id) as url
+				FROM inagle_items
+				WHERE category != 'special_tactics' AND (name_fr ILIKE $1 OR name_en ILIKE $1 OR name_ja ILIKE $1)
+				ORDER BY name_fr ASC LIMIT 10
+			`, [q]);
+			results.push(...itemRes.rows);
+
+			await client.end();
+			return results;
+		} catch {
+			// Fail silently to try SQLite fallback
+		}
+	}
+
+	// SQLite fallback
+	const dbPath = getSqlitePath();
+	if (dbPath) {
+		try {
+			const { Database: DBConstructor } = require("bun:sqlite");
+			const db = new DBConstructor(dbPath, { readonly: true });
+			const results: any[] = [];
+
+			const queryRun = (sql: string, params: any[]) => {
+				const stmt = db.prepare(sql);
+				return stmt.all(...params);
+			};
+
+			// Characters
+			let charSql = `
+				SELECT id, 'character' as type, 'Personnage' as typeLabel,
+				       name_fr, name_en, name_ja, slug,
+				       ('/chara/' || slug) as url
+				FROM inagle_characters
+				WHERE name_fr LIKE ?1 OR name_en LIKE ?1 OR name_ja LIKE ?1
+				  AND internal_code NOT LIKE '%_5000'
+				ORDER BY name_fr ASC LIMIT 10
+			`;
+			let charParams: any[] = [q];
+			if (isValidHira && hira !== sanitized.toLowerCase()) {
+				charSql = charSql.replace("OR name_ja LIKE ?1", `OR name_ja LIKE ?1 OR name_ja LIKE ?2`);
+				charParams.push(`%${hira}%`);
+			}
+			if (isValidKata && kata !== sanitized.toLowerCase()) {
+				const paramIndex = charParams.length + 1;
+				charSql = charSql.replace("OR name_ja LIKE ?2", `OR name_ja LIKE ?2 OR name_ja LIKE ?${paramIndex}`);
+				charParams.push(`%${kata}%`);
+			}
+
+			const chars = queryRun(charSql, charParams);
+			for (const c of chars) {
+				results.push({
+					id: c.id,
+					type: c.type,
+					typeLabel: c.typeLabel,
+					name_fr: c.name_fr,
+					name_en: c.name_en,
+					name_ja: c.name_ja,
+					name_roma: c.name_ja ? wanakanaToRomaji(c.name_ja) : null,
+					url: c.url
+				});
+			}
+
+			// Skills
+			let skillSql = `
+				SELECT id, 'skill' as type, 'Technique' as typeLabel,
+				       name_fr, name_en, name_ja, ('/skill/' || id) as url
+				FROM inagle_skills
+				WHERE name_fr LIKE ?1 OR name_en LIKE ?1 OR name_ja LIKE ?1
+				ORDER BY name_fr ASC LIMIT 10
+			`;
+			const skills = queryRun(skillSql, [q]);
+			for (const s of skills) {
+				results.push({
+					id: s.id,
+					type: s.type,
+					typeLabel: s.typeLabel,
+					name_fr: s.name_fr,
+					name_en: s.name_en,
+					name_ja: s.name_ja,
+					name_roma: s.name_ja ? wanakanaToRomaji(s.name_ja) : null,
+					url: s.url
+				});
+			}
+
+			// Teams
+			let teamSql = `
+				SELECT id, 'team' as type, 'Équipe' as typeLabel,
+				       name_fr, name_en, name_ja, ('/team/' || id) as url
+				FROM inagle_teams
+				WHERE name_fr LIKE ?1 OR name_en LIKE ?1 OR name_ja LIKE ?1
+				ORDER BY name_fr ASC LIMIT 10
+			`;
+			const teams = queryRun(teamSql, [q]);
+			for (const t of teams) {
+				results.push({
+					id: t.id,
+					type: t.type,
+					typeLabel: t.typeLabel,
+					name_fr: t.name_fr,
+					name_en: t.name_en,
+					name_ja: t.name_ja,
+					name_roma: t.name_ja ? wanakanaToRomaji(t.name_ja) : null,
+					url: t.url
+				});
+			}
+
+			// Items
+			let itemSql = `
+				SELECT id, 'item' as type, 'Objet' as typeLabel,
+				       name_fr, name_en, name_ja, ('/item/' || id) as url
+				FROM inagle_items
+				WHERE category != 'special_tactics' AND (name_fr LIKE ?1 OR name_en LIKE ?1 OR name_ja LIKE ?1)
+				ORDER BY name_fr ASC LIMIT 10
+			`;
+			const items = queryRun(itemSql, [q]);
+			for (const i of items) {
+				results.push({
+					id: i.id,
+					type: i.type,
+					typeLabel: i.typeLabel,
+					name_fr: i.name_fr,
+					name_en: i.name_en,
+					name_ja: i.name_ja,
+					name_roma: i.name_ja ? wanakanaToRomaji(i.name_ja) : null,
+					url: i.url
+				});
+			}
+
+			db.close();
+			return results;
+		} catch {
+			// Ignore sqlite errors
+		}
+	}
+
+	return [];
+}
+
+async function searchGlossaryTranslate(query: string): Promise<any[]> {
+	const glossaryPath = path.join(process.cwd(), "data", "glossary.json");
+	const glossaryFile = Bun.file(glossaryPath);
+	if (!(await glossaryFile.exists())) return [];
+
+	try {
+		const glossary = await glossaryFile.json();
+		const sanitized = query.replaceAll(/[%_,().*\\]/g, "").trim().toLowerCase();
+		if (!sanitized) return [];
+
+		const hiraCandidate = toHiragana(sanitized).toLowerCase();
+		const kataCandidate = toKatakana(sanitized).toLowerCase();
+
+		const isValidHira = hiraCandidate.length > 0 && [...hiraCandidate].every((c) => isKana(c) || c === "ー");
+		const isValidKata = kataCandidate.length > 0 && [...kataCandidate].every((c) => isKana(c) || c === "ー");
+
+		const results: any[] = [];
+
+		const searchCategory = (catName: string, type: string, typeLabel: string, urlPrefix: string) => {
+			const list = glossary[catName] || [];
+			for (const entry of list) {
+				let matched = false;
+				const enLower = (entry.en || "").toLowerCase();
+				const frLower = (entry.fr || "").toLowerCase();
+				const jaLower = (entry.ja || "").toLowerCase();
+
+				if (enLower.includes(sanitized) || frLower.includes(sanitized) || jaLower.includes(sanitized)) {
+					matched = true;
+				} else if (isValidHira && jaLower.includes(hiraCandidate)) {
+					matched = true;
+				} else if (isValidKata && jaLower.includes(kataCandidate)) {
+					matched = true;
+				} else if (entry.ja) {
+					const roma = wanakanaToRomaji(entry.ja);
+					if (roma && roma.toLowerCase().includes(sanitized)) {
+						matched = true;
+					}
+				}
+
+				if (matched) {
+					const id = entry.code || entry.en || entry.ja || Math.random().toString();
+					let finalType = type;
+					let finalTypeLabel = typeLabel;
+					let finalUrl = `${urlPrefix}/${id}`;
+
+					if (type === "aura") {
+						const isSoul = entry.subType === "soul" || (entry.subType && entry.subType.toLowerCase().includes("soul"));
+						finalType = isSoul ? "soul" : "keshin";
+						finalTypeLabel = isSoul ? "Totem" : "Esprit Guerrier";
+						finalUrl = isSoul ? `/aura/totems/${id}` : `/aura/esprits-guerriers/${id}`;
+					}
+
+					results.push({
+						id,
+						type: finalType,
+						typeLabel: finalTypeLabel,
+						name_fr: entry.fr || entry.en || null,
+						name_en: entry.en || null,
+						name_ja: entry.ja || null,
+						name_roma: entry.ja ? wanakanaToRomaji(entry.ja) : null,
+						url: finalUrl,
+					});
+				}
+			}
+		};
+
+		searchCategory("characters", "character", "Personnage", "/chara");
+		searchCategory("techniques", "skill", "Technique", "/skill");
+		searchCategory("auras", "aura", "Aura", "/aura");
+		searchCategory("passives", "skill", "Technique", "/skill");
+		searchCategory("teams", "team", "Équipe", "/team");
+		searchCategory("items", "item", "Objet", "/item");
+		searchCategory("terms", "term", "Terme", "#");
+
+		return results;
+	} catch {
+		return [];
+	}
+}
+
 // 1. translate
 program
 	.command("translate [text]")
@@ -692,11 +1060,57 @@ program
 			const isJa = containsJapanese(inputText);
 			if (!options.json) {
 				console.log(
-					`${colors.cyan}Langue source détectée : ${isJa ? "Japonais" : "Anglais"}${colors.reset}`
+					`${colors.cyan}Langue source détectée : ${isJa ? "Japonais" : "Anglais/Français"}${colors.reset}`
 				);
 			}
 
-			const translated = await translateTextHelper(inputText);
+			// Run unified database & glossary search for matches
+			const [dbResults, glossaryResults] = await Promise.all([
+				searchDatabaseTranslate(inputText),
+				searchGlossaryTranslate(inputText)
+			]);
+
+			const seen = new Set<string>();
+			const merged: any[] = [];
+
+			if (dbResults) {
+				for (const r of dbResults) {
+					const key = `${r.type}-${r.id}`.toLowerCase();
+					if (!seen.has(key)) {
+						seen.add(key);
+						merged.push(r);
+					}
+				}
+			}
+
+			if (glossaryResults) {
+				for (const r of glossaryResults) {
+					const key = `${r.type}-${r.id}`.toLowerCase();
+					const nameKey = `${r.type}-${r.name_fr || r.name_en}`.toLowerCase();
+					if (!seen.has(key) && !seen.has(nameKey)) {
+						seen.add(key);
+						seen.add(nameKey);
+						merged.push(r);
+					}
+				}
+			}
+
+			// Sort by relevance: exact match > prefix > contains
+			const queryLower = inputText.toLowerCase();
+			merged.sort((a, b) => {
+				const scoreOf = (r: any) => {
+					for (const name of [r.name_fr, r.name_en, r.name_ja, r.name_roma]) {
+						if (!name) continue;
+						const n = name.toLowerCase();
+						if (n === queryLower) return 3;
+						if (n.startsWith(queryLower)) return 2;
+					}
+					return 1;
+				};
+				return scoreOf(b) - scoreOf(a);
+			});
+
+			const translatedBlock = await translateTextHelper(inputText);
 
 			if (options.json) {
 				restoreLogs(true);
@@ -704,13 +1118,27 @@ program
 					JSON.stringify({
 						original: inputText,
 						detectedLanguage: isJa ? "ja" : "en",
-						translated: translated,
+						translatedText: translatedBlock,
+						matches: merged.slice(0, 15)
 					}, null, 2)
 				);
 			} else {
-				console.log(`\n${colors.bold}${colors.green}Texte traduit :${colors.reset}`);
-				console.log(translated);
+				if (merged.length > 0) {
+					console.log(`\n${colors.bold}${colors.blue}Entités trouvées dans la base & le glossaire :${colors.reset}`);
+					const rows = merged.slice(0, 15).map((r) => ({
+						Type: r.typeLabel,
+						"Nom FR": r.name_fr || "—",
+						"Nom EN": r.name_en || "—",
+						"Nom JA": r.name_ja || "—",
+						Romaji: r.name_roma || "—"
+					}));
+					console.log(renderAsciiTable(rows));
+				}
+				
+				console.log(`\n${colors.bold}${colors.green}Traduction brute du texte :${colors.reset}`);
+				console.log(translatedBlock);
 			}
+			process.exit(0);
 		} catch (e: any) {
 			restoreLogs(!!options.json);
 			if (options.json) {
@@ -718,6 +1146,7 @@ program
 			} else {
 				console.error(`${colors.red}Erreur de traduction : ${e.message}${colors.reset}`);
 			}
+			process.exit(1);
 		}
 	});
 
@@ -984,7 +1413,7 @@ program
 			const skills = svc.skills.all();
 
 			const missingName = chars.filter((c) => !c.names?.fr && !c.names?.en);
-			const missingImg = chars.filter((c) => !c.image_url && !c.zukan_hash);
+			const missingImg = chars.filter((c) => !c.icons?.face && !c.image_url && !c.zukan_hash && !c.zukanHash && !c.image);
 			const missingStats = chars.filter((c) => !c.stats || Object.keys(c.stats).length === 0);
 			const missingSkillName = skills.filter((s) => !s.name_FR && !s.name_EN);
 
@@ -1389,6 +1818,275 @@ program
 			if (!isReplMode) process.exit(code);
 		} else {
 			console.log(`${colors.yellow}Veuillez spécifier une option: --push ou --json.${colors.reset}`);
+		}
+	});
+
+// 11b. compare command
+program
+	.command("compare <chara1> <chara2>")
+	.description("Compare deux joueurs côte à côte (stats interpolées et moveset)")
+	.option("-l, --level <level>", "Niveau à comparer (1-99)", "99")
+	.option("-j, --json", "Format de sortie en JSON brut")
+	.action(async (chara1: string, chara2: string, options: { level: string; json?: boolean }) => {
+		suppressLogs(!!options.json);
+		try {
+			const level = parseInt(options.level, 10);
+			if (isNaN(level) || level < 1 || level > 99) {
+				restoreLogs(!!options.json);
+				if (options.json) {
+					console.log(JSON.stringify({ error: "Le niveau doit être compris entre 1 et 99." }));
+				} else {
+					console.error(`${colors.red}Erreur: Le niveau doit être compris entre 1 et 99.${colors.reset}`);
+				}
+				return;
+			}
+
+			const svc = await createInagleService();
+			const chars = svc.characters.baseCharacters();
+
+			const findMatch = (query: string) => {
+				const q = query.toLowerCase().trim();
+				// exact check
+				let exactMatches = chars.filter((c: any) => 
+					c.charaId.toLowerCase() === q || 
+					c.internalCode?.toLowerCase() === q ||
+					c.slug?.toLowerCase() === q ||
+					c.names?.fr?.toLowerCase() === q ||
+					c.names?.en?.toLowerCase() === q
+				);
+				if (exactMatches.length > 0) return exactMatches;
+
+				// substring check
+				let matches = chars.filter((c: any) => {
+					const nameFr = c.names?.fr?.toLowerCase() || "";
+					const nameEn = c.names?.en?.toLowerCase() || "";
+					const nameJa = c.names?.ja?.toLowerCase() || "";
+					const slug = c.slug?.toLowerCase() || "";
+					return nameFr.includes(q) || nameEn.includes(q) || nameJa.includes(q) || slug.includes(q);
+				});
+				return matches;
+			};
+
+			const matches1 = findMatch(chara1);
+			const matches2 = findMatch(chara2);
+
+			if (matches1.length === 0 || matches2.length === 0) {
+				restoreLogs(!!options.json);
+				const errorMsg = matches1.length === 0 && matches2.length === 0
+					? `Aucun joueur trouvé pour "${chara1}" et "${chara2}".`
+					: matches1.length === 0
+						? `Aucun joueur trouvé pour "${chara1}".`
+						: `Aucun joueur trouvé pour "${chara2}".`;
+				if (options.json) {
+					console.log(JSON.stringify({ error: errorMsg }));
+				} else {
+					console.error(`${colors.red}Erreur: ${errorMsg}${colors.reset}`);
+				}
+				return;
+			}
+
+			// If multiple matches, take the first
+			const c1 = matches1[0];
+			const c2 = matches2[0];
+
+			const v1 = c1.variants?.[0];
+			const v2 = c2.variants?.[0];
+
+			if (!v1 || !v2) {
+				restoreLogs(!!options.json);
+				const errorMsg = "Données de variante introuvables pour l'un des joueurs.";
+				if (options.json) {
+					console.log(JSON.stringify({ error: errorMsg }));
+				} else {
+					console.error(`${colors.red}Erreur: ${errorMsg}${colors.reset}`);
+				}
+				return;
+			}
+
+			const stats1 = getInterpolatedStats(v1, level);
+			const stats2 = getInterpolatedStats(v2, level);
+
+			const resolveMoves = (variant: any, baseChara: any) => {
+				const PHANTOM_SKILL_IDS = new Set(["0xDBEDB6B8"]);
+				const rawSkills = variant.skills || [];
+				let skillList = rawSkills.filter((sk: any) => sk.skillId && !PHANTOM_SKILL_IDS.has(sk.skillId));
+				
+				// Sibling inheritance fallback
+				if (skillList.length === 0 && baseChara.variants) {
+					for (const sibling of baseChara.variants) {
+						if (sibling.skills && sibling.skills.length > 0) {
+							const sibSkills = sibling.skills.filter((sk: any) => sk.skillId && !PHANTOM_SKILL_IDS.has(sk.skillId));
+							if (sibSkills.length > 0) {
+								skillList = sibSkills;
+								break;
+							}
+						}
+					}
+				}
+
+				return skillList.map((sk: any) => {
+					const details = getSkillDetails(svc, sk.skillId);
+					return {
+						learnLevel: sk.learnLevel,
+						...details
+					};
+				});
+			};
+
+			const skills1 = resolveMoves(v1, c1);
+			const skills2 = resolveMoves(v2, c2);
+
+			if (options.json) {
+				restoreLogs(true);
+				console.log(JSON.stringify({
+					level,
+					chara1: {
+						id: c1.charaId,
+						name: c1.names.fr || c1.names.en || c1.names.ja,
+						position: v1.position,
+						element: v1.element,
+						rarity: v1.rarity,
+						stats: stats1,
+						skills: skills1
+					},
+					chara2: {
+						id: c2.charaId,
+						name: c2.names.fr || c2.names.en || c2.names.ja,
+						position: v2.position,
+						element: v2.element,
+						rarity: v2.rarity,
+						stats: stats2,
+						skills: skills2
+					}
+				}, null, 2));
+				return;
+			}
+
+			// ASCII Table rendering
+			restoreLogs(true);
+			const colWidthL = 35;
+			const colWidthM = 16;
+			const colWidthR = 35;
+
+			const padCenter = (text: string, width: number): string => {
+				const pad = width - text.length;
+				if (pad <= 0) return text.substring(0, width);
+				const left = Math.floor(pad / 2);
+				const right = pad - left;
+				return " ".repeat(left) + text + " ".repeat(right);
+			};
+
+			const formatRow = (leftText: string, midText: string, rightText: string, leftColor = "", midColor = "", rightColor = "") => {
+				const rawLeft = leftText.substring(0, colWidthL);
+				const rawMid = midText.substring(0, colWidthM);
+				const rawRight = rightText.substring(0, colWidthR);
+				
+				const padL = rawLeft.padEnd(colWidthL);
+				const padM = padCenter(rawMid, colWidthM);
+				const padR = rawRight.padStart(colWidthR);
+
+				const coloredL = leftColor ? `${leftColor}${padL}${colors.reset}` : padL;
+				const coloredM = midColor ? `${midColor}${padM}${colors.reset}` : padM;
+				const coloredR = rightColor ? `${rightColor}${padR}${colors.reset}` : padR;
+
+				return `│ ${coloredL} │ ${coloredM} │ ${coloredR} │`;
+			};
+
+			const borderTop = `┌─${"─".repeat(colWidthL)}─┬─${"─".repeat(colWidthM)}─┬─${"─".repeat(colWidthR)}─┐`;
+			const borderDivider = `├─${"─".repeat(colWidthL)}─┼─${"─".repeat(colWidthM)}─┼─${"─".repeat(colWidthR)}─┤`;
+			const borderBottom = `└─${"─".repeat(colWidthL)}─┴─${"─".repeat(colWidthM)}─┴─${"─".repeat(colWidthR)}─┘`;
+
+			console.log(`\n${colors.cyan}=== COMPARAISON DE JOUEURS (Niveau ${level}) ===${colors.reset}`);
+			console.log(borderTop);
+
+			const name1 = c1.names.fr || c1.names.en || c1.names.ja;
+			const name2 = c2.names.fr || c2.names.en || c2.names.ja;
+
+			console.log(formatRow(name1, "VS", name2, colors.bold + colors.green, colors.bold + colors.magenta, colors.bold + colors.green));
+			console.log(borderDivider);
+			
+			console.log(formatRow(v1.position, "Position", v2.position));
+			console.log(formatRow(v1.element, "Élément", v2.element));
+			console.log(formatRow(v1.rarity, "Rareté", v2.rarity));
+			console.log(borderDivider);
+
+			const statKeys: Array<{ key: "kick" | "control" | "technique" | "pressure" | "physical" | "agility" | "intelligence"; label: string }> = [
+				{ key: "kick", label: "Frappe" },
+				{ key: "control", label: "Contrôle" },
+				{ key: "technique", label: "Technique" },
+				{ key: "pressure", label: "Pression" },
+				{ key: "physical", label: "Physique" },
+				{ key: "agility", label: "Agilité" },
+				{ key: "intelligence", label: "Intelligence" }
+			];
+
+			let total1 = 0;
+			let total2 = 0;
+
+			for (const { key, label } of statKeys) {
+				const val1 = stats1[key];
+				const val2 = stats2[key];
+				total1 += val1;
+				total2 += val2;
+
+				let cL = "";
+				let cR = "";
+				let showVal1 = String(val1);
+				let showVal2 = String(val2);
+
+				if (val1 > val2) {
+					cL = colors.green + colors.bold;
+					cR = colors.red;
+					showVal1 += " (▲)";
+				} else if (val2 > val1) {
+					cL = colors.red;
+					cR = colors.green + colors.bold;
+					showVal2 = "(▲) " + showVal2;
+				}
+
+				console.log(formatRow(showVal1, label, showVal2, cL, colors.cyan, cR));
+			}
+
+			console.log(borderDivider);
+			let totalCL = "";
+			let totalCR = "";
+			let showTotal1 = String(total1);
+			let showTotal2 = String(total2);
+			if (total1 > total2) {
+				totalCL = colors.green + colors.bold;
+				totalCR = colors.red;
+				showTotal1 += " (▲)";
+			} else if (total2 > total1) {
+				totalCL = colors.red;
+				totalCR = colors.green + colors.bold;
+				showTotal2 = "(▲) " + showTotal2;
+			}
+			console.log(formatRow(showTotal1, "TOTAL", showTotal2, totalCL, colors.bold + colors.yellow, totalCR));
+			console.log(borderDivider);
+
+			const maxMoves = Math.max(skills1.length, skills2.length);
+			console.log(formatRow("", "TECHNIQUES", "", "", colors.bold + colors.magenta));
+			
+			for (let i = 0; i < maxMoves; i++) {
+				const sk1 = skills1[i];
+				const sk2 = skills2[i];
+
+				const text1 = sk1 ? `${sk1.name} (L. ${sk1.learnLevel}${sk1.power ? `, ${sk1.power}P` : ""})` : "";
+				const text2 = sk2 ? `${sk2.name} (L. ${sk2.learnLevel}${sk2.power ? `, ${sk2.power}P` : ""})` : "";
+
+				console.log(formatRow(text1, `Slot ${i + 1}`, text2));
+			}
+			console.log(borderBottom);
+
+		} catch (e: any) {
+			restoreLogs(!!options.json);
+			if (options.json) {
+				console.log(JSON.stringify({ error: e.message }));
+			} else {
+				console.error(`${colors.red}Erreur lors de la comparaison: ${e.message}${colors.reset}`);
+			}
+		} finally {
+			if (!isReplMode) process.exit(0);
 		}
 	});
 
@@ -1813,7 +2511,809 @@ program
 		}
 	});
 
-// 17. shell command
+// 17. random-team command
+program
+	.command("random-team")
+	.description("Génère une équipe aléatoire complète de 11 joueurs, coach et managers")
+	.option("-f, --formation <formation>", "Configuration de la formation (ex: 4-4-2, 4-3-3, 3-5-2)", "4-4-2")
+	.option("-e, --element <element>", "Filtrer de préférence par élément (Feu, Vent, Forêt, Montagne)")
+	.option("-p, --playstyle <playstyle>", "Filtrer de préférence par style (Lien, Justice, Percée, Tension, Jeu violent, Contre)")
+	.option("-j, --json", "Format de sortie en JSON brute")
+	.action(async (options: { formation: string; element?: string; playstyle?: string; json?: boolean }) => {
+		suppressLogs(!!options.json);
+		try {
+			const FORMATIONS = [
+				{ def: 3, df: 4, fw: 2, layout: "4-4-2", mf: 4, name: "4-4-2", off: 3 },
+				{ def: 2, df: 4, fw: 3, layout: "4-3-3", mf: 3, name: "4-3-3", off: 4 },
+				{ def: 2, df: 3, fw: 3, layout: "3-4-3", mf: 4, name: "3-4-3", off: 4 },
+				{ def: 3, df: 3, fw: 2, layout: "3-5-2", mf: 5, name: "3-5-2", off: 3 },
+				{ def: 4, df: 4, fw: 1, layout: "4-5-1", mf: 5, name: "4-5-1", off: 2 },
+				{ def: 3, df: 3, fw: 1, layout: "3-6-1", mf: 6, name: "3-6-1", off: 3 },
+				{ def: 4, df: 5, fw: 1, layout: "5-4-1", mf: 4, name: "5-4-1", off: 2 },
+				{ def: 1, df: 2, fw: 4, layout: "2-4-4", mf: 4, name: "2-4-4", off: 5 },
+				{ def: 2, df: 2, fw: 3, layout: "2-5-3", mf: 5, name: "2-5-3", off: 4 },
+				{ def: 4, df: 5, fw: 4, layout: "5-1-4", mf: 1, name: "5-1-4", off: 2 },
+				{ def: 5, df: 3, fw: 4, layout: "3-3-4", mf: 3, name: "3-3-4", off: 1 },
+				{ def: 3, df: 5, fw: 2, layout: "5-3-2", mf: 3, name: "5-3-2", off: 3 },
+			];
+
+			const dbPath = getSqlitePath();
+			if (!dbPath) {
+				restoreLogs(!!options.json);
+				if (options.json) {
+					console.log(JSON.stringify({ error: "Base de données SQLite introuvable" }));
+				} else {
+					console.error(`${colors.red}Erreur: Base de données SQLite introuvable.${colors.reset}`);
+				}
+				return;
+			}
+
+			const { Database: DBConstructor } = require("bun:sqlite");
+			const db = new DBConstructor(dbPath, { readonly: true });
+
+			const elementMap: Record<string, string> = {
+				fire: "Feu",
+				feu: "Feu",
+				wind: "Vent",
+				vent: "Vent",
+				forest: "Forêt",
+				forêt: "Forêt",
+				foret: "Forêt",
+				mountain: "Montagne",
+				montagne: "Montagne",
+				void: "Néant",
+				néant: "Néant",
+				neant: "Néant"
+			};
+			const elVal = options.element ? elementMap[options.element.toLowerCase()] : undefined;
+
+			const psMap: Record<string, string> = {
+				bond: "Bond",
+				lien: "Bond",
+				justice: "Justice",
+				breach: "Breach",
+				percée: "Breach",
+				percee: "Breach",
+				tension: "Tension",
+				"rough play": "Rough Play",
+				"roughplay": "Rough Play",
+				"jeu violent": "Rough Play",
+				counter: "Counter",
+				contre: "Counter"
+			};
+			const psVal = options.playstyle ? psMap[options.playstyle.toLowerCase()] : undefined;
+
+			const layout = options.formation || "4-4-2";
+			const formation = FORMATIONS.find(f => f.name === layout || f.layout === layout) || FORMATIONS[0];
+
+			function pickRandom(arr: any[], n: number): any[] {
+				const copy = [...arr];
+				const result: any[] = [];
+				for (let i = 0; i < n && copy.length > 0; i++) {
+					const idx = Math.floor(Math.random() * copy.length);
+					result.push(copy.splice(idx, 1)[0]);
+				}
+				return result;
+			}
+
+			function fetchPool(position: string, requiredCount: number) {
+				let query = `SELECT id, chara_id, internal_code, name_fr, name_en, element, position, stat_frappe, stat_controle, stat_technique, stat_pression, stat_physique, stat_agilite, stat_intelligence, sheet_data, zukan_hash FROM inagle_characters WHERE position = ? AND stat_frappe IS NOT NULL AND zukan_hash IS NOT NULL`;
+				let params: string[] = [position];
+				
+				let filterQuery = query;
+				let filterParams = [...params];
+				
+				if (elVal) {
+					filterQuery += " AND element = ?";
+					filterParams.push(elVal);
+				}
+				if (psVal) {
+					filterQuery += " AND json_extract(sheet_data, '$.playstyle') = ?";
+					filterParams.push(psVal);
+				}
+				
+				let rows = db.prepare(filterQuery).all(...filterParams);
+				
+				if (rows.length < requiredCount && psVal) {
+					let fbQuery = query;
+					let fbParams = [...params];
+					if (elVal) {
+						fbQuery += " AND element = ?";
+						fbParams.push(elVal);
+					}
+					rows = db.prepare(fbQuery).all(...fbParams);
+				}
+				
+				if (rows.length < requiredCount) {
+					rows = db.prepare(query).all(...params);
+				}
+				
+				return rows;
+			}
+
+			const gk = pickRandom(fetchPool("Gardien", 1), 1);
+			const df = pickRandom(fetchPool("Défenseur", formation.df), formation.df);
+			const mf = pickRandom(fetchPool("Milieu", formation.mf), formation.mf);
+			const fw = pickRandom(fetchPool("Attaquant", formation.fw), formation.fw);
+
+			const coachesPool = db.prepare("SELECT id, name_localised, name_romaji, element, playstyle, buff, role FROM inagle_coordinators WHERE role = 'Coach' OR role = 'Manager'").all();
+			const managersPool = db.prepare("SELECT id, name_localised, name_romaji, element, playstyle, buff, role FROM inagle_coordinators WHERE role = 'Coordinator'").all();
+			
+			const coach = pickRandom(coachesPool, 1)[0] || null;
+			const managers = pickRandom(managersPool, 3);
+
+			db.close();
+
+			const allPlayers = [...gk, ...df, ...mf, ...fw];
+
+			if (options.json) {
+				restoreLogs(true);
+				const teamJson = {
+					formation: formation.layout,
+					gk: gk.map(p => ({ id: p.id, name: p.name_fr || p.name_en, element: p.element })),
+					df: df.map(p => ({ id: p.id, name: p.name_fr || p.name_en, element: p.element })),
+					mf: mf.map(p => ({ id: p.id, name: p.name_fr || p.name_en, element: p.element })),
+					fw: fw.map(p => ({ id: p.id, name: p.name_fr || p.name_en, element: p.element })),
+					coach: coach ? { id: coach.id, name: coach.name_localised || coach.name_romaji, element: coach.element, playstyle: coach.playstyle, buff: coach.buff } : null,
+					managers: managers.map(m => ({ id: m.id, name: m.name_localised || m.name_romaji, element: m.element, playstyle: m.playstyle, buff: m.buff }))
+				};
+				console.log(JSON.stringify(teamJson, null, 2));
+				return;
+			}
+
+			restoreLogs(true);
+
+			// Stats computation
+			const statsTotal = { frappe: 0, controle: 0, technique: 0, pression: 0, physique: 0, agilite: 0, intelligence: 0 };
+			const elementCounts: Record<string, number> = {};
+			const playstyleCounts: Record<string, number> = {};
+
+			for (const p of allPlayers) {
+				let kick = p.stat_frappe || 0;
+				let ctrl = p.stat_controle || 0;
+				let tech = p.stat_technique || 0;
+				let pres = p.stat_pression || 0;
+				let phys = p.stat_physique || 0;
+				let agil = p.stat_agilite || 0;
+				let intel = p.stat_intelligence || 0;
+
+				try {
+					const sd = typeof p.sheet_data === "string" ? JSON.parse(p.sheet_data) : p.sheet_data;
+					if (sd?.stats) {
+						kick = sd.stats.kick || kick;
+						ctrl = sd.stats.control || ctrl;
+						tech = sd.stats.technique || tech;
+						pres = sd.stats.pressure || pres;
+						phys = sd.stats.physical || phys;
+						agil = sd.stats.agility || agil;
+						intel = sd.stats.intelligence || intel;
+					}
+				} catch {}
+
+				statsTotal.frappe += kick;
+				statsTotal.controle += ctrl;
+				statsTotal.technique += tech;
+				statsTotal.pression += pres;
+				statsTotal.physique += phys;
+				statsTotal.agilite += agil;
+				statsTotal.intelligence += intel;
+
+				const el = p.element || "Néant";
+				elementCounts[el] = (elementCounts[el] || 0) + 1;
+
+				let ps = "Aucun";
+				try {
+					const sd = typeof p.sheet_data === "string" ? JSON.parse(p.sheet_data) : p.sheet_data;
+					ps = sd?.playstyle || "Aucun";
+				} catch {}
+				playstyleCounts[ps] = (playstyleCounts[ps] || 0) + 1;
+			}
+
+			const pCount = allPlayers.length || 1;
+			const statsAvg = {
+				frappe: Math.round(statsTotal.frappe / pCount),
+				controle: Math.round(statsTotal.controle / pCount),
+				technique: Math.round(statsTotal.technique / pCount),
+				pression: Math.round(statsTotal.pression / pCount),
+				physique: Math.round(statsTotal.physique / pCount),
+				agilite: Math.round(statsTotal.agilite / pCount),
+				intelligence: Math.round(statsTotal.intelligence / pCount)
+			};
+
+			const synergies: string[] = [];
+			for (const [el, num] of Object.entries(elementCounts)) {
+				if (num >= 3) {
+					const boost = num >= 6 ? 15 : num >= 4 ? 10 : 5;
+					synergies.push(`${el} x${num} (+${boost}% boost)`);
+				}
+			}
+
+			// Format text alignment helpers
+			function centerText(text: string, width: number): string {
+				const padTotal = width - text.length;
+				if (padTotal <= 0) return text.substring(0, width);
+				const padLeft = Math.floor(padTotal / 2);
+				const padRight = padTotal - padLeft;
+				return " ".repeat(padLeft) + text + " ".repeat(padRight);
+			}
+
+			function shortenName(name: string, maxLen: number = 14): string {
+				if (name.length <= maxLen) return name;
+				const parts = name.split(" ");
+				if (parts.length > 1) {
+					const first = parts[0];
+					const last = parts[parts.length - 1];
+					const shortened = `${first} ${last[0]}.`;
+					if (shortened.length <= maxLen) return shortened;
+				}
+				return name.substring(0, maxLen - 1) + "…";
+			}
+
+			function formatPlayerForPitch(player: any, positionCode: string, maxNameLen: number): { display: string; length: number } {
+				const name = player.name_fr || player.name_en || player.id;
+				const el = player.element || "Néant";
+				const shortName = shortenName(name, maxNameLen);
+				
+				const elAbbrMap: Record<string, string> = {
+					"Feu": "Fe",
+					"Vent": "Ve",
+					"Forêt": "Fo",
+					"Montagne": "Mo",
+					"Néant": "Ne"
+				};
+				const elAbbr = elAbbrMap[el] || "Ne";
+				const raw = `${shortName} (${elAbbr})`;
+				
+				const colorMap: Record<string, string> = {
+					GK: colors.yellow,
+					DF: colors.blue,
+					MF: colors.green,
+					FW: colors.red
+				};
+				const pColor = colorMap[positionCode] || colors.reset;
+				const elColor = el === "Feu" ? colors.red : el === "Vent" ? colors.cyan : el === "Forêt" ? colors.green : el === "Montagne" ? colors.yellow : colors.reset;
+				
+				const display = `${colors.bold}${pColor}${shortName}${colors.reset} (${elColor}${elAbbr}${colors.reset})`;
+				return { display, length: raw.length };
+			}
+
+			function centerRowOfPlayers(players: any[], positionCode: string, totalWidth: number = 78): string {
+				const n = players.length;
+				if (n === 0) return "";
+				const colWidth = Math.floor(totalWidth / n);
+				const maxNameLen = Math.max(5, colWidth - 6);
+				
+				let rowText = "";
+				for (const p of players) {
+					const { display, length } = formatPlayerForPitch(p, positionCode, maxNameLen);
+					const padTotal = colWidth - length;
+					const padLeft = Math.floor(Math.max(0, padTotal) / 2);
+					const padRight = Math.max(0, padTotal - padLeft);
+					rowText += " ".repeat(padLeft) + display + " ".repeat(padRight);
+				}
+				const leftOver = totalWidth - (n * colWidth);
+				if (leftOver > 0) {
+					rowText += " ".repeat(leftOver);
+				}
+				return rowText;
+			}
+
+			const fwRowText = centerRowOfPlayers(fw, "FW", 78);
+			const mfRowText = centerRowOfPlayers(mf, "MF", 78);
+			const dfRowText = centerRowOfPlayers(df, "DF", 78);
+			const gkRowText = centerRowOfPlayers(gk, "GK", 78);
+
+			console.log(`\n${colors.green}╔${"═".repeat(78)}╗${colors.reset}`);
+			const titleRaw = `TERRAIN DE JEU - VICTORY ROAD (${formation.name})`;
+			const titleColored = `${colors.bold}${colors.yellow}TERRAIN DE JEU - VICTORY ROAD (${formation.name})${colors.reset}`;
+			const padTotal = 78 - titleRaw.length;
+			const padLeft = Math.floor(padTotal / 2);
+			const padRight = padTotal - padLeft;
+			const titleRowText = " ".repeat(padLeft) + titleColored + " ".repeat(padRight);
+
+			console.log(`${colors.green}║${colors.reset}${titleRowText}${colors.green}║${colors.reset}`);
+			console.log(`${colors.green}╠${"═".repeat(78)}╣${colors.reset}`);
+			console.log(`${colors.green}║${colors.reset}${" ".repeat(78)}${colors.green}║${colors.reset}`);
+			console.log(`${colors.green}║${colors.reset}${fwRowText}${colors.green}║${colors.reset}`);
+			console.log(`${colors.green}║${colors.reset}${" ".repeat(78)}${colors.green}║${colors.reset}`);
+			const lineSepRaw = "─".repeat(60);
+			const lineSepPad = centerText(lineSepRaw, 78);
+			console.log(`${colors.green}║${colors.reset}${lineSepPad}${colors.green}║${colors.reset}`);
+			console.log(`${colors.green}║${colors.reset}${" ".repeat(78)}${colors.green}║${colors.reset}`);
+			console.log(`${colors.green}║${colors.reset}${mfRowText}${colors.green}║${colors.reset}`);
+			console.log(`${colors.green}║${colors.reset}${" ".repeat(78)}${colors.green}║${colors.reset}`);
+			console.log(`${colors.green}║${colors.reset}${lineSepPad}${colors.green}║${colors.reset}`);
+			console.log(`${colors.green}║${colors.reset}${" ".repeat(78)}${colors.green}║${colors.reset}`);
+			console.log(`${colors.green}║${colors.reset}${dfRowText}${colors.green}║${colors.reset}`);
+			console.log(`${colors.green}║${colors.reset}${" ".repeat(78)}${colors.green}║${colors.reset}`);
+			console.log(`${colors.green}║${colors.reset}${lineSepPad}${colors.green}║${colors.reset}`);
+			console.log(`${colors.green}║${colors.reset}${" ".repeat(78)}${colors.green}║${colors.reset}`);
+			console.log(`${colors.green}║${colors.reset}${gkRowText}${colors.green}║${colors.reset}`);
+			console.log(`${colors.green}║${colors.reset}${" ".repeat(78)}${colors.green}║${colors.reset}`);
+			console.log(`${colors.green}╚${"═".repeat(78)}╝${colors.reset}`);
+
+			console.log(`\n${colors.bold}${colors.cyan}⚙️  CARACTÉRISTIQUES DE L'ÉQUIPE :${colors.reset}`);
+			console.log(`  · ${colors.bold}Formation :${colors.reset} ${formation.name} (${formation.layout})`);
+			console.log(`  · ${colors.bold}Moyennes de stats (Lv 99) :${colors.reset}`);
+			console.log(`      Frappe: ${colors.yellow}${statsAvg.frappe}${colors.reset} | Contrôle: ${colors.yellow}${statsAvg.controle}${colors.reset} | Technique: ${colors.yellow}${statsAvg.technique}${colors.reset}`);
+			console.log(`      Physique: ${colors.yellow}${statsAvg.physique}${colors.reset} | Pression: ${colors.yellow}${statsAvg.pression}${colors.reset} | Agilité: ${colors.yellow}${statsAvg.agilite}${colors.reset} | Intel.: ${colors.yellow}${statsAvg.intelligence}${colors.reset}`);
+			
+			console.log(`  · ${colors.bold}Synergies d'éléments :${colors.reset} ${synergies.length > 0 ? synergies.map(s => `${colors.green}${s}${colors.reset}`).join(", ") : "Aucune synergie active (3+ du même élément)"}`);
+			
+			console.log(`\n${colors.bold}${colors.cyan}👔 STAFF TECHNIQUE :${colors.reset}`);
+			if (coach) {
+				console.log(`  · [${colors.yellow}COACH${colors.reset}] ${colors.bold}${coach.name_localised || coach.name_romaji}${colors.reset} (${coach.element} | ${coach.playstyle || 'N/A'})`);
+				if (coach.buff) console.log(`      Buff: ${colors.green}${coach.buff}${colors.reset}`);
+			} else {
+				console.log(`  · [${colors.yellow}COACH${colors.reset}] Aucun`);
+			}
+			console.log(`  · [${colors.yellow}MANAGERS${colors.reset}]`);
+			for (const m of managers) {
+				console.log(`      - ${colors.bold}${m.name_localised || m.name_romaji}${colors.reset} (${m.element} | ${m.playstyle || 'N/A'})${m.buff ? ` -> Buff: ${colors.green}${m.buff}${colors.reset}` : ""}`);
+			}
+			console.log();
+		} catch (e: any) {
+			restoreLogs(!!options.json);
+			if (options.json) {
+				console.log(JSON.stringify({ error: e.message }));
+			} else {
+				console.error(`${colors.red}Erreur random-team : ${e.message}${colors.reset}`);
+			}
+		}
+	});
+
+// 17. team-builder command
+program
+	.command("team-builder <action> [args...]")
+	.description("Gère et génère des compositions d'équipes (actions: list, show <id>, delete <id>, save <name> <encoded-team>, generate)")
+	.option("-j, --json", "Format de sortie en JSON brute")
+	.option("-f, --formation <formation>", "Spécifie la formation pour l'action 'generate' (ex: diamond442)")
+	.action(async (action: string, args: string[], options: { json?: boolean; formation?: string }) => {
+		suppressLogs(!!options.json);
+		try {
+			const dbUrl = process.env.DATABASE_URL;
+			if (!dbUrl) {
+				throw new Error("DATABASE_URL non définie dans l'environnement");
+			}
+			const pg = require("pg");
+			const client = new pg.Client({ connectionString: dbUrl });
+			
+			const svc = await createInagleService();
+			const characters = svc.characters.baseCharacters();
+			
+			// Simple coordinate database for synergy distance check
+			const FORMATION_POSITIONS: Record<string, Array<{ index: number; top: number; left: number; role: string }>> = {
+				diamond442: [
+					{ index: 0, top: 1, left: 15, role: "FW" }, { index: 1, top: 1, left: 65, role: "FW" },
+					{ index: 2, top: 9, left: 40, role: "MF" }, { index: 3, top: 17, left: 10, role: "MF" },
+					{ index: 4, top: 17, left: 70, role: "MF" }, { index: 5, top: 22, left: 40, role: "MF" },
+					{ index: 6, top: 31, left: 2, role: "DF" }, { index: 7, top: 35, left: 22, role: "DF" },
+					{ index: 8, top: 35, left: 58, role: "DF" }, { index: 9, top: 31, left: 78, role: "DF" },
+					{ index: 10, top: 43, left: 40, role: "GK" }
+				],
+				box442: [
+					{ index: 0, top: 1, left: 22, role: "FW" }, { index: 1, top: 1, left: 58, role: "FW" },
+					{ index: 2, top: 10, left: 2, role: "MF" }, { index: 3, top: 21, left: 22, role: "MF" },
+					{ index: 4, top: 21, left: 58, role: "MF" }, { index: 5, top: 10, left: 78, role: "MF" },
+					{ index: 6, top: 28, left: 2, role: "DF" }, { index: 7, top: 35, left: 22, role: "DF" },
+					{ index: 8, top: 35, left: 58, role: "DF" }, { index: 9, top: 28, left: 78, role: "DF" },
+					{ index: 10, top: 43, left: 40, role: "GK" }
+				],
+				freedom352: [
+					{ index: 0, top: 1, left: 22, role: "FW" }, { index: 1, top: 1, left: 58, role: "FW" },
+					{ index: 2, top: 6, left: 2, role: "MF" }, { index: 3, top: 17, left: 22, role: "MF" },
+					{ index: 4, top: 10, left: 40, role: "MF" }, { index: 5, top: 17, left: 58, role: "MF" },
+					{ index: 6, top: 6, left: 78, role: "MF" }, { index: 7, top: 33, left: 12, role: "DF" },
+					{ index: 8, top: 29, left: 40, role: "DF" }, { index: 9, top: 33, left: 68, role: "DF" },
+					{ index: 10, top: 43, left: 40, role: "GK" }
+				],
+				triangle433: [
+					{ index: 0, top: 4, left: 2, role: "FW" }, { index: 1, top: 1, left: 40, role: "FW" },
+					{ index: 2, top: 4, left: 78, role: "FW" }, { index: 3, top: 16, left: 40, role: "MF" },
+					{ index: 4, top: 24, left: 15, role: "MF" }, { index: 5, top: 24, left: 65, role: "MF" },
+					{ index: 6, top: 31, left: 2, role: "DF" }, { index: 7, top: 38, left: 22, role: "DF" },
+					{ index: 8, top: 38, left: 58, role: "DF" }, { index: 9, top: 31, left: 78, role: "DF" },
+					{ index: 10, top: 43, left: 40, role: "GK" }
+				],
+				delta433: [
+					{ index: 0, top: 4, left: 2, role: "FW" }, { index: 1, top: 1, left: 40, role: "FW" },
+					{ index: 2, top: 4, left: 78, role: "FW" }, { index: 3, top: 12, left: 15, role: "MF" },
+					{ index: 4, top: 12, left: 65, role: "MF" }, { index: 5, top: 23, left: 40, role: "MF" },
+					{ index: 6, top: 22, left: 2, role: "DF" }, { index: 7, top: 32, left: 22, role: "DF" },
+					{ index: 8, top: 32, left: 58, role: "DF" }, { index: 9, top: 22, left: 78, role: "DF" },
+					{ index: 10, top: 43, left: 40, role: "GK" }
+				],
+				balance451: [
+					{ index: 0, top: 1, left: 40, role: "FW" }, { index: 1, top: 10, left: 2, role: "MF" },
+					{ index: 2, top: 15, left: 40, role: "MF" }, { index: 3, top: 10, left: 78, role: "MF" },
+					{ index: 4, top: 25, left: 22, role: "MF" }, { index: 5, top: 25, left: 58, role: "MF" },
+					{ index: 6, top: 29, left: 2, role: "DF" }, { index: 7, top: 38, left: 22, py: 0, left: 22, role: "DF" },
+					{ index: 8, top: 38, left: 58, role: "DF" }, { index: 9, top: 29, left: 78, role: "DF" },
+					{ index: 10, top: 43, left: 40, role: "GK" }
+				],
+				hexa361: [
+					{ index: 0, top: 1, left: 40, role: "FW" }, { index: 1, top: 7, left: 2, role: "MF" },
+					{ index: 2, top: 11, left: 22, role: "MF" }, { index: 3, top: 11, left: 58, role: "MF" },
+					{ index: 4, top: 7, left: 78, role: "MF" }, { index: 5, top: 25, left: 22, role: "MF" },
+					{ index: 6, top: 25, left: 58, role: "MF" }, { index: 7, top: 39, left: 10, role: "DF" },
+					{ index: 8, top: 29, left: 40, role: "DF" }, { index: 9, top: 39, left: 70, role: "DF" },
+					{ index: 10, top: 43, left: 40, role: "GK" }
+				],
+				double541: [
+					{ index: 0, top: 1, left: 40, role: "FW" }, { index: 1, top: 7, left: 2, role: "MF" },
+					{ index: 2, top: 11, left: 22, role: "MF" }, { index: 3, top: 11, left: 58, role: "MF" },
+					{ index: 4, top: 7, left: 78, role: "MF" }, { index: 5, top: 23, left: 2, role: "DF" },
+					{ index: 6, top: 27, left: 22, role: "DF" }, { index: 7, top: 29, left: 40, role: "DF" },
+					{ index: 8, top: 27, left: 58, role: "DF" }, { index: 9, top: 23, left: 78, role: "DF" },
+					{ index: 10, top: 43, left: 40, role: "GK" }
+				]
+			};
+			
+			if (action === "list") {
+				await client.connect();
+				const res = await client.query("SELECT id, name, formation_id, updated_at FROM user_teams ORDER BY updated_at DESC");
+				await client.end();
+				
+				restoreLogs(!!options.json);
+				if (options.json) {
+					console.log(JSON.stringify(res.rows, null, 2));
+				} else {
+					console.log(`\n${colors.bold}${colors.green}=== Compositions d'Équipes Sauvegardées ===${colors.reset}`);
+					if (res.rows.length === 0) {
+						console.log("Aucune équipe enregistrée.");
+					} else {
+						console.log(renderAsciiTable(res.rows));
+					}
+				}
+			} else if (action === "show") {
+				const teamId = args[0];
+				if (!teamId) {
+					throw new Error("ID de l'équipe manquant. Usage: azalee team-builder show <id>");
+				}
+				await client.connect();
+				const res = await client.query("SELECT * FROM user_teams WHERE id = $1", [teamId]);
+				await client.end();
+				
+				if (res.rows.length === 0) {
+					throw new Error(`Aucune équipe trouvée avec l'ID: ${teamId}`);
+				}
+				const team = res.rows[0];
+				const formationData = typeof team.formation_data === "string" ? JSON.parse(team.formation_data) : team.formation_data;
+				
+				// Resolve details of members
+				const resolvedMembers = (formationData.members || []).map((m: any) => {
+					const char = characters.find((c: any) => c.charaId === m.charaId);
+					return {
+						slot: m.slot,
+						charaId: m.charaId,
+						name: char ? (char.names?.fr || char.names?.en || m.name) : m.name,
+						position: char ? (char.variants?.[0]?.position || m.position) : m.position,
+						element: char ? (char.variants?.[0]?.element || m.element) : m.element,
+						rarity: char ? (char.bestRarity || m.rarity) : m.rarity,
+						stats: char?.variants?.[0]?.stats?.lv99 || m.stats
+					};
+				});
+				
+				// Calculate synergies
+				const fieldMembers = resolvedMembers.filter((m: any) => m.slot.startsWith("field-"));
+				const elements: Record<string, number> = { Fire: 0, Forest: 0, Mountain: 0, Wind: 0 };
+				for (const m of fieldMembers) {
+					if (elements[m.element] !== undefined) elements[m.element]++;
+				}
+				
+				// Dominance & Harmony
+				const dominance = Object.entries(elements)
+					.filter(([_, count]) => count >= 4)
+					.map(([el]) => el);
+				const harmony = Object.values(elements).every(c => c > 0);
+				
+				// Links
+				const links: Array<[string, string]> = [];
+				const positions = FORMATION_POSITIONS[team.formation_id] || [];
+				for (let i = 0; i < fieldMembers.length; i++) {
+					const m1 = fieldMembers[i];
+					const slotIdx1 = parseInt(m1.slot.replace("field-", ""), 10);
+					const pos1 = positions.find((p: any) => p.index === slotIdx1);
+					if (!pos1 || pos1.role === "GK") continue;
+					
+					for (let j = i + 1; j < fieldMembers.length; j++) {
+						const m2 = fieldMembers[j];
+						if (m1.element !== m2.element) continue;
+						
+						const slotIdx2 = parseInt(m2.slot.replace("field-", ""), 10);
+						const pos2 = positions.find((p: any) => p.index === slotIdx2);
+						if (!pos2 || pos2.role === "GK") continue;
+						
+						const dist = Math.sqrt(Math.pow(pos1.top - pos2.top, 2) + Math.pow(pos1.left - pos2.left, 2));
+						if (dist < 25) {
+							links.push([m1.name, m2.name]);
+						}
+					}
+				}
+				
+				restoreLogs(!!options.json);
+				if (options.json) {
+					console.log(JSON.stringify({
+						id: team.id,
+						name: team.name,
+						formation_id: team.formation_id,
+						updated_at: team.updated_at,
+						members: resolvedMembers,
+						synergy: {
+							elements,
+							dominance,
+							harmony,
+							links: links.map(([n1, n2]) => `${n1} <-> ${n2}`)
+						}
+					}, null, 2));
+				} else {
+					console.log(`\n${colors.bold}${colors.green}=== Fiche d'Équipe : ${team.name} ===${colors.reset}`);
+					console.log(`ID : ${colors.cyan}${team.id}${colors.reset}`);
+					console.log(`Formation : ${colors.yellow}${team.formation_id}${colors.reset}`);
+					console.log(`Mise à jour : ${team.updated_at}`);
+					console.log(`\n${colors.bold}${colors.blue}Membres de l'équipe :${colors.reset}`);
+					const tableRows = resolvedMembers.map((m: any) => ({
+						Emplacement: m.slot,
+						Joueur: m.name,
+						Poste: m.position,
+						Élément: m.element,
+						Rareté: m.rarity
+					}));
+					console.log(renderAsciiTable(tableRows));
+					
+					console.log(`\n${colors.bold}${colors.cyan}Synergies Élémentaires :${colors.reset}`);
+					for (const [el, count] of Object.entries(elements)) {
+						console.log(`  - ${el} : ${count} joueur(s)`);
+					}
+					if (dominance.length > 0) {
+						console.log(`  - ${colors.green}Dominance détectée${colors.reset} : ${dominance.join(", ")} (+5% puissance des techniques associés)`);
+					}
+					if (harmony) {
+						console.log(`  - ${colors.green}Harmonie élémentaire active${colors.reset} (+3% stats globales)`);
+					}
+					if (links.length > 0) {
+						console.log(`  - ${colors.green}Liens de proximité élémentaires (${links.length}) :${colors.reset}`);
+						for (const [n1, n2] of links) {
+							console.log(`    * ${n1} <-> ${n2}`);
+						}
+					}
+				}
+			} else if (action === "delete") {
+				const teamId = args[0];
+				if (!teamId) {
+					throw new Error("ID de l'équipe manquant. Usage: azalee team-builder delete <id>");
+				}
+				await client.connect();
+				const res = await client.query("DELETE FROM user_teams WHERE id = $1", [teamId]);
+				await client.end();
+				
+				restoreLogs(!!options.json);
+				if (options.json) {
+					console.log(JSON.stringify({ success: true, deletedId: teamId }));
+				} else {
+					console.log(`\n${colors.green}Équipe ${teamId} supprimée avec succès.${colors.reset}`);
+				}
+			} else if (action === "save") {
+				const name = args[0];
+				const encodedTeam = args[1];
+				if (!name || !encodedTeam) {
+					throw new Error("Usage: azalee team-builder save <name> <encoded-team>");
+				}
+				
+				// Decode team
+				const decoded = Buffer.from(encodedTeam, "base64").toString("utf-8");
+				const parts = decoded.split("|");
+				const formationId = parts[0];
+				
+				const members: any[] = [];
+				for (let i = 1; i < parts.length; i++) {
+					const [slot, charaId] = parts[i].split(":");
+					const char = characters.find((c: any) => c.charaId === charaId);
+					if (char && slot) {
+						const variant = char.variants?.[0];
+						members.push({
+							slot,
+							charaId: char.charaId,
+							name: char.names?.fr || char.names?.en || char.names?.ja,
+							position: variant?.position || "MF",
+							element: variant?.element || "Void",
+							rarity: char.bestRarity || variant?.rarity || "Normal",
+							imageUrl: `https://dxi4wb638ujep.cloudfront.net/1/${char.zukanHash || variant?.zukanHash}.png`,
+							slug: char.slug || charaId,
+							stats: variant?.stats?.lv99
+						});
+					}
+				}
+				
+				const teamData = {
+					formationId,
+					members
+				};
+				
+				const id = require("crypto").randomUUID();
+				const userId = "00000000-0000-0000-0000-000000000000"; // default CLI user
+				
+				await client.connect();
+				await client.query(
+					`INSERT INTO user_teams(id, user_id, name, formation_id, formation_data, is_public, created_at, updated_at)
+					 VALUES ($1, $2, $3, $4, $5, TRUE, NOW(), NOW())`,
+					[id, userId, name, formationId, JSON.stringify(teamData)]
+				);
+				await client.end();
+				
+				restoreLogs(!!options.json);
+				if (options.json) {
+					console.log(JSON.stringify({ success: true, id, name }));
+				} else {
+					console.log(`\n${colors.green}Équipe "${name}" sauvegardée avec succès sous l'ID: ${id}.${colors.reset}`);
+				}
+			} else if (action === "generate") {
+				// Coherent and elements-synergized team generator
+				const formations = ["diamond442", "box442", "freedom352", "triangle433", "delta433", "balance451", "hexa361", "double541"];
+				const chosenFormationId = options.formation || formations[Math.floor(Math.random() * formations.length)];
+				
+				// Elements
+				const elementsList = ["Fire", "Forest", "Mountain", "Wind"];
+				const chosenElement = elementsList[Math.floor(Math.random() * elementsList.length)];
+				
+				// Group characters by position
+				const charsByPosition: Record<string, any[]> = { FW: [], MF: [], DF: [], GK: [] };
+				for (const char of characters) {
+					const variant = char.variants?.[0];
+					if (variant && variant.position && charsByPosition[variant.position]) {
+						charsByPosition[variant.position].push({
+							charaId: char.charaId,
+							name: char.names?.fr || char.names?.en,
+							position: variant.position,
+							element: variant.element,
+							rarity: char.bestRarity || variant.rarity,
+							slug: char.slug,
+							zukanHash: char.zukanHash || variant.zukanHash,
+							stats: variant.stats?.lv99
+						});
+					}
+				}
+				
+				const positions = FORMATION_POSITIONS[chosenFormationId] || FORMATION_POSITIONS.diamond442;
+				const selectedCharaIds = new Set<string>();
+				const members: any[] = [];
+				
+				// Helper to select character of preferred element and role
+				const selectChara = (role: string) => {
+					const candidates = charsByPosition[role] || [];
+					// prioritize chosenElement
+					const elementCandidates = candidates.filter(c => c.element === chosenElement && !selectedCharaIds.has(c.charaId));
+					const fallbackCandidates = candidates.filter(c => !selectedCharaIds.has(c.charaId));
+					
+					const pool = elementCandidates.length > 0 ? elementCandidates : fallbackCandidates;
+					if (pool.length === 0) return null;
+					const picked = pool[Math.floor(Math.random() * pool.length)];
+					selectedCharaIds.add(picked.charaId);
+					return picked;
+				};
+				
+				// Generate field
+				for (const pos of positions) {
+					const picked = selectChara(pos.role);
+					if (picked) {
+						members.push({
+							slot: `field-${pos.index}`,
+							charaId: picked.charaId,
+							name: picked.name,
+							position: picked.position,
+							element: picked.element,
+							rarity: picked.rarity,
+							imageUrl: `https://dxi4wb638ujep.cloudfront.net/1/${picked.zukanHash}.png`,
+							slug: picked.slug,
+							stats: picked.stats
+						});
+					}
+				}
+				
+				// Generate 5 reserves
+				for (let i = 0; i < 5; i++) {
+					const allPos = ["FW", "MF", "DF", "GK"];
+					const randomRole = allPos[Math.floor(Math.random() * allPos.length)];
+					const picked = selectChara(randomRole);
+					if (picked) {
+						members.push({
+							slot: `reserve-${i}`,
+							charaId: picked.charaId,
+							name: picked.name,
+							position: picked.position,
+							element: picked.element,
+							rarity: picked.rarity,
+							imageUrl: `https://dxi4wb638ujep.cloudfront.net/1/${picked.zukanHash}.png`,
+							slug: picked.slug,
+							stats: picked.stats
+						});
+					}
+				}
+				
+				// Resolve staff
+				await client.connect();
+				const resCoordinators = await client.query("SELECT * FROM inagle_coordinators");
+				await client.end();
+				
+				const coaches = resCoordinators.rows.filter((r: any) => r.role === "Manager" || r.role === "Coach");
+				const managers = resCoordinators.rows.filter((r: any) => r.role === "Coordinator");
+
+				const matchedCoach = coaches[Math.floor(Math.random() * coaches.length)];
+				if (matchedCoach) {
+					members.push({
+						slot: "manager-0",
+						charaId: `coord_${matchedCoach.id}`,
+						name: matchedCoach.name_localised,
+						position: "COACH",
+						element: "Void",
+						rarity: "Coach",
+						imageUrl: `https://dxi4wb638ujep.cloudfront.net/1/k/c/b/cb88nfolkwe.png`,
+						slug: `coord-${matchedCoach.id}`,
+					});
+				}
+				
+				const shuffledManagers = managers.sort(() => 0.5 - Math.random());
+				for (let i = 0; i < Math.min(3, shuffledManagers.length); i++) {
+					const m = shuffledManagers[i];
+					members.push({
+						slot: `support-${i}`,
+						charaId: `coord_${m.id}`,
+						name: m.name_localised,
+						position: "COORD",
+						element: "Void",
+						rarity: "Coordinator",
+						imageUrl: `https://dxi4wb638ujep.cloudfront.net/1/k/z/p/zpndk6oxjls.png`,
+						slug: `coord-${m.id}`,
+					});
+				}
+				
+				// Encode
+				const parts = [chosenFormationId];
+				for (const m of members) {
+					if (!m.slot.startsWith("manager-") && !m.slot.startsWith("support-")) {
+						parts.push(`${m.slot}:${m.charaId}`);
+					}
+				}
+				const encodedTeam = Buffer.from(parts.join("|")).toString("base64");
+				
+				restoreLogs(!!options.json);
+				if (options.json) {
+					console.log(JSON.stringify({
+						formationId: chosenFormationId,
+						elementTheme: chosenElement,
+						encodedTeam,
+						members
+					}, null, 2));
+				} else {
+					console.log(`\n${colors.bold}${colors.green}=== Compo Générée (Thème : ${chosenElement}) ===${colors.reset}`);
+					console.log(`Formation : ${chosenFormationId}`);
+					console.log(`Chaîne d'encodage : ${colors.yellow}${encodedTeam}${colors.reset}`);
+					console.log(`\n${colors.bold}${colors.blue}Joueurs terrain et remplaçants :${colors.reset}`);
+					const tableRows = members.map((m: any) => ({
+						Emplacement: m.slot,
+						Joueur: m.name,
+						Poste: m.position,
+						Élément: m.element,
+						Rareté: m.rarity
+					}));
+					console.log(renderAsciiTable(tableRows));
+				}
+			} else {
+				throw new Error(`Action inconnue: ${action}. Utilisez list, show, delete, save ou generate.`);
+			}
+		} catch (e: any) {
+			restoreLogs(!!options.json);
+			if (options.json) {
+				console.log(JSON.stringify({ error: e.message }));
+			} else {
+				console.error(`${colors.red}Erreur team-builder : ${e.message}${colors.reset}`);
+			}
+		} finally {
+			if (!isReplMode) process.exit(0);
+		}
+	});
+
+// 18. shell command
 program
 	.command("shell")
 	.aliases(["repl"])
@@ -1847,7 +3347,7 @@ Tapez '${colors.bold}exit${colors.reset}' ou '${colors.bold}quit${colors.reset}'
 			// ignore fallback
 		}
 
-		const commands = ['help', 'chara', 'search', 'translate', 'dialogue', 'skill', 'item', 'team', 'db', 'status', 'audit', 'wave', 'sync', 'repair', 'redis', 'glossary-rebuild', 'exit', 'quit'];
+		const commands = ['help', 'chara', 'compare', 'search', 'translate', 'dialogue', 'skill', 'item', 'team', 'db', 'status', 'audit', 'wave', 'sync', 'repair', 'redis', 'glossary-rebuild', 'exit', 'quit'];
 		
 		function completer(line: string) {
 			const trimmed = line.trim();
@@ -1969,12 +3469,14 @@ Tapez '${colors.bold}exit${colors.reset}' ou '${colors.bold}quit${colors.reset}'
 Commandes disponibles :
   ${colors.bold}help${colors.reset}, ${colors.bold}h${colors.reset}          Affiche cette aide
   ${colors.bold}chara${colors.reset} <query>     Détails d'un personnage (nom, stats, techniques)
+  ${colors.bold}compare${colors.reset} <c1> <c2>  Compare deux personnages (stats, techniques, moveset)
   ${colors.bold}search${colors.reset} <query>    Recherche globale d'entités (joueurs, items, techniques)
   ${colors.bold}translate${colors.reset} <text>   Traduit du texte via glossaire consolidé
   ${colors.bold}dialogue${colors.reset} <query>   Recherche dans les répliques et dialogues narratifs
   ${colors.bold}skill${colors.reset} <query>      Détails d'une technique / compétence / passive
   ${colors.bold}item${colors.reset} <query>       Détails d'un objet (consommable, équipement, etc.)
   ${colors.bold}team${colors.reset} <query>       Détails d'une équipe (kits, saisons, etc.)
+  ${colors.bold}random-team${colors.reset}       Génère une équipe aléatoire (options dispo)
   ${colors.bold}db${colors.reset} <sql>          Exécute une requête SQL PostgreSQL
   ${colors.bold}status${colors.reset}            Diagnostic de santé système et services
   ${colors.bold}audit${colors.reset}             Audit de cohérence de la base

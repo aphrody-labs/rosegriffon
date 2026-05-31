@@ -28,17 +28,23 @@ export default async function MyTeamPage() {
 	const session = await getServerSession();
 	const isAuthenticated = Boolean(session?.user);
 
-	const { data: rawChars } = await wikiService.getCharactersList({
-		limit: 6000,
-		page: 1,
-		status: "all",
-	});
+	const [{ data: rawChars }, { data: rawCoords }] = await Promise.all([
+		wikiService.getCharactersList({
+			limit: 6000,
+			page: 1,
+			status: "all",
+		}),
+		wikiService.getCoordinatorsList({
+			limit: 200,
+			status: "all",
+		})
+	]);
 
 	// Group variants and deduplicate
 	const grouped = wikiService.groupVariants(rawChars);
 
-	// Map to picker-friendly format (with stats for detail panel)
-	const characters: PickerCharacter[] = grouped
+	// Map players to picker-friendly format
+	const mappedPlayers: PickerCharacter[] = grouped
 		.map((char) => {
 			const variant = char.variants?.[0] as any;
 			const name = char.names?.fr || char.names?.en || char.names?.ja || "?";
@@ -58,6 +64,8 @@ export default async function MyTeamPage() {
 				rarity,
 				series: (char as any).sheetData?.series,
 				slug,
+				internalCode: char.internalCode,
+				zukanHash: char.zukanHash || variant?.zukanHash,
 				stats: statsLv99
 					? {
 							kick: statsLv99.kick || 0,
@@ -72,6 +80,25 @@ export default async function MyTeamPage() {
 			};
 		})
 		.filter((c) => c.imageUrl);
+
+	// Map coordinators to picker-friendly format
+	const mappedCoords: PickerCharacter[] = rawCoords.map((c: any) => {
+		const isCoord = c.bestRarity === "Coordinator";
+		return {
+			charaId: c.charaId,
+			element: "Void",
+			imageUrl: c.image_url || c.image || "https://dxi4wb638ujep.cloudfront.net/1/k/c/b/cb88nfolkwe.png",
+			name: c.names?.fr || c.names?.en || "?",
+			position: isCoord ? "COORD" : "COACH",
+			rarity: c.bestRarity || "Coach",
+			slug: c.slug,
+			internalCode: c.internalCode,
+			zukanHash: c.zukanHash,
+			stats: undefined,
+		};
+	});
+
+	const characters = [...mappedPlayers, ...mappedCoords];
 
 	return <TeamBuilderLoader characters={characters} isAuthenticated={isAuthenticated} />;
 }

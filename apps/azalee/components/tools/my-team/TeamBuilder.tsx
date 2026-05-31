@@ -31,6 +31,7 @@ import { PlayerDetailPanel } from "./PlayerDetailPanel";
 import { PlayerSlotOverlay } from "./PlayerSlot";
 import { TeamStats } from "./TeamStats";
 import { RagAssistant } from "@/components/wiki/RagAssistant";
+import { calculateElementSynergies } from "@/lib/team-rules";
 
 /* ── Types ────────────────────────────────────────────────── */
 
@@ -259,6 +260,8 @@ export function TeamBuilder({ characters, initialTeam, isAuthenticated }: TeamBu
 	const [mobilePanel, setMobilePanel] = useState<"field" | "roster" | "stats">("field");
 	const [selectedCharaId, setSelectedCharaId] = useState<string | null>(null);
 	const [selectedMemberSlot, setSelectedMemberSlot] = useState<string | null>(null);
+	const [level, setLevel] = useState(99);
+	const [activeSlotId, setActiveSlotId] = useState<string | null>(null);
 
 	// ── Undo history ───────────────────────────────────
 	const [history, setHistory] = useState<Array<Record<string, TeamMember>>>([]);
@@ -266,62 +269,127 @@ export function TeamBuilder({ characters, initialTeam, isAuthenticated }: TeamBu
 		setHistory((prev) => [...prev.slice(-19), state]);
 	}, []);
 
+	// Get synergies
+	const { dominantElement, hasHarmony, links } = useMemo(() => {
+		return calculateElementSynergies(members, formation);
+	}, [members, formation]);
+
 	const ragSuggestions = useMemo(() => {
 		const list: string[] = [];
 		const placedMembers = Object.values(members);
-		
-		if (placedMembers.length > 0) {
-			const sample1 = placedMembers[0];
-			list.push(sample1.name);
-			list.push(`Techniques de ${sample1.name}`);
-			if (placedMembers.length > 1) {
-				const sample2 = placedMembers[1];
-				list.push(sample2.name);
+		const fieldMembers = placedMembers.filter((m) => m.slot.startsWith("field-"));
+
+		// 1. Position match checking / role coverage suggestions
+		const positionsCount: Record<string, number> = { FW: 0, MF: 0, DF: 0, GK: 0 };
+		for (const m of fieldMembers) {
+			if (positionsCount[m.position] !== undefined) {
+				positionsCount[m.position]++;
 			}
 		}
-		
-		list.push(`Formation ${formation.name}`);
-		
-		if (list.length < 4) {
-			list.push("Meilleurs attaquants");
-			list.push("Style de jeu");
+
+		const expected: Record<string, number> = { DF: 0, FW: 0, GK: 0, MF: 0 };
+		for (const p of formation.positions) {
+			expected[p.role]++;
 		}
-		
+
+		for (const role of ["FW", "MF", "DF", "GK"]) {
+			if (positionsCount[role] < expected[role]) {
+				const frRole = role === "FW" ? "Attaquants" : role === "MF" ? "Milieux" : role === "DF" ? "Défenseurs" : "Gardiens";
+				list.push(`Meilleurs ${frRole.toLowerCase()} pour ${formation.name}`);
+			}
+		}
+
+		// 2. Element synergy tactical suggestions
+		if (dominantElement) {
+			list.push(`Avantages du type ${dominantElement === "Fire" ? "Feu" : dominantElement === "Wind" ? "Vent" : dominantElement === "Forest" ? "Forêt" : "Montagne"}`);
+			list.push(`Comment maximiser la dominance ${dominantElement === "Fire" ? "Feu" : dominantElement === "Wind" ? "Vent" : dominantElement === "Forest" ? "Forêt" : "Montagne"}`);
+		} else {
+			list.push("Comment activer la Dominance d'élément");
+		}
+
+		if (hasHarmony) {
+			list.push("Bonus tactique de l'Harmonie d'éléments");
+		} else {
+			list.push("Comment obtenir l'Harmonie d'éléments");
+		}
+
+		// 3. Specific player moveset and synergy suggestions
+		if (fieldMembers.length > 0) {
+			const p1 = fieldMembers[0];
+			list.push(`Techniques de ${p1.name}`);
+			list.push(`Meilleurs partenaires pour ${p1.name}`);
+			if (fieldMembers.length > 1) {
+				const p2 = fieldMembers[1];
+				list.push(`Synergie entre ${p1.name} et ${p2.name}`);
+			}
+		}
+
+		// 4. Default strategic questions
+		list.push(`Forces et faiblesses de la formation ${formation.name}`);
+		list.push("Tactiques méta actuelles");
+
 		return Array.from(new Set(list)).slice(0, 5);
-	}, [members, formation]);
+	}, [members, formation, dominantElement, hasHarmony]);
 
-	// ── Tap-to-select (mobile) ─────────────────────────
+	// ── Tap-to-select (mobile/desktop) ─────────────────
 	const handleCharaTap = useCallback((char: PickerCharacter) => {
-		setSelectedCharaId((prev) => (prev === char.charaId ? null : char.charaId));
-		setMobilePanel("field");
-	}, []);
-
-	const handleSlotTap = useCallback(
-		(slotId: string) => {
-			if (!selectedCharaId) {
-				return;
-			}
-			const char = characters.find((c) => c.charaId === selectedCharaId);
-			if (!char) {
-				return;
-			}
-
+		const targetSlot = selectedMemberSlot || activeSlotId;
+		if (targetSlot) {
 			pushHistory({ ...members });
 			setMembers((prev) => ({
 				...prev,
-				[slotId]: {
+				[targetSlot]: {
 					charaId: char.charaId,
 					element: char.element,
 					imageUrl: char.imageUrl,
 					name: char.name,
 					position: char.position,
 					rarity: char.rarity,
-					slot: slotId,
+					slot: targetSlot,
 					slug: char.slug,
 					stats: char.stats,
+					internalCode: char.internalCode,
+					zukanHash: char.zukanHash,
 				},
 			}));
 			setSelectedCharaId(null);
+			setActiveSlotId(null);
+			setSelectedMemberSlot(null);
+		} else {
+			setSelectedCharaId((prev) => (prev === char.charaId ? null : char.charaId));
+		}
+		setMobilePanel("field");
+	}, [activeSlotId, selectedMemberSlot, members, pushHistory]);
+
+	const handleSlotTap = useCallback(
+		(slotId: string) => {
+			if (selectedCharaId) {
+				const char = characters.find((c) => c.charaId === selectedCharaId);
+				if (char) {
+					pushHistory({ ...members });
+					setMembers((prev) => ({
+						...prev,
+						[slotId]: {
+							charaId: char.charaId,
+							element: char.element,
+							imageUrl: char.imageUrl,
+							name: char.name,
+							position: char.position,
+							rarity: char.rarity,
+							slot: slotId,
+							slug: char.slug,
+							stats: char.stats,
+							internalCode: char.internalCode,
+							zukanHash: char.zukanHash,
+						},
+					}));
+					setSelectedCharaId(null);
+					return;
+				}
+			}
+			setActiveSlotId((prev) => (prev === slotId ? null : slotId));
+			setSelectedMemberSlot(null);
+			setMobilePanel("roster");
 		},
 		[selectedCharaId, characters, members, pushHistory]
 	);
@@ -519,6 +587,8 @@ export function TeamBuilder({ characters, initialTeam, isAuthenticated }: TeamBu
 						slot: slotId,
 						slug: match.slug,
 						stats: match.stats,
+						internalCode: match.internalCode,
+						zukanHash: match.zukanHash,
 					};
 					usedNow.add(match.charaId);
 				}
@@ -542,6 +612,8 @@ export function TeamBuilder({ characters, initialTeam, isAuthenticated }: TeamBu
 						slot: slotId,
 						slug: match.slug,
 						stats: match.stats,
+						internalCode: match.internalCode,
+						zukanHash: match.zukanHash,
 					};
 					usedNow.add(match.charaId);
 				}
@@ -820,6 +892,32 @@ export function TeamBuilder({ characters, initialTeam, isAuthenticated }: TeamBu
 					</div>
 				</div>
 
+				{/* Level Slider (Material Design 3 style) */}
+				<div className="bg-surface-container-high/40 p-3.5 rounded-2xl border border-outline/10 space-y-2">
+					<div className="flex items-center justify-between text-xs font-bold text-on-surface-variant">
+						<span className="flex items-center gap-1.5">
+							<Icon name="trending_up" size={16} className="text-primary animate-pulse" />
+							Niveau global de l'équipe
+						</span>
+						<span className="text-primary text-sm font-black bg-primary-container text-on-primary-container px-2.5 py-0.5 rounded-lg">
+							Niv. {level}
+						</span>
+					</div>
+					<div className="flex items-center gap-3">
+						<span className="text-[10px] font-bold text-on-surface-variant/60 w-3">1</span>
+						<input
+							type="range"
+							min="1"
+							max="99"
+							value={level}
+							onChange={(e) => setLevel(parseInt(e.target.value, 10))}
+							className="flex-1 h-1.5 bg-outline/20 rounded-lg appearance-none cursor-pointer accent-primary focus:outline-hidden"
+							aria-label="Niveau de l'équipe"
+						/>
+						<span className="text-[10px] font-bold text-on-surface-variant/60 w-4">99</span>
+					</div>
+				</div>
+
 				{/* Mobile tab switcher — Material 3 segmented button */}
 				<div
 					className="relative flex lg:hidden h-12 rounded-2xl bg-surface-container-high/80 p-1 overflow-hidden"
@@ -883,6 +981,8 @@ export function TeamBuilder({ characters, initialTeam, isAuthenticated }: TeamBu
 								selectedCharaId={selectedCharaId}
 								onMemberClick={handleMemberClick}
 								selectedMemberSlot={selectedMemberSlot}
+								activeSlotId={activeSlotId}
+								links={links}
 							/>
 						</div>
 
@@ -893,13 +993,15 @@ export function TeamBuilder({ characters, initialTeam, isAuthenticated }: TeamBu
 									member={members[selectedMemberSlot]}
 									onClose={() => setSelectedMemberSlot(null)}
 									onRemove={handleRemoveMember}
+									level={level}
+									formation={formation}
 								/>
 							</div>
 						)}
 
 						{/* Stats (desktop only — mobile has own tab) */}
 						<div className="hidden lg:block">
-							<TeamStats members={members} formation={formation} />
+							<TeamStats members={members} formation={formation} level={level} />
 						</div>
 					</div>
 
@@ -917,13 +1019,14 @@ export function TeamBuilder({ characters, initialTeam, isAuthenticated }: TeamBu
 							placedIds={placedIds}
 							selectedCharaId={selectedCharaId}
 							onCharaTap={handleCharaTap}
+							activeSlotId={selectedMemberSlot || activeSlotId}
 						/>
 					</div>
 
 					{/* Mobile stats tab */}
 					{mobilePanel === "stats" && (
 						<div className="w-full lg:hidden space-y-3">
-							<TeamStats members={members} formation={formation} />
+							<TeamStats members={members} formation={formation} level={level} />
 							{/* Mobile action cards */}
 							<div className="grid grid-cols-2 gap-2">
 								<button

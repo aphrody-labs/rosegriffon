@@ -1,6 +1,8 @@
 "use server";
 
-import { isKana, toKatakana } from "wanakana";
+import fs from "node:fs/promises";
+import path from "node:path";
+import { isKana, toKatakana, toHiragana } from "wanakana";
 import { japaneseToRomaji } from "@/lib/japanese-romaji";
 import { createClient } from "@/lib/supabase/server";
 import { TACTIC_FR } from "@/lib/translations";
@@ -26,34 +28,151 @@ const ENTITY_TYPE_CONFIG: Record<string, { label: string; urlPrefix: string }> =
 	team: { label: "Équipe", urlPrefix: "/team" },
 };
 
+let glossaryCache: any = null;
+
+async function loadGlossary() {
+	if (glossaryCache) return glossaryCache;
+	const possiblePaths = [
+		path.join(process.cwd(), "data", "glossary.json"),
+		path.join(process.cwd(), "..", "..", "data", "glossary.json"),
+		"/home/ubuntu/rg/data/glossary.json",
+	];
+	for (const p of possiblePaths) {
+		try {
+			const content = await fs.readFile(p, "utf-8");
+			glossaryCache = JSON.parse(content);
+			return glossaryCache;
+		} catch {
+			// Ignore error and try next path
+		}
+	}
+	return null;
+}
+
+interface GlossaryItem {
+	ja?: string;
+	en?: string;
+	fr?: string;
+	code?: string;
+	category?: string;
+	element?: string;
+	subType?: string;
+	boostType?: string;
+}
+
 /**
- * Search translations across all game entities.
- * Returns name_fr, name_en, name_ja for each match.
+ * Searches in local glossary cache.
  */
-export async function searchTranslations(
-	query: string,
-	entityType?: string
-): Promise<TranslationResult[]> {
-	if (!query || query.length < 2) {
-		return [];
-	}
+async function searchGlossary(query: string, entityType?: string): Promise<TranslationResult[]> {
+	const glossary = await loadGlossary();
+	if (!glossary) return [];
 
-	const supabase = await createClient();
-	const sanitized = query.replaceAll(/[%_,().*\\]/g, "");
-	const q = `%${sanitized}%`;
+	const sanitized = query.replaceAll(/[%_,().*\\]/g, "").trim().toLowerCase();
+	if (!sanitized) return [];
 
-	// Build OR filter with optional katakana conversion
-	let orFilter = `name_fr.ilike.${q},name_en.ilike.${q},name_ja.ilike.${q}`;
-	const kataCandidate = toKatakana(sanitized.toLowerCase());
-	const isValidKana =
-		kataCandidate.length > 0 && [...kataCandidate].every((c) => isKana(c) || c === "ー");
-	if (isValidKana && kataCandidate !== sanitized) {
-		orFilter += `,name_ja.ilike.%${kataCandidate}%`;
-	}
+	const hiraCandidate = toHiragana(sanitized).toLowerCase();
+	const kataCandidate = toKatakana(sanitized).toLowerCase();
+
+	const isValidHira = hiraCandidate.length > 0 && [...hiraCandidate].every((c) => isKana(c) || c === "ー");
+	const isValidKata = kataCandidate.length > 0 && [...kataCandidate].every((c) => isKana(c) || c === "ー");
 
 	const results: TranslationResult[] = [];
 
-	// Build queries based on entityType filter
+	const searchCategory = (catName: string, type: string, typeLabel: string, urlPrefix: string) => {
+		if (entityType && entityType !== type) return;
+		const list = glossary[catName] || [];
+		for (const entry of list as GlossaryItem[]) {
+			let matched = false;
+			const enLower = (entry.en || "").toLowerCase();
+			const frLower = (entry.fr || "").toLowerCase();
+			const jaLower = (entry.ja || "").toLowerCase();
+
+			if (enLower.includes(sanitized) || frLower.includes(sanitized) || jaLower.includes(sanitized)) {
+				matched = true;
+			} else if (isValidHira && jaLower.includes(hiraCandidate)) {
+				matched = true;
+			} else if (isValidKata && jaLower.includes(kataCandidate)) {
+				matched = true;
+			} else if (entry.ja) {
+				const roma = japaneseToRomaji(entry.ja);
+				if (roma && roma.toLowerCase().includes(sanitized)) {
+					matched = true;
+				}
+			}
+
+			if (matched) {
+				const id = entry.code || entry.en || entry.ja || Math.random().toString();
+				let finalType = type;
+				let finalTypeLabel = typeLabel;
+				let finalUrl = `${urlPrefix}/${id}`;
+
+				if (type === "aura") {
+					const isSoul = entry.subType === "soul" || (entry.subType && entry.subType.toLowerCase().includes("soul"));
+					finalType = isSoul ? "soul" : "keshin";
+					finalTypeLabel = isSoul ? "Totem" : "Esprit Guerrier";
+					finalUrl = isSoul ? `/aura/totems/${id}` : `/aura/esprits-guerriers/${id}`;
+				}
+
+				results.push({
+					id,
+					type: finalType,
+					typeLabel: finalTypeLabel,
+					name_fr: entry.fr || entry.en || null,
+					name_en: entry.en || null,
+					name_ja: entry.ja || null,
+					name_roma: entry.ja ? japaneseToRomaji(entry.ja) : null,
+					url: finalUrl,
+				});
+			}
+		}
+	};
+
+	searchCategory("characters", "character", "Personnage", "/chara");
+	searchCategory("techniques", "skill", "Technique", "/skill");
+	searchCategory("auras", "aura", "Aura", "/aura");
+	searchCategory("passives", "skill", "Technique", "/skill");
+	searchCategory("teams", "team", "Équipe", "/team");
+	searchCategory("items", "item", "Objet", "/item");
+	searchCategory("terms", "term", "Terme", "#");
+
+	return results;
+}
+
+/**
+ * Searches in Supabase database tables.
+ */
+async function searchSupabase(query: string, entityType?: string): Promise<TranslationResult[]> {
+	const supabase = await createClient();
+	const sanitized = query.replaceAll(/[%_,().*\\]/g, "").trim();
+	if (!sanitized) return [];
+
+	const q = `%${sanitized}%`;
+
+	// Build base OR filter
+	const orFilters = [
+		`name_fr.ilike.${q}`,
+		`name_en.ilike.${q}`,
+		`name_ja.ilike.${q}`
+	];
+
+	// Romaji-Katakana/Hiragana conversion checks
+	const hiraCandidate = toHiragana(sanitized.toLowerCase());
+	const kataCandidate = toKatakana(sanitized.toLowerCase());
+
+	const isValidHira = hiraCandidate.length > 0 && [...hiraCandidate].every((c) => isKana(c) || c === "ー");
+	const isValidKata = kataCandidate.length > 0 && [...kataCandidate].every((c) => isKana(c) || c === "ー");
+
+	if (isValidHira && hiraCandidate !== sanitized.toLowerCase()) {
+		orFilters.push(`name_ja.ilike.%${hiraCandidate}%`);
+	}
+	if (isValidKata && kataCandidate !== sanitized.toLowerCase()) {
+		orFilters.push(`name_ja.ilike.%${kataCandidate}%`);
+	}
+
+	const orFilterString = orFilters.join(",");
+	const charOrFilterString = [...orFilters, `name_roma.ilike.${q}`].join(",");
+
+	const results: TranslationResult[] = [];
 	const queries: Array<PromiseLike<void>> = [];
 
 	const shouldQuery = (type: string) => !entityType || entityType === type;
@@ -63,7 +182,7 @@ export async function searchTranslations(
 			supabase
 				.from("inagle_characters")
 				.select("slug, name_fr, name_en, name_ja, name_roma")
-				.or(orFilter)
+				.or(charOrFilterString)
 				.not("internal_code", "like", "%_5000")
 				.order("name_fr", { ascending: true, nullsFirst: false })
 				.limit(entityType ? 30 : 8)
@@ -91,7 +210,7 @@ export async function searchTranslations(
 			supabase
 				.from("inagle_skills")
 				.select("id, name_fr, name_en, name_ja")
-				.or(orFilter)
+				.or(orFilterString)
 				.order("name_fr", { ascending: true, nullsFirst: false })
 				.limit(entityType ? 30 : 8)
 				.then(({ data }: any) => {
@@ -118,7 +237,7 @@ export async function searchTranslations(
 			supabase
 				.from("inagle_items")
 				.select("id, name_fr, name_en, name_ja, category")
-				.or(orFilter)
+				.or(orFilterString)
 				.neq("category", "special_tactics")
 				.order("name_fr", { ascending: true, nullsFirst: false })
 				.limit(entityType ? 30 : 6)
@@ -146,7 +265,7 @@ export async function searchTranslations(
 			supabase
 				.from("inagle_items")
 				.select("id, name_fr, name_en, name_ja")
-				.or(orFilter)
+				.or(orFilterString)
 				.eq("category", "special_tactics")
 				.order("name_fr", { ascending: true, nullsFirst: false })
 				.limit(entityType ? 30 : 6)
@@ -174,7 +293,7 @@ export async function searchTranslations(
 			supabase
 				.from("inagle_teams")
 				.select("id, name_fr, name_en, name_ja")
-				.or(orFilter)
+				.or(orFilterString)
 				.order("name_fr", { ascending: true, nullsFirst: false })
 				.limit(entityType ? 30 : 6)
 				.then(({ data }: any) => {
@@ -201,7 +320,7 @@ export async function searchTranslations(
 			supabase
 				.from("inagle_keshins_clean")
 				.select("id, name_fr, name_en, name_ja")
-				.or(orFilter)
+				.or(orFilterString)
 				.order("name_fr", { ascending: true, nullsFirst: false })
 				.limit(entityType ? 30 : 5)
 				.then(({ data }: any) => {
@@ -228,7 +347,7 @@ export async function searchTranslations(
 			supabase
 				.from("inagle_souls_clean")
 				.select("id, name_fr, name_en, name_ja")
-				.or(orFilter)
+				.or(orFilterString)
 				.order("name_fr", { ascending: true, nullsFirst: false })
 				.limit(entityType ? 30 : 5)
 				.then(({ data }: any) => {
@@ -250,28 +369,69 @@ export async function searchTranslations(
 		);
 	}
 
-	await Promise.all(queries);
+	try {
+		await Promise.all(queries);
+	} catch {
+		// Suppress database connection errors to allow glossary fallback
+	}
+
+	return results;
+}
+
+/**
+ * Unified translations search exploiting database queries, romaji-katakana translation, and local glossary caches.
+ */
+export async function searchTranslations(
+	query: string,
+	entityType?: string
+): Promise<TranslationResult[]> {
+	if (!query || query.length < 2) {
+		return [];
+	}
+
+	const [dbResults, glossaryResults] = await Promise.all([
+		searchSupabase(query, entityType),
+		searchGlossary(query, entityType),
+	]);
+
+	// Merge and de-duplicate
+	const seen = new Set<string>();
+	const merged: TranslationResult[] = [];
+
+	// Database results take priority because they have accurate DB slugs & URLs
+	for (const r of dbResults) {
+		const key = `${r.type}-${r.id}`.toLowerCase();
+		if (!seen.has(key)) {
+			seen.add(key);
+			merged.push(r);
+		}
+	}
+
+	// Backfill with glossary results
+	for (const r of glossaryResults) {
+		const key = `${r.type}-${r.id}`.toLowerCase();
+		const nameKey = `${r.type}-${r.name_fr || r.name_en}`.toLowerCase();
+		if (!seen.has(key) && !seen.has(nameKey)) {
+			seen.add(key);
+			seen.add(nameKey);
+			merged.push(r);
+		}
+	}
 
 	// Sort by relevance: exact match > prefix > contains
-	const queryLower = sanitized.toLowerCase();
-	results.sort((a, b) => {
+	const queryLower = query.replaceAll(/[%_,().*\\]/g, "").trim().toLowerCase();
+	merged.sort((a, b) => {
 		const scoreOf = (r: TranslationResult) => {
-			for (const name of [r.name_fr, r.name_en, r.name_ja]) {
-				if (!name) {
-					continue;
-				}
+			for (const name of [r.name_fr, r.name_en, r.name_ja, r.name_roma]) {
+				if (!name) continue;
 				const n = name.toLowerCase();
-				if (n === queryLower) {
-					return 3;
-				}
-				if (n.startsWith(queryLower)) {
-					return 2;
-				}
+				if (n === queryLower) return 3;
+				if (n.startsWith(queryLower)) return 2;
 			}
 			return 1;
 		};
 		return scoreOf(b) - scoreOf(a);
 	});
 
-	return results.slice(0, 30);
+	return merged.slice(0, 30);
 }
