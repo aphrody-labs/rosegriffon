@@ -3347,7 +3347,7 @@ Tapez '${colors.bold}exit${colors.reset}' ou '${colors.bold}quit${colors.reset}'
 			// ignore fallback
 		}
 
-		const commands = ['help', 'chara', 'compare', 'search', 'translate', 'dialogue', 'skill', 'item', 'team', 'db', 'status', 'audit', 'wave', 'sync', 'repair', 'redis', 'glossary-rebuild', 'exit', 'quit'];
+		const commands = ['help', 'chara', 'compare', 'search', 'translate', 'dialogue', 'skill', 'item', 'team', 'random-team', 'team-builder', 'db', 'status', 'audit', 'wave', 'sync', 'repair', 'redis', 'glossary-rebuild', 'exit', 'quit'];
 		
 		function completer(line: string) {
 			const trimmed = line.trim();
@@ -3477,6 +3477,7 @@ Commandes disponibles :
   ${colors.bold}item${colors.reset} <query>       Détails d'un objet (consommable, équipement, etc.)
   ${colors.bold}team${colors.reset} <query>       Détails d'une équipe (kits, saisons, etc.)
   ${colors.bold}random-team${colors.reset}       Génère une équipe aléatoire (options dispo)
+  ${colors.bold}team-builder${colors.reset}      Gère et génère des équipes tactiques (options dispo)
   ${colors.bold}db${colors.reset} <sql>          Exécute une requête SQL PostgreSQL
   ${colors.bold}status${colors.reset}            Diagnostic de santé système et services
   ${colors.bold}audit${colors.reset}             Audit de cohérence de la base
