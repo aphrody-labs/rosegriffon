@@ -14,6 +14,7 @@ import {
 	type GrowthTableEntry,
 	loadGrowthTableMain,
 	loadZukanMapping,
+	loadZukanOrder,
 } from "../core/data-loader.js";
 import { createImageAPI } from "../core/images.js";
 import type {
@@ -409,6 +410,11 @@ export function loadAllCharacters(): Character[] {
 	// Import dynamically or use the loader we added
 	const zukanMapping = loadZukanMapping?.() || {};
 	const zukanStats = loadZukanCharacters();
+	const zukanOrderList = loadZukanOrder() || [];
+	const hashToOrderMap = new Map<string, number>();
+	for (const e of zukanOrderList) {
+		if (e.zukanHash) hashToOrderMap.set(e.zukanHash, e.order);
+	}
 
 	const images = createImageAPI();
 
@@ -556,6 +562,12 @@ export function loadAllCharacters(): Character[] {
 				character.zukanOrder = zukanInfo.order;
 			}
 		}
+		if (character.zukanHash && (character.zukanOrder === undefined || character.zukanOrder === null || character.zukanOrder === 0)) {
+			const o = hashToOrderMap.get(character.zukanHash);
+			if (o !== undefined) {
+				character.zukanOrder = o;
+			}
+		}
 
 		// Add constellation data
 		const constellationIndex = constellationMapping.byCharacterId.get(param.charaParamId);
@@ -609,13 +621,11 @@ export function loadAllCharacters(): Character[] {
 
 	// Sort by Zukan Order first (to match official site), then by internal code
 	characters.sort((a, b) => {
-		// If both have Zukan order, sort by it
-		if (a.zukanOrder && b.zukanOrder) {
-			return a.zukanOrder - b.zukanOrder;
+		const orderA = a.zukanOrder !== undefined && a.zukanOrder !== null ? a.zukanOrder : 999999;
+		const orderB = b.zukanOrder !== undefined && b.zukanOrder !== null ? b.zukanOrder : 999999;
+		if (orderA !== orderB) {
+			return orderA - orderB;
 		}
-		// If only one has, prioritize the one with order (it's arguably "more official")
-		if (a.zukanOrder) return -1;
-		if (b.zukanOrder) return 1;
 
 		// Fallback to internal code
 		const codeA = a.internalCode || "";
@@ -753,7 +763,11 @@ import { buildCharaBaseToParamsMap } from "../parsers/chara-param.js";
 function buildVariant(
 	param: ParsedCharaParam,
 	charaRank: number,
-	constellationMapping?: ConstellationMapping
+	constellationMapping?: ConstellationMapping,
+	slug?: string,
+	internalCode?: string,
+	image?: string,
+	sheetData?: any
 ): CharacterVariant {
 	const positionCode = positionIdToCode(param.mainPosition);
 	const elementNames = elementIdToNames(param.element);
@@ -786,6 +800,10 @@ function buildVariant(
 			lv99: stats?.lv99 ?? { kick: 0, control: 0, technique: 0, physical: 0, pressure: 0, agility: 0, intelligence: 0 },
 			lv1: lv1Stats
 		} as any,
+		slug,
+		internalCode,
+		image,
+		sheetData
 	};
 
 	if (constellationMapping) {
@@ -846,6 +864,12 @@ export function loadBaseCharacters(): BaseCharacter[] {
 
 	const zukanMapping = loadZukanMapping?.() || {};
 	const zukanStats = loadZukanCharacters();
+	const images = createImageAPI();
+	const zukanOrderList = loadZukanOrder() || [];
+	const hashToOrderMap = new Map<string, number>();
+	for (const e of zukanOrderList) {
+		if (e.zukanHash) hashToOrderMap.set(e.zukanHash, e.order);
+	}
 
 	const charaDetailsMap = parseCharaDetails();
 	const charaTextMap = loadUniversalText("chara_text");
@@ -870,6 +894,8 @@ export function loadBaseCharacters(): BaseCharacter[] {
 
 		// Get localized names
 		const localizedNames = getLocalizedNames(base.nameHash, nameMaps, romaMaps);
+		const slugName = localizedNames.en || localizedNames.fr || localizedNames.ja || "unknown";
+		const baseSlug = generateSlug(slugName);
 
 		// Build all variants
 		const variants: CharacterVariant[] = [];
@@ -878,7 +904,9 @@ export function loadBaseCharacters(): BaseCharacter[] {
 		for (const param of params) {
 			const starSign = starSignMap.get(param.charaParamId);
 			const charaRank = starSign?.charaRarity ?? 0;
-			const variant = buildVariant(param, charaRank, constellationMapping);
+			const variantSlug = `${baseSlug}-${param.charaParamId}`;
+			const faceImage = images.face(base.internalCode);
+			const variant = buildVariant(param, charaRank, constellationMapping, variantSlug, base.internalCode, faceImage);
 
 			// Backfill stats from Zukan (chara.json) if missing
 			if (variant.stats.lv99.kick === 0 && base.internalCode && zukanStats.has(base.internalCode)) {
@@ -905,6 +933,12 @@ export function loadBaseCharacters(): BaseCharacter[] {
 					variant.zukanOrder = zukanInfo.order;
 				}
 			}
+			if (variant.zukanHash && (variant.zukanOrder === undefined || variant.zukanOrder === null || variant.zukanOrder === 0)) {
+				const o = hashToOrderMap.get(variant.zukanHash);
+				if (o !== undefined) {
+					variant.zukanOrder = o;
+				}
+			}
 
 			variants.push(variant);
 
@@ -913,8 +947,15 @@ export function loadBaseCharacters(): BaseCharacter[] {
 			}
 		}
 
-		// Sort variants by rarity (best first)
-		variants.sort((a, b) => b.rarityCode - a.rarityCode);
+		// Sort variants by age (youngest first)
+		variants.sort((a, b) => {
+			const orderA = a.zukanOrder !== undefined && a.zukanOrder !== null ? a.zukanOrder : 999999;
+			const orderB = b.zukanOrder !== undefined && b.zukanOrder !== null ? b.zukanOrder : 999999;
+			if (orderA !== orderB) return orderA - orderB;
+			const idA = parseInt(a.charaParamId, 16) || 0;
+			const idB = parseInt(b.charaParamId, 16) || 0;
+			return idA - idB;
+		});
 
 		const isBasara = variants.some((v) => v.rarityCode === 20);
 
@@ -977,7 +1018,6 @@ export function loadBaseCharacters(): BaseCharacter[] {
 		}
 
 		// Generate slug
-		const slugName = localizedNames.en || localizedNames.fr || localizedNames.ja || "unknown";
 		const slug = generateSlug(slugName);
 
 		// Check if this base character is controllable (ctrl_chara uses charaId)
@@ -1030,13 +1070,15 @@ export function loadBaseCharacters(): BaseCharacter[] {
 			// Update isBasara flag
 			if (char.isBasara) existing.isBasara = true;
 
-			// Perform resort of variants
-			existing.variants.sort((a, b) => b.rarityCode - a.rarityCode);
-
-			// Update zukanHash if existing one is missing but new one has it
-			if (!existing.zukanHash && char.zukanHash) {
-				existing.zukanHash = char.zukanHash;
-			}
+			// Perform resort of variants by age (youngest first)
+			existing.variants.sort((a, b) => {
+				const orderA = a.zukanOrder !== undefined && a.zukanOrder !== null ? a.zukanOrder : 999999;
+				const orderB = b.zukanOrder !== undefined && b.zukanOrder !== null ? b.zukanOrder : 999999;
+				if (orderA !== orderB) return orderA - orderB;
+				const idA = parseInt(a.charaParamId, 16) || 0;
+				const idB = parseInt(b.charaParamId, 16) || 0;
+				return idA - idB;
+			});
 		} else {
 			nameMap.set(key, char);
 		}
@@ -1044,6 +1086,21 @@ export function loadBaseCharacters(): BaseCharacter[] {
 
 	// Rebuild results from map values
 	const uniqueResults = Array.from(nameMap.values());
+
+	// Update representative fields for ALL base characters from their youngest variant
+	for (const char of uniqueResults) {
+		if (char.variants.length > 0) {
+			const youngest = char.variants[0];
+			char.bestRarityCode = youngest.rarityCode;
+			char.bestRarity = youngest.rarity;
+			char.image = youngest.image || char.image;
+			char.slug = youngest.slug || char.slug;
+			char.zukanHash = youngest.zukanHash || char.zukanHash;
+			char.sheetData = youngest.sheetData || char.sheetData;
+			char.internalCode = youngest.internalCode || char.internalCode;
+			char.icons = { face: youngest.image };
+		}
+	}
 
 	// Sort by best rarity then by name
 	uniqueResults.sort((a, b) => {

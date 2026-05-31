@@ -113,6 +113,8 @@ const nextConfig: NextConfig = {
 	serverExternalPackages: [
 		"@rose-griffon/inagle",
 		"better-auth",
+		"@better-auth/kysely-adapter",
+		"kysely",
 		"pg",
 		"sharp",
 		"nodemailer",

@@ -418,6 +418,18 @@ export function loadZukanMapping(): Record<string, { hash: string; order: number
 }
 
 /**
+ * Load Zukan order list (sync)
+ */
+export function loadZukanOrder(): Array<{ order: number; name: string; zukanHash: string | null }> {
+	const filePath = join(DATA_ROOT, "zukan/zukan_order_en.json");
+	try {
+		return loadJSON<Array<{ order: number; name: string; zukanHash: string | null }>>(filePath);
+	} catch {
+		return [];
+	}
+}
+
+/**
  * Load Zukan hash mapping (async, Bun-native).
  */
 export async function loadZukanMappingAsync(): Promise<

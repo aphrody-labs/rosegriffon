@@ -39,6 +39,7 @@ export {
 	PERSONALITY_NAMES,
 	RARITY_NAMES,
 } from "./characters/api.js";
+export * from "./characters/comparison-engine.js";
 
 // Constellation
 export { type ConstellationAPI, createConstellationAPI } from "./constellation/index.js";

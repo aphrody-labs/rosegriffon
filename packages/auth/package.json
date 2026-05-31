@@ -18,7 +18,9 @@
 	"dependencies": {
 		"@rose-griffon/db": "workspace:*",
 		"@rose-griffon/types": "workspace:*",
-		"better-auth": "catalog:"
+		"@supabase/supabase-js": "catalog:",
+		"better-auth": "catalog:",
+		"zod": "catalog:"
 	},
 	"devDependencies": {
 		"@types/bun": "catalog:",

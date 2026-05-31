@@ -256,6 +256,45 @@ const PERSONALITY_NAMES: Record<number, string> = {
 	11: "Espiègle",
 };
 
+// Helper to calculate visual/display length of a string in terminal
+function getVisibleLength(str: string): number {
+	// Remove ANSI escape codes
+	const stripped = str.replace(/\x1b\[[0-9;]*m/g, "");
+	// Count full-width characters (e.g. CJK range) as 2
+	let len = 0;
+	for (let i = 0; i < stripped.length; i++) {
+		const code = stripped.charCodeAt(i);
+		if (
+			(code >= 0x3000 && code <= 0x9FFF) ||
+			(code >= 0xF900 && code <= 0xFAFF) ||
+			(code >= 0xFF00 && code <= 0xFFEF)
+		) {
+			len += 2;
+		} else {
+			len += 1;
+		}
+	}
+	return len;
+}
+
+// Helper to render a clean single column row
+function renderOneColumn(text: string): string {
+	const visible = getVisibleLength(text);
+	const padding = " ".repeat(Math.max(0, 76 - visible));
+	return `│ ${text}${padding} │`;
+}
+
+// Helper to render a clean two column row
+function renderTwoColumns(left: string, right: string, colWidthLeft = 39, colWidthRight = 34): string {
+	const visibleLeft = getVisibleLength(left);
+	const visibleRight = getVisibleLength(right);
+	
+	const padLeft = " ".repeat(Math.max(0, colWidthLeft - visibleLeft));
+	const padRight = " ".repeat(Math.max(0, colWidthRight - visibleRight));
+	
+	return `│ ${left}${padLeft} │ ${right}${padRight} │`;
+}
+
 // Helper to render character profiler card
 function renderCharaProfile(chara: any, svc: any): string {
 	const lines: string[] = [];
@@ -274,52 +313,118 @@ function renderCharaProfile(chara: any, svc: any): string {
 	const secondPerson = chara.secondPersonMale?.ja || chara.secondPersonMale?.fr || "N/A";
 	
 	lines.push(`┌──────────────────────────────────────────────────────────────────────────────┐`);
-	lines.push(`│ ${colors.bold}${colors.green}${nameFr.padEnd(40)}${colors.reset} │ ${colors.cyan}ID: ${chara.charaId.padEnd(28)}${colors.reset} │`);
-	lines.push(`│ ${colors.yellow}Anglais: ${nameEn.padEnd(31)}${colors.reset} │ ${colors.yellow}Japonais: ${nameJa.padEnd(29)}${colors.reset} │`);
-	lines.push(`│ ${colors.yellow}Romanisé: ${roma.padEnd(30)}${colors.reset} │ ${colors.yellow}Genre: ${genderStr.padEnd(32)}${colors.reset} │`);
+	lines.push(renderTwoColumns(
+		`${colors.bold}${colors.green}${nameFr}${colors.reset}`,
+		`${colors.cyan}ID: ${chara.charaId}${colors.reset}`
+	));
+	lines.push(renderTwoColumns(
+		`${colors.yellow}Anglais: ${nameEn}${colors.reset}`,
+		`${colors.yellow}Japonais: ${nameJa}${colors.reset}`
+	));
+	lines.push(renderTwoColumns(
+		`${colors.yellow}Romanisé: ${roma}${colors.reset}`,
+		`${colors.yellow}Genre: ${genderStr}${colors.reset}`
+	));
 	lines.push(`├──────────────────────────────────────────────────────────────────────────────┤`);
-	lines.push(`│ ${colors.bold}Affiliation :${colors.reset} ${(chara.teamName || "Aucune").padEnd(61)} │`);
-	lines.push(`│ ${colors.bold}Contrôlable :${colors.reset} ${controllableStr.padEnd(14)} │ ${colors.bold}Personnalité :${colors.reset} ${personality.padEnd(30)} │`);
-	lines.push(`│ ${colors.bold}Je :${colors.reset} ${firstPerson.padEnd(22)} │ ${colors.bold}Tu (Masc) :${colors.reset} ${secondPerson.padEnd(33)} │`);
+	lines.push(renderOneColumn(`${colors.bold}Affiliation :${colors.reset} ${chara.teamName || "Aucune"}`));
+	lines.push(renderTwoColumns(
+		`${colors.bold}Contrôlable :${colors.reset} ${controllableStr}`,
+		`${colors.bold}Personnalité :${colors.reset} ${personality}`
+	));
+	lines.push(renderTwoColumns(
+		`${colors.bold}Je :${colors.reset} ${firstPerson}`,
+		`${colors.bold}Tu (Masc) :${colors.reset} ${secondPerson}`
+	));
 	lines.push(`├──────────────────────────────────────────────────────────────────────────────┤`);
 	
 	if (chara.descriptions?.fr || chara.descriptions?.en) {
 		const desc = chara.descriptions.fr || chara.descriptions.en;
-		lines.push(`│ ${colors.bold}Description :${colors.reset}${" ".repeat(63)} │`);
+		lines.push(renderOneColumn(`${colors.bold}Description :${colors.reset}`));
 		const words = desc.split(" ");
-		let currentLine = "│   ";
+		let currentLine = "  ";
 		for (const word of words) {
-			if ((currentLine + word).length > 74) {
-				lines.push(currentLine.padEnd(79) + "│");
-				currentLine = "│   " + word + " ";
+			if (getVisibleLength(currentLine + word) > 72) {
+				lines.push(renderOneColumn(currentLine));
+				currentLine = "  " + word + " ";
 			} else {
 				currentLine += word + " ";
 			}
 		}
-		if (currentLine !== "│   ") {
-			lines.push(currentLine.padEnd(79) + "│");
+		if (currentLine !== "  ") {
+			lines.push(renderOneColumn(currentLine));
 		}
 		lines.push(`├──────────────────────────────────────────────────────────────────────────────┤`);
 	}
 
 	if (chara.variants && chara.variants.length > 0) {
-		lines.push(`│ ${colors.bold}${colors.magenta}Variantes de cartes (${chara.variants.length}) :${colors.reset}${" ".repeat(47)} │`);
+		const varHeader = `Variantes de cartes (${chara.variants.length}) :`;
+		const varPadding = " ".repeat(Math.max(0, 76 - varHeader.length));
+		lines.push(`│ ${colors.bold}${colors.magenta}${varHeader}${colors.reset}${varPadding} │`);
 		for (const [idx, v] of chara.variants.entries()) {
 			const el = v.element || "N/A";
 			const pos = v.position || "N/A";
 			const rar = v.rarity || "N/A";
 			
-			lines.push(`│   [${idx + 1}] Element: ${el.padEnd(10)} | Position: ${pos.padEnd(4)} | Rareté: ${rar.padEnd(14)}        │`);
-			if (v.stats?.lv99) {
-				const s = v.stats.lv99;
-				lines.push(`│       ${colors.cyan}Kick: ${s.kick.toString().padEnd(4)} Dribble: ${s.control.toString().padEnd(4)} Block: ${s.pressure.toString().padEnd(4)} Catch: ${s.technique.toString().padEnd(4)} Speed: ${s.agility.toString().padEnd(4)}${colors.reset} │`);
+			lines.push(renderOneColumn(`  [${idx + 1}] Element: ${el.padEnd(10)} | Position: ${pos.padEnd(4)} | Rareté: ${rar}`));
+			
+			if (v.stats) {
+				const s1 = getInterpolatedStats(v, 1);
+				const s50 = getInterpolatedStats(v, 50);
+				const s99 = getInterpolatedStats(v, 99);
+
+				const t1 = s1.kick + s1.control + s1.physical + s1.pressure + s1.technique + s1.agility + (s1.intelligence || 0);
+				const t50 = s50.kick + s50.control + s50.physical + s50.pressure + s50.technique + s50.agility + (s50.intelligence || 0);
+				const t99 = s99.kick + s99.control + s99.physical + s99.pressure + s99.technique + s99.agility + (s99.intelligence || 0);
+
+				const renderRow = (label: string, v1: number, v2: number, v3: number) => {
+					const col1 = ` ${label.padEnd(12)} `;
+					const col2 = ` ${v1.toString().padStart(7)} `;
+					const col3 = ` ${v2.toString().padStart(7)} `;
+					const col4 = ` ${v3.toString().padStart(7)} `;
+					return `│       │${col1}│${col2}│${col3}│${col4}│                         │`;
+				};
+
+				const renderTotalRow = () => {
+					const col1 = ` ${colors.bold}${"TOTAL".padEnd(12)}${colors.reset} `;
+					const col2 = ` ${colors.green}${t1.toString().padStart(7)}${colors.reset} `;
+					const col3 = ` ${colors.green}${t50.toString().padStart(7)}${colors.reset} `;
+					const col4 = ` ${colors.green}${t99.toString().padStart(7)}${colors.reset} `;
+					return `│       │${col1}│${col2}│${col3}│${col4}│                         │`;
+				};
+
+				lines.push(`│       ${colors.bold}Courbe de progression des statistiques :${colors.reset}${" ".repeat(30)} │`);
+				lines.push(`│       ┌──────────────┬─────────┬─────────┬─────────┐                         │`);
+				lines.push(`│       │ Stat         │ Niv. 1  │ Niv. 50 │ Niv. 99 │                         │`);
+				lines.push(`│       ├──────────────┼─────────┼─────────┼─────────┤                         │`);
+				lines.push(renderRow("Frappe", s1.kick, s50.kick, s99.kick));
+				lines.push(renderRow("Contrôle", s1.control, s50.control, s99.control));
+				lines.push(renderRow("Physique", s1.physical, s50.physical, s99.physical));
+				lines.push(renderRow("Pression", s1.pressure, s50.pressure, s99.pressure));
+				lines.push(renderRow("Technique", s1.technique, s50.technique, s99.technique));
+				lines.push(renderRow("Agilité", s1.agility, s50.agility, s99.agility));
+				lines.push(renderRow("Intelligence", s1.intelligence || 0, s50.intelligence || 0, s99.intelligence || 0));
+				lines.push(`│       ├──────────────┼─────────┼─────────┼─────────┤                         │`);
+				lines.push(renderTotalRow());
+				lines.push(`│       └──────────────┴─────────┴─────────┴─────────┘                         │`);
 			}
+			
 			if (v.skills && v.skills.length > 0) {
-				const skillNames = v.skills.map((sk: any) => {
+				const renderColoredLine = (prefix: string, content: string, colorCode: string) => {
+					const visibleLength = prefix.length + content.length;
+					const padding = " ".repeat(Math.max(0, 70 - visibleLength));
+					return `│       ${colorCode}${prefix}${content}${colors.reset}${padding} │`;
+				};
+
+				lines.push(renderColoredLine("Techniques : ", `(${v.skills.length})`, colors.bold + colors.blue));
+				for (const sk of v.skills) {
 					const name = getSkillName(svc, sk.skillId);
-					return `${name} (Lv.${sk.learnLevel})`;
-				}).join(", ");
-				lines.push(`│       ${colors.blue}Super Moves:${colors.reset} ${skillNames.substring(0, 58)}${skillNames.length > 58 ? "..." : ""} │`);
+					const label = ` - ${name} (Niv. ${sk.learnLevel})`;
+					lines.push(`│       ${label.padEnd(70)} │`);
+				}
+			}
+			
+			if (idx < chara.variants.length - 1) {
+				lines.push(`│                                                                              │`);
 			}
 		}
 	}
@@ -1470,6 +1575,76 @@ program
 		}
 	});
 
+// 6b. test-variants
+program
+	.command("test-variants")
+	.description("Exécute des tests de cohérence de haut niveau sur les personnages et leurs variantes")
+	.action(async () => {
+		console.log(`${colors.cyan}Démarrage des tests de cohérence de haut niveau...${colors.reset}`);
+		const svc = await createInagleService();
+		const baseChars = svc.characters.baseCharacters();
+		
+		let passed = 0;
+		let failed = 0;
+		const errors: string[] = [];
+
+		for (const bc of baseChars) {
+			if (!bc.variants || bc.variants.length === 0) {
+				errors.push(`Personnage ${bc.names.fr || bc.names.en} (ID: ${bc.charaId}) sans variantes !`);
+				failed++;
+				continue;
+			}
+
+			const youngest = bc.variants[0];
+
+			// 1. Check youngest-first sort
+			for (let i = 1; i < bc.variants.length; i++) {
+				const current = bc.variants[i];
+				const orderYoungest = youngest.zukanOrder !== undefined && youngest.zukanOrder !== null ? youngest.zukanOrder : 999999;
+				const orderCurrent = current.zukanOrder !== undefined && current.zukanOrder !== null ? current.zukanOrder : 999999;
+				if (orderYoungest > orderCurrent) {
+					errors.push(`Personnage ${bc.names.fr || bc.names.en} : variante ${current.charaParamId} a un zukanOrder (${orderCurrent}) plus petit que la variante d'origine ${youngest.charaParamId} (${orderYoungest}) !`);
+					failed++;
+					break;
+				} else if (orderYoungest === orderCurrent) {
+					const idYoungest = parseInt(youngest.charaParamId, 16) || 0;
+					const idCurrent = parseInt(current.charaParamId, 16) || 0;
+					if (idYoungest > idCurrent) {
+						errors.push(`Personnage ${bc.names.fr || bc.names.en} : variante ${current.charaParamId} a un ID numérique plus petit que la variante d'origine ${youngest.charaParamId} !`);
+						failed++;
+						break;
+					}
+				}
+			}
+
+			// 2. Check representative fields alignment
+			if (bc.image !== youngest.image) {
+				errors.push(`Personnage ${bc.names.fr} : image de couverture désignée (${bc.image}) ne correspond pas à la variante d'origine (${youngest.image}) !`);
+				failed++;
+				continue;
+			}
+
+			passed++;
+		}
+
+		console.log(`\n${colors.bold}Rapport des tests :${colors.reset}`);
+		console.log(`  - Réussis : ${colors.green}${passed}${colors.reset}`);
+		console.log(`  - Échecs  : ${failed > 0 ? colors.red : colors.green}${failed}${colors.reset}`);
+
+		if (errors.length > 0) {
+			console.log(`\n${colors.red}Erreurs détectées :${colors.reset}`);
+			for (const err of errors.slice(0, 10)) {
+				console.log(`  - ${err}`);
+			}
+			if (errors.length > 10) {
+				console.log(`  ... et ${errors.length - 10} autres erreurs.`);
+			}
+			process.exit(1);
+		} else {
+			console.log(`\n${colors.green}✅ Tous les tests de cohérence ont réussi !${colors.reset}`);
+		}
+	});
+
 // 7. rag query
 program
 	.command("rag [query]")
@@ -2158,7 +2333,18 @@ program
 			}
 
 			if (options.json) {
-				console.log(JSON.stringify(matches[0], null, 2));
+				const enhancedChara = {
+					...matches[0],
+					variants: matches[0].variants?.map((v: any) => ({
+						...v,
+						statsGrowth: {
+							lv1: getInterpolatedStats(v, 1),
+							lv50: getInterpolatedStats(v, 50),
+							lv99: getInterpolatedStats(v, 99),
+						}
+					}))
+				};
+				console.log(JSON.stringify(enhancedChara, null, 2));
 			} else {
 				console.log(renderCharaProfile(matches[0], svc));
 			}

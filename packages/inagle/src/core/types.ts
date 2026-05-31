@@ -238,6 +238,13 @@ export interface CharacterVariant {
 	/** Is this a hero variant (火, 黒, 桃)? */
 	heroType?: "fire" | "black" | "pink";
 
+	/** Slug for URL */
+	slug?: string;
+	/** Sheet data object */
+	sheetData?: any;
+	/** Internal character code */
+	internalCode?: string;
+
 	/** Constellation (Players Universe star sign) */
 	constellation?: {
 		/** Constellation index (0-29) */

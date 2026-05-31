@@ -33,6 +33,7 @@ import { TEAM_EMBLEM_MAP } from "@/lib/team-emblem-map";
 import { cn } from "@/lib/utils";
 import { FormSelector } from "./FormSelector";
 import type { MovesetSkill } from "./MovesetList";
+import { RagAssistant } from "./RagAssistant";
 import { StatHeptagon } from "./StatHeptagon";
 
 // Position badge colors - matching game exactly
@@ -1065,6 +1066,17 @@ export function CharacterSheet({
 					)}
 				</div>
 			</section>
+
+			{/* RAG Tactical Assistant */}
+			<RagAssistant
+				initialQuery={`${name} build`}
+				suggestions={[
+					`${name} techniques`,
+					`Synergies avec ${name}`,
+					`Comment obtenir ${name}`,
+					sheetData?.playstyle ? `Style de jeu ${PLAYSTYLE_FR[sheetData.playstyle] || sheetData.playstyle}` : "",
+				].filter(Boolean)}
+			/>
 
 			{/* Technical Footer */}
 			<div className="px-6 py-3 rounded-2xl bg-surface-container-high/30 border border-outline-variant/10 flex flex-col gap-1 text-[10px] font-mono text-on-surface-variant/40">

@@ -526,11 +526,13 @@ export function Shell({
 					{/* NAVIGATION RAIL (MEDIUM SCREENS) */}
 					{isMedium && <AzaleeNavigationRail />}
 
-					{/* SIDEBAR (EXPANDED SCREENS) */}
-					<AppSidebar
-						variant="sidebar"
-						className={cn("hidden", isExpanded && "md:flex !h-[calc(100vh-3.5rem)]")}
-					/>
+					{/* SIDEBAR (EXPANDED OR COMPACT SCREENS) */}
+					{(isExpanded || isCompact) && (
+						<AppSidebar
+							variant="sidebar"
+							className={cn("hidden", isExpanded && "md:flex !h-[calc(100vh-3.5rem)]")}
+						/>
+					)}
 
 					{/* Content Area */}
 					<SidebarInset

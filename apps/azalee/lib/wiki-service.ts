@@ -632,7 +632,20 @@ export const wikiService = {
 			.select("*")
 			.eq("id", id)
 			.maybeSingle();
-		const base = this.mapDbCharacterToBase(row);
+		if (!row) return undefined;
+
+		// Fetch all variants sharing this chara_id
+		const { data: rows } = await supabase
+			.from("inagle_characters")
+			.select("*")
+			.eq("chara_id", row.chara_id)
+			.order("zukan_order", { ascending: true, nullsFirst: false })
+			.order("id", { ascending: true });
+
+		const allRows = rows && rows.length > 0 ? rows : [row];
+		const mapped = allRows.map((r) => this.mapDbCharacterToBase(r)!).filter(Boolean);
+		const base = this.groupVariants(mapped)[0];
+
 		if (base) {
 			await this._inheritConstellation(base, row);
 			if ((row as any)?.rarity_label === "Héros") {
@@ -645,17 +658,20 @@ export const wikiService = {
 	/** Fetch character by base_slug (name_en + internal_code) — returns best variant as BaseCharacter */
 	async getCharacterByBaseSlug(baseSlug: string): Promise<BaseCharacter | undefined> {
 		const supabase = await createClient();
-		// Fetch all variants sharing this base_slug, ordered by rarity DESC
+		// Fetch all variants sharing this base_slug, ordered by age ASC (youngest first)
 		const { data: rows } = await supabase
 			.from("inagle_characters")
 			.select("*")
 			.eq("base_slug", baseSlug)
-			.order("rarity", { ascending: false });
+			.order("zukan_order", { ascending: true, nullsFirst: false })
+			.order("id", { ascending: true });
 		if (!rows || rows.length === 0) return undefined;
-		// Use the highest-rarity variant as the "main" row for BaseCharacter
-		const mainRow = rows[0];
-		const base = this.mapDbCharacterToBase(mainRow);
+
+		const mapped = rows.map((r) => this.mapDbCharacterToBase(r)!).filter(Boolean);
+		const base = this.groupVariants(mapped)[0];
+
 		if (base) {
+			const mainRow = rows[0];
 			await this._inheritConstellation(base, mainRow);
 			if (mainRow?.rarity_label === "Héros") {
 				(base as any).heroConstellations = await this._getHeroConstellations(mainRow);
@@ -671,7 +687,20 @@ export const wikiService = {
 			.select("*")
 			.eq("slug", slug)
 			.maybeSingle();
-		const base = this.mapDbCharacterToBase(row);
+		if (!row) return undefined;
+
+		// Fetch all variants sharing this chara_id
+		const { data: rows } = await supabase
+			.from("inagle_characters")
+			.select("*")
+			.eq("chara_id", row.chara_id)
+			.order("zukan_order", { ascending: true, nullsFirst: false })
+			.order("id", { ascending: true });
+
+		const allRows = rows && rows.length > 0 ? rows : [row];
+		const mapped = allRows.map((r) => this.mapDbCharacterToBase(r)!).filter(Boolean);
+		const base = this.groupVariants(mapped)[0];
+
 		if (base) {
 			await this._inheritConstellation(base, row);
 			if ((row as any)?.rarity_label === "Héros") {
@@ -710,9 +739,8 @@ export const wikiService = {
 			query = query.eq("chara_id", charaId);
 		}
 		const { data } = await query
-			.order("rarity", { ascending: false })
-			.order("position")
-			.order("element");
+			.order("zukan_order", { ascending: true, nullsFirst: false })
+			.order("id", { ascending: true });
 		if (!data) return [];
 		// Sort within groups: prefer versions with zukan_hash, then highest stat_frappe
 		// This ensures dedup picks the most enriched version as canonical
@@ -1570,52 +1598,17 @@ export const wikiService = {
 			const existing = grouped.get(key);
 			if (existing) {
 				existing.variants.push(...char.variants);
-
-				const existingHasSheet = !!existing.sheetData;
-				const newHasSheet = !!char.sheetData;
-
-				const charBestRarityCode = char.bestRarityCode;
-				const existingBestRarityCode = existing.bestRarityCode;
-
-				if (
-					(newHasSheet && !existingHasSheet) ||
-					(newHasSheet === existingHasSheet && charBestRarityCode > existingBestRarityCode)
-				) {
-					existing.bestRarity = char.bestRarity;
-					existing.bestRarityCode = char.bestRarityCode;
-					existing.image = char.image || existing.image;
-					existing.slug = char.slug || existing.slug;
-					existing.zukanHash = char.zukanHash || existing.zukanHash;
-					existing.sheetData = char.sheetData;
-					if (char.wikiSections && char.wikiSections.length > 0) {
-						existing.wikiSections = char.wikiSections;
-					}
-					(existing as unknown as Record<string, unknown>).baseSlug =
-						(char as unknown as Record<string, unknown>).baseSlug ||
-						(existing as unknown as Record<string, unknown>).baseSlug;
-				} else {
-					existing.sheetData = existing.sheetData || char.sheetData;
-					existing.zukanHash = existing.zukanHash || char.zukanHash;
-					(existing as unknown as Record<string, unknown>).baseSlug =
-						(existing as unknown as Record<string, unknown>).baseSlug ||
-						(char as unknown as Record<string, unknown>).baseSlug;
-					if (
-						(!existing.wikiSections || existing.wikiSections.length === 0) &&
-						char.wikiSections &&
-						char.wikiSections.length > 0
-					) {
-						existing.wikiSections = char.wikiSections;
-					}
-				}
-
 				existing.isBasara = existing.isBasara || char.isBasara;
 				existing.constellation = existing.constellation || char.constellation;
+				existing.wikiSections = existing.wikiSections && existing.wikiSections.length > 0
+					? existing.wikiSections
+					: char.wikiSections;
 			} else {
 				grouped.set(key, char);
 			}
 		}
 
-		// Deduplicate variants inside each character to avoid duplicates in variants list and clean nulls
+		// Deduplicate and sort variants inside each character by age (youngest first)
 		for (const char of grouped.values()) {
 			const seenVariants = new Set<string>();
 			const dedupedVariants: typeof char.variants = [];
@@ -1637,18 +1630,28 @@ export const wikiService = {
 					}
 				}
 			}
+
+			// Sort variants by age (youngest first: zukanOrder ASC, charaParamId ASC)
+			dedupedVariants.sort((a: any, b: any) => {
+				const orderA = a.zukanOrder !== undefined && a.zukanOrder !== null ? a.zukanOrder : 999999;
+				const orderB = b.zukanOrder !== undefined && b.zukanOrder !== null ? b.zukanOrder : 999999;
+				if (orderA !== orderB) return orderA - orderB;
+				const idA = typeof a.charaParamId === "string" ? parseInt(a.charaParamId, 16) : 0;
+				const idB = typeof b.charaParamId === "string" ? parseInt(b.charaParamId, 16) : 0;
+				return idA - idB;
+			});
+
 			char.variants = dedupedVariants;
 
-			// Update canonical zukanHash to be the one from the variant with the lowest zukanOrder
-			const variantsWithHash = dedupedVariants.filter((v: any) => v.zukanHash);
-			if (variantsWithHash.length > 0) {
-				variantsWithHash.sort((a: any, b: any) => {
-					const orderA = a.zukanOrder ?? 999999;
-					const orderB = b.zukanOrder ?? 999999;
-					if (orderA !== orderB) return orderA - orderB;
-					return a.rarityCode - b.rarityCode;
-				});
-				char.zukanHash = variantsWithHash[0].zukanHash;
+			// Update representative fields to represent the youngest variant (variants[0])
+			const youngest = dedupedVariants[0];
+			if (youngest) {
+				char.bestRarity = youngest.rarity;
+				char.bestRarityCode = youngest.rarityCode;
+				char.image = youngest.image || char.image;
+				char.zukanHash = youngest.zukanHash || char.zukanHash;
+				char.slug = youngest.slug || char.slug;
+				char.sheetData = youngest.sheetData || char.sheetData;
 			}
 		}
 
