@@ -9,6 +9,11 @@ build
 scratch
 bin
 apps/bot
+apps/azalee
+data
+.bun-cache
+.agents
+supabase
 *.sqlite
 data/backups
 **/data/backups
