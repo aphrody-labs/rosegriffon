@@ -1802,6 +1802,7 @@ export const wikiService = {
 		const { data } = await supabase
 			.from("tweets")
 			.select("*")
+			.eq("author_username", "Azalee_IE")
 			.order("created_at", { ascending: false })
 			.limit(limit);
 		return data || [];
@@ -1809,7 +1810,12 @@ export const wikiService = {
 
 	async getTweetById(id: string): Promise<any | null> {
 		const supabase = await createClient();
-		const { data } = await supabase.from("tweets").select("*").eq("id", id).maybeSingle();
+		const { data } = await supabase
+			.from("tweets")
+			.select("*")
+			.eq("id", id)
+			.eq("author_username", "Azalee_IE")
+			.maybeSingle();
 		return data;
 	},
 };
