@@ -5,7 +5,7 @@ import { get } from "@vercel/edge-config";
 const PROTECTED_PATHS = ["/dashboard", "/settings"];
 const API_PROTECTED_PATHS = ["/api/dashboard"];
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
 	// 1. Zero-latency maintenance mode via Edge Config
 	try {
 		if (process.env.EDGE_CONFIG) {

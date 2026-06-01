@@ -9,7 +9,7 @@ AZALEE="$ROOT/apps/azalee"
 
 echo "▸ [1/4] build (Next.js standalone)…"
 cd "$AZALEE"
-SENTRY_SKIP_UPLOAD=1 NEXT_TELEMETRY_DISABLED=1 bun --env-file=../../.env.local run build --webpack
+SENTRY_SKIP_UPLOAD=1 NEXT_TELEMETRY_DISABLED=1 bun --env-file=../../.env.local run build
 
 echo "▸ [2/4] deploy standalone (static/public/data)…"
 bash "$ROOT/scripts/deploy-azalee.sh"

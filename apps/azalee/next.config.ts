@@ -226,6 +226,7 @@ const nextConfig: NextConfig = {
 	},
 
 	experimental: {
+		cpus: 1,
 		optimizeCss: false,
 		optimizePackageImports: [
 			"lucide-react",

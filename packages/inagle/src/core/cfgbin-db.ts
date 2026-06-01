@@ -31,7 +31,11 @@
 
 import { homedir } from "node:os";
 import { basename, dirname, join } from "node:path";
-import { Database } from "bun:sqlite";
+import type { Database } from "bun:sqlite";
+import { createRequire } from "node:module";
+
+const require = createRequire(import.meta.url);
+const DB = typeof Bun !== "undefined" ? (require("bun:sqlite").Database as typeof Database) : null;
 
 const DEFAULT_DB_PATH = join(homedir(), "data/cache/cfgbin.sqlite");
 
@@ -74,7 +78,7 @@ export function cfgbinDbAvailable(): boolean {
 function getDb(): Database | null {
 	if (_db) return _db;
 	if (!cfgbinDbAvailable()) return null;
-	_db = new Database(cfgbinDbPath(), { readonly: true });
+	_db = new DB!(cfgbinDbPath(), { readonly: true });
 	_db.exec("PRAGMA journal_mode=WAL");
 	_db.exec("PRAGMA temp_store=MEMORY");
 	_db.exec("PRAGMA cache_size=-65536");
