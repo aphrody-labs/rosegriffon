@@ -9,13 +9,14 @@ build
 /scratch
 /bin
 apps/bot
-apps/azalee
+# apps/azalee
+apps/azalee/tests-e2e
+apps/azalee/playwright-report
+apps/azalee/test-results
 /data
 .bun-cache
 .agents
 /supabase
-packages/inagle
-packages/cron
 *.sqlite
 data/backups
 **/data/backups
