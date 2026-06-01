@@ -1,3 +1,6 @@
+# Optimise la RAM globale en activant le mode smol de Bun
+smol = true
+
 [install]
 # Hoist deps autant que possible (vitesse + déduplication)
 hoist = true
