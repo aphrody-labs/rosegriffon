@@ -1,13 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { searchTranslations } from "@/app/actions/translate";
 import type { TranslationResult } from "@/app/actions/translate";
 import { Icon } from "@/components/ui/Icon";
 import { Skeleton } from "@rose-griffon/ui";
 import { cn } from "@/lib/utils";
-import { RagAssistant } from "@/components/wiki/RagAssistant";
 
 const ENTITY_TYPES = [
 	{ label: "Tous", value: undefined },
@@ -102,18 +101,9 @@ export function TranslatorClient() {
 
 	const active = selectedResult;
 
-	const ragSuggestions = useMemo(() => {
-		const list: string[] = [];
-		if (active) {
-			if (active.name_fr) list.push(active.name_fr);
-			if (active.name_en) list.push(active.name_en);
-			if (active.name_ja) list.push(active.name_ja);
-		} else if (query.trim().length >= 2) {
-			list.push(query);
-		}
-		list.push("Esprits Guerriers", "Victory Road", "Chroniques");
-		return Array.from(new Set(list)).slice(0, 5);
-	}, [active, query]);
+	// Recherche approximative : tous les résultats remontés sont marqués fuzzy
+	// (aucun match exact/préfixe) → on l'indique discrètement à l'utilisateur.
+	const isApproximate = results.length > 0 && results.every((r) => r.fuzzy === true);
 
 	return (
 		<div className="w-full space-y-6 sm:space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-300">
@@ -124,8 +114,8 @@ export function TranslatorClient() {
 						Traducteur Azalée
 					</h1>
 					<p className="type-body-medium text-on-surface-variant/80 mt-2 max-w-xl">
-						Dictionnaire de noms et termes de jeu Inazuma Eleven: Victory Road.
-						Recherchez en <span className="text-primary font-semibold">Français</span>,{" "}
+						Dictionnaire de noms et termes de jeu Inazuma Eleven: Victory Road. Recherchez en{" "}
+						<span className="text-primary font-semibold">Français</span>,{" "}
 						<span className="text-secondary font-semibold">Anglais</span>,{" "}
 						<span className="text-tertiary font-semibold">Japonais (Kanji/Kana)</span> ou{" "}
 						<span className="text-on-surface font-semibold">Romaji</span>.
@@ -139,11 +129,7 @@ export function TranslatorClient() {
 				<label className="text-[11px] font-bold uppercase tracking-wider text-on-surface-variant/55 block">
 					Filtrer par type d&apos;entité
 				</label>
-				<div
-					className="flex flex-wrap gap-2"
-					role="radiogroup"
-					aria-label="Filtrer par type"
-				>
+				<div className="flex flex-wrap gap-2" role="radiogroup" aria-label="Filtrer par type">
 					{ENTITY_TYPES.map((et) => {
 						const isActive = entityType === et.value;
 						return (
@@ -175,7 +161,9 @@ export function TranslatorClient() {
 						<div className="flex items-center justify-between h-14 px-5 border-b border-outline/5 bg-surface-container/20">
 							<div className="flex items-center gap-2">
 								<span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
-								<span className="type-label-large font-bold text-on-surface/80">Recherche multilingue</span>
+								<span className="type-label-large font-bold text-on-surface/80">
+									Recherche multilingue
+								</span>
 							</div>
 							{query && (
 								<button
@@ -212,7 +200,9 @@ export function TranslatorClient() {
 					<div className="bg-surface-container-low/20 flex flex-col min-h-[220px] sm:min-h-[280px]">
 						{/* Header */}
 						<div className="flex items-center h-14 px-5 border-b border-outline/5 bg-surface-container/20">
-							<span className="type-label-large font-bold text-on-surface/80">Fiche de Traduction</span>
+							<span className="type-label-large font-bold text-on-surface/80">
+								Fiche de Traduction
+							</span>
 						</div>
 
 						{/* Translation content */}
@@ -228,7 +218,8 @@ export function TranslatorClient() {
 											En attente de saisie...
 										</p>
 										<p className="text-xs text-on-surface-variant/65 mt-1 max-w-[280px]">
-											Saisissez au moins 2 caractères dans le champ de gauche pour lancer la recherche.
+											Saisissez au moins 2 caractères dans le champ de gauche pour lancer la
+											recherche.
 										</p>
 									</div>
 								</div>
@@ -258,13 +249,22 @@ export function TranslatorClient() {
 									<div className="p-3.5 rounded-full bg-error/10 border border-error/20 text-error">
 										<Icon name="search_off" size={24} />
 									</div>
-									<div>
-										<p className="type-title-small text-on-surface">
-											Aucun résultat trouvé
+									<div className="max-w-[300px]">
+										<p className="type-title-small text-on-surface">Aucun résultat trouvé</p>
+										<p className="text-xs text-on-surface-variant/60 mt-1">
+											Rien pour « <span className="font-semibold text-primary">{query}</span> ». La
+											recherche tolère les fautes et accents : vérifiez l&apos;orthographe, essayez
+											une autre langue (EN/JA) ou retirez le filtre de type.
 										</p>
-										<p className="text-xs text-on-surface-variant/60 mt-1 max-w-[280px]">
-											Nous n&apos;avons rien trouvé pour « <span className="font-semibold text-primary">{query}</span> ». Essayez un autre terme.
-										</p>
+										{entityType && (
+											<button
+												onClick={() => setEntityType(undefined)}
+												className="mt-3 inline-flex items-center gap-1.5 h-8 px-3 rounded-full text-xs font-bold bg-surface-container-high hover:bg-primary-container/40 text-on-surface-variant hover:text-on-surface border border-outline/15 transition-colors cursor-pointer"
+											>
+												<Icon name="filter_list" size={14} />
+												Chercher dans tous les types
+											</button>
+										)}
 									</div>
 								</div>
 							)}
@@ -274,7 +274,13 @@ export function TranslatorClient() {
 								<div className="space-y-4 animate-in fade-in slide-in-from-right-3 duration-300">
 									{/* Type badge + link */}
 									<div className="flex items-center justify-between border-b border-outline/5 pb-3">
-										<span className={cn("px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider", TYPE_COLORS[active.type] || "bg-surface-container-highest text-on-surface-variant")}>
+										<span
+											className={cn(
+												"px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider",
+												TYPE_COLORS[active.type] ||
+													"bg-surface-container-highest text-on-surface-variant"
+											)}
+										>
 											{active.typeLabel}
 										</span>
 										{active.url !== "#" && (
@@ -283,7 +289,11 @@ export function TranslatorClient() {
 												className="inline-flex items-center gap-1 text-xs font-semibold text-primary hover:text-primary-hover group/link transition-colors"
 											>
 												Voir la fiche complète
-												<Icon name="chevron_right" size={14} className="group-hover/link:translate-x-0.5 transition-transform" />
+												<Icon
+													name="chevron_right"
+													size={14}
+													className="group-hover/link:translate-x-0.5 transition-transform"
+												/>
 											</Link>
 										)}
 									</div>
@@ -334,7 +344,9 @@ export function TranslatorClient() {
 																	{name}
 																</span>
 															) : (
-																<span className="text-on-surface-variant/30 text-sm italic">non renseigné</span>
+																<span className="text-on-surface-variant/30 text-sm italic">
+																	non renseigné
+																</span>
 															)}
 														</div>
 													</div>
@@ -345,7 +357,11 @@ export function TranslatorClient() {
 															className="shrink-0 p-2 rounded-full cursor-pointer opacity-0 group-hover/row:opacity-100 focus/row:opacity-100 hover:bg-surface-container-high text-on-surface-variant/60 hover:text-primary transition-all duration-200"
 														>
 															{copiedLang === lang ? (
-																<Icon name="check" size={14} className="text-emerald-400 animate-bounce" />
+																<Icon
+																	name="check"
+																	size={14}
+																	className="text-emerald-400 animate-bounce"
+																/>
 															) : (
 																<Icon name="content_copy" size={14} />
 															)}
@@ -365,11 +381,22 @@ export function TranslatorClient() {
 			{/* Results list section */}
 			{hasSearched && !isSearching && results.length > 0 && (
 				<div className="space-y-3 animate-in fade-in slide-in-from-bottom-2 duration-300">
-					<div className="flex items-center justify-between px-1">
-						<h2 className="type-title-small font-bold text-on-surface-variant/80">
-							Résultats de recherche ({results.length})
+					<div className="flex items-center justify-between gap-3 px-1">
+						<h2 className="type-title-small font-bold text-on-surface-variant/80 flex items-center gap-2 min-w-0">
+							<span className="truncate">Résultats de recherche ({results.length})</span>
+							{isApproximate && (
+								<span
+									title="Aucune correspondance exacte — résultats les plus proches affichés"
+									className="shrink-0 inline-flex items-center gap-1 h-5 px-2 rounded-full text-[10px] font-bold bg-amber-500/10 text-amber-400 border border-amber-500/20"
+								>
+									<Icon name="auto_fix_high" size={11} />
+									Résultats approchants
+								</span>
+							)}
 						</h2>
-						<span className="text-[10px] text-on-surface-variant/50">Sélectionnez pour afficher les détails</span>
+						<span className="hidden sm:inline text-[10px] text-on-surface-variant/50 shrink-0">
+							Sélectionnez pour afficher les détails
+						</span>
 					</div>
 					<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
 						{results.map((result) => {
@@ -389,7 +416,8 @@ export function TranslatorClient() {
 										<span
 											className={cn(
 												"shrink-0 px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider select-none",
-												TYPE_COLORS[result.type] || "bg-surface-container-highest text-on-surface-variant"
+												TYPE_COLORS[result.type] ||
+													"bg-surface-container-highest text-on-surface-variant"
 											)}
 										>
 											{result.typeLabel}
@@ -421,13 +449,6 @@ export function TranslatorClient() {
 					</div>
 				</div>
 			)}
-
-			{/* RAG Tactical Assistant */}
-			<RagAssistant
-				initialQuery={active ? active.name_fr || active.name_en || "" : ""}
-				suggestions={ragSuggestions}
-				className="mt-8 border border-outline/10 rounded-2xl overflow-hidden shadow-xs"
-			/>
 		</div>
 	);
 }
