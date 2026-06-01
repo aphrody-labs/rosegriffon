@@ -13,7 +13,22 @@ type MediaItem = {
 	type: string;
 	url?: string;
 	original_url?: string;
+	video_url?: string;
+	preview_url?: string;
+	width?: number;
+	height?: number;
 	[key: string]: string | number | boolean | null | undefined;
+};
+
+type RawMediaItem = {
+	id?: string;
+	type?: string;
+	url?: string;
+	original_url?: string;
+	video_url?: string;
+	preview_url?: string;
+	width?: number;
+	height?: number;
 };
 
 type RawTweetItem = {
@@ -22,9 +37,33 @@ type RawTweetItem = {
 	fullText: string;
 	created_at?: string;
 	in_reply_to_status_id?: string;
-	media: { url?: string }[];
+	media: RawMediaItem[];
 	[key: string]: Json | undefined;
 };
+
+// Normalise un media de la lib X (preview_url/video_url/width/height) vers le
+// format DB, en propageant l'URL téléchargeable principale + la miniature.
+function mapMedia(m: {
+	id?: string;
+	type?: string;
+	url?: string;
+	video_url?: string;
+	preview_url?: string;
+	width?: number;
+	height?: number;
+}): MediaItem {
+	const out: MediaItem = {
+		id: m.id ?? "",
+		type: m.type ?? "",
+		url: m.url,
+		original_url: m.url,
+	};
+	if (m.video_url) out.video_url = m.video_url;
+	if (m.preview_url) out.preview_url = m.preview_url;
+	if (typeof m.width === "number") out.width = m.width;
+	if (typeof m.height === "number") out.height = m.height;
+	return out;
+}
 
 // Décode la vraie date de publication depuis l'ID Snowflake Twitter
 // (epoch Twitter = 1288834974657 ms). Utilisé en repli quand created_at
@@ -79,11 +118,40 @@ export async function crawlTwitter(): Promise<{
 				}
 				console.log(`[Crawl Twitter] ID résolu pour @${screenName} : ${user.id} (${user.name})`);
 
-				console.log(`[Crawl Twitter] Récupération des tweets récents de @${screenName}...`);
-				const timeline = await client.userTweets(user.id, 40);
-				const fetchedTweets = timeline.tweets || [];
+				console.log(`[Crawl Twitter] Crawl historique complet de @${screenName}...`);
+				const MAX_TWEETS_PER_ACCOUNT = 800;
+				const fetchedTweets: Tweet[] = [];
+				const seenTimelineIds = new Set<string>();
+				let cursor: string | undefined;
+				let pageIndex = 0;
+
+				while (fetchedTweets.length < MAX_TWEETS_PER_ACCOUNT) {
+					const page = await client.userTweets(user.id, 100, cursor);
+					const pageTweets = page.tweets || [];
+
+					let addedThisPage = 0;
+					for (const t of pageTweets) {
+						if (!seenTimelineIds.has(t.id)) {
+							seenTimelineIds.add(t.id);
+							fetchedTweets.push(t);
+							addedThisPage++;
+						}
+					}
+
+					pageIndex++;
+					console.log(
+						`[Crawl Twitter] @${screenName} page ${pageIndex} : ${pageTweets.length} reçus, ${addedThisPage} nouveaux (total ${fetchedTweets.length}).`
+					);
+
+					// Arrêt : plus de cursor, ou page sans nouveau tweet (anti-boucle).
+					if (!page.next_cursor || addedThisPage === 0) {
+						break;
+					}
+					cursor = page.next_cursor;
+				}
+
 				console.log(
-					`[Crawl Twitter] ${fetchedTweets.length} tweets récupérés pour @${screenName}.`
+					`[Crawl Twitter] ${fetchedTweets.length} tweets accumulés au total pour @${screenName}.`
 				);
 
 				const nonRetweets = fetchedTweets.filter((t) => !t.text.startsWith("RT @"));
@@ -146,8 +214,46 @@ export async function crawlTwitter(): Promise<{
 					const isThread = isUserThread && filteredGroup.length > 1;
 
 					if (isThread) {
-						const lastTweet = filteredGroup[filteredGroup.length - 1];
-						const firstTweet = filteredGroup[0];
+						// Récupère TOUS les tweets du thread (au-delà des 100 de timeline)
+						// via TweetDetail paginé, puis fusionne avec la timeline.
+						let threadGroup = filteredGroup;
+						try {
+							const threadTweets: Tweet[] = [];
+							let threadCursor: string | undefined;
+							const THREAD_MAX_PAGES = 5;
+							for (let p = 0; p < THREAD_MAX_PAGES; p++) {
+								const threadPage = await client.thread(convId, threadCursor);
+								threadTweets.push(...(threadPage.tweets || []));
+								if (!threadPage.next_cursor) break;
+								threadCursor = threadPage.next_cursor;
+							}
+
+							// Fusion timeline + thread, garde uniquement les tweets de l'auteur.
+							const merged = new Map<string, Tweet>();
+							for (const item of filteredGroup) {
+								merged.set(item.id, item);
+							}
+							for (const item of threadTweets) {
+								if (item.author.username.toLowerCase() === screenName.toLowerCase()) {
+									if (!merged.has(item.id)) {
+										merged.set(item.id, item);
+									}
+								}
+							}
+							threadGroup = Array.from(merged.values()).sort((a, b) => a.id.localeCompare(b.id));
+							console.log(
+								`[Crawl Twitter] Thread ${convId} : ${threadGroup.length} tweets après fusion timeline+thread.`
+							);
+						} catch (threadErr) {
+							console.warn(
+								`[Crawl Twitter] Récupération du thread complet ${convId} échouée, repli sur la timeline :`,
+								threadErr
+							);
+							threadGroup = filteredGroup;
+						}
+
+						const lastTweet = threadGroup[threadGroup.length - 1];
+						const firstTweet = threadGroup[0];
 
 						const createdAtIso = lastTweet.created_at
 							? new Date(lastTweet.created_at).toISOString()
@@ -156,15 +262,8 @@ export async function crawlTwitter(): Promise<{
 						const allThreadMedia: MediaItem[] = [];
 						const seenMediaUrls = new Set<string>();
 
-						for (const item of filteredGroup) {
-							const itemMedia = (item.media || []).map(
-								(m: { id: string; type: string; url?: string }) => ({
-									id: m.id,
-									type: m.type,
-									url: m.url,
-									original_url: m.url,
-								})
-							);
+						for (const item of threadGroup) {
+							const itemMedia = (item.media || []).map((m: RawMediaItem) => mapMedia(m));
 							for (const m of itemMedia) {
 								if (m.url && !seenMediaUrls.has(m.url)) {
 									allThreadMedia.push(m);
@@ -181,7 +280,7 @@ export async function crawlTwitter(): Promise<{
 							created_at: createdAtIso,
 							text: firstTweet.text, // Introductory text of first tweet
 							is_thread: true,
-							tweet_count: filteredGroup.length,
+							tweet_count: threadGroup.length,
 							metrics: {
 								reply_count: lastTweet.reply_count,
 								retweet_count: lastTweet.retweet_count,
@@ -193,15 +292,13 @@ export async function crawlTwitter(): Promise<{
 							quoted_tweets: lastTweet.quoted_tweet
 								? JSON.parse(JSON.stringify(lastTweet.quoted_tweet))
 								: null,
-							raw_tweets: filteredGroup.map((item) => ({
+							raw_tweets: threadGroup.map((item) => ({
 								id: item.id,
 								text: item.text,
 								fullText: item.text,
 								created_at: item.created_at,
 								in_reply_to_status_id: item.in_reply_to_status_id,
-								media: (item.media || []).map((m: { url?: string }) => ({
-									url: m.url,
-								})),
+								media: (item.media || []).map((m: RawMediaItem) => mapMedia(m)),
 							})),
 							updated_at: new Date().toISOString(),
 						};
@@ -209,7 +306,7 @@ export async function crawlTwitter(): Promise<{
 						finalTweetsToUpsert.push(tweetRow);
 
 						// Clean up duplicate intermediate tweets of the thread
-						for (const item of filteredGroup) {
+						for (const item of threadGroup) {
 							if (item.id !== lastTweet.id) {
 								deleteOldTweetIds.push(item.id);
 							}
@@ -220,12 +317,7 @@ export async function crawlTwitter(): Promise<{
 							? new Date(t.created_at).toISOString()
 							: snowflakeToIso(t.id);
 
-						const tMedia = (t.media || []).map((m: { id: string; type: string; url?: string }) => ({
-							id: m.id,
-							type: m.type,
-							url: m.url,
-							original_url: m.url,
-						}));
+						const tMedia = (t.media || []).map((m: RawMediaItem) => mapMedia(m));
 
 						const tweetRow: DBTweetRow = {
 							id: t.id,
