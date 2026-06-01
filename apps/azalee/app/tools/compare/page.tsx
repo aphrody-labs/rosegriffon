@@ -95,15 +95,26 @@ async function resolveCharacter(idOrSlug: string | undefined): Promise<CompareCh
 		return null;
 	}
 
-	let baseChar = await wikiService.getCharacter(idOrSlug);
+	// MÊME chaîne de résolution que la fiche perso (app/chara/[id]/page.tsx) :
+	// base_slug → slug variante → id brut. Sinon le comparateur résout une AUTRE
+	// variante que celle affichée sur la fiche → stats/skills/image désynchronisés.
+	let baseChar = await wikiService.getCharacterByBaseSlug(idOrSlug);
 	if (!baseChar) {
 		baseChar = await wikiService.getCharacterBySlug(idOrSlug);
+	}
+	if (!baseChar) {
+		baseChar = await wikiService.getCharacter(idOrSlug);
 	}
 	if (!baseChar) {
 		return null;
 	}
 
-	const variant = (baseChar.variants as any[])?.[0];
+	// Sélection de la variante alignée sur la fiche : variante dont le charaParamId
+	// matche l'id demandé, sinon variants[0] (la plus jeune après groupVariants).
+	const variants = (baseChar.variants as any[]) || [];
+	const matchedVariant = variants.find((v) => v.charaParamId === idOrSlug) || variants[0];
+
+	const variant = matchedVariant;
 	if (!variant) {
 		return null;
 	}
