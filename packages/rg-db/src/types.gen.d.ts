@@ -1163,6 +1163,7 @@ export type Database = {
                     image_url: string | null;
                     internal_code: string | null;
                     is_controllable: boolean | null;
+                    is_primary: boolean | null;
                     model_id: string | null;
                     name_en: string | null;
                     name_fr: string | null;
@@ -1218,6 +1219,7 @@ export type Database = {
                     image_url?: string | null;
                     internal_code?: string | null;
                     is_controllable?: boolean | null;
+                    is_primary?: boolean | null;
                     model_id?: string | null;
                     name_en?: string | null;
                     name_fr?: string | null;
@@ -1273,6 +1275,7 @@ export type Database = {
                     image_url?: string | null;
                     internal_code?: string | null;
                     is_controllable?: boolean | null;
+                    is_primary?: boolean | null;
                     model_id?: string | null;
                     name_en?: string | null;
                     name_fr?: string | null;
@@ -3905,6 +3908,9 @@ export type Database = {
                     id: string;
                     image: string | null;
                     name: string;
+                    two_factor_backup_codes: string | null;
+                    two_factor_enabled: boolean;
+                    two_factor_secret: string | null;
                     updated_at: string;
                 };
                 Insert: {
@@ -3914,6 +3920,9 @@ export type Database = {
                     id: string;
                     image?: string | null;
                     name: string;
+                    two_factor_backup_codes?: string | null;
+                    two_factor_enabled?: boolean;
+                    two_factor_secret?: string | null;
                     updated_at?: string;
                 };
                 Update: {
@@ -3923,6 +3932,9 @@ export type Database = {
                     id?: string;
                     image?: string | null;
                     name?: string;
+                    two_factor_backup_codes?: string | null;
+                    two_factor_enabled?: boolean;
+                    two_factor_secret?: string | null;
                     updated_at?: string;
                 };
                 Relationships: [];
