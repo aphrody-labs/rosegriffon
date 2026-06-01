@@ -21,7 +21,11 @@ interface RagAssistantProps {
 	className?: string;
 }
 
-export function RagAssistant({ initialQuery = "", suggestions = [], className }: RagAssistantProps) {
+export function RagAssistant({
+	initialQuery = "",
+	suggestions = [],
+	className,
+}: RagAssistantProps) {
 	const [query, setQuery] = useState(initialQuery);
 	const [results, setResults] = useState<RagDocument[]>([]);
 	const [loading, setLoading] = useState(false);
@@ -70,6 +74,48 @@ export function RagAssistant({ initialQuery = "", suggestions = [], className }:
 					icon: "feed",
 					bg: "bg-amber-500/10 text-amber-400 border-amber-500/25",
 					label: "Info Officielle",
+				};
+			case "character":
+			case "basara":
+				return {
+					icon: "person",
+					bg: "bg-blue-500/10 text-blue-400 border-blue-500/25",
+					label: "Personnage",
+				};
+			case "skill":
+				return {
+					icon: "sports_soccer",
+					bg: "bg-amber-500/10 text-amber-400 border-amber-500/25",
+					label: "Technique",
+				};
+			case "item":
+				return {
+					icon: "inventory_2",
+					bg: "bg-emerald-500/10 text-emerald-400 border-emerald-500/25",
+					label: "Objet",
+				};
+			case "tactic":
+				return {
+					icon: "schema",
+					bg: "bg-purple-500/10 text-purple-400 border-purple-500/25",
+					label: "Tactique",
+				};
+			case "team":
+				return {
+					icon: "groups",
+					bg: "bg-rose-500/10 text-rose-400 border-rose-500/25",
+					label: "Équipe",
+				};
+			case "keshin":
+			case "soul":
+			case "miximax":
+			case "awakening":
+			case "modechange":
+			case "aura":
+				return {
+					icon: "auto_awesome",
+					bg: "bg-cyan-500/10 text-cyan-400 border-cyan-500/25",
+					label: "Aura",
 				};
 			default:
 				return {

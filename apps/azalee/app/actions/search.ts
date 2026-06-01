@@ -768,29 +768,97 @@ export async function getMetaSuggestions(): Promise<MetaSuggestions> {
 }
 
 /**
- * Perform a RAG-only semantic search using the Redis vector store.
+ * Recherche pour la barre "RAG" affichée en bas des outils.
+ *
+ * La barre doit produire des résultats RÉELS et cliquables. On combine :
+ *  1. Une recherche full-text multi-entités du wiki (personnages, techniques,
+ *     objets, auras, équipes, articles…) via `searchGlobal` — toujours
+ *     pertinente et avec de vraies URLs vers les fiches.
+ *  2. Les documents sémantiques du corpus actus/tweets (Redis vector store),
+ *     en complément, si disponibles.
+ *
+ * Les deux sources sont fusionnées dans la forme `RagDocument` attendue par
+ * le composant `RagAssistant`.
  */
 export async function searchRagOnly(query: string): Promise<any[]> {
 	if (!query || query.length < 2) {
 		return [];
 	}
-	try {
-		const { getEmbedding, vectorStore } = require("@rose-griffon/db/redis");
-		const sanitized = query.replaceAll(/[%_,().*\\]/g, "");
-		const questionEmbedding = await getEmbedding(sanitized);
-		const results = await vectorStore.search("inazuma-news", questionEmbedding, 10, sanitized);
-		return results.map((r: any) => ({
-			id: r.document.id,
-			title: r.document.metadata?.title || r.document.text.substring(0, 50),
-			date: r.document.metadata?.date || "",
-			url: r.document.metadata?.url || "#",
-			type: r.document.metadata?.type || "article",
-			text: r.document.text,
-			score: r.score,
-		}));
-	} catch (e) {
-		console.warn("RAG search failed:", e);
-		return [];
-	}
-}
 
+	const sanitized = query.replaceAll(/[%_,().*\\]/g, "");
+
+	// 1. Entités wiki réelles (cliquables) — source principale.
+	const wikiPromise = (async () => {
+		try {
+			const entities = await searchGlobal(query);
+			return (
+				entities
+					// searchGlobal injecte aussi des docs RAG internes (type "doc",
+					// url file://…) non cliquables → on ne garde que les fiches wiki.
+					.filter((r) => r.type !== "doc" && !String(r.url).startsWith("file:"))
+					.slice(0, 12)
+					.map((r) => ({
+						id: `wiki-${r.type}-${r.id}`,
+						title: r.title,
+						date: "",
+						url: r.url,
+						type: r.type,
+						text:
+							r.matchedName && r.matchedName !== r.title
+								? `${r.subtitle} · ${r.matchedName}`
+								: r.subtitle,
+						score: typeof r.score === "number" ? Math.min(1, r.score / 3) : 0.6,
+					}))
+			);
+		} catch (e) {
+			console.warn("RAG wiki search failed:", e);
+			return [] as any[];
+		}
+	})();
+
+	// 2. Corpus sémantique actus / tweets — complément.
+	const newsPromise = (async () => {
+		try {
+			const { getEmbedding, vectorStore } = require("@rose-griffon/db/redis");
+			const questionEmbedding = await getEmbedding(sanitized);
+			const results = await vectorStore.search("inazuma-news", questionEmbedding, 8, sanitized);
+			return (
+				results
+					// Exclut le bruit non-actionnable (docs internes, chemins file://).
+					.filter((r: any) => {
+						const type = r.document.metadata?.type || "article";
+						const url = r.document.metadata?.url || "";
+						return type !== "doc" && !String(url).startsWith("file:");
+					})
+					.map((r: any) => ({
+						id: r.document.id,
+						title: r.document.metadata?.title || r.document.text.substring(0, 50),
+						date: r.document.metadata?.date || "",
+						url: r.document.metadata?.url || "#",
+						type: r.document.metadata?.type || "article",
+						text: r.document.text,
+						score: r.score,
+					}))
+			);
+		} catch (e) {
+			console.warn("RAG news search failed or Redis not configured:", e);
+			return [] as any[];
+		}
+	})();
+
+	const [wikiDocs, newsDocs] = await Promise.all([wikiPromise, newsPromise]);
+
+	// Fusion : les entités wiki (pertinence directe + fiche cliquable) priment
+	// toujours sur les actus sémantiques. On trie chaque groupe par score, puis
+	// on concatène wiki avant actus. Dédupliqué par id.
+	const seen = new Set<string>();
+	const sortByScore = (a: any, b: any) => (b.score || 0) - (a.score || 0);
+	const merged: any[] = [];
+	for (const doc of [...wikiDocs.sort(sortByScore), ...newsDocs.sort(sortByScore)]) {
+		if (seen.has(doc.id)) continue;
+		seen.add(doc.id);
+		merged.push(doc);
+	}
+
+	return merged.slice(0, 12);
+}
