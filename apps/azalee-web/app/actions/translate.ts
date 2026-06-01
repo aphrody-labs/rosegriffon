@@ -67,14 +67,19 @@ async function searchGlossary(query: string, entityType?: string): Promise<Trans
 	const glossary = await loadGlossary();
 	if (!glossary) return [];
 
-	const sanitized = query.replaceAll(/[%_,().*\\]/g, "").trim().toLowerCase();
+	const sanitized = query
+		.replaceAll(/[%_,().*\\]/g, "")
+		.trim()
+		.toLowerCase();
 	if (!sanitized) return [];
 
 	const hiraCandidate = toHiragana(sanitized).toLowerCase();
 	const kataCandidate = toKatakana(sanitized).toLowerCase();
 
-	const isValidHira = hiraCandidate.length > 0 && [...hiraCandidate].every((c) => isKana(c) || c === "ー");
-	const isValidKata = kataCandidate.length > 0 && [...kataCandidate].every((c) => isKana(c) || c === "ー");
+	const isValidHira =
+		hiraCandidate.length > 0 && [...hiraCandidate].every((c) => isKana(c) || c === "ー");
+	const isValidKata =
+		kataCandidate.length > 0 && [...kataCandidate].every((c) => isKana(c) || c === "ー");
 
 	const results: TranslationResult[] = [];
 
@@ -87,7 +92,11 @@ async function searchGlossary(query: string, entityType?: string): Promise<Trans
 			const frLower = (entry.fr || "").toLowerCase();
 			const jaLower = (entry.ja || "").toLowerCase();
 
-			if (enLower.includes(sanitized) || frLower.includes(sanitized) || jaLower.includes(sanitized)) {
+			if (
+				enLower.includes(sanitized) ||
+				frLower.includes(sanitized) ||
+				jaLower.includes(sanitized)
+			) {
 				matched = true;
 			} else if (isValidHira && jaLower.includes(hiraCandidate)) {
 				matched = true;
@@ -107,7 +116,9 @@ async function searchGlossary(query: string, entityType?: string): Promise<Trans
 				let finalUrl = `${urlPrefix}/${id}`;
 
 				if (type === "aura") {
-					const isSoul = entry.subType === "soul" || (entry.subType && entry.subType.toLowerCase().includes("soul"));
+					const isSoul =
+						entry.subType === "soul" ||
+						(entry.subType && entry.subType.toLowerCase().includes("soul"));
 					finalType = isSoul ? "soul" : "keshin";
 					finalTypeLabel = isSoul ? "Totem" : "Esprit Guerrier";
 					finalUrl = isSoul ? `/aura/totems/${id}` : `/aura/esprits-guerriers/${id}`;
@@ -149,18 +160,16 @@ async function searchSupabase(query: string, entityType?: string): Promise<Trans
 	const q = `%${sanitized}%`;
 
 	// Build base OR filter
-	const orFilters = [
-		`name_fr.ilike.${q}`,
-		`name_en.ilike.${q}`,
-		`name_ja.ilike.${q}`
-	];
+	const orFilters = [`name_fr.ilike.${q}`, `name_en.ilike.${q}`, `name_ja.ilike.${q}`];
 
 	// Romaji-Katakana/Hiragana conversion checks
 	const hiraCandidate = toHiragana(sanitized.toLowerCase());
 	const kataCandidate = toKatakana(sanitized.toLowerCase());
 
-	const isValidHira = hiraCandidate.length > 0 && [...hiraCandidate].every((c) => isKana(c) || c === "ー");
-	const isValidKata = kataCandidate.length > 0 && [...kataCandidate].every((c) => isKana(c) || c === "ー");
+	const isValidHira =
+		hiraCandidate.length > 0 && [...hiraCandidate].every((c) => isKana(c) || c === "ー");
+	const isValidKata =
+		kataCandidate.length > 0 && [...kataCandidate].every((c) => isKana(c) || c === "ー");
 
 	if (isValidHira && hiraCandidate !== sanitized.toLowerCase()) {
 		orFilters.push(`name_ja.ilike.%${hiraCandidate}%`);
@@ -170,7 +179,10 @@ async function searchSupabase(query: string, entityType?: string): Promise<Trans
 	}
 
 	const orFilterString = orFilters.join(",");
-	const charOrFilterString = [...orFilters, `name_roma.ilike.${q}`].join(",");
+	// NB : la table inagle_characters n'a PAS de colonne name_roma → filtrer dessus
+	// lève "no such column" dans le miroir SQLite et fait échouer toute la recherche.
+	// Le romaji est dérivé côté résultat via japaneseToRomaji(name_ja).
+	const charOrFilterString = orFilterString;
 
 	const results: TranslationResult[] = [];
 	const queries: Array<PromiseLike<void>> = [];
@@ -181,7 +193,7 @@ async function searchSupabase(query: string, entityType?: string): Promise<Trans
 		queries.push(
 			supabase
 				.from("inagle_characters")
-				.select("slug, name_fr, name_en, name_ja, name_roma")
+				.select("slug, name_fr, name_en, name_ja")
 				.or(charOrFilterString)
 				.not("internal_code", "like", "%_5000")
 				.order("name_fr", { ascending: true, nullsFirst: false })
@@ -194,7 +206,7 @@ async function searchSupabase(query: string, entityType?: string): Promise<Trans
 								name_en: c.name_en,
 								name_fr: c.name_fr,
 								name_ja: c.name_ja,
-								name_roma: c.name_roma || japaneseToRomaji(c.name_ja),
+								name_roma: japaneseToRomaji(c.name_ja),
 								type: "character",
 								typeLabel: ENTITY_TYPE_CONFIG.character.label,
 								url: `/chara/${c.slug}`,
@@ -369,11 +381,10 @@ async function searchSupabase(query: string, entityType?: string): Promise<Trans
 		);
 	}
 
-	try {
-		await Promise.all(queries);
-	} catch {
-		// Suppress database connection errors to allow glossary fallback
-	}
+	// allSettled : si une table échoue (colonne manquante, opérateur shim non
+	// supporté…), on garde quand même les résultats des autres entités au lieu
+	// de tout perdre comme le faisait Promise.all.
+	await Promise.allSettled(queries);
 
 	return results;
 }
@@ -419,7 +430,10 @@ export async function searchTranslations(
 	}
 
 	// Sort by relevance: exact match > prefix > contains
-	const queryLower = query.replaceAll(/[%_,().*\\]/g, "").trim().toLowerCase();
+	const queryLower = query
+		.replaceAll(/[%_,().*\\]/g, "")
+		.trim()
+		.toLowerCase();
 	merged.sort((a, b) => {
 		const scoreOf = (r: TranslationResult) => {
 			for (const name of [r.name_fr, r.name_en, r.name_ja, r.name_roma]) {
