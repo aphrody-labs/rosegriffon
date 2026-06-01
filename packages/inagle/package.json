@@ -68,7 +68,7 @@
 		"test": "bun test",
 		"lint": "bunx oxlint -c ../../.oxlintrc.json src",
 		"lint:fix": "bunx oxlint -c ../../.oxlintrc.json --fix src",
-		"type-check": "tsc --noEmit"
+		"type-check": "tsc -p tsconfig.build.json --noEmit"
 	},
 	"dependencies": {
 		"@aphrody-code/bxc": "catalog:",

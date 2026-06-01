@@ -9,10 +9,7 @@
 		"noImplicitAny": true,
 		"noImplicitOverride": true,
 		"noUncheckedIndexedAccess": false,
-		"types": ["bun"],
-		"paths": {
-			"@aphrody-code/bxc": ["./types/bxc-shim.d.ts"]
-		}
+		"types": ["bun"]
 	},
 	"include": ["src/**/*.ts"],
 	"exclude": [
