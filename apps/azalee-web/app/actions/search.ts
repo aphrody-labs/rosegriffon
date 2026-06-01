@@ -848,17 +848,35 @@ export async function searchRagOnly(query: string): Promise<any[]> {
 
 	const [wikiDocs, newsDocs] = await Promise.all([wikiPromise, newsPromise]);
 
-	// Fusion : les entités wiki (pertinence directe + fiche cliquable) priment
-	// toujours sur les actus sémantiques. On trie chaque groupe par score, puis
-	// on concatène wiki avant actus. Dédupliqué par id.
-	const seen = new Set<string>();
+	// Fusion hybride par Reciprocal Rank Fusion (RRF) — cf. pattern Supabase
+	// hybrid-search. Au lieu de préfixer BRUTALEMENT toutes les entités wiki avant
+	// toutes les actus (l'ancien concat faisait perdre tout résultat sémantique
+	// fort), on fusionne les deux sources par RANG : chaque doc reçoit
+	// `poids / (k + rang)` dans sa liste, on additionne (un doc présent dans les
+	// deux listes cumule), puis on trie. Les têtes de chaque liste remontent, les
+	// queues sont pénalisées → meilleur des deux mondes, interclassé.
+	const RRF_K = 50; // constante de lissage (limite la domination des tout 1ers)
+	const FULL_TEXT_WEIGHT = 1.2; // léger biais vers les fiches wiki (cliquables)
+	const SEMANTIC_WEIGHT = 1; // actus / tweets sémantiques
 	const sortByScore = (a: any, b: any) => (b.score || 0) - (a.score || 0);
-	const merged: any[] = [];
-	for (const doc of [...wikiDocs.sort(sortByScore), ...newsDocs.sort(sortByScore)]) {
-		if (seen.has(doc.id)) continue;
-		seen.add(doc.id);
-		merged.push(doc);
-	}
 
-	return merged.slice(0, 12);
+	const ranked = new Map<string, { doc: any; rrf: number }>();
+	const fuse = (docs: any[], weight: number) => {
+		docs.sort(sortByScore).forEach((doc, index) => {
+			const contribution = weight / (RRF_K + index + 1);
+			const existing = ranked.get(doc.id);
+			if (existing) {
+				existing.rrf += contribution;
+			} else {
+				ranked.set(doc.id, { doc, rrf: contribution });
+			}
+		});
+	};
+	fuse(wikiDocs, FULL_TEXT_WEIGHT);
+	fuse(newsDocs, SEMANTIC_WEIGHT);
+
+	return [...ranked.values()]
+		.sort((a, b) => b.rrf - a.rrf)
+		.slice(0, 12)
+		.map((entry) => entry.doc);
 }
