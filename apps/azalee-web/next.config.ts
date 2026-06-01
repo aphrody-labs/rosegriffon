@@ -197,7 +197,7 @@ const nextConfig: NextConfig = {
 			`script-src 'self' 'unsafe-inline'${cdnSrc} https://www.googletagmanager.com https://www.google-analytics.com${isDev ? " 'unsafe-eval'" : ""}`,
 			`style-src 'self' 'unsafe-inline'${cdnSrc}`,
 			`img-src 'self' blob: data:${cdnSrc} https://dxi4wb638ujep.cloudfront.net https://*.inazuma.jp https://*.supabase.co https://lh3.googleusercontent.com https://cdn.discordapp.com https://pbs.twimg.com`,
-			`media-src 'self' blob: data:${cdnSrc} https://dxi4wb638ujep.cloudfront.net https://*.inazuma.jp`,
+			`media-src 'self' blob: data:${cdnSrc} https://dxi4wb638ujep.cloudfront.net https://*.inazuma.jp https://video.twimg.com https://pbs.twimg.com`,
 			`font-src 'self'${cdnSrc}`,
 			`connect-src 'self'${cdnSrc} https://www.google-analytics.com https://www.googletagmanager.com https://*.supabase.co wss://*.supabase.co`,
 			"frame-src 'none'",

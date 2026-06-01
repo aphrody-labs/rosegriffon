@@ -49,7 +49,7 @@ export async function generateMetadata({
 
 	const { title } = extractTitleAndBody(tweet?.translation || tweet?.text || "");
 	const description = title.slice(0, 160);
-	const image = tweet?.media?.[0]?.url;
+	const image = tweet?.media?.[0]?.preview_url || tweet?.media?.[0]?.url;
 
 	return {
 		description,
@@ -150,7 +150,9 @@ function formatSectionText(text: string, isFirstSection = false) {
 							className="list-none flex items-start gap-2.5 my-2 pl-2 text-on-surface-variant/90 leading-relaxed text-base sm:text-lg font-medium"
 						>
 							<span className="inline-flex size-2 rounded-full bg-[#1DA1F2]/50 mt-2.5 shrink-0 animate-pulse" />
-							<span className="flex-1">{renderFormattedText(trimmed.replace(/^[-\s•]+/g, ""))}</span>
+							<span className="flex-1">
+								{renderFormattedText(trimmed.replace(/^[-\s•]+/g, ""))}
+							</span>
 						</li>
 					);
 				}
@@ -236,7 +238,11 @@ export default async function TweetPage({ params }: { params: Promise<{ id: stri
 	const authorInfo = getAuthorInfo(tweet.author_username, tweet.author_name);
 
 	const { title } = extractTitleAndBody(tweet.translation || tweet.text || "");
-	const heroImage = tweet.media?.[0]?.url;
+	const firstMedia = tweet.media?.[0];
+	// Hero = miniature d'image. Si le 1er media est une vidéo (url = mp4),
+	// on prend sa preview ; sinon pas de hero image (la vidéo sera rendue inline).
+	const heroIsVideo = firstMedia?.type === "video" || !!firstMedia?.video_url;
+	const heroImage = heroIsVideo ? firstMedia?.preview_url : firstMedia?.url;
 	const readTime = estimateReadTime(tweet.translation || tweet.text || "");
 	const isThread = tweet.is_thread && tweet.tweet_count > 1;
 	const publishedDate = tweet.created_at;
@@ -358,8 +364,12 @@ export default async function TweetPage({ params }: { params: Promise<{ id: stri
 									</div>
 								)}
 								<div>
-									<span className="font-bold text-on-surface block sm:inline">{authorInfo.name}</span>
-									<span className="text-on-surface-variant/70 text-xs sm:ml-1.5">@{tweet.author_username}</span>
+									<span className="font-bold text-on-surface block sm:inline">
+										{authorInfo.name}
+									</span>
+									<span className="text-on-surface-variant/70 text-xs sm:ml-1.5">
+										@{tweet.author_username}
+									</span>
 								</div>
 							</div>
 
@@ -403,43 +413,47 @@ export default async function TweetPage({ params }: { params: Promise<{ id: stri
 											section.media.length === 1 ? "grid-cols-1" : "grid-cols-2"
 										}`}
 									>
-										{section.media.map((m: any, j: number) => (
-											<div
-												key={j}
-												className={`group relative overflow-hidden rounded-2xl border border-outline-variant/15 shadow-md bg-surface-container transition-all duration-300 hover:shadow-lg ${
-													section.media.length === 1
-														? "aspect-video"
-														: section.media.length === 3 && j === 0
-															? "col-span-2 aspect-video"
-															: "aspect-square"
-												}`}
-											>
-												<Image
-													src={m.url}
-													alt=""
-													fill
-													className="object-cover transition-transform duration-500 ease-out group-hover:scale-[1.02]"
-													sizes={section.media.length === 1 ? "850px" : "425px"}
-												/>
-												<div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-												
-												{/* Play Button Overlay for Videos */}
-												{(m.type === "video" || m.type === "animated_gif") && (
-													<div className="absolute inset-0 flex items-center justify-center bg-black/10 group-hover:bg-black/20 transition-colors duration-300">
-														<div className="size-12 rounded-full bg-white/90 border border-white/20 shadow-lg flex items-center justify-center text-black transform group-hover:scale-110 transition-transform duration-300">
-															<svg
-																xmlns="http://www.w3.org/2000/svg"
-																viewBox="0 0 24 24"
-																fill="currentColor"
-																className="size-6 ml-0.5"
-															>
-																<path fillRule="evenodd" d="M4.5 5.653c0-1.427 1.529-2.33 2.779-1.643l11.54 6.347c1.295.712 1.295 2.573 0 3.286L7.28 19.99c-1.25.687-2.779-.217-2.779-1.643V5.653Z" clipRule="evenodd" />
-															</svg>
-														</div>
-													</div>
-												)}
-											</div>
-										))}
+										{section.media.map((m: any, j: number) => {
+											const videoSrc = m.video_url || (m.type === "video" ? m.url : undefined);
+											const posterSrc = m.preview_url || (videoSrc ? undefined : m.url);
+											return (
+												<div
+													key={j}
+													className={`group relative overflow-hidden rounded-2xl border border-outline-variant/15 shadow-md bg-surface-container transition-all duration-300 hover:shadow-lg ${
+														section.media.length === 1
+															? "aspect-video"
+															: section.media.length === 3 && j === 0
+																? "col-span-2 aspect-video"
+																: "aspect-square"
+													}`}
+												>
+													{videoSrc ? (
+														<video
+															controls
+															playsInline
+															loop={m.type === "animated_gif"}
+															muted={m.type === "animated_gif"}
+															poster={posterSrc}
+															preload="metadata"
+															className="absolute inset-0 size-full object-cover"
+														>
+															<source src={videoSrc} type="video/mp4" />
+														</video>
+													) : (
+														<>
+															<Image
+																src={m.url}
+																alt=""
+																fill
+																className="object-cover transition-transform duration-500 ease-out group-hover:scale-[1.02]"
+																sizes={section.media.length === 1 ? "850px" : "425px"}
+															/>
+															<div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+														</>
+													)}
+												</div>
+											);
+										})}
 									</div>
 								)}
 							</div>
@@ -469,12 +483,16 @@ export default async function TweetPage({ params }: { params: Promise<{ id: stri
 							)}
 							<div>
 								<div className="flex items-center gap-2">
-									<p className="font-bold text-on-surface text-base sm:text-lg">{authorInfo.name}</p>
+									<p className="font-bold text-on-surface text-base sm:text-lg">
+										{authorInfo.name}
+									</p>
 									<span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#1DA1F2]/10 text-[#1DA1F2]">
 										Auteur
 									</span>
 								</div>
-								<p className="text-sm text-on-surface-variant/60 font-medium">@{tweet.author_username}</p>
+								<p className="text-sm text-on-surface-variant/60 font-medium">
+									@{tweet.author_username}
+								</p>
 								<p className="text-xs sm:text-sm text-on-surface-variant/70 mt-1.5 max-w-[520px] leading-relaxed">
 									{authorInfo.bio}
 								</p>
