@@ -161,10 +161,22 @@ export class SqliteQueryBuilder {
 	}
 
 	or(orString: string) {
-		const regex = /([a-zA-Z0-9_>-]+)\.(eq|ilike|cs)\.((?:[^\s,]+|\[[^\]]+\]|\{[^}]+\})+)/g;
-		let match;
 		const conditions: string[] = [];
 		const orParams: Array<string | number | boolean | null> = [];
+
+		// 1. Null checks (PostgREST: `col.is.null` / `col.not.is.null`) — sans paramètre.
+		//    Doit passer AVANT le regex op/val sinon `not`/`is` sont ignorés et la
+		//    condition disparaît silencieusement (cf. bug `sheet_data.not.is.null`).
+		const nullRegex = /([a-zA-Z0-9_>-]+)\.(not\.is|is)\.null/g;
+		let nullMatch;
+		while ((nullMatch = nullRegex.exec(orString)) !== null) {
+			const column = this.cleanCol(nullMatch[1]);
+			conditions.push(nullMatch[2] === "is" ? `${column} IS NULL` : `${column} IS NOT NULL`);
+		}
+
+		// 2. Opérateurs avec valeur : eq | ilike | like | cs.
+		const regex = /([a-zA-Z0-9_>-]+)\.(eq|ilike|like|cs)\.((?:[^\s,]+|\[[^\]]+\]|\{[^}]+\})+)/g;
+		let match;
 
 		while ((match = regex.exec(orString)) !== null) {
 			const [, col, op, val] = match;
@@ -176,6 +188,11 @@ export class SqliteQueryBuilder {
 				if (cleanVal.endsWith("%")) cleanVal = cleanVal.slice(0, -1);
 				conditions.push(`${column} LIKE ?`);
 				orParams.push(`%${cleanVal}%`);
+			} else if (op === "like") {
+				// PostgREST `like` : motif fourni tel quel (`%`/`*` = joker). On
+				// normalise `*` → `%` et on garde les `%` littéraux du motif.
+				conditions.push(`${column} LIKE ?`);
+				orParams.push(val.replaceAll("*", "%"));
 			} else if (op === "eq") {
 				conditions.push(`${column} = ?`);
 				orParams.push(val === "true" ? 1 : val === "false" ? 0 : val);
@@ -183,7 +200,9 @@ export class SqliteQueryBuilder {
 				try {
 					const parsed = JSON.parse(val);
 					if (Array.isArray(parsed) && parsed[0]?.id) {
-						conditions.push(`EXISTS (SELECT 1 FROM json_each(${column}) WHERE json_each.value->>'id' = ?)`);
+						conditions.push(
+							`EXISTS (SELECT 1 FROM json_each(${column}) WHERE json_each.value->>'id' = ?)`
+						);
 						orParams.push(parsed[0].id);
 					}
 				} catch {
