@@ -26,6 +26,14 @@ type RawTweetItem = {
 	[key: string]: Json | undefined;
 };
 
+// Décode la vraie date de publication depuis l'ID Snowflake Twitter
+// (epoch Twitter = 1288834974657 ms). Utilisé en repli quand created_at
+// est absent de l'API, pour ne JAMAIS retomber sur la date de crawl.
+function snowflakeToIso(id: string): string {
+	const ms = (BigInt(id) >> 22n) + 1288834974657n;
+	return new Date(Number(ms)).toISOString();
+}
+
 type DBTweetRow = {
 	id: string;
 	author_id: string;
@@ -93,7 +101,6 @@ export async function crawlTwitter(): Promise<{
 				const finalTweetsToUpsert: DBTweetRow[] = [];
 				const deleteOldTweetIds: string[] = [];
 
-
 				for (const [convId, group] of conversations.entries()) {
 					group.sort((a, b) => a.id.localeCompare(b.id));
 
@@ -144,7 +151,7 @@ export async function crawlTwitter(): Promise<{
 
 						const createdAtIso = lastTweet.created_at
 							? new Date(lastTweet.created_at).toISOString()
-							: new Date().toISOString();
+							: snowflakeToIso(lastTweet.id);
 
 						const allThreadMedia: MediaItem[] = [];
 						const seenMediaUrls = new Set<string>();
@@ -183,7 +190,9 @@ export async function crawlTwitter(): Promise<{
 								view_count: lastTweet.view_count,
 							},
 							media: allThreadMedia,
-							quoted_tweets: lastTweet.quoted_tweet ? JSON.parse(JSON.stringify(lastTweet.quoted_tweet)) : null,
+							quoted_tweets: lastTweet.quoted_tweet
+								? JSON.parse(JSON.stringify(lastTweet.quoted_tweet))
+								: null,
 							raw_tweets: filteredGroup.map((item) => ({
 								id: item.id,
 								text: item.text,
@@ -209,7 +218,7 @@ export async function crawlTwitter(): Promise<{
 						const t = filteredGroup[0];
 						const createdAtIso = t.created_at
 							? new Date(t.created_at).toISOString()
-							: new Date().toISOString();
+							: snowflakeToIso(t.id);
 
 						const tMedia = (t.media || []).map((m: { id: string; type: string; url?: string }) => ({
 							id: m.id,
@@ -259,10 +268,18 @@ export async function crawlTwitter(): Promise<{
 					} else {
 						totalCount += uniqueTweets.length;
 						if (deleteOldTweetIds.length > 0) {
-							console.log(`[Crawl Twitter] Nettoyage de ${deleteOldTweetIds.length} doublons de threads de la base de données...`);
-							const { error: deleteErr } = await supabase.from("tweets").delete().in("id", deleteOldTweetIds);
+							console.log(
+								`[Crawl Twitter] Nettoyage de ${deleteOldTweetIds.length} doublons de threads de la base de données...`
+							);
+							const { error: deleteErr } = await supabase
+								.from("tweets")
+								.delete()
+								.in("id", deleteOldTweetIds);
 							if (deleteErr) {
-								console.warn(`[Crawl Twitter] Échec de suppression des anciens tweets de thread :`, deleteErr);
+								console.warn(
+									`[Crawl Twitter] Échec de suppression des anciens tweets de thread :`,
+									deleteErr
+								);
 							}
 						}
 					}
