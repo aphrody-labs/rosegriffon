@@ -71,6 +71,7 @@
 		"type-check": "tsc --noEmit"
 	},
 	"dependencies": {
+		"@aphrody-code/bxc": "catalog:",
 		"@leeoniya/ufuzzy": "catalog:",
 		"@streamparser/json": "catalog:",
 		"@supabase/supabase-js": "catalog:",
