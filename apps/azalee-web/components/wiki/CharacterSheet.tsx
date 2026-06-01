@@ -33,7 +33,6 @@ import { TEAM_EMBLEM_MAP } from "@/lib/team-emblem-map";
 import { cn } from "@/lib/utils";
 import { FormSelector } from "./FormSelector";
 import type { MovesetSkill } from "./MovesetList";
-import { RagAssistant } from "./RagAssistant";
 import { StatHeptagon } from "./StatHeptagon";
 
 // Position badge colors - matching game exactly
@@ -305,7 +304,7 @@ export function CharacterSheet({
 			const endStats = stats;
 			const t = (level - 1) / 98;
 			const lerp = (start: number, end: number) => Math.floor(start + (end - start) * t);
-			
+
 			return {
 				kick: lerp(startStats.kick, endStats.kick),
 				control: lerp(startStats.control, endStats.control),
@@ -419,7 +418,13 @@ export function CharacterSheet({
 						<SafeImage
 							src={finalImageSrc}
 							zukanHash={zukanHash}
-							fallbackSrc={avatarUrl ? (avatarUrl.startsWith("/") || avatarUrl.startsWith("http") ? avatarUrl : getCharacterFaceUrl(avatarUrl)) : undefined}
+							fallbackSrc={
+								avatarUrl
+									? avatarUrl.startsWith("/") || avatarUrl.startsWith("http")
+										? avatarUrl
+										: getCharacterFaceUrl(avatarUrl)
+									: undefined
+							}
 							alt={name}
 							fill
 							unoptimized
@@ -718,7 +723,12 @@ export function CharacterSheet({
 									["Pression", currentStats.pressure, statsLv1?.pressure, stats.pressure],
 									["Physique", currentStats.physical, statsLv1?.physical, stats.physical],
 									["Agilité", currentStats.agility, statsLv1?.agility, stats.agility],
-									["Intelligence", currentStats.intelligence, statsLv1?.intelligence, stats.intelligence],
+									[
+										"Intelligence",
+										currentStats.intelligence,
+										statsLv1?.intelligence,
+										stats.intelligence,
+									],
 								] as Array<[string, number, number | undefined, number]>
 							).map(([label, current, lv1, lv99]) => {
 								const percentage = Math.min(100, Math.max(0, (current / 999) * 100));
@@ -1066,17 +1076,6 @@ export function CharacterSheet({
 					)}
 				</div>
 			</section>
-
-			{/* RAG Tactical Assistant */}
-			<RagAssistant
-				initialQuery={`${name} build`}
-				suggestions={[
-					`${name} techniques`,
-					`Synergies avec ${name}`,
-					`Comment obtenir ${name}`,
-					sheetData?.playstyle ? `Style de jeu ${PLAYSTYLE_FR[sheetData.playstyle] || sheetData.playstyle}` : "",
-				].filter(Boolean)}
-			/>
 
 			{/* Technical Footer */}
 			<div className="px-6 py-3 rounded-2xl bg-surface-container-high/30 border border-outline-variant/10 flex flex-col gap-1 text-[10px] font-mono text-on-surface-variant/40">

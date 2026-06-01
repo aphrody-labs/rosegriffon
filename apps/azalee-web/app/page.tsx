@@ -6,6 +6,7 @@ import { AnimatedSection } from "@/components/home/AnimatedSection";
 import { LandingHero } from "@/components/home/LandingHero";
 import { LatestNewsSection } from "@/components/home/LatestNewsSection";
 import { RgtvBanner } from "@/components/home/RgtvBanner";
+import { ToolsPreview } from "@/components/home/ToolsPreview";
 import { WikiCarousel } from "@/components/home/WikiCarousel";
 import type { WikiSectionStats } from "@/components/home/WikiCarousel";
 import { createClient } from "@/lib/supabase/server";
@@ -171,6 +172,13 @@ export default async function HomePage() {
 						>
 							<LatestNewsSection articles={standardNews} tweets={recentTweets} />
 						</Suspense>
+					</section>
+				</AnimatedSection>
+
+				{/* Interactive Tools Preview */}
+				<AnimatedSection direction="up" delay={0.05}>
+					<section className="md:px-8 lg:px-12">
+						<ToolsPreview />
 					</section>
 				</AnimatedSection>
 
