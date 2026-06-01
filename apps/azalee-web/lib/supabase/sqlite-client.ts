@@ -160,60 +160,145 @@ export class SqliteQueryBuilder {
 		return this;
 	}
 
+	/**
+	 * Découpe une liste PostgREST `.or()` sur les virgules de NIVEAU SUPÉRIEUR
+	 * uniquement — les virgules à l'intérieur d'un littéral `[...]`/`{...}` (valeur
+	 * JSON pour l'opérateur `cs`) sont préservées. Indispensable pour ne PAS couper
+	 * une valeur multi-mots (ex. `name_fr.eq.Tornade de Feu`) : l'ancien regex
+	 * s'arrêtait au 1er espace et tronquait silencieusement la valeur.
+	 */
+	private splitTopLevel(s: string): string[] {
+		const out: string[] = [];
+		let depth = 0;
+		let cur = "";
+		for (const ch of s) {
+			if (ch === "[" || ch === "{") {
+				depth++;
+			} else if (ch === "]" || ch === "}") {
+				depth = Math.max(0, depth - 1);
+			}
+			if (ch === "," && depth === 0) {
+				out.push(cur);
+				cur = "";
+			} else {
+				cur += ch;
+			}
+		}
+		if (cur) {
+			out.push(cur);
+		}
+		return out;
+	}
+
 	or(orString: string) {
 		const conditions: string[] = [];
 		const orParams: Array<string | number | boolean | null> = [];
 
-		// 1. Null checks (PostgREST: `col.is.null` / `col.not.is.null`) — sans paramètre.
-		//    Doit passer AVANT le regex op/val sinon `not`/`is` sont ignorés et la
-		//    condition disparaît silencieusement (cf. bug `sheet_data.not.is.null`).
-		const nullRegex = /([a-zA-Z0-9_>-]+)\.(not\.is|is)\.null/g;
-		let nullMatch;
-		while ((nullMatch = nullRegex.exec(orString)) !== null) {
-			const column = this.cleanCol(nullMatch[1]);
-			conditions.push(nullMatch[2] === "is" ? `${column} IS NULL` : `${column} IS NOT NULL`);
-		}
+		// Parse chaque condition `colonne.opérateur.valeur` séparément. La colonne
+		// (qui peut contenir `->>`) n'a jamais de `.` littéral en PostgREST, donc on
+		// coupe au 1er `.`. La valeur est TOUT le reste après l'opérateur (espaces
+		// inclus) — corrige la troncature multi-mots de l'ancien parser regex.
+		for (const rawToken of this.splitTopLevel(orString)) {
+			const token = rawToken.trim();
+			if (!token) {
+				continue;
+			}
 
-		// 2. Opérateurs avec valeur : eq | ilike | like | cs.
-		const regex = /([a-zA-Z0-9_>-]+)\.(eq|ilike|like|cs)\.((?:[^\s,]+|\[[^\]]+\]|\{[^}]+\})+)/g;
-		let match;
-
-		while ((match = regex.exec(orString)) !== null) {
-			const [, col, op, val] = match;
+			const firstDot = token.indexOf(".");
+			if (firstDot === -1) {
+				continue;
+			}
+			const col = token.slice(0, firstDot);
+			const rest = token.slice(firstDot + 1);
 			const column = this.cleanCol(col);
 
-			if (op === "ilike") {
-				let cleanVal = val;
-				if (cleanVal.startsWith("%")) cleanVal = cleanVal.slice(1);
-				if (cleanVal.endsWith("%")) cleanVal = cleanVal.slice(0, -1);
-				conditions.push(`${column} LIKE ?`);
-				orParams.push(`%${cleanVal}%`);
-			} else if (op === "like") {
-				// PostgREST `like` : motif fourni tel quel (`%`/`*` = joker). On
-				// normalise `*` → `%` et on garde les `%` littéraux du motif.
-				conditions.push(`${column} LIKE ?`);
-				orParams.push(val.replaceAll("*", "%"));
-			} else if (op === "eq") {
-				conditions.push(`${column} = ?`);
-				orParams.push(val === "true" ? 1 : val === "false" ? 0 : val);
-			} else if (op === "cs") {
-				try {
-					const parsed = JSON.parse(val);
-					if (Array.isArray(parsed) && parsed[0]?.id) {
-						conditions.push(
-							`EXISTS (SELECT 1 FROM json_each(${column}) WHERE json_each.value->>'id' = ?)`
-						);
-						orParams.push(parsed[0].id);
-					}
-				} catch {
-					// fallback if JSON parsing fails
+			// Null checks (PostgREST: `col.is.null` / `col.not.is.null`) — sans param.
+			if (rest === "is.null") {
+				conditions.push(`${column} IS NULL`);
+				continue;
+			}
+			if (rest === "not.is.null") {
+				conditions.push(`${column} IS NOT NULL`);
+				continue;
+			}
+
+			const opDot = rest.indexOf(".");
+			if (opDot === -1) {
+				continue;
+			}
+			const op = rest.slice(0, opDot);
+			const val = rest.slice(opDot + 1);
+			// Valeur vide (`id.eq.`) → on saute la condition plutôt que de générer un
+			// filtre qui matche tout (qui ferait remonter la 1re ligne en maybeSingle).
+			if (val === "") {
+				continue;
+			}
+
+			switch (op) {
+				case "ilike": {
+					let cleanVal = val;
+					if (cleanVal.startsWith("%")) cleanVal = cleanVal.slice(1);
+					if (cleanVal.endsWith("%")) cleanVal = cleanVal.slice(0, -1);
+					conditions.push(`${column} LIKE ?`);
+					orParams.push(`%${cleanVal}%`);
+					break;
 				}
+				case "like":
+					// PostgREST `like` : `%`/`*` = joker. On normalise `*` → `%`.
+					conditions.push(`${column} LIKE ?`);
+					orParams.push(val.replaceAll("*", "%"));
+					break;
+				case "eq":
+					conditions.push(`${column} = ?`);
+					orParams.push(val === "true" ? 1 : val === "false" ? 0 : val);
+					break;
+				case "neq":
+					conditions.push(`${column} != ?`);
+					orParams.push(val);
+					break;
+				case "gt":
+					conditions.push(`${column} > ?`);
+					orParams.push(val);
+					break;
+				case "gte":
+					conditions.push(`${column} >= ?`);
+					orParams.push(val);
+					break;
+				case "lt":
+					conditions.push(`${column} < ?`);
+					orParams.push(val);
+					break;
+				case "lte":
+					conditions.push(`${column} <= ?`);
+					orParams.push(val);
+					break;
+				case "cs":
+					try {
+						const parsed = JSON.parse(val);
+						if (Array.isArray(parsed) && parsed[0]?.id) {
+							conditions.push(
+								`EXISTS (SELECT 1 FROM json_each(${column}) WHERE json_each.value->>'id' = ?)`
+							);
+							orParams.push(parsed[0].id);
+						}
+					} catch {
+						// fallback if JSON parsing fails
+					}
+					break;
+				default:
+					break;
 			}
 		}
 
 		if (conditions.length > 0) {
 			this.wheres.push(`(${conditions.join(" OR ")})`);
 			this.params.push(...orParams);
+		} else {
+			// Aucune condition valide (`.or()` malformé / valeurs vides) → matcher
+			// RIEN. Sinon l'absence de WHERE ferait remonter toute la table, et un
+			// .maybeSingle() renverrait silencieusement la 1re ligne (mauvaise entité
+			// au lieu d'un 404).
+			this.wheres.push("1 = 0");
 		}
 
 		return this;

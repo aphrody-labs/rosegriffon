@@ -354,9 +354,16 @@ export const wikiService = {
 		// For "éveil", also search in inagle_auras (generic auras used as awakenings)
 		const tablesToSearch = typeSlug === "eveil" ? [table, "inagle_auras"] : [table];
 
-		// Try match by ID or asset_code across all candidate tables in parallel
+		// Try match by ID or asset_code across all candidate tables in parallel.
+		// sanitizeFilter : `id` vient d'un param d'URL → éviter l'injection de filtre
+		// PostgREST (virgules/points/parenthèses casseraient le .or()).
+		const safeId = sanitizeFilter(id);
 		const searchPromises = tablesToSearch.map((t) =>
-			(supabase as any).from(t).select("*").or(`id.eq.${id},asset_code.eq.${id}`).maybeSingle()
+			(supabase as any)
+				.from(t)
+				.select("*")
+				.or(`id.eq.${safeId},asset_code.eq.${safeId}`)
+				.maybeSingle()
 		);
 		const searchResults = await Promise.all(searchPromises);
 		const row = searchResults.find((res) => res.data)?.data || null;
@@ -1276,7 +1283,9 @@ export const wikiService = {
 				.not("stat_frappe", "is", null)
 				.not("zukan_hash", "is", null);
 			if (playstyles && playstyles.length > 0) {
-				const filter = playstyles.map((p) => `sheet_data->>playstyle.eq.${p}`).join(",");
+				const filter = playstyles
+					.map((p) => `sheet_data->>playstyle.eq.${sanitizeFilter(p)}`)
+					.join(",");
 				query = query.or(filter);
 			}
 			const { data } = await query.limit(limit);
