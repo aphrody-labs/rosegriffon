@@ -288,6 +288,8 @@ export interface BaseCharacter {
 
 	/** Slug for URL (English name with underscores) */
 	slug?: string;
+	/** Base slug for merging variants */
+	baseSlug?: string;
 
 	/** Is this a BASARA character? */
 	isBasara: boolean;

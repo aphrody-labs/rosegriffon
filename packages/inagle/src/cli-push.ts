@@ -248,10 +248,80 @@ export function registerPushCommand(program: Command) {
 
 // === Importers (Generic) ===
 
+function slugify(name: string): string {
+	return name
+		.toLowerCase()
+		.normalize("NFD")
+		.replace(/[\u0300-\u036f]/g, "")
+		.replace(/[^a-z0-9\s-]/g, "")
+		.trim()
+		.replace(/\s+/g, "-");
+}
+
 async function importCharacters(service: any, db: DataAdapter) {
 	console.log("🔄 Importing Characters...");
+
+	// Clean existing characters in database first to remove leftover duplicates/mismatch entries
+	console.log("  Cleaning existing characters in database...");
+	await db.deleteAllExcept("inagle_characters", "id", "DUMMY_NONE");
+
 	let chars = service.characters.all();
 	chars = chars.filter((c: any) => c.charaParamId && c.charaParamId !== "null");
+
+	// Group by character name to find the primary (youngest) version and set slugs
+	const charsByName = new Map<string, any[]>();
+	for (const c of chars) {
+		const nameEn = getLoc(c, "en") || c.name || "";
+		const key = nameEn.toLowerCase().trim() || c.charaId;
+		if (!charsByName.has(key)) {
+			charsByName.set(key, []);
+		}
+		charsByName.get(key)!.push(c);
+	}
+
+	// Align images/codes and assign is_primary and slugs
+	const processedChars: any[] = [];
+	for (const [key, variants] of charsByName.entries()) {
+		// Sort variants: normal first, prefer zukanHash, then sorted by charaParamId ASC
+		variants.sort((a: any, b: any) => {
+			const aHero = a.rarity === "Héros" || a.rarityCode === 10 ? 1 : 0;
+			const bHero = b.rarity === "Héros" || b.rarityCode === 10 ? 1 : 0;
+			if (aHero !== bHero) return aHero - bHero;
+
+			const aBasara = a.rarity === "BASARA" || a.rarityCode >= 20 ? 1 : 0;
+			const bBasara = b.rarity === "BASARA" || b.rarityCode >= 20 ? 1 : 0;
+			if (aBasara !== bBasara) return aBasara - bBasara;
+
+			const aHash = a.zukanHash ? 1 : 0;
+			const bHash = b.zukanHash ? 1 : 0;
+			if (aHash !== bHash) return bHash - aHash;
+
+			return String(a.internalCode || "").localeCompare(String(b.internalCode || ""));
+		});
+
+		const primary = variants[0];
+		const nameEn = getLoc(primary, "en") || primary.name || "unknown";
+		const baseSlug = slugify(nameEn);
+
+		for (let idx = 0; idx < variants.length; idx++) {
+			const v = variants[idx];
+			v.is_primary = idx === 0;
+			v.base_slug = baseSlug;
+			v.slug = `${baseSlug}-${v.charaParamId}`;
+
+			// Mismatch correction: Hero and Basara variants get the same image, zukanHash, and zukanOrder as the normal version
+			const isH = v.rarity === "Héros" || v.rarityCode === 10;
+			const isB = v.rarity === "BASARA" || v.rarityCode >= 20;
+			if ((isH || isB) && primary) {
+				v.internalCode = primary.internalCode;
+				v.zukanHash = primary.zukanHash;
+				if (primary.zukanOrder) {
+					v.zukanOrder = primary.zukanOrder;
+				}
+			}
+			processedChars.push(v);
+		}
+	}
 
 	// Build aura hash set to separate auras from skills in chara_param slots
 	const auraHashes = buildAuraHashSet();
@@ -261,8 +331,8 @@ async function importCharacters(service: any, db: DataAdapter) {
 	const BATCH_SIZE = 100;
 	let successCount = 0;
 
-	for (let i = 0; i < chars.length; i += BATCH_SIZE) {
-		const batch = chars.slice(i, i + BATCH_SIZE);
+	for (let i = 0; i < processedChars.length; i += BATCH_SIZE) {
+		const batch = processedChars.slice(i, i + BATCH_SIZE);
 		let records = batch.map((c: any) => {
 			const stats = c.stats?.lv99 || {};
 
@@ -275,6 +345,7 @@ async function importCharacters(service: any, db: DataAdapter) {
 
 			return {
 				id: c.charaParamId,
+				chara_id: c.charaId,
 				name_fr: getLoc(c, "fr"),
 				name_en: getLoc(c, "en"),
 				name_ja: getLoc(c, "ja"),
@@ -313,6 +384,10 @@ async function importCharacters(service: any, db: DataAdapter) {
 				skills,
 				data: { ...c, skills, auras },
 				updated_at: new Date().toISOString(),
+				is_primary: c.is_primary ?? false,
+				hero_type: (c.sheetData && c.sheetData.heroType) || null,
+				slug: c.slug || null,
+				base_slug: c.base_slug || null,
 			};
 		});
 
@@ -321,17 +396,25 @@ async function importCharacters(service: any, db: DataAdapter) {
 		if (error) console.error("❌ Error batch char:", error.message || error);
 		else successCount += records.length;
 	}
-	console.log(`✅ Characters imported (${successCount}/${chars.length}).`);
+	console.log(`✅ Characters imported (${successCount}/${processedChars.length}).`);
 }
 
 async function importSkills(service: any, db: DataAdapter) {
 	console.log("🔄 Importing Skills...");
+
+	// Clean existing skills in database first to remove leftover passive/stat boost and duplicate entries
+	console.log("  Cleaning existing skills in database...");
+	await db.deleteAllExcept("inagle_skills", "id", "DUMMY_NONE");
+
 	let skills = service.skills.all();
 	skills = skills.filter(
 		(s: any) =>
 			(s.internalCode || s.skillIDStr || s.skillID || s.id) &&
 			s.category !== 6 &&
-			s.category !== "Passive"
+			s.category !== "Passive" &&
+			s.category !== 9 &&
+			s.category !== "Stat Boost" &&
+			s.category !== "Boost Stats"
 	);
 
 	// Charger les vidéos depuis skill-videos.json (db_skills.json absent)
@@ -354,61 +437,64 @@ async function importSkills(service: any, db: DataAdapter) {
 		}
 	}
 
+	// Map to database records
+	let records = skills.map((s: any) => {
+		const id = s.internalCode || s.skillIDStr || s.skillID || s.id;
+		const nameEn = getLoc(s, "en")?.toLowerCase();
+		const nameJa = getLoc(s, "ja");
+		const zukanEntry =
+			(nameEn ? zukanMap.get(nameEn) : undefined) ||
+			(nameJa ? zukanMap.get(nameJa.toLowerCase()) : undefined) ||
+			null;
+		const videoUrl = zukanEntry?.videoUrl || null;
+		const posterUrl = zukanEntry?.posterUrl || null;
+
+		return {
+			id: String(id),
+			name_fr: getLoc(s, "fr"),
+			name_en: getLoc(s, "en"),
+			name_ja: getLoc(s, "ja"),
+			description_fr: getDesc(s, "fr"),
+			description_en: getDesc(s, "en"),
+			description_ja: getDesc(s, "ja"),
+			element: ELEMENT_NAMES[s.element]?.fr || null,
+			category: CATEGORY_NAMES[s.category]?.fr || null,
+			tp_cost: s.consumeTp || s.tensionCost || 0,
+			power_min: s.power_min || s.powerMin || 0,
+			power_max: s.power_max || s.powerMax || 0,
+			foul_rate: s.foulRate || 0,
+			growth_type: s.growthType,
+			internal_code: s.internalCode || null,
+			hash_id: s.hashId || null,
+			video_url: videoUrl,
+			poster_url: posterUrl,
+			recast_time: s.recastTime || 0,
+			is_eldorado: s.eldorado || false,
+			partner_count: s.partnerCount || 0,
+			evolution_type: s.growthSpeed || null,
+			skill_effect_bit_flag: s.skillEffectBitFlag || 0,
+			tags: s.tags
+				? `{${s.tags.map((t: string) => `"${t.replace(/"/g, '\\"')}"`).join(",")}}`
+				: "{}",
+			image_url: service.images.skillUrl(id),
+			data: s,
+			updated_at: new Date().toISOString(),
+		};
+	});
+
+	// Deduplicate the entire set of records before chunking
+	records = dedup(records);
+
 	const BATCH_SIZE = 100;
 	let successCount = 0;
 
-	for (let i = 0; i < skills.length; i += BATCH_SIZE) {
-		const batch = skills.slice(i, i + BATCH_SIZE);
-		let records = batch.map((s: any) => {
-			const id = s.internalCode || s.skillIDStr || s.skillID || s.id;
-			const nameEn = getLoc(s, "en")?.toLowerCase();
-			const nameJa = getLoc(s, "ja");
-			const zukanEntry =
-				(nameEn ? zukanMap.get(nameEn) : undefined) ||
-				(nameJa ? zukanMap.get(nameJa.toLowerCase()) : undefined) ||
-				null;
-			const videoUrl = zukanEntry?.videoUrl || null;
-			const posterUrl = zukanEntry?.posterUrl || null;
-
-			return {
-				id: String(id),
-				name_fr: getLoc(s, "fr"),
-				name_en: getLoc(s, "en"),
-				name_ja: getLoc(s, "ja"),
-				description_fr: getDesc(s, "fr"),
-				description_en: getDesc(s, "en"),
-				description_ja: getDesc(s, "ja"),
-				element: ELEMENT_NAMES[s.element]?.fr || null,
-				category: CATEGORY_NAMES[s.category]?.fr || null,
-				tp_cost: s.consumeTp || s.tensionCost || 0,
-				power_min: s.power_min || s.powerMin || 0,
-				power_max: s.power_max || s.powerMax || 0,
-				foul_rate: s.foulRate || 0,
-				growth_type: s.growthType,
-				internal_code: s.internalCode || null,
-				hash_id: s.hashId || null,
-				video_url: videoUrl,
-				poster_url: posterUrl,
-				recast_time: s.recastTime || 0,
-				is_eldorado: s.eldorado || false,
-				partner_count: s.partnerCount || 0,
-				evolution_type: s.growthSpeed || null,
-				skill_effect_bit_flag: s.skillEffectBitFlag || 0,
-				tags: s.tags
-					? `{${s.tags.map((t: string) => `"${t.replace(/"/g, '\\"')}"`).join(",")}}`
-					: "{}",
-				image_url: service.images.skillUrl(id),
-				data: s,
-				updated_at: new Date().toISOString(),
-			};
-		});
-
-		records = dedup(records);
-		const { error } = await db.upsert("inagle_skills", records);
+	for (let i = 0; i < records.length; i += BATCH_SIZE) {
+		const batch = records.slice(i, i + BATCH_SIZE);
+		const { error } = await db.upsert("inagle_skills", batch);
 		if (error) console.error("❌ Error batch skills:", error.message || error);
-		else successCount += records.length;
+		else successCount += batch.length;
 	}
-	console.log(`✅ Skills imported (${successCount}/${skills.length}).`);
+	console.log(`✅ Skills imported (${successCount}/${records.length}).`);
 }
 
 async function importItems(service: any, db: DataAdapter) {

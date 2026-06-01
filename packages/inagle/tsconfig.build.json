@@ -13,5 +13,5 @@
 		"types": ["bun"]
 	},
 	"include": ["src/**/*.ts"],
-	"exclude": ["node_modules", "dist", "src/**/*.test.ts"]
+	"exclude": ["node_modules", "dist", "src/**/*.test.ts", "src/zukan/inspect-*.ts", "src/zukan/scrape-*.ts", "src/zukan/read-*.ts"]
 }

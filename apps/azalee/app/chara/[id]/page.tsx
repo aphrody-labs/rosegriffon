@@ -153,9 +153,9 @@ export default async function PlayerDetailPage({ params }: { params: Promise<{ i
 		zukanHash: baseChar.zukanHash || variant.zukanHash,
 	};
 
-	// Fetch all distinct forms of this character (same chara_id, different pos/elem/rarity)
+	// Fetch all distinct forms of this character (same baseSlug/chara_id, different pos/elem/rarity)
 	const sheetId = (player as any).sheetData?.sheetId;
-	const forms = await wikiService.getCharacterForms(baseChar.charaId, sheetId);
+	const forms = await wikiService.getCharacterForms(baseChar.charaId, sheetId, baseChar.baseSlug || undefined);
 	const auras = await wikiService.getCharacterAuras(baseChar.charaId, variant.charaParamId);
 
 	// Build a map of skillId -> skillName for variant comparisons

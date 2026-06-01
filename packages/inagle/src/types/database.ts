@@ -200,6 +200,7 @@ export type Database = {
 					updated_at: string | null;
 					zukan_hash: string | null;
 					zukan_order: number | null;
+					is_primary: boolean | null;
 				};
 				Insert: {
 					constellation?: string | null;
@@ -237,6 +238,7 @@ export type Database = {
 					updated_at?: string | null;
 					zukan_hash?: string | null;
 					zukan_order?: number | null;
+					is_primary?: boolean | null;
 				};
 				Update: {
 					constellation?: string | null;
@@ -274,6 +276,7 @@ export type Database = {
 					updated_at?: string | null;
 					zukan_hash?: string | null;
 					zukan_order?: number | null;
+					is_primary?: boolean | null;
 				};
 				Relationships: [];
 			};
