@@ -93,7 +93,7 @@ function sanitizeFilter(input: string): string {
  */
 const HERO_BASE_CODES: Record<string, string> = {
 	c03030100: "c03032210", // Hector Helio → Hector
-	c05024640: "c11200500", // Hurley Kane → Hurley
+	c05024640: "c02024040", // Hurley Kane → Hurley (surfer young)
 	c05024690: "c03030040", // Xavier Schiller → Xavier
 	c05026600: "c03030010", // Austin Hobbes → Austin
 	c06037430: "c02023810", // Darren LaChance → Darren
@@ -105,7 +105,7 @@ const HERO_BASE_CODES: Record<string, string> = {
 	c07070010: "c01000210", // Joseph King → Joseph
 	c07070110: "c02023700", // Caleb Stonewall → Caleb
 	c07070120: "c01000020", // Nathan Swift → Nathan
-	c07080010: "c05026590", // Byron Love → Byron Love (GO)
+	c07080010: "c01001900", // Byron Love → Byron Love (Zeus young)
 	c07090010: "c02023290", // Shawn Froste → Shawn
 	c07110020: "c01000010", // Mark Evans → Mark
 	c07120060: "c01010910", // Erik Eagle → Erik
@@ -713,7 +713,8 @@ export const wikiService = {
 	/** Get all distinct forms/variants of a character (same chara_id, different pos/elem/rarity) */
 	async getCharacterForms(
 		charaId: string,
-		sheetId?: string
+		sheetId?: string,
+		baseSlug?: string
 	): Promise<
 		Array<{
 			id: string;
@@ -733,7 +734,9 @@ export const wikiService = {
 			.select(
 				"id, slug, position, element, rarity_label, rarity, zukan_hash, internal_code, stat_frappe, hero_type"
 			);
-		if (sheetId) {
+		if (baseSlug) {
+			query = query.eq("base_slug", baseSlug);
+		} else if (sheetId) {
 			query = query.eq("sheet_data->>sheetId", sheetId);
 		} else {
 			query = query.eq("chara_id", charaId);
@@ -755,7 +758,7 @@ export const wikiService = {
 			// Tertiary: highest stat_frappe (proxy for enrichment quality)
 			return (Number(b.stat_frappe) || 0) - (Number(a.stat_frappe) || 0);
 		});
-		// Deduplicate by position+element+rarity+heroType combo (keep first = most enriched)
+		// Deduplicate by position+element+rarity+heroType+internalCode combo (keep first = most enriched)
 		const seen = new Set<string>();
 		const results: Array<{
 			id: string;
@@ -773,7 +776,8 @@ export const wikiService = {
 			const elem = r.element || "Void";
 			const rar = r.rarity_label || "Normal";
 			const heroType = r.hero_type || "";
-			const key = `${pos}|${elem}|${rar}|${heroType}`;
+			const internalCode = r.internal_code || "";
+			const key = `${pos}|${elem}|${rar}|${heroType}|${internalCode}`;
 			if (seen.has(key)) continue;
 			seen.add(key);
 			results.push({
@@ -831,15 +835,15 @@ export const wikiService = {
 			const dbPosition = positionMap[params.position] || params.position;
 			query = query.eq("position", dbPosition);
 		}
-		if (params.rarity) {
-			query = query.eq("rarity_label", params.rarity);
-		}
-		// Exclude Héros and BASARA unless explicitly requested via rarity filter
-		if (params.rarity !== "Héros") {
-			query = query.neq("rarity_label", "Héros");
-		}
-		if (params.rarity !== "BASARA") {
-			query = query.neq("rarity_label", "BASARA");
+		if (params.rarity === "Héros") {
+			query = query.eq("rarity_label", "Héros");
+		} else if (params.rarity === "BASARA") {
+			query = query.eq("rarity_label", "BASARA");
+		} else {
+			if (params.rarity) {
+				query = query.eq("rarity_label", params.rarity);
+			}
+			query = query.eq("is_primary", true);
 		}
 		// Exclude _5000 variant entries (duplicates of normal characters)
 		query = query.not("internal_code", "like", "%_5000");
@@ -1590,19 +1594,20 @@ export const wikiService = {
 		return undefined;
 	},
 
-	/** Merge BaseCharacters with same charaId into one entry with multiple variants */
+	/** Merge BaseCharacters with same charaId or baseSlug into one entry with multiple variants */
 	groupVariants(characters: BaseCharacter[]): BaseCharacter[] {
 		const grouped = new Map<string, BaseCharacter>();
 		for (const char of characters) {
-			const key = char.charaId;
+			const key = char.baseSlug || char.charaId;
 			const existing = grouped.get(key);
 			if (existing) {
 				existing.variants.push(...char.variants);
 				existing.isBasara = existing.isBasara || char.isBasara;
 				existing.constellation = existing.constellation || char.constellation;
-				existing.wikiSections = existing.wikiSections && existing.wikiSections.length > 0
-					? existing.wikiSections
-					: char.wikiSections;
+				existing.wikiSections =
+					existing.wikiSections && existing.wikiSections.length > 0
+						? existing.wikiSections
+						: char.wikiSections;
 			} else {
 				grouped.set(key, char);
 			}
@@ -1613,13 +1618,13 @@ export const wikiService = {
 			const seenVariants = new Set<string>();
 			const dedupedVariants: typeof char.variants = [];
 			for (const v of char.variants) {
-				const vKey = `${v.position}|${v.element}|${v.rarity}`;
+				const vKey = `${v.position}|${v.element}|${v.rarity}|${v.internalCode || ""}`;
 				if (!seenVariants.has(vKey)) {
 					seenVariants.add(vKey);
 					dedupedVariants.push(v);
 				} else {
 					const idx = dedupedVariants.findIndex(
-						(x) => `${x.position}|${x.element}|${x.rarity}` === vKey
+						(x) => `${x.position}|${x.element}|${x.rarity}|${x.internalCode || ""}` === vKey
 					);
 					if (
 						idx !== -1 &&
@@ -1813,6 +1818,7 @@ export const wikiService = {
 			.from("tweets")
 			.select("*")
 			.eq("author_username", "Azalee_IE")
+			.eq("is_thread", true)
 			.order("created_at", { ascending: false })
 			.limit(limit);
 		return data || [];
