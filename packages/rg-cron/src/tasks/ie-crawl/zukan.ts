@@ -4,32 +4,16 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Browser, Page } from "@aphrody-code/bxc";
 import { createSupabaseServiceClient, cache } from "@rose-griffon/db";
-import * as cheerio from "cheerio";
+import { buildOrderMap, crawlZukanOrderPages } from "@rose-griffon/inagle/zukan/order";
 
-const PER_PAGE = 200;
-const MAX_PAGES = 30;
-const HASH_RE = /cloudfront\.net\/1\/([^."\s]+)/;
+// Le scraper d'ordre (navigation bxc + parsing cheerio des pages chara_param) est
+// désormais unifié dans `@rose-griffon/inagle/zukan/order` (leaf, hors barrel car
+// il tire @aphrody-code/bxc). Ce fichier ne garde que l'orchestration prod :
+// diff Redis + écriture `zukan_order` sur Supabase. Comportement identique.
 
-export interface ZukanCharacter {
-	id: string;
-	name: string;
-	zukanHash: string | null;
-	position: string;
-	element: string;
-	game: string;
-	order: number;
-}
-
-async function safeGoto(page: Page, url: string, timeout = 30000): Promise<unknown> {
-	return Promise.race([
-		page.goto(url),
-		new Promise((_, reject) =>
-			setTimeout(() => reject(new Error(`Navigation timeout (${timeout}ms) pour ${url}`)), timeout)
-		),
-	]);
-}
+/** @deprecated Réexport de compatibilité — type unifié dans le module order. */
+export type { ZukanOrderCharacter as ZukanCharacter } from "@rose-griffon/inagle/zukan/order";
 
 export async function crawlZukanOrder(): Promise<{
 	success: boolean;
@@ -39,81 +23,9 @@ export async function crawlZukanOrder(): Promise<{
 	console.log("[Crawl Zukan] Démarrage du crawl de l'ordre officiel des personnages...");
 
 	const client = createSupabaseServiceClient();
-	const allCharacters: ZukanCharacter[] = [];
-	let globalIndex = 0;
 
 	try {
-		const page = (await Browser.newPage({
-			profile:
-				(process.env.BXC_PROFILE as "stealth" | "max" | "static" | "fast" | "http") || "stealth",
-		})) as Page;
-
-		for (let pageNum = 1; pageNum <= MAX_PAGES; pageNum++) {
-			const url = `https://zukan.inazuma.jp/en/chara_param/?page=${pageNum}&per_page=${PER_PAGE}`;
-			console.log(`[Crawl Zukan] Navigation vers page ${pageNum} : ${url}`);
-
-			try {
-				await safeGoto(page, url);
-				await page.waitForSelector("ul.charaListBox", 15000).catch(() => {});
-				// Attendre le rendu complet côté client des personnages (plus de 2 li)
-				try {
-					let retries = 24; // 24 * 250ms = 6s max
-					while (retries > 0) {
-						const count = await page.evaluate(
-							() => (globalThis as any).document.querySelectorAll("ul.charaListBox > li").length
-						);
-						if (count > 2) {
-							break;
-						}
-						await new Promise((r) => setTimeout(r, 250));
-						retries--;
-					}
-				} catch (e) {
-					console.warn("[Crawl Zukan] page.evaluate failed, falling back to static sleep", e);
-					await new Promise((r) => setTimeout(r, 4000));
-				}
-				const html = await page.content();
-				const $ = cheerio.load(html);
-
-				const listItems = $("ul.charaListBox > li");
-				if (listItems.length === 0) {
-					console.log(`[Crawl Zukan] Page ${pageNum} vide. Fin du crawl.`);
-					break;
-				}
-
-				listItems.each((i, el) => {
-					const img = $(el).find("img[src*='cloudfront']").first();
-					const source = $(el).find("source[srcset*='cloudfront.net/1/']").first();
-					const src = img.attr("src") || source.attr("srcset") || "";
-					const hashMatch = src.match(HASH_RE);
-					const zukanHash = (hashMatch && hashMatch[1]) || null;
-
-					const name = img.attr("alt")?.trim() || "?";
-					const position = $(el).find("dl:has(dt:contains('Position')) dd p").text().trim() || "?";
-					const element = $(el).find("dl:has(dt:contains('Element')) dd p").text().trim() || "?";
-					const game = $(el).find("dl.appearedWorks dd").text().trim() || "?";
-
-					allCharacters.push({
-						id: zukanHash || `chara-${globalIndex}`,
-						name,
-						zukanHash,
-						position,
-						element,
-						game,
-						order: globalIndex,
-					});
-
-					globalIndex++;
-				});
-
-				console.log(`[Crawl Zukan] Page ${pageNum} : ${listItems.length} personnages trouvés.`);
-			} catch (err) {
-				console.error(`[Crawl Zukan] Erreur sur la page ${pageNum} :`, err);
-				break;
-			}
-		}
-
-		await page.close();
+		const allCharacters = await crawlZukanOrderPages();
 
 		if (allCharacters.length === 0) {
 			return { success: true, count: 0 };
@@ -123,12 +35,7 @@ export async function crawlZukanOrder(): Promise<{
 			`[Crawl Zukan] Fin du crawl. ${allCharacters.length} personnages trouvés. Vérification des changements via Redis...`
 		);
 
-		const orderMapObj: Record<string, number> = {};
-		for (const char of allCharacters) {
-			if (char.zukanHash) {
-				orderMapObj[char.zukanHash] = char.order;
-			}
-		}
+		const orderMapObj = buildOrderMap(allCharacters);
 
 		const cacheKey = "crawl:zukan:orders";
 		const cachedOrders = await cache.get<Record<string, number>>(cacheKey);
