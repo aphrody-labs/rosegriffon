@@ -4,7 +4,61 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import type { OverrideSkillData } from "@/components/wiki/OverrideSkillSection";
 import { SkillDetail } from "@/components/wiki/SkillDetail";
+import { createClient } from "@/lib/supabase/server";
 import { wikiService } from "@/lib/wiki-service";
+
+/**
+ * getSkill() (lib/wiki-service.ts) spreads sheet_data — empty {} for the 993 real
+ * skills — then overrides with a subset of DB columns. Several populated columns
+ * (evolution_type, growth_type, tp_cost, foul_rate, partner_count, recast_time,
+ * description_en, skill_effect_bit_flag) are never mapped, so the detail page can't
+ * render them. We read them directly here and map onto the field names SkillDetail
+ * already expects, without touching wiki-service.
+ */
+async function enrichSkillFromDbColumns(skill: Record<string, unknown>): Promise<void> {
+	const code = skill.internalCode as string | undefined;
+	if (!code) {
+		return;
+	}
+	try {
+		const supabase = await createClient();
+		const { data } = await supabase
+			.from("inagle_skills")
+			.select(
+				"evolution_type, growth_type, tp_cost, tension_cost, foul_rate, partner_count, recast_time, description_en, skill_effect_bit_flag, hash_id"
+			)
+			.eq("internal_code", code)
+			.limit(1)
+			.maybeSingle();
+		if (!data) {
+			return;
+		}
+		const row = data as Record<string, unknown>;
+		// Tension: real skills carry tp_cost; tension_cost is null. Keep existing if set.
+		if (skill.consumeTp == null) {
+			skill.consumeTp = row.tp_cost ?? row.tension_cost ?? skill.consumeTp;
+		}
+		if (skill.foulRate == null && row.foul_rate != null) {
+			skill.foulRate = row.foul_rate;
+		}
+		if (skill.partnerCount == null && row.partner_count != null) {
+			skill.partnerCount = row.partner_count;
+		}
+		if (skill.recastTime == null && row.recast_time != null) {
+			skill.recastTime = row.recast_time;
+		}
+		if (!skill.desc_EN && row.description_en) {
+			skill.desc_EN = row.description_en;
+		}
+		// Fields newly surfaced (rendered by SkillDetail's stats grid).
+		skill.evolutionType = row.evolution_type ?? null;
+		skill.growthTypeId = row.growth_type ?? null;
+		skill.skillEffectBitFlag = row.skill_effect_bit_flag ?? null;
+		skill.hashId = row.hash_id ?? null;
+	} catch {
+		// Mirror/Postgres unavailable — fall back to whatever getSkill returned.
+	}
+}
 
 export async function generateMetadata({
 	params,
@@ -50,6 +104,11 @@ export default async function MoveDetailPage({ params }: { params: Promise<{ id:
 	if (!skill) {
 		notFound();
 	}
+
+	// Rich DB columns not surfaced by getSkill() (wiki-service spreads an empty
+	// sheet_data for real skills, so foulRate/growth/tp_cost/etc. never reach the UI).
+	// Supplementary read on the same source (inagle_skills mirror) to enrich display.
+	await enrichSkillFromDbColumns(skill as unknown as Record<string, unknown>);
 
 	const name = skill.name_FR || skill.name_EN || skill.displayName || "Unknown";
 	const desc = skill.desc_FR || skill.desc_EN || "";

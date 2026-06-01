@@ -314,10 +314,12 @@ function MetaRow({
 
 			<div className="flex items-center gap-2">
 				{/* Tension Cost Chip */}
-				<div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-surface-container-highest/50 border border-outline-variant/10 text-on-surface-variant text-sm font-medium">
-					<Zap size={18} aria-hidden="true" />
-					{skill.consumeTp} Tension
-				</div>
+				{skill.consumeTp != null && (
+					<div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-surface-container-highest/50 border border-outline-variant/10 text-on-surface-variant text-sm font-medium">
+						<Zap size={18} aria-hidden="true" />
+						{skill.consumeTp} Tension
+					</div>
+				)}
 
 				{/* Client Component for Actions */}
 				<SkillVideoActions videoUrl={skill.videoUrl} skillName={name} />
@@ -363,12 +365,17 @@ function DescriptionBox({
 						{sheetData.duration} sec.
 					</span>
 				)}
-				{skill.growthType !== undefined && (
-					<span className="inline-flex items-center gap-1.5">
-						<TrendingUp size={16} className="text-secondary" aria-hidden="true" />
-						{skill.growthSpeed} Évolution
-					</span>
-				)}
+				{(() => {
+					const evolution =
+						(skill as any).evolutionType ??
+						(skill.growthType !== undefined ? skill.growthSpeed : null);
+					return evolution ? (
+						<span className="inline-flex items-center gap-1.5">
+							<TrendingUp size={16} className="text-secondary" aria-hidden="true" />
+							{evolution} Évolution
+						</span>
+					) : null;
+				})()}
 				{skill.partnerCount !== undefined && skill.partnerCount > 0 && (
 					<span className="inline-flex items-center gap-1.5">
 						<Users size={16} className="text-on-surface-variant" aria-hidden="true" />
@@ -381,7 +388,9 @@ function DescriptionBox({
 						{skill.recastTime} Recharge
 					</span>
 				)}
-				<span className="opacity-40 font-mono font-normal">#{skill.skillIDStr}</span>
+				<span className="opacity-40 font-mono font-normal">
+					#{(skill as any).internalCode || skill.skillIDStr}
+				</span>
 			</div>
 
 			{/* Description FR */}
