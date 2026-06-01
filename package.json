@@ -55,7 +55,7 @@
 			"@dnd-kit/sortable": "^10.0.0",
 			"@asteasolutions/zod-to-openapi": "^8.5.0",
 			"@better-auth/agent-auth": "^0.5.1",
-			"@aphrody-code/x": "^1.0.2",
+			"@aphrody-code/x": "^1.0.3",
 			"@dnd-kit/core": "^6.3.1",
 			"@cloudflare/workers-types": "^4.20260531.1",
 			"@dnd-kit/utilities": "^3.2.2",
@@ -216,23 +216,22 @@
 		"docs:build": "bun run docs:map && bun run docs:bundle && bun run docs:check-links && bun run docs:lint"
 	},
 	"dependencies": {
-		"@streamparser/json": "catalog:",
-		"pg": "catalog:"
+		"@streamparser/json": "^0.0.22",
+		"pg": "^8.21.0"
 	},
 	"devDependencies": {
-		"@types/bun": "catalog:",
-		"@vercel/edge-config": "catalog:",
-		"commander": "catalog:",
-		"dotenv": "catalog:",
-		"geist": "catalog:",
-		"oxfmt": "catalog:",
-		"oxlint": "catalog:",
-		"turbo": "catalog:",
-		"typescript": "catalog:",
-		"wanakana": "catalog:"
+		"@types/bun": "^1.3.14",
+		"@vercel/edge-config": "^1.4.3",
+		"commander": "^15.0.0",
+		"dotenv": "^17.4.2",
+		"geist": "^1.7.1",
+		"oxfmt": "^0.52.0",
+		"oxlint": "^1.67.0",
+		"turbo": "^2.9.16",
+		"typescript": "^6.0.3",
+		"wanakana": "^5.3.1"
 	},
 	"overrides": {
-		"@aphrody-code/x": "file:/home/ubuntu/x-client/ts",
 		"kysely": "0.28.2"
 	},
 	"engines": {
