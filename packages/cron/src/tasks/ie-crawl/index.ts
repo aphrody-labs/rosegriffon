@@ -12,7 +12,7 @@ import { crawlLevel5 } from "./level5";
 import { crawlLevel5Blog } from "./level5-blog";
 import { crawlTwitter } from "./twitter";
 import { crawlExternalDocs } from "./external-docs";
-import { runRagSync } from "./rag";
+import { runRagSync } from "./rag-index";
 import { withProxyRotation } from "../../lib/proxy";
 import { processTweets } from "./process-tweets";
 
