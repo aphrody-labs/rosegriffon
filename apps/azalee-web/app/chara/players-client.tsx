@@ -153,15 +153,29 @@ export function PlayersClient({
 		<FilterTransitionContext.Provider value={filterTransition}>
 			<div className="space-y-6">
 				<div className="flex flex-col gap-3">
-					<div className="flex flex-col sm:flex-row sm:items-center gap-4">
+					{/* Mobile/tablette : recherche + filtres dans un Drawer (bouton "Filtres"). */}
+					<div className="md:hidden flex flex-col gap-4">
 						<WikiSearchToolbar
 							placeholder={t("wiki.players.search_placeholder")}
 							filterKeys={filterKeys}
 							showFilters={true}
-							containerClassName="max-w-md w-full"
+							containerClassName="w-full"
 						>
 							<CharacterFilters teams={teams} />
 						</WikiSearchToolbar>
+					</div>
+
+					{/* Desktop : recherche sans bouton + TOUS les filtres affichés en permanence. */}
+					<div className="hidden md:flex md:flex-col gap-4">
+						<WikiSearchToolbar
+							placeholder={t("wiki.players.search_placeholder")}
+							filterKeys={filterKeys}
+							showFilters={false}
+							containerClassName="max-w-md w-full"
+						/>
+						<div className="rounded-3xl border border-outline-variant/30 bg-surface-container-low/60 px-5 py-4">
+							<CharacterFilters teams={teams} />
+						</div>
 					</div>
 
 					{activeFilters.length > 0 && (
