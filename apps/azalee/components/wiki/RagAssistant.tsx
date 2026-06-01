@@ -144,7 +144,7 @@ export function RagAssistant({
 				</div>
 				<div>
 					<h3 className="font-[BradBunR] text-base sm:text-lg text-on-surface tracking-wide">
-						Assistant Tactique RAG
+						Assistant Tactique
 					</h3>
 					<p className="text-[10px] sm:text-xs text-on-surface-variant">
 						Recherchez en direct dans la base de connaissances (actus, patch notes, tweets)

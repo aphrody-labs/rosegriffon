@@ -1,14 +1,32 @@
 "use server";
 
-import webpush from "web-push";
 import { getServerSession } from "@/lib/auth-helpers";
 import { createClient } from "@/lib/supabase/server";
 
 const VAPID_PUBLIC_KEY = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY || "";
 const VAPID_PRIVATE_KEY = process.env.VAPID_PRIVATE_KEY || "";
 
-if (VAPID_PUBLIC_KEY && VAPID_PRIVATE_KEY) {
-	webpush.setVapidDetails("mailto:azalee@rose-griffon.fr", VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY);
+/**
+ * Charge `web-push` à la DEMANDE (jamais au top-level du module).
+ *
+ * `web-push` est un `serverExternalPackages` : Next l'externalise et s'attend à
+ * le trouver dans `.next/standalone/.../node_modules`. Or le tracing standalone
+ * peut produire un symlink DANGLING (cf. `Failed to load external module
+ * web-push … ENOENT`). Un `import webpush from "web-push"` en tête de module
+ * faisait alors throw l'évaluation du module — et comme Next co-bundle TOUTES
+ * les server actions d'une page dans un même graphe, ça faisait planter
+ * `searchTranslations`/`searchRagOnly`/`searchGlobal`/`searchCompareCharacters`
+ * (comparateur, traducteur, recherche assistée morts "du tout"). En important
+ * web-push uniquement dans `sendPushToAll`, le module se charge toujours et seul
+ * l'envoi de push réel dépend du paquet natif.
+ */
+async function getWebPush() {
+	const mod = await import("web-push");
+	const webpush = mod.default ?? mod;
+	if (VAPID_PUBLIC_KEY && VAPID_PRIVATE_KEY) {
+		webpush.setVapidDetails("mailto:azalee@rose-griffon.fr", VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY);
+	}
+	return webpush;
 }
 
 export async function getNotifications(limit = 20): Promise<
@@ -159,6 +177,15 @@ export async function sendPushToAll(
 	const payload = JSON.stringify({ body, data, title });
 	let sent = 0;
 	let failed = 0;
+
+	let webpush: Awaited<ReturnType<typeof getWebPush>>;
+	try {
+		webpush = await getWebPush();
+	} catch {
+		// `web-push` indisponible (module externe non tracé) — les notifications
+		// in-app sont déjà enregistrées ci-dessus ; on saute juste l'envoi push.
+		return { failed: subscriptions.length, sent: 0 };
+	}
 
 	await Promise.allSettled(
 		subscriptions.map(async (sub: { endpoint: string; p256dh: string; auth_key: string }) => {
