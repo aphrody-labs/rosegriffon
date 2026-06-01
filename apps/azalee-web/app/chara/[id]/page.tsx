@@ -15,7 +15,9 @@ import { CharaVariantsComparison } from "@/components/wiki/CharaVariantsComparis
 
 export async function generateStaticParams() {
 	try {
-		return await wikiService.getAllBaseSlugParams();
+		const allParams = await wikiService.getAllBaseSlugParams();
+		// Optimisation build speed : limiter à 50 personnages statiques, le reste en ISR dynamique
+		return allParams.slice(0, 50);
 	} catch (err) {
 		console.error("Error generating static params for characters:", err);
 		return [];

@@ -3,9 +3,9 @@
 	"version": "0.1.0",
 	"private": true,
 	"scripts": {
-		"dev": "bun run --bun next dev",
-		"build": "bun node_modules/next/dist/bin/next build",
-		"start": "bun run --bun next start",
+		"dev": "bun node_modules/next/dist/bin/next dev --turbopack",
+		"build": "bun node_modules/next/dist/bin/next build --turbopack",
+		"start": "bun node_modules/next/dist/bin/next start",
 		"lint": "oxlint .",
 		"lint:fix": "oxlint --fix .",
 		"format": "oxfmt .",
