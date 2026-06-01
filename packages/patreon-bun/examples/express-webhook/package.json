@@ -11,12 +11,12 @@
 		"start": "node -r dotenv/config ./dist/index.js"
 	},
 	"dependencies": {
-		"dotenv": "^17.3.1",
-		"express": "^5.2.0",
-		"patreon-api.ts": "../../"
+		"dotenv": "catalog:",
+		"express": "catalog:",
+		"patreon-api.ts": "catalog:"
 	},
 	"devDependencies": {
-		"@types/express": "^5.0.5",
-		"@types/node": "^22.7.6"
+		"@types/express": "catalog:",
+		"@types/node": "catalog:"
 	}
 }

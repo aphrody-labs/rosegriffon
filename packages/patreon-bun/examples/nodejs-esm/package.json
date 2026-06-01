@@ -12,7 +12,7 @@
 		"start": "node -r dotenv/config . dotenv_config_path=../.env"
 	},
 	"devDependencies": {
-		"dotenv": "^17.3.1",
-		"patreon-api.ts": "../../"
+		"dotenv": "catalog:",
+		"patreon-api.ts": "catalog:"
 	}
 }

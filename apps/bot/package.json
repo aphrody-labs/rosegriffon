@@ -16,7 +16,7 @@
 		"smoke:canvas": "bun src/scripts/smoke-canvas.ts"
 	},
 	"dependencies": {
-		"@aphrody-code/canvas": "0.1.99-fork.4",
+		"@aphrody-code/canvas": "catalog:",
 		"@rose-griffon/db": "workspace:*",
 		"@rose-griffon/types": "workspace:*",
 		"@rpbey/discordx": "catalog:",

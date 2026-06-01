@@ -14,14 +14,14 @@
 		"lint": "bunx oxlint -c ../../.oxlintrc.json src"
 	},
 	"dependencies": {
-		"@aphrody-code/bxc": "^0.5.2",
-		"@aphrody-code/x": "^1.0.2",
-		"@asteasolutions/zod-to-openapi": "^8.5.0",
+		"@aphrody-code/bxc": "catalog:",
+		"@aphrody-code/x": "catalog:",
+		"@asteasolutions/zod-to-openapi": "catalog:",
 		"@rose-griffon/auth": "workspace:*",
 		"@rose-griffon/db": "workspace:*",
 		"@rose-griffon/inagle": "workspace:*",
 		"@rose-griffon/types": "workspace:*",
-		"cheerio": "^1.2.0",
+		"cheerio": "catalog:",
 		"zod": "catalog:"
 	},
 	"devDependencies": {

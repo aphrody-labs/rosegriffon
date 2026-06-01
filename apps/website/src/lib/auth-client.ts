@@ -1,5 +1,5 @@
-import { genericOAuthClient } from "better-auth/client/plugins";
 import { createAuthClient } from "better-auth/react";
+import { twoFactorClient } from "better-auth/client/plugins";
 
 const getBaseURL = () => {
 	if (typeof window !== "undefined") {
@@ -18,9 +18,15 @@ const getBaseURL = () => {
 
 export const authClient = createAuthClient({
 	baseURL: getBaseURL(),
-	// GenericOAuthClient expose authClient.signIn.oauth2() pour les providers
-	// Configurés via genericOAuth côté serveur (cf. src/lib/auth.ts → "patreon").
-	plugins: [genericOAuthClient()],
+	plugins: [
+		twoFactorClient({
+			onTwoFactorRedirect() {
+				if (typeof window !== "undefined") {
+					window.location.href = "/2fa";
+				}
+			},
+		}),
+	],
 });
 
 export type ClientSession = typeof authClient.$Infer.Session;

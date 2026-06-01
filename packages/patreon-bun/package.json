@@ -52,10 +52,10 @@
 		"prepublishOnly": "bun run build"
 	},
 	"devDependencies": {
-		"@types/bun": "^1.1.13",
-		"msw": "^2.12.14",
-		"openapi-types": "^12.1.3",
-		"ts-morph": "^27.0.2",
+		"@types/bun": "catalog:",
+		"msw": "catalog:",
+		"openapi-types": "catalog:",
+		"ts-morph": "catalog:",
 		"typescript": "catalog:"
 	},
 	"engines": {

@@ -129,10 +129,12 @@ function makeOauthRequestOptions(
 export class PatreonOauthClient {
 	public options: Required<Omit<OauthClientOptions, "token">> & Partial<Oauth2RedirectOptions>;
 
-	/**
-	 * The last (updated) token that is stored
-	 */
 	public cachedToken: Oauth2CreatorToken | Oauth2StoredToken | undefined = undefined;
+
+	/**
+	 * Active refresh promise to prevent concurrent refreshes of the same token.
+	 */
+	public activeRefreshPromise: Promise<Oauth2StoredToken | undefined> | null = null;
 
 	/**
 	 * Called when the token is refreshed
@@ -383,7 +385,7 @@ export class PatreonOauthClient {
 	protected static async validateToken(
 		client: PatreonOauthClient,
 		token: Oauth2CreatorToken | Oauth2StoredToken | string | undefined = client.cachedToken
-	) {
+	): Promise<Oauth2StoredToken | undefined> {
 		if (token != undefined && typeof token === "object" && !PatreonOauthClient.isExpired(token))
 			return token;
 		if (token == undefined) throw new Error("No token found to validate!");
@@ -391,15 +393,26 @@ export class PatreonOauthClient {
 		// Since the token is the access token, you cannot use this to refresh a token
 		if (typeof token === "string") return;
 
-		// TODO: add test for this case
-		const refreshed = await client.refreshToken(token);
-		await client.onTokenRefreshed?.(refreshed ? this.toStored<false>(refreshed) : undefined);
-		if (refreshed) {
-			client.cachedToken = refreshed;
-			await client.options.onTokenValidationRefreshed(refreshed);
+		if (client.activeRefreshPromise) {
+			return client.activeRefreshPromise;
 		}
 
-		return refreshed;
+		const promise = (async () => {
+			try {
+				const refreshed = await client.refreshToken(token);
+				await client.onTokenRefreshed?.(refreshed ? this.toStored<false>(refreshed) : undefined);
+				if (refreshed) {
+					client.cachedToken = refreshed;
+					await client.options.onTokenValidationRefreshed(refreshed);
+				}
+				return refreshed;
+			} finally {
+				client.activeRefreshPromise = null;
+			}
+		})();
+
+		client.activeRefreshPromise = promise;
+		return promise;
 	}
 
 	/**

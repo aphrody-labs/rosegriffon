@@ -8,11 +8,13 @@ import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { createCharactersAPI } from "../characters/api.js";
 import { PATHS } from "../core/paths.js";
-import type { Basara, CharacterStats, Character as EnrichedCharacter } from "../core/types.js";
 import {
 	ElementNames as ELEMENT_NAMES,
-	type ElementId,
 	PositionNames as POSITION_NAMES,
+	type Basara,
+	type CharacterStats,
+	type Character as EnrichedCharacter,
+	type ElementId,
 	type PositionId,
 } from "../core/types.js";
 import { loadBasaraConfig } from "../parsers/basara-config.js";

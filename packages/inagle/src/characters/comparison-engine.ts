@@ -1,5 +1,5 @@
 import type { CharacterVariant, BaseCharacter } from "../core/types.js";
-import { ELEMENT_NAMES } from "../index.js";
+import { ELEMENT_NAMES } from "../skills/types.js";
 
 export interface StatComparison {
 	stat: string;

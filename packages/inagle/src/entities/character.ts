@@ -23,6 +23,8 @@ import type {
 	LocalizedNames,
 	MultiLevelStats,
 	RarityId,
+	BaseCharacter,
+	CharacterVariant,
 } from "../core/types.js";
 import { buildSeriesMapping, buildTeamMapping } from "../parsers/belong-team.js";
 import { parseAllCharaBase } from "../parsers/chara-base.js";
@@ -33,6 +35,7 @@ import {
 	type ParsedCharaParam,
 	parseAllCharaParams,
 	positionIdToCode,
+	buildCharaBaseToParamsMap,
 } from "../parsers/chara-param.js";
 import { buildAllNameMaps, getLocalizedNames } from "../parsers/chara-text.js";
 import { buildConstellationMapping, type ConstellationMapping } from "../parsers/constellation.js";
@@ -754,8 +757,7 @@ export function getCharacterStats(characters: Character[]): CharacterStatsSummar
 // BASE CHARACTER WITH VARIANTS
 // ============================================================================
 
-import type { BaseCharacter, CharacterVariant } from "../core/types.js";
-import { buildCharaBaseToParamsMap } from "../parsers/chara-param.js";
+
 
 /**
  * Build a CharacterVariant from parsed param data

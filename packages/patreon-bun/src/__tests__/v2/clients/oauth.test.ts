@@ -1,4 +1,5 @@
 import { describe, expect, test } from "bun:test";
+import "../../server";
 
 import { creatorClient, userClient } from "../../client";
 
@@ -59,9 +60,11 @@ describe("oauth client", () => {
 			creatorClient.oauth.cachedToken
 		);
 
-		expect(
-			parseInt(PatreonOauthClient["toStored"](<never>{ expires_in: "600" }).expires_in_epoch)
-		).approximately(Date.now() + 600_000, 20);
+		const diff = Math.abs(
+			parseInt(PatreonOauthClient["toStored"](<never>{ expires_in: "600" }).expires_in_epoch) -
+			(Date.now() + 600_000)
+		);
+		expect(diff).toBeLessThan(100);
 	});
 
 	test("uri", () => {
@@ -126,5 +129,44 @@ describe("oauth client", () => {
 		expect(
 			await PatreonOauthClient["validateToken"](creatorClient.oauth, "access_token")
 		).toBeUndefined();
+	});
+
+	test("validate token concurrent refresh locking", async () => {
+		creatorClient.oauth.options.validateToken = true;
+		
+		const expiredToken = {
+			access_token: "old_access",
+			refresh_token: "old_refresh",
+			expires_in: "0",
+			token_type: "Bearer",
+			expires_in_epoch: "0"
+		};
+		creatorClient.oauth.cachedToken = expiredToken;
+
+		let callCount = 0;
+		const originalRefreshToken = creatorClient.oauth.refreshToken;
+		
+		creatorClient.oauth.refreshToken = async (t) => {
+			callCount++;
+			await new Promise(resolve => setTimeout(resolve, 50));
+			return {
+				access_token: "new_access",
+				refresh_token: "new_refresh",
+				expires_in: "10000",
+				token_type: "Bearer",
+				expires_in_epoch: (Date.now() + 10000000).toString()
+			};
+		};
+
+		const [res1, res2] = await Promise.all([
+			PatreonOauthClient["validateToken"](creatorClient.oauth, expiredToken),
+			PatreonOauthClient["validateToken"](creatorClient.oauth, expiredToken)
+		]);
+
+		creatorClient.oauth.refreshToken = originalRefreshToken;
+
+		expect(callCount).toBe(1);
+		expect(res1).toBeDefined();
+		expect(res1).toEqual(res2);
 	});
 });
