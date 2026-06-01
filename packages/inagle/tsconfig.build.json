@@ -10,8 +10,20 @@
 		"noImplicitAny": true,
 		"noImplicitOverride": true,
 		"noUncheckedIndexedAccess": false,
-		"types": ["bun"]
+		"types": ["bun"],
+		"paths": {
+			"@aphrody-code/bxc": ["./types/bxc-shim.d.ts"]
+		}
 	},
 	"include": ["src/**/*.ts"],
-	"exclude": ["node_modules", "dist", "src/**/*.test.ts", "src/zukan/scripts"]
+	"exclude": [
+		"node_modules",
+		"dist",
+		"src/**/*.test.ts",
+		"src/zukan/scripts",
+		// Script de maintenance one-shot : importe en dur `../../../db/src/service.js`
+		// (source d'un autre workspace, hors `rootDir` → TS6059). Aucun consommateur
+		// du `dist` (lancé via `bun src/zukan/map-missing-skill-videos.ts`). Exclu du build.
+		"src/zukan/map-missing-skill-videos.ts"
+	]
 }
