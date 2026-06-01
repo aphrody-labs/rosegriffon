@@ -138,7 +138,7 @@ function DraggableCharaCard({
 				}
 			}}
 			className={cn(
-				"relative w-full rounded-lg overflow-hidden bg-neutral-900 transition-all",
+				"relative w-full rounded-xl overflow-hidden bg-surface-container-highest transition-all",
 				isPlaced
 					? "cursor-not-allowed grayscale"
 					: "cursor-pointer sm:cursor-grab sm:active:cursor-grabbing hover:ring-1 hover:ring-primary/50",
@@ -188,7 +188,7 @@ function DraggableCharaCard({
 				)}
 				{/* Selected indicator (tap-to-place) */}
 				{isSelected && !isPlaced && (
-					<div className="absolute inset-0 flex items-center justify-center bg-primary/20 border-2 border-primary rounded-lg">
+					<div className="absolute inset-0 flex items-center justify-center bg-primary/25 border-2 border-primary rounded-xl">
 						<Icon name="touch_app" size={20} className="text-primary" />
 					</div>
 				)}
@@ -289,13 +289,19 @@ export function CharacterPicker({
 
 	return (
 		<div className="flex flex-col h-full min-h-0">
+			{/* Header — roster title */}
+			<div className="flex items-center gap-2 px-3 pt-3 pb-1.5">
+				<Icon name="groups" size={18} className="text-primary" />
+				<h2 className="text-sm font-bold text-on-surface">Effectif</h2>
+			</div>
+
 			{/* Search */}
-			<div className="px-3 pt-3 pb-2">
+			<div className="px-3 pb-2">
 				<div className="relative">
 					<Icon
 						name="search"
 						size={18}
-						className="absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant"
+						className="absolute left-3.5 top-1/2 -translate-y-1/2 text-on-surface-variant pointer-events-none"
 					/>
 					<input
 						type="search"
@@ -304,9 +310,9 @@ export function CharacterPicker({
 							setSearch(e.target.value);
 							setVisibleCount(PAGE_SIZE);
 						}}
-						placeholder="Rechercher..."
+						placeholder="Rechercher un joueur..."
 						aria-label="Rechercher par nom"
-						className="w-full h-11 pl-10 pr-3 rounded-2xl bg-surface-container-high border-none text-sm text-on-surface placeholder:text-on-surface-variant/50 focus:outline-hidden focus:ring-2 focus:ring-primary/50"
+						className="w-full h-11 pl-11 pr-3 rounded-full bg-surface-container-high border border-transparent text-sm text-on-surface placeholder:text-on-surface-variant/50 focus:outline-hidden focus:border-primary/40 focus:ring-2 focus:ring-primary/30 transition-colors"
 					/>
 				</div>
 			</div>
@@ -314,7 +320,7 @@ export function CharacterPicker({
 			{/* Filters */}
 			<div className="px-3 pb-2 space-y-1.5">
 				{/* Position */}
-				<div className="flex flex-wrap gap-1" role="group" aria-label="Filtrer par position">
+				<div className="flex flex-wrap gap-1.5" role="group" aria-label="Filtrer par position">
 					{POSITIONS.map(({ value, label }) => (
 						<button
 							key={value}
@@ -325,12 +331,16 @@ export function CharacterPicker({
 							aria-pressed={filterPosition === value}
 							aria-label={`Filtrer par position ${label}`}
 							className={cn(
-								"flex-1 min-w-[50px] h-8 rounded-xl text-[10px] font-bold transition-all",
+								"flex-1 min-w-[50px] h-9 rounded-full text-[11px] font-bold transition-all active:scale-95",
 								filterPosition === value
 									? "text-white elevation-1"
-									: "border border-outline/30 text-on-surface-variant hover:bg-on-surface/[0.08]"
+									: "border border-outline-variant/40 text-on-surface-variant hover:bg-on-surface/[0.06]"
 							)}
-							style={filterPosition === value ? { backgroundColor: PICKER_ROLE_COLORS[value] } : undefined}
+							style={
+								filterPosition === value
+									? { backgroundColor: PICKER_ROLE_COLORS[value] }
+									: undefined
+							}
 						>
 							{label}
 						</button>
@@ -349,14 +359,14 @@ export function CharacterPicker({
 							aria-pressed={filterElement === value}
 							aria-label={`Filtrer par élément ${label}`}
 							className={cn(
-								"flex-1 inline-flex items-center justify-center gap-1 h-8 rounded-xl text-xs font-bold transition-all",
+								"flex-1 inline-flex items-center justify-center gap-1 h-9 rounded-full text-xs font-bold transition-all active:scale-95",
 								filterElement === value
-									? "bg-secondary-container text-on-secondary-container elevation-1"
-									: "border border-outline/30 text-on-surface-variant hover:bg-on-surface/[0.08]"
+									? "bg-secondary-container text-on-secondary-container elevation-1 ring-1 ring-inset ring-on-secondary-container/10"
+									: "border border-outline-variant/40 text-on-surface-variant hover:bg-on-surface/[0.06]"
 							)}
 						>
 							<CommonSpriteIcon name={ELEMENT_SPRITE[value]} scale={0.15} />
-							<span className="hidden sm:inline">{label}</span>
+							<span className="hidden xs:inline">{label}</span>
 						</button>
 					))}
 					{hasActiveFilters && (
@@ -368,16 +378,17 @@ export function CharacterPicker({
 								setFilterRarity(null);
 								setVisibleCount(PAGE_SIZE);
 							}}
-							className="h-8 px-3 rounded-xl text-xs text-primary font-bold hover:bg-primary/10 transition-colors"
+							className="inline-flex items-center justify-center size-9 shrink-0 rounded-full text-primary hover:bg-primary/10 active:scale-90 transition-all"
 							aria-label="Réinitialiser les filtres"
+							title="Réinitialiser les filtres"
 						>
-							<Icon name="filter_alt_off" size={16} />
+							<Icon name="filter_alt_off" size={18} />
 						</button>
 					)}
 				</div>
 
 				{/* Rarity */}
-				<div className="flex gap-1 overflow-x-auto scrollbar-hide">
+				<div className="flex gap-1.5 overflow-x-auto scrollbar-hide -mx-1 px-1">
 					{RARITIES.map(({ value, label, color }) => (
 						<button
 							key={value}
@@ -386,10 +397,10 @@ export function CharacterPicker({
 								setVisibleCount(PAGE_SIZE);
 							}}
 							className={cn(
-								"h-7 px-2 rounded-lg text-[10px] font-bold transition-all shrink-0",
+								"h-8 px-2.5 rounded-full text-[10px] font-bold transition-all shrink-0 active:scale-95",
 								filterRarity === value
 									? "text-white elevation-1"
-									: "border border-outline/30 text-on-surface-variant hover:bg-on-surface/[0.08]"
+									: "border border-outline-variant/40 text-on-surface-variant hover:bg-on-surface/[0.06]"
 							)}
 							style={filterRarity === value ? { backgroundColor: color } : undefined}
 						>
@@ -400,14 +411,16 @@ export function CharacterPicker({
 			</div>
 
 			{/* Count */}
-			<div className="px-3 pb-1.5 flex items-center justify-between">
-				<p className="text-[10px] text-on-surface-variant">
+			<div className="px-3 pb-2 flex items-center justify-between text-[10px] font-bold">
+				<span className="inline-flex items-center gap-1 text-on-surface-variant">
+					<Icon name="group" size={13} />
 					{filtered.length} disponible{filtered.length > 1 ? "s" : ""}
-				</p>
+				</span>
 				{placedIds.size > 0 && (
-					<p className="text-[10px] text-primary font-bold">
+					<span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-primary-container text-on-primary-container">
+						<Icon name="check_circle" size={12} />
 						{placedIds.size} placé{placedIds.size > 1 ? "s" : ""}
-					</p>
+					</span>
 				)}
 			</div>
 
@@ -435,9 +448,10 @@ export function CharacterPicker({
 				{visibleCount < filtered.length && (
 					<button
 						onClick={() => setVisibleCount((prev) => prev + PAGE_SIZE)}
-						className="w-full mt-3 py-3 text-sm text-primary font-bold rounded-2xl bg-surface-container-high hover:bg-surface-container-highest transition-colors"
+						className="w-full mt-3 inline-flex items-center justify-center gap-1.5 min-h-11 text-sm text-on-secondary-container font-bold rounded-full bg-secondary-container hover:elevation-1 active:scale-[0.98] transition-all"
 					>
-						Charger plus ({filtered.length - visibleCount} restants)
+						<Icon name="expand_more" size={18} />
+						Charger plus ({filtered.length - visibleCount})
 					</button>
 				)}
 				{filtered.length === 0 && (

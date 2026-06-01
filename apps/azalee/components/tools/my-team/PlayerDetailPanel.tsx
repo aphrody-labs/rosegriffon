@@ -48,7 +48,13 @@ interface PlayerDetailPanelProps {
 	formation?: Formation | null;
 }
 
-export function PlayerDetailPanel({ member, onClose, onRemove, level = 99, formation }: PlayerDetailPanelProps) {
+export function PlayerDetailPanel({
+	member,
+	onClose,
+	onRemove,
+	level = 99,
+	formation,
+}: PlayerDetailPanelProps) {
 	const [skills, setSkills] = useState<MovesetSkill[]>([]);
 	const [loading, setLoading] = useState(true);
 	const lastCharaId = useRef<string | null>(null);
@@ -111,10 +117,10 @@ export function PlayerDetailPanel({ member, onClose, onRemove, level = 99, forma
 				{/* Close button */}
 				<button
 					onClick={onClose}
-					className="absolute top-2 right-2 p-1.5 rounded-full bg-surface-container/80 backdrop-blur-sm text-on-surface-variant hover:bg-surface-container-high transition-colors"
+					className="absolute top-2 right-2 inline-flex items-center justify-center size-9 rounded-full bg-surface-container/80 backdrop-blur-sm text-on-surface-variant hover:bg-surface-container-high active:scale-90 transition-all"
 					aria-label="Fermer le détail"
-				>
-					<Icon name="close" size={16} />
+					>
+						<Icon name="close" size={18} />
 				</button>
 
 				{/* Character info overlay */}
@@ -123,7 +129,9 @@ export function PlayerDetailPanel({ member, onClose, onRemove, level = 99, forma
 						<SafeImage
 							src={member.imageUrl}
 							zukanHash={member.zukanHash}
-							fallbackSrc={member.internalCode ? getCharacterImageUrl(member.internalCode) : undefined}
+							fallbackSrc={
+								member.internalCode ? getCharacterImageUrl(member.internalCode) : undefined
+							}
 							alt={member.name}
 							fill
 							sizes="64px"
@@ -159,7 +167,8 @@ export function PlayerDetailPanel({ member, onClose, onRemove, level = 99, forma
 					<div className="p-2.5 rounded-xl border border-red-500/20 bg-red-500/5 text-red-400 text-xs flex items-center gap-2 font-medium">
 						<Icon name="error" size={16} />
 						<span>
-							Malus de position ({posInfo.status === "adjacent" ? "-15%" : "-35%"} de stats). Placez ce joueur à un poste adapté pour restaurer ses capacités.
+							Malus de position ({posInfo.status === "adjacent" ? "-15%" : "-35%"} de stats). Placez
+							ce joueur à un poste adapté pour restaurer ses capacités.
 						</span>
 					</div>
 				)}
@@ -216,10 +225,10 @@ export function PlayerDetailPanel({ member, onClose, onRemove, level = 99, forma
 				<div className="flex gap-2 pt-1">
 					<Link
 						href={`/chara/${member.slug}`}
-						className="flex-1 inline-flex items-center justify-center gap-1.5 h-10 rounded-xl bg-primary text-on-primary text-xs font-bold hover:elevation-2 active:scale-[0.97] transition-all"
+						className="flex-1 inline-flex items-center justify-center gap-1.5 min-h-11 rounded-full bg-primary text-on-primary text-sm font-bold hover:elevation-2 active:scale-[0.97] transition-all"
 						aria-label={`Voir la fiche wiki de ${member.name}`}
 					>
-						<Icon name="open_in_new" size={14} />
+						<Icon name="open_in_new" size={16} />
 						Fiche Wiki
 					</Link>
 					<button
@@ -227,10 +236,10 @@ export function PlayerDetailPanel({ member, onClose, onRemove, level = 99, forma
 							onRemove(member.slot);
 							onClose();
 						}}
-						className="inline-flex items-center justify-center gap-1.5 h-10 px-4 rounded-xl bg-error-container text-on-error-container text-xs font-bold hover:elevation-2 active:scale-[0.97] transition-all"
+						className="inline-flex items-center justify-center gap-1.5 min-h-11 px-4 rounded-full bg-error-container text-on-error-container text-sm font-bold hover:elevation-2 active:scale-[0.97] transition-all"
 						aria-label={`Retirer ${member.name} de l'équipe`}
 					>
-						<Icon name="person_remove" size={14} />
+						<Icon name="person_remove" size={16} />
 						Retirer
 					</button>
 				</div>
