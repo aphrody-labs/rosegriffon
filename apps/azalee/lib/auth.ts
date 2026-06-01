@@ -9,6 +9,7 @@ import { Pool } from "pg";
 import { logAudit } from "@/lib/audit";
 import { ADMIN_ROLES } from "@/lib/auth-roles";
 import { getIPIntelligence } from "@/lib/ip-intelligence";
+import { getPublicOrigin } from "@/lib/site-url";
 import { sendEmail } from "@/src/lib/email";
 import { commonAuthOptions, ensureUserProfile } from "@rose-griffon/auth";
 
@@ -37,7 +38,8 @@ const supabaseAdmin = createSupabaseServiceClient();
 const getBetterAuthURL = () => {
 	const url = process.env.BETTER_AUTH_URL;
 	if (!url || url === "undefined" || url === "null" || !url.startsWith("http")) {
-		return "https://azalee.rosegriffon.fr";
+		// Origin public canonique (jamais le host interne 0.0.0.0:3003 du self-host).
+		return getPublicOrigin();
 	}
 	return url;
 };
@@ -53,6 +55,7 @@ function createAuth() {
 		...commonAuthOptions,
 
 		trustedOrigins: [
+			getPublicOrigin(),
 			"https://azalee.rosegriffon.fr",
 			"https://rg-azalee.vercel.app",
 			"https://rg-azalee-aphrody.vercel.app",
@@ -128,7 +131,7 @@ function createAuth() {
     <tr><td align="center">
       <table width="100%" style="max-width:480px;background:#2D1F14;border-radius:28px;overflow:hidden">
         <tr><td style="padding:40px 32px 24px;text-align:center">
-          <img src="${process.env.BETTER_AUTH_URL || "https://azalee.rosegriffon.fr"}/logo.webp" alt="Azalée" width="48" height="48" style="border-radius:12px;margin-bottom:16px">
+          <img src="${getPublicOrigin()}/logo.webp" alt="Azalée" width="48" height="48" style="border-radius:12px;margin-bottom:16px">
           <h1 style="margin:0 0 8px;font-size:22px;font-weight:800;color:#F2A93B">Mot de passe oublié ?</h1>
           <p style="margin:0;font-size:15px;color:#BBA998;line-height:1.5">
             Quelqu'un a demandé la réinitialisation du mot de passe pour <strong style="color:#E8D5C4">${user.email}</strong>.

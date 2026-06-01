@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { get } from "@vercel/edge-config";
+import { absoluteUrl } from "@/lib/site-url";
 
 const PROTECTED_PATHS = ["/dashboard", "/settings"];
 const API_PROTECTED_PATHS = ["/api/dashboard"];
@@ -40,7 +41,7 @@ export async function proxy(request: NextRequest) {
 			return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 		}
 
-		const loginUrl = new URL("/login", request.url);
+		const loginUrl = absoluteUrl("/login");
 		loginUrl.searchParams.set("returnTo", pathname);
 		return NextResponse.redirect(loginUrl);
 	}

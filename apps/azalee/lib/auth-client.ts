@@ -1,15 +1,13 @@
 import { createAuthClient } from "better-auth/react";
 import { twoFactorClient } from "better-auth/client/plugins";
+import { getPublicOrigin } from "@/lib/site-url";
 
 const getBaseURL = () => {
 	if (typeof window !== "undefined") {
 		return window.location.origin;
 	}
-	const url = process.env.BETTER_AUTH_URL;
-	if (!url || url === "undefined" || url === "null" || !url.startsWith("http")) {
-		return "https://azalee.rosegriffon.fr";
-	}
-	return url;
+	// SSR / RSC : origin public canonique (jamais le host interne du self-host).
+	return getPublicOrigin();
 };
 
 export const authClient = createAuthClient({

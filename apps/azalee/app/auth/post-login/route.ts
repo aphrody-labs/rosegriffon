@@ -2,6 +2,7 @@ import { headers } from "next/headers";
 import { type NextRequest, NextResponse } from "next/server";
 import { ADMIN_ROLES } from "@/lib/auth-roles";
 import { auth } from "@/lib/auth";
+import { absoluteUrl } from "@/lib/site-url";
 import { createClient } from "@/lib/supabase/server";
 
 export const runtime = "nodejs";
@@ -39,7 +40,7 @@ export async function GET(request: NextRequest) {
 
 	if (!session?.user) {
 		const dest = `/login?returnTo=${encodeURIComponent(returnTo)}`;
-		return NextResponse.redirect(new URL(dest, request.url));
+		return NextResponse.redirect(absoluteUrl(dest));
 	}
 
 	let role: string | null = null;
@@ -60,10 +61,10 @@ export async function GET(request: NextRequest) {
 	if (isAdmin) {
 		// Honore un returnTo déjà dans le dashboard, sinon l'accueil admin.
 		const dest = returnTo.startsWith("/dashboard") ? returnTo : "/dashboard";
-		return NextResponse.redirect(new URL(dest, request.url));
+		return NextResponse.redirect(absoluteUrl(dest));
 	}
 
 	// Non-admin : ne jamais renvoyer vers une page admin (boucle middleware → /login).
 	const dest = returnTo.startsWith("/dashboard") ? "/" : returnTo;
-	return NextResponse.redirect(new URL(dest, request.url));
+	return NextResponse.redirect(absoluteUrl(dest));
 }

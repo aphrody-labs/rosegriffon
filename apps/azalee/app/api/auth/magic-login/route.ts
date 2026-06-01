@@ -5,6 +5,7 @@ import { NextResponse } from "next/server";
 import { logAudit } from "@/lib/audit";
 import { auth } from "@/lib/auth";
 import { ADMIN_ROLES } from "@/lib/auth-roles";
+import { absoluteUrl, getPublicOrigin } from "@/lib/site-url";
 
 /**
  * Allowed IPs for magic login. Only these IPs can access this endpoint.
@@ -77,7 +78,7 @@ export async function GET(request: Request) {
 			.in("role", ADMIN_ROLES as unknown as string[])
 			.order("role");
 
-		const baseUrl = url.origin;
+		const baseUrl = getPublicOrigin();
 		const links = (users || []).map((u) => ({
 			full_name: u.full_name,
 			magic_link: `${baseUrl}/api/auth/magic-login?secret=${encodeURIComponent(secret)}&user=${u.id}`,
@@ -140,7 +141,7 @@ export async function GET(request: Request) {
 			{ ipAddress: realIp }
 		);
 
-		const response = NextResponse.redirect(new URL("/dashboard", request.url));
+		const response = NextResponse.redirect(absoluteUrl("/dashboard"));
 		const authSecret = process.env.BETTER_AUTH_SECRET!;
 		const signedToken = signCookieValue(session.token, authSecret);
 		const cookieName = "__Secure-better-auth.session_token";
