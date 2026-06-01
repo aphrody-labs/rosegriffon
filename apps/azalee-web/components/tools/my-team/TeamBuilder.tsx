@@ -30,7 +30,6 @@ import { FormationField } from "./FormationField";
 import { PlayerDetailPanel } from "./PlayerDetailPanel";
 import { PlayerSlotOverlay } from "./PlayerSlot";
 import { TeamStats } from "./TeamStats";
-import { RagAssistant } from "@/components/wiki/RagAssistant";
 import { calculateElementSynergies } from "@/lib/team-rules";
 
 /* ── Types ────────────────────────────────────────────────── */
@@ -143,6 +142,39 @@ const RARITY_SCORE: Record<string, number> = {
 	Normal: 1,
 	Émérite: 4,
 };
+
+/* ── Round Icon Action Button (MD3) ───────────────────────── */
+
+function IconAction({
+	onClick,
+	icon,
+	title,
+	label,
+	variant = "standard",
+}: {
+	onClick: () => void;
+	icon: string;
+	title: string;
+	label: string;
+	variant?: "standard" | "error";
+}) {
+	return (
+		<button
+			type="button"
+			onClick={onClick}
+			title={title}
+			aria-label={label}
+			className={cn(
+				"inline-flex items-center justify-center size-11 shrink-0 rounded-full state-layer transition-all active:scale-90",
+				variant === "error"
+					? "bg-error-container text-on-error-container"
+					: "bg-surface-container-high text-on-surface-variant hover:text-on-surface"
+			)}
+		>
+			<Icon name={icon} size={20} />
+		</button>
+	);
+}
 
 /* ── Formation Mini-Preview ───────────────────────────────── */
 
@@ -269,97 +301,43 @@ export function TeamBuilder({ characters, initialTeam, isAuthenticated }: TeamBu
 		setHistory((prev) => [...prev.slice(-19), state]);
 	}, []);
 
-	// Get synergies
-	const { dominantElement, hasHarmony, links } = useMemo(() => {
+	// Get element synergies — `links` drives the glowing connection lines on the pitch.
+	const { links } = useMemo(() => {
 		return calculateElementSynergies(members, formation);
 	}, [members, formation]);
 
-	const ragSuggestions = useMemo(() => {
-		const list: string[] = [];
-		const placedMembers = Object.values(members);
-		const fieldMembers = placedMembers.filter((m) => m.slot.startsWith("field-"));
-
-		// 1. Position match checking / role coverage suggestions
-		const positionsCount: Record<string, number> = { FW: 0, MF: 0, DF: 0, GK: 0 };
-		for (const m of fieldMembers) {
-			if (positionsCount[m.position] !== undefined) {
-				positionsCount[m.position]++;
-			}
-		}
-
-		const expected: Record<string, number> = { DF: 0, FW: 0, GK: 0, MF: 0 };
-		for (const p of formation.positions) {
-			expected[p.role]++;
-		}
-
-		for (const role of ["FW", "MF", "DF", "GK"]) {
-			if (positionsCount[role] < expected[role]) {
-				const frRole = role === "FW" ? "Attaquants" : role === "MF" ? "Milieux" : role === "DF" ? "Défenseurs" : "Gardiens";
-				list.push(`Meilleurs ${frRole.toLowerCase()} pour ${formation.name}`);
-			}
-		}
-
-		// 2. Element synergy tactical suggestions
-		if (dominantElement) {
-			list.push(`Avantages du type ${dominantElement === "Fire" ? "Feu" : dominantElement === "Wind" ? "Vent" : dominantElement === "Forest" ? "Forêt" : "Montagne"}`);
-			list.push(`Comment maximiser la dominance ${dominantElement === "Fire" ? "Feu" : dominantElement === "Wind" ? "Vent" : dominantElement === "Forest" ? "Forêt" : "Montagne"}`);
-		} else {
-			list.push("Comment activer la Dominance d'élément");
-		}
-
-		if (hasHarmony) {
-			list.push("Bonus tactique de l'Harmonie d'éléments");
-		} else {
-			list.push("Comment obtenir l'Harmonie d'éléments");
-		}
-
-		// 3. Specific player moveset and synergy suggestions
-		if (fieldMembers.length > 0) {
-			const p1 = fieldMembers[0];
-			list.push(`Techniques de ${p1.name}`);
-			list.push(`Meilleurs partenaires pour ${p1.name}`);
-			if (fieldMembers.length > 1) {
-				const p2 = fieldMembers[1];
-				list.push(`Synergie entre ${p1.name} et ${p2.name}`);
-			}
-		}
-
-		// 4. Default strategic questions
-		list.push(`Forces et faiblesses de la formation ${formation.name}`);
-		list.push("Tactiques méta actuelles");
-
-		return Array.from(new Set(list)).slice(0, 5);
-	}, [members, formation, dominantElement, hasHarmony]);
-
 	// ── Tap-to-select (mobile/desktop) ─────────────────
-	const handleCharaTap = useCallback((char: PickerCharacter) => {
-		const targetSlot = selectedMemberSlot || activeSlotId;
-		if (targetSlot) {
-			pushHistory({ ...members });
-			setMembers((prev) => ({
-				...prev,
-				[targetSlot]: {
-					charaId: char.charaId,
-					element: char.element,
-					imageUrl: char.imageUrl,
-					name: char.name,
-					position: char.position,
-					rarity: char.rarity,
-					slot: targetSlot,
-					slug: char.slug,
-					stats: char.stats,
-					internalCode: char.internalCode,
-					zukanHash: char.zukanHash,
-				},
-			}));
-			setSelectedCharaId(null);
-			setActiveSlotId(null);
-			setSelectedMemberSlot(null);
-		} else {
-			setSelectedCharaId((prev) => (prev === char.charaId ? null : char.charaId));
-		}
-		setMobilePanel("field");
-	}, [activeSlotId, selectedMemberSlot, members, pushHistory]);
+	const handleCharaTap = useCallback(
+		(char: PickerCharacter) => {
+			const targetSlot = selectedMemberSlot || activeSlotId;
+			if (targetSlot) {
+				pushHistory({ ...members });
+				setMembers((prev) => ({
+					...prev,
+					[targetSlot]: {
+						charaId: char.charaId,
+						element: char.element,
+						imageUrl: char.imageUrl,
+						name: char.name,
+						position: char.position,
+						rarity: char.rarity,
+						slot: targetSlot,
+						slug: char.slug,
+						stats: char.stats,
+						internalCode: char.internalCode,
+						zukanHash: char.zukanHash,
+					},
+				}));
+				setSelectedCharaId(null);
+				setActiveSlotId(null);
+				setSelectedMemberSlot(null);
+			} else {
+				setSelectedCharaId((prev) => (prev === char.charaId ? null : char.charaId));
+			}
+			setMobilePanel("field");
+		},
+		[activeSlotId, selectedMemberSlot, members, pushHistory]
+	);
 
 	const handleSlotTap = useCallback(
 		(slotId: string) => {
@@ -743,69 +721,58 @@ export function TeamBuilder({ characters, initialTeam, isAuthenticated }: TeamBu
 
 					{/* Quick stats strip + actions */}
 					<div className="flex items-center justify-between gap-2">
-						<div className="flex items-center gap-2 text-xs text-on-surface-variant">
-							<span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-surface-container-high font-bold">
+						<div className="flex items-center gap-1.5 text-xs text-on-surface-variant min-w-0">
+							<span className="inline-flex items-center gap-1 h-7 px-2.5 rounded-full bg-secondary-container text-on-secondary-container font-bold shrink-0">
 								<Icon name="group" size={14} />
 								{memberCount}/20
 							</span>
-							<span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-surface-container-high font-medium">
+							<span className="inline-flex items-center h-7 px-2.5 rounded-full bg-surface-container-high font-medium truncate">
 								{formation.name}
 							</span>
 						</div>
-						<div className="flex items-center gap-1">
+						<div className="flex items-center gap-0.5 sm:gap-1 -mr-1 overflow-x-auto scrollbar-hide">
 							{history.length > 0 && (
-								<button
+								<IconAction
 									onClick={undo}
-									className="p-2 rounded-full bg-surface-container-high state-layer text-on-surface-variant"
+									icon="undo"
 									title={`Annuler (${history.length})`}
-									aria-label={`Annuler la dernière action (${history.length} restantes)`}
-								>
-									<Icon name="undo" size={18} />
-								</button>
+									label={`Annuler la dernière action (${history.length} restantes)`}
+								/>
 							)}
-							<button
+							<IconAction
 								onClick={handleAutoFill}
-								className="p-2 rounded-full bg-surface-container-high state-layer text-on-surface-variant"
+								icon="auto_fix_high"
 								title="Auto-remplir"
-								aria-label="Auto-remplir l'équipe"
-							>
-								<Icon name="auto_fix_high" size={18} />
-							</button>
+								label="Auto-remplir l'équipe"
+							/>
 							{memberCount > 0 && (
-								<button
+								<IconAction
 									onClick={handleClearAll}
-									className="p-2 rounded-full bg-surface-container-high state-layer text-on-surface-variant"
+									icon="delete_sweep"
 									title="Tout effacer"
-									aria-label="Retirer tous les joueurs"
-								>
-									<Icon name="delete_sweep" size={18} />
-								</button>
+									label="Retirer tous les joueurs"
+								/>
 							)}
-							<button
+							<IconAction
 								onClick={handleExport}
-								className="p-2 rounded-full bg-surface-container-high state-layer text-on-surface-variant"
+								icon="download"
 								title="Exporter en image"
-								aria-label="Exporter l'équipe en image PNG"
-							>
-								<Icon name="download" size={18} />
-							</button>
-							<button
+								label="Exporter l'équipe en image PNG"
+							/>
+							<IconAction
 								onClick={handleShare}
-								className="p-2 rounded-full bg-surface-container-high state-layer text-on-surface-variant"
+								icon="share"
 								title="Partager"
-								aria-label="Copier le lien de partage"
-							>
-								<Icon name="share" size={18} />
-							</button>
+								label="Copier le lien de partage"
+							/>
 							{teamId && (
-								<button
+								<IconAction
 									onClick={handleDelete}
-									className="p-2 rounded-full bg-error-container text-on-error-container state-layer"
+									icon="delete"
 									title="Supprimer"
-									aria-label="Supprimer l'équipe"
-								>
-									<Icon name="delete" size={18} />
-								</button>
+									label="Supprimer l'équipe"
+									variant="error"
+								/>
 							)}
 						</div>
 					</div>
@@ -840,7 +807,8 @@ export function TeamBuilder({ characters, initialTeam, isAuthenticated }: TeamBu
 								</div>
 								<button
 									onClick={() => setSelectedCharaId(null)}
-									className="p-2 rounded-full hover:bg-on-primary-container/10 text-on-primary-container"
+									className="inline-flex items-center justify-center size-10 shrink-0 rounded-full hover:bg-on-primary-container/10 text-on-primary-container active:scale-90 transition-transform"
+									aria-label="Annuler la sélection"
 								>
 									<Icon name="close" size={18} />
 								</button>
@@ -867,8 +835,11 @@ export function TeamBuilder({ characters, initialTeam, isAuthenticated }: TeamBu
 
 				{/* Formation picker — horizontal scroll on all sizes */}
 				<div>
-					<p className="type-label-medium text-on-surface-variant mb-1.5">Formation</p>
-					<div className="flex gap-1.5 overflow-x-auto pb-1 -mx-1 px-1 scrollbar-hide">
+					<p className="flex items-center gap-1.5 type-label-medium text-on-surface-variant mb-1.5">
+						<Icon name="grid_view" size={14} />
+						Formation
+					</p>
+					<div className="flex gap-2 overflow-x-auto pb-1.5 -mx-4 px-4 sm:-mx-1 sm:px-1 scrollbar-hide scroll-smooth snap-x">
 						{FORMATIONS.map((f, i) => {
 							const isActive = i === formationIdx;
 							return (
@@ -878,10 +849,10 @@ export function TeamBuilder({ characters, initialTeam, isAuthenticated }: TeamBu
 									aria-label={`Formation ${f.name}`}
 									aria-pressed={isActive}
 									className={cn(
-										"inline-flex items-center gap-1.5 h-10 pl-1.5 pr-3 rounded-xl text-xs font-bold transition-all shrink-0",
+										"inline-flex items-center gap-1.5 min-h-11 pl-2 pr-3.5 rounded-2xl text-xs font-bold transition-all shrink-0 snap-start active:scale-[0.97]",
 										isActive
-											? "bg-secondary-container text-on-secondary-container elevation-1"
-											: "border border-outline/40 text-on-surface-variant hover:bg-on-surface/[0.08]"
+											? "bg-secondary-container text-on-secondary-container elevation-1 ring-1 ring-inset ring-on-secondary-container/10"
+											: "bg-surface-container-high/60 border border-outline-variant/40 text-on-surface-variant hover:bg-surface-container-high"
 									)}
 								>
 									<FormationMiniPreview formation={f} />
@@ -893,34 +864,49 @@ export function TeamBuilder({ characters, initialTeam, isAuthenticated }: TeamBu
 				</div>
 
 				{/* Level Slider (Material Design 3 style) */}
-				<div className="bg-surface-container-high/40 p-3.5 rounded-2xl border border-outline/10 space-y-2">
-					<div className="flex items-center justify-between text-xs font-bold text-on-surface-variant">
-						<span className="flex items-center gap-1.5">
-							<Icon name="trending_up" size={16} className="text-primary animate-pulse" />
-							Niveau global de l'équipe
+				<div className="bg-surface-container-high/50 p-3.5 sm:p-4 rounded-3xl border border-outline-variant/15 space-y-2.5">
+					<div className="flex items-center justify-between">
+						<span className="flex items-center gap-1.5 text-xs font-bold text-on-surface-variant">
+							<Icon name="trending_up" size={16} className="text-primary" />
+							Niveau global
 						</span>
-						<span className="text-primary text-sm font-black bg-primary-container text-on-primary-container px-2.5 py-0.5 rounded-lg">
+						<span className="inline-flex items-center gap-1 text-sm font-black bg-primary text-on-primary px-3 py-1 rounded-full elevation-1 tabular-nums">
+							<Icon name="sports" size={14} />
 							Niv. {level}
 						</span>
 					</div>
-					<div className="flex items-center gap-3">
-						<span className="text-[10px] font-bold text-on-surface-variant/60 w-3">1</span>
+					<div className="flex items-center gap-2.5">
+						<button
+							type="button"
+							onClick={() => setLevel((l) => Math.max(1, l - 1))}
+							aria-label="Diminuer le niveau"
+							className="inline-flex items-center justify-center size-9 shrink-0 rounded-full bg-surface-container-highest text-on-surface-variant state-layer active:scale-90 transition-transform text-lg font-black leading-none"
+						>
+							&minus;
+						</button>
 						<input
 							type="range"
 							min="1"
 							max="99"
 							value={level}
 							onChange={(e) => setLevel(parseInt(e.target.value, 10))}
-							className="flex-1 h-1.5 bg-outline/20 rounded-lg appearance-none cursor-pointer accent-primary focus:outline-hidden"
+							className="flex-1 h-2 bg-outline/20 rounded-full appearance-none cursor-pointer accent-primary focus:outline-hidden focus-visible:ring-2 focus-visible:ring-primary/40"
 							aria-label="Niveau de l'équipe"
 						/>
-						<span className="text-[10px] font-bold text-on-surface-variant/60 w-4">99</span>
+						<button
+							type="button"
+							onClick={() => setLevel((l) => Math.min(99, l + 1))}
+							aria-label="Augmenter le niveau"
+							className="inline-flex items-center justify-center size-9 shrink-0 rounded-full bg-surface-container-highest text-on-surface-variant state-layer active:scale-90 transition-transform"
+						>
+							<Icon name="add" size={18} />
+						</button>
 					</div>
 				</div>
 
 				{/* Mobile tab switcher — Material 3 segmented button */}
 				<div
-					className="relative flex lg:hidden h-12 rounded-2xl bg-surface-container-high/80 p-1 overflow-hidden"
+					className="relative flex lg:hidden h-13 rounded-full bg-surface-container-high p-1 overflow-hidden elevation-1"
 					role="tablist"
 					aria-label="Panneaux du Team Builder"
 				>
@@ -929,7 +915,7 @@ export function TeamBuilder({ characters, initialTeam, isAuthenticated }: TeamBu
 						const tabIndex = mobilePanel === "field" ? 0 : mobilePanel === "roster" ? 1 : 2;
 						return (
 							<div
-								className="absolute top-1 bottom-1 rounded-xl bg-primary transition-all duration-300 ease-[cubic-bezier(0.2,0,0,1)]"
+								className="absolute top-1 bottom-1 rounded-full bg-primary elevation-1 transition-all duration-300 ease-[cubic-bezier(0.2,0,0,1)]"
 								style={{
 									left: `calc(4px + ${tabIndex} * (100% - 8px) / 3)`,
 									width: "calc((100% - 8px) / 3)",
@@ -938,25 +924,38 @@ export function TeamBuilder({ characters, initialTeam, isAuthenticated }: TeamBu
 						);
 					})()}
 					{[
-						{ icon: "stadium", key: "field" as const, label: "Terrain" },
-						{ icon: "group", key: "roster" as const, label: "Joueurs" },
-						{ icon: "analytics", key: "stats" as const, label: "Stats" },
-					].map((tab) => (
-						<button
-							key={tab.key}
-							onClick={() => setMobilePanel(tab.key)}
-							role="tab"
-							aria-selected={mobilePanel === tab.key}
-							aria-label={`Afficher le panneau ${tab.label}`}
-							className={cn(
-								"relative z-10 flex-1 flex items-center justify-center gap-1.5 rounded-xl text-xs font-bold transition-colors duration-200",
-								mobilePanel === tab.key ? "text-on-primary" : "text-on-surface-variant"
-							)}
-						>
-							<Icon name={tab.icon} size={16} />
-							{tab.label}
-						</button>
-					))}
+						{ icon: "stadium", key: "field" as const, label: "Terrain", count: 0 },
+						{ icon: "group", key: "roster" as const, label: "Joueurs", count: memberCount },
+						{ icon: "analytics", key: "stats" as const, label: "Stats", count: 0 },
+					].map((tab) => {
+						const isActive = mobilePanel === tab.key;
+						return (
+							<button
+								key={tab.key}
+								onClick={() => setMobilePanel(tab.key)}
+								role="tab"
+								aria-selected={isActive}
+								aria-label={`Afficher le panneau ${tab.label}`}
+								className={cn(
+									"relative z-10 flex-1 flex items-center justify-center gap-1.5 rounded-full text-xs font-bold transition-colors duration-200",
+									isActive ? "text-on-primary" : "text-on-surface-variant"
+								)}
+							>
+								<Icon name={tab.icon} size={18} />
+								<span>{tab.label}</span>
+								{tab.count > 0 && (
+									<span
+										className={cn(
+											"inline-flex items-center justify-center min-w-4 h-4 px-1 rounded-full text-[9px] font-black tabular-nums",
+											isActive ? "bg-on-primary/25 text-on-primary" : "bg-primary/15 text-primary"
+										)}
+									>
+										{tab.count}
+									</span>
+								)}
+							</button>
+						);
+					})}
 				</div>
 
 				{/* Main layout */}
@@ -1028,16 +1027,16 @@ export function TeamBuilder({ characters, initialTeam, isAuthenticated }: TeamBu
 						<div className="w-full lg:hidden space-y-3">
 							<TeamStats members={members} formation={formation} level={level} />
 							{/* Mobile action cards */}
-							<div className="grid grid-cols-2 gap-2">
+							<div className="grid grid-cols-2 gap-2.5">
 								<button
 									onClick={handleExport}
-									className="flex items-center justify-center gap-2.5 py-3.5 rounded-2xl bg-surface-container elevation-1 text-on-surface text-sm font-bold active:scale-[0.97] transition-transform"
+									className="flex items-center justify-center gap-2 min-h-12 rounded-2xl bg-secondary-container text-on-secondary-container text-sm font-bold elevation-1 active:scale-[0.97] transition-transform"
 								>
 									<Icon name="download" size={20} /> Exporter
 								</button>
 								<button
 									onClick={handleShare}
-									className="flex items-center justify-center gap-2.5 py-3.5 rounded-2xl bg-surface-container elevation-1 text-on-surface text-sm font-bold active:scale-[0.97] transition-transform"
+									className="flex items-center justify-center gap-2 min-h-12 rounded-2xl bg-secondary-container text-on-secondary-container text-sm font-bold elevation-1 active:scale-[0.97] transition-transform"
 								>
 									<Icon name="share" size={20} /> Partager
 								</button>
@@ -1045,12 +1044,6 @@ export function TeamBuilder({ characters, initialTeam, isAuthenticated }: TeamBu
 						</div>
 					)}
 				</div>
-
-				{/* RAG Tactical Assistant */}
-				<RagAssistant
-					suggestions={ragSuggestions}
-					className="mt-6"
-				/>
 			</div>
 
 			{/* Drag Overlay */}
