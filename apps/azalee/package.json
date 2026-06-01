@@ -14,7 +14,9 @@
 		"test": "vitest run",
 		"test:run": "vitest run",
 		"create-draft": "bun scripts/create-draft.ts",
-		"backup:supabase": "bun scripts/ops/backup-supabase-to-sqlite.ts"
+		"backup:supabase": "bun scripts/ops/backup-supabase-to-sqlite.ts",
+		"sync:supabase": "bun scripts/ops/sync-supabase-to-sqlite.ts",
+		"sync:full": "bun scripts/ops/sync-supabase-to-sqlite.ts --full --deletes"
 	},
 	"dependencies": {
 		"@better-auth/agent-auth": "catalog:",
@@ -68,7 +70,6 @@
 		"@vercel/speed-insights": "catalog:",
 		"bcryptjs": "catalog:",
 		"better-auth": "catalog:",
-		"kysely": "catalog:",
 		"cheerio": "catalog:",
 		"class-variance-authority": "catalog:",
 		"clsx": "catalog:",
@@ -82,6 +83,7 @@
 		"html-to-image": "catalog:",
 		"input-otp": "catalog:",
 		"jsonwebtoken": "catalog:",
+		"kysely": "catalog:",
 		"lexical": "catalog:",
 		"lucide-react": "catalog:",
 		"motion": "catalog:",
