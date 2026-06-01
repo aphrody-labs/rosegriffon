@@ -7,7 +7,7 @@
 import { runInaglePush, runSQLiteBackup, runPostgresBackup } from "./tasks/db";
 import { syncCdnAssets } from "./tasks/cdn";
 import { runIeCrawl } from "./tasks/ie-crawl";
-import { runRagSync, queryRag } from "./tasks/ie-crawl/rag";
+import { runRagSync, queryRag, ragGroundedQuery } from "./tasks/ie-crawl/rag-index";
 import {
 	triggerPublishScheduled,
 	triggerPatreonRefresh,
@@ -449,8 +449,19 @@ Bun.listen({
 			try {
 				const payload = JSON.parse(data.toString());
 				if (payload.cmd === "query_rag" && payload.question) {
-					const results = await queryRag(payload.question);
-					socket.write(JSON.stringify({ success: true, results }) + "\n");
+					if (payload.web) {
+						// Réponse unifiée : vectoriel local + grounding web live (bxc).
+						const grounded = await ragGroundedQuery(payload.question, {
+							web: true,
+							webMaxResults: payload.webMaxResults ?? 3,
+						});
+						socket.write(
+							JSON.stringify({ success: true, results: grounded.sources, grounded }) + "\n"
+						);
+					} else {
+						const results = await queryRag(payload.question);
+						socket.write(JSON.stringify({ success: true, results }) + "\n");
+					}
 				} else if (payload.cmd === "health") {
 					socket.write(JSON.stringify({ success: true, uptime: process.uptime(), metrics }) + "\n");
 				} else {
