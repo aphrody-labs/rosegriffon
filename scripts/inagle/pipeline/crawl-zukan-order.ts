@@ -13,6 +13,7 @@ import { existsSync } from "node:fs";
 import { mkdir, readFile, stat, writeFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { buildOrderMap } from "@rose-griffon/inagle/zukan/order";
 import * as cheerio from "cheerio";
 import dotenv from "dotenv";
 import { Client } from "pg";
@@ -184,11 +185,8 @@ async function main() {
 		ON inagle_characters(zukan_order ASC NULLS LAST);
 	`);
 
-	// Build hash → order map
-	const hashToOrder = new Map<string, number>();
-	for (const entry of allEntries) {
-		if (entry.zukanHash) hashToOrder.set(entry.zukanHash, entry.order);
-	}
+	// Build hash → order map (helper partagé du module order unifié)
+	const orderMap = buildOrderMap(allEntries);
 
 	// Batch update via single query
 	const { rows: dbChars } = await client.query(
@@ -197,7 +195,7 @@ async function main() {
 
 	let updated = 0;
 	for (const row of dbChars) {
-		const order = hashToOrder.get(row.zukan_hash);
+		const order = orderMap[row.zukan_hash];
 		if (order !== undefined) {
 			const result = await client.query(
 				"UPDATE inagle_characters SET zukan_order = $1 WHERE id = $2 AND (zukan_order IS NULL OR zukan_order != $1)",

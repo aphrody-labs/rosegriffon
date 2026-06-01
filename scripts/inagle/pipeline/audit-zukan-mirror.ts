@@ -8,6 +8,13 @@
  */
 
 import { Database } from "bun:sqlite";
+import {
+	AUDIT_ERAS as ERAS,
+	auditNormElem as normElem,
+	auditNormPos as normPos,
+	auditSpearmanCorrelation as spearmanCorrelation,
+	auditZukanGameToSeries as zukanGameToSeries,
+} from "@rose-griffon/inagle/zukan/audit.ts";
 
 const PARAM_EN = "/home/ubuntu/data/zukan/param_en.json";
 const PARAM_JA = "/home/ubuntu/data/zukan/param_ja.json";
@@ -52,93 +59,6 @@ interface DbRow {
 	stat_physique: number | null;
 	stat_agilite: number | null;
 	stat_intelligence: number | null;
-}
-
-const POS_MAP: Record<string, string> = {
-	FW: "FW",
-	MF: "MF",
-	DF: "DF",
-	GK: "GK",
-	Attaquant: "FW",
-	Milieu: "MF",
-	Défenseur: "DF",
-	Defenseur: "DF",
-	Gardien: "GK",
-};
-const ELEM_MAP: Record<string, string> = {
-	Fire: "Fire",
-	Wind: "Wind",
-	Forest: "Forest",
-	Mountain: "Mountain",
-	Void: "Void",
-	Feu: "Fire",
-	Vent: "Wind",
-	Forêt: "Forest",
-	Foret: "Forest",
-	Montagne: "Mountain",
-	Néant: "Void",
-	Neant: "Void",
-};
-
-function normPos(p: string | undefined): string | null {
-	if (!p) return null;
-	return POS_MAP[p] || p || null;
-}
-function normElem(e: string | undefined): string | null {
-	if (!e) return null;
-	return ELEM_MAP[e] || e || null;
-}
-
-const ERAS: Record<string, string> = {
-	"Inazuma Eleven": "OG",
-	"Inazuma Eleven 2": "OG",
-	"Inazuma Eleven 3": "OG",
-	"Inazuma Eleven GO": "GO",
-	"Chrono Stone": "GO",
-	Galaxy: "GO",
-	Ares: "Modern",
-	Orion: "Modern",
-	"Victory Road": "Modern",
-};
-
-function zukanGameToSeries(game?: string): string | null {
-	if (!game) return null;
-	if (game === "Inazuma Eleven: Victory Road") return "Victory Road";
-	if (game === "Inazuma Eleven Ares") return "Ares";
-	if (game.startsWith("Inazuma Eleven GO Galaxy")) return "Galaxy";
-	if (game.startsWith("Inazuma Eleven GO Chrono Stones") || game.startsWith("Inazuma Eleven GO2"))
-		return "Chrono Stone";
-	if (game.startsWith("Inazuma Eleven GO")) return "Inazuma Eleven GO";
-	if (game.startsWith("Inazuma Eleven 3")) return "Inazuma Eleven 3";
-	if (game.startsWith("Inazuma Eleven 2")) return "Inazuma Eleven 2";
-	if (game === "Inazuma Eleven") return "Inazuma Eleven";
-	return null;
-}
-
-function spearmanCorrelation(a: number[], b: number[]): number {
-	const n = a.length;
-	if (n < 2) return 0;
-	function ranks(arr: number[]): number[] {
-		const sorted = arr.map((v, i) => ({ v, i })).sort((x, y) => x.v - y.v);
-		const r = new Array<number>(n);
-		let i = 0;
-		while (i < n) {
-			let j = i;
-			while (j < n - 1 && sorted[j + 1].v === sorted[j].v) j++;
-			const avgRank = (i + j) / 2 + 1;
-			for (let k = i; k <= j; k++) r[sorted[k].i] = avgRank;
-			i = j + 1;
-		}
-		return r;
-	}
-	const ra = ranks(a);
-	const rb = ranks(b);
-	let sumD2 = 0;
-	for (let i = 0; i < n; i++) {
-		const d = ra[i] - rb[i];
-		sumD2 += d * d;
-	}
-	return 1 - (6 * sumD2) / (n * (n * n - 1));
 }
 
 async function main() {

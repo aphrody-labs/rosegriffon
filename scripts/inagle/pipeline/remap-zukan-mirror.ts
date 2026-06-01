@@ -18,6 +18,17 @@
  */
 
 import { Database } from "bun:sqlite";
+import {
+	assignBest,
+	createMatchContext,
+	descriptionSimilarity,
+	ERAS,
+	matchGroupsStrict,
+	matchScore,
+	normElem,
+	normPos,
+	zukanGameToSeries,
+} from "@rose-griffon/inagle/zukan/matcher.ts";
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-expect-error — no types for kuroshiro
 import Kuroshiro from "kuroshiro";
@@ -90,303 +101,6 @@ interface DbChar {
 }
 
 // ============================================================================
-// Normalization — PORTED VERBATIM from map-zukan-images.ts
-// ============================================================================
-
-const POS_MAP: Record<string, string> = {
-	FW: "FW",
-	MF: "MF",
-	DF: "DF",
-	GK: "GK",
-	Attaquant: "FW",
-	Milieu: "MF",
-	Défenseur: "DF",
-	Gardien: "GK",
-	Entraîneur: "Coach",
-	Coach: "Coach",
-};
-const ELEM_MAP: Record<string, string> = {
-	Fire: "Fire",
-	Wind: "Wind",
-	Forest: "Forest",
-	Mountain: "Mountain",
-	Void: "Void",
-	Feu: "Fire",
-	Vent: "Wind",
-	Forêt: "Forest",
-	Montagne: "Mountain",
-	Néant: "Void",
-	Foret: "Forest",
-	Neant: "Void",
-	Aucun: "Void",
-	火: "Fire",
-	風: "Wind",
-	林: "Forest",
-	山: "Mountain",
-	無: "Void",
-};
-
-function normPos(p?: string): string | null {
-	return p ? POS_MAP[p] || p : null;
-}
-function normElem(e?: string): string | null {
-	return e ? ELEM_MAP[e] || e : null;
-}
-
-function zukanGameToSeries(game?: string): string | null {
-	if (!game) return null;
-	if (game === "Inazuma Eleven: Victory Road") return "Victory Road";
-	if (game === "Inazuma Eleven Ares") return "Ares";
-	if (game === "Inazuma Eleven Orion") return "Orion";
-	if (game.startsWith("Inazuma Eleven GO Galaxy")) return "Galaxy";
-	if (game.startsWith("Inazuma Eleven GO Chrono Stones") || game.startsWith("Inazuma Eleven GO2"))
-		return "Chrono Stone";
-	if (game.startsWith("Inazuma Eleven GO")) return "Inazuma Eleven GO";
-	if (game.startsWith("Inazuma Eleven 3")) return "Inazuma Eleven 3";
-	if (game.startsWith("Inazuma Eleven 2")) return "Inazuma Eleven 2";
-	if (game === "Inazuma Eleven") return "Inazuma Eleven";
-	return null;
-}
-
-const ERAS: Record<string, string> = {
-	"Inazuma Eleven": "OG",
-	"Inazuma Eleven 2": "OG",
-	"Inazuma Eleven 3": "OG",
-	"Inazuma Eleven GO": "GO",
-	"Chrono Stone": "GO",
-	Galaxy: "GO",
-	Ares: "Modern",
-	Orion: "Modern",
-	"Victory Road": "Modern",
-};
-
-function normGender(g?: string): string | null {
-	if (!g) return null;
-	if (g === "Male" || g === "男") return "M";
-	if (g === "Female" || g === "女") return "F";
-	return null;
-}
-
-function spearmanCorrelation(a: number[], b: number[]): number {
-	const n = a.length;
-	if (n < 2) return 0;
-
-	function ranks(arr: number[]): number[] {
-		const sorted = arr.map((v, i) => ({ v, i })).sort((x, y) => x.v - y.v);
-		const r = new Array<number>(n);
-		let i = 0;
-		while (i < n) {
-			let j = i;
-			while (j < n - 1 && sorted[j + 1].v === sorted[j].v) j++;
-			const avgRank = (i + j) / 2 + 1;
-			for (let k = i; k <= j; k++) r[sorted[k].i] = avgRank;
-			i = j + 1;
-		}
-		return r;
-	}
-
-	const ra = ranks(a);
-	const rb = ranks(b);
-
-	let sumD2 = 0;
-	for (let i = 0; i < n; i++) {
-		const d = ra[i] - rb[i];
-		sumD2 += d * d;
-	}
-
-	return 1 - (6 * sumD2) / (n * (n * n - 1));
-}
-
-const STOP_WORDS = new Set([
-	"a",
-	"an",
-	"the",
-	"and",
-	"or",
-	"but",
-	"in",
-	"on",
-	"of",
-	"to",
-	"is",
-	"are",
-	"was",
-	"were",
-	"he",
-	"she",
-	"they",
-	"his",
-	"her",
-	"their",
-	"it",
-	"its",
-	"with",
-	"for",
-	"at",
-	"from",
-	"that",
-	"this",
-	"as",
-	"be",
-	"by",
-	"has",
-	"have",
-	"had",
-	"not",
-	"who",
-	"which",
-	"when",
-]);
-
-function descriptionSimilarity(a: string, b: string): number {
-	const tokenize = (s: string) =>
-		new Set(
-			s
-				.toLowerCase()
-				.replace(/[^a-z0-9\s]/g, "")
-				.split(/\s+/)
-				.filter((w) => w.length > 2 && !STOP_WORDS.has(w))
-		);
-	const sa = tokenize(a);
-	const sb = tokenize(b);
-	if (sa.size === 0 || sb.size === 0) return 0;
-	const intersection = [...sa].filter((w) => sb.has(w)).length;
-	const union = new Set([...sa, ...sb]).size;
-	return intersection / union;
-}
-
-function matchScore(z: ZukanEntry, db: DbChar): number {
-	const zPos = normPos(z.position);
-	const zElem = normElem(z.element);
-	const dPos = db.position ? normPos(db.position) : null;
-	const dElem = db.element ? normElem(db.element) : null;
-
-	if (zPos && dPos && zPos !== dPos) return -1;
-	if (zElem && dElem && zElem !== dElem) return -1;
-
-	let score = 0;
-	if (zPos && zPos === dPos) score += 10;
-	if (zElem && zElem === dElem) score += 10;
-
-	const zGender = normGender(z.gender);
-	if (zGender && db.gender) {
-		if (zGender === db.gender) {
-			score += 5;
-		} else {
-			score -= 10;
-		}
-	}
-
-	const isHero = db.rarity_label === "Héros";
-	const zSeries = zukanGameToSeries(z.game);
-	if (zSeries && db.series) {
-		const dbEra = ERAS[db.series];
-		const zEra = ERAS[zSeries];
-		if (isHero) {
-			const ERA_ORDER: Record<string, number> = { OG: 1, GO: 2, Modern: 3 };
-			const zOrder = ERA_ORDER[zEra || ""] || 0;
-			if (zOrder === 1) score += 60;
-			else if (zSeries === db.series) score += 40;
-			else if (zEra === dbEra) score += 30;
-			else score += 5;
-		} else {
-			if (dbEra && zEra && dbEra !== zEra) return -1;
-			if (zSeries === db.series) {
-				score += 50;
-			} else if (dbEra && zEra && dbEra === zEra) {
-				score += 20;
-			}
-		}
-	}
-
-	if (z.description && db.description_en) {
-		const sim = descriptionSimilarity(z.description, db.description_en);
-		if (sim >= 0.15) {
-			score += Math.round(sim * 30);
-		} else if (sim === 0) {
-			score -= 10;
-		}
-	}
-
-	if (z.stats && db.stat_frappe != null) {
-		const zArr = [
-			z.stats.kick || 0,
-			z.stats.control || 0,
-			z.stats.technique || 0,
-			z.stats.pressure || 0,
-			z.stats.physical || 0,
-			z.stats.agility || 0,
-			z.stats.intelligence || 0,
-		];
-		const dArr = [
-			db.stat_frappe || 0,
-			db.stat_controle || 0,
-			db.stat_technique || 0,
-			db.stat_pression || 0,
-			db.stat_physique || 0,
-			db.stat_agilite || 0,
-			db.stat_intelligence || 0,
-		];
-
-		const zTotal = zArr.reduce((a, b) => a + b, 0);
-		const dTotal = dArr.reduce((a, b) => a + b, 0);
-
-		if (zTotal > 0 && dTotal > 0) {
-			const corr = spearmanCorrelation(zArr, dArr);
-			score += Math.round(Math.max(0, corr) * 15);
-		}
-	}
-
-	return score;
-}
-
-const usedHashes = new Set<string>();
-
-function matchGroupsStrict(
-	zukanGroup: ZukanEntry[],
-	dbGroup: DbChar[],
-	assigned: Map<string, string>
-) {
-	const unassignedDb = dbGroup.filter((c) => !assigned.has(c.id));
-	if (unassignedDb.length === 0) return;
-
-	const available = zukanGroup.filter((z) => z.zukanHash && !usedHashes.has(z.zukanHash));
-
-	const pairs: { db: DbChar; z: ZukanEntry; score: number }[] = [];
-	for (const db of unassignedDb) {
-		for (const z of available) {
-			const s = matchScore(z, db);
-			if (s >= 20) pairs.push({ db, z, score: s });
-		}
-	}
-
-	pairs.sort((a, b) => b.score - a.score);
-	for (const { db, z } of pairs) {
-		if (assigned.has(db.id) || usedHashes.has(z.zukanHash!)) continue;
-		assigned.set(db.id, z.zukanHash!);
-		usedHashes.add(z.zukanHash!);
-	}
-}
-
-function assignBest(
-	c: DbChar,
-	candidates: ZukanEntry[],
-	assigned: Map<string, string>,
-	minScore = 20
-) {
-	if (assigned.has(c.id)) return;
-	const scored = candidates
-		.filter((z) => z.zukanHash && !usedHashes.has(z.zukanHash))
-		.map((z) => ({ z, score: matchScore(z, c) }))
-		.filter((p) => p.score >= minScore)
-		.sort((a, b) => b.score - a.score);
-	if (scored.length > 0) {
-		assigned.set(c.id, scored[0].z.zukanHash!);
-		usedHashes.add(scored[0].z.zukanHash!);
-	}
-}
-
-// ============================================================================
 // Main
 // ============================================================================
 
@@ -425,6 +139,9 @@ async function main() {
 	for (const c of dbChars) currentHashById.set(c.id, c.zukan_hash);
 
 	const assigned = new Map<string, string>(); // id -> hash
+	// Contexte de matching (set usedHashes propre à ce run) — enforce le 1:1 hash↔perso.
+	const ctx = createMatchContext();
+	const usedHashes = ctx.usedHashes;
 
 	// ── Index zukan by hash (used in C/D/validation for description checks) ──
 	const zukanByHash = new Map<string, ZukanEntry>();
@@ -475,7 +192,7 @@ async function main() {
 	// ═══ Phase A: Exact EN name match (strict pos+elem+stats) ═══
 	for (const [name, zukanGroup] of enByName) {
 		const dbGroup = dbByNameEn.get(name);
-		if (dbGroup) matchGroupsStrict(zukanGroup, dbGroup, assigned);
+		if (dbGroup) matchGroupsStrict(ctx, zukanGroup, dbGroup, assigned);
 	}
 	console.log(`Phase A: ${assigned.size} matched`);
 
@@ -487,7 +204,7 @@ async function main() {
 		const dbGroup = dbByNameFr.get(name);
 		if (!dbGroup) continue;
 		const unassigned = dbGroup.filter((c) => !assigned.has(c.id));
-		if (unassigned.length > 0) matchGroupsStrict(zukanGroup, unassigned, assigned);
+		if (unassigned.length > 0) matchGroupsStrict(ctx, zukanGroup, unassigned, assigned);
 	}
 	console.log(`Phase B: +${assigned.size - beforeB} (total: ${assigned.size})`);
 
@@ -510,7 +227,7 @@ async function main() {
 		const dbName = c.name_en.trim().toLowerCase();
 		if (dbName.includes(" ")) continue;
 		const zukanGroup = enByNickname.get(dbName);
-		if (zukanGroup && zukanGroup.length > 0) assignBest(c, zukanGroup, assigned);
+		if (zukanGroup && zukanGroup.length > 0) assignBest(ctx, c, zukanGroup, assigned);
 	}
 	console.log(`Phase B1.5: +${assigned.size - beforeB15} (total: ${assigned.size})`);
 
@@ -529,7 +246,7 @@ async function main() {
 		const dbName = c.name_en.trim().toLowerCase();
 		if (dbName.includes(" ")) continue;
 		const zukanGroup = enByFirstWord.get(dbName);
-		if (zukanGroup && zukanGroup.length > 0) assignBest(c, zukanGroup, assigned);
+		if (zukanGroup && zukanGroup.length > 0) assignBest(ctx, c, zukanGroup, assigned);
 	}
 	console.log(`Phase B2: +${assigned.size - beforeB2} (total: ${assigned.size})`);
 
@@ -555,7 +272,7 @@ async function main() {
 		if (!zukanGroup) continue;
 		const dbFirst = words[0].toLowerCase();
 		const filtered = zukanGroup.filter((z) => z.name.toLowerCase().includes(dbFirst));
-		if (filtered.length > 0) assignBest(c, filtered, assigned);
+		if (filtered.length > 0) assignBest(ctx, c, filtered, assigned);
 	}
 	console.log(`Phase B3: +${assigned.size - beforeB3} (total: ${assigned.size})`);
 
@@ -571,7 +288,7 @@ async function main() {
 		const dbGroup = dbByNameJa.get(name);
 		if (dbGroup) {
 			const unassigned = dbGroup.filter((c) => !assigned.has(c.id));
-			if (unassigned.length > 0) matchGroupsStrict(zukanGroup, unassigned, assigned);
+			if (unassigned.length > 0) matchGroupsStrict(ctx, zukanGroup, unassigned, assigned);
 		}
 	}
 	console.log(`Phase JA-A: +${assigned.size - beforeJA} (total: ${assigned.size})`);
@@ -593,7 +310,7 @@ async function main() {
 		if (dbName.includes("・") || dbName.length > 8) continue;
 		const zukanGroup = jaByNickname.get(dbName);
 		if (!zukanGroup || zukanGroup.length === 0) continue;
-		assignBest(c, zukanGroup, assigned);
+		assignBest(ctx, c, zukanGroup, assigned);
 	}
 	console.log(`Phase JA-B: +${assigned.size - beforeJAB} (total: ${assigned.size})`);
 
@@ -619,7 +336,7 @@ async function main() {
 			const zParts = z.name.trim().split(/[\s・]+/);
 			return zParts.some((p) => p === dbSecond);
 		});
-		if (filtered.length > 0) assignBest(c, filtered, assigned);
+		if (filtered.length > 0) assignBest(ctx, c, filtered, assigned);
 	}
 	console.log(`Phase JA-C: +${assigned.size - beforeJAC} (total: ${assigned.size})`);
 
@@ -992,10 +709,7 @@ async function main() {
 		lines.push("BEGIN;");
 		// Batch as individual UPDATEs grouped by (hash, order) to keep file compact-ish.
 		// Group ids that share the same (hash, order) into one IN(...) update.
-		const groups = new Map<
-			string,
-			{ hash: string | null; order: number | null; ids: string[] }
-		>();
+		const groups = new Map<string, { hash: string | null; order: number | null; ids: string[] }>();
 		for (const ch of changes) {
 			const key = `${ch.hash ?? "<NULL>"}|${ch.order ?? "<NULL>"}`;
 			if (!groups.has(key)) groups.set(key, { hash: ch.hash, order: ch.order, ids: [] });
