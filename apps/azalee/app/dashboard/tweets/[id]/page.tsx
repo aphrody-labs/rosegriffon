@@ -11,7 +11,15 @@ export default async function TweetEditorPage({ params }: { params: Promise<{ id
 
 	if (!isNew) {
 		const supabase = await createClient();
-		const { data } = await supabase.from("tweets").select("*").eq("id", id).single();
+		let { data } = await supabase.from("tweets").select("*").eq("id", id).maybeSingle();
+		if (!data) {
+			const { data: threadTweet } = await supabase
+				.from("tweets")
+				.select("*")
+				.contains("raw_tweets", [{ id }])
+				.maybeSingle();
+			data = threadTweet;
+		}
 		tweet = data;
 	}
 

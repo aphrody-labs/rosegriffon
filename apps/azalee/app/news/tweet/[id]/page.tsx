@@ -28,12 +28,24 @@ export async function generateMetadata({
 }): Promise<Metadata> {
 	const { id } = await params;
 	const supabase = await createClient();
-	const { data: tweet } = await (supabase as any)
+	let { data: tweet } = await (supabase as any)
 		.from("tweets")
-		.select("text, translation, author_username, author_name, media")
+		.select("text, translation, author_username, author_name, media, raw_tweets")
 		.eq("id", id)
 		.eq("author_username", "Azalee_IE")
 		.maybeSingle();
+
+	if (!tweet) {
+		const { data: threadTweet } = await (supabase as any)
+			.from("tweets")
+			.select("text, translation, author_username, author_name, media, raw_tweets")
+			.contains("raw_tweets", [{ id }])
+			.eq("author_username", "Azalee_IE")
+			.maybeSingle();
+		if (threadTweet) {
+			tweet = threadTweet;
+		}
+	}
 
 	const { title } = extractTitleAndBody(tweet?.translation || tweet?.text || "");
 	const description = title.slice(0, 160);
@@ -198,12 +210,24 @@ function formatSectionText(text: string, isFirstSection = false) {
 export default async function TweetPage({ params }: { params: Promise<{ id: string }> }) {
 	const { id } = await params;
 	const supabase = await createClient();
-	const { data: tweet } = await (supabase as any)
+	let { data: tweet } = await (supabase as any)
 		.from("tweets")
 		.select("*")
 		.eq("id", id)
 		.eq("author_username", "Azalee_IE")
 		.maybeSingle();
+
+	if (!tweet) {
+		const { data: threadTweet } = await (supabase as any)
+			.from("tweets")
+			.select("*")
+			.contains("raw_tweets", [{ id }])
+			.eq("author_username", "Azalee_IE")
+			.maybeSingle();
+		if (threadTweet) {
+			tweet = threadTweet;
+		}
+	}
 
 	if (!tweet) {
 		notFound();

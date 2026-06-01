@@ -33,9 +33,10 @@ async function main() {
 		// Sort by ID to ensure chronological order
 		threadTweets.sort((a, b) => a.id.localeCompare(b.id));
 
-		// Find the head tweet (usually the first one, but let's be sure)
+		// Find the head tweet (usually the first one, but let's be sure) and the last tweet
 		const headTweet = threadTweets.find((t) => t.id === tweetId) || threadTweets[0];
-		console.log(`Head Tweet ID: ${headTweet.id}`);
+		const lastTweet = threadTweets[threadTweets.length - 1];
+		console.log(`Head Tweet ID: ${headTweet.id}, Last Tweet ID: ${lastTweet.id}`);
 
 		// 2. Download and upload all media to Supabase Storage
 		const allThreadMedia: MediaItem[] = [];
@@ -132,8 +133,8 @@ async function main() {
 
 		// 3. Assemble and save DB Tweet Row
 		const isThread = threadTweets.length > 1;
-		const createdAtIso = headTweet.created_at
-			? new Date(headTweet.created_at).toISOString()
+		const createdAtIso = lastTweet.created_at
+			? new Date(lastTweet.created_at).toISOString()
 			: new Date().toISOString();
 
 		// Classification
@@ -150,24 +151,24 @@ async function main() {
 		}
 
 		const tweetRow = {
-			id: headTweet.id,
-			author_id: headTweet.author_id || "1391462345197686789",
-			author_name: headTweet.author?.name || "Azalée 🌸 | Inazuma Eleven FR",
-			author_username: headTweet.author?.username || screenName,
+			id: lastTweet.id,
+			author_id: lastTweet.author_id || headTweet.author_id || "1391462345197686789",
+			author_name: lastTweet.author?.name || headTweet.author?.name || "Azalée 🌸 | Inazuma Eleven FR",
+			author_username: lastTweet.author?.username || headTweet.author?.username || screenName,
 			created_at: createdAtIso,
 			text: headTweet.text,
 			translation: headTweet.text, // Azalee is French
 			is_thread: isThread,
 			tweet_count: threadTweets.length,
 			metrics: {
-				reply_count: headTweet.reply_count,
-				retweet_count: headTweet.retweet_count,
-				like_count: headTweet.like_count,
-				quote_count: headTweet.quote_count,
-				view_count: headTweet.view_count,
+				reply_count: lastTweet.reply_count,
+				retweet_count: lastTweet.retweet_count,
+				like_count: lastTweet.like_count,
+				quote_count: lastTweet.quote_count,
+				view_count: lastTweet.view_count,
 			},
 			media: allThreadMedia,
-			quoted_tweets: headTweet.quoted_tweet ? JSON.parse(JSON.stringify(headTweet.quoted_tweet)) : null,
+			quoted_tweets: lastTweet.quoted_tweet ? JSON.parse(JSON.stringify(lastTweet.quoted_tweet)) : null,
 			raw_tweets: processedRawTweets,
 			category: category,
 			updated_at: new Date().toISOString(),
@@ -181,7 +182,14 @@ async function main() {
 		if (upsertErr) {
 			console.error("Upsert failed:", upsertErr);
 		} else {
-			console.log(`Successfully sync'ed and imported thread ${tweetId} with ${threadTweets.length} tweets!`);
+			console.log(`Successfully sync'ed and imported thread ${tweetId} under ID ${lastTweet.id}!`);
+			
+			// Clean up duplicate intermediate/earlier tweets
+			const deleteIds = threadTweets.map(t => t.id).filter(id => id !== lastTweet.id);
+			if (deleteIds.length > 0) {
+				console.log(`Cleaning up ${deleteIds.length} older thread tweets:`, deleteIds);
+				await supabase.from("tweets").delete().in("id", deleteIds);
+			}
 		}
 
 	} catch (e) {
