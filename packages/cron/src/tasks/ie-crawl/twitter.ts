@@ -126,7 +126,19 @@ export async function crawlTwitter(): Promise<{
 				let pageIndex = 0;
 
 				while (fetchedTweets.length < MAX_TWEETS_PER_ACCOUNT) {
-					const page = await client.userTweets(user.id, 100, cursor);
+					// L'API X throw (rate-limit / erreur transitoire) après N pages.
+					// On CONSERVE les tweets déjà accumulés : break, pas de remontée
+					// au catch du compte (qui jetterait tout l'historique récupéré).
+					let page;
+					try {
+						page = await client.userTweets(user.id, 100, cursor);
+					} catch (pageErr) {
+						console.warn(
+							`[Crawl Twitter] @${screenName} : arrêt pagination après ${pageIndex} page(s) (erreur API, ${fetchedTweets.length} tweets conservés) :`,
+							pageErr instanceof Error ? pageErr.message : pageErr
+						);
+						break;
+					}
 					const pageTweets = page.tweets || [];
 
 					let addedThisPage = 0;
@@ -148,6 +160,8 @@ export async function crawlTwitter(): Promise<{
 						break;
 					}
 					cursor = page.next_cursor;
+					// Throttle léger pour limiter le rate-limit X sur l'historique.
+					await new Promise((r) => setTimeout(r, 700));
 				}
 
 				console.log(
