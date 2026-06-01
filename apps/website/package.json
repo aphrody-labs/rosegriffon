@@ -7,7 +7,7 @@
 		"test": "vitest run",
 		"test:ui": "vitest --ui",
 		"test:run": "vitest run",
-		"build": "bun --bun node_modules/next/dist/bin/next build",
+		"build": "bun node_modules/next/dist/bin/next build",
 		"start": "bun run --bun next start",
 		"lint": "oxlint .",
 		"lint:fix": "oxlint --fix .",
