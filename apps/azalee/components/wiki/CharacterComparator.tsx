@@ -9,7 +9,6 @@ import { Icon } from "@/components/ui/Icon";
 import { RarityBadge } from "@/components/ui/rarity-badge";
 import { CharacterSearchDialog } from "@/components/wiki/CharacterSearchDialog";
 import { StatHeptagon } from "@/components/wiki/StatHeptagon";
-import { RagAssistant } from "@/components/wiki/RagAssistant";
 import type { SpriteCommonKey } from "@/config/sprites-common";
 import {
 	getCharacterImageUrl,
@@ -519,7 +518,10 @@ function SkillsComparison({
 
 // ---------- Main component ----------
 
-function interpolateStats(char: CompareCharacter | null | undefined, level: number): CharacterStats {
+function interpolateStats(
+	char: CompareCharacter | null | undefined,
+	level: number
+): CharacterStats {
 	const defaultStats = {
 		kick: 0,
 		control: 0,
@@ -540,16 +542,19 @@ function interpolateStats(char: CompareCharacter | null | undefined, level: numb
 	if (level === 99) return stats;
 	if (level === 1 && statsLv1) return statsLv1;
 
-	const hasCompleteData = statsLv1 && statsLv30 && statsLv50 &&
-		Object.values(statsLv30).some(v => v > 0) &&
-		Object.values(statsLv50).some(v => v > 0);
+	const hasCompleteData =
+		statsLv1 &&
+		statsLv30 &&
+		statsLv50 &&
+		Object.values(statsLv30).some((v) => v > 0) &&
+		Object.values(statsLv50).some((v) => v > 0);
 
 	if (!hasCompleteData) {
 		const startStats = statsLv1 || stats;
 		const endStats = stats;
 		const t = (level - 1) / 98;
 		const lerp = (start: number, end: number) => Math.floor(start + (end - start) * t);
-		
+
 		return {
 			kick: lerp(startStats.kick, endStats.kick),
 			control: lerp(startStats.control, endStats.control),
@@ -647,26 +652,6 @@ export function CharacterComparator({ char1, char2 }: CharacterComparatorProps) 
 
 	const currentStats1 = useMemo(() => interpolateStats(char1, level), [char1, level]);
 	const currentStats2 = useMemo(() => interpolateStats(char2, level), [char2, level]);
-
-	const ragSuggestions = useMemo(() => {
-		const list: string[] = [];
-		if (char1) {
-			list.push(char1.name);
-			list.push(`Techniques de ${char1.name}`);
-		}
-		if (char2) {
-			list.push(char2.name);
-			list.push(`Techniques de ${char2.name}`);
-		}
-		if (char1 && char2) {
-			list.push(`${char1.name} vs ${char2.name}`);
-		}
-		if (list.length < 4) {
-			list.push("Meilleurs joueurs");
-			list.push("Stats des éléments");
-		}
-		return list.slice(0, 5);
-	}, [char1, char2]);
 
 	return (
 		<div className="w-full space-y-5 sm:space-y-8">
@@ -819,12 +804,6 @@ export function CharacterComparator({ char1, char2 }: CharacterComparatorProps) 
 					</div>
 				</div>
 			)}
-
-			{/* RAG Tactical Assistant */}
-			<RagAssistant
-				suggestions={ragSuggestions}
-				className="mt-6"
-			/>
 
 			{/* Search dialog */}
 			<CharacterSearchDialog
