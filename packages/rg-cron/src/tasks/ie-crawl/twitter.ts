@@ -182,6 +182,12 @@ export async function crawlTwitter(): Promise<{
 
 				const finalTweetsToUpsert: DBTweetRow[] = [];
 				const deleteOldTweetIds: string[] = [];
+				// Une fois rate-limité sur TweetDetail, on arrête d'appeler thread()
+				// pour ce compte (sinon backoffs 429 en cascade qui bloquent le crawl)
+				// et on se rabat sur le grouping timeline, déjà complet sur la fenêtre.
+				let threadFetchDisabled = false;
+				// Idem pour les getTweet() de vérification d'origine de conversation.
+				let originCheckDisabled = false;
 
 				for (const [convId, group] of conversations.entries()) {
 					group.sort((a, b) => a.id.localeCompare(b.id));
@@ -197,20 +203,23 @@ export async function crawlTwitter(): Promise<{
 
 						if (dbHead) {
 							isUserThread = dbHead.author_username?.toLowerCase() === screenName.toLowerCase();
-						} else {
+						} else if (!originCheckDisabled) {
 							try {
-								console.log(
-									`[Crawl Twitter] Vérification de l'origine de la conversation ${convId}...`
-								);
-								const headTweet = await client.getTweet(convId);
+								const headTweet = await Promise.race([
+									client.getTweet(convId),
+									new Promise<never>((_, rej) =>
+										setTimeout(() => rej(new Error("getTweet() timeout")), 10000)
+									),
+								]);
 								if (headTweet) {
 									isUserThread =
 										headTweet.author.username.toLowerCase() === screenName.toLowerCase();
 								}
 							} catch (apiErr) {
+								// Coupe les vérifications d'origine après le 1er échec (429/timeout).
+								originCheckDisabled = true;
 								console.warn(
-									`[Crawl Twitter] Impossible de récupérer le tweet d'origine ${convId} :`,
-									apiErr
+									`[Crawl Twitter] Origine conversation ${convId} indisponible (${apiErr instanceof Error ? apiErr.message : String(apiErr)}) — vérifs d'origine désactivées pour @${screenName}.`
 								);
 							}
 						}
@@ -231,39 +240,49 @@ export async function crawlTwitter(): Promise<{
 						// Récupère TOUS les tweets du thread (au-delà des 100 de timeline)
 						// via TweetDetail paginé, puis fusionne avec la timeline.
 						let threadGroup = filteredGroup;
-						try {
-							const threadTweets: Tweet[] = [];
-							let threadCursor: string | undefined;
-							const THREAD_MAX_PAGES = 5;
-							for (let p = 0; p < THREAD_MAX_PAGES; p++) {
-								const threadPage = await client.thread(convId, threadCursor);
-								threadTweets.push(...(threadPage.tweets || []));
-								if (!threadPage.next_cursor) break;
-								threadCursor = threadPage.next_cursor;
-							}
+						if (!threadFetchDisabled) {
+							try {
+								const threadTweets: Tweet[] = [];
+								let threadCursor: string | undefined;
+								const THREAD_MAX_PAGES = 3;
+								for (let p = 0; p < THREAD_MAX_PAGES; p++) {
+									// Timeout dur : un appel thread() ne doit jamais bloquer le crawl.
+									const threadPage = await Promise.race([
+										client.thread(convId, threadCursor),
+										new Promise<never>((_, rej) =>
+											setTimeout(() => rej(new Error("thread() timeout")), 12000)
+										),
+									]);
+									threadTweets.push(...(threadPage.tweets || []));
+									if (!threadPage.next_cursor) break;
+									threadCursor = threadPage.next_cursor;
+								}
 
-							// Fusion timeline + thread, garde uniquement les tweets de l'auteur.
-							const merged = new Map<string, Tweet>();
-							for (const item of filteredGroup) {
-								merged.set(item.id, item);
-							}
-							for (const item of threadTweets) {
-								if (item.author.username.toLowerCase() === screenName.toLowerCase()) {
-									if (!merged.has(item.id)) {
-										merged.set(item.id, item);
+								// Fusion timeline + thread, garde uniquement les tweets de l'auteur.
+								const merged = new Map<string, Tweet>();
+								for (const item of filteredGroup) {
+									merged.set(item.id, item);
+								}
+								for (const item of threadTweets) {
+									if (item.author.username.toLowerCase() === screenName.toLowerCase()) {
+										if (!merged.has(item.id)) {
+											merged.set(item.id, item);
+										}
 									}
 								}
+								threadGroup = Array.from(merged.values()).sort((a, b) => a.id.localeCompare(b.id));
+								console.log(
+									`[Crawl Twitter] Thread ${convId} : ${threadGroup.length} tweets après fusion timeline+thread.`
+								);
+							} catch (threadErr) {
+								// 1er échec (429/timeout) → coupe le fetch thread pour le reste
+								// du compte et repli sur le grouping timeline.
+								threadFetchDisabled = true;
+								console.warn(
+									`[Crawl Twitter] Thread complet ${convId} indisponible (${threadErr instanceof Error ? threadErr.message : String(threadErr)}) — fetch thread désactivé pour @${screenName}, repli timeline.`
+								);
+								threadGroup = filteredGroup;
 							}
-							threadGroup = Array.from(merged.values()).sort((a, b) => a.id.localeCompare(b.id));
-							console.log(
-								`[Crawl Twitter] Thread ${convId} : ${threadGroup.length} tweets après fusion timeline+thread.`
-							);
-						} catch (threadErr) {
-							console.warn(
-								`[Crawl Twitter] Récupération du thread complet ${convId} échouée, repli sur la timeline :`,
-								threadErr
-							);
-							threadGroup = filteredGroup;
 						}
 
 						const lastTweet = threadGroup[threadGroup.length - 1];
