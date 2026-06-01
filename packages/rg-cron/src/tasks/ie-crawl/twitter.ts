@@ -387,13 +387,56 @@ export async function crawlTwitter(): Promise<{
 
 				if (finalTweetsToUpsert.length > 0) {
 					// Deduplicate by ID to prevent ON CONFLICT DO UPDATE constraints error
-					const uniqueTweets = Array.from(
+					let uniqueTweets = Array.from(
 						new Map(finalTweetsToUpsert.map((item) => [item.id, item])).values()
 					);
+
+					// Anti-régression : la timeline collapse les longs self-threads à ~5
+					// tweets, et thread() peut être coupé sur 429 (threadFetchDisabled) →
+					// on n'écrit alors qu'un sous-ensemble. NE JAMAIS écraser un thread
+					// déjà complet en base par une version plus pauvre : on compare le
+					// tweet_count existant et on saute l'upsert s'il régresse.
+					const existingCounts = new Map<string, number>();
+					try {
+						const { data: existingRows } = await supabase
+							.from("tweets")
+							.select("id, tweet_count")
+							.in(
+								"id",
+								uniqueTweets.map((t) => t.id)
+							);
+						for (const r of existingRows ?? []) {
+							existingCounts.set(r.id as string, (r.tweet_count as number) ?? 0);
+						}
+					} catch (e) {
+						console.warn(
+							`[Crawl Twitter] Lecture tweet_count existants impossible (garde anti-régression désactivée) :`,
+							e instanceof Error ? e.message : e
+						);
+					}
+					uniqueTweets = uniqueTweets.filter((t) => {
+						const prev = existingCounts.get(t.id) ?? 0;
+						if (t.is_thread && (t.tweet_count ?? 0) < prev) {
+							console.warn(
+								`[Crawl Twitter] Thread ${t.id} : version tronquée (${t.tweet_count} tweets) < existante (${prev}) — upsert IGNORÉ (anti-régression).`
+							);
+							return false;
+						}
+						return true;
+					});
+					if (uniqueTweets.length === 0) {
+						console.log(
+							`[Crawl Twitter] Rien à upserter pour @${screenName} après garde anti-régression.`
+						);
+					}
+
 					console.log(
 						`[Crawl Twitter] Envoi de ${uniqueTweets.length} tweets uniques pour @${screenName} (total brut: ${finalTweetsToUpsert.length})...`
 					);
-					const { error } = await supabase.from("tweets").upsert(uniqueTweets);
+					const { error } =
+						uniqueTweets.length > 0
+							? await supabase.from("tweets").upsert(uniqueTweets)
+							: { error: null };
 					if (error) {
 						console.error(`[Crawl Twitter] Erreur d'upsert pour @${screenName} :`, error);
 						hasErrors = true;
