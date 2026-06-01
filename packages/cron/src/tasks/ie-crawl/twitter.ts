@@ -131,7 +131,14 @@ export async function crawlTwitter(): Promise<{
 					// au catch du compte (qui jetterait tout l'historique récupéré).
 					let page;
 					try {
-						page = await client.userTweets(user.id, 100, cursor);
+						// Timeout dur : un backoff interne de userTweets ne doit pas
+						// bloquer le crawl indéfiniment (sinon hang sans throw).
+						page = await Promise.race([
+							client.userTweets(user.id, 100, cursor),
+							new Promise<never>((_, rej) =>
+								setTimeout(() => rej(new Error("userTweets() timeout")), 20000)
+							),
+						]);
 					} catch (pageErr) {
 						console.warn(
 							`[Crawl Twitter] @${screenName} : arrêt pagination après ${pageIndex} page(s) (erreur API, ${fetchedTweets.length} tweets conservés) :`,
