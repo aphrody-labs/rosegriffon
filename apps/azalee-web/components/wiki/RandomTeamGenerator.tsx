@@ -3,7 +3,7 @@
 import type { BaseCharacter } from "@rose-griffon/inagle";
 import Image from "next/image";
 import Link from "next/link";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { CommonSpriteIcon } from "@/components/ui/CommonSpriteIcon";
 import { Icon } from "@/components/ui/Icon";
 import { RarityBadge } from "@/components/ui/rarity-badge";
@@ -11,7 +11,6 @@ import { SafeImage } from "@/components/ui/SafeImage";
 import type { SpriteCommonKey } from "@/config/sprites-common";
 import { getCharacterImageUrl } from "@/lib/images";
 import { cn } from "@/lib/utils";
-import { RagAssistant } from "@/components/wiki/RagAssistant";
 
 // ---------- Constants ----------
 
@@ -79,6 +78,28 @@ const ELEMENTS = [
 	{ label: "Montagne", value: "Mountain" },
 ];
 
+// Genre — gender 0 = garçon, 1 = fille (cf. mapDbCharacterToBase)
+const GENDERS = [
+	{ icon: "male", label: "Garçon", value: 0 },
+	{ icon: "female", label: "Fille", value: 1 },
+] as const;
+
+// Rareté — labels in-game FR tels que stockés dans bestRarity
+const RARITIES = ["Normal", "Expérimenté", "Héros", "BASARA"];
+
+// Ordre canonique d'affichage des séries (les autres sont ajoutées après par fréquence)
+const SERIES_ORDER = [
+	"Victory Road",
+	"Galaxy",
+	"Orion",
+	"Ares",
+	"Chrono Stone",
+	"Inazuma Eleven GO",
+	"Inazuma Eleven 3",
+	"Inazuma Eleven 2",
+	"Inazuma Eleven",
+];
+
 interface Formation {
 	name: string;
 	layout: string;
@@ -139,6 +160,30 @@ function getCharName(char: BaseCharacter): string {
 	return char.names?.fr || char.names?.en || char.names?.ja || "?";
 }
 
+// ---------- Per-character field accessors (mêmes chemins que mapDbCharacterToBase) ----------
+
+function getCharElement(c: BaseCharacter): string | undefined {
+	const variant = c.variants?.[0] as any;
+	return canonicalElement(variant?.element || (c as any).element);
+}
+
+function getCharPlaystyle(c: BaseCharacter): string | undefined {
+	return (c as any).sheetData?.playstyle || (c as any).playstyle;
+}
+
+function getCharGender(c: BaseCharacter): number | undefined {
+	const g = (c as any).gender;
+	return g === 0 || g === 1 ? g : undefined;
+}
+
+function getCharRarity(c: BaseCharacter): string {
+	return (c as any).bestRarity || (c.variants?.[0] as any)?.rarity || "Normal";
+}
+
+function getCharSeries(c: BaseCharacter): string | undefined {
+	return (c as any).series || undefined;
+}
+
 // ---------- Types ----------
 
 interface Coordinator {
@@ -173,6 +218,45 @@ interface GeneratedTeam {
 	fw: BaseCharacter[];
 	coach: Coordinator | null;
 	managers: Coordinator[];
+}
+
+// ---------- Generic Filter Chip (MD3) ----------
+
+function FilterChip({
+	active,
+	onClick,
+	label,
+	icon,
+	sprite,
+	spriteScale = 0.25,
+}: {
+	active: boolean;
+	onClick: () => void;
+	label: string;
+	icon?: string;
+	sprite?: SpriteCommonKey;
+	spriteScale?: number;
+}) {
+	return (
+		<button
+			type="button"
+			onClick={onClick}
+			aria-pressed={active}
+			aria-label={label}
+			className={cn(
+				"inline-flex items-center gap-1.5 h-9 sm:h-8 px-3 rounded-full text-xs font-bold transition-all",
+				"min-h-[44px] sm:min-h-0",
+				active
+					? "bg-secondary-container text-on-secondary-container elevation-1 shadow-sm"
+					: "border border-outline text-on-surface-variant hover:bg-on-surface/[0.08]"
+			)}
+		>
+			{active && <Icon name="check" size={14} />}
+			{!active && icon && <Icon name={icon} size={14} />}
+			{sprite && <CommonSpriteIcon name={sprite} scale={spriteScale} />}
+			<span>{label}</span>
+		</button>
+	);
 }
 
 // ---------- Sub-components ----------
@@ -263,19 +347,19 @@ function PlayerCard({
 					onToggleLock();
 				}}
 				className={cn(
-					"absolute top-0.5 right-0.5 sm:top-1.5 sm:right-1.5 z-10 p-0.5 sm:p-1 rounded-full transition-all",
+					"absolute top-0.5 right-0.5 sm:top-1.5 sm:right-1.5 z-10 p-1.5 sm:p-1 rounded-full transition-all",
 					locked
 						? "bg-primary text-on-primary elevation-1"
-						: "bg-black/40 text-white/60 opacity-0 group-hover:opacity-100 hover:bg-black/60"
+						: "bg-black/40 text-white/70 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 hover:bg-black/60"
 				)}
 				aria-label={locked ? `Débloquer ${name}` : `Bloquer ${name}`}
 				aria-pressed={locked}
 				title={locked ? "Débloquer" : "Bloquer ce joueur"}
 			>
 				{locked ? (
-					<Icon name="lock" size={10} className="sm:w-3 sm:h-3" />
+					<Icon name="lock" size={12} className="sm:w-3 sm:h-3" />
 				) : (
-					<Icon name="lock_open" size={10} className="sm:w-3 sm:h-3" />
+					<Icon name="lock_open" size={12} className="sm:w-3 sm:h-3" />
 				)}
 			</button>
 		</div>
@@ -315,9 +399,8 @@ function StaffSlot({
 
 	const players = [...team.gk, ...team.df, ...team.mf, ...team.fw];
 	const compatibility = players.filter((p) => {
-		const variant = p.variants?.[0] as any;
-		const el = canonicalElement(variant?.element || (p as any).element);
-		const ps = (p as any).sheetData?.playstyle || (p as any).playstyle;
+		const el = getCharElement(p);
+		const ps = getCharPlaystyle(p);
 		return (coordElement && el === coordElement) || ps === person.playstyle;
 	}).length;
 
@@ -405,7 +488,7 @@ function FormationPicker({
 					<select
 						value={selectedIdx}
 						onChange={(e) => onSelect(Number(e.target.value))}
-						className="w-full appearance-none rounded-xl bg-surface-container border border-outline-variant/30 px-3 py-2.5 pr-8 text-sm font-bold text-on-surface focus:outline-hidden focus:ring-2 focus:ring-primary/50"
+						className="w-full appearance-none rounded-xl bg-surface-container border border-outline-variant/30 px-3 min-h-[44px] py-2.5 pr-8 text-sm font-bold text-on-surface focus:outline-hidden focus:ring-2 focus:ring-primary/50"
 					>
 						{formations.map((f, i) => (
 							<option key={i} value={i}>
@@ -563,13 +646,12 @@ const getTeamSynergies = (team: GeneratedTeam) => {
 	};
 
 	for (const p of players) {
-		const variant = p.variants?.[0] as any;
-		const el = canonicalElement(variant?.element || (p as any).element) || "Void";
+		const el = getCharElement(p) || "Void";
 		if (elementCounts[el] !== undefined) {
 			elementCounts[el]++;
 		}
 
-		const ps = (p as any).sheetData?.playstyle || (p as any).playstyle;
+		const ps = getCharPlaystyle(p);
 		if (ps && playstyleCounts[ps] !== undefined) {
 			playstyleCounts[ps]++;
 		}
@@ -592,6 +674,9 @@ const getTeamSynergies = (team: GeneratedTeam) => {
 export function RandomTeamGenerator({ pools, coordinators }: RandomTeamGeneratorProps) {
 	const [selectedPlaystyles, setSelectedPlaystyles] = useState<string[]>([]);
 	const [selectedElement, setSelectedElement] = useState<string | undefined>();
+	const [selectedGender, setSelectedGender] = useState<number | undefined>();
+	const [selectedRarity, setSelectedRarity] = useState<string | undefined>();
+	const [selectedSeries, setSelectedSeries] = useState<string | undefined>();
 	const [formationIdx, setFormationIdx] = useState(0);
 	const [animating, setAnimating] = useState(false);
 	const [copied, setCopied] = useState(false);
@@ -599,14 +684,31 @@ export function RandomTeamGenerator({ pools, coordinators }: RandomTeamGenerator
 
 	const formation = FORMATIONS[formationIdx];
 
-	// Filtered pools based on playstyle + element
+	// Séries disponibles dérivées des pools (ordre canonique d'abord, reste par fréquence)
+	const availableSeries = useMemo(() => {
+		const counts = new Map<string, number>();
+		for (const arr of [pools.gk, pools.df, pools.mf, pools.fw]) {
+			for (const c of arr) {
+				const s = getCharSeries(c);
+				if (s) counts.set(s, (counts.get(s) || 0) + 1);
+			}
+		}
+		const known = SERIES_ORDER.filter((s) => counts.has(s));
+		const rest = [...counts.keys()]
+			.filter((s) => !SERIES_ORDER.includes(s))
+			.sort((a, b) => (counts.get(b) || 0) - (counts.get(a) || 0));
+		return [...known, ...rest];
+	}, [pools]);
+
+	// Filtered pools — applique chaque filtre seulement s'il reste >= minCount joueurs,
+	// sinon le filtre est ignoré pour ne jamais casser la génération.
 	const filteredPools = useCallback(() => {
 		const filterPool = (arr: BaseCharacter[], minCount: number) => {
 			let filtered = arr;
 
 			if (selectedPlaystyles.length > 0) {
-				const psFiltered = arr.filter((c) => {
-					const ps = (c as any).sheetData?.playstyle || (c as any).playstyle;
+				const psFiltered = filtered.filter((c) => {
+					const ps = getCharPlaystyle(c);
 					return ps && selectedPlaystyles.includes(ps);
 				});
 				if (psFiltered.length >= minCount) {
@@ -616,13 +718,30 @@ export function RandomTeamGenerator({ pools, coordinators }: RandomTeamGenerator
 
 			if (selectedElement) {
 				const target = canonicalElement(selectedElement);
-				const elFiltered = filtered.filter((c) => {
-					const variant = c.variants?.[0] as any;
-					const el = variant?.element || (c as any).element;
-					return canonicalElement(el) === target;
-				});
+				const elFiltered = filtered.filter((c) => getCharElement(c) === target);
 				if (elFiltered.length >= minCount) {
 					filtered = elFiltered;
+				}
+			}
+
+			if (selectedGender !== undefined) {
+				const gFiltered = filtered.filter((c) => getCharGender(c) === selectedGender);
+				if (gFiltered.length >= minCount) {
+					filtered = gFiltered;
+				}
+			}
+
+			if (selectedRarity) {
+				const rFiltered = filtered.filter((c) => getCharRarity(c) === selectedRarity);
+				if (rFiltered.length >= minCount) {
+					filtered = rFiltered;
+				}
+			}
+
+			if (selectedSeries) {
+				const sFiltered = filtered.filter((c) => getCharSeries(c) === selectedSeries);
+				if (sFiltered.length >= minCount) {
+					filtered = sFiltered;
 				}
 			}
 
@@ -635,42 +754,83 @@ export function RandomTeamGenerator({ pools, coordinators }: RandomTeamGenerator
 			gk: filterPool(pools.gk, 1),
 			mf: filterPool(pools.mf, formation.mf),
 		};
-	}, [pools, selectedPlaystyles, selectedElement, formation]);
+	}, [
+		pools,
+		selectedPlaystyles,
+		selectedElement,
+		selectedGender,
+		selectedRarity,
+		selectedSeries,
+		formation,
+	]);
 
-	const generate = useCallback((): GeneratedTeam => {
-		const p = filteredPools();
-		return {
-			coach: pickRandom(coordinators.coaches, 1)[0] || null,
-			df: pickRandom(p.df, formation.df),
-			fw: pickRandom(p.fw, formation.fw),
-			gk: pickRandom(p.gk, 1),
-			managers: pickRandom(coordinators.managers, 3),
-			mf: pickRandom(p.mf, formation.mf),
-		};
-	}, [filteredPools, formation, coordinators]);
+	const generate = useCallback(
+		(deterministic = false): GeneratedTeam => {
+			const p = filteredPools();
+			// SSR + 1er rendu client : sélection déterministe (slice) pour éviter le
+			// mismatch d'hydratation (#418) dû à Math.random. On rebrasse au montage.
+			const pick = <T,>(arr: T[], n: number): T[] =>
+				deterministic ? arr.slice(0, n) : pickRandom(arr, n);
+			return {
+				coach: pick(coordinators.coaches, 1)[0] || null,
+				df: pick(p.df, formation.df),
+				fw: pick(p.fw, formation.fw),
+				gk: pick(p.gk, 1),
+				managers: pick(coordinators.managers, 3),
+				mf: pick(p.mf, formation.mf),
+			};
+		},
+		[filteredPools, formation, coordinators]
+	);
 
-	const [team, setTeam] = useState<GeneratedTeam>(() => generate());
+	const [team, setTeam] = useState<GeneratedTeam>(() => generate(true));
 
-	// Auto-regenerate when formation or filters change
+	// Rebrasse aléatoirement après le montage (l'init déterministe ci-dessus garde
+	// SSR et 1er rendu client identiques → pas d'erreur d'hydratation React #418).
+	const didShuffleRef = useRef(false);
+	useEffect(() => {
+		if (didShuffleRef.current) return;
+		didShuffleRef.current = true;
+		setTeam(generate());
+	}, [generate]);
+
+	// Auto-regenerate when formation or any filter changes
 	const prevFormationRef = useRef(formationIdx);
 	const prevElementRef = useRef(selectedElement);
 	const prevPlaystyleRef = useRef(selectedPlaystyles);
+	const prevGenderRef = useRef(selectedGender);
+	const prevRarityRef = useRef(selectedRarity);
+	const prevSeriesRef = useRef(selectedSeries);
 	useEffect(() => {
 		if (
 			prevFormationRef.current !== formationIdx ||
 			prevElementRef.current !== selectedElement ||
-			prevPlaystyleRef.current !== selectedPlaystyles
+			prevPlaystyleRef.current !== selectedPlaystyles ||
+			prevGenderRef.current !== selectedGender ||
+			prevRarityRef.current !== selectedRarity ||
+			prevSeriesRef.current !== selectedSeries
 		) {
 			prevFormationRef.current = formationIdx;
 			prevElementRef.current = selectedElement;
 			prevPlaystyleRef.current = selectedPlaystyles;
+			prevGenderRef.current = selectedGender;
+			prevRarityRef.current = selectedRarity;
+			prevSeriesRef.current = selectedSeries;
 			setAnimating(true);
 			setTimeout(() => {
 				setTeam(generate());
 				setAnimating(false);
 			}, 200);
 		}
-	}, [formationIdx, selectedElement, selectedPlaystyles, generate]);
+	}, [
+		formationIdx,
+		selectedElement,
+		selectedPlaystyles,
+		selectedGender,
+		selectedRarity,
+		selectedSeries,
+		generate,
+	]);
 
 	// Locked players
 	const [locked, setLocked] = useState<Set<string>>(new Set());
@@ -747,8 +907,22 @@ export function RandomTeamGenerator({ pools, coordinators }: RandomTeamGenerator
 		});
 	};
 
+	const clearAllFilters = () => {
+		setSelectedPlaystyles([]);
+		setSelectedElement(undefined);
+		setSelectedGender(undefined);
+		setSelectedRarity(undefined);
+		setSelectedSeries(undefined);
+	};
+
 	const hasLocked = locked.size > 0;
-	const hasActiveFilters = selectedPlaystyles.length > 0 || Boolean(selectedElement);
+	const activeFilterCount =
+		selectedPlaystyles.length +
+		(selectedElement ? 1 : 0) +
+		(selectedGender !== undefined ? 1 : 0) +
+		(selectedRarity ? 1 : 0) +
+		(selectedSeries ? 1 : 0);
+	const hasActiveFilters = activeFilterCount > 0;
 
 	// Staggered animation delay counter
 	let slotIndex = 0;
@@ -794,8 +968,123 @@ export function RandomTeamGenerator({ pools, coordinators }: RandomTeamGenerator
 		}
 	}
 
+	// ---------- Filter section (réutilisée dans le panneau) ----------
+	const filterSection = (
+		<div className="space-y-3.5">
+			{/* Element filter */}
+			<div>
+				<p className="type-label-medium text-on-surface-variant mb-1.5 font-bold">Élément</p>
+				<div className="flex flex-wrap gap-1.5">
+					{ELEMENTS.map(({ value, label }) => (
+						<FilterChip
+							key={value}
+							active={selectedElement === value}
+							onClick={() => setSelectedElement((prev) => (prev === value ? undefined : value))}
+							label={label}
+							sprite={ELEMENT_SPRITE[value]}
+						/>
+					))}
+				</div>
+			</div>
+
+			{/* Playstyle filter */}
+			<div>
+				<p className="type-label-medium text-on-surface-variant mb-1.5 font-bold">
+					Style de jeu (max 2)
+				</p>
+				<div className="flex flex-wrap gap-1.5">
+					{PLAYSTYLES.map((ps) => (
+						<FilterChip
+							key={ps.key}
+							active={selectedPlaystyles.includes(ps.key)}
+							onClick={() => togglePlaystyle(ps.key)}
+							label={ps.label}
+							sprite={PLAYSTYLE_SPRITE[ps.key]}
+						/>
+					))}
+				</div>
+			</div>
+
+			{/* Gender filter */}
+			<div>
+				<p className="type-label-medium text-on-surface-variant mb-1.5 font-bold">Genre</p>
+				<div className="flex flex-wrap gap-1.5">
+					{GENDERS.map(({ value, label, icon }) => (
+						<FilterChip
+							key={value}
+							active={selectedGender === value}
+							onClick={() => setSelectedGender((prev) => (prev === value ? undefined : value))}
+							label={label}
+							icon={icon}
+						/>
+					))}
+				</div>
+			</div>
+
+			{/* Rarity filter — RarityBadge chips */}
+			<div>
+				<p className="type-label-medium text-on-surface-variant mb-1.5 font-bold">Rareté</p>
+				<div className="flex flex-wrap gap-1.5">
+					{RARITIES.map((rarity) => {
+						const active = selectedRarity === rarity;
+						return (
+							<button
+								type="button"
+								key={rarity}
+								onClick={() => setSelectedRarity((prev) => (prev === rarity ? undefined : rarity))}
+								aria-pressed={active}
+								aria-label={`Rareté ${rarity}`}
+								className={cn(
+									"inline-flex items-center gap-1.5 h-9 sm:h-8 px-2.5 rounded-full transition-all",
+									"min-h-[44px] sm:min-h-0",
+									active
+										? "bg-secondary-container elevation-1 shadow-sm"
+										: "border border-outline hover:bg-on-surface/[0.08]"
+								)}
+							>
+								{active && <Icon name="check" size={14} className="text-on-secondary-container" />}
+								<RarityBadge rarity={rarity} size="xs" />
+							</button>
+						);
+					})}
+				</div>
+			</div>
+
+			{/* Series filter */}
+			{availableSeries.length > 0 && (
+				<div>
+					<p className="type-label-medium text-on-surface-variant mb-1.5 font-bold">Série</p>
+					<div className="flex flex-wrap gap-1.5">
+						{availableSeries.map((series) => (
+							<FilterChip
+								key={series}
+								active={selectedSeries === series}
+								onClick={() => setSelectedSeries((prev) => (prev === series ? undefined : series))}
+								label={series}
+							/>
+						))}
+					</div>
+				</div>
+			)}
+
+			{/* Clear all */}
+			{hasActiveFilters && (
+				<div className="pt-0.5">
+					<button
+						type="button"
+						onClick={clearAllFilters}
+						className="inline-flex items-center gap-1.5 h-9 sm:h-8 px-3 rounded-full type-label-large text-primary hover:bg-primary/[0.08] transition-all min-h-[44px] sm:min-h-0"
+					>
+						<Icon name="filter_alt_off" size={16} />
+						Tout effacer
+					</button>
+				</div>
+			)}
+		</div>
+	);
+
 	return (
-		<div className="w-full space-y-4 sm:space-y-6">
+		<div className="w-full max-w-full overflow-x-hidden space-y-4 sm:space-y-6">
 			{/* CSS slot-machine roll animation */}
 			<style>{`
 				@keyframes slot-machine {
@@ -823,7 +1112,7 @@ export function RandomTeamGenerator({ pools, coordinators }: RandomTeamGenerator
 					{hasLocked && (
 						<button
 							onClick={() => setLocked(new Set())}
-							className="p-2.5 rounded-full bg-surface-container-high state-layer relative overflow-hidden text-on-surface-variant transition-all hover:bg-surface-container-highest"
+							className="inline-flex items-center justify-center size-11 rounded-full bg-surface-container-high state-layer relative overflow-hidden text-on-surface-variant transition-all hover:bg-surface-container-highest"
 							aria-label="Débloquer tous les joueurs"
 							title="Tout débloquer"
 						>
@@ -832,7 +1121,7 @@ export function RandomTeamGenerator({ pools, coordinators }: RandomTeamGenerator
 					)}
 					<button
 						onClick={handleCopyLink}
-						className="p-2.5 rounded-full bg-surface-container-high state-layer relative overflow-hidden text-on-surface-variant transition-all hover:bg-surface-container-highest"
+						className="inline-flex items-center justify-center size-11 rounded-full bg-surface-container-high state-layer relative overflow-hidden text-on-surface-variant transition-all hover:bg-surface-container-highest"
 						aria-label="Copier le lien"
 						title="Copier le lien"
 					>
@@ -847,7 +1136,7 @@ export function RandomTeamGenerator({ pools, coordinators }: RandomTeamGenerator
 						onClick={regenerate}
 						disabled={animating}
 						aria-label="Régénérer l'équipe"
-						className="inline-flex items-center gap-2 h-14 px-5 rounded-2xl bg-primary-container text-on-primary-container font-bold text-sm shadow-md active:scale-[0.98] transition-all disabled:opacity-50 hover:bg-primary-container-highest"
+						className="inline-flex items-center gap-2 h-14 px-4 sm:px-5 rounded-2xl bg-primary-container text-on-primary-container font-bold text-sm shadow-md active:scale-[0.98] transition-all disabled:opacity-50 hover:bg-primary-container-highest"
 					>
 						<Icon name="casino" size={20} className={cn(animating && "animate-spin")} />
 						<span className="hidden sm:inline">Régénérer</span>
@@ -865,107 +1154,50 @@ export function RandomTeamGenerator({ pools, coordinators }: RandomTeamGenerator
 				}}
 			/>
 
-			{/* Filters toggle (mobile: collapsible) */}
-			<div>
+			{/* Filters panel — collapsible on mobile, persistant on desktop */}
+			<div className="rounded-3xl bg-surface-container border border-outline/5">
+				{/* Mobile header (toggle) */}
 				<button
+					type="button"
 					onClick={() => setFiltersOpen(!filtersOpen)}
-					className="sm:hidden flex items-center gap-1.5 type-label-medium text-on-surface-variant"
+					aria-expanded={filtersOpen}
+					className="sm:hidden flex w-full items-center justify-between gap-2 p-4 min-h-[44px]"
 				>
-					Filtres
-					{hasActiveFilters ? ` (${selectedPlaystyles.length + (selectedElement ? 1 : 0)})` : ""}
-					<Icon name={filtersOpen ? "expand_less" : "expand_more"} size={16} />
+					<span className="flex items-center gap-2 type-label-large font-bold text-on-surface">
+						<Icon name="tune" size={18} />
+						Filtres
+						{hasActiveFilters && (
+							<span className="inline-flex items-center justify-center min-w-5 h-5 px-1.5 rounded-full bg-primary text-on-primary text-[11px] font-black">
+								{activeFilterCount}
+							</span>
+						)}
+					</span>
+					<Icon name={filtersOpen ? "expand_less" : "expand_more"} size={20} />
 				</button>
 
-				<div
-					className={cn(
-						"space-y-3 sm:space-y-3",
-						"sm:block",
-						filtersOpen ? "block mt-2" : "hidden"
-					)}
-				>
-					{/* Element filter — Filter Chips MD3 */}
-					<div>
-						<p className="type-label-medium text-on-surface-variant mb-1.5 font-bold">Élément</p>
-						<div className="flex flex-wrap gap-1.5">
-							{ELEMENTS.map(({ value, label }) => {
-								const isActive = selectedElement === value;
-								return (
-									<button
-										key={value}
-										onClick={() =>
-											setSelectedElement((prev) => (prev === value ? undefined : value))
-										}
-										aria-label={`Filtrer par élément ${label}`}
-										aria-pressed={isActive}
-										className={cn(
-											"inline-flex items-center gap-1.5 h-8 px-3 rounded-full text-xs font-bold transition-all",
-											isActive
-												? "bg-secondary-container text-on-secondary-container elevation-1 shadow-sm"
-												: "border border-outline text-on-surface-variant hover:bg-on-surface/[0.08]"
-										)}
-									>
-										{isActive && <Icon name="check" size={14} />}
-										<CommonSpriteIcon name={ELEMENT_SPRITE[value]} scale={0.25} />
-										{label}
-									</button>
-								);
-							})}
-							{selectedElement && (
-								<button
-									onClick={() => setSelectedElement(undefined)}
-									className="type-label-large text-primary px-3 py-2 rounded-full hover:bg-primary/[0.08] transition-all"
-								>
-									Effacer
-								</button>
-							)}
-						</div>
-					</div>
+				{/* Desktop header (static label) */}
+				<div className="hidden sm:flex items-center justify-between gap-2 px-4 pt-4">
+					<span className="flex items-center gap-2 type-label-large font-bold text-on-surface">
+						<Icon name="tune" size={18} />
+						Filtres
+						{hasActiveFilters && (
+							<span className="inline-flex items-center justify-center min-w-5 h-5 px-1.5 rounded-full bg-primary text-on-primary text-[11px] font-black">
+								{activeFilterCount}
+							</span>
+						)}
+					</span>
+				</div>
 
-					{/* Playstyle filter — Filter Chips MD3 */}
-					<div>
-						<p className="type-label-medium text-on-surface-variant mb-1.5 font-bold">
-							Style de jeu (max 2)
-						</p>
-						<div className="flex flex-wrap gap-1.5">
-							{PLAYSTYLES.map((ps) => {
-								const active = selectedPlaystyles.includes(ps.key);
-								const sprite = PLAYSTYLE_SPRITE[ps.key];
-								return (
-									<button
-										key={ps.key}
-										onClick={() => togglePlaystyle(ps.key)}
-										aria-label={`Filtrer par style ${ps.label}`}
-										aria-pressed={active}
-										className={cn(
-											"inline-flex items-center gap-1.5 h-8 px-3 rounded-full text-xs font-bold transition-all",
-											active
-												? "bg-secondary-container text-on-secondary-container elevation-1 shadow-sm"
-												: "border border-outline text-on-surface-variant hover:bg-on-surface/[0.08]"
-										)}
-									>
-										{active && <Icon name="check" size={14} />}
-										{sprite && <CommonSpriteIcon name={sprite} scale={0.25} />}
-										{ps.label}
-									</button>
-								);
-							})}
-							{selectedPlaystyles.length > 0 && (
-								<button
-									onClick={() => setSelectedPlaystyles([])}
-									className="type-label-large text-primary px-3 py-2 rounded-full hover:bg-primary/[0.08] transition-all"
-								>
-									Effacer
-								</button>
-							)}
-						</div>
-					</div>
+				{/* Filter body */}
+				<div className={cn("px-4 pb-4", "sm:block", filtersOpen ? "block" : "hidden")}>
+					{filterSection}
 				</div>
 			</div>
 
 			{/* Main Grid: Pitch + Info Column */}
-			<div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+			<div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
 				{/* Beautiful Soccer Field Preview */}
-				<div className="lg:col-span-2 relative w-full bg-linear-to-b from-emerald-950 via-emerald-900 to-emerald-950 rounded-3xl border border-emerald-800/80 overflow-hidden shadow-2xl p-4 sm:p-6 flex flex-col justify-between gap-4 sm:gap-6 min-h-[450px] sm:min-h-[580px]">
+				<div className="lg:col-span-2 relative w-full bg-linear-to-b from-emerald-950 via-emerald-900 to-emerald-950 rounded-3xl border border-emerald-800/80 overflow-hidden shadow-2xl p-3 sm:p-6 flex flex-col justify-between gap-4 sm:gap-6 min-h-[450px] sm:min-h-[580px]">
 					{/* Pitch markings background */}
 					<div className="absolute inset-0 pointer-events-none opacity-15 m-2 sm:m-4 border border-white rounded-lg">
 						{/* Center line */}
@@ -1025,7 +1257,7 @@ export function RandomTeamGenerator({ pools, coordinators }: RandomTeamGenerator
 				</div>
 
 				{/* Info Column: Stats + Synergies */}
-				<div className="space-y-6">
+				<div className="space-y-4 sm:space-y-6">
 					{/* Team Average Stats */}
 					<div className="p-4 rounded-3xl bg-surface-container border border-outline/5 space-y-4">
 						<h2 className="text-sm font-bold text-on-surface uppercase tracking-wider">
@@ -1100,17 +1332,6 @@ export function RandomTeamGenerator({ pools, coordinators }: RandomTeamGenerator
 					))}
 				</div>
 			</div>
-
-			{/* RAG Tactical Assistant */}
-			<RagAssistant
-				suggestions={[
-					"Conseils tactiques",
-					selectedElement ? `Élément ${selectedElement}` : "Élément Feu",
-					selectedPlaystyles.length > 0 ? `Style ${selectedPlaystyles[0]}` : "Style Percée",
-					team.coach ? team.coach.name_localised : "Coach",
-				].filter(Boolean)}
-				className="mt-6"
-			/>
 		</div>
 	);
 }
