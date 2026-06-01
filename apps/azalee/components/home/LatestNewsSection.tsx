@@ -31,7 +31,7 @@ interface Tweet {
 	created_at: string;
 	author_username: string;
 	author_name: string;
-	media: Array<{ url: string }>;
+	media: Array<{ url: string; preview_url?: string; video_url?: string; type?: string }>;
 }
 
 interface LatestNewsSectionProps {
@@ -162,7 +162,7 @@ function TweetCard({ tweet, variant }: { tweet: Tweet; variant: "chip" | "full" 
 	const paragraphs = (tweet.translation || tweet.text || "").split(/\n\n+/).filter(Boolean);
 	const title = paragraphs[0]?.trim() || "";
 	const excerpt = paragraphs.slice(1, 3).join(" ").trim();
-	const heroImage = tweet.media?.[0]?.url;
+	const heroImage = tweet.media?.[0]?.preview_url || tweet.media?.[0]?.url;
 
 	const authorInfo = getAuthorInfo(tweet.author_username, tweet.author_name);
 

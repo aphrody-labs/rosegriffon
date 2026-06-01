@@ -164,7 +164,7 @@ export default async function NewsFeedPage({
 						date: t.created_at,
 						excerpt: t.translation || t.text,
 						id: t.id,
-						image: t.media && t.media.length > 0 ? t.media[0].url : null,
+						image: t.media && t.media.length > 0 ? t.media[0].preview_url || t.media[0].url : null,
 						media: t.media || [],
 						quotedTweets: t.quoted_tweets || [],
 						slug: t.id,
