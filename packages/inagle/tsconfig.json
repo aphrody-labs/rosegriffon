@@ -12,5 +12,13 @@
 		"types": ["bun"]
 	},
 	"include": ["src/**/*.ts"],
-	"exclude": ["node_modules", "dist"]
+	"exclude": [
+		"node_modules",
+		"dist",
+		// Scripts scratch/one-shot zukan (inspect-*/scrape-*/read-*/parse-and-refresh-videos)
+		// rangés sous src/zukan/scripts. Ils importent db/src en dur (fuite rootDir) et
+		// s'appuient sur des types DB obsolètes — exclus du type-check, exécutables au besoin
+		// via `bun src/zukan/scripts/<x>.ts`.
+		"src/zukan/scripts"
+	]
 }

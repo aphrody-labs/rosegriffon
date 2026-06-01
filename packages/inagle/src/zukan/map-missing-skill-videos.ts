@@ -95,7 +95,7 @@ async function main() {
 
 	for (const s of missing) {
 		// 1) Dreamscape reuse
-		const baseCode = DREAMSCAPE_BASE[s.internal_code];
+		const baseCode = s.internal_code ? DREAMSCAPE_BASE[s.internal_code] : undefined;
 		if (baseCode) {
 			const base = byCode.get(baseCode);
 			if (base?.video_url) {
@@ -137,7 +137,7 @@ async function main() {
 	}
 
 	for (const u of updates) {
-		const patch: Record<string, string> = { video_url: u.video_url };
+		const patch: { video_url: string; poster_url?: string } = { video_url: u.video_url };
 		if (u.poster_url) {
 			patch.poster_url = u.poster_url;
 		}
