@@ -875,7 +875,12 @@ export const wikiService = {
 			}
 		}
 		if (params.status !== "all") {
-			query = query.or("sheet_data.not.is.null,is_controllable.eq.true");
+			// "Incomplets masqués" : on garde tout perso jouable (sheet_data),
+			// contrôlable, OU présent dans le zukan officiel (zukan_order non null).
+			// Sans la clause zukan_order, les persos emblématiques sans sheet_data
+			// (Mark Evans #0, etc.) disparaissaient → la liste ne commençait plus
+			// au #0 du zukan. On ne masque désormais que les entrées hors-zukan.
+			query = query.or("sheet_data.not.is.null,is_controllable.eq.true,zukan_order.not.is.null");
 		}
 		if (params.status === "jouable") {
 			query = query.eq("is_controllable", true);
