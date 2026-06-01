@@ -9,6 +9,7 @@ import { join } from "node:path";
 import * as cheerio from "cheerio";
 import { vectorStore, getEmbedding, crawlerTracker, cache } from "@rose-griffon/db/redis";
 import { createSupabaseServiceClient } from "@rose-griffon/db/service";
+import { indexZukanCharacters } from "./rag-zukan";
 
 interface DBTweetRow {
 	id: string;
@@ -123,7 +124,7 @@ function cleanHtml(html: string): string {
 /**
  * Calcule un hash simple pour détecter les modifications de texte.
  */
-function computeStringHash(str: string): string {
+export function computeStringHash(str: string): string {
 	let hash = 0;
 	for (let i = 0; i < str.length; i++) {
 		hash = (hash << 5) - hash + str.charCodeAt(i);
@@ -458,8 +459,8 @@ export function chunkText(text: string, chunkSize = 800, chunkOverlap = 150): st
 				if (overlapStart > 0) {
 					const nextSpace = currentChunk.indexOf(" ", overlapStart);
 					const prevSpace = currentChunk.lastIndexOf(" ", overlapStart);
-					
-					if (nextSpace !== -1 && (overlapStart - prevSpace > nextSpace - overlapStart)) {
+
+					if (nextSpace !== -1 && overlapStart - prevSpace > nextSpace - overlapStart) {
 						overlapStart = nextSpace + 1;
 					} else if (prevSpace !== -1) {
 						overlapStart = prevSpace + 1;
@@ -495,6 +496,11 @@ export async function runRagSync(): Promise<{
 	let errors = 0;
 
 	try {
+		// 0. Cœur du RAG : les personnages du Zukan officiel (mirror corrigé).
+		const zukan = await indexZukanCharacters();
+		processed += zukan.processed;
+		errors += zukan.errors;
+
 		const items = collectScrapedItems();
 		console.log(`[RAG Sync] ${items.length} documents scrapés trouvés localement.`);
 
@@ -504,19 +510,18 @@ export async function runRagSync(): Promise<{
 				let cleanText = "";
 				if (item.type === "doc") {
 					const { content } = parseFrontmatter(fileContent);
-					const rawMarkdownText = Bun.markdown
-						.render(content, {
-							heading: (children: string) => "\n\n" + children + "\n\n",
-							paragraph: (children: string) => "\n\n" + children + "\n\n",
-							strong: (children: string) => children,
-							emphasis: (children: string) => children,
-							link: (children: string) => children,
-							image: () => "",
-							code: (children: string) => "\n\n" + children + "\n\n",
-							codespan: (children: string) => children,
-							list: (children: string) => "\n\n" + children + "\n\n",
-							listItem: (children: string) => "- " + children + "\n",
-						});
+					const rawMarkdownText = Bun.markdown.render(content, {
+						heading: (children: string) => "\n\n" + children + "\n\n",
+						paragraph: (children: string) => "\n\n" + children + "\n\n",
+						strong: (children: string) => children,
+						emphasis: (children: string) => children,
+						link: (children: string) => children,
+						image: () => "",
+						code: (children: string) => "\n\n" + children + "\n\n",
+						codespan: (children: string) => children,
+						list: (children: string) => "\n\n" + children + "\n\n",
+						listItem: (children: string) => "- " + children + "\n",
+					});
 					cleanText = normalizeText(rawMarkdownText);
 				} else {
 					cleanText = cleanHtml(fileContent);

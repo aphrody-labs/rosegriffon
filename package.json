@@ -51,6 +51,7 @@
 			"@tanstack/query-sync-storage-persister": "^5.100.14",
 			"@tanstack/react-query-persist-client": "^5.100.14",
 			"@aphrody-code/bxc": "^0.5.7",
+			"@aphrody-code/zukan": "^0.1.1",
 			"@aphrody-code/canvas": "0.1.99-fork.4",
 			"@dnd-kit/sortable": "^10.0.0",
 			"@asteasolutions/zod-to-openapi": "^8.5.0",

@@ -72,6 +72,7 @@
 	},
 	"dependencies": {
 		"@aphrody-code/bxc": "catalog:",
+		"@aphrody-code/zukan": "catalog:",
 		"@leeoniya/ufuzzy": "catalog:",
 		"@streamparser/json": "catalog:",
 		"@supabase/supabase-js": "catalog:",

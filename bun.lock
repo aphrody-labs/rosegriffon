@@ -310,6 +310,7 @@
       "dependencies": {
         "@aphrody-code/bxc": "catalog:",
         "@aphrody-code/x": "catalog:",
+        "@aphrody-code/zukan": "catalog:",
         "@asteasolutions/zod-to-openapi": "catalog:",
         "@rose-griffon/auth": "workspace:*",
         "@rose-griffon/db": "workspace:*",
@@ -345,6 +346,7 @@
       },
       "dependencies": {
         "@aphrody-code/bxc": "catalog:",
+        "@aphrody-code/zukan": "catalog:",
         "@leeoniya/ufuzzy": "catalog:",
         "@streamparser/json": "catalog:",
         "@supabase/supabase-js": "catalog:",
@@ -460,6 +462,7 @@
     "@aphrody-code/bxc": "^0.5.7",
     "@aphrody-code/canvas": "0.1.99-fork.4",
     "@aphrody-code/x": "^1.0.3",
+    "@aphrody-code/zukan": "^0.1.1",
     "@asteasolutions/zod-to-openapi": "^8.5.0",
     "@better-auth/agent-auth": "^0.5.1",
     "@cloudflare/workers-types": "^4.20260531.1",
