@@ -38,9 +38,9 @@ export function AuthForm() {
 							callbackURL: redirectTo,
 							provider: "discord",
 						})
-					: await authClient.signIn.oauth2({
+					: await authClient.signIn.social({
 							callbackURL: redirectTo,
-							providerId: "patreon",
+							provider: "patreon",
 						});
 			const err = (res as { error?: { message?: string } | null })?.error;
 			if (err) {

@@ -59,9 +59,9 @@ export function ConnectionsSection({ accounts }: { accounts: LinkedAccount[] }) 
 	const linkPatreon = async () => {
 		setBusy("patreon");
 		try {
-			const res = await authClient.signIn.oauth2({
+			const res = await authClient.signIn.social({
 				callbackURL: "/dashboard/account?tab=connections",
-				providerId: "patreon",
+				provider: "patreon",
 			});
 			const err = (res as { error?: { message?: string } | null })?.error;
 			if (err) {

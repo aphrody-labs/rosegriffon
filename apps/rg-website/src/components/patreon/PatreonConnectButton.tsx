@@ -56,9 +56,9 @@ export function PatreonConnectButton({
 		setLoading(true);
 		try {
 			const callbackURL = redirect ?? (variant === "creator-link" ? "/admin/patreon" : "/profil");
-			const res = await authClient.signIn.oauth2({
+			const res = await authClient.signIn.social({
 				callbackURL,
-				providerId: "patreon",
+				provider: "patreon",
 				...(variant === "creator-link" ? { scopes: CREATOR_EXTRA_SCOPES } : {}),
 			});
 			const err = (res as { error?: { message?: string } | null })?.error;

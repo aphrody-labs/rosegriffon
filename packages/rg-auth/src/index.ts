@@ -172,6 +172,9 @@ export const commonAuthOptions = {
 			emailVerified: "email_verified",
 			createdAt: "created_at",
 			updatedAt: "updated_at",
+			twoFactorEnabled: "two_factor_enabled",
+			twoFactorSecret: "two_factor_secret",
+			twoFactorBackupCodes: "two_factor_backup_codes",
 		},
 	},
 	session: {

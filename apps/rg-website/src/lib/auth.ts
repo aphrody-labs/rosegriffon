@@ -2,7 +2,7 @@ import crypto from "node:crypto";
 import { createClient as createSupabaseAdmin } from "@supabase/supabase-js";
 import { betterAuth } from "better-auth";
 import { nextCookies } from "better-auth/next-js";
-import { bearer, genericOAuth, oAuthProxy } from "better-auth/plugins";
+import { bearer, genericOAuth, oAuthProxy, twoFactor } from "better-auth/plugins";
 import { Pool } from "pg";
 
 import { commonAuthOptions, ensureUserProfile } from "@rose-griffon/auth";
@@ -206,6 +206,9 @@ export const auth = betterAuth({
 	},
 
 	plugins: [
+		twoFactor({
+			issuer: "Rose Griffon",
+		}),
 		bearer(),
 		// oAuthProxy UNIQUEMENT sur les déploiements preview Vercel : sur le domaine
 		// de prod il s'interpose dans le callback OAuth (round-trip + encrypt/decrypt)

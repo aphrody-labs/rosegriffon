@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { isAdmin, isStaff, resolveProfile } from "./index";
+import { isAdmin, isStaff, resolveProfile, commonAuthOptions } from "./index";
 
 describe("resolveProfile", () => {
 	const mockSupabase = {
@@ -98,5 +98,13 @@ describe("Role Helpers", () => {
 		it("should return false for user role", () => {
 			expect(isStaff("user")).toBe(false);
 		});
+	});
+});
+
+describe("commonAuthOptions", () => {
+	it("should have correct two-factor field mappings", () => {
+		expect(commonAuthOptions.user.fields.twoFactorEnabled).toBe("two_factor_enabled");
+		expect(commonAuthOptions.user.fields.twoFactorSecret).toBe("two_factor_secret");
+		expect(commonAuthOptions.user.fields.twoFactorBackupCodes).toBe("two_factor_backup_codes");
 	});
 });

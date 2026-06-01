@@ -1,44 +1,22 @@
 {
-	"$schema": "./node_modules/oxlint/configuration_schema.json",
-	"plugins": ["eslint", "typescript", "import", "oxc", "promise", "unicorn", "node"],
+	"$schema": "../../node_modules/oxlint/configuration_schema.json",
+	"extends": ["../../.oxlintrc.json"],
 	"categories": {
 		"correctness": "error",
-		"suspicious": "warn",
-		"perf": "warn",
 		"pedantic": "off",
 		"style": "off",
-		"restriction": "off",
-		"nursery": "off"
+		"restriction": "off"
 	},
-	"env": {
-		"node": true,
-		"es2024": true
-	},
-	"ignorePatterns": ["dist/", "node_modules/", "*.cjs", "*.mjs"],
 	"rules": {
+		"no-console": "off",
 		"typescript/no-floating-promises": ["error", { "ignoreVoid": true }],
 		"typescript/no-misused-promises": "error",
 		"typescript/await-thenable": "error",
-		"typescript/no-explicit-any": "warn",
-		"typescript/consistent-type-imports": ["warn", { "prefer": "type-imports" }],
 		"typescript/no-unused-vars": "off",
-		"no-unused-vars": ["warn", { "argsIgnorePattern": "^_", "varsIgnorePattern": "^_" }],
-		"no-console": "off",
-		"no-debugger": "error",
-		"no-eval": "error",
-		"no-var": "error",
-		"prefer-const": "warn",
-		"eqeqeq": ["warn", "smart"],
-		"import/no-duplicates": "error",
-		"import/no-self-import": "error",
 		"import/no-cycle": "off",
 		"promise/no-return-wrap": "error",
 		"promise/no-nesting": "warn",
-		"promise/catch-or-return": "off",
-		"promise/always-return": "off",
-		"unicorn/prefer-node-protocol": "warn",
 		"unicorn/prefer-module": "off",
-		"unicorn/no-null": "off",
 		"unicorn/no-array-for-each": "off"
 	},
 	"overrides": [

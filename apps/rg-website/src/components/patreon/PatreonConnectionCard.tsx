@@ -62,9 +62,9 @@ export function PatreonConnectionCard({ isLinked, hasDiscord }: Props) {
 	const startLink = async () => {
 		setBusy(true);
 		try {
-			const res = await authClient.signIn.oauth2({
+			const res = await authClient.signIn.social({
 				callbackURL: window.location.pathname,
-				providerId: "patreon",
+				provider: "patreon",
 			});
 			const err = (res as { error?: { message?: string } | null })?.error;
 			if (err) {

@@ -3,7 +3,7 @@ import { createSupabaseServiceClient } from "@rose-griffon/db/service";
 import bcrypt from "bcryptjs";
 import { betterAuth } from "better-auth";
 import { nextCookies } from "better-auth/next-js";
-import { bearer, oAuthProxy } from "better-auth/plugins";
+import { bearer, oAuthProxy, twoFactor } from "better-auth/plugins";
 import { agentAuth } from "@better-auth/agent-auth";
 import { Pool } from "pg";
 import { logAudit } from "@/lib/audit";
@@ -328,6 +328,9 @@ function createAuth() {
 							throw new Error(`Unsupported capability: ${capability}`);
 					}
 				},
+			}),
+			twoFactor({
+				issuer: "Azalée",
 			}),
 			bearer(),
 			// oAuthProxy UNIQUEMENT sur les déploiements preview Vercel : il proxifie

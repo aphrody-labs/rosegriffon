@@ -416,7 +416,7 @@ function collectScrapedItems(): ScrapedItem[] {
 /**
  * Découpe un texte long en blocs (chunks) sémantiques récursifs.
  */
-function chunkText(text: string, chunkSize = 800, chunkOverlap = 150): string[] {
+export function chunkText(text: string, chunkSize = 800, chunkOverlap = 150): string[] {
 	const separators = ["\n\n", "\n", ". ", " ", ""];
 
 	function splitText(txt: string, separator: string): string[] {
@@ -454,7 +454,17 @@ function chunkText(text: string, chunkSize = 800, chunkOverlap = 150): string[] 
 				if (currentChunk) {
 					chunks.push(currentChunk.trim());
 				}
-				const overlapStart = Math.max(0, currentChunk.length - chunkOverlap);
+				let overlapStart = Math.max(0, currentChunk.length - chunkOverlap);
+				if (overlapStart > 0) {
+					const nextSpace = currentChunk.indexOf(" ", overlapStart);
+					const prevSpace = currentChunk.lastIndexOf(" ", overlapStart);
+					
+					if (nextSpace !== -1 && (overlapStart - prevSpace > nextSpace - overlapStart)) {
+						overlapStart = nextSpace + 1;
+					} else if (prevSpace !== -1) {
+						overlapStart = prevSpace + 1;
+					}
+				}
 				currentChunk = currentChunk.slice(overlapStart) + (currentChunk ? separator : "") + split;
 			} else {
 				currentChunk += (currentChunk ? separator : "") + split;
