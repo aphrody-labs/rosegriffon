@@ -224,10 +224,17 @@ export class SqliteQueryBuilder {
 		return this;
 	}
 
-	order(col: string, options?: { ascending?: boolean }) {
+	order(col: string, options?: { ascending?: boolean; nullsFirst?: boolean }) {
 		const column = this.cleanCol(col);
 		const dir = options?.ascending === false ? "DESC" : "ASC";
-		this.orders.push(`${column} ${dir}`);
+		// SQLite trie les NULL EN PREMIER par défaut (ASC) — l'inverse de PostgREST
+		// quand `nullsFirst:false`. On émet NULLS FIRST/LAST explicitement (SQLite
+		// >= 3.30) pour matcher la sémantique supabase-js, sinon les lignes à
+		// valeur NULL (ex. zukan_order) remontent en tête et cassent l'ordre.
+		let nulls = "";
+		if (options?.nullsFirst === true) nulls = " NULLS FIRST";
+		else if (options?.nullsFirst === false) nulls = " NULLS LAST";
+		this.orders.push(`${column} ${dir}${nulls}`);
 		return this;
 	}
 
