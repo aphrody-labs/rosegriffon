@@ -91,6 +91,8 @@ export async function crawlTwitter(): Promise<{
 				}
 
 				const finalTweetsToUpsert: DBTweetRow[] = [];
+				const deleteOldTweetIds: string[] = [];
+
 
 				for (const [convId, group] of conversations.entries()) {
 					group.sort((a, b) => a.id.localeCompare(b.id));
@@ -136,30 +138,18 @@ export async function crawlTwitter(): Promise<{
 
 					const isThread = isUserThread && filteredGroup.length > 1;
 
-					for (const t of filteredGroup) {
-						const createdAtIso = t.created_at
-							? new Date(t.created_at).toISOString()
-							: new Date().toISOString();
+					if (isThread) {
+						const lastTweet = filteredGroup[filteredGroup.length - 1];
+						const firstTweet = filteredGroup[0];
 
-						const tMedia = (t.media || []).map((m: { id: string; type: string; url?: string }) => ({
-							id: m.id,
-							type: m.type,
-							url: m.url,
-							original_url: m.url,
-						}));
+						const createdAtIso = lastTweet.created_at
+							? new Date(lastTweet.created_at).toISOString()
+							: new Date().toISOString();
 
 						const allThreadMedia: MediaItem[] = [];
 						const seenMediaUrls = new Set<string>();
 
-						for (const m of tMedia) {
-							if (m.url) {
-								allThreadMedia.push(m);
-								seenMediaUrls.add(m.url);
-							}
-						}
-
 						for (const item of filteredGroup) {
-							if (item.id === t.id) continue;
 							const itemMedia = (item.media || []).map(
 								(m: { id: string; type: string; url?: string }) => ({
 									id: m.id,
@@ -177,23 +167,23 @@ export async function crawlTwitter(): Promise<{
 						}
 
 						const tweetRow: DBTweetRow = {
-							id: t.id,
-							author_id: t.author_id || user.id,
-							author_name: t.author.name || user.name,
-							author_username: t.author.username || screenName,
+							id: lastTweet.id,
+							author_id: lastTweet.author_id || user.id,
+							author_name: lastTweet.author.name || user.name,
+							author_username: lastTweet.author.username || screenName,
 							created_at: createdAtIso,
-							text: t.text,
-							is_thread: isThread,
-							tweet_count: isThread ? filteredGroup.length : 1,
+							text: firstTweet.text, // Introductory text of first tweet
+							is_thread: true,
+							tweet_count: filteredGroup.length,
 							metrics: {
-								reply_count: t.reply_count,
-								retweet_count: t.retweet_count,
-								like_count: t.like_count,
-								quote_count: t.quote_count,
-								view_count: t.view_count,
+								reply_count: lastTweet.reply_count,
+								retweet_count: lastTweet.retweet_count,
+								like_count: lastTweet.like_count,
+								quote_count: lastTweet.quote_count,
+								view_count: lastTweet.view_count,
 							},
 							media: allThreadMedia,
-							quoted_tweets: t.quoted_tweet ? JSON.parse(JSON.stringify(t.quoted_tweet)) : null,
+							quoted_tweets: lastTweet.quoted_tweet ? JSON.parse(JSON.stringify(lastTweet.quoted_tweet)) : null,
 							raw_tweets: filteredGroup.map((item) => ({
 								id: item.id,
 								text: item.text,
@@ -204,6 +194,49 @@ export async function crawlTwitter(): Promise<{
 									url: m.url,
 								})),
 							})),
+							updated_at: new Date().toISOString(),
+						};
+
+						finalTweetsToUpsert.push(tweetRow);
+
+						// Clean up duplicate intermediate tweets of the thread
+						for (const item of filteredGroup) {
+							if (item.id !== lastTweet.id) {
+								deleteOldTweetIds.push(item.id);
+							}
+						}
+					} else {
+						const t = filteredGroup[0];
+						const createdAtIso = t.created_at
+							? new Date(t.created_at).toISOString()
+							: new Date().toISOString();
+
+						const tMedia = (t.media || []).map((m: { id: string; type: string; url?: string }) => ({
+							id: m.id,
+							type: m.type,
+							url: m.url,
+							original_url: m.url,
+						}));
+
+						const tweetRow: DBTweetRow = {
+							id: t.id,
+							author_id: t.author_id || user.id,
+							author_name: t.author.name || user.name,
+							author_username: t.author.username || screenName,
+							created_at: createdAtIso,
+							text: t.text,
+							is_thread: false,
+							tweet_count: 1,
+							metrics: {
+								reply_count: t.reply_count,
+								retweet_count: t.retweet_count,
+								like_count: t.like_count,
+								quote_count: t.quote_count,
+								view_count: t.view_count,
+							},
+							media: tMedia,
+							quoted_tweets: t.quoted_tweet ? JSON.parse(JSON.stringify(t.quoted_tweet)) : null,
+							raw_tweets: null,
 							updated_at: new Date().toISOString(),
 						};
 
@@ -225,6 +258,13 @@ export async function crawlTwitter(): Promise<{
 						hasErrors = true;
 					} else {
 						totalCount += uniqueTweets.length;
+						if (deleteOldTweetIds.length > 0) {
+							console.log(`[Crawl Twitter] Nettoyage de ${deleteOldTweetIds.length} doublons de threads de la base de données...`);
+							const { error: deleteErr } = await supabase.from("tweets").delete().in("id", deleteOldTweetIds);
+							if (deleteErr) {
+								console.warn(`[Crawl Twitter] Échec de suppression des anciens tweets de thread :`, deleteErr);
+							}
+						}
 					}
 				} else {
 					console.log(`[Crawl Twitter] Aucun nouveau tweet à synchroniser pour @${screenName}.`);
