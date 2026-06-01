@@ -52,6 +52,9 @@ interface DataAdapter {
 	upsert(table: string, records: any[], onConflict?: string): Promise<{ error: any }>;
 	insert(table: string, records: any[]): Promise<{ error: any }>;
 	deleteAllExcept(table: string, column: string, value: any): Promise<{ error: any }>;
+	// Lit toutes les lignes (colonnes choisies) — sert à préserver les colonnes
+	// curatées hors-pipeline (sheet_data, zukan_order) à travers un delete+reinsert.
+	fetchAll(table: string, columns: string): Promise<any[]>;
 	close(): Promise<void>;
 }
 
@@ -67,6 +70,19 @@ class SupabaseAdapter implements DataAdapter {
 	}
 	async deleteAllExcept(table: string, column: string, value: any) {
 		return this.client.from(table).delete().neq(column, value);
+	}
+	async fetchAll(table: string, columns: string) {
+		const out: any[] = [];
+		for (let from = 0; ; from += 1000) {
+			const { data, error } = await this.client
+				.from(table)
+				.select(columns)
+				.range(from, from + 999);
+			if (error || !data || data.length === 0) break;
+			out.push(...data);
+			if (data.length < 1000) break;
+		}
+		return out;
 	}
 	async close() {}
 }
@@ -144,6 +160,19 @@ class PostgresAdapter implements DataAdapter {
 		}
 	}
 
+	async fetchAll(table: string, columns: string) {
+		try {
+			const cols = columns
+				.split(",")
+				.map((c) => `"${c.trim()}"`)
+				.join(", ");
+			const res = await this.pool.query(`SELECT ${cols} FROM "${table}"`);
+			return res.rows;
+		} catch {
+			return [];
+		}
+	}
+
 	async close() {
 		await this.pool.end();
 	}
@@ -178,10 +207,17 @@ export function registerPushCommand(program: Command) {
 					options.jwtSecret || process.env.JWT_SECRET || process.env.SUPABASE_JWT_SECRET;
 
 				const isValidKey = (val: string | undefined | null) =>
-					typeof val === "string" && val.length > 0 && !val.startsWith("eyJ2Ijo") && val !== "undefined" && val !== "null";
+					typeof val === "string" &&
+					val.length > 0 &&
+					!val.startsWith("eyJ2Ijo") &&
+					val !== "undefined" &&
+					val !== "null";
 
 				const isValidUrl = (val: string | undefined | null) =>
-					typeof val === "string" && val.length > 0 && val.startsWith("http") && !val.startsWith("eyJ2Ijo");
+					typeof val === "string" &&
+					val.length > 0 &&
+					val.startsWith("http") &&
+					!val.startsWith("eyJ2Ijo");
 
 				if (!isValidUrl(SUPABASE_URL)) {
 					SUPABASE_URL = "https://isbkaeltubqittywibeh.supabase.co";
@@ -199,7 +235,8 @@ export function registerPushCommand(program: Command) {
 						SUPABASE_KEY = jwt.sign(payload, JWT_SECRET!);
 					} else {
 						console.log("[Push] Using local dev Supabase fallback service role key");
-						SUPABASE_KEY = "***REDACTED-SERVICE-ROLE***";
+						SUPABASE_KEY =
+							"***REDACTED-SERVICE-ROLE***";
 					}
 				}
 
@@ -262,6 +299,17 @@ async function importCharacters(service: any, db: DataAdapter) {
 	console.log("🔄 Importing Characters...");
 
 	// Clean existing characters in database first to remove leftover duplicates/mismatch entries
+	// Préserve les colonnes CURATÉES hors-pipeline (alimentées par d'autres
+	// process : sheet_data = données communautaires, zukan_order = ordre officiel
+	// zukan.inazuma.jp). Le delete+reinsert les écraserait sinon. On les snapshot
+	// puis on les réinjecte par id dans les records.
+	console.log("  Préservation de sheet_data / zukan_order avant nettoyage...");
+	const preserved = new Map<string, { sheet_data: any; zukan_order: any }>();
+	for (const r of await db.fetchAll("inagle_characters", "id, sheet_data, zukan_order")) {
+		preserved.set(r.id, { sheet_data: r.sheet_data ?? null, zukan_order: r.zukan_order ?? null });
+	}
+	console.log(`  ${preserved.size} lignes curatées snapshotées.`);
+
 	console.log("  Cleaning existing characters in database...");
 	await db.deleteAllExcept("inagle_characters", "id", "DUMMY_NONE");
 
@@ -367,7 +415,10 @@ async function importCharacters(service: any, db: DataAdapter) {
 				stat_technique: stats.technique || 0,
 				stat_intelligence: stats.intelligence || 0,
 				zukan_hash: c.zukanHash || null,
-				zukan_order: c.zukanOrder || null,
+				// zukan_order : conserve l'ordre officiel curaté s'il existe, sinon parser.
+				zukan_order: preserved.get(c.charaParamId)?.zukan_order ?? c.zukanOrder ?? null,
+				// sheet_data : 100% curaté hors-pipeline → restaure le snapshot (jamais le parser).
+				sheet_data: preserved.get(c.charaParamId)?.sheet_data ?? null,
 				internal_code: c.internalCode || null,
 				constellation: c.constellation?.names?.fr || null,
 				constellation_index: c.constellation?.index ?? null,
@@ -499,7 +550,7 @@ async function importSkills(service: any, db: DataAdapter) {
 
 async function importItems(service: any, db: DataAdapter) {
 	console.log("🔄 Importing Items...");
-	
+
 	// Clean existing items first to remove leftover fake/null entries from previous syncs
 	console.log("  Cleaning existing items in database...");
 	await db.deleteAllExcept("inagle_items", "id", "0x00000000");
@@ -508,7 +559,7 @@ async function importItems(service: any, db: DataAdapter) {
 	items = items.filter((item: any) => {
 		const id = item.itemId || item.id;
 		if (!id || id === "0x00000000" || id === "0x00000002" || id === "null") return false;
-		
+
 		const name = item.name || "";
 		if (
 			name.includes("_0x") ||
@@ -1006,4 +1057,3 @@ async function exportStoryTextDatabase() {
 	writeFileSync(storyTextPath, JSON.stringify(db, null, 2), "utf-8");
 	console.log(`✅ Story Text Database written to ${storyTextPath}`);
 }
-
