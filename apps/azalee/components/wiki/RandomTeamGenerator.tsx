@@ -22,6 +22,30 @@ const ELEMENT_SPRITE: Record<string, SpriteCommonKey> = {
 	Wind: "wind",
 };
 
+// Les données joueurs en DB stockent l'élément en FRANÇAIS (Feu/Vent/Forêt/Montagne/Néant),
+// alors que les filtres UI utilisent la valeur anglaise (Fire/Wind/Forest/Mountain).
+// On normalise les deux côtés vers une clé canonique anglaise pour que le filtre matche.
+const ELEMENT_CANONICAL: Record<string, string> = {
+	Fire: "Fire",
+	Feu: "Fire",
+	Wind: "Wind",
+	Vent: "Wind",
+	Forest: "Forest",
+	Forêt: "Forest",
+	Foret: "Forest",
+	Mountain: "Mountain",
+	Montagne: "Mountain",
+	Void: "Void",
+	Néant: "Void",
+	Neant: "Void",
+	Aucun: "Void",
+};
+
+function canonicalElement(el: string | undefined | null): string | undefined {
+	if (!el) return undefined;
+	return ELEMENT_CANONICAL[el] || el;
+}
+
 const POS_LABEL: Record<string, string> = { DF: "DEF", FW: "ATT", GK: "GAR", MF: "MIL" };
 const POS_COLOR: Record<string, string> = {
 	DF: "bg-blue-600",
@@ -169,7 +193,7 @@ function PlayerCard({
 	const charAny = player as any;
 	const variant = player.variants?.[0] as any;
 	const position = variant?.position || charAny.position || "MF";
-	const element = variant?.element || charAny.element || "Void";
+	const element = canonicalElement(variant?.element || charAny.element) || "Void";
 	const rarity = charAny.bestRarity || variant?.rarity || "Normal";
 	const imageUrl = resolveImageUrl(player);
 	const name = getCharName(player);
@@ -267,26 +291,34 @@ function resolveCoordinatorImage(person: Coordinator): string | null {
 }
 
 const COORD_ELEMENT_MAP: Record<string, string> = {
-	"火": "Fire",
-	"風": "Wind",
-	"林": "Forest",
-	"山": "Mountain",
-	"無": "Void",
+	火: "Fire",
+	風: "Wind",
+	林: "Forest",
+	山: "Mountain",
+	無: "Void",
 };
 
-function StaffSlot({ person, role, team }: { person: Coordinator; role: string; team: GeneratedTeam }) {
+function StaffSlot({
+	person,
+	role,
+	team,
+}: {
+	person: Coordinator;
+	role: string;
+	team: GeneratedTeam;
+}) {
 	const imageUrl = resolveCoordinatorImage(person);
 	const [imgError, setImgError] = useState(false);
 
-	const coordElement = COORD_ELEMENT_MAP[person.element || ""] || person.element;
+	const coordElement = canonicalElement(COORD_ELEMENT_MAP[person.element || ""] || person.element);
 	const elSprite = coordElement ? ELEMENT_SPRITE[coordElement] : null;
 
 	const players = [...team.gk, ...team.df, ...team.mf, ...team.fw];
 	const compatibility = players.filter((p) => {
 		const variant = p.variants?.[0] as any;
-		const el = variant?.element || (p as any).element;
+		const el = canonicalElement(variant?.element || (p as any).element);
 		const ps = (p as any).sheetData?.playstyle || (p as any).playstyle;
-		return el === coordElement || ps === person.playstyle;
+		return (coordElement && el === coordElement) || ps === person.playstyle;
 	}).length;
 
 	return (
@@ -462,7 +494,7 @@ const getPlayerStats = (player: BaseCharacter) => {
 	const dbStats = variant?.stats?.lv99;
 	const sd = (player as any).sheetData || (variant as any)?.sheetData;
 	const sdStats = sd?.stats;
-	
+
 	return {
 		kick: dbStats?.kick || sdStats?.kick || 0,
 		control: dbStats?.control || sdStats?.control || 0,
@@ -475,13 +507,8 @@ const getPlayerStats = (player: BaseCharacter) => {
 };
 
 const getTeamAverageStats = (team: GeneratedTeam) => {
-	const players = [
-		...team.gk,
-		...team.df,
-		...team.mf,
-		...team.fw
-	];
-	
+	const players = [...team.gk, ...team.df, ...team.mf, ...team.fw];
+
 	const total = {
 		kick: 0,
 		control: 0,
@@ -489,9 +516,9 @@ const getTeamAverageStats = (team: GeneratedTeam) => {
 		pressure: 0,
 		physical: 0,
 		agility: 0,
-		intelligence: 0
+		intelligence: 0,
 	};
-	
+
 	for (const p of players) {
 		const stats = getPlayerStats(p);
 		total.kick += stats.kick;
@@ -502,7 +529,7 @@ const getTeamAverageStats = (team: GeneratedTeam) => {
 		total.agility += stats.agility;
 		total.intelligence += stats.intelligence;
 	}
-	
+
 	const count = players.length || 1;
 	return {
 		kick: Math.round(total.kick / count),
@@ -516,43 +543,38 @@ const getTeamAverageStats = (team: GeneratedTeam) => {
 };
 
 const getTeamSynergies = (team: GeneratedTeam) => {
-	const players = [
-		...team.gk,
-		...team.df,
-		...team.mf,
-		...team.fw
-	];
-	
+	const players = [...team.gk, ...team.df, ...team.mf, ...team.fw];
+
 	const elementCounts: Record<string, number> = {
 		Fire: 0,
 		Wind: 0,
 		Forest: 0,
 		Mountain: 0,
-		Void: 0
+		Void: 0,
 	};
-	
+
 	const playstyleCounts: Record<string, number> = {
 		Bond: 0,
 		Justice: 0,
 		Breach: 0,
 		Tension: 0,
 		"Rough Play": 0,
-		Counter: 0
+		Counter: 0,
 	};
-	
+
 	for (const p of players) {
 		const variant = p.variants?.[0] as any;
-		const el = variant?.element || (p as any).element || "Void";
+		const el = canonicalElement(variant?.element || (p as any).element) || "Void";
 		if (elementCounts[el] !== undefined) {
 			elementCounts[el]++;
 		}
-		
+
 		const ps = (p as any).sheetData?.playstyle || (p as any).playstyle;
 		if (ps && playstyleCounts[ps] !== undefined) {
 			playstyleCounts[ps]++;
 		}
 	}
-	
+
 	// Synergies list
 	const list: Array<{ element: string; count: number; boost: number }> = [];
 	for (const [el, count] of Object.entries(elementCounts)) {
@@ -561,7 +583,7 @@ const getTeamSynergies = (team: GeneratedTeam) => {
 			list.push({ element: el, count, boost });
 		}
 	}
-	
+
 	return { elementCounts, playstyleCounts, list };
 };
 
@@ -593,10 +615,11 @@ export function RandomTeamGenerator({ pools, coordinators }: RandomTeamGenerator
 			}
 
 			if (selectedElement) {
+				const target = canonicalElement(selectedElement);
 				const elFiltered = filtered.filter((c) => {
 					const variant = c.variants?.[0] as any;
 					const el = variant?.element || (c as any).element;
-					return el === selectedElement;
+					return canonicalElement(el) === target;
 				});
 				if (elFiltered.length >= minCount) {
 					filtered = elFiltered;
@@ -667,10 +690,10 @@ export function RandomTeamGenerator({ pools, coordinators }: RandomTeamGenerator
 	const regenerate = useCallback(() => {
 		if (animating) return;
 		setAnimating(true);
-		
+
 		let ticks = 0;
 		const maxTicks = 6;
-		
+
 		const interval = setInterval(() => {
 			setTeam((prev) => {
 				const fresh = generate();
@@ -693,7 +716,7 @@ export function RandomTeamGenerator({ pools, coordinators }: RandomTeamGenerator
 					mf: mergePosition("mf", fresh.mf),
 				};
 			});
-			
+
 			ticks++;
 			if (ticks >= maxTicks) {
 				clearInterval(interval);
@@ -756,7 +779,15 @@ export function RandomTeamGenerator({ pools, coordinators }: RandomTeamGenerator
 	let maxSingleStat = 0;
 	for (const p of allPlayersList) {
 		const s = getPlayerStats(p);
-		const max = Math.max(s.kick, s.control, s.technique, s.pressure, s.physical, s.agility, s.intelligence);
+		const max = Math.max(
+			s.kick,
+			s.control,
+			s.technique,
+			s.pressure,
+			s.physical,
+			s.agility,
+			s.intelligence
+		);
 		if (max > maxSingleStat) {
 			maxSingleStat = max;
 			mvpPlayer = p;
@@ -892,7 +923,9 @@ export function RandomTeamGenerator({ pools, coordinators }: RandomTeamGenerator
 
 					{/* Playstyle filter — Filter Chips MD3 */}
 					<div>
-						<p className="type-label-medium text-on-surface-variant mb-1.5 font-bold">Style de jeu (max 2)</p>
+						<p className="type-label-medium text-on-surface-variant mb-1.5 font-bold">
+							Style de jeu (max 2)
+						</p>
 						<div className="flex flex-wrap gap-1.5">
 							{PLAYSTYLES.map((ps) => {
 								const active = selectedPlaystyles.includes(ps.key);
@@ -987,9 +1020,7 @@ export function RandomTeamGenerator({ pools, coordinators }: RandomTeamGenerator
 						</div>
 
 						{/* GK */}
-						<div className="w-[20%] sm:w-1/6 mx-auto">
-							{renderRow("gk", team.gk)}
-						</div>
+						<div className="w-[20%] sm:w-1/6 mx-auto">{renderRow("gk", team.gk)}</div>
 					</div>
 				</div>
 
@@ -1009,7 +1040,7 @@ export function RandomTeamGenerator({ pools, coordinators }: RandomTeamGenerator
 							<StatBar label="Agilité" value={averageStats.agility} />
 							<StatBar label="Intelligence" value={averageStats.intelligence} />
 						</div>
-						
+
 						{mvpPlayer && (
 							<div className="pt-2 border-t border-outline/5">
 								<p className="text-[11px] text-on-surface-variant">
@@ -1076,7 +1107,7 @@ export function RandomTeamGenerator({ pools, coordinators }: RandomTeamGenerator
 					"Conseils tactiques",
 					selectedElement ? `Élément ${selectedElement}` : "Élément Feu",
 					selectedPlaystyles.length > 0 ? `Style ${selectedPlaystyles[0]}` : "Style Percée",
-					team.coach ? team.coach.name_localised : "Coach"
+					team.coach ? team.coach.name_localised : "Coach",
 				].filter(Boolean)}
 				className="mt-6"
 			/>
