@@ -4,9 +4,11 @@ import { RarityBadge } from "@/components/ui/rarity-badge";
 import { useFilterNavigation } from "@/lib/hooks/use-filter-navigation";
 import { cn } from "@/lib/utils";
 
-// Seuls les 3 tiers pertinents pour le filtrage utilisateur
+// Tiers de rareté in-game (progression Normal → Expérimenté → Héros → BASARA).
+// "Expérimenté" (≈150 perso en DB) était manquant → filtre incomplet.
 const RARITY_OPTIONS = [
 	{ rarity: "Normal", value: "Normal" },
+	{ rarity: "Expérimenté", value: "Expérimenté" },
 	{ rarity: "Héros", value: "Héros" },
 	{ rarity: "BASARA", value: "BASARA" },
 ] as const;
