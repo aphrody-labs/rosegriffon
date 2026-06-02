@@ -214,7 +214,7 @@ _API universelle et parses de données de jeu Inazuma Eleven_
   - ✅ Parsing des fichiers binaires et de configuration de jeu (items, skills, characters).
   - ✅ Module Basara pour l'agrégation de statistiques.
   - ✅ Calculateur de statistiques de personnage dynamique.
-  - ✅ Script de synchronisation DB (`cli-push.ts`).
+  - ✅ Script de synchronisation DB (`cli-push.ts`) avec préservation complète des métadonnées brutes et enrichies d'auras.
   - ⏳ Support de nouvelles versions de fichiers lors des futures mises à jour du jeu.
   - ⏳ Simulateur interactif de composition d'équipe.
 
@@ -257,6 +257,10 @@ _API universelle et parses de données de jeu Inazuma Eleven_
    - Suppression définitive de l'avertissement de module manquant `@streamparser/json` à l'exécution de l'exécutable standalone compilé.
    - Indexation bidirectionnelle des techniques par identifiant textuel (`skillIDStr`) et par adresse hexadécimale (`skillID`), résolvant l'affichage des noms des Super Moves dans les fiches de personnages.
    - Amélioration de l'interaction utilisateur dans le REPL interactif en autorisant l'exécution immédiate des commandes lors de l'annulation d'un prompt de sélection multiple.
+5. ✅ **Mapping des Auras, liaison et affichage en UI** :
+   - Pipeline de synchronisation `cli-push.ts` corrigée pour uploader la structure complète des auras (`data`, `sheet_data`, `description_en`) en base de données sans perte d'information.
+   - Résolution de l'owner manquant des auras en faisant un fallback de recherche dans `change_aura_skills.json`.
+   - Affichage en temps réel des techniques spéciales (`hissatsuName`) et des talents passifs (`passiveEffect`) sur les fiches joueurs via la récupération de `sheet_data` dans `getCharacterAuras` et le rendu dans les `AuraCard`.
 
 ### Phase 5 : Sécurité & Stratégie de Sauvegarde Externe
 
