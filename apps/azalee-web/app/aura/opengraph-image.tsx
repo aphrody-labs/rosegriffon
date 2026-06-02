@@ -1,4 +1,5 @@
 import { ImageResponse } from "next/og";
+import { getOgLogoDataUri } from "@/lib/og-logo";
 
 export const alt = "Hyper Techniques - Wiki Azalee";
 export const size = { height: 630, width: 1200 };
@@ -147,7 +148,7 @@ export default async function Image() {
 				style={{ alignItems: "center", bottom: 20, display: "flex", gap: 10, position: "absolute" }}
 			>
 				<img
-					src="https://azalee.rosegriffon.fr/logo-og.png"
+					src={getOgLogoDataUri()}
 					width={28}
 					height={28}
 					style={{ borderRadius: 7 }}

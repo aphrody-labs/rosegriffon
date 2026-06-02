@@ -1,4 +1,5 @@
 import { ImageResponse } from "next/og";
+import { getOgLogoDataUri } from "@/lib/og-logo";
 
 export const alt = "Objets - Wiki Azalee";
 export const size = { height: 630, width: 1200 };
@@ -184,7 +185,7 @@ export default async function Image() {
 				}}
 			>
 				<img
-					src="https://azalee.rosegriffon.fr/logo-og.png"
+					src={getOgLogoDataUri()}
 					width={28}
 					height={28}
 					style={{ borderRadius: 7 }}
