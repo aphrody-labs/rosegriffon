@@ -121,10 +121,27 @@ jobs:
 
       - run: bun turbo run test
 
+  secret-scan:
+    name: Secret scan
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run gitleaks (binaire OSS, sans licence org)
+        run: |
+          VERSION=8.21.2
+          curl -fsSL "https://github.com/gitleaks/gitleaks/releases/download/v${VERSION}/gitleaks_${VERSION}_linux_x64.tar.gz" | tar -xz gitleaks
+          # Scan de l'arbre committé (pas l'historique) : attrape tout nouveau secret
+          # présent dans les fichiers, faux positifs connus filtrés via .gitleaks.toml.
+          ./gitleaks detect --no-banner --redact --no-git --source . \
+            --config .gitleaks.toml \
+            --exit-code 1
+
   ci-success:
     name: CI Success
     if: always()
-    needs: [lint-type, build, test]
+    needs: [lint-type, build, test, secret-scan]
     runs-on: ubuntu-latest
     steps:
       - if: contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled')

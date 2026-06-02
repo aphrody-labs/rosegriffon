@@ -91,3 +91,21 @@ supabase/.temp/
 
 # Espace de travail jetable (peut contenir des secrets extraits) — jamais committé
 scratch/
+
+# Secrets & artefacts sensibles — durcissement post-incident purge historique 2026-06
+# (.env de base déjà ignoré plus haut ; ici les variantes qui ont fui par le passé)
+*.env.bak
+*.env.bak.*
+.env.bak.*
+data/backups/
+*.sqlite
+*.sqlite3
+*.db
+*.dump
+*_history
+.*_history
+*.pem
+*.key
+*.p12
+serviceaccount*.json
+*credentials*.json
