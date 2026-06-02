@@ -13,7 +13,6 @@
 		"VERCEL_ENV"
 	],
 	"ui": "tui",
-	"daemon": true,
 	"cacheDir": ".turbo/cache",
 	"tasks": {
 		"build": {
