@@ -10,8 +10,10 @@ export const metadata: Metadata = {
 	title: "Notre Équipe - Staff | Rose Griffon",
 };
 
-// ISR: Revalidate toutes les heures (équipe rarement modifiée)
-export const revalidate = 3600; // 1 heure
+// Rendu dynamique : les membres sont fetchés côté serveur À LA REQUÊTE (env
+// runtime garanti). Évite de figer une page vide si le fetch Supabase échoue au
+// moment du build/prerender (cohérent avec /association et /partenaires).
+export const dynamic = "force-dynamic";
 
 export default function StaffPage() {
 	return (
