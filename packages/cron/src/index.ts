@@ -15,6 +15,8 @@ import {
 	warmCaches,
 	triggerGithubPublishWorkflow,
 } from "./tasks/api";
+import { initDiscord, getDiscordTelemetry, onTelemetryUpdate, getDiscordClient, GUILD_ID } from "./lib/discord";
+import { runDiscordSync, runDiscordChannelScan } from "./tasks/discord";
 import { ServerWebSocket } from "bun";
 import { createSupabaseServiceClient } from "@rose-griffon/db/service";
 import { resolveProfile, isAdmin } from "@rose-griffon/auth";
@@ -80,6 +82,9 @@ console.log("=================================================================="
 console.log("🚀 Initialisation du Daemon Cron Rose Griffon (Mode Autonome)");
 console.log(`⏰ Heure actuelle : ${new Date().toISOString()}`);
 console.log("==================================================================");
+
+// Initialisation du client Discord
+await initDiscord();
 
 // ─── METRICS & STATS D'EXÉCUTION ─────────────────────────────────────────────
 const metrics = {
@@ -191,6 +196,10 @@ if (args.includes("--run")) {
 		await executeTask(`reminders:${stage}`, () => triggerPatreonReminders(stage));
 	} else if (task === "warm") {
 		await executeTask("warm", warmCaches);
+	} else if (task === "discord") {
+		await executeTask("discord:sync", runDiscordSync);
+	} else if (task === "discord:scan") {
+		await executeTask("discord:scan", runDiscordChannelScan);
 	} else if (task === "all") {
 		console.log("🏃 Exécution de toutes les tâches...");
 		await executeTask("publish", triggerPublishScheduled);
@@ -202,9 +211,11 @@ if (args.includes("--run")) {
 		await executeTask("cdn", syncCdnAssets);
 		await executeTask("crawl", runIeCrawl);
 		await executeTask("reminders", () => triggerPatreonReminders("announce"));
+		await executeTask("discord:sync", runDiscordSync);
+		await executeTask("discord:scan", runDiscordChannelScan);
 	} else {
 		console.error(
-			`❌ Tâche inconnue : ${task}. Choisissez parmi : db, cdn, crawl, rag, query, publish, github-publish, patreon, reminders, warm, backup:postgres, backup:pg, all.`
+			`❌ Tâche inconnue : ${task}. Choisissez parmi : db, cdn, crawl, rag, query, publish, github-publish, patreon, reminders, warm, discord, discord:scan, backup:postgres, backup:pg, all.`
 		);
 	}
 	process.exit(0);
@@ -220,6 +231,11 @@ Bun.cron("*/15 * * * *", async () => {
 // 2. Pré-chauffage des caches ISR : toutes les 30 minutes
 Bun.cron("*/30 * * * *", async () => {
 	await executeTask("warm", warmCaches);
+});
+
+// 2b. Synchronisation Discord (membres, rôles, staff) : toutes les 30 minutes
+Bun.cron("*/30 * * * *", async () => {
+	await executeTask("discord:sync", runDiscordSync);
 });
 
 // 3. Synchronisation Inagle DB & SQLite Backup : tous les jours à 2h00 UTC
@@ -303,6 +319,18 @@ const server = Bun.serve({
 			});
 		}
 
+		// 3d. Télémétrie Discord
+		if (url.pathname === "/discord-telemetry") {
+			const telemetry = getDiscordTelemetry();
+			if (!telemetry) {
+				return new Response(JSON.stringify({ error: "Télémétrie Discord indisponible (non connecté ou désactivé)" }), {
+					status: 503,
+					headers: { "Content-Type": "application/json" }
+				});
+			}
+			return Response.json(telemetry);
+		}
+
 		// Helper pour extraire les cookies de la requête
 		function getCookie(request: Request, name: string): string | null {
 			const cookieHeader = request.headers.get("Cookie");
@@ -367,6 +395,8 @@ const server = Bun.serve({
 					"patreon",
 					"reminders",
 					"warm",
+					"discord",
+					"discord:scan",
 				],
 				schedules: {
 					publish: "*/15 * * * *",
@@ -377,6 +407,8 @@ const server = Bun.serve({
 					"github-publish": "30 4 * * *",
 					crawl: "0 5 * * *",
 					reminders: "0 8 * * *",
+					discord: "*/30 * * * *",
+					"discord:scan": "manuel",
 				},
 			});
 		}
@@ -399,6 +431,9 @@ const server = Bun.serve({
 				patreon: triggerPatreonRefresh,
 				reminders: () => triggerPatreonReminders("announce"),
 				warm: warmCaches,
+				discord: runDiscordSync,
+				"discord:scan": runDiscordChannelScan,
+				"discord-scan": runDiscordChannelScan,
 			};
 
 			const taskFn = runnerMap[taskName];
@@ -426,6 +461,10 @@ const server = Bun.serve({
 			ws.send(
 				JSON.stringify({ type: "system", text: "Connexion établie avec le flux de logs rg-cron." })
 			);
+			const telemetry = getDiscordTelemetry();
+			if (telemetry) {
+				ws.send(JSON.stringify({ type: "discord-telemetry", data: telemetry }));
+			}
 		},
 		message(ws, msg) {
 			originalLog(`[WS Message] reçu : ${msg}`);
@@ -474,5 +513,125 @@ Bun.listen({
 	},
 });
 
+// ─── STREAMING DE LA TÉLÉMÉTRIE EN TEMPS RÉEL SUR LES WEBSOCKETS ─────────────
+onTelemetryUpdate((telemetry) => {
+	const payload = JSON.stringify({
+		type: "discord-telemetry",
+		data: telemetry,
+		timestamp: Date.now(),
+	});
+	for (const ws of wsConnections) {
+		try {
+			ws.send(payload);
+		} catch {
+			wsConnections.delete(ws);
+		}
+	}
+});
+
+// ─── SERVEUR HTTP D'ANNONCES DISCORD (PORT 3006) ─────────────────────────────
+const ANNOUNCE_PORT = 3006;
+const announceSecret = Bun.env.DISCORD_ANNOUNCE_SECRET || "default-secret-key-12345";
+
+Bun.serve({
+	port: ANNOUNCE_PORT,
+	async fetch(req) {
+		const url = new URL(req.url);
+		if (req.method !== "POST" || url.pathname !== "/announce") {
+			return new Response("Not Found", { status: 404 });
+		}
+
+		// Check Authorization
+		const authHeader = req.headers.get("Authorization");
+		if (!authHeader || authHeader !== `Bearer ${announceSecret}`) {
+			return new Response("Unauthorized", { status: 401 });
+		}
+
+		try {
+			const body = (await req.json()) as {
+				type?: string;
+				title?: string;
+				slug?: string;
+				excerpt?: string;
+				featured_image_url?: string;
+			};
+			const { type, title, slug, excerpt, featured_image_url } = body;
+
+			if (!title || !slug) {
+				return new Response("Missing title or slug", { status: 400 });
+			}
+
+			const client = getDiscordClient();
+			if (!client || !client.isReady()) {
+				console.error("[announce-server] Client Discord non prêt ou non initialisé.");
+				return new Response("Discord client not ready", { status: 500 });
+			}
+
+			// Find Guild
+			const guild = client.guilds.cache.get(GUILD_ID || "");
+			if (!guild) {
+				console.error("[announce-server] Guild non trouvé:", GUILD_ID);
+				return new Response("Guild not found", { status: 500 });
+			}
+
+			// Resolve Channel ID
+			const channelId = type === "wiki"
+				? (Bun.env.DISCORD_WIKI_ANNOUNCEMENTS_CHANNEL_ID || Bun.env.DISCORD_NEWS_CHANNEL_ID)
+				: (Bun.env.DISCORD_WEBSITE_ANNOUNCEMENTS_CHANNEL_ID || Bun.env.DISCORD_NEWS_CHANNEL_ID);
+
+			let channel;
+			if (channelId) {
+				channel = guild.channels.cache.get(channelId);
+			}
+
+			if (!channel) {
+				const possibleNames = type === "wiki"
+					? ["wiki-annonces", "annonces-wiki", "annonces", "📢-annonces"]
+					: ["annonces", "📢-annonces", "news", "general"];
+
+				for (const name of possibleNames) {
+					channel = guild.channels.cache.find(c => c.name.toLowerCase() === name && c.isTextBased());
+					if (channel) break;
+				}
+			}
+
+			if (!channel || !channel.isTextBased()) {
+				console.error("[announce-server] Aucun salon textuel d'annonces trouvé.");
+				return new Response("Channel not found", { status: 500 });
+			}
+
+			// Build Embed
+			const articleUrl = type === "wiki"
+				? `https://azalee.rosegriffon.fr/news/${slug}`
+				: `https://rosegriffon.fr/chroniques/${slug}`;
+
+			const embedColor = type === "wiki" ? 0xf2a93b : 0xa14b3f; // Azalée orange vs Rose Griffon red
+
+			const embed = {
+				title,
+				url: articleUrl,
+				description: excerpt || undefined,
+				color: embedColor,
+				image: featured_image_url ? { url: featured_image_url } : undefined,
+				footer: { text: type === "wiki" ? "Azalée — Rose Griffon" : "Rose Griffon" },
+				timestamp: new Date().toISOString()
+			};
+
+			await channel.send({ embeds: [embed] });
+			console.log(`[announce-server] Annonce envoyée pour : "${title}" dans le salon #${channel.name}`);
+			return new Response(JSON.stringify({ success: true }), {
+				headers: { "Content-Type": "application/json" }
+			});
+		} catch (err) {
+			console.error("[announce-server] Erreur lors de l'annonce:", err);
+			return new Response(JSON.stringify({ error: err instanceof Error ? err.message : String(err) }), {
+				status: 500,
+				headers: { "Content-Type": "application/json" }
+			});
+		}
+	}
+});
+
+console.log(`📣 Serveur HTTP d'annonces Discord à l'écoute sur le port ${ANNOUNCE_PORT}`);
 console.log(`🔌 Serveur TCP IPC local à l'écoute sur le port ${IPC_PORT}`);
 console.log("💤 Le daemon est en cours d'exécution et écoute...");
