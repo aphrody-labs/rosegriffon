@@ -299,6 +299,8 @@ export const wikiService = {
 			assetCode: string | null;
 			subType: string;
 			element?: { en?: string; ja?: string; fr?: string };
+			passiveEffect?: string;
+			hissatsuName?: string;
 		}>
 	> {
 		const supabase = await createClient();
@@ -350,20 +352,24 @@ export const wikiService = {
 
 				const { data: auraRows } = await supabase
 					.from(t.table as any)
-					.select("id, name_fr, name_en, name_ja, image_url, asset_code, element_id")
+					.select("id, name_fr, name_en, name_ja, image_url, asset_code, element_id, sheet_data")
 					.in("id", possibleIds);
 
 				if (auraRows && auraRows.length > 0) {
 					const a = auraRows[0] as any;
+					const sd = normalizeAuraSheetData(a.sheet_data) || {};
 					results.push({
 						id: a.id,
-						name: a.name_fr || a.name_en || a.name_ja || "Inconnu",
+						name: a.name_fr || a.name_en || a.name_ja || sd.displayName || sd.name_FR || sd.name_EN || "Inconnu",
 						type: t.table.replace("inagle_", "").replace("s", ""),
 						categorySlug: t.slug,
 						imageUrl: a.image_url,
 						assetCode: a.asset_code,
 						subType: t.table.replace("inagle_", "").replace("s", ""),
 						element: ElementNames[a.element_id as keyof typeof ElementNames] || undefined,
+						sheetData: sd,
+						passiveEffect: sd.passiveEffect || sd.passive || a.description_fr || sd.desc_FR || undefined,
+						hissatsuName: sd.hissatsu?.name || sd.sheetData?.hissatsu?.name || undefined,
 					});
 					break; // Found it in this table, move to the next hexId
 				}
@@ -451,7 +457,20 @@ export const wikiService = {
 		}
 
 		// Push owner query
-		const ownerCharaId = a.owner_chara_id || (a.data as any)?.ownerCharaParamId;
+		let ownerCharaId = a.owner_chara_id || (a.data as any)?.ownerCharaParamId;
+		if (!ownerCharaId) {
+			const cleanAuraId = (a.id || "").replace(/^(keshin|soul|miximax|awakening|mode_change)_/i, "").toLowerCase();
+			const mapping = changeAuraSkills.find(
+				(m: any) =>
+					m.id &&
+					(m.id.toLowerCase() === id.toLowerCase() ||
+						m.id.toLowerCase() === a.id?.toLowerCase() ||
+						m.id.toLowerCase() === cleanAuraId)
+			);
+			if (mapping && mapping.charaParamId && mapping.charaParamId !== "0x00000000") {
+				ownerCharaId = mapping.charaParamId;
+			}
+		}
 		if (ownerCharaId) {
 			parallelPromises.push(
 				supabase

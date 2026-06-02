@@ -709,6 +709,8 @@ export default async function PlayerDetailPage({ params }: { params: Promise<{ i
 								element={aura.element}
 								assetCode={aura.assetCode || undefined}
 								image={aura.imageUrl || undefined}
+								passiveEffect={aura.passiveEffect}
+								hissatsuName={aura.hissatsuName}
 							/>
 						))}
 					</div>
