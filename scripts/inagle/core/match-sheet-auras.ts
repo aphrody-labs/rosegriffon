@@ -54,7 +54,7 @@ function clean(s: string | undefined): string {
 
 async function main() {
 	// Charger le sheet
-	const sheetRaw = await Bun.file("/home/ubuntu/vps/packages/inagle/data/sheet_export.json").json();
+	const sheetRaw = await Bun.file("/home/ubuntu/rg/packages/inagle/data/sheet_export.json").json();
 	const rows: string[][] = sheetRaw.sheets["Hyper Moves"];
 	const dataRows = rows.slice(2).filter((r) => r[0]?.trim());
 

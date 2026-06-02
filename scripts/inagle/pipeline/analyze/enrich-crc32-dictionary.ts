@@ -101,7 +101,7 @@ function main() {
 	console.log("\n[1] Ghidra strings...");
 	let ghidraAdded = 0;
 	try {
-		const altPath = "/home/ubuntu/vps/packages/iecode/docs/ghidra-export/strings.json";
+		const altPath = "/home/ubuntu/rg/packages/iecode/docs/ghidra-export/strings.json";
 		const ghidraData = JSON.parse(readFileSync(altPath, "utf8"));
 
 		for (const entry of ghidraData.strings) {

@@ -18,7 +18,7 @@ function toHex(value: string): string {
 // Extraire les hashes de skills liés aux auras depuis aura_skill_config
 function getAuraSkillHashes(): Set<string> {
 	const path =
-		"/home/ubuntu/vps/packages/inagle/data/common/gamedata/skill/aura_skill_config_1.04.09.00.cfg.bin.json";
+		"/home/ubuntu/rg/packages/inagle/data/common/gamedata/skill/aura_skill_config_1.04.09.00.cfg.bin.json";
 	const data = JSON.parse(readFileSync(path, "utf-8"));
 	const hashes = new Set<string>();
 

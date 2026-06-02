@@ -539,7 +539,7 @@ async function main() {
 	let totalSizeMb = 0;
 	const folderMeta: Record<string, { files: number; sizeMb: number; subfolders: string[] }> = {};
 
-	const bucketPaths = [BUCKET_JSON, "/home/ubuntu/vps/supabase-storage-buckets.json"];
+	const bucketPaths = [BUCKET_JSON, "/home/ubuntu/rg/supabase-storage-buckets.json"];
 
 	let bucketLoaded = false;
 	for (const p of bucketPaths) {

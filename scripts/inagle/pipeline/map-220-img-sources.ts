@@ -495,7 +495,7 @@ async function main() {
 	const bucketExists = await Bun.file(BUCKET_JSON).exists();
 	if (!bucketExists) {
 		// Essayer le chemin absolu depuis le repo
-		const altPath = "/home/ubuntu/vps/supabase-storage-buckets.json";
+		const altPath = "/home/ubuntu/rg/supabase-storage-buckets.json";
 		const altExists = await Bun.file(altPath).exists();
 		if (!altExists) {
 			console.error(
@@ -506,7 +506,7 @@ async function main() {
 		}
 	}
 
-	const bucketPath = bucketExists ? BUCKET_JSON : "/home/ubuntu/vps/supabase-storage-buckets.json";
+	const bucketPath = bucketExists ? BUCKET_JSON : "/home/ubuntu/rg/supabase-storage-buckets.json";
 
 	const bucket = (await Bun.file(bucketPath).json()) as BucketData;
 	const img220 = bucket.folders["220_img"];
