@@ -689,30 +689,32 @@ async function importAuras(service: any, db: DataAdapter) {
 		const isInvalid = !name || name.includes("(was") || name.startsWith("Aura ");
 		if (isInvalid) continue;
 
-		const record = {
+		const baseRecord = {
 			id: a.auraIdStr || a.auraId,
 			name_fr: name,
 			name_en: getLoc(a, "en"),
 			name_ja: getLoc(a, "ja"),
 			description_fr: getDesc(a, "fr"),
+			description_en: getDesc(a, "en"),
 			description_ja: getDesc(a, "ja"),
 			element_id: a.element ?? null,
 			asset_code: a.assetCode || null,
 			image_url: a.image || null,
+			sheet_data: a.sheetData ?? null,
 			updated_at: new Date().toISOString(),
 		};
 
 		const subType = a.subType || "Aura";
-		if (subType === "Keshin") keshins.push({ ...record, type: "Esprit Guerrier" });
-		else if (subType === "Soul") souls.push({ ...record, type: "Totem" });
-		else if (subType === "Awakening") awakenings.push({ ...record, type: "Éveil" });
-		else if (subType === "ModeChange") modeChanges.push({ ...record, type: "Changement de mode" });
+		if (subType === "Keshin") keshins.push({ ...baseRecord, type: "Esprit Guerrier", data: a });
+		else if (subType === "Soul") souls.push({ ...baseRecord, type: "Totem", data: a });
+		else if (subType === "Awakening") awakenings.push({ ...baseRecord, type: "Éveil", data: a });
+		else if (subType === "ModeChange") modeChanges.push({ ...baseRecord, type: "Changement de mode", data: a });
 		else if (subType === "Aura") {
-			if (name.includes("Miximax")) miximax.push({ ...record, type: "Miximax" });
+			if (name.includes("Miximax")) miximax.push({ ...baseRecord, type: "Miximax", data: a });
 			else {
-				aurasList.push({ ...record, sub_type: "Aura" });
+				aurasList.push({ ...baseRecord, sub_type: "Aura" });
 			}
-		} else miximax.push({ ...record, type: "Miximax" });
+		} else miximax.push({ ...baseRecord, type: "Miximax", data: a });
 	}
 
 	if (keshins.length > 0) await db.upsert("inagle_keshins", dedup(keshins));
