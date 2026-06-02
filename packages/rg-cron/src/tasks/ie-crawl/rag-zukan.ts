@@ -7,7 +7,7 @@
 import type { ZukanCharacterDetail } from "@aphrody-code/zukan";
 import { crawlerTracker, getEmbedding, vectorStore } from "@rose-griffon/db/redis";
 import { createSupabaseServiceClient } from "@rose-griffon/db/service";
-import { chunkText, computeStringHash } from "./rag";
+import { chunkText, computeStringHash } from "./rag-utils";
 
 // Centre le RAG sur le mirror Zukan : indexe les personnages du Zukan officiel
 // (table `inagle_characters`, données corrigées par le remap zukan_hash/zukan_order

@@ -13,7 +13,8 @@
 // Les consommateurs (daemon `index.ts`, orchestrateur `ie-crawl/index.ts`)
 // importent depuis ce barrel plutôt que de toucher les modules internes.
 
-export { chunkText, computeStringHash, queryRag, runRagSync } from "./rag";
+export { queryRag, runRagSync } from "./rag";
+export { chunkText, computeStringHash } from "./rag-utils";
 export { indexZukanCharacters } from "./rag-zukan";
 export { ragWebSearch, type RagWebDoc, type RagWebOptions } from "./rag-web";
 

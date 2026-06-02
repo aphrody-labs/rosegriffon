@@ -1,5 +1,5 @@
 import { describe, it, expect } from "bun:test";
-import { chunkText } from "./rag";
+import { chunkText } from "./rag-utils";
 
 describe("RAG chunkText Tests", () => {
 	it("should split long text at word boundaries without cutting words in half during overlap", () => {
