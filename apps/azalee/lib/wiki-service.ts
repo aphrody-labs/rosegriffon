@@ -698,11 +698,14 @@ export const wikiService = {
 			.maybeSingle();
 		if (!row) return undefined;
 
-		// Fetch all variants sharing this chara_id
-		const { data: rows } = await supabase
-			.from("inagle_characters")
-			.select("*")
-			.eq("chara_id", row.chara_id)
+		// Fetch all variants sharing this base_slug (or chara_id if base_slug is null)
+		let query = supabase.from("inagle_characters").select("*");
+		if (row.base_slug) {
+			query = query.eq("base_slug", row.base_slug);
+		} else {
+			query = query.eq("chara_id", row.chara_id);
+		}
+		const { data: rows } = await query
 			.order("zukan_order", { ascending: true, nullsFirst: false })
 			.order("id", { ascending: true });
 
@@ -753,11 +756,14 @@ export const wikiService = {
 			.maybeSingle();
 		if (!row) return undefined;
 
-		// Fetch all variants sharing this chara_id
-		const { data: rows } = await supabase
-			.from("inagle_characters")
-			.select("*")
-			.eq("chara_id", row.chara_id)
+		// Fetch all variants sharing this base_slug (or chara_id if base_slug is null)
+		let query = supabase.from("inagle_characters").select("*");
+		if (row.base_slug) {
+			query = query.eq("base_slug", row.base_slug);
+		} else {
+			query = query.eq("chara_id", row.chara_id);
+		}
+		const { data: rows } = await query
 			.order("zukan_order", { ascending: true, nullsFirst: false })
 			.order("id", { ascending: true });
 

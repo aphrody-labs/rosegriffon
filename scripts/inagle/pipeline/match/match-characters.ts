@@ -123,14 +123,12 @@ async function matchCharacters() {
 			matches += foundChars.length;
 			if (movesetData) movesetMatches += foundChars.length;
 			for (const char of foundChars) {
-				// Only assign BASARA movesets to BASARA characters
-				const isBasara = char.rarity === "BASARA";
 				char.sheetData = {
 					sheetId,
 					matchedName: nameLocalised,
 					playstyle: cleanSheetValue(playstyle),
 					firstMoves: cleanSheetValue(firstMoves),
-					...(movesetData && isBasara
+					...(movesetData
 						? { moveset: movesetData.moveset, altMoveset: movesetData.altMoveset }
 						: {}),
 					stats: {
@@ -190,15 +188,13 @@ async function matchCharacters() {
 		if (kick === 0 && control === 0) continue; // no real stats
 
 		const movesetData = movesetMap.get(String(sheetId));
-		const isBasara = char.rarity === "BASARA";
-
 		char.sheetData = {
 			sheetId,
 			matchedName: nameLocalised,
 			matchedVia: "kanji",
 			playstyle: cleanSheetValue(playstyle),
 			firstMoves: cleanSheetValue(firstMoves),
-			...(movesetData && isBasara
+			...(movesetData
 				? { moveset: movesetData.moveset, altMoveset: movesetData.altMoveset }
 				: {}),
 			stats: { kick, control, technique, pressure, physical, agility, intelligence },
@@ -234,12 +230,17 @@ async function matchCharacters() {
 		const refData = matchedByJaAndRarity.get(`${ja}::${rarity}`);
 		if (!refData?.stats) continue;
 
-		// Copy stats only (not playstyle/paths which may differ)
+		// Copy full sheetData (playstyle/moveset should match for same character and rarity)
 		char.sheetData = {
 			sheetId: refData.sheetId,
 			matchedName: refData.matchedName,
 			matchedVia: "ja-variant",
+			playstyle: refData.playstyle,
+			firstMoves: refData.firstMoves,
+			moveset: refData.moveset,
+			altMoveset: refData.altMoveset,
 			stats: { ...refData.stats },
+			paths: refData.paths ? { ...refData.paths } : undefined,
 		};
 		variantMatches++;
 	}

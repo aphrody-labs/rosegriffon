@@ -417,8 +417,19 @@ async function importCharacters(service: any, db: DataAdapter) {
 				zukan_hash: c.zukanHash || null,
 				// zukan_order : conserve l'ordre officiel curaté s'il existe, sinon parser.
 				zukan_order: preserved.get(c.charaParamId)?.zukan_order ?? c.zukanOrder ?? null,
-				// sheet_data : 100% curaté hors-pipeline → restaure le snapshot (jamais le parser).
-				sheet_data: preserved.get(c.charaParamId)?.sheet_data ?? null,
+				// sheet_data : 100% curaté hors-pipeline → restaure le snapshot (jamais le parser), mais intègre les nouveaux movesets.
+				sheet_data: (() => {
+					const jsonSd = c.sheetData || {};
+					const dbSd = preserved.get(c.charaParamId)?.sheet_data || {};
+					const merged = { ...jsonSd, ...dbSd };
+					if (!merged.moveset && jsonSd.moveset) {
+						merged.moveset = jsonSd.moveset;
+					}
+					if (!merged.altMoveset && jsonSd.altMoveset) {
+						merged.altMoveset = jsonSd.altMoveset;
+					}
+					return Object.keys(merged).length > 0 ? merged : null;
+				})(),
 				internal_code: c.internalCode || null,
 				constellation: c.constellation?.names?.fr || null,
 				constellation_index: c.constellation?.index ?? null,
