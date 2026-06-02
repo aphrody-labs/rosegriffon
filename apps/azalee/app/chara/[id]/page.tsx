@@ -401,6 +401,36 @@ export default async function PlayerDetailPage({ params }: { params: Promise<{ i
 		}
 	}
 
+	// If moveset has less than 6 skills, and we have an aura, append the first aura as the 6th moveset slot
+	if (moveset.length < 6 && auras && auras.length > 0) {
+		const aura = auras[0];
+		moveset.push({
+			category: "Hyper Technique",
+			href: `/aura/${aura.categorySlug || "autres"}/${aura.id}`,
+			id: aura.id,
+			isPassive: false,
+			name: aura.name || "Aura",
+			slotNumber: moveset.length + 1,
+			element: aura.element?.en?.toLowerCase(),
+			imageUrl: aura.imageUrl || undefined,
+		});
+	}
+
+	// If altMoveset has less than 6 skills, and we have an aura, append the first aura as the 6th altMoveset slot
+	if (altMoveset.length < 6 && auras && auras.length > 0) {
+		const aura = auras[0];
+		altMoveset.push({
+			category: "Hyper Technique",
+			href: `/aura/${aura.categorySlug || "autres"}/${aura.id}`,
+			id: aura.id,
+			isPassive: false,
+			name: aura.name || "Aura",
+			slotNumber: altMoveset.length + 1,
+			element: aura.element?.en?.toLowerCase(),
+			imageUrl: aura.imageUrl || undefined,
+		});
+	}
+
 	// IEVR : toujours 6 techniques par moveset
 	const moveLimit = 6;
 	const limitedMoveset = moveset.slice(0, moveLimit);

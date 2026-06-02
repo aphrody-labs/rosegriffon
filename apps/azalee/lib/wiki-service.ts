@@ -1,6 +1,7 @@
 import type { BaseCharacter, Item, Skill, Team } from "@rose-griffon/inagle";
 import { ElementNames } from "@rose-griffon/inagle/core/types";
 import { CATEGORY_NAMES as CategoryNames } from "@rose-griffon/inagle/skills/types";
+import changeAuraSkills from "../../../packages/inagle/src/entries/change_aura_skills.json";
 import type { Database } from "@rose-griffon/db";
 import {
 	getAuraImageUrl,
@@ -301,43 +302,74 @@ export const wikiService = {
 		}>
 	> {
 		const supabase = await createClient();
+		const supabaseHexIds = new Set<string>();
+
+		// 1. Get from database: inagle_characters (data->'auras')
+		const { data: charData } = await supabase
+			.from("inagle_characters")
+			.select("data")
+			.or(`chara_id.eq.${sanitizeFilter(charaId)},id.eq.${sanitizeFilter(charaParamId)}`)
+			.maybeSingle();
+
+		if (charData) {
+			const dbAuras = (charData.data as any)?.auras || [];
+			for (const a of dbAuras) {
+				if (a.skillId) supabaseHexIds.add(a.skillId.toLowerCase());
+			}
+		}
+
+		// 2. Get from change_aura_skills mapping JSON
+		try {
+			const jsonAuras = changeAuraSkills.filter(
+				(c: any) =>
+					c.charaParamId &&
+					(c.charaParamId.toLowerCase() === charaId.toLowerCase() ||
+						c.charaParamId.toLowerCase() === charaParamId.toLowerCase())
+			);
+			for (const a of jsonAuras) {
+				if (a.id) supabaseHexIds.add(a.id.toLowerCase());
+			}
+		} catch (e) {
+			console.error("Error reading changeAuraSkills JSON:", e);
+		}
+
 		const results: any[] = [];
 		const tables = [
-			{ table: "inagle_keshins", slug: "esprits-guerriers", subType: "Keshin" },
-			{ table: "inagle_souls", slug: "totems", subType: "Soul" },
-			{ table: "inagle_miximax", slug: "miximax", subType: "Miximax" },
+			{ table: "inagle_keshins", slug: "esprits-guerriers", prefix: "keshin_" },
+			{ table: "inagle_souls", slug: "totems", prefix: "soul_" },
+			{ table: "inagle_miximax", slug: "miximax", prefix: "miximax_" },
 		] as const;
 
-		const cleanCharaId = sanitizeFilter(charaId);
-		const cleanParamId = sanitizeFilter(charaParamId);
+		for (const hexId of supabaseHexIds) {
+			const cleanHexPart = hexId.replace(/^0x/i, "").toUpperCase();
+			const formattedId = "0x" + cleanHexPart;
 
-		const searchPromises = tables.map(async ({ table, slug, subType }) => {
-			const { data } = await supabase
-				.from(table as any)
-				.select(
-					"id, name_fr, name_en, name_ja, image_url, asset_code, element_id, data, owner_chara_id"
-				)
-				.or(
-					`owner_chara_id.eq.${cleanCharaId},owner_chara_id.eq.${cleanParamId},data->>ownerCharaParamId.eq.${cleanCharaId},data->>ownerCharaParamId.eq.${cleanParamId}`
-				);
+			for (const t of tables) {
+				const prefixedId = t.prefix + formattedId;
+				const possibleIds = [prefixedId, formattedId, hexId];
 
-			if (data) {
-				for (const a of data as any[]) {
+				const { data: auraRows } = await supabase
+					.from(t.table as any)
+					.select("id, name_fr, name_en, name_ja, image_url, asset_code, element_id")
+					.in("id", possibleIds);
+
+				if (auraRows && auraRows.length > 0) {
+					const a = auraRows[0] as any;
 					results.push({
 						id: a.id,
 						name: a.name_fr || a.name_en || a.name_ja || "Inconnu",
-						type: subType.toLowerCase(),
-						categorySlug: slug,
+						type: t.table.replace("inagle_", "").replace("s", ""),
+						categorySlug: t.slug,
 						imageUrl: a.image_url,
 						assetCode: a.asset_code,
-						subType,
+						subType: t.table.replace("inagle_", "").replace("s", ""),
 						element: ElementNames[a.element_id as keyof typeof ElementNames] || undefined,
 					});
+					break; // Found it in this table, move to the next hexId
 				}
 			}
-		});
+		}
 
-		await Promise.all(searchPromises);
 		return results;
 	},
 
