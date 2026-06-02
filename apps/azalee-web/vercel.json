@@ -4,7 +4,7 @@
 	"bunVersion": "1.x",
 	"installCommand": "cd ../.. && bun install --no-save",
 	"ignoreCommand": "cd ../.. && npx turbo-ignore @rose-griffon/azalee",
-	"buildCommand": "cd ../.. && turbo run build --filter=@rose-griffon/azalee... --cache=remote:rw",
+	"buildCommand": "cd ../.. && turbo run build --filter=@rose-griffon/azalee... --cache=local:rw",
 	"env": {
 		"NEXT_PUBLIC_SUPABASE_URL": "https://isbkaeltubqittywibeh.supabase.co"
 	},
