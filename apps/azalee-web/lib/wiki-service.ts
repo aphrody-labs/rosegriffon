@@ -81,9 +81,15 @@ function getCategoryId(name: string): number | undefined {
 	return undefined;
 }
 
-/** Sanitize user input for PostgREST filter interpolation to prevent filter injection */
+/**
+ * Sanitize user input for PostgREST filter interpolation to prevent filter injection.
+ * On retire les chars structurels PostgREST (`,` sépare les conditions `.or()`, `.`
+ * sépare col.op.val, `()` groupent, `*`/`\`) + le joker `%`. On NE retire PAS `_` :
+ * ce n'est un joker que pour `LIKE`/`ILIKE`, jamais pour un `.eq.` exact, et les IDs
+ * d'auras en contiennent (`keshin_0x…`, `soul_0x…`) — le strip cassait getAura → 404.
+ */
 function sanitizeFilter(input: string): string {
-	return input.replaceAll(/[%_,().*\\]/g, "");
+	return input.replaceAll(/[%,().*\\]/g, "");
 }
 
 /**
