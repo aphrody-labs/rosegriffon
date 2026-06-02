@@ -21,3 +21,17 @@ export const Browser: {
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type Page = any;
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type NavigationResponse = any;
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const googleWebSearch: any;
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const extractTitle: any;
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const htmlToMarkdown: any;
+
+

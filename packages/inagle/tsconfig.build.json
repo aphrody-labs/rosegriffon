@@ -11,8 +11,10 @@
 		"noImplicitOverride": true,
 		"noUncheckedIndexedAccess": false,
 		"types": ["bun"],
+		"baseUrl": ".",
 		"paths": {
-			"@aphrody-code/bxc": ["./types/bxc-shim.d.ts"]
+			"@aphrody-code/bxc": ["./types/bxc-shim.d.ts"],
+			"@aphrody-code/bxc/*": ["./types/bxc-shim.d.ts"]
 		}
 	},
 	"include": ["src/**/*.ts"],

@@ -7,7 +7,7 @@ Wants=network-online.target
 Type=simple
 User=ubuntu
 Group=ubuntu
-WorkingDirectory=/home/ubuntu/rg
+WorkingDirectory=/home/ubuntu/rg/packages/cron
 # Charge les variables d'env décryptées de production (DATABASE_URL, SUPABASE_SERVICE_ROLE_KEY, CRON_SECRET, etc.)
 EnvironmentFile=/home/ubuntu/rg/apps/website/.env.production.local
 Environment=NODE_ENV=production
@@ -15,7 +15,7 @@ Environment=AZALEE_URL=https://azalee.rosegriffon.fr
 Environment=WEBSITE_URL=https://rosegriffon.fr
 Environment=API_URL=https://api.rosegriffon.fr
 Environment=CDN_URL=https://cdn.rosegriffon.fr
-ExecStart=/home/ubuntu/rg/packages/cron/dist/rg-cron
+ExecStart=/home/ubuntu/.bun/bin/bun run src/index.ts
 Restart=on-failure
 RestartSec=10s
 StandardOutput=journal
