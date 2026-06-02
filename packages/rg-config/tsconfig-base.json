@@ -16,7 +16,24 @@
 		"resolveJsonModule": true,
 		"isolatedModules": true,
 		"skipLibCheck": true,
-		"allowJs": false
+		"allowJs": false,
+		"baseUrl": ".",
+		"ignoreDeprecations": "6.0",
+		"rootDir": "../..",
+		"paths": {
+			"@rose-griffon/db": ["../db/src/index.ts"],
+			"@rose-griffon/db/*": ["../db/src/*"],
+			"@rose-griffon/types": ["../types/src/index.ts"],
+			"@rose-griffon/types/*": ["../types/src/*"],
+			"@rose-griffon/auth": ["../auth/src/index.ts"],
+			"@rose-griffon/auth/*": ["../auth/src/*"],
+			"@rose-griffon/ui": ["../ui/src/index.ts"],
+			"@rose-griffon/ui/*": ["../ui/src/*"],
+			"@rose-griffon/assets": ["../assets/src/index.ts"],
+			"@rose-griffon/assets/*": ["../assets/src/*"],
+			"@rose-griffon/patreon-bun": ["../patreon-bun/src/index.ts"],
+			"@rose-griffon/patreon-bun/*": ["../patreon-bun/src/*"]
+		}
 	},
 	"exclude": ["node_modules", "dist", "build", ".turbo", "coverage"]
 }

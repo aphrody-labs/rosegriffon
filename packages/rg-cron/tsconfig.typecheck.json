@@ -1,0 +1,15 @@
+{
+	"extends": "./tsconfig.json",
+	"compilerOptions": {
+		"paths": {
+			"@rose-griffon/db": ["../db/src/index.ts"],
+			"@rose-griffon/db/*": ["../db/src/*"],
+			"@rose-griffon/types": ["../types/src/index.ts"],
+			"@rose-griffon/types/*": ["../types/src/*"],
+			"@rose-griffon/auth": ["../auth/src/index.ts"],
+			"@rose-griffon/auth/*": ["../auth/src/*"],
+			"@aphrody-code/bxc": ["../inagle/types/bxc-shim.d.ts"],
+			"@aphrody-code/bxc/*": ["../inagle/types/bxc-shim.d.ts"]
+		}
+	}
+}

@@ -78,22 +78,16 @@ _Site principal communautaire et portail membres (déployé sur `rosegriffon.fr`
   - ⏳ Boutique en ligne avec gestion de paniers persistants en Redis.
   - ⏳ Module de commentaires en temps réel sous les articles et flux de diffusion.
 
-### 🤖 @rose-griffon/bot
+### 🤖 @rose-griffon/bot (Retiré & Migré dans @rose-griffon/cron)
 
-_Bot Discord de modération et d'animation (déployé sous systemd sur le VPS)_
+_Le bot Discord autonome a été retiré et migré dans le démon de tâche de fond `rg-cron` pour des raisons de performance et de simplicité._
 
-- **Description** : Bot officiel pour l'engagement communautaire et la synchronisation avec le site.
+- **Description** : Migration de la synchronisation des données (membres, rôles, staff) et de la télémétrie utilisateur en temps réel au sein du cron.
 - **État d'avancement** :
-  - ✅ Framework Discordx et Discord.js (Bun-native fork) avec tsyringe.
-  - ✅ Commandes Slash publiques et d'administration (gestion utilisateur, configuration).
-  - ✅ Rendu de cartes de joueur complexes en Canvas via `@aphrody-code/canvas`.
-  - ✅ Synchronisation des membres et des photos de l'équipe vers la base de données.
-  - ✅ Système d'autorisation RBAC avec `withRgAdmin` et `isAdmin` partagés.
-  - ✅ Utilisation de `sql` (Bun.SQL) pour les requêtes de base de données ultra-rapides et du client Supabase pour le query-building.
-  - ✅ **Nettoyage de la dépendance inutilisée `tsyringe` (dead dep)** : Retiré avec succès des dépendances du bot.
-  - ✅ **Centralisation de la configuration environnementale** : Toutes les variables (GUILD_ID, thèmes, etc.) centralisées dans `src/lib/config.ts`.
-  - ✅ Système d'annonces automatiques sur Discord lors de la mise à jour du Wiki ou du site.
-  - ✅ **Migration vers le helper natif `avatarURL` de discord.js** : Intégration complète de `user.displayAvatarURL()` pour la synchronisation automatique des photos de profil.
+  - ✅ **Migration de la synchronisation** : Intégration de la synchronisation des rôles, membres et photos staff dans `packages/cron`.
+  - ✅ **Télémétrie en temps réel** : Implémentation du suivi des présences, des activités et des salons vocaux, diffusée en temps réel via WebSocket.
+  - ✅ **Serveur d'annonces compatible** : Migration du serveur d'annonces HTTP (port 3006) dans `packages/cron` pour conserver la compatibilité avec l'API existante.
+  - ✅ **Suppression du bot interactif** : Retrait du framework lourd `discordx` et des commandes slash au profit d'un client `discord.js` léger et natif.
 
 ---
 
@@ -269,3 +263,18 @@ _API universelle et parses de données de jeu Inazuma Eleven_
 1. ✅ **Script de backup PG18 automatisé** :
    - Mettre en place un script de sauvegarde globale (schéma + rôles + données) via pg_dump / pg_dumpall natifs, découpé en trois fichiers (`roles.sql`, `schema.sql`, `data.sql`) et compressé.
    - Exporter ces sauvegardes logiques PostgreSQL 18 vers un espace de stockage externe (type AWS S3 ou serveur froid externe) pour se prémunir de toute perte de données dynamique (utilisateurs, logs, profils).
+
+### Phase 6 : Déploiement, Stabilisation & Nettoyage (Juin 2026)
+
+1. ✅ **Résolution globale du type-check et shims de dépendance** :
+   - Isolation du shim de types `@aphrody-code/bxc` dans des configurations spécifiques à la compilation/typecheck (`tsconfig.build.json` pour `inagle` et `tsconfig.typecheck.json` pour `cron`).
+   - Retrait du shim de la configuration commune `tsconfig-base.json` et locale `tsconfig.json` de runtime pour éviter les erreurs d'initialisation de variables par le JIT de Bun.
+   - Résolution des résolutions de chemins `@/*` dans `apps/website`, `apps/azalee` et `apps/bot` en fixant localement le paramètre `"baseUrl": "."` dans leurs TSConfig respectifs.
+   - Compilation robuste du binaire `packages/cron/dist/rg-cron` en marquant `@aphrody-code/bxc` comme dépendance externe.
+2. ✅ **Build et Déploiement robustes Next.js (Next 16 / Turbopack)** :
+   - Déploiement de l'application principale Website (`apps/website`) en production sur Vercel à partir de la racine du monorepo.
+   - Déploiement de l'application self-host Azalée (`apps/azalee`) en production sur le VPS (port `3003`) avec le script de contournement `next-build.sh` pour intercepter les crashs Bun à l'exit et garantir la présence de `server.js` standalone.
+3. ✅ **Gestion et Nettoyage des Services VPS** :
+   - Mise à jour et installation du démon Cron de production (`rg-cron.service`) pour exécuter le démon à l'aide de `bun run src/index.ts` depuis le répertoire `packages/cron` (JIT propre résolvant les vrais modules).
+   - Retrait définitif et désactivation complète du bot Discord (`rg-bot.service`) du VPS à la demande.
+

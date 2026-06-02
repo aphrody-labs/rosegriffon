@@ -4,7 +4,7 @@
 	"private": true,
 	"scripts": {
 		"dev": "bun --smol --bun node_modules/next/dist/bin/next dev --turbopack",
-		"build": "bun --smol --bun node_modules/next/dist/bin/next build --turbopack",
+		"build": "bash ../../scripts/next-build.sh",
 		"start": "bun node_modules/next/dist/bin/next start",
 		"lint": "oxlint .",
 		"lint:fix": "oxlint --fix .",

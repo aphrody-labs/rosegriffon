@@ -73,7 +73,7 @@ Auto-deploy est **disabled** sur rg-azalee + rg-website. Pour déclencher un bui
 **A. Via API Vercel (recommandé, depuis n'importe où) :**
 
 ```bash
-export VERCEL_TOKEN=$(grep "^VERCEL_TOKEN=" /home/ubuntu/vps/.env | cut -d= -f2)
+export VERCEL_TOKEN=$(grep "^VERCEL_TOKEN=" /home/ubuntu/rg/.env | cut -d= -f2)
 TEAM=team_guWQJZI4ZmSLj2K3RWuU4VqM
 SHA=$(cd ~/rg && git rev-parse main)
 

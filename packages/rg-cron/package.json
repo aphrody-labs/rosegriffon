@@ -9,8 +9,8 @@
 	},
 	"scripts": {
 		"start": "bun src/index.ts",
-		"build": "bun build src/index.ts --compile --minify --sourcemap --bytecode --format esm --outfile dist/rg-cron",
-		"type-check": "tsc --noEmit",
+		"build": "bun build src/index.ts --compile --minify --sourcemap --bytecode --format esm --external @aphrody-code/bxc --external @aphrody-code/bxc/google --external @aphrody-code/bxc/internal/html-utils --outfile dist/rg-cron",
+		"type-check": "tsc -p tsconfig.typecheck.json --noEmit",
 		"lint": "bunx oxlint -c ../../.oxlintrc.json src"
 	},
 	"dependencies": {
@@ -23,6 +23,7 @@
 		"@rose-griffon/inagle": "workspace:*",
 		"@rose-griffon/types": "workspace:*",
 		"cheerio": "catalog:",
+		"discord.js": "catalog:",
 		"zod": "catalog:"
 	},
 	"devDependencies": {

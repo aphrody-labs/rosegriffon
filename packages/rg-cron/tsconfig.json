@@ -9,7 +9,18 @@
 		"strictNullChecks": true,
 		"noImplicitAny": true,
 		"noImplicitOverride": true,
-		"skipLibCheck": true
+		"skipLibCheck": true,
+		"ignoreDeprecations": "6.0",
+		"baseUrl": ".",
+		"rootDir": "..",
+		"paths": {
+			"@rose-griffon/db": ["../db/src/index.ts"],
+			"@rose-griffon/db/*": ["../db/src/*"],
+			"@rose-griffon/types": ["../types/src/index.ts"],
+			"@rose-griffon/types/*": ["../types/src/*"],
+			"@rose-griffon/auth": ["../auth/src/index.ts"],
+			"@rose-griffon/auth/*": ["../auth/src/*"]
+		}
 	},
 	"include": ["src/**/*.ts"],
 	"exclude": ["node_modules", "dist"]

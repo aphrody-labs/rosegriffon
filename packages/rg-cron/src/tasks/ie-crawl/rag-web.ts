@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+/* eslint-disable import/no-duplicates */
 import { Browser } from "@aphrody-code/bxc";
 import { googleWebSearch } from "@aphrody-code/bxc/google";
 import { extractTitle, htmlToMarkdown } from "@aphrody-code/bxc/internal/html-utils";
@@ -80,10 +81,10 @@ export async function ragWebSearch(query: string, opts: RagWebOptions = {}): Pro
 			hl: opts.hl ?? "fr",
 			gl: opts.gl ?? "FR",
 		});
-		targets = organic
+		targets = (organic as any[])
 			.slice(0, maxResults)
-			.map((r, i) => ({ url: (r as { url?: string }).url ?? "", rank: i + 1 }))
-			.filter((t) => t.url);
+			.map((r: any, i: number) => ({ url: (r as { url?: string }).url ?? "", rank: i + 1 }))
+			.filter((t: { url: string; rank: number }) => t.url);
 	}
 
 	const docs: RagWebDoc[] = [];
