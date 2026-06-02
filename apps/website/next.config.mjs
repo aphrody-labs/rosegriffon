@@ -49,8 +49,6 @@ const nextConfig = {
 
 	serverExternalPackages: [
 		"@sentry/nextjs",
-		"@supabase/supabase-js",
-		"@supabase/realtime-js",
 		"discord.js",
 		"googleapis",
 		"nodemailer",
