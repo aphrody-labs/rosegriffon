@@ -21,10 +21,6 @@ const getDatabaseURL = () => {
 		url =
 			"***REDACTED-DATABASE-URL***";
 	}
-	// Si l'URL pointe vers l'hôte direct de Supabase (IPv6-only), on redirige dynamiquement vers le pooler IPv4
-	if (url.includes("db.isbkaeltubqittywibeh.supabase.co")) {
-		return "***REMOVED***";
-	}
 	return url;
 };
 
