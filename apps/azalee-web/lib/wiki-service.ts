@@ -1332,10 +1332,22 @@ export const wikiService = {
 
 		if (row) {
 			const h = row as unknown as DbSkill;
-			const elementInfo =
-				ElementNames[h.element_id as keyof typeof ElementNames] || ElementNames[0];
-			const categoryInfo =
-				CategoryNames[h.category_id as keyof typeof CategoryNames] || CategoryNames[0];
+			const elementMap: Record<string, { en: string; ja: string; fr: string }> = {
+				Feu: { en: "Fire", ja: "火", fr: "Feu" },
+				Vent: { en: "Wind", ja: "風", fr: "Vent" },
+				Forêt: { en: "Forest", ja: "林", fr: "Forêt" },
+				Montagne: { en: "Mountain", ja: "山", fr: "Montagne" },
+				Néant: { en: "Void", ja: "無", fr: "Néant" },
+				Aucun: { en: "Void", ja: "無", fr: "Néant" }
+			};
+			const categoryMap: Record<string, { en: string; ja: string; fr: string }> = {
+				Tir: { en: "Shoot", ja: "シュート", fr: "Tir" },
+				Dribble: { en: "Dribble", ja: "ドリブル", fr: "Dribble" },
+				Défense: { en: "Block", ja: "ブロック", fr: "Défense" },
+				Arrêt: { en: "Catch", ja: "キャッチ", fr: "Arrêt" }
+			};
+			const elementInfo = elementMap[h.element || ""] || { en: "Void", ja: "無", fr: "Néant" };
+			const categoryInfo = categoryMap[h.category || ""] || { en: "None", ja: "なし", fr: "Aucun" };
 			const sd = (h.sheet_data || {}) as any;
 
 			return {
@@ -1396,13 +1408,29 @@ export const wikiService = {
 			);
 		}
 		if (params.element) {
-			const elIds = getElementIds(params.element);
-			if (elIds.length === 1) query = query.eq("element_id", elIds[0]);
-			else if (elIds.length > 1) query = query.in("element_id", elIds);
+			// element column stores values like 'Feu', 'Vent', 'Forêt', 'Montagne', 'Néant', 'Aucun'
+			// Map param.element (e.g. 'Fire', 'Wind', 'Forest', 'Mountain', 'Void') to French element name
+			const elementMap: Record<string, string> = {
+				fire: "Feu",
+				wind: "Vent",
+				forest: "Forêt",
+				mountain: "Montagne",
+				void: "Néant"
+			};
+			const searchElem = elementMap[params.element.toLowerCase()] || params.element;
+			query = query.eq("element", searchElem);
 		}
 		if (params.category) {
-			const catId = getCategoryId(params.category);
-			if (catId !== undefined) query = query.eq("category_id", catId);
+			// category column stores values like 'Tir', 'Défense', 'Dribble', 'Arrêt'
+			// Map param.category (e.g. 'shoot', 'block', 'dribble', 'catch') to French category name
+			const categoryMap: Record<string, string> = {
+				shoot: "Tir",
+				block: "Défense",
+				dribble: "Dribble",
+				catch: "Arrêt"
+			};
+			const searchCat = categoryMap[params.category.toLowerCase()] || params.category;
+			query = query.eq("category", searchCat);
 		}
 		if (params.has_video) {
 			query = query.not("video_url", "is", null);
@@ -1432,7 +1460,7 @@ export const wikiService = {
 				}
 			}
 			if (hexIds.size > 0) {
-				query = query.in("sheet_data->>skillID", Array.from(hexIds));
+				query = query.in("data->>skillID", Array.from(hexIds));
 			} else {
 				query = query.eq("id", "__no_match__");
 			}
@@ -1461,10 +1489,22 @@ export const wikiService = {
 		}
 
 		const results = (data as unknown as DbSkill[]).map((h) => {
-			const elementInfo =
-				ElementNames[h.element_id as keyof typeof ElementNames] || ElementNames[0];
-			const categoryInfo =
-				CategoryNames[h.category_id as keyof typeof CategoryNames] || CategoryNames[0];
+			const elementMap: Record<string, { en: string; ja: string; fr: string }> = {
+				Feu: { en: "Fire", ja: "火", fr: "Feu" },
+				Vent: { en: "Wind", ja: "風", fr: "Vent" },
+				Forêt: { en: "Forest", ja: "林", fr: "Forêt" },
+				Montagne: { en: "Mountain", ja: "山", fr: "Montagne" },
+				Néant: { en: "Void", ja: "無", fr: "Néant" },
+				Aucun: { en: "Void", ja: "無", fr: "Néant" }
+			};
+			const categoryMap: Record<string, { en: string; ja: string; fr: string }> = {
+				Tir: { en: "Shoot", ja: "シュート", fr: "Tir" },
+				Dribble: { en: "Dribble", ja: "ドリブル", fr: "Dribble" },
+				Défense: { en: "Block", ja: "ブロック", fr: "Défense" },
+				Arrêt: { en: "Catch", ja: "キャッチ", fr: "Arrêt" }
+			};
+			const elementInfo = elementMap[h.element || ""] || { en: "Void", ja: "無", fr: "Néant" };
+			const categoryInfo = categoryMap[h.category || ""] || { en: "None", ja: "なし", fr: "Aucun" };
 
 			return {
 				skillId: h.id,
