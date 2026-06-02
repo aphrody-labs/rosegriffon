@@ -117,7 +117,7 @@ SECURITY DEFINER
 AS $$
 BEGIN
   UPDATE public.articles
-  SET views_count = COALESCE(views_count, 0) + 1
+  SET view_count = COALESCE(view_count, 0) + 1
   WHERE id = article_id;
 END;
 $$;
