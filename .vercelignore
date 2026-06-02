@@ -20,3 +20,12 @@ apps/azalee/test-results
 *.sqlite
 data/backups
 **/data/backups
+# Build artefacts imbriqués (déploiement depuis la racine = upload de tout le monorepo)
+**/.next
+**/.turbo
+**/.bun-cache
+.claude
+# azalee n'est PAS buildé par le déploiement website (turbo --filter=@rose-griffon/website...)
+apps/azalee/.next
+apps/azalee/data
+apps/azalee/public
