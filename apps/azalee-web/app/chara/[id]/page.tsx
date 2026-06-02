@@ -135,7 +135,7 @@ export default async function PlayerDetailPage({ params }: { params: Promise<{ i
 	}
 
 	// Find the specific variant matching the ID or use first variant if matched by slug
-	const variant = baseChar.variants.find((v) => v.charaParamId === id) || baseChar.variants[0];
+	const variant = baseChar.variants.find((v) => v.charaParamId === id || v.slug === id) || baseChar.variants[0];
 
 	if (!variant) {
 		notFound();
@@ -316,8 +316,8 @@ export default async function PlayerDetailPage({ params }: { params: Promise<{ i
 	const moveset: MovesetSkill[] = [];
 	const altMoveset: MovesetSkill[] = [];
 
-	const movesetRaw = (player as any).sheetData?.moveset as string | undefined;
-	const altMovesetRaw = (player as any).sheetData?.altMoveset as string | undefined;
+	const movesetRaw = ((player as any).sheetData?.moveset || (baseChar as any).sheetData?.moveset) as string | undefined;
+	const altMovesetRaw = ((player as any).sheetData?.altMoveset || (baseChar as any).sheetData?.altMoveset) as string | undefined;
 
 	if (movesetRaw) {
 		const resolved = await resolveSkillNames(movesetRaw);
