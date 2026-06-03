@@ -31,6 +31,13 @@ export default function Footer() {
 						>
 							Wiki Azalée — Inazuma Eleven: Victory Road
 						</Link>
+						<Link
+							href="https://achillea.rosegriffon.fr"
+							rel="noopener"
+							className="text-sm text-muted-foreground hover:text-foreground hover:underline transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-sm"
+						>
+							Achilléa — Compétitif Inazuma Eleven
+						</Link>
 					</div>
 
 					<div className="flex flex-col items-center sm:items-start gap-2">

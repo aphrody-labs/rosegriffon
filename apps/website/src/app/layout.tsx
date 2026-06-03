@@ -131,6 +131,9 @@ export default function RootLayout({
 										"https://www.youtube.com/@RoseGriffon",
 										"https://www.instagram.com/rose_griffonfr",
 										"https://azalee.rosegriffon.fr",
+										"https://achillea.rosegriffon.fr",
+										"https://disboard.org/server/1072991720268111892",
+										"https://discord.do/fr/inazuma-eleven-fr-%E2%9A%BD-rose-griffon/",
 									],
 								},
 								{
