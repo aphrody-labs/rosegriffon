@@ -1,5 +1,11 @@
 export default function robots() {
-	const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://rosegriffon.fr";
+	// Host canonique (apex, sans www) — cohérent avec le `metadataBase` du layout et
+	// la redirection 301 www → apex de next.config. Évite que la directive Sitemap
+	// pointe vers une URL redirigée.
+	const baseUrl = (process.env.NEXT_PUBLIC_BASE_URL || "https://rosegriffon.fr").replace(
+		"://www.",
+		"://",
+	);
 	return {
 		rules: [
 			{

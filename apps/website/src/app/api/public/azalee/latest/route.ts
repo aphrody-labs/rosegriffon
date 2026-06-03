@@ -12,7 +12,7 @@ export async function GET(request: Request) {
 	let query = supabase
 		.from("articles")
 		.select(
-			"id, title, slug, excerpt, content, featured_image_url, published_at, category, author_id, profiles(username, avatar_url)"
+			"id, title, slug, excerpt, content, featured_image_url, published_at, category, author_id"
 		)
 		.eq("status", "published")
 		.eq("app", "azalee")
@@ -29,12 +29,24 @@ export async function GET(request: Request) {
 		return Response.json({ error: error.message }, { status: 500 });
 	}
 
+	// Pas de clé étrangère articles.author_id → profiles dans le schéma : on résout
+	// les auteurs via une requête séparée (un embed PostgREST échouerait en 500).
+	type ProfileRow = { id: string; avatar_url: string | null; username: string | null };
+	const authorIds = [...new Set(articles.map((a) => a.author_id).filter(Boolean))] as string[];
+	const profilesById = new Map<string, ProfileRow>();
+	if (authorIds.length > 0) {
+		const { data: profiles } = await supabase
+			.from("profiles")
+			.select("id, username, avatar_url")
+			.in("id", authorIds);
+		for (const p of (profiles ?? []) as ProfileRow[]) {
+			profilesById.set(p.id, p);
+		}
+	}
+
 	// Formatage pour simplifier la consommation
 	const formattedArticles = articles.map((article) => {
-		type ProfileRow = { avatar_url: string | null; username: string | null };
-		const profile: ProfileRow | null = Array.isArray(article.profiles)
-			? ((article.profiles[0] as ProfileRow | undefined) ?? null)
-			: (article.profiles as ProfileRow | null);
+		const profile = article.author_id ? profilesById.get(article.author_id) ?? null : null;
 		return {
 			author: {
 				avatar: profile?.avatar_url,
