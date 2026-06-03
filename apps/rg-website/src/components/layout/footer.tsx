@@ -24,6 +24,13 @@ export default function Footer() {
 						>
 							Numéro RNA
 						</Link>
+						<Link
+							href="https://azalee.rosegriffon.fr"
+							rel="noopener"
+							className="text-sm text-muted-foreground hover:text-foreground hover:underline transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-sm"
+						>
+							Wiki Azalée — Inazuma Eleven: Victory Road
+						</Link>
 					</div>
 
 					<div className="flex flex-col items-center sm:items-start gap-2">
@@ -148,9 +155,20 @@ export default function Footer() {
 					</div>
 				</div>
 
-				<div className="mt-8 pt-6 border-t border-border/40 text-center">
+				<div className="mt-8 pt-6 border-t border-border/40 text-center space-y-1">
 					<p className="text-xs sm:text-sm text-muted-foreground">
 						Rose Griffon © 2025 - Tous Droits Réservés
+					</p>
+					<p className="text-xs text-muted-foreground">
+						Conçu et développé par{" "}
+						<Link
+							href="https://x.com/yoyo__goat"
+							target="_blank"
+							rel="author me noopener noreferrer"
+							className="font-medium hover:text-foreground hover:underline transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-sm"
+						>
+							yoyo
+						</Link>
 					</p>
 				</div>
 			</div>
