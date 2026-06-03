@@ -301,7 +301,7 @@ export default async function Home() {
 						<div className="text-center space-y-2 max-w-7xl mx-auto px-4">
 							<h2
 								id="community-heading"
-								className="text-2xl md:text-3xl font-bold bg-clip-text text-transparent bg-linear-to-r from-indigo-600 via-purple-600 to-indigo-600 dark:from-indigo-400 dark:via-purple-400 dark:to-indigo-400"
+								className="text-2xl md:text-3xl font-bold bg-clip-text text-transparent bg-linear-to-r from-[#C83C51] via-[#921044] to-[#FECD50] dark:from-[#FECD50] dark:via-[#C83C51] dark:to-[#FECD50]"
 							>
 								{communityTitle}
 							</h2>
