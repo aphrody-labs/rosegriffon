@@ -129,7 +129,7 @@ public static class GameFileType
     private const uint Magic_PXCL  = 0x4C435850u; // "PXCL" LE
     private const uint Magic_XFSA  = 0x41534658u; // "XFSA" LE
     private const uint Magic_XPCK  = 0x4B435058u; // "XPCK" LE
-    private const uint Magic_AGI   = 0x2E494741u; // ".AGI" LE
+    private const uint Magic_AGI   = 0x4147492Eu; // ".AGI" — uint32 LE (octets disque 2E 49 47 41), aligné FormatDetector.cs
     // NB : pas de Magic_ACB — un ACB CRI est un conteneur "@UTF" (= Magic_UTF), indistinguable de
     // l'UTF brut sur 4 octets. Détectable seulement par extension .acb (cf. FromExtension).
     private const uint Magic_HCA   = 0x00414348u; // "HCA\x00" LE
