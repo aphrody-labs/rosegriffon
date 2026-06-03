@@ -17,7 +17,7 @@ export default function GoogleMapEvents({ events, isLoading }: GoogleMapEventsPr
 	const { isLoaded, importLibrary } = useGoogleMaps();
 
 	useEffect(() => {
-		if (!isLoaded || !mapRef.current) {
+		if (!isLoaded || !importLibrary || !mapRef.current) {
 			return;
 		}
 

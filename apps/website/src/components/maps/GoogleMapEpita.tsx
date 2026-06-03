@@ -10,7 +10,7 @@ export default function GoogleMapEpita() {
 	const { isLoaded, error, importLibrary } = useGoogleMaps();
 
 	useEffect(() => {
-		if (!isLoaded || !mapRef.current) {
+		if (!isLoaded || !importLibrary || !mapRef.current) {
 			return;
 		}
 
