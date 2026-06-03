@@ -1,3 +1,4 @@
+import type { ImageLoaderProps } from "next/image";
 /**
  * Cdn-loader.js — passthrough vers cdn.rosegriffon.fr (website)
  *
@@ -11,7 +12,7 @@
  * Note : bypass /_next/image — nginx CDN sert les fichiers tels quels (immutable, gzip_static).
  *        Pré-générer les tailles multiples côté build si besoin.
  */
-export default function cdnLoader({ src, width, quality }) {
+export default function cdnLoader({ src, width, quality }: ImageLoaderProps): string {
 	const cdn = process.env.NEXT_PUBLIC_CDN_URL;
 	if (!cdn) {
 		return src;

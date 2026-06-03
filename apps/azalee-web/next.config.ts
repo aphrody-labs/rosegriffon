@@ -82,7 +82,7 @@ const nextConfig: NextConfig = {
 		],
 		...(CDN_LOADER && {
 			loader: "custom",
-			loaderFile: "./cdn-loader.js",
+			loaderFile: "./cdn-loader.ts",
 		}),
 	},
 

@@ -1,3 +1,4 @@
+import type { ImageLoaderProps } from "next/image";
 /**
  * Cdn-loader.js — passthrough vers cdn.rosegriffon.fr (azalee)
  *
@@ -14,7 +15,7 @@
  *        Le param `width` est ignoré côté CDN nginx mais conservé en query
  *        pour cache-busting si jamais on wire un image-resizer plus tard.
  */
-export default function cdnLoader({ src, width, quality }) {
+export default function cdnLoader({ src, width, quality }: ImageLoaderProps): string {
 	const cdn = process.env.NEXT_PUBLIC_CDN_URL;
 	if (!cdn) {
 		return src;
