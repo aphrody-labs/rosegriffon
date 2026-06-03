@@ -61,7 +61,7 @@
 		"build": "bun run tsc -p tsconfig.build.json",
 		"cli": "bun src/cli.ts",
 		"entries": "bun src/scripts/generate-entries.ts",
-		"push": "bun src/cli-push.ts",
+		"push": "bun src/cli.ts push",
 		"serve": "bun src/scripts/serve-data.ts",
 		"compile": "bun src/scripts/build-standalone.ts",
 		"prepublishOnly": "bun run build",
