@@ -36,17 +36,22 @@ Couverture data réelle : 6148 personnages, 1002 techniques, 1668 objets, 289 ke
 
 ---
 
-## 2. Constat critique (P0) — le CDN ne sert AUCUN asset de jeu
+## 2. Constat critique (P0) — le CDN ne servait AUCUN asset de jeu → **RÉSOLU (2026-06-03)**
 
-**Vérifié** : `cdn.rosegriffon.fr` (nginx, `51.77.147.152`) renvoie **404 sur tout** (racine,
-`/dx11/`, `/static/`, `/public/`, `/_next/`). Or **tout** le contenu visuel d'azalee
-(faces, uniformes, telop techniques, items, keshins/souls/auras, miximax, emblèmes, menu) est
-résolu vers `cdn.rosegriffon.fr/dx11/menu/**` par `apps/azalee/src/lib/images/utils.ts`.
-→ **100 % des vignettes de contenu azalee sont en 404 en prod**, fallback `/ievr.webp`.
+**Cause racine réelle (VÉRIFIÉE)** : `cdn.rosegriffon.fr` (nginx, `51.77.147.152`) renvoyait
+**404** sur `/dx11/**`. Or **tout** le contenu visuel d'azalee (faces, uniformes, telop
+techniques, items, keshins/souls/auras, miximax, emblèmes, menu) est résolu vers
+`cdn.rosegriffon.fr/dx11/menu/**` par `apps/azalee/src/lib/images/utils.ts`.
 
-Le contenu **existe** (dump 3.7 Go sur le VPS) : c'est un **problème de déploiement/infra**, pas
-d'extraction. Le légacy Supabase Storage (`/storage/v1/object/public/menu/…`, 1002 skills) est
-**mort (400)** aussi.
+Ce n'était **ni** une conf nginx perdue **ni** des fichiers jamais synchronisés (hypothèses de
+l'audit initial, **infirmées**). La conf existait ET contenait un bloc `location ^~ /dx11/`,
+mais son `alias` pointait vers `…/steamcmd/…` (**chemin inexistant**) au lieu du dump réel
+`…/iecode/inazuma/data/dx11/` (40 471 PNG / 3.7 Go **déjà** présents sur l'hôte). Le correctif
+est donc un **one-liner** (re-pointer l'`alias` + `nginx -t` + `reload`), **pas** un rsync de
+3.7 Go. Vérif live post-fix : `curl -sI .../dx11/menu/icon_chr/face/c01000010_l_c01000010_1_l00.png`
+→ **200** (`image/png`, 26 848 o). Conf corrigée versionnée dans
+`infra/nginx/cdn.rosegriffon.conf` (cdn-3). Le légacy Supabase Storage
+(`/storage/v1/object/public/menu/…`, 1002 skills) était **mort (400)** aussi (traité db-2).
 
 Les `public/` du **website** et d'**azalee** (logos, icônes UI element/rarity/move) sont, eux,
 servis correctement par l'origine (200). Le website n'active pas le CDN en prod → non impacté.
@@ -59,12 +64,12 @@ servis correctement par l'origine (200). Le website n'active pas le CDN en prod 
 |---|---|---|:--:|---|
 | 1 | **CDN dx11 (azalee jeu)** | ~~404 global sur `cdn.rosegriffon.fr/dx11/menu/**`~~ → **FAIT (2026-06-03)** : alias nginx corrigé `steamcmd/`→`iecode/inazuma/data/dx11/` ; `curl -sI .../dx11/menu/icon_chr/face/c01000010_l_c01000010_1_l00.png` = **200** (image/png, 26848 o) ; conf **versionnée** dans `infra/nginx/cdn.rosegriffon.conf` (cdn-3, anti-dérive) | **P0** | ~~Déployer/synchroniser le dump dx11~~ Cause unique = alias nginx pointant vers `steamcmd/` (inexistant) ; corrigé vers `…/iecode/inazuma/data/dx11/` (40 471 PNG servis), `nginx -t` + reload OK ; conf déployée copiée dans le repo (`infra/nginx/`) pour tracer le fix et éviter la perte (cdn-3) |
 | 2 | **CDN static menu** | ~~`…/static/azalee/menu/**` 404 (dossier vide)~~ → **FAIT (2026-06-03)** : surface retirée (option a) ; `/var/www/cdn/static/azalee/menu/` (0 fichier) supprimé, aucun outil cdn-sync n'y déploie. Le contenu vit déjà dans le dump dx11 servi par (1) → `curl .../dx11/menu/200_icon/01_icon_emblem/em010001_em010001.png` = **200**. Reste côté azalee-code : re-pointer le fallback `resolveAssetUrl` `MENU_BASE`→`MENU_DUMP_BASE` | **P0** | ~~alias nginx + upload~~ Décidé : ne plus dépendre de `/static/azalee/menu` (rien à y déployer) ; dossier vide retiré. `MENU_BASE` (utils.ts) reste utilisé par 2 fallbacks → à rediriger vers `/dx11/menu` côté azalee-code |
-| 3 | **Légacy Supabase Storage** | bucket `menu` → 400 | P0 | Cible morte : confirmer que le rewrite front (→ dx11) suffit une fois (1) fait ; sinon migrer les paths DB |
+| 3 | **Légacy Supabase Storage** | ~~bucket `menu` → 400 (1002 skills `image_url`)~~ → **FAIT (db-2, 2026-06-03)** : 0 URL légacy restante dans `inagle_skills`. Sur les 1002, seuls **16** codes (`whk00050/80/90/100/110`, `who00010-110/190`) ont un fichier telop réel dans le dump → re-pointés vers `/dx11/menu/220_img/telop_waza/fr/<code>_<code>.png` (16/16 = HTTP 200 live). Les **986** autres (majorité `whs*`/`whd*` + `rh*`/`swap`) n'ont **aucun** telop dans le dump → `image_url = NULL` + `has_telop = false` (absence documentée, plus d'URL morte stockée ; lié db-3 pour le gating front) | **P0** | ~~migrer les paths DB~~ Fait : re-point dx11 pour les 16 présents, NULL pour les 986 absents |
 | 4 | **Items (mapping)** | résolveur `{id}.png` ≠ fichier `icon_item{NN}_{id}.png` | P1 | Compléter `apps/azalee/data/item-image-manifest.json` (couvrir les 1668 items) OU corriger le fallback |
-| 5 | **Telop techniques** | `telop_waza/fr` n'a pas de `rhd*` (codes `a*`/`k*` seulement) | P1 | Établir le mapping technique→telop, OU confirmer absence dans le dump complet et masquer l'image |
-| 6 | **Keshins sans image** | 66/289 `image_url` NULL | P1 | Re-mapper via `asset_code` → `icon_chr/aura_fs/k{N}` |
+| 5 | **Telop techniques** | `telop_waza/fr` n'a pas de `rhd*` (codes `a*`/`k*` seulement) | P1 | **FAIT (db-3, 2026-06-03)** — absence confirmée dans le dump complet : `220_img/telop_waza/fr/` = 310 fichiers, prefixes `a*`/`k*`/`aura*`/`wh*`/`mode*` uniquement, **0** `rh*`/`shd*`/`swap_*`. Les 28 codes techniques (19 `rh[dkos]*` + 9 `swap_skill_waza_*`) marqués sans telop : `inagle_skills.has_telop=false` + `image_url=NULL` volontaire (commenté en DB). Résolveur `getSkillImageUrl` court-circuite ces codes vers `PLACEHOLDERS.skill` (plus de 404). `curl rhd10010_rhd10010.png` = **404** (garanti), `who00010_who00010.png` = **200**. Cf. `azalee-tables-gaps.md §7` |
+| 6 | **Keshins sans image** | **38/289** `image_url` NULL (était 66 ; db-1 a rempli 28). **Correction audit (VÉRIFIÉ 2026-06-03)** : pas un cas « `asset_code` NULL » — les 38 ont **toutes** leur `asset_code` (0 NULL parmi elles ; au global 240/289 ont un code, et les 49 sans code ont déjà une image). Blocage réel = leur code n'a pas de PNG dans le dump `dx11` | P1 | Reste (db-1) : confirmer l'absence dans le dump complet — pas un mapping `asset_code` à refaire |
 | 7 | **Passives sans image** | 128/128 `image_url` NULL | P2 | **FAIT (db-4)** — vérifié dump (3.7G) : `200_icon/` = emblem/item/tactics uniquement, aucun `*passive*` ; pas d'asset jeu. UI `passive/page.tsx` rend des icônes Lucide (sans visuel jeu, assumé). `image_url` NULL volontaire, aucune ré-extraction. Cf. `azalee-tables-gaps.md §6` |
-| 8 | **`inagle_characters.stats` jsonb vide** | 6148 lignes, colonne morte | P2 | Peupler depuis `stat_*` au re-parse inagle, ou documenter dépréciée |
+| 8 | **`inagle_characters.stats` jsonb vide** | ~~6148 lignes, colonne morte~~ → **FAIT (db-6, 2026-06-03)** : colonne **dépréciée** (`COMMENT ON COLUMN` posé). Données réelles dans les scalaires `stat_*` (lv99, 6148/6148) et `stat_lv1_*` (lv1, 6138/6148). Les 2 mappers (`api-client.ts` + `wiki-service.ts`) ne lisent plus le fallback `stats.lv99/lv1` (toujours vide) → uniquement scalaires ; `api-client` expose désormais aussi `stats.lv1`. **skills (423 vides)** : NORMAL, pas de gap de jointure — 412 PNJ/non-controllables sans learnset (sur 6093 non-controllables, 5681 EN ONT) + 11 variantes dupliquées dont la canonique porte le learnset ; `COMMENT` posé. Learnsets = attribut par-variante (`[{skillId, learnLevel}]`), définitions dans `inagle_skills` | **P2** | Décidé : déprécier (pas peupler — éviterait la dérive avec les scalaires source de vérité) ; mappers adaptés |
 | 9 | **Localisation FR partielle** | 58 sans `name_fr`, 157 sans `description_fr` | P2 | Compléter la résolution hash→texte FR (iecode `common/text/fr`) |
 | 10 | **`inagle_game_assets` vide** | manifest CDN jamais peuplé (0 ligne) | P1 | Générer le manifeste assets (path + existence) pour valider URL avant render |
 | 11 | **Website `public/`** | aucun manquant (200 en origine) | — | RAS |
@@ -73,12 +78,12 @@ servis correctement par l'origine (200). Le website n'active pas le CDN en prod 
 
 ## 4. Trous de données inagle à combler
 
-- `inagle_characters.stats` jsonb vide (6148) — peupler ou déprécier.
-- `inagle_characters.skills` vide pour 423 lignes.
+- `inagle_characters.stats` jsonb vide (6148) — **STATUÉ db-6 : DÉPRÉCIÉE** (COMMENT posé) ; source de vérité = scalaires `stat_*`/`stat_lv1_*` ; mappers `api-client.ts`+`wiki-service.ts` ne lisent plus le fallback jsonb.
+- `inagle_characters.skills` vide pour 423 lignes — **STATUÉ db-6 : NORMAL** (412 non-controllables sans learnset + 11 variantes dupliquées dont la canonique porte le learnset) ; pas un gap de jointure (5681/6093 non-controllables ont des skills). COMMENT posé.
 - `name_fr` (58) / `description_fr` (157) manquants.
-- `inagle_keshins.image_url` NULL (66), `inagle_miximax` (1).
+- `inagle_keshins.image_url` NULL (**38**, était 66 ; db-1 a rempli 28) — **correction audit** : les 38 ont toutes leur `asset_code` (pas un cas « `asset_code` NULL ») ; blocage = absence de PNG dans le dump. `inagle_miximax` (1).
 - `inagle_passives.image_url` NULL (128/128) — **STATUÉ db-4 : pas d'asset jeu (aucun `*passive*` dans le dump), UI sans visuel assumée ; NULL volontaire**.
-- `inagle_skills.image_url` tous légacy (1002) → re-pointer vers dx11 ou stocker le vrai code telop.
+- `inagle_skills.image_url` — **FAIT (db-2)** : 0 légacy restante. 16/1002 re-pointés `/dx11/menu/220_img/telop_waza/fr/<code>_<code>.png` (HTTP 200 vérifié), 986/1002 `NULL` + `has_telop=false` (telop absent du dump).
 - Tables vides à peupler si features prévues : `formations`, `tactics`, `heroes`, `coordinators`,
   `awakenings`, `mode_changes`, `stadiums`, `drops_tables/_treasures`, `nameplates` (54 dispo non
   exposées ?), `chara_menu_resource` (92 dispo), etc. (liste complète : audit tables).
@@ -105,8 +110,12 @@ servis correctement par l'origine (200). Le website n'active pas le CDN en prod 
 
 ### inagle (données)
 
-6. **P0 (après 1)** — re-pointer `inagle_skills.image_url` (1002) vers les chemins dx11 réels OU
-   garder le rewrite front ; supprimer la dépendance au Storage Supabase mort.
+6. **P0 — FAIT (db-2, 2026-06-03)** : `inagle_skills.image_url` (1002) sorti du Storage Supabase
+   mort. Dump croisé fichier-par-fichier (`telop_waza/fr`, 310 PNG) : seuls **16** codes ont un
+   telop réel (`whk00050/80/90/100/110`, `who00010-110/190`) → re-pointés
+   `/dx11/menu/220_img/telop_waza/fr/<code>_<code>.png` (16/16 HTTP 200 live via CDN). Les **986**
+   restants (`whs*`/`whd*` dominants + `rh*`/`swap`) n'ont aucun telop dans le dump →
+   `image_url = NULL` + `has_telop = false`. 0 URL `/storage/v1/object/public/menu/` subsistante.
 7. **P1 — partiel (db-1)** : `inagle_keshins.image_url` rempli pour 28/66 via `asset_code`
    (`was{N}` → `aura_soul/a{N pad6}`, format legacy `200_icon/10_icon_chr/aura_soul/...webp`
    rewrité par le résolveur azalee vers le dump dx11 PNG). Filtrage strict sur existence
