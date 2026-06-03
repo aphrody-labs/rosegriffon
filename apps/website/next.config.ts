@@ -202,6 +202,8 @@ const nextConfig = {
 			{ hostname: "cdn.rosegriffon.fr", protocol: "https" },
 			{ hostname: "placehold.co", protocol: "https" },
 			{ hostname: "rosegriffon.fr", protocol: "https" },
+			{ hostname: "azalee.rosegriffon.fr", protocol: "https" },
+			{ hostname: "achillea.rosegriffon.fr", protocol: "https" },
 			{ hostname: "cdn.discordapp.com", protocol: "https" },
 			{ hostname: "static-cdn.jtvnw.net", protocol: "https" },
 			{ hostname: "pbs.twimg.com", protocol: "https" },
