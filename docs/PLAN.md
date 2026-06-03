@@ -194,7 +194,7 @@ _Client API Patreon V2 typé pour Bun_
   - ✅ Implémentation du client d'API Patreon V2 typé.
   - ✅ Outils d'écoute et de traitement des webhooks (exemples express/cloudflare).
   - ✅ Prise en charge de la liaison de compte OAuth.
-  - ⏳ Consolidation du système de rafraîchissement des tokens OAuth.
+  - ✅ Consolidation du système de rafraîchissement des tokens OAuth (lib/oauth/refresh.ts, 3 call-sites Patreon).
 
 ### 📦 @rose-griffon/assets
 
@@ -203,8 +203,8 @@ _Ressources graphiques et statiques partagées_
 - **Description** Centralisation des images, polices et logos pour les apps Next.js et le bot.
 - **État d'avancement** :
   - ✅ Structure d'exportation de fichiers statiques prête.
-  - ⏳ Pipeline de compression automatisé pour réduire le poids des images.
-  - ⏳ Script d'invalidation automatique du cache CDN de production.
+  - ✅ Pipeline de compression automatisé pour réduire le poids des images (scripts/ops/compress-images.ts, alias images:compress).
+  - ✅ Script d'invalidation automatique du cache CDN de production (scripts/ops/invalidate-cdn.ts, alias cdn:invalidate).
 
 ### 🎮 @rose-griffon/inagle
 
@@ -217,7 +217,7 @@ _API universelle et parses de données de jeu Inazuma Eleven_
   - ✅ Calculateur de statistiques de personnage dynamique.
   - ✅ Script de synchronisation DB (`cli-push.ts`) avec préservation complète des métadonnées brutes et enrichies d'auras.
   - ✅ **Test d'intégration unifié en conditions réelles** : Création de `azalee-inagle-integration.test.ts` (exécuté sous `bun test`) validant le cycle complet (chargement des fichiers JSON binaires via Bun.file, cohérence avec la base SQLite locale et exécution complète du binaire de test CLI via Bun.process).
-  - ⏳ Support de nouvelles versions de fichiers lors des futures mises à jour du jeu.
+  - ✅ Support de nouvelles versions de fichiers lors des futures mises à jour du jeu (resolveGameDataFile version-agnostic, 10 call-sites).
   - ⏳ Simulateur interactif de composition d'équipe.
 
 ---
