@@ -1375,7 +1375,9 @@ export const wikiService = {
 			const { data } = await supabase
 				.from("inagle_skills")
 				.select("*")
-				.or(`id.eq.${safeId},sheet_data->>skillID.eq.${safeId}`)
+				// Le hash chara_param matche le skill via skillID, qui vit dans la colonne
+				// `data` (sheet_data est vide depuis la migration) — d'où data->>skillID.
+				.or(`id.eq.${safeId},data->>skillID.eq.${safeId},sheet_data->>skillID.eq.${safeId}`)
 				.limit(1)
 				.maybeSingle();
 			row = data;
