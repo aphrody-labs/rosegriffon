@@ -49,6 +49,15 @@ const SITES: SiteTarget[] = [
 // On plafonne raisonnablement pour éviter tout abus / risque de bannissement.
 const MAX_URLS_PER_SITE = 5000;
 
+// Taille de lot par requête. Les gros envois (plusieurs milliers d'URLs en une
+// seule requête) sont rejetés par l'endpoint (HTTP 403/422), alors qu'un lot
+// modéré passe (HTTP 200/202). On découpe donc en lots de 100, conformément aux
+// bonnes pratiques IndexNow, avec une courte pause entre lots.
+const BATCH_SIZE = 100;
+const BATCH_DELAY_MS = 500;
+
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
 /**
  * Récupère toutes les URLs `<loc>` d'un sitemap XML (gère les sitemap index
  * imbriqués en suivant un niveau de profondeur).
@@ -125,13 +134,28 @@ export async function runSeoIndexNow(): Promise<{ success: boolean; error?: stri
 		}
 
 		const capped = urls.slice(0, MAX_URLS_PER_SITE);
+		// Découpage en lots : les très gros envois en une requête sont rejetés (403).
+		const batches: string[][] = [];
+		for (let i = 0; i < capped.length; i += BATCH_SIZE) {
+			batches.push(capped.slice(i, i + BATCH_SIZE));
+		}
+
+		let okBatches = 0;
+		const statuses: number[] = [];
 		try {
-			const { status, ok } = await submitToIndexNow(site, capped, key);
+			for (let b = 0; b < batches.length; b++) {
+				const { status, ok } = await submitToIndexNow(site, batches[b]!, key);
+				statuses.push(status);
+				if (ok) okBatches++;
+				if (b < batches.length - 1) await sleep(BATCH_DELAY_MS);
+			}
+			const lastStatus = statuses[statuses.length - 1] ?? 0;
+			const allOk = okBatches === batches.length;
 			console.log(
-				`[SEO IndexNow] ${site.name} : ${capped.length} URLs soumises → HTTP ${status}${ok ? " (OK)" : " (échec)"}.`
+				`[SEO IndexNow] ${site.name} : ${capped.length} URLs en ${batches.length} lot(s), ${okBatches}/${batches.length} OK (dernier HTTP ${lastStatus}).`
 			);
-			summary.push(`${site.name}: ${capped.length} URLs → HTTP ${status}`);
-			if (!ok) anyFailure = true;
+			summary.push(`${site.name}: ${capped.length} URLs, ${okBatches}/${batches.length} lots OK (HTTP ${lastStatus})`);
+			if (!allOk) anyFailure = true;
 		} catch (err: any) {
 			console.error(`[SEO IndexNow] Erreur de soumission pour ${site.name} :`, err.message || err);
 			summary.push(`${site.name}: ERREUR ${err.message || err}`);
