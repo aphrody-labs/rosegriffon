@@ -1626,6 +1626,13 @@ export const wikiService = {
 				duration: match.duration,
 				cooldown: match.cooldown,
 				shop: match.shop,
+				// Surface complète de la table tactique
+				internalCode: (match as any).internal_code,
+				element: (match as any).element,
+				power: (match as any).power,
+				recastTime: (match as any).recast_time,
+				partnerCount: (match as any).partner_count,
+				partnerIds: (match as any).partner_ids,
 				image: resolveAssetUrl((match as any).image_url) || null,
 				imageUrl: resolveAssetUrl((match as any).image_url) || null,
 			};
@@ -1649,6 +1656,12 @@ export const wikiService = {
 			duration: match.duration,
 			cooldown: match.cooldown,
 			shop: match.shop,
+			internalCode: match.internal_code,
+			element: match.element,
+			power: match.power,
+			recastTime: match.recast_time,
+			partnerCount: match.partner_count,
+			partnerIds: match.partner_ids,
 			image: resolveAssetUrl(match.image_url) || null,
 			imageUrl: resolveAssetUrl(match.image_url) || null,
 		};
