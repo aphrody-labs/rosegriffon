@@ -7,7 +7,7 @@
  * fallback immediately and fire-and-forget the Redis DEL.
  */
 import { RedisClient } from "bun";
-import { REDIS_URL } from "./config.ts";
+import { REDIS_URL } from "./config.js";
 
 const PREFIX = "rgbot:";
 

@@ -15,7 +15,7 @@
  */
 
 // Hono adapter
-export { createInagleAppAsync, type InagleApp } from "./hono.ts";
+export { createInagleAppAsync, type InagleApp } from "./hono.js";
 
 // Hono RPC Adapter (Zod Validated)
 /*

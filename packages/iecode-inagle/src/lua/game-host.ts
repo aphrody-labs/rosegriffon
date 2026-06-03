@@ -9,7 +9,7 @@
  * Compatible Bun + navigateur (étend `DefaultLuaHost`, qui est pur JS via fengari).
  */
 
-import { DefaultLuaHost, resolveHash } from "./runtime.ts";
+import { DefaultLuaHost, resolveHash } from "./runtime.js";
 
 // ── Modèle d'état (miroir de MenuState.cs) ───────────────────────────────────
 

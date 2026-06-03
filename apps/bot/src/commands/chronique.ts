@@ -5,9 +5,9 @@ import {
 	type ChatInputCommandInteraction,
 } from "discord.js";
 
-import { renderChroniqueList } from "../lib/canvas/cards.ts";
-import { fmtDate, rgEmbed, rgUrl, truncate } from "../lib/embeds.ts";
-import { listChronicles, readChronicle } from "../services/website.ts";
+import { renderChroniqueList } from "../lib/canvas/cards.js";
+import { fmtDate, rgEmbed, rgUrl, truncate } from "../lib/embeds.js";
+import { listChronicles, readChronicle } from "../services/website.js";
 
 @Discord()
 @SlashGroup({ name: "chronique", description: "Chroniques Rose Griffon" })

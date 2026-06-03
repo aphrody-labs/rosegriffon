@@ -5,7 +5,7 @@
  */
 
 // Re-export types
-export { createInagleAppAsync, type InagleApp } from "./adapters/hono.ts";
+export { createInagleAppAsync, type InagleApp } from "./adapters/hono.js";
 
 // Domain APIs
 export {
@@ -23,7 +23,7 @@ export {
 	type HeroVariants,
 	POSITION_MAP,
 	type Position,
-} from "./basara/index.ts";
+} from "./basara/index.js";
 
 // Characters API
 export {
@@ -38,13 +38,13 @@ export {
 	type EnrichedCharacter,
 	PERSONALITY_NAMES,
 	RARITY_NAMES,
-} from "./characters/api.ts";
-export * from "./characters/comparison-engine.ts";
+} from "./characters/api.js";
+export * from "./characters/comparison-engine.js";
 
 // Constellation
-export { type ConstellationAPI, createConstellationAPI } from "./constellation/index.ts";
+export { type ConstellationAPI, createConstellationAPI } from "./constellation/index.js";
 // Exporters
-export * from "./core/exporters.ts";
+export * from "./core/exporters.js";
 
 // Core exports
 export {
@@ -62,7 +62,7 @@ export {
 	RarityId,
 	RarityNames,
 	toHex,
-} from "./core/index.ts";
+} from "./core/index.js";
 // Core types for base characters with variants
 export type {
 	BaseCharacter,
@@ -70,8 +70,8 @@ export type {
 	CharacterStats as GameCharacterStats,
 	CharacterVariant,
 	MultiLevelStats,
-} from "./core/types.ts";
-export * from "./drops/index.ts";
+} from "./core/types.js";
+export * from "./drops/index.js";
 // New entity builders
 export {
 	type BaseCharacterStats,
@@ -84,23 +84,23 @@ export {
 	loadBaseCharacters,
 	loadFilteredCharacters,
 	preloadCharacterEnrichment,
-} from "./entities/character.ts";
-export * from "./menu/index.ts";
-export * from "./rag/index.ts";
+} from "./entities/character.js";
+export * from "./menu/index.js";
+export * from "./rag/index.js";
 // APIs
-export * from "./service.ts";
+export * from "./service.js";
 
 // Stat Calculator
-export * from "./analysis/index.ts";
-export * from "./stat-calculator.ts";
-export * from "./zukan/index.ts";
+export * from "./analysis/index.js";
+export * from "./stat-calculator.js";
+export * from "./zukan/index.js";
 
 // === AZALEE COMPATIBILITY LAYER ===
 
-export type { ItemsAPI, ItemsDatabase } from "./items/api.ts";
-export { buildItemsDatabaseAsync, createItemsAPIAsync } from "./items/api.ts";
+export type { ItemsAPI, ItemsDatabase } from "./items/api.js";
+export { buildItemsDatabaseAsync, createItemsAPIAsync } from "./items/api.js";
 // Items
-export type { ItemCategory, ParsedItem as Item } from "./parsers/item-config.ts";
+export type { ItemCategory, ParsedItem as Item } from "./parsers/item-config.js";
 // Global Search
 export {
 	createGlobalSearch,
@@ -108,7 +108,7 @@ export {
 	type GlobalSearchResult,
 	type SearchableType,
 	type SearchConfig,
-} from "./search/index.ts";
+} from "./search/index.js";
 // Skills
 export type {
 	EnrichedAuraSkill as Aura,
@@ -118,7 +118,7 @@ export type {
 	SkillsDatabase,
 	SkillType,
 	TeamPassive,
-} from "./skills/api.ts";
+} from "./skills/api.js";
 export {
 	buildSkillsDatabase,
 	CATEGORY_NAMES,
@@ -126,15 +126,15 @@ export {
 	ELEMENT_NAMES,
 	PASSIVE_BOOST_NAMES,
 	PASSIVE_SCOPE_NAMES,
-} from "./skills/api.ts";
+} from "./skills/api.js";
 // Teams & Formations
 export type {
 	EnrichedFormation as Formation,
 	EnrichedTeam as Team,
 	TeamsAPI,
 	TeamsDatabase,
-} from "./teams/api.ts";
-export { buildTeamsDatabase, createTeamsAPI } from "./teams/api.ts";
+} from "./teams/api.js";
+export { buildTeamsDatabase, createTeamsAPI } from "./teams/api.js";
 
 // Romaji & Transliteration
-export { initRomaji, toRomaji, toRomajiTitleCase, toKana } from "./utils/romaji.ts";
+export { initRomaji, toRomaji, toRomajiTitleCase, toKana } from "./utils/romaji.js";

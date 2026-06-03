@@ -3,8 +3,8 @@
  * Port du LuaDisassembler.cs C# (IECODE.Core.Formats.Lua).
  */
 
-import { opcodeName, Opcode } from "./constants.ts";
-import type { LuaChunk, LuaConstant, LuaInstruction, LuaProto } from "./model.ts";
+import { opcodeName, Opcode } from "./constants.js";
+import type { LuaChunk, LuaConstant, LuaInstruction, LuaProto } from "./model.js";
 
 // ── Format d'une instruction ─────────────────────────────────────────────────
 /**

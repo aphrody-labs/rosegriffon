@@ -11,16 +11,16 @@
 
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
-import { createImageAPI } from "../core/images.ts";
-import { PATHS } from "../core/paths.ts";
-import { buildSeriesMapping, getAllTeams, type Series } from "../parsers/belong-team.ts";
-import { loadTextFile } from "../parsers/text-parser.ts";
+import { createImageAPI } from "../core/images.js";
+import { PATHS } from "../core/paths.js";
+import { buildSeriesMapping, getAllTeams, type Series } from "../parsers/belong-team.js";
+import { loadTextFile } from "../parsers/text-parser.js";
 import type {
 	FormationInfo,
 	FormationPlacement,
 	TeamInfo,
 	UniformInfo,
-} from "../types/gamedata.ts";
+} from "../types/gamedata.js";
 
 // Data paths
 const ENTITIES_PATH = PATHS.entities;

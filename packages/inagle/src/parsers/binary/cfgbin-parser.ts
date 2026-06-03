@@ -16,7 +16,7 @@
  * avec fallback gracieux sur le parser TS pur si la FFI est indisponible ou echoue.
  */
 
-import { crc32String } from "../hash/crc32.ts";
+import { crc32String } from "../hash/crc32.js";
 
 // ============================================================================
 // Types

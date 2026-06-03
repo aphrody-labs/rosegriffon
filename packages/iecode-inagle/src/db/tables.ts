@@ -11,8 +11,8 @@
 
 import type {
 	CharaElement, CharaPosition, CharaRarityLabel, Gender, HeroType, Series, SkillCategory,
-} from "./enums.ts";
-import type { CharaData, CharaSheetData, CharaSkillsColumn, SkillData } from "./jsonb.ts";
+} from "./enums.js";
+import type { CharaData, CharaSheetData, CharaSkillsColumn, SkillData } from "./jsonb.js";
 
 /** Ligne typée `inagle_characters` (colonnes utiles + JSONB typés). */
 export interface InagleCharacter {

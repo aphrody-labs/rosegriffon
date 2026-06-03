@@ -1,7 +1,7 @@
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
-import { rewriteZukanUrl } from "../core/images.ts";
-import { DATA_ROOT } from "../core/paths.ts";
+import { rewriteZukanUrl } from "../core/images.js";
+import { DATA_ROOT } from "../core/paths.js";
 
 export interface ZukanCharacter {
 	id: string;

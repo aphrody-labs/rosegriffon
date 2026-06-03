@@ -1,7 +1,7 @@
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
-import { PATHS } from "../core/paths.ts";
-import { loadFashionItemMappingAsync } from "../parsers/item-config.ts";
+import { PATHS } from "../core/paths.js";
+import { loadFashionItemMappingAsync } from "../parsers/item-config.js";
 
 export interface ZukanUniform {
 	item_id: string;

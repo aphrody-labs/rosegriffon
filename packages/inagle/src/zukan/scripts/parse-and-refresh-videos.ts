@@ -1,6 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
-import { parseSkillListPage } from "../parser.ts";
+import { parseSkillListPage } from "../parser.js";
 
 async function main() {
 	const skillDir = "/home/ubuntu/rg/packages/inagle/data/zukan/skill";

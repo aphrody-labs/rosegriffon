@@ -6,10 +6,10 @@ import { describe, expect, it } from "bun:test";
 import { join } from "node:path";
 import { existsSync, readdirSync } from "node:fs";
 
-import { isLua52, parseLua52, LuaParseError, decodeInstruction } from "./parser.ts";
-import { disassemble, summarize } from "./disassembler.ts";
-import { Opcode, SBIAS } from "./constants.ts";
-import type { LuaConstant } from "./model.ts";
+import { isLua52, parseLua52, LuaParseError, decodeInstruction } from "./parser.js";
+import { disassemble, summarize } from "./disassembler.js";
+import { Opcode, SBIAS } from "./constants.js";
+import type { LuaConstant } from "./model.js";
 
 const RAW_DIR = join(import.meta.dir, "../../../../../re/lua/raw");
 const hasRawFiles = existsSync(join(RAW_DIR, "qrcode_menu.lua.bin"));

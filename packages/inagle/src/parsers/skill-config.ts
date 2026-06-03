@@ -5,10 +5,10 @@
 
 import { existsSync, readdirSync } from "node:fs";
 import { join } from "node:path";
-import { loadJsonAsync } from "../core/async-loader.ts";
-import { toHex } from "../core/data-loader.ts";
-import { EntityExporters, type ExportableEntity } from "../core/exporters.ts";
-import { loadTextFileAsync } from "./text-parser.ts";
+import { loadJsonAsync } from "../core/async-loader.js";
+import { toHex } from "../core/data-loader.js";
+import { EntityExporters, type ExportableEntity } from "../core/exporters.js";
+import { loadTextFileAsync } from "./text-parser.js";
 
 export interface ParsedSkill extends ExportableEntity {
 	skillId: string; // Hex

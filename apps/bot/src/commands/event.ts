@@ -5,8 +5,8 @@ import {
 	type ChatInputCommandInteraction,
 } from "discord.js";
 
-import { renderEventList } from "../lib/canvas/cards.ts";
-import { nextEvents } from "../services/website.ts";
+import { renderEventList } from "../lib/canvas/cards.js";
+import { nextEvents } from "../services/website.js";
 
 @Discord()
 export class EventCommand {

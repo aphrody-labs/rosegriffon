@@ -5,9 +5,9 @@
 
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
-import { loadJsonAsync } from "../core/async-loader.ts";
-import { findConfigFile } from "../core/data-loader.ts";
-import { DATA_ROOT } from "../core/paths.ts";
+import { loadJsonAsync } from "../core/async-loader.js";
+import { findConfigFile } from "../core/data-loader.js";
+import { DATA_ROOT } from "../core/paths.js";
 
 export interface BasaraBuildInfo {
 	charaId: string;

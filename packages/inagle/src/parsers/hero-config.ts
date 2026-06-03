@@ -13,7 +13,7 @@
 
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
-import { PATHS } from "../core/paths.ts";
+import { PATHS } from "../core/paths.js";
 
 export interface HeroVariantInfo {
 	charaId: string;

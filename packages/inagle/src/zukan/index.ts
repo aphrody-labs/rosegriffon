@@ -1,6 +1,6 @@
-export * from "./library.ts";
-export * from "./parser.ts";
-export * from "./types.ts";
+export * from "./library.js";
+export * from "./parser.js";
+export * from "./types.js";
 // NB : `./scraper.js` (live scraper, tire @aphrody-code/bxc) n'est volontairement
 // PAS ré-exporté par ce barrel — le barrel inagle est value-importé en runtime par
 // Azalée (app/chara/[id]/page.tsx). L'importer chargerait bxc côté Next et casserait

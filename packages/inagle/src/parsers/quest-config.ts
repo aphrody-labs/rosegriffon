@@ -5,9 +5,9 @@
 
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
-import type { ConfigNode } from "../core/config-parser.ts";
-import { type Locale, toHex } from "../core/data-loader.ts";
-import { loadTextFile } from "./text-parser.ts";
+import type { ConfigNode } from "../core/config-parser.js";
+import { type Locale, toHex } from "../core/data-loader.js";
+import { loadTextFile } from "./text-parser.js";
 
 /** Quest type */
 export enum QuestType {

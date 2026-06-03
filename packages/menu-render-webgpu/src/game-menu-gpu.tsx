@@ -24,7 +24,7 @@ import {
 	type MenuLayout,
 	type MenuObjectOverride,
 } from "@rose-griffon/menu-render";
-import { CANVAS_SIZE, computeLetterbox, WebGpuMenuRenderer } from "./renderer.ts";
+import { CANVAS_SIZE, computeLetterbox, WebGpuMenuRenderer } from "./renderer";
 
 export interface GameMenuGpuProps {
 	/** Layout JSON produit par `iecode menu export <screen>`. */

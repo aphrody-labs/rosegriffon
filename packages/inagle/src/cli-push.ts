@@ -12,8 +12,8 @@ import {
 	PASSIVE_BOOST_NAMES,
 	PASSIVE_SCOPE_NAMES,
 	PositionNames,
-} from "./index.ts";
-import { buildAuraHashSet } from "./skills/mapper-aura.ts";
+} from "./index.js";
+import { buildAuraHashSet } from "./skills/mapper-aura.js";
 
 // === Helpers ===
 
@@ -881,7 +881,7 @@ async function importDrops(service: any, db: DataAdapter) {
 
 async function importGallery(_service: any, db: DataAdapter) {
 	console.log("🔄 Importing Gallery...");
-	const { buildGalleryDatabase } = await import("./parsers/gallery-config.ts");
+	const { buildGalleryDatabase } = await import("./parsers/gallery-config.js");
 	const gallery = await buildGalleryDatabase();
 
 	const records = gallery.galleries.map((g: any) => ({
@@ -903,7 +903,7 @@ async function importGallery(_service: any, db: DataAdapter) {
 
 async function importCostumes(_service: any, db: DataAdapter) {
 	console.log("🔄 Importing Costumes...");
-	const { buildCharaCostumeDatabase } = await import("./parsers/chara-costume-config.ts");
+	const { buildCharaCostumeDatabase } = await import("./parsers/chara-costume-config.js");
 	const costumes = await buildCharaCostumeDatabase();
 
 	const records = costumes.costumes.map((c: any) => ({
@@ -930,7 +930,7 @@ async function importCostumes(_service: any, db: DataAdapter) {
 
 async function importOpponentTeams(_service: any, db: DataAdapter) {
 	console.log("🔄 Importing Opponent Teams...");
-	const { buildOpponentTeamDatabase } = await import("./parsers/opponent-team-config.ts");
+	const { buildOpponentTeamDatabase } = await import("./parsers/opponent-team-config.js");
 	const opponents = await buildOpponentTeamDatabase();
 
 	const records = opponents.opponents.map((o: any) => ({
@@ -1037,7 +1037,7 @@ async function importGrowthTables(db: DataAdapter) {
 
 async function importCapsules(_service: any, db: DataAdapter) {
 	console.log("🔄 Importing Capsules...");
-	const { buildCapsuleDatabase } = await import("./parsers/capsule-config.ts");
+	const { buildCapsuleDatabase } = await import("./parsers/capsule-config.js");
 	const capsule = await buildCapsuleDatabase();
 
 	const records = capsule.prizes.map((p: any) => ({
@@ -1060,10 +1060,10 @@ async function importCapsules(_service: any, db: DataAdapter) {
 
 async function exportStoryTextDatabase() {
 	console.log("🔄 Exporting Story Text Database...");
-	const { buildStoryTextDatabase } = await import("./parsers/story-text-parser.ts");
+	const { buildStoryTextDatabase } = await import("./parsers/story-text-parser.js");
 	const db = buildStoryTextDatabase();
 
-	const { PATHS } = await import("./core/paths.ts");
+	const { PATHS } = await import("./core/paths.js");
 	const { writeFileSync } = await import("node:fs");
 
 	const storyTextPath = path.join(PATHS.allGamedata, "story_text_database.json");

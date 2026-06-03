@@ -10,9 +10,9 @@
  */
 
 import { join } from "node:path";
-import { loadJsonAsync } from "../core/async-loader.ts";
-import { EntityExporters, type ExportableEntity } from "../core/exporters.ts";
-import { DATA_ROOT } from "../core/paths.ts";
+import { loadJsonAsync } from "../core/async-loader.js";
+import { EntityExporters, type ExportableEntity } from "../core/exporters.js";
+import { DATA_ROOT } from "../core/paths.js";
 
 // ============================================================================
 // Types

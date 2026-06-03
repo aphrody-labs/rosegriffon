@@ -11,7 +11,7 @@
  */
 import type { Client } from "discord.js";
 
-import { sql } from "../lib/db.ts";
+import { sql } from "../lib/db.js";
 
 interface StaffRow {
 	id: string;

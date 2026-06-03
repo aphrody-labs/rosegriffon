@@ -11,8 +11,8 @@ import type {
 	CfgBinEntry,
 	CfgBinNamedDocument,
 	TypedDocument,
-} from "../schemas/cfgbin.ts";
-import type { NounInfo, TextInfo } from "../schemas/text.ts";
+} from "../schemas/cfgbin.js";
+import type { NounInfo, TextInfo } from "../schemas/text.js";
 
 /**
  * Check if document is lowercase Entries format

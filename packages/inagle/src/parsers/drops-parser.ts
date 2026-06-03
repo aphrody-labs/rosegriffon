@@ -1,8 +1,8 @@
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
-import type { ConfigNode } from "../core/config-parser.ts";
-import { toHex } from "../core/data-loader.ts";
-import { DATA_ROOT } from "../core/paths.ts";
+import type { ConfigNode } from "../core/config-parser.js";
+import { toHex } from "../core/data-loader.js";
+import { DATA_ROOT } from "../core/paths.js";
 
 export interface DropEntry {
 	itemId: string;

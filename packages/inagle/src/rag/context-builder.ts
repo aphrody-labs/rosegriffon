@@ -1,4 +1,4 @@
-import { createInagleService, type InagleService } from "../service.ts";
+import { createInagleService, type InagleService } from "../service.js";
 
 export class InagleContextBuilder {
 	private service: InagleService | null = null;

@@ -5,11 +5,11 @@
  */
 
 import { join } from "node:path";
-import { loadJsonAsync } from "../core/async-loader.ts";
-import type { ConfigNode } from "../core/config-parser.ts";
-import { findConfigFile, toHex } from "../core/data-loader.ts";
-import { EntityExporters, type ExportableEntity } from "../core/exporters.ts";
-import { loadTextFileAsync } from "./text-parser.ts";
+import { loadJsonAsync } from "../core/async-loader.js";
+import type { ConfigNode } from "../core/config-parser.js";
+import { findConfigFile, toHex } from "../core/data-loader.js";
+import { EntityExporters, type ExportableEntity } from "../core/exporters.js";
+import { loadTextFileAsync } from "./text-parser.js";
 
 export type ItemCategory =
 	| "consume"

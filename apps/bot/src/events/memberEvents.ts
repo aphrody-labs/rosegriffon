@@ -1,8 +1,8 @@
 import { type ArgsOf, Discord, On } from "@rpbey/discordx";
 import type { Client } from "discord.js";
 
-import { syncOneMember, syncOneUser } from "../services/syncMembers.ts";
-import { GUILD_ID } from "../lib/config.ts";
+import { syncOneMember, syncOneUser } from "../services/syncMembers.js";
+import { GUILD_ID } from "../lib/config.js";
 
 @Discord()
 export class MemberEvents {

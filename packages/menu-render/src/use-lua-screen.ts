@@ -34,7 +34,7 @@
  */
 
 import { useState, useEffect, useRef } from "react";
-import type { LuaLayerState, MenuState } from "./lua-host.ts";
+import type { LuaLayerState, MenuState } from "./lua-host";
 import {
 	runMenuScreen,
 	runMenuScreenState,
@@ -42,7 +42,7 @@ import {
 	type RunMenuScreenOptions,
 	type RunMenuStateOptions,
 	type MenuObjectOverride,
-} from "./lua-host.ts";
+} from "./lua-host";
 
 /** Résultat du hook `useLuaScreen`. */
 export interface UseLuaScreenResult {

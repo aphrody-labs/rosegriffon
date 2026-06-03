@@ -1,14 +1,14 @@
-import { createBasaraAPI } from "./basara/index.ts";
-import { createCharactersAPI } from "./characters/api.ts";
-import { compareEvolutions, getCharacterEvolution } from "./characters/evolution.ts";
+import { createBasaraAPI } from "./basara/index.js";
+import { createCharactersAPI } from "./characters/api.js";
+import { compareEvolutions, getCharacterEvolution } from "./characters/evolution.js";
 
-import { createImageAPI } from "./core/index.ts";
-import { DATA_ROOT } from "./core/paths.ts";
-import type { BaseCharacter, CharacterVariant } from "./core/types.ts";
-import { createDropsAPI } from "./drops/index.ts";
-import { preloadCharacterEnrichment } from "./entities/character.ts";
-import { createItemsAPIAsync } from "./items/api.ts";
-import { createMenuExplorer } from "./menu/index.ts";
+import { createImageAPI } from "./core/index.js";
+import { DATA_ROOT } from "./core/paths.js";
+import type { BaseCharacter, CharacterVariant } from "./core/types.js";
+import { createDropsAPI } from "./drops/index.js";
+import { preloadCharacterEnrichment } from "./entities/character.js";
+import { createItemsAPIAsync } from "./items/api.js";
+import { createMenuExplorer } from "./menu/index.js";
 import {
 	buildCapsuleDatabase,
 	buildCharaCostumeDatabase,
@@ -18,11 +18,11 @@ import {
 	buildGrowthTableDatabase,
 	buildOpponentTeamDatabase,
 	buildTrickDatabase,
-} from "./parsers/index.ts";
-import { createQuestsAPI } from "./quests/index.ts";
-import { createGlobalSearch } from "./search/index.ts";
-import { createSkillsAPI } from "./skills/index.ts";
-import { createTeamsAPI } from "./teams/index.ts";
+} from "./parsers/index.js";
+import { createQuestsAPI } from "./quests/index.js";
+import { createGlobalSearch } from "./search/index.js";
+import { createSkillsAPI } from "./skills/index.js";
+import { createTeamsAPI } from "./teams/index.js";
 
 // Re-export types for use in components
 export type { BaseCharacter, CharacterVariant };

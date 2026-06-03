@@ -2,5 +2,5 @@
  * Types module exports
  */
 
-export * from "./database.ts";
-export * from "./gamedata.ts";
+export * from "./database.js";
+export * from "./gamedata.js";

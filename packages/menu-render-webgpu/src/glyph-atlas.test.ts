@@ -21,7 +21,7 @@ import {
 	OUTLINE_OFFSETS,
 	type RawFontMetrics,
 	sjisCodeToUnicode,
-} from "./glyph-atlas.ts";
+} from "./glyph-atlas";
 
 const raw = JSON.parse(
 	await Bun.file(

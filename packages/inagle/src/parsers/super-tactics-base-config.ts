@@ -13,10 +13,10 @@
  */
 
 import { join } from "node:path";
-import { loadJsonAsync } from "../core/async-loader.ts";
-import type { ConfigNode } from "../core/config-parser.ts";
-import { toHex } from "../core/data-loader.ts";
-import { DATA_ROOT } from "../core/paths.ts";
+import { loadJsonAsync } from "../core/async-loader.js";
+import type { ConfigNode } from "../core/config-parser.js";
+import { toHex } from "../core/data-loader.js";
+import { DATA_ROOT } from "../core/paths.js";
 
 // ============================================================================
 // Types

@@ -4,11 +4,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { createCharactersAPI } from "../characters/api.ts";
-import { createBasaraAPI } from "../basara/api.ts";
-import { createSkillsAPI } from "../skills/api.ts";
-import type { CharacterStats } from "../core/types.ts";
-import type { EnrichedBasara } from "../basara/api.ts";
+import { createCharactersAPI } from "../characters/api.js";
+import { createBasaraAPI } from "../basara/api.js";
+import { createSkillsAPI } from "../skills/api.js";
+import type { CharacterStats } from "../core/types.js";
+import type { EnrichedBasara } from "../basara/api.js";
 
 // ============================================================================
 // Types

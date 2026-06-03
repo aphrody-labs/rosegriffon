@@ -9,13 +9,13 @@
  */
 
 // Core CFG.BIN formats
-export * from "./cfgbin.ts";
+export * from "./cfgbin.js";
 // Domain-specific schemas
-export * from "./character.ts";
-export * from "./skill.ts";
-export * from "./soccer.ts";
+export * from "./character.js";
+export * from "./skill.js";
+export * from "./soccer.js";
 // Localized text structures
-export * from "./text.ts";
+export * from "./text.js";
 
 // Zod 4 schemas (runtime validation + TypeScript inference)
-export * from "./zod.ts";
+export * from "./zod.js";

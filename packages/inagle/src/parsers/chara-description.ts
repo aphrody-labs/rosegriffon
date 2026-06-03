@@ -8,9 +8,9 @@
 
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
-import type { ConfigNode } from "../core/config-parser.ts";
-import { type Locale, sanitizeText, toHex } from "../core/data-loader.ts";
-import { DATA_ROOT } from "../core/paths.ts";
+import type { ConfigNode } from "../core/config-parser.js";
+import { type Locale, sanitizeText, toHex } from "../core/data-loader.js";
+import { DATA_ROOT } from "../core/paths.js";
 
 /**
  * Parsed character description entry

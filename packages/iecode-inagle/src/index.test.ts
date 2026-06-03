@@ -1,5 +1,5 @@
 import { expect, test } from "bun:test";
-import { getInagle } from "./index.ts";
+import { getInagle } from "./index.js";
 
 test("getInagle charge le vrai service inagle (données jeu réelles)", async () => {
 	const inagle = await getInagle();

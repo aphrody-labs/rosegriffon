@@ -1,6 +1,6 @@
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
-import { DATA_ROOT } from "../core/paths.ts";
+import { DATA_ROOT } from "../core/paths.js";
 
 interface ConfigVariable {
 	type: string;

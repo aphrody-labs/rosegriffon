@@ -1,7 +1,7 @@
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
-import { PATHS } from "../../core/paths.ts";
-import { loadDropTablesFromConfig } from "../../parsers/drops-parser.ts";
+import { PATHS } from "../../core/paths.js";
+import { loadDropTablesFromConfig } from "../../parsers/drops-parser.js";
 
 export interface DropEntry {
   itemId: number | string; // dropRarity for now, string if from new parser

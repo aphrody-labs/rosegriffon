@@ -15,7 +15,7 @@
  * - types: Complete TypeScript type definitions
  */
 
-export { loadJsonAsync as loadJsonFileAsync, loadJsonStream, measureTime } from "./async-loader.ts";
+export { loadJsonAsync as loadJsonFileAsync, loadJsonStream, measureTime } from "./async-loader.js";
 export {
 	type CharaBaseData,
 	type CharaParamData,
@@ -30,7 +30,7 @@ export {
 	parseIntVar,
 	parseListVar,
 	parseStringVar,
-} from "./config-parser.ts";
+} from "./config-parser.js";
 export {
 	clearCache,
 	dataExists,
@@ -52,8 +52,8 @@ export {
 	loadStarSignCharaInfo,
 	sanitizeText,
 	toHex,
-} from "./data-loader.ts";
-export * from "./entities.ts";
+} from "./data-loader.js";
+export * from "./entities.js";
 // Error handling
 export {
 	InagleError,
@@ -63,16 +63,16 @@ export {
 	inagleLogger,
 	isInagleError,
 	wrapError,
-} from "./errors.ts";
-export * from "./gamedata.ts";
-export * from "./hash.ts";
+} from "./errors.js";
+export * from "./gamedata.js";
+export * from "./hash.js";
 
-export * from "./images.ts";
-export * from "./openapi.ts";
-export * from "./parser.ts";
+export * from "./images.js";
+export * from "./openapi.js";
+export * from "./parser.js";
 // New architecture - explicit exports to avoid conflicts
-export { DATA_ROOT, type DataFile, type DataPath, FILES, PATHS } from "./paths.ts";
-export * from "./search.ts";
+export { DATA_ROOT, type DataFile, type DataPath, FILES, PATHS } from "./paths.js";
+export * from "./search.js";
 
 // Types with aliased names to avoid conflicts
 export {
@@ -96,4 +96,4 @@ export {
 	type RomanizedName,
 	type Skill as GameSkill,
 	type Team as GameTeam,
-} from "./types.ts";
+} from "./types.js";

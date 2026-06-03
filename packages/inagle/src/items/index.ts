@@ -19,5 +19,5 @@
  * const gallery = items.allGallery();
  * ```
  */
-export * from "./api.ts";
-export * from "./uniform-mapper.ts";
+export * from "./api.js";
+export * from "./uniform-mapper.js";

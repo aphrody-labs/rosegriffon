@@ -17,4 +17,4 @@
  * const results = quests.search('win');
  * ```
  */
-export * from "./api.ts";
+export * from "./api.js";

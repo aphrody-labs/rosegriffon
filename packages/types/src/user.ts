@@ -5,7 +5,7 @@
  * répétée dans 9+ fichiers website.
  */
 import type { Database } from "@rose-griffon/db";
-import type { RgRole } from "./roles.ts";
+import type { RgRole } from "./roles.js";
 
 /** Profile Supabase canonique (row de la table public.profiles). */
 export type Profile = Database["public"]["Tables"]["profiles"]["Row"];

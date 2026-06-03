@@ -1,5 +1,5 @@
-export { GameMenu } from "./game-menu.tsx";
-export type { GameMenuProps, MenuObjectOverride } from "./game-menu.tsx";
+export { GameMenu } from "./game-menu";
+export type { GameMenuProps, MenuObjectOverride } from "./game-menu";
 export type {
 	MenuLayout,
 	MenuObject,
@@ -9,7 +9,7 @@ export type {
 	MenuAnim,
 	MenuPrimitive,
 	MenuCanvas,
-} from "./types.ts";
+} from "./types";
 
 // ── Runtime Lua : SERVER-ONLY (Node : child_process/fs/unluac.jar) ─────────────
 // NE PAS ré-exporter ici : ce barrel est bundlé côté navigateur (azalee). Importer

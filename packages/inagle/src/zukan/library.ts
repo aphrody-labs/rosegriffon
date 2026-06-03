@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import { join } from "node:path";
-import { PATHS } from "../core/paths.ts";
-import type { ZukanCharacter, ZukanFormation, ZukanItem, ZukanSkill, ZukanTeam } from "./types.ts";
+import { PATHS } from "../core/paths.js";
+import type { ZukanCharacter, ZukanFormation, ZukanItem, ZukanSkill, ZukanTeam } from "./types.js";
 
 const ZUKAN_DATA_ROOT = join(PATHS.root, "zukan");
 const DB_PATH = join(ZUKAN_DATA_ROOT, "db_consolidated.json");

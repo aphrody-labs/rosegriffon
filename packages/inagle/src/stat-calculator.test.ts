@@ -8,7 +8,7 @@ import {
 	generateGrowthCurve,
 	rarityToGrowthRank,
 	type StatBlock,
-} from "./stat-calculator.ts";
+} from "./stat-calculator.js";
 
 describe("rarityToGrowthRank", () => {
 	it("should map N rarity to rank 0", () => {

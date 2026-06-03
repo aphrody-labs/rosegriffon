@@ -1,4 +1,4 @@
-import { createInagleService } from "../../index.ts";
+import { createInagleService } from "../../index.js";
 
 async function main() {
     try {

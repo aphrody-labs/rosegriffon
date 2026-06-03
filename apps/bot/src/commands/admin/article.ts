@@ -1,9 +1,9 @@
 import { Discord, Slash, SlashChoice, SlashGroup, SlashOption } from "@rpbey/discordx";
 import { ApplicationCommandOptionType, type ChatInputCommandInteraction } from "discord.js";
-import { logAdminAction } from "../../lib/audit.ts";
-import { fmtDate, rgEmbed, rgUrl, truncate } from "../../lib/embeds.ts";
-import { withRgAdmin } from "../../lib/rbac.ts";
-import { deleteArticle, listArticlesAdmin, setArticleStatus } from "../../services/admin.ts";
+import { logAdminAction } from "../../lib/audit.js";
+import { fmtDate, rgEmbed, rgUrl, truncate } from "../../lib/embeds.js";
+import { withRgAdmin } from "../../lib/rbac.js";
+import { deleteArticle, listArticlesAdmin, setArticleStatus } from "../../services/admin.js";
 
 @Discord()
 @SlashGroup({ name: "rg-chronique-admin", description: "Gestion chroniques/articles (admin)" })

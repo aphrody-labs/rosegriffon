@@ -14,12 +14,12 @@ import { fileURLToPath } from "node:url";
 
 const require = createRequire(import.meta.url);
 
-import { createImageAPI } from "../core/images.ts";
-import { PATHS } from "../core/paths.ts";
-import { loadTextFile } from "../parsers/text-parser.ts";
-import type { SkillInfo } from "../types/gamedata.ts";
-import { loadAuraSkills } from "./mapper-aura.ts";
-import { buildPassiveSkillDatabase } from "./mapper-passive.ts";
+import { createImageAPI } from "../core/images.js";
+import { PATHS } from "../core/paths.js";
+import { loadTextFile } from "../parsers/text-parser.js";
+import type { SkillInfo } from "../types/gamedata.js";
+import { loadAuraSkills } from "./mapper-aura.js";
+import { buildPassiveSkillDatabase } from "./mapper-passive.js";
 import {
 	CATEGORY_NAMES,
 	ELEMENT_NAMES,
@@ -28,8 +28,8 @@ import {
 	type PassiveBoostType,
 	type PassiveScope,
 	type TeamPassive,
-} from "./types.ts";
-import { loadSkillVideos } from "./video-loader.ts";
+} from "./types.js";
+import { loadSkillVideos } from "./video-loader.js";
 
 export {
 	CATEGORY_NAMES,

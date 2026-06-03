@@ -1,7 +1,7 @@
 import type { Guild, GuildMember, User } from "discord.js";
 import type { DiscordMember as MemberRow } from "@rose-griffon/types";
 
-import { sql } from "../lib/db.ts";
+import { sql } from "../lib/db.js";
 
 function resolveAvatarUrl(member: GuildMember): string | null {
 	const guildAvatar = member.avatarURL({ size: 256, extension: "webp" });

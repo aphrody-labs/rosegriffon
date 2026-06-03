@@ -1,4 +1,4 @@
-import { sql } from "./lib/db.ts";
+import { sql } from "./lib/db.js";
 
 async function main() {
   try {

@@ -12,9 +12,9 @@
 
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
-import { sanitizeText } from "../core/data-loader.ts";
-import { PATHS } from "../core/paths.ts";
-import type { LocalizedNames } from "../core/types.ts";
+import { sanitizeText } from "../core/data-loader.js";
+import { PATHS } from "../core/paths.js";
+import type { LocalizedNames } from "../core/types.js";
 
 // ============================================================================
 // Types

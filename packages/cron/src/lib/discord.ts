@@ -4,7 +4,7 @@
  */
 
 import { Client, IntentsBitField, Partials, ActivityType, type Guild, type GuildMember, type User } from "discord.js";
-import { sql } from "./db.ts";
+import { sql } from "./db.js";
 import { resolveGuildId } from "@rose-griffon/types/discord";
 
 export const GUILD_ID = resolveGuildId(Bun.env as Record<string, string | undefined>);

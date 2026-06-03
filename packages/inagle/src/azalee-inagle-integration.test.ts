@@ -1,6 +1,6 @@
 import { expect, test, describe, beforeAll } from "bun:test";
-import { createInagleService } from "./service.ts";
-import { DATA_ROOT, FILES } from "./core/paths.ts";
+import { createInagleService } from "./service.js";
+import { DATA_ROOT, FILES } from "./core/paths.js";
 import { join } from "node:path";
 import { readdir, exists } from "node:fs/promises";
 import { Database } from "bun:sqlite";

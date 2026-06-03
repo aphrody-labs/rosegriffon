@@ -6,9 +6,9 @@
  */
 
 import { join } from "node:path";
-import { createMenuExplorer, type MenuEntry } from "../menu/explorer.ts";
-import { hasMenuMaps, loadMenuMaps } from "../menu/maps.ts";
-import { CDN_URL, PATHS } from "./paths.ts";
+import { createMenuExplorer, type MenuEntry } from "../menu/explorer.js";
+import { hasMenuMaps, loadMenuMaps } from "../menu/maps.js";
+import { CDN_URL, PATHS } from "./paths.js";
 
 // Base path for menu images relative to configured data root
 const _IMAGES_BASE = join(PATHS.images, "menu");

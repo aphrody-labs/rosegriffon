@@ -15,7 +15,7 @@
 
 import { existsSync, readdirSync } from "node:fs";
 import { join } from "node:path";
-import { loadJsonAsync } from "../core/async-loader.ts";
+import { loadJsonAsync } from "../core/async-loader.js";
 
 // ============================================================================
 // Types

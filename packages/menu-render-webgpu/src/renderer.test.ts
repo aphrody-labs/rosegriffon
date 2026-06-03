@@ -17,10 +17,10 @@ import {
 	FLOATS_PER_GLYPH,
 	hexToRgba01,
 	parseHexColor,
-} from "./renderer.ts";
-import { decodeFontMetrics, type RawFontMetrics } from "./glyph-atlas.ts";
-import { blendForDrawType, projectOrtho } from "./blend.ts";
-import { shouldUseWebGpu } from "./game-menu-gpu.tsx";
+} from "./renderer";
+import { decodeFontMetrics, type RawFontMetrics } from "./glyph-atlas";
+import { blendForDrawType, projectOrtho } from "./blend";
+import { shouldUseWebGpu } from "./game-menu-gpu";
 
 const atlasFixture = decodeFontMetrics(
 	JSON.parse(

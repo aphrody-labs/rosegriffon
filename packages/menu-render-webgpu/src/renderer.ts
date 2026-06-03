@@ -17,9 +17,9 @@
  */
 
 import type { MenuLayout, MenuObject, MenuObjectOverride, MenuText } from "@rose-griffon/menu-render";
-import { blendForDrawType, type BlendState } from "./blend.ts";
-import { renderTextBitmap, textCacheKey, type TextBitmap } from "./text-atlas.ts";
-import { type GlyphAtlas, layoutText, parseFontMetrics } from "./glyph-atlas.ts";
+import { blendForDrawType, type BlendState } from "./blend";
+import { renderTextBitmap, textCacheKey, type TextBitmap } from "./text-atlas";
+import { type GlyphAtlas, layoutText, parseFontMetrics } from "./glyph-atlas";
 
 /* ── Atlas de police (rendu de glyphes pixel-perfect) ───────────────────────── */
 
@@ -294,7 +294,7 @@ interface TexEntry {
 }
 
 /** Source WGSL injectée au build (Bun importe le .wgsl comme texte via `with { type: "text" }`). */
-import { shaderSource } from "./shaders.ts";
+import { shaderSource } from "./shaders";
 
 export class WebGpuMenuRenderer {
 	private readonly device: GPUDevice;

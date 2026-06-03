@@ -31,5 +31,5 @@
  * const justiceSkills = skills.passiveJustice();
  * ```
  */
-export * from "./api.ts";
-export * from "./types.ts";
+export * from "./api.js";
+export * from "./types.js";

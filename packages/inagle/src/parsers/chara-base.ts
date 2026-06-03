@@ -20,8 +20,8 @@
  * [19] = description hash -> links to chara_description_text
  */
 
-import type { ConfigNode } from "../core/config-parser.ts";
-import { loadCharaBase, toHex } from "../core/data-loader.ts";
+import type { ConfigNode } from "../core/config-parser.js";
+import { loadCharaBase, toHex } from "../core/data-loader.js";
 
 /**
  * Parsed character base entry

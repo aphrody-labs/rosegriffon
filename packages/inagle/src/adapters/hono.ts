@@ -7,10 +7,10 @@
  * - Next.js Route Handlers
  */
 
-import type { ItemCategory } from "../parsers/item-config.ts";
+import type { ItemCategory } from "../parsers/item-config.js";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
-import { createInagleService } from "../service.ts";
+import { createInagleService } from "../service.js";
 
 /**
  * Create Hono app with game data API

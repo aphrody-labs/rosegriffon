@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { getDiscordClient, GUILD_ID, syncAllMembers, syncAllRoles, syncStaffPhotos } from "../lib/discord.ts";
-import { sql } from "../lib/db.ts";
+import { getDiscordClient, GUILD_ID, syncAllMembers, syncAllRoles, syncStaffPhotos } from "../lib/discord.js";
+import { sql } from "../lib/db.js";
 
 /**
  * Exécute la synchronisation globale de Discord (membres, rôles et photos d'équipe).

@@ -2,7 +2,7 @@ import { mkdirSync, writeFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 import type { Command } from "commander";
 import pc from "picocolors";
-import { createMenuExplorer } from "./menu/index.ts";
+import { createMenuExplorer } from "./menu/index.js";
 
 export function registerMenuCommand(program: Command) {
 	const menu = program.command("menu").description("Explore game menu images");

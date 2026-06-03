@@ -21,7 +21,7 @@ export {
 	type Series,
 	searchTeams,
 	type Team,
-} from "./belong-team.ts";
+} from "./belong-team.js";
 // Binary format parsers
 export {
 	buildHashTable,
@@ -37,7 +37,7 @@ export {
 	resolveNames,
 	toJson as cfgBinToJson,
 	VariableType as BinaryCfgBinVariableType,
-} from "./binary/cfgbin-parser.ts";
+} from "./binary/cfgbin-parser.js";
 export {
 	convertNxtchToDds,
 	DDS_MAGIC,
@@ -56,7 +56,7 @@ export {
 	parseHeader as parseG4txHeader,
 	parseNxtchHeader,
 	parseTextures,
-} from "./binary/g4tx-parser.ts";
+} from "./binary/g4tx-parser.js";
 // Boost player group parser
 export {
 	type BoostPlayerGroupConfig,
@@ -64,7 +64,7 @@ export {
 	type BoostSpiritTableEntry,
 	buildBoostPlayerGroupDatabase,
 	loadBoostPlayerGroupConfigAsync,
-} from "./boost-player-group-config.ts";
+} from "./boost-player-group-config.js";
 // Capsule (gacha) parser
 export {
 	buildCapsuleDatabase,
@@ -75,7 +75,7 @@ export {
 	type CapsulePrizeTable,
 	type CapsuleWeaponColorEntry,
 	loadCapsuleConfigAsync,
-} from "./capsule-config.ts";
+} from "./capsule-config.js";
 // Change Aura Skill parser
 export {
 	buildChangeAuraSkillDatabase,
@@ -83,7 +83,7 @@ export {
 	type ChangeAuraSkillDatabase,
 	type ChangeAuraSkillInfo,
 	loadChangeAuraSkillConfigAsync,
-} from "./change-aura-skill-config.ts";
+} from "./change-aura-skill-config.js";
 // Character base parser
 export {
 	buildCharaBaseMap,
@@ -91,14 +91,14 @@ export {
 	buildNameHashToBaseMap,
 	type ParsedCharaBase,
 	parseAllCharaBase,
-} from "./chara-base.ts";
+} from "./chara-base.js";
 // Character costume parser
 export {
 	buildCharaCostumeDatabase,
 	type CharaCostume,
 	type CharaCostumeDatabase,
 	loadCharaCostumeConfigAsync,
-} from "./chara-costume-config.ts";
+} from "./chara-costume-config.js";
 // Character description parser
 export {
 	buildAllDescriptionMaps,
@@ -106,7 +106,7 @@ export {
 	getDescription,
 	loadCharaDescriptions,
 	type ParsedDescription,
-} from "./chara-description.ts";
+} from "./chara-description.js";
 // Character EXP table parser
 export {
 	buildCharaExpTableDatabase,
@@ -114,7 +114,7 @@ export {
 	type CharaExpTableDatabase,
 	type ExpRarityRate,
 	loadCharaExpTableAsync,
-} from "./chara-exp-table.ts";
+} from "./chara-exp-table.js";
 // Character param parser
 export {
 	buildCharaBaseToParamsMap,
@@ -124,7 +124,7 @@ export {
 	parseAllCharaParams,
 	positionIdToCode,
 	rarityCodeToName,
-} from "./chara-param.ts";
+} from "./chara-param.js";
 // Character text parser
 export {
 	buildAllNameMaps,
@@ -134,7 +134,7 @@ export {
 	type LocalizedCharaNames,
 	type ParsedNoun,
 	type ParsedRomanizedName,
-} from "./chara-text.ts";
+} from "./chara-text.js";
 // Constellation parser (Players Universe star signs)
 export {
 	buildConstellationMapping,
@@ -148,14 +148,14 @@ export {
 	getConstellationForCharacter,
 	type StarInfo,
 	type StarSignRarityRateInfo,
-} from "./constellation.ts";
+} from "./constellation.js";
 // Controllable character parser
 export {
 	buildCtrlCharaDatabase,
 	type CtrlCharaData,
 	type CtrlCharaDatabase,
 	loadCtrlCharaConfigAsync,
-} from "./ctrl-chara-config.ts";
+} from "./ctrl-chara-config.js";
 // Dictionary parser
 export {
 	buildDictionaryDatabase,
@@ -163,14 +163,14 @@ export {
 	type DictionaryHabitat,
 	type DictionaryObservation,
 	loadDictionaryConfigAsync,
-} from "./dictionary-config.ts";
+} from "./dictionary-config.js";
 // Enjoy mode team parser
 export {
 	buildEnjoyModeTeamDatabase,
 	type EnjoyModeTeamDatabase,
 	loadEnjoyModeTeamConfigAsync,
 	type ParsedEnjoyModeTeam,
-} from "./enjoy-mode-team-config.ts";
+} from "./enjoy-mode-team-config.js";
 // Extended story parser
 export {
 	buildExtendStoryDatabase,
@@ -178,16 +178,16 @@ export {
 	type ExtendStoryDatabase,
 	type ExtendStoryGameData,
 	loadExtendStoryConfigAsync,
-} from "./extend-story-config.ts";
+} from "./extend-story-config.js";
 // Formation parser
-export { buildFormationDatabase, type ParsedFormation } from "./formation-config.ts";
+export { buildFormationDatabase, type ParsedFormation } from "./formation-config.js";
 // Gallery parser
 export {
 	buildGalleryDatabase,
 	type GalleryDatabase,
 	loadGalleryConfigAsync,
 	type ParsedGallery,
-} from "./gallery-config.ts";
+} from "./gallery-config.js";
 // Gameplay parser (Events, Craft, Routes)
 export {
 	buildCraftDatabase,
@@ -196,7 +196,7 @@ export {
 	type ParsedCraft,
 	type ParsedEvent,
 	type ParsedVsRoute,
-} from "./gameplay-config.ts";
+} from "./gameplay-config.js";
 // Growth table parser
 export {
 	buildGrowthTableDatabase,
@@ -206,18 +206,18 @@ export {
 	type GrowthTableMain,
 	type GrowthTableSub,
 	loadGrowthTableConfigAsync,
-} from "./growth-table-config.ts";
+} from "./growth-table-config.js";
 // Hash utilities - renamed to avoid conflicts with core/crc32
-export { crc32 as binaryCrc32, crc32Hex as binaryCrc32Hex } from "./hash/crc32.ts";
+export { crc32 as binaryCrc32, crc32Hex as binaryCrc32Hex } from "./hash/crc32.js";
 // Help parser
-export { buildHelpDatabase, type ParsedHelp } from "./help-config.ts";
+export { buildHelpDatabase, type ParsedHelp } from "./help-config.js";
 // Inacode parser
 export {
 	buildInacodeDatabase,
 	type InacodeDatabase,
 	type InacodeStamp,
 	loadInacodeConfigAsync,
-} from "./inacode-config.ts";
+} from "./inacode-config.js";
 // Item config parser
 export {
 	buildItemDatabase,
@@ -226,11 +226,11 @@ export {
 	loadFashionItemMappingAsync,
 	loadItemConfig,
 	type ParsedItem,
-} from "./item-config.ts";
+} from "./item-config.js";
 // Mission parser
-export { buildMissionDatabase, type ParsedMission } from "./mission-config.ts";
+export { buildMissionDatabase, type ParsedMission } from "./mission-config.js";
 // Music parser
-export { buildMusicDatabase, type ParsedMusic } from "./music-config.ts";
+export { buildMusicDatabase, type ParsedMusic } from "./music-config.js";
 // NFC lottery parser
 export {
 	buildNfcLotteryDatabase,
@@ -239,7 +239,7 @@ export {
 	type NfcLotteryDatabase,
 	type NfcLotteryItem,
 	type NfcLotteryTable,
-} from "./nfc-lottery-config.ts";
+} from "./nfc-lottery-config.js";
 // Opponent team parser
 export {
 	buildOpponentTeamDatabase,
@@ -248,7 +248,7 @@ export {
 	type OpponentTeamDatabase,
 	type ParsedOpponentTeam,
 	type PracticeMatchInfo,
-} from "./opponent-team-config.ts";
+} from "./opponent-team-config.js";
 // Override Skill parser (DLC Orion)
 export {
 	buildOverrideSkillDatabase,
@@ -258,13 +258,13 @@ export {
 	type OverrideSkillDatabase,
 	type OverrideSkillInfo,
 	type ResolvedOverride,
-} from "./override-skill-config.ts";
+} from "./override-skill-config.js";
 // Passive Skill parser
 export {
 	buildPassiveDatabase,
 	buildPassiveDatabaseAsync,
 	type ParsedPassive,
-} from "./passive-skill-config.ts";
+} from "./passive-skill-config.js";
 // Passive skill effect parser
 export {
 	buildPassiveSkillEffectDatabase,
@@ -272,7 +272,7 @@ export {
 	type PassiveSkillEffect,
 	type PassiveSkillEffectDatabase,
 	type PassiveSkillEffectRange,
-} from "./passive-skill-effect-config.ts";
+} from "./passive-skill-effect-config.js";
 // Playstyle parser (chara_param T2B[5])
 export {
 	buildPlaystyleMap,
@@ -280,16 +280,16 @@ export {
 	parseAllPlaystyles,
 	playstyleIdToEn,
 	playstyleIdToFr,
-} from "./playstyle.ts";
+} from "./playstyle.js";
 // Post/Delivery parser
-export { buildPostDatabase, type ParsedDelivery, type ParsedPassword } from "./post-config.ts";
+export { buildPostDatabase, type ParsedDelivery, type ParsedPassword } from "./post-config.js";
 // Quest parser
 export {
 	buildQuestDatabase,
 	loadQuestConfig,
 	type ParsedQuest,
 	QuestType,
-} from "./quest-config.ts";
+} from "./quest-config.js";
 // Real skill parser
 export {
 	buildRealSkillDatabase,
@@ -297,18 +297,18 @@ export {
 	type RealSkillDatabase,
 	type RealSkillInfo,
 	type RealSkillShootCourse,
-} from "./real-skill-config.ts";
+} from "./real-skill-config.js";
 // Shop parser
-export { loadShopConfig, type ShopInfo, type ShopItem } from "./shop-config.ts";
+export { loadShopConfig, type ShopInfo, type ShopItem } from "./shop-config.js";
 // Skill parser
-export { buildSkillDatabase, buildSkillDatabaseAsync, type ParsedSkill } from "./skill-config.ts";
+export { buildSkillDatabase, buildSkillDatabaseAsync, type ParsedSkill } from "./skill-config.js";
 // Skill technic parser
 export {
 	buildSkillTechnicDatabase,
 	loadSkillTechnicConfigAsync,
 	type SkillTechnicDatabase,
 	type SkillTechnicInfo,
-} from "./skill-technic-config.ts";
+} from "./skill-technic-config.js";
 // Special Tactics parser (DLC Orion - Tactiques Speciales)
 export {
 	buildSpecialTacticsDatabase,
@@ -316,7 +316,7 @@ export {
 	type SpecialTacticsCondId,
 	type SpecialTacticsDatabase,
 	type SpecialTacticsEffect,
-} from "./special-tactics-config.ts";
+} from "./special-tactics-config.js";
 // Super tactics base parser (pre-DLC)
 export {
 	buildSuperTacticsBaseDatabase,
@@ -324,9 +324,9 @@ export {
 	type SuperTacticsBaseDatabase,
 	type SuperTacticsBaseEffect,
 	type SuperTacticsBaseInfo,
-} from "./super-tactics-base-config.ts";
+} from "./super-tactics-base-config.js";
 // System/Menu parser
-export { buildMenuDatabase, type ParsedMenuInfo } from "./system-config.ts";
+export { buildMenuDatabase, type ParsedMenuInfo } from "./system-config.js";
 // Team Build parser (DLC Orion)
 export {
 	buildTeamBuildDatabase,
@@ -336,7 +336,7 @@ export {
 	type TeamBuildEffectInfo,
 	type TeamBuildInfo,
 	type TeamBuildModifierData,
-} from "./team-build-config.ts";
+} from "./team-build-config.js";
 // Generic text parser for all text files
 export {
 	buildTextDatabase,
@@ -348,16 +348,16 @@ export {
 	loadTextFileAsync,
 	loadTextListAsync,
 	type TextDatabase,
-} from "./text-parser.ts";
+} from "./text-parser.js";
 // Trick parser
 export {
 	buildTrickDatabase,
 	loadTrickConfigAsync,
 	type ParsedTrick,
 	type TrickDatabase,
-} from "./trick-config.ts";
+} from "./trick-config.js";
 // Trophy parser
-export { buildTrophyDatabase, type ParsedTrophy } from "./trophy-config.ts";
+export { buildTrophyDatabase, type ParsedTrophy } from "./trophy-config.js";
 // Uniform parser
 export {
 	buildUniformDatabase,
@@ -365,7 +365,7 @@ export {
 	type UniformDatabase,
 	type UniformInfo,
 	type UniformModelInfo,
-} from "./uniform-config.ts";
+} from "./uniform-config.js";
 // Universal gamedata parser - auto-discovers ALL gamedata files
 export {
 	buildUniversalGamedataDatabase,
@@ -382,7 +382,7 @@ export {
 	type ParsedEntry,
 	type UniversalGamedataAPI,
 	type UniversalGamedataDatabase,
-} from "./universal-gamedata.ts";
+} from "./universal-gamedata.js";
 // Universal text parser - auto-discovers ALL text files
 export {
 	buildUniversalTextDatabase,
@@ -393,48 +393,48 @@ export {
 	type TextFileInfo,
 	type UniversalTextAPI,
 	type UniversalTextDatabase,
-} from "./universal-text.ts";
+} from "./universal-text.js";
 
 // Additional config parsers
 export {
 	buildActivityPhotoDatabase,
 	type ActivityPhotoDatabase,
 	type ParsedTrophyReward,
-} from "./activity-photo-config.ts";
+} from "./activity-photo-config.js";
 export {
 	buildChatEmoteDatabase,
 	type ChatEmoteDatabase,
 	type ParsedChatEmote,
-} from "./chat-emote-config.ts";
+} from "./chat-emote-config.js";
 export {
 	buildNameplateDatabase,
 	type NameplateDatabase,
 	type ParsedNameplate,
-} from "./nameplate-config.ts";
+} from "./nameplate-config.js";
 export {
 	buildPerformanceDatabase,
 	type PerformanceDatabase,
 	type ParsedPerformance,
-} from "./performance-config.ts";
+} from "./performance-config.js";
 export {
 	buildPhaseTitleDatabase,
 	type PhaseTitleDatabase,
 	type ParsedPhaseTitle,
-} from "./phase-title-config.ts";
+} from "./phase-title-config.js";
 export {
 	buildSceneArchiveDatabase,
 	type SceneArchiveDatabase,
 	type ParsedSceneArchive,
-} from "./scene-archive-config.ts";
+} from "./scene-archive-config.js";
 export {
 	buildStadiumDatabase,
 	type StadiumDatabase,
 	type ParsedStadium,
-} from "./stadium-config.ts";
+} from "./stadium-config.js";
 export {
 	buildCharaMenuResourceDatabase,
 	type ParsedCharaResource,
-} from "./chara-menu-resource-config.ts";
+} from "./chara-menu-resource-config.js";
 
 // Story text parser (dialogues, map NPCs, goals, phases)
 export {
@@ -449,7 +449,7 @@ export {
 	type MapNpcDialogue,
 	type StoryGoal,
 	type ChapterPhase,
-} from "./story-text-parser.ts";
+} from "./story-text-parser.js";
 
 
 

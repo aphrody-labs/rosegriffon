@@ -12,7 +12,7 @@
 import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import type { CfgBinEntry, CfgBinFile, CharacterDatabase, UnifiedCharacter } from "./types.ts";
+import type { CfgBinEntry, CfgBinFile, CharacterDatabase, UnifiedCharacter } from "./types.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const DATA_ROOT = join(__dirname, "../../../../../data");

@@ -1,8 +1,8 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
-import { ConfigNode } from "../core/config-parser.ts";
-import { findConfigFile, toHex } from "../core/data-loader.ts";
-import { DATA_ROOT } from "../core/paths.ts";
+import { ConfigNode } from "../core/config-parser.js";
+import { findConfigFile, toHex } from "../core/data-loader.js";
+import { DATA_ROOT } from "../core/paths.js";
 
 export interface AbilityBoardEffect {
 	id: number;

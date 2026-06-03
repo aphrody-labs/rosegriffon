@@ -16,7 +16,7 @@
 
 import fengari from "fengari";
 import type { LuaState } from "fengari";
-import { isLua52 } from "./parser.ts";
+import { isLua52 } from "./parser.js";
 
 const { lua, lauxlib, lualib, to_luastring } = fengari;
 

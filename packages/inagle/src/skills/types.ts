@@ -3,7 +3,7 @@
  * Based on skill_config and passive_skill_config dump structures
  */
 
-import type { CfgBinEntry, CfgBinFile } from "../characters/types.ts";
+import type { CfgBinEntry, CfgBinFile } from "../characters/types.js";
 
 export type { CfgBinEntry, CfgBinFile };
 

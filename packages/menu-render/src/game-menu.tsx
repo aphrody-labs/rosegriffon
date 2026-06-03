@@ -21,7 +21,7 @@
  */
 
 import type { CSSProperties, ReactNode } from "react";
-import type { MenuLayout, MenuObject } from "./types.ts";
+import type { MenuLayout, MenuObject } from "./types";
 import { useEffect, useRef, useState } from "react";
 
 /* ── constantes ───────────────────────────────────────────────────────────── */

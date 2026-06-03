@@ -11,8 +11,8 @@ import type {
 	ZukanPositionType,
 	ZukanSkill,
 	ZukanTeam,
-} from "./types.ts";
-import { GAME_KEYS, GAME_TO_SERIES } from "./types.ts";
+} from "./types.js";
+import { GAME_KEYS, GAME_TO_SERIES } from "./types.js";
 
 const _DATA_ROOT = "data/zukan";
 

@@ -10,17 +10,17 @@
 
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join, resolve } from "node:path";
-import { toHex } from "../core/data-loader.ts";
-import { createImageAPI } from "../core/images.ts";
-import { DATA_ROOT, PATHS } from "../core/paths.ts";
+import { toHex } from "../core/data-loader.js";
+import { createImageAPI } from "../core/images.js";
+import { DATA_ROOT, PATHS } from "../core/paths.js";
 import {
 	buildItemDatabaseAsync,
 	type ItemCategory,
 	type ParsedItem,
-} from "../parsers/item-config.ts";
-import { loadShopConfig } from "../parsers/shop-config.ts";
-import { loadTextFileAsync } from "../parsers/text-parser.ts";
-import type { CapsuleInfo, GalleryInfo } from "../types/gamedata.ts";
+} from "../parsers/item-config.js";
+import { loadShopConfig } from "../parsers/shop-config.js";
+import { loadTextFileAsync } from "../parsers/text-parser.js";
+import type { CapsuleInfo, GalleryInfo } from "../types/gamedata.js";
 
 // Data paths
 const GAMEDATA_PATH = PATHS.allGamedata;
