@@ -92,7 +92,7 @@ servis correctement par l'origine (200). Le website n'active pas le CDN en prod 
 ### iecode (extraction / pipeline)
 
 1. **P0 — Publier le dump dx11 sur le CDN.** Restaurer la conf nginx du vhost `cdn.rosegriffon.fr`
-   (alias `/dx11/` → `…/inazuma/data/dx11/`, `/static/azalee/menu/`, `/public/`) et synchroniser
+   (alias `/dx11/` → `…/iecode/inazuma/data/dx11/`, `/public/` ; `/static/azalee/menu/` retiré — cf. asset #2) et synchroniser
    les 3.7 Go (rsync vers `51.77.147.152`). Vérifier ensuite les URLs résolveur (faces/auras OK,
    items/telop à valider). C'est l'action à plus fort impact (débloque 100 % des visuels azalee).
 2. **P1 — Générer `inagle_game_assets`** (manifeste {path, bucket, existe}) depuis le dump +
@@ -107,7 +107,13 @@ servis correctement par l'origine (200). Le website n'active pas le CDN en prod 
 
 6. **P0 (après 1)** — re-pointer `inagle_skills.image_url` (1002) vers les chemins dx11 réels OU
    garder le rewrite front ; supprimer la dépendance au Storage Supabase mort.
-7. **P1** — remplir `inagle_keshins.image_url` manquants (66) via `asset_code`.
+7. **P1 — partiel (db-1)** : `inagle_keshins.image_url` rempli pour 28/66 via `asset_code`
+   (`was{N}` → `aura_soul/a{N pad6}`, format legacy `200_icon/10_icon_chr/aura_soul/...webp`
+   rewrité par le résolveur azalee vers le dump dx11 PNG). Filtrage strict sur existence
+   fichier : les 38 restants n'ont PAS de fichier dans le dump (`aura_soul` s'arrête à
+   `a000560` → codes ≥ 610 absents ; variantes `_b1/_h1/_h2` et codes non-ronds 041/241/291/
+   301-303 sans PNG dédié). Audit erroné sur ce point : tous les `was*` ne sont pas dans le dump.
+   Vérif live : `curl 200` sur `.../aura_soul/a000020|a000240|a000530_l_..._l00.png`.
 8. **P2** — peupler/déprécier `inagle_characters.stats` ; combler `skills` (423).
 9. **Sécurité (hors plan, à remonter)** — **fait** (db-5) : RLS activé sur
    `inagle_rag_chunks` + `inagle_game_assets` avec policy `SELECT USING (true)` pour
