@@ -3,12 +3,13 @@ export default function robots() {
 	return {
 		rules: [
 			{
-				allow: "/",
+				// /api/llm/* = contexte IA (CLAUDE.md/GEMINI.md/Grok) : explicitement autorisé (allow plus spécifique que disallow /api/).
+				allow: ["/", "/api/llm/"],
 				disallow: ["/api/", "/admin/", "/_next/", "/dashboard/"],
 				userAgent: "*",
 			},
 			{
-				allow: "/",
+				allow: ["/", "/api/llm/"],
 				disallow: ["/api/", "/admin/", "/_next/", "/dashboard/"],
 				userAgent: "Googlebot",
 			},
