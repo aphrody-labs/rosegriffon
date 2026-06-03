@@ -1,4 +1,4 @@
-import { sql } from "./db.js";
+import { sql } from "./db";
 
 /**
  * Insert a row into `admin_logs` mirroring the website's `logAdminAction()`.

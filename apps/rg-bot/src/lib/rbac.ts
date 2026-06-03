@@ -3,8 +3,8 @@ import { MessageFlags } from "discord.js";
 
 import { isBotAdminRole, type RgRole } from "@rose-griffon/types/roles";
 
-import { cached, invalidate } from "./cache.js";
-import { sql } from "./db.js";
+import { cached, invalidate } from "./cache";
+import { sql } from "./db";
 
 export type { RgRole };
 

@@ -1,6 +1,6 @@
 import { createCanvas } from "@aphrody-code/canvas";
 
-import { ensureFonts, RG_THEME as T } from "./theme.js";
+import { ensureFonts, RG_THEME as T } from "./theme";
 import {
 	drawCircularImage,
 	drawCoveredImage,
@@ -9,7 +9,7 @@ import {
 	fillRoundedRect,
 	fillWrappedText,
 	strokeRoundedRect,
-} from "./utils.js";
+} from "./utils";
 
 const W = 1200;
 

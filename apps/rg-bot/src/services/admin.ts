@@ -1,5 +1,5 @@
-import { cached, invalidate } from "../lib/cache.js";
-import { sql } from "../lib/db.js";
+import { cached, invalidate } from "../lib/cache";
+import { sql } from "../lib/db";
 
 const STATS_CACHE_TTL_MS = 30_000;
 const SETTINGS_CACHE_TTL_MS = 60_000;

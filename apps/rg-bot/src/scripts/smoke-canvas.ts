@@ -1,6 +1,6 @@
 import { writeFileSync } from "node:fs";
-import { renderEventList, renderProfileCard, renderTeamGrid } from "../lib/canvas/cards.js";
-import { getProfile, getTeam, nextEvents } from "../services/website.js";
+import { renderEventList, renderProfileCard, renderTeamGrid } from "../lib/canvas/cards";
+import { getProfile, getTeam, nextEvents } from "../services/website";
 
 async function main() {
 	console.log("[smoke] team grid (staff)");

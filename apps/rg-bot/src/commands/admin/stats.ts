@@ -1,9 +1,9 @@
 import { Discord, Slash } from "@rpbey/discordx";
 import type { ChatInputCommandInteraction } from "discord.js";
 
-import { rgEmbed } from "../../lib/embeds.js";
-import { withRgAdmin } from "../../lib/rbac.js";
-import { getAdminStats } from "../../services/admin.js";
+import { rgEmbed } from "../../lib/embeds";
+import { withRgAdmin } from "../../lib/rbac";
+import { getAdminStats } from "../../services/admin";
 
 @Discord()
 export class AdminStatsCommand {
