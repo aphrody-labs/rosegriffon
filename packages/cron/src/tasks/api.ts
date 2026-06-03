@@ -1,14 +1,24 @@
 /**
  * Tâches de déclenchement d'API et de pré-chauffage de cache pour les applications Next.js.
+ *
+ * IMPORTANT — routage des hôtes :
+ *   Les routes cron ne sont PAS servies par api.rosegriffon.fr (gateway nginx réservée
+ *   aux futurs outils Rust internes ; elle ne sert que /health et renvoie 404
+ *   {"error":"unknown service"} pour tout le reste). Chaque route vit dans l'app
+ *   Next.js qui l'implémente :
+ *     - /api/cron/publish-scheduled        → Azalée  (azalee.rosegriffon.fr)
+ *     - /api/cron/patreon-refresh|reminders → Website (rosegriffon.fr)
  */
+
+const AZALEE_URL = process.env.AZALEE_URL || "https://azalee.rosegriffon.fr";
+const WEBSITE_URL = process.env.WEBSITE_URL || "https://rosegriffon.fr";
 
 export async function triggerPublishScheduled(): Promise<{ success: boolean; error?: string }> {
 	const secret = process.env.CRON_SECRET;
 	if (!secret) {
 		return { success: false, error: "La variable d'environnement CRON_SECRET est manquante." };
 	}
-	const apiUrl = process.env.API_URL || "https://api.rosegriffon.fr";
-	const url = `${apiUrl}/api/cron/publish-scheduled`;
+	const url = `${AZALEE_URL}/api/cron/publish-scheduled`;
 
 	console.log(`[Cron API] Déclenchement de la publication programmée (Azalée) : ${url}...`);
 	try {
@@ -40,8 +50,7 @@ export async function triggerPatreonRefresh(): Promise<{ success: boolean; error
 	if (!secret) {
 		return { success: false, error: "La variable d'environnement CRON_SECRET est manquante." };
 	}
-	const apiUrl = process.env.API_URL || "https://api.rosegriffon.fr";
-	const url = `${apiUrl}/api/cron/patreon-refresh`;
+	const url = `${WEBSITE_URL}/api/cron/patreon-refresh`;
 
 	console.log(`[Cron API] Déclenchement du rafraîchissement Patreon (Website) : ${url}...`);
 	try {
@@ -75,8 +84,7 @@ export async function triggerPatreonReminders(
 	if (!secret) {
 		return { success: false, error: "La variable d'environnement CRON_SECRET est manquante." };
 	}
-	const apiUrl = process.env.API_URL || "https://api.rosegriffon.fr";
-	const url = `${apiUrl}/api/cron/patreon-reminders?stage=${stage}`;
+	const url = `${WEBSITE_URL}/api/cron/patreon-reminders?stage=${stage}`;
 
 	console.log(`[Cron API] Déclenchement des rappels Patreon (${stage}) (Website) : ${url}...`);
 	try {
@@ -111,15 +119,14 @@ export async function warmCaches(): Promise<{ success: boolean }> {
 
 	const paths = [
 		`${azaleeUrl}/`,
-		`${azaleeUrl}/wiki`,
-		`${azaleeUrl}/wiki/zukan`,
+		`${azaleeUrl}/news`,
+		`${azaleeUrl}/chara`,
 		`${websiteUrl}/`,
-		`${websiteUrl}/articles`,
-		`${websiteUrl}/notre-equipe`,
-		`${websiteUrl}/notre-equipe/staff`,
-		`${apiUrl}/health`, // Vérifier l'état de l'API
+		`${websiteUrl}/chroniques`,
+		`${websiteUrl}/community`,
+		`${apiUrl}/health`, // Vérifier l'état de la gateway API
 		`${cdnUrl}/static/azalee/public/logo-og.png`, // Vérifier que le CDN répond correctement
-		`${cdnUrl}/static/website/public/favicon.ico`,
+		`${cdnUrl}/static/website/public/icon.webp`,
 	];
 
 	console.log("[Cron Cache] Pré-chauffage des caches ISR...");
