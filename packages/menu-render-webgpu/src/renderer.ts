@@ -294,7 +294,7 @@ interface TexEntry {
 }
 
 /** Source WGSL injectée au build (Bun importe le .wgsl comme texte via `with { type: "text" }`). */
-import shaderSource from "./shaders.wgsl" with { type: "text" };
+import { shaderSource } from "./shaders.ts";
 
 export class WebGpuMenuRenderer {
 	private readonly device: GPUDevice;

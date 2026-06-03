@@ -10,8 +10,8 @@ export {
 	parseHexColor,
 	computeLetterbox,
 	CANVAS_SIZE,
-} from "./renderer.js";
-export type { DrawItem, FontAtlasConfig } from "./renderer.js";
+} from "./renderer.ts";
+export type { DrawItem, FontAtlasConfig } from "./renderer.ts";
 
 export {
 	decodeFontMetrics,
@@ -22,7 +22,7 @@ export {
 	sjisCodeToUnicode,
 	computeOutlinePixel,
 	OUTLINE_OFFSETS,
-} from "./glyph-atlas.js";
+} from "./glyph-atlas.ts";
 export type {
 	Glyph,
 	GlyphAtlas,
@@ -32,16 +32,16 @@ export type {
 	TextLayout,
 	RawFontMetrics,
 	Rgba,
-} from "./glyph-atlas.js";
+} from "./glyph-atlas.ts";
 
-export { blendForDrawType, projectOrtho, DRAW_TYPES } from "./blend.js";
-export type { BlendState, BlendComponent } from "./blend.js";
+export { blendForDrawType, projectOrtho, DRAW_TYPES } from "./blend.ts";
+export type { BlendState, BlendComponent } from "./blend.ts";
 
-export { renderTextBitmap, textCacheKey } from "./text-atlas.js";
-export type { TextBitmap } from "./text-atlas.js";
+export { renderTextBitmap, textCacheKey } from "./text-atlas.ts";
+export type { TextBitmap } from "./text-atlas.ts";
 
-export { GameMenuGpu, shouldUseWebGpu } from "./game-menu-gpu.js";
-export type { GameMenuGpuProps } from "./game-menu-gpu.js";
+export { GameMenuGpu, shouldUseWebGpu } from "./game-menu-gpu.tsx";
+export type { GameMenuGpuProps } from "./game-menu-gpu.tsx";
 
 // Ré-export du contrat (provenant de @rose-griffon/menu-render) pour confort.
 export type {

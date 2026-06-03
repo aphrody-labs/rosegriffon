@@ -1,5 +1,5 @@
-export { GameMenu } from "./game-menu.js";
-export type { GameMenuProps, MenuObjectOverride } from "./game-menu.js";
+export { GameMenu } from "./game-menu.tsx";
+export type { GameMenuProps, MenuObjectOverride } from "./game-menu.tsx";
 export type {
 	MenuLayout,
 	MenuObject,
@@ -9,25 +9,9 @@ export type {
 	MenuAnim,
 	MenuPrimitive,
 	MenuCanvas,
-} from "./types.js";
+} from "./types.ts";
 
-// ── Runtime Lua (navigateur + Bun) ────────────────────────────────────────────
-export {
-	LuaScreenHost,
-	GameScreenHost,
-	runMenuScreen,
-	runMenuScreenState,
-	menuStateToOverrides,
-} from "./lua-host.js";
-export type {
-	LuaGameHost,
-	LuaLayerState,
-	LuaCallRecord,
-	LayerInfo,
-	RunMenuScreenOptions,
-	RunMenuStateOptions,
-	MenuState,
-	MenuObjectState,
-} from "./lua-host.js";
-export { useLuaScreen, useLuaMenu } from "./use-lua-screen.js";
-export type { UseLuaScreenResult, UseLuaMenuResult } from "./use-lua-screen.js";
+// ── Runtime Lua : SERVER-ONLY (Node : child_process/fs/unluac.jar) ─────────────
+// NE PAS ré-exporter ici : ce barrel est bundlé côté navigateur (azalee). Importer
+// le runtime Lua via le sous-chemin `@rose-griffon/menu-render/lua-host` /
+// `/use-lua-screen` (cf. exports package.json) depuis du code serveur uniquement.

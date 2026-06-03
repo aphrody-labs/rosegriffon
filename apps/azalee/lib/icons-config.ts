@@ -63,7 +63,6 @@ import {
 	ImageIcon,
 	Image as ImageLucide,
 	Info,
-	Instagram,
 	LayoutGrid,
 	List,
 	Loader2,
@@ -111,8 +110,6 @@ import {
 	Trophy,
 	Tv,
 	// Social & Media
-	Twitch,
-	Twitter,
 	Upload,
 	// User & Auth
 	User,
@@ -126,9 +123,9 @@ import {
 	X,
 	XCircle,
 	X as XIcon,
-	Youtube,
 	Zap,
 } from "lucide-react";
+import { Instagram, Twitch, Twitter, Youtube } from "./brand-icons";
 
 /**
  * Tailles standardisées pour les icônes
