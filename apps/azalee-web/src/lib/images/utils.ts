@@ -9,13 +9,14 @@ const ITEM_IMAGE_MANIFEST = itemImageManifest as Record<string, string>;
 // Constantes globales
 export const CDN_URL = process.env.NEXT_PUBLIC_ASSET_URL || "https://azalee.rosegriffon.fr";
 export const CDN_ASSETS = CDN_URL; // Alias pour compatibilité
-// CDN local cdn.rosegriffon.fr/static/azalee/menu/ (Phase 2026-05).
-// URL publique fixe : pas d'env (prerender Next peut ne pas voir NEXT_PUBLIC_*).
-const MENU_BASE = "https://cdn.rosegriffon.fr/static/azalee/menu";
-export const MENU_BUCKET_URL = MENU_BASE;
-
 // Dump PNG dx11 brut (alias nginx → /home/.../inazuma/data/dx11/menu/).
+// Tout le contenu menu vit ici : 200_icon/ 220_img/ icon_chr/ … (cf. cdn-2).
 const MENU_DUMP_BASE = "https://cdn.rosegriffon.fr/dx11/menu";
+
+// L'ancien CDN cdn.rosegriffon.fr/static/azalee/menu/ est vide (404, cf. cdn-2).
+// Fallback de resolveAssetUrl et export public pointent désormais sur le dump dx11.
+const MENU_BASE = MENU_DUMP_BASE;
+export const MENU_BUCKET_URL = MENU_DUMP_BASE;
 
 // Prefixe Supabase Storage legacy stocke en DB (cf. inagle_skills.image_url
 // — ~1010 lignes, 2026-04). Rewrite transparent vers le CDN local.

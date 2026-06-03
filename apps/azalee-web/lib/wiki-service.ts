@@ -1784,16 +1784,16 @@ export const wikiService = {
 		if (!row) return undefined;
 		const char = row;
 
-		// Stats: use individual columns (stat_frappe etc.), fallback to stats JSONB
-		const jsonStats = (char.stats as any)?.lv99 || {};
+		// Stats: source de verite = colonnes scalaires stat_* (lv99).
+		// La colonne jsonb `stats` est DEPRECATED (toujours vide, cf db-6) : plus de fallback.
 		const statsLv99 = {
-			kick: char.stat_frappe || jsonStats.kick || 0,
-			control: char.stat_controle || jsonStats.control || 0,
-			technique: char.stat_technique || jsonStats.technique || 0,
-			pressure: char.stat_pression || jsonStats.pressure || 0,
-			physical: char.stat_physique || jsonStats.physical || 0,
-			agility: char.stat_agilite || jsonStats.agility || 0,
-			intelligence: char.stat_intelligence || jsonStats.intelligence || 0,
+			kick: char.stat_frappe || 0,
+			control: char.stat_controle || 0,
+			technique: char.stat_technique || 0,
+			pressure: char.stat_pression || 0,
+			physical: char.stat_physique || 0,
+			agility: char.stat_agilite || 0,
+			intelligence: char.stat_intelligence || 0,
 		};
 
 		// Skills: fix reversed mapping (learnLevel=hex skillId, skillId=learnLevel)
@@ -1835,18 +1835,17 @@ export const wikiService = {
 		const isHero = char.rarity_label === "Héros";
 		const faceCode = isHero ? HERO_BASE_CODES[originalCode] || originalCode : originalCode;
 
-		// Stats lv1: from lv1 columns or stats JSONB
-		const jsonStatsLv1 = (char.stats as any)?.lv1 || {};
-		const hasLv1 = char.stat_lv1_frappe || jsonStatsLv1.kick;
+		// Stats lv1: colonnes scalaires stat_lv1_* (la colonne jsonb `stats` est DEPRECATED, cf db-6).
+		const hasLv1 = char.stat_lv1_frappe != null;
 		const statsLv1 = hasLv1
 			? {
-					kick: char.stat_lv1_frappe || jsonStatsLv1.kick || 0,
-					control: char.stat_lv1_controle || jsonStatsLv1.control || 0,
-					technique: char.stat_lv1_technique || jsonStatsLv1.technique || 0,
-					pressure: char.stat_lv1_pression || jsonStatsLv1.pressure || 0,
-					physical: char.stat_lv1_physique || jsonStatsLv1.physical || 0,
-					agility: char.stat_lv1_agilite || jsonStatsLv1.agility || 0,
-					intelligence: char.stat_lv1_intelligence || jsonStatsLv1.intelligence || 0,
+					kick: char.stat_lv1_frappe || 0,
+					control: char.stat_lv1_controle || 0,
+					technique: char.stat_lv1_technique || 0,
+					pressure: char.stat_lv1_pression || 0,
+					physical: char.stat_lv1_physique || 0,
+					agility: char.stat_lv1_agilite || 0,
+					intelligence: char.stat_lv1_intelligence || 0,
 				}
 			: undefined;
 
