@@ -8,7 +8,7 @@ import './K4os.Compression.LZ4';
 
 type DateTime = Date & { kind?: 'utc' | 'local' | 'unspecified' }
 
-import { Duplex } from 'stream';
+import { Duplex } from 'node:stream';
 
 /** A JavaScript projection of a .NET type. */
 interface IType {
