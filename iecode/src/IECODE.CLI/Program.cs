@@ -51,6 +51,7 @@ public static class Program
         rootCommand.AddCommand(G4mdCommand.Create());
         rootCommand.AddCommand(G4mgCommand.Create());
         rootCommand.AddCommand(UtfCommand.Create());
+        rootCommand.AddCommand(UsmCommand.Create());
         rootCommand.AddCommand(AudioCommand.Create());
         rootCommand.AddCommand(SearchCommand.Create());
         rootCommand.AddCommand(DumpGameDataCommand.Create());
@@ -62,6 +63,8 @@ public static class Program
         rootCommand.AddCommand(AgiCommand.Create());
         rootCommand.AddCommand(LuaCommand.Create());
         rootCommand.AddCommand(MenuCommand.Create());
+        rootCommand.AddCommand(MevbinCommand.Create());
+        rootCommand.AddCommand(ShaderCommand.Create());
         rootCommand.AddCommand(CreatePassiveSkillCommand(gamePathOption, verboseOption));
 
         // Temporary test command
