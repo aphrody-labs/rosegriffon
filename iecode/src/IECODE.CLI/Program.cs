@@ -51,6 +51,7 @@ public static class Program
         rootCommand.AddCommand(G4mdCommand.Create());
         rootCommand.AddCommand(G4mgCommand.Create());
         rootCommand.AddCommand(UtfCommand.Create());
+        rootCommand.AddCommand(AudioCommand.Create());
         rootCommand.AddCommand(UsmCommand.Create());
         rootCommand.AddCommand(AudioCommand.Create());
         rootCommand.AddCommand(SearchCommand.Create());

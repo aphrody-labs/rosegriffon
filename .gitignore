@@ -121,8 +121,12 @@ scratch/
 *.env.bak.*
 .env.bak.*
 data/backups/
+**/data/backups/
 *.sqlite
 *.sqlite3
+*.sqlite-shm
+*.sqlite-wal
+*.sqlite-journal
 *.db
 *.dump
 *_history
