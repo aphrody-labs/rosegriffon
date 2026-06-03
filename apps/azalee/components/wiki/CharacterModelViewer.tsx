@@ -1,8 +1,7 @@
 "use client";
 
-import { Box, RotateCw, ZoomIn, ZoomOut } from "lucide-react";
-import Image from "next/image";
-import { useEffect, useState } from "react";
+import { Box } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import {
 	Button,
 	Dialog,
@@ -11,72 +10,104 @@ import {
 	DialogTitle,
 	DialogTrigger,
 } from "@rose-griffon/ui";
-import { getCharacterModel360Url } from "@/lib/images";
 
 interface CharacterModelViewerProps {
-	hash: string;
+	/** URL absolue du GLB (cdn.rosegriffon.fr/model/<code>.glb). */
+	glbUrl: string;
 	name?: string;
-	className?: string;
 }
 
-const TOTAL_FRAMES = 8;
+// Bundle <model-viewer> auto-hébergé (public/vendor) — pas de dépendance npm ni de
+// CDN tiers (CSP reste script-src 'self'). Chargé une seule fois, à l'ouverture.
+const MODEL_VIEWER_SRC = "/vendor/model-viewer.min.js";
 
-export default function CharacterModelViewer({ hash, name }: CharacterModelViewerProps) {
-	const [frame, setFrame] = useState(0);
-	const [isFullBody, setIsFullBody] = useState(false);
-	const [isDragging, setIsDragging] = useState(false);
-	const [startX, setStartX] = useState(0);
-	const [startFrame, setStartFrame] = useState(0);
-	const [loading, setLoading] = useState(true);
+let modelViewerLoading: Promise<void> | null = null;
 
-	// Preload images
-	useEffect(() => {
-		// Basic preloading logic
-		const preload = (f: number, full: boolean) => {
-			const img = new window.Image();
-			img.src = getCharacterModel360Url(hash, f, full);
-		};
-
-		// Preload current mode frames
-		for (let i = 0; i < TOTAL_FRAMES; i++) {
-			preload(i, isFullBody);
-		}
-	}, [hash, isFullBody]);
-
-	const handlePointerDown = (e: React.PointerEvent) => {
-		setIsDragging(true);
-		setStartX(e.clientX);
-		setStartFrame(frame);
-		(e.target as HTMLElement).setPointerCapture(e.pointerId);
-	};
-
-	const handlePointerMove = (e: React.PointerEvent) => {
-		if (!isDragging) {
+function loadModelViewer(): Promise<void> {
+	if (typeof window === "undefined") {
+		return Promise.resolve();
+	}
+	if (window.customElements?.get("model-viewer")) {
+		return Promise.resolve();
+	}
+	if (modelViewerLoading) {
+		return modelViewerLoading;
+	}
+	modelViewerLoading = new Promise<void>((resolve, reject) => {
+		const existing = document.querySelector<HTMLScriptElement>(
+			`script[src="${MODEL_VIEWER_SRC}"]`
+		);
+		if (existing) {
+			existing.addEventListener("load", () => resolve());
+			existing.addEventListener("error", () => reject(new Error("model-viewer load failed")));
 			return;
 		}
+		const script = document.createElement("script");
+		script.src = MODEL_VIEWER_SRC;
+		script.async = true;
+		script.addEventListener("load", () => resolve());
+		script.addEventListener("error", () => reject(new Error("model-viewer load failed")));
+		document.head.appendChild(script);
+	});
+	return modelViewerLoading;
+}
 
-		const deltaX = e.clientX - startX;
-		// Sensitivity: 1 frame per 10px
-		const frameDelta = Math.floor(deltaX / 10);
+export default function CharacterModelViewer({ glbUrl, name }: CharacterModelViewerProps) {
+	const [open, setOpen] = useState(false);
+	const [ready, setReady] = useState(false);
+	const [errored, setErrored] = useState(false);
+	const containerRef = useRef<HTMLDivElement>(null);
 
-		// Calculate new frame (wrapping around)
-		let newFrame = (startFrame - frameDelta) % TOTAL_FRAMES;
-		if (newFrame < 0) {
-			newFrame += TOTAL_FRAMES;
+	// Charge le custom element à la 1re ouverture, puis injecte <model-viewer>.
+	useEffect(() => {
+		if (!open) {
+			return;
 		}
+		let cancelled = false;
+		loadModelViewer()
+			.then(() => {
+				if (!cancelled) {
+					setReady(true);
+				}
+			})
+			.catch(() => {
+				if (!cancelled) {
+					setErrored(true);
+				}
+			});
+		return () => {
+			cancelled = true;
+		};
+	}, [open]);
 
-		setFrame(newFrame);
-	};
-
-	const handlePointerUp = (e: React.PointerEvent) => {
-		setIsDragging(false);
-		(e.target as HTMLElement).releasePointerCapture(e.pointerId);
-	};
-
-	const currentUrl = getCharacterModel360Url(hash, frame, isFullBody);
+	// Monte l'élément impérativement (custom element non typé par React/JSX).
+	useEffect(() => {
+		if (!open || !ready || !containerRef.current) {
+			return;
+		}
+		const host = containerRef.current;
+		host.innerHTML = "";
+		const mv = document.createElement("model-viewer");
+		mv.setAttribute("src", glbUrl);
+		mv.setAttribute("alt", `Modèle 3D de ${name ?? "personnage"}`);
+		mv.setAttribute("camera-controls", "");
+		mv.setAttribute("auto-rotate", "");
+		mv.setAttribute("rotation-per-second", "30deg");
+		mv.setAttribute("shadow-intensity", "1");
+		mv.setAttribute("exposure", "1");
+		mv.setAttribute("touch-action", "pan-y");
+		mv.style.width = "100%";
+		mv.style.height = "100%";
+		mv.style.backgroundColor = "transparent";
+		mv.addEventListener("error", () => setErrored(true));
+		host.appendChild(mv);
+		return () => {
+			host.innerHTML = "";
+		};
+	}, [open, ready, glbUrl, name]);
 
 	return (
-		<Dialog>
+		<Dialog open={open} onOpenChange={setOpen}>
 			<DialogTrigger asChild>
 				<Button
 					variant="ghost"
@@ -87,7 +118,7 @@ export default function CharacterModelViewer({ hash, name }: CharacterModelViewe
 					<span className="sr-only">Voir le modèle 3D de {name}</span>
 				</Button>
 			</DialogTrigger>
-			<DialogContent className="sm:max-w-[400px] bg-surface p-0 overflow-hidden border-outline-variant rounded-xl sm:rounded-2xl">
+			<DialogContent className="sm:max-w-[420px] bg-surface p-0 overflow-hidden border-outline-variant rounded-xl sm:rounded-2xl">
 				<DialogHeader className="p-4 bg-surface-container absolute top-0 w-full z-10 bg-opacity-80 backdrop-blur-sm border-b border-outline-variant/20">
 					<DialogTitle className="text-on-surface flex items-center gap-2 text-base">
 						<Box className="size-4 text-primary" />
@@ -95,74 +126,30 @@ export default function CharacterModelViewer({ hash, name }: CharacterModelViewe
 					</DialogTitle>
 				</DialogHeader>
 
-				<div
-					className="aspect-[3/4] relative bg-[url(/fond.webp)] bg-cover bg-center cursor-ew-resize touch-none select-none transition-cursor"
-					onPointerDown={handlePointerDown}
-					onPointerMove={handlePointerMove}
-					onPointerUp={handlePointerUp}
-					onPointerLeave={handlePointerUp}
-				>
-					<div className="absolute inset-0 flex items-center justify-center p-8">
-						{currentUrl && (
-							<Image
-								src={currentUrl}
-								alt={`${name} 3D View`}
-								fill
-								className="object-contain drop-shadow-xl"
-								priority
-								draggable={false}
-								onLoadingComplete={() => setLoading(false)}
-								unoptimized
-							/>
-						)}
-					</div>
+				<div className="aspect-[3/4] relative bg-[url(/fond.webp)] bg-cover bg-center">
+					<div ref={containerRef} className="absolute inset-0" />
 
-					{/* Loading Indicator */}
-					{loading && (
+					{!ready && !errored && (
 						<div className="absolute inset-0 flex items-center justify-center bg-surface/50">
 							<div className="animate-spin rounded-full size-8 border-b-2 border-primary" />
 						</div>
 					)}
 
-					{/* Controls Overlay */}
-					<div className="absolute bottom-4 left-0 right-0 flex justify-center gap-2 opacity-50 hover:opacity-100 transition-opacity">
-						<div className="bg-surface-container-high/80 backdrop-blur rounded-full p-1 flex gap-1 border border-outline-variant shadow-sm">
-							<Button
-								variant={!isFullBody ? "secondary" : "ghost"}
-								size="icon"
-								className="size-8 rounded-full"
-								onClick={() => setIsFullBody(false)}
-								title="Portrait"
-							>
-								<ZoomIn className="size-4" />
-							</Button>
-							<Button
-								variant={isFullBody ? "secondary" : "ghost"}
-								size="icon"
-								className="size-8 rounded-full"
-								onClick={() => setIsFullBody(true)}
-								title="Plein pied"
-							>
-								<ZoomOut className="size-4" />
-							</Button>
-							<div className="w-px bg-outline-variant my-1" />
-							<Button
-								variant="ghost"
-								size="icon"
-								className="size-8 rounded-full"
-								onClick={() => setFrame((f) => (f + 1) % TOTAL_FRAMES)}
-							>
-								<RotateCw className="size-4" />
-							</Button>
+					{errored && (
+						<div className="absolute inset-0 flex items-center justify-center p-6 text-center">
+							<span className="text-sm text-on-surface-variant">
+								Modèle 3D indisponible.
+							</span>
 						</div>
-					</div>
+					)}
 
-					{/* Hint */}
-					<div className="absolute top-20 left-0 right-0 text-center pointer-events-none opacity-0 animate-[fadeIn_3s_ease-in-out_2s_forwards]">
-						<span className="text-xs text-on-surface-variant/50 bg-surface/30 px-2 py-1 rounded">
-							Glissez pour tourner
-						</span>
-					</div>
+					{ready && !errored && (
+						<div className="absolute bottom-3 left-0 right-0 text-center pointer-events-none">
+							<span className="text-xs text-on-surface-variant/60 bg-surface/40 px-2 py-1 rounded">
+								Glissez pour tourner · molette pour zoomer
+							</span>
+						</div>
+					)}
 				</div>
 			</DialogContent>
 		</Dialog>

@@ -22,6 +22,7 @@ import { SafeImage } from "@/components/ui/SafeImage";
 import type { SpriteCommonKey } from "@/config/sprites-common";
 import {
 	getCharacterFaceUrl,
+	getCharacterModelGlbUrl,
 	getCharacterUniformBackUrl,
 	getCharacterUniformUrl,
 	getEmblemImageUrl,
@@ -31,6 +32,7 @@ import {
 import { japaneseToRomaji } from "@/lib/japanese-romaji";
 import { TEAM_EMBLEM_MAP } from "@/lib/team-emblem-map";
 import { cn } from "@/lib/utils";
+import CharacterModelViewer from "./CharacterModelViewer";
 import { FormSelector } from "./FormSelector";
 import type { MovesetSkill } from "./MovesetList";
 import { StatHeptagon } from "./StatHeptagon";
@@ -382,6 +384,9 @@ export function CharacterSheet({
 	// Uniform URLs
 	const internalCode =
 		avatarUrl && !avatarUrl.startsWith("/") && !avatarUrl.startsWith("http") ? avatarUrl : null;
+	// Modèle 3D GLB (g4mg→GLB streamé depuis cdn.rosegriffon.fr/model/<code>.glb).
+	// null si aucun modèle exporté → pas de bouton 3D (fallback portrait image).
+	const modelGlbUrl = internalCode ? getCharacterModelGlbUrl(internalCode) : null;
 	const uniformFrontUrl = internalCode ? getCharacterUniformUrl(internalCode) : null;
 	const uniformBackUrl = internalCode ? getCharacterUniformBackUrl(internalCode) : null;
 	const uniformUrl = uniformSide === "back" ? uniformBackUrl : uniformFrontUrl;
@@ -430,6 +435,12 @@ export function CharacterSheet({
 							unoptimized
 							className="object-contain"
 						/>
+						{/* Bouton modèle 3D GLB — monté seulement si un modèle existe (anti-404). */}
+						{modelGlbUrl && (
+							<div className="absolute bottom-1 right-1 rounded-full bg-black/40 backdrop-blur-sm border border-white/20">
+								<CharacterModelViewer glbUrl={modelGlbUrl} name={name} />
+							</div>
+						)}
 					</div>
 
 					{/* Character Info */}

@@ -3,6 +3,7 @@
  * Fonctionne côté client et serveur.
  */
 import characterFaceManifest from "@/data/character-face-manifest.json";
+import characterModelManifest from "@/data/character-model-manifest.json";
 import itemImageManifest from "@/data/item-image-manifest.json";
 
 const ITEM_IMAGE_MANIFEST = itemImageManifest as Record<string, string>;
@@ -15,6 +16,16 @@ const ITEM_IMAGE_MANIFEST = itemImageManifest as Record<string, string>;
  * pour éviter les 404 silencieux → placeholder des persos sans face (azalee-3).
  */
 const CHARACTER_FACE_CODES = new Set(characterFaceManifest as string[]);
+
+/**
+ * Set EXHAUSTIF des basenames `c<NNNNNNNN>` (et autres) qui possèdent un modèle 3D GLB
+ * réellement servi sur `cdn.rosegriffon.fr/model/<base>.glb`. Généré par
+ * `iecode cdn export-glb` (g4mg+g4md → GLB) puis listé depuis le dossier servi par nginx.
+ * 5502 personnages ont un modèle (intersection avec les faces). Sert de gate à
+ * `getCharacterModelGlbUrl` pour ne monter le viewer 3D que quand le GLB existe (sinon
+ * fallback image) — même garde-fou anti-404 que CHARACTER_FACE_CODES.
+ */
+const CHARACTER_MODEL_CODES = new Set(characterModelManifest as string[]);
 
 // Constantes globales
 export const CDN_URL = process.env.NEXT_PUBLIC_ASSET_URL || "https://azalee.rosegriffon.fr";
@@ -641,6 +652,37 @@ export function getCharacterModel360Url(
 	// Frame est souvent 0-7 ou 0-15
 	const type = full ? "full" : "face";
 	return `${CDN_URL}/zukan-assets-mirror/3d/${hash}/${type}/${frame}.webp`;
+}
+
+/**
+ * Base nginx des modèles 3D GLB (alias → /home/.../inazuma/data/dx11/model/).
+ * Servis par `iecode cdn export-glb` (g4mg+g4md → glTF binary) ; content-type
+ * `model/gltf-binary`, cache immutable 1 an.
+ */
+const MODEL_GLB_BASE = "https://cdn.rosegriffon.fr/model";
+
+/**
+ * Résout l'URL du modèle 3D GLB d'un personnage à partir de son code interne
+ * (`internalCode`/`charaParamId`, ex `c01000010`). Le basename du GLB = basename du
+ * .g4mg `_face` du dump = ce code. Gate sur `CHARACTER_MODEL_CODES` (manifeste des GLB
+ * réellement exportés) : renvoie `null` si aucun modèle n'existe → le caller garde le
+ * fallback image et ne monte pas le viewer 3D (évite tout 404).
+ */
+export function getCharacterModelGlbUrl(code: string | undefined | null): string | null {
+	if (!code) {
+		return null;
+	}
+	// Strip suffixe de variante éventuel (_5000/_5100…) — le dump n'a que le code de base.
+	const base = code.replace(/_\d{4}$/, "");
+	if (!CHARACTER_MODEL_CODES.has(base)) {
+		return null;
+	}
+	return `${MODEL_GLB_BASE}/${base}.glb`;
+}
+
+/** Indique si un personnage possède un modèle 3D GLB servi (gate viewer). */
+export function hasCharacterModelGlb(code: string | undefined | null): boolean {
+	return getCharacterModelGlbUrl(code) !== null;
 }
 
 /**
