@@ -212,6 +212,8 @@ export default async function Home() {
 					Aller au contenu principal
 				</a>
 
+				<h1 className="sr-only">Rose Griffon — Association Inazuma Eleven France</h1>
+
 				<div
 					id="main-content"
 					className="flex flex-col gap-4 md:gap-6 lg:gap-8 pb-12 md:pb-16 lg:pb-20 pt-2 md:pt-4 will-change-scroll"
