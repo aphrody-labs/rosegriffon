@@ -1,6 +1,7 @@
 using System.CommandLine;
 using IECODE.Core;
 using IECODE.Core.Cdn;
+using IECODE.Core.Formats.Level5;
 
 namespace IECODE.CLI.Commands;
 
@@ -41,6 +42,20 @@ public static class CdnCommand
         exportCommand.AddOption(overwriteOption);
         exportCommand.SetHandler(ExportAsync, exportOutArg, gameOption, filterOption, overwriteOption);
         command.AddCommand(exportCommand);
+
+        // ── export-glb : matérialiser les modèles G4MG en GLB (arborescence nginx) ──
+        var exportGlbCommand = new Command("export-glb", "Convertit chaque G4MG ayant un .g4md compagnon en GLB (idempotent)");
+        var exportGlbOutArg = new Argument<string>("output", "Dossier de sortie des .glb (neuf ; jamais sous la prod)");
+        exportGlbCommand.AddArgument(exportGlbOutArg);
+        exportGlbCommand.AddOption(gameOption);
+        var glbFilterOption = new Option<string?>(["--filter"], () => null, "Sous-chaîne de chemin g4mg (ex: _uniform, _face)");
+        exportGlbCommand.AddOption(glbFilterOption);
+        var glbLimitOption = new Option<int>(["--limit", "-n"], () => 0, "Nb max de modèles à exporter (0 = tous)");
+        exportGlbCommand.AddOption(glbLimitOption);
+        var glbOverwriteOption = new Option<bool>(["--overwrite"], () => false, "Réécrire les GLB déjà présents (sinon reprise idempotente)");
+        exportGlbCommand.AddOption(glbOverwriteOption);
+        exportGlbCommand.SetHandler(ExportGlbAsync, exportGlbOutArg, gameOption, glbFilterOption, glbLimitOption, glbOverwriteOption);
+        command.AddCommand(exportGlbCommand);
 
         // ── ls : lister/compter les fichiers servables ──────────────────────────
         var lsCommand = new Command("ls", "Liste les fichiers servables (manifest), filtrable par sous-chaîne");
@@ -151,6 +166,117 @@ public static class CdnCommand
         Console.WriteLine($"  Sortie     : {report.OutputRoot}");
         Console.WriteLine($"  Durée      : {sw.Elapsed.TotalSeconds:N1}s");
         if (report.Failed > 0) Environment.ExitCode = 2;
+    }
+
+    /// <summary>
+    /// Exporte les modèles G4MG (géométrie Level-5) en GLB. Pour chaque .g4mg du manifeste
+    /// ayant un .g4md compagnon de MÊME chemin (basename), extrait la paire des CPK, fait
+    /// g4mg→GLB et écrit &lt;out-dir&gt;/&lt;basename&gt;.glb à plat. Idempotent : saute les GLB déjà
+    /// présents (sauf --overwrite). Le basename plat est celui du .g4mg (ex: u001105.glb),
+    /// ce qui correspond au charaParamId/internal code attendu par le viewer azalee.
+    /// </summary>
+    private static async Task ExportGlbAsync(string output, string? gamePath, string? filter, int limit, bool overwrite)
+    {
+        using var game = new IEVRGame(gamePath);
+        if (!game.IsValid)
+        {
+            Console.Error.WriteLine($"Erreur : jeu introuvable à {game.GamePath}");
+            Environment.ExitCode = 1;
+            return;
+        }
+
+        using var cdn = CdnFileService.FromGame(game);
+
+        // Index des .g4md par chemin-sans-extension (companion = même basename que le .g4mg).
+        var g4mdByBase = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        var g4mgPaths = new List<string>();
+        foreach (var loc in cdn.All)
+        {
+            if (loc.Path.EndsWith(".g4md", StringComparison.OrdinalIgnoreCase))
+                g4mdByBase.Add(loc.Path[..^5]);
+            else if (loc.Path.EndsWith(".g4mg", StringComparison.OrdinalIgnoreCase))
+            {
+                if (string.IsNullOrEmpty(filter) || loc.Path.Contains(filter, StringComparison.OrdinalIgnoreCase))
+                    g4mgPaths.Add(loc.Path);
+            }
+        }
+
+        // Ne garder que les g4mg ayant un g4md compagnon, ordre stable.
+        g4mgPaths.Sort(StringComparer.Ordinal);
+        var candidates = g4mgPaths.Where(p => g4mdByBase.Contains(p[..^5])).ToList();
+
+        Directory.CreateDirectory(output);
+
+        var sw = System.Diagnostics.Stopwatch.StartNew();
+        int written = 0, skipped = 0, empty = 0, failed = 0, processed = 0;
+        long bytesWritten = 0;
+        int target = limit > 0 ? Math.Min(limit, candidates.Count) : candidates.Count;
+
+        Console.Error.WriteLine($"  {candidates.Count:N0} G4MG avec compagnon .g4md" +
+            (string.IsNullOrEmpty(filter) ? "" : $" (filtre « {filter} »)") +
+            $" ; cible : {target:N0}");
+
+        foreach (var g4mgPath in candidates)
+        {
+            if (limit > 0 && processed >= limit) break;
+            processed++;
+
+            var basename = Path.GetFileNameWithoutExtension(g4mgPath);
+            var glbPath = Path.Combine(output, basename + ".glb");
+
+            if (!overwrite && File.Exists(glbPath))
+            {
+                skipped++;
+                continue;
+            }
+
+            try
+            {
+                var g4mgFile = await cdn.ReadAsync(g4mgPath).ConfigureAwait(false);
+                var g4mdFile = await cdn.ReadAsync(g4mgPath[..^5] + ".g4md").ConfigureAwait(false);
+                if (g4mgFile is not { } mg || g4mdFile is not { } md)
+                {
+                    failed++;
+                    Console.Error.WriteLine($"\n  ✗ {g4mgPath} : extraction CPK échouée");
+                    continue;
+                }
+
+                var g4md = new G4mdParser();
+                g4md.Parse(md.Bytes);
+
+                var glb = G4mgCommand.BuildGlb(mg.Bytes, g4md, out _);
+                if (glb is null)
+                {
+                    empty++;
+                    continue;
+                }
+
+                await File.WriteAllBytesAsync(glbPath, glb).ConfigureAwait(false);
+                written++;
+                bytesWritten += glb.LongLength;
+            }
+            catch (Exception ex)
+            {
+                failed++;
+                Console.Error.WriteLine($"\n  ✗ {g4mgPath} : {ex.Message}");
+            }
+
+            if (processed % 25 == 0 || processed == target)
+                Console.Error.Write($"\r  {processed:N0}/{target:N0} — {written:N0} GLB, {skipped:N0} sautés, {empty:N0} vides, {failed:N0} échecs…   ");
+        }
+        sw.Stop();
+
+        Console.Error.WriteLine();
+        Console.WriteLine($"  Candidats  : {candidates.Count:N0}" + (string.IsNullOrEmpty(filter) ? "" : $" (filtre « {filter} »)"));
+        Console.WriteLine($"  Traités    : {processed:N0}");
+        Console.WriteLine($"  GLB écrits : {written:N0}");
+        Console.WriteLine($"  Sautés     : {skipped:N0} (déjà présents)");
+        Console.WriteLine($"  Vides      : {empty:N0} (aucune géométrie)");
+        Console.WriteLine($"  Échecs     : {failed:N0}");
+        Console.WriteLine($"  Octets     : {bytesWritten:N0}");
+        Console.WriteLine($"  Sortie     : {Path.GetFullPath(output)}");
+        Console.WriteLine($"  Durée      : {sw.Elapsed.TotalSeconds:N1}s");
+        if (failed > 0) Environment.ExitCode = 2;
     }
 
     private static void Ls(string? filter, string? gamePath, int limit)

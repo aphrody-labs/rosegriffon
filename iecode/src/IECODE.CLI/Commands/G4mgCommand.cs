@@ -126,22 +126,38 @@ public static class G4mgCommand
         outputPath = string.IsNullOrEmpty(outputPath) ? Path.ChangeExtension(g4mgPath, ".glb") : outputPath;
         Console.WriteLine($"Converting: {Path.GetFileName(g4mgPath)} -> {Path.GetFileName(outputPath)}");
 
-        var geometry = G4mgParser.ExtractGeometry(g4mgData, g4md);
-        if (geometry.Count == 0)
+        var glb = BuildGlb(g4mgData, g4md, out int totalTris, line => Console.WriteLine($"  {line}"));
+        if (glb is null)
         {
             Console.Error.WriteLine("No submesh geometry extracted; nothing to export.");
             return 1;
         }
 
+        File.WriteAllBytes(outputPath, glb);
+        Console.WriteLine($"OK: {outputPath} ({totalTris} triangles)");
+        return 0;
+    }
+
+    /// <summary>
+    /// Construit les octets GLB depuis les données g4mg + son g4md déjà parsé.
+    /// Réutilisable hors fichier (ex: export par lot depuis les CPK). Renvoie null si
+    /// aucune géométrie n'est extraite. Seule la position est décodée honnêtement
+    /// (normale/UV packées SNORM16 non fabriquées).
+    /// </summary>
+    public static byte[]? BuildGlb(ReadOnlySpan<byte> g4mgData, G4mdParser g4md, out int totalTris, Action<string>? log = null)
+    {
+        totalTris = 0;
+        var geometry = G4mgParser.ExtractGeometry(g4mgData, g4md);
+        if (geometry.Count == 0)
+            return null;
+
         var scene = new SceneBuilder();
         var material = new MaterialBuilder("Default").WithDoubleSide(true).WithMetallicRoughnessShader();
 
-        int totalTris = 0;
         foreach (var g in geometry)
         {
-            Console.WriteLine($"  {g.Name}: V={g.VertexCount} I={g.Indices.Count} stride={g.VertexStride}");
+            log?.Invoke($"{g.Name}: V={g.VertexCount} I={g.Indices.Count} stride={g.VertexStride}");
 
-            // Seule la position est décodée honnêtement (normale/UV packées SNORM16 non fabriquées).
             var meshBuilder = new MeshBuilder<VertexPosition>(g.Name);
             var primitive = meshBuilder.UsePrimitive(material);
 
@@ -162,9 +178,8 @@ public static class G4mgCommand
         }
 
         var model = scene.ToGltf2();
-        model.SaveGLB(outputPath);
-
-        Console.WriteLine($"OK: {outputPath} ({totalTris} triangles)");
-        return 0;
+        using var ms = new MemoryStream();
+        model.WriteGLB(ms);
+        return ms.ToArray();
     }
 }
