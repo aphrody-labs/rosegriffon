@@ -426,7 +426,9 @@ export const wikiService = {
 		let ownerSlug: string | undefined;
 
 		const rawSd = (a.sheet_data || {}) as any;
-		const config = rawSd.config || {};
+		// Le lien aura→technique (skillId1/skillId2) vit dans `config`, présent soit dans
+		// sheet_data (injecté par cli-push) soit dans la colonne `data` (AuraSkill complet).
+		const config = rawSd.config || (a.data as any)?.config || {};
 		const possibleSkillIds = [config.skillId1, config.skillId2].filter(
 			(sid: string) => sid && sid !== "0x00000000"
 		);
@@ -1405,10 +1407,13 @@ export const wikiService = {
 			};
 			const elementInfo = elementMap[h.element || ""] || { en: "Void", ja: "無", fr: "Néant" };
 			const categoryInfo = categoryMap[h.category || ""] || { en: "None", ja: "なし", fr: "Aucun" };
-			const sd = (h.sheet_data || {}) as any;
+			// La surface complète inagle (shops, foulRate, tags, recastTime…) vit dans la
+			// colonne `data` ; `sheet_data` ne porte que les overrides communautaires (souvent
+			// vide pour les hissatsu wh*/rh*). On fusionne les deux, sheet_data prioritaire.
+			const sd = { ...(((h as any).data as any) || {}), ...((h.sheet_data as any) || {}) } as any;
 
 			return {
-				// Spread all inagle fields from sheet_data (foulRate, tags, shops, etc.)
+				// Spread all inagle fields from data + sheet_data (foulRate, tags, shops, etc.)
 				...sd,
 				// Override with DB column values (authoritative)
 				skillId: h.id,
