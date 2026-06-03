@@ -47,6 +47,52 @@ public class GameDataMapper
         return results;
     }
 
+    /// <summary>
+    /// Parmi <paramref name="files"/>, retient ceux dont le nom est « &lt;base&gt;_&lt;version&gt;.cfg.bin[.json] »
+    /// (où base = <paramref name="filePattern"/> sans le « * » final) et renvoie la version la plus
+    /// haute (tri numérique des segments X.Y.Z.W). Renvoie null si aucun match versionné — ce qui
+    /// écarte les collisions de préfixe (« chara_param » vs « chara_param_table_config »).
+    /// </summary>
+    private static string? SelectVersionedFile(string[] files, string? filePattern)
+    {
+        if (files.Length == 0 || string.IsNullOrEmpty(filePattern)) return null;
+        // Base = portion AVANT le premier « * » (gère « chara_param*.cfg.bin », « chara_param* »…).
+        int star = filePattern.IndexOf('*');
+        var bas = Path.GetFileName(star >= 0 ? filePattern[..star] : filePattern);
+        if (string.IsNullOrEmpty(bas)) return null;
+
+        var rx = new System.Text.RegularExpressions.Regex(
+            "^" + System.Text.RegularExpressions.Regex.Escape(bas) + @"_(\d+(?:\.\d+)*)\.cfg\.bin(?:\.json)?$",
+            System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+
+        string? best = null;
+        int[]? bestVer = null;
+        bool bestJson = false;
+        foreach (var f in files)
+        {
+            var m = rx.Match(Path.GetFileName(f));
+            if (!m.Success) continue;
+            var ver = m.Groups[1].Value.Split('.').Select(s => int.TryParse(s, out var n) ? n : 0).ToArray();
+            bool isJson = f.EndsWith(".json", StringComparison.OrdinalIgnoreCase);
+            int cmp = bestVer is null ? 1 : CompareVersion(ver, bestVer);
+            // Version la plus haute ; à version égale, préférer la forme parsée .cfg.bin.json
+            // (le binaire .cfg.bin brut de ce dump échoue au parseur — « footer magic »).
+            if (cmp > 0 || (cmp == 0 && isJson && !bestJson)) { best = f; bestVer = ver; bestJson = isJson; }
+        }
+        return best;
+    }
+
+    private static int CompareVersion(int[] a, int[] b)
+    {
+        int n = Math.Max(a.Length, b.Length);
+        for (int i = 0; i < n; i++)
+        {
+            int av = i < a.Length ? a[i] : 0, bv = i < b.Length ? b[i] : 0;
+            if (av != bv) return av.CompareTo(bv);
+        }
+        return 0;
+    }
+
     private CfgBin? LoadCfgBin(string relativePath, string? filePattern = null)
     {
         // Normalise les séparateurs Windows (« \ ») des chemins relatifs codés en dur
@@ -59,16 +105,18 @@ public class GameDataMapper
             if (Directory.Exists(fullPath))
             {
                 var pattern = filePattern ?? "*.cfg.bin";
-                var files = Directory.GetFiles(fullPath, pattern);
+                // Inclut le binaire .cfg.bin ET la forme parsée .cfg.bin.json (ce dump ne
+                // contient que les .json ; le binaire brut échoue au parseur de footer).
+                var files = Directory.GetFiles(fullPath, pattern)
+                    .Concat(Directory.GetFiles(fullPath, pattern + ".json"))
+                    .ToArray();
 
-                if (files.Length == 0)
-                {
-                    // Try looking for .json version if .cfg.bin is missing
-                    files = Directory.GetFiles(fullPath, pattern + ".json");
-                }
-
-                // Pick the one that contains the prefix or just the longest one if no pattern
-                fullPath = files.OrderByDescending(f => f.Length).FirstOrDefault() ?? "";
+                // Sélectionne le fichier versionné correct (ex. « chara_param_1.03.66.00 ») :
+                // évite la collision de préfixe (« chara_param » matchait aussi le plus long
+                // « chara_param_table_config_* ») et prend la version la plus haute.
+                // Repli sur le plus long si aucun match versionné (motifs non versionnés).
+                fullPath = SelectVersionedFile(files, filePattern)
+                    ?? files.OrderByDescending(f => f.Length).FirstOrDefault() ?? "";
             }
             else
             {
