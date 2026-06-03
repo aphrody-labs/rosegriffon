@@ -143,6 +143,7 @@ export default async function SkillsPage({
 				type="application/ld+json"
 				dangerouslySetInnerHTML={{ __html: JSON.stringify(collectionJsonLd) }}
 			/>
+			<h1 className="sr-only">Techniques — Inazuma Eleven: Victory Road</h1>
 			<div className="space-y-4">
 				<WikiSearchToolbar placeholder="Rechercher une technique..." showFilters={false} />
 				<SkillFilterBar

@@ -125,6 +125,7 @@ export default async function PlayersPage({
 
 	return (
 		<>
+			<h1 className="sr-only">Personnages - Inazuma Eleven: Victory Road</h1>
 			<script
 				type="application/ld+json"
 				dangerouslySetInnerHTML={{ __html: JSON.stringify(collectionJsonLd) }}
