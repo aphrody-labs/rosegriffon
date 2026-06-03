@@ -74,6 +74,12 @@ GEMINI.md
 !apps/*/README.md
 # Corpus + runbook des sous-agents llm-agents (doc demandée, trackable)
 !tools/llm-agents/**/*.md
+# SEO : llms.txt / llm.txt / llms-full.txt + clé IndexNow (publics par design)
+!apps/*/public/llms.txt
+!apps/*/public/llm.txt
+!apps/*/public/llms-full.txt
+!apps/*/public/humans.txt
+!apps/*/public/*.txt
 
 # Deployment artifacts
 .deployments/

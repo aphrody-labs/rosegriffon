@@ -1,0 +1,68 @@
+# Rose Griffon — Référence complète
+
+> Rose Griffon est une association française dédiée à la communauté Inazuma Eleven (licence LEVEL-5). Elle fédère les fans francophones autour d'événements, de projets créatifs collaboratifs et de contenus d'information, et maintient le wiki Azalée consacré à Inazuma Eleven: Victory Road.
+
+Site officiel : https://rosegriffon.fr
+Wiki Azalée : https://azalee.rosegriffon.fr
+Développeur & fondateur : Yohan Pierre (yoyo) — https://x.com/yoyo__goat
+Langue : fr-FR
+Généré le : 2026-06-03
+
+## À propos de l'association
+
+Rose Griffon rassemble la communauté Inazuma Eleven en France. L'association
+organise des événements, anime des projets communautaires et produit des
+contenus (articles, outils, ressources) autour de la licence Inazuma Eleven.
+
+- [Accueil](https://rosegriffon.fr/)
+- [À propos](https://rosegriffon.fr/a-propos)
+- [Rejoindre Rose Griffon](https://rosegriffon.fr/a-propos/rejoindre-rg)
+- [Contact](https://rosegriffon.fr/a-propos/contact)
+- [Charte & engagements](https://rosegriffon.fr/charte-engagements)
+- [Cellule de médiation](https://rosegriffon.fr/cellule-de-mediation)
+
+## Équipe
+
+- [Notre équipe](https://rosegriffon.fr/notre-equipe)
+- [Association](https://rosegriffon.fr/notre-equipe/association)
+- [Staff](https://rosegriffon.fr/notre-equipe/staff)
+- [Partenaires](https://rosegriffon.fr/notre-equipe/partenaires)
+
+## Projets
+
+- [Projets](https://rosegriffon.fr/projets)
+- [Nostalgie](https://rosegriffon.fr/projets/nostalgie)
+- [Émotes](https://rosegriffon.fr/projets/emotes)
+- [Muraux](https://rosegriffon.fr/projets/muraux)
+- [Outil PFP](https://rosegriffon.fr/projets/outils/pfp)
+
+## Contenus & communauté
+
+- [Événements](https://rosegriffon.fr/evenements)
+- [Chroniques](https://rosegriffon.fr/chroniques)
+- [Communauté](https://rosegriffon.fr/community)
+- [Nous soutenir](https://rosegriffon.fr/nous-soutenir)
+
+## Wiki Azalée
+
+Azalée est le wiki francophone d'Inazuma Eleven: Victory Road maintenu par Rose
+Griffon : personnages, techniques, objets, auras (esprits guerriers, totems,
+miximax…), tactiques et actualités.
+
+- Wiki : https://azalee.rosegriffon.fr
+- Personnages : https://azalee.rosegriffon.fr/chara
+- Techniques : https://azalee.rosegriffon.fr/skill
+- Objets : https://azalee.rosegriffon.fr/item
+- Auras : https://azalee.rosegriffon.fr/aura
+- Actualités : https://azalee.rosegriffon.fr/news
+
+## Mentions légales
+
+- [Mentions légales](https://rosegriffon.fr/mentions-legales)
+- [CGU](https://rosegriffon.fr/legal/cgu)
+- [Confidentialité](https://rosegriffon.fr/legal/confidentialite)
+
+## Crédits
+
+Conception, développement full-stack et architecture : Yohan Pierre (yoyo) — https://x.com/yoyo__goat.
+Stack : Next.js, React, Bun, TypeScript, Supabase.

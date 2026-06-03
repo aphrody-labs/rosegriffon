@@ -15,6 +15,8 @@ import {
 	warmCaches,
 	triggerGithubPublishWorkflow,
 } from "./tasks/api";
+import { runSeoIndexNow } from "./tasks/seo/indexnow";
+import { runSeoLlmsTxt } from "./tasks/seo/llms-txt";
 import { initDiscord, getDiscordTelemetry, onTelemetryUpdate, getDiscordClient, GUILD_ID } from "./lib/discord";
 import { runDiscordSync, runDiscordChannelScan } from "./tasks/discord";
 import { ServerWebSocket } from "bun";
@@ -200,6 +202,13 @@ if (args.includes("--run")) {
 		await executeTask("discord:sync", runDiscordSync);
 	} else if (task === "discord:scan") {
 		await executeTask("discord:scan", runDiscordChannelScan);
+	} else if (task === "seo:indexnow") {
+		await executeTask("seo:indexnow", runSeoIndexNow);
+	} else if (task === "seo:llms-txt" || task === "seo:llms") {
+		await executeTask("seo:llms-txt", runSeoLlmsTxt);
+	} else if (task === "seo") {
+		await executeTask("seo:llms-txt", runSeoLlmsTxt);
+		await executeTask("seo:indexnow", runSeoIndexNow);
 	} else if (task === "all") {
 		console.log("🏃 Exécution de toutes les tâches...");
 		await executeTask("publish", triggerPublishScheduled);
@@ -213,9 +222,11 @@ if (args.includes("--run")) {
 		await executeTask("reminders", () => triggerPatreonReminders("announce"));
 		await executeTask("discord:sync", runDiscordSync);
 		await executeTask("discord:scan", runDiscordChannelScan);
+		await executeTask("seo:llms-txt", runSeoLlmsTxt);
+		await executeTask("seo:indexnow", runSeoIndexNow);
 	} else {
 		console.error(
-			`❌ Tâche inconnue : ${task}. Choisissez parmi : db, cdn, crawl, rag, query, publish, github-publish, patreon, reminders, warm, discord, discord:scan, backup:postgres, backup:pg, all.`
+			`❌ Tâche inconnue : ${task}. Choisissez parmi : db, cdn, crawl, rag, query, publish, github-publish, patreon, reminders, warm, discord, discord:scan, seo, seo:indexnow, seo:llms-txt, backup:postgres, backup:pg, all.`
 		);
 	}
 	process.exit(0);
@@ -272,6 +283,20 @@ Bun.cron("0 5 * * *", async () => {
 // 6. Rappels Patreon Website : tous les jours à 8h00 UTC
 Bun.cron("0 8 * * *", async () => {
 	await executeTask("reminders", () => triggerPatreonReminders("announce"));
+});
+
+// 7. SEO — Régénération des fichiers llms.txt/llm.txt (fraîcheur) : tous les jours à 5h45 UTC.
+// NB : régénère les fichiers publics dans le checkout local (canonique). La mise en
+// ligne effective dépend d'un redeploy Vercel (commit du repo) ; sur le VPS, cela
+// rafraîchit la copie servie localement si applicable.
+Bun.cron("45 5 * * *", async () => {
+	await executeTask("seo:llms-txt", runSeoLlmsTxt);
+});
+
+// 8. SEO — Soumission IndexNow des sitemaps (Bing/Yandex/Seznam…) : tous les jours à 6h00 UTC.
+// Cadence quotidienne raisonnable pour éviter tout abus/bannissement de la clé.
+Bun.cron("0 6 * * *", async () => {
+	await executeTask("seo:indexnow", runSeoIndexNow);
 });
 
 console.log("✅ Toutes les tâches cron ont été planifiées avec succès.");
@@ -397,6 +422,8 @@ const server = Bun.serve({
 					"warm",
 					"discord",
 					"discord:scan",
+					"seo:indexnow",
+					"seo:llms-txt",
 				],
 				schedules: {
 					publish: "*/15 * * * *",
@@ -406,6 +433,8 @@ const server = Bun.serve({
 					cdn: "0 4 * * *",
 					"github-publish": "30 4 * * *",
 					crawl: "0 5 * * *",
+					"seo:llms-txt": "45 5 * * *",
+					"seo:indexnow": "0 6 * * *",
 					reminders: "0 8 * * *",
 					discord: "*/30 * * * *",
 					"discord:scan": "manuel",
@@ -434,6 +463,10 @@ const server = Bun.serve({
 				discord: runDiscordSync,
 				"discord:scan": runDiscordChannelScan,
 				"discord-scan": runDiscordChannelScan,
+				"seo:indexnow": runSeoIndexNow,
+				"seo-indexnow": runSeoIndexNow,
+				"seo:llms-txt": runSeoLlmsTxt,
+				"seo-llms-txt": runSeoLlmsTxt,
 			};
 
 			const taskFn = runnerMap[taskName];
