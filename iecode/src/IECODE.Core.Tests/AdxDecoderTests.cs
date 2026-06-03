@@ -69,7 +69,7 @@ public class AdxDecoderTests
     public void Parse_ReadsHeaderFields()
     {
         var adx = BuildAdx(
-            encoding: 0x02,
+            encoding: 0x03,
             blockSize: 18,
             bitsPerSample: 4,
             channels: 2,
@@ -105,10 +105,10 @@ public class AdxDecoderTests
     [Fact]
     public void Parse_DetectsNonDecodableEncodingTypes()
     {
-        var ahx = BuildAdx(0x03, 18, 4, 1, 44100, 100, 0, 4, 0);
-        var infoAhx = AdxDecoder.Parse(ahx);
-        Assert.Equal(AdxEncodingType.Ahx, infoAhx.EncodingType);
-        Assert.False(infoAhx.IsDecodable);
+        var fixedAdx = BuildAdx(0x02, 18, 4, 1, 44100, 100, 0, 4, 0);
+        var infoFixed = AdxDecoder.Parse(fixedAdx);
+        Assert.Equal(AdxEncodingType.Fixed, infoFixed.EncodingType);
+        Assert.False(infoFixed.IsDecodable);
 
         var exp = BuildAdx(0x04, 18, 4, 1, 44100, 100, 0, 4, 0);
         var infoExp = AdxDecoder.Parse(exp);
@@ -117,11 +117,12 @@ public class AdxDecoderTests
     }
 
     [Fact]
-    public void DecodePcm16_ThrowsOnAhx()
+    public void DecodePcm16_ThrowsOnNonStandard()
     {
-        var ahx = BuildAdx(0x03, 18, 4, 1, 44100, 32, 0, 4, 0,
+        // Type exponentiel (0x04) : non décodable -> NotSupportedException.
+        var exp = BuildAdx(0x04, 18, 4, 1, 44100, 32, 0, 4, 0,
             blocks: new byte[18]);
-        var dec = AdxDecoder.FromBytes(ahx);
+        var dec = AdxDecoder.FromBytes(exp);
         Assert.Throws<NotSupportedException>(() => dec.DecodePcm16());
     }
 
@@ -129,9 +130,8 @@ public class AdxDecoderTests
     public void DecodePcm16_MonoStandard_ProducesExpectedSamples()
     {
         // 1 canal, blockSize 18 => 32 échantillons par bloc, 4 bits/échantillon.
-        // On décode un seul bloc avec scale=1 et un premier nibble = 1 (delta +1).
-        // highpass=0, sampleRate=48000 => coeffs calculés ; on vérifie le 1er échantillon
-        // qui ne dépend que de scale*delta + prediction(historique nul à 0) = 1.
+        // scale brut = 1 ; type standard => échelle effective = scale + 1 = 2 (vgmstream).
+        // premier nibble = 1 (delta +1).
         var block = new byte[18];
         // scale (u16 BE) = 1
         block[0] = 0x00;
@@ -140,7 +140,7 @@ public class AdxDecoderTests
         block[2] = 0x10;
 
         var adx = BuildAdx(
-            encoding: 0x02,
+            encoding: 0x03,
             blockSize: 18,
             bitsPerSample: 4,
             channels: 1,
@@ -157,11 +157,10 @@ public class AdxDecoderTests
         var pcm = dec.DecodePcm16();
         Assert.Equal(4, pcm.Length); // 4 échantillons mono
 
-        // Premier échantillon : prediction = 0 (historique nul), scale*delta = 1*1 = 1.
-        Assert.Equal(1, pcm[0]);
-        // Deuxième échantillon : nibble bas = 0 -> delta 0, prediction = (coeff1*hist1
-        // + coeff2*hist2) >> 12 avec hist1=1, hist2=0. highpass=0 => coeff1=16384,
-        // coeff2=-8192 => prediction = (16384*1) >> 12 = 4.
+        // Premier échantillon : prediction = 0 (historique nul), scale(2)*delta(1) = 2.
+        Assert.Equal(2, pcm[0]);
+        // Deuxième échantillon : nibble bas = 0 -> delta 0. highpass=0 => coeff1=8192,
+        // coeff2=-4096. prediction = (8192*hist1(2) + (-4096)*hist2(0)) >> 12 = 16384>>12 = 4.
         Assert.Equal(4, pcm[1]);
     }
 

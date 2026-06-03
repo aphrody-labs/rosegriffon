@@ -18,13 +18,15 @@ namespace IECODE.Core.Audio;
 /// <summary>Type d'encodage d'un flux ADX (champ encodingType de l'en-tête).</summary>
 public enum AdxEncodingType : byte
 {
-    /// <summary>ADX-ADPCM standard (4 bits/échantillon, prédicteur LMS 2 coeffs). Décodage supporté.</summary>
-    Standard = 0x02,
+    /// <summary>ADX à coefficients fixes (type XA, 4 jeux de coefs prédéfinis, sélection par frame).
+    /// Rare / encodeur seulement. Décodage non supporté (en-tête seul).</summary>
+    Fixed = 0x02,
 
-    /// <summary>AHX (MPEG-2 layer II). Décodage non supporté (en-tête seul).</summary>
-    Ahx = 0x03,
+    /// <summary>ADX-ADPCM standard (coefs dérivés de la fréquence de coupure). Décodage supporté.
+    /// C'est le type décodable courant (vgmstream adx.c : encoding_type 0x03 = CRI_ADX).</summary>
+    Standard = 0x03,
 
-    /// <summary>ADX exponentiel (échelle delta). Décodage non supporté (en-tête seul).</summary>
+    /// <summary>ADX exponentiel (échelle = 1&lt;&lt;(12-scale)). Décodage non supporté (en-tête seul).</summary>
     Exponential = 0x04,
 
     /// <summary>Type inconnu.</summary>
@@ -123,8 +125,11 @@ public sealed class AdxDecoder
         int sampleRate = (int)BinaryPrimitives.ReadUInt32BigEndian(data[8..]);
         int totalSamples = (int)BinaryPrimitives.ReadUInt32BigEndian(data[12..]);
         int highpassFreq = BinaryPrimitives.ReadUInt16BigEndian(data[16..]);
-        int version = data[18];
-        int flags = data[19];
+        // Version : u16 big-endian @0x12 (ex. 0x0400). Octet haut = version majeure (3/4/5),
+        // octet bas = sous-drapeau (0x08/0x09 = chiffré). (vgmstream adx.c)
+        int versionFull = BinaryPrimitives.ReadUInt16BigEndian(data[18..]);
+        int version = versionFull >> 8;
+        int flags = versionFull & 0xFF;
 
         // Vérifie la chaîne "(c)CRI" à copyrightOffset-2 (= 6 octets avant headerSize).
         bool hasCriCopyright = false;
@@ -204,10 +209,12 @@ public sealed class AdxDecoder
         double z = Math.Cos(2.0 * Math.PI * highpassFreq / sampleRate);
         double a = sqrt2 - z;
         double b = sqrt2 - 1.0;
-        double d = (a - Math.Sqrt((a + b) * (a - b))) / b;
+        double c = (a - Math.Sqrt((a + b) * (a - b))) / b;
 
-        int coeff1 = (int)Math.Floor(d * 8192.0 * 2.0 + 0.5);   // 2*d en Q12
-        int coeff2 = (int)Math.Floor(d * d * -8192.0 + 0.5);    // -d^2 en Q12
+        // Coefficients Q12 EXACTEMENT comme vgmstream adx.c : coef1 = (short)(c*8192),
+        // coef2 = (short)(c*c*-4096). Le cast (short) tronque vers zéro (sémantique C).
+        int coeff1 = (short)(c * 8192.0);
+        int coeff2 = (short)(c * c * -4096.0);
         return (coeff1, coeff2);
     }
 
@@ -256,7 +263,9 @@ public sealed class AdxDecoder
                     return output; // flux tronqué : on retourne ce qui est décodé
 
                 // L'échelle (scale) est un u16 big-endian en tête de bloc.
-                int scale = BinaryPrimitives.ReadUInt16BigEndian(data.AsSpan(blockStart, 2));
+                int scaleRaw = BinaryPrimitives.ReadUInt16BigEndian(data.AsSpan(blockStart, 2));
+                if (scaleRaw == 0x8001) return output;     // marqueur de fin de flux ADX
+                int scale = scaleRaw + 1;                  // type standard : échelle = scale + 1 (vgmstream)
 
                 int h1 = hist1[ch];
                 int h2 = hist2[ch];
