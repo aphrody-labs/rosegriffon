@@ -24,9 +24,18 @@ L'hôte répond (DNS `cdn.rosegriffon.fr` → `51.77.147.152`, `server: nginx`, 
 | `https://cdn.rosegriffon.fr/static/azalee/menu/` | 404 |
 | `https://cdn.rosegriffon.fr/menu/200_icon/01_icon_emblem/em0001_em0001.png` | 404 |
 
-→ **nginx tourne mais aucun root/alias ne pointe vers les fichiers** (dump dx11, /public,
-/static, /_next). Soit la conf nginx du vhost a été perdue, soit les fichiers n'ont jamais été
-synchronisés sur l'hôte `51.77.147.152`.
+→ **nginx tourne mais l'alias `/dx11/` pointait vers le mauvais chemin.**
+
+**Cause racine réelle (VÉRIFIÉE 2026-06-03, corrigé)** : la conf nginx du vhost existait bien
+ET contenait un bloc `location ^~ /dx11/`, mais son `alias` pointait vers un chemin
+`…/steamcmd/…` **inexistant** au lieu du dump réel
+`/home/ubuntu/.local/share/Steam/iecode/inazuma/data/dx11/`. Ce n'était donc **ni** une conf
+perdue, **ni** des fichiers jamais synchronisés (les 40 471 PNG / 3.7 Go étaient déjà sur
+l'hôte) : juste un mauvais chemin d'alias. Le correctif est un **one-liner** (re-pointer
+l'`alias` + `nginx -t` + `systemctl reload nginx`), **pas** un rsync de 3.7 Go.
+Conf corrigée versionnée dans `infra/nginx/cdn.rosegriffon.conf` (anti-dérive).
+Vérif live : `curl -sI .../dx11/menu/icon_chr/face/c01000010_l_c01000010_1_l00.png` → **200**
+(`image/png`, 26 848 o).
 
 ## Source des assets EXISTE bien (VÉRIFIÉ) — dump local non publié
 
@@ -39,8 +48,10 @@ Le dump iecode est présent **sur le VPS de build** :
 - `220_img/telop_waza/fr/a000010_a000010.png` … (310 fichiers ; codes `a*`/`k*`, **pas** `rhd*`)
 - `200_icon/02_icon_item/icon_item02_btl_re000001.png` (préfixe `icon_itemNN_` requis)
 
-→ Le contenu existe ; il **n'est pas déployé sur le CDN**. C'est un problème
-d'**infra/déploiement**, pas d'extraction.
+→ Le contenu existe ET était déjà sur l'hôte CDN ; il n'était **pas servi** à cause d'un
+**alias nginx mal pointé** (`…/steamcmd/…` au lieu de `…/iecode/inazuma/data/dx11/`). Ce
+n'est donc pas un problème de synchro de fichiers ni d'extraction, mais une simple correction
+de chemin d'alias (corrigée 2026-06-03).
 
 ## Légacy mort (VÉRIFIÉ)
 
@@ -57,14 +68,28 @@ L'ancien stockage Supabase Storage référencé par 1002 lignes `inagle_skills.i
   (le website sert son `public/` depuis l'origine ; `NEXT_PUBLIC_CDN_URL` n'est visiblement
   pas actif en prod, donc le CDN cassé n'impacte pas le website).
 
-## Verdict
+## Verdict (état initial — pré-correctif)
 
-| Surface | État | Sévérité |
+| Surface | État (au moment de l'audit) | Sévérité |
 |---|---|---|
-| Images de jeu azalee (faces, telop skills, items, keshins/souls/auras, miximax, menu) | **100 % cassées** — tout passe par `cdn.rosegriffon.fr/dx11/menu/**` → 404 | **P0** |
+| Images de jeu azalee (faces, telop skills, items, keshins/souls/auras, miximax, menu) | **100 % cassées** — `cdn.rosegriffon.fr/dx11/menu/**` → 404 (alias mal pointé) | **P0** |
 | Légacy Supabase Storage menu | mort (400) | P0 (déjà contourné par le rewrite, mais cible morte aussi) |
 | `public/` website | OK (origine) | — |
 | `public/` azalee (UI : rarity/element/move/emote/…) | OK (origine) | — |
 
-Fallback actuel quand l'image jeu 404 : `/ievr.webp` (existe) → l'UI ne crashe pas mais
-**aucune** vignette de perso/technique/objet/keshin ne s'affiche en prod.
+Fallback alors en place quand l'image jeu 404 : `/ievr.webp` (existe) → l'UI ne crashait pas mais
+**aucune** vignette de perso/technique/objet/keshin ne s'affichait en prod.
+
+## Re-run après correctif (VÉRIFIÉ 2026-06-03)
+
+Cause unique = `alias` nginx du bloc `/dx11/` pointant vers `…/steamcmd/…` (inexistant) au lieu de
+`…/iecode/inazuma/data/dx11/` (dump réel). Correctif = **one-liner** (re-pointer l'alias +
+`nginx -t` + `reload`), **pas** un rsync de 3.7 Go : les 40 471 PNG étaient déjà sur l'hôte.
+
+| URL re-testée | Code |
+|---|---|
+| `…/dx11/menu/icon_chr/face/c01000010_l_c01000010_1_l00.png` | **200** (`image/png`, 26 848 o) |
+| `…/dx11/menu/200_icon/01_icon_emblem/em010001_em010001.png` | **200** |
+
+→ Surface « images de jeu azalee » : **débloquée**. Conf corrigée versionnée dans
+`infra/nginx/cdn.rosegriffon.conf`.
