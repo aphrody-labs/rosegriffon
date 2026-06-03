@@ -7,10 +7,10 @@ Comptes obtenus via `count(*)` réel (le résumé `list_tables` était périmé/
 | Table | Lignes (count réel) | Colonne(s) asset | Avec image | Sans image |
 |---|---:|---|---:|---:|
 | `inagle_characters` | 6148 (5710 codes distincts) | `image_url` | **0** | **6148** |
-| `inagle_skills` | 1002 | `image_url` | 1002 (legacy `/storage/…` mort) | 0 |
+| `inagle_skills` | 1002 | `image_url` | 16 (dx11 réel, db-2) | 986 (telop absent du dump, NULL+`has_telop=false`) |
 | `inagle_items` | 1668 | `image_url` (path relatif) | 1668 | 0 |
 | `inagle_auras` | 9 | `image_url`, `asset_code` | 9 | 0 |
-| `inagle_keshins` | 289 | `image_url`, `asset_code` | 223 | **66** |
+| `inagle_keshins` | 289 | `image_url`, `asset_code` | 251 | **38** (était 66 ; db-1 a rempli 28) |
 | `inagle_souls` | 56 | `image_url` | 56 | 0 |
 | `inagle_miximax` | 70 | `image_url`,`asset_code`,`icon_code` | 69 | 1 |
 | `inagle_passives` | 128 | `image_url` | **0** | **128** |
@@ -40,8 +40,15 @@ Comptes obtenus via `count(*)` réel (le résumé `list_tables` était périmé/
 4. **`inagle_characters` : 58 sans `name_fr`, 157 sans `description_fr`.** Localisation FR
    incomplète (hash→texte FR non résolu pour ces lignes).
 
-5. **`inagle_keshins` : 66/289 sans `image_url`** (et `asset_code` NULL → tombent sur un
-   emblème `em0001` ou rien). Auras/keshins non mappés vers le dump `aura_fs`.
+5. **`inagle_keshins` : 38/289 sans `image_url`** (était 66 ; db-1 en a rempli 28 via
+   `asset_code`). **Correction d'audit (VÉRIFIÉ 2026-06-03)** : l'affirmation « `asset_code`
+   NULL » est **fausse**. Les 38 lignes restantes sans `image_url` ont **toutes** leur
+   `asset_code` (`COUNT(image_url IS NULL AND asset_code IS NOT NULL)` = 38, `… IS NULL` = 0).
+   Au global : 240/289 ont un `asset_code`, les 49 NULL sont précisément des lignes qui ont
+   **déjà** une `image_url` — donc le manque d'image n'est PAS corrélé à un `asset_code` NULL.
+   Le vrai blocage des 38 : leur `asset_code` (codes `aura_soul` ≥ 610, variantes `_b1/_h1/_h2`,
+   codes non-ronds) **n'a pas de fichier correspondant dans le dump `dx11`** (cf. roadmap db-1
+   du plan). Ce n'est donc pas un mapping `asset_code` manquant, mais une absence de PNG source.
 
 6. **`inagle_passives` : 128/128 sans `image_url`. STATUÉ (db-4) — pas d'asset jeu, UI sans
    visuel assumée.** Vérification réelle du dump (`/home/ubuntu/.local/share/Steam/iecode/
@@ -52,11 +59,19 @@ Comptes obtenus via `count(*)` réel (le résumé `list_tables` était périmé/
    n'utilise aucune image de jeu : il rend des icônes Lucide par catégorie. La colonne
    `image_url` reste donc volontairement NULL ; aucune ré-extraction à tenter.
 
-7. **`inagle_skills.image_url` : 1002/1002 pointent vers le légacy mort**
-   (`/storage/v1/object/public/menu/220_img/telop_waza/fr/{code}_0.webp`). Le rewrite front
-   les renvoie vers `dx11/…/{code}_{code}.png`, **mais** le dump ne contient pas de telop pour
-   les codes techniques `rhd*`/`shd*` (codes `a*`/`k*` seulement). Le mapping technique→telop
-   reste à établir, OU les telop techniques n'existent pas (à confirmer dans le dump complet).
+7. **`inagle_skills.image_url` — FAIT (db-2, 2026-06-03).** Les 1002 lignes ne pointent plus
+   vers le légacy mort. Cross-référence **fichier-par-fichier** du dump
+   `220_img/telop_waza/fr/` (310 PNG, tous en forme doublée `{code}_{code}.png`) : seuls **16**
+   codes de la table ont un telop réel — `whk00050/00080/00090/00100/00110` et
+   `who00010/00020/00030/00040/00060/00070/00080/00090/00100/00110/00190`. Ces 16 →
+   `image_url = /dx11/menu/220_img/telop_waza/fr/{code}_{code}.png` (HTTP 200 live vérifié 16/16),
+   `has_telop = true`. Les **986** restants → `image_url = NULL`, `has_telop = false`.
+   ATTENTION : contrairement à l'hypothèse initiale (« tous les `wh*` présents »), la **majorité**
+   des `whs*` (419) et `whd*` (187) — ainsi que la quasi-totalité des `whk*`/`who*` — n'ont
+   **aucun** fichier telop dans le dump (974 `wh*` en DB, 16 fichiers seulement). Le garde
+   `SKILL_WITHOUT_TELOP` du résolveur azalee (db-3) ne couvre que `rh[dkos]*`/`swap_*` → il génère
+   encore des 404 pour les ~958 `wh*` sans telop. Correctif front à faire côté db-3/azalee-code
+   (gater sur la donnée `has_telop`/`image_url` plutôt que sur un regex de préfixe).
 
 8. **`inagle_items.image_url` = path relatif `200_icon/02_icon_item/{name}.webp`** alors que les
    fichiers réels portent le préfixe `icon_item{NN}_`. Mapping à corriger / manifest à compléter.
