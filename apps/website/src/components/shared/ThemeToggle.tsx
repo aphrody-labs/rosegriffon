@@ -24,7 +24,7 @@ export function ThemeToggle() {
 			<Button
 				variant="ghost"
 				size="icon"
-				className="h-8 sm:h-9 md:h-10 w-8 sm:w-9 md:w-10"
+				className="h-11 w-11 sm:h-9 sm:w-9 md:h-10 md:w-10"
 				disabled
 				aria-label="Chargement du thème"
 			>
@@ -40,7 +40,7 @@ export function ThemeToggle() {
 			variant="ghost"
 			size="icon"
 			onClick={toggleTheme}
-			className="h-8 sm:h-9 md:h-10 w-8 sm:w-9 md:w-10 relative overflow-hidden rounded-full hover:bg-sidebar-accent/20 transition-all duration-300 group"
+			className="h-11 w-11 sm:h-9 sm:w-9 md:h-10 md:w-10 relative overflow-hidden rounded-full hover:bg-sidebar-accent/20 transition-all duration-300 group"
 			title={`Thème actuel : ${currentTheme.name} (Cliquer pour changer)`}
 		>
 			<div className="relative size-6 sm:h-7 sm:w-7 transition-transform duration-500 ease-in-out group-hover:rotate-12 group-active:rotate-180">

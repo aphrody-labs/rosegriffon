@@ -21,7 +21,7 @@ export function HeaderUserMenu() {
 	if (loading) {
 		return (
 			<Skeleton
-				className={cn("h-8 sm:h-9 md:h-10 w-8 sm:w-9 md:w-10 rounded-full", "animate-pulse")}
+				className={cn("h-11 w-11 sm:h-9 sm:w-9 md:h-10 md:w-10 rounded-full", "animate-pulse")}
 				aria-label="Chargement du profil utilisateur"
 			/>
 		);
@@ -33,7 +33,7 @@ export function HeaderUserMenu() {
 			<Button
 				variant="ghost"
 				size="icon"
-				className="h-8 sm:h-9 md:h-10 w-8 sm:w-9 md:w-10 text-destructive hover:text-destructive/90"
+				className="h-11 w-11 sm:h-9 sm:w-9 md:h-10 md:w-10 text-destructive hover:text-destructive/90"
 				onClick={() => window.location.reload()}
 				title="Cliquez pour recharger"
 				aria-label="Erreur de chargement du profil"
@@ -54,7 +54,7 @@ export function HeaderUserMenu() {
 			<Button
 				size="icon"
 				className={cn(
-					"h-8 sm:h-9 md:h-10 w-8 sm:w-9 md:w-10",
+					"h-11 w-11 sm:h-9 sm:w-9 md:h-10 md:w-10",
 					"bg-linear-to-r from-[#a14b3f] to-gaelle-blue",
 					"hover:from-[#8a3f34] hover:to-[#1e4a63]",
 					"text-white font-medium shadow-md",
