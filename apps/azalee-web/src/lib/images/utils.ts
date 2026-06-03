@@ -352,14 +352,24 @@ export function getRarityIconUrl(rarity: string | number | undefined | null): st
 }
 
 /**
- * URL pour les vidéos de techniques
+ * Le miroir `zukan-assets-mirror` (modèles 3D 360° + vidéos de techniques) n'existe
+ * NULLE PART en prod (azalee-1) : `{CDN_URL}/zukan-assets-mirror/...` renvoie 404, et
+ * la source amont `zukan.inazuma.jp/3d/...` est elle aussi morte (404 vérifié 2026-06).
+ * Tant que ce flag reste `false`, les résolveurs 3D/vidéo renvoient une chaîne vide /
+ * un placeholder au lieu d'une URL 404, et le bouton 360° n'est pas monté dans l'UI
+ * (cf. CharacterTable). Repasser à `true` uniquement quand un vrai miroir est en place.
+ */
+export const ZUKAN_3D_MIRROR_AVAILABLE = false;
+
+/**
+ * URL pour les vidéos de techniques.
+ * Gaté sur `ZUKAN_3D_MIRROR_AVAILABLE` (azalee-1) : renvoie une chaîne vide tant que le
+ * miroir est absent, ce qui évite un `<video src>` en 404.
  */
 export function getSkillVideoUrl(skillId: string | undefined | null): string {
-	if (!skillId) {
+	if (!skillId || !ZUKAN_3D_MIRROR_AVAILABLE) {
 		return "";
 	}
-	// Les vidéos sont généralement hébergées ailleurs ou dans un dossier spécifique
-	// Pour l'instant, on pointe vers le CDN mirror si disponible
 	return `${CDN_URL}/zukan-assets-mirror/movies/${skillId}.mp4`;
 }
 
@@ -491,13 +501,20 @@ export function resolveAuraTelopUrl(assetCode: string | undefined | null): strin
 }
 
 /**
- * URL pour les modèles 3D (360°)
+ * URL pour les modèles 3D (360°).
+ * Gaté sur `ZUKAN_3D_MIRROR_AVAILABLE` (azalee-1) : tant que le miroir est absent,
+ * renvoie le placeholder `PLACEHOLDERS.character` au lieu d'une URL 404. Le bouton 360°
+ * étant lui aussi gaté côté UI, ce résolveur n'est plus appelé pour produire une frame
+ * en prod, mais le garde-fou évite tout 404 si quelqu'un l'invoque directement.
  */
 export function getCharacterModel360Url(
 	hash: string,
 	frame: number,
 	full: boolean = false
 ): string {
+	if (!ZUKAN_3D_MIRROR_AVAILABLE) {
+		return PLACEHOLDERS.character;
+	}
 	// Format Zukan: https://zukan.inazuma.jp/3d/{hash}/{type}/{frame}.webp
 	// Notre miroir: /zukan-assets-mirror/3d/{hash}/{type}/{frame}.webp
 	// Frame est souvent 0-7 ou 0-15
