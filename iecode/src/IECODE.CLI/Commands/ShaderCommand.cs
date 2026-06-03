@@ -53,7 +53,7 @@ public static class ShaderCommand
             {
                 var dx = DxbcReader.Parse(data);
                 Console.WriteLine("Format: DXBC (DirectX Byte Code)");
-                Console.WriteLine($"  Version:       {dx.Version >> 16}.{dx.Version & 0xFFFF}");
+                Console.WriteLine($"  Version:       {dx.Version & 0xFF}.{(dx.Version >> 8) & 0xFF}");
                 Console.WriteLine($"  Program type:  {dx.ProgramType}");
                 Console.WriteLine($"  Shader model:  {dx.ShaderModelMajor}.{dx.ShaderModelMinor}");
                 Console.WriteLine($"  Total size:    {dx.TotalSize:N0} bytes");

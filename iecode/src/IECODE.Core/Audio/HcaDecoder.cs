@@ -114,7 +114,7 @@ public static class HcaDecoder
                 frameSize = BinaryPrimitives.ReadUInt16BigEndian(data.Slice(o + 4, 2));
                 o += 12;
             }
-            else if (TagIs(data, o, "vbr")) { o += 6; }
+            else if (TagIs(data, o, "vbr")) { o += 8; } // vbr = tag + max_frame_size u16 + noise_level u16 (vgmstream clhca.c)
             else if (TagIs(data, o, "ath")) { o += 6; }
             else if (TagIs(data, o, "loop"))
             {

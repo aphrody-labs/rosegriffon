@@ -112,9 +112,10 @@ namespace IECODE.Core.Formats.Shader
 
         private void DecodeRdefCreator(byte[] payload)
         {
-            // RDEF : +0x1C = offset (relatif au début du chunk) vers la chaîne "Creator".
+            // RDEF : +0x18 = offset (relatif au début du chunk) vers la chaîne "Creator".
+            // (+0x1C porte la signature étendue "RD11" sur les shaders SM5, pas le créateur.)
             if (payload.Length < 0x20) return;
-            uint creatorOff = ReadU32(payload, 0x1C);
+            uint creatorOff = ReadU32(payload, 0x18);
             if (creatorOff == 0 || creatorOff >= payload.Length) return;
             int end = (int)creatorOff;
             while (end < payload.Length && payload[end] != 0) end++;

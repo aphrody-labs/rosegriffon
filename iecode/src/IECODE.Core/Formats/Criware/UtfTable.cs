@@ -146,16 +146,19 @@ public sealed class UtfTable
         for (int c = 0; c < _columns.Length; c++)
         {
             var col = _columns[c];
+            // Priorité DEFAULT (0x20) > ROW (0x40), conforme à vgmstream cri_utf.c : une
+            // colonne DEFAULT porte une valeur constante (schéma) et ne consomme AUCUN
+            // octet par ligne — donc rowPtr n'avance que pour les colonnes ROW.
+            if ((col.Flags & FlagHasDefault) != 0)
+            {
+                if (c == columnIndex) return col.DefaultOffset;
+                continue;
+            }
             if ((col.Flags & FlagRowStorage) != 0)
             {
                 int vp = rowPtr;
                 if (c == columnIndex) return vp;
                 rowPtr += ValueSize(col.Type);
-                continue;
-            }
-            if ((col.Flags & FlagHasDefault) != 0)
-            {
-                if (c == columnIndex) return col.DefaultOffset;
                 continue;
             }
             if (c == columnIndex) return -1; // colonne sans stockage

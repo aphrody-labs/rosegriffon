@@ -26,7 +26,8 @@ public readonly record struct AwbEntry(
 /// </summary>
 public readonly record struct AwbHeader(
     byte Version,
-    byte OffsetSize,   // largeur en octets des entrées des tables d'id/offset (2 ou 4)
+    byte OffsetSize,   // largeur des entrées de la table d'OFFSETS (0x05, 2 ou 4)
+    ushort IdSize,     // largeur des entrées de la table d'IDS (waveid_alignment @0x06, 2 ou 4)
     ushort Align,      // alignement des blocs de données
     ushort Subkey,     // sous-clé de chiffrement (0 = non chiffré)
     int EntryCount
@@ -55,18 +56,22 @@ public static class AwbReader
 
         byte version = data[0x04];
         byte offsetSize = data[0x05];
+        // waveid_alignment (largeur de la table d'IDs) — champ DISTINCT d'offset_size
+        // (vgmstream awb.c). Sur IEVR les deux valent 4, mais le format les sépare.
+        ushort idSize = BinaryPrimitives.ReadUInt16LittleEndian(data[0x06..0x08]);
         ushort align = BinaryPrimitives.ReadUInt16LittleEndian(data[0x0C..0x0E]);
         ushort subkey = BinaryPrimitives.ReadUInt16LittleEndian(data[0x0E..0x10]);
         int count = (int)BinaryPrimitives.ReadUInt32LittleEndian(data[0x08..0x0C]);
 
-        // Garde-fous : offset_size doit valoir 2 ou 4, align ne peut être nul.
+        // Garde-fous : offset_size/id_size doivent valoir 2 ou 4, align ne peut être nul.
         if (offsetSize is not (2 or 4))
             throw new InvalidDataException($"AWB offset_size inattendu: {offsetSize}");
+        if (idSize is not (2 or 4)) idSize = offsetSize; // tolérance : retombe sur offset_size
         if (align == 0) align = 0x20;
         if (count < 0 || count > 0x100000)
             throw new InvalidDataException($"AWB entry_count aberrant: {count}");
 
-        return new AwbHeader(version, offsetSize, align, subkey, count);
+        return new AwbHeader(version, offsetSize, idSize, align, subkey, count);
     }
 
     /// <summary>
@@ -78,8 +83,9 @@ public static class AwbReader
         int n = h.EntryCount;
         var entries = new AwbEntry[n];
 
-        // Table d'identifiants : id_size = offset_size, démarre à 0x10.
-        int idSize = h.OffsetSize;
+        // Table d'identifiants (largeur = id_size, distincte d'offset_size), démarre à 0x10 ;
+        // la table d'offsets suit immédiatement après (n entrées d'id_size octets).
+        int idSize = h.IdSize;
         int idTablePos = 0x10;
         int offTablePos = idTablePos + n * idSize;
 
@@ -94,7 +100,7 @@ public static class AwbReader
 
         for (int i = 0; i < n; i++)
         {
-            uint id = (uint)ReadEntry(data, h.OffsetSize, idTablePos, i);
+            uint id = (uint)ReadEntry(data, h.IdSize, idTablePos, i);
             long rawStart = ReadEntry(data, h.OffsetSize, offTablePos, i);
             long rawEnd = ReadEntry(data, h.OffsetSize, offTablePos, i + 1);
             long start = Align(rawStart);
