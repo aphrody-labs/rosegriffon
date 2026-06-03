@@ -90,7 +90,7 @@ export function Header({
 								variant="ghost"
 								size="icon"
 								asChild
-								className="text-muted-foreground hover:text-primary size-9"
+								className="text-muted-foreground hover:text-primary size-11 sm:size-9"
 							>
 								<Link href="/admin" title="Administration">
 									<ShieldCheck className="size-5" />
