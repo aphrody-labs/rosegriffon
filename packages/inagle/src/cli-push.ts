@@ -650,9 +650,11 @@ async function importItems(service: any, db: DataAdapter) {
 				stat_boost_2: item.stats?.stat2 || null,
 				image_url: item.imageUrl || null,
 				data: item,
-				// Restaure le sheet_data riche préservé (shops/price/attributes) ou, à défaut,
-				// retombe sur l'objet parsé courant — la page lit sheet_data en priorité.
-				sheet_data: preserved.get(String(id)) ?? item ?? null,
+				// NATIF d'abord : l'objet parsé porte shops/price/attributes directement de
+				// shop_config/item_config (cfg.bin) — plus de dépendance au Google Sheet
+				// communautaire. Garde-fou : si ce run n'a pas chargé les shops (DATA_ROOT
+				// absent), retombe sur le snapshot préservé pour ne pas appauvrir la donnée.
+				sheet_data: (item?.shops ? item : (preserved.get(String(id)) ?? item)) ?? null,
 				updated_at: new Date().toISOString(),
 			};
 		});
