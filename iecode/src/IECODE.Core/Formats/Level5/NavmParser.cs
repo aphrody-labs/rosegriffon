@@ -19,7 +19,7 @@ namespace IECODE.Core.Formats.Level5;
 ///   0x06  u16      typeId        0x0066
 ///   0x08  u16      reserved0     0x0000
 ///   0x0A  u16      align         0x0018 (24)
-///   0x0C  u32      dataSize      0x000011C0 (offset de fin de section données)
+///   0x0C  u32      dataSize      0x000011C0 (LONGUEUR de la section données ; headerSize+dataSize==fileSize)
 ///   0x10  u8[16]   padding (zéros)
 ///   0x20  u32[5]   sectionCounts  {120, 102, 30, 40, 51}
 ///   ...   données du navmesh (arrays d'indices u32)
@@ -96,11 +96,14 @@ public sealed class NavmParser
         return parser;
     }
 
-    /// <summary>Nombre de nœuds (1ère entrée de la table de sections).</summary>
-    public uint NodeCount => SectionCounts.Count > 0 ? SectionCounts[0] : 0;
-
-    /// <summary>Nombre d'arêtes/liens (2e entrée de la table de sections).</summary>
-    public uint EdgeCount => SectionCounts.Count > 1 ? SectionCounts[1] : 0;
+    /// <summary>
+    /// Compte de la section d'index <paramref name="i"/> de la table d'en-tête (@0x20).
+    /// NOTE RE : la sémantique exacte de chaque compteur n'est PAS confirmée — sur 5 maps
+    /// réelles (s28/s40/s41/s48/s49) les indices 0..3 sont constants {120,102,30,40} tandis
+    /// que les données varient ; seul l'indice 4 (=51 ici) suit un tableau d'enregistrements
+    /// de 32 octets corrélé au contenu. On n'expose donc PAS de "nodes/edges" spéculatifs.
+    /// </summary>
+    public uint SectionCount(int i) => i >= 0 && i < SectionCounts.Count ? SectionCounts[i] : 0;
 
     public string GetSummary()
     {
@@ -119,8 +122,6 @@ public sealed class NavmParser
             sb.Append(SectionCounts[i]);
         }
         sb.AppendLine("]");
-        sb.AppendLine($"  Nodes (est.): {NodeCount}");
-        sb.AppendLine($"  Edges (est.): {EdgeCount}");
         return sb.ToString();
     }
 }

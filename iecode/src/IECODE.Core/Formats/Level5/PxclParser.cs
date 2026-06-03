@@ -44,8 +44,11 @@ public sealed class PxclParser
         public ushort Reserved0;
         public ushort Align;
         public uint DataSize;
-        public uint SectionSize;
-        public uint SectionOffset;
+        // Champs @0x20/@0x24 : sémantique NON vérifiée sur données réelles (sur ao111.col,
+        // Field0x24=16 ne pointe pas le 1er sous-bloc SEBD@0x40, et Field0x20 ne couvre pas
+        // la section). Exposés bruts ; la navigation se fait par scan du magic "SEBD".
+        public uint Field0x20;
+        public uint Field0x24;
     }
 
     public struct SubBlock
@@ -85,8 +88,8 @@ public sealed class PxclParser
             Reserved0 = BinaryPrimitives.ReadUInt16LittleEndian(span[8..]),
             Align = BinaryPrimitives.ReadUInt16LittleEndian(span[10..]),
             DataSize = BinaryPrimitives.ReadUInt32LittleEndian(span[12..]),
-            SectionSize = BinaryPrimitives.ReadUInt32LittleEndian(span[0x20..]),
-            SectionOffset = BinaryPrimitives.ReadUInt32LittleEndian(span[0x24..]),
+            Field0x20 = BinaryPrimitives.ReadUInt32LittleEndian(span[0x20..]),
+            Field0x24 = BinaryPrimitives.ReadUInt32LittleEndian(span[0x24..]),
         };
         parser.Header = header;
 
@@ -125,8 +128,8 @@ public sealed class PxclParser
         sb.AppendLine($"  TypeId       : 0x{Header.TypeId:X4}");
         sb.AppendLine($"  Align        : {Header.Align}");
         sb.AppendLine($"  DataSize     : {Header.DataSize} (0x{Header.DataSize:X})");
-        sb.AppendLine($"  SectionSize  : {Header.SectionSize} (0x{Header.SectionSize:X})");
-        sb.AppendLine($"  SectionOff   : {Header.SectionOffset}");
+        sb.AppendLine($"  Field0x20    : {Header.Field0x20} (0x{Header.Field0x20:X})");
+        sb.AppendLine($"  Field0x24    : {Header.Field0x24}");
         sb.AppendLine($"  FileSize     : {FileSize}");
         sb.AppendLine($"  Consistent   : {HeaderConsistent} (dataSize+headerSize==fileSize)");
         sb.AppendLine($"  SubBlocks    : {SubBlocks.Count}");
