@@ -222,6 +222,7 @@
 		"iecode:dotnet:test": "dotnet test iecode/IECODE.sln -c Release",
 		"iecode:napi:build": "dotnet build iecode/vendor/node-api-dotnet/NodeApi.sln -c Release",
 		"iecode:sync:gamedata": "bun iecode/scripts/sync-gamedata.ts",
+		"inagle:manifest:game-assets": "bun scripts/inagle/pipeline/generate-game-assets-manifest.ts",
 		"iecode:scrape": "bun iecode/packages/steam-sync/src/cli.ts",
 		"iecode:steam:sync": "bun iecode/packages/steam-sync/src/cli.ts",
 		"iecode:steam:depots": "bun iecode/packages/steam-sync/src/cli.ts --list",
