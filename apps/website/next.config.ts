@@ -191,7 +191,7 @@ const nextConfig = {
 		unoptimized: false,
 		...(CDN_LOADER && {
 			loader: "custom",
-			loaderFile: "./cdn-loader.js",
+			loaderFile: "./cdn-loader.ts",
 		}),
 		remotePatterns: [
 			{ hostname: "cdn.rosegriffon.fr", protocol: "https" },
