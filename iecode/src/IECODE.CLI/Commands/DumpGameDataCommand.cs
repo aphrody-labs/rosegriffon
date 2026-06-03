@@ -64,7 +64,7 @@ public static class DumpGameDataCommand
                         @"data\common\gamedata\item",
                         "ITEM_CONSUME_INFO",
                         e => new ItemConfig(e),
-                        "item*.cfg.bin");
+                        "item_config*.cfg.bin");
                     json = JsonSerializer.Serialize(items, AppJsonContext.Default.ListItemConfig);
                     break;
                 case "skill":
