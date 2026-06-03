@@ -39,7 +39,7 @@ export const MobileBottomNavigation = () => {
 
 	return (
 		<div className="fixed bottom-0 left-0 right-0 z-50 border-t border-border/40 bg-background/95 backdrop-blur-xl pb-[env(safe-area-inset-bottom)] shadow-[0_-5px_20px_-5px_rgba(0,0,0,0.1)]">
-			<nav className="flex h-16 items-center justify-around px-2">
+			<nav aria-label="Navigation mobile" className="flex h-16 items-center justify-around px-2">
 				{navItems.map((item) => {
 					const isActive = pathname
 						? item.href === "/"
@@ -67,7 +67,7 @@ export const MobileBottomNavigation = () => {
 						>
 							{/* Active Indicator Line */}
 							{isActive && (
-								<span className="absolute -top-0.5 left-1/2 -translate-x-1/2 w-8 h-1 bg-primary rounded-b-full shadow-[0_2px_8px_rgba(var(--primary),0.5)]" />
+								<span className="absolute -top-0.5 left-1/2 -translate-x-1/2 w-8 h-1 bg-primary rounded-b-full shadow-[0_2px_8px_color-mix(in_oklab,var(--primary)_50%,transparent)]" />
 							)}
 
 							<Icon
@@ -98,7 +98,7 @@ export const MobileBottomNavigation = () => {
 					aria-expanded={isMenuOpen}
 				>
 					{isMenuOpen && (
-						<span className="absolute -top-0.5 left-1/2 -translate-x-1/2 w-8 h-1 bg-primary rounded-b-full shadow-[0_2px_8px_rgba(var(--primary),0.5)]" />
+						<span className="absolute -top-0.5 left-1/2 -translate-x-1/2 w-8 h-1 bg-primary rounded-b-full shadow-[0_2px_8px_color-mix(in_oklab,var(--primary)_50%,transparent)]" />
 					)}
 					<Menu
 						className={cn("size-6 transition-transform duration-300", isMenuOpen && "rotate-90")}

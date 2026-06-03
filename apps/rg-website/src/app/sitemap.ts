@@ -32,7 +32,14 @@ const ROUTES: Array<{
 ];
 
 export default function sitemap(): MetadataRoute.Sitemap {
-	const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://rosegriffon.fr";
+	// Host canonique (apex, sans www) : doit correspondre au `metadataBase`
+	// (https://rosegriffon.fr) du layout. next.config redirige www → apex en 301,
+	// donc émettre des URLs www imposerait un saut de redirection aux crawlers et
+	// brouillerait le signal canonique. On normalise vers l'apex.
+	const baseUrl = (process.env.NEXT_PUBLIC_BASE_URL || "https://rosegriffon.fr").replace(
+		"://www.",
+		"://",
+	);
 	const lastModified = new Date();
 	return ROUTES.map(({ path, priority, changeFrequency }) => ({
 		url: `${baseUrl}${path}`,
