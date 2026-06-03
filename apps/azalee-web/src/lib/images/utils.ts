@@ -2,9 +2,19 @@
  * Utilitaires légers pour la génération d'URLs d'images de jeu.
  * Fonctionne côté client et serveur.
  */
+import characterFaceManifest from "@/data/character-face-manifest.json";
 import itemImageManifest from "@/data/item-image-manifest.json";
 
 const ITEM_IMAGE_MANIFEST = itemImageManifest as Record<string, string>;
+
+/**
+ * Set EXHAUSTIF des codes de base `c<NNNNNNNN>` qui possèdent réellement un visage
+ * variant-1 dans le dump dx11, d'après `inagle_game_assets` (table-of-truth des URL
+ * servies, 40471 lignes ; 5677 faces variant-1). Régénéré par
+ * `scripts/build-character-face-manifest.ts`. Sert de gate à `getCharacterFaceUrl`
+ * pour éviter les 404 silencieux → placeholder des persos sans face (azalee-3).
+ */
+const CHARACTER_FACE_CODES = new Set(characterFaceManifest as string[]);
 
 // Constantes globales
 export const CDN_URL = process.env.NEXT_PUBLIC_ASSET_URL || "https://azalee.rosegriffon.fr";
@@ -82,6 +92,11 @@ export function resolveAssetUrl(path: string | null | undefined): string | null 
 /**
  * URL d'un visage de personnage depuis le dump dx11 brut.
  * Pattern fichier : `icon_chr/face/{base}_l_{base}_1_l00.png` (variant 1 par défaut).
+ *
+ * Gate sur `inagle_game_assets` (azalee-3) : si le code de base n'a pas de face
+ * variant-1 dans la table-of-truth des assets servis (`CHARACTER_FACE_CODES`), on
+ * renvoie directement `PLACEHOLDERS.character` au lieu de produire une URL qui
+ * déclencherait un 404 silencieux résorbé par le `<Image onError>` côté client.
  */
 const CHR_DUMP_BASE = "https://cdn.rosegriffon.fr/dx11/menu/icon_chr";
 
@@ -94,6 +109,9 @@ export function getCharacterFaceUrl(
 	}
 	// Strip _5000/_5100/etc. suffix — dump only has base code face icons
 	const baseCode = charaId.replace(/_\d{4}$/, "");
+	if (!CHARACTER_FACE_CODES.has(baseCode)) {
+		return PLACEHOLDERS.character;
+	}
 	return `${CHR_DUMP_BASE}/face/${baseCode}_l_${baseCode}_1_l00.png`;
 }
 // Alias pour compatibilité
