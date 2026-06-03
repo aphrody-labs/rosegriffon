@@ -1,4 +1,7 @@
 using IECODE.Core.Native;
+// Flux de déchiffrement CPK canonique (déchiffrement complet basé sur l'offset) — partagé
+// avec CpkService. Remplace l'ancien CpkDecryptionStream interne (buggé : en-tête seul).
+using IECODE.Core.Formats.Criware.CriFs.Encryption;
 
 namespace IECODE.Core.Crypto;
 
@@ -180,117 +183,4 @@ public sealed class CriCryptoService
     /// </summary>
     public static uint CalculateKeyFromFilename(string filePath)
         => NativeCrypto.CalculateKeyFromPath(filePath);
-}
-
-/// <summary>
-/// Stream de décryptage CPK utilisant NativeCrypto optimisé.
-/// </summary>
-internal sealed class CpkDecryptionStream : Stream
-{
-    private readonly Stream _baseStream;
-    private readonly uint _key;
-    private readonly bool _ownsStream;
-    private long _position;
-    private byte[]? _decryptedHeader;
-
-    public CpkDecryptionStream(Stream baseStream, uint key, bool ownsStream = false)
-    {
-        _baseStream = baseStream;
-        _key = key;
-        _ownsStream = ownsStream;
-        _position = 0;
-
-        // Pre-decrypt header
-        DecryptHeader();
-    }
-
-    private void DecryptHeader()
-    {
-        _baseStream.Position = 0;
-        _decryptedHeader = new byte[2048]; // First 2KB is header
-        int read = _baseStream.Read(_decryptedHeader, 0, _decryptedHeader.Length);
-
-        if (read < _decryptedHeader.Length)
-        {
-            Array.Resize(ref _decryptedHeader, read);
-        }
-
-        // Apply decryption using NativeCrypto optimisé (SIMD)
-        NativeCrypto.DecryptBlock(_decryptedHeader.AsSpan(), 0, _key);
-        _baseStream.Position = 0;
-    }
-
-    public override bool CanRead => true;
-    public override bool CanSeek => true;
-    public override bool CanWrite => false;
-    public override long Length => _baseStream.Length;
-
-    public override long Position
-    {
-        get => _position;
-        set
-        {
-            _position = value;
-            _baseStream.Position = value;
-        }
-    }
-
-    public override int Read(byte[] buffer, int offset, int count)
-    {
-        // For header region, use decrypted data
-        if (_position < _decryptedHeader!.Length)
-        {
-            int headerBytes = (int)Math.Min(count, _decryptedHeader.Length - _position);
-            Array.Copy(_decryptedHeader, _position, buffer, offset, headerBytes);
-
-            _position += headerBytes;
-
-            if (headerBytes < count)
-            {
-                // Read rest from base stream
-                _baseStream.Position = _position;
-                int remaining = _baseStream.Read(buffer, offset + headerBytes, count - headerBytes);
-                _position += remaining;
-                return headerBytes + remaining;
-            }
-
-            return headerBytes;
-        }
-
-        // For data region, read directly
-        _baseStream.Position = _position;
-        int bytesRead = _baseStream.Read(buffer, offset, count);
-        _position += bytesRead;
-        return bytesRead;
-    }
-
-    public override long Seek(long offset, SeekOrigin origin)
-    {
-        switch (origin)
-        {
-            case SeekOrigin.Begin:
-                _position = offset;
-                break;
-            case SeekOrigin.Current:
-                _position += offset;
-                break;
-            case SeekOrigin.End:
-                _position = Length + offset;
-                break;
-        }
-        return _position;
-    }
-
-    public override void Flush() { }
-    public override void SetLength(long value) => throw new NotSupportedException();
-    public override void Write(byte[] buffer, int offset, int count) => throw new NotSupportedException();
-
-    protected override void Dispose(bool disposing)
-    {
-        if (disposing && _ownsStream)
-        {
-            _baseStream.Dispose();
-        }
-        base.Dispose(disposing);
-    }
 }
