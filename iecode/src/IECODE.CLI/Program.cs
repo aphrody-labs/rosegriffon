@@ -58,6 +58,7 @@ public static class Program
         rootCommand.AddCommand(ConvertCommand.Create());
         rootCommand.AddCommand(FormatCommand.Create());
         rootCommand.AddCommand(G4raCommand.Create());
+        rootCommand.AddCommand(P3lipCommand.Create());
         rootCommand.AddCommand(AgiCommand.Create());
         rootCommand.AddCommand(LuaCommand.Create());
         rootCommand.AddCommand(MenuCommand.Create());
