@@ -70,9 +70,9 @@ public static class DumpGameDataCommand
                 case "skill":
                     var skills = mapper.LoadEntries<AuraSkillConfig>(
                         @"data\common\gamedata\skill",
-                        "AURA_CMD_UNIQUE_EFFECT",
+                        "AURA_CMD_INFO_",
                         e => new AuraSkillConfig(e),
-                        "skill*.cfg.bin");
+                        "aura_skill_config*.cfg.bin");
                     json = JsonSerializer.Serialize(skills, AppJsonContext.Default.ListAuraSkillConfig);
                     break;
                 case "subtitle":

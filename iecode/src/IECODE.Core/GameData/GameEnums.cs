@@ -1,272 +1,88 @@
 namespace IECODE.Core.GameData;
 
 /// <summary>
-/// Player rarity tiers in Inazuma Eleven: Victory Road.
+/// Rareté d'un joueur (charaRarity de starSignCharaInfo).
 /// </summary>
 /// <remarks>
-/// Memory offset: PLAYER_RARITY (0x3C), 2 bytes.
-/// Values verified from starSignCharaInfo.json (4439 characters).
-/// Galaxy&amp;LBX DLC (v1.5.0, 2025-12-21) added BASARA tier (52 eligible characters).
+/// Codes et libellés vérifiés contre le parser inagle
+/// (packages/inagle/src/parsers/star-sign.ts, rarityCodeToName + rarityToGrowthRank)
+/// et la surface rendue par azalee (rarity_label : « Normal », « Héros », « BASARA »…).
+///
+/// Le champ source est <c>charaParamId → starSignCharaInfo.charaRarity</c> dans
+/// les données de jeu (pas un offset mémoire). Les valeurs numériques observées :
+/// 0/1 = Normal, 2 = Expérimenté, 3 = Émérite, 4 = Normal, 5/6/7 = Légendaire,
+/// 10 = Héros (variantes Hero), 20 = BASARA.
+///
+/// Les codes 5/6/7 partagent le libellé « Légendaire » (inagle) ; ils ne sont donc
+/// pas exposés comme membres distincts pour éviter d'inventer des paliers
+/// (les anciens « UR / LR / Legend » et leurs comptes de personnages chiffrés
+/// n'étaient adossés à aucune donnée réelle).
 /// </remarks>
-public enum PlayerRarity : byte
+public enum PlayerRarity
 {
-    /// <summary>Normal rarity (4203 characters)</summary>
-    N = 0,
+    /// <summary>Normal (codes 0, 1 et 4).</summary>
+    Normal = 0,
 
-    /// <summary>Rare rarity (150 characters)</summary>
-    R = 2,
+    /// <summary>Expérimenté (code 2).</summary>
+    Experimente = 2,
 
-    /// <summary>Ultra Rare rarity (27 characters)</summary>
-    UR = 5,
+    /// <summary>Émérite (code 3).</summary>
+    Emerite = 3,
 
-    /// <summary>Legendary Rare rarity (29 characters)</summary>
-    LR = 6,
+    /// <summary>Légendaire (codes 5, 6 et 7 — même libellé inagle).</summary>
+    Legendaire = 5,
 
-    /// <summary>Legend rarity (30 characters) - Can use passive skills</summary>
-    Legend = 7,
+    /// <summary>Héros (code 10) — variantes Hero (Fire/Black/Pink).</summary>
+    Heros = 10,
 
-    /// <summary>
-    /// BASARA rarity - Highest tier added in Galaxy&amp;LBX DLC.
-    /// Can switch between all 6 builds (basaraBuildType 0-5) and have moves reassigned.
-    /// Requires high-rarity Spirits from "Atrium of the Untamed" shop.
-    /// 52 characters eligible (basaraBuildInfo.json).
-    /// </summary>
-    BASARA = 20
+    /// <summary>BASARA (code 20) — palier le plus haut.</summary>
+    Basara = 20
 }
 
 /// <summary>
-/// Player positions on the field.
+/// Position d'un joueur sur le terrain.
 /// </summary>
 /// <remarks>
-/// Memory offset: PLAYER_POSITION (0x20), 4 bytes.
-/// Values verified from growthTableMain.json (48 entries, 12 per position).
+/// Codes vérifiés contre inagle (packages/inagle/src/parsers/chara-param.ts,
+/// positionIdToCode) et le dump chara_param (variable [3] = mainPosition).
+/// Le code 0 = Coach existe aussi dans positionIdToCode mais n'apparaît pas comme
+/// position jouable dans les entrées CHARA_PARAM_INFO échantillonnées.
 /// </remarks>
-public enum PlayerPosition : byte
+public enum PlayerPosition
 {
-    /// <summary>Goalkeeper (position 1)</summary>
+    /// <summary>Gardien (1).</summary>
     GK = 1,
 
-    /// <summary>Forward (position 2) - Highest Kick stat potential</summary>
+    /// <summary>Attaquant (2).</summary>
     FW = 2,
 
-    /// <summary>Midfielder (position 3)</summary>
+    /// <summary>Milieu (3).</summary>
     MF = 3,
 
-    /// <summary>Defender (position 4) - Highest Intelligence stat potential</summary>
+    /// <summary>Défenseur (4).</summary>
     DF = 4
 }
 
 /// <summary>
-/// Player elements (attributes).
+/// Élément (attribut) d'un joueur.
 /// </summary>
 /// <remarks>
-/// Memory offset: PLAYER_ELEMENT (0x24), 4 bytes.
-/// Values verified from chara-param.ts parser.
+/// Codes vérifiés contre inagle (packages/inagle/src/parsers/chara-param.ts,
+/// elementIdToNames) et le dump chara_param (variable [2] = element).
+/// Preuves inagle : Mark Evans [2]=4 (Montagne/Mountain), Axel Blaze [2]=3 (Feu/Fire),
+/// Nathan Swift [2]=1 (Vent/Wind).
 /// </remarks>
-public enum PlayerElement : byte
+public enum PlayerElement
 {
-    /// <summary>Wind element (風) - 1</summary>
+    /// <summary>Vent / 風 (1).</summary>
     Wind = 1,
 
-    /// <summary>Forest element (林) - 2</summary>
+    /// <summary>Forêt / 林 (2).</summary>
     Forest = 2,
 
-    /// <summary>Fire element (火) - 3</summary>
+    /// <summary>Feu / 火 (3).</summary>
     Fire = 3,
 
-    /// <summary>Mountain element (山) - 4</summary>
+    /// <summary>Montagne / 山 (4).</summary>
     Mountain = 4
-}
-
-/// <summary>
-/// Chronicle Mode routes available in the game.
-/// </summary>
-/// <remarks>
-/// Galaxy&amp;LBX DLC (v1.5.0, 2025-12-21) added Galaxy and LBX routes.
-/// </remarks>
-public enum ChronicleRoute : byte
-{
-    /// <summary>Original Inazuma Eleven route</summary>
-    Original = 0,
-
-    /// <summary>Inazuma Eleven GO route</summary>
-    Go = 1,
-
-    /// <summary>Inazuma Eleven GO Chrono Stone route</summary>
-    ChronoStone = 2,
-
-    /// <summary>
-    /// Inazuma Eleven GO Galaxy route.
-    /// Features planet stadiums with unique effects and Totems.
-    /// Added in Galaxy&amp;LBX DLC (2025-12-21).
-    /// </summary>
-    Galaxy = 3,
-
-    /// <summary>
-    /// Inazuma Eleven GO vs. Little Battlers eXperience W route.
-    /// Features Inazuma Legend National and Despairdoes teams.
-    /// Added in Galaxy&amp;LBX DLC (2025-12-21).
-    /// </summary>
-    LBX = 4,
-
-    /// <summary>Inazuma Eleven GO: Shine route</summary>
-    GoShine = 5,
-
-    /// <summary>Inazuma Eleven GO: Dark route</summary>
-    GoDark = 6,
-
-    /// <summary>Inazuma Eleven GO 2 Chrono Stone: Thunderflash route</summary>
-    ChronoStoneThunderflash = 7,
-
-    /// <summary>Inazuma Eleven GO 2 Chrono Stone: Wildfire route</summary>
-    ChronoStoneWildfire = 8
-}
-
-/// <summary>
-/// Totem types for hyper-dimensional enhancement.
-/// </summary>
-/// <remarks>
-/// Totems are a new feature in the Galaxy Route (Galaxy&amp;LBX DLC).
-/// They provide special enhancements during matches.
-/// Element values match PlayerElement (1-4).
-/// </remarks>
-public enum TotemType : byte
-{
-    /// <summary>No totem active</summary>
-    None = 0,
-
-    /// <summary>Wind Totem (風) - Enhances speed and agility</summary>
-    Wind = 1,
-
-    /// <summary>Forest Totem (林) - Enhances stamina recovery</summary>
-    Forest = 2,
-
-    /// <summary>Fire Totem (火) - Enhances attack power</summary>
-    Fire = 3,
-
-    /// <summary>Mountain Totem (山) - Enhances defense and stability</summary>
-    Mountain = 4
-}
-
-/// <summary>
-/// Spirit element types for BASARA upgrades.
-/// </summary>
-/// <remarks>
-/// High-rarity Spirits are required at the "Atrium of the Untamed" shop
-/// to obtain BASARA players (Galaxy&amp;LBX DLC feature).
-/// Element values match PlayerElement.
-/// </remarks>
-public enum SpiritElement : byte
-{
-    /// <summary>Wind Spirit (風)</summary>
-    Wind = 1,
-
-    /// <summary>Forest Spirit (林)</summary>
-    Forest = 2,
-
-    /// <summary>Fire Spirit (火)</summary>
-    Fire = 3,
-
-    /// <summary>Mountain Spirit (山)</summary>
-    Mountain = 4
-}
-
-/// <summary>
-/// Game modes available in Inazuma Eleven: Victory Road.
-/// </summary>
-public enum GameMode : byte
-{
-    /// <summary>Story Mode - Follow Destin Billows' adventure</summary>
-    Story = 0,
-
-    /// <summary>RE Story - Replay story from beginning while keeping progression</summary>
-    REStory = 1,
-
-    /// <summary>Chronicle Mode - Scout 5400+ characters from past/present titles</summary>
-    Chronicle = 2,
-
-    /// <summary>BB Stadium - Battle various teams including Earth Eleven</summary>
-    BBStadium = 3,
-
-    /// <summary>Victory Road - Online tournament mode</summary>
-    VictoryRoad = 4,
-
-    /// <summary>2P Tag Mode - Cooperative multiplayer with buff sigils</summary>
-    Tag2P = 5,
-
-    /// <summary>Commander Ladder - Online commander-only ranked mode</summary>
-    CommanderLadder = 6,
-
-    /// <summary>Fast Commander - Accelerated bot matches</summary>
-    FastCommander = 7
-}
-
-/// <summary>
-/// Known teams in Inazuma Eleven: Victory Road.
-/// </summary>
-/// <remarks>
-/// Galaxy&amp;LBX DLC (2025-12-21) added:
-/// - Earth Eleven (Galaxy route)
-/// - South Cirrus Junior High A/B/C (BB Stadium)
-/// - Inazuma Legend National (LBX route)
-/// - Despairdoes (LBX route)
-/// </remarks>
-public static class KnownTeams
-{
-    // Original teams
-    public const string RaimonFirst = "RAIMON_FIRST";
-    public const string RaimonSecond = "RAIMON_SECOND";
-    public const string Teikoku = "TEIKOKU";
-    public const string Zeus = "ZEUS";
-    public const string Aliea = "ALIEA";
-    public const string InazumaJapan = "INAZUMA_JAPAN";
-
-    // GO teams
-    public const string RaimonGo = "RAIMON_GO";
-    public const string Dragonlink = "DRAGONLINK";
-    public const string Protocol = "PROTOCOL_OMEGA";
-    public const string Chrono = "EL_DORADO";
-
-    // Galaxy teams (added in Galaxy&LBX DLC)
-    public const string EarthEleven = "EARTH_ELEVEN";
-    public const string Faram = "FARAM_OBIUS";
-    public const string Gurdon = "GURDON_ELEVEN";
-    public const string Sazanaara = "SAZANAARA_ELEVEN";
-
-    // LBX teams (added in Galaxy&LBX DLC)
-    public const string InazumaLegendNational = "INAZUMA_LEGEND_NATIONAL";
-    public const string Despairdoes = "DESPAIRDOES";
-
-    // Victory Road original teams (added in Galaxy&LBX DLC for BB Stadium)
-    public const string SouthCirrusA = "SOUTH_CIRRUS_A";
-    public const string SouthCirrusB = "SOUTH_CIRRUS_B";
-    public const string SouthCirrusC = "SOUTH_CIRRUS_C";
-}
-
-/// <summary>
-/// Planet stadium types with unique effects (Galaxy Route).
-/// </summary>
-/// <remarks>
-/// Each planet's stadium introduces unique effects during matches.
-/// Part of the Galaxy Route in Galaxy&amp;LBX DLC.
-/// </remarks>
-public enum PlanetStadium : byte
-{
-    /// <summary>Standard Earth stadium</summary>
-    Earth = 0,
-
-    /// <summary>Sandorius - Desert planet stadium</summary>
-    Sandorius = 1,
-
-    /// <summary>Sazanaara - Water planet stadium</summary>
-    Sazanaara = 2,
-
-    /// <summary>Ratoniik - Ice planet stadium</summary>
-    Ratoniik = 3,
-
-    /// <summary>Gurdon - Mechanical planet stadium</summary>
-    Gurdon = 4,
-
-    /// <summary>Faram Obius - Final planet stadium</summary>
-    FaramObius = 5
 }

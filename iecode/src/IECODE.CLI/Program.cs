@@ -699,35 +699,22 @@ public static class Program
             "Path to passive_skill_config.cfg.bin");
         analyzeCommand.AddOption(skillConfigOption);
 
-        var effectConfigOption = new Option<string?>(
-            "--effect-config",
-            "Path to passive_skill_effect_config.cfg.bin");
-        analyzeCommand.AddOption(effectConfigOption);
-
         var outputOption = new Option<string?>(
             ["--output", "-o"],
             "Export results to JSON file");
         analyzeCommand.AddOption(outputOption);
 
-        var buildTypeOption = new Option<string?>(
-            "--build-type",
-            "Filter by build type (Knockout, Tension, Counter, Kizuna, RoughPlay, Justice)");
-        analyzeCommand.AddOption(buildTypeOption);
+        var rarityOption = new Option<int?>(
+            "--rarity",
+            "Filter by rarity value (champ [4] de PASSIVE_SKILL_INFO)");
+        analyzeCommand.AddOption(rarityOption);
 
-        analyzeCommand.SetHandler(async (string? gamePath, bool verbose, string? skillConfig, string? effectConfig, string? output, string? buildType) =>
+        analyzeCommand.SetHandler(async (string? gamePath, bool verbose, string? skillConfig, string? output, int? rarity) =>
         {
-            await PassiveSkillCommand.AnalyzeAsync(gamePath, skillConfig, effectConfig, output, buildType, verbose);
-        }, gamePathOption, verboseOption, skillConfigOption, effectConfigOption, outputOption, buildTypeOption);
+            await PassiveSkillCommand.AnalyzeAsync(gamePath, skillConfig, output, rarity, verbose);
+        }, gamePathOption, verboseOption, skillConfigOption, outputOption, rarityOption);
 
         command.AddCommand(analyzeCommand);
-
-        // Subcommand: buildtypes
-        var buildTypesCommand = new Command("buildtypes", "List all build type categories");
-        buildTypesCommand.SetHandler(() =>
-        {
-            PassiveSkillCommand.ListBuildTypes();
-        });
-        command.AddCommand(buildTypesCommand);
 
         // Subcommand: help
         var helpCommand = new Command("help", "Show help for passive skill commands");

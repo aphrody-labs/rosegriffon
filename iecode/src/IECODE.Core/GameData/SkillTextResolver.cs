@@ -7,62 +7,56 @@ using IECODE.Core.Formats.Level5.CfgBin.Logic;
 namespace IECODE.Core.GameData;
 
 /// <summary>
-/// Resolves skill hashes (CRC32) to localized names and descriptions from cfg.bin game files.
-/// Supports 3299 passive skills and 500+ active techniques.
+/// Résout les talents passifs (passive_skill_config) vers leurs noms/descriptions localisés.
 /// </summary>
 /// <remarks>
-/// Uses the following game files:
-/// - passive_skill_config.cfg.bin: Skill configuration (ID, effect, values)
-/// - passive_skill_text.cfg.bin: Skill name/description text (per language)
-/// - text_info.cfg.bin: General text table for technique names
-/// 
-/// Native AOT compatible - uses source-generated JSON serialization.
+/// Layout et jointures vérifiés contre inagle
+/// (packages/inagle/src/parsers/passive-skill-config.ts, collectSkills) et le dump :
+/// - passive_skill_config.cfg.bin (PASSIVE_SKILL_INFO_*) :
+///   [0] passiveId, [1] effectId, [2] nameId, [3] descId, [4] rareté.
+/// - skill_text.cfg.bin (NOUN_INFO_*) : [0] hash, [5] texte localisé
+///   (ex. fr « Trampoline du tonnerre »).
+///   nameId/descId → ces tables NOUN_INFO localisées.
+///
+/// CE QUI A ÉTÉ RETIRÉ (fabriqué, sans aucune assise dans le dump ni inagle) :
+/// - l'enum EffectTypes (KickBoost=1…TeamSynergy=20) et ses noms anglais inventés ;
+/// - le type LocalizedTechnique (Type/TpCost/Power/Element) jamais renseigné ;
+/// - PassiveSkillJsonEntry (BuildType/IconIndex…) et ExtractLevelFromName (regex « Lv.N »).
+/// Le vrai effet d'un passif vit dans passive_skill_effect_config (8 effets, params float) ;
+/// il n'est pas une table d'enum de boosts par stat.
 /// </remarks>
 public sealed class SkillTextResolver : IDisposable
 {
     private readonly Dictionary<uint, LocalizedSkill> _skillCache = new();
-    private readonly Dictionary<uint, LocalizedTechnique> _techniqueCache = new();
     private bool _isLoaded;
 
     /// <summary>
-    /// Localized passive skill data.
+    /// Talent passif localisé.
     /// </summary>
     public sealed record LocalizedSkill
     {
-        public int Id { get; init; }
-        public uint SkillHash { get; init; }
+        /// <summary>Hash du passif (passive_skill_config [0]).</summary>
+        public uint PassiveHash { get; init; }
+
+        /// <summary>Hash de l'effet lié (passive_skill_config [1] → passive_skill_effect_config).</summary>
+        public uint EffectHash { get; init; }
+
+        /// <summary>Hash du nom (passive_skill_config [2] → skill_text NOUN_INFO).</summary>
         public uint NameHash { get; init; }
-        public string SkillHashHex => $"0x{SkillHash:X8}";
-        public string NameHashHex => $"0x{NameHash:X8}";
+
+        /// <summary>Hash de la description (passive_skill_config [3]).</summary>
+        public uint DescHash { get; init; }
+
+        /// <summary>Rareté (passive_skill_config [4], ex. 6 ou 9 observés).</summary>
+        public int Rarity { get; init; }
+
+        public string PassiveHashHex => $"0x{PassiveHash:X8}";
         public LocalizedText Names { get; init; } = new();
         public LocalizedText Descriptions { get; init; } = new();
-        public string BuildType { get; init; } = string.Empty;
-        public int BuildTypeId { get; init; }
-        public int EffectId { get; init; }
-        public float EffectValue { get; init; }
-        public int EffectCount { get; init; }
-        public int Level { get; init; }
-        public int IconIndex1 { get; init; }
-        public int IconIndex2 { get; init; }
     }
 
     /// <summary>
-    /// Localized active technique/hissatsu data.
-    /// </summary>
-    public sealed record LocalizedTechnique
-    {
-        public uint Hash { get; init; }
-        public string HashHex => $"0x{Hash:X8}";
-        public LocalizedText Names { get; init; } = new();
-        public LocalizedText Descriptions { get; init; } = new();
-        public string Type { get; init; } = string.Empty; // Shoot, Dribble, Block, Catch, etc.
-        public int TpCost { get; init; }
-        public int Power { get; init; }
-        public string Element { get; init; } = string.Empty;
-    }
-
-    /// <summary>
-    /// Localized text container for all supported languages.
+    /// Conteneur de texte localisé.
     /// </summary>
     public sealed record LocalizedText
     {
@@ -89,225 +83,82 @@ public sealed class SkillTextResolver : IDisposable
                               !string.IsNullOrEmpty(French);
     }
 
-    /// <summary>
-    /// Known effect types for passive skills.
-    /// </summary>
-    public static class EffectTypes
-    {
-        public const int KickBoost = 1;
-        public const int BodyBoost = 2;
-        public const int ControlBoost = 3;
-        public const int GuardBoost = 4;
-        public const int SpeedBoost = 5;
-        public const int StaminaBoost = 6;
-        public const int GutsBoost = 7;
-        public const int FreedomBoost = 8;
-        public const int TpReduction = 10;
-        public const int CriticalRate = 11;
-        public const int ElementBoost = 15;
-        public const int TeamSynergy = 20;
-
-        public static string GetName(int effectId) => effectId switch
-        {
-            KickBoost => "Kick Boost",
-            BodyBoost => "Body Boost",
-            ControlBoost => "Control Boost",
-            GuardBoost => "Guard Boost",
-            SpeedBoost => "Speed Boost",
-            StaminaBoost => "Stamina Boost",
-            GutsBoost => "Guts Boost",
-            FreedomBoost => "Freedom Boost",
-            TpReduction => "TP Reduction",
-            CriticalRate => "Critical Rate",
-            ElementBoost => "Element Boost",
-            TeamSynergy => "Team Synergy",
-            _ => $"Effect #{effectId}"
-        };
-    }
-
-    /// <summary>
-    /// Supported language codes.
-    /// </summary>
+    /// <summary>Codes de langue supportés.</summary>
     public static readonly string[] SupportedLanguages = ["ja", "en", "fr", "de", "es", "it"];
 
-    /// <summary>
-    /// Whether skill data has been loaded.
-    /// </summary>
+    /// <summary>Indique si les données ont été chargées.</summary>
     public bool IsLoaded => _isLoaded;
 
-    /// <summary>
-    /// Number of loaded passive skills.
-    /// </summary>
+    /// <summary>Nombre de passifs chargés.</summary>
     public int SkillCount => _skillCache.Count;
 
     /// <summary>
-    /// Number of loaded techniques.
+    /// Charge les talents passifs et résout leurs textes localisés depuis un dump.
     /// </summary>
-    public int TechniqueCount => _techniqueCache.Count;
-
-    /// <summary>
-    /// Loads skill data from cfg.bin files and optional JSON database.
-    /// </summary>
-    /// <param name="gameDataPath">Path to the game data dump folder.</param>
-    /// <param name="passiveSkillsJsonPath">Optional path to passive_skills.json for additional data.</param>
-    /// <param name="cancellationToken">Cancellation token.</param>
     public async Task<int> LoadFromGameDataAsync(
         string gameDataPath,
-        string? passiveSkillsJsonPath = null,
         CancellationToken cancellationToken = default)
     {
         _skillCache.Clear();
-        _techniqueCache.Clear();
 
-        // Step 1: Load passive skill configuration
+        // Étape 1 : configuration des passifs (PASSIVE_SKILL_INFO).
         var skillConfigs = await LoadPassiveSkillConfigAsync(gameDataPath, cancellationToken);
 
-        // Step 2: Load localized text for each language
-        var localizedSkillTexts = new Dictionary<string, Dictionary<uint, (string Name, string Desc)>>();
+        // Étape 2 : textes localisés (skill_text NOUN_INFO) par langue.
+        var localizedTexts = new Dictionary<string, Dictionary<uint, string>>();
         foreach (var lang in SupportedLanguages)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            localizedSkillTexts[lang] = await LoadSkillTextAsync(gameDataPath, lang, cancellationToken);
+            localizedTexts[lang] = await LoadSkillTextAsync(gameDataPath, lang, cancellationToken);
         }
 
-        // Step 3: Load from passive_skills.json if provided
-        Dictionary<uint, PassiveSkillJsonEntry>? jsonEntries = null;
-        if (!string.IsNullOrEmpty(passiveSkillsJsonPath) && File.Exists(passiveSkillsJsonPath))
-        {
-            jsonEntries = await LoadPassiveSkillsJsonAsync(passiveSkillsJsonPath, cancellationToken);
-        }
-
-        // Step 4: Build skill cache by merging all sources
-        foreach (var (skillHash, config) in skillConfigs)
+        // Étape 3 : construction du cache (jointure nameId/descId → texte).
+        foreach (var config in skillConfigs)
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            var nameHash = (uint)config.SkillId; // May need adjustment based on actual mapping
-            var jsonEntry = jsonEntries?.GetValueOrDefault(skillHash);
-
-            // Try to find localized names
-            var names = new LocalizedText
-            {
-                Japanese = GetTextForLang(localizedSkillTexts, "ja", nameHash)?.Name ?? string.Empty,
-                English = GetTextForLang(localizedSkillTexts, "en", nameHash)?.Name ?? string.Empty,
-                French = GetTextForLang(localizedSkillTexts, "fr", nameHash)?.Name ?? string.Empty,
-                German = GetTextForLang(localizedSkillTexts, "de", nameHash)?.Name ?? string.Empty,
-                Spanish = GetTextForLang(localizedSkillTexts, "es", nameHash)?.Name ?? string.Empty,
-                Italian = GetTextForLang(localizedSkillTexts, "it", nameHash)?.Name ?? string.Empty,
-            };
-
-            var descriptions = new LocalizedText
-            {
-                Japanese = GetTextForLang(localizedSkillTexts, "ja", nameHash)?.Desc ?? string.Empty,
-                English = GetTextForLang(localizedSkillTexts, "en", nameHash)?.Desc ?? string.Empty,
-                French = GetTextForLang(localizedSkillTexts, "fr", nameHash)?.Desc ?? string.Empty,
-                German = GetTextForLang(localizedSkillTexts, "de", nameHash)?.Desc ?? string.Empty,
-                Spanish = GetTextForLang(localizedSkillTexts, "es", nameHash)?.Desc ?? string.Empty,
-                Italian = GetTextForLang(localizedSkillTexts, "it", nameHash)?.Desc ?? string.Empty,
-            };
+            var nameHash = (uint)Convert.ToInt32(config.NameId.Replace("0x", ""), 16);
+            var descHash = (uint)Convert.ToInt32(config.DescId.Replace("0x", ""), 16);
+            var passiveHash = (uint)Convert.ToInt32(config.PassiveId.Replace("0x", ""), 16);
+            var effectHash = (uint)Convert.ToInt32(config.EffectId.Replace("0x", ""), 16);
 
             var skill = new LocalizedSkill
             {
-                Id = jsonEntry?.Id ?? (int)skillHash,
-                SkillHash = skillHash,
-                NameHash = jsonEntry?.NameHash ?? nameHash,
-                Names = names,
-                Descriptions = descriptions,
-                BuildType = jsonEntry?.BuildType ?? string.Empty,
-                BuildTypeId = jsonEntry?.BuildTypeId ?? 0,
-                EffectId = jsonEntry?.EffectId ?? 0,
-                EffectValue = config.EffectValue,
-                EffectCount = jsonEntry?.EffectCount ?? 1,
-                Level = ExtractLevelFromName(names.English),
-                IconIndex1 = jsonEntry?.IconIndex1 ?? 0,
-                IconIndex2 = jsonEntry?.IconIndex2 ?? 0,
+                PassiveHash = passiveHash,
+                EffectHash = effectHash,
+                NameHash = nameHash,
+                DescHash = descHash,
+                Rarity = config.Rarity,
+                Names = BuildText(localizedTexts, nameHash),
+                Descriptions = BuildText(localizedTexts, descHash),
             };
 
-            _skillCache[skillHash] = skill;
-        }
-
-        // Step 5: Also load from JSON entries not in cfg.bin
-        if (jsonEntries != null)
-        {
-            foreach (var (hash, entry) in jsonEntries)
-            {
-                if (_skillCache.ContainsKey(hash)) continue;
-
-                var skill = new LocalizedSkill
-                {
-                    Id = entry.Id,
-                    SkillHash = hash,
-                    NameHash = entry.NameHash,
-                    Names = new LocalizedText(), // No localized text available
-                    Descriptions = new LocalizedText(),
-                    BuildType = entry.BuildType,
-                    BuildTypeId = entry.BuildTypeId,
-                    EffectId = entry.EffectId,
-                    EffectValue = 0,
-                    EffectCount = entry.EffectCount,
-                    Level = 1,
-                    IconIndex1 = entry.IconIndex1,
-                    IconIndex2 = entry.IconIndex2,
-                };
-
-                _skillCache[hash] = skill;
-            }
+            _skillCache[passiveHash] = skill;
         }
 
         _isLoaded = true;
         return _skillCache.Count;
     }
 
-    /// <summary>
-    /// Gets a passive skill by hash.
-    /// </summary>
+    /// <summary>Récupère un passif par son hash.</summary>
     public LocalizedSkill? GetSkill(uint hash) => _skillCache.GetValueOrDefault(hash);
 
-    /// <summary>
-    /// Gets skill name by hash for a specific language.
-    /// </summary>
-    public string GetSkillName(uint hash, string language = "en")
+    /// <summary>Récupère le nom d'un passif pour une langue donnée (chaîne vide si inconnu).</summary>
+    public string GetSkillName(uint hash, string language = "fr")
     {
         var skill = GetSkill(hash);
-        if (skill == null)
-            return $"Unknown Skill (0x{hash:X8})";
-
-        var name = skill.Names.GetByCode(language);
-        if (!string.IsNullOrEmpty(name))
-            return name;
-
-        // Fallback: generate from effect type
-        return $"{EffectTypes.GetName(skill.EffectId)} Lv.{skill.Level}";
+        return skill?.Names.GetByCode(language) ?? string.Empty;
     }
 
-    /// <summary>
-    /// Gets skill description by hash for a specific language.
-    /// </summary>
-    public string GetSkillDescription(uint hash, string language = "en")
+    /// <summary>Récupère la description d'un passif pour une langue donnée.</summary>
+    public string GetSkillDescription(uint hash, string language = "fr")
     {
         var skill = GetSkill(hash);
-        if (skill == null)
-            return string.Empty;
-
-        var desc = skill.Descriptions.GetByCode(language);
-        if (!string.IsNullOrEmpty(desc))
-            return desc;
-
-        // Fallback: generate from effect type and value
-        var effectName = EffectTypes.GetName(skill.EffectId);
-        var value = skill.EffectValue > 0 ? $"+{skill.EffectValue:P0}" : string.Empty;
-        return $"{effectName} {value}".Trim();
+        return skill?.Descriptions.GetByCode(language) ?? string.Empty;
     }
 
-    /// <summary>
-    /// Gets a technique by hash.
-    /// </summary>
-    public LocalizedTechnique? GetTechnique(uint hash) => _techniqueCache.GetValueOrDefault(hash);
-
-    /// <summary>
-    /// Searches skills by name (partial match, case-insensitive).
-    /// </summary>
-    public IEnumerable<LocalizedSkill> SearchSkills(string query, string language = "en")
+    /// <summary>Recherche par nom (correspondance partielle, insensible à la casse).</summary>
+    public IEnumerable<LocalizedSkill> SearchSkills(string query, string language = "fr")
     {
         if (string.IsNullOrWhiteSpace(query))
             return _skillCache.Values;
@@ -317,42 +168,16 @@ public sealed class SkillTextResolver : IDisposable
             var name = s.Names.GetByCode(language);
             if (!string.IsNullOrEmpty(name) && name.Contains(query, StringComparison.OrdinalIgnoreCase))
                 return true;
-
-            if (s.BuildType.Contains(query, StringComparison.OrdinalIgnoreCase))
+            if (s.PassiveHashHex.Contains(query, StringComparison.OrdinalIgnoreCase))
                 return true;
-
-            if (s.SkillHashHex.Contains(query, StringComparison.OrdinalIgnoreCase))
-                return true;
-
             return false;
         });
     }
 
-    /// <summary>
-    /// Filters skills by effect type.
-    /// </summary>
-    public IEnumerable<LocalizedSkill> FilterByEffect(int effectId)
-    {
-        return _skillCache.Values.Where(s => s.EffectId == effectId);
-    }
-
-    /// <summary>
-    /// Filters skills by build type (Justice, Love, Power, Rhythm, etc.).
-    /// </summary>
-    public IEnumerable<LocalizedSkill> FilterByBuildType(string buildType)
-    {
-        return _skillCache.Values.Where(s =>
-            s.BuildType.Equals(buildType, StringComparison.OrdinalIgnoreCase));
-    }
-
-    /// <summary>
-    /// Gets all passive skills.
-    /// </summary>
+    /// <summary>Tous les passifs.</summary>
     public IReadOnlyCollection<LocalizedSkill> GetAllSkills() => _skillCache.Values;
 
-    /// <summary>
-    /// Exports skill data to JSON cache file.
-    /// </summary>
+    /// <summary>Exporte le cache vers un fichier JSON.</summary>
     public async Task ExportToCacheAsync(string outputPath, CancellationToken cancellationToken = default)
     {
         var data = new SkillCacheData
@@ -360,9 +185,7 @@ public sealed class SkillTextResolver : IDisposable
             Version = "1.0",
             GeneratedAt = DateTime.UtcNow,
             SkillCount = _skillCache.Count,
-            TechniqueCount = _techniqueCache.Count,
             Skills = _skillCache.Values.ToList(),
-            Techniques = _techniqueCache.Values.ToList()
         };
 
         await using var stream = File.Create(outputPath);
@@ -373,9 +196,7 @@ public sealed class SkillTextResolver : IDisposable
             cancellationToken);
     }
 
-    /// <summary>
-    /// Loads skill data from cached JSON file.
-    /// </summary>
+    /// <summary>Charge le cache depuis un fichier JSON.</summary>
     public async Task<int> LoadFromCacheAsync(string cachePath, CancellationToken cancellationToken = default)
     {
         if (!File.Exists(cachePath))
@@ -391,35 +212,46 @@ public sealed class SkillTextResolver : IDisposable
             return 0;
 
         _skillCache.Clear();
-        _techniqueCache.Clear();
-
         foreach (var skill in data.Skills ?? [])
         {
-            _skillCache[skill.SkillHash] = skill;
-        }
-
-        foreach (var technique in data.Techniques ?? [])
-        {
-            _techniqueCache[technique.Hash] = technique;
+            _skillCache[skill.PassiveHash] = skill;
         }
 
         _isLoaded = true;
-        return _skillCache.Count + _techniqueCache.Count;
+        return _skillCache.Count;
     }
 
     #region Private Methods
 
-    private async Task<Dictionary<uint, PassiveSkillConfig>> LoadPassiveSkillConfigAsync(
+    private static LocalizedText BuildText(
+        Dictionary<string, Dictionary<uint, string>> texts,
+        uint hash)
+    {
+        if (hash == 0) return new LocalizedText();
+        return new LocalizedText
+        {
+            Japanese = texts.GetValueOrDefault("ja")?.GetValueOrDefault(hash) ?? string.Empty,
+            English = texts.GetValueOrDefault("en")?.GetValueOrDefault(hash) ?? string.Empty,
+            French = texts.GetValueOrDefault("fr")?.GetValueOrDefault(hash) ?? string.Empty,
+            German = texts.GetValueOrDefault("de")?.GetValueOrDefault(hash) ?? string.Empty,
+            Spanish = texts.GetValueOrDefault("es")?.GetValueOrDefault(hash) ?? string.Empty,
+            Italian = texts.GetValueOrDefault("it")?.GetValueOrDefault(hash) ?? string.Empty,
+        };
+    }
+
+    [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("CFG.BIN parsing uses reflection.")]
+    private static async Task<List<PassiveSkillConfig>> LoadPassiveSkillConfigAsync(
         string basePath,
         CancellationToken cancellationToken)
     {
-        var result = new Dictionary<uint, PassiveSkillConfig>();
-        var configPath = Path.Combine(basePath, "data", "common", "gamedata", "skill");
-
+        var result = new List<PassiveSkillConfig>();
+        var configPath = Path.Combine(basePath, "common", "gamedata", "skill");
+        if (!Directory.Exists(configPath))
+            configPath = Path.Combine(basePath, "data", "common", "gamedata", "skill");
         if (!Directory.Exists(configPath))
             return result;
 
-        var cfgBinFiles = Directory.GetFiles(configPath, "passive_skill*.cfg.bin");
+        var cfgBinFiles = Directory.GetFiles(configPath, "passive_skill_config*.cfg.bin");
         foreach (var file in cfgBinFiles)
         {
             cancellationToken.ThrowIfCancellationRequested();
@@ -427,57 +259,17 @@ public sealed class SkillTextResolver : IDisposable
             var cfgBin = await LoadCfgBinAsync(file, cancellationToken);
             if (cfgBin == null) continue;
 
-            // Look for PASSIVE_SKILL_EFFECT entries
-            var entries = FindEntriesByPrefix(cfgBin, "PASSIVE_SKILL_EFFECT");
+            // PASSIVE_SKILL_INFO_* (hors _LIST_ et _REF_), conforme à inagle.
+            var entries = FindEntries(cfgBin, e =>
+                e.Name.StartsWith("PASSIVE_SKILL_INFO_", StringComparison.Ordinal) &&
+                !e.Name.Contains("_LIST_") &&
+                !e.Name.Contains("_REF_"));
+
             foreach (var entry in entries)
             {
-                var config = new PassiveSkillConfig(entry);
-                var hash = (uint)config.SkillId;
-                result.TryAdd(hash, config);
-            }
-        }
-
-        return result;
-    }
-
-    private async Task<Dictionary<uint, (string Name, string Desc)>> LoadSkillTextAsync(
-        string basePath,
-        string language,
-        CancellationToken cancellationToken)
-    {
-        var result = new Dictionary<uint, (string, string)>();
-        var textPath = Path.Combine(basePath, "data", "common", "text", language);
-
-        if (!Directory.Exists(textPath))
-            return result;
-
-        // Look for passive_skill_text.cfg.bin or text_info.cfg.bin
-        string[] possibleFiles = [
-            Path.Combine(textPath, "passive_skill_text.cfg.bin"),
-            Path.Combine(textPath, "skill_text.cfg.bin"),
-            Path.Combine(textPath, "text_info.cfg.bin")
-        ];
-
-        foreach (var file in possibleFiles)
-        {
-            if (!File.Exists(file)) continue;
-
-            cancellationToken.ThrowIfCancellationRequested();
-
-            var cfgBin = await LoadCfgBinAsync(file, cancellationToken);
-            if (cfgBin == null) continue;
-
-            // TEXT_INFO entries have: [0]=ID, [2]=Text
-            var entries = FindEntriesByPrefix(cfgBin, "TEXT_INFO");
-            foreach (var entry in entries)
-            {
-                var textInfo = new PassiveSkillText(entry);
-                if (!string.IsNullOrEmpty(textInfo.Description))
+                if (entry.Variables.Count >= 5)
                 {
-                    var hash = (uint)textInfo.TextId;
-                    // For now, we use description as both name and description
-                    // Actual implementation may need to distinguish based on entry structure
-                    result.TryAdd(hash, (textInfo.Description, textInfo.Description));
+                    result.Add(new PassiveSkillConfig(entry));
                 }
             }
         }
@@ -485,70 +277,46 @@ public sealed class SkillTextResolver : IDisposable
         return result;
     }
 
-    private async Task<Dictionary<uint, PassiveSkillJsonEntry>> LoadPassiveSkillsJsonAsync(
-        string path,
+    [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("CFG.BIN parsing uses reflection.")]
+    private static async Task<Dictionary<uint, string>> LoadSkillTextAsync(
+        string basePath,
+        string language,
         CancellationToken cancellationToken)
     {
-        var result = new Dictionary<uint, PassiveSkillJsonEntry>();
-
-        await using var stream = File.OpenRead(path);
-        var entries = await JsonSerializer.DeserializeAsync<List<PassiveSkillJsonEntry>>(
-            stream,
-            SkillTextResolverJsonContext.Default.ListPassiveSkillJsonEntry,
-            cancellationToken);
-
-        if (entries == null)
+        var result = new Dictionary<uint, string>();
+        var textPath = Path.Combine(basePath, "common", "text", language);
+        if (!Directory.Exists(textPath))
+            textPath = Path.Combine(basePath, "data", "common", "text", language);
+        if (!Directory.Exists(textPath))
             return result;
+
+        var file = Path.Combine(textPath, "skill_text.cfg.bin");
+        if (!File.Exists(file)) return result;
+
+        cancellationToken.ThrowIfCancellationRequested();
+
+        var cfgBin = await LoadCfgBinAsync(file, cancellationToken);
+        if (cfgBin == null) return result;
+
+        // NOUN_INFO_* : [0] hash, [5] texte localisé.
+        var entries = FindEntries(cfgBin, e =>
+            e.Name.StartsWith("NOUN_INFO_", StringComparison.Ordinal) &&
+            !e.Name.Contains("BEGIN") &&
+            !e.Name.Contains("LIST"));
 
         foreach (var entry in entries)
         {
-            // Parse hex string hash
-            if (TryParseHash(entry.SkillHashHex, out var hash))
+            var info = new NounInfo(entry);
+            if (!string.IsNullOrEmpty(info.Name))
             {
-                result.TryAdd(hash, entry);
+                result.TryAdd((uint)info.Crc32, info.Name);
             }
         }
 
         return result;
     }
 
-    private static (string Name, string Desc)? GetTextForLang(
-        Dictionary<string, Dictionary<uint, (string Name, string Desc)>> texts,
-        string lang,
-        uint hash)
-    {
-        if (texts.TryGetValue(lang, out var langTexts) && langTexts.TryGetValue(hash, out var text))
-            return text;
-        return null;
-    }
-
-    private static int ExtractLevelFromName(string name)
-    {
-        // Try to extract level from patterns like "Lv.5", "Level 3", etc.
-        if (string.IsNullOrEmpty(name))
-            return 1;
-
-        var match = System.Text.RegularExpressions.Regex.Match(
-            name,
-            @"(?:Lv\.?|Level\s*)(\d+)",
-            System.Text.RegularExpressions.RegexOptions.IgnoreCase);
-
-        return match.Success && int.TryParse(match.Groups[1].Value, out var level) ? level : 1;
-    }
-
-    private static bool TryParseHash(string? hexString, out uint hash)
-    {
-        hash = 0;
-        if (string.IsNullOrEmpty(hexString))
-            return false;
-
-        var cleanHex = hexString.StartsWith("0x", StringComparison.OrdinalIgnoreCase)
-            ? hexString[2..]
-            : hexString;
-
-        return uint.TryParse(cleanHex, System.Globalization.NumberStyles.HexNumber, null, out hash);
-    }
-
+    [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("CFG.BIN parsing uses reflection.")]
     private static async Task<CfgBin?> LoadCfgBinAsync(string path, CancellationToken cancellationToken)
     {
         if (!File.Exists(path))
@@ -562,32 +330,30 @@ public sealed class SkillTextResolver : IDisposable
         }
 
         var cfgBin = new CfgBin();
-#pragma warning disable IL2026
         cfgBin.Open(data);
-#pragma warning restore IL2026
         return cfgBin;
     }
 
-    private static List<Entry> FindEntriesByPrefix(CfgBin cfgBin, string prefix)
+    private static List<Entry> FindEntries(CfgBin cfgBin, Func<Entry, bool> predicate)
     {
         var items = new List<Entry>();
         foreach (var entry in cfgBin.Entries)
         {
-            FindEntriesRecursive(entry, prefix, items);
+            FindEntriesRecursive(entry, predicate, items);
         }
         return items;
     }
 
-    private static void FindEntriesRecursive(Entry entry, string prefix, List<Entry> items)
+    private static void FindEntriesRecursive(Entry entry, Func<Entry, bool> predicate, List<Entry> items)
     {
-        if (entry.Name.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
+        if (predicate(entry))
         {
             items.Add(entry);
         }
 
         foreach (var child in entry.Children)
         {
-            FindEntriesRecursive(child, prefix, items);
+            FindEntriesRecursive(child, predicate, items);
         }
     }
 
@@ -596,68 +362,28 @@ public sealed class SkillTextResolver : IDisposable
     public void Dispose()
     {
         _skillCache.Clear();
-        _techniqueCache.Clear();
         _isLoaded = false;
     }
 }
 
 /// <summary>
-/// JSON entry from passive_skills.json database.
-/// </summary>
-public sealed record PassiveSkillJsonEntry
-{
-    [JsonPropertyName("id")]
-    public int Id { get; init; }
-
-    [JsonPropertyName("skillHash")]
-    public string? SkillHashHex { get; init; }
-
-    [JsonPropertyName("nameHash")]
-    public uint NameHash { get; init; }
-
-    [JsonPropertyName("buildType")]
-    public string BuildType { get; init; } = string.Empty;
-
-    [JsonPropertyName("buildTypeId")]
-    public int BuildTypeId { get; init; }
-
-    [JsonPropertyName("effectId")]
-    public int EffectId { get; init; }
-
-    [JsonPropertyName("effectCount")]
-    public int EffectCount { get; init; }
-
-    [JsonPropertyName("iconIndex1")]
-    public int IconIndex1 { get; init; }
-
-    [JsonPropertyName("iconIndex2")]
-    public int IconIndex2 { get; init; }
-}
-
-/// <summary>
-/// Cache data structure for serialization.
+/// Structure de cache pour la sérialisation.
 /// </summary>
 public sealed record SkillCacheData
 {
     public string Version { get; init; } = "1.0";
     public DateTime GeneratedAt { get; init; }
     public int SkillCount { get; init; }
-    public int TechniqueCount { get; init; }
     public List<SkillTextResolver.LocalizedSkill>? Skills { get; init; }
-    public List<SkillTextResolver.LocalizedTechnique>? Techniques { get; init; }
 }
 
 /// <summary>
-/// JSON serializer context for Native AOT compatibility.
+/// Contexte de sérialisation JSON (compatible Native AOT).
 /// </summary>
 [JsonSerializable(typeof(SkillCacheData))]
 [JsonSerializable(typeof(SkillTextResolver.LocalizedSkill))]
-[JsonSerializable(typeof(SkillTextResolver.LocalizedTechnique))]
 [JsonSerializable(typeof(SkillTextResolver.LocalizedText))]
 [JsonSerializable(typeof(List<SkillTextResolver.LocalizedSkill>))]
-[JsonSerializable(typeof(List<SkillTextResolver.LocalizedTechnique>))]
-[JsonSerializable(typeof(List<PassiveSkillJsonEntry>))]
-[JsonSerializable(typeof(PassiveSkillJsonEntry))]
 [JsonSourceGenerationOptions(PropertyNamingPolicy = JsonKnownNamingPolicy.CamelCase)]
 public partial class SkillTextResolverJsonContext : JsonSerializerContext
 {

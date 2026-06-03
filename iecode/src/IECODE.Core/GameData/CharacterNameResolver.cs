@@ -26,19 +26,31 @@ public sealed class CharacterNameResolver : IDisposable
     private string? _basePath;
 
     /// <summary>
-    /// Localized character data with names in all supported languages.
+    /// Données localisées d'un personnage (noms dans toutes les langues supportées).
     /// </summary>
+    /// <remarks>
+    /// Ce résolveur ne couvre QUE la résolution de noms (chara_base → chara_text).
+    /// Les champs position/élément/rareté/stats ont été retirés : ils n'étaient
+    /// jamais renseignés (toujours 0) et ne sont PAS présents dans chara_base.
+    /// La position et l'élément proviennent de chara_param (voir
+    /// <see cref="CharacterParam"/>), la rareté de starSignCharaInfo, et les stats du
+    /// growth_table — aucun de ces champs n'est résolu ici, donc ils ne sont pas exposés
+    /// (l'ancien <c>CharacterStats</c> Kick/Body/Control/Guard/Speed/Stamina/Guts/Freedom
+    ///  n'était même pas la bonne liste de stats IEVR :
+    ///  kick/control/technique/physical/pressure/agility/intelligence).
+    /// </remarks>
     public sealed record LocalizedCharacter
     {
         public uint Hash { get; init; }
         public string HashHex => $"0x{Hash:X8}";
+
+        /// <summary>Code interne du personnage (chara_base [1], ex. « c01000100 », « npc0010 »).</summary>
         public string InternalId { get; init; } = string.Empty;
+
+        /// <summary>Alias de <see cref="InternalId"/> (compatibilité ; ce n'est PAS un model 3D).</summary>
         public string ModelId { get; init; } = string.Empty;
+
         public LocalizedString Names { get; init; } = new();
-        public int Position { get; init; }
-        public int Element { get; init; }
-        public int Rarity { get; init; }
-        public CharacterStats BaseStats { get; init; } = new();
     }
 
     /// <summary>
@@ -63,23 +75,6 @@ public sealed class CharacterNameResolver : IDisposable
             "it" => Italian,
             _ => English
         };
-    }
-
-    /// <summary>
-    /// Base character stats.
-    /// </summary>
-    public sealed record CharacterStats
-    {
-        public int Kick { get; init; }
-        public int Body { get; init; }
-        public int Control { get; init; }
-        public int Guard { get; init; }
-        public int Speed { get; init; }
-        public int Stamina { get; init; }
-        public int Guts { get; init; }
-        public int Freedom { get; init; }
-
-        public int Total => Kick + Body + Control + Guard + Speed + Stamina + Guts + Freedom;
     }
 
     /// <summary>
@@ -138,8 +133,8 @@ public sealed class CharacterNameResolver : IDisposable
             var character = new LocalizedCharacter
             {
                 Hash = hash,
-                InternalId = baseInfo.ModelId ?? string.Empty,
-                ModelId = baseInfo.ModelId ?? string.Empty,
+                InternalId = baseInfo.InternalCode ?? string.Empty,
+                ModelId = baseInfo.InternalCode ?? string.Empty,
                 Names = names,
             };
 
@@ -425,7 +420,6 @@ public sealed record CharacterCacheData
 [JsonSerializable(typeof(CharacterCacheData))]
 [JsonSerializable(typeof(CharacterNameResolver.LocalizedCharacter))]
 [JsonSerializable(typeof(CharacterNameResolver.LocalizedString))]
-[JsonSerializable(typeof(CharacterNameResolver.CharacterStats))]
 [JsonSerializable(typeof(List<CharacterNameResolver.LocalizedCharacter>))]
 [JsonSourceGenerationOptions(PropertyNamingPolicy = JsonKnownNamingPolicy.CamelCase)]
 public partial class CharacterNameResolverJsonContext : JsonSerializerContext

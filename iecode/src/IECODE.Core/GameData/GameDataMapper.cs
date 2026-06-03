@@ -49,6 +49,9 @@ public class GameDataMapper
 
     private CfgBin? LoadCfgBin(string relativePath, string? filePattern = null)
     {
+        // Normalise les séparateurs Windows (« \ ») des chemins relatifs codés en dur
+        // (ex. « data\common\gamedata\character ») pour rester portable hors Windows.
+        relativePath = relativePath.Replace('\\', Path.DirectorySeparatorChar);
         string fullPath = Path.Combine(_dumpPath, relativePath);
 
         if (!File.Exists(fullPath))
@@ -110,7 +113,14 @@ public class GameDataMapper
 
     private void FindEntriesRecursive(Entry entry, string prefix, List<Entry> items)
     {
-        if (entry.Name.StartsWith(prefix))
+        // On exclut les nœuds de structure (_LIST_, _REF_, _BEG/BEGIN), comme tous les
+        // parsers inagle : ces nœuds partagent le préfixe mais ne portent pas de données
+        // d'entrée (ex. AURA_CMD_INFO_REF_*, PASSIVE_SKILL_INFO_LIST_BEG_*, NOUN_INFO_BEGIN_*).
+        if (entry.Name.StartsWith(prefix, StringComparison.Ordinal) &&
+            !entry.Name.Contains("_LIST_") &&
+            !entry.Name.Contains("_REF_") &&
+            !entry.Name.Contains("_BEG") &&
+            !entry.Name.Contains("BEGIN"))
         {
             items.Add(entry);
         }

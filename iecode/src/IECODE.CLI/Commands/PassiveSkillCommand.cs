@@ -5,21 +5,27 @@ using IECODE.Core.Game.PassiveSkills;
 namespace IECODE.CLI.Commands;
 
 /// <summary>
-/// Command for analyzing and exporting passive skill data.
-/// Usage: iecode passive [subcommand] [options]
+/// Commande d'analyse et d'export des talents passifs.
+/// Usage : iecode passive [sous-commande] [options]
 /// </summary>
 public static class PassiveSkillCommand
 {
     /// <summary>
-    /// Analyze passive skill config files and export data.
+    /// Analyse passive_skill_config.cfg.bin et exporte les données.
     /// </summary>
+    /// <remarks>
+    /// Le fichier passive_skill_config.cfg.bin contient à la fois les talents
+    /// (PASSIVE_SKILL_INFO) et leurs effets bruts (PASSIVE_SKILL_EFFECT). Le fichier
+    /// passive_skill_effect_config.cfg.bin (format listes m_soccerPassiveSkillEffect*)
+    /// n'est PAS un arbre d'effets exploitable comme l'ancienne version le supposait :
+    /// l'option --effect-config a donc été retirée.
+    /// </remarks>
     [RequiresUnreferencedCode("CFG.BIN parsing uses reflection.")]
     public static async Task AnalyzeAsync(
         string? gamePath,
         string? skillConfig,
-        string? effectConfig,
         string? output,
-        string? buildType,
+        int? rarityFilter,
         bool verbose)
     {
         try
@@ -27,76 +33,50 @@ public static class PassiveSkillCommand
             using var game = new IEVRGame(gamePath);
             var service = new PassiveSkillService();
 
-            // Load skill config
-            if (!string.IsNullOrEmpty(skillConfig))
+            if (string.IsNullOrEmpty(skillConfig))
             {
-                if (!File.Exists(skillConfig))
-                {
-                    Console.Error.WriteLine($"Error: Skill config not found: {skillConfig}");
-                    Environment.ExitCode = 1;
-                    return;
-                }
-
-                var data = await File.ReadAllBytesAsync(skillConfig);
-                var count = service.LoadSkillConfig(data);
-                Console.WriteLine($"Loaded {count} passive skill definitions");
+                Console.Error.WriteLine("Error: --skill-config est requis (passive_skill_config.cfg.bin).");
+                Environment.ExitCode = 1;
+                return;
             }
 
-            // Load effect config
-            if (!string.IsNullOrEmpty(effectConfig))
+            if (!File.Exists(skillConfig))
             {
-                if (!File.Exists(effectConfig))
-                {
-                    Console.Error.WriteLine($"Error: Effect config not found: {effectConfig}");
-                    Environment.ExitCode = 1;
-                    return;
-                }
-
-                var data = await File.ReadAllBytesAsync(effectConfig);
-                var count = service.LoadEffectConfig(data);
-                Console.WriteLine($"Loaded {count} effect definitions");
+                Console.Error.WriteLine($"Error: Skill config not found: {skillConfig}");
+                Environment.ExitCode = 1;
+                return;
             }
 
-            // Link skills to effects
-            service.LinkSkillsToEffects();
+            var data = await File.ReadAllBytesAsync(skillConfig);
+            var count = service.LoadSkillConfig(data);
+            Console.WriteLine($"Loaded {count} passive skill definitions, {service.Effects.Count} raw effects");
 
-            // Filter by build type if specified
-            if (!string.IsNullOrEmpty(buildType))
+            // Filtrage par rareté (champ [4] de PASSIVE_SKILL_INFO).
+            if (rarityFilter.HasValue)
             {
-                if (Enum.TryParse<PassiveSkillBuildType>(buildType, true, out var bt))
+                var filtered = service.GetSkillsByRarity(rarityFilter.Value).ToList();
+                Console.WriteLine($"\nSkills with rarity '{rarityFilter.Value}': {filtered.Count}");
+
+                foreach (var skill in filtered.Take(20))
                 {
-                    var filtered = service.GetSkillsByBuildType(bt).ToList();
-                    Console.WriteLine($"\nSkills with build type '{bt}': {filtered.Count}");
-
-                    foreach (var skill in filtered.Take(20))
-                    {
-                        Console.WriteLine($"  [{skill.Id}] Hash: 0x{skill.Info.SkillHash:X8}, Effect: {skill.EffectRef.EffectId}");
-                    }
-
-                    if (filtered.Count > 20)
-                    {
-                        Console.WriteLine($"  ... and {filtered.Count - 20} more");
-                    }
+                    Console.WriteLine($"  [{skill.Id}] Passive: 0x{skill.Info.PassiveHash:X8}, Effect: 0x{skill.Info.EffectHash:X8}");
                 }
-                else
+
+                if (filtered.Count > 20)
                 {
-                    Console.Error.WriteLine($"Unknown build type: {buildType}");
-                    Console.Error.WriteLine($"Valid types: {string.Join(", ", Enum.GetNames<PassiveSkillBuildType>())}");
+                    Console.WriteLine($"  ... and {filtered.Count - 20} more");
                 }
             }
 
-            // Show summary
-            Console.WriteLine("\n=== Build Type Distribution ===");
-            foreach (var bt in Enum.GetValues<PassiveSkillBuildType>())
+            // Distribution par rareté (valeurs réelles, non préjugées).
+            Console.WriteLine("\n=== Rarity Distribution ===");
+            foreach (var group in service.Skills.Values
+                         .GroupBy(s => s.Info.Rarity)
+                         .OrderBy(g => g.Key))
             {
-                var count = service.GetSkillsByBuildType(bt).Count();
-                if (count > 0)
-                {
-                    Console.WriteLine($"  {bt}: {count} skills");
-                }
+                Console.WriteLine($"  Rarity {group.Key}: {group.Count()} skills");
             }
 
-            // Export to JSON if output specified
             if (!string.IsNullOrEmpty(output))
             {
                 var json = service.ExportToJson();
@@ -107,27 +87,13 @@ public static class PassiveSkillCommand
             if (verbose)
             {
                 Console.WriteLine("\n=== Sample Skills (first 10) ===");
-                foreach (var (skill, effect) in service.GetSkillsWithEffects().Take(10))
+                foreach (var skill in service.Skills.Values.Take(10))
                 {
-                    Console.WriteLine($"[{skill.Id}] {skill.BuildTypeName}");
-                    Console.WriteLine($"  SkillHash: 0x{skill.Info.SkillHash:X8}");
-                    Console.WriteLine($"  NameHash:  0x{skill.Info.NameHash:X8}");
-                    Console.WriteLine($"  EffectRef: {skill.EffectRef.EffectId} (count: {skill.EffectRef.EffectCount})");
-                    Console.WriteLine($"  Icons:     [{skill.BuffIcon.IconIndex1}, {skill.BuffIcon.IconIndex2}]");
-
-                    if (effect != null)
-                    {
-                        Console.WriteLine($"  Effect Details:");
-                        Console.WriteLine($"    Timing Conditions: {effect.ExecTimingConditions.Count}");
-                        Console.WriteLine($"    Target Conditions: {effect.TargetConditions.Count}");
-                        Console.WriteLine($"    Exec Conditions:   {effect.ExecConditions.Count}");
-                        Console.WriteLine($"    Effects:           {effect.Effects.Count}");
-
-                        if (effect.GrandTotalInfo.PercentageValue > 0)
-                        {
-                            Console.WriteLine($"    Percentage: {effect.GrandTotalInfo.PercentageValue}%");
-                        }
-                    }
+                    Console.WriteLine($"[{skill.Id}] rarity {skill.Info.Rarity}");
+                    Console.WriteLine($"  PassiveHash: 0x{skill.Info.PassiveHash:X8}");
+                    Console.WriteLine($"  EffectHash:  0x{skill.Info.EffectHash:X8}");
+                    Console.WriteLine($"  NameHash:    0x{skill.Info.NameHash:X8}");
+                    Console.WriteLine($"  DescHash:    0x{skill.Info.DescHash:X8}");
                     Console.WriteLine();
                 }
             }
@@ -144,23 +110,7 @@ public static class PassiveSkillCommand
     }
 
     /// <summary>
-    /// List all passive skill build types.
-    /// </summary>
-    public static void ListBuildTypes()
-    {
-        Console.WriteLine("Passive Skill Build Types:");
-        Console.WriteLine("==========================");
-        Console.WriteLine($"  0 = {PassiveSkillBuildType.Default}  (Default/Unknown)");
-        Console.WriteLine($"  1 = {PassiveSkillBuildType.Knockout} (ノックアウト - Offensive)");
-        Console.WriteLine($"  2 = {PassiveSkillBuildType.Tension}  (テンション - Momentum)");
-        Console.WriteLine($"  3 = {PassiveSkillBuildType.Counter}  (カウンター - Defensive)");
-        Console.WriteLine($"  4 = {PassiveSkillBuildType.Kizuna}   (キズナ - Bond)");
-        Console.WriteLine($"  5 = {PassiveSkillBuildType.RoughPlay}(ラフプレー - Physical)");
-        Console.WriteLine($"  6 = {PassiveSkillBuildType.Justice}  (ジャスティス - Fair Play)");
-    }
-
-    /// <summary>
-    /// Show help for passive skill command.
+    /// Affiche l'aide de la commande passive.
     /// </summary>
     public static void ShowHelp()
     {
@@ -170,26 +120,22 @@ Passive Skill Analysis Command
 
 Usage:
   iecode passive analyze [options]
-  iecode passive buildtypes
   iecode passive help
 
 Commands:
-  analyze     Parse passive skill config files and export data
-  buildtypes  List all build type categories
+  analyze     Parse passive_skill_config.cfg.bin and export data
   help        Show this help message
 
 Analyze Options:
-  --skill-config <path>   Path to passive_skill_config.cfg.bin
-  --effect-config <path>  Path to passive_skill_effect_config.cfg.bin
+  --skill-config <path>   Path to passive_skill_config.cfg.bin (requis)
   --output <path>         Export results to JSON file
-  --build-type <type>     Filter by build type (Knockout, Tension, etc.)
+  --rarity <n>            Filter by rarity value (champ [4] de PASSIVE_SKILL_INFO)
   --verbose               Show detailed output
 
 Examples:
-  iecode passive buildtypes
   iecode passive analyze --skill-config passive_skill_config_0.08.86.cfg.bin
-  iecode passive analyze --skill-config skill.cfg.bin --effect-config effect.cfg.bin --output skills.json
-  iecode passive analyze --skill-config skill.cfg.bin --build-type Knockout --verbose
+  iecode passive analyze --skill-config skill.cfg.bin --output skills.json --verbose
+  iecode passive analyze --skill-config skill.cfg.bin --rarity 6
 ");
     }
 }

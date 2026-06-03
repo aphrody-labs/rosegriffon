@@ -4,44 +4,47 @@ using IECODE.Core.Formats.Level5.CfgBin.Logic;
 namespace IECODE.Core.Game.PassiveSkills;
 
 /// <summary>
-/// Service for loading and parsing passive skill data from CFG.BIN files.
-/// Supports passive_skill_config.cfg.bin and passive_skill_effect_config.cfg.bin.
+/// Service de chargement des talents passifs depuis les CFG.BIN.
 /// </summary>
+/// <remarks>
+/// Aligné sur le layout RÉEL vérifié contre inagle
+/// (packages/inagle/src/parsers/passive-skill-config.ts) et les octets du dump.
+///
+/// - passive_skill_config.cfg.bin :
+///   * PASSIVE_SKILL_INFO_{N} : [0] passiveId, [1] effectId, [2] nameId, [3] descId, [4] rareté.
+///   * PASSIVE_SKILL_EFFECT_{N} : [0] effectId (hash), [1] param (float), [2..8] sentinelles.
+///   * PASSIVE_SKILL_INFO_REF_EFFECT/REF_BUFF_ICON : paires (index, count).
+///
+/// L'ancien LoadEffectConfig parsait une arborescence
+/// PASSIVE_SKILL_EFFECT_INFO_LIST_BEG / EXEC_TIMING / TARGET / GRAND_TOTAL inexistante :
+/// le fichier passive_skill_effect_config réel n'a que des listes
+/// (m_soccerPassiveSkillEffect{,Info,Range}List). Il n'est donc plus parsé par une
+/// arborescence inventée ; les effets bruts viennent de la table PASSIVE_SKILL_EFFECT_{N}.
+/// </remarks>
 public sealed class PassiveSkillService
 {
     private const string PassiveSkillInfoPrefix = "PASSIVE_SKILL_INFO_";
     private const string PassiveSkillInfoRefEffectPrefix = "PASSIVE_SKILL_INFO_REF_EFFECT_";
     private const string PassiveSkillInfoRefBuffIconPrefix = "PASSIVE_SKILL_INFO_REF_BUFF_ICON_";
-    private const string PassiveSkillEffectInfoPrefix = "PASSIVE_SKILL_EFFECT_INFO_";
+    private const string PassiveSkillEffectPrefix = "PASSIVE_SKILL_EFFECT_";
 
     private readonly Dictionary<int, PassiveSkillDefinition> _skills = [];
-    private readonly Dictionary<int, PassiveSkillEffect> _effects = [];
+    private readonly List<PassiveSkillEffect> _effects = [];
 
-    /// <summary>
-    /// Gets all loaded passive skill definitions.
-    /// </summary>
+    /// <summary>Définitions de talents passifs chargées (indexées par ID local).</summary>
     public IReadOnlyDictionary<int, PassiveSkillDefinition> Skills => _skills;
 
-    /// <summary>
-    /// Gets all loaded passive skill effects.
-    /// </summary>
-    public IReadOnlyDictionary<int, PassiveSkillEffect> Effects => _effects;
+    /// <summary>Effets bruts chargés (hash + param float).</summary>
+    public IReadOnlyList<PassiveSkillEffect> Effects => _effects;
 
-    /// <summary>
-    /// Gets passive skill by ID.
-    /// </summary>
+    /// <summary>Récupère un talent passif par ID local.</summary>
     public PassiveSkillDefinition? GetSkill(int id) => _skills.GetValueOrDefault(id);
 
     /// <summary>
-    /// Gets effect by ID.
+    /// Charge les talents passifs ET les effets bruts depuis passive_skill_config.cfg.bin.
     /// </summary>
-    public PassiveSkillEffect? GetEffect(int id) => _effects.GetValueOrDefault(id);
-
-    /// <summary>
-    /// Loads passive skill definitions from passive_skill_config.cfg.bin.
-    /// </summary>
-    /// <param name="data">Raw CFG.BIN file data.</param>
-    /// <returns>Number of skills loaded.</returns>
+    /// <param name="data">Données brutes du fichier CFG.BIN.</param>
+    /// <returns>Nombre de talents chargés.</returns>
     [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("CFG.BIN parsing uses reflection.")]
     public int LoadSkillConfig(byte[] data)
     {
@@ -51,12 +54,32 @@ public sealed class PassiveSkillService
         var cfg = new CfgBin();
         cfg.Open(data);
 
-        var loadedCount = 0;
         var entries = FlattenEntries(cfg.Entries);
 
-        // Parse PASSIVE_SKILL_INFO entries
+        // Effets bruts : PASSIVE_SKILL_EFFECT_{N} (hors INFO / REF / LIST).
+        _effects.Clear();
+        foreach (var entry in entries)
+        {
+            if (entry.Name.StartsWith(PassiveSkillEffectPrefix, StringComparison.Ordinal) &&
+                !entry.Name.Contains("INFO") &&
+                !entry.Name.Contains("REF") &&
+                !entry.Name.Contains("LIST") &&
+                entry.Variables.Count >= 1)
+            {
+                _effects.Add(new PassiveSkillEffect
+                {
+                    EffectHash = (uint)GetIntValue(entry.Variables, 0),
+                    Param1 = GetFloatValue(entry.Variables, 1)
+                });
+            }
+        }
+
+        // Talents : PASSIVE_SKILL_INFO_{N} (hors REF / LIST).
+        var loadedCount = 0;
         var skillInfoEntries = entries
-            .Where(e => e.Name.StartsWith(PassiveSkillInfoPrefix) && !e.Name.Contains("REF"))
+            .Where(e => e.Name.StartsWith(PassiveSkillInfoPrefix, StringComparison.Ordinal) &&
+                        !e.Name.Contains("REF") &&
+                        !e.Name.Contains("LIST"))
             .ToList();
 
         foreach (var entry in skillInfoEntries)
@@ -66,41 +89,38 @@ public sealed class PassiveSkillService
 
             var skillDef = new PassiveSkillDefinition { Id = id };
 
-            // Parse PASSIVE_SKILL_INFO_{id} (6 Int variables)
-            if (entry.Variables.Count >= 6)
+            if (entry.Variables.Count >= 5)
             {
                 skillDef.Info = new PassiveSkillInfo
                 {
-                    SkillHash = (uint)GetIntValue(entry.Variables, 0),
-                    NameHash = (uint)GetIntValue(entry.Variables, 1),
-                    Reserved0 = GetIntValue(entry.Variables, 2),
-                    Reserved1 = GetIntValue(entry.Variables, 3),
-                    BuildType = GetIntValue(entry.Variables, 4),
-                    Reserved2 = GetIntValue(entry.Variables, 5)
+                    PassiveHash = (uint)GetIntValue(entry.Variables, 0),
+                    EffectHash = (uint)GetIntValue(entry.Variables, 1),
+                    NameHash = (uint)GetIntValue(entry.Variables, 2),
+                    DescHash = (uint)GetIntValue(entry.Variables, 3),
+                    Rarity = GetIntValue(entry.Variables, 4),
+                    Reserved = GetIntValue(entry.Variables, 5)
                 };
             }
 
-            // Find matching REF_BUFF_ICON entry
             var buffIconName = $"{PassiveSkillInfoRefBuffIconPrefix}{id}";
             var buffIconEntry = entries.FirstOrDefault(e => e.Name == buffIconName);
             if (buffIconEntry?.Variables.Count >= 2)
             {
-                skillDef.BuffIcon = new PassiveSkillBuffIcon
+                skillDef.BuffIconRef = new PassiveSkillBuffIconRef
                 {
-                    IconIndex1 = GetIntValue(buffIconEntry.Variables, 0),
-                    IconIndex2 = GetIntValue(buffIconEntry.Variables, 1)
+                    Index = GetIntValue(buffIconEntry.Variables, 0),
+                    Count = GetIntValue(buffIconEntry.Variables, 1)
                 };
             }
 
-            // Find matching REF_EFFECT entry
             var effectRefName = $"{PassiveSkillInfoRefEffectPrefix}{id}";
             var effectRefEntry = entries.FirstOrDefault(e => e.Name == effectRefName);
             if (effectRefEntry?.Variables.Count >= 2)
             {
                 skillDef.EffectRef = new PassiveSkillEffectRef
                 {
-                    EffectId = GetIntValue(effectRefEntry.Variables, 0),
-                    EffectCount = GetIntValue(effectRefEntry.Variables, 1)
+                    Index = GetIntValue(effectRefEntry.Variables, 0),
+                    Count = GetIntValue(effectRefEntry.Variables, 1)
                 };
             }
 
@@ -111,88 +131,14 @@ public sealed class PassiveSkillService
         return loadedCount;
     }
 
-    /// <summary>
-    /// Loads passive skill effects from passive_skill_effect_config.cfg.bin.
-    /// </summary>
-    /// <param name="data">Raw CFG.BIN file data.</param>
-    /// <returns>Number of effects loaded.</returns>
-    [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("CFG.BIN parsing uses reflection.")]
-    public int LoadEffectConfig(byte[] data)
+    /// <summary>Talents filtrés par rareté (champ [4] de PASSIVE_SKILL_INFO).</summary>
+    public IEnumerable<PassiveSkillDefinition> GetSkillsByRarity(int rarity)
     {
-        if (!CfgBin.HasValidFooter(data))
-            throw new InvalidDataException("Invalid cfg.bin file: missing footer.");
-
-        var cfg = new CfgBin();
-        cfg.Open(data);
-
-        var loadedCount = 0;
-        var entries = FlattenEntries(cfg.Entries);
-
-        // Find top-level PASSIVE_SKILL_EFFECT_INFO entries
-        var effectListEntries = entries
-            .Where(e => e.Name.StartsWith("PASSIVE_SKILL_EFFECT_INFO_LIST_BEG_"))
-            .ToList();
-
-        foreach (var listEntry in effectListEntries)
-        {
-            if (!TryParseSkillId(listEntry.Name, "PASSIVE_SKILL_EFFECT_INFO_LIST_BEG_", out int id))
-                continue;
-
-            var effect = new PassiveSkillEffect { Id = id };
-
-            // Parse child entries for effect data
-            foreach (var child in listEntry.Children)
-            {
-                ParseEffectEntry(child, effect);
-            }
-
-            _effects[id] = effect;
-            loadedCount++;
-        }
-
-        return loadedCount;
+        return _skills.Values.Where(s => s.Info.Rarity == rarity);
     }
 
     /// <summary>
-    /// Links skill definitions to their effect implementations.
-    /// Call after loading both skill config and effect config.
-    /// </summary>
-    public void LinkSkillsToEffects()
-    {
-        foreach (var skill in _skills.Values)
-        {
-            if (skill.EffectRef.EffectId > 0 && _effects.TryGetValue(skill.EffectRef.EffectId, out var effect))
-            {
-                // Effect is linked via EffectRef.EffectId
-                // Skills can reference effects by ID for runtime lookup
-            }
-        }
-    }
-
-    /// <summary>
-    /// Gets skills filtered by build type.
-    /// </summary>
-    public IEnumerable<PassiveSkillDefinition> GetSkillsByBuildType(PassiveSkillBuildType buildType)
-    {
-        return _skills.Values.Where(s => s.Info.GetBuildType() == buildType);
-    }
-
-    /// <summary>
-    /// Gets all skills with their effects resolved.
-    /// </summary>
-    public IEnumerable<(PassiveSkillDefinition Skill, PassiveSkillEffect? Effect)> GetSkillsWithEffects()
-    {
-        foreach (var skill in _skills.Values)
-        {
-            var effect = skill.EffectRef.EffectId > 0
-                ? _effects.GetValueOrDefault(skill.EffectRef.EffectId)
-                : null;
-            yield return (skill, effect);
-        }
-    }
-
-    /// <summary>
-    /// Exports skill data to JSON format.
+    /// Exporte les talents en JSON (champs vérifiés uniquement).
     /// </summary>
     public string ExportToJson()
     {
@@ -206,97 +152,24 @@ public sealed class PassiveSkillService
             var skill = skillList[i];
             sb.AppendLine("    {");
             sb.AppendLine($"      \"id\": {skill.Id},");
-            sb.AppendLine($"      \"skillHash\": \"0x{skill.Info.SkillHash:X8}\",");
+            sb.AppendLine($"      \"passiveHash\": \"0x{skill.Info.PassiveHash:X8}\",");
+            sb.AppendLine($"      \"effectHash\": \"0x{skill.Info.EffectHash:X8}\",");
             sb.AppendLine($"      \"nameHash\": \"0x{skill.Info.NameHash:X8}\",");
-            sb.AppendLine($"      \"buildType\": \"{skill.BuildTypeName}\",");
-            sb.AppendLine($"      \"buildTypeId\": {skill.Info.BuildType},");
-            sb.AppendLine($"      \"effectId\": {skill.EffectRef.EffectId},");
-            sb.AppendLine($"      \"effectCount\": {skill.EffectRef.EffectCount},");
-            sb.AppendLine($"      \"iconIndex1\": {skill.BuffIcon.IconIndex1},");
-            sb.AppendLine($"      \"iconIndex2\": {skill.BuffIcon.IconIndex2}");
+            sb.AppendLine($"      \"descHash\": \"0x{skill.Info.DescHash:X8}\",");
+            sb.AppendLine($"      \"rarity\": {skill.Info.Rarity}");
             sb.Append("    }");
             sb.AppendLine(i < skillList.Count - 1 ? "," : "");
         }
 
         sb.AppendLine("  ],");
         sb.AppendLine($"  \"totalSkills\": {_skills.Count},");
-        sb.AppendLine($"  \"totalEffects\": {_effects.Count},");
-
-        // Add effect type summary
-        sb.AppendLine("  \"effectTypes\": {");
-        sb.AppendLine($"    \"KICK (0x8A52A068)\": \"Power boost for kick actions (50%-150%)\",");
-        sb.AppendLine($"    \"GUARD (0x135BF1D2)\": \"Power boost for guard actions (50%-110%)\",");
-        sb.AppendLine($"    \"CATCH (0x645CC144)\": \"Power boost for goalkeeper catch (100%-350%)\",");
-        sb.AppendLine($"    \"BODY (0xFA3854E7)\": \"Body stat boost (50%-150%)\",");
-        sb.AppendLine($"    \"CONTROL (0x8D3F6471)\": \"Control stat boost (50%-150%)\",");
-        sb.AppendLine($"    \"SPEED (0x143635CB)\": \"Speed stat boost (50%-150%)\",");
-        sb.AppendLine($"    \"STAMINA (0x6331055D)\": \"Stamina boost (200%-450%)\",");
-        sb.AppendLine($"    \"MISC (0xF38E18CC)\": \"Miscellaneous effects (50%-150%)\"");
-        sb.AppendLine("  }");
+        sb.AppendLine($"  \"totalEffects\": {_effects.Count}");
         sb.AppendLine("}");
 
         return sb.ToString();
     }
 
-    /// <summary>
-    /// Gets detailed effect analysis with decoded type names.
-    /// </summary>
-    public IEnumerable<EffectAnalysis> AnalyzeEffects()
-    {
-        foreach (var effect in _effects.Values.OrderBy(e => e.Id))
-        {
-            foreach (var effectData in effect.Effects)
-            {
-                yield return new EffectAnalysis
-                {
-                    EffectId = effect.Id,
-                    TypeHash = effectData.EffectTypeHash,
-                    TypeName = PassiveSkillHashes.GetEffectTypeName(effectData.EffectTypeHash),
-                    ModifierValue = effectData.ModifierValue,
-                    PercentageDisplay = effect.GrandTotalInfo.PercentageValue
-                };
-            }
-        }
-    }
-
-    /// <summary>
-    /// Gets summary statistics about loaded effects.
-    /// </summary>
-    public EffectStatistics GetEffectStatistics()
-    {
-        var stats = new EffectStatistics();
-
-        foreach (var effect in _effects.Values)
-        {
-            foreach (var effectData in effect.Effects)
-            {
-                var typeName = PassiveSkillHashes.GetEffectTypeName(effectData.EffectTypeHash);
-
-                if (!stats.EffectTypeCount.ContainsKey(typeName))
-                {
-                    stats.EffectTypeCount[typeName] = 0;
-                    stats.EffectTypeMinValue[typeName] = float.MaxValue;
-                    stats.EffectTypeMaxValue[typeName] = float.MinValue;
-                }
-
-                stats.EffectTypeCount[typeName]++;
-
-                // ModifierValue is likely a float packed as int
-                float value = BitConverter.Int32BitsToSingle(effectData.ModifierValue);
-                if (float.IsNaN(value) || float.IsInfinity(value))
-                    value = effectData.ModifierValue / 100f;
-
-                stats.EffectTypeMinValue[typeName] = Math.Min(stats.EffectTypeMinValue[typeName], value);
-                stats.EffectTypeMaxValue[typeName] = Math.Max(stats.EffectTypeMaxValue[typeName], value);
-            }
-        }
-
-        return stats;
-    }
-
-    /// <summary>
-    /// Clears all loaded data.
-    /// </summary>
+    /// <summary>Efface toutes les données chargées.</summary>
     public void Clear()
     {
         _skills.Clear();
@@ -316,84 +189,10 @@ public sealed class PassiveSkillService
         return result;
     }
 
-    private void ParseEffectEntry(Entry entry, PassiveSkillEffect effect)
-    {
-        // Parse exec timing data
-        if (entry.Name.Contains("EXEC_TIMING_DATA"))
-        {
-            if (entry.Name.Contains("COND_DATA") && !entry.Name.Contains("LIST"))
-            {
-                effect.ExecTimingConditions.Add(ParseCondition(entry));
-            }
-        }
-        // Parse target data
-        else if (entry.Name.Contains("TARGET_DATA"))
-        {
-            if (entry.Name.Contains("COND_DATA") && !entry.Name.Contains("LIST"))
-            {
-                effect.TargetConditions.Add(ParseCondition(entry));
-            }
-        }
-        // Parse exec data
-        else if (entry.Name.Contains("EXEC_DATA"))
-        {
-            if (entry.Name.Contains("COND_DATA") && !entry.Name.Contains("LIST"))
-            {
-                effect.ExecConditions.Add(ParseCondition(entry));
-            }
-            else if (entry.Name.Contains("EFFECT_DATA") && !entry.Name.Contains("LIST"))
-            {
-                effect.Effects.Add(ParseEffectData(entry));
-            }
-        }
-        // Parse grand total info
-        else if (entry.Name.Contains("GRAND_TOTAL_INFO") && !entry.Name.Contains("LIST") && !entry.Name.Contains("DATA"))
-        {
-            effect.GrandTotalInfo = ParseGrandTotalInfo(entry);
-        }
-
-        // Recurse into children
-        foreach (var child in entry.Children)
-        {
-            ParseEffectEntry(child, effect);
-        }
-    }
-
-    private static PassiveSkillCondition ParseCondition(Entry entry)
-    {
-        return new PassiveSkillCondition
-        {
-            ConditionHash = (uint)GetIntValue(entry.Variables, 0),
-            Param1 = GetIntValue(entry.Variables, 1),
-            Param2 = GetIntValue(entry.Variables, 2)
-        };
-    }
-
-    private static PassiveSkillEffectData ParseEffectData(Entry entry)
-    {
-        return new PassiveSkillEffectData
-        {
-            EffectTypeHash = (uint)GetIntValue(entry.Variables, 0),
-            ModifierValue = GetIntValue(entry.Variables, 1),
-            EffectParam = GetIntValue(entry.Variables, 2)
-        };
-    }
-
-    private static PassiveSkillGrandTotalInfo ParseGrandTotalInfo(Entry entry)
-    {
-        return new PassiveSkillGrandTotalInfo
-        {
-            CategoryHash = (uint)GetIntValue(entry.Variables, 0),
-            PercentageValue = GetIntValue(entry.Variables, 1),
-            BuildTypeIcon = GetIntValue(entry.Variables, 2),
-            BuffIconId = GetIntValue(entry.Variables, 3)
-        };
-    }
-
     private static bool TryParseSkillId(string name, string prefix, out int id)
     {
         id = 0;
-        if (!name.StartsWith(prefix))
+        if (!name.StartsWith(prefix, StringComparison.Ordinal))
             return false;
 
         var suffix = name[prefix.Length..];
@@ -416,45 +215,23 @@ public sealed class PassiveSkillService
         return 0;
     }
 
+    private static float GetFloatValue(List<Variable> variables, int index)
+    {
+        if (index < 0 || index >= variables.Count)
+            return 0f;
+
+        var variable = variables[index];
+        if (variable.Value is float f)
+            return f;
+        if (variable.Value is int i)
+            return i;
+        if (float.TryParse(variable.Value?.ToString(),
+                System.Globalization.NumberStyles.Float,
+                System.Globalization.CultureInfo.InvariantCulture, out float parsed))
+            return parsed;
+
+        return 0f;
+    }
+
     #endregion
 }
-
-/// <summary>
-/// Analysis result for a single effect.
-/// </summary>
-public sealed class EffectAnalysis
-{
-    /// <summary>Effect ID from effect config.</summary>
-    public int EffectId { get; set; }
-
-    /// <summary>Effect type hash (identifies stat category).</summary>
-    public uint TypeHash { get; set; }
-
-    /// <summary>Decoded type name (KICK, GUARD, etc.).</summary>
-    public string TypeName { get; set; } = "";
-
-    /// <summary>Raw modifier value from config.</summary>
-    public int ModifierValue { get; set; }
-
-    /// <summary>Percentage value for display.</summary>
-    public int PercentageDisplay { get; set; }
-
-    /// <summary>Gets modifier as float (0.5 = 50%).</summary>
-    public float ModifierAsFloat => BitConverter.Int32BitsToSingle(ModifierValue);
-}
-
-/// <summary>
-/// Statistics summary for loaded effects.
-/// </summary>
-public sealed class EffectStatistics
-{
-    /// <summary>Count of effects per type.</summary>
-    public Dictionary<string, int> EffectTypeCount { get; } = [];
-
-    /// <summary>Minimum value per type.</summary>
-    public Dictionary<string, float> EffectTypeMinValue { get; } = [];
-
-    /// <summary>Maximum value per type.</summary>
-    public Dictionary<string, float> EffectTypeMaxValue { get; } = [];
-}
-

@@ -94,7 +94,7 @@ public class CharacterDataPipeline
                 if (baseInfo != null)
                 {
                     result.BaseEntry = baseInfo.OriginalEntry;
-                    result.ModelId = baseInfo.ModelId;
+                    result.ModelId = baseInfo.InternalCode;
                 }
 
                 results.Add(result);
@@ -129,7 +129,7 @@ public class CharacterDataPipeline
             if (baseInfo != null)
             {
                 result.BaseEntry = baseInfo.OriginalEntry;
-                result.ModelId = baseInfo.ModelId;
+                result.ModelId = baseInfo.InternalCode;
             }
 
             results.Add(result);
