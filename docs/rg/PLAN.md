@@ -63,6 +63,7 @@ _Wiki Inazuma Eleven Victory Road (déployé sur `azalee.rosegriffon.fr` via le 
   - ✅ **Centrage mobile du FormSelector** : Centrage horizontal des vignettes de formulaires et élargissement automatique du conteneur de fiches de personnage (`w-full sm:flex-1`) sur mobile.
   - ✅ **Optimisation de la mise en cache ISR (Incremental Static Regeneration) pour le Zukan** : Pré-génération statique via `generateStaticParams()` pour les 1 051 fiches de personnages à la compilation, éliminant les requêtes à la base de données en production.
   - ✅ Système de recherche hybride combinant recherche floue (uFuzzy) et vectorielle (RAG).
+  - ✅ **Retrait complet de Playwright & commande de test native** : Remplacement des tests lourds Playwright E2E par des vérifications ultra-rapides nativement intégrées dans le CLI `azalee test` (base de données SQLite, points d'entrée d'API, résolveur GraphQL, audits bxc, structure DOM et rendu HTTP de 29 routes). Nettoyage global du cache navigateur (`~/.cache/ms-playwright`) et suppression des dépendances Chromium obsolètes.
 
 ### 🌐 @rose-griffon/website
 
@@ -215,6 +216,7 @@ _API universelle et parses de données de jeu Inazuma Eleven_
   - ✅ Module Basara pour l'agrégation de statistiques.
   - ✅ Calculateur de statistiques de personnage dynamique.
   - ✅ Script de synchronisation DB (`cli-push.ts`) avec préservation complète des métadonnées brutes et enrichies d'auras.
+  - ✅ **Test d'intégration unifié en conditions réelles** : Création de `azalee-inagle-integration.test.ts` (exécuté sous `bun test`) validant le cycle complet (chargement des fichiers JSON binaires via Bun.file, cohérence avec la base SQLite locale et exécution complète du binaire de test CLI via Bun.process).
   - ⏳ Support de nouvelles versions de fichiers lors des futures mises à jour du jeu.
   - ⏳ Simulateur interactif de composition d'équipe.
 
@@ -281,4 +283,8 @@ _API universelle et parses de données de jeu Inazuma Eleven_
 3. ✅ **Gestion et Nettoyage des Services VPS** :
    - Mise à jour et installation du démon Cron de production (`rg-cron.service`) pour exécuter le démon à l'aide de `bun run src/index.ts` depuis le répertoire `packages/cron` (JIT propre résolvant les vrais modules).
    - Retrait définitif et désactivation complète du bot Discord (`rg-bot.service`) du VPS à la demande.
+4. ✅ **Migration et unification des tests E2E vers le mode natif (Juin 2026)** :
+   - Remplacement complet de la suite E2E de Playwright par 5 suites de tests natifs exécutées en moins de 40 secondes par le CLI (`azalee test`).
+   - Implémentation du test d'intégration complet `packages/inagle/src/azalee-inagle-integration.test.ts` s'exécutant via `bun test` pour valider de bout en bout le pipeline : parsing Inagle, conformité de la DB SQLite locale, et bon comportement du CLI.
+   - Nettoyage du cache de navigateurs de Playwright (`~/.cache/ms-playwright`) et arrêt de tous les processus chrome/playwright orphelins sur le VPS.
 
