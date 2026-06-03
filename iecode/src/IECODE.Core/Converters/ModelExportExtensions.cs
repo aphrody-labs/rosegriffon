@@ -78,7 +78,8 @@ public static class ModelExportExtensions
     {
         var vertexBytes = G4mgReader.ReadVertexBuffer(stream, mesh);
         var indexBytes = G4mgReader.ReadIndexBuffer(stream, mesh);
-        var vertices = G4mgReader.ParseVertices(vertexBytes, mesh.Format);
+        int stride = mesh.VertexStride > 0 ? mesh.VertexStride : G4mgParser.GetVertexStride(mesh.Format);
+        var vertices = G4mgReader.ParseVertices(vertexBytes, stride);
         var indices = G4mgReader.ParseIndices(indexBytes);
 
         var material = new MaterialBuilder($"{mesh.Name}_Mat")

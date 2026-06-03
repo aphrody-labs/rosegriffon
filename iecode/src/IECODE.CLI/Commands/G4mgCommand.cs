@@ -1,6 +1,5 @@
-using System.Runtime.InteropServices;
-using System.Buffers.Binary;
 using System.CommandLine;
+using System.CommandLine.Invocation;
 using System.Numerics;
 using IECODE.Core.Formats.Level5;
 using SharpGLTF.Geometry;
@@ -11,450 +10,161 @@ using SharpGLTF.Scenes;
 namespace IECODE.CLI.Commands;
 
 /// <summary>
-/// Command to parse and convert G4MG (Level-5 Mesh Geometry) files.
+/// Commande de parsing/conversion des fichiers G4MG (géométrie Level-5).
+///
+/// Les .g4mg sont SANS en-tête : aucun magic, pas de header. La métadonnée géométrique
+/// (offsets/comptes vertex et index, stride, sous-mailles) vit dans le .g4md compagnon de
+/// même basename. Sans .g4md → erreur explicite + code de sortie non nul.
 /// </summary>
 public static class G4mgCommand
 {
     public static Command Create()
     {
-        var command = new Command("g4mg", "Parse and convert G4MG geometry files");
+        var command = new Command("g4mg", "Parse and convert G4MG geometry files (headerless, requires companion .g4md)");
 
-        // Subcommand: to-glb
-        var toGlbCommand = new Command("to-glb", "Convert G4MG to GLB");
+        // Sous-commande : info
+        var infoCommand = new Command("info", "Inspect G4MG geometry via its companion .g4md");
+        var infoFileArg = new Argument<string>("file", "Path to G4MG file");
+        infoCommand.AddArgument(infoFileArg);
+        infoCommand.SetHandler((InvocationContext ctx) =>
+        {
+            string file = ctx.ParseResult.GetValueForArgument(infoFileArg);
+            ctx.ExitCode = Info(file);
+        });
+        command.AddCommand(infoCommand);
+
+        // Sous-commande : to-glb
+        var toGlbCommand = new Command("to-glb", "Convert G4MG to GLB (positions + indices)");
         var fileArg = new Argument<string>("file", "Path to G4MG file");
         toGlbCommand.AddArgument(fileArg);
         var outputOption = new Option<string?>(["--output", "-o"], "Output GLB file");
         toGlbCommand.AddOption(outputOption);
-
-        toGlbCommand.SetHandler((string file, string? output) =>
+        toGlbCommand.SetHandler((InvocationContext ctx) =>
         {
-            ConvertToGlb(file, output);
-        }, fileArg, outputOption);
-
+            string file = ctx.ParseResult.GetValueForArgument(fileArg);
+            string? output = ctx.ParseResult.GetValueForOption(outputOption);
+            ctx.ExitCode = ConvertToGlb(file, output);
+        });
         command.AddCommand(toGlbCommand);
 
         return command;
     }
 
-    [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    private struct Vertex24
+    /// <summary>
+    /// Charge le .g4mg et son .g4md compagnon, ou écrit une erreur claire et renvoie un code non nul.
+    /// </summary>
+    private static bool TryLoad(string g4mgPath, out byte[] g4mgData, out G4mdParser g4md)
     {
-        public float PositionX, PositionY, PositionZ;
-        public byte BoneIndex0, BoneIndex1, BoneIndex2, BoneIndex3;
-        public byte Weight0, Weight1, Weight2, Weight3;
-        public ushort U, V;
+        g4mgData = [];
+        g4md = new G4mdParser();
+
+        if (!File.Exists(g4mgPath))
+        {
+            Console.Error.WriteLine($"File not found: {g4mgPath}");
+            return false;
+        }
+
+        string g4mdPath = Path.ChangeExtension(g4mgPath, ".g4md");
+        if (!File.Exists(g4mdPath))
+        {
+            Console.Error.WriteLine(
+                $"G4MG headerless: companion .g4md required, none found at {g4mdPath}");
+            return false;
+        }
+
+        g4mgData = File.ReadAllBytes(g4mgPath);
+        g4md.Parse(g4mdPath);
+        return true;
     }
 
-    private static void ConvertToGlb(string filePath, string? outputPath)
+    private static int Info(string g4mgPath)
     {
-        try
+        if (!TryLoad(g4mgPath, out var g4mgData, out var g4md))
+            return 1;
+
+        Console.WriteLine($"G4MG: {Path.GetFileName(g4mgPath)} ({g4mgData.Length} bytes, headerless)");
+        Console.WriteLine($"Companion G4MD: submeshes={g4md.Header.SubmeshCount} materials={g4md.Header.MaterialCount} " +
+                          $"vlayout={g4md.Header.VLayoutCount} faceDataBase=0x{g4md.Header.FaceDataBase:X}");
+
+        var geometry = G4mgParser.ExtractGeometry(g4mgData, g4md);
+        if (geometry.Count == 0)
         {
-            if (!File.Exists(filePath))
-            {
-                Console.Error.WriteLine($"File not found: {filePath}");
-                return;
-            }
-
-            if (string.IsNullOrEmpty(outputPath))
-            {
-                outputPath = Path.ChangeExtension(filePath, ".glb");
-            }
-
-            Console.WriteLine($"Converting: {Path.GetFileName(filePath)} -> {Path.GetFileName(outputPath)}");
-
-            byte[] fileData = File.ReadAllBytes(filePath);
-
-            // Check for encryption (Magic: 0x0CA3D70A — header-only XOR)
-            if (fileData.Length > 4)
-            {
-                uint magic = BinaryPrimitives.ReadUInt32LittleEndian(fileData);
-                if (magic == 0x0CA3D70A)
-                {
-                    uint key = 0x4BEEE34D;
-                    var keyBytes = BitConverter.GetBytes(key);
-                    for (int i = 0; i < 0x40; i++)
-                        fileData[i] ^= keyBytes[i % 4];
-                    Console.WriteLine($"Decrypted header. Magic now: 0x{BinaryPrimitives.ReadUInt32LittleEndian(fileData):X8}");
-                }
-            }
-
-            List<G4mgParser.MeshEntry> meshes;
-
-            // Check for companion G4MD file
-            string g4mdPath = Path.ChangeExtension(filePath, ".g4md");
-            if (File.Exists(g4mdPath))
-            {
-                Console.WriteLine($"Found companion G4MD: {Path.GetFileName(g4mdPath)}");
-                var g4md = new G4mdParser();
-                g4md.Parse(g4mdPath);
-                Console.WriteLine(g4md.GetSummary());
-                meshes = G4mgParser.ParseRawGeometry(fileData, g4md.Submeshes);
-
-                // Fixup formats based on heuristics
-                var fixedMeshes = new List<G4mgParser.MeshEntry>();
-                foreach (var m in meshes)
-                {
-                    var format = m.Format;
-                    // Force 24-byte format if RawFormat is 0 and BoneCount > 0
-                    if (m.RawFormat == 0 && g4md.Header.BoneCount > 0)
-                    {
-                        format = G4mgParser.VertexFormat.Level5_24Byte;
-                    }
-                    // Also force 24-byte for 0x02020000 (Face mesh?)
-                    if (m.RawFormat == 0x02020000)
-                    {
-                        format = G4mgParser.VertexFormat.Level5_24Byte;
-                    }
-
-                    fixedMeshes.Add(new G4mgParser.MeshEntry
-                    {
-                        Name = m.Name,
-                        VertexCount = m.VertexCount,
-                        IndexCount = m.IndexCount,
-                        VertexBufferOffset = m.VertexBufferOffset,
-                        IndexBufferOffset = m.IndexBufferOffset,
-                        MaterialIndex = m.MaterialIndex,
-                        Format = format,
-                        RawFormat = m.RawFormat,
-                        BBoxMin = m.BBoxMin,
-                        BBoxMax = m.BBoxMax
-                    });
-                }
-                meshes = fixedMeshes;
-
-                // Robust Scan for Index Buffer
-                // Find a block of size (IndexCount * 2) where all ushorts are < VertexCount
-                int ibFoundOffset = -1;
-                if (meshes.Count > 0)
-                {
-                    var m0 = meshes[0];
-                    int requiredSize = m0.IndexCount * 2;
-                    int maxVertexIndex = m0.VertexCount;
-
-                    Console.WriteLine($"Scanning for index buffer (size={requiredSize}, maxVal={maxVertexIndex})...");
-
-                    // Scan with stride 4 (alignment)
-                    for (int i = 0x600; i < fileData.Length - requiredSize; i += 4)
-                    {
-                        bool valid = true;
-                        // Check first 10 indices to fail fast
-                        for (int j = 0; j < 20; j += 2)
-                        {
-                            ushort val = BitConverter.ToUInt16(fileData, i + j);
-                            if (val >= maxVertexIndex)
-                            {
-                                valid = false;
-                                break;
-                            }
-                        }
-
-                        if (valid)
-                        {
-                            // Check ALL indices
-                            for (int j = 0; j < requiredSize; j += 2)
-                            {
-                                ushort val = BitConverter.ToUInt16(fileData, i + j);
-                                if (val >= maxVertexIndex)
-                                {
-                                    valid = false;
-                                    break;
-                                }
-                            }
-                        }
-
-                        if (valid)
-                        {
-                            ibFoundOffset = i;
-                            break;
-                        }
-                    }
-                }
-
-                if (ibFoundOffset != -1)
-                {
-                    Console.WriteLine($"Index buffer found at 0x{ibFoundOffset:X}");
-
-                    // Apply IB offset
-                    var newMeshes = new List<G4mgParser.MeshEntry>();
-                    foreach (var m in meshes)
-                    {
-                        int newIbOffset = m.IndexBufferOffset;
-                        if (m == meshes[0])
-                        {
-                            newIbOffset = ibFoundOffset;
-                        }
-                        else if (m == meshes[1])
-                        {
-                            // Guess Mesh 1 IB is after Mesh 0 IB
-                            // Align to 4 bytes
-                            int m0Size = meshes[0].IndexCount * 2;
-                            int nextOffset = ibFoundOffset + m0Size;
-                            if (nextOffset % 4 != 0) nextOffset += 2;
-                            newIbOffset = nextOffset;
-                        }
-
-                        newMeshes.Add(new G4mgParser.MeshEntry
-                        {
-                            Name = m.Name,
-                            VertexCount = m.VertexCount,
-                            IndexCount = m.IndexCount,
-                            VertexBufferOffset = m.VertexBufferOffset,
-                            IndexBufferOffset = newIbOffset,
-                            MaterialIndex = m.MaterialIndex,
-                            Format = m.Format,
-                            RawFormat = m.RawFormat,
-                            BBoxMin = m.BBoxMin,
-                            BBoxMax = m.BBoxMax
-                        });
-                    }
-                    meshes = newMeshes;
-                }
-
-                // Heuristic scan removed (replaced by global IB scan and format fixup)
-            }
-            else
-            {
-                // Fallback to standalone G4MG parsing
-                // We need to pass the decrypted data, not read from file again
-                meshes = G4mgParser.ParseMeshes(fileData);
-            }
-
-            // 2. Create Scene
-            var scene = new SceneBuilder();
-
-            // Default material
-            var material = new MaterialBuilder("Default")
-                .WithDoubleSide(true)
-                .WithMetallicRoughnessShader();
-
-            foreach (var meshEntry in meshes)
-            {
-                Console.WriteLine($"  {meshEntry.Name}: V={meshEntry.VertexCount} I={meshEntry.IndexCount} fmt={meshEntry.Format}");
-
-                if (meshEntry.VertexCount == 0) continue;
-
-                // Read buffers based on format
-                if (meshEntry.Format == G4mgParser.VertexFormat.Skinned)
-                {
-                    G4mgParser.SkinnedVertex[] vertices = [];
-                    ushort[] indices = [];
-
-                    // Manual read vertices
-                    int vSize = 40;
-                    int vCount = meshEntry.VertexCount;
-                    int vOffset = meshEntry.VertexBufferOffset;
-                    if (vOffset + vCount * vSize > fileData.Length)
-                    {
-                        Console.Error.WriteLine($"    Vertex buffer overflow for {meshEntry.Name}");
-                        continue;
-                    }
-                    var vSpan = fileData.AsSpan(vOffset, vCount * vSize);
-                    vertices = MemoryMarshal.Cast<byte, G4mgParser.SkinnedVertex>(vSpan).ToArray();
-
-                    int iSize = 2;
-                    int iCount = meshEntry.IndexCount;
-                    int iOffset = meshEntry.IndexBufferOffset;
-                    if (iOffset + iCount * iSize > fileData.Length)
-                    {
-                        Console.Error.WriteLine($"    Index buffer overflow for {meshEntry.Name}");
-                        continue;
-                    }
-                    var iSpan = new ReadOnlySpan<byte>(fileData, iOffset, iCount * iSize);
-                    indices = MemoryMarshal.Cast<byte, ushort>(iSpan).ToArray();
-
-
-                    var meshBuilder = new MeshBuilder<VertexPositionNormal, VertexTexture1, VertexJoints4>(meshEntry.Name);
-                    var primitive = meshBuilder.UsePrimitive(material);
-
-                    var gltfVertices = new (VertexPositionNormal, VertexTexture1, VertexJoints4)[vertices.Length];
-                    for (int i = 0; i < vertices.Length; i++)
-                    {
-                        var v = vertices[i];
-                        gltfVertices[i] = (
-                            new VertexPositionNormal(v.BaseVertex.PositionX, v.BaseVertex.PositionY, v.BaseVertex.PositionZ,
-                                                   v.BaseVertex.NormalX, v.BaseVertex.NormalY, v.BaseVertex.NormalZ),
-                            new VertexTexture1(new Vector2(v.BaseVertex.U, v.BaseVertex.V)),
-                            new VertexJoints4(
-                                (v.BoneIndex0, v.Weight0 / 255f),
-                                (v.BoneIndex1, v.Weight1 / 255f),
-                                (v.BoneIndex2, v.Weight2 / 255f),
-                                (v.BoneIndex3, v.Weight3 / 255f)
-                            )
-                        );
-                    }
-
-                    for (int i = 0; i < indices.Length; i += 3)
-                    {
-                        if (i + 2 >= indices.Length) break;
-                        primitive.AddTriangle(gltfVertices[indices[i]], gltfVertices[indices[i + 1]], gltfVertices[indices[i + 2]]);
-                    }
-
-                    scene.AddRigidMesh(meshBuilder, Matrix4x4.Identity);
-                }
-                else if (meshEntry.Format == G4mgParser.VertexFormat.Level5_24Byte)
-                {
-                    // Manual read 24-byte vertices
-                    int vSize = 24;
-                    int vCount = meshEntry.VertexCount;
-                    int vOffset = meshEntry.VertexBufferOffset;
-                    if (vOffset + vCount * vSize > fileData.Length)
-                    {
-                        Console.Error.WriteLine($"    Vertex buffer overflow for {meshEntry.Name}");
-                        continue;
-                    }
-                    var vSpan = fileData.AsSpan(vOffset, vCount * vSize);
-                    var vertices = MemoryMarshal.Cast<byte, Vertex24>(vSpan).ToArray();
-
-                    int iSize = 2;
-                    int iCount = meshEntry.IndexCount;
-                    int iOffset = meshEntry.IndexBufferOffset;
-                    if (iOffset + iCount * iSize > fileData.Length)
-                    {
-                        Console.Error.WriteLine($"    Index buffer overflow for {meshEntry.Name}");
-                        continue;
-                    }
-                    var iSpan = fileData.AsSpan(iOffset, iCount * iSize);
-                    var indices = MemoryMarshal.Cast<byte, ushort>(iSpan).ToArray();
-
-                    // Debug indices
-                    bool indicesValid = true;
-                    if (indices.Length > 0)
-                    {
-                        ushort maxIdx = 0;
-                        foreach (var idx in indices) if (idx > maxIdx) maxIdx = idx;
-                        if (maxIdx >= vertices.Length)
-                        {
-                            Console.Error.WriteLine($"    Invalid indices for {meshEntry.Name} (max={maxIdx} >= vtx={vertices.Length}). Falling back to points.");
-                            indicesValid = false;
-                        }
-                    }
-
-                    var meshBuilder = new MeshBuilder<VertexPositionNormal, VertexTexture1, VertexJoints4>(meshEntry.Name);
-                    var primitive = meshBuilder.UsePrimitive(material);
-
-                    var gltfVertices = new (VertexPositionNormal, VertexTexture1, VertexJoints4)[vertices.Length];
-                    for (int i = 0; i < vertices.Length; i++)
-                    {
-                        var v = vertices[i];
-                        // Assume Half Float UVs
-                        float u = (float)BitConverter.UInt16BitsToHalf(v.U);
-                        float v_ = (float)BitConverter.UInt16BitsToHalf(v.V);
-
-                        // Normalize weights
-                        float w0 = v.Weight0 / 255f;
-                        float w1 = v.Weight1 / 255f;
-                        float w2 = v.Weight2 / 255f;
-                        float w3 = v.Weight3 / 255f;
-                        float sum = w0 + w1 + w2 + w3;
-                        if (sum > 0)
-                        {
-                            w0 /= sum; w1 /= sum; w2 /= sum; w3 /= sum;
-                        }
-                        else
-                        {
-                            w0 = 1.0f; w1 = 0; w2 = 0; w3 = 0;
-                        }
-
-                        gltfVertices[i] = (
-                            new VertexPositionNormal(v.PositionX, v.PositionY, v.PositionZ, 0, 1, 0), // Dummy normal
-                            new VertexTexture1(new Vector2(u, v_)),
-                            new VertexJoints4(
-                                (v.BoneIndex0, w0),
-                                (v.BoneIndex1, w1),
-                                (v.BoneIndex2, w2),
-                                (v.BoneIndex3, w3)
-                            )
-                        );
-                    }
-
-                    if (indicesValid)
-                    {
-                        for (int i = 0; i < indices.Length; i += 3)
-                        {
-                            if (i + 2 >= indices.Length) break;
-                            primitive.AddTriangle(gltfVertices[indices[i]], gltfVertices[indices[i + 1]], gltfVertices[indices[i + 2]]);
-                        }
-                    }
-                    else
-                    {
-                        // Add points for debugging
-                        var pointPrim = meshBuilder.UsePrimitive(material, 1); // 1 = POINTS
-                        for (int i = 0; i < gltfVertices.Length; i++)
-                        {
-                            pointPrim.AddPoint(gltfVertices[i]);
-                        }
-                    }
-
-                    scene.AddRigidMesh(meshBuilder, Matrix4x4.Identity);
-                }
-                else
-                {
-                    // Manual read static
-                    int vSize = 32;
-                    int vCount = meshEntry.VertexCount;
-                    int vOffset = meshEntry.VertexBufferOffset;
-                    if (vOffset + vCount * vSize > fileData.Length)
-                    {
-                        Console.Error.WriteLine($"    Vertex buffer overflow for {meshEntry.Name}");
-                        continue;
-                    }
-
-                    var vSpan = fileData.AsSpan(vOffset, vCount * vSize);
-                    var vertices = MemoryMarshal.Cast<byte, G4mgParser.Vertex>(vSpan).ToArray();
-
-                    int iSize = 2;
-                    int iCount = meshEntry.IndexCount;
-                    int iOffset = meshEntry.IndexBufferOffset;
-                    if (iOffset + iCount * iSize > fileData.Length)
-                    {
-                        Console.Error.WriteLine($"    Index buffer overflow for {meshEntry.Name}");
-                        continue;
-                    }
-
-                    var iSpan = fileData.AsSpan(iOffset, iCount * iSize);
-                    var indices = MemoryMarshal.Cast<byte, ushort>(iSpan).ToArray();
-
-                    var meshBuilder = new MeshBuilder<VertexPositionNormal, VertexTexture1>(meshEntry.Name);
-                    var primitive = meshBuilder.UsePrimitive(material);
-
-                    var gltfVertices = new (VertexPositionNormal, VertexTexture1)[vertices.Length];
-                    for (int i = 0; i < vertices.Length; i++)
-                    {
-                        var v = vertices[i];
-                        gltfVertices[i] = (
-                            new VertexPositionNormal(v.PositionX, v.PositionY, v.PositionZ, v.NormalX, v.NormalY, v.NormalZ),
-                            new VertexTexture1(new Vector2(v.U, v.V))
-                        );
-                    }
-
-                    for (int i = 0; i < indices.Length; i += 3)
-                    {
-                        if (i + 2 >= indices.Length) break;
-
-                        var i0 = indices[i];
-                        var i1 = indices[i + 1];
-                        var i2 = indices[i + 2];
-
-                        if (i0 >= vertices.Length || i1 >= vertices.Length || i2 >= vertices.Length)
-                            continue;
-
-                        primitive.AddTriangle(gltfVertices[i0], gltfVertices[i1], gltfVertices[i2]);
-                    }
-
-                    scene.AddRigidMesh(meshBuilder, Matrix4x4.Identity);
-                }
-            }
-
-            // 3. Save GLB
-            var model = scene.ToGltf2();
-            model.SaveGLB(outputPath);
-
-            Console.WriteLine($"OK: {outputPath}");
+            Console.Error.WriteLine("No submesh geometry extracted.");
+            return 1;
         }
-        catch (Exception ex)
+
+        foreach (var g in geometry)
         {
-            Console.Error.WriteLine($"Error: {ex.Message}");
-            Console.Error.WriteLine(ex.StackTrace);
+            Console.WriteLine($"  {g.Name}: V={g.VertexCount} I={g.Indices.Count} stride={g.VertexStride} " +
+                              $"index32={g.Index32} vOff=0x{g.VertexBufferOffset:X} iOff=0x{g.IndexBufferOffset:X}");
+
+            if (g.Positions.Count > 0)
+            {
+                var p = g.Positions[0];
+                Console.WriteLine($"    vtx0 pos = ({p.X:0.####}, {p.Y:0.####}, {p.Z:0.####})");
+            }
+            if (g.Indices.Count >= 6)
+            {
+                Console.WriteLine($"    idx[0..6] = [{string.Join(", ", g.Indices.Take(6))}]");
+            }
+            if (g.Attributes.Count > 0)
+            {
+                var a = g.Attributes
+                    .Select(x => $"vtype={x.VType}@{x.Offset}/dt{x.DataType}");
+                Console.WriteLine($"    attrs = {string.Join(", ", a)}");
+            }
         }
+
+        return 0;
+    }
+
+    private static int ConvertToGlb(string g4mgPath, string? outputPath)
+    {
+        if (!TryLoad(g4mgPath, out var g4mgData, out var g4md))
+            return 1;
+
+        outputPath = string.IsNullOrEmpty(outputPath) ? Path.ChangeExtension(g4mgPath, ".glb") : outputPath;
+        Console.WriteLine($"Converting: {Path.GetFileName(g4mgPath)} -> {Path.GetFileName(outputPath)}");
+
+        var geometry = G4mgParser.ExtractGeometry(g4mgData, g4md);
+        if (geometry.Count == 0)
+        {
+            Console.Error.WriteLine("No submesh geometry extracted; nothing to export.");
+            return 1;
+        }
+
+        var scene = new SceneBuilder();
+        var material = new MaterialBuilder("Default").WithDoubleSide(true).WithMetallicRoughnessShader();
+
+        int totalTris = 0;
+        foreach (var g in geometry)
+        {
+            Console.WriteLine($"  {g.Name}: V={g.VertexCount} I={g.Indices.Count} stride={g.VertexStride}");
+
+            // Seule la position est décodée honnêtement (normale/UV packées SNORM16 non fabriquées).
+            var meshBuilder = new MeshBuilder<VertexPosition>(g.Name);
+            var primitive = meshBuilder.UsePrimitive(material);
+
+            var verts = new VertexPosition[g.Positions.Count];
+            for (int i = 0; i < g.Positions.Count; i++)
+                verts[i] = new VertexPosition(g.Positions[i].X, g.Positions[i].Y, g.Positions[i].Z);
+
+            for (int i = 0; i + 2 < g.Indices.Count; i += 3)
+            {
+                uint i0 = g.Indices[i], i1 = g.Indices[i + 1], i2 = g.Indices[i + 2];
+                if (i0 >= verts.Length || i1 >= verts.Length || i2 >= verts.Length)
+                    continue;
+                primitive.AddTriangle(verts[i0], verts[i1], verts[i2]);
+                totalTris++;
+            }
+
+            scene.AddRigidMesh(meshBuilder, Matrix4x4.Identity);
+        }
+
+        var model = scene.ToGltf2();
+        model.SaveGLB(outputPath);
+
+        Console.WriteLine($"OK: {outputPath} ({totalTris} triangles)");
+        return 0;
     }
 }

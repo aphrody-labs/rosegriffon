@@ -28,8 +28,20 @@ public static class ModelConverter
     /// <param name="outputPath">Path to save the .glb file</param>
     public static void ConvertToGlb(string g4mgPath, string outputPath)
     {
-        // 1. Parse G4MG
-        var meshes = G4mgParser.ParseMeshes(g4mgPath);
+        // Les .g4mg sont SANS en-tête : toute la métadonnée géométrique vit dans le .g4md
+        // compagnon (même basename). On l'exige, sinon erreur explicite.
+        string g4mdPath = Path.ChangeExtension(g4mgPath, ".g4md");
+        if (!File.Exists(g4mdPath))
+            throw new FileNotFoundException(
+                $"G4MG sans en-tête : .g4md compagnon requis, introuvable à '{g4mdPath}'.", g4mdPath);
+
+        var g4md = new G4mdParser();
+        g4md.Parse(g4mdPath);
+
+        var g4mgData = File.ReadAllBytes(g4mgPath);
+
+        // 1. Parse géométrie brute pilotée par le .g4md
+        var meshes = G4mgParser.ParseRawGeometry(g4mgData, g4md);
 
         // 2. Create Scene Builder
         var sceneBuilder = new SceneBuilder();
@@ -46,8 +58,9 @@ public static class ModelConverter
             var vertexBytes = G4mgReader.ReadVertexBuffer(g4mgPath, meshEntry);
             var indexBytes = G4mgReader.ReadIndexBuffer(g4mgPath, meshEntry);
 
-            // Parse data
-            var vertices = G4mgReader.ParseVertices(vertexBytes, meshEntry.Format);
+            // Parse data (stride réel dérivé du .g4md)
+            int stride = meshEntry.VertexStride > 0 ? meshEntry.VertexStride : G4mgParser.GetVertexStride(meshEntry.Format);
+            var vertices = G4mgReader.ParseVertices(vertexBytes, stride);
             var indices = G4mgReader.ParseIndices(indexBytes);
 
             // Create MeshBuilder

@@ -24,7 +24,8 @@ public static class G4mgReader
 
     public static byte[] ReadVertexBuffer(Stream stream, G4mgParser.MeshEntry mesh)
     {
-        int stride = G4mgParser.GetVertexStride(mesh.Format);
+        // Stride réel dérivé du .g4md (jamais codé en dur) ; repli sur la table de format hérité.
+        int stride = mesh.VertexStride > 0 ? mesh.VertexStride : G4mgParser.GetVertexStride(mesh.Format);
         int bufferSize = mesh.VertexCount * stride;
 
         if (mesh.VertexBufferOffset + bufferSize > stream.Length)
@@ -66,9 +67,17 @@ public static class G4mgReader
     // -------------------------------------------------------------------------
 
     public static G4mgParser.Vertex[] ParseVertices(ReadOnlySpan<byte> vertexData, G4mgParser.VertexFormat format)
+        => ParseVertices(vertexData, G4mgParser.GetVertexStride(format));
+
+    /// <summary>
+    /// Décode les vertices à partir d'un stride explicite (dérivé du .g4md). Seule la position
+    /// (float3 à +0 de chaque vertex) est décodée — confirmée sur fichiers réels. La normale et
+    /// l'UV du tail sont packées (SNORM16) et NON fabriquées ici : normale par défaut (0,0,1),
+    /// UV (0,0). On expose seulement ce qu'on peut vérifier.
+    /// </summary>
+    public static G4mgParser.Vertex[] ParseVertices(ReadOnlySpan<byte> vertexData, int stride)
     {
-        int stride = G4mgParser.GetVertexStride(format);
-        int count = stride > 0 ? vertexData.Length / stride : 0;
+        int count = stride >= 12 ? vertexData.Length / stride : 0;
         var result = new G4mgParser.Vertex[count];
 
         for (int i = 0; i < count; i++)
@@ -79,30 +88,8 @@ public static class G4mgReader
             float py = Sanitize(BinaryPrimitives.ReadSingleLittleEndian(s[4..]));
             float pz = Sanitize(BinaryPrimitives.ReadSingleLittleEndian(s[8..]));
 
-            float nx = 0f, ny = 0f, nz = 1f;
-            int off = 12;
-
-            if (format.HasFlag(G4mgParser.VertexFormat.Normal))
-            {
-                nx = Sanitize(BinaryPrimitives.ReadSingleLittleEndian(s[off..]));
-                ny = Sanitize(BinaryPrimitives.ReadSingleLittleEndian(s[(off + 4)..]));
-                nz = Sanitize(BinaryPrimitives.ReadSingleLittleEndian(s[(off + 8)..]));
-
-                float lenSq = nx * nx + ny * ny + nz * nz;
-                if (lenSq < 1e-6f) { nx = 0; ny = 0; nz = 1; }
-                else { float l = MathF.Sqrt(lenSq); nx /= l; ny /= l; nz /= l; }
-
-                off += 12;
-            }
-
-            float u = 0f, v = 0f;
-            if (format.HasFlag(G4mgParser.VertexFormat.UV0))
-            {
-                u = Sanitize(BinaryPrimitives.ReadSingleLittleEndian(s[off..]));
-                v = Sanitize(BinaryPrimitives.ReadSingleLittleEndian(s[(off + 4)..]));
-            }
-
-            result[i] = new G4mgParser.Vertex(px, py, pz, nx, ny, nz, u, v);
+            // Normale/UV packées SNORM16 dans le tail : non décodées (valeurs non fabriquées).
+            result[i] = new G4mgParser.Vertex(px, py, pz, 0f, 0f, 1f, 0f, 0f);
         }
 
         return result;

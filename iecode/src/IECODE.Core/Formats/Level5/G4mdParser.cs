@@ -38,20 +38,21 @@ public class G4mdParser
     public struct G4mdHeader
     {
         public uint Magic;              // 0x00: "G4MD"
-        public ushort Field04;          // 0x04: byte-swapped
-        public ushort Field06;          // 0x06: byte-swapped
+        public ushort SubmeshInfo;      // 0x04: offset de la table des sous-mailles (records 0x50)
+        public ushort Field06;          // 0x06: taille de header observée (ex. 0x68)
         public byte Field08;            // 0x08
         public byte Field09;            // 0x09
-        public ushort SectionBase;      // 0x0A: Base for section offset calculations
+        public ushort SectionBase;      // 0x0A: base pour le calcul des offsets de section
         public uint Field0C;            // 0x0C: byte-swapped (32-bit)
 
         // Reserved: 0x10-0x1F (16 bytes)
 
-        public ushort VertexCount;      // 0x20: Number of vertices (formerly SubmeshCount)
-        public ushort FaceCount;        // 0x22: Number of faces (formerly TotalCount)
-        public byte BoneCount;          // 0x24: Number of bone references
+        public ushort SubmeshCount;     // 0x20: nombre de sous-mailles (vérifié sur fichiers réels)
+        public ushort MaterialCount;    // 0x22: nombre de matériaux (vérifié sur fichiers réels)
+        public byte BoneCount;          // 0x24: nombre de références d'os
         public byte Reserved25;         // 0x25
-        public ushort Reserved26;       // 0x26
+        public byte VLayoutCount;       // 0x26: nombre d'attributs dans la table de layout vertex
+        public byte Reserved27;         // 0x27
 
         public uint Field28;            // 0x28: byte-swapped
         public uint Field2C;            // 0x2C: byte-swapped
@@ -68,13 +69,22 @@ public class G4mdParser
         public ushort Section40Offset;  // 0x40
         public ushort Section42Offset;  // 0x42
 
+        /// <summary>
+        /// 0x5C u32 : offset de base du bloc de données d'index (face_data) dans le .g4mg compagnon.
+        /// Les offsets de face de chaque sous-maille s'y ajoutent (vérifié sur chr/_uniform et _face).
+        /// </summary>
+        public uint FaceDataBase;       // 0x5C
+
         // Legacy accessors
         public readonly ushort HeaderSize => (ushort)(SectionBase * 4);
         public readonly ushort TypeId => Field06;
         public readonly uint Unk1 => (uint)(Field08 | (Field09 << 8));
         public readonly uint Unk2 => Field0C;
-        public readonly ushort SubmeshCount => VertexCount;
-        public readonly ushort TotalCount => FaceCount;
+        // Anciens noms conservés : VertexCount/FaceCount désignaient en réalité
+        // submesh_count / material_count (relabellisés d'après les octets réels).
+        public readonly ushort VertexCount => SubmeshCount;
+        public readonly ushort FaceCount => MaterialCount;
+        public readonly ushort TotalCount => MaterialCount;
     }
 
     /// <summary>
@@ -90,6 +100,16 @@ public class G4mdParser
         public int IndexBufferSize;
         public int VertexCount;
         public int VertexBufferOffset;
+
+        /// <summary>
+        /// Pas (stride) du vertex en octets, lu sur l'enregistrement de sous-maille (+0x3E).
+        /// Réel : 68 octets pour les chr (position float3 à +0, normale/UV packées en SNORM16).
+        /// Ne jamais coder en dur — toujours dérivé du .g4md.
+        /// </summary>
+        public int VertexStride;
+
+        /// <summary>Numéro de layout vertex (+0x3C, octet bas) référençant la table d'attributs.</summary>
+        public int LayoutNum;
     }
 
     /// <summary>
@@ -155,6 +175,12 @@ public class G4mdParser
     public int FileSize { get; private set; }
     public bool IsBigEndian { get; private set; }
 
+    /// <summary>
+    /// Copie des octets bruts du .g4md, conservée pour relire la table d'attributs de
+    /// vertex (8 octets/attribut) lors de l'extraction de la géométrie du .g4mg compagnon.
+    /// </summary>
+    public byte[] RawData { get; private set; } = [];
+
     public void Parse(string filePath)
     {
         var data = File.ReadAllBytes(filePath);
@@ -163,6 +189,7 @@ public class G4mdParser
 
     public void Parse(ReadOnlySpan<byte> data)
     {
+        RawData = data.ToArray();
         // Detect endianness
         uint magic = BinaryPrimitives.ReadUInt32LittleEndian(data[..4]);
         IsBigEndian = magic == MAGIC_BE;
@@ -326,43 +353,65 @@ public class G4mdParser
         return (Header.SectionBase + relativeOffset) * 4;
     }
 
+    /// <summary>
+    /// Table des sous-mailles : records de 0x50 octets à partir de l'offset <c>submesh_info</c>
+    /// (header +0x04), <c>submesh_count</c> entrées (header +0x20). Disposition vérifiée octet
+    /// par octet sur des fichiers réels chr/_uniform et chr/_face :
+    /// +0x00 u32 vert_offset (OCTETS dans le .g4mg) ; +0x04 u32 face_offset (OCTETS, à ajouter à
+    /// FaceDataBase) ; +0x08 u32 vert_count ; +0x0C u32 face_count (= index_count) ;
+    /// +0x2E u8 stride ; +0x32 u8 layout_num ; +0x33 u8 mat_num.
+    /// </summary>
     private void ParseSubmeshes(ReadOnlySpan<byte> data)
     {
-        // Submesh table starts at calculated offset
-        int meshTableOffset = GetSectionOffset(Header.VertexDataOffset);
-        int meshStride = 0x10; // 12-byte entries (3 x uint32) from FUN_14056d530
+        const int recordSize = 0x50;
+        int tableOffset = Header.SubmeshInfo;
+        int count = Header.SubmeshCount;
 
-        // Fallback to legacy parsing if offset seems wrong
-        if (meshTableOffset <= 0 || meshTableOffset >= data.Length)
-        {
-            meshTableOffset = 0xD0;
-            meshStride = 0x50;
-        }
-
-        int count = Math.Min(Header.VertexCount, (data.Length - meshTableOffset) / meshStride);
+        if (tableOffset <= 0 || tableOffset >= data.Length || count <= 0)
+            return;
 
         for (int i = 0; i < count; i++)
         {
-            int offset = meshTableOffset + (i * meshStride);
-            if (offset + meshStride > data.Length)
+            int offset = tableOffset + i * recordSize;
+            if (offset + recordSize > data.Length)
                 break;
 
-            var meshData = data.Slice(offset, Math.Min(meshStride, data.Length - offset));
+            var rec = data.Slice(offset, recordSize);
+
+            int faceCount = ReadInt32(rec, 0x0C);
+            int vertCount = ReadInt32(rec, 0x08);
+            byte stride = rec.Length > 0x2E ? rec[0x2E] : (byte)0;
 
             var mesh = new Submesh
             {
                 Name = $"Mesh_{i}",
-                IndexCount = ReadInt32(meshData, 0x00),
-                MaterialIndex = meshData.Length >= 0x0C ? ReadInt32(meshData, 0x08) : 0,
-                VertexFormat = meshData.Length >= 0x14 ? ReadUInt32(meshData, 0x10) : 0,
-                IndexBufferOffset = meshData.Length >= 0x24 ? ReadInt32(meshData, 0x20) : 0,
-                IndexBufferSize = meshData.Length >= 0x28 ? ReadInt32(meshData, 0x24) : 0,
-                VertexCount = meshData.Length >= 0x2C ? ReadInt32(meshData, 0x28) : 0,
-                VertexBufferOffset = meshData.Length >= 0x30 ? ReadInt32(meshData, 0x2C) : 0
+                VertexBufferOffset = ReadInt32(rec, 0x00),
+                IndexBufferOffset = ReadInt32(rec, 0x04),
+                VertexCount = vertCount,
+                IndexCount = faceCount,
+                // index_count u16 (ou u32 si vert_count > 65535) → taille du buffer d'index en octets
+                IndexBufferSize = faceCount * (vertCount > 65535 ? 4 : 2),
+                VertexStride = stride,
+                LayoutNum = rec.Length > 0x32 ? rec[0x32] : 0,
+                MaterialIndex = rec.Length > 0x33 ? rec[0x33] : 0,
+                VertexFormat = 0,
             };
 
             Submeshes.Add(mesh);
         }
+    }
+
+    /// <summary>
+    /// Injecte une table de sous-mailles déjà construite (et la base du bloc d'index) sans
+    /// parser de fichier. Sert au pont de compatibilité <c>G4mgParser.ParseRawGeometry</c>
+    /// qui accepte directement une <see cref="List{Submesh}"/>.
+    /// </summary>
+    public void SetSubmeshesForExtraction(List<Submesh> submeshes, int faceDataBase)
+    {
+        Submeshes = submeshes ?? [];
+        var h = Header;
+        h.FaceDataBase = (uint)faceDataBase;
+        Header = h;
     }
 
     private void ParseBoneRefs(ReadOnlySpan<byte> data)
@@ -424,7 +473,7 @@ public class G4mdParser
             throw new InvalidDataException($"Invalid G4MD magic: 0x{header.Magic:X8}");
 
         // Read with appropriate endianness
-        header.Field04 = isBigEndian
+        header.SubmeshInfo = isBigEndian
             ? BinaryPrimitives.ReadUInt16BigEndian(span[4..])
             : BinaryPrimitives.ReadUInt16LittleEndian(span[4..]);
         header.Field06 = isBigEndian
@@ -439,14 +488,22 @@ public class G4mdParser
             ? BinaryPrimitives.ReadUInt32BigEndian(span[0x0C..])
             : BinaryPrimitives.ReadUInt32LittleEndian(span[0x0C..]);
 
-        // Counts at 0x20+
-        header.VertexCount = isBigEndian
+        // Counts at 0x20+ (relabellisés d'après les octets réels :
+        // 0x20 = submesh_count, 0x22 = material_count)
+        header.SubmeshCount = isBigEndian
             ? BinaryPrimitives.ReadUInt16BigEndian(span[0x20..])
             : BinaryPrimitives.ReadUInt16LittleEndian(span[0x20..]);
-        header.FaceCount = isBigEndian
+        header.MaterialCount = isBigEndian
             ? BinaryPrimitives.ReadUInt16BigEndian(span[0x22..])
             : BinaryPrimitives.ReadUInt16LittleEndian(span[0x22..]);
         header.BoneCount = span[0x24];
+        if (span.Length > 0x26)
+            header.VLayoutCount = span[0x26];
+        // Base du bloc d'index (face_data) dans le .g4mg compagnon
+        if (span.Length >= 0x60)
+            header.FaceDataBase = isBigEndian
+                ? BinaryPrimitives.ReadUInt32BigEndian(span[0x5C..])
+                : BinaryPrimitives.ReadUInt32LittleEndian(span[0x5C..]);
 
         // Section offsets (0x30-0x42)
         header.VertexDataOffset = isBigEndian

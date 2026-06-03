@@ -104,7 +104,17 @@ public class AssetConverterFacade
     /// </summary>
     public void ConvertModel(string inputPath, string outputPath)
     {
-        var meshes = G4mgParser.ParseMeshes(inputPath);
+        // Les .g4mg sont sans en-tête : le .g4md compagnon est obligatoire.
+        string g4mdPath = Path.ChangeExtension(inputPath, ".g4md");
+        if (!File.Exists(g4mdPath))
+            throw new FileNotFoundException(
+                $"G4MG sans en-tête : .g4md compagnon requis, introuvable à '{g4mdPath}'.", g4mdPath);
+
+        var g4md = new G4mdParser();
+        g4md.Parse(g4mdPath);
+
+        var g4mgData = File.ReadAllBytes(inputPath);
+        var meshes = G4mgParser.ParseRawGeometry(g4mgData, g4md);
 
         // Try to find associated textures
         // Heuristic: Look in data/dx11 mirror path
@@ -113,7 +123,7 @@ public class AssetConverterFacade
         if (texturePath != null && File.Exists(texturePath))
             LogService.Instance.Info("Converter", $"Found associated texture: {texturePath}");
 
-        meshes.SaveAllAsGlb(inputPath, outputPath);
+        meshes.SaveAllAsGlb(g4mgData, outputPath);
     }
 
     /// <summary>
@@ -178,7 +188,7 @@ public class AssetConverterFacade
             }
         }
 
-        var meshes = G4mgParser.ParseRawGeometry(g4mgData, g4mdParser.Submeshes);
+        var meshes = G4mgParser.ParseRawGeometry(g4mgData, g4mdParser);
 
         string? texturePath = FindTextureForModel(inputPath);
         if (texturePath != null && File.Exists(texturePath))
