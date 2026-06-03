@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import ImageWithSkeleton from "@/components/shared/ImageWithSkeleton";
+import { TeamStructuredData } from "@/components/shared/StructuredData";
 import getTeamMembers from "@/lib/get-team-members";
 
 // Rôle générique inséré par le sync Discord en attendant un libellé précis :
@@ -42,8 +43,22 @@ async function TeamsSection() {
 	);
 	const teams = teamsData.filter((team) => team.members.length > 0);
 
+	const allMembers = teams.flatMap((team) =>
+		team.members.map((member) => ({
+			name: member.name,
+			role: member.role === PLACEHOLDER_ROLE ? `${team.name}` : member.role || team.name,
+			image: member.image || undefined,
+			sameAs: member.link && member.link.startsWith("http") ? [member.link] : undefined,
+		}))
+	);
+
 	return (
 		<section className="flex flex-col gap-10 lg:gap-12">
+			<TeamStructuredData
+				pageName="Le Staff RG"
+				url="https://rosegriffon.fr/notre-equipe/staff"
+				members={allMembers}
+			/>
 			{/* Header Section */}
 			<div className="text-center lg:text-left space-y-4 max-w-4xl mx-auto lg:mx-0 animate-fade-in">
 				<h1 className="text-4xl lg:text-5xl font-black bg-linear-to-r from-gaelle-blue to-gaelle-blue-light dark:from-gaelle-blue-light dark:to-gaelle-blue bg-clip-text text-transparent">
@@ -96,8 +111,8 @@ async function TeamsSection() {
 											{/* Member Image */}
 											<div className="relative size-24 sm:w-32 sm:h-32 lg:w-40 lg:h-40 rounded-full overflow-hidden border-3 sm:border-4 border-gaelle-blue/30 group-hover:border-gaelle-blue transition-all duration-300 group-hover:shadow-lg group-hover:shadow-gaelle-blue/20">
 												<ImageWithSkeleton
-													src={member.image || "https://placehold.co/200x200"}
-													alt={`${member.name} Rose Griffon`}
+													src={member.image || "/RG_Logo_V2.5.webp"}
+													alt={`${member.name}, ${displayedRole} — ${team.name} Rose Griffon`}
 													priority={memberIdx < 3}
 												/>
 											</div>

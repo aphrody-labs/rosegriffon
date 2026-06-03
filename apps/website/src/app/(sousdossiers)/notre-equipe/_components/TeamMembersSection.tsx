@@ -1,4 +1,5 @@
 import ImageWithSkeleton from "@/components/shared/ImageWithSkeleton";
+import { TeamStructuredData } from "@/components/shared/StructuredData";
 import getTeamMembers from "@/lib/get-team-members";
 
 interface TeamMembersSectionProps {
@@ -6,6 +7,8 @@ interface TeamMembersSectionProps {
 	title: string;
 	description: string;
 	showRole?: boolean;
+	/** URL canonique de la page hôte pour les données structurées (ProfilePage). */
+	canonicalUrl?: string;
 }
 
 /**
@@ -18,6 +21,7 @@ async function TeamMembersSection({
 	title,
 	description,
 	showRole = false,
+	canonicalUrl,
 }: TeamMembersSectionProps) {
 	const response = await getTeamMembers(teamName);
 	const members = response
@@ -26,11 +30,24 @@ async function TeamMembersSection({
 			role: member.metadata.memberRole,
 			index: member.metadata.memberIndex,
 			image: member.url,
+			link: member.metadata.memberLink,
 		}))
 		.toSorted((a, b) => a.index - b.index);
 
 	return (
 		<section className="flex flex-col gap-10 lg:gap-12">
+			{canonicalUrl && members.length > 0 && (
+				<TeamStructuredData
+					pageName={title}
+					url={canonicalUrl}
+					members={members.map((member) => ({
+						name: member.name,
+						role: member.role || undefined,
+						image: member.image || undefined,
+						sameAs: member.link && member.link.startsWith("http") ? [member.link] : undefined,
+					}))}
+				/>
+			)}
 			<div className="text-center space-y-4 max-w-4xl mx-auto animate-fade-in">
 				<h2 className="text-4xl lg:text-6xl font-black bg-linear-to-r from-gaelle-blue to-gaelle-blue-light dark:from-gaelle-blue-light dark:to-gaelle-blue bg-clip-text text-transparent">
 					{title}
@@ -56,8 +73,12 @@ async function TeamMembersSection({
 							<div className="relative">
 								<div className="relative size-28 sm:w-36 sm:h-36 lg:w-40 lg:h-40 rounded-full overflow-hidden border-3 sm:border-4 border-gaelle-blue group-hover:border-gaelle-blue-light transition-all duration-300 group-hover:scale-105 group-hover:shadow-2xl group-hover:shadow-gaelle-blue/20">
 									<ImageWithSkeleton
-										src={member.image || "https://placehold.co/200x200"}
-										alt={`${member.name} Rose Griffon`}
+										src={member.image || "/RG_Logo_V2.5.webp"}
+										alt={
+											member.role
+												? `${member.name}, ${member.role} — Rose Griffon`
+												: `${member.name} — Rose Griffon`
+										}
 										priority={member.index < 3}
 									/>
 								</div>

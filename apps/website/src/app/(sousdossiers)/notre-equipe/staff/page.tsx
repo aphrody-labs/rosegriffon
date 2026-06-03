@@ -8,6 +8,14 @@ export const metadata: Metadata = {
 	description:
 		"Découvrez les talents qui donnent vie à l'univers de Rose Griffon. Notre équipe passionnée de créateurs, artistes et producteurs.",
 	title: "Notre Équipe - Staff | Rose Griffon",
+	alternates: { canonical: "https://rosegriffon.fr/notre-equipe/staff" },
+	openGraph: {
+		title: "Notre Équipe - Staff | Rose Griffon",
+		description:
+			"Découvrez les talents qui donnent vie à l'univers de Rose Griffon : créateurs, artistes, dessinateurs et producteurs.",
+		url: "https://rosegriffon.fr/notre-equipe/staff",
+		type: "website",
+	},
 };
 
 // Rendu dynamique : les membres sont fetchés côté serveur À LA REQUÊTE (env

@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Button } from "@rose-griffon/ui";
 
 import ImageWithSkeleton from "@/components/shared/ImageWithSkeleton";
+import { TeamStructuredData } from "@/components/shared/StructuredData";
 import getTeamMembers from "@/lib/get-team-members";
 import { ArrowUpRight } from "@/lib/icons-config";
 
@@ -25,6 +26,18 @@ export default async function PartenairesSection() {
 
 	return (
 		<section className="flex flex-col gap-10 lg:gap-12">
+			{collaborateurs.length > 0 && (
+				<TeamStructuredData
+					pageName="Nos Partenaires"
+					url="https://rosegriffon.fr/notre-equipe/partenaires"
+					members={collaborateurs.map((member) => ({
+						name: member.name,
+						role: member.role || undefined,
+						image: member.image || undefined,
+						sameAs: member.link && member.link.startsWith("http") ? [member.link] : undefined,
+					}))}
+				/>
+			)}
 			<div className="text-center space-y-4 max-w-4xl mx-auto animate-fade-in">
 				<h1 className="text-4xl lg:text-6xl font-black bg-linear-to-r from-[#2f6e9c] to-[#4088b8] dark:from-[#4088b8] dark:to-[#2f6e9c] bg-clip-text text-transparent">
 					Nos Partenaires
@@ -53,8 +66,8 @@ export default async function PartenairesSection() {
 							<div className="relative">
 								<div className="relative size-28 sm:w-36 sm:h-36 lg:w-40 lg:h-40 rounded-full overflow-hidden border-3 sm:border-4 border-[#2f6e9c]/30 group-hover:border-[#2f6e9c] transition-all duration-300 group-hover:scale-105 group-hover:shadow-2xl group-hover:shadow-[#2f6e9c]/20">
 									<ImageWithSkeleton
-										src={member.image || "https://placehold.co/200x200"}
-										alt={`${member.name} Rose Griffon`}
+										src={member.image || "/RG_Logo_V2.5.webp"}
+										alt={`${member.name}, ${member.role} — partenaire Rose Griffon`}
 										priority={member.index < 3}
 									/>
 								</div>
