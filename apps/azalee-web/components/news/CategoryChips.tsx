@@ -1,6 +1,6 @@
 "use client";
 
-import { Twitter } from "lucide-react";
+import { Twitter } from "@/lib/brand-icons";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { CATEGORIES } from "@/components/dashboard/news-editor/constants";
