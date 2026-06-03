@@ -317,6 +317,23 @@ export function getSkillVideoUrl(skillId: string | undefined | null): string {
  */
 const AURA_DUMP_BASE = CHR_DUMP_BASE;
 
+/**
+ * Extrait la partie numérique d'un asset_code keshin/soul/armed en retirant le
+ * préfixe `w[ksad][a-z]` ET tout suffixe de variante.
+ *
+ * Les codes réels portent des suffixes de variante hétérogènes que le fichier
+ * disque (base-only `{base}_l_{base}_l00.png`) ne reflète pas :
+ *   - digits   : `was00290_1`
+ *   - alpha-num : `was00240_b1`, `wad00650_h2`, `was00303_h1`
+ *   - stage     : `wks02020_st0701`, `wks02060_st0901`
+ * On ne garde donc que les chiffres qui suivent immédiatement le préfixe.
+ * Cohérent avec db-1.
+ */
+function auraBaseNum(assetCode: string, prefix: RegExp): string | null {
+	const m = assetCode.replace(prefix, "").match(/^\d+/);
+	return m ? m[0] : null;
+}
+
 export function getAuraImageUrl(assetCode: string | undefined | null, _subType?: string): string {
 	if (!assetCode) {
 		return "";
@@ -326,14 +343,14 @@ export function getAuraImageUrl(assetCode: string | undefined | null, _subType?:
 		`${AURA_DUMP_BASE}/${folder}/${base}_l_${base}_l00.png`;
 
 	if (assetCode.startsWith("wk")) {
-		const num = assetCode.replace(/^wk[a-z]/, "").replace(/_\d+$/, "");
-		if (num && /^\d+$/.test(num)) {
+		const num = auraBaseNum(assetCode, /^wk[a-z]/);
+		if (num) {
 			return buildAuraUrl("aura_fs", `k${num.padStart(6, "0")}`);
 		}
 	}
 	if (assetCode.startsWith("ws") || (assetCode.startsWith("wa") && !assetCode.startsWith("wap"))) {
-		const num = assetCode.replace(/^w[sa][a-z]/, "").replace(/_\d+$/, "");
-		if (num && /^\d+$/.test(num)) {
+		const num = auraBaseNum(assetCode, /^w[sa][a-z]/);
+		if (num) {
 			return buildAuraUrl("aura_soul", `a${num.padStart(6, "0")}`);
 		}
 	}
@@ -375,8 +392,9 @@ export function resolveAuraTelopUrl(assetCode: string | undefined | null): strin
 
 	if (assetCode.startsWith("wk")) {
 		// All Keshins: wks/wkk/wkd/wko/wkt -> k{N padded 6}
-		const num = assetCode.replace(/^wk[a-z]/, "").replace(/_\d+$/, "");
-		bucketCode = `k${num.padStart(6, "0")}`;
+		// Strip variant suffix (_b1/_h2/_st0701/_1…) → base only (cf. auraBaseNum).
+		const num = auraBaseNum(assetCode, /^wk[a-z]/);
+		bucketCode = num ? `k${num.padStart(6, "0")}` : null;
 	} else if (assetCode.startsWith("wmm")) {
 		// Miximax character-based: wmm{N} -> aura_mixi_c{charId}
 		const numStr = assetCode.replace(/^wmm/, "").replace(/_.*$/, "");
@@ -396,8 +414,9 @@ export function resolveAuraTelopUrl(assetCode: string | undefined | null): strin
 		if (assetCode.startsWith("wap")) {
 			bucketCode = `aura_power_${assetCode}`;
 		} else {
-			const num = assetCode.replace(/^w[sa][a-z]/, "").replace(/_\d+$/, "");
-			bucketCode = `a${num.padStart(6, "0")}`;
+			// Strip variant suffix (_b1/_h2/_st0701/_1…) → base only (cf. auraBaseNum).
+			const num = auraBaseNum(assetCode, /^w[sa][a-z]/);
+			bucketCode = num ? `a${num.padStart(6, "0")}` : null;
 		}
 	} else if (assetCode.startsWith("mode_change_")) {
 		bucketCode = assetCode;
