@@ -45,7 +45,8 @@ bun install
 bun run build           # Build tous les workspaces (turbo)
 bun run lint            # oxlint + eslint
 bun run type-check      # tsc --noEmit partout
-bun run test            # vitest
+bun run test            # bun test (tests d'intégration & unitaires) + vitest
+bun run azalee test     # Lance la suite complète de vérifications natives du Wiki (bxc, APIs, pages)
 ```
 
 Lancer un seul workspace en dev :

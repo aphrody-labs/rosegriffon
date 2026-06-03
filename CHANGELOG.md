@@ -2,6 +2,15 @@
 
 Toutes les évolutions notables du monorepo `rg`. Format : [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/) + [SemVer](https://semver.org/lang/fr/).
 
+## [0.3.0] — 2026-06-03
+
+### Ajouté
+
+- **Tests natifs unifiés (Azalée CLI)** :
+  - Intégration d'une suite de tests natifs dans la commande `azalee test` pour exécuter toutes les étapes précédemment gérées sous Playwright directement en Bun (sauvegarde SQLite locale, endpoints d'API, résolveur GraphQL, audits bxc, structure DOM et rendu HTTP de 29 routes).
+  - Création du test d'intégration unifié `packages/inagle/src/azalee-inagle-integration.test.ts` (exécuté via `bun test`) validant de bout en bout le chargement des fichiers JSON binaires d'Inagle, la cohérence avec la base SQLite et le bon comportement du CLI.
+  - Nettoyage automatique des caches de navigateurs Playwright (`~/.cache/ms-playwright`) et suppression des processus chrome/playwright orphelins sur le VPS.
+
 ## [0.2.0] — 2026-05-31
 
 ### Ajouté
