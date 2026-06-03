@@ -57,7 +57,7 @@ servis correctement par l'origine (200). Le website n'active pas le CDN en prod 
 
 | # | Source | Symptôme (vérifié) | Sévérité | Action |
 |---|---|---|:--:|---|
-| 1 | **CDN dx11 (azalee jeu)** | 404 global sur `cdn.rosegriffon.fr/dx11/menu/**` ; dump 3.7 Go non publié | **P0** | **Déployer/synchroniser** le dump dx11 vers l'hôte CDN + restaurer la conf nginx (`location /dx11/ { alias …/inazuma/data/dx11/ }`) |
+| 1 | **CDN dx11 (azalee jeu)** | ~~404 global sur `cdn.rosegriffon.fr/dx11/menu/**`~~ → **FAIT (2026-06-03)** : alias nginx corrigé `steamcmd/`→`iecode/inazuma/data/dx11/` ; `curl -sI .../dx11/menu/icon_chr/face/c01000010_l_c01000010_1_l00.png` = **200** (image/png, 26848 o) | **P0** | ~~Déployer/synchroniser le dump dx11~~ Cause unique = alias nginx pointant vers `steamcmd/` (inexistant) ; corrigé vers `…/iecode/inazuma/data/dx11/` (40 471 PNG servis), `nginx -t` + reload OK |
 | 2 | **CDN static menu** | `…/static/azalee/menu/**` 404 | **P0** | Idem : alias nginx `location /static/azalee/menu/` + upload des PNG menu |
 | 3 | **Légacy Supabase Storage** | bucket `menu` → 400 | P0 | Cible morte : confirmer que le rewrite front (→ dx11) suffit une fois (1) fait ; sinon migrer les paths DB |
 | 4 | **Items (mapping)** | résolveur `{id}.png` ≠ fichier `icon_item{NN}_{id}.png` | P1 | Compléter `apps/azalee/data/item-image-manifest.json` (couvrir les 1668 items) OU corriger le fallback |
@@ -109,8 +109,11 @@ servis correctement par l'origine (200). Le website n'active pas le CDN en prod 
    garder le rewrite front ; supprimer la dépendance au Storage Supabase mort.
 7. **P1** — remplir `inagle_keshins.image_url` manquants (66) via `asset_code`.
 8. **P2** — peupler/déprécier `inagle_characters.stats` ; combler `skills` (423).
-9. **Sécurité (hors plan, à remonter)** — activer RLS sur `inagle_rag_chunks` +
-   `inagle_game_assets` avec policies read-only ; externaliser la clé anon en dur de
+9. **Sécurité (hors plan, à remonter)** — **fait** (db-5) : RLS activé sur
+   `inagle_rag_chunks` + `inagle_game_assets` avec policy `SELECT USING (true)` pour
+   `anon`/`authenticated` (migration `enable_rls_readonly_inagle_rag_chunks_game_assets`).
+   Lecture anon vérifiée (546 chunks visibles), `get_advisors(security)` ne signale plus
+   `rls_disabled_in_public` sur ces tables. Reste : externaliser la clé anon en dur de
    `apps/azalee/lib/api-client.ts`.
 
 ### Validation
