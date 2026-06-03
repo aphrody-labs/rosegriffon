@@ -42,7 +42,11 @@ function mapLegacyMenuPath(menuPath: string): string | null {
 		const folder = chrMatch[1];
 		const base = chrMatch[2];
 		if (folder.startsWith("aura_")) {
-			return `${MENU_DUMP_BASE}/icon_chr/${folder}/${base}_l_${base}_l00.png`;
+			// Même contrainte que getAuraImageUrl : le dump n'a que les icônes ×10.
+			// On arrondit le numéro du base (`k000721` → `k000720`) à la famille
+			// existante, sinon les formes évoluées (…721/…2025) renvoient un 404.
+			const auraBase = base.replace(/^([ka])(\d+)$/, (_m, p, n) => `${p}${auraFamilyBase(n)}`);
+			return `${MENU_DUMP_BASE}/icon_chr/${folder}/${auraBase}_l_${auraBase}_l00.png`;
 		}
 		if (folder === "face") {
 			return `${MENU_DUMP_BASE}/icon_chr/face/${base}_l_${base}_1_l00.png`;
@@ -81,6 +85,15 @@ export function resolveAssetUrl(path: string | null | undefined): string | null 
 	}
 	if (path.startsWith(LEGACY_STORAGE_PREFIX)) {
 		const stripped = path.slice(LEGACY_STORAGE_PREFIX.length);
+		return mapLegacyMenuPath(stripped) || `${MENU_BASE}/${stripped}`;
+	}
+	// Forme legacy DB raccourcie `/menu/200_icon/…​.webp` (sans le préfixe storage
+	// complet) : c'est un chemin de dump, pas une route locale. On retire `/menu/`
+	// et on route vers le mapper dump comme les autres webp — sinon le `startsWith("/")`
+	// ci-dessous le renverrait tel quel vers une route azalee inexistante (404).
+	// Cas réel : 42 keshins sans `asset_code` pointant vers les emblèmes em0001-em0004.
+	if (path.startsWith("/menu/")) {
+		const stripped = path.slice("/menu/".length);
 		return mapLegacyMenuPath(stripped) || `${MENU_BASE}/${stripped}`;
 	}
 	if (path.startsWith("http") || path.startsWith("/")) {
@@ -401,6 +414,21 @@ function auraBaseNum(assetCode: string, prefix: RegExp): string | null {
 	return m ? m[0] : null;
 }
 
+/**
+ * Le dump dx11 ne contient que les icônes d'aura « famille » : tous les fichiers
+ * de `aura_fs/`/`aura_soul/` portent un numéro **multiple de 10** (vérifié dump :
+ * 98 + 56 fichiers, 0 numéro non-×10). Les formes évoluées / éveillées / armées
+ * (…721, …651, …672, …2025) n'ont PAS d'icône propre : l'icône réutilisée est
+ * celle de la famille. On arrondit donc le numéro à la dizaine inférieure, ce qui
+ * garantit un fichier existant (sinon 404 garanti — c'était le cas de 25 keshins
+ * de la plage 700-725/2025 dont l'`image_url` DB `.webp` est elle aussi morte).
+ */
+function auraFamilyBase(num: string): string {
+	const n = Number.parseInt(num, 10);
+	const family = Number.isFinite(n) ? Math.floor(n / 10) * 10 : 0;
+	return String(family).padStart(6, "0");
+}
+
 export function getAuraImageUrl(assetCode: string | undefined | null, _subType?: string): string {
 	if (!assetCode) {
 		return "";
@@ -409,16 +437,27 @@ export function getAuraImageUrl(assetCode: string | undefined | null, _subType?:
 	const buildAuraUrl = (folder: string, base: string): string =>
 		`${AURA_DUMP_BASE}/${folder}/${base}_l_${base}_l00.png`;
 
-	if (assetCode.startsWith("wk")) {
-		const num = auraBaseNum(assetCode, /^wk[a-z]/);
+	// Keshins : tous les `wk*` (wks/wkk/wkd/wko/wkt) + les variantes Keshin-armé
+	// `wak/wao/wad` vivent dans `aura_fs/k{N}` (vérifié sur dump + image_url DB :
+	// 70 lignes wak/wao/wad → 0 aura_soul). Seuls les Souls/Soul-armé `ws*`/`was*`
+	// vivent dans `aura_soul/a{N}`. L'ancien code routait TOUT `wa*` (sauf wap) vers
+	// aura_soul → 404 garanti pour wak/wao/wad (db-1, corrigé 2026-06).
+	if (assetCode.startsWith("wk") || /^wa[kod]/.test(assetCode)) {
+		const num = auraBaseNum(assetCode, /^w[ka][a-z]/);
 		if (num) {
-			return buildAuraUrl("aura_fs", `k${num.padStart(6, "0")}`);
+			return buildAuraUrl("aura_fs", `k${auraFamilyBase(num)}`);
 		}
 	}
-	if (assetCode.startsWith("ws") || (assetCode.startsWith("wa") && !assetCode.startsWith("wap"))) {
-		const num = auraBaseNum(assetCode, /^w[sa][a-z]/);
+	// Souls `ws*` (wss/wso/wsd/wsk) → aura_soul/a{N} (cohérent sur tout le dump).
+	// MAIS les Soul-armé `was*` (Warrior Armed Spirit, 66 keshins) sont répartis sans
+	// règle dérivable entre aura_fs/k{N} (12 codes) et aura_soul/a{N} (18 codes) : on
+	// NE dérive donc PAS `was*` ici — on renvoie "" pour laisser `image_url` (DB,
+	// chemin vérifié HTTP 200 par le backfill) faire foi. L'ancienne dérivation
+	// `was*` → aura_soul produisait un 404 pour ~40% des formes armées (db-1).
+	if (assetCode.startsWith("ws")) {
+		const num = auraBaseNum(assetCode, /^ws[a-z]/);
 		if (num) {
-			return buildAuraUrl("aura_soul", `a${num.padStart(6, "0")}`);
+			return buildAuraUrl("aura_soul", `a${auraFamilyBase(num)}`);
 		}
 	}
 
