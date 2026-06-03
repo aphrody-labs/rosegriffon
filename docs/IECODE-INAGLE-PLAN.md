@@ -63,7 +63,7 @@ servis correctement par l'origine (200). Le website n'active pas le CDN en prod 
 | # | Source | Symptôme (vérifié) | Sévérité | Action |
 |---|---|---|:--:|---|
 | 1 | **CDN dx11 (azalee jeu)** | ~~404 global sur `cdn.rosegriffon.fr/dx11/menu/**`~~ → **FAIT (2026-06-03)** : alias nginx corrigé `steamcmd/`→`iecode/inazuma/data/dx11/` ; `curl -sI .../dx11/menu/icon_chr/face/c01000010_l_c01000010_1_l00.png` = **200** (image/png, 26848 o) ; conf **versionnée** dans `infra/nginx/cdn.rosegriffon.conf` (cdn-3, anti-dérive) | **P0** | ~~Déployer/synchroniser le dump dx11~~ Cause unique = alias nginx pointant vers `steamcmd/` (inexistant) ; corrigé vers `…/iecode/inazuma/data/dx11/` (40 471 PNG servis), `nginx -t` + reload OK ; conf déployée copiée dans le repo (`infra/nginx/`) pour tracer le fix et éviter la perte (cdn-3) |
-| 2 | **CDN static menu** | ~~`…/static/azalee/menu/**` 404 (dossier vide)~~ → **FAIT (2026-06-03)** : surface retirée (option a) ; `/var/www/cdn/static/azalee/menu/` (0 fichier) supprimé, aucun outil cdn-sync n'y déploie. Le contenu vit déjà dans le dump dx11 servi par (1) → `curl .../dx11/menu/200_icon/01_icon_emblem/em010001_em010001.png` = **200**. Reste côté azalee-code : re-pointer le fallback `resolveAssetUrl` `MENU_BASE`→`MENU_DUMP_BASE` | **P0** | ~~alias nginx + upload~~ Décidé : ne plus dépendre de `/static/azalee/menu` (rien à y déployer) ; dossier vide retiré. `MENU_BASE` (utils.ts) reste utilisé par 2 fallbacks → à rediriger vers `/dx11/menu` côté azalee-code |
+| 2 | **CDN static menu** | ~~`…/static/azalee/menu/**` 404 (dossier vide)~~ → **FAIT (2026-06-03)** : surface retirée (option a) ; `/var/www/cdn/static/azalee/menu/` (0 fichier) supprimé, aucun outil cdn-sync n'y déploie. Le contenu vit déjà dans le dump dx11 servi par (1) → `curl .../dx11/menu/200_icon/01_icon_emblem/em010001_em010001.png` = **200**. **azalee-code FAIT (2026-06-03, azalee-1)** : `MENU_BASE` ré-aliasé sur `MENU_DUMP_BASE` (`/dx11/menu`) dans `apps/azalee/src/lib/images/utils.ts` → les 2 fallbacks de `resolveAssetUrl` (lignes 73/78) + l'export `MENU_BUCKET_URL` ne pointent plus sur le dossier 404. `tsc` OK, rebuild `ship-azalee.sh`. | **P0** | ~~alias nginx + upload~~ Décidé : ne plus dépendre de `/static/azalee/menu` (rien à y déployer) ; dossier vide retiré. Fallback azalee redirigé vers `/dx11/menu` (azalee-1) |
 | 3 | **Légacy Supabase Storage** | ~~bucket `menu` → 400 (1002 skills `image_url`)~~ → **FAIT (db-2, 2026-06-03)** : 0 URL légacy restante dans `inagle_skills`. Sur les 1002, seuls **16** codes (`whk00050/80/90/100/110`, `who00010-110/190`) ont un fichier telop réel dans le dump → re-pointés vers `/dx11/menu/220_img/telop_waza/fr/<code>_<code>.png` (16/16 = HTTP 200 live). Les **986** autres (majorité `whs*`/`whd*` + `rh*`/`swap`) n'ont **aucun** telop dans le dump → `image_url = NULL` + `has_telop = false` (absence documentée, plus d'URL morte stockée ; lié db-3 pour le gating front) | **P0** | ~~migrer les paths DB~~ Fait : re-point dx11 pour les 16 présents, NULL pour les 986 absents |
 | 4 | **Items (mapping)** | résolveur `{id}.png` ≠ fichier `icon_item{NN}_{id}.png` | P1 | Compléter `apps/azalee/data/item-image-manifest.json` (couvrir les 1668 items) OU corriger le fallback |
 | 5 | **Telop techniques** | `telop_waza/fr` n'a pas de `rhd*` (codes `a*`/`k*` seulement) | P1 | **FAIT (db-3, 2026-06-03)** — absence confirmée dans le dump complet : `220_img/telop_waza/fr/` = 310 fichiers, prefixes `a*`/`k*`/`aura*`/`wh*`/`mode*` uniquement, **0** `rh*`/`shd*`/`swap_*`. Les 28 codes techniques (19 `rh[dkos]*` + 9 `swap_skill_waza_*`) marqués sans telop : `inagle_skills.has_telop=false` + `image_url=NULL` volontaire (commenté en DB). Résolveur `getSkillImageUrl` court-circuite ces codes vers `PLACEHOLDERS.skill` (plus de 404). `curl rhd10010_rhd10010.png` = **404** (garanti), `who00010_who00010.png` = **200**. Cf. `azalee-tables-gaps.md §7` |
@@ -96,10 +96,15 @@ servis correctement par l'origine (200). Le website n'active pas le CDN en prod 
 
 ### iecode (extraction / pipeline)
 
-1. **P0 — Publier le dump dx11 sur le CDN.** Restaurer la conf nginx du vhost `cdn.rosegriffon.fr`
-   (alias `/dx11/` → `…/iecode/inazuma/data/dx11/`, `/public/` ; `/static/azalee/menu/` retiré — cf. asset #2) et synchroniser
-   les 3.7 Go (rsync vers `51.77.147.152`). Vérifier ensuite les URLs résolveur (faces/auras OK,
-   items/telop à valider). C'est l'action à plus fort impact (débloque 100 % des visuels azalee).
+1. **P0 — FAIT (cdn-3, 2026-06-03) — servir le dump dx11 sur le CDN.** **Correction de cause
+   racine** : ce n'était **ni** une conf perdue **ni** un dump à synchroniser (les 40 471 PNG /
+   3.7 Go étaient **déjà** sur l'hôte `51.77.147.152`). La conf existait ET avait un bloc
+   `/dx11/`, mais l'`alias` pointait vers `…/steamcmd/…` (inexistant) au lieu de
+   `…/iecode/inazuma/data/dx11/`. Correctif = **one-liner** : re-pointer l'`alias` + `nginx -t` +
+   `systemctl reload nginx` — **aucun rsync de 3.7 Go**. (`/static/azalee/menu/` retiré — cf. asset
+   #2.) Vérif live : faces/emblem/aura/telop → **200**. Conf corrigée versionnée
+   (`infra/nginx/cdn.rosegriffon.conf`). Action à plus fort impact (a débloqué 100 % des visuels
+   azalee).
 2. **P1 — Générer `inagle_game_assets`** (manifeste {path, bucket, existe}) depuis le dump +
    `asset-cross-reference.json` ; sert de table de vérité pour les mappings front.
 3. **P1 — Réconcilier les nommages** items (`icon_item{NN}_`) et telop techniques ; compléter
@@ -145,9 +150,14 @@ servis correctement par l'origine (200). Le website n'active pas le CDN en prod 
 
 ## 6. Synthèse chiffrée (vérifié)
 
-- **Assets jeu azalee en 404 prod : 100 %** (faces 6148, telop skills 1002, items 1668, keshins
-  289, souls 56, miximax 70, auras 9, emblèmes/menu) — cause unique : CDN dx11 non déployé.
-- **Trous tables inagle** : stats jsonb 6148 vides, keshins 66 sans img, passives 128 sans img,
-  FR 58 noms / 157 descriptions manquants, `inagle_game_assets` vide.
+- **Assets jeu azalee : 404 prod RÉSOLU (cdn-3, 2026-06-03).** Cause unique = **alias nginx mal
+  pointé** (`…/steamcmd/…` inexistant → `…/iecode/inazuma/data/dx11/`), **pas** un dump non
+  déployé ni une conf perdue. Correctif = one-liner (alias + reload), pas de rsync 3.7 Go. Faces
+  6148, telop skills, items, keshins, souls, miximax, auras, emblèmes/menu → servis (200 live).
+- **Trous tables inagle** : stats jsonb 6148 vides (db-6 : dépréciée), keshins **38** sans img
+  (était 66 ; correction audit : les 38 ont leur `asset_code`, blocage = pas de PNG dans le dump),
+  passives 128 sans img (db-4 : pas d'asset jeu), FR 58 noms / 157 descriptions manquants,
+  `inagle_game_assets` vide.
 - **Website UI** : 0 manquant.
-- **Source disponible** : dump dx11 40 471 fichiers / 3.7 Go présent sur le VPS, prêt à publier.
+- **Source disponible** : dump dx11 40 471 fichiers / 3.7 Go présent sur le VPS, **servi** par le
+  CDN (alias `/dx11/` corrigé).

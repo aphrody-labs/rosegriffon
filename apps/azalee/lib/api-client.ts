@@ -85,19 +85,31 @@ function mapToBaseCharacter(row: any): BaseCharacter {
 	// Cast to any because the generated types might be outdated
 	const char = row;
 
-	// Stats: prioritize individual columns, fallback to stats JSONB
-	const jsonStats = (char.stats as any)?.lv99 || {};
+	// Stats: source de verite = colonnes scalaires stat_* (lv99) et stat_lv1_* (lv1).
+	// La colonne jsonb `stats` est DEPRECATED (toujours vide sur les 6148 lignes, cf db-6) ;
+	// on ne la lit plus en fallback.
 	const stats: MultiLevelStats = {
 		lv99: {
-			agility: char.stat_agilite || jsonStats.agility || 0,
-			control: char.stat_controle || jsonStats.control || 0,
-			intelligence: char.stat_intelligence || jsonStats.intelligence || 0,
-			kick: char.stat_frappe || jsonStats.kick || 0,
-			physical: char.stat_physique || jsonStats.physical || 0,
-			pressure: char.stat_pression || jsonStats.pressure || 0,
-			technique: char.stat_technique || jsonStats.technique || 0,
+			agility: char.stat_agilite || 0,
+			control: char.stat_controle || 0,
+			intelligence: char.stat_intelligence || 0,
+			kick: char.stat_frappe || 0,
+			physical: char.stat_physique || 0,
+			pressure: char.stat_pression || 0,
+			technique: char.stat_technique || 0,
 		},
 	};
+	if (char.stat_lv1_frappe != null) {
+		stats.lv1 = {
+			agility: char.stat_lv1_agilite || 0,
+			control: char.stat_lv1_controle || 0,
+			intelligence: char.stat_lv1_intelligence || 0,
+			kick: char.stat_lv1_frappe || 0,
+			physical: char.stat_lv1_physique || 0,
+			pressure: char.stat_lv1_pression || 0,
+			technique: char.stat_lv1_technique || 0,
+		};
+	}
 
 	// Extract zukan hash
 	let zukanHash = char.zukan_hash;
