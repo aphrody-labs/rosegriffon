@@ -65,6 +65,8 @@ export function OrganizationSchema() {
 			"https://twitch.tv/rose_griffontv",
 			"https://www.youtube.com/@RoseGriffon",
 			"https://www.instagram.com/rose_griffonfr",
+			"https://disboard.org/server/1072991720268111892",
+			"https://discord.do/fr/inazuma-eleven-fr-%E2%9A%BD-rose-griffon/",
 		],
 		url: "https://rosegriffon.fr",
 	};
@@ -210,6 +212,61 @@ export function ProfileSchema({
 			name: name,
 			sameAs: sameAs,
 			url: url,
+		},
+	};
+
+	return (
+		<script
+			type="application/ld+json"
+			dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
+		/>
+	);
+}
+
+interface TeamMemberSchema {
+	name: string;
+	role?: string;
+	image?: string;
+	sameAs?: string[];
+}
+
+interface TeamStructuredDataProps {
+	/** Titre de la page équipe (ex : "Le Staff RG"). */
+	pageName: string;
+	/** URL canonique de la page (ex : "https://rosegriffon.fr/notre-equipe/staff"). */
+	url: string;
+	members: TeamMemberSchema[];
+}
+
+/**
+ * Données structurées pour une page équipe : un `CollectionPage` dont l'entité
+ * principale est un `ItemList` de `Person`. Chaque membre expose name, jobTitle,
+ * image et `sameAs` (ses réseaux), rattaché à l'Organization Rose Griffon —
+ * éligible aux rich results Google et au knowledge graph.
+ */
+export function TeamStructuredData({ pageName, url, members }: TeamStructuredDataProps) {
+	const schema = {
+		"@context": "https://schema.org",
+		"@type": "CollectionPage",
+		name: pageName,
+		url,
+		isPartOf: { "@id": "https://rosegriffon.fr/#website" },
+		about: { "@id": "https://rosegriffon.fr/#organization" },
+		mainEntity: {
+			"@type": "ItemList",
+			numberOfItems: members.length,
+			itemListElement: members.map((member, index) => ({
+				"@type": "ListItem",
+				position: index + 1,
+				item: {
+					"@type": "Person",
+					name: member.name,
+					...(member.role ? { jobTitle: member.role } : {}),
+					...(member.image ? { image: member.image } : {}),
+					...(member.sameAs && member.sameAs.length > 0 ? { sameAs: member.sameAs } : {}),
+					memberOf: { "@id": "https://rosegriffon.fr/#organization" },
+				},
+			})),
 		},
 	};
 

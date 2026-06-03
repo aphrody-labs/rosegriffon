@@ -1,11 +1,26 @@
 export const dynamic = "force-dynamic";
 
+import type { Metadata } from "next";
 import { Suspense } from "react";
 
 import { Skeleton } from "@rose-griffon/ui";
 
 import AssoMembersSection from "../_components/asso";
 import BoardMembersSection from "../_components/board";
+
+export const metadata: Metadata = {
+	title: "L'Association | Rose Griffon",
+	description:
+		"Le bureau et les membres de l'association Rose Griffon, communauté Inazuma Eleven en France : président, vice-présidents, trésorier, secrétaire et bénévoles.",
+	alternates: { canonical: "https://rosegriffon.fr/notre-equipe/association" },
+	openGraph: {
+		title: "L'Association | Rose Griffon",
+		description:
+			"Le bureau et les membres de l'association Rose Griffon, communauté Inazuma Eleven en France.",
+		url: "https://rosegriffon.fr/notre-equipe/association",
+		type: "website",
+	},
+};
 
 export default function AssociationPage() {
 	return (
