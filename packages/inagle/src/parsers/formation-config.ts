@@ -6,8 +6,8 @@
 import { Buffer } from "node:buffer";
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
-import { toHex } from "../core/data-loader.js";
-import { loadTextFile } from "./text-parser.js";
+import { toHex } from "../core/data-loader.ts";
+import { loadTextFile } from "./text-parser.ts";
 
 export interface FormationPosition {
 	positionNo: number; // 0-10

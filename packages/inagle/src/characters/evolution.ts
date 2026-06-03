@@ -19,9 +19,9 @@
  *   lv 50→99 : linéaire entre stat_50 et stat_99
  */
 
-import { DATA_ROOT } from "../core/paths.js";
-import { PositionId } from "../core/types.js";
-import { loadAllCharacters } from "../entities/character.js";
+import { DATA_ROOT } from "../core/paths.ts";
+import { PositionId } from "../core/types.ts";
+import { loadAllCharacters } from "../entities/character.ts";
 import {
 	buildCharaExpTableDatabase,
 	buildGrowthTableDatabase,
@@ -29,13 +29,13 @@ import {
 	type ExpRarityRate,
 	type GrowthTableDatabase,
 	type GrowthTableMain,
-} from "../parsers/index.js";
+} from "../parsers/index.ts";
 import {
 	calculateSingleStat,
 	calculateTotalPower,
 	rarityToGrowthRank,
 	type StatBlock,
-} from "../stat-calculator.js";
+} from "../stat-calculator.ts";
 
 // ── Types ────────────────────────────────────────────────────────────────────
 

@@ -11,8 +11,8 @@
  * - Growth pattern for stat calculation
  */
 
-import type { ConfigNode } from "../core/config-parser.js";
-import { loadCharaParam, toHex } from "../core/data-loader.js";
+import type { ConfigNode } from "../core/config-parser.ts";
+import { loadCharaParam, toHex } from "../core/data-loader.ts";
 
 /**
  * Parsed character param entry

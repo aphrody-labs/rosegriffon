@@ -1,7 +1,7 @@
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
-import { DATA_ROOT } from "../core/paths.js";
-import type { ZukanTeam } from "../zukan/types.js";
+import { DATA_ROOT } from "../core/paths.ts";
+import type { ZukanTeam } from "../zukan/types.ts";
 
 let zukanTeamCache: Map<string, ZukanTeam> | null = null;
 

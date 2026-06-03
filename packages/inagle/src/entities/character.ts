@@ -15,8 +15,8 @@ import {
 	loadGrowthTableMain,
 	loadZukanMapping,
 	loadZukanOrder,
-} from "../core/data-loader.js";
-import { createImageAPI } from "../core/images.js";
+} from "../core/data-loader.ts";
+import { createImageAPI } from "../core/images.ts";
 import type {
 	Character,
 	CharacterStats,
@@ -25,10 +25,10 @@ import type {
 	RarityId,
 	BaseCharacter,
 	CharacterVariant,
-} from "../core/types.js";
-import { buildSeriesMapping, buildTeamMapping } from "../parsers/belong-team.js";
-import { parseAllCharaBase } from "../parsers/chara-base.js";
-import { buildAllDescriptionMaps } from "../parsers/chara-description.js";
+} from "../core/types.ts";
+import { buildSeriesMapping, buildTeamMapping } from "../parsers/belong-team.ts";
+import { parseAllCharaBase } from "../parsers/chara-base.ts";
+import { buildAllDescriptionMaps } from "../parsers/chara-description.ts";
 import {
 	buildCharaParamMap,
 	elementIdToNames,
@@ -36,16 +36,16 @@ import {
 	parseAllCharaParams,
 	positionIdToCode,
 	buildCharaBaseToParamsMap,
-} from "../parsers/chara-param.js";
-import { buildAllNameMaps, getLocalizedNames } from "../parsers/chara-text.js";
-import { buildConstellationMapping, type ConstellationMapping } from "../parsers/constellation.js";
-import { type CtrlCharaData, loadCtrlCharaConfigAsync } from "../parsers/ctrl-chara-config.js";
-import { type GrowthTableLv1, loadGrowthTableConfigAsync } from "../parsers/growth-table-config.js";
-import { loadHeroConfig } from "../parsers/hero-config.js";
-import { buildStarSignMap, rarityCodeToName, rarityToGrowthRank } from "../parsers/star-sign.js";
-import { loadZukanCharacters } from "./chara-json.js";
-import { parseCharaDetails } from "../parsers/chara-details.js";
-import { loadUniversalText } from "../parsers/universal-text.js";
+} from "../parsers/chara-param.ts";
+import { buildAllNameMaps, getLocalizedNames } from "../parsers/chara-text.ts";
+import { buildConstellationMapping, type ConstellationMapping } from "../parsers/constellation.ts";
+import { type CtrlCharaData, loadCtrlCharaConfigAsync } from "../parsers/ctrl-chara-config.ts";
+import { type GrowthTableLv1, loadGrowthTableConfigAsync } from "../parsers/growth-table-config.ts";
+import { loadHeroConfig } from "../parsers/hero-config.ts";
+import { buildStarSignMap, rarityCodeToName, rarityToGrowthRank } from "../parsers/star-sign.ts";
+import { loadZukanCharacters } from "./chara-json.ts";
+import { parseCharaDetails } from "../parsers/chara-details.ts";
+import { loadUniversalText } from "../parsers/universal-text.ts";
 
 // ============================================================================
 // Series from Internal Code

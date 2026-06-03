@@ -17,8 +17,8 @@
 
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
-import { FILES, PATHS } from "../core/paths.js";
-import { loadBasaraConfig } from "./basara-config.js";
+import { FILES, PATHS } from "../core/paths.ts";
+import { loadBasaraConfig } from "./basara-config.ts";
 
 export interface StarSignCharaInfo {
 	charaParamId: string;

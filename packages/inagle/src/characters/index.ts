@@ -7,8 +7,8 @@
  */
 
 // Primary API - uses pre-extracted JSON entities
-export * from "./api.js";
-export * from "./comparison-engine.js";
+export * from "./api.ts";
+export * from "./comparison-engine.ts";
 
 // Types used by the API
-export type { CharacterDatabase, UnifiedCharacter, UnifiedCharacterVariant } from "./types.js";
+export type { CharacterDatabase, UnifiedCharacter, UnifiedCharacterVariant } from "./types.ts";

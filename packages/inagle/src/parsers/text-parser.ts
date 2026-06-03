@@ -6,11 +6,11 @@
 
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
-import { loadJsonAsync } from "../core/async-loader.js";
-import type { ConfigNode } from "../core/config-parser.js";
-import { type Locale, sanitizeText, toHex } from "../core/data-loader.js";
-import { DATA_ROOT } from "../core/paths.js";
-import type { TextFileType } from "../schemas/text.js";
+import { loadJsonAsync } from "../core/async-loader.ts";
+import type { ConfigNode } from "../core/config-parser.ts";
+import { type Locale, sanitizeText, toHex } from "../core/data-loader.ts";
+import { DATA_ROOT } from "../core/paths.ts";
+import type { TextFileType } from "../schemas/text.ts";
 
 /**
  * Simplified text type keys for API usage

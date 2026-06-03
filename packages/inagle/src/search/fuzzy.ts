@@ -11,10 +11,10 @@
  */
 
 import uFuzzy from "@leeoniya/ufuzzy";
-import type { EnrichedBasara } from "../basara/api.js";
-import type { EnrichedCharacter } from "../characters/api.js";
-import type { ParsedItem } from "../parsers/item-config.js";
-import type { EnrichedAuraSkill, EnrichedPassiveSkill, EnrichedSkill } from "../skills/api.js";
+import type { EnrichedBasara } from "../basara/api.ts";
+import type { EnrichedCharacter } from "../characters/api.ts";
+import type { ParsedItem } from "../parsers/item-config.ts";
+import type { EnrichedAuraSkill, EnrichedPassiveSkill, EnrichedSkill } from "../skills/api.ts";
 
 /** Search result with score */
 export interface SearchResult<T> {

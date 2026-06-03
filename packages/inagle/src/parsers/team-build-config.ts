@@ -14,9 +14,9 @@
 
 import { existsSync, readdirSync } from "node:fs";
 import { join } from "node:path";
-import { loadJsonAsync } from "../core/async-loader.js";
-import type { ConfigNode } from "../core/config-parser.js";
-import { toHex } from "../core/data-loader.js";
+import { loadJsonAsync } from "../core/async-loader.ts";
+import type { ConfigNode } from "../core/config-parser.ts";
+import { toHex } from "../core/data-loader.ts";
 
 // ============================================================================
 // Types

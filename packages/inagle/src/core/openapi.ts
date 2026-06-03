@@ -22,7 +22,7 @@ import {
 	PaginationQuery,
 	SearchQuery,
 	toJSONSchema,
-} from "../schemas/zod.js";
+} from "../schemas/zod.ts";
 
 // ============================================================================
 // Types

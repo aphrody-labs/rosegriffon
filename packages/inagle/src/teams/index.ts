@@ -20,4 +20,4 @@
  * const uniforms = teams.teamUniforms(teamId);
  * ```
  */
-export * from "./api.js";
+export * from "./api.ts";

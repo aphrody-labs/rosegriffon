@@ -1,7 +1,7 @@
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join, resolve } from "node:path";
-import { PATHS } from "../core/paths.js";
-import type { MenuEntry } from "./explorer.js";
+import { PATHS } from "../core/paths.ts";
+import type { MenuEntry } from "./explorer.ts";
 
 // Path resolution for menu maps
 // Now located in packages/inagle/data/menu-maps

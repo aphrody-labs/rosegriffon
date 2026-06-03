@@ -21,7 +21,7 @@ import type {
 	CharaParamInfo,
 	CharaTextInfo,
 	UnifiedCharacter,
-} from "./types.js";
+} from "./types.ts";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const DATA_ROOT = join(__dirname, "../../../../../data");

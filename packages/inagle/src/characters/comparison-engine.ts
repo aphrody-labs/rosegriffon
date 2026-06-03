@@ -1,5 +1,5 @@
-import type { CharacterVariant, BaseCharacter } from "../core/types.js";
-import { ELEMENT_NAMES } from "../skills/types.js";
+import type { CharacterVariant, BaseCharacter } from "../core/types.ts";
+import { ELEMENT_NAMES } from "../skills/types.ts";
 
 export interface StatComparison {
 	stat: string;

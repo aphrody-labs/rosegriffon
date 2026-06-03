@@ -1,6 +1,6 @@
 import { existsSync, readdirSync, statSync } from "node:fs";
 import { join, resolve, sep } from "node:path";
-import { PATHS } from "../core/paths.js";
+import { PATHS } from "../core/paths.ts";
 
 // Use PATHS.images + "menu" to ensure we follow the configured data root
 const MENU_IMAGES_BASE = join(PATHS.images, "menu");

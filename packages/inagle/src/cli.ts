@@ -7,9 +7,9 @@ import {
 	registerSkillsCommand,
 	registerStatsCommand,
 	registerTeamsCommand,
-} from "./cli-commands.js";
-import { registerMenuCommand } from "./cli-menu.js";
-import { registerPushCommand } from "./cli-push.js";
+} from "./cli-commands.ts";
+import { registerMenuCommand } from "./cli-menu.ts";
+import { registerPushCommand } from "./cli-push.ts";
 
 const program = new Command();
 

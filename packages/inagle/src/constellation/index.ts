@@ -11,4 +11,4 @@ export {
 	type ConstellationDatabase,
 	type ConstellationMapping,
 	createConstellationAPI,
-} from "./api.js";
+} from "./api.ts";

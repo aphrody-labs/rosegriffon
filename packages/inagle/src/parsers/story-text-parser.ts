@@ -1,10 +1,10 @@
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
-import { parseAllCharaBase } from "./chara-base.js";
-import { buildAllNameMaps, getLocalizedNames } from "./chara-text.js";
-import { type Locale, sanitizeText, toHex } from "../core/data-loader.js";
-import { DATA_ROOT } from "../core/paths.js";
-import type { ConfigNode } from "../core/config-parser.js";
+import { parseAllCharaBase } from "./chara-base.ts";
+import { buildAllNameMaps, getLocalizedNames } from "./chara-text.ts";
+import { type Locale, sanitizeText, toHex } from "../core/data-loader.ts";
+import { DATA_ROOT } from "../core/paths.ts";
+import type { ConfigNode } from "../core/config-parser.ts";
 
 export interface ResolvedSpeaker {
 	charaId: string;

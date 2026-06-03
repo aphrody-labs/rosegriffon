@@ -1,6 +1,6 @@
 import { join } from "node:path";
 import { existsSync, readFileSync } from "node:fs";
-import { DATA_ROOT } from "../core/paths.js";
+import { DATA_ROOT } from "../core/paths.ts";
 
 export interface ParsedCharaDetails {
 	charaId: string;

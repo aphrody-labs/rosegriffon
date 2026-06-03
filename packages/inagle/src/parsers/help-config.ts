@@ -5,9 +5,9 @@
 
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
-import type { ConfigNode } from "../core/config-parser.js";
-import { toHex } from "../core/data-loader.js";
-import { loadTextList } from "./text-parser.js";
+import type { ConfigNode } from "../core/config-parser.ts";
+import { toHex } from "../core/data-loader.ts";
+import { loadTextList } from "./text-parser.ts";
 
 export interface ParsedHelp {
 	helpId: string; // Hex

@@ -16,8 +16,8 @@
  *   5 = Freedom  / Liberté
  */
 
-import type { ConfigNode } from "../core/config-parser.js";
-import { loadCharaParam, toHex } from "../core/data-loader.js";
+import type { ConfigNode } from "../core/config-parser.ts";
+import { loadCharaParam, toHex } from "../core/data-loader.ts";
 
 export interface PlaystyleEntry {
 	charaParamId: string;

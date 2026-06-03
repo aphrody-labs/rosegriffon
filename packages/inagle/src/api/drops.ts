@@ -1,7 +1,7 @@
-import { PATHS } from "../core/paths.js";
-import { type BattleDropInfo, loadBattleDrops } from "../data/drops/battles.js";
-import { type DropEntry, loadItemDropTables } from "../data/drops/tables.js";
-import { loadTreasureDrops, type TreasureDrop } from "../data/drops/treasures.js";
+import { PATHS } from "../core/paths.ts";
+import { type BattleDropInfo, loadBattleDrops } from "../data/drops/battles.ts";
+import { type DropEntry, loadItemDropTables } from "../data/drops/tables.ts";
+import { loadTreasureDrops, type TreasureDrop } from "../data/drops/treasures.ts";
 
 const DEFAULT_DATA_PATH = PATHS.root;
 

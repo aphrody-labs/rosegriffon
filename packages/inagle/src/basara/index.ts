@@ -18,8 +18,8 @@
  * ```
  */
 
-export type { BasaraAPI, BasaraIndexes, EnrichedBasara } from "./api.js";
-export { buildBasaraDatabase, createBasaraAPI } from "./api.js";
+export type { BasaraAPI, BasaraIndexes, EnrichedBasara } from "./api.ts";
+export { buildBasaraDatabase, createBasaraAPI } from "./api.ts";
 export type {
 	BasaraBuild,
 	BasaraCharacter,
@@ -30,5 +30,5 @@ export type {
 	HeroVariants,
 	MultilingualName,
 	Position,
-} from "./types.js";
-export { ELEMENT_NAMES, POSITION_MAP, POSITION_NAMES } from "./types.js";
+} from "./types.ts";
+export { ELEMENT_NAMES, POSITION_MAP, POSITION_NAMES } from "./types.ts";

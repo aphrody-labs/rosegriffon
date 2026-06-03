@@ -1,8 +1,8 @@
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
-import { rewriteZukanUrl } from "../core/images.js";
-import { DATA_ROOT } from "../core/paths.js";
-import type { ZukanSkill } from "../zukan/types.js";
+import { rewriteZukanUrl } from "../core/images.ts";
+import { DATA_ROOT } from "../core/paths.ts";
+import type { ZukanSkill } from "../zukan/types.ts";
 
 let zukanSkillCache: Map<string, ZukanSkill> | null = null;
 

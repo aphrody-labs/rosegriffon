@@ -15,7 +15,7 @@
 
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
-import type { ConfigNode } from "../core/config-parser.js";
+import type { ConfigNode } from "../core/config-parser.ts";
 
 export interface ShopItem {
 	itemId: number; // Unsigned Int

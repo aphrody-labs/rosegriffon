@@ -7,8 +7,8 @@
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { sanitizeText } from "../core/data-loader.js";
-import { PATHS } from "../core/paths.js";
+import { sanitizeText } from "../core/data-loader.ts";
+import { PATHS } from "../core/paths.ts";
 import type {
 	CfgBinFile,
 	PassiveBoostType,
@@ -17,7 +17,7 @@ import type {
 	PassiveSkillDatabase,
 	TeamPassive,
 	UnifiedPassiveSkill,
-} from "./types.js";
+} from "./types.ts";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const DATA_ROOT = join(__dirname, "../../../data");

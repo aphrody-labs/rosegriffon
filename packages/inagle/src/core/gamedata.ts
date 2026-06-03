@@ -8,8 +8,8 @@
 import { existsSync, readdirSync } from "node:fs";
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
-import { loadJSONAsync } from "./data-loader.js";
-import { PATHS } from "./paths.js";
+import { loadJSONAsync } from "./data-loader.ts";
+import { PATHS } from "./paths.ts";
 
 // Default path to all-gamedata (relative to inagle package)
 const DEFAULT_GAMEDATA_PATH = PATHS.allGamedata;

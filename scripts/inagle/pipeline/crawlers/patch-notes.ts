@@ -1,6 +1,6 @@
 /* eslint-disable no-console */
 import * as cheerio from "cheerio";
-import type { PatchNoteSummary } from "./types.js";
+import type { PatchNoteSummary } from "./types.ts";
 
 // --- Config ---
 

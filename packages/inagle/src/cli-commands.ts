@@ -1,7 +1,7 @@
 import type { Command } from "commander";
 import pc from "picocolors";
-import { ITEM_CATEGORY_NAMES } from "./items/api.js";
-import { createInagleService } from "./service.js";
+import { ITEM_CATEGORY_NAMES } from "./items/api.ts";
+import { createInagleService } from "./service.ts";
 
 // === STATS COMMAND ===
 export function registerStatsCommand(program: Command) {

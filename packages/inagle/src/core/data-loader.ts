@@ -20,9 +20,9 @@ import {
 	cfgbinDbFindLatest,
 	cfgbinDbLoad,
 	cfgbinDbLoadText,
-} from "./cfgbin-db.js";
-import type { ConfigFile, ConfigNode } from "./config-parser.js";
-import { DATA_ROOT, FILES, PATHS } from "./paths.js";
+} from "./cfgbin-db.ts";
+import type { ConfigFile, ConfigNode } from "./config-parser.ts";
+import { DATA_ROOT, FILES, PATHS } from "./paths.ts";
 
 /**
  * Supported locales for text files

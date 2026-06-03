@@ -1,6 +1,6 @@
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
-import { PATHS } from "../../core/paths.js";
+import { PATHS } from "../../core/paths.ts";
 
 export interface TreasureDrop {
   mapId: string;

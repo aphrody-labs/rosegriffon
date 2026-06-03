@@ -3,8 +3,8 @@
  * @description Quests API - Quest data access and querying
  */
 
-import { getDataPath } from "../core/data-loader.js";
-import { buildQuestDatabase, type ParsedQuest } from "../parsers/quest-config.js";
+import { getDataPath } from "../core/data-loader.ts";
+import { buildQuestDatabase, type ParsedQuest } from "../parsers/quest-config.ts";
 
 export interface Quest extends ParsedQuest {
 	/** Unique quest ID (hex) */

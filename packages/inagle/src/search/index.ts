@@ -21,5 +21,5 @@ export type {
 	SearchableType,
 	SearchConfig,
 	SearchResult,
-} from "./fuzzy.js";
-export { createGlobalSearch, createSearchIndex } from "./fuzzy.js";
+} from "./fuzzy.ts";
+export { createGlobalSearch, createSearchIndex } from "./fuzzy.ts";

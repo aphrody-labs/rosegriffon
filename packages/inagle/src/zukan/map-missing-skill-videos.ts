@@ -20,7 +20,7 @@
  */
 import fs from "node:fs";
 import path from "node:path";
-import { createSupabaseServiceClient } from "../../../db/src/service.js";
+import { createSupabaseServiceClient } from "../../../db/src/service.ts";
 
 const ZUKAN_SKILL_DIR = "/tmp/zukan/zukan.inazuma.jp/en/skill";
 

@@ -9,9 +9,9 @@
  * - star_sign_*.cfg.bin.json (rarity)
  */
 
-import { createImageAPI } from "../core/images.js";
-import type { BaseCharacter, Character } from "../core/types.js";
-import { loadAllCharacters, loadBaseCharacters } from "../entities/character.js";
+import { createImageAPI } from "../core/images.ts";
+import type { BaseCharacter, Character } from "../core/types.ts";
+import { loadAllCharacters, loadBaseCharacters } from "../entities/character.ts";
 
 // Alias for backward compatibility
 export type EnrichedCharacter = Character;

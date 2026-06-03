@@ -1,8 +1,8 @@
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 
-import { PATHS } from "../../core/paths.js";
-import { loadBattleDropsFromConfig } from "../../parsers/drops-parser.js";
+import { PATHS } from "../../core/paths.ts";
+import { loadBattleDropsFromConfig } from "../../parsers/drops-parser.ts";
 
 interface RawBtlLotInfo {
   winBtlGroupId: string; // Hex string in JSON

@@ -1,4 +1,4 @@
-import { createSupabaseServiceClient } from "../../../../db/src/service.js";
+import { createSupabaseServiceClient } from "../../../../db/src/service.ts";
 
 const supabase = createSupabaseServiceClient();
 

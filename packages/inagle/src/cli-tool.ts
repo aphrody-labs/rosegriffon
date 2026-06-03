@@ -1,4 +1,4 @@
-import { createInagleService } from "./service.js";
+import { createInagleService } from "./service.ts";
 
 async function main() {
 	const args = process.argv.slice(2);

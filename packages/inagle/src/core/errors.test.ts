@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { InagleError, InagleErrorCode, inagleLogger, isInagleError, wrapError } from "./errors.js";
+import { InagleError, InagleErrorCode, inagleLogger, isInagleError, wrapError } from "./errors.ts";
 
 describe("InagleError", () => {
 	it("should create error with code and message", () => {

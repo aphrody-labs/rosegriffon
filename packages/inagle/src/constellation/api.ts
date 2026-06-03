@@ -29,7 +29,7 @@ import {
 	buildConstellationMapping,
 	type Constellation,
 	type ConstellationMapping,
-} from "../parsers/constellation.js";
+} from "../parsers/constellation.ts";
 
 // Re-export types
 export type { Constellation, ConstellationMapping };

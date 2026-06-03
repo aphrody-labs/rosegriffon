@@ -7,14 +7,14 @@
  * - Maps hash IDs to localized strings
  */
 
-import type { ConfigNode } from "../core/config-parser.js";
+import type { ConfigNode } from "../core/config-parser.ts";
 import {
 	type Locale,
 	loadCharaText,
 	loadCharaTextRoma,
 	sanitizeText,
 	toHex,
-} from "../core/data-loader.js";
+} from "../core/data-loader.ts";
 
 /**
  * Parsed noun (name) entry from text file

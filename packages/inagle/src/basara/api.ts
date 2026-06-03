@@ -6,8 +6,8 @@
 
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
-import { createCharactersAPI } from "../characters/api.js";
-import { PATHS } from "../core/paths.js";
+import { createCharactersAPI } from "../characters/api.ts";
+import { PATHS } from "../core/paths.ts";
 import {
 	ElementNames as ELEMENT_NAMES,
 	PositionNames as POSITION_NAMES,
@@ -16,8 +16,8 @@ import {
 	type Character as EnrichedCharacter,
 	type ElementId,
 	type PositionId,
-} from "../core/types.js";
-import { loadBasaraConfig } from "../parsers/basara-config.js";
+} from "../core/types.ts";
+import { loadBasaraConfig } from "../parsers/basara-config.ts";
 
 // Type aliases for compatibility
 type BasaraCharacter = Basara;

@@ -1,7 +1,7 @@
 import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
 import * as cheerio from "cheerio";
-import { CDN_URL } from "../core/paths.js";
+import { CDN_URL } from "../core/paths.ts";
 
 /**
  * Loads skill video URLs from scraped Zukan HTML files in the data directory.

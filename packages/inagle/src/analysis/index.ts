@@ -1,5 +1,5 @@
 /**
  * Analysis module exports
  */
-export * from "./matcher.js";
-export * from "./optimizer.js";
+export * from "./matcher.ts";
+export * from "./optimizer.ts";

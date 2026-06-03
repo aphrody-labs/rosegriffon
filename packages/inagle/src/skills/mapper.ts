@@ -13,9 +13,9 @@
 /* eslint-disable no-console */
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
-import { findConfigFile, sanitizeText } from "../core/data-loader.js";
-import { DATA_ROOT } from "../core/index.js";
-import { loadShopConfig } from "../parsers/shop-config.js";
+import { findConfigFile, sanitizeText } from "../core/data-loader.ts";
+import { DATA_ROOT } from "../core/index.ts";
+import { loadShopConfig } from "../parsers/shop-config.ts";
 import type {
 	CfgBinEntry,
 	CfgBinFile,
@@ -23,8 +23,8 @@ import type {
 	SkillConfigFile,
 	SkillDatabase,
 	UnifiedSkill,
-} from "./types.js";
-import { CATEGORY_NAMES, ELEMENT_NAMES } from "./types.js";
+} from "./types.ts";
+import { CATEGORY_NAMES, ELEMENT_NAMES } from "./types.ts";
 
 /** Parse JSON file safely */
 function loadJson<T>(path: string): T {
