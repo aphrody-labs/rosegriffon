@@ -119,6 +119,13 @@ export default async function HomePage() {
 				},
 				name: "Rose Griffon",
 				url: "https://rosegriffon.fr",
+				founder: {
+					"@type": "Person",
+					name: "Yohan Pierre",
+					alternateName: "yoyo",
+					url: "https://x.com/yoyo__goat",
+					sameAs: ["https://x.com/yoyo__goat"],
+				},
 			},
 			url: "https://azalee.rosegriffon.fr",
 		},
