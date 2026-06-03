@@ -14,7 +14,7 @@ interface GoogleMapEventsProps {
 
 export default function GoogleMapEvents({ events, isLoading }: GoogleMapEventsProps) {
 	const mapRef = useRef<HTMLDivElement>(null);
-	const { isLoaded, loader } = useGoogleMaps();
+	const { isLoaded, importLibrary } = useGoogleMaps();
 
 	useEffect(() => {
 		if (!isLoaded || !mapRef.current) {
@@ -23,8 +23,8 @@ export default function GoogleMapEvents({ events, isLoading }: GoogleMapEventsPr
 
 		const initMap = async () => {
 			try {
-				const { Map } = await loader.importLibrary("maps");
-				const { AdvancedMarkerElement } = (await loader.importLibrary(
+				const { Map } = await importLibrary("maps");
+				const { AdvancedMarkerElement } = (await importLibrary(
 					"marker"
 				)) as google.maps.MarkerLibrary;
 
@@ -120,7 +120,7 @@ export default function GoogleMapEvents({ events, isLoading }: GoogleMapEventsPr
 		};
 
 		initMap();
-	}, [events, isLoaded, loader]);
+	}, [events, isLoaded, importLibrary]);
 
 	const showLoading = isLoading || !isLoaded;
 

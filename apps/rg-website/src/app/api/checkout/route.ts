@@ -46,7 +46,6 @@ export async function POST(req: NextRequest) {
 	const session = await stripe.checkout.sessions.create(
 		{
 			mode: "payment",
-			ui_mode: "hosted",
 			// Pas de `payment_method_types` — dynamic payment methods activés (Stripe
 			// Pousse automatiquement card/Apple Pay/Google Pay/SEPA/Link selon eligibility
 			// Et géo, géré côté dashboard.stripe.com/settings/payment_methods).

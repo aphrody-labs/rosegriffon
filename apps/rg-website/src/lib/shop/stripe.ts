@@ -18,7 +18,7 @@ export function getStripe(): Stripe {
 	cached = new Stripe(key, {
 		// Latest Stripe API version (cf. skill stripe-best-practices). Pin explicite
 		// Pour éviter drift silencieux à chaque release Stripe.
-		apiVersion: "2025-08-27.basil",
+		apiVersion: "2026-05-27.dahlia",
 		typescript: true,
 		// Auto-retry idempotent sur erreurs réseau / 5xx
 		maxNetworkRetries: 2,

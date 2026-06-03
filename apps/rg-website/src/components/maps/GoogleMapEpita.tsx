@@ -7,7 +7,7 @@ import { EPITA_COORDS, EPITA_PLACE_ID, GOOGLE_MAPS_ID } from "@/lib/maps";
 
 export default function GoogleMapEpita() {
 	const mapRef = useRef<HTMLDivElement>(null);
-	const { isLoaded, error, loader } = useGoogleMaps();
+	const { isLoaded, error, importLibrary } = useGoogleMaps();
 
 	useEffect(() => {
 		if (!isLoaded || !mapRef.current) {
@@ -16,8 +16,8 @@ export default function GoogleMapEpita() {
 
 		const initMap = async () => {
 			try {
-				const { Map } = await loader.importLibrary("maps");
-				const { AdvancedMarkerElement, PinElement } = (await loader.importLibrary(
+				const { Map } = await importLibrary("maps");
+				const { AdvancedMarkerElement, PinElement } = (await importLibrary(
 					"marker"
 				)) as google.maps.MarkerLibrary;
 
@@ -55,7 +55,7 @@ export default function GoogleMapEpita() {
 		};
 
 		initMap();
-	}, [isLoaded, loader]);
+	}, [isLoaded, importLibrary]);
 
 	if (error) {
 		return (

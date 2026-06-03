@@ -1,4 +1,5 @@
 import withBundleAnalyzer from "@next/bundle-analyzer";
+import type { NextConfig } from "next";
 import path from "node:path";
 
 const bundleAnalyzer = withBundleAnalyzer({
@@ -11,8 +12,7 @@ const CDN_LOADER = CDN_URL && process.env.NEXT_PUBLIC_CDN_LOADER === "1";
 
 const IS_VERCEL = process.env.VERCEL === "1";
 
-/** @type {import('next').NextConfig} */
-const nextConfig = {
+const nextConfig: NextConfig = {
 	reactCompiler: true,
 
 	...(IS_VERCEL

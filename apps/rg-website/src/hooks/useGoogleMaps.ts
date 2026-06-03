@@ -1,10 +1,10 @@
-import { Loader } from "@googlemaps/js-api-loader";
+import { importLibrary, setOptions } from "@googlemaps/js-api-loader";
 import { useEffect, useState } from "react";
 
-const loader = new Loader({
-	apiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY as string,
+setOptions({
+	key: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY as string,
 	libraries: ["marker", "places"],
-	version: "weekly",
+	v: "weekly",
 });
 
 export const useGoogleMaps = () => {
@@ -12,11 +12,10 @@ export const useGoogleMaps = () => {
 	const [error, setError] = useState<Error | null>(null);
 
 	useEffect(() => {
-		loader
-			.importLibrary("maps")
+		importLibrary("maps")
 			.then(() => setIsLoaded(true))
-			.catch((error) => setError(error));
+			.catch((error: unknown) => setError(error as Error));
 	}, []);
 
-	return { error, isLoaded, loader };
+	return { error, isLoaded, importLibrary };
 };
