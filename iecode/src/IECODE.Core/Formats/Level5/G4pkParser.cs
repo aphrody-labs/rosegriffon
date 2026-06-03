@@ -222,5 +222,36 @@ public static class G4pkParser
     {
         return CompressionHelper.DetectFormat(data);
     }
+
+    /// <summary>
+    /// Detect the Level-5 sub-format of an extracted G4PK entry by its 4-byte
+    /// ASCII magic (G4SK/G4MG/G4TX/G4MD/G4MT/G4NV/G4RA…). Falls back to the file
+    /// name extension when the payload carries no recognizable magic (e.g. objbin,
+    /// cfg.bin), and to "raw" otherwise.
+    /// </summary>
+    public static string DetectSubFormat(string name, ReadOnlySpan<byte> data)
+    {
+        if (data.Length >= 4 &&
+            IsPrintableMagic(data[0], data[1], data[2], data[3]))
+        {
+            // Level-5 containers consistently use a "G4??" ASCII magic.
+            if (data[0] == (byte)'G' && data[1] == (byte)'4')
+            {
+                return Encoding.ASCII.GetString(data[..4]);
+            }
+        }
+
+        // No container magic: classify by extension (objbin, cfg.bin, …).
+        string ext = Path.GetExtension(name);
+        if (!string.IsNullOrEmpty(ext))
+            return ext.TrimStart('.').ToLowerInvariant();
+
+        return "raw";
+    }
+
+    private static bool IsPrintableMagic(byte a, byte b, byte c, byte d)
+        => IsPrintable(a) && IsPrintable(b) && IsPrintable(c) && IsPrintable(d);
+
+    private static bool IsPrintable(byte v) => v >= 0x20 && v < 0x7F;
 }
 

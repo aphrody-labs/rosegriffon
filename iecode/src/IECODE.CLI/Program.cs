@@ -53,7 +53,7 @@ public static class Program
         rootCommand.AddCommand(UtfCommand.Create());
         rootCommand.AddCommand(AudioCommand.Create());
         rootCommand.AddCommand(UsmCommand.Create());
-        rootCommand.AddCommand(AudioCommand.Create());
+        rootCommand.AddCommand(SceneCommand.Create());
         rootCommand.AddCommand(SearchCommand.Create());
         rootCommand.AddCommand(DumpGameDataCommand.Create());
         rootCommand.AddCommand(GenerateGameDataClassesCommand.Create());
