@@ -37,14 +37,14 @@ export function AchilleaBanner({
 				<div className="absolute -left-20 -bottom-20 size-96 bg-[#DFFF57] rounded-full blur-[128px] opacity-10 pointer-events-none" />
 
 				<div className="grid md:grid-cols-2 gap-0 relative z-20 md:min-h-[320px] lg:min-h-[360px]">
-					{/* Left: Image Banner */}
-					<div className="relative h-52 sm:h-64 md:h-auto w-full overflow-hidden">
+					{/* Left: Image Banner — aspect natif (1.91:1) sur mobile, remplissage sur desktop. */}
+					<div className="relative aspect-[1200/630] md:aspect-auto md:h-auto w-full overflow-hidden">
 						<Image
 							src={image}
 							alt="Bannière Achillea"
 							fill
 							className="object-cover object-center transition-transform duration-700 group-hover:scale-105"
-							sizes="(max-width: 768px) 100vw, 50vw"
+							sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 640px"
 						/>
 					</div>
 
