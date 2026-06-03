@@ -43,8 +43,14 @@ Comptes obtenus via `count(*)` réel (le résumé `list_tables` était périmé/
 5. **`inagle_keshins` : 66/289 sans `image_url`** (et `asset_code` NULL → tombent sur un
    emblème `em0001` ou rien). Auras/keshins non mappés vers le dump `aura_fs`.
 
-6. **`inagle_passives` : 128/128 sans `image_url`.** Aucune passive n'a d'icône → l'UI passives
-   n'affiche aucun visuel. Soit pas d'asset dédié dans le jeu, soit mapping manquant.
+6. **`inagle_passives` : 128/128 sans `image_url`. STATUÉ (db-4) — pas d'asset jeu, UI sans
+   visuel assumée.** Vérification réelle du dump (`/home/ubuntu/.local/share/Steam/iecode/
+   inazuma/data/dx11/`, 3.7G) : `menu/200_icon/` ne contient que `01_icon_emblem`,
+   `02_icon_item`, `13_icon_tactics` ; aucun dossier `*passive*` (ni `*support*`/`*ability*`/
+   `*trait*`) nulle part dans l'arbre. Les 128 passives n'ont donc **aucun asset dédié dans le
+   jeu** — ce n'est pas un mapping manquant. Côté front, `apps/azalee/app/passive/page.tsx`
+   n'utilise aucune image de jeu : il rend des icônes Lucide par catégorie. La colonne
+   `image_url` reste donc volontairement NULL ; aucune ré-extraction à tenter.
 
 7. **`inagle_skills.image_url` : 1002/1002 pointent vers le légacy mort**
    (`/storage/v1/object/public/menu/220_img/telop_waza/fr/{code}_0.webp`). Le rewrite front
