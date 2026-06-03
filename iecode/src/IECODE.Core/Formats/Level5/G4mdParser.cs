@@ -274,6 +274,13 @@ public class G4mdParser
     /// </summary>
     public G4mdInfo GetInfo(string? name = null)
     {
+        // Sanitize floats: the bone-ref block currently overlaps the header
+        // float region, so raw reinterpretation can yield NaN/Infinity which
+        // are not valid JSON. Clamp non-finite values to 0 for safe export.
+        var safeBones = new List<BoneRef>(BoneRefs.Count);
+        foreach (var b in BoneRefs)
+            safeBones.Add(new BoneRef(b.BoneIndex, Finite(b.Weight)));
+
         return new G4mdInfo
         {
             Name = name ?? string.Empty,
@@ -286,16 +293,29 @@ public class G4mdParser
             FaceCount = Header.FaceCount,
             BoneCount = Header.BoneCount,
             SubmeshCount = Submeshes.Count,
-            Bounds = Bounds,
+            Bounds = SanitizeBounds(Bounds),
             VertexDataOffset = GetSectionOffset(Header.VertexDataOffset),
             BoneRefOffset = GetSectionOffset(Header.BoneRefOffset),
             IndexOffset = GetSectionOffset(Header.IndexOffset),
             Submeshes = Submeshes,
-            BoneRefs = BoneRefs,
+            BoneRefs = safeBones,
             TextureRefs = TextureRefs,
             FileSize = FileSize,
         };
     }
+
+    /// <summary>Clamp a non-finite float (NaN/±Infinity) to 0 for valid JSON.</summary>
+    private static float Finite(float v) => float.IsFinite(v) ? v : 0f;
+
+    private static BoundingBox SanitizeBounds(BoundingBox b) => new()
+    {
+        MinX = Finite(b.MinX),
+        MinY = Finite(b.MinY),
+        MinZ = Finite(b.MinZ),
+        MaxX = Finite(b.MaxX),
+        MaxY = Finite(b.MaxY),
+        MaxZ = Finite(b.MaxZ),
+    };
 
     /// <summary>
     /// Calculate absolute offset for a section.
