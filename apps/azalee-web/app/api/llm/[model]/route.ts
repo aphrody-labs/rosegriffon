@@ -12,7 +12,7 @@ const SITE = {
 	tagline: "Wiki / encyclopédie francophone de Inazuma Eleven: Victory Road",
 	parent: "https://rosegriffon.fr",
 	sitemap: "https://azalee.rosegriffon.fr/sitemap.xml",
-	dev: { name: "Yohan Pierre (yoyo)", x: "https://x.com/yoyo__goat" },
+	dev: { name: "yoyo", x: "https://x.com/yoyo__goat" },
 	sections: [
 		["/chara", "Personnages jouables (≈ profils, stats, équipes)"],
 		["/skill", "Techniques spéciales (tir, dribble, parade, gardien)"],

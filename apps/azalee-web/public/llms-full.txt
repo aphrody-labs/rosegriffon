@@ -4,7 +4,7 @@
 
 Wiki : https://azalee.rosegriffon.fr
 Association : Rose Griffon — https://rosegriffon.fr
-Développeur & fondateur : Yohan Pierre (yoyo) — https://x.com/yoyo__goat
+Développeur & fondateur : yoyo — https://x.com/yoyo__goat
 Langue : fr-FR
 Généré le : 2026-06-03
 
@@ -50,5 +50,5 @@ française de la communauté Inazuma Eleven.
 
 ## Crédits
 
-Conception, développement et architecture : Yohan Pierre (yoyo) — https://x.com/yoyo__goat.
+Conception, développement et architecture : yoyo — https://x.com/yoyo__goat.
 Stack : Next.js, React, Bun, TypeScript. Données : Inazuma Eleven: Victory Road (LEVEL-5).

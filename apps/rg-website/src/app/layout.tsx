@@ -107,7 +107,7 @@ export default function RootLayout({
 								{
 									"@type": "Person",
 									"@id": "https://rosegriffon.fr/#yoyo",
-									name: "Yohan Pierre",
+									name: "yoyo",
 									alternateName: "yoyo",
 									jobTitle: "Développeur & fondateur",
 									url: "https://x.com/yoyo__goat",

@@ -4,7 +4,7 @@
 
 Site officiel : https://rosegriffon.fr
 Wiki Azalée : https://azalee.rosegriffon.fr
-Développeur & fondateur : Yohan Pierre (yoyo) — https://x.com/yoyo__goat
+Développeur & fondateur : yoyo — https://x.com/yoyo__goat
 Langue : fr-FR
 Généré le : 2026-06-03
 
@@ -64,5 +64,5 @@ miximax…), tactiques et actualités.
 
 ## Crédits
 
-Conception, développement full-stack et architecture : Yohan Pierre (yoyo) — https://x.com/yoyo__goat.
+Conception, développement full-stack et architecture : yoyo — https://x.com/yoyo__goat.
 Stack : Next.js, React, Bun, TypeScript, Supabase.
