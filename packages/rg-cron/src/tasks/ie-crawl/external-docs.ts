@@ -4,10 +4,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { writeFile } from "node:fs/promises";
+import { mkdir, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 
 const DOCS_DIR = "/home/ubuntu/rg/docs";
+// Les docs de référence externes (crawlées) sont isolées dans docs/reference/
+// pour ne pas polluer la racine des docs-projet écrits à la main.
+const REFERENCE_DIR = join(DOCS_DIR, "reference");
 
 /**
  * Récupère les documentations de référence sur Markdown et Bun.markdown
@@ -17,6 +20,7 @@ export async function crawlExternalDocs(): Promise<{ success: boolean; error?: s
 	console.log("[Crawl External Docs] Récupération de awesome-markdown & bun-markdown...");
 
 	try {
+		await mkdir(REFERENCE_DIR, { recursive: true });
 		// 1. Fetch awesome-markdown README
 		const awesomeRes = await fetch(
 			"https://raw.githubusercontent.com/mundimark/awesome-markdown/master/README.md"
@@ -40,7 +44,7 @@ status: "stable"
 ---
 
 `;
-		await writeFile(join(DOCS_DIR, "awesome-markdown.md"), awesomeFrontmatter + awesomeContent);
+		await writeFile(join(REFERENCE_DIR, "awesome-markdown.md"), awesomeFrontmatter + awesomeContent);
 		console.log("[Crawl External Docs] Fichier awesome-markdown.md enregistré.");
 
 		// 2. Fetch Bun markdown docs (MDX)
@@ -81,7 +85,7 @@ status: "stable"
 			});
 		}
 
-		await writeFile(join(DOCS_DIR, "bun-markdown.md"), bunContent);
+		await writeFile(join(REFERENCE_DIR, "bun-markdown.md"), bunContent);
 		console.log("[Crawl External Docs] Fichier bun-markdown.md enregistré.");
 
 		return { success: true };
