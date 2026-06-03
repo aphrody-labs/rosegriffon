@@ -37,8 +37,14 @@ Comptes obtenus via `count(*)` réel (le résumé `list_tables` était périmé/
 
 3. **`inagle_characters.skills` (jsonb) vide pour 423 lignes** (perso sans techniques liées).
 
-4. **`inagle_characters` : 58 sans `name_fr`, 157 sans `description_fr`.** Localisation FR
-   incomplète (hash→texte FR non résolu pour ces lignes).
+4. **`inagle_characters` : 58 sans `name_fr`, 157 sans `description_fr`.** **STATUÉ (iecode-2,
+   2026-06-03)** : résolution hash→FR vérifiée OK (`chara_base[3]`→`chara_text/fr` pour le nom,
+   `chara_base[19]`→`chara_description_text/fr` pour la desc ; couvre 89 %/79 % de chara_base, ce
+   qui correspond aux lignes déjà peuplées). Les 53 cids sans nom / 116 cids sans desc restants
+   **n'ont aucune source** : leur hash vaut 0 ou pointe vers une clé absente de **fr ET en ET ja**.
+   Ce sont des entités **non-joueur/internes** (npc mob, spirit_element/token, edit_avatar, kt, an,
+   variantes cosmétiques c11xxx/c0502xxx, orphelins sans `internal_code`). Le jeu ne leur attribue
+   pas de texte localisé → **NULL volontaire**, pas de backfill possible sans inventer du contenu.
 
 5. **`inagle_keshins` : 38/289 sans `image_url`** (était 66 ; db-1 en a rempli 28 via
    `asset_code`). **Correction d'audit (VÉRIFIÉ 2026-06-03)** : l'affirmation « `asset_code`
@@ -68,10 +74,19 @@ Comptes obtenus via `count(*)` réel (le résumé `list_tables` était périmé/
    `has_telop = true`. Les **986** restants → `image_url = NULL`, `has_telop = false`.
    ATTENTION : contrairement à l'hypothèse initiale (« tous les `wh*` présents »), la **majorité**
    des `whs*` (419) et `whd*` (187) — ainsi que la quasi-totalité des `whk*`/`who*` — n'ont
-   **aucun** fichier telop dans le dump (974 `wh*` en DB, 16 fichiers seulement). Le garde
-   `SKILL_WITHOUT_TELOP` du résolveur azalee (db-3) ne couvre que `rh[dkos]*`/`swap_*` → il génère
-   encore des 404 pour les ~958 `wh*` sans telop. Correctif front à faire côté db-3/azalee-code
-   (gater sur la donnée `has_telop`/`image_url` plutôt que sur un regex de préfixe).
+   **aucun** fichier telop dans le dump (974 `wh*` en DB, 16 fichiers seulement ; les 67 `wht*`
+   du dump sont un autre jeu, titres romanisés hors `internal_code`).
+
+   **FAIT (db-3, 2026-06-03) — gating front fermé.** Le résolveur `getSkillImageUrl`
+   (`apps/azalee/src/lib/images/utils.ts`) utilise désormais un **gate POSITIF** : allowlist
+   exhaustive `SKILLS_WITH_TELOP` des **16** codes réellement présents (après normalisation du
+   suffixe variant `_<lettres>`, ex. `who00060_or` → `who00060`). Tout code hors liste (986)
+   renvoie `PLACEHOLDERS.skill` (`/ievr.webp`) au lieu de fabriquer une URL `{code}_{code}.png`
+   garantie 404. Cela couvre TOUS les appels directs `getSkillImageUrl(id)` (search.ts l.710,
+   MoveCard, SkillDetail, OverrideSkillSection) et le fallback `d.image_url || getSkillImageUrl`
+   (search.ts l.405). Aligné sur `has_telop` (16 true / 986 false). type-check azalee = 0 erreur.
+   Vérifié live : `rhd10010` & `whs00010` (hors liste) → placeholder ; `who00010` → telop **200**.
+   `inagle_skills.has_telop` documenté via `COMMENT ON COLUMN` (db-3).
 
 8. **`inagle_items.image_url` = path relatif `200_icon/02_icon_item/{name}.webp`** alors que les
    fichiers réels portent le préfixe `icon_item{NN}_`. Mapping à corriger / manifest à compléter.

@@ -70,7 +70,7 @@ servis correctement par l'origine (200). Le website n'active pas le CDN en prod 
 | 6 | **Keshins sans image** | **38/289** `image_url` NULL (était 66 ; db-1 a rempli 28). **Correction audit (VÉRIFIÉ 2026-06-03)** : pas un cas « `asset_code` NULL » — les 38 ont **toutes** leur `asset_code` (0 NULL parmi elles ; au global 240/289 ont un code, et les 49 sans code ont déjà une image). Blocage réel = leur code n'a pas de PNG dans le dump `dx11` | P1 | Reste (db-1) : confirmer l'absence dans le dump complet — pas un mapping `asset_code` à refaire |
 | 7 | **Passives sans image** | 128/128 `image_url` NULL | P2 | **FAIT (db-4)** — vérifié dump (3.7G) : `200_icon/` = emblem/item/tactics uniquement, aucun `*passive*` ; pas d'asset jeu. UI `passive/page.tsx` rend des icônes Lucide (sans visuel jeu, assumé). `image_url` NULL volontaire, aucune ré-extraction. Cf. `azalee-tables-gaps.md §6` |
 | 8 | **`inagle_characters.stats` jsonb vide** | ~~6148 lignes, colonne morte~~ → **FAIT (db-6, 2026-06-03)** : colonne **dépréciée** (`COMMENT ON COLUMN` posé). Données réelles dans les scalaires `stat_*` (lv99, 6148/6148) et `stat_lv1_*` (lv1, 6138/6148). Les 2 mappers (`api-client.ts` + `wiki-service.ts`) ne lisent plus le fallback `stats.lv99/lv1` (toujours vide) → uniquement scalaires ; `api-client` expose désormais aussi `stats.lv1`. **skills (423 vides)** : NORMAL, pas de gap de jointure — 412 PNJ/non-controllables sans learnset (sur 6093 non-controllables, 5681 EN ONT) + 11 variantes dupliquées dont la canonique porte le learnset ; `COMMENT` posé. Learnsets = attribut par-variante (`[{skillId, learnLevel}]`), définitions dans `inagle_skills` | **P2** | Décidé : déprécier (pas peupler — éviterait la dérive avec les scalaires source de vérité) ; mappers adaptés |
-| 9 | **Localisation FR partielle** | 58 sans `name_fr`, 157 sans `description_fr` | P2 | Compléter la résolution hash→texte FR (iecode `common/text/fr`) |
+| 9 | **Localisation FR partielle** | 58 sans `name_fr`, 157 sans `description_fr` | P2 | **STATUÉ (iecode-2, 2026-06-03)** : résolution hash→FR vérifiée OK (`chara_base[3]`=hash nom→`chara_text/fr`, `chara_base[19]`=hash desc→`chara_description_text/fr` ; couvre 89 % noms / 79 % desc de chara_base). Les 53 cids sans nom / 116 cids sans desc restants sont **non résolvables car aucun texte n'existe** (hash=0 ou clé absente de **fr ET en ET ja**) : ce sont des entités **non-joueur/internes** (28 npc mob, 8 spirit_element, 4 kt, 3 an, 2 spirit_token, 8 orphelins sans `internal_code` pour les noms ; +15 edit_avatar, +35 variantes c11xxx/c0502xxx cosmétiques pour les desc). **NULL volontaire**, aucune donnée de jeu à backfiller (pas d'invention de texte) |
 | 10 | **`inagle_game_assets` vide** | ~~manifest CDN jamais peuplé (0 ligne)~~ → **FAIT (iecode-1, 2026-06-03)** : manifeste de vérité peuplé = **40 471 lignes** (1 par fichier réel du dump dx11 servi par le CDN, `exists=true`), colonnes `path` (relatif `/dx11/`), `bucket` (icon_chr 36 664 / 220_img 2389 / 200_icon 1375 / 210_minimap 41 / movie 2), `kind`, `size`, `buildid=22792000`. Vérif croisée : `path=menu/icon_chr/face/c01000010_l_c01000010_1_l00.png` → `size=26848` en DB == `content-length: 26848` du `curl 200` CDN. Script : `scripts/inagle/pipeline/generate-game-assets-manifest.ts` (walk dump → upsert). Couverture cross-ref par code-feuille = 6448/17341 (37,2 %). RLS anon SELECT déjà en place. | P1 | ~~Générer le manifeste~~ Généré : table-of-truth des URL servies, lookup exact sur `path` avant render (évite les 404 → `/ievr.webp`) |
 | 11 | **Website `public/`** | aucun manquant (200 en origine) | — | RAS |
 
@@ -80,7 +80,7 @@ servis correctement par l'origine (200). Le website n'active pas le CDN en prod 
 
 - `inagle_characters.stats` jsonb vide (6148) — **STATUÉ db-6 : DÉPRÉCIÉE** (COMMENT posé) ; source de vérité = scalaires `stat_*`/`stat_lv1_*` ; mappers `api-client.ts`+`wiki-service.ts` ne lisent plus le fallback jsonb.
 - `inagle_characters.skills` vide pour 423 lignes — **STATUÉ db-6 : NORMAL** (412 non-controllables sans learnset + 11 variantes dupliquées dont la canonique porte le learnset) ; pas un gap de jointure (5681/6093 non-controllables ont des skills). COMMENT posé.
-- `name_fr` (58) / `description_fr` (157) manquants.
+- `name_fr` (58) / `description_fr` (157) manquants — **STATUÉ (iecode-2)** : non résolvables (aucun texte FR/EN/JA pour ces entités non-joueur : npc mob, spirit, edit_avatar, variantes cosmétiques c11xxx). NULL volontaire.
 - `inagle_keshins.image_url` NULL (**38**, était 66 ; db-1 a rempli 28) — **correction audit** : les 38 ont toutes leur `asset_code` (pas un cas « `asset_code` NULL ») ; blocage = absence de PNG dans le dump. `inagle_miximax` (1).
 - `inagle_passives.image_url` NULL (128/128) — **STATUÉ db-4 : pas d'asset jeu (aucun `*passive*` dans le dump), UI sans visuel assumée ; NULL volontaire**.
 - `inagle_skills.image_url` — **FAIT (db-2)** : 0 légacy restante. 16/1002 re-pointés `/dx11/menu/220_img/telop_waza/fr/<code>_<code>.png` (HTTP 200 vérifié), 986/1002 `NULL` + `has_telop=false` (telop absent du dump).
@@ -111,7 +111,11 @@ servis correctement par l'origine (200). Le website n'active pas le CDN en prod 
    (walk dump → upsert) ; table de vérité des URL servies pour valider avant render.
 3. **P1 — Réconcilier les nommages** items (`icon_item{NN}_`) et telop techniques ; compléter
    `item-image-manifest.json` ; documenter les codes telop disponibles vs codes techniques.
-4. **P2 — Résoudre hash→texte FR** pour les 58+157 lignes manquantes (`common/text/fr`).
+4. **P2 — Résoudre hash→texte FR** — **STATUÉ (iecode-2, 2026-06-03)** : mécanisme vérifié
+   (`chara_base[3]`→`chara_text/fr`, `chara_base[19]`→`chara_description_text/fr`) ; les 58 noms /
+   157 desc restants n'ont **aucune source** (hash=0 ou clé absente de fr/en/ja) car ce sont des
+   entités non-joueur (mobs, spirits, edit_avatar, variantes cosmétiques). NULL volontaire, pas de
+   backfill possible sans inventer du texte.
 5. **Continuer `coverage-100-plan.md`** (90.3 % → 100 %) : g4pk, objbin (déverrouille aussi le
    menu pixel-perfect), acb/awb. Hors chemin critique assets visibles.
 
