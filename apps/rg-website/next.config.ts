@@ -188,7 +188,13 @@ const nextConfig: NextConfig = {
 	},
 	images: {
 		formats: ["image/avif", "image/webp"],
-		unoptimized: false,
+		// L'optimiseur d'images Vercel a épuisé son quota sur le projet rg-website :
+		// /_next/image renvoie 402 OPTIMIZED_IMAGE_REQUEST_PAYMENT_REQUIRED pour TOUTES
+		// les images (locales `public/` ET distantes), cassant l'intégralité des visuels
+		// du site (bannières, avatars, OG cross-site azalee/achillea, photos d'équipe…).
+		// On sert les images en mode non-optimisé : les assets `public/` (déjà en .webp)
+		// et les URLs distantes whitelistées passent en direct, sans /_next/image → 200.
+		unoptimized: true,
 		// Next 16 : seules les valeurs `quality` listées ici sont acceptées par
 		// l'optimiseur (défaut = [75]). Les composants utilisent q=70/90/95/100 ;
 		// sans cette liste l'optimiseur renvoie 400 INVALID_IMAGE_OPTIMIZE_REQUEST
