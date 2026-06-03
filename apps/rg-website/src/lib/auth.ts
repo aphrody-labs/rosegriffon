@@ -12,14 +12,22 @@ import { SCOPES_CREATOR, SCOPES_PATRON } from "@/lib/patreon/types";
 import type { Database } from "@rose-griffon/db";
 
 const getDatabaseURL = () => {
-	let url = process.env.DATABASE_URL;
+	const url = process.env.DATABASE_URL;
 	if (!url || url.startsWith("eyJ2Ijo") || url === "undefined" || url === "null") {
-		url =
-			"***REDACTED-DATABASE-URL***";
+		throw new Error(
+			"DATABASE_URL absent ou corrompu : une chaîne de connexion Postgres valide est requise (cf. variables d'environnement Vercel).",
+		);
 	}
-	// Si l'URL pointe vers l'hôte direct de Supabase (IPv6-only), on redirige dynamiquement vers le pooler IPv4
-	if (url.includes("db.isbkaeltubqittywibeh.supabase.co")) {
-		return "***REMOVED***";
+	// Vercel serverless est IPv4-only ; l'hôte direct Supabase (db.<ref>.supabase.co) est IPv6-only
+	// → DNS getaddrinfo ENOTFOUND. On réécrit vers le pooler Supavisor en mode transaction (IPv4, port 6543),
+	// en DÉRIVANT depuis l'URL directe — aucun secret en dur, donc résilient à un scrub d'historique.
+	const direct = url.match(
+		/^postgres(?:ql)?:\/\/([^:]+):([^@]+)@db\.([a-z0-9]+)\.supabase\.co:\d+\/([^?]+)(?:\?.*)?$/,
+	);
+	if (direct) {
+		const [, , password, ref, db] = direct;
+		const region = process.env.SUPABASE_REGION ?? "eu-west-1";
+		return `postgresql://postgres.${ref}:${password}@aws-0-${region}.pooler.supabase.com:6543/${db}`;
 	}
 	return url;
 };
