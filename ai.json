@@ -1,0 +1,115 @@
+{
+  "protocolVersion": "1.0.1",
+  "name": "rose-griffon",
+  "description": "Rose Griffon monorepo orchestrator. Exposes grok (xAI Grok Build) and agy (Antigravity / Google Cloud Code) as A2A subagent peers, routed by Claude Code over a file-based A2A coord protocol (this Agent Card + .coord/*.jsonl mailboxes).",
+  "url": "file://tools/llm-agents/workspace/.coord/",
+  "preferredTransport": "HTTP+JSON",
+  "version": "1.0.0",
+  "documentationUrl": "tools/llm-agents/ORCHESTRATION.md",
+  "provider": {
+    "organization": "rose-griffon",
+    "url": "https://github.com/rose-griffon/rg"
+  },
+  "additionalInterfaces": [
+    {
+      "url": "file://tools/llm-agents/workspace/.coord/",
+      "transport": "HTTP+JSON"
+    }
+  ],
+  "capabilities": {
+    "streaming": false,
+    "pushNotifications": false,
+    "stateTransitionHistory": false,
+    "extendedAgentCard": false
+  },
+  "defaultInputModes": ["text/plain"],
+  "defaultOutputModes": ["text/plain", "application/json"],
+  "skills": [
+    {
+      "id": "grok.code",
+      "name": "grok code task",
+      "description": "Run a coding / refactor / analysis task on the Grok Build model and return its final answer. Headless, JSON-parsed.",
+      "tags": ["codegen", "refactor", "analysis", "fast", "json"],
+      "examples": [
+        "Refactor this module to remove duplication",
+        "Write a Bun test for tools/llm-agents/llm.ts",
+        "Explain what this function does"
+      ],
+      "inputModes": ["text/plain"],
+      "outputModes": ["text/plain", "application/json"]
+    },
+    {
+      "id": "agy.reason",
+      "name": "agy reasoning task",
+      "description": "Run a broad reasoning / generation task on the Antigravity (Gemini / Cloud Code) backend and return its plain-text answer. Headless print mode.",
+      "tags": ["reasoning", "gemini", "generation", "broad-context"],
+      "examples": [
+        "Draft an architecture doc for the menu pipeline",
+        "Review this design and list risks",
+        "Summarize the tradeoffs between two approaches"
+      ],
+      "inputModes": ["text/plain"],
+      "outputModes": ["text/plain"]
+    },
+    {
+      "id": "coord.route",
+      "name": "route a task to a peer",
+      "description": "Write an A2A envelope (kind=ask) to a peer inbox in the .coord mailbox and read its ack — the file-based routing primitive of this orchestrator.",
+      "tags": ["a2a", "routing", "coord", "mailbox"],
+      "examples": [
+        "Route this refactor to grok and await its ack",
+        "Broadcast a fact to all peers"
+      ],
+      "inputModes": ["text/plain", "application/json"],
+      "outputModes": ["application/json"]
+    }
+  ],
+  "_aphrody": {
+    "comment": "Compat dialecte aphrody (aphrody doctor / a2a-ui). Les champs canoniques A2A v1.0.1 sont au niveau racine ci-dessus.",
+    "version": "1.0.0",
+    "spec": "a2a/v0.4",
+    "id": "rg@rose-griffon/rg",
+    "schema_version": "1.0.0",
+    "kind": "agent"
+  },
+  "_peers": [
+    {
+      "id": "claude@rose-griffon/rg",
+      "role": "orchestrator",
+      "transport": "claude-code",
+      "description": "Claude Code — decomposes tasks and routes sub-tasks to grok/agy, then merges results."
+    },
+    {
+      "id": "grok@rose-griffon/rg",
+      "role": "subagent",
+      "transport": "cli",
+      "binary": "~/.local/bin/grok",
+      "invocation": "grok --prompt-file <f> --always-approve --permission-mode bypassPermissions --max-turns <N> --cwd <dir> --output-format json",
+      "wrapper": "tools/llm-agents/grok-agent.ts",
+      "model": "grok-build",
+      "note": "Ne JAMAIS passer --effort/--reasoning-effort (grok-build -> 400).",
+      "description": "xAI Grok Build CLI (logged in via grok.com). Fast, JSON output, codegen + self-verify (--check)."
+    },
+    {
+      "id": "agy@rose-griffon/rg",
+      "role": "subagent",
+      "transport": "cli",
+      "binary": "~/.local/bin/agy",
+      "invocation": "agy -p \"<prompt>\" --dangerously-skip-permissions --print-timeout 10m --add-dir <dir>",
+      "wrapper": "tools/llm-agents/agy-agent.ts",
+      "model": "gemini (Antigravity / Cloud Code v1internal)",
+      "description": "Antigravity CLI (fork Codeium/Windsurf -> Google Cloud Code). Plain-text, large context, slower."
+    }
+  ],
+  "_coord": {
+    "mailbox_dir": "partagé avec aphrody: ~/.aphrody/workspace-azalee/.coord (fallback tools/llm-agents/workspace/.coord)",
+    "inbox_pattern": "inbox-from-<peer-short-id>.jsonl",
+    "envelope": {
+      "v": 1,
+      "fields": ["v", "ts", "from", "to", "kind", "topic", "body"],
+      "kinds": ["fact", "ask", "ack", "ping", "error"],
+      "format": "append-only JSONL, one envelope per line, ISO-8601 UTC ts, // comment lines ignored"
+    },
+    "note": "Compatible aphrody a2a-ui::Envelope (v1, flat) + duel-loop. Spec canonique clonée: tools/llm-agents/reference/A2A (v1.0.1)."
+  }
+}

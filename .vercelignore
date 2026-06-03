@@ -25,6 +25,8 @@ data/backups
 **/.turbo
 **/.bun-cache
 .claude
+# tools/llm-agents : wrappers sous-agents grok/agy (hors build Vercel, dev/orchestration only)
+tools
 # azalee n'est PAS buildé par le déploiement website (turbo --filter=@rose-griffon/website...)
 apps/azalee/.next
 apps/azalee/data

@@ -1,0 +1,13 @@
+{
+	"extends": "@rose-griffon/iecode-config/tsconfig-base.json",
+	"compilerOptions": {
+		"types": ["bun", "@webgpu/types"],
+		"lib": ["ESNext", "DOM", "DOM.Iterable"],
+		"jsx": "react-jsx",
+		"jsxImportSource": "react"
+	},
+	"include": [
+		"src/**/*.ts",
+		"src/**/*.tsx"
+	]
+}

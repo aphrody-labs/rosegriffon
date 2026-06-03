@@ -6,4 +6,5 @@ export * from "./service";
 export * from "./storage";
 export * from "./services/stats";
 export * from "./redis";
+export * from "./rag";
 export type * from "./types";

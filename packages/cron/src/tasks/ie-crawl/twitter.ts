@@ -7,6 +7,7 @@
 import { XClient, XSession, type Tweet } from "@aphrody-code/x";
 import { createSupabaseServiceClient } from "@rose-griffon/db/service";
 import type { Json } from "@rose-griffon/db";
+import { getOfficialXAccounts, loadBxcXCookieHeader } from "./x-accounts";
 
 type MediaItem = {
 	id: string;
@@ -94,7 +95,9 @@ export async function crawlTwitter(): Promise<{
 	count?: number;
 	error?: string;
 }> {
-	const screenNames = ["Azalee_IE", "AkihiroHino", "LEVEL5_times", "inazuma_project"];
+	// Multi-comptes officiels (additif, source x-accounts.ts — mis à jour après discovery bxc x + search).
+	// Inclut les comptes validés (principaux + fallback low-activity pour complétude historique).
+	const screenNames = getOfficialXAccounts();
 	console.log(
 		`[Crawl Twitter] Démarrage de la synchronisation des tweets de : ${screenNames.join(", ")}...`
 	);
@@ -103,7 +106,15 @@ export async function crawlTwitter(): Promise<{
 	let hasErrors = false;
 
 	try {
-		const session = XSession.loadOrEnv();
+		// Utilise pleinement le cookie bxc (~/.bxc/cookies/xcom.json) si présent (prioritaire),
+		// fallback sur loadOrEnv ( .aphrody ou X_* env) — supporte le flux CLI bxc x.
+		let session: XSession;
+		const bxcCookie = loadBxcXCookieHeader();
+		if (bxcCookie) {
+			session = XSession.fromCookieString(bxcCookie);
+		} else {
+			session = XSession.loadOrEnv();
+		}
 		const client = new XClient(session);
 		const supabase = createSupabaseServiceClient();
 
@@ -119,7 +130,7 @@ export async function crawlTwitter(): Promise<{
 				console.log(`[Crawl Twitter] ID résolu pour @${screenName} : ${user.id} (${user.name})`);
 
 				console.log(`[Crawl Twitter] Crawl historique complet de @${screenName}...`);
-				const MAX_TWEETS_PER_ACCOUNT = 800;
+				const MAX_TWEETS_PER_ACCOUNT = 1200; // augmenté pour multi-comptes officiels (bxc x pagination)
 				const fetchedTweets: Tweet[] = [];
 				const seenTimelineIds = new Set<string>();
 				let cursor: string | undefined;

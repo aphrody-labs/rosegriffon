@@ -72,6 +72,8 @@ GEMINI.md
 !docs/**/*.txt
 !packages/*/README.md
 !apps/*/README.md
+# Corpus + runbook des sous-agents llm-agents (doc demandée, trackable)
+!tools/llm-agents/**/*.md
 
 # Deployment artifacts
 .deployments/
@@ -126,3 +128,11 @@ serviceaccount*.json
 playwright-report/
 **/playwright-report/
 **/tests-e2e/__snapshots__/
+
+# RAG ingestion state (local, idempotence reprise)
+.rag-ingest-state.json
+
+# A2A coord mailbox : artefacts de runtime des sous-agents llm-agents (format figé par ai.json + docs)
+tools/llm-agents/workspace/.coord/*.jsonl
+tools/llm-agents/workspace/.coord/heartbeat-*.txt
+/tools/llm-agents/reference/

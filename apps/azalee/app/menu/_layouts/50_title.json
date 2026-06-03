@@ -1,0 +1,170 @@
+{
+  "screen": "50_title",
+  "locale": "fr",
+  "canvas": { "w": 1280, "h": 720 },
+  "objects": [
+    {
+      "name": "title_dim_overlay",
+      "parent": null,
+      "transform": {
+        "x": 0.0,
+        "y": 0.0,
+        "scaleX": 1.0,
+        "scaleY": 1.0,
+        "rot": 0.0,
+        "anchorX": 0.0,
+        "anchorY": 0.0
+      },
+      "drawPriority": 2,
+      "drawType": 0,
+      "camera": "menu",
+      "sprite": null,
+      "text": null,
+      "anim": null,
+      "primitive": {
+        "type": "rect",
+        "w": 1280,
+        "h": 720,
+        "color": "#0a1430",
+        "alpha": 1.0
+      },
+      "charModel": null
+    },
+    {
+      "name": "title_logo",
+      "parent": null,
+      "transform": {
+        "x": 640.0,
+        "y": 260.0,
+        "scaleX": 0.6,
+        "scaleY": 0.6,
+        "rot": 0.0,
+        "anchorX": 0.5,
+        "anchorY": 0.5
+      },
+      "drawPriority": 5,
+      "drawType": 0,
+      "camera": "menu",
+      "sprite": {
+        "logicalPath": "dx11/menu/50_title/title00/title00_04.g4tx",
+        "pngUrl": "/menu/50_title/title_logo.png",
+        "w": 1920,
+        "h": 296
+      },
+      "text": null,
+      "anim": { "open": "open", "close": "close" },
+      "primitive": null,
+      "charModel": null
+    },
+    {
+      "name": "title_subtitle",
+      "parent": null,
+      "transform": {
+        "x": 640.0,
+        "y": 400.0,
+        "scaleX": 0.5,
+        "scaleY": 0.5,
+        "rot": 0.0,
+        "anchorX": 0.5,
+        "anchorY": 0.5
+      },
+      "drawPriority": 6,
+      "drawType": 0,
+      "camera": "menu",
+      "sprite": {
+        "logicalPath": "dx11/menu/50_title/title00/title00_05.g4tx",
+        "pngUrl": "/menu/50_title/subtitle.png",
+        "w": 2160,
+        "h": 288
+      },
+      "text": null,
+      "anim": { "open": "open", "close": "close" },
+      "primitive": null,
+      "charModel": null
+    },
+    {
+      "name": "title_start_button",
+      "parent": null,
+      "transform": {
+        "x": 640.0,
+        "y": 540.0,
+        "scaleX": 1.0,
+        "scaleY": 1.0,
+        "rot": 0.0,
+        "anchorX": 0.5,
+        "anchorY": 0.5
+      },
+      "drawPriority": 9,
+      "drawType": 0,
+      "camera": "menu",
+      "sprite": {
+        "logicalPath": "dx11/menu/50_title/title02/title02_12.g4tx",
+        "pngUrl": "/menu/50_title/start_button.png",
+        "w": 236,
+        "h": 104
+      },
+      "text": null,
+      "anim": { "open": "open", "close": "close" },
+      "primitive": null,
+      "charModel": null
+    },
+    {
+      "name": "title_press_start",
+      "parent": null,
+      "transform": {
+        "x": 640.0,
+        "y": 600.0,
+        "scaleX": 1.0,
+        "scaleY": 1.0,
+        "rot": 0.0,
+        "anchorX": 0.5,
+        "anchorY": 0.5
+      },
+      "drawPriority": 10,
+      "drawType": 0,
+      "camera": "menu",
+      "sprite": null,
+      "text": {
+        "key": "_text_press_start",
+        "keyHash": 1337001234,
+        "value": "APPUYEZ SUR START",
+        "font": "nie_bold",
+        "size": 28,
+        "color": "#ffffff",
+        "align": "center"
+      },
+      "anim": { "open": "open", "close": "close" },
+      "primitive": null,
+      "charModel": null
+    },
+    {
+      "name": "title00_09_version",
+      "parent": null,
+      "transform": {
+        "x": 980.0,
+        "y": 680.0,
+        "scaleX": 1.0,
+        "scaleY": 1.0,
+        "rot": 0.0,
+        "anchorX": 0.5,
+        "anchorY": 0.5
+      },
+      "drawPriority": 13,
+      "drawType": 0,
+      "camera": "menu",
+      "sprite": null,
+      "text": {
+        "key": "_text_version",
+        "keyHash": 2240914530,
+        "value": "Ver. 1.0.0",
+        "font": "nie_main",
+        "size": 20,
+        "color": "#c8c8c8",
+        "align": "center"
+      },
+      "anim": { "open": "open", "close": "close" },
+      "primitive": null,
+      "charModel": null
+    }
+  ]
+}

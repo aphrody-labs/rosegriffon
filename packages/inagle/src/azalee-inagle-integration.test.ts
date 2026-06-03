@@ -30,7 +30,7 @@ describe("Azalée CLI & Inagle Real-World Integration Tests", () => {
 		// 1. Initialize the Inagle service using real game files
 		service = await createInagleService();
 		sqlitePath = await getSqlitePath();
-	});
+	}, 120000); // Le parse réel (~50 cfg.bin, 6000+ persos) dépasse le défaut 5s → timeout explicite.
 
 	test("1. Bun File System API - Verify real game config files exist and are readable", async () => {
 		const charaBasePath = join(DATA_ROOT, "common/gamedata/character", FILES.charaBase);
