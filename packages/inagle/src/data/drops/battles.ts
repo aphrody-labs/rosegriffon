@@ -1,7 +1,9 @@
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 
-import { PATHS } from "../../core/paths.js";
+import { basename } from "node:path";
+
+import { PATHS, resolveGameDataFile } from "../../core/paths.js";
 import { loadBattleDropsFromConfig } from "../../parsers/drops-parser.js";
 
 interface RawBtlLotInfo {
@@ -24,9 +26,11 @@ export function loadBattleDrops(_dataDir: string): Map<number, BattleDropInfo> {
   const decidePath = join(PATHS.allGamedata, "decideTableData.json");
 
   if (!existsSync(btlLotPath) || !existsSync(decidePath)) {
-    // Fallback: Parse raw config
-    // Using soccer_drop_config_1.03.20.00.cfg.bin.json
-    const map = loadBattleDropsFromConfig("soccer_drop_config_1.03.20.00.cfg.bin.json");
+    // Repli : parse du config brut soccer_drop_config (version la plus haute)
+    const dropConfig = resolveGameDataFile("soccer", "soccer_drop_config");
+    const map = dropConfig
+      ? loadBattleDropsFromConfig(basename(dropConfig))
+      : new Map<number, BattleDropInfo>();
     if (map.size > 0) return map;
 
     console.warn("[Drops] Files not found: btlLotInfo.json or decideTableData.json");

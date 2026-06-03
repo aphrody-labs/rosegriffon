@@ -204,3 +204,71 @@ export const FILES = {
 
 export type DataPath = keyof typeof PATHS;
 export type DataFile = keyof typeof FILES;
+
+/**
+ * Compare deux noms de fichiers versionnés du dump et renvoie celui dont le
+ * segment `_X.Y.Z.W` est le plus élevé (tri numérique segment par segment).
+ *
+ * Les noms de fichiers cfg.bin du jeu embarquent la version qui les a produits
+ * (ex. `aura_skill_config_1.04.09.00.cfg.bin.json`). Un patch du jeu fait
+ * grimper cette version → on doit toujours sélectionner la plus haute, sans
+ * supposer un padding constant des segments.
+ */
+function versionSegments(filename: string): number[] {
+	// Capture le dernier groupe `_<chiffres séparés par des points>` avant l'extension
+	const m = filename.match(/_(\d+(?:\.\d+)*)\.cfg\.bin/);
+	if (!m) return [];
+	return m[1].split(".").map((s) => Number.parseInt(s, 10));
+}
+
+/** Tri numérique de versions (segment par segment), -1 / 0 / 1. */
+function compareVersions(a: string, b: string): number {
+	const va = versionSegments(a);
+	const vb = versionSegments(b);
+	const len = Math.max(va.length, vb.length);
+	for (let i = 0; i < len; i++) {
+		const da = va[i] ?? 0;
+		const db = vb[i] ?? 0;
+		if (da !== db) return da < db ? -1 : 1;
+	}
+	return a < b ? -1 : a > b ? 1 : 0;
+}
+
+/**
+ * Résout un fichier de game data version-agnostique.
+ *
+ * Globbe `<DATA_ROOT>/<relDir>/<baseName>_*.cfg.bin.json` et renvoie le chemin
+ * absolu de la version la plus haute. Tolère les futures mises à jour du jeu
+ * qui changent le segment de version dans le nom de fichier.
+ *
+ * @param relDir   Sous-dossier sous `common/gamedata` (ex. "skill", "character/party").
+ * @param baseName Préfixe sans version ni extension (ex. "aura_skill_config").
+ * @returns Chemin absolu du fichier, ou `null` si aucun fichier trouvé.
+ */
+export function resolveGameDataFile(relDir: string, baseName: string): string | null {
+	const dir = join(PATHS.gamedata, relDir);
+	// N'accepte que `<baseName>_<version numérique>.cfg.bin.json` afin d'éviter les
+	// collisions de préfixe (ex. "chara_param" ne doit PAS capter
+	// "chara_param_table_config"). Le segment suivant `_` doit commencer par un chiffre.
+	const versionedRe = new RegExp(`^${baseName}_\\d[\\d.]*\\.cfg\\.bin\\.json$`);
+	try {
+		const matches = [
+			...new Bun.Glob(`${baseName}_*.cfg.bin.json`).scanSync({
+				cwd: dir,
+				onlyFiles: true,
+			}),
+		].filter((f) => versionedRe.test(f));
+		if (matches.length > 0) {
+			matches.sort(compareVersions);
+			return join(dir, matches[matches.length - 1]);
+		}
+	} catch {
+		// dossier absent → on tente le repli exact ci-dessous
+	}
+
+	// Repli : nom exact sans segment de version (certains fichiers n'en ont pas)
+	const exact = join(dir, `${baseName}.cfg.bin.json`);
+	if (existsSync(exact)) return exact;
+
+	return null;
+}

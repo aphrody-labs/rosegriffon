@@ -1,6 +1,5 @@
-import { join } from "node:path";
 import { existsSync, readFileSync } from "node:fs";
-import { DATA_ROOT } from "../core/paths.js";
+import { resolveGameDataFile } from "../core/paths.js";
 
 export interface ParsedCharaDetails {
 	charaId: string;
@@ -15,9 +14,9 @@ export interface ParsedCharaDetails {
  */
 export function parseCharaDetails(): Map<string, ParsedCharaDetails> {
 	const map = new Map<string, ParsedCharaDetails>();
-	const filePath = join(DATA_ROOT, "common/gamedata/character/chara_details_config_0.00.00.00.cfg.bin.json");
-	
-	if (!existsSync(filePath)) {
+	const filePath = resolveGameDataFile("character", "chara_details_config");
+
+	if (!filePath || !existsSync(filePath)) {
 		return map;
 	}
 

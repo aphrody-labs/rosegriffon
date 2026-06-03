@@ -3,7 +3,7 @@ import { join } from "node:path";
 import { parseAllCharaBase } from "./chara-base.js";
 import { buildAllNameMaps, getLocalizedNames } from "./chara-text.js";
 import { type Locale, sanitizeText, toHex } from "../core/data-loader.js";
-import { DATA_ROOT } from "../core/paths.js";
+import { DATA_ROOT, resolveGameDataFile } from "../core/paths.js";
 import type { ConfigNode } from "../core/config-parser.js";
 
 export interface ResolvedSpeaker {
@@ -52,8 +52,8 @@ export interface ChapterPhase {
  */
 function loadNameTagLookup(): Map<string, string[]> {
 	const lookup = new Map<string, string[]>();
-	const filePath = join(DATA_ROOT, "common/gamedata/character/chara_name_tag_1.03.38.00.cfg.bin.json");
-	if (!existsSync(filePath)) return lookup;
+	const filePath = resolveGameDataFile("character", "chara_name_tag");
+	if (!filePath || !existsSync(filePath)) return lookup;
 
 	try {
 		const data = JSON.parse(readFileSync(filePath, "utf-8"));

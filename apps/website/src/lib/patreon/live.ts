@@ -1,5 +1,6 @@
-import { patreonFetch, refreshAccessToken } from "@/lib/patreon/client";
+import { patreonFetch } from "@/lib/patreon/client";
 import { decryptToken, encryptToken } from "@/lib/patreon/encryption";
+import { isTokenFresh, refreshOAuthToken } from "@/lib/oauth/refresh";
 import { createAdminClient } from "@/lib/supabase/server";
 import type {
 	JsonApiResource,
@@ -26,23 +27,21 @@ async function ensureFreshCreatorToken(
 	row: CreatorTokenRow,
 	marginMs = 5 * 60 * 1000
 ): Promise<string> {
-	const expiresAt = new Date(row.expires_at).getTime();
-	if (expiresAt - Date.now() > marginMs) {
+	if (isTokenFresh(new Date(row.expires_at), marginMs)) {
 		return decryptToken(row.access_token_enc);
 	}
 	const refresh = decryptToken(row.refresh_token_enc);
-	const refreshed = await refreshAccessToken(refresh);
-	const newExpiresAt = new Date(Date.now() + refreshed.expires_in * 1000).toISOString();
+	const refreshed = await refreshOAuthToken(refresh);
 	await supabase
 		.from("patreon_oauth_tokens")
 		.update({
-			access_token_enc: encryptToken(refreshed.access_token),
-			expires_at: newExpiresAt,
-			refresh_token_enc: encryptToken(refreshed.refresh_token),
+			access_token_enc: encryptToken(refreshed.accessToken),
+			expires_at: refreshed.expiresAt.toISOString(),
+			refresh_token_enc: encryptToken(refreshed.refreshToken),
 			scope: refreshed.scope || row.scope,
 		})
 		.eq("id", row.id);
-	return refreshed.access_token;
+	return refreshed.accessToken;
 }
 
 export interface LiveTier {

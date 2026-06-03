@@ -13,7 +13,7 @@ import { join } from "node:path";
 import { loadJsonAsync } from "../core/async-loader.js";
 import type { ConfigNode } from "../core/config-parser.js";
 import { toHex } from "../core/data-loader.js";
-import { DATA_ROOT } from "../core/paths.js";
+import { DATA_ROOT, resolveGameDataFile } from "../core/paths.js";
 
 // ============================================================================
 // Types
@@ -65,7 +65,10 @@ function parseEntries(entries: ConfigNode[]): CharaCostume[] {
 // ============================================================================
 
 export async function loadCharaCostumeConfigAsync(dataPath: string = DATA_ROOT) {
-	const path = join(dataPath, "common/gamedata/character", "chara_costume_1.02.28.00.cfg.bin.json");
+	// Résolution version-agnostique (repli sur le chemin versionné historique si introuvable)
+	const path =
+		resolveGameDataFile("character", "chara_costume") ??
+		join(dataPath, "common/gamedata/character", "chara_costume_1.02.28.00.cfg.bin.json");
 	const content = await loadJsonAsync<{ entries: ConfigNode[] }>(path);
 	if (!content?.entries) return null;
 	return parseEntries(content.entries);

@@ -13,6 +13,7 @@
 import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+import { resolveGameDataFile } from "../core/paths.js";
 import type {
 	CfgBinEntry,
 	CfgBinFile,
@@ -212,8 +213,13 @@ export function buildCharacterDatabase(options?: { dataRoot?: string }): Charact
 
 	// File paths
 	const paths = {
-		charaBase: join(root, "common/gamedata/character/chara_base_1.03.98.00.cfg.bin.json"),
-		charaParam: join(root, "common/gamedata/character/chara_param_1.03.66.00.cfg.bin.json"),
+		// Résolution version-agnostique (repli sur le chemin versionné historique)
+		charaBase:
+			resolveGameDataFile("character", "chara_base") ??
+			join(root, "common/gamedata/character/chara_base_1.03.98.00.cfg.bin.json"),
+		charaParam:
+			resolveGameDataFile("character", "chara_param") ??
+			join(root, "common/gamedata/character/chara_param_1.03.66.00.cfg.bin.json"),
 		charaTextEn: join(root, "common/text/en/chara_text.cfg.bin.json"),
 		charaTextFr: join(root, "common/text/fr/chara_text.cfg.bin.json"),
 		charaTextRoma: join(root, "common/text/en/chara_text_roma.cfg.bin.json"),
@@ -320,8 +326,13 @@ export function buildCharacterDatabaseV2(options?: { dataRoot?: string }): Chara
 	const root = options?.dataRoot || DATA_ROOT;
 
 	const paths = {
-		charaBase: join(root, "common/gamedata/character/chara_base_1.03.98.00.cfg.bin.json"),
-		charaParam: join(root, "common/gamedata/character/chara_param_1.03.66.00.cfg.bin.json"),
+		// Résolution version-agnostique (repli sur le chemin versionné historique)
+		charaBase:
+			resolveGameDataFile("character", "chara_base") ??
+			join(root, "common/gamedata/character/chara_base_1.03.98.00.cfg.bin.json"),
+		charaParam:
+			resolveGameDataFile("character", "chara_param") ??
+			join(root, "common/gamedata/character/chara_param_1.03.66.00.cfg.bin.json"),
 		charaTextEn: join(root, "common/text/en/chara_text.cfg.bin.json"),
 		charaTextFr: join(root, "common/text/fr/chara_text.cfg.bin.json"),
 		charaTextRoma: join(root, "common/text/en/chara_text_roma.cfg.bin.json"),

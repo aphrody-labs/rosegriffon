@@ -12,6 +12,7 @@
 import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+import { resolveGameDataFile } from "../core/paths.js";
 import type { CfgBinEntry, CfgBinFile, CharacterDatabase, UnifiedCharacter } from "./types.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -128,7 +129,10 @@ export function buildCharacterDatabaseV3(options?: { dataRoot?: string }): Chara
 	const root = options?.dataRoot || DATA_ROOT;
 
 	const paths = {
-		charaBase: join(root, "common/gamedata/character/chara_base_1.03.98.00.cfg.bin.json"),
+		// Résolution version-agnostique (repli sur le chemin versionné historique)
+		charaBase:
+			resolveGameDataFile("character", "chara_base") ??
+			join(root, "common/gamedata/character/chara_base_1.03.98.00.cfg.bin.json"),
 		charaTextEn: join(root, "common/text/en/chara_text.cfg.bin.json"),
 		charaTextRoma: join(root, "common/text/en/chara_text_roma.cfg.bin.json"),
 		charaDescFr: join(root, "common/text/fr/chara_description_text.cfg.bin.json"),

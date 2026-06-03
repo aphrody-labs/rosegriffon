@@ -1,5 +1,6 @@
-import { patreonFetch, refreshAccessToken } from "./client";
+import { patreonFetch } from "./client";
 import { decryptToken, encryptToken } from "./encryption";
+import { isTokenFresh, refreshOAuthToken } from "@/lib/oauth/refresh";
 import { TIER_MAPPING } from "./types";
 import type {
 	JsonApiResource,
@@ -103,15 +104,15 @@ export async function loadCreatorTokens(): Promise<CreatorTokens> {
 
 export async function ensureFreshAccessToken(tokens: CreatorTokens): Promise<CreatorTokens> {
 	const skewMs = 60 * 1000;
-	if (tokens.expiresAt.getTime() - Date.now() > skewMs) {
+	if (isTokenFresh(tokens.expiresAt, skewMs)) {
 		return tokens;
 	}
 
-	const refreshed = await refreshAccessToken(tokens.refreshToken);
+	const refreshed = await refreshOAuthToken(tokens.refreshToken);
 	const newTokens: CreatorTokens = {
-		accessToken: refreshed.access_token,
-		expiresAt: new Date(Date.now() + refreshed.expires_in * 1000),
-		refreshToken: refreshed.refresh_token,
+		accessToken: refreshed.accessToken,
+		expiresAt: refreshed.expiresAt,
+		refreshToken: refreshed.refreshToken,
 		tokenRowId: tokens.tokenRowId,
 	};
 

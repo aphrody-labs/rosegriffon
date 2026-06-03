@@ -18,7 +18,7 @@ import { loadJsonAsync } from "../core/async-loader.js";
 import type { ConfigNode } from "../core/config-parser.js";
 import { toHex } from "../core/data-loader.js";
 import { EntityExporters, type ExportableEntity } from "../core/exporters.js";
-import { DATA_ROOT } from "../core/paths.js";
+import { DATA_ROOT, resolveGameDataFile } from "../core/paths.js";
 
 // ============================================================================
 // Types
@@ -94,11 +94,10 @@ function parseEntries(entries: ConfigNode[]): ParsedEnjoyModeTeam[] {
 // ============================================================================
 
 export async function loadEnjoyModeTeamConfigAsync(dataPath: string = DATA_ROOT) {
-	const path = join(
-		dataPath,
-		"common/gamedata/team",
-		"enjoy_mode_team_config_1.04.02.00.cfg.bin.json"
-	);
+	// Résolution version-agnostique (repli sur le chemin versionné historique si introuvable)
+	const path =
+		resolveGameDataFile("team", "enjoy_mode_team_config") ??
+		join(dataPath, "common/gamedata/team", "enjoy_mode_team_config_1.04.02.00.cfg.bin.json");
 	const content = await loadJsonAsync<{ entries: ConfigNode[] }>(path);
 	if (!content?.entries) return null;
 	return parseEntries(content.entries);

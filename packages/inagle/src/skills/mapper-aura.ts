@@ -1,6 +1,5 @@
 import { existsSync, readFileSync } from "node:fs";
-import { join } from "node:path";
-import { DATA_ROOT } from "../core/paths.js";
+import { resolveGameDataFile } from "../core/paths.js";
 
 interface ConfigVariable {
 	type: string;
@@ -336,13 +335,10 @@ export function loadAuraSkills(
 ): AuraSkill[] {
 	const results: AuraSkill[] = [];
 
-	// Find the aura_skill_config file
-	const auraConfigPath = join(
-		DATA_ROOT,
-		"common/gamedata/skill/aura_skill_config_1.04.09.00.cfg.bin.json"
-	);
+	// Résolution version-agnostique du fichier aura_skill_config
+	const auraConfigPath = resolveGameDataFile("skill", "aura_skill_config");
 
-	if (!existsSync(auraConfigPath)) {
+	if (!auraConfigPath || !existsSync(auraConfigPath)) {
 		return results;
 	}
 
@@ -377,11 +373,8 @@ export function loadAuraSkills(
 	}
 
 	// Enrich with owner character from change_aura_skill_config
-	const changeAuraPath = join(
-		DATA_ROOT,
-		"common/gamedata/skill/change_aura_skill_config_1.01.73.00.cfg.bin.json"
-	);
-	if (existsSync(changeAuraPath)) {
+	const changeAuraPath = resolveGameDataFile("skill", "change_aura_skill_config");
+	if (changeAuraPath && existsSync(changeAuraPath)) {
 		try {
 			const changeConfig = readJson<{
 				lists: Array<{ name: string; values: Array<{ id: string; charaParamId: string }> }>;
@@ -413,13 +406,10 @@ export function loadAuraSkills(
  * Used to distinguish aura IDs from skill IDs in chara_param slots.
  */
 export function buildAuraHashSet(): Set<string> {
-	const auraConfigPath = join(
-		DATA_ROOT,
-		"common/gamedata/skill/aura_skill_config_1.04.09.00.cfg.bin.json"
-	);
+	const auraConfigPath = resolveGameDataFile("skill", "aura_skill_config");
 
 	const hashes = new Set<string>();
-	if (!existsSync(auraConfigPath)) return hashes;
+	if (!auraConfigPath || !existsSync(auraConfigPath)) return hashes;
 
 	try {
 		const config = readJson<AuraConfigData>(auraConfigPath);

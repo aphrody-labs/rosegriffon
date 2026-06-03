@@ -1,9 +1,6 @@
-import {
-	fetchIdentity,
-	parseIdentityWithMemberships,
-	refreshAccessToken,
-} from "@/lib/patreon/client";
+import { fetchIdentity, parseIdentityWithMemberships } from "@/lib/patreon/client";
 import { decryptToken, encryptToken } from "@/lib/patreon/encryption";
+import { isTokenFresh, refreshOAuthToken } from "@/lib/oauth/refresh";
 import { SCOPES_PATRON } from "@/lib/patreon/types";
 import { createAdminClient } from "@/lib/supabase/server";
 import type { ParsedIdentity } from "@/lib/patreon/types";
@@ -55,24 +52,22 @@ async function ensureFreshAccessToken(
 				throw new Error("Patreon token row not found in database");
 			}
 
-			const expiresAt = new Date(latestToken.expires_at).getTime();
 			// Si un appel concurrent a déjà rafraîchi le token avec succès entre-temps
-			if (expiresAt - Date.now() > marginMs) {
+			if (isTokenFresh(new Date(latestToken.expires_at), marginMs)) {
 				return decryptToken(latestToken.access_token_enc);
 			}
 
 			// Lancer le rafraîchissement effectif auprès de l'API Patreon
 			const refresh = decryptToken(latestToken.refresh_token_enc);
-			const refreshed = await refreshAccessToken(refresh);
-			const newExpiresAt = new Date(Date.now() + refreshed.expires_in * 1000).toISOString();
+			const refreshed = await refreshOAuthToken(refresh);
 
 			// Mise à jour optimiste : on ne met à jour que si le token n'a pas bougé en DB
 			const { data, error } = await supabase
 				.from("patreon_oauth_tokens")
 				.update({
-					access_token_enc: encryptToken(refreshed.access_token),
-					expires_at: newExpiresAt,
-					refresh_token_enc: encryptToken(refreshed.refresh_token),
+					access_token_enc: encryptToken(refreshed.accessToken),
+					expires_at: refreshed.expiresAt.toISOString(),
+					refresh_token_enc: encryptToken(refreshed.refreshToken),
 					scope: refreshed.scope || latestToken.scope,
 				})
 				.eq("id", latestToken.id)
@@ -92,7 +87,7 @@ async function ensureFreshAccessToken(
 				throw new Error("Patreon token refreshed concurrently but final token could not be retrieved");
 			}
 
-			return refreshed.access_token;
+			return refreshed.accessToken;
 		} finally {
 			// Libérer le verrou
 			refreshLocks.delete(row.id);
