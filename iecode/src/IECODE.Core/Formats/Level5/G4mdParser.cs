@@ -100,9 +100,59 @@ public class G4mdParser
         float Weight
     );
 
+    /// <summary>
+    /// Axis-aligned bounding box (two corners), or a transform/bounds region
+    /// read from the header float block at 0x34.
+    /// </summary>
+    public struct BoundingBox
+    {
+        public float MinX;
+        public float MinY;
+        public float MinZ;
+        public float MaxX;
+        public float MaxY;
+        public float MaxZ;
+    }
+
+    /// <summary>
+    /// Complete G4MD model information, suitable for JSON export.
+    /// Aggregates header fields, geometry counts, submeshes, bone refs,
+    /// bounding region floats and the embedded texture/material string refs.
+    /// </summary>
+    public struct G4mdInfo
+    {
+        public string Name { get; set; }
+        public string MagicHex { get; set; }
+        public bool IsBigEndian { get; set; }
+        public int HeaderSize { get; set; }
+        public int TypeId { get; set; }
+        public int SectionBase { get; set; }
+
+        public int VertexCount { get; set; }
+        public int FaceCount { get; set; }
+        public int BoneCount { get; set; }
+        public int SubmeshCount { get; set; }
+
+        public BoundingBox Bounds { get; set; }
+
+        public int VertexDataOffset { get; set; }
+        public int BoneRefOffset { get; set; }
+        public int IndexOffset { get; set; }
+
+        public List<Submesh> Submeshes { get; set; }
+        public List<BoneRef> BoneRefs { get; set; }
+
+        /// <summary>Embedded null-terminated texture/material reference strings.</summary>
+        public List<string> TextureRefs { get; set; }
+        public int FileSize { get; set; }
+    }
+
     public G4mdHeader Header { get; private set; }
     public List<Submesh> Submeshes { get; private set; } = [];
     public List<BoneRef> BoneRefs { get; private set; } = [];
+    public List<string> TextureRefs { get; private set; } = [];
+    public BoundingBox Bounds { get; private set; }
+    public int FileSize { get; private set; }
     public bool IsBigEndian { get; private set; }
 
     public void Parse(string filePath)
@@ -120,6 +170,8 @@ public class G4mdParser
         Header = ParseHeader(data, IsBigEndian);
         Submeshes.Clear();
         BoneRefs.Clear();
+        TextureRefs.Clear();
+        FileSize = data.Length;
 
         // Parse submeshes using section offset table
         ParseSubmeshes(data);
@@ -129,6 +181,120 @@ public class G4mdParser
         {
             ParseBoneRefs(data);
         }
+
+        // Bounding/transform float block at 0x34 (6 floats: min xyz, max xyz)
+        Bounds = ParseBounds(data);
+
+        // Embedded null-terminated texture/material reference strings
+        TextureRefs.AddRange(ExtractTextureRefs(data));
+    }
+
+    /// <summary>
+    /// Read the 6-float bounds block at header offset 0x34.
+    /// Identified from real chr/_uniform models (min xyz / max xyz region).
+    /// </summary>
+    private BoundingBox ParseBounds(ReadOnlySpan<byte> data)
+    {
+        if (data.Length < 0x34 + 24)
+            return default;
+
+        static float ReadF(ReadOnlySpan<byte> d, bool bigEndian, int off) =>
+            BitConverter.Int32BitsToSingle(
+                bigEndian
+                    ? BinaryPrimitives.ReadInt32BigEndian(d[off..])
+                    : BinaryPrimitives.ReadInt32LittleEndian(d[off..]));
+
+        return new BoundingBox
+        {
+            MinX = ReadF(data, IsBigEndian, 0x34),
+            MinY = ReadF(data, IsBigEndian, 0x38),
+            MinZ = ReadF(data, IsBigEndian, 0x3C),
+            MaxX = ReadF(data, IsBigEndian, 0x40),
+            MaxY = ReadF(data, IsBigEndian, 0x44),
+            MaxZ = ReadF(data, IsBigEndian, 0x48),
+        };
+    }
+
+    /// <summary>
+    /// Extract embedded null-terminated ASCII texture/material reference strings.
+    /// These appear in the string region near the file tail (e.g. "e000401_10",
+    /// "e000401_10M"). Filtered to model-id-like tokens to drop binary noise.
+    /// </summary>
+    private static List<string> ExtractTextureRefs(ReadOnlySpan<byte> data)
+    {
+        var refs = new List<string>();
+        var seen = new HashSet<string>();
+        var sb = new StringBuilder();
+
+        for (int i = 0; i < data.Length; i++)
+        {
+            byte b = data[i];
+            if (b >= 0x20 && b <= 0x7E)
+            {
+                sb.Append((char)b);
+            }
+            else
+            {
+                if (b == 0x00 && sb.Length >= 4 && IsTextureRef(sb))
+                {
+                    string s = sb.ToString();
+                    if (seen.Add(s))
+                        refs.Add(s);
+                }
+                sb.Clear();
+            }
+        }
+
+        return refs;
+    }
+
+    /// <summary>
+    /// Heuristic for a real texture/material ref: starts with a letter,
+    /// followed by digits/letters/underscore, contains at least one digit.
+    /// Drops the "G4MD" magic and binary-garbage runs.
+    /// </summary>
+    private static bool IsTextureRef(StringBuilder sb)
+    {
+        if (!char.IsLetter(sb[0]))
+            return false;
+        bool hasDigit = false;
+        for (int i = 0; i < sb.Length; i++)
+        {
+            char c = sb[i];
+            if (!(char.IsLetterOrDigit(c) || c == '_'))
+                return false;
+            if (char.IsDigit(c))
+                hasDigit = true;
+        }
+        return hasDigit && sb.ToString() != "G4MD";
+    }
+
+    /// <summary>
+    /// Build the complete <see cref="G4mdInfo"/> after parsing.
+    /// </summary>
+    public G4mdInfo GetInfo(string? name = null)
+    {
+        return new G4mdInfo
+        {
+            Name = name ?? string.Empty,
+            MagicHex = $"0x{Header.Magic:X8}",
+            IsBigEndian = IsBigEndian,
+            HeaderSize = Header.HeaderSize,
+            TypeId = Header.TypeId,
+            SectionBase = Header.SectionBase,
+            VertexCount = Header.VertexCount,
+            FaceCount = Header.FaceCount,
+            BoneCount = Header.BoneCount,
+            SubmeshCount = Submeshes.Count,
+            Bounds = Bounds,
+            VertexDataOffset = GetSectionOffset(Header.VertexDataOffset),
+            BoneRefOffset = GetSectionOffset(Header.BoneRefOffset),
+            IndexOffset = GetSectionOffset(Header.IndexOffset),
+            Submeshes = Submeshes,
+            BoneRefs = BoneRefs,
+            TextureRefs = TextureRefs,
+            FileSize = FileSize,
+        };
     }
 
     /// <summary>

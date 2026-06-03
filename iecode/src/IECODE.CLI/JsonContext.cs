@@ -8,10 +8,13 @@ namespace IECODE.CLI;
 /// </summary>
 [JsonSerializable(typeof(GameAnalysisReport))]
 [JsonSerializable(typeof(G4mdParser.G4mdHeader))]
+[JsonSerializable(typeof(G4mdParser.G4mdInfo))]
 [JsonSerializable(typeof(Commands.SearchCommand.Root))]
 [JsonSerializable(typeof(CharacterSearchOutput[]))]
 [JsonSerializable(typeof(FormatDetectionResult[]))]
 [JsonSerializable(typeof(G4raResourceInfo[]))]
+[JsonSerializable(typeof(G4pkEntryInfo[]))]
+[JsonSerializable(typeof(P3lipJson))]
 [JsonSourceGenerationOptions(
     WriteIndented = true,
     PropertyNamingPolicy = JsonKnownNamingPolicy.CamelCase,
@@ -58,6 +61,18 @@ public class GameAnalysisReport
 }
 
 /// <summary>
+/// G4PK sub-file entry info for JSON serialization (AOT-compatible)
+/// </summary>
+public class G4pkEntryInfo
+{
+    public string Name { get; set; } = "";
+    public int Size { get; set; }
+    public int Offset { get; set; }
+    public string Hash { get; set; } = "";
+    public string Format { get; set; } = "";
+}
+
+/// <summary>
 /// G4RA resource info for JSON serialization (AOT-compatible)
 /// </summary>
 public class G4raResourceInfo
@@ -68,4 +83,24 @@ public class G4raResourceInfo
     public uint Size { get; set; }
     public ushort RefCount { get; set; }
     public byte Flags { get; set; }
+}
+
+/// <summary>
+/// P3lip (lives::CResLipSync) lip-sync track for JSON serialization (AOT-compatible).
+/// </summary>
+public class P3lipJson
+{
+    public float Duration { get; set; }
+    public uint FileSize { get; set; }
+    public int Count { get; set; }
+    public P3lipFrameJson[] Frames { get; set; } = System.Array.Empty<P3lipFrameJson>();
+}
+
+public class P3lipFrameJson
+{
+    public float Time { get; set; }
+    public byte Phoneme { get; set; }
+    public byte Channel { get; set; }
+    public ushort Weight { get; set; }
+    public bool Sentinel { get; set; }
 }
