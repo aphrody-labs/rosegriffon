@@ -711,7 +711,12 @@ async function importAuras(service: any, db: DataAdapter) {
 			element_id: a.element ?? null,
 			asset_code: a.assetCode || null,
 			image_url: a.image || null,
-			sheet_data: a.sheetData ?? null,
+			// Injecte TOUJOURS le lien aura→technique (config.skillId1/skillId2) dans
+			// sheet_data — c'est ce que getAura consomme côté azalee. (Le `data` complet
+			// porte aussi a.config, mais on garantit la présence dans sheet_data.)
+			sheet_data: a.config
+				? { ...((a.sheetData as any) ?? {}), config: a.config }
+				: (a.sheetData ?? null),
 			updated_at: new Date().toISOString(),
 		};
 

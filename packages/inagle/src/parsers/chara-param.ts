@@ -90,28 +90,30 @@ function parseParamNode(node: ConfigNode): ParsedCharaParam | null {
 	const subPosition = values[4] || 0;
 	const growthPattern = values[8] || 0;
 
-	// Extract skills (6 slots)
-	// Format: [SkillHash] [LearnLevel] pairs starting at index 9
-	// [9] Skill 1 hash, [10] Level 1
-	// [11] Skill 2 hash, [12] Level 2
-	// ...
-	// Note: The game stores skill hash first, then learn level.
+	// Extract skills — 9 slots, LEVEL-FIRST, starting at index 10.
+	// Layout réel (vérifié sur le dump chara_param) : niveaux aux index PAIRS 10,12,…,26
+	// (0..99) et hash de technique aux index IMPAIRS 11,13,…,27.
+	//   [10] Level 1, [11] Skill 1 hash
+	//   [12] Level 2, [13] Skill 2 hash … jusqu'à 9 slots.
+	// (L'ancienne lecture 6 slots hash-first @9 tronquait/désalignait les techniques
+	//  pour TOUTES les versions — normal, héros et basara — qui sont des entrées
+	//  chara_param distinctes partageant ce parseur.)
 	const skills: { learnLevel: number; skillId: string }[] = [];
-	for (let i = 0; i < 6; i++) {
-		const skillIdx = 9 + i * 2;
-		const levelIdx = 10 + i * 2;
+	for (let slot = 0; slot < 9; slot++) {
+		const levelIdx = 10 + slot * 2;
+		const hashIdx = 11 + slot * 2;
+		if (hashIdx >= values.length) break;
 
-		if (levelIdx < values.length && values[skillIdx] !== 0) {
-			const skillIdNum = values[skillIdx];
-			const learnLevel = values[levelIdx];
+		const skillIdNum = values[hashIdx];
+		const learnLevel = values[levelIdx];
 
-			// Skip placeholders (IDs < 16) and corrupted/negative learn levels
-			if (skillIdNum >= 16 && learnLevel >= 0 && learnLevel <= 99) {
-				skills.push({
-					skillId: toHex(skillIdNum),
-					learnLevel: learnLevel,
-				});
-			}
+		// Le hash peut être n'importe quelle valeur 32 bits (signée/non signée) ≠ 0 ;
+		// on valide le NIVEAU (0..99) plutôt que le hash.
+		if (skillIdNum !== 0 && learnLevel >= 0 && learnLevel <= 99) {
+			skills.push({
+				skillId: toHex(skillIdNum),
+				learnLevel: learnLevel,
+			});
 		}
 	}
 
