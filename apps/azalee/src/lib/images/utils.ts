@@ -125,8 +125,43 @@ export function getCharacterUniformBackUrl(charaId: string | undefined | null): 
 }
 
 /**
+ * Allowlist EXHAUSTIVE des codes de techniques qui possèdent réellement un fichier
+ * telop dans le dump dx11 `220_img/telop_waza/fr/{code}_{code}.png` (db-3, 2026-06-03).
+ *
+ * Cross-référence fichier-par-fichier du dump complet (310 PNG telop) contre les 1002
+ * `internal_code` de `inagle_skills` : seuls **16** codes ont un telop. Les fichiers
+ * `wht*` du dump (67) sont un autre jeu (titres romanisés, hors `internal_code`) → exclus.
+ * Les 986 autres skills (la majorité des `whs*`/`whd*`, tous les `rh[dkos]*` et
+ * `swap_skill_waza_*`) n'ont AUCUN telop → l'URL `{code}_{code}.png` serait un 404 garanti.
+ *
+ * Donc : gate POSITIF (allowlist) — tout code hors liste renvoie le placeholder, jamais
+ * une URL 404. Aligné sur `inagle_skills.has_telop` (16 true / 986 false / 1002 total)
+ * et `image_url` (NULL = sans telop). Cf. docs/asset-audit/azalee-tables-gaps.md §7.
+ */
+const SKILLS_WITH_TELOP = new Set([
+	"whk00050",
+	"whk00080",
+	"whk00090",
+	"whk00100",
+	"whk00110",
+	"who00010",
+	"who00020",
+	"who00030",
+	"who00040",
+	"who00060",
+	"who00070",
+	"who00080",
+	"who00090",
+	"who00100",
+	"who00110",
+	"who00190",
+]);
+
+/**
  * URL d'une technique (image telop) — dump dx11 brut.
  * Pattern fichier : `220_img/telop_waza/fr/{code}_{code}.png`.
+ * Renvoie le placeholder pour tout code sans telop dans le dump (db-3) afin que
+ * l'UI affiche un visuel propre au lieu d'un 404.
  */
 export function getSkillImageUrl(
 	skillId: string | undefined | null,
@@ -135,7 +170,11 @@ export function getSkillImageUrl(
 	if (!skillId) {
 		return "";
 	}
+	// Normalisation : retire le suffixe variant `_<lettres>` (ex. `who00060_or` → `who00060`).
 	const baseCode = skillId.replace(/_[a-z]+$/i, "");
+	if (!SKILLS_WITH_TELOP.has(baseCode)) {
+		return PLACEHOLDERS.skill;
+	}
 	return `${MENU_DUMP_BASE}/220_img/telop_waza/fr/${baseCode}_${baseCode}.png`;
 }
 
