@@ -8,34 +8,7 @@ Il détaille l'état d'avancement de chaque application et package, avec les fon
 
 ## 1. Vue d'Ensemble de l'Architecture
 
-Le monorepo `/home/ubuntu/rg` est structuré pour dissocier les applications hébergées sur Vercel des services s'exécutant sur le VPS (comme le bot Discord et le démon Cron).
-
-```mermaid
-graph TD
-    subgraph Apps
-        A[@rose-griffon/azalee]
-        B[@rose-griffon/website]
-        C[@rose-griffon/bot]
-    end
-    subgraph Services VPS
-        D[@rose-griffon/cron]
-    end
-    subgraph Packages Partagés
-        E[@rose-griffon/ui]
-        F[@rose-griffon/db]
-        G[@rose-griffon/auth]
-        H[@rose-griffon/types]
-        I[@rose-griffon/config]
-        J[@rose-griffon/patreon-bun]
-        K[@rose-griffon/assets]
-        L[@rose-griffon/inagle]
-    end
-
-    A --> E & F & G & L & H
-    B --> E & F & G & J & H
-    C --> F & H & G
-    D --> F & G & L & H
-```
+Le monorepo dissocie les applications Vercel (`website`) des services VPS (`azalee` self-host, `cron`). Pour la **structure détaillée** — applications, packages et dépendances croisées — voir **[REPO_MAP.md](REPO_MAP.md)** (référence structurelle canonique, non dupliquée ici).
 
 ---
 
