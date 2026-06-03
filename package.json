@@ -6,7 +6,8 @@
 	"workspaces": {
 		"packages": [
 			"apps/*",
-			"packages/*"
+			"packages/*",
+			"iecode/packages/*"
 		],
 		"catalog": {
 			"next": "16.3.0-canary.37",
@@ -190,7 +191,8 @@
 			"vuetify": "^4.0.8",
 			"wrangler": "^4.95.0",
 			"web-tree-sitter": "^0.26.9",
-			"zustand": "^5.0.14"
+			"zustand": "^5.0.14",
+			"valibot": "^1.4.1"
 		}
 	},
 	"type": "module",
@@ -212,7 +214,17 @@
 		"docs:bundle": "bun scripts/bundle-llms-docs.ts",
 		"docs:check-links": "bun scripts/check-docs-links.ts",
 		"docs:lint": "bunx markdownlint-cli2 \"docs/**/*.md\" \"!docs/awesome-markdown.md\" \"!docs/bun-markdown.md\"",
-		"docs:build": "bun run docs:map && bun run docs:bundle && bun run docs:check-links && bun run docs:lint"
+		"docs:build": "bun run docs:map && bun run docs:bundle && bun run docs:check-links && bun run docs:lint",
+		"iecode:dotnet:build": "dotnet build iecode/IECODE.sln -c Release",
+		"iecode:dotnet:test": "dotnet test iecode/IECODE.sln -c Release",
+		"iecode:napi:build": "dotnet build iecode/vendor/node-api-dotnet/NodeApi.sln -c Release",
+		"iecode:sync:gamedata": "bun iecode/scripts/sync-gamedata.ts",
+		"iecode:scrape": "bun iecode/packages/steam-sync/src/cli.ts",
+		"iecode:steam:sync": "bun iecode/packages/steam-sync/src/cli.ts",
+		"iecode:steam:depots": "bun iecode/packages/steam-sync/src/cli.ts --list",
+		"iecode:data:accumulate": "bun iecode/packages/pipeline/src/cli.ts accumulate",
+		"iecode:data:export": "bun iecode/packages/pipeline/src/cli.ts export",
+		"iecode:data:serve": "bun iecode/packages/pipeline/src/cli.ts serve"
 	},
 	"dependencies": {
 		"@streamparser/json": "^0.0.22",

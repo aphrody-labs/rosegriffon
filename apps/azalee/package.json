@@ -108,7 +108,8 @@
 		"vaul": "catalog:",
 		"wanakana": "catalog:",
 		"web-push": "catalog:",
-		"zod": "catalog:"
+		"zod": "catalog:",
+		"@rose-griffon/menu-render": "workspace:*"
 	},
 	"devDependencies": {
 		"@next/bundle-analyzer": "catalog:",

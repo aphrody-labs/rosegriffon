@@ -1,5 +1,5 @@
 {
-  "lockfileVersion": 1,
+  "lockfileVersion": 2,
   "configVersion": 1,
   "workspaces": {
     "": {
@@ -66,6 +66,7 @@
         "@rose-griffon/auth": "workspace:*",
         "@rose-griffon/db": "workspace:*",
         "@rose-griffon/inagle": "workspace:*",
+        "@rose-griffon/menu-render": "workspace:*",
         "@rose-griffon/types": "workspace:*",
         "@rose-griffon/ui": "workspace:*",
         "@sentry/nextjs": "catalog:",
@@ -278,6 +279,79 @@
         "vitest": "catalog:",
       },
     },
+    "iecode/packages/cdn": {
+      "name": "@rose-griffon/iecode-cdn",
+      "version": "0.1.0",
+      "bin": {
+        "iecode-cdn": "./src/cli.ts",
+      },
+      "dependencies": {
+        "@rose-griffon/iecode-core": "workspace:*",
+      },
+      "devDependencies": {
+        "@rose-griffon/iecode-config": "workspace:*",
+        "@types/bun": "catalog:",
+        "oxlint": "catalog:",
+        "typescript": "catalog:",
+      },
+    },
+    "iecode/packages/core": {
+      "name": "@rose-griffon/iecode-core",
+      "version": "0.1.0",
+      "dependencies": {
+        "node-api-dotnet": "file:../../vendor/node-api-dotnet/out/pkg/node-api-dotnet",
+      },
+      "devDependencies": {
+        "@rose-griffon/iecode-config": "workspace:*",
+        "@types/bun": "catalog:",
+        "oxlint": "catalog:",
+        "typescript": "catalog:",
+      },
+    },
+    "iecode/packages/pipeline": {
+      "name": "@rose-griffon/iecode-pipeline",
+      "version": "0.1.0",
+      "bin": {
+        "iecode-data": "./src/cli.ts",
+      },
+      "dependencies": {
+        "@rose-griffon/iecode-inagle": "workspace:*",
+        "@rose-griffon/iecode-steam-sync": "workspace:*",
+      },
+      "devDependencies": {
+        "@rose-griffon/iecode-config": "workspace:*",
+        "@types/bun": "catalog:",
+        "oxlint": "catalog:",
+        "typescript": "catalog:",
+      },
+    },
+    "iecode/packages/runtime-harness": {
+      "name": "@rose-griffon/iecode-runtime-harness",
+      "version": "0.1.0",
+      "devDependencies": {
+        "@rose-griffon/iecode-config": "workspace:*",
+        "@types/bun": "catalog:",
+        "oxlint": "catalog:",
+        "typescript": "catalog:",
+      },
+    },
+    "iecode/packages/steam-sync": {
+      "name": "@rose-griffon/iecode-steam-sync",
+      "version": "0.1.0",
+      "bin": {
+        "steam-sync": "./src/cli.ts",
+      },
+      "dependencies": {
+        "@aphrody-code/bxc": "^0.6.0",
+        "@rose-griffon/iecode-core": "workspace:*",
+      },
+      "devDependencies": {
+        "@rose-griffon/iecode-config": "workspace:*",
+        "@types/bun": "catalog:",
+        "oxlint": "catalog:",
+        "typescript": "catalog:",
+      },
+    },
     "packages/assets": {
       "name": "@rose-griffon/assets",
       "version": "0.1.0",
@@ -339,6 +413,25 @@
         "vitest": "catalog:",
       },
     },
+    "packages/iecode-config": {
+      "name": "@rose-griffon/iecode-config",
+      "version": "0.1.0",
+    },
+    "packages/iecode-inagle": {
+      "name": "@rose-griffon/iecode-inagle",
+      "version": "0.1.0",
+      "dependencies": {
+        "@rose-griffon/inagle": "workspace:*",
+        "fengari": "catalog:",
+        "valibot": "catalog:",
+      },
+      "devDependencies": {
+        "@rose-griffon/iecode-config": "workspace:*",
+        "@types/bun": "catalog:",
+        "oxlint": "catalog:",
+        "typescript": "catalog:",
+      },
+    },
     "packages/inagle": {
       "name": "@rose-griffon/inagle",
       "version": "1.2.0",
@@ -370,6 +463,28 @@
         "@types/pg": "catalog:",
         "typescript": "catalog:",
         "vitest": "catalog:",
+      },
+    },
+    "packages/menu-render": {
+      "name": "@rose-griffon/menu-render",
+      "version": "0.1.0",
+      "dependencies": {
+        "@rose-griffon/iecode-inagle": "workspace:*",
+        "fengari": "catalog:",
+      },
+      "devDependencies": {
+        "@rose-griffon/iecode-config": "workspace:*",
+        "@types/bun": "catalog:",
+        "@types/react": "catalog:",
+        "@types/react-dom": "catalog:",
+        "oxlint": "catalog:",
+        "react": "catalog:",
+        "react-dom": "catalog:",
+        "typescript": "catalog:",
+      },
+      "peerDependencies": {
+        "react": ">=18.0.0",
+        "react-dom": ">=18.0.0",
       },
     },
     "packages/patreon-bun": {
@@ -630,6 +745,7 @@
     "typescript": "^6.0.3",
     "typescript-json-schema": "^0.67.4",
     "use-image": "^1.1.4",
+    "valibot": "^1.4.1",
     "vaul": "^1.1.2",
     "vitepress": "^1.6.4",
     "vitest": "^4.1.7",
@@ -1420,7 +1536,23 @@
 
     "@rose-griffon/db": ["@rose-griffon/db@workspace:packages/db"],
 
+    "@rose-griffon/iecode-cdn": ["@rose-griffon/iecode-cdn@workspace:iecode/packages/cdn"],
+
+    "@rose-griffon/iecode-config": ["@rose-griffon/iecode-config@workspace:packages/iecode-config"],
+
+    "@rose-griffon/iecode-core": ["@rose-griffon/iecode-core@workspace:iecode/packages/core"],
+
+    "@rose-griffon/iecode-inagle": ["@rose-griffon/iecode-inagle@workspace:packages/iecode-inagle"],
+
+    "@rose-griffon/iecode-pipeline": ["@rose-griffon/iecode-pipeline@workspace:iecode/packages/pipeline"],
+
+    "@rose-griffon/iecode-runtime-harness": ["@rose-griffon/iecode-runtime-harness@workspace:iecode/packages/runtime-harness"],
+
+    "@rose-griffon/iecode-steam-sync": ["@rose-griffon/iecode-steam-sync@workspace:iecode/packages/steam-sync"],
+
     "@rose-griffon/inagle": ["@rose-griffon/inagle@workspace:packages/inagle"],
+
+    "@rose-griffon/menu-render": ["@rose-griffon/menu-render@workspace:packages/menu-render"],
 
     "@rose-griffon/patreon-bun": ["@rose-griffon/patreon-bun@workspace:packages/patreon-bun"],
 
@@ -3090,6 +3222,8 @@
 
     "uzip": ["uzip@0.20201231.0", "", {}, "sha512-OZeJfZP+R0z9D6TmBgLq2LHzSSptGMGDGigGiEe0pr8UBe/7fdflgHlHBNDASTXB5jnFuxHpNaJywSg8YFeGng=="],
 
+    "valibot": ["valibot@1.4.1", "", { "peerDependencies": { "typescript": ">=5" }, "optionalPeers": ["typescript"] }, "sha512-klCmFTz2jeDluy9RwX+F884TCiogtdBJ/YaxSx1EOBYXa3NXNWj8kR1jjN8rzluwojJVWWaHJ4r1U5LfICnM3g=="],
+
     "validate-npm-package-name": ["validate-npm-package-name@7.0.2", "", {}, "sha512-hVDIBwsRruT73PbK7uP5ebUt+ezEtCmzZz3F59BSr2F6OVFnJ/6h8liuvdLrQ88Xmnk6/+xGGuq+pG9WwTuy3A=="],
 
     "validator": ["validator@13.15.35", "", {}, "sha512-TQ5pAGhd5whStmqWvYF4OjQROlmv9SMFVt37qoCBdqRffuuklWYQlCNnEs2ZaIBD1kZRNnikiZOS1eqgkar0iw=="],
@@ -3270,6 +3404,10 @@
 
     "@rollup/pluginutils/estree-walker": ["estree-walker@2.0.2", "", {}, "sha512-Rfkk/Mp/DL7JVje3u18FxFujQlTNR2q6QfMSMB7AvCBx91NGj/ba3kCfza0f6dVDbw7YlRf/nDrn7pQrCCyQ/w=="],
 
+    "@rose-griffon/iecode-core/node-api-dotnet": ["node-api-dotnet@file:iecode/vendor/node-api-dotnet/out/pkg/node-api-dotnet", {}],
+
+    "@rose-griffon/iecode-steam-sync/@aphrody-code/bxc": ["@aphrody-code/bxc@0.6.0", "https://npm.pkg.github.com/download/@aphrody-code/bxc/0.6.0/0c70ac28921823a984e3b138124501f2c5c38c1d", { "dependencies": { "@aphrody-code/challonge": "0.1.2", "@aphrody-code/fut": "0.1.2", "@aphrody-code/voiranime": "0.1.2", "@aphrody-code/worldbeyblade": "0.1.2", "@aphrody-code/x": "1.0.4", "@aphrody-code/xcom": "0.1.2", "@aphrody-code/zukan": "0.1.2", "@bogeychan/elysia-logger": "^0.1.10", "@elysiajs/cors": "^1.4.2", "@elysiajs/swagger": "^1.3.1", "@libsql/client": "^0.17.3", "@mozilla/readability": "^0.6.0", "bottleneck": "^2.19.5", "class-validator": "^0.15.1", "drizzle-orm": "^0.45.2", "elysia": "^1.4.28", "graphql": "^16.14.0", "graphql-yoga": "^5.21.0", "lru-cache": "^11.5.1", "p-limit": "^7.3.0", "p-queue": "^9.3.0", "p-retry": "^8.0.0", "reflect-metadata": "^0.2.2", "type-graphql": "^2.0.0-rc.3", "zod": "^4.4.3" }, "bin": { "bxc": "bin/bxc" } }, "sha512-HNoUhgZ28QAoIDwxOt/a74LMtiGxSmQu4VYA0Bia75T4Ae4yM0l5uh9gOI+aYkf2v3doOIN5UbhbZWC7zhmgRA=="],
+
     "@scalar/themes/@scalar/types": ["@scalar/types@0.1.7", "", { "dependencies": { "@scalar/openapi-types": "0.2.0", "@unhead/schema": "^1.11.11", "nanoid": "^5.1.5", "type-fest": "^4.20.0", "zod": "^3.23.8" } }, "sha512-irIDYzTQG2KLvFbuTI8k2Pz/R4JR+zUUSykVTbEMatkzMmVFnn1VzNSMlODbadycwZunbnL2tA27AXed9URVjw=="],
 
     "@sentry/bundler-plugin-core/dotenv": ["dotenv@16.6.1", "", {}, "sha512-uBq4egWHTcTt33a72vpSG0z3HnPuIl6NqYcTrKEg2azoEyl2hpW0zqlxysq2pK9HlDIHyHyakeYaYnSAwd8bow=="],
@@ -3426,6 +3564,16 @@
 
     "@dotenvx/dotenvx/execa/strip-final-newline": ["strip-final-newline@2.0.0", "", {}, "sha512-BrpvfNAE3dcvq7ll3xVumzjKjZQ5tI1sEUIKr3Uoks0XUl45St3FlatVqef9prk4jRDzhW6WZg+3bk93y6pLjA=="],
 
+    "@rose-griffon/iecode-steam-sync/@aphrody-code/bxc/@aphrody-code/challonge": ["@aphrody-code/challonge@0.1.2", "https://npm.pkg.github.com/download/@aphrody-code/challonge/0.1.2/213cea911bcc0331591c4db377804177258a438a", {}, "sha512-fE+pska2Dii3un1GIiYZrTVGu8CRp+PYVZN9AzK+fx7yWc9QoVKbPmq6QHHf+QBM3+tKZwetcLkxq1ivVlZEcQ=="],
+
+    "@rose-griffon/iecode-steam-sync/@aphrody-code/bxc/@aphrody-code/fut": ["@aphrody-code/fut@0.1.2", "https://npm.pkg.github.com/download/@aphrody-code/fut/0.1.2/c371a6702d5311488f33e1100d69c81e6c419722", { "dependencies": { "bottleneck": "^2.19.5", "lru-cache": "^11.5.1", "p-queue": "^8.0.1", "p-retry": "^6.2.0", "zod": "^3.24.2" } }, "sha512-lMLG2uDZz/Hgcb16Mm8vfMbX/p+943emwbIWExpAmwmvmtx6FTOkPiRM1F5elMpuqNleXQ+DexC77/vlQpsk6w=="],
+
+    "@rose-griffon/iecode-steam-sync/@aphrody-code/bxc/@aphrody-code/voiranime": ["@aphrody-code/voiranime@0.1.2", "https://npm.pkg.github.com/download/@aphrody-code/voiranime/0.1.2/fd3bbcb08be45c8ff9371841942a1880fcffec4a", {}, "sha512-fOAGktaroTIWrSwyTzM9wwdTj2VRUKQwEZxYvhM0+wlARHvsCAaoUj0sjDBLyxhALtk65xw6cduEz0EGjxOImQ=="],
+
+    "@rose-griffon/iecode-steam-sync/@aphrody-code/bxc/@aphrody-code/worldbeyblade": ["@aphrody-code/worldbeyblade@0.1.2", "https://npm.pkg.github.com/download/@aphrody-code/worldbeyblade/0.1.2/5aee176ec3c7fca0972bf2861ab63f892b19f802", { "dependencies": { "cheerio": "^1.2.0" } }, "sha512-MYc5CPuW6CE3D/lPl6dxGnq7BOmx1eHNVFlIUNQPGcOQ5OCkc1mLkFXMXo9HkgJvenJBHaEVwJTelhS/Tk7vfg=="],
+
+    "@rose-griffon/iecode-steam-sync/@aphrody-code/bxc/@aphrody-code/xcom": ["@aphrody-code/xcom@0.1.2", "https://npm.pkg.github.com/download/@aphrody-code/xcom/0.1.2/db7069c4fd2d2fad4c2b4f29529cdd29fdc62ffc", {}, "sha512-rRP0bWyfm/SRd/3ZykC+A5djtaiZwA3JYo5oVh1otuHbV1BxV1z7w4AqQ75fNgCObrFVrla73vNeI4N9ZcaiUQ=="],
+
     "@scalar/themes/@scalar/types/@scalar/openapi-types": ["@scalar/openapi-types@0.2.0", "", { "dependencies": { "zod": "^3.23.8" } }, "sha512-waiKk12cRCqyUCWTOX0K1WEVX46+hVUK+zRPzAahDJ7G0TApvbNkuy5wx7aoUyEk++HHde0XuQnshXnt8jsddA=="],
 
     "@scalar/themes/@scalar/types/nanoid": ["nanoid@5.1.11", "", { "bin": { "nanoid": "bin/nanoid.js" } }, "sha512-v+KEsUv2ps74PaSKv0gHTxTCgMXOIfBEbaqa6w6ISIGC7ZsvHN4N9oJ8d4cmf0n5oTzQz2SLmThbQWhjd/8eKg=="],
@@ -3455,5 +3603,13 @@
     "parse5-parser-stream/parse5/entities": ["entities@6.0.1", "", {}, "sha512-aN97NXWF6AWBTahfVOIrB/NShkzi5H7F9r1s9mD3cDj4Ko5f2qhhVoYMibXF7GlLveb/D2ioWay8lxI97Ven3g=="],
 
     "shadcn/ts-morph/@ts-morph/common": ["@ts-morph/common@0.27.0", "", { "dependencies": { "fast-glob": "^3.3.3", "minimatch": "^10.0.1", "path-browserify": "^1.0.1" } }, "sha512-Wf29UqxWDpc+i61k3oIOzcUfQt79PIT9y/MWfAGlrkjg6lBC1hwDECLXPVJAhWjiGbfBCxZd65F/LIZF3+jeJQ=="],
+
+    "@rose-griffon/iecode-steam-sync/@aphrody-code/bxc/@aphrody-code/fut/p-queue": ["p-queue@8.1.1", "", { "dependencies": { "eventemitter3": "^5.0.1", "p-timeout": "^6.1.2" } }, "sha512-aNZ+VfjobsWryoiPnEApGGmf5WmNsCo9xu8dfaYamG5qaLP7ClhLN6NgsFe6SwJ2UbLEBK5dv9x8Mn5+RVhMWQ=="],
+
+    "@rose-griffon/iecode-steam-sync/@aphrody-code/bxc/@aphrody-code/fut/p-retry": ["p-retry@6.2.1", "", { "dependencies": { "@types/retry": "0.12.2", "is-network-error": "^1.0.0", "retry": "^0.13.1" } }, "sha512-hEt02O4hUct5wtwg4H4KcWgDdm+l1bOaEy/hWzd8xtXB9BqxTWBBhb+2ImAtH4Cv4rPjV76xN3Zumqk3k3AhhQ=="],
+
+    "@rose-griffon/iecode-steam-sync/@aphrody-code/bxc/@aphrody-code/fut/zod": ["zod@3.25.76", "", {}, "sha512-gzUt/qt81nXsFGKIFcC3YnfEAx5NkunCfnDlvuBSSFS02bcXu4Lmea0AFIUwbLWxWPx3d9p8S5QoaujKcNQxcQ=="],
+
+    "@rose-griffon/iecode-steam-sync/@aphrody-code/bxc/@aphrody-code/fut/p-queue/p-timeout": ["p-timeout@6.1.4", "", {}, "sha512-MyIV3ZA/PmyBN/ud8vV9XzwTrNtR4jFrObymZYnZqMmW0zA8Z17vnT0rBgFE/TlohB+YCHqXMgZzb3Csp49vqg=="],
   }
 }

@@ -1,0 +1,62 @@
+# .NET build artifacts
+bin/
+obj/
+*.user
+
+# IECODE extracted data (gros, non versionné)
+data/
+dump/
+out/
+
+# Node / Bun / Turbo
+node_modules/
+.turbo/
+dist/
+build/
+*.tsbuildinfo
+
+# Test coverage
+coverage/
+*.lcov
+
+# Caches lint/format
+.oxlintcache
+.cache/
+
+# Logs
+*.log
+logs/
+
+# Editor / OS
+.DS_Store
+.idea/
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+
+# AI instructions files — gardés en local seulement, jamais commit/push
+CLAUDE.md
+**/CLAUDE.md
+GEMINI.md
+**/GEMINI.md
+
+# Markdown — only allow root README/CHANGELOG/SECURITY/LICENSE + docs/**
+*.md
+*.txt
+!README.md
+!CHANGELOG.md
+!SECURITY.md
+!LICENSE
+!docs/**/*.md
+!docs/**/*.txt
+!packages/*/README.md
+# Skill bun écrit à la main (non restaurable via skills-lock) → committé
+!.agents/skills/bun/SKILL.md
+
+# Secrets — cookie jars, tokens (jamais commit)
+.secrets/
+
+# Artefacts reverse-engineering (dumps mémoire, décompilation, gros binaires)
+/re/
+/.secrets/
+/.secrets/

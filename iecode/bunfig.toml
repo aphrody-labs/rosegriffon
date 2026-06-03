@@ -1,0 +1,38 @@
+# Config Bun racine — monorepo iecode (même pattern que rg).
+# Optimise la RAM globale (mode smol de Bun).
+smol = true
+telemetry = false
+
+[install]
+# Hoist deps autant que possible (vitesse + déduplication)
+hoist = true
+saveTextLockfile = true
+exact = false
+
+[install.cache]
+# Chemin absolu — Bun n'expand PAS le ~ dans bunfig
+dir = "/home/ubuntu/.bun/install/cache"
+
+[run]
+# Permet d'utiliser bun comme task runner sans préfixe
+bun = true
+silent = false
+
+[test]
+coverage = false
+# Exclut du scan de tests : submodule .NET, builds, fixtures, corpus RE, deps.
+# (les dossiers matchés sont élagués pendant le scan → pas de traversée inutile)
+pathIgnorePatterns = [
+	"vendor/**",
+	"**/dist/**",
+	"**/fixtures/**",
+	".turbo/**",
+	"re/**",
+	"node_modules/**",
+]
+# Rapports de couverture : ignore les mêmes zones + les tests eux-mêmes.
+coveragePathIgnorePatterns = [
+	"**/*.test.ts",
+	"**/fixtures/**",
+	"vendor/**",
+]

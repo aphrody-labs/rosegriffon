@@ -1,0 +1,16 @@
+{
+	"name": "@rose-griffon/iecode-config",
+	"version": "0.1.0",
+	"private": true,
+	"description": "Configs partagées iecode : presets tsconfig + oxlint (même pattern que @rose-griffon/config).",
+	"files": [
+		"tsconfig-*.json",
+		"oxlintrc.json"
+	],
+	"type": "module",
+	"exports": {
+		"./tsconfig-base.json": "./tsconfig-base.json",
+		"./tsconfig-bun.json": "./tsconfig-bun.json",
+		"./oxlintrc.json": "./oxlintrc.json"
+	}
+}

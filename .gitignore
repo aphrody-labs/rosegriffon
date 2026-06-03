@@ -109,3 +109,20 @@ data/backups/
 *.p12
 serviceaccount*.json
 *credentials*.json
+
+# Sécurité : secrets jamais trackés (iecode .secrets/ + tout .env réel, où qu'ils soient)
+.secrets/
+**/.secrets/
+*.env
+!*.env.example
+!*.env.sample
+
+# .claude : config locale + gros docs LLM jamais trackés (agents/skills OK)
+.claude/settings.local.json
+.claude/docs/*.txt
+**/.claude/docs/*.txt
+
+# Artefacts de test Playwright (rapports/snapshots) — jamais trackés
+playwright-report/
+**/playwright-report/
+**/tests-e2e/__snapshots__/

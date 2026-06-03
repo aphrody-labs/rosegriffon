@@ -1,0 +1,36 @@
+{
+	"name": "@rose-griffon/iecode-pipeline",
+	"version": "0.1.0",
+	"private": true,
+	"description": "Flow IEVR headless unifié : acquisition Steam (steam-sync) → extraction → parsing inagle → corpus versionné + API HTTP, avec auto-update sur nouveau build.",
+	"type": "module",
+	"main": "src/index.ts",
+	"module": "src/index.ts",
+	"types": "src/index.ts",
+	"exports": {
+		".": {
+			"bun": "./src/index.ts",
+			"default": "./src/index.ts"
+		}
+	},
+	"bin": {
+		"iecode-data": "./src/cli.ts"
+	},
+	"scripts": {
+		"lint": "oxlint src",
+		"lint:fix": "oxlint src --fix",
+		"type-check": "tsc --noEmit",
+		"test": "bun test",
+		"clean": "rm -rf *.tsbuildinfo"
+	},
+	"dependencies": {
+		"@rose-griffon/iecode-inagle": "workspace:*",
+		"@rose-griffon/iecode-steam-sync": "workspace:*"
+	},
+	"devDependencies": {
+		"@rose-griffon/iecode-config": "workspace:*",
+		"@types/bun": "catalog:",
+		"oxlint": "catalog:",
+		"typescript": "catalog:"
+	}
+}

@@ -1,0 +1,3 @@
+[submodule "vendor/node-api-dotnet"]
+	path = vendor/node-api-dotnet
+	url = https://github.com/aphrody-code/node-api-dotnet.git

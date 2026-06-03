@@ -1,0 +1,38 @@
+{
+	"name": "@rose-griffon/iecode-core",
+	"version": "0.1.0",
+	"private": true,
+	"description": "Pont Bun/Node ↔ IECODE.Core (.NET 10) via node-api-dotnet.",
+	"type": "module",
+	"main": "src/index.ts",
+	"module": "src/index.ts",
+	"types": "src/index.ts",
+	"exports": {
+		".": {
+			"types": "./src/index.ts",
+			"bun": "./src/index.ts",
+			"import": "./dist/index.js",
+			"default": "./dist/index.js"
+		}
+	},
+	"scripts": {
+		"build:dotnet": "dotnet build ../../src/IECODE.Core/IECODE.Core.csproj -c Release",
+		"gen:types": "bun scripts/gen-types.ts",
+		"build": "bun run build:dotnet && bun build src/index.ts --outdir dist --target bun --minify --sourcemap=linked --external node-api-dotnet",
+		"test": "bun test",
+		"lint": "oxlint src",
+		"lint:fix": "oxlint src --fix",
+		"type-check": "tsc --noEmit",
+		"clean": "rm -rf dist *.tsbuildinfo"
+	},
+	"dependencies": {
+		"node-api-dotnet": "file:../../vendor/node-api-dotnet/out/pkg/node-api-dotnet"
+	},
+	"devDependencies": {
+		"@rose-griffon/iecode-config": "workspace:*",
+		"@types/bun": "catalog:",
+		"oxlint": "catalog:",
+		"typescript": "catalog:"
+	},
+	"//": "Bun-first : on expose le TS source (Bun transpile à l'import, zéro build requis pour les consommateurs Bun). dist/ reste pour les consommateurs non-Bun."
+}

@@ -29,3 +29,13 @@ data/backups
 apps/azalee/.next
 apps/azalee/data
 apps/azalee/public
+
+# iecode : C#/.NET + corpus RE exclus du build azalee (les packages TS restent via workspace)
+iecode/src
+iecode/dotnet
+iecode/vendor
+iecode/re
+iecode/docs
+iecode/IECODE.sln
+iecode/global.json
+iecode/gpu-bridge

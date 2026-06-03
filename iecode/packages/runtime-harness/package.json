@@ -1,0 +1,49 @@
+{
+	"name": "@rose-griffon/iecode-runtime-harness",
+	"version": "0.1.0",
+	"private": true,
+	"description": "Harness d'exécution live IEVR sous Wine/LavaPipe headless : confinement cgroup v2 (kill atomique), Xvfb, env Vulkan logiciel, pinning CPU. Pour le reverse-engineering en direct uniquement — le pipeline DATA n'en a PAS besoin (extraction statique SteamKit2).",
+	"type": "module",
+	"main": "src/index.ts",
+	"module": "src/index.ts",
+	"types": "src/index.ts",
+	"exports": {
+		".": {
+			"bun": "./src/index.ts",
+			"default": "./src/index.ts"
+		},
+		"./session": {
+			"bun": "./src/session.ts",
+			"default": "./src/session.ts"
+		},
+		"./cgroup": {
+			"bun": "./src/cgroup.ts",
+			"default": "./src/cgroup.ts"
+		},
+		"./vulkan": {
+			"bun": "./src/vulkan.ts",
+			"default": "./src/vulkan.ts"
+		},
+		"./xvfb": {
+			"bun": "./src/xvfb.ts",
+			"default": "./src/xvfb.ts"
+		},
+		"./cpu": {
+			"bun": "./src/cpu.ts",
+			"default": "./src/cpu.ts"
+		}
+	},
+	"scripts": {
+		"lint": "oxlint src",
+		"lint:fix": "oxlint src --fix",
+		"type-check": "tsc --noEmit",
+		"test": "bun test",
+		"clean": "rm -rf *.tsbuildinfo"
+	},
+	"devDependencies": {
+		"@rose-griffon/iecode-config": "workspace:*",
+		"@types/bun": "catalog:",
+		"oxlint": "catalog:",
+		"typescript": "catalog:"
+	}
+}

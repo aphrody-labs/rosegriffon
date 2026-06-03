@@ -1,0 +1,5 @@
+# node-api-dotnet dynamic host artifacts + generated .NET typedefs (regenerable)
+dotnet-host/
+# C# helper build outputs
+tools/**/bin/
+tools/**/obj/
