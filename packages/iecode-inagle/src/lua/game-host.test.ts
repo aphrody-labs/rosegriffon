@@ -8,8 +8,8 @@ import { describe, expect, it, beforeAll } from "bun:test";
 import { join } from "node:path";
 import { existsSync } from "node:fs";
 
-import { runLuaSource, loadHashDictionary } from "./runtime.js";
-import { GameLuaHost, loadMenuCommandNames } from "./game-host.js";
+import { runLuaSource, loadHashDictionary } from "./runtime";
+import { GameLuaHost, loadMenuCommandNames } from "./game-host";
 
 const ROOT = join(import.meta.dir, "../../../../..");
 const DECOMPILED = join(ROOT, "re/lua/decompiled/common/script/lua/menu/qrcode_menu.lua");

@@ -1,7 +1,7 @@
 import { Discord, Slash } from "@rpbey/discordx";
 import { type ChatInputCommandInteraction, MessageFlags, PermissionFlagsBits } from "discord.js";
 
-import { syncAllMembers } from "../services/syncMembers.js";
+import { syncAllMembers } from "../services/syncMembers";
 
 @Discord()
 export class SyncCommand {

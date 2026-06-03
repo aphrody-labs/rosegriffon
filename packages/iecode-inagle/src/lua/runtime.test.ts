@@ -13,7 +13,7 @@ import { describe, expect, it, beforeAll } from "bun:test";
 import { join } from "node:path";
 import { existsSync } from "node:fs";
 
-import { runLuaScript, runLuaSource, DefaultLuaHost, LuaRuntimeError, loadHashDictionary, resolveHash } from "./runtime.js";
+import { runLuaScript, runLuaSource, DefaultLuaHost, LuaRuntimeError, loadHashDictionary, resolveHash } from "./runtime";
 
 const RAW_DIR = join(import.meta.dir, "../../../../../re/lua/raw");
 const DECOMPILED_DIR = join(import.meta.dir, "../../../../../re/lua/decompiled/common/script/lua/menu");

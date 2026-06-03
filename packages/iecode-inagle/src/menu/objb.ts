@@ -42,7 +42,7 @@ import type {
 	TextComponent,
 	TextEntry,
 	UnknownComponent,
-} from "./model.js";
+} from "./model";
 
 // ── CRC-32 des records connus ─────────────────────────────────────────────────
 // Validés sur les vrais fichiers IEVR.

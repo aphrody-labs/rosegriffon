@@ -6,11 +6,11 @@
 import { describe, expect, it } from "bun:test";
 import * as v from "valibot";
 
-import { CharaData, CharaSheetData, CharaSkillsColumn, SkillData } from "./jsonb.js";
+import { CharaData, CharaSheetData, CharaSkillsColumn, SkillData } from "./jsonb";
 import {
 	CharaElement, CharaPosition, CharaRarityLabel, Gender, SkillCategory,
-} from "./enums.js";
-import { isCrc32Hex, toCrc32Hex } from "./ids.js";
+} from "./enums";
+import { isCrc32Hex, toCrc32Hex } from "./ids";
 import fixtures from "./fixtures/inagle.sample.json" with { type: "json" };
 import edge from "./fixtures/inagle.edge.json" with { type: "json" };
 

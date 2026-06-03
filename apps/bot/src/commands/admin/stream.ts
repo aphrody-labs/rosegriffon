@@ -1,9 +1,9 @@
 import { Discord, Slash, SlashGroup, SlashOption } from "@rpbey/discordx";
 import { ApplicationCommandOptionType, type ChatInputCommandInteraction } from "discord.js";
-import { logAdminAction } from "../../lib/audit.js";
-import { DAYS_FR, rgEmbed } from "../../lib/embeds.js";
-import { withRgAdmin } from "../../lib/rbac.js";
-import { addStream, deleteStream, listStreamsAdmin } from "../../services/admin.js";
+import { logAdminAction } from "../../lib/audit";
+import { DAYS_FR, rgEmbed } from "../../lib/embeds";
+import { withRgAdmin } from "../../lib/rbac";
+import { addStream, deleteStream, listStreamsAdmin } from "../../services/admin";
 
 @Discord()
 @SlashGroup({ name: "rg-stream-admin", description: "Gestion planning stream (admin)" })

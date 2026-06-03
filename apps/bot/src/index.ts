@@ -17,7 +17,7 @@ import "./commands/admin/settings.ts";
 import "./commands/admin/team.ts";
 import "./events/ready.ts";
 import "./events/memberEvents.ts";
-import { DISCORD_TOKEN, GUILD_ID } from "./lib/config.js";
+import { DISCORD_TOKEN, GUILD_ID } from "./lib/config";
 
 const client = new Client({
 	intents: [

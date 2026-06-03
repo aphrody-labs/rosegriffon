@@ -252,7 +252,7 @@ export function buildSkillsDatabase(options?: {
 			// Use a dynamic import or assume it's available. For now, let's use a simpler approach.
 			// I will add the import at the top of the file in the next step.
 
-			const { buildSkillDatabase: buildRawDb } = require("./mapper.ts");
+			const { buildSkillDatabase: buildRawDb } = require("./mapper.js");
 			const mapperDb = buildRawDb({ dataRoot: PATHS.root });
 			// eslint-disable-next-line @typescript-eslint/no-explicit-any
 			rawSkills = mapperDb.skills as any;

@@ -12,7 +12,7 @@
  * schémas — toute dérive de structure casse le test.
  */
 
-export * from "./ids.js";
-export * from "./enums.js";
-export * from "./jsonb.js";
-export * from "./tables.js";
+export * from "./ids";
+export * from "./enums";
+export * from "./jsonb";
+export * from "./tables";

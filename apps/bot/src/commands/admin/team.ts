@@ -1,10 +1,10 @@
 import { Discord, Slash, SlashChoice, SlashGroup, SlashOption } from "@rpbey/discordx";
 import { ApplicationCommandOptionType, type ChatInputCommandInteraction } from "discord.js";
-import { logAdminAction } from "../../lib/audit.js";
-import { sql } from "../../lib/db.js";
-import { rgEmbed } from "../../lib/embeds.js";
-import { withRgAdmin } from "../../lib/rbac.js";
-import { deleteTeamMember, setTeamMemberActive } from "../../services/admin.js";
+import { logAdminAction } from "../../lib/audit";
+import { sql } from "../../lib/db";
+import { rgEmbed } from "../../lib/embeds";
+import { withRgAdmin } from "../../lib/rbac";
+import { deleteTeamMember, setTeamMemberActive } from "../../services/admin";
 
 const TEAMS = [
 	{ name: "Bureau de l'Association", value: "bureauteam" },
@@ -256,7 +256,7 @@ export class AdminTeamCommand {
 		await withRgAdmin(async (admin, i) => {
 			await i.deferReply();
 			try {
-				const { syncStaffPhotos } = await import("../../services/teamPhotos.js");
+				const { syncStaffPhotos } = await import("../../services/teamPhotos");
 				const report = await syncStaffPhotos(i.client);
 				await logAdminAction({
 					adminId: admin.profileId,

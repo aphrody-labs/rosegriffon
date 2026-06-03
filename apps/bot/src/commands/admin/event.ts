@@ -1,9 +1,9 @@
 import { Discord, Slash, SlashChoice, SlashGroup, SlashOption } from "@rpbey/discordx";
 import { ApplicationCommandOptionType, type ChatInputCommandInteraction } from "discord.js";
-import { logAdminAction } from "../../lib/audit.js";
-import { fmtDate, rgEmbed, truncate } from "../../lib/embeds.js";
-import { withRgAdmin } from "../../lib/rbac.js";
-import { createEvent, deleteEvent, listEventsAdmin, updateEvent } from "../../services/admin.js";
+import { logAdminAction } from "../../lib/audit";
+import { fmtDate, rgEmbed, truncate } from "../../lib/embeds";
+import { withRgAdmin } from "../../lib/rbac";
+import { createEvent, deleteEvent, listEventsAdmin, updateEvent } from "../../services/admin";
 
 function parseDate(input: string): Date | null {
 	// Accepte ISO 8601 ou formats simples "YYYY-MM-DD HH:mm"

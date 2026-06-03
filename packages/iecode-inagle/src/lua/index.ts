@@ -20,9 +20,9 @@
  * ```
  */
 
-export { isLua52, parseLua52, decodeInstruction, LuaParseError } from "./parser.js";
-export { disassemble, formatInstruction, summarize } from "./disassembler.js";
-export { Opcode, OPCODE_NAMES, opcodeName } from "./constants.js";
+export { isLua52, parseLua52, decodeInstruction, LuaParseError } from "./parser";
+export { disassemble, formatInstruction, summarize } from "./disassembler";
+export { Opcode, OPCODE_NAMES, opcodeName } from "./constants";
 export type {
 	LuaChunk,
 	LuaConstant,
@@ -31,7 +31,7 @@ export type {
 	LuaLocal,
 	LuaProto,
 	LuaUpvalue,
-} from "./model.js";
+} from "./model";
 
 // ── Runtime ───────────────────────────────────────────────────────────────────
 export {
@@ -43,11 +43,11 @@ export {
 	loadHashDictionary,
 	resolveHash,
 	UNLUAC_JAR_PATH,
-} from "./runtime.js";
+} from "./runtime";
 export type {
 	LuaGameHost,
 	LuaLayerState,
 	LuaCallRecord,
 	LayerInfo,
 	RunLuaOptions,
-} from "./runtime.js";
+} from "./runtime";

@@ -15,7 +15,7 @@ import {
 	crcKeyFromFileName,
 	CfgBinDecodeError,
 	type CfgBinDocument,
-} from "./generic.js";
+} from "./generic";
 
 // ── Chemins ───────────────────────────────────────────────────────────────────
 

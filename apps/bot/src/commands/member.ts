@@ -5,8 +5,8 @@ import {
 	type ChatInputCommandInteraction,
 } from "discord.js";
 
-import { renderMemberList } from "../lib/canvas/cards.js";
-import { findMember } from "../services/website.js";
+import { renderMemberList } from "../lib/canvas/cards";
+import { findMember } from "../services/website";
 
 @Discord()
 export class MemberCommand {

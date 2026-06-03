@@ -3,7 +3,7 @@
  * Réexporte l'API publique de ObjbParser + les types du modèle.
  */
 
-export { isObjb, ObjbParseError, parseObjb, parseObjbFile } from "./objb.js";
+export { isObjb, ObjbParseError, parseObjb, parseObjbFile } from "./objb";
 export type {
 	AnimationComponent,
 	AttachLocatorComponent,
@@ -23,4 +23,4 @@ export type {
 	TextComponent,
 	TextEntry,
 	UnknownComponent,
-} from "./model.js";
+} from "./model";

@@ -5,8 +5,8 @@ import {
 	type ChatInputCommandInteraction,
 } from "discord.js";
 
-import { renderProfileCard } from "../lib/canvas/cards.js";
-import { getProfile } from "../services/website.js";
+import { renderProfileCard } from "../lib/canvas/cards";
+import { getProfile } from "../services/website";
 
 @Discord()
 export class ProfilCommand {

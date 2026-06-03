@@ -11,7 +11,7 @@
  */
 
 import * as v from "valibot";
-import { Crc32Hex } from "./ids.js";
+import { Crc32Hex } from "./ids";
 
 // ── Briques communes ──────────────────────────────────────────────────────────
 

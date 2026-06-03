@@ -5,8 +5,8 @@ import {
 	type ChatInputCommandInteraction,
 } from "discord.js";
 
-import { renderTeamGrid } from "../lib/canvas/cards.js";
-import { sql } from "../lib/db.js";
+import { renderTeamGrid } from "../lib/canvas/cards";
+import { sql } from "../lib/db";
 
 const TEAMS: Record<string, string> = {
 	bureauteam: "Bureau de l'Association",

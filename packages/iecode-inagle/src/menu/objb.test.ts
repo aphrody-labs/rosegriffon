@@ -4,8 +4,8 @@
  */
 
 import { expect, test, describe } from "bun:test";
-import { isObjb, ObjbParseError, parseObjb, parseObjbFile } from "./objb.js";
-import type { AnimationComponent, MeshVisibleComponent, PrimitiveComponent, RenderComponent, TextComponent } from "./model.js";
+import { isObjb, ObjbParseError, parseObjb, parseObjbFile } from "./objb";
+import type { AnimationComponent, MeshVisibleComponent, PrimitiveComponent, RenderComponent, TextComponent } from "./model";
 
 const OBJ_DIR = "/home/ubuntu/data/common/gamedata/menu/obj";
 const hasFiles = await Bun.file(`${OBJ_DIR}/title00_09_version.objbin`).exists();

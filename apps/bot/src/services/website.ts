@@ -1,5 +1,5 @@
-import { cached } from "../lib/cache.js";
-import { sql } from "../lib/db.js";
+import { cached } from "../lib/cache";
+import { sql } from "../lib/db";
 import type {
 	TeamMember,
 	Profile,

@@ -2,9 +2,9 @@
  * Smoke test : exercise toutes les fonctions services + RBAC + audit
  * sans toucher Discord. Sortie attendue : 0 (succès), > 0 (au moins 1 fail).
  */
-import { logAdminAction } from "../lib/audit.js";
-import { sql } from "../lib/db.js";
-import { NotAdminError, requireRgAdmin } from "../lib/rbac.js";
+import { logAdminAction } from "../lib/audit";
+import { sql } from "../lib/db";
+import { NotAdminError, requireRgAdmin } from "../lib/rbac";
 import {
 	getAdminStats,
 	getUserByDiscord,
@@ -13,7 +13,7 @@ import {
 	listSettings,
 	listStreamsAdmin,
 	listUsers,
-} from "../services/admin.js";
+} from "../services/admin";
 
 const ADMIN_DISCORD_ID = "299502648317444096"; // koltilasko
 

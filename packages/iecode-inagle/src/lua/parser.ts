@@ -7,8 +7,8 @@
  *   Ordre des champs : code, constants, sub-protos, upvalues, debug.
  */
 
-import { LUA_SIGNATURE, LUA_VERSION_52, LUAC_TAIL, SBIAS } from "./constants.js";
-import type { LuaChunk, LuaConstant, LuaHeader, LuaInstruction, LuaLocal, LuaProto, LuaUpvalue } from "./model.js";
+import { LUA_SIGNATURE, LUA_VERSION_52, LUAC_TAIL, SBIAS } from "./constants";
+import type { LuaChunk, LuaConstant, LuaHeader, LuaInstruction, LuaLocal, LuaProto, LuaUpvalue } from "./model";
 
 // ── Erreur ────────────────────────────────────────────────────────────────────
 export class LuaParseError extends Error {
