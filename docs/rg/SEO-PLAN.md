@@ -37,3 +37,25 @@ Honnêteté : le code pose tous les signaux corrects, mais le rang #1 dépend de
 - **azalee** : ajouter les schémas tools demandés par le marché (tier list, team builder) = pages à fort potentiel de mots-clés ; JSON-LD `Article`/`VideoObject` (RGTV) ; BreadcrumbList.
 - **website** : Person/author sur azalee+achillea ; `Article` JSON-LD sur `/chroniques/[slug]` ; sitemap dynamique des chroniques ; corriger les 9 erreurs TS préexistantes (stripe apiVersion, googlemaps `importLibrary` v2.1, next.config typing).
 - **Mesure** : Search Console (rosegriffon.fr + azalee), Core Web Vitals, suivi requêtes marque + « yoyo ».
+
+## Best practices 2026 — écarts identifiés (recherche web)
+
+Sources : DebugBear / Search Engine Land / Google AI-optimization-guide / Next.js learn (juin 2026).
+
+- **GEO (Generative Engine Optimization)** : l'objectif bascule de « ranker » à « être CITÉ » par les IA. Les **données structurées sont le langage des LLM** → ajouter `Article`, `FAQPage`, `HowTo`, `BreadcrumbList` (en plus de Organization/WebSite/Person déjà posés). Contenu en **HTML serveur** (les crawlers IA ne lisent que le HTML rendu côté serveur, pas le client-side). Fraîcheur : maj contenu ≤ 3 mois (biais de récence des IA).
+- **robots.txt IA** : autoriser explicitement GPTBot, ClaudeBot, anthropic-ai, Google-Extended, PerplexityBot, CCBot, Bytespider (en cours via l'agent cron).
+- **Core Web Vitals 2026** : **INP < 200 ms** (a remplacé FID), LCP < 2,5 s, CLS < 0,1. Leviers : `next/image` + `priority` au-dessus de la ligne de flottaison, Server Components + streaming, défer JS non critique, débounce. Mesurer en **field data (CrUX)**, pas seulement lab.
+
+## Librairies — état
+
+Déjà présent : `@vercel/speed-insights`, `@vercel/analytics`, `@vercel/og`, `schema-dts` (typage JSON-LD). Stack bien équipé.
+Manquant / optionnel : `web-vitals` (RUM custom — optionnel, Speed Insights couvre le field data). Le reste des écarts est du **contenu** (schémas Breadcrumb/FAQ/Article, h1) et non des libs.
+
+## Audit bxc « en masse » — `scripts/seo-bxc-audit.ts` (exécuté)
+
+Outil : drive `bxc recon` (rendu réel) + parse meta HTML (title/description/canonical/OG/JSON-LD/h1) sur un set curé d'URLs clés, en pool concurrent. À câbler en tâche cron `seo-site-audit`. Findings du 1er run (17 URLs, tout en 200) :
+
+- **website `/` (home) : aucun `<h1>`** — à corriger (P0, signal SEO majeur).
+- **website `/notre-equipe*`** : h1 absent + aucun JSON-LD → traité par l'agent /notre-equipe (ProfilePage/Person).
+- **website `/chroniques`** : `og:image` absent ; `/a-propos`, `/nous-soutenir` : aucun JSON-LD.
+- **azalee `/` : 4 h1** (cible 1) ; **`/chara`, `/skill`, `/passive` : aucun h1** (P0 — pages d'index à fort trafic) ; `/item`, `/aura`, `/news` : 2 h1 + JSON-LD manquant ; `/news` : description 57 car (cible 70-165).
