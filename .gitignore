@@ -43,10 +43,16 @@ logs/
 *.swp
 *.swo
 
-# Claude / AI
-.claude/local.json
+# Claude / AI — TOUS les dossiers AI gardés en local seulement, jamais commit/push
+.claude/
+.agents/
+.cursor/
+.gemini/
+.grok/
 .serena/
 .aider*
+.cursorrules
+.windsurfrules
 
 # Caches
 .cache/
@@ -55,11 +61,20 @@ logs/
 .parcel-cache/
 .swc/
 
-# AI instructions files — gardés en local seulement, jamais commit/push
+# AI instructions / config files — gardés en local seulement, jamais commit/push
 CLAUDE.md
 **/CLAUDE.md
 GEMINI.md
 **/GEMINI.md
+AGENTS.md
+**/AGENTS.md
+ai.json
+**/ai.json
+skills-lock.json
+**/skills-lock.json
+copilot-instructions.md
+**/copilot-instructions.md
+.github/copilot-instructions.md
 
 # Markdown — only allow root README/CHANGELOG/SECURITY/LICENSE + docs/**
 *.md
