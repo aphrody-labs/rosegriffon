@@ -1,8 +1,8 @@
 import { Discord, Slash, SlashGroup, SlashOption } from "@rpbey/discordx";
 import { ApplicationCommandOptionType, type ChatInputCommandInteraction } from "discord.js";
 
-import { fmtDate, rgEmbed, truncate } from "../lib/embeds.ts";
-import { azaleeLatest } from "../services/website.ts";
+import { fmtDate, rgEmbed, truncate } from "../lib/embeds.js";
+import { azaleeLatest } from "../services/website.js";
 
 const AZALEE_BASE = "https://azalee.rosegriffon.fr";
 

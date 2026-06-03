@@ -4,10 +4,10 @@ import {
 	type ChatInputCommandInteraction,
 	type User,
 } from "discord.js";
-import { logAdminAction } from "../../lib/audit.ts";
-import { rgEmbed, truncate } from "../../lib/embeds.ts";
-import { type RgAdmin, withRgAdmin } from "../../lib/rbac.ts";
-import { getUserByDiscord, getUserById, listUsers, setUserRole } from "../../services/admin.ts";
+import { logAdminAction } from "../../lib/audit.js";
+import { rgEmbed, truncate } from "../../lib/embeds.js";
+import { type RgAdmin, withRgAdmin } from "../../lib/rbac.js";
+import { getUserByDiscord, getUserById, listUsers, setUserRole } from "../../services/admin.js";
 
 const VALID_ROLES = ["user", "premium", "moderator", "staff", "admin", "banned"] as const;
 

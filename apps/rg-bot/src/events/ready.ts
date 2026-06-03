@@ -1,9 +1,9 @@
 import { Discord, Once } from "@rpbey/discordx";
 import type { Client } from "discord.js";
 
-import { syncAllMembers } from "../services/syncMembers.ts";
-import { syncStaffPhotos } from "../services/teamPhotos.ts";
-import { GUILD_ID, SYNC_INTERVAL_MS } from "../lib/config.ts";
+import { syncAllMembers } from "../services/syncMembers.js";
+import { syncStaffPhotos } from "../services/teamPhotos.js";
+import { GUILD_ID, SYNC_INTERVAL_MS } from "../lib/config.js";
 
 @Discord()
 export class ReadyEvent {

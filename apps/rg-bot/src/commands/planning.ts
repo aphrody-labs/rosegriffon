@@ -1,8 +1,8 @@
 import { Discord, Slash, SlashOption } from "@rpbey/discordx";
 import { ApplicationCommandOptionType, type ChatInputCommandInteraction } from "discord.js";
 
-import { DAYS_FR, rgEmbed, rgUrl } from "../lib/embeds.ts";
-import { getPlanning } from "../services/website.ts";
+import { DAYS_FR, rgEmbed, rgUrl } from "../lib/embeds.js";
+import { getPlanning } from "../services/website.js";
 
 @Discord()
 export class PlanningCommand {

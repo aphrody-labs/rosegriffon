@@ -1,9 +1,9 @@
 import { Discord, Slash, SlashGroup, SlashOption } from "@rpbey/discordx";
 import { ApplicationCommandOptionType, type ChatInputCommandInteraction } from "discord.js";
-import { logAdminAction } from "../../lib/audit.ts";
-import { rgEmbed, truncate } from "../../lib/embeds.ts";
-import { withRgAdmin } from "../../lib/rbac.ts";
-import { getSettingDetail, listSettings, setSetting } from "../../services/admin.ts";
+import { logAdminAction } from "../../lib/audit.js";
+import { rgEmbed, truncate } from "../../lib/embeds.js";
+import { withRgAdmin } from "../../lib/rbac.js";
+import { getSettingDetail, listSettings, setSetting } from "../../services/admin.js";
 
 function fmtValue(v: unknown): string {
 	if (v === null || v === undefined) return "null";
