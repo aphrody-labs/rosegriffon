@@ -57,13 +57,13 @@ servis correctement par l'origine (200). Le website n'active pas le CDN en prod 
 
 | # | Source | Symptôme (vérifié) | Sévérité | Action |
 |---|---|---|:--:|---|
-| 1 | **CDN dx11 (azalee jeu)** | ~~404 global sur `cdn.rosegriffon.fr/dx11/menu/**`~~ → **FAIT (2026-06-03)** : alias nginx corrigé `steamcmd/`→`iecode/inazuma/data/dx11/` ; `curl -sI .../dx11/menu/icon_chr/face/c01000010_l_c01000010_1_l00.png` = **200** (image/png, 26848 o) | **P0** | ~~Déployer/synchroniser le dump dx11~~ Cause unique = alias nginx pointant vers `steamcmd/` (inexistant) ; corrigé vers `…/iecode/inazuma/data/dx11/` (40 471 PNG servis), `nginx -t` + reload OK |
+| 1 | **CDN dx11 (azalee jeu)** | ~~404 global sur `cdn.rosegriffon.fr/dx11/menu/**`~~ → **FAIT (2026-06-03)** : alias nginx corrigé `steamcmd/`→`iecode/inazuma/data/dx11/` ; `curl -sI .../dx11/menu/icon_chr/face/c01000010_l_c01000010_1_l00.png` = **200** (image/png, 26848 o) ; conf **versionnée** dans `infra/nginx/cdn.rosegriffon.conf` (cdn-3, anti-dérive) | **P0** | ~~Déployer/synchroniser le dump dx11~~ Cause unique = alias nginx pointant vers `steamcmd/` (inexistant) ; corrigé vers `…/iecode/inazuma/data/dx11/` (40 471 PNG servis), `nginx -t` + reload OK ; conf déployée copiée dans le repo (`infra/nginx/`) pour tracer le fix et éviter la perte (cdn-3) |
 | 2 | **CDN static menu** | `…/static/azalee/menu/**` 404 | **P0** | Idem : alias nginx `location /static/azalee/menu/` + upload des PNG menu |
 | 3 | **Légacy Supabase Storage** | bucket `menu` → 400 | P0 | Cible morte : confirmer que le rewrite front (→ dx11) suffit une fois (1) fait ; sinon migrer les paths DB |
 | 4 | **Items (mapping)** | résolveur `{id}.png` ≠ fichier `icon_item{NN}_{id}.png` | P1 | Compléter `apps/azalee/data/item-image-manifest.json` (couvrir les 1668 items) OU corriger le fallback |
 | 5 | **Telop techniques** | `telop_waza/fr` n'a pas de `rhd*` (codes `a*`/`k*` seulement) | P1 | Établir le mapping technique→telop, OU confirmer absence dans le dump complet et masquer l'image |
 | 6 | **Keshins sans image** | 66/289 `image_url` NULL | P1 | Re-mapper via `asset_code` → `icon_chr/aura_fs/k{N}` |
-| 7 | **Passives sans image** | 128/128 `image_url` NULL | P2 | Vérifier l'existence d'icônes passives dans le dump ; sinon UI sans visuel assumée |
+| 7 | **Passives sans image** | 128/128 `image_url` NULL | P2 | **FAIT (db-4)** — vérifié dump (3.7G) : `200_icon/` = emblem/item/tactics uniquement, aucun `*passive*` ; pas d'asset jeu. UI `passive/page.tsx` rend des icônes Lucide (sans visuel jeu, assumé). `image_url` NULL volontaire, aucune ré-extraction. Cf. `azalee-tables-gaps.md §6` |
 | 8 | **`inagle_characters.stats` jsonb vide** | 6148 lignes, colonne morte | P2 | Peupler depuis `stat_*` au re-parse inagle, ou documenter dépréciée |
 | 9 | **Localisation FR partielle** | 58 sans `name_fr`, 157 sans `description_fr` | P2 | Compléter la résolution hash→texte FR (iecode `common/text/fr`) |
 | 10 | **`inagle_game_assets` vide** | manifest CDN jamais peuplé (0 ligne) | P1 | Générer le manifeste assets (path + existence) pour valider URL avant render |
@@ -77,7 +77,7 @@ servis correctement par l'origine (200). Le website n'active pas le CDN en prod 
 - `inagle_characters.skills` vide pour 423 lignes.
 - `name_fr` (58) / `description_fr` (157) manquants.
 - `inagle_keshins.image_url` NULL (66), `inagle_miximax` (1).
-- `inagle_passives.image_url` NULL (128/128).
+- `inagle_passives.image_url` NULL (128/128) — **STATUÉ db-4 : pas d'asset jeu (aucun `*passive*` dans le dump), UI sans visuel assumée ; NULL volontaire**.
 - `inagle_skills.image_url` tous légacy (1002) → re-pointer vers dx11 ou stocker le vrai code telop.
 - Tables vides à peupler si features prévues : `formations`, `tactics`, `heroes`, `coordinators`,
   `awakenings`, `mode_changes`, `stadiums`, `drops_tables/_treasures`, `nameplates` (54 dispo non
@@ -118,8 +118,11 @@ servis correctement par l'origine (200). Le website n'active pas le CDN en prod 
 
 ### Validation
 
-- Une fois le CDN rétabli : re-run l'échantillon CDN de `docs/asset-audit/missing-cdn.md` (doit
-  passer en 200) + checker visuellement une page `/chara`, `/skill`, `/item` en prod.
+- **[fait — cdn-4, 2026-06-03]** Re-run de l'échantillon CDN de `docs/asset-audit/missing-cdn.md` :
+  les 5 surfaces réellement résolues (face, telop, item icon `icon_item02_`, aura_fs k000290,
+  emblem em0001) renvoient toutes **200** (`content-type: image/png`, `cache-control: immutable`).
+  Voir le tableau « Re-run 2026-06-03 » du doc audit. Reste à checker visuellement `/chara`,
+  `/skill`, `/item` en prod (hors périmètre cdn-infra).
 - Diff pixel menu (harnais headless lavapipe vs rendu azalee) une fois OBJB/G4PKM exportés
   (cf. `menu-azalee-plan.md §5`).
 
