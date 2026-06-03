@@ -1093,8 +1093,17 @@ export function loadBaseCharacters(): BaseCharacter[] {
 	for (const char of uniqueResults) {
 		if (char.variants.length > 0) {
 			const youngest = char.variants[0];
-			char.bestRarityCode = youngest.rarityCode;
-			char.bestRarity = youngest.rarity;
+			// Determine the actual best rarity across all variants
+			let maxRarityCode = 0;
+			let maxRarity = "Normal";
+			for (const v of char.variants) {
+				if (v.rarityCode > maxRarityCode) {
+					maxRarityCode = v.rarityCode;
+					maxRarity = v.rarity;
+				}
+			}
+			char.bestRarityCode = maxRarityCode;
+			char.bestRarity = maxRarity;
 			char.image = youngest.image || char.image;
 			char.slug = youngest.slug || char.slug;
 			char.zukanHash = youngest.zukanHash || char.zukanHash;

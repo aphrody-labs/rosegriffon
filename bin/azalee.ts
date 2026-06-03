@@ -16,6 +16,7 @@ import { isKana, toKatakana, toHiragana, toRomaji } from "wanakana";
 import { createInagleService } from "../packages/inagle/src/service.ts";
 import { getRedisClient, cache } from "../packages/db/src/redis.ts";
 import { queryRag } from "../packages/cron/src/tasks/ie-crawl/rag.ts";
+import { buildAuraHashSet } from "../packages/inagle/src/skills/mapper-aura.ts";
 
 // Load environment variables
 dotenv.config({ path: path.resolve(process.cwd(), ".env.local") });
@@ -295,6 +296,138 @@ function renderTwoColumns(left: string, right: string, colWidthLeft = 39, colWid
 	return `│ ${left}${padLeft} │ ${right}${padRight} │`;
 }
 
+// Helper to fetch character auras from SQLite or change_aura_skills JSON mapping
+function getAurasForChara(charaId: string, charaParamId: string): any[] {
+	const dbPath = getSqlitePath();
+	if (!dbPath) return [];
+
+	try {
+		const { Database: DBConstructor } = require("bun:sqlite");
+		const db = new DBConstructor(dbPath, { readonly: true });
+
+		const hexIds = new Set<string>();
+
+		// 1. Get from database: inagle_characters (data->'auras')
+		const rows = db.query(
+			"SELECT data FROM inagle_characters WHERE chara_id = ? OR id = ?"
+		).all(charaId, charaParamId);
+
+		for (const row of rows as any[]) {
+			if (row.data) {
+				try {
+					const dataObj = JSON.parse(row.data);
+					const dbAuras = dataObj.auras || [];
+					for (const a of dbAuras) {
+						if (a.skillId) hexIds.add(a.skillId.toLowerCase());
+					}
+				} catch {}
+			}
+		}
+
+		// 2. Get from change_aura_skills mapping JSON
+		let changeAuraSkillsPath = path.resolve(process.cwd(), "packages/inagle/src/entries/change_aura_skills.json");
+		if (!existsSync(changeAuraSkillsPath)) {
+			changeAuraSkillsPath = "/home/ubuntu/rg/packages/inagle/src/entries/change_aura_skills.json";
+		}
+		if (existsSync(changeAuraSkillsPath)) {
+			try {
+				const changeAuraSkills = JSON.parse(readFileSync(changeAuraSkillsPath, "utf-8"));
+				const jsonAuras = changeAuraSkills.filter(
+					(c: any) =>
+						c.charaParamId &&
+						(c.charaParamId.toLowerCase() === charaId.toLowerCase() ||
+							c.charaParamId.toLowerCase() === charaParamId.toLowerCase())
+				);
+				for (const a of jsonAuras) {
+					if (a.id) hexIds.add(a.id.toLowerCase());
+				}
+			} catch {}
+		}
+
+		const results: any[] = [];
+		const tables = [
+			{ table: "inagle_keshins", prefix: "keshin_" },
+			{ table: "inagle_souls", prefix: "soul_" },
+			{ table: "inagle_miximax", prefix: "miximax_" },
+		];
+
+		for (const hexId of hexIds) {
+			const cleanHexPart = hexId.replace(/^0x/i, "").toUpperCase();
+			const formattedId = "0x" + cleanHexPart;
+
+			for (const t of tables) {
+				const prefixedId = t.prefix + formattedId;
+				const possibleIds = [prefixedId, formattedId, hexId];
+
+				const placeHolders = possibleIds.map(() => "?").join(",");
+				const auraRows = db.query(
+					`SELECT id, name_fr, name_en, name_ja FROM ${t.table} WHERE id IN (${placeHolders})`
+				).all(...possibleIds);
+
+				if (auraRows && auraRows.length > 0) {
+					const a = auraRows[0] as any;
+					results.push({
+						id: a.id,
+						name: a.name_fr || a.name_en || a.name_ja || "Inconnu",
+						type: t.table.replace("inagle_", "").replace("s", ""),
+					});
+					break;
+				}
+			}
+		}
+
+		db.close();
+		return results;
+	} catch (e) {
+		return [];
+	}
+}
+
+// Helper to fetch aura metadata from SQLite for raw auraIds
+function getAuraMetadataFromDb(auraId: string): any | null {
+	const dbPath = getSqlitePath();
+	if (!dbPath) return null;
+
+	try {
+		const { Database: DBConstructor } = require("bun:sqlite");
+		const db = new DBConstructor(dbPath, { readonly: true });
+
+		const cleanHexPart = auraId.replace(/^0x/i, "").toUpperCase();
+		const formattedId = "0x" + cleanHexPart;
+
+		const tables = [
+			{ table: "inagle_keshins", prefix: "keshin_" },
+			{ table: "inagle_souls", prefix: "soul_" },
+			{ table: "inagle_miximax", prefix: "miximax_" },
+		];
+
+		for (const t of tables) {
+			const prefixedId = t.prefix + formattedId;
+			const possibleIds = [prefixedId, formattedId, auraId];
+			const placeHolders = possibleIds.map(() => "?").join(",");
+
+			const auraRows = db.query(
+				`SELECT id, name_fr, name_en, name_ja FROM ${t.table} WHERE id IN (${placeHolders})`
+			).all(...possibleIds);
+
+			if (auraRows && auraRows.length > 0) {
+				const a = auraRows[0] as any;
+				db.close();
+				return {
+					id: a.id,
+					name: a.name_fr || a.name_en || a.name_ja || "Inconnu",
+					type: t.table.replace("inagle_", "").replace("s", ""),
+				};
+			}
+		}
+
+		db.close();
+		return null;
+	} catch {
+		return null;
+	}
+}
+
 // Helper to render character profiler card
 function renderCharaProfile(chara: any, svc: any): string {
 	const lines: string[] = [];
@@ -408,17 +541,53 @@ function renderCharaProfile(chara: any, svc: any): string {
 				lines.push(`│       └──────────────┴─────────┴─────────┴─────────┘                         │`);
 			}
 			
-			if (v.skills && v.skills.length > 0) {
-				const renderColoredLine = (prefix: string, content: string, colorCode: string) => {
-					const visibleLength = prefix.length + content.length;
-					const padding = " ".repeat(Math.max(0, 70 - visibleLength));
-					return `│       ${colorCode}${prefix}${content}${colors.reset}${padding} │`;
-				};
+			const auraHashes = buildAuraHashSet();
+			const trueSkills = (v.skills || []).filter(
+				(s: any) => s.skillId !== "0x00000002" && !auraHashes.has(s.skillId)
+			);
+			const rawAuraIds = (v.skills || []).filter(
+				(s: any) => auraHashes.has(s.skillId)
+			).map((s: any) => s.skillId);
 
-				lines.push(renderColoredLine("Techniques : ", `(${v.skills.length})`, colors.bold + colors.blue));
-				for (const sk of v.skills) {
+			const renderColoredLine = (prefix: string, content: string, colorCode: string) => {
+				const visibleLength = prefix.length + content.length;
+				const padding = " ".repeat(Math.max(0, 70 - visibleLength));
+				return `│       ${colorCode}${prefix}${content}${colors.reset}${padding} │`;
+			};
+
+			if (trueSkills.length > 0) {
+				lines.push(renderColoredLine("Techniques : ", `(${trueSkills.length})`, colors.bold + colors.blue));
+				for (const sk of trueSkills) {
 					const name = getSkillName(svc, sk.skillId);
 					const label = ` - ${name} (Niv. ${sk.learnLevel})`;
+					lines.push(`│       ${label.padEnd(70)} │`);
+				}
+			}
+
+			// Gather Auras (Keshin, Soul, Miximax)
+			const sqliteAuras = getAurasForChara(chara.charaId, v.charaParamId);
+			const allAuras = [...sqliteAuras];
+			for (const auraId of rawAuraIds) {
+				if (!allAuras.some(a => a.id.toLowerCase().includes(auraId.toLowerCase()))) {
+					const auraDetails = getAuraMetadataFromDb(auraId);
+					if (auraDetails) {
+						allAuras.push(auraDetails);
+					} else {
+						const name = getSkillName(svc, auraId);
+						allAuras.push({
+							id: auraId,
+							name,
+							type: "aura",
+						});
+					}
+				}
+			}
+
+			if (allAuras.length > 0) {
+				lines.push(renderColoredLine("Auras / Miximax / Keshin : ", `(${allAuras.length})`, colors.bold + colors.magenta));
+				for (const aura of allAuras) {
+					const typeLabel = aura.type === "keshin" ? "Esprit Guerrier" : aura.type === "soul" ? "Totem" : aura.type === "miximax" ? "Miximax" : "Aura";
+					const label = ` - ${aura.name} [${typeLabel}]`;
 					lines.push(`│       ${label.padEnd(70)} │`);
 				}
 			}
@@ -2083,14 +2252,19 @@ program
 
 			const resolveMoves = (variant: any, baseChara: any) => {
 				const PHANTOM_SKILL_IDS = new Set(["0xDBEDB6B8"]);
+				const auraHashes = buildAuraHashSet();
 				const rawSkills = variant.skills || [];
-				let skillList = rawSkills.filter((sk: any) => sk.skillId && !PHANTOM_SKILL_IDS.has(sk.skillId));
+				let skillList = rawSkills.filter(
+					(sk: any) => sk.skillId && !PHANTOM_SKILL_IDS.has(sk.skillId) && !auraHashes.has(sk.skillId)
+				);
 				
 				// Sibling inheritance fallback
 				if (skillList.length === 0 && baseChara.variants) {
 					for (const sibling of baseChara.variants) {
 						if (sibling.skills && sibling.skills.length > 0) {
-							const sibSkills = sibling.skills.filter((sk: any) => sk.skillId && !PHANTOM_SKILL_IDS.has(sk.skillId));
+							const sibSkills = sibling.skills.filter(
+								(sk: any) => sk.skillId && !PHANTOM_SKILL_IDS.has(sk.skillId) && !auraHashes.has(sk.skillId)
+							);
 							if (sibSkills.length > 0) {
 								skillList = sibSkills;
 								break;

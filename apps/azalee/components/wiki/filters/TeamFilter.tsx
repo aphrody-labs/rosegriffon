@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter, useSearchParams } from "next/navigation";
 import * as React from "react";
 import {
 	Button,
@@ -14,6 +13,7 @@ import {
 	CommandItem,
 	CommandList,
 } from "@rose-griffon/ui";
+import { useFilterNavigation } from "@/lib/hooks/use-filter-navigation";
 import { cn } from "@/lib/utils";
 
 export interface TeamOption {
@@ -27,20 +27,18 @@ interface TeamFilterProps {
 
 export function TeamFilter({ teams }: TeamFilterProps) {
 	const [open, setOpen] = React.useState(false);
-	const router = useRouter();
-	const searchParams = useSearchParams();
+	const { isPending, navigate, searchParams } = useFilterNavigation();
 	const currentTeamId = searchParams.get("team");
 
 	const handleSelect = (teamId: string) => {
-		const params = new URLSearchParams(searchParams.toString());
-		if (currentTeamId === teamId) {
-			params.delete("team");
-		} else {
-			params.set("team", teamId);
-		}
-		params.delete("page");
 		setOpen(false);
-		router.replace(`?${params.toString()}`, { scroll: false });
+		navigate((params) => {
+			if (params.get("team") === teamId) {
+				params.delete("team");
+			} else {
+				params.set("team", teamId);
+			}
+		});
 	};
 
 	const selectedTeam = teams.find((t) => t.id === currentTeamId);
@@ -52,7 +50,11 @@ export function TeamFilter({ teams }: TeamFilterProps) {
 					variant="outline"
 					role="combobox"
 					aria-expanded={open}
-					className="w-full justify-between bg-surface text-on-surface hover:bg-surface-container"
+					disabled={isPending}
+					className={cn(
+						"w-full justify-between bg-surface text-on-surface hover:bg-surface-container",
+						isPending && "opacity-70 pointer-events-none"
+					)}
 				>
 					{selectedTeam ? selectedTeam.name : "Rechercher une équipe..."}
 				</Button>

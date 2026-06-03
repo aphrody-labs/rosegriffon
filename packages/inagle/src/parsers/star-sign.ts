@@ -119,7 +119,11 @@ export function buildStarSignMap(): Map<string, StarSignCharaInfo> {
 	// Add BASARA characters with rarity 20
 	const basaraIds = loadBasaraCharaIds();
 	for (const id of basaraIds) {
-		if (!starSignCache.has(id)) {
+		const existing = starSignCache.get(id);
+		if (existing) {
+			existing.charaRarity = 20;
+			existing.isRemarkable = true;
+		} else {
 			starSignCache.set(id, {
 				charaParamId: id,
 				charaRarity: 20,
