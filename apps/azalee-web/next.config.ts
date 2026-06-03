@@ -9,6 +9,10 @@ const CDN_URL = process.env.NEXT_PUBLIC_CDN_URL?.trim() || "";
 const CDN_ORIGIN = CDN_URL ? new URL(CDN_URL).origin : "";
 const CDN_LOADER = CDN_URL && process.env.NEXT_PUBLIC_CDN_LOADER === "1";
 
+// Origin du CDN d'assets jeu (modèles 3D GLB, images dump dx11) — toujours présent
+// indépendamment du toggle NEXT_PUBLIC_CDN_URL (qui ne sert qu'à offloader .next/static).
+const ASSET_CDN_ORIGIN = "https://cdn.rosegriffon.fr";
+
 const nextConfig: NextConfig = {
 	poweredByHeader: false,
 
@@ -201,7 +205,7 @@ const nextConfig: NextConfig = {
 			`img-src 'self' blob: data:${cdnSrc} https://dxi4wb638ujep.cloudfront.net https://*.inazuma.jp https://*.supabase.co https://lh3.googleusercontent.com https://cdn.discordapp.com https://pbs.twimg.com`,
 			`media-src 'self' blob: data:${cdnSrc} https://dxi4wb638ujep.cloudfront.net https://*.inazuma.jp https://video.twimg.com https://pbs.twimg.com`,
 			`font-src 'self'${cdnSrc}`,
-			`connect-src 'self'${cdnSrc} https://www.google-analytics.com https://www.googletagmanager.com https://*.supabase.co wss://*.supabase.co`,
+			`connect-src 'self'${cdnSrc} ${ASSET_CDN_ORIGIN} https://www.google-analytics.com https://www.googletagmanager.com https://*.supabase.co wss://*.supabase.co`,
 			"frame-src 'none'",
 			"frame-ancestors 'none'",
 			"base-uri 'self'",

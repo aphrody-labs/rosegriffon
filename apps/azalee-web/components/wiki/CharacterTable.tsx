@@ -15,9 +15,9 @@ import { isFemaleGender } from "@/lib/gender";
 import type { GenderValue } from "@/lib/gender";
 import {
 	getCharacterImageUrl,
+	getCharacterModelGlbUrl,
 	getEmblemImageUrl,
 	getSkillCategoryIconUrl,
-	ZUKAN_3D_MIRROR_AVAILABLE,
 } from "@/lib/images";
 import { TEAM_EMBLEM_MAP } from "@/lib/team-emblem-map";
 import { cn } from "@/lib/utils";
@@ -170,7 +170,11 @@ export function CharacterTable({ characters, startIndex = 0 }: CharacterTablePro
 						const element = character.element || activeData.element || "Void";
 						const rarity = character.rarity || activeData.rarity || "N";
 						const stats = character.stats || activeData.stats;
-						const zukanHash = character.zukanHash || activeData.zukanHash;
+						// Modèle 3D GLB (g4mg→GLB servi sur cdn.rosegriffon.fr/model/<code>.glb).
+						// Le basename du GLB = internalCode (`c…`). null si pas de modèle → pas de bouton.
+						const modelGlbUrl = getCharacterModelGlbUrl(
+							character.internalCode || (activeData as Record<string, any>).internalCode
+						);
 
 						// Localization logic for name/description
 						const name =
@@ -350,8 +354,8 @@ export function CharacterTable({ characters, startIndex = 0 }: CharacterTablePro
 								{/* Stats */}
 								<TableCell className="text-center p-0">
 									{stats?.lv99 && <CharacterStatsPopover stats={stats.lv99} name={name} />}
-									{ZUKAN_3D_MIRROR_AVAILABLE && zukanHash && (
-										<CharacterModelViewer hash={zukanHash} name={name} />
+									{modelGlbUrl && (
+										<CharacterModelViewer glbUrl={modelGlbUrl} name={name} />
 									)}
 								</TableCell>
 
