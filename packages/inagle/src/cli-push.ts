@@ -562,6 +562,14 @@ async function importSkills(service: any, db: DataAdapter) {
 async function importItems(service: any, db: DataAdapter) {
 	console.log("🔄 Importing Items...");
 
+	// Préserve le sheet_data curaté/riche (shops, price, attributes) AVANT le delete+reinsert,
+	// sinon chaque push wipe la donnée enrichie des items (régression connue).
+	const preserved = new Map<string, any>();
+	for (const r of await db.fetchAll("inagle_items", "id, sheet_data")) {
+		if (r.sheet_data) preserved.set(String(r.id), r.sheet_data);
+	}
+	console.log(`  ${preserved.size} sheet_data items préservés.`);
+
 	// Clean existing items first to remove leftover fake/null entries from previous syncs
 	console.log("  Cleaning existing items in database...");
 	await db.deleteAllExcept("inagle_items", "id", "0x00000000");
@@ -642,6 +650,9 @@ async function importItems(service: any, db: DataAdapter) {
 				stat_boost_2: item.stats?.stat2 || null,
 				image_url: item.imageUrl || null,
 				data: item,
+				// Restaure le sheet_data riche préservé (shops/price/attributes) ou, à défaut,
+				// retombe sur l'objet parsé courant — la page lit sheet_data en priorité.
+				sheet_data: preserved.get(String(id)) ?? item ?? null,
 				updated_at: new Date().toISOString(),
 			};
 		});
