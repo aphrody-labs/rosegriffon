@@ -23,7 +23,10 @@ export function AzaleeNavigationRail() {
 	});
 
 	return (
-		<NavigationRail className="fixed left-0 top-14 bottom-0 z-50 border-r border-outline-variant/10 hidden md:flex lg:hidden">
+		<NavigationRail
+			aria-label="Navigation principale"
+			className="fixed left-0 top-14 bottom-0 z-50 border-r border-outline-variant/10 hidden md:flex lg:hidden"
+		>
 			{filteredNavItems.map((item) => {
 				const LucideIcon = iconMap[item.icon];
 				const isActive =

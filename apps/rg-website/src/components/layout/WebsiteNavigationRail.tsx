@@ -18,7 +18,10 @@ export function WebsiteNavigationRail() {
 	];
 
 	return (
-		<NavigationRail className="fixed left-0 top-0 bottom-0 z-50 border-r border-border/40 hidden md:flex lg:hidden bg-background/95 backdrop-blur-xl">
+		<NavigationRail
+			aria-label="Navigation principale"
+			className="fixed left-0 top-0 bottom-0 z-50 border-r border-border/40 hidden md:flex lg:hidden bg-background/95 backdrop-blur-xl"
+		>
 			<div className="pt-4 pb-2">
 				<NavigationRailItem
 					icon={<Menu size={24} />}

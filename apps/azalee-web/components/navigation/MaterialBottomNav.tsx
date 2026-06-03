@@ -129,6 +129,7 @@ export function MaterialBottomNav() {
 
 	return (
 		<nav
+			aria-label="Navigation mobile"
 			className={cn(
 				"fixed bottom-0 left-0 right-0 z-50",
 				"h-20 pb-safe",
