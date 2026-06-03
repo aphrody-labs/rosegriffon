@@ -25,7 +25,8 @@
 	},
 	"dependencies": {
 		"@rose-griffon/iecode-inagle": "workspace:*",
-		"@rose-griffon/iecode-steam-sync": "workspace:*"
+		"@rose-griffon/iecode-steam-sync": "workspace:*",
+		"valibot": "catalog:"
 	},
 	"devDependencies": {
 		"@rose-griffon/iecode-config": "workspace:*",

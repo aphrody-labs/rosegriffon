@@ -17,6 +17,21 @@
 export type * from "./types.ts";
 export { exportCorpus } from "./corpus.ts";
 export {
+	CORPUS_SCHEMAS,
+	hasCorpusSchema,
+	CorpusCharacter,
+	CorpusSkill,
+	CorpusAura,
+	CorpusPassive,
+	CorpusTeamPassive,
+	CorpusBasara,
+	CorpusItem,
+	CorpusTeam,
+	CorpusSeries,
+	CorpusQuest,
+	type CorpusDomain,
+} from "./corpus-schema.ts";
+export {
 	exportDataPath,
 	stripDataPrefix,
 	type DataPathExportOptions,
