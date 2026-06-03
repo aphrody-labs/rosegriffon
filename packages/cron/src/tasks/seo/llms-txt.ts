@@ -34,7 +34,7 @@ const MONOREPO_ROOT = join(import.meta.dir, "..", "..", "..", "..", "..");
 const WEBSITE_PUBLIC = join(MONOREPO_ROOT, "apps", "website", "public");
 const AZALEE_PUBLIC = join(MONOREPO_ROOT, "apps", "azalee", "public");
 
-const DEV_CREDIT = "Yohan Pierre (yoyo) — https://x.com/yoyo__goat";
+const DEV_CREDIT = "yoyo — https://x.com/yoyo__goat";
 
 function nowStamp(): string {
 	return new Date().toISOString().slice(0, 10);

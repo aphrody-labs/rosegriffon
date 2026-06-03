@@ -13,7 +13,7 @@ const SITE = {
 	wiki: "https://azalee.rosegriffon.fr",
 	sitemap: "https://rosegriffon.fr/sitemap.xml",
 	llms: "https://rosegriffon.fr/llm.txt",
-	dev: { name: "Yohan Pierre (yoyo)", x: "https://x.com/yoyo__goat" },
+	dev: { name: "yoyo", x: "https://x.com/yoyo__goat" },
 	socials: [
 		"https://x.com/rose_griffon",
 		"https://discord.gg/TYzQvbByv4",

@@ -121,7 +121,7 @@ export default async function HomePage() {
 				url: "https://rosegriffon.fr",
 				founder: {
 					"@type": "Person",
-					name: "Yohan Pierre",
+					name: "yoyo",
 					alternateName: "yoyo",
 					url: "https://x.com/yoyo__goat",
 					sameAs: ["https://x.com/yoyo__goat"],

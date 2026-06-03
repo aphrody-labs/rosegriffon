@@ -1,6 +1,6 @@
 /* TEAM */
 
-Développeur & fondateur : Yohan Pierre (yoyo)
+Développeur & fondateur : yoyo
 X / Twitter : https://x.com/yoyo__goat
 Rôle : conception, développement full-stack, architecture
 
