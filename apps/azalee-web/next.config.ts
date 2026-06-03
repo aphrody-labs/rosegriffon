@@ -107,6 +107,8 @@ const nextConfig: NextConfig = {
 		"@rose-griffon/config",
 		"@rose-griffon/auth",
 		"@rose-griffon/assets",
+		"@rose-griffon/menu-render",
+		"@rose-griffon/menu-render-webgpu",
 	],
 
 	// Packages Node.js natifs exclus du bundling serveur

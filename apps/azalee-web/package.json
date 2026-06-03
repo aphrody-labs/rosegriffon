@@ -109,7 +109,8 @@
 		"wanakana": "catalog:",
 		"web-push": "catalog:",
 		"zod": "catalog:",
-		"@rose-griffon/menu-render": "workspace:*"
+		"@rose-griffon/menu-render": "workspace:*",
+		"@rose-griffon/menu-render-webgpu": "workspace:*"
 	},
 	"devDependencies": {
 		"@next/bundle-analyzer": "catalog:",
@@ -126,6 +127,7 @@
 		"@types/react-dom": "catalog:",
 		"@types/web-push": "catalog:",
 		"@vitejs/plugin-react": "catalog:",
+		"@webgpu/types": "catalog:",
 		"babel-plugin-react-compiler": "catalog:",
 		"jsdom": "catalog:",
 		"oxlint": "catalog:",

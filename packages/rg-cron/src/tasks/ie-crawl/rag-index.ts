@@ -18,6 +18,18 @@ export { chunkText, computeStringHash } from "./rag-utils";
 export { indexZukanCharacters } from "./rag-zukan";
 export { ragWebSearch, type RagWebDoc, type RagWebOptions } from "./rag-web";
 
+// RAG unifié pgvector (additif, cf. UNIFIED-RAG-PLAN). Le store Redis reste
+// branché ; ces exports exposent la nouvelle voie hybride pgvector.
+export {
+	ingestSources,
+	ragHybridSearch,
+	type RagSource,
+	type RagPgResult,
+	type IngestStats,
+} from "./rag-store-pg";
+export { chunkBySource, chunkTweet, type SourceKind, type Chunk } from "./rag-chunkers";
+export { embedBatch, embedOne, type EmbedBackend } from "./rag-embed";
+
 import { queryRag } from "./rag";
 import { ragWebSearch, type RagWebDoc } from "./rag-web";
 

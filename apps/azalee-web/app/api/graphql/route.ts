@@ -1,6 +1,8 @@
 import { useGraphQlJit } from "@envelop/graphql-jit";
 import { useResponseCache } from "@graphql-yoga/plugin-response-cache";
 import { createSchema, createYoga } from "graphql-yoga";
+import { ragSearch, type RagSourceKind } from "@rose-griffon/db/rag";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { wikiService } from "@/lib/wiki-service";
 
 const typeDefs = `
@@ -84,7 +86,20 @@ const typeDefs = `
     sheetData: JSON
   }
 
+  type RagChunk {
+    id: ID!
+    sourceId: String
+    sourceKind: String
+    title: String
+    url: String
+    lang: String
+    content: String
+    score: Float
+    meta: JSON
+  }
+
   type Query {
+    ragSearch(query: String!, k: Int, kinds: [String!]): [RagChunk]
     characters(page: Int, limit: Int, q: String, element: String, position: String, rarity: String, team: String, series: String): [Character]
     character(id: ID!): Character
     items(page: Int, limit: Int, q: String, category: String): [Item]
@@ -115,6 +130,24 @@ const resolvers = {
 		},
 	},
 	Query: {
+		ragSearch: async (_: any, { query, k, kinds }: any) => {
+			const supabase = createAdminClient();
+			const rows = await ragSearch(supabase as any, query, {
+				k: k ?? 10,
+				kinds: kinds as RagSourceKind[] | undefined,
+			});
+			return rows.map((r) => ({
+				id: r.id,
+				sourceId: r.source_id,
+				sourceKind: r.source_kind,
+				title: r.title,
+				url: r.url,
+				lang: r.lang,
+				content: r.content,
+				score: r.score,
+				meta: r.meta,
+			}));
+		},
 		auras: async (_: any, args: any) => {
 			const { data } = await wikiService.getAurasList(args);
 			return data.map((a: any) => ({

@@ -81,6 +81,7 @@ yarn-error.log*
 /*.tgz
 /*.zip
 /menu*
+!/menu-webgpu.d.ts
 /*.png
 /*.jpg
 /*.jpeg

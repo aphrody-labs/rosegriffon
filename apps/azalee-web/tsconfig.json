@@ -10,6 +10,8 @@
 		"module": "esnext",
 		"moduleResolution": "bundler",
 		"jsx": "react-jsx",
+		"allowImportingTsExtensions": true,
+		"types": ["node", "react", "react-dom", "@webgpu/types"],
 		"paths": {
 			"@/*": ["./src/*", "./*"],
 			"@rose-griffon/db": ["../../packages/db/src/index.ts"],

@@ -11,6 +11,7 @@ import { vectorStore, getEmbedding, crawlerTracker, cache } from "@rose-griffon/
 import { createSupabaseServiceClient } from "@rose-griffon/db/service";
 import { indexZukanCharacters } from "./rag-zukan";
 import { chunkText, computeStringHash } from "./rag-utils";
+import { ingestSources, type RagSource } from "./rag-store-pg";
 
 interface DBTweetRow {
 	id: string;
@@ -18,6 +19,11 @@ interface DBTweetRow {
 	author_name: string | null;
 	text: string | null;
 	created_at: string | null;
+	// champs complets pour chunker RAG pgvector (métriques, médias, raw si besoin)
+	metrics?: unknown;
+	media?: unknown;
+	translation?: string | null;
+	category?: string | null;
 }
 
 const DATA_ROOT = "/home/ubuntu/rg/data/inazuma.jp/victory-road";
@@ -521,7 +527,7 @@ export async function runRagSync(): Promise<{
 			const supabase = createSupabaseServiceClient();
 			const { data, error } = await supabase
 				.from("tweets")
-				.select("id, author_username, author_name, text, created_at");
+				.select("id, author_username, author_name, text, created_at, metrics, media, translation, category");
 			if (error) {
 				console.error("[RAG Sync] Erreur lors de la récupération des tweets :", error);
 				errors++;
@@ -607,6 +613,58 @@ export async function runRagSync(): Promise<{
 				console.error(`[RAG Sync] Erreur lors de la vectorisation du tweet ${tweet.id} :`, err);
 				errors++;
 			}
+		}
+
+		// 7b. Branche X/tweets → RAG pgvector (additif, multi-comptes, idempotent par tweet id, chunker enrichi).
+		// Utilise chunkTweet (auteur/date/métriques/médias) → embed (BGE-M3 / OpenAI / hash 1024) → upsert inagle_rag_chunks.
+		// La table tweets est déjà multi-comptes (via crawlTwitter + x-accounts). Le Redis ancien reste en // (compat).
+		try {
+			const tweetSources: RagSource[] = dbTweets
+				.filter((t) => (t.text || "").length >= 20)
+				.map((tweet) => {
+					const username = tweet.author_username || "unknown";
+					const displayName = tweet.author_name || username;
+					const date = tweet.created_at || "";
+					const url = `https://x.com/${username}/status/${tweet.id}`;
+					// Passe structuré (JSON) → chunkTweet gère et enrichit (métriques, media urls, etc).
+					const rawForChunk = JSON.stringify({
+						id: tweet.id,
+						text: tweet.text || "",
+						author_username: username,
+						author_name: displayName,
+						created_at: date,
+						metrics: (tweet as any).metrics || null,
+						media: (tweet as any).media || null,
+						url,
+					});
+					return {
+						sourceId: `tweet-${tweet.id}`,
+						kind: "tweet" as const,
+						raw: rawForChunk,
+						title: `Tweet de ${displayName} (@${username})`,
+						url,
+						lang: undefined,
+						meta: {
+							author_username: username,
+							author_name: displayName,
+							date,
+							category: (tweet as any).category || null,
+							has_translation: !!(tweet as any).translation,
+						},
+					};
+				});
+			if (tweetSources.length > 0) {
+				console.log(`[RAG PG] Ingestion ${tweetSources.length} tweets (chunker tweet enrichi + pgvector)...`);
+				const pgStats = await ingestSources(tweetSources);
+				console.log(
+					`[RAG PG] Tweets pgvector: ${pgStats.chunks} chunks (${pgStats.sources} sources, backend=${pgStats.backend}, skipped=${pgStats.skipped}).`
+				);
+			}
+		} catch (pgErr) {
+			console.warn(
+				"[RAG PG] Ingestion tweets pgvector échouée (Redis inchangé):",
+				pgErr instanceof Error ? pgErr.message : pgErr
+			);
 		}
 
 		console.log(

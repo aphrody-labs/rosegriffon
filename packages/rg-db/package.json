@@ -9,6 +9,7 @@
 		"./server": "./src/server.ts",
 		"./service": "./src/service.ts",
 		"./redis": "./src/redis.ts",
+		"./rag": "./src/rag.ts",
 		"./storage": "./src/storage.ts",
 		"./types": "./src/types.ts"
 	},

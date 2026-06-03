@@ -1659,6 +1659,36 @@ export type Database = {
         }
         Relationships: []
       }
+      inagle_game_assets: {
+        Row: {
+          buildid: number | null
+          cpk: string | null
+          kind: string | null
+          path: string
+          sha256: string | null
+          size: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          buildid?: number | null
+          cpk?: string | null
+          kind?: string | null
+          path: string
+          sha256?: string | null
+          size?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          buildid?: number | null
+          cpk?: string | null
+          kind?: string | null
+          path?: string
+          sha256?: string | null
+          size?: number | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       inagle_growth_tables: {
         Row: {
           chara_rank: number | null
@@ -2472,6 +2502,54 @@ export type Database = {
           phase?: string | null
           type?: string | null
           updated_at?: string | null
+        }
+        Relationships: []
+      }
+      inagle_rag_chunks: {
+        Row: {
+          buildid: number | null
+          content: string
+          content_hash: string
+          content_tsv: unknown
+          created_at: string | null
+          embedding: unknown
+          id: string
+          lang: string | null
+          meta: Json
+          source_id: string
+          source_kind: string
+          title: string | null
+          url: string | null
+        }
+        Insert: {
+          buildid?: number | null
+          content: string
+          content_hash: string
+          content_tsv?: unknown
+          created_at?: string | null
+          embedding?: unknown
+          id: string
+          lang?: string | null
+          meta?: Json
+          source_id: string
+          source_kind: string
+          title?: string | null
+          url?: string | null
+        }
+        Update: {
+          buildid?: number | null
+          content?: string
+          content_hash?: string
+          content_tsv?: unknown
+          created_at?: string | null
+          embedding?: unknown
+          id?: string
+          lang?: string | null
+          meta?: Json
+          source_id?: string
+          source_kind?: string
+          title?: string | null
+          url?: string | null
         }
         Relationships: []
       }
@@ -4249,6 +4327,26 @@ export type Database = {
       patreon_heartbeat: {
         Args: { p_event_id: string; p_success: boolean; p_trigger: string }
         Returns: undefined
+      }
+      rag_hybrid_search: {
+        Args: {
+          k?: number
+          kinds?: string[]
+          q_emb: unknown
+          q_text: string
+          rrf_k?: number
+        }
+        Returns: {
+          content: string
+          id: string
+          lang: string
+          meta: Json
+          score: number
+          source_id: string
+          source_kind: string
+          title: string
+          url: string
+        }[]
       }
       show_limit: { Args: never; Returns: number }
       show_trgm: { Args: { "": string }; Returns: string[] }
