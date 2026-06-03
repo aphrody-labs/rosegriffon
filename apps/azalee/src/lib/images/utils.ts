@@ -36,6 +36,60 @@ const LEGACY_STORAGE_PREFIX = "/storage/v1/object/public/menu/";
  * Mappe un path legacy `200_icon/10_icon_chr/<folder>/<file>.webp` (DB Supabase)
  * vers le dump PNG dx11 quand un mapping est connu.
  */
+
+/**
+ * Table famille `internal_code` → préfixe `icon_itemNN_` réel des PNG dans le dump
+ * dx11 `200_icon/02_icon_item/`. Vérité terrain : le nom de fichier disque n'est PAS
+ * `<internal_code>.png` mais `icon_item<NN>_<internal_code>.png`, où `<NN>` est
+ * déterministe par famille (db-4, 2026-06-03 — scan exhaustif des 828 PNG).
+ *
+ * Ex. : `eq_ac0105001` → `icon_item05_eq_ac0105001.png`.
+ *
+ * Ordonné préfixe-le-plus-long-d'abord pour éviter les collisions (`eq_sh` avant `eq`,
+ * `tk_*` avant `tr`). Les familles ABSENTES du dump (`ht`/`ti`/`ss_ps`/`ds`/`coi_*`/`nm`/
+ * `fm`/`st`/`em` côté item) renvoient `null` → pas d'URL 404 forgée, le caller bascule
+ * sur le placeholder. (`em` = emblème : son vrai fichier vit dans `01_icon_emblem`, pas
+ * ici ; `ht`/`ss_ps` = tactiques/special_skill sans icône d'item dédiée.)
+ */
+const ITEM_ICON_PREFIXES: ReadonlyArray<readonly [string, string]> = [
+	["performance_type_", "icon_item01"],
+	["icon_item_nameplate", "icon_item90"],
+	["eq_sh", "icon_item03"],
+	["eq_mi", "icon_item04"],
+	["eq_ac", "icon_item05"],
+	["eq_sp", "icon_item08"],
+	["uni_u", "icon_item07"],
+	["cos_u", "icon_item09"],
+	["btl_re", "icon_item02"],
+	["test_tk", "icon_item10"],
+	["tk_bb", "icon_item10"],
+	["tk_hr", "icon_item10"],
+	["tk_ki", "icon_item10"],
+	["tk_si", "icon_item10"],
+	["tk_st", "icon_item10"],
+	["tk_tr", "icon_item10"],
+	["tk_vi", "icon_item10"],
+	["abl_", "icon_item01"],
+	["abl", "icon_item01"],
+	["ke", "icon_item02"],
+	["gd", "icon_item01"],
+	["ex", "icon_item01"],
+	["tr", "icon_item10"],
+];
+
+/**
+ * Résout le vrai nom de fichier PNG (sans extension) d'un `internal_code` d'item, ou
+ * `null` si aucune famille connue ne correspond (= pas d'icône d'item dans le dump).
+ */
+export function itemIconFileBase(internalCode: string): string | null {
+	for (const [fam, prefix] of ITEM_ICON_PREFIXES) {
+		if (internalCode.startsWith(fam)) {
+			return `${prefix}_${internalCode}`;
+		}
+	}
+	return null;
+}
+
 function mapLegacyMenuPath(menuPath: string): string | null {
 	const chrMatch = menuPath.match(/^200_icon\/10_icon_chr\/([^/]+)\/([^/]+?)_l(?:_[^.]+)?\.webp$/);
 	if (chrMatch) {
@@ -63,7 +117,11 @@ function mapLegacyMenuPath(menuPath: string): string | null {
 	}
 	const itemMatch = menuPath.match(/^200_icon\/02_icon_item\/(.+)\.webp$/);
 	if (itemMatch) {
-		return `${MENU_DUMP_BASE}/200_icon/02_icon_item/${itemMatch[1]}.png`;
+		// Le DB stocke `image_url = 200_icon/02_icon_item/<internal_code>.webp`, mais le
+		// fichier disque est `icon_item<NN>_<internal_code>.png` (db-4). On mappe via la
+		// table des familles ; sans correspondance → null (placeholder, pas de 404 forgé).
+		const fileBase = itemIconFileBase(itemMatch[1]);
+		return fileBase ? `${MENU_DUMP_BASE}/200_icon/02_icon_item/${fileBase}.png` : null;
 	}
 	const telopMatch = menuPath.match(/^220_img\/telop_waza\/(fr|en)\/([^/]+)\.webp$/);
 	if (telopMatch) {
@@ -78,14 +136,30 @@ function mapLegacyMenuPath(menuPath: string): string | null {
 	return null;
 }
 
+/**
+ * Résout un path de dump déjà débarrassé de son préfixe (`200_icon/…webp`).
+ * Pour une icône d'item d'une famille INCONNUE (pas de fichier `icon_item<NN>_…` sur
+ * disque), on renvoie le placeholder au lieu de re-forger le `.webp` brut (qui serait un
+ * 404 garanti — le dump ne sert que des PNG `icon_item<NN>_`). Sinon, fallback dump brut.
+ */
+function mapStrippedMenuPath(stripped: string): string {
+	const mapped = mapLegacyMenuPath(stripped);
+	if (mapped) {
+		return mapped;
+	}
+	if (/^200_icon\/02_icon_item\/.+\.webp$/.test(stripped)) {
+		return PLACEHOLDERS.item;
+	}
+	return `${MENU_BASE}/${stripped}`;
+}
+
 /** Resolve a potentially relative asset path to a full URL. */
 export function resolveAssetUrl(path: string | null | undefined): string | null {
 	if (!path) {
 		return null;
 	}
 	if (path.startsWith(LEGACY_STORAGE_PREFIX)) {
-		const stripped = path.slice(LEGACY_STORAGE_PREFIX.length);
-		return mapLegacyMenuPath(stripped) || `${MENU_BASE}/${stripped}`;
+		return mapStrippedMenuPath(path.slice(LEGACY_STORAGE_PREFIX.length));
 	}
 	// Forme legacy DB raccourcie `/menu/200_icon/…​.webp` (sans le préfixe storage
 	// complet) : c'est un chemin de dump, pas une route locale. On retire `/menu/`
@@ -93,13 +167,12 @@ export function resolveAssetUrl(path: string | null | undefined): string | null 
 	// ci-dessous le renverrait tel quel vers une route azalee inexistante (404).
 	// Cas réel : 42 keshins sans `asset_code` pointant vers les emblèmes em0001-em0004.
 	if (path.startsWith("/menu/")) {
-		const stripped = path.slice("/menu/".length);
-		return mapLegacyMenuPath(stripped) || `${MENU_BASE}/${stripped}`;
+		return mapStrippedMenuPath(path.slice("/menu/".length));
 	}
 	if (path.startsWith("http") || path.startsWith("/")) {
 		return path;
 	}
-	return mapLegacyMenuPath(path) || `${MENU_BASE}/${path}`;
+	return mapStrippedMenuPath(path);
 }
 
 /**
@@ -211,8 +284,13 @@ export function getSkillImageUrl(
 
 /**
  * URL d'un objet — dump dx11 brut.
- * Mapping `internalCode → path relatif` via `data/item-image-manifest.json`.
- * Fallback : `200_icon/02_icon_item/{itemId}.png`.
+ *
+ * Le nom de fichier disque est `icon_item<NN>_<internal_code>.png` (db-4), résolu via
+ * `itemIconFileBase`. On attend donc un `internal_code` (`eq_ac0105001`, `ke000033`…),
+ * pas un id hex (`0x002B6B38`) : un id hex ne matche aucune famille → placeholder, ce
+ * qui est le comportement voulu côté fallback (l'icône réelle vient de `image_url` via
+ * `resolveAssetUrl`). Un mapping explicite optionnel via `item-image-manifest.json`
+ * reste prioritaire.
  */
 export function getItemImageUrl(itemId: string): string {
 	if (!itemId) {
@@ -222,7 +300,11 @@ export function getItemImageUrl(itemId: string): string {
 	if (mapped) {
 		return `${MENU_DUMP_BASE}/${mapped}.png`;
 	}
-	return `${MENU_DUMP_BASE}/200_icon/02_icon_item/${itemId}.png`;
+	const fileBase = itemIconFileBase(itemId);
+	if (fileBase) {
+		return `${MENU_DUMP_BASE}/200_icon/02_icon_item/${fileBase}.png`;
+	}
+	return PLACEHOLDERS.item;
 }
 // Alias
 export const getItemIconUrl = getItemImageUrl;
