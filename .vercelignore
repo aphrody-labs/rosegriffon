@@ -25,8 +25,11 @@ data/backups
 **/.turbo
 **/.bun-cache
 .claude
-# tools/llm-agents : wrappers sous-agents grok/agy (hors build Vercel, dev/orchestration only)
-tools
+# tools/llm-agents : wrappers sous-agents grok/agy (hors build Vercel, dev/orchestration only).
+# ANCRÉ à la racine (`/tools`) : un motif nu `tools` matche à toute profondeur et
+# excluait par erreur `apps/website/src/components/tools/` (PfpGenerator/PfpThemeImage)
+# → « Module not found » au build Vercel.
+/tools
 # azalee n'est PAS buildé par le déploiement website (turbo --filter=@rose-griffon/website...)
 apps/azalee/.next
 apps/azalee/data
