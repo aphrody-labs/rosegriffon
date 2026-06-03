@@ -13,7 +13,12 @@ import type { SpriteCommonKey } from "@/config/sprites-common";
 import { formatDescription } from "@/lib/format-description";
 import { isFemaleGender } from "@/lib/gender";
 import type { GenderValue } from "@/lib/gender";
-import { getCharacterImageUrl, getEmblemImageUrl, getSkillCategoryIconUrl } from "@/lib/images";
+import {
+	getCharacterImageUrl,
+	getEmblemImageUrl,
+	getSkillCategoryIconUrl,
+	ZUKAN_3D_MIRROR_AVAILABLE,
+} from "@/lib/images";
 import { TEAM_EMBLEM_MAP } from "@/lib/team-emblem-map";
 import { cn } from "@/lib/utils";
 import CharacterModelViewer from "./CharacterModelViewer";
@@ -345,7 +350,9 @@ export function CharacterTable({ characters, startIndex = 0 }: CharacterTablePro
 								{/* Stats */}
 								<TableCell className="text-center p-0">
 									{stats?.lv99 && <CharacterStatsPopover stats={stats.lv99} name={name} />}
-									{zukanHash && <CharacterModelViewer hash={zukanHash} name={name} />}
+									{ZUKAN_3D_MIRROR_AVAILABLE && zukanHash && (
+										<CharacterModelViewer hash={zukanHash} name={name} />
+									)}
 								</TableCell>
 
 								{/* Équipe */}
