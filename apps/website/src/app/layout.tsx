@@ -96,6 +96,56 @@ export default function RootLayout({
 				/>
 				<link rel="preconnect" href="https://cdn.discordapp.com" />
 				<link rel="dns-prefetch" href="https://cdn.discordapp.com" />
+				<link rel="author" href="/humans.txt" />
+				{/* Données structurées site-wide : Organization + WebSite (rich results Google). */}
+				<script
+					type="application/ld+json"
+					dangerouslySetInnerHTML={{
+						__html: JSON.stringify({
+							"@context": "https://schema.org",
+							"@graph": [
+								{
+									"@type": "Person",
+									"@id": "https://rosegriffon.fr/#yoyo",
+									name: "Yohan Pierre",
+									alternateName: "yoyo",
+									jobTitle: "Développeur & fondateur",
+									url: "https://x.com/yoyo__goat",
+									sameAs: ["https://x.com/yoyo__goat"],
+									worksFor: { "@id": "https://rosegriffon.fr/#organization" },
+								},
+								{
+									"@type": "Organization",
+									"@id": "https://rosegriffon.fr/#organization",
+									name: "Rose Griffon",
+									alternateName: "Association Rose Griffon",
+									url: "https://rosegriffon.fr",
+									logo: "https://rosegriffon.fr/RG_Logo_V2.5.webp",
+									description:
+										"Association rassemblant la communauté Inazuma Eleven en France.",
+									founder: { "@id": "https://rosegriffon.fr/#yoyo" },
+									sameAs: [
+										"https://x.com/rose_griffon",
+										"https://discord.gg/TYzQvbByv4",
+										"https://twitch.tv/rose_griffontv",
+										"https://www.youtube.com/@RoseGriffon",
+										"https://www.instagram.com/rose_griffonfr",
+										"https://azalee.rosegriffon.fr",
+									],
+								},
+								{
+									"@type": "WebSite",
+									"@id": "https://rosegriffon.fr/#website",
+									url: "https://rosegriffon.fr",
+									name: "Rose Griffon",
+									inLanguage: "fr-FR",
+									publisher: { "@id": "https://rosegriffon.fr/#organization" },
+									creator: { "@id": "https://rosegriffon.fr/#yoyo" },
+								},
+							],
+						}),
+					}}
+				/>
 				<script
 					type="speculationrules"
 					dangerouslySetInnerHTML={{

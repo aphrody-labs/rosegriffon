@@ -1,5 +1,5 @@
 import { Button, Card, CardContent } from "@rose-griffon/ui";
-import { Newspaper } from "lucide-react";
+import { BookOpen, Newspaper } from "lucide-react";
 import Image from "next/image";
 
 import { Twitter } from "@/lib/icons-config";
@@ -11,16 +11,18 @@ export interface AzaleeBannerProps {
 	description?: string;
 	image?: string;
 	logo?: string;
+	wikiLink?: string;
 	twitterLink?: string;
 	instagramLink?: string;
 }
 
 export function AzaleeBanner({
 	title = "AZALÉE",
-	tag = "Actualités",
-	description = "Le pilier médiatique de Rose Griffon. Ne ratez aucune info sur Victory Road : traductions exclusives, interviews, analyses et couverture complète de l'actualité de la licence.",
+	tag = "Wiki & Actualités",
+	description = "Le pilier médiatique et l'encyclopédie de Rose Griffon. Le wiki Azalée couvre tout Inazuma Eleven: Victory Road — personnages, techniques, esprits guerriers — avec traductions exclusives, interviews et analyses.",
 	image = "/azalee-bg.webp",
 	logo = "/RG_Azalee-logo.webp",
+	wikiLink = "https://azalee.rosegriffon.fr",
 	twitterLink = "https://x.com/Azalee_IE",
 	instagramLink = "https://www.instagram.com/azaleefr/",
 }: AzaleeBannerProps) {
@@ -83,6 +85,17 @@ export function AzaleeBanner({
 								asChild
 								size="lg"
 								className="bg-white hover:bg-gray-100 text-[#240112] font-bold rounded-full shadow-lg hover:shadow-white/20 transition-all duration-300 px-5 text-sm sm:text-base"
+							>
+								<a href={wikiLink} rel="noopener">
+									<BookOpen className="mr-2 size-4 sm:w-5 sm:h-5" />
+									Explorer le wiki Azalée
+								</a>
+							</Button>
+							<Button
+								asChild
+								variant="outline"
+								size="lg"
+								className="border-[#C83C51] text-[#FECD50] hover:bg-[#C83C51]/20 hover:text-white hover:border-[#FECD50] rounded-full backdrop-blur-sm bg-[#240112]/50 transition-all duration-300 px-5 text-sm sm:text-base"
 							>
 								<a href={twitterLink} target="_blank" rel="noopener noreferrer">
 									<Twitter className="mr-2 size-4 sm:w-5 sm:h-5 fill-current" />
