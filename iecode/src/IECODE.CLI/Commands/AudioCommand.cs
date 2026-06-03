@@ -12,11 +12,12 @@ public static class AudioCommand
 {
     public static Command Create()
     {
-        var command = new Command("audio", "Outils audio CRI (ACB/AWB/HCA)");
+        var command = new Command("audio", "Outils audio CRI (ACB/AWB/HCA/ADX)");
         command.AddCommand(InfoCommand());
         command.AddCommand(ListCommand());
         command.AddCommand(ExtractCommand());
         command.AddCommand(DecodeCommand());
+        command.AddCommand(AdxCommand());
         return command;
     }
 
@@ -35,7 +36,11 @@ public static class AudioCommand
         if (!File.Exists(file)) { Console.WriteLine($"Fichier introuvable: {file}"); return; }
         var data = File.ReadAllBytes(file);
 
-        if (AwbReader.IsAwb(data))
+        if (AdxDecoder.IsAdx(data))
+        {
+            Console.Write(AdxDecoder.FromBytes(data).GetSummary());
+        }
+        else if (AwbReader.IsAwb(data))
         {
             var h = AwbReader.ParseHeader(data);
             var entries = AwbReader.ParseEntries(data);
@@ -176,5 +181,60 @@ public static class AudioCommand
         }
         if (File.Exists(tmp)) File.Delete(tmp);
         Console.WriteLine($"En-têtes HCA parsés={headers}, WAV décodés={decoded}");
+    }
+
+    // ---- adx : info + décodage natif ADX-ADPCM (type 0x02) -> WAV ----
+    private static Command AdxCommand()
+    {
+        var cmd = new Command("adx", "Métadonnées d'un .adx (CRI ADX) + décodage PCM natif (type 0x02)");
+        var fileArg = new Argument<string>("file", "Chemin du .adx");
+        var outOpt = new Option<string?>(["--output", "-o"], "Écrit un WAV PCM16 décodé (type 0x02 uniquement)");
+        cmd.AddArgument(fileArg);
+        cmd.AddOption(outOpt);
+        cmd.SetHandler((string file, string? outWav) => Adx(file, outWav), fileArg, outOpt);
+        return cmd;
+    }
+
+    private static void Adx(string file, string? outWav)
+    {
+        if (!File.Exists(file)) { Console.WriteLine($"Fichier introuvable: {file}"); return; }
+        var data = File.ReadAllBytes(file);
+        if (!AdxDecoder.IsAdx(data)) { Console.WriteLine("Pas un ADX (magic 0x8000 absent)"); return; }
+
+        var dec = AdxDecoder.FromBytes(data);
+        Console.Write(dec.GetSummary());
+
+        if (string.IsNullOrEmpty(outWav)) return;
+        if (!dec.Info.IsDecodable)
+        {
+            Console.WriteLine($"Décodage PCM impossible : encodingType 0x{(byte)dec.Info.EncodingType:X2} (seul 0x02 ADX-ADPCM l'est).");
+            return;
+        }
+
+        var pcm = dec.DecodePcm16();
+        WriteWav(outWav, pcm, dec.Info.ChannelCount, dec.Info.SampleRate);
+        Console.WriteLine($"WAV écrit : {outWav} ({pcm.Length} échantillons, {dec.Info.ChannelCount}ch, {dec.Info.SampleRate}Hz)");
+    }
+
+    // Écrit un WAV PCM16 entrelacé (RIFF/WAVE) minimal.
+    private static void WriteWav(string path, short[] samples, int channels, int sampleRate)
+    {
+        int dataBytes = samples.Length * 2;
+        using var fs = File.Create(path);
+        using var w = new BinaryWriter(fs);
+        w.Write("RIFF"u8.ToArray());
+        w.Write(36 + dataBytes);
+        w.Write("WAVE"u8.ToArray());
+        w.Write("fmt "u8.ToArray());
+        w.Write(16);                                  // taille du sous-bloc fmt
+        w.Write((short)1);                            // PCM
+        w.Write((short)channels);
+        w.Write(sampleRate);
+        w.Write(sampleRate * channels * 2);           // byte rate
+        w.Write((short)(channels * 2));               // block align
+        w.Write((short)16);                           // bits/échantillon
+        w.Write("data"u8.ToArray());
+        w.Write(dataBytes);
+        foreach (var s in samples) w.Write(s);
     }
 }
