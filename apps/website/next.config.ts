@@ -189,6 +189,11 @@ const nextConfig = {
 	images: {
 		formats: ["image/avif", "image/webp"],
 		unoptimized: false,
+		// Next 16 : seules les valeurs `quality` listées ici sont acceptées par
+		// l'optimiseur (défaut = [75]). Les composants utilisent q=70/90/95/100 ;
+		// sans cette liste l'optimiseur renvoie 400 INVALID_IMAGE_OPTIMIZE_REQUEST
+		// (toutes les photos d'équipe cassées). On autorise les qualités employées.
+		qualities: [70, 75, 90, 95, 100],
 		...(CDN_LOADER && {
 			loader: "custom",
 			loaderFile: "./cdn-loader.ts",
