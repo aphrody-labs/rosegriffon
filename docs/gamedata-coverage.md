@@ -3,15 +3,15 @@
 > Objectif : **indexer, mapper, typer, analyser, extraire et peupler en DB proprement** TOUTE la donnée du jeu
 > (items, teams, uniformes, passifs, skills, auras, emblèmes, telop/video waza, textures & modèles chr,
 > drop-rates par élément, shops, tous les cfg.bin, tous les lua, tout le code C).
-> Ancré au réel : `/home/ubuntu/data/common/gamedata/**` (sources), `packages/inagle/src/parsers/**` (66 parseurs),
+> Ancré au réel : `/home/ubuntu/niers/data/common/gamedata/**` (sources), `packages/inagle/src/parsers/**` (66 parseurs),
 > `packages/inagle/src/cli-push.ts` (push Supabase), tables `inagle_*` Supabase. **Aucune valeur inventée.**
 
 ## Sources réelles
 
-- **19 371** `*.cfg.bin.json` sous `/home/ubuntu/data` (dont ~16k `ev*`/`Subtitle_ev*` = scripts d'événements/cutscenes).
+- **19 371** `*.cfg.bin.json` sous `/home/ubuntu/niers/data` (dont ~16k `ev*`/`Subtitle_ev*` = scripts d'événements/cutscenes).
 - **common/gamedata/** organisé par catégorie : `item shop capsule formation party command soccer skill skill_view
   character chara_bank uniform craft boost_grp quest mission dungeon movie motion live2d banner gallery formation …`
-- **677** scripts Lua (`/home/ubuntu/data/lua_scripts/{decompiled,analysis}`, classés `p0-critical/p1-gameplay/p2-other`).
+- **677** scripts Lua (`/home/ubuntu/niers/data/lua_scripts/{decompiled,analysis}`, classés `p0-critical/p1-gameplay/p2-other`).
 - **Code C** : `nie.exe` reversé par **niers** (52 783 fonctions réelles, 92,43 % classifiées — repo séparé `/home/ubuntu/niers`).
 - **Assets binaires** (textures/modèles) : g4tx/g4mg/g4md/g4sk dans les CPK — traités côté **iecode** (embed g4tx→GLB fait).
 
@@ -84,9 +84,9 @@ video waza) demandent un **nouveau parseur**. Plus : vérifier les drop-rates **
 |---|---|---|---|
 | **B1** | Catégories nommées : uniformes, shops, tricks, tactiques spéciales, telop waza, video waza, emblèmes → table + parseur + push + COUNT + câblage | `rg/packages/inagle` + Supabase | **FAIT** (`8ec292d` ; 384/2331/9/85/926/4/2 vérifiés ; RLS+policy `Public Read` 7/7 ; type-check vert) |
 | **B2** | Reste parseur→DB (8 catégories) | `rg/packages/inagle` + Supabase | **FAIT** (`99e3c25` ; 23/14/86/5/30/5080/228/1 vérifiés ; RLS+`Public Read` 8/8 dès création ; type-check vert ; bonus fix parser constellation) |
-| **B3** | **Taux de drop** : auditer `soccer_drop_config`+`item_emission_rarity_table`+`win_treasure_lot_table`+treasures et l'existant `inagle_drops_*`, combler le VRAI gap (taux par droppable/source ; élément si dimension réelle) — investigation-first, zéro fabrication | `rg/packages/inagle` + Supabase | **FAIT** |
-| **B4** | **Lua** : indexer/typer les 677 scripts (`inagle_lua_scripts` : nom, version, catégorie p0/p1/p2, fonctions/symboles, hash) + analyse statique | `rg` (module `inagle/src/lua/` dédié, NE touche PAS cli-push/push-categories/parsers-index) + Supabase | **FAIT** |
-| **B5** | **Assets chr** : CPK packs déchiffrés (clé **CRC32 du nom** ; `0x1717E18E`=Viola cfg.bin) → extraire/indexer g4tx + g4mg/g4md/g4sk → manifest/DB + index arbre du jeu → Redis (node-api-dotnet) | `iecode` (C#) + `niers` (nie-formats) | **EN COURS** (niers cpk.rs+g4sk FAIT `a0e5333` ; arbre→Redis `wlisv0fjt`) |
+| **B3** | **Taux de drop** : audit configs drop + existant `inagle_drops_*`, combler le vrai gap | `rg/packages/inagle` + Supabase | **FAIT** (`d54cdf5` ; `inagle_drop_rates` **177** vérifié REST = 10 emission + 54 spirit + 113 treasure ; RLS ; AUCUNE dimension élément-attribut dans les octets → « élément » du /goal = chaque item/objet) |
+| **B4** | **Lua** : indexer/typer les ~677 scripts (`inagle_lua_scripts`) + analyse statique | `rg` (`inagle/src/lua/`) + Supabase | **FAIT** (agy `bea3687`/`bc6c9ff` ; `inagle_lua_scripts` **666** vérifié REST ; `parsers/lua.ts` + `PostgresAdapter` + câblé `cli-push`) |
+| **B5** | **Assets chr** : extraire/indexer g4tx + g4mg/g4md/g4sk → manifest/DB + index arbre du jeu → Redis | `iecode` (C#) + `niers` (nie-formats) | **EN COURS** (arbre du jeu→Redis FAIT `0ba8a8a` : 250800 fichiers/921 CPK db3 `iev:*` ; **extraction CPK** FAIT `c91faeb` : `CpkReader.extract`+`Vfs.read` ; niers cpk+g4sk `a0e5333` ; reste : décoder g4tx/g4mg→manifest) |
 | **B6** | Événements : `ev*`/`Subtitle_ev*` (~16k) → index/typage des scripts d'event (dialogues, video waza in-game) | `rg` + Supabase | À FAIRE |
 | **B7** | Code C : niers continue (nie-wasm, câblage runtime sim, levier feuilles) | `niers` | EN COURS (axe séparé) |
 
