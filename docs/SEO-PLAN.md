@@ -14,12 +14,14 @@ Dev / marque personnelle : **Yohan Pierre (yoyo)** — https://x.com/yoyo__goat.
 
 ## Fait (appliqué — commit en cours)
 
-P0 — website :
+P0 — website & azalee :
 - `AzaleeBanner` : CTA principal **« Explorer le wiki Azalée » → azalee.rosegriffon.fr** (ancre descriptive).
 - `footer` : lien **« Wiki Azalée — Inazuma Eleven: Victory Road »** (cross-domain, présent sur toutes les pages).
 - `app/layout.tsx` : JSON-LD `@graph` **Person (yoyo) + Organization + WebSite** (sameAs réseaux + azalee ; `founder`/`creator` = yoyo).
 - `app/sitemap.ts` : réécrit avec les **22 routes publiques réelles** (fin des 404).
 - `public/humans.txt` + `<link rel="author">` : crédit dev.
+- **Réplication Person & rel="author"** : Crédit auteur et données structurées `Person` (yoyo) intégrés dans le layout d'**azalee**.
+- **Correction des H1 manquants** : Balises `<h1>` visibles et descriptions stylisées ajoutées sur la home (`/`) du site web principal, et sur les pages d'index `/chara`, `/skill` et `/passive` du wiki.
 
 ## Marque personnelle « yoyo » — être en haut de Google (white-hat)
 
