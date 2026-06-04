@@ -20,6 +20,7 @@
  */
 import { RedisClient } from "bun";
 import { parseArgs } from "node:util";
+import * as path from "node:path";
 import { iecodeCore, loadIecode } from "@rose-griffon/iecode-core";
 
 const t0 = performance.now();
@@ -153,34 +154,52 @@ async function main(): Promise<void> {
 		return;
 	}
 
-	const redis = new RedisClient(REDIS_URL, {
-		connectionTimeout: 5000,
-		idleTimeout: 300_000, // crawl/acquire long → évite l'idle-close (cf. db/redis.ts).
-		autoReconnect: true,
-		maxRetries: 10,
-		enableOfflineQueue: true,
-		enableAutoPipelining: true, // ESSENTIEL : Promise.all → 1 flush réseau par lot.
-	});
-	let closing = false; // ferméture délibérée → ne pas logguer le "connection closed".
-	redis.onclose = (err?: Error) => {
-		if (err && !closing) console.warn(`[iev-index] redis closed: ${err.message ?? err}`);
-	};
-
+	let redis: RedisClient | null = null;
+	let redis2: RedisClient | null = null;
+	let closing1 = false;
+	let closing2 = false;
 	let redisKeys = 0;
+
 	try {
+		redis = new RedisClient(REDIS_URL, {
+			connectionTimeout: 5000,
+			idleTimeout: 300_000,
+			autoReconnect: true,
+			maxRetries: 10,
+			enableOfflineQueue: true,
+			enableAutoPipelining: true,
+		});
+		redis.onclose = (err?: Error) => {
+			if (err && !closing1) console.warn(`[iev-index] redis closed: ${err.message ?? err}`);
+		};
+
 		await redis.connect();
 
 		// Reset propre : seul sur db dédié → FLUSHDB ne touche PAS db0/db1.
 		// (JAMAIS FLUSHALL : purgerait niers + bot.)
 		await redis.send("FLUSHDB", []);
 
-		const tasks: (() => Promise<unknown>)[] = [];
+		let batchTasks: (() => Promise<unknown>)[] = [];
+		const pushTask = async (task: () => Promise<unknown>) => {
+			batchTasks.push(task);
+			if (batchTasks.length >= BATCH) {
+				await Promise.all(batchTasks.map((t) => t()));
+				batchTasks.length = 0;
+			}
+		};
+		const flushTasks = async () => {
+			if (batchTasks.length > 0) {
+				await Promise.all(batchTasks.map((t) => t()));
+				batchTasks.length = 0;
+			}
+		};
+
 		for (const cpk of cpks) {
 			const files = byCpk.get(cpk)!;
 			const disk = diskInfo.get(cpk);
 
 			// 1) set de tous les CPK
-			tasks.push(() => redis.sadd(`${KP}cpk:index`, cpk));
+			await pushTask(() => redis!.send("SADD", [`${KP}cpk:index`, cpk]));
 			redisKeys++; // iev:cpk:index (compté une fois suffit, mais terse)
 
 			// 2) hash du CPK : path → size, chunké pour borner la taille de commande.
@@ -188,7 +207,7 @@ async function main(): Promise<void> {
 			for (const f of files) flat.push(f.path, String(f.size));
 			for (let i = 0; i < flat.length; i += 4000) {
 				const c = flat.slice(i, i + 4000);
-				tasks.push(() => redis.hmset(`${KP}cpk:${cpk}`, c));
+				await pushTask(() => redis!.send("HMSET", [`${KP}cpk:${cpk}`, ...c]));
 			}
 
 			// 3) index inverse global path → cpkName (O(1) pour « quel CPK contient X »).
@@ -196,12 +215,13 @@ async function main(): Promise<void> {
 			for (const f of files) inv.push(f.path, cpk);
 			for (let i = 0; i < inv.length; i += 4000) {
 				const c = inv.slice(i, i + 4000);
-				tasks.push(() => redis.hmset(`${KP}file:index`, c));
+				await pushTask(() => redis!.send("HMSET", [`${KP}file:index`, ...c]));
 			}
 
 			// 4) méta du CPK
-			tasks.push(() =>
-				redis.hmset(`${KP}cpk:${cpk}:meta`, [
+			await pushTask(() =>
+				redis!.send("HMSET", [
+					`${KP}cpk:${cpk}:meta`,
 					"disk_path",
 					disk?.path ?? "",
 					"file_count",
@@ -211,7 +231,7 @@ async function main(): Promise<void> {
 				]),
 			);
 		}
-		await pflush(tasks);
+		await flushTasks();
 
 		// 5) TOC enrichi (optionnel) : offset ABSENT (CpkFileInfo ne l'expose pas) →
 		//    on stocke size(compressé):extractSize:compressed par fichier. Borné par concurrency.
@@ -240,7 +260,7 @@ async function main(): Promise<void> {
 						const tocTasks: (() => Promise<unknown>)[] = [];
 						for (let j = 0; j < pairs.length; j += 4000) {
 							const c = pairs.slice(j, j + 4000);
-							tocTasks.push(() => redis.hmset(`${KP}cpk:${name}:toc`, c));
+							tocTasks.push(() => redis!.send("HMSET", [`${KP}cpk:${name}:toc`, ...c]));
 						}
 						await pflush(tocTasks);
 					}),
@@ -248,9 +268,224 @@ async function main(): Promise<void> {
 			}
 		}
 
-		// 6) méta du scan
+		closing1 = true;
+		redis.close();
+
+		// === INDEXATION 3D INTÉLLIGENTE ET RÉCURSIVE ===
+		console.info("▸ Indexation 3D et Avatar...");
+		const toHex = (n: number) => "0x" + (n >>> 0).toString(16).toUpperCase().padStart(8, "0");
+		const resolveGamedataFile = (baseName: string): string => {
+			const dir = "/home/ubuntu/niers/data/common/gamedata/character";
+			const fs = require("node:fs");
+			const files = fs.readdirSync(dir);
+			const versionedRe = new RegExp("^" + baseName + "_\\d[\\d.]*\\.cfg\\.bin\\.json$");
+			const matches = files.filter((f: string) => versionedRe.test(f));
+			if (matches.length === 0) {
+				// Repli : sans version
+				const exact = baseName + ".cfg.bin.json";
+				if (files.includes(exact)) {
+					return path.join(dir, exact);
+				}
+				throw new Error(`Fichier gamedata introuvable pour ${baseName}`);
+			}
+			matches.sort();
+			return path.join(dir, matches[matches.length - 1]);
+		};
+
+		// Fonction récursive pour traverser l'arbre cfg.bin.json
+		const walkNodes = (nodes: any[], namePrefix: string, cb: (node: any) => void) => {
+			for (const node of nodes || []) {
+				if (node.name && node.name.startsWith(namePrefix)) {
+					cb(node);
+				}
+				if (node.children && node.children.length > 0) {
+					walkNodes(node.children, namePrefix, cb);
+				}
+			}
+		};
+
+		// 1. Lire chara_base pour lier charaId -> internalCode
+		const charaBaseFilePath = resolveGamedataFile("chara_base");
+		const charaBaseData = JSON.parse(await Bun.file(charaBaseFilePath).text());
+		console.info(`[debug] chara_base file: ${charaBaseFilePath}, entries: ${charaBaseData.entries?.length}`);
+		const charaIdToCode = new Map<string, string>();
+		walkNodes(charaBaseData.entries, "CHARA_BASE_", (entry) => {
+			if (entry.name.startsWith("CHARA_BASE_INFO_") || entry.name.startsWith("CHARA_BASE_BATTLE_")) {
+				const idVar = entry.variables[0];
+				const codeVar = entry.variables[1];
+				if (idVar && codeVar && idVar.type === "Int" && codeVar.type === "String") {
+					const charaId = toHex(parseInt(idVar.value, 10));
+					charaIdToCode.set(charaId, codeVar.value);
+				}
+			}
+		});
+		console.info(`[debug] charaIdToCode size: ${charaIdToCode.size}`);
+
+		// 2. Indexer les fichiers 3D (G4MD/G4MG/G4TX) par code de personnage
+		const allTreeFiles = cpks.flatMap(c => byCpk.get(c)!);
+		const g4mdPaths = allTreeFiles.filter(f => f.path.toLowerCase().endsWith(".g4md"));
+		const g4txPaths = allTreeFiles.filter(f => f.path.toLowerCase().endsWith(".g4tx"));
+		const allPaths = new Set(allTreeFiles.map(f => f.path));
+
+		// Pré-grouper les textures par leur dossier parent
+		const texturesByDir = new Map<string, string[]>();
+		for (const tx of g4txPaths) {
+			const p = tx.path.toLowerCase();
+			const idx = p.lastIndexOf("/");
+			if (idx !== -1) {
+				const dir = p.substring(0, idx);
+				let arr = texturesByDir.get(dir);
+				if (!arr) {
+					arr = [];
+					texturesByDir.set(dir, arr);
+				}
+				arr.push(tx.path);
+			}
+		}
+
+		// 3. Lire chara_model pour lier charaId -> modèles 3D (visage, uniforme, etc.)
+		const charaModelFilePath = resolveGamedataFile("chara_model");
+		const charaModelData = JSON.parse(await Bun.file(charaModelFilePath).text());
+		console.info(`[debug] chara_model file: ${charaModelFilePath}, entries: ${charaModelData.entries?.length}`);
+		console.info("[debug] chara_model roots:", charaModelData.entries?.map((e: any) => e.name));
+		let modelCount = 0;
+		const charaModelTasks: (() => Promise<unknown>)[] = [];
+		walkNodes(charaModelData.entries, "CHARA_MODEL_INFO_", (entry) => {
+			modelCount++;
+			const idVar = entry.variables[0];
+			const faceVar = entry.variables[1];
+			if (idVar && idVar.type === "Int") {
+				const charaId = toHex(parseInt(idVar.value, 10));
+				const code = charaIdToCode.get(charaId) || "";
+
+				const faceRelPath = faceVar && faceVar.type === "String" ? faceVar.value : "";
+				let faceG4mdPath = "";
+				let faceG4mgPath = "";
+
+				if (faceRelPath) {
+					faceG4mdPath = ("data/common/chr/" + faceRelPath.replace(".objbin", ".g4md")).toLowerCase();
+					faceG4mgPath = faceG4mdPath.replace(".g4md", ".g4mg");
+				}
+
+				const faceG4mdExists = faceG4mdPath ? allPaths.has(faceG4mdPath) : false;
+				const faceG4mgExists = faceG4mgPath ? allPaths.has(faceG4mgPath) : false;
+
+				// Trouver les textures du visage associées (dossier parent commun)
+				const faceDir = faceG4mdPath ? faceG4mdPath.substring(0, faceG4mdPath.lastIndexOf("/")) : "";
+				const associatedTextures = faceDir ? (texturesByDir.get(faceDir) || []) : [];
+
+				const modelInfo = [
+					"internal_code", code,
+					"face_g4md", faceG4mdExists ? faceG4mdPath : "",
+					"face_g4mg", faceG4mgExists ? faceG4mgPath : "",
+				];
+
+				charaModelTasks.push(() => redis2!.send("HMSET", [`${KP}chara:${charaId}:model`, ...modelInfo]));
+				if (associatedTextures.length > 0) {
+					const chunkedTextures = associatedTextures.slice(0, 1000); // Éviter des commandes Redis trop grandes
+					charaModelTasks.push(() => redis2!.send("SADD", [`${KP}chara:${charaId}:textures`, ...chunkedTextures]));
+				}
+			}
+		});
+		console.info(`[debug] walkNodes chara_model count: ${modelCount}`);
+
+		// Initialiser la seconde connexion Redis pour la phase 3D/Avatar
+		redis2 = new RedisClient(REDIS_URL, {
+			connectionTimeout: 5000,
+			idleTimeout: 300_000,
+			autoReconnect: true,
+			maxRetries: 10,
+			enableOfflineQueue: true,
+			enableAutoPipelining: true,
+		});
+		redis2.onclose = (err?: Error) => {
+			if (err && !closing2) console.warn(`[iev-index] redis2 closed: ${err.message ?? err}`);
+		};
+		await redis2.connect();
+
+		let batchTasks2: (() => Promise<unknown>)[] = [];
+		const pushTask2 = async (task: () => Promise<unknown>) => {
+			batchTasks2.push(task);
+			if (batchTasks2.length >= BATCH) {
+				await Promise.all(batchTasks2.map((t) => t()));
+				batchTasks2.length = 0;
+			}
+		};
+		const flushTasks2 = async () => {
+			if (batchTasks2.length > 0) {
+				await Promise.all(batchTasks2.map((t) => t()));
+				batchTasks2.length = 0;
+			}
+		};
+
+		for (const task of charaModelTasks) {
+			await pushTask2(task);
+		}
+
+		// 4. Indexer la Création d'Avatar (chara_edit et chara_edit_parts_type_config)
+		const charaEditFilePath = resolveGamedataFile("chara_edit");
+		const charaEditData = JSON.parse(await Bun.file(charaEditFilePath).text());
+		console.info(`[debug] chara_edit file: ${charaEditFilePath}, lists: ${charaEditData.lists?.length}`);
+		const partsDataList = charaEditData.lists.find((l: any) => l.name === "m_CharaEditPartsDataList")?.values || [];
+		console.info(`[debug] partsDataList count: ${partsDataList.length}`);
+
+		for (const part of partsDataList) {
+			const partId = part.id;
+			const resName1 = part.resourceNameStr1 || "";
+			const resName2 = part.resourceNameStr2 || "";
+
+			let g4mdPath = "";
+			let g4mgPath = "";
+			if (resName1) {
+				const found = g4mdPaths.find(f => f.path.toLowerCase().endsWith(`/${resName1.toLowerCase()}.g4md`));
+				if (found) {
+					g4mdPath = found.path;
+					g4mgPath = g4mdPath.replace(".g4md", ".g4mg");
+				}
+			}
+
+			let textures: string[] = [];
+			if (g4mdPath) {
+				const partDir = g4mdPath.substring(0, g4mdPath.lastIndexOf("/"));
+				textures = texturesByDir.get(partDir) || [];
+			}
+
+			const partInfo = {
+				id: partId,
+				gender: part.gender,
+				resourceName1: resName1,
+				resourceName2: resName2,
+				g4md: g4mdPath,
+				g4mg: g4mgPath,
+				textures,
+			};
+			await pushTask2(() => redis2!.send("HSET", [`${KP}avatar:parts`, partId, JSON.stringify(partInfo)]));
+		}
+		await flushTasks2();
+
+		// 5. Indexer les catégories d'UI d'édition
+		const partsInfoList = charaEditData.lists.find((l: any) => l.name === "m_CharaEditPartsInfoList")?.values || [];
+		await redis2!.send("SET", [`${KP}avatar:configs:parts_info`, JSON.stringify(partsInfoList)]);
+
+		const partsTypeFilePath = resolveGamedataFile("chara_edit_parts_type_config");
+		const partsTypeData = JSON.parse(await Bun.file(partsTypeFilePath).text());
+		await redis2!.send("SET", [`${KP}avatar:configs:parts_type`, JSON.stringify(partsTypeData.lists)]);
+
+		// 6. Indexer les scripts Lua d'avatar
+		const fs = require("node:fs");
+		const luaDir = "/home/ubuntu/niers/data/lua_scripts/decompiled/p0-critical";
+		if (fs.existsSync(luaDir)) {
+			const luaFiles = fs.readdirSync(luaDir).filter((f: string) => f.startsWith("chara_edit_parts_menu_") && f.endsWith(".lua"));
+			for (const f of luaFiles) {
+				const content = await Bun.file(path.join(luaDir, f)).text();
+				await redis2!.send("HSET", [`${KP}avatar:lua`, f, content]);
+			}
+		}
+
+		// 7) méta du scan
 		const buildId = String(game.Info?.["buildId"] ?? "");
-		await redis.hmset(`${KP}scan:meta`, [
+		await redis2!.send("HMSET", [
+			`${KP}scan:meta`,
 			"root",
 			game.GamePath,
 			"gamePath",
@@ -268,11 +503,13 @@ async function main(): Promise<void> {
 		]);
 
 		// Nombre réel de clés top-level écrites (pour la ligne de sortie).
-		const dbsize = await redis.send("DBSIZE", []);
+		const dbsize = await redis2!.send("DBSIZE", []);
 		redisKeys = Number.parseInt(String(dbsize), 10) || redisKeys;
 	} finally {
-		closing = true;
-		redis.close();
+		closing1 = true;
+		closing2 = true;
+		if (redis) redis.close();
+		if (redis2) redis2.close();
 	}
 
 	console.log(
