@@ -1,73 +1,69 @@
-import { assertType, describe, expectTypeOf, test } from "bun:test";
+import { describe, expectTypeOf, test } from "bun:test";
 
 import { Add, If, Length, Subtract, Tuple } from "../../utils/generics";
 
 describe("add type", () => {
 	test("add zero", () => {
-		expectTypeOf<Add<9>>().toMatchTypeOf<9>();
-		assertType<Add<9>>(9);
-
-		assertType<Add<12>>(12);
+		expectTypeOf<Add<9>>().toEqualTypeOf<9>();
+		expectTypeOf<Add<12>>().toEqualTypeOf<12>();
 	});
 
 	test("add", () => {
-		assertType<Add<9, 3>>(12);
-		assertType<Add<12, 3>>(15);
+		expectTypeOf<Add<9, 3>>().toEqualTypeOf<12>();
+		expectTypeOf<Add<12, 3>>().toEqualTypeOf<15>();
 	});
 });
 
 describe("if type", () => {
 	test("generic boolean", () => {
-		assertType<If<boolean, true, false>>(true);
-
-		assertType<If<boolean, number, string>>(9);
-		assertType<If<boolean, number, string>>("test");
+		expectTypeOf<If<boolean, true, false>>().toEqualTypeOf<boolean>();
+		expectTypeOf<If<boolean, number, string>>().toEqualTypeOf<number | string>();
 	});
 
 	test("true boolean", () => {
-		assertType<If<true, true, false>>(true);
-		assertType<If<true, string, number>>("test");
+		expectTypeOf<If<true, true, false>>().toEqualTypeOf<true>();
+		expectTypeOf<If<true, string, number>>().toEqualTypeOf<string>();
 	});
 
 	test("false boolean", () => {
-		assertType<If<false, true, false>>(false);
-		assertType<If<false, true>>(<never>{});
-		assertType<If<false, string, number>>(9);
+		expectTypeOf<If<false, true, false>>().toEqualTypeOf<false>();
+		expectTypeOf<If<false, true>>().toEqualTypeOf<never>();
+		expectTypeOf<If<false, string, number>>().toEqualTypeOf<number>();
 	});
 });
 
 describe("length", () => {
 	test("array", () => {
-		assertType<Length<[0, 1, 2]>>(3);
+		expectTypeOf<Length<[0, 1, 2]>>().toEqualTypeOf<3>();
 	});
 
 	test("string", () => {
-		assertType<Length<"test">>(4);
+		expectTypeOf<Length<"test">>().toEqualTypeOf<4>();
 	});
 });
 
 describe("subtract", () => {
 	test("two numbers", () => {
-		assertType<Subtract<9, 6>>(3);
+		expectTypeOf<Subtract<9, 6>>().toEqualTypeOf<3>();
 	});
 
 	test("no changes", () => {
-		assertType<Subtract<9, 0>>(9);
-		assertType<Subtract<1, 0>>(1);
-		assertType<Subtract<0, 0>>(0);
+		expectTypeOf<Subtract<9, 0>>().toEqualTypeOf<9>();
+		expectTypeOf<Subtract<1, 0>>().toEqualTypeOf<1>();
+		expectTypeOf<Subtract<0, 0>>().toEqualTypeOf<0>();
 	});
 });
 
 describe("tuple", () => {
 	test("array", () => {
-		assertType<Tuple<0, 2>>([0, 0]);
+		expectTypeOf<Tuple<0, 2>>().toEqualTypeOf<[0, 0]>();
 	});
 
 	test("one length", () => {
-		assertType<Tuple<"test", 1>>(["test"]);
+		expectTypeOf<Tuple<"test", 1>>().toEqualTypeOf<["test"]>();
 	});
 
 	test("empty", () => {
-		assertType<Tuple<"test", 0>>([]);
+		expectTypeOf<Tuple<"test", 0>>().toEqualTypeOf<[]>();
 	});
 });

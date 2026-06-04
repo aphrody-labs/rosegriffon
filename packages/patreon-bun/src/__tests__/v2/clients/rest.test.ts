@@ -1,13 +1,21 @@
-import { describe, expect, it } from "bun:test";
+import { describe, expect, it, afterEach } from "bun:test";
 
 import {
 	getLastFetchMockCall,
 	mockFetch,
 	mockFetchReturnValue,
 	restClient as client,
+	resetMockFetch,
 } from "../../client";
 
 import { PatreonMockData, RestClient } from "../../../v2";
+
+afterEach(() => {
+	resetMockFetch();
+	client.clearRatelimitTimeout();
+	client.requestCounter.clear();
+	client.invalidRequestCounter.clear();
+});
 
 const JsonResponse = (...args: Parameters<typeof Response.json>) => {
 	return Promise.resolve(Response.json(...args));
@@ -224,7 +232,7 @@ describe("requests", () => {
 				accessToken: "token",
 				timeout: 10,
 			})
-		).rejects.toThrowError("The operation was aborted due to timeout");
+		).rejects.toThrowError(/The operation (was aborted due to timeout|timed out)/);
 	});
 
 	it("GET request: ratelimited, no retry information", async () => {

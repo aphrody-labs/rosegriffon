@@ -1,7 +1,17 @@
 import { describe, expect, test } from "bun:test";
+import { clientId, clientSecret } from "../../client";
+import { PatreonCreatorClient, QueryBuilder, Type } from "../../../v2";
 
-import { creatorClient } from "../../client";
-import { QueryBuilder, Type } from "../../../v2";
+const creatorClient = new PatreonCreatorClient({
+	oauth: {
+		clientId,
+		clientSecret,
+		token: {
+			access_token: "access_token",
+			refresh_token: "refresh_token",
+		},
+	},
+});
 
 describe("client methods", () => {
 	test("campaigns", async () => {

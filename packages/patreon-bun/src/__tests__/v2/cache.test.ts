@@ -327,23 +327,31 @@ describe("item cache", () => {
 		});
 
 		test("sync request: POST request with no body", async () => {
-			await expect(
-				async () =>
-					await cache.syncRequest(
-						{ body: null, method: RequestMethod.Post },
-						{ id: "webhook_id", resource: Type.Webhook }
-					)
-			).rejects.toThrow("Missing request body to sync with cache");
+			let error: Error | null = null;
+			try {
+				await cache.syncRequest(
+					{ body: null, method: RequestMethod.Post },
+					{ id: "webhook_id", resource: Type.Webhook }
+				);
+			} catch (err: any) {
+				error = err;
+			}
+			expect(error).toBeDefined();
+			expect(error?.message).toContain("Missing request body to sync with cache");
 		});
 
 		test("sync request: POST request with no id", async () => {
-			await expect(
-				async () =>
-					await cache.syncRequest(
-						{ body: null, method: RequestMethod.Post },
-						{ id: <never>null, resource: Type.Webhook }
-					)
-			).rejects.toThrow("Missing id of resource webhook to update in cache");
+			let error: Error | null = null;
+			try {
+				await cache.syncRequest(
+					{ body: null, method: RequestMethod.Post },
+					{ id: <never>null, resource: Type.Webhook }
+				);
+			} catch (err: any) {
+				error = err;
+			}
+			expect(error).toBeDefined();
+			expect(error?.message).toContain("Missing id of resource webhook to update in cache");
 		});
 
 		test("sync request: POST request with no mocked attributes", async () => {
@@ -353,32 +361,36 @@ describe("item cache", () => {
 				},
 			});
 
-			await expect(
-				async () =>
-					await cache.syncRequest(
-						{
-							body: {
-								data: {
-									type: Type.Webhook,
-									attributes: {
-										triggers: [],
-										uri: "https://mywebsite.com",
-									},
-									relationships: {
-										campaign: {
-											data: {
-												id: "campaign_id",
-												type: Type.Campaign,
-											},
+			let error: Error | null = null;
+			try {
+				await cache.syncRequest(
+					{
+						body: {
+							data: {
+								type: Type.Webhook,
+								attributes: {
+									triggers: [],
+									uri: "https://mywebsite.com",
+								},
+								relationships: {
+									campaign: {
+										data: {
+											id: "campaign_id",
+											type: Type.Campaign,
 										},
 									},
 								},
 							},
-							method: RequestMethod.Post,
 						},
-						{ id: "webhook_id", resource: Type.Webhook }
-					)
-			).rejects.toThrow("Failed to find mocked attributes for resource: webhook");
+						method: RequestMethod.Post,
+					},
+					{ id: "webhook_id", resource: Type.Webhook }
+				);
+			} catch (err: any) {
+				error = err;
+			}
+			expect(error).toBeDefined();
+			expect(error?.message).toContain("Failed to find mocked attributes for resource: webhook");
 		});
 
 		test("sync request: DELETE request", async () => {

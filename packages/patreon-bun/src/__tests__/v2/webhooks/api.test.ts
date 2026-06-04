@@ -1,9 +1,20 @@
 import { describe, expect, test } from "bun:test";
 
-import { WebhookClient, QueryBuilder, type Webhook } from "../../../v2";
+import { WebhookClient, QueryBuilder, type Webhook, PatreonCreatorClient } from "../../../v2";
 
-import { creatorClient } from "../../client";
+import { clientId, clientSecret } from "../../client";
 import { testWebhook } from "../../server/cache";
+
+const creatorClient = new PatreonCreatorClient({
+	oauth: {
+		clientId,
+		clientSecret,
+		token: {
+			access_token: "access_token",
+			refresh_token: "refresh_token",
+		},
+	},
+});
 
 describe("webhook client", () => {
 	test("webhook headers", () => {
@@ -60,25 +71,25 @@ describe("webhook client", () => {
 		});
 
 		// TODO: remove fails
-		test("edit webhooks", { fails: true }, async () => {
+		test.todo("edit webhooks", async () => {
 			const res = await client.editWebhook({ id, paused: true });
 
 			expect(res).toEqual(pausedWebhook);
 		});
 
-		test("unpause webhooks", { fails: true }, async () => {
+		test.todo("unpause webhooks", async () => {
 			const res = await client.unpauseWebhook(id, { token: "token" });
 
 			expect(res).toEqual(baseWebhook);
 		});
 
-		test("pause webhooks", { fails: true }, async () => {
+		test.todo("pause webhooks", async () => {
 			const res = await client.pauseWebhook(id, { token: "token" });
 
 			expect(res).toEqual(pausedWebhook);
 		});
 
-		test("create webhooks", { fails: true }, async () => {
+		test.todo("create webhooks", async () => {
 			const res = await client.createWebhook({
 				campaignId: "campaign",
 				triggers: ["posts:publish"],
@@ -90,7 +101,7 @@ describe("webhook client", () => {
 
 		test("delete a webhook", async () => {
 			const deleteWebhook = () => client.deleteWebhook(id);
-			await expect(deleteWebhook()).resolves.not.toThrowError();
+			await expect(deleteWebhook()).resolves.toBeUndefined();
 		});
 	});
 });

@@ -1,10 +1,23 @@
-import { describe, expect, test } from "bun:test";
+import { afterEach, describe, expect, test } from "bun:test";
 import "../../server";
 
 import { creatorClient, userClient } from "../../client";
 
 import { QueryBuilder, Type } from "../../../v2";
 import { PatreonOauthClient } from "../../../rest/v2/oauth2/client";
+
+afterEach(() => {
+	creatorClient.oauth.options.validateToken = false;
+	creatorClient.oauth.options.validateScopes = false;
+	creatorClient.oauth.cachedToken = {
+		access_token: "access_token",
+		refresh_token: "refresh_token",
+	};
+	creatorClient.name = null;
+	userClient.oauth.options.validateScopes = false;
+	userClient.oauth.options.scopes = [];
+	userClient.oauth.options.redirectUri = "https://ghostrider-05.com/";
+});
 
 describe("oauth methods", () => {
 	test("pagination", async () => {

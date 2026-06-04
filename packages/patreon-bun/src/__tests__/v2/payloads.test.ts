@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-empty-object-type */
-import { assertType, describe, expect, expectTypeOf, test } from "bun:test";
+import { describe, expect, expectTypeOf, test } from "bun:test";
 
 import {
 	Type,
@@ -23,60 +23,60 @@ describe("campaign payload", () => {
 			data: { type: Type.Campaign; id: string; attributes: {} };
 		}>().toEqualTypeOf<PatreonQuery<Type.Campaign, never, never>["_payload_type"]>();
 
-		assertType<{
+		const _: {
 			links: { self: string };
 			data: { type: Type.Campaign; id: string; attributes: {} };
-		}>(QueryBuilder.campaign.build()()._payload_type);
+		} = QueryBuilder.campaign.build()()._payload_type;
 	});
 
 	test("campaign with benefits", () => {
-		assertType<{
+		const _benefits: {
 			links: { self: string };
 			data: { type: Type.Campaign; id: string; attributes: {} };
 			included: { type: Type.Benefit; id: string; attributes: {} }[];
-		}>(QueryBuilder.campaign.build(["benefits"])()._payload_type);
+		} = QueryBuilder.campaign.build(["benefits"])()._payload_type;
 
-		assertType<{
+		const _benefitsEmpty: {
 			links: { self: string };
 			data: { type: Type.Campaign; id: string; attributes: {} };
 			included: { type: Type.Benefit; id: string; attributes: {} }[];
-		}>(QueryBuilder.campaign.build(["benefits"])({ benefit: [] })._payload_type);
+		} = QueryBuilder.campaign.build(["benefits"])({ benefit: [] })._payload_type;
 
-		assertType<{
+		const _benefitsAttr: {
 			links: { self: string };
 			data: { type: Type.Campaign; id: string; attributes: {} };
 			included: { type: Type.Benefit; id: string; attributes: { benefit_type: string | null } }[];
-		}>(QueryBuilder.campaign.build(["benefits"])({ benefit: ["benefit_type"] })._payload_type);
+		} = QueryBuilder.campaign.build(["benefits"])({ benefit: ["benefit_type"] })._payload_type;
 	});
 
 	test("campaign with creator", () => {
-		assertType<{
+		const _creator: {
 			links: { self: string };
 			data: { type: Type.Campaign; id: string; attributes: {} };
-		}>(QueryBuilder.campaign.build(["creator"])()._payload_type);
+		} = QueryBuilder.campaign.build(["creator"])()._payload_type;
 	});
 
 	test("campaign with goals", () => {
-		assertType<{
+		const _goals: {
 			links: { self: string };
 			data: { type: Type.Campaign; id: string; attributes: {} };
-		}>(QueryBuilder.campaign.build(["goals"])()._payload_type);
+		} = QueryBuilder.campaign.build(["goals"])()._payload_type;
 	});
 
 	test("campaign with tiers", () => {
-		assertType<{
+		const _tiers: {
 			links: { self: string };
 			data: { type: Type.Campaign; id: string; attributes: {} };
-		}>(QueryBuilder.campaign.build(["tiers"])()._payload_type);
+		} = QueryBuilder.campaign.build(["tiers"])()._payload_type;
 	});
 });
 
 describe("campaigns payload", () => {
 	test("list", () => {
-		assertType<{
+		const _list: {
 			meta: { pagination: { total: number; cursors?: { next: string | null } } };
 			data: { type: Type.Campaign; id: string; attributes: {} }[];
-		}>(QueryBuilder.campaigns.build()()._payload_type);
+		} = QueryBuilder.campaigns.build()()._payload_type;
 	});
 });
 

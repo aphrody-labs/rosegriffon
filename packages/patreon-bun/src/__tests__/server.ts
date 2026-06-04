@@ -3,6 +3,7 @@ import { afterAll, afterEach, beforeAll } from "bun:test";
 import { setupServer } from "msw/node";
 
 import { apiHandlers } from "./server/handlers";
+import { resetMockFetch } from "./client";
 
 const server = setupServer(...[...apiHandlers]);
 
@@ -16,5 +17,8 @@ beforeAll(() => {
 	});
 });
 
-afterAll(() => server.close());
-afterEach(() => server.resetHandlers());
+afterEach(() => {
+	server.resetHandlers();
+	resetMockFetch();
+});
+

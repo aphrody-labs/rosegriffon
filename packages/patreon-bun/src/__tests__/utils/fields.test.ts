@@ -1,32 +1,30 @@
-import { assertType, describe, test } from "bun:test";
+import { describe, test } from "bun:test";
 
 import { AdditionalKeys } from "../../utils/fields";
 
 describe("additional keys", () => {
 	test("include all keys", () => {
-		assertType<AdditionalKeys<"test", { test: string[] }>>({
+		const _1: AdditionalKeys<"test", { test: string[] }> = {
 			test: [],
-		});
+		};
 
-		assertType<AdditionalKeys<"test" | "another_test", { test: string[]; another_test: string[] }>>(
-			{
-				test: [],
-				another_test: [],
-			}
-		);
-
-		assertType<AdditionalKeys<"test", { test: string[]; another_test: string[] }>>({
+		const _2: AdditionalKeys<"test" | "another_test", { test: string[]; another_test: string[] }> = {
 			test: [],
 			another_test: [],
-		});
+		};
 
-		assertType<AdditionalKeys<string, { test: string[]; another_test: string[] }>>({
+		const _3: AdditionalKeys<"test", { test: string[]; another_test: string[] }> = {
 			test: [],
 			another_test: [],
-		});
+		};
+
+		const _4: AdditionalKeys<string, { test: string[]; another_test: string[] }> = {
+			test: [],
+			another_test: [],
+		};
 	});
 
 	test("omit keys", () => {
-		assertType<AdditionalKeys<never, { test: string[]; another_test: string[] }>>(0);
+		const _: AdditionalKeys<never, { test: string[]; another_test: string[] }> = 0;
 	});
 });

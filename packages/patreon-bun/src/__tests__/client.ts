@@ -39,6 +39,14 @@ export const mockFetch = vi.fn(async (url: string, _init?: RequestInit) => {
 	return new Response(null, { status: 500 });
 });
 
+export function resetMockFetch() {
+	mockFetch.mockReset();
+	mockFetch.mockImplementation(async (url: string, _init?: RequestInit) => {
+		throw new Error("Fetch is not mocked for: " + url);
+	});
+}
+
+
 // eslint-disable-next-line jsdoc/require-jsdoc
 export function mockFetchReturnValue(
 	response: Promise<Response>,

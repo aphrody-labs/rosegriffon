@@ -1,4 +1,4 @@
-import { assert, describe, expect, test } from "bun:test";
+import { describe, expect, test } from "bun:test";
 
 import {
 	createBackoff,
@@ -65,10 +65,15 @@ describe("backoff", () => {
 			jitter: 200,
 		});
 
-		assert(expect(backoff(0)).approximately(0, 200));
-		assert(expect(backoff(1)).approximately(1000, 200));
-		assert(expect(backoff(2)).approximately(2000, 200));
-		assert(expect(backoff(3)).approximately(3000, 200));
+		const checkJitter = (val: number, target: number) => {
+			expect(val).toBeGreaterThanOrEqual(target - 200);
+			expect(val).toBeLessThanOrEqual(target + 200);
+		};
+
+		checkJitter(backoff(0), 0);
+		checkJitter(backoff(1), 1000);
+		checkJitter(backoff(2), 2000);
+		checkJitter(backoff(3), 3000);
 	});
 });
 
