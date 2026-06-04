@@ -7,6 +7,7 @@
 import { runInaglePush, runSQLiteBackup, runPostgresBackup } from "./tasks/db";
 import { syncCdnAssets } from "./tasks/cdn";
 import { runIeCrawl } from "./tasks/ie-crawl";
+import { crawlTwitterSearch } from "./tasks/ie-crawl/harvest-search";
 import { runRagSync, queryRag, ragGroundedQuery, ingestWikiCorpus } from "./tasks/ie-crawl/rag-index";
 import {
 	triggerPublishScheduled,
@@ -172,6 +173,8 @@ if (args.includes("--run")) {
 		await executeTask("crawl", runIeCrawl);
 	} else if (task === "rag") {
 		await executeTask("rag", runRagSync);
+	} else if (task === "x-search" || task === "x:search") {
+		await executeTask("x-search", crawlTwitterSearch);
 	} else if (task === "rag:wiki" || task === "rag-wiki") {
 		await executeTask("rag:wiki", () => ingestWikiCorpus());
 	} else if (task === "query") {
@@ -228,7 +231,7 @@ if (args.includes("--run")) {
 		await executeTask("seo:indexnow", runSeoIndexNow);
 	} else {
 		console.error(
-			`❌ Tâche inconnue : ${task}. Choisissez parmi : db, cdn, crawl, rag, query, publish, github-publish, patreon, reminders, warm, discord, discord:scan, seo, seo:indexnow, seo:llms-txt, backup:postgres, backup:pg, all.`
+			`❌ Tâche inconnue : ${task}. Choisissez parmi : db, cdn, crawl, rag, x-search, query, publish, github-publish, patreon, reminders, warm, discord, discord:scan, seo, seo:indexnow, seo:llms-txt, backup:postgres, backup:pg, all.`
 		);
 	}
 	process.exit(0);

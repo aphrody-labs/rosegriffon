@@ -11,6 +11,7 @@ import { crawlCross } from "./cross";
 import { crawlLevel5 } from "./level5";
 import { crawlLevel5Blog } from "./level5-blog";
 import { crawlTwitter } from "./twitter";
+import { crawlTwitterSearch } from "./harvest-search";
 import { crawlExternalDocs } from "./external-docs";
 import { runRagSync } from "./rag-index";
 import { withProxyRotation } from "../../lib/proxy";
@@ -84,6 +85,20 @@ export async function runIeCrawl(): Promise<{ success: boolean; error?: string }
 			}
 		}
 
+		// 5b-bis. Harvest X par requêtes de recherche (news/communauté multi-langue,
+		// IEVR/Victory Road) — complémentaire des timelines, ingère aussi dans le RAG.
+		let searchSuccess = true;
+		try {
+			const searchRes = await withProxyRotation(() => crawlTwitterSearch());
+			searchSuccess = searchRes.success;
+			console.log(
+				`[ie-crawl] Harvest X search complété : ${searchRes.kept} tweets retenus, ${searchRes.ragChunks} chunks RAG (backend=${searchRes.ragBackend}).`
+			);
+		} catch (searchErr) {
+			searchSuccess = false;
+			console.error("[ie-crawl] Échec du harvest X search :", searchErr);
+		}
+
 		// 5c. Crawl documentations externes (Markdown & Bun.markdown)
 		const externalRes = await crawlExternalDocs();
 		if (!externalRes.success) {
@@ -101,6 +116,7 @@ export async function runIeCrawl(): Promise<{ success: boolean; error?: string }
 			level5Res.success ||
 			level5BlogRes.success ||
 			twitterRes.success ||
+			searchSuccess ||
 			externalRes.success;
 		if (anyNewsCrawlSuccess) {
 			const ragRes = await runRagSync();
@@ -122,6 +138,7 @@ export async function runIeCrawl(): Promise<{ success: boolean; error?: string }
 			level5Res.success &&
 			level5BlogRes.success &&
 			twitterRes.success &&
+			searchSuccess &&
 			externalRes.success &&
 			ragSuccess;
 		return {
