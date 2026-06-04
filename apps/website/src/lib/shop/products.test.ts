@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it } from "bun:test";
 
 import { CATEGORY_LABELS, PRODUCTS, formatEuros, getProduct, getVariantPrice } from "./products";
 import type { Product } from "./products";

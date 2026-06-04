@@ -3,7 +3,7 @@
  * À exécuter avec: npm run test
  */
 
-import { describe, expect, it } from "vitest";
+import { describe, expect, it } from "bun:test";
 
 describe("Admin Phase 6 - Dashboard", () => {
 	describe("API Endpoints", () => {
