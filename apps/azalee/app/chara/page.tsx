@@ -124,12 +124,19 @@ export default async function PlayersPage({
 	};
 
 	return (
-		<>
-			<h1 className="sr-only">Personnages - Inazuma Eleven: Victory Road</h1>
+		<div className="space-y-6">
 			<script
 				type="application/ld+json"
 				dangerouslySetInnerHTML={{ __html: JSON.stringify(collectionJsonLd) }}
 			/>
+			<div className="space-y-1">
+				<h1 className="text-3xl font-extrabold tracking-tight text-on-surface font-display">
+					Personnages
+				</h1>
+				<p className="text-sm text-on-surface-variant">
+					Base de données complète des joueurs d'Inazuma Eleven: Victory Road.
+				</p>
+			</div>
 			<PlayersClient
 				paginatedCharacters={characters}
 				totalItems={total}
@@ -140,6 +147,6 @@ export default async function PlayersPage({
 				showIncomplete={status === "all"}
 				showControllable={status === "jouable"}
 			/>
-		</>
+		</div>
 	);
 }

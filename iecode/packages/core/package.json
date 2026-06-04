@@ -18,7 +18,7 @@
 	"scripts": {
 		"build:dotnet": "dotnet build ../../src/IECODE.Core/IECODE.Core.csproj -c Release",
 		"gen:types": "bun scripts/gen-types.ts",
-		"build": "bun run build:dotnet && bun build src/index.ts --outdir dist --target bun --minify --sourcemap=linked --external node-api-dotnet",
+		"build": "dotnet build ../../src/IECODE.Core/IECODE.Core.csproj -c Release && bun build src/index.ts --outdir dist --target bun --minify --sourcemap=linked --external node-api-dotnet",
 		"test": "bun test",
 		"lint": "oxlint src",
 		"lint:fix": "oxlint src --fix",
