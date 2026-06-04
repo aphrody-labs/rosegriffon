@@ -21,3 +21,5 @@ silent = false
 
 [test]
 coverage = false
+# Globals DOM (document/window) pour les tests de composants React via happy-dom.
+preload = ["./happydom.ts"]
