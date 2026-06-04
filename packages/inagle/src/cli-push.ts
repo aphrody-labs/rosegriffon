@@ -3,7 +3,6 @@ import { createClient } from "@supabase/supabase-js";
 import type { Command } from "commander";
 import * as dotenv from "dotenv";
 import jwt from "jsonwebtoken";
-import pg from "pg";
 import {
 	CATEGORY_NAMES,
 	RARITY_NAMES as CHAR_RARITY_NAMES,
@@ -14,6 +13,18 @@ import {
 	PositionNames,
 } from "./index.js";
 import { loadTextFile } from "./parsers/text-parser.js";
+// Pushers de catégories câblées (source unique sous src/, réutilisée par les
+// scripts standalone scripts/push-<cat>.ts).
+import {
+	importEmblems,
+	importShops,
+	importSpecialTactics,
+	importTelopWaza,
+	importTricks,
+	importUniforms,
+	importVideoWaza,
+} from "./push-categories.js";
+import { type DataAdapter, dedup, PostgresAdapter, SupabaseAdapter } from "./push-adapter.js";
 import { type AuraHissatsu, buildAuraHashSet, loadAuraSkills } from "./skills/mapper-aura.js";
 
 // === Helpers ===
@@ -37,147 +48,6 @@ const getDesc = (obj: any, lang: string) => {
 const getPositionFr = (posRaw: number) => {
 	return (PositionNames as any)[posRaw]?.fr || "Inconnu";
 };
-
-function dedup(records: any[], key = "id") {
-	const map = new Map();
-	for (const r of records) {
-		const k = r[key] || r.id;
-		if (k) map.set(k, r);
-	}
-	return Array.from(map.values());
-}
-
-// === Adapters ===
-
-interface DataAdapter {
-	upsert(table: string, records: any[], onConflict?: string): Promise<{ error: any }>;
-	insert(table: string, records: any[]): Promise<{ error: any }>;
-	deleteAllExcept(table: string, column: string, value: any): Promise<{ error: any }>;
-	// Lit toutes les lignes (colonnes choisies) — sert à préserver les colonnes
-	// curatées hors-pipeline (sheet_data, zukan_order) à travers un delete+reinsert.
-	fetchAll(table: string, columns: string): Promise<any[]>;
-	close(): Promise<void>;
-}
-
-class SupabaseAdapter implements DataAdapter {
-	constructor(private client: any) {}
-	async upsert(table: string, records: any[], onConflict = "id") {
-		if (records.length === 0) return { error: null };
-		return this.client.from(table).upsert(records, { onConflict });
-	}
-	async insert(table: string, records: any[]) {
-		if (records.length === 0) return { error: null };
-		return this.client.from(table).insert(records);
-	}
-	async deleteAllExcept(table: string, column: string, value: any) {
-		return this.client.from(table).delete().neq(column, value);
-	}
-	async fetchAll(table: string, columns: string) {
-		const out: any[] = [];
-		for (let from = 0; ; from += 1000) {
-			const { data, error } = await this.client
-				.from(table)
-				.select(columns)
-				.range(from, from + 999);
-			if (error || !data || data.length === 0) break;
-			out.push(...data);
-			if (data.length < 1000) break;
-		}
-		return out;
-	}
-	async close() {}
-}
-
-class PostgresAdapter implements DataAdapter {
-	private pool: pg.Pool;
-	constructor(connectionString: string) {
-		this.pool = new pg.Pool({ connectionString });
-	}
-
-	async upsert(table: string, records: any[], onConflict = "id") {
-		if (records.length === 0) return { error: null };
-
-		// Chunking for Postgres max params (65535)
-		// Let's safe limit to 100 rows per insert if many columns
-		const CHUNK_SIZE = 50;
-		for (let i = 0; i < records.length; i += CHUNK_SIZE) {
-			const chunk = records.slice(i, i + CHUNK_SIZE);
-			const err = await this._upsertBatch(table, chunk, onConflict);
-			if (err) return { error: err };
-		}
-		return { error: null };
-	}
-
-	private async _upsertBatch(table: string, records: any[], onConflict: string) {
-		const keys = Object.keys(records[0]);
-		let paramIndex = 1;
-		const values: any[] = [];
-		const rows: string[] = [];
-
-		for (const r of records) {
-			const rowParams: string[] = [];
-			for (const k of keys) {
-				rowParams.push(`$${paramIndex++}`);
-				let val = r[k];
-				if (typeof val === "object" && val !== null) val = JSON.stringify(val);
-				values.push(val);
-			}
-			rows.push(`(${rowParams.join(", ")})`);
-		}
-
-		const updateSet = keys.map((k) => `"${k}" = EXCLUDED."${k}"`).join(", ");
-
-		const conflictCols = onConflict
-			.split(",")
-			.map((c) => `"${c.trim()}"`)
-			.join(", ");
-		const query = `
-            INSERT INTO "${table}" (${keys.map((k) => `"${k}"`).join(", ")})
-            VALUES ${rows.join(", ")}
-            ON CONFLICT (${conflictCols}) DO UPDATE SET ${updateSet}
-        `;
-
-		try {
-			await this.pool.query(query, values);
-			return null;
-		} catch (e: any) {
-			console.error(`[PostgresAdapter] Error in upsert: ${e.message}`, e);
-			return e;
-		}
-	}
-
-	async insert(table: string, records: any[]) {
-		// Simple insert without conflict handling (or could fail)
-		// For treasures, we deleted before, so simple insert is fine.
-		return this.upsert(table, records, "id"); // treasures has id
-	}
-
-	async deleteAllExcept(table: string, column: string, value: any) {
-		try {
-			await this.pool.query(`DELETE FROM "${table}" WHERE "${column}" != $1`, [value]);
-			return { error: null };
-		} catch (e: any) {
-			return { error: e };
-		}
-	}
-
-	async fetchAll(table: string, columns: string) {
-		try {
-			const cols = columns
-				.split(",")
-				.map((c) => `"${c.trim()}"`)
-				.join(", ");
-			const res = await this.pool.query(`SELECT ${cols} FROM "${table}"`);
-			return res.rows;
-		} catch {
-			return [];
-		}
-	}
-
-	async close() {
-		await this.pool.end();
-	}
-}
 
 // === Command ===
 
@@ -267,6 +137,15 @@ export function registerPushCommand(program: Command) {
 				await importCostumes(service, adapter);
 				await importOpponentTeams(service, adapter);
 				await importCapsules(service, adapter);
+
+				// Catégories câblées depuis les pushers standalone (octets réels du dump).
+				await importUniforms(service, adapter);
+				await importShops(service, adapter);
+				await importTricks(service, adapter);
+				await importSpecialTactics(service, adapter);
+				await importTelopWaza(service, adapter);
+				await importVideoWaza(service, adapter);
+				await importEmblems(service, adapter);
 
 				// Static reference tables
 				await importExpTable(adapter);
