@@ -6,6 +6,7 @@ import { ArrowRight, AtSign, Newspaper } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
+import { isRemoteAvatar } from "@/lib/avatar";
 import { getAuthorInfo } from "@/lib/author";
 
 interface Article {
@@ -94,6 +95,7 @@ function AuthorInfo({
 					width={avatarSize}
 					height={avatarSize}
 					className={`rounded-full border ${isLight ? "border-white/20" : "border-surface"}`}
+					unoptimized={isRemoteAvatar(author.avatar_url)}
 				/>
 			) : (
 				<div

@@ -10,6 +10,7 @@ import { deleteComment, getReplies, updateComment } from "@/app/actions/comments
 import { CommentForm } from "@/components/news/CommentForm";
 import { useAuth } from "@/components/providers/AuthProvider";
 import { Badge, Button } from "@rose-griffon/ui";
+import { isRemoteAvatar } from "@/lib/avatar";
 import { cn } from "@/lib/utils";
 
 export interface Comment {
@@ -176,6 +177,7 @@ export function CommentItem({
 								width={36}
 								height={36}
 								className="size-9 rounded-full object-cover shrink-0 ring-2 ring-outline-variant/15"
+								unoptimized={isRemoteAvatar(comment.author.avatar_url)}
 							/>
 						) : (
 							<div className="size-9 rounded-full bg-secondary-container flex items-center justify-center shrink-0 ring-2 ring-outline-variant/15">

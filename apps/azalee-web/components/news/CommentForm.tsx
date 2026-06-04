@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { createComment } from "@/app/actions/comments";
 import { useAuth } from "@/components/providers/AuthProvider";
 import { Button } from "@rose-griffon/ui";
+import { isRemoteAvatar } from "@/lib/avatar";
 import { cn } from "@/lib/utils";
 
 const MAX_LENGTH = 2000;
@@ -110,6 +111,7 @@ export function CommentForm({
 						width={36}
 						height={36}
 						className="size-9 rounded-full object-cover ring-2 ring-outline-variant/20"
+						unoptimized={isRemoteAvatar(avatarSrc)}
 					/>
 				) : (
 					<div className="size-9 rounded-full bg-secondary-container flex items-center justify-center ring-2 ring-outline-variant/20">
