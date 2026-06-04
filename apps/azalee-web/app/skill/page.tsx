@@ -143,7 +143,14 @@ export default async function SkillsPage({
 				type="application/ld+json"
 				dangerouslySetInnerHTML={{ __html: JSON.stringify(collectionJsonLd) }}
 			/>
-			<h1 className="sr-only">Techniques — Inazuma Eleven: Victory Road</h1>
+			<div className="space-y-1">
+				<h1 className="text-3xl font-extrabold tracking-tight text-on-surface font-display">
+					Techniques Spéciales
+				</h1>
+				<p className="text-sm text-on-surface-variant">
+					Base de données complète des techniques (Hissatsu) d'Inazuma Eleven: Victory Road.
+				</p>
+			</div>
 			<div className="space-y-4">
 				<WikiSearchToolbar placeholder="Rechercher une technique..." showFilters={false} />
 				<SkillFilterBar

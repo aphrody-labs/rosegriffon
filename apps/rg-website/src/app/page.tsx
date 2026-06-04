@@ -212,8 +212,6 @@ export default async function Home() {
 					Aller au contenu principal
 				</a>
 
-				<h1 className="sr-only">Rose Griffon — Association Inazuma Eleven France</h1>
-
 				<div
 					id="main-content"
 					className="flex flex-col gap-4 md:gap-6 lg:gap-8 pb-12 md:pb-16 lg:pb-20 pt-2 md:pt-4 will-change-scroll"
@@ -227,12 +225,12 @@ export default async function Home() {
 
 						<FusionBlock isImageLeft image={introImage} isPriority>
 							<div className="space-y-2 sm:space-y-3 lg:space-y-4 flex flex-col justify-center h-full">
-								<h2
+								<h1
 									id="about-heading"
 									className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold leading-tight text-gray-900 dark:text-white"
 								>
 									{introTitle}
-								</h2>
+								</h1>
 								<p className="text-sm sm:text-base md:text-lg leading-relaxed text-gray-700 dark:text-gray-300">
 									{introText}
 								</p>

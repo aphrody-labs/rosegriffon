@@ -189,7 +189,14 @@ export default async function PassivesPage({
 
 	return (
 		<div className="space-y-8 pb-20" role="main" aria-label="Passifs et talents">
-			<h1 className="sr-only">Passifs et talents — Inazuma Eleven: Victory Road</h1>
+			<div className="space-y-1">
+				<h1 className="text-3xl font-extrabold tracking-tight text-on-surface font-display">
+					Talents & Passifs
+				</h1>
+				<p className="text-sm text-on-surface-variant">
+					Guide complet des talents et passifs d'Inazuma Eleven: Victory Road.
+				</p>
+			</div>
 			{/* Sticky Header */}
 			<div className="sticky top-[64px] z-40 bg-surface/90 backdrop-blur-md -mx-4 px-4 py-4 border-b border-outline-variant/10">
 				<div className="space-y-3">
