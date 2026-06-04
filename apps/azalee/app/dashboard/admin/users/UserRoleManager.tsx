@@ -6,6 +6,7 @@ import { useState, useTransition } from "react";
 import { toast } from "sonner";
 import { useAuth } from "@/components/providers/AuthProvider";
 import { useSupabase } from "@/hooks/use-supabase";
+import { isRemoteAvatar } from "@/lib/avatar";
 import { cn } from "@/lib/utils";
 
 interface UserProfile {
@@ -114,6 +115,7 @@ export function UserRoleManager({ users }: { users: UserProfile[] }) {
 										alt={user.full_name || ""}
 										fill
 										className="object-cover"
+										unoptimized={isRemoteAvatar(user.avatar_url)}
 									/>
 								) : (
 									<div className="w-full h-full flex items-center justify-center">

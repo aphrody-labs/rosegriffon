@@ -37,6 +37,7 @@ import { RelatedArticles } from "@/components/news/RelatedArticles";
 import { SeriesNavigation } from "@/components/news/SeriesNavigation";
 import { TableOfContents } from "@/components/news/TableOfContents";
 import { Badge } from "@rose-griffon/ui";
+import { isRemoteAvatar } from "@/lib/avatar";
 import { extractTableOfContents } from "@/lib/lexical-utils";
 
 interface ArticlePageProps {
@@ -515,6 +516,7 @@ export default async function ArticlePage({ params, searchParams }: ArticlePageP
 														alt={authorName}
 														fill
 														className="object-cover"
+														unoptimized={isRemoteAvatar(news.author.avatar_url)}
 													/>
 												) : (
 													<div className="w-full h-full flex items-center justify-center">
@@ -545,7 +547,7 @@ export default async function ArticlePage({ params, searchParams }: ArticlePageP
 																alt={co.name}
 																fill
 																className="object-cover"
-																unoptimized={co.avatar_url.includes("cdn.discordapp.com")}
+																unoptimized={isRemoteAvatar(co.avatar_url)}
 															/>
 														) : (
 															<div className="w-full h-full flex items-center justify-center">

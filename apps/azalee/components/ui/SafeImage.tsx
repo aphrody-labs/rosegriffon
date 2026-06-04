@@ -13,7 +13,14 @@ interface SafeImageProps extends ImageProps {
 /** Placeholder par défaut pour les personnages sans image */
 const DEFAULT_PLACEHOLDER = "/ievr.webp";
 
-export function SafeImage({ src, zukanHash, alt, fallbackSrc, ...props }: SafeImageProps) {
+export function SafeImage({
+	src,
+	zukanHash,
+	alt,
+	fallbackSrc,
+	unoptimized,
+	...props
+}: SafeImageProps) {
 	const [imgSrc, setImgSrc] = useState(src);
 	const [fallbackStage, setFallbackStage] = useState(0);
 	const [isFailed, setIsFailed] = useState(false);
@@ -61,7 +68,9 @@ export function SafeImage({ src, zukanHash, alt, fallbackSrc, ...props }: SafeIm
 			src={imgSrc}
 			alt={alt}
 			onError={isFailed ? undefined : handleError}
-			unoptimized={isFailed}
+			// On respecte le `unoptimized` du caller (images CDN tierces déjà en webp →
+			// éviter le quota d'optim Next/402) et on force `unoptimized` au fallback final.
+			unoptimized={unoptimized || isFailed}
 		/>
 	);
 }

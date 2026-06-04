@@ -63,6 +63,9 @@ export default function CharacterModelViewer({ glbUrl, name }: CharacterModelVie
 		if (!open) {
 			return;
 		}
+		// Reset de l'état d'erreur à chaque (ré)ouverture : sinon un échec antérieur
+		// (GLB 404/réseau) laisserait l'overlay « indisponible » collé après réouverture.
+		setErrored(false);
 		let cancelled = false;
 		loadModelViewer()
 			.then(() => {
@@ -119,8 +122,11 @@ export default function CharacterModelViewer({ glbUrl, name }: CharacterModelVie
 				</Button>
 			</DialogTrigger>
 			<DialogContent className="sm:max-w-[420px] bg-surface p-0 overflow-hidden border-outline-variant rounded-xl sm:rounded-2xl">
-				<DialogHeader className="p-4 bg-surface-container absolute top-0 w-full z-10 bg-opacity-80 backdrop-blur-sm border-b border-outline-variant/20">
-					<DialogTitle className="text-on-surface flex items-center gap-2 text-base">
+				{/* `pointer-events-none` sur le bandeau + `pr-10` laissent le bouton de
+				    fermeture (coin haut-droit du DialogContent, sous ce header en z-10)
+				    cliquable ; seul le titre capte les events. */}
+				<DialogHeader className="p-4 pr-10 bg-surface-container/80 absolute top-0 w-full z-10 backdrop-blur-sm border-b border-outline-variant/20 pointer-events-none">
+					<DialogTitle className="text-on-surface flex items-center gap-2 text-base pointer-events-auto">
 						<Box className="size-4 text-primary" />
 						{name || "Modèle 3D"}
 					</DialogTitle>
