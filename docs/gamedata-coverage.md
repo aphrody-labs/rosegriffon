@@ -74,3 +74,25 @@ video waza) demandent un **nouveau parseur**. Plus : vérifier les drop-rates **
 
 > Chaque livrable est classé **FAIT / INCOMPLET / NON_FAIT** et vérifié contre la donnée réelle (parseur exécuté,
 > `COUNT(*)` Supabase, octets du config). Voir aussi `docs/iecode-inagle-supabase.md` (audit consolidé).
+
+## Batches (découpage exécutable en workflows dynamiques)
+
+| Batch | Contenu | Domaine (évite conflits) | Statut |
+|---|---|---|---|
+| **B1** | Catégories nommées : uniformes, shops, tricks, tactiques spéciales, telop waza, video waza, emblèmes → table + parseur + push + COUNT + câblage | `rg/packages/inagle` + Supabase | **EN COURS** (`wjxs0t2vo`) |
+| **B2** | Reste parseur→DB : super-tactiques, skill-technic, team-build, stadiums, nameplates, boost-groups, constellations, star-signs, trophées, missions | `rg/packages/inagle` + Supabase | À FAIRE |
+| **B3** | Drop-rates **par élément** : `soccer_drop_config` + `item_emission_rarity_table` + `win_treasure_lot_table` ventilés par élément → `inagle_drop_rates` | `rg/packages/inagle` + Supabase | À FAIRE |
+| **B4** | **Lua** : indexer/typer les 677 scripts (`inagle_lua_scripts` : nom, version, catégorie p0/p1/p2, fonctions/symboles, hash) + analyse statique | `rg` (module lua dédié) + Supabase | À FAIRE |
+| **B5** | **Assets chr** : déchiffrer CPK (clé `0x1717E18E`) → extraire/indexer textures g4tx + modèles g4mg/g4md/g4sk → manifest/DB | `iecode` (C#) + `niers` (nie-formats) | À FAIRE |
+| **B6** | Événements : `ev*`/`Subtitle_ev*` (~16k) → index/typage des scripts d'event (dialogues, video waza in-game) | `rg` + Supabase | À FAIRE |
+| **B7** | Code C : niers continue (nie-wasm, câblage runtime sim, levier feuilles) | `niers` | EN COURS (axe séparé) |
+
+## Moteur de workflows dynamiques (cadence autonome)
+
+Le `/goal` (Stop hook) maintient la session active. Cadence : **lancer un MAX de workflows dynamiques en parallèle sur
+des domaines DISJOINTS** (`rg/packages/inagle`+Supabase ⟂ `niers` ⟂ `iecode` C#) pour éviter les conflits de fichiers
+(`cli-push.ts` est mono-fichier → un seul workflow le câble à la fois ; les migrations Supabase sont idempotentes
+`IF NOT EXISTS`). Boucle par batch : **dispatch workflow → vérifier les `COUNT(*)`/builds RÉELS soi-même (ne pas croire
+l'agent) → committer le vérifié → marquer le batch FAIT ici → enchaîner**. Anti-hallucination systématique : toute
+valeur/colonne adossée au vrai config/octet ; sinon NON_FAIT motivé. Plan tenu à jour dans CE fichier + mémoire
+`project-gamedata-extraction-goal`.
