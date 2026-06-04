@@ -209,10 +209,15 @@ export function resolveSupabaseClient() {
 }
 
 /**
- * Adaptateur Supabase prêt à l'emploi, basé sur l'environnement. Pratique pour
- * les pushers exécutés en standalone (scripts/push-*.ts) qui veulent le même
- * adaptateur que le flux principal sans réimplémenter la résolution des creds.
+ * Adaptateur Supabase ou Postgres direct prêt à l'emploi, basé sur l'environnement.
+ * Pratique pour les pushers exécutés en standalone (scripts/push-*.ts) qui veulent
+ * le même adaptateur que le flux principal sans réimplémenter la résolution des creds.
  */
 export function createSupabaseAdapter(): DataAdapter {
+	if (process.env.DATABASE_URL) {
+		console.log("🔌 Using direct PostgreSQL Adapter (DATABASE_URL provided)");
+		return new PostgresAdapter(process.env.DATABASE_URL);
+	}
 	return new SupabaseAdapter(resolveSupabaseClient());
 }
+

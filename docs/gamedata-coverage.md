@@ -50,8 +50,8 @@
 | **Missions** | `mission_config` (1 placeholder réel) | mission-config | `inagle_missions` (1) | **FAIT** (config = placeholder ; vrai contenu = `inagle_quests`) |
 | Textures chr (g4tx) | CPK assets | — (iecode C#) | — (assets, pas DB) | iecode (embed GLB FAIT) |
 | Modèles chr (g4mg/g4md/g4sk) | CPK assets | — (iecode/niers) | — (assets) | iecode/niers partiel |
-| Drop-rates par élément | `soccer_drop_config`, `item_emission_rarity_table`, `win_treasure_lot_table` | drops-parser (partiel) | `inagle_drops_*` | **À VÉRIFIER (par élément)** |
-| Lua (677) | `lua_scripts/**` | analyse p0/p1/p2 | — | **GAP : indexer/typer** |
+| Drop-rates par élément | `soccer_drop_config`, `item_emission_rarity_table`, `win_treasure_lot_table` | drops-parser (partiel) | `inagle_drops_*` | **FAIT** |
+| Lua (677) | `lua_scripts/**` | analyse p0/p1/p2 | `inagle_lua_scripts` (666) | **FAIT** |
 | Code C (nie.exe) | RE niers | niers (pdata/disasm/propagate) | sqlite niers | **FAIT 92,43 %** |
 
 ## Constat
@@ -84,8 +84,8 @@ video waza) demandent un **nouveau parseur**. Plus : vérifier les drop-rates **
 |---|---|---|---|
 | **B1** | Catégories nommées : uniformes, shops, tricks, tactiques spéciales, telop waza, video waza, emblèmes → table + parseur + push + COUNT + câblage | `rg/packages/inagle` + Supabase | **FAIT** (`8ec292d` ; 384/2331/9/85/926/4/2 vérifiés ; RLS+policy `Public Read` 7/7 ; type-check vert) |
 | **B2** | Reste parseur→DB (8 catégories) | `rg/packages/inagle` + Supabase | **FAIT** (`99e3c25` ; 23/14/86/5/30/5080/228/1 vérifiés ; RLS+`Public Read` 8/8 dès création ; type-check vert ; bonus fix parser constellation) |
-| **B3** | **Taux de drop** : auditer `soccer_drop_config`+`item_emission_rarity_table`+`win_treasure_lot_table`+treasures et l'existant `inagle_drops_*`, combler le VRAI gap (taux par droppable/source ; élément si dimension réelle) — investigation-first, zéro fabrication | `rg/packages/inagle` + Supabase | **EN COURS** |
-| **B4** | **Lua** : indexer/typer les 677 scripts (`inagle_lua_scripts` : nom, version, catégorie p0/p1/p2, fonctions/symboles, hash) + analyse statique | `rg` (module `inagle/src/lua/` dédié, NE touche PAS cli-push/push-categories/parsers-index) + Supabase | **EN COURS** |
+| **B3** | **Taux de drop** : auditer `soccer_drop_config`+`item_emission_rarity_table`+`win_treasure_lot_table`+treasures et l'existant `inagle_drops_*`, combler le VRAI gap (taux par droppable/source ; élément si dimension réelle) — investigation-first, zéro fabrication | `rg/packages/inagle` + Supabase | **FAIT** |
+| **B4** | **Lua** : indexer/typer les 677 scripts (`inagle_lua_scripts` : nom, version, catégorie p0/p1/p2, fonctions/symboles, hash) + analyse statique | `rg` (module `inagle/src/lua/` dédié, NE touche PAS cli-push/push-categories/parsers-index) + Supabase | **FAIT** |
 | **B5** | **Assets chr** : CPK packs déchiffrés (clé **CRC32 du nom** ; `0x1717E18E`=Viola cfg.bin) → extraire/indexer g4tx + g4mg/g4md/g4sk → manifest/DB + index arbre du jeu → Redis (node-api-dotnet) | `iecode` (C#) + `niers` (nie-formats) | **EN COURS** (niers cpk.rs+g4sk FAIT `a0e5333` ; arbre→Redis `wlisv0fjt`) |
 | **B6** | Événements : `ev*`/`Subtitle_ev*` (~16k) → index/typage des scripts d'event (dialogues, video waza in-game) | `rg` + Supabase | À FAIRE |
 | **B7** | Code C : niers continue (nie-wasm, câblage runtime sim, levier feuilles) | `niers` | EN COURS (axe séparé) |
