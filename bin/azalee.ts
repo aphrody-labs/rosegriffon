@@ -3785,8 +3785,19 @@ program
 			if (!(await isServerRunning())) {
 				console.log(`${colors.cyan}Serveur local inactif sur http://localhost:3000. Démarrage de 'bun run dev'...${colors.reset}`);
 				const { spawn } = require("node:child_process");
-				devServerProcess = spawn("bun", ["run", "dev"], {
-					cwd: path.resolve(process.cwd(), "apps/azalee"),
+				const fs = require("node:fs");
+				const homeBun = require("node:path").join(process.env.HOME || "/home/ubuntu", ".bun/bin/bun");
+				const bunPath = fs.existsSync(homeBun) ? homeBun : "bun";
+				const monorepoRoot = (() => {
+					let d = process.cwd();
+					while (d !== path.dirname(d)) {
+						if (fs.existsSync(path.join(d, "turbo.json"))) return d;
+						d = path.dirname(d);
+					}
+					return "/home/ubuntu/rg";
+				})();
+				devServerProcess = spawn(bunPath, ["run", "dev"], {
+					cwd: path.resolve(monorepoRoot, "apps/azalee"),
 					stdio: "ignore",
 					env: { ...process.env, PORT: "3000" }
 				});
