@@ -13,7 +13,8 @@ import {
 	PASSIVE_SCOPE_NAMES,
 	PositionNames,
 } from "./index.js";
-import { buildAuraHashSet } from "./skills/mapper-aura.js";
+import { loadTextFile } from "./parsers/text-parser.js";
+import { type AuraHissatsu, buildAuraHashSet, loadAuraSkills } from "./skills/mapper-aura.js";
 
 // === Helpers ===
 
@@ -700,7 +701,41 @@ async function importPassives(service: any, db: DataAdapter) {
 
 async function importAuras(service: any, db: DataAdapter) {
 	console.log("🔄 Importing Auras...");
-	const auras = service.skills.auraAll();
+	const serviceAuras = service.skills.auraAll();
+
+	// HISSATSU NATIF : on résout les auras + leur hissatsu directement depuis le dump
+	// (loadAuraSkills → config.skillId1 → skill_config). Le service peut renvoyer un
+	// snapshot prépackagé (entries/auras.json) incomplet et sans hissatsu ; si le parse
+	// natif est plus riche (dump présent), il devient la source de vérité. Sinon on
+	// retombe sur le service et on fusionne le hissatsu natif par auraId / assetCode.
+	const nativeHissatsu = new Map<string, AuraHissatsu>();
+	let nativeAuras: any[] = [];
+	try {
+		const fr = loadTextFile("skill", "fr");
+		const en = loadTextFile("skill", "en");
+		const ja = loadTextFile("skill", "ja");
+		nativeAuras = loadAuraSkills("", "", fr, en, ja);
+		for (const a of nativeAuras) {
+			if (!a.hissatsu) continue;
+			if (a.auraId) nativeHissatsu.set(a.auraId, a.hissatsu);
+			if (a.auraIdStr) nativeHissatsu.set(a.auraIdStr, a.hissatsu);
+			if (a.assetCode) nativeHissatsu.set(a.assetCode, a.hissatsu);
+		}
+		console.log(
+			`   ↳ ${nativeAuras.length} auras natives, ${nativeAuras.filter((x) => x.hissatsu).length} avec hissatsu natif.`
+		);
+	} catch (e) {
+		console.warn("   ⚠️ Résolution hissatsu native indisponible:", (e as Error)?.message);
+	}
+
+	// Source de vérité : le dump natif s'il est plus complet que le snapshot du service.
+	const auras = nativeAuras.length >= serviceAuras.length ? nativeAuras : serviceAuras;
+
+	const resolveHissatsu = (a: any): AuraHissatsu | undefined =>
+		a.hissatsu ||
+		nativeHissatsu.get(a.auraId) ||
+		nativeHissatsu.get(a.auraIdStr) ||
+		(a.assetCode ? nativeHissatsu.get(a.assetCode) : undefined);
 	const keshins: any[] = [];
 	const souls: any[] = [];
 	const awakenings: any[] = [];
@@ -727,9 +762,20 @@ async function importAuras(service: any, db: DataAdapter) {
 			// Injecte TOUJOURS le lien aura→technique (config.skillId1/skillId2) dans
 			// sheet_data — c'est ce que getAura consomme côté azalee. (Le `data` complet
 			// porte aussi a.config, mais on garantit la présence dans sheet_data.)
-			sheet_data: a.config
-				? { ...((a.sheetData as any) ?? {}), config: a.config }
-				: (a.sheetData ?? null),
+			//
+			// HISSATSU NATIF : on écrit le hissatsu résolu depuis les fichiers du jeu
+			// (a.hissatsu = {name,type,element,power} via config.skillId1 → skill_config),
+			// qui REMPLACE le hissatsu du Google Sheet communautaire. Le `name` du sheet
+			// (sheet_data.name / sheetName) reste seulement comme alias d'affichage.
+			sheet_data: (() => {
+				const base = (a.sheetData as any) ?? {};
+				const out: Record<string, unknown> = { ...base };
+				if (a.config) out.config = a.config;
+				// Le hissatsu natif prime sur celui du sheet (s'il y en avait un).
+				const hissatsu = resolveHissatsu(a);
+				if (hissatsu) out.hissatsu = hissatsu;
+				return Object.keys(out).length > 0 ? out : null;
+			})(),
 			updated_at: new Date().toISOString(),
 		};
 

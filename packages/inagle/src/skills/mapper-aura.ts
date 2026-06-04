@@ -1,4 +1,5 @@
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync } from "node:fs";
+import { join } from "node:path";
 import { resolveGameDataFile } from "../core/paths.js";
 
 interface ConfigVariable {
@@ -43,6 +44,12 @@ export interface AuraSkill {
 	assetCode?: string;
 	/** Owner character param ID (from change_aura_skill_config) */
 	ownerCharaParamId?: string;
+	/**
+	 * Technique débloquée par l'aura, résolue NATIVEMENT depuis les fichiers du jeu
+	 * (config.skillId1 → skill_config). Remplace le `hissatsu` du Google Sheet
+	 * communautaire. `undefined` si l'aura n'a pas de skillId résoluble (pas d'invention).
+	 */
+	hissatsu?: AuraHissatsu;
 	/** Raw config values extracted from aura_skill_config */
 	config?: {
 		/** vars[4] : durée ou valeur de buff 1 */
@@ -66,8 +73,146 @@ export interface AuraSkill {
 	_file: string;
 }
 
+/**
+ * Hissatsu (technique spéciale) liée à une aura, résolu nativement depuis skill_config.
+ * - `name` : nom FR (depuis skill_text), fallback EN/JA.
+ * - `type` : catégorie (Tir/Dribble/Défense/Arrêt/Spécial) — depuis `category`.
+ * - `element` : élément (Vent/Forêt/Feu/Montagne/Néant) — depuis `element`.
+ * - `power` : { min, max } depuis `power_min`/`power_max`.
+ */
+export interface AuraHissatsu {
+	/** Hash hex de la technique (= config.skillId1) */
+	skillId: string;
+	/** Code interne (ex: whs01780) */
+	skillIdStr?: string;
+	name?: string;
+	name_EN?: string;
+	name_JA?: string;
+	type?: string;
+	element?: string;
+	power: { min: number; max: number };
+}
+
 function readJson<T>(path: string): T {
 	return JSON.parse(readFileSync(path, "utf-8"));
+}
+
+/** Entrée brute de m_skillInfoList (skill_config) utile à la résolution hissatsu. */
+interface RawSkillInfo {
+	skillID: string;
+	skillIDStr?: string;
+	skillNameId: string;
+	skillDescId?: string;
+	power_min?: number;
+	power_max?: number;
+	element?: number;
+	category?: number;
+}
+
+// Mappings réutilisés depuis skill-config.ts (1=Vent … / 1=Tir …)
+const ELEMENT_LABELS: Record<number, string> = {
+	1: "Vent",
+	2: "Forêt",
+	3: "Feu",
+	4: "Montagne",
+};
+const CATEGORY_LABELS: Record<number, string> = {
+	1: "Tir",
+	2: "Défense",
+	3: "Dribble",
+	4: "Arrêt",
+	5: "Spécial",
+};
+
+/**
+ * Normalise un hash hex au format canonique du dump : `0x` minuscule + chiffres
+ * MAJUSCULES (ex. `0x0F8C620D`). C'est le format des clés de skill_text et de toHex.
+ */
+function normalizeHex(hex: string): string {
+	const body = hex.replace(/^0x/i, "").toUpperCase().padStart(8, "0");
+	return `0x${body}`;
+}
+
+/**
+ * Charge et fusionne tous les skill_config_*.cfg.bin.json (v4 base + v5 DLC Orion)
+ * en une Map skillID(hex) → entrée brute. Lecture synchrone (loadAuraSkills est sync).
+ * Les versions antérieures ont la priorité (override = on skip si déjà présent),
+ * cohérent avec buildSkillDatabaseAsync.
+ */
+function loadSkillInfoMap(): Map<string, RawSkillInfo> {
+	const byId = new Map<string, RawSkillInfo>();
+
+	// Le dossier skill est résolu via un fichier connu, puis on liste les frères.
+	const anchor = resolveGameDataFile("skill", "aura_skill_config");
+	if (!anchor) return byId;
+	const skillDir = anchor.slice(0, anchor.lastIndexOf("/"));
+	if (!skillDir || !existsSync(skillDir)) return byId;
+
+	const files = readdirSync(skillDir)
+		.filter((f) => f.startsWith("skill_config_") && f.endsWith(".cfg.bin.json"))
+		.sort();
+
+	for (const file of files) {
+		try {
+			const content = readJson<{
+				lists?: Array<{ name: string; values?: RawSkillInfo[] }>;
+			}>(join(skillDir, file));
+			const infoList = content.lists?.find((l) => l.name === "m_skillInfoList");
+			if (!infoList?.values) continue;
+			for (const entry of infoList.values) {
+				const skillId = entry.skillID;
+				if (!skillId) continue;
+				const hex = skillId.startsWith("0x") ? normalizeHex(skillId) : toHex(Number(skillId));
+				if (byId.has(hex)) continue; // version antérieure prioritaire
+				byId.set(hex, entry);
+			}
+		} catch {
+			// silently skip — fichier illisible
+		}
+	}
+
+	return byId;
+}
+
+/**
+ * Résout le hissatsu natif d'une aura à partir de son config.skillId1
+ * (fallback skillId2). Retourne `undefined` si aucun skillId résoluble — pas d'invention.
+ */
+function resolveAuraHissatsu(
+	config: AuraSkill["config"],
+	skillMap: Map<string, RawSkillInfo>,
+	textMap: Map<string, string>,
+	textMapEN?: Map<string, string>,
+	textMapJA?: Map<string, string>
+): AuraHissatsu | undefined {
+	if (!config) return undefined;
+	const candidates = [config.skillId1, config.skillId2].filter(
+		(s): s is string => !!s && s !== "0x00000000"
+	);
+	for (const raw of candidates) {
+		const hex = normalizeHex(raw);
+		const skill = skillMap.get(hex);
+		if (!skill) continue;
+
+		const nameIdHex = skill.skillNameId?.startsWith("0x")
+			? normalizeHex(skill.skillNameId)
+			: toHex(Number(skill.skillNameId));
+		const name = textMap.get(nameIdHex);
+		const nameEN = textMapEN?.get(nameIdHex);
+		const nameJA = textMapJA?.get(nameIdHex);
+
+		return {
+			skillId: hex,
+			skillIdStr: skill.skillIDStr || undefined,
+			name: name || nameEN || nameJA,
+			name_EN: nameEN,
+			name_JA: nameJA,
+			type: skill.category != null ? CATEGORY_LABELS[skill.category] : undefined,
+			element: skill.element != null ? ELEMENT_LABELS[skill.element] : undefined,
+			power: { min: skill.power_min ?? 0, max: skill.power_max ?? 0 },
+		};
+	}
+	return undefined;
 }
 
 /**
@@ -342,6 +487,9 @@ export function loadAuraSkills(
 		return results;
 	}
 
+	// Base de techniques (skill_config) pour résoudre le hissatsu natif de chaque aura.
+	const skillMap = loadSkillInfoMap();
+
 	try {
 		const config = readJson<AuraConfigData>(auraConfigPath);
 
@@ -354,6 +502,15 @@ export function loadAuraSkills(
 						if (child.name.startsWith("AURA_CMD_INFO_") && !child.name.includes("REF_")) {
 							const aura = parseAuraCmdInfo(child, textMap, textMapEN, textMapJA);
 							if (aura) {
+								// Hissatsu 100% natif depuis config.skillId1/skillId2 → skill_config.
+								const hissatsu = resolveAuraHissatsu(
+									aura.config,
+									skillMap,
+									textMap,
+									textMapEN,
+									textMapJA
+								);
+								if (hissatsu) aura.hissatsu = hissatsu;
 								results.push(aura);
 							}
 						}
