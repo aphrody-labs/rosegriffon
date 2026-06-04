@@ -32,22 +32,57 @@ function getSqlitePath(): string | null {
 	return null;
 }
 
-let _sqliteDb: Database | null = null;
+// Surface minimale commune entre `bun:sqlite` (runtime Bun) et `node:sqlite`
+// (Node >= 22 — `DatabaseSync`). `SqliteQueryBuilder` n'utilise que `prepare`/
+// `exec`, et sur le statement `all`/`get`. Les deux moteurs exposent la même
+// forme, on les unifie derrière ce type pour pouvoir builder sous Node.
+type SqliteLike = {
+	prepare(sql: string): {
+		all(...params: unknown[]): unknown[];
+		get(...params: unknown[]): unknown;
+	};
+	exec(sql: string): void;
+};
+
+let _sqliteDb: SqliteLike | null = null;
 function getSqliteDb(): Database {
-	if (_sqliteDb) return _sqliteDb;
+	if (_sqliteDb) return _sqliteDb as unknown as Database;
 	const dbPath = getSqlitePath();
 	if (!dbPath) {
 		throw new Error("No SQLite database backup found");
 	}
-	if (typeof Bun === "undefined") {
-		throw new Error("[SQLite Client] bun:sqlite is only available when running under Bun");
+
+	if (typeof Bun !== "undefined") {
+		// Runtime Bun (prod `azalee-web.service`) → bun:sqlite natif.
+		// eslint-disable-next-line @typescript-eslint/no-require-imports -- lazy load bun:sqlite sous garde Bun
+		const { Database: DBConstructor } = require("bun:sqlite");
+		const db = new DBConstructor(dbPath, { readonly: true }) as SqliteLike;
+		db.exec("PRAGMA journal_mode = WAL");
+		db.exec("PRAGMA temp_store = MEMORY");
+		_sqliteDb = db;
+		return _sqliteDb as unknown as Database;
 	}
-	// eslint-disable-next-line @typescript-eslint/no-require-imports -- dynamic require needed for bun:sqlite lazy load inside Bun guard
-	const { Database: DBConstructor } = require("bun:sqlite");
-	_sqliteDb = new DBConstructor(dbPath, { readonly: true }) as Database;
-	_sqliteDb.exec("PRAGMA journal_mode = WAL");
-	_sqliteDb.exec("PRAGMA temp_store = MEMORY");
-	return _sqliteDb;
+
+	// Runtime Node (>= 22) → node:sqlite (`DatabaseSync`). Indispensable pour
+	// `next build` sous /usr/bin/node : Bun déclenche un bug de prerender du
+	// /_global-error (dispatcher React null), donc le build de prod tourne sous
+	// Node. Sans ce fallback, getSqliteDb retombait sur Postgres → timeouts >60s
+	// sur les milliers de fiches perso et build avorté.
+	// `process.getBuiltinModule` : résolution 100% runtime du builtin, invisible
+	// à l'analyse statique de Turbopack (un `require("node:sqlite")` littéral
+	// échoue: "Unsupported external type Url for commonjs reference").
+	const nodeSqlite = (
+		process as unknown as {
+			getBuiltinModule?: (id: string) => { DatabaseSync: new (p: string, o?: unknown) => SqliteLike };
+		}
+	).getBuiltinModule?.("node:sqlite");
+	if (!nodeSqlite) {
+		throw new Error("[SQLite Client] node:sqlite indisponible (Node < 22)");
+	}
+	const db = new nodeSqlite.DatabaseSync(dbPath, { readOnly: true });
+	db.exec("PRAGMA temp_store = MEMORY");
+	_sqliteDb = db;
+	return _sqliteDb as unknown as Database;
 }
 
 export class SqliteQueryBuilder {
