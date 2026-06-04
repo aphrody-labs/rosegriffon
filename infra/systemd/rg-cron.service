@@ -31,7 +31,7 @@ CPUWeight=200
 # Hardening systemd
 ProtectSystem=strict
 ProtectHome=read-only
-ReadWritePaths=/var/www/cdn/static/azalee/public /var/www/cdn/static/website/public /tmp /home/ubuntu/rg
+ReadWritePaths=/var/www/cdn/static/azalee/public /var/www/cdn/static/website/public /tmp /home/ubuntu/rg /home/ubuntu/.bxc
 PrivateTmp=true
 PrivateDevices=true
 ProtectKernelTunables=true

@@ -287,7 +287,6 @@ const { handleRequest } = createYoga({
 	}),
 	graphqlEndpoint: "/api/graphql",
 	fetchAPI: { Response },
-	/* eslint-disable react-hooks/rules-of-hooks -- GraphQL Yoga plugins, not React hooks */
 	plugins: [
 		useGraphQlJit(),
 		useResponseCache({
@@ -295,7 +294,6 @@ const { handleRequest } = createYoga({
 			ttl: 900_000, // 15 minutes
 		}),
 	],
-	/* eslint-enable react-hooks/rules-of-hooks */
 });
 
 export const GET = (request: Request) => handleRequest(request, {});

@@ -279,7 +279,6 @@ export function LexicalRenderer({ content, className }: LexicalRendererProps) {
 		return (
 			<div
 				className={className}
-				// eslint-disable-next-line react/no-danger
 				dangerouslySetInnerHTML={{ __html: injectHeadingIds(legacyHtml) }}
 			/>
 		);

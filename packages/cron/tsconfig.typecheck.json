@@ -9,7 +9,9 @@
 			"@rose-griffon/auth": ["../auth/src/index.ts"],
 			"@rose-griffon/auth/*": ["../auth/src/*"],
 			"@aphrody-code/bxc": ["../inagle/types/bxc-shim.d.ts"],
-			"@aphrody-code/bxc/*": ["../inagle/types/bxc-shim.d.ts"]
+			"@aphrody-code/bxc/*": ["../inagle/types/bxc-shim.d.ts"],
+			"@aphrody-code/x": ["./types/x-shim.d.ts"],
+			"@aphrody-code/x/*": ["./types/x-shim.d.ts"]
 		}
 	}
 }

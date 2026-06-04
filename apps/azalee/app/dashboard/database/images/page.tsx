@@ -51,9 +51,9 @@ export default async function ImageValidationPage({
 	const db = supabase as any;
 
 	let characters: CharRow[] = [];
-	let totalCount = 0;
-	let title = "Validation des images";
-	let subtitle = "";
+	let totalCount: number;
+	let title: string;
+	let subtitle: string;
 
 	if (filter === "multi_versions") {
 		// Get chara_ids that have at least one BASARA version

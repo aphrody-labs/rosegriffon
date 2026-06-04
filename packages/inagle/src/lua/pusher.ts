@@ -3,8 +3,8 @@
  * @description Pusher pour insérer ou mettre à jour les métadonnées des scripts Lua dans Supabase.
  */
 
-import { parseLuaIndex } from "../parsers/lua.ts";
-import { type DataAdapter, dedup } from "../push-adapter.ts";
+import { parseLuaIndex } from "../parsers/lua";
+import { type DataAdapter, dedup } from "../push-adapter";
 
 /**
  * Importe les scripts Lua dans la table inagle_lua_scripts.

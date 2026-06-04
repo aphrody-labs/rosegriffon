@@ -115,6 +115,69 @@ export function chunkProse(text: string, size = 800, overlap = 150): Chunk[] {
 	return chunkText(text, size, overlap).map((content, index) => ({ index, content }));
 }
 
+/** Markdown : découpe par sections (#, ##, ###) en préservant le contexte complet des titres parents (breadcrumbs). */
+export function chunkMarkdown(src: string, maxChunkSize = 800): Chunk[] {
+	const lines = src.split("\n");
+	const chunks: Chunk[] = [];
+	const headerStack: string[] = [];
+	let currentChunk = "";
+	let chunkIndex = 0;
+
+	const getContextPrefix = () => {
+		const path = headerStack.filter(Boolean).join(" > ");
+		return path ? `Contexte: ${path}\n\n` : "";
+	};
+
+	const getCurrentHeader = () => {
+		return headerStack[headerStack.length - 1] || "";
+	};
+
+	for (const line of lines) {
+		const headerMatch = line.match(/^(#{1,6})\s+(.*)$/);
+		if (headerMatch) {
+			if (currentChunk.trim().length > 10) {
+				chunks.push({
+					index: chunkIndex++,
+					content: getContextPrefix() + currentChunk.trim(),
+					symbol: getCurrentHeader() || undefined,
+				});
+			}
+			const level = headerMatch[1]!.length;
+			const title = headerMatch[2]!.trim();
+			
+			// Ajuster la pile d'en-têtes au niveau actuel
+			headerStack[level - 1] = title;
+			headerStack.length = level;
+			
+			currentChunk = line + "\n";
+		} else {
+			if (currentChunk.length + line.length > maxChunkSize && currentChunk.trim().length > 10) {
+				chunks.push({
+					index: chunkIndex++,
+					content: getContextPrefix() + currentChunk.trim(),
+					symbol: getCurrentHeader() || undefined,
+				});
+				currentChunk = "";
+			}
+			currentChunk += line + "\n";
+		}
+	}
+
+	if (currentChunk.trim().length > 10) {
+		chunks.push({
+			index: chunkIndex++,
+			content: getContextPrefix() + currentChunk.trim(),
+			symbol: getCurrentHeader() || undefined,
+		});
+	}
+
+	if (chunks.length === 0) {
+		return chunkText(src, maxChunkSize, 120).map((content, index) => ({ index, content }));
+	}
+
+	return chunks;
+}
+
 /**
  * Chunker tweet spécialisé (additif, cf. UNIFIED-RAG-PLAN §4.1).
  * Enrichit avec auteur/date/métriques/médias/liens pour meilleur contexte RAG (pas seulement le texte brut).
@@ -191,6 +254,11 @@ export function chunkBySource(kind: SourceKind, raw: string): Chunk[] {
 				}
 			} catch {}
 			return chunkTweet(raw);
+		case "doc":
+			if (raw.includes("# ") || raw.includes("## ")) {
+				return chunkMarkdown(raw);
+			}
+			return chunkProse(raw);
 		default:
 			return chunkProse(raw);
 	}

@@ -59,6 +59,7 @@ public static class Program
         rootCommand.AddCommand(GenerateGameDataClassesCommand.Create());
         rootCommand.AddCommand(ConvertCommand.Create());
         rootCommand.AddCommand(FormatCommand.Create());
+        rootCommand.AddCommand(ExportKnowledgeCommand.Create());
         rootCommand.AddCommand(G4raCommand.Create());
         rootCommand.AddCommand(P3lipCommand.Create());
         rootCommand.AddCommand(AgiCommand.Create());

@@ -3,12 +3,14 @@
 /* eslint-disable */
 
 import './CommunityToolkit.HighPerformance';
+import './SteamKit2';
+import './MoonSharp.Interpreter';
 import './SixLabors.ImageSharp';
 import './K4os.Compression.LZ4';
 
 type DateTime = Date & { kind?: 'utc' | 'local' | 'unspecified' }
 
-import { Duplex } from 'node:stream';
+import { Duplex } from 'stream';
 
 /** A JavaScript projection of a .NET type. */
 interface IType {
@@ -301,6 +303,8 @@ declare module 'node-api-dotnet' {
 
 			readonly Dump: IECODE.Core.Dump.DumpService;
 
+			static ResolveDefaultGamePath(): string;
+
 			LoadInfoAsync(ct?: AbortSignal): Promise<IECODE.Core.GameInfo>;
 
 			ExportInfoAsJsonAsync(ct?: AbortSignal): Promise<string>;
@@ -330,6 +334,45 @@ declare module 'node-api-dotnet' {
 			AnalyzedAt: DateTime;
 
 			readonly TotalCpkSizeFormatted: string;
+		}
+	}
+
+	export namespace IECODE.Core.Util {
+		export namespace Level5Hash {
+			export function Hash(name: string): number;
+
+			export function Hash(data: System.ReadOnlySpan$1<number>): number;
+
+			export function ToHex(hash: number): string;
+
+			export function TryParseHex(hex: string): number | undefined;
+		}
+	}
+
+	export namespace IECODE.Core.Util {
+		export class Level5HashDictionary {
+			readonly Count: number;
+
+			readonly Entries: ReadonlyMap<number, string>;
+
+			static Load(jsonPath: string): IECODE.Core.Util.Level5HashDictionary;
+
+			TryResolve(hash: number): string | undefined;
+
+			Resolve(hash: number): string | undefined;
+
+			ResolveOrHex(hash: number): string;
+		}
+	}
+
+	export namespace IECODE.Core.Util {
+		export namespace Level5HashDictionaryBuilder {
+			export function Build(dataRoot: string): Map<number, string>;
+
+			export function ExtractKeyTable(
+				filePath: string,
+				dict: Map<number, string>,
+			): void;
 		}
 	}
 
@@ -677,6 +720,213 @@ declare module 'node-api-dotnet' {
 		}
 	}
 
+	export namespace IECODE.Core.Steam.Content {
+		export class SteamDepotDownloader {
+			constructor(logger?: System.Action$1<string>);
+
+			DownloadAppAsync(
+				options: IECODE.Core.Steam.Content.SteamDownloadOptions,
+				progress?: System.IProgress$1<IECODE.Core.Steam.Content.SteamDownloadProgress>,
+				ct?: AbortSignal,
+			): Promise<IECODE.Core.Steam.Content.SteamDownloadResult>;
+
+			GetBuildIdAsync(
+				options: IECODE.Core.Steam.Content.SteamDownloadOptions,
+				ct?: AbortSignal,
+			): Promise<number>;
+
+			ListDepotsAsync(
+				options: IECODE.Core.Steam.Content.SteamDownloadOptions,
+				ct?: AbortSignal,
+			): Promise<readonly IECODE.Core.Steam.Content.SteamDepotInfo[]>;
+		}
+	}
+
+	export namespace IECODE.Core.Steam.Content {
+		export namespace SteamDepotResolver {
+			export function SelectDepotIds(
+				depots: SteamKit2.KeyValue,
+				explicitDepots: readonly number[],
+				allPlatforms: boolean,
+				os: string,
+				arch: string | undefined,
+				language: string,
+			): number[];
+
+			export function IsDepotEligible(
+				depot: SteamKit2.KeyValue,
+				os: string,
+				arch: string | undefined,
+				language: string,
+			): boolean;
+
+			export function ReadManifestGid(
+				depotChild: SteamKit2.KeyValue,
+				branch: string,
+			): number;
+
+			export function ProxiedFromApp(depotChild: SteamKit2.KeyValue): number;
+
+			export function ReadBranchBuildId(
+				depots: SteamKit2.KeyValue,
+				branch: string,
+			): number;
+		}
+	}
+
+	export namespace IECODE.Core.Steam.Content {
+		export enum SteamGuardKind {
+			Device = 0,
+
+			Email = 1,
+		}
+	}
+
+	export namespace IECODE.Core.Steam.Content {
+		export interface ISteamGuardProvider {
+			GetCodeAsync(
+				kind: IECODE.Core.Steam.Content.SteamGuardKind,
+				email: string | undefined,
+				previousIncorrect: boolean,
+				ct: AbortSignal,
+			): Promise<string>;
+		}
+	}
+
+	export namespace IECODE.Core.Steam.Content {
+		export class DelegateSteamGuardProvider implements IECODE.Core.Steam.Content.ISteamGuardProvider {
+			constructor(getCode: System.Func$5<IECODE.Core.Steam.Content.SteamGuardKind, string | undefined, boolean, AbortSignal, Promise<string>>);
+
+			GetCodeAsync(
+				kind: IECODE.Core.Steam.Content.SteamGuardKind,
+				email: string | undefined,
+				previousIncorrect: boolean,
+				ct: AbortSignal,
+			): Promise<string>;
+		}
+	}
+
+	export namespace IECODE.Core.Steam.Content {
+		export class SteamDownloadOptions {
+			constructor();
+
+			AppId: number;
+
+			InstallDir: string;
+
+			Username?: string;
+
+			Password?: string;
+
+			Branch: string;
+
+			BetaPassword?: string;
+
+			Os: string;
+
+			Arch?: string;
+
+			Language: string;
+
+			AllPlatforms: boolean;
+
+			DepotIds: readonly number[];
+
+			MaxDownloads: number;
+
+			TokenStorePath?: string;
+
+			GuardProvider?: IECODE.Core.Steam.Content.ISteamGuardProvider;
+		}
+	}
+
+	export namespace IECODE.Core.Steam.Content {
+		export enum SteamDownloadPhase {
+			Connecting = 0,
+
+			LoggingIn = 1,
+
+			FetchingAppInfo = 2,
+
+			FetchingManifests = 3,
+
+			Downloading = 4,
+
+			Completed = 5,
+
+			Error = 6,
+		}
+	}
+
+	export namespace IECODE.Core.Steam.Content {
+		export class SteamDownloadProgress extends System.ValueType {
+			constructor(
+				Phase: IECODE.Core.Steam.Content.SteamDownloadPhase,
+				Message: string,
+				DownloadedBytes: number,
+				TotalBytes: number,
+			);
+
+			Phase: IECODE.Core.Steam.Content.SteamDownloadPhase;
+
+			Message: string;
+
+			DownloadedBytes: number;
+
+			TotalBytes: number;
+
+			readonly PercentComplete: number;
+
+			ToString(): string;
+
+			GetHashCode(): number;
+
+			Equals(obj: unknown): boolean;
+
+			Equals(other: IECODE.Core.Steam.Content.SteamDownloadProgress): boolean;
+
+			Deconstruct(): { Phase: IECODE.Core.Steam.Content.SteamDownloadPhase, Message: string, DownloadedBytes: number, TotalBytes: number };
+		}
+	}
+
+	export namespace IECODE.Core.Steam.Content {
+		export class SteamDepotInfo {
+			constructor();
+
+			DepotId: number;
+
+			ManifestId: number;
+
+			Name?: string;
+
+			FileCount: number;
+
+			TotalBytes: number;
+		}
+	}
+
+	export namespace IECODE.Core.Steam.Content {
+		export class SteamDownloadResult {
+			constructor();
+
+			Success: boolean;
+
+			Error?: string;
+
+			AppId: number;
+
+			InstallDir: string;
+
+			Depots: readonly number[];
+
+			DownloadedBytes: number;
+
+			FileCount: number;
+
+			Duration: number;
+		}
+	}
+
 	export namespace IECODE.Core.Serialization {
 		export class AppJsonContext extends System.Text.Json.Serialization.JsonSerializerContext {
 			constructor();
@@ -733,6 +983,8 @@ declare module 'node-api-dotnet' {
 
 			readonly CharacterParam: System.Text.Json.Serialization.Metadata.JsonTypeInfo$1<IECODE.Core.GameData.CharacterParam>;
 
+			readonly CharacterSkillSlot: System.Text.Json.Serialization.Metadata.JsonTypeInfo$1<IECODE.Core.GameData.CharacterSkillSlot>;
+
 			readonly ItemConfig: System.Text.Json.Serialization.Metadata.JsonTypeInfo$1<IECODE.Core.GameData.ItemConfig>;
 
 			readonly NounInfo: System.Text.Json.Serialization.Metadata.JsonTypeInfo$1<IECODE.Core.GameData.NounInfo>;
@@ -782,6 +1034,8 @@ declare module 'node-api-dotnet' {
 			readonly ListCharacterBaseInfo: System.Text.Json.Serialization.Metadata.JsonTypeInfo$1<IECODE.Core.GameData.CharacterBaseInfo[]>;
 
 			readonly ListCharacterParam: System.Text.Json.Serialization.Metadata.JsonTypeInfo$1<IECODE.Core.GameData.CharacterParam[]>;
+
+			readonly ListCharacterSkillSlot: System.Text.Json.Serialization.Metadata.JsonTypeInfo$1<IECODE.Core.GameData.CharacterSkillSlot[]>;
 
 			readonly ListItemConfig: System.Text.Json.Serialization.Metadata.JsonTypeInfo$1<IECODE.Core.GameData.ItemConfig[]>;
 
@@ -1313,6 +1567,684 @@ declare module 'node-api-dotnet' {
 			AddToIndexScope(path: string): boolean;
 
 			dispose(): void;
+		}
+	}
+
+	export namespace IECODE.Core.Scripting.Lua {
+		export class DefaultLuaHost implements IECODE.Core.Scripting.Lua.ILuaGameHost {
+			constructor(
+				dictionary?: IECODE.Core.Util.Level5HashDictionary,
+				trace?: boolean,
+			);
+
+			readonly CallLog: readonly IECODE.Core.Scripting.Lua.LuaCallRecord[];
+
+			Include(name: string): string | undefined;
+
+			MenuCommand(
+				cmdId: number,
+				layerId: number,
+				args: unknown | undefined[],
+			): unknown | undefined;
+
+			Command(
+				cmdId: number,
+				args: unknown | undefined[],
+			): unknown | undefined;
+
+			ActionCommand(args: unknown | undefined[]): unknown | undefined;
+
+			CameraCommand(args: unknown | undefined[]): unknown | undefined;
+
+			SpTacticsCommand(args: unknown | undefined[]): unknown | undefined;
+
+			NameSettingBegin(
+				layerId: number,
+				arg: unknown | undefined,
+			): void;
+
+			AddNames(
+				baseName: string,
+				format: string,
+				count: number,
+				start: number,
+			): void;
+
+			NameSettingEnd(): void;
+
+			IsCloseEndListLayer(): boolean;
+
+			SetGuideStatusToLua(args: unknown | undefined[]): void;
+
+			WaitPredicate(
+				expected: boolean,
+				predFn: unknown | undefined,
+			): void;
+		}
+	}
+
+	export namespace IECODE.Core.Scripting.Lua {
+		export class FuncLuaCommands {
+			MenuCommandName(cmdId: number): string | undefined;
+
+			Name(
+				family: string,
+				cmdId: number,
+			): string | undefined;
+
+			Count(family: string): number;
+
+			static Load(jsonPath: string): IECODE.Core.Scripting.Lua.FuncLuaCommands;
+
+			static LoadDefault(): IECODE.Core.Scripting.Lua.FuncLuaCommands;
+		}
+	}
+
+	export namespace IECODE.Core.Scripting.Lua {
+		export class GameLuaHost extends IECODE.Core.Scripting.Lua.DefaultLuaHost implements IECODE.Core.Scripting.Lua.ILuaGameHost {
+			constructor(
+				dictionary: IECODE.Core.Util.Level5HashDictionary | undefined,
+				commands: IECODE.Core.Scripting.Lua.FuncLuaCommands | undefined,
+				trace?: boolean,
+			);
+
+			readonly State: IECODE.Core.Scripting.Lua.MenuState;
+
+			TextResolver?: System.Func$2<number, string | undefined>;
+
+			MenuCommand(
+				cmdId: number,
+				layerId: number,
+				args: unknown | undefined[],
+			): unknown | undefined;
+		}
+	}
+
+	export namespace IECODE.Core.Scripting.Lua {
+		export enum LuaCommandKind {
+			MenuCommand = 0,
+
+			Command = 1,
+
+			ActionCommand = 2,
+
+			CameraCommand = 3,
+
+			SpTacticsCommand = 4,
+		}
+	}
+
+	export namespace IECODE.Core.Scripting.Lua {
+		export class LuaCallRecord {
+			constructor(
+				Kind: IECODE.Core.Scripting.Lua.LuaCommandKind,
+				CmdId: number,
+				CmdName: string,
+				LayerId: number,
+				LayerName: string,
+				Args: unknown[],
+			);
+
+			Kind: IECODE.Core.Scripting.Lua.LuaCommandKind;
+
+			CmdId: number;
+
+			CmdName: string;
+
+			LayerId: number;
+
+			LayerName: string;
+
+			Args: unknown[];
+
+			ToString(): string;
+
+			GetHashCode(): number;
+
+			Equals(obj: unknown | undefined): boolean;
+
+			Equals(other: IECODE.Core.Scripting.Lua.LuaCallRecord | undefined): boolean;
+
+			_Clone_$(): IECODE.Core.Scripting.Lua.LuaCallRecord;
+
+			Deconstruct(): { Kind: IECODE.Core.Scripting.Lua.LuaCommandKind, CmdId: number, CmdName: string, LayerId: number, LayerName: string, Args: unknown[] };
+		}
+	}
+
+	export namespace IECODE.Core.Scripting.Lua {
+		export interface ILuaGameHost {
+			readonly CallLog: readonly IECODE.Core.Scripting.Lua.LuaCallRecord[];
+
+			Include(name: string): string | undefined;
+
+			MenuCommand(
+				cmdId: number,
+				layerId: number,
+				args: unknown | undefined[],
+			): unknown | undefined;
+
+			Command(
+				cmdId: number,
+				args: unknown | undefined[],
+			): unknown | undefined;
+
+			ActionCommand(args: unknown | undefined[]): unknown | undefined;
+
+			CameraCommand(args: unknown | undefined[]): unknown | undefined;
+
+			SpTacticsCommand(args: unknown | undefined[]): unknown | undefined;
+
+			NameSettingBegin(
+				layerId: number,
+				arg: unknown | undefined,
+			): void;
+
+			AddNames(
+				baseName: string,
+				format: string,
+				count: number,
+				start: number,
+			): void;
+
+			NameSettingEnd(): void;
+
+			IsCloseEndListLayer(): boolean;
+
+			SetGuideStatusToLua(args: unknown | undefined[]): void;
+
+			WaitPredicate(
+				expected: boolean,
+				predFn: unknown | undefined,
+			): void;
+		}
+	}
+
+	export namespace IECODE.Core.Scripting.Lua {
+		export class LuaRuntime {
+			constructor(
+				host: IECODE.Core.Scripting.Lua.ILuaGameHost,
+				unluacJar?: string,
+			);
+
+			readonly LastDecompiledSource?: string;
+
+			readonly HasOnSetupLayer: boolean;
+
+			readonly HasOnOpenLayer: boolean;
+
+			readonly HasOnCloseLayer: boolean;
+
+			readonly HasOnCloseEndLayer: boolean;
+
+			readonly HasOnChangeLayerGroup: boolean;
+
+			LoadFile(path: string): void;
+
+			LoadBytes(
+				data: number[],
+				sourceName?: string,
+			): void;
+
+			LoadSource(
+				source: string,
+				sourceName?: string,
+			): void;
+
+			CallOnSetupLayer(
+				layerId: number,
+				arg?: unknown,
+			): MoonSharp.Interpreter.DynValue | undefined;
+
+			CallOnOpenLayer(
+				layerId: number,
+				arg?: unknown,
+			): MoonSharp.Interpreter.DynValue | undefined;
+
+			CallOnCloseLayer(
+				layerId: number,
+				arg?: unknown,
+			): MoonSharp.Interpreter.DynValue | undefined;
+
+			CallOnCloseEndLayer(
+				layerId: number,
+				arg?: unknown,
+			): MoonSharp.Interpreter.DynValue | undefined;
+
+			CallOnChangeLayerGroup(groupId: number): MoonSharp.Interpreter.DynValue | undefined;
+
+			Step(): void;
+
+			static ToUInt32(val: unknown | undefined): number;
+		}
+	}
+
+	export namespace IECODE.Core.Scripting.Lua {
+		export class LuaRuntimeException extends System.Exception {
+			constructor(
+				message: string,
+				inner?: unknown,
+			);
+		}
+	}
+
+	export namespace IECODE.Core.Scripting.Lua {
+		export class ScriptObjectManifest {
+			constructor(
+				Id: number,
+				Name: string | undefined,
+				Kind: string,
+			);
+
+			Id: number;
+
+			Name?: string;
+
+			Kind: string;
+
+			ToString(): string;
+
+			GetHashCode(): number;
+
+			Equals(obj: unknown | undefined): boolean;
+
+			Equals(other: IECODE.Core.Scripting.Lua.ScriptObjectManifest | undefined): boolean;
+
+			_Clone_$(): IECODE.Core.Scripting.Lua.ScriptObjectManifest;
+
+			Deconstruct(): { Id: number, Name?: string, Kind: string };
+		}
+	}
+
+	export namespace IECODE.Core.Scripting.Lua {
+		export class ScriptLayerManifest {
+			constructor(
+				Id: number,
+				Name: string | undefined,
+				Objects: readonly IECODE.Core.Scripting.Lua.ScriptObjectManifest[],
+			);
+
+			Id: number;
+
+			Name?: string;
+
+			Objects: readonly IECODE.Core.Scripting.Lua.ScriptObjectManifest[];
+
+			ToString(): string;
+
+			GetHashCode(): number;
+
+			Equals(obj: unknown | undefined): boolean;
+
+			Equals(other: IECODE.Core.Scripting.Lua.ScriptLayerManifest | undefined): boolean;
+
+			_Clone_$(): IECODE.Core.Scripting.Lua.ScriptLayerManifest;
+
+			Deconstruct(): { Id: number, Name?: string, Objects: readonly IECODE.Core.Scripting.Lua.ScriptObjectManifest[] };
+		}
+	}
+
+	export namespace IECODE.Core.Scripting.Lua {
+		export class CommandResolution {
+			constructor(
+				CmdId: number,
+				CFunction: string | undefined,
+				Resolved: boolean,
+			);
+
+			CmdId: number;
+
+			CFunction?: string;
+
+			Resolved: boolean;
+
+			ToString(): string;
+
+			GetHashCode(): number;
+
+			Equals(obj: unknown | undefined): boolean;
+
+			Equals(other: IECODE.Core.Scripting.Lua.CommandResolution | undefined): boolean;
+
+			_Clone_$(): IECODE.Core.Scripting.Lua.CommandResolution;
+
+			Deconstruct(): { CmdId: number, CFunction?: string, Resolved: boolean };
+		}
+	}
+
+	export namespace IECODE.Core.Scripting.Lua {
+		export class ScriptResolution {
+			constructor(
+				Decompiled: boolean,
+				Encrypted: boolean,
+				Parsed: boolean,
+				ProtoCount: number,
+				InstructionCount: number,
+				Commands: readonly IECODE.Core.Scripting.Lua.CommandResolution[],
+				UnresolvedCommands: number,
+				HashesTotal: number,
+				HashesResolved: number,
+				CfgRefs: readonly string[],
+				FullyResolved: boolean,
+			);
+
+			Decompiled: boolean;
+
+			Encrypted: boolean;
+
+			Parsed: boolean;
+
+			ProtoCount: number;
+
+			InstructionCount: number;
+
+			Commands: readonly IECODE.Core.Scripting.Lua.CommandResolution[];
+
+			UnresolvedCommands: number;
+
+			HashesTotal: number;
+
+			HashesResolved: number;
+
+			CfgRefs: readonly string[];
+
+			FullyResolved: boolean;
+
+			ToString(): string;
+
+			GetHashCode(): number;
+
+			Equals(obj: unknown | undefined): boolean;
+
+			Equals(other: IECODE.Core.Scripting.Lua.ScriptResolution | undefined): boolean;
+
+			_Clone_$(): IECODE.Core.Scripting.Lua.ScriptResolution;
+
+			Deconstruct(): { Decompiled: boolean, Encrypted: boolean, Parsed: boolean, ProtoCount: number, InstructionCount: number, Commands: readonly IECODE.Core.Scripting.Lua.CommandResolution[], UnresolvedCommands: number, HashesTotal: number, HashesResolved: number, CfgRefs: readonly string[], FullyResolved: boolean };
+		}
+	}
+
+	export namespace IECODE.Core.Scripting.Lua {
+		export class ScriptManifest {
+			constructor(
+				Script: string,
+				SourceFile: string,
+				Callbacks: readonly string[],
+				LayerIds: readonly number[],
+				Layers: readonly IECODE.Core.Scripting.Lua.ScriptLayerManifest[],
+				Resolution: IECODE.Core.Scripting.Lua.ScriptResolution,
+			);
+
+			Script: string;
+
+			SourceFile: string;
+
+			Callbacks: readonly string[];
+
+			LayerIds: readonly number[];
+
+			Layers: readonly IECODE.Core.Scripting.Lua.ScriptLayerManifest[];
+
+			Resolution: IECODE.Core.Scripting.Lua.ScriptResolution;
+
+			ToString(): string;
+
+			GetHashCode(): number;
+
+			Equals(obj: unknown | undefined): boolean;
+
+			Equals(other: IECODE.Core.Scripting.Lua.ScriptManifest | undefined): boolean;
+
+			_Clone_$(): IECODE.Core.Scripting.Lua.ScriptManifest;
+
+			Deconstruct(): { Script: string, SourceFile: string, Callbacks: readonly string[], LayerIds: readonly number[], Layers: readonly IECODE.Core.Scripting.Lua.ScriptLayerManifest[], Resolution: IECODE.Core.Scripting.Lua.ScriptResolution };
+		}
+	}
+
+	export namespace IECODE.Core.Scripting.Lua {
+		export class LuaTypesGenerator {
+			constructor(
+				dict: IECODE.Core.Util.Level5HashDictionary | undefined,
+				cmds: IECODE.Core.Scripting.Lua.FuncLuaCommands,
+				unluacJar?: string,
+			);
+
+			Generate(luaBinPath: string): IECODE.Core.Scripting.Lua.ScriptManifest;
+
+			GenerateAll(
+				input: string,
+				outDir: string,
+				onProgress?: System.Action$1<string>,
+			): IECODE.Core.Scripting.Lua.LuaTypesGenerator.GenerateSummary;
+
+			static ToJson(m: IECODE.Core.Scripting.Lua.ScriptManifest): string;
+		}
+	}
+
+	export namespace IECODE.Core.Scripting.Lua.LuaTypesGenerator {
+		export class GenerateSummary {
+			constructor(
+				Total: number,
+				Decompiled: number,
+				Parsed: number,
+				Encrypted: number,
+				FullyResolved: number,
+				CommandsTotal: number,
+				CommandsUnresolved: number,
+				NotFullyResolved: readonly string[],
+			);
+
+			Total: number;
+
+			Decompiled: number;
+
+			Parsed: number;
+
+			Encrypted: number;
+
+			FullyResolved: number;
+
+			CommandsTotal: number;
+
+			CommandsUnresolved: number;
+
+			NotFullyResolved: readonly string[];
+
+			ToString(): string;
+
+			GetHashCode(): number;
+
+			Equals(obj: unknown | undefined): boolean;
+
+			Equals(other: IECODE.Core.Scripting.Lua.LuaTypesGenerator.GenerateSummary | undefined): boolean;
+
+			_Clone_$(): IECODE.Core.Scripting.Lua.LuaTypesGenerator.GenerateSummary;
+
+			Deconstruct(): { Total: number, Decompiled: number, Parsed: number, Encrypted: number, FullyResolved: number, CommandsTotal: number, CommandsUnresolved: number, NotFullyResolved: readonly string[] };
+		}
+	}
+
+	export namespace IECODE.Core.Scripting.Lua {
+		export class MenuObjectState {
+			constructor();
+
+			Id: number;
+
+			Name?: string;
+
+			Visible: boolean;
+
+			Active: boolean;
+
+			SpriteTextureHash?: number;
+
+			Frame?: number;
+
+			ColorHash?: number;
+
+			ColorRgba?: number;
+
+			Text?: string;
+
+			Number?: number;
+
+			ScrollIndex?: number;
+
+			Scale?: number;
+
+			Badge?: number;
+
+			Progress?: number;
+		}
+	}
+
+	export namespace IECODE.Core.Scripting.Lua {
+		export class MenuLayerState {
+			constructor();
+
+			Id: number;
+
+			Name?: string;
+
+			Visible: boolean;
+
+			Enabled: boolean;
+
+			Focus?: number;
+
+			CurrentItem?: number;
+
+			readonly Objects: Map<number, IECODE.Core.Scripting.Lua.MenuObjectState>;
+
+			Obj(
+				objectId: number,
+				resolver?: System.Func$2<number, string | undefined>,
+			): IECODE.Core.Scripting.Lua.MenuObjectState;
+		}
+	}
+
+	export namespace IECODE.Core.Scripting.Lua {
+		export class MenuState {
+			constructor();
+
+			readonly Layers: Map<number, IECODE.Core.Scripting.Lua.MenuLayerState>;
+
+			readonly Groups: Map<number, boolean>;
+
+			Layer(
+				layerId: number,
+				resolver?: System.Func$2<number, string | undefined>,
+			): IECODE.Core.Scripting.Lua.MenuLayerState;
+
+			ToJson(): string;
+		}
+	}
+
+	export namespace IECODE.Core.Runtime {
+		export namespace HostProfile {
+			export const LogicalCores: number;
+
+			export const Parallelism: number;
+
+			export const IoBufferBytes: number;
+		}
+	}
+
+	export namespace IECODE.Core.Runtime {
+		export namespace WineMemory {
+			export function Read(
+				pid: number,
+				remoteAddress: number,
+				destination: System.Span$1<number>,
+			): number;
+
+			export function ReadExact(
+				pid: number,
+				remoteAddress: number,
+				length: number,
+			): number[];
+
+			export function ReadStruct<T>(
+				pid: number,
+				remoteAddress: number,
+			): T;
+
+			export function Write(
+				pid: number,
+				remoteAddress: number,
+				source: System.ReadOnlySpan$1<number>,
+			): number;
+
+			export function ReadMaps(pid: number): readonly IECODE.Core.Runtime.WineMemory.MapEntry[];
+
+			export function FindModuleBase(
+				pid: number,
+				moduleNameFragment: string,
+			): number | undefined;
+
+			export function FindModuleRegions(
+				pid: number,
+				moduleNameFragment: string,
+			): readonly IECODE.Core.Runtime.WineMemory.MapEntry[];
+
+			export function LikelyPermitted(pid: number): boolean;
+
+			export function ReadPtraceScope(): number;
+
+			export function IsAncestorOf(
+				pid: number,
+				ancestorPid: number,
+			): boolean;
+		}
+	}
+
+	export namespace IECODE.Core.Runtime.WineMemory {
+		export class MapEntry extends System.ValueType {
+			constructor(
+				Start: number,
+				End: number,
+				Perms: string,
+				Offset: number,
+				Path: string,
+			);
+
+			Start: number;
+
+			End: number;
+
+			Perms: string;
+
+			Offset: number;
+
+			Path: string;
+
+			readonly Size: number;
+
+			readonly IsExecutable: boolean;
+
+			readonly IsReadable: boolean;
+
+			readonly IsWritable: boolean;
+
+			ToString(): string;
+
+			GetHashCode(): number;
+
+			Equals(obj: unknown): boolean;
+
+			Equals(other: IECODE.Core.Runtime.WineMemory.MapEntry): boolean;
+
+			Deconstruct(): { Start: number, End: number, Perms: string, Offset: number, Path: string };
+		}
+	}
+
+	export namespace IECODE.Core.Runtime {
+		export class WineMemoryException extends System.Exception {
+			constructor(
+				message: string,
+				errno?: number,
+			);
+
+			readonly Errno: number;
 		}
 	}
 
@@ -2141,14 +3073,6 @@ declare module 'node-api-dotnet' {
 
 			Names: IECODE.Core.GameData.CharacterNameResolver.LocalizedString;
 
-			Position: number;
-
-			Element: number;
-
-			Rarity: number;
-
-			BaseStats: IECODE.Core.GameData.CharacterNameResolver.CharacterStats;
-
 			ToString(): string;
 
 			GetHashCode(): number;
@@ -2191,40 +3115,6 @@ declare module 'node-api-dotnet' {
 		}
 	}
 
-	export namespace IECODE.Core.GameData.CharacterNameResolver {
-		export class CharacterStats {
-			constructor();
-
-			Kick: number;
-
-			Body: number;
-
-			Control: number;
-
-			Guard: number;
-
-			Speed: number;
-
-			Stamina: number;
-
-			Guts: number;
-
-			Freedom: number;
-
-			readonly Total: number;
-
-			ToString(): string;
-
-			GetHashCode(): number;
-
-			Equals(obj: unknown | undefined): boolean;
-
-			Equals(other: IECODE.Core.GameData.CharacterNameResolver.CharacterStats | undefined): boolean;
-
-			_Clone_$(): IECODE.Core.GameData.CharacterNameResolver.CharacterStats;
-		}
-	}
-
 	export namespace IECODE.Core.GameData {
 		export class CharacterCacheData {
 			constructor();
@@ -2256,8 +3146,6 @@ declare module 'node-api-dotnet' {
 			constructor(options: unknown);
 
 			readonly CharacterCacheData: System.Text.Json.Serialization.Metadata.JsonTypeInfo$1<IECODE.Core.GameData.CharacterCacheData>;
-
-			readonly CharacterStats: System.Text.Json.Serialization.Metadata.JsonTypeInfo$1<IECODE.Core.GameData.CharacterNameResolver.CharacterStats>;
 
 			readonly LocalizedCharacter: System.Text.Json.Serialization.Metadata.JsonTypeInfo$1<IECODE.Core.GameData.CharacterNameResolver.LocalizedCharacter>;
 
@@ -2310,10 +3198,6 @@ declare module 'node-api-dotnet' {
 			StartTime: number;
 
 			EndTime: number;
-
-			StartTime2: number;
-
-			EndTime2: number;
 		}
 	}
 
@@ -2321,13 +3205,23 @@ declare module 'node-api-dotnet' {
 		export class AuraSkillConfig extends IECODE.Core.GameData.GameDataEntry {
 			constructor(entry: IECODE.Core.Formats.Level5.CfgBin.Logic.Entry);
 
-			EffectId: number;
+			AuraId: string;
 
-			Duration: number;
+			AssetCode: string;
 
-			Param1: number;
+			NameId: string;
 
-			Param2: number;
+			DescId: string;
+
+			Element: number;
+
+			SkillId1?: string;
+
+			SkillId2?: string;
+
+			BuffId?: string;
+
+			Rank: number;
 		}
 	}
 
@@ -2335,15 +3229,15 @@ declare module 'node-api-dotnet' {
 		export class ItemConfig extends IECODE.Core.GameData.GameDataEntry {
 			constructor(entry: IECODE.Core.Formats.Level5.CfgBin.Logic.Entry);
 
-			ItemId: number;
+			ItemId: string;
 
-			NameId: number;
+			NameId: string;
+
+			DescId: string;
 
 			Price: number;
 
-			Rarity: number;
-
-			ScriptName?: string;
+			InternalCode?: string;
 		}
 	}
 
@@ -2353,7 +3247,7 @@ declare module 'node-api-dotnet' {
 
 			CharacterId: number;
 
-			ModelId?: string;
+			InternalCode?: string;
 
 			NameId: number;
 		}
@@ -2370,24 +3264,32 @@ declare module 'node-api-dotnet' {
 	}
 
 	export namespace IECODE.Core.GameData {
+		export class CharacterSkillSlot {
+			constructor();
+
+			LearnLevel: number;
+
+			SkillId: string;
+		}
+	}
+
+	export namespace IECODE.Core.GameData {
 		export class CharacterParam extends IECODE.Core.GameData.GameDataEntry {
 			constructor(entry: IECODE.Core.Formats.Level5.CfgBin.Logic.Entry);
 
-			CharacterId: number;
+			CharaParamId: string;
 
-			Kick: number;
+			CharaBaseId: string;
 
-			Control: number;
+			Element: number;
 
-			Technic: number;
+			MainPosition: number;
 
-			Intelligence: number;
+			SubPosition: number;
 
-			Pressure: number;
+			GrowthPattern: number;
 
-			Agility: number;
-
-			Physical: number;
+			Skills: IECODE.Core.GameData.CharacterSkillSlot[];
 		}
 	}
 
@@ -2395,9 +3297,15 @@ declare module 'node-api-dotnet' {
 		export class PassiveSkillConfig extends IECODE.Core.GameData.GameDataEntry {
 			constructor(entry: IECODE.Core.Formats.Level5.CfgBin.Logic.Entry);
 
-			SkillId: number;
+			PassiveId: string;
 
-			EffectValue: number;
+			EffectId: string;
+
+			NameId: string;
+
+			DescId: string;
+
+			Rarity: number;
 		}
 	}
 
@@ -2407,23 +3315,23 @@ declare module 'node-api-dotnet' {
 
 			TextId: number;
 
-			Description: string;
+			Text: string;
 		}
 	}
 
 	export namespace IECODE.Core.GameData {
 		export enum PlayerRarity {
-			N = 0,
+			Normal = 0,
 
-			R = 2,
+			Experimente = 2,
 
-			UR = 5,
+			Emerite = 3,
 
-			LR = 6,
+			Legendaire = 5,
 
-			Legend = 7,
+			Heros = 10,
 
-			BASARA = 20,
+			Basara = 20,
 		}
 	}
 
@@ -2452,95 +3360,6 @@ declare module 'node-api-dotnet' {
 	}
 
 	export namespace IECODE.Core.GameData {
-		export enum ChronicleRoute {
-			Original = 0,
-
-			Go = 1,
-
-			ChronoStone = 2,
-
-			Galaxy = 3,
-
-			LBX = 4,
-
-			GoShine = 5,
-
-			GoDark = 6,
-
-			ChronoStoneThunderflash = 7,
-
-			ChronoStoneWildfire = 8,
-		}
-	}
-
-	export namespace IECODE.Core.GameData {
-		export enum TotemType {
-			None = 0,
-
-			Wind = 1,
-
-			Forest = 2,
-
-			Fire = 3,
-
-			Mountain = 4,
-		}
-	}
-
-	export namespace IECODE.Core.GameData {
-		export enum SpiritElement {
-			Wind = 1,
-
-			Forest = 2,
-
-			Fire = 3,
-
-			Mountain = 4,
-		}
-	}
-
-	export namespace IECODE.Core.GameData {
-		export enum GameMode {
-			Story = 0,
-
-			REStory = 1,
-
-			Chronicle = 2,
-
-			BBStadium = 3,
-
-			VictoryRoad = 4,
-
-			Tag2P = 5,
-
-			CommanderLadder = 6,
-
-			FastCommander = 7,
-		}
-	}
-
-	export namespace IECODE.Core.GameData {
-		export namespace KnownTeams {
-		}
-	}
-
-	export namespace IECODE.Core.GameData {
-		export enum PlanetStadium {
-			Earth = 0,
-
-			Sandorius = 1,
-
-			Sazanaara = 2,
-
-			Ratoniik = 3,
-
-			Gurdon = 4,
-
-			FaramObius = 5,
-		}
-	}
-
-	export namespace IECODE.Core.GameData {
 		export class SkillTextResolver {
 			constructor();
 
@@ -2548,11 +3367,8 @@ declare module 'node-api-dotnet' {
 
 			readonly SkillCount: number;
 
-			readonly TechniqueCount: number;
-
 			LoadFromGameDataAsync(
 				gameDataPath: string,
-				passiveSkillsJsonPath?: string,
 				cancellationToken?: AbortSignal,
 			): Promise<number>;
 
@@ -2568,16 +3384,10 @@ declare module 'node-api-dotnet' {
 				language?: string,
 			): string;
 
-			GetTechnique(hash: number): IECODE.Core.GameData.SkillTextResolver.LocalizedTechnique | undefined;
-
 			SearchSkills(
 				query: string,
 				language?: string,
 			): Iterable<IECODE.Core.GameData.SkillTextResolver.LocalizedSkill>;
-
-			FilterByEffect(effectId: number): Iterable<IECODE.Core.GameData.SkillTextResolver.LocalizedSkill>;
-
-			FilterByBuildType(buildType: string): Iterable<IECODE.Core.GameData.SkillTextResolver.LocalizedSkill>;
 
 			GetAllSkills(): Iterable<IECODE.Core.GameData.SkillTextResolver.LocalizedSkill> | { length: number };
 
@@ -2599,35 +3409,21 @@ declare module 'node-api-dotnet' {
 		export class LocalizedSkill {
 			constructor();
 
-			Id: number;
+			PassiveHash: number;
 
-			SkillHash: number;
+			EffectHash: number;
 
 			NameHash: number;
 
-			readonly SkillHashHex: string;
+			DescHash: number;
 
-			readonly NameHashHex: string;
+			Rarity: number;
+
+			readonly PassiveHashHex: string;
 
 			Names: IECODE.Core.GameData.SkillTextResolver.LocalizedText;
 
 			Descriptions: IECODE.Core.GameData.SkillTextResolver.LocalizedText;
-
-			BuildType: string;
-
-			BuildTypeId: number;
-
-			EffectId: number;
-
-			EffectValue: number;
-
-			EffectCount: number;
-
-			Level: number;
-
-			IconIndex1: number;
-
-			IconIndex2: number;
 
 			ToString(): string;
 
@@ -2638,38 +3434,6 @@ declare module 'node-api-dotnet' {
 			Equals(other: IECODE.Core.GameData.SkillTextResolver.LocalizedSkill | undefined): boolean;
 
 			_Clone_$(): IECODE.Core.GameData.SkillTextResolver.LocalizedSkill;
-		}
-	}
-
-	export namespace IECODE.Core.GameData.SkillTextResolver {
-		export class LocalizedTechnique {
-			constructor();
-
-			Hash: number;
-
-			readonly HashHex: string;
-
-			Names: IECODE.Core.GameData.SkillTextResolver.LocalizedText;
-
-			Descriptions: IECODE.Core.GameData.SkillTextResolver.LocalizedText;
-
-			Type: string;
-
-			TpCost: number;
-
-			Power: number;
-
-			Element: string;
-
-			ToString(): string;
-
-			GetHashCode(): number;
-
-			Equals(obj: unknown | undefined): boolean;
-
-			Equals(other: IECODE.Core.GameData.SkillTextResolver.LocalizedTechnique | undefined): boolean;
-
-			_Clone_$(): IECODE.Core.GameData.SkillTextResolver.LocalizedTechnique;
 		}
 	}
 
@@ -2705,46 +3469,6 @@ declare module 'node-api-dotnet' {
 		}
 	}
 
-	export namespace IECODE.Core.GameData.SkillTextResolver {
-		export namespace EffectTypes {
-			export function GetName(effectId: number): string;
-		}
-	}
-
-	export namespace IECODE.Core.GameData {
-		export class PassiveSkillJsonEntry {
-			constructor();
-
-			Id: number;
-
-			SkillHashHex?: string;
-
-			NameHash: number;
-
-			BuildType: string;
-
-			BuildTypeId: number;
-
-			EffectId: number;
-
-			EffectCount: number;
-
-			IconIndex1: number;
-
-			IconIndex2: number;
-
-			ToString(): string;
-
-			GetHashCode(): number;
-
-			Equals(obj: unknown | undefined): boolean;
-
-			Equals(other: IECODE.Core.GameData.PassiveSkillJsonEntry | undefined): boolean;
-
-			_Clone_$(): IECODE.Core.GameData.PassiveSkillJsonEntry;
-		}
-	}
-
 	export namespace IECODE.Core.GameData {
 		export class SkillCacheData {
 			constructor();
@@ -2755,11 +3479,7 @@ declare module 'node-api-dotnet' {
 
 			SkillCount: number;
 
-			TechniqueCount: number;
-
 			Skills?: IECODE.Core.GameData.SkillTextResolver.LocalizedSkill[];
-
-			Techniques?: IECODE.Core.GameData.SkillTextResolver.LocalizedTechnique[];
 
 			ToString(): string;
 
@@ -2781,23 +3501,13 @@ declare module 'node-api-dotnet' {
 
 			readonly Boolean: System.Text.Json.Serialization.Metadata.JsonTypeInfo$1<boolean>;
 
-			readonly Single: System.Text.Json.Serialization.Metadata.JsonTypeInfo$1<number>;
-
-			readonly PassiveSkillJsonEntry: System.Text.Json.Serialization.Metadata.JsonTypeInfo$1<IECODE.Core.GameData.PassiveSkillJsonEntry>;
-
 			readonly SkillCacheData: System.Text.Json.Serialization.Metadata.JsonTypeInfo$1<IECODE.Core.GameData.SkillCacheData>;
 
 			readonly LocalizedSkill: System.Text.Json.Serialization.Metadata.JsonTypeInfo$1<IECODE.Core.GameData.SkillTextResolver.LocalizedSkill>;
 
-			readonly LocalizedTechnique: System.Text.Json.Serialization.Metadata.JsonTypeInfo$1<IECODE.Core.GameData.SkillTextResolver.LocalizedTechnique>;
-
 			readonly LocalizedText: System.Text.Json.Serialization.Metadata.JsonTypeInfo$1<IECODE.Core.GameData.SkillTextResolver.LocalizedText>;
 
-			readonly ListPassiveSkillJsonEntry: System.Text.Json.Serialization.Metadata.JsonTypeInfo$1<IECODE.Core.GameData.PassiveSkillJsonEntry[]>;
-
 			readonly ListLocalizedSkill: System.Text.Json.Serialization.Metadata.JsonTypeInfo$1<IECODE.Core.GameData.SkillTextResolver.LocalizedSkill[]>;
-
-			readonly ListLocalizedTechnique: System.Text.Json.Serialization.Metadata.JsonTypeInfo$1<IECODE.Core.GameData.SkillTextResolver.LocalizedTechnique[]>;
 
 			readonly DateTime: System.Text.Json.Serialization.Metadata.JsonTypeInfo$1<DateTime>;
 
@@ -2824,145 +3534,22 @@ declare module 'node-api-dotnet' {
 
 			readonly Skills: ReadonlyMap<number, IECODE.Core.Game.PassiveSkills.PassiveSkillDefinition>;
 
-			readonly Effects: ReadonlyMap<number, IECODE.Core.Game.PassiveSkills.PassiveSkillEffect>;
+			readonly Effects: readonly IECODE.Core.Game.PassiveSkills.PassiveSkillEffect[];
 
 			GetSkill(id: number): IECODE.Core.Game.PassiveSkills.PassiveSkillDefinition | undefined;
 
-			GetEffect(id: number): IECODE.Core.Game.PassiveSkills.PassiveSkillEffect | undefined;
-
 			LoadSkillConfig(data: number[]): number;
 
-			LoadEffectConfig(data: number[]): number;
-
-			LinkSkillsToEffects(): void;
-
-			GetSkillsByBuildType(buildType: IECODE.Core.Game.PassiveSkills.PassiveSkillBuildType): Iterable<IECODE.Core.Game.PassiveSkills.PassiveSkillDefinition>;
-
-			GetSkillsWithEffects(): Iterable<[IECODE.Core.Game.PassiveSkills.PassiveSkillDefinition, IECODE.Core.Game.PassiveSkills.PassiveSkillEffect | undefined]>;
+			GetSkillsByRarity(rarity: number): Iterable<IECODE.Core.Game.PassiveSkills.PassiveSkillDefinition>;
 
 			ExportToJson(): string;
-
-			AnalyzeEffects(): Iterable<IECODE.Core.Game.PassiveSkills.EffectAnalysis>;
-
-			GetEffectStatistics(): IECODE.Core.Game.PassiveSkills.EffectStatistics;
 
 			Clear(): void;
 		}
 	}
 
 	export namespace IECODE.Core.Game.PassiveSkills {
-		export class EffectAnalysis {
-			constructor();
-
-			EffectId: number;
-
-			TypeHash: number;
-
-			TypeName: string;
-
-			ModifierValue: number;
-
-			PercentageDisplay: number;
-
-			readonly ModifierAsFloat: number;
-		}
-	}
-
-	export namespace IECODE.Core.Game.PassiveSkills {
-		export class EffectStatistics {
-			constructor();
-
-			readonly EffectTypeCount: Map<string, number>;
-
-			readonly EffectTypeMinValue: Map<string, number>;
-
-			readonly EffectTypeMaxValue: Map<string, number>;
-		}
-	}
-
-	export namespace IECODE.Core.Game.PassiveSkills {
-		export enum PassiveSkillBuildType {
-			Default = 0,
-
-			Knockout = 1,
-
-			Tension = 2,
-
-			Counter = 3,
-
-			Kizuna = 4,
-
-			RoughPlay = 5,
-
-			Justice = 6,
-		}
-	}
-
-	export namespace IECODE.Core.Game.PassiveSkills {
-		export enum PassiveSkillEffectType {
-			KickPower = 2320670824,
-
-			GuardPower = 324792786,
-
-			CatchPower = 1683800388,
-
-			BodyPower = 4197995751,
-
-			ControlPower = 2369741937,
-
-			SpeedPower = 339097035,
-
-			StaminaPower = 1664157021,
-
-			Miscellaneous = 4086175948,
-		}
-	}
-
-	export namespace IECODE.Core.Game.PassiveSkills {
-		export namespace PassiveSkillHashes {
-			export function GetEffectTypeName(hash: number): string;
-		}
-	}
-
-	export namespace IECODE.Core.Game.PassiveSkills {
-		export enum PassiveSkillTiming {
-			Always = 1,
-
-			OnBallTouch = 2,
-
-			OnShoot = 3,
-
-			OnDribble = 4,
-
-			OnTackle = 5,
-
-			OnMatchStart = 6,
-
-			OnGoalScored = 7,
-
-			OnGoalConceded = 8,
-		}
-	}
-
-	export namespace IECODE.Core.Game.PassiveSkills {
-		export enum PassiveSkillTarget {
-			Self = 1,
-
-			Ally = 2,
-
-			Enemy = 3,
-
-			Team = 4,
-
-			Ball = 5,
-
-			Goalkeeper = 6,
-		}
-	}
-
-	export namespace IECODE.Core.Game.PassiveSkills {
 		export class PassiveSkillInfo extends System.ValueType {
-			GetBuildType(): IECODE.Core.Game.PassiveSkills.PassiveSkillBuildType;
 		}
 	}
 
@@ -2972,7 +3559,12 @@ declare module 'node-api-dotnet' {
 	}
 
 	export namespace IECODE.Core.Game.PassiveSkills {
-		export class PassiveSkillBuffIcon extends System.ValueType {
+		export class PassiveSkillBuffIconRef extends System.ValueType {
+		}
+	}
+
+	export namespace IECODE.Core.Game.PassiveSkills {
+		export class PassiveSkillEffect extends System.ValueType {
 		}
 	}
 
@@ -2984,71 +3576,216 @@ declare module 'node-api-dotnet' {
 
 			Info: IECODE.Core.Game.PassiveSkills.PassiveSkillInfo;
 
-			BuffIcon: IECODE.Core.Game.PassiveSkills.PassiveSkillBuffIcon;
+			BuffIconRef: IECODE.Core.Game.PassiveSkills.PassiveSkillBuffIconRef;
 
 			EffectRef: IECODE.Core.Game.PassiveSkills.PassiveSkillEffectRef;
 
 			Name?: string;
 
 			Description?: string;
-
-			readonly BuildTypeName: string;
 		}
 	}
 
-	export namespace IECODE.Core.Game.PassiveSkills {
-		export class PassiveSkillCondition extends System.ValueType {
+	export namespace IECODE.Core.Formats {
+		export enum FormatEndianness {
+			Little = 0,
+
+			Big = 1,
+
+			None = 2,
 		}
 	}
 
-	export namespace IECODE.Core.Game.PassiveSkills {
-		export class PassiveSkillEffectData extends System.ValueType {
+	export namespace IECODE.Core.Formats {
+		export enum FormatCategory {
+			Archive = 0,
+
+			Model = 1,
+
+			Texture = 2,
+
+			Material = 3,
+
+			Animation = 4,
+
+			Config = 5,
+
+			Audio = 6,
+
+			Video = 7,
+
+			Compression = 8,
+
+			Script = 9,
+
+			Spatial = 10,
 		}
 	}
 
-	export namespace IECODE.Core.Game.PassiveSkills {
-		export class PassiveSkillGrandTotalInfo extends System.ValueType {
+	export namespace IECODE.Core.Formats {
+		export class FormatField {
+			constructor(
+				Offset: number,
+				Size: number,
+				Type: string,
+				Name: string,
+				Note?: string,
+			);
+
+			Offset: number;
+
+			Size: number;
+
+			Type: string;
+
+			Name: string;
+
+			Note?: string;
+
+			ToString(): string;
+
+			GetHashCode(): number;
+
+			Equals(obj: unknown | undefined): boolean;
+
+			Equals(other: IECODE.Core.Formats.FormatField | undefined): boolean;
+
+			_Clone_$(): IECODE.Core.Formats.FormatField;
+
+			Deconstruct(): { Offset: number, Size: number, Type: string, Name: string, Note?: string };
 		}
 	}
 
-	export namespace IECODE.Core.Game.PassiveSkills {
-		export class PassiveSkillEffect {
+	export namespace IECODE.Core.Formats {
+		export class FormatDefinition {
+			constructor(
+				Name: string,
+				Category: IECODE.Core.Formats.FormatCategory,
+				Extensions: readonly string[],
+				Magic: string | undefined,
+				MagicHex: number | undefined,
+				Endianness: IECODE.Core.Formats.FormatEndianness,
+				HeaderSize: number | undefined,
+				Description: string,
+				Doc: string,
+				Fields: readonly IECODE.Core.Formats.FormatField[],
+			);
+
+			Name: string;
+
+			Category: IECODE.Core.Formats.FormatCategory;
+
+			Extensions: readonly string[];
+
+			Magic?: string;
+
+			MagicHex?: number;
+
+			Endianness: IECODE.Core.Formats.FormatEndianness;
+
+			HeaderSize?: number;
+
+			Description: string;
+
+			Doc: string;
+
+			Fields: readonly IECODE.Core.Formats.FormatField[];
+
+			ToString(): string;
+
+			GetHashCode(): number;
+
+			Equals(obj: unknown | undefined): boolean;
+
+			Equals(other: IECODE.Core.Formats.FormatDefinition | undefined): boolean;
+
+			_Clone_$(): IECODE.Core.Formats.FormatDefinition;
+
+			Deconstruct(): { Name: string, Category: IECODE.Core.Formats.FormatCategory, Extensions: readonly string[], Magic?: string, MagicHex?: number, Endianness: IECODE.Core.Formats.FormatEndianness, HeaderSize?: number, Description: string, Doc: string, Fields: readonly IECODE.Core.Formats.FormatField[] };
+		}
+	}
+
+	export namespace IECODE.Core.Formats {
+		export class FormatCatalogDocument {
+			constructor(
+				SchemaVersion: number,
+				Generator: string,
+				Game: string,
+				FormatCount: number,
+				Formats: readonly IECODE.Core.Formats.FormatDefinition[],
+			);
+
+			SchemaVersion: number;
+
+			Generator: string;
+
+			Game: string;
+
+			FormatCount: number;
+
+			Formats: readonly IECODE.Core.Formats.FormatDefinition[];
+
+			ToString(): string;
+
+			GetHashCode(): number;
+
+			Equals(obj: unknown | undefined): boolean;
+
+			Equals(other: IECODE.Core.Formats.FormatCatalogDocument | undefined): boolean;
+
+			_Clone_$(): IECODE.Core.Formats.FormatCatalogDocument;
+
+			Deconstruct(): { SchemaVersion: number, Generator: string, Game: string, FormatCount: number, Formats: readonly IECODE.Core.Formats.FormatDefinition[] };
+		}
+	}
+
+	export namespace IECODE.Core.Formats {
+		export class FormatCatalogJsonContext extends System.Text.Json.Serialization.JsonSerializerContext {
 			constructor();
 
-			Id: number;
+			constructor(options: unknown);
 
-			ExecTimingConditions: IECODE.Core.Game.PassiveSkills.PassiveSkillCondition[];
+			readonly FormatCatalogDocument: System.Text.Json.Serialization.Metadata.JsonTypeInfo$1<IECODE.Core.Formats.FormatCatalogDocument>;
 
-			TargetConditions: IECODE.Core.Game.PassiveSkills.PassiveSkillCondition[];
+			readonly FormatCategory: System.Text.Json.Serialization.Metadata.JsonTypeInfo$1<IECODE.Core.Formats.FormatCategory>;
 
-			ExecConditions: IECODE.Core.Game.PassiveSkills.PassiveSkillCondition[];
+			readonly FormatDefinition: System.Text.Json.Serialization.Metadata.JsonTypeInfo$1<IECODE.Core.Formats.FormatDefinition>;
 
-			Effects: IECODE.Core.Game.PassiveSkills.PassiveSkillEffectData[];
+			readonly FormatEndianness: System.Text.Json.Serialization.Metadata.JsonTypeInfo$1<IECODE.Core.Formats.FormatEndianness>;
 
-			GrandTotalInfo: IECODE.Core.Game.PassiveSkills.PassiveSkillGrandTotalInfo;
+			readonly FormatField: System.Text.Json.Serialization.Metadata.JsonTypeInfo$1<IECODE.Core.Formats.FormatField>;
+
+			readonly IReadOnlyListFormatDefinition: System.Text.Json.Serialization.Metadata.JsonTypeInfo$1<readonly IECODE.Core.Formats.FormatDefinition[]>;
+
+			readonly IReadOnlyListFormatField: System.Text.Json.Serialization.Metadata.JsonTypeInfo$1<readonly IECODE.Core.Formats.FormatField[]>;
+
+			readonly IReadOnlyListString: System.Text.Json.Serialization.Metadata.JsonTypeInfo$1<readonly string[]>;
+
+			readonly Int32: System.Text.Json.Serialization.Metadata.JsonTypeInfo$1<number>;
+
+			readonly NullableInt32: System.Text.Json.Serialization.Metadata.JsonTypeInfo$1<number | undefined>;
+
+			readonly String: System.Text.Json.Serialization.Metadata.JsonTypeInfo$1<string>;
+
+			readonly UInt32: System.Text.Json.Serialization.Metadata.JsonTypeInfo$1<number>;
+
+			readonly NullableUInt32: System.Text.Json.Serialization.Metadata.JsonTypeInfo$1<number | undefined>;
+
+			static readonly Default: IECODE.Core.Formats.FormatCatalogJsonContext;
+
+			GetTypeInfo(type: unknown): unknown | undefined;
 		}
 	}
 
-	export namespace IECODE.Core.Game.PassiveSkills {
-		export class PlayerPassiveSkillSlots {
-			constructor();
+	export namespace IECODE.Core.Formats {
+		export namespace FormatCatalog {
+			export const All: readonly IECODE.Core.Formats.FormatDefinition[];
 
-			readonly SlotSkillIds: number[];
+			export function Get(name: string): IECODE.Core.Formats.FormatDefinition | undefined;
 
-			readonly SlotEnabled: boolean[];
+			export function BuildDocument(): IECODE.Core.Formats.FormatCatalogDocument;
 
-			Rarity: number;
-
-			readonly UnlockedSlots: number;
-
-			GetSlotSkill(slot: number): number;
-
-			IsSlotActive(slot: number): boolean;
-		}
-	}
-
-	export namespace IECODE.Core.Game.PassiveSkills {
-		export class AbilityLearningTypeInfo extends System.ValueType {
+			export function ToJson(): string;
 		}
 	}
 
@@ -3166,6 +3903,915 @@ declare module 'node-api-dotnet' {
 		}
 	}
 
+	export namespace IECODE.Core.Formats {
+		export enum GameFileKind {
+			Unknown = 0,
+
+			CpkArchive = 1,
+
+			G4Package = 2,
+
+			G4PackageMenu = 3,
+
+			G4ResourceArchive = 4,
+
+			XfsaArchive = 5,
+
+			XpckPackage = 6,
+
+			Afs2Archive = 7,
+
+			AcbBundle = 8,
+
+			AwbWaveBank = 9,
+
+			G4Texture = 10,
+
+			G4Skeleton = 11,
+
+			G4ModelData = 12,
+
+			G4ModelGroup = 13,
+
+			G4Material = 14,
+
+			G4Motion = 15,
+
+			AgiInfo = 16,
+
+			CfgBin = 17,
+
+			ObjBinary = 18,
+
+			PxclData = 19,
+
+			LuaBytecode = 20,
+
+			CriUtfTable = 21,
+
+			CriLaylaCompressed = 22,
+
+			AdxAudio = 23,
+
+			HcaAudio = 24,
+
+			UsmVideo = 25,
+		}
+	}
+
+	export namespace IECODE.Core.Formats {
+		export class GameFileTypeInfo {
+			constructor(
+				Kind: IECODE.Core.Formats.GameFileKind,
+				Magic: string,
+				Extension: string,
+				Description: string,
+				TsKind: string,
+			);
+
+			Kind: IECODE.Core.Formats.GameFileKind;
+
+			Magic: string;
+
+			Extension: string;
+
+			Description: string;
+
+			TsKind: string;
+
+			ToString(): string;
+
+			GetHashCode(): number;
+
+			Equals(obj: unknown | undefined): boolean;
+
+			Equals(other: IECODE.Core.Formats.GameFileTypeInfo | undefined): boolean;
+
+			_Clone_$(): IECODE.Core.Formats.GameFileTypeInfo;
+
+			Deconstruct(): { Kind: IECODE.Core.Formats.GameFileKind, Magic: string, Extension: string, Description: string, TsKind: string };
+		}
+	}
+
+	export namespace IECODE.Core.Formats {
+		export namespace GameFileType {
+			export const KnownTypes: readonly IECODE.Core.Formats.GameFileTypeInfo[];
+
+			export function Detect(magic: System.ReadOnlySpan$1<number>): IECODE.Core.Formats.GameFileKind;
+
+			export function DetectFromData(data: System.ReadOnlySpan$1<number>): IECODE.Core.Formats.GameFileKind;
+
+			export function Detect(path: string): IECODE.Core.Formats.GameFileKind;
+
+			export function GetInfo(kind: IECODE.Core.Formats.GameFileKind): IECODE.Core.Formats.GameFileTypeInfo | undefined;
+
+			export function EmitDts(): string;
+		}
+	}
+
+	export namespace IECODE.Core.Formats.Shader {
+		export class DxbcReader {
+			constructor();
+
+			readonly Digest: number[];
+
+			Version: number;
+
+			TotalSize: number;
+
+			readonly Chunks: readonly IECODE.Core.Formats.Shader.DxbcChunk[];
+
+			ProgramType: IECODE.Core.Formats.Shader.DxbcProgramType;
+
+			ShaderModelMajor: number;
+
+			ShaderModelMinor: number;
+
+			Creator?: string;
+
+			static IsDxbc(data: System.ReadOnlySpan$1<number>): boolean;
+
+			static Parse(path: string): IECODE.Core.Formats.Shader.DxbcReader;
+
+			static Parse(data: number[]): IECODE.Core.Formats.Shader.DxbcReader;
+
+			FindChunk(fourcc: string): IECODE.Core.Formats.Shader.DxbcChunk | undefined;
+		}
+	}
+
+	export namespace IECODE.Core.Formats.Shader {
+		export enum DxbcProgramType {
+			Unknown = -1,
+
+			Pixel = 0,
+
+			Vertex = 1,
+
+			Geometry = 2,
+
+			Hull = 3,
+
+			Domain = 4,
+
+			Compute = 5,
+		}
+	}
+
+	export namespace IECODE.Core.Formats.Shader {
+		export class DxbcChunk {
+			constructor(
+				fourCc: string,
+				offset: number,
+				size: number,
+				data: number[],
+			);
+
+			readonly FourCc: string;
+
+			readonly Offset: number;
+
+			readonly Size: number;
+
+			readonly Data: number[];
+		}
+	}
+
+	export namespace IECODE.Core.Formats.Menu {
+		export class Transform2D {
+			constructor(
+				X: number,
+				Y: number,
+				ScaleX: number,
+				ScaleY: number,
+				Rot: number,
+				AnchorX: number,
+				AnchorY: number,
+			);
+
+			X: number;
+
+			Y: number;
+
+			ScaleX: number;
+
+			ScaleY: number;
+
+			Rot: number;
+
+			AnchorX: number;
+
+			AnchorY: number;
+
+			readonly IsOffScreen1920: boolean;
+
+			static readonly Zero: IECODE.Core.Formats.Menu.Transform2D;
+
+			ToCss1280x720(): [number, number];
+
+			ToString(): string;
+
+			GetHashCode(): number;
+
+			Equals(obj: unknown | undefined): boolean;
+
+			Equals(other: IECODE.Core.Formats.Menu.Transform2D | undefined): boolean;
+
+			_Clone_$(): IECODE.Core.Formats.Menu.Transform2D;
+
+			Deconstruct(): { X: number, Y: number, ScaleX: number, ScaleY: number, Rot: number, AnchorX: number, AnchorY: number };
+		}
+	}
+
+	export namespace IECODE.Core.Formats.Menu {
+		export class G4pkmBone {
+			constructor();
+
+			Index: number;
+
+			Name: string;
+
+			ParentIndex: number;
+
+			LocalBindPose: IECODE.Core.Formats.Menu.Transform2D;
+
+			WorldBindPose: IECODE.Core.Formats.Menu.Transform2D;
+		}
+	}
+
+	export namespace IECODE.Core.Formats.Menu {
+		export class G4pkmLayout {
+			constructor();
+
+			readonly BoneCount: number;
+
+			Bones: readonly IECODE.Core.Formats.Menu.G4pkmBone[];
+
+			WorldPoseByName: ReadonlyMap<string, IECODE.Core.Formats.Menu.Transform2D>;
+
+			GetWorldPose(boneName: string): IECODE.Core.Formats.Menu.Transform2D | undefined;
+		}
+	}
+
+	export namespace IECODE.Core.Formats.Menu {
+		export namespace G4pkmParser {
+			export function ParseG4pkm(g4pkmData: System.ReadOnlySpan$1<number>): IECODE.Core.Formats.Menu.G4pkmLayout;
+
+			export function ParseG4pkm(filePath: string): IECODE.Core.Formats.Menu.G4pkmLayout;
+
+			export function ExtractG4maData(g4pkmData: number[]): Uint8Array;
+
+			export function ExtractG4mtData(g4pkmData: number[]): Uint8Array;
+
+			export function ParseG4sk(g4skData: System.ReadOnlySpan$1<number>): IECODE.Core.Formats.Menu.G4pkmLayout;
+		}
+	}
+
+	export namespace IECODE.Core.Formats.Menu {
+		export class G4pkmMotionPose {
+			constructor();
+
+			BoneName: string;
+
+			Pose: IECODE.Core.Formats.Menu.Transform2D;
+
+			UsedAncestorFallback: boolean;
+
+			HasOpenMotion: boolean;
+		}
+	}
+
+	export namespace IECODE.Core.Formats.Menu {
+		export namespace G4pkmMotion {
+			export function GetMotionFinalPose(
+				layout: IECODE.Core.Formats.Menu.G4pkmLayout,
+				hasOpenMotion?: boolean,
+			): IECODE.Core.Formats.Menu.G4pkmMotionPose;
+		}
+	}
+
+	export namespace IECODE.Core.Formats.Menu {
+		export namespace G4maParser {
+			export function ParseMotionNames(data: System.ReadOnlySpan$1<number>): readonly string[];
+		}
+	}
+
+	export namespace IECODE.Core.Formats.Menu {
+		export class MenuObject {
+			constructor();
+
+			Name: string;
+
+			EngineType: string;
+
+			G4pkmPath?: string;
+
+			G4txPath?: string;
+
+			Components: readonly IECODE.Core.Formats.Menu.MenuComponent[];
+		}
+	}
+
+	export namespace IECODE.Core.Formats.Menu {
+		export class MenuComponent {
+			TypeName: string;
+		}
+	}
+
+	export namespace IECODE.Core.Formats.Menu {
+		export class RenderComponent extends IECODE.Core.Formats.Menu.MenuComponent {
+			constructor();
+
+			DrawPriority: number;
+
+			DrawType: number;
+
+			CameraNameHash: number;
+		}
+	}
+
+	export namespace IECODE.Core.Formats.Menu {
+		export class AnimationComponent extends IECODE.Core.Formats.Menu.MenuComponent {
+			constructor();
+
+			MotOpenHash: number;
+
+			MotCloseHash: number;
+
+			MotSelectHash: number;
+		}
+	}
+
+	export namespace IECODE.Core.Formats.Menu {
+		export class TextComponent extends IECODE.Core.Formats.Menu.MenuComponent {
+			constructor();
+
+			TableIndex: number;
+
+			Entries: readonly IECODE.Core.Formats.Menu.TextEntry[];
+		}
+	}
+
+	export namespace IECODE.Core.Formats.Menu {
+		export class TextEntry {
+			constructor();
+
+			Key: string;
+
+			Hashes: readonly number[];
+		}
+	}
+
+	export namespace IECODE.Core.Formats.Menu {
+		export class PrimitiveComponent extends IECODE.Core.Formats.Menu.MenuComponent {
+			constructor();
+
+			NumberSettingHashes: readonly number[];
+
+			DispMaxValues: readonly IECODE.Core.Formats.Menu.DispMaxEntry[];
+		}
+	}
+
+	export namespace IECODE.Core.Formats.Menu {
+		export class DispMaxEntry {
+			constructor();
+
+			PrimitiveHash: number;
+
+			MaxValue: number;
+		}
+	}
+
+	export namespace IECODE.Core.Formats.Menu {
+		export class AttachLocatorComponent extends IECODE.Core.Formats.Menu.MenuComponent {
+			constructor();
+
+			NullLayerHashes: readonly number[];
+		}
+	}
+
+	export namespace IECODE.Core.Formats.Menu {
+		export class CollisionComponent extends IECODE.Core.Formats.Menu.MenuComponent {
+			constructor();
+
+			Mode: number;
+
+			Entries: readonly IECODE.Core.Formats.Menu.CollisionEntry[];
+		}
+	}
+
+	export namespace IECODE.Core.Formats.Menu {
+		export class CollisionEntry {
+			constructor();
+
+			Key: string;
+
+			Enabled: number;
+
+			Type: number;
+
+			Extra: number;
+		}
+	}
+
+	export namespace IECODE.Core.Formats.Menu {
+		export class SoundCmdComponent extends IECODE.Core.Formats.Menu.MenuComponent {
+			constructor();
+
+			Entries: readonly IECODE.Core.Formats.Menu.SoundCmdEntry[];
+		}
+	}
+
+	export namespace IECODE.Core.Formats.Menu {
+		export class SoundCmdEntry {
+			constructor();
+
+			Command: string;
+
+			Param: number;
+		}
+	}
+
+	export namespace IECODE.Core.Formats.Menu {
+		export class MeshVisibleComponent extends IECODE.Core.Formats.Menu.MenuComponent {
+			constructor();
+
+			Params: readonly IECODE.Core.Formats.Menu.MeshVisibleEntry[];
+		}
+	}
+
+	export namespace IECODE.Core.Formats.Menu {
+		export class MeshVisibleEntry {
+			constructor();
+
+			MeshNameCrc: number;
+
+			IsVisible: boolean;
+		}
+	}
+
+	export namespace IECODE.Core.Formats.Menu {
+		export class UnknownComponent extends IECODE.Core.Formats.Menu.MenuComponent {
+			constructor();
+
+			RawParams: readonly [string, readonly number[]][];
+		}
+	}
+
+	export namespace IECODE.Core.Formats.Menu {
+		export class ObjbParseException extends System.Exception {
+			constructor(message: string);
+
+			constructor(
+				message: string,
+				inner: unknown,
+			);
+		}
+	}
+
+	export namespace IECODE.Core.Formats.Menu {
+		export namespace ObjbParser {
+			export function Parse(data: number[]): IECODE.Core.Formats.Menu.MenuObject;
+
+			export function Parse(stream: Duplex): IECODE.Core.Formats.Menu.MenuObject;
+
+			export function IsObjb(data: System.ReadOnlySpan$1<number>): boolean;
+		}
+	}
+
+	export namespace IECODE.Core.Formats.Lua {
+		export namespace LuaConstants {
+			export const Signature: System.ReadOnlySpan$1<number>;
+
+			export const LuacTail: System.ReadOnlySpan$1<number>;
+
+			export function OpcodeName(op: IECODE.Core.Formats.Lua.LuaConstants.Opcode): string;
+		}
+	}
+
+	export namespace IECODE.Core.Formats.Lua.LuaConstants {
+		export enum Opcode {
+			MOVE = 0,
+
+			LOADK = 1,
+
+			LOADKX = 2,
+
+			LOADBOOL = 3,
+
+			LOADNIL = 4,
+
+			GETUPVAL = 5,
+
+			GETTABUP = 6,
+
+			GETTABLE = 7,
+
+			SETTABUP = 8,
+
+			SETUPVAL = 9,
+
+			SETTABLE = 10,
+
+			NEWTABLE = 11,
+
+			SELF = 12,
+
+			ADD = 13,
+
+			SUB = 14,
+
+			MUL = 15,
+
+			DIV = 16,
+
+			MOD = 17,
+
+			POW = 18,
+
+			UNM = 19,
+
+			NOT = 20,
+
+			LEN = 21,
+
+			CONCAT = 22,
+
+			JMP = 23,
+
+			EQ = 24,
+
+			LT = 25,
+
+			LE = 26,
+
+			TEST = 27,
+
+			TESTSET = 28,
+
+			CALL = 29,
+
+			TAILCALL = 30,
+
+			RETURN = 31,
+
+			FORLOOP = 32,
+
+			FORPREP = 33,
+
+			TFORCALL = 34,
+
+			TFORLOOP = 35,
+
+			SETLIST = 36,
+
+			CLOSURE = 37,
+
+			VARARG = 38,
+
+			EXTRAARG = 39,
+		}
+	}
+
+	export namespace IECODE.Core.Formats.Lua {
+		export namespace LuaDisassembler {
+			export function Disassemble(chunk: IECODE.Core.Formats.Lua.LuaChunk): string;
+
+			export function DisassembleProto(
+				proto: IECODE.Core.Formats.Lua.LuaProto,
+				label?: string,
+			): string;
+
+			export function FormatInstruction(instr: IECODE.Core.Formats.Lua.LuaInstruction): string;
+
+			export function Summary(chunk: IECODE.Core.Formats.Lua.LuaChunk): string;
+		}
+	}
+
+	export namespace IECODE.Core.Formats.Lua {
+		export class LuaHeader {
+			constructor(
+				Version: number,
+				Format: number,
+				IsLittleEndian: boolean,
+				IntSize: number,
+				SizeTSize: number,
+				InstructionSize: number,
+				NumberSize: number,
+				IsFloat: boolean,
+			);
+
+			Version: number;
+
+			Format: number;
+
+			IsLittleEndian: boolean;
+
+			IntSize: number;
+
+			SizeTSize: number;
+
+			InstructionSize: number;
+
+			NumberSize: number;
+
+			IsFloat: boolean;
+
+			ToString(): string;
+
+			GetHashCode(): number;
+
+			Equals(obj: unknown | undefined): boolean;
+
+			Equals(other: IECODE.Core.Formats.Lua.LuaHeader | undefined): boolean;
+
+			_Clone_$(): IECODE.Core.Formats.Lua.LuaHeader;
+
+			Deconstruct(): { Version: number, Format: number, IsLittleEndian: boolean, IntSize: number, SizeTSize: number, InstructionSize: number, NumberSize: number, IsFloat: boolean };
+		}
+	}
+
+	export namespace IECODE.Core.Formats.Lua {
+		export class LuaInstruction {
+			constructor(
+				Raw: number,
+				Opcode: IECODE.Core.Formats.Lua.LuaConstants.Opcode,
+				A: number,
+				B: number,
+				C: number,
+				Bx: number,
+				sBx: number,
+				Ax: number,
+			);
+
+			Raw: number;
+
+			Opcode: IECODE.Core.Formats.Lua.LuaConstants.Opcode;
+
+			A: number;
+
+			B: number;
+
+			C: number;
+
+			Bx: number;
+
+			sBx: number;
+
+			Ax: number;
+
+			static Decode(raw: number): IECODE.Core.Formats.Lua.LuaInstruction;
+
+			ToDisasm(): string;
+
+			ToString(): string;
+
+			GetHashCode(): number;
+
+			Equals(obj: unknown | undefined): boolean;
+
+			Equals(other: IECODE.Core.Formats.Lua.LuaInstruction | undefined): boolean;
+
+			_Clone_$(): IECODE.Core.Formats.Lua.LuaInstruction;
+
+			Deconstruct(): { Raw: number, Opcode: IECODE.Core.Formats.Lua.LuaConstants.Opcode, A: number, B: number, C: number, Bx: number, sBx: number, Ax: number };
+		}
+	}
+
+	export namespace IECODE.Core.Formats.Lua {
+		export class LuaConstant {
+			ToString(): string;
+
+			GetHashCode(): number;
+
+			Equals(obj: unknown | undefined): boolean;
+
+			Equals(other: IECODE.Core.Formats.Lua.LuaConstant | undefined): boolean;
+
+			_Clone_$(): IECODE.Core.Formats.Lua.LuaConstant;
+		}
+	}
+
+	export namespace IECODE.Core.Formats.Lua.LuaConstant {
+		export class Nil extends IECODE.Core.Formats.Lua.LuaConstant {
+			constructor();
+
+			ToString(): string;
+
+			GetHashCode(): number;
+
+			Equals(obj: unknown | undefined): boolean;
+
+			Equals(other: IECODE.Core.Formats.Lua.LuaConstant | undefined): boolean;
+
+			Equals(other: IECODE.Core.Formats.Lua.LuaConstant.Nil | undefined): boolean;
+
+			_Clone_$(): IECODE.Core.Formats.Lua.LuaConstant.Nil;
+
+			_Clone_$(): IECODE.Core.Formats.Lua.LuaConstant;
+		}
+	}
+
+	export namespace IECODE.Core.Formats.Lua.LuaConstant {
+		export class Bool extends IECODE.Core.Formats.Lua.LuaConstant {
+			constructor(Value: boolean);
+
+			Value: boolean;
+
+			ToString(): string;
+
+			GetHashCode(): number;
+
+			Equals(obj: unknown | undefined): boolean;
+
+			Equals(other: IECODE.Core.Formats.Lua.LuaConstant | undefined): boolean;
+
+			Equals(other: IECODE.Core.Formats.Lua.LuaConstant.Bool | undefined): boolean;
+
+			_Clone_$(): IECODE.Core.Formats.Lua.LuaConstant.Bool;
+
+			Deconstruct(): { Value: boolean };
+
+			_Clone_$(): IECODE.Core.Formats.Lua.LuaConstant;
+		}
+	}
+
+	export namespace IECODE.Core.Formats.Lua.LuaConstant {
+		export class Number extends IECODE.Core.Formats.Lua.LuaConstant {
+			constructor(Value: number);
+
+			Value: number;
+
+			ToString(): string;
+
+			GetHashCode(): number;
+
+			Equals(obj: unknown | undefined): boolean;
+
+			Equals(other: IECODE.Core.Formats.Lua.LuaConstant | undefined): boolean;
+
+			Equals(other: IECODE.Core.Formats.Lua.LuaConstant.Number | undefined): boolean;
+
+			_Clone_$(): IECODE.Core.Formats.Lua.LuaConstant.Number;
+
+			Deconstruct(): { Value: number };
+
+			_Clone_$(): IECODE.Core.Formats.Lua.LuaConstant;
+		}
+	}
+
+	export namespace IECODE.Core.Formats.Lua.LuaConstant {
+		export class String extends IECODE.Core.Formats.Lua.LuaConstant {
+			constructor(Value: string);
+
+			Value: string;
+
+			ToString(): string;
+
+			GetHashCode(): number;
+
+			Equals(obj: unknown | undefined): boolean;
+
+			Equals(other: IECODE.Core.Formats.Lua.LuaConstant | undefined): boolean;
+
+			Equals(other: IECODE.Core.Formats.Lua.LuaConstant.String | undefined): boolean;
+
+			_Clone_$(): IECODE.Core.Formats.Lua.LuaConstant.String;
+
+			Deconstruct(): { Value: string };
+
+			_Clone_$(): IECODE.Core.Formats.Lua.LuaConstant;
+		}
+	}
+
+	export namespace IECODE.Core.Formats.Lua {
+		export class LuaUpvalue {
+			constructor(
+				InStack: boolean,
+				Idx: number,
+				Name?: string,
+			);
+
+			InStack: boolean;
+
+			Idx: number;
+
+			Name?: string;
+
+			ToString(): string;
+
+			GetHashCode(): number;
+
+			Equals(obj: unknown | undefined): boolean;
+
+			Equals(other: IECODE.Core.Formats.Lua.LuaUpvalue | undefined): boolean;
+
+			_Clone_$(): IECODE.Core.Formats.Lua.LuaUpvalue;
+
+			Deconstruct(): { InStack: boolean, Idx: number, Name?: string };
+		}
+	}
+
+	export namespace IECODE.Core.Formats.Lua {
+		export class LuaLocal {
+			constructor(
+				Name: string,
+				PcStart: number,
+				PcEnd: number,
+			);
+
+			Name: string;
+
+			PcStart: number;
+
+			PcEnd: number;
+
+			ToString(): string;
+
+			GetHashCode(): number;
+
+			Equals(obj: unknown | undefined): boolean;
+
+			Equals(other: IECODE.Core.Formats.Lua.LuaLocal | undefined): boolean;
+
+			_Clone_$(): IECODE.Core.Formats.Lua.LuaLocal;
+
+			Deconstruct(): { Name: string, PcStart: number, PcEnd: number };
+		}
+	}
+
+	export namespace IECODE.Core.Formats.Lua {
+		export class LuaProto {
+			constructor();
+
+			Source?: string;
+
+			LineDefined: number;
+
+			LastLineDefined: number;
+
+			NumParams: number;
+
+			IsVararg: number;
+
+			MaxStackSize: number;
+
+			Code: readonly IECODE.Core.Formats.Lua.LuaInstruction[];
+
+			Constants: readonly IECODE.Core.Formats.Lua.LuaConstant[];
+
+			Upvalues: readonly IECODE.Core.Formats.Lua.LuaUpvalue[];
+
+			Protos: readonly IECODE.Core.Formats.Lua.LuaProto[];
+
+			LineInfo: readonly number[];
+
+			LocVars: readonly IECODE.Core.Formats.Lua.LuaLocal[];
+
+			readonly IsStripped: boolean;
+		}
+	}
+
+	export namespace IECODE.Core.Formats.Lua {
+		export class LuaChunk {
+			constructor(
+				Header: IECODE.Core.Formats.Lua.LuaHeader,
+				Main: IECODE.Core.Formats.Lua.LuaProto,
+			);
+
+			Header: IECODE.Core.Formats.Lua.LuaHeader;
+
+			Main: IECODE.Core.Formats.Lua.LuaProto;
+
+			ToString(): string;
+
+			GetHashCode(): number;
+
+			Equals(obj: unknown | undefined): boolean;
+
+			Equals(other: IECODE.Core.Formats.Lua.LuaChunk | undefined): boolean;
+
+			_Clone_$(): IECODE.Core.Formats.Lua.LuaChunk;
+
+			Deconstruct(): { Header: IECODE.Core.Formats.Lua.LuaHeader, Main: IECODE.Core.Formats.Lua.LuaProto };
+		}
+	}
+
+	export namespace IECODE.Core.Formats.Lua {
+		export namespace LuaParser {
+			export function IsLua52(data: System.ReadOnlySpan$1<number>): boolean;
+
+			export function Parse(data: number[]): IECODE.Core.Formats.Lua.LuaChunk;
+
+			export function Parse(data: System.ReadOnlySpan$1<number>): IECODE.Core.Formats.Lua.LuaChunk;
+		}
+	}
+
+	export namespace IECODE.Core.Formats.Lua {
+		export class LuaParseException extends System.Exception {
+			constructor(message: string);
+		}
+	}
+
 	export namespace IECODE.Core.Formats.Level5 {
 		export namespace AgiParser {
 			export function IsAgi(data: System.ReadOnlySpan$1<number>): boolean;
@@ -3219,6 +4865,241 @@ declare module 'node-api-dotnet' {
 	}
 
 	export namespace IECODE.Core.Formats.Level5 {
+		export enum CfgBinValueKind {
+			String = 0,
+
+			Int = 1,
+
+			Float = 2,
+
+			Hash = 3,
+
+			Bool = 4,
+
+			Short = 5,
+
+			Byte = 6,
+
+			Tuple = 7,
+
+			Blob = 8,
+
+			Unknown = 9,
+		}
+	}
+
+	export namespace IECODE.Core.Formats.Level5 {
+		export class CfgBinValue {
+			constructor();
+
+			Name: string;
+
+			Kind: IECODE.Core.Formats.Level5.CfgBinValueKind;
+
+			Value?: unknown;
+
+			ToString(): string;
+		}
+	}
+
+	export namespace IECODE.Core.Formats.Level5 {
+		export class CfgBinRecord {
+			constructor();
+
+			Name: string;
+
+			Fields: readonly IECODE.Core.Formats.Level5.CfgBinValue[];
+
+			Children: readonly IECODE.Core.Formats.Level5.CfgBinRecord[];
+		}
+	}
+
+	export namespace IECODE.Core.Formats.Level5 {
+		export class CfgBinTable {
+			constructor();
+
+			Name: string;
+
+			TypeName: string;
+
+			Rows: readonly IECODE.Core.Formats.Level5.CfgBinRecord[];
+		}
+	}
+
+	export namespace IECODE.Core.Formats.Level5 {
+		export class CfgBinDocument {
+			constructor();
+
+			Format: string;
+
+			Encoding: string;
+
+			Records: readonly IECODE.Core.Formats.Level5.CfgBinRecord[];
+
+			Tables: readonly IECODE.Core.Formats.Level5.CfgBinTable[];
+
+			static Decode(
+				data: number[],
+				fileNameKey?: string,
+				hashDictionary?: ReadonlyMap<number, string>,
+			): IECODE.Core.Formats.Level5.CfgBinDocument;
+
+			static DecodeFile(
+				filePath: string,
+				hashDictionary?: ReadonlyMap<number, string>,
+			): IECODE.Core.Formats.Level5.CfgBinDocument;
+
+			ToJson(indented?: boolean): string;
+		}
+	}
+
+	export namespace IECODE.Core.Formats.Level5 {
+		export class CfgBinFieldSchema {
+			constructor(
+				Name: string,
+				Kind: IECODE.Core.Formats.Level5.CfgBinValueKind,
+				Repeated: boolean,
+				Optional: boolean,
+			);
+
+			Name: string;
+
+			Kind: IECODE.Core.Formats.Level5.CfgBinValueKind;
+
+			Repeated: boolean;
+
+			Optional: boolean;
+
+			ToString(): string;
+
+			GetHashCode(): number;
+
+			Equals(obj: unknown | undefined): boolean;
+
+			Equals(other: IECODE.Core.Formats.Level5.CfgBinFieldSchema | undefined): boolean;
+
+			_Clone_$(): IECODE.Core.Formats.Level5.CfgBinFieldSchema;
+
+			Deconstruct(): { Name: string, Kind: IECODE.Core.Formats.Level5.CfgBinValueKind, Repeated: boolean, Optional: boolean };
+		}
+	}
+
+	export namespace IECODE.Core.Formats.Level5 {
+		export class CfgBinTableSchema {
+			constructor(
+				Name: string,
+				TypeName: string,
+				SampleCount: number,
+				Fields: readonly IECODE.Core.Formats.Level5.CfgBinFieldSchema[],
+			);
+
+			Name: string;
+
+			TypeName: string;
+
+			SampleCount: number;
+
+			Fields: readonly IECODE.Core.Formats.Level5.CfgBinFieldSchema[];
+
+			ToString(): string;
+
+			GetHashCode(): number;
+
+			Equals(obj: unknown | undefined): boolean;
+
+			Equals(other: IECODE.Core.Formats.Level5.CfgBinTableSchema | undefined): boolean;
+
+			_Clone_$(): IECODE.Core.Formats.Level5.CfgBinTableSchema;
+
+			Deconstruct(): { Name: string, TypeName: string, SampleCount: number, Fields: readonly IECODE.Core.Formats.Level5.CfgBinFieldSchema[] };
+		}
+	}
+
+	export namespace IECODE.Core.Formats.Level5 {
+		export class CfgBinManifest {
+			constructor(
+				Config: string,
+				SourceFile: string,
+				Format: string,
+				Encoding: string,
+				Tables: readonly IECODE.Core.Formats.Level5.CfgBinTableSchema[],
+			);
+
+			Config: string;
+
+			SourceFile: string;
+
+			Format: string;
+
+			Encoding: string;
+
+			Tables: readonly IECODE.Core.Formats.Level5.CfgBinTableSchema[];
+
+			ToString(): string;
+
+			GetHashCode(): number;
+
+			Equals(obj: unknown | undefined): boolean;
+
+			Equals(other: IECODE.Core.Formats.Level5.CfgBinManifest | undefined): boolean;
+
+			_Clone_$(): IECODE.Core.Formats.Level5.CfgBinManifest;
+
+			Deconstruct(): { Config: string, SourceFile: string, Format: string, Encoding: string, Tables: readonly IECODE.Core.Formats.Level5.CfgBinTableSchema[] };
+		}
+	}
+
+	export namespace IECODE.Core.Formats.Level5 {
+		export class CfgBinTypesGenerator {
+			constructor();
+
+			Generate(cfgBinPath: string): IECODE.Core.Formats.Level5.CfgBinManifest;
+
+			GenerateAll(
+				input: string,
+				outDir: string,
+				onProgress?: System.Action$1<string>,
+			): IECODE.Core.Formats.Level5.CfgBinTypesGenerator.GenerateSummary;
+
+			static ToJson(m: IECODE.Core.Formats.Level5.CfgBinManifest): string;
+		}
+	}
+
+	export namespace IECODE.Core.Formats.Level5.CfgBinTypesGenerator {
+		export class GenerateSummary {
+			constructor(
+				Total: number,
+				Decoded: number,
+				ParsedOk: number,
+				Failed: number,
+				Failures: readonly string[],
+			);
+
+			Total: number;
+
+			Decoded: number;
+
+			ParsedOk: number;
+
+			Failed: number;
+
+			Failures: readonly string[];
+
+			ToString(): string;
+
+			GetHashCode(): number;
+
+			Equals(obj: unknown | undefined): boolean;
+
+			Equals(other: IECODE.Core.Formats.Level5.CfgBinTypesGenerator.GenerateSummary | undefined): boolean;
+
+			_Clone_$(): IECODE.Core.Formats.Level5.CfgBinTypesGenerator.GenerateSummary;
+
+			Deconstruct(): { Total: number, Decoded: number, ParsedOk: number, Failed: number, Failures: readonly string[] };
+		}
+	}
+
+	export namespace IECODE.Core.Formats.Level5 {
 		export namespace DdsParser {
 			export function ParseHeader(ddsData: System.ReadOnlySpan$1<number>): IECODE.Core.Formats.Level5.DdsParser.DdsHeader;
 
@@ -3239,6 +5120,71 @@ declare module 'node-api-dotnet' {
 	}
 
 	export namespace IECODE.Core.Formats.Level5 {
+		export class FxbinParser {
+			constructor();
+
+			SourceName: string;
+
+			MemberCount: number;
+
+			readonly Techniques: IECODE.Core.Formats.Level5.FxbinTechnique[];
+
+			readonly References: IECODE.Core.Formats.Level5.FxbinReference[];
+
+			static LooksLikeFxbin(data: number[]): boolean;
+
+			static Parse(path: string): IECODE.Core.Formats.Level5.FxbinParser;
+
+			static Parse(data: number[]): IECODE.Core.Formats.Level5.FxbinParser;
+		}
+	}
+
+	export namespace IECODE.Core.Formats.Level5 {
+		export class FxbinTechnique {
+			constructor();
+
+			Name: string;
+
+			readonly Passes: IECODE.Core.Formats.Level5.FxbinPass[];
+		}
+	}
+
+	export namespace IECODE.Core.Formats.Level5 {
+		export class FxbinPass {
+			constructor();
+
+			Name: string;
+
+			VertexShader: string;
+
+			PixelShader: string;
+		}
+	}
+
+	export namespace IECODE.Core.Formats.Level5 {
+		export class FxbinReference extends System.ValueType {
+			constructor(
+				Offset: number,
+				Value: string,
+			);
+
+			Offset: number;
+
+			Value: string;
+
+			ToString(): string;
+
+			GetHashCode(): number;
+
+			Equals(obj: unknown): boolean;
+
+			Equals(other: IECODE.Core.Formats.Level5.FxbinReference): boolean;
+
+			Deconstruct(): { Offset: number, Value: string };
+		}
+	}
+
+	export namespace IECODE.Core.Formats.Level5 {
 		export class G4mdParser {
 			constructor();
 
@@ -3248,13 +5194,32 @@ declare module 'node-api-dotnet' {
 
 			BoneRefs: IECODE.Core.Formats.Level5.G4mdParser.BoneRef[];
 
+			TextureRefs: string[];
+
+			MaterialBaseNames: string[];
+
+			Bounds: IECODE.Core.Formats.Level5.G4mdParser.BoundingBox;
+
+			FileSize: number;
+
 			IsBigEndian: boolean;
+
+			RawData: number[];
+
+			GetMaterialBaseName(materialIndex: number): string | undefined;
 
 			Parse(filePath: string): void;
 
 			Parse(data: System.ReadOnlySpan$1<number>): void;
 
+			GetInfo(name?: string): IECODE.Core.Formats.Level5.G4mdParser.G4mdInfo;
+
 			GetSectionOffset(relativeOffset: number): number;
+
+			SetSubmeshesForExtraction(
+				submeshes: IECODE.Core.Formats.Level5.G4mdParser.Submesh[],
+				faceDataBase: number,
+			): void;
 
 			GetSummary(): string;
 
@@ -3272,7 +5237,9 @@ declare module 'node-api-dotnet' {
 
 			readonly Unk2: number;
 
-			readonly SubmeshCount: number;
+			readonly VertexCount: number;
+
+			readonly FaceCount: number;
 
 			readonly TotalCount: number;
 		}
@@ -3306,32 +5273,74 @@ declare module 'node-api-dotnet' {
 		}
 	}
 
+	export namespace IECODE.Core.Formats.Level5.G4mdParser {
+		export class BoundingBox extends System.ValueType {
+		}
+	}
+
+	export namespace IECODE.Core.Formats.Level5.G4mdParser {
+		export class G4mdInfo extends System.ValueType {
+			Name: string;
+
+			MagicHex: string;
+
+			IsBigEndian: boolean;
+
+			HeaderSize: number;
+
+			TypeId: number;
+
+			SectionBase: number;
+
+			VertexCount: number;
+
+			FaceCount: number;
+
+			BoneCount: number;
+
+			SubmeshCount: number;
+
+			Bounds: IECODE.Core.Formats.Level5.G4mdParser.BoundingBox;
+
+			VertexDataOffset: number;
+
+			BoneRefOffset: number;
+
+			IndexOffset: number;
+
+			Submeshes: IECODE.Core.Formats.Level5.G4mdParser.Submesh[];
+
+			BoneRefs: IECODE.Core.Formats.Level5.G4mdParser.BoneRef[];
+
+			TextureRefs: string[];
+
+			MaterialBaseNames: string[];
+
+			FileSize: number;
+		}
+	}
+
 	export namespace IECODE.Core.Formats.Level5 {
 		export namespace G4mgParser {
-			export function ParseHeader(data: System.ReadOnlySpan$1<number>): IECODE.Core.Formats.Level5.G4mgParser.G4mgHeader;
+			export function ExtractGeometry(
+				g4mgData: System.ReadOnlySpan$1<number>,
+				g4md: IECODE.Core.Formats.Level5.G4mdParser,
+			): IECODE.Core.Formats.Level5.G4mgParser.SubmeshGeometry[];
 
-			export function ParseHeaderFromFile(filePath: string): IECODE.Core.Formats.Level5.G4mgParser.G4mgHeader;
-
-			export function ParseMeshes(filePath: string): IECODE.Core.Formats.Level5.G4mgParser.MeshEntry[];
-
-			export function ParseMeshes(data: System.ReadOnlySpan$1<number>): IECODE.Core.Formats.Level5.G4mgParser.MeshEntry[];
+			export function ParseRawGeometry(
+				g4mgData: System.ReadOnlySpan$1<number>,
+				g4md: IECODE.Core.Formats.Level5.G4mdParser,
+			): IECODE.Core.Formats.Level5.G4mgParser.MeshEntry[];
 
 			export function ParseRawGeometry(
 				g4mgData: System.ReadOnlySpan$1<number>,
 				submeshes: IECODE.Core.Formats.Level5.G4mdParser.Submesh[],
+				faceDataBase?: number,
 			): IECODE.Core.Formats.Level5.G4mgParser.MeshEntry[];
 
-			export function ReadStaticVertices(
-				data: System.ReadOnlySpan$1<number>,
-				offset: number,
-				count: number,
-			): IECODE.Core.Formats.Level5.G4mgParser.Vertex[];
+			export function ParseMeshes(filePath: string): IECODE.Core.Formats.Level5.G4mgParser.MeshEntry[];
 
-			export function ReadSkinnedVertices(
-				data: System.ReadOnlySpan$1<number>,
-				offset: number,
-				count: number,
-			): IECODE.Core.Formats.Level5.G4mgParser.SkinnedVertex[];
+			export function ParseMeshes(data: System.ReadOnlySpan$1<number>): IECODE.Core.Formats.Level5.G4mgParser.MeshEntry[];
 
 			export function ReadIndices(
 				data: System.ReadOnlySpan$1<number>,
@@ -3340,9 +5349,7 @@ declare module 'node-api-dotnet' {
 			): number[];
 
 			export function ExportToObj(
-				mesh: IECODE.Core.Formats.Level5.G4mgParser.MeshEntry,
-				vertices: IECODE.Core.Formats.Level5.G4mgParser.Vertex[],
-				indices: number[],
+				mesh: IECODE.Core.Formats.Level5.G4mgParser.SubmeshGeometry,
 				outputPath: string,
 			): void;
 
@@ -3400,14 +5407,6 @@ declare module 'node-api-dotnet' {
 	}
 
 	export namespace IECODE.Core.Formats.Level5.G4mgParser {
-		export class G4mgHeader extends System.ValueType {
-			readonly IsValid: boolean;
-
-			readonly IsBigEndian: boolean;
-		}
-	}
-
-	export namespace IECODE.Core.Formats.Level5.G4mgParser {
 		export class MeshEntry {
 			constructor();
 
@@ -3426,6 +5425,10 @@ declare module 'node-api-dotnet' {
 			Format: IECODE.Core.Formats.Level5.G4mgParser.VertexFormat;
 
 			RawFormat: number;
+
+			VertexStride: number;
+
+			Attributes: readonly IECODE.Core.Formats.Level5.G4mgParser.VertexAttribute[];
 
 			BBoxMin: IECODE.Core.Formats.Level5.G4mgParser.Vector3;
 
@@ -3491,6 +5494,62 @@ declare module 'node-api-dotnet' {
 		}
 	}
 
+	export namespace IECODE.Core.Formats.Level5.G4mgParser {
+		export class VertexAttribute extends System.ValueType {
+			constructor(
+				VType: number,
+				Offset: number,
+				DataType: number,
+			);
+
+			VType: number;
+
+			Offset: number;
+
+			DataType: number;
+
+			ToString(): string;
+
+			GetHashCode(): number;
+
+			Equals(obj: unknown): boolean;
+
+			Equals(other: IECODE.Core.Formats.Level5.G4mgParser.VertexAttribute): boolean;
+
+			Deconstruct(): { VType: number, Offset: number, DataType: number };
+		}
+	}
+
+	export namespace IECODE.Core.Formats.Level5.G4mgParser {
+		export class SubmeshGeometry {
+			constructor();
+
+			Name: string;
+
+			VertexCount: number;
+
+			VertexStride: number;
+
+			VertexBufferOffset: number;
+
+			IndexBufferOffset: number;
+
+			Index32: boolean;
+
+			MaterialIndex: number;
+
+			Positions: readonly IECODE.Core.Formats.Level5.G4mgParser.Vector3[];
+
+			Normals: readonly IECODE.Core.Formats.Level5.G4mgParser.Vector3[];
+
+			UV0: readonly IECODE.Core.Formats.Level5.G4mgParser.Vector2[];
+
+			Indices: readonly number[];
+
+			Attributes: readonly IECODE.Core.Formats.Level5.G4mgParser.VertexAttribute[];
+		}
+	}
+
 	export namespace IECODE.Core.Formats.Level5 {
 		export namespace G4mgReader {
 			export function ReadVertexBuffer(
@@ -3516,6 +5575,17 @@ declare module 'node-api-dotnet' {
 			export function ParseVertices(
 				vertexData: System.ReadOnlySpan$1<number>,
 				format: IECODE.Core.Formats.Level5.G4mgParser.VertexFormat,
+			): IECODE.Core.Formats.Level5.G4mgParser.Vertex[];
+
+			export function ParseVertices(
+				vertexData: System.ReadOnlySpan$1<number>,
+				stride: number,
+			): IECODE.Core.Formats.Level5.G4mgParser.Vertex[];
+
+			export function ParseVertices(
+				vertexData: System.ReadOnlySpan$1<number>,
+				stride: number,
+				attributes: readonly IECODE.Core.Formats.Level5.G4mgParser.VertexAttribute[],
 			): IECODE.Core.Formats.Level5.G4mgParser.Vertex[];
 
 			export function ParseIndices(indexData: System.ReadOnlySpan$1<number>): number[];
@@ -3646,6 +5716,11 @@ declare module 'node-api-dotnet' {
 			export function CalculateFileHash(filename: string): number;
 
 			export function DetectCompression(data: System.ReadOnlySpan$1<number>): IECODE.Core.Compression.CompressionFormat;
+
+			export function DetectSubFormat(
+				name: string,
+				data: System.ReadOnlySpan$1<number>,
+			): string;
 		}
 	}
 
@@ -3874,6 +5949,86 @@ declare module 'node-api-dotnet' {
 	}
 
 	export namespace IECODE.Core.Formats.Level5 {
+		export class MevbinEvent {
+			constructor();
+
+			Time: number;
+
+			TypeRaw: number;
+
+			TypeIsFloat: boolean;
+
+			TypeFloat: number;
+
+			ParamRaw: number;
+
+			ParamIsFloat: boolean;
+
+			ParamFloat: number;
+		}
+	}
+
+	export namespace IECODE.Core.Formats.Level5 {
+		export class MevbinMotion {
+			constructor();
+
+			Hash: number;
+
+			Events: readonly IECODE.Core.Formats.Level5.MevbinEvent[];
+		}
+	}
+
+	export namespace IECODE.Core.Formats.Level5 {
+		export class MevbinDocument {
+			constructor();
+
+			MotionCount: number;
+
+			EventCount: number;
+
+			Motions: readonly IECODE.Core.Formats.Level5.MevbinMotion[];
+
+			readonly ParsedEventCount: number;
+
+			static Decode(
+				data: number[],
+				fileNameKey?: string,
+			): IECODE.Core.Formats.Level5.MevbinDocument;
+
+			static DecodeFile(filePath: string): IECODE.Core.Formats.Level5.MevbinDocument;
+
+			ToJson(indented?: boolean): string;
+		}
+	}
+
+	export namespace IECODE.Core.Formats.Level5 {
+		export class NavmParser {
+			constructor();
+
+			Header: IECODE.Core.Formats.Level5.NavmParser.NavmHeader;
+
+			SectionCounts: readonly number[];
+
+			FileSize: number;
+
+			static IsNavm(data: System.ReadOnlySpan$1<number>): boolean;
+
+			static Parse(filePath: string): IECODE.Core.Formats.Level5.NavmParser;
+
+			static Parse(span: System.ReadOnlySpan$1<number>): IECODE.Core.Formats.Level5.NavmParser;
+
+			SectionCount(i: number): number;
+
+			GetSummary(): string;
+		}
+	}
+
+	export namespace IECODE.Core.Formats.Level5.NavmParser {
+		export class NavmHeader extends System.ValueType {
+		}
+	}
+
+	export namespace IECODE.Core.Formats.Level5 {
 		export enum NxtchTextureFormat {
 			Unknown = 0,
 
@@ -3908,6 +6063,98 @@ declare module 'node-api-dotnet' {
 			export function ParseFile(path: string): [IECODE.Core.Formats.Level5.NxtchHeader, number[]];
 
 			export function ConvertToDds(nxtchData: System.ReadOnlySpan$1<number>): number[];
+		}
+	}
+
+	export namespace IECODE.Core.Formats.Level5 {
+		export class P3lipHeader extends System.ValueType {
+			HeaderSize: number;
+
+			FileSize: number;
+
+			Duration: number;
+
+			DataOffset: number;
+
+			KeyframeOffset: number;
+
+			KeyframeCount: number;
+
+			KeyframeStride: number;
+		}
+	}
+
+	export namespace IECODE.Core.Formats.Level5 {
+		export class P3lipKeyframe extends System.ValueType {
+			Time: number;
+
+			Phoneme: number;
+
+			Channel: number;
+
+			WeightRaw: number;
+
+			MarkerRaw: number;
+
+			readonly IsSentinel: boolean;
+		}
+	}
+
+	export namespace IECODE.Core.Formats.Level5 {
+		export class P3lipFile {
+			constructor();
+
+			Header: IECODE.Core.Formats.Level5.P3lipHeader;
+
+			Keyframes: readonly IECODE.Core.Formats.Level5.P3lipKeyframe[];
+		}
+	}
+
+	export namespace IECODE.Core.Formats.Level5 {
+		export namespace P3lipParser {
+			export const Magic: System.ReadOnlySpan$1<number>;
+
+			export function IsP3lip(data: System.ReadOnlySpan$1<number>): boolean;
+
+			export function ParseHeader(data: System.ReadOnlySpan$1<number>): IECODE.Core.Formats.Level5.P3lipHeader;
+
+			export function Parse(data: System.ReadOnlySpan$1<number>): IECODE.Core.Formats.Level5.P3lipFile;
+
+			export function ParseFile(path: string): IECODE.Core.Formats.Level5.P3lipFile;
+
+			export function GetSummary(file: IECODE.Core.Formats.Level5.P3lipFile): string;
+		}
+	}
+
+	export namespace IECODE.Core.Formats.Level5 {
+		export class PxclParser {
+			constructor();
+
+			Header: IECODE.Core.Formats.Level5.PxclParser.PxclHeader;
+
+			FileSize: number;
+
+			SubBlocks: readonly IECODE.Core.Formats.Level5.PxclParser.SubBlock[];
+
+			readonly HeaderConsistent: boolean;
+
+			static IsPxcl(data: System.ReadOnlySpan$1<number>): boolean;
+
+			static Parse(filePath: string): IECODE.Core.Formats.Level5.PxclParser;
+
+			static Parse(span: System.ReadOnlySpan$1<number>): IECODE.Core.Formats.Level5.PxclParser;
+
+			GetSummary(): string;
+		}
+	}
+
+	export namespace IECODE.Core.Formats.Level5.PxclParser {
+		export class PxclHeader extends System.ValueType {
+		}
+	}
+
+	export namespace IECODE.Core.Formats.Level5.PxclParser {
+		export class SubBlock extends System.ValueType {
 		}
 	}
 
@@ -4335,13 +6582,200 @@ declare module 'node-api-dotnet' {
 	}
 
 	export namespace IECODE.Core.Formats.Criware {
+		export enum AcbEncodeType {
+			Adx = 0,
+
+			Hca = 2,
+
+			HcaMx = 4,
+
+			Vag = 7,
+
+			AtracX = 8,
+
+			Bcwav = 9,
+
+			Nintendo = 13,
+
+			Unknown = -1,
+		}
+	}
+
+	export namespace IECODE.Core.Formats.Criware {
+		export class AcbCue extends System.ValueType {
+			constructor(
+				Name: string,
+				CueIndex: number,
+				WaveformIndex: number,
+				AwbId: number,
+				Streaming: boolean,
+				EncodeType: IECODE.Core.Formats.Criware.AcbEncodeType,
+				NumChannels: number,
+				SamplingRate: number,
+				NumSamples: number,
+			);
+
+			Name: string;
+
+			CueIndex: number;
+
+			WaveformIndex: number;
+
+			AwbId: number;
+
+			Streaming: boolean;
+
+			EncodeType: IECODE.Core.Formats.Criware.AcbEncodeType;
+
+			NumChannels: number;
+
+			SamplingRate: number;
+
+			NumSamples: number;
+
+			ToString(): string;
+
+			GetHashCode(): number;
+
+			Equals(obj: unknown): boolean;
+
+			Equals(other: IECODE.Core.Formats.Criware.AcbCue): boolean;
+
+			Deconstruct(): { Name: string, CueIndex: number, WaveformIndex: number, AwbId: number, Streaming: boolean, EncodeType: IECODE.Core.Formats.Criware.AcbEncodeType, NumChannels: number, SamplingRate: number, NumSamples: number };
+		}
+	}
+
+	export namespace IECODE.Core.Formats.Criware {
+		export class AcbReader {
+			constructor(data: number[]);
+
+			readonly Name: string;
+
+			readonly VersionString: string;
+
+			readonly InternalAwb: IECODE.Core.Formats.Criware.UtfBlob;
+
+			static FromFile(path: string): IECODE.Core.Formats.Criware.AcbReader;
+
+			GetCues(): readonly IECODE.Core.Formats.Criware.AcbCue[];
+		}
+	}
+
+	export namespace IECODE.Core.Formats.Criware {
+		export class AwbEntry extends System.ValueType {
+			constructor(
+				Index: number,
+				Id: number,
+				Offset: number,
+				Size: number,
+			);
+
+			Index: number;
+
+			Id: number;
+
+			Offset: number;
+
+			Size: number;
+
+			ToString(): string;
+
+			GetHashCode(): number;
+
+			Equals(obj: unknown): boolean;
+
+			Equals(other: IECODE.Core.Formats.Criware.AwbEntry): boolean;
+
+			Deconstruct(): { Index: number, Id: number, Offset: number, Size: number };
+		}
+	}
+
+	export namespace IECODE.Core.Formats.Criware {
+		export class AwbHeader extends System.ValueType {
+			constructor(
+				Version: number,
+				OffsetSize: number,
+				IdSize: number,
+				Align: number,
+				Subkey: number,
+				EntryCount: number,
+			);
+
+			Version: number;
+
+			OffsetSize: number;
+
+			IdSize: number;
+
+			Align: number;
+
+			Subkey: number;
+
+			EntryCount: number;
+
+			ToString(): string;
+
+			GetHashCode(): number;
+
+			Equals(obj: unknown): boolean;
+
+			Equals(other: IECODE.Core.Formats.Criware.AwbHeader): boolean;
+
+			Deconstruct(): { Version: number, OffsetSize: number, IdSize: number, Align: number, Subkey: number, EntryCount: number };
+		}
+	}
+
+	export namespace IECODE.Core.Formats.Criware {
+		export namespace AwbReader {
+			export function IsAwb(data: System.ReadOnlySpan$1<number>): boolean;
+
+			export function ParseHeader(data: System.ReadOnlySpan$1<number>): IECODE.Core.Formats.Criware.AwbHeader;
+
+			export function ParseEntries(data: System.ReadOnlySpan$1<number>): readonly IECODE.Core.Formats.Criware.AwbEntry[];
+
+			export function ExtractBlock(
+				data: System.ReadOnlySpan$1<number>,
+				entry: IECODE.Core.Formats.Criware.AwbEntry,
+			): number[];
+
+			export function ParseFile(path: string): readonly IECODE.Core.Formats.Criware.AwbEntry[];
+		}
+	}
+
+	export namespace IECODE.Core.Formats.Criware {
+		export class UsmVideoInfo {
+			constructor();
+
+			readonly FramerateHz: number;
+
+			readonly DurationSeconds: number;
+		}
+	}
+
+	export namespace IECODE.Core.Formats.Criware {
+		export class UsmAudioInfo {
+			constructor();
+		}
+	}
+
+	export namespace IECODE.Core.Formats.Criware {
+		export class UsmInfo {
+			constructor();
+		}
+	}
+
+	export namespace IECODE.Core.Formats.Criware {
 		export class UsmDemuxer {
 			constructor();
+
+			static LoadDecrypted(inputPath: string): { result: number[], wasEncrypted: boolean };
+
+			static GetInfo(inputPath: string): IECODE.Core.Formats.Criware.UsmInfo;
 
 			static Demux(
 				inputPath: string,
 				outputDir: string,
-			): void;
+			): Map<number, string>;
 		}
 	}
 
@@ -4400,6 +6834,108 @@ declare module 'node-api-dotnet' {
 			export function IsUtfFile(data: System.ReadOnlySpan$1<number>): boolean;
 
 			export function GetEncoding(data: System.ReadOnlySpan$1<number>): unknown;
+		}
+	}
+
+	export namespace IECODE.Core.Formats.Criware {
+		export enum UtfColumnType {
+			Byte = 0,
+
+			SByte = 1,
+
+			UInt16 = 2,
+
+			Int16 = 3,
+
+			UInt32 = 4,
+
+			Int32 = 5,
+
+			UInt64 = 6,
+
+			Int64 = 7,
+
+			Single = 8,
+
+			Double = 9,
+
+			String = 10,
+
+			RawData = 11,
+
+			Guid = 12,
+		}
+	}
+
+	export namespace IECODE.Core.Formats.Criware {
+		export class UtfBlob extends System.ValueType {
+			constructor(
+				Offset: number,
+				Size: number,
+			);
+
+			Offset: number;
+
+			Size: number;
+
+			ToString(): string;
+
+			GetHashCode(): number;
+
+			Equals(obj: unknown): boolean;
+
+			Equals(other: IECODE.Core.Formats.Criware.UtfBlob): boolean;
+
+			Deconstruct(): { Offset: number, Size: number };
+		}
+	}
+
+	export namespace IECODE.Core.Formats.Criware {
+		export class UtfTable {
+			constructor(
+				data: number[],
+				baseOffset?: number,
+			);
+
+			readonly RowCount: number;
+
+			readonly ColumnCount: number;
+
+			readonly ColumnNames: readonly string[];
+
+			static IsUtf(
+				data: System.ReadOnlySpan$1<number>,
+				offset?: number,
+			): boolean;
+
+			IndexOf(columnName: string): number;
+
+			HasColumn(columnName: string): boolean;
+
+			GetLong(
+				row: number,
+				columnName: string,
+			): number;
+
+			GetInt(
+				row: number,
+				columnName: string,
+			): number;
+
+			GetString(
+				row: number,
+				columnName: string,
+			): string;
+
+			GetBlob(
+				row: number,
+				columnName: string,
+			): IECODE.Core.Formats.Criware.UtfBlob;
+
+			GetSubTable(
+				row: number,
+				columnName: string,
+			): IECODE.Core.Formats.Criware.UtfTable | undefined;
 		}
 	}
 
@@ -5483,6 +8019,87 @@ declare module 'node-api-dotnet' {
 	}
 
 	export namespace IECODE.Core.Dump {
+		export class DataPathExporter {
+			constructor(game: IECODE.Core.IEVRGame);
+
+			static StripDataPrefix(relativePath: string): string;
+
+			ExecuteAsync(
+				options: IECODE.Core.Dump.DataPathExporter.Options,
+				ct?: AbortSignal,
+			): Promise<IECODE.Core.Dump.DataPathExporter.Result>;
+		}
+	}
+
+	export namespace IECODE.Core.Dump.DataPathExporter {
+		export class Options {
+			constructor();
+
+			InputDir?: string;
+
+			OutputDir: string;
+
+			Force: boolean;
+
+			CopyRawCfgBin: boolean;
+
+			MaxParallelism: number;
+
+			OnProgress?: System.Action$1<string>;
+		}
+	}
+
+	export namespace IECODE.Core.Dump.DataPathExporter {
+		export class Result {
+			constructor();
+
+			CfgBinDecoded: number;
+
+			CfgBinSkipped: number;
+
+			CfgBinFailed: number;
+
+			RawCopied: number;
+
+			OtherCopied: number;
+
+			readonly Failures: string[];
+
+			OutputDir: string;
+		}
+	}
+
+	export namespace IECODE.Core.Dump {
+		export namespace DiskBudget {
+			export function Reserve(totalBytes: number): number;
+
+			export function UsableBudget(
+				freeBytes: number,
+				totalBytes: number,
+			): number;
+
+			export function Fits(
+				estimatedBytes: number,
+				freeBytes: number,
+				totalBytes: number,
+			): boolean;
+
+			export function ReserveBreached(
+				freeBytes: number,
+				totalBytes: number,
+			): boolean;
+		}
+	}
+
+	export namespace IECODE.Core.Dump {
+		export namespace DumpPresets {
+			export const Names: string;
+
+			export function Resolve(preset: string | undefined): string | undefined;
+		}
+	}
+
+	export namespace IECODE.Core.Dump {
 		export class DumpService {
 			constructor(game: IECODE.Core.IEVRGame);
 
@@ -5512,6 +8129,12 @@ declare module 'node-api-dotnet' {
 			OnProgress?: System.Action$1<IECODE.Core.Dump.DumpProgress>;
 
 			FileFilter?: string;
+
+			MaxDiskBytes?: number;
+
+			IgnoreSpaceCheck: boolean;
+
+			CpkParallelism: number;
 		}
 	}
 
@@ -5546,6 +8169,10 @@ declare module 'node-api-dotnet' {
 			LooseFilesCopied: number;
 
 			ExtractedBytes: number;
+
+			EstimatedBytes: number;
+
+			DiskAborted: boolean;
 
 			Errors: string[];
 
@@ -5914,6 +8541,23 @@ declare module 'node-api-dotnet' {
 	}
 
 	export namespace IECODE.Core.Converters {
+		export namespace TexturedModelExport {
+			export function BuildTexturedGlb(
+				g4mgData: System.ReadOnlySpan$1<number>,
+				g4md: IECODE.Core.Formats.Level5.G4mdParser,
+				g4txProvider: IECODE.Core.Converters.TexturedModelExport.G4txProvider,
+				maxTextureSize?: number,
+				webpQuality?: number,
+				log?: System.Action$1<string>,
+			): { result: number[] | undefined, totalTris: number, texturedSubmeshes: number };
+		}
+	}
+
+	export namespace IECODE.Core.Converters.TexturedModelExport {
+		export interface G4txProvider { (): readonly IECODE.Core.Formats.Level5.G4txTexture[] | undefined; }
+	}
+
+	export namespace IECODE.Core.Converters {
 		export namespace TextureExportExtensions {
 			export function SaveAsPng(
 				texture: IECODE.Core.Formats.Level5.G4txTexture,
@@ -6207,6 +8851,881 @@ declare module 'node-api-dotnet' {
 		}
 	}
 
+	export namespace IECODE.Core.Cdn {
+		export class CdnFile extends System.ValueType {
+			constructor(
+				Path: string,
+				Bytes: number[],
+				Size: number,
+				ETag: string,
+				MediaType: string,
+			);
+
+			Path: string;
+
+			Bytes: number[];
+
+			Size: number;
+
+			ETag: string;
+
+			MediaType: string;
+
+			ToString(): string;
+
+			GetHashCode(): number;
+
+			Equals(obj: unknown): boolean;
+
+			Equals(other: IECODE.Core.Cdn.CdnFile): boolean;
+
+			Deconstruct(): { Path: string, Bytes: number[], Size: number, ETag: string, MediaType: string };
+		}
+	}
+
+	export namespace IECODE.Core.Cdn {
+		export class CdnFileService {
+			constructor(
+				index: IECODE.Core.Cdn.CpkFileIndex,
+				pool?: IECODE.Core.Cdn.CpkReaderPool,
+			);
+
+			readonly BuildId: string;
+
+			readonly Count: number;
+
+			readonly All: Iterable<IECODE.Core.Cdn.CpkFileLocation>;
+
+			readonly MenuPng: IECODE.Core.Cdn.MenuPngService;
+
+			static FromGame(
+				game: IECODE.Core.IEVRGame,
+				buildId?: string,
+				pool?: IECODE.Core.Cdn.CpkReaderPool,
+			): IECODE.Core.Cdn.CdnFileService;
+
+			TryResolve(path: string): IECODE.Core.Cdn.CpkFileLocation | undefined;
+
+			ETag(location: IECODE.Core.Cdn.CpkFileLocation): string;
+
+			ReadAsync(
+				path: string,
+				ct?: AbortSignal,
+			): Promise<IECODE.Core.Cdn.CdnFile | undefined>;
+
+			ReadConvertedAsync(
+				path: string,
+				format: string | undefined,
+				ct?: AbortSignal,
+			): Promise<IECODE.Core.Cdn.CdnFile | undefined>;
+
+			dispose(): void;
+		}
+	}
+
+	export namespace IECODE.Core.Cdn {
+		export namespace CdnMediaTypes {
+			export function ForPath(path: string): string;
+		}
+	}
+
+	export namespace IECODE.Core.Cdn {
+		export class CpkFileLocation extends System.ValueType {
+			constructor(
+				Path: string,
+				CpkName: string,
+				CpkPath: string,
+				Size: number,
+			);
+
+			Path: string;
+
+			CpkName: string;
+
+			CpkPath: string;
+
+			Size: number;
+
+			ToString(): string;
+
+			GetHashCode(): number;
+
+			Equals(obj: unknown): boolean;
+
+			Equals(other: IECODE.Core.Cdn.CpkFileLocation): boolean;
+
+			Deconstruct(): { Path: string, CpkName: string, CpkPath: string, Size: number };
+		}
+	}
+
+	export namespace IECODE.Core.Cdn {
+		export class CpkFileIndex {
+			readonly BuildId: string;
+
+			readonly Count: number;
+
+			readonly All: Iterable<IECODE.Core.Cdn.CpkFileLocation>;
+
+			static Build(
+				cpkList: IECODE.Core.Config.CpkListData,
+				packsPath: string,
+				buildId?: string,
+			): IECODE.Core.Cdn.CpkFileIndex;
+
+			TryResolve(path: string): IECODE.Core.Cdn.CpkFileLocation | undefined;
+
+			ETag(location: IECODE.Core.Cdn.CpkFileLocation): string;
+		}
+	}
+
+	export namespace IECODE.Core.Cdn {
+		export class CpkReaderPool {
+			constructor(capacity?: number);
+
+			readonly OpenCount: number;
+
+			readonly Capacity: number;
+
+			dispose(): void;
+		}
+	}
+
+	export namespace IECODE.Core.Cdn {
+		export namespace GameTreeExport {
+			export function ExportTreeNdjson(game: IECODE.Core.IEVRGame): string;
+
+			export function ExportCpkTocNdjson(
+				game: IECODE.Core.IEVRGame,
+				cpkPath: string,
+			): string;
+		}
+	}
+
+	export namespace IECODE.Core.Cdn {
+		export class MenuAssetRef extends System.ValueType {
+			constructor(
+				ContainerPath: string,
+				TextureName: string,
+				AzaleePath: string,
+			);
+
+			ContainerPath: string;
+
+			TextureName: string;
+
+			AzaleePath: string;
+
+			ToString(): string;
+
+			GetHashCode(): number;
+
+			Equals(obj: unknown): boolean;
+
+			Equals(other: IECODE.Core.Cdn.MenuAssetRef): boolean;
+
+			Deconstruct(): { ContainerPath: string, TextureName: string, AzaleePath: string };
+		}
+	}
+
+	export namespace IECODE.Core.Cdn {
+		export namespace MenuAssetResolver {
+			export function NormalizeAzaleePath(path: string): string;
+
+			export function TryResolve(
+				azaleePath: string,
+				containerExists: System.Func$2<string, boolean>,
+			): IECODE.Core.Cdn.MenuAssetRef | undefined;
+
+			export function ToAzaleePath(
+				containerLogicalPath: string,
+				textureName: string,
+			): string;
+
+			export function IsMenuG4tx(logicalPath: string): boolean;
+
+			export function EnumerateMenuContainers(cdn: IECODE.Core.Cdn.CdnFileService): Iterable<IECODE.Core.Cdn.CpkFileLocation>;
+		}
+	}
+
+	export namespace IECODE.Core.Cdn {
+		export class MenuExportReport extends System.ValueType {
+			constructor(
+				Containers: number,
+				PngWritten: number,
+				Failed: number,
+				BytesWritten: number,
+				OutputRoot: string,
+			);
+
+			Containers: number;
+
+			PngWritten: number;
+
+			Failed: number;
+
+			BytesWritten: number;
+
+			OutputRoot: string;
+
+			ToString(): string;
+
+			GetHashCode(): number;
+
+			Equals(obj: unknown): boolean;
+
+			Equals(other: IECODE.Core.Cdn.MenuExportReport): boolean;
+
+			Deconstruct(): { Containers: number, PngWritten: number, Failed: number, BytesWritten: number, OutputRoot: string };
+		}
+	}
+
+	export namespace IECODE.Core.Cdn {
+		export class MenuBatchExporter {
+			constructor(cdn: IECODE.Core.Cdn.CdnFileService);
+
+			ExportAsync(
+				outputRoot: string,
+				filter?: string,
+				overwrite?: boolean,
+				maxDegreeOfParallelism?: number,
+				progress?: System.IProgress$1<IECODE.Core.Cdn.MenuExportProgress>,
+				ct?: AbortSignal,
+			): Promise<IECODE.Core.Cdn.MenuExportReport>;
+		}
+	}
+
+	export namespace IECODE.Core.Cdn {
+		export class MenuExportProgress extends System.ValueType {
+			constructor(
+				Done: number,
+				Total: number,
+				PngWritten: number,
+			);
+
+			Done: number;
+
+			Total: number;
+
+			PngWritten: number;
+
+			ToString(): string;
+
+			GetHashCode(): number;
+
+			Equals(obj: unknown): boolean;
+
+			Equals(other: IECODE.Core.Cdn.MenuExportProgress): boolean;
+
+			Deconstruct(): { Done: number, Total: number, PngWritten: number };
+		}
+	}
+
+	export namespace IECODE.Core.Cdn {
+		export class MenuAssetDto {
+			constructor();
+
+			ContainerPath: string;
+
+			TextureName: string;
+
+			AzaleePath: string;
+		}
+	}
+
+	export namespace IECODE.Core.Cdn {
+		export class MenuPngDto {
+			constructor();
+
+			AzaleePath: string;
+
+			Bytes: number[];
+
+			Width: number;
+
+			Height: number;
+
+			ETag: string;
+		}
+	}
+
+	export namespace IECODE.Core.Cdn {
+		export class MenuCdnBridge {
+			readonly BuildId: string;
+
+			readonly MenuContainerCount: number;
+
+			static Open(gamePath?: string): IECODE.Core.Cdn.MenuCdnBridge;
+
+			Resolve(azaleePath: string): IECODE.Core.Cdn.MenuAssetDto | undefined;
+
+			RenderAsync(
+				azaleePath: string,
+				ct?: AbortSignal,
+			): Promise<IECODE.Core.Cdn.MenuPngDto | undefined>;
+
+			RenderAllAsync(
+				containerLogicalPath: string,
+				ct?: AbortSignal,
+			): Promise<IECODE.Core.Cdn.MenuPngDto[]>;
+
+			ListContainers(filter?: string): string[];
+
+			ExportAsync(
+				outputRoot: string,
+				filter?: string,
+				overwrite?: boolean,
+				concurrency?: number,
+				ct?: AbortSignal,
+			): Promise<IECODE.Core.Cdn.MenuExportReportDto>;
+
+			dispose(): void;
+		}
+	}
+
+	export namespace IECODE.Core.Cdn {
+		export class MenuExportReportDto {
+			constructor();
+
+			Containers: number;
+
+			PngWritten: number;
+
+			Failed: number;
+
+			BytesWritten: number;
+
+			OutputRoot: string;
+		}
+	}
+
+	export namespace IECODE.Core.Cdn {
+		export class MenuTransform {
+			constructor(
+				X: number,
+				Y: number,
+				ScaleX?: number,
+				ScaleY?: number,
+				Rot?: number,
+				AnchorX?: number,
+				AnchorY?: number,
+			);
+
+			X: number;
+
+			Y: number;
+
+			ScaleX: number;
+
+			ScaleY: number;
+
+			Rot: number;
+
+			AnchorX: number;
+
+			AnchorY: number;
+
+			ToString(): string;
+
+			GetHashCode(): number;
+
+			Equals(obj: unknown | undefined): boolean;
+
+			Equals(other: IECODE.Core.Cdn.MenuTransform | undefined): boolean;
+
+			_Clone_$(): IECODE.Core.Cdn.MenuTransform;
+
+			Deconstruct(): { X: number, Y: number, ScaleX: number, ScaleY: number, Rot: number, AnchorX: number, AnchorY: number };
+		}
+	}
+
+	export namespace IECODE.Core.Cdn {
+		export class MenuLayoutSprite {
+			constructor(
+				LogicalPath: string,
+				PngUrl: string,
+				W: number,
+				H: number,
+			);
+
+			LogicalPath: string;
+
+			PngUrl: string;
+
+			W: number;
+
+			H: number;
+
+			ToString(): string;
+
+			GetHashCode(): number;
+
+			Equals(obj: unknown | undefined): boolean;
+
+			Equals(other: IECODE.Core.Cdn.MenuLayoutSprite | undefined): boolean;
+
+			_Clone_$(): IECODE.Core.Cdn.MenuLayoutSprite;
+
+			Deconstruct(): { LogicalPath: string, PngUrl: string, W: number, H: number };
+		}
+	}
+
+	export namespace IECODE.Core.Cdn {
+		export class MenuLayoutText {
+			constructor(
+				Key: string,
+				KeyHash: number,
+				Value: string | undefined,
+				Font?: string,
+				Size?: number,
+				Color?: string,
+				Align?: string,
+			);
+
+			Key: string;
+
+			KeyHash: number;
+
+			Value?: string;
+
+			Font: string;
+
+			Size: number;
+
+			Color: string;
+
+			Align: string;
+
+			ToString(): string;
+
+			GetHashCode(): number;
+
+			Equals(obj: unknown | undefined): boolean;
+
+			Equals(other: IECODE.Core.Cdn.MenuLayoutText | undefined): boolean;
+
+			_Clone_$(): IECODE.Core.Cdn.MenuLayoutText;
+
+			Deconstruct(): { Key: string, KeyHash: number, Value?: string, Font: string, Size: number, Color: string, Align: string };
+		}
+	}
+
+	export namespace IECODE.Core.Cdn {
+		export class MenuLayoutAnim {
+			constructor(
+				Open: string | undefined,
+				Close: string | undefined,
+			);
+
+			Open?: string;
+
+			Close?: string;
+
+			ToString(): string;
+
+			GetHashCode(): number;
+
+			Equals(obj: unknown | undefined): boolean;
+
+			Equals(other: IECODE.Core.Cdn.MenuLayoutAnim | undefined): boolean;
+
+			_Clone_$(): IECODE.Core.Cdn.MenuLayoutAnim;
+
+			Deconstruct(): { Open?: string, Close?: string };
+		}
+	}
+
+	export namespace IECODE.Core.Cdn {
+		export class MenuLayoutObject {
+			constructor(
+				Name: string,
+				Parent: string | undefined,
+				Transform: IECODE.Core.Cdn.MenuTransform,
+				DrawPriority: number,
+				DrawType: number,
+				Camera: string,
+				Sprite: IECODE.Core.Cdn.MenuLayoutSprite | undefined,
+				Text: IECODE.Core.Cdn.MenuLayoutText | undefined,
+				Anim: IECODE.Core.Cdn.MenuLayoutAnim | undefined,
+			);
+
+			Name: string;
+
+			Parent?: string;
+
+			Transform: IECODE.Core.Cdn.MenuTransform;
+
+			DrawPriority: number;
+
+			DrawType: number;
+
+			Camera: string;
+
+			Sprite?: IECODE.Core.Cdn.MenuLayoutSprite;
+
+			Text?: IECODE.Core.Cdn.MenuLayoutText;
+
+			Anim?: IECODE.Core.Cdn.MenuLayoutAnim;
+
+			ToString(): string;
+
+			GetHashCode(): number;
+
+			Equals(obj: unknown | undefined): boolean;
+
+			Equals(other: IECODE.Core.Cdn.MenuLayoutObject | undefined): boolean;
+
+			_Clone_$(): IECODE.Core.Cdn.MenuLayoutObject;
+
+			Deconstruct(): { Name: string, Parent?: string, Transform: IECODE.Core.Cdn.MenuTransform, DrawPriority: number, DrawType: number, Camera: string, Sprite?: IECODE.Core.Cdn.MenuLayoutSprite, Text?: IECODE.Core.Cdn.MenuLayoutText, Anim?: IECODE.Core.Cdn.MenuLayoutAnim };
+		}
+	}
+
+	export namespace IECODE.Core.Cdn {
+		export class MenuLayout {
+			constructor(
+				Screen: string,
+				Locale: string,
+				Canvas: IECODE.Core.Cdn.MenuCanvas,
+				Objects: readonly IECODE.Core.Cdn.MenuLayoutObject[],
+			);
+
+			Screen: string;
+
+			Locale: string;
+
+			Canvas: IECODE.Core.Cdn.MenuCanvas;
+
+			Objects: readonly IECODE.Core.Cdn.MenuLayoutObject[];
+
+			ToString(): string;
+
+			GetHashCode(): number;
+
+			Equals(obj: unknown | undefined): boolean;
+
+			Equals(other: IECODE.Core.Cdn.MenuLayout | undefined): boolean;
+
+			_Clone_$(): IECODE.Core.Cdn.MenuLayout;
+
+			Deconstruct(): { Screen: string, Locale: string, Canvas: IECODE.Core.Cdn.MenuCanvas, Objects: readonly IECODE.Core.Cdn.MenuLayoutObject[] };
+		}
+	}
+
+	export namespace IECODE.Core.Cdn {
+		export class MenuCanvas {
+			constructor(
+				W?: number,
+				H?: number,
+			);
+
+			W: number;
+
+			H: number;
+
+			ToString(): string;
+
+			GetHashCode(): number;
+
+			Equals(obj: unknown | undefined): boolean;
+
+			Equals(other: IECODE.Core.Cdn.MenuCanvas | undefined): boolean;
+
+			_Clone_$(): IECODE.Core.Cdn.MenuCanvas;
+
+			Deconstruct(): { W: number, H: number };
+		}
+	}
+
+	export namespace IECODE.Core.Cdn {
+		export class MenuLayoutExporter {
+			constructor(
+				cdn: IECODE.Core.Cdn.CdnFileService,
+				png?: IECODE.Core.Cdn.MenuPngService,
+			);
+
+			TransformProvider?: System.Func$2<string, IECODE.Core.Cdn.MenuTransform | undefined>;
+
+			HashResolver?: System.Func$2<number, string | undefined>;
+
+			TextResolver?: System.Func$3<string, string, string | undefined>;
+
+			EnumerateObjbinPaths(): Iterable<string>;
+
+			ExportScreenAsync(
+				screenId: string,
+				locale: string,
+				assetsDir?: string,
+				ct?: AbortSignal,
+			): Promise<IECODE.Core.Cdn.MenuLayout>;
+
+			static ToJson(layout: IECODE.Core.Cdn.MenuLayout): string;
+		}
+	}
+
+	export namespace IECODE.Core.Cdn {
+		export class MenuPng extends System.ValueType {
+			constructor(
+				AzaleePath: string,
+				Bytes: number[],
+				Width: number,
+				Height: number,
+				ETag: string,
+			);
+
+			AzaleePath: string;
+
+			Bytes: number[];
+
+			Width: number;
+
+			Height: number;
+
+			ETag: string;
+
+			ToString(): string;
+
+			GetHashCode(): number;
+
+			Equals(obj: unknown): boolean;
+
+			Equals(other: IECODE.Core.Cdn.MenuPng): boolean;
+
+			Deconstruct(): { AzaleePath: string, Bytes: number[], Width: number, Height: number, ETag: string };
+		}
+	}
+
+	export namespace IECODE.Core.Cdn {
+		export class MenuPngService {
+			constructor(cdn: IECODE.Core.Cdn.CdnFileService);
+
+			readonly BuildId: string;
+
+			TryResolve(azaleePath: string): IECODE.Core.Cdn.MenuAssetRef | undefined;
+
+			RenderAsync(
+				azaleePath: string,
+				ct?: AbortSignal,
+			): Promise<IECODE.Core.Cdn.MenuPng | undefined>;
+
+			RenderContainerTextureAsync(
+				containerLogicalPath: string,
+				textureName: string,
+				ct?: AbortSignal,
+			): Promise<IECODE.Core.Cdn.MenuPng | undefined>;
+
+			RenderAllAsync(
+				containerLogicalPath: string,
+				ct?: AbortSignal,
+			): Promise<readonly IECODE.Core.Cdn.MenuPng[]>;
+		}
+	}
+
+	export namespace IECODE.Core.Audio {
+		export enum AdxEncodingType {
+			Fixed = 2,
+
+			Standard = 3,
+
+			Exponential = 4,
+
+			Unknown = 0,
+		}
+	}
+
+	export namespace IECODE.Core.Audio {
+		export class AdxLoopInfo extends System.ValueType {
+			constructor(
+				Enabled: boolean,
+				LoopStartSample: number,
+				LoopStartByte: number,
+				LoopEndSample: number,
+				LoopEndByte: number,
+			);
+
+			Enabled: boolean;
+
+			LoopStartSample: number;
+
+			LoopStartByte: number;
+
+			LoopEndSample: number;
+
+			LoopEndByte: number;
+
+			ToString(): string;
+
+			GetHashCode(): number;
+
+			Equals(obj: unknown): boolean;
+
+			Equals(other: IECODE.Core.Audio.AdxLoopInfo): boolean;
+
+			Deconstruct(): { Enabled: boolean, LoopStartSample: number, LoopStartByte: number, LoopEndSample: number, LoopEndByte: number };
+		}
+	}
+
+	export namespace IECODE.Core.Audio {
+		export class AdxInfo extends System.ValueType {
+			constructor(
+				EncodingType: IECODE.Core.Audio.AdxEncodingType,
+				BlockSize: number,
+				BitsPerSample: number,
+				ChannelCount: number,
+				SampleRate: number,
+				TotalSamples: number,
+				HighpassFrequency: number,
+				Version: number,
+				Flags: number,
+				HeaderSize: number,
+				HasCriCopyright: boolean,
+				Loop: IECODE.Core.Audio.AdxLoopInfo,
+			);
+
+			EncodingType: IECODE.Core.Audio.AdxEncodingType;
+
+			BlockSize: number;
+
+			BitsPerSample: number;
+
+			ChannelCount: number;
+
+			SampleRate: number;
+
+			TotalSamples: number;
+
+			HighpassFrequency: number;
+
+			Version: number;
+
+			Flags: number;
+
+			HeaderSize: number;
+
+			HasCriCopyright: boolean;
+
+			Loop: IECODE.Core.Audio.AdxLoopInfo;
+
+			readonly IsDecodable: boolean;
+
+			ToString(): string;
+
+			GetHashCode(): number;
+
+			Equals(obj: unknown): boolean;
+
+			Equals(other: IECODE.Core.Audio.AdxInfo): boolean;
+
+			Deconstruct(): { EncodingType: IECODE.Core.Audio.AdxEncodingType, BlockSize: number, BitsPerSample: number, ChannelCount: number, SampleRate: number, TotalSamples: number, HighpassFrequency: number, Version: number, Flags: number, HeaderSize: number, HasCriCopyright: boolean, Loop: IECODE.Core.Audio.AdxLoopInfo };
+		}
+	}
+
+	export namespace IECODE.Core.Audio {
+		export class AdxDecoder {
+			readonly Info: IECODE.Core.Audio.AdxInfo;
+
+			static IsAdx(data: System.ReadOnlySpan$1<number>): boolean;
+
+			static FromFile(path: string): IECODE.Core.Audio.AdxDecoder;
+
+			static FromBytes(data: number[]): IECODE.Core.Audio.AdxDecoder;
+
+			static Parse(data: System.ReadOnlySpan$1<number>): IECODE.Core.Audio.AdxInfo;
+
+			static ComputeCoefficients(
+				highpassFreq: number,
+				sampleRate: number,
+			): [number, number];
+
+			DecodePcm16(): number[];
+
+			GetSummary(): string;
+		}
+	}
+
+	export namespace IECODE.Core.Audio {
+		export enum HcaCipherType {
+			None = 0,
+
+			Static = 1,
+
+			Key = 56,
+
+			Unknown = -1,
+		}
+	}
+
+	export namespace IECODE.Core.Audio {
+		export class HcaInfo extends System.ValueType {
+			constructor(
+				Version: number,
+				HeaderSize: number,
+				Channels: number,
+				SampleRate: number,
+				FrameCount: number,
+				FrameSize: number,
+				EncoderDelay: number,
+				EncoderPadding: number,
+				Cipher: IECODE.Core.Audio.HcaCipherType,
+				HasLoop: boolean,
+				LoopStart: number,
+				LoopEnd: number,
+			);
+
+			Version: number;
+
+			HeaderSize: number;
+
+			Channels: number;
+
+			SampleRate: number;
+
+			FrameCount: number;
+
+			FrameSize: number;
+
+			EncoderDelay: number;
+
+			EncoderPadding: number;
+
+			Cipher: IECODE.Core.Audio.HcaCipherType;
+
+			HasLoop: boolean;
+
+			LoopStart: number;
+
+			LoopEnd: number;
+
+			readonly TotalSamples: number;
+
+			readonly IsEncrypted: boolean;
+
+			ToString(): string;
+
+			GetHashCode(): number;
+
+			Equals(obj: unknown): boolean;
+
+			Equals(other: IECODE.Core.Audio.HcaInfo): boolean;
+
+			Deconstruct(): { Version: number, HeaderSize: number, Channels: number, SampleRate: number, FrameCount: number, FrameSize: number, EncoderDelay: number, EncoderPadding: number, Cipher: IECODE.Core.Audio.HcaCipherType, HasLoop: boolean, LoopStart: number, LoopEnd: number };
+		}
+	}
+
+	export namespace IECODE.Core.Audio {
+		export namespace HcaDecoder {
+			export function IsHca(data: System.ReadOnlySpan$1<number>): boolean;
+
+			export function ParseHeader(data: System.ReadOnlySpan$1<number>): IECODE.Core.Audio.HcaInfo;
+
+			export function VgmstreamAvailable(): { result: boolean, path?: string };
+
+			export function DecodeToWavViaVgmstream(
+				hcaPath: string,
+				wavPath: string,
+			): boolean;
+		}
+	}
+
 	export namespace IECODE.Core.Archives {
 		export class CpkService {
 			constructor(game: IECODE.Core.IEVRGame);
@@ -6238,6 +9757,7 @@ declare module 'node-api-dotnet' {
 				maxParallelism: number,
 				progress?: System.IProgress$1<[number, number, string]>,
 				ct?: AbortSignal,
+				shouldExtract?: System.Func$2<string, boolean>,
 			): Promise<void>;
 		}
 	}

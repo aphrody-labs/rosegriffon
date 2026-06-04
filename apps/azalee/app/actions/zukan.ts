@@ -26,7 +26,7 @@ export async function searchZukan(searchParams: {
 	const limit = Number.parseInt(searchParams.limit || "50", 10);
 
 	// Perform search or get all characters
-	let allItems: CharacterWithSpirit[] = [];
+	let allItems: CharacterWithSpirit[];
 
 	if (query) {
 		const searchResults = await apiClient.inagle.search(query, 1000);

@@ -16,6 +16,7 @@ import { crawlExternalDocs } from "./external-docs";
 import { runRagSync } from "./rag-index";
 import { withProxyRotation } from "../../lib/proxy";
 import { processTweets } from "./process-tweets";
+import { crawlXRadar } from "./x-radar";
 
 export async function runIeCrawl(): Promise<{ success: boolean; error?: string }> {
 	console.log("==================================================================");
@@ -83,6 +84,20 @@ export async function runIeCrawl(): Promise<{ success: boolean; error?: string }
 			} catch (tweetProcessErr) {
 				console.error("[ie-crawl] Échec du traitement/traduction des tweets :", tweetProcessErr);
 			}
+		}
+
+		// 5d. X Radar (bxc x radar) — ex: radar spécifique IE / Hino / Level-5 (curated feed)
+		// Utilise @aphrody-code/bxc Browser + cookies bxc xcom (auth) + extraction structurée.
+		// Les tweets sont upsertés dans la même table + passent par processTweets (Azalee + Grok trans + RAG).
+		try {
+			const radarRes = await crawlXRadar("2062085553466552555");
+			if (radarRes.success) {
+				console.log(`[ie-crawl] X Radar complété : ${radarRes.count ?? 0} tweets (bxc x radar).`);
+			} else {
+				console.error("[ie-crawl] Échec X Radar :", radarRes.error);
+			}
+		} catch (radarErr) {
+			console.error("[ie-crawl] Exception X Radar :", radarErr);
 		}
 
 		// 5b-bis. Harvest X par requêtes de recherche (news/communauté multi-langue,

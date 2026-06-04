@@ -358,7 +358,7 @@ function createAuthMock(): Auth {
 	} as unknown as Auth;
 }
 
-let _auth: Auth | null = null;
+let _auth: Auth;
 try {
 	_auth = createAuth();
 } catch (error) {

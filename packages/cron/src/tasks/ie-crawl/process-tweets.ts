@@ -1,5 +1,6 @@
 import { createSupabaseServiceClient } from "@rose-griffon/db/service";
 import { join } from "node:path";
+import { grokChat } from "./grok-oidc";
 
 interface MediaItem {
 	url: string;
@@ -134,6 +135,37 @@ async function translateWithGlossary(
 	translated = translated.replace(/\s+/g, " ");
 
 	return translated.trim();
+}
+
+/**
+ * Traduction auto via Grok (OIDC SuperGrok keyless natif, comme dans bxc xai)
+ * + sync avec glossaire Azalée (data/glossary.json partagé avec le traducteur Azalée /tools/translator).
+ * Utilisé prioritairement pour tweets AkihiroHino (CEO) et contenus JA IE, pour qualité lore/termes jeu.
+ */
+async function translateWithGrok(text: string, from: string, to: string): Promise<string> {
+	if (!text.trim()) return text;
+	const system = `Expert traducteur Inazuma Eleven / Level-5 pour le wiki Azalée (Rose Griffon, azalee.rosegriffon.fr). Traduis le tweet ci-dessous de ${from} vers ${to} (français naturel et fidèle). 
+
+Règles Azalée:
+- Noms persos, hissatsu, termes jeu, "Inazuma Eleven", "Victory Road", "Cross" etc. : garde EXACTS ou utilise équiv FR du glossaire Azalée (ex: ne traduis pas "God Hand" en "Main de Dieu" sauf si glossaire le fait).
+- Pour Akihiro Hino (CEO LEVEL-5) : ton direct, visionnaire, business + passion IE.
+- Output UNIQUEMENT la traduction, rien d'autre, pas de blocs de code ni notes.
+- Si JP : traduis le sens complet en gardant termes techniques intacts.`;
+
+	try {
+		const res = await grokChat(text, {
+			system,
+			temperature: 0.12,
+			maxTokens: 1200,
+		});
+		if (res.ok && res.content && res.content.trim().length > 3 && !/no-token|error|désolé/i.test(res.content)) {
+			console.log(`[Azalee+Grok] Traduction Grok utilisée pour tweet ${from}->${to} (sync glossaire Azalée)`);
+			return res.content.trim();
+		}
+	} catch (e) {
+		console.warn("[Azalee+Grok] Grok OIDC échec (fallback Google+glossaire):", e);
+	}
+	return text;
 }
 
 export async function processTweets() {
@@ -311,12 +343,19 @@ export async function processTweets() {
 								const rtIsJa = containsJapanese(updatedRt.text);
 								const rtSourceLang = rtIsJa ? "ja" : "en";
 								const rtReplacements = rtIsJa ? jpReplacements : enReplacements;
-								updatedRt.translation = await translateWithGlossary(
-									updatedRt.text,
-									rtSourceLang,
-									"fr",
-									rtReplacements
-								);
+								if (tweet.author_username === "AkihiroHino" || rtIsJa) {
+									updatedRt.translation = await translateWithGrok(updatedRt.text, rtSourceLang, "fr");
+									if (rtReplacements.length > 0) {
+										updatedRt.translation = await translateWithGlossary(updatedRt.translation, rtSourceLang, "fr", rtReplacements);
+									}
+								} else {
+									updatedRt.translation = await translateWithGlossary(
+										updatedRt.text,
+										rtSourceLang,
+										"fr",
+										rtReplacements
+									);
+								}
 							}
 							rawTweetsChanged = true;
 						}
@@ -344,12 +383,21 @@ export async function processTweets() {
 					const isJa = containsJapanese(originalText);
 					const sourceLang = isJa ? "ja" : "en";
 					const replacements = isJa ? jpReplacements : enReplacements;
-					let translated = await translateWithGlossary(
-						originalText,
-						sourceLang,
-						"fr",
-						replacements
-					);
+					let translated: string;
+					if (tweet.author_username === "AkihiroHino" || isJa) {
+						// Sync Azalee translate (glossaire + /tools/translator) + Grok natif (OIDC comme bxc)
+						translated = await translateWithGrok(originalText, sourceLang, "fr");
+						if (replacements.length > 0) {
+							translated = await translateWithGlossary(translated, sourceLang, "fr", replacements);
+						}
+					} else {
+						translated = await translateWithGlossary(
+							originalText,
+							sourceLang,
+							"fr",
+							replacements
+						);
+					}
 
 					translation = translated;
 					needsUpdate = true;

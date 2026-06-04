@@ -128,7 +128,7 @@ export async function GET(request: Request) {
 
   const token = await getTwitchAccessToken();
   let liveData = { category: "", is_live: false, started_at: "", title: "", viewers: 0 };
-  let userId: string | null = null;
+  let userId: string | null;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let videos: any[] = [];
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

@@ -14,8 +14,8 @@
 		}
 	},
 	"scripts": {
-		"lint": "oxlint src",
-		"lint:fix": "oxlint src --fix",
+		"lint": "oxlint -A style -A pedantic -A restriction src",
+		"lint:fix": "oxlint -A style -A pedantic -A restriction src --fix",
 		"type-check": "tsc --noEmit",
 		"demo": "bun src/demo/server.ts",
 		"clean": "rm -rf *.tsbuildinfo"

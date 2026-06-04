@@ -66,8 +66,8 @@
 		"compile": "bun src/scripts/build-standalone.ts",
 		"prepublishOnly": "bun run build",
 		"test": "bun test",
-		"lint": "bunx oxlint -c ../../.oxlintrc.json src",
-		"lint:fix": "bunx oxlint -c ../../.oxlintrc.json --fix src",
+		"lint": "bunx oxlint -c ../../.oxlintrc.json -A style -A pedantic -A restriction src",
+		"lint:fix": "bunx oxlint -c ../../.oxlintrc.json -A style -A pedantic -A restriction --fix src",
 		"type-check": "tsc -p tsconfig.build.json --noEmit"
 	},
 	"dependencies": {
