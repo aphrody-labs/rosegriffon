@@ -40,11 +40,14 @@
 | **Emblèmes** | `emblem_resource` | **emblems (nouveau)** | `inagle_emblems` (2) | **FAIT** |
 | **Stadiums** | `stadium_*` | stadium-config | `inagle_stadiums` (81) | **FAIT** |
 | **Nameplates** | `user_name_plate_config` | nameplate-config | `inagle_nameplates` (54) | **FAIT** |
-| **Super-tactiques** | `super_tactics_*` | **super-tactics-base-config (existe)** | — | **GAP : pousser** |
-| **Team-build** | `team_build_config` | **team-build-config (existe)** | — | **GAP : pousser** |
-| **Skill-technic** | `skill_technic_config` | **skill-technic-config (existe)** | — | **GAP : pousser** |
-| **Boost groups** | `boost_grp` | **boost-player-group-config (existe)** | — | **GAP : pousser** |
-| **Constellations / Star-signs / Trophées / Missions** | divers | constellation, star-sign, trophy, mission (existent) | — | **GAP : pousser** |
+| **Super-tactiques** | `super_tactics_config` | super-tactics-base-config | `inagle_super_tactics` (23) | **FAIT** |
+| **Team-build** | `team_build_config` | team-build-config | `inagle_team_build` (86) | **FAIT** |
+| **Skill-technic** | `skill_technic_config` | skill-technic-config | `inagle_skill_technic` (14) | **FAIT** |
+| **Boost groups** | `boost_player_group_config` | boost-player-group-config | `inagle_boost_groups` (5) | **FAIT** |
+| **Constellations** | `players_universe_config` | constellation | `inagle_constellations` (30) | **FAIT** |
+| **Star-signs** (pool drop/signe) | `players_universe_config`+basara | star-sign | `inagle_star_signs` (5080) | **FAIT** |
+| **Trophées** | `trophy_config` | trophy-config | `inagle_trophies` (228) | **FAIT** |
+| **Missions** | `mission_config` (1 placeholder réel) | mission-config | `inagle_missions` (1) | **FAIT** (config = placeholder ; vrai contenu = `inagle_quests`) |
 | Textures chr (g4tx) | CPK assets | — (iecode C#) | — (assets, pas DB) | iecode (embed GLB FAIT) |
 | Modèles chr (g4mg/g4md/g4sk) | CPK assets | — (iecode/niers) | — (assets) | iecode/niers partiel |
 | Drop-rates par élément | `soccer_drop_config`, `item_emission_rarity_table`, `win_treasure_lot_table` | drops-parser (partiel) | `inagle_drops_*` | **À VÉRIFIER (par élément)** |
@@ -80,8 +83,8 @@ video waza) demandent un **nouveau parseur**. Plus : vérifier les drop-rates **
 | Batch | Contenu | Domaine (évite conflits) | Statut |
 |---|---|---|---|
 | **B1** | Catégories nommées : uniformes, shops, tricks, tactiques spéciales, telop waza, video waza, emblèmes → table + parseur + push + COUNT + câblage | `rg/packages/inagle` + Supabase | **FAIT** (`8ec292d` ; 384/2331/9/85/926/4/2 vérifiés ; RLS+policy `Public Read` 7/7 ; type-check vert) |
-| **B2** | Reste parseur→DB : super-tactiques, skill-technic, team-build, boost-groups, constellations, star-signs, trophées, missions (stadiums 81 + nameplates 54 = DÉJÀ FAIT) | `rg/packages/inagle` + Supabase | **EN COURS** |
-| **B3** | Drop-rates **par élément** : `soccer_drop_config` + `item_emission_rarity_table` + `win_treasure_lot_table` ventilés par élément → `inagle_drop_rates` | `rg/packages/inagle` + Supabase | À FAIRE |
+| **B2** | Reste parseur→DB (8 catégories) | `rg/packages/inagle` + Supabase | **FAIT** (`99e3c25` ; 23/14/86/5/30/5080/228/1 vérifiés ; RLS+`Public Read` 8/8 dès création ; type-check vert ; bonus fix parser constellation) |
+| **B3** | **Taux de drop** : auditer `soccer_drop_config`+`item_emission_rarity_table`+`win_treasure_lot_table`+treasures et l'existant `inagle_drops_*`, combler le VRAI gap (taux par droppable/source ; élément si dimension réelle) — investigation-first, zéro fabrication | `rg/packages/inagle` + Supabase | **EN COURS** |
 | **B4** | **Lua** : indexer/typer les 677 scripts (`inagle_lua_scripts` : nom, version, catégorie p0/p1/p2, fonctions/symboles, hash) + analyse statique | `rg` (module `inagle/src/lua/` dédié, NE touche PAS cli-push/push-categories/parsers-index) + Supabase | **EN COURS** |
 | **B5** | **Assets chr** : CPK packs déchiffrés (clé **CRC32 du nom** ; `0x1717E18E`=Viola cfg.bin) → extraire/indexer g4tx + g4mg/g4md/g4sk → manifest/DB + index arbre du jeu → Redis (node-api-dotnet) | `iecode` (C#) + `niers` (nie-formats) | **EN COURS** (niers cpk.rs+g4sk FAIT `a0e5333` ; arbre→Redis `wlisv0fjt`) |
 | **B6** | Événements : `ev*`/`Subtitle_ev*` (~16k) → index/typage des scripts d'event (dialogues, video waza in-game) | `rg` + Supabase | À FAIRE |
