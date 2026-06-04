@@ -164,13 +164,37 @@ public class G4mdParser
 
         /// <summary>Embedded null-terminated texture/material reference strings.</summary>
         public List<string> TextureRefs { get; set; }
+
+        /// <summary>Base-color texture name per material index (sans suffixe M).</summary>
+        public List<string> MaterialBaseNames { get; set; }
         public int FileSize { get; set; }
+    }
+
+    /// <summary>
+    /// Nom de la texture base-color pour un index de matériau donné, ou null si l'index est
+    /// hors plage / non résolu. Sert au pont GLB pour mapper submesh → texture g4tx.
+    /// </summary>
+    public string? GetMaterialBaseName(int materialIndex)
+    {
+        if (materialIndex < 0 || materialIndex >= MaterialBaseNames.Count)
+            return null;
+        return MaterialBaseNames[materialIndex];
     }
 
     public G4mdHeader Header { get; private set; }
     public List<Submesh> Submeshes { get; private set; } = [];
     public List<BoneRef> BoneRefs { get; private set; } = [];
     public List<string> TextureRefs { get; private set; } = [];
+
+    /// <summary>
+    /// Noms de texture/material de BASE (sans suffixe M), un par index de matériau, dans
+    /// l'ordre des matériaux du .g4md. Vérifié octet par octet sur fichiers réels chr/_uniform
+    /// (u11130090 : 1 mat → [u11130090_10]) et chr/_face (c01000010 : 3 mats →
+    /// [c01000010_20, mouth_10, eye_10]). Le nom de base correspond au basename de la texture
+    /// base-color dans le .g4tx compagnon (texture homonyme). La variante <c>…M</c> est la
+    /// normal/material map (non utilisée pour la base-color).
+    /// </summary>
+    public List<string> MaterialBaseNames { get; private set; } = [];
     public BoundingBox Bounds { get; private set; }
     public int FileSize { get; private set; }
     public bool IsBigEndian { get; private set; }
@@ -198,6 +222,7 @@ public class G4mdParser
         Submeshes.Clear();
         BoneRefs.Clear();
         TextureRefs.Clear();
+        MaterialBaseNames.Clear();
         FileSize = data.Length;
 
         // Parse submeshes using section offset table
@@ -214,6 +239,97 @@ public class G4mdParser
 
         // Embedded null-terminated texture/material reference strings
         TextureRefs.AddRange(ExtractTextureRefs(data));
+
+        // Noms de base-color par matériau (région de chaînes en queue de fichier)
+        MaterialBaseNames.AddRange(ExtractMaterialBaseNames(data, Header.MaterialCount));
+    }
+
+    /// <summary>
+    /// Extrait les noms de base-color par matériau depuis le bloc de chaînes en queue de .g4md.
+    ///
+    /// Disposition vérifiée octet par octet (chr/_uniform u11130090, chr/_face c01000010,
+    /// c02028110, c06031920) : la queue contient une table d'offsets puis exactement
+    /// <c>2 * material_count</c> chaînes null-terminées contiguës — d'abord les
+    /// <c>material_count</c> variantes <c>…M</c> (normal/material), puis les
+    /// <c>material_count</c> noms de BASE (base-color), dans le MÊME ordre. Le i-ème nom de base
+    /// est donc l'élément <c>material_count + i</c> du run terminal de chaînes matériau.
+    ///
+    /// On localise le run terminal en repartant de la fin : on collecte les chaînes ASCII
+    /// null-terminées (≥3, alphanumériques + '_') jusqu'à briser la contiguïté, puis on garde
+    /// les <c>2 * material_count</c> dernières et on renvoie la seconde moitié (les bases).
+    /// </summary>
+    private static List<string> ExtractMaterialBaseNames(ReadOnlySpan<byte> data, int materialCount)
+    {
+        var result = new List<string>();
+        if (materialCount <= 0 || data.Length == 0)
+            return result;
+
+        // Collecte de toutes les chaînes terminales contiguës, dans l'ordre du fichier.
+        // On part de la fin du fichier (en sautant un éventuel padding 0x00) et on remonte
+        // tant que les octets précédents forment des chaînes ASCII matériau séparées par 0x00.
+        int end = data.Length;
+        while (end > 0 && data[end - 1] == 0x00)
+            end--; // saute le padding final
+
+        var tailStrings = new List<(int start, string value)>();
+        int i = end;
+        while (i > 0)
+        {
+            // borne de fin de la chaîne courante = i (exclu)
+            int strEnd = i;
+            int j = i - 1;
+            while (j >= 0 && data[j] >= 0x20 && data[j] <= 0x7E)
+                j--;
+            // j pointe sur l'octet non-imprimable (séparateur) ou -1
+            int strStart = j + 1;
+            int len = strEnd - strStart;
+            if (len < 1)
+                break;
+
+            // Le séparateur attendu est un 0x00 ; sinon la contiguïté du run est rompue.
+            bool precededByNul = j < 0 || data[j] == 0x00;
+            if (!precededByNul)
+                break;
+
+            var sb = new StringBuilder(len);
+            for (int k = strStart; k < strEnd; k++)
+                sb.Append((char)data[k]);
+
+            if (!IsMaterialName(sb))
+                break;
+
+            tailStrings.Insert(0, (strStart, sb.ToString()));
+            i = j; // poursuit avant le séparateur 0x00
+        }
+
+        // Doit contenir au moins 2 * material_count chaînes (M + base).
+        int need = 2 * materialCount;
+        if (tailStrings.Count < need)
+            return result; // disposition inattendue : on ne fabrique rien
+
+        // Garde les need dernières (le run matériau pur) ; la 2e moitié = noms de base.
+        var run = tailStrings.GetRange(tailStrings.Count - need, need);
+        for (int m = 0; m < materialCount; m++)
+            result.Add(run[materialCount + m].value);
+
+        return result;
+    }
+
+    /// <summary>
+    /// Vrai si la chaîne ressemble à un nom de texture/material : alphanumérique + '_',
+    /// commence par une lettre. (Tolère l'absence de chiffre, ex. "eye"/"mouth" sont suffixés.)
+    /// </summary>
+    private static bool IsMaterialName(StringBuilder sb)
+    {
+        if (sb.Length < 3 || !char.IsLetter(sb[0]))
+            return false;
+        for (int i = 0; i < sb.Length; i++)
+        {
+            char c = sb[i];
+            if (!(char.IsLetterOrDigit(c) || c == '_'))
+                return false;
+        }
+        return true;
     }
 
     /// <summary>
@@ -327,6 +443,7 @@ public class G4mdParser
             Submeshes = Submeshes,
             BoneRefs = safeBones,
             TextureRefs = TextureRefs,
+            MaterialBaseNames = MaterialBaseNames,
             FileSize = FileSize,
         };
     }

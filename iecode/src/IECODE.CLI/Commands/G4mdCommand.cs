@@ -63,6 +63,7 @@ public static class G4mdCommand
             Console.WriteLine($"  Bones:        {parser.Header.BoneCount}");
             Console.WriteLine($"  Bounds:       min({parser.Bounds.MinX:0.###}, {parser.Bounds.MinY:0.###}, {parser.Bounds.MinZ:0.###}) max({parser.Bounds.MaxX:0.###}, {parser.Bounds.MaxY:0.###}, {parser.Bounds.MaxZ:0.###})");
             Console.WriteLine($"  TextureRefs ({parser.TextureRefs.Count}): {string.Join(", ", parser.TextureRefs)}");
+            Console.WriteLine($"  MaterialBaseNames ({parser.MaterialBaseNames.Count}): {string.Join(", ", parser.MaterialBaseNames)}");
             Console.WriteLine($"  Submeshes ({parser.Submeshes.Count}):");
 
             foreach (var mesh in parser.Submeshes)
@@ -70,7 +71,7 @@ public static class G4mdCommand
                 Console.WriteLine($"    {mesh.Name}");
                 Console.WriteLine($"      Indices:  {mesh.IndexCount}  @ 0x{mesh.IndexBufferOffset:X}  ({mesh.IndexBufferSize} bytes)");
                 Console.WriteLine($"      Vertices: {mesh.VertexCount} @ 0x{mesh.VertexBufferOffset:X}");
-                Console.WriteLine($"      Material: {mesh.MaterialIndex}");
+                Console.WriteLine($"      Material: {mesh.MaterialIndex} -> {parser.GetMaterialBaseName(mesh.MaterialIndex) ?? "(none)"}");
             }
 
             if (output != null)

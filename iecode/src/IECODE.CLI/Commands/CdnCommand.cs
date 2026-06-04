@@ -54,7 +54,13 @@ public static class CdnCommand
         exportGlbCommand.AddOption(glbLimitOption);
         var glbOverwriteOption = new Option<bool>(["--overwrite"], () => false, "Réécrire les GLB déjà présents (sinon reprise idempotente)");
         exportGlbCommand.AddOption(glbOverwriteOption);
-        exportGlbCommand.SetHandler(ExportGlbAsync, exportGlbOutArg, gameOption, glbFilterOption, glbLimitOption, glbOverwriteOption);
+        var glbTexturesOption = new Option<bool>(["--textures", "-t"], () => false,
+            "Embarquer la base-color réelle depuis le .g4tx compagnon (downscale + WebP)");
+        exportGlbCommand.AddOption(glbTexturesOption);
+        var glbMaxTexOption = new Option<int>(["--max-tex"], () => Core.Converters.TexturedModelExport.DefaultMaxTextureSize,
+            "Côté max de la texture embarquée en px (0 = pas de downscale)");
+        exportGlbCommand.AddOption(glbMaxTexOption);
+        exportGlbCommand.SetHandler(ExportGlbAsync, exportGlbOutArg, gameOption, glbFilterOption, glbLimitOption, glbOverwriteOption, glbTexturesOption, glbMaxTexOption);
         command.AddCommand(exportGlbCommand);
 
         // ── ls : lister/compter les fichiers servables ──────────────────────────
@@ -175,7 +181,8 @@ public static class CdnCommand
     /// présents (sauf --overwrite). Le basename plat est celui du .g4mg (ex: u001105.glb),
     /// ce qui correspond au charaParamId/internal code attendu par le viewer azalee.
     /// </summary>
-    private static async Task ExportGlbAsync(string output, string? gamePath, string? filter, int limit, bool overwrite)
+    private static async Task ExportGlbAsync(string output, string? gamePath, string? filter, int limit, bool overwrite,
+        bool textures, int maxTex)
     {
         using var game = new IEVRGame(gamePath);
         if (!game.IsValid)
@@ -214,6 +221,7 @@ public static class CdnCommand
 
         Console.Error.WriteLine($"  {candidates.Count:N0} G4MG avec compagnon .g4md" +
             (string.IsNullOrEmpty(filter) ? "" : $" (filtre « {filter} »)") +
+            (textures ? $" ; base-color ON (max {maxTex}px)" : "") +
             $" ; cible : {target:N0}");
 
         foreach (var g4mgPath in candidates)
@@ -244,7 +252,29 @@ public static class CdnCommand
                 var g4md = new G4mdParser();
                 g4md.Parse(md.Bytes);
 
-                var glb = G4mgCommand.BuildGlb(mg.Bytes, g4md, out _);
+                byte[]? glb;
+                if (textures)
+                {
+                    // Le .g4tx base-color vit sous data/dx11/… (modèle sous data/common/…), même basename.
+                    string g4txLogical = ResolveG4txLogicalPath(g4mgPath);
+                    glb = Core.Converters.TexturedModelExport.BuildTexturedGlb(
+                        mg.Bytes, g4md,
+                        g4txProvider: () =>
+                        {
+                            // Extraction paresseuse du g4tx depuis les CPK (uniquement si UV présents).
+                            var g4txFile = cdn.ReadAsync(g4txLogical).GetAwaiter().GetResult();
+                            if (g4txFile is not { } tx)
+                                return null;
+                            return Core.Formats.Level5.G4txParser.ParseTextures(tx.Bytes);
+                        },
+                        out _, out _,
+                        maxTextureSize: maxTex);
+                }
+                else
+                {
+                    glb = G4mgCommand.BuildGlb(mg.Bytes, g4md, out _);
+                }
+
                 if (glb is null)
                 {
                     empty++;
@@ -277,6 +307,25 @@ public static class CdnCommand
         Console.WriteLine($"  Sortie     : {Path.GetFullPath(output)}");
         Console.WriteLine($"  Durée      : {sw.Elapsed.TotalSeconds:N1}s");
         if (failed > 0) Environment.ExitCode = 2;
+    }
+
+    /// <summary>
+    /// Chemin LOGIQUE (cpk_list) du .g4tx base-color compagnon d'un .g4mg. Convention IEVR
+    /// vérifiée : modèle sous data/common/chr/… , texture sous data/dx11/chr/… , même basename
+    /// (ex. data/common/chr/_uniform/u11130090/u11130090.g4mg →
+    /// data/dx11/chr/_uniform/u11130090/u11130090.g4tx).
+    /// </summary>
+    private static string ResolveG4txLogicalPath(string g4mgLogicalPath)
+    {
+        string norm = g4mgLogicalPath.Replace('\\', '/');
+        int idx = norm.IndexOf("/common/", StringComparison.OrdinalIgnoreCase);
+        string p = idx >= 0
+            ? norm[..idx] + "/dx11/" + norm[(idx + "/common/".Length)..]
+            : norm;
+        // .g4mg → .g4tx
+        if (p.EndsWith(".g4mg", StringComparison.OrdinalIgnoreCase))
+            p = p[..^5] + ".g4tx";
+        return p;
     }
 
     private static void Ls(string? filter, string? gamePath, int limit)

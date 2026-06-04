@@ -1,6 +1,7 @@
 using System.CommandLine;
 using System.CommandLine.Invocation;
 using System.Numerics;
+using IECODE.Core.Converters;
 using IECODE.Core.Formats.Level5;
 using SharpGLTF.Geometry;
 using SharpGLTF.Geometry.VertexTypes;
@@ -34,16 +35,28 @@ public static class G4mgCommand
         command.AddCommand(infoCommand);
 
         // Sous-commande : to-glb
-        var toGlbCommand = new Command("to-glb", "Convert G4MG to GLB (positions + indices)");
+        var toGlbCommand = new Command("to-glb", "Convert G4MG to GLB (positions + indices, base-color optionnelle)");
         var fileArg = new Argument<string>("file", "Path to G4MG file");
         toGlbCommand.AddArgument(fileArg);
         var outputOption = new Option<string?>(["--output", "-o"], "Output GLB file");
         toGlbCommand.AddOption(outputOption);
+        var texturesOption = new Option<bool>(["--textures", "-t"], () => false,
+            "Embarquer la base-color réelle depuis le .g4tx compagnon (downscale + WebP)");
+        toGlbCommand.AddOption(texturesOption);
+        var g4txOption = new Option<string?>(["--g4tx"], () => null,
+            "Chemin explicite du .g4tx (sinon résolu : data/common→data/dx11, même basename)");
+        toGlbCommand.AddOption(g4txOption);
+        var maxTexOption = new Option<int>(["--max-tex"], () => TexturedModelExport.DefaultMaxTextureSize,
+            "Côté max de la texture embarquée en px (0 = pas de downscale)");
+        toGlbCommand.AddOption(maxTexOption);
         toGlbCommand.SetHandler((InvocationContext ctx) =>
         {
             string file = ctx.ParseResult.GetValueForArgument(fileArg);
             string? output = ctx.ParseResult.GetValueForOption(outputOption);
-            ctx.ExitCode = ConvertToGlb(file, output);
+            bool textures = ctx.ParseResult.GetValueForOption(texturesOption);
+            string? g4tx = ctx.ParseResult.GetValueForOption(g4txOption);
+            int maxTex = ctx.ParseResult.GetValueForOption(maxTexOption);
+            ctx.ExitCode = ConvertToGlb(file, output, textures, g4tx, maxTex);
         });
         command.AddCommand(toGlbCommand);
 
@@ -118,15 +131,44 @@ public static class G4mgCommand
         return 0;
     }
 
-    private static int ConvertToGlb(string g4mgPath, string? outputPath)
+    private static int ConvertToGlb(string g4mgPath, string? outputPath,
+        bool textures = false, string? g4txPath = null, int maxTex = TexturedModelExport.DefaultMaxTextureSize)
     {
         if (!TryLoad(g4mgPath, out var g4mgData, out var g4md))
             return 1;
 
         outputPath = string.IsNullOrEmpty(outputPath) ? Path.ChangeExtension(g4mgPath, ".glb") : outputPath;
-        Console.WriteLine($"Converting: {Path.GetFileName(g4mgPath)} -> {Path.GetFileName(outputPath)}");
+        Console.WriteLine($"Converting: {Path.GetFileName(g4mgPath)} -> {Path.GetFileName(outputPath)}" +
+                          (textures ? " (+base-color)" : ""));
 
-        var glb = BuildGlb(g4mgData, g4md, out int totalTris, line => Console.WriteLine($"  {line}"));
+        byte[]? glb;
+        int totalTris;
+        if (textures)
+        {
+            string? resolvedG4tx = g4txPath ?? ResolveG4txOnDisk(g4mgPath);
+            if (resolvedG4tx is null || !File.Exists(resolvedG4tx))
+            {
+                Console.Error.WriteLine($"  .g4tx introuvable ({resolvedG4tx ?? "non résolu"}) ; export sans texture.");
+                glb = BuildGlb(g4mgData, g4md, out totalTris, line => Console.WriteLine($"  {line}"));
+            }
+            else
+            {
+                Console.WriteLine($"  g4tx : {resolvedG4tx}");
+                var loadedTextures = G4txParser.ParseFile(resolvedG4tx);
+                glb = TexturedModelExport.BuildTexturedGlb(
+                    g4mgData, g4md,
+                    g4txProvider: () => loadedTextures,
+                    out totalTris, out int texturedCount,
+                    maxTextureSize: maxTex,
+                    log: line => Console.WriteLine($"  {line}"));
+                Console.WriteLine($"  sous-mailles texturées : {texturedCount}");
+            }
+        }
+        else
+        {
+            glb = BuildGlb(g4mgData, g4md, out totalTris, line => Console.WriteLine($"  {line}"));
+        }
+
         if (glb is null)
         {
             Console.Error.WriteLine("No submesh geometry extracted; nothing to export.");
@@ -134,8 +176,36 @@ public static class G4mgCommand
         }
 
         File.WriteAllBytes(outputPath, glb);
-        Console.WriteLine($"OK: {outputPath} ({totalTris} triangles)");
+        Console.WriteLine($"OK: {outputPath} ({totalTris} triangles, {glb.Length:N0} octets)");
         return 0;
+    }
+
+    /// <summary>
+    /// Résout le chemin disque du .g4tx base-color compagnon d'un .g4mg. Convention IEVR vérifiée :
+    /// le modèle vit sous data/common/chr/… alors que le g4tx vit sous data/dx11/chr/… avec le
+    /// MÊME basename (ex. …/common/chr/_uniform/u11130090/u11130090.g4mg →
+    /// …/dx11/chr/_uniform/u11130090/u11130090.g4tx). À défaut de "common" dans le chemin, tente
+    /// un .g4tx homonyme à côté du .g4mg.
+    /// </summary>
+    public static string? ResolveG4txOnDisk(string g4mgPath)
+    {
+        string sameDir = Path.ChangeExtension(g4mgPath, ".g4tx");
+        if (File.Exists(sameDir))
+            return sameDir;
+
+        // data/common/… → data/dx11/… (insensible au séparateur)
+        string norm = g4mgPath.Replace('\\', '/');
+        int idx = norm.IndexOf("/common/", StringComparison.OrdinalIgnoreCase);
+        if (idx >= 0)
+        {
+            string dx11 = norm[..idx] + "/dx11/" + norm[(idx + "/common/".Length)..];
+            dx11 = Path.ChangeExtension(dx11, ".g4tx");
+            if (File.Exists(dx11))
+                return dx11;
+            return dx11; // renvoyé même si absent : l'appelant logge l'échec
+        }
+
+        return sameDir;
     }
 
     /// <summary>
