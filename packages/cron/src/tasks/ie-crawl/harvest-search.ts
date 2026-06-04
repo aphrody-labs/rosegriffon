@@ -35,6 +35,29 @@ export const IE_SEARCH_QUERIES: readonly string[] = [
 	"Inazuma Eleven Victory Road lang:fr -filter:replies",
 	// ES — grosse communauté hispanophone (news/leaks)
 	"Inazuma Eleven Victory Road lang:es -filter:replies min_faves:5",
+
+	// ── Round 2 — requêtes Grok (OIDC) VALIDÉES, multi-langue ────────────────
+	// JA — compétitif / techniques /育成 (progression), événements (大会/イナダイ)
+	'"ヴィクトリーロード" (大会 OR 対戦 OR 必殺技 OR 育成) -filter:replies',
+	"#イナイレ (リーク OR 解析 OR データマイニング) -filter:replies",
+	"イナイレ (イナダイ OR 大会システム) ヴィクトリーロード -filter:replies",
+	"イナイレ (配信 OR ライブ OR 動画) ヴィクトリーロード -filter:replies",
+	// JA — Inazuma Eleven Cross (jeu mobile lié à l'univers VR) + 日本代表2026
+	'"イナイレクロス" OR "イナズマイレブン クロス" (新情報 OR コラボ OR 設定資料 OR 日本代表) -filter:replies',
+	// JA — hissatsu récents (overrides EV) + persos VR
+	'("ゴッドハンドEV" OR "インフェルノペンギン" OR 必殺技 EV) #イナイレ -filter:replies',
+	// EN — lore / story / Cross + mods/datamine
+	'"Inazuma Eleven" ("Victory Road" OR Cross) (lore OR story OR datamine OR mod) lang:en -filter:replies min_faves:3',
+	// FR — actualité Victory Road francophone (élargie au-delà du titre exact)
+	"(Inazuma OR ievr OR \"Victory Road\") lang:fr (sortie OR màj OR DLC OR perso OR technique) -filter:replies",
+	// ES — communauté/news Espagne (élargie)
+	'Inazuma (España OR español) ("Victory Road" OR Cross) -filter:replies',
+	// IT — communauté italienne (petite mais centrée)
+	'"Inazuma Eleven" lang:it (Victory Road OR Cross OR novità) -filter:replies',
+	// PT/BR — communauté lusophone
+	'"Inazuma Eleven" "Victory Road" lang:pt -filter:replies',
+	// Multi — hashtags globaux art/gameplay
+	"(#InazumaEleven OR #VictoryRoad) (gameplay OR update OR DLC OR reveal) -filter:replies min_faves:3",
 ] as const;
 
 type MediaItem = {
@@ -83,12 +106,23 @@ const IE_KEYWORDS = [
 	"inazuma",
 	"victory road",
 	"イナズマイレブン",
-	"イナイレ",
+	"イナイレ", // couvre イナイレV / イナイレクロス
 	"ヴィクトリーロード",
 	"英雄たち",
 	"level-5",
 	"level5",
 	"レベルファイブ",
+	// Round 2 — abréviations + termes Victory Road / Cross récents
+	"ievr",
+	"イナヴィク",
+	"イナダイ", // émission/événement (Ina-Dai)
+	"クロス 公式", // Inazuma Eleven Cross officiel
+	"イナイレクロス",
+	"日本代表2026", // projet Cross
+	"ゴッドハンドev", // override hissatsu récent
+	"インフェルノペンギン",
+	"#inazumaeleven",
+	"#victoryroad",
 ];
 
 function isInformativeIeTweet(t: Tweet): boolean {

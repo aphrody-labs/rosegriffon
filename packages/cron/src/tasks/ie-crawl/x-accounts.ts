@@ -23,6 +23,34 @@
 // - ShinAngelico    : ES leaker/news IE (~22k, gros engagement trailers/DLC)
 // - Braco_Frost     : ES news/leaks IE (~? , annonces DLC/mundial)
 //
+// Round 2 — découverte Grok (OIDC auth.x.ai, modèle grok-4.3) puis VÉRIFICATION
+// individuelle via bxc x client (profil + tweets), 2026-06. Ajoutés uniquement les
+// comptes RÉELS, centrés IE et à signal suffisant :
+// - inazumaSD_L5   : イナズマイレブン SD 公式 (JP officiel, ~24.5k)
+// - mutugame       : ムツゲーム — ambassadeur officiel LEVEL-5 公認 (JP, ~2k)
+// - inazo__        : Inazo|Noa — FR news/analyse IE (~4.7k, interviews Hino, critiques VR)
+// - ievrfr         : "Inazuma Eleven: Victory Road FR" (FR, ~500, dédié VR)
+// - InazumaCrossFR : "Inazuma Cross FR" (FR, ~230, dédié Cross)
+// - ElevenEspanol  : INAZUMA ELEVEN España (ES, ~15.7k, news communauté)
+// - InazumaItalia  : Inazuma Eleven Italia (IT, ~2k, news communauté)
+// - Tenmatsukaze2  : "Tenma: Inazuma Eleven" (PT/BR, ~2.4k)
+// - TheBrasem      : EN — résumés Ina-Dai, dates DLC, nouveaux hissatsu (~1.2k, fort engagement)
+// - Inazuma_JuuuN  : ジューーン — JA streamer/analyse VR+Cross (~2.4k, vues 100k+ sur hissatsu)
+// - Koume_no_Inaire: コウメ大福 — JA compétitif/meta VR (~1.5k)
+//
+// Round 2 — ÉCARTÉS bien que RÉELS (vérifiés via bxc, mais signal insuffisant ou
+// timeline trop bruyante pour un RAG informatif ; leur contenu IE reste capté par
+// les requêtes de recherche dans harvest-search.ts) :
+// - Suumash (~516) timeline multi-jeux (Sonic/Pokémon/SF6), trop de bruit
+// - Peo_ie (~10), superonzeroad (~31) : trop peu de followers/activité
+// - inazuma_1122/Tyode, dialgaburger, shiratoyanae, kanaruhanon : nom générique,
+//   focus IE non confirmé sur la timeline (risque hors-sujet)
+// - fanarts JP/ES petits comptes (Haru_anime_cos, nususi_53, makino35963,
+//   TZUCHICHI1112, YGO_5838DUEL, lotto6700, YxTrPL8h1N44366, 4488ku, CAZADORX7,
+//   fhilipecrash, YU_REI12) : <4k followers, fan-art (peu de texte informatif)
+// Aucun handle Grok ne s'est révélé inexistant ce round (35/35 réels), mais ~24
+// écartés pour signal/centrage.
+//
 // Découverts / testés (low activity ou non-officiel principal, conservés pour complétude):
 // - InazumaElevenEN (EN, 3 followers, 0 tweets récents)
 // - inazuma_eleven (fan/low, ~150)
@@ -51,6 +79,18 @@ export const OFFICIAL_X_ACCOUNTS = [
 	"InazumaNational", // EN clips/comparatifs
 	"ShinAngelico", // ES leaker/news
 	"Braco_Frost", // ES news/leaks
+	// round 2 — officiels + communauté vérifiés (Grok OIDC discovery + bxc verify)
+	"inazumaSD_L5", // 公式 JP — Inazuma Eleven SD
+	"mutugame", // ambassadeur officiel LEVEL-5 公認
+	"inazo__", // FR news/analyse
+	"ievrfr", // FR dédié Victory Road
+	"InazumaCrossFR", // FR dédié Cross
+	"ElevenEspanol", // ES communauté/news
+	"InazumaItalia", // IT communauté/news
+	"Tenmatsukaze2", // PT/BR communauté
+	"TheBrasem", // EN résumés/news (Ina-Dai, DLC, hissatsu)
+	"Inazuma_JuuuN", // JA streamer/analyse VR+Cross
+	"Koume_no_Inaire", // JA compétitif/meta VR
 	// low / fallback (gardés pour historique / search discovery, peuvent retourner 0)
 	"InazumaElevenEN",
 	"inazuma_eleven",
