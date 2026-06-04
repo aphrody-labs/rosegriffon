@@ -8,7 +8,7 @@ import { Browser, Page, type NavigationResponse } from "@aphrody-code/bxc";
 import { mkdir, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 
-const DATA_ROOT = "/home/ubuntu/rg/data/inazuma-cross.jp";
+const DATA_ROOT = "/home/ubuntu/niers/data/inazuma-cross.jp";
 
 interface CrossPageTarget {
 	lang: string;

@@ -15,7 +15,7 @@ import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 import { ingestSources, ragHybridSearch, type RagSource } from "./rag-store-pg";
 
-const DATA = "/home/ubuntu/data";
+const DATA = "/home/ubuntu/niers/data";
 const SAMPLE = 3;
 
 function take<T>(arr: T[], n: number): T[] {

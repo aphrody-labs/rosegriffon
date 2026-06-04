@@ -26,7 +26,7 @@ interface DBTweetRow {
 	category?: string | null;
 }
 
-const DATA_ROOT = "/home/ubuntu/rg/data/inazuma.jp/victory-road";
+const DATA_ROOT = "/home/ubuntu/niers/data/inazuma.jp/victory-road";
 
 function parseFrontmatter(fileContent: string): {
 	data: Record<string, string[] | string>;
@@ -225,7 +225,7 @@ function collectScrapedItems(): ScrapedItem[] {
 	}
 
 	// 3. Collecter les pages Inazuma Eleven RE (re)
-	const reDir = "/home/ubuntu/rg/data/inazuma.jp/re";
+	const reDir = "/home/ubuntu/niers/data/inazuma.jp/re";
 	if (existsSync(reDir)) {
 		const subDirs = readdirSync(reDir, { withFileTypes: true })
 			.filter((dirent) => dirent.isDirectory())
@@ -260,7 +260,7 @@ function collectScrapedItems(): ScrapedItem[] {
 	}
 
 	// 4. Collecter les pages Inazuma Eleven: Cross (cross)
-	const crossDir = "/home/ubuntu/rg/data/inazuma-cross.jp";
+	const crossDir = "/home/ubuntu/niers/data/inazuma-cross.jp";
 	if (existsSync(crossDir)) {
 		const subDirs = readdirSync(crossDir, { withFileTypes: true })
 			.filter((dirent) => dirent.isDirectory())
@@ -295,7 +295,7 @@ function collectScrapedItems(): ScrapedItem[] {
 	}
 
 	// 5. Collecter les articles LEVEL-5 (level5)
-	const level5Dir = "/home/ubuntu/rg/data/level5.co.jp/inazuma";
+	const level5Dir = "/home/ubuntu/niers/data/level5.co.jp/inazuma";
 	if (existsSync(level5Dir)) {
 		const subDirs = readdirSync(level5Dir, { withFileTypes: true })
 			.filter((dirent) => dirent.isDirectory())
@@ -330,7 +330,7 @@ function collectScrapedItems(): ScrapedItem[] {
 	}
 
 	// 6. Collecter les articles du blog LEVEL-5 (ja/en/zh-tw/zh-cn)
-	const blogDir = "/home/ubuntu/rg/data/level5.co.jp/blog";
+	const blogDir = "/home/ubuntu/niers/data/level5.co.jp/blog";
 	const blogLocales = ["ja", "en", "zh-tw", "zh-cn"] as const;
 	for (const locale of blogLocales) {
 		const localeBlogDir = join(blogDir, locale);

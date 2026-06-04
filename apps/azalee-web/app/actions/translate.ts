@@ -190,7 +190,7 @@ async function loadGlossary() {
 	const possiblePaths = [
 		path.join(process.cwd(), "data", "glossary.json"),
 		path.join(process.cwd(), "..", "..", "data", "glossary.json"),
-		"/home/ubuntu/rg/data/glossary.json",
+		"/home/ubuntu/niers/data/glossary.json",
 	];
 	for (const p of possiblePaths) {
 		try {
