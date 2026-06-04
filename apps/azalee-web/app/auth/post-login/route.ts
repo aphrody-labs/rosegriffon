@@ -30,7 +30,7 @@ function sanitizeReturnTo(returnTo: string | null): string {
 export async function GET(request: NextRequest) {
 	const returnTo = sanitizeReturnTo(request.nextUrl.searchParams.get("returnTo"));
 
-	let session: Awaited<ReturnType<typeof auth.api.getSession>> = null;
+	let session: Awaited<ReturnType<typeof auth.api.getSession>>;
 	try {
 		const reqHeaders = await headers();
 		session = await auth.api.getSession({ headers: reqHeaders });
@@ -43,7 +43,7 @@ export async function GET(request: NextRequest) {
 		return NextResponse.redirect(absoluteUrl(dest));
 	}
 
-	let role: string | null = null;
+	let role: string | null;
 	try {
 		const supabase = await createClient();
 		const { data } = await supabase

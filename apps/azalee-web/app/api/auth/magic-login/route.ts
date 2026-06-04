@@ -91,7 +91,7 @@ export async function GET(request: Request) {
 
 	// Trouver l'utilisateur cible
 	const targetUserId = url.searchParams.get("user");
-	let targetUser: { id: string; username: string; role: string } | null = null;
+	let targetUser: { id: string; username: string; role: string };
 
 	if (targetUserId) {
 		const { data, error } = await supabaseAdmin

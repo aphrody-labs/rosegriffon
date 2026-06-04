@@ -130,7 +130,9 @@ export async function crawlTwitter(): Promise<{
 				console.log(`[Crawl Twitter] ID résolu pour @${screenName} : ${user.id} (${user.name})`);
 
 				console.log(`[Crawl Twitter] Crawl historique complet de @${screenName}...`);
-				const MAX_TWEETS_PER_ACCOUNT = 1200; // augmenté pour multi-comptes officiels (bxc x pagination)
+				// rg cron + bxc x : MAX plus élevé pour AkihiroHino (CEO Level-5, tweets clés pour Azalée wiki + RAG).
+				// "peuple tout les tweets" via pagination userTweets + bxc cookie natif.
+				const MAX_TWEETS_PER_ACCOUNT = screenName === "AkihiroHino" ? 5000 : 1200;
 				const fetchedTweets: Tweet[] = [];
 				const seenTimelineIds = new Set<string>();
 				let cursor: string | undefined;
@@ -185,6 +187,9 @@ export async function crawlTwitter(): Promise<{
 				console.log(
 					`[Crawl Twitter] ${fetchedTweets.length} tweets accumulés au total pour @${screenName}.`
 				);
+				if (screenName === "AkihiroHino") {
+					console.log(`[AkihiroHino] Peuplement tweets CEO Level-5 via rg-cron + bxc x (historique étendu, pour sync Azalée + RAG + traductions).`);
+				}
 
 				const nonRetweets = fetchedTweets.filter((t) => !t.text.startsWith("RT @"));
 				console.log(`[Crawl Twitter] ${nonRetweets.length} tweets après filtrage des RTs.`);

@@ -14,7 +14,7 @@ export async function POST(req: Request) {
 		return auth.response;
 	}
 
-	let body: { id?: string; status?: string } = {};
+	let body: { id?: string; status?: string };
 	try {
 		body = (await req.json()) as { id?: string; status?: string };
 	} catch {

@@ -103,8 +103,8 @@ export class PatchNotesLibrary {
 
 		const summary = this.notes.find((n) => n.id === compositeId);
 
-		let platform = "";
-		let realId = "";
+		let platform: string;
+		let realId: string;
 
 		if (compositeId.startsWith("ps-steam_")) {
 			platform = "ps-steam";
@@ -134,7 +134,9 @@ export class PatchNotesLibrary {
 			try {
 				const data = JSON.parse(fs.readFileSync(jsonPath, "utf8"));
 				if (data.featured_image) ({ featured_image } = data);
-			} catch {}
+			} catch {
+				// Ignore JSON parsing errors and fallback to summary.featured_image
+			}
 		}
 
 		return {

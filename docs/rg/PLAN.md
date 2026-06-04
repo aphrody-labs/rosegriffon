@@ -49,8 +49,8 @@ _Site principal communautaire et portail membres (déployé sur `rosegriffon.fr`
   - ✅ Section équipe ("Équipe") et page "Rose Griffon TV" pour la diffusion de streams.
   - ✅ Module de boutique et paiements sécurisés via Stripe.
   - ✅ Espace profil membre étendu avec personnalisation (badges, bannières).
-  - ⏳ Boutique en ligne avec gestion de paniers persistants en Redis.
-  - ⏳ Module de commentaires en temps réel sous les articles et flux de diffusion.
+  - ✅ Boutique en ligne avec gestion de paniers persistants en Redis.
+  - ✅ Module de commentaires en temps réel sous les articles et flux de diffusion (Supabase Realtime).
 
 ### 🤖 @rose-griffon/bot (Retiré & Migré dans @rose-griffon/cron)
 
@@ -156,7 +156,7 @@ _Outils de qualité de code et configurations partagées_
   - ✅ Règles de validation avec ESLint et Oxlint (`eslint-base.mjs`, `oxlintrc.json`).
   - ✅ Configuration unifiée de presets pour Tailwind CSS.
   - ✅ **Résolution des dépréciations signalées sous TypeScript 6.0** : Retrait du flag `ignoreDeprecations` de tous les fichiers TSConfig et correction des types.
-  - ⏳ Migration globale de toutes les configurations ESLint vers le format de configuration plat (Flat Config).
+  - ✅ Migration globale de toutes les configurations ESLint vers le format de configuration plat (Flat Config).
 
 ### 🎟️ @rose-griffon/patreon-bun
 

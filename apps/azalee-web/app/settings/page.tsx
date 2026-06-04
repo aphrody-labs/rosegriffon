@@ -34,7 +34,7 @@ export default async function SettingsPage() {
 
 	// Fetch active sessions
 	const reqHeaders = await headers();
-	let sessions: any[] = [];
+	let sessions: any[];
 	try {
 		const sessionList = await auth.api.listSessions({ headers: reqHeaders });
 		sessions = sessionList || [];
@@ -43,7 +43,7 @@ export default async function SettingsPage() {
 	}
 
 	// Fetch linked accounts (OAuth providers)
-	let linkedAccounts: any[] = [];
+	let linkedAccounts: any[];
 	try {
 		const { data } = await supabase
 			.from("account")

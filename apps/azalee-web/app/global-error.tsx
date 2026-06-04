@@ -91,7 +91,7 @@ export default function GlobalError({
 					</button>
 					{/* <a> volontaire (pas next/link) : le root layout a échoué, le routeur
 					    Next n'est pas fiable ici → navigation full-page assumée. */}
-					{/* eslint-disable-next-line no-html-link-for-pages */}
+					{/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
 					<a
 						href="/"
 						style={{

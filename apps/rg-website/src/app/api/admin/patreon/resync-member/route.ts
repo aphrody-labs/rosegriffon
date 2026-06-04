@@ -12,7 +12,7 @@ export async function POST(req: Request) {
 		return auth.response;
 	}
 
-	let body: { memberId?: string } = {};
+	let body: { memberId?: string };
 	try {
 		body = (await req.json()) as { memberId?: string };
 	} catch {

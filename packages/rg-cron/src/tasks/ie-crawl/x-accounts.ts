@@ -129,3 +129,21 @@ export function loadBxcXCookieHeader(): string | null {
 		return null;
 	}
 }
+
+/** Charge les cookies complets depuis bxc xcom.json pour injection dans Browser (bxc) ou XSession. */
+export function loadBxcXCookies(): Array<{ name: string; value: string; domain?: string; path?: string }> {
+	try {
+		const fs = require("node:fs") as typeof import("node:fs");
+		const path = "/home/ubuntu/.bxc/cookies/xcom.json";
+		if (!fs.existsSync(path)) return [];
+		const cookies = JSON.parse(fs.readFileSync(path, "utf-8")) as Array<{ name: string; value: string; domain?: string; path?: string }>;
+		return cookies.map((c) => ({
+			name: c.name,
+			value: c.value,
+			domain: c.domain || ".x.com",
+			path: c.path || "/",
+		}));
+	} catch {
+		return [];
+	}
+}

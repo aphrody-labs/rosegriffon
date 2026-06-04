@@ -4,6 +4,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { ArticleSchema, BreadcrumbSchema } from "@/components/shared/StructuredData";
+import { CommentsSection } from "@/components/shared/CommentsSection";
 
 import { createClient } from "@/lib/supabase/server";
 
@@ -130,6 +131,8 @@ export default async function ChroniquePage({ params }: { params: Promise<{ slug
 					{/* Footer / Share */}
 					<ShareButtons title={content.title} slug={slug} />
 				</article>
+
+				<CommentsSection targetId={content.id} targetType="article" className="mt-8" />
 			</div>
 		</div>
 	);

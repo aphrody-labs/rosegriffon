@@ -32,7 +32,7 @@ OOMScoreAdjust=-300
 # ── Hardening systemd (MemoryDenyWriteExecute INTERDIT — casse Bun/V8 JIT) ──
 ProtectSystem=strict
 ProtectHome=read-only
-ReadWritePaths=/home/ubuntu/rg /tmp
+ReadWritePaths=/home/ubuntu/rg /tmp /home/ubuntu/.bxc
 PrivateTmp=true
 PrivateDevices=true
 ProtectKernelTunables=true

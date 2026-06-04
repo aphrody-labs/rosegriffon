@@ -26,6 +26,7 @@ import { TwitchProvider, useTwitch } from "../_context/twitch-context";
 import type { TwitchChannel } from "../_context/twitch-context";
 import { RgtvAppShell } from "./RgtvAppShell";
 import { TwitchChat } from "./TwitchChat";
+import { CommentsSection } from "@/components/shared/CommentsSection";
 import { TwitchEnrichedInfo } from "./TwitchEnrichedInfo";
 import { TwitchPlayer } from "./TwitchPlayer";
 
@@ -185,7 +186,18 @@ function RgtvPageInner({
 									animate={{ opacity: 1, x: 0 }}
 									transition={{ delay: 0.1, duration: 0.3 }}
 								>
-									<TwitchChat channelName={twitchChannel} />
+									<Tabs defaultValue="twitch" className="w-full">
+										<TabsList className="grid grid-cols-2 mb-2">
+											<TabsTrigger value="twitch">Tchat Twitch</TabsTrigger>
+											<TabsTrigger value="site">Tchat Site</TabsTrigger>
+										</TabsList>
+										<TabsContent value="twitch">
+											<TwitchChat channelName={twitchChannel} />
+										</TabsContent>
+										<TabsContent value="site">
+											<CommentsSection targetId={twitchChannel} targetType="stream" className="h-[600px]" />
+										</TabsContent>
+									</Tabs>
 								</motion.div>
 							</div>
 						</div>

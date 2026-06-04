@@ -63,7 +63,7 @@ export async function POST(req: Request) {
 	const creatorToken = decryptToken((tokenRow as { access_token_enc: string }).access_token_enc);
 
 	// 2. Récupère le campaign_id du créateur (via /campaigns)
-	let campaignId: string | null = null;
+	let campaignId: string | null;
 	try {
 		const campaigns = await patreonFetch(creatorToken, "/campaigns");
 		const data = Array.isArray(campaigns.data) ? campaigns.data[0] : campaigns.data;
@@ -119,7 +119,7 @@ export async function POST(req: Request) {
 	const path = existingId ? `/webhooks/${existingId}` : "/webhooks";
 	const method = existingId ? "PATCH" : "POST";
 
-	let result: PatreonWebhookResource | null = null;
+	let result: PatreonWebhookResource | null;
 	try {
 		const res = await fetch(`https://www.patreon.com/api/oauth2/v2${path}`, {
 			body: JSON.stringify(body),

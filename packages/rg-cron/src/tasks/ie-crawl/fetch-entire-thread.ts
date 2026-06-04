@@ -12,7 +12,7 @@ async function main() {
 		await Bun.write("scratch/test-thread-raw.json", JSON.stringify(threadData, null, 2));
 		console.log("Saved raw thread data to scratch/test-thread-raw.json");
 
-		threadData.tweets.forEach((t, idx) => {
+		threadData.tweets.forEach((t: any, idx: number) => {
 			console.log(`\n--- Tweet #${idx + 1} (ID: ${t.id}) ---`);
 			console.log(`Author: @${t.author?.username}`);
 			console.log(`Text: ${t.text}`);

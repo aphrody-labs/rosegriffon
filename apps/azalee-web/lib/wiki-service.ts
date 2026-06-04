@@ -1,6 +1,5 @@
 import type { BaseCharacter, Item, Skill, Team } from "@rose-griffon/inagle";
 import { ElementNames } from "@rose-griffon/inagle/core/types";
-import { CATEGORY_NAMES as CategoryNames } from "@rose-griffon/inagle/skills/types";
 import changeAuraSkills from "../../../packages/inagle/src/entries/change_aura_skills.json";
 import type { Database } from "@rose-griffon/db";
 import {
@@ -66,20 +65,6 @@ function getElementIds(name: string): number[] {
 		}
 	}
 	return ids;
-}
-
-function getCategoryId(name: string): number | undefined {
-	if (!name) {
-		return undefined;
-	}
-	const n = name.toLowerCase();
-	for (const [id, val] of Object.entries(CategoryNames)) {
-		const v = val as any;
-		if (v.en?.toLowerCase() === n || v.fr?.toLowerCase() === n) {
-			return Number(id);
-		}
-	}
-	return undefined;
 }
 
 /**
@@ -1368,8 +1353,7 @@ export const wikiService = {
 	async getSkill(id: string): Promise<Skill | undefined> {
 		const supabase = await createClient();
 		const safeId = sanitizeFilter(id);
-
-		let row: any = null;
+		let row: any;
 
 		if (id.startsWith("0x")) {
 			const { data } = await supabase
