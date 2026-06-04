@@ -39,6 +39,13 @@ public static class G4mgParser
         /// <summary>Pas du vertex en octets, dérivé du .g4md (jamais codé en dur).</summary>
         public int VertexStride { get; init; }
 
+        /// <summary>
+        /// Table d'attributs du layout vertex (vtype/offset/datatype) dérivée du .g4md.
+        /// Permet aux readers/convertisseurs hérités de décoder normale (vtype=2) et UV0
+        /// (vtype=10) à leur offset réel. Vide si non résoluble.
+        /// </summary>
+        public IReadOnlyList<VertexAttribute> Attributes { get; init; } = [];
+
         // Bounding box
         public Vector3 BBoxMin { get; init; }
         public Vector3 BBoxMax { get; init; }
@@ -121,9 +128,10 @@ public static class G4mgParser
 
     /// <summary>
     /// Géométrie réelle d'une sous-maille extraite d'un .g4mg piloté par le .g4md.
-    /// Seules les positions (float3 à +0 de chaque vertex) et les indices sont décodés —
-    /// confirmé sur fichiers réels. La table d'attributs est exposée brute pour le tail
-    /// packé (normale/UV SNORM16) sans inventer de valeurs.
+    /// Positions (float3 à +0), normales (vtype=2, SNORM16 décodé), UV0 (vtype=10, ushort/UNORM
+    /// décodé) et indices sont décodés depuis le layout réel de la table d'attributs du .g4md —
+    /// confirmé octet par octet sur fichiers réels (chr/_uniform u11130090 : stride 68, normale
+    /// short ×3 @12, uv ushort ×2 @64). La table d'attributs reste exposée brute.
     /// </summary>
     public sealed class SubmeshGeometry
     {
@@ -137,6 +145,18 @@ public static class G4mgParser
 
         /// <summary>Positions décodées (float3 à +0 de chaque vertex stride-aligné).</summary>
         public required IReadOnlyList<Vector3> Positions { get; init; }
+
+        /// <summary>
+        /// Normales décodées (vtype=2) depuis l'attribut réel, normalisées. Vide si le layout
+        /// ne porte pas de normale résoluble (alors le writer GLB ne fabrique pas de normale).
+        /// </summary>
+        public required IReadOnlyList<Vector3> Normals { get; init; }
+
+        /// <summary>
+        /// UV0 décodés (vtype=10) depuis l'attribut réel. Vide si le layout ne porte pas d'UV
+        /// résoluble (alors le writer GLB n'émet pas de TEXCOORD_0).
+        /// </summary>
+        public required IReadOnlyList<Vector2> UV0 { get; init; }
 
         /// <summary>Indices locaux à la sous-maille (u16 ou u32 selon la règle &gt; 65535).</summary>
         public required IReadOnlyList<uint> Indices { get; init; }
@@ -161,6 +181,13 @@ public static class G4mgParser
 
         var attributes = ReadVertexAttributes(g4md);
         int faceDataBase = (int)g4md.Header.FaceDataBase;
+
+        // Résolution des attributs réels du layout : on prend le PREMIER de chaque vtype voulu.
+        // vtype=1 position (déjà à +0), vtype=2 normale, vtype=10 UV0. Si un vtype manque ou si
+        // son datatype est inconnu, l'attribut reste null et on n'émet pas la valeur (pas de
+        // fabrication). datatype : 2/3=float32, 12=ubyte4, 14=ushort, 18/20=short(SNORM16).
+        VertexAttribute? normalAttr = FindAttribute(attributes, vtype: 2);
+        VertexAttribute? uvAttr = FindAttribute(attributes, vtype: 10);
 
         // Stride : préférer le champ +0x2E de la sous-maille ; sinon le dériver du layout
         // global (région vertex = [0, faceDataBase) divisée par le nombre total de vertices).
@@ -187,6 +214,15 @@ public static class G4mgParser
 
             // Positions : float3 little-endian à +0 de chaque vertex.
             var positions = new List<Vector3>(sm.VertexCount);
+
+            // Normales / UV0 : décodées seulement si l'attribut existe ET tient dans le stride
+            // (offset + taille du datatype). Sinon on laisse la liste vide (pas de fabrication).
+            bool decodeNormal = normalAttr is { } na && na.Offset + Vec3ByteSize(na.DataType) <= stride && Vec3ByteSize(na.DataType) > 0;
+            bool decodeUv = uvAttr is { } ua && ua.Offset + Vec2ByteSize(ua.DataType) <= stride && Vec2ByteSize(ua.DataType) > 0;
+
+            var normals = decodeNormal ? new List<Vector3>(sm.VertexCount) : new List<Vector3>(0);
+            var uvs = decodeUv ? new List<Vector2>(sm.VertexCount) : new List<Vector2>(0);
+
             for (int i = 0; i < sm.VertexCount; i++)
             {
                 int p = vOffset + i * stride;
@@ -194,6 +230,11 @@ public static class G4mgParser
                 float y = BinaryPrimitives.ReadSingleLittleEndian(g4mgData[(p + 4)..]);
                 float z = BinaryPrimitives.ReadSingleLittleEndian(g4mgData[(p + 8)..]);
                 positions.Add(new Vector3(Sanitize(x), Sanitize(y), Sanitize(z)));
+
+                if (decodeNormal)
+                    normals.Add(DecodeNormal(g4mgData, p + normalAttr!.Value.Offset, normalAttr.Value.DataType));
+                if (decodeUv)
+                    uvs.Add(DecodeUv(g4mgData, p + uvAttr!.Value.Offset, uvAttr.Value.DataType));
             }
 
             // Indices : offset face = faceDataBase + IndexBufferOffset (octets).
@@ -225,6 +266,8 @@ public static class G4mgParser
                 Index32 = index32,
                 MaterialIndex = sm.MaterialIndex,
                 Positions = positions,
+                Normals = normals,
+                UV0 = uvs,
                 Indices = indices,
                 Attributes = attributes,
             });
@@ -282,6 +325,95 @@ public static class G4mgParser
 
     private static float Sanitize(float f) => float.IsFinite(f) ? f : 0f;
 
+    /// <summary>Renvoie le 1er attribut du <paramref name="vtype"/> demandé, ou null.</summary>
+    internal static VertexAttribute? FindAttribute(IReadOnlyList<VertexAttribute> attrs, byte vtype)
+    {
+        foreach (var a in attrs)
+            if (a.VType == vtype)
+                return a;
+        return null;
+    }
+
+    /// <summary>
+    /// Taille en octets d'un vecteur 3 composantes selon le datatype de la table d'attributs
+    /// (2/3=float32 → 12 ; 18/20=short SNORM16 → 6). 0 = datatype non géré pour une normale.
+    /// </summary>
+    internal static int Vec3ByteSize(uint datatype) => datatype switch
+    {
+        2 or 3 => 12,
+        18 or 20 => 6,
+        _ => 0,
+    };
+
+    /// <summary>
+    /// Taille en octets d'un vecteur 2 composantes selon le datatype (2/3=float32 → 8 ;
+    /// 14=ushort UNORM16 → 4 ; 18/20=short SNORM16 → 4). 0 = datatype non géré pour un UV.
+    /// </summary>
+    internal static int Vec2ByteSize(uint datatype) => datatype switch
+    {
+        2 or 3 => 8,
+        14 => 4,
+        18 or 20 => 4,
+        _ => 0,
+    };
+
+    /// <summary>
+    /// Décode une normale (3 composantes) à <paramref name="off"/> selon le datatype et la
+    /// renormalise. SNORM16 (short s) → max(s/32767, -1) ; float32 lu tel quel.
+    /// </summary>
+    internal static Vector3 DecodeNormal(ReadOnlySpan<byte> data, int off, uint datatype)
+    {
+        float x, y, z;
+        switch (datatype)
+        {
+            case 2 or 3: // float32 ×3
+                x = BinaryPrimitives.ReadSingleLittleEndian(data[off..]);
+                y = BinaryPrimitives.ReadSingleLittleEndian(data[(off + 4)..]);
+                z = BinaryPrimitives.ReadSingleLittleEndian(data[(off + 8)..]);
+                break;
+            default: // 18/20 : short SNORM16 ×3
+                x = Snorm16(BinaryPrimitives.ReadInt16LittleEndian(data[off..]));
+                y = Snorm16(BinaryPrimitives.ReadInt16LittleEndian(data[(off + 2)..]));
+                z = Snorm16(BinaryPrimitives.ReadInt16LittleEndian(data[(off + 4)..]));
+                break;
+        }
+
+        x = Sanitize(x); y = Sanitize(y); z = Sanitize(z);
+        float len = MathF.Sqrt(x * x + y * y + z * z);
+        if (len > 1e-6f)
+            return new Vector3(x / len, y / len, z / len);
+        return new Vector3(0f, 0f, 1f); // normale dégénérée : repli sûr, non normalisable
+    }
+
+    /// <summary>
+    /// Décode un UV0 (2 composantes) à <paramref name="off"/>. ushort UNORM16 → u/65535 ;
+    /// float32 lu tel quel ; short SNORM16 → s/32767. Confirmé ~[0,1] sur fichiers réels.
+    /// </summary>
+    internal static Vector2 DecodeUv(ReadOnlySpan<byte> data, int off, uint datatype)
+    {
+        float u, v;
+        switch (datatype)
+        {
+            case 2 or 3: // float32 ×2
+                u = BinaryPrimitives.ReadSingleLittleEndian(data[off..]);
+                v = BinaryPrimitives.ReadSingleLittleEndian(data[(off + 4)..]);
+                break;
+            case 14: // ushort UNORM16 ×2
+                u = BinaryPrimitives.ReadUInt16LittleEndian(data[off..]) / 65535f;
+                v = BinaryPrimitives.ReadUInt16LittleEndian(data[(off + 2)..]) / 65535f;
+                break;
+            default: // 18/20 : short SNORM16 ×2
+                u = Snorm16(BinaryPrimitives.ReadInt16LittleEndian(data[off..]));
+                v = Snorm16(BinaryPrimitives.ReadInt16LittleEndian(data[(off + 2)..]));
+                break;
+        }
+
+        return new Vector2(Sanitize(u), Sanitize(v));
+    }
+
+    /// <summary>SNORM16 : short s → max(s/32767, -1) (convention OpenGL/glTF).</summary>
+    private static float Snorm16(short s) => MathF.Max(s / 32767f, -1f);
+
     /// <summary>
     /// Pont de compatibilité : convertit la géométrie extraite en <see cref="MeshEntry"/>
     /// pour les convertisseurs GLB existants. Pilotée par le .g4md (offsets/comptes/stride réels).
@@ -304,6 +436,7 @@ public static class G4mgParser
                 Format = VertexFormat.Position,
                 RawFormat = 0,
                 VertexStride = g.VertexStride,
+                Attributes = g.Attributes,
                 BBoxMin = new Vector3(0, 0, 0),
                 BBoxMax = new Vector3(0, 0, 0),
             });

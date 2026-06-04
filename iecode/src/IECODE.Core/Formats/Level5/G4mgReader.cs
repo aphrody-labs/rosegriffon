@@ -70,15 +70,31 @@ public static class G4mgReader
         => ParseVertices(vertexData, G4mgParser.GetVertexStride(format));
 
     /// <summary>
-    /// Décode les vertices à partir d'un stride explicite (dérivé du .g4md). Seule la position
-    /// (float3 à +0 de chaque vertex) est décodée — confirmée sur fichiers réels. La normale et
-    /// l'UV du tail sont packées (SNORM16) et NON fabriquées ici : normale par défaut (0,0,1),
-    /// UV (0,0). On expose seulement ce qu'on peut vérifier.
+    /// Décode les vertices à partir d'un stride explicite, sans table d'attributs : seule la
+    /// position (float3 à +0) est décodée. Normale (0,0,1) et UV (0,0) par défaut faute de
+    /// layout pour localiser/décoder le tail packé. Préférer la surcharge avec attributs.
     /// </summary>
     public static G4mgParser.Vertex[] ParseVertices(ReadOnlySpan<byte> vertexData, int stride)
+        => ParseVertices(vertexData, stride, []);
+
+    /// <summary>
+    /// Décode les vertices avec la table d'attributs réelle du .g4md : position (float3 à +0),
+    /// normale (vtype=2, SNORM16/float décodé et normalisé) et UV0 (vtype=10, ushort UNORM /
+    /// float décodé) à leur offset/datatype réels. Si un attribut manque, on retombe sur la
+    /// valeur par défaut (normale (0,0,1), UV (0,0)) sans rien fabriquer.
+    /// </summary>
+    public static G4mgParser.Vertex[] ParseVertices(ReadOnlySpan<byte> vertexData, int stride,
+        IReadOnlyList<G4mgParser.VertexAttribute> attributes)
     {
         int count = stride >= 12 ? vertexData.Length / stride : 0;
         var result = new G4mgParser.Vertex[count];
+
+        var normalAttr = G4mgParser.FindAttribute(attributes, vtype: 2);
+        var uvAttr = G4mgParser.FindAttribute(attributes, vtype: 10);
+        bool decodeNormal = normalAttr is { } na && G4mgParser.Vec3ByteSize(na.DataType) > 0
+            && na.Offset + G4mgParser.Vec3ByteSize(na.DataType) <= stride;
+        bool decodeUv = uvAttr is { } ua && G4mgParser.Vec2ByteSize(ua.DataType) > 0
+            && ua.Offset + G4mgParser.Vec2ByteSize(ua.DataType) <= stride;
 
         for (int i = 0; i < count; i++)
         {
@@ -88,8 +104,19 @@ public static class G4mgReader
             float py = Sanitize(BinaryPrimitives.ReadSingleLittleEndian(s[4..]));
             float pz = Sanitize(BinaryPrimitives.ReadSingleLittleEndian(s[8..]));
 
-            // Normale/UV packées SNORM16 dans le tail : non décodées (valeurs non fabriquées).
-            result[i] = new G4mgParser.Vertex(px, py, pz, 0f, 0f, 1f, 0f, 0f);
+            float nx = 0f, ny = 0f, nz = 1f, u = 0f, v = 0f;
+            if (decodeNormal)
+            {
+                var n = G4mgParser.DecodeNormal(s, normalAttr!.Value.Offset, normalAttr.Value.DataType);
+                nx = n.X; ny = n.Y; nz = n.Z;
+            }
+            if (decodeUv)
+            {
+                var uv = G4mgParser.DecodeUv(s, uvAttr!.Value.Offset, uvAttr.Value.DataType);
+                u = uv.X; v = uv.Y;
+            }
+
+            result[i] = new G4mgParser.Vertex(px, py, pz, nx, ny, nz, u, v);
         }
 
         return result;

@@ -79,7 +79,8 @@ public static class ModelExportExtensions
         var vertexBytes = G4mgReader.ReadVertexBuffer(stream, mesh);
         var indexBytes = G4mgReader.ReadIndexBuffer(stream, mesh);
         int stride = mesh.VertexStride > 0 ? mesh.VertexStride : G4mgParser.GetVertexStride(mesh.Format);
-        var vertices = G4mgReader.ParseVertices(vertexBytes, stride);
+        // Décode normale (vtype=2) et UV0 (vtype=10) via la table d'attributs réelle du .g4md.
+        var vertices = G4mgReader.ParseVertices(vertexBytes, stride, mesh.Attributes);
         var indices = G4mgReader.ParseIndices(indexBytes);
 
         var material = new MaterialBuilder($"{mesh.Name}_Mat")

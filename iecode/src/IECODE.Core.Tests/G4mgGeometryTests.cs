@@ -95,4 +95,80 @@ public class G4mgGeometryTests
         Assert.Throws<System.NotSupportedException>(
             () => G4mgParser.ParseMeshes(MenuG4mg));
     }
+
+    /// <summary>
+    /// Décodage normale (vtype=2, short SNORM16 ×3) + UV0 (vtype=10, ushort UNORM ×2) à leur
+    /// offset réel, sur le layout vérifié de chr/_uniform u11130090 (stride 68, normale @12,
+    /// uv @64). Vecteur unique construit avec des valeurs SNORM/UNORM connues → normale
+    /// normalisée attendue et UV ~[0,1].
+    /// </summary>
+    [Fact]
+    public void ParseVertices_DecodesSnorm16NormalAndUnormUv()
+    {
+        const int stride = 68;
+        var vtx = new byte[stride];
+
+        // Position float3 à +0 : (0.5, -0.25, 2.0)
+        System.BitConverter.GetBytes(0.5f).CopyTo(vtx, 0);
+        System.BitConverter.GetBytes(-0.25f).CopyTo(vtx, 4);
+        System.BitConverter.GetBytes(2.0f).CopyTo(vtx, 8);
+
+        // Normale short SNORM16 @12 : (32767, 0, 0) -> (1,0,0)
+        System.BitConverter.GetBytes((short)32767).CopyTo(vtx, 12);
+        System.BitConverter.GetBytes((short)0).CopyTo(vtx, 14);
+        System.BitConverter.GetBytes((short)0).CopyTo(vtx, 16);
+
+        // UV0 ushort UNORM16 @64 : (16383, 49151) -> (~0.25, ~0.75)
+        System.BitConverter.GetBytes((ushort)16383).CopyTo(vtx, 64);
+        System.BitConverter.GetBytes((ushort)49151).CopyTo(vtx, 66);
+
+        var attrs = new[]
+        {
+            new G4mgParser.VertexAttribute(1, 0, 3),    // position float3
+            new G4mgParser.VertexAttribute(2, 12, 20),  // normale short SNORM16 ×3
+            new G4mgParser.VertexAttribute(10, 64, 14), // uv0 ushort UNORM16 ×2
+        };
+
+        var verts = G4mgReader.ParseVertices(vtx, stride, attrs);
+        Assert.Single(verts);
+        var v = verts[0];
+
+        Assert.Equal(0.5f, v.PositionX, precision: 5);
+        Assert.Equal(-0.25f, v.PositionY, precision: 5);
+        Assert.Equal(2.0f, v.PositionZ, precision: 5);
+
+        // Normale normalisée (1,0,0)
+        Assert.Equal(1.0f, v.NormalX, precision: 4);
+        Assert.Equal(0.0f, v.NormalY, precision: 4);
+        Assert.Equal(0.0f, v.NormalZ, precision: 4);
+        float len = System.MathF.Sqrt(v.NormalX * v.NormalX + v.NormalY * v.NormalY + v.NormalZ * v.NormalZ);
+        Assert.Equal(1.0f, len, precision: 4);
+
+        // UV0 dans [0,1]
+        Assert.Equal(16383f / 65535f, v.U, precision: 4);
+        Assert.Equal(49151f / 65535f, v.V, precision: 4);
+        Assert.InRange(v.U, 0f, 1f);
+        Assert.InRange(v.V, 0f, 1f);
+    }
+
+    /// <summary>
+    /// Sans table d'attributs, le décodage retombe sur la position seule (normale (0,0,1),
+    /// UV (0,0)) — aucune valeur fabriquée. Garantit la rétrocompatibilité.
+    /// </summary>
+    [Fact]
+    public void ParseVertices_NoAttributes_PositionOnlyDefaults()
+    {
+        const int stride = 68;
+        var vtx = new byte[stride];
+        System.BitConverter.GetBytes(1.0f).CopyTo(vtx, 0);
+
+        var verts = G4mgReader.ParseVertices(vtx, stride);
+        Assert.Single(verts);
+        Assert.Equal(1.0f, verts[0].PositionX, precision: 5);
+        Assert.Equal(0f, verts[0].NormalX);
+        Assert.Equal(0f, verts[0].NormalY);
+        Assert.Equal(1f, verts[0].NormalZ);
+        Assert.Equal(0f, verts[0].U);
+        Assert.Equal(0f, verts[0].V);
+    }
 }

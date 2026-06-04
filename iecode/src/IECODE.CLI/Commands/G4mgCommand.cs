@@ -141,8 +141,9 @@ public static class G4mgCommand
     /// <summary>
     /// Construit les octets GLB depuis les données g4mg + son g4md déjà parsé.
     /// Réutilisable hors fichier (ex: export par lot depuis les CPK). Renvoie null si
-    /// aucune géométrie n'est extraite. Seule la position est décodée honnêtement
-    /// (normale/UV packées SNORM16 non fabriquées).
+    /// aucune géométrie n'est extraite. Émet POSITION + (si décodés depuis la table d'attributs
+    /// réelle du .g4md) NORMAL (normalisé) et TEXCOORD_0. Aucune valeur fabriquée : si une
+    /// sous-maille n'a pas de normale/UV résoluble, elle retombe sur POSITION seule.
     /// </summary>
     public static byte[]? BuildGlb(ReadOnlySpan<byte> g4mgData, G4mdParser g4md, out int totalTris, Action<string>? log = null)
     {
@@ -156,30 +157,100 @@ public static class G4mgCommand
 
         foreach (var g in geometry)
         {
-            log?.Invoke($"{g.Name}: V={g.VertexCount} I={g.Indices.Count} stride={g.VertexStride}");
+            bool hasNormals = g.Normals.Count == g.Positions.Count && g.Positions.Count > 0;
+            bool hasUv = g.UV0.Count == g.Positions.Count && g.Positions.Count > 0;
+            log?.Invoke($"{g.Name}: V={g.VertexCount} I={g.Indices.Count} stride={g.VertexStride} " +
+                        $"normals={(hasNormals ? "oui" : "non")} uv0={(hasUv ? "oui" : "non")}");
 
-            var meshBuilder = new MeshBuilder<VertexPosition>(g.Name);
-            var primitive = meshBuilder.UsePrimitive(material);
-
-            var verts = new VertexPosition[g.Positions.Count];
-            for (int i = 0; i < g.Positions.Count; i++)
-                verts[i] = new VertexPosition(g.Positions[i].X, g.Positions[i].Y, g.Positions[i].Z);
-
-            for (int i = 0; i + 2 < g.Indices.Count; i += 3)
-            {
-                uint i0 = g.Indices[i], i1 = g.Indices[i + 1], i2 = g.Indices[i + 2];
-                if (i0 >= verts.Length || i1 >= verts.Length || i2 >= verts.Length)
-                    continue;
-                primitive.AddTriangle(verts[i0], verts[i1], verts[i2]);
-                totalTris++;
-            }
-
-            scene.AddRigidMesh(meshBuilder, Matrix4x4.Identity);
+            int added = AddSubmesh(scene, material, g, hasNormals, hasUv);
+            totalTris += added;
         }
 
         var model = scene.ToGltf2();
         using var ms = new MemoryStream();
         model.WriteGLB(ms);
         return ms.ToArray();
+    }
+
+    /// <summary>
+    /// Ajoute une sous-maille à la scène en choisissant le type de vertex selon les attributs
+    /// réellement décodés : position+normale+UV, position+UV, position+normale, ou position seule.
+    /// Renvoie le nombre de triangles ajoutés.
+    /// </summary>
+    private static int AddSubmesh(SceneBuilder scene, MaterialBuilder material,
+        G4mgParser.SubmeshGeometry g, bool hasNormals, bool hasUv)
+    {
+        if (hasNormals && hasUv)
+        {
+            var mb = new MeshBuilder<VertexPositionNormal, VertexTexture1>(g.Name);
+            var prim = mb.UsePrimitive(material);
+            var verts = new (VertexPositionNormal, VertexTexture1)[g.Positions.Count];
+            for (int i = 0; i < g.Positions.Count; i++)
+            {
+                var p = g.Positions[i]; var n = g.Normals[i]; var uv = g.UV0[i];
+                verts[i] = (new VertexPositionNormal(p.X, p.Y, p.Z, n.X, n.Y, n.Z),
+                            new VertexTexture1(new Vector2(uv.X, uv.Y)));
+            }
+            int tris = EmitTriangles(g.Indices, verts.Length, (a, b, c) => prim.AddTriangle(verts[a], verts[b], verts[c]));
+            scene.AddRigidMesh(mb, Matrix4x4.Identity);
+            return tris;
+        }
+
+        if (hasUv)
+        {
+            var mb = new MeshBuilder<VertexPosition, VertexTexture1>(g.Name);
+            var prim = mb.UsePrimitive(material);
+            var verts = new (VertexPosition, VertexTexture1)[g.Positions.Count];
+            for (int i = 0; i < g.Positions.Count; i++)
+            {
+                var p = g.Positions[i]; var uv = g.UV0[i];
+                verts[i] = (new VertexPosition(p.X, p.Y, p.Z), new VertexTexture1(new Vector2(uv.X, uv.Y)));
+            }
+            int tris = EmitTriangles(g.Indices, verts.Length, (a, b, c) => prim.AddTriangle(verts[a], verts[b], verts[c]));
+            scene.AddRigidMesh(mb, Matrix4x4.Identity);
+            return tris;
+        }
+
+        if (hasNormals)
+        {
+            var mb = new MeshBuilder<VertexPositionNormal>(g.Name);
+            var prim = mb.UsePrimitive(material);
+            var verts = new VertexPositionNormal[g.Positions.Count];
+            for (int i = 0; i < g.Positions.Count; i++)
+            {
+                var p = g.Positions[i]; var n = g.Normals[i];
+                verts[i] = new VertexPositionNormal(p.X, p.Y, p.Z, n.X, n.Y, n.Z);
+            }
+            int tris = EmitTriangles(g.Indices, verts.Length, (a, b, c) => prim.AddTriangle(verts[a], verts[b], verts[c]));
+            scene.AddRigidMesh(mb, Matrix4x4.Identity);
+            return tris;
+        }
+
+        var mbp = new MeshBuilder<VertexPosition>(g.Name);
+        var primp = mbp.UsePrimitive(material);
+        var vp = new VertexPosition[g.Positions.Count];
+        for (int i = 0; i < g.Positions.Count; i++)
+            vp[i] = new VertexPosition(g.Positions[i].X, g.Positions[i].Y, g.Positions[i].Z);
+        int t = EmitTriangles(g.Indices, vp.Length, (a, b, c) => primp.AddTriangle(vp[a], vp[b], vp[c]));
+        scene.AddRigidMesh(mbp, Matrix4x4.Identity);
+        return t;
+    }
+
+    /// <summary>
+    /// Itère les triangles (triplets d'indices), saute ceux hors limites, et délègue l'ajout.
+    /// Renvoie le nombre de triangles effectivement émis.
+    /// </summary>
+    private static int EmitTriangles(IReadOnlyList<uint> indices, int vertexCount, Action<int, int, int> add)
+    {
+        int tris = 0;
+        for (int i = 0; i + 2 < indices.Count; i += 3)
+        {
+            uint i0 = indices[i], i1 = indices[i + 1], i2 = indices[i + 2];
+            if (i0 >= vertexCount || i1 >= vertexCount || i2 >= vertexCount)
+                continue;
+            add((int)i0, (int)i1, (int)i2);
+            tris++;
+        }
+        return tris;
     }
 }
