@@ -7,7 +7,7 @@
 import { runInaglePush, runSQLiteBackup, runPostgresBackup } from "./tasks/db";
 import { syncCdnAssets } from "./tasks/cdn";
 import { runIeCrawl } from "./tasks/ie-crawl";
-import { runRagSync, queryRag, ragGroundedQuery } from "./tasks/ie-crawl/rag-index";
+import { runRagSync, queryRag, ragGroundedQuery, ingestWikiCorpus } from "./tasks/ie-crawl/rag-index";
 import {
 	triggerPublishScheduled,
 	triggerPatreonRefresh,
@@ -172,6 +172,8 @@ if (args.includes("--run")) {
 		await executeTask("crawl", runIeCrawl);
 	} else if (task === "rag") {
 		await executeTask("rag", runRagSync);
+	} else if (task === "rag:wiki" || task === "rag-wiki") {
+		await executeTask("rag:wiki", () => ingestWikiCorpus());
 	} else if (task === "query") {
 		const question = args.slice(taskIdx + 1).join(" ");
 		if (!question) {

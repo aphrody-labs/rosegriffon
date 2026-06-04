@@ -16,6 +16,7 @@
 export { queryRag, runRagSync } from "./rag";
 export { chunkText, computeStringHash } from "./rag-utils";
 export { indexZukanCharacters } from "./rag-zukan";
+export { ingestWikiCorpus, type WikiIngestStats } from "./rag-wiki";
 export { ragWebSearch, type RagWebDoc, type RagWebOptions } from "./rag-web";
 
 // RAG unifié pgvector (additif, cf. UNIFIED-RAG-PLAN). Le store Redis reste
