@@ -83,7 +83,7 @@ video waza) demandent un **nouveau parseur**. Plus : vérifier les drop-rates **
 | **B2** | Reste parseur→DB : super-tactiques, skill-technic, team-build, boost-groups, constellations, star-signs, trophées, missions (stadiums 81 + nameplates 54 = DÉJÀ FAIT) | `rg/packages/inagle` + Supabase | **EN COURS** |
 | **B3** | Drop-rates **par élément** : `soccer_drop_config` + `item_emission_rarity_table` + `win_treasure_lot_table` ventilés par élément → `inagle_drop_rates` | `rg/packages/inagle` + Supabase | À FAIRE |
 | **B4** | **Lua** : indexer/typer les 677 scripts (`inagle_lua_scripts` : nom, version, catégorie p0/p1/p2, fonctions/symboles, hash) + analyse statique | `rg` (module `inagle/src/lua/` dédié, NE touche PAS cli-push/push-categories/parsers-index) + Supabase | **EN COURS** |
-| **B5** | **Assets chr** : déchiffrer CPK (clé `0x1717E18E`) → extraire/indexer textures g4tx + modèles g4mg/g4md/g4sk → manifest/DB | `iecode` (C#) + `niers` (nie-formats) | À FAIRE |
+| **B5** | **Assets chr** : CPK packs déchiffrés (clé **CRC32 du nom** ; `0x1717E18E`=Viola cfg.bin) → extraire/indexer g4tx + g4mg/g4md/g4sk → manifest/DB + index arbre du jeu → Redis (node-api-dotnet) | `iecode` (C#) + `niers` (nie-formats) | **EN COURS** (niers cpk.rs+g4sk FAIT `a0e5333` ; arbre→Redis `wlisv0fjt`) |
 | **B6** | Événements : `ev*`/`Subtitle_ev*` (~16k) → index/typage des scripts d'event (dialogues, video waza in-game) | `rg` + Supabase | À FAIRE |
 | **B7** | Code C : niers continue (nie-wasm, câblage runtime sim, levier feuilles) | `niers` | EN COURS (axe séparé) |
 
