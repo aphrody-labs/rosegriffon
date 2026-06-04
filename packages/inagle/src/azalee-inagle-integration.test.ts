@@ -124,5 +124,5 @@ describe("Azalée CLI & Inagle Real-World Integration Tests", () => {
 		// Verify CLI executed successfully and output contains success summary
 		expect(exitCode).toBe(0);
 		expect(stdoutText).toContain("TOUTES LES SUITES DE TESTS NATIVES ONT RÉUSSI");
-	}, { timeout: 90000 }); // Give Next.js server compile step plenty of time to stabilize
+	}, { timeout: 150000 }); // Give Next.js server compile step plenty of time to stabilize
 });

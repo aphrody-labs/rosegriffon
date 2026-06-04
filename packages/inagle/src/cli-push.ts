@@ -34,6 +34,8 @@ import {
 } from "./push-categories.js";
 import { type DataAdapter, dedup, PostgresAdapter, SupabaseAdapter } from "./push-adapter.js";
 import { type AuraHissatsu, buildAuraHashSet, loadAuraSkills } from "./skills/mapper-aura.js";
+import { importLuaScripts } from "./lua/pusher.js";
+
 
 // === Helpers ===
 
@@ -162,6 +164,8 @@ export function registerPushCommand(program: Command) {
 				await importStarSigns(service, adapter);
 				await importTrophies(service, adapter);
 				await importMissions(service, adapter);
+				await importLuaScripts(service, adapter);
+
 
 				// Static reference tables
 				await importExpTable(adapter);
