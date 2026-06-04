@@ -1,31 +1,48 @@
 #!/usr/bin/env bash
-# next-build.sh — build Next sous Bun, robuste au crash-à-l'exit de Bun 1.3.14.
+# next-build.sh — build Next standalone pour Azalee.
 #
-# Sur certains CPU (dont ce VPS : sse42/avx2), `bun … next build` peut SIGILL
-# (Illegal instruction / Segmentation fault) en QUITTANT, APRÈS avoir produit
-# tous les artefacts (.next/BUILD_ID). Le combo `--smol --bun --turbopack` (le
-# même qu'azalee) permet en plus de passer la phase "Collecting page data" qui
-# crashait mid-build avec l'invocation nue.
+# IMPORTANT — runtime de build = Node (PAS Bun) :
+#   Bun (1.3.x ET 1.4-canary) déclenche un bug de PRERENDER de la page synthétique
+#   `/_global-error` de Next 16 : `TypeError: null is not an object (evaluating
+#   'k.H.useContext')` — dispatcher React null dans le OuterLayoutRouter interne de
+#   Next, avant même la 1re page. Le bug est 100% reproductible (vanilla Next 16 +
+#   Bun, sans aucun code azalee) et avorte l'export AVANT l'émission du standalone
+#   (`.next/standalone/.../server.js` ABSENT) → impossible de déployer.
+#   Sous Node (/usr/bin/node, v22+) le prerender passe.
 #
-# On valide donc le succès sur la PRÉSENCE D'UN BUILD_ID FRAIS plutôt que sur le
-# code retour — sinon `turbo run build` marque l'app en échec alors que le build
-# a réussi. Sur Vercel (CPU sans le bug), Bun sort proprement (exit 0) et la
-# garde passe trivialement ; un vrai échec ne produit pas de BUILD_ID frais →
-# exit non nul, l'erreur remonte correctement.
+#   En contrepartie, le cache SQLite embarqué (`lib/supabase/sqlite-client.ts`)
+#   utilisait `bun:sqlite` (indispo sous Node) → fallback Postgres → timeouts >60s
+#   sur les milliers de fiches perso. Résolu : `node:sqlite` (`DatabaseSync`,
+#   Node >= 22) via `process.getBuiltinModule` côté build.
 #
-# Usage (depuis le répertoire de l'app) : bash ../../scripts/next-build.sh [args next…]
+#   `VERCEL` est UNSET de force : la session/env du VPS peut exporter `VERCEL=1`
+#   (token OIDC Vercel CLI), ce qui fait basculer next.config.ts sur la branche
+#   Vercel (PAS de `output: standalone`) → server.js jamais produit.
+#
+# On valide le succès sur la PRÉSENCE d'un BUILD_ID FRAIS + server.js.
 set -uo pipefail
 
+NODE_BIN="${NODE_BIN:-/usr/bin/node}"
+SERVER_JS=".next/standalone/apps/azalee/server.js"
+
+# TMPDIR sur disque (PAS le tmpfs /tmp, RAM-backed et souvent plein sur ce VPS) :
+# un /tmp saturé fait crasher le sous-process babel-loader (SIGTERM/EDQUOT).
+BUILD_TMP="${BUILD_TMP:-$HOME/.azalee-build-tmp}"
+mkdir -p "$BUILD_TMP"
+
 build_start=$(date +%s)
-bun --smol --bun node_modules/next/dist/bin/next build --turbopack "$@"
+env -u VERCEL -u VERCEL_OIDC_TOKEN \
+	TMPDIR="$BUILD_TMP" \
+	NODE_ENV=production NODE_NO_WARNINGS=1 \
+	"$NODE_BIN" node_modules/next/dist/bin/next build --turbopack "$@"
 rc=$?
 
-if [ -f .next/BUILD_ID ] && [ "$(stat -c %Y .next/BUILD_ID)" -ge "$build_start" ]; then
+if [ -f .next/BUILD_ID ] && [ "$(stat -c %Y .next/BUILD_ID)" -ge "$build_start" ] && [ -f "$SERVER_JS" ]; then
 	if [ "$rc" -ne 0 ]; then
-		echo "⚠ build OK (BUILD_ID $(cat .next/BUILD_ID)) — crash Bun à l'exit (code $rc) ignoré" >&2
+		echo "⚠ build OK (BUILD_ID $(cat .next/BUILD_ID)) — code retour $rc ignoré (artefacts présents)" >&2
 	fi
 	exit 0
 fi
 
-echo "✗ build réellement échoué — pas de BUILD_ID frais (exit $rc)" >&2
+echo "✗ build réellement échoué — BUILD_ID frais=$([ -f .next/BUILD_ID ] && echo o || echo n) server.js=$([ -f "$SERVER_JS" ] && echo o || echo n) (exit $rc)" >&2
 exit "$([ "$rc" -ne 0 ] && echo "$rc" || echo 1)"
