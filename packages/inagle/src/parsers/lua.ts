@@ -2,7 +2,7 @@
  * @file lua.ts
  * @description Parser pour l'index global des scripts Lua decompilés et analysés.
  *
- * Source: /home/ubuntu/data/lua_scripts/analysis/lua-global-index.json
+ * Source: /home/ubuntu/niers/data/lua_scripts/analysis/lua-global-index.json
  */
 
 import { join } from "node:path";
@@ -52,7 +52,7 @@ export async function computeSHA256(filePath: string): Promise<string | null> {
  * Résout le chemin absolu du script Lua en fonction de son tier.
  */
 export function resolveLuaScriptPath(file: string, tier: string): string | null {
-	const baseDir = "/home/ubuntu/data/lua_scripts/decompiled";
+	const baseDir = "/home/ubuntu/niers/data/lua_scripts/decompiled";
 	if (tier && tier !== "root") {
 		const path = join(baseDir, tier, file);
 		if (existsSync(path)) return path;
@@ -66,7 +66,7 @@ export function resolveLuaScriptPath(file: string, tier: string): string | null 
  * Charge et parse l'index global des scripts Lua.
  */
 export async function parseLuaIndex(
-	indexPath = "/home/ubuntu/data/lua_scripts/analysis/lua-global-index.json"
+	indexPath = "/home/ubuntu/niers/data/lua_scripts/analysis/lua-global-index.json"
 ): Promise<ParsedLuaScript[]> {
 	const file = Bun.file(indexPath);
 	if (!(await file.exists())) {

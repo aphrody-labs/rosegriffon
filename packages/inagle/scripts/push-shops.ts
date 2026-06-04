@@ -1,7 +1,7 @@
 /**
  * @file push-shops.ts
  * @description Runner standalone pour peupler `inagle_shops` depuis le VRAI
- * shop_config (octets réels /home/ubuntu/data). La logique d'import vit dans
+ * shop_config (octets réels /home/ubuntu/niers/data). La logique d'import vit dans
  * `src/push-categories.ts` (`importShops`) — source UNIQUE partagée avec le flux
  * principal cli-push.ts. 1 ligne = 1 (shop × item), clé `id = "<shopId>:<itemId>"`.
  * Upsert idempotent (ON CONFLICT id).

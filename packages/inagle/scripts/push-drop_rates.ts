@@ -12,7 +12,7 @@
  * Upsert idempotent (ON CONFLICT id = `<source>:<ordinal>` déterministe).
  *
  * Lancement (depuis /home/ubuntu/rg) :
- *   DATA_PATH=/home/ubuntu/data bun packages/inagle/scripts/push-drop_rates.ts
+ *   DATA_PATH=/home/ubuntu/niers/data bun packages/inagle/scripts/push-drop_rates.ts
  */
 
 import { loadAllDropRates } from "../src/parsers/drop-rates.ts";

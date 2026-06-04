@@ -1,7 +1,7 @@
 /**
  * @file push-emblems.ts
  * @description Runner standalone pour peupler `inagle_emblems` depuis le VRAI
- * config menu/emblem_resource_*.cfg.bin.json (octets réels /home/ubuntu/data).
+ * config menu/emblem_resource_*.cfg.bin.json (octets réels /home/ubuntu/niers/data).
  * La logique d'import vit dans `src/push-categories.ts` (`importEmblems`) —
  * source UNIQUE partagée avec le flux principal cli-push.ts. Upsert idempotent
  * (ON CONFLICT emblem_id).

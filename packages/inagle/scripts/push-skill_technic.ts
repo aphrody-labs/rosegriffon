@@ -8,7 +8,7 @@
  * (ON CONFLICT id = hash hex du technic).
  *
  * Lancement (depuis /home/ubuntu/rg) :
- *   DATA_PATH=/home/ubuntu/data bun packages/inagle/scripts/push-skill_technic.ts
+ *   DATA_PATH=/home/ubuntu/niers/data bun packages/inagle/scripts/push-skill_technic.ts
  */
 
 import { importSkillTechnic } from "../src/push-categories.ts";

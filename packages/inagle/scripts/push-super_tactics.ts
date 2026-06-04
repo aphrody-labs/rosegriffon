@@ -8,7 +8,7 @@
  * (ON CONFLICT id = "<kind>:<idx>").
  *
  * Lancement (depuis /home/ubuntu/rg) :
- *   DATA_PATH=/home/ubuntu/data bun packages/inagle/scripts/push-super_tactics.ts
+ *   DATA_PATH=/home/ubuntu/niers/data bun packages/inagle/scripts/push-super_tactics.ts
  */
 
 import { importSuperTactics } from "../src/push-categories.ts";
