@@ -27,6 +27,62 @@ const CHARACTER_FACE_CODES = new Set(characterFaceManifest as string[]);
  */
 const CHARACTER_MODEL_CODES = new Set(characterModelManifest as string[]);
 
+/**
+ * Set EXHAUSTIF des codes uniforme `u<NNNNNNNN>` (8 chiffres) qui possèdent réellement
+ * un fichier d'icône dans le dump dx11 `menu/icon_chr/uniform/`. Vérité terrain : scan
+ * des 24966 PNG du dossier (db-5, 2026-06-04). Sur 5677 personnages, seuls **303**
+ * uniformes existent en forme `u<8>_l_u<8>_{1,2}.png` (front+back).
+ *
+ * Le code uniforme dérive du code perso par swap de préfixe `c<NNNNNNNN>` → `u<NNNNNNNN>`
+ * (vérifié : 295/303 des `u<8>` ont un perso `c<8>` correspondant). MAIS la dérivation
+ * `c→u` ne suffit PAS comme garde-fou : ~5380 persos n'ont AUCUN fichier uniforme et le
+ * swap produisait une URL `u<8>_l_u<8>_1.png` en 404 garanti (mesuré 0/10 avant gate).
+ *
+ * Donc : gate POSITIF (allowlist) — tout perso dont le `u<8>` n'est pas listé renvoie une
+ * chaîne vide (le caller affiche le portrait/placeholder au lieu d'un 404 silencieux).
+ * Aligné sur le même garde-fou que `CHARACTER_FACE_CODES` / `CHARACTER_MODEL_CODES`.
+ */
+const CHARACTER_UNIFORM_CODES = new Set<string>([
+	"u01000310", "u01002610", "u02024500", "u02024700", "u02024720", "u02024730", "u02024740", "u02024750",
+	"u02029500", "u03030080", "u03039500", "u04000100", "u04000360", "u04000370", "u04000380", "u05020110",
+	"u05020120", "u05020270", "u05020280", "u05020290", "u05020320", "u05020321", "u05020330", "u05020340",
+	"u05020350", "u05020380", "u05020390", "u05024610", "u05024620", "u05024670", "u05024671", "u05026520",
+	"u05026530", "u05026550", "u05026570", "u05026580", "u05026590", "u05026710", "u05026730", "u05026740",
+	"u05026750", "u05026760", "u05029510", "u05029520", "u05029710", "u05029720", "u06030210", "u06030220",
+	"u06030221", "u06030230", "u06030240", "u06031520", "u06031720", "u06031920", "u06037390", "u06037410",
+	"u06037420", "u06037430", "u06039010", "u06039011", "u06039020", "u06039030", "u06039050", "u06039060",
+	"u06039090", "u06039100", "u06039110", "u06039130", "u06039140", "u06039150", "u06039180", "u06039190",
+	"u06039200", "u06039210", "u06039220", "u06039230", "u06039290", "u06039291", "u06039300", "u06039320",
+	"u07160500", "u08060090", "u11010010", "u11010011", "u11010020", "u11010030", "u11010040", "u11010050",
+	"u11010051", "u11010060", "u11010070", "u11010072", "u11010090", "u11010100", "u11010110", "u11010120",
+	"u11010170", "u11010190", "u11010510", "u11020010", "u11020020", "u11020500", "u11020510", "u11020520",
+	"u11030010", "u11030011", "u11030020", "u11030021", "u11030030", "u11030040", "u11030140", "u11030150",
+	"u11030500", "u11030510", "u11040010", "u11040020", "u11040040", "u11040050", "u11040060", "u11040070",
+	"u11040090", "u11050500", "u11050510", "u11060500", "u11060510", "u11070500", "u11070510", "u11080500",
+	"u11090500", "u11090510", "u11100500", "u11100510", "u11110500", "u11110510", "u11120040", "u11120510",
+	"u11130010", "u11130060", "u11130090", "u11130110", "u11130510", "u11140500", "u11140510", "u11140520",
+	"u11140530", "u11150500", "u11150510", "u11160500", "u11170500", "u11180500", "u11180510", "u11190500",
+	"u11200500", "u11210510", "u11220500", "u11220510", "u11230010", "u11500010", "u11500011", "u11500040",
+	"u11500050", "u11500060", "u11500061", "u11500070", "u11500080", "u11500090", "u11500110", "u11500120",
+	"u11500130", "u11500140", "u11500150", "u11500170", "u11500180", "u11500190", "u11500200", "u11500210",
+	"u11500240", "u11500500", "u11500501", "u11500510", "u11500520", "u11500530", "u11500540", "u11500680",
+	"u11500690", "u11500860", "u11500870", "u11500890", "u11600010", "u11600020", "u11600021", "u11600030",
+	"u11600050", "u11600060", "u11600110", "u11600120", "u11700150", "u11801010", "u11801020", "u11801030",
+	"u11801040", "u11801060", "u11801070", "u11801080", "u11801090", "u11801100", "u11801110", "u11801120",
+	"u11801130", "u11802010", "u11802020", "u11802030", "u11802040", "u11802050", "u11802060", "u11802070",
+	"u11803010", "u11803020", "u11803030", "u11803040", "u11803050", "u11803060", "u11803070", "u11803080",
+	"u11803090", "u11804010", "u11804020", "u11804030", "u11804040", "u11804050", "u11804060", "u11804070",
+	"u11804080", "u11805010", "u11806010", "u11806020", "u11806030", "u11806040", "u11806050", "u11806060",
+	"u11806070", "u11806080", "u11806090", "u11807010", "u11807030", "u11807040", "u11807050", "u11807060",
+	"u11807070", "u11807080", "u11807090", "u11807100", "u11807110", "u11807120", "u11807130", "u11807140",
+	"u11807150", "u11807160", "u11807170", "u11807180", "u11807190", "u11807200", "u11807210", "u11807220",
+	"u11807240", "u11807260", "u11808010", "u11808020", "u11808030", "u11808040", "u11808050", "u11808060",
+	"u11808070", "u11808080", "u11808090", "u11808100", "u11808110", "u11808120", "u11808130", "u11808140",
+	"u11808150", "u11808160", "u11808170", "u11901080", "u11901090", "u11902060", "u11902070", "u11902080",
+	"u11903020", "u11903040", "u11904030", "u11905030", "u11907050", "u11907060", "u11907070", "u11907080",
+	"u11908020", "u11908030", "u11908040", "u11908050", "u11908060", "u11908120", "u11908130",
+]);
+
 // Constantes globales
 export const CDN_URL = process.env.NEXT_PUBLIC_ASSET_URL || "https://azalee.rosegriffon.fr";
 export const CDN_ASSETS = CDN_URL; // Alias pour compatibilité
@@ -89,10 +145,34 @@ const ITEM_ICON_PREFIXES: ReadonlyArray<readonly [string, string]> = [
 ];
 
 /**
+ * Trous de données (data-gaps) PROUVÉS de la famille chaussures `eq_sh` : `internal_code`
+ * présents en DB (`inagle_items`) dont AUCUN fichier `icon_item03_<code>.png` n'existe
+ * dans le dump dx11 (db-5, 2026-06-04 — scan des 203 PNG `eq_sh` du dossier
+ * `200_icon/02_icon_item/`). Toutes les variantes voisines de la série `eq_sh11<NNN>01`
+ * existent ; seules ces 24 variantes-là n'ont pas été extraites (vérifié : 0 fichier sous
+ * AUCUNE forme, pas de transform récupérable).
+ *
+ * Le préfixe `eq_sh` matche `icon_item03` (cf. `ITEM_ICON_PREFIXES`) et le nom de fichier
+ * = `icon_item03_<internal_code>.png` (la règle de suffixe est DÉJÀ correcte : le code DB
+ * porte le `01` final, le fichier aussi). Donc il ne s'agit pas d'un mapping à corriger
+ * mais d'un gap : on renvoie `null` (→ placeholder propre) au lieu d'un 404 forgé.
+ */
+const ITEM_ICON_GAPS = new Set<string>([
+	"eq_sh1100101", "eq_sh1100201", "eq_sh1100501", "eq_sh1100601", "eq_sh1101001", "eq_sh1101101",
+	"eq_sh1101501", "eq_sh1101601", "eq_sh1101701", "eq_sh1102201", "eq_sh1102301", "eq_sh1102801",
+	"eq_sh1103001", "eq_sh1103701", "eq_sh1104101", "eq_sh1104401", "eq_sh1104501", "eq_sh1104701",
+	"eq_sh1104801", "eq_sh1105201", "eq_sh1105301", "eq_sh1106301", "eq_sh1106601", "eq_sh1106701",
+]);
+
+/**
  * Résout le vrai nom de fichier PNG (sans extension) d'un `internal_code` d'item, ou
- * `null` si aucune famille connue ne correspond (= pas d'icône d'item dans le dump).
+ * `null` si aucune famille connue ne correspond (= pas d'icône d'item dans le dump) OU si
+ * le code est un data-gap connu (`ITEM_ICON_GAPS` — fichier absent du dump → 404 forgé).
  */
 export function itemIconFileBase(internalCode: string): string | null {
+	if (ITEM_ICON_GAPS.has(internalCode)) {
+		return null;
+	}
 	for (const [fam, prefix] of ITEM_ICON_PREFIXES) {
 		if (internalCode.startsWith(fam)) {
 			return `${prefix}_${internalCode}`;
@@ -215,27 +295,43 @@ export function getCharacterFaceUrl(
 export const getCharacterImageUrl = getCharacterFaceUrl;
 
 /**
- * URL d'un uniforme de personnage (vue de face).
- * Pattern fichier : `icon_chr/uniform/u{NNN}_l_u{NNN}_1.png` (préfixe `c` → `u`).
+ * Dérive le code uniforme `u<8>` d'un code perso et le retourne UNIQUEMENT s'il a un
+ * fichier réel dans le dump (`CHARACTER_UNIFORM_CODES`). Sinon `null` → le caller ne
+ * tente pas d'URL (évite un 404 garanti : la dérivation `c→u` ne matche que 303/5677
+ * persos). Le code uniforme = code perso préfixe `c` → `u` (vérité terrain db-5).
  */
-export function getCharacterUniformUrl(charaId: string | undefined | null): string {
+function resolveUniformCode(charaId: string | undefined | null): string | null {
 	if (!charaId) {
-		return "";
+		return null;
 	}
+	// Strip suffixe de variante (_5000/_5100…) — le dump n'a que le code de base.
 	const baseCode = charaId.replace(/_\d{4}$/, "");
 	const uniformCode = baseCode.startsWith("c") ? `u${baseCode.slice(1)}` : baseCode;
+	return CHARACTER_UNIFORM_CODES.has(uniformCode) ? uniformCode : null;
+}
+
+/**
+ * URL d'un uniforme de personnage (vue de face).
+ * Pattern fichier : `icon_chr/uniform/u{NNNNNNNN}_l_u{NNNNNNNN}_1.png` (préfixe `c` → `u`).
+ * Gate sur `CHARACTER_UNIFORM_CODES` : chaîne vide si le perso n'a pas d'uniforme dans le
+ * dump (au lieu d'un 404 forgé). Le caller affiche le portrait/placeholder à la place.
+ */
+export function getCharacterUniformUrl(charaId: string | undefined | null): string {
+	const uniformCode = resolveUniformCode(charaId);
+	if (!uniformCode) {
+		return "";
+	}
 	return `${CHR_DUMP_BASE}/uniform/${uniformCode}_l_${uniformCode}_1.png`;
 }
 
 /**
- * URL du dos de l'uniforme (variant 2).
+ * URL du dos de l'uniforme (variant 2). Même gate que la vue de face.
  */
 export function getCharacterUniformBackUrl(charaId: string | undefined | null): string {
-	if (!charaId) {
+	const uniformCode = resolveUniformCode(charaId);
+	if (!uniformCode) {
 		return "";
 	}
-	const baseCode = charaId.replace(/_\d{4}$/, "");
-	const uniformCode = baseCode.startsWith("c") ? `u${baseCode.slice(1)}` : baseCode;
 	return `${CHR_DUMP_BASE}/uniform/${uniformCode}_l_${uniformCode}_2.png`;
 }
 
