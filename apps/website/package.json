@@ -4,7 +4,7 @@
 	"private": true,
 	"scripts": {
 		"dev": "bun run --bun next dev",
-		"test": "vitest run",
+		"test": "bun test src",
 		"test:ui": "vitest --ui",
 		"test:run": "vitest run",
 		"build": "bash ../../scripts/next-build.sh",
