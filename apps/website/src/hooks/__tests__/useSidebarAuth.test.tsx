@@ -1,37 +1,62 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { renderHook, waitFor } from "@testing-library/react";
+import { beforeEach, describe, expect, it, mock } from "bun:test";
 import type React from "react";
-import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { createClient } from "@/lib/supabase/client";
+// --- Mocks de module (top-level, AVANT tout import du SUT) ---------------
+// @/lib/auth-client CRASHE a l'import (createAuthClient au top-level).
+// On override les deux modules ici pour que leur code original ne soit
+// jamais evalue : le SUT (useSidebarAuth) est importe dynamiquement plus bas.
 
-import { useSidebarAuth } from "../useSidebarAuth";
+const mockCreateClient = mock();
+const mockUseSession = mock();
 
-// Mock Supabase client
-vi.mock("@/lib/supabase/client", () => ({
-	createClient: vi.fn(),
+mock.module("@/lib/supabase/client", () => ({
+	createClient: mockCreateClient,
 }));
 
-// Mock authClient
-const mockUseSession = vi.fn();
-vi.mock("@/lib/auth-client", () => ({
+mock.module("@/lib/auth-client", () => ({
 	authClient: {
 		useSession: () => mockUseSession(),
 	},
 }));
 
+// useSidebarAuth appelle useRouter() de next/navigation : sans AppRouterContext
+// monte, le vrai hook throw « invariant expected app router to be mounted ».
+// Le router n'est pas utilise par le hook, on fournit un stub neutre.
+mock.module("next/navigation", () => ({
+	useRouter: () => ({
+		back: mock(),
+		forward: mock(),
+		prefetch: mock(),
+		push: mock(),
+		refresh: mock(),
+		replace: mock(),
+	}),
+}));
+
 describe("useSidebarAuth", () => {
 	let queryClient: QueryClient;
+	let useSidebarAuth: typeof import("../useSidebarAuth").useSidebarAuth;
 
 	const wrapper = ({ children }: { children: React.ReactNode }) => (
 		<QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
 	);
 
-	const mockSelect = vi.fn();
-	const mockFrom = vi.fn();
+	const mockSelect = mock();
+	const mockFrom = mock();
 
-	beforeEach(() => {
-		vi.clearAllMocks();
+	beforeEach(async () => {
+		// Pas de vi.clearAllMocks() en bun:test : on reset chaque mock a la main
+		// pour eviter toute fuite entre tests.
+		mockCreateClient.mockClear();
+		mockUseSession.mockClear();
+		mockSelect.mockClear();
+		mockFrom.mockClear();
+
+		// Import dynamique du SUT APRES les mock.module ci-dessus.
+		({ useSidebarAuth } = await import("../useSidebarAuth"));
+
 		queryClient = new QueryClient({
 			defaultOptions: {
 				queries: {
@@ -43,8 +68,7 @@ describe("useSidebarAuth", () => {
 		});
 
 		// Setup default mock implementation
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		(createClient as any).mockReturnValue({
+		mockCreateClient.mockReturnValue({
 			from: mockFrom,
 		});
 
@@ -53,8 +77,8 @@ describe("useSidebarAuth", () => {
 		});
 
 		mockSelect.mockReturnValue({
-			eq: vi.fn().mockReturnValue({
-				maybeSingle: vi.fn().mockResolvedValue({ data: null, error: null }),
+			eq: mock().mockReturnValue({
+				maybeSingle: mock().mockResolvedValue({ data: null, error: null }),
 			}),
 		});
 	});
@@ -89,9 +113,9 @@ describe("useSidebarAuth", () => {
 		mockUseSession.mockReturnValue({ data: { user: mockUser }, isPending: false });
 
 		mockFrom.mockReturnValue({
-			select: vi.fn().mockReturnValue({
-				eq: vi.fn().mockReturnValue({
-					maybeSingle: vi.fn().mockResolvedValue({ data: mockProfile, error: null }),
+			select: mock().mockReturnValue({
+				eq: mock().mockReturnValue({
+					maybeSingle: mock().mockResolvedValue({ data: mockProfile, error: null }),
 				}),
 			}),
 		});
@@ -121,9 +145,9 @@ describe("useSidebarAuth", () => {
 		mockUseSession.mockReturnValue({ data: { user: mockUser }, isPending: false });
 
 		mockFrom.mockReturnValue({
-			select: vi.fn().mockReturnValue({
-				eq: vi.fn().mockReturnValue({
-					maybeSingle: vi.fn().mockRejectedValue(new Error("Network error")),
+			select: mock().mockReturnValue({
+				eq: mock().mockReturnValue({
+					maybeSingle: mock().mockRejectedValue(new Error("Network error")),
 				}),
 			}),
 		});

@@ -1,85 +1,110 @@
-import { describe, expect, it, vi, beforeEach } from "vitest";
-import { getCart, addToCart, updateQty, removeFromCart, clearCart } from "./cart";
-import { cookies } from "next/headers";
-import { cache as redisCache } from "@rose-griffon/db/redis";
-import { getServerUser } from "@/lib/auth-helpers";
+import { describe, expect, it, beforeAll, beforeEach, mock } from "bun:test";
+import type { Mock } from "bun:test";
+
+// --- Mocks de modules (top-level, AVANT tout import du SUT) ---
+// On garde des références aux mocks pour pouvoir les réinitialiser dans beforeEach
+// (bun:test n'a pas d'équivalent fiable à vi.clearAllMocks()).
+
+const mockProduct = {
+	category: "textile",
+	image: "/shop/tshirt.png",
+	name: "T-shirt Rose Griffon 2026",
+	priceCents: 2000,
+	slug: "tee-shirt-rose-griffon-2026",
+	tags: ["new"],
+};
+const mockPack = {
+	category: "pack-patreon",
+	image: "/patreon/destin.webp",
+	name: "Pack Personnage — Édition Destin Billows",
+	priceCents: 2490,
+	slug: "pack-personnage-destin-billows",
+	tags: ["limited"],
+	variants: [{ id: "solstice", label: "Illustration · Solstice" }],
+};
+
+const getProduct = mock((slug: string) => {
+	if (slug === "tee-shirt-rose-griffon-2026") return mockProduct;
+	if (slug === "pack-personnage-destin-billows") return mockPack;
+	return undefined;
+});
+const getVariantPrice = mock((product: { priceCents: number }, _variantId?: string) => product.priceCents);
 
 // Mock products
-vi.mock("./products", () => {
-	const mockProduct = {
-		category: "textile",
-		image: "/shop/tshirt.png",
-		name: "T-shirt Rose Griffon 2026",
-		priceCents: 2000,
-		slug: "tee-shirt-rose-griffon-2026",
-		tags: ["new"],
-	};
-	const mockPack = {
-		category: "pack-patreon",
-		image: "/patreon/destin.webp",
-		name: "Pack Personnage — Édition Destin Billows",
-		priceCents: 2490,
-		slug: "pack-personnage-destin-billows",
-		tags: ["limited"],
-		variants: [
-			{ id: "solstice", label: "Illustration · Solstice" },
-		],
-	};
-	return {
-		getProduct: vi.fn((slug) => {
-			if (slug === "tee-shirt-rose-griffon-2026") return mockProduct;
-			if (slug === "pack-personnage-destin-billows") return mockPack;
-			return undefined;
-		}),
-		getVariantPrice: vi.fn((product, variantId) => {
-			return product.priceCents;
-		}),
-	};
-});
+mock.module("./products", () => ({ getProduct, getVariantPrice }));
 
-// Mock next/headers
-vi.mock("next/headers", () => {
-	const mockStore = {
-		delete: vi.fn(),
-		get: vi.fn(),
-		set: vi.fn(),
-	};
-	return {
-		cookies: vi.fn(() => mockStore),
-	};
-});
+// Mock next/headers (store cookie synchrone — le SUT fait `await cookies()`,
+// await sur une valeur non-promesse renvoie la valeur telle quelle).
+const cookieStore = {
+	delete: mock(),
+	get: mock(),
+	set: mock(),
+};
+const cookies = mock(() => cookieStore);
+mock.module("next/headers", () => ({ cookies }));
 
 // Mock next/cache
-vi.mock("next/cache", () => ({
-	revalidatePath: vi.fn(),
-}));
+const revalidatePath = mock();
+mock.module("next/cache", () => ({ revalidatePath }));
 
 // Mock @rose-griffon/db/redis
-vi.mock("@rose-griffon/db/redis", () => ({
-	cache: {
-		del: vi.fn(),
-		get: vi.fn(),
-		set: vi.fn(),
-	},
-}));
+const redisCache = {
+	del: mock(),
+	get: mock(),
+	set: mock(),
+};
+mock.module("@rose-griffon/db/redis", () => ({ cache: redisCache }));
 
-// Mock @/lib/auth-helpers
-vi.mock("@/lib/auth-helpers", () => ({
-	getServerUser: vi.fn(),
-}));
+// Mock @/lib/auth-helpers (le module réel charge @/lib/auth → betterAuth/Pool ;
+// on le mocke entièrement pour ne jamais évaluer ces effets de bord).
+const getServerUser = mock();
+mock.module("@/lib/auth-helpers", () => ({ getServerUser }));
+
+// --- Import dynamique du SUT, APRÈS les mock.module ci-dessus ---
+type CartModule = typeof import("./cart");
+let getCart: CartModule["getCart"];
+let addToCart: CartModule["addToCart"];
+let updateQty: CartModule["updateQty"];
+let removeFromCart: CartModule["removeFromCart"];
+let clearCart: CartModule["clearCart"];
+
+beforeAll(async () => {
+	const mod = await import("./cart");
+	getCart = mod.getCart;
+	addToCart = mod.addToCart;
+	updateQty = mod.updateQty;
+	removeFromCart = mod.removeFromCart;
+	clearCart = mod.clearCart;
+});
 
 describe("Cart persistence & merging", () => {
-	const mockCookies = cookies() as any;
+	const mockCookies = cookieStore;
 
 	beforeEach(() => {
-		vi.clearAllMocks();
+		// Réinitialise l'historique d'appels de tous les mocks (remplace vi.clearAllMocks()).
+		for (const m of [
+			getProduct,
+			getVariantPrice,
+			cookies,
+			cookieStore.get,
+			cookieStore.set,
+			cookieStore.delete,
+			revalidatePath,
+			redisCache.get,
+			redisCache.set,
+			redisCache.del,
+			getServerUser,
+		] as Mock<(...args: never[]) => unknown>[]) {
+			m.mockClear();
+		}
+
 		mockCookies.get.mockReturnValue(undefined);
 		mockCookies.set.mockReturnValue(undefined);
 		mockCookies.delete.mockReturnValue(undefined);
-		vi.mocked(redisCache.get).mockResolvedValue(null);
-		vi.mocked(redisCache.set).mockResolvedValue(true);
-		vi.mocked(redisCache.del).mockResolvedValue(true);
-		vi.mocked(getServerUser).mockResolvedValue(null);
+		redisCache.get.mockResolvedValue(null);
+		redisCache.set.mockResolvedValue(true);
+		redisCache.del.mockResolvedValue(true);
+		getServerUser.mockResolvedValue(null);
 	});
 
 	describe("Anonymous user (Cookie-based cart)", () => {
@@ -107,7 +132,7 @@ describe("Cart persistence & merging", () => {
 		it("should add a product to cookie cart", async () => {
 			await addToCart("tee-shirt-rose-griffon-2026", undefined, 1);
 			expect(mockCookies.set).toHaveBeenCalled();
-			const [, value] = mockCookies.set.mock.calls[0];
+			const [, value] = mockCookies.set.mock.calls[0] as [string, string];
 			const saved = JSON.parse(decodeURIComponent(value));
 			expect(saved[0].slug).toBe("tee-shirt-rose-griffon-2026");
 			expect(saved[0].qty).toBe(1);
@@ -121,7 +146,7 @@ describe("Cart persistence & merging", () => {
 
 			await updateQty("tee-shirt-rose-griffon-2026::default", 5);
 			expect(mockCookies.set).toHaveBeenCalled();
-			const [, value] = mockCookies.set.mock.calls[0];
+			const [, value] = mockCookies.set.mock.calls[0] as [string, string];
 			const saved = JSON.parse(decodeURIComponent(value));
 			expect(saved[0].qty).toBe(5);
 		});
@@ -143,23 +168,23 @@ describe("Cart persistence & merging", () => {
 	});
 
 	describe("Authenticated user (Redis-based cart & merging)", () => {
-		const mockUser = { id: "user_123", email: "test@rosegriffon.fr" } as any;
+		const mockUser = { id: "user_123", email: "test@rosegriffon.fr" } as { id: string; email: string };
 
 		beforeEach(() => {
-			vi.mocked(getServerUser).mockResolvedValue(mockUser);
+			getServerUser.mockResolvedValue(mockUser);
 		});
 
 		it("should return empty cart when Redis cache is empty", async () => {
 			const cart = await getCart();
 			expect(cart.items).toEqual([]);
-			expect(vi.mocked(redisCache.get)).toHaveBeenCalledWith("cart:user_123");
+			expect(redisCache.get).toHaveBeenCalledWith("cart:user_123");
 		});
 
 		it("should retrieve items from Redis cache when authenticated", async () => {
 			const redisItems = [
 				{ id: "tee-shirt-rose-griffon-2026::default", qty: 3, slug: "tee-shirt-rose-griffon-2026" }
 			];
-			vi.mocked(redisCache.get).mockResolvedValue(redisItems);
+			redisCache.get.mockResolvedValue(redisItems);
 
 			const cart = await getCart();
 			expect(cart.items.length).toBe(1);
@@ -171,7 +196,7 @@ describe("Cart persistence & merging", () => {
 			const redisItems = [
 				{ id: "tee-shirt-rose-griffon-2026::default", qty: 1, slug: "tee-shirt-rose-griffon-2026" }
 			];
-			vi.mocked(redisCache.get).mockResolvedValue(redisItems);
+			redisCache.get.mockResolvedValue(redisItems);
 
 			// Simule des items dans le cookie (avant authentification complète)
 			const cookieItems = [
@@ -202,14 +227,14 @@ describe("Cart persistence & merging", () => {
 		it("should add a product directly to Redis when authenticated", async () => {
 			await addToCart("tee-shirt-rose-griffon-2026", undefined, 2);
 			expect(redisCache.set).toHaveBeenCalled();
-			const calls = vi.mocked(redisCache.set).mock.calls;
+			const calls = redisCache.set.mock.calls;
 			expect(calls.length).toBeGreaterThan(0);
 			const call = calls[0]!;
 			const key = call[0];
 			const savedItems = call[1];
 			expect(key).toBe("cart:user_123");
-			expect((savedItems as any)[0].slug).toBe("tee-shirt-rose-griffon-2026");
-			expect((savedItems as any)[0].qty).toBe(2);
+			expect((savedItems as { slug: string; qty: number }[])[0]!.slug).toBe("tee-shirt-rose-griffon-2026");
+			expect((savedItems as { slug: string; qty: number }[])[0]!.qty).toBe(2);
 		});
 
 		it("should clear Redis cart on clearCart", async () => {
