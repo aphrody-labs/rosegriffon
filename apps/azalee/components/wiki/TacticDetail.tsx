@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowLeft, Hourglass, Map, Store, Timer, Zap } from "lucide-react";
+import { ArrowLeft, Flame, Hourglass, Map, Store, Timer, Zap } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
@@ -20,6 +20,10 @@ interface Tactic {
 	duration: number | null;
 	cooldown: number | null;
 	shop: string | null;
+	// Surface native de la table tactique (cf. wiki-service.getTactic).
+	element?: string | null;
+	power?: number | null;
+	recastTime?: number | null;
 	image?: string | null;
 	imageUrl?: string | null;
 }
@@ -84,14 +88,35 @@ export function TacticDetail({ tactic }: TacticDetailProps) {
 									<Map size={14} aria-hidden="true" />
 									Tactique Spéciale
 								</span>
+								{/* Élément natif (table inagle_tactics, déjà en FR ; défaut 'Néant'). */}
+								{tactic.element && tactic.element !== "Néant" && (
+									<span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-primary/10 text-xs font-bold text-primary">
+										<Flame size={14} aria-hidden="true" />
+										{tactic.element}
+									</span>
+								)}
 							</div>
 						</div>
 					</div>
 				</div>
 
-				{/* Stats Row */}
+				{/* Stats Row — masquée si aucune stat (sinon rangée fantôme bordée/paddée). */}
+				{((tactic.power != null && tactic.power > 0) ||
+					tactic.duration != null ||
+					tactic.cooldown != null) && (
 				<div className="px-6 py-4 border-t border-outline-variant/20">
 					<div className="flex flex-wrap gap-4">
+						{tactic.power != null && tactic.power > 0 && (
+							<div className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-surface-container border border-outline-variant/20">
+								<Flame size={20} className="text-primary" aria-hidden="true" />
+								<div>
+									<p className="text-[10px] uppercase tracking-wider text-on-surface-variant font-bold">
+										Puissance
+									</p>
+									<p className="text-sm font-black text-on-surface">{tactic.power}</p>
+								</div>
+							</div>
+						)}
 						{tactic.duration != null && (
 							<div className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-surface-container border border-outline-variant/20">
 								<Timer size={20} className="text-tertiary" aria-hidden="true" />
@@ -116,6 +141,7 @@ export function TacticDetail({ tactic }: TacticDetailProps) {
 						)}
 					</div>
 				</div>
+				)}
 
 				{/* Description */}
 				{tactic.description_fr && (
