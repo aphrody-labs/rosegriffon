@@ -309,6 +309,15 @@ export {
 	type SkillTechnicDatabase,
 	type SkillTechnicInfo,
 } from "./skill-technic-config.js";
+// Star sign parser (Players Universe rarity / drop pool per sign)
+export {
+	buildStarSignMap,
+	getRarity,
+	isRemarkable,
+	loadStarSignCharaInfo,
+	rarityToGrowthRank,
+	type StarSignCharaInfo,
+} from "./star-sign.js";
 // Special Tactics parser (DLC Orion - Tactiques Speciales)
 export {
 	buildSpecialTacticsDatabase,

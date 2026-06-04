@@ -16,11 +16,19 @@ import { loadTextFile } from "./parsers/text-parser.js";
 // Pushers de catégories câblées (source unique sous src/, réutilisée par les
 // scripts standalone scripts/push-<cat>.ts).
 import {
+	importBoostGroups,
+	importConstellations,
 	importEmblems,
+	importMissions,
 	importShops,
+	importSkillTechnic,
 	importSpecialTactics,
+	importStarSigns,
+	importSuperTactics,
+	importTeamBuild,
 	importTelopWaza,
 	importTricks,
+	importTrophies,
 	importUniforms,
 	importVideoWaza,
 } from "./push-categories.js";
@@ -146,6 +154,14 @@ export function registerPushCommand(program: Command) {
 				await importTelopWaza(service, adapter);
 				await importVideoWaza(service, adapter);
 				await importEmblems(service, adapter);
+				await importSuperTactics(service, adapter);
+				await importSkillTechnic(service, adapter);
+				await importTeamBuild(service, adapter);
+				await importBoostGroups(service, adapter);
+				await importConstellations(service, adapter);
+				await importStarSigns(service, adapter);
+				await importTrophies(service, adapter);
+				await importMissions(service, adapter);
 
 				// Static reference tables
 				await importExpTable(adapter);

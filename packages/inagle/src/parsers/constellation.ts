@@ -5,7 +5,7 @@
 
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
-import { PATHS } from "../core/paths.js";
+import { PATHS, resolveGameDataFile } from "../core/paths.js";
 
 // ============================================================================
 // Types
@@ -136,52 +136,74 @@ export interface StarSignInfoEntry {
 	enableCond: string;
 }
 
-/** Load star sign info (30 constellations with name hashes) */
-function loadStarSignInfo(): StarSignInfoEntry[] {
-	const filePath = join(PATHS.allGamedata, "starSignInfo.json");
+/**
+ * Charge les `lists` du vrai config Players Universe
+ * (`players_universe_config_*.cfg.bin.json`) et indexe par nom de liste.
+ *
+ * Source de vérité = octets réels du dump. Les listes star/sign vivent ici
+ * (`m_starInfoList`, `m_starSignInfoList`, `m_starSignRarityRateInfoList`,
+ * `m_starSignCharaInfoList`, `m_starSignCharaSetDataList`), chaque entrée sous
+ * la clé `values`. Repli legacy : anciens JSON pré-extraits dans all-gamedata.
+ */
+let rawListsCache: Map<string, any[]> | null = null;
+function loadPlayersUniverseLists(): Map<string, any[]> {
+	if (rawListsCache) return rawListsCache;
+	const map = new Map<string, any[]>();
+	const filePath =
+		resolveGameDataFile("players_universe", "players_universe_config") ||
+		join(PATHS.playersUniverse, "players_universe_config_1.03.59.00.cfg.bin.json");
+	if (existsSync(filePath)) {
+		try {
+			const data = JSON.parse(readFileSync(filePath, "utf-8"));
+			for (const list of data.lists || []) {
+				if (list?.name) map.set(list.name, list.values || []);
+			}
+		} catch (e) {
+			console.error(`[Constellation] Failed to parse ${filePath}:`, e);
+		}
+	}
+	rawListsCache = map;
+	return map;
+}
 
-	if (!existsSync(filePath)) {
+/** Repli legacy : ancien JSON pré-extrait `all-gamedata/<name>.json` (`{ data: [] }`). */
+function loadLegacyAllGamedata<T>(fileName: string): T[] {
+	const filePath = join(PATHS.allGamedata, fileName);
+	if (!existsSync(filePath)) return [];
+	try {
+		const data = JSON.parse(readFileSync(filePath, "utf-8"));
+		return data.data || [];
+	} catch {
 		return [];
 	}
+}
 
-	const data = JSON.parse(readFileSync(filePath, "utf-8"));
-	return data.data || [];
+/** Load star sign info (30 constellations with name hashes) */
+function loadStarSignInfo(): StarSignInfoEntry[] {
+	const fromConfig = loadPlayersUniverseLists().get("m_starSignInfoList");
+	if (fromConfig?.length) return fromConfig as StarSignInfoEntry[];
+	return loadLegacyAllGamedata<StarSignInfoEntry>("starSignInfo.json");
 }
 
 /** Load star info (30 constellations) */
 function loadStarInfo(): StarInfo[] {
-	const filePath = join(PATHS.allGamedata, "starInfo.json");
-
-	if (!existsSync(filePath)) {
-		return [];
-	}
-
-	const data = JSON.parse(readFileSync(filePath, "utf-8"));
-	return data.data || [];
+	const fromConfig = loadPlayersUniverseLists().get("m_starInfoList");
+	if (fromConfig?.length) return fromConfig as StarInfo[];
+	return loadLegacyAllGamedata<StarInfo>("starInfo.json");
 }
 
 /** Load rarity rate info (90 entries) */
 function loadRarityRateInfo(): StarSignRarityRateInfo[] {
-	const filePath = join(PATHS.allGamedata, "starSignRarityRateInfo.json");
-
-	if (!existsSync(filePath)) {
-		return [];
-	}
-
-	const data = JSON.parse(readFileSync(filePath, "utf-8"));
-	return data.data || [];
+	const fromConfig = loadPlayersUniverseLists().get("m_starSignRarityRateInfoList");
+	if (fromConfig?.length) return fromConfig as StarSignRarityRateInfo[];
+	return loadLegacyAllGamedata<StarSignRarityRateInfo>("starSignRarityRateInfo.json");
 }
 
-/** Load character info (4439 entries) */
+/** Load character info (5010 entries) */
 function loadCharaInfo(): Array<{ charaParamId: string }> {
-	const filePath = join(PATHS.allGamedata, "starSignCharaInfo.json");
-
-	if (!existsSync(filePath)) {
-		return [];
-	}
-
-	const data = JSON.parse(readFileSync(filePath, "utf-8"));
-	return data.data || [];
+	const fromConfig = loadPlayersUniverseLists().get("m_starSignCharaInfoList");
+	if (fromConfig?.length) return fromConfig as Array<{ charaParamId: string }>;
+	return loadLegacyAllGamedata<{ charaParamId: string }>("starSignCharaInfo.json");
 }
 
 // ============================================================================
@@ -212,16 +234,31 @@ export function buildConstellationMapping(): ConstellationMapping {
 		keyHashToSignInfo.set(signInfo.starKeyNameHash, signInfo);
 	}
 
+	// Pré-résolution des noms localisés HORS de la boucle principale. Sous Bun
+	// 1.4-canary, faire les `Map.get()` de noms à l'intérieur de la grande boucle
+	// builder déclenche une miscompilation JIT (un nom sur 30 sortait
+	// `undefined`). Cette petite boucle dédiée n'est pas mal-optimisée et donne un
+	// résultat déterministe 30/30. Indexée par position dans starInfoList.
+	const resolvedNames: Array<{ fr?: string; en?: string; ja?: string }> = [];
+	for (let i = 0; i < starInfoList.length; i++) {
+		const signInfo = keyHashToSignInfo.get(starInfoList[i].starNameHash);
+		const nameHash = signInfo ? hashToNumber(signInfo.starSignNameId) : 0;
+		resolvedNames.push({
+			fr: namesFR.get(nameHash),
+			en: namesEN.get(nameHash),
+			ja: namesJA.get(nameHash),
+		});
+	}
+
 	// Build constellations
 	const constellations: Constellation[] = [];
 	const byCharacterId = new Map<string, number>();
 
 	for (let i = 0; i < starInfoList.length; i++) {
 		const star = starInfoList[i];
-		const signInfo = keyHashToSignInfo.get(star.starNameHash);
 
-		// Get name hash from starSignInfo.starSignNameId
-		const nameHash = signInfo ? hashToNumber(signInfo.starSignNameId) : 0;
+		// Noms localisés : pré-résolus hors boucle (cf. note ci-dessus).
+		const names = resolvedNames[i];
 
 		// Each constellation has 3 rarity entries (indices i*3, i*3+1, i*3+2)
 		const rarityEntries = [
@@ -247,11 +284,7 @@ export function buildConstellationMapping(): ConstellationMapping {
 		const constellation: Constellation = {
 			index: i,
 			hashId: star.starNameHash,
-			names: {
-				fr: namesFR.get(nameHash),
-				en: namesEN.get(nameHash),
-				ja: namesJA.get(nameHash),
-			},
+			names,
 			characterIds,
 			characterCount: characterIds.length,
 			textures: {
@@ -321,4 +354,5 @@ export function getCharacterIdsInConstellation(constellationIndex: number): stri
 /** Clear cache (for testing) */
 export function clearConstellationCache(): void {
 	constellationCache = null;
+	rawListsCache = null;
 }
