@@ -228,7 +228,7 @@ _API universelle et parses de données de jeu Inazuma Eleven_
    - Parallélisation des E/S et du parsing JSON dans le générateur de glossaire via `Promise.all` et traitement AST en une seule passe pour `extractNouns`.
    - Optimisation de l'exécutable compilé via le cache de bytecode natif Bun (`--bytecode`) divisant par 2 le temps de démarrage du CLI en production, avec sourcemaps `zstd` embarqués (`--sourcemap`).
 4. ✅ **Résolution du fallback d'API Skills et indexation par IDs hexadécimaux** :
-   - Redirection automatique du chargeur de Skills API vers les entrées précompilées locales (`packages/inagle/src/entries`) quand le dossier de données de production `/home/ubuntu/data/entities` n'existe pas.
+   - Redirection automatique du chargeur de Skills API vers les entrées précompilées locales (`packages/inagle/src/entries`) quand le dossier de données de production `/home/ubuntu/niers/data/entities` n'existe pas.
    - Suppression définitive de l'avertissement de module manquant `@streamparser/json` à l'exécution de l'exécutable standalone compilé.
    - Indexation bidirectionnelle des techniques par identifiant textuel (`skillIDStr`) et par adresse hexadécimale (`skillID`), résolvant l'affichage des noms des Super Moves dans les fiches de personnages.
    - Amélioration de l'interaction utilisateur dans le REPL interactif en autorisant l'exécution immédiate des commandes lors de l'annulation d'un prompt de sélection multiple.
@@ -261,3 +261,18 @@ _API universelle et parses de données de jeu Inazuma Eleven_
    - Implémentation du test d'intégration complet `packages/inagle/src/azalee-inagle-integration.test.ts` s'exécutant via `bun test` pour valider de bout en bout le pipeline : parsing Inagle, conformité de la DB SQLite locale, et bon comportement du CLI.
    - Nettoyage du cache de navigateurs de Playwright (`~/.cache/ms-playwright`) et arrêt de tous les processus chrome/playwright orphelins sur le VPS.
 
+### Phase 7 : WebAssembly, Rendu WebGPU & Reverse Engineering Avancé (Juin 2026)
+
+1. ✅ **Reconstruction Mémoire & Cartographie RTTI (nie.exe)** :
+   - Réalignement physique du dump mémoire paginé (`nie_module.bin` 37.4 Mo) vers une structure PE brute (`nie_module_raw.exe` 30.0 Mo) pour éliminer le désalignement de section de 7.3 Mo et débloquer les outils d'analyse statique.
+   - Alignement du squelette de fonctions Ghidra sur les 50 674 vrais points d'entrée découverts via la table `.pdata`.
+   - Extraction de 2 495 classes RTTI MSVC et 3 915 relations d'héritage pour cartographier le moteur.
+   - Désassemblage récursif via Iced-x86 découvrant 125 029 nouvelles arêtes d'appel direct.
+   - Propagation de labels par diffusion de chaleur (Label Spreading) atteignant **92,45 % de couverture de code**.
+2. ✅ **Indexation SQLite & Redis Étendue (niers/rg-cron)** :
+   - Correction de tous les chemins hardcodés `/home/ubuntu/data` vers `/home/ubuntu/niers/data` dans les scripts de RAG et d'indexation.
+   - Extension de la synchronisation SQLite/Redis à 10 nouvelles tables de jeu (skills, passives, trophies, missions, keshins, emblems, special_tactics, formations, basara, stadiums) assurant l'indexation de l'intégralité du corpus.
+3. ✅ **Portage WebAssembly Universel (`nie-wasm`)** :
+   - Portage complet des décodeurs CPK (décompression CRILAYLA et déchiffrement XOR position-based) et G4* (G4MD/G4MG/G4TX) en Rust portable (wasm32-unknown-unknown).
+   - Intégration d'un polyfill d'importation WASM à détection d'environnement automatique dans `nie_wasm.js` permettant la compilation et l'instanciation synchrone dans les environnements de test headless (Bun/Node.js) tout en conservant le support des bundlers de production (Vite/Next.js).
+   - Validation de la suite complète de 63 tests unitaires d'intégration graphiques et mathématiques 3D (`packages/menu-render-webgpu`) s'exécutant sur le runtime Wasm natif.
