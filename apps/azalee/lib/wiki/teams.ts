@@ -22,7 +22,10 @@
 import "server-only";
 
 import { createClient } from "@/lib/supabase/server";
-import { getCharacterFaceUrl, resolveAssetUrl } from "@/lib/images";
+import { getCharacterFaceUrl, getEmblemImageUrl, resolveAssetUrl } from "@/lib/images";
+// Table CRC → nom d'emblème (`emNNNNNN`), générée depuis l'index CPK
+// (crc32 standard de chaque `emNNNNNN`). Couvre 206/208 emblèmes réels.
+import emblemCrcMap from "@/data/emblem-crc-map.json";
 import {
 	SEASON_LABELS,
 	SERIES_LABELS,
@@ -100,8 +103,40 @@ function teamOrder(dataRaw: string | null): number {
 	return typeof v === "number" ? v : 9999;
 }
 
+// Ordre de préférence des séries (la « vraie » identité visuelle de l'équipe
+// dans Victory Road > Inazuma Eleven original > GO > Ares/Orion).
+const EMBLEM_SERIES_ORDER = ["v", "ie", "go", "aresOrion"] as const;
+
+// Normalise un CRC en clé du map : `0x` minuscule + hex MAJUSCULE.
+// Piège : `crc.toUpperCase()` transformerait aussi le `x` → `0X…` (clé absente).
+function normalizeCrcKey(crc: string): string {
+	return `0x${crc.replace(/^0x/i, "").toUpperCase()}`;
+}
+
+const EMBLEM_CRC_MAP = emblemCrcMap as Record<string, string>;
+
 function resolveTeamEmblem(row: RawTeamRow): string | null {
-	// `emblem_url` (icône webp déjà résolue côté DB) → URL dump dx11 live.
+	// 1) Vrai emblème : `emblems` = { série: CRC }. On choisit la série la plus
+	// représentative dispo, on mappe son CRC → `emNNNNNN` → URL CDN (sert 200).
+	const emblems = parseJson<Record<string, string>>(row.emblems);
+	if (emblems) {
+		let crc: string | null = null;
+		for (const series of EMBLEM_SERIES_ORDER) {
+			if (emblems[series]) {
+				crc = emblems[series];
+				break;
+			}
+		}
+		if (!crc) crc = Object.values(emblems).find(Boolean) ?? null;
+		if (crc) {
+			const emName = EMBLEM_CRC_MAP[normalizeCrcKey(crc)];
+			if (emName) {
+				const url = getEmblemImageUrl(emName);
+				if (url) return url;
+			}
+		}
+	}
+	// 2) Repli : `emblem_url` (URL proxy Supabase, souvent HTTP 400 — dernier recours).
 	const fromUrl = resolveAssetUrl(row.emblem_url);
 	if (fromUrl) return fromUrl;
 	return null;
@@ -115,7 +150,7 @@ export async function getTeamsList(): Promise<TeamListItem[]> {
 	const supabase = await createClient();
 	const { data: teamsRaw } = await supabase
 		.from("inagle_teams")
-		.select("id, name_fr, name_en, name_ja, emblem_url, kits, data");
+		.select("id, name_fr, name_en, name_ja, emblem_url, emblems, kits, data");
 
 	const rows = (teamsRaw ?? []) as RawTeamRow[];
 

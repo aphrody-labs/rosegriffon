@@ -21,7 +21,11 @@
  *   - La colonne `game` est décalée pour ~70 lignes (contient « Manager »/« Coach » au lieu
  *     du titre du jeu) → on ne s'y fie pas pour un filtre.
  *   - `element` est en kanji (山 林 火 風) → mappé vers une clé EN pour l'icône.
- *   - Aucune ligne n'a d'`image` non vide → pas d'illustration disponible, fallback icône.
+ *   - Aucune ligne n'a d'`image` non vide → pas d'illustration disponible.
+ *     On dérive donc le portrait du `internal_code` du personnage homonyme :
+ *     join `name_localised` = `inagle_characters.name_en` → `internal_code`
+ *     (84/102 matchent). Le composant client passe ce code à `getCharacterFaceUrl`
+ *     (client-safe) ; les 18 NPC sans match gardent le fallback icône.
  */
 
 import "server-only";
@@ -139,6 +143,12 @@ export interface Coach {
 	/** Valeur du bonus pré-résolue dans la feuille source. */
 	buff: string | null;
 	image: string | null;
+	/**
+	 * Code interne du personnage homonyme (`c0xxxxxxx`), dérivé du join
+	 * `name_localised` = `inagle_characters.name_en`. Sert au composant client à
+	 * résoudre le portrait via `getCharacterFaceUrl`. `null` pour les NPC sans match.
+	 */
+	internalCode: string | null;
 	/** Échelle complète du passif (rôle × rareté) si résolue. */
 	scaling: PassiveScaling | null;
 }
@@ -164,7 +174,11 @@ function normalizeRole(role: string | null): CoachRole {
 }
 
 /** Convertit une ligne brute + son passif résolu en `Coach`. */
-function toCoach(raw: RawCoordinator, scaling: PassiveScaling | null): Coach {
+function toCoach(
+	raw: RawCoordinator,
+	scaling: PassiveScaling | null,
+	internalCode: string | null
+): Coach {
 	const role = normalizeRole(raw.role);
 	const elementKanji = cleanCell(raw.element);
 	const playstyle = cleanCell(raw.playstyle);
@@ -182,6 +196,7 @@ function toCoach(raw: RawCoordinator, scaling: PassiveScaling | null): Coach {
 		gender: cleanCell(raw.gender),
 		id: raw.id,
 		image: cleanCell(raw.image),
+		internalCode,
 		name,
 		nameKanji: cleanCell(raw.name_kanji),
 		nameLocalised: cleanCell(raw.name_localised),
@@ -195,6 +210,40 @@ function toCoach(raw: RawCoordinator, scaling: PassiveScaling | null): Coach {
 		scaling,
 		stat: cleanCell(raw.stat),
 	};
+}
+
+/** Ligne minimale de `inagle_characters` pour la résolution du portrait. */
+interface RawCharacterRef {
+	name_en: string | null;
+	internal_code: string | null;
+}
+
+/**
+ * Construit l'index `name_en` → `internal_code` depuis `inagle_characters`.
+ * Le premier code rencontré est conservé (les homonymes éventuels sont ignorés).
+ */
+function indexCharacterCodes(rows: RawCharacterRef[]): Map<string, string> {
+	const map = new Map<string, string>();
+	for (const r of rows) {
+		const name = r.name_en?.trim();
+		if (!name || !r.internal_code || map.has(name)) {
+			continue;
+		}
+		map.set(name, r.internal_code);
+	}
+	return map;
+}
+
+/** Résout le `internal_code` d'un coach via son nom localisé (sinon null). */
+function resolveInternalCode(
+	raw: RawCoordinator,
+	byName: Map<string, string>
+): string | null {
+	const name = raw.name_localised?.trim();
+	if (!name) {
+		return null;
+	}
+	return byName.get(name) ?? null;
 }
 
 /** Construit l'index id → passif d'équipe depuis `inagle_manager_passives`. */
@@ -229,18 +278,20 @@ export interface CoachListParams {
 export async function getCoachesList(params: CoachListParams = {}): Promise<Coach[]> {
 	const supabase = await createClient();
 
-	const [coordRes, passiveRes] = await Promise.all([
+	const [coordRes, passiveRes, charRes] = await Promise.all([
 		supabase.from("inagle_coordinators").select("*").order("id", { ascending: true }),
 		supabase.from("inagle_manager_passives").select("*"),
+		supabase.from("inagle_characters").select("name_en, internal_code"),
 	]);
 
 	const rawCoords = (coordRes.data ?? []) as RawCoordinator[];
 	const rawPassives = (passiveRes.data ?? []) as RawManagerPassive[];
 	const passiveIndex = indexPassives(rawPassives);
+	const codeByName = indexCharacterCodes((charRes.data ?? []) as RawCharacterRef[]);
 
 	let coaches = rawCoords.map((raw) => {
 		const scaling = raw.passive_no != null ? (passiveIndex.get(raw.passive_no) ?? null) : null;
-		return toCoach(raw, scaling);
+		return toCoach(raw, scaling, resolveInternalCode(raw, codeByName));
 	});
 
 	const q = params.q?.trim().toLowerCase();
@@ -287,7 +338,21 @@ export async function getCoach(id: number): Promise<Coach | null> {
 	}
 	const passiveIndex = indexPassives((passiveRes.data ?? []) as RawManagerPassive[]);
 	const scaling = raw.passive_no != null ? (passiveIndex.get(raw.passive_no) ?? null) : null;
-	return toCoach(raw, scaling);
+
+	// Résolution du portrait : 1er personnage homonyme (`name_en` = `name_localised`).
+	let internalCode: string | null = null;
+	const name = raw.name_localised?.trim();
+	if (name) {
+		const charRes = await supabase
+			.from("inagle_characters")
+			.select("internal_code")
+			.eq("name_en", name)
+			.limit(1)
+			.maybeSingle();
+		internalCode = (charRes.data as { internal_code: string | null } | null)?.internal_code ?? null;
+	}
+
+	return toCoach(raw, scaling, internalCode);
 }
 
 /** Options de filtre dérivées des données réelles (pour les puces de filtre). */
