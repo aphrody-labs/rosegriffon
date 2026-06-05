@@ -5,6 +5,7 @@
 import characterFaceManifest from "@/data/character-face-manifest.json";
 import characterModelManifest from "@/data/character-model-manifest.json";
 import itemImageManifest from "@/data/item-image-manifest.json";
+import keshinModelManifest from "@/data/keshin-model-manifest.json";
 import miximaxIconManifest from "@/data/miximax-icon-manifest.json";
 
 const ITEM_IMAGE_MANIFEST = itemImageManifest as Record<string, string>;
@@ -41,6 +42,18 @@ const CHARACTER_FACE_CODES = new Set(characterFaceManifest as string[]);
  * fallback image) — même garde-fou anti-404 que CHARACTER_FACE_CODES.
  */
 const CHARACTER_MODEL_CODES = new Set(characterModelManifest as string[]);
+
+/**
+ * Gate des modèles 3D COMPLETS keshin (`k<NNNNNN>`) + armures (`ka<NNNNNN>NN`) réellement
+ * servis live par `nie-model-serve` sur `cdn.rosegriffon.fr/model-full/<code>.glb`.
+ * Vérité terrain = probe HTTP du vrai endpoint (cf. `scripts/build-keshin-model-manifest.ts`).
+ *
+ * Aujourd'hui : 5 keshin (ceux en `.g4md`) + 89 armures. Les ~92 keshin restants ne
+ * sont qu'en `.g4mg` — pas encore assemblables côté serving → exclus du gate (pas de
+ * bouton 3D mort). Régénérer le manifeste quand la couche serving gagne le support g4mg.
+ */
+const KESHIN_MODEL_CODES = new Set((keshinModelManifest as { keshin: string[] }).keshin);
+const ARMURE_MODEL_CODES = new Set((keshinModelManifest as { armures: string[] }).armures);
 
 /**
  * Set EXHAUSTIF des codes uniforme `u<NNNNNNNN>` (8 chiffres) qui possèdent réellement
@@ -955,6 +968,56 @@ export function getCharacterModelFullGlbUrl(code: string | undefined | null): st
 		return null;
 	}
 	return `${MODEL_FULL_GLB_BASE}/${base}.glb`;
+}
+
+/**
+ * Extrait le code modèle keshin (`k<NNNNNN>`) d'une entrée aura keshin. Le code vit dans
+ * le chemin de l'icône (`200_icon/10_icon_chr/aura_fs/k<NNNNNN>_l_…`) ou la colonne `data`.
+ * Renvoie `null` si aucun `k<6 chiffres>` n'est trouvé.
+ */
+export function extractKeshinModelCode(
+	...sources: Array<string | null | undefined>
+): string | null {
+	for (const s of sources) {
+		if (!s) continue;
+		// `k` suivi d'exactement 6 chiffres, NON précédé d'un chiffre et NON suivi d'un
+		// chiffre (un `_`/`/` après est OK : `aura_fs/k000010_l_…` doit matcher `k000010`).
+		const m = s.match(/(?<![0-9])(k\d{6})(?![0-9])/);
+		if (m?.[1]) return m[1];
+	}
+	return null;
+}
+
+/**
+ * Résout l'URL du modèle 3D COMPLET d'un keshin (`k<NNNNNN>`), gardé sur le manifeste
+ * des modèles réellement servis (`KESHIN_MODEL_CODES`). Renvoie `null` si non servi
+ * (keshin `.g4mg`-seul pas encore assemblable) → pas de bouton 3D mort.
+ */
+export function getKeshinModelGlbUrl(code: string | undefined | null): string | null {
+	if (!code) return null;
+	const base = code.replace(/_\d+$/, "");
+	if (!KESHIN_MODEL_CODES.has(base)) return null;
+	return `${MODEL_FULL_GLB_BASE}/${base}.glb`;
+}
+
+/**
+ * Résout l'URL du modèle 3D COMPLET d'une armure (`ka<NNNNNN>NN`), gardé sur le manifeste
+ * des armures réellement servies (`ARMURE_MODEL_CODES`). Renvoie `null` si inconnue.
+ */
+export function getArmureModelGlbUrl(code: string | undefined | null): string | null {
+	if (!code) return null;
+	if (!ARMURE_MODEL_CODES.has(code)) return null;
+	return `${MODEL_FULL_GLB_BASE}/${code}.glb`;
+}
+
+/** Liste triée des codes keshin servis (gate des fiches/galeries 3D). */
+export function listServedKeshinCodes(): string[] {
+	return [...KESHIN_MODEL_CODES].sort();
+}
+
+/** Liste triée des codes armure servis (gate de la galerie 3D armures). */
+export function listServedArmureCodes(): string[] {
+	return [...ARMURE_MODEL_CODES].sort();
 }
 
 /**
