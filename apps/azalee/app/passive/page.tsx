@@ -7,6 +7,8 @@ import { PassiveFilters } from "@/components/wiki/filters/PassiveFilters";
 import {
 	CoordinatorPassiveCard,
 	CustomPassiveCard,
+	NierPassiveFamilyCard,
+	NierTeamPassiveCard,
 	PLAYSTYLE_FR,
 	PlayerPassiveCard,
 	REQUIREMENT_FR,
@@ -15,11 +17,15 @@ import {
 import type {
 	CoordinatorPassiveData,
 	CustomPassiveData,
+	NierPassiveFamily,
+	NierPassiveInstance,
+	NierTeamPassive,
 	PlayerPassiveData,
 } from "@/components/wiki/PassiveCard";
 import { WikiSearchToolbar } from "@/components/wiki/WikiSearchToolbar";
 import type { SpriteCommonKey } from "@/config/sprites-common";
 import passiveData from "@/data/passive-sheets.json";
+import passivesFullData from "@/data/passives-full.json";
 import { normalizeText } from "@/lib/search-utils";
 import { parseSearchParams } from "@/lib/validations";
 
@@ -29,7 +35,40 @@ export const metadata: Metadata = {
 	title: "Talents & Passifs | Codex Stratégique - Azalée",
 };
 
-// ── Helpers ──
+// ── Groupement nie-data ──
+
+/** Regroupe les instances de passives joueur par effect_id (128 familles). */
+function buildNierFamilies(player: NierPassiveInstance[]): NierPassiveFamily[] {
+	const map = new Map<string, NierPassiveInstance[]>();
+	for (const inst of player) {
+		if (!map.has(inst.effect_id)) map.set(inst.effect_id, []);
+		map.get(inst.effect_id)!.push(inst);
+	}
+	// Trier les familles par texte FR de la première instance (ordre alphabétique)
+	return [...map.entries()]
+		.map(([effect_id, instances]) => ({ effect_id, instances }))
+		.sort((a, b) => {
+			const ta = a.instances[0]?.description.fr ?? "";
+			const tb = b.instances[0]?.description.fr ?? "";
+			return ta.localeCompare(tb, "fr");
+		});
+}
+
+/** Recherche dans une famille : compare le texte FR/EN/JA de la première instance. */
+function familyMatchesSearch(family: NierPassiveFamily, qNorm: string): boolean {
+	if (!qNorm) return true;
+	const inst = family.instances[0];
+	if (!inst) return false;
+	const texts = [
+		inst.description.fr,
+		inst.description.en,
+		inst.description.ja,
+		inst.string_id,
+	];
+	return texts.some((t) => t && normalizeText(t).includes(qNorm));
+}
+
+// ── Helpers passive-sheets ──
 
 function passiveSearchText(p: { requirement: string; stat: string; playstyle?: string }): string {
 	const req = REQUIREMENT_FR[p.requirement] || p.requirement;
@@ -74,15 +113,12 @@ function matchesFilters(
 	playstyleFilter: string | null,
 	statCatFilter: string
 ): boolean {
-	// Text search
 	if (qNorm && !passiveSearchText(p).includes(qNorm)) {
 		return false;
 	}
-	// Playstyle filter
 	if (playstyleFilter !== null && (p.playstyle ?? "") !== playstyleFilter) {
 		return false;
 	}
-	// Stat category
 	if (statCatFilter && statCategory(p.stat) !== statCatFilter) {
 		return false;
 	}
@@ -119,16 +155,26 @@ export default async function PassivesPage({
 	const psFilter = playstyleFilter !== undefined ? (playstyleFilter?.toString() ?? "") : null;
 	const catFilter = statCatFilter?.toString() || "";
 
-	// ── Load all data ──
-	const allPlayerPassives = passiveData.playerPassives as PlayerPassiveData[];
+	// ── Load passive-sheets data (custom + coordinator) ──
+	const allPlayerPassivesSheets = passiveData.playerPassives as PlayerPassiveData[];
 	const allCustomPassives = passiveData.customPassives as CustomPassiveData[];
 	const allCoordinatorPassives = passiveData.coordinatorPassives as CoordinatorPassiveData[];
 
-	// ── Compute type counts (before type filter, after text/playstyle/cat filter) ──
-	const playerFiltered = allPlayerPassives.filter((p) =>
+	// ── Load nie-data passives (passives-full.json) ──
+	const nierAllPlayer = passivesFullData.player as NierPassiveInstance[];
+	const nierTeamPassives = passivesFullData.team as NierTeamPassive[];
+	const nierFamiliesAll = buildNierFamilies(nierAllPlayer);
+
+	// ── Filter nie-data families by search ──
+	const nierFamiliesFiltered = nierFamiliesAll.filter((f) => familyMatchesSearch(f, qNorm));
+
+	// ── Compute type counts ──
+	const playerFiltered = allPlayerPassivesSheets.filter((p) =>
 		matchesFilters(p, qNorm, psFilter, catFilter)
 	);
-	const customFiltered = allCustomPassives.filter((p) => matchesFilters(p, qNorm, null, catFilter));
+	const customFiltered = allCustomPassives.filter((p) =>
+		matchesFilters(p, qNorm, null, catFilter)
+	);
 	const coordFiltered = allCoordinatorPassives.filter((p) =>
 		matchesFilters(p, qNorm, psFilter, catFilter)
 	);
@@ -136,7 +182,7 @@ export default async function PassivesPage({
 	const typeCounts: Record<string, number> = {
 		coordinator: coordFiltered.length,
 		custom: customFiltered.length,
-		player: playerFiltered.length,
+		player: nierFamiliesFiltered.length,
 	};
 
 	// ── Apply type filter ──
@@ -144,25 +190,33 @@ export default async function PassivesPage({
 	const showCustom = !typeFilter || typeFilter === "custom";
 	const showCoord = !typeFilter || typeFilter === "coordinator";
 
-	const playerPassives = showPlayer ? playerFiltered : [];
+	const nierFamilies = showPlayer ? nierFamiliesFiltered : [];
 	const customPassives = showCustom ? customFiltered : [];
 	const coordinatorPassives = showCoord ? coordFiltered : [];
 
-	// ── Compute playstyle counts (on visible data, before playstyle filter) ──
+	// ── Playstyle counts (sheets fallback, used for filters) ──
 	const allForPlaystyleCounts = [
 		...(showPlayer
-			? allPlayerPassives.filter(
+			? (allPlayerPassivesSheets as Array<{
+					playstyle?: string;
+					requirement: string;
+					stat: string;
+				}>).filter(
 					(p) =>
-						(!qNorm || passiveSearchText(p).includes(qNorm)) &&
+						(!qNorm || passiveSearchText(p as { requirement: string; stat: string; playstyle?: string }).includes(qNorm)) &&
 						(!catFilter || statCategory(p.stat) === catFilter)
 				)
 			: []),
 		...(showCoord
 			? (
-					allCoordinatorPassives as Array<{ playstyle?: string; requirement: string; stat: string }>
+					allCoordinatorPassives as Array<{
+						playstyle?: string;
+						requirement: string;
+						stat: string;
+					}>
 				).filter(
 					(p) =>
-						(!qNorm || passiveSearchText(p).includes(qNorm)) &&
+						(!qNorm || passiveSearchText(p as { requirement: string; stat: string; playstyle?: string }).includes(qNorm)) &&
 						(!catFilter || statCategory(p.stat) === catFilter)
 				)
 			: []),
@@ -173,19 +227,21 @@ export default async function PassivesPage({
 		playstyleCounts[ps] = (playstyleCounts[ps] || 0) + 1;
 	}
 
-	// ── Group player passives by playstyle ──
+	// ── Legacy player passive groups (sheets) ──
+	const sheetPlayerPassives = showPlayer ? playerFiltered : [];
 	const playerGroups = PLAYSTYLE_SECTIONS.map((section) => ({
 		...section,
-		passives: playerPassives.filter((p) => p.playstyle === section.key),
+		passives: sheetPlayerPassives.filter((p) => p.playstyle === section.key),
 	})).filter((g) => g.passives.length > 0);
 
-	// ── Group coordinator passives by playstyle ──
+	// ── Coordinator groups ──
 	const coordGroups = PLAYSTYLE_SECTIONS.map((section) => ({
 		...section,
 		passives: coordinatorPassives.filter((p) => p.playstyle === section.key),
 	})).filter((g) => g.passives.length > 0);
 
-	const totalCount = playerPassives.length + customPassives.length + coordinatorPassives.length;
+	const totalCount =
+		nierFamilies.length + customPassives.length + coordinatorPassives.length;
 
 	return (
 		<div className="space-y-8 pb-20" role="main" aria-label="Passifs et talents">
@@ -194,15 +250,16 @@ export default async function PassivesPage({
 					Talents & Passifs
 				</h1>
 				<p className="text-sm text-on-surface-variant">
-					Guide complet des talents et passifs d'Inazuma Eleven: Victory Road.
+					Guide complet des talents et passifs d&apos;Inazuma Eleven: Victory Road.
 				</p>
 			</div>
+
 			{/* Sticky Header */}
 			<div className="sticky top-[64px] z-40 bg-surface/90 backdrop-blur-md -mx-4 px-4 py-4 border-b border-outline-variant/10">
 				<div className="space-y-3">
 					<div className="w-full md:max-w-md">
 						<WikiSearchToolbar
-							placeholder="Rechercher un passif (stat, condition...)"
+							placeholder="Rechercher un passif (effet, condition...)"
 							showFilters={false}
 							className="bg-surface-container-high border-outline-variant/50"
 						/>
@@ -210,7 +267,6 @@ export default async function PassivesPage({
 
 					<PassiveFilters typeCounts={typeCounts} playstyleCounts={playstyleCounts} />
 
-					{/* Results count */}
 					<div
 						className="text-xs font-medium text-on-surface-variant px-1 uppercase tracking-wider"
 						aria-live="polite"
@@ -231,8 +287,8 @@ export default async function PassivesPage({
 				</div>
 			) : (
 				<div className="space-y-16">
-					{/* Player Passives */}
-					{playerPassives.length > 0 && (
+					{/* Passifs joueur — données complètes nie-data (128 familles, 1716 instances) */}
+					{nierFamilies.length > 0 && (
 						<section id="player" className="scroll-mt-36" aria-labelledby="player-heading">
 							<div className="flex items-center gap-4 mb-8 border-b border-outline-variant/30 pb-2">
 								<User size={36} className="text-blue-600" aria-hidden="true" />
@@ -241,8 +297,41 @@ export default async function PassivesPage({
 										Passifs joueur
 									</h2>
 									<p className="text-sm text-on-surface-variant font-medium">
-										{playerPassives.length} passifs &mdash; valeurs par rareté (Légendaire &rarr;
-										Commun)
+										{nierFamilies.length} familles &mdash; {nierAllPlayer.length} instances totales
+										(données gamedata IEVR, textes officiels FR/EN/JA résolus)
+									</p>
+								</div>
+							</div>
+
+							<FadeInStagger
+								className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4"
+								role="list"
+								aria-label="Familles de passifs joueur"
+							>
+								{nierFamilies.map((family) => (
+									<FadeInItem
+										key={family.effect_id}
+										className="h-full"
+										role="listitem"
+									>
+										<NierPassiveFamilyCard family={family} />
+									</FadeInItem>
+								))}
+							</FadeInStagger>
+						</section>
+					)}
+
+					{/* Passifs joueur legacy (passive-sheets, groupés par style de jeu) — affiché si pas de nie-data */}
+					{nierFamilies.length === 0 && playerGroups.length > 0 && (
+						<section id="player-legacy" className="scroll-mt-36" aria-labelledby="player-legacy-heading">
+							<div className="flex items-center gap-4 mb-8 border-b border-outline-variant/30 pb-2">
+								<User size={36} className="text-blue-600" aria-hidden="true" />
+								<div>
+									<h2 id="player-legacy-heading" className="text-2xl font-bold text-on-surface">
+										Passifs joueur
+									</h2>
+									<p className="text-sm text-on-surface-variant font-medium">
+										{sheetPlayerPassives.length} passifs &mdash; valeurs par rareté
 									</p>
 								</div>
 							</div>
@@ -285,6 +374,35 @@ export default async function PassivesPage({
 									</div>
 								))}
 							</div>
+						</section>
+					)}
+
+					{/* Passifs d'équipe (team passives nie-data, 21 entrées) */}
+					{!typeFilter && nierTeamPassives.length > 0 && (
+						<section id="team" className="scroll-mt-36" aria-labelledby="team-heading">
+							<div className="flex items-center gap-4 mb-8 border-b border-outline-variant/30 pb-2">
+								<Users size={36} className="text-sky-600" aria-hidden="true" />
+								<div>
+									<h2 id="team-heading" className="text-2xl font-bold text-on-surface">
+										Passifs d&apos;équipe
+									</h2>
+									<p className="text-sm text-on-surface-variant font-medium">
+										{nierTeamPassives.length} passifs &mdash; appliqués à toute l&apos;équipe
+									</p>
+								</div>
+							</div>
+
+							<FadeInStagger
+								className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"
+								role="list"
+								aria-label="Passifs d'équipe"
+							>
+								{nierTeamPassives.map((t) => (
+									<FadeInItem key={t.team_passive_id} className="h-full" role="listitem">
+										<NierTeamPassiveCard passive={t} />
+									</FadeInItem>
+								))}
+							</FadeInStagger>
 						</section>
 					)}
 
