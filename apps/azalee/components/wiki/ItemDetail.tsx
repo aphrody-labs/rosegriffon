@@ -5,7 +5,7 @@ import { ArrowRightLeft, Backpack, Coins, MapPin, ShoppingBag, Star, Store } fro
 import Image from "next/image";
 import { useState } from "react";
 import { Icon } from "@/components/ui/Icon";
-import { resolveAssetUrl } from "@/lib/images";
+import { PLACEHOLDERS, resolveAssetUrl } from "@/lib/images";
 import { japaneseToRomaji } from "@/lib/japanese-romaji";
 
 const RARITY_LABELS: Record<string, string> = {
@@ -52,7 +52,11 @@ interface ItemDetailProps {
 
 export function ItemDetail({ item, itemName, itemDesc }: ItemDetailProps) {
 	const [imgError, setImgError] = useState(false);
-	const imageSrc = resolveAssetUrl(item.imageUrl || item.image);
+	const resolvedSrc = resolveAssetUrl(item.imageUrl || item.image);
+	// Pas de <img> cassé : une URL placeholder (`/ievr.webp`) ou une erreur runtime bascule
+	// sur l'icône Backpack (les items « important » `gd120002..091` n'ont pas d'icône réelle
+	// dans le CPK ; le `onError` couvre tout 404 résiduel).
+	const hasRealImage = !!resolvedSrc && resolvedSrc !== PLACEHOLDERS.item && !imgError;
 
 	const nameJA = item.names?.ja;
 	const nameEN = item.names?.en;
@@ -77,9 +81,9 @@ export function ItemDetail({ item, itemName, itemDesc }: ItemDetailProps) {
 				{/* Left: Image */}
 				<div className="flex flex-col items-center gap-6">
 					<div className="w-full aspect-square max-w-[200px] sm:max-w-[280px] rounded-2xl sm:rounded-3xl bg-surface-container-high flex items-center justify-center shrink-0 shadow-inner overflow-hidden relative border border-outline-variant/20">
-						{imageSrc && !imgError ? (
+						{hasRealImage ? (
 							<Image
-								src={imageSrc}
+								src={resolvedSrc as string}
 								alt={itemName}
 								width={128}
 								height={128}

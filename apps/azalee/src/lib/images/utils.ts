@@ -299,6 +299,23 @@ export function resolveAssetUrl(path: string | null | undefined): string | null 
 }
 
 /**
+ * URL d'une illustration de galerie (`inagle_gallery.img_path`) depuis le dump dx11.
+ *
+ * Vérité terrain (`inagle_game_assets`, db-2026-06-05) : les 360 illustrations vivent
+ * dans `menu/220_img/gallery_img2/` et le nom de fichier réel double le `img_path`
+ * (pattern `<imgPath>_<imgPath>.png`, ex. `img_story_ev01_main_0010_img_story_ev01_main_0010.png`).
+ * Couverture vérifiée 360/360 (HTTP 200 sur le CDN `cdn.rosegriffon.fr/dx11/menu/`).
+ *
+ * Renvoie `null` pour un `img_path` vide → le caller bascule sur le placeholder.
+ */
+export function getGalleryImageUrl(imgPath: string | undefined | null): string | null {
+	if (!imgPath) {
+		return null;
+	}
+	return `${MENU_DUMP_BASE}/220_img/gallery_img2/${imgPath}_${imgPath}.png`;
+}
+
+/**
  * URL d'un visage de personnage depuis le dump dx11 brut.
  * Pattern fichier : `icon_chr/face/{base}_l_{base}_1_l00.png` (variant 1 par défaut).
  *

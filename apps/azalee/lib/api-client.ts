@@ -2,7 +2,6 @@ import type { BaseCharacter, CharacterVariant, MultiLevelStats, Skill } from "@r
 import type {
 	InagleCharacter,
 	InagleDrop,
-	InagleHissatsu,
 	InagleItem,
 	InagleKizunaItem,
 	InagleTactic,
@@ -325,32 +324,37 @@ const getAuras = unstable_cache(
 	{ revalidate: CACHE_TTL, tags: ["auras"] }
 );
 
-const getHissatsu = unstable_cache(
-	async (): Promise<InagleHissatsu[]> => fetchTable<InagleHissatsu>("inagle_hissatsu"),
-	["all-hissatsu"],
-	{ revalidate: CACHE_TTL, tags: ["hissatsu"] }
+// Les "hissatsu" (techniques) vivent dans `inagle_skills` ; la table/vue
+// `inagle_hissatsu` n'existe NI dans le miroir SQLite NI dans Supabase. L'ancien
+// `fetchTable("inagle_hissatsu")` levait "no such table" → catch → [] → le
+// compteur "Techniques" du dashboard affichait 0 (au lieu de ~1002).
+const getRawSkills = unstable_cache(
+	async (): Promise<Array<Record<string, unknown>>> =>
+		fetchTable<Record<string, unknown>>("inagle_skills"),
+	["all-skills"],
+	{ revalidate: CACHE_TTL, tags: ["skills"] }
 );
 
 const getSkills = async (): Promise<Skill[]> => {
-	const hissatsu = await getHissatsu();
-	return hissatsu.map(
-		(h) =>
+	const rows = await getRawSkills();
+	return rows.map(
+		(r) =>
 			({
-				categoryName: { en: h.type || undefined, fr: h.type || undefined },
-				displayName: h.name || "Inconnu",
+				categoryName: { en: r.category || undefined, fr: r.category || undefined },
+				displayName: r.name_fr || r.name_en || "Inconnu",
 				element: 0,
-				elementName: { en: h.element || undefined, fr: h.element || undefined },
-				name_EN: h.name || "Inconnu",
-				name_FR: h.name || "Inconnu",
-				name_JA: h.name_jp || undefined,
+				elementName: { en: r.element || undefined, fr: r.element || undefined },
+				name_EN: r.name_en || r.name_fr || "Inconnu",
+				name_FR: r.name_fr || "Inconnu",
+				name_JA: r.name_ja || undefined,
 				names: {
-					en: h.name || undefined,
-					fr: h.name || undefined,
-					ja: h.name_jp || undefined,
+					en: r.name_en || undefined,
+					fr: r.name_fr || undefined,
+					ja: r.name_ja || undefined,
 				},
-				power: h.power,
-				skillId: h.id?.toString() || "0",
-				tpCost: h.tension,
+				power: r.power_max ?? r.power_min,
+				skillId: r.id?.toString() || "0",
+				tpCost: r.tp_cost ?? r.tension_cost,
 				type: 1,
 			}) as any
 	);
