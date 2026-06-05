@@ -384,7 +384,8 @@ export function CharacterSheet({
 	// Uniform URLs
 	const internalCode =
 		avatarUrl && !avatarUrl.startsWith("/") && !avatarUrl.startsWith("http") ? avatarUrl : null;
-	// Modèle 3D GLB (g4mg→GLB streamé depuis cdn.rosegriffon.fr/model/<code>.glb).
+	// Modèle 3D GLB COMPLET (corps+face+uniforme) assemblé live par nie-model-serve,
+	// servi sur cdn.rosegriffon.fr/model-full/<code>.glb.
 	// null si aucun modèle exporté → pas de bouton 3D (fallback portrait image).
 	const modelGlbUrl = internalCode ? getCharacterModelFullGlbUrl(internalCode) : null;
 	const uniformFrontUrl = internalCode ? getCharacterUniformUrl(internalCode) : null;
