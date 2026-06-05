@@ -571,7 +571,7 @@ export function SettingsClient({
 										Comptes liés
 									</CardTitle>
 									<CardDescription className="text-on-surface-variant/80 font-medium text-xs mt-1">
-										Connecte tes comptes Discord et Google pour te connecter plus facilement
+										Connecte tes comptes Discord, Google et Steam pour te connecter plus facilement
 									</CardDescription>
 								</div>
 							</div>
@@ -636,6 +636,48 @@ export function SettingsClient({
 										</div>
 									);
 								})}
+								{/* Steam — login OpenID 2.0 (flow distinct de linkSocial → page dédiée). */}
+								{(() => {
+									const linkedSteam = linkedAccounts.find((a) => a.provider_id === "steam");
+									return (
+										<div className="flex items-center justify-between p-6 hover:bg-surface-container-low/30 transition-colors">
+											<div className="flex items-center gap-4">
+												<div className="p-2.5 rounded-xl bg-[#171a21]/10 text-on-surface">
+													<svg className="size-5" viewBox="0 0 24 24" fill="currentColor">
+														<path d="M11.979 0C5.678 0 .511 4.86.022 11.037l6.432 2.658c.545-.371 1.203-.59 1.912-.59.063 0 .125.004.188.006l2.861-4.142V8.91c0-2.495 2.028-4.524 4.524-4.524 2.494 0 4.524 2.031 4.524 4.527s-2.03 4.525-4.524 4.525h-.105l-4.076 2.911c0 .052.004.105.004.159 0 1.875-1.515 3.396-3.39 3.396-1.635 0-3.016-1.173-3.331-2.727L.436 15.27C1.862 20.307 6.486 24 11.979 24c6.627 0 11.999-5.373 11.999-12S18.605 0 11.979 0zM7.54 18.21l-1.473-.61c.262.543.714.999 1.314 1.25.945.392 2.001.005 2.397-.94.396-.945.005-2.001-.94-2.397-.945-.396-2.001-.005-2.397.94l1.473.61c.945.392 2.001.005 2.397-.94zm11.082-9.299c0-1.662-1.353-3.015-3.015-3.015-1.663 0-3.015 1.353-3.015 3.015 0 1.663 1.352 3.015 3.015 3.015 1.662 0 3.015-1.352 3.015-3.015zm-5.273-.005c0-1.252 1.013-2.266 2.265-2.266 1.253 0 2.266 1.014 2.266 2.266 0 1.253-1.013 2.266-2.266 2.266-1.252 0-2.265-1.013-2.265-2.266z" />
+													</svg>
+												</div>
+												<div>
+													<p className="font-bold text-on-surface text-sm">Steam</p>
+													<p className="text-xs text-on-surface-variant">
+														{linkedSteam
+															? `Lié le ${formatDate(linkedSteam.created_at)}`
+															: "Non connecté"}
+													</p>
+												</div>
+											</div>
+											{linkedSteam ? (
+												<Button
+													variant="outline"
+													size="sm"
+													onClick={() => router.push("/compte/steam")}
+													className="rounded-full text-xs font-bold"
+												>
+													Voir
+												</Button>
+											) : (
+												<Button
+													variant="outline"
+													size="sm"
+													onClick={() => authClient.signIn.steam({ callbackURL: "/compte/steam" })}
+													className="rounded-full text-xs font-bold"
+												>
+													Lier
+												</Button>
+											)}
+										</div>
+									);
+								})()}
 							</div>
 						</CardContent>
 					</Card>

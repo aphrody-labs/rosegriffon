@@ -74,6 +74,7 @@
         "@radix-ui/react-tooltip": "catalog:",
         "@rose-griffon/assets": "workspace:*",
         "@rose-griffon/auth": "workspace:*",
+        "@rose-griffon/better-auth-steam": "workspace:*",
         "@rose-griffon/db": "workspace:*",
         "@rose-griffon/inagle": "workspace:*",
         "@rose-griffon/menu-render": "workspace:*",
@@ -176,6 +177,14 @@
         "typescript": "catalog:",
         "vitest": "catalog:",
       },
+    },
+    "apps/cdn": {
+      "name": "cdn",
+      "version": "0.1.0",
+    },
+    "apps/cdn-variants": {
+      "name": "cdn-variants",
+      "version": "0.1.0",
     },
     "apps/website": {
       "name": "@rose-griffon/website",
@@ -387,6 +396,18 @@
         "react": "catalog:",
         "typescript": "catalog:",
         "vitest": "catalog:",
+      },
+    },
+    "packages/better-auth-steam": {
+      "name": "@rose-griffon/better-auth-steam",
+      "version": "0.1.0",
+      "dependencies": {
+        "better-auth": "catalog:",
+        "zod": "catalog:",
+      },
+      "devDependencies": {
+        "@types/bun": "catalog:",
+        "typescript": "catalog:",
       },
     },
     "packages/config": {
@@ -1669,6 +1690,8 @@
 
     "@rose-griffon/azalee": ["@rose-griffon/azalee@workspace:apps/azalee"],
 
+    "@rose-griffon/better-auth-steam": ["@rose-griffon/better-auth-steam@workspace:packages/better-auth-steam"],
+
     "@rose-griffon/bot": ["@rose-griffon/bot@workspace:apps/bot"],
 
     "@rose-griffon/config": ["@rose-griffon/config@workspace:packages/config"],
@@ -2290,6 +2313,10 @@
     "camelize": ["camelize@1.0.1", "", {}, "sha512-dU+Tx2fsypxTgtLoE36npi3UqcjSSMNYfkqgmoEhtZrraP5VWq0K7FkWVTYa8eMPtnU/G2txVsfdCJTn9uzpuQ=="],
 
     "caniuse-lite": ["caniuse-lite@1.0.30001793", "", {}, "sha512-iwSsYWaCOoh26cV8NwNRViHlrfUvYsHDfRVcbtmw0Kg6PJIZZXwMkj1442FYLBGkeUf1juAsU3DTfxW579mrPA=="],
+
+    "cdn": ["cdn@workspace:apps/cdn"],
+
+    "cdn-variants": ["cdn-variants@workspace:apps/cdn-variants"],
 
     "chai": ["chai@6.2.2", "", {}, "sha512-NUPRluOfOiTKBKvWPtSD4PhFvWCqOi0BGStNWs57X9js7XGTprSmFoz5F0tWhR4WPjNeR9jXqdC7/UpSJTnlRg=="],
 
