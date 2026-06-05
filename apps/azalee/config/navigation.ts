@@ -31,6 +31,7 @@ export const navigationItems: NavItem[] = [
 		label: "nav.news",
 		path: "/news",
 	},
+	// — Base de données (wiki curé) —
 	{
 		commonSprite: "chara",
 		icon: "groups",
@@ -38,12 +39,18 @@ export const navigationItems: NavItem[] = [
 		path: "/chara",
 	},
 	{
-		commonSprite: "skill",
-		icon: "",
-		label: "nav.wiki.skills",
+		// Techniques, tactiques, passifs (capacités hors hyper).
+		children: [
+			{ label: "nav.wiki.skills", path: "/skill", icon: "sports_martial_arts", commonSprite: "skill" },
+			{ label: "nav.wiki.tactics", path: "/tactic", icon: "strategy" },
+			{ label: "nav.wiki.passives", path: "/passive", icon: "auto_awesome", commonSprite: "tension" },
+		],
+		icon: "sports_martial_arts",
+		label: "nav.section.abilities",
 		path: "/skill",
 	},
 	{
+		// Hyper-techniques (5 familles d'auras).
 		children: [
 			{
 				label: "nav.wiki.auras.keshin",
@@ -76,60 +83,57 @@ export const navigationItems: NavItem[] = [
 				commonSprite: "mode_change",
 			},
 		],
-		defaultOpen: true,
-		icon: "",
+		icon: "auto_awesome",
 		label: "nav.wiki.hyper_skills",
 		path: "/aura",
 	},
 	{
-		icon: "backpack",
-		label: "nav.wiki.items",
-		path: "/item",
-	},
-	{
-		icon: "casino",
-		label: "nav.wiki.capsules",
-		path: "/capsule",
-	},
-	{
-		icon: "storefront",
-		label: "nav.wiki.shops",
-		path: "/boutique",
-	},
-	{
+		// Équipes, entraîneurs, stades.
+		children: [
+			{ label: "nav.wiki.teams", path: "/equipe", icon: "shield" },
+			{ label: "nav.wiki.coaches", path: "/entraineur", icon: "sports" },
+			{ label: "nav.wiki.stadiums", path: "/stade", icon: "stadium" },
+		],
 		icon: "shield",
-		label: "nav.wiki.teams",
+		label: "nav.section.clubs",
 		path: "/equipe",
 	},
 	{
-		icon: "strategy",
-		label: "nav.wiki.tactics",
-		path: "/tactic",
+		// Objets & moyens d'obtention (boutiques, capsules, drops).
+		children: [
+			{ label: "nav.wiki.items", path: "/item", icon: "backpack" },
+			{ label: "nav.wiki.shops", path: "/boutique", icon: "storefront" },
+			{ label: "nav.wiki.capsules", path: "/capsule", icon: "casino" },
+			{ label: "nav.wiki.drops", path: "/drops", icon: "redeem" },
+		],
+		icon: "backpack",
+		label: "nav.section.items",
+		path: "/item",
 	},
 	{
-		commonSprite: "tension",
-		icon: "auto_awesome",
-		label: "nav.wiki.passives",
-		path: "/passive",
+		icon: "task_alt",
+		label: "nav.wiki.quests",
+		path: "/quete",
 	},
 	{
-		icon: "image",
-		label: "nav.wiki.gallery",
+		// Médias : galerie d'illustrations + modèles 3D.
+		children: [
+			{ label: "nav.wiki.gallery", path: "/gallery", icon: "image" },
+			{ label: "nav.wiki.keshin_models", path: "/keshin", icon: "view_in_ar" },
+		],
+		icon: "perm_media",
+		label: "nav.section.media",
 		path: "/gallery",
 	},
 	{
+		// Explorer le jeu : données brutes des CPK + écrans de menu reconstruits.
 		children: [
-			{ label: "nav.wiki.quests", path: "/quete", icon: "task_alt" },
-			{ label: "nav.wiki.coaches", path: "/entraineur", icon: "sports" },
-			{ label: "nav.wiki.stadiums", path: "/stade", icon: "stadium" },
-			{ label: "nav.wiki.drops", path: "/drops", icon: "redeem" },
-			{ label: "nav.wiki.keshin_models", path: "/keshin", icon: "view_in_ar" },
-			{ label: "nav.wiki.game_menus", path: "/menu/100_mainmenu", icon: "grid_view" },
 			{ label: "nav.wiki.cpk_browser", path: "/cpk", icon: "account_tree" },
+			{ label: "nav.wiki.game_menus", path: "/menu/100_mainmenu", icon: "grid_view" },
 		],
-		icon: "more_horiz",
-		label: "nav.wiki.more",
-		path: "/quete",
+		icon: "travel_explore",
+		label: "nav.section.explore",
+		path: "/cpk",
 	},
 	{
 		children: [
@@ -186,6 +190,7 @@ export const mobileNavItems: NavItem[] = [
 			"/drops",
 			"/keshin",
 			"/menu",
+			"/cpk",
 			"/wiki",
 			"/search",
 		],
