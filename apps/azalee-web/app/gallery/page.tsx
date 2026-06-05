@@ -82,7 +82,11 @@ export default async function GalleryPage({
 		return {
 			id: item.id,
 			title: item.title,
-			image: item.image,
+			// Vignette légère (w=400 webp) pour la carte ; grande (w=1600 webp) pour le
+			// lightbox ; `original` = PNG plein cadre réservé au téléchargement.
+			thumb: item.thumb,
+			full: item.full,
+			original: item.image,
 			categoryLabel: cat?.label,
 			categoryIcon: cat?.icon,
 		};

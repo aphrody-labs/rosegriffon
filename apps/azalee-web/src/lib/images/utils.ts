@@ -316,6 +316,45 @@ export function getGalleryImageUrl(imgPath: string | undefined | null): string |
 }
 
 /**
+ * Largeurs de variantes whitelistées côté CDN (`apps/cdn-variants`, :8805). Toute
+ * autre largeur est « snappée » à la plus proche par le service, mais on s'aligne ici
+ * pour ne demander que des tailles cachées (un seul fichier disque par largeur).
+ */
+export const GALLERY_VARIANT_WIDTHS = [200, 400, 800, 1600] as const;
+export type GalleryVariantWidth = (typeof GALLERY_VARIANT_WIDTHS)[number];
+
+/**
+ * Décline une URL d'illustration CDN brute (`cdn.rosegriffon.fr/dx11/...png`,
+ * potentiellement multi-Mo) en variante WebP redimensionnée servie par le service
+ * `cdn-variants` (resize+webp q≈78, cache disque). nginx route les `/dx11|/g4tx` AVEC
+ * `?w=` vers ce service ; SANS query le serving direct reste le PNG plein cadre.
+ *
+ * Ne réécrit QUE les URLs `/dx11/` ou `/g4tx/` raster (png/jpg). Tout autre host/chemin
+ * (placeholder local, webp déjà léger, route relative) est renvoyé tel quel — la
+ * fonction est donc idempotente et sûre à appliquer partout.
+ */
+export function galleryVariantUrl(
+	url: string | null | undefined,
+	width: GalleryVariantWidth
+): string | null {
+	if (!url) {
+		return null;
+	}
+	// Seules les sources CDN dx11/g4tx ont un décodeur de variantes derrière nginx.
+	// On match sur le chemin (host implicite ou explicite) pour rester robuste.
+	if (!/\/(dx11|g4tx)\//.test(url)) {
+		return url;
+	}
+	// Ne resize que des sources raster lourdes (png/jpg/jpeg). Un webp est déjà léger.
+	if (!/\.(png|jpe?g)(\?|$)/i.test(url)) {
+		return url;
+	}
+	// Si une query existe déjà (improbable ici), on évite de doubler `?`.
+	const sep = url.includes("?") ? "&" : "?";
+	return `${url}${sep}w=${width}&format=webp`;
+}
+
+/**
  * URL d'un visage de personnage depuis le dump dx11 brut.
  * Pattern fichier : `icon_chr/face/{base}_l_{base}_1_l00.png` (variant 1 par défaut).
  *

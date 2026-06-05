@@ -13,6 +13,7 @@ interface ItemEnrichment {
 const ITEM_ENRICHMENT = itemEnrichmentData as Record<string, ItemEnrichment>;
 import type { Database } from "@rose-griffon/db";
 import {
+	galleryVariantUrl,
 	getAuraImageUrl,
 	getGalleryImageUrl,
 	getMiximaxIconUrl,
@@ -68,9 +69,33 @@ export interface GalleryItem {
 	imgPath: string;
 	category: string;
 	title: string;
+	/** URL source pleine résolution (PNG brut, multi-Mo) — réservée au téléchargement. */
 	image: string | null;
+	/** Variante WebP légère (w=400) pour la vignette de carte (~4–60 Ko vs ~12 Mo). */
+	thumb: string | null;
+	/** Variante WebP grande (w=1600) pour le lightbox plein écran (~65–300 Ko). */
+	full: string | null;
 	needTokenNum: number;
 	flgNo: number;
+}
+
+/**
+ * Décline une URL d'illustration source en triplet `{ image, thumb, full }` :
+ *   - `image` : PNG plein cadre d'origine (téléchargement haute résolution)
+ *   - `thumb` : WebP w=400 (vignette de carte — cache disque CDN)
+ *   - `full`  : WebP w=1600 (lightbox plein écran — cache disque CDN)
+ * Les URLs non-CDN/non-raster sont renvoyées telles quelles par `galleryVariantUrl`.
+ */
+function galleryVariants(image: string | null): {
+	image: string | null;
+	thumb: string | null;
+	full: string | null;
+} {
+	return {
+		image,
+		thumb: galleryVariantUrl(image, 400),
+		full: galleryVariantUrl(image, 1600),
+	};
 }
 
 /**
@@ -129,7 +154,7 @@ function galleryRowToItem(row: any): GalleryItem {
 		imgPath,
 		category: galleryCategoryOf(imgPath),
 		title: galleryTitleOf(imgPath),
-		image: getGalleryImageUrl(imgPath),
+		...galleryVariants(getGalleryImageUrl(imgPath)),
 		needTokenNum: row.need_token_num ?? 0,
 		flgNo: row.flg_no ?? 0,
 	};
@@ -161,7 +186,7 @@ function menuManifestToItem(it: MenuGalleryManifestItem): GalleryItem {
 		imgPath: `${it.dir}/${it.file}`,
 		category: it.category,
 		title: it.title,
-		image: menuItemImageUrl(it),
+		...galleryVariants(menuItemImageUrl(it)),
 		needTokenNum: 0,
 		flgNo: 0,
 	};

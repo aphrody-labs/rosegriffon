@@ -11,7 +11,10 @@ import { cn } from "@/lib/utils";
 export interface GalleryLightboxItem {
 	id: string;
 	title: string;
-	image: string | null;
+	/** Variante WebP grande (w=1600) affichée en plein écran (~65–300 Ko). */
+	full: string | null;
+	/** PNG plein cadre d'origine — utilisé pour le téléchargement haute résolution. */
+	original: string | null;
 	categoryLabel?: string;
 	categoryIcon?: string;
 }
@@ -26,7 +29,7 @@ interface GalleryLightboxProps {
 
 /** Nom de fichier de téléchargement dérivé du titre, sinon du basename de l'URL. */
 function downloadName(item: GalleryLightboxItem): string {
-	const fromUrl = item.image?.split("/").pop()?.split("?")[0];
+	const fromUrl = (item.original ?? item.full)?.split("/").pop()?.split("?")[0];
 	const base = item.title?.trim() || fromUrl?.replace(/\.[a-z0-9]+$/i, "") || item.id;
 	const safe = base.replace(/[^\w.-]+/g, "_").replace(/^_+|_+$/g, "") || "illustration";
 	return safe.toLowerCase().endsWith(".png") ? safe : `${safe}.png`;
@@ -104,12 +107,15 @@ export function GalleryLightbox({ items, index, onClose, onNavigate }: GalleryLi
 	}
 
 	const handleDownload = async () => {
-		if (!item.image || downloading) {
+		// Téléchargement = PNG plein cadre d'origine (haute résolution). Repli sur la
+		// grande variante WebP si l'original n'est pas disponible.
+		const downloadUrl = item.original ?? item.full;
+		if (!downloadUrl || downloading) {
 			return;
 		}
 		setDownloading(true);
 		try {
-			const res = await fetch(item.image, { mode: "cors" });
+			const res = await fetch(downloadUrl, { mode: "cors" });
 			if (!res.ok) {
 				throw new Error(`HTTP ${res.status}`);
 			}
@@ -124,7 +130,7 @@ export function GalleryLightbox({ items, index, onClose, onNavigate }: GalleryLi
 			URL.revokeObjectURL(objectUrl);
 		} catch {
 			// Fallback : ouvrir l'image dans un nouvel onglet si le fetch blob échoue.
-			window.open(item.image, "_blank", "noopener");
+			window.open(downloadUrl, "_blank", "noopener");
 		} finally {
 			setDownloading(false);
 		}
@@ -155,7 +161,7 @@ export function GalleryLightbox({ items, index, onClose, onNavigate }: GalleryLi
 					<button
 						type="button"
 						onClick={handleDownload}
-						disabled={downloading || !item.image}
+						disabled={downloading || (!item.original && !item.full)}
 						aria-label="Télécharger l'illustration"
 						className={cn(
 							"inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition-colors",
@@ -188,7 +194,7 @@ export function GalleryLightbox({ items, index, onClose, onNavigate }: GalleryLi
 				onClick={onClose}
 				className="relative flex flex-1 cursor-zoom-out items-center justify-center overflow-hidden p-4 sm:p-8"
 			>
-				{item.image ? (
+				{item.full ? (
 					/* biome-ignore lint/a11y/noStaticElementInteractions: stop propagation pour ne pas fermer au clic sur l'image */
 					<div
 						className="relative flex size-full items-center justify-center"
@@ -196,7 +202,7 @@ export function GalleryLightbox({ items, index, onClose, onNavigate }: GalleryLi
 					>
 						<Image
 							key={item.id}
-							src={item.image}
+							src={item.full}
 							alt={item.title}
 							fill
 							sizes="100vw"
