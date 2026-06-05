@@ -125,6 +125,7 @@ export const navigationItems: NavItem[] = [
 			{ label: "nav.wiki.drops", path: "/drops", icon: "redeem" },
 			{ label: "nav.wiki.keshin_models", path: "/keshin", icon: "view_in_ar" },
 			{ label: "nav.wiki.game_menus", path: "/menu/100_mainmenu", icon: "grid_view" },
+			{ label: "nav.wiki.cpk_browser", path: "/cpk", icon: "account_tree" },
 		],
 		icon: "more_horiz",
 		label: "nav.wiki.more",
