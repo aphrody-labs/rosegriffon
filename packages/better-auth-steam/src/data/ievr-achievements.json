@@ -1,0 +1,1828 @@
+{
+	"ACHIEVEMENT_0001": {
+		"num": 1,
+		"trophyId": "activity_story_miniquest_001",
+		"nameFr": "Vieil homme qui a perdu sa clé",
+		"nameEn": "Old Man Who Lost His Key",
+		"nameJa": "鍵をなくしたおじいさん",
+		"descFr": "Offrir son aide.",
+		"descEn": "Help the one in need."
+	},
+	"ACHIEVEMENT_0002": {
+		"num": 2,
+		"trophyId": "activity_story_miniquest_002",
+		"nameFr": "De bonnes prises aujourd'hui",
+		"nameEn": "Big Haul Today",
+		"nameJa": "今日は大漁",
+		"descFr": "Offrir son aide.",
+		"descEn": "Help the one in need."
+	},
+	"ACHIEVEMENT_0003": {
+		"num": 3,
+		"trophyId": "activity_story_miniquest_003",
+		"nameFr": "Le bonheur sous ton nez",
+		"nameEn": "Happiness Under Your Nose",
+		"nameJa": "幸せはすぐそばに",
+		"descFr": "Offrir son aide.",
+		"descEn": "Help the one in need."
+	},
+	"ACHIEVEMENT_0004": {
+		"num": 4,
+		"trophyId": "activity_story_miniquest_004",
+		"nameFr": "C'est dans la poche",
+		"nameEn": "Hole in One",
+		"nameJa": "ホールインワン",
+		"descFr": "Offrir son aide.",
+		"descEn": "Help the one in need."
+	},
+	"ACHIEVEMENT_0005": {
+		"num": 5,
+		"trophyId": "activity_story_miniquest_005",
+		"nameFr": "Chercher l'énergie",
+		"nameEn": "In Search of Energy",
+		"nameJa": "エナジーを求めて",
+		"descFr": "Offrir son aide.",
+		"descEn": "Help the one in need."
+	},
+	"ACHIEVEMENT_0006": {
+		"num": 6,
+		"trophyId": "activity_story_miniquest_006",
+		"nameFr": "Fan de sable",
+		"nameEn": "Sand Enthusiast",
+		"nameJa": "すなはマニア",
+		"descFr": "Offrir son aide.",
+		"descEn": "Help the one in need."
+	},
+	"ACHIEVEMENT_0007": {
+		"num": 7,
+		"trophyId": "activity_story_miniquest_007",
+		"nameFr": "Fan de sable 2",
+		"nameEn": "Sand Enthusiast 2",
+		"nameJa": "続・すなはマニア",
+		"descFr": "Offrir son aide.",
+		"descEn": "Help the one in need."
+	},
+	"ACHIEVEMENT_0008": {
+		"num": 8,
+		"trophyId": "activity_story_miniquest_008",
+		"nameFr": "Fan de baskets",
+		"nameEn": "Sneakerhead",
+		"nameJa": "靴マニアのスタッフ",
+		"descFr": "Offrir son aide.",
+		"descEn": "Help the one in need."
+	},
+	"ACHIEVEMENT_0009": {
+		"num": 9,
+		"trophyId": "activity_story_miniquest_009",
+		"nameFr": "Enfant perdue au village",
+		"nameEn": "Lost Child in the Gardens",
+		"nameJa": "サッカーガーデンの迷子",
+		"descFr": "Offrir son aide.",
+		"descEn": "Help the one in need."
+	},
+	"ACHIEVEMENT_0010": {
+		"num": 10,
+		"trophyId": "activity_story_explore_001",
+		"nameFr": "L'odeur du club d'art",
+		"nameEn": "Art Club's Foul Smell",
+		"nameJa": "美術部の異臭",
+		"descFr": "Explorez bien les lieux.",
+		"descEn": "Search the area carefully."
+	},
+	"ACHIEVEMENT_0011": {
+		"num": 11,
+		"trophyId": "activity_story_explore_002",
+		"nameFr": "Bazar littéraire",
+		"nameEn": "Book Mess in a Retro Spot",
+		"nameJa": "レトロな場所の乱れた本",
+		"descFr": "Explorez bien les lieux.",
+		"descEn": "Search the area carefully."
+	},
+	"ACHIEVEMENT_0012": {
+		"num": 12,
+		"trophyId": "activity_story_explore_003",
+		"nameFr": "Chat-dore le poisson",
+		"nameEn": "Fish-Loving Cat",
+		"nameJa": "魚好きの招き猫",
+		"descFr": "Explorez bien les lieux.",
+		"descEn": "Search the area carefully."
+	},
+	"ACHIEVEMENT_0013": {
+		"num": 13,
+		"trophyId": "activity_story_explore_004",
+		"nameFr": "Un duo en blanc",
+		"nameEn": "A Pair in White",
+		"nameJa": "白いもの同士",
+		"descFr": "Explorez bien les lieux.",
+		"descEn": "Search the area carefully."
+	},
+	"ACHIEVEMENT_0014": {
+		"num": 14,
+		"trophyId": "activity_story_explore_005",
+		"nameFr": "Efforts d'embellissement",
+		"nameEn": "Town Beautification Efforts",
+		"nameJa": "町の美化活動",
+		"descFr": "Explorez bien les lieux.",
+		"descEn": "Search the area carefully."
+	},
+	"ACHIEVEMENT_0015": {
+		"num": 15,
+		"trophyId": "activity_story_explore_006",
+		"nameFr": "Notes d'un piano abandonné",
+		"nameEn": "Sound of an Unmanned Piano",
+		"nameJa": "無人のピアノの音",
+		"descFr": "Explorez bien les lieux.",
+		"descEn": "Search the area carefully."
+	},
+	"ACHIEVEMENT_0016": {
+		"num": 16,
+		"trophyId": "activity_story_explore_007",
+		"nameFr": "Silhouette mouvante",
+		"nameEn": "A Moving Mount",
+		"nameJa": "動く剥製",
+		"descFr": "Explorez bien les lieux.",
+		"descEn": "Search the area carefully."
+	},
+	"ACHIEVEMENT_0017": {
+		"num": 17,
+		"trophyId": "activity_story_explore_008",
+		"nameFr": "Le livre interdit",
+		"nameEn": "Forbidden Library Book",
+		"nameJa": "図書室の禁断の書",
+		"descFr": "Explorez bien les lieux.",
+		"descEn": "Search the area carefully."
+	},
+	"ACHIEVEMENT_0018": {
+		"num": 18,
+		"trophyId": "activity_story_explore_009",
+		"nameFr": "Le casier bloqué",
+		"nameEn": "The Locked Locker",
+		"nameJa": "開かずのロッカー",
+		"descFr": "Explorez bien les lieux.",
+		"descEn": "Search the area carefully."
+	},
+	"ACHIEVEMENT_0019": {
+		"num": 19,
+		"trophyId": "activity_story_explore_010",
+		"nameFr": "Marmite d'éducation ménagère",
+		"nameEn": "Pot in the Home Ec Room",
+		"nameJa": "家庭科室の鍋",
+		"descFr": "Explorez bien les lieux.",
+		"descEn": "Search the area carefully."
+	},
+	"ACHIEVEMENT_0020": {
+		"num": 20,
+		"trophyId": "activity_story_explore_011",
+		"nameFr": "Lettre maudite",
+		"nameEn": "Cursed Letter",
+		"nameJa": "呪いの手紙",
+		"descFr": "Explorez bien les lieux.",
+		"descEn": "Search the area carefully."
+	},
+	"ACHIEVEMENT_0021": {
+		"num": 21,
+		"trophyId": "activity_story_explore_012",
+		"nameFr": "Douceurs de luxe d'Odaiba",
+		"nameEn": "Gourmet Sweets of Odaiba",
+		"nameJa": "お台場のグルメスイーツ",
+		"descFr": "Explorez bien les lieux.",
+		"descEn": "Search the area carefully."
+	},
+	"ACHIEVEMENT_0022": {
+		"num": 22,
+		"trophyId": "activity_story_explore_013",
+		"nameFr": "Nourriture célèbre d'Odaiba",
+		"nameEn": "Famous Food of Odaiba",
+		"nameJa": "お台場の名物フード",
+		"descFr": "Explorez bien les lieux.",
+		"descEn": "Search the area carefully."
+	},
+	"ACHIEVEMENT_0023": {
+		"num": 23,
+		"trophyId": "activity_story_explore_014",
+		"nameFr": "Un écho",
+		"nameEn": "Echoing Sound",
+		"nameJa": "鳴り響く音",
+		"descFr": "Explorez bien les lieux.",
+		"descEn": "Search the area carefully."
+	},
+	"ACHIEVEMENT_0024": {
+		"num": 24,
+		"trophyId": "activity_story_explore_015",
+		"nameFr": "Coffre de foot\n(Route de campagne)",
+		"nameEn": "Secret Lootball (Rural Road)",
+		"nameJa": "田舎道の隠れたチェスト",
+		"descFr": "Trouvez et frappez dans le coffre de foot secret.",
+		"descEn": "Find and kick the secret loot football."
+	},
+	"ACHIEVEMENT_0025": {
+		"num": 25,
+		"trophyId": "activity_story_explore_016",
+		"nameFr": "Coffre de foot\n(Centre-ville)",
+		"nameEn": "Secret Lootball (Downtown)",
+		"nameJa": "繁華街の隠れたチェスト",
+		"descFr": "Trouvez et frappez dans le coffre de foot secret.",
+		"descEn": "Find and kick the secret loot football."
+	},
+	"ACHIEVEMENT_0026": {
+		"num": 26,
+		"trophyId": "activity_story_explore_017",
+		"nameFr": "Coffre de foot\n(Chemin du collège)",
+		"nameEn": "Secret Lootball (School Road)",
+		"nameJa": "学校通りの隠れたチェスト",
+		"descFr": "Trouvez et frappez dans le coffre de foot secret.",
+		"descEn": "Find and kick the secret loot football."
+	},
+	"ACHIEVEMENT_0027": {
+		"num": 27,
+		"trophyId": "activity_story_explore_018",
+		"nameFr": "Coffre de foot\n(Rue NAGUMO2)",
+		"nameEn": "Secret Lootball (NAGUMO2 Street)",
+		"nameJa": "南雲通りの隠れたチェスト",
+		"descFr": "Trouvez et frappez dans le coffre de foot secret.",
+		"descEn": "Find and kick the secret loot football."
+	},
+	"ACHIEVEMENT_0028": {
+		"num": 28,
+		"trophyId": "activity_story_explore_019",
+		"nameFr": "Coffre de foot\n(Parc océanique)",
+		"nameEn": "Secret Lootball (Seaside Park)",
+		"nameJa": "海公園の隠れたチェスト",
+		"descFr": "Trouvez et frappez dans le coffre de foot secret.",
+		"descEn": "Find and kick the secret loot football."
+	},
+	"ACHIEVEMENT_0029": {
+		"num": 29,
+		"trophyId": "activity_story_explore_020",
+		"nameFr": "Coffre de foot\n(Route côtière)",
+		"nameEn": "Secret Lootball (Coastal Road)",
+		"nameJa": "海岸沿いの道の隠れたチェスト",
+		"descFr": "Trouvez et frappez dans le coffre de foot secret.",
+		"descEn": "Find and kick the secret loot football."
+	},
+	"ACHIEVEMENT_0030": {
+		"num": 30,
+		"trophyId": "activity_story_explore_021",
+		"nameFr": "Coffre de foot\n(Gare de NAGUMOHARA3)",
+		"nameEn": "Secret Lootball (NAGUMOHARA3 Station)",
+		"nameJa": "南雲原駅の隠れたチェスト",
+		"descFr": "Trouvez et frappez dans le coffre de foot secret.",
+		"descEn": "Find and kick the secret loot football."
+	},
+	"ACHIEVEMENT_0031": {
+		"num": 31,
+		"trophyId": "activity_story_explore_022",
+		"nameFr": "Coffre de foot\n(Port de NAGUMOHARA3)",
+		"nameEn": "Secret Lootball (NAGUMOHARA3 Port)",
+		"nameJa": "南雲原港の隠れたチェスト",
+		"descFr": "Trouvez et frappez dans le coffre de foot secret.",
+		"descEn": "Find and kick the secret loot football."
+	},
+	"ACHIEVEMENT_0032": {
+		"num": 32,
+		"trophyId": "activity_story_explore_023",
+		"nameFr": "Coffre de foot\n(Ancien chantier naval)",
+		"nameEn": "Secret Lootball (Old Shipyard)",
+		"nameJa": "造船所跡の隠れたチェスト",
+		"descFr": "Trouvez et frappez dans le coffre de foot secret.",
+		"descEn": "Find and kick the secret loot football."
+	},
+	"ACHIEVEMENT_0033": {
+		"num": 33,
+		"trophyId": "activity_story_explore_024",
+		"nameFr": "Coffre de foot\n(Espace principal)",
+		"nameEn": "Secret Lootball (Main Area)",
+		"nameJa": "中央エリアの隠れたチェスト",
+		"descFr": "Trouvez et frappez dans le coffre de foot secret.",
+		"descEn": "Find and kick the secret loot football."
+	},
+	"ACHIEVEMENT_0034": {
+		"num": 34,
+		"trophyId": "activity_story_explore_025",
+		"nameFr": "Coffre de foot\n(Hébergements)",
+		"nameEn": "Secret Lootball (Lodging Area)",
+		"nameJa": "宿舎エリアの隠れたチェスト",
+		"descFr": "Trouvez et frappez dans le coffre de foot secret.",
+		"descEn": "Find and kick the secret loot football."
+	},
+	"ACHIEVEMENT_0035": {
+		"num": 35,
+		"trophyId": "activity_story_photo_001",
+		"nameFr": "Réunion des chats en chef",
+		"nameEn": "Boss Cats' Gathering",
+		"nameJa": "ボス猫たちの集会",
+		"descFr": "Trouvez votre cible et prenez une photo.",
+		"descEn": "Find your target and snap a photo."
+	},
+	"ACHIEVEMENT_0036": {
+		"num": 36,
+		"trophyId": "activity_story_photo_002",
+		"nameFr": "Visite umi-bozu\n(Chemin du collège)",
+		"nameEn": "UMIBOZU Tour: School Road",
+		"nameJa": "海坊主巡り・学校通り編",
+		"descFr": "Trouvez votre cible et prenez une photo.",
+		"descEn": "Find your target and snap a photo."
+	},
+	"ACHIEVEMENT_0037": {
+		"num": 37,
+		"trophyId": "activity_story_photo_003",
+		"nameFr": "Visite umi-bozu\n(Parc océanique)",
+		"nameEn": "UMIBOZU Tour: Seaside Park",
+		"nameJa": "海坊主巡り・海公園編",
+		"descFr": "Trouvez votre cible et prenez une photo.",
+		"descEn": "Find your target and snap a photo."
+	},
+	"ACHIEVEMENT_0038": {
+		"num": 38,
+		"trophyId": "activity_story_photo_004",
+		"nameFr": "Visite umi-bozu\n(Gare de NAGUMOHARA3)",
+		"nameEn": "UMIBOZU Tour: NAGUMOHARA3 Station",
+		"nameJa": "海坊主巡り・南雲原駅編",
+		"descFr": "Trouvez votre cible et prenez une photo.",
+		"descEn": "Find your target and snap a photo."
+	},
+	"ACHIEVEMENT_0039": {
+		"num": 39,
+		"trophyId": "activity_story_photo_005",
+		"nameFr": "Visite umi-bozu\n(Port de NAGUMOHARA3)",
+		"nameEn": "UMIBOZU Tour: NAGUMOHARA3 Port",
+		"nameJa": "海坊主巡り・南雲原港編",
+		"descFr": "Trouvez votre cible et prenez une photo.",
+		"descEn": "Find your target and snap a photo."
+	},
+	"ACHIEVEMENT_0040": {
+		"num": 40,
+		"trophyId": "activity_story_photo_006",
+		"nameFr": "Plus sombre qu'un chat noir",
+		"nameEn": "Blacker Than Black Cat",
+		"nameJa": "黒より黒い猫",
+		"descFr": "Trouvez votre cible et prenez une photo.",
+		"descEn": "Find your target and snap a photo."
+	},
+	"ACHIEVEMENT_0041": {
+		"num": 41,
+		"trophyId": "activity_story_photo_007",
+		"nameFr": "Monument de NAGUMOHARA",
+		"nameEn": "NAGUMOHARA Monument",
+		"nameJa": "南雲原のモニュメント",
+		"descFr": "Trouvez votre cible et prenez une photo.",
+		"descEn": "Find your target and snap a photo."
+	},
+	"ACHIEVEMENT_0042": {
+		"num": 42,
+		"trophyId": "activity_story_photo_008",
+		"nameFr": "Illuminer Odaiba",
+		"nameEn": "Illuminating Odaiba",
+		"nameJa": "お台場を照らす光",
+		"descFr": "Trouvez votre cible et prenez une photo.",
+		"descEn": "Find your target and snap a photo."
+	},
+	"ACHIEVEMENT_0043": {
+		"num": 43,
+		"trophyId": "activity_story_photo_009",
+		"nameFr": "Grande roue du village",
+		"nameEn": "Ferris Wheel of the Gardens",
+		"nameJa": "ガーデンの大観覧車",
+		"descFr": "Trouvez votre cible et prenez une photo.",
+		"descEn": "Find your target and snap a photo."
+	},
+	"ACHIEVEMENT_0044": {
+		"num": 44,
+		"trophyId": "activity_story_photo_010",
+		"nameFr": "Mecque du foot",
+		"nameEn": "The Mecca of Football",
+		"nameJa": "サッカーの聖地",
+		"descFr": "Trouvez votre cible et prenez une photo.",
+		"descEn": "Find your target and snap a photo."
+	},
+	"ACHIEVEMENT_0045": {
+		"num": 45,
+		"trophyId": "activity_story_photo_011",
+		"nameFr": "Gare du village sportif",
+		"nameEn": "Odaiba Gardens Station",
+		"nameJa": "お台場サッカーガーデン駅",
+		"descFr": "Trouvez votre cible et prenez une photo.",
+		"descEn": "Find your target and snap a photo."
+	},
+	"ACHIEVEMENT_0046": {
+		"num": 46,
+		"trophyId": "activity_story_photo_012",
+		"nameFr": "Bateau de pêche d'Odaiba",
+		"nameEn": "Fishing Boat in Odaiba",
+		"nameJa": "お台場の漁船",
+		"descFr": "Trouvez votre cible et prenez une photo.",
+		"descEn": "Find your target and snap a photo."
+	},
+	"ACHIEVEMENT_0047": {
+		"num": 47,
+		"trophyId": "activity_story_photo_013",
+		"nameFr": "Hébergement de NAGUMOHARAHIFN",
+		"nameEn": "NAGUMOHARA Lodging Cottage",
+		"nameJa": "南雲原中の宿舎コテージ",
+		"descFr": "Trouvez votre cible et prenez une photo.",
+		"descEn": "Find your target and snap a photo."
+	},
+	"ACHIEVEMENT_0048": {
+		"num": 48,
+		"trophyId": "activity_story_photo_014",
+		"nameFr": "Chat (Route de campagne)",
+		"nameEn": "Cat on Rural Road",
+		"nameJa": "田舎道に潜む猫",
+		"descFr": "Trouvez votre cible et prenez une photo.",
+		"descEn": "Find your target and snap a photo."
+	},
+	"ACHIEVEMENT_0049": {
+		"num": 49,
+		"trophyId": "activity_story_photo_015",
+		"nameFr": "Chat (Centre-ville)",
+		"nameEn": "Cat in Downtown",
+		"nameJa": "繁華街に潜む猫",
+		"descFr": "Trouvez votre cible et prenez une photo.",
+		"descEn": "Find your target and snap a photo."
+	},
+	"ACHIEVEMENT_0050": {
+		"num": 50,
+		"trophyId": "activity_story_photo_016",
+		"nameFr": "Chat (Chemin du collège)",
+		"nameEn": "Cat on School Road",
+		"nameJa": "学校通りに潜む猫",
+		"descFr": "Trouvez votre cible et prenez une photo.",
+		"descEn": "Find your target and snap a photo."
+	},
+	"ACHIEVEMENT_0051": {
+		"num": 51,
+		"trophyId": "activity_story_photo_017",
+		"nameFr": "Chat (Rue NAGUMO)",
+		"nameEn": "Cat on NAGUMO Street",
+		"nameJa": "南雲通りに潜む猫",
+		"descFr": "Trouvez votre cible et prenez une photo.",
+		"descEn": "Find your target and snap a photo."
+	},
+	"ACHIEVEMENT_0052": {
+		"num": 52,
+		"trophyId": "activity_story_photo_018",
+		"nameFr": "Chat (Parc océanique)",
+		"nameEn": "Cat in Seaside Park",
+		"nameJa": "海公園に潜む猫",
+		"descFr": "Trouvez votre cible et prenez une photo.",
+		"descEn": "Find your target and snap a photo."
+	},
+	"ACHIEVEMENT_0053": {
+		"num": 53,
+		"trophyId": "activity_story_photo_019",
+		"nameFr": "Chat (Route côtière)",
+		"nameEn": "Cat on Coastal Road",
+		"nameJa": "海岸沿いの道に潜む猫",
+		"descFr": "Trouvez votre cible et prenez une photo.",
+		"descEn": "Find your target and snap a photo."
+	},
+	"ACHIEVEMENT_0054": {
+		"num": 54,
+		"trophyId": "activity_story_photo_020",
+		"nameFr": "Chat (Gare de NAGUMOHARA)",
+		"nameEn": "Cat at NAGUMOHARA Station",
+		"nameJa": "南雲原駅に潜む猫",
+		"descFr": "Trouvez votre cible et prenez une photo.",
+		"descEn": "Find your target and snap a photo."
+	},
+	"ACHIEVEMENT_0055": {
+		"num": 55,
+		"trophyId": "activity_story_photo_021",
+		"nameFr": "Chat (Port de NAGUMOHARA)",
+		"nameEn": "Cat at NAGUMOHARA Port",
+		"nameJa": "南雲原港に潜む猫",
+		"descFr": "Trouvez votre cible et prenez une photo.",
+		"descEn": "Find your target and snap a photo."
+	},
+	"ACHIEVEMENT_0056": {
+		"num": 56,
+		"trophyId": "activity_story_photo_022",
+		"nameFr": "Chat (Ancien chantier naval)",
+		"nameEn": "Cat at Old Shipyard",
+		"nameJa": "造船所跡に潜む猫",
+		"descFr": "Trouvez votre cible et prenez une photo.",
+		"descEn": "Find your target and snap a photo."
+	},
+	"ACHIEVEMENT_0100": {
+		"num": 100,
+		"trophyId": "activity_story_achieve_001",
+		"nameFr": "Coffres de foot (NAGUMOHARA3) :",
+		"nameEn": "Loot Footballs (NAGUMOHARA3):",
+		"nameJa": "ボールチェスト入手（南雲原）"
+	},
+	"ACHIEVEMENT_0101": {
+		"num": 101,
+		"trophyId": "activity_story_achieve_002",
+		"nameFr": "Coffres de foot rares :",
+		"nameEn": "Rare Loot Footballs:",
+		"nameJa": "レアボールチェスト入手"
+	},
+	"ACHIEVEMENT_0102": {
+		"num": 102,
+		"trophyId": "activity_story_achieve_003",
+		"nameFr": "Une caresse parrrfaite",
+		"nameEn": "Purrfect Touch",
+		"nameJa": "初めて猫をなでた"
+	},
+	"ACHIEVEMENT_0103": {
+		"num": 103,
+		"trophyId": "activity_story_achieve_004",
+		"nameFr": "Victoires par\ncoup de grâce :",
+		"nameEn": "Finishing Blow Wins:",
+		"nameJa": "トドメ勝利回数"
+	},
+	"ACHIEVEMENT_0104": {
+		"num": 104,
+		"trophyId": "activity_story_achieve_005",
+		"nameFr": "Pierre-feuille-ciseaux\ncorrects :",
+		"nameEn": "Rock-Paper-Scissors Wins:",
+		"nameJa": "じゃんけん属性勝利回数"
+	},
+	"ACHIEVEMENT_0105": {
+		"num": 105,
+		"trophyId": "activity_story_achieve_006",
+		"nameFr": "Coffres de foot (Odaiba) :",
+		"nameEn": "Loot Footballs (Odaiba):",
+		"nameJa": "ボールチェスト入手（お台場）"
+	},
+	"ACHIEVEMENT_0106": {
+		"num": 106,
+		"trophyId": "activity_story_achieve_007",
+		"nameFr": "Victoires rencontres\nciblées :",
+		"nameEn": "Focus Squabble Wins:",
+		"nameJa": "フォーカスバトル勝利回数"
+	},
+	"ACHIEVEMENT_0107": {
+		"num": 107,
+		"trophyId": "activity_story_achieve_008",
+		"nameFr": "Victoires défis de foot :",
+		"nameEn": "Football Battle Wins:",
+		"nameJa": "サッカーバトル勝利回数"
+	},
+	"ACHIEVEMENT_0108": {
+		"num": 108,
+		"trophyId": "activity_story_achieve_009",
+		"nameFr": "Victoires de match :",
+		"nameEn": "Match Wins:",
+		"nameJa": "試合勝利回数"
+	},
+	"ACHIEVEMENT_0109": {
+		"num": 109,
+		"trophyId": "activity_story_achieve_010",
+		"nameFr": "Achats en boutique :",
+		"nameEn": "Shop Purchases:",
+		"nameJa": "ショップで購入回数"
+	},
+	"ACHIEVEMENT_0110": {
+		"num": 110,
+		"trophyId": "activity_story_achieve_011",
+		"nameFr": "Battles de danse finis :",
+		"nameEn": "Dance Battle Clears:",
+		"nameJa": "ダンスバトル達成数"
+	},
+	"ACHIEVEMENT_0111": {
+		"num": 111,
+		"trophyId": "activity_story_achieve_012",
+		"nameFr": "Combats de nouilles finis :",
+		"nameEn": "Noodle Battle Clears:",
+		"nameJa": "麺バトル達成数"
+	},
+	"ACHIEVEMENT_0112": {
+		"num": 112,
+		"trophyId": "activity_story_achieve_013",
+		"nameFr": "Amélioration max\ntrèfle de lien :",
+		"nameEn": "Max Bond Clover Upgrades:",
+		"nameJa": "キズナクローバー最大強化回数"
+	},
+	"ACHIEVEMENT_0114": {
+		"num": 114,
+		"trophyId": "activity_story_achieve_015",
+		"nameFr": "Tirs sur pneu finis :",
+		"nameEn": "Tire Target Clears:",
+		"nameJa": "タイヤターゲット達成数"
+	},
+	"ACHIEVEMENT_0115": {
+		"num": 115,
+		"trophyId": "activity_story_achieve_016",
+		"nameFr": "Dribble zigzag d'umi-bozu :",
+		"nameEn": "UMIBOZU ZigZag Dribble Clears:",
+		"nameJa": "海坊主ジグザグドリブル達成数"
+	},
+	"ACHIEVEMENT_0116": {
+		"num": 116,
+		"trophyId": "activity_story_achieve_017",
+		"nameFr": "Sprints de tour de pneus :",
+		"nameEn": "Tire Tower Dash Clears:",
+		"nameJa": "タイヤタワーダッシュ達成数"
+	},
+	"ACHIEVEMENT_0118": {
+		"num": 118,
+		"trophyId": "activity_story_achieve_019",
+		"nameFr": "Jongle umi-bo :",
+		"nameEn": "UMIBOZU Juggling Clears:",
+		"nameJa": "海坊主リフティング達成数"
+	},
+	"ACHIEVEMENT_0119": {
+		"num": 119,
+		"trophyId": "activity_story_achieve_020",
+		"nameFr": "Escalier Hekaton :",
+		"nameEn": "Hecaton Stairway Clears:",
+		"nameJa": "百目階段達成数"
+	},
+	"ACHIEVEMENT_0120": {
+		"num": 120,
+		"trophyId": "activity_story_achieve_021",
+		"nameFr": "Tirs tentés :",
+		"nameEn": "Shots Taken:",
+		"nameJa": "シュート回数"
+	},
+	"ACHIEVEMENT_0121": {
+		"num": 121,
+		"trophyId": "activity_story_achieve_022",
+		"nameFr": "Victoires affrontement\nciblé offensif :",
+		"nameEn": "Offensive Focus Battle Wins:",
+		"nameJa": "攻撃フォーカス勝利回数"
+	},
+	"ACHIEVEMENT_0122": {
+		"num": 122,
+		"trophyId": "activity_story_achieve_023",
+		"nameFr": "Victoire affrontement\nciblé défensif :",
+		"nameEn": "Defensive Focus Battle Wins:",
+		"nameJa": "守備フォーカス勝利回数"
+	},
+	"ACHIEVEMENT_0123": {
+		"num": 123,
+		"trophyId": "activity_story_achieve_024",
+		"nameFr": "Total des buts marqués :",
+		"nameEn": "Total Goals Scored:",
+		"nameJa": "累計得点数"
+	},
+	"ACHIEVEMENT_0124": {
+		"num": 124,
+		"trophyId": "activity_story_achieve_025",
+		"nameFr": "Battle de danse (Avancé) :\nScore",
+		"nameEn": "Dance Battle (Adv.) Score:",
+		"nameJa": "ダンスバトル上級でスコア達成"
+	},
+	"ACHIEVEMENT_0126": {
+		"num": 126,
+		"trophyId": "activity_story_achieve_027",
+		"nameFr": "Tir sur pneu (Avancé) :\nScore",
+		"nameEn": "Tire Target (Adv.) Score:",
+		"nameJa": "タイヤターゲット上級でスコア達成"
+	},
+	"ACHIEVEMENT_0129": {
+		"num": 129,
+		"trophyId": "activity_story_achieve_030",
+		"nameFr": "Piège umi-bozu mitrailleur\n(Avancé) : Score",
+		"nameEn": "Gatling UMIBOZU Trap (Adv.) Score:",
+		"nameJa": "ガトリング海坊主トラップ上級でスコア達成"
+	},
+	"ACHIEVEMENT_0130": {
+		"num": 130,
+		"trophyId": "activity_story_achieve_031",
+		"nameFr": "Gardien umi-bozu mitrailleurs\n(Avancé) : Score",
+		"nameEn": "Gatling UMIBOZU Keeper (Adv.) Score:",
+		"nameJa": "ガトリング海坊主キーパー上級でスコア達成"
+	},
+	"ACHIEVEMENT_0131": {
+		"num": 131,
+		"trophyId": "activity_story_achieve_032",
+		"nameFr": "Jongle umi-bozu (avancé) :\nScore",
+		"nameEn": "UMIBOZU Juggling (Adv.) Score:",
+		"nameJa": "海坊主リフティング上級でスコア達成"
+	},
+	"ACHIEVEMENT_0133": {
+		"num": 133,
+		"trophyId": "activity_story_achieve_034",
+		"nameFr": "Piège umi-bozu mitrailleur :",
+		"nameEn": "Gatling UMIBOZU Trap Clears:",
+		"nameJa": "ガトリング海坊主トラップ達成数"
+	},
+	"ACHIEVEMENT_0134": {
+		"num": 134,
+		"trophyId": "activity_story_achieve_035",
+		"nameFr": "Gardien umi-bozu\nmitrailleur :",
+		"nameEn": "Gatling UMIBOZU Keeper Clears:",
+		"nameJa": "ガトリング海坊主キーパー達成数"
+	},
+	"ACHIEVEMENT_0135": {
+		"num": 135,
+		"trophyId": "activity_story_achieve_036",
+		"nameFr": "Dribble zigzag d'umi-bozu\n(Avancé) - Record",
+		"nameEn": "UMIBOZU ZZ Dribble (Adv.) Record",
+		"nameJa": "海坊主ジグザグドリブル上級　ベストタイム"
+	},
+	"ACHIEVEMENT_0136": {
+		"num": 136,
+		"trophyId": "activity_story_achieve_037",
+		"nameFr": "Sprint de tour de pneus\n(Avancé) - Record",
+		"nameEn": "Tire Tower Dash (Adv.) Record",
+		"nameJa": "タイヤタワーダッシュ上級　ベストタイム"
+	},
+	"ACHIEVEMENT_0137": {
+		"num": 137,
+		"trophyId": "activity_story_achieve_038",
+		"nameFr": "Escalier Hekaton\n(Avancé) - Record",
+		"nameEn": "Hecaton Stairway (Adv.) Record",
+		"nameJa": "百目階段上級　ベストタイム"
+	},
+	"ACHIEVEMENT_0200": {
+		"num": 200,
+		"trophyId": "activity_whole_achieve_001",
+		"nameFr": "Joueurs recrutés :",
+		"nameEn": "Total Players Recruited:",
+		"nameJa": "選手の累計獲得数"
+	},
+	"ACHIEVEMENT_0201": {
+		"num": 201,
+		"trophyId": "activity_whole_achieve_002",
+		"nameFr": "Joueurs vent recrutés :",
+		"nameEn": "Wind Players Recruited:",
+		"nameJa": "風属性選手の獲得数"
+	},
+	"ACHIEVEMENT_0202": {
+		"num": 202,
+		"trophyId": "activity_whole_achieve_003",
+		"nameFr": "Joueurs forêt recrutés :",
+		"nameEn": "Forest Players Recruited:",
+		"nameJa": "林属性選手の獲得数"
+	},
+	"ACHIEVEMENT_0203": {
+		"num": 203,
+		"trophyId": "activity_whole_achieve_004",
+		"nameFr": "Joueurs feu recrutés :",
+		"nameEn": "Fire Players Recruited:",
+		"nameJa": "火属性選手の獲得数"
+	},
+	"ACHIEVEMENT_0204": {
+		"num": 204,
+		"trophyId": "activity_whole_achieve_005",
+		"nameFr": "Joueurs montagne recrutés :",
+		"nameEn": "Mountain Players Recruited:",
+		"nameJa": "山属性選手の獲得数"
+	},
+	"ACHIEVEMENT_0205": {
+		"num": 205,
+		"trophyId": "activity_whole_achieve_006",
+		"nameFr": "Manageurs recrutés :",
+		"nameEn": "Coordinators Recruited:",
+		"nameJa": "マネージャーの獲得数"
+	},
+	"ACHIEVEMENT_0206": {
+		"num": 206,
+		"trophyId": "activity_whole_achieve_007",
+		"nameFr": "Entraîneurs recrutés :",
+		"nameEn": "Managers Recruited:",
+		"nameJa": "監督の獲得数"
+	},
+	"ACHIEVEMENT_0207": {
+		"num": 207,
+		"trophyId": "activity_whole_achieve_008",
+		"nameFr": "Joueurs au Niv. 50 :",
+		"nameEn": "Players Trained to Level 50:",
+		"nameJa": "レベル５０まで育成した選手数"
+	},
+	"ACHIEVEMENT_0208": {
+		"num": 208,
+		"trophyId": "activity_whole_achieve_009",
+		"nameFr": "Joueurs rang héros\nrecrutés :",
+		"nameEn": "Hero Rank Players Recruited:",
+		"nameJa": "ＨＥＲＯランク選手の獲得数"
+	},
+	"ACHIEVEMENT_0209": {
+		"num": 209,
+		"trophyId": "activity_whole_achieve_010",
+		"nameFr": "Victoires (Circuit FF) :",
+		"nameEn": "Wins (FF Route):",
+		"nameJa": "ＦＦルート勝利マス数"
+	},
+	"ACHIEVEMENT_0210": {
+		"num": 210,
+		"trophyId": "activity_whole_achieve_011",
+		"nameFr": "Victoires (Circuit Alius) :",
+		"nameEn": "Wins (Alius Route):",
+		"nameJa": "エイリアルート勝利マス数"
+	},
+	"ACHIEVEMENT_0211": {
+		"num": 211,
+		"trophyId": "activity_whole_achieve_012",
+		"nameFr": "Victoires (Circuit FFI) :",
+		"nameEn": "Wins (FFI Route):",
+		"nameJa": "ＦＦＩルート勝利マス数"
+	},
+	"ACHIEVEMENT_0212": {
+		"num": 212,
+		"trophyId": "activity_whole_achieve_013",
+		"nameFr": "Victoires (Circuit Route\ndu sacre) :",
+		"nameEn": "Wins (Saints' Way Route):",
+		"nameJa": "ホーリーロードＲ勝利マス数"
+	},
+	"ACHIEVEMENT_0213": {
+		"num": 213,
+		"trophyId": "activity_whole_achieve_014",
+		"nameFr": "Victoires (Circuit\nChronolithe) :",
+		"nameEn": "Wins (Chrono Stone Route):",
+		"nameJa": "クロノ・ストーンＲ勝利マス数"
+	},
+	"ACHIEVEMENT_0214": {
+		"num": 214,
+		"trophyId": "activity_whole_achieve_015",
+		"nameFr": "Victoires (Équipe Zanark) :",
+		"nameEn": "Wins (Zanark's Team):",
+		"nameJa": "ザナークのチームに勝利した"
+	},
+	"ACHIEVEMENT_0215": {
+		"num": 215,
+		"trophyId": "activity_whole_achieve_016",
+		"nameFr": "Victoires totales\n(Mode Chronique) :",
+		"nameEn": "Total Wins (Chronicle Mode):",
+		"nameJa": "クロニクルモードの累計勝利数"
+	},
+	"ACHIEVEMENT_0216": {
+		"num": 216,
+		"trophyId": "activity_whole_achieve_017",
+		"nameFr": "Univers du joueur\ndébloqués :",
+		"nameEn": "Player Universe Unlocks:",
+		"nameJa": "プレイヤーズユニバース解放数"
+	},
+	"ACHIEVEMENT_0217": {
+		"num": 217,
+		"trophyId": "activity_whole_achieve_018",
+		"nameFr": "Objet de liens récupérés :",
+		"nameEn": "Bond Objects Collected:",
+		"nameJa": "入手したキズナオブジェの種類"
+	},
+	"ACHIEVEMENT_0218": {
+		"num": 218,
+		"trophyId": "activity_whole_achieve_019",
+		"nameFr": "Matchs de ville Kizuna :",
+		"nameEn": "Matches Played in Bond Town:",
+		"nameJa": "キズナタウンでの対戦回数"
+	},
+	"ACHIEVEMENT_0219": {
+		"num": 219,
+		"trophyId": "activity_whole_achieve_020",
+		"nameFr": "Visiteurs de votre ville :",
+		"nameEn": "Visitors to Your Town:",
+		"nameJa": "自分のタウンへの訪問人数"
+	},
+	"ACHIEVEMENT_0220": {
+		"num": 220,
+		"trophyId": "activity_whole_achieve_021",
+		"nameFr": "Visites d'autres villes :",
+		"nameEn": "Visits to Other Towns:",
+		"nameJa": "他のタウンへの訪問回数"
+	},
+	"ACHIEVEMENT_0221": {
+		"num": 221,
+		"trophyId": "activity_whole_achieve_022",
+		"nameFr": "Techniques spéciales :",
+		"nameEn": "Special Moves Learned:",
+		"nameJa": "必殺技の獲得数"
+	},
+	"ACHIEVEMENT_0222": {
+		"num": 222,
+		"trophyId": "activity_whole_achieve_023",
+		"nameFr": "Éveils appris :",
+		"nameEn": "Awakenings Learned:",
+		"nameJa": "覚醒パワーの獲得数"
+	},
+	"ACHIEVEMENT_0223": {
+		"num": 223,
+		"trophyId": "activity_whole_achieve_024",
+		"nameFr": "Tactiques spéciales\napprises :",
+		"nameEn": "Special Tactics Learned:",
+		"nameJa": "必殺タクティクスの獲得数"
+	},
+	"ACHIEVEMENT_0224": {
+		"num": 224,
+		"trophyId": "activity_whole_achieve_025",
+		"nameFr": "Nœuds de tableau\ndes compétences :",
+		"nameEn": "Abilearn Board Nodes:",
+		"nameJa": "アビラーボードの解放マス数"
+	},
+	"ACHIEVEMENT_0225": {
+		"num": 225,
+		"trophyId": "activity_whole_achieve_026",
+		"nameFr": "Fusions d'esprit effectuées :",
+		"nameEn": "Spirit Fusions Performed:",
+		"nameJa": "スピリット合成を行った回数"
+	},
+	"ACHIEVEMENT_0226": {
+		"num": 226,
+		"trophyId": "activity_whole_achieve_027",
+		"nameFr": "Invocations d'esprit\neffectuées :",
+		"nameEn": "Spirit Summons Performed:",
+		"nameJa": "スピリット召喚を行った回数"
+	},
+	"ACHIEVEMENT_0227": {
+		"num": 227,
+		"trophyId": "activity_whole_achieve_028",
+		"nameFr": "Équipement acquis :",
+		"nameEn": "Equipment Acquired:",
+		"nameJa": "装備品の獲得数"
+	},
+	"ACHIEVEMENT_0228": {
+		"num": 228,
+		"trophyId": "activity_whole_achieve_029",
+		"nameFr": "Emblèmes acquis :",
+		"nameEn": "Emblems Acquired:",
+		"nameJa": "エンブレムの獲得数"
+	},
+	"ACHIEVEMENT_0229": {
+		"num": 229,
+		"trophyId": "activity_whole_achieve_030",
+		"nameFr": "Maillots acquis :",
+		"nameEn": "Kits Acquired:",
+		"nameJa": "ユニフォームの獲得数"
+	},
+	"ACHIEVEMENT_0230": {
+		"num": 230,
+		"trophyId": "activity_whole_achieve_031",
+		"nameFr": "Total des matchs en ligne :",
+		"nameEn": "Total Online Matches:",
+		"nameJa": "オンライン対戦の累計回数"
+	},
+	"ACHIEVEMENT_0231": {
+		"num": 231,
+		"trophyId": "activity_whole_achieve_032",
+		"nameFr": "Victoires de matchs\nen ligne :",
+		"nameEn": "Total Online Match Wins:",
+		"nameJa": "オンライン対戦の累計勝利数"
+	},
+	"ACHIEVEMENT_0232": {
+		"num": 232,
+		"trophyId": "activity_whole_achieve_033",
+		"nameFr": "Campagnes stade BB :",
+		"nameEn": "BB Stadium Campaign Clears:",
+		"nameJa": "ＢＢスタジアムのＣＰクリア数"
+	},
+	"ACHIEVEMENT_0233": {
+		"num": 233,
+		"trophyId": "activity_whole_achieve_034",
+		"nameFr": "Matchs en simple stade BB :",
+		"nameEn": "BB Stadium Single Matches:",
+		"nameJa": "ＢＢスタジアムシングル試合数"
+	},
+	"ACHIEVEMENT_0234": {
+		"num": 234,
+		"trophyId": "activity_whole_achieve_035",
+		"nameFr": "Victoires en simple\nstade BB :",
+		"nameEn": "BB Stadium Single Match Wins:",
+		"nameJa": "ＢＢスタジアムシングル勝利数"
+	},
+	"ACHIEVEMENT_0235": {
+		"num": 235,
+		"trophyId": "activity_whole_achieve_036",
+		"nameFr": "Matchs multi stade BB :",
+		"nameEn": "BB Stadium MP Matches:",
+		"nameJa": "ＢＢスタジアムマルチ試合数"
+	},
+	"ACHIEVEMENT_0236": {
+		"num": 236,
+		"trophyId": "activity_whole_achieve_037",
+		"nameFr": "Victoires multi stade BB :",
+		"nameEn": "BB Stadium MP Match Wins:",
+		"nameJa": "ＢＢスタジアムマルチ勝利数"
+	},
+	"ACHIEVEMENT_0237": {
+		"num": 237,
+		"trophyId": "activity_whole_achieve_038",
+		"nameFr": "Rang national atteint :",
+		"nameEn": "Reached National Rank:",
+		"nameJa": "カントリーランクに到達した"
+	},
+	"ACHIEVEMENT_0238": {
+		"num": 238,
+		"trophyId": "activity_whole_achieve_039",
+		"nameFr": "Rang continental atteint :",
+		"nameEn": "Reached Continental Rank:",
+		"nameJa": "コンチネントランクに到達した"
+	},
+	"ACHIEVEMENT_0239": {
+		"num": 239,
+		"trophyId": "activity_whole_achieve_040",
+		"nameFr": "Rang mondial atteint :",
+		"nameEn": "Reached Worldwide Rank:",
+		"nameJa": "ワールドランクに到達した"
+	},
+	"ACHIEVEMENT_0240": {
+		"num": 240,
+		"trophyId": "activity_whole_achieve_041",
+		"nameFr": "Matchs classés :",
+		"nameEn": "Ranked Matches:",
+		"nameJa": "ランクマッチの対戦回数"
+	},
+	"ACHIEVEMENT_0241": {
+		"num": 241,
+		"trophyId": "activity_whole_achieve_042",
+		"nameFr": "Victoires en match classé :",
+		"nameEn": "Ranked Match Wins:",
+		"nameJa": "ランクマッチの対戦勝利数"
+	},
+	"ACHIEVEMENT_0242": {
+		"num": 242,
+		"trophyId": "activity_whole_achieve_043",
+		"nameFr": "Techniques spéciales\nutilisées :",
+		"nameEn": "Special Moves Used:",
+		"nameJa": "必殺技の使用回数"
+	},
+	"ACHIEVEMENT_0243": {
+		"num": 243,
+		"trophyId": "activity_whole_achieve_044",
+		"nameFr": "Keshin utilisés :",
+		"nameEn": "Keshin Used:",
+		"nameJa": "化身の使用回数"
+	},
+	"ACHIEVEMENT_0244": {
+		"num": 244,
+		"trophyId": "activity_whole_achieve_045",
+		"nameFr": "Armures Keshin utilisées :",
+		"nameEn": "Armourfied Keshin Used:",
+		"nameJa": "化身アームドの使用回数"
+	},
+	"ACHIEVEMENT_0245": {
+		"num": 245,
+		"trophyId": "activity_whole_achieve_046",
+		"nameFr": "Miximax utilisés :",
+		"nameEn": "Mix 'n' Matches Used:",
+		"nameJa": "ミキシトランスの使用回数"
+	},
+	"ACHIEVEMENT_0246": {
+		"num": 246,
+		"trophyId": "activity_whole_achieve_047",
+		"nameFr": "Totems utilisés :",
+		"nameEn": "Totems Used:",
+		"nameJa": "ソウルの使用回数"
+	},
+	"ACHIEVEMENT_0247": {
+		"num": 247,
+		"trophyId": "activity_whole_achieve_048",
+		"nameFr": "Transformation de lien\nutilisées :",
+		"nameEn": "Bond Transforms Used:",
+		"nameJa": "キズナトランスの使用回数"
+	},
+	"ACHIEVEMENT_0248": {
+		"num": 248,
+		"trophyId": "activity_whole_achieve_049",
+		"nameFr": "Pouvoirs d'éveil utilisés :",
+		"nameEn": "Awakened Powers Used:",
+		"nameJa": "覚醒パワーの使用回数"
+	},
+	"ACHIEVEMENT_0249": {
+		"num": 249,
+		"trophyId": "activity_whole_achieve_050",
+		"nameFr": "Tactiques spéciales\nutilisées :",
+		"nameEn": "Special Tactics Used:",
+		"nameJa": "必殺タクティクスの使用回数"
+	},
+	"ACHIEVEMENT_0250": {
+		"num": 250,
+		"trophyId": "activity_whole_achieve_051",
+		"nameFr": "Total des buts marqués :",
+		"nameEn": "Total Goals Scored:",
+		"nameJa": "累計得点数"
+	},
+	"ACHIEVEMENT_0251": {
+		"num": 251,
+		"trophyId": "activity_whole_achieve_052",
+		"nameFr": "Total des tirs tentés :",
+		"nameEn": "Total Shots Taken:",
+		"nameJa": "シュートした累計回数"
+	},
+	"ACHIEVEMENT_0252": {
+		"num": 252,
+		"trophyId": "activity_whole_achieve_053",
+		"nameFr": "Tirs arrêtés par gardien :",
+		"nameEn": "Shots Blocked by Goalkeeper:",
+		"nameJa": "ＧＫのシュートブロック数"
+	},
+	"ACHIEVEMENT_0253": {
+		"num": 253,
+		"trophyId": "activity_whole_achieve_054",
+		"nameFr": "Victoires affrontement\nciblé offensif :",
+		"nameEn": "Offensive Focus Battle Wins:",
+		"nameJa": "攻撃時フォーカスの勝利数"
+	},
+	"ACHIEVEMENT_0254": {
+		"num": 254,
+		"trophyId": "activity_whole_achieve_055",
+		"nameFr": "Victoire affrontement\nciblé défensif :",
+		"nameEn": "Defensive Focus Battle Wins:",
+		"nameJa": "守備時フォーカスの勝利数"
+	},
+	"ACHIEVEMENT_0255": {
+		"num": 255,
+		"trophyId": "activity_whole_achieve_056",
+		"nameFr": "Victoires duels :",
+		"nameEn": "Scramble Wins:",
+		"nameJa": "スクランブルの勝利数"
+	},
+	"ACHIEVEMENT_0256": {
+		"num": 256,
+		"trophyId": "activity_whole_achieve_057",
+		"nameFr": "Compétences réelles\nutilisées :",
+		"nameEn": "Real Skills Used:",
+		"nameJa": "リアルスキルの使用回数"
+	},
+	"ACHIEVEMENT_0257": {
+		"num": 257,
+		"trophyId": "activity_whole_achieve_058",
+		"nameFr": "Tirs via chaîne de tir :",
+		"nameEn": "Goals via Shot Chains:",
+		"nameJa": "シュートチェインでの得点数"
+	},
+	"ACHIEVEMENT_0258": {
+		"num": 258,
+		"trophyId": "activity_whole_achieve_059",
+		"nameFr": "ATT de tir max :",
+		"nameEn": "Highest Shot AT:",
+		"nameJa": "最大シュートＡＴ値"
+	},
+	"ACHIEVEMENT_0259": {
+		"num": 259,
+		"trophyId": "activity_whole_achieve_060",
+		"nameFr": "ATT affrontement max :",
+		"nameEn": "Highest Focus AT:",
+		"nameJa": "最大フォーカスＡＴ値"
+	},
+	"ACHIEVEMENT_0260": {
+		"num": 260,
+		"trophyId": "activity_whole_achieve_061",
+		"nameFr": "DÉF affrontement max :",
+		"nameEn": "Highest Focus DF:",
+		"nameJa": "最大フォーカスＤＦ値"
+	},
+	"ACHIEVEMENT_0261": {
+		"num": 261,
+		"trophyId": "activity_whole_achieve_062",
+		"nameFr": "ATT duel max :",
+		"nameEn": "Highest Scramble AT:",
+		"nameJa": "最大スクランブルＡＴ値"
+	},
+	"ACHIEVEMENT_0262": {
+		"num": 262,
+		"trophyId": "activity_whole_achieve_063",
+		"nameFr": "DÉF duel max :",
+		"nameEn": "Highest Scramble DF:",
+		"nameJa": "最大スクランブルＤＦ値"
+	},
+	"ACHIEVEMENT_0263": {
+		"num": 263,
+		"trophyId": "activity_whole_achieve_064",
+		"nameFr": "DÉF des remparts max :",
+		"nameEn": "Highest Castle Wall DF:",
+		"nameJa": "最大城壁ＤＦ値"
+	},
+	"ACHIEVEMENT_0264": {
+		"num": 264,
+		"trophyId": "activity_whole_achieve_065",
+		"nameFr": "PG max :",
+		"nameEn": "Highest KP:",
+		"nameJa": "最大ＫＰ値"
+	},
+	"ACHIEVEMENT_0265": {
+		"num": 265,
+		"trophyId": "activity_whole_achieve_066",
+		"nameFr": "Niveau de joueur max :",
+		"nameEn": "Highest Player Level:",
+		"nameJa": "最大選手レベル"
+	},
+	"ACHIEVEMENT_0266": {
+		"num": 266,
+		"trophyId": "activity_whole_achieve_067",
+		"nameFr": "Frappe max :",
+		"nameEn": "Highest Kick:",
+		"nameJa": "最大キック力"
+	},
+	"ACHIEVEMENT_0267": {
+		"num": 267,
+		"trophyId": "activity_whole_achieve_068",
+		"nameFr": "Contrôle max :",
+		"nameEn": "Highest Control:",
+		"nameJa": "最大コントロール力"
+	},
+	"ACHIEVEMENT_0268": {
+		"num": 268,
+		"trophyId": "activity_whole_achieve_069",
+		"nameFr": "Pression max :",
+		"nameEn": "Highest Pressure:",
+		"nameJa": "最大プレッシャー力"
+	},
+	"ACHIEVEMENT_0269": {
+		"num": 269,
+		"trophyId": "activity_whole_achieve_070",
+		"nameFr": "Physique max :",
+		"nameEn": "Highest Physical:",
+		"nameJa": "最大フィジカル力"
+	},
+	"ACHIEVEMENT_0270": {
+		"num": 270,
+		"trophyId": "activity_whole_achieve_071",
+		"nameFr": "Agilité max :",
+		"nameEn": "Highest Agility:",
+		"nameJa": "最大アジリティ力"
+	},
+	"ACHIEVEMENT_0271": {
+		"num": 271,
+		"trophyId": "activity_whole_achieve_072",
+		"nameFr": "Intelligence max :",
+		"nameEn": "Highest Intelligence:",
+		"nameJa": "最大インテリジェンス力"
+	},
+	"ACHIEVEMENT_0272": {
+		"num": 272,
+		"trophyId": "activity_whole_achieve_073",
+		"nameFr": "Technique max :",
+		"nameEn": "Highest Technique:",
+		"nameJa": "最大テクニック力"
+	},
+	"ACHIEVEMENT_0273": {
+		"num": 273,
+		"trophyId": "activity_whole_achieve_074",
+		"nameFr": "ATT d'équipe max :",
+		"nameEn": "Highest Team AT:",
+		"nameJa": "最大チーム攻撃力"
+	},
+	"ACHIEVEMENT_0274": {
+		"num": 274,
+		"trophyId": "activity_whole_achieve_075",
+		"nameFr": "DÉF d'équipe max :",
+		"nameEn": "Highest Team DF:",
+		"nameJa": "最大チーム防御力"
+	},
+	"ACHIEVEMENT_0275": {
+		"num": 275,
+		"trophyId": "activity_whole_achieve_076",
+		"nameFr": "Victoires par 3 buts\nou plus :",
+		"nameEn": "Wins by 3 Goals or More:",
+		"nameJa": "３点差以上で勝利した回数"
+	},
+	"ACHIEVEMENT_0276": {
+		"num": 276,
+		"trophyId": "activity_whole_achieve_077",
+		"nameFr": "Matchs à +70 %\nde possession :",
+		"nameEn": "Matches with 70%+ Possession:",
+		"nameJa": "支配率７０％以上の試合数"
+	},
+	"ACHIEVEMENT_0277": {
+		"num": 277,
+		"trophyId": "activity_whole_achieve_078",
+		"nameFr": "Victoires sans prendre\nde but :",
+		"nameEn": "Clean Sheet Wins:",
+		"nameJa": "無失点で勝利した試合数"
+	},
+	"ACHIEVEMENT_0278": {
+		"num": 278,
+		"trophyId": "activity_whole_achieve_079",
+		"nameFr": "Tirs à 2 enchaînements :",
+		"nameEn": "2-Chain Shots:",
+		"nameJa": "シュートを２チェインした回数"
+	},
+	"ACHIEVEMENT_0279": {
+		"num": 279,
+		"trophyId": "activity_whole_achieve_080",
+		"nameFr": "Tirs de contre effectués :",
+		"nameEn": "Counter Shots:",
+		"nameJa": "カウンターシュートを返した数"
+	},
+	"ACHIEVEMENT_0280": {
+		"num": 280,
+		"trophyId": "activity_whole_achieve_081",
+		"nameFr": "Enchaînement de victoires",
+		"nameEn": "Racking in Victories",
+		"nameJa": "ヴィクトリーカウント"
+	},
+	"ACHIEVEMENT_0281": {
+		"num": 281,
+		"trophyId": "activity_whole_achieve_082",
+		"nameFr": "Enchaînement de victoires",
+		"nameEn": "Racking in Victories",
+		"nameJa": "ヴィクトリーカウント"
+	},
+	"ACHIEVEMENT_0282": {
+		"num": 282,
+		"trophyId": "activity_whole_achieve_083",
+		"nameFr": "Enchaînement de victoires",
+		"nameEn": "Racking in Victories",
+		"nameJa": "ヴィクトリーカウント"
+	},
+	"ACHIEVEMENT_0283": {
+		"num": 283,
+		"trophyId": "activity_whole_achieve_084",
+		"nameFr": "Enchaînement de victoires",
+		"nameEn": "Racking in Victories",
+		"nameJa": "ヴィクトリーカウント"
+	},
+	"ACHIEVEMENT_0284": {
+		"num": 284,
+		"trophyId": "activity_whole_achieve_085",
+		"nameFr": "Enchaînement de victoires",
+		"nameEn": "Racking in Victories",
+		"nameJa": "ヴィクトリーカウント"
+	},
+	"ACHIEVEMENT_0285": {
+		"num": 285,
+		"trophyId": "activity_whole_achieve_086",
+		"nameFr": "Victoires (Circuit Galaxie) :",
+		"nameEn": "Wins (Galaxy Route):",
+		"nameJa": "ギャラクシールート勝利マス数"
+	},
+	"ACHIEVEMENT_0286": {
+		"num": 286,
+		"trophyId": "activity_whole_achieve_087",
+		"nameFr": "Victoires (Circuit Arès) :",
+		"nameEn": "Wins (Ares Route):",
+		"nameJa": "アレスルート勝利マス数"
+	},
+	"ACHIEVEMENT_0287": {
+		"num": 287,
+		"trophyId": "activity_whole_achieve_088",
+		"nameFr": "Victoires (Circuit d'Orion) :",
+		"nameEn": "Wins (Orion Route):",
+		"nameJa": "オリオンルート勝利マス数"
+	},
+	"ACHIEVEMENT_0288": {
+		"num": 288,
+		"trophyId": "activity_whole_achieve_089",
+		"nameFr": null,
+		"nameEn": null,
+		"nameJa": "オリオンルート（本戦）勝利マス数"
+	},
+	"ACHIEVEMENT_0289": {
+		"num": 289,
+		"trophyId": "activity_whole_achieve_090",
+		"nameFr": null,
+		"nameEn": null,
+		"nameJa": "試練の道勝利マス数"
+	},
+	"ACHIEVEMENT_1000": {
+		"num": 1000,
+		"trophyId": "trophy_complete",
+		"nameFr": "La route de la victoire des héros",
+		"nameEn": "Heroes' Victory Road",
+		"nameJa": "英雄たちのヴィクトリーロード",
+		"descFr": "Débloquer tous les trophées.",
+		"descEn": "Unlock all trophies."
+	},
+	"ACHIEVEMENT_1001": {
+		"num": 1001,
+		"trophyId": "trophy_story_main_01",
+		"nameFr": "Tu n'as pas perdu le foot",
+		"nameEn": "You Still Have Football",
+		"nameJa": "君はサッカーができる",
+		"descFr": "Vaincre le terrible Big king umi-bozu en Mode Histoire.",
+		"descEn": "Defeat the fearsome King Colossal UMIBOZU in Story Mode."
+	},
+	"ACHIEVEMENT_1002": {
+		"num": 1002,
+		"trophyId": "trophy_story_main_02",
+		"nameFr": "Des tréfonds vers le sommet",
+		"nameEn": "From Zero to Hero",
+		"nameJa": "どん底から最高へ",
+		"descFr": "Affronter Raika dans un battle de danse en Mode Histoire.",
+		"descEn": "Face off against Raika in the dance showdown in Story Mode."
+	},
+	"ACHIEVEMENT_1003": {
+		"num": 1003,
+		"trophyId": "trophy_story_main_03",
+		"nameFr": "Le jour où le foot a changé",
+		"nameEn": "The Day Football Changed",
+		"nameJa": "サッカーが変わる日",
+		"descFr": "Gagner le défi contre le club de baseball en Mode Histoire.",
+		"descEn": "Win the showdown against the baseball club in Story Mode."
+	},
+	"ACHIEVEMENT_1004": {
+		"num": 1004,
+		"trophyId": "trophy_story_main_04",
+		"nameFr": "L'invasion du monstre du foot !",
+		"nameEn": "Invasion of the Football Monster!",
+		"nameJa": "襲来 サッカーモンスター‼",
+		"descFr": "Vaincre le collège West Manor en Mode Histoire.",
+		"descEn": "Overcome West Manor Academy in Story Mode."
+	},
+	"ACHIEVEMENT_1005": {
+		"num": 1005,
+		"trophyId": "trophy_story_main_05",
+		"nameFr": "Le rival pleurnichard",
+		"nameEn": "The Crybaby Rival",
+		"nameJa": "泣き虫ライバル",
+		"descFr": "Vaincre le collège Northbright en Mode Histoire.",
+		"descEn": "Overcome Northbright Middle School in Story Mode."
+	},
+	"ACHIEVEMENT_1006": {
+		"num": 1006,
+		"trophyId": "trophy_story_main_06",
+		"nameFr": "Tous ensemble, club de foot !",
+		"nameEn": "Come Together, Football Club!",
+		"nameJa": "南雲原よ、ひとつになれ",
+		"descFr": "Vaincre Eastwind International en Mode Histoire.",
+		"descEn": "Overcome Eastwind International in Story Mode."
+	},
+	"ACHIEVEMENT_1007": {
+		"num": 1007,
+		"trophyId": "trophy_story_main_07",
+		"nameFr": "Keshin en pleine tempête",
+		"nameEn": "Keshin in the Storm",
+		"nameJa": "化身は嵐の中に",
+		"descFr": "Vaincre le collège Stormridge en Mode Histoire.",
+		"descEn": "Overcome Stormridge Junior High in Story Mode."
+	},
+	"ACHIEVEMENT_1008": {
+		"num": 1008,
+		"trophyId": "trophy_story_main_08",
+		"nameFr": "Le pays du football d'Alice",
+		"nameEn": "Alice's Wonderland",
+		"nameJa": "アリスの世界",
+		"descFr": "Vaincre la Royal Academy en Mode Histoire.",
+		"descEn": "Overcome Royal Academy in Story Mode."
+	},
+	"ACHIEVEMENT_1009": {
+		"num": 1009,
+		"trophyId": "trophy_story_main_09",
+		"nameFr": "Le soleil qui traverse les nuages",
+		"nameEn": "Sunshine Through the Clouds",
+		"nameJa": "雲から太陽はのぞく",
+		"descFr": "Terminer le Mode Histoire.",
+		"descEn": "Complete Story Mode."
+	},
+	"ACHIEVEMENT_1010": {
+		"num": 1010,
+		"trophyId": "trophy_story_sub_01",
+		"nameFr": "Le meilleur des potes",
+		"nameEn": "Sidekick Supreme",
+		"nameJa": "お助け中学生",
+		"descFr": "Terminer les 45 quêtes secondaires en Mode Histoire.",
+		"descEn": "Completed 45 side quests in Story Mode."
+	},
+	"ACHIEVEMENT_1011": {
+		"num": 1011,
+		"trophyId": "trophy_story_sub_02",
+		"nameFr": "Le roi de l'activité",
+		"nameEn": "Activity Ace",
+		"nameJa": "アクティブ部長",
+		"descFr": "Terminer 50 activités.",
+		"descEn": "Complete 50 activities."
+	},
+	"ACHIEVEMENT_1012": {
+		"num": 1012,
+		"trophyId": "trophy_story_sub_03",
+		"nameFr": "Monstre des rencontres",
+		"nameEn": "Squabble Monster",
+		"nameJa": "レスバモンスター",
+		"descFr": "Gagner 20 rencontres ciblées en Mode Histoire.",
+		"descEn": "Win 20 Focus Squabbles in Story Mode."
+	},
+	"ACHIEVEMENT_1013": {
+		"num": 1013,
+		"trophyId": "trophy_story_sub_04",
+		"nameFr": "Chimère devenue réalité",
+		"nameEn": "Phantasy Made Real",
+		"nameJa": "妄想は現実に",
+		"descFr": "Frapper dans 20 coffres de foot en Mode Histoire.",
+		"descEn": "Kick 20 Loot Footballs in Story Mode."
+	},
+	"ACHIEVEMENT_1014": {
+		"num": 1014,
+		"trophyId": "trophy_story_sub_05",
+		"nameFr": "Première victoire",
+		"nameEn": "First Victory",
+		"nameJa": "はじめての白星",
+		"descFr": "Gagner votre premier match en Mode Histoire.",
+		"descEn": "Win your first match in Story Mode."
+	},
+	"ACHIEVEMENT_1015": {
+		"num": 1015,
+		"trophyId": "trophy_story_sub_06",
+		"nameFr": "Meilleur ami des chats",
+		"nameEn": "Cat's Best Friend",
+		"nameJa": "ねこ可愛がり",
+		"descFr": "Caresser cinq fois un chat dans le Mode Histoire.",
+		"descEn": "Pet a cat five times in Story Mode."
+	},
+	"ACHIEVEMENT_1016": {
+		"num": 1016,
+		"trophyId": "trophy_story_sub_07",
+		"nameFr": "Créateur de liens",
+		"nameEn": "Builder of Bonds",
+		"nameJa": "キズナを結ぶ者",
+		"descFr": "Recruter 10 joueurs en Mode Histoire.",
+		"descEn": "Scout 10 players in Story Mode."
+	},
+	"ACHIEVEMENT_1017": {
+		"num": 1017,
+		"trophyId": "trophy_story_sub_08",
+		"nameFr": "La pratique, c'est comme les boules de riz !",
+		"nameEn": "Practice is Like Rice Balls!",
+		"nameJa": "練習はおにぎりだ！",
+		"descFr": "Terminer 10 sessions d'entraînement spécial en Mode Histoire.",
+		"descEn": "Complete 10 special training sessions in Story Mode."
+	},
+	"ACHIEVEMENT_1018": {
+		"num": 1018,
+		"trophyId": "trophy_story_sub_09",
+		"nameFr": "Histoire étendue",
+		"nameEn": "Extended Story",
+		"nameJa": "EXTEND STORY",
+		"descFr": "Terminer l'histoire étendue.",
+		"descEn": "Complete the Extended Story."
+	},
+	"ACHIEVEMENT_1019": {
+		"num": 1019,
+		"trophyId": "trophy_chronicle_01",
+		"nameFr": "La légende commence",
+		"nameEn": "The Legend Begins",
+		"nameJa": "伝説の始まり",
+		"descFr": "Terminer le circuit Football Frontier du Mode Chronique.",
+		"descEn": "Complete the Football Frontier Route in Chronicle Mode."
+	},
+	"ACHIEVEMENT_1020": {
+		"num": 1020,
+		"trophyId": "trophy_chronicle_02",
+		"nameFr": "Envahisseurs de l'espace",
+		"nameEn": "Invaders from Space",
+		"nameJa": "宇宙からの侵略者",
+		"descFr": "Terminer le circuit Alius du Mode Chronique.",
+		"descEn": "Complete the Alius Route in Chronicle Mode."
+	},
+	"ACHIEVEMENT_1021": {
+		"num": 1021,
+		"trophyId": "trophy_chronicle_03",
+		"nameFr": "Affrontez le monde !",
+		"nameEn": "A Challenge to the World!",
+		"nameJa": "世界への挑戦！",
+		"descFr": "Terminer le circuit Football Frontier International du Mode Chronique.",
+		"descEn": "Complete the Football Frontier International Route in Chronicle Mode."
+	},
+	"ACHIEVEMENT_1022": {
+		"num": 1022,
+		"trophyId": "trophy_chronicle_04",
+		"nameFr": "Un vent nouveau",
+		"nameEn": "The Winds of Change",
+		"nameJa": "雷門に吹く新しい風",
+		"descFr": "Terminer le circuit Stade RS du Mode Chronique.",
+		"descEn": "Complete the Saints' Way Route in Chronicle Mode."
+	},
+	"ACHIEVEMENT_1023": {
+		"num": 1023,
+		"trophyId": "trophy_chronicle_05",
+		"nameFr": "Chronolithe",
+		"nameEn": "Chrono Stone",
+		"nameJa": "クロノ・ストーン",
+		"descFr": "Terminer le circuit chronolithe du Mode Chronique.",
+		"descEn": "Complete the Chrono Stone Route in Chronicle Mode."
+	},
+	"ACHIEVEMENT_1024": {
+		"num": 1024,
+		"trophyId": "trophy_chronicle_06",
+		"nameFr": "Combat tout-puissant",
+		"nameEn": "Almighty Battle",
+		"nameJa": "グレートマックスな戦い",
+		"descFr": "Vaincre les étrangers de Zanark du Mode Chronique.",
+		"descEn": "Overcome Zanark's Outsiders in Chronicle Mode."
+	},
+	"ACHIEVEMENT_1025": {
+		"num": 1025,
+		"trophyId": "trophy_chronicle_07",
+		"nameFr": "Débloqueur d'univers",
+		"nameEn": "Universe Unlocker",
+		"nameJa": "ユニバースの解放者",
+		"descFr": "Débloquer 10 joueurs dans l'univers du joueur.",
+		"descEn": "Unlock 10 players in Player Universe."
+	},
+	"ACHIEVEMENT_1026": {
+		"num": 1026,
+		"trophyId": "trophy_town_01",
+		"nameFr": "Collectionneur",
+		"nameEn": "Collector of Objects",
+		"nameJa": "オブジェクト収集家",
+		"descFr": "Collectionner 20 objets de lien ou plus.",
+		"descEn": "Collect 20 or more bond objects."
+	},
+	"ACHIEVEMENT_1027": {
+		"num": 1027,
+		"trophyId": "trophy_town_02",
+		"nameFr": "Créateur de ville",
+		"nameEn": "Town Creator",
+		"nameJa": "タウンクリエイター",
+		"descFr": "Placer 10 objets ou plus dans votre ville Kizuna.",
+		"descEn": "Place 10 or more objects in your Bond Town."
+	},
+	"ACHIEVEMENT_1028": {
+		"num": 1028,
+		"trophyId": "trophy_town_03",
+		"nameFr": "Vagabond des liens",
+		"nameEn": "Bond Wanderer",
+		"nameJa": "キズナの旅人",
+		"descFr": "Visiter les villes Kizuna d'autres joueurs au moins 3 fois.",
+		"descEn": "Visit other players' Bond Towns at least 3 times."
+	},
+	"ACHIEVEMENT_1029": {
+		"num": 1029,
+		"trophyId": "trophy_town_04",
+		"nameFr": "Challenger de stade",
+		"nameEn": "Stadium Challenger",
+		"nameJa": "スタジアムの挑戦者",
+		"descFr": "Jouer 3 matchs au stade de la ville Kizuna.",
+		"descEn": "Play 3 matches at the Bond Town Stadium."
+	},
+	"ACHIEVEMENT_1030": {
+		"num": 1030,
+		"trophyId": "trophy_battle_01",
+		"nameFr": "Concurrent en ligne",
+		"nameEn": "Online Contender",
+		"nameJa": "対戦チャレンジャー",
+		"descFr": "Jouer 10 matchs en ligne.",
+		"descEn": "Play 10 online matches."
+	},
+	"ACHIEVEMENT_1031": {
+		"num": 1031,
+		"trophyId": "trophy_battle_02",
+		"nameFr": "Étoile montante",
+		"nameEn": "Rising Star",
+		"nameJa": "対戦の花形",
+		"descFr": "Gagner 10 matchs en ligne.",
+		"descEn": "Win 10 online matches."
+	},
+	"ACHIEVEMENT_1032": {
+		"num": 1032,
+		"trophyId": "trophy_battle_03",
+		"nameFr": "Déchireur de filet",
+		"nameEn": "Net Ripper",
+		"nameJa": "エースストライカー",
+		"descFr": "Mettre 50 buts dans des matchs en ligne.",
+		"descEn": "Score 50 goals in online matches."
+	},
+	"ACHIEVEMENT_1033": {
+		"num": 1033,
+		"trophyId": "trophy_battle_04",
+		"nameFr": "Football hyperdimensionnel",
+		"nameEn": "Hyperdimensional Football",
+		"nameJa": "超次元サッカー",
+		"descFr": "Utiliser des techniques spéciales 50 fois dans des matchs en ligne.",
+		"descEn": "Use Special Moves 50 times in online matches."
+	},
+	"ACHIEVEMENT_1034": {
+		"num": 1034,
+		"trophyId": "trophy_battle_05",
+		"nameFr": "Le dernier bastion",
+		"nameEn": "The Last Bastion",
+		"nameJa": "最後の砦",
+		"descFr": "Bloquer 50 tirs en tant que gardien dans des matchs en ligne.",
+		"descEn": "Block 50 shots as the goalkeeper in online matches."
+	},
+	"ACHIEVEMENT_1035": {
+		"num": 1035,
+		"trophyId": "trophy_battle_06",
+		"nameFr": "Maître des affrontements",
+		"nameEn": "Focus Master",
+		"nameJa": "フォーカスの達人",
+		"descFr": "Gagner 50 affrontements ciblés en match en ligne.",
+		"descEn": "Win 50 Focus Battles in online matches."
+	},
+	"ACHIEVEMENT_1036": {
+		"num": 1036,
+		"trophyId": "trophy_battle_07",
+		"nameFr": "Roi des duels",
+		"nameEn": "Scramble Ace",
+		"nameJa": "スクランブル名人",
+		"descFr": "Gagner 20 duels en match en ligne.",
+		"descEn": "Win 20 Scrambles in online matches."
+	},
+	"ACHIEVEMENT_1037": {
+		"num": 1037,
+		"trophyId": "trophy_battle_08",
+		"nameFr": "Maestro des compétences",
+		"nameEn": "Hands-on Specialist",
+		"nameJa": "技の仕事人",
+		"descFr": "Utiliser des compétences réelles 5 fois dans des matchs en ligne.",
+		"descEn": "Use Real Skills 5 times in online matches."
+	},
+	"ACHIEVEMENT_1038": {
+		"num": 1038,
+		"trophyId": "trophy_battle_09",
+		"nameFr": "Tireur en chaîne",
+		"nameEn": "Chain Shooter",
+		"nameJa": "チェインシューター",
+		"descFr": "Mettre 20 buts avec des tirs en chaîne dans des matchs en ligne.",
+		"descEn": "Score 20 goals with Shot Chains in online matches."
+	},
+	"ACHIEVEMENT_1039": {
+		"num": 1039,
+		"trophyId": "trophy_collection_01",
+		"nameFr": "Jouons au foot !",
+		"nameEn": "Let's Play Football!",
+		"nameJa": "サッカーやろうぜ！！",
+		"descFr": "Enregistrer 100 joueurs dans la banque de joueurs.",
+		"descEn": "Register 100 players in the Player Bank."
+	},
+	"ACHIEVEMENT_1040": {
+		"num": 1040,
+		"trophyId": "trophy_collection_02",
+		"nameFr": "Liens puissants",
+		"nameEn": "Spirit Summoner",
+		"nameJa": "大いなるキズナ",
+		"descFr": "Faire 50 invocations d'esprits.",
+		"descEn": "Perform 50 Spirit summons."
+	},
+	"ACHIEVEMENT_1041": {
+		"num": 1041,
+		"trophyId": "trophy_collection_03",
+		"nameFr": "Puissance accumulée",
+		"nameEn": "Stacked Power",
+		"nameJa": "重なる力",
+		"descFr": "Faire 50 fusions d'esprits.",
+		"descEn": "Perform 50 Spirit fusions."
+	},
+	"ACHIEVEMENT_1042": {
+		"num": 1042,
+		"trophyId": "trophy_collection_04",
+		"nameFr": "Sagesse unie",
+		"nameEn": "United Wisdom",
+		"nameJa": "集う英知",
+		"descFr": "Obtenir 5 entraîneurs.",
+		"descEn": "Acquire 5 managers."
+	},
+	"ACHIEVEMENT_1043": {
+		"num": 1043,
+		"trophyId": "trophy_collection_05",
+		"nameFr": "Capacité déchaînée",
+		"nameEn": "Ability Unleashed",
+		"nameJa": "能力解放",
+		"descFr": "Débloquer 50 nœuds du tableau des compétences.",
+		"descEn": "Unlock 50 nodes on the Abilearn Board."
+	},
+	"ACHIEVEMENT_1044": {
+		"num": 1044,
+		"trophyId": "trophy_collection_06",
+		"nameFr": "Mordu des techniques",
+		"nameEn": "Move Maniac",
+		"nameJa": "必殺技マニア",
+		"descFr": "Obtenir 100 techniques spéciales.",
+		"descEn": "Obtain 100 Special Moves."
+	},
+	"ACHIEVEMENT_1045": {
+		"num": 1045,
+		"trophyId": "trophy_collection_07",
+		"nameFr": "Chercheur de l'éveil",
+		"nameEn": "Awakening Seeker",
+		"nameJa": "覚醒パワーの探求者",
+		"descFr": "Obtenir 4 éveils.",
+		"descEn": "Obtain 4 Awakenings."
+	},
+	"ACHIEVEMENT_1046": {
+		"num": 1046,
+		"trophyId": "trophy_collection_08",
+		"nameFr": "Collectionneur de tactiques",
+		"nameEn": "Tactical Collector",
+		"nameJa": "必殺タクティクスコレクター",
+		"descFr": "Obtenir 20 tactiques spéciales.",
+		"descEn": "Obtain 20 Special Tactics."
+	},
+	"ACHIEVEMENT_1047": {
+		"num": 1047,
+		"trophyId": "trophy_collection_09",
+		"nameFr": "Traqueur d'équipement",
+		"nameEn": "Equipment Hunter",
+		"nameJa": "装備品フリーク",
+		"descFr": "Obtenir 100 pièces d'équipement.",
+		"descEn": "Obtain 100 pieces of equipment."
+	},
+	"ACHIEVEMENT_1048": {
+		"num": 1048,
+		"trophyId": "trophy_collection_10",
+		"nameFr": "Porteur d'emblème",
+		"nameEn": "Emblem Bearer",
+		"nameJa": "エンブレムホルダー",
+		"descFr": "Obtenir 50 emblèmes.",
+		"descEn": "Obtain 50 Emblems."
+	},
+	"ACHIEVEMENT_1049": {
+		"num": 1049,
+		"trophyId": "trophy_collection_11",
+		"nameFr": "Conservateur d'uniformes",
+		"nameEn": "Uniform Curator",
+		"nameJa": "ユニフォームコレクター",
+		"descFr": "Obtenir 50 uniformes.",
+		"descEn": "Obtain 50 Uniforms."
+	},
+	"ACHIEVEMENT_1050": {
+		"num": 1050,
+		"trophyId": "trophy_collection_12",
+		"nameFr": "Rassemblement des héros",
+		"nameEn": "Heroes Assemble",
+		"nameJa": "集うヒーローたち",
+		"descFr": "Avoir 3 joueurs au rang héros.",
+		"descEn": "Have 3 players of hero rank."
+	},
+	"ACHIEVEMENT_1051": {
+		"num": 1051,
+		"trophyId": "trophy_collection_13",
+		"nameFr": "Les puissants onze",
+		"nameEn": "The Powerful Eleven",
+		"nameJa": "パワフルイレブン",
+		"descFr": "Avoir onze joueurs de niveau 50.",
+		"descEn": "Have eleven level 50 players."
+	}
+}

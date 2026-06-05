@@ -247,6 +247,9 @@ export { buildSteamLoginUrl, verifySteamAssertion } from "./openid";
 export {
 	SteamWebApiClient,
 	SteamWebApiError,
+	enrichAchievements,
+	getIevrOwnershipWithToken,
+	type IevrPlayerAchievement,
 	type SteamIevrAccount,
 	type SteamOwnedGame,
 	type SteamPlayerAchievement,
@@ -254,6 +257,25 @@ export {
 } from "./web-api";
 export {
 	IEVR_STEAM_APP_ID,
+	IEVR_STEAM,
+	IEVR_SHARED_DEPOTS,
+	IEVR_STEAM_INTERFACES,
+	IEVR_STEAM_FEATURES,
+	IEVR_ACHIEVEMENT_API_NAME_FORMAT,
+	IEVR_ACHIEVEMENT_API_NAME_PREFIX,
+	IEVR_TROPHY_COUNT,
+	IEVR_VISIBLE_ACHIEVEMENT_COUNT,
 	STEAM_PROVIDER_ID,
+	achievementApiName,
+	achievementNumFromApiName,
 	extractSteamId64,
 } from "./constants";
+export {
+	IEVR_ACHIEVEMENTS,
+	IEVR_ACHIEVEMENTS_COUNT,
+	type AchievementLanguage,
+	type IevrAchievementInfo,
+	achievementDisplayDescription,
+	achievementDisplayName,
+	lookupAchievement,
+} from "./achievements";
