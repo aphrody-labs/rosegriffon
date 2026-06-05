@@ -1,0 +1,1656 @@
+{
+  "screen": "31_universe",
+  "locale": "fr",
+  "canvas": {
+    "w": 1280,
+    "h": 720
+  },
+  "objects": [
+    {
+      "name": "universe00_00_background",
+      "transform": {
+        "x": 640,
+        "y": 360,
+        "scaleX": 1,
+        "scaleY": 1,
+        "rot": 0,
+        "anchorX": 0.5,
+        "anchorY": 0.5
+      },
+      "drawPriority": 1,
+      "drawType": 0,
+      "camera": "0x02D8FB06",
+      "anim": {
+        "open": "0x5FEC8E4E",
+        "close": "0xA15F1DEE"
+      }
+    },
+    {
+      "name": "universe02_10_bustup_icon",
+      "transform": {
+        "x": 640,
+        "y": 360,
+        "scaleX": 1,
+        "scaleY": 1,
+        "rot": 0,
+        "anchorX": 0.5,
+        "anchorY": 0.5
+      },
+      "drawPriority": 200,
+      "drawType": 4,
+      "camera": "menu",
+      "anim": {
+        "open": "0x5FEC8E4E",
+        "close": "0xA15F1DEE"
+      }
+    },
+    {
+      "name": "universe00_04_star_background",
+      "transform": {
+        "x": 640,
+        "y": 360,
+        "scaleX": 1,
+        "scaleY": 1,
+        "rot": 0,
+        "anchorX": 0.5,
+        "anchorY": 0.5
+      },
+      "drawPriority": 303,
+      "drawType": 0,
+      "camera": "0x02D8FB06",
+      "anim": {
+        "open": "0x5FEC8E4E",
+        "close": "0xA15F1DEE"
+      }
+    },
+    {
+      "name": "universe01_05_13_star",
+      "transform": {
+        "x": 640,
+        "y": 360,
+        "scaleX": 0.001004016064257028,
+        "scaleY": 0.0007898894154818325,
+        "rot": 0,
+        "anchorX": 0.5,
+        "anchorY": 0.5
+      },
+      "drawPriority": 304,
+      "drawType": 0,
+      "camera": "0x02D8FB06",
+      "sprite": {
+        "logicalPath": "dx11/menu/31_universe/universe01/universe01_05_13/fr/universe01_05_13.g4tx",
+        "pngUrl": "/dx11/menu/31_universe/universe01/universe01_05_13/fr/universe01_05_13.png",
+        "w": 664,
+        "h": 844
+      },
+      "anim": {
+        "open": "0x5FEC8E4E",
+        "close": "0xA15F1DEE"
+      }
+    },
+    {
+      "name": "universe00_08_star_active",
+      "transform": {
+        "x": 640,
+        "y": 360,
+        "scaleX": 1,
+        "scaleY": 1,
+        "rot": 0,
+        "anchorX": 0.5,
+        "anchorY": 0.5
+      },
+      "drawPriority": 304,
+      "drawType": 0,
+      "camera": "0x02D8FB06",
+      "anim": {
+        "open": "0x5FEC8E4E",
+        "close": "0xA15F1DEE"
+      }
+    },
+    {
+      "name": "universe01_05_24_star",
+      "transform": {
+        "x": 640,
+        "y": 360,
+        "scaleX": 0.001004016064257028,
+        "scaleY": 0.0007898894154818325,
+        "rot": 0,
+        "anchorX": 0.5,
+        "anchorY": 0.5
+      },
+      "drawPriority": 304,
+      "drawType": 0,
+      "camera": "0x02D8FB06",
+      "sprite": {
+        "logicalPath": "dx11/menu/31_universe/universe01/universe01_05_24/fr/universe01_05_24.g4tx",
+        "pngUrl": "/dx11/menu/31_universe/universe01/universe01_05_24/fr/universe01_05_24.png",
+        "w": 664,
+        "h": 844
+      },
+      "anim": {
+        "open": "0x5FEC8E4E",
+        "close": "0xA15F1DEE"
+      }
+    },
+    {
+      "name": "universe01_05_28_star",
+      "transform": {
+        "x": 640,
+        "y": 360,
+        "scaleX": 0.001004016064257028,
+        "scaleY": 0.0007898894154818325,
+        "rot": 0,
+        "anchorX": 0.5,
+        "anchorY": 0.5
+      },
+      "drawPriority": 304,
+      "drawType": 0,
+      "camera": "0x02D8FB06",
+      "sprite": {
+        "logicalPath": "dx11/menu/31_universe/universe01/universe01_05_28/fr/universe01_05_28.g4tx",
+        "pngUrl": "/dx11/menu/31_universe/universe01/universe01_05_28/fr/universe01_05_28.png",
+        "w": 664,
+        "h": 844
+      },
+      "anim": {
+        "open": "0x5FEC8E4E",
+        "close": "0xA15F1DEE"
+      }
+    },
+    {
+      "name": "universe01_05_01_star",
+      "transform": {
+        "x": 640,
+        "y": 360,
+        "scaleX": 0.001004016064257028,
+        "scaleY": 0.0007898894154818325,
+        "rot": 0,
+        "anchorX": 0.5,
+        "anchorY": 0.5
+      },
+      "drawPriority": 304,
+      "drawType": 0,
+      "camera": "0x02D8FB06",
+      "sprite": {
+        "logicalPath": "dx11/menu/31_universe/universe01/universe01_05_01/fr/universe01_05_01.g4tx",
+        "pngUrl": "/dx11/menu/31_universe/universe01/universe01_05_01/fr/universe01_05_01.png",
+        "w": 664,
+        "h": 844
+      },
+      "anim": {
+        "open": "0x5FEC8E4E",
+        "close": "0xA15F1DEE"
+      }
+    },
+    {
+      "name": "universe01_03_star_locator",
+      "transform": {
+        "x": 640,
+        "y": 360,
+        "scaleX": 1,
+        "scaleY": 1,
+        "rot": 0,
+        "anchorX": 0.5,
+        "anchorY": 0.5
+      },
+      "drawPriority": 304,
+      "drawType": 0,
+      "camera": "0x02D8FB06",
+      "anim": {
+        "open": "0x5FEC8E4E",
+        "close": "0xA15F1DEE"
+      }
+    },
+    {
+      "name": "universe01_05_18_star",
+      "transform": {
+        "x": 640,
+        "y": 360,
+        "scaleX": 0.001004016064257028,
+        "scaleY": 0.0007898894154818325,
+        "rot": 0,
+        "anchorX": 0.5,
+        "anchorY": 0.5
+      },
+      "drawPriority": 304,
+      "drawType": 0,
+      "camera": "0x02D8FB06",
+      "sprite": {
+        "logicalPath": "dx11/menu/31_universe/universe01/universe01_05_18/fr/universe01_05_18.g4tx",
+        "pngUrl": "/dx11/menu/31_universe/universe01/universe01_05_18/fr/universe01_05_18.png",
+        "w": 664,
+        "h": 844
+      },
+      "anim": {
+        "open": "0x5FEC8E4E",
+        "close": "0xA15F1DEE"
+      }
+    },
+    {
+      "name": "universe01_05_04_star",
+      "transform": {
+        "x": 640,
+        "y": 360,
+        "scaleX": 0.001004016064257028,
+        "scaleY": 0.0007898894154818325,
+        "rot": 0,
+        "anchorX": 0.5,
+        "anchorY": 0.5
+      },
+      "drawPriority": 304,
+      "drawType": 0,
+      "camera": "0x02D8FB06",
+      "sprite": {
+        "logicalPath": "dx11/menu/31_universe/universe01/universe01_05_04/fr/universe01_05_04.g4tx",
+        "pngUrl": "/dx11/menu/31_universe/universe01/universe01_05_04/fr/universe01_05_04.png",
+        "w": 664,
+        "h": 844
+      },
+      "anim": {
+        "open": "0x5FEC8E4E",
+        "close": "0xA15F1DEE"
+      }
+    },
+    {
+      "name": "universe01_05_25_star",
+      "transform": {
+        "x": 640,
+        "y": 360,
+        "scaleX": 0.001004016064257028,
+        "scaleY": 0.0007898894154818325,
+        "rot": 0,
+        "anchorX": 0.5,
+        "anchorY": 0.5
+      },
+      "drawPriority": 304,
+      "drawType": 0,
+      "camera": "0x02D8FB06",
+      "sprite": {
+        "logicalPath": "dx11/menu/31_universe/universe01/universe01_05_25/fr/universe01_05_25.g4tx",
+        "pngUrl": "/dx11/menu/31_universe/universe01/universe01_05_25/fr/universe01_05_25.png",
+        "w": 664,
+        "h": 844
+      },
+      "anim": {
+        "open": "0x5FEC8E4E",
+        "close": "0xA15F1DEE"
+      }
+    },
+    {
+      "name": "universe01_05_12_star",
+      "transform": {
+        "x": 640,
+        "y": 360,
+        "scaleX": 0.001004016064257028,
+        "scaleY": 0.0007898894154818325,
+        "rot": 0,
+        "anchorX": 0.5,
+        "anchorY": 0.5
+      },
+      "drawPriority": 304,
+      "drawType": 0,
+      "camera": "0x02D8FB06",
+      "sprite": {
+        "logicalPath": "dx11/menu/31_universe/universe01/universe01_05_12/fr/universe01_05_12.g4tx",
+        "pngUrl": "/dx11/menu/31_universe/universe01/universe01_05_12/fr/universe01_05_12.png",
+        "w": 664,
+        "h": 844
+      },
+      "anim": {
+        "open": "0x5FEC8E4E",
+        "close": "0xA15F1DEE"
+      }
+    },
+    {
+      "name": "universe01_05_17_star",
+      "transform": {
+        "x": 640,
+        "y": 360,
+        "scaleX": 0.001004016064257028,
+        "scaleY": 0.0007898894154818325,
+        "rot": 0,
+        "anchorX": 0.5,
+        "anchorY": 0.5
+      },
+      "drawPriority": 304,
+      "drawType": 0,
+      "camera": "0x02D8FB06",
+      "sprite": {
+        "logicalPath": "dx11/menu/31_universe/universe01/universe01_05_17/fr/universe01_05_17.g4tx",
+        "pngUrl": "/dx11/menu/31_universe/universe01/universe01_05_17/fr/universe01_05_17.png",
+        "w": 664,
+        "h": 844
+      },
+      "anim": {
+        "open": "0x5FEC8E4E",
+        "close": "0xA15F1DEE"
+      }
+    },
+    {
+      "name": "universe01_05_20_star",
+      "transform": {
+        "x": 640,
+        "y": 360,
+        "scaleX": 0.001004016064257028,
+        "scaleY": 0.0007898894154818325,
+        "rot": 0,
+        "anchorX": 0.5,
+        "anchorY": 0.5
+      },
+      "drawPriority": 304,
+      "drawType": 0,
+      "camera": "0x02D8FB06",
+      "sprite": {
+        "logicalPath": "dx11/menu/31_universe/universe01/universe01_05_20/fr/universe01_05_20.g4tx",
+        "pngUrl": "/dx11/menu/31_universe/universe01/universe01_05_20/fr/universe01_05_20.png",
+        "w": 664,
+        "h": 844
+      },
+      "anim": {
+        "open": "0x5FEC8E4E",
+        "close": "0xA15F1DEE"
+      }
+    },
+    {
+      "name": "universe01_03_10_star_locator",
+      "transform": {
+        "x": 640,
+        "y": 360,
+        "scaleX": 1,
+        "scaleY": 1,
+        "rot": 0,
+        "anchorX": 0.5,
+        "anchorY": 0.5
+      },
+      "drawPriority": 304,
+      "drawType": 0,
+      "camera": "0x02D8FB06",
+      "anim": {
+        "open": "0x5FEC8E4E",
+        "close": "0xA15F1DEE"
+      }
+    },
+    {
+      "name": "universe01_05_27_star",
+      "transform": {
+        "x": 640,
+        "y": 360,
+        "scaleX": 0.001004016064257028,
+        "scaleY": 0.0007898894154818325,
+        "rot": 0,
+        "anchorX": 0.5,
+        "anchorY": 0.5
+      },
+      "drawPriority": 304,
+      "drawType": 0,
+      "camera": "0x02D8FB06",
+      "sprite": {
+        "logicalPath": "dx11/menu/31_universe/universe01/universe01_05_27/fr/universe01_05_27.g4tx",
+        "pngUrl": "/dx11/menu/31_universe/universe01/universe01_05_27/fr/universe01_05_27.png",
+        "w": 664,
+        "h": 844
+      },
+      "anim": {
+        "open": "0x5FEC8E4E",
+        "close": "0xA15F1DEE"
+      }
+    },
+    {
+      "name": "universe01_05_10_star",
+      "transform": {
+        "x": 640,
+        "y": 360,
+        "scaleX": 0.001004016064257028,
+        "scaleY": 0.0007898894154818325,
+        "rot": 0,
+        "anchorX": 0.5,
+        "anchorY": 0.5
+      },
+      "drawPriority": 304,
+      "drawType": 0,
+      "camera": "0x02D8FB06",
+      "sprite": {
+        "logicalPath": "dx11/menu/31_universe/universe01/universe01_05_10/fr/universe01_05_10.g4tx",
+        "pngUrl": "/dx11/menu/31_universe/universe01/universe01_05_10/fr/universe01_05_10.png",
+        "w": 664,
+        "h": 844
+      },
+      "anim": {
+        "open": "0x5FEC8E4E",
+        "close": "0xA15F1DEE"
+      }
+    },
+    {
+      "name": "universe01_03_03_star_locator",
+      "transform": {
+        "x": 640,
+        "y": 360,
+        "scaleX": 1,
+        "scaleY": 1,
+        "rot": 0,
+        "anchorX": 0.5,
+        "anchorY": 0.5
+      },
+      "drawPriority": 304,
+      "drawType": 0,
+      "camera": "0x02D8FB06",
+      "anim": {
+        "open": "0x5FEC8E4E",
+        "close": "0xA15F1DEE"
+      }
+    },
+    {
+      "name": "universe01_05_09_star",
+      "transform": {
+        "x": 640,
+        "y": 360,
+        "scaleX": 0.001004016064257028,
+        "scaleY": 0.0007898894154818325,
+        "rot": 0,
+        "anchorX": 0.5,
+        "anchorY": 0.5
+      },
+      "drawPriority": 304,
+      "drawType": 0,
+      "camera": "0x02D8FB06",
+      "sprite": {
+        "logicalPath": "dx11/menu/31_universe/universe01/universe01_05_09/fr/universe01_05_09.g4tx",
+        "pngUrl": "/dx11/menu/31_universe/universe01/universe01_05_09/fr/universe01_05_09.png",
+        "w": 664,
+        "h": 844
+      },
+      "anim": {
+        "open": "0x5FEC8E4E",
+        "close": "0xA15F1DEE"
+      }
+    },
+    {
+      "name": "universe01_05_15_star",
+      "transform": {
+        "x": 640,
+        "y": 360,
+        "scaleX": 0.001004016064257028,
+        "scaleY": 0.0007898894154818325,
+        "rot": 0,
+        "anchorX": 0.5,
+        "anchorY": 0.5
+      },
+      "drawPriority": 304,
+      "drawType": 0,
+      "camera": "0x02D8FB06",
+      "sprite": {
+        "logicalPath": "dx11/menu/31_universe/universe01/universe01_05_15/fr/universe01_05_15.g4tx",
+        "pngUrl": "/dx11/menu/31_universe/universe01/universe01_05_15/fr/universe01_05_15.png",
+        "w": 664,
+        "h": 844
+      },
+      "anim": {
+        "open": "0x5FEC8E4E",
+        "close": "0xA15F1DEE"
+      }
+    },
+    {
+      "name": "universe01_05_22_star",
+      "transform": {
+        "x": 640,
+        "y": 360,
+        "scaleX": 0.001004016064257028,
+        "scaleY": 0.0007898894154818325,
+        "rot": 0,
+        "anchorX": 0.5,
+        "anchorY": 0.5
+      },
+      "drawPriority": 304,
+      "drawType": 0,
+      "camera": "0x02D8FB06",
+      "sprite": {
+        "logicalPath": "dx11/menu/31_universe/universe01/universe01_05_22/fr/universe01_05_22.g4tx",
+        "pngUrl": "/dx11/menu/31_universe/universe01/universe01_05_22/fr/universe01_05_22.png",
+        "w": 664,
+        "h": 844
+      },
+      "anim": {
+        "open": "0x5FEC8E4E",
+        "close": "0xA15F1DEE"
+      }
+    },
+    {
+      "name": "universe01_05_03_star",
+      "transform": {
+        "x": 640,
+        "y": 360,
+        "scaleX": 0.001004016064257028,
+        "scaleY": 0.0007898894154818325,
+        "rot": 0,
+        "anchorX": 0.5,
+        "anchorY": 0.5
+      },
+      "drawPriority": 304,
+      "drawType": 0,
+      "camera": "0x02D8FB06",
+      "sprite": {
+        "logicalPath": "dx11/menu/31_universe/universe01/universe01_05_03/fr/universe01_05_03.g4tx",
+        "pngUrl": "/dx11/menu/31_universe/universe01/universe01_05_03/fr/universe01_05_03.png",
+        "w": 664,
+        "h": 844
+      },
+      "anim": {
+        "open": "0x5FEC8E4E",
+        "close": "0xA15F1DEE"
+      }
+    },
+    {
+      "name": "universe01_05_16_star",
+      "transform": {
+        "x": 640,
+        "y": 360,
+        "scaleX": 0.001004016064257028,
+        "scaleY": 0.0007898894154818325,
+        "rot": 0,
+        "anchorX": 0.5,
+        "anchorY": 0.5
+      },
+      "drawPriority": 304,
+      "drawType": 0,
+      "camera": "0x02D8FB06",
+      "sprite": {
+        "logicalPath": "dx11/menu/31_universe/universe01/universe01_05_16/fr/universe01_05_16.g4tx",
+        "pngUrl": "/dx11/menu/31_universe/universe01/universe01_05_16/fr/universe01_05_16.png",
+        "w": 664,
+        "h": 844
+      },
+      "anim": {
+        "open": "0x5FEC8E4E",
+        "close": "0xA15F1DEE"
+      }
+    },
+    {
+      "name": "universe01_05_21_star",
+      "transform": {
+        "x": 640,
+        "y": 360,
+        "scaleX": 0.001004016064257028,
+        "scaleY": 0.0007898894154818325,
+        "rot": 0,
+        "anchorX": 0.5,
+        "anchorY": 0.5
+      },
+      "drawPriority": 304,
+      "drawType": 0,
+      "camera": "0x02D8FB06",
+      "sprite": {
+        "logicalPath": "dx11/menu/31_universe/universe01/universe01_05_21/fr/universe01_05_21.g4tx",
+        "pngUrl": "/dx11/menu/31_universe/universe01/universe01_05_21/fr/universe01_05_21.png",
+        "w": 664,
+        "h": 844
+      },
+      "anim": {
+        "open": "0x5FEC8E4E",
+        "close": "0xA15F1DEE"
+      }
+    },
+    {
+      "name": "universe01_05_06_star",
+      "transform": {
+        "x": 640,
+        "y": 360,
+        "scaleX": 0.001004016064257028,
+        "scaleY": 0.0007898894154818325,
+        "rot": 0,
+        "anchorX": 0.5,
+        "anchorY": 0.5
+      },
+      "drawPriority": 304,
+      "drawType": 0,
+      "camera": "0x02D8FB06",
+      "sprite": {
+        "logicalPath": "dx11/menu/31_universe/universe01/universe01_05_06/fr/universe01_05_06.g4tx",
+        "pngUrl": "/dx11/menu/31_universe/universe01/universe01_05_06/fr/universe01_05_06.png",
+        "w": 664,
+        "h": 844
+      },
+      "anim": {
+        "open": "0x5FEC8E4E",
+        "close": "0xA15F1DEE"
+      }
+    },
+    {
+      "name": "universe01_05_07_star",
+      "transform": {
+        "x": 640,
+        "y": 360,
+        "scaleX": 0.001004016064257028,
+        "scaleY": 0.0007898894154818325,
+        "rot": 0,
+        "anchorX": 0.5,
+        "anchorY": 0.5
+      },
+      "drawPriority": 304,
+      "drawType": 0,
+      "camera": "0x02D8FB06",
+      "sprite": {
+        "logicalPath": "dx11/menu/31_universe/universe01/universe01_05_07/fr/universe01_05_07.g4tx",
+        "pngUrl": "/dx11/menu/31_universe/universe01/universe01_05_07/fr/universe01_05_07.png",
+        "w": 664,
+        "h": 844
+      },
+      "anim": {
+        "open": "0x5FEC8E4E",
+        "close": "0xA15F1DEE"
+      }
+    },
+    {
+      "name": "universe01_05_26_star",
+      "transform": {
+        "x": 640,
+        "y": 360,
+        "scaleX": 0.001004016064257028,
+        "scaleY": 0.0007898894154818325,
+        "rot": 0,
+        "anchorX": 0.5,
+        "anchorY": 0.5
+      },
+      "drawPriority": 304,
+      "drawType": 0,
+      "camera": "0x02D8FB06",
+      "sprite": {
+        "logicalPath": "dx11/menu/31_universe/universe01/universe01_05_26/fr/universe01_05_26.g4tx",
+        "pngUrl": "/dx11/menu/31_universe/universe01/universe01_05_26/fr/universe01_05_26.png",
+        "w": 664,
+        "h": 844
+      },
+      "anim": {
+        "open": "0x5FEC8E4E",
+        "close": "0xA15F1DEE"
+      }
+    },
+    {
+      "name": "universe01_05_30_star",
+      "transform": {
+        "x": 640,
+        "y": 360,
+        "scaleX": 0.001004016064257028,
+        "scaleY": 0.0007898894154818325,
+        "rot": 0,
+        "anchorX": 0.5,
+        "anchorY": 0.5
+      },
+      "drawPriority": 304,
+      "drawType": 0,
+      "camera": "0x02D8FB06",
+      "sprite": {
+        "logicalPath": "dx11/menu/31_universe/universe01/universe01_05_30/fr/universe01_05_30.g4tx",
+        "pngUrl": "/dx11/menu/31_universe/universe01/universe01_05_30/fr/universe01_05_30.png",
+        "w": 664,
+        "h": 844
+      },
+      "anim": {
+        "open": "0x5FEC8E4E",
+        "close": "0xA15F1DEE"
+      }
+    },
+    {
+      "name": "universe01_05_11_star",
+      "transform": {
+        "x": 640,
+        "y": 360,
+        "scaleX": 0.001004016064257028,
+        "scaleY": 0.0007898894154818325,
+        "rot": 0,
+        "anchorX": 0.5,
+        "anchorY": 0.5
+      },
+      "drawPriority": 304,
+      "drawType": 0,
+      "camera": "0x02D8FB06",
+      "sprite": {
+        "logicalPath": "dx11/menu/31_universe/universe01/universe01_05_11/fr/universe01_05_11.g4tx",
+        "pngUrl": "/dx11/menu/31_universe/universe01/universe01_05_11/fr/universe01_05_11.png",
+        "w": 664,
+        "h": 844
+      },
+      "anim": {
+        "open": "0x5FEC8E4E",
+        "close": "0xA15F1DEE"
+      }
+    },
+    {
+      "name": "universe01_05_08_star",
+      "transform": {
+        "x": 640,
+        "y": 360,
+        "scaleX": 0.001004016064257028,
+        "scaleY": 0.0007898894154818325,
+        "rot": 0,
+        "anchorX": 0.5,
+        "anchorY": 0.5
+      },
+      "drawPriority": 304,
+      "drawType": 0,
+      "camera": "0x02D8FB06",
+      "sprite": {
+        "logicalPath": "dx11/menu/31_universe/universe01/universe01_05_08/fr/universe01_05_08.g4tx",
+        "pngUrl": "/dx11/menu/31_universe/universe01/universe01_05_08/fr/universe01_05_08.png",
+        "w": 664,
+        "h": 844
+      },
+      "anim": {
+        "open": "0x5FEC8E4E",
+        "close": "0xA15F1DEE"
+      }
+    },
+    {
+      "name": "universe01_05_29_star",
+      "transform": {
+        "x": 640,
+        "y": 360,
+        "scaleX": 0.001004016064257028,
+        "scaleY": 0.0007898894154818325,
+        "rot": 0,
+        "anchorX": 0.5,
+        "anchorY": 0.5
+      },
+      "drawPriority": 304,
+      "drawType": 0,
+      "camera": "0x02D8FB06",
+      "sprite": {
+        "logicalPath": "dx11/menu/31_universe/universe01/universe01_05_29/fr/universe01_05_29.g4tx",
+        "pngUrl": "/dx11/menu/31_universe/universe01/universe01_05_29/fr/universe01_05_29.png",
+        "w": 664,
+        "h": 844
+      },
+      "anim": {
+        "open": "0x5FEC8E4E",
+        "close": "0xA15F1DEE"
+      }
+    },
+    {
+      "name": "universe01_05_14_star",
+      "transform": {
+        "x": 640,
+        "y": 360,
+        "scaleX": 0.001004016064257028,
+        "scaleY": 0.0007898894154818325,
+        "rot": 0,
+        "anchorX": 0.5,
+        "anchorY": 0.5
+      },
+      "drawPriority": 304,
+      "drawType": 0,
+      "camera": "0x02D8FB06",
+      "sprite": {
+        "logicalPath": "dx11/menu/31_universe/universe01/universe01_05_14/fr/universe01_05_14.g4tx",
+        "pngUrl": "/dx11/menu/31_universe/universe01/universe01_05_14/fr/universe01_05_14.png",
+        "w": 664,
+        "h": 844
+      },
+      "anim": {
+        "open": "0x5FEC8E4E",
+        "close": "0xA15F1DEE"
+      }
+    },
+    {
+      "name": "universe01_05_02_star",
+      "transform": {
+        "x": 640,
+        "y": 360,
+        "scaleX": 0.001004016064257028,
+        "scaleY": 0.0007898894154818325,
+        "rot": 0,
+        "anchorX": 0.5,
+        "anchorY": 0.5
+      },
+      "drawPriority": 304,
+      "drawType": 0,
+      "camera": "0x02D8FB06",
+      "sprite": {
+        "logicalPath": "dx11/menu/31_universe/universe01/universe01_05_02/fr/universe01_05_02.g4tx",
+        "pngUrl": "/dx11/menu/31_universe/universe01/universe01_05_02/fr/universe01_05_02.png",
+        "w": 664,
+        "h": 844
+      },
+      "anim": {
+        "open": "0x5FEC8E4E",
+        "close": "0xA15F1DEE"
+      }
+    },
+    {
+      "name": "universe01_05_23_star",
+      "transform": {
+        "x": 640,
+        "y": 360,
+        "scaleX": 0.001004016064257028,
+        "scaleY": 0.0007898894154818325,
+        "rot": 0,
+        "anchorX": 0.5,
+        "anchorY": 0.5
+      },
+      "drawPriority": 304,
+      "drawType": 0,
+      "camera": "0x02D8FB06",
+      "sprite": {
+        "logicalPath": "dx11/menu/31_universe/universe01/universe01_05_23/fr/universe01_05_23.g4tx",
+        "pngUrl": "/dx11/menu/31_universe/universe01/universe01_05_23/fr/universe01_05_23.png",
+        "w": 664,
+        "h": 844
+      },
+      "anim": {
+        "open": "0x5FEC8E4E",
+        "close": "0xA15F1DEE"
+      }
+    },
+    {
+      "name": "universe01_40_star_clear_stamp",
+      "transform": {
+        "x": 640,
+        "y": 360,
+        "scaleX": 0.0022222222222222222,
+        "scaleY": 0.0022222222222222222,
+        "rot": 0,
+        "anchorX": 0.5,
+        "anchorY": 0.5
+      },
+      "drawPriority": 304,
+      "drawType": 0,
+      "camera": "0x02D8FB06",
+      "sprite": {
+        "logicalPath": "dx11/menu/31_universe/universe01/universe01_40/fr/universe01_40.g4tx",
+        "pngUrl": "/dx11/menu/31_universe/universe01/universe01_40/fr/universe01_40.png",
+        "w": 300,
+        "h": 300
+      },
+      "anim": {
+        "open": "0x5FEC8E4E",
+        "close": "0xA15F1DEE"
+      }
+    },
+    {
+      "name": "universe01_03_02_star_locator",
+      "transform": {
+        "x": 640,
+        "y": 360,
+        "scaleX": 1,
+        "scaleY": 1,
+        "rot": 0,
+        "anchorX": 0.5,
+        "anchorY": 0.5
+      },
+      "drawPriority": 304,
+      "drawType": 0,
+      "camera": "0x02D8FB06",
+      "anim": {
+        "open": "0x5FEC8E4E",
+        "close": "0xA15F1DEE"
+      }
+    },
+    {
+      "name": "universe01_05_19_star",
+      "transform": {
+        "x": 640,
+        "y": 360,
+        "scaleX": 0.001004016064257028,
+        "scaleY": 0.0007898894154818325,
+        "rot": 0,
+        "anchorX": 0.5,
+        "anchorY": 0.5
+      },
+      "drawPriority": 304,
+      "drawType": 0,
+      "camera": "0x02D8FB06",
+      "sprite": {
+        "logicalPath": "dx11/menu/31_universe/universe01/universe01_05_19/fr/universe01_05_19.g4tx",
+        "pngUrl": "/dx11/menu/31_universe/universe01/universe01_05_19/fr/universe01_05_19.png",
+        "w": 664,
+        "h": 844
+      },
+      "anim": {
+        "open": "0x5FEC8E4E",
+        "close": "0xA15F1DEE"
+      }
+    },
+    {
+      "name": "universe01_05_05_star",
+      "transform": {
+        "x": 640,
+        "y": 360,
+        "scaleX": 0.001004016064257028,
+        "scaleY": 0.0007898894154818325,
+        "rot": 0,
+        "anchorX": 0.5,
+        "anchorY": 0.5
+      },
+      "drawPriority": 304,
+      "drawType": 0,
+      "camera": "0x02D8FB06",
+      "sprite": {
+        "logicalPath": "dx11/menu/31_universe/universe01/universe01_05_05/fr/universe01_05_05.g4tx",
+        "pngUrl": "/dx11/menu/31_universe/universe01/universe01_05_05/fr/universe01_05_05.png",
+        "w": 664,
+        "h": 844
+      },
+      "anim": {
+        "open": "0x5FEC8E4E",
+        "close": "0xA15F1DEE"
+      }
+    },
+    {
+      "name": "universe01_03_01_star_locator",
+      "transform": {
+        "x": 640,
+        "y": 360,
+        "scaleX": 1,
+        "scaleY": 1,
+        "rot": 0,
+        "anchorX": 0.5,
+        "anchorY": 0.5
+      },
+      "drawPriority": 304,
+      "drawType": 0,
+      "camera": "0x02D8FB06",
+      "anim": {
+        "open": "0x5FEC8E4E",
+        "close": "0xA15F1DEE"
+      }
+    },
+    {
+      "name": "universe01_06_star_key",
+      "transform": {
+        "x": 640,
+        "y": 360,
+        "scaleX": 1,
+        "scaleY": 1,
+        "rot": 0,
+        "anchorX": 0.5,
+        "anchorY": 0.5
+      },
+      "drawPriority": 305,
+      "drawType": 0,
+      "camera": "0x02D8FB06",
+      "anim": {
+        "open": "0x5FEC8E4E",
+        "close": "0xA15F1DEE"
+      }
+    },
+    {
+      "name": "universe00_07_cursor",
+      "transform": {
+        "x": 640,
+        "y": 360,
+        "scaleX": 1,
+        "scaleY": 1,
+        "rot": 0,
+        "anchorX": 0.5,
+        "anchorY": 0.5
+      },
+      "drawPriority": 306,
+      "drawType": 0,
+      "camera": "0x02D8FB06",
+      "anim": {
+        "open": "0x5FEC8E4E",
+        "close": "0xA15F1DEE"
+      }
+    },
+    {
+      "name": "universe01_07_cursor",
+      "transform": {
+        "x": 640,
+        "y": 360,
+        "scaleX": 1,
+        "scaleY": 1,
+        "rot": 0,
+        "anchorX": 0.5,
+        "anchorY": 0.5
+      },
+      "drawPriority": 306,
+      "drawType": 0,
+      "camera": "0x02D8FB06",
+      "anim": {
+        "open": "0x5FEC8E4E",
+        "close": "0xA15F1DEE"
+      }
+    },
+    {
+      "name": "universe01_08_rare_star_key",
+      "transform": {
+        "x": 640,
+        "y": 360,
+        "scaleX": 0.0012165450121654502,
+        "scaleY": 0.0014619883040935672,
+        "rot": 0,
+        "anchorX": 0.5,
+        "anchorY": 0.5
+      },
+      "drawPriority": 306,
+      "drawType": 0,
+      "camera": "0x02D8FB06",
+      "sprite": {
+        "logicalPath": "dx11/menu/31_universe/universe01/universe01_08/universe01_08.g4tx",
+        "pngUrl": "/dx11/menu/31_universe/universe01/universe01_08/universe01_08.png",
+        "w": 548,
+        "h": 456
+      },
+      "anim": {
+        "open": "0x5FEC8E4E",
+        "close": "0xA15F1DEE"
+      }
+    },
+    {
+      "name": "universe01_21_item_num",
+      "transform": {
+        "x": 640,
+        "y": 360,
+        "scaleX": 1,
+        "scaleY": 1,
+        "rot": 0,
+        "anchorX": 0.5,
+        "anchorY": 0.5
+      },
+      "drawPriority": 307,
+      "drawType": 0,
+      "camera": "0x02D8FB06",
+      "anim": {
+        "open": "0x5FEC8E4E",
+        "close": "0xA15F1DEE"
+      }
+    },
+    {
+      "name": "universe00_02_button_guide",
+      "transform": {
+        "x": 640,
+        "y": 360,
+        "scaleX": 1,
+        "scaleY": 1,
+        "rot": 0,
+        "anchorX": 0.5,
+        "anchorY": 0.5
+      },
+      "drawPriority": 307,
+      "drawType": 0,
+      "camera": "0x02D8FB06",
+      "anim": {
+        "open": "0x5FEC8E4E",
+        "close": "0xA15F1DEE"
+      }
+    },
+    {
+      "name": "universe00_01_title",
+      "transform": {
+        "x": 640,
+        "y": 360,
+        "scaleX": 1,
+        "scaleY": 1,
+        "rot": 0,
+        "anchorX": 0.5,
+        "anchorY": 0.5
+      },
+      "drawPriority": 309,
+      "drawType": 0,
+      "camera": "0x02D8FB06",
+      "anim": {
+        "open": "0x5FEC8E4E",
+        "close": "0xA15F1DEE"
+      }
+    },
+    {
+      "name": "universe01_01_title",
+      "transform": {
+        "x": 640,
+        "y": 360,
+        "scaleX": 0.0007407407407407407,
+        "scaleY": 0.005376344086021505,
+        "rot": 0,
+        "anchorX": 0.5,
+        "anchorY": 0.5
+      },
+      "drawPriority": 309,
+      "drawType": 0,
+      "camera": "0x02D8FB06",
+      "sprite": {
+        "logicalPath": "dx11/menu/31_universe/universe01/universe01_01/fr/universe01_01.g4tx",
+        "pngUrl": "/dx11/menu/31_universe/universe01/universe01_01/fr/universe01_01.png",
+        "w": 900,
+        "h": 124
+      },
+      "text": {
+        "key": "_text_area_name01",
+        "keyHash": 2852277939,
+        "value": "_text_area_name01",
+        "font": "nie_main",
+        "size": 24,
+        "color": "#ffffff",
+        "align": "center"
+      },
+      "anim": {
+        "open": "0x5FEC8E4E",
+        "close": "0xA15F1DEE"
+      }
+    },
+    {
+      "name": "universe03_00_bg",
+      "transform": {
+        "x": 640,
+        "y": 360,
+        "scaleX": 1,
+        "scaleY": 1,
+        "rot": 0,
+        "anchorX": 0.5,
+        "anchorY": 0.5
+      },
+      "drawPriority": 445,
+      "drawType": 0,
+      "camera": "0x02D8FB06",
+      "anim": {
+        "open": "0x5FEC8E4E",
+        "close": "0xA15F1DEE"
+      }
+    },
+    {
+      "name": "universe03_02_top_locator",
+      "transform": {
+        "x": 640,
+        "y": 360,
+        "scaleX": 1,
+        "scaleY": 1,
+        "rot": 0,
+        "anchorX": 0.5,
+        "anchorY": 0.5
+      },
+      "drawPriority": 446,
+      "drawType": 0,
+      "camera": "0x02D8FB06",
+      "anim": {
+        "open": "0x5FEC8E4E",
+        "close": "0xA15F1DEE"
+      }
+    },
+    {
+      "name": "universe03_03_result_menu_list",
+      "transform": {
+        "x": 640,
+        "y": 360,
+        "scaleX": 1,
+        "scaleY": 1,
+        "rot": 0,
+        "anchorX": 0.5,
+        "anchorY": 0.5
+      },
+      "drawPriority": 447,
+      "drawType": 0,
+      "camera": "0x02D8FB06",
+      "text": {
+        "key": "_text_spirit_name01",
+        "keyHash": 1953169082,
+        "value": "_text_spirit_name01",
+        "font": "nie_main",
+        "size": 24,
+        "color": "#ffffff",
+        "align": "center"
+      },
+      "anim": {
+        "open": "0x5FEC8E4E",
+        "close": "0xA15F1DEE"
+      }
+    },
+    {
+      "name": "universe02_02_background",
+      "transform": {
+        "x": 640,
+        "y": 360,
+        "scaleX": 1,
+        "scaleY": 1,
+        "rot": 0,
+        "anchorX": 0.5,
+        "anchorY": 0.5
+      },
+      "drawPriority": 447,
+      "drawType": 0,
+      "camera": "0x02D8FB06",
+      "anim": {
+        "open": "0x5FEC8E4E",
+        "close": "0xA15F1DEE"
+      }
+    },
+    {
+      "name": "universe03_04_result_menu_item",
+      "transform": {
+        "x": 640,
+        "y": 360,
+        "scaleX": 1,
+        "scaleY": 1,
+        "rot": 0,
+        "anchorX": 0.5,
+        "anchorY": 0.5
+      },
+      "drawPriority": 447,
+      "drawType": 0,
+      "camera": "0x02D8FB06",
+      "text": {
+        "key": "_text_list01_on",
+        "keyHash": 3466937357,
+        "value": "_text_list01_on",
+        "font": "nie_main",
+        "size": 24,
+        "color": "#ffffff",
+        "align": "center"
+      },
+      "anim": {
+        "open": "0x5FEC8E4E",
+        "close": "0xA15F1DEE"
+      }
+    },
+    {
+      "name": "universe01_06_search_result_star_icon",
+      "transform": {
+        "x": 640,
+        "y": 360,
+        "scaleX": 1,
+        "scaleY": 1,
+        "rot": 0,
+        "anchorX": 0.5,
+        "anchorY": 0.5
+      },
+      "drawPriority": 448,
+      "drawType": 0,
+      "camera": "0x02D8FB06",
+      "anim": {
+        "open": "0x5FEC8E4E",
+        "close": "0xA15F1DEE"
+      }
+    },
+    {
+      "name": "universe02_02_p1_effect",
+      "transform": {
+        "x": 640,
+        "y": 360,
+        "scaleX": 1,
+        "scaleY": 1,
+        "rot": 0,
+        "anchorX": 0.5,
+        "anchorY": 0.5
+      },
+      "drawPriority": 448,
+      "drawType": 0,
+      "camera": "0x02D8FB06",
+      "anim": {
+        "open": "0x5FEC8E4E",
+        "close": "0xA15F1DEE"
+      }
+    },
+    {
+      "name": "universe02_03_chara_spirit",
+      "transform": {
+        "x": 640,
+        "y": 360,
+        "scaleX": 0.0011494252873563218,
+        "scaleY": 0.0009578544061302681,
+        "rot": 0,
+        "anchorX": 0.5,
+        "anchorY": 0.5
+      },
+      "drawPriority": 451,
+      "drawType": 0,
+      "camera": "0x02D8FB06",
+      "sprite": {
+        "logicalPath": "dx11/menu/31_universe/universe02/universe02_03/fr/universe02_03.g4tx",
+        "pngUrl": "/dx11/menu/31_universe/universe02/universe02_03/fr/universe02_03.png",
+        "w": 580,
+        "h": 696
+      },
+      "anim": {
+        "open": "0x5FEC8E4E",
+        "close": "0xA15F1DEE"
+      }
+    },
+    {
+      "name": "universe03_01_title",
+      "transform": {
+        "x": 640,
+        "y": 360,
+        "scaleX": 1,
+        "scaleY": 1,
+        "rot": 0,
+        "anchorX": 0.5,
+        "anchorY": 0.5
+      },
+      "drawPriority": 451,
+      "drawType": 0,
+      "camera": "0x02D8FB06",
+      "text": {
+        "key": "_text_title01",
+        "keyHash": 123620440,
+        "value": "_text_title01",
+        "font": "nie_main",
+        "size": 24,
+        "color": "#ffffff",
+        "align": "center"
+      },
+      "anim": {
+        "open": "0x5FEC8E4E",
+        "close": "0xA15F1DEE"
+      }
+    },
+    {
+      "name": "universe02_04_chara_effect",
+      "transform": {
+        "x": 640,
+        "y": 360,
+        "scaleX": 1,
+        "scaleY": 1,
+        "rot": 0,
+        "anchorX": 0.5,
+        "anchorY": 0.5
+      },
+      "drawPriority": 453,
+      "drawType": 0,
+      "camera": "0x02D8FB06",
+      "anim": {
+        "open": "0x5FEC8E4E",
+        "close": "0xA15F1DEE"
+      }
+    },
+    {
+      "name": "universe02_01_title",
+      "transform": {
+        "x": 1280,
+        "y": 514.6666870117188,
+        "scaleX": 0.0003472222222222222,
+        "scaleY": 0.0035460992907801418,
+        "rot": 0,
+        "anchorX": 0.5,
+        "anchorY": 0.5
+      },
+      "drawPriority": 465,
+      "drawType": 0,
+      "camera": "0x02D8FB06",
+      "sprite": {
+        "logicalPath": "dx11/menu/31_universe/universe02/universe02_01/fr/universe02_01.g4tx",
+        "pngUrl": "/dx11/menu/31_universe/universe02/universe02_01/fr/universe02_01.png",
+        "w": 1920,
+        "h": 188
+      },
+      "anim": {
+        "open": "0x5FEC8E4E",
+        "close": "0xA15F1DEE"
+      }
+    },
+    {
+      "name": "universe01_10_detail_window",
+      "transform": {
+        "x": 640,
+        "y": 360,
+        "scaleX": 0.0005995203836930455,
+        "scaleY": 0.0005555555555555556,
+        "rot": 0,
+        "anchorX": 0.5,
+        "anchorY": 0.5
+      },
+      "drawPriority": 652,
+      "drawType": 0,
+      "camera": "0x02D8FB06",
+      "sprite": {
+        "logicalPath": "dx11/menu/31_universe/universe01/universe01_10/fr/universe01_10.g4tx",
+        "pngUrl": "/dx11/menu/31_universe/universe01/universe01_10/fr/universe01_10.png",
+        "w": 1112,
+        "h": 1200
+      },
+      "text": {
+        "key": "_text_star_name01",
+        "keyHash": 123620440,
+        "value": "_text_star_name01",
+        "font": "nie_main",
+        "size": 24,
+        "color": "#ffffff",
+        "align": "center"
+      },
+      "anim": {
+        "open": "0x5FEC8E4E",
+        "close": "0xA15F1DEE"
+      }
+    },
+    {
+      "name": "universe01_12_charalist_window",
+      "transform": {
+        "x": 640,
+        "y": 360,
+        "scaleX": 0.023809523809523808,
+        "scaleY": 0.020833333333333332,
+        "rot": 0,
+        "anchorX": 0.5,
+        "anchorY": 0.5
+      },
+      "drawPriority": 653,
+      "drawType": 0,
+      "camera": "0x02D8FB06",
+      "sprite": {
+        "logicalPath": "dx11/menu/31_universe/universe01/universe01_12/universe01_12.g4tx",
+        "pngUrl": "/dx11/menu/31_universe/universe01/universe01_12/universe01_12.png",
+        "w": 28,
+        "h": 32
+      },
+      "text": {
+        "key": "_text_offer_title01",
+        "keyHash": 123620440,
+        "value": "_text_offer_title01",
+        "font": "nie_main",
+        "size": 24,
+        "color": "#ffffff",
+        "align": "center"
+      },
+      "anim": {}
+    },
+    {
+      "name": "universe01_20_item_possession_num",
+      "transform": {
+        "x": 640,
+        "y": 360,
+        "scaleX": 0.0011111111111111111,
+        "scaleY": 0.008333333333333333,
+        "rot": 0,
+        "anchorX": 0.5,
+        "anchorY": 0.5
+      },
+      "drawPriority": 653,
+      "drawType": 0,
+      "camera": "0x02D8FB06",
+      "sprite": {
+        "logicalPath": "dx11/menu/31_universe/universe01/universe01_20/fr/universe01_20.g4tx",
+        "pngUrl": "/dx11/menu/31_universe/universe01/universe01_20/fr/universe01_20.png",
+        "w": 600,
+        "h": 80
+      },
+      "anim": {
+        "open": "0x5FEC8E4E",
+        "close": "0xA15F1DEE"
+      }
+    },
+    {
+      "name": "universe01_30_rarity_rate_winddow",
+      "transform": {
+        "x": 640,
+        "y": 360,
+        "scaleX": 1,
+        "scaleY": 1,
+        "rot": 0,
+        "anchorX": 0.5,
+        "anchorY": 0.5
+      },
+      "drawPriority": 653,
+      "drawType": 0,
+      "camera": "0x02D8FB06",
+      "anim": {
+        "open": "0x5FEC8E4E",
+        "close": "0xA15F1DEE"
+      }
+    },
+    {
+      "name": "universe01_13_line_item_rarity",
+      "transform": {
+        "x": 640,
+        "y": 360,
+        "scaleX": 0.003205128205128205,
+        "scaleY": 0.009259259259259259,
+        "rot": 0,
+        "anchorX": 0.5,
+        "anchorY": 0.5
+      },
+      "drawPriority": 654,
+      "drawType": 0,
+      "camera": "0x02D8FB06",
+      "sprite": {
+        "logicalPath": "dx11/menu/31_universe/universe01/universe01_13/fr/universe01_13.g4tx",
+        "pngUrl": "/dx11/menu/31_universe/universe01/universe01_13/fr/universe01_13.png",
+        "w": 208,
+        "h": 72
+      },
+      "anim": {}
+    },
+    {
+      "name": "universe01_14_line_item_rare_icon",
+      "transform": {
+        "x": 640,
+        "y": 360,
+        "scaleX": 1,
+        "scaleY": 1,
+        "rot": 0,
+        "anchorX": 0.5,
+        "anchorY": 0.5
+      },
+      "drawPriority": 654,
+      "drawType": 0,
+      "camera": "0x02D8FB06",
+      "anim": {}
+    },
+    {
+      "name": "universe01_15_line_item_normal_icon",
+      "transform": {
+        "x": 640,
+        "y": 360,
+        "scaleX": 1,
+        "scaleY": 1,
+        "rot": 0,
+        "anchorX": 0.5,
+        "anchorY": 0.5
+      },
+      "drawPriority": 654,
+      "drawType": 0,
+      "camera": "0x02D8FB06",
+      "anim": {}
+    },
+    {
+      "name": "universe01_11_chara_icon",
+      "transform": {
+        "x": 640,
+        "y": 360,
+        "scaleX": 0.0021645021645021645,
+        "scaleY": 0.0021645021645021645,
+        "rot": 0,
+        "anchorX": 0.5,
+        "anchorY": 0.5
+      },
+      "drawPriority": 655,
+      "drawType": 0,
+      "camera": "0x02D8FB06",
+      "sprite": {
+        "logicalPath": "dx11/menu/31_universe/universe01/universe01_11/fr/universe01_11.g4tx",
+        "pngUrl": "/dx11/menu/31_universe/universe01/universe01_11/fr/universe01_11.png",
+        "w": 308,
+        "h": 308
+      },
+      "anim": {}
+    },
+    {
+      "name": "universe00_10_detail_window",
+      "transform": {
+        "x": 640,
+        "y": 360,
+        "scaleX": 1,
+        "scaleY": 1,
+        "rot": 0,
+        "anchorX": 0.5,
+        "anchorY": 0.5
+      },
+      "drawPriority": 655,
+      "drawType": 0,
+      "camera": "0x02D8FB06",
+      "anim": {
+        "open": "0x5FEC8E4E",
+        "close": "0xA15F1DEE"
+      }
+    },
+    {
+      "name": "universe01_11_charalist_chara_icon",
+      "transform": {
+        "x": 640,
+        "y": 360,
+        "scaleX": 0.0021645021645021645,
+        "scaleY": 0.0021645021645021645,
+        "rot": 0,
+        "anchorX": 0.5,
+        "anchorY": 0.5
+      },
+      "drawPriority": 655,
+      "drawType": 0,
+      "camera": "0x02D8FB06",
+      "sprite": {
+        "logicalPath": "dx11/menu/31_universe/universe01/universe01_11/fr/universe01_11.g4tx",
+        "pngUrl": "/dx11/menu/31_universe/universe01/universe01_11/fr/universe01_11.png",
+        "w": 308,
+        "h": 308
+      },
+      "anim": {}
+    },
+    {
+      "name": "universe01_30_rarity_rate_window",
+      "transform": {
+        "x": 640,
+        "y": 360,
+        "scaleX": 1,
+        "scaleY": 1,
+        "rot": 0,
+        "anchorX": 0.5,
+        "anchorY": 0.5
+      },
+      "drawPriority": 750,
+      "drawType": 0,
+      "camera": "0x02D8FB06",
+      "text": {
+        "key": "_text_rarity_offer_title01",
+        "keyHash": 2169113570,
+        "value": "_text_rarity_offer_title01",
+        "font": "nie_main",
+        "size": 24,
+        "color": "#ffffff",
+        "align": "center"
+      },
+      "anim": {
+        "open": "0x5FEC8E4E",
+        "close": "0xA15F1DEE"
+      }
+    },
+    {
+      "name": "universe01_31_rarity_rate_item",
+      "transform": {
+        "x": 640,
+        "y": 360,
+        "scaleX": 0.041666666666666664,
+        "scaleY": 0.041666666666666664,
+        "rot": 0,
+        "anchorX": 0.5,
+        "anchorY": 0.5
+      },
+      "drawPriority": 751,
+      "drawType": 0,
+      "camera": "0x02D8FB06",
+      "sprite": {
+        "logicalPath": "dx11/menu/31_universe/universe01/universe01_31/universe01_31.g4tx",
+        "pngUrl": "/dx11/menu/31_universe/universe01/universe01_31/universe01_31.png",
+        "w": 16,
+        "h": 16
+      },
+      "anim": {
+        "open": "0x5FEC8E4E",
+        "close": "0xA15F1DEE"
+      }
+    }
+  ]
+}

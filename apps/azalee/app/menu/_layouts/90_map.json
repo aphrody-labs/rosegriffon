@@ -1,0 +1,383 @@
+{
+  "screen": "90_map",
+  "locale": "fr",
+  "canvas": {
+    "w": 1280,
+    "h": 720
+  },
+  "objects": [
+    {
+      "name": "map01_01_town_map",
+      "transform": {
+        "x": 640,
+        "y": 360,
+        "scaleX": 1,
+        "scaleY": 1,
+        "rot": 0,
+        "anchorX": 0.5,
+        "anchorY": 0.5
+      },
+      "drawPriority": 749,
+      "drawType": 1,
+      "camera": "0x02D8FB06",
+      "anim": {
+        "open": "0x5FEC8E4E",
+        "close": "0xA15F1DEE"
+      }
+    },
+    {
+      "name": "map01_01_02_town_map",
+      "transform": {
+        "x": 640,
+        "y": 360,
+        "scaleX": 1,
+        "scaleY": 1,
+        "rot": 0,
+        "anchorX": 0.5,
+        "anchorY": 0.5
+      },
+      "drawPriority": 749,
+      "drawType": 1,
+      "camera": "0x02D8FB06",
+      "anim": {
+        "open": "0x5FEC8E4E",
+        "close": "0xA15F1DEE"
+      }
+    },
+    {
+      "name": "map01_01_03_town_map",
+      "transform": {
+        "x": 640,
+        "y": 360,
+        "scaleX": 1,
+        "scaleY": 1,
+        "rot": 0,
+        "anchorX": 0.5,
+        "anchorY": 0.5
+      },
+      "drawPriority": 749,
+      "drawType": 1,
+      "camera": "0x02D8FB06",
+      "anim": {
+        "open": "0x5FEC8E4E",
+        "close": "0xA15F1DEE"
+      }
+    },
+    {
+      "name": "map01_03_purpose_text",
+      "transform": {
+        "x": 640,
+        "y": 360,
+        "scaleX": 1,
+        "scaleY": 1,
+        "rot": 0,
+        "anchorX": 0.5,
+        "anchorY": 0.5
+      },
+      "drawPriority": 750,
+      "drawType": 0,
+      "camera": "0x02D8FB06",
+      "anim": {
+        "open": "0x5FEC8E4E",
+        "close": "0xA15F1DEE"
+      }
+    },
+    {
+      "name": "map01_05_marker_select_ring",
+      "transform": {
+        "x": 640,
+        "y": 360,
+        "scaleX": 1,
+        "scaleY": 1,
+        "rot": 0,
+        "anchorX": 0.5,
+        "anchorY": 0.5
+      },
+      "drawPriority": 750,
+      "drawType": 0,
+      "camera": "0x02D8FB06",
+      "anim": {
+        "open": "0x5FEC8E4E",
+        "close": "0xA15F1DEE"
+      }
+    },
+    {
+      "name": "map01_04_map_marker",
+      "transform": {
+        "x": 640,
+        "y": 360,
+        "scaleX": 1,
+        "scaleY": 1,
+        "rot": 0,
+        "anchorX": 0.5,
+        "anchorY": 0.5
+      },
+      "drawPriority": 751,
+      "drawType": 0,
+      "camera": "0x02D8FB06",
+      "anim": {
+        "open": "0x5FEC8E4E",
+        "close": "0xA15F1DEE"
+      }
+    },
+    {
+      "name": "map01_08_map_quest_popup",
+      "transform": {
+        "x": 640,
+        "y": 360,
+        "scaleX": 1,
+        "scaleY": 1,
+        "rot": 0,
+        "anchorX": 0.5,
+        "anchorY": 0.5
+      },
+      "drawPriority": 752,
+      "drawType": 0,
+      "camera": "0x02D8FB06",
+      "anim": {
+        "open": "0x5FEC8E4E",
+        "close": "0xA15F1DEE"
+      }
+    },
+    {
+      "name": "map01_10_area_map",
+      "transform": {
+        "x": 640,
+        "y": 360,
+        "scaleX": 1,
+        "scaleY": 1,
+        "rot": 0,
+        "anchorX": 0.5,
+        "anchorY": 0.5
+      },
+      "drawPriority": 753,
+      "drawType": 0,
+      "camera": "0x02D8FB06",
+      "anim": {
+        "open": "0x5FEC8E4E",
+        "close": "0xA15F1DEE"
+      }
+    },
+    {
+      "name": "map01_07_map_explanation",
+      "transform": {
+        "x": 640,
+        "y": 360,
+        "scaleX": 1,
+        "scaleY": 1,
+        "rot": 0,
+        "anchorX": 0.5,
+        "anchorY": 0.5
+      },
+      "drawPriority": 753,
+      "drawType": 0,
+      "camera": "0x02D8FB06",
+      "text": {
+        "key": "_text_flavor01",
+        "keyHash": 3466937357,
+        "value": "_text_flavor01",
+        "font": "nie_main",
+        "size": 24,
+        "color": "#ffffff",
+        "align": "center"
+      },
+      "anim": {
+        "open": "0x5FEC8E4E",
+        "close": "0xA15F1DEE"
+      }
+    },
+    {
+      "name": "map01_11_area_zoom_guide",
+      "transform": {
+        "x": 640,
+        "y": 360,
+        "scaleX": 1,
+        "scaleY": 1,
+        "rot": 0,
+        "anchorX": 0.5,
+        "anchorY": 0.5
+      },
+      "drawPriority": 754,
+      "drawType": 0,
+      "camera": "0x02D8FB06",
+      "anim": {
+        "open": "0x5FEC8E4E",
+        "close": "0xA15F1DEE"
+      }
+    },
+    {
+      "name": "map01_02_map_name",
+      "transform": {
+        "x": 640,
+        "y": 360,
+        "scaleX": 1,
+        "scaleY": 1,
+        "rot": 0,
+        "anchorX": 0.5,
+        "anchorY": 0.5
+      },
+      "drawPriority": 754,
+      "drawType": 0,
+      "camera": "0x02D8FB06",
+      "text": {
+        "key": "_text_map01",
+        "keyHash": 2505002161,
+        "value": "_text_map01",
+        "font": "nie_main",
+        "size": 24,
+        "color": "#ffffff",
+        "align": "center"
+      },
+      "anim": {
+        "open": "0x5FEC8E4E",
+        "close": "0xA15F1DEE"
+      }
+    },
+    {
+      "name": "map01_13_quest_window",
+      "transform": {
+        "x": 640,
+        "y": 372.6666564941406,
+        "scaleX": 0.01111111111111111,
+        "scaleY": 0.01111111111111111,
+        "rot": 0,
+        "anchorX": 0.5,
+        "anchorY": 0.5
+      },
+      "drawPriority": 754,
+      "drawType": 0,
+      "camera": "0x02D8FB06",
+      "sprite": {
+        "logicalPath": "dx11/menu/90_map/map01/map01_13/fr/map01_13.g4tx",
+        "pngUrl": "/dx11/menu/90_map/map01/map01_13/fr/map01_13.png",
+        "w": 60,
+        "h": 60
+      },
+      "text": {
+        "key": "_text_chapter01",
+        "keyHash": 3945487540,
+        "value": "_text_chapter01",
+        "font": "nie_main",
+        "size": 24,
+        "color": "#ffffff",
+        "align": "center"
+      },
+      "anim": {
+        "open": "0x5FEC8E4E",
+        "close": "0xA15F1DEE"
+      }
+    },
+    {
+      "name": "map01_12_area_change_guide",
+      "transform": {
+        "x": 640,
+        "y": 360,
+        "scaleX": 1,
+        "scaleY": 1,
+        "rot": 0,
+        "anchorX": 0.5,
+        "anchorY": 0.5
+      },
+      "drawPriority": 754,
+      "drawType": 0,
+      "camera": "0x02D8FB06",
+      "text": {
+        "key": "_text_area01",
+        "keyHash": 4057287501,
+        "value": "_text_area01",
+        "font": "nie_main",
+        "size": 24,
+        "color": "#ffffff",
+        "align": "center"
+      },
+      "anim": {
+        "open": "0x5FEC8E4E",
+        "close": "0xA15F1DEE"
+      }
+    },
+    {
+      "name": "map01_06_marker_name",
+      "transform": {
+        "x": 640,
+        "y": 372.6666564941406,
+        "scaleX": 1,
+        "scaleY": 1,
+        "rot": 0,
+        "anchorX": 0.5,
+        "anchorY": 0.5
+      },
+      "drawPriority": 754,
+      "drawType": 0,
+      "camera": "0x02D8FB06",
+      "text": {
+        "key": "_text_name01",
+        "keyHash": 2553409787,
+        "value": "_text_name01",
+        "font": "nie_main",
+        "size": 24,
+        "color": "#ffffff",
+        "align": "center"
+      },
+      "anim": {
+        "open": "0x5FEC8E4E",
+        "close": "0xA15F1DEE"
+      }
+    },
+    {
+      "name": "map01_02b_map_name_change_guide",
+      "transform": {
+        "x": 640,
+        "y": 360,
+        "scaleX": 1,
+        "scaleY": 1,
+        "rot": 0,
+        "anchorX": 0.5,
+        "anchorY": 0.5
+      },
+      "drawPriority": 754,
+      "drawType": 0,
+      "camera": "0x02D8FB06",
+      "text": {
+        "key": "_text_map01",
+        "keyHash": 1861390763,
+        "value": "_text_map01",
+        "font": "nie_main",
+        "size": 24,
+        "color": "#ffffff",
+        "align": "center"
+      },
+      "anim": {
+        "open": "0x5FEC8E4E",
+        "close": "0xA15F1DEE"
+      }
+    },
+    {
+      "name": "map01_11_p1_area_zoom_guide_button",
+      "transform": {
+        "x": 640,
+        "y": 360,
+        "scaleX": 1,
+        "scaleY": 1,
+        "rot": 0,
+        "anchorX": 0.5,
+        "anchorY": 0.5
+      },
+      "drawPriority": 755,
+      "drawType": 0,
+      "camera": "0x02D8FB06",
+      "text": {
+        "key": "_text_btn01",
+        "keyHash": 1556358205,
+        "value": "_text_btn01",
+        "font": "nie_main",
+        "size": 24,
+        "color": "#ffffff",
+        "align": "center"
+      },
+      "anim": {
+        "open": "0x5FEC8E4E",
+        "close": "0xA15F1DEE"
+      }
+    }
+  ]
+}

@@ -1,0 +1,130 @@
+{
+  "screen": "109_system",
+  "locale": "fr",
+  "canvas": {
+    "w": 1280,
+    "h": 720
+  },
+  "objects": [
+    {
+      "name": "system02_01_photo_list_locator",
+      "transform": {
+        "x": 640,
+        "y": 360,
+        "scaleX": 1,
+        "scaleY": 1,
+        "rot": 0,
+        "anchorX": 0.5,
+        "anchorY": 0.5
+      },
+      "drawPriority": 446,
+      "drawType": 0,
+      "camera": "0x02D8FB06",
+      "anim": {}
+    },
+    {
+      "name": "system02_02_photo_list_item",
+      "transform": {
+        "x": 640,
+        "y": 360,
+        "scaleX": 1,
+        "scaleY": 1,
+        "rot": 0,
+        "anchorX": 0.5,
+        "anchorY": 0.5
+      },
+      "drawPriority": 447,
+      "drawType": 0,
+      "camera": "0x02D8FB06",
+      "anim": {}
+    },
+    {
+      "name": "system01_01_list_attach_base",
+      "transform": {
+        "x": 640,
+        "y": 360,
+        "scaleX": 1,
+        "scaleY": 1,
+        "rot": 0,
+        "anchorX": 0.5,
+        "anchorY": 0.5
+      },
+      "drawPriority": 451,
+      "drawType": 0,
+      "camera": "0x02D8FB06",
+      "text": {
+        "key": "_text_time01",
+        "keyHash": 1590746387,
+        "value": "_text_time01",
+        "font": "nie_main",
+        "size": 24,
+        "color": "#ffffff",
+        "align": "center"
+      },
+      "anim": {}
+    },
+    {
+      "name": "system02_03_photo_possession_num",
+      "transform": {
+        "x": 640,
+        "y": 360,
+        "scaleX": 0.16666666666666666,
+        "scaleY": 0.16666666666666666,
+        "rot": 0,
+        "anchorX": 0.5,
+        "anchorY": 0.5
+      },
+      "drawPriority": 453,
+      "drawType": 0,
+      "camera": "0x02D8FB06",
+      "sprite": {
+        "logicalPath": "dx11/menu/109_system/system02/system02_03/fr/system02_03.g4tx",
+        "pngUrl": "/dx11/menu/109_system/system02/system02_03/fr/system02_03.png",
+        "w": 4,
+        "h": 4
+      },
+      "anim": {}
+    },
+    {
+      "name": "system02_04_photo_details_locator",
+      "transform": {
+        "x": 640,
+        "y": 360,
+        "scaleX": 1,
+        "scaleY": 1,
+        "rot": 0,
+        "anchorX": 0.5,
+        "anchorY": 0.5
+      },
+      "drawPriority": 523,
+      "drawType": 0,
+      "camera": "0x02D8FB06",
+      "anim": {}
+    },
+    {
+      "name": "system01_02_list_item",
+      "transform": {
+        "x": 640,
+        "y": 360,
+        "scaleX": 1,
+        "scaleY": 1,
+        "rot": 0,
+        "anchorX": 0.5,
+        "anchorY": 0.5
+      },
+      "drawPriority": 551,
+      "drawType": 0,
+      "camera": "0x02D8FB06",
+      "text": {
+        "key": "_text_list01_on",
+        "keyHash": 478786179,
+        "value": "_text_list01_on",
+        "font": "nie_main",
+        "size": 24,
+        "color": "#ffffff",
+        "align": "center"
+      },
+      "anim": {}
+    }
+  ]
+}

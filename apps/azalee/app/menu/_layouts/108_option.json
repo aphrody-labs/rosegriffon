@@ -1,0 +1,443 @@
+{
+  "screen": "108_option",
+  "locale": "fr",
+  "canvas": {
+    "w": 1280,
+    "h": 720
+  },
+  "objects": [
+    {
+      "name": "option03_10_stamp_input_base_attach",
+      "transform": {
+        "x": 640,
+        "y": 360,
+        "scaleX": 1,
+        "scaleY": 1,
+        "rot": 0,
+        "anchorX": 0.5,
+        "anchorY": 0.5
+      },
+      "drawPriority": 200,
+      "drawType": 0,
+      "camera": "0x02D8FB06",
+      "anim": {
+        "open": "0x5FEC8E4E",
+        "close": "0xA15F1DEE"
+      }
+    },
+    {
+      "name": "option03_11_select_stamp_view.objcfg",
+      "transform": {
+        "x": 640,
+        "y": 360,
+        "scaleX": 0.002109704641350211,
+        "scaleY": 0.002109704641350211,
+        "rot": 0,
+        "anchorX": 0.5,
+        "anchorY": 0.5
+      },
+      "drawPriority": 301,
+      "drawType": 0,
+      "camera": "0x02D8FB06",
+      "sprite": {
+        "logicalPath": "dx11/menu/108_option/option03/option03_11/option03_11.g4tx",
+        "pngUrl": "/dx11/menu/108_option/option03/option03_11/option03_11.png",
+        "w": 316,
+        "h": 316
+      },
+      "anim": {}
+    },
+    {
+      "name": "option03_01_list_locator_key_config",
+      "transform": {
+        "x": 640,
+        "y": 360,
+        "scaleX": 1,
+        "scaleY": 1,
+        "rot": 0,
+        "anchorX": 0.5,
+        "anchorY": 0.5
+      },
+      "drawPriority": 304,
+      "drawType": 0,
+      "camera": "0x02D8FB06",
+      "anim": {
+        "open": "0x5FEC8E4E",
+        "close": "0xA15F1DEE"
+      }
+    },
+    {
+      "name": "option03_01_list_locator",
+      "transform": {
+        "x": 640,
+        "y": 360,
+        "scaleX": 1,
+        "scaleY": 1,
+        "rot": 0,
+        "anchorX": 0.5,
+        "anchorY": 0.5
+      },
+      "drawPriority": 304,
+      "drawType": 0,
+      "camera": "0x02D8FB06",
+      "anim": {
+        "open": "0x5FEC8E4E",
+        "close": "0xA15F1DEE"
+      }
+    },
+    {
+      "name": "option03_00_p1_bg",
+      "transform": {
+        "x": 640,
+        "y": 360,
+        "scaleX": 1,
+        "scaleY": 1,
+        "rot": 0,
+        "anchorX": 0.5,
+        "anchorY": 0.5
+      },
+      "drawPriority": 451,
+      "drawType": 0,
+      "camera": "0x02D8FB06",
+      "anim": {
+        "open": "0x5FEC8E4E",
+        "close": "0xA15F1DEE"
+      }
+    },
+    {
+      "name": "option01_01_setting_list_attach",
+      "transform": {
+        "x": 640,
+        "y": 360,
+        "scaleX": 1,
+        "scaleY": 1,
+        "rot": 0,
+        "anchorX": 0.5,
+        "anchorY": 0.5
+      },
+      "drawPriority": 651,
+      "drawType": 0,
+      "camera": "0x02D8FB06",
+      "anim": {
+        "open": "0x5FEC8E4E",
+        "close": "0xA15F1DEE"
+      }
+    },
+    {
+      "name": "option10_01_demo03_language_title_list_attach",
+      "transform": {
+        "x": 640,
+        "y": 360,
+        "scaleX": 1,
+        "scaleY": 1,
+        "rot": 0,
+        "anchorX": 0.5,
+        "anchorY": 0.5
+      },
+      "drawPriority": 651,
+      "drawType": 0,
+      "camera": "0x02D8FB06",
+      "anim": {
+        "open": "0x5FEC8E4E",
+        "close": "0xA15F1DEE"
+      }
+    },
+    {
+      "name": "option01_05_guide_base",
+      "transform": {
+        "x": 640,
+        "y": 360,
+        "scaleX": 1,
+        "scaleY": 1,
+        "rot": 0,
+        "anchorX": 0.5,
+        "anchorY": 0.5
+      },
+      "drawPriority": 651,
+      "drawType": 0,
+      "camera": "0x02D8FB06",
+      "text": {
+        "key": "_text_guide01",
+        "keyHash": 3560529197,
+        "value": "_text_guide01",
+        "font": "nie_main",
+        "size": 24,
+        "color": "#ffffff",
+        "align": "center"
+      },
+      "anim": {
+        "open": "0x5FEC8E4E",
+        "close": "0xA15F1DEE"
+      }
+    },
+    {
+      "name": "option10_01_language_title_list_attach",
+      "transform": {
+        "x": 640,
+        "y": 360,
+        "scaleX": 0.0005649717514124294,
+        "scaleY": 0.003333333333333333,
+        "rot": 0,
+        "anchorX": 0.5,
+        "anchorY": 0.5
+      },
+      "drawPriority": 651,
+      "drawType": 0,
+      "camera": "0x02D8FB06",
+      "sprite": {
+        "logicalPath": "dx11/menu/108_option/option10/option10_01/fr/option10_01.g4tx",
+        "pngUrl": "/dx11/menu/108_option/option10/option10_01/fr/option10_01.png",
+        "w": 1180,
+        "h": 200
+      },
+      "anim": {
+        "open": "0x5FEC8E4E",
+        "close": "0xA15F1DEE"
+      }
+    },
+    {
+      "name": "option10_01_language_title_list_attach_demo02",
+      "transform": {
+        "x": 640,
+        "y": 360,
+        "scaleX": 1,
+        "scaleY": 1,
+        "rot": 0,
+        "anchorX": 0.5,
+        "anchorY": 0.5
+      },
+      "drawPriority": 651,
+      "drawType": 0,
+      "camera": "0x02D8FB06",
+      "anim": {
+        "open": "0x5FEC8E4E",
+        "close": "0xA15F1DEE"
+      }
+    },
+    {
+      "name": "option01_21_keyconfig_setting_list_attach",
+      "transform": {
+        "x": 640,
+        "y": 360,
+        "scaleX": 1,
+        "scaleY": 1,
+        "rot": 0,
+        "anchorX": 0.5,
+        "anchorY": 0.5
+      },
+      "drawPriority": 651,
+      "drawType": 0,
+      "camera": "0x02D8FB06",
+      "anim": {
+        "open": "0x5FEC8E4E",
+        "close": "0xA15F1DEE"
+      }
+    },
+    {
+      "name": "option01_02_setting_list_item",
+      "transform": {
+        "x": 640,
+        "y": 360,
+        "scaleX": 1,
+        "scaleY": 1,
+        "rot": 0,
+        "anchorX": 0.5,
+        "anchorY": 0.5
+      },
+      "drawPriority": 652,
+      "drawType": 0,
+      "camera": "0x02D8FB06",
+      "text": {
+        "key": "_text_option_list01_on",
+        "keyHash": 3466937357,
+        "value": "_text_option_list01_on",
+        "font": "nie_main",
+        "size": 24,
+        "color": "#ffffff",
+        "align": "center"
+      },
+      "anim": {
+        "open": "0x5FEC8E4E",
+        "close": "0xA15F1DEE"
+      }
+    },
+    {
+      "name": "option01_22_keyconfig_setting_list_item",
+      "transform": {
+        "x": 640,
+        "y": 360,
+        "scaleX": 1,
+        "scaleY": 1,
+        "rot": 0,
+        "anchorX": 0.5,
+        "anchorY": 0.5
+      },
+      "drawPriority": 652,
+      "drawType": 0,
+      "camera": "0x02D8FB06",
+      "text": {
+        "key": "_text_keyconfig_list01_on",
+        "keyHash": 3466937357,
+        "value": "_text_keyconfig_list01_on",
+        "font": "nie_main",
+        "size": 24,
+        "color": "#ffffff",
+        "align": "center"
+      },
+      "anim": {
+        "open": "0x5FEC8E4E",
+        "close": "0xA15F1DEE"
+      }
+    },
+    {
+      "name": "option10_02_language_list_item_demo02",
+      "transform": {
+        "x": 640,
+        "y": 360,
+        "scaleX": 1,
+        "scaleY": 1,
+        "rot": 0,
+        "anchorX": 0.5,
+        "anchorY": 0.5
+      },
+      "drawPriority": 652,
+      "drawType": 0,
+      "camera": "0x02D8FB06",
+      "anim": {
+        "open": "0x5FEC8E4E",
+        "close": "0xA15F1DEE"
+      }
+    },
+    {
+      "name": "option10_02_language_list_item",
+      "transform": {
+        "x": 640,
+        "y": 360,
+        "scaleX": 1,
+        "scaleY": 1,
+        "rot": 0,
+        "anchorX": 0.5,
+        "anchorY": 0.5
+      },
+      "drawPriority": 652,
+      "drawType": 0,
+      "camera": "0x02D8FB06",
+      "text": {
+        "key": "_text_list01_on",
+        "keyHash": 270886602,
+        "value": "_text_list01_on",
+        "font": "nie_main",
+        "size": 24,
+        "color": "#ffffff",
+        "align": "center"
+      },
+      "anim": {
+        "open": "0x5FEC8E4E",
+        "close": "0xA15F1DEE"
+      }
+    },
+    {
+      "name": "option01_23_keyconfig_setting_list_item_key",
+      "transform": {
+        "x": 640,
+        "y": 360,
+        "scaleX": 1,
+        "scaleY": 1,
+        "rot": 0,
+        "anchorX": 0.5,
+        "anchorY": 0.5
+      },
+      "drawPriority": 653,
+      "drawType": 0,
+      "camera": "0x02D8FB06",
+      "text": {
+        "key": "_text_btn01",
+        "keyHash": 1016631670,
+        "value": "_text_btn01",
+        "font": "nie_main",
+        "size": 24,
+        "color": "#ffffff",
+        "align": "center"
+      },
+      "anim": {
+        "open": "0x5FEC8E4E",
+        "close": "0xA15F1DEE"
+      }
+    },
+    {
+      "name": "option02_02_license_notation",
+      "transform": {
+        "x": 640,
+        "y": 360,
+        "scaleX": 1,
+        "scaleY": 1,
+        "rot": 0,
+        "anchorX": 0.5,
+        "anchorY": 0.5
+      },
+      "drawPriority": 655,
+      "drawType": 0,
+      "camera": "0x02D8FB06",
+      "anim": {
+        "open": "0x5FEC8E4E",
+        "close": "0xA15F1DEE"
+      }
+    },
+    {
+      "name": "option02_01_license_notation",
+      "transform": {
+        "x": 640,
+        "y": 360,
+        "scaleX": 1,
+        "scaleY": 1,
+        "rot": 0,
+        "anchorX": 0.5,
+        "anchorY": 0.5
+      },
+      "drawPriority": 880,
+      "drawType": 0,
+      "camera": "0x02D8FB06",
+      "text": {
+        "key": "_text_license01",
+        "keyHash": 2617056861,
+        "value": "_text_license01",
+        "font": "nie_main",
+        "size": 24,
+        "color": "#ffffff",
+        "align": "center"
+      },
+      "anim": {
+        "open": "0x5FEC8E4E",
+        "close": "0xA15F1DEE"
+      }
+    },
+    {
+      "name": "option01_10_brightness_change_window",
+      "transform": {
+        "x": 640,
+        "y": 360,
+        "scaleX": 1,
+        "scaleY": 1,
+        "rot": 0,
+        "anchorX": 0.5,
+        "anchorY": 0.5
+      },
+      "drawPriority": 880,
+      "drawType": 0,
+      "camera": "0x02D8FB06",
+      "text": {
+        "key": "_text_option_volume02_on",
+        "keyHash": 3807486875,
+        "value": "_text_option_volume02_on",
+        "font": "nie_main",
+        "size": 24,
+        "color": "#ffffff",
+        "align": "center"
+      },
+      "anim": {
+        "open": "0x5FEC8E4E",
+        "close": "0xA15F1DEE"
+      }
+    }
+  ]
+}
