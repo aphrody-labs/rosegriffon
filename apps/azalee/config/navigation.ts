@@ -93,6 +93,11 @@ export const navigationItems: NavItem[] = [
 		path: "/passive",
 	},
 	{
+		icon: "image",
+		label: "nav.wiki.gallery",
+		path: "/gallery",
+	},
+	{
 		children: [
 			{
 				label: "nav.tools.compare",
@@ -125,7 +130,17 @@ export const navigationItems: NavItem[] = [
 export const mobileNavItems: NavItem[] = [
 	{ icon: "home", label: "nav.home", path: "/" },
 	{
-		activePaths: ["/chara", "/skill", "/item", "/aura", "/passive", "/tactic", "/wiki", "/search"],
+		activePaths: [
+			"/chara",
+			"/skill",
+			"/item",
+			"/aura",
+			"/passive",
+			"/tactic",
+			"/gallery",
+			"/wiki",
+			"/search",
+		],
 		icon: "search",
 		label: "nav.wiki",
 		path: "/search",
