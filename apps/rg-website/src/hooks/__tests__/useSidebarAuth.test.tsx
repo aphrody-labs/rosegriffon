@@ -107,6 +107,9 @@ describe("useSidebarAuth", () => {
 	});
 
 	it("should handle authenticated user with profile", async () => {
+		// Fixtures partielles : seuls les champs lus par le hook sont fournis.
+		// On caste a `never` au moment de l'assertion (cf. toEqual ci-dessous)
+		// pour ne pas dupliquer les types complets User/Profile dans le test.
 		const mockUser = { email: "test@example.com", id: "user-123" };
 		const mockProfile = { id: "user-123", username: "testuser" };
 
@@ -124,14 +127,14 @@ describe("useSidebarAuth", () => {
 
 		await waitFor(
 			() => {
-				expect(result.current.user).toEqual(mockUser);
+				expect(result.current.user).toEqual(mockUser as never);
 			},
 			{ timeout: 2000 }
 		);
 
 		await waitFor(
 			() => {
-				expect(result.current.profile).toEqual(mockProfile);
+				expect(result.current.profile).toEqual(mockProfile as never);
 			},
 			{ timeout: 2000 }
 		);
