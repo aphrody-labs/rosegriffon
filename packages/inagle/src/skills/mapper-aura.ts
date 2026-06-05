@@ -329,25 +329,22 @@ function getElement(variables: ConfigVariable[]): number {
 }
 
 /**
- * Derive icon_code from miximax asset_code (wmm00210_h2 → c05028210)
- */
-function deriveIconCodeInternal(assetCode: string): string | null {
-	if (!assetCode.startsWith("wmm")) return null;
-	const numStr = assetCode.replace(/^wmm/, "").replace(/_.*$/, "");
-	const num = parseInt(numStr, 10);
-	if (Number.isNaN(num)) return null;
-	if (numStr.length > 5) return `c${numStr}`;
-	if (num <= 999) return `c05028${String(num).padStart(3, "0")}`;
-	return null;
-}
-
-/**
  * Build image path based on asset code and subtype.
- * Keshins : 200_icon/10_icon_chr/aura_fs/k{6d}_l_{5d}_l00.webp
- * Souls   : 200_icon/10_icon_chr/aura_soul/a{6d}_l_{5d}_l00.webp
- * Miximax : 220_img/telop_waza/fr/aura_mixi_{iconCode}.webp (fallback car mapping ca/cn non déterministe)
- * Aura    : 220_img/telop_waza/fr/aura_power_{assetCode}.webp
+ * Keshins : 200_icon/10_icon_chr/aura_fs/k{6d}_l_{5d}_l00.webp (telop k{N} == numéro keshin)
+ * Souls   : 200_icon/10_icon_chr/aura_soul/a{6d}_l_{5d}_l00.webp (telop a{N} == numéro soul)
+ * Aura    : 220_img/telop_waza/fr/aura_power_{assetCode}.webp (telop == asset_code propre)
+ * Miximax : AUCUNE image — voir note ci-dessous.
  * ModeChange : non supporté (pas d'icône standardisée)
+ *
+ * NOTE Miximax (bug corrigé 2026-06) : l'ancien code dérivait `wmm00<NNN>` → `c05028<NNN>`
+ * → `aura_mixi_c05028<NNN>` NAÏVEMENT. Or `c05028<NNN>` est l'internal_code d'un
+ * PERSONNAGE LÉGENDAIRE d'un AUTRE set (c05028100 = Ryoma Nishiki, c05028010 = Fei Rune…),
+ * et les telops `aura_mixi_*` du dump forment un set FERMÉ tied à ces persos — ils ne
+ * correspondent PAS aux miximax `wmm` de Victory Road. Résultat : Arthur (wmm00100)
+ * affichait le bandeau de Ryoma (faux), 18/69 « matchaient » un mauvais nom, 51/69
+ * tombaient en 404. Il n'existe PAS de telop_waza valide pour les miximax `wmm` → on
+ * NE dérive plus d'image ici (undefined). L'icône miximax correcte (cn/ca via le
+ * manifeste côté azalee `getMiximaxIconUrl`) reste juste et est résolue ailleurs.
  */
 function buildImagePath(assetCode: string, subType: AuraSubType): string | undefined {
 	if (!assetCode) return undefined;
@@ -374,9 +371,9 @@ function buildImagePath(assetCode: string, subType: AuraSubType): string | undef
 			return `220_img/telop_waza/fr/aura_power_${assetCode}.webp`;
 		}
 		case "Miximax": {
-			const iconCode = deriveIconCodeInternal(assetCode);
-			if (!iconCode) return undefined;
-			return `220_img/telop_waza/fr/aura_mixi_${iconCode}.webp`;
+			// Pas de telop_waza valide pour les `wmm` (cf. note) — l'icône est résolue
+			// via le manifeste miximax côté azalee, pas via un mapping numérique faux.
+			return undefined;
 		}
 		default:
 			return undefined;

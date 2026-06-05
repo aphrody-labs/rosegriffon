@@ -728,18 +728,73 @@ export function getMiximaxIconUrl(iconCode: string | undefined | null): string {
 }
 
 /**
+ * Détecte un `image_url` DB de miximax issu de l'ANCIEN mapping naïf
+ * `wmm00<NNN>` → `aura_mixi_c05028<NNN>.webp` (ou `aura_mixi_c<charId>.webp`). Ce path
+ * pointe vers le telop d'un PERSONNAGE LÉGENDAIRE d'un autre set (c05028100 = Ryoma
+ * Nishiki…), PAS vers le miximax `wmm` réel → bannière du mauvais perso. Ces lignes
+ * restent en DB tant que le miroir n'a pas été repushé : on les rejette ici (au profit
+ * de l'icône manifeste correcte) plutôt que d'afficher un faux nom. Cf. bug Arthur.
+ */
+function isStaleMiximaxTelopUrl(imageUrl: string | undefined | null): boolean {
+	if (!imageUrl) {
+		return false;
+	}
+	return /(?:^|\/)220_img\/telop_waza\/[a-z]+\/aura_mixi_c\d/.test(imageUrl);
+}
+
+/**
+ * Résout l'icône d'un miximax à partir de son `icon_code`/`asset_code` (via le manifeste
+ * des vrais fichiers `aura_mixi` du dump) en IGNORANT tout `image_url` DB issu de l'ancien
+ * mapping naïf telop (`aura_mixi_c05028*` = bannière d'un autre perso). Retourne le
+ * placeholder si aucun fichier réel n'existe — jamais le bandeau d'un perso étranger.
+ *
+ * Ordre : manifeste (icon_code puis asset_code) → image_url DB SI ce n'est PAS un telop
+ * miximax périmé → placeholder. Sépare clairement l'ICÔNE (carrée, juste) du TELOP
+ * (bandeau, supprimé pour les wmm car aucun n'est valide).
+ */
+export function getMiximaxImageUrl(
+	iconCode: string | undefined | null,
+	assetCode: string | undefined | null,
+	dbImageUrl: string | undefined | null
+): string {
+	const fromIcon = getMiximaxIconUrl(iconCode);
+	if (fromIcon) {
+		return fromIcon;
+	}
+	const fromAsset = getMiximaxIconUrl(assetCode);
+	if (fromAsset) {
+		return fromAsset;
+	}
+	// L'image_url DB n'est utilisable QUE si ce n'est pas un telop miximax périmé.
+	if (dbImageUrl && !isStaleMiximaxTelopUrl(dbImageUrl)) {
+		const resolved = resolveAssetUrl(dbImageUrl);
+		if (resolved) {
+			return resolved;
+		}
+	}
+	return PLACEHOLDERS.character;
+}
+
+/**
  * Résout l'URL telop (grande image) d'une aura à partir de son asset_code.
  * Les fichiers du bucket utilisent le pattern {code}_{code}.webp avec des préfixes
  * différents de ceux stockés en DB.
  *
  * Mapping :
- * - Keshins (wks/wkk/wkd/wko/wkt):  wk*{N} -> k{N padded 6 digits}
- * - Souls (wss/wso/wsd/wsk):         ws*{N} -> a{N padded 6 digits}
+ * - Keshins (wks/wkk/wkd/wko/wkt):  wk*{N} -> k{N padded 6 digits} (telop k{N} == numéro keshin)
+ * - Souls (wss/wso/wsd/wsk):         ws*{N} -> a{N padded 6 digits} (telop a{N} == numéro soul)
  * - Armed (was/wak/wad/wao):         wa*{N} -> a{N padded 6 digits}
  * - Mode changes: mode_change_{X} -> tel quel
- * - Miximax wap: wap{N} -> aura_power_wap{N}
- * - Miximax wmm (short ≤5 digits): wmm000XX -> aura_mixi_c05028{XXX}
- * - Miximax wmm (long charId): wmm{charId} -> aura_mixi_c{charId}
+ * - Aura wap: wap{N} -> aura_power_wap{N} (telop == asset_code propre)
+ *
+ * Miximax `wmm` : AUCUN telop (retourne null). L'ancien code dérivait `wmm00<NNN>` →
+ * `aura_mixi_c05028<NNN>` (ou `aura_mixi_c<charId>` pour les codes longs). Or
+ * `c05028<NNN>` est l'internal_code d'un PERSONNAGE LÉGENDAIRE d'un AUTRE set
+ * (c05028100 = Ryoma Nishiki…), et les telops `aura_mixi_*` du dump forment un set
+ * FERMÉ tied à ces persos — ils ne correspondent PAS aux miximax `wmm` de Victory Road.
+ * Conséquence : Arthur (wmm00100) affichait le bandeau de Ryoma (faux). Il n'existe
+ * PAS de telop_waza valide pour un miximax `wmm` → on ne dérive plus rien (null) ;
+ * l'icône miximax correcte vient du manifeste (`getMiximaxIconUrl`).
  */
 export function resolveAuraTelopUrl(assetCode: string | undefined | null): string | null {
 	if (!assetCode) {
@@ -748,24 +803,15 @@ export function resolveAuraTelopUrl(assetCode: string | undefined | null): strin
 
 	let bucketCode: string | null = null;
 
+	if (assetCode.startsWith("wmm")) {
+		// Miximax : pas de telop fiable (cf. note) — jamais de bandeau d'un autre perso.
+		return null;
+	}
 	if (assetCode.startsWith("wk")) {
 		// All Keshins: wks/wkk/wkd/wko/wkt -> k{N padded 6}
 		// Strip variant suffix (_b1/_h2/_st0701/_1…) → base only (cf. auraBaseNum).
 		const num = auraBaseNum(assetCode, /^wk[a-z]/);
 		bucketCode = num ? `k${num.padStart(6, "0")}` : null;
-	} else if (assetCode.startsWith("wmm")) {
-		// Miximax character-based: wmm{N} -> aura_mixi_c{charId}
-		const numStr = assetCode.replace(/^wmm/, "").replace(/_.*$/, "");
-		const num = Number.parseInt(numStr, 10);
-		if (!Number.isNaN(num)) {
-			if (numStr.length > 5) {
-				// Long code = direct character ID (e.g. wmm11010230 -> c11010230)
-				bucketCode = `aura_mixi_c${numStr}`;
-			} else if (num <= 999) {
-				// Short code = c05028 prefix (e.g. wmm00010 -> c05028010)
-				bucketCode = `aura_mixi_c05028${String(num).padStart(3, "0")}`;
-			}
-		}
 	} else if (assetCode.startsWith("ws") || assetCode.startsWith("wa")) {
 		// Souls (ws*) and Armed (wa*) -> a{N padded 6}
 		// Except wap which has special mapping
