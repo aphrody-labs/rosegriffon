@@ -120,6 +120,11 @@ export const navigationItems: NavItem[] = [
 				path: "/tools/translator",
 				icon: "translate",
 			},
+			{
+				label: "nav.tools.save_reader",
+				path: "/save",
+				icon: "save",
+			},
 		],
 		icon: "build",
 		label: "nav.tools",
