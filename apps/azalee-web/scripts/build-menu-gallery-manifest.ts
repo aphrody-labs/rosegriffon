@@ -89,6 +89,13 @@ for (const def of MENU_DIRS) {
 		}
 		files.sort();
 		for (const file of files) {
+			// Filtre les PNG 0-octet : g4tx indécodables (pré-extracteur a écrit un
+			// fichier vide ; le décodeur live hang aussi dessus). Les lister donnerait
+			// des vignettes mortes + un hang 30s du service de variantes (sharp sur 0
+			// octet → 504) qui bloque le pool de connexions du navigateur.
+			if (Bun.file(`${MENU_ROOT}/220_img/${sd.fs}/${file}`).size === 0) {
+				continue;
+			}
 			items.push({
 				id: `menu_${sd.rel.replaceAll("/", "_")}_${logicalName(file)}`,
 				dir: sd.rel,

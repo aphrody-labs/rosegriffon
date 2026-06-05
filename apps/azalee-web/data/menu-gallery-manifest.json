@@ -1,7 +1,7 @@
 {
   "counts": {
     "gallery_img2": 363,
-    "ev_pic": 94,
+    "ev_pic": 70,
     "stadium": 202,
     "vsroute_map": 88,
     "hlp": 306,
@@ -2550,41 +2550,6 @@
       "category": "gallery_img2"
     },
     {
-      "id": "menu_ev_pic_back_ev03_03300_03",
-      "dir": "ev_pic",
-      "file": "back_ev03_03300_03_back_ev03_03300_03.png",
-      "title": "Ev03 03300 03",
-      "category": "ev_pic"
-    },
-    {
-      "id": "menu_ev_pic_back_ev03_03300_06",
-      "dir": "ev_pic",
-      "file": "back_ev03_03300_06_back_ev03_03300_06.png",
-      "title": "Ev03 03300 06",
-      "category": "ev_pic"
-    },
-    {
-      "id": "menu_ev_pic_back_ev05_01000_01",
-      "dir": "ev_pic",
-      "file": "back_ev05_01000_01_back_ev05_01000_01.png",
-      "title": "Ev05 01000 01",
-      "category": "ev_pic"
-    },
-    {
-      "id": "menu_ev_pic_back_ev05_01000_02",
-      "dir": "ev_pic",
-      "file": "back_ev05_01000_02_back_ev05_01000_02.png",
-      "title": "Ev05 01000 02",
-      "category": "ev_pic"
-    },
-    {
-      "id": "menu_ev_pic_back_ev05_01300_01",
-      "dir": "ev_pic",
-      "file": "back_ev05_01300_01_back_ev05_01300_01.png",
-      "title": "Ev05 01300 01",
-      "category": "ev_pic"
-    },
-    {
       "id": "menu_ev_pic_back_ev05_01300_02",
       "dir": "ev_pic",
       "file": "back_ev05_01300_02_back_ev05_01300_02.png",
@@ -2599,13 +2564,6 @@
       "category": "ev_pic"
     },
     {
-      "id": "menu_ev_pic_back_ev05_01300_04",
-      "dir": "ev_pic",
-      "file": "back_ev05_01300_04_back_ev05_01300_04.png",
-      "title": "Ev05 01300 04",
-      "category": "ev_pic"
-    },
-    {
       "id": "menu_ev_pic_back_ev05_01300_05",
       "dir": "ev_pic",
       "file": "back_ev05_01300_05_back_ev05_01300_05.png",
@@ -2617,20 +2575,6 @@
       "dir": "ev_pic",
       "file": "back_ev05_01300_06_back_ev05_01300_06.png",
       "title": "Ev05 01300 06",
-      "category": "ev_pic"
-    },
-    {
-      "id": "menu_ev_pic_back_ev05_01300_07",
-      "dir": "ev_pic",
-      "file": "back_ev05_01300_07_back_ev05_01300_07.png",
-      "title": "Ev05 01300 07",
-      "category": "ev_pic"
-    },
-    {
-      "id": "menu_ev_pic_back_ev05_01300_08",
-      "dir": "ev_pic",
-      "file": "back_ev05_01300_08_back_ev05_01300_08.png",
-      "title": "Ev05 01300 08",
       "category": "ev_pic"
     },
     {
@@ -2683,24 +2627,10 @@
       "category": "ev_pic"
     },
     {
-      "id": "menu_ev_pic_cap_ev03_00250_01",
-      "dir": "ev_pic",
-      "file": "cap_ev03_00250_01_cap_ev03_00250_01.png",
-      "title": "Cap Ev03 00250 01",
-      "category": "ev_pic"
-    },
-    {
       "id": "menu_ev_pic_cap_ev05_00025_01",
       "dir": "ev_pic",
       "file": "cap_ev05_00025_01_cap_ev05_00025_01.png",
       "title": "Cap Ev05 00025 01",
-      "category": "ev_pic"
-    },
-    {
-      "id": "menu_ev_pic_cap_ev05_00200_01",
-      "dir": "ev_pic",
-      "file": "cap_ev05_00200_01_cap_ev05_00200_01.png",
-      "title": "Cap Ev05 00200 01",
       "category": "ev_pic"
     },
     {
@@ -2830,13 +2760,6 @@
       "category": "ev_pic"
     },
     {
-      "id": "menu_ev_pic_ev_ch_pic2112_01",
-      "dir": "ev_pic",
-      "file": "ev_ch_pic2112_01_ev_ch_pic2112_01.png",
-      "title": "Ev Ch Pic2112 01",
-      "category": "ev_pic"
-    },
-    {
       "id": "menu_ev_pic_ev_ch_pic2112_02",
       "dir": "ev_pic",
       "file": "ev_ch_pic2112_02_ev_ch_pic2112_02.png",
@@ -2872,24 +2795,10 @@
       "category": "ev_pic"
     },
     {
-      "id": "menu_ev_pic_ev_ch_pic2502_01",
-      "dir": "ev_pic",
-      "file": "ev_ch_pic2502_01_ev_ch_pic2502_01.png",
-      "title": "Ev Ch Pic2502 01",
-      "category": "ev_pic"
-    },
-    {
       "id": "menu_ev_pic_ev_ch_pic2503_01",
       "dir": "ev_pic",
       "file": "ev_ch_pic2503_01_ev_ch_pic2503_01.png",
       "title": "Ev Ch Pic2503 01",
-      "category": "ev_pic"
-    },
-    {
-      "id": "menu_ev_pic_ev_ch_pic2504_01",
-      "dir": "ev_pic",
-      "file": "ev_ch_pic2504_01_ev_ch_pic2504_01.png",
-      "title": "Ev Ch Pic2504 01",
       "category": "ev_pic"
     },
     {
@@ -2928,24 +2837,10 @@
       "category": "ev_pic"
     },
     {
-      "id": "menu_ev_pic_ev_ch_pic2518_01",
-      "dir": "ev_pic",
-      "file": "ev_ch_pic2518_01_ev_ch_pic2518_01.png",
-      "title": "Ev Ch Pic2518 01",
-      "category": "ev_pic"
-    },
-    {
       "id": "menu_ev_pic_ev_ch_pic2520_01",
       "dir": "ev_pic",
       "file": "ev_ch_pic2520_01_ev_ch_pic2520_01.png",
       "title": "Ev Ch Pic2520 01",
-      "category": "ev_pic"
-    },
-    {
-      "id": "menu_ev_pic_ev_ch_pic2522_01",
-      "dir": "ev_pic",
-      "file": "ev_ch_pic2522_01_ev_ch_pic2522_01.png",
-      "title": "Ev Ch Pic2522 01",
       "category": "ev_pic"
     },
     {
@@ -3009,69 +2904,6 @@
       "dir": "ev_pic",
       "file": "ev_ch_pic2875_18_ev_ch_pic2875_18.png",
       "title": "Ev Ch Pic2875 18",
-      "category": "ev_pic"
-    },
-    {
-      "id": "menu_ev_pic_pic_ev03_00250_01",
-      "dir": "ev_pic",
-      "file": "pic_ev03_00250_01_pic_ev03_00250_01.png",
-      "title": "Pic Ev03 00250 01",
-      "category": "ev_pic"
-    },
-    {
-      "id": "menu_ev_pic_pic_ev03_00250_02",
-      "dir": "ev_pic",
-      "file": "pic_ev03_00250_02_pic_ev03_00250_02.png",
-      "title": "Pic Ev03 00250 02",
-      "category": "ev_pic"
-    },
-    {
-      "id": "menu_ev_pic_pic_ev03_00250_03",
-      "dir": "ev_pic",
-      "file": "pic_ev03_00250_03_pic_ev03_00250_03.png",
-      "title": "Pic Ev03 00250 03",
-      "category": "ev_pic"
-    },
-    {
-      "id": "menu_ev_pic_pic_ev03_00800_01",
-      "dir": "ev_pic",
-      "file": "pic_ev03_00800_01_pic_ev03_00800_01.png",
-      "title": "Pic Ev03 00800 01",
-      "category": "ev_pic"
-    },
-    {
-      "id": "menu_ev_pic_pic_ev03_01000_01",
-      "dir": "ev_pic",
-      "file": "pic_ev03_01000_01_pic_ev03_01000_01.png",
-      "title": "Pic Ev03 01000 01",
-      "category": "ev_pic"
-    },
-    {
-      "id": "menu_ev_pic_pic_ev03_01500_02",
-      "dir": "ev_pic",
-      "file": "pic_ev03_01500_02_pic_ev03_01500_02.png",
-      "title": "Pic Ev03 01500 02",
-      "category": "ev_pic"
-    },
-    {
-      "id": "menu_ev_pic_pic_ev03_02100_02",
-      "dir": "ev_pic",
-      "file": "pic_ev03_02100_02_pic_ev03_02100_02.png",
-      "title": "Pic Ev03 02100 02",
-      "category": "ev_pic"
-    },
-    {
-      "id": "menu_ev_pic_pic_ev03_02100_03",
-      "dir": "ev_pic",
-      "file": "pic_ev03_02100_03_pic_ev03_02100_03.png",
-      "title": "Pic Ev03 02100 03",
-      "category": "ev_pic"
-    },
-    {
-      "id": "menu_ev_pic_pic_ev03_02100_04",
-      "dir": "ev_pic",
-      "file": "pic_ev03_02100_04_pic_ev03_02100_04.png",
-      "title": "Pic Ev03 02100 04",
       "category": "ev_pic"
     },
     {
