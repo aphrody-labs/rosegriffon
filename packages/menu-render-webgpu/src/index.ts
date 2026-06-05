@@ -52,3 +52,10 @@ export type {
 	MenuSprite,
 	MenuText,
 } from "@rose-griffon/menu-render";
+
+// NB : AvatarRenderer3d / cpk-loader importent nie-wasm (glue wasm-pack qui require 'fs')
+// → casse le bundle navigateur Turbopack d'azalee. Ils ne sont PAS ré-exportés par l'index
+// (aucun consommateur externe) ; importer directement le sous-module si besoin (et rebuild
+// nie-wasm en --target web pour le navigateur). GameMenuGpu/renderer n'en dépendent pas.
+// export { AvatarRenderer3d } from "./avatar-renderer-3d";
+// export type { AvatarPart, GeometryData } from "./avatar-renderer-3d";
