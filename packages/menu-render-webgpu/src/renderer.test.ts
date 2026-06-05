@@ -7,15 +7,17 @@
  *   - décision de fallback `shouldUseWebGpu`.
  */
 
-import { describe, expect, test } from "bun:test";
+import { afterEach, describe, expect, test } from "bun:test";
 import type { MenuLayout, MenuObject } from "@rose-griffon/menu-render";
 import {
 	buildDrawList,
 	buildGlyphInstances,
 	computeLetterbox,
 	type DrawItem,
+	fetchWithRetry,
 	FLOATS_PER_GLYPH,
 	hexToRgba01,
+	mapWithConcurrency,
 	parseHexColor,
 } from "./renderer";
 import { decodeFontMetrics, type RawFontMetrics } from "./glyph-atlas";
@@ -265,6 +267,89 @@ describe("buildGlyphInstances", () => {
 		const { data, pages } = buildGlyphInstances(textItem(""), atlasFixture, opts);
 		expect(pages).toHaveLength(0);
 		expect(data.length).toBe(0);
+	});
+});
+
+describe("mapWithConcurrency", () => {
+	test("traite tous les éléments dans l'ordre, jamais plus de `limit` en vol", async () => {
+		const items = Array.from({ length: 20 }, (_, i) => i);
+		const seen: number[] = [];
+		let inFlight = 0;
+		let peak = 0;
+		await mapWithConcurrency(items, 6, async (n) => {
+			inFlight += 1;
+			peak = Math.max(peak, inFlight);
+			await new Promise((r) => setTimeout(r, 1));
+			seen.push(n);
+			inFlight -= 1;
+		});
+		expect(seen.sort((a, b) => a - b)).toEqual(items);
+		expect(peak).toBeLessThanOrEqual(6);
+		expect(peak).toBeGreaterThan(1);
+	});
+
+	test("limite ramenée à la taille de la liste (pas de runner vide)", async () => {
+		let count = 0;
+		await mapWithConcurrency([1, 2], 50, async () => {
+			count += 1;
+		});
+		expect(count).toBe(2);
+	});
+
+	test("liste vide → no-op", async () => {
+		await expect(mapWithConcurrency([], 6, async () => {})).resolves.toBeUndefined();
+	});
+});
+
+describe("fetchWithRetry", () => {
+	const realFetch = globalThis.fetch;
+	afterEach(() => {
+		globalThis.fetch = realFetch;
+	});
+
+	test("retourne la réponse OK sans retry", async () => {
+		let calls = 0;
+		globalThis.fetch = (async () => {
+			calls += 1;
+			return new Response("x", { status: 200 });
+		}) as unknown as typeof fetch;
+		const res = await fetchWithRetry("http://x/a.png", 2);
+		expect(res?.ok).toBe(true);
+		expect(calls).toBe(1);
+	});
+
+	test("retente sur 404 puis réussit (décode-à-froid chaud à la 2ᵉ)", async () => {
+		let calls = 0;
+		globalThis.fetch = (async () => {
+			calls += 1;
+			return calls < 2 ? new Response("", { status: 404 }) : new Response("ok", { status: 200 });
+		}) as unknown as typeof fetch;
+		const res = await fetchWithRetry("http://x/a.png", 2);
+		expect(res?.ok).toBe(true);
+		expect(calls).toBe(2);
+	});
+
+	test("épuise les retries puis renvoie la dernière réponse non-OK", async () => {
+		let calls = 0;
+		globalThis.fetch = (async () => {
+			calls += 1;
+			return new Response("", { status: 404 });
+		}) as unknown as typeof fetch;
+		const res = await fetchWithRetry("http://x/a.png", 2);
+		expect(res?.ok).toBe(false);
+		expect(res?.status).toBe(404);
+		expect(calls).toBe(3); // 1 + 2 retries
+	});
+
+	test("erreur réseau persistante → null", async () => {
+		let calls = 0;
+		globalThis.fetch = (async () => {
+			calls += 1;
+			throw new Error("offline");
+		}) as unknown as typeof fetch;
+		const res = await fetchWithRetry("http://x/a.png", 2);
+		expect(res).toBeNull();
+		expect(calls).toBe(3);
 	});
 });
 

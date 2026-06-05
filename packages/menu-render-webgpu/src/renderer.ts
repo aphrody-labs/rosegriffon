@@ -66,6 +66,82 @@ export function assetUrl(assetBase: string, pngUrl: string): string {
 	return `${base}${path}`;
 }
 
+/* ── chargement réseau (concurrence bornée + retry) ──────────────────────────── */
+
+/**
+ * Nombre max de fetches de sprites simultanés. Le CDN retombe sur un décodeur g4tx→png
+ * **live** (iecode-cdn) quand le PNG n'est pas dans le dump ; ce décodeur (~8.6s/g4tx à
+ * froid) **sature sous burst** (mesuré : 7/12 requêtes parallèles échouent). On borne donc
+ * la concurrence pour étaler la charge plutôt que de noyer le décodeur.
+ */
+export const SPRITE_FETCH_CONCURRENCY = 6;
+
+/** Nombre de tentatives supplémentaires sur échec transitoire (404 décode-à-froid / réseau). */
+export const SPRITE_FETCH_RETRIES = 2;
+
+/** Délais de backoff (ms) entre tentatives — index = numéro de retry (0-based). */
+const SPRITE_RETRY_BACKOFF_MS = [200, 600];
+
+/** Attente non bloquante (no-op si pas de timer, ex. environnement de test). */
+function delay(ms: number): Promise<void> {
+	return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+/**
+ * Applique `worker` à chaque élément de `items` avec une concurrence bornée à `limit`.
+ *
+ * Une simple file partagée : `limit` "runners" tirent le prochain index tant qu'il en reste.
+ * Évite de lancer N fetches d'un coup (qui noient le décodeur live du CDN). Les rejets
+ * individuels sont absorbés par le `worker` (qui ne doit pas throw) ; on `await` la fin de
+ * tous les runners.
+ */
+export async function mapWithConcurrency<T>(
+	items: readonly T[],
+	limit: number,
+	worker: (item: T, index: number) => Promise<void>,
+): Promise<void> {
+	const max = Math.max(1, Math.min(limit, items.length));
+	let next = 0;
+	const runner = async (): Promise<void> => {
+		for (;;) {
+			const i = next;
+			next += 1;
+			if (i >= items.length) {
+				return;
+			}
+			await worker(items[i] as T, i);
+		}
+	};
+	await Promise.all(Array.from({ length: max }, () => runner()));
+}
+
+/**
+ * `fetch` avec retries sur échec transitoire (statut non-OK ou erreur réseau).
+ *
+ * Le « 404 » du CDN est le plus souvent un **décodage g4tx→png à froid qui a timeout**
+ * (≈8.6s), pas un vrai miss : une 2ᵉ requête tombe sur le décode désormais chaud et réussit.
+ * On retente donc `retries` fois avec un petit backoff avant d'abandonner. Retourne la
+ * dernière `Response` (OK ou non) ou `null` si toutes les tentatives ont jeté une erreur réseau.
+ */
+export async function fetchWithRetry(url: string, retries: number): Promise<Response | null> {
+	let lastResponse: Response | null = null;
+	for (let attempt = 0; attempt <= retries; attempt++) {
+		try {
+			const res = await fetch(url);
+			if (res.ok) {
+				return res;
+			}
+			lastResponse = res;
+		} catch {
+			lastResponse = null;
+		}
+		if (attempt < retries) {
+			await delay(SPRITE_RETRY_BACKOFF_MS[attempt] ?? SPRITE_RETRY_BACKOFF_MS[SPRITE_RETRY_BACKOFF_MS.length - 1] ?? 600);
+		}
+	}
+	return lastResponse;
+}
+
 /* ── draw-list (logique pure, testable headless) ─────────────────────────────── */
 
 /** Un item de dessin : ce qu'il faut pour émettre une instance. */
@@ -560,7 +636,11 @@ export class WebGpuMenuRenderer {
 				urls.add(obj.sprite.pngUrl);
 			}
 		}
-		await Promise.all([...urls].map((pngUrl) => this.loadSpriteTexture(pngUrl)));
+		// Concurrence bornée : ne pas lancer N fetches d'un coup (le décodeur live du CDN
+		// sature sous burst). Pool de `SPRITE_FETCH_CONCURRENCY` requêtes simultanées max.
+		await mapWithConcurrency([...urls], SPRITE_FETCH_CONCURRENCY, (pngUrl) =>
+			this.loadSpriteTexture(pngUrl),
+		);
 	}
 
 	private async loadSpriteTexture(pngUrl: string): Promise<void> {
@@ -568,9 +648,16 @@ export class WebGpuMenuRenderer {
 		// ignoré (warn) plutôt que de faire échouer toute l'init WebGPU — l'objet
 		// correspondant est simplement omis au rendu (cf. `resolveItem` → null). Le menu
 		// reste affichable en WebGPU avec un asset partiel (utile en dev sans CDN complet).
+		//
+		// Le « 404 » du CDN est le plus souvent un décodage g4tx→png à froid qui a timeout
+		// (≈8.6s), pas un vrai miss : on retente (`fetchWithRetry`) avant d'abandonner.
 		const url = assetUrl(this.assetBase, pngUrl);
 		try {
-			const res = await fetch(url);
+			const res = await fetchWithRetry(url, SPRITE_FETCH_RETRIES);
+			if (!res) {
+				console.warn(`[menu-webgpu] sprite ignoré (réseau) : ${url}`);
+				return;
+			}
 			if (!res.ok) {
 				console.warn(`[menu-webgpu] sprite ignoré (${res.status}) : ${url}`);
 				return;

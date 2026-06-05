@@ -9,6 +9,10 @@ export {
 	assetUrl,
 	parseHexColor,
 	computeLetterbox,
+	mapWithConcurrency,
+	fetchWithRetry,
+	SPRITE_FETCH_CONCURRENCY,
+	SPRITE_FETCH_RETRIES,
 	CANVAS_SIZE,
 } from "./renderer";
 export type { DrawItem, FontAtlasConfig } from "./renderer";
