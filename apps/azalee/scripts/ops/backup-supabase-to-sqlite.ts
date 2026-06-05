@@ -47,6 +47,10 @@ const stamp = new Date().toISOString().replaceAll(/[:.]/g, "-").slice(0, 19);
 const outFile = path.resolve(argMap.get("output") ?? `data/backups/supabase-${stamp}.sqlite`);
 const schemas = (argMap.get("schema") ?? "public").split(",").map((s) => s.trim());
 const includeTablesArg = argMap.get("tables");
+// Filtre PII : ne snapshoter que les tables d'un préfixe (ex --prefix=inagle_).
+// Le wiki ne sert QUE les tables inagle_* via le miroir SQLite ; profiles/articles/
+// tweets (emails membres = PII) passent par Supabase direct → on les exclut du dump.
+const prefixArg = argMap.get("prefix");
 const pageSize = Number(argMap.get("page") ?? "5000");
 
 await mkdir(path.dirname(outFile), { recursive: true });
@@ -95,6 +99,9 @@ await pg.connect();
 	if (includeTablesArg) {
 		const allow = new Set(includeTablesArg.split(",").map((t) => t.trim()));
 		names = names.filter((t) => allow.has(t.name));
+	}
+	if (prefixArg) {
+		names = names.filter((t) => t.name.startsWith(prefixArg));
 	}
 
 	const colQuery = `
