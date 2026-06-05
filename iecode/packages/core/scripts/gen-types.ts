@@ -31,6 +31,11 @@ function sanitize(file: string): void {
 	s = s.replace(/(^|[\s.(,:;{])<([A-Za-z0-9_]+)>/gm, "$1_$2_"); // noms compilateur <X> -> _X_
 	s = s.replace(/`(\d+)/g, "$$$1"); // arité .NET `N -> $N
 	s = s.replace(/([\w$)\]>])&(?!&)/g, "$1"); // byref Name& -> Name
+	// Préfixe les builtins Node émis sans `node:` (le générateur émet `from 'stream'`)
+	s = s.replace(
+		/(from\s+['"])(stream|fs|path|os|crypto|util|events|buffer|http|https|url|net|tls|zlib)(['"])/g,
+		"$1node:$2$3",
+	);
 	writeFileSync(file, s);
 }
 

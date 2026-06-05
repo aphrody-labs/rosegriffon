@@ -4,7 +4,7 @@
 
 type DateTime = Date & { kind?: 'utc' | 'local' | 'unspecified' }
 
-import { Duplex } from 'stream';
+import { Duplex } from 'node:stream';
 
 interface IDisposable { dispose(): void; }
 

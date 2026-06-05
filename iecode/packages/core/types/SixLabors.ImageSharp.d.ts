@@ -6,7 +6,7 @@ type DateTime = Date & { kind?: 'utc' | 'local' | 'unspecified' }
 
 type DateTimeOffset = Date & { offset?: number }
 
-import { Duplex } from 'stream';
+import { Duplex } from 'node:stream';
 
 /** A JavaScript projection of a .NET type. */
 interface IType {
