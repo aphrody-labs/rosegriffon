@@ -13,6 +13,33 @@ import { wikiService } from "@/lib/wiki-service";
 import { compareVariants } from "@rose-griffon/inagle";
 import { CharaVariantsComparison } from "@/components/wiki/CharaVariantsComparison";
 
+/**
+ * Variante représentative d'un personnage (accès par slug de base) : celle dont la
+ * position est la plus fréquente parmi les variantes. Les variantes étant déjà triées
+ * par stat décroissante, on renvoie la meilleure de la position dominante. Corrige le
+ * cas où une variante atypique (ex « Mark Evans » Milieu isolé parmi des Gardien)
+ * devenait le défaut affiché à cause d'une stat plus haute.
+ */
+function pickDominantPositionVariant<T extends { position?: string }>(
+	variants: T[]
+): T | undefined {
+	if (variants.length === 0) return undefined;
+	const counts = new Map<string, number>();
+	for (const v of variants) {
+		const p = v.position || "";
+		counts.set(p, (counts.get(p) ?? 0) + 1);
+	}
+	let dominant = "";
+	let max = -1;
+	for (const [p, c] of counts) {
+		if (c > max) {
+			max = c;
+			dominant = p;
+		}
+	}
+	return variants.find((v) => (v.position || "") === dominant) ?? variants[0];
+}
+
 export async function generateStaticParams() {
 	try {
 		const allParams = await wikiService.getAllBaseSlugParams();
@@ -40,7 +67,7 @@ export async function generateMetadata({
 	}
 
 	const name = baseChar.names.fr || baseChar.names.en || "Personnage";
-	const variant = baseChar.variants?.[0];
+	const variant = pickDominantPositionVariant(baseChar.variants ?? []);
 	const posMap: Record<string, string> = {
 		DF: "Défenseur",
 		FW: "Attaquant",
@@ -134,8 +161,12 @@ export default async function PlayerDetailPage({ params }: { params: Promise<{ i
 		notFound();
 	}
 
-	// Find the specific variant matching the ID or use first variant if matched by slug
-	const variant = baseChar.variants.find((v) => v.charaParamId === id || v.slug === id) || baseChar.variants[0];
+	// Variante spécifique si l'URL cible un id/slug de variante ; sinon (accès par slug de
+	// base) on prend la variante de position DOMINANTE — évite qu'une variante atypique
+	// (ex un « Mark Evans » Milieu isolé parmi 15 Gardien) devienne le défaut affiché.
+	const variant =
+		baseChar.variants.find((v) => v.charaParamId === id || v.slug === id) ||
+		pickDominantPositionVariant(baseChar.variants);
 
 	if (!variant) {
 		notFound();
