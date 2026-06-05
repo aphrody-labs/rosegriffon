@@ -1,582 +1,632 @@
 {
-  "screen": "91_quest",
-  "locale": "fr",
-  "canvas": {
-    "w": 1280,
-    "h": 720
-  },
-  "objects": [
-    {
-      "name": "quest02_07_sp_training_phase_norma_clear_telop",
-      "transform": {
-        "x": 1280,
-        "y": 448.66668701171875,
-        "scaleX": 0.0002944640753828033,
-        "scaleY": 0.0021929824561403508,
-        "rot": 0,
-        "anchorX": 0.5,
-        "anchorY": 0.5
-      },
-      "drawPriority": 299,
-      "drawType": 0,
-      "camera": "0x02D8FB06",
-      "sprite": {
-        "logicalPath": "dx11/menu/91_quest/quest02/quest02_07/fr/quest02_07.g4tx",
-        "pngUrl": "/dx11/menu/91_quest/quest02/quest02_07/fr/quest02_07.png",
-        "w": 2264,
-        "h": 304
-      },
-      "anim": {}
-    },
-    {
-      "name": "quest02_01_sp_training_phase_norma_info",
-      "transform": {
-        "x": 970.6666870117188,
-        "y": 539.3333740234375,
-        "scaleX": 1,
-        "scaleY": 1,
-        "rot": 0,
-        "anchorX": 0.5,
-        "anchorY": 0.5
-      },
-      "drawPriority": 300,
-      "drawType": 0,
-      "camera": "0x02D8FB06",
-      "text": {
-        "key": "_text_title01",
-        "keyHash": 86326680,
-        "value": "_text_title01",
-        "font": "nie_main",
-        "size": 24,
-        "color": "#ffffff",
-        "align": "center"
-      },
-      "anim": {}
-    },
-    {
-      "name": "quest02_06_sp_training_phase_clear_telop",
-      "transform": {
-        "x": 1280,
-        "y": 520,
-        "scaleX": 0.0026041666666666665,
-        "scaleY": 0.041666666666666664,
-        "rot": 0,
-        "anchorX": 0.5,
-        "anchorY": 0.5
-      },
-      "drawPriority": 301,
-      "drawType": 0,
-      "camera": "0x02D8FB06",
-      "sprite": {
-        "logicalPath": "dx11/menu/91_quest/quest02/quest02_06/fr/quest02_06.g4tx",
-        "pngUrl": "/dx11/menu/91_quest/quest02/quest02_06/fr/quest02_06.png",
-        "w": 256,
-        "h": 16
-      },
-      "anim": {}
-    },
-    {
-      "name": "quest02_05_sp_training_phase_start_telop",
-      "transform": {
-        "x": 1280,
-        "y": 520,
-        "scaleX": 0.0026041666666666665,
-        "scaleY": 0.041666666666666664,
-        "rot": 0,
-        "anchorX": 0.5,
-        "anchorY": 0.5
-      },
-      "drawPriority": 301,
-      "drawType": 0,
-      "camera": "0x02D8FB06",
-      "sprite": {
-        "logicalPath": "dx11/menu/91_quest/quest02/quest02_05/fr/quest02_05.g4tx",
-        "pngUrl": "/dx11/menu/91_quest/quest02/quest02_05/fr/quest02_05.png",
-        "w": 256,
-        "h": 16
-      },
-      "anim": {}
-    },
-    {
-      "name": "quest01_20_quest_accept_menu",
-      "transform": {
-        "x": 640,
-        "y": 360,
-        "scaleX": 1,
-        "scaleY": 1,
-        "rot": 0,
-        "anchorX": 0.5,
-        "anchorY": 0.5
-      },
-      "drawPriority": 551,
-      "drawType": 0,
-      "camera": "0x02D8FB06",
-      "anim": {}
-    },
-    {
-      "name": "quest01_05_quest_info_base",
-      "transform": {
-        "x": 640,
-        "y": 360,
-        "scaleX": 1,
-        "scaleY": 1,
-        "rot": 0,
-        "anchorX": 0.5,
-        "anchorY": 0.5
-      },
-      "drawPriority": 551,
-      "drawType": 0,
-      "camera": "0x02D8FB06",
-      "anim": {}
-    },
-    {
-      "name": "quest01_01_list_base_sub",
-      "transform": {
-        "x": 640,
-        "y": 360,
-        "scaleX": 1,
-        "scaleY": 1,
-        "rot": 0,
-        "anchorX": 0.5,
-        "anchorY": 0.5
-      },
-      "drawPriority": 552,
-      "drawType": 0,
-      "camera": "0x02D8FB06",
-      "anim": {}
-    },
-    {
-      "name": "quest01_07_quest_info",
-      "transform": {
-        "x": 1280,
-        "y": 446,
-        "scaleX": 0.0005393743257820927,
-        "scaleY": 0.0005175983436853001,
-        "rot": 0,
-        "anchorX": 0.5,
-        "anchorY": 0.5
-      },
-      "drawPriority": 552,
-      "drawType": 0,
-      "camera": "0x02D8FB06",
-      "sprite": {
-        "logicalPath": "dx11/menu/91_quest/quest01/quest01_07/fr/quest01_07.g4tx",
-        "pngUrl": "/dx11/menu/91_quest/quest01/quest01_07/fr/quest01_07.png",
-        "w": 1236,
-        "h": 1288
-      },
-      "text": {
-        "key": "_text_title01",
-        "keyHash": 587662852,
-        "value": "_text_title01",
-        "font": "nie_main",
-        "size": 24,
-        "color": "#ffffff",
-        "align": "center"
-      },
-      "anim": {
-        "open": "0x5FEC8E4E",
-        "close": "0xA15F1DEE"
-      }
-    },
-    {
-      "name": "quest01_01_list_base_story_soccer",
-      "transform": {
-        "x": 640,
-        "y": 360,
-        "scaleX": 1,
-        "scaleY": 1,
-        "rot": 0,
-        "anchorX": 0.5,
-        "anchorY": 0.5
-      },
-      "drawPriority": 552,
-      "drawType": 0,
-      "camera": "0x02D8FB06",
-      "anim": {}
-    },
-    {
-      "name": "quest01_01_list_base",
-      "transform": {
-        "x": 640,
-        "y": 360,
-        "scaleX": 1,
-        "scaleY": 1,
-        "rot": 0,
-        "anchorX": 0.5,
-        "anchorY": 0.5
-      },
-      "drawPriority": 552,
-      "drawType": 0,
-      "camera": "0x02D8FB06",
-      "anim": {}
-    },
-    {
-      "name": "quest01_01_bookmark_list_base",
-      "transform": {
-        "x": 640,
-        "y": 360,
-        "scaleX": 1,
-        "scaleY": 1,
-        "rot": 0,
-        "anchorX": 0.5,
-        "anchorY": 0.5
-      },
-      "drawPriority": 552,
-      "drawType": 0,
-      "camera": "0x02D8FB06",
-      "anim": {}
-    },
-    {
-      "name": "quest01_11_list_base_story_soccer",
-      "transform": {
-        "x": 640,
-        "y": 360,
-        "scaleX": 1,
-        "scaleY": 1,
-        "rot": 0,
-        "anchorX": 0.5,
-        "anchorY": 0.5
-      },
-      "drawPriority": 552,
-      "drawType": 0,
-      "camera": "0x02D8FB06",
-      "anim": {}
-    },
-    {
-      "name": "quest01_13_sp_training_norma_info",
-      "transform": {
-        "x": 1280,
-        "y": 446,
-        "scaleX": 0.16666666666666666,
-        "scaleY": 0.16666666666666666,
-        "rot": 0,
-        "anchorX": 0.5,
-        "anchorY": 0.5
-      },
-      "drawPriority": 552,
-      "drawType": 0,
-      "camera": "0x02D8FB06",
-      "sprite": {
-        "logicalPath": "dx11/menu/91_quest/quest01/quest01_13/fr/quest01_13.g4tx",
-        "pngUrl": "/dx11/menu/91_quest/quest01/quest01_13/fr/quest01_13.png",
-        "w": 4,
-        "h": 4
-      },
-      "text": {
-        "key": "_text_title01",
-        "keyHash": 587662852,
-        "value": "_text_title01",
-        "font": "nie_main",
-        "size": 24,
-        "color": "#ffffff",
-        "align": "center"
-      },
-      "anim": {}
-    },
-    {
-      "name": "quest01_01_list_base",
-      "transform": {
-        "x": 640,
-        "y": 360,
-        "scaleX": 1,
-        "scaleY": 1,
-        "rot": 0,
-        "anchorX": 0.5,
-        "anchorY": 0.5
-      },
-      "drawPriority": 552,
-      "drawType": 0,
-      "camera": "0x02D8FB06",
-      "anim": {}
-    },
-    {
-      "name": "quest01_01_list_base_main",
-      "transform": {
-        "x": 640,
-        "y": 360,
-        "scaleX": 1,
-        "scaleY": 1,
-        "rot": 0,
-        "anchorX": 0.5,
-        "anchorY": 0.5
-      },
-      "drawPriority": 552,
-      "drawType": 0,
-      "camera": "0x02D8FB06",
-      "anim": {}
-    },
-    {
-      "name": "quest01_06_quest_info",
-      "transform": {
-        "x": 1280,
-        "y": 446,
-        "scaleX": 0.0005649717514124294,
-        "scaleY": 0.0005592841163310962,
-        "rot": 0,
-        "anchorX": 0.5,
-        "anchorY": 0.5
-      },
-      "drawPriority": 552,
-      "drawType": 0,
-      "camera": "0x02D8FB06",
-      "sprite": {
-        "logicalPath": "dx11/menu/91_quest/quest01/quest01_06/fr/quest01_06.g4tx",
-        "pngUrl": "/dx11/menu/91_quest/quest01/quest01_06/fr/quest01_06.png",
-        "w": 1180,
-        "h": 1192
-      },
-      "text": {
-        "key": "_text_title01",
-        "keyHash": 587662852,
-        "value": "_text_title01",
-        "font": "nie_main",
-        "size": 24,
-        "color": "#ffffff",
-        "align": "center"
-      },
-      "anim": {
-        "open": "0x5FEC8E4E",
-        "close": "0xA15F1DEE"
-      }
-    },
-    {
-      "name": "datafile_quest01_01_list_base_empty",
-      "transform": {
-        "x": 640,
-        "y": 360,
-        "scaleX": 1,
-        "scaleY": 1,
-        "rot": 0,
-        "anchorX": 0.5,
-        "anchorY": 0.5
-      },
-      "drawPriority": 552,
-      "drawType": 0,
-      "camera": "0x02D8FB06",
-      "anim": {}
-    },
-    {
-      "name": "quest01_08_reward_item",
-      "transform": {
-        "x": 640,
-        "y": 360,
-        "scaleX": 1,
-        "scaleY": 1,
-        "rot": 0,
-        "anchorX": 0.5,
-        "anchorY": 0.5
-      },
-      "drawPriority": 553,
-      "drawType": 0,
-      "camera": "0x02D8FB06",
-      "anim": {}
-    },
-    {
-      "name": "quest01_14_sp_training_norma_item",
-      "transform": {
-        "x": 640,
-        "y": 360,
-        "scaleX": 1,
-        "scaleY": 1,
-        "rot": 0,
-        "anchorX": 0.5,
-        "anchorY": 0.5
-      },
-      "drawPriority": 553,
-      "drawType": 0,
-      "camera": "0x02D8FB06",
-      "text": {
-        "key": "_text_at01",
-        "keyHash": 2169113570,
-        "value": "_text_at01",
-        "font": "nie_main",
-        "size": 24,
-        "color": "#ffffff",
-        "align": "center"
-      },
-      "anim": {}
-    },
-    {
-      "name": "quest02_03_sp_training_phase_norma_clear_effect",
-      "transform": {
-        "x": 865.3333740234375,
-        "y": 360,
-        "scaleX": 1,
-        "scaleY": 1,
-        "rot": 0,
-        "anchorX": 0.5,
-        "anchorY": 0.5
-      },
-      "drawPriority": 554,
-      "drawType": 0,
-      "camera": "0x02D8FB06",
-      "anim": {}
-    },
-    {
-      "name": "quest02_02_sp_training_phase_norma_clear_particle",
-      "transform": {
-        "x": 640,
-        "y": 360,
-        "scaleX": 1,
-        "scaleY": 1,
-        "rot": 0,
-        "anchorX": 0.5,
-        "anchorY": 0.5
-      },
-      "drawPriority": 554,
-      "drawType": 0,
-      "camera": "0x02D8FB06",
-      "anim": {}
-    },
-    {
-      "name": "quest01_12_list_item_top",
-      "transform": {
-        "x": 640,
-        "y": 360,
-        "scaleX": 0.0037037037037037034,
-        "scaleY": 0.002564102564102564,
-        "rot": 0,
-        "anchorX": 0.5,
-        "anchorY": 0.5
-      },
-      "drawPriority": 645,
-      "drawType": 0,
-      "camera": "0x02D8FB06",
-      "sprite": {
-        "logicalPath": "dx11/menu/91_quest/quest01/quest01_12/fr/quest01_12.g4tx",
-        "pngUrl": "/dx11/menu/91_quest/quest01/quest01_12/fr/quest01_12.png",
-        "w": 180,
-        "h": 260
-      },
-      "text": {
-        "key": "_text_list01_on",
-        "keyHash": 3273821866,
-        "value": "_text_list01_on",
-        "font": "nie_main",
-        "size": 24,
-        "color": "#ffffff",
-        "align": "center"
-      },
-      "anim": {}
-    },
-    {
-      "name": "quest01_02_list_item",
-      "transform": {
-        "x": 640,
-        "y": 360,
-        "scaleX": 0.0006587615283267456,
-        "scaleY": 0.001016260162601626,
-        "rot": 0,
-        "anchorX": 0.5,
-        "anchorY": 0.5
-      },
-      "drawPriority": 645,
-      "drawType": 0,
-      "camera": "0x02D8FB06",
-      "sprite": {
-        "logicalPath": "dx11/menu/91_quest/quest01/quest01_02/fr/quest01_02.g4tx",
-        "pngUrl": "/dx11/menu/91_quest/quest01/quest01_02/fr/quest01_02.png",
-        "w": 1012,
-        "h": 656
-      },
-      "text": {
-        "key": "_text_list01_on",
-        "keyHash": 3273821866,
-        "value": "_text_list01_on",
-        "font": "nie_main",
-        "size": 24,
-        "color": "#ffffff",
-        "align": "center"
-      },
-      "anim": {}
-    },
-    {
-      "name": "quest01_03_list_item",
-      "transform": {
-        "x": 640,
-        "y": 360,
-        "scaleX": 0.0006587615283267456,
-        "scaleY": 0.001004016064257028,
-        "rot": 0,
-        "anchorX": 0.5,
-        "anchorY": 0.5
-      },
-      "drawPriority": 645,
-      "drawType": 0,
-      "camera": "0x02D8FB06",
-      "sprite": {
-        "logicalPath": "dx11/menu/91_quest/quest01/quest01_03/fr/quest01_03.g4tx",
-        "pngUrl": "/dx11/menu/91_quest/quest01/quest01_03/fr/quest01_03.png",
-        "w": 1012,
-        "h": 664
-      },
-      "text": {
-        "key": "_text_list01_on",
-        "keyHash": 3273821866,
-        "value": "_text_list01_on",
-        "font": "nie_main",
-        "size": 24,
-        "color": "#ffffff",
-        "align": "center"
-      },
-      "anim": {}
-    },
-    {
-      "name": "quest01_12_list_item",
-      "transform": {
-        "x": 640,
-        "y": 360,
-        "scaleX": 0.0037037037037037034,
-        "scaleY": 0.002564102564102564,
-        "rot": 0,
-        "anchorX": 0.5,
-        "anchorY": 0.5
-      },
-      "drawPriority": 645,
-      "drawType": 0,
-      "camera": "0x02D8FB06",
-      "sprite": {
-        "logicalPath": "dx11/menu/91_quest/quest01/quest01_12/fr/quest01_12.g4tx",
-        "pngUrl": "/dx11/menu/91_quest/quest01/quest01_12/fr/quest01_12.png",
-        "w": 180,
-        "h": 260
-      },
-      "text": {
-        "key": "_text_list01_on",
-        "keyHash": 3273821866,
-        "value": "_text_list01_on",
-        "font": "nie_main",
-        "size": 24,
-        "color": "#ffffff",
-        "align": "center"
-      },
-      "anim": {}
-    },
-    {
-      "name": "quest01_15_sp_training_norma_error_balloon",
-      "transform": {
-        "x": 640,
-        "y": 360,
-        "scaleX": 1,
-        "scaleY": 1,
-        "rot": 0,
-        "anchorX": 0.5,
-        "anchorY": 0.5
-      },
-      "drawPriority": 755,
-      "drawType": 0,
-      "camera": "0x02D8FB06",
-      "text": {
-        "key": "_text_win01",
-        "keyHash": 4265781018,
-        "value": "_text_win01",
-        "font": "nie_main",
-        "size": 24,
-        "color": "#ffffff",
-        "align": "center"
-      },
-      "anim": {}
-    }
-  ]
+	"screen": "91_quest",
+	"locale": "fr",
+	"canvas": {
+		"w": 1280,
+		"h": 720
+	},
+	"objects": [
+		{
+			"name": "quest02_07_sp_training_phase_norma_clear_telop",
+			"transform": {
+				"x": 1280,
+				"y": 448.66668701171875,
+				"scaleX": 0.0002944640753828033,
+				"scaleY": 0.0021929824561403508,
+				"rot": 0,
+				"anchorX": 0.5,
+				"anchorY": 0.5
+			},
+			"drawPriority": 299,
+			"drawType": 0,
+			"camera": "0x02D8FB06",
+			"sprite": {
+				"logicalPath": "dx11/menu/91_quest/quest02/quest02_07/fr/quest02_07.g4tx",
+				"pngUrl": "/dx11/menu/91_quest/quest02/quest02_07/fr/quest02_07.png",
+				"w": 2264,
+				"h": 304
+			},
+			"anim": {}
+		},
+		{
+			"name": "quest02_01_sp_training_phase_norma_info",
+			"transform": {
+				"x": 970.6666870117188,
+				"y": 539.3333740234375,
+				"scaleX": 1,
+				"scaleY": 1,
+				"rot": 0,
+				"anchorX": 0.5,
+				"anchorY": 0.5
+			},
+			"drawPriority": 300,
+			"drawType": 0,
+			"camera": "0x02D8FB06",
+			"text": {
+				"key": "_text_title01",
+				"keyHash": 86326680,
+				"value": "Title",
+				"font": "nie_main",
+				"size": 24,
+				"color": "#ffffff",
+				"align": "center",
+				"localized": {
+					"fr": "Title",
+					"en": "Title",
+					"ja": "Title"
+				}
+			},
+			"anim": {}
+		},
+		{
+			"name": "quest02_06_sp_training_phase_clear_telop",
+			"transform": {
+				"x": 1280,
+				"y": 520,
+				"scaleX": 0.0026041666666666665,
+				"scaleY": 0.041666666666666664,
+				"rot": 0,
+				"anchorX": 0.5,
+				"anchorY": 0.5
+			},
+			"drawPriority": 301,
+			"drawType": 0,
+			"camera": "0x02D8FB06",
+			"sprite": {
+				"logicalPath": "dx11/menu/91_quest/quest02/quest02_06/fr/quest02_06.g4tx",
+				"pngUrl": "/dx11/menu/91_quest/quest02/quest02_06/fr/quest02_06.png",
+				"w": 256,
+				"h": 16
+			},
+			"anim": {}
+		},
+		{
+			"name": "quest02_05_sp_training_phase_start_telop",
+			"transform": {
+				"x": 1280,
+				"y": 520,
+				"scaleX": 0.0026041666666666665,
+				"scaleY": 0.041666666666666664,
+				"rot": 0,
+				"anchorX": 0.5,
+				"anchorY": 0.5
+			},
+			"drawPriority": 301,
+			"drawType": 0,
+			"camera": "0x02D8FB06",
+			"sprite": {
+				"logicalPath": "dx11/menu/91_quest/quest02/quest02_05/fr/quest02_05.g4tx",
+				"pngUrl": "/dx11/menu/91_quest/quest02/quest02_05/fr/quest02_05.png",
+				"w": 256,
+				"h": 16
+			},
+			"anim": {}
+		},
+		{
+			"name": "quest01_20_quest_accept_menu",
+			"transform": {
+				"x": 640,
+				"y": 360,
+				"scaleX": 1,
+				"scaleY": 1,
+				"rot": 0,
+				"anchorX": 0.5,
+				"anchorY": 0.5
+			},
+			"drawPriority": 551,
+			"drawType": 0,
+			"camera": "0x02D8FB06",
+			"anim": {}
+		},
+		{
+			"name": "quest01_05_quest_info_base",
+			"transform": {
+				"x": 640,
+				"y": 360,
+				"scaleX": 1,
+				"scaleY": 1,
+				"rot": 0,
+				"anchorX": 0.5,
+				"anchorY": 0.5
+			},
+			"drawPriority": 551,
+			"drawType": 0,
+			"camera": "0x02D8FB06",
+			"anim": {}
+		},
+		{
+			"name": "quest01_01_list_base_sub",
+			"transform": {
+				"x": 640,
+				"y": 360,
+				"scaleX": 1,
+				"scaleY": 1,
+				"rot": 0,
+				"anchorX": 0.5,
+				"anchorY": 0.5
+			},
+			"drawPriority": 552,
+			"drawType": 0,
+			"camera": "0x02D8FB06",
+			"anim": {}
+		},
+		{
+			"name": "quest01_07_quest_info",
+			"transform": {
+				"x": 1280,
+				"y": 446,
+				"scaleX": 0.0005393743257820927,
+				"scaleY": 0.0005175983436853001,
+				"rot": 0,
+				"anchorX": 0.5,
+				"anchorY": 0.5
+			},
+			"drawPriority": 552,
+			"drawType": 0,
+			"camera": "0x02D8FB06",
+			"sprite": {
+				"logicalPath": "dx11/menu/91_quest/quest01/quest01_07/fr/quest01_07.g4tx",
+				"pngUrl": "/dx11/menu/91_quest/quest01/quest01_07/fr/quest01_07.png",
+				"w": 1236,
+				"h": 1288
+			},
+			"text": {
+				"key": "_text_title01",
+				"keyHash": 587662852,
+				"value": "Title",
+				"font": "nie_main",
+				"size": 24,
+				"color": "#ffffff",
+				"align": "center",
+				"localized": {
+					"fr": "Title",
+					"en": "Title",
+					"ja": "Title"
+				}
+			},
+			"anim": {
+				"open": "0x5FEC8E4E",
+				"close": "0xA15F1DEE"
+			}
+		},
+		{
+			"name": "quest01_01_list_base_story_soccer",
+			"transform": {
+				"x": 640,
+				"y": 360,
+				"scaleX": 1,
+				"scaleY": 1,
+				"rot": 0,
+				"anchorX": 0.5,
+				"anchorY": 0.5
+			},
+			"drawPriority": 552,
+			"drawType": 0,
+			"camera": "0x02D8FB06",
+			"anim": {}
+		},
+		{
+			"name": "quest01_01_list_base",
+			"transform": {
+				"x": 640,
+				"y": 360,
+				"scaleX": 1,
+				"scaleY": 1,
+				"rot": 0,
+				"anchorX": 0.5,
+				"anchorY": 0.5
+			},
+			"drawPriority": 552,
+			"drawType": 0,
+			"camera": "0x02D8FB06",
+			"anim": {}
+		},
+		{
+			"name": "quest01_01_bookmark_list_base",
+			"transform": {
+				"x": 640,
+				"y": 360,
+				"scaleX": 1,
+				"scaleY": 1,
+				"rot": 0,
+				"anchorX": 0.5,
+				"anchorY": 0.5
+			},
+			"drawPriority": 552,
+			"drawType": 0,
+			"camera": "0x02D8FB06",
+			"anim": {}
+		},
+		{
+			"name": "quest01_11_list_base_story_soccer",
+			"transform": {
+				"x": 640,
+				"y": 360,
+				"scaleX": 1,
+				"scaleY": 1,
+				"rot": 0,
+				"anchorX": 0.5,
+				"anchorY": 0.5
+			},
+			"drawPriority": 552,
+			"drawType": 0,
+			"camera": "0x02D8FB06",
+			"anim": {}
+		},
+		{
+			"name": "quest01_13_sp_training_norma_info",
+			"transform": {
+				"x": 1280,
+				"y": 446,
+				"scaleX": 0.16666666666666666,
+				"scaleY": 0.16666666666666666,
+				"rot": 0,
+				"anchorX": 0.5,
+				"anchorY": 0.5
+			},
+			"drawPriority": 552,
+			"drawType": 0,
+			"camera": "0x02D8FB06",
+			"sprite": {
+				"logicalPath": "dx11/menu/91_quest/quest01/quest01_13/fr/quest01_13.g4tx",
+				"pngUrl": "/dx11/menu/91_quest/quest01/quest01_13/fr/quest01_13.png",
+				"w": 4,
+				"h": 4
+			},
+			"text": {
+				"key": "_text_title01",
+				"keyHash": 587662852,
+				"value": "Title",
+				"font": "nie_main",
+				"size": 24,
+				"color": "#ffffff",
+				"align": "center",
+				"localized": {
+					"fr": "Title",
+					"en": "Title",
+					"ja": "Title"
+				}
+			},
+			"anim": {}
+		},
+		{
+			"name": "quest01_01_list_base",
+			"transform": {
+				"x": 640,
+				"y": 360,
+				"scaleX": 1,
+				"scaleY": 1,
+				"rot": 0,
+				"anchorX": 0.5,
+				"anchorY": 0.5
+			},
+			"drawPriority": 552,
+			"drawType": 0,
+			"camera": "0x02D8FB06",
+			"anim": {}
+		},
+		{
+			"name": "quest01_01_list_base_main",
+			"transform": {
+				"x": 640,
+				"y": 360,
+				"scaleX": 1,
+				"scaleY": 1,
+				"rot": 0,
+				"anchorX": 0.5,
+				"anchorY": 0.5
+			},
+			"drawPriority": 552,
+			"drawType": 0,
+			"camera": "0x02D8FB06",
+			"anim": {}
+		},
+		{
+			"name": "quest01_06_quest_info",
+			"transform": {
+				"x": 1280,
+				"y": 446,
+				"scaleX": 0.0005649717514124294,
+				"scaleY": 0.0005592841163310962,
+				"rot": 0,
+				"anchorX": 0.5,
+				"anchorY": 0.5
+			},
+			"drawPriority": 552,
+			"drawType": 0,
+			"camera": "0x02D8FB06",
+			"sprite": {
+				"logicalPath": "dx11/menu/91_quest/quest01/quest01_06/fr/quest01_06.g4tx",
+				"pngUrl": "/dx11/menu/91_quest/quest01/quest01_06/fr/quest01_06.png",
+				"w": 1180,
+				"h": 1192
+			},
+			"text": {
+				"key": "_text_title01",
+				"keyHash": 587662852,
+				"value": "Title",
+				"font": "nie_main",
+				"size": 24,
+				"color": "#ffffff",
+				"align": "center",
+				"localized": {
+					"fr": "Title",
+					"en": "Title",
+					"ja": "Title"
+				}
+			},
+			"anim": {
+				"open": "0x5FEC8E4E",
+				"close": "0xA15F1DEE"
+			}
+		},
+		{
+			"name": "datafile_quest01_01_list_base_empty",
+			"transform": {
+				"x": 640,
+				"y": 360,
+				"scaleX": 1,
+				"scaleY": 1,
+				"rot": 0,
+				"anchorX": 0.5,
+				"anchorY": 0.5
+			},
+			"drawPriority": 552,
+			"drawType": 0,
+			"camera": "0x02D8FB06",
+			"anim": {}
+		},
+		{
+			"name": "quest01_08_reward_item",
+			"transform": {
+				"x": 640,
+				"y": 360,
+				"scaleX": 1,
+				"scaleY": 1,
+				"rot": 0,
+				"anchorX": 0.5,
+				"anchorY": 0.5
+			},
+			"drawPriority": 553,
+			"drawType": 0,
+			"camera": "0x02D8FB06",
+			"anim": {}
+		},
+		{
+			"name": "quest01_14_sp_training_norma_item",
+			"transform": {
+				"x": 640,
+				"y": 360,
+				"scaleX": 1,
+				"scaleY": 1,
+				"rot": 0,
+				"anchorX": 0.5,
+				"anchorY": 0.5
+			},
+			"drawPriority": 553,
+			"drawType": 0,
+			"camera": "0x02D8FB06",
+			"text": {
+				"key": "_text_at01",
+				"keyHash": 2169113570,
+				"value": "At",
+				"font": "nie_main",
+				"size": 24,
+				"color": "#ffffff",
+				"align": "center",
+				"localized": {
+					"fr": "At",
+					"en": "At",
+					"ja": "At"
+				}
+			},
+			"anim": {}
+		},
+		{
+			"name": "quest02_03_sp_training_phase_norma_clear_effect",
+			"transform": {
+				"x": 865.3333740234375,
+				"y": 360,
+				"scaleX": 1,
+				"scaleY": 1,
+				"rot": 0,
+				"anchorX": 0.5,
+				"anchorY": 0.5
+			},
+			"drawPriority": 554,
+			"drawType": 0,
+			"camera": "0x02D8FB06",
+			"anim": {}
+		},
+		{
+			"name": "quest02_02_sp_training_phase_norma_clear_particle",
+			"transform": {
+				"x": 640,
+				"y": 360,
+				"scaleX": 1,
+				"scaleY": 1,
+				"rot": 0,
+				"anchorX": 0.5,
+				"anchorY": 0.5
+			},
+			"drawPriority": 554,
+			"drawType": 0,
+			"camera": "0x02D8FB06",
+			"anim": {}
+		},
+		{
+			"name": "quest01_12_list_item_top",
+			"transform": {
+				"x": 640,
+				"y": 360,
+				"scaleX": 0.0037037037037037034,
+				"scaleY": 0.002564102564102564,
+				"rot": 0,
+				"anchorX": 0.5,
+				"anchorY": 0.5
+			},
+			"drawPriority": 645,
+			"drawType": 0,
+			"camera": "0x02D8FB06",
+			"sprite": {
+				"logicalPath": "dx11/menu/91_quest/quest01/quest01_12/fr/quest01_12.g4tx",
+				"pngUrl": "/dx11/menu/91_quest/quest01/quest01_12/fr/quest01_12.png",
+				"w": 180,
+				"h": 260
+			},
+			"text": {
+				"key": "_text_list01_on",
+				"keyHash": 3273821866,
+				"value": "List",
+				"font": "nie_main",
+				"size": 24,
+				"color": "#ffffff",
+				"align": "center",
+				"localized": {
+					"fr": "List",
+					"en": "List",
+					"ja": "List"
+				}
+			},
+			"anim": {}
+		},
+		{
+			"name": "quest01_02_list_item",
+			"transform": {
+				"x": 640,
+				"y": 360,
+				"scaleX": 0.0006587615283267456,
+				"scaleY": 0.001016260162601626,
+				"rot": 0,
+				"anchorX": 0.5,
+				"anchorY": 0.5
+			},
+			"drawPriority": 645,
+			"drawType": 0,
+			"camera": "0x02D8FB06",
+			"sprite": {
+				"logicalPath": "dx11/menu/91_quest/quest01/quest01_02/fr/quest01_02.g4tx",
+				"pngUrl": "/dx11/menu/91_quest/quest01/quest01_02/fr/quest01_02.png",
+				"w": 1012,
+				"h": 656
+			},
+			"text": {
+				"key": "_text_list01_on",
+				"keyHash": 3273821866,
+				"value": "List",
+				"font": "nie_main",
+				"size": 24,
+				"color": "#ffffff",
+				"align": "center",
+				"localized": {
+					"fr": "List",
+					"en": "List",
+					"ja": "List"
+				}
+			},
+			"anim": {}
+		},
+		{
+			"name": "quest01_03_list_item",
+			"transform": {
+				"x": 640,
+				"y": 360,
+				"scaleX": 0.0006587615283267456,
+				"scaleY": 0.001004016064257028,
+				"rot": 0,
+				"anchorX": 0.5,
+				"anchorY": 0.5
+			},
+			"drawPriority": 645,
+			"drawType": 0,
+			"camera": "0x02D8FB06",
+			"sprite": {
+				"logicalPath": "dx11/menu/91_quest/quest01/quest01_03/fr/quest01_03.g4tx",
+				"pngUrl": "/dx11/menu/91_quest/quest01/quest01_03/fr/quest01_03.png",
+				"w": 1012,
+				"h": 664
+			},
+			"text": {
+				"key": "_text_list01_on",
+				"keyHash": 3273821866,
+				"value": "List",
+				"font": "nie_main",
+				"size": 24,
+				"color": "#ffffff",
+				"align": "center",
+				"localized": {
+					"fr": "List",
+					"en": "List",
+					"ja": "List"
+				}
+			},
+			"anim": {}
+		},
+		{
+			"name": "quest01_12_list_item",
+			"transform": {
+				"x": 640,
+				"y": 360,
+				"scaleX": 0.0037037037037037034,
+				"scaleY": 0.002564102564102564,
+				"rot": 0,
+				"anchorX": 0.5,
+				"anchorY": 0.5
+			},
+			"drawPriority": 645,
+			"drawType": 0,
+			"camera": "0x02D8FB06",
+			"sprite": {
+				"logicalPath": "dx11/menu/91_quest/quest01/quest01_12/fr/quest01_12.g4tx",
+				"pngUrl": "/dx11/menu/91_quest/quest01/quest01_12/fr/quest01_12.png",
+				"w": 180,
+				"h": 260
+			},
+			"text": {
+				"key": "_text_list01_on",
+				"keyHash": 3273821866,
+				"value": "List",
+				"font": "nie_main",
+				"size": 24,
+				"color": "#ffffff",
+				"align": "center",
+				"localized": {
+					"fr": "List",
+					"en": "List",
+					"ja": "List"
+				}
+			},
+			"anim": {}
+		},
+		{
+			"name": "quest01_15_sp_training_norma_error_balloon",
+			"transform": {
+				"x": 640,
+				"y": 360,
+				"scaleX": 1,
+				"scaleY": 1,
+				"rot": 0,
+				"anchorX": 0.5,
+				"anchorY": 0.5
+			},
+			"drawPriority": 755,
+			"drawType": 0,
+			"camera": "0x02D8FB06",
+			"text": {
+				"key": "_text_win01",
+				"keyHash": 4265781018,
+				"value": "Win",
+				"font": "nie_main",
+				"size": 24,
+				"color": "#ffffff",
+				"align": "center",
+				"localized": {
+					"fr": "Win",
+					"en": "Win",
+					"ja": "Win"
+				}
+			},
+			"anim": {}
+		}
+	]
 }

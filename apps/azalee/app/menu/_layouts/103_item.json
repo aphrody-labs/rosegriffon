@@ -1,576 +1,641 @@
 {
-  "screen": "103_item",
-  "locale": "fr",
-  "canvas": {
-    "w": 1280,
-    "h": 720
-  },
-  "objects": [
-    {
-      "name": "item01_12_list_base_animal",
-      "transform": {
-        "x": 640,
-        "y": 360,
-        "scaleX": 1,
-        "scaleY": 1,
-        "rot": 0,
-        "anchorX": 0.5,
-        "anchorY": 0.5
-      },
-      "drawPriority": 200,
-      "drawType": 0,
-      "camera": "0x02D8FB06",
-      "text": {
-        "key": "_text_list01",
-        "keyHash": 2465419892,
-        "value": "_text_list01",
-        "font": "nie_main",
-        "size": 24,
-        "color": "#ffffff",
-        "align": "center"
-      },
-      "anim": {}
-    },
-    {
-      "name": "item01_20_detail_win_attach_locator",
-      "transform": {
-        "x": 640,
-        "y": 360,
-        "scaleX": 1,
-        "scaleY": 1,
-        "rot": 0,
-        "anchorX": 0.5,
-        "anchorY": 0.5
-      },
-      "drawPriority": 200,
-      "drawType": 0,
-      "camera": "0x02D8FB06",
-      "anim": {}
-    },
-    {
-      "name": "item01_20_detail_win_attach_locator",
-      "transform": {
-        "x": 640,
-        "y": 360,
-        "scaleX": 1,
-        "scaleY": 1,
-        "rot": 0,
-        "anchorX": 0.5,
-        "anchorY": 0.5
-      },
-      "drawPriority": 200,
-      "drawType": 0,
-      "camera": "0x02D8FB06",
-      "anim": {}
-    },
-    {
-      "name": "item01_11_list_base_craft",
-      "transform": {
-        "x": 640,
-        "y": 360,
-        "scaleX": 1,
-        "scaleY": 1,
-        "rot": 0,
-        "anchorX": 0.5,
-        "anchorY": 0.5
-      },
-      "drawPriority": 200,
-      "drawType": 0,
-      "camera": "0x02D8FB06",
-      "text": {
-        "key": "_text_list01",
-        "keyHash": 2116099931,
-        "value": "_text_list01",
-        "font": "nie_main",
-        "size": 24,
-        "color": "#ffffff",
-        "align": "center"
-      },
-      "anim": {}
-    },
-    {
-      "name": "item01_20_detail_win_attach_aura_skill_locator",
-      "transform": {
-        "x": 640,
-        "y": 360,
-        "scaleX": 1,
-        "scaleY": 1,
-        "rot": 0,
-        "anchorX": 0.5,
-        "anchorY": 0.5
-      },
-      "drawPriority": 200,
-      "drawType": 0,
-      "camera": "0x02D8FB06",
-      "anim": {}
-    },
-    {
-      "name": "item01_04_list_item",
-      "transform": {
-        "x": 640,
-        "y": 360,
-        "scaleX": 1,
-        "scaleY": 1,
-        "rot": 0,
-        "anchorX": 0.5,
-        "anchorY": 0.5
-      },
-      "drawPriority": 201,
-      "drawType": 0,
-      "camera": "0x02D8FB06",
-      "anim": {}
-    },
-    {
-      "name": "item02_01_list_training_beans_attach",
-      "transform": {
-        "x": 640,
-        "y": 360,
-        "scaleX": 1,
-        "scaleY": 1,
-        "rot": 0,
-        "anchorX": 0.5,
-        "anchorY": 0.5
-      },
-      "drawPriority": 300,
-      "drawType": 0,
-      "camera": "0x02D8FB06",
-      "text": {
-        "key": "_text_item01",
-        "keyHash": 3255802419,
-        "value": "_text_item01",
-        "font": "nie_main",
-        "size": 24,
-        "color": "#ffffff",
-        "align": "center"
-      },
-      "anim": {
-        "open": "0x5FEC8E4E",
-        "close": "0xA15F1DEE"
-      }
-    },
-    {
-      "name": "item02_04_chara_list_locator",
-      "transform": {
-        "x": 640,
-        "y": 360,
-        "scaleX": 1,
-        "scaleY": 1,
-        "rot": 0,
-        "anchorX": 0.5,
-        "anchorY": 0.5
-      },
-      "drawPriority": 300,
-      "drawType": 0,
-      "camera": "0x02D8FB06",
-      "text": {
-        "key": "_text_item01",
-        "keyHash": 3255802419,
-        "value": "_text_item01",
-        "font": "nie_main",
-        "size": 24,
-        "color": "#ffffff",
-        "align": "center"
-      },
-      "anim": {
-        "open": "0x5FEC8E4E",
-        "close": "0xA15F1DEE"
-      }
-    },
-    {
-      "name": "item01_03_battle_item_atc_base",
-      "transform": {
-        "x": 640,
-        "y": 360,
-        "scaleX": 1,
-        "scaleY": 1,
-        "rot": 0,
-        "anchorX": 0.5,
-        "anchorY": 0.5
-      },
-      "drawPriority": 300,
-      "drawType": 0,
-      "camera": "0x02D8FB06",
-      "text": {
-        "key": "_text_slot01",
-        "keyHash": 3305375408,
-        "value": "_text_slot01",
-        "font": "nie_main",
-        "size": 24,
-        "color": "#ffffff",
-        "align": "center"
-      },
-      "anim": {}
-    },
-    {
-      "name": "item01_01_not_use_list",
-      "transform": {
-        "x": 640,
-        "y": 360,
-        "scaleX": 1,
-        "scaleY": 1,
-        "rot": 0,
-        "anchorX": 0.5,
-        "anchorY": 0.5
-      },
-      "drawPriority": 451,
-      "drawType": 0,
-      "camera": "0x02D8FB06",
-      "anim": {}
-    },
-    {
-      "name": "item01_10_list_base",
-      "transform": {
-        "x": 640,
-        "y": 625.3333740234375,
-        "scaleX": 1,
-        "scaleY": 1,
-        "rot": 0,
-        "anchorX": 0.5,
-        "anchorY": 0.5
-      },
-      "drawPriority": 451,
-      "drawType": 0,
-      "camera": "0x02D8FB06",
-      "text": {
-        "key": "_text_list01",
-        "keyHash": 2465419892,
-        "value": "_text_list01",
-        "font": "nie_main",
-        "size": 24,
-        "color": "#ffffff",
-        "align": "center"
-      },
-      "anim": {}
-    },
-    {
-      "name": "item01_13_list_base_communication_msg",
-      "transform": {
-        "x": 640,
-        "y": 360,
-        "scaleX": 1,
-        "scaleY": 1,
-        "rot": 0,
-        "anchorX": 0.5,
-        "anchorY": 0.5
-      },
-      "drawPriority": 451,
-      "drawType": 0,
-      "camera": "0x02D8FB06",
-      "text": {
-        "key": "_text_title01",
-        "keyHash": 652667030,
-        "value": "_text_title01",
-        "font": "nie_main",
-        "size": 24,
-        "color": "#ffffff",
-        "align": "center"
-      },
-      "anim": {}
-    },
-    {
-      "name": "item01_01_list_base",
-      "transform": {
-        "x": 640,
-        "y": 360,
-        "scaleX": 1,
-        "scaleY": 1,
-        "rot": 0,
-        "anchorX": 0.5,
-        "anchorY": 0.5
-      },
-      "drawPriority": 451,
-      "drawType": 0,
-      "camera": "0x02D8FB06",
-      "text": {
-        "key": "_text_list01",
-        "keyHash": 2465419892,
-        "value": "_text_list01",
-        "font": "nie_main",
-        "size": 24,
-        "color": "#ffffff",
-        "align": "center"
-      },
-      "anim": {}
-    },
-    {
-      "name": "item01_01_list_base_item_menu",
-      "transform": {
-        "x": 640,
-        "y": 360,
-        "scaleX": 1,
-        "scaleY": 1,
-        "rot": 0,
-        "anchorX": 0.5,
-        "anchorY": 0.5
-      },
-      "drawPriority": 451,
-      "drawType": 0,
-      "camera": "0x02D8FB06",
-      "text": {
-        "key": "_text_list01",
-        "keyHash": 2465419892,
-        "value": "_text_list01",
-        "font": "nie_main",
-        "size": 24,
-        "color": "#ffffff",
-        "align": "center"
-      },
-      "anim": {}
-    },
-    {
-      "name": "item01_07_use_chara_select_box_list",
-      "transform": {
-        "x": 640,
-        "y": 360,
-        "scaleX": 1,
-        "scaleY": 1,
-        "rot": 0,
-        "anchorX": 0.5,
-        "anchorY": 0.5
-      },
-      "drawPriority": 452,
-      "drawType": 0,
-      "camera": "0x02D8FB06",
-      "text": {
-        "key": "_text_title01",
-        "keyHash": 877188265,
-        "value": "_text_title01",
-        "font": "nie_main",
-        "size": 24,
-        "color": "#ffffff",
-        "align": "center"
-      },
-      "anim": {}
-    },
-    {
-      "name": "item01_08_use_chara_select_box_list_item",
-      "transform": {
-        "x": 640,
-        "y": 360,
-        "scaleX": 1,
-        "scaleY": 1,
-        "rot": 0,
-        "anchorX": 0.5,
-        "anchorY": 0.5
-      },
-      "drawPriority": 453,
-      "drawType": 0,
-      "camera": "0x02D8FB06",
-      "anim": {
-        "open": "0x5FEC8E4E",
-        "close": "0xA15F1DEE"
-      }
-    },
-    {
-      "name": "item01_06_list_item_communication",
-      "transform": {
-        "x": 640,
-        "y": 360,
-        "scaleX": 1,
-        "scaleY": 1,
-        "rot": 0,
-        "anchorX": 0.5,
-        "anchorY": 0.5
-      },
-      "drawPriority": 453,
-      "drawType": 0,
-      "camera": "0x02D8FB06",
-      "text": {
-        "key": "_text_sentence01",
-        "keyHash": 3058026282,
-        "value": "_text_sentence01",
-        "font": "nie_main",
-        "size": 24,
-        "color": "#ffffff",
-        "align": "center"
-      },
-      "anim": {}
-    },
-    {
-      "name": "item02_02_list_item_chara",
-      "transform": {
-        "x": 640,
-        "y": 360,
-        "scaleX": 0.16666666666666666,
-        "scaleY": 0.16666666666666666,
-        "rot": 0,
-        "anchorX": 0.5,
-        "anchorY": 0.5
-      },
-      "drawPriority": 551,
-      "drawType": 0,
-      "camera": "0x02D8FB06",
-      "sprite": {
-        "logicalPath": "dx11/menu/103_item/item02/item02_02/item02_02.g4tx",
-        "pngUrl": "/dx11/menu/103_item/item02/item02_02/item02_02.png",
-        "w": 4,
-        "h": 4
-      },
-      "text": {
-        "key": "_text_list01_off",
-        "keyHash": 1390126981,
-        "value": "_text_list01_off",
-        "font": "nie_main",
-        "size": 24,
-        "color": "#ffffff",
-        "align": "center"
-      },
-      "anim": {}
-    },
-    {
-      "name": "item01_02_list_item",
-      "transform": {
-        "x": 640,
-        "y": 360,
-        "scaleX": 0.16666666666666666,
-        "scaleY": 0.16666666666666666,
-        "rot": 0,
-        "anchorX": 0.5,
-        "anchorY": 0.5
-      },
-      "drawPriority": 552,
-      "drawType": 0,
-      "camera": "0x02D8FB06",
-      "sprite": {
-        "logicalPath": "dx11/menu/103_item/item01/item01_02/fr/item01_02.g4tx",
-        "pngUrl": "/dx11/menu/103_item/item01/item01_02/fr/item01_02.png",
-        "w": 4,
-        "h": 4
-      },
-      "anim": {}
-    },
-    {
-      "name": "item02_03_list_item_attach_gauge",
-      "transform": {
-        "x": 640,
-        "y": 360,
-        "scaleX": 1,
-        "scaleY": 1,
-        "rot": 0,
-        "anchorX": 0.5,
-        "anchorY": 0.5
-      },
-      "drawPriority": 552,
-      "drawType": 0,
-      "camera": "0x02D8FB06",
-      "anim": {}
-    },
-    {
-      "name": "item02_05_attach_gauge",
-      "transform": {
-        "x": 640,
-        "y": 360,
-        "scaleX": 0.0026041666666666665,
-        "scaleY": 0.041666666666666664,
-        "rot": 0,
-        "anchorX": 0.5,
-        "anchorY": 0.5
-      },
-      "drawPriority": 552,
-      "drawType": 0,
-      "camera": "0x02D8FB06",
-      "sprite": {
-        "logicalPath": "dx11/menu/103_item/item02/item02_05/fr/item02_05.g4tx",
-        "pngUrl": "/dx11/menu/103_item/item02/item02_05/fr/item02_05.png",
-        "w": 256,
-        "h": 16
-      },
-      "anim": {}
-    },
-    {
-      "name": "item01_02_list_item",
-      "transform": {
-        "x": 640,
-        "y": 360,
-        "scaleX": 1,
-        "scaleY": 1,
-        "rot": 0,
-        "anchorX": 0.5,
-        "anchorY": 0.5
-      },
-      "drawPriority": 552,
-      "drawType": 0,
-      "camera": "0x02D8FB06",
-      "anim": {}
-    },
-    {
-      "name": "item02_03_p1_gauge_effect",
-      "transform": {
-        "x": 640,
-        "y": 360,
-        "scaleX": 1,
-        "scaleY": 1,
-        "rot": 0,
-        "anchorX": 0.5,
-        "anchorY": 0.5
-      },
-      "drawPriority": 553,
-      "drawType": 0,
-      "camera": "0x02D8FB06",
-      "anim": {}
-    },
-    {
-      "name": "item01_13_list_base_communication",
-      "transform": {
-        "x": 640,
-        "y": 360,
-        "scaleX": 1,
-        "scaleY": 1,
-        "rot": 0,
-        "anchorX": 0.5,
-        "anchorY": 0.5
-      },
-      "drawPriority": 567,
-      "drawType": 0,
-      "camera": "0x02D8FB06",
-      "text": {
-        "key": "_text_title01",
-        "keyHash": 652667030,
-        "value": "_text_title01",
-        "font": "nie_main",
-        "size": 24,
-        "color": "#ffffff",
-        "align": "center"
-      },
-      "anim": {}
-    },
-    {
-      "name": "item01_05_list_item_communication",
-      "transform": {
-        "x": 640,
-        "y": 360,
-        "scaleX": 1,
-        "scaleY": 1,
-        "rot": 0,
-        "anchorX": 0.5,
-        "anchorY": 0.5
-      },
-      "drawPriority": 570,
-      "drawType": 0,
-      "camera": "0x02D8FB06",
-      "anim": {}
-    },
-    {
-      "name": "item01_02_list_item_kizuna_link",
-      "transform": {
-        "x": 640,
-        "y": 360,
-        "scaleX": 0.16666666666666666,
-        "scaleY": 0.16666666666666666,
-        "rot": 0,
-        "anchorX": 0.5,
-        "anchorY": 0.5
-      },
-      "drawPriority": 652,
-      "drawType": 0,
-      "camera": "0x02D8FB06",
-      "sprite": {
-        "logicalPath": "dx11/menu/103_item/item01/item01_02/fr/item01_02.g4tx",
-        "pngUrl": "/dx11/menu/103_item/item01/item01_02/fr/item01_02.png",
-        "w": 4,
-        "h": 4
-      },
-      "anim": {}
-    }
-  ]
+	"screen": "103_item",
+	"locale": "fr",
+	"canvas": {
+		"w": 1280,
+		"h": 720
+	},
+	"objects": [
+		{
+			"name": "item01_12_list_base_animal",
+			"transform": {
+				"x": 640,
+				"y": 360,
+				"scaleX": 1,
+				"scaleY": 1,
+				"rot": 0,
+				"anchorX": 0.5,
+				"anchorY": 0.5
+			},
+			"drawPriority": 200,
+			"drawType": 0,
+			"camera": "0x02D8FB06",
+			"text": {
+				"key": "_text_list01",
+				"keyHash": 2465419892,
+				"value": "List",
+				"font": "nie_main",
+				"size": 24,
+				"color": "#ffffff",
+				"align": "center",
+				"localized": {
+					"fr": "List",
+					"en": "List",
+					"ja": "List"
+				}
+			},
+			"anim": {}
+		},
+		{
+			"name": "item01_20_detail_win_attach_locator",
+			"transform": {
+				"x": 640,
+				"y": 360,
+				"scaleX": 1,
+				"scaleY": 1,
+				"rot": 0,
+				"anchorX": 0.5,
+				"anchorY": 0.5
+			},
+			"drawPriority": 200,
+			"drawType": 0,
+			"camera": "0x02D8FB06",
+			"anim": {}
+		},
+		{
+			"name": "item01_20_detail_win_attach_locator",
+			"transform": {
+				"x": 640,
+				"y": 360,
+				"scaleX": 1,
+				"scaleY": 1,
+				"rot": 0,
+				"anchorX": 0.5,
+				"anchorY": 0.5
+			},
+			"drawPriority": 200,
+			"drawType": 0,
+			"camera": "0x02D8FB06",
+			"anim": {}
+		},
+		{
+			"name": "item01_11_list_base_craft",
+			"transform": {
+				"x": 640,
+				"y": 360,
+				"scaleX": 1,
+				"scaleY": 1,
+				"rot": 0,
+				"anchorX": 0.5,
+				"anchorY": 0.5
+			},
+			"drawPriority": 200,
+			"drawType": 0,
+			"camera": "0x02D8FB06",
+			"text": {
+				"key": "_text_list01",
+				"keyHash": 2116099931,
+				"value": "List",
+				"font": "nie_main",
+				"size": 24,
+				"color": "#ffffff",
+				"align": "center",
+				"localized": {
+					"fr": "List",
+					"en": "List",
+					"ja": "List"
+				}
+			},
+			"anim": {}
+		},
+		{
+			"name": "item01_20_detail_win_attach_aura_skill_locator",
+			"transform": {
+				"x": 640,
+				"y": 360,
+				"scaleX": 1,
+				"scaleY": 1,
+				"rot": 0,
+				"anchorX": 0.5,
+				"anchorY": 0.5
+			},
+			"drawPriority": 200,
+			"drawType": 0,
+			"camera": "0x02D8FB06",
+			"anim": {}
+		},
+		{
+			"name": "item01_04_list_item",
+			"transform": {
+				"x": 640,
+				"y": 360,
+				"scaleX": 1,
+				"scaleY": 1,
+				"rot": 0,
+				"anchorX": 0.5,
+				"anchorY": 0.5
+			},
+			"drawPriority": 201,
+			"drawType": 0,
+			"camera": "0x02D8FB06",
+			"anim": {}
+		},
+		{
+			"name": "item02_01_list_training_beans_attach",
+			"transform": {
+				"x": 640,
+				"y": 360,
+				"scaleX": 1,
+				"scaleY": 1,
+				"rot": 0,
+				"anchorX": 0.5,
+				"anchorY": 0.5
+			},
+			"drawPriority": 300,
+			"drawType": 0,
+			"camera": "0x02D8FB06",
+			"text": {
+				"key": "_text_item01",
+				"keyHash": 3255802419,
+				"value": "Item",
+				"font": "nie_main",
+				"size": 24,
+				"color": "#ffffff",
+				"align": "center",
+				"localized": {
+					"fr": "Item",
+					"en": "Item",
+					"ja": "Item"
+				}
+			},
+			"anim": {
+				"open": "0x5FEC8E4E",
+				"close": "0xA15F1DEE"
+			}
+		},
+		{
+			"name": "item02_04_chara_list_locator",
+			"transform": {
+				"x": 640,
+				"y": 360,
+				"scaleX": 1,
+				"scaleY": 1,
+				"rot": 0,
+				"anchorX": 0.5,
+				"anchorY": 0.5
+			},
+			"drawPriority": 300,
+			"drawType": 0,
+			"camera": "0x02D8FB06",
+			"text": {
+				"key": "_text_item01",
+				"keyHash": 3255802419,
+				"value": "Item",
+				"font": "nie_main",
+				"size": 24,
+				"color": "#ffffff",
+				"align": "center",
+				"localized": {
+					"fr": "Item",
+					"en": "Item",
+					"ja": "Item"
+				}
+			},
+			"anim": {
+				"open": "0x5FEC8E4E",
+				"close": "0xA15F1DEE"
+			}
+		},
+		{
+			"name": "item01_03_battle_item_atc_base",
+			"transform": {
+				"x": 640,
+				"y": 360,
+				"scaleX": 1,
+				"scaleY": 1,
+				"rot": 0,
+				"anchorX": 0.5,
+				"anchorY": 0.5
+			},
+			"drawPriority": 300,
+			"drawType": 0,
+			"camera": "0x02D8FB06",
+			"text": {
+				"key": "_text_slot01",
+				"keyHash": 3305375408,
+				"value": "Slot",
+				"font": "nie_main",
+				"size": 24,
+				"color": "#ffffff",
+				"align": "center",
+				"localized": {
+					"fr": "Slot",
+					"en": "Slot",
+					"ja": "Slot"
+				}
+			},
+			"anim": {}
+		},
+		{
+			"name": "item01_01_not_use_list",
+			"transform": {
+				"x": 640,
+				"y": 360,
+				"scaleX": 1,
+				"scaleY": 1,
+				"rot": 0,
+				"anchorX": 0.5,
+				"anchorY": 0.5
+			},
+			"drawPriority": 451,
+			"drawType": 0,
+			"camera": "0x02D8FB06",
+			"anim": {}
+		},
+		{
+			"name": "item01_10_list_base",
+			"transform": {
+				"x": 640,
+				"y": 625.3333740234375,
+				"scaleX": 1,
+				"scaleY": 1,
+				"rot": 0,
+				"anchorX": 0.5,
+				"anchorY": 0.5
+			},
+			"drawPriority": 451,
+			"drawType": 0,
+			"camera": "0x02D8FB06",
+			"text": {
+				"key": "_text_list01",
+				"keyHash": 2465419892,
+				"value": "List",
+				"font": "nie_main",
+				"size": 24,
+				"color": "#ffffff",
+				"align": "center",
+				"localized": {
+					"fr": "List",
+					"en": "List",
+					"ja": "List"
+				}
+			},
+			"anim": {}
+		},
+		{
+			"name": "item01_13_list_base_communication_msg",
+			"transform": {
+				"x": 640,
+				"y": 360,
+				"scaleX": 1,
+				"scaleY": 1,
+				"rot": 0,
+				"anchorX": 0.5,
+				"anchorY": 0.5
+			},
+			"drawPriority": 451,
+			"drawType": 0,
+			"camera": "0x02D8FB06",
+			"text": {
+				"key": "_text_title01",
+				"keyHash": 652667030,
+				"value": "Title",
+				"font": "nie_main",
+				"size": 24,
+				"color": "#ffffff",
+				"align": "center",
+				"localized": {
+					"fr": "Title",
+					"en": "Title",
+					"ja": "Title"
+				}
+			},
+			"anim": {}
+		},
+		{
+			"name": "item01_01_list_base",
+			"transform": {
+				"x": 640,
+				"y": 360,
+				"scaleX": 1,
+				"scaleY": 1,
+				"rot": 0,
+				"anchorX": 0.5,
+				"anchorY": 0.5
+			},
+			"drawPriority": 451,
+			"drawType": 0,
+			"camera": "0x02D8FB06",
+			"text": {
+				"key": "_text_list01",
+				"keyHash": 2465419892,
+				"value": "List",
+				"font": "nie_main",
+				"size": 24,
+				"color": "#ffffff",
+				"align": "center",
+				"localized": {
+					"fr": "List",
+					"en": "List",
+					"ja": "List"
+				}
+			},
+			"anim": {}
+		},
+		{
+			"name": "item01_01_list_base_item_menu",
+			"transform": {
+				"x": 640,
+				"y": 360,
+				"scaleX": 1,
+				"scaleY": 1,
+				"rot": 0,
+				"anchorX": 0.5,
+				"anchorY": 0.5
+			},
+			"drawPriority": 451,
+			"drawType": 0,
+			"camera": "0x02D8FB06",
+			"text": {
+				"key": "_text_list01",
+				"keyHash": 2465419892,
+				"value": "List",
+				"font": "nie_main",
+				"size": 24,
+				"color": "#ffffff",
+				"align": "center",
+				"localized": {
+					"fr": "List",
+					"en": "List",
+					"ja": "List"
+				}
+			},
+			"anim": {}
+		},
+		{
+			"name": "item01_07_use_chara_select_box_list",
+			"transform": {
+				"x": 640,
+				"y": 360,
+				"scaleX": 1,
+				"scaleY": 1,
+				"rot": 0,
+				"anchorX": 0.5,
+				"anchorY": 0.5
+			},
+			"drawPriority": 452,
+			"drawType": 0,
+			"camera": "0x02D8FB06",
+			"text": {
+				"key": "_text_title01",
+				"keyHash": 877188265,
+				"value": "Title",
+				"font": "nie_main",
+				"size": 24,
+				"color": "#ffffff",
+				"align": "center",
+				"localized": {
+					"fr": "Title",
+					"en": "Title",
+					"ja": "Title"
+				}
+			},
+			"anim": {}
+		},
+		{
+			"name": "item01_08_use_chara_select_box_list_item",
+			"transform": {
+				"x": 640,
+				"y": 360,
+				"scaleX": 1,
+				"scaleY": 1,
+				"rot": 0,
+				"anchorX": 0.5,
+				"anchorY": 0.5
+			},
+			"drawPriority": 453,
+			"drawType": 0,
+			"camera": "0x02D8FB06",
+			"anim": {
+				"open": "0x5FEC8E4E",
+				"close": "0xA15F1DEE"
+			}
+		},
+		{
+			"name": "item01_06_list_item_communication",
+			"transform": {
+				"x": 640,
+				"y": 360,
+				"scaleX": 1,
+				"scaleY": 1,
+				"rot": 0,
+				"anchorX": 0.5,
+				"anchorY": 0.5
+			},
+			"drawPriority": 453,
+			"drawType": 0,
+			"camera": "0x02D8FB06",
+			"text": {
+				"key": "_text_sentence01",
+				"keyHash": 3058026282,
+				"value": "Sentence",
+				"font": "nie_main",
+				"size": 24,
+				"color": "#ffffff",
+				"align": "center",
+				"localized": {
+					"fr": "Sentence",
+					"en": "Sentence",
+					"ja": "Sentence"
+				}
+			},
+			"anim": {}
+		},
+		{
+			"name": "item02_02_list_item_chara",
+			"transform": {
+				"x": 640,
+				"y": 360,
+				"scaleX": 0.16666666666666666,
+				"scaleY": 0.16666666666666666,
+				"rot": 0,
+				"anchorX": 0.5,
+				"anchorY": 0.5
+			},
+			"drawPriority": 551,
+			"drawType": 0,
+			"camera": "0x02D8FB06",
+			"sprite": {
+				"logicalPath": "dx11/menu/103_item/item02/item02_02/item02_02.g4tx",
+				"pngUrl": "/dx11/menu/103_item/item02/item02_02/item02_02.png",
+				"w": 4,
+				"h": 4
+			},
+			"text": {
+				"key": "_text_list01_off",
+				"keyHash": 1390126981,
+				"value": "List",
+				"font": "nie_main",
+				"size": 24,
+				"color": "#ffffff",
+				"align": "center",
+				"localized": {
+					"fr": "List",
+					"en": "List",
+					"ja": "List"
+				}
+			},
+			"anim": {}
+		},
+		{
+			"name": "item01_02_list_item",
+			"transform": {
+				"x": 640,
+				"y": 360,
+				"scaleX": 0.16666666666666666,
+				"scaleY": 0.16666666666666666,
+				"rot": 0,
+				"anchorX": 0.5,
+				"anchorY": 0.5
+			},
+			"drawPriority": 552,
+			"drawType": 0,
+			"camera": "0x02D8FB06",
+			"sprite": {
+				"logicalPath": "dx11/menu/103_item/item01/item01_02/fr/item01_02.g4tx",
+				"pngUrl": "/dx11/menu/103_item/item01/item01_02/fr/item01_02.png",
+				"w": 4,
+				"h": 4
+			},
+			"anim": {}
+		},
+		{
+			"name": "item02_03_list_item_attach_gauge",
+			"transform": {
+				"x": 640,
+				"y": 360,
+				"scaleX": 1,
+				"scaleY": 1,
+				"rot": 0,
+				"anchorX": 0.5,
+				"anchorY": 0.5
+			},
+			"drawPriority": 552,
+			"drawType": 0,
+			"camera": "0x02D8FB06",
+			"anim": {}
+		},
+		{
+			"name": "item02_05_attach_gauge",
+			"transform": {
+				"x": 640,
+				"y": 360,
+				"scaleX": 0.0026041666666666665,
+				"scaleY": 0.041666666666666664,
+				"rot": 0,
+				"anchorX": 0.5,
+				"anchorY": 0.5
+			},
+			"drawPriority": 552,
+			"drawType": 0,
+			"camera": "0x02D8FB06",
+			"sprite": {
+				"logicalPath": "dx11/menu/103_item/item02/item02_05/fr/item02_05.g4tx",
+				"pngUrl": "/dx11/menu/103_item/item02/item02_05/fr/item02_05.png",
+				"w": 256,
+				"h": 16
+			},
+			"anim": {}
+		},
+		{
+			"name": "item01_02_list_item",
+			"transform": {
+				"x": 640,
+				"y": 360,
+				"scaleX": 1,
+				"scaleY": 1,
+				"rot": 0,
+				"anchorX": 0.5,
+				"anchorY": 0.5
+			},
+			"drawPriority": 552,
+			"drawType": 0,
+			"camera": "0x02D8FB06",
+			"anim": {}
+		},
+		{
+			"name": "item02_03_p1_gauge_effect",
+			"transform": {
+				"x": 640,
+				"y": 360,
+				"scaleX": 1,
+				"scaleY": 1,
+				"rot": 0,
+				"anchorX": 0.5,
+				"anchorY": 0.5
+			},
+			"drawPriority": 553,
+			"drawType": 0,
+			"camera": "0x02D8FB06",
+			"anim": {}
+		},
+		{
+			"name": "item01_13_list_base_communication",
+			"transform": {
+				"x": 640,
+				"y": 360,
+				"scaleX": 1,
+				"scaleY": 1,
+				"rot": 0,
+				"anchorX": 0.5,
+				"anchorY": 0.5
+			},
+			"drawPriority": 567,
+			"drawType": 0,
+			"camera": "0x02D8FB06",
+			"text": {
+				"key": "_text_title01",
+				"keyHash": 652667030,
+				"value": "Title",
+				"font": "nie_main",
+				"size": 24,
+				"color": "#ffffff",
+				"align": "center",
+				"localized": {
+					"fr": "Title",
+					"en": "Title",
+					"ja": "Title"
+				}
+			},
+			"anim": {}
+		},
+		{
+			"name": "item01_05_list_item_communication",
+			"transform": {
+				"x": 640,
+				"y": 360,
+				"scaleX": 1,
+				"scaleY": 1,
+				"rot": 0,
+				"anchorX": 0.5,
+				"anchorY": 0.5
+			},
+			"drawPriority": 570,
+			"drawType": 0,
+			"camera": "0x02D8FB06",
+			"anim": {}
+		},
+		{
+			"name": "item01_02_list_item_kizuna_link",
+			"transform": {
+				"x": 640,
+				"y": 360,
+				"scaleX": 0.16666666666666666,
+				"scaleY": 0.16666666666666666,
+				"rot": 0,
+				"anchorX": 0.5,
+				"anchorY": 0.5
+			},
+			"drawPriority": 652,
+			"drawType": 0,
+			"camera": "0x02D8FB06",
+			"sprite": {
+				"logicalPath": "dx11/menu/103_item/item01/item01_02/fr/item01_02.g4tx",
+				"pngUrl": "/dx11/menu/103_item/item01/item01_02/fr/item01_02.png",
+				"w": 4,
+				"h": 4
+			},
+			"anim": {}
+		}
+	]
 }

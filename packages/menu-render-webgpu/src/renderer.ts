@@ -193,9 +193,22 @@ const spriteSize = (obj: MenuObject): { w: number; h: number } => {
  *
  * Pur : aucune dépendance GPU. C'est le cœur testé en headless.
  */
+/** Langue d'affichage du texte de menu (clé de `MenuText.localized`). */
+export type MenuLang = "fr" | "en" | "ja";
+
+/**
+ * Libellé d'un node texte pour la langue demandée : `localized[lang]` si présent
+ * (layouts post-traités par `resolve-menu-text.ts`), sinon repli sur `value` (qui
+ * est déjà le libellé FR par défaut pour les layouts non encore enrichis).
+ */
+export function localizedTextValue(text: MenuText, lang: MenuLang): string {
+	return text.localized?.[lang] ?? text.value;
+}
+
 export function buildDrawList(
 	layout: MenuLayout,
 	overrides: Record<string, MenuObjectOverride> = {},
+	lang: MenuLang = "fr",
 ): DrawItem[] {
 	const items: DrawItem[] = [];
 
@@ -225,7 +238,8 @@ export function buildDrawList(
 			items.push({ ...base, opacity: 1, kind: "sprite", pngUrl: obj.sprite.pngUrl });
 		} else if (obj.text) {
 			const liveText =
-				ov?.text ?? (ov?.number !== undefined ? String(ov.number) : obj.text.value);
+				ov?.text
+				?? (ov?.number !== undefined ? String(ov.number) : localizedTextValue(obj.text, lang));
 			items.push({
 				...base,
 				opacity: 1,
@@ -409,6 +423,7 @@ export class WebGpuMenuRenderer {
 	private instanceCapacity = 0;
 
 	private overrides: Record<string, MenuObjectOverride> = {};
+	private lang: MenuLang = "fr";
 	private destroyed = false;
 	private dpr = 1;
 
@@ -732,6 +747,12 @@ export class WebGpuMenuRenderer {
 		this.overrides = o;
 	}
 
+	/** Change la langue d'affichage du texte (`localized[lang]`, repli `value`). */
+	setLang(lang: MenuLang): void {
+		this.lang = lang;
+		this.textTextures.clear();
+	}
+
 	/** Reconfigure le canvas pour une taille CSS + devicePixelRatio (letterbox géré en amont). */
 	resize(cssW: number, cssH: number, dpr: number): void {
 		if (this.destroyed) {
@@ -756,7 +777,7 @@ export class WebGpuMenuRenderer {
 		if (this.destroyed) {
 			return;
 		}
-		const items = buildDrawList(this.layout, this.overrides);
+		const items = buildDrawList(this.layout, this.overrides, this.lang);
 		const useGlyphs = this.useGlyphAtlas();
 
 		// Buffer A : instances "standard" (sprite / primitive / texte fallback canvas2d).

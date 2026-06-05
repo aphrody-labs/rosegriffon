@@ -1,80 +1,80 @@
 {
-  "screen": "112_gallery",
-  "locale": "fr",
-  "canvas": {
-    "w": 1280,
-    "h": 720
-  },
-  "objects": [
-    {
-      "name": "gallery01_01_list_base",
-      "transform": {
-        "x": 640,
-        "y": 360,
-        "scaleX": 1,
-        "scaleY": 1,
-        "rot": 0,
-        "anchorX": 0.5,
-        "anchorY": 0.5
-      },
-      "drawPriority": 451,
-      "drawType": 0,
-      "camera": "0x02D8FB06",
-      "anim": {}
-    },
-    {
-      "name": "gallery01_02_list_item",
-      "transform": {
-        "x": 640,
-        "y": 360,
-        "scaleX": 1,
-        "scaleY": 1,
-        "rot": 0,
-        "anchorX": 0.5,
-        "anchorY": 0.5
-      },
-      "drawPriority": 452,
-      "drawType": 0,
-      "camera": "0x02D8FB06",
-      "anim": {}
-    },
-    {
-      "name": "shop01_03_token_list",
-      "transform": {
-        "x": 640,
-        "y": 360,
-        "scaleX": 0.00273224043715847,
-        "scaleY": 0.006944444444444444,
-        "rot": 0,
-        "anchorX": 0.5,
-        "anchorY": 0.5
-      },
-      "drawPriority": 455,
-      "drawType": 0,
-      "camera": "0x02D8FB06",
-      "sprite": {
-        "logicalPath": "dx11/menu/112_gallery/gallery01/gallery01_03/fr/gallery01_03.g4tx",
-        "pngUrl": "/dx11/menu/112_gallery/gallery01/gallery01_03/fr/gallery01_03.png",
-        "w": 244,
-        "h": 96
-      },
-      "anim": {}
-    },
-    {
-      "name": "shop01_00_background",
-      "transform": {
-        "x": 640,
-        "y": 360,
-        "scaleX": 1,
-        "scaleY": 1,
-        "rot": 0,
-        "anchorX": 0.5,
-        "anchorY": 0.5
-      },
-      "drawPriority": 649,
-      "drawType": 0,
-      "camera": "0x02D8FB06",
-      "anim": {}
-    }
-  ]
+	"screen": "112_gallery",
+	"locale": "fr",
+	"canvas": {
+		"w": 1280,
+		"h": 720
+	},
+	"objects": [
+		{
+			"name": "gallery01_01_list_base",
+			"transform": {
+				"x": 640,
+				"y": 360,
+				"scaleX": 1,
+				"scaleY": 1,
+				"rot": 0,
+				"anchorX": 0.5,
+				"anchorY": 0.5
+			},
+			"drawPriority": 451,
+			"drawType": 0,
+			"camera": "0x02D8FB06",
+			"anim": {}
+		},
+		{
+			"name": "gallery01_02_list_item",
+			"transform": {
+				"x": 640,
+				"y": 360,
+				"scaleX": 1,
+				"scaleY": 1,
+				"rot": 0,
+				"anchorX": 0.5,
+				"anchorY": 0.5
+			},
+			"drawPriority": 452,
+			"drawType": 0,
+			"camera": "0x02D8FB06",
+			"anim": {}
+		},
+		{
+			"name": "shop01_03_token_list",
+			"transform": {
+				"x": 640,
+				"y": 360,
+				"scaleX": 0.00273224043715847,
+				"scaleY": 0.006944444444444444,
+				"rot": 0,
+				"anchorX": 0.5,
+				"anchorY": 0.5
+			},
+			"drawPriority": 455,
+			"drawType": 0,
+			"camera": "0x02D8FB06",
+			"sprite": {
+				"logicalPath": "dx11/menu/112_gallery/gallery01/gallery01_03/fr/gallery01_03.g4tx",
+				"pngUrl": "/dx11/menu/112_gallery/gallery01/gallery01_03/fr/gallery01_03.png",
+				"w": 244,
+				"h": 96
+			},
+			"anim": {}
+		},
+		{
+			"name": "shop01_00_background",
+			"transform": {
+				"x": 640,
+				"y": 360,
+				"scaleX": 1,
+				"scaleY": 1,
+				"rot": 0,
+				"anchorX": 0.5,
+				"anchorY": 0.5
+			},
+			"drawPriority": 649,
+			"drawType": 0,
+			"camera": "0x02D8FB06",
+			"anim": {}
+		}
+	]
 }

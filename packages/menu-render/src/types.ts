@@ -35,8 +35,13 @@ export interface MenuText {
 	/** Clé hashée dans common/text/<locale>. */
 	key: string;
 	keyHash: number;
-	/** Valeur résolue pour la locale courante. */
+	/** Valeur résolue pour la locale courante (= `localized.fr` par défaut azalee). */
 	value: string;
+	/**
+	 * Libellé résolu par locale (`resolve-menu-text.ts`), pour un futur switch de langue.
+	 * Absent sur les layouts non encore post-traités → le renderer retombe sur `value`.
+	 */
+	localized?: { fr: string; en: string; ja: string };
 	/** Nom de la font du jeu (nie_main, nie_bold, nie_mono, …). */
 	font: string;
 	/** Taille en pixels à 1280×720. */

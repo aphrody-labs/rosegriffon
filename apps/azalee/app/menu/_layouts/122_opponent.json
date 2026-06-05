@@ -1,132 +1,147 @@
 {
-  "screen": "122_opponent",
-  "locale": "fr",
-  "canvas": {
-    "w": 1280,
-    "h": 720
-  },
-  "objects": [
-    {
-      "name": "opponent01_01_bg",
-      "transform": {
-        "x": 640,
-        "y": 360,
-        "scaleX": 1,
-        "scaleY": 1,
-        "rot": 0,
-        "anchorX": 0.5,
-        "anchorY": 0.5
-      },
-      "drawPriority": 199,
-      "drawType": 0,
-      "camera": "0x02D8FB06",
-      "anim": {
-        "open": "0x5FEC8E4E",
-        "close": "0xA15F1DEE"
-      }
-    },
-    {
-      "name": "opponent01_05_formation_attach",
-      "transform": {
-        "x": 640,
-        "y": 360,
-        "scaleX": 0.0006802721088435374,
-        "scaleY": 0.001016260162601626,
-        "rot": 0,
-        "anchorX": 0.5,
-        "anchorY": 0.5
-      },
-      "drawPriority": 550,
-      "drawType": 0,
-      "camera": "0x02D8FB06",
-      "sprite": {
-        "logicalPath": "dx11/menu/122_opponent/opponent01/opponent01_05/fr/opponent01_05.g4tx",
-        "pngUrl": "/dx11/menu/122_opponent/opponent01/opponent01_05/fr/opponent01_05.png",
-        "w": 980,
-        "h": 656
-      },
-      "text": {
-        "key": "_text_team_name01",
-        "keyHash": 1036406022,
-        "value": "_text_team_name01",
-        "font": "nie_main",
-        "size": 24,
-        "color": "#ffffff",
-        "align": "center"
-      },
-      "anim": {}
-    },
-    {
-      "name": "opponent01_04_explanation",
-      "transform": {
-        "x": 640,
-        "y": 360,
-        "scaleX": 0.16666666666666666,
-        "scaleY": 0.16666666666666666,
-        "rot": 0,
-        "anchorX": 0.5,
-        "anchorY": 0.5
-      },
-      "drawPriority": 550,
-      "drawType": 0,
-      "camera": "0x02D8FB06",
-      "sprite": {
-        "logicalPath": "dx11/menu/122_opponent/opponent01/opponent01_04/fr/opponent01_04.g4tx",
-        "pngUrl": "/dx11/menu/122_opponent/opponent01/opponent01_04/fr/opponent01_04.png",
-        "w": 4,
-        "h": 4
-      },
-      "text": {
-        "key": "_text_team_name01",
-        "keyHash": 812942928,
-        "value": "_text_team_name01",
-        "font": "nie_main",
-        "size": 24,
-        "color": "#ffffff",
-        "align": "center"
-      },
-      "anim": {}
-    },
-    {
-      "name": "opponent01_02_list_base",
-      "transform": {
-        "x": 640,
-        "y": 360,
-        "scaleX": 1,
-        "scaleY": 1,
-        "rot": 0,
-        "anchorX": 0.5,
-        "anchorY": 0.5
-      },
-      "drawPriority": 550,
-      "drawType": 0,
-      "camera": "0x02D8FB06",
-      "anim": {}
-    },
-    {
-      "name": "opponent01_03_list_item",
-      "transform": {
-        "x": 640,
-        "y": 360,
-        "scaleX": 1,
-        "scaleY": 1,
-        "rot": 0,
-        "anchorX": 0.5,
-        "anchorY": 0.5
-      },
-      "drawPriority": 551,
-      "drawType": 0,
-      "camera": "0x02D8FB06",
-      "text": {
-        "key": "_text_list01_on",
-        "keyHash": 3466937357,
-        "value": "_text_list01_on",
-        "font": "nie_main",
-        "size": 24,
-        "color": "#ffffff",
-        "align": "center"
-      },
-      "anim": {}
-    }
-  ]
+	"screen": "122_opponent",
+	"locale": "fr",
+	"canvas": {
+		"w": 1280,
+		"h": 720
+	},
+	"objects": [
+		{
+			"name": "opponent01_01_bg",
+			"transform": {
+				"x": 640,
+				"y": 360,
+				"scaleX": 1,
+				"scaleY": 1,
+				"rot": 0,
+				"anchorX": 0.5,
+				"anchorY": 0.5
+			},
+			"drawPriority": 199,
+			"drawType": 0,
+			"camera": "0x02D8FB06",
+			"anim": {
+				"open": "0x5FEC8E4E",
+				"close": "0xA15F1DEE"
+			}
+		},
+		{
+			"name": "opponent01_05_formation_attach",
+			"transform": {
+				"x": 640,
+				"y": 360,
+				"scaleX": 0.0006802721088435374,
+				"scaleY": 0.001016260162601626,
+				"rot": 0,
+				"anchorX": 0.5,
+				"anchorY": 0.5
+			},
+			"drawPriority": 550,
+			"drawType": 0,
+			"camera": "0x02D8FB06",
+			"sprite": {
+				"logicalPath": "dx11/menu/122_opponent/opponent01/opponent01_05/fr/opponent01_05.g4tx",
+				"pngUrl": "/dx11/menu/122_opponent/opponent01/opponent01_05/fr/opponent01_05.png",
+				"w": 980,
+				"h": 656
+			},
+			"text": {
+				"key": "_text_team_name01",
+				"keyHash": 1036406022,
+				"value": "Team name",
+				"font": "nie_main",
+				"size": 24,
+				"color": "#ffffff",
+				"align": "center",
+				"localized": {
+					"fr": "Team name",
+					"en": "Team name",
+					"ja": "Team name"
+				}
+			},
+			"anim": {}
+		},
+		{
+			"name": "opponent01_04_explanation",
+			"transform": {
+				"x": 640,
+				"y": 360,
+				"scaleX": 0.16666666666666666,
+				"scaleY": 0.16666666666666666,
+				"rot": 0,
+				"anchorX": 0.5,
+				"anchorY": 0.5
+			},
+			"drawPriority": 550,
+			"drawType": 0,
+			"camera": "0x02D8FB06",
+			"sprite": {
+				"logicalPath": "dx11/menu/122_opponent/opponent01/opponent01_04/fr/opponent01_04.g4tx",
+				"pngUrl": "/dx11/menu/122_opponent/opponent01/opponent01_04/fr/opponent01_04.png",
+				"w": 4,
+				"h": 4
+			},
+			"text": {
+				"key": "_text_team_name01",
+				"keyHash": 812942928,
+				"value": "Team name",
+				"font": "nie_main",
+				"size": 24,
+				"color": "#ffffff",
+				"align": "center",
+				"localized": {
+					"fr": "Team name",
+					"en": "Team name",
+					"ja": "Team name"
+				}
+			},
+			"anim": {}
+		},
+		{
+			"name": "opponent01_02_list_base",
+			"transform": {
+				"x": 640,
+				"y": 360,
+				"scaleX": 1,
+				"scaleY": 1,
+				"rot": 0,
+				"anchorX": 0.5,
+				"anchorY": 0.5
+			},
+			"drawPriority": 550,
+			"drawType": 0,
+			"camera": "0x02D8FB06",
+			"anim": {}
+		},
+		{
+			"name": "opponent01_03_list_item",
+			"transform": {
+				"x": 640,
+				"y": 360,
+				"scaleX": 1,
+				"scaleY": 1,
+				"rot": 0,
+				"anchorX": 0.5,
+				"anchorY": 0.5
+			},
+			"drawPriority": 551,
+			"drawType": 0,
+			"camera": "0x02D8FB06",
+			"text": {
+				"key": "_text_list01_on",
+				"keyHash": 3466937357,
+				"value": "List",
+				"font": "nie_main",
+				"size": 24,
+				"color": "#ffffff",
+				"align": "center",
+				"localized": {
+					"fr": "List",
+					"en": "List",
+					"ja": "List"
+				}
+			},
+			"anim": {}
+		}
+	]
 }
