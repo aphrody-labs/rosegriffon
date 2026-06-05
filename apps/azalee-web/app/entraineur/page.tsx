@@ -89,6 +89,7 @@ export default async function CoachesPage({
 								playstyleFr={c.playstyleFr}
 								elementKey={c.elementKey}
 								elementFr={c.elementFr}
+								internalCode={c.internalCode}
 								stat={c.stat}
 								buff={c.buff}
 							/>

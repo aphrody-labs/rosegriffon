@@ -41,7 +41,11 @@ export interface SpiritTier {
 	/** Bonus de rareté de drop (0/10/20). */
 	dropRarity: number | null;
 	weight: number;
-	/** Probabilité dans le groupe (%). */
+	/**
+	 * Probabilité ABSOLUE réelle du palier (%). Pour spirit_drop le `weight` EST déjà
+	 * un pourcentage, donc `chance === weight` (PAS une fraction du total du groupe).
+	 * La somme des paliers d'un groupe peut être < 100 (le reste = ne rien obtenir).
+	 */
 	chance: number;
 }
 
@@ -49,6 +53,11 @@ export interface SpiritTier {
 export interface SpiritGroup {
 	sourceId: string;
 	tiers: SpiritTier[];
+	/**
+	 * Probabilité d'obtenir un esprit (un palier quelconque) = somme des `chance`.
+	 * Si < 100, le complément est la chance de ne rien obtenir.
+	 */
+	anyChance?: number;
 	/** `battle_group_id` qui référencent cette table (via `inagle_drops_battles`). */
 	battleGroupIds: number[];
 }

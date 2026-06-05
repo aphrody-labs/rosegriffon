@@ -37,7 +37,11 @@ export interface Stadium {
 	code: string;
 	/** Index d'ordre in-game (`field_index`), `null` si absent. */
 	index: number | null;
-	/** Libellé dérivé du code (pas de localisation en DB — meilleur libellé possible). */
+	/**
+	 * Libellé générique HONNÊTE (« Terrain N »). La DB ne contient AUCUN nom
+	 * localisé ni lien d'équipe : on n'invente pas de nom — on numérote le terrain
+	 * d'après son ordre in-game (`field_index`), avec repli sur le code interne.
+	 */
 	title: string;
 	/** PNG plein cadre d'origine (téléchargement / fond haute résolution). */
 	image: string;
@@ -60,13 +64,18 @@ function codeFromPath(imagePath: string | null): string {
 }
 
 /**
- * Dérive un libellé lisible depuis le code terrain : retire le préfixe `img_room_`,
- * remplace les `_` par des espaces et met en Title Case. Aucun nom localisé en DB
- * pour les stades — c'est le meilleur libellé dérivable honnêtement.
+ * Libellé générique honnête d'un terrain. La table `inagle_stadiums` ne porte
+ * AUCUN nom de stade ni nom d'équipe (champs absents en DB ET en gamedata indexée),
+ * et le code `img_room_sNNg001` ne résout vers aucun texte localisé. On ne fabrique
+ * donc PAS de faux nom à partir du code : on numérote le terrain d'après son ordre
+ * in-game (`field_index`, 0-based → « Terrain N+1 »), avec repli sur le code brut si
+ * l'index est absent.
  */
-function titleFromCode(code: string): string {
-	const cleaned = code.replace(/^img_room_/, "").replaceAll("_", " ").trim();
-	return cleaned.replace(/\b\w/g, (c) => c.toUpperCase()) || code;
+function genericTitle(index: number | null, code: string): string {
+	if (typeof index === "number") {
+		return `Terrain ${index + 1}`;
+	}
+	return code || "Terrain";
 }
 
 /**
@@ -84,7 +93,7 @@ function rowToStadium(row: StadiumRow): Stadium {
 		id: row.id,
 		code,
 		index: row.field_index,
-		title: titleFromCode(code),
+		title: genericTitle(row.field_index, code),
 		image,
 		thumb: galleryVariantUrl(image, 400),
 		full: galleryVariantUrl(image, 1600),

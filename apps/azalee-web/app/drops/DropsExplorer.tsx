@@ -111,9 +111,10 @@ function SpiritsTab({ groups }: { groups: SpiritGroup[] }) {
 	return (
 		<div className="space-y-4">
 			<p className="text-sm text-on-surface-variant">
-				Chaque esprit possède une table de paliers de rareté : la probabilité indique la
-				chance de tomber sur chaque palier (et non un objet précis). Les combats associés
-				utilisent cette table.
+				Chaque esprit possède une table de paliers de rareté : la probabilité affichée est
+				le pourcentage ABSOLU de tomber sur ce palier (et non un objet précis). La somme des
+				paliers d'un groupe peut être inférieure à 100 % : le complément correspond à la
+				chance de ne rien obtenir. Les combats associés utilisent cette table.
 			</p>
 			<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 				{groups.map((g) => (
@@ -132,6 +133,12 @@ function SpiritsTab({ groups }: { groups: SpiritGroup[] }) {
 								</span>
 							)}
 						</div>
+						{typeof g.anyChance === "number" && (
+							<p className="mb-3 text-xs text-on-surface-variant">
+								<span className="font-bold tabular-nums text-on-surface">{pct(g.anyChance)}</span>{" "}
+								d'obtenir un esprit
+							</p>
+						)}
 						<ul className="space-y-1.5">
 							{g.tiers.map((t) => (
 								<li

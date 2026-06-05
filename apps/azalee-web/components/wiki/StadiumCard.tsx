@@ -17,10 +17,11 @@ export interface StadiumCardProps {
 }
 
 /**
- * Carte de stade : illustration plein cadre du terrain (ratio paysage 16/9) +
- * libellé dérivé du code et index in-game. Fallback propre (icône `LandPlot`) si
- * l'image est absente ou 404. Aucune donnée d'effet affichée (la table n'en
- * contient pas).
+ * Carte de stade : la VRAIE illustration in-game du terrain (ratio paysage 16/9)
+ * au premier plan, sous un libellé générique honnête (« Terrain N ») et le code
+ * interne en sous-titre technique. Fallback propre (icône `LandPlot`) si l'image
+ * est absente ou 404. AUCUN nom de stade ni nom d'équipe n'est affiché : la table
+ * `inagle_stadiums` n'en contient pas, on n'invente donc rien.
  */
 export function StadiumCard({ id, code, title, index, thumb, className }: StadiumCardProps) {
 	const [imgError, setImgError] = useState(false);

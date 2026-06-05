@@ -173,6 +173,10 @@ async function fetchSpiritGroups(): Promise<SpiritGroup[]> {
 
 	const groups: SpiritGroup[] = [];
 	for (const [sourceId, groupRows] of bySource) {
+		// Pour spirit_drop, `weight` EST DÉJÀ un pourcentage absolu réel (0.05..83.8),
+		// PAS un poids de loterie : on ne normalise donc PAS par la somme (contrairement
+		// aux coffres). La somme des paliers peut être < 100 → le reste = chance de ne
+		// rien obtenir (intentionnel). `anyChance` = total = proba d'obtenir un esprit.
 		const total = groupRows.reduce((acc, r) => acc + (r.weight ?? 0), 0);
 		const tiers = groupRows
 			.map((r): SpiritTier => {
@@ -182,13 +186,14 @@ async function fetchSpiritGroups(): Promise<SpiritGroup[]> {
 					rarity: r.rarity,
 					dropRarity: r.drop_rarity,
 					weight,
-					chance: total > 0 ? (weight / total) * 100 : 0,
+					chance: weight,
 				};
 			})
 			.sort((a, b) => (a.rarity ?? 0) - (b.rarity ?? 0));
 		groups.push({
 			sourceId,
 			tiers,
+			anyChance: total,
 			battleGroupIds: battleByTable.get(sourceId) ?? [],
 		});
 	}

@@ -1,5 +1,6 @@
-import { ArrowLeft, ClipboardList } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
+import { CoachFace } from "@/components/wiki/CoachFace";
 import { ElementIcon } from "@/components/wiki/ElementIcon";
 import type { Coach } from "@/lib/wiki/coaches";
 
@@ -40,8 +41,12 @@ export function CoachDetail({ coach }: { coach: Coach }) {
 
 			{/* En-tête */}
 			<div className="flex flex-col gap-4 rounded-3xl border border-outline-variant/30 bg-surface-container-low p-5 sm:flex-row sm:items-center">
-				<div className="flex aspect-square w-24 shrink-0 items-center justify-center rounded-2xl bg-surface-container-high">
-					<ClipboardList size={40} className="text-primary opacity-40" aria-hidden="true" />
+				<div className="relative flex aspect-square w-24 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-surface-container-high">
+					<CoachFace
+						internalCode={coach.internalCode}
+						alt={coach.name}
+						className="text-primary opacity-40"
+					/>
 				</div>
 				<div className="min-w-0 flex-1">
 					<div className="flex items-center gap-2">

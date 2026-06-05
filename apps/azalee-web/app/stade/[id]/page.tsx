@@ -15,8 +15,8 @@ export async function generateMetadata({
 	const { id } = await params;
 	const stadium = await getStadium(id);
 
-	const name = stadium?.title || "Stade";
-	const description = `${name} — terrain de match d'Inazuma Eleven: Victory Road. Illustration in-game, code interne et index.`;
+	const name = stadium?.title || "Terrain";
+	const description = `${name} — terrain de match d'Inazuma Eleven: Victory Road. Illustration in-game, code interne et index (le jeu n'expose ni nom ni équipe associée).`;
 
 	return {
 		alternates: { canonical: `/stade/${id}` },
@@ -96,7 +96,7 @@ export default async function StadiumDetailPage({
 			<div className="space-y-4">
 				<div>
 					<span className="text-xs font-bold uppercase tracking-wider text-on-surface-variant/60">
-						Stade
+						Terrain de match
 					</span>
 					<h1 className="text-2xl lg:text-3xl font-black text-on-surface tracking-tight">
 						{stadium.title}
