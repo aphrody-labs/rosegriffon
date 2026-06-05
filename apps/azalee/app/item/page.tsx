@@ -100,6 +100,7 @@ export default async function ItemsPage({
 								price={item.price}
 								location={item.location}
 								stats={item.stats}
+								bonuses={item.bonuses}
 								className="h-full"
 							/>
 						</FadeInItem>

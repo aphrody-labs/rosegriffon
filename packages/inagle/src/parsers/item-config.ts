@@ -4,12 +4,41 @@
  * @description Parser for item_config files to extract items and link Uniforms
  */
 
-import { join } from "node:path";
+import { existsSync, readFileSync } from "node:fs";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
 import { loadJsonAsync } from "../core/async-loader.js";
 import type { ConfigNode } from "../core/config-parser.js";
 import { findConfigFile, toHex } from "../core/data-loader.js";
 import { EntityExporters, type ExportableEntity } from "../core/exporters.js";
 import { loadTextFileAsync } from "./text-parser.js";
+
+/**
+ * Charge la base communautaire des bonus d'équipement (item-bonus-db.json).
+ * Relevé in-game : chaque entrée mappe un nameId (var[2] du leaf) vers ses
+ * bonus de stats réels (kick/control/…). Couvre chaussures/bracelets/accessoires.
+ * Clé de retour : nameId hex MAJUSCULE sans préfixe `0x`.
+ */
+function loadItemBonusDb(): Map<string, ItemStatBonuses> {
+	const map = new Map<string, ItemStatBonuses>();
+	try {
+		const here = dirname(fileURLToPath(import.meta.url));
+		const dbPath = join(here, "../data/item-bonus-db.json");
+		if (!existsSync(dbPath)) return map;
+		const entries = JSON.parse(readFileSync(dbPath, "utf-8")) as Array<{
+			id: string;
+			bonuses?: ItemStatBonuses;
+		}>;
+		for (const e of entries) {
+			if (!e.id || !e.bonuses) continue;
+			const key = e.id.toUpperCase().replace(/^0X/, "");
+			map.set(key, e.bonuses);
+		}
+	} catch {
+		// best-effort : pas de bonus décodés si le fichier est absent/illisible
+	}
+	return map;
+}
 
 export type ItemCategory =
 	| "consume"
@@ -33,6 +62,21 @@ export type ItemCategory =
 	| "performance"
 	| "important";
 
+/**
+ * Bonus de statistique décodé (issu de la base communautaire item-bonus-db).
+ * Clés possibles : kick, control, technique, intelligence, pressure, agility, physical.
+ */
+export type ItemStatBonuses = Partial<Record<StatBonusKey, number>>;
+
+export type StatBonusKey =
+	| "kick"
+	| "control"
+	| "technique"
+	| "intelligence"
+	| "pressure"
+	| "agility"
+	| "physical";
+
 export interface ParsedItem extends ExportableEntity {
 	itemId: string; // Hex
 	internalCode?: string; // Asset ID / Filename base
@@ -44,9 +88,28 @@ export interface ParsedItem extends ExportableEntity {
 	shops?: { en: string[]; fr: string[] };
 	price?: number;
 	stats?: { stat1: number; stat2: number };
+	/**
+	 * Bonus de stats RÉELS décodés (kick +6, control +5, …) pour l'équipement
+	 * (chaussures/bracelets/accessoires). Joint sur le nameId (var[2]) via
+	 * item-bonus-db.json (relevé in-game communautaire). Absent si non décodé.
+	 */
+	bonuses?: ItemStatBonuses;
+	/** Quantité max empilable en inventaire (consommables : var[7]). */
+	maxStack?: number;
 	// Specific fields
 	uniformId?: number; // For fashion items
 }
+
+/** Libellés FR des clés de bonus de stats (pour les attributes d'export). */
+const STAT_FR_LABELS: Record<string, string> = {
+	agility: "Agilité",
+	control: "Contrôle",
+	intelligence: "Intelligence",
+	kick: "Tir",
+	physical: "Physique",
+	pressure: "Pression",
+	technique: "Technique",
+};
 
 const CATEGORY_MAP: Record<string, ItemCategory> = {
 	ITEM_CONSUME_INFO: "consume",
@@ -129,15 +192,21 @@ export async function buildItemDatabaseAsync(
 	}
 	const configPath = join(dataPath, "common", "gamedata", "item", filename);
 
-	// Load Texts (Parallel)
-	const [textEn, textFr, textJa, descEn, descFr, descJa] = await Promise.all([
+	// Charge la base de bonus décodés (synchrone, fichier statique bundlé).
+	const bonusDb = loadItemBonusDb();
+
+	// Load Texts (Parallel).
+	// NOTE: il n'existe PAS de fichier `item_explain_text` dans le jeu — les
+	// descriptions vivent DANS `item_text`, résolues via le descId (var[3]).
+	// On charge donc `item` deux fois (noms ET descriptions partagent la table).
+	const [textEn, textFr, textJa] = await Promise.all([
 		loadTextFileAsync("item", "en"),
 		loadTextFileAsync("item", "fr"),
 		loadTextFileAsync("item", "ja"),
-		loadTextFileAsync("item_explain", "en"),
-		loadTextFileAsync("item_explain", "fr"),
-		loadTextFileAsync("item_explain", "ja"),
 	]);
+	const descEn = textEn;
+	const descFr = textFr;
+	const descJa = textJa;
 
 	try {
 		const content = await loadJsonAsync<any>(configPath);
@@ -162,6 +231,8 @@ export async function buildItemDatabaseAsync(
 
 						const nameIdInt = vars.length > 2 ? Number.parseInt(vars[2].value, 10) : 0;
 						const nameIdHex = toHex(nameIdInt);
+						// Clé de jointure bonus-db : nameId hex MAJUSCULE sans `0x`.
+						const bonusKey = nameIdHex.toUpperCase().replace(/^0X/, "");
 
 						const descIdInt = vars.length > 3 ? Number.parseInt(vars[3].value, 10) : 0;
 						const descIdHex = toHex(descIdInt);
@@ -203,7 +274,8 @@ export async function buildItemDatabaseAsync(
 							}
 						}
 
-						// Equipment stats extraction
+						// Equipment stats extraction (codes bruts var[5]/var[6] — peu lisibles,
+						// conservés pour compat ; les vrais bonus arrivent via bonus-db ci-dessous).
 						if (
 							category === "shoes" ||
 							category === "misanga" ||
@@ -216,8 +288,27 @@ export async function buildItemDatabaseAsync(
 									stat1: Number.parseInt(vars[5].value, 10),
 									stat2: Number.parseInt(vars[6].value, 10),
 								};
-								item.attributes!["Stat 1"] = item.stats.stat1;
-								item.attributes!["Stat 2"] = item.stats.stat2;
+							}
+						}
+
+						// Bonus de stats RÉELS (relevé communautaire) — joint sur le nameId.
+						// Couvre chaussures/bracelets/accessoires : kick +6, control +5, …
+						const bonuses = bonusDb.get(bonusKey);
+						if (bonuses && Object.keys(bonuses).length > 0) {
+							item.bonuses = bonuses;
+							for (const [stat, val] of Object.entries(bonuses)) {
+								if (val) item.attributes![STAT_FR_LABELS[stat] || stat] = val;
+							}
+						}
+
+						// Quantité max empilable (consommables/craft : var[7]).
+						if (
+							(category === "consume" || category === "craft_obj") &&
+							vars.length > 7
+						) {
+							const stack = Number.parseInt(vars[7].value, 10);
+							if (stack > 0 && stack < 1_000_000) {
+								item.maxStack = stack;
 							}
 						}
 
