@@ -58,7 +58,9 @@ export const metadata: Metadata = {
 			"Association française Inazuma Eleven : événements, streaming et communauté passionnée depuis 2019",
 		images: [
 			{
-				url: "/og-image-home.webp",
+				// Convention /opengraph-image (comme azalee + achillea) = capture HD plein écran
+				// de la home (apps/website/src/app/opengraph-image.png).
+				url: "/opengraph-image",
 				width: 1200,
 				height: 630,
 				alt: "Rose Griffon - Association Inazuma Eleven",
