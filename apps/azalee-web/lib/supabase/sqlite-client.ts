@@ -1,6 +1,8 @@
 import type { Database } from "bun:sqlite";
 import { readdirSync } from "node:fs";
 import path from "node:path";
+import { sql, type SQL } from "drizzle-orm";
+import { drizzle as drizzleProxy } from "drizzle-orm/sqlite-proxy";
 
 function getSqlitePath(): string | null {
 	if (process.env.SQLITE_DB_PATH) {
@@ -33,9 +35,10 @@ function getSqlitePath(): string | null {
 }
 
 // Surface minimale commune entre `bun:sqlite` (runtime Bun) et `node:sqlite`
-// (Node >= 22 — `DatabaseSync`). `SqliteQueryBuilder` n'utilise que `prepare`/
-// `exec`, et sur le statement `all`/`get`. Les deux moteurs exposent la même
-// forme, on les unifie derrière ce type pour pouvoir builder sous Node.
+// (Node >= 22 — `DatabaseSync`). La façade Drizzle (`drizzle-orm/sqlite-proxy`)
+// délègue l'exécution à ce moteur : un seul schéma, un seul driver universel,
+// swap derrière le garde `typeof Bun`. Les deux moteurs exposent `prepare(sql)`
+// avec `all`/`get` sur le statement → on les unifie derrière ce type.
 type SqliteLike = {
 	prepare(sql: string): {
 		all(...params: unknown[]): unknown[];
@@ -85,15 +88,53 @@ function getSqliteDb(): Database {
 	return _sqliteDb as unknown as Database;
 }
 
+// Instance Drizzle universelle (`sqlite-proxy`). L'exécution est déléguée au
+// `SqliteLike` actif (bun:sqlite au runtime, node:sqlite au build). Drizzle
+// compile la requête (placeholders `?`, NULLS FIRST/LAST, json_extract, GROUP BY)
+// puis nous remet `{ sql, params, method }` ; on prépare et on exécute sur le
+// moteur natif. Singleton process-local — pas de réouverture du fichier.
+type ProxyDb = ReturnType<typeof drizzleProxy>;
+let _drizzle: ProxyDb | null = null;
+function getDrizzle(): ProxyDb {
+	if (_drizzle) return _drizzle;
+	const engine = getSqliteDb() as unknown as SqliteLike;
+	// Le callback est typé `AsyncRemoteCallback` (doit renvoyer une Promise). Le
+	// moteur sous-jacent (bun:sqlite / node:sqlite) est SYNCHRONE — on enveloppe
+	// donc le résultat dans une promesse résolue (aucun I/O async réel).
+	_drizzle = drizzleProxy(async (queryString, params, method) => {
+		const stmt = engine.prepare(queryString);
+		if (method === "get") {
+			const row = stmt.get(...params);
+			// sqlite-proxy attend `{ rows: <ligne unique en tableau de valeurs OU
+			// objet> }`. On utilise UNIQUEMENT `db.all(sql)` côté façade (jamais
+			// `db.get`), donc cette branche n'est pas empruntée en pratique ; on la
+			// garde correcte par sûreté.
+			return { rows: row ? [row] : [] };
+		}
+		if (method === "values") {
+			const rows = stmt.all(...params) as Array<Record<string, unknown>>;
+			return { rows: rows.map((r) => Object.values(r)) };
+		}
+		// method "all" / "run" → on renvoie les lignes en objets. La façade lit
+		// `result.rows` comme un tableau d'objets (mode "all" de Drizzle).
+		const rows = stmt.all(...params) as unknown[];
+		return { rows };
+	});
+	return _drizzle;
+}
+
 export class SqliteQueryBuilder {
 	private db: Database;
 	private table: string;
 	private selects: string = "*";
-	private wheres: string[] = [];
-	private params: Array<string | number | boolean | null> = [];
+	// Conditions WHERE émises comme fragments Drizzle (`sql`). Chaque fragment
+	// porte ses propres paramètres bindés via Drizzle (placeholders `?`).
+	private wheres: SQL[] = [];
 	private limitValue: number | null = null;
 	private offsetValue: number | null = null;
-	private orders: string[] = [];
+	// Fragments ORDER BY dans l'ordre d'insertion (l'ordre des appels `.order()`
+	// est significatif — plusieurs tris s'accumulent).
+	private orders: SQL[] = [];
 	private isSingle: boolean = false;
 	private isMaybeSingle: boolean = false;
 	private countOption: string | null = null;
@@ -118,21 +159,24 @@ export class SqliteQueryBuilder {
 		return this;
 	}
 
-	private cleanCol(col: string): string {
+	// Expression de colonne SQL (fragment Drizzle), avec support `->>` → json_extract.
+	// IMPORTANT : émis via `sql.raw` car ce sont des identifiants de schéma, jamais
+	// des valeurs utilisateur (les colonnes viennent du code, pas d'input runtime).
+	private cleanCol(col: string): SQL {
 		if (col.includes("->>")) {
 			const [left, right] = col.split("->>");
-			return `json_extract(${left}, '$.${right}')`;
+			return sql.raw(`json_extract("${left}", '$.${right}')`);
 		}
-		return `"${col}"`;
+		return sql.raw(`"${col}"`);
 	}
 
 	eq(col: string, val: string | number | boolean | null) {
 		const column = this.cleanCol(col);
 		if (val === null) {
-			this.wheres.push(`${column} IS NULL`);
+			this.wheres.push(sql`${column} IS NULL`);
 		} else {
-			this.wheres.push(`${column} = ?`);
-			this.params.push(typeof val === "boolean" ? (val ? 1 : 0) : val);
+			const bound = typeof val === "boolean" ? (val ? 1 : 0) : val;
+			this.wheres.push(sql`${column} = ${bound}`);
 		}
 		return this;
 	}
@@ -140,10 +184,10 @@ export class SqliteQueryBuilder {
 	neq(col: string, val: string | number | boolean | null) {
 		const column = this.cleanCol(col);
 		if (val === null) {
-			this.wheres.push(`${column} IS NOT NULL`);
+			this.wheres.push(sql`${column} IS NOT NULL`);
 		} else {
-			this.wheres.push(`${column} != ?`);
-			this.params.push(typeof val === "boolean" ? (val ? 1 : 0) : val);
+			const bound = typeof val === "boolean" ? (val ? 1 : 0) : val;
+			this.wheres.push(sql`${column} != ${bound}`);
 		}
 		return this;
 	}
@@ -151,47 +195,49 @@ export class SqliteQueryBuilder {
 	not(col: string, op: string, val: string | number | boolean | null) {
 		const column = this.cleanCol(col);
 		if (op === "is" && val === null) {
-			this.wheres.push(`${column} IS NOT NULL`);
+			this.wheres.push(sql`${column} IS NOT NULL`);
 		} else if (op === "like" || op === "ilike") {
-			this.wheres.push(`${column} NOT LIKE ?`);
-			this.params.push(val);
+			this.wheres.push(sql`${column} NOT LIKE ${val}`);
 		} else {
-			this.wheres.push(`${column} != ?`);
-			this.params.push(typeof val === "boolean" ? (val ? 1 : 0) : val);
+			const bound = typeof val === "boolean" ? (val ? 1 : 0) : val;
+			this.wheres.push(sql`${column} != ${bound}`);
 		}
 		return this;
 	}
 
 	ilike(col: string, pattern: string) {
 		const column = this.cleanCol(col);
-		this.wheres.push(`${column} LIKE ?`);
-		this.params.push(pattern);
+		this.wheres.push(sql`${column} LIKE ${pattern}`);
 		return this;
 	}
 
 	gte(col: string, val: string | number | boolean | null) {
 		const column = this.cleanCol(col);
-		this.wheres.push(`${column} >= ?`);
-		this.params.push(typeof val === "boolean" ? (val ? 1 : 0) : val);
+		const bound = typeof val === "boolean" ? (val ? 1 : 0) : val;
+		this.wheres.push(sql`${column} >= ${bound}`);
 		return this;
 	}
 
 	lte(col: string, val: string | number | boolean | null) {
 		const column = this.cleanCol(col);
-		this.wheres.push(`${column} <= ?`);
-		this.params.push(typeof val === "boolean" ? (val ? 1 : 0) : val);
+		const bound = typeof val === "boolean" ? (val ? 1 : 0) : val;
+		this.wheres.push(sql`${column} <= ${bound}`);
 		return this;
 	}
 
 	in(col: string, arr: Array<string | number | boolean | null>) {
 		if (!arr || arr.length === 0) {
-			this.wheres.push("1 = 0");
+			this.wheres.push(sql`1 = 0`);
 			return this;
 		}
 		const column = this.cleanCol(col);
-		const placeholders = arr.map(() => "?").join(", ");
-		this.wheres.push(`${column} IN (${placeholders})`);
-		this.params.push(...arr.map((val) => (typeof val === "boolean" ? (val ? 1 : 0) : val)));
+		const bound = arr.map((val) => (typeof val === "boolean" ? (val ? 1 : 0) : val));
+		// `sql.join` insère un placeholder `?` par valeur (binding paramétré).
+		const list = sql.join(
+			bound.map((v) => sql`${v}`),
+			sql`, `
+		);
+		this.wheres.push(sql`${column} IN (${list})`);
 		return this;
 	}
 
@@ -226,8 +272,7 @@ export class SqliteQueryBuilder {
 	}
 
 	or(orString: string) {
-		const conditions: string[] = [];
-		const orParams: Array<string | number | boolean | null> = [];
+		const conditions: SQL[] = [];
 
 		// Parse chaque condition `colonne.opérateur.valeur` séparément. La colonne
 		// (qui peut contenir `->>`) n'a jamais de `.` littéral en PostgREST, donc on
@@ -249,11 +294,11 @@ export class SqliteQueryBuilder {
 
 			// Null checks (PostgREST: `col.is.null` / `col.not.is.null`) — sans param.
 			if (rest === "is.null") {
-				conditions.push(`${column} IS NULL`);
+				conditions.push(sql`${column} IS NULL`);
 				continue;
 			}
 			if (rest === "not.is.null") {
-				conditions.push(`${column} IS NOT NULL`);
+				conditions.push(sql`${column} IS NOT NULL`);
 				continue;
 			}
 
@@ -274,47 +319,38 @@ export class SqliteQueryBuilder {
 					let cleanVal = val;
 					if (cleanVal.startsWith("%")) cleanVal = cleanVal.slice(1);
 					if (cleanVal.endsWith("%")) cleanVal = cleanVal.slice(0, -1);
-					conditions.push(`${column} LIKE ?`);
-					orParams.push(`%${cleanVal}%`);
+					conditions.push(sql`${column} LIKE ${`%${cleanVal}%`}`);
 					break;
 				}
 				case "like":
 					// PostgREST `like` : `%`/`*` = joker. On normalise `*` → `%`.
-					conditions.push(`${column} LIKE ?`);
-					orParams.push(val.replaceAll("*", "%"));
+					conditions.push(sql`${column} LIKE ${val.replaceAll("*", "%")}`);
 					break;
 				case "eq":
-					conditions.push(`${column} = ?`);
-					orParams.push(val === "true" ? 1 : val === "false" ? 0 : val);
+					conditions.push(sql`${column} = ${val === "true" ? 1 : val === "false" ? 0 : val}`);
 					break;
 				case "neq":
-					conditions.push(`${column} != ?`);
-					orParams.push(val);
+					conditions.push(sql`${column} != ${val}`);
 					break;
 				case "gt":
-					conditions.push(`${column} > ?`);
-					orParams.push(val);
+					conditions.push(sql`${column} > ${val}`);
 					break;
 				case "gte":
-					conditions.push(`${column} >= ?`);
-					orParams.push(val);
+					conditions.push(sql`${column} >= ${val}`);
 					break;
 				case "lt":
-					conditions.push(`${column} < ?`);
-					orParams.push(val);
+					conditions.push(sql`${column} < ${val}`);
 					break;
 				case "lte":
-					conditions.push(`${column} <= ?`);
-					orParams.push(val);
+					conditions.push(sql`${column} <= ${val}`);
 					break;
 				case "cs":
 					try {
 						const parsed = JSON.parse(val);
 						if (Array.isArray(parsed) && parsed[0]?.id) {
 							conditions.push(
-								`EXISTS (SELECT 1 FROM json_each(${column}) WHERE json_each.value->>'id' = ?)`
+								sql`EXISTS (SELECT 1 FROM json_each(${column}) WHERE json_each.value->>'id' = ${parsed[0].id})`
 							);
-							orParams.push(parsed[0].id);
 						}
 					} catch {
 						// fallback if JSON parsing fails
@@ -326,14 +362,14 @@ export class SqliteQueryBuilder {
 		}
 
 		if (conditions.length > 0) {
-			this.wheres.push(`(${conditions.join(" OR ")})`);
-			this.params.push(...orParams);
+			const joined = sql.join(conditions, sql` OR `);
+			this.wheres.push(sql`(${joined})`);
 		} else {
 			// Aucune condition valide (`.or()` malformé / valeurs vides) → matcher
 			// RIEN. Sinon l'absence de WHERE ferait remonter toute la table, et un
 			// .maybeSingle() renverrait silencieusement la 1re ligne (mauvaise entité
 			// au lieu d'un 404).
-			this.wheres.push("1 = 0");
+			this.wheres.push(sql`1 = 0`);
 		}
 
 		return this;
@@ -346,15 +382,18 @@ export class SqliteQueryBuilder {
 
 	order(col: string, options?: { ascending?: boolean; nullsFirst?: boolean }) {
 		const column = this.cleanCol(col);
-		const dir = options?.ascending === false ? "DESC" : "ASC";
+		const dir = options?.ascending === false ? sql.raw("DESC") : sql.raw("ASC");
 		// SQLite trie les NULL EN PREMIER par défaut (ASC) — l'inverse de PostgREST
 		// quand `nullsFirst:false`. On émet NULLS FIRST/LAST explicitement (SQLite
 		// >= 3.30) pour matcher la sémantique supabase-js, sinon les lignes à
 		// valeur NULL (ex. zukan_order) remontent en tête et cassent l'ordre.
-		let nulls = "";
-		if (options?.nullsFirst === true) nulls = " NULLS FIRST";
-		else if (options?.nullsFirst === false) nulls = " NULLS LAST";
-		this.orders.push(`${column} ${dir}${nulls}`);
+		if (options?.nullsFirst === true) {
+			this.orders.push(sql`${column} ${dir} NULLS FIRST`);
+		} else if (options?.nullsFirst === false) {
+			this.orders.push(sql`${column} ${dir} NULLS LAST`);
+		} else {
+			this.orders.push(sql`${column} ${dir}`);
+		}
 		return this;
 	}
 
@@ -412,32 +451,37 @@ export class SqliteQueryBuilder {
 		}
 	}
 
-	private compileSelect(): string {
-		let sql = `SELECT ${this.selects} FROM "${this.table}"`;
+	// Assemble la requête SELECT complète comme fragment Drizzle unique. La
+	// projection (`this.selects`) reste une liste de colonnes PostgREST brute
+	// (`*`, `id, name_fr`, …) émise via `sql.raw` — identique au SQL maison
+	// d'origine (`SELECT ${this.selects} FROM "table" …`).
+	private compileSelect(): SQL {
+		const parts: SQL[] = [
+			sql`SELECT ${sql.raw(this.selects)} FROM ${sql.raw(`"${this.table}"`)}`,
+		];
 		if (this.wheres.length > 0) {
-			sql += ` WHERE ${this.wheres.join(" AND ")}`;
+			parts.push(sql`WHERE ${sql.join(this.wheres, sql` AND `)}`);
 		}
 		if (this.needsGrouping) {
-			sql += ' GROUP BY "name_fr"';
+			parts.push(sql`GROUP BY "name_fr"`);
 		}
 		if (this.orders.length > 0) {
-			sql += ` ORDER BY ${this.orders.join(", ")}`;
+			parts.push(sql`ORDER BY ${sql.join(this.orders, sql`, `)}`);
 		}
 		if (this.limitValue !== null) {
-			sql += ` LIMIT ${this.limitValue}`;
+			parts.push(sql`LIMIT ${sql.raw(String(this.limitValue))}`);
 		}
 		if (this.offsetValue !== null) {
-			sql += ` OFFSET ${this.offsetValue}`;
+			parts.push(sql`OFFSET ${sql.raw(String(this.offsetValue))}`);
 		}
-		return sql;
+		return sql.join(parts, sql` `);
 	}
 
 	private async execute(): Promise<
 		Record<string, unknown> | Array<Record<string, unknown>> | null
 	> {
-		const sql = this.compileSelect();
-		const stmt = this.db.prepare(sql);
-		const rawRows = stmt.all(...this.params) as Array<Record<string, unknown>>;
+		const drizzle = getDrizzle();
+		const rawRows = (await drizzle.all(this.compileSelect())) as Array<Record<string, unknown>>;
 
 		const parsedRows = rawRows.map((r) => this.parseRow(r));
 
@@ -456,15 +500,16 @@ export class SqliteQueryBuilder {
 	}
 
 	private async executeCount(): Promise<number> {
-		let sql = this.needsGrouping
-			? `SELECT COUNT(DISTINCT "name_fr") as count FROM "${this.table}"`
-			: `SELECT COUNT(*) as count FROM "${this.table}"`;
+		const drizzle = getDrizzle();
+		const projection = this.needsGrouping
+			? sql.raw(`COUNT(DISTINCT "name_fr") as count`)
+			: sql.raw(`COUNT(*) as count`);
+		const parts: SQL[] = [sql`SELECT ${projection} FROM ${sql.raw(`"${this.table}"`)}`];
 		if (this.wheres.length > 0) {
-			sql += ` WHERE ${this.wheres.join(" AND ")}`;
+			parts.push(sql`WHERE ${sql.join(this.wheres, sql` AND `)}`);
 		}
-		const stmt = this.db.prepare(sql);
-		const result = stmt.get(...this.params) as { count: number };
-		return result?.count ?? 0;
+		const rows = (await drizzle.all(sql.join(parts, sql` `))) as Array<{ count: number }>;
+		return rows[0]?.count ?? 0;
 	}
 
 	private parseRow(row: Record<string, unknown>): Record<string, unknown> {
