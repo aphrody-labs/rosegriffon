@@ -1,8 +1,7 @@
 export const dynamic = "force-dynamic";
 
 import type { Metadata } from "next";
-import { FadeInItem, FadeInStagger } from "@/components/ui/fade-in";
-import { GalleryCard } from "@/components/wiki/GalleryCard";
+import { GalleryGrid } from "@/components/wiki/GalleryGrid";
 import { GalleryFilterBar } from "@/components/wiki/filters/GalleryFilterBar";
 import { WikiPagination } from "@/components/wiki/WikiPagination";
 import { WikiSearchToolbar } from "@/components/wiki/WikiSearchToolbar";
@@ -76,6 +75,19 @@ export default async function GalleryPage({
 
 	const totalPages = Math.max(1, Math.ceil(total / ITEMS_PER_PAGE));
 
+	// Résout les libellés/icônes de catégorie côté serveur pour une liste sérialisable
+	// transmise à la grille client (lightbox + préchargement).
+	const gridItems = items.map((item) => {
+		const cat = GALLERY_CATEGORIES.find((c) => c.value === item.category);
+		return {
+			id: item.id,
+			title: item.title,
+			image: item.image,
+			categoryLabel: cat?.label,
+			categoryIcon: cat?.icon,
+		};
+	});
+
 	return (
 		<div className="space-y-6">
 			<div className="space-y-2">
@@ -99,23 +111,7 @@ export default async function GalleryPage({
 			</div>
 
 			{items.length > 0 ? (
-				<FadeInStagger className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-					{items.map((item) => {
-						const cat = GALLERY_CATEGORIES.find((c) => c.value === item.category);
-						return (
-							<FadeInItem key={item.id} className="h-full">
-								<GalleryCard
-									id={item.id}
-									title={item.title}
-									image={item.image}
-									categoryLabel={cat?.label}
-									categoryIcon={cat?.icon}
-									className="h-full"
-								/>
-							</FadeInItem>
-						);
-					})}
-				</FadeInStagger>
+				<GalleryGrid items={gridItems} />
 			) : (
 				<div className="rounded-[32px] border border-dashed border-outline-variant bg-surface-container-low py-20 text-center">
 					<p className="italic text-on-surface-variant">Aucune illustration trouvée.</p>

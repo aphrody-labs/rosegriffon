@@ -1,6 +1,7 @@
 import type { BaseCharacter, Item, Skill, Team } from "@rose-griffon/inagle";
 import { ElementNames } from "@rose-griffon/inagle/core/types";
 import changeAuraSkills from "../../../packages/inagle/src/entries/change_aura_skills.json";
+import menuGalleryManifest from "@/data/menu-gallery-manifest.json";
 import type { Database } from "@rose-griffon/db";
 import {
 	getAuraImageUrl,
@@ -62,14 +63,35 @@ export interface GalleryItem {
 	flgNo: number;
 }
 
-/** Catégories d'illustrations (dérivées du préfixe `img_<category>_` du `img_path`). */
+/**
+ * Catégories d'illustrations. Les 5 premières dérivent du préfixe `img_<category>_`
+ * du `img_path` de la table DB `inagle_gallery`. Les suivantes (`menu_*`) viennent
+ * du manifeste statique `data/menu-gallery-manifest.json` : le RESTE des illustrations
+ * du dossier jeu `dx11/menu/220_img/<dir>/`, servies live par le CDN.
+ */
 export const GALLERY_CATEGORIES: ReadonlyArray<{ value: string; label: string; icon: string }> = [
 	{ value: "story", label: "Histoire", icon: "menu_book" },
 	{ value: "chronicle", label: "Chroniques", icon: "history_edu" },
 	{ value: "special", label: "Spéciales", icon: "star" },
 	{ value: "kizuna", label: "Liens", icon: "favorite" },
 	{ value: "other", label: "Autres", icon: "image" },
+	{ value: "gallery_img2", label: "Galerie", icon: "grid_view" },
+	{ value: "ev_pic", label: "Événements", icon: "person_celebrate" },
+	{ value: "stadium", label: "Stades", icon: "stadium" },
+	{ value: "vsroute_map", label: "Cartes route", icon: "strategy" },
+	{ value: "hlp", label: "Aide", icon: "lightbulb" },
+	{ value: "telop_waza", label: "Techniques", icon: "bolt" },
 ];
+
+/** Catégories alimentées par le manifeste menu (et non par la table DB `inagle_gallery`). */
+const MENU_GALLERY_CATEGORIES = new Set([
+	"gallery_img2",
+	"ev_pic",
+	"stadium",
+	"vsroute_map",
+	"hlp",
+	"telop_waza",
+]);
 
 const GALLERY_CATEGORY_VALUES = new Set(GALLERY_CATEGORIES.map((c) => c.value));
 
@@ -101,6 +123,66 @@ function galleryRowToItem(row: any): GalleryItem {
 		needTokenNum: row.need_token_num ?? 0,
 		flgNo: row.flg_no ?? 0,
 	};
+}
+
+/** Item du manifeste menu (`data/menu-gallery-manifest.json`). */
+interface MenuGalleryManifestItem {
+	id: string;
+	dir: string;
+	file: string;
+	title: string;
+	category: string;
+}
+
+const MENU_MANIFEST_ITEMS: ReadonlyArray<MenuGalleryManifestItem> =
+	(menuGalleryManifest as { items?: MenuGalleryManifestItem[] }).items ?? [];
+
+/** Base CDN du dossier menu jeu — assets servis live depuis les CPK (g4tx→png). */
+const MENU_CDN_BASE = "https://cdn.rosegriffon.fr/dx11/menu/220_img";
+
+/** URL CDN directe d'un item menu : `<base>/<dir>/<file>` (aucune transformation). */
+function menuItemImageUrl(it: MenuGalleryManifestItem): string {
+	return `${MENU_CDN_BASE}/${it.dir}/${it.file}`;
+}
+
+function menuManifestToItem(it: MenuGalleryManifestItem): GalleryItem {
+	return {
+		id: it.id,
+		imgPath: `${it.dir}/${it.file}`,
+		category: it.category,
+		title: it.title,
+		image: menuItemImageUrl(it),
+		needTokenNum: 0,
+		flgNo: 0,
+	};
+}
+
+/**
+ * Sélectionne les items menu pour une page : filtre par catégorie (`menu` = toutes
+ * les catégories menu confondues) puis par recherche texte (titre/file insensible
+ * à la casse). Renvoie le sous-ensemble paginé + le total filtré.
+ */
+function getMenuGalleryPage(params: {
+	category?: string;
+	q?: string;
+	from: number;
+	to: number;
+}): { data: GalleryItem[]; total: number } {
+	const q = params.q?.trim().toLowerCase();
+	let pool: ReadonlyArray<MenuGalleryManifestItem> = MENU_MANIFEST_ITEMS;
+
+	if (params.category && params.category !== "menu") {
+		pool = pool.filter((it) => it.category === params.category);
+	}
+	if (q) {
+		pool = pool.filter(
+			(it) => it.title.toLowerCase().includes(q) || it.file.toLowerCase().includes(q)
+		);
+	}
+
+	const total = pool.length;
+	const page = pool.slice(params.from, params.to + 1).map(menuManifestToItem);
+	return { data: page, total };
 }
 
 // Helpers — returns all matching element IDs (Void maps to both 0 and 5)
@@ -1996,11 +2078,24 @@ export const wikiService = {
 		q?: string;
 		category?: string;
 	}): Promise<ListResult<GalleryItem>> {
-		const supabase = await createClient();
 		const page = params.page || 1;
 		const limit = params.limit || 48;
 		const from = (page - 1) * limit;
 		const to = from + limit - 1;
+
+		// Catégories menu (`gallery_img2`, `ev_pic`, `stadium`, …) ou `menu` (toutes) →
+		// servies depuis le manifeste statique, pas la table DB `inagle_gallery`.
+		if (params.category && (params.category === "menu" || MENU_GALLERY_CATEGORIES.has(params.category))) {
+			const { data, total } = getMenuGalleryPage({
+				category: params.category,
+				q: params.q,
+				from,
+				to,
+			});
+			return { data, total, page, limit };
+		}
+
+		const supabase = await createClient();
 
 		let query = supabase.from("inagle_gallery").select("*", { count: "exact" });
 
@@ -2035,6 +2130,11 @@ export const wikiService = {
 			counts.all += 1;
 			const cat = galleryCategoryOf(row.img_path);
 			counts[cat] = (counts[cat] || 0) + 1;
+		}
+		// Catégories menu = manifeste statique (servi live par le CDN).
+		for (const it of MENU_MANIFEST_ITEMS) {
+			counts.all += 1;
+			counts[it.category] = (counts[it.category] || 0) + 1;
 		}
 		return counts;
 	},
