@@ -15,6 +15,7 @@ import { loadJsonAsync } from "../core/async-loader.js";
 import { findConfigFile } from "../core/data-loader.js";
 import { EntityExporters, type ExportableEntity } from "../core/exporters.js";
 import { DATA_ROOT } from "../core/paths.js";
+import { decodeUnlockCondition, type UnlockCondition } from "./unlock-condition.js";
 
 // ============================================================================
 // Types
@@ -26,7 +27,10 @@ export interface ParsedGallery extends ExportableEntity {
 	thumbPath: string;
 	needTokenNum: number;
 	flgNo: number;
+	/** Condition de deblocage brute (base64). */
 	openCond: string;
+	/** Condition de deblocage decodee. */
+	unlock: UnlockCondition;
 }
 
 export interface GalleryDatabase {
@@ -56,6 +60,7 @@ function parseContent(content: any): ParsedGallery[] {
 					needTokenNum: val.needTokenNum,
 					flgNo: val.flgNo,
 					openCond: val.openCond,
+					unlock: decodeUnlockCondition(val.openCond),
 					attributes: {
 						Image: val.imgPath,
 						Cout: val.needTokenNum,

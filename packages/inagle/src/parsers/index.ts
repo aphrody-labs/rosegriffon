@@ -188,6 +188,18 @@ export {
 	loadGalleryConfigAsync,
 	type ParsedGallery,
 } from "./gallery-config.js";
+// Unlock-condition decoder (gallery openCond + scene_archive condition)
+export {
+	buildEventCrcLookup,
+	decodeUnlockCondition,
+	type RequiredEvent,
+	STORY_EPISODE_BASE,
+	STORY_EPISODE_STEP,
+	STORY_NAMESPACE,
+	storyThresholdToEpisode,
+	type UnlockCondition,
+	type UnlockOp,
+} from "./unlock-condition.js";
 // Gameplay parser (Events, Craft, Routes)
 export {
 	buildCraftDatabase,

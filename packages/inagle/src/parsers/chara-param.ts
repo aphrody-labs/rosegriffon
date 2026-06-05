@@ -259,39 +259,6 @@ export function elementIdToNames(id: number): { ja: string; en: string; fr: stri
 	}
 }
 
-/**
- * Rarity code to name (from starSignCharaInfo.charaRarity)
- *
- * Official tier names (system_text NOUN_INFO 76-82):
- *   EN: COMMON / GROWING / ADVANCED / TOP / LEGENDARY / HERO / FABLED
- *   FR: Normal / En progression / Expérimenté / Émérite / Légendaire / Héros / BASARA
- *
- * Distribution from starSignCharaInfo.json (4439 characters):
- * - 0: Normal - 4203 characters
- * - 2: Expérimenté - 150 characters
- * - 5/6/7: Légendaire - 86 characters
- * - 20: BASARA - 52 eligible (from basaraBuildInfo.json)
- *
- * Codes 1 (En progression) and 3 (Émérite) are upgrade milestones,
- * not assigned as base rarity from gacha.
- */
-export function rarityCodeToName(code: number): string {
-	switch (code) {
-		case 0:
-		case 1:
-			return "Normal";
-		case 2:
-			return "Expérimenté";
-		case 3:
-			return "Émérite";
-		case 4:
-		case 5:
-		case 6:
-		case 7:
-			return "Normal";
-		case 20:
-			return "BASARA";
-		default:
-			return `Rarity${code}`;
-	}
-}
+// Source unique : voir src/lib/rarity.ts. Réexporté ici pour préserver l'API
+// publique de chara-param (réexporté via parsers/index.ts).
+export { rarityCodeToName } from "../lib/rarity.js";

@@ -84,35 +84,12 @@ export interface CharacterGrowthParams {
 // Rarity Mapping
 // ============================================================================
 
-/**
- * Map rarity code to growth table rank (for stats calculation)
- * The growth table uses ranks 0-5 for charaRank
- * starSignCharaInfo uses: 0=N, 2=R, 5=UR, 6=LR, 7=Legend, 20=BASARA
- */
-export function rarityToGrowthRank(code: number): number {
-	// Growth table ranks: 0, 1, 2, 3, 4, 5
-	// starSign codes: 0=N, 2=R, 5=UR, 6=LR, 7=Legend, 20=BASARA
-	switch (code) {
-		case 0:
-			return 0; // N -> rank 0
-		case 2:
-			return 2; // R -> rank 2
-		case 3:
-			return 3; // SR -> rank 3
-		case 4:
-			return 4; // SSR -> rank 4
-		case 5:
-			return 5; // UR -> rank 5
-		case 6:
-			return 5; // LR -> use UR stats
-		case 7:
-			return 5; // Legend -> use UR stats
-		case 20:
-			return 5; // BASARA -> use UR stats
-		default:
-			return code <= 5 ? code : 5;
-	}
-}
+// Source unique : voir src/lib/rarity.ts. Réexporté ici pour préserver l'API
+// publique de stat-calculator (importé par characters/evolution.ts et les tests).
+export { rarityToGrowthRank } from "./lib/rarity.js";
+
+// Réimporté en interne pour les usages locaux (calculateStats/generateGrowthCurve).
+import { rarityToGrowthRank } from "./lib/rarity.js";
 
 // ============================================================================
 // Interpolation

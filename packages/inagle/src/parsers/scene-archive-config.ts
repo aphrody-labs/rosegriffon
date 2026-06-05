@@ -15,6 +15,11 @@ import { loadJsonAsync } from "../core/async-loader.js";
 import { findConfigFile } from "../core/data-loader.js";
 import { EntityExporters, type ExportableEntity } from "../core/exporters.js";
 import { DATA_ROOT } from "../core/paths.js";
+import {
+	buildEventCrcLookup,
+	decodeUnlockCondition,
+	type UnlockCondition,
+} from "./unlock-condition.js";
 
 // ============================================================================
 // Types
@@ -29,7 +34,10 @@ export interface ParsedSceneArchive extends ExportableEntity {
 	chapterNo: number;
 	isFullScreen: boolean;
 	thumbnailPath: string;
+	/** Condition de deblocage brute (base64). */
 	condition: string;
+	/** Condition de deblocage decodee. */
+	unlock: UnlockCondition;
 }
 
 export interface SceneArchiveDatabase {
@@ -59,6 +67,12 @@ function parseContent(content: any): ParsedSceneArchive[] {
 
 	for (const list of content.lists) {
 		if (list.name === "m_sceneArchiveDataList") {
+			// 1re passe : index CRC32 -> event_id pour resoudre les feuilles event-flag.
+			const crcLookup = buildEventCrcLookup(
+				(list.values as any[]).map((v) => v.event_id_text).filter(Boolean) as string[]
+			);
+			const resolveEvent = (crc: number) => crcLookup.get(crc >>> 0);
+
 			for (const val of list.values) {
 				const thumbPath = extractImageName(val.thumbnail_texture_path || "");
 				scenes.push({
@@ -73,6 +87,7 @@ function parseContent(content: any): ParsedSceneArchive[] {
 					isFullScreen: val.is_full_screen_view ?? false,
 					thumbnailPath: thumbPath,
 					condition: val.condition || "",
+					unlock: decodeUnlockCondition(val.condition, resolveEvent),
 					attributes: {
 						Category: val.category,
 						Chapter: val.chapter_no,
