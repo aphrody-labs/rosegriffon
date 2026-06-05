@@ -5,17 +5,24 @@
  *
  * Reproduisent fidèlement les animations du site officiel inazuma-cross.jp :
  *  - Reveal : éléments `.animation` → `.is-action` au scroll (IntersectionObserver,
- *    seuil 65 % du viewport, 85 % pour les blocs « system »). Effet `fadeup`
- *    (translateY(20→0)+opacity) — cf. home.css @keyframes fadeup.
+ *    seuil ~20 % du viewport). Effet `fadeup` (translateY(20→0)+opacity) — cf. home.css @keyframes fadeup.
  *  - KenBurns : boucle lente du key visual (équivalent @keyframes bgLoop : pan/zoom continu).
  *  - StampPop : tampons « 達成 » des récompenses (scale 2.5→0.9→1.05→1, staggered) — @keyframes stamp-pop.
  *  - Carousel : remplace Swiper 11 (slidesPerView auto, navigation prev/next + dots).
  *  - Float : flottement doux des éléments décoratifs.
  *
+ * GARANTIE ANTI-INVISIBILITÉ : aucun contenu ne reste à opacity:0.
+ *  - reduced-motion → rendu statique, opacity:1 immédiat.
+ *  - sinon, l'animation `show` est déclenchée soit à l'entrée dans le viewport
+ *    (IntersectionObserver via `whileInView`), soit AU MONTAGE après un court délai
+ *    de garde (fallback). Si l'observer ne fire jamais (capture headless, viewport
+ *    bizarre, contenu déjà au-dessus de la ligne de flottaison), le fallback force
+ *    l'état `show` → le contenu devient visible quoi qu'il arrive.
+ *
  * Tout respecte `prefers-reduced-motion` (motion/react `useReducedMotion`).
  */
 
-import { useReducedMotion, motion, type Variants } from "motion/react";
+import { useReducedMotion, motion, useInView, type Variants } from "motion/react";
 import {
 	type ReactNode,
 	useCallback,
@@ -44,13 +51,39 @@ const FADEUP_BLUR: Variants = {
 	},
 };
 
+/**
+ * Garde anti-invisibilité ROBUSTE.
+ *
+ * Combine deux déclencheurs et renvoie l'état d'animation cible (`"show"` | `"hidden"`)
+ * piloté par `animate` (PAS par `whileInView` — qui, couplé à `viewport`, ignore le
+ * fallback `animate` tant que l'élément n'est jamais entré dans le viewport, ce qui
+ * laissait du contenu bloqué à opacity:0) :
+ *  1. `useInView(ref)` — reveal au scroll (IntersectionObserver, `once`).
+ *  2. fallback monté → après `delayMs`, on force `show` quoi qu'il arrive.
+ *
+ * Garantit qu'AUCUN contenu ne reste invisible : si l'observer ne fire jamais
+ * (capture headless, élément hors-flux, viewport atypique), le fallback prend le relais.
+ */
+function useReveal(
+	ref: React.RefObject<Element | null>,
+	{ amount = 0.2, delayMs = 500 }: { amount?: number; delayMs?: number } = {},
+): "show" | "hidden" {
+	const inView = useInView(ref, { once: true, amount, margin: "0px 0px -8% 0px" });
+	const [forced, setForced] = useState(false);
+	useEffect(() => {
+		const t = setTimeout(() => setForced(true), delayMs);
+		return () => clearTimeout(t);
+	}, [delayMs]);
+	return inView || forced ? "show" : "hidden";
+}
+
 export function Reveal({
 	children,
 	className,
 	delay = 0,
 	blur = false,
 	as = "div",
-	amount = 0.35,
+	amount = 0.2,
 }: {
 	children: ReactNode;
 	className?: string;
@@ -60,6 +93,8 @@ export function Reveal({
 	amount?: number;
 }) {
 	const reduce = useReducedMotion();
+	const ref = useRef<HTMLDivElement>(null);
+	const state = useReveal(ref, { amount });
 	const MotionTag = motion[as] as typeof motion.div;
 	if (reduce) {
 		const Tag = as;
@@ -67,11 +102,11 @@ export function Reveal({
 	}
 	return (
 		<MotionTag
+			ref={ref}
 			className={className}
 			variants={blur ? FADEUP_BLUR : FADEUP}
 			initial="hidden"
-			whileInView="show"
-			viewport={{ once: true, amount }}
+			animate={state}
 			transition={{ delay }}
 		>
 			{children}
@@ -92,6 +127,8 @@ export function RevealGroup({
 	as?: "div" | "ul" | "section";
 }) {
 	const reduce = useReducedMotion();
+	const ref = useRef<HTMLDivElement>(null);
+	const state = useReveal(ref, { amount: 0.1 });
 	const MotionTag = motion[as] as typeof motion.div;
 	if (reduce) {
 		const Tag = as;
@@ -99,11 +136,14 @@ export function RevealGroup({
 	}
 	return (
 		<MotionTag
+			ref={ref}
 			className={className}
 			initial="hidden"
-			whileInView="show"
-			viewport={{ once: true, amount: 0.2 }}
-			variants={{ show: { transition: { staggerChildren: stagger } } }}
+			animate={state}
+			variants={{
+				hidden: {},
+				show: { transition: { staggerChildren: stagger } },
+			}}
 		>
 			{children}
 		</MotionTag>
@@ -127,6 +167,8 @@ export function RevealChild({
 		const Tag = as;
 		return <Tag className={className}>{children}</Tag>;
 	}
+	// Les enfants héritent de l'orchestration du parent RevealGroup (variants hidden/show).
+	// Si le parent force `show` (fallback), les enfants suivent → jamais bloqués invisibles.
 	return (
 		<MotionTag className={className} variants={blur ? FADEUP_BLUR : FADEUP}>
 			{children}
@@ -147,21 +189,25 @@ export function StampPop({
 	className?: string;
 }) {
 	const reduce = useReducedMotion();
+	const ref = useRef<HTMLImageElement>(null);
+	const state = useReveal(ref, { amount: 0.4, delayMs: 900 });
 	if (reduce) {
 		// eslint-disable-next-line @next/next/no-img-element
 		return <img src={src} alt={alt} className={className} />;
 	}
+	const settled = {
+		scale: [2.4, 0.9, 1.05, 1] as number[],
+		opacity: [0, 1, 1, 1] as number[],
+	};
 	return (
 		<motion.img
+			ref={ref}
 			src={src}
 			alt={alt}
 			className={className}
 			initial={{ scale: 2.4, opacity: 0 }}
-			whileInView={{
-				scale: [2.4, 0.9, 1.05, 1],
-				opacity: [0, 1, 1, 1],
-			}}
-			viewport={{ once: true, amount: 0.6 }}
+			// piloté par `animate` (useReveal) → jamais bloqué invisible même sans trigger.
+			animate={state === "show" ? settled : { scale: 2.4, opacity: 0 }}
 			transition={{
 				duration: 0.45,
 				delay,
@@ -176,6 +222,7 @@ export function StampPop({
  * KenBurns : enveloppe le key visual du hero et applique une boucle lente
  * de pan + zoom (équivalent @keyframes bgLoop du site, qui fait défiler la
  * background-position en continu). Désactivé en reduced-motion.
+ * Le contenu reste TOUJOURS visible (pas d'opacity:0).
  */
 export function KenBurns({
 	children,
@@ -198,7 +245,7 @@ export function KenBurns({
 	);
 }
 
-/** Flottement doux (décoratif). */
+/** Flottement doux (décoratif). Le contenu reste visible. */
 export function Float({
 	children,
 	className,

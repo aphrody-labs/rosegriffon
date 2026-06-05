@@ -23,6 +23,12 @@ export const metadata: Metadata = {
 	},
 };
 
+// Bleu « Inazuma » (cyan électrique du site officiel inazuma-cross.jp) — utilisé en
+// surcouche du hero pour rapprocher la DA du vrai site, tout en gardant les tokens
+// azalée pour le reste de la page. #00aeef (cyan) + #0c1730 (marine RG).
+const INAZUMA_CYAN = "#00aeef";
+const INAZUMA_NAVY = "#0c1730";
+
 function formatFrDate(iso: string): string {
 	const d = new Date(`${iso}T00:00:00Z`);
 	return d.toLocaleDateString("fr-FR", {
@@ -83,8 +89,13 @@ export default function CrossPage() {
 			</div>
 
 			{/* ===================== HERO ===================== */}
-			{/* Key visual animé (Ken Burns / bgLoop) + logo + entrée fade-up-blur. */}
-			<section className="relative mb-12 overflow-hidden rounded-3xl border-2 border-primary/30 bg-surface-container-low shadow-level-2">
+			{/* Reproduit le firstview du site officiel : key visual vertical plein-hauteur,
+			    identité cyan/marine « Inazuma », logo + CTA « 6/9 サービス開始 » + badges store. */}
+			<section
+				className="relative mb-12 flex min-h-[68vh] flex-col items-center justify-end overflow-hidden rounded-3xl border-2 shadow-level-2 sm:min-h-[78vh]"
+				style={{ borderColor: `${INAZUMA_CYAN}80`, backgroundColor: INAZUMA_NAVY }}
+			>
+				{/* Key visual vertical animé (Ken Burns / bgLoop) — VISIBLE (pas d'opacity faible). */}
 				<div className="absolute inset-0">
 					<KenBurns className="absolute inset-0">
 						<Image
@@ -93,68 +104,108 @@ export default function CrossPage() {
 							fill
 							priority
 							sizes="100vw"
-							className="object-cover opacity-30"
+							className="object-cover object-top"
 						/>
 					</KenBurns>
-					<div className="absolute inset-0 bg-gradient-to-t from-surface-container-low via-surface-container-low/70 to-surface-container-low/30" />
+					{/* dégradé marine pour la lisibilité du logo + CTA en bas (comme le site). */}
+					<div
+						className="absolute inset-0"
+						style={{
+							background: `linear-gradient(to top, ${INAZUMA_NAVY} 18%, ${INAZUMA_NAVY}e6 34%, ${INAZUMA_NAVY}66 58%, transparent 82%)`,
+						}}
+					/>
+					{/* liseré cyan latéral, signature Inazuma. */}
+					<div
+						className="pointer-events-none absolute inset-y-0 left-0 w-1.5"
+						style={{ backgroundColor: INAZUMA_CYAN }}
+					/>
+					<div
+						className="pointer-events-none absolute inset-y-0 right-0 w-1.5"
+						style={{ backgroundColor: INAZUMA_CYAN }}
+					/>
 				</div>
-				<div className="relative flex flex-col items-center px-6 py-14 text-center sm:py-20">
+
+				<div className="relative z-10 flex w-full flex-col items-center px-6 pb-24 pt-10 text-center sm:pb-16">
 					<Reveal blur>
 						<Image
 							src={localImages.logo}
 							alt="Logo Inazuma Eleven Cross"
-							width={420}
-							height={160}
+							width={460}
+							height={176}
 							priority
-							className="mb-6 h-auto w-[min(420px,80vw)] drop-shadow-[0_4px_0_rgba(0,0,0,0.4)]"
+							className="mb-5 h-auto w-[min(440px,82vw)] drop-shadow-[0_4px_0_rgba(0,0,0,0.55)]"
 						/>
 					</Reveal>
-					<Reveal delay={0.1}>
-						<h1 className="type-display-medium mb-2 font-bold text-primary">
+					<Reveal delay={0.08}>
+						<h1 className="type-display-small mb-1 font-bold text-white drop-shadow-[0_2px_0_rgba(0,0,0,0.5)] sm:type-display-medium">
 							Inazuma Eleven Cross
 						</h1>
-						<p className="type-title-medium mb-6 text-on-surface-variant">
+						<p className="type-title-small mb-6 text-white/80 sm:type-title-medium">
 							{crossData.site.title} — {crossData.site.subtitleFr}
 						</p>
 					</Reveal>
-					<Reveal delay={0.2} className="flex flex-wrap items-center justify-center gap-3">
-						<Badge className="bg-tertiary px-4 py-1.5 text-on-tertiary type-label-large">
-							{status.phaseLabelFr}
-						</Badge>
-						<Badge
-							variant="outline"
-							className="border-primary/50 px-4 py-1.5 text-primary type-label-large"
-						>
-							Sortie : {formatFrDate(status.serviceStart)}
-						</Badge>
+
+					{/* CTA proéminent « 6/9 サービス開始 / pré-enregistrement » */}
+					<Reveal delay={0.16} className="flex flex-col items-center gap-3">
+						<div className="flex flex-wrap items-center justify-center gap-3">
+							<span
+								className="rounded-full px-5 py-2 type-title-medium font-extrabold text-white shadow-[0_4px_0_0_rgba(0,0,0,0.4)]"
+								style={{ backgroundColor: INAZUMA_CYAN }}
+							>
+								6/9 サービス開始
+							</span>
+							<span className="rounded-full bg-white/15 px-4 py-2 type-label-large font-bold text-white backdrop-blur">
+								{status.phaseLabelFr}
+							</span>
+						</div>
+						<p className="type-body-medium text-white/90">
+							Lancement le {formatFrDate(status.serviceStart)} — pré-enregistrement ouvert
+						</p>
 					</Reveal>
-					<Reveal
-						delay={0.3}
-						className="mt-8 flex flex-wrap items-center justify-center gap-3"
-					>
-						<a
-							href={GOOGLE_PLAY}
-							target="_blank"
-							rel="noopener noreferrer"
-							className="rounded-full bg-primary px-6 py-3 type-label-large font-medium text-on-primary shadow-level-1 transition-transform hover:scale-105"
-						>
-							Pré-enregistrer sur Google Play
-						</a>
+
+					{/* Badges officiels App Store + Google Play (lien store). */}
+					<Reveal delay={0.24} className="mt-6 flex flex-wrap items-center justify-center gap-3">
 						<a
 							href={APP_STORE}
 							target="_blank"
 							rel="noopener noreferrer"
-							className="rounded-full bg-secondary px-6 py-3 type-label-large font-medium text-on-secondary shadow-level-1 transition-transform hover:scale-105"
+							aria-label="Télécharger dans l'App Store"
+							className="transition-transform hover:scale-105"
 						>
-							Réserver sur l&apos;App Store
+							{/* badge Apple = SVG officiel, rendu en <img> (Next/Image n'optimise pas le SVG). */}
+							{/* eslint-disable-next-line @next/next/no-img-element */}
+							<img
+								src={localImages.badgeAppStore}
+								alt="Télécharger dans l'App Store"
+								className="h-[52px] w-auto"
+							/>
 						</a>
+						<a
+							href={GOOGLE_PLAY}
+							target="_blank"
+							rel="noopener noreferrer"
+							aria-label="Disponible sur Google Play"
+							className="transition-transform hover:scale-105"
+						>
+							<Image
+								src={localImages.badgeGooglePlay}
+								alt="Disponible sur Google Play"
+								width={172}
+								height={52}
+								unoptimized
+								className="h-[52px] w-auto"
+							/>
+						</a>
+					</Reveal>
+
+					<Reveal delay={0.3} className="mt-4">
 						<a
 							href={OFFICIAL_SITE}
 							target="_blank"
 							rel="noopener noreferrer"
-							className="rounded-full border border-outline px-6 py-3 type-label-large font-medium text-on-surface transition-colors hover:bg-surface-container-high"
+							className="rounded-full border border-white/40 px-5 py-2 type-label-large font-medium text-white transition-colors hover:bg-white/10"
 						>
-							Site officiel
+							Site officiel inazuma-cross.jp
 						</a>
 					</Reveal>
 				</div>

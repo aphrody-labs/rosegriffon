@@ -154,6 +154,11 @@ export interface CrossData {
 		footerBanners: { youtube: string; x: string; report: string; inazuma: string; victoryRoad: string };
 		logoLevel5: string;
 		logoAiming: string;
+		rewardAchieve: string[];
+		firstview: string;
+		preregistrationText: string;
+		badgeAppStore: string;
+		badgeGooglePlay: string;
 	};
 }
 
