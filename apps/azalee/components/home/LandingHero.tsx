@@ -1,10 +1,36 @@
 "use client";
 
 import { ArrowDown } from "lucide-react";
-import { motion, useReducedMotion, useScroll, useTransform } from "motion/react";
+import { AnimatePresence, motion, useReducedMotion, useScroll, useTransform } from "motion/react";
 import Image from "next/image";
+import { useEffect, useState } from "react";
 import { GlobalSearch } from "@/components/wiki/GlobalSearch";
 import type { WikiSectionStats } from "./WikiCarousel";
+
+/**
+ * Key visuals qui défilent en fond du hero (crossfade).
+ * Choisis pour leur format paysage et leur cohérence DA Inazuma,
+ * lisibles derrière le gradient d'assombrissement.
+ */
+const HERO_BACKGROUNDS = [
+	{
+		src: "/sky.webp",
+		// Position horizontale du Ken Burns ajustée par visuel pour garder le sujet cadré.
+		objectPosition: "center 35%",
+	},
+	{
+		src: "/ievr.webp",
+		objectPosition: "center 30%",
+	},
+	{
+		src: "/og-image-home.webp",
+		objectPosition: "center 40%",
+	},
+] as const;
+
+// Durée d'affichage de chaque fond (cycle) et durée du crossfade.
+const HERO_CYCLE_MS = 7000;
+const HERO_CROSSFADE_S = 1.3;
 
 interface LandingHeroProps {
 	stats?: WikiSectionStats;
@@ -23,6 +49,19 @@ export function LandingHero({ stats }: LandingHeroProps) {
 	const mascotStyle = prefersReducedMotion ? undefined : { y: mascotY };
 	const foregroundStyle = prefersReducedMotion ? undefined : { y: foregroundY };
 
+	// Cycle automatique des key visuals — figé sur la 1re image si motion réduit
+	// ou si un seul visuel est configuré.
+	const [bgIndex, setBgIndex] = useState(0);
+	useEffect(() => {
+		if (prefersReducedMotion || HERO_BACKGROUNDS.length <= 1) return;
+		const id = window.setInterval(() => {
+			setBgIndex((i) => (i + 1) % HERO_BACKGROUNDS.length);
+		}, HERO_CYCLE_MS);
+		return () => window.clearInterval(id);
+	}, [prefersReducedMotion]);
+
+	const activeBg = HERO_BACKGROUNDS[bgIndex] ?? HERO_BACKGROUNDS[0];
+
 	const handleScrollToContent = () => {
 		const contentElement = document.querySelector("#home-content");
 		if (contentElement) {
@@ -40,16 +79,44 @@ export function LandingHero({ stats }: LandingHeroProps) {
 
 	return (
 		<section className="relative h-[90svh] min-h-[520px] md:h-[75vh] md:min-h-[520px] md:max-h-[700px] overflow-hidden bg-black w-auto -mx-4 md:-mx-8 lg:-mx-12">
-			{/* Background Image with parallax wrapper (layer 1 — deepest, -300px) */}
+			{/* Background switcher with parallax wrapper (layer 1 — deepest, -300px).
+			    Plusieurs key visuals défilent en crossfade ; Ken Burns sur l'actif.
+			    Motion réduit → 1re image statique, sans cycle ni zoom. */}
 			<motion.div style={bgStyle} className="absolute inset-0 will-change-transform">
-				<Image
-					src="/sky.webp"
-					alt=""
-					fill
-					priority
-					sizes="100vw"
-					className="object-cover object-center opacity-70 scale-105"
-				/>
+				{prefersReducedMotion ? (
+					<Image
+						src={HERO_BACKGROUNDS[0].src}
+						alt=""
+						fill
+						priority
+						sizes="100vw"
+						style={{ objectPosition: HERO_BACKGROUNDS[0].objectPosition }}
+						className="object-cover opacity-70 scale-105"
+					/>
+				) : (
+					<AnimatePresence initial={false}>
+						<motion.div
+							key={activeBg.src}
+							initial={{ opacity: 0 }}
+							animate={{ opacity: 0.7 }}
+							exit={{ opacity: 0 }}
+							transition={{ duration: HERO_CROSSFADE_S, ease: "easeInOut" }}
+							className="absolute inset-0"
+						>
+							<Image
+								src={activeBg.src}
+								alt=""
+								fill
+								// 1re image préchargée ; les suivantes en lazy.
+								priority={bgIndex === 0}
+								loading={bgIndex === 0 ? undefined : "lazy"}
+								sizes="100vw"
+								style={{ objectPosition: activeBg.objectPosition }}
+								className="hero-kenburns object-cover"
+							/>
+						</motion.div>
+					</AnimatePresence>
+				)}
 			</motion.div>
 
 			{/* Gradient Overlays — layered for depth */}
