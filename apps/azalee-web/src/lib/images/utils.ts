@@ -930,6 +930,34 @@ export function hasCharacterModelGlb(code: string | undefined | null): boolean {
 }
 
 /**
+ * Base nginx des modèles 3D COMPLETS assemblés live (corps+face+uniforme).
+ * Servis par `nie-model-serve :8790` (assemble depuis les CPK à la volée, cache disque).
+ */
+const MODEL_FULL_GLB_BASE = "https://cdn.rosegriffon.fr/model-full";
+
+/**
+ * Résout l'URL du modèle 3D COMPLET (corps+face+uniforme) d'un personnage.
+ *
+ * Utilise `/model-full/<code>.glb` (nie-model-serve, assemblage live depuis CPK).
+ * Même gate que `getCharacterModelGlbUrl` : renvoie `null` si le code face n'existe pas
+ * (évite les 404 sur des codes sans GLB face pré-converti).
+ *
+ * Fonctionne aussi pour les keshins (`k<N>`) et armures (`ka<N>`) mais sans gate
+ * (le service renvoie 404 proprement si le code est inconnu).
+ */
+export function getCharacterModelFullGlbUrl(code: string | undefined | null): string | null {
+	if (!code) {
+		return null;
+	}
+	const base = code.replace(/_\d{4}$/, "");
+	// Pour les personnages c*, on gate sur le manifeste face (évite les 404 assurés).
+	if (base.startsWith("c") && !CHARACTER_MODEL_CODES.has(base)) {
+		return null;
+	}
+	return `${MODEL_FULL_GLB_BASE}/${base}.glb`;
+}
+
+/**
  * URL de fallback générique — pointe vers /ievr.webp qui existe en public/.
  * (Le dossier /images/placeholders/ n'a jamais été créé ; ces 3 paths
  * étaient des 404 silencieux dans les Image fallbacks de characters/skills/items.)

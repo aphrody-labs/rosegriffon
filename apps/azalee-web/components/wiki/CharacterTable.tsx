@@ -15,7 +15,7 @@ import { isFemaleGender } from "@/lib/gender";
 import type { GenderValue } from "@/lib/gender";
 import {
 	getCharacterImageUrl,
-	getCharacterModelGlbUrl,
+	getCharacterModelFullGlbUrl,
 	getEmblemImageUrl,
 	getSkillCategoryIconUrl,
 } from "@/lib/images";
@@ -170,9 +170,8 @@ export function CharacterTable({ characters, startIndex = 0 }: CharacterTablePro
 						const element = character.element || activeData.element || "Void";
 						const rarity = character.rarity || activeData.rarity || "N";
 						const stats = character.stats || activeData.stats;
-						// Modèle 3D GLB (g4mg→GLB servi sur cdn.rosegriffon.fr/model/<code>.glb).
-						// Le basename du GLB = internalCode (`c…`). null si pas de modèle → pas de bouton.
-						const modelGlbUrl = getCharacterModelGlbUrl(
+						// Modèle 3D GLB complet (corps+face+uniforme, nie-model-serve /model-full/).
+						const modelGlbUrl = getCharacterModelFullGlbUrl(
 							character.internalCode || (activeData as Record<string, any>).internalCode
 						);
 
