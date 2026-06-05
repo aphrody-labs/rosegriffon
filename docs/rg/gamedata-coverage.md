@@ -54,9 +54,65 @@
 | Lua (677) | `lua_scripts/**` | analyse p0/p1/p2 | `inagle_lua_scripts` (666) | **FAIT** |
 | Code C (nie.exe) | RE niers | niers (pdata/disasm/propagate) | sqlite niers | **FAIT 92,43 %** |
 
+## Surfaçage azalee (contenu jeu → page wiki)
+
+Le `/goal` ne s'arrête pas à la DB : la donnée doit être **navigable**. État du surfaçage des tables
+`inagle_*` dans des pages azalee (vérifié 2026-06-06, routes réelles sous `apps/azalee/app/`).
+
+| Table `inagle_*` | Page azalee | Statut |
+|---|---|---|
+| `inagle_characters` | `/chara` (+ `/chara/[id]`) | **SURFACÉ** |
+| `inagle_skills` | `/skill` (+ détail) | **SURFACÉ** |
+| `inagle_auras` | `/aura` (+ détail) | **SURFACÉ** |
+| `inagle_items` | `/item` (+ détail) | **SURFACÉ** |
+| `inagle_keshins/souls/miximax/awakenings` | `/keshin` | **SURFACÉ** |
+| `inagle_special_tactics`/`super_tactics`/`team_build` | `/tactic` | **SURFACÉ** |
+| `inagle_passives` (1716) | **`/passive`** (+ `/passive/[id]`) — via export `nie-data` `data/passives-full.json` | **SURFACÉ (récent)** |
+| `inagle_teams` (208) | **`/equipe`** (+ `/equipe/[id]`) | **SURFACÉ (récent)** |
+| `inagle_shops` (2331) | **`/boutique`** (+ détail) | **SURFACÉ (récent)** |
+| `inagle_quests` (182) | **`/quete`** (+ détail) | **SURFACÉ (récent)** |
+| coachs/entraîneurs | **`/entraineur`** (+ détail) | **SURFACÉ (récent)** |
+| `inagle_stadiums` (81) | **`/stade`** (+ détail) | **SURFACÉ (récent)** |
+| `inagle_drop_rates`/`inagle_drops_*` | **`/drops`** (explorer taux) | **SURFACÉ (récent)** |
+| `inagle_capsules` + costumes | **`/capsule`** (+ détail) | **SURFACÉ (récent)** |
+| `inagle_uniforms` (384) | (servi via modèles 3D `/model-full`, pas de page dédiée) | indirect |
+| `inagle_emblems`, `inagle_nameplates`, `inagle_tricks`, `inagle_skill_technic`, `inagle_boost_groups`, `inagle_telop_waza`, `inagle_video_waza` | — | **PAS DE PAGE** (en DB, non surfacé) |
+| `inagle_constellations` (30), `inagle_star_signs` (5080) | — | **PAS DE PAGE** (cf. RESTANT) |
+| `inagle_trophies` (228) | — (mappés côté succès Steam) | **PAS DE PAGE** dédiée |
+| `inagle_events` (4708), `inagle_event_subtitles` (2093) | — | **PAS DE PAGE** (cf. RESTANT) |
+
+> Pattern de page wiki récente (RSC) : lib serveur `lib/wiki/<x>.ts` (`import "server-only"`, lit le miroir
+> SQLite) + `<x>-shared.ts` client-safe (types/helpers) ; nav dans `config/navigation.ts` + locales
+> fr/en/ja. Frontière stricte : un `"use client"` n'importe **jamais** une lib qui touche sqlite (sinon
+> build casse `Can't resolve 'tls'`). Cf. `docs/cpk-browser.md` (même frontière pour `lib/cpk`).
+
+## État CPK-mirror (navigateur de fichiers)
+
+**FAIT** — azalee surface aussi l'**arbre des fichiers** des CPK (pas seulement les données parsées) :
+route `/cpk/[[...path]]` + API `/api/cpk` miroitent les **250 800 fichiers** (common 193 540 / dx11 57 260,
+source Redis db3 `iev:file:index`). Index tracké `apps/azalee/data/cpk-index.ndjson.gz` (~3,9 Mo) →
+matérialisé en SQLite runtime sur `/tmp`. Contenu décodé live par le CDN : g4tx→png (:8788), g4md/g4mg→GLB
+**texturé complet** (corps+visage+uniforme) via `nie-model-serve` :8790 `/model-full/<code>.glb`. Doc dédiée :
+`docs/cpk-browser.md`. C'est la concrétisation « extraction totale → exploration totale » du `/goal`.
+
+## RESTANT (domaines non surfacés / à câbler)
+
+1. **Événements / histoire** : `inagle_events` (**4708**) + `inagle_event_subtitles` (**2093**) en DB mais
+   **aucune page** — dialogues/cutscenes/lyrics non navigables.
+2. **Constellations / star-signs** : `inagle_constellations` (**30**) + `inagle_star_signs` (**5080**) en DB,
+   pas de page (pool drop par signe = donnée riche non exposée).
+3. **Héros** : ~**126** héros (Hero/légendaires) — à vérifier/séparer dans une vue dédiée (actuellement noyés
+   dans `/chara`).
+4. **Trophées** : `inagle_trophies` (**228**) mappés côté succès Steam mais **pas de page wiki** trophées.
+5. **Telop / video waza** : `inagle_telop_waza` (926) + `inagle_video_waza` (4) en DB, servis comme bannières
+   sur certaines fiches (`/tactic`) mais pas de galerie/section dédiée.
+6. **Courbes de stats zukan** : câbler les courbes de progression de stats (source zukan, ingérées par
+   `nie-zukan` côté niers) sur les fiches perso.
+
 ## Constat
 
-L'essentiel du socle est **FAIT** (22 tables `inagle_*` peuplées). Le gros du `/goal` = **fermer l'écart parseur→DB** :
+L'essentiel du socle est **FAIT** (22 tables `inagle_*` peuplées) et **largement surfacé** (14 sections wiki +
+navigateur CPK). Le gros du `/goal` = **fermer l'écart parseur→DB** :
 **~14 parseurs existent déjà** mais ne sont **pas poussés** en table `inagle_*`, et **3 catégories** (emblèmes, telop waza,
 video waza) demandent un **nouveau parseur**. Plus : vérifier les drop-rates **par élément**, indexer/typer les **677 Lua**.
 
