@@ -6,6 +6,7 @@ import { bearer, genericOAuth, oAuthProxy, twoFactor } from "better-auth/plugins
 import { Pool } from "pg";
 
 import { commonAuthOptions, ensureUserProfile } from "@rose-griffon/auth";
+import { steam } from "@rose-griffon/better-auth-steam";
 import { fetchIdentity, parseIdentityWithMemberships } from "@/lib/patreon/client";
 import { encryptToken } from "@/lib/patreon/encryption";
 import { SCOPES_CREATOR, SCOPES_PATRON } from "@/lib/patreon/types";
@@ -137,7 +138,7 @@ export const auth = betterAuth({
 		...commonAuthOptions.account,
 		accountLinking: {
 			enabled: true,
-			trustedProviders: ["discord", "twitch", "patreon"],
+			trustedProviders: ["discord", "twitch", "patreon", "steam"],
 		},
 	},
 
@@ -218,6 +219,10 @@ export const auth = betterAuth({
 			issuer: "Rose Griffon",
 		}),
 		bearer(),
+		// Login Steam (OpenID 2.0) + vue compte IEVR (app 2799860) via Steam Web API.
+		// Steam n'expose PAS d'OAuth2/OIDC public → plugin custom OpenID 2.0 (cf.
+		// @rose-griffon/better-auth-steam). webApiKey lu depuis STEAM_WEB_API_KEY.
+		steam({ realm: getBetterAuthURL() }),
 		// oAuthProxy UNIQUEMENT sur les déploiements preview Vercel : sur le domaine
 		// de prod il s'interpose dans le callback OAuth (round-trip + encrypt/decrypt)
 		// et empêche le set-cookie de session → session non persistée après login,
