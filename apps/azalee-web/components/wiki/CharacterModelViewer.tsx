@@ -12,7 +12,7 @@ import {
 } from "@rose-griffon/ui";
 
 interface CharacterModelViewerProps {
-	/** URL absolue du GLB (cdn.rosegriffon.fr/model/<code>.glb). */
+	/** URL absolue du GLB complet (cdn.rosegriffon.fr/model-full/<code>.glb, nie-model-serve). */
 	glbUrl: string;
 	name?: string;
 }
