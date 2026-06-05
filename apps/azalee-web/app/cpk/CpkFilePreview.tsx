@@ -20,7 +20,9 @@ import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
 import { Icon } from "@/components/ui/Icon";
 import {
+	cpkCfgUrl,
 	cpkPreviewKind,
+	cpkRawUrl,
 	modelFullCode,
 	modelFullUrl,
 	previewKindLabel,
@@ -79,12 +81,12 @@ export function CpkFilePreview(props: CpkFilePreviewProps) {
 					</a>
 				)}
 				<a
-					href={assetUrl ?? `https://cdn.rosegriffon.fr/g4tx/${path}`}
+					href={cpkRawUrl(path)}
 					download
 					className="inline-flex items-center gap-2 h-10 px-4 rounded-full border border-outline-variant/40 bg-surface-container-low text-on-surface text-sm font-semibold hover:border-primary transition"
 				>
 					<Icon name="download" size={16} />
-					Télécharger
+					Télécharger l'original
 				</a>
 			</div>
 		</div>
@@ -155,45 +157,103 @@ function PreviewBody(
 		);
 	}
 
-	if (previewKind === "sound" && assetUrl) {
-		return (
-			<div className="p-6">
-				{/* eslint-disable-next-line jsx-a11y/media-has-caption */}
-				<audio controls preload="none" className="w-full" src={assetUrl}>
-					Audio non supporté.
-				</audio>
-			</div>
-		);
+	if (previewKind === "sound") {
+		// Audio CRI (acb/awb/hca/adx) — pas lisible brut par le navigateur (décodage
+		// CRI→wav à venir). On expose le téléchargement de l'original ci-dessous.
+		return <UnplayableNote icon="graphic_eq" label="Audio CRI (ADX/HCA)" />;
 	}
 
-	if (previewKind === "movie" && assetUrl) {
-		return (
-			<div className="bg-black">
-				{/* eslint-disable-next-line jsx-a11y/media-has-caption */}
-				<video controls preload="none" className="w-full max-h-[60vh]" src={assetUrl}>
-					Vidéo non supportée.
-				</video>
-			</div>
-		);
+	if (previewKind === "movie") {
+		// Vidéo USM (CRI Sofdec2) — pas lisible brut par le navigateur (transcodage
+		// USM→mp4 à venir). Téléchargement de l'original ci-dessous.
+		return <UnplayableNote icon="movie" label="Vidéo USM (CRI Sofdec2)" />;
 	}
 
 	if (previewKind === "text") {
-		return <TextPreview url={assetUrl ?? `https://cdn.rosegriffon.fr/g4tx/${path}`} />;
+		return <TextPreview url={cpkRawUrl(path)} />;
 	}
 
-	// config / raw : pas de preview inline, on guide vers les liens ci-dessous.
+	if (previewKind === "config") {
+		return <ConfigPreview url={cpkCfgUrl(path)} />;
+	}
+
+	// raw : pas de preview inline → métadonnées + téléchargement ci-dessous.
 	return (
 		<div className="flex flex-col items-center gap-2 p-10 text-center">
-			<Icon
-				name={previewKind === "config" ? "database" : "description"}
-				size={40}
-				className="text-on-surface-variant/40"
-			/>
+			<Icon name="description" size={40} className="text-on-surface-variant/40" />
 			<p className="text-sm text-on-surface-variant">
-				{previewKind === "config"
-					? "Fichier de configuration binaire — décodage via le CDN."
-					: "Aperçu non disponible pour ce type de fichier."}
+				Aperçu inline non disponible — téléchargez l'original ci-dessous.
 			</p>
+		</div>
+	);
+}
+
+/** Note pour un format non encore lisible inline (audio/vidéo CRI) — download ci-dessous. */
+function UnplayableNote({ icon, label }: { icon: string; label: string }) {
+	return (
+		<div className="flex flex-col items-center gap-2 p-10 text-center">
+			<Icon name={icon} size={40} className="text-on-surface-variant/50" />
+			<p className="text-sm text-on-surface">{label}</p>
+			<p className="text-xs text-on-surface-variant max-w-sm">
+				Format propriétaire CRI non lisible directement par le navigateur. Le décodage
+				natif arrive ; en attendant, téléchargez l'original ci-dessous.
+			</p>
+		</div>
+	);
+}
+
+/** Preview config : décode le cfg.bin/objbin en JSON natif (nie-model-serve /cfg). */
+function ConfigPreview({ url }: { url: string }) {
+	const [json, setJson] = useState<string | null>(null);
+	const [summary, setSummary] = useState<string | null>(null);
+	const [errored, setErrored] = useState(false);
+
+	useEffect(() => {
+		let cancelled = false;
+		setJson(null);
+		setErrored(false);
+		setSummary(null);
+		fetch(url)
+			.then((r) => (r.ok ? r.json() : Promise.reject(new Error(String(r.status)))))
+			.then((data: unknown) => {
+				if (cancelled) return;
+				// Résumé : format + nb de listes/entrées.
+				const d = data as { format?: string; lists?: unknown[]; entries?: unknown[] };
+				const count = d.lists?.length ?? d.entries?.length ?? 0;
+				setSummary(`${d.format ?? "cfg.bin"} · ${count} ${d.lists ? "listes" : "entrées"}`);
+				setJson(JSON.stringify(data, null, 2));
+			})
+			.catch(() => !cancelled && setErrored(true));
+		return () => {
+			cancelled = true;
+		};
+	}, [url]);
+
+	if (errored) {
+		return (
+			<div className="flex flex-col items-center gap-2 p-10 text-center">
+				<Icon name="database" size={40} className="text-on-surface-variant/40" />
+				<p className="text-sm text-on-surface-variant">
+					Décodage indisponible — téléchargez l'original ci-dessous.
+				</p>
+			</div>
+		);
+	}
+	if (json === null) {
+		return (
+			<div className="flex items-center justify-center p-10">
+				<div className="animate-spin rounded-full size-7 border-b-2 border-primary" />
+			</div>
+		);
+	}
+	return (
+		<div className="p-4">
+			{summary && (
+				<p className="text-xs text-on-surface-variant mb-2 font-mono">{summary}</p>
+			)}
+			<pre className="text-xs text-on-surface bg-surface-container-lowest rounded-xl p-3 overflow-auto max-h-[60vh] font-mono leading-relaxed">
+				{json}
+			</pre>
 		</div>
 	);
 }

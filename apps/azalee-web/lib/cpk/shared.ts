@@ -96,8 +96,21 @@ export function cpkAssetUrl(path: string, ext?: string): string | null {
 		return `${CDN_BASE}/model/${base}.glb`;
 	}
 
-	// raw : route de décodage brut du CDN (peut 404 si non couvert côté serving).
-	return `${CDN_BASE}/g4tx/${path}`;
+	// raw : bytes décompressés/déchiffrés bruts du CPK (nie-model-serve /raw, texte/download).
+	return `${CDN_BASE}/raw/${path}`;
+}
+
+/**
+ * URL du décodage JSON natif d'un `cfg.bin`/`objbin`/`fxbin`/`mevbin` (RDBN ou T2B)
+ * par nie-model-serve (`/cfg/<vfs-path>.json`). `path` = chemin d'index (préfixe `data/`).
+ */
+export function cpkCfgUrl(path: string): string {
+	return `${CDN_BASE}/cfg/${path}.json`;
+}
+
+/** URL des bytes bruts décompressés du CPK (`/raw/<vfs-path>`) — texte, download, lecteurs. */
+export function cpkRawUrl(path: string): string {
+	return `${CDN_BASE}/raw/${path}`;
 }
 
 /**
