@@ -1,8 +1,8 @@
 "use client";
 
-import { Box, Shield, Swords } from "lucide-react";
+import { Shield, Swords } from "lucide-react";
 import { useState } from "react";
-import CharacterModelViewer from "@/components/wiki/CharacterModelViewer";
+import InlineModelViewer from "@/components/wiki/InlineModelViewer";
 import { cn } from "@/lib/utils";
 
 interface ModelEntry {
@@ -20,18 +20,14 @@ type Tab = "keshin" | "armures";
 
 function ModelCard({ entry }: { entry: ModelEntry }) {
 	return (
-		<div className="group flex items-center gap-3 p-3 rounded-2xl bg-surface-container border border-outline-variant/20 hover:border-primary/40 hover:bg-surface-container-high transition-all duration-200">
-			<div className="size-12 rounded-xl bg-surface-container-highest flex items-center justify-center shrink-0 text-primary">
-				<Box size={22} aria-hidden="true" />
+		<div className="group rounded-2xl overflow-hidden bg-surface-container border border-outline-variant/20 hover:border-primary/40 transition-all duration-200">
+			{/* Vrai modèle 3D texturé rendu INLINE (monté quand visible, démonté hors-champ). */}
+			<div className="relative aspect-[3/4] bg-[url(/fond.webp)] bg-cover bg-center">
+				<InlineModelViewer glbUrl={entry.glbUrl} name={entry.name} />
 			</div>
-			<div className="flex-1 min-w-0">
+			<div className="p-3 border-t border-outline-variant/10">
 				<p className="type-title-small text-on-surface truncate">{entry.name}</p>
 				<p className="type-body-small text-on-surface-variant/60 font-mono">{entry.code}</p>
-			</div>
-			{/* Réutilise le viewer dialog (lazy <model-viewer> au clic) — anti-surcharge :
-			    on ne monte pas 94 canvases d'un coup. */}
-			<div className="shrink-0 rounded-full bg-surface-container-highest/60 border border-outline-variant/20">
-				<CharacterModelViewer glbUrl={entry.glbUrl} name={entry.name} />
 			</div>
 		</div>
 	);

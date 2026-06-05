@@ -15,6 +15,13 @@ export const metadata: Metadata = {
 	title: "Inazuma Eleven Cross — le nouveau jeu mobile | Azalée",
 	description:
 		"Inazuma Eleven Cross (イナズマイレブン クロス), le jeu mobile Level-5 × Aiming, lancement le 9 juin 2026. Traduction factuelle du site officiel inazuma-cross.jp + tweets récents @inazuma_cross. Jeu distinct d'Inazuma Eleven: Victory Road.",
+	// Favicon de la page = la VRAIE icône du jeu Cross (protagoniste Yo Shiosawa), pas
+	// celle d'azalée — la page reproduit le site officiel d'un jeu distinct.
+	icons: {
+		icon: [{ url: "/inazuma-cross/appicon.webp", type: "image/webp" }],
+		shortcut: "/inazuma-cross/appicon.webp",
+		apple: "/inazuma-cross/appicon.webp",
+	},
 	openGraph: {
 		title: "Inazuma Eleven Cross — le nouveau jeu mobile",
 		description:
