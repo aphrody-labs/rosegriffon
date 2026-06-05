@@ -947,6 +947,10 @@ export function hasCharacterModelGlb(code: string | undefined | null): boolean {
  * Servis par `nie-model-serve :8790` (assemble depuis les CPK à la volée, cache disque).
  */
 const MODEL_FULL_GLB_BASE = "https://cdn.rosegriffon.fr/model-full";
+// Version du pipeline d'assemblage 3D : les GLB sont servis `Cache-Control: immutable`
+// (1 an) — sans cache-buster, un navigateur garde l'ancien modèle après une amélioration
+// du pipeline. Bumper à CHAQUE évolution de l'assemblage. v3 = corps+visage+UNIFORME texturés.
+const MODEL_FULL_VERSION = "3";
 
 /**
  * Résout l'URL du modèle 3D COMPLET (corps+face+uniforme) d'un personnage.
@@ -967,7 +971,7 @@ export function getCharacterModelFullGlbUrl(code: string | undefined | null): st
 	if (base.startsWith("c") && !CHARACTER_MODEL_CODES.has(base)) {
 		return null;
 	}
-	return `${MODEL_FULL_GLB_BASE}/${base}.glb`;
+	return `${MODEL_FULL_GLB_BASE}/${base}.glb?v=${MODEL_FULL_VERSION}`;
 }
 
 /**
@@ -997,7 +1001,7 @@ export function getKeshinModelGlbUrl(code: string | undefined | null): string | 
 	if (!code) return null;
 	const base = code.replace(/_\d+$/, "");
 	if (!KESHIN_MODEL_CODES.has(base)) return null;
-	return `${MODEL_FULL_GLB_BASE}/${base}.glb`;
+	return `${MODEL_FULL_GLB_BASE}/${base}.glb?v=${MODEL_FULL_VERSION}`;
 }
 
 /**
@@ -1007,7 +1011,7 @@ export function getKeshinModelGlbUrl(code: string | undefined | null): string | 
 export function getArmureModelGlbUrl(code: string | undefined | null): string | null {
 	if (!code) return null;
 	if (!ARMURE_MODEL_CODES.has(code)) return null;
-	return `${MODEL_FULL_GLB_BASE}/${code}.glb`;
+	return `${MODEL_FULL_GLB_BASE}/${code}.glb?v=${MODEL_FULL_VERSION}`;
 }
 
 /** Liste triée des codes keshin servis (gate des fiches/galeries 3D). */
