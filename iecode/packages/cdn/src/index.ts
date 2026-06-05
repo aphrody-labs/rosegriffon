@@ -121,9 +121,32 @@ export class MenuCdn {
 		return toArray(this.bridge.ListContainers(filter ?? null));
 	}
 
+	/**
+	 * Sert n'importe quel fichier du CPK par son chemin logique (ex. `data/dx11/menu/face/c01000010_l.g4tx`).
+	 * Renvoie `null` si le chemin est inconnu de l'index (→ 404). Octets natifs bruts.
+	 */
+	async readRaw(path: string): Promise<CdnRawFile | null> {
+		const f = await this.bridge.ReadRawAsync(path);
+		if (f == null) return null;
+		return {
+			path: f.Path,
+			bytes: Uint8Array.from(f.Bytes as number[]),
+			mediaType: f.MediaType,
+			etag: f.ETag,
+		};
+	}
+
 	dispose(): void {
 		this.bridge.Dispose?.();
 	}
+}
+
+/** Un fichier brut du CPK : octets natifs déchiffrés/décompressés, media-type et ETag immuable. */
+export interface CdnRawFile {
+	path: string;
+	bytes: Uint8Array;
+	mediaType: string;
+	etag: string;
 }
 
 /** Un `List<T>`/`T[]` .NET se projette en JS Array ; tolère aussi l'API indexée. */

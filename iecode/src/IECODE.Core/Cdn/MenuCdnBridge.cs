@@ -125,6 +125,18 @@ public sealed class MenuCdnBridge : IDisposable
         };
     }
 
+    /// <summary>
+    /// Sert n'importe quel fichier du jeu par son chemin logique CPK (ex. <c>data/dx11/menu/face/c01000010_l.g4tx</c>).
+    /// Renvoie <c>null</c> si le chemin est inconnu de l'index (→ 404). Octets natifs bruts : déchiffrés
+    /// et décompressés CRILAYLA, aucune conversion lossy. Pour les PNG menu, préférer <see cref="RenderAsync"/>.
+    /// </summary>
+    public async Task<CdnFileDto?> ReadRawAsync(string path, CancellationToken ct = default)
+    {
+        var file = await _cdn.ReadAsync(path, ct).ConfigureAwait(false);
+        if (file is not { } f) return null;
+        return new CdnFileDto { Path = f.Path, Bytes = f.Bytes, ETag = f.ETag, MediaType = f.MediaType };
+    }
+
     private static MenuPngDto ToDto(in MenuPng m) =>
         new() { AzaleePath = m.AzaleePath, Bytes = m.Bytes, Width = m.Width, Height = m.Height, ETag = m.ETag };
 
@@ -133,6 +145,19 @@ public sealed class MenuCdnBridge : IDisposable
         _cdn.Dispose();
         if (_ownsGame) _game.Dispose();
     }
+}
+
+/// <summary>
+/// DTO de fichier brut (CLASSE) pour le pont Bun. Contient les octets natifs déchiffrés/décompressés,
+/// le media-type informatif et l'ETag immuable. Distinct de <c>CdnFile</c> (record struct non projetable
+/// par node-api-dotnet).
+/// </summary>
+public sealed class CdnFileDto
+{
+    public string Path { get; init; } = string.Empty;
+    public byte[] Bytes { get; init; } = [];
+    public string ETag { get; init; } = string.Empty;
+    public string MediaType { get; init; } = string.Empty;
 }
 
 /// <summary>Compte-rendu d'export (CLASSE) pour le pont Bun.</summary>
