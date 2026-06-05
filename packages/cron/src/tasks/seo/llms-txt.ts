@@ -228,6 +228,22 @@ française de la communauté Inazuma Eleven.
 - [Traducteur](https://azalee.rosegriffon.fr/tools/translator)
 - [Recherche](https://azalee.rosegriffon.fr/search)
 
+## API (pour les IA et outils)
+
+Azalée expose une API GraphQL publique en lecture seule pour interroger la base de données du jeu.
+
+- Endpoint GraphQL : POST https://azalee.rosegriffon.fr/api/graphql (Content-Type: application/json)
+- Queries disponibles : characters, character, skills, skill, items, item, auras, ragSearch, tweets.
+- Filtres skills(page, limit, q, category, element) ; characters(page, limit, q, element, position, rarity, team, series).
+- Champs Skill : id, name { fr en ja }, description { fr en ja }, category, element, power, tension, image, sheetData. Le champ name est de type LocalizedString (sous-champs fr/en/ja).
+- Recherche sémantique (RAG) : POST https://azalee.rosegriffon.fr/api/rag/search ; données formatées LLM : https://azalee.rosegriffon.fr/api/llm/<model>.
+
+Exemple de requête (techniques de Tir) :
+POST https://azalee.rosegriffon.fr/api/graphql
+{"query":"{ skills(category: \\"Tir\\", limit: 5) { id name { fr en } category element power } }"}
+
+Réponse (extrait) : { "data": { "skills": [ { "name": { "fr": "Feu tout-puissant" }, "category": "Tir", "element": "Feu", "power": "100-640" } ] } }
+
 ## Mentions légales
 
 - [CGU](https://azalee.rosegriffon.fr/legal/cgu)
@@ -241,21 +257,82 @@ Stack : Next.js, React, Bun, TypeScript. Données : Inazuma Eleven: Victory Road
 `;
 }
 
+/**
+ * Convertit le markdown llms.txt en page HTML lisible (titres, blockquote, listes, liens).
+ * But : servir une version `text/html` (et `.md` markdown explicite) que les web-fetchers
+ * d'IA (Gemini, etc.) acceptent — certains rejettent/mal-gèrent le `text/plain` de `llm.txt`.
+ */
+function llmsToHtml(md: string, title: string): string {
+	const esc = (s: string) =>
+		s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+	const linkify = (s: string) =>
+		esc(s)
+			.replace(/\[([^\]]+)\]\((https?:\/\/[^)]+)\)/g, '<a href="$2">$1</a>')
+			.replace(/(?<!["=])(https?:\/\/[^\s<]+)/g, '<a href="$1">$1</a>');
+	const lines = md.split("\n");
+	const out: string[] = [];
+	let inList = false;
+	const closeList = () => {
+		if (inList) {
+			out.push("</ul>");
+			inList = false;
+		}
+	};
+	for (const raw of lines) {
+		const l = raw.trimEnd();
+		if (/^#{1,6}\s/.test(l)) {
+			closeList();
+			const lvl = (l.match(/^#+/) as RegExpMatchArray)[0].length;
+			out.push(`<h${lvl}>${linkify(l.replace(/^#+\s/, ""))}</h${lvl}>`);
+		} else if (/^>\s?/.test(l)) {
+			closeList();
+			out.push(`<blockquote>${linkify(l.replace(/^>\s?/, ""))}</blockquote>`);
+		} else if (/^[-*]\s/.test(l)) {
+			if (!inList) {
+				out.push("<ul>");
+				inList = true;
+			}
+			out.push(`<li>${linkify(l.replace(/^[-*]\s/, ""))}</li>`);
+		} else if (l === "") {
+			closeList();
+		} else {
+			closeList();
+			out.push(`<p>${linkify(l)}</p>`);
+		}
+	}
+	closeList();
+	return `<!DOCTYPE html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>${esc(title)}</title><meta name="robots" content="index, follow"><style>body{max-width:48rem;margin:2rem auto;padding:0 1rem;font-family:system-ui,sans-serif;line-height:1.6}a{color:#0c1730}blockquote{border-left:3px solid #d4af37;margin:0;padding-left:1rem;color:#555}</style></head><body>\n${out.join("\n")}\n</body></html>\n`;
+}
+
 export async function runSeoLlmsTxt(): Promise<{ success: boolean; error?: string }> {
-	console.log("[SEO llms.txt] Génération des fichiers llms.txt / llms-full.txt / llm.txt…");
+	console.log("[SEO llms.txt] Génération des fichiers llms.txt / llm.txt / .md / .html…");
 	try {
 		const websiteIndex = websiteLlms();
 		const azaleeIndex = azaleeLlms();
+		const websiteFull = websiteLlmsFull();
+		const azaleeFull = azaleeLlmsFull();
 
 		const targets: Array<{ path: string; content: string }> = [
 			// Website : llm.txt est l'alias référencé par les métadonnées Next.
 			{ path: join(WEBSITE_PUBLIC, "llms.txt"), content: websiteIndex },
 			{ path: join(WEBSITE_PUBLIC, "llm.txt"), content: websiteIndex },
-			{ path: join(WEBSITE_PUBLIC, "llms-full.txt"), content: websiteLlmsFull() },
+			{ path: join(WEBSITE_PUBLIC, "llms-full.txt"), content: websiteFull },
+			// Website — versions markdown (.md) + HTML (.html) fetchables par les IA.
+			{ path: join(WEBSITE_PUBLIC, "llm.md"), content: websiteIndex },
+			{ path: join(WEBSITE_PUBLIC, "llms.md"), content: websiteIndex },
+			{ path: join(WEBSITE_PUBLIC, "llms-full.md"), content: websiteFull },
+			{ path: join(WEBSITE_PUBLIC, "llm.html"), content: llmsToHtml(websiteIndex, "Rose Griffon — llm.txt") },
+			{ path: join(WEBSITE_PUBLIC, "llms-full.html"), content: llmsToHtml(websiteFull, "Rose Griffon — llms-full") },
 			// Azalée.
 			{ path: join(AZALEE_PUBLIC, "llms.txt"), content: azaleeIndex },
 			{ path: join(AZALEE_PUBLIC, "llm.txt"), content: azaleeIndex },
-			{ path: join(AZALEE_PUBLIC, "llms-full.txt"), content: azaleeLlmsFull() },
+			{ path: join(AZALEE_PUBLIC, "llms-full.txt"), content: azaleeFull },
+			// Azalée — versions markdown (.md) + HTML (.html).
+			{ path: join(AZALEE_PUBLIC, "llm.md"), content: azaleeIndex },
+			{ path: join(AZALEE_PUBLIC, "llms.md"), content: azaleeIndex },
+			{ path: join(AZALEE_PUBLIC, "llms-full.md"), content: azaleeFull },
+			{ path: join(AZALEE_PUBLIC, "llm.html"), content: llmsToHtml(azaleeIndex, "Azalée — llm.txt") },
+			{ path: join(AZALEE_PUBLIC, "llms-full.html"), content: llmsToHtml(azaleeFull, "Azalée — llms-full") },
 		];
 
 		for (const { path, content } of targets) {
