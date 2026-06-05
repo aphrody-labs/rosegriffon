@@ -30,7 +30,8 @@ interface SheetData {
 		name: string;
 		type: string;
 		element: string;
-		power: string;
+		// La puissance peut être un scalaire OU une plage {min,max} (ex hissatsu de soul/keshin).
+		power?: string | number | { min: number; max: number };
 	};
 	buff?: {
 		name: string;
@@ -42,6 +43,21 @@ interface SubTypeInfo {
 	label: string;
 	icon: string;
 	color: string;
+}
+
+/**
+ * Rend la puissance d'une hissatsu : scalaire tel quel, ou plage `{min,max}` en
+ * `min–max` (un seul nombre si min===max). Évite l'erreur React « Objects are not
+ * valid as a React child » quand la donnée est une plage.
+ */
+function formatHissatsuPower(
+	power: string | number | { min: number; max: number } | null | undefined
+): string {
+	if (power == null) return "";
+	if (typeof power === "object") {
+		return power.min === power.max ? `${power.max}` : `${power.min}–${power.max}`;
+	}
+	return String(power);
 }
 
 interface AuraData {
@@ -247,11 +263,11 @@ export function AuraDetail({ aura, category, subTypeInfo, prevAura, nextAura }: 
 														aura.sheetData.hissatsu.element}
 												</span>
 											)}
-											{aura.sheetData?.hissatsu?.power && (
+											{aura.sheetData?.hissatsu?.power != null && (
 												<>
 													<span className="text-on-surface-variant/40">|</span>
 													<span className="text-xl font-black text-primary">
-														{aura.sheetData.hissatsu.power}
+														{formatHissatsuPower(aura.sheetData.hissatsu.power)}
 													</span>
 												</>
 											)}
