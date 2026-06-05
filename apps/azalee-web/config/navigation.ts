@@ -87,6 +87,16 @@ export const navigationItems: NavItem[] = [
 		path: "/item",
 	},
 	{
+		icon: "casino",
+		label: "nav.wiki.capsules",
+		path: "/capsule",
+	},
+	{
+		icon: "storefront",
+		label: "nav.wiki.shops",
+		path: "/boutique",
+	},
+	{
 		icon: "strategy",
 		label: "nav.wiki.tactics",
 		path: "/tactic",
@@ -144,6 +154,7 @@ export const mobileNavItems: NavItem[] = [
 			"/chara",
 			"/skill",
 			"/item",
+			"/boutique",
 			"/aura",
 			"/passive",
 			"/tactic",

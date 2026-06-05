@@ -12,6 +12,7 @@ export const searchParamsSchema = z.object({
 		.transform((val) => Math.max(1, parseInt(val, 10)))
 		.optional()
 		.default(1),
+	pcat: z.string().optional(),
 	perPage: z
 		.string()
 		.transform((val) => {

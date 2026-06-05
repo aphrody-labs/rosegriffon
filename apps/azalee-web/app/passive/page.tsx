@@ -4,6 +4,7 @@ import type React from "react";
 import { CommonSpriteIcon } from "@/components/ui/CommonSpriteIcon";
 import { FadeInItem, FadeInStagger } from "@/components/ui/fade-in";
 import { PassiveFilters } from "@/components/wiki/filters/PassiveFilters";
+import { PassivePlayerFilters } from "@/components/wiki/filters/PassivePlayerFilters";
 import {
 	CoordinatorPassiveCard,
 	CustomPassiveCard,
@@ -28,6 +29,7 @@ import passiveData from "@/data/passive-sheets.json";
 import passivesFullData from "@/data/passives-full.json";
 import { normalizeText } from "@/lib/search-utils";
 import { parseSearchParams } from "@/lib/validations";
+import { passiveCategory } from "@/lib/wiki-service";
 
 export const metadata: Metadata = {
 	description:
@@ -66,6 +68,25 @@ function familyMatchesSearch(family: NierPassiveFamily, qNorm: string): boolean 
 		inst.string_id,
 	];
 	return texts.some((t) => t && normalizeText(t).includes(qNorm));
+}
+
+interface NierFamilyFilters {
+	qNorm: string;
+	element: string;
+	rarity: string;
+	category: string;
+}
+
+/** Une famille passe les filtres si elle contient ≥1 instance qui matche tous les critères. */
+function familyMatchesFilters(family: NierPassiveFamily, f: NierFamilyFilters): boolean {
+	if (f.qNorm && !familyMatchesSearch(family, f.qNorm)) return false;
+	if (!f.element && !f.rarity && !f.category) return true;
+	return family.instances.some((inst) => {
+		if (f.element && inst.element_name !== f.element) return false;
+		if (f.rarity && String(inst.rarity) !== f.rarity) return false;
+		if (f.category && passiveCategory(inst.string_id) !== f.category) return false;
+		return true;
+	});
 }
 
 // ── Helpers passive-sheets ──
@@ -149,11 +170,22 @@ export default async function PassivesPage({
 	searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
 	const params = parseSearchParams(await searchParams);
-	const { q, type: typeFilter, playstyle: playstyleFilter, category: statCatFilter } = params;
+	const {
+		q,
+		type: typeFilter,
+		playstyle: playstyleFilter,
+		category: statCatFilter,
+		element: elementFilter,
+		rarity: rarityFilter,
+		pcat: passiveCatFilter,
+	} = params;
 	const qNorm = q ? normalizeText(q) : "";
 
 	const psFilter = playstyleFilter !== undefined ? (playstyleFilter?.toString() ?? "") : null;
 	const catFilter = statCatFilter?.toString() || "";
+	const elFilter = elementFilter?.toString() || "";
+	const rarFilter = rarityFilter?.toString() || "";
+	const pCatFilter = passiveCatFilter?.toString() || "";
 
 	// ── Load passive-sheets data (custom + coordinator) ──
 	const allPlayerPassivesSheets = passiveData.playerPassives as PlayerPassiveData[];
@@ -165,8 +197,28 @@ export default async function PassivesPage({
 	const nierTeamPassives = passivesFullData.team as NierTeamPassive[];
 	const nierFamiliesAll = buildNierFamilies(nierAllPlayer);
 
-	// ── Filter nie-data families by search ──
-	const nierFamiliesFiltered = nierFamiliesAll.filter((f) => familyMatchesSearch(f, qNorm));
+	// ── Filter nie-data families (recherche + élément + rareté + catégorie) ──
+	const nierFilters: NierFamilyFilters = {
+		category: pCatFilter,
+		element: elFilter,
+		qNorm,
+		rarity: rarFilter,
+	};
+	const nierFamiliesFiltered = nierFamiliesAll.filter((f) =>
+		familyMatchesFilters(f, nierFilters)
+	);
+
+	// ── Compteurs élément / rareté / catégorie (sur toutes les instances joueur) ──
+	const elementCounts: Record<string, number> = {};
+	const rarityCounts: Record<string, number> = {};
+	const categoryCounts: Record<string, number> = {};
+	for (const inst of nierAllPlayer) {
+		elementCounts[inst.element_name] = (elementCounts[inst.element_name] || 0) + 1;
+		const rk = String(inst.rarity);
+		rarityCounts[rk] = (rarityCounts[rk] || 0) + 1;
+		const ck = passiveCategory(inst.string_id);
+		categoryCounts[ck] = (categoryCounts[ck] || 0) + 1;
+	}
 
 	// ── Compute type counts ──
 	const playerFiltered = allPlayerPassivesSheets.filter((p) =>
@@ -266,6 +318,15 @@ export default async function PassivesPage({
 					</div>
 
 					<PassiveFilters typeCounts={typeCounts} playstyleCounts={playstyleCounts} />
+
+					{/* Filtres spécifiques aux passifs joueur (nie-data) : élément / rareté / catégorie */}
+					{showPlayer && (
+						<PassivePlayerFilters
+							elementCounts={elementCounts}
+							rarityCounts={rarityCounts}
+							categoryCounts={categoryCounts}
+						/>
+					)}
 
 					<div
 						className="text-xs font-medium text-on-surface-variant px-1 uppercase tracking-wider"

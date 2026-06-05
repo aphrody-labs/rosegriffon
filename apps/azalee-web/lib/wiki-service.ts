@@ -3,6 +3,7 @@ import { ElementNames } from "@rose-griffon/inagle/core/types";
 import changeAuraSkills from "../../../packages/inagle/src/entries/change_aura_skills.json";
 import menuGalleryManifest from "@/data/menu-gallery-manifest.json";
 import itemEnrichmentData from "@/data/item-enrichment.json";
+import passivesFullData from "@/data/passives-full.json";
 
 /** Enrichissement objet figé (bonus de stats / descriptions / maxStack), appliqué par id. */
 interface ItemEnrichment {
@@ -2316,4 +2317,172 @@ export const wikiService = {
 			.maybeSingle();
 		return data;
 	},
+
+	// ── Passifs (passives-full.json — données gamedata IEVR résolues) ──
+
+	/**
+	 * Liste paginée+filtrée des passifs joueur (1716 instances, textes FR/EN/JA résolus).
+	 * Données figées dans `data/passives-full.json` (nie-data) car non poussées dans le
+	 * miroir Supabase — elles survivent ainsi à chaque re-sync (pattern item-enrichment).
+	 */
+	getPassivesList(params: PassiveListParams = {}): ListResult<PassiveListItem> {
+		const page = params.page || 1;
+		const limit = params.limit || 60;
+		const all = PASSIVE_INSTANCES;
+
+		const qNorm = params.q ? normalizePassiveText(params.q) : "";
+		let filtered = all.filter((p) => {
+			if (params.element && p.element_name !== params.element) return false;
+			if (params.rarity && String(p.rarity) !== String(params.rarity)) return false;
+			if (params.category && passiveCategory(p.string_id) !== params.category) return false;
+			if (qNorm) {
+				const hay = normalizePassiveText(
+					`${p.name.fr ?? ""} ${p.name.en ?? ""} ${p.name.ja ?? ""} ${p.string_id}`
+				);
+				if (!hay.includes(qNorm)) return false;
+			}
+			return true;
+		});
+
+		// Tri (par défaut : texte FR alphabétique ; aussi value/string_id)
+		const sort = params.sort || "name";
+		filtered = [...filtered].sort((a, b) => {
+			if (sort === "value") {
+				return (b.main_value ?? 0) - (a.main_value ?? 0);
+			}
+			if (sort === "value_asc") {
+				return (a.main_value ?? 0) - (b.main_value ?? 0);
+			}
+			if (sort === "id") {
+				return a.string_id.localeCompare(b.string_id);
+			}
+			const ta = a.name.fr ?? a.name.en ?? a.name.ja ?? "";
+			const tb = b.name.fr ?? b.name.en ?? b.name.ja ?? "";
+			return ta.localeCompare(tb, "fr");
+		});
+
+		const total = filtered.length;
+		const from = (page - 1) * limit;
+		const data = filtered.slice(from, from + limit);
+		return { data, limit, page, total };
+	},
+
+	/**
+	 * Détail d'un passif joueur par `passive_id` (hex) ou `string_id` (ex: ps10001_03).
+	 * Renvoie l'instance ciblée + toutes les instances de la même famille (effect_id) pour
+	 * la courbe d'effets par valeur. Repli `inagle_passives` (miroir) pour `image_url`.
+	 */
+	async getPassive(id: string): Promise<PassiveDetail | undefined> {
+		const inst = PASSIVE_INSTANCES.find(
+			(p) => p.passive_id === id || p.string_id === id
+		);
+		if (!inst) return undefined;
+
+		// Toutes les instances partageant le même effet (courbe de valeurs).
+		const family = PASSIVE_INSTANCES.filter((p) => p.effect_id === inst.effect_id).sort(
+			(a, b) => (a.main_value ?? 0) - (b.main_value ?? 0)
+		);
+
+		// Repli miroir Supabase : image_url éventuelle (le JSON nie-data n'en porte pas).
+		let imageUrl: string | null = null;
+		try {
+			const supabase = await createClient();
+			const { data: row } = await supabase
+				.from("inagle_passives")
+				.select("image_url")
+				.eq("id", inst.passive_id)
+				.maybeSingle();
+			imageUrl = (row as { image_url?: string | null } | null)?.image_url
+				? resolveAssetUrl((row as { image_url: string }).image_url)
+				: null;
+		} catch {
+			imageUrl = null;
+		}
+
+		return {
+			...inst,
+			category: passiveCategory(inst.string_id),
+			family,
+			imageUrl,
+		};
+	},
+
+	/** Les 21 passifs d'équipe (soccer_team_passive_config). */
+	getTeamPassives(): PassiveTeamItem[] {
+		return PASSIVE_TEAM;
+	},
+
+	/** Une famille de passifs par effect_id (toutes les valeurs partageant l'effet). */
+	getPassiveFamily(effectId: string): PassiveListItem[] {
+		return PASSIVE_INSTANCES.filter((p) => p.effect_id === effectId).sort(
+			(a, b) => (a.main_value ?? 0) - (b.main_value ?? 0)
+		);
+	},
 };
+
+// ── Passifs : types + données figées (passives-full.json) ──
+
+export interface PassiveListItem {
+	passive_id: string;
+	string_id: string;
+	effect_id: string;
+	rarity: number;
+	element: number;
+	element_name: string;
+	buff_icon_type: number | null;
+	effect_params: number[];
+	main_value: number | null;
+	name: { fr: string | null; en: string | null; ja: string | null };
+	description: { fr: string | null; en: string | null; ja: string | null };
+	text_raw: { fr: string | null; en: string | null; ja: string | null };
+}
+
+export interface PassiveTeamItem {
+	team_passive_id: string;
+	effect_id: string;
+	value_min: number;
+	value_max: number;
+	text_id: string;
+	text: { fr: string | null; en: string | null; ja: string | null };
+}
+
+export interface PassiveDetail extends PassiveListItem {
+	category: string;
+	family: PassiveListItem[];
+	imageUrl: string | null;
+}
+
+export interface PassiveListParams {
+	page?: number;
+	limit?: number;
+	q?: string;
+	element?: string;
+	rarity?: string;
+	category?: string;
+	sort?: string;
+}
+
+const PASSIVE_INSTANCES = passivesFullData.player as PassiveListItem[];
+const PASSIVE_TEAM = passivesFullData.team as PassiveTeamItem[];
+
+/** Catégorie d'un passif déduite du préfixe de son string_id (ps/mps/cps/hps/ss/…). */
+export function passiveCategory(stringId: string): string {
+	if (stringId.startsWith("bmps")) return "team_mixi";
+	if (stringId.startsWith("bcps")) return "team_custom";
+	if (stringId.startsWith("mps")) return "miximax";
+	if (stringId.startsWith("cps")) return "custom";
+	if (stringId.startsWith("hps")) return "hero";
+	if (stringId.startsWith("ss_ps") || stringId.startsWith("ss")) return "soul";
+	if (stringId.startsWith("swap")) return "swap";
+	if (stringId.startsWith("ps")) return "player";
+	return "other";
+}
+
+/** Normalisation de recherche (minuscule, sans accents) — local pour éviter un cycle d'import. */
+function normalizePassiveText(s: string): string {
+	return s
+		.toLowerCase()
+		.normalize("NFD")
+		.replace(/[\u0300-\u036f]/g, "")
+		.trim();
+}
