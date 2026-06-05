@@ -4,6 +4,7 @@ import changeAuraSkills from "../../../packages/inagle/src/entries/change_aura_s
 import type { Database } from "@rose-griffon/db";
 import {
 	getAuraImageUrl,
+	getGalleryImageUrl,
 	getMiximaxIconUrl,
 	resolveAssetUrl,
 	resolveAuraTelopUrl,
@@ -49,6 +50,57 @@ interface ListResult<T> {
 	total: number;
 	page: number;
 	limit: number;
+}
+
+export interface GalleryItem {
+	id: string;
+	imgPath: string;
+	category: string;
+	title: string;
+	image: string | null;
+	needTokenNum: number;
+	flgNo: number;
+}
+
+/** Catégories d'illustrations (dérivées du préfixe `img_<category>_` du `img_path`). */
+export const GALLERY_CATEGORIES: ReadonlyArray<{ value: string; label: string; icon: string }> = [
+	{ value: "story", label: "Histoire", icon: "menu_book" },
+	{ value: "chronicle", label: "Chroniques", icon: "history_edu" },
+	{ value: "special", label: "Spéciales", icon: "star" },
+	{ value: "kizuna", label: "Liens", icon: "favorite" },
+	{ value: "other", label: "Autres", icon: "image" },
+];
+
+const GALLERY_CATEGORY_VALUES = new Set(GALLERY_CATEGORIES.map((c) => c.value));
+
+/** Catégorie d'un `img_path` (2e token `img_<cat>_…`), `other` par défaut. */
+function galleryCategoryOf(imgPath: string | undefined | null): string {
+	const m = imgPath?.match(/^img_([a-z]+)/);
+	const cat = m?.[1];
+	return cat && GALLERY_CATEGORY_VALUES.has(cat) ? cat : "other";
+}
+
+/**
+ * Dérive un titre lisible depuis le `img_path` brut : retire le préfixe `img_`,
+ * remplace les `_` par des espaces et met en Title Case. Pas de localisation en DB
+ * pour ces illustrations — c'est le meilleur libellé dérivable.
+ */
+function galleryTitleOf(imgPath: string): string {
+	const cleaned = imgPath.replace(/^img_/, "").replaceAll("_", " ").trim();
+	return cleaned.replace(/\b\w/g, (c) => c.toUpperCase()) || imgPath;
+}
+
+function galleryRowToItem(row: any): GalleryItem {
+	const imgPath: string = row.img_path || "";
+	return {
+		id: row.id,
+		imgPath,
+		category: galleryCategoryOf(imgPath),
+		title: galleryTitleOf(imgPath),
+		image: getGalleryImageUrl(imgPath),
+		needTokenNum: row.need_token_num ?? 0,
+		flgNo: row.flg_no ?? 0,
+	};
 }
 
 // Helpers — returns all matching element IDs (Void maps to both 0 and 5)
@@ -1930,6 +1982,61 @@ export const wikiService = {
 		} as any;
 
 		return base;
+	},
+
+	/**
+	 * Galerie d'illustrations in-game (`inagle_gallery`, 360 lignes). Chaque entrée
+	 * porte un `img_path` qui résout vers une illustration live du dump dx11
+	 * (`menu/220_img/gallery_img2/`, couverture 360/360 vérifiée). Catégorisé par le
+	 * 2e token du `img_path` (`img_<cat>_…` → story / special / other / chronicle / kizuna).
+	 */
+	async getGalleryList(params: {
+		page?: number;
+		limit?: number;
+		q?: string;
+		category?: string;
+	}): Promise<ListResult<GalleryItem>> {
+		const supabase = await createClient();
+		const page = params.page || 1;
+		const limit = params.limit || 48;
+		const from = (page - 1) * limit;
+		const to = from + limit - 1;
+
+		let query = supabase.from("inagle_gallery").select("*", { count: "exact" });
+
+		// Catégorie = préfixe `img_<category>_` du `img_path` (filtre serveur via LIKE).
+		if (params.category && GALLERY_CATEGORIES.some((c) => c.value === params.category)) {
+			query = query.ilike("img_path", `img_${sanitizeFilter(params.category)}_%`);
+		}
+		if (params.q) {
+			query = query.ilike("img_path", `%${sanitizeFilter(params.q)}%`);
+		}
+
+		const { data, count, error } = await query
+			.order("flg_no", { ascending: true, nullsFirst: false })
+			.range(from, to);
+
+		if (error) {
+			console.error("Error fetching gallery:", error);
+			return { data: [], total: 0, page, limit };
+		}
+
+		const results = (data as any[]).map((row) => galleryRowToItem(row));
+
+		return { data: results, total: count || 0, page, limit };
+	},
+
+	/** Compte les illustrations par catégorie (pour les chips de filtre). */
+	async getGalleryCategoryCounts(): Promise<Record<string, number>> {
+		const supabase = await createClient();
+		const { data } = await supabase.from("inagle_gallery").select("img_path");
+		const counts: Record<string, number> = { all: 0 };
+		for (const row of (data as any[]) || []) {
+			counts.all += 1;
+			const cat = galleryCategoryOf(row.img_path);
+			counts[cat] = (counts[cat] || 0) + 1;
+		}
+		return counts;
 	},
 
 	async getTweets(limit: number = 20): Promise<any[]> {

@@ -5,7 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 import { Icon } from "@/components/ui/Icon";
-import { getItemIconUrl, resolveAssetUrl } from "@/lib/images";
+import { getItemIconUrl, PLACEHOLDERS, resolveAssetUrl } from "@/lib/images";
 import { cn } from "@/lib/utils";
 
 export interface ItemCardProps {
@@ -57,9 +57,14 @@ export function ItemCard({
 	stats,
 	className,
 }: ItemCardProps) {
-	const imageSrc = resolveAssetUrl(icon) || (internalCode ? getItemIconUrl(internalCode) : null);
+	const resolvedSrc = resolveAssetUrl(icon) || (internalCode ? getItemIconUrl(internalCode) : null);
 	const [imgError, setImgError] = useState(false);
 	const catIcon = CATEGORY_ICONS[category] || "backpack";
+	// Une URL = placeholder (`/ievr.webp`) ou erreur runtime → on n'affiche PAS de <img>
+	// cassé : on rend l'icône de catégorie (toujours propre, jamais 404). Les items
+	// « important » `gd120002..091` n'ont aucune icône réelle (vérité terrain CPK), résolus
+	// en amont vers le placeholder ; le `onError` ci-dessous couvre tout 404 résiduel.
+	const hasRealImage = !!resolvedSrc && resolvedSrc !== PLACEHOLDERS.item && !imgError;
 
 	// Filter numeric stats for standard items
 	const statEntries = stats
@@ -86,9 +91,9 @@ export function ItemCard({
 			<div className="p-4 flex gap-4">
 				{/* Icon */}
 				<div className="size-14 shrink-0 rounded-xl bg-surface-container-high flex items-center justify-center border border-outline-variant/20 overflow-hidden">
-					{imageSrc && !imgError ? (
+					{hasRealImage ? (
 						<Image
-							src={imageSrc}
+							src={resolvedSrc as string}
 							alt={name}
 							width={48}
 							height={48}
