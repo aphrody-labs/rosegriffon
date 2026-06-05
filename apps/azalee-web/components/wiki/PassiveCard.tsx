@@ -4,6 +4,40 @@ import { CommonSpriteIcon } from "@/components/ui/CommonSpriteIcon";
 import type { SpriteCommonKey } from "@/config/sprites-common";
 import { cn } from "@/lib/utils";
 
+// ── Types nie-data (passives-full.json) ──
+
+/** Une instance de passif joueur issue de passives-full.json (nie-data). */
+export interface NierPassiveInstance {
+	passive_id: string;
+	string_id: string;
+	effect_id: string;
+	rarity: number;
+	element: number;
+	element_name: string;
+	buff_icon_type: number | null;
+	effect_params: number[];
+	main_value: number | null;
+	name: { fr: string | null; en: string | null; ja: string | null };
+	description: { fr: string | null; en: string | null; ja: string | null };
+	text_raw: { fr: string | null; en: string | null; ja: string | null };
+}
+
+/** Une famille de passifs (toutes les instances partageant le même effect_id). */
+export interface NierPassiveFamily {
+	effect_id: string;
+	instances: NierPassiveInstance[];
+}
+
+/** Un passif d'équipe (team passive). */
+export interface NierTeamPassive {
+	team_passive_id: string;
+	effect_id: string;
+	value_min: number;
+	value_max: number;
+	text_id: string;
+	text: { fr: string | null; en: string | null; ja: string | null };
+}
+
 // ── Types ──
 
 export interface RarityValues {
@@ -242,6 +276,132 @@ export function CustomPassiveCard({ passive }: { passive: CustomPassiveData }) {
 					Bonus
 				</span>
 				<span className="text-sm font-mono font-bold text-on-surface">{passive.buff}</span>
+			</div>
+		</div>
+	);
+}
+
+// ── Nie-data Passive Family Card ──
+
+const ELEMENT_COLORS: Record<string, string> = {
+	fire: "bg-red-500/15 text-red-600 border-red-300/40",
+	forest: "bg-green-500/15 text-green-600 border-green-300/40",
+	mountain: "bg-stone-500/15 text-stone-600 border-stone-300/40",
+	neutral: "bg-slate-500/10 text-slate-500 border-slate-300/30",
+	wind: "bg-sky-500/15 text-sky-600 border-sky-300/40",
+};
+
+const ELEMENT_LABELS: Record<string, string> = {
+	fire: "Feu",
+	forest: "Forêt",
+	mountain: "Montagne",
+	neutral: "Neutre",
+	wind: "Vent",
+};
+
+const STRING_ID_PREFIX_LABEL: Record<string, string> = {
+	bcps: "Cust. équipe",
+	bmps: "Mixi équipe",
+	cps: "Personnalisé",
+	hps: "Héros",
+	mps: "Miximax",
+	ps: "Joueur",
+	ss: "Soul",
+	swap: "Swap",
+};
+
+function instancePrefix(stringId: string): string {
+	const m = stringId.match(/^([a-z_]+)/);
+	const prefix = m ? m[1].replace(/_$/, "") : "";
+	return STRING_ID_PREFIX_LABEL[prefix] ?? prefix;
+}
+
+/**
+ * Carte affichant une famille de passifs nie-data (128 familles, ~1-32 instances chacune).
+ * Affiche le texte FR résolu de la première instance + toutes les valeurs.
+ */
+export function NierPassiveFamilyCard({ family }: { family: NierPassiveFamily }) {
+	const { instances } = family;
+	if (instances.length === 0) return null;
+
+	const representative = instances[0];
+	const textFr = representative.description.fr ?? representative.description.en ?? representative.description.ja ?? "";
+	const elementName = representative.element_name;
+	const elementColor = ELEMENT_COLORS[elementName] ?? ELEMENT_COLORS.neutral;
+	const elementLabel = ELEMENT_LABELS[elementName] ?? elementName;
+
+	// Grouper les instances par préfixe (ps, mps, cps, hps, ss, swap…)
+	const byPrefix = new Map<string, NierPassiveInstance[]>();
+	for (const inst of instances) {
+		const prefix = instancePrefix(inst.string_id);
+		if (!byPrefix.has(prefix)) byPrefix.set(prefix, []);
+		byPrefix.get(prefix)!.push(inst);
+	}
+
+	return (
+		<div className="rounded-2xl border border-outline-variant/30 bg-surface-container-low hover:bg-surface-container transition-colors p-4 space-y-3">
+			{/* Description FR résolue */}
+			<div className="flex items-start justify-between gap-2">
+				<p className="text-sm font-semibold text-on-surface leading-snug whitespace-pre-line flex-1">
+					{textFr}
+				</p>
+				{elementName !== "neutral" && (
+					<span
+						className={cn(
+							"inline-flex items-center shrink-0 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border",
+							elementColor
+						)}
+					>
+						{elementLabel}
+					</span>
+				)}
+			</div>
+
+			{/* Tableau des valeurs par type de passif */}
+			<div className="space-y-2">
+				{[...byPrefix.entries()].map(([prefix, insts]) => (
+					<div key={prefix}>
+						<div className="text-[10px] font-bold uppercase tracking-wider text-on-surface-variant mb-1">
+							{prefix}
+						</div>
+						<div className="flex flex-wrap gap-1">
+							{insts.map((inst) => (
+								<span
+									key={inst.string_id}
+									className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-surface-container-highest text-xs font-mono text-on-surface"
+									title={inst.string_id}
+								>
+									{inst.main_value !== null ? `+${inst.main_value}%` : inst.string_id}
+								</span>
+							))}
+						</div>
+					</div>
+				))}
+			</div>
+
+			{/* string_id de référence (hover) */}
+			<div className="text-[10px] text-on-surface-variant/50 font-mono truncate">
+				{representative.string_id}
+			</div>
+		</div>
+	);
+}
+
+// ── Nie-data Team Passive Card ──
+
+export function NierTeamPassiveCard({ passive }: { passive: NierTeamPassive }) {
+	const text = passive.text.ja ?? passive.text.en ?? passive.text.fr ?? "";
+
+	return (
+		<div className="rounded-2xl border border-outline-variant/30 bg-surface-container-low hover:bg-surface-container transition-colors p-4 space-y-2">
+			<p className="text-sm font-semibold text-on-surface leading-snug">{text}</p>
+			<div className="flex items-center gap-2">
+				<span className="text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-blue-500/15 text-blue-600">
+					Équipe
+				</span>
+				<span className="text-xs font-mono text-on-surface-variant">
+					{passive.value_min} – {passive.value_max}
+				</span>
 			</div>
 		</div>
 	);
