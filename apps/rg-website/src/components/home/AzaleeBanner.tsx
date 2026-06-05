@@ -45,6 +45,10 @@ export function AzaleeBanner({
 							alt={`Bannière ${title}`}
 							fill
 							priority
+							// L'image peut être distante (OG cross-site azalee.rosegriffon.fr/opengraph-image,
+							// réglable via home_azalee_image). L'optimiseur Vercel renvoie 402 (quota) sur ces
+							// distants → unoptimized pour qu'elle s'affiche (cf. piège images.qualities/402).
+							unoptimized
 							className="object-cover object-center transition-transform duration-700 group-hover:scale-105 group-hover:rotate-1"
 							sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 640px"
 						/>
@@ -63,6 +67,7 @@ export function AzaleeBanner({
 										src={logo}
 										alt={`Logo ${title} Miniature`}
 										fill
+										unoptimized
 										className="object-contain drop-shadow-sm"
 									/>
 								</div>
