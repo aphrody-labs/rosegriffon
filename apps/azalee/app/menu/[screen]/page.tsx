@@ -23,6 +23,14 @@ export async function generateMetadata({
 	return {
 		description: `Rendu WebGPU 2D de l'écran de menu IEVR « ${screen} ».`,
 		title: `Menu IEVR — ${screen}`,
+		// Favicon du vrai site officiel Inazuma Eleven: Victory Road (inazuma.jp/victory-road).
+		icons: {
+			icon: [
+				{ url: "/ievr-favicon.ico", sizes: "any" },
+				{ url: "/ievr-icon-192.png", type: "image/png", sizes: "192x192" },
+			],
+			apple: "/ievr-icon-192.png",
+		},
 	};
 }
 
