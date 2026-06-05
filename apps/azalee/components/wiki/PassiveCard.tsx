@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { CommonSpriteIcon } from "@/components/ui/CommonSpriteIcon";
 import type { SpriteCommonKey } from "@/config/sprites-common";
 import { cn } from "@/lib/utils";
@@ -340,11 +341,14 @@ export function NierPassiveFamilyCard({ family }: { family: NierPassiveFamily })
 
 	return (
 		<div className="rounded-2xl border border-outline-variant/30 bg-surface-container-low hover:bg-surface-container transition-colors p-4 space-y-3">
-			{/* Description FR résolue */}
+			{/* Description FR résolue (lien vers la fiche détail) */}
 			<div className="flex items-start justify-between gap-2">
-				<p className="text-sm font-semibold text-on-surface leading-snug whitespace-pre-line flex-1">
+				<Link
+					href={`/passive/${representative.passive_id}`}
+					className="text-sm font-semibold text-on-surface leading-snug whitespace-pre-line flex-1 hover:text-primary transition-colors"
+				>
 					{textFr}
-				</p>
+				</Link>
 				{elementName !== "neutral" && (
 					<span
 						className={cn(
@@ -357,7 +361,7 @@ export function NierPassiveFamilyCard({ family }: { family: NierPassiveFamily })
 				)}
 			</div>
 
-			{/* Tableau des valeurs par type de passif */}
+			{/* Tableau des valeurs par type de passif (chaque valeur → fiche détail) */}
 			<div className="space-y-2">
 				{[...byPrefix.entries()].map(([prefix, insts]) => (
 					<div key={prefix}>
@@ -366,20 +370,21 @@ export function NierPassiveFamilyCard({ family }: { family: NierPassiveFamily })
 						</div>
 						<div className="flex flex-wrap gap-1">
 							{insts.map((inst) => (
-								<span
+								<Link
 									key={inst.string_id}
-									className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-surface-container-highest text-xs font-mono text-on-surface"
+									href={`/passive/${inst.passive_id}`}
+									className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-surface-container-highest text-xs font-mono text-on-surface hover:bg-primary/15 hover:text-primary transition-colors"
 									title={inst.string_id}
 								>
 									{inst.main_value !== null ? `+${inst.main_value}%` : inst.string_id}
-								</span>
+								</Link>
 							))}
 						</div>
 					</div>
 				))}
 			</div>
 
-			{/* string_id de référence (hover) */}
+			{/* string_id de référence */}
 			<div className="text-[10px] text-on-surface-variant/50 font-mono truncate">
 				{representative.string_id}
 			</div>
