@@ -52,6 +52,7 @@
 		"@radix-ui/react-tooltip": "catalog:",
 		"@rose-griffon/assets": "workspace:*",
 		"@rose-griffon/auth": "workspace:*",
+		"@rose-griffon/better-auth-steam": "workspace:*",
 		"@rose-griffon/db": "workspace:*",
 		"@rose-griffon/patreon-bun": "workspace:*",
 		"@rose-griffon/types": "workspace:*",

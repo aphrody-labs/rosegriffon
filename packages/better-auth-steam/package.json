@@ -1,0 +1,27 @@
+{
+	"name": "@rose-griffon/better-auth-steam",
+	"version": "0.1.0",
+	"description": "Plugin Better Auth « steam » : login Steam OpenID 2.0 + vue compte IEVR (Steam Web API, app 2799860)",
+	"type": "module",
+	"exports": {
+		".": "./src/index.ts",
+		"./client": "./src/client.ts",
+		"./web-api": "./src/web-api.ts"
+	},
+	"publishConfig": {
+		"access": "restricted",
+		"registry": "https://npm.pkg.github.com"
+	},
+	"scripts": {
+		"type-check": "tsc --noEmit",
+		"test": "bun test"
+	},
+	"dependencies": {
+		"better-auth": "catalog:",
+		"zod": "catalog:"
+	},
+	"devDependencies": {
+		"@types/bun": "catalog:",
+		"typescript": "catalog:"
+	}
+}
