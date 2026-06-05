@@ -1,5 +1,6 @@
 import { createAuthClient } from "better-auth/react";
 import { twoFactorClient } from "better-auth/client/plugins";
+import { steamClient } from "@rose-griffon/better-auth-steam/client";
 import { getPublicOrigin } from "@/lib/site-url";
 
 const getBaseURL = () => {
@@ -20,5 +21,6 @@ export const authClient = createAuthClient({
 				}
 			},
 		}),
+		steamClient(),
 	],
 });

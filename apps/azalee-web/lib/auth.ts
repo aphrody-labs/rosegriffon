@@ -5,6 +5,7 @@ import { betterAuth } from "better-auth";
 import { nextCookies } from "better-auth/next-js";
 import { bearer, oAuthProxy, twoFactor } from "better-auth/plugins";
 import { agentAuth } from "@better-auth/agent-auth";
+import { steam } from "@rose-griffon/better-auth-steam";
 import { Pool } from "pg";
 import { logAudit } from "@/lib/audit";
 import { ADMIN_ROLES } from "@/lib/auth-roles";
@@ -185,7 +186,7 @@ function createAuth() {
 			...commonAuthOptions.account,
 			accountLinking: {
 				enabled: true,
-				trustedProviders: ["google", "discord"],
+				trustedProviders: ["google", "discord", "steam"],
 			},
 		},
 
@@ -340,6 +341,10 @@ function createAuth() {
 			...(process.env.VERCEL_ENV === "preview"
 				? [oAuthProxy({ productionURL: "https://azalee.rosegriffon.fr" })]
 				: []),
+			// Login Steam (OpenID 2.0) + vue compte IEVR (app 2799860) via Steam Web API.
+			// Steam n'expose PAS d'OAuth2/OIDC public → plugin custom OpenID 2.0 (cf.
+			// @rose-griffon/better-auth-steam). webApiKey lu depuis STEAM_WEB_API_KEY.
+			steam({ realm: getBetterAuthURL() }),
 			nextCookies(),
 		],
 	});

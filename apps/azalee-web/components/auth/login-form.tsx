@@ -91,7 +91,13 @@ export function LoginForm({ onSuccess, returnTo }: LoginFormProps) {
 			}
 
 			if (mode === "signup") {
-				const { error } = await authClient.signUp.email({
+				// `steamId` (champ additionnel du plugin Steam, `input: false`) n'est jamais
+				// fourni à l'inscription email : il est posé uniquement lors du login Steam
+				// (OpenID 2.0). Le cast évite que le typage du plugin l'exige côté client.
+				const signUpEmail = authClient.signUp.email as (
+					payload: { email: string; name: string; password: string }
+				) => ReturnType<typeof authClient.signUp.email>;
+				const { error } = await signUpEmail({
 					email,
 					name: name || email.split("@")[0],
 					password,

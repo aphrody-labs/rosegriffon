@@ -1,5 +1,14 @@
-import { Avatar, AvatarFallback, AvatarImage, Badge, Button, Card, CardContent } from "@rose-griffon/ui";
+import {
+	Avatar,
+	AvatarFallback,
+	AvatarImage,
+	Badge,
+	Button,
+	Card,
+	CardContent,
+} from "@rose-griffon/ui";
 import { ArrowLeft } from "lucide-react";
+import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { redirect } from "next/navigation";
@@ -11,11 +20,17 @@ import {
 	type SteamPlayerAchievement,
 } from "@rose-griffon/better-auth-steam";
 
-import { getServerUser } from "@/lib/auth-helpers";
+import { requireAuth } from "@/lib/auth-helpers";
 
 import { SteamConnectButton } from "./steam-connect-button";
 
 export const dynamic = "force-dynamic";
+
+export const metadata: Metadata = {
+	description:
+		"Lie ton compte Steam pour voir ta progression sur Inazuma Eleven Victory Road (temps de jeu, succès).",
+	title: "Mon compte Steam | Azalée",
+};
 
 /**
  * Page « Mon compte Steam » scopée Inazuma Eleven Victory Road (app 2799860).
@@ -26,9 +41,9 @@ export const dynamic = "force-dynamic";
  * - STEAM_WEB_API_KEY absente → message de configuration (pas de crash).
  */
 export default async function SteamAccountPage() {
-	const user = await getServerUser();
+	const user = await requireAuth();
 	if (!user) {
-		redirect("/login");
+		redirect("/login?returnTo=/compte/steam");
 	}
 
 	const steamId = (user as { steamId?: string | null }).steamId ?? null;
@@ -38,10 +53,10 @@ export default async function SteamAccountPage() {
 		return (
 			<main className="mx-auto max-w-2xl px-4 py-10">
 				<BackLink />
-				<h1 className="mb-2 text-2xl font-bold">Mon compte Steam</h1>
-				<p className="mb-6 text-muted-foreground">
-					Connectez votre compte Steam pour voir votre progression sur Inazuma Eleven
-					Victory Road (temps de jeu, succès).
+				<h1 className="mb-2 text-2xl font-bold text-on-surface">Mon compte Steam</h1>
+				<p className="mb-6 text-on-surface-variant">
+					Lie ton compte Steam pour voir ta progression sur Inazuma Eleven Victory Road
+					(temps de jeu, succès).
 				</p>
 				<SteamConnectButton callbackURL="/compte/steam" />
 			</main>
@@ -64,11 +79,11 @@ export default async function SteamAccountPage() {
 	return (
 		<main className="mx-auto max-w-3xl px-4 py-10">
 			<BackLink />
-			<h1 className="mb-6 text-2xl font-bold">Mon compte Steam</h1>
+			<h1 className="mb-6 text-2xl font-bold text-on-surface">Mon compte Steam</h1>
 
 			{!apiKey && (
 				<Card className="mb-6">
-					<CardContent className="py-4 text-sm text-muted-foreground">
+					<CardContent className="py-4 text-sm text-on-surface-variant">
 						La clé <code>STEAM_WEB_API_KEY</code> n&apos;est pas configurée : seul
 						l&apos;identifiant Steam est disponible.
 						<div className="mt-2 font-mono text-xs">SteamID64 : {steamId}</div>
@@ -77,8 +92,8 @@ export default async function SteamAccountPage() {
 			)}
 
 			{apiError && (
-				<Card className="mb-6 border-destructive/50">
-					<CardContent className="py-4 text-sm text-destructive">
+				<Card className="mb-6 border-error/50">
+					<CardContent className="py-4 text-sm text-error">
 						Impossible de joindre la Steam Web API : {apiError}
 					</CardContent>
 				</Card>
@@ -92,7 +107,9 @@ export default async function SteamAccountPage() {
 							<AvatarFallback>{account.summary.personaname.slice(0, 2)}</AvatarFallback>
 						</Avatar>
 						<div>
-							<div className="text-lg font-semibold">{account.summary.personaname}</div>
+							<div className="text-lg font-semibold text-on-surface">
+								{account.summary.personaname}
+							</div>
 							<Link
 								href={account.summary.profileurl}
 								target="_blank"
@@ -101,7 +118,7 @@ export default async function SteamAccountPage() {
 							>
 								Profil Steam
 							</Link>
-							<div className="mt-1 font-mono text-xs text-muted-foreground">{steamId}</div>
+							<div className="mt-1 font-mono text-xs text-on-surface-variant">{steamId}</div>
 						</div>
 					</CardContent>
 				</Card>
@@ -109,9 +126,11 @@ export default async function SteamAccountPage() {
 
 			<Card className="mb-6">
 				<CardContent className="py-4">
-					<h2 className="mb-3 text-lg font-semibold">Inazuma Eleven Victory Road</h2>
+					<h2 className="mb-3 text-lg font-semibold text-on-surface">
+						Inazuma Eleven Victory Road
+					</h2>
 					{account?.ievr ? (
-						<div className="space-y-1 text-sm">
+						<div className="space-y-1 text-sm text-on-surface">
 							<div className="flex items-center gap-2">
 								{account.ievr.img_icon_url && (
 									<Image
@@ -126,8 +145,7 @@ export default async function SteamAccountPage() {
 								<Badge>Jeu possédé</Badge>
 							</div>
 							<div>
-								Temps de jeu :{" "}
-								<strong>{formatPlaytime(account.ievr.playtime_forever)}</strong>
+								Temps de jeu : <strong>{formatPlaytime(account.ievr.playtime_forever)}</strong>
 							</div>
 							{account.ievr.playtime_2weeks ? (
 								<div>
@@ -136,7 +154,7 @@ export default async function SteamAccountPage() {
 							) : null}
 						</div>
 					) : (
-						<p className="text-sm text-muted-foreground">
+						<p className="text-sm text-on-surface-variant">
 							{apiKey
 								? "Jeu non détecté sur ce compte (non possédé ou profil Steam privé)."
 								: "Possession indisponible sans clé Web API."}
@@ -148,13 +166,13 @@ export default async function SteamAccountPage() {
 			{account?.ievr && (
 				<Card>
 					<CardContent className="py-4">
-						<h2 className="mb-3 text-lg font-semibold">Succès</h2>
-						<p className="mb-3 text-sm">
+						<h2 className="mb-3 text-lg font-semibold text-on-surface">Succès</h2>
+						<p className="mb-3 text-sm text-on-surface">
 							<strong>{account.achievementsUnlocked}</strong> / {account.achievementsTotal}{" "}
 							débloqués
 						</p>
 						{account.achievementsTotal === 0 ? (
-							<p className="text-sm text-muted-foreground">
+							<p className="text-sm text-on-surface-variant">
 								Aucun succès disponible (profil privé ou jeu sans succès).
 							</p>
 						) : (
@@ -162,7 +180,7 @@ export default async function SteamAccountPage() {
 								{account.achievements.slice(0, 50).map((a: SteamPlayerAchievement) => (
 									<li
 										key={a.apiname}
-										className={`text-sm ${a.achieved ? "text-foreground" : "text-muted-foreground line-through"}`}
+										className={`text-sm ${a.achieved ? "text-on-surface" : "text-on-surface-variant line-through"}`}
 									>
 										{a.achieved ? "✓ " : "○ "}
 										{a.name ?? a.apiname}
@@ -180,8 +198,8 @@ export default async function SteamAccountPage() {
 function BackLink() {
 	return (
 		<Button asChild variant="ghost" size="sm" className="mb-4">
-			<Link href="/dashboard/account">
-				<ArrowLeft className="mr-1 size-4" /> Retour au compte
+			<Link href="/settings">
+				<ArrowLeft className="mr-1 size-4" /> Retour aux paramètres
 			</Link>
 		</Button>
 	);
