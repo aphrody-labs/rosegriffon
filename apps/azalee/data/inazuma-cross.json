@@ -17,7 +17,7 @@
     "subtitleFr": "Jeu mobile — site officiel",
     "description": "「イナズマイレブン」シリーズの最新スマホゲーム『イナズマイレブン クロス』（イナイレクロス）公式サイト",
     "descriptionFr": "Site officiel d'Inazuma Eleven Cross (イナイレクロス), le dernier jeu mobile de la série Inazuma Eleven.",
-    "ogImage": "https://www.inazuma-cross.jp/wp-content/uploads/ogp.jpg"
+    "ogImage": "/inazuma-cross/ogp.jpg"
   },
   "status": {
     "phase": "pre-registration",
@@ -58,7 +58,7 @@
     "nameRomaji": "Yo Shiosawa",
     "descriptionJa": "戦術分析を駆使し選手のサポートをおこなう。消えてしまった弟を探している。",
     "descriptionFr": "Il met à profit son analyse tactique pour épauler les joueurs. Il recherche son petit frère qui a disparu.",
-    "image": "https://www.inazuma-cross.jp/wp-content/themes/officialsite/dist/webp/home/intro-character.webp"
+    "image": "/inazuma-cross/intro-character.webp"
   },
   "system": {
     "headingJa": "SYSTEM ゲーム紹介",
@@ -118,10 +118,10 @@
     "headingFr": "Récompenses de pré-enregistrement",
     "noteFr": "Le site officiel présente quatre paliers de récompenses de pré-enregistrement débloqués lorsqu'un objectif collectif est atteint (badge « 達成 », « objectif atteint »). Le détail est affiché sous forme de bannières sur la page d'accueil.",
     "images": [
-      "https://www.inazuma-cross.jp/wp-content/themes/officialsite/dist/webp/home/reward-image1-achieve.webp",
-      "https://www.inazuma-cross.jp/wp-content/themes/officialsite/dist/webp/home/reward-image2-achieve.webp",
-      "https://www.inazuma-cross.jp/wp-content/themes/officialsite/dist/webp/home/reward-image3-achieve.webp",
-      "https://www.inazuma-cross.jp/wp-content/themes/officialsite/dist/webp/home/reward-image4-achieve.webp"
+      "/inazuma-cross/reward-image1-achieve.webp",
+      "/inazuma-cross/reward-image2-achieve.webp",
+      "/inazuma-cross/reward-image3-achieve.webp",
+      "/inazuma-cross/reward-image4-achieve.webp"
     ]
   },
   "samuraiBlue2026": {
@@ -195,7 +195,7 @@
       "adTruckFr": "Camion publicitaire (ad truck) — période : du vendredi 12 juin 2026 à 12h00 au dimanche 21 juin 2026 à 19h00."
     },
     "character": "/inazuma-cross/sb-hissatsu-chara.webp",
-    "banner": "/inazuma-cross/samuraiblue.webp"
+    "banner": "/inazuma-cross/banner-samuraiblue-collabo.webp"
   },
   "cbtReport": {
     "url": "https://www.inazuma-cross.jp/cbt-report/",
@@ -426,6 +426,16 @@
       "victoryRoad": "/inazuma-cross/footer-banner-victory-road.webp"
     },
     "logoLevel5": "/inazuma-cross/logo-level5.webp",
-    "logoAiming": "/inazuma-cross/logo-aiming.webp"
+    "logoAiming": "/inazuma-cross/logo-aiming.webp",
+    "rewardAchieve": [
+      "/inazuma-cross/reward-image1-achieve.webp",
+      "/inazuma-cross/reward-image2-achieve.webp",
+      "/inazuma-cross/reward-image3-achieve.webp",
+      "/inazuma-cross/reward-image4-achieve.webp"
+    ],
+    "firstview": "/inazuma-cross/firstview-image-pc.webp",
+    "preregistrationText": "/inazuma-cross/preregistration-text.webp",
+    "badgeAppStore": "/inazuma-cross/badge-appstore.svg",
+    "badgeGooglePlay": "/inazuma-cross/badge-googleplay.png"
   }
 }
