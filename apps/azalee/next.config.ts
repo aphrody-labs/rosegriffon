@@ -200,7 +200,9 @@ const nextConfig: NextConfig = {
 
 		const cspHeader = [
 			"default-src 'self'",
-			`script-src 'self' 'unsafe-inline'${cdnSrc} https://www.googletagmanager.com https://www.google-analytics.com${isDev ? " 'unsafe-eval'" : ""}`,
+			// 'wasm-unsafe-eval' : requis pour instancier les modules WebAssembly
+			// (lecteur de sauvegarde /save, renderer menu webgpu) sous CSP strict.
+			`script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'${cdnSrc} https://www.googletagmanager.com https://www.google-analytics.com${isDev ? " 'unsafe-eval'" : ""}`,
 			`style-src 'self' 'unsafe-inline'${cdnSrc}`,
 			`img-src 'self' blob: data:${cdnSrc} ${ASSET_CDN_ORIGIN} https://dxi4wb638ujep.cloudfront.net https://*.inazuma.jp https://*.supabase.co https://lh3.googleusercontent.com https://cdn.discordapp.com https://pbs.twimg.com`,
 			`media-src 'self' blob: data:${cdnSrc} ${ASSET_CDN_ORIGIN} https://dxi4wb638ujep.cloudfront.net https://*.inazuma.jp https://video.twimg.com https://pbs.twimg.com`,

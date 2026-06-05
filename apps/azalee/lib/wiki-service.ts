@@ -13,11 +13,16 @@ interface ItemEnrichment {
 const ITEM_ENRICHMENT = itemEnrichmentData as Record<string, ItemEnrichment>;
 import type { Database } from "@rose-griffon/db";
 import {
+	extractKeshinModelCode,
 	galleryVariantUrl,
+	getArmureModelGlbUrl,
 	getAuraImageUrl,
 	getGalleryImageUrl,
+	getKeshinModelGlbUrl,
 	getMiximaxIconUrl,
 	getMiximaxImageUrl,
+	listServedArmureCodes,
+	listServedKeshinCodes,
 	resolveAssetUrl,
 	resolveAuraTelopUrl,
 } from "@/lib/images";
@@ -718,7 +723,63 @@ export const wikiService = {
 			ownerCharaParamId: ownerCharaId || undefined,
 			ownerName,
 			ownerSlug,
+			// Modèle 3D COMPLET keshin (corps+armure+textures) assemblé live depuis les CPK.
+			// Le code `k<NNNNNN>` vit dans le chemin d'icône (`aura_fs/k…`) ou la colonne `data`.
+			// Gardé sur le manifeste des modèles réellement servis → null si non assemblable.
+			modelGlbUrl:
+				typeSlug === "esprits-guerriers" || typeSlug === "totems"
+					? getKeshinModelGlbUrl(
+							extractKeshinModelCode(
+								a.image_url,
+								typeof a.data === "string" ? a.data : JSON.stringify(a.data ?? ""),
+								sd.image
+							)
+						)
+					: null,
 		};
+	},
+
+	/**
+	 * Galerie des modèles 3D COMPLETS keshin + armures réellement servis live
+	 * (`/model-full/<code>.glb`). Source codes = manifeste `keshin-model-manifest.json`
+	 * (gate anti-404). Les noms viennent de `inagle_keshins` (par code `k<NNNNNN>` extrait
+	 * de l'icône) ; l'armure `ka<NNNNNN>NN` mappe sur le même groupe keshin (forme blindée).
+	 */
+	async getKeshinModelGallery(): Promise<{
+		keshin: Array<{ code: string; name: string; glbUrl: string }>;
+		armures: Array<{ code: string; name: string; glbUrl: string }>;
+	}> {
+		const supabase = await createClient();
+		const { data } = await (supabase as any)
+			.from("inagle_keshins")
+			.select("name_fr, name_en, image_url, data");
+		const rows = (data as any[]) || [];
+
+		// Index code keshin (`k<NNNNNN>`) -> nom FR, extrait icône/data.
+		const nameByCode = new Map<string, string>();
+		for (const r of rows) {
+			const blob = `${r.image_url || ""} ${typeof r.data === "string" ? r.data : JSON.stringify(r.data ?? "")}`;
+			const code = extractKeshinModelCode(blob);
+			const name = r.name_fr || r.name_en;
+			if (code && name && !nameByCode.has(code)) nameByCode.set(code, name);
+		}
+
+		const keshin = listServedKeshinCodes().flatMap((code) => {
+			const glbUrl = getKeshinModelGlbUrl(code);
+			return glbUrl ? [{ code, glbUrl, name: nameByCode.get(code) || code }] : [];
+		});
+
+		// Armure `ka00<GG>01` -> keshin `k00<GG>0` (groupe). Fallback : code armure.
+		const armures = listServedArmureCodes().flatMap((code) => {
+			const glbUrl = getArmureModelGlbUrl(code);
+			if (!glbUrl) return [];
+			const grp = code.match(/^ka(\d{2})(\d{2})\d{2}$/);
+			const keshinCode = grp ? `k${grp[1]}${grp[2]}0` : null;
+			const baseName = keshinCode ? nameByCode.get(keshinCode) : undefined;
+			return [{ code, glbUrl, name: baseName ? `${baseName} (Armure)` : code }];
+		});
+
+		return { armures, keshin };
 	},
 
 	async getAurasList(params: ListParams & { typeSlug: string }): Promise<ListResult<any>> {

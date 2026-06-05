@@ -13,6 +13,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 import { Icon } from "@/components/ui/Icon";
+import CharacterModelViewer from "@/components/wiki/CharacterModelViewer";
 import { ElementIcon } from "@/components/wiki/ElementIcon";
 import {
 	BUFF_EFFECT_FR,
@@ -83,6 +84,8 @@ interface AuraData {
 	ownerCharaParamId?: string;
 	ownerName?: string;
 	ownerSlug?: string;
+	/** URL du modèle 3D COMPLET keshin (corps+armure+textures), null si non servi. */
+	modelGlbUrl?: string | null;
 }
 
 interface AuraDetailProps {
@@ -134,6 +137,13 @@ export function AuraDetail({ aura, category, subTypeInfo, prevAura, nextAura }: 
 									className={`hidden sm:block ${subTypeInfo.color} opacity-30`}
 								/>
 							</>
+						)}
+						{/* Modèle 3D COMPLET keshin (corps+armure+textures) — monté seulement
+						    si un modèle assemblé est servi (gate manifeste, anti-404). */}
+						{aura.modelGlbUrl && (
+							<div className="absolute bottom-1 right-1 rounded-full bg-black/40 backdrop-blur-sm border border-white/20">
+								<CharacterModelViewer glbUrl={aura.modelGlbUrl} name={aura.displayName} />
+							</div>
 						)}
 					</div>
 
