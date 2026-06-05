@@ -1,148 +1,168 @@
 {
-  "screen": "51_save",
-  "locale": "fr",
-  "canvas": {
-    "w": 1280,
-    "h": 720
-  },
-  "objects": [
-    {
-      "name": "save01_03_detail_window_attach_base_rpg",
-      "transform": {
-        "x": 640,
-        "y": 360,
-        "scaleX": 1,
-        "scaleY": 1,
-        "rot": 0,
-        "anchorX": 0.5,
-        "anchorY": 0.5
-      },
-      "drawPriority": 451,
-      "drawType": 0,
-      "camera": "0x02D8FB06",
-      "anim": {}
-    },
-    {
-      "name": "save01_01_list_attach_base",
-      "transform": {
-        "x": 640,
-        "y": 360,
-        "scaleX": 1,
-        "scaleY": 1,
-        "rot": 0,
-        "anchorX": 0.5,
-        "anchorY": 0.5
-      },
-      "drawPriority": 451,
-      "drawType": 0,
-      "camera": "0x02D8FB06",
-      "text": {
-        "key": "_text_time01",
-        "keyHash": 1590746387,
-        "value": "_text_time01",
-        "font": "nie_main",
-        "size": 24,
-        "color": "#ffffff",
-        "align": "center"
-      },
-      "anim": {}
-    },
-    {
-      "name": "save01_03_detail_window_attach_base",
-      "transform": {
-        "x": 640,
-        "y": 360,
-        "scaleX": 1,
-        "scaleY": 1,
-        "rot": 0,
-        "anchorX": 0.5,
-        "anchorY": 0.5
-      },
-      "drawPriority": 451,
-      "drawType": 0,
-      "camera": "0x02D8FB06",
-      "anim": {}
-    },
-    {
-      "name": "save01_02_list_item",
-      "transform": {
-        "x": 640,
-        "y": 360,
-        "scaleX": 1,
-        "scaleY": 1,
-        "rot": 0,
-        "anchorX": 0.5,
-        "anchorY": 0.5
-      },
-      "drawPriority": 551,
-      "drawType": 0,
-      "camera": "0x02D8FB06",
-      "text": {
-        "key": "_text_list01_on",
-        "keyHash": 478786179,
-        "value": "_text_list01_on",
-        "font": "nie_main",
-        "size": 24,
-        "color": "#ffffff",
-        "align": "center"
-      },
-      "anim": {}
-    },
-    {
-      "name": "save01_04_savedata_detail_window",
-      "transform": {
-        "x": 640,
-        "y": 360,
-        "scaleX": 0.16666666666666666,
-        "scaleY": 0.16666666666666666,
-        "rot": 0,
-        "anchorX": 0.5,
-        "anchorY": 0.5
-      },
-      "drawPriority": 552,
-      "drawType": 0,
-      "camera": "0x02D8FB06",
-      "sprite": {
-        "logicalPath": "dx11/menu/51_save/save01/save01_04/fr/save01_04.g4tx",
-        "pngUrl": "/dx11/menu/51_save/save01/save01_04/fr/save01_04.png",
-        "w": 4,
-        "h": 4
-      },
-      "text": {
-        "key": "_text_save_info_title01",
-        "keyHash": 812942928,
-        "value": "_text_save_info_title01",
-        "font": "nie_main",
-        "size": 24,
-        "color": "#ffffff",
-        "align": "center"
-      },
-      "anim": {}
-    },
-    {
-      "name": "save01_05_user_info",
-      "transform": {
-        "x": 1280,
-        "y": 720,
-        "scaleX": 1,
-        "scaleY": 1,
-        "rot": 0,
-        "anchorX": 0.5,
-        "anchorY": 0.5
-      },
-      "drawPriority": 885,
-      "drawType": 3,
-      "camera": "0x02D8FB06",
-      "text": {
-        "key": "_text_user_name_title01",
-        "keyHash": 3441435847,
-        "value": "_text_user_name_title01",
-        "font": "nie_main",
-        "size": 24,
-        "color": "#ffffff",
-        "align": "center"
-      },
-      "anim": {}
-    }
-  ]
+	"screen": "51_save",
+	"locale": "fr",
+	"canvas": {
+		"w": 1280,
+		"h": 720
+	},
+	"objects": [
+		{
+			"name": "save01_03_detail_window_attach_base_rpg",
+			"transform": {
+				"x": 640,
+				"y": 360,
+				"scaleX": 1,
+				"scaleY": 1,
+				"rot": 0,
+				"anchorX": 0.5,
+				"anchorY": 0.5
+			},
+			"drawPriority": 451,
+			"drawType": 0,
+			"camera": "0x02D8FB06",
+			"anim": {}
+		},
+		{
+			"name": "save01_01_list_attach_base",
+			"transform": {
+				"x": 640,
+				"y": 360,
+				"scaleX": 1,
+				"scaleY": 1,
+				"rot": 0,
+				"anchorX": 0.5,
+				"anchorY": 0.5
+			},
+			"drawPriority": 451,
+			"drawType": 0,
+			"camera": "0x02D8FB06",
+			"text": {
+				"key": "_text_time01",
+				"keyHash": 1590746387,
+				"value": "Time",
+				"font": "nie_main",
+				"size": 24,
+				"color": "#ffffff",
+				"align": "center",
+				"localized": {
+					"fr": "Time",
+					"en": "Time",
+					"ja": "Time"
+				}
+			},
+			"anim": {}
+		},
+		{
+			"name": "save01_03_detail_window_attach_base",
+			"transform": {
+				"x": 640,
+				"y": 360,
+				"scaleX": 1,
+				"scaleY": 1,
+				"rot": 0,
+				"anchorX": 0.5,
+				"anchorY": 0.5
+			},
+			"drawPriority": 451,
+			"drawType": 0,
+			"camera": "0x02D8FB06",
+			"anim": {}
+		},
+		{
+			"name": "save01_02_list_item",
+			"transform": {
+				"x": 640,
+				"y": 360,
+				"scaleX": 1,
+				"scaleY": 1,
+				"rot": 0,
+				"anchorX": 0.5,
+				"anchorY": 0.5
+			},
+			"drawPriority": 551,
+			"drawType": 0,
+			"camera": "0x02D8FB06",
+			"text": {
+				"key": "_text_list01_on",
+				"keyHash": 478786179,
+				"value": "List",
+				"font": "nie_main",
+				"size": 24,
+				"color": "#ffffff",
+				"align": "center",
+				"localized": {
+					"fr": "List",
+					"en": "List",
+					"ja": "List"
+				}
+			},
+			"anim": {}
+		},
+		{
+			"name": "save01_04_savedata_detail_window",
+			"transform": {
+				"x": 640,
+				"y": 360,
+				"scaleX": 0.16666666666666666,
+				"scaleY": 0.16666666666666666,
+				"rot": 0,
+				"anchorX": 0.5,
+				"anchorY": 0.5
+			},
+			"drawPriority": 552,
+			"drawType": 0,
+			"camera": "0x02D8FB06",
+			"sprite": {
+				"logicalPath": "dx11/menu/51_save/save01/save01_04/fr/save01_04.g4tx",
+				"pngUrl": "/dx11/menu/51_save/save01/save01_04/fr/save01_04.png",
+				"w": 4,
+				"h": 4
+			},
+			"text": {
+				"key": "_text_save_info_title01",
+				"keyHash": 812942928,
+				"value": "Save info title",
+				"font": "nie_main",
+				"size": 24,
+				"color": "#ffffff",
+				"align": "center",
+				"localized": {
+					"fr": "Save info title",
+					"en": "Save info title",
+					"ja": "Save info title"
+				}
+			},
+			"anim": {}
+		},
+		{
+			"name": "save01_05_user_info",
+			"transform": {
+				"x": 1280,
+				"y": 720,
+				"scaleX": 1,
+				"scaleY": 1,
+				"rot": 0,
+				"anchorX": 0.5,
+				"anchorY": 0.5
+			},
+			"drawPriority": 885,
+			"drawType": 3,
+			"camera": "0x02D8FB06",
+			"text": {
+				"key": "_text_user_name_title01",
+				"keyHash": 3441435847,
+				"value": "User name title",
+				"font": "nie_main",
+				"size": 24,
+				"color": "#ffffff",
+				"align": "center",
+				"localized": {
+					"fr": "User name title",
+					"en": "User name title",
+					"ja": "User name title"
+				}
+			},
+			"anim": {}
+		}
+	]
 }

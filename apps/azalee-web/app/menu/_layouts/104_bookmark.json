@@ -1,161 +1,176 @@
 {
-  "screen": "104_bookmark",
-  "locale": "fr",
-  "canvas": {
-    "w": 1280,
-    "h": 720
-  },
-  "objects": [
-    {
-      "name": "bookmark01_05_bookmark_detail",
-      "transform": {
-        "x": 640,
-        "y": 360,
-        "scaleX": 0.00025562372188139056,
-        "scaleY": 0.00035161744022503517,
-        "rot": 0,
-        "anchorX": 0.5,
-        "anchorY": 0.5
-      },
-      "drawPriority": 452,
-      "drawType": 0,
-      "camera": "0x02D8FB06",
-      "sprite": {
-        "logicalPath": "dx11/menu/104_bookmark/bookmark01/bookmark01_05/fr/bookmark01_05.g4tx",
-        "pngUrl": "/dx11/menu/104_bookmark/bookmark01/bookmark01_05/fr/bookmark01_05.png",
-        "w": 2608,
-        "h": 1896
-      },
-      "text": {
-        "key": "_text_sp_screen01_title01",
-        "keyHash": 914958531,
-        "value": "_text_sp_screen01_title01",
-        "font": "nie_main",
-        "size": 24,
-        "color": "#ffffff",
-        "align": "center"
-      },
-      "anim": {}
-    },
-    {
-      "name": "bookmark01_00_2_mask_bg",
-      "transform": {
-        "x": 640,
-        "y": 360,
-        "scaleX": 1,
-        "scaleY": 1,
-        "rot": 0,
-        "anchorX": 0.5,
-        "anchorY": 0.5
-      },
-      "drawPriority": 452,
-      "drawType": 0,
-      "camera": "0x02D8FB06",
-      "anim": {}
-    },
-    {
-      "name": "bookmark01_05_p1_bookmark_detail_check",
-      "transform": {
-        "x": 640,
-        "y": 360,
-        "scaleX": 1,
-        "scaleY": 1,
-        "rot": -1.5707963705062866,
-        "anchorX": 0.5,
-        "anchorY": 0.5
-      },
-      "drawPriority": 453,
-      "drawType": 0,
-      "camera": "0x02D8FB06",
-      "anim": {}
-    },
-    {
-      "name": "bookmark01_02_list_item",
-      "transform": {
-        "x": 640,
-        "y": 360,
-        "scaleX": 1,
-        "scaleY": 1,
-        "rot": 0,
-        "anchorX": 0.5,
-        "anchorY": 0.5
-      },
-      "drawPriority": 521,
-      "drawType": 0,
-      "camera": "0x02D8FB06",
-      "text": {
-        "key": "_text_list01_on",
-        "keyHash": 3273821866,
-        "value": "_text_list01_on",
-        "font": "nie_main",
-        "size": 24,
-        "color": "#ffffff",
-        "align": "center"
-      },
-      "anim": {}
-    },
-    {
-      "name": "bookmark01_02_p1_list_item_check",
-      "transform": {
-        "x": 640,
-        "y": 360,
-        "scaleX": 0.0018518518518518517,
-        "scaleY": 0.008333333333333333,
-        "rot": 0,
-        "anchorX": 0.5,
-        "anchorY": 0.5
-      },
-      "drawPriority": 522,
-      "drawType": 0,
-      "camera": "0x02D8FB06",
-      "sprite": {
-        "logicalPath": "dx11/menu/104_bookmark/bookmark01/bookmark01_02_p1/fr/bookmark01_02_p1.g4tx",
-        "pngUrl": "/dx11/menu/104_bookmark/bookmark01/bookmark01_02_p1/fr/bookmark01_02_p1.png",
-        "w": 360,
-        "h": 80
-      },
-      "anim": {}
-    },
-    {
-      "name": "bookmark01_03_check_button",
-      "transform": {
-        "x": 640,
-        "y": 360,
-        "scaleX": 1,
-        "scaleY": 1,
-        "rot": 0,
-        "anchorX": 0.5,
-        "anchorY": 0.5
-      },
-      "drawPriority": 522,
-      "drawType": 0,
-      "camera": "0x02D8FB06",
-      "text": {
-        "key": "_text_btn01",
-        "keyHash": 1067362825,
-        "value": "_text_btn01",
-        "font": "nie_main",
-        "size": 24,
-        "color": "#ffffff",
-        "align": "center"
-      },
-      "anim": {}
-    },
-    {
-      "name": "bookmark01_02_p2_list_item_check_eff",
-      "transform": {
-        "x": 640,
-        "y": 360,
-        "scaleX": 1,
-        "scaleY": 1,
-        "rot": 0,
-        "anchorX": 0.5,
-        "anchorY": 0.5
-      },
-      "drawPriority": 522,
-      "drawType": 0,
-      "camera": "0x02D8FB06",
-      "anim": {}
-    }
-  ]
+	"screen": "104_bookmark",
+	"locale": "fr",
+	"canvas": {
+		"w": 1280,
+		"h": 720
+	},
+	"objects": [
+		{
+			"name": "bookmark01_05_bookmark_detail",
+			"transform": {
+				"x": 640,
+				"y": 360,
+				"scaleX": 0.00025562372188139056,
+				"scaleY": 0.00035161744022503517,
+				"rot": 0,
+				"anchorX": 0.5,
+				"anchorY": 0.5
+			},
+			"drawPriority": 452,
+			"drawType": 0,
+			"camera": "0x02D8FB06",
+			"sprite": {
+				"logicalPath": "dx11/menu/104_bookmark/bookmark01/bookmark01_05/fr/bookmark01_05.g4tx",
+				"pngUrl": "/dx11/menu/104_bookmark/bookmark01/bookmark01_05/fr/bookmark01_05.png",
+				"w": 2608,
+				"h": 1896
+			},
+			"text": {
+				"key": "_text_sp_screen01_title01",
+				"keyHash": 914958531,
+				"value": "Sp screen title",
+				"font": "nie_main",
+				"size": 24,
+				"color": "#ffffff",
+				"align": "center",
+				"localized": {
+					"fr": "Sp screen title",
+					"en": "Sp screen title",
+					"ja": "Sp screen title"
+				}
+			},
+			"anim": {}
+		},
+		{
+			"name": "bookmark01_00_2_mask_bg",
+			"transform": {
+				"x": 640,
+				"y": 360,
+				"scaleX": 1,
+				"scaleY": 1,
+				"rot": 0,
+				"anchorX": 0.5,
+				"anchorY": 0.5
+			},
+			"drawPriority": 452,
+			"drawType": 0,
+			"camera": "0x02D8FB06",
+			"anim": {}
+		},
+		{
+			"name": "bookmark01_05_p1_bookmark_detail_check",
+			"transform": {
+				"x": 640,
+				"y": 360,
+				"scaleX": 1,
+				"scaleY": 1,
+				"rot": -1.5707963705062866,
+				"anchorX": 0.5,
+				"anchorY": 0.5
+			},
+			"drawPriority": 453,
+			"drawType": 0,
+			"camera": "0x02D8FB06",
+			"anim": {}
+		},
+		{
+			"name": "bookmark01_02_list_item",
+			"transform": {
+				"x": 640,
+				"y": 360,
+				"scaleX": 1,
+				"scaleY": 1,
+				"rot": 0,
+				"anchorX": 0.5,
+				"anchorY": 0.5
+			},
+			"drawPriority": 521,
+			"drawType": 0,
+			"camera": "0x02D8FB06",
+			"text": {
+				"key": "_text_list01_on",
+				"keyHash": 3273821866,
+				"value": "List",
+				"font": "nie_main",
+				"size": 24,
+				"color": "#ffffff",
+				"align": "center",
+				"localized": {
+					"fr": "List",
+					"en": "List",
+					"ja": "List"
+				}
+			},
+			"anim": {}
+		},
+		{
+			"name": "bookmark01_02_p1_list_item_check",
+			"transform": {
+				"x": 640,
+				"y": 360,
+				"scaleX": 0.0018518518518518517,
+				"scaleY": 0.008333333333333333,
+				"rot": 0,
+				"anchorX": 0.5,
+				"anchorY": 0.5
+			},
+			"drawPriority": 522,
+			"drawType": 0,
+			"camera": "0x02D8FB06",
+			"sprite": {
+				"logicalPath": "dx11/menu/104_bookmark/bookmark01/bookmark01_02_p1/fr/bookmark01_02_p1.g4tx",
+				"pngUrl": "/dx11/menu/104_bookmark/bookmark01/bookmark01_02_p1/fr/bookmark01_02_p1.png",
+				"w": 360,
+				"h": 80
+			},
+			"anim": {}
+		},
+		{
+			"name": "bookmark01_03_check_button",
+			"transform": {
+				"x": 640,
+				"y": 360,
+				"scaleX": 1,
+				"scaleY": 1,
+				"rot": 0,
+				"anchorX": 0.5,
+				"anchorY": 0.5
+			},
+			"drawPriority": 522,
+			"drawType": 0,
+			"camera": "0x02D8FB06",
+			"text": {
+				"key": "_text_btn01",
+				"keyHash": 1067362825,
+				"value": "Btn",
+				"font": "nie_main",
+				"size": 24,
+				"color": "#ffffff",
+				"align": "center",
+				"localized": {
+					"fr": "Btn",
+					"en": "Btn",
+					"ja": "Btn"
+				}
+			},
+			"anim": {}
+		},
+		{
+			"name": "bookmark01_02_p2_list_item_check_eff",
+			"transform": {
+				"x": 640,
+				"y": 360,
+				"scaleX": 1,
+				"scaleY": 1,
+				"rot": 0,
+				"anchorX": 0.5,
+				"anchorY": 0.5
+			},
+			"drawPriority": 522,
+			"drawType": 0,
+			"camera": "0x02D8FB06",
+			"anim": {}
+		}
+	]
 }
