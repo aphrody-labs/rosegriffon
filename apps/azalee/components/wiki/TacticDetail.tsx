@@ -56,14 +56,15 @@ export function TacticDetail({ tactic }: TacticDetailProps) {
 				{/* Header */}
 				<div className="px-6 pt-6 pb-4">
 					<div className="flex items-start gap-4">
-						<div className="size-16 shrink-0 rounded-2xl bg-surface-container-high flex items-center justify-center border border-outline-variant/20 overflow-hidden">
+						<div className="w-full max-w-xs sm:max-w-sm shrink-0 rounded-2xl bg-surface-container-high flex items-center justify-center border border-outline-variant/20 overflow-hidden">
 							{imageSrc && !imgError ? (
 								<Image
 									src={imageSrc}
 									alt={tactic.name_fr || tactic.name}
-									width={56}
-									height={56}
-									className="object-contain size-14"
+									width={1728}
+									height={352}
+									sizes="(max-width: 640px) 100vw, 384px"
+									className="w-full h-auto object-contain"
 									unoptimized
 									onError={() => setImgError(true)}
 								/>

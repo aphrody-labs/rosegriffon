@@ -3,7 +3,7 @@ export const dynamic = "force-dynamic";
 import { SearchX } from "lucide-react";
 import type { Metadata } from "next";
 import { FadeInItem, FadeInStagger } from "@/components/ui/fade-in";
-import { ItemCard } from "@/components/wiki/ItemCard";
+import { TacticCard } from "@/components/wiki/TacticCard";
 import { WikiPagination } from "@/components/wiki/WikiPagination";
 import { WikiSearchToolbar } from "@/components/wiki/WikiSearchToolbar";
 import { parseSearchParams } from "@/lib/validations";
@@ -53,16 +53,11 @@ export default async function TacticsPage({
 				<FadeInStagger className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
 					{tactics.map((t: any) => (
 						<FadeInItem key={t.itemId}>
-							<ItemCard
+							<TacticCard
 								id={t.itemId}
 								name={t.names?.fr || t.names?.en || t.name_FR}
-								category="special_tactics"
+								image={t.image}
 								categoryLabel="Tactique"
-								rarity={t.rarity}
-								internalCode={t.internalCode}
-								price={t.price}
-								location={t.location}
-								stats={t.stats}
 							/>
 						</FadeInItem>
 					))}
