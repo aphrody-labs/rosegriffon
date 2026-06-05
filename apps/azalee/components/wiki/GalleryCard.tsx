@@ -8,7 +8,10 @@ import { cn } from "@/lib/utils";
 export interface GalleryCardProps {
 	id: string;
 	title: string;
-	image: string | null;
+	/** Vignette WebP légère (w=400) affichée dans la carte. */
+	thumb: string | null;
+	/** Variante grande (w=1600) préchargée au survol pour un lightbox instantané. */
+	full?: string | null;
 	categoryLabel?: string;
 	categoryIcon?: string;
 	className?: string;
@@ -19,15 +22,16 @@ export interface GalleryCardProps {
 }
 
 /**
- * Carte d'illustration de galerie in-game. Image plein cadre (illustration 16:9 du
- * dump dx11), titre dérivé du `img_path`, chip de catégorie. Cliquable → ouvre le
- * lightbox plein écran via `onOpen`. Au survol, précharge l'image pleine résolution
- * (l'URL CDN est la même que l'affichage) pour une ouverture instantanée du lightbox.
+ * Carte d'illustration de galerie in-game. Vignette WebP légère (illustration 16:9 du
+ * dump dx11, ~4–60 Ko au lieu du PNG ~12 Mo), titre dérivé du `img_path`, chip de
+ * catégorie. Cliquable → ouvre le lightbox plein écran via `onOpen`. Au survol,
+ * précharge la grande variante (w=1600) pour une ouverture instantanée du lightbox.
  * Fallback propre (icône de catégorie) si l'image est absente ou renvoie 404.
  */
 export function GalleryCard({
+	thumb,
+	full,
 	title,
-	image,
 	categoryLabel,
 	categoryIcon = "image",
 	className,
@@ -36,17 +40,18 @@ export function GalleryCard({
 }: GalleryCardProps) {
 	const [imgError, setImgError] = useState(false);
 	const prefetchedRef = useRef(false);
-	const hasImage = !!image && !imgError;
+	const hasImage = !!thumb && !imgError;
 
 	// Préchargement au survol : crée une <img> détachée pour amorcer le cache navigateur
-	// avant l'ouverture du lightbox (l'URL CDN est identique, donc cache partagé).
+	// avec la GRANDE variante (w=1600) que le lightbox affichera — ouverture instantanée.
 	const prefetch = () => {
-		if (prefetchedRef.current || !image) {
+		const target = full ?? thumb;
+		if (prefetchedRef.current || !target) {
 			return;
 		}
 		prefetchedRef.current = true;
 		const img = new window.Image();
-		img.src = image;
+		img.src = target;
 	};
 
 	return (
@@ -67,7 +72,7 @@ export function GalleryCard({
 			<div className="relative aspect-video w-full overflow-hidden bg-surface-container-high">
 				{hasImage ? (
 					<Image
-						src={image as string}
+						src={thumb as string}
 						alt={title}
 						fill
 						sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"

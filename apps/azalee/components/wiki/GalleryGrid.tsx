@@ -9,7 +9,12 @@ import { GalleryLightbox } from "@/components/wiki/GalleryLightbox";
 export interface GalleryGridItem {
 	id: string;
 	title: string;
-	image: string | null;
+	/** Vignette WebP légère (w=400) — affichée dans la carte. */
+	thumb: string | null;
+	/** Variante WebP grande (w=1600) — affichée dans le lightbox. */
+	full: string | null;
+	/** PNG plein cadre d'origine — réservé au téléchargement du lightbox. */
+	original: string | null;
 	categoryLabel?: string;
 	categoryIcon?: string;
 }
@@ -31,11 +36,11 @@ export function GalleryGrid({ items, priorityCount = 4 }: GalleryGridProps) {
 
 	return (
 		<>
-			{/* Préchargement des premières images (1re rangée) avant le paint. */}
+			{/* Préchargement des vignettes de la 1re rangée (WebP w=400, ~Ko) avant le paint. */}
 			{items.slice(0, priorityCount).map((item) =>
-				item.image ? (
+				item.thumb ? (
 					// biome-ignore lint/correctness/useUniqueElementIds: lien de preload sans id
-					<link key={`preload-${item.id}`} rel="preload" as="image" href={item.image} />
+					<link key={`preload-${item.id}`} rel="preload" as="image" href={item.thumb} />
 				) : null
 			)}
 
@@ -45,7 +50,8 @@ export function GalleryGrid({ items, priorityCount = 4 }: GalleryGridProps) {
 						<GalleryCard
 							id={item.id}
 							title={item.title}
-							image={item.image}
+							thumb={item.thumb}
+							full={item.full}
 							categoryLabel={item.categoryLabel}
 							categoryIcon={item.categoryIcon}
 							priority={i < priorityCount}
@@ -57,7 +63,14 @@ export function GalleryGrid({ items, priorityCount = 4 }: GalleryGridProps) {
 			</FadeInStagger>
 
 			<GalleryLightbox
-				items={items}
+				items={items.map((it) => ({
+					id: it.id,
+					title: it.title,
+					full: it.full,
+					original: it.original,
+					categoryLabel: it.categoryLabel,
+					categoryIcon: it.categoryIcon,
+				}))}
 				index={openIndex}
 				onClose={() => setOpenIndex(null)}
 				onNavigate={setOpenIndex}
