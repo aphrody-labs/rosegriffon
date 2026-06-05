@@ -4170,5 +4170,12 @@
 	"nav.tools.my_team": "My Team",
 	"nav.tools.translator": "Translator",
 	"nav.tools.save_reader": "Save reader",
-	"nav.settings": "Settings"
+	"nav.settings": "Settings",
+	"nav.wiki.quests": "Quests",
+	"nav.wiki.coaches": "Coaches",
+	"nav.wiki.stadiums": "Stadiums",
+	"nav.wiki.drops": "Drops",
+	"nav.wiki.keshin_models": "3D Models",
+	"nav.wiki.game_menus": "Game Menus",
+	"nav.wiki.more": "More"
 }
