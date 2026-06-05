@@ -9,9 +9,9 @@
  * Prérequis : `bun run build:dotnet` (→ IECODE.Core.dll Release net10.0) et le
  * paquet node-api-dotnet construit (`bun run napi:build` à la racine).
  */
-import { createRequire } from "node:module";
-import { existsSync } from "node:fs";
 import { dirname, join } from "node:path";
+import { existsSync } from "node:fs";
+import { createRequire } from "node:module";
 
 /** Assembly IECODE.Core compilé (Release, net10.0). */
 export const IECODE_CORE_DLL = join(
@@ -33,12 +33,12 @@ let _dotnet: Dotnet | undefined;
  */
 export function loadIecode(): Dotnet {
 	if (_dotnet) return _dotnet;
-	// Le host node-api-dotnet cible net8/net9 ; on autorise le roll-forward
-	// vers le runtime .NET 10 installé. Doit être posé AVANT l'init du CLR.
+	// Host node-api-dotnet cible net8/net9 ; on autorise le roll-forward
+	// Vers le runtime .NET 10 installé. Doit être posé AVANT l'init du CLR.
 	process.env["DOTNET_ROLL_FORWARD"] ??= "LatestMajor";
 	const dotnet = require("node-api-dotnet") as Dotnet;
 	// Résout les assemblies dépendantes (ImageSharp, EF Core, SharpGLTF, …)
-	// depuis le dossier de sortie de IECODE.Core.
+	// Depuis le dossier de sortie de IECODE.Core.
 	dotnet.addListener("resolving", (name: string, _v: string, resolve: (p: string) => void) => {
 		const candidate = join(CORE_DIR, `${name}.dll`);
 		if (existsSync(candidate)) resolve(candidate);
