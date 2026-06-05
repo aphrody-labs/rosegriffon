@@ -8,7 +8,7 @@ import type {
 } from "@rose-griffon/inagle/types/database";
 import { createClient } from "@supabase/supabase-js";
 import { unstable_cache } from "next/cache";
-import { resolveAssetUrl, resolveAuraTelopUrl } from "@/lib/images";
+import { getMiximaxImageUrl, resolveAssetUrl, resolveAuraTelopUrl } from "@/lib/images";
 
 import { createSqliteClient } from "./supabase/sqlite-client";
 
@@ -218,10 +218,21 @@ const ELEMENT_NAMES: Record<number, { en: string; ja: string; fr: string }> = {
 function mapAuraRow(row: any): any {
 	const elementInfo = ELEMENT_NAMES[row.element_id as number] || ELEMENT_NAMES[0];
 	const sd = row.sheet_data || {};
+	const assetCode = row.asset_code || sd.assetCode;
+	// Miximax (`wmm`) : icône via le manifeste (cn/ca), JAMAIS le telop périmé
+	// `aura_mixi_c05028*` du DB (= bannière d'un autre perso, cf. bug Arthur). Les
+	// autres types ont un telop self-cohérent (k{N}/a{N}/aura_power) → chaîne normale.
+	const isMiximax = row.sub_type === "Miximax" || (assetCode || "").startsWith("wmm");
+	const image = isMiximax
+		? getMiximaxImageUrl(row.icon_code, assetCode, row.image_url)
+		: resolveAuraTelopUrl(row.asset_code) ||
+			resolveAssetUrl(row.image_url) ||
+			sd.image ||
+			row.image_url;
 	return {
 		_file: "inagle_auras",
 		_source: "supabase",
-		assetCode: row.asset_code || sd.assetCode,
+		assetCode,
 		auraId: row.id,
 		auraIdStr: row.id,
 		desc_FR: row.description_fr || sd.desc_FR,
@@ -230,11 +241,7 @@ function mapAuraRow(row: any): any {
 			row.name_fr || row.name_en || sd.displayName || sd.name_FR || sd.name_EN || "Inconnu",
 		element: row.element_id,
 		elementName: elementInfo,
-		image:
-			resolveAuraTelopUrl(row.asset_code) ||
-			resolveAssetUrl(row.image_url) ||
-			sd.image ||
-			row.image_url,
+		image,
 		name_EN: row.name_en || sd.name_EN,
 		name_FR: row.name_fr || sd.name_FR,
 		name_JA: row.name_ja || sd.name_JA,
