@@ -5,8 +5,23 @@
 import characterFaceManifest from "@/data/character-face-manifest.json";
 import characterModelManifest from "@/data/character-model-manifest.json";
 import itemImageManifest from "@/data/item-image-manifest.json";
+import miximaxIconManifest from "@/data/miximax-icon-manifest.json";
 
 const ITEM_IMAGE_MANIFEST = itemImageManifest as Record<string, string>;
+
+/**
+ * Correspondance code Miximax (`icon_code` `c05028XXX` ou `asset_code` base `wmm00XXX`)
+ * → code d'icône RÉEL du dump dx11 (`ca/cn/cp/iau`). Généré par
+ * `scripts/build-miximax-icon-manifest.ts` (cf. ce fichier pour la dérivation
+ * `config.skillId2` → `inagle_chara_menu_resource` → fichier disque).
+ *
+ * `inagle_miximax.icon_code` vaut `c05028XXX` (dérivé du code perso) mais AUCUN fichier
+ * `c05028XXX_l_..._l00.png` n'existe : les 17 vrais fichiers portent des codes
+ * hétérogènes non dérivables par règle. Seules les entrées présentes ici ont un fichier
+ * sur disque — un code absent → placeholder (le caller bascule sur telop/image_url), pas
+ * un 404 forgé.
+ */
+const MIXIMAX_ICON_MANIFEST = miximaxIconManifest as Record<string, string>;
 
 /**
  * Set EXHAUSTIF des codes de base `c<NNNNNNNN>` qui possèdent réellement un visage
@@ -165,12 +180,29 @@ const ITEM_ICON_GAPS = new Set<string>([
 ]);
 
 /**
+ * Items « important » `gd120<NNN>` : sur les 89 codes en DB (`inagle_items`), seul
+ * `gd120001` possède une icône réelle dans le CPK (vérité terrain : scan via le décodeur
+ * live `iecode-cdn:8788` lisant directement le CPK, 2026-06-05 — 1 existe / 90 absents).
+ * Les `gd120002..091` n'ont AUCUN fichier (ni dump pré-extrait, ni CPK → le fallback live
+ * Stream ne les couvre pas) : forger `icon_item01_gd120<NNN>.png` = 404 garanti.
+ *
+ * `gd120001` n'est PAS une icône générique (carte stade « Legend » spécifique), on ne peut
+ * donc PAS la réutiliser pour les autres important. Gate : tout `gd120*` ≠ `gd120001`
+ * renvoie `null` → le caller bascule sur le placeholder propre (`/ievr.webp`) au lieu d'un
+ * 404 silencieux. Aligné sur le même garde-fou que `ITEM_ICON_GAPS` / `eq_sh`.
+ */
+function isMissingImportantIcon(internalCode: string): boolean {
+	return internalCode.startsWith("gd120") && internalCode !== "gd120001";
+}
+
+/**
  * Résout le vrai nom de fichier PNG (sans extension) d'un `internal_code` d'item, ou
  * `null` si aucune famille connue ne correspond (= pas d'icône d'item dans le dump) OU si
- * le code est un data-gap connu (`ITEM_ICON_GAPS` — fichier absent du dump → 404 forgé).
+ * le code est un data-gap connu (`ITEM_ICON_GAPS` / important `gd120*` sans icône — fichier
+ * absent du CPK → 404 forgé).
  */
 export function itemIconFileBase(internalCode: string): string | null {
-	if (ITEM_ICON_GAPS.has(internalCode)) {
+	if (ITEM_ICON_GAPS.has(internalCode) || isMissingImportantIcon(internalCode)) {
 		return null;
 	}
 	for (const [fam, prefix] of ITEM_ICON_PREFIXES) {
@@ -654,14 +686,28 @@ export function getAuraImageUrl(assetCode: string | undefined | null, _subType?:
 }
 
 /**
- * URL d'une icône Miximax (visage personnage) depuis le dossier aura_mixi du dump dx11.
- * Pattern fichier : `{base}_l_{base}_l00.png`.
+ * URL d'une icône Miximax (visage personnage) depuis le dossier `aura_mixi` du dump dx11.
+ * Pattern fichier : `{realIcon}_l_{realIcon}_l00.png`.
+ *
+ * L'argument est l'`icon_code` (`c05028XXX`) OU l'`asset_code` (`wmm00XXX[_variant]`) de
+ * `inagle_miximax`. Aucun de ces deux codes n'est le nom de fichier réel : les 17 vrais
+ * fichiers du dump portent des codes hétérogènes (`ca0201`, `cn0221`, `cp1811`,
+ * `iau0010a`…) NON dérivables par règle. On traduit donc via `MIXIMAX_ICON_MANIFEST`
+ * (issu de `config.skillId2` → `inagle_chara_menu_resource`). Un code absent du manifeste
+ * = pas de fichier sur disque → chaîne vide (le caller bascule sur telop/image_url ou le
+ * placeholder), jamais un 404 forgé. Corrige le bug `c05028XXX_l_..._l00.png` (404 garanti).
  */
 export function getMiximaxIconUrl(iconCode: string | undefined | null): string {
 	if (!iconCode) {
 		return "";
 	}
-	return `${AURA_DUMP_BASE}/aura_mixi/${iconCode}_l_${iconCode}_l00.png`;
+	// Normalise l'asset_code en retirant un éventuel suffixe de variante (`_h1`/`_b1`…).
+	const key = iconCode.replace(/_[a-z0-9]+$/i, "");
+	const realIcon = MIXIMAX_ICON_MANIFEST[iconCode] ?? MIXIMAX_ICON_MANIFEST[key];
+	if (!realIcon) {
+		return "";
+	}
+	return `${AURA_DUMP_BASE}/aura_mixi/${realIcon}_l_${realIcon}_l00.png`;
 }
 
 /**
