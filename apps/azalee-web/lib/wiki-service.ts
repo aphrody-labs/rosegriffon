@@ -7,6 +7,7 @@ import {
 	getAuraImageUrl,
 	getGalleryImageUrl,
 	getMiximaxIconUrl,
+	getMiximaxImageUrl,
 	resolveAssetUrl,
 	resolveAuraTelopUrl,
 } from "@/lib/images";
@@ -469,20 +470,33 @@ export const wikiService = {
 				const prefixedId = t.prefix + formattedId;
 				const possibleIds = [prefixedId, formattedId, hexId];
 
+				// `icon_code` n'existe que sur inagle_miximax (pas keshins/souls) — sélection
+				// conditionnelle pour éviter l'erreur PostgREST « column does not exist ».
+				const selectCols =
+					t.table === "inagle_miximax"
+						? "id, name_fr, name_en, name_ja, image_url, icon_code, asset_code, element_id, sheet_data"
+						: "id, name_fr, name_en, name_ja, image_url, asset_code, element_id, sheet_data";
 				const { data: auraRows } = await supabase
 					.from(t.table as any)
-					.select("id, name_fr, name_en, name_ja, image_url, asset_code, element_id, sheet_data")
+					.select(selectCols)
 					.in("id", possibleIds);
 
 				if (auraRows && auraRows.length > 0) {
 					const a = auraRows[0] as any;
 					const sd = normalizeAuraSheetData(a.sheet_data) || {};
+					// Miximax : icône manifeste (cn/ca), jamais le telop périmé `aura_mixi_c05028*`
+					// du DB (= bannière d'un autre perso, cf. bug Arthur). Autres types : icône
+					// résolue via asset_code, fallback image_url DB.
+					const resolvedImageUrl =
+						t.slug === "miximax"
+							? getMiximaxImageUrl((a as any).icon_code, a.asset_code, a.image_url)
+							: getAuraImageUrl(a.asset_code, sd.subType) || resolveAssetUrl(a.image_url);
 					results.push({
 						id: a.id,
 						name: a.name_fr || a.name_en || a.name_ja || sd.displayName || sd.name_FR || sd.name_EN || "Inconnu",
 						type: t.table.replace("inagle_", "").replace("s", ""),
 						categorySlug: t.slug,
-						imageUrl: a.image_url,
+						imageUrl: resolvedImageUrl,
 						assetCode: a.asset_code,
 						subType: t.table.replace("inagle_", "").replace("s", ""),
 						element: ElementNames[a.element_id as keyof typeof ElementNames] || undefined,
@@ -643,6 +657,11 @@ export const wikiService = {
 			image: (() => {
 				const ac = a.asset_code || sd.assetCode || null;
 				const subType = a.sub_type || sd.subType;
+				// Miximax : icône via le manifeste (cn/ca), JAMAIS le telop périmé
+				// `aura_mixi_c05028*` du DB (= bannière d'un autre perso, cf. bug Arthur).
+				if (typeSlug === "miximax" || subType === "Miximax") {
+					return getMiximaxImageUrl(a.icon_code, ac, a.image_url);
+				}
 				return (
 					getAuraImageUrl(ac, subType) ||
 					resolveAssetUrl(a.image_url) ||
@@ -653,6 +672,7 @@ export const wikiService = {
 				);
 			})(),
 			// Bandeau telop (1728x352) — affichage banner sous l'image principale.
+			// Pour les miximax `wmm`, resolveAuraTelopUrl renvoie null (aucun telop valide).
 			telopUrl: resolveAuraTelopUrl(a.asset_code || sd.assetCode || null),
 			assetCode: a.asset_code || sd.assetCode,
 			subType: a.sub_type || sd.subType || "Aura",
@@ -790,12 +810,16 @@ export const wikiService = {
 				hissatsu_name: sd?.hissatsu?.name || sd?.sheetData?.hissatsu?.name,
 				element: elementInfo.en,
 				image_url:
-					getAuraImageUrl(assetCode, (a as any).sub_type || sd.subType) ||
-					getMiximaxIconUrl((a as any).icon_code) ||
-					// image_url DB = chemin icône relatif (200_icon/) — priorité sur sd.image (telop)
-					resolveAssetUrl(a.image_url) ||
-					resolveAuraTelopUrl(assetCode) ||
-					sd.image,
+					// Miximax : icône manifeste (cn/ca), jamais le telop périmé du DB
+					// (`aura_mixi_c05028*` = bannière d'un autre perso, cf. bug Arthur).
+					params.typeSlug === "miximax"
+						? getMiximaxImageUrl((a as any).icon_code, assetCode, a.image_url)
+						: getAuraImageUrl(assetCode, (a as any).sub_type || sd.subType) ||
+							getMiximaxIconUrl((a as any).icon_code) ||
+							// image_url DB = chemin icône relatif (200_icon/) — priorité sur sd.image (telop)
+							resolveAssetUrl(a.image_url) ||
+							resolveAuraTelopUrl(assetCode) ||
+							sd.image,
 				type: (a as any).sub_type || sd.subType,
 				sheetData: normalizeAuraSheetData(a.sheet_data),
 				assetCode,
@@ -1312,32 +1336,49 @@ export const wikiService = {
 		if (row) {
 			const item = row as unknown as DbItem;
 			const sd = (item.sheet_data || {}) as any;
+			// `data` = ParsedItem complet (parser inagle) — porte bonuses/maxStack/descriptions
+			// natifs même si sheet_data est un snapshot communautaire plus ancien.
+			const parsed = ((row as any).data || {}) as any;
 			const community = sd.sheetData || {};
-			const descFr = item.description_fr || sd.descriptions?.fr || null;
-			const descJa = item.description_ja || sd.descriptions?.ja || null;
+			const descFr =
+				item.description_fr || sd.descriptions?.fr || parsed.descriptions?.fr || null;
+			const descEn = item.description_en || sd.descriptions?.en || parsed.descriptions?.en || null;
+			const descJa =
+				item.description_ja || sd.descriptions?.ja || parsed.descriptions?.ja || null;
+			// Bonus de stats RÉELS (kick +6, …) — natifs parser, jamais les codes bruts stat1/stat2.
+			const bonuses =
+				sd.bonuses && Object.keys(sd.bonuses).length
+					? sd.bonuses
+					: parsed.bonuses && Object.keys(parsed.bonuses).length
+						? parsed.bonuses
+						: null;
+			const maxStack = sd.maxStack ?? parsed.maxStack ?? null;
 			return {
 				itemId: item.id,
-				internalCode: item.internal_code || sd.internalCode,
+				internalCode: item.internal_code || sd.internalCode || parsed.internalCode,
 				names: {
 					fr: item.name_fr,
 					en: item.name_en,
 					ja: item.name_ja || sd.names?.ja,
 				},
-				descriptions: { fr: descFr, ja: descJa },
+				descriptions: { fr: descFr, en: descEn, ja: descJa },
 				name_FR: item.name_fr,
 				description: descFr,
+				description_EN: descEn,
 				description_JA: descJa,
 				category: item.category,
 				rarity: item.rarity,
 				image: resolveAssetUrl(item.image_url) || item.image_url,
 				imageUrl: resolveAssetUrl(item.image_url) || item.image_url,
 				// Shops: top-level column (populated by update-item-prices.ts), fallback to sheet_data
-				shops: (row as any).shops || sd.shops || null,
+				shops: (row as any).shops || sd.shops || parsed.shops || null,
 				// Note: top-level 'price' column contains catalog sort IDs (not real GP prices) — do not use
-				price: sd.price || null,
+				price: sd.price || parsed.price || null,
 				stats: community.stats || null,
+				bonuses,
+				maxStack,
 				location: community.location || null,
-				attributes: sd.attributes || null,
+				attributes: sd.attributes || parsed.attributes || null,
 				exchangeRecipes: sd.exchangeRecipes || null,
 				sheetData: community,
 			} as any;
@@ -1376,7 +1417,15 @@ export const wikiService = {
 
 		const results = (data as unknown as DbItem[]).map((item) => {
 			const sd = (item.sheet_data || {}) as any;
+			const parsed = ((item as any).data || {}) as any;
 			const community = sd.sheetData || {};
+			// Bonus de stats réels (kick +6, …) pour l'aperçu carte.
+			const bonuses =
+				sd.bonuses && Object.keys(sd.bonuses).length
+					? sd.bonuses
+					: parsed.bonuses && Object.keys(parsed.bonuses).length
+						? parsed.bonuses
+						: null;
 			return {
 				itemId: item.id,
 				internalCode: item.internal_code,
@@ -1386,9 +1435,10 @@ export const wikiService = {
 				rarity: item.rarity,
 				image: resolveAssetUrl(item.image_url) || item.image_url,
 				// Note: top-level 'price' column contains catalog sort IDs (not real GP prices) — do not use
-				price: sd.price || null,
+				price: sd.price || parsed.price || null,
 				location: community.location || null,
 				stats: community.stats || null,
+				bonuses,
 				shops: (item as any).shops || sd.shops || null,
 			} as any;
 		});

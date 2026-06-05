@@ -19,6 +19,8 @@ export interface ItemCardProps {
 	price?: number | null;
 	location?: string | null;
 	stats?: Record<string, any> | null;
+	/** Bonus de stats RÉELS décodés (kick +6, …) — prioritaires sur `stats` brut. */
+	bonuses?: Record<string, number> | null;
 	className?: string;
 }
 
@@ -55,6 +57,7 @@ export function ItemCard({
 	price: _price,
 	location,
 	stats,
+	bonuses,
 	className,
 }: ItemCardProps) {
 	const resolvedSrc = resolveAssetUrl(icon) || (internalCode ? getItemIconUrl(internalCode) : null);
@@ -66,11 +69,18 @@ export function ItemCard({
 	// en amont vers le placeholder ; le `onError` ci-dessous couvre tout 404 résiduel.
 	const hasRealImage = !!resolvedSrc && resolvedSrc !== PLACEHOLDERS.item && !imgError;
 
-	// Filter numeric stats for standard items
-	const statEntries = stats
-		? Object.entries(stats).filter(([, v]) => typeof v === "number" && v > 0)
+	// Bonus de stats RÉELS prioritaires (kick/control/…). Les `stats` bruts
+	// (stat1/stat2 = codes non interprétables) ne sont PLUS affichés tels quels :
+	// on ne garde que les clés de stats reconnues.
+	const bonusEntries = bonuses
+		? Object.entries(bonuses).filter(([k, v]) => k in STAT_SHORT && typeof v === "number" && v !== 0)
 		: [];
-	const topStat = statEntries.length > 0 ? statEntries.toSorted(([, a], [, b]) => b - a)[0] : null;
+	const fallbackStatEntries =
+		bonusEntries.length === 0 && stats
+			? Object.entries(stats).filter(([k, v]) => k in STAT_SHORT && typeof v === "number" && v > 0)
+			: [];
+	const topEntries = bonusEntries.length > 0 ? bonusEntries : fallbackStatEntries;
+	const topStats = topEntries.toSorted(([, a], [, b]) => Math.abs(b) - Math.abs(a)).slice(0, 2);
 
 	// Tactic effects
 	const isTactic = category === "special_tactics";
@@ -119,11 +129,15 @@ export function ItemCard({
 							{categoryLabel || category}
 						</span>
 
-						{topStat && (
-							<span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-primary/10 text-[10px] font-bold text-primary">
-								{STAT_SHORT[topStat[0]] || topStat[0]} +{topStat[1]}
+						{topStats.map(([key, value]) => (
+							<span
+								key={key}
+								className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-primary/10 text-[10px] font-bold text-primary"
+							>
+								{STAT_SHORT[key] || key} {value > 0 ? "+" : ""}
+								{value}
 							</span>
-						)}
+						))}
 
 						{/* Tactic Duration/Cooldown */}
 						{isTactic && stats && (
