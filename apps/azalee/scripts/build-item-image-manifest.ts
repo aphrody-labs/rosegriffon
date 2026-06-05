@@ -15,7 +15,7 @@
  */
 const MENU_ROOT =
 	process.env.IEVR_MENU_ROOT ??
-	`${process.env.DATA_PATH ?? "/home/ubuntu/data"}/dx11/menu`;
+	`${process.env.DATA_PATH ?? "/home/ubuntu/niers/data"}/dx11/menu`;
 
 const SCAN_DIRS = ["200_icon/02_icon_item", "220_img/telop_waza/fr", "220_img/telop_waza/en"];
 
