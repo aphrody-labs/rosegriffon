@@ -18,6 +18,11 @@ export const navigationItems: NavItem[] = [
 		path: "/",
 	},
 	{
+		icon: "sports_soccer",
+		label: "nav.cross",
+		path: "/cross",
+	},
+	{
 		children: [
 			{ label: "nav.news.articles", path: "/news", icon: "feed" },
 			{ label: "nav.news.patch_notes", path: "/patch-notes", icon: "update" },
