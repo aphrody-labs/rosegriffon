@@ -2546,7 +2546,8 @@ program
 			const speakerQuery = options.speaker;
 			const limitVal = parseInt(options.limit, 10) || 10;
 			
-			const dbPath = "/home/ubuntu/data/all-gamedata/story_text_database.json";
+			const dataRoot = process.env.DATA_ROOT || process.env.DATA_PATH || "/home/ubuntu/niers/data";
+			const dbPath = path.join(dataRoot, "all-gamedata/story_text_database.json");
 			if (!existsSync(dbPath)) {
 				restoreLogs(!!options.json);
 				if (options.json) {
@@ -4300,7 +4301,7 @@ Commandes disponibles :
 // ──────────────────────────────────────────────────────────────────────────
 const REPO_ROOT = "/home/ubuntu/rg";
 const AZALEE_ENV = `${REPO_ROOT}/apps/azalee/.env`;
-const DATA_ROOT_DEFAULT = process.env.DATA_ROOT || process.env.DATA_PATH || "/home/ubuntu/data";
+const DATA_ROOT_DEFAULT = process.env.DATA_ROOT || process.env.DATA_PATH || "/home/ubuntu/niers/data";
 
 function runDataStep(label: string, cmd: string, env: Record<string, string> = {}): boolean {
 	const { execSync } = require("node:child_process");

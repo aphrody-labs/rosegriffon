@@ -207,8 +207,6 @@
 		"clean": "turbo run clean && rm -rf node_modules .turbo",
 		"format": "oxfmt .",
 		"format:check": "oxfmt --check .",
-		"azalee": "bun bin/azalee.ts",
-		"azalee:compile": "bun build bin/azalee.ts --compile --minify --sourcemap --bytecode --outfile bin/azalee",
 		"azalee:dev": "bun --filter @rose-griffon/azalee dev",
 		"website:dev": "bun --filter @rose-griffon/website dev",
 		"rag:poc": "bun packages/cron/src/tasks/ie-crawl/rag-poc.ts",
