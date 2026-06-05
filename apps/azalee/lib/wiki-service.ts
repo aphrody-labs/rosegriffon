@@ -2,6 +2,15 @@ import type { BaseCharacter, Item, Skill, Team } from "@rose-griffon/inagle";
 import { ElementNames } from "@rose-griffon/inagle/core/types";
 import changeAuraSkills from "../../../packages/inagle/src/entries/change_aura_skills.json";
 import menuGalleryManifest from "@/data/menu-gallery-manifest.json";
+import itemEnrichmentData from "@/data/item-enrichment.json";
+
+/** Enrichissement objet figé (bonus de stats / descriptions / maxStack), appliqué par id. */
+interface ItemEnrichment {
+	bonuses?: Record<string, number>;
+	descriptions?: { fr?: string; en?: string; ja?: string };
+	maxStack?: number;
+}
+const ITEM_ENRICHMENT = itemEnrichmentData as Record<string, ItemEnrichment>;
 import type { Database } from "@rose-griffon/db";
 import {
 	getAuraImageUrl,
@@ -1340,19 +1349,26 @@ export const wikiService = {
 			// natifs même si sheet_data est un snapshot communautaire plus ancien.
 			const parsed = ((row as any).data || {}) as any;
 			const community = sd.sheetData || {};
+			// Repli DURABLE : enrichissement figé (item-enrichment.json) appliqué au runtime
+			// par id. Le mirror re-dumpé depuis Supabase perd bonuses/descriptions natifs du
+			// parser (non poussés) → ce repli garantit qu'ils survivent à chaque sync.
+			const enrich = (ITEM_ENRICHMENT as Record<string, ItemEnrichment>)[item.id] || {};
 			const descFr =
-				item.description_fr || sd.descriptions?.fr || parsed.descriptions?.fr || null;
-			const descEn = item.description_en || sd.descriptions?.en || parsed.descriptions?.en || null;
+				item.description_fr || sd.descriptions?.fr || parsed.descriptions?.fr || enrich.descriptions?.fr || null;
+			const descEn =
+				item.description_en || sd.descriptions?.en || parsed.descriptions?.en || enrich.descriptions?.en || null;
 			const descJa =
-				item.description_ja || sd.descriptions?.ja || parsed.descriptions?.ja || null;
+				item.description_ja || sd.descriptions?.ja || parsed.descriptions?.ja || enrich.descriptions?.ja || null;
 			// Bonus de stats RÉELS (kick +6, …) — natifs parser, jamais les codes bruts stat1/stat2.
 			const bonuses =
 				sd.bonuses && Object.keys(sd.bonuses).length
 					? sd.bonuses
 					: parsed.bonuses && Object.keys(parsed.bonuses).length
 						? parsed.bonuses
-						: null;
-			const maxStack = sd.maxStack ?? parsed.maxStack ?? null;
+						: enrich.bonuses && Object.keys(enrich.bonuses).length
+							? enrich.bonuses
+							: null;
+			const maxStack = sd.maxStack ?? parsed.maxStack ?? enrich.maxStack ?? null;
 			return {
 				itemId: item.id,
 				internalCode: item.internal_code || sd.internalCode || parsed.internalCode,
@@ -1419,13 +1435,16 @@ export const wikiService = {
 			const sd = (item.sheet_data || {}) as any;
 			const parsed = ((item as any).data || {}) as any;
 			const community = sd.sheetData || {};
-			// Bonus de stats réels (kick +6, …) pour l'aperçu carte.
+			const enrich = (ITEM_ENRICHMENT as Record<string, ItemEnrichment>)[item.id] || {};
+			// Bonus de stats réels (kick +6, …) pour l'aperçu carte. Repli durable item-enrichment.json.
 			const bonuses =
 				sd.bonuses && Object.keys(sd.bonuses).length
 					? sd.bonuses
 					: parsed.bonuses && Object.keys(parsed.bonuses).length
 						? parsed.bonuses
-						: null;
+						: enrich.bonuses && Object.keys(enrich.bonuses).length
+							? enrich.bonuses
+							: null;
 			return {
 				itemId: item.id,
 				internalCode: item.internal_code,
