@@ -34,6 +34,7 @@ import { existsSync, mkdirSync, readdirSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { gzipSync } from "node:zlib";
 import { loadTextFileRaw } from "@rose-griffon/inagle/parsers/universal-text";
+import { formatGameText } from "../lib/game-text/format";
 import { buildSqliteFromEntries, type TextEntry } from "@/lib/game-text/materialize";
 
 // --- Catégorisation des dicts racine ---------------------------------------
@@ -184,7 +185,7 @@ function collectRoot(dataRoot: string): { entries: TextEntry[]; perCat: Map<stri
 			if (!existsSync(fp)) continue;
 			const map = loadTextFileRaw(fp);
 			for (const [hashId, value] of map) {
-				entries.push([hashId, loc, category, value]);
+				entries.push([hashId, loc, category, formatGameText(value)]);
 				perCat.set(category, (perCat.get(category) ?? 0) + 1);
 			}
 		}
@@ -214,7 +215,7 @@ function collectDialogue(dataRoot: string): { entries: TextEntry[]; perCat: Map<
 				files++;
 				const map = loadTextFileRaw(path.join(dir, f));
 				for (const [hashId, value] of map) {
-					entries.push([hashId, loc, category, value]);
+					entries.push([hashId, loc, category, formatGameText(value)]);
 					perCat.set(category, (perCat.get(category) ?? 0) + 1);
 				}
 			}

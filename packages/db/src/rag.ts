@@ -24,7 +24,8 @@ export type RagSourceKind =
 	| "web"
 	| "tweet"
 	| "doc"
-	| "asset";
+	| "asset"
+	| "text";
 
 /**
  * Format enrichi tweet pour chunk RAG (auteur + date + métriques + texte).
@@ -94,7 +95,8 @@ export async function ragEmbedQuery(text: string): Promise<number[]> {
 			const res = await fetch(sidecar.replace(/\/$/, "") + "/embed", {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({ texts: [text] }),
+				// Chemin REQUÊTE : marque `query:true` pour le préfixe e5 côté sidecar.
+				body: JSON.stringify({ texts: [text], query: true }),
 			});
 			if (res.ok) {
 				const json = (await res.json()) as { embeddings?: number[][] };

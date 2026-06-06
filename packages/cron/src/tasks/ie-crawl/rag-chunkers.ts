@@ -21,7 +21,8 @@ export type SourceKind =
 	| "web"
 	| "tweet"
 	| "doc"
-	| "asset";
+	| "asset"
+	| "text";
 
 export interface Chunk {
 	/** Index local du chunk dans la source. */
@@ -246,6 +247,9 @@ export function chunkBySource(kind: SourceKind, raw: string): Chunk[] {
 			return chunkTs(raw);
 		case "code":
 			return chunkProse(raw, 900, 120);
+		case "text":
+			// Texte de jeu (noms/descriptions/dialogues) : prose courte.
+			return chunkProse(raw, 700, 100);
 		case "tweet":
 			// Utilise le chunker enrichi (raw peut être string formaté ou JSON stringifié).
 			try {

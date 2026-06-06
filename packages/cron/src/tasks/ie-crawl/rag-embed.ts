@@ -66,12 +66,16 @@ function projectToDim(vec: number[], dim = RAG_EMBED_DIM): number[] {
 	return l2normalize(out);
 }
 
-async function embedViaSidecar(texts: string[], url: string): Promise<number[][] | null> {
+async function embedViaSidecar(
+	texts: string[],
+	url: string,
+	isQuery = false
+): Promise<number[][] | null> {
 	try {
 		const res = await fetch(url.replace(/\/$/, "") + "/embed", {
 			method: "POST",
 			headers: { "Content-Type": "application/json" },
-			body: JSON.stringify({ texts }),
+			body: JSON.stringify({ texts, query: isQuery }),
 		});
 		if (!res.ok) return null;
 		const json = (await res.json()) as { embeddings?: number[][] };
@@ -105,13 +109,21 @@ export interface EmbedResult {
 	vectors: number[][];
 }
 
-/** Embedde un lot de textes en 1024-dim, avec résolution de backend. */
-export async function embedBatch(texts: string[]): Promise<EmbedResult> {
+/**
+ * Embedde un lot de textes en 1024-dim, avec résolution de backend.
+ * `opts.query` (défaut `false` = passage) marque les requêtes pour le sidecar
+ * e5 (préfixe `query:`/`passage:`). Signature additive, rétro-compatible.
+ */
+export async function embedBatch(
+	texts: string[],
+	opts?: { query?: boolean }
+): Promise<EmbedResult> {
 	if (texts.length === 0) return { backend: "hash", vectors: [] };
 
+	const isQuery = opts?.query ?? false;
 	const sidecarUrl = process.env.RAG_EMBED_URL;
 	if (sidecarUrl) {
-		const v = await embedViaSidecar(texts, sidecarUrl);
+		const v = await embedViaSidecar(texts, sidecarUrl, isQuery);
 		if (v) return { backend: "sidecar", vectors: v };
 	}
 
