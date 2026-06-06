@@ -297,6 +297,114 @@ function normalizeAuraSheetData(sd: any): any {
 	};
 }
 
+/**
+ * Tactiques : la table historique `inagle_tactics` (70) porte les effets/durée/boutique ;
+ * le superset `inagle_special_tactics` (85, nommé FR) ajoute power/element/partner_count/
+ * partner_ids ET ~10 tactiques `wht*` de scénario absentes de la première. On fusionne :
+ * `inagle_tactics` reste la source primaire, on complète les champs manquants depuis le
+ * superset et on ajoute les codes qui n'existent QUE dans le superset.
+ *
+ * On écarte les lignes de gabarit/test du superset (noms placeholder japonais
+ * « 必殺タクティクス… », codes `test_…`) pour ne pas polluer la liste.
+ */
+function isPlaceholderSpecialTactic(row: any): boolean {
+	const code = String(row?.internal_code || "");
+	if (!code || code.startsWith("test_")) return true;
+	const fr = String(row?.name_fr || "");
+	const en = String(row?.name_en || "");
+	return fr.includes("必殺タクティクス") || en.includes("必殺タクティクス");
+}
+
+/** Forme « détail » (cf. getTactic) depuis une ligne `inagle_tactics`, complétée par le superset. */
+function tacticDetailFromTactics(match: any, special: any | null): any {
+	// Ne complète QUE si le champ historique est absent (préserve ex. l'élément accentué « Néant »).
+	const fill = (tVal: any, sVal: any) => (tVal === null || tVal === undefined ? (sVal ?? null) : tVal);
+	const img = resolveAssetUrl(match.image_url) || null;
+	return {
+		slug: tacticSlug(match.name),
+		name: match.name,
+		name_fr: match.name_fr || TACTIC_FR[match.name] || match.name,
+		name_ja: match.name_ja,
+		description_fr: match.description_fr,
+		description_en: match.description_en,
+		description_ja: match.description_ja,
+		effect1: match.effect1,
+		effect2: match.effect2,
+		effect3: match.effect3,
+		duration: match.duration,
+		cooldown: match.cooldown,
+		shop: match.shop,
+		internalCode: match.internal_code,
+		element: fill(match.element, special?.element),
+		power: fill(match.power, special?.power),
+		recastTime: fill(match.recast_time, special?.recast_time),
+		partnerCount: fill(match.partner_count, special?.partner_count),
+		partnerIds: fill(match.partner_ids, special?.partner_ids),
+		image: img,
+		imageUrl: img,
+	};
+}
+
+/** Forme « détail » (cf. getTactic) depuis une ligne `inagle_special_tactics` pure (wht* scénario). */
+function specialTacticToDetail(s: any): any {
+	const nameEn = s.name_en || s.name_fr || s.internal_code;
+	return {
+		slug: tacticSlug(nameEn),
+		name: nameEn,
+		name_fr: s.name_fr || TACTIC_FR[nameEn] || nameEn,
+		name_ja: s.name_ja,
+		description_fr: s.description_fr,
+		description_en: s.description_en,
+		description_ja: s.description_ja,
+		// La table superset ne porte pas effets/durée/boutique : champs absents.
+		effect1: null,
+		effect2: null,
+		effect3: null,
+		duration: null,
+		cooldown: s.recast_time ?? null,
+		shop: null,
+		internalCode: s.internal_code,
+		element: s.element ?? null,
+		power: s.power ?? null,
+		recastTime: s.recast_time ?? null,
+		partnerCount: s.partner_count ?? null,
+		partnerIds: s.partner_ids ?? null,
+		// Pas d'image telop fiable pour ces codes → laissé vide (le composant retombe sur l'icône).
+		image: null,
+		imageUrl: null,
+	};
+}
+
+/** Forme « liste » (cf. getTacticsList) depuis une ligne `inagle_special_tactics` pure. */
+function specialTacticToListItem(s: any): any {
+	const nameEn = s.name_en || s.name_fr || s.internal_code;
+	return {
+		itemId: s.internal_code || tacticSlug(nameEn),
+		internalCode: s.internal_code || "TACTIC",
+		names: {
+			en: nameEn,
+			fr: s.name_fr || TACTIC_FR[nameEn] || nameEn,
+			ja: s.name_ja || nameEn,
+		},
+		name_FR: s.name_fr || TACTIC_FR[nameEn] || nameEn,
+		description: s.description_fr,
+		description_JA: s.description_ja,
+		category: "special_tactics",
+		rarity: 3,
+		image: null,
+		price: null,
+		location: null,
+		stats: {
+			effect1: null,
+			effect2: null,
+			effect3: null,
+			duration: null,
+			cooldown: s.recast_time ?? null,
+		},
+		shops: [],
+	};
+}
+
 export const wikiService = {
 	/** Get all distinct constellations for a character (by name — heroes appear in multiple constellations via different chara_ids) */
 	async _getHeroConstellations(row: any): Promise<Array<{ name: string; index: number }>> {
@@ -1887,60 +1995,42 @@ export const wikiService = {
 			.eq("internal_code", safeSlug)
 			.maybeSingle();
 		if (direct) {
-			const match = direct;
-			return {
-				slug: tacticSlug(match.name),
-				name: match.name,
-				name_fr: match.name_fr || TACTIC_FR[match.name] || match.name,
-				name_ja: match.name_ja,
-				description_fr: match.description_fr,
-				description_en: match.description_en,
-				description_ja: match.description_ja,
-				effect1: match.effect1,
-				effect2: match.effect2,
-				effect3: match.effect3,
-				duration: match.duration,
-				cooldown: match.cooldown,
-				shop: match.shop,
-				// Surface complète de la table tactique
-				internalCode: (match as any).internal_code,
-				element: (match as any).element,
-				power: (match as any).power,
-				recastTime: (match as any).recast_time,
-				partnerCount: (match as any).partner_count,
-				partnerIds: (match as any).partner_ids,
-				image: resolveAssetUrl((match as any).image_url) || null,
-				imageUrl: resolveAssetUrl((match as any).image_url) || null,
-			};
+			// Complète les champs manquants (power/element/partenaires) depuis le superset.
+			const { data: special } = await supabase
+				.from("inagle_special_tactics")
+				.select("*")
+				.eq("internal_code", safeSlug)
+				.maybeSingle();
+			return tacticDetailFromTactics(direct, special);
 		}
-		// Fallback: slug is derived from name — must fetch all to compute slug match
-		const { data, error } = await supabase.from("inagle_tactics").select("*");
-		if (error || !data) return null;
-		const match = (data as any[]).find((t: any) => tacticSlug(t.name) === slug);
-		if (!match) return null;
-		return {
-			slug: tacticSlug(match.name),
-			name: match.name,
-			name_fr: match.name_fr || TACTIC_FR[match.name] || match.name,
-			name_ja: match.name_ja,
-			description_fr: match.description_fr,
-			description_en: match.description_en,
-			description_ja: match.description_ja,
-			effect1: match.effect1,
-			effect2: match.effect2,
-			effect3: match.effect3,
-			duration: match.duration,
-			cooldown: match.cooldown,
-			shop: match.shop,
-			internalCode: match.internal_code,
-			element: match.element,
-			power: match.power,
-			recastTime: match.recast_time,
-			partnerCount: match.partner_count,
-			partnerIds: match.partner_ids,
-			image: resolveAssetUrl(match.image_url) || null,
-			imageUrl: resolveAssetUrl(match.image_url) || null,
-		};
+		// La tactique peut n'exister QUE dans le superset (wht* de scénario absentes d'inagle_tactics).
+		const { data: directSpecial } = await supabase
+			.from("inagle_special_tactics")
+			.select("*")
+			.eq("internal_code", safeSlug)
+			.maybeSingle();
+		if (directSpecial && !isPlaceholderSpecialTactic(directSpecial)) {
+			return specialTacticToDetail(directSpecial);
+		}
+		// Fallback: slug is derived from name — must fetch all to compute slug match (les deux tables).
+		const [{ data: allT }, { data: allS }] = await Promise.all([
+			supabase.from("inagle_tactics").select("*"),
+			supabase.from("inagle_special_tactics").select("*"),
+		]);
+		const matchT = ((allT as any[]) || []).find((t: any) => tacticSlug(t.name) === slug);
+		if (matchT) {
+			const special = ((allS as any[]) || []).find(
+				(s: any) => s.internal_code === matchT.internal_code
+			);
+			return tacticDetailFromTactics(matchT, special);
+		}
+		const matchS = ((allS as any[]) || []).find(
+			(s: any) =>
+				!isPlaceholderSpecialTactic(s) &&
+				tacticSlug(s.name_en || s.name_fr || s.internal_code) === slug
+		);
+		if (matchS) return specialTacticToDetail(matchS);
+		return null;
 	},
 
 	async getTacticsList(params: ListParams): Promise<ListResult<Item>> {
@@ -1950,52 +2040,72 @@ export const wikiService = {
 		const from = (page - 1) * limit;
 		const to = from + limit - 1;
 
-		let query = supabase.from("inagle_tactics").select("*", { count: "exact" });
+		// Fusion `inagle_tactics` (70) + extras `inagle_special_tactics` (~10 wht* de scénario).
+		// Volume total ~80 → on lit tout et on pagine en mémoire (pagination serveur non
+		// combinable entre deux tables).
+		const [tacticsRes, specialRes] = await Promise.all([
+			supabase.from("inagle_tactics").select("*"),
+			supabase.from("inagle_special_tactics").select("*"),
+		]);
 
-		if (params.q) {
-			const q = sanitizeFilter(params.q);
-			query = query.or(`name.ilike.%${q}%,name_fr.ilike.%${q}%`);
-		}
-
-		const { data, count, error } = await query.range(from, to).order("name");
-
-		if (error) {
-			console.error("Error fetching tactics:", error);
+		if (tacticsRes.error) {
+			console.error("Error fetching tactics:", tacticsRes.error);
 			return { data: [], total: 0, page, limit };
 		}
 
-		const results = (data || []).map(
-			(t: any) =>
-				({
-					itemId: t.internal_code || tacticSlug(t.name),
-					internalCode: t.internal_code || "TACTIC",
-					names: {
-						en: t.name,
-						fr: t.name_fr || TACTIC_FR[t.name] || t.name,
-						ja: t.name_ja || t.name,
-					},
-					name_FR: t.name_fr || TACTIC_FR[t.name] || t.name,
-					description: t.description_fr,
-					description_JA: t.description_ja,
-					category: "special_tactics",
-					rarity: 3,
-					image: resolveAssetUrl(t.image_url) || null,
-					price: null,
-					location: t.shop,
-					stats: {
-						effect1: t.effect1,
-						effect2: t.effect2,
-						effect3: t.effect3,
-						duration: t.duration,
-						cooldown: t.cooldown,
-					},
-					shops: t.shop ? [t.shop] : [],
-				}) as any
+		const tactics = (tacticsRes.data || []) as any[];
+		const knownCodes = new Set(tactics.map((t) => t.internal_code).filter(Boolean));
+		const extras = ((specialRes.data as any[]) || []).filter(
+			(s) => s.internal_code && !knownCodes.has(s.internal_code) && !isPlaceholderSpecialTactic(s)
 		);
 
+		let merged: any[] = [
+			...tactics.map((t) => ({
+				itemId: t.internal_code || tacticSlug(t.name),
+				internalCode: t.internal_code || "TACTIC",
+				names: {
+					en: t.name,
+					fr: t.name_fr || TACTIC_FR[t.name] || t.name,
+					ja: t.name_ja || t.name,
+				},
+				name_FR: t.name_fr || TACTIC_FR[t.name] || t.name,
+				description: t.description_fr,
+				description_JA: t.description_ja,
+				category: "special_tactics",
+				rarity: 3,
+				image: resolveAssetUrl(t.image_url) || null,
+				price: null,
+				location: t.shop,
+				stats: {
+					effect1: t.effect1,
+					effect2: t.effect2,
+					effect3: t.effect3,
+					duration: t.duration,
+					cooldown: t.cooldown,
+				},
+				shops: t.shop ? [t.shop] : [],
+			})),
+			...extras.map((s) => specialTacticToListItem(s)),
+		];
+
+		// Recherche texte en mémoire (parité avec l'ancien filtre serveur name/name_fr).
+		if (params.q) {
+			const q = params.q.toLowerCase();
+			merged = merged.filter((it) => {
+				const en = String(it.names?.en || "").toLowerCase();
+				const fr = String(it.name_FR || it.names?.fr || "").toLowerCase();
+				return en.includes(q) || fr.includes(q);
+			});
+		}
+
+		merged.sort((a, b) => String(a.names?.en || "").localeCompare(String(b.names?.en || "")));
+
+		const total = merged.length;
+		const pageItems = merged.slice(from, to + 1);
+
 		return {
-			data: results,
-			total: count || 0,
+			data: pageItems as any,
+			total,
 			page,
 			limit,
 		};
@@ -2143,27 +2253,36 @@ export const wikiService = {
 				}
 			: undefined;
 
-		const jsonStatsLv30 = (char.stats as any)?.lv30 || {};
-		const statsLv30 = {
-			kick: jsonStatsLv30.kick || 0,
-			control: jsonStatsLv30.control || 0,
-			technique: jsonStatsLv30.technique || 0,
-			pressure: jsonStatsLv30.pressure || 0,
-			physical: jsonStatsLv30.physical || 0,
-			agility: jsonStatsLv30.agility || 0,
-			intelligence: jsonStatsLv30.intelligence || 0,
-		};
+		// Paliers Lv30/Lv50 : la colonne jsonb `stats` est DEPRECATED (vide 0/6148, cf db-6).
+		// On NE peuple PLUS de zéros (qui s'affichaient comme de fausses stats à 0) : on ne
+		// retient ces paliers QUE si le jsonb porte une vraie valeur, sinon `undefined`.
+		// Les VRAIS paliers Lv30/Lv50 sont calculés LIVE via lib/wiki/chara-stats.ts
+		// (table de croissance gamedata) côté fiche perso (app/chara/[id]).
+		const jsonStatsLv30 = (char.stats as any)?.lv30;
+		const statsLv30 = jsonStatsLv30?.kick
+			? {
+					kick: jsonStatsLv30.kick,
+					control: jsonStatsLv30.control || 0,
+					technique: jsonStatsLv30.technique || 0,
+					pressure: jsonStatsLv30.pressure || 0,
+					physical: jsonStatsLv30.physical || 0,
+					agility: jsonStatsLv30.agility || 0,
+					intelligence: jsonStatsLv30.intelligence || 0,
+				}
+			: undefined;
 
-		const jsonStatsLv50 = (char.stats as any)?.lv50 || {};
-		const statsLv50 = {
-			kick: jsonStatsLv50.kick || 0,
-			control: jsonStatsLv50.control || 0,
-			technique: jsonStatsLv50.technique || 0,
-			pressure: jsonStatsLv50.pressure || 0,
-			physical: jsonStatsLv50.physical || 0,
-			agility: jsonStatsLv50.agility || 0,
-			intelligence: jsonStatsLv50.intelligence || 0,
-		};
+		const jsonStatsLv50 = (char.stats as any)?.lv50;
+		const statsLv50 = jsonStatsLv50?.kick
+			? {
+					kick: jsonStatsLv50.kick,
+					control: jsonStatsLv50.control || 0,
+					technique: jsonStatsLv50.technique || 0,
+					pressure: jsonStatsLv50.pressure || 0,
+					physical: jsonStatsLv50.physical || 0,
+					agility: jsonStatsLv50.agility || 0,
+					intelligence: jsonStatsLv50.intelligence || 0,
+				}
+			: undefined;
 
 		const variant = {
 			charaParamId: char.id,
@@ -2208,7 +2327,8 @@ export const wikiService = {
 			teamId: char.team_id,
 			teamName: char.teams?.[0]?.names?.fr || char.teams?.[0]?.names?.en || "",
 			zukanHash,
-			gameAppearances: char.game_appearances || undefined,
+			// `gameAppearances` retiré : la colonne `game_appearances` est morte (vide 0/6148) →
+			// elle n'injectait jamais rien d'utile (la section « Apparitions » reste donc masquée).
 			controlType: char.control_type || undefined,
 			isControllable: char.is_controllable || undefined,
 			constellation: char.constellation
