@@ -9,6 +9,7 @@ import { HowToObtain } from "@/components/wiki/HowToObtain";
 import type { MovesetSkill } from "@/components/wiki/MovesetList";
 import { AuraCard } from "@/components/wiki/AuraCard";
 import { formatDescription, formatJapaneseName } from "@/lib/format-description";
+import { resolveCharaStats } from "@/lib/wiki/chara-stats";
 import { wikiService } from "@/lib/wiki-service";
 import { compareVariants } from "@rose-griffon/inagle";
 import { CharaVariantsComparison } from "@/components/wiki/CharaVariantsComparison";
@@ -224,6 +225,16 @@ export default async function PlayerDetailPage({ params }: { params: Promise<{ i
 
 	// Stats brutes du Google Sheet (pas de calcul d'interpolation)
 	const stats = player.stats.lv99;
+
+	// Stats RÉELLES décodées LIVE depuis la gamedata (table de croissance cfg.bin
+	// via CDN /cfg). La DB ne porte que Lv1/Lv99 dans des colonnes scalaires ; les
+	// paliers Lv30/Lv50 (et le total) sont résolus ici par
+	// (position × growthPattern × rang de rareté). Repli silencieux si CDN KO.
+	const growthStats = await resolveCharaStats(
+		(variant as any).charaParamId || id,
+		player.position,
+		player.rarity
+	);
 
 	// --- Detect BASARA & Hero ---
 	const _isBasara = player.rarity === "BASARA" || (variant as any).rarityCode >= 20;
@@ -620,30 +631,36 @@ export default async function PlayerDetailPage({ params }: { params: Promise<{ i
 						: undefined
 				}
 				statsLv30={
-					player.stats.lv30
-						? {
-								agility: player.stats.lv30.agility,
-								control: player.stats.lv30.control,
-								intelligence: player.stats.lv30.intelligence || 0,
-								kick: player.stats.lv30.kick,
-								physical: player.stats.lv30.physical,
-								pressure: player.stats.lv30.pressure,
-								technique: player.stats.lv30.technique,
-							}
-						: undefined
+					// Priorité aux stats RÉELLES de la table de croissance (gamedata) ;
+					// repli sur le JSONB historique (souvent vide) puis undefined.
+					growthStats
+						? growthStats.lv30
+						: player.stats.lv30 && player.stats.lv30.kick
+							? {
+									agility: player.stats.lv30.agility,
+									control: player.stats.lv30.control,
+									intelligence: player.stats.lv30.intelligence || 0,
+									kick: player.stats.lv30.kick,
+									physical: player.stats.lv30.physical,
+									pressure: player.stats.lv30.pressure,
+									technique: player.stats.lv30.technique,
+								}
+							: undefined
 				}
 				statsLv50={
-					player.stats.lv50
-						? {
-								agility: player.stats.lv50.agility,
-								control: player.stats.lv50.control,
-								intelligence: player.stats.lv50.intelligence || 0,
-								kick: player.stats.lv50.kick,
-								physical: player.stats.lv50.physical,
-								pressure: player.stats.lv50.pressure,
-								technique: player.stats.lv50.technique,
-							}
-						: undefined
+					growthStats
+						? growthStats.lv50
+						: player.stats.lv50 && player.stats.lv50.kick
+							? {
+									agility: player.stats.lv50.agility,
+									control: player.stats.lv50.control,
+									intelligence: player.stats.lv50.intelligence || 0,
+									kick: player.stats.lv50.kick,
+									physical: player.stats.lv50.physical,
+									pressure: player.stats.lv50.pressure,
+									technique: player.stats.lv50.technique,
+								}
+							: undefined
 				}
 			/>
 

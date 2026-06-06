@@ -31,9 +31,11 @@ export default function SavePage() {
 					<code className="rounded bg-surface-container px-1.5 py-0.5 type-body-small text-on-surface">
 						002AB8F4-USERDATALIVE
 					</code>
-					) pour en lire un résumé. La sauvegarde est déchiffrée et analysée{" "}
+					) pour en lire le détail. La sauvegarde est déchiffrée et analysée{" "}
 					<strong className="text-on-surface">entièrement dans votre navigateur</strong> — aucun
-					octet n&apos;est envoyé sur nos serveurs.
+					octet de la sauvegarde n&apos;est envoyé sur nos serveurs. Seule la liste des
+					identifiants de personnages transite (jamais le fichier) pour résoudre les noms du
+					roster contre la base Azalée.
 				</p>
 			</header>
 
