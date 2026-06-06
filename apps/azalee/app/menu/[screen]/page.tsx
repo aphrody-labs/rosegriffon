@@ -4,7 +4,7 @@ export const dynamicParams = false; // Liste d'écrans finie → 404 sur écran 
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { MENU_SCREEN_IDS, getMenuLayout } from "../_layouts";
-import { MenuClient } from "./MenuClient";
+import { MenuScreenView } from "./MenuScreenView";
 
 export function generateStaticParams(): Array<{ screen: string }> {
 	return MENU_SCREEN_IDS.map((screen) => ({ screen }));
@@ -21,7 +21,7 @@ export async function generateMetadata({
 		return { title: "Écran de menu introuvable" };
 	}
 	return {
-		description: `Rendu WebGPU 2D de l'écran de menu IEVR « ${screen} ».`,
+		description: `Rendu de l'écran de menu IEVR « ${screen} » (composité serveur depuis les CPK).`,
 		title: `Menu IEVR — ${screen}`,
 		// Favicon du vrai site officiel Inazuma Eleven: Victory Road (inazuma.jp/victory-road).
 		icons: {
@@ -44,5 +44,5 @@ export default async function MenuScreenPage({
 	if (!layout) {
 		notFound();
 	}
-	return <MenuClient layout={layout} />;
+	return <MenuScreenView layout={layout} screens={MENU_SCREEN_IDS} />;
 }

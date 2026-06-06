@@ -446,8 +446,8 @@
 			"transform": {
 				"x": 640,
 				"y": 360,
-				"scaleX": 0.16666666666666666,
-				"scaleY": 0.16666666666666666,
+				"scaleX": 1,
+				"scaleY": 1,
 				"rot": 0,
 				"anchorX": 0.5,
 				"anchorY": 0.5
@@ -482,8 +482,8 @@
 			"transform": {
 				"x": 640,
 				"y": 360,
-				"scaleX": 0.16666666666666666,
-				"scaleY": 0.16666666666666666,
+				"scaleX": 1,
+				"scaleY": 1,
 				"rot": 0,
 				"anchorX": 0.5,
 				"anchorY": 0.5
@@ -518,10 +518,10 @@
 		{
 			"name": "item02_05_attach_gauge",
 			"transform": {
-				"x": 640,
-				"y": 360,
-				"scaleX": 0.0026041666666666665,
-				"scaleY": 0.041666666666666664,
+				"x": 470,
+				"y": 378.6666564941406,
+				"scaleX": 0.625,
+				"scaleY": 0.6666666666666666,
 				"rot": 0,
 				"anchorX": 0.5,
 				"anchorY": 0.5
@@ -620,8 +620,8 @@
 			"transform": {
 				"x": 640,
 				"y": 360,
-				"scaleX": 0.16666666666666666,
-				"scaleY": 0.16666666666666666,
+				"scaleX": 1,
+				"scaleY": 1,
 				"rot": 0,
 				"anchorX": 0.5,
 				"anchorY": 0.5
