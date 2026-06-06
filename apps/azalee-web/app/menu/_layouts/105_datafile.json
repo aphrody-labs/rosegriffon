@@ -101,10 +101,10 @@
 		{
 			"name": "datafile01_01_datafile_top_image",
 			"transform": {
-				"x": 640,
-				"y": 360,
-				"scaleX": 0.0005393743257820927,
-				"scaleY": 0.0005668934240362812,
+				"x": 1130,
+				"y": 432,
+				"scaleX": 0.6666666666666666,
+				"scaleY": 0.6190476190476191,
 				"rot": 0,
 				"anchorX": 0.5,
 				"anchorY": 0.5
@@ -125,8 +125,8 @@
 			"transform": {
 				"x": 640,
 				"y": 360,
-				"scaleX": 0.0018315018315018315,
-				"scaleY": 0.009259259259259259,
+				"scaleX": 1,
+				"scaleY": 1,
 				"rot": 0,
 				"anchorX": 0.5,
 				"anchorY": 0.5
@@ -147,8 +147,8 @@
 			"transform": {
 				"x": 640,
 				"y": 360,
-				"scaleX": 0.0035460992907801418,
-				"scaleY": 0.009259259259259259,
+				"scaleX": 1,
+				"scaleY": 1,
 				"rot": 0,
 				"anchorX": 0.5,
 				"anchorY": 0.5
@@ -199,8 +199,8 @@
 			"transform": {
 				"x": 640,
 				"y": 360,
-				"scaleX": 0.000496031746031746,
-				"scaleY": 0.00039777247414478914,
+				"scaleX": 1,
+				"scaleY": 1,
 				"rot": 0,
 				"anchorX": 0.5,
 				"anchorY": 0.5
@@ -235,8 +235,8 @@
 			"transform": {
 				"x": 640,
 				"y": 360,
-				"scaleX": 0.0006666666666666666,
-				"scaleY": 0.0007374631268436578,
+				"scaleX": 1,
+				"scaleY": 1,
 				"rot": 0,
 				"anchorX": 0.5,
 				"anchorY": 0.5
@@ -271,8 +271,8 @@
 			"transform": {
 				"x": 640,
 				"y": 360,
-				"scaleX": 0.0043859649122807015,
-				"scaleY": 0.005376344086021505,
+				"scaleX": 1,
+				"scaleY": 1,
 				"rot": 0,
 				"anchorX": 0.5,
 				"anchorY": 0.5
@@ -307,8 +307,8 @@
 			"transform": {
 				"x": 640,
 				"y": 360,
-				"scaleX": 0.008771929824561403,
-				"scaleY": 0.013888888888888888,
+				"scaleX": 1,
+				"scaleY": 1,
 				"rot": 0,
 				"anchorX": 0.5,
 				"anchorY": 0.5
@@ -343,8 +343,8 @@
 			"transform": {
 				"x": 640,
 				"y": 360,
-				"scaleX": 0.16666666666666666,
-				"scaleY": 0.16666666666666666,
+				"scaleX": 1,
+				"scaleY": 1,
 				"rot": 0,
 				"anchorX": 0.5,
 				"anchorY": 0.5
@@ -379,8 +379,8 @@
 			"transform": {
 				"x": 640,
 				"y": 360,
-				"scaleX": 0.007575757575757575,
-				"scaleY": 0.005376344086021505,
+				"scaleX": 1,
+				"scaleY": 1,
 				"rot": 0,
 				"anchorX": 0.5,
 				"anchorY": 0.5
@@ -415,8 +415,8 @@
 			"transform": {
 				"x": 640,
 				"y": 360,
-				"scaleX": 0.0043859649122807015,
-				"scaleY": 0.005376344086021505,
+				"scaleX": 1,
+				"scaleY": 1,
 				"rot": 0,
 				"anchorX": 0.5,
 				"anchorY": 0.5
@@ -479,10 +479,10 @@
 		{
 			"name": "datafile01_06_can_scouted_chara_num",
 			"transform": {
-				"x": 640,
-				"y": 366.6666564941406,
-				"scaleX": 0.006944444444444444,
-				"scaleY": 0.007575757575757575,
+				"x": 712,
+				"y": 909.3333740234375,
+				"scaleX": 0.6666666666666666,
+				"scaleY": 0.606060606060606,
 				"rot": 0,
 				"anchorX": 0.5,
 				"anchorY": 0.5

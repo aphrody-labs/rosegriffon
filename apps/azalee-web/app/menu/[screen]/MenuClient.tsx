@@ -10,6 +10,7 @@
 // `GameMenuGpu` retombe automatiquement sur le `<GameMenu>` DOM si WebGPU est indisponible.
 
 import dynamic from "next/dynamic";
+import type { CSSProperties } from "react";
 import type { MenuLayout } from "@rose-griffon/menu-render-webgpu";
 
 const GameMenuGpu = dynamic(
@@ -20,12 +21,25 @@ const GameMenuGpu = dynamic(
 	}
 );
 
-export function MenuClient({ layout }: { layout: MenuLayout }) {
+export function MenuClient({
+	layout,
+	style,
+}: {
+	layout: MenuLayout;
+	// Par défaut le renderer remplit son conteneur (positionnement absolu, `inset: 0`). La page
+	// `/menu/[screen]` le confine dans un cadre 16/9 ; un appelant plein écran peut passer
+	// `{ position: "fixed" }`.
+	style?: CSSProperties;
+}) {
 	// Base des assets PNG : `public/menu/...` (self, assetBase "") par défaut, ou un CDN dédié
 	// via `NEXT_PUBLIC_MENU_ASSET_BASE` (couvert par la CSP `connect-src 'self' ${cdn}`).
 	const assetBase = process.env.NEXT_PUBLIC_MENU_ASSET_BASE ?? "";
 
 	return (
-		<GameMenuGpu layout={layout} assetBase={assetBase} style={{ inset: 0, position: "fixed" }} />
+		<GameMenuGpu
+			layout={layout}
+			assetBase={assetBase}
+			style={style ?? { inset: 0, position: "absolute" }}
+		/>
 	);
 }

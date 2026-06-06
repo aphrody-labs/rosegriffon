@@ -103,8 +103,8 @@
 			"transform": {
 				"x": 640,
 				"y": 360,
-				"scaleX": 0.16666666666666666,
-				"scaleY": 0.16666666666666666,
+				"scaleX": 1,
+				"scaleY": 1,
 				"rot": 0,
 				"anchorX": 0.5,
 				"anchorY": 0.5
