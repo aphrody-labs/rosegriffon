@@ -91,20 +91,27 @@ export async function ragEmbedQuery(text: string): Promise<number[]> {
 
 	const sidecar = process.env.RAG_EMBED_URL;
 	if (sidecar) {
-		try {
-			const res = await fetch(sidecar.replace(/\/$/, "") + "/embed", {
-				method: "POST",
-				headers: { "Content-Type": "application/json" },
-				// Chemin REQUÊTE : marque `query:true` pour le préfixe e5 côté sidecar.
-				body: JSON.stringify({ texts: [text], query: true }),
-			});
-			if (res.ok) {
-				const json = (await res.json()) as { embeddings?: number[][] };
-				const e = json.embeddings?.[0];
-				if (e) return projectAndNormalize(e, dim);
+		const endpoint = sidecar.replace(/\/$/, "") + "/embed";
+		// 2 tentatives à court backoff : absorbe un hoquet réseau sans faire
+		// patienter l'utilisateur (un vrai redémarrage du sidecar bascule vite
+		// sur le repli plutôt que de bloquer la requête plusieurs secondes).
+		for (let attempt = 0; attempt < 2; attempt++) {
+			try {
+				const res = await fetch(endpoint, {
+					method: "POST",
+					headers: { "Content-Type": "application/json" },
+					// Chemin REQUÊTE : marque `query:true` pour le préfixe e5 côté sidecar.
+					body: JSON.stringify({ texts: [text], query: true }),
+				});
+				if (res.ok) {
+					const json = (await res.json()) as { embeddings?: number[][] };
+					const e = json.embeddings?.[0];
+					if (e) return projectAndNormalize(e, dim);
+				}
+			} catch {
+				/* réessai puis repli */
 			}
-		} catch {
-			/* fallback */
+			if (attempt === 0) await new Promise((r) => setTimeout(r, 400));
 		}
 	}
 
