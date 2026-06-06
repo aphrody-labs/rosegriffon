@@ -4,6 +4,7 @@
  */
 import characterFaceManifest from "@/data/character-face-manifest.json";
 import characterModelManifest from "@/data/character-model-manifest.json";
+import chrModelManifest from "@/data/chr-model-manifest.json";
 import itemImageManifest from "@/data/item-image-manifest.json";
 import keshinModelManifest from "@/data/keshin-model-manifest.json";
 import miximaxIconManifest from "@/data/miximax-icon-manifest.json";
@@ -1022,6 +1023,38 @@ export function listServedKeshinCodes(): string[] {
 /** Liste triée des codes armure servis (gate de la galerie 3D armures). */
 export function listServedArmureCodes(): string[] {
 	return [...ARMURE_MODEL_CODES].sort();
+}
+
+/**
+ * Base nginx des modèles 3D génériques des sous-domaines `common/chr/_<sub>/` (techniques
+ * `waza`, objets `item`, animaux `animal`). Servis par `nie-model-serve :8790` via
+ * `/model-chr/<sub>/<code>.glb` (maillage g4md+g4mg assemblé live, sans texture embarquée).
+ */
+const MODEL_CHR_GLB_BASE = "https://cdn.rosegriffon.fr/model-chr";
+
+/** Sous-domaines chr exposés en galerie 3D (gate + libellés). Ordre = ordre d'affichage. */
+export type ChrModelSub = "waza" | "item" | "animal";
+
+const CHR_MODEL_CODES: Record<ChrModelSub, Set<string>> = {
+	animal: new Set((chrModelManifest as { animal: string[] }).animal),
+	item: new Set((chrModelManifest as { item: string[] }).item),
+	waza: new Set((chrModelManifest as { waza: string[] }).waza),
+};
+
+/**
+ * Résout l'URL du modèle 3D générique d'un sous-domaine chr (`/model-chr/<sub>/<code>.glb`),
+ * gardé sur le manifeste des codes réellement servis (gate anti-404). Renvoie `null` si le
+ * code n'a pas de paire g4md+g4mg assemblable.
+ */
+export function getChrModelGlbUrl(sub: ChrModelSub, code: string | undefined | null): string | null {
+	if (!code) return null;
+	if (!CHR_MODEL_CODES[sub]?.has(code)) return null;
+	return `${MODEL_CHR_GLB_BASE}/${sub}/${code}.glb?v=${MODEL_FULL_VERSION}`;
+}
+
+/** Liste triée des codes servis pour un sous-domaine chr (gate de la galerie 3D). */
+export function listServedChrModelCodes(sub: ChrModelSub): string[] {
+	return [...(CHR_MODEL_CODES[sub] ?? [])].sort();
 }
 
 /**
