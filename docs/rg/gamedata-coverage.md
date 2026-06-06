@@ -145,6 +145,17 @@ video waza) demandent un **nouveau parseur**. Plus : vérifier les drop-rates **
 | **B5** | **Assets chr** : extraire/indexer g4tx + g4mg/g4md/g4sk → manifest/DB + index arbre du jeu → Redis | `iecode` (C#) + `niers` (nie-formats) | **FAIT (voie C#)** (`319af59` ; `TextureManifestExport.cs` + `index-textures-to-redis.ts` ; **2000 g4tx → 20479 textures** en-têtes W/H/format/mips dans Redis db3 `iev:tex:*` vérifié `SCARD`=2000 + `HGETALL` échantillon `w14h015`=2048×2048 DX10 mips10 ; test 1293 assert ; arbre→Redis `0ba8a8a` 250800 fic/921 CPK). **CORRECTION honnête** : l'« extraction CPK » niers `c91faeb`/`a0e5333` était **cassée sur les vrais CPK** (modèle storage @UTF faux : nibble haut traité en enum au lieu de bits HasName/HasDefault/RowStorage → 0% extrait sur CPK textures) → fix Rust en cours (ancré au C# `UtfTable.cs`) + validation croisée Rust↔C#) |
 | **B6** | Événements : `ev*`/`Subtitle_ev*` (~16k) → index/typage des scripts d'event (dialogues, video waza in-game) | `rg` + Supabase | **FAIT** (`7e0cb0e` ; 3 familles réelles tracées : `Subtitle_ev*`=timing 5 vars, `text/<lang>/event/ev*`=TEXT_INFO localisé, `ev*_map`=washa 17 vars, jointes par hash Int signé ; `inagle_events`=**4708** + `inagle_event_subtitles`=**2093** vérifiés REST count=exact, dont **1572** lignes texte FR non-null, 521 NULL légitimes lyrics ; RLS+`Public Read` ; type-check vert ; texte stocké brut tags `<MNT:>`/furigana préservés) |
 | **B7** | Code C : niers continue (nie-wasm, câblage runtime sim, levier feuilles) | `niers` | EN COURS (axe séparé) |
+| **B8** | **RAG unifié — vecteurs précis + liens** : sidecar embeddings self-host (`rg-rag-embed.service`, multilingual-e5-small, zéro clé), graphe `inagle_rag_edges`, ingestion du texte de jeu (kind `text`) | `rg` (`packages/db`+`cron`, `scripts/rag-*`) + Supabase | **FAIT** (`c5569c4`,`c07e2c0` ; **41 491 arêtes** references/has_face/has_icon/is_texture/has_miximax ; texte de jeu **formaté/UTF-8** `[C…]` résiduel 0 / 259 899 entrées ; reembed 9850 PoC hash→e5 + ingestion ~70 k chunks `text` via sidecar ; doc `docs/rag-unified.md`) |
+| **B9** | **Surfaçage UI / drift data↔UI** (audit read-only 66 tables) : combler P0/P1 | `rg/apps/azalee` | **FAIT (P0/P1)** (`637ad44` ; `/item` 6→19 catégories ~1078 objets débloqués ; section `/succes` 228 trophées ; fusion `special_tactics` dans `/tactic` 70→80 ; retrait stats Lv30/50 mortes — vrai calcul = `lib/wiki/chara-stats.ts`) |
+
+## Surfaçage UI — drift restant (audit read-only, 66 tables)
+
+Tables peuplées encore **NON surfacées** (P2, candidates) : `inagle_events`(4708)+`event_subtitles`(1572 FR)
+→ section `/histoire` ; `star_signs`(5080) → enrichir `/invocation` ; `kizuna_items`(125, `getKizunaItems`
+jamais importé) ; galerie cosmétique (`activity_photos`115/`scene_archives`112/`nameplates`54/`chat_emotes`57/`phase_titles`9) ;
+`growth_tables`(276)+`exp_table`(100). Anomalies : `inagle_formations` **vide (0)** mais comptée au dashboard +
+liée vers route 404 (whitelist navigateur générique = 9/65 tables). Hash non résolus : capsules `contentRef`/`poolRef`,
+costumes `model_ref`.
 
 ## Moteur de workflows dynamiques (cadence autonome)
 
