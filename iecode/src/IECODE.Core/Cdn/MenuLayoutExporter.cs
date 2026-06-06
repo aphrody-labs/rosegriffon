@@ -229,19 +229,79 @@ public sealed class MenuLayoutExporter
         catch { return null; }
         if (layout.WorldPoseByName.Count == 0) return null;
 
-        // Obtenir la pose finale via G4pkmMotion (gère le fallback ancêtre pour les hors-écran)
+        // Obtenir la pose finale via G4pkmMotion (gère le fallback ancêtre pour les hors-écran).
+        // Si le bone de placement est un locator (ScaleX ≤ 1), rechercher le bone dont la
+        // géométrie correspond aux dimensions du sprite (tolérance 30 %) ; cela est nécessaire
+        // pour les objets IEVR dont le bone racine est une identité et dont la vraie taille est
+        // encodée dans un bone feuille (ex. _header_gtxt_title02_01 sx=776 sy=120 pour un sprite 776×120).
         var motionPose = G4pkmMotion.GetMotionFinalPose(layout, hasOpenMotion);
-        var pose = motionPose.Pose;
+        var pose = PickBestPoseForSprite(layout, motionPose.Pose, sprite);
 
         var (px, py) = pose.ToCss1280x720();
-        double sx = sprite is { W: > 0 } && pose.ScaleX > 0 ? pose.ScaleX * (1280.0 / 1920.0) / sprite.W : 1.0;
-        double sy = sprite is { H: > 0 } && pose.ScaleY > 0 ? pose.ScaleY * (720.0 / 1080.0) / sprite.H : 1.0;
+        // scaleX = (taille géométrie en px 1920) × ratio_canvas / taille_texture_native
+        // Si pose.ScaleX provient d'un bone de taille réelle (> 1), le résultat est le ratio
+        // canvas/texture (ex. 1280px bone→ sprite 1920px → scaleX = 0.667 = plein écran).
+        // Si pose.ScaleX reste ≤ 1 (locator sans match), on affiche le sprite à sa taille native.
+        double sx = sprite is { W: > 0 } && pose.ScaleX > 1.0 ? pose.ScaleX * (1280.0 / 1920.0) / sprite.W : 1.0;
+        double sy = sprite is { H: > 0 } && pose.ScaleY > 1.0 ? pose.ScaleY * (720.0 / 1080.0) / sprite.H : 1.0;
         return new MenuTransform(px, py, sx, sy, pose.Rot, pose.AnchorX, pose.AnchorY);
     }
 
     /// <summary>
     /// Construit la liste des chemins CDN à essayer pour un G4PKM (exact + variantes sans suffixe).
     /// </summary>
+    /// <summary>
+    /// Sélectionne la meilleure pose pour un sprite donné.
+    ///
+    /// <para>Si la pose fournie par <see cref="G4pkmMotion.GetMotionFinalPose"/> est un
+    /// locator (ScaleX ≤ 1.0), cherche dans le layout le bone dont les dimensions en
+    /// espace-écran 1920×1080 correspondent le mieux au sprite (tolérance 30 %).
+    /// En cas de correspondance, la position X/Y est préservée depuis la pose originale
+    /// (issue du bone de placement) ; seule la scale provient du bone feuille.</para>
+    ///
+    /// <para>Cela corrige le bug de dégénérescence : le code précédent associait un bone
+    /// identité (ScaleX=1 = 1 pixel) à un sprite de plusieurs centaines de pixels, rendant
+    /// scaleX_json = 0.001 → sprite invisible (0.67 px rendu).</para>
+    /// </summary>
+    private static Transform2D PickBestPoseForSprite(
+        G4pkmLayout layout, Transform2D placementPose, MenuLayoutSprite? sprite)
+    {
+        // Si le bone de placement a déjà une géométrie réelle, on l'utilise directement.
+        if (placementPose.ScaleX > 1.0f || sprite is not { W: > 0, H: > 0 })
+            return placementPose;
+
+        // Chercher le bone dont sx et sy sont les plus proches de sprite.W et sprite.H
+        // dans un rapport de 30 % (tolérance pour les sprite légèrement recadrés).
+        const float Tolerance = 0.30f;
+        float targetSx = sprite.W;
+        float targetSy = sprite.H;
+
+        Transform2D? best = null;
+        float bestScore = float.MaxValue;
+
+        foreach (var bone in layout.Bones)
+        {
+            var wp = bone.WorldBindPose;
+            if (wp.ScaleX <= 1.0f || wp.ScaleY <= 1.0f) continue;
+
+            float ratioX = wp.ScaleX / targetSx;
+            float ratioY = wp.ScaleY / targetSy;
+            if (ratioX < (1.0f - Tolerance) || ratioX > (1.0f + Tolerance)) continue;
+            if (ratioY < (1.0f - Tolerance) || ratioY > (1.0f + Tolerance)) continue;
+
+            // Score = distance relative cumulée (plus c'est proche de 1, mieux c'est).
+            float score = Math.Abs(1.0f - ratioX) + Math.Abs(1.0f - ratioY);
+            if (score < bestScore)
+            {
+                bestScore = score;
+                // Position X/Y depuis le bone feuille (il est positionné correctement).
+                best = new Transform2D(wp.X, wp.Y, wp.ScaleX, wp.ScaleY, wp.Rot, wp.AnchorX, wp.AnchorY);
+            }
+        }
+
+        return best ?? placementPose;
+    }
+
     private static IReadOnlyList<string> BuildG4pkmPathCandidates(string g4pkmLogical)
     {
         const StringComparison OIC = StringComparison.OrdinalIgnoreCase;
