@@ -114,6 +114,22 @@ export function cpkRawUrl(path: string): string {
 }
 
 /**
+ * URL du décodage audio CRI (`/audio/<vfs-path>`) → WAV PCM 16-bit décodé live par
+ * nie-model-serve (HCA/ADX, conteneurs ACB/AWB). Lisible directement par `<audio>`.
+ */
+export function cpkAudioUrl(path: string): string {
+	return `${CDN_BASE}/audio/${path}`;
+}
+
+/**
+ * URL du décodage vidéo CRI (`/video/<vfs-path>`) → MP4 fragmenté (démux USM Sofdec2
+ * + remux H.264) décodé live par nie-model-serve. Lisible directement par `<video>`.
+ */
+export function cpkVideoUrl(path: string): string {
+	return `${CDN_BASE}/video/${path}`;
+}
+
+/**
  * Variante WebP redimensionnée pour les vignettes d'images (g4tx → webp `?w=`).
  * Sert la galerie/arbre en léger ; `null` si l'extension n'est pas une image.
  */

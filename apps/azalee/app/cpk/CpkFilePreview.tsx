@@ -20,9 +20,11 @@ import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
 import { Icon } from "@/components/ui/Icon";
 import {
+	cpkAudioUrl,
 	cpkCfgUrl,
 	cpkPreviewKind,
 	cpkRawUrl,
+	cpkVideoUrl,
 	modelFullCode,
 	modelFullUrl,
 	previewKindLabel,
@@ -158,15 +160,29 @@ function PreviewBody(
 	}
 
 	if (previewKind === "sound") {
-		// Audio CRI (acb/awb/hca/adx) — pas lisible brut par le navigateur (décodage
-		// CRI→wav à venir). On expose le téléchargement de l'original ci-dessous.
-		return <UnplayableNote icon="graphic_eq" label="Audio CRI (ADX/HCA)" />;
+		// Audio CRI (acb/awb/hca/adx) décodé en direct en WAV par nie-model-serve
+		// (`/audio/`) → lisible nativement. `preload="none"` : le décodage (coûteux)
+		// ne se déclenche qu'au clic sur lecture.
+		return (
+			<div className="flex flex-col items-center gap-3 p-8 text-center">
+				<Icon name="graphic_eq" size={36} className="text-on-surface-variant/50" />
+				<p className="text-xs text-on-surface-variant">Audio CRI décodé en direct (HCA/ADX → WAV)</p>
+				{/* eslint-disable-next-line jsx-a11y/media-has-caption */}
+				<audio controls preload="none" className="w-full max-w-md" src={cpkAudioUrl(path)} />
+			</div>
+		);
 	}
 
 	if (previewKind === "movie") {
-		// Vidéo USM (CRI Sofdec2) — pas lisible brut par le navigateur (transcodage
-		// USM→mp4 à venir). Téléchargement de l'original ci-dessous.
-		return <UnplayableNote icon="movie" label="Vidéo USM (CRI Sofdec2)" />;
+		// Vidéo USM (CRI Sofdec2) démuxée + remuxée en MP4 H.264 par nie-model-serve
+		// (`/video/`) → lisible nativement. `preload="none"` : décodage au clic.
+		return (
+			<div className="flex flex-col items-center gap-3 p-6 text-center">
+				<p className="text-xs text-on-surface-variant">Vidéo USM décodée en direct (Sofdec2 → MP4 H.264)</p>
+				{/* eslint-disable-next-line jsx-a11y/media-has-caption */}
+				<video controls preload="none" className="w-full max-w-2xl rounded-lg" src={cpkVideoUrl(path)} />
+			</div>
+		);
 	}
 
 	if (previewKind === "text") {
@@ -183,20 +199,6 @@ function PreviewBody(
 			<Icon name="description" size={40} className="text-on-surface-variant/40" />
 			<p className="text-sm text-on-surface-variant">
 				Aperçu inline non disponible — téléchargez l'original ci-dessous.
-			</p>
-		</div>
-	);
-}
-
-/** Note pour un format non encore lisible inline (audio/vidéo CRI) — download ci-dessous. */
-function UnplayableNote({ icon, label }: { icon: string; label: string }) {
-	return (
-		<div className="flex flex-col items-center gap-2 p-10 text-center">
-			<Icon name={icon} size={40} className="text-on-surface-variant/50" />
-			<p className="text-sm text-on-surface">{label}</p>
-			<p className="text-xs text-on-surface-variant max-w-sm">
-				Format propriétaire CRI non lisible directement par le navigateur. Le décodage
-				natif arrive ; en attendant, téléchargez l'original ci-dessous.
 			</p>
 		</div>
 	);
