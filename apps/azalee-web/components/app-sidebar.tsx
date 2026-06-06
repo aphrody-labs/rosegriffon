@@ -22,11 +22,13 @@ import {
 } from "@rose-griffon/ui";
 import { dashboardItems, navigationItems } from "@/config/navigation";
 import type { NavItem } from "@/config/navigation";
+import type { GameIconKey } from "@/config/game-icons";
 import type { SpriteCommonKey } from "@/config/sprites-common";
 import { iconMap } from "@/lib/icons";
 import { cn } from "@/lib/utils";
 import { useAuth } from "./providers/AuthProvider";
 import { CommonSpriteIcon } from "./ui/CommonSpriteIcon";
+import { GameSpriteIcon } from "./ui/GameSpriteIcon";
 
 export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
 	const { isAdmin } = useAuth();
@@ -107,6 +109,18 @@ function NavIcon({
 					)}
 				/>
 			</div>
+		);
+	}
+
+	if (item.gameIcon) {
+		// Cellule native ~256x200 → on cible une hauteur d'icone ~20/24px.
+		const px = isCollapsed && depth === 0 ? 24 : 20;
+		return (
+			<GameSpriteIcon
+				name={item.gameIcon as GameIconKey}
+				size={px}
+				className={cn(isActive ? "opacity-100" : "opacity-70 group-hover:opacity-100")}
+			/>
 		);
 	}
 

@@ -1,4 +1,4 @@
-const CACHE_NAME = "azalee-shell-v7-20260517";
+const CACHE_NAME = "azalee-shell-v8-20260606";
 const SHELL_URLS = ["/manifest.webmanifest", "/icon.webp", "/logo.webp"];
 // Origin du CDN VPS — quand NEXT_PUBLIC_CDN_URL est actif, les chunks
 // _next/static sont chargés depuis cdn.rosegriffon.fr et non self.location.

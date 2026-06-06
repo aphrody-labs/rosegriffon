@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { GameSpriteIcon } from "@/components/ui/GameSpriteIcon";
+import type { GameIconKey } from "@/config/game-icons";
 import { useLanguage } from "@/components/providers/language-provider";
 import { dashboardItems, navigationItems } from "@/config/navigation";
 import { iconMap } from "@/lib/icons";
@@ -32,13 +34,16 @@ export function AzaleeNavigationRail() {
 				const isActive =
 					pathname === item.path || (item.path !== "/" && pathname.startsWith(item.path));
 
+				// Priorite : vraie icone du jeu (teintee) > lucide.
+				const icon = item.gameIcon ? (
+					<GameSpriteIcon name={item.gameIcon as GameIconKey} size={24} />
+				) : LucideIcon ? (
+					<LucideIcon size={24} />
+				) : null;
+
 				return (
 					<Link key={item.path} href={item.path} passHref legacyBehavior>
-						<NavigationRailItem
-							active={isActive}
-							icon={LucideIcon ? <LucideIcon size={24} /> : null}
-							label={t(item.label)}
-						/>
+						<NavigationRailItem active={isActive} icon={icon} label={t(item.label)} />
 					</Link>
 				);
 			})}
