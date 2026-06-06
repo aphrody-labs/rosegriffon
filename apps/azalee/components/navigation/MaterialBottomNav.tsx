@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { GameSpriteIcon } from "@/components/ui/GameSpriteIcon";
+import type { GameIconKey } from "@/config/game-icons";
 import { useLanguage } from "@/components/providers/language-provider";
 import { mobileNavItems } from "@/config/navigation";
 import { haptic } from "@/lib/haptics";
@@ -12,11 +14,13 @@ function NavItem({
 	label,
 	path,
 	icon,
+	gameIcon,
 	isActive,
 }: {
 	label: string;
 	path: string;
 	icon: string;
+	gameIcon?: string;
 	isActive: boolean;
 }) {
 	const { t } = useLanguage();
@@ -49,17 +53,28 @@ function NavItem({
 				)}
 			/>
 
-			{/* Icon */}
-			{LucideIcon && (
-				<LucideIcon
+			{/* Icon : vraie icone du jeu (teintee) sinon lucide */}
+			{gameIcon ? (
+				<GameSpriteIcon
+					name={gameIcon as GameIconKey}
 					size={24}
 					className={cn(
 						"relative z-10 transition-colors duration-200",
 						isActive ? "text-on-secondary-container" : "text-on-surface-variant"
 					)}
-					fill={isActive ? "currentColor" : "none"}
-					aria-hidden="true"
 				/>
+			) : (
+				LucideIcon && (
+					<LucideIcon
+						size={24}
+						className={cn(
+							"relative z-10 transition-colors duration-200",
+							isActive ? "text-on-secondary-container" : "text-on-surface-variant"
+						)}
+						fill={isActive ? "currentColor" : "none"}
+						aria-hidden="true"
+					/>
+				)
 			)}
 
 			{/* Label */}
@@ -157,6 +172,7 @@ export function MaterialBottomNav() {
 							label={item.label}
 							path={item.path}
 							icon={item.icon}
+							gameIcon={"gameIcon" in item ? item.gameIcon : undefined}
 							isActive={isActive}
 						/>
 					);

@@ -3,6 +3,8 @@ export interface NavItem {
 	path: string;
 	imageUrl?: string;
 	commonSprite?: string;
+	/** Cle d'une VRAIE icone de menu du jeu (cf. config/game-icons.ts). */
+	gameIcon?: string;
 	icon: string;
 	adminOnly?: boolean;
 	defaultOpen?: boolean;
@@ -90,10 +92,11 @@ export const navigationItems: NavItem[] = [
 	{
 		// Équipes, entraîneurs, stades.
 		children: [
-			{ label: "nav.wiki.teams", path: "/equipe", icon: "shield" },
-			{ label: "nav.wiki.coaches", path: "/entraineur", icon: "sports" },
-			{ label: "nav.wiki.stadiums", path: "/stade", icon: "stadium" },
+			{ label: "nav.wiki.teams", path: "/equipe", icon: "shield", gameIcon: "emblem" },
+			{ label: "nav.wiki.coaches", path: "/entraineur", icon: "sports", gameIcon: "medal" },
+			{ label: "nav.wiki.stadiums", path: "/stade", icon: "stadium", gameIcon: "stadium" },
 		],
+		gameIcon: "emblem",
 		icon: "shield",
 		label: "nav.section.clubs",
 		path: "/equipe",
@@ -101,12 +104,13 @@ export const navigationItems: NavItem[] = [
 	{
 		// Objets & moyens d'obtention (boutiques, capsules, drops).
 		children: [
-			{ label: "nav.wiki.items", path: "/item", icon: "backpack" },
-			{ label: "nav.wiki.shops", path: "/boutique", icon: "storefront" },
-			{ label: "nav.wiki.capsules", path: "/capsule", icon: "casino" },
-			{ label: "nav.wiki.invocation", path: "/invocation", icon: "stars" },
+			{ label: "nav.wiki.items", path: "/item", icon: "backpack", gameIcon: "chest" },
+			{ label: "nav.wiki.shops", path: "/boutique", icon: "storefront", gameIcon: "moneybag" },
+			{ label: "nav.wiki.capsules", path: "/capsule", icon: "casino", gameIcon: "ticket" },
+			{ label: "nav.wiki.invocation", path: "/invocation", icon: "stars", gameIcon: "star-token" },
 			{ label: "nav.wiki.drops", path: "/drops", icon: "redeem" },
 		],
+		gameIcon: "chest",
 		icon: "backpack",
 		label: "nav.section.items",
 		path: "/item",
@@ -117,10 +121,11 @@ export const navigationItems: NavItem[] = [
 		path: "/quete",
 	},
 	{
-		// Médias : galerie d'illustrations + modèles 3D.
+		// Médias : galerie d'illustrations + modèles 3D (esprits/armures + objets/animaux).
 		children: [
 			{ label: "nav.wiki.gallery", path: "/gallery", icon: "image" },
 			{ label: "nav.wiki.keshin_models", path: "/keshin", icon: "view_in_ar" },
+			{ label: "nav.wiki.models", path: "/modeles", icon: "deployed_code" },
 		],
 		icon: "perm_media",
 		label: "nav.section.media",
@@ -191,6 +196,7 @@ export const mobileNavItems: NavItem[] = [
 			"/stade",
 			"/drops",
 			"/keshin",
+			"/modeles",
 			"/menu",
 			"/cpk",
 			"/wiki",
