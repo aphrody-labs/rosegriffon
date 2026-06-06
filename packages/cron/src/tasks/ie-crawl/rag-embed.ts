@@ -71,19 +71,32 @@ async function embedViaSidecar(
 	url: string,
 	isQuery = false
 ): Promise<number[][] | null> {
-	try {
-		const res = await fetch(url.replace(/\/$/, "") + "/embed", {
-			method: "POST",
-			headers: { "Content-Type": "application/json" },
-			body: JSON.stringify({ texts, query: isQuery }),
-		});
-		if (!res.ok) return null;
-		const json = (await res.json()) as { embeddings?: number[][] };
-		if (!json.embeddings || json.embeddings.length !== texts.length) return null;
-		return json.embeddings.map((e) => projectToDim(e));
-	} catch {
-		return null;
+	// Réessais avec backoff : un redémarrage du sidecar (ex. OOM → systemd
+	// Restart, ~5 s) ne doit PAS faire retomber tout un run d'ingestion sur le
+	// hash. On retente plutôt que de renvoyer null au premier hoquet.
+	const endpoint = url.replace(/\/$/, "") + "/embed";
+	const ATTEMPTS = 5;
+	for (let attempt = 0; attempt < ATTEMPTS; attempt++) {
+		try {
+			const res = await fetch(endpoint, {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({ texts, query: isQuery }),
+			});
+			if (res.ok) {
+				const json = (await res.json()) as { embeddings?: number[][] };
+				if (json.embeddings && json.embeddings.length === texts.length) {
+					return json.embeddings.map((e) => projectToDim(e));
+				}
+			}
+		} catch {
+			/* réseau/redémarrage en cours → on retente */
+		}
+		if (attempt < ATTEMPTS - 1) {
+			await new Promise((r) => setTimeout(r, 1500 * (attempt + 1)));
+		}
 	}
+	return null;
 }
 
 async function embedViaOpenAI(texts: string[], apiKey: string): Promise<number[][] | null> {

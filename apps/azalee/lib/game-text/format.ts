@@ -44,7 +44,10 @@ const GLYPH_SENTINEL_BASE = 0xf8f0;
 // (minuscule).
 const C_KEYWORD = "C[A-Z0-9_]*";
 const RE_WELL_FORMED = new RegExp(`\\[${C_KEYWORD}\\]`, "g"); // [CG] [CPASSIVE01]…
-const RE_KEYWORD_CLOSE = new RegExp(`${C_KEYWORD}\\]`, "g"); // scramble : `卵C]`, `CG2]`
+// scramble `卵C]`, `CG2]` : le mot-clé NE doit PAS être précédé d'une lettre latine
+// (sinon on mangerait la queue d'un mot comme `[ABC]` -> `AB`). Les vrais cas de
+// scramble sont précédés de CJK / crochet / espace / début — jamais d'une lettre A-Za-z.
+const RE_KEYWORD_CLOSE = new RegExp(`(?<![A-Za-z])${C_KEYWORD}\\]`, "g");
 const RE_OPEN_KEYWORD = new RegExp(`\\[${C_KEYWORD}`, "g"); // scramble : `[CG2` (sans fermeture)
 
 /** Remplace les glyphes de position par des sentinelles inviolables. */
