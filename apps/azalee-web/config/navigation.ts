@@ -121,6 +121,11 @@ export const navigationItems: NavItem[] = [
 		path: "/quete",
 	},
 	{
+		icon: "emoji_events",
+		label: "nav.wiki.trophies",
+		path: "/succes",
+	},
+	{
 		// Médias : galerie d'illustrations + modèles 3D (esprits/armures + objets/animaux).
 		children: [
 			{ label: "nav.wiki.gallery", path: "/gallery", icon: "image" },
@@ -192,6 +197,7 @@ export const mobileNavItems: NavItem[] = [
 			"/tactic",
 			"/gallery",
 			"/quete",
+			"/succes",
 			"/entraineur",
 			"/stade",
 			"/drops",

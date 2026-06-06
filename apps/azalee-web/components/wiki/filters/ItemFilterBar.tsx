@@ -46,7 +46,9 @@ export function ItemFilterBar({ categories, currentCategory }: ItemFilterBarProp
 							onClick={() => updateCategory(f.value)}
 							className={cn(
 								"inline-flex items-center justify-center gap-2 px-4 py-2 rounded-full text-sm font-medium",
-								"transition-all duration-200 border flex-1 sm:flex-none cursor-pointer",
+								// Puces dimensionnées au contenu : avec ~19 catégories le retour à la ligne
+								// reste lisible (pas d'étirement flex-1 qui déforme les rangées).
+								"transition-all duration-200 border cursor-pointer",
 								isActive
 									? "bg-primary text-on-primary border-primary shadow-md"
 									: "bg-surface-container hover:bg-surface-container-high border-outline-variant/30 text-on-surface-variant hover:text-on-surface"

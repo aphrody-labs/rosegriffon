@@ -41,13 +41,31 @@ export async function generateMetadata({
 
 const ITEMS_PER_PAGE = 48;
 
+// Toutes les catégories peuplées de inagle_items (équipement d'abord, puis le reste).
+// Counts indicatifs du miroir : shoes 214, misanga 79, accessory 80, special 80,
+// emblem 242, kizuna_link 82, consume 65, special_tactics 70, super_tactics 6,
+// special_skill 43, performance 16, formation 11, fashion 168, costume 69,
+// name_plate 54, title 110, craft_obj 137, important 135, animal 7.
 const CATEGORIES = [
 	{ icon: "steps", label: "Chaussures", value: "shoes" },
 	{ icon: "watch", label: "Bracelets", value: "misanga" },
 	{ icon: "diamond", label: "Pendentifs", value: "accessory" },
+	{ icon: "auto_awesome", label: "Accessoires spéciaux", value: "special" },
+	{ icon: "shield", label: "Emblèmes", value: "emblem" },
 	{ icon: "link", label: "Lien Kizuna", value: "kizuna_link" },
 	{ icon: "lunch_dining", label: "Consommables", value: "consume" },
 	{ icon: "strategy", label: "Tactiques Sp.", value: "special_tactics" },
+	{ icon: "bolt", label: "Super tactiques", value: "super_tactics" },
+	{ icon: "stars", label: "Compétences sp.", value: "special_skill" },
+	{ icon: "person_celebrate", label: "Performances", value: "performance" },
+	{ icon: "groups", label: "Formations", value: "formation" },
+	{ icon: "shopping_bag", label: "Mode", value: "fashion" },
+	{ icon: "redeem", label: "Costumes", value: "costume" },
+	{ icon: "tag", label: "Plaques", value: "name_plate" },
+	{ icon: "verified", label: "Titres", value: "title" },
+	{ icon: "build", label: "Objets d'artisanat", value: "craft_obj" },
+	{ icon: "push_pin", label: "Objets importants", value: "important" },
+	{ icon: "pets", label: "Animaux", value: "animal" },
 ];
 
 export default async function ItemsPage({
