@@ -12,6 +12,7 @@
  * `lib/game-text/index.ts`.
  */
 import type { Database } from "bun:sqlite";
+import { formatGameText } from "./format";
 
 /** Une entrée brute de l'artefact : `[hashId, locale, category, value]`. */
 export type TextEntry = [hashId: string, locale: string, category: string, value: string];
@@ -47,7 +48,9 @@ export function buildSqliteFromEntries(db: Database, entries: TextEntry[]): { in
 	let ignored = 0;
 	const insertMany = db.transaction((batch: TextEntry[]) => {
 		for (const [hashId, locale, category, value] of batch) {
-			const res = insert.run(hashId, locale, category, value);
+			// Défense en profondeur : nettoie aussi à l'insert (artefact déjà
+			// nettoyé en amont, mais on garantit l'invariant côté SQLite).
+			const res = insert.run(hashId, locale, category, formatGameText(value));
 			if (res.changes > 0) inserted++;
 			else ignored++;
 		}
