@@ -73,7 +73,7 @@ export function TacticDetail({ tactic }: TacticDetailProps) {
 							)}
 						</div>
 						<div className="flex-1 min-w-0">
-							<h1 className="text-2xl lg:text-3xl font-black text-on-surface tracking-tight">
+							<h1 className="text-2xl lg:text-3xl font-extrabold tracking-tight text-on-surface font-display">
 								{tactic.name_fr || tactic.name}
 							</h1>
 							{tactic.name_fr && tactic.name_fr !== tactic.name && (

@@ -35,18 +35,52 @@ export default async function TacticsPage({
 		q,
 	});
 
+	const collectionJsonLd = {
+		"@context": "https://schema.org",
+		"@type": "CollectionPage",
+		description: `Base de données des tactiques spéciales dans Inazuma Eleven: Victory Road.`,
+		isPartOf: { "@type": "WebSite", name: "Azalée", url: "https://azalee.rosegriffon.fr" },
+		mainEntity: {
+			"@type": "ItemList",
+			itemListElement: tactics.slice(0, 10).map((t: any, i: number) => ({
+				"@type": "ListItem",
+				position: (page - 1) * ITEMS_PER_PAGE + i + 1,
+				url: `https://azalee.rosegriffon.fr/tactic/${t.itemId}`,
+				name: t.names?.fr || t.names?.en || t.name_FR || "Tactique",
+			})),
+			numberOfItems: total,
+		},
+		name: "Tactiques - Inazuma Eleven: Victory Road",
+		numberOfItems: total,
+		url: "https://azalee.rosegriffon.fr/tactic",
+	};
+
 	return (
-		<div className="w-full space-y-6">
+		<div className="space-y-6">
+			<script
+				type="application/ld+json"
+				dangerouslySetInnerHTML={{ __html: JSON.stringify(collectionJsonLd) }}
+			/>
+
 			{/* Header */}
-			<div>
-				<h1 className="text-2xl lg:text-3xl font-black text-on-surface tracking-tight">
+			<div className="space-y-1">
+				<h1 className="text-3xl font-extrabold tracking-tight text-on-surface font-display">
 					Tactiques
 				</h1>
-				<p className="text-sm text-on-surface-variant mt-1">{total} tactiques disponibles</p>
+				<p className="text-sm text-on-surface-variant">
+					Liste complète des tactiques spéciales dans Inazuma Eleven: Victory Road.
+				</p>
 			</div>
 
 			{/* Search */}
 			<WikiSearchToolbar placeholder="Rechercher une tactique..." showFilters={false} />
+
+			<div className="flex items-center justify-between text-xs font-medium text-on-surface-variant px-1 uppercase tracking-wider">
+				<span>{total} tactiques</span>
+				<span>
+					Page {page} sur {Math.max(1, Math.ceil(total / ITEMS_PER_PAGE))}
+				</span>
+			</div>
 
 			{/* Grid */}
 			{tactics.length > 0 ? (

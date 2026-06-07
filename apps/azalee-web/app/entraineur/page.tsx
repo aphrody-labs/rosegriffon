@@ -36,16 +36,40 @@ export default async function CoachesPage({
 		role: params.role,
 	});
 
+	const collectionJsonLd = {
+		"@context": "https://schema.org",
+		"@type": "CollectionPage",
+		description: `Liste complète des entraîneurs, managers et coachs d'Inazuma Eleven: Victory Road.`,
+		isPartOf: { "@type": "WebSite", name: "Azalée", url: "https://azalee.rosegriffon.fr" },
+		mainEntity: {
+			"@type": "ItemList",
+			itemListElement: coaches.slice(0, 10).map((c: any, i: number) => ({
+				"@type": "ListItem",
+				position: i + 1,
+				url: `https://azalee.rosegriffon.fr/entraineur/${c.id}`,
+				name: c.name,
+			})),
+			numberOfItems: coaches.length,
+		},
+		name: "Entraîneurs & Coachs - Inazuma Eleven: Victory Road",
+		numberOfItems: coaches.length,
+		url: "https://azalee.rosegriffon.fr/entraineur",
+	};
+
 	return (
-		<div className="w-full space-y-6">
+		<div className="space-y-6">
+			<script
+				type="application/ld+json"
+				dangerouslySetInnerHTML={{ __html: JSON.stringify(collectionJsonLd) }}
+			/>
+
 			{/* En-tête */}
-			<div>
-				<h1 className="text-2xl font-black tracking-tight text-on-surface lg:text-3xl">
+			<div className="space-y-1">
+				<h1 className="text-3xl font-extrabold tracking-tight text-on-surface font-display">
 					Entraîneurs &amp; Coachs
 				</h1>
-				<p className="mt-1 text-sm text-on-surface-variant">
-					{coaches.length} membre{coaches.length > 1 ? "s" : ""} de banc avec leurs passifs
-					d'équipe
+				<p className="text-sm text-on-surface-variant">
+					Liste complète des entraîneurs, managers et coachs d&apos;Inazuma Eleven: Victory Road.
 				</p>
 			</div>
 
@@ -75,6 +99,10 @@ export default async function CoachesPage({
 					</div>
 				</div>
 			</WikiSearchToolbar>
+
+			<div className="flex items-center justify-between text-xs font-medium text-on-surface-variant px-1 uppercase tracking-wider">
+				<span>{coaches.length} entraîneur{coaches.length > 1 ? "s" : ""}</span>
+			</div>
 
 			{/* Grille */}
 			{coaches.length > 0 ? (

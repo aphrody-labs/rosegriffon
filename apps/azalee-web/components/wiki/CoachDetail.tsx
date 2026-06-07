@@ -55,7 +55,7 @@ export function CoachDetail({ coach }: { coach: Coach }) {
 						</span>
 						{coach.elementKey ? <ElementIcon element={coach.elementKey} size="md" /> : null}
 					</div>
-					<h1 className="mt-2 text-2xl font-black leading-tight text-on-surface">{coach.name}</h1>
+					<h1 className="mt-2 text-2xl font-extrabold leading-tight text-on-surface font-display">{coach.name}</h1>
 					{coach.nameKanji && coach.nameKanji !== coach.name ? (
 						<p className="text-sm text-on-surface-variant">
 							{coach.nameKanji}

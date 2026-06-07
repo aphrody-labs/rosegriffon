@@ -144,7 +144,7 @@ export default async function TrophyDetailPage({
 					>
 						{categoryLabel} · {trophy.groupLabel}
 					</span>
-					<h1 className="mt-2 text-2xl font-black leading-tight tracking-tight text-on-surface lg:text-3xl">
+					<h1 className="mt-2 text-3xl font-extrabold leading-tight tracking-tight text-on-surface font-display">
 						{trophy.name}
 					</h1>
 					{trophy.desc && (
