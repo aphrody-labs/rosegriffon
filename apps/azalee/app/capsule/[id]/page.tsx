@@ -95,7 +95,7 @@ export default async function CapsuleDetailPage({
 					<span className="text-[10px] font-bold uppercase tracking-wider text-on-surface-variant/60">
 						Lot de capsule
 					</span>
-					<h1 className="font-mono text-xl font-black text-on-surface">{prize.id}</h1>
+					<h1 className="font-mono text-2xl font-extrabold tracking-tight text-on-surface font-display">{prize.id}</h1>
 					<p className="mt-1 text-sm text-on-surface-variant">
 						Référencé dans le pool de tirage{" "}
 						<Link

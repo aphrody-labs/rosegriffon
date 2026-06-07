@@ -61,15 +61,40 @@ export default async function CapsulePage({
 		return `/capsule?${sp.toString()}`;
 	};
 
+	const collectionJsonLd = {
+		"@context": "https://schema.org",
+		"@type": "CollectionPage",
+		description: `Lots de capsules (gacha) et costumes d'Inazuma Eleven: Victory Road. pools et modèles de costumes extraits directement des données du jeu.`,
+		isPartOf: { "@type": "WebSite", name: "Azalée", url: "https://azalee.rosegriffon.fr" },
+		mainEntity: {
+			"@type": "ItemList",
+			itemListElement: (tab === "capsules" ? capsules?.data : costumes?.data)?.slice(0, 10).map((x: any, i: number) => ({
+				"@type": "ListItem",
+				position: (page - 1) * ITEMS_PER_PAGE + i + 1,
+				url: `https://azalee.rosegriffon.fr/capsule/${x.id}`,
+				name: x.name || x.id,
+			})),
+			numberOfItems: total,
+		},
+		name: "Capsules & Costumes - Inazuma Eleven: Victory Road",
+		numberOfItems: total,
+		url: "https://azalee.rosegriffon.fr/capsule",
+	};
+
 	return (
-		<div className="w-full space-y-6">
+		<div className="space-y-6">
+			<script
+				type="application/ld+json"
+				dangerouslySetInnerHTML={{ __html: JSON.stringify(collectionJsonLd) }}
+			/>
+
 			{/* En-tête */}
-			<div>
-				<h1 className="text-2xl lg:text-3xl font-black text-on-surface tracking-tight">
-					Capsules & Costumes
+			<div className="space-y-1">
+				<h1 className="text-3xl font-extrabold tracking-tight text-on-surface font-display">
+					Capsules &amp; Costumes
 				</h1>
-				<p className="text-sm text-on-surface-variant mt-1">
-					{counts.capsules} lots de capsules · {counts.costumes} costumes
+				<p className="text-sm text-on-surface-variant">
+					Liste complète des capsules (gacha) et costumes d&apos;Inazuma Eleven: Victory Road.
 				</p>
 			</div>
 
@@ -102,7 +127,6 @@ export default async function CapsulePage({
 					<span className="text-xs opacity-70">{counts.costumes}</span>
 				</Link>
 			</div>
-
 			{/* Recherche */}
 			<WikiSearchToolbar
 				placeholder={
@@ -110,6 +134,15 @@ export default async function CapsulePage({
 				}
 				showFilters={false}
 			/>
+
+			<div className="flex items-center justify-between text-xs font-medium text-on-surface-variant px-1 uppercase tracking-wider">
+				<span>
+					{total} {tab === "capsules" ? "lots de capsules" : "costumes"}
+				</span>
+				<span>
+					Page {page} sur {Math.max(1, Math.ceil(total / ITEMS_PER_PAGE))}
+				</span>
+			</div>
 
 			{/* CAPSULES */}
 			{tab === "capsules" && capsules && (

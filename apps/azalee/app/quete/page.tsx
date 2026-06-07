@@ -27,16 +27,47 @@ export default async function QuetesPage({
 
 	const { quests, total, main, side } = await getQuestsList({ q, kind });
 
+	const collectionJsonLd = {
+		"@context": "https://schema.org",
+		"@type": "CollectionPage",
+		description: `Liste complète des quêtes d'Inazuma Eleven: Victory Road — objectifs d'histoire principale et quêtes annexes.`,
+		isPartOf: { "@type": "WebSite", name: "Azalée", url: "https://azalee.rosegriffon.fr" },
+		mainEntity: {
+			"@type": "ItemList",
+			itemListElement: quests.slice(0, 10).map((quest: any, i: number) => ({
+				"@type": "ListItem",
+				position: i + 1,
+				url: `https://azalee.rosegriffon.fr/quete/${quest.id}`,
+				name: quest.title,
+			})),
+			numberOfItems: quests.length,
+		},
+		name: "Quêtes - Inazuma Eleven: Victory Road",
+		numberOfItems: quests.length,
+		url: "https://azalee.rosegriffon.fr/quete",
+	};
+
 	return (
-		<div className="w-full space-y-6">
+		<div className="space-y-6">
+			<script
+				type="application/ld+json"
+				dangerouslySetInnerHTML={{ __html: JSON.stringify(collectionJsonLd) }}
+			/>
+
 			{/* En-tête */}
-			<div>
-				<h1 className="text-2xl font-black tracking-tight text-on-surface lg:text-3xl">
+			<div className="space-y-1">
+				<h1 className="text-3xl font-extrabold tracking-tight text-on-surface font-display">
 					Quêtes
 				</h1>
-				<p className="mt-1 text-sm text-on-surface-variant">
-					{total} quêtes — {main} d&apos;histoire principale et {side} annexes.
+				<p className="text-sm text-on-surface-variant">
+					Liste complète des objectifs d&apos;histoire principale et des quêtes annexes.
 				</p>
+			</div>
+
+			<div className="flex items-center justify-between text-xs font-medium text-on-surface-variant px-1 uppercase tracking-wider">
+				<span>
+					{quests.length} quête{quests.length > 1 ? "s" : ""} ({main} principales · {side} annexes)
+				</span>
 			</div>
 
 			{/* Filtre + recherche */}

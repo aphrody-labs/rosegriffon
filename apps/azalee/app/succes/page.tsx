@@ -53,7 +53,7 @@ function TrophyCard({ trophy }: { trophy: Trophy }) {
 	return (
 		<Link
 			href={`/succes/${trophy.id}`}
-			className="group flex h-full gap-3 rounded-2xl border border-outline-variant/30 bg-surface-container-low p-4 transition-colors hover:bg-surface-container"
+			className="group flex h-full gap-3 rounded-2xl border border-outline-variant/30 bg-surface-container-low p-4 transition-all duration-200 hover:bg-surface-container hover:shadow-lg hover:-translate-y-0.5"
 		>
 			<div
 				className={
@@ -102,14 +102,40 @@ export default async function SuccesPage({
 		return qs ? `/succes?${qs}` : "/succes";
 	};
 
+	const collectionJsonLd = {
+		"@context": "https://schema.org",
+		"@type": "CollectionPage",
+		description: `Liste complète des succès et trophées d'Inazuma Eleven: Victory Road — trophées officiels et objectifs d'activité.`,
+		isPartOf: { "@type": "WebSite", name: "Azalée", url: "https://azalee.rosegriffon.fr" },
+		mainEntity: {
+			"@type": "ItemList",
+			itemListElement: trophies.slice(0, 10).map((t: Trophy, i: number) => ({
+				"@type": "ListItem",
+				position: i + 1,
+				url: `https://azalee.rosegriffon.fr/succes/${t.id}`,
+				name: t.name,
+			})),
+			numberOfItems: trophies.length,
+		},
+		name: "Succès & Trophées - Inazuma Eleven: Victory Road",
+		numberOfItems: trophies.length,
+		url: "https://azalee.rosegriffon.fr/succes",
+	};
+
 	return (
-		<div className="w-full space-y-6">
+		<div className="space-y-6">
+			<script
+				type="application/ld+json"
+				dangerouslySetInnerHTML={{ __html: JSON.stringify(collectionJsonLd) }}
+			/>
+
 			{/* En-tête */}
-			<div>
-				<h1 className="text-2xl font-black tracking-tight text-on-surface lg:text-3xl">Succès</h1>
-				<p className="mt-1 text-sm text-on-surface-variant">
-					{counts.all} succès — {counts.trophy} trophées officiels et {counts.activity} objectifs
-					d&apos;activité.
+			<div className="space-y-1">
+				<h1 className="text-3xl font-extrabold tracking-tight text-on-surface font-display">
+					Succès & Trophées
+				</h1>
+				<p className="text-sm text-on-surface-variant">
+					Liste complète des succès et objectifs d&apos;activité d&apos;Inazuma Eleven: Victory Road.
 				</p>
 			</div>
 
@@ -131,6 +157,12 @@ export default async function SuccesPage({
 					label={CATEGORY_LABELS.activity}
 					count={counts.activity}
 				/>
+			</div>
+
+			<div className="flex items-center justify-between text-xs font-medium text-on-surface-variant px-1 uppercase tracking-wider">
+				<span>
+					{trophies.length} succès ({counts.trophy} trophées · {counts.activity} activités)
+				</span>
 			</div>
 
 			{/* Grille */}
