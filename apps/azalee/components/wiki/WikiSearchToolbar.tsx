@@ -153,7 +153,7 @@ export function WikiSearchToolbar({
 					onChange={(e) => setQuery(e.target.value)}
 					placeholder={finalPlaceholder}
 					aria-label={finalPlaceholder}
-					className="flex-1 bg-transparent border-none shadow-none focus-visible:ring-0 h-10 text-base"
+					className="flex-1 bg-transparent border-none shadow-none focus-visible:ring-0 h-11 sm:h-10 text-base"
 				/>
 
 				{/* Clear Button (if query exists) */}

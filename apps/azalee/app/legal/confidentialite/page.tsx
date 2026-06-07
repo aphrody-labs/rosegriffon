@@ -17,7 +17,7 @@ export default function PrivacyPolicyPage() {
 				Dernière mise à jour : 24 novembre 2025
 			</p>
 
-			<div className="prose prose-lg dark:prose-invert max-w-none space-y-8 text-on-surface">
+			<div className="prose prose-base md:prose-lg dark:prose-invert max-w-none space-y-8 text-on-surface">
 				<section className="bg-surface-container p-6 rounded-lg">
 					<p className="font-semibold text-lg">
 						Rose Griffon s&apos;engage à protéger et respecter votre vie privée.

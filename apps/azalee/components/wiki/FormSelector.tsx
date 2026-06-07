@@ -169,7 +169,7 @@ export function FormSelector({ forms, currentFormId }: FormSelectorProps) {
 
 							{/* Position label at bottom */}
 							<div className="absolute bottom-0 left-0 right-0 bg-linear-to-t from-black/80 to-transparent pt-3 pb-0.5 px-1">
-								<span className="text-[8px] font-bold text-white/90 block text-center leading-tight truncate">
+								<span className="text-xs sm:text-[8px] font-bold text-white/90 block text-center leading-tight truncate">
 									{pos}
 								</span>
 							</div>

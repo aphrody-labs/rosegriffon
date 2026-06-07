@@ -317,7 +317,7 @@ export function TranslatorClient() {
 													<div className="flex items-center gap-3.5 min-w-0">
 														<span
 															className={cn(
-																"shrink-0 w-9 h-6 flex items-center justify-center rounded text-[9px] font-extrabold select-none",
+																"shrink-0 w-9 h-6 flex items-center justify-center rounded text-xs sm:text-[9px] font-extrabold select-none",
 																lang === "FR"
 																	? "bg-blue-500/10 text-blue-400 border border-blue-500/20"
 																	: lang === "EN"
@@ -354,7 +354,7 @@ export function TranslatorClient() {
 														<button
 															onClick={() => copyName(name, lang)}
 															aria-label={`Copier le nom ${LANG_LABELS[lang]}`}
-															className="shrink-0 p-2 rounded-full cursor-pointer opacity-0 group-hover/row:opacity-100 focus/row:opacity-100 hover:bg-surface-container-high text-on-surface-variant/60 hover:text-primary transition-all duration-200"
+															className="shrink-0 inline-flex items-center justify-center min-h-11 min-w-11 sm:min-h-0 sm:min-w-0 p-2 rounded-full cursor-pointer opacity-100 sm:opacity-0 sm:group-hover/row:opacity-100 focus/row:opacity-100 hover:bg-surface-container-high text-on-surface-variant/60 hover:text-primary transition-all duration-200"
 														>
 															{copiedLang === lang ? (
 																<Icon

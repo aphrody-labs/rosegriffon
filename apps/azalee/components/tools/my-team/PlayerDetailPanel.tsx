@@ -117,7 +117,7 @@ export function PlayerDetailPanel({
 				{/* Close button */}
 				<button
 					onClick={onClose}
-					className="absolute top-2 right-2 inline-flex items-center justify-center size-9 rounded-full bg-surface-container/80 backdrop-blur-sm text-on-surface-variant hover:bg-surface-container-high active:scale-90 transition-all"
+					className="absolute top-2 right-2 inline-flex items-center justify-center size-11 sm:size-9 rounded-full bg-surface-container/80 backdrop-blur-sm text-on-surface-variant hover:bg-surface-container-high active:scale-90 transition-all"
 					aria-label="Fermer le détail"
 					>
 						<Icon name="close" size={18} />

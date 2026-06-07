@@ -80,7 +80,7 @@ export function PassivePlayerFilters({
 							onClick={() => toggle("pcat", opt.value)}
 							aria-pressed={isActive}
 							className={cn(
-								"inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold tracking-wider transition-all border",
+								"inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold tracking-wider transition-all border min-h-11 sm:min-h-0",
 								isActive
 									? "bg-primary/15 text-primary border-primary/30"
 									: "bg-surface-container-low text-on-surface-variant border-transparent hover:bg-surface-container-highest hover:border-outline-variant/30"
@@ -108,7 +108,7 @@ export function PassivePlayerFilters({
 							onClick={() => toggle("element", opt.value)}
 							aria-pressed={isActive}
 							className={cn(
-								"inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold tracking-wider transition-all border",
+								"inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold tracking-wider transition-all border min-h-11 sm:min-h-0",
 								isActive
 									? "bg-primary/15 text-primary border-primary/30"
 									: "bg-surface-container-low text-on-surface-variant border-transparent hover:bg-surface-container-highest hover:border-outline-variant/30"
@@ -137,7 +137,7 @@ export function PassivePlayerFilters({
 								onClick={() => toggle("rarity", r)}
 								aria-pressed={isActive}
 								className={cn(
-									"inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold tracking-wider transition-all border",
+									"inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold tracking-wider transition-all border min-h-11 sm:min-h-0",
 									isActive
 										? "bg-amber-500/20 text-amber-600 border-amber-300/40"
 										: "bg-surface-container-low text-on-surface-variant border-transparent hover:bg-surface-container-highest hover:border-outline-variant/30"

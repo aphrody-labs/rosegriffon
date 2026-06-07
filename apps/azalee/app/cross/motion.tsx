@@ -342,7 +342,7 @@ export function Carousel({
 					aria-label="Précédent"
 					onClick={() => scrollToIndex(Math.max(0, active - 1))}
 					disabled={active <= 0}
-					className="absolute top-1/2 left-1 z-10 flex size-9 -translate-y-1/2 items-center justify-center rounded-full bg-surface/80 text-on-surface shadow-level-1 backdrop-blur transition hover:bg-surface disabled:opacity-30 sm:-left-3"
+					className="absolute top-1/2 left-1 z-10 flex size-11 -translate-y-1/2 items-center justify-center rounded-full bg-surface/80 text-on-surface shadow-level-1 backdrop-blur transition hover:bg-surface disabled:opacity-30 md:size-9 sm:-left-3"
 				>
 					‹
 				</button>
@@ -351,7 +351,7 @@ export function Carousel({
 					aria-label="Suivant"
 					onClick={() => scrollToIndex(Math.min(count - 1, active + 1))}
 					disabled={active >= count - 1}
-					className="absolute top-1/2 right-1 z-10 flex size-9 -translate-y-1/2 items-center justify-center rounded-full bg-surface/80 text-on-surface shadow-level-1 backdrop-blur transition hover:bg-surface disabled:opacity-30 sm:-right-3"
+					className="absolute top-1/2 right-1 z-10 flex size-11 -translate-y-1/2 items-center justify-center rounded-full bg-surface/80 text-on-surface shadow-level-1 backdrop-blur transition hover:bg-surface disabled:opacity-30 md:size-9 sm:-right-3"
 				>
 					›
 				</button>

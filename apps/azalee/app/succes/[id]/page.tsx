@@ -50,7 +50,7 @@ function NeighborLink({ trophy, dir }: { trophy: Trophy; dir: "prev" | "next" })
 	return (
 		<Link
 			href={`/succes/${trophy.id}`}
-			className="group flex min-w-0 flex-1 items-center gap-2 rounded-xl border border-outline-variant/30 bg-surface-container-low p-3 transition-colors hover:bg-surface-container"
+			className="group flex min-h-12 min-w-0 flex-1 items-center gap-2 rounded-xl border border-outline-variant/30 bg-surface-container-low p-3 transition-colors hover:bg-surface-container"
 		>
 			{isPrev && (
 				<ArrowLeft size={18} className="shrink-0 text-on-surface-variant" aria-hidden="true" />
@@ -144,7 +144,7 @@ export default async function TrophyDetailPage({
 					>
 						{categoryLabel} · {trophy.groupLabel}
 					</span>
-					<h1 className="mt-2 text-3xl font-extrabold leading-tight tracking-tight text-on-surface font-display">
+					<h1 className="mt-2 text-2xl sm:text-3xl font-extrabold leading-tight tracking-tight text-on-surface font-display">
 						{trophy.name}
 					</h1>
 					{trophy.desc && (

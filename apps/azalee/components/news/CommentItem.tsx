@@ -215,7 +215,7 @@ export function CommentItem({
 										setIsEditing(true);
 										setShowDeleteConfirm(false);
 									}}
-									className="p-1.5 rounded-xl text-on-surface-variant/50 hover:text-on-surface hover:bg-surface-container transition-colors"
+									className="inline-flex items-center justify-center min-h-11 min-w-11 sm:min-h-0 sm:min-w-0 p-1.5 rounded-xl text-on-surface-variant/50 hover:text-on-surface hover:bg-surface-container transition-colors"
 									title="Modifier"
 								>
 									<Pencil className="size-3.5" />
@@ -225,7 +225,7 @@ export function CommentItem({
 								<button
 									onClick={() => setShowDeleteConfirm((v) => !v)}
 									className={cn(
-										"p-1.5 rounded-xl transition-colors",
+										"inline-flex items-center justify-center min-h-11 min-w-11 sm:min-h-0 sm:min-w-0 p-1.5 rounded-xl transition-colors",
 										showDeleteConfirm
 											? "text-red-500 bg-red-500/10"
 											: "text-on-surface-variant/50 hover:text-red-500 hover:bg-surface-container"
@@ -248,7 +248,7 @@ export function CommentItem({
 								variant="ghost"
 								size="sm"
 								onClick={() => setShowDeleteConfirm(false)}
-								className="h-6 px-2.5 text-xs rounded-lg text-on-surface-variant"
+								className="h-10 sm:h-6 px-2.5 text-xs rounded-lg text-on-surface-variant"
 							>
 								Annuler
 							</Button>
@@ -256,7 +256,7 @@ export function CommentItem({
 								size="sm"
 								disabled={isPending}
 								onClick={handleDelete}
-								className="h-6 px-2.5 text-xs rounded-lg bg-red-500 hover:bg-red-600 text-white"
+								className="h-10 sm:h-6 px-2.5 text-xs rounded-lg bg-red-500 hover:bg-red-600 text-white"
 							>
 								{isPending ? "…" : "Supprimer"}
 							</Button>
@@ -279,7 +279,7 @@ export function CommentItem({
 								value={editContent}
 								onChange={(e) => setEditContent(e.target.value)}
 								rows={3}
-								className="w-full resize-none bg-transparent px-3 pt-3 pb-9 text-sm text-on-surface focus:outline-hidden leading-relaxed"
+								className="w-full resize-none bg-transparent px-3 pt-3 pb-14 sm:pb-9 text-sm text-on-surface focus:outline-hidden leading-relaxed"
 								style={{ minHeight: "80px" }}
 							/>
 							<div className="absolute bottom-0 inset-x-0 flex items-center justify-between px-3 pb-2">
@@ -300,7 +300,7 @@ export function CommentItem({
 										variant="ghost"
 										size="sm"
 										onClick={() => setIsEditing(false)}
-										className="h-6 px-2.5 text-xs rounded-lg text-on-surface-variant"
+										className="h-10 sm:h-6 px-2.5 text-xs rounded-lg text-on-surface-variant"
 									>
 										Annuler
 									</Button>
@@ -313,7 +313,7 @@ export function CommentItem({
 											editContent.length > EDIT_MAX_LENGTH
 										}
 										onClick={handleEditSave}
-										className="h-6 px-2.5 text-xs rounded-lg"
+										className="h-10 sm:h-6 px-2.5 text-xs rounded-lg"
 									>
 										{isPending ? "…" : "Enregistrer"}
 									</Button>
@@ -333,7 +333,7 @@ export function CommentItem({
 						<button
 							onClick={() => setShowReplyForm((v) => !v)}
 							className={cn(
-								"inline-flex items-center gap-1.5 text-xs font-medium transition-colors rounded-lg px-2 py-1",
+								"inline-flex items-center gap-1.5 text-xs font-medium transition-colors rounded-lg px-3 py-1 min-h-11 sm:min-h-0",
 								showReplyForm
 									? "text-primary bg-primary/5"
 									: "text-on-surface-variant/60 hover:text-primary hover:bg-primary/5"

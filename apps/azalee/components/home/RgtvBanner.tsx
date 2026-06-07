@@ -43,6 +43,7 @@ function RgButton({ link, buttonText }: { link: string; buttonText: string }) {
 	return (
 		<Button
 			asChild
+			size="lg"
 			className="bg-white text-[#8B5023] hover:bg-white/90 font-black rounded-xl shadow-[4px_4px_0px_0px_#6b3d1b] hover:translate-y-[2px] hover:shadow-[2px_2px_0px_0px_#6b3d1b] transition-all duration-200 border-2 border-white cursor-pointer"
 		>
 			<a href={link} target="_blank" rel="noopener noreferrer">
@@ -80,8 +81,10 @@ export function RgtvBanner({
 
 				<div className="relative z-10 p-5 flex flex-col gap-4">
 					<RgBadge subtitle={subtitle} className="px-3 py-1 text-[10px] border border-white/20" />
-					<RgTitle title={title} />
-					<p className="text-white/90 text-sm leading-relaxed font-bold line-clamp-2 max-w-[300px]">
+					<div className="text-3xl xs:text-4xl">
+						<RgTitle title={title} />
+					</div>
+					<p className="text-white/90 text-sm leading-relaxed font-bold line-clamp-2 max-w-[min(90vw,400px)]">
 						{description}
 					</p>
 					<div className="w-full">

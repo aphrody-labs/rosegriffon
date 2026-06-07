@@ -164,7 +164,7 @@ export function GalleryLightbox({ items, index, onClose, onNavigate }: GalleryLi
 						disabled={downloading || (!item.original && !item.full)}
 						aria-label="Télécharger l'illustration"
 						className={cn(
-							"inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition-colors",
+							"inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition-colors min-h-11 sm:min-h-0",
 							"bg-primary text-on-primary hover:bg-primary/90 disabled:opacity-50"
 						)}
 					>
@@ -180,7 +180,7 @@ export function GalleryLightbox({ items, index, onClose, onNavigate }: GalleryLi
 						type="button"
 						onClick={onClose}
 						aria-label="Fermer"
-						className="flex size-10 items-center justify-center rounded-full text-on-surface-variant transition-colors hover:bg-surface-container-high"
+						className="flex size-11 sm:size-10 items-center justify-center rounded-full text-on-surface-variant transition-colors hover:bg-surface-container-high"
 					>
 						<X className="size-5" />
 					</button>

@@ -65,7 +65,7 @@ export default async function CoachesPage({
 
 			{/* En-tête */}
 			<div className="space-y-1">
-				<h1 className="text-3xl font-extrabold tracking-tight text-on-surface font-display">
+				<h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-on-surface font-display">
 					Entraîneurs &amp; Coachs
 				</h1>
 				<p className="text-sm text-on-surface-variant">

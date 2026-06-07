@@ -75,7 +75,7 @@ export function PlayerSlot({ member, onRemove, compact }: PlayerSlotProps) {
 			<span
 				className={cn(
 					"absolute bottom-0 inset-x-0 px-0.5 pb-0.5 text-white font-bold truncate drop-shadow-lg text-center",
-					compact ? "text-[5px] sm:text-[7px]" : "text-[6px] sm:text-[9px]"
+					compact ? "text-xs sm:text-[7px]" : "text-xs sm:text-[9px]"
 				)}
 			>
 				{member.name}
@@ -89,7 +89,7 @@ export function PlayerSlot({ member, onRemove, compact }: PlayerSlotProps) {
 				}}
 				onPointerDown={(e) => e.stopPropagation()}
 				className={cn(
-					"no-export absolute top-0 right-0 p-1 bg-red-600/90 rounded-bl-xl z-10 transition-opacity",
+					"no-export absolute top-0 right-0 p-1.5 sm:p-1 bg-red-600/90 rounded-bl-xl z-10 transition-opacity",
 					"opacity-70 sm:opacity-0 sm:group-hover:opacity-100"
 				)}
 				aria-label={`Retirer ${member.name}`}

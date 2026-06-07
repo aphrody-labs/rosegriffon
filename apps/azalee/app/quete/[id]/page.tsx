@@ -148,7 +148,7 @@ export default async function QuestDetailPage({
 					>
 						{isMain ? "Histoire principale" : `Quête annexe${quest.area ? ` · Zone ${quest.area}` : ""}`}
 					</span>
-					<h1 className="mt-2 text-3xl font-extrabold leading-tight tracking-tight text-on-surface font-display">
+					<h1 className="mt-2 text-2xl sm:text-3xl font-extrabold leading-tight tracking-tight text-on-surface font-display">
 						{quest.title}
 					</h1>
 				</div>

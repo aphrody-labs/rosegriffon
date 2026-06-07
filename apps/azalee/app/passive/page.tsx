@@ -298,7 +298,7 @@ export default async function PassivesPage({
 	return (
 		<div className="space-y-8 pb-20" role="main" aria-label="Passifs et talents">
 			<div className="space-y-1">
-				<h1 className="text-3xl font-extrabold tracking-tight text-on-surface font-display">
+				<h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-on-surface font-display">
 					Talents & Passifs
 				</h1>
 				<p className="text-sm text-on-surface-variant">

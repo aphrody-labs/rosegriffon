@@ -54,7 +54,7 @@ export function TacticDetail({ tactic }: TacticDetailProps) {
 			{/* Main Card */}
 			<div className="bg-surface-container-low border border-outline-variant/30 rounded-3xl overflow-hidden">
 				{/* Header */}
-				<div className="px-6 pt-6 pb-4">
+				<div className="px-4 sm:px-6 pt-6 pb-4">
 					<div className="flex items-start gap-4">
 						<div className="w-full max-w-xs sm:max-w-sm shrink-0 rounded-2xl bg-surface-container-high flex items-center justify-center border border-outline-variant/20 overflow-hidden">
 							{imageSrc && !imgError ? (
@@ -105,7 +105,7 @@ export function TacticDetail({ tactic }: TacticDetailProps) {
 				{((tactic.power != null && tactic.power > 0) ||
 					tactic.duration != null ||
 					tactic.cooldown != null) && (
-				<div className="px-6 py-4 border-t border-outline-variant/20">
+				<div className="px-4 sm:px-6 py-4 border-t border-outline-variant/20">
 					<div className="flex flex-wrap gap-4">
 						{tactic.power != null && tactic.power > 0 && (
 							<div className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-surface-container border border-outline-variant/20">
@@ -146,7 +146,7 @@ export function TacticDetail({ tactic }: TacticDetailProps) {
 
 				{/* Description */}
 				{tactic.description_fr && (
-					<div className="px-6 py-4 border-t border-outline-variant/20">
+					<div className="px-4 sm:px-6 py-4 border-t border-outline-variant/20">
 						<p className="text-sm text-on-surface-variant whitespace-pre-line leading-relaxed">
 							{tactic.description_fr}
 						</p>
@@ -160,7 +160,7 @@ export function TacticDetail({ tactic }: TacticDetailProps) {
 
 				{/* Effects */}
 				{effects.length > 0 && (
-					<div className="px-6 py-4 border-t border-outline-variant/20">
+					<div className="px-4 sm:px-6 py-4 border-t border-outline-variant/20">
 						<h2 className="text-xs uppercase tracking-wider text-on-surface-variant font-bold mb-3">
 							<Zap size={16} className="inline align-middle mr-1" aria-hidden="true" />
 							Effets
@@ -188,7 +188,7 @@ export function TacticDetail({ tactic }: TacticDetailProps) {
 
 				{/* Shop */}
 				{shopFr && (
-					<div className="px-6 py-4 border-t border-outline-variant/20">
+					<div className="px-4 sm:px-6 py-4 border-t border-outline-variant/20">
 						<h2 className="text-xs uppercase tracking-wider text-on-surface-variant font-bold mb-3">
 							<Store size={16} className="inline align-middle mr-1" aria-hidden="true" />
 							Disponibilité

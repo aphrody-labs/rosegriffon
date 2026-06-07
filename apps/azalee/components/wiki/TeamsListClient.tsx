@@ -67,7 +67,7 @@ export function TeamsListClient({ teams }: TeamsListClientProps) {
 							type="button"
 							onClick={() => setSeries(f.value)}
 							className={cn(
-								"px-3 py-1.5 rounded-full text-xs font-bold transition-colors border",
+								"px-3 py-1.5 rounded-full text-xs font-bold transition-colors border min-h-11 sm:min-h-0",
 								series === f.value
 									? "bg-primary text-on-primary border-primary"
 									: "bg-surface-container-low text-on-surface-variant border-outline-variant hover:bg-surface-container"

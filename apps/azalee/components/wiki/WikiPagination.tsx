@@ -92,7 +92,7 @@ export function WikiPagination({
 								prefetch
 								aria-current={opt === itemsPerPage ? "page" : undefined}
 								className={cn(
-									"px-2.5 py-1 rounded-full text-xs font-medium transition-colors",
+									"inline-flex items-center justify-center min-h-11 sm:min-h-0 px-2.5 py-1 rounded-full text-xs font-medium transition-colors",
 									opt === itemsPerPage
 										? "bg-primary text-on-primary"
 										: "bg-surface-container-high text-on-surface-variant hover:bg-surface-container-highest"

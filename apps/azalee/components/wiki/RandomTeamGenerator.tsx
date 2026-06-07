@@ -347,7 +347,7 @@ function PlayerCard({
 					onToggleLock();
 				}}
 				className={cn(
-					"absolute top-0.5 right-0.5 sm:top-1.5 sm:right-1.5 z-10 p-1.5 sm:p-1 rounded-full transition-all",
+					"absolute top-0.5 right-0.5 sm:top-1.5 sm:right-1.5 z-10 p-2 sm:p-1 rounded-full transition-all",
 					locked
 						? "bg-primary text-on-primary elevation-1"
 						: "bg-black/40 text-white/70 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 hover:bg-black/60"

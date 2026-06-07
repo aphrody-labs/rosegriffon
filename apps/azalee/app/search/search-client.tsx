@@ -224,7 +224,7 @@ export function SearchClient({ defaultQuery }: { defaultQuery?: string }) {
 						<button
 							onClick={clearQuery}
 							aria-label="Effacer la recherche"
-							className="size-8 rounded-full flex items-center justify-center mr-3 shrink-0 hover:bg-on-surface/[0.08] transition-colors"
+							className="size-10 md:size-8 rounded-full flex items-center justify-center mr-3 shrink-0 hover:bg-on-surface/[0.08] transition-colors"
 						>
 							<Icon name="close" size={18} className="text-on-surface-variant" />
 						</button>

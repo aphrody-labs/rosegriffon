@@ -446,42 +446,61 @@ a,
 
 @layer components {
 	.type-display-large {
-		@apply text-[57px] leading-[64px] tracking-[-0.25px] font-normal;
+		/* Mobile-first fluide : shrink sous ~683px, capé a 57px (desktop identique). */
+		font-size: clamp(2.25rem, 6vw + 1rem, 3.5625rem);
+		line-height: 1.122;
+		letter-spacing: -0.25px;
+		font-weight: 400;
 		font-optical-sizing: auto;
 		font-variation-settings:
 			"opsz" 64,
 			"wght" 400;
 	}
 	.type-display-medium {
-		@apply text-[45px] leading-[52px] tracking-[0px] font-normal;
+		font-size: clamp(2rem, 5vw + 1rem, 2.8125rem);
+		line-height: 1.156;
+		letter-spacing: 0;
+		font-weight: 400;
 		font-optical-sizing: auto;
 		font-variation-settings:
 			"opsz" 52,
 			"wght" 400;
 	}
 	.type-display-small {
-		@apply text-[36px] leading-[44px] tracking-[0px] font-normal;
+		font-size: clamp(1.75rem, 4vw + 1rem, 2.25rem);
+		line-height: 1.222;
+		letter-spacing: 0;
+		font-weight: 400;
 		font-optical-sizing: auto;
 		font-variation-settings:
 			"opsz" 44,
 			"wght" 400;
 	}
 	.type-headline-large {
-		@apply text-[32px] leading-[40px] tracking-[0px] font-normal;
+		font-size: clamp(1.5rem, 3.5vw + 1rem, 2rem);
+		line-height: 1.25;
+		letter-spacing: 0;
+		font-weight: 400;
 		font-optical-sizing: auto;
 		font-variation-settings:
 			"opsz" 40,
 			"wght" 400;
 	}
 	.type-headline-medium {
-		@apply text-[28px] leading-[36px] tracking-[0px] font-normal;
+		font-size: clamp(1.375rem, 3vw + 0.9rem, 1.75rem);
+		line-height: 1.286;
+		letter-spacing: 0;
+		font-weight: 400;
 		font-optical-sizing: auto;
 		font-variation-settings:
 			"opsz" 36,
 			"wght" 400;
 	}
 	.type-headline-small {
-		@apply text-[24px] leading-[32px] tracking-[0px] font-normal;
+		font-size: clamp(1.25rem, 2.5vw + 0.8rem, 1.5rem);
+		line-height: 1.333;
+		letter-spacing: 0;
+		font-weight: 400;
 		font-optical-sizing: auto;
 		font-variation-settings:
 			"opsz" 32,

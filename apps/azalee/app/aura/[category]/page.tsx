@@ -95,7 +95,7 @@ export default async function AuraCategoryPage({
 	return (
 		<div className="w-full space-y-8">
 			<div className="flex flex-col gap-2">
-				<h1 className="text-3xl font-bold font-grade-high">{config.title}</h1>
+				<h1 className="text-2xl sm:text-3xl font-bold font-grade-high">{config.title}</h1>
 				<p className="text-on-surface-variant">{total} résultats trouvés</p>
 			</div>
 
