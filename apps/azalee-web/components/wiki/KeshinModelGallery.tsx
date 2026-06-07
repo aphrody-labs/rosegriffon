@@ -22,7 +22,7 @@ function ModelCard({ entry }: { entry: ModelEntry }) {
 	return (
 		<div className="group rounded-2xl overflow-hidden bg-surface-container border border-outline-variant/20 hover:border-primary/40 transition-all duration-200">
 			{/* Vrai modèle 3D texturé rendu INLINE (monté quand visible, démonté hors-champ). */}
-			<div className="relative aspect-[3/4] bg-[url(/fond.webp)] bg-cover bg-center">
+			<div className="relative aspect-[3/4] bg-[url(/stand_ie.webp)] bg-cover bg-center">
 				<InlineModelViewer glbUrl={entry.glbUrl} name={entry.name} />
 			</div>
 			<div className="p-3 border-t border-outline-variant/10">
