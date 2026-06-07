@@ -15,6 +15,14 @@ export const metadata: Metadata = {
 			"Découvrez les talents qui donnent vie à l'univers de Rose Griffon : créateurs, artistes, dessinateurs et producteurs.",
 		url: "https://rosegriffon.fr/notre-equipe/staff",
 		type: "website",
+		images: [
+			{
+				url: "/opengraph-image",
+				width: 1200,
+				height: 630,
+				alt: "Rose Griffon - Association Inazuma Eleven",
+			},
+		],
 	},
 };
 

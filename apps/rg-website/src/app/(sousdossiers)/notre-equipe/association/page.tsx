@@ -19,6 +19,14 @@ export const metadata: Metadata = {
 			"Le bureau et les membres de l'association Rose Griffon, communauté Inazuma Eleven en France.",
 		url: "https://rosegriffon.fr/notre-equipe/association",
 		type: "website",
+		images: [
+			{
+				url: "/opengraph-image",
+				width: 1200,
+				height: 630,
+				alt: "Rose Griffon - Association Inazuma Eleven",
+			},
+		],
 	},
 };
 

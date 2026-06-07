@@ -551,18 +551,11 @@ export function Shell({
 								isCompact ? "pt-16" : "pt-0"
 							)}
 						>
-							<div className={cn(isCompact ? "block" : "hidden")}>
-								<PullToRefresh>
-									<div className="vt-page-content mx-auto w-full max-w-[1800px] px-4 pb-4 flex-1">
-										{children}
-									</div>
-								</PullToRefresh>
-							</div>
-							<div className={cn("flex-1", !isCompact ? "block" : "hidden")}>
-								<div className="vt-page-content mx-auto w-full max-w-[1800px] px-8 lg:px-12 pb-6 flex-1">
+							<PullToRefresh>
+								<div className="vt-page-content mx-auto w-full max-w-[1800px] px-4 pb-4 md:px-8 lg:px-12 md:pb-6 flex-1">
 									{children}
 								</div>
-							</div>
+							</PullToRefresh>
 							<Footer />
 						</main>
 					</SidebarInset>

@@ -6,7 +6,7 @@ Wiki : https://azalee.rosegriffon.fr
 Association : Rose Griffon — https://rosegriffon.fr
 Développeur & fondateur : yoyo — https://x.com/yoyo__goat
 Langue : fr-FR
-Généré le : 2026-06-05
+Généré le : 2026-06-07
 
 ## Présentation
 
@@ -50,11 +50,13 @@ Azalée expose une API GraphQL publique en lecture seule pour interroger la base
 - Queries disponibles : characters, character, skills, skill, items, item, auras, ragSearch, tweets.
 - Filtres skills(page, limit, q, category, element) ; characters(page, limit, q, element, position, rarity, team, series).
 - Champs Skill : id, name { fr en ja }, description { fr en ja }, category, element, power, tension, image, sheetData. Le champ name est de type LocalizedString (sous-champs fr/en/ja).
-- Recherche semantique (RAG) : POST https://azalee.rosegriffon.fr/api/rag/search ; donnees formatees LLM : https://azalee.rosegriffon.fr/api/llm/<model>.
+- Recherche sémantique (RAG) : POST https://azalee.rosegriffon.fr/api/rag/search ; données formatées LLM : https://azalee.rosegriffon.fr/api/llm/<model>.
 
-Exemple de requete (techniques de Tir) :
+Exemple de requête (techniques de Tir) :
 POST https://azalee.rosegriffon.fr/api/graphql
 {"query":"{ skills(category: \"Tir\", limit: 5) { id name { fr en } category element power } }"}
+
+Réponse (extrait) : { "data": { "skills": [ { "name": { "fr": "Feu tout-puissant" }, "category": "Tir", "element": "Feu", "power": "100-640" } ] } }
 
 ## Mentions légales
 

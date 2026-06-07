@@ -9,6 +9,7 @@ interface TeamMembersSectionProps {
 	showRole?: boolean;
 	/** URL canonique de la page hôte pour les données structurées (ProfilePage). */
 	canonicalUrl?: string;
+	isH1?: boolean;
 }
 
 /**
@@ -22,6 +23,7 @@ async function TeamMembersSection({
 	description,
 	showRole = false,
 	canonicalUrl,
+	isH1 = false,
 }: TeamMembersSectionProps) {
 	const response = await getTeamMembers(teamName);
 	const members = response
@@ -49,9 +51,15 @@ async function TeamMembersSection({
 				/>
 			)}
 			<div className="text-center space-y-4 max-w-4xl mx-auto animate-fade-in">
-				<h2 className="text-4xl lg:text-6xl font-black bg-linear-to-r from-gaelle-blue to-gaelle-blue-light dark:from-gaelle-blue-light dark:to-gaelle-blue bg-clip-text text-transparent">
-					{title}
-				</h2>
+				{isH1 ? (
+					<h1 className="text-4xl lg:text-6xl font-black bg-linear-to-r from-gaelle-blue to-gaelle-blue-light dark:from-gaelle-blue-light dark:to-gaelle-blue bg-clip-text text-transparent">
+						{title}
+					</h1>
+				) : (
+					<h2 className="text-4xl lg:text-6xl font-black bg-linear-to-r from-gaelle-blue to-gaelle-blue-light dark:from-gaelle-blue-light dark:to-gaelle-blue bg-clip-text text-transparent">
+						{title}
+					</h2>
+				)}
 				<p className="text-lg lg:text-xl text-gray-700 dark:text-gray-300 leading-relaxed">
 					{description}
 				</p>
