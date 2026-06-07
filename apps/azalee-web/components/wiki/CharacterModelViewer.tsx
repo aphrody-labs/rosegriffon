@@ -33,20 +33,26 @@ function loadModelViewer(): Promise<void> {
 	if (modelViewerLoading) {
 		return modelViewerLoading;
 	}
+
+	const existing = document.querySelector<HTMLScriptElement>(
+		`script[src="${MODEL_VIEWER_SRC}"]`
+	);
+	if (existing) {
+		modelViewerLoading = window.customElements.whenDefined("model-viewer").then(() => {});
+		return modelViewerLoading;
+	}
+
 	modelViewerLoading = new Promise<void>((resolve, reject) => {
-		const existing = document.querySelector<HTMLScriptElement>(
-			`script[src="${MODEL_VIEWER_SRC}"]`
-		);
-		if (existing) {
-			existing.addEventListener("load", () => resolve());
-			existing.addEventListener("error", () => reject(new Error("model-viewer load failed")));
-			return;
-		}
 		const script = document.createElement("script");
 		script.src = MODEL_VIEWER_SRC;
 		script.async = true;
-		script.addEventListener("load", () => resolve());
-		script.addEventListener("error", () => reject(new Error("model-viewer load failed")));
+		script.addEventListener("load", () => {
+			window.customElements.whenDefined("model-viewer").then(() => resolve(), reject);
+		});
+		script.addEventListener("error", () => {
+			modelViewerLoading = null;
+			reject(new Error("model-viewer load failed"));
+		});
 		document.head.appendChild(script);
 	});
 	return modelViewerLoading;
@@ -91,7 +97,6 @@ export default function CharacterModelViewer({ glbUrl, name }: CharacterModelVie
 		const host = containerRef.current;
 		host.innerHTML = "";
 		const mv = document.createElement("model-viewer");
-		mv.setAttribute("src", glbUrl);
 		mv.setAttribute("alt", `Modèle 3D de ${name ?? "personnage"}`);
 		mv.setAttribute("camera-controls", "");
 		mv.setAttribute("auto-rotate", "");
@@ -102,7 +107,13 @@ export default function CharacterModelViewer({ glbUrl, name }: CharacterModelVie
 		mv.style.width = "100%";
 		mv.style.height = "100%";
 		mv.style.backgroundColor = "transparent";
+
+		// Enregistre les écouteurs d'événements AVANT de définir la source (src),
+		// pour éviter les conditions de concurrence si le modèle est déjà en cache.
 		mv.addEventListener("error", () => setErrored(true));
+
+		mv.setAttribute("src", glbUrl);
+
 		host.appendChild(mv);
 		return () => {
 			host.innerHTML = "";

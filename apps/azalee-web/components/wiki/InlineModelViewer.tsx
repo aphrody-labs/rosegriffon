@@ -18,20 +18,26 @@ function loadModelViewer(): Promise<void> {
 	if (typeof window === "undefined") return Promise.resolve();
 	if (window.customElements?.get("model-viewer")) return Promise.resolve();
 	if (modelViewerLoading) return modelViewerLoading;
+
+	const existing = document.querySelector<HTMLScriptElement>(
+		`script[src="${MODEL_VIEWER_SRC}"]`
+	);
+	if (existing) {
+		modelViewerLoading = window.customElements.whenDefined("model-viewer").then(() => {});
+		return modelViewerLoading;
+	}
+
 	modelViewerLoading = new Promise<void>((resolve, reject) => {
-		const existing = document.querySelector<HTMLScriptElement>(
-			`script[src="${MODEL_VIEWER_SRC}"]`
-		);
-		if (existing) {
-			existing.addEventListener("load", () => resolve());
-			existing.addEventListener("error", () => reject(new Error("model-viewer load failed")));
-			return;
-		}
 		const script = document.createElement("script");
 		script.src = MODEL_VIEWER_SRC;
 		script.async = true;
-		script.addEventListener("load", () => resolve());
-		script.addEventListener("error", () => reject(new Error("model-viewer load failed")));
+		script.addEventListener("load", () => {
+			window.customElements.whenDefined("model-viewer").then(() => resolve(), reject);
+		});
+		script.addEventListener("error", () => {
+			modelViewerLoading = null;
+			reject(new Error("model-viewer load failed"));
+		});
 		document.head.appendChild(script);
 	});
 	return modelViewerLoading;
@@ -79,7 +85,6 @@ export default function InlineModelViewer({ glbUrl, name }: InlineModelViewerPro
 			.then(() => {
 				if (cancelled || !hostRef.current) return;
 				const mv = document.createElement("model-viewer");
-				mv.setAttribute("src", glbUrl);
 				mv.setAttribute("alt", `Modèle 3D de ${name ?? "modèle"}`);
 				mv.setAttribute("camera-controls", "");
 				mv.setAttribute("auto-rotate", "");
@@ -91,8 +96,18 @@ export default function InlineModelViewer({ glbUrl, name }: InlineModelViewerPro
 				mv.style.width = "100%";
 				mv.style.height = "100%";
 				mv.style.backgroundColor = "transparent";
-				mv.addEventListener("load", () => !cancelled && setReady(true));
-				mv.addEventListener("error", () => !cancelled && setErrored(true));
+
+				// Enregistre les écouteurs d'événements AVANT de définir la source (src),
+				// pour éviter les conditions de concurrence si le modèle est déjà en cache.
+				mv.addEventListener("load", () => {
+					if (!cancelled) setReady(true);
+				});
+				mv.addEventListener("error", () => {
+					if (!cancelled) setErrored(true);
+				});
+
+				mv.setAttribute("src", glbUrl);
+
 				hostRef.current.innerHTML = "";
 				hostRef.current.appendChild(mv);
 			})
