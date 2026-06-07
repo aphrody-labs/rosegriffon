@@ -8,8 +8,10 @@
 const BXC = process.env.BXC_BIN || "bxc";
 const CONCURRENCY = Number(process.env.SEO_AUDIT_CONCURRENCY || 6);
 
+const localMode = process.argv.includes("--local");
+
 // Set curé : indexes de section + échantillons (pas les 3100 URLs azalee — on teste les pages à fort SEO).
-const URLS: string[] = [
+const BASE_URLS: string[] = [
 	// website
 	"https://rosegriffon.fr/",
 	"https://rosegriffon.fr/notre-equipe",
@@ -30,6 +32,15 @@ const URLS: string[] = [
 	"https://azalee.rosegriffon.fr/passive",
 	"https://azalee.rosegriffon.fr/news",
 ];
+
+const URLS = BASE_URLS.map(url => {
+	if (localMode) {
+		return url
+			.replace("https://rosegriffon.fr", "http://localhost:3000")
+			.replace("https://azalee.rosegriffon.fr", "http://localhost:3001");
+	}
+	return url;
+});
 
 interface Audit {
 	url: string;

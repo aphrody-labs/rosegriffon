@@ -45,27 +45,9 @@ export default function FusionBlock({
 	);
 
 	return (
-		<div className="flex flex-col md:flex-row w-full gap-3 sm:gap-4 md:gap-0 group hover:shadow-2xl transition-all duration-300 md:min-h-[320px] lg:min-h-[380px] rounded-2xl md:rounded-3xl overflow-hidden">
-			{/* Mobile: Image always on top */}
-			<div className="contents md:hidden">
-				{imageBlock}
-				{contentBlock}
-			</div>
-
-			{/* Desktop: Respect isImageLeft */}
-			<div className="contents max-md:hidden">
-				{isImageLeft ? (
-					<>
-						{imageBlock}
-						{contentBlock}
-					</>
-				) : (
-					<>
-						{contentBlock}
-						{imageBlock}
-					</>
-				)}
-			</div>
+		<div className={`flex flex-col w-full gap-3 sm:gap-4 md:gap-0 group hover:shadow-2xl transition-all duration-300 md:min-h-[320px] lg:min-h-[380px] rounded-2xl md:rounded-3xl overflow-hidden ${isImageLeft ? "md:flex-row" : "md:flex-row-reverse"}`}>
+			{imageBlock}
+			{contentBlock}
 		</div>
 	);
 }

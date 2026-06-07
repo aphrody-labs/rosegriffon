@@ -11,7 +11,7 @@ import type { FeedItem } from "./news-client";
 export const dynamic = "force-dynamic";
 
 export const metadata = {
-	description: "Toutes les informations sur Inazuma Eleven: Victory Road.",
+	description: "Toutes les dernières actualités, traductions exclusives, interviews et analyses détaillées sur le jeu Inazuma Eleven: Victory Road par l'équipe Azalée.",
 	title: "Actualités | Azalée",
 };
 
@@ -211,8 +211,35 @@ export default async function NewsFeedPage({
 		currentPage === 1 && !searchQuery ? getContinueReading(4) : Promise.resolve([]),
 	]);
 
+	const collectionJsonLd = {
+		"@context": "https://schema.org",
+		"@type": "CollectionPage",
+		description: "Actualités, traductions exclusives, interviews et analyses sur Inazuma Eleven: Victory Road.",
+		isPartOf: { "@type": "WebSite", name: "Azalée", url: "https://azalee.rosegriffon.fr" },
+		mainEntity: {
+			"@type": "ItemList",
+			itemListElement: feedItems.slice(0, 10).map((item, i) => ({
+				"@type": "ListItem",
+				position: i + 1,
+				url: item.type === "article"
+					? `https://azalee.rosegriffon.fr/news/${item.slug}`
+					: `https://azalee.rosegriffon.fr/news/tweet/${item.id}`,
+				name: item.title || "Actualité",
+			})),
+			numberOfItems: totalItems,
+		},
+		name: "Actualités Inazuma Eleven: Victory Road - Azalée",
+		numberOfItems: totalItems,
+		url: "https://azalee.rosegriffon.fr/news",
+	};
+
 	return (
-		<NewsFeedClient
+		<>
+			<script
+				type="application/ld+json"
+				dangerouslySetInnerHTML={{ __html: JSON.stringify(collectionJsonLd) }}
+			/>
+			<NewsFeedClient
 			feedItems={feedItems}
 			totalItems={totalItems}
 			currentPage={currentPage}
@@ -226,5 +253,6 @@ export default async function NewsFeedPage({
 			commentCounts={commentCounts}
 			continueReadingArticles={continueReadingArticles}
 		/>
+		</>
 	);
 }

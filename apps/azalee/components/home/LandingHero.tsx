@@ -172,13 +172,13 @@ export function LandingHero({ stats }: LandingHeroProps) {
 							className="h-14 object-contain drop-shadow-[0_0_25px_rgba(240,125,125,0.4)] animate-[gentleFloat_4s_ease-in-out_infinite]"
 						/>
 
-						<h1 className="mt-4 text-[1.5rem] leading-tight font-black text-white text-center drop-shadow-lg">
+						<p className="mt-4 text-[1.5rem] leading-tight font-black text-white text-center drop-shadow-lg">
 							L&apos;encyclopédie
 							<br />
 							<span className="bg-clip-text text-transparent bg-linear-to-r from-[#F07D7D] via-[#F4D03F] to-[#F07D7D] bg-300% animate-gradient">
 								Inazuma Eleven
 							</span>
-						</h1>
+						</p>
 
 						<p className="mt-2 text-sm text-white/60 text-center max-w-[280px]">
 							Joueurs, techniques, objets et actus en français.

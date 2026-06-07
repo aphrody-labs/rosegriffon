@@ -95,6 +95,14 @@ export async function generateMetadata({
 			title,
 			type: "website",
 			url: `https://rosegriffon.fr/chroniques${urlSuffix}`,
+			images: [
+				{
+					url: "/opengraph-image",
+					width: 1200,
+					height: 630,
+					alt: "Rose Griffon - Association Inazuma Eleven",
+				},
+			],
 		},
 		robots: {
 			follow: true,

@@ -6,15 +6,47 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@rose-griffon/ui";
+import type { Metadata } from "next";
 import Link from "next/link";
 
 import { Heart, Mail, Users } from "@/lib/icons-config";
+import { BreadcrumbSchema, OrganizationSchema } from "@/components/shared/StructuredData";
+
+export const metadata: Metadata = {
+	title: "À propos | Rose Griffon",
+	description: "À propos de l'association Rose Griffon, la communauté Inazuma Eleven en France. Découvrez comment nous rejoindre, nous soutenir ou nous contacter.",
+	alternates: {
+		canonical: "https://rosegriffon.fr/a-propos",
+	},
+	openGraph: {
+		title: "À propos | Rose Griffon",
+		description: "À propos de l'association Rose Griffon, la communauté Inazuma Eleven en France.",
+		url: "https://rosegriffon.fr/a-propos",
+		type: "website",
+		images: [
+			{
+				url: "/opengraph-image",
+				width: 1200,
+				height: 630,
+				alt: "Rose Griffon - À propos",
+			},
+		],
+	},
+};
 
 export const dynamic = "force-dynamic";
 
 export default function AProposPage() {
 	return (
-		<div className="container mx-auto py-12 px-4">
+		<>
+			<BreadcrumbSchema
+				items={[
+					{ name: "Accueil", item: "/" },
+					{ name: "À propos", item: "/a-propos" },
+				]}
+			/>
+			<OrganizationSchema />
+			<div className="container mx-auto py-12 px-4">
 			<h1 className="text-4xl font-bold mb-8 text-center">À propos de Rose Griffon</h1>
 
 			<div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -58,5 +90,6 @@ export default function AProposPage() {
 				</Card>
 			</div>
 		</div>
+		</>
 	);
 }

@@ -9,8 +9,24 @@ import PartenairesSection from "./PartenairesSection";
 
 export const metadata: Metadata = {
 	description:
-		"Découvrez les partenaires qui contribuent à enrichir l'univers de Rose Griffon. Notre équipe passionnée de créateurs, artistes et producteurs.",
+		"Découvrez les partenaires qui contribuent à enrichir l'univers de Rose Griffon par leur expertise et leur créativité.",
 	title: "Nos Partenaires | Rose Griffon",
+	alternates: { canonical: "https://rosegriffon.fr/notre-equipe/partenaires" },
+	openGraph: {
+		title: "Nos Partenaires | Rose Griffon",
+		description:
+			"Découvrez les partenaires qui contribuent à enrichir l'univers de Rose Griffon par leur expertise et leur créativité.",
+		url: "https://rosegriffon.fr/notre-equipe/partenaires",
+		type: "website",
+		images: [
+			{
+				url: "/opengraph-image",
+				width: 1200,
+				height: 630,
+				alt: "Rose Griffon - Association Inazuma Eleven",
+			},
+		],
+	},
 };
 
 export default function CollaborateursPage() {

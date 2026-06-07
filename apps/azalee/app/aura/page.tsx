@@ -56,8 +56,31 @@ const CATEGORIES = [
 ];
 
 export default function AuraHubPage() {
+	const pageJsonLd = {
+		"@context": "https://schema.org",
+		"@type": "WebPage",
+		description: "Explorez les Esprits Guerriers, Totems, Miximax et autres pouvoirs spéciaux.",
+		isPartOf: { "@type": "WebSite", name: "Azalée", url: "https://azalee.rosegriffon.fr" },
+		name: "Hyper Techniques - Azalée",
+		url: "https://azalee.rosegriffon.fr/aura",
+		mainEntity: {
+			"@type": "ItemList",
+			itemListElement: CATEGORIES.map((cat, i) => ({
+				"@type": "ListItem",
+				position: i + 1,
+				url: `https://azalee.rosegriffon.fr/aura/${cat.id}`,
+				name: cat.title,
+				description: cat.description,
+			})),
+		},
+	};
+
 	return (
 		<div className="w-full space-y-6">
+			<script
+				type="application/ld+json"
+				dangerouslySetInnerHTML={{ __html: JSON.stringify(pageJsonLd) }}
+			/>
 			<div>
 				<h1 className="type-headline-small text-on-surface">Hyper Techniques</h1>
 				<p className="type-body-medium text-on-surface-variant mt-1">

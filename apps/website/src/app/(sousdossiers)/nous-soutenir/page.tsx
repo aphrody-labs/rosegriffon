@@ -11,11 +11,29 @@ import {
 import type { Metadata } from "next";
 
 import { PublicTiers } from "@/components/patreon/PublicTiers";
+import { BreadcrumbSchema, OrganizationSchema } from "@/components/shared/StructuredData";
 
 export const metadata: Metadata = {
 	description:
 		"Rose Griffon est porté par sa communauté. Soutenez l'association via Patreon (mensuel) ou PayPal (don ponctuel). Transparence garantie.",
 	title: "Nous soutenir · Rose Griffon",
+	alternates: {
+		canonical: "https://rosegriffon.fr/nous-soutenir",
+	},
+	openGraph: {
+		title: "Nous soutenir · Rose Griffon",
+		description: "Rose Griffon est porté par sa communauté. Soutenez l'association via Patreon (mensuel) ou PayPal (don ponctuel). Transparence garantie.",
+		url: "https://rosegriffon.fr/nous-soutenir",
+		type: "website",
+		images: [
+			{
+				url: "/opengraph-image",
+				width: 1200,
+				height: 630,
+				alt: "Rose Griffon - Nous soutenir",
+			},
+		],
+	},
 };
 
 export const dynamic = "force-dynamic";
@@ -102,7 +120,15 @@ function CtaButton({ option }: { option: (typeof SUPPORT_OPTIONS)[number] }) {
 
 export default function NousSoutenirPage() {
 	return (
-		<div className="min-h-screen bg-background text-foreground">
+		<>
+			<BreadcrumbSchema
+				items={[
+					{ name: "Accueil", item: "/" },
+					{ name: "Nous soutenir", item: "/nous-soutenir" },
+				]}
+			/>
+			<OrganizationSchema />
+			<div className="min-h-screen bg-background text-foreground">
 			{/* Hero */}
 			<section className="relative overflow-hidden">
 				<div
@@ -245,5 +271,6 @@ export default function NousSoutenirPage() {
 				</div>
 			</section>
 		</div>
+		</>
 	);
 }

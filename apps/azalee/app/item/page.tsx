@@ -79,6 +79,7 @@ export default async function ItemsPage({
 
 	const pageNumber = page ? Number.parseInt(page.toString(), 10) : 1;
 	const activeCategory = (category as string) || "shoes";
+	const categoryLabel = CATEGORIES.find((t) => t.value === activeCategory)?.label || "Équipements";
 
 	// Data First: Fetch paginated from DB
 	const { data: items, total } = await wikiService.getItemsList({
@@ -88,8 +89,32 @@ export default async function ItemsPage({
 		q: q?.toString(),
 	});
 
+	const collectionJsonLd = {
+		"@context": "https://schema.org",
+		"@type": "CollectionPage",
+		description: `Base de données des objets (${categoryLabel}) dans Inazuma Eleven: Victory Road.`,
+		isPartOf: { "@type": "WebSite", name: "Azalée", url: "https://azalee.rosegriffon.fr" },
+		mainEntity: {
+			"@type": "ItemList",
+			itemListElement: items.slice(0, 10).map((item: any, i: number) => ({
+				"@type": "ListItem",
+				position: (pageNumber - 1) * ITEMS_PER_PAGE + i + 1,
+				url: `https://azalee.rosegriffon.fr/item/${item.itemId}`,
+				name: item.name_FR || item.names?.en || "Objet",
+			})),
+			numberOfItems: total,
+		},
+		name: `${categoryLabel} - Objets - Inazuma Eleven: Victory Road`,
+		numberOfItems: total,
+		url: `https://azalee.rosegriffon.fr/item?category=${activeCategory}`,
+	};
+
 	return (
 		<div className="space-y-6">
+			<script
+				type="application/ld+json"
+				dangerouslySetInnerHTML={{ __html: JSON.stringify(collectionJsonLd) }}
+			/>
 			<h1 className="sr-only">Objets</h1>
 			<div className="space-y-4">
 				<WikiSearchToolbar placeholder="Rechercher un objet..." showFilters={false} />
