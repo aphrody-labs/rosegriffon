@@ -117,7 +117,8 @@ export function CoachDetail({ coach }: { coach: Coach }) {
 						scaling.managerCommon ||
 						scaling.managerLegendary) ? (
 						<div className="mt-4 overflow-hidden rounded-2xl border border-outline-variant/20">
-							<table className="w-full text-sm">
+							<div className="overflow-x-auto">
+								<table className="w-full min-w-[18rem] text-sm">
 								<thead>
 									<tr className="bg-surface-container-high text-on-surface-variant">
 										<th className="px-3 py-2 text-left font-semibold">Rôle</th>
@@ -138,6 +139,7 @@ export function CoachDetail({ coach }: { coach: Coach }) {
 									</tr>
 								</tbody>
 							</table>
+							</div>
 						</div>
 					) : null}
 				</div>

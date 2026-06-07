@@ -396,7 +396,7 @@ export function LatestNewsSection({ articles, tweets = [] }: LatestNewsSectionPr
 				<div className="mt-5 px-0">
 					<Link
 						href="/news"
-						className="flex items-center justify-center w-full gap-2 text-sm font-bold text-primary px-5 py-3 rounded-xl bg-surface-container-high hover:bg-primary hover:text-on-primary transition-all"
+						className="flex items-center justify-center w-full gap-2 text-sm font-bold text-primary px-5 py-4 rounded-xl bg-surface-container-high hover:bg-primary hover:text-on-primary transition-all"
 					>
 						Toutes les news
 						<ArrowRight size={18} aria-hidden="true" />

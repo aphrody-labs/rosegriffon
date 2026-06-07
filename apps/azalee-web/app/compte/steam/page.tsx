@@ -51,7 +51,7 @@ export default async function SteamAccountPage() {
 	// Pas de compte Steam lié → proposer la connexion.
 	if (!steamId) {
 		return (
-			<main className="mx-auto max-w-2xl px-4 py-10">
+			<main className="mx-auto w-full max-w-2xl px-4 py-10">
 				<BackLink />
 				<h1 className="mb-2 text-2xl font-bold text-on-surface">Mon compte Steam</h1>
 				<p className="mb-6 text-on-surface-variant">
@@ -77,7 +77,7 @@ export default async function SteamAccountPage() {
 	}
 
 	return (
-		<main className="mx-auto max-w-3xl px-4 py-10">
+		<main className="mx-auto w-full max-w-3xl px-4 py-10">
 			<BackLink />
 			<h1 className="mb-6 text-2xl font-bold text-on-surface">Mon compte Steam</h1>
 

@@ -74,7 +74,7 @@ export function SkillVideoActions({ videoUrl, skillName }: SkillVideoActionsProp
 					onClick={handleDownload}
 					target="_blank"
 					rel="noopener noreferrer"
-					className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-colors cursor-pointer ${
+					className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-colors cursor-pointer min-h-11 sm:min-h-0 ${
 						isDownloading
 							? "bg-surface-container-high text-on-surface/50 cursor-wait"
 							: "bg-surface-container-highest hover:bg-surface-container-high text-on-surface"
@@ -91,7 +91,7 @@ export function SkillVideoActions({ videoUrl, skillName }: SkillVideoActionsProp
 
 			<button
 				onClick={handleShare}
-				className="inline-flex items-center justify-center size-9 rounded-full bg-surface-container-highest hover:bg-surface-container-high text-on-surface transition-colors"
+				className="inline-flex items-center justify-center size-11 sm:size-9 rounded-full bg-surface-container-highest hover:bg-surface-container-high text-on-surface transition-colors"
 				title="Partager"
 			>
 				{shareConfirmed ? (

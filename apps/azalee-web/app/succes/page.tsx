@@ -37,8 +37,8 @@ function CategoryTab({
 			href={href}
 			className={
 				active
-					? "rounded-full bg-primary px-3.5 py-1.5 text-sm font-semibold text-on-primary"
-					: "rounded-full border border-outline-variant/40 bg-surface-container-low px-3.5 py-1.5 text-sm font-medium text-on-surface-variant transition-colors hover:bg-surface-container"
+					? "inline-flex items-center min-h-11 sm:min-h-0 rounded-full bg-primary px-3.5 py-1.5 text-sm font-semibold text-on-primary"
+					: "inline-flex items-center min-h-11 sm:min-h-0 rounded-full border border-outline-variant/40 bg-surface-container-low px-3.5 py-1.5 text-sm font-medium text-on-surface-variant transition-colors hover:bg-surface-container"
 			}
 		>
 			{label} <span className="opacity-70">{count}</span>
@@ -131,7 +131,7 @@ export default async function SuccesPage({
 
 			{/* En-tête */}
 			<div className="space-y-1">
-				<h1 className="text-3xl font-extrabold tracking-tight text-on-surface font-display">
+				<h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-on-surface font-display">
 					Succès & Trophées
 				</h1>
 				<p className="text-sm text-on-surface-variant">

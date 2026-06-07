@@ -202,7 +202,7 @@ export function AccountSave() {
 						<button
 							type="button"
 							onClick={reset}
-							className="mt-2 type-label-large text-on-error-container underline underline-offset-2"
+							className="mt-2 inline-flex min-h-11 items-center type-label-large text-on-error-container underline underline-offset-2 sm:min-h-0"
 						>
 							Réessayer
 						</button>
@@ -284,7 +284,7 @@ function SaveResult({
 				<button
 					type="button"
 					onClick={onReset}
-					className="flex items-center gap-1.5 rounded-full bg-on-primary-container/10 px-4 py-2 type-label-large transition-colors hover:bg-on-primary-container/20"
+					className="flex min-h-11 items-center gap-1.5 rounded-full bg-on-primary-container/10 px-4 py-2 type-label-large transition-colors hover:bg-on-primary-container/20 sm:min-h-0"
 				>
 					<Icon name="replay" size={18} />
 					Autre fichier
@@ -292,7 +292,7 @@ function SaveResult({
 			</div>
 
 			{/* Stats */}
-			<div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+			<div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3">
 				<StatCard icon="person" label="Joueur" value={hs?.player_name || "—"} />
 				<StatCard icon="stars" label="Niveau" value={hs?.level_str || "—"} />
 				<StatCard
@@ -398,7 +398,7 @@ function RosterGrid({ roster }: { roster: ResolvedChara[] }) {
 					return (
 						<li
 							key={c.id}
-							className="rounded-md bg-surface-container px-2.5 py-1.5 transition-colors hover:bg-surface-container-high"
+							className="rounded-md bg-surface-container px-2.5 py-2 transition-colors hover:bg-surface-container-high md:py-1.5"
 							title={[c.element, c.position, c.rarity].filter(Boolean).join(" · ")}
 						>
 							{c.baseSlug ? (
@@ -416,7 +416,7 @@ function RosterGrid({ roster }: { roster: ResolvedChara[] }) {
 				<button
 					type="button"
 					onClick={() => setExpanded((v) => !v)}
-					className="mt-3 type-label-large text-primary underline underline-offset-2"
+					className="mt-3 inline-flex min-h-11 items-center type-label-large text-primary underline underline-offset-2 sm:min-h-0"
 				>
 					{expanded
 						? "Réduire"

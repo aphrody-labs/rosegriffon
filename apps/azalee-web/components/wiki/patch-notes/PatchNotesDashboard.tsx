@@ -181,7 +181,7 @@ export default function PatchNotesPageClient({ initialNotes }: PatchNotesDashboa
 								setDetailData(null);
 							}}
 							className={cn(
-								"flex-1 py-3 text-sm font-bold transition-all relative",
+								"flex-1 py-4 sm:py-3 text-sm font-bold transition-all relative",
 								platform === key
 									? "text-on-surface"
 									: "text-on-surface-variant/50 hover:text-on-surface-variant"
@@ -235,7 +235,7 @@ export default function PatchNotesPageClient({ initialNotes }: PatchNotesDashboa
 							setSelectedId(null);
 							setDetailData(null);
 						}}
-						className="lg:hidden flex items-center gap-2 text-sm font-medium text-primary mb-4 py-2 active:opacity-70 transition-opacity"
+						className="lg:hidden flex items-center gap-2 text-sm font-medium text-primary mb-4 py-3 active:opacity-70 transition-opacity"
 					>
 						<ChevronRight className="size-4 rotate-180" />
 						Retour à la liste

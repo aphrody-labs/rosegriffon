@@ -140,7 +140,7 @@ export function SkillFilterBar({
 							onClick={() => updateFilters("type", f.value)}
 							className={cn(
 								"inline-flex items-center justify-center gap-2 px-4 py-2 rounded-full text-sm font-medium",
-								"transition-all duration-200 border flex-1 sm:flex-none cursor-pointer",
+								"min-h-11 sm:min-h-0 transition-all duration-200 border flex-1 sm:flex-none cursor-pointer",
 								isActive
 									? "bg-primary text-on-primary border-primary shadow-md"
 									: "bg-surface-container hover:bg-surface-container-high border-outline-variant/30 text-on-surface-variant hover:text-on-surface"
@@ -167,7 +167,7 @@ export function SkillFilterBar({
 						onClick={() => updateFilters("has_video", "1")}
 						className={cn(
 							"inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-bold tracking-wide uppercase",
-							"transition-all duration-300 border cursor-pointer",
+							"min-h-11 sm:min-h-0 transition-all duration-300 border cursor-pointer",
 							currentHasVideo === "1"
 								? "bg-tertiary text-on-tertiary border-tertiary shadow-lg ring-2 ring-tertiary/20"
 								: "bg-surface-container hover:bg-surface-container-high border-outline-variant/30 text-on-surface-variant hover:text-on-surface"
@@ -182,7 +182,7 @@ export function SkillFilterBar({
 						onClick={() => updateFilters("show_aura", "1")}
 						className={cn(
 							"inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-bold tracking-wide uppercase",
-							"transition-all duration-300 border cursor-pointer",
+							"min-h-11 sm:min-h-0 transition-all duration-300 border cursor-pointer",
 							currentShowAura === "1"
 								? "bg-tertiary text-on-tertiary border-tertiary shadow-lg ring-2 ring-tertiary/20"
 								: "bg-surface-container hover:bg-surface-container-high border-outline-variant/30 text-on-surface-variant hover:text-on-surface"
@@ -197,7 +197,7 @@ export function SkillFilterBar({
 						onClick={() => updateFilters("overdrive", "1")}
 						className={cn(
 							"inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-bold tracking-wide uppercase",
-							"transition-all duration-300 border cursor-pointer",
+							"min-h-11 sm:min-h-0 transition-all duration-300 border cursor-pointer",
 							currentOverdrive === "1"
 								? "bg-tertiary text-on-tertiary border-tertiary shadow-lg ring-2 ring-tertiary/20"
 								: "bg-surface-container hover:bg-surface-container-high border-outline-variant/30 text-on-surface-variant hover:text-on-surface"
@@ -214,7 +214,7 @@ export function SkillFilterBar({
 						<button
 							onClick={() => updateFilters("sort", "tension")}
 							className={cn(
-								"px-3 py-1.5 rounded-full text-xs font-bold uppercase transition-colors cursor-pointer",
+								"min-h-10 sm:min-h-0 px-3 py-1.5 rounded-full text-xs font-bold uppercase transition-colors cursor-pointer",
 								currentSort === "tension" || !currentSort
 									? "bg-surface-container-highest text-primary shadow-sm"
 									: "text-on-surface-variant hover:text-on-surface hover:bg-surface-container-highest/50"
@@ -225,7 +225,7 @@ export function SkillFilterBar({
 						<button
 							onClick={() => updateFilters("sort", "power")}
 							className={cn(
-								"px-3 py-1.5 rounded-full text-xs font-bold uppercase transition-colors cursor-pointer",
+								"min-h-10 sm:min-h-0 px-3 py-1.5 rounded-full text-xs font-bold uppercase transition-colors cursor-pointer",
 								currentSort === "power"
 									? "bg-surface-container-highest text-primary shadow-sm"
 									: "text-on-surface-variant hover:text-on-surface hover:bg-surface-container-highest/50"
@@ -246,7 +246,7 @@ export function SkillFilterBar({
 								onClick={() => updateFilters("element", f.value)}
 								className={cn(
 									"inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium",
-									"transition-all duration-200 border cursor-pointer",
+									"min-h-10 sm:min-h-0 transition-all duration-200 border cursor-pointer",
 									isActive
 										? "bg-secondary text-on-secondary border-secondary shadow-sm"
 										: "bg-surface-container-low hover:bg-surface-container border-outline-variant/20 text-on-surface-variant hover:text-on-surface"

@@ -83,7 +83,7 @@ export function CommentForm({
 
 	if (!user) {
 		return (
-			<div className="flex items-center gap-3 bg-surface-container-low border border-outline-variant/10 rounded-2xl px-4 py-3.5">
+			<div className="flex items-center gap-3 bg-surface-container-low border border-outline-variant/10 rounded-2xl px-4 py-4">
 				<div className="size-9 rounded-full bg-surface-container flex items-center justify-center shrink-0">
 					<User className="size-4 text-on-surface-variant/50" />
 				</div>
@@ -138,7 +138,7 @@ export function CommentForm({
 						onChange={handleChange}
 						placeholder={defaultPlaceholder}
 						rows={2}
-						className="w-full resize-none bg-transparent px-4 pt-3 pb-10 text-sm text-on-surface placeholder:text-on-surface-variant/40 focus:outline-hidden leading-relaxed"
+						className="w-full resize-none bg-transparent px-4 pt-3 pb-14 sm:pb-10 text-sm text-on-surface placeholder:text-on-surface-variant/40 focus:outline-hidden leading-relaxed"
 						style={{ maxHeight: "192px", minHeight: "80px" }}
 					/>
 
@@ -164,7 +164,7 @@ export function CommentForm({
 									variant="ghost"
 									size="sm"
 									onClick={onCancel}
-									className="h-7 px-2.5 text-xs rounded-xl text-on-surface-variant"
+									className="h-10 sm:h-7 px-3 sm:px-2.5 text-xs rounded-xl text-on-surface-variant"
 								>
 									Annuler
 								</Button>
@@ -173,7 +173,7 @@ export function CommentForm({
 								type="submit"
 								size="sm"
 								disabled={isEmpty || isOverLimit || isPending}
-								className="h-7 px-3 text-xs rounded-xl"
+								className="h-10 sm:h-7 px-4 sm:px-3 text-xs rounded-xl"
 							>
 								{isPending ? "…" : isReply ? "Répondre" : "Commenter"}
 							</Button>

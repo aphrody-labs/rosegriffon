@@ -59,7 +59,7 @@ export function MovesetList({ skills, maxSlots = 4, className }: MovesetListProp
 							)}
 						>
 							{/* Slot Number */}
-							<div className="absolute -left-3 top-1/2 -translate-y-1/2 size-6 flex items-center justify-center">
+							<div className="absolute -left-1 sm:-left-3 top-1/2 -translate-y-1/2 size-6 flex items-center justify-center">
 								<span className="text-[10px] font-black text-white ml-2">{i + 1}</span>
 							</div>
 

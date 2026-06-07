@@ -176,7 +176,7 @@ function DraggableCharaCard({
 				</div>
 
 				{/* Name */}
-				<p className="absolute bottom-0 inset-x-0 px-0.5 pb-0.5 text-white font-bold text-[7px] sm:text-[8px] truncate drop-shadow-lg text-center">
+				<p className="absolute bottom-0 inset-x-0 px-0.5 pb-0.5 text-white font-bold text-xs sm:text-[8px] truncate drop-shadow-lg text-center">
 					{char.name}
 				</p>
 
@@ -331,7 +331,7 @@ export function CharacterPicker({
 							aria-pressed={filterPosition === value}
 							aria-label={`Filtrer par position ${label}`}
 							className={cn(
-								"flex-1 min-w-[50px] h-9 rounded-full text-[11px] font-bold transition-all active:scale-95",
+								"flex-1 min-w-[50px] h-9 min-h-11 sm:min-h-0 rounded-full text-[11px] font-bold transition-all active:scale-95",
 								filterPosition === value
 									? "text-white elevation-1"
 									: "border border-outline-variant/40 text-on-surface-variant hover:bg-on-surface/[0.06]"
@@ -359,7 +359,7 @@ export function CharacterPicker({
 							aria-pressed={filterElement === value}
 							aria-label={`Filtrer par élément ${label}`}
 							className={cn(
-								"flex-1 inline-flex items-center justify-center gap-1 h-9 rounded-full text-xs font-bold transition-all active:scale-95",
+								"flex-1 inline-flex items-center justify-center gap-1 h-9 min-h-11 sm:min-h-0 rounded-full text-xs font-bold transition-all active:scale-95",
 								filterElement === value
 									? "bg-secondary-container text-on-secondary-container elevation-1 ring-1 ring-inset ring-on-secondary-container/10"
 									: "border border-outline-variant/40 text-on-surface-variant hover:bg-on-surface/[0.06]"
@@ -378,7 +378,7 @@ export function CharacterPicker({
 								setFilterRarity(null);
 								setVisibleCount(PAGE_SIZE);
 							}}
-							className="inline-flex items-center justify-center size-9 shrink-0 rounded-full text-primary hover:bg-primary/10 active:scale-90 transition-all"
+							className="inline-flex items-center justify-center size-11 sm:size-9 shrink-0 rounded-full text-primary hover:bg-primary/10 active:scale-90 transition-all"
 							aria-label="Réinitialiser les filtres"
 							title="Réinitialiser les filtres"
 						>
@@ -397,7 +397,7 @@ export function CharacterPicker({
 								setVisibleCount(PAGE_SIZE);
 							}}
 							className={cn(
-								"h-8 px-2.5 rounded-full text-[10px] font-bold transition-all shrink-0 active:scale-95",
+								"h-8 min-h-11 sm:min-h-0 px-2.5 rounded-full text-[10px] font-bold transition-all shrink-0 active:scale-95",
 								filterRarity === value
 									? "text-white elevation-1"
 									: "border border-outline-variant/40 text-on-surface-variant hover:bg-on-surface/[0.06]"

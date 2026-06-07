@@ -233,7 +233,7 @@ export function SaveUploader() {
 						<button
 							type="button"
 							onClick={reset}
-							className="mt-2 type-label-large text-on-error-container underline underline-offset-2"
+							className="mt-2 inline-flex min-h-11 items-center type-label-large text-on-error-container underline underline-offset-2 sm:min-h-0"
 						>
 							Réessayer
 						</button>
@@ -346,8 +346,8 @@ function SaveResume({
 					type="button"
 					onClick={onReset}
 					className="
-       flex items-center gap-1.5 rounded-full bg-on-primary-container/10 px-4 py-2 type-label-large transition-colors
-       hover:bg-on-primary-container/20
+       flex min-h-11 items-center gap-1.5 rounded-full bg-on-primary-container/10 px-4 py-2 type-label-large transition-colors
+       hover:bg-on-primary-container/20 sm:min-h-0
      "
 				>
 					<Icon name="replay" size={18} />
@@ -358,8 +358,8 @@ function SaveResume({
 			{/* --- Profil --- */}
 			<Section icon="badge" title="Profil">
 				<div className="
-       grid grid-cols-2 gap-3
-       sm:grid-cols-3
+       grid grid-cols-1 gap-3
+       sm:grid-cols-2 md:grid-cols-3
      ">
 					<StatCard
 						icon="person"
@@ -741,8 +741,8 @@ function RosterGrid({ roster }: { roster: ResolvedChara[] }) {
 						<li
 							key={c.id}
 							className="
-             rounded-md bg-surface-container px-2.5 py-1.5 transition-colors
-             hover:bg-surface-container-high
+             rounded-md bg-surface-container px-2.5 py-2 transition-colors
+             hover:bg-surface-container-high md:py-1.5
            "
 							title={[c.element, c.position, c.rarity].filter(Boolean).join(" · ")}
 						>
@@ -761,7 +761,7 @@ function RosterGrid({ roster }: { roster: ResolvedChara[] }) {
 				<button
 					type="button"
 					onClick={() => setExpanded((v) => !v)}
-					className="mt-3 type-label-large text-primary underline underline-offset-2"
+					className="mt-3 inline-flex min-h-11 items-center type-label-large text-primary underline underline-offset-2 sm:min-h-0"
 				>
 					{expanded ? "Réduire" : `Afficher les ${fmt(filtered.length)} personnages`}
 				</button>

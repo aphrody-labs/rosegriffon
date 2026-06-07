@@ -84,7 +84,7 @@ function AchilleaButtons({
 		<div className={isMobile ? "flex gap-3" : "flex flex-wrap gap-4 pt-2"}>
 			<Button
 				asChild
-				size={isMobile ? "default" : "lg"}
+				size="lg"
 				className={`bg-[#6d00ce] hover:bg-[#5a00ab] text-white font-black rounded-xl shadow-[0_0_20px_-5px_rgba(223,255,87,0.6)] transition-all duration-300 border border-[#DFFF57] cursor-pointer ${
 					isMobile ? "flex-1" : "hover:shadow-[0_0_25px_-5px_rgba(223,255,87,0.8)] px-8"
 				}`}
@@ -96,7 +96,7 @@ function AchilleaButtons({
 			<Button
 				asChild
 				variant="outline"
-				size={isMobile ? "default" : "lg"}
+				size="lg"
 				className={`font-bold rounded-xl transition-all duration-300 backdrop-blur-md bg-white/10 text-white border-white/20 hover:bg-white/20 hover:border-white/30 cursor-pointer ${
 					isMobile ? "flex-1" : "px-8"
 				}`}

@@ -477,7 +477,7 @@ export default function CrossPage() {
 						href={GOOGLE_PLAY}
 						target="_blank"
 						rel="noopener noreferrer"
-						className="inline-flex items-center gap-2 rounded-full bg-tertiary px-6 py-3 type-label-large font-medium text-on-tertiary shadow-level-1 transition-transform hover:scale-105"
+						className="inline-flex min-h-11 items-center gap-2 rounded-full bg-tertiary px-6 py-3 type-label-large font-medium text-on-tertiary shadow-level-1 transition-transform hover:scale-105"
 					>
 						S&apos;inscrire sur Google Play
 					</a>
@@ -485,7 +485,7 @@ export default function CrossPage() {
 						href={APP_STORE}
 						target="_blank"
 						rel="noopener noreferrer"
-						className="inline-flex items-center gap-2 rounded-full border border-outline px-6 py-3 type-label-large font-medium text-on-surface transition-colors hover:bg-surface-container-high"
+						className="inline-flex min-h-11 items-center gap-2 rounded-full border border-outline px-6 py-3 type-label-large font-medium text-on-surface transition-colors hover:bg-surface-container-high"
 					>
 						Réserver sur l&apos;App Store
 					</a>
@@ -953,7 +953,7 @@ export default function CrossPage() {
 						href={OFFICIAL_SITE}
 						target="_blank"
 						rel="noopener noreferrer"
-						className="rounded-full border border-outline px-5 py-2.5 type-label-large text-on-surface transition-colors hover:bg-surface-container-high"
+						className="inline-flex min-h-11 items-center rounded-full border border-outline px-5 py-2.5 type-label-large text-on-surface transition-colors hover:bg-surface-container-high sm:min-h-0"
 					>
 						Site officiel
 					</a>
@@ -961,7 +961,7 @@ export default function CrossPage() {
 						href={X_ACCOUNT}
 						target="_blank"
 						rel="noopener noreferrer"
-						className="rounded-full border border-outline px-5 py-2.5 type-label-large text-on-surface transition-colors hover:bg-surface-container-high"
+						className="inline-flex min-h-11 items-center rounded-full border border-outline px-5 py-2.5 type-label-large text-on-surface transition-colors hover:bg-surface-container-high sm:min-h-0"
 					>
 						X @inazuma_cross
 					</a>
@@ -969,7 +969,7 @@ export default function CrossPage() {
 						href={YT_PLAYLIST}
 						target="_blank"
 						rel="noopener noreferrer"
-						className="rounded-full border border-outline px-5 py-2.5 type-label-large text-on-surface transition-colors hover:bg-surface-container-high"
+						className="inline-flex min-h-11 items-center rounded-full border border-outline px-5 py-2.5 type-label-large text-on-surface transition-colors hover:bg-surface-container-high sm:min-h-0"
 					>
 						Playlist YouTube
 					</a>
@@ -977,7 +977,7 @@ export default function CrossPage() {
 						href={GOOGLE_PLAY}
 						target="_blank"
 						rel="noopener noreferrer"
-						className="rounded-full border border-outline px-5 py-2.5 type-label-large text-on-surface transition-colors hover:bg-surface-container-high"
+						className="inline-flex min-h-11 items-center rounded-full border border-outline px-5 py-2.5 type-label-large text-on-surface transition-colors hover:bg-surface-container-high sm:min-h-0"
 					>
 						Google Play (pré-enregistrement)
 					</a>
@@ -985,7 +985,7 @@ export default function CrossPage() {
 						href={APP_STORE}
 						target="_blank"
 						rel="noopener noreferrer"
-						className="rounded-full border border-outline px-5 py-2.5 type-label-large text-on-surface transition-colors hover:bg-surface-container-high"
+						className="inline-flex min-h-11 items-center rounded-full border border-outline px-5 py-2.5 type-label-large text-on-surface transition-colors hover:bg-surface-container-high sm:min-h-0"
 					>
 						App Store (réservation)
 					</a>

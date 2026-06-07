@@ -552,7 +552,7 @@ export function Shell({
 							)}
 						>
 							<PullToRefresh>
-								<div className="vt-page-content mx-auto w-full max-w-[1800px] px-4 pb-4 md:px-8 lg:px-12 md:pb-6 flex-1">
+								<div className="vt-page-content mx-auto w-full max-w-[1800px] px-4 pb-24 md:px-8 lg:px-12 md:pb-6 flex-1">
 									{children}
 								</div>
 							</PullToRefresh>

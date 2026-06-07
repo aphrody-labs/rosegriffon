@@ -98,7 +98,7 @@ export function ReactionBar({ articleId, initialReactions }: ReactionBarProps) {
 						title={r.label}
 						aria-label={`${r.label}${state.count > 0 ? ` (${state.count})` : ""}`}
 						className={cn(
-							"inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium",
+							"inline-flex items-center justify-center gap-1 min-h-11 sm:min-h-0 px-3 sm:px-2.5 py-1 rounded-full text-xs font-medium",
 							"border transition-all duration-150 shrink-0",
 							"select-none cursor-pointer",
 							isActive

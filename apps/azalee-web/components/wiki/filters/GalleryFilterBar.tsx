@@ -47,7 +47,7 @@ export function GalleryFilterBar({ categories, currentCategory }: GalleryFilterB
 						onClick={() => updateCategory(f.value)}
 						className={cn(
 							"inline-flex items-center justify-center gap-2 rounded-full px-4 py-2 text-sm font-medium",
-							"cursor-pointer border transition-all duration-200",
+							"min-h-11 sm:min-h-0 cursor-pointer border transition-all duration-200",
 							isActive
 								? "border-primary bg-primary text-on-primary shadow-md"
 								: "border-outline-variant/30 bg-surface-container text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface"

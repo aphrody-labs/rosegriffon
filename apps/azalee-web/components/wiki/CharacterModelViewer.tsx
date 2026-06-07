@@ -126,7 +126,7 @@ export default function CharacterModelViewer({ glbUrl, name }: CharacterModelVie
 				<Button
 					variant="ghost"
 					size="icon"
-					className="size-8 text-on-surface-variant hover:text-primary"
+					className="size-11 sm:size-8 text-on-surface-variant hover:text-primary"
 				>
 					<Box className="size-4" />
 					<span className="sr-only">Voir le modèle 3D de {name}</span>

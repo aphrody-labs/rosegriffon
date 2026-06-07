@@ -105,7 +105,7 @@ export function PassiveFilters({ typeCounts, playstyleCounts }: PassiveFiltersPr
 							onClick={() => toggleParam("type", opt.value)}
 							aria-pressed={isActive}
 							className={cn(
-								"inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-bold uppercase tracking-wider transition-all border",
+								"inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-bold uppercase tracking-wider transition-all border min-h-11 sm:min-h-0",
 								isActive
 									? "bg-primary/15 text-primary border-primary/30"
 									: "bg-surface-container-low text-on-surface-variant border-transparent hover:bg-surface-container-highest hover:border-primary/20"
@@ -136,7 +136,7 @@ export function PassiveFilters({ typeCounts, playstyleCounts }: PassiveFiltersPr
 							onClick={() => setPlaystyle(opt.value)}
 							aria-pressed={isActive}
 							className={cn(
-								"inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold tracking-wider transition-all border",
+								"inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold tracking-wider transition-all border min-h-11 sm:min-h-0",
 								isActive
 									? "bg-primary/15 text-primary border-primary/30"
 									: "bg-surface-container-low text-on-surface-variant border-transparent hover:bg-surface-container-highest hover:border-outline-variant/30"
@@ -174,7 +174,7 @@ export function PassiveFilters({ typeCounts, playstyleCounts }: PassiveFiltersPr
 							onClick={() => toggleParam("category", opt.value)}
 							aria-pressed={isActive}
 							className={cn(
-								"inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold tracking-wider transition-all border",
+								"inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold tracking-wider transition-all border min-h-11 sm:min-h-0",
 								isActive
 									? "bg-secondary-container text-on-secondary-container border-secondary/30"
 									: "bg-surface-container-low text-on-surface-variant border-transparent hover:bg-surface-container-highest hover:border-outline-variant/30"

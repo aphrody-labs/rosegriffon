@@ -352,7 +352,7 @@ function StaffSlot({
 							unoptimized
 						/>
 						<div className="absolute inset-0 bg-linear-to-t from-black/80 via-transparent to-transparent" />
-						<span className="absolute bottom-0 inset-x-0 px-0.5 pb-0.5 text-white font-bold text-[6px] sm:text-[8px] truncate text-center drop-shadow-lg">
+						<span className="absolute bottom-0 inset-x-0 px-0.5 pb-0.5 text-white font-bold text-xs sm:text-[8px] truncate text-center drop-shadow-lg">
 							{member.name}
 						</span>
 						<button
@@ -390,7 +390,7 @@ function StaffSlot({
 					<span style={{ color }} className="opacity-60">
 						<Icon name={icon} size={14} />
 					</span>
-					<span className="text-[6px] sm:text-[8px] font-bold opacity-50" style={{ color }}>
+					<span className="text-xs sm:text-[8px] font-bold opacity-50" style={{ color }}>
 						{label}
 					</span>
 				</div>
@@ -469,7 +469,7 @@ function BenchSlot({
 					<span className="opacity-30" style={{ color }}>
 						<Icon name="add" size={12} />
 					</span>
-					<span className="text-[6px] sm:text-[8px] font-bold opacity-30" style={{ color }}>
+					<span className="text-xs sm:text-[8px] font-bold opacity-30" style={{ color }}>
 						{label}
 					</span>
 				</div>
@@ -646,7 +646,7 @@ export function FormationField({
 							{reserveCount}/{BENCH_SLOTS.reserves}
 						</span>
 					</div>
-					<div className="grid grid-cols-5 gap-1.5">
+					<div className="grid grid-cols-4 sm:grid-cols-5 gap-1.5">
 						{Array.from({ length: BENCH_SLOTS.reserves }, (_, i) => {
 							const slotId = `reserve-${i}`;
 							const isSlotSelected = selectedMemberSlot === slotId || activeSlotId === slotId;

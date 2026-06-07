@@ -111,7 +111,7 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
 									<Button
 										size="icon"
 										variant="secondary"
-										className="rounded-full shadow-lg size-9 border-2 border-surface-container-lowest"
+										className="rounded-full shadow-lg size-11 sm:size-9 border-2 border-surface-container-lowest"
 									>
 										<Edit className="h-3.5 w-3.5" />
 									</Button>
@@ -155,7 +155,7 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
 									<Button
 										size="icon"
 										variant="ghost"
-										className="rounded-full text-on-surface-variant shrink-0"
+										className="size-11 sm:size-9 rounded-full text-on-surface-variant shrink-0"
 									>
 										<Share2 className="size-5" />
 									</Button>

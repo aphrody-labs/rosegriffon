@@ -669,7 +669,7 @@ export function CharacterComparator({ char1, char2 }: CharacterComparatorProps) 
 					{anySelected && (
 						<button
 							onClick={handleCopyLink}
-							className="p-2.5 rounded-full bg-surface-container-high state-layer relative overflow-hidden text-on-surface-variant transition-all"
+							className="flex items-center justify-center p-3 sm:p-2.5 rounded-full bg-surface-container-high state-layer relative overflow-hidden text-on-surface-variant transition-all"
 							aria-label="Copier le lien de partage"
 							title="Copier le lien"
 						>
@@ -684,7 +684,7 @@ export function CharacterComparator({ char1, char2 }: CharacterComparatorProps) 
 						<button
 							onClick={() => router.push("/tools/compare")}
 							aria-label="Reinitialiser la comparaison"
-							className="type-label-large text-primary px-3 py-2 rounded-full state-layer relative overflow-hidden"
+							className="inline-flex items-center min-h-11 sm:min-h-0 type-label-large text-primary px-3 py-2 rounded-full state-layer relative overflow-hidden"
 						>
 							Reinitialiser
 						</button>
@@ -777,7 +777,7 @@ export function CharacterComparator({ char1, char2 }: CharacterComparatorProps) 
 								</span>
 							</div>
 						</div>
-						<div className="grid grid-cols-2 gap-4 sm:gap-6 justify-items-center">
+						<div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 justify-items-center">
 							<StatHeptagon stats={currentStats1} size={240} />
 							<StatHeptagon stats={currentStats2} size={240} />
 						</div>

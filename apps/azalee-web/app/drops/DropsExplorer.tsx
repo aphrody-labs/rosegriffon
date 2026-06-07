@@ -279,7 +279,7 @@ function FilterChip({
 			type="button"
 			onClick={onClick}
 			className={cn(
-				"px-3 py-1.5 rounded-full text-xs font-bold transition-colors border",
+				"inline-flex items-center justify-center min-h-11 sm:min-h-0 px-3 py-1.5 rounded-full text-xs font-bold transition-colors border",
 				active
 					? "bg-primary text-on-primary border-primary"
 					: "bg-surface-container-low text-on-surface-variant border-outline-variant/40 hover:bg-surface-container"
@@ -317,7 +317,7 @@ export function DropsExplorer({ data }: { data: DropsPageData }) {
 						aria-selected={tab === t.value}
 						onClick={() => setTab(t.value)}
 						className={cn(
-							"inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-bold transition-colors",
+							"inline-flex items-center gap-2 min-h-11 sm:min-h-0 px-4 py-2 rounded-full text-sm font-bold transition-colors",
 							tab === t.value
 								? "bg-primary text-on-primary"
 								: "bg-surface-container-low text-on-surface-variant hover:bg-surface-container"

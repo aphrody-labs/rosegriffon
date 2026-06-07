@@ -80,7 +80,7 @@ function NavItem({
 			{/* Label */}
 			<span
 				className={cn(
-					"relative z-10 type-label-medium text-center whitespace-nowrap transition-colors duration-200",
+					"relative z-10 type-label-medium text-center w-full truncate transition-colors duration-200",
 					isActive ? "text-on-surface" : "text-on-surface-variant"
 				)}
 			>

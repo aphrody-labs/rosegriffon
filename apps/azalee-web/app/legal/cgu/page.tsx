@@ -16,7 +16,7 @@ export default function TermsOfServicePage() {
 				Dernière mise à jour : 24 novembre 2025
 			</p>
 
-			<div className="prose prose-lg dark:prose-invert max-w-none space-y-8 text-on-surface">
+			<div className="prose prose-base md:prose-lg dark:prose-invert max-w-none space-y-8 text-on-surface">
 				<section>
 					<h2 className="type-headline-small font-semibold mb-4 text-secondary">
 						1. Objet et Champ d&apos;Application

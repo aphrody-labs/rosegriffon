@@ -628,7 +628,7 @@ export function SettingsClient({
 													variant="outline"
 													size="sm"
 													onClick={() => handleLinkProvider(provider)}
-													className="rounded-full text-xs font-bold"
+													className="min-h-11 rounded-full text-xs font-bold sm:min-h-0"
 												>
 													Lier
 												</Button>
@@ -661,7 +661,7 @@ export function SettingsClient({
 													variant="outline"
 													size="sm"
 													onClick={() => router.push("/compte/steam")}
-													className="rounded-full text-xs font-bold"
+													className="min-h-11 rounded-full text-xs font-bold sm:min-h-0"
 												>
 													Voir
 												</Button>
@@ -670,7 +670,7 @@ export function SettingsClient({
 													variant="outline"
 													size="sm"
 													onClick={() => authClient.signIn.steam({ callbackURL: "/compte/steam" })}
-													className="rounded-full text-xs font-bold"
+													className="min-h-11 rounded-full text-xs font-bold sm:min-h-0"
 												>
 													Lier
 												</Button>
@@ -707,7 +707,7 @@ export function SettingsClient({
 										size="sm"
 										onClick={handleRevokeAllOtherSessions}
 										disabled={revokeAllLoading}
-										className="rounded-full text-xs font-bold text-error border-error/30 hover:bg-error/5"
+										className="min-h-11 rounded-full text-xs font-bold text-error border-error/30 hover:bg-error/5 sm:min-h-0"
 									>
 										{revokeAllLoading ? (
 											<Loader2 className="mr-1 size-3 animate-spin" />
@@ -761,7 +761,7 @@ export function SettingsClient({
 													size="sm"
 													onClick={() => handleRevokeSession(s.token)}
 													disabled={sessionLoading === s.token}
-													className="shrink-0 rounded-full text-error hover:bg-error/10 hover:text-error"
+													className="min-h-11 min-w-11 shrink-0 rounded-full text-error hover:bg-error/10 hover:text-error sm:min-h-0 sm:min-w-0"
 												>
 													{sessionLoading === s.token ? (
 														<Loader2 className="size-4 animate-spin" />

@@ -12,7 +12,7 @@ export default function CharteEngagementsPage() {
 		<div className="w-full">
 			<h1 className="type-display-medium font-bold mb-6 text-primary">Charte d&apos;engagements</h1>
 
-			<div className="prose prose-lg dark:prose-invert max-w-none mb-12">
+			<div className="prose prose-base md:prose-lg dark:prose-invert max-w-none mb-12">
 				<h2 className="type-headline-small font-bold mb-4 text-on-surface">
 					Rose Griffon, Achilléa et Azalée s&apos;engagent à respecter et promouvoir les valeurs
 					suivantes dans toutes leurs activités et productions.
@@ -104,7 +104,7 @@ export default function CharteEngagementsPage() {
 			</div>
 
 			{/* Section Partenariats */}
-			<div className="prose prose-lg dark:prose-invert max-w-none mb-12">
+			<div className="prose prose-base md:prose-lg dark:prose-invert max-w-none mb-12">
 				<h2 className="type-headline-medium font-bold mb-6 text-primary">
 					Partenariat avec l&apos;ensemble des projets Rose Griffon
 				</h2>

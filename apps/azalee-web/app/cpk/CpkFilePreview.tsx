@@ -76,7 +76,7 @@ export function CpkFilePreview(props: CpkFilePreviewProps) {
 						href={assetUrl}
 						target="_blank"
 						rel="noopener noreferrer"
-						className="inline-flex items-center gap-2 h-10 px-4 rounded-full bg-primary text-on-primary text-sm font-semibold hover:opacity-90 transition"
+						className="inline-flex items-center gap-2 h-11 sm:h-10 px-4 rounded-full bg-primary text-on-primary text-sm font-semibold hover:opacity-90 transition"
 					>
 						<Icon name="open_in_new" size={16} />
 						Contenu décodé (CDN)
@@ -85,7 +85,7 @@ export function CpkFilePreview(props: CpkFilePreviewProps) {
 				<a
 					href={cpkRawUrl(path)}
 					download
-					className="inline-flex items-center gap-2 h-10 px-4 rounded-full border border-outline-variant/40 bg-surface-container-low text-on-surface text-sm font-semibold hover:border-primary transition"
+					className="inline-flex items-center gap-2 h-11 sm:h-10 px-4 rounded-full border border-outline-variant/40 bg-surface-container-low text-on-surface text-sm font-semibold hover:border-primary transition"
 				>
 					<Icon name="download" size={16} />
 					Télécharger l'original

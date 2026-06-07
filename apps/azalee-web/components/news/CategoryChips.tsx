@@ -25,7 +25,7 @@ export function CategoryChips() {
 					<Link
 						key={filter.value}
 						href={href}
-						className={`shrink-0 inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all duration-200 ${
+						className={`shrink-0 inline-flex items-center justify-center gap-1.5 min-h-11 sm:min-h-0 px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all duration-200 ${
 							isActive
 								? "bg-primary text-on-primary shadow-sm"
 								: "bg-surface-container-high text-on-surface-variant hover:bg-surface-container-highest"

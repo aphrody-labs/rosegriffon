@@ -33,15 +33,15 @@ export function CharacterStatsPopover({ stats, name }: CharacterStatsPopoverProp
 				<Button
 					variant="ghost"
 					size="icon"
-					className="size-8 text-on-surface-variant hover:text-primary"
+					className="size-11 sm:size-8 text-on-surface-variant hover:text-primary"
 				>
 					<BarChart3 className="size-4" />
 					<span className="sr-only">Stats de {name}</span>
 				</Button>
 			</PopoverTrigger>
 			<PopoverContent
-				className="w-80 p-4 bg-surface-container-high border-outline-variant"
-				align="end"
+				className="w-[calc(100vw-2rem)] max-w-sm sm:w-80 p-4 bg-surface-container-high border-outline-variant"
+				align="center"
 			>
 				<div className="space-y-4">
 					<h4 className="font-medium text-on-surface flex items-center justify-between">
