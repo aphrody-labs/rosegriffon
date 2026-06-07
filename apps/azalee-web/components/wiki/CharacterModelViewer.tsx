@@ -143,7 +143,7 @@ export default function CharacterModelViewer({ glbUrl, name }: CharacterModelVie
 					</DialogTitle>
 				</DialogHeader>
 
-				<div className="aspect-[3/4] relative bg-[url(/stand_ie.webp)] bg-cover bg-center">
+				<div className="aspect-[3/4] relative bg-surface-container-high">
 					<div ref={containerRef} className="absolute inset-0" />
 
 					{!ready && !errored && (
