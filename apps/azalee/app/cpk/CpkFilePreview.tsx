@@ -106,7 +106,7 @@ function PreviewBody(
 				href={assetUrl}
 				target="_blank"
 				rel="noopener noreferrer"
-				className="block bg-[url(/stand_ie.webp)] bg-cover bg-center"
+				className="block bg-surface-container-high"
 			>
 				{/* CDN webp déjà optimisé → <img> brut (pas de quota Next/image). */}
 				{/* eslint-disable-next-line @next/next/no-img-element */}
