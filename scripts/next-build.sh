@@ -23,7 +23,8 @@
 set -uo pipefail
 
 NODE_BIN="${NODE_BIN:-/usr/bin/node}"
-SERVER_JS=".next/standalone/apps/azalee/server.js"
+APP_NAME=$(basename "$(pwd)")
+SERVER_JS=".next/standalone/apps/$APP_NAME/server.js"
 
 # TMPDIR sur disque (PAS le tmpfs /tmp, RAM-backed et souvent plein sur ce VPS) :
 # un /tmp saturé fait crasher le sous-process babel-loader (SIGTERM/EDQUOT).
@@ -37,12 +38,16 @@ env -u VERCEL -u VERCEL_OIDC_TOKEN \
 	"$NODE_BIN" node_modules/next/dist/bin/next build --turbopack "$@"
 rc=$?
 
-if [ -f .next/BUILD_ID ] && [ "$(stat -c %Y .next/BUILD_ID)" -ge "$build_start" ] && [ -f "$SERVER_JS" ]; then
+if [ -f .next/BUILD_ID ] && [ "$(stat -c %Y .next/BUILD_ID)" -ge "$build_start" ]; then
+	if [ "$APP_NAME" = "azalee" ] && [ ! -f "$SERVER_JS" ]; then
+		echo "✗ build réellement échoué — server.js absent pour azalee" >&2
+		exit 1
+	fi
 	if [ "$rc" -ne 0 ]; then
 		echo "⚠ build OK (BUILD_ID $(cat .next/BUILD_ID)) — code retour $rc ignoré (artefacts présents)" >&2
 	fi
 	exit 0
 fi
 
-echo "✗ build réellement échoué — BUILD_ID frais=$([ -f .next/BUILD_ID ] && echo o || echo n) server.js=$([ -f "$SERVER_JS" ] && echo o || echo n) (exit $rc)" >&2
+echo "✗ build réellement échoué — BUILD_ID absent ou non mis à jour (exit $rc)" >&2
 exit "$([ "$rc" -ne 0 ] && echo "$rc" || echo 1)"
