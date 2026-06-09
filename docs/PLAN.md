@@ -94,7 +94,7 @@ _Daemon de planification, crawling et RAG (VPS simple process)_
     - ✅ **patreon** (`api.ts`) : Synchronisation des tiers d'abonnements Patreon.
     - ✅ **warm** (`api.ts`) : Chauffage régulier du cache ISR Next.js des applications.
   - ✅ Rotation automatique de proxies pour contourner les limitations d'API et anti-bots (X/Level-5) avec repli résilient.
-  - ⏳ Amélioration du chunking sémantique des documents pour le RAG.
+  - ✅ Amélioration du chunking sémantique des documents pour le RAG.
   - ⏳ Sources additionnelles pour le crawling (Reddit, Discord).
 
 ### 🎨 @rose-griffon/ui
@@ -208,7 +208,7 @@ _API universelle et parses de données de jeu Inazuma Eleven_
 1. ✅ **Fiabilisation de la connexion Redis** : Correction des déconnexions intempestives Redis (`ERR_REDIS_CONNECTION_CLOSED`) lors du RAG Sync en ajustant le cycle de vie du socket de Bun.
 2. ✅ **Amélioration du crawler Twitter et rendu UI** : Extraction des entités média distantes sur X, reconstruction ordonnée des threads, et structuration complète des colonnes `media` et `raw_tweets` pour le rendu dynamique des threads dans l'UI d'Azalée.
 3. ✅ **Résilience réseau** : Intégrer un système de rotation de proxies dans `@rose-griffon/cron` pour prémunir le crawl officiel Zukan, Level-5 et X/Twitter contre les blocages d'IP (avec retry-loop et injection de flag chrome).
-4. **Qualité RAG** : Améliorer le chunking des documents récoltés pour affiner la pertinence des résultats de recherche sémantique.
+4. ✅ **Qualité RAG** : Améliorer le chunking des documents récoltés pour affiner la pertinence des résultats de recherche sémantique (gestion des blocs de code et des tables markdown, et cleanHtmlToMarkdown pour les pages web).
 
 ### Phase 3 : Nouvelles fonctionnalités applicatives
 
