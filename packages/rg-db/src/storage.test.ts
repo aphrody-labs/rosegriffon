@@ -5,7 +5,6 @@ describe("getAssetUrl", () => {
 	const originalEnv = process.env;
 
 	beforeEach(() => {
-		vi.resetModules();
 		process.env = { ...originalEnv };
 		process.env.NEXT_PUBLIC_SUPABASE_URL = "https://test.supabase.co";
 	});

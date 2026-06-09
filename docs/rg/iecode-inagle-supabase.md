@@ -17,7 +17,7 @@ Le flux part des binaires bruts du jeu (extraits de Steam via iecode) et finit d
 │  IECODE.Core/Formats (CRILAYLA, @UTF, G4MD/G4MG/G4TX, cfg.bin/RDBN, HCA/ADX)   │
 │  FormatCatalog.cs (31 formats, magics + offsets) ──export-knowledge──▶ niers   │
 └───────────────────────────────┬──────────────────────────────────────────────┘
-                                 │ corpus parsé → /home/ubuntu/data (DATA_PATH)
+                                 │ corpus parsé → /home/ubuntu/niers/data (DATA_PATH)
                                  │ (cfg.bin.json + JSON pré-traités, PAS un dump brut)
                                  ▼
 ┌──────────────────────────────────────────────────────────────────────────────┐
@@ -109,7 +109,7 @@ Arborescence clé (`iecode/src/IECODE.Core/`) :
 
 ### 1.5 Flow data headless (`@rose-griffon/iecode-pipeline`)
 
-Unifie **acquire** (steam-sync : download depots + dump CPK) + **parse/serve** (délégué à `@rose-griffon/inagle`, ~50 cfg.bin, 12 domaines, 6000+ persos / 2900+ skills — **non dupliqué en C#**), gardé par le **buildid Steam** (idempotence via `.build-snapshot.json`). API : `accumulate()` (check build → download+dump si update → corpus), `exportCorpus()` (chaque domaine → `<domaine>.json` + `corpus.json`), `serve()` (HTTP inagle headless), `getRemoteBuildId()`. CLI `iecode-data accumulate|export|serve|version`. Données de dev : `/home/ubuntu/data` (corpus parsé, **PAS** un dump Steam brut). `@rose-griffon/iecode-steam-sync` pilote le CLI natif (`syncApp`/`listDepots`) + scrape store via `@aphrody-code/bxc`. Packages annexes : `iecode-cdn` (résolveur G4TX→PNG lossless pour `cdn.rosegriffon.fr/dx11/menu/**`), `iecode-runtime-harness` (exécution live headless — RE mémoire uniquement, **pas requis** par le pipeline data), `menu-render` (renderer React pixel-perfect des écrans menu depuis menu-layout.json), `iecode-inagle`, `iecode-config`.
+Unifie **acquire** (steam-sync : download depots + dump CPK) + **parse/serve** (délégué à `@rose-griffon/inagle`, ~50 cfg.bin, 12 domaines, 6000+ persos / 2900+ skills — **non dupliqué en C#**), gardé par le **buildid Steam** (idempotence via `.build-snapshot.json`). API : `accumulate()` (check build → download+dump si update → corpus), `exportCorpus()` (chaque domaine → `<domaine>.json` + `corpus.json`), `serve()` (HTTP inagle headless), `getRemoteBuildId()`. CLI `iecode-data accumulate|export|serve|version`. Données de dev : `/home/ubuntu/niers/data` (corpus parsé, **PAS** un dump Steam brut). `@rose-griffon/iecode-steam-sync` pilote le CLI natif (`syncApp`/`listDepots`) + scrape store via `@aphrody-code/bxc`. Packages annexes : `iecode-cdn` (résolveur G4TX→PNG lossless pour `cdn.rosegriffon.fr/dx11/menu/**`), `iecode-runtime-harness` (exécution live headless — RE mémoire uniquement, **pas requis** par le pipeline data), `menu-render` (renderer React pixel-perfect des écrans menu depuis menu-layout.json), `iecode-inagle`, `iecode-config`.
 
 ### 1.6 Capacités réelles vs gaps, et exploitable par niers
 
@@ -123,7 +123,7 @@ Unifie **acquire** (steam-sync : download depots + dump CPK) + **parse/serve** (
 - **G4MG sans `.g4md`** : impossible par construction (headerless) ; `ParseMeshes` lève `NotSupportedException` explicite.
 - **G4SK** : offsets « unknown/confusing », parse heuristique (hiérarchie d'os partielle).
 - **`dump-gamedata`** ne couvre que ~7 types (inagle couvre tout le reste).
-- Les binaires bruts (`.cpk`/`.g4mg`) sont **ABSENTS du VPS** (`/home/ubuntu/data` = corpus parsé) → tout RE additionnel sur G4MG/Player champs interdit de stub spéculatif à l'aveugle.
+- Les binaires bruts (`.cpk`/`.g4mg`) sont **ABSENTS du VPS** (`/home/ubuntu/niers/data` = corpus parsé) → tout RE additionnel sur G4MG/Player champs interdit de stub spéculatif à l'aveugle.
 
 **Incertitudes signalées** : G4MG n'expose que le 1er layout vertex quand `VLayoutCount` > attributs de la 1re table (limite assumée dans le code) ; plusieurs champs de headers G4TX/G4SK restent `Unknown*`.
 
@@ -135,12 +135,12 @@ Fichiers de référence (absolus) : `/home/ubuntu/rg/iecode/src/IECODE.Core/Form
 
 ## 2. inagle — parse / calcul des données
 
-API universelle de données de jeu pour IEVR. Package `@rose-griffon/inagle` v1.2.0 (`packages/inagle`), **package émetteur** (`tsc` → `dist/` + subpath exports `./*`, son `dist/` doit exister sinon `rg-cron` et `azalee-web` cassent). Bun-natif (`Bun.file`, `Bun.Glob.scanSync`, `bun:sqlite`). Rôle : transformer le dump cfg.bin du jeu (`/home/ubuntu/data`) en entités typées, puis pousser vers Supabase d'où azalee lit via un miroir SQLite embarqué.
+API universelle de données de jeu pour IEVR. Package `@rose-griffon/inagle` v1.2.0 (`packages/inagle`), **package émetteur** (`tsc` → `dist/` + subpath exports `./*`, son `dist/` doit exister sinon `rg-cron` et `azalee-web` cassent). Bun-natif (`Bun.file`, `Bun.Glob.scanSync`, `bun:sqlite`). Rôle : transformer le dump cfg.bin du jeu (`/home/ubuntu/niers/data`) en entités typées, puis pousser vers Supabase d'où azalee lit via un miroir SQLite embarqué.
 
 ### 2.1 Flux de données global
 
 ```
-/home/ubuntu/data (DATA_PATH)              cfg.bin.json + JSON pré-traités
+/home/ubuntu/niers/data (DATA_PATH)              cfg.bin.json + JSON pré-traités
    └─ common/gamedata/<cat>/*.cfg.bin.json    (sources brutes du dump)
    └─ common/text/<locale>/*.cfg.bin.json     (localisation)
    └─ all-gamedata/*.json                      (JSON pré-extraits : growth_tables, exp_table, starSignCharaInfo…)
@@ -159,7 +159,7 @@ API universelle de données de jeu pour IEVR. Package `@rose-griffon/inagle` v1.
    Wiki azalee (SSR Next 16, :3003)
 ```
 
-`DATA_ROOT` est résolu dans `src/core/paths.ts` : `DATA_PATH` env (azalee `.env` = `/home/ubuntu/data`) → sinon `packages/inagle/data` → sinon `cwd/data`. Les chemins par catégorie sont dans `PATHS` ; les fichiers connus (versionnés) dans `FILES`. `resolveGameDataFile(relDir, baseName)` choisit la **version la plus haute** par tri numérique segment-par-segment (regex `^<base>_\d[\d.]*\.cfg\.bin\.json$`, qui empêche les collisions de préfixe comme `chara_param` captant `chara_param_table_config`).
+`DATA_ROOT` est résolu dans `src/core/paths.ts` : `DATA_PATH` env (azalee `.env` = `/home/ubuntu/niers/data`) → sinon `packages/inagle/data` → sinon `cwd/data`. Les chemins par catégorie sont dans `PATHS` ; les fichiers connus (versionnés) dans `FILES`. `resolveGameDataFile(relDir, baseName)` choisit la **version la plus haute** par tri numérique segment-par-segment (regex `^<base>_\d[\d.]*\.cfg\.bin\.json$`, qui empêche les collisions de préfixe comme `chara_param` captant `chara_param_table_config`).
 
 Option `cfgbin-db` (`src/core/cfgbin-db.ts`) : une DB SQLite `~/data/cache/cfgbin.sqlite` (~2.3 Go, produite par le toolkit iecode) peut remplacer les loose `.cfg.bin.json` ; **opt-in**, désactivée par défaut dans azalee. Les fichiers texte sont **bypassés** par défaut (le parser cfg.bin corrompt les chaînes localisées → `vars[N]=null`) ; réactivable via `IEVR_CFGBIN_DB_TEXT=1`.
 
@@ -383,7 +383,7 @@ Nombreuses tables `inagle_*` vides **volontairement** (features non livrées / s
 Liens inter-étages vérifiés entre les trois audits :
 
 - **iecode `FormatCatalog.cs` → niers `nie-seed/src/formats.rs`** : niers re-porte le catalogue iecode (magics + chemins de parser de référence) en table Rust `FormatDef`, sourcée sur `FormatDetector.cs` et les parsers Level-5/Criware. La clé XOR `0x1717E18E`, le décodeur CRILAYLA et les offsets G4MD/G4TX/NXTCH sont directement portables. `iecode export-knowledge` est le canal d'interop (JSON régénérable, non commité). La boucle RE niers est donc câblée sur les ancres de vérité iecode.
-- **iecode (extraction) → inagle (`/home/ubuntu/data`)** : ce que iecode dump (cfg.bin clair issu des CPK) est exactement ce qu'inagle attend dans `DATA_PATH`. `/home/ubuntu/data` est un **corpus parsé**, pas un dump Steam brut — cohérent des deux côtés (iecode §1.5 le dit, inagle §2.1 le confirme). L'option `cfgbin-db` d'inagle (`~/data/cache/cfgbin.sqlite`, ~2.3 Go) est **produite par le toolkit iecode** : pont concret entre les deux étages.
+- **iecode (extraction) → inagle (`/home/ubuntu/niers/data`)** : ce que iecode dump (cfg.bin clair issu des CPK) est exactement ce qu'inagle attend dans `DATA_PATH`. `/home/ubuntu/niers/data` est un **corpus parsé**, pas un dump Steam brut — cohérent des deux côtés (iecode §1.5 le dit, inagle §2.1 le confirme). L'option `cfgbin-db` d'inagle (`~/data/cache/cfgbin.sqlite`, ~2.3 Go) est **produite par le toolkit iecode** : pont concret entre les deux étages.
 - **inagle (cli-push) → Supabase (tables `inagle_*`)** : les tables `inagle_*` sont des projections écrasées par `cli-push.ts` (delete+reinsert) ; cohérent avec l'absence totale de FK Postgres entre elles (audit Supabase §3.4) et avec leur corrélation par champs métier (`internal_code`, `team_id`, `partner_ids`). Le piège `category_id`/`element_id = NULL` est constaté des deux côtés : décrit dans inagle (`wiki-service.ts` filtre via texte FR) et **mesuré** dans Supabase (`skills_null_catid=1002` sur 1 002 lignes). Triple confirmation avec CLAUDE.md.
 - **inagle (auras hissatsu natif) → Supabase répartition** : le `loadAuraSkills`/`resolveAuraHissatsu` d'inagle (228/387 auras résolues) alimente `sheet_data.hissatsu` et la répartition par sous-type → tables `inagle_keshins (282) / souls (56) / miximax (70) / auras (9)`. Les comptes Supabase reflètent cette ventilation.
 - **cron ie-crawl → `inagle_rag_chunks`** : le RAG est alimenté par le cron, pas par cli-push. La répartition `source_kind` le prouve : `sqlite` 6 962 (miroir inagle embarqué côté azalee re-chunké), `tweet` 1 328, `json/doc/lua/ts/cfg` (sources iecode/docs). La dédup `(source_id, content_hash)` rend le crawl idempotent. La RPC `rag_hybrid_search` (HNSW + GIN fusionnés par RRF) est consommée par azalee.
@@ -398,7 +398,7 @@ iecode :
 - G4MG sans `.g4md` compagnon : impossible par construction (headerless), `NotSupportedException` explicite.
 - G4SK : parse heuristique, hiérarchie d'os partielle (offsets `unknown/confusing`).
 - `dump-gamedata` ne couvre que ~7 types ; le reste est délégué à inagle.
-- Binaires bruts (`.cpk`/`.g4mg`) **absents du VPS** (`/home/ubuntu/data` = corpus parsé) → pas de RE additionnel possible à l'aveugle.
+- Binaires bruts (`.cpk`/`.g4mg`) **absents du VPS** (`/home/ubuntu/niers/data` = corpus parsé) → pas de RE additionnel possible à l'aveugle.
 - G4MG n'expose que le 1er layout vertex si `VLayoutCount` > attributs de la 1re table (limite assumée) ; champs `Unknown*` résiduels dans G4TX/G4SK.
 
 inagle :
