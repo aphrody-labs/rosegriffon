@@ -71,7 +71,6 @@ export default async function CapsuleDetailPage({
 
 	return (
 		<div className="w-full space-y-8">
-			{/* eslint-disable-next-line react/no-danger */}
 			<script
 				type="application/ld+json"
 				dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}

@@ -6,6 +6,9 @@
 			"rootDir": "."
 		}
 	},
+	"ignorePatterns": [
+		"lib/nie-wasm-web/**"
+	],
 	"rules": {
 		"no-unused-vars": "error",
 		"typescript/no-explicit-any": "off"

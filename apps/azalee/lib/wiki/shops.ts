@@ -2,7 +2,6 @@ import "server-only";
 
 import { createClient } from "@/lib/supabase/server";
 import {
-	SHOP_CATEGORY_FR,
 	type ShopDetail,
 	type ShopItem,
 	type ShopSummary,

@@ -103,7 +103,9 @@
 		"**/.turbo/**",
 		"**/coverage/**",
 		"**/*.d.ts",
-		"packages/patreon-bun/docs/examples/**"
+		"packages/patreon-bun/docs/examples/**",
+		"**/src/wasm/**",
+		"**/lib/nie-wasm-web/**"
 	],
 	"overrides": [
 		{

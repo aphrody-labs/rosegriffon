@@ -31,7 +31,6 @@ import "server-only";
 import { createClient } from "@/lib/supabase/server";
 import type {
 	DropEntry,
-	DropsCounts,
 	DropsPageData,
 	SpiritGroup,
 	SpiritTier,

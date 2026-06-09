@@ -27,7 +27,6 @@ import { getCharacterFaceUrl, getEmblemImageUrl, resolveAssetUrl } from "@/lib/i
 // (crc32 standard de chaque `emNNNNNN`). Couvre 206/208 emblèmes réels.
 import emblemCrcMap from "@/data/emblem-crc-map.json";
 import {
-	SEASON_LABELS,
 	SERIES_LABELS,
 	type TeamDetail,
 	type TeamEmblem,

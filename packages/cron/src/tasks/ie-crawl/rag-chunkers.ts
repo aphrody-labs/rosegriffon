@@ -116,13 +116,18 @@ export function chunkProse(text: string, size = 800, overlap = 150): Chunk[] {
 	return chunkText(text, size, overlap).map((content, index) => ({ index, content }));
 }
 
-/** Markdown : découpe par sections (#, ##, ###) en préservant le contexte complet des titres parents (breadcrumbs). */
+/** Markdown : découpe par sections (#, ##, ###) en préservant le contexte complet des titres parents (breadcrumbs) et la structure des tables et blocs de code lors d'un découpage. */
 export function chunkMarkdown(src: string, maxChunkSize = 800): Chunk[] {
 	const lines = src.split("\n");
 	const chunks: Chunk[] = [];
 	const headerStack: string[] = [];
 	let currentChunk = "";
 	let chunkIndex = 0;
+
+	let inCodeBlock = false;
+	let codeBlockLang = "";
+	let inTable = false;
+	let tableHeaderLines: string[] = [];
 
 	const getContextPrefix = () => {
 		const path = headerStack.filter(Boolean).join(" > ");
@@ -134,15 +139,46 @@ export function chunkMarkdown(src: string, maxChunkSize = 800): Chunk[] {
 	};
 
 	for (const line of lines) {
+		// Détection de début/fin de code block
+		const codeBlockMatch = line.match(/^\s*```(\w+)?/);
+		if (codeBlockMatch) {
+			inCodeBlock = !inCodeBlock;
+			codeBlockLang = inCodeBlock ? (codeBlockMatch[1] || "") : "";
+		}
+
+		// Détection de ligne de table
+		const isTableLine = line.match(/^\s*\|/);
+		if (isTableLine) {
+			if (!inTable) {
+				inTable = true;
+				tableHeaderLines = [];
+			}
+			if (tableHeaderLines.length < 2) {
+				tableHeaderLines.push(line);
+			}
+		} else if (inTable) {
+			inTable = false;
+			tableHeaderLines = [];
+		}
+
 		const headerMatch = line.match(/^(#{1,6})\s+(.*)$/);
 		if (headerMatch) {
 			if (currentChunk.trim().length > 10) {
+				let chunkContent = currentChunk.trim();
+				if (inCodeBlock) {
+					chunkContent += "\n```";
+				}
 				chunks.push({
 					index: chunkIndex++,
-					content: getContextPrefix() + currentChunk.trim(),
+					content: getContextPrefix() + chunkContent,
 					symbol: getCurrentHeader() || undefined,
 				});
 			}
+
+			// Réinitialisation de la table/codeblock si on change de section
+			inTable = false;
+			tableHeaderLines = [];
+			
 			const level = headerMatch[1]!.length;
 			const title = headerMatch[2]!.trim();
 			
@@ -150,24 +186,40 @@ export function chunkMarkdown(src: string, maxChunkSize = 800): Chunk[] {
 			headerStack[level - 1] = title;
 			headerStack.length = level;
 			
-			currentChunk = line + "\n";
+			currentChunk = (inCodeBlock ? `\`\`\`${codeBlockLang}\n` : "") + line + "\n";
 		} else {
 			if (currentChunk.length + line.length > maxChunkSize && currentChunk.trim().length > 10) {
+				let chunkContent = currentChunk.trim();
+				if (inCodeBlock) {
+					chunkContent += "\n```";
+				}
 				chunks.push({
 					index: chunkIndex++,
-					content: getContextPrefix() + currentChunk.trim(),
+					content: getContextPrefix() + chunkContent,
 					symbol: getCurrentHeader() || undefined,
 				});
-				currentChunk = "";
+
+				// Préparer le début du nouveau chunk avec les entêtes structurels
+				if (inCodeBlock) {
+					currentChunk = `\`\`\`${codeBlockLang}\n`;
+				} else if (inTable && tableHeaderLines.length >= 2) {
+					currentChunk = tableHeaderLines.join("\n") + "\n";
+				} else {
+					currentChunk = "";
+				}
 			}
 			currentChunk += line + "\n";
 		}
 	}
 
 	if (currentChunk.trim().length > 10) {
+		let chunkContent = currentChunk.trim();
+		if (inCodeBlock) {
+			chunkContent += "\n```";
+		}
 		chunks.push({
 			index: chunkIndex++,
-			content: getContextPrefix() + currentChunk.trim(),
+			content: getContextPrefix() + chunkContent,
 			symbol: getCurrentHeader() || undefined,
 		});
 	}
@@ -259,11 +311,11 @@ export function chunkBySource(kind: SourceKind, raw: string): Chunk[] {
 			} catch {}
 			return chunkTweet(raw);
 		case "doc":
+		case "web":
+		default:
 			if (raw.includes("# ") || raw.includes("## ")) {
 				return chunkMarkdown(raw);
 			}
-			return chunkProse(raw);
-		default:
 			return chunkProse(raw);
 	}
 }
