@@ -16,7 +16,7 @@ namespace IECODE.Core.Tests;
 /// </summary>
 public class CfgBinTypesGeneratorTests
 {
-    private const string DataRoot = "/home/ubuntu/data";
+    private const string DataRoot = "/home/ubuntu/niers/data";
 
     // Fichier RDBN de référence — courant dans le dump IEVR.
     private const string RdbnFile =

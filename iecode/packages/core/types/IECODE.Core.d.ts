@@ -10,7 +10,7 @@ import './K4os.Compression.LZ4';
 
 type DateTime = Date & { kind?: 'utc' | 'local' | 'unspecified' }
 
-import { Duplex } from 'stream';
+import { Duplex } from 'node:stream';
 
 /** A JavaScript projection of a .NET type. */
 interface IType {
@@ -9517,6 +9517,15 @@ declare module 'node-api-dotnet' {
 				containerLogicalPath: string,
 				ct?: AbortSignal,
 			): Promise<readonly IECODE.Core.Cdn.MenuPng[]>;
+		}
+	}
+
+	export namespace IECODE.Core.Cdn {
+		export namespace TextureManifestExport {
+			export function ExportTextureHeadersNdjson(
+				game: IECODE.Core.IEVRGame,
+				limit?: number,
+			): string;
 		}
 	}
 

@@ -4,7 +4,7 @@ import { join } from "node:path";
 import { afterAll, describe, expect, test } from "bun:test";
 import { exportCorpus } from "./corpus.ts";
 
-const DATA = process.env["DATA_PATH"] ?? "/home/ubuntu/data";
+const DATA = process.env["DATA_PATH"] ?? "/home/ubuntu/niers/data";
 const hasData = existsSync(DATA);
 const OUT = join(import.meta.dir, "..", ".test-corpus");
 

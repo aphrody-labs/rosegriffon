@@ -1,6 +1,6 @@
 /**
  * Conformité « schéma cfg.bin aligné sur la vraie donnée » : décode de VRAIS fichiers `*.cfg.bin`
- * (`/home/ubuntu/data`) puis `v.parse(CfgBinDocument, …)` chaque document décodé. Couvre T2B + RDBN
+ * (`/home/ubuntu/niers/data`) puis `v.parse(CfgBinDocument, …)` chaque document décodé. Couvre T2B + RDBN
  * et les 9 kinds de valeur. Skip si la donnée jeu est absente.
  */
 import { existsSync, readdirSync, statSync } from "node:fs";
@@ -11,7 +11,7 @@ import * as v from "valibot";
 import { decodeCfgBinFile } from "./generic.ts";
 import { cfgConfigName, CfgBinDocument } from "./schema.ts";
 
-const DATA = process.env["DATA_PATH"] ?? "/home/ubuntu/data";
+const DATA = process.env["DATA_PATH"] ?? "/home/ubuntu/niers/data";
 const ROOT = join(DATA, "common/gamedata");
 const hasData = existsSync(ROOT);
 

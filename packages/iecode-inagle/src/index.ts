@@ -4,7 +4,7 @@
  * Game Data API IEVR : parse les vrais fichiers du jeu (cfg.bin/CPK/G4TX, lua,
  * zukan) et expose characters, skills, items, teams, quests, drops, basara,
  * menu, search, images, parsers (gallery/capsules/costumes/expTable/…),
- * evolution. Les données sont lues depuis `DATA_PATH` (défaut `/home/ubuntu/data`).
+ * evolution. Les données sont lues depuis `DATA_PATH` (défaut `/home/ubuntu/niers/data`).
  *
  * @example
  *   import { getInagle } from "@rose-griffon/iecode-inagle";
@@ -21,7 +21,7 @@ export type * from "@rose-griffon/inagle";
 import type { InagleService } from "@rose-griffon/inagle";
 
 /** Racine des données jeu par défaut (override via `DATA_PATH`). */
-export const DEFAULT_DATA_PATH = "/home/ubuntu/data";
+export const DEFAULT_DATA_PATH = "/home/ubuntu/niers/data";
 
 let _service: Promise<InagleService> | undefined;
 

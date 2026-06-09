@@ -10,7 +10,7 @@
  *   # ouvre http://localhost:3456
  *
  * Pour les sprites locaux :
- *   ln -s /home/ubuntu/data/dx11/menu packages/menu-render/src/demo/public/dx11/menu
+ *   ln -s /home/ubuntu/niers/data/dx11/menu packages/menu-render/src/demo/public/dx11/menu
  *   # ou copier quelques PNG de test
  */
 

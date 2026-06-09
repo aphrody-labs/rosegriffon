@@ -8,13 +8,13 @@ namespace IECODE.Core.Tests;
 
 /// <summary>
 /// Tests du parseur OBJB contre les vrais fichiers .objbin d'IEVR.
-/// Fichiers de référence : /home/ubuntu/data/common/gamedata/menu/obj/
+/// Fichiers de référence : /home/ubuntu/niers/data/common/gamedata/menu/obj/
 /// Les tests qui dépendent des fichiers réels sont skippés si ceux-ci sont absents.
 /// </summary>
 public class ObjbParserTests
 {
     private static readonly string ObjDir =
-        "/home/ubuntu/data/common/gamedata/menu/obj";
+        "/home/ubuntu/niers/data/common/gamedata/menu/obj";
 
     private static string ObjFile(string name) => Path.Combine(ObjDir, name);
 

@@ -1,7 +1,7 @@
 /**
  * Tests du décodeur générique cfg.bin (@rose-griffon/iecode-inagle/cfgbin/generic.ts).
  *
- * Fichiers de référence : /home/ubuntu/data/ (dump IEVR réel).
+ * Fichiers de référence : /home/ubuntu/niers/data/ (dump IEVR réel).
  * Chaque test commençant par un accès au FS est ignoré silencieusement si le
  * fichier est absent (CI sans données jeu).
  */
@@ -19,7 +19,7 @@ import {
 
 // ── Chemins ───────────────────────────────────────────────────────────────────
 
-const DATA_ROOT   = "/home/ubuntu/data";
+const DATA_ROOT   = "/home/ubuntu/niers/data";
 const EVENT_DIR   = `${DATA_ROOT}/common/gamedata/event`;
 const MENU_CFG    = `${DATA_ROOT}/common/gamedata/menu/cfg`;
 const OBJ_DIR     = `${DATA_ROOT}/common/gamedata/menu/obj`;

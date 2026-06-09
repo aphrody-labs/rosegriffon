@@ -1,7 +1,7 @@
 /**
  * Conformité de l'union discriminée `GameFile` :
  *   1. détection par magic bytes — chaque magic RE'd (REPORT §6) mappe au bon `kind` ;
- *   2. détection sur de VRAIS fichiers du jeu (`/home/ubuntu/data`) — magic (lua), footer T2B,
+ *   2. détection sur de VRAIS fichiers du jeu (`/home/ubuntu/niers/data`) — magic (lua), footer T2B,
  *      et extension (cfg.bin/objbin/usm chiffrés → fallback extension correct).
  */
 import { existsSync } from "node:fs";
@@ -17,7 +17,7 @@ import {
 	type GameFileKind,
 } from "./index.ts";
 
-const DATA = process.env["DATA_PATH"] ?? "/home/ubuntu/data";
+const DATA = process.env["DATA_PATH"] ?? "/home/ubuntu/niers/data";
 
 /** Construit un header à partir d'une chaîne ASCII (magic) + octets optionnels. */
 function header(ascii: string, ...extra: number[]): Uint8Array {

@@ -3,7 +3,7 @@
  * que `inagle push` (createInagleService, DATA_PATH) consomme.
  *
  * Contrat vérifié contre packages/inagle/src/core/{paths,data-loader,cfgbin-db}.ts
- * et /home/ubuntu/data :
+ * et /home/ubuntu/niers/data :
  *
  *   1. PAS de préfixe `data/` (inagle lit DATA_ROOT/common/..., le dump iecode
  *      écrit data/common/... d'après cpk_list) → on strip `data/`.
@@ -11,7 +11,7 @@
  *        - T2B  → { entries: [...] }                 (loadConfig*)
  *        - RDBN → { version, lists:[{name,typeName,values}] }  (parsers spécialisés)
  *      Le décodeur iecode route automatiquement T2B/RDBN ; sortie byte-identique
- *      à /home/ubuntu/data. → pour chaque `<x>.cfg.bin`, on émet `<x>.cfg.bin.json`.
+ *      à /home/ubuntu/niers/data. → pour chaque `<x>.cfg.bin`, on émet `<x>.cfg.bin.json`.
  *   3. Le `.cfg.bin` brut est conservé à côté (comme la référence ; lossless).
  *
  * Idempotent : un `.json` à jour (plus récent que sa source) est sauté.
@@ -37,7 +37,7 @@ export interface DataPathExportOptions {
 	outDir: string;
 	/** Ré-écrire les .json à jour. */
 	force?: boolean;
-	/** Copier le .cfg.bin brut à côté du .json (défaut true, comme /home/ubuntu/data). */
+	/** Copier le .cfg.bin brut à côté du .json (défaut true, comme /home/ubuntu/niers/data). */
 	copyRawCfgBin?: boolean;
 	/** Parallélisme de décodage (défaut: 8). */
 	concurrency?: number;

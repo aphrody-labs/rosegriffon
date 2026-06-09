@@ -31,7 +31,7 @@ async function syncPatchNotes() {
 	}
 
 	const pool = new pg.Pool({ connectionString: dbUrl });
-	const jsonPath = "/home/ubuntu/data/translations/patch-notes-fr.json";
+	const jsonPath = "/home/ubuntu/niers/data/translations/patch-notes-fr.json";
 	
 	console.log(`📖 Reading patch notes from: ${jsonPath}`);
 	try {

@@ -18,7 +18,7 @@ public class MevbinDocumentTests
     private static readonly string[] SampleDirs =
     {
         "/tmp/s/mevbin/data/common/chr",
-        "/home/ubuntu/data/common/chr",
+        "/home/ubuntu/niers/data/common/chr",
     };
 
     private static string? FindSample()

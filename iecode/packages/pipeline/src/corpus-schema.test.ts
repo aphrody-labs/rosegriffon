@@ -1,6 +1,6 @@
 /**
  * Conformité « schémas alignés sur la vraie donnée » : exporte le corpus RÉEL via inagle
- * (`DATA_PATH`, défaut `/home/ubuntu/data`) puis valide CHAQUE entrée de chaque domaine couvert
+ * (`DATA_PATH`, défaut `/home/ubuntu/niers/data`) puis valide CHAQUE entrée de chaque domaine couvert
  * contre son schéma Valibot. Toute dérive de structure casse ce test (skip si la donnée est absente).
  */
 import { existsSync } from "node:fs";
@@ -11,7 +11,7 @@ import * as v from "valibot";
 import { exportCorpus } from "./corpus.ts";
 import { CORPUS_SCHEMAS, hasCorpusSchema, type CorpusDomain } from "./corpus-schema.ts";
 
-const DATA = process.env["DATA_PATH"] ?? "/home/ubuntu/data";
+const DATA = process.env["DATA_PATH"] ?? "/home/ubuntu/niers/data";
 const hasData = existsSync(DATA);
 const OUT = join(import.meta.dir, "..", ".test-corpus-schema");
 

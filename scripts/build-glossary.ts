@@ -139,9 +139,9 @@ export async function main() {
 	];
 
 	for (const file of binaryFiles) {
-		const jaPath = `/home/ubuntu/data/common/text/ja/${file.name}.cfg.bin.json`;
-		const enPath = `/home/ubuntu/data/common/text/en/${file.name}.cfg.bin.json`;
-		const frPath = `/home/ubuntu/data/common/text/fr/${file.name}.cfg.bin.json`;
+		const jaPath = `/home/ubuntu/niers/data/common/text/ja/${file.name}.cfg.bin.json`;
+		const enPath = `/home/ubuntu/niers/data/common/text/en/${file.name}.cfg.bin.json`;
+		const frPath = `/home/ubuntu/niers/data/common/text/fr/${file.name}.cfg.bin.json`;
 
 		const jaFile = Bun.file(jaPath);
 		const enFile = Bun.file(enPath);

@@ -9,7 +9,7 @@ namespace IECODE.Core.Tests;
 /// <summary>
 /// Tests du décodeur générique cfg.bin (<see cref="CfgBinDocument"/>).
 ///
-/// Fichiers de référence : /home/ubuntu/data/ (dump IEVR réel).
+/// Fichiers de référence : /home/ubuntu/niers/data/ (dump IEVR réel).
 /// Les tests qui dépendent de fichiers réels sont passés silencieusement si
 /// les fichiers sont absents (CI sans données jeu).
 /// </summary>
@@ -17,7 +17,7 @@ public class CfgBinGenericTests
 {
     // ── Chemins des fichiers de test ──────────────────────────────────────────
 
-    private const string DataRoot   = "/home/ubuntu/data";
+    private const string DataRoot   = "/home/ubuntu/niers/data";
     private const string EventDir   = DataRoot + "/common/gamedata/event";
     private const string MenuCfgDir = DataRoot + "/common/gamedata/menu/cfg";
 

@@ -1,13 +1,13 @@
 /**
  * Tests du parseur .objbin — port TypeScript du ObjbParser.cs C#.
- * Validés contre les vrais fichiers /home/ubuntu/data/common/gamedata/menu/obj/
+ * Validés contre les vrais fichiers /home/ubuntu/niers/data/common/gamedata/menu/obj/
  */
 
 import { expect, test, describe } from "bun:test";
 import { isObjb, ObjbParseError, parseObjb, parseObjbFile } from "./objb";
 import type { AnimationComponent, MeshVisibleComponent, PrimitiveComponent, RenderComponent, TextComponent } from "./model";
 
-const OBJ_DIR = "/home/ubuntu/data/common/gamedata/menu/obj";
+const OBJ_DIR = "/home/ubuntu/niers/data/common/gamedata/menu/obj";
 const hasFiles = await Bun.file(`${OBJ_DIR}/title00_09_version.objbin`).exists();
 
 function objFile(name: string) {

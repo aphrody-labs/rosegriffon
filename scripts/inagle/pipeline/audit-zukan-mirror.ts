@@ -1,7 +1,7 @@
 /**
  * Audit zukan_hash assignments in the SQLite MIRROR (not local pg).
  * Faithful port of audit-zukan-matches.ts criteria, reading the active mirror.
- * Writes /home/ubuntu/data/zukan-audit-mirror.json and prints AVANT/APRÈS summary.
+ * Writes /home/ubuntu/niers/data/zukan-audit-mirror.json and prints AVANT/APRÈS summary.
  *
  * Run:
  *   bun scripts/inagle/pipeline/audit-zukan-mirror.ts
@@ -16,9 +16,9 @@ import {
 	auditZukanGameToSeries as zukanGameToSeries,
 } from "@rose-griffon/inagle/zukan/audit.ts";
 
-const PARAM_EN = "/home/ubuntu/data/zukan/param_en.json";
-const PARAM_JA = "/home/ubuntu/data/zukan/param_ja.json";
-const AUDIT_OUT = "/home/ubuntu/data/zukan-audit-mirror.json";
+const PARAM_EN = "/home/ubuntu/niers/data/zukan/param_en.json";
+const PARAM_JA = "/home/ubuntu/niers/data/zukan/param_ja.json";
+const AUDIT_OUT = "/home/ubuntu/niers/data/zukan-audit-mirror.json";
 
 function mirrorPath(): string {
 	const fs = require("node:fs");

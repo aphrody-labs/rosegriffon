@@ -12,12 +12,12 @@ if (!dbUrl) {
 
 const pool = new pg.Pool({ connectionString: dbUrl });
 
-console.log("Fetching Inagle tables...");
+console.log("Fetching tables in public schema...");
 try {
     const res = await pool.query(`
         SELECT table_name 
         FROM information_schema.tables 
-        WHERE table_schema = 'public' AND table_name LIKE 'inagle_%'
+        WHERE table_schema = 'public'
         ORDER BY table_name;
     `);
     console.log("Tables found:");

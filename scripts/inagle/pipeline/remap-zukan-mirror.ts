@@ -8,8 +8,8 @@
  * auth-broken) local pg `rose_griffon`. Only zukan_hash and zukan_order are touched.
  *
  * Sources of truth:
- *   - /home/ubuntu/data/zukan/param_en.json  (5407 EN zukan entries)
- *   - /home/ubuntu/data/zukan/param_ja.json  (5407 JA zukan entries, merged by hash)
+ *   - /home/ubuntu/niers/data/zukan/param_en.json  (5407 EN zukan entries)
+ *   - /home/ubuntu/niers/data/zukan/param_ja.json  (5407 JA zukan entries, merged by hash)
  *   - /tmp/zukan_official_order.json         (order_map: zukanHash -> index)
  *
  * Run:
@@ -38,11 +38,11 @@ import KuromojiAnalyzer from "kuroshiro-analyzer-kuromoji";
 
 const DRY = process.argv.includes("--dry") || !process.argv.includes("--apply");
 
-const PARAM_EN = "/home/ubuntu/data/zukan/param_en.json";
-const PARAM_JA = "/home/ubuntu/data/zukan/param_ja.json";
+const PARAM_EN = "/home/ubuntu/niers/data/zukan/param_en.json";
+const PARAM_JA = "/home/ubuntu/niers/data/zukan/param_ja.json";
 const ORDER_PATH = "/tmp/zukan_official_order.json";
 const SUPABASE_SQL_OUT = "/tmp/zukan_remap_supabase.sql";
-const AUDIT_OUT = "/home/ubuntu/data/zukan-audit-mirror.json";
+const AUDIT_OUT = "/home/ubuntu/niers/data/zukan-audit-mirror.json";
 
 function mirrorPath(): string {
 	// newest backup
