@@ -12,6 +12,7 @@ import { createSupabaseServiceClient } from "@rose-griffon/db/service";
 import { indexZukanCharacters } from "./rag-zukan";
 import { chunkText, computeStringHash } from "./rag-utils";
 import { ingestSources, type RagSource } from "./rag-store-pg";
+import { chunkBySource, type SourceKind } from "./rag-chunkers";
 
 interface DBTweetRow {
 	id: string;
@@ -102,9 +103,9 @@ function normalizeText(text: string): string {
 }
 
 /**
- * Nettoie le contenu HTML pour en extraire le texte brut utile au RAG.
+ * Nettoie le contenu HTML pour en extraire du texte structuré sous forme de Markdown simplifié.
  */
-function cleanHtml(html: string): string {
+function cleanHtmlToMarkdown(html: string): string {
 	const $ = cheerio.load(html);
 
 	// Supprimer les éléments inutiles (scripts, styles, navigation, pied de page)
@@ -119,12 +120,43 @@ function cleanHtml(html: string): string {
 	// Remplacer les <br> par des sauts de ligne
 	contentArea.find("br").replaceWith("\n");
 
-	// Ajouter des sauts de ligne autour des éléments de bloc pour préserver la structure
-	contentArea.find("p, div, li, h1, h2, h3, h4, h5, h6, tr, section, article").each((_, elem) => {
+	// Convertir les titres en Markdown
+	for (let i = 1; i <= 6; i++) {
+		contentArea.find(`h${i}`).each((_, elem) => {
+			const text = $(elem).text().trim();
+			if (text) {
+				$(elem).replaceWith(`\n\n${"#".repeat(i)} ${text}\n\n`);
+			}
+		});
+	}
+
+	// Convertir les listes
+	contentArea.find("li").each((_, elem) => {
+		const text = $(elem).text().trim();
+		if (text) {
+			$(elem).replaceWith(`\n- ${text}\n`);
+		}
+	});
+
+	// Convertir les gras / emphasis
+	contentArea.find("strong, b").each((_, elem) => {
+		const text = $(elem).text().trim();
+		if (text) {
+			$(elem).replaceWith(` **${text}** `);
+		}
+	});
+	contentArea.find("em, i").each((_, elem) => {
+		const text = $(elem).text().trim();
+		if (text) {
+			$(elem).replaceWith(` *${text}* `);
+		}
+	});
+
+	// Ajouter des sauts de ligne pour les autres blocs afin de préserver la structure
+	contentArea.find("p, div, tr, section, article").each((_, elem) => {
 		$(elem).before("\n").after("\n");
 	});
 
-	// Extraire le texte propre normalisé
 	return normalizeText(contentArea.text());
 }
 
@@ -441,21 +473,9 @@ export async function runRagSync(): Promise<{
 				let cleanText = "";
 				if (item.type === "doc") {
 					const { content } = parseFrontmatter(fileContent);
-					const rawMarkdownText = Bun.markdown.render(content, {
-						heading: (children: string) => "\n\n" + children + "\n\n",
-						paragraph: (children: string) => "\n\n" + children + "\n\n",
-						strong: (children: string) => children,
-						emphasis: (children: string) => children,
-						link: (children: string) => children,
-						image: () => "",
-						code: (children: string) => "\n\n" + children + "\n\n",
-						codespan: (children: string) => children,
-						list: (children: string) => "\n\n" + children + "\n\n",
-						listItem: (children: string) => "- " + children + "\n",
-					});
-					cleanText = normalizeText(rawMarkdownText);
+					cleanText = content;
 				} else {
-					cleanText = cleanHtml(fileContent);
+					cleanText = cleanHtmlToMarkdown(fileContent);
 				}
 
 				if (cleanText.length < 50) {
@@ -484,12 +504,13 @@ export async function runRagSync(): Promise<{
 				await vectorStore.deleteDocuments("inazuma-news", idsToDelete);
 
 				// Découper le texte nettoyé en chunks
-				const textChunks = chunkText(cleanText, 800, 150);
+				const kind: SourceKind = item.type === "doc" ? "doc" : "web";
+				const textChunks = chunkBySource(kind, cleanText);
 				console.log(`[RAG Sync] -> Découpé en ${textChunks.length} chunks.`);
 
 				for (let i = 0; i < textChunks.length; i++) {
-					const chunkTextContent = textChunks[i] || "";
-					const formattedChunkText = `Titre: ${item.title}\nDate: ${item.date}\nLangue: ${item.metadata.language || "unknown"}\nType: ${item.type} [Partie ${i + 1}/${textChunks.length}]\nContenu:\n${chunkTextContent}`;
+					const chunk = textChunks[i]!;
+					const formattedChunkText = `Titre: ${item.title}\nDate: ${item.date}\nLangue: ${item.metadata.language || "unknown"}\nType: ${item.type} [Partie ${i + 1}/${textChunks.length}]\nContenu:\n${chunk.content}`;
 
 					// Génération de l'embedding pour le chunk
 					const embedding = await getEmbedding(formattedChunkText);
@@ -506,6 +527,7 @@ export async function runRagSync(): Promise<{
 							type: item.type,
 							chunkIndex: i,
 							totalChunks: textChunks.length,
+							symbol: chunk.symbol ?? null,
 							...item.metadata,
 						},
 					});

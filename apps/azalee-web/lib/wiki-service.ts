@@ -2503,7 +2503,6 @@ export const wikiService = {
 			(a, b) => (a.main_value ?? 0) - (b.main_value ?? 0)
 		);
 
-		// Repli miroir Supabase : image_url éventuelle (le JSON nie-data n'en porte pas).
 		let imageUrl: string | null = null;
 		try {
 			const supabase = await createClient();
@@ -2512,11 +2511,11 @@ export const wikiService = {
 				.select("image_url")
 				.eq("id", inst.passive_id)
 				.maybeSingle();
-			imageUrl = (row as { image_url?: string | null } | null)?.image_url
-				? resolveAssetUrl((row as { image_url: string }).image_url)
-				: null;
+			if (row?.image_url) {
+				imageUrl = resolveAssetUrl(row.image_url);
+			}
 		} catch {
-			imageUrl = null;
+			// keep null
 		}
 
 		return {

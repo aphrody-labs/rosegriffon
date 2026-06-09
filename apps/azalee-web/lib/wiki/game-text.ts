@@ -19,8 +19,6 @@ import {
 	getText,
 	getTextLocale,
 	getTexts,
-	listCategory,
-	searchText,
 } from "@/lib/game-text/index";
 import type { GameTextLocale, GameTextLocalized } from "@/lib/game-text/shared";
 import { type ChrModelNames, resolveModelName } from "@/lib/wiki/game-text-shared";
