@@ -121,7 +121,12 @@ export async function crawlTwitter(): Promise<{
 		for (const screenName of screenNames) {
 			console.log(`[Crawl Twitter] Résolution du profil @${screenName}...`);
 			try {
-				const user = await client.userByScreenName(screenName);
+				const user = await Promise.race([
+					client.userByScreenName(screenName),
+					new Promise<any>((_, rej) =>
+						setTimeout(() => rej(new Error("userByScreenName() timeout")), 20000)
+					),
+				]);
 				if (!user.id) {
 					console.warn(`[Crawl Twitter] Impossible de résoudre l'ID de @${screenName}`);
 					hasErrors = true;

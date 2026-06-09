@@ -95,7 +95,7 @@ _Daemon de planification, crawling et RAG (VPS simple process)_
     - ✅ **warm** (`api.ts`) : Chauffage régulier du cache ISR Next.js des applications.
   - ✅ Rotation automatique de proxies pour contourner les limitations d'API et anti-bots (X/Level-5) avec repli résilient.
   - ✅ Amélioration du chunking sémantique des documents pour le RAG.
-  - ⏳ Sources additionnelles pour le crawling (Reddit, Discord).
+  - ✅ Sources additionnelles pour le crawling (Reddit, Discord).
 
 ### 🎨 @rose-griffon/ui
 

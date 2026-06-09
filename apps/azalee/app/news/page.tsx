@@ -115,6 +115,9 @@ export default async function NewsFeedPage({
 				// eslint-disable-next-line @typescript-eslint/no-explicit-any
 				const { data, count, error } = (await query) as any;
 				if (error) {
+					if ((error as { code?: string }).code === "PGRST103") {
+						return { items: [] as FeedItem[], total: 0 };
+					}
 					console.error("Error fetching articles:", error);
 					return { items: [] as FeedItem[], total: 0 };
 				}
@@ -151,6 +154,9 @@ export default async function NewsFeedPage({
 					.order("created_at", { ascending: false })
 					.range(articleRangeStart, articleRangeEnd)) as any;
 				if (error) {
+					if ((error as { code?: string }).code === "PGRST103") {
+						return { items: [] as FeedItem[], total: 0 };
+					}
 					console.error("Error fetching tweets:", error);
 					return { items: [] as FeedItem[], total: 0 };
 				}

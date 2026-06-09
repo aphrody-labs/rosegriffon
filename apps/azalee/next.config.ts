@@ -168,6 +168,16 @@ const nextConfig: NextConfig = {
 				permanent: true,
 				source: "/random-team",
 			},
+			{
+				destination: "/menu/100_mainmenu",
+				permanent: true,
+				source: "/menu",
+			},
+			{
+				destination: "/news",
+				permanent: true,
+				source: "/news/tweet",
+			},
 		];
 	},
 
@@ -207,7 +217,7 @@ const nextConfig: NextConfig = {
 			`img-src 'self' blob: data:${cdnSrc} ${ASSET_CDN_ORIGIN} https://dxi4wb638ujep.cloudfront.net https://*.inazuma.jp https://*.supabase.co https://lh3.googleusercontent.com https://cdn.discordapp.com https://pbs.twimg.com`,
 			`media-src 'self' blob: data:${cdnSrc} ${ASSET_CDN_ORIGIN} https://dxi4wb638ujep.cloudfront.net https://*.inazuma.jp https://video.twimg.com https://pbs.twimg.com`,
 			`font-src 'self'${cdnSrc} ${ASSET_CDN_ORIGIN}`,
-			`connect-src 'self'${cdnSrc} ${ASSET_CDN_ORIGIN} https://www.google-analytics.com https://www.googletagmanager.com https://*.supabase.co wss://*.supabase.co`,
+			`connect-src 'self' blob:${cdnSrc} ${ASSET_CDN_ORIGIN} https://www.google-analytics.com https://www.googletagmanager.com https://*.supabase.co wss://*.supabase.co`,
 			"frame-src 'none'",
 			"frame-ancestors 'none'",
 			"base-uri 'self'",
