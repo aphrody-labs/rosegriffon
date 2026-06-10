@@ -12,13 +12,21 @@ import {
 	getCrossStatus,
 	getCrossTables,
 } from "@/lib/cross/data";
-import { searchCatalog, getCatalogTypes } from "@/lib/cross/catalog";
+import { searchCatalog, getCatalogTypes, getAsset } from "@/lib/cross/catalog";
+import AssetVisualizer from "./AssetVisualizer";
+import audioJson from "@/data/cross/audio-manifest.json";
 
 export const metadata: Metadata = {
 	alternates: { canonical: "/cross/donnees" },
 	description:
-		"Modèle de données d'Inazuma Eleven Cross extrait par rétro-ingénierie statique du jeu (Unity IL2CPP) : 153 tables masterdata typées, 214 énumérations, catalogue d'assets. Les valeurs de jeu restent côté serveur.",
+		"Modèle de données d'Inazuma Eleven Cross extrait par rétro-ingénierie statique du jeu (Unity IL2CPP) : 153 tables masterdata typées, 214 énumérations, catalogue d'assets, voix décodées. Les valeurs de jeu restent côté serveur.",
 	title: "Données extraites | Inazuma Eleven Cross - Azalée",
+};
+
+const CHARACTER_NAMES: Record<string, string> = {
+	c00001001: "Yo Shiosawa (Protagoniste)",
+	c00003001: "Mark Evans (Mamoru Endou)",
+	c00003021: "Jude Sharp (Yuuto Kidou)",
 };
 
 function StatTile({ icon, value, label }: { icon: React.ReactNode; value: string; label: string }) {
@@ -41,6 +49,10 @@ export default async function CrossDataPage({
 	const tab = typeof sp.tab === "string" ? sp.tab : "tables";
 	const page = typeof sp.page === "string" ? Math.max(1, parseInt(sp.page) || 1) : 1;
 	const assetType = typeof sp.type === "string" ? sp.type : "";
+	const selectedChar = typeof sp.char === "string" && (audioJson.characters as any)[sp.char] ? sp.char : "c00001001";
+	
+	const selectedAssetGuid = typeof sp.asset === "string" ? sp.asset : "";
+	const selectedAsset = selectedAssetGuid ? getAsset(selectedAssetGuid) : null;
 
 	const status = getCrossStatus();
 	const counts = getCrossDataCounts();
@@ -56,6 +68,12 @@ export default async function CrossDataPage({
 	const { assets, total: totalAssets } = searchCatalog(q, assetType, limit, offset);
 	const assetTypes = getCatalogTypes();
 	const totalPages = Math.ceil(totalAssets / limit);
+
+	// Charger les voix audio
+	const characterLines: string[] = (audioJson.characters as any)[selectedChar] || [];
+	const filteredLines = q
+		? characterLines.filter((line) => line.toLowerCase().includes(q.toLowerCase()))
+		: characterLines;
 
 	return (
 		<div className="w-full space-y-8">
@@ -75,7 +93,7 @@ export default async function CrossDataPage({
 				</h1>
 				<p className="text-sm text-on-surface-variant mt-2 max-w-2xl">
 					Modèle de données reconstitué par rétro-ingénierie statique du jeu (jeu mobile distinct de
-					Victory Road). Schéma, types, énumérations et catalogue d'assets sont réels ; les <strong>valeurs</strong> de jeu
+					Victory Road). Schéma, types, énumérations, catalogue d'assets et voix audio sont réels ; les <strong>valeurs</strong> de jeu
 					(stats des joueurs, hissatsu…) sont servies par le serveur du jeu et ne sont pas encore
 					récupérées.
 				</p>
@@ -99,7 +117,7 @@ export default async function CrossDataPage({
 					<span className="font-semibold text-on-surface">Valeurs en attente.</span> Les lignes de
 					données (stats chiffrées) transitent par le serveur du jeu protégé par anti-triche — leur
 					récupération nécessite une capture runtime. Cette page ne montre donc que le{" "}
-					<strong>modèle</strong> et le <strong>catalogue d'assets</strong>, jamais de valeur inventée. Localisation du jeu : {status.localization_langs.join(" / ")}.
+					<strong>modèle</strong>, le <strong>catalogue</strong> et les **voix décodées**, jamais de valeur inventée. Localisation du jeu : {status.localization_langs.join(" / ")}.
 				</p>
 			</div>
 
@@ -135,11 +153,22 @@ export default async function CrossDataPage({
 				>
 					Catalogue d'Assets ({catalogObjects.toLocaleString("fr-FR")})
 				</Link>
+				<Link
+					href={`/cross/donnees?tab=audio${q ? `&q=${q}` : ""}`}
+					className={`pb-3 border-b-2 transition-colors ${
+						tab === "audio"
+							? "text-[#00aeef] border-[#00aeef]"
+							: "text-on-surface-variant/70 border-transparent hover:text-on-surface"
+					}`}
+				>
+					Voix & Audios ({audioJson.total_wav})
+				</Link>
 			</div>
 
 			{/* Recherche */}
 			<form className="flex flex-col sm:flex-row gap-2" action="/cross/donnees">
 				<input type="hidden" name="tab" value={tab} />
+				{tab === "audio" && <input type="hidden" name="char" value={selectedChar} />}
 				<input
 					type="search"
 					name="q"
@@ -147,6 +176,8 @@ export default async function CrossDataPage({
 					placeholder={
 						tab === "assets"
 							? "Rechercher par adresse (key) ou nom de bundle…"
+							: tab === "audio"
+							? "Rechercher par action de clip audio…"
 							: "Filtrer tables et énumérations…"
 					}
 					className="flex-1 rounded-full bg-surface-container px-4 py-2.5 text-sm text-on-surface border border-outline-variant focus:outline-none focus:ring-2"
@@ -278,78 +309,179 @@ export default async function CrossDataPage({
 							Aucun asset ne correspond à votre recherche.
 						</div>
 					) : (
-						<>
-							<div className="overflow-x-auto rounded-2xl border border-outline-variant/50 bg-surface-container-low">
-								<table className="w-full text-left border-collapse text-sm">
-									<thead>
-										<tr className="border-b border-outline-variant bg-surface-container text-on-surface-variant font-semibold">
-											<th className="px-4 py-3">Adresse (Key)</th>
-											<th className="px-4 py-3 w-44">Type</th>
-											<th className="px-4 py-3 w-64">Physical Bundle</th>
-											<th className="px-4 py-3 w-32 text-right">Taille</th>
-											<th className="px-4 py-3 w-24 text-center">Déps</th>
-										</tr>
-									</thead>
-									<tbody className="divide-y divide-outline-variant/30 text-on-surface">
-										{assets.map((asset) => (
-											<tr key={asset.guid} className="hover:bg-surface-container/30 transition-colors">
-												<td className="px-4 py-3 font-mono text-xs break-all" title={`GUID: ${asset.guid}`}>
-													{asset.key}
-												</td>
-												<td className="px-4 py-3">
-													<span className="rounded-full bg-secondary-container text-on-secondary-container px-2 py-0.5 text-xs font-semibold">
-														{asset.type}
-													</span>
-												</td>
-												<td className="px-4 py-3 font-mono text-xs break-all text-on-surface-variant">
-													{asset.bundle}
-												</td>
-												<td className="px-4 py-3 text-right text-xs">
-													{asset.size > 0 ? (asset.size / (1024 * 1024)).toFixed(2) + " Mo" : "—"}
-												</td>
-												<td className="px-4 py-3 text-center text-xs text-on-surface-variant">
-													{asset.n_deps}
-												</td>
+						<div className={`grid grid-cols-1 ${selectedAsset ? "lg:grid-cols-[1fr_400px]" : ""} gap-6 items-start`}>
+							<div className="space-y-4">
+								<div className="overflow-x-auto rounded-2xl border border-outline-variant/50 bg-surface-container-low">
+									<table className="w-full text-left border-collapse text-sm">
+										<thead>
+											<tr className="border-b border-outline-variant bg-surface-container text-on-surface-variant font-semibold">
+												<th className="px-4 py-3">Adresse (Key)</th>
+												<th className="px-4 py-3 w-40">Type</th>
+												<th className="px-4 py-3 w-56">Physical Bundle</th>
+												<th className="px-4 py-3 w-28 text-right">Taille</th>
+												<th className="px-4 py-3 w-20 text-center">Déps</th>
 											</tr>
-										))}
-									</tbody>
-								</table>
+										</thead>
+										<tbody className="divide-y divide-outline-variant/30 text-on-surface">
+											{assets.map((asset) => {
+												const active = asset.guid === selectedAssetGuid;
+												return (
+													<tr 
+														key={asset.guid} 
+														className={`transition-colors hover:bg-surface-container/30 ${
+															active ? "bg-surface-container-high/80 font-semibold border-l-4 border-l-[#00aeef]" : ""
+														}`}
+													>
+														<td className="px-4 py-3 font-mono text-xs break-all" title={`GUID: ${asset.guid}`}>
+															<Link
+																href={`/cross/donnees?tab=assets&page=${page}&q=${q}${assetType ? `&type=${assetType}` : ""}&asset=${asset.guid}`}
+																className={`hover:underline block w-full text-left ${active ? "text-[#00aeef] font-bold" : ""}`}
+															>
+																{asset.key}
+															</Link>
+														</td>
+														<td className="px-4 py-3">
+															<span className="rounded-full bg-secondary-container text-on-secondary-container px-2 py-0.5 text-xs font-semibold">
+																{asset.type}
+															</span>
+														</td>
+														<td className="px-4 py-3 font-mono text-xs break-all text-on-surface-variant/80">
+															{asset.bundle.length > 25 ? `${asset.bundle.substring(0, 12)}...${asset.bundle.substring(asset.bundle.length - 10)}` : asset.bundle}
+														</td>
+														<td className="px-4 py-3 text-right text-xs">
+															{asset.size > 0 ? (asset.size / (1024 * 1024)).toFixed(2) + " Mo" : "—"}
+														</td>
+														<td className="px-4 py-3 text-center text-xs text-on-surface-variant">
+															{asset.n_deps}
+														</td>
+													</tr>
+												);
+											})}
+										</tbody>
+									</table>
+								</div>
+
+								{/* Pagination */}
+								{totalPages > 1 && (
+									<div className="flex items-center justify-between py-4">
+										<div className="text-xs text-on-surface-variant">
+											Page <span className="font-semibold text-on-surface">{page}</span> sur{" "}
+											<span className="font-semibold text-on-surface">{totalPages}</span>
+										</div>
+										<div className="flex gap-2">
+											<Link
+												href={`/cross/donnees?tab=assets&page=${page - 1}${q ? `&q=${q}` : ""}${assetType ? `&type=${assetType}` : ""}${selectedAssetGuid ? `&asset=${selectedAssetGuid}` : ""}`}
+												className={`rounded-full px-4 py-2 text-xs font-bold transition-all border ${
+													page > 1
+														? "bg-surface-container hover:bg-surface-container-high border-outline-variant text-on-surface"
+														: "bg-surface-container/50 border-transparent text-on-surface-variant/40 pointer-events-none"
+												}`}
+											>
+												Précédent
+											</Link>
+											<Link
+												href={`/cross/donnees?tab=assets&page=${page + 1}${q ? `&q=${q}` : ""}${assetType ? `&type=${assetType}` : ""}${selectedAssetGuid ? `&asset=${selectedAssetGuid}` : ""}`}
+												className={`rounded-full px-4 py-2 text-xs font-bold transition-all border ${
+													page < totalPages
+														? "bg-surface-container hover:bg-surface-container-high border-outline-variant text-on-surface"
+														: "bg-surface-container/50 border-transparent text-on-surface-variant/40 pointer-events-none"
+												}`}
+											>
+												Suivant
+											</Link>
+										</div>
+									</div>
+								)}
 							</div>
 
-							{/* Pagination */}
-							{totalPages > 1 && (
-								<div className="flex items-center justify-between py-4">
-									<div className="text-xs text-on-surface-variant">
-										Page <span className="font-semibold text-on-surface">{page}</span> sur{" "}
-										<span className="font-semibold text-on-surface">{totalPages}</span>
-									</div>
-									<div className="flex gap-2">
-										<Link
-											href={`/cross/donnees?tab=assets&page=${page - 1}${q ? `&q=${q}` : ""}${assetType ? `&type=${assetType}` : ""}`}
-											className={`rounded-full px-4 py-2 text-xs font-bold transition-all border ${
-												page > 1
-													? "bg-surface-container hover:bg-surface-container-high border-outline-variant text-on-surface"
-													: "bg-surface-container/50 border-transparent text-on-surface-variant/40 pointer-events-none"
-											}`}
-										>
-											Précédent
-										</Link>
-										<Link
-											href={`/cross/donnees?tab=assets&page=${page + 1}${q ? `&q=${q}` : ""}${assetType ? `&type=${assetType}` : ""}`}
-											className={`rounded-full px-4 py-2 text-xs font-bold transition-all border ${
-												page < totalPages
-													? "bg-surface-container hover:bg-surface-container-high border-outline-variant text-on-surface"
-													: "bg-surface-container/50 border-transparent text-on-surface-variant/40 pointer-events-none"
-											}`}
-										>
-											Suivant
-										</Link>
-									</div>
+							{selectedAsset && (
+								<div className="w-full lg:sticky lg:top-4 z-10">
+									<AssetVisualizer asset={selectedAsset} />
 								</div>
 							)}
-						</>
+						</div>
 					)}
 				</section>
+			)}
+
+			{/* Voix & Audios */}
+			{tab === "audio" && (
+				<div className="grid grid-cols-1 md:grid-cols-[280px_1fr] gap-6">
+					{/* Sélecteur de personnage */}
+					<div className="space-y-3">
+						<h3 className="text-sm font-bold uppercase tracking-wider text-on-surface-variant/70">
+							Personnages ({Object.keys(audioJson.characters).length})
+						</h3>
+						<div className="flex flex-col gap-2">
+							{Object.keys(audioJson.characters).map((charId) => {
+								const active = selectedChar === charId;
+								const name = CHARACTER_NAMES[charId] || charId;
+								const count = (audioJson.characters as any)[charId].length;
+								return (
+									<Link
+										key={charId}
+										href={`/cross/donnees?tab=audio&char=${charId}${q ? `&q=${q}` : ""}`}
+										className={`flex items-center justify-between rounded-xl px-4 py-3 border text-sm font-semibold transition-all ${
+											active
+												? "bg-[#00aeef] text-white border-[#00aeef] shadow-sm"
+												: "bg-surface-container hover:bg-surface-container-high border-outline-variant/30 text-on-surface"
+										}`}
+									>
+										<span>{name}</span>
+										<span className={`text-xs rounded-full px-2 py-0.5 ${active ? "bg-white/25 text-white" : "bg-surface-container-highest text-on-surface-variant"}`}>
+											{count} clips
+										</span>
+									</Link>
+								);
+							})}
+						</div>
+					</div>
+
+					{/* Liste des clips audio */}
+					<div className="space-y-4">
+						<div className="flex items-center justify-between">
+							<h3 className="text-lg font-black text-on-surface">
+								Clips audio pour {CHARACTER_NAMES[selectedChar] || selectedChar}
+								{q && (
+									<span className="text-on-surface-variant font-normal ml-2">
+										({filteredLines.length} trouvés)
+									</span>
+								)}
+							</h3>
+						</div>
+
+						{filteredLines.length === 0 ? (
+							<div className="rounded-2xl bg-surface-container p-8 text-center border border-outline-variant/30 text-on-surface-variant">
+								Aucun clip audio ne correspond à votre recherche.
+							</div>
+						) : (
+							<div className="grid grid-cols-1 gap-3">
+								{filteredLines.map((line) => {
+									const fileName = `${selectedChar}_${line}.wav`;
+									const audioUrl = `/inazuma-cross/audio/${fileName}`;
+									// Nettoyer le nom de la ligne (enlever le préfixe numérique et remplacer les points-virgules)
+									const cleanLabel = line.replace(/^\d+_c\d+_(.+)$/, "$1").replace(/_/g, " ").replace(/;/g, " /");
+									return (
+										<div
+											key={line}
+											className="rounded-2xl bg-surface-container p-4 border border-outline-variant/50 flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+										>
+											<div className="space-y-1">
+												<div className="font-bold text-on-surface text-sm capitalize">{cleanLabel}</div>
+												<div className="font-mono text-[10px] text-on-surface-variant/75 truncate max-w-lg" title={fileName}>
+													{fileName}
+												</div>
+											</div>
+											<div className="shrink-0 flex items-center gap-2">
+												<audio src={audioUrl} controls className="h-9 max-w-[240px] sm:max-w-none" />
+											</div>
+										</div>
+									);
+								})}
+							</div>
+						)}
+					</div>
+				</div>
 			)}
 		</div>
 	);
