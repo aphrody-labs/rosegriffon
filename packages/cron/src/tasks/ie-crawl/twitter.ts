@@ -118,21 +118,62 @@ export async function crawlTwitter(): Promise<{
 		const client = new XClient(session);
 		const supabase = createSupabaseServiceClient();
 
-		for (const screenName of screenNames) {
-			console.log(`[Crawl Twitter] Résolution du profil @${screenName}...`);
-			try {
-				const user = await Promise.race([
-					client.userByScreenName(screenName),
-					new Promise<any>((_, rej) =>
-						setTimeout(() => rej(new Error("userByScreenName() timeout")), 20000)
-					),
-				]);
-				if (!user.id) {
-					console.warn(`[Crawl Twitter] Impossible de résoudre l'ID de @${screenName}`);
-					hasErrors = true;
-					continue;
+		// Charger le cache d'IDs depuis la DB pour éviter les requêtes API userByScreenName inutiles
+		const usernameToUserMap = new Map<string, { id: string; name: string }>();
+		try {
+			const { data: existingTweets } = await supabase
+				.from("tweets")
+				.select("author_id, author_name, author_username");
+			if (existingTweets) {
+				for (const t of existingTweets) {
+					if (t.author_username && t.author_id) {
+						usernameToUserMap.set(t.author_username.toLowerCase(), {
+							id: t.author_id,
+							name: t.author_name || t.author_username,
+						});
+					}
 				}
-				console.log(`[Crawl Twitter] ID résolu pour @${screenName} : ${user.id} (${user.name})`);
+			}
+			console.log(`[Crawl Twitter] Cache d'IDs chargé depuis la DB (${usernameToUserMap.size} profils trouvés).`);
+		} catch (dbErr) {
+			console.warn("[Crawl Twitter] Impossible de charger le cache d'IDs depuis la DB:", dbErr);
+		}
+
+		for (const screenName of screenNames) {
+			try {
+				let user = usernameToUserMap.get(screenName.toLowerCase());
+			if (!user) {
+				console.log(`[Crawl Twitter] Résolution du profil @${screenName} via API X...`);
+				try {
+					const apiUser = await Promise.race([
+						client.userByScreenName(screenName),
+						new Promise<any>((_, rej) =>
+							setTimeout(() => rej(new Error("userByScreenName() timeout")), 20000)
+						),
+					]);
+					if (apiUser && apiUser.id) {
+						user = {
+							id: apiUser.id,
+							name: apiUser.name || screenName,
+						};
+						usernameToUserMap.set(screenName.toLowerCase(), user);
+						console.log(`[Crawl Twitter] ID résolu pour @${screenName} via API X : ${user.id} (${user.name})`);
+					}
+				} catch (profileErr) {
+					console.error(
+						`[Crawl Twitter] Erreur lors de la résolution de @${screenName} via API X :`,
+						profileErr
+					);
+				}
+			} else {
+				console.log(`[Crawl Twitter] Profil @${screenName} résolu via le cache DB : ${user.id} (${user.name})`);
+			}
+
+			if (!user) {
+				console.warn(`[Crawl Twitter] Impossible de résoudre l'ID de @${screenName}`);
+				hasErrors = true;
+				continue;
+			}
 
 				console.log(`[Crawl Twitter] Crawl historique complet de @${screenName}...`);
 				// rg cron + bxc x : MAX plus élevé pour AkihiroHino (CEO Level-5, tweets clés pour Azalée wiki + RAG).

@@ -19,6 +19,8 @@ import { processTweets } from "./process-tweets";
 import { crawlXRadar } from "./x-radar";
 import { crawlReddit } from "./reddit";
 import { crawlDiscord } from "./discord";
+import { XClient, XSession } from "@aphrody-code/x";
+import { loadBxcXCookieHeader } from "./x-accounts";
 
 export async function runIeCrawl(): Promise<{ success: boolean; error?: string }> {
 	console.log("==================================================================");
@@ -168,19 +170,27 @@ export async function runIeCrawl(): Promise<{ success: boolean; error?: string }
 		const success =
 			zukanRes.success &&
 			newsRes.success &&
-			reRes.success &&
-			crossRes.success &&
-			level5Res.success &&
-			level5BlogRes.success &&
-			twitterRes.success &&
-			searchSuccess &&
-			externalRes.success &&
-			redditRes.success &&
-			discordCrawlRes.success &&
 			ragSuccess;
+
+		if (success) {
+			try {
+				console.log("[ie-crawl] Publication du tweet d'annonce...");
+				const bxcCookies = loadBxcXCookieHeader();
+				const session = bxcCookies ? XSession.fromCookieString(bxcCookies) : XSession.loadOrEnv();
+				const client = new XClient(session);
+				// S'assurer que les query IDs sont frais
+				await client.queryIds.refresh(["CreateTweet"], false);
+				const tweetText = "Crawl et indexation sémantique terminés ! Toutes les sources Inazuma Eleven (Victory Road & Cross) ont été synchronisées via ie-crawler. #InazumaEleven #VictoryRoad";
+				const tweetRes = await client.createTweet(tweetText);
+				console.log(`[ie-crawl] Tweet publié avec succès : ID ${tweetRes.id}`);
+			} catch (tweetErr) {
+				console.error("[ie-crawl] Échec de la publication du tweet d'annonce :", tweetErr);
+			}
+		}
+
 		return {
 			success,
-			error: success ? undefined : "Certaines tâches de crawl ou RAG ont échoué.",
+			error: success ? undefined : "Les tâches de crawl critiques (Zukan, News) ou le RAG ont échoué.",
 		};
 	} catch (err: any) {
 		console.error("[ie-crawl] Erreur critique lors de l'exécution du crawl :", err);

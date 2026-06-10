@@ -1,0 +1,20 @@
+{
+	"name": "@rose-griffon/inagle-cross",
+	"version": "0.1.0",
+	"description": "API de données et de rétro-conception pour Inazuma Eleven Cross — types, schémas, et analyseurs d'assets",
+	"type": "module",
+	"main": "./src/index.ts",
+	"exports": {
+		".": "./src/index.ts"
+	},
+	"scripts": {
+		"type-check": "tsc --noEmit"
+	},
+	"dependencies": {
+		"zod": "catalog:"
+	},
+	"devDependencies": {
+		"@types/node": "catalog:",
+		"typescript": "catalog:"
+	}
+}
