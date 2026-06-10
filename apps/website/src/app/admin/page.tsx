@@ -77,18 +77,18 @@ export default async function AdminDashboardPage() {
 		upcomingEventsCountRes,
 		activeSessionsRes,
 		patreonLinkedRes,
-		recentUsersRes,
+		recentUsersRaw,
 		recentArticlesRes,
 		upcomingEventsListRes,
 		signupsTimelineRes,
 	] = await Promise.all([
 		supabase.from("profiles").select("*", { count: "exact", head: true }),
 		supabase
-			.from("profiles")
+			.from("user")
 			.select("*", { count: "exact", head: true })
 			.gt("created_at", oneDayAgo.toISOString()),
 		supabase
-			.from("profiles")
+			.from("user")
 			.select("*", { count: "exact", head: true })
 			.gt("created_at", sevenDaysAgo.toISOString()),
 		supabase.from("articles").select("*", { count: "exact", head: true }).eq("status", "published"),
@@ -104,8 +104,8 @@ export default async function AdminDashboardPage() {
 			.select("user_id", { count: "exact", head: true })
 			.eq("provider_id", "patreon"),
 		supabase
-			.from("profiles")
-			.select("id, username, full_name, avatar_url, created_at, role")
+			.from("user")
+			.select("id, created_at")
 			.order("created_at", { ascending: false })
 			.limit(5),
 		supabase
@@ -120,7 +120,7 @@ export default async function AdminDashboardPage() {
 			.order("start_time", { ascending: true })
 			.limit(5),
 		supabase
-			.from("profiles")
+			.from("user")
 			.select("created_at")
 			.gte("created_at", thirtyDaysAgo.toISOString())
 			.order("created_at", { ascending: true }),
@@ -136,6 +136,26 @@ export default async function AdminDashboardPage() {
 	const activeSessions = activeSessionsRes.count ?? 0;
 	const patreonLinked = patreonLinkedRes.count ?? 0;
 	const signupsTimeline = buildDailySignups(signupsTimelineRes.data ?? []);
+
+	const recentUserIds = (recentUsersRaw.data ?? []).map((u) => u.id);
+	const profilesRes = recentUserIds.length > 0
+		? await supabase
+				.from("profiles")
+				.select("id, username, full_name, avatar_url, role")
+				.in("id", recentUserIds)
+		: { data: [] };
+
+	const recentUsers = (recentUsersRaw.data ?? []).map((u) => {
+		const profile = (profilesRes.data ?? []).find((p) => p.id === u.id);
+		return {
+			avatar_url: profile?.avatar_url ?? null,
+			created_at: u.created_at,
+			full_name: profile?.full_name ?? null,
+			id: u.id,
+			role: profile?.role ?? "Utilisateur",
+			username: profile?.username ?? null,
+		};
+	});
 
 	return (
 		<div className="mx-auto max-w-7xl space-y-8 px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
@@ -224,7 +244,7 @@ export default async function AdminDashboardPage() {
 					href="/admin/users"
 					icon={UserPlus}
 					accent="bg-sky-500/10 text-sky-600"
-					items={(recentUsersRes.data ?? []).map((u) => ({
+					items={recentUsers.map((u) => ({
 						date: u.created_at || undefined,
 						id: u.id,
 						subtitle: u.role || "Utilisateur",
