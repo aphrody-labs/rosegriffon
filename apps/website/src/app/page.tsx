@@ -161,7 +161,7 @@ export default async function Home() {
 			"home_achillea_description",
 			"Le carrefour de l'esport Inazuma Eleven ! Gestion de clans, tournois, matchs classés, ranking communautaire et bot officiel."
 		),
-		getPublicSetting("home_achillea_image", "/achillea/bannière.webp"),
+		getPublicSetting("home_achillea_image", "/achillea/banniere.webp"),
 		getPublicSetting("home_achillea_link", "https://achillea.rosegriffon.fr/"),
 		getPublicSetting(
 			"home_achillea_discord",
