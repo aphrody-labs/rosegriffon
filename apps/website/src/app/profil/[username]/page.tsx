@@ -13,7 +13,50 @@ import { ProfileBanner } from "./_components/profile-banner";
 import { ProfileIdentity } from "./_components/profile-identity";
 import { ProfileQuickLinks } from "./_components/profile-quick-links";
 
+import type { Metadata } from "next";
+
 export const dynamic = "force-dynamic";
+
+export async function generateMetadata({
+	params,
+}: {
+	params: Promise<{ username: string }>;
+}): Promise<Metadata> {
+	const { username } = await params;
+	const supabase = await createClient();
+	const { data: profile } = await supabase
+		.from("profiles")
+		.select("full_name, username, avatar_url, bio")
+		.eq("username", username)
+		.single();
+
+	if (!profile) {
+		return { title: "Profil introuvable · Rose Griffon" };
+	}
+
+	const displayName = profile.full_name || profile.username || username;
+	const title = `Profil de ${displayName} · Rose Griffon`;
+	const description = profile.bio || `Découvrez le profil de ${displayName} sur Rose Griffon.`;
+	const image = profile.avatar_url || "/opengraph-image.png";
+
+	return {
+		description,
+		openGraph: {
+			description,
+			images: [{ url: image }],
+			title,
+			type: "profile",
+			url: `https://rosegriffon.fr/profil/${username}`,
+		},
+		title,
+		twitter: {
+			card: "summary",
+			description,
+			images: [image],
+			title,
+		},
+	};
+}
 
 export default async function UserProfilePage({
 	params,

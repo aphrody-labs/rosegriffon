@@ -6,12 +6,52 @@ import { notFound } from "next/navigation";
 import { ArticleSchema, BreadcrumbSchema } from "@/components/shared/StructuredData";
 import { CommentsSection } from "@/components/shared/CommentsSection";
 
+import type { Metadata } from "next";
+
 import { createClient } from "@/lib/supabase/server";
 
 import { ShareButtons } from "./components/ShareButtons";
 
 // ⚡ ISR - Revalidation toutes les 15 minutes
 export const revalidate = 900;
+
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+	const { slug } = await params;
+	const supabase = await createClient();
+	const { data: article } = await supabase
+		.from("articles")
+		.select("title, excerpt, featured_image_url")
+		.eq("slug", slug)
+		.eq("status", "published")
+		.eq("app", "website")
+		.single();
+
+	if (!article) {
+		return { title: "Article introuvable · Rose Griffon" };
+	}
+
+	const title = `${article.title} · Rose Griffon`;
+	const description = article.excerpt || "Chronique de l'association Rose Griffon";
+	const image = article.featured_image_url || "/opengraph-image.png";
+
+	return {
+		description,
+		openGraph: {
+			description,
+			images: [{ url: image }],
+			title,
+			type: "article",
+			url: `https://rosegriffon.fr/chroniques/${slug}`,
+		},
+		title,
+		twitter: {
+			card: "summary_large_image",
+			description,
+			images: [image],
+			title,
+		},
+	};
+}
 
 export default async function ChroniquePage({ params }: { params: Promise<{ slug: string }> }) {
 	const { slug } = await params;
