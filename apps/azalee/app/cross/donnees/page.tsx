@@ -21,6 +21,7 @@ import { EnumsTab } from "./EnumsTab";
 import { AssetsTab } from "./AssetsTab";
 import { AudioTab } from "./AudioTab";
 import { CharaAssetsTab } from "./CharaAssetsTab";
+import { LeaksTab } from "./LeaksTab";
 
 export const dynamic = "force-dynamic";
 
@@ -137,6 +138,8 @@ export default async function CrossDataPage({
 		searchPlaceholder = "Rechercher par action de clip audio…";
 	} else if (tab === "chara_assets") {
 		searchPlaceholder = "Rechercher par mot-clé…";
+	} else if (tab === "leaks") {
+		searchPlaceholder = "Rechercher une mécanique ou mot-clé…";
 	}
 
 	const lockIcon = (
@@ -199,6 +202,16 @@ export default async function CrossDataPage({
 					}`}
 				>
 					{dev ? `Tables Masterdata (${counts.tables})` : "Encyclopédie & Systèmes"}
+				</Link>
+				<Link
+					href={`/cross/donnees?tab=leaks${q ? `&q=${q}` : ""}${dev ? "&dev=true" : ""}`}
+					className={`pb-3 border-b-2 transition-colors ${
+						tab === "leaks"
+							? "text-[#00aeef] border-[#00aeef]"
+							: "text-on-surface-variant/70 border-transparent hover:text-on-surface"
+					}`}
+				>
+					⚡ Révélations & Leaks
 				</Link>
 				{dev && (
 					<>
@@ -324,6 +337,10 @@ export default async function CrossDataPage({
 					dev={dev}
 					q={q}
 				/>
+			)}
+
+			{tab === "leaks" && (
+				<LeaksTab dev={dev} />
 			)}
 
 			{/* Bannière Mode Développeur / Encyclopédie publique */}
