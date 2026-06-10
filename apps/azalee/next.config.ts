@@ -154,6 +154,11 @@ const nextConfig: NextConfig = {
 	async redirects() {
 		return [
 			{
+				destination: "/cross/donnees?tab=assets",
+				permanent: true,
+				source: "/cross/catalogue",
+			},
+			{
 				destination: "/dashboard/news/new",
 				permanent: true,
 				source: "/dashboard/news/edit",
