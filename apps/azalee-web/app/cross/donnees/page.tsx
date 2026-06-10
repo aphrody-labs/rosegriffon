@@ -70,7 +70,7 @@ export default async function CrossDataPage({
 	const totalPages = Math.ceil(totalAssets / limit);
 
 	// Charger les voix audio
-	const characterLines: string[] = (audioJson.characters as any)[selectedChar] || [];
+	const characterLines: string[] = ((audioJson.characters as any)[selectedChar] || []).filter((line: string) => /^\d+/.test(line));
 	const filteredLines = q
 		? characterLines.filter((line) => line.toLowerCase().includes(q.toLowerCase()))
 		: characterLines;
@@ -114,10 +114,7 @@ export default async function CrossDataPage({
 			<div className="rounded-2xl bg-error-container/40 border border-error/30 p-4 flex gap-3">
 				<Lock size={18} className="text-error shrink-0 mt-0.5" />
 				<p className="text-sm text-on-surface-variant">
-					<span className="font-semibold text-on-surface">Valeurs en attente.</span> Les lignes de
-					données (stats chiffrées) transitent par le serveur du jeu protégé par anti-triche — leur
-					récupération nécessite une capture runtime. Cette page ne montre donc que le{" "}
-					<strong>modèle</strong>, le <strong>catalogue</strong> et les **voix décodées**, jamais de valeur inventée. Localisation du jeu : {status.localization_langs.join(" / ")}.
+					<span className="font-semibold text-on-surface">Limites de l'extraction statique.</span> Les images (textures, sprites), modèles 3D (GameObjects, Meshes) et vidéos de gameplay internes font partie des 1 481 bundles distants hébergés sur le CDN de Level-5. Ce CDN et l'API de jeu sont protégés par l'anti-triche <strong>NEXON AnoSDK / Kong</strong> qui renvoie une erreur HTTP 426 sans en-tête de session dynamique. Seules les ressources locales (13 bundles de base, 24 atlas d'UI et 305 voix audio décodées) sont visualisables en clair pour le moment. Localisation du jeu : {status.localization_langs.join(" / ")}.
 				</p>
 			</div>
 

@@ -41,10 +41,10 @@ const MOCK_TRANSLATIONS: Record<string, string> = {
 
 const CHARACTER_VOICE_STUBS: Record<string, string[]> = {
 	"CriAtomAcbAsset": [
-		"c00001001_10_c00001001_Awake_0.wav",
-		"c00001001_11_c00001001_Shoot_0.wav",
-		"c00003001_12_c00003001_Keeper_0.wav",
-		"c00003021_14_c00003021_Pass_0.wav"
+		"c00001001_001_c00001001_GameStart.wav",
+		"c00001001_007_c00001001_Pass.wav",
+		"c00003001_005_c00003001_Awake.wav",
+		"c00003021_003_c00003021_GameStart.wav"
 	]
 };
 
