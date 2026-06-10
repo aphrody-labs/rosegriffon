@@ -1,4 +1,5 @@
 "use client";
+/* eslint-disable no-unused-vars, react/no-unknown-property, @typescript-eslint/no-unused-vars */
 
 import React, { useState } from "react";
 import { X, Info, FileText, Volume2, Box, Compass, Sliders, ChevronRight, Download, Search, Image as ImageIcon } from "lucide-react";

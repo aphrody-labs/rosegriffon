@@ -403,40 +403,55 @@ function collectScrapedItems(): ScrapedItem[] {
 		}
 	}
 
-	// 7. Collecter les documentations du monorepo (docs/*.md)
+	// 7. Collecter les documentations du monorepo (docs/*.md et docs/reference/*.md)
 	const docsDir = "/home/ubuntu/rg/docs";
+	const docPaths: { path: string; isReference: boolean }[] = [];
+
 	if (existsSync(docsDir)) {
-		const files = readdirSync(docsDir, { withFileTypes: true })
+		const rootFiles = readdirSync(docsDir, { withFileTypes: true })
 			.filter(
 				(dirent) =>
 					!dirent.isDirectory() && (dirent.name.endsWith(".md") || dirent.name.endsWith(".mdx"))
 			)
-			.map((dirent) => dirent.name);
+			.map((dirent) => ({ path: join(docsDir, dirent.name), isReference: false }));
+		docPaths.push(...rootFiles);
 
-		for (const file of files) {
-			if (file === "llms.txt" || file === "llms-full.txt") continue;
+		const refDir = join(docsDir, "reference");
+		if (existsSync(refDir)) {
+			const refFiles = readdirSync(refDir, { withFileTypes: true })
+				.filter(
+					(dirent) =>
+						!dirent.isDirectory() && (dirent.name.endsWith(".md") || dirent.name.endsWith(".mdx"))
+				)
+				.map((dirent) => ({ path: join(refDir, dirent.name), isReference: true }));
+			docPaths.push(...refFiles);
+		}
+	}
 
-			const filePath = join(docsDir, file);
-			try {
-				const rawContent = readFileSync(filePath, "utf-8");
-				const { data } = parseFrontmatter(rawContent);
+	for (const docInfo of docPaths) {
+		const filePath = docInfo.path;
+		const file = filePath.split("/").pop() || "";
+		if (file === "llms.txt" || file === "llms-full.txt") continue;
 
-				items.push({
-					id: `doc-${file}`,
-					type: "doc",
-					title: (data.title as string) || file,
-					url: `file:///docs/${file}`,
-					date: (data.last_updated as string) || "",
-					htmlPath: filePath,
-					metadata: {
-						id: file,
-						category: data.scope ? (data.scope as string[]).join(", ") : "Monorepo Doc",
-						language: "fr",
-					},
-				});
-			} catch (err) {
-				console.error(`[RAG Sync] Erreur de lecture de doc ${file} :`, err);
-			}
+		try {
+			const rawContent = readFileSync(filePath, "utf-8");
+			const { data } = parseFrontmatter(rawContent);
+
+			items.push({
+				id: `doc-${file}`,
+				type: "doc",
+				title: (data.title as string) || file,
+				url: docInfo.isReference ? `file:///docs/reference/${file}` : `file:///docs/${file}`,
+				date: (data.last_updated as string) || "",
+				htmlPath: filePath,
+				metadata: {
+					id: file,
+					category: data.scope ? (data.scope as string[]).join(", ") : (docInfo.isReference ? "Reference Doc" : "Monorepo Doc"),
+					language: "fr",
+				},
+			});
+		} catch (err) {
+			console.error(`[RAG Sync] Erreur de lecture de doc ${file} :`, err);
 		}
 	}
 

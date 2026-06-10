@@ -61,6 +61,7 @@
 		"@rose-griffon/better-auth-steam": "workspace:*",
 		"@rose-griffon/db": "workspace:*",
 		"@rose-griffon/inagle": "workspace:*",
+		"@rose-griffon/inagle-cross": "workspace:*",
 		"@rose-griffon/menu-render": "workspace:*",
 		"@rose-griffon/menu-render-webgpu": "workspace:*",
 		"@rose-griffon/types": "workspace:*",

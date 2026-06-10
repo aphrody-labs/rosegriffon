@@ -20,7 +20,7 @@ export function AzaleeBanner({
 	title = "AZALÉE",
 	tag = "Wiki & Actualités",
 	description = "Le pilier médiatique et l'encyclopédie de Rose Griffon. Le wiki Azalée couvre tout Inazuma Eleven: Victory Road — personnages, techniques, esprits guerriers — avec traductions exclusives, interviews et analyses.",
-	image = "/azalee-bg.webp",
+	image = "https://azalee.rosegriffon.fr/opengraph-image",
 	logo = "/RG_Azalee-logo.webp",
 	wikiLink = "https://azalee.rosegriffon.fr",
 	twitterLink = "https://x.com/Azalee_IE",

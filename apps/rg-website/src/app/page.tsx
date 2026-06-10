@@ -152,7 +152,7 @@ export default async function Home() {
 			"home_azalee_description",
 			"Le pilier médiatique de Rose Griffon. Ne ratez aucune info sur Victory Road : traductions exclusives, interviews, analyses et couverture complète de l'actualité de la licence."
 		),
-		getPublicSetting("home_azalee_image", "/azalee-bg.webp"),
+		getPublicSetting("home_azalee_image", "https://azalee.rosegriffon.fr/opengraph-image"),
 		getPublicSetting("home_azalee_logo", "/RG_Azalee-logo.webp"),
 		getPublicSetting("home_azalee_twitter", "https://x.com/Azalee_IE"),
 		getPublicSetting("home_azalee_instagram", "https://www.instagram.com/azaleefr/"),
