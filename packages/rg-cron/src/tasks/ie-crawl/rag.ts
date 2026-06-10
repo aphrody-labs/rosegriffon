@@ -440,6 +440,80 @@ function collectScrapedItems(): ScrapedItem[] {
 		}
 	}
 
+	// 8. Collecter les posts Reddit (reddit)
+	const redditRoot = "/home/ubuntu/niers/data/reddit";
+	if (existsSync(redditRoot)) {
+		const subDirs = readdirSync(redditRoot, { withFileTypes: true })
+			.filter((dirent) => dirent.isDirectory())
+			.map((dirent) => dirent.name);
+
+		for (const dir of subDirs) {
+			const dirPath = join(redditRoot, dir);
+			const metaPath = join(dirPath, "meta.json");
+			const htmlPath = join(dirPath, "index.html");
+
+			if (existsSync(metaPath) && existsSync(htmlPath)) {
+				try {
+					const meta = JSON.parse(readFileSync(metaPath, "utf-8"));
+					items.push({
+						id: `reddit-${dir}`,
+						type: "reddit" as any,
+						title: meta.title || "Post Reddit",
+						url: meta.url || "",
+						date: meta.date || "",
+						htmlPath,
+						metadata: {
+							id: dir,
+							category: "Reddit",
+							language: meta.language || "en",
+							author: meta.author || "",
+							score: meta.score || 0,
+							num_comments: meta.num_comments || 0,
+						},
+					});
+				} catch (err) {
+					console.error(`[RAG Sync] Erreur de lecture de meta pour Reddit ${dir} :`, err);
+				}
+			}
+		}
+	}
+
+	// 9. Collecter les discussions Discord (discord)
+	const discordRoot = "/home/ubuntu/niers/data/discord";
+	if (existsSync(discordRoot)) {
+		const subDirs = readdirSync(discordRoot, { withFileTypes: true })
+			.filter((dirent) => dirent.isDirectory())
+			.map((dirent) => dirent.name);
+
+		for (const dir of subDirs) {
+			const dirPath = join(discordRoot, dir);
+			const metaPath = join(dirPath, "meta.json");
+			const htmlPath = join(dirPath, "index.html");
+
+			if (existsSync(metaPath) && existsSync(htmlPath)) {
+				try {
+					const meta = JSON.parse(readFileSync(metaPath, "utf-8"));
+					items.push({
+						id: `discord-${dir}`,
+						type: "discord" as any,
+						title: meta.title || "Discussion Discord",
+						url: meta.url || "",
+						date: meta.date || "",
+						htmlPath,
+						metadata: {
+							id: dir,
+							category: "Discord",
+							language: meta.language || "fr",
+							channelName: meta.channelName || "",
+						},
+					});
+				} catch (err) {
+					console.error(`[RAG Sync] Erreur de lecture de meta pour Discord ${dir} :`, err);
+				}
+			}
+		}
+	}
+
 	return items;
 }
 
