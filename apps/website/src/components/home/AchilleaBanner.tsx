@@ -21,7 +21,7 @@ export interface AchilleaBannerProps {
 
 export function AchilleaBanner({
 	description = "Le carrefour de l'esport Inazuma Eleven ! Gestion de clans, tournois, matchs classés, ranking communautaire et bot officiel.",
-	image = "/achillea/banniere.webp",
+	image = "https://achillea.rosegriffon.fr/opengraph-image",
 	link = "https://achillea.rosegriffon.fr/",
 	discordLink = "https://discord.gg/achillea-competitif-inazuma-eleven-fr-1055585286320554055",
 }: AchilleaBannerProps) {
@@ -43,6 +43,7 @@ export function AchilleaBanner({
 							src={image}
 							alt="Bannière Achillea"
 							fill
+							unoptimized
 							className="object-cover object-center transition-transform duration-700 group-hover:scale-105"
 							sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 640px"
 						/>
