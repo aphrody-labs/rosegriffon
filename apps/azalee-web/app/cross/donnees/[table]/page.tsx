@@ -1,6 +1,6 @@
 export const dynamic = "force-dynamic";
 
-import { ArrowLeft, FileSpreadsheet } from "lucide-react";
+import { ArrowLeft, FileSpreadsheet, Cpu } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -136,7 +136,24 @@ export default async function CrossTablePage({
 				</table>
 			</div>
 
-			<CSharpCodeViewer code={csharpCode} fullName={t.fullName} />
+			<div className="mt-8">
+				<details className="group border border-outline-variant/40 rounded-2xl bg-surface-container-low overflow-hidden">
+					<summary className="flex items-center justify-between px-5 py-4 font-bold text-sm text-on-surface-variant cursor-pointer hover:bg-surface-container-high/40 transition-colors select-none">
+						<div className="flex items-center gap-2">
+							<Cpu className="size-4 text-on-surface-variant/70" />
+							<span>Rétro-ingénierie & Code C# de mapping (Développeurs)</span>
+						</div>
+						<span className="text-xs text-on-surface-variant/60 font-mono group-open:hidden">Afficher ↓</span>
+						<span className="text-xs text-on-surface-variant/60 font-mono hidden group-open:inline">Masquer ↑</span>
+					</summary>
+					<div className="p-4 border-t border-outline-variant/30 bg-surface-container-lowest">
+						<p className="text-xs text-on-surface-variant/80 mb-4 leading-relaxed">
+							Ce code C# a été généré à la volée en corrélant les colonnes typées du masterdata et le dump des structures IL2CPP du binaire du jeu.
+						</p>
+						<CSharpCodeViewer code={csharpCode} fullName={t.fullName} />
+					</div>
+				</details>
+			</div>
 		</div>
 	);
 }
