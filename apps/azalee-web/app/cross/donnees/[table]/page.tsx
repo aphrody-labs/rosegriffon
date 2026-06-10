@@ -5,7 +5,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { CROSS_CYAN, KIND_LABELS, KIND_TONE } from "@/lib/cross/data-shared";
-import { getCrossTable, getCrossTables } from "@/lib/cross/data";
+import { getCrossTable, getCrossTables, getCrossTypeFields, generateCSharpClass } from "@/lib/cross/data";
+import { CSharpCodeViewer } from "./CSharpCodeViewer";
 
 export async function generateMetadata({
 	params,
@@ -32,6 +33,9 @@ export default async function CrossTablePage({
 	const slug = decodeURIComponent(table);
 	const t = getCrossTable(slug);
 	if (!t) notFound();
+
+	const typeFields = getCrossTypeFields(t.fullName);
+	const csharpCode = generateCSharpClass(t, typeFields);
 
 	const knownTables = new Set(getCrossTables().map((x) => x.short));
 
@@ -131,6 +135,8 @@ export default async function CrossTablePage({
 					</tbody>
 				</table>
 			</div>
+
+			<CSharpCodeViewer code={csharpCode} fullName={t.fullName} />
 		</div>
 	);
 }
