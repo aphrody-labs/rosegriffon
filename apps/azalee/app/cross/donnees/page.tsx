@@ -1,6 +1,9 @@
 export const dynamic = "force-dynamic";
 
-import { ArrowRight, Database, KeyRound, Lock, Music, Table2, Layers, Search, FileArchive } from "lucide-react";
+import { 
+	ArrowRight, Database, KeyRound, Lock, Music, Table2, Layers, Search, FileArchive,
+	Users, Swords, Backpack, BookOpen, Trophy, ShoppingBag, Settings 
+} from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { FadeInItem, FadeInStagger } from "@/components/ui/fade-in";
@@ -15,6 +18,7 @@ import {
 import { searchCatalog, getCatalogTypes, getAsset } from "@/lib/cross/catalog";
 import AssetVisualizer from "./AssetVisualizer";
 import audioJson from "@/data/cross/audio-manifest.json";
+import classTaxonomyJson from "@/data/cross/class-taxonomy.json";
 
 export const metadata: Metadata = {
 	alternates: { canonical: "/cross/donnees" },
@@ -28,6 +32,163 @@ const CHARACTER_NAMES: Record<string, string> = {
 	c00003001: "Mark Evans (Mamoru Endou)",
 	c00003021: "Jude Sharp (Yuuto Kidou)",
 };
+
+// Human-readable labels and descriptions for Inazuma Eleven Cross masterdata tables
+const TABLE_METADATA: Record<string, { label: string; desc: string }> = {
+	AffinityItemMaster: { label: "Cadeaux d'Affinité", desc: "Liste des objets offerts aux membres pour augmenter leur niveau de relation." },
+	AffinityRankMaster: { label: "Niveaux d'Affinité", desc: "Paliers d'expérience requis pour augmenter l'affinité avec un joueur." },
+	AffinityRewardMaster: { label: "Récompenses d'Affinité", desc: "Récompenses débloquées à chaque niveau d'affinité atteint pour chaque joueur." },
+	AwakeningTierMaster: { label: "Paliers d'Éveil", desc: "Bonus de statistiques et multiplicateurs appliqués à chaque palier d'éveil." },
+	AwakeningTierMaterialMaster: { label: "Matériaux d'Éveil", desc: "Objets requis pour éveiller les joueurs à différents paliers." },
+	BackgroundMaster: { label: "Fonds d'écran", desc: "Textures d'arrière-plan de l'interface et du terrain." },
+	BaseMissionMaster: { label: "Missions de Base", desc: "Objectifs réguliers et défis permanents pour obtenir des récompenses." },
+	BaseScheduleMaster: { label: "Calendrier de Jeu", desc: "Planification générale des campagnes et ouvertures de serveurs." },
+	BattleBgmMaster: { label: "Musiques de Combat", desc: "Bandes-son associées aux différents types de matchs." },
+	BattleOperationParameter: { label: "Physique des Matchs", desc: "Ajustements des calculs physiques, vitesses et collisions en match." },
+	BattlePassMaster: { label: "Passe de Combat", desc: "Configuration des passes saisonniers payants et gratuits." },
+	BattlePassLevelMaster: { label: "Niveaux de Passe", desc: "Récompenses et points requis pour chaque niveau du passe de combat." },
+	CharacterMaster: { label: "Fiches Joueurs", desc: "Statistiques de base, positions, attributs et identifiants des joueurs d'Inazuma." },
+	CharacterGradeMaster: { label: "Grades de Rareté", desc: "Définition des raretés de cartes de joueurs (N, R, SR, UR...)." },
+	CharacterAwakeningGrowthMaster: { label: "Croissance d'Éveil", desc: "Statistiques additionnelles gagnées à chaque éveil de personnage." },
+	CharacterItemMaster: { label: "Objets de Personnages", desc: "Items exclusifs à certains joueurs pour débloquer du contenu." },
+	CharacterSoulItemMaster: { label: "Âmes de Joueurs", desc: "Fragments d'âmes requis pour le recrutement et l'évolution." },
+	EnemyTeamMaster: { label: "Équipes Adversaires", desc: "Compositions d'équipes et tactiques des adversaires du mode histoire." },
+	FormationMaster: { label: "Formations Tactiques", desc: "Ajustements de placement des joueurs sur le terrain." },
+	FormationDeckMaster: { label: "Decks d'Équipes", desc: "Structures de configuration de l'équipe du joueur." },
+	SpecialMoveManualMaster: { label: "Manuels de Hissatsu", desc: "Manuels pour enseigner des supertechniques aux joueurs." },
+	SpecialMoveLevelUpRecipeMasterData: { label: "Recettes de Techniques", desc: "Combinaisons de matériaux requises pour améliorer une supertechnique." },
+	SpecialMoveLevelUpMaterialItemMaster: { label: "Matériaux de Techniques", desc: "Objets consommés pour augmenter la puissance des techniques." },
+	QuestMaster: { label: "Quêtes du Jeu", desc: "Missions narratives et défis à accomplir." },
+	GuildEmblemMaster: { label: "Emblèmes de Guilde", desc: "Logos et bordures personnalisables pour les guildes." },
+	GuildMissionGroupMaster: { label: "Missions de Guilde", desc: "Défis hebdomadaires à accomplir en groupe." },
+	PvPPlacementMaster: { label: "Saisons PvP", desc: "Récompenses et rangs de la ligue multijoueur." },
+	PvPMatchingSlotMaster: { label: "Créneaux de Matchmaking", desc: "Configuration des files d'attente PvP." },
+	RaidGroupMaster: { label: "Boss de Raid", desc: "Configuration des boss géants affrontables en multijoueur." },
+	RaidDifficultyMaster: { label: "Difficultés de Raid", desc: "Statistiques et taux de loot pour chaque difficulté de boss." },
+	GachaDroptableMaster: { label: "Probabilités du Gacha", desc: "Tables de probabilités d'obtention de joueurs et d'objets." },
+	FixedDropTableMaster: { label: "Récompenses Fixes", desc: "Tables de butin garanti pour les fins de match et quêtes." },
+	GachaBackgroundCutsceneMaster: { label: "Cinématiques de Tirage", desc: "Animation et arrière-plans joués pendant les tirages." },
+	InAppLinkProductMaster: { label: "Boutique d'Achats", desc: "Tarifs et contenu des microtransactions réelles." },
+	OfferMaster: { label: "Offres Spéciales", desc: "Packs promotionnels limités dans le temps." },
+	LoginBonusMaster: { label: "Bonus de Connexion", desc: "Calendriers mensuels et événementiels de fidélité." },
+	LoginBonusRewardMaster: { label: "Détail des Bonus", desc: "Récompenses reçues chaque jour de connexion." },
+	ChatStampMaster: { label: "Autocollants de Chat", desc: "Images emoji de personnages utilisables en chat multijoueur." },
+	InalinkGroupMaster: { label: "Messages Inalink", desc: "Dialogues de messagerie fictive avec les personnages." },
+	ClubHouseDecorationItemMaster: { label: "Décorations de Club", desc: "Meubles, trophées et peintures pour personnaliser le club-house." },
+	ClubHouseDecorationSlotTypeMaster: { label: "Emplacements Déco", desc: "Zones de placement des meubles dans le club." },
+};
+
+function humanizeClassName(className: string): string {
+	let name = className.replace(/Master(Data)?$/, "");
+	name = name.replace(/([A-Z])/g, " $1").trim();
+	name = name
+		.replace(/\bAffinity\b/g, "Affinité")
+		.replace(/\bAwakening\b/g, "Éveil")
+		.replace(/\bTier\b/g, "Palier")
+		.replace(/\bMaterial\b/g, "Matériau")
+		.replace(/\bCharacter\b/g, "Personnage")
+		.replace(/\bSpecial Move\b/g, "Supertechnique")
+		.replace(/\bEquipment\b/g, "Équipement")
+		.replace(/\bItem\b/g, "Objet")
+		.replace(/\bMission\b/g, "Mission")
+		.replace(/\bQuest\b/g, "Quête")
+		.replace(/\bBattle Pass\b/g, "Passe de combat")
+		.replace(/\bReward\b/g, "Récompense")
+		.replace(/\bGacha\b/g, "Tirage")
+		.replace(/\bDeck\b/g, "Composition")
+		.replace(/\bEnemy\b/g, "Ennemi")
+		.replace(/\bGuild\b/g, "Guilde")
+		.replace(/\bRaid\b/g, "Raid")
+		.replace(/\bStory\b/g, "Histoire")
+		.replace(/\bStage\b/g, "Niveau")
+		.replace(/\bArea\b/g, "Zone")
+		.replace(/\bChapter\b/g, "Chapitre")
+		.replace(/\bProduct\b/g, "Produit")
+		.replace(/\bOffer\b/g, "Offre")
+		.replace(/\bLogin Bonus\b/g, "Bonus de connexion")
+		.replace(/\bClub House\b/g, "Club")
+		.replace(/\bDecoration\b/g, "Décoration")
+		.replace(/\bBgm\b/g, "Musique")
+		.replace(/\bMatching\b/g, "Matchmaking")
+		.replace(/\bSchedule\b/g, "Planification");
+	return name;
+}
+
+interface TableCategory {
+	name: string;
+	icon: string;
+	description: string;
+	domains: string[];
+}
+
+const CATEGORIES: TableCategory[] = [
+	{
+		name: "Personnages & Éveil",
+		icon: "users",
+		description: "Profils des joueurs, relations d'affinité et mécanique d'éveil des raretés.",
+		domains: ["Character", "Training", "Reward"],
+	},
+	{
+		name: "Combats & Supertechniques",
+		icon: "swords",
+		description: "Supertechniques (Hissatsu), formations tactiques, équipes ennemies et physique du jeu.",
+		domains: ["Battle", "SpecialMoves/Skills", "Formation_Team", "Sound"],
+	},
+	{
+		name: "Inventaire & Équipements",
+		icon: "backpack",
+		description: "Objets de l'inventaire, équipements statistiques, cadeaux et matériaux de craft.",
+		domains: ["Item", "Equipment", "Emblem_Customize"],
+	},
+	{
+		name: "Mode Histoire & Quêtes",
+		icon: "book-open",
+		description: "Plateaux de scénario, quêtes narratives, tutoriels et dialogues d'événements.",
+		domains: ["Story", "Mission", "Stage", "Tutorial"],
+	},
+	{
+		name: "Multijoueur, Raids & Guildes",
+		icon: "trophy",
+		description: "Ligues PvP, combats de boss en Raid, clans/guildes et Passes de Combat.",
+		domains: ["PvP", "Raid", "Guild", "BattlePass"],
+	},
+	{
+		name: "Boutiques & Tirages (Gacha)",
+		icon: "shopping-bag",
+		description: "Boutique en jeu, packs spéciaux, tirages (Gacha), taux d'apparition et bonus de connexion.",
+		domains: ["Gacha", "Shop_IAP", "Auth_Account"],
+	},
+	{
+		name: "Système & Personnalisation",
+		icon: "settings",
+		description: "Calendriers globaux, messagerie Inalink, décoration du club-house et messagerie.",
+		domains: ["Club", "Social", "Event"],
+	},
+];
+
+const CATEGORY_ICONS: Record<string, React.ComponentType<any>> = {
+	"Personnages & Éveil": Users,
+	"Combats & Supertechniques": Swords,
+	"Inventaire & Équipements": Backpack,
+	"Mode Histoire & Quêtes": BookOpen,
+	"Multijoueur, Raids & Guildes": Trophy,
+	"Boutiques & Tirages (Gacha)": ShoppingBag,
+	"Système & Personnalisation": Settings,
+};
+
+function getTableCategory(fullName: string): string {
+	const tax = classTaxonomyJson as any;
+	const domains = (tax.domains || {}) as Record<string, string[]>;
+	for (const cat of CATEGORIES) {
+		for (const domain of cat.domains) {
+			const classesInDomain = domains[domain] || [];
+			if (classesInDomain.includes(fullName)) {
+				return cat.name;
+			}
+		}
+	}
+	return "Système & Personnalisation";
+}
 
 function StatTile({ icon, value, label }: { icon: React.ReactNode; value: string; label: string }) {
 	return (
@@ -206,51 +367,106 @@ export default async function CrossDataPage({
 
 			{/* Tables masterdata */}
 			{tab === "tables" && (
-				<section>
+				<section className="space-y-6">
 					<h2 className="text-lg font-black text-on-surface mb-3">
-						Tables masterdata <span className="text-on-surface-variant font-normal">({tables.length})</span>
+						Exploration des données du jeu <span className="text-on-surface-variant font-normal">({tables.length} tables trouvées)</span>
 					</h2>
-					<FadeInStagger className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-						{tables.map((t) => (
-							<FadeInItem key={t.slug}>
-								<Link
-									href={`/cross/donnees/${encodeURIComponent(t.slug)}`}
-									className="group block rounded-2xl bg-surface-container hover:bg-surface-container-high transition-colors p-4 border border-outline-variant/50 h-full"
-								>
-									<div className="flex items-start justify-between gap-2">
-										<span className="font-bold text-on-surface text-sm leading-tight">{t.short}</span>
-										<ArrowRight
-											size={16}
-											className="text-on-surface-variant group-hover:translate-x-0.5 transition-transform shrink-0"
-										/>
+
+					{q ? (
+						<FadeInStagger className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+							{tables.map((t) => {
+								const meta = TABLE_METADATA[t.short] || { 
+									label: humanizeClassName(t.short), 
+									desc: `Fichier de données du système ${humanizeClassName(t.short).toLowerCase()}.` 
+								};
+								return (
+									<FadeInItem key={t.slug}>
+										<Link
+											href={`/cross/donnees/${encodeURIComponent(t.slug)}`}
+											className="group block rounded-2xl bg-surface-container hover:bg-surface-container-high transition-colors p-4 border border-outline-variant/50 h-full hover:shadow-sm"
+										>
+											<div className="flex items-start justify-between gap-2">
+												<span className="font-bold text-on-surface text-sm leading-tight group-hover:text-[#00aeef] transition-colors">{meta.label}</span>
+												<ArrowRight
+													size={16}
+													className="text-on-surface-variant group-hover:translate-x-0.5 transition-transform shrink-0"
+												/>
+											</div>
+											<p className="text-xs text-on-surface-variant mt-1.5 line-clamp-2">
+												{meta.desc}
+											</p>
+											<div className="mt-3 flex items-center justify-between border-t border-outline-variant/10 pt-2 text-[10px] font-mono text-on-surface-variant/70">
+												<span className="truncate max-w-[150px]" title={t.short}>{t.short}</span>
+												<span>{t.columnCount} colonnes</span>
+											</div>
+										</Link>
+									</FadeInItem>
+								);
+							})}
+						</FadeInStagger>
+					) : (
+						<div className="space-y-6">
+							{CATEGORIES.map((cat) => {
+								const catTables = tables.filter((t) => getTableCategory(t.fullName) === cat.name);
+								if (catTables.length === 0) return null;
+								const IconComponent = CATEGORY_ICONS[cat.name] || Settings;
+
+								return (
+									<div key={cat.name} className="rounded-2xl border border-outline-variant/40 bg-surface-container-low p-5 space-y-4">
+										<div className="flex items-center gap-3">
+											<div className="p-2 rounded-xl bg-primary-container text-on-primary-container">
+												<IconComponent size={20} />
+											</div>
+											<div>
+												<h3 className="text-lg font-black text-on-surface flex items-center gap-2">
+													{cat.name}
+													<span className="text-xs font-normal text-on-surface-variant bg-surface-container px-2 py-0.5 rounded-full">
+														{catTables.length} tables
+													</span>
+												</h3>
+												<p className="text-xs text-on-surface-variant">{cat.description}</p>
+											</div>
+										</div>
+
+										<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+											{catTables.map((t) => {
+												const meta = TABLE_METADATA[t.short] || { 
+													label: humanizeClassName(t.short), 
+													desc: `Fichier de données du système ${humanizeClassName(t.short).toLowerCase()}.` 
+												};
+												return (
+													<Link
+														key={t.slug}
+														href={`/cross/donnees/${encodeURIComponent(t.slug)}`}
+														className="group rounded-xl bg-surface-container-lowest hover:bg-surface-container-high transition-all p-4 border border-outline-variant/30 flex flex-col justify-between h-full hover:shadow-sm"
+													>
+														<div>
+															<div className="flex items-start justify-between gap-2">
+																<span className="font-bold text-on-surface text-sm leading-tight group-hover:text-[#00aeef] transition-colors">
+																	{meta.label}
+																</span>
+																<ArrowRight
+																	size={14}
+																	className="text-on-surface-variant group-hover:translate-x-0.5 transition-transform shrink-0 mt-0.5"
+																/>
+															</div>
+															<p className="text-xs text-on-surface-variant mt-1.5 line-clamp-2 leading-relaxed">
+																{meta.desc}
+															</p>
+														</div>
+														<div className="mt-3 flex items-center justify-between border-t border-outline-variant/10 pt-2 text-[10px] font-mono text-on-surface-variant/70">
+															<span className="truncate max-w-[120px]" title={t.short}>{t.short}</span>
+															<span>{t.columnCount} col.</span>
+														</div>
+													</Link>
+												);
+											})}
+										</div>
 									</div>
-									<p className="text-xs text-on-surface-variant mt-1 truncate" title={t.file}>
-										{t.file}
-									</p>
-									<div className="flex flex-wrap gap-1.5 mt-3 text-[11px]">
-										<span className="rounded-full bg-primary-container text-on-primary-container px-2 py-0.5">
-											{t.columnCount} colonnes
-										</span>
-										{t.refCount > 0 && (
-											<span className="rounded-full bg-surface-container-highest text-on-surface px-2 py-0.5">
-												{t.refCount} réf.
-											</span>
-										)}
-										{t.enumCount > 0 && (
-											<span className="rounded-full bg-tertiary-container text-on-tertiary-container px-2 py-0.5">
-												{t.enumCount} enum
-											</span>
-										)}
-										{t.extends && (
-											<span className="rounded-full bg-secondary-container text-on-secondary-container px-2 py-0.5">
-												: {t.extends.split(".").pop()}
-											</span>
-										)}
-									</div>
-								</Link>
-							</FadeInItem>
-						))}
-					</FadeInStagger>
+								);
+							})}
+						</div>
+					)}
 				</section>
 			)}
 
