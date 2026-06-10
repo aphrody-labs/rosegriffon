@@ -4035,6 +4035,8 @@
 	"0xC7817F9C": "FABLED",
 	"nav.home": "Home",
 	"nav.cross": "Inazuma Eleven Cross",
+	"nav.cross.overview": "Overview",
+	"nav.cross.data": "Extracted data",
 	"nav.search": "Search",
 	"nav.news": "News",
 	"nav.news.articles": "Articles",
