@@ -27,9 +27,7 @@
 			"@rose-griffon/ui/*": ["./packages/ui/src/*"],
 			"@rose-griffon/db": ["./packages/db/src/index.ts"],
 			"@rose-griffon/db/*": ["./packages/db/src/*"],
-			"@rose-griffon/config/*": ["./packages/config/*"],
-			"@rose-griffon/inagle": ["./packages/inagle/src/index.ts"],
-			"@rose-griffon/inagle/*": ["./packages/inagle/src/*"]
+			"@rose-griffon/config/*": ["./packages/config/*"]
 		}
 	},
 	"exclude": ["node_modules", ".next", "dist", "build", ".turbo", "coverage"]

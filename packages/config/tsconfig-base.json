@@ -33,8 +33,6 @@
 			"@rose-griffon/assets/*": ["../assets/src/*"],
 			"@rose-griffon/patreon-bun": ["../patreon-bun/src/index.ts"],
 			"@rose-griffon/patreon-bun/*": ["../patreon-bun/src/*"],
-			"@rose-griffon/inagle": ["../inagle/src/index.ts"],
-			"@rose-griffon/inagle/*": ["../inagle/src/*"],
 			"@rose-griffon/inagle-cross": ["../inagle-cross/src/index.ts"],
 			"@rose-griffon/inagle-cross/*": ["../inagle-cross/src/*"]
 		}
