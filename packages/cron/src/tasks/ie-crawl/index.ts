@@ -17,6 +17,8 @@ import { runRagSync } from "./rag-index";
 import { withProxyRotation } from "../../lib/proxy";
 import { processTweets } from "./process-tweets";
 import { crawlXRadar } from "./x-radar";
+import { crawlReddit } from "./reddit";
+import { crawlDiscord } from "./discord";
 
 export async function runIeCrawl(): Promise<{ success: boolean; error?: string }> {
 	console.log("==================================================================");
@@ -122,6 +124,22 @@ export async function runIeCrawl(): Promise<{ success: boolean; error?: string }
 			console.log("[ie-crawl] Crawl des documentations externes complété.");
 		}
 
+		// 5e. Crawl Reddit (r/inazumaeleven)
+		const redditRes = await crawlReddit();
+		if (!redditRes.success) {
+			console.error("[ie-crawl] Échec du crawl Reddit :", redditRes.error);
+		} else {
+			console.log(`[ie-crawl] Crawl Reddit complété : ${redditRes.count} posts sauvegardés.`);
+		}
+
+		// 5f. Crawl Discord (salons publics)
+		const discordCrawlRes = await crawlDiscord();
+		if (!discordCrawlRes.success) {
+			console.error("[ie-crawl] Échec du crawl Discord :", discordCrawlRes.error);
+		} else {
+			console.log(`[ie-crawl] Crawl Discord complété : ${discordCrawlRes.count} blocs sauvegardés.`);
+		}
+
 		// 6. Synchronisation sémantique / vectorisation pour le RAG
 		let ragSuccess = true;
 		const anyNewsCrawlSuccess =
@@ -132,7 +150,9 @@ export async function runIeCrawl(): Promise<{ success: boolean; error?: string }
 			level5BlogRes.success ||
 			twitterRes.success ||
 			searchSuccess ||
-			externalRes.success;
+			externalRes.success ||
+			redditRes.success ||
+			discordCrawlRes.success;
 		if (anyNewsCrawlSuccess) {
 			const ragRes = await runRagSync();
 			ragSuccess = ragRes.success;
@@ -155,6 +175,8 @@ export async function runIeCrawl(): Promise<{ success: boolean; error?: string }
 			twitterRes.success &&
 			searchSuccess &&
 			externalRes.success &&
+			redditRes.success &&
+			discordCrawlRes.success &&
 			ragSuccess;
 		return {
 			success,
