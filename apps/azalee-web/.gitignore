@@ -92,3 +92,8 @@ yarn-error.log*
 # Claude Code worktrees / state
 .claude/
 .env*.local
+
+# Inazuma Eleven Cross public assets (kept locally, not committed)
+/public/inazuma-cross/audio/
+/public/inazuma-cross/textures/
+/app/cross/donnees/page.tsx.bak

@@ -19,6 +19,7 @@ export interface CatalogAsset {
 	bundle: string;
 	size: number;
 	n_deps: number;
+	deps?: string[];
 }
 
 function resolveSourcePath(): string | null {
@@ -39,18 +40,18 @@ function getDb(): Database {
 	if (_db) return _db;
 	const src = resolveSourcePath();
 	if (!src) {
-		throw new Error("[cross-catalog] artefact introuvable (catalog-index.ndjson.gz).");
+		throw new Error("[cross-catalog] etape obligatoire: catalog-index.ndjson.gz introuvable.");
 	}
 
-	const cacheDir = path.join(tmpdir(), "azalee-cross-catalog");
+	const cacheDir = path.join(tmpdir(), "azalee-cross-catalog-v2");
 	mkdirSync(cacheDir, { recursive: true });
-	const cachePath = path.join(cacheDir, "catalog-index.sqlite");
+	const cachePath = path.join(cacheDir, "catalog-index-v2.sqlite");
 
 	const needsBuild =
 		!existsSync(cachePath) || statSync(cachePath).mtimeMs < statSync(src).mtimeMs;
 
 	if (typeof Bun === "undefined") {
-		throw new Error("[cross-catalog] bun:sqlite requis (runtime Bun) — indisponible ici.");
+		throw new Error("[cross-catalog] Bun requis pour bun:sqlite — indisponible.");
 	}
 
 	// eslint-disable-next-line @typescript-eslint/no-require-imports
@@ -68,7 +69,7 @@ function getDb(): Database {
 }
 
 function buildSqlite(db: Database, srcPath: string): void {
-	console.log("[cross-catalog] Matérialisation de l'index des Addressables...");
+	console.log("[cross-catalog] Matérialisation de l'index v2 des Addressables...");
 	db.exec("PRAGMA journal_mode = WAL");
 	db.exec("DROP TABLE IF EXISTS cross_catalog");
 	db.exec(`
@@ -78,7 +79,8 @@ function buildSqlite(db: Database, srcPath: string): void {
 			type   TEXT NOT NULL,
 			bundle TEXT NOT NULL,
 			size   INTEGER NOT NULL,
-			n_deps INTEGER NOT NULL
+			n_deps INTEGER NOT NULL,
+			deps   TEXT NOT NULL
 		)
 	`);
 
@@ -86,7 +88,7 @@ function buildSqlite(db: Database, srcPath: string): void {
 	const ndjson = gunzipSync(gz).toString("utf8");
 
 	const insert = db.prepare(
-		"INSERT OR REPLACE INTO cross_catalog (guid, key, type, bundle, size, n_deps) VALUES (?, ?, ?, ?, ?, ?)"
+		"INSERT OR REPLACE INTO cross_catalog (guid, key, type, bundle, size, n_deps, deps) VALUES (?, ?, ?, ?, ?, ?, ?)"
 	);
 
 	db.transaction(() => {
@@ -101,7 +103,8 @@ function buildSqlite(db: Database, srcPath: string): void {
 						entry.type || "Unknown",
 						entry.bundle || "",
 						entry.size || 0,
-						entry.n_deps || 0
+						entry.n_deps || 0,
+						JSON.stringify(entry.deps || [])
 					);
 				}
 			} catch (e) {
@@ -114,7 +117,7 @@ function buildSqlite(db: Database, srcPath: string): void {
 	db.exec("CREATE INDEX idx_catalog_key ON cross_catalog (key)");
 	db.exec("PRAGMA wal_checkpoint(TRUNCATE)");
 	db.exec("ANALYZE");
-	console.log("[cross-catalog] Matérialisation terminée.");
+	console.log("[cross-catalog] Matérialisation v2 terminée.");
 }
 
 /** Recherche paginée dans le catalogue d'assets. */
@@ -128,7 +131,7 @@ export function searchCatalog(
 	const cleanQ = (q ?? "").trim().toLowerCase();
 	const cleanType = (type ?? "").trim();
 
-	let query = "SELECT guid, key, type, bundle, size, n_deps FROM cross_catalog WHERE 1=1";
+	let query = "SELECT guid, key, type, bundle, size, n_deps, deps FROM cross_catalog WHERE 1=1";
 	let countQuery = "SELECT COUNT(*) AS total FROM cross_catalog WHERE 1=1";
 	const params: any[] = [];
 
@@ -152,9 +155,51 @@ export function searchCatalog(
 	// Récupérer les données avec pagination
 	query += " ORDER BY key LIMIT ? OFFSET ?";
 	const dataParams = [...params, limit, offset];
-	const rows = db.query(query).all(...dataParams) as CatalogAsset[];
+	const rows = db.query(query).all(...dataParams) as any[];
 
-	return { assets: rows, total };
+	const assets = rows.map((r) => {
+		let parsedDeps: string[] = [];
+		try {
+			parsedDeps = JSON.parse(r.deps);
+		} catch (e) {
+			// fallback
+		}
+		return {
+			guid: r.guid,
+			key: r.key,
+			type: r.type,
+			bundle: r.bundle,
+			size: r.size,
+			n_deps: r.n_deps,
+			deps: parsedDeps,
+		};
+	});
+
+	return { assets, total };
+}
+
+/** Récupère un asset unique par son GUID. */
+export function getAsset(guid: string): CatalogAsset | null {
+	const db = getDb();
+	const row = db.query("SELECT guid, key, type, bundle, size, n_deps, deps FROM cross_catalog WHERE guid = ?").get(guid) as any;
+	if (!row) return null;
+
+	let parsedDeps: string[] = [];
+	try {
+		parsedDeps = JSON.parse(row.deps);
+	} catch (e) {
+		// fallback
+	}
+
+	return {
+		guid: row.guid,
+		key: row.key,
+		type: row.type,
+		bundle: row.bundle,
+		size: row.size,
+		n_deps: row.n_deps,
+		deps: parsedDeps,
+	};
 }
 
 /** Liste tous les types d'assets distincts présents dans le catalogue. */
