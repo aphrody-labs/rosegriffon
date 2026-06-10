@@ -1,6 +1,6 @@
 export const dynamic = "force-dynamic";
 
-import { ArrowRight, Database, KeyRound, Lock, Music, Table2 } from "lucide-react";
+import { ArrowRight, Database, KeyRound, Lock, Music, Table2, Layers, Search, FileArchive } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { FadeInItem, FadeInStagger } from "@/components/ui/fade-in";
@@ -12,6 +12,7 @@ import {
 	getCrossStatus,
 	getCrossTables,
 } from "@/lib/cross/data";
+import { searchCatalog, getCatalogTypes } from "@/lib/cross/catalog";
 
 export const metadata: Metadata = {
 	alternates: { canonical: "/cross/donnees" },
@@ -37,6 +38,9 @@ export default async function CrossDataPage({
 }) {
 	const sp = await searchParams;
 	const q = typeof sp.q === "string" ? sp.q : "";
+	const tab = typeof sp.tab === "string" ? sp.tab : "tables";
+	const page = typeof sp.page === "string" ? Math.max(1, parseInt(sp.page) || 1) : 1;
+	const assetType = typeof sp.type === "string" ? sp.type : "";
 
 	const status = getCrossStatus();
 	const counts = getCrossDataCounts();
@@ -45,6 +49,13 @@ export default async function CrossDataPage({
 	const stats = getCrossCatalogStats();
 	const totals = (stats.totals ?? {}) as Record<string, number>;
 	const catalogObjects = totals.loadable_objects ?? totals.rows ?? 0;
+
+	// Charger les assets du catalogue
+	const limit = 55;
+	const offset = (page - 1) * limit;
+	const { assets, total: totalAssets } = searchCatalog(q, assetType, limit, offset);
+	const assetTypes = getCatalogTypes();
+	const totalPages = Math.ceil(totalAssets / limit);
 
 	return (
 		<div className="w-full space-y-8">
@@ -64,7 +75,7 @@ export default async function CrossDataPage({
 				</h1>
 				<p className="text-sm text-on-surface-variant mt-2 max-w-2xl">
 					Modèle de données reconstitué par rétro-ingénierie statique du jeu (jeu mobile distinct de
-					Victory Road). Schéma, types et énumérations sont réels ; les <strong>valeurs</strong> de jeu
+					Victory Road). Schéma, types, énumérations et catalogue d'assets sont réels ; les <strong>valeurs</strong> de jeu
 					(stats des joueurs, hissatsu…) sont servies par le serveur du jeu et ne sont pas encore
 					récupérées.
 				</p>
@@ -73,7 +84,7 @@ export default async function CrossDataPage({
 					<StatTile icon={<Database size={16} />} value={String(counts.columns)} label="colonnes typées" />
 					<StatTile icon={<KeyRound size={16} />} value={String(counts.enums)} label="énumérations" />
 					<StatTile
-						icon={<Database size={16} />}
+						icon={<Layers size={16} />}
 						value={catalogObjects ? catalogObjects.toLocaleString("fr-FR") : "—"}
 						label="objets catalogue"
 					/>
@@ -88,102 +99,258 @@ export default async function CrossDataPage({
 					<span className="font-semibold text-on-surface">Valeurs en attente.</span> Les lignes de
 					données (stats chiffrées) transitent par le serveur du jeu protégé par anti-triche — leur
 					récupération nécessite une capture runtime. Cette page ne montre donc que le{" "}
-					<strong>modèle</strong>, jamais de valeur inventée. Localisation du jeu : {status.localization_langs.join(" / ")}.
+					<strong>modèle</strong> et le <strong>catalogue d'assets</strong>, jamais de valeur inventée. Localisation du jeu : {status.localization_langs.join(" / ")}.
 				</p>
 			</div>
 
+			{/* Onglets de Navigation */}
+			<div className="flex border-b border-outline-variant/30 gap-6 text-sm font-bold overflow-x-auto whitespace-nowrap">
+				<Link
+					href={`/cross/donnees?tab=tables${q ? `&q=${q}` : ""}`}
+					className={`pb-3 border-b-2 transition-colors ${
+						tab === "tables"
+							? "text-[#00aeef] border-[#00aeef]"
+							: "text-on-surface-variant/70 border-transparent hover:text-on-surface"
+					}`}
+				>
+					Tables Masterdata ({counts.tables})
+				</Link>
+				<Link
+					href={`/cross/donnees?tab=enums${q ? `&q=${q}` : ""}`}
+					className={`pb-3 border-b-2 transition-colors ${
+						tab === "enums"
+							? "text-[#00aeef] border-[#00aeef]"
+							: "text-on-surface-variant/70 border-transparent hover:text-on-surface"
+					}`}
+				>
+					Énumérations ({counts.enums})
+				</Link>
+				<Link
+					href={`/cross/donnees?tab=assets${q ? `&q=${q}` : ""}`}
+					className={`pb-3 border-b-2 transition-colors ${
+						tab === "assets"
+							? "text-[#00aeef] border-[#00aeef]"
+							: "text-on-surface-variant/70 border-transparent hover:text-on-surface"
+					}`}
+				>
+					Catalogue d'Assets ({catalogObjects.toLocaleString("fr-FR")})
+				</Link>
+			</div>
+
 			{/* Recherche */}
-			<form className="flex gap-2" action="/cross/donnees">
+			<form className="flex flex-col sm:flex-row gap-2" action="/cross/donnees">
+				<input type="hidden" name="tab" value={tab} />
 				<input
 					type="search"
 					name="q"
 					defaultValue={q}
-					placeholder="Filtrer tables et énumérations…"
+					placeholder={
+						tab === "assets"
+							? "Rechercher par adresse (key) ou nom de bundle…"
+							: "Filtrer tables et énumérations…"
+					}
 					className="flex-1 rounded-full bg-surface-container px-4 py-2.5 text-sm text-on-surface border border-outline-variant focus:outline-none focus:ring-2"
 					style={{ outlineColor: CROSS_CYAN }}
 				/>
+				{tab === "assets" && (
+					<select
+						name="type"
+						defaultValue={assetType}
+						className="rounded-full bg-surface-container px-4 py-2.5 text-sm text-on-surface border border-outline-variant focus:outline-none focus:ring-2"
+						style={{ outlineColor: CROSS_CYAN }}
+					>
+						<option value="">Tous les types ({assetTypes.length})</option>
+						{assetTypes.map((t) => (
+							<option key={t} value={t}>
+								{t}
+							</option>
+						))}
+					</select>
+				)}
+				<button
+					type="submit"
+					className="rounded-full px-6 py-2.5 text-sm font-bold text-white transition-transform hover:scale-[1.02]"
+					style={{ backgroundColor: CROSS_CYAN }}
+				>
+					Rechercher
+				</button>
 			</form>
 
 			{/* Tables masterdata */}
-			<section>
-				<h2 className="text-lg font-black text-on-surface mb-3">
-					Tables masterdata <span className="text-on-surface-variant font-normal">({tables.length})</span>
-				</h2>
-				<FadeInStagger className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-					{tables.map((t) => (
-						<FadeInItem key={t.slug}>
-							<Link
-								href={`/cross/donnees/${encodeURIComponent(t.slug)}`}
-								className="group block rounded-2xl bg-surface-container hover:bg-surface-container-high transition-colors p-4 border border-outline-variant/50 h-full"
-							>
-								<div className="flex items-start justify-between gap-2">
-									<span className="font-bold text-on-surface text-sm leading-tight">{t.short}</span>
-									<ArrowRight
-										size={16}
-										className="text-on-surface-variant group-hover:translate-x-0.5 transition-transform shrink-0"
-									/>
-								</div>
-								<p className="text-xs text-on-surface-variant mt-1 truncate" title={t.file}>
-									{t.file}
-								</p>
-								<div className="flex flex-wrap gap-1.5 mt-3 text-[11px]">
-									<span className="rounded-full bg-primary-container text-on-primary-container px-2 py-0.5">
-										{t.columnCount} colonnes
-									</span>
-									{t.refCount > 0 && (
-										<span className="rounded-full bg-surface-container-highest text-on-surface px-2 py-0.5">
-											{t.refCount} réf.
+			{tab === "tables" && (
+				<section>
+					<h2 className="text-lg font-black text-on-surface mb-3">
+						Tables masterdata <span className="text-on-surface-variant font-normal">({tables.length})</span>
+					</h2>
+					<FadeInStagger className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+						{tables.map((t) => (
+							<FadeInItem key={t.slug}>
+								<Link
+									href={`/cross/donnees/${encodeURIComponent(t.slug)}`}
+									className="group block rounded-2xl bg-surface-container hover:bg-surface-container-high transition-colors p-4 border border-outline-variant/50 h-full"
+								>
+									<div className="flex items-start justify-between gap-2">
+										<span className="font-bold text-on-surface text-sm leading-tight">{t.short}</span>
+										<ArrowRight
+											size={16}
+											className="text-on-surface-variant group-hover:translate-x-0.5 transition-transform shrink-0"
+										/>
+									</div>
+									<p className="text-xs text-on-surface-variant mt-1 truncate" title={t.file}>
+										{t.file}
+									</p>
+									<div className="flex flex-wrap gap-1.5 mt-3 text-[11px]">
+										<span className="rounded-full bg-primary-container text-on-primary-container px-2 py-0.5">
+											{t.columnCount} colonnes
 										</span>
-									)}
-									{t.enumCount > 0 && (
-										<span className="rounded-full bg-tertiary-container text-on-tertiary-container px-2 py-0.5">
-											{t.enumCount} enum
-										</span>
-									)}
-									{t.extends && (
-										<span className="rounded-full bg-secondary-container text-on-secondary-container px-2 py-0.5">
-											: {t.extends.split(".").pop()}
-										</span>
-									)}
-								</div>
-							</Link>
-						</FadeInItem>
-					))}
-				</FadeInStagger>
-			</section>
+										{t.refCount > 0 && (
+											<span className="rounded-full bg-surface-container-highest text-on-surface px-2 py-0.5">
+												{t.refCount} réf.
+											</span>
+										)}
+										{t.enumCount > 0 && (
+											<span className="rounded-full bg-tertiary-container text-on-tertiary-container px-2 py-0.5">
+												{t.enumCount} enum
+											</span>
+										)}
+										{t.extends && (
+											<span className="rounded-full bg-secondary-container text-on-secondary-container px-2 py-0.5">
+												: {t.extends.split(".").pop()}
+											</span>
+										)}
+									</div>
+								</Link>
+							</FadeInItem>
+						))}
+					</FadeInStagger>
+				</section>
+			)}
 
 			{/* Enums */}
-			<section>
-				<h2 className="text-lg font-black text-on-surface mb-3">
-					Énumérations <span className="text-on-surface-variant font-normal">({enums.length})</span>
-				</h2>
-				<div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-					{enums.slice(0, 60).map((e) => (
-						<div key={e.name} className="rounded-2xl bg-surface-container p-4 border border-outline-variant/50">
-							<div className="font-bold text-on-surface text-sm">{e.short}</div>
-							<div className="flex flex-wrap gap-1.5 mt-2">
-								{e.members.slice(0, 24).map((m) => (
-									<span
-										key={`${e.name}.${m.name}`}
-										className="rounded-md bg-surface-container-highest text-on-surface-variant px-1.5 py-0.5 text-[11px]"
-										title={`= ${m.value}`}
-									>
-										{m.name}
-									</span>
-								))}
-								{e.members.length > 24 && (
-									<span className="text-[11px] text-on-surface-variant">+{e.members.length - 24}</span>
-								)}
+			{tab === "enums" && (
+				<section>
+					<h2 className="text-lg font-black text-on-surface mb-3">
+						Énumérations <span className="text-on-surface-variant font-normal">({enums.length})</span>
+					</h2>
+					<div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+						{enums.slice(0, 60).map((e) => (
+							<div key={e.name} className="rounded-2xl bg-surface-container p-4 border border-outline-variant/50">
+								<div className="font-bold text-on-surface text-sm">{e.short}</div>
+								<div className="flex flex-wrap gap-1.5 mt-2">
+									{e.members.slice(0, 24).map((m) => (
+										<span
+											key={`${e.name}.${m.name}`}
+											className="rounded-md bg-surface-container-highest text-on-surface-variant px-1.5 py-0.5 text-[11px]"
+											title={`= ${m.value}`}
+										>
+											{m.name}
+										</span>
+									))}
+									{e.members.length > 24 && (
+										<span className="text-[11px] text-on-surface-variant">+{e.members.length - 24}</span>
+									)}
+								</div>
 							</div>
+						))}
+					</div>
+					{enums.length > 60 && (
+						<p className="text-xs text-on-surface-variant mt-3">
+							{enums.length - 60} énumérations supplémentaires (affinez la recherche).
+						</p>
+					)}
+				</section>
+			)}
+
+			{/* Catalogue d'Assets */}
+			{tab === "assets" && (
+				<section className="space-y-4">
+					<div className="flex items-center justify-between">
+						<h2 className="text-lg font-black text-on-surface">
+							Objets du catalogue Addressables
+							<span className="text-on-surface-variant font-normal ml-2">
+								({totalAssets.toLocaleString("fr-FR")} trouvés)
+							</span>
+						</h2>
+					</div>
+					
+					{assets.length === 0 ? (
+						<div className="rounded-2xl bg-surface-container p-8 text-center border border-outline-variant/30 text-on-surface-variant">
+							Aucun asset ne correspond à votre recherche.
 						</div>
-					))}
-				</div>
-				{enums.length > 60 && (
-					<p className="text-xs text-on-surface-variant mt-3">
-						{enums.length - 60} énumérations supplémentaires (affinez la recherche).
-					</p>
-				)}
-			</section>
+					) : (
+						<>
+							<div className="overflow-x-auto rounded-2xl border border-outline-variant/50 bg-surface-container-low">
+								<table className="w-full text-left border-collapse text-sm">
+									<thead>
+										<tr className="border-b border-outline-variant bg-surface-container text-on-surface-variant font-semibold">
+											<th className="px-4 py-3">Adresse (Key)</th>
+											<th className="px-4 py-3 w-44">Type</th>
+											<th className="px-4 py-3 w-64">Physical Bundle</th>
+											<th className="px-4 py-3 w-32 text-right">Taille</th>
+											<th className="px-4 py-3 w-24 text-center">Déps</th>
+										</tr>
+									</thead>
+									<tbody className="divide-y divide-outline-variant/30 text-on-surface">
+										{assets.map((asset) => (
+											<tr key={asset.guid} className="hover:bg-surface-container/30 transition-colors">
+												<td className="px-4 py-3 font-mono text-xs break-all" title={`GUID: ${asset.guid}`}>
+													{asset.key}
+												</td>
+												<td className="px-4 py-3">
+													<span className="rounded-full bg-secondary-container text-on-secondary-container px-2 py-0.5 text-xs font-semibold">
+														{asset.type}
+													</span>
+												</td>
+												<td className="px-4 py-3 font-mono text-xs break-all text-on-surface-variant">
+													{asset.bundle}
+												</td>
+												<td className="px-4 py-3 text-right text-xs">
+													{asset.size > 0 ? (asset.size / (1024 * 1024)).toFixed(2) + " Mo" : "—"}
+												</td>
+												<td className="px-4 py-3 text-center text-xs text-on-surface-variant">
+													{asset.n_deps}
+												</td>
+											</tr>
+										))}
+									</tbody>
+								</table>
+							</div>
+
+							{/* Pagination */}
+							{totalPages > 1 && (
+								<div className="flex items-center justify-between py-4">
+									<div className="text-xs text-on-surface-variant">
+										Page <span className="font-semibold text-on-surface">{page}</span> sur{" "}
+										<span className="font-semibold text-on-surface">{totalPages}</span>
+									</div>
+									<div className="flex gap-2">
+										<Link
+											href={`/cross/donnees?tab=assets&page=${page - 1}${q ? `&q=${q}` : ""}${assetType ? `&type=${assetType}` : ""}`}
+											className={`rounded-full px-4 py-2 text-xs font-bold transition-all border ${
+												page > 1
+													? "bg-surface-container hover:bg-surface-container-high border-outline-variant text-on-surface"
+													: "bg-surface-container/50 border-transparent text-on-surface-variant/40 pointer-events-none"
+											}`}
+										>
+											Précédent
+										</Link>
+										<Link
+											href={`/cross/donnees?tab=assets&page=${page + 1}${q ? `&q=${q}` : ""}${assetType ? `&type=${assetType}` : ""}`}
+											className={`rounded-full px-4 py-2 text-xs font-bold transition-all border ${
+												page < totalPages
+													? "bg-surface-container hover:bg-surface-container-high border-outline-variant text-on-surface"
+													: "bg-surface-container/50 border-transparent text-on-surface-variant/40 pointer-events-none"
+											}`}
+										>
+											Suivant
+										</Link>
+									</div>
+								</div>
+							)}
+						</>
+					)}
+				</section>
+			)}
 		</div>
 	);
 }
