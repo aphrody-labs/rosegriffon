@@ -5,7 +5,7 @@ import { Play, ExternalLink } from "lucide-react";
 import { Badge, Card, CardContent, CardHeader, CardTitle } from "@rose-griffon/ui";
 import { crossData } from "./data";
 import { Reveal, RevealGroup, RevealChild, StampPop, KenBurns, Float, Carousel } from "./motion";
-import { AudioShowcase } from "./AudioShowcase";
+import { CrossGallery } from "./CrossGallery";
 
 const GOOGLE_PLAY = "https://play.google.com/store/apps/details?id=jp.co.level5.inazumacross";
 const APP_STORE = "https://apps.apple.com/jp/app/id6756994116";
@@ -920,11 +920,11 @@ export default function CrossPage() {
 						Démonstrateur d'Assets & Preuve de Concept
 					</h2>
 					<p className="mb-6 type-body-small text-on-surface-variant/60">
-						Visualisation et écoute des ressources extraites directement du client de jeu Inazuma Eleven Cross
+						Visualisation des ressources (images, rendus, structures 3D) extraites directement du client de jeu Inazuma Eleven Cross
 					</p>
 				</Reveal>
 				<Reveal>
-					<AudioShowcase />
+					<CrossGallery />
 				</Reveal>
 			</section>
 
