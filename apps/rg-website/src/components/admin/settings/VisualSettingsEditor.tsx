@@ -325,7 +325,7 @@ export function VisualSettingsEditor({ settings: initialSettings }: VisualSettin
 								def="Le carrefour de l'esport Inazuma Eleven !"
 								type="textarea"
 							/>
-							<Field label="Image URL" sKey="home_achillea_image" def="/achillea/banniere.webp" />
+							<Field label="Image URL" sKey="home_achillea_image" def="https://achillea.rosegriffon.fr/opengraph-image" />
 							<Field
 								label="Lien Site"
 								sKey="home_achillea_link"
@@ -350,7 +350,7 @@ export function VisualSettingsEditor({ settings: initialSettings }: VisualSettin
 									"home_achillea_description",
 									"Le carrefour de l'esport Inazuma Eleven !"
 								)}
-								image={getVal(settings, "home_achillea_image", "/achillea/banniere.webp")}
+								image={getVal(settings, "home_achillea_image", "https://achillea.rosegriffon.fr/opengraph-image")}
 								link={getVal(settings, "home_achillea_link", "https://achillea.rosegriffon.fr/")}
 								discordLink={getVal(
 									settings,
