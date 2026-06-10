@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
-import { Play, ExternalLink, Database, Cpu, Layers, Lock, ArrowRight } from "lucide-react";
+import { Play, ExternalLink } from "lucide-react";
 import { Badge, Card, CardContent, CardHeader, CardTitle } from "@rose-griffon/ui";
 import { crossData } from "./data";
 import { Reveal, RevealGroup, RevealChild, StampPop, KenBurns, Float, Carousel } from "./motion";
+import { AudioShowcase } from "./AudioShowcase";
 
 const GOOGLE_PLAY = "https://play.google.com/store/apps/details?id=jp.co.level5.inazumacross";
 const APP_STORE = "https://apps.apple.com/jp/app/id6756994116";
@@ -912,112 +913,19 @@ export default function CrossPage() {
 				</RevealGroup>
 			</section>
 
-			{/* ===================== ANALYSE DES ASSETS & RETRO-INGENIERIE ===================== */}
+			{/* ===================== DEMONSTRATION DES ASSETS VERIFIES (POC) ===================== */}
 			<section className="mb-12">
 				<Reveal>
 					<h2 className="type-headline-medium mb-1 font-bold text-primary">
-						Rétro-ingénierie & Modèle de Données
+						Démonstrateur d'Assets & Preuve de Concept
 					</h2>
 					<p className="mb-6 type-body-small text-on-surface-variant/60">
-						Cartographie des structures internes et du catalogue d'assets d'Inazuma Eleven Cross
+						Visualisation et écoute des ressources extraites directement du client de jeu Inazuma Eleven Cross
 					</p>
 				</Reveal>
-				<div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_360px]">
-					<RevealGroup className="space-y-4" stagger={0.08}>
-						<RevealChild>
-							<Card className="bg-surface-container-low shadow-sm border-l-4" style={{ borderLeftColor: INAZUMA_CYAN }}>
-								<CardHeader className="pb-2">
-									<CardTitle className="flex items-center gap-2 type-title-medium">
-										<Cpu className="size-5" style={{ color: INAZUMA_CYAN }} />
-										Moteur & Architecture du client
-									</CardTitle>
-								</CardHeader>
-								<CardContent>
-									<p className="type-body-medium text-on-surface-variant">
-										L'application mobile (package <code className="text-xs bg-surface-container px-1 py-0.5 rounded">jp.co.level5.inazumacross</code>) a été compilée avec le moteur <strong>Unity 6000.0.62f1</strong> sous l'architecture <strong>IL2CPP (arm64)</strong>. L'analyse statique du binaire permet d'extraire la taxonomie de <strong>14 283 classes</strong> au runtime, dont 2 592 classes de jeu spécifiques au code métier Level-5 × Aiming.
-									</p>
-								</CardContent>
-							</Card>
-						</RevealChild>
-
-						<RevealChild>
-							<Card className="bg-surface-container-low shadow-sm border-l-4" style={{ borderLeftColor: INAZUMA_CYAN }}>
-								<CardHeader className="pb-2">
-									<CardTitle className="flex items-center gap-2 type-title-medium">
-										<Database className="size-5" style={{ color: INAZUMA_CYAN }} />
-										Schéma Masterdata (Base de données locale)
-									</CardTitle>
-								</CardHeader>
-								<CardContent>
-									<p className="type-body-medium text-on-surface-variant">
-										Les structures de stockage de données de jeu (masterdata) comprennent <strong>153 tables relationnelles typées</strong> regroupant <strong>1 215 colonnes</strong>, indexant de nombreuses relations inter-tables (clés étrangères) ainsi que <strong>214 énumérations</strong> définies dans le typage C# d'origine.
-									</p>
-								</CardContent>
-							</Card>
-						</RevealChild>
-
-						<RevealChild>
-							<Card className="bg-surface-container-low shadow-sm border-l-4" style={{ borderLeftColor: INAZUMA_CYAN }}>
-								<CardHeader className="pb-2">
-									<CardTitle className="flex items-center gap-2 type-title-medium">
-										<Layers className="size-5" style={{ color: INAZUMA_CYAN }} />
-										Index des Addressables & Assets physiques
-									</CardTitle>
-								</CardHeader>
-								<CardContent>
-									<p className="type-body-medium text-on-surface-variant">
-										Le catalogue d'Addressables Unity du jeu recense un total de <strong>23 247 objets chargeables</strong> répartis au sein de <strong>2 081 AssetBundles physiques</strong> (totalisant plus de 2 Go). L'inventaire par type d'asset est structuré ainsi :
-									</p>
-									<div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-3">
-										<div className="bg-surface-container px-3 py-2 rounded-xl text-center border border-outline-variant/30">
-											<div className="type-title-medium font-bold" style={{ color: INAZUMA_CYAN }}>6 795</div>
-											<div className="text-[10px] text-on-surface-variant uppercase font-medium">Textures 2D</div>
-										</div>
-										<div className="bg-surface-container px-3 py-2 rounded-xl text-center border border-outline-variant/30">
-											<div className="type-title-medium font-bold" style={{ color: INAZUMA_CYAN }}>5 238</div>
-											<div className="text-[10px] text-on-surface-variant uppercase font-medium">GameObjects</div>
-										</div>
-										<div className="bg-surface-container px-3 py-2 rounded-xl text-center border border-outline-variant/30">
-											<div className="type-title-medium font-bold" style={{ color: INAZUMA_CYAN }}>3 371</div>
-											<div className="text-[10px] text-on-surface-variant uppercase font-medium">Sprites UI/2D</div>
-										</div>
-										<div className="bg-surface-container px-3 py-2 rounded-xl text-center border border-outline-variant/30">
-											<div className="type-title-medium font-bold" style={{ color: INAZUMA_CYAN }}>1 113</div>
-											<div className="text-[10px] text-on-surface-variant uppercase font-medium">Animations</div>
-										</div>
-									</div>
-								</CardContent>
-							</Card>
-						</RevealChild>
-					</RevealGroup>
-
-					<Reveal blur amount={0.2} className="h-full">
-						<Card className="h-full flex flex-col justify-between border-2 bg-surface-container-low shadow-md" style={{ borderColor: `${INAZUMA_CYAN}80` }}>
-							<CardHeader>
-								<CardTitle className="type-title-large text-primary flex items-center gap-2">
-									<Lock className="size-5 text-error shrink-0" />
-									Note sur l'AnoSDK
-								</CardTitle>
-							</CardHeader>
-							<CardContent className="flex-1 flex flex-col justify-between">
-								<p className="type-body-medium text-on-surface-variant mb-6">
-									Les flux de données réseau du jeu mobile (stats des joueurs, détails numériques des techniques) sont cryptés par le serveur de jeu, abrité derrière le bouclier anti-triche <strong>NEXON AnoSDK</strong> (renvoyant une erreur HTTP 426). 
-									<br /><br />
-									Pour conserver la rigueur du wiki Azalée, <strong>aucune fausse valeur n'est injectée</strong>. Seul le modèle structurel extrait statiquement est documenté ici.
-								</p>
-								
-								<Link
-									href="/cross/donnees"
-									className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full px-6 py-3 type-label-large font-bold text-white shadow-level-1 transition-transform hover:scale-105"
-									style={{ backgroundColor: INAZUMA_CYAN }}
-								>
-									Explorer les tables & enums
-									<ArrowRight className="size-4" />
-								</Link>
-							</CardContent>
-						</Card>
-					</Reveal>
-				</div>
+				<Reveal>
+					<AudioShowcase />
+				</Reveal>
 			</section>
 
 			{/* ===================== LIENS OFFICIELS + bannières footer ===================== */}

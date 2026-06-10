@@ -154,7 +154,7 @@ const nextConfig: NextConfig = {
 	async redirects() {
 		return [
 			{
-				destination: "/cross/donnees?tab=assets",
+				destination: "/cross",
 				permanent: true,
 				source: "/cross/catalogue",
 			},
