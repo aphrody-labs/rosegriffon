@@ -20,7 +20,7 @@ export function AzaleeBanner({
 	title = "AZALÉE",
 	tag = "Wiki & Actualités",
 	description = "Le pilier médiatique et l'encyclopédie de Rose Griffon. Le wiki Azalée couvre tout Inazuma Eleven: Victory Road — personnages, techniques, esprits guerriers — avec traductions exclusives, interviews et analyses.",
-	image = "https://azalee.rosegriffon.fr/opengraph-image",
+	image = "https://azalee.rosegriffon.fr/opengraph-image.png",
 	logo = "/RG_Azalee-logo.webp",
 	wikiLink = "https://azalee.rosegriffon.fr",
 	twitterLink = "https://x.com/Azalee_IE",
@@ -45,7 +45,7 @@ export function AzaleeBanner({
 							alt={`Bannière ${title}`}
 							fill
 							priority
-							// L'image peut être distante (OG cross-site azalee.rosegriffon.fr/opengraph-image,
+							// L'image peut être distante (OG cross-site azalee.rosegriffon.fr/opengraph-image.png,
 							// réglable via home_azalee_image). L'optimiseur Vercel renvoie 402 (quota) sur ces
 							// distants → unoptimized pour qu'elle s'affiche (cf. piège images.qualities/402).
 							unoptimized

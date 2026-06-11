@@ -267,7 +267,7 @@ export function VisualSettingsEditor({ settings: initialSettings }: VisualSettin
 								def="Le pilier médiatique de Rose Griffon."
 								type="textarea"
 							/>
-							<Field label="Image URL" sKey="home_azalee_image" def="https://azalee.rosegriffon.fr/opengraph-image" />
+							<Field label="Image URL" sKey="home_azalee_image" def="https://azalee.rosegriffon.fr/opengraph-image.png" />
 							<Field label="Logo URL" sKey="home_azalee_logo" def="/RG_Azalee-logo.webp" />
 							<Separator />
 							<Field
@@ -296,7 +296,7 @@ export function VisualSettingsEditor({ settings: initialSettings }: VisualSettin
 									"home_azalee_description",
 									"Le pilier médiatique de Rose Griffon."
 								)}
-								image={getVal(settings, "home_azalee_image", "https://azalee.rosegriffon.fr/opengraph-image")}
+								image={getVal(settings, "home_azalee_image", "https://azalee.rosegriffon.fr/opengraph-image.png")}
 								logo={getVal(settings, "home_azalee_logo", "/RG_Azalee-logo.webp")}
 								twitterLink={getVal(settings, "home_azalee_twitter", "https://x.com/Azalee_IE")}
 								instagramLink={getVal(

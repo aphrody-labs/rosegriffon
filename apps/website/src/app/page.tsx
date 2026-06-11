@@ -58,9 +58,9 @@ export const metadata: Metadata = {
 			"Association française Inazuma Eleven : événements, streaming et communauté passionnée depuis 2019",
 		images: [
 			{
-				// Convention /opengraph-image (comme azalee + achillea) = capture HD plein écran
-				// de la home (apps/website/src/app/opengraph-image.png).
-				url: "/opengraph-image",
+				// Fichier statique app/opengraph-image.png = capture HD plein écran de la home.
+				// Servi uniquement à /opengraph-image.png (sans extension = 404, cf. azalee idem).
+				url: "/opengraph-image.png",
 				width: 1200,
 				height: 630,
 				alt: "Rose Griffon - Association Inazuma Eleven",
@@ -152,7 +152,7 @@ export default async function Home() {
 			"home_azalee_description",
 			"Le pilier médiatique de Rose Griffon. Ne ratez aucune info sur Victory Road : traductions exclusives, interviews, analyses et couverture complète de l'actualité de la licence."
 		),
-		getPublicSetting("home_azalee_image", "https://azalee.rosegriffon.fr/opengraph-image"),
+		getPublicSetting("home_azalee_image", "https://azalee.rosegriffon.fr/opengraph-image.png"),
 		getPublicSetting("home_azalee_logo", "/RG_Azalee-logo.webp"),
 		getPublicSetting("home_azalee_twitter", "https://x.com/Azalee_IE"),
 		getPublicSetting("home_azalee_instagram", "https://www.instagram.com/azaleefr/"),
