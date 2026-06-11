@@ -23,6 +23,16 @@
 set -uo pipefail
 
 NODE_BIN="${NODE_BIN:-/usr/bin/node}"
+# Sur le VPS, /usr/bin/node (v22+) existe et est requis (azalee self-host).
+# Sur Vercel (image de build Node 24.x), node n'est PAS à /usr/bin/node →
+# fallback sur le node du PATH (toujours du vrai Node ici, jamais Bun).
+if [ ! -x "$NODE_BIN" ]; then
+	NODE_BIN="$(command -v node || true)"
+fi
+if [ -z "$NODE_BIN" ] || [ ! -x "$NODE_BIN" ]; then
+	echo "✗ node introuvable (NODE_BIN='$NODE_BIN') — build impossible" >&2
+	exit 127
+fi
 APP_NAME=$(basename "$(pwd)")
 SERVER_JS=".next/standalone/apps/$APP_NAME/server.js"
 
