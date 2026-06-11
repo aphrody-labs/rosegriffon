@@ -97,7 +97,7 @@ export async function generateMetadata({
 			url: `https://rosegriffon.fr/chroniques${urlSuffix}`,
 			images: [
 				{
-					url: "/opengraph-image",
+					url: "/opengraph-image.png",
 					width: 1200,
 					height: 630,
 					alt: "Rose Griffon - Association Inazuma Eleven",
