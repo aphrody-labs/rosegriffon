@@ -21,13 +21,17 @@ const getDatabaseURL = () => {
 	// Vercel serverless est IPv4-only ; l'hôte direct Supabase (db.<ref>.supabase.co) est IPv6-only
 	// → DNS getaddrinfo ENOTFOUND. On réécrit vers le pooler Supavisor en mode transaction (IPv4, port 6543),
 	// en DÉRIVANT depuis l'URL directe — aucun secret en dur, donc résilient à un scrub d'historique.
-	const direct = url.match(
-		/^postgres(?:ql)?:\/\/([^:]+):([^@]+)@db\.([a-z0-9]+)\.supabase\.co:\d+\/([^?]+)(?:\?.*)?$/,
-	);
-	if (direct) {
-		const [, , password, ref, db] = direct;
-		const region = process.env.SUPABASE_REGION ?? "eu-west-1";
-		return `postgresql://postgres.${ref}:${password}@aws-0-${region}.pooler.supabase.com:6543/${db}`;
+	// EN SELF-HOST VPS (rosegriffon.fr / azalee.rosegriffon.fr) l'IPv6 est dispo et le pooler Supavisor
+	// ne résout plus de façon fiable → on GARDE l'URL directe. Le rewrite n'a lieu que sous Vercel.
+	if (process.env.VERCEL === "1") {
+		const direct = url.match(
+			/^postgres(?:ql)?:\/\/([^:]+):([^@]+)@db\.([a-z0-9]+)\.supabase\.co:\d+\/([^?]+)(?:\?.*)?$/,
+		);
+		if (direct) {
+			const [, , password, ref, db] = direct;
+			const region = process.env.SUPABASE_REGION ?? "eu-west-1";
+			return `postgresql://postgres.${ref}:${password}@aws-0-${region}.pooler.supabase.com:6543/${db}`;
+		}
 	}
 	return url;
 };
