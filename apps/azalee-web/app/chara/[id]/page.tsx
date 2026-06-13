@@ -12,6 +12,7 @@ import { formatDescription, formatJapaneseName } from "@/lib/format-description"
 import { resolveCharaStats } from "@/lib/wiki/chara-stats";
 import { wikiService } from "@/lib/wiki-service";
 import { compareVariants } from "@rose-griffon/inagle";
+import { CharaAssetsSection } from "@/components/wiki/CharaAssetsSection";
 import { CharaVariantsComparison } from "@/components/wiki/CharaVariantsComparison";
 
 /**
@@ -187,7 +188,11 @@ export default async function PlayerDetailPage({ params }: { params: Promise<{ i
 
 	// Fetch all distinct forms of this character (same baseSlug/chara_id, different pos/elem/rarity)
 	const sheetId = (player as any).sheetData?.sheetId;
-	const forms = await wikiService.getCharacterForms(baseChar.charaId, sheetId, baseChar.baseSlug || undefined);
+	const forms = await wikiService.getCharacterForms(
+		baseChar.charaId,
+		sheetId,
+		baseChar.baseSlug || undefined
+	);
 	const auras = await wikiService.getCharacterAuras(baseChar.charaId, variant.charaParamId);
 
 	// Build a map of skillId -> skillName for variant comparisons
@@ -358,8 +363,10 @@ export default async function PlayerDetailPage({ params }: { params: Promise<{ i
 	const moveset: MovesetSkill[] = [];
 	const altMoveset: MovesetSkill[] = [];
 
-	const movesetRaw = ((player as any).sheetData?.moveset || (baseChar as any).sheetData?.moveset) as string | undefined;
-	const altMovesetRaw = ((player as any).sheetData?.altMoveset || (baseChar as any).sheetData?.altMoveset) as string | undefined;
+	const movesetRaw = ((player as any).sheetData?.moveset ||
+		(baseChar as any).sheetData?.moveset) as string | undefined;
+	const altMovesetRaw = ((player as any).sheetData?.altMoveset ||
+		(baseChar as any).sheetData?.altMoveset) as string | undefined;
 
 	if (movesetRaw) {
 		const resolved = await resolveSkillNames(movesetRaw);
@@ -663,6 +670,12 @@ export default async function PlayerDetailPage({ params }: { params: Promise<{ i
 							: undefined
 				}
 			/>
+
+			{player.internalCode && (
+				<div className="mt-6">
+					<CharaAssetsSection internalCode={player.internalCode} />
+				</div>
+			)}
 
 			<CharaVariantsComparison comparisons={comparisons} baseName={charName} />
 
