@@ -45,6 +45,11 @@ export function calculate_stats(main_position: number, sub_position: number, gro
 export function cfgbin_parse_json(bytes: Uint8Array): string;
 
 /**
+ * Décode un `cfg.bin` (octets bruts) en structure de jeu typée selon le nom de fichier.
+ */
+export function cfgbin_typed_json(bytes: Uint8Array, filename: string): string;
+
+/**
  * Extrait et décompresse un fichier d'un CPK.
  */
 export function cpk_extract_file(cpk_bytes: Uint8Array, cpk_filename: string, entry_json: string): Uint8Array;
@@ -205,6 +210,7 @@ export interface InitOutput {
     readonly aura_lookup: (a: number, b: number, c: number, d: number) => [number, number, number, number];
     readonly calculate_stats: (a: number, b: number, c: number, d: number, e: number, f: number) => [number, number];
     readonly cfgbin_parse_json: (a: number, b: number) => [number, number, number, number];
+    readonly cfgbin_typed_json: (a: number, b: number, c: number, d: number) => [number, number, number, number];
     readonly cpk_extract_file: (a: number, b: number, c: number, d: number, e: number, f: number) => [number, number, number, number];
     readonly cpk_parse_entries: (a: number, b: number, c: number, d: number) => [number, number, number, number];
     readonly crilayla_decompress: (a: number, b: number) => [number, number, number, number];

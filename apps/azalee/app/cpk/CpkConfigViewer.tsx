@@ -10,7 +10,8 @@ import { useEffect, useState } from "react";
 import { Icon } from "@/components/ui/Icon";
 import { CpkFormationViewer } from "@/app/cpk/CpkFormationViewer";
 import { CpkJsonTree } from "@/app/cpk/CpkJsonTree";
-import { cpkCfgUrl, cpkTypedUrl, type CpkTypedResponse } from "@/lib/cpk/shared";
+import { cpkCfgUrl, cpkRawUrl } from "@/lib/cpk/shared";
+import { cfgbinTyped } from "@/lib/cpk-wasm";
 
 /** Libellé humain d'une famille de jeu (badge). */
 const FAMILY_LABEL: Record<string, string> = {
@@ -45,11 +46,14 @@ export function CpkConfigViewer({ path }: { path: string }) {
 		setState({ status: "loading" });
 
 		(async () => {
-			// 1. Décodage typé (RDBN à listes ou T2B à entrées).
+			const filename = path.split("/").pop() ?? path;
+			// 1. Décodage typé NATIF IN-BROWSER (wasm nie-data) depuis les octets bruts (/raw).
+			//    Mêmes parseurs Rust que le jeu — aucune dépendance à la route serveur /typed.
 			try {
-				const res = await fetch(cpkTypedUrl(path));
+				const res = await fetch(cpkRawUrl(path));
 				if (res.ok) {
-					const body = (await res.json()) as CpkTypedResponse;
+					const bytes = new Uint8Array(await res.arrayBuffer());
+					const body = await cfgbinTyped(bytes, filename);
 					if (cancelled) return;
 					if (body.family) {
 						setState({ status: "typed", family: body.family, data: body.data });
@@ -59,9 +63,9 @@ export function CpkConfigViewer({ path }: { path: string }) {
 					return;
 				}
 			} catch {
-				/* tombe sur le repli /cfg */
+				/* octets non RDBN/T2B ou wasm indispo → repli serveur /cfg */
 			}
-			// 2. Repli : /cfg (gère aussi les formats hiérarchiques hors RDBN/T2B à listes).
+			// 2. Repli serveur : /cfg (formats hiérarchiques hors RDBN/T2B à listes).
 			try {
 				const res = await fetch(cpkCfgUrl(path));
 				if (!res.ok) throw new Error(String(res.status));

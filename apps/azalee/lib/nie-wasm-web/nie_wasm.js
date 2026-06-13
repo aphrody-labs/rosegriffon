@@ -107,6 +107,35 @@ export function cfgbin_parse_json(bytes) {
 }
 
 /**
+ * Décode un `cfg.bin` (octets bruts) en structure de jeu typée selon le nom de fichier.
+ * @param {Uint8Array} bytes
+ * @param {string} filename
+ * @returns {string}
+ */
+export function cfgbin_typed_json(bytes, filename) {
+    let deferred4_0;
+    let deferred4_1;
+    try {
+        const ptr0 = passArray8ToWasm0(bytes, wasm.__wbindgen_malloc);
+        const len0 = WASM_VECTOR_LEN;
+        const ptr1 = passStringToWasm0(filename, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        const len1 = WASM_VECTOR_LEN;
+        const ret = wasm.cfgbin_typed_json(ptr0, len0, ptr1, len1);
+        var ptr3 = ret[0];
+        var len3 = ret[1];
+        if (ret[3]) {
+            ptr3 = 0; len3 = 0;
+            throw takeFromExternrefTable0(ret[2]);
+        }
+        deferred4_0 = ptr3;
+        deferred4_1 = len3;
+        return getStringFromWasm0(ptr3, len3);
+    } finally {
+        wasm.__wbindgen_free(deferred4_0, deferred4_1, 1);
+    }
+}
+
+/**
  * Extrait et décompresse un fichier d'un CPK.
  * @param {Uint8Array} cpk_bytes
  * @param {string} cpk_filename
@@ -737,11 +766,7 @@ async function __wbg_init(module_or_path) {
     }
 
     if (module_or_path === undefined) {
-        // Vendored pour azalee : le binaire wasm est servi depuis public/wasm/ et
-        // passé explicitement via `init({ module_or_path: fetch('/wasm/nie_wasm_bg.wasm') })`
-        // (cf. lib/save-reader.ts). On NE résout PAS `new URL(..., import.meta.url)` :
-        // ce pattern ferait chercher au bundler un asset wasm absent de ce dossier.
-        throw new Error("nie-wasm: passez les octets wasm explicitement (module_or_path)");
+        module_or_path = new URL('nie_wasm_bg.wasm', import.meta.url);
     }
     const imports = __wbg_get_imports();
 
