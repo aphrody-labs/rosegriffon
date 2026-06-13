@@ -15,6 +15,11 @@ const CharacterModelViewer = dynamic(() => import("@/components/wiki/CharacterMo
 	ssr: false,
 });
 
+// Sous-domaines chr dont le G4MD est empaqueté dans le `.g4pkm` (pas en fichier libre) et
+// que le serveur assemble en GLB **texturé** (route /model-chr/<sub>/<code>.glb).
+const SERVER_SUBS = new Set(["waza", "item", "animal", "keshin", "armd"]);
+const CDN = "https://cdn.rosegriffon.fr";
+
 export function CpkModelViewer({ path, name }: { path: string; name: string }) {
 	const [url, setUrl] = useState<string | null>(null);
 	const [error, setError] = useState(false);
@@ -25,9 +30,17 @@ export function CpkModelViewer({ path, name }: { path: string; name: string }) {
 		setUrl(null);
 		setError(false);
 
+		// Modèles à G4MD packé (_waza/_item/_keshin/_animal/_armd) → route serveur texturée.
+		const sub = path.match(/\/common\/chr\/_([a-z]+)\/([^/]+)\/[^/]+\.g4m[dg]$/i);
+		if (sub && SERVER_SUBS.has(sub[1].toLowerCase())) {
+			setUrl(`${CDN}/model-chr/${sub[1].toLowerCase()}/${sub[2]}.glb`);
+			return;
+		}
+
 		(async () => {
 			try {
-				// Paire G4MD (descripteur) + G4MG (géométrie) — chemins siblings.
+				// Paire G4MD (descripteur) + G4MG (géométrie) libres (cas _face/_uniform) →
+				// assemblage in-browser (wasm).
 				const mdPath = path.replace(/\.g4mg$/i, ".g4md");
 				const mgPath = mdPath.replace(/\.g4md$/i, ".g4mg");
 				const [mdRes, mgRes] = await Promise.all([
