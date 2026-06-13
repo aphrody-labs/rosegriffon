@@ -308,6 +308,23 @@ export function g4mg_extract_json(g4mg_bytes, g4md_json) {
 }
 
 /**
+ * Décode un `.g4tx` (octets bruts) en PNG (octets), in-browser.
+ * @param {Uint8Array} bytes
+ * @returns {Uint8Array}
+ */
+export function g4tx_to_png(bytes) {
+    const ptr0 = passArray8ToWasm0(bytes, wasm.__wbindgen_malloc);
+    const len0 = WASM_VECTOR_LEN;
+    const ret = wasm.g4tx_to_png(ptr0, len0);
+    if (ret[3]) {
+        throw takeFromExternrefTable0(ret[2]);
+    }
+    var v2 = getArrayU8FromWasm0(ret[0], ret[1]).slice();
+    wasm.__wbindgen_free(ret[0], ret[1] * 1, 1);
+    return v2;
+}
+
+/**
  * Installe le hook de panique `console_error_panic_hook`.
  *
  * Appeler cette fonction UNE FOIS au démarrage (après `await init()`) pour que
@@ -766,10 +783,7 @@ async function __wbg_init(module_or_path) {
     }
 
     if (module_or_path === undefined) {
-        // Patch azalee : le défaut `new URL('nie_wasm_bg.wasm', import.meta.url)` casse
-        // le bundle Turbopack (Module not found). On passe TOUJOURS `module_or_path`
-        // explicitement (fetch('/wasm/nie_wasm_bg.wasm')) — cf. lib/cpk-wasm.ts & save-reader.ts.
-        throw new Error("nie-wasm: module_or_path requis (fetch('/wasm/nie_wasm_bg.wasm'))");
+        throw new Error("nie-wasm: module_or_path requis");
     }
     const imports = __wbg_get_imports();
 
