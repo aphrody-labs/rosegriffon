@@ -85,15 +85,19 @@ export function cpkAssetUrl(path: string, ext?: string): string | null {
 
 	if (kind === "image") {
 		// g4tx vivent 100 % sous `data/dx11/` → `/dx11/<reste>.png` (g4tx→png live).
-		const rel = path.startsWith("data/dx11/") ? path.slice("data/dx11/".length) : stripDataPrefix(path);
+		const rel = path.startsWith("data/dx11/")
+			? path.slice("data/dx11/".length)
+			: stripDataPrefix(path);
 		const noExt = rel.replace(/\.g4tx$/i, "");
 		return `${CDN_BASE}/dx11/${noExt}.png`;
 	}
 
 	if (kind === "model") {
-		// `/model/<code>.glb` — `code` = basename sans extension (ex. `n031708`).
+		// `/model-full/<code>.glb` — assemblage glTF live (corps+visage+uniforme) par
+		// nie-model-serve. `code` = basename sans extension (ex. `n031708`). L'ancienne
+		// route `/model/` n'existe pas côté serveur (404) ; `/model-full/` est la vraie.
 		const base = name.replace(/\.(g4md|g4mg)$/i, "");
-		return `${CDN_BASE}/model/${base}.glb`;
+		return `${CDN_BASE}/model-full/${base}.glb`;
 	}
 
 	// raw : bytes décompressés/déchiffrés bruts du CPK (nie-model-serve /raw, texte/download).
@@ -106,6 +110,28 @@ export function cpkAssetUrl(path: string, ext?: string): string | null {
  */
 export function cpkCfgUrl(path: string): string {
 	return `${CDN_BASE}/cfg/${path}.json`;
+}
+
+/**
+ * URL du décodage **typé** d'un `cfg.bin` (`/typed/<vfs-path>.json`) — nie-model-serve
+ * dispatche vers le parseur de famille `nie-data` (formation, skill, item, mission…) et
+ * renvoie `{ family, data }` (structures de jeu nommées), ou `{ family: null, key, generic }`
+ * si aucune famille typée ne correspond (le caller bascule sur l'arbre JSON brut).
+ */
+export function cpkTypedUrl(path: string): string {
+	return `${CDN_BASE}/typed/${path}.json`;
+}
+
+/** Réponse de `/typed` : soit une famille reconnue + données typées, soit un repli générique. */
+export interface CpkTypedResponse {
+	/** Nom de la famille de jeu (`"formation"`, `"item"`…) ou `null` si non typée. */
+	family: string | null;
+	/** Données typées de la famille (présent si `family` non nul). */
+	data?: unknown;
+	/** Clé de fichier dérivée (présent si `family` nul) — aide au diagnostic. */
+	key?: string;
+	/** RDBN/T2B brut (forme iecode) si aucune famille typée. */
+	generic?: unknown;
 }
 
 /** URL des bytes bruts décompressés du CPK (`/raw/<vfs-path>`) — texte, download, lecteurs. */
@@ -190,14 +216,7 @@ export function normalizeDir(path: string): string {
  * rendu de la fiche fichier (`<img>`, viewer 3D, player audio/vidéo, texte,
  * config binaire, ou lien brut). Purement dérivée de l'extension.
  */
-export type CpkPreviewKind =
-	| "image"
-	| "model"
-	| "text"
-	| "config"
-	| "sound"
-	| "movie"
-	| "raw";
+export type CpkPreviewKind = "image" | "model" | "text" | "config" | "sound" | "movie" | "raw";
 
 const TEXT_EXTS = new Set(["txt", "json", "xml", "csv", "lua", "cfg", "ini", "yml", "yaml"]);
 const CONFIG_EXTS = new Set(["bin", "objbin", "fxbin", "mevbin", "cfg.bin"]);
