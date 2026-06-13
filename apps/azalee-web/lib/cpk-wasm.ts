@@ -8,7 +8,12 @@
  * Module wasm vendoré (`lib/nie-wasm-web/`, build `wasm-bindgen --target web`), binaire
  * servi same-origin depuis `/wasm/nie_wasm_bg.wasm` (`public/`). Instancié une fois.
  */
-import init, { cfgbin_typed_json, g4tx_to_png, init_panic_hook } from "./nie-wasm-web/nie_wasm.js";
+import init, {
+	audio_to_wav,
+	cfgbin_typed_json,
+	g4tx_to_png,
+	init_panic_hook,
+} from "./nie-wasm-web/nie_wasm.js";
 
 /** URL same-origin du binaire wasm. */
 const WASM_URL = "/wasm/nie_wasm_bg.wasm";
@@ -61,4 +66,16 @@ export async function cfgbinTyped(bytes: Uint8Array, filename: string): Promise<
 export async function g4txToPng(bytes: Uint8Array): Promise<Uint8Array> {
 	await ensureWasm();
 	return g4tx_to_png(bytes);
+}
+
+/**
+ * Décode un audio CRI (HCA/ADX/AWB/ACB, octets bruts) en **WAV** PCM16, in-browser.
+ *
+ * @param bytes octets bruts de l'audio (ex. `/raw` ; pour un `.acb` sans AWB embarqué,
+ *   passer plutôt les octets du `.awb` sibling — la résolution se fait côté appelant).
+ * @throws si le wasm échoue, ou si le format n'est pas un audio CRI décodable.
+ */
+export async function audioToWav(bytes: Uint8Array): Promise<Uint8Array> {
+	await ensureWasm();
+	return audio_to_wav(bytes);
 }
