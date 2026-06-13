@@ -102,6 +102,11 @@ export function g4md_parse_json(bytes: Uint8Array): string;
 export function g4mg_extract_json(g4mg_bytes: Uint8Array, g4md_json: string): string;
 
 /**
+ * Décode un `.g4tx` (octets bruts) en PNG (octets), in-browser.
+ */
+export function g4tx_to_png(bytes: Uint8Array): Uint8Array;
+
+/**
  * Installe le hook de panique `console_error_panic_hook`.
  *
  * Appeler cette fonction UNE FOIS au démarrage (après `await init()`) pour que
@@ -218,6 +223,7 @@ export interface InitOutput {
     readonly final_score: (a: number, b: number) => number;
     readonly g4md_parse_json: (a: number, b: number) => [number, number, number, number];
     readonly g4mg_extract_json: (a: number, b: number, c: number, d: number) => [number, number, number, number];
+    readonly g4tx_to_png: (a: number, b: number) => [number, number, number, number];
     readonly item_lookup: (a: number, b: number) => [number, number, number, number];
     readonly match_tick: (a: number, b: number, c: number, d: number) => [number, number, number, number];
     readonly parse_save_json: (a: number, b: number, c: number, d: number) => [number, number, number, number];

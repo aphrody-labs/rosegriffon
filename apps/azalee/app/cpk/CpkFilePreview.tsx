@@ -21,6 +21,7 @@ import { useEffect, useState } from "react";
 import { Icon } from "@/components/ui/Icon";
 import { CpkConfigViewer } from "@/app/cpk/CpkConfigViewer";
 import { CpkHexViewer } from "@/app/cpk/CpkHexViewer";
+import { CpkImageViewer } from "@/app/cpk/CpkImageViewer";
 import {
 	cpkAudioUrl,
 	cpkPreviewKind,
@@ -96,26 +97,11 @@ export function CpkFilePreview(props: CpkFilePreviewProps) {
 }
 
 function PreviewBody(props: CpkFilePreviewProps & { previewKind: CpkPreviewKind }) {
-	const { name, path, assetUrl, thumbUrl, previewKind } = props;
+	const { name, path, assetUrl, previewKind } = props;
 
-	if (previewKind === "image" && assetUrl) {
-		return (
-			<a
-				href={assetUrl}
-				target="_blank"
-				rel="noopener noreferrer"
-				className="block bg-surface-container-high"
-			>
-				{/* CDN webp déjà optimisé → <img> brut (pas de quota Next/image). */}
-				{/* eslint-disable-next-line @next/next/no-img-element */}
-				<img
-					src={thumbUrl ?? assetUrl}
-					alt={name}
-					loading="lazy"
-					className="mx-auto max-h-[60vh] w-auto object-contain p-4"
-				/>
-			</a>
-		);
+	if (previewKind === "image") {
+		// Décodage g4tx→PNG NATIF IN-BROWSER (wasm) depuis /raw ; repli serveur /dx11.
+		return <CpkImageViewer path={path} name={name} fallbackUrl={assetUrl} />;
 	}
 
 	if (previewKind === "model") {

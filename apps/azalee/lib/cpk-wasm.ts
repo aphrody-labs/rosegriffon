@@ -8,7 +8,7 @@
  * Module wasm vendoré (`lib/nie-wasm-web/`, build `wasm-bindgen --target web`), binaire
  * servi same-origin depuis `/wasm/nie_wasm_bg.wasm` (`public/`). Instancié une fois.
  */
-import init, { cfgbin_typed_json, init_panic_hook } from "./nie-wasm-web/nie_wasm.js";
+import init, { cfgbin_typed_json, g4tx_to_png, init_panic_hook } from "./nie-wasm-web/nie_wasm.js";
 
 /** URL same-origin du binaire wasm. */
 const WASM_URL = "/wasm/nie_wasm_bg.wasm";
@@ -49,4 +49,16 @@ export async function cfgbinTyped(bytes: Uint8Array, filename: string): Promise<
 	await ensureWasm();
 	const json = cfgbin_typed_json(bytes, filename);
 	return JSON.parse(json) as CpkTypedDecoded;
+}
+
+/**
+ * Décode une texture `.g4tx` (octets bruts) en **PNG**, dans le navigateur (DDS
+ * BC1/BC3/BC5/BC7 → RGBA → PNG via wasm). Renvoie les octets PNG.
+ *
+ * @param bytes octets bruts du `.g4tx` (décompressés du CPK, ex. via `/raw`).
+ * @throws si le wasm échoue, ou si le `.g4tx` n'a pas de texture DDS décodable.
+ */
+export async function g4txToPng(bytes: Uint8Array): Promise<Uint8Array> {
+	await ensureWasm();
+	return g4tx_to_png(bytes);
 }
