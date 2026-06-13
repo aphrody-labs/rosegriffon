@@ -1,0 +1,3880 @@
+{
+  "assets": [
+    {
+      "code": "c01001900",
+      "face_g4md": "data/common/chr/_face/01_ie1/c01001900/c01001900.g4md",
+      "face_g4mg": "data/common/chr/_face/01_ie1/c01001900/c01001900.g4mg",
+      "face_g4tx": "data/dx11/chr/_face/01_ie1/c01001900/c01001900.g4tx",
+      "icon_g4tx": "data/dx11/menu/200_icon/10_icon_chr/face/c01001900_l.g4tx",
+      "model_full_code": "c01001900",
+      "voice_acb": "data/common/sound_asset/ja/c01001900.acb",
+      "voice_awb": "data/common/sound_asset/ja/c01001900.awb"
+    },
+    {
+      "code": "c05026590",
+      "face_g4md": "data/common/chr/_face/05_go2/c05026590/c05026590.g4md",
+      "face_g4mg": "data/common/chr/_face/05_go2/c05026590/c05026590.g4mg",
+      "face_g4tx": "data/dx11/chr/_face/05_go2/c05026590/c05026590.g4tx",
+      "icon_g4tx": "data/dx11/menu/200_icon/10_icon_chr/face/c05026590_l.g4tx",
+      "model_full_code": "c05026590",
+      "voice_acb": "data/common/sound_asset/ja/c05026590.acb",
+      "voice_awb": "data/common/sound_asset/ja/c05026590.awb"
+    },
+    {
+      "code": "c07080010",
+      "face_g4md": "data/common/chr/_face/07_ares/c07080010/c07080010.g4md",
+      "face_g4mg": "data/common/chr/_face/07_ares/c07080010/c07080010.g4mg",
+      "face_g4tx": "data/dx11/chr/_face/07_ares/c07080010/c07080010.g4tx",
+      "icon_g4tx": "data/dx11/menu/200_icon/10_icon_chr/face/c07080010_l.g4tx",
+      "model_full_code": "c07080010",
+      "voice_acb": "data/common/sound_asset/ja/c07080010.acb",
+      "voice_awb": "data/common/sound_asset/ja/c07080010.awb"
+    }
+  ],
+  "identity": {
+    "constellation_en": "Inazumis",
+    "constellation_fr": "Éclaris",
+    "element_id": 2,
+    "gender_male": true,
+    "main_position": 3,
+    "name_en": "Byron Love Aphrody",
+    "name_fr": "Byron Love Aphrody",
+    "name_ja": "亜風炉 照美 アフロディ",
+    "nickname_en": "Aphrody",
+    "nickname_ja": "アフロディ",
+    "series_id": 1659389071,
+    "sub_position": 2,
+    "team_id": 2611819281,
+    "team_name_en": "Zeus",
+    "zukan_order": 166
+  },
+  "series": [
+    {
+      "base_id": 936881403,
+      "code": "c01001900",
+      "face_subdir": "01_ie1",
+      "label": "Inazuma Eleven (IE1)"
+    },
+    {
+      "base_id": 4233601308,
+      "code": "c05026590",
+      "face_subdir": "05_go2",
+      "label": "Inazuma Eleven GO"
+    },
+    {
+      "base_id": 3389112235,
+      "code": "c07080010",
+      "face_subdir": "07_ares",
+      "label": "Ares"
+    }
+  ],
+  "stats": {
+    "lv1": {
+      "agility": 9,
+      "control": 14,
+      "intelligence": 11,
+      "kick": 13,
+      "physical": 10,
+      "pressure": 10,
+      "technique": 12
+    },
+    "lv50": {
+      "agility": 81,
+      "control": 109,
+      "intelligence": 97,
+      "kick": 100,
+      "physical": 87,
+      "pressure": 88,
+      "technique": 105
+    },
+    "lv99": {
+      "agility": 129,
+      "control": 174,
+      "intelligence": 155,
+      "kick": 160,
+      "physical": 140,
+      "pressure": 141,
+      "technique": 169
+    }
+  },
+  "variants": [
+    {
+      "auras": [
+        {
+          "cmd": {
+            "asset_code": "wap01005",
+            "aura_id": 2709273970,
+            "config": {
+              "buff_id": 2478045099,
+              "rank": 3005,
+              "skill_id1": null,
+              "skill_id2": null,
+              "val11": 1,
+              "val4": 30,
+              "val5": 90,
+              "val9": 8
+            },
+            "desc_id": 1932039139,
+            "element": 0,
+            "name_id": 3312214375,
+            "sub_type": "Aura"
+          },
+          "learn_level": 38
+        },
+        {
+          "cmd": {
+            "asset_code": "wap01001",
+            "aura_id": 2786195819,
+            "config": {
+              "buff_id": 2478045099,
+              "rank": 3001,
+              "skill_id1": null,
+              "skill_id2": null,
+              "val11": 1,
+              "val4": 30,
+              "val5": 90,
+              "val9": 8
+            },
+            "desc_id": 1950701562,
+            "element": 0,
+            "name_id": 3254887806,
+            "sub_type": "Aura"
+          },
+          "learn_level": 38
+        }
+      ],
+      "chara_base_id": 936881403,
+      "chara_param_id": 2653135497,
+      "code": "c01001900",
+      "element": 2,
+      "growth_pattern": 0,
+      "is_primary": true,
+      "main_position": 3,
+      "sub_position": 2,
+      "techniques": [
+        {
+          "cutin": {
+            "effects_dir": "data/common/event/techo0010/techo0010/",
+            "event_id_name": "techo0010",
+            "model_g4md": "data/common/chr/_waza/techo0010/techo0010.g4md",
+            "model_g4mg": "data/common/chr/_waza/techo0010/techo0010.g4mg",
+            "sound_cfg": "data/common/event_cfg/snd/techo0010_snd.cfg.bin",
+            "telop_by_lang": [
+              [
+                "de",
+                "data/dx11/menu/220_img/telop_waza/de/rho10010.g4tx"
+              ],
+              [
+                "en",
+                "data/dx11/menu/220_img/telop_waza/en/rho10010.g4tx"
+              ],
+              [
+                "es",
+                "data/dx11/menu/220_img/telop_waza/es/rho10010.g4tx"
+              ],
+              [
+                "fr",
+                "data/dx11/menu/220_img/telop_waza/fr/rho10010.g4tx"
+              ],
+              [
+                "it",
+                "data/dx11/menu/220_img/telop_waza/it/rho10010.g4tx"
+              ],
+              [
+                "pt",
+                "data/dx11/menu/220_img/telop_waza/pt/rho10010.g4tx"
+              ],
+              [
+                "zh_hans",
+                "data/dx11/menu/220_img/telop_waza/zh_hans/rho10010.g4tx"
+              ],
+              [
+                "zh_hant",
+                "data/dx11/menu/220_img/telop_waza/zh_hant/rho10010.g4tx"
+              ]
+            ],
+            "texture_g4tx": "data/dx11/chr/_waza/techo0010/techo0010.g4tx"
+          },
+          "info": {
+            "category": 2,
+            "cmd_opt_idx": 3,
+            "color_idx": 0,
+            "consume_tp": 40,
+            "eldorado": false,
+            "element": 5,
+            "event_id": 2719103316,
+            "event_id_name": "techo0010",
+            "fail_event_id": 0,
+            "fail_event_id_name": "",
+            "focus_battle_effect_id": 0,
+            "foul_rate": 0,
+            "growth_type": 0,
+            "is_disable_playable_until_next_patch": false,
+            "partner1": 0,
+            "partner2": 0,
+            "partner3": 0,
+            "partner_type": 0,
+            "power_max": 200,
+            "power_min": 30,
+            "recast_time": 60,
+            "series_id_crc": 0,
+            "skill_desc_id": 2252307085,
+            "skill_effect_bit_flag": 0,
+            "skill_id": 1646874000,
+            "skill_id_str": "rho10010",
+            "skill_name_id": 104403333,
+            "telop_info_id": 0
+          },
+          "learn_level": 0
+        },
+        {
+          "cutin": {
+            "effects_dir": "data/common/event/ev60/ev60_00340/",
+            "event_id_name": "ev60_00340",
+            "model_g4md": "data/common/chr/_waza/ev60_00340/ev60_00340.g4md",
+            "model_g4mg": "data/common/chr/_waza/ev60_00340/ev60_00340.g4mg",
+            "sound_cfg": "data/common/event_cfg/snd/ev60_00340_snd.cfg.bin",
+            "telop_by_lang": [
+              [
+                "de",
+                "data/dx11/menu/220_img/telop_waza/de/whs00340.g4tx"
+              ],
+              [
+                "en",
+                "data/dx11/menu/220_img/telop_waza/en/whs00340.g4tx"
+              ],
+              [
+                "es",
+                "data/dx11/menu/220_img/telop_waza/es/whs00340.g4tx"
+              ],
+              [
+                "fr",
+                "data/dx11/menu/220_img/telop_waza/fr/whs00340.g4tx"
+              ],
+              [
+                "it",
+                "data/dx11/menu/220_img/telop_waza/it/whs00340.g4tx"
+              ],
+              [
+                "pt",
+                "data/dx11/menu/220_img/telop_waza/pt/whs00340.g4tx"
+              ],
+              [
+                "zh_hans",
+                "data/dx11/menu/220_img/telop_waza/zh_hans/whs00340.g4tx"
+              ],
+              [
+                "zh_hant",
+                "data/dx11/menu/220_img/telop_waza/zh_hant/whs00340.g4tx"
+              ]
+            ],
+            "texture_g4tx": "data/dx11/chr/_waza/ev60_00340/ev60_00340.g4tx"
+          },
+          "info": {
+            "category": 1,
+            "cmd_opt_idx": 2,
+            "color_idx": 1,
+            "consume_tp": 70,
+            "eldorado": false,
+            "element": 1,
+            "event_id": 2872082466,
+            "event_id_name": "ev60_00340",
+            "fail_event_id": 0,
+            "fail_event_id_name": "",
+            "focus_battle_effect_id": 0,
+            "foul_rate": 0,
+            "growth_type": 3,
+            "is_disable_playable_until_next_patch": false,
+            "partner1": 0,
+            "partner2": 0,
+            "partner3": 0,
+            "partner_type": 0,
+            "power_max": 440,
+            "power_min": 70,
+            "recast_time": 90,
+            "series_id_crc": 1659389071,
+            "skill_desc_id": 4170896805,
+            "skill_effect_bit_flag": 0,
+            "skill_id": 478995128,
+            "skill_id_str": "whs00340",
+            "skill_name_id": 2023538349,
+            "telop_info_id": 609963765
+          },
+          "learn_level": 1
+        },
+        {
+          "cutin": {
+            "effects_dir": "data/common/event/ev61/ev61_00200/",
+            "event_id_name": "ev61_00200",
+            "model_g4md": "data/common/chr/_waza/ev61_00200/ev61_00200.g4md",
+            "model_g4mg": "data/common/chr/_waza/ev61_00200/ev61_00200.g4mg",
+            "sound_cfg": "data/common/event_cfg/snd/ev61_00200_snd.cfg.bin",
+            "telop_by_lang": [
+              [
+                "de",
+                "data/dx11/menu/220_img/telop_waza/de/who00200.g4tx"
+              ],
+              [
+                "en",
+                "data/dx11/menu/220_img/telop_waza/en/who00200.g4tx"
+              ],
+              [
+                "es",
+                "data/dx11/menu/220_img/telop_waza/es/who00200.g4tx"
+              ],
+              [
+                "fr",
+                "data/dx11/menu/220_img/telop_waza/fr/who00200.g4tx"
+              ],
+              [
+                "it",
+                "data/dx11/menu/220_img/telop_waza/it/who00200.g4tx"
+              ],
+              [
+                "pt",
+                "data/dx11/menu/220_img/telop_waza/pt/who00200.g4tx"
+              ],
+              [
+                "zh_hans",
+                "data/dx11/menu/220_img/telop_waza/zh_hans/who00200.g4tx"
+              ],
+              [
+                "zh_hant",
+                "data/dx11/menu/220_img/telop_waza/zh_hant/who00200.g4tx"
+              ]
+            ],
+            "texture_g4tx": "data/dx11/chr/_waza/ev61_00200/ev61_00200.g4tx"
+          },
+          "info": {
+            "category": 2,
+            "cmd_opt_idx": 2,
+            "color_idx": 1,
+            "consume_tp": 80,
+            "eldorado": false,
+            "element": 1,
+            "event_id": 1760109733,
+            "event_id_name": "ev61_00200",
+            "fail_event_id": 0,
+            "fail_event_id_name": "",
+            "focus_battle_effect_id": 0,
+            "foul_rate": 0,
+            "growth_type": 6,
+            "is_disable_playable_until_next_patch": false,
+            "partner1": 0,
+            "partner2": 0,
+            "partner3": 0,
+            "partner_type": 0,
+            "power_max": 540,
+            "power_min": 85,
+            "recast_time": 60,
+            "series_id_crc": 1659389071,
+            "skill_desc_id": 3911235702,
+            "skill_effect_bit_flag": 0,
+            "skill_id": 221679467,
+            "skill_id_str": "who00200",
+            "skill_name_id": 1764152190,
+            "telop_info_id": 903947046
+          },
+          "learn_level": 13
+        },
+        {
+          "cutin": {
+            "effects_dir": "data/common/event/ev60/ev60_00900/",
+            "event_id_name": "ev60_00900",
+            "model_g4md": "data/common/chr/_waza/ev60_00900/ev60_00900.g4md",
+            "model_g4mg": "data/common/chr/_waza/ev60_00900/ev60_00900.g4mg",
+            "sound_cfg": "data/common/event_cfg/snd/ev60_00900_snd.cfg.bin",
+            "telop_by_lang": [
+              [
+                "de",
+                "data/dx11/menu/220_img/telop_waza/de/whs00900.g4tx"
+              ],
+              [
+                "en",
+                "data/dx11/menu/220_img/telop_waza/en/whs00900.g4tx"
+              ],
+              [
+                "es",
+                "data/dx11/menu/220_img/telop_waza/es/whs00900.g4tx"
+              ],
+              [
+                "fr",
+                "data/dx11/menu/220_img/telop_waza/fr/whs00900.g4tx"
+              ],
+              [
+                "it",
+                "data/dx11/menu/220_img/telop_waza/it/whs00900.g4tx"
+              ],
+              [
+                "pt",
+                "data/dx11/menu/220_img/telop_waza/pt/whs00900.g4tx"
+              ],
+              [
+                "zh_hans",
+                "data/dx11/menu/220_img/telop_waza/zh_hans/whs00900.g4tx"
+              ],
+              [
+                "zh_hant",
+                "data/dx11/menu/220_img/telop_waza/zh_hant/whs00900.g4tx"
+              ]
+            ],
+            "texture_g4tx": "data/dx11/chr/_waza/ev60_00900/ev60_00900.g4tx"
+          },
+          "info": {
+            "category": 1,
+            "cmd_opt_idx": 2,
+            "color_idx": 1,
+            "consume_tp": 80,
+            "eldorado": false,
+            "element": 1,
+            "event_id": 3268133104,
+            "event_id_name": "ev60_00900",
+            "fail_event_id": 0,
+            "fail_event_id_name": "",
+            "focus_battle_effect_id": 0,
+            "foul_rate": 0,
+            "growth_type": 7,
+            "is_disable_playable_until_next_patch": false,
+            "partner1": 0,
+            "partner2": 0,
+            "partner3": 0,
+            "partner_type": 0,
+            "power_max": 540,
+            "power_min": 85,
+            "recast_time": 90,
+            "series_id_crc": 4225832245,
+            "skill_desc_id": 2439091575,
+            "skill_effect_bit_flag": 0,
+            "skill_id": 1970774634,
+            "skill_id_str": "whs00900",
+            "skill_name_id": 292028031,
+            "telop_info_id": 1302335015
+          },
+          "learn_level": 20
+        },
+        {
+          "cutin": {
+            "effects_dir": "data/common/event/ev60/ev60_01250/",
+            "event_id_name": "ev60_01250",
+            "model_g4md": "data/common/chr/_waza/ev60_01250/ev60_01250.g4md",
+            "model_g4mg": "data/common/chr/_waza/ev60_01250/ev60_01250.g4mg",
+            "sound_cfg": "data/common/event_cfg/snd/ev60_01250_snd.cfg.bin",
+            "telop_by_lang": [
+              [
+                "de",
+                "data/dx11/menu/220_img/telop_waza/de/whs01250.g4tx"
+              ],
+              [
+                "en",
+                "data/dx11/menu/220_img/telop_waza/en/whs01250.g4tx"
+              ],
+              [
+                "es",
+                "data/dx11/menu/220_img/telop_waza/es/whs01250.g4tx"
+              ],
+              [
+                "fr",
+                "data/dx11/menu/220_img/telop_waza/fr/whs01250.g4tx"
+              ],
+              [
+                "it",
+                "data/dx11/menu/220_img/telop_waza/it/whs01250.g4tx"
+              ],
+              [
+                "pt",
+                "data/dx11/menu/220_img/telop_waza/pt/whs01250.g4tx"
+              ],
+              [
+                "zh_hans",
+                "data/dx11/menu/220_img/telop_waza/zh_hans/whs01250.g4tx"
+              ],
+              [
+                "zh_hant",
+                "data/dx11/menu/220_img/telop_waza/zh_hant/whs01250.g4tx"
+              ]
+            ],
+            "texture_g4tx": "data/dx11/chr/_waza/ev60_01250/ev60_01250.g4tx"
+          },
+          "info": {
+            "category": 1,
+            "cmd_opt_idx": 2,
+            "color_idx": 3,
+            "consume_tp": 100,
+            "eldorado": false,
+            "element": 2,
+            "event_id": 190168113,
+            "event_id_name": "ev60_01250",
+            "fail_event_id": 0,
+            "fail_event_id_name": "",
+            "focus_battle_effect_id": 0,
+            "foul_rate": 0,
+            "growth_type": 7,
+            "is_disable_playable_until_next_patch": false,
+            "partner1": 0,
+            "partner2": 0,
+            "partner3": 0,
+            "partner_type": 3,
+            "power_max": 640,
+            "power_min": 100,
+            "recast_time": 90,
+            "series_id_crc": 2363893155,
+            "skill_desc_id": 1493166518,
+            "skill_effect_bit_flag": 0,
+            "skill_id": 3169443499,
+            "skill_id_str": "whs01250",
+            "skill_name_id": 3640230590,
+            "telop_info_id": 2218685158
+          },
+          "learn_level": 30
+        },
+        {
+          "cutin": {
+            "effects_dir": "data/common/event/ev60/ev60_00310/",
+            "event_id_name": "ev60_00310",
+            "model_g4md": "data/common/chr/_waza/ev60_00310/ev60_00310.g4md",
+            "model_g4mg": "data/common/chr/_waza/ev60_00310/ev60_00310.g4mg",
+            "sound_cfg": "data/common/event_cfg/snd/ev60_00310_snd.cfg.bin",
+            "telop_by_lang": [
+              [
+                "de",
+                "data/dx11/menu/220_img/telop_waza/de/whs00310.g4tx"
+              ],
+              [
+                "en",
+                "data/dx11/menu/220_img/telop_waza/en/whs00310.g4tx"
+              ],
+              [
+                "es",
+                "data/dx11/menu/220_img/telop_waza/es/whs00310.g4tx"
+              ],
+              [
+                "fr",
+                "data/dx11/menu/220_img/telop_waza/fr/whs00310.g4tx"
+              ],
+              [
+                "it",
+                "data/dx11/menu/220_img/telop_waza/it/whs00310.g4tx"
+              ],
+              [
+                "pt",
+                "data/dx11/menu/220_img/telop_waza/pt/whs00310.g4tx"
+              ],
+              [
+                "zh_hans",
+                "data/dx11/menu/220_img/telop_waza/zh_hans/whs00310.g4tx"
+              ],
+              [
+                "zh_hant",
+                "data/dx11/menu/220_img/telop_waza/zh_hant/whs00310.g4tx"
+              ]
+            ],
+            "texture_g4tx": "data/dx11/chr/_waza/ev60_00310/ev60_00310.g4tx"
+          },
+          "info": {
+            "category": 1,
+            "cmd_opt_idx": 2,
+            "color_idx": 1,
+            "consume_tp": 60,
+            "eldorado": false,
+            "element": 1,
+            "event_id": 3595007079,
+            "event_id_name": "ev60_00310",
+            "fail_event_id": 0,
+            "fail_event_id_name": "",
+            "focus_battle_effect_id": 0,
+            "foul_rate": 0,
+            "growth_type": 3,
+            "is_disable_playable_until_next_patch": false,
+            "partner1": 0,
+            "partner2": 0,
+            "partner3": 0,
+            "partner_type": 0,
+            "power_max": 360,
+            "power_min": 60,
+            "recast_time": 90,
+            "series_id_crc": 1659389071,
+            "skill_desc_id": 2246910432,
+            "skill_effect_bit_flag": 0,
+            "skill_id": 1643845373,
+            "skill_id_str": "whs00310",
+            "skill_name_id": 99306216,
+            "telop_info_id": 1496103600
+          },
+          "learn_level": 43
+        },
+        {
+          "cutin": {
+            "effects_dir": "data/common/event/ev60/ev60_01080/",
+            "event_id_name": "ev60_01080",
+            "model_g4md": "data/common/chr/_waza/ev60_01080/ev60_01080.g4md",
+            "model_g4mg": "data/common/chr/_waza/ev60_01080/ev60_01080.g4mg",
+            "sound_cfg": "data/common/event_cfg/snd/ev60_01080_snd.cfg.bin",
+            "telop_by_lang": [
+              [
+                "de",
+                "data/dx11/menu/220_img/telop_waza/de/whs01080.g4tx"
+              ],
+              [
+                "en",
+                "data/dx11/menu/220_img/telop_waza/en/whs01080.g4tx"
+              ],
+              [
+                "es",
+                "data/dx11/menu/220_img/telop_waza/es/whs01080.g4tx"
+              ],
+              [
+                "fr",
+                "data/dx11/menu/220_img/telop_waza/fr/whs01080.g4tx"
+              ],
+              [
+                "it",
+                "data/dx11/menu/220_img/telop_waza/it/whs01080.g4tx"
+              ],
+              [
+                "pt",
+                "data/dx11/menu/220_img/telop_waza/pt/whs01080.g4tx"
+              ],
+              [
+                "zh_hans",
+                "data/dx11/menu/220_img/telop_waza/zh_hans/whs01080.g4tx"
+              ],
+              [
+                "zh_hant",
+                "data/dx11/menu/220_img/telop_waza/zh_hant/whs01080.g4tx"
+              ]
+            ],
+            "texture_g4tx": "data/dx11/chr/_waza/ev60_01080/ev60_01080.g4tx"
+          },
+          "info": {
+            "category": 1,
+            "cmd_opt_idx": 2,
+            "color_idx": 0,
+            "consume_tp": 70,
+            "eldorado": false,
+            "element": 4,
+            "event_id": 3179222546,
+            "event_id_name": "ev60_01080",
+            "fail_event_id": 0,
+            "fail_event_id_name": "",
+            "focus_battle_effect_id": 0,
+            "foul_rate": 0,
+            "growth_type": 2,
+            "is_disable_playable_until_next_patch": false,
+            "partner1": 0,
+            "partner2": 0,
+            "partner3": 0,
+            "partner_type": 0,
+            "power_max": 440,
+            "power_min": 70,
+            "recast_time": 90,
+            "series_id_crc": 2363893155,
+            "skill_desc_id": 4006953877,
+            "skill_effect_bit_flag": 4,
+            "skill_id": 180581512,
+            "skill_id_str": "whs01080",
+            "skill_name_id": 1859332253,
+            "telop_info_id": 840227013
+          },
+          "learn_level": 30
+        }
+      ],
+      "unresolved": []
+    },
+    {
+      "auras": [
+        {
+          "cmd": {
+            "asset_code": "wap01005",
+            "aura_id": 2709273970,
+            "config": {
+              "buff_id": 2478045099,
+              "rank": 3005,
+              "skill_id1": null,
+              "skill_id2": null,
+              "val11": 1,
+              "val4": 30,
+              "val5": 90,
+              "val9": 8
+            },
+            "desc_id": 1932039139,
+            "element": 0,
+            "name_id": 3312214375,
+            "sub_type": "Aura"
+          },
+          "learn_level": 38
+        },
+        {
+          "cmd": {
+            "asset_code": "wap01001",
+            "aura_id": 2786195819,
+            "config": {
+              "buff_id": 2478045099,
+              "rank": 3001,
+              "skill_id1": null,
+              "skill_id2": null,
+              "val11": 1,
+              "val4": 30,
+              "val5": 90,
+              "val9": 8
+            },
+            "desc_id": 1950701562,
+            "element": 0,
+            "name_id": 3254887806,
+            "sub_type": "Aura"
+          },
+          "learn_level": 38
+        }
+      ],
+      "chara_base_id": 4233601308,
+      "chara_param_id": 1436790638,
+      "code": "c05026590",
+      "element": 2,
+      "growth_pattern": 0,
+      "is_primary": false,
+      "main_position": 3,
+      "sub_position": 2,
+      "techniques": [
+        {
+          "cutin": {
+            "effects_dir": "data/common/event/techo0010/techo0010/",
+            "event_id_name": "techo0010",
+            "model_g4md": "data/common/chr/_waza/techo0010/techo0010.g4md",
+            "model_g4mg": "data/common/chr/_waza/techo0010/techo0010.g4mg",
+            "sound_cfg": "data/common/event_cfg/snd/techo0010_snd.cfg.bin",
+            "telop_by_lang": [
+              [
+                "de",
+                "data/dx11/menu/220_img/telop_waza/de/rho10010.g4tx"
+              ],
+              [
+                "en",
+                "data/dx11/menu/220_img/telop_waza/en/rho10010.g4tx"
+              ],
+              [
+                "es",
+                "data/dx11/menu/220_img/telop_waza/es/rho10010.g4tx"
+              ],
+              [
+                "fr",
+                "data/dx11/menu/220_img/telop_waza/fr/rho10010.g4tx"
+              ],
+              [
+                "it",
+                "data/dx11/menu/220_img/telop_waza/it/rho10010.g4tx"
+              ],
+              [
+                "pt",
+                "data/dx11/menu/220_img/telop_waza/pt/rho10010.g4tx"
+              ],
+              [
+                "zh_hans",
+                "data/dx11/menu/220_img/telop_waza/zh_hans/rho10010.g4tx"
+              ],
+              [
+                "zh_hant",
+                "data/dx11/menu/220_img/telop_waza/zh_hant/rho10010.g4tx"
+              ]
+            ],
+            "texture_g4tx": "data/dx11/chr/_waza/techo0010/techo0010.g4tx"
+          },
+          "info": {
+            "category": 2,
+            "cmd_opt_idx": 3,
+            "color_idx": 0,
+            "consume_tp": 40,
+            "eldorado": false,
+            "element": 5,
+            "event_id": 2719103316,
+            "event_id_name": "techo0010",
+            "fail_event_id": 0,
+            "fail_event_id_name": "",
+            "focus_battle_effect_id": 0,
+            "foul_rate": 0,
+            "growth_type": 0,
+            "is_disable_playable_until_next_patch": false,
+            "partner1": 0,
+            "partner2": 0,
+            "partner3": 0,
+            "partner_type": 0,
+            "power_max": 200,
+            "power_min": 30,
+            "recast_time": 60,
+            "series_id_crc": 0,
+            "skill_desc_id": 2252307085,
+            "skill_effect_bit_flag": 0,
+            "skill_id": 1646874000,
+            "skill_id_str": "rho10010",
+            "skill_name_id": 104403333,
+            "telop_info_id": 0
+          },
+          "learn_level": 0
+        },
+        {
+          "cutin": {
+            "effects_dir": "data/common/event/ev60/ev60_00340/",
+            "event_id_name": "ev60_00340",
+            "model_g4md": "data/common/chr/_waza/ev60_00340/ev60_00340.g4md",
+            "model_g4mg": "data/common/chr/_waza/ev60_00340/ev60_00340.g4mg",
+            "sound_cfg": "data/common/event_cfg/snd/ev60_00340_snd.cfg.bin",
+            "telop_by_lang": [
+              [
+                "de",
+                "data/dx11/menu/220_img/telop_waza/de/whs00340.g4tx"
+              ],
+              [
+                "en",
+                "data/dx11/menu/220_img/telop_waza/en/whs00340.g4tx"
+              ],
+              [
+                "es",
+                "data/dx11/menu/220_img/telop_waza/es/whs00340.g4tx"
+              ],
+              [
+                "fr",
+                "data/dx11/menu/220_img/telop_waza/fr/whs00340.g4tx"
+              ],
+              [
+                "it",
+                "data/dx11/menu/220_img/telop_waza/it/whs00340.g4tx"
+              ],
+              [
+                "pt",
+                "data/dx11/menu/220_img/telop_waza/pt/whs00340.g4tx"
+              ],
+              [
+                "zh_hans",
+                "data/dx11/menu/220_img/telop_waza/zh_hans/whs00340.g4tx"
+              ],
+              [
+                "zh_hant",
+                "data/dx11/menu/220_img/telop_waza/zh_hant/whs00340.g4tx"
+              ]
+            ],
+            "texture_g4tx": "data/dx11/chr/_waza/ev60_00340/ev60_00340.g4tx"
+          },
+          "info": {
+            "category": 1,
+            "cmd_opt_idx": 2,
+            "color_idx": 1,
+            "consume_tp": 70,
+            "eldorado": false,
+            "element": 1,
+            "event_id": 2872082466,
+            "event_id_name": "ev60_00340",
+            "fail_event_id": 0,
+            "fail_event_id_name": "",
+            "focus_battle_effect_id": 0,
+            "foul_rate": 0,
+            "growth_type": 3,
+            "is_disable_playable_until_next_patch": false,
+            "partner1": 0,
+            "partner2": 0,
+            "partner3": 0,
+            "partner_type": 0,
+            "power_max": 440,
+            "power_min": 70,
+            "recast_time": 90,
+            "series_id_crc": 1659389071,
+            "skill_desc_id": 4170896805,
+            "skill_effect_bit_flag": 0,
+            "skill_id": 478995128,
+            "skill_id_str": "whs00340",
+            "skill_name_id": 2023538349,
+            "telop_info_id": 609963765
+          },
+          "learn_level": 1
+        },
+        {
+          "cutin": {
+            "effects_dir": "data/common/event/ev61/ev61_00200/",
+            "event_id_name": "ev61_00200",
+            "model_g4md": "data/common/chr/_waza/ev61_00200/ev61_00200.g4md",
+            "model_g4mg": "data/common/chr/_waza/ev61_00200/ev61_00200.g4mg",
+            "sound_cfg": "data/common/event_cfg/snd/ev61_00200_snd.cfg.bin",
+            "telop_by_lang": [
+              [
+                "de",
+                "data/dx11/menu/220_img/telop_waza/de/who00200.g4tx"
+              ],
+              [
+                "en",
+                "data/dx11/menu/220_img/telop_waza/en/who00200.g4tx"
+              ],
+              [
+                "es",
+                "data/dx11/menu/220_img/telop_waza/es/who00200.g4tx"
+              ],
+              [
+                "fr",
+                "data/dx11/menu/220_img/telop_waza/fr/who00200.g4tx"
+              ],
+              [
+                "it",
+                "data/dx11/menu/220_img/telop_waza/it/who00200.g4tx"
+              ],
+              [
+                "pt",
+                "data/dx11/menu/220_img/telop_waza/pt/who00200.g4tx"
+              ],
+              [
+                "zh_hans",
+                "data/dx11/menu/220_img/telop_waza/zh_hans/who00200.g4tx"
+              ],
+              [
+                "zh_hant",
+                "data/dx11/menu/220_img/telop_waza/zh_hant/who00200.g4tx"
+              ]
+            ],
+            "texture_g4tx": "data/dx11/chr/_waza/ev61_00200/ev61_00200.g4tx"
+          },
+          "info": {
+            "category": 2,
+            "cmd_opt_idx": 2,
+            "color_idx": 1,
+            "consume_tp": 80,
+            "eldorado": false,
+            "element": 1,
+            "event_id": 1760109733,
+            "event_id_name": "ev61_00200",
+            "fail_event_id": 0,
+            "fail_event_id_name": "",
+            "focus_battle_effect_id": 0,
+            "foul_rate": 0,
+            "growth_type": 6,
+            "is_disable_playable_until_next_patch": false,
+            "partner1": 0,
+            "partner2": 0,
+            "partner3": 0,
+            "partner_type": 0,
+            "power_max": 540,
+            "power_min": 85,
+            "recast_time": 60,
+            "series_id_crc": 1659389071,
+            "skill_desc_id": 3911235702,
+            "skill_effect_bit_flag": 0,
+            "skill_id": 221679467,
+            "skill_id_str": "who00200",
+            "skill_name_id": 1764152190,
+            "telop_info_id": 903947046
+          },
+          "learn_level": 13
+        },
+        {
+          "cutin": {
+            "effects_dir": "data/common/event/ev60/ev60_00900/",
+            "event_id_name": "ev60_00900",
+            "model_g4md": "data/common/chr/_waza/ev60_00900/ev60_00900.g4md",
+            "model_g4mg": "data/common/chr/_waza/ev60_00900/ev60_00900.g4mg",
+            "sound_cfg": "data/common/event_cfg/snd/ev60_00900_snd.cfg.bin",
+            "telop_by_lang": [
+              [
+                "de",
+                "data/dx11/menu/220_img/telop_waza/de/whs00900.g4tx"
+              ],
+              [
+                "en",
+                "data/dx11/menu/220_img/telop_waza/en/whs00900.g4tx"
+              ],
+              [
+                "es",
+                "data/dx11/menu/220_img/telop_waza/es/whs00900.g4tx"
+              ],
+              [
+                "fr",
+                "data/dx11/menu/220_img/telop_waza/fr/whs00900.g4tx"
+              ],
+              [
+                "it",
+                "data/dx11/menu/220_img/telop_waza/it/whs00900.g4tx"
+              ],
+              [
+                "pt",
+                "data/dx11/menu/220_img/telop_waza/pt/whs00900.g4tx"
+              ],
+              [
+                "zh_hans",
+                "data/dx11/menu/220_img/telop_waza/zh_hans/whs00900.g4tx"
+              ],
+              [
+                "zh_hant",
+                "data/dx11/menu/220_img/telop_waza/zh_hant/whs00900.g4tx"
+              ]
+            ],
+            "texture_g4tx": "data/dx11/chr/_waza/ev60_00900/ev60_00900.g4tx"
+          },
+          "info": {
+            "category": 1,
+            "cmd_opt_idx": 2,
+            "color_idx": 1,
+            "consume_tp": 80,
+            "eldorado": false,
+            "element": 1,
+            "event_id": 3268133104,
+            "event_id_name": "ev60_00900",
+            "fail_event_id": 0,
+            "fail_event_id_name": "",
+            "focus_battle_effect_id": 0,
+            "foul_rate": 0,
+            "growth_type": 7,
+            "is_disable_playable_until_next_patch": false,
+            "partner1": 0,
+            "partner2": 0,
+            "partner3": 0,
+            "partner_type": 0,
+            "power_max": 540,
+            "power_min": 85,
+            "recast_time": 90,
+            "series_id_crc": 4225832245,
+            "skill_desc_id": 2439091575,
+            "skill_effect_bit_flag": 0,
+            "skill_id": 1970774634,
+            "skill_id_str": "whs00900",
+            "skill_name_id": 292028031,
+            "telop_info_id": 1302335015
+          },
+          "learn_level": 20
+        },
+        {
+          "cutin": {
+            "effects_dir": "data/common/event/ev60/ev60_01250/",
+            "event_id_name": "ev60_01250",
+            "model_g4md": "data/common/chr/_waza/ev60_01250/ev60_01250.g4md",
+            "model_g4mg": "data/common/chr/_waza/ev60_01250/ev60_01250.g4mg",
+            "sound_cfg": "data/common/event_cfg/snd/ev60_01250_snd.cfg.bin",
+            "telop_by_lang": [
+              [
+                "de",
+                "data/dx11/menu/220_img/telop_waza/de/whs01250.g4tx"
+              ],
+              [
+                "en",
+                "data/dx11/menu/220_img/telop_waza/en/whs01250.g4tx"
+              ],
+              [
+                "es",
+                "data/dx11/menu/220_img/telop_waza/es/whs01250.g4tx"
+              ],
+              [
+                "fr",
+                "data/dx11/menu/220_img/telop_waza/fr/whs01250.g4tx"
+              ],
+              [
+                "it",
+                "data/dx11/menu/220_img/telop_waza/it/whs01250.g4tx"
+              ],
+              [
+                "pt",
+                "data/dx11/menu/220_img/telop_waza/pt/whs01250.g4tx"
+              ],
+              [
+                "zh_hans",
+                "data/dx11/menu/220_img/telop_waza/zh_hans/whs01250.g4tx"
+              ],
+              [
+                "zh_hant",
+                "data/dx11/menu/220_img/telop_waza/zh_hant/whs01250.g4tx"
+              ]
+            ],
+            "texture_g4tx": "data/dx11/chr/_waza/ev60_01250/ev60_01250.g4tx"
+          },
+          "info": {
+            "category": 1,
+            "cmd_opt_idx": 2,
+            "color_idx": 3,
+            "consume_tp": 100,
+            "eldorado": false,
+            "element": 2,
+            "event_id": 190168113,
+            "event_id_name": "ev60_01250",
+            "fail_event_id": 0,
+            "fail_event_id_name": "",
+            "focus_battle_effect_id": 0,
+            "foul_rate": 0,
+            "growth_type": 7,
+            "is_disable_playable_until_next_patch": false,
+            "partner1": 0,
+            "partner2": 0,
+            "partner3": 0,
+            "partner_type": 3,
+            "power_max": 640,
+            "power_min": 100,
+            "recast_time": 90,
+            "series_id_crc": 2363893155,
+            "skill_desc_id": 1493166518,
+            "skill_effect_bit_flag": 0,
+            "skill_id": 3169443499,
+            "skill_id_str": "whs01250",
+            "skill_name_id": 3640230590,
+            "telop_info_id": 2218685158
+          },
+          "learn_level": 30
+        },
+        {
+          "cutin": {
+            "effects_dir": "data/common/event/ev60/ev60_01080/",
+            "event_id_name": "ev60_01080",
+            "model_g4md": "data/common/chr/_waza/ev60_01080/ev60_01080.g4md",
+            "model_g4mg": "data/common/chr/_waza/ev60_01080/ev60_01080.g4mg",
+            "sound_cfg": "data/common/event_cfg/snd/ev60_01080_snd.cfg.bin",
+            "telop_by_lang": [
+              [
+                "de",
+                "data/dx11/menu/220_img/telop_waza/de/whs01080.g4tx"
+              ],
+              [
+                "en",
+                "data/dx11/menu/220_img/telop_waza/en/whs01080.g4tx"
+              ],
+              [
+                "es",
+                "data/dx11/menu/220_img/telop_waza/es/whs01080.g4tx"
+              ],
+              [
+                "fr",
+                "data/dx11/menu/220_img/telop_waza/fr/whs01080.g4tx"
+              ],
+              [
+                "it",
+                "data/dx11/menu/220_img/telop_waza/it/whs01080.g4tx"
+              ],
+              [
+                "pt",
+                "data/dx11/menu/220_img/telop_waza/pt/whs01080.g4tx"
+              ],
+              [
+                "zh_hans",
+                "data/dx11/menu/220_img/telop_waza/zh_hans/whs01080.g4tx"
+              ],
+              [
+                "zh_hant",
+                "data/dx11/menu/220_img/telop_waza/zh_hant/whs01080.g4tx"
+              ]
+            ],
+            "texture_g4tx": "data/dx11/chr/_waza/ev60_01080/ev60_01080.g4tx"
+          },
+          "info": {
+            "category": 1,
+            "cmd_opt_idx": 2,
+            "color_idx": 0,
+            "consume_tp": 70,
+            "eldorado": false,
+            "element": 4,
+            "event_id": 3179222546,
+            "event_id_name": "ev60_01080",
+            "fail_event_id": 0,
+            "fail_event_id_name": "",
+            "focus_battle_effect_id": 0,
+            "foul_rate": 0,
+            "growth_type": 2,
+            "is_disable_playable_until_next_patch": false,
+            "partner1": 0,
+            "partner2": 0,
+            "partner3": 0,
+            "partner_type": 0,
+            "power_max": 440,
+            "power_min": 70,
+            "recast_time": 90,
+            "series_id_crc": 2363893155,
+            "skill_desc_id": 4006953877,
+            "skill_effect_bit_flag": 4,
+            "skill_id": 180581512,
+            "skill_id_str": "whs01080",
+            "skill_name_id": 1859332253,
+            "telop_info_id": 840227013
+          },
+          "learn_level": 43
+        },
+        {
+          "cutin": {
+            "effects_dir": "data/common/event/ev60/ev60_00310/",
+            "event_id_name": "ev60_00310",
+            "model_g4md": "data/common/chr/_waza/ev60_00310/ev60_00310.g4md",
+            "model_g4mg": "data/common/chr/_waza/ev60_00310/ev60_00310.g4mg",
+            "sound_cfg": "data/common/event_cfg/snd/ev60_00310_snd.cfg.bin",
+            "telop_by_lang": [
+              [
+                "de",
+                "data/dx11/menu/220_img/telop_waza/de/whs00310.g4tx"
+              ],
+              [
+                "en",
+                "data/dx11/menu/220_img/telop_waza/en/whs00310.g4tx"
+              ],
+              [
+                "es",
+                "data/dx11/menu/220_img/telop_waza/es/whs00310.g4tx"
+              ],
+              [
+                "fr",
+                "data/dx11/menu/220_img/telop_waza/fr/whs00310.g4tx"
+              ],
+              [
+                "it",
+                "data/dx11/menu/220_img/telop_waza/it/whs00310.g4tx"
+              ],
+              [
+                "pt",
+                "data/dx11/menu/220_img/telop_waza/pt/whs00310.g4tx"
+              ],
+              [
+                "zh_hans",
+                "data/dx11/menu/220_img/telop_waza/zh_hans/whs00310.g4tx"
+              ],
+              [
+                "zh_hant",
+                "data/dx11/menu/220_img/telop_waza/zh_hant/whs00310.g4tx"
+              ]
+            ],
+            "texture_g4tx": "data/dx11/chr/_waza/ev60_00310/ev60_00310.g4tx"
+          },
+          "info": {
+            "category": 1,
+            "cmd_opt_idx": 2,
+            "color_idx": 1,
+            "consume_tp": 60,
+            "eldorado": false,
+            "element": 1,
+            "event_id": 3595007079,
+            "event_id_name": "ev60_00310",
+            "fail_event_id": 0,
+            "fail_event_id_name": "",
+            "focus_battle_effect_id": 0,
+            "foul_rate": 0,
+            "growth_type": 3,
+            "is_disable_playable_until_next_patch": false,
+            "partner1": 0,
+            "partner2": 0,
+            "partner3": 0,
+            "partner_type": 0,
+            "power_max": 360,
+            "power_min": 60,
+            "recast_time": 90,
+            "series_id_crc": 1659389071,
+            "skill_desc_id": 2246910432,
+            "skill_effect_bit_flag": 0,
+            "skill_id": 1643845373,
+            "skill_id_str": "whs00310",
+            "skill_name_id": 99306216,
+            "telop_info_id": 1496103600
+          },
+          "learn_level": 30
+        }
+      ],
+      "unresolved": []
+    },
+    {
+      "auras": [
+        {
+          "cmd": {
+            "asset_code": "wap01005",
+            "aura_id": 2709273970,
+            "config": {
+              "buff_id": 2478045099,
+              "rank": 3005,
+              "skill_id1": null,
+              "skill_id2": null,
+              "val11": 1,
+              "val4": 30,
+              "val5": 90,
+              "val9": 8
+            },
+            "desc_id": 1932039139,
+            "element": 0,
+            "name_id": 3312214375,
+            "sub_type": "Aura"
+          },
+          "learn_level": 38
+        },
+        {
+          "cmd": {
+            "asset_code": "wap01001",
+            "aura_id": 2786195819,
+            "config": {
+              "buff_id": 2478045099,
+              "rank": 3001,
+              "skill_id1": null,
+              "skill_id2": null,
+              "val11": 1,
+              "val4": 30,
+              "val5": 90,
+              "val9": 8
+            },
+            "desc_id": 1950701562,
+            "element": 0,
+            "name_id": 3254887806,
+            "sub_type": "Aura"
+          },
+          "learn_level": 38
+        }
+      ],
+      "chara_base_id": 3389112235,
+      "chara_param_id": 1677046233,
+      "code": "c07080010",
+      "element": 2,
+      "growth_pattern": 0,
+      "is_primary": false,
+      "main_position": 3,
+      "sub_position": 2,
+      "techniques": [
+        {
+          "cutin": {
+            "effects_dir": "data/common/event/techo0040/techo0040/",
+            "event_id_name": "techo0040",
+            "model_g4md": "data/common/chr/_waza/techo0040/techo0040.g4md",
+            "model_g4mg": "data/common/chr/_waza/techo0040/techo0040.g4mg",
+            "sound_cfg": "data/common/event_cfg/snd/techo0040_snd.cfg.bin",
+            "telop_by_lang": [
+              [
+                "de",
+                "data/dx11/menu/220_img/telop_waza/de/rho10040.g4tx"
+              ],
+              [
+                "en",
+                "data/dx11/menu/220_img/telop_waza/en/rho10040.g4tx"
+              ],
+              [
+                "es",
+                "data/dx11/menu/220_img/telop_waza/es/rho10040.g4tx"
+              ],
+              [
+                "fr",
+                "data/dx11/menu/220_img/telop_waza/fr/rho10040.g4tx"
+              ],
+              [
+                "it",
+                "data/dx11/menu/220_img/telop_waza/it/rho10040.g4tx"
+              ],
+              [
+                "pt",
+                "data/dx11/menu/220_img/telop_waza/pt/rho10040.g4tx"
+              ],
+              [
+                "zh_hans",
+                "data/dx11/menu/220_img/telop_waza/zh_hans/rho10040.g4tx"
+              ],
+              [
+                "zh_hant",
+                "data/dx11/menu/220_img/telop_waza/zh_hant/rho10040.g4tx"
+              ]
+            ],
+            "texture_g4tx": "data/dx11/chr/_waza/techo0040/techo0040.g4tx"
+          },
+          "info": {
+            "category": 2,
+            "cmd_opt_idx": 3,
+            "color_idx": 0,
+            "consume_tp": 40,
+            "eldorado": false,
+            "element": 5,
+            "event_id": 3747990801,
+            "event_id_name": "techo0040",
+            "fail_event_id": 0,
+            "fail_event_id_name": "",
+            "focus_battle_effect_id": 0,
+            "foul_rate": 0,
+            "growth_type": 0,
+            "is_disable_playable_until_next_patch": false,
+            "partner1": 0,
+            "partner2": 0,
+            "partner3": 0,
+            "partner_type": 0,
+            "power_max": 200,
+            "power_min": 30,
+            "recast_time": 60,
+            "series_id_crc": 0,
+            "skill_desc_id": 4215836360,
+            "skill_effect_bit_flag": 0,
+            "skill_id": 526301653,
+            "skill_id_str": "rho10040",
+            "skill_name_id": 2068768192,
+            "telop_info_id": 0
+          },
+          "learn_level": 0
+        },
+        {
+          "cutin": {
+            "effects_dir": "data/common/event/ev60/ev60_02900/",
+            "event_id_name": "ev60_02900",
+            "model_g4md": "data/common/chr/_waza/ev60_02900/ev60_02900.g4md",
+            "model_g4mg": "data/common/chr/_waza/ev60_02900/ev60_02900.g4mg",
+            "sound_cfg": "data/common/event_cfg/snd/ev60_02900_snd.cfg.bin",
+            "telop_by_lang": [
+              [
+                "de",
+                "data/dx11/menu/220_img/telop_waza/de/whs02900.g4tx"
+              ],
+              [
+                "en",
+                "data/dx11/menu/220_img/telop_waza/en/whs02900.g4tx"
+              ],
+              [
+                "es",
+                "data/dx11/menu/220_img/telop_waza/es/whs02900.g4tx"
+              ],
+              [
+                "fr",
+                "data/dx11/menu/220_img/telop_waza/fr/whs02900.g4tx"
+              ],
+              [
+                "it",
+                "data/dx11/menu/220_img/telop_waza/it/whs02900.g4tx"
+              ],
+              [
+                "pt",
+                "data/dx11/menu/220_img/telop_waza/pt/whs02900.g4tx"
+              ],
+              [
+                "zh_hans",
+                "data/dx11/menu/220_img/telop_waza/zh_hans/whs02900.g4tx"
+              ],
+              [
+                "zh_hant",
+                "data/dx11/menu/220_img/telop_waza/zh_hant/whs02900.g4tx"
+              ]
+            ],
+            "texture_g4tx": "data/dx11/chr/_waza/ev60_02900/ev60_02900.g4tx"
+          },
+          "info": {
+            "category": 1,
+            "cmd_opt_idx": 2,
+            "color_idx": 1,
+            "consume_tp": 100,
+            "eldorado": false,
+            "element": 1,
+            "event_id": 1757546619,
+            "event_id_name": "ev60_02900",
+            "fail_event_id": 0,
+            "fail_event_id_name": "",
+            "focus_battle_effect_id": 0,
+            "foul_rate": 0,
+            "growth_type": 6,
+            "is_disable_playable_until_next_patch": false,
+            "partner1": 0,
+            "partner2": 0,
+            "partner3": 0,
+            "partner_type": 0,
+            "power_max": 640,
+            "power_min": 100,
+            "recast_time": 90,
+            "series_id_crc": 1684126900,
+            "skill_desc_id": 996695548,
+            "skill_effect_bit_flag": 0,
+            "skill_id": 3749604065,
+            "skill_id_str": "whs02900",
+            "skill_name_id": 3144562420,
+            "telop_info_id": 3886663340
+          },
+          "learn_level": 1
+        },
+        {
+          "cutin": {
+            "effects_dir": "data/common/event/ev61/ev61_00200/",
+            "event_id_name": "ev61_00200",
+            "model_g4md": "data/common/chr/_waza/ev61_00200/ev61_00200.g4md",
+            "model_g4mg": "data/common/chr/_waza/ev61_00200/ev61_00200.g4mg",
+            "sound_cfg": "data/common/event_cfg/snd/ev61_00200_snd.cfg.bin",
+            "telop_by_lang": [
+              [
+                "de",
+                "data/dx11/menu/220_img/telop_waza/de/who00200.g4tx"
+              ],
+              [
+                "en",
+                "data/dx11/menu/220_img/telop_waza/en/who00200.g4tx"
+              ],
+              [
+                "es",
+                "data/dx11/menu/220_img/telop_waza/es/who00200.g4tx"
+              ],
+              [
+                "fr",
+                "data/dx11/menu/220_img/telop_waza/fr/who00200.g4tx"
+              ],
+              [
+                "it",
+                "data/dx11/menu/220_img/telop_waza/it/who00200.g4tx"
+              ],
+              [
+                "pt",
+                "data/dx11/menu/220_img/telop_waza/pt/who00200.g4tx"
+              ],
+              [
+                "zh_hans",
+                "data/dx11/menu/220_img/telop_waza/zh_hans/who00200.g4tx"
+              ],
+              [
+                "zh_hant",
+                "data/dx11/menu/220_img/telop_waza/zh_hant/who00200.g4tx"
+              ]
+            ],
+            "texture_g4tx": "data/dx11/chr/_waza/ev61_00200/ev61_00200.g4tx"
+          },
+          "info": {
+            "category": 2,
+            "cmd_opt_idx": 2,
+            "color_idx": 1,
+            "consume_tp": 80,
+            "eldorado": false,
+            "element": 1,
+            "event_id": 1760109733,
+            "event_id_name": "ev61_00200",
+            "fail_event_id": 0,
+            "fail_event_id_name": "",
+            "focus_battle_effect_id": 0,
+            "foul_rate": 0,
+            "growth_type": 6,
+            "is_disable_playable_until_next_patch": false,
+            "partner1": 0,
+            "partner2": 0,
+            "partner3": 0,
+            "partner_type": 0,
+            "power_max": 540,
+            "power_min": 85,
+            "recast_time": 60,
+            "series_id_crc": 1659389071,
+            "skill_desc_id": 3911235702,
+            "skill_effect_bit_flag": 0,
+            "skill_id": 221679467,
+            "skill_id_str": "who00200",
+            "skill_name_id": 1764152190,
+            "telop_info_id": 903947046
+          },
+          "learn_level": 13
+        },
+        {
+          "cutin": {
+            "effects_dir": "data/common/event/ev60/ev60_00340/",
+            "event_id_name": "ev60_00340",
+            "model_g4md": "data/common/chr/_waza/ev60_00340/ev60_00340.g4md",
+            "model_g4mg": "data/common/chr/_waza/ev60_00340/ev60_00340.g4mg",
+            "sound_cfg": "data/common/event_cfg/snd/ev60_00340_snd.cfg.bin",
+            "telop_by_lang": [
+              [
+                "de",
+                "data/dx11/menu/220_img/telop_waza/de/whs00340.g4tx"
+              ],
+              [
+                "en",
+                "data/dx11/menu/220_img/telop_waza/en/whs00340.g4tx"
+              ],
+              [
+                "es",
+                "data/dx11/menu/220_img/telop_waza/es/whs00340.g4tx"
+              ],
+              [
+                "fr",
+                "data/dx11/menu/220_img/telop_waza/fr/whs00340.g4tx"
+              ],
+              [
+                "it",
+                "data/dx11/menu/220_img/telop_waza/it/whs00340.g4tx"
+              ],
+              [
+                "pt",
+                "data/dx11/menu/220_img/telop_waza/pt/whs00340.g4tx"
+              ],
+              [
+                "zh_hans",
+                "data/dx11/menu/220_img/telop_waza/zh_hans/whs00340.g4tx"
+              ],
+              [
+                "zh_hant",
+                "data/dx11/menu/220_img/telop_waza/zh_hant/whs00340.g4tx"
+              ]
+            ],
+            "texture_g4tx": "data/dx11/chr/_waza/ev60_00340/ev60_00340.g4tx"
+          },
+          "info": {
+            "category": 1,
+            "cmd_opt_idx": 2,
+            "color_idx": 1,
+            "consume_tp": 70,
+            "eldorado": false,
+            "element": 1,
+            "event_id": 2872082466,
+            "event_id_name": "ev60_00340",
+            "fail_event_id": 0,
+            "fail_event_id_name": "",
+            "focus_battle_effect_id": 0,
+            "foul_rate": 0,
+            "growth_type": 3,
+            "is_disable_playable_until_next_patch": false,
+            "partner1": 0,
+            "partner2": 0,
+            "partner3": 0,
+            "partner_type": 0,
+            "power_max": 440,
+            "power_min": 70,
+            "recast_time": 90,
+            "series_id_crc": 1659389071,
+            "skill_desc_id": 4170896805,
+            "skill_effect_bit_flag": 0,
+            "skill_id": 478995128,
+            "skill_id_str": "whs00340",
+            "skill_name_id": 2023538349,
+            "telop_info_id": 609963765
+          },
+          "learn_level": 20
+        },
+        {
+          "cutin": {
+            "effects_dir": "data/common/event/ev62/ev62_00190_1/",
+            "event_id_name": "ev62_00190_1",
+            "model_g4md": "data/common/chr/_waza/ev62_00190_1/ev62_00190_1.g4md",
+            "model_g4mg": "data/common/chr/_waza/ev62_00190_1/ev62_00190_1.g4mg",
+            "sound_cfg": "data/common/event_cfg/snd/ev62_00190_1_snd.cfg.bin",
+            "telop_by_lang": [
+              [
+                "de",
+                "data/dx11/menu/220_img/telop_waza/de/whd00190.g4tx"
+              ],
+              [
+                "en",
+                "data/dx11/menu/220_img/telop_waza/en/whd00190.g4tx"
+              ],
+              [
+                "es",
+                "data/dx11/menu/220_img/telop_waza/es/whd00190.g4tx"
+              ],
+              [
+                "fr",
+                "data/dx11/menu/220_img/telop_waza/fr/whd00190.g4tx"
+              ],
+              [
+                "it",
+                "data/dx11/menu/220_img/telop_waza/it/whd00190.g4tx"
+              ],
+              [
+                "pt",
+                "data/dx11/menu/220_img/telop_waza/pt/whd00190.g4tx"
+              ],
+              [
+                "zh_hans",
+                "data/dx11/menu/220_img/telop_waza/zh_hans/whd00190.g4tx"
+              ],
+              [
+                "zh_hant",
+                "data/dx11/menu/220_img/telop_waza/zh_hant/whd00190.g4tx"
+              ]
+            ],
+            "texture_g4tx": "data/dx11/chr/_waza/ev62_00190_1/ev62_00190_1.g4tx"
+          },
+          "info": {
+            "category": 3,
+            "cmd_opt_idx": 2,
+            "color_idx": 2,
+            "consume_tp": 70,
+            "eldorado": false,
+            "element": 3,
+            "event_id": 3245514325,
+            "event_id_name": "ev62_00190_1",
+            "fail_event_id": 1484509167,
+            "fail_event_id_name": "ev62_00190_2",
+            "focus_battle_effect_id": 0,
+            "foul_rate": 0,
+            "growth_type": 1,
+            "is_disable_playable_until_next_patch": false,
+            "partner1": 0,
+            "partner2": 0,
+            "partner3": 0,
+            "partner_type": 0,
+            "power_max": 440,
+            "power_min": 70,
+            "recast_time": 60,
+            "series_id_crc": 1659389071,
+            "skill_desc_id": 1348685221,
+            "skill_effect_bit_flag": 16,
+            "skill_id": 3027598008,
+            "skill_id_str": "whd00190",
+            "skill_name_id": 3496289965,
+            "telop_info_id": 2359482101
+          },
+          "learn_level": 30
+        },
+        {
+          "cutin": {
+            "effects_dir": "data/common/event/ev60/ev60_00340/",
+            "event_id_name": "ev60_00340",
+            "model_g4md": "data/common/chr/_waza/ev60_00340/ev60_00340.g4md",
+            "model_g4mg": "data/common/chr/_waza/ev60_00340/ev60_00340.g4mg",
+            "sound_cfg": "data/common/event_cfg/snd/ev60_00340_snd.cfg.bin",
+            "telop_by_lang": [
+              [
+                "de",
+                "data/dx11/menu/220_img/telop_waza/de/whs00340.g4tx"
+              ],
+              [
+                "en",
+                "data/dx11/menu/220_img/telop_waza/en/whs00340.g4tx"
+              ],
+              [
+                "es",
+                "data/dx11/menu/220_img/telop_waza/es/whs00340.g4tx"
+              ],
+              [
+                "fr",
+                "data/dx11/menu/220_img/telop_waza/fr/whs00340.g4tx"
+              ],
+              [
+                "it",
+                "data/dx11/menu/220_img/telop_waza/it/whs00340.g4tx"
+              ],
+              [
+                "pt",
+                "data/dx11/menu/220_img/telop_waza/pt/whs00340.g4tx"
+              ],
+              [
+                "zh_hans",
+                "data/dx11/menu/220_img/telop_waza/zh_hans/whs00340.g4tx"
+              ],
+              [
+                "zh_hant",
+                "data/dx11/menu/220_img/telop_waza/zh_hant/whs00340.g4tx"
+              ]
+            ],
+            "texture_g4tx": "data/dx11/chr/_waza/ev60_00340/ev60_00340.g4tx"
+          },
+          "info": {
+            "category": 1,
+            "cmd_opt_idx": 2,
+            "color_idx": 1,
+            "consume_tp": 70,
+            "eldorado": false,
+            "element": 1,
+            "event_id": 2872082466,
+            "event_id_name": "ev60_00340",
+            "fail_event_id": 0,
+            "fail_event_id_name": "",
+            "focus_battle_effect_id": 0,
+            "foul_rate": 0,
+            "growth_type": 3,
+            "is_disable_playable_until_next_patch": false,
+            "partner1": 0,
+            "partner2": 0,
+            "partner3": 0,
+            "partner_type": 0,
+            "power_max": 440,
+            "power_min": 70,
+            "recast_time": 90,
+            "series_id_crc": 1659389071,
+            "skill_desc_id": 4170896805,
+            "skill_effect_bit_flag": 0,
+            "skill_id": 478995128,
+            "skill_id_str": "whs00340",
+            "skill_name_id": 2023538349,
+            "telop_info_id": 609963765
+          },
+          "learn_level": 43
+        },
+        {
+          "cutin": {
+            "effects_dir": "data/common/event/ev60/ev60_00900/",
+            "event_id_name": "ev60_00900",
+            "model_g4md": "data/common/chr/_waza/ev60_00900/ev60_00900.g4md",
+            "model_g4mg": "data/common/chr/_waza/ev60_00900/ev60_00900.g4mg",
+            "sound_cfg": "data/common/event_cfg/snd/ev60_00900_snd.cfg.bin",
+            "telop_by_lang": [
+              [
+                "de",
+                "data/dx11/menu/220_img/telop_waza/de/whs00900.g4tx"
+              ],
+              [
+                "en",
+                "data/dx11/menu/220_img/telop_waza/en/whs00900.g4tx"
+              ],
+              [
+                "es",
+                "data/dx11/menu/220_img/telop_waza/es/whs00900.g4tx"
+              ],
+              [
+                "fr",
+                "data/dx11/menu/220_img/telop_waza/fr/whs00900.g4tx"
+              ],
+              [
+                "it",
+                "data/dx11/menu/220_img/telop_waza/it/whs00900.g4tx"
+              ],
+              [
+                "pt",
+                "data/dx11/menu/220_img/telop_waza/pt/whs00900.g4tx"
+              ],
+              [
+                "zh_hans",
+                "data/dx11/menu/220_img/telop_waza/zh_hans/whs00900.g4tx"
+              ],
+              [
+                "zh_hant",
+                "data/dx11/menu/220_img/telop_waza/zh_hant/whs00900.g4tx"
+              ]
+            ],
+            "texture_g4tx": "data/dx11/chr/_waza/ev60_00900/ev60_00900.g4tx"
+          },
+          "info": {
+            "category": 1,
+            "cmd_opt_idx": 2,
+            "color_idx": 1,
+            "consume_tp": 80,
+            "eldorado": false,
+            "element": 1,
+            "event_id": 3268133104,
+            "event_id_name": "ev60_00900",
+            "fail_event_id": 0,
+            "fail_event_id_name": "",
+            "focus_battle_effect_id": 0,
+            "foul_rate": 0,
+            "growth_type": 7,
+            "is_disable_playable_until_next_patch": false,
+            "partner1": 0,
+            "partner2": 0,
+            "partner3": 0,
+            "partner_type": 0,
+            "power_max": 540,
+            "power_min": 85,
+            "recast_time": 90,
+            "series_id_crc": 4225832245,
+            "skill_desc_id": 2439091575,
+            "skill_effect_bit_flag": 0,
+            "skill_id": 1970774634,
+            "skill_id_str": "whs00900",
+            "skill_name_id": 292028031,
+            "telop_info_id": 1302335015
+          },
+          "learn_level": 30
+        }
+      ],
+      "unresolved": []
+    },
+    {
+      "auras": [],
+      "chara_base_id": 936881403,
+      "chara_param_id": 3331000798,
+      "code": "c01001900",
+      "element": 2,
+      "growth_pattern": 0,
+      "is_primary": false,
+      "main_position": 2,
+      "sub_position": 3,
+      "techniques": [
+        {
+          "cutin": {
+            "effects_dir": "data/common/event/techo0010/techo0010/",
+            "event_id_name": "techo0010",
+            "model_g4md": "data/common/chr/_waza/techo0010/techo0010.g4md",
+            "model_g4mg": "data/common/chr/_waza/techo0010/techo0010.g4mg",
+            "sound_cfg": "data/common/event_cfg/snd/techo0010_snd.cfg.bin",
+            "telop_by_lang": [
+              [
+                "de",
+                "data/dx11/menu/220_img/telop_waza/de/rho10010.g4tx"
+              ],
+              [
+                "en",
+                "data/dx11/menu/220_img/telop_waza/en/rho10010.g4tx"
+              ],
+              [
+                "es",
+                "data/dx11/menu/220_img/telop_waza/es/rho10010.g4tx"
+              ],
+              [
+                "fr",
+                "data/dx11/menu/220_img/telop_waza/fr/rho10010.g4tx"
+              ],
+              [
+                "it",
+                "data/dx11/menu/220_img/telop_waza/it/rho10010.g4tx"
+              ],
+              [
+                "pt",
+                "data/dx11/menu/220_img/telop_waza/pt/rho10010.g4tx"
+              ],
+              [
+                "zh_hans",
+                "data/dx11/menu/220_img/telop_waza/zh_hans/rho10010.g4tx"
+              ],
+              [
+                "zh_hant",
+                "data/dx11/menu/220_img/telop_waza/zh_hant/rho10010.g4tx"
+              ]
+            ],
+            "texture_g4tx": "data/dx11/chr/_waza/techo0010/techo0010.g4tx"
+          },
+          "info": {
+            "category": 2,
+            "cmd_opt_idx": 3,
+            "color_idx": 0,
+            "consume_tp": 40,
+            "eldorado": false,
+            "element": 5,
+            "event_id": 2719103316,
+            "event_id_name": "techo0010",
+            "fail_event_id": 0,
+            "fail_event_id_name": "",
+            "focus_battle_effect_id": 0,
+            "foul_rate": 0,
+            "growth_type": 0,
+            "is_disable_playable_until_next_patch": false,
+            "partner1": 0,
+            "partner2": 0,
+            "partner3": 0,
+            "partner_type": 0,
+            "power_max": 200,
+            "power_min": 30,
+            "recast_time": 60,
+            "series_id_crc": 0,
+            "skill_desc_id": 2252307085,
+            "skill_effect_bit_flag": 0,
+            "skill_id": 1646874000,
+            "skill_id_str": "rho10010",
+            "skill_name_id": 104403333,
+            "telop_info_id": 0
+          },
+          "learn_level": 0
+        },
+        {
+          "cutin": {
+            "effects_dir": "data/common/event/ev60/ev60_00340/",
+            "event_id_name": "ev60_00340",
+            "model_g4md": "data/common/chr/_waza/ev60_00340/ev60_00340.g4md",
+            "model_g4mg": "data/common/chr/_waza/ev60_00340/ev60_00340.g4mg",
+            "sound_cfg": "data/common/event_cfg/snd/ev60_00340_snd.cfg.bin",
+            "telop_by_lang": [
+              [
+                "de",
+                "data/dx11/menu/220_img/telop_waza/de/whs00340.g4tx"
+              ],
+              [
+                "en",
+                "data/dx11/menu/220_img/telop_waza/en/whs00340.g4tx"
+              ],
+              [
+                "es",
+                "data/dx11/menu/220_img/telop_waza/es/whs00340.g4tx"
+              ],
+              [
+                "fr",
+                "data/dx11/menu/220_img/telop_waza/fr/whs00340.g4tx"
+              ],
+              [
+                "it",
+                "data/dx11/menu/220_img/telop_waza/it/whs00340.g4tx"
+              ],
+              [
+                "pt",
+                "data/dx11/menu/220_img/telop_waza/pt/whs00340.g4tx"
+              ],
+              [
+                "zh_hans",
+                "data/dx11/menu/220_img/telop_waza/zh_hans/whs00340.g4tx"
+              ],
+              [
+                "zh_hant",
+                "data/dx11/menu/220_img/telop_waza/zh_hant/whs00340.g4tx"
+              ]
+            ],
+            "texture_g4tx": "data/dx11/chr/_waza/ev60_00340/ev60_00340.g4tx"
+          },
+          "info": {
+            "category": 1,
+            "cmd_opt_idx": 2,
+            "color_idx": 1,
+            "consume_tp": 70,
+            "eldorado": false,
+            "element": 1,
+            "event_id": 2872082466,
+            "event_id_name": "ev60_00340",
+            "fail_event_id": 0,
+            "fail_event_id_name": "",
+            "focus_battle_effect_id": 0,
+            "foul_rate": 0,
+            "growth_type": 3,
+            "is_disable_playable_until_next_patch": false,
+            "partner1": 0,
+            "partner2": 0,
+            "partner3": 0,
+            "partner_type": 0,
+            "power_max": 440,
+            "power_min": 70,
+            "recast_time": 90,
+            "series_id_crc": 1659389071,
+            "skill_desc_id": 4170896805,
+            "skill_effect_bit_flag": 0,
+            "skill_id": 478995128,
+            "skill_id_str": "whs00340",
+            "skill_name_id": 2023538349,
+            "telop_info_id": 609963765
+          },
+          "learn_level": 1
+        },
+        {
+          "cutin": {
+            "effects_dir": "data/common/event/ev61/ev61_00200/",
+            "event_id_name": "ev61_00200",
+            "model_g4md": "data/common/chr/_waza/ev61_00200/ev61_00200.g4md",
+            "model_g4mg": "data/common/chr/_waza/ev61_00200/ev61_00200.g4mg",
+            "sound_cfg": "data/common/event_cfg/snd/ev61_00200_snd.cfg.bin",
+            "telop_by_lang": [
+              [
+                "de",
+                "data/dx11/menu/220_img/telop_waza/de/who00200.g4tx"
+              ],
+              [
+                "en",
+                "data/dx11/menu/220_img/telop_waza/en/who00200.g4tx"
+              ],
+              [
+                "es",
+                "data/dx11/menu/220_img/telop_waza/es/who00200.g4tx"
+              ],
+              [
+                "fr",
+                "data/dx11/menu/220_img/telop_waza/fr/who00200.g4tx"
+              ],
+              [
+                "it",
+                "data/dx11/menu/220_img/telop_waza/it/who00200.g4tx"
+              ],
+              [
+                "pt",
+                "data/dx11/menu/220_img/telop_waza/pt/who00200.g4tx"
+              ],
+              [
+                "zh_hans",
+                "data/dx11/menu/220_img/telop_waza/zh_hans/who00200.g4tx"
+              ],
+              [
+                "zh_hant",
+                "data/dx11/menu/220_img/telop_waza/zh_hant/who00200.g4tx"
+              ]
+            ],
+            "texture_g4tx": "data/dx11/chr/_waza/ev61_00200/ev61_00200.g4tx"
+          },
+          "info": {
+            "category": 2,
+            "cmd_opt_idx": 2,
+            "color_idx": 1,
+            "consume_tp": 80,
+            "eldorado": false,
+            "element": 1,
+            "event_id": 1760109733,
+            "event_id_name": "ev61_00200",
+            "fail_event_id": 0,
+            "fail_event_id_name": "",
+            "focus_battle_effect_id": 0,
+            "foul_rate": 0,
+            "growth_type": 6,
+            "is_disable_playable_until_next_patch": false,
+            "partner1": 0,
+            "partner2": 0,
+            "partner3": 0,
+            "partner_type": 0,
+            "power_max": 540,
+            "power_min": 85,
+            "recast_time": 60,
+            "series_id_crc": 1659389071,
+            "skill_desc_id": 3911235702,
+            "skill_effect_bit_flag": 0,
+            "skill_id": 221679467,
+            "skill_id_str": "who00200",
+            "skill_name_id": 1764152190,
+            "telop_info_id": 903947046
+          },
+          "learn_level": 13
+        },
+        {
+          "cutin": {
+            "effects_dir": "data/common/event/ev60/ev60_00900/",
+            "event_id_name": "ev60_00900",
+            "model_g4md": "data/common/chr/_waza/ev60_00900/ev60_00900.g4md",
+            "model_g4mg": "data/common/chr/_waza/ev60_00900/ev60_00900.g4mg",
+            "sound_cfg": "data/common/event_cfg/snd/ev60_00900_snd.cfg.bin",
+            "telop_by_lang": [
+              [
+                "de",
+                "data/dx11/menu/220_img/telop_waza/de/whs00900.g4tx"
+              ],
+              [
+                "en",
+                "data/dx11/menu/220_img/telop_waza/en/whs00900.g4tx"
+              ],
+              [
+                "es",
+                "data/dx11/menu/220_img/telop_waza/es/whs00900.g4tx"
+              ],
+              [
+                "fr",
+                "data/dx11/menu/220_img/telop_waza/fr/whs00900.g4tx"
+              ],
+              [
+                "it",
+                "data/dx11/menu/220_img/telop_waza/it/whs00900.g4tx"
+              ],
+              [
+                "pt",
+                "data/dx11/menu/220_img/telop_waza/pt/whs00900.g4tx"
+              ],
+              [
+                "zh_hans",
+                "data/dx11/menu/220_img/telop_waza/zh_hans/whs00900.g4tx"
+              ],
+              [
+                "zh_hant",
+                "data/dx11/menu/220_img/telop_waza/zh_hant/whs00900.g4tx"
+              ]
+            ],
+            "texture_g4tx": "data/dx11/chr/_waza/ev60_00900/ev60_00900.g4tx"
+          },
+          "info": {
+            "category": 1,
+            "cmd_opt_idx": 2,
+            "color_idx": 1,
+            "consume_tp": 80,
+            "eldorado": false,
+            "element": 1,
+            "event_id": 3268133104,
+            "event_id_name": "ev60_00900",
+            "fail_event_id": 0,
+            "fail_event_id_name": "",
+            "focus_battle_effect_id": 0,
+            "foul_rate": 0,
+            "growth_type": 7,
+            "is_disable_playable_until_next_patch": false,
+            "partner1": 0,
+            "partner2": 0,
+            "partner3": 0,
+            "partner_type": 0,
+            "power_max": 540,
+            "power_min": 85,
+            "recast_time": 90,
+            "series_id_crc": 4225832245,
+            "skill_desc_id": 2439091575,
+            "skill_effect_bit_flag": 0,
+            "skill_id": 1970774634,
+            "skill_id_str": "whs00900",
+            "skill_name_id": 292028031,
+            "telop_info_id": 1302335015
+          },
+          "learn_level": 20
+        },
+        {
+          "cutin": {
+            "effects_dir": "data/common/event/ev60/ev60_01250/",
+            "event_id_name": "ev60_01250",
+            "model_g4md": "data/common/chr/_waza/ev60_01250/ev60_01250.g4md",
+            "model_g4mg": "data/common/chr/_waza/ev60_01250/ev60_01250.g4mg",
+            "sound_cfg": "data/common/event_cfg/snd/ev60_01250_snd.cfg.bin",
+            "telop_by_lang": [
+              [
+                "de",
+                "data/dx11/menu/220_img/telop_waza/de/whs01250.g4tx"
+              ],
+              [
+                "en",
+                "data/dx11/menu/220_img/telop_waza/en/whs01250.g4tx"
+              ],
+              [
+                "es",
+                "data/dx11/menu/220_img/telop_waza/es/whs01250.g4tx"
+              ],
+              [
+                "fr",
+                "data/dx11/menu/220_img/telop_waza/fr/whs01250.g4tx"
+              ],
+              [
+                "it",
+                "data/dx11/menu/220_img/telop_waza/it/whs01250.g4tx"
+              ],
+              [
+                "pt",
+                "data/dx11/menu/220_img/telop_waza/pt/whs01250.g4tx"
+              ],
+              [
+                "zh_hans",
+                "data/dx11/menu/220_img/telop_waza/zh_hans/whs01250.g4tx"
+              ],
+              [
+                "zh_hant",
+                "data/dx11/menu/220_img/telop_waza/zh_hant/whs01250.g4tx"
+              ]
+            ],
+            "texture_g4tx": "data/dx11/chr/_waza/ev60_01250/ev60_01250.g4tx"
+          },
+          "info": {
+            "category": 1,
+            "cmd_opt_idx": 2,
+            "color_idx": 3,
+            "consume_tp": 100,
+            "eldorado": false,
+            "element": 2,
+            "event_id": 190168113,
+            "event_id_name": "ev60_01250",
+            "fail_event_id": 0,
+            "fail_event_id_name": "",
+            "focus_battle_effect_id": 0,
+            "foul_rate": 0,
+            "growth_type": 7,
+            "is_disable_playable_until_next_patch": false,
+            "partner1": 0,
+            "partner2": 0,
+            "partner3": 0,
+            "partner_type": 3,
+            "power_max": 640,
+            "power_min": 100,
+            "recast_time": 90,
+            "series_id_crc": 2363893155,
+            "skill_desc_id": 1493166518,
+            "skill_effect_bit_flag": 0,
+            "skill_id": 3169443499,
+            "skill_id_str": "whs01250",
+            "skill_name_id": 3640230590,
+            "telop_info_id": 2218685158
+          },
+          "learn_level": 30
+        },
+        {
+          "cutin": {
+            "effects_dir": "data/common/event/ev60/ev60_00340/",
+            "event_id_name": "ev60_00340",
+            "model_g4md": "data/common/chr/_waza/ev60_00340/ev60_00340.g4md",
+            "model_g4mg": "data/common/chr/_waza/ev60_00340/ev60_00340.g4mg",
+            "sound_cfg": "data/common/event_cfg/snd/ev60_00340_snd.cfg.bin",
+            "telop_by_lang": [
+              [
+                "de",
+                "data/dx11/menu/220_img/telop_waza/de/whs00340.g4tx"
+              ],
+              [
+                "en",
+                "data/dx11/menu/220_img/telop_waza/en/whs00340.g4tx"
+              ],
+              [
+                "es",
+                "data/dx11/menu/220_img/telop_waza/es/whs00340.g4tx"
+              ],
+              [
+                "fr",
+                "data/dx11/menu/220_img/telop_waza/fr/whs00340.g4tx"
+              ],
+              [
+                "it",
+                "data/dx11/menu/220_img/telop_waza/it/whs00340.g4tx"
+              ],
+              [
+                "pt",
+                "data/dx11/menu/220_img/telop_waza/pt/whs00340.g4tx"
+              ],
+              [
+                "zh_hans",
+                "data/dx11/menu/220_img/telop_waza/zh_hans/whs00340.g4tx"
+              ],
+              [
+                "zh_hant",
+                "data/dx11/menu/220_img/telop_waza/zh_hant/whs00340.g4tx"
+              ]
+            ],
+            "texture_g4tx": "data/dx11/chr/_waza/ev60_00340/ev60_00340.g4tx"
+          },
+          "info": {
+            "category": 1,
+            "cmd_opt_idx": 2,
+            "color_idx": 1,
+            "consume_tp": 70,
+            "eldorado": false,
+            "element": 1,
+            "event_id": 2872082466,
+            "event_id_name": "ev60_00340",
+            "fail_event_id": 0,
+            "fail_event_id_name": "",
+            "focus_battle_effect_id": 0,
+            "foul_rate": 0,
+            "growth_type": 3,
+            "is_disable_playable_until_next_patch": false,
+            "partner1": 0,
+            "partner2": 0,
+            "partner3": 0,
+            "partner_type": 0,
+            "power_max": 440,
+            "power_min": 70,
+            "recast_time": 90,
+            "series_id_crc": 1659389071,
+            "skill_desc_id": 4170896805,
+            "skill_effect_bit_flag": 0,
+            "skill_id": 478995128,
+            "skill_id_str": "whs00340",
+            "skill_name_id": 2023538349,
+            "telop_info_id": 609963765
+          },
+          "learn_level": 38
+        },
+        {
+          "cutin": {
+            "effects_dir": "data/common/event/ev60/ev60_00900/",
+            "event_id_name": "ev60_00900",
+            "model_g4md": "data/common/chr/_waza/ev60_00900/ev60_00900.g4md",
+            "model_g4mg": "data/common/chr/_waza/ev60_00900/ev60_00900.g4mg",
+            "sound_cfg": "data/common/event_cfg/snd/ev60_00900_snd.cfg.bin",
+            "telop_by_lang": [
+              [
+                "de",
+                "data/dx11/menu/220_img/telop_waza/de/whs00900.g4tx"
+              ],
+              [
+                "en",
+                "data/dx11/menu/220_img/telop_waza/en/whs00900.g4tx"
+              ],
+              [
+                "es",
+                "data/dx11/menu/220_img/telop_waza/es/whs00900.g4tx"
+              ],
+              [
+                "fr",
+                "data/dx11/menu/220_img/telop_waza/fr/whs00900.g4tx"
+              ],
+              [
+                "it",
+                "data/dx11/menu/220_img/telop_waza/it/whs00900.g4tx"
+              ],
+              [
+                "pt",
+                "data/dx11/menu/220_img/telop_waza/pt/whs00900.g4tx"
+              ],
+              [
+                "zh_hans",
+                "data/dx11/menu/220_img/telop_waza/zh_hans/whs00900.g4tx"
+              ],
+              [
+                "zh_hant",
+                "data/dx11/menu/220_img/telop_waza/zh_hant/whs00900.g4tx"
+              ]
+            ],
+            "texture_g4tx": "data/dx11/chr/_waza/ev60_00900/ev60_00900.g4tx"
+          },
+          "info": {
+            "category": 1,
+            "cmd_opt_idx": 2,
+            "color_idx": 1,
+            "consume_tp": 80,
+            "eldorado": false,
+            "element": 1,
+            "event_id": 3268133104,
+            "event_id_name": "ev60_00900",
+            "fail_event_id": 0,
+            "fail_event_id_name": "",
+            "focus_battle_effect_id": 0,
+            "foul_rate": 0,
+            "growth_type": 7,
+            "is_disable_playable_until_next_patch": false,
+            "partner1": 0,
+            "partner2": 0,
+            "partner3": 0,
+            "partner_type": 0,
+            "power_max": 540,
+            "power_min": 85,
+            "recast_time": 90,
+            "series_id_crc": 4225832245,
+            "skill_desc_id": 2439091575,
+            "skill_effect_bit_flag": 0,
+            "skill_id": 1970774634,
+            "skill_id_str": "whs00900",
+            "skill_name_id": 292028031,
+            "telop_info_id": 1302335015
+          },
+          "learn_level": 43
+        },
+        {
+          "cutin": {
+            "effects_dir": "data/common/event/ev60/ev60_01250/",
+            "event_id_name": "ev60_01250",
+            "model_g4md": "data/common/chr/_waza/ev60_01250/ev60_01250.g4md",
+            "model_g4mg": "data/common/chr/_waza/ev60_01250/ev60_01250.g4mg",
+            "sound_cfg": "data/common/event_cfg/snd/ev60_01250_snd.cfg.bin",
+            "telop_by_lang": [
+              [
+                "de",
+                "data/dx11/menu/220_img/telop_waza/de/whs01250.g4tx"
+              ],
+              [
+                "en",
+                "data/dx11/menu/220_img/telop_waza/en/whs01250.g4tx"
+              ],
+              [
+                "es",
+                "data/dx11/menu/220_img/telop_waza/es/whs01250.g4tx"
+              ],
+              [
+                "fr",
+                "data/dx11/menu/220_img/telop_waza/fr/whs01250.g4tx"
+              ],
+              [
+                "it",
+                "data/dx11/menu/220_img/telop_waza/it/whs01250.g4tx"
+              ],
+              [
+                "pt",
+                "data/dx11/menu/220_img/telop_waza/pt/whs01250.g4tx"
+              ],
+              [
+                "zh_hans",
+                "data/dx11/menu/220_img/telop_waza/zh_hans/whs01250.g4tx"
+              ],
+              [
+                "zh_hant",
+                "data/dx11/menu/220_img/telop_waza/zh_hant/whs01250.g4tx"
+              ]
+            ],
+            "texture_g4tx": "data/dx11/chr/_waza/ev60_01250/ev60_01250.g4tx"
+          },
+          "info": {
+            "category": 1,
+            "cmd_opt_idx": 2,
+            "color_idx": 3,
+            "consume_tp": 100,
+            "eldorado": false,
+            "element": 2,
+            "event_id": 190168113,
+            "event_id_name": "ev60_01250",
+            "fail_event_id": 0,
+            "fail_event_id_name": "",
+            "focus_battle_effect_id": 0,
+            "foul_rate": 0,
+            "growth_type": 7,
+            "is_disable_playable_until_next_patch": false,
+            "partner1": 0,
+            "partner2": 0,
+            "partner3": 0,
+            "partner_type": 3,
+            "power_max": 640,
+            "power_min": 100,
+            "recast_time": 90,
+            "series_id_crc": 2363893155,
+            "skill_desc_id": 1493166518,
+            "skill_effect_bit_flag": 0,
+            "skill_id": 3169443499,
+            "skill_id_str": "whs01250",
+            "skill_name_id": 3640230590,
+            "telop_info_id": 2218685158
+          },
+          "learn_level": 30
+        },
+        {
+          "cutin": {
+            "effects_dir": "data/common/event/ev60/ev60_00340/",
+            "event_id_name": "ev60_00340",
+            "model_g4md": "data/common/chr/_waza/ev60_00340/ev60_00340.g4md",
+            "model_g4mg": "data/common/chr/_waza/ev60_00340/ev60_00340.g4mg",
+            "sound_cfg": "data/common/event_cfg/snd/ev60_00340_snd.cfg.bin",
+            "telop_by_lang": [
+              [
+                "de",
+                "data/dx11/menu/220_img/telop_waza/de/whs00340.g4tx"
+              ],
+              [
+                "en",
+                "data/dx11/menu/220_img/telop_waza/en/whs00340.g4tx"
+              ],
+              [
+                "es",
+                "data/dx11/menu/220_img/telop_waza/es/whs00340.g4tx"
+              ],
+              [
+                "fr",
+                "data/dx11/menu/220_img/telop_waza/fr/whs00340.g4tx"
+              ],
+              [
+                "it",
+                "data/dx11/menu/220_img/telop_waza/it/whs00340.g4tx"
+              ],
+              [
+                "pt",
+                "data/dx11/menu/220_img/telop_waza/pt/whs00340.g4tx"
+              ],
+              [
+                "zh_hans",
+                "data/dx11/menu/220_img/telop_waza/zh_hans/whs00340.g4tx"
+              ],
+              [
+                "zh_hant",
+                "data/dx11/menu/220_img/telop_waza/zh_hant/whs00340.g4tx"
+              ]
+            ],
+            "texture_g4tx": "data/dx11/chr/_waza/ev60_00340/ev60_00340.g4tx"
+          },
+          "info": {
+            "category": 1,
+            "cmd_opt_idx": 2,
+            "color_idx": 1,
+            "consume_tp": 70,
+            "eldorado": false,
+            "element": 1,
+            "event_id": 2872082466,
+            "event_id_name": "ev60_00340",
+            "fail_event_id": 0,
+            "fail_event_id_name": "",
+            "focus_battle_effect_id": 0,
+            "foul_rate": 0,
+            "growth_type": 3,
+            "is_disable_playable_until_next_patch": false,
+            "partner1": 0,
+            "partner2": 0,
+            "partner3": 0,
+            "partner_type": 0,
+            "power_max": 440,
+            "power_min": 70,
+            "recast_time": 90,
+            "series_id_crc": 1659389071,
+            "skill_desc_id": 4170896805,
+            "skill_effect_bit_flag": 0,
+            "skill_id": 478995128,
+            "skill_id_str": "whs00340",
+            "skill_name_id": 2023538349,
+            "telop_info_id": 609963765
+          },
+          "learn_level": 38
+        }
+      ],
+      "unresolved": []
+    },
+    {
+      "auras": [],
+      "chara_base_id": 936881403,
+      "chara_param_id": 865666511,
+      "code": "c01001900",
+      "element": 2,
+      "growth_pattern": 0,
+      "is_primary": false,
+      "main_position": 3,
+      "sub_position": 2,
+      "techniques": [
+        {
+          "cutin": {
+            "effects_dir": "data/common/event/ev60/ev60_00340/",
+            "event_id_name": "ev60_00340",
+            "model_g4md": "data/common/chr/_waza/ev60_00340/ev60_00340.g4md",
+            "model_g4mg": "data/common/chr/_waza/ev60_00340/ev60_00340.g4mg",
+            "sound_cfg": "data/common/event_cfg/snd/ev60_00340_snd.cfg.bin",
+            "telop_by_lang": [
+              [
+                "de",
+                "data/dx11/menu/220_img/telop_waza/de/whs00340.g4tx"
+              ],
+              [
+                "en",
+                "data/dx11/menu/220_img/telop_waza/en/whs00340.g4tx"
+              ],
+              [
+                "es",
+                "data/dx11/menu/220_img/telop_waza/es/whs00340.g4tx"
+              ],
+              [
+                "fr",
+                "data/dx11/menu/220_img/telop_waza/fr/whs00340.g4tx"
+              ],
+              [
+                "it",
+                "data/dx11/menu/220_img/telop_waza/it/whs00340.g4tx"
+              ],
+              [
+                "pt",
+                "data/dx11/menu/220_img/telop_waza/pt/whs00340.g4tx"
+              ],
+              [
+                "zh_hans",
+                "data/dx11/menu/220_img/telop_waza/zh_hans/whs00340.g4tx"
+              ],
+              [
+                "zh_hant",
+                "data/dx11/menu/220_img/telop_waza/zh_hant/whs00340.g4tx"
+              ]
+            ],
+            "texture_g4tx": "data/dx11/chr/_waza/ev60_00340/ev60_00340.g4tx"
+          },
+          "info": {
+            "category": 1,
+            "cmd_opt_idx": 2,
+            "color_idx": 1,
+            "consume_tp": 70,
+            "eldorado": false,
+            "element": 1,
+            "event_id": 2872082466,
+            "event_id_name": "ev60_00340",
+            "fail_event_id": 0,
+            "fail_event_id_name": "",
+            "focus_battle_effect_id": 0,
+            "foul_rate": 0,
+            "growth_type": 3,
+            "is_disable_playable_until_next_patch": false,
+            "partner1": 0,
+            "partner2": 0,
+            "partner3": 0,
+            "partner_type": 0,
+            "power_max": 440,
+            "power_min": 70,
+            "recast_time": 90,
+            "series_id_crc": 1659389071,
+            "skill_desc_id": 4170896805,
+            "skill_effect_bit_flag": 0,
+            "skill_id": 478995128,
+            "skill_id_str": "whs00340",
+            "skill_name_id": 2023538349,
+            "telop_info_id": 609963765
+          },
+          "learn_level": 0
+        },
+        {
+          "cutin": {
+            "effects_dir": "data/common/event/ev61/ev61_00200/",
+            "event_id_name": "ev61_00200",
+            "model_g4md": "data/common/chr/_waza/ev61_00200/ev61_00200.g4md",
+            "model_g4mg": "data/common/chr/_waza/ev61_00200/ev61_00200.g4mg",
+            "sound_cfg": "data/common/event_cfg/snd/ev61_00200_snd.cfg.bin",
+            "telop_by_lang": [
+              [
+                "de",
+                "data/dx11/menu/220_img/telop_waza/de/who00200.g4tx"
+              ],
+              [
+                "en",
+                "data/dx11/menu/220_img/telop_waza/en/who00200.g4tx"
+              ],
+              [
+                "es",
+                "data/dx11/menu/220_img/telop_waza/es/who00200.g4tx"
+              ],
+              [
+                "fr",
+                "data/dx11/menu/220_img/telop_waza/fr/who00200.g4tx"
+              ],
+              [
+                "it",
+                "data/dx11/menu/220_img/telop_waza/it/who00200.g4tx"
+              ],
+              [
+                "pt",
+                "data/dx11/menu/220_img/telop_waza/pt/who00200.g4tx"
+              ],
+              [
+                "zh_hans",
+                "data/dx11/menu/220_img/telop_waza/zh_hans/who00200.g4tx"
+              ],
+              [
+                "zh_hant",
+                "data/dx11/menu/220_img/telop_waza/zh_hant/who00200.g4tx"
+              ]
+            ],
+            "texture_g4tx": "data/dx11/chr/_waza/ev61_00200/ev61_00200.g4tx"
+          },
+          "info": {
+            "category": 2,
+            "cmd_opt_idx": 2,
+            "color_idx": 1,
+            "consume_tp": 80,
+            "eldorado": false,
+            "element": 1,
+            "event_id": 1760109733,
+            "event_id_name": "ev61_00200",
+            "fail_event_id": 0,
+            "fail_event_id_name": "",
+            "focus_battle_effect_id": 0,
+            "foul_rate": 0,
+            "growth_type": 6,
+            "is_disable_playable_until_next_patch": false,
+            "partner1": 0,
+            "partner2": 0,
+            "partner3": 0,
+            "partner_type": 0,
+            "power_max": 540,
+            "power_min": 85,
+            "recast_time": 60,
+            "series_id_crc": 1659389071,
+            "skill_desc_id": 3911235702,
+            "skill_effect_bit_flag": 0,
+            "skill_id": 221679467,
+            "skill_id_str": "who00200",
+            "skill_name_id": 1764152190,
+            "telop_info_id": 903947046
+          },
+          "learn_level": 1
+        }
+      ],
+      "unresolved": []
+    },
+    {
+      "auras": [
+        {
+          "cmd": {
+            "asset_code": "wap01005",
+            "aura_id": 2709273970,
+            "config": {
+              "buff_id": 2478045099,
+              "rank": 3005,
+              "skill_id1": null,
+              "skill_id2": null,
+              "val11": 1,
+              "val4": 30,
+              "val5": 90,
+              "val9": 8
+            },
+            "desc_id": 1932039139,
+            "element": 0,
+            "name_id": 3312214375,
+            "sub_type": "Aura"
+          },
+          "learn_level": 38
+        }
+      ],
+      "chara_base_id": 936881403,
+      "chara_param_id": 547068269,
+      "code": "c01001900",
+      "element": 2,
+      "growth_pattern": 0,
+      "is_primary": false,
+      "main_position": 3,
+      "sub_position": 2,
+      "techniques": [
+        {
+          "cutin": {
+            "effects_dir": "data/common/event/ev61/ev61_00200/",
+            "event_id_name": "ev61_00200",
+            "model_g4md": "data/common/chr/_waza/ev61_00200/ev61_00200.g4md",
+            "model_g4mg": "data/common/chr/_waza/ev61_00200/ev61_00200.g4mg",
+            "sound_cfg": "data/common/event_cfg/snd/ev61_00200_snd.cfg.bin",
+            "telop_by_lang": [
+              [
+                "de",
+                "data/dx11/menu/220_img/telop_waza/de/who00200.g4tx"
+              ],
+              [
+                "en",
+                "data/dx11/menu/220_img/telop_waza/en/who00200.g4tx"
+              ],
+              [
+                "es",
+                "data/dx11/menu/220_img/telop_waza/es/who00200.g4tx"
+              ],
+              [
+                "fr",
+                "data/dx11/menu/220_img/telop_waza/fr/who00200.g4tx"
+              ],
+              [
+                "it",
+                "data/dx11/menu/220_img/telop_waza/it/who00200.g4tx"
+              ],
+              [
+                "pt",
+                "data/dx11/menu/220_img/telop_waza/pt/who00200.g4tx"
+              ],
+              [
+                "zh_hans",
+                "data/dx11/menu/220_img/telop_waza/zh_hans/who00200.g4tx"
+              ],
+              [
+                "zh_hant",
+                "data/dx11/menu/220_img/telop_waza/zh_hant/who00200.g4tx"
+              ]
+            ],
+            "texture_g4tx": "data/dx11/chr/_waza/ev61_00200/ev61_00200.g4tx"
+          },
+          "info": {
+            "category": 2,
+            "cmd_opt_idx": 2,
+            "color_idx": 1,
+            "consume_tp": 80,
+            "eldorado": false,
+            "element": 1,
+            "event_id": 1760109733,
+            "event_id_name": "ev61_00200",
+            "fail_event_id": 0,
+            "fail_event_id_name": "",
+            "focus_battle_effect_id": 0,
+            "foul_rate": 0,
+            "growth_type": 6,
+            "is_disable_playable_until_next_patch": false,
+            "partner1": 0,
+            "partner2": 0,
+            "partner3": 0,
+            "partner_type": 0,
+            "power_max": 540,
+            "power_min": 85,
+            "recast_time": 60,
+            "series_id_crc": 1659389071,
+            "skill_desc_id": 3911235702,
+            "skill_effect_bit_flag": 0,
+            "skill_id": 221679467,
+            "skill_id_str": "who00200",
+            "skill_name_id": 1764152190,
+            "telop_info_id": 903947046
+          },
+          "learn_level": 1
+        },
+        {
+          "cutin": {
+            "effects_dir": "data/common/event/ev60/ev60_01250/",
+            "event_id_name": "ev60_01250",
+            "model_g4md": "data/common/chr/_waza/ev60_01250/ev60_01250.g4md",
+            "model_g4mg": "data/common/chr/_waza/ev60_01250/ev60_01250.g4mg",
+            "sound_cfg": "data/common/event_cfg/snd/ev60_01250_snd.cfg.bin",
+            "telop_by_lang": [
+              [
+                "de",
+                "data/dx11/menu/220_img/telop_waza/de/whs01250.g4tx"
+              ],
+              [
+                "en",
+                "data/dx11/menu/220_img/telop_waza/en/whs01250.g4tx"
+              ],
+              [
+                "es",
+                "data/dx11/menu/220_img/telop_waza/es/whs01250.g4tx"
+              ],
+              [
+                "fr",
+                "data/dx11/menu/220_img/telop_waza/fr/whs01250.g4tx"
+              ],
+              [
+                "it",
+                "data/dx11/menu/220_img/telop_waza/it/whs01250.g4tx"
+              ],
+              [
+                "pt",
+                "data/dx11/menu/220_img/telop_waza/pt/whs01250.g4tx"
+              ],
+              [
+                "zh_hans",
+                "data/dx11/menu/220_img/telop_waza/zh_hans/whs01250.g4tx"
+              ],
+              [
+                "zh_hant",
+                "data/dx11/menu/220_img/telop_waza/zh_hant/whs01250.g4tx"
+              ]
+            ],
+            "texture_g4tx": "data/dx11/chr/_waza/ev60_01250/ev60_01250.g4tx"
+          },
+          "info": {
+            "category": 1,
+            "cmd_opt_idx": 2,
+            "color_idx": 3,
+            "consume_tp": 100,
+            "eldorado": false,
+            "element": 2,
+            "event_id": 190168113,
+            "event_id_name": "ev60_01250",
+            "fail_event_id": 0,
+            "fail_event_id_name": "",
+            "focus_battle_effect_id": 0,
+            "foul_rate": 0,
+            "growth_type": 7,
+            "is_disable_playable_until_next_patch": false,
+            "partner1": 0,
+            "partner2": 0,
+            "partner3": 0,
+            "partner_type": 3,
+            "power_max": 640,
+            "power_min": 100,
+            "recast_time": 90,
+            "series_id_crc": 2363893155,
+            "skill_desc_id": 1493166518,
+            "skill_effect_bit_flag": 0,
+            "skill_id": 3169443499,
+            "skill_id_str": "whs01250",
+            "skill_name_id": 3640230590,
+            "telop_info_id": 2218685158
+          },
+          "learn_level": 13
+        },
+        {
+          "cutin": {
+            "effects_dir": "data/common/event/ev60/ev60_01250/",
+            "event_id_name": "ev60_01250",
+            "model_g4md": "data/common/chr/_waza/ev60_01250/ev60_01250.g4md",
+            "model_g4mg": "data/common/chr/_waza/ev60_01250/ev60_01250.g4mg",
+            "sound_cfg": "data/common/event_cfg/snd/ev60_01250_snd.cfg.bin",
+            "telop_by_lang": [
+              [
+                "de",
+                "data/dx11/menu/220_img/telop_waza/de/whs01250.g4tx"
+              ],
+              [
+                "en",
+                "data/dx11/menu/220_img/telop_waza/en/whs01250.g4tx"
+              ],
+              [
+                "es",
+                "data/dx11/menu/220_img/telop_waza/es/whs01250.g4tx"
+              ],
+              [
+                "fr",
+                "data/dx11/menu/220_img/telop_waza/fr/whs01250.g4tx"
+              ],
+              [
+                "it",
+                "data/dx11/menu/220_img/telop_waza/it/whs01250.g4tx"
+              ],
+              [
+                "pt",
+                "data/dx11/menu/220_img/telop_waza/pt/whs01250.g4tx"
+              ],
+              [
+                "zh_hans",
+                "data/dx11/menu/220_img/telop_waza/zh_hans/whs01250.g4tx"
+              ],
+              [
+                "zh_hant",
+                "data/dx11/menu/220_img/telop_waza/zh_hant/whs01250.g4tx"
+              ]
+            ],
+            "texture_g4tx": "data/dx11/chr/_waza/ev60_01250/ev60_01250.g4tx"
+          },
+          "info": {
+            "category": 1,
+            "cmd_opt_idx": 2,
+            "color_idx": 3,
+            "consume_tp": 100,
+            "eldorado": false,
+            "element": 2,
+            "event_id": 190168113,
+            "event_id_name": "ev60_01250",
+            "fail_event_id": 0,
+            "fail_event_id_name": "",
+            "focus_battle_effect_id": 0,
+            "foul_rate": 0,
+            "growth_type": 7,
+            "is_disable_playable_until_next_patch": false,
+            "partner1": 0,
+            "partner2": 0,
+            "partner3": 0,
+            "partner_type": 3,
+            "power_max": 640,
+            "power_min": 100,
+            "recast_time": 90,
+            "series_id_crc": 2363893155,
+            "skill_desc_id": 1493166518,
+            "skill_effect_bit_flag": 0,
+            "skill_id": 3169443499,
+            "skill_id_str": "whs01250",
+            "skill_name_id": 3640230590,
+            "telop_info_id": 2218685158
+          },
+          "learn_level": 20
+        },
+        {
+          "cutin": {
+            "effects_dir": "data/common/event/ev61/ev61_00200/",
+            "event_id_name": "ev61_00200",
+            "model_g4md": "data/common/chr/_waza/ev61_00200/ev61_00200.g4md",
+            "model_g4mg": "data/common/chr/_waza/ev61_00200/ev61_00200.g4mg",
+            "sound_cfg": "data/common/event_cfg/snd/ev61_00200_snd.cfg.bin",
+            "telop_by_lang": [
+              [
+                "de",
+                "data/dx11/menu/220_img/telop_waza/de/who00200.g4tx"
+              ],
+              [
+                "en",
+                "data/dx11/menu/220_img/telop_waza/en/who00200.g4tx"
+              ],
+              [
+                "es",
+                "data/dx11/menu/220_img/telop_waza/es/who00200.g4tx"
+              ],
+              [
+                "fr",
+                "data/dx11/menu/220_img/telop_waza/fr/who00200.g4tx"
+              ],
+              [
+                "it",
+                "data/dx11/menu/220_img/telop_waza/it/who00200.g4tx"
+              ],
+              [
+                "pt",
+                "data/dx11/menu/220_img/telop_waza/pt/who00200.g4tx"
+              ],
+              [
+                "zh_hans",
+                "data/dx11/menu/220_img/telop_waza/zh_hans/who00200.g4tx"
+              ],
+              [
+                "zh_hant",
+                "data/dx11/menu/220_img/telop_waza/zh_hant/who00200.g4tx"
+              ]
+            ],
+            "texture_g4tx": "data/dx11/chr/_waza/ev61_00200/ev61_00200.g4tx"
+          },
+          "info": {
+            "category": 2,
+            "cmd_opt_idx": 2,
+            "color_idx": 1,
+            "consume_tp": 80,
+            "eldorado": false,
+            "element": 1,
+            "event_id": 1760109733,
+            "event_id_name": "ev61_00200",
+            "fail_event_id": 0,
+            "fail_event_id_name": "",
+            "focus_battle_effect_id": 0,
+            "foul_rate": 0,
+            "growth_type": 6,
+            "is_disable_playable_until_next_patch": false,
+            "partner1": 0,
+            "partner2": 0,
+            "partner3": 0,
+            "partner_type": 0,
+            "power_max": 540,
+            "power_min": 85,
+            "recast_time": 60,
+            "series_id_crc": 1659389071,
+            "skill_desc_id": 3911235702,
+            "skill_effect_bit_flag": 0,
+            "skill_id": 221679467,
+            "skill_id_str": "who00200",
+            "skill_name_id": 1764152190,
+            "telop_info_id": 903947046
+          },
+          "learn_level": 30
+        }
+      ],
+      "unresolved": []
+    },
+    {
+      "auras": [
+        {
+          "cmd": {
+            "asset_code": "wap01005",
+            "aura_id": 2709273970,
+            "config": {
+              "buff_id": 2478045099,
+              "rank": 3005,
+              "skill_id1": null,
+              "skill_id2": null,
+              "val11": 1,
+              "val4": 30,
+              "val5": 90,
+              "val9": 8
+            },
+            "desc_id": 1932039139,
+            "element": 0,
+            "name_id": 3312214375,
+            "sub_type": "Aura"
+          },
+          "learn_level": 38
+        }
+      ],
+      "chara_base_id": 936881403,
+      "chara_param_id": 156446111,
+      "code": "c01001900",
+      "element": 2,
+      "growth_pattern": 0,
+      "is_primary": false,
+      "main_position": 3,
+      "sub_position": 2,
+      "techniques": [
+        {
+          "cutin": {
+            "effects_dir": "data/common/event/ev61/ev61_00200/",
+            "event_id_name": "ev61_00200",
+            "model_g4md": "data/common/chr/_waza/ev61_00200/ev61_00200.g4md",
+            "model_g4mg": "data/common/chr/_waza/ev61_00200/ev61_00200.g4mg",
+            "sound_cfg": "data/common/event_cfg/snd/ev61_00200_snd.cfg.bin",
+            "telop_by_lang": [
+              [
+                "de",
+                "data/dx11/menu/220_img/telop_waza/de/who00200.g4tx"
+              ],
+              [
+                "en",
+                "data/dx11/menu/220_img/telop_waza/en/who00200.g4tx"
+              ],
+              [
+                "es",
+                "data/dx11/menu/220_img/telop_waza/es/who00200.g4tx"
+              ],
+              [
+                "fr",
+                "data/dx11/menu/220_img/telop_waza/fr/who00200.g4tx"
+              ],
+              [
+                "it",
+                "data/dx11/menu/220_img/telop_waza/it/who00200.g4tx"
+              ],
+              [
+                "pt",
+                "data/dx11/menu/220_img/telop_waza/pt/who00200.g4tx"
+              ],
+              [
+                "zh_hans",
+                "data/dx11/menu/220_img/telop_waza/zh_hans/who00200.g4tx"
+              ],
+              [
+                "zh_hant",
+                "data/dx11/menu/220_img/telop_waza/zh_hant/who00200.g4tx"
+              ]
+            ],
+            "texture_g4tx": "data/dx11/chr/_waza/ev61_00200/ev61_00200.g4tx"
+          },
+          "info": {
+            "category": 2,
+            "cmd_opt_idx": 2,
+            "color_idx": 1,
+            "consume_tp": 80,
+            "eldorado": false,
+            "element": 1,
+            "event_id": 1760109733,
+            "event_id_name": "ev61_00200",
+            "fail_event_id": 0,
+            "fail_event_id_name": "",
+            "focus_battle_effect_id": 0,
+            "foul_rate": 0,
+            "growth_type": 6,
+            "is_disable_playable_until_next_patch": false,
+            "partner1": 0,
+            "partner2": 0,
+            "partner3": 0,
+            "partner_type": 0,
+            "power_max": 540,
+            "power_min": 85,
+            "recast_time": 60,
+            "series_id_crc": 1659389071,
+            "skill_desc_id": 3911235702,
+            "skill_effect_bit_flag": 0,
+            "skill_id": 221679467,
+            "skill_id_str": "who00200",
+            "skill_name_id": 1764152190,
+            "telop_info_id": 903947046
+          },
+          "learn_level": 1
+        },
+        {
+          "cutin": {
+            "effects_dir": "data/common/event/ev60/ev60_01250/",
+            "event_id_name": "ev60_01250",
+            "model_g4md": "data/common/chr/_waza/ev60_01250/ev60_01250.g4md",
+            "model_g4mg": "data/common/chr/_waza/ev60_01250/ev60_01250.g4mg",
+            "sound_cfg": "data/common/event_cfg/snd/ev60_01250_snd.cfg.bin",
+            "telop_by_lang": [
+              [
+                "de",
+                "data/dx11/menu/220_img/telop_waza/de/whs01250.g4tx"
+              ],
+              [
+                "en",
+                "data/dx11/menu/220_img/telop_waza/en/whs01250.g4tx"
+              ],
+              [
+                "es",
+                "data/dx11/menu/220_img/telop_waza/es/whs01250.g4tx"
+              ],
+              [
+                "fr",
+                "data/dx11/menu/220_img/telop_waza/fr/whs01250.g4tx"
+              ],
+              [
+                "it",
+                "data/dx11/menu/220_img/telop_waza/it/whs01250.g4tx"
+              ],
+              [
+                "pt",
+                "data/dx11/menu/220_img/telop_waza/pt/whs01250.g4tx"
+              ],
+              [
+                "zh_hans",
+                "data/dx11/menu/220_img/telop_waza/zh_hans/whs01250.g4tx"
+              ],
+              [
+                "zh_hant",
+                "data/dx11/menu/220_img/telop_waza/zh_hant/whs01250.g4tx"
+              ]
+            ],
+            "texture_g4tx": "data/dx11/chr/_waza/ev60_01250/ev60_01250.g4tx"
+          },
+          "info": {
+            "category": 1,
+            "cmd_opt_idx": 2,
+            "color_idx": 3,
+            "consume_tp": 100,
+            "eldorado": false,
+            "element": 2,
+            "event_id": 190168113,
+            "event_id_name": "ev60_01250",
+            "fail_event_id": 0,
+            "fail_event_id_name": "",
+            "focus_battle_effect_id": 0,
+            "foul_rate": 0,
+            "growth_type": 7,
+            "is_disable_playable_until_next_patch": false,
+            "partner1": 0,
+            "partner2": 0,
+            "partner3": 0,
+            "partner_type": 3,
+            "power_max": 640,
+            "power_min": 100,
+            "recast_time": 90,
+            "series_id_crc": 2363893155,
+            "skill_desc_id": 1493166518,
+            "skill_effect_bit_flag": 0,
+            "skill_id": 3169443499,
+            "skill_id_str": "whs01250",
+            "skill_name_id": 3640230590,
+            "telop_info_id": 2218685158
+          },
+          "learn_level": 13
+        },
+        {
+          "cutin": {
+            "effects_dir": "data/common/event/ev60/ev60_01250/",
+            "event_id_name": "ev60_01250",
+            "model_g4md": "data/common/chr/_waza/ev60_01250/ev60_01250.g4md",
+            "model_g4mg": "data/common/chr/_waza/ev60_01250/ev60_01250.g4mg",
+            "sound_cfg": "data/common/event_cfg/snd/ev60_01250_snd.cfg.bin",
+            "telop_by_lang": [
+              [
+                "de",
+                "data/dx11/menu/220_img/telop_waza/de/whs01250.g4tx"
+              ],
+              [
+                "en",
+                "data/dx11/menu/220_img/telop_waza/en/whs01250.g4tx"
+              ],
+              [
+                "es",
+                "data/dx11/menu/220_img/telop_waza/es/whs01250.g4tx"
+              ],
+              [
+                "fr",
+                "data/dx11/menu/220_img/telop_waza/fr/whs01250.g4tx"
+              ],
+              [
+                "it",
+                "data/dx11/menu/220_img/telop_waza/it/whs01250.g4tx"
+              ],
+              [
+                "pt",
+                "data/dx11/menu/220_img/telop_waza/pt/whs01250.g4tx"
+              ],
+              [
+                "zh_hans",
+                "data/dx11/menu/220_img/telop_waza/zh_hans/whs01250.g4tx"
+              ],
+              [
+                "zh_hant",
+                "data/dx11/menu/220_img/telop_waza/zh_hant/whs01250.g4tx"
+              ]
+            ],
+            "texture_g4tx": "data/dx11/chr/_waza/ev60_01250/ev60_01250.g4tx"
+          },
+          "info": {
+            "category": 1,
+            "cmd_opt_idx": 2,
+            "color_idx": 3,
+            "consume_tp": 100,
+            "eldorado": false,
+            "element": 2,
+            "event_id": 190168113,
+            "event_id_name": "ev60_01250",
+            "fail_event_id": 0,
+            "fail_event_id_name": "",
+            "focus_battle_effect_id": 0,
+            "foul_rate": 0,
+            "growth_type": 7,
+            "is_disable_playable_until_next_patch": false,
+            "partner1": 0,
+            "partner2": 0,
+            "partner3": 0,
+            "partner_type": 3,
+            "power_max": 640,
+            "power_min": 100,
+            "recast_time": 90,
+            "series_id_crc": 2363893155,
+            "skill_desc_id": 1493166518,
+            "skill_effect_bit_flag": 0,
+            "skill_id": 3169443499,
+            "skill_id_str": "whs01250",
+            "skill_name_id": 3640230590,
+            "telop_info_id": 2218685158
+          },
+          "learn_level": 20
+        },
+        {
+          "cutin": {
+            "effects_dir": "data/common/event/ev61/ev61_00200/",
+            "event_id_name": "ev61_00200",
+            "model_g4md": "data/common/chr/_waza/ev61_00200/ev61_00200.g4md",
+            "model_g4mg": "data/common/chr/_waza/ev61_00200/ev61_00200.g4mg",
+            "sound_cfg": "data/common/event_cfg/snd/ev61_00200_snd.cfg.bin",
+            "telop_by_lang": [
+              [
+                "de",
+                "data/dx11/menu/220_img/telop_waza/de/who00200.g4tx"
+              ],
+              [
+                "en",
+                "data/dx11/menu/220_img/telop_waza/en/who00200.g4tx"
+              ],
+              [
+                "es",
+                "data/dx11/menu/220_img/telop_waza/es/who00200.g4tx"
+              ],
+              [
+                "fr",
+                "data/dx11/menu/220_img/telop_waza/fr/who00200.g4tx"
+              ],
+              [
+                "it",
+                "data/dx11/menu/220_img/telop_waza/it/who00200.g4tx"
+              ],
+              [
+                "pt",
+                "data/dx11/menu/220_img/telop_waza/pt/who00200.g4tx"
+              ],
+              [
+                "zh_hans",
+                "data/dx11/menu/220_img/telop_waza/zh_hans/who00200.g4tx"
+              ],
+              [
+                "zh_hant",
+                "data/dx11/menu/220_img/telop_waza/zh_hant/who00200.g4tx"
+              ]
+            ],
+            "texture_g4tx": "data/dx11/chr/_waza/ev61_00200/ev61_00200.g4tx"
+          },
+          "info": {
+            "category": 2,
+            "cmd_opt_idx": 2,
+            "color_idx": 1,
+            "consume_tp": 80,
+            "eldorado": false,
+            "element": 1,
+            "event_id": 1760109733,
+            "event_id_name": "ev61_00200",
+            "fail_event_id": 0,
+            "fail_event_id_name": "",
+            "focus_battle_effect_id": 0,
+            "foul_rate": 0,
+            "growth_type": 6,
+            "is_disable_playable_until_next_patch": false,
+            "partner1": 0,
+            "partner2": 0,
+            "partner3": 0,
+            "partner_type": 0,
+            "power_max": 540,
+            "power_min": 85,
+            "recast_time": 60,
+            "series_id_crc": 1659389071,
+            "skill_desc_id": 3911235702,
+            "skill_effect_bit_flag": 0,
+            "skill_id": 221679467,
+            "skill_id_str": "who00200",
+            "skill_name_id": 1764152190,
+            "telop_info_id": 903947046
+          },
+          "learn_level": 30
+        }
+      ],
+      "unresolved": []
+    },
+    {
+      "auras": [
+        {
+          "cmd": {
+            "asset_code": "wap01005",
+            "aura_id": 2709273970,
+            "config": {
+              "buff_id": 2478045099,
+              "rank": 3005,
+              "skill_id1": null,
+              "skill_id2": null,
+              "val11": 1,
+              "val4": 30,
+              "val5": 90,
+              "val9": 8
+            },
+            "desc_id": 1932039139,
+            "element": 0,
+            "name_id": 3312214375,
+            "sub_type": "Aura"
+          },
+          "learn_level": 38
+        },
+        {
+          "cmd": {
+            "asset_code": "wap01005",
+            "aura_id": 2709273970,
+            "config": {
+              "buff_id": 2478045099,
+              "rank": 3005,
+              "skill_id1": null,
+              "skill_id2": null,
+              "val11": 1,
+              "val4": 30,
+              "val5": 90,
+              "val9": 8
+            },
+            "desc_id": 1932039139,
+            "element": 0,
+            "name_id": 3312214375,
+            "sub_type": "Aura"
+          },
+          "learn_level": 38
+        }
+      ],
+      "chara_base_id": 936881403,
+      "chara_param_id": 314000948,
+      "code": "c01001900",
+      "element": 2,
+      "growth_pattern": 0,
+      "is_primary": false,
+      "main_position": 3,
+      "sub_position": 2,
+      "techniques": [
+        {
+          "cutin": {
+            "effects_dir": "data/common/event/ev61/ev61_00200/",
+            "event_id_name": "ev61_00200",
+            "model_g4md": "data/common/chr/_waza/ev61_00200/ev61_00200.g4md",
+            "model_g4mg": "data/common/chr/_waza/ev61_00200/ev61_00200.g4mg",
+            "sound_cfg": "data/common/event_cfg/snd/ev61_00200_snd.cfg.bin",
+            "telop_by_lang": [
+              [
+                "de",
+                "data/dx11/menu/220_img/telop_waza/de/who00200.g4tx"
+              ],
+              [
+                "en",
+                "data/dx11/menu/220_img/telop_waza/en/who00200.g4tx"
+              ],
+              [
+                "es",
+                "data/dx11/menu/220_img/telop_waza/es/who00200.g4tx"
+              ],
+              [
+                "fr",
+                "data/dx11/menu/220_img/telop_waza/fr/who00200.g4tx"
+              ],
+              [
+                "it",
+                "data/dx11/menu/220_img/telop_waza/it/who00200.g4tx"
+              ],
+              [
+                "pt",
+                "data/dx11/menu/220_img/telop_waza/pt/who00200.g4tx"
+              ],
+              [
+                "zh_hans",
+                "data/dx11/menu/220_img/telop_waza/zh_hans/who00200.g4tx"
+              ],
+              [
+                "zh_hant",
+                "data/dx11/menu/220_img/telop_waza/zh_hant/who00200.g4tx"
+              ]
+            ],
+            "texture_g4tx": "data/dx11/chr/_waza/ev61_00200/ev61_00200.g4tx"
+          },
+          "info": {
+            "category": 2,
+            "cmd_opt_idx": 2,
+            "color_idx": 1,
+            "consume_tp": 80,
+            "eldorado": false,
+            "element": 1,
+            "event_id": 1760109733,
+            "event_id_name": "ev61_00200",
+            "fail_event_id": 0,
+            "fail_event_id_name": "",
+            "focus_battle_effect_id": 0,
+            "foul_rate": 0,
+            "growth_type": 6,
+            "is_disable_playable_until_next_patch": false,
+            "partner1": 0,
+            "partner2": 0,
+            "partner3": 0,
+            "partner_type": 0,
+            "power_max": 540,
+            "power_min": 85,
+            "recast_time": 60,
+            "series_id_crc": 1659389071,
+            "skill_desc_id": 3911235702,
+            "skill_effect_bit_flag": 0,
+            "skill_id": 221679467,
+            "skill_id_str": "who00200",
+            "skill_name_id": 1764152190,
+            "telop_info_id": 903947046
+          },
+          "learn_level": 1
+        },
+        {
+          "cutin": {
+            "effects_dir": "data/common/event/ev60/ev60_01250/",
+            "event_id_name": "ev60_01250",
+            "model_g4md": "data/common/chr/_waza/ev60_01250/ev60_01250.g4md",
+            "model_g4mg": "data/common/chr/_waza/ev60_01250/ev60_01250.g4mg",
+            "sound_cfg": "data/common/event_cfg/snd/ev60_01250_snd.cfg.bin",
+            "telop_by_lang": [
+              [
+                "de",
+                "data/dx11/menu/220_img/telop_waza/de/whs01250.g4tx"
+              ],
+              [
+                "en",
+                "data/dx11/menu/220_img/telop_waza/en/whs01250.g4tx"
+              ],
+              [
+                "es",
+                "data/dx11/menu/220_img/telop_waza/es/whs01250.g4tx"
+              ],
+              [
+                "fr",
+                "data/dx11/menu/220_img/telop_waza/fr/whs01250.g4tx"
+              ],
+              [
+                "it",
+                "data/dx11/menu/220_img/telop_waza/it/whs01250.g4tx"
+              ],
+              [
+                "pt",
+                "data/dx11/menu/220_img/telop_waza/pt/whs01250.g4tx"
+              ],
+              [
+                "zh_hans",
+                "data/dx11/menu/220_img/telop_waza/zh_hans/whs01250.g4tx"
+              ],
+              [
+                "zh_hant",
+                "data/dx11/menu/220_img/telop_waza/zh_hant/whs01250.g4tx"
+              ]
+            ],
+            "texture_g4tx": "data/dx11/chr/_waza/ev60_01250/ev60_01250.g4tx"
+          },
+          "info": {
+            "category": 1,
+            "cmd_opt_idx": 2,
+            "color_idx": 3,
+            "consume_tp": 100,
+            "eldorado": false,
+            "element": 2,
+            "event_id": 190168113,
+            "event_id_name": "ev60_01250",
+            "fail_event_id": 0,
+            "fail_event_id_name": "",
+            "focus_battle_effect_id": 0,
+            "foul_rate": 0,
+            "growth_type": 7,
+            "is_disable_playable_until_next_patch": false,
+            "partner1": 0,
+            "partner2": 0,
+            "partner3": 0,
+            "partner_type": 3,
+            "power_max": 640,
+            "power_min": 100,
+            "recast_time": 90,
+            "series_id_crc": 2363893155,
+            "skill_desc_id": 1493166518,
+            "skill_effect_bit_flag": 0,
+            "skill_id": 3169443499,
+            "skill_id_str": "whs01250",
+            "skill_name_id": 3640230590,
+            "telop_info_id": 2218685158
+          },
+          "learn_level": 13
+        },
+        {
+          "cutin": {
+            "effects_dir": "data/common/event/ev60/ev60_01250/",
+            "event_id_name": "ev60_01250",
+            "model_g4md": "data/common/chr/_waza/ev60_01250/ev60_01250.g4md",
+            "model_g4mg": "data/common/chr/_waza/ev60_01250/ev60_01250.g4mg",
+            "sound_cfg": "data/common/event_cfg/snd/ev60_01250_snd.cfg.bin",
+            "telop_by_lang": [
+              [
+                "de",
+                "data/dx11/menu/220_img/telop_waza/de/whs01250.g4tx"
+              ],
+              [
+                "en",
+                "data/dx11/menu/220_img/telop_waza/en/whs01250.g4tx"
+              ],
+              [
+                "es",
+                "data/dx11/menu/220_img/telop_waza/es/whs01250.g4tx"
+              ],
+              [
+                "fr",
+                "data/dx11/menu/220_img/telop_waza/fr/whs01250.g4tx"
+              ],
+              [
+                "it",
+                "data/dx11/menu/220_img/telop_waza/it/whs01250.g4tx"
+              ],
+              [
+                "pt",
+                "data/dx11/menu/220_img/telop_waza/pt/whs01250.g4tx"
+              ],
+              [
+                "zh_hans",
+                "data/dx11/menu/220_img/telop_waza/zh_hans/whs01250.g4tx"
+              ],
+              [
+                "zh_hant",
+                "data/dx11/menu/220_img/telop_waza/zh_hant/whs01250.g4tx"
+              ]
+            ],
+            "texture_g4tx": "data/dx11/chr/_waza/ev60_01250/ev60_01250.g4tx"
+          },
+          "info": {
+            "category": 1,
+            "cmd_opt_idx": 2,
+            "color_idx": 3,
+            "consume_tp": 100,
+            "eldorado": false,
+            "element": 2,
+            "event_id": 190168113,
+            "event_id_name": "ev60_01250",
+            "fail_event_id": 0,
+            "fail_event_id_name": "",
+            "focus_battle_effect_id": 0,
+            "foul_rate": 0,
+            "growth_type": 7,
+            "is_disable_playable_until_next_patch": false,
+            "partner1": 0,
+            "partner2": 0,
+            "partner3": 0,
+            "partner_type": 3,
+            "power_max": 640,
+            "power_min": 100,
+            "recast_time": 90,
+            "series_id_crc": 2363893155,
+            "skill_desc_id": 1493166518,
+            "skill_effect_bit_flag": 0,
+            "skill_id": 3169443499,
+            "skill_id_str": "whs01250",
+            "skill_name_id": 3640230590,
+            "telop_info_id": 2218685158
+          },
+          "learn_level": 20
+        },
+        {
+          "cutin": {
+            "effects_dir": "data/common/event/ev61/ev61_00200/",
+            "event_id_name": "ev61_00200",
+            "model_g4md": "data/common/chr/_waza/ev61_00200/ev61_00200.g4md",
+            "model_g4mg": "data/common/chr/_waza/ev61_00200/ev61_00200.g4mg",
+            "sound_cfg": "data/common/event_cfg/snd/ev61_00200_snd.cfg.bin",
+            "telop_by_lang": [
+              [
+                "de",
+                "data/dx11/menu/220_img/telop_waza/de/who00200.g4tx"
+              ],
+              [
+                "en",
+                "data/dx11/menu/220_img/telop_waza/en/who00200.g4tx"
+              ],
+              [
+                "es",
+                "data/dx11/menu/220_img/telop_waza/es/who00200.g4tx"
+              ],
+              [
+                "fr",
+                "data/dx11/menu/220_img/telop_waza/fr/who00200.g4tx"
+              ],
+              [
+                "it",
+                "data/dx11/menu/220_img/telop_waza/it/who00200.g4tx"
+              ],
+              [
+                "pt",
+                "data/dx11/menu/220_img/telop_waza/pt/who00200.g4tx"
+              ],
+              [
+                "zh_hans",
+                "data/dx11/menu/220_img/telop_waza/zh_hans/who00200.g4tx"
+              ],
+              [
+                "zh_hant",
+                "data/dx11/menu/220_img/telop_waza/zh_hant/who00200.g4tx"
+              ]
+            ],
+            "texture_g4tx": "data/dx11/chr/_waza/ev61_00200/ev61_00200.g4tx"
+          },
+          "info": {
+            "category": 2,
+            "cmd_opt_idx": 2,
+            "color_idx": 1,
+            "consume_tp": 80,
+            "eldorado": false,
+            "element": 1,
+            "event_id": 1760109733,
+            "event_id_name": "ev61_00200",
+            "fail_event_id": 0,
+            "fail_event_id_name": "",
+            "focus_battle_effect_id": 0,
+            "foul_rate": 0,
+            "growth_type": 6,
+            "is_disable_playable_until_next_patch": false,
+            "partner1": 0,
+            "partner2": 0,
+            "partner3": 0,
+            "partner_type": 0,
+            "power_max": 540,
+            "power_min": 85,
+            "recast_time": 60,
+            "series_id_crc": 1659389071,
+            "skill_desc_id": 3911235702,
+            "skill_effect_bit_flag": 0,
+            "skill_id": 221679467,
+            "skill_id_str": "who00200",
+            "skill_name_id": 1764152190,
+            "telop_info_id": 903947046
+          },
+          "learn_level": 30
+        },
+        {
+          "cutin": {
+            "effects_dir": "data/common/event/ev60/ev60_01250/",
+            "event_id_name": "ev60_01250",
+            "model_g4md": "data/common/chr/_waza/ev60_01250/ev60_01250.g4md",
+            "model_g4mg": "data/common/chr/_waza/ev60_01250/ev60_01250.g4mg",
+            "sound_cfg": "data/common/event_cfg/snd/ev60_01250_snd.cfg.bin",
+            "telop_by_lang": [
+              [
+                "de",
+                "data/dx11/menu/220_img/telop_waza/de/whs01250.g4tx"
+              ],
+              [
+                "en",
+                "data/dx11/menu/220_img/telop_waza/en/whs01250.g4tx"
+              ],
+              [
+                "es",
+                "data/dx11/menu/220_img/telop_waza/es/whs01250.g4tx"
+              ],
+              [
+                "fr",
+                "data/dx11/menu/220_img/telop_waza/fr/whs01250.g4tx"
+              ],
+              [
+                "it",
+                "data/dx11/menu/220_img/telop_waza/it/whs01250.g4tx"
+              ],
+              [
+                "pt",
+                "data/dx11/menu/220_img/telop_waza/pt/whs01250.g4tx"
+              ],
+              [
+                "zh_hans",
+                "data/dx11/menu/220_img/telop_waza/zh_hans/whs01250.g4tx"
+              ],
+              [
+                "zh_hant",
+                "data/dx11/menu/220_img/telop_waza/zh_hant/whs01250.g4tx"
+              ]
+            ],
+            "texture_g4tx": "data/dx11/chr/_waza/ev60_01250/ev60_01250.g4tx"
+          },
+          "info": {
+            "category": 1,
+            "cmd_opt_idx": 2,
+            "color_idx": 3,
+            "consume_tp": 100,
+            "eldorado": false,
+            "element": 2,
+            "event_id": 190168113,
+            "event_id_name": "ev60_01250",
+            "fail_event_id": 0,
+            "fail_event_id_name": "",
+            "focus_battle_effect_id": 0,
+            "foul_rate": 0,
+            "growth_type": 7,
+            "is_disable_playable_until_next_patch": false,
+            "partner1": 0,
+            "partner2": 0,
+            "partner3": 0,
+            "partner_type": 3,
+            "power_max": 640,
+            "power_min": 100,
+            "recast_time": 90,
+            "series_id_crc": 2363893155,
+            "skill_desc_id": 1493166518,
+            "skill_effect_bit_flag": 0,
+            "skill_id": 3169443499,
+            "skill_id_str": "whs01250",
+            "skill_name_id": 3640230590,
+            "telop_info_id": 2218685158
+          },
+          "learn_level": 43
+        },
+        {
+          "cutin": {
+            "effects_dir": "data/common/event/ev60/ev60_01250/",
+            "event_id_name": "ev60_01250",
+            "model_g4md": "data/common/chr/_waza/ev60_01250/ev60_01250.g4md",
+            "model_g4mg": "data/common/chr/_waza/ev60_01250/ev60_01250.g4mg",
+            "sound_cfg": "data/common/event_cfg/snd/ev60_01250_snd.cfg.bin",
+            "telop_by_lang": [
+              [
+                "de",
+                "data/dx11/menu/220_img/telop_waza/de/whs01250.g4tx"
+              ],
+              [
+                "en",
+                "data/dx11/menu/220_img/telop_waza/en/whs01250.g4tx"
+              ],
+              [
+                "es",
+                "data/dx11/menu/220_img/telop_waza/es/whs01250.g4tx"
+              ],
+              [
+                "fr",
+                "data/dx11/menu/220_img/telop_waza/fr/whs01250.g4tx"
+              ],
+              [
+                "it",
+                "data/dx11/menu/220_img/telop_waza/it/whs01250.g4tx"
+              ],
+              [
+                "pt",
+                "data/dx11/menu/220_img/telop_waza/pt/whs01250.g4tx"
+              ],
+              [
+                "zh_hans",
+                "data/dx11/menu/220_img/telop_waza/zh_hans/whs01250.g4tx"
+              ],
+              [
+                "zh_hant",
+                "data/dx11/menu/220_img/telop_waza/zh_hant/whs01250.g4tx"
+              ]
+            ],
+            "texture_g4tx": "data/dx11/chr/_waza/ev60_01250/ev60_01250.g4tx"
+          },
+          "info": {
+            "category": 1,
+            "cmd_opt_idx": 2,
+            "color_idx": 3,
+            "consume_tp": 100,
+            "eldorado": false,
+            "element": 2,
+            "event_id": 190168113,
+            "event_id_name": "ev60_01250",
+            "fail_event_id": 0,
+            "fail_event_id_name": "",
+            "focus_battle_effect_id": 0,
+            "foul_rate": 0,
+            "growth_type": 7,
+            "is_disable_playable_until_next_patch": false,
+            "partner1": 0,
+            "partner2": 0,
+            "partner3": 0,
+            "partner_type": 3,
+            "power_max": 640,
+            "power_min": 100,
+            "recast_time": 90,
+            "series_id_crc": 2363893155,
+            "skill_desc_id": 1493166518,
+            "skill_effect_bit_flag": 0,
+            "skill_id": 3169443499,
+            "skill_id_str": "whs01250",
+            "skill_name_id": 3640230590,
+            "telop_info_id": 2218685158
+          },
+          "learn_level": 30
+        }
+      ],
+      "unresolved": []
+    }
+  ]
+}
