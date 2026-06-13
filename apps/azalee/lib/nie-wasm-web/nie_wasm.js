@@ -325,6 +325,58 @@ export function g4mg_extract_json(g4mg_bytes, g4md_json) {
 }
 
 /**
+ * Parse une archive `.g4pk` (en-tête + sous-fichiers) en JSON, in-browser.
+ * @param {Uint8Array} bytes
+ * @returns {string}
+ */
+export function g4pk_parse_json(bytes) {
+    let deferred3_0;
+    let deferred3_1;
+    try {
+        const ptr0 = passArray8ToWasm0(bytes, wasm.__wbindgen_malloc);
+        const len0 = WASM_VECTOR_LEN;
+        const ret = wasm.g4pk_parse_json(ptr0, len0);
+        var ptr2 = ret[0];
+        var len2 = ret[1];
+        if (ret[3]) {
+            ptr2 = 0; len2 = 0;
+            throw takeFromExternrefTable0(ret[2]);
+        }
+        deferred3_0 = ptr2;
+        deferred3_1 = len2;
+        return getStringFromWasm0(ptr2, len2);
+    } finally {
+        wasm.__wbindgen_free(deferred3_0, deferred3_1, 1);
+    }
+}
+
+/**
+ * Métadonnées d'un `.g4tx` (textures : nom, dimensions, DDS) en JSON, in-browser.
+ * @param {Uint8Array} bytes
+ * @returns {string}
+ */
+export function g4tx_info_json(bytes) {
+    let deferred3_0;
+    let deferred3_1;
+    try {
+        const ptr0 = passArray8ToWasm0(bytes, wasm.__wbindgen_malloc);
+        const len0 = WASM_VECTOR_LEN;
+        const ret = wasm.g4tx_info_json(ptr0, len0);
+        var ptr2 = ret[0];
+        var len2 = ret[1];
+        if (ret[3]) {
+            ptr2 = 0; len2 = 0;
+            throw takeFromExternrefTable0(ret[2]);
+        }
+        deferred3_0 = ptr2;
+        deferred3_1 = len2;
+        return getStringFromWasm0(ptr2, len2);
+    } finally {
+        wasm.__wbindgen_free(deferred3_0, deferred3_1, 1);
+    }
+}
+
+/**
  * Décode un `.g4tx` (octets bruts) en PNG (octets), in-browser.
  * @param {Uint8Array} bytes
  * @returns {Uint8Array}

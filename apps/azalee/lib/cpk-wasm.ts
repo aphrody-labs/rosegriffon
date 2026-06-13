@@ -11,6 +11,7 @@
 import init, {
 	audio_to_wav,
 	cfgbin_typed_json,
+	g4pk_parse_json,
 	g4tx_to_png,
 	init_panic_hook,
 } from "./nie-wasm-web/nie_wasm.js";
@@ -78,4 +79,23 @@ export async function g4txToPng(bytes: Uint8Array): Promise<Uint8Array> {
 export async function audioToWav(bytes: Uint8Array): Promise<Uint8Array> {
 	await ensureWasm();
 	return audio_to_wav(bytes);
+}
+
+/** Un sous-fichier d'une archive `.g4pk`. */
+export interface G4pkFile {
+	name: string;
+	offset: number;
+	size: number;
+	hash: number;
+}
+/** Archive `.g4pk` parsée (en-tête + sous-fichiers). */
+export interface G4pkParsed {
+	header: { file_count: number; version: number; kind: string };
+	files: G4pkFile[];
+}
+
+/** Parse une archive `.g4pk` (octets bruts) en-tête + sous-fichiers, in-browser. */
+export async function g4pkParse(bytes: Uint8Array): Promise<G4pkParsed> {
+	await ensureWasm();
+	return JSON.parse(g4pk_parse_json(bytes)) as G4pkParsed;
 }

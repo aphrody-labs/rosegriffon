@@ -216,12 +216,22 @@ export function normalizeDir(path: string): string {
  * rendu de la fiche fichier (`<img>`, viewer 3D, player audio/vidéo, texte,
  * config binaire, ou lien brut). Purement dérivée de l'extension.
  */
-export type CpkPreviewKind = "image" | "model" | "text" | "config" | "sound" | "movie" | "raw";
+export type CpkPreviewKind =
+	| "image"
+	| "model"
+	| "text"
+	| "config"
+	| "sound"
+	| "movie"
+	| "package"
+	| "raw";
 
 const TEXT_EXTS = new Set(["txt", "json", "xml", "csv", "lua", "cfg", "ini", "yml", "yaml"]);
 const CONFIG_EXTS = new Set(["bin", "objbin", "fxbin", "mevbin", "cfg.bin"]);
 const SOUND_EXTS = new Set(["acb", "awb", "hca", "wav", "at9"]);
 const MOVIE_EXTS = new Set(["usm", "mp4", "webm", "bk2"]);
+/** Archives G4PK (paquets de sous-fichiers) — listées par le viewer paquet. */
+const PACKAGE_EXTS = new Set(["g4pk", "g4pkm", "g4ra"]);
 
 /** Détermine la famille de preview d'une extension (sans point). */
 export function cpkPreviewKind(ext: string): CpkPreviewKind {
@@ -230,6 +240,7 @@ export function cpkPreviewKind(ext: string): CpkPreviewKind {
 	if (MODEL_EXTS.has(e)) return "model";
 	if (SOUND_EXTS.has(e)) return "sound";
 	if (MOVIE_EXTS.has(e)) return "movie";
+	if (PACKAGE_EXTS.has(e)) return "package";
 	if (TEXT_EXTS.has(e)) return "text";
 	if (CONFIG_EXTS.has(e)) return "config";
 	return "raw";
@@ -244,6 +255,7 @@ export function previewKindLabel(kind: CpkPreviewKind): string {
 		config: "Config binaire",
 		sound: "Audio",
 		movie: "Vidéo",
+		package: "Archive G4PK",
 		raw: "Fichier",
 	};
 	return labels[kind];
