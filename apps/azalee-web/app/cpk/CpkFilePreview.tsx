@@ -16,7 +16,6 @@
  * ⚠ `"use client"` : importe UNIQUEMENT le `-shared` client-safe (types + URLs),
  * jamais la lib serveur `lib/cpk/index.ts` (sqlite/Node → casse le bundle).
  */
-import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
 import { Icon } from "@/components/ui/Icon";
 import { CpkAudioViewer } from "@/app/cpk/CpkAudioViewer";
@@ -29,16 +28,9 @@ import {
 	cpkPreviewKind,
 	cpkRawUrl,
 	cpkVideoUrl,
-	modelFullCode,
-	modelFullUrl,
 	previewKindLabel,
 	type CpkPreviewKind,
 } from "@/lib/cpk/shared";
-
-// Le viewer 3D (model-viewer) est purement client + lourd → import dynamique.
-const CharacterModelViewer = dynamic(() => import("@/components/wiki/CharacterModelViewer"), {
-	ssr: false,
-});
 
 export interface CpkFilePreviewProps {
 	name: string;
@@ -107,25 +99,7 @@ function PreviewBody(props: CpkFilePreviewProps & { previewKind: CpkPreviewKind 
 	}
 
 	if (previewKind === "model") {
-		const code = modelFullCode(name);
-		if (code) {
-			return (
-				<div className="flex flex-col items-center gap-3 p-6">
-					<p className="text-sm text-on-surface-variant text-center">
-						Modèle 3D assemblé (corps + visage + uniforme) servi live par le CDN.
-					</p>
-					<CharacterModelViewer glbUrl={modelFullUrl(code)} name={name} />
-					<a
-						href={modelFullUrl(code)}
-						download
-						className="text-xs text-primary hover:underline inline-flex items-center gap-1"
-					>
-						<Icon name="download" size={14} /> Télécharger le GLB
-					</a>
-				</div>
-			);
-		}
-		// Pas de code perso assemblable → assemblage in-browser de la paire g4md+g4mg (wasm).
+		// Aperçu du modèle de CE fichier : assemblage in-browser de sa paire g4md+g4mg (wasm).
 		return <CpkModelViewer path={path} name={name} />;
 	}
 
