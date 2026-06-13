@@ -183,11 +183,15 @@ export function topLabel(top: string): string {
  * segment brut (les noms techniques restent lisibles : `_face`, `c05021090`…).
  */
 export function segLabel(seg: string): string {
+	// Labels VÉRIFIÉS contre le contenu réel des dossiers (vérité terrain). Les segments
+	// non listés gardent leur nom technique brut — on ne traduit pas ce qu'on ne sait pas
+	// (ex. `chr` n'est PAS « Personnages » : il contient aussi visages/uniformes/waza/
+	// keshin/objets — c'est la racine des MODÈLES 3D).
 	const labels: Record<string, string> = {
 		event: "Événements",
 		event_cfg: "Config événements",
 		text: "Textes",
-		chr: "Personnages",
+		chr: "Modèles 3D",
 		sound: "Sons",
 		sound_asset: "Assets sonores",
 		map: "Cartes",
@@ -197,9 +201,14 @@ export function segLabel(seg: string): string {
 		shader: "Shaders",
 		movie: "Vidéos",
 		font: "Polices",
+		script: "Scripts",
+		craft: "Artisanat",
+		// Sous-dossiers de `chr/` (modèles 3D) :
 		_face: "Visages",
 		_uniform: "Uniformes",
-		_hair: "Cheveux",
+		_waza: "Techniques (waza)",
+		_keshin: "Keshin",
+		_item: "Objets",
 	};
 	return labels[seg] ?? seg;
 }
