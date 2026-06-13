@@ -19,9 +19,10 @@
 import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
 import { Icon } from "@/components/ui/Icon";
+import { CpkConfigViewer } from "@/app/cpk/CpkConfigViewer";
+import { CpkHexViewer } from "@/app/cpk/CpkHexViewer";
 import {
 	cpkAudioUrl,
-	cpkCfgUrl,
 	cpkPreviewKind,
 	cpkRawUrl,
 	cpkVideoUrl,
@@ -32,10 +33,9 @@ import {
 } from "@/lib/cpk/shared";
 
 // Le viewer 3D (model-viewer) est purement client + lourd → import dynamique.
-const CharacterModelViewer = dynamic(
-	() => import("@/components/wiki/CharacterModelViewer"),
-	{ ssr: false },
-);
+const CharacterModelViewer = dynamic(() => import("@/components/wiki/CharacterModelViewer"), {
+	ssr: false,
+});
 
 export interface CpkFilePreviewProps {
 	name: string;
@@ -95,9 +95,7 @@ export function CpkFilePreview(props: CpkFilePreviewProps) {
 	);
 }
 
-function PreviewBody(
-	props: CpkFilePreviewProps & { previewKind: CpkPreviewKind },
-) {
+function PreviewBody(props: CpkFilePreviewProps & { previewKind: CpkPreviewKind }) {
 	const { name, path, assetUrl, thumbUrl, previewKind } = props;
 
 	if (previewKind === "image" && assetUrl) {
@@ -166,7 +164,9 @@ function PreviewBody(
 		return (
 			<div className="flex flex-col items-center gap-3 p-8 text-center">
 				<Icon name="graphic_eq" size={36} className="text-on-surface-variant/50" />
-				<p className="text-xs text-on-surface-variant">Audio CRI décodé en direct (HCA/ADX → WAV)</p>
+				<p className="text-xs text-on-surface-variant">
+					Audio CRI décodé en direct (HCA/ADX → WAV)
+				</p>
 				{/* eslint-disable-next-line jsx-a11y/media-has-caption */}
 				<audio controls preload="none" className="w-full max-w-md" src={cpkAudioUrl(path)} />
 			</div>
@@ -178,9 +178,16 @@ function PreviewBody(
 		// (`/video/`) → lisible nativement. `preload="none"` : décodage au clic.
 		return (
 			<div className="flex flex-col items-center gap-3 p-6 text-center">
-				<p className="text-xs text-on-surface-variant">Vidéo USM décodée en direct (Sofdec2 → MP4 H.264)</p>
+				<p className="text-xs text-on-surface-variant">
+					Vidéo USM décodée en direct (Sofdec2 → MP4 H.264)
+				</p>
 				{/* eslint-disable-next-line jsx-a11y/media-has-caption */}
-				<video controls preload="none" className="w-full max-w-2xl rounded-lg" src={cpkVideoUrl(path)} />
+				<video
+					controls
+					preload="none"
+					className="w-full max-w-2xl rounded-lg"
+					src={cpkVideoUrl(path)}
+				/>
 			</div>
 		);
 	}
@@ -190,74 +197,11 @@ function PreviewBody(
 	}
 
 	if (previewKind === "config") {
-		return <ConfigPreview url={cpkCfgUrl(path)} />;
+		return <CpkConfigViewer path={path} />;
 	}
 
-	// raw : pas de preview inline → métadonnées + téléchargement ci-dessous.
-	return (
-		<div className="flex flex-col items-center gap-2 p-10 text-center">
-			<Icon name="description" size={40} className="text-on-surface-variant/40" />
-			<p className="text-sm text-on-surface-variant">
-				Aperçu inline non disponible — téléchargez l'original ci-dessous.
-			</p>
-		</div>
-	);
-}
-
-/** Preview config : décode le cfg.bin/objbin en JSON natif (nie-model-serve /cfg). */
-function ConfigPreview({ url }: { url: string }) {
-	const [json, setJson] = useState<string | null>(null);
-	const [summary, setSummary] = useState<string | null>(null);
-	const [errored, setErrored] = useState(false);
-
-	useEffect(() => {
-		let cancelled = false;
-		setJson(null);
-		setErrored(false);
-		setSummary(null);
-		fetch(url)
-			.then((r) => (r.ok ? r.json() : Promise.reject(new Error(String(r.status)))))
-			.then((data: unknown) => {
-				if (cancelled) return;
-				// Résumé : format + nb de listes/entrées.
-				const d = data as { format?: string; lists?: unknown[]; entries?: unknown[] };
-				const count = d.lists?.length ?? d.entries?.length ?? 0;
-				setSummary(`${d.format ?? "cfg.bin"} · ${count} ${d.lists ? "listes" : "entrées"}`);
-				setJson(JSON.stringify(data, null, 2));
-			})
-			.catch(() => !cancelled && setErrored(true));
-		return () => {
-			cancelled = true;
-		};
-	}, [url]);
-
-	if (errored) {
-		return (
-			<div className="flex flex-col items-center gap-2 p-10 text-center">
-				<Icon name="database" size={40} className="text-on-surface-variant/40" />
-				<p className="text-sm text-on-surface-variant">
-					Décodage indisponible — téléchargez l'original ci-dessous.
-				</p>
-			</div>
-		);
-	}
-	if (json === null) {
-		return (
-			<div className="flex items-center justify-center p-10">
-				<div className="animate-spin rounded-full size-7 border-b-2 border-primary" />
-			</div>
-		);
-	}
-	return (
-		<div className="p-4">
-			{summary && (
-				<p className="text-xs text-on-surface-variant mb-2 font-mono">{summary}</p>
-			)}
-			<pre className="text-xs text-on-surface bg-surface-container-lowest rounded-xl p-3 overflow-auto max-h-[60vh] font-mono leading-relaxed">
-				{json}
-			</pre>
-		</div>
-	);
+	// raw : dump hexadécimal des premiers Ko (offset | hex | ASCII).
+	return <CpkHexViewer url={cpkRawUrl(path)} />;
 }
 
 /** Preview texte best-effort : fetch le contenu brut et l'affiche en `<pre>`. */
