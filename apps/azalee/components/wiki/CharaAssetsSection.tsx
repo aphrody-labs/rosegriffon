@@ -35,7 +35,7 @@ export function CharaAssetsSection({ internalCode }: { internalCode: string }) {
 				<p className="text-xs text-on-surface-variant mb-1">
 					Modèle 3D (corps + visage + uniforme)
 				</p>
-				<CharacterModelViewer glbUrl={glbUrl} name={internalCode} />
+				<CharacterModelViewer glbUrl={glbUrl} name={internalCode} inline />
 			</div>
 
 			{!voiceFailed && (

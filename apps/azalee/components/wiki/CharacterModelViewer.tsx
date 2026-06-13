@@ -15,6 +15,8 @@ interface CharacterModelViewerProps {
 	/** URL absolue du GLB complet (cdn.rosegriffon.fr/model-full/<code>.glb, nie-model-serve). */
 	glbUrl: string;
 	name?: string;
+	/** Rend le viewer **directement** (sans dialog/clic) — pour l'explorateur, fiches perso/skill. */
+	inline?: boolean;
 }
 
 // Bundle <model-viewer> auto-hébergé (public/vendor) — pas de dépendance npm ni de
@@ -58,15 +60,17 @@ function loadModelViewer(): Promise<void> {
 	return modelViewerLoading;
 }
 
-export default function CharacterModelViewer({ glbUrl, name }: CharacterModelViewerProps) {
+export default function CharacterModelViewer({ glbUrl, name, inline }: CharacterModelViewerProps) {
 	const [open, setOpen] = useState(false);
 	const [ready, setReady] = useState(false);
 	const [errored, setErrored] = useState(false);
 	const containerRef = useRef<HTMLDivElement>(null);
+	// En mode inline, le viewer est toujours « ouvert » (rendu direct, sans dialog).
+	const active = inline || open;
 
 	// Charge le custom element à la 1re ouverture, puis injecte <model-viewer>.
 	useEffect(() => {
-		if (!open) {
+		if (!active) {
 			return;
 		}
 		// Reset de l'état d'erreur à chaque (ré)ouverture : sinon un échec antérieur
@@ -87,11 +91,11 @@ export default function CharacterModelViewer({ glbUrl, name }: CharacterModelVie
 		return () => {
 			cancelled = true;
 		};
-	}, [open]);
+	}, [active]);
 
 	// Monte l'élément impérativement (custom element non typé par React/JSX).
 	useEffect(() => {
-		if (!open || !ready || !containerRef.current) {
+		if (!active || !ready || !containerRef.current) {
 			return;
 		}
 		const host = containerRef.current;
@@ -118,7 +122,36 @@ export default function CharacterModelViewer({ glbUrl, name }: CharacterModelVie
 		return () => {
 			host.innerHTML = "";
 		};
-	}, [open, ready, glbUrl, name]);
+	}, [active, ready, glbUrl, name]);
+
+	// Corps du viewer (boîte 3:4 + spinner/erreur/aide) — partagé inline et en dialog.
+	const viewerBody = (
+		<div className="aspect-[3/4] relative bg-surface-container-high rounded-xl overflow-hidden">
+			<div ref={containerRef} className="absolute inset-0" />
+			{!ready && !errored && (
+				<div className="absolute inset-0 flex items-center justify-center bg-surface/50">
+					<div className="animate-spin rounded-full size-8 border-b-2 border-primary" />
+				</div>
+			)}
+			{errored && (
+				<div className="absolute inset-0 flex items-center justify-center p-6 text-center">
+					<span className="text-sm text-on-surface-variant">Modèle 3D indisponible.</span>
+				</div>
+			)}
+			{ready && !errored && (
+				<div className="absolute bottom-3 left-0 right-0 text-center pointer-events-none">
+					<span className="text-xs text-on-surface-variant/60 bg-surface/40 px-2 py-1 rounded">
+						Glissez pour tourner · molette pour zoomer
+					</span>
+				</div>
+			)}
+		</div>
+	);
+
+	// Mode inline : rendu direct, sans dialog ni clic.
+	if (inline) {
+		return viewerBody;
+	}
 
 	return (
 		<Dialog open={open} onOpenChange={setOpen}>

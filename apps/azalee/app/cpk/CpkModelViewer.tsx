@@ -75,7 +75,7 @@ export function CpkModelViewer({ path, name }: { path: string; name: string }) {
 			<p className="text-xs text-on-surface-variant">
 				Modèle 3D assemblé in-browser (G4MD + G4MG → GLB, wasm)
 			</p>
-			<CharacterModelViewer glbUrl={url} name={name} />
+			<CharacterModelViewer glbUrl={url} name={name} inline />
 			<a
 				href={url}
 				download={`${name}.glb`}

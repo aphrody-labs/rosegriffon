@@ -141,6 +141,11 @@ export function init_panic_hook(): void;
 export function item_lookup(item_config_json: string): string;
 
 /**
+ * Décode une piste de lip-sync `.p3lip` (visèmes datés) en JSON, in-browser.
+ */
+export function lip_to_json(bytes: Uint8Array): string;
+
+/**
  * Avance la machine à états du match d'un tick (transition nominale).
  *
  * Porte la FSM 11 états de `CSceneSoccer` (`nie-core::match_fsm::tick`).
@@ -248,6 +253,7 @@ export interface InitOutput {
     readonly g4tx_info_json: (a: number, b: number) => [number, number, number, number];
     readonly g4tx_to_png: (a: number, b: number) => [number, number, number, number];
     readonly item_lookup: (a: number, b: number) => [number, number, number, number];
+    readonly lip_to_json: (a: number, b: number) => [number, number, number, number];
     readonly match_tick: (a: number, b: number, c: number, d: number) => [number, number, number, number];
     readonly model_to_glb: (a: number, b: number, c: number, d: number) => [number, number, number, number];
     readonly parse_save_json: (a: number, b: number, c: number, d: number) => [number, number, number, number];
