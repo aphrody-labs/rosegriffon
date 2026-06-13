@@ -49,7 +49,8 @@ export function AphrodyDossierSection({ internalCode }: { internalCode?: string 
 					</span>
 				</h2>
 				<p className="text-sm text-on-surface-variant">
-					{id.name_ja} — « {id.nickname_en} » · Constellation {id.constellation_fr} (
+					{id.name_ja} — « {id.nickname_en} » · {dossier.profile.epithet_ja} (
+					{dossier.profile.epithet_en}) · Constellation {id.constellation_fr} (
 					{id.constellation_en}) · Équipe {id.team_name_en} · Élément{" "}
 					{ELEMENT[id.element_id] ?? id.element_id} · Poste {POSITION[id.main_position]}/
 					{POSITION[id.sub_position]} · Zukan #{id.zukan_order}
@@ -179,6 +180,63 @@ export function AphrodyDossierSection({ internalCode }: { internalCode?: string 
 									{a.cmd.sub_type} · rang {a.cmd.config.rank} · Lv {a.learn_level}
 								</span>
 							</div>
+						))}
+					</div>
+				</div>
+			)}
+
+			{/* Références / easter eggs */}
+			{dossier.references.length > 0 && (
+				<div className="space-y-2">
+					<h3 className="text-fluid-title-sm font-semibold text-on-surface">
+						Références &amp; easter eggs
+					</h3>
+					<ul className="space-y-1.5">
+						{dossier.references.map((r) => (
+							<li key={r.title} className="text-sm">
+								<span className="font-semibold text-on-surface">{r.title}</span>
+								<span className="text-on-surface-variant"> — {r.detail}</span>
+							</li>
+						))}
+					</ul>
+				</div>
+			)}
+
+			{/* Dialogues trilingues (scènes de l'histoire) */}
+			{dossier.dialogues.length > 0 && (
+				<div className="space-y-2">
+					<h3 className="text-fluid-title-sm font-semibold text-on-surface">
+						Dialogues — {dossier.dialogues.length} scènes,{" "}
+						{dossier.dialogues.reduce((n, d) => n + d.line_count, 0)} répliques
+					</h3>
+					<div className="space-y-2">
+						{dossier.dialogues.map((scene) => (
+							<details
+								key={scene.event_id}
+								className="rounded-2xl border border-outline-variant/20 bg-surface-container-low/40 p-3"
+							>
+								<summary className="cursor-pointer text-sm font-mono text-on-surface flex items-center gap-2">
+									<Icon name="forum" size={16} className="text-primary" />
+									{scene.event_id}
+									<span className="text-xs text-on-surface-variant">
+										({scene.line_count} répliques · {scene.aphrody_mentions} mentions)
+									</span>
+								</summary>
+								<ol className="mt-2 space-y-2">
+									{scene.lines.map((l, i) => (
+										<li
+											key={`${scene.event_id}-${l.id}-${i}`}
+											className={`text-sm border-l-2 pl-3 ${
+												l.mentions ? "border-primary" : "border-outline-variant/30"
+											}`}
+										>
+											<p className="text-on-surface">{l.ja}</p>
+											{l.fr && <p className="text-on-surface-variant italic">{l.fr}</p>}
+											{l.en && <p className="text-on-surface-variant/70 text-xs">{l.en}</p>}
+										</li>
+									))}
+								</ol>
+							</details>
 						))}
 					</div>
 				</div>
