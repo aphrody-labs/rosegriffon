@@ -1,6 +1,15 @@
 /* @ts-self-types="./nie_wasm.d.ts" */
 
 /**
+ * Point d'entrée **auto-exécuté à l'instanciation** du module (attribut `start`,
+ * best practice wasm-bindgen) : installe le hook de panique sans dépendre d'un
+ * appel JS explicite — toute panique reste lisible même si l'hôte oublie l'init.
+ */
+export function __wasm_start() {
+    wasm.__wasm_start();
+}
+
+/**
  * Décode un audio CRI (HCA/ADX/AWB/ACB, octets bruts) en **WAV PCM16**, in-browser.
  * @param {Uint8Array} bytes
  * @returns {Uint8Array}
@@ -398,7 +407,8 @@ export function g4tx_to_png(bytes) {
  *
  * Appeler cette fonction UNE FOIS au démarrage (après `await init()`) pour que
  * toute panique Rust apparaisse dans la console du navigateur avec un message
- * lisible au lieu d'une erreur Wasm opaque.
+ * lisible au lieu d'une erreur Wasm opaque. Conservée pour compat ; le hook est
+ * désormais aussi installé automatiquement par [`__wasm_start`] (best practice).
  */
 export function init_panic_hook() {
     wasm.init_panic_hook();
