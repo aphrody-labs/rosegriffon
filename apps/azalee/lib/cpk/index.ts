@@ -308,6 +308,27 @@ export function fileMeta(filePath: string): CpkFileMeta | null {
 	};
 }
 
+/**
+ * Recherche globale de fichiers par sous-chaîne de **nom** (case-insensitive), bornée.
+ * Sert la search app bar de l'explorateur — recouvre les 250 800 entrées via l'index couvrant.
+ */
+export function searchFiles(query: string, limit = 200): CpkFile[] {
+	const q = query.trim().toLowerCase();
+	if (q.length < 2) return [];
+	const db = getDb();
+	const rows = db
+		.query(
+			"SELECT path, name, ext, cpk FROM cpk_index WHERE name LIKE ?1 ESCAPE '\\' ORDER BY length(name), name LIMIT ?2",
+		)
+		.all(`%${q.replace(/[%_\\]/g, "\\$&")}%`, limit) as {
+		path: string;
+		name: string;
+		ext: string;
+		cpk: string;
+	}[];
+	return rows.map((r) => ({ name: r.name, ext: r.ext, cpk: r.cpk, path: r.path }));
+}
+
 /** Nombre total de fichiers indexés (sanity / health). */
 export function totalFiles(): number {
 	const db = getDb();

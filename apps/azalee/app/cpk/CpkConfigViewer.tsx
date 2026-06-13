@@ -9,6 +9,7 @@
 import { useEffect, useState } from "react";
 import { Icon } from "@/components/ui/Icon";
 import { CpkFormationViewer } from "@/app/cpk/CpkFormationViewer";
+import { CpkHexViewer } from "@/app/cpk/CpkHexViewer";
 import { CpkJsonTree } from "@/app/cpk/CpkJsonTree";
 import { CpkTypedTable } from "@/app/cpk/CpkTypedTable";
 import { cpkCfgUrl, cpkRawUrl } from "@/lib/cpk/shared";
@@ -91,12 +92,16 @@ export function CpkConfigViewer({ path }: { path: string }) {
 	}
 
 	if (state.status === "error") {
+		// Pas un cfg.bin RDBN/T2B (ex. .objbin/.fxbin/.bin binaire opaque) → dump hexadécimal
+		// utile plutôt qu'un cul-de-sac. Le bouton de téléchargement vit dans CpkFilePreview.
 		return (
-			<div className="flex flex-col items-center gap-2 p-10 text-center">
-				<Icon name="database" size={40} className="text-on-surface-variant/40" />
-				<p className="text-sm text-on-surface-variant">
-					Décodage indisponible — téléchargez l'original ci-dessous.
-				</p>
+			<div>
+				<div className="px-4 pt-3">
+					<span className="inline-flex items-center gap-1.5 rounded-full bg-surface-container-high px-3 py-1 text-xs text-on-surface-variant">
+						<Icon name="memory" size={14} /> Binaire opaque — aperçu hexadécimal
+					</span>
+				</div>
+				<CpkHexViewer url={cpkRawUrl(path)} />
 			</div>
 		);
 	}

@@ -12,7 +12,7 @@
  * (l'index ne change qu'à la régénération de l'artefact) → cache court.
  */
 import { NextResponse } from "next/server";
-import { fileMeta, listDir } from "@/lib/cpk/index";
+import { fileMeta, listDir, searchFiles } from "@/lib/cpk/index";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -21,6 +21,7 @@ export function GET(request: Request): NextResponse {
 	const { searchParams } = new URL(request.url);
 	const rawPath = searchParams.get("path") ?? "";
 	const wantMeta = searchParams.get("meta") === "1";
+	const query = searchParams.get("q");
 
 	// Garde-fou : pas de `..`, on borne au sous-arbre `data/` de l'index.
 	if (rawPath.includes("..")) {
@@ -28,6 +29,13 @@ export function GET(request: Request): NextResponse {
 	}
 
 	try {
+		if (query != null) {
+			const files = searchFiles(query, 200);
+			return NextResponse.json(
+				{ query, files, count: files.length },
+				{ headers: { "Cache-Control": "public, max-age=60" } },
+			);
+		}
 		if (wantMeta) {
 			const meta = fileMeta(rawPath);
 			if (!meta) {
