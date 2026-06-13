@@ -766,7 +766,10 @@ async function __wbg_init(module_or_path) {
     }
 
     if (module_or_path === undefined) {
-        module_or_path = new URL('nie_wasm_bg.wasm', import.meta.url);
+        // Patch azalee : le défaut `new URL('nie_wasm_bg.wasm', import.meta.url)` casse
+        // le bundle Turbopack (Module not found). On passe TOUJOURS `module_or_path`
+        // explicitement (fetch('/wasm/nie_wasm_bg.wasm')) — cf. lib/cpk-wasm.ts & save-reader.ts.
+        throw new Error("nie-wasm: module_or_path requis (fetch('/wasm/nie_wasm_bg.wasm'))");
     }
     const imports = __wbg_get_imports();
 
