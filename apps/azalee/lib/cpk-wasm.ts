@@ -14,6 +14,7 @@ import init, {
 	g4pk_parse_json,
 	g4tx_to_png,
 	init_panic_hook,
+	model_to_glb,
 } from "./nie-wasm-web/nie_wasm.js";
 
 /** URL same-origin du binaire wasm. */
@@ -98,4 +99,15 @@ export interface G4pkParsed {
 export async function g4pkParse(bytes: Uint8Array): Promise<G4pkParsed> {
 	await ensureWasm();
 	return JSON.parse(g4pk_parse_json(bytes)) as G4pkParsed;
+}
+
+/**
+ * Assemble une paire **G4MD + G4MG** (octets bruts) en **GLB** (modèle 3D glTF binaire),
+ * dans le navigateur (géométrie). Renvoie les octets GLB (à servir via blob URL à `<model-viewer>`).
+ *
+ * @throws si le wasm échoue, ou si la paire n'est pas un modèle valide.
+ */
+export async function modelToGlb(g4md: Uint8Array, g4mg: Uint8Array): Promise<Uint8Array> {
+	await ensureWasm();
+	return model_to_glb(g4md, g4mg);
 }

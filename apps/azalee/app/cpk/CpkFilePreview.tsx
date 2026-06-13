@@ -23,6 +23,7 @@ import { CpkAudioViewer } from "@/app/cpk/CpkAudioViewer";
 import { CpkConfigViewer } from "@/app/cpk/CpkConfigViewer";
 import { CpkHexViewer } from "@/app/cpk/CpkHexViewer";
 import { CpkImageViewer } from "@/app/cpk/CpkImageViewer";
+import { CpkModelViewer } from "@/app/cpk/CpkModelViewer";
 import { CpkPackageViewer } from "@/app/cpk/CpkPackageViewer";
 import {
 	cpkPreviewKind,
@@ -124,24 +125,8 @@ function PreviewBody(props: CpkFilePreviewProps & { previewKind: CpkPreviewKind 
 				</div>
 			);
 		}
-		return (
-			<div className="flex flex-col items-center gap-2 p-8 text-center">
-				<Icon name="blur_on" size={32} className="text-on-surface-variant/50" />
-				<p className="text-sm text-on-surface-variant">
-					Maillage 3D brut — pas d'assemblage complet pour ce code.
-				</p>
-				{assetUrl && (
-					<a
-						href={assetUrl}
-						target="_blank"
-						rel="noopener noreferrer"
-						className="text-xs text-primary hover:underline"
-					>
-						Ouvrir le GLB
-					</a>
-				)}
-			</div>
-		);
+		// Pas de code perso assemblable → assemblage in-browser de la paire g4md+g4mg (wasm).
+		return <CpkModelViewer path={path} name={name} />;
 	}
 
 	if (previewKind === "sound") {
