@@ -44,13 +44,27 @@ interface FormationData {
 
 type PosField = "start_pos" | "offense_pos" | "defense_pos";
 
-/** Rôle déduit de `position_id` (loader iecode : GK=1, FW=2, MF=3, DF=4). */
-const ROLE: Record<number, { label: string; cls: string }> = {
-	1: { label: "GB", cls: "bg-amber-500 text-black" },
-	2: { label: "AT", cls: "bg-red-500 text-white" },
-	3: { label: "MI", cls: "bg-emerald-500 text-black" },
-	4: { label: "DF", cls: "bg-sky-500 text-white" },
+type Role = "GK" | "DF" | "MF" | "FW";
+
+/** Style (libellé + couleur) par rôle de jeu. */
+const ROLE_STYLE: Record<Role, { label: string; cls: string }> = {
+	GK: { label: "GB", cls: "bg-amber-500 text-black" },
+	DF: { label: "DF", cls: "bg-sky-500 text-white" },
+	MF: { label: "MI", cls: "bg-emerald-500 text-black" },
+	FW: { label: "AT", cls: "bg-red-500 text-white" },
 };
+
+/**
+ * Rôle déduit de `position_id` (1..10, type de poste), via les poids off/déf de
+ * `m_SoccerPositionInfoList` : GK=1, DF=2-3, MF=4-7, FW=8-10 (identique à
+ * `export_formations`). L'ancien mapping 1-4 affichait « ? » pour les postes 5-10.
+ */
+function roleOf(positionId: number): Role {
+	if (positionId === 1) return "GK";
+	if (positionId <= 3) return "DF";
+	if (positionId <= 7) return "MF";
+	return "FW";
+}
 
 function hex(n: number): string {
 	return `0x${(n >>> 0).toString(16).toUpperCase().padStart(8, "0")}`;
@@ -149,7 +163,7 @@ export function CpkFormationViewer({ data }: { data: FormationData }) {
 						if (!p) return null;
 						const left = 8 + ((p.x - norm.minX) / norm.spanX) * 84;
 						const top = 6 + ((p.y - norm.minY) / norm.spanY) * 88;
-						const role = ROLE[s.position_id] ?? { label: "?", cls: "bg-gray-400 text-black" };
+						const role = ROLE_STYLE[roleOf(s.position_id)];
 						return (
 							<div
 								key={`${s.position_no}-${i}`}
@@ -173,7 +187,7 @@ export function CpkFormationViewer({ data }: { data: FormationData }) {
 
 			{/* Légende */}
 			<div className="flex flex-wrap justify-center gap-3 text-xs text-on-surface-variant">
-				{Object.values(ROLE).map((r) => (
+				{Object.values(ROLE_STYLE).map((r) => (
 					<span key={r.label} className="inline-flex items-center gap-1.5">
 						<span className={`size-3 rounded-full ${r.cls}`} /> {r.label}
 					</span>
