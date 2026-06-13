@@ -2,6 +2,11 @@
 /* eslint-disable */
 
 /**
+ * Décode un audio CRI (HCA/ADX/AWB/ACB, octets bruts) en **WAV PCM16**, in-browser.
+ */
+export function audio_to_wav(bytes: Uint8Array): Uint8Array;
+
+/**
  * Parse un `aura_skill_config.cfg.bin.json` (et un `skill_config.cfg.bin.json`
  * optionnel pour résoudre le hissatsu lié) et retourne les auras.
  *
@@ -212,6 +217,7 @@ export type InitInput = RequestInfo | URL | Response | BufferSource | WebAssembl
 
 export interface InitOutput {
     readonly memory: WebAssembly.Memory;
+    readonly audio_to_wav: (a: number, b: number) => [number, number, number, number];
     readonly aura_lookup: (a: number, b: number, c: number, d: number) => [number, number, number, number];
     readonly calculate_stats: (a: number, b: number, c: number, d: number, e: number, f: number) => [number, number];
     readonly cfgbin_parse_json: (a: number, b: number) => [number, number, number, number];

@@ -1,6 +1,23 @@
 /* @ts-self-types="./nie_wasm.d.ts" */
 
 /**
+ * Décode un audio CRI (HCA/ADX/AWB/ACB, octets bruts) en **WAV PCM16**, in-browser.
+ * @param {Uint8Array} bytes
+ * @returns {Uint8Array}
+ */
+export function audio_to_wav(bytes) {
+    const ptr0 = passArray8ToWasm0(bytes, wasm.__wbindgen_malloc);
+    const len0 = WASM_VECTOR_LEN;
+    const ret = wasm.audio_to_wav(ptr0, len0);
+    if (ret[3]) {
+        throw takeFromExternrefTable0(ret[2]);
+    }
+    var v2 = getArrayU8FromWasm0(ret[0], ret[1]).slice();
+    wasm.__wbindgen_free(ret[0], ret[1] * 1, 1);
+    return v2;
+}
+
+/**
  * Parse un `aura_skill_config.cfg.bin.json` (et un `skill_config.cfg.bin.json`
  * optionnel pour résoudre le hissatsu lié) et retourne les auras.
  *

@@ -19,11 +19,11 @@
 import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
 import { Icon } from "@/components/ui/Icon";
+import { CpkAudioViewer } from "@/app/cpk/CpkAudioViewer";
 import { CpkConfigViewer } from "@/app/cpk/CpkConfigViewer";
 import { CpkHexViewer } from "@/app/cpk/CpkHexViewer";
 import { CpkImageViewer } from "@/app/cpk/CpkImageViewer";
 import {
-	cpkAudioUrl,
 	cpkPreviewKind,
 	cpkRawUrl,
 	cpkVideoUrl,
@@ -144,19 +144,8 @@ function PreviewBody(props: CpkFilePreviewProps & { previewKind: CpkPreviewKind 
 	}
 
 	if (previewKind === "sound") {
-		// Audio CRI (acb/awb/hca/adx) décodé en direct en WAV par nie-model-serve
-		// (`/audio/`) → lisible nativement. `preload="none"` : le décodage (coûteux)
-		// ne se déclenche qu'au clic sur lecture.
-		return (
-			<div className="flex flex-col items-center gap-3 p-8 text-center">
-				<Icon name="graphic_eq" size={36} className="text-on-surface-variant/50" />
-				<p className="text-xs text-on-surface-variant">
-					Audio CRI décodé en direct (HCA/ADX → WAV)
-				</p>
-				{/* eslint-disable-next-line jsx-a11y/media-has-caption */}
-				<audio controls preload="none" className="w-full max-w-md" src={cpkAudioUrl(path)} />
-			</div>
-		);
+		// Audio CRI (acb/awb/hca/adx) décodé NATIVEMENT in-browser (wasm) ; repli serveur.
+		return <CpkAudioViewer path={path} />;
 	}
 
 	if (previewKind === "movie") {
