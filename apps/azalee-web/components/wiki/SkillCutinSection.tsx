@@ -1,60 +1,56 @@
 "use client";
 
 /**
- * Section "Cut-in" d'une fiche hissatsu : affiche les assets du cut-in (déjà servis live par
- * niers) — le **telop** (nom rendu, g4tx→png), le **modèle 3D** du cut-in (g4md+g4mg assemblés
- * en GLB **dans le navigateur** via wasm), et les chemins son/effets. Données : `skills-cutin.json`.
+ * Section "Cut-in" d'une fiche hissatsu : affiche **tous** les assets du cut-in servis live par
+ * niers — le **telop** (nom rendu, g4tx→png), le **modèle 3D** du cut-in (`chr/_waza`, assemblé
+ * serveur depuis g4pkm→g4md + g4mg + texture g4tx embarquée), la **texture** (`dx11/chr/_waza`,
+ * g4tx→png) et la liste des **effets d'event** (`common/event/<grp>/<ev>/`, g4pk). Données :
+ * `skills-cutin.json` (+ `/api/cpk` pour le listing d'effets).
  */
 import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
 import { Icon } from "@/components/ui/Icon";
-import { cpkAssetUrl, cpkRawUrl } from "@/lib/cpk/shared";
-import { modelToGlb } from "@/lib/cpk-wasm";
+import { cpkAssetUrl } from "@/lib/cpk/shared";
 import type { SkillCutin } from "@/lib/skills-cutin";
 
 const CharacterModelViewer = dynamic(() => import("@/components/wiki/CharacterModelViewer"), {
 	ssr: false,
 });
 
-/** Charge le modèle 3D du cut-in (g4md+g4mg) assemblé in-browser → blob GLB → model-viewer. */
-function CutinModel({ g4md, g4mg, name }: { g4md: string; g4mg: string; name: string }) {
-	const [url, setUrl] = useState<string | null>(null);
-	const [failed, setFailed] = useState(false);
+const CDN = "https://cdn.rosegriffon.fr";
 
+/** Liste des effets g4pk d'un event de cut-in (via l'API d'index CPK). */
+function CutinEffects({ dir }: { dir: string }) {
+	const [files, setFiles] = useState<string[] | null>(null);
 	useEffect(() => {
-		let cancelled = false;
-		let objectUrl: string | null = null;
-		setUrl(null);
-		setFailed(false);
-		(async () => {
-			try {
-				const [mdRes, mgRes] = await Promise.all([fetch(cpkRawUrl(g4md)), fetch(cpkRawUrl(g4mg))]);
-				if (!mdRes.ok || !mgRes.ok) throw new Error("paire g4md/g4mg introuvable");
-				const md = new Uint8Array(await mdRes.arrayBuffer());
-				const mg = new Uint8Array(await mgRes.arrayBuffer());
-				const glb = await modelToGlb(md, mg);
-				if (cancelled) return;
-				objectUrl = URL.createObjectURL(new Blob([glb.slice()], { type: "model/gltf-binary" }));
-				setUrl(objectUrl);
-			} catch {
-				if (!cancelled) setFailed(true);
-			}
-		})();
+		let on = true;
+		fetch(`/api/cpk?path=${encodeURIComponent(dir.replace(/\/$/, ""))}`)
+			.then((r) => (r.ok ? r.json() : null))
+			.then((j) => {
+				if (on && j?.files) setFiles(j.files.map((f: { name: string }) => f.name));
+			})
+			.catch(() => on && setFiles([]));
 		return () => {
-			cancelled = true;
-			if (objectUrl) URL.revokeObjectURL(objectUrl);
+			on = false;
 		};
-	}, [g4md, g4mg]);
+	}, [dir]);
 
-	if (failed) return null;
-	if (!url) {
-		return (
-			<div className="flex items-center justify-center p-6">
-				<div className="animate-spin rounded-full size-6 border-b-2 border-primary" />
-			</div>
-		);
-	}
-	return <CharacterModelViewer glbUrl={url} name={name} />;
+	if (!files) return null;
+	const g4pk = files.filter((f) => f.endsWith(".g4pk"));
+	return (
+		<details className="text-xs">
+			<summary className="cursor-pointer text-on-surface-variant hover:text-on-surface">
+				Effets d'event ({g4pk.length} g4pk · {files.length} fichiers)
+			</summary>
+			<ul className="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-x-4 font-mono text-on-surface-variant/80 max-h-60 overflow-y-auto">
+				{files.map((f) => (
+					<li key={f} className="truncate">
+						{f}
+					</li>
+				))}
+			</ul>
+		</details>
+	);
 }
 
 export function SkillCutinSection({ cutin, skillName }: { cutin: SkillCutin; skillName: string }) {
@@ -64,6 +60,9 @@ export function SkillCutinSection({ cutin, skillName }: { cutin: SkillCutin; ski
 		cutin.telop_by_lang.find(([l]) => l === "en")?.[1] ??
 		cutin.telop_by_lang[0]?.[1];
 	const telopUrl = telopPath ? cpkAssetUrl(telopPath) : null;
+	// Modèle assemblé serveur (g4pkm→g4md + g4mg + texture) ; bien plus fiable qu'in-browser.
+	const modelUrl = `${CDN}/model-chr/waza/${cutin.event_id_name}.glb`;
+	const textureUrl = cpkAssetUrl(cutin.texture_g4tx);
 
 	return (
 		<section className="rounded-3xl border border-outline-variant/20 bg-surface-container-low/40 p-5 space-y-4">
@@ -77,25 +76,37 @@ export function SkillCutinSection({ cutin, skillName }: { cutin: SkillCutin; ski
 				<div>
 					<p className="text-xs text-on-surface-variant mb-1">Telop (nom rendu)</p>
 					{/* eslint-disable-next-line @next/next/no-img-element */}
-					<img
-						src={telopUrl}
-						alt={`Telop ${skillName}`}
-						loading="lazy"
-						className="max-h-24 w-auto"
-					/>
+					<img src={telopUrl} alt={`Telop ${skillName}`} loading="lazy" className="max-h-24 w-auto" />
 				</div>
 			)}
 
-			<div>
-				<p className="text-xs text-on-surface-variant mb-1">
-					Modèle 3D du cut-in (assemblé in-browser)
-				</p>
-				<CutinModel g4md={cutin.model_g4md} g4mg={cutin.model_g4mg} name={skillName} />
+			<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+				<div>
+					<p className="text-xs text-on-surface-variant mb-1">
+						Modèle 3D du cut-in (chr/_waza, texturé)
+					</p>
+					<CharacterModelViewer glbUrl={modelUrl} name={skillName} inline />
+				</div>
+				{textureUrl && (
+					<div>
+						<p className="text-xs text-on-surface-variant mb-1">Texture (dx11/chr/_waza)</p>
+						{/* eslint-disable-next-line @next/next/no-img-element */}
+						<img
+							src={textureUrl}
+							alt={`Texture ${skillName}`}
+							loading="lazy"
+							className="w-full max-w-xs rounded-lg bg-surface-container [image-rendering:pixelated]"
+						/>
+					</div>
+				)}
 			</div>
 
+			<CutinEffects dir={cutin.effects_dir} />
+
 			<details className="text-xs text-on-surface-variant">
-				<summary className="cursor-pointer hover:text-on-surface">Assets du cut-in</summary>
+				<summary className="cursor-pointer hover:text-on-surface">Chemins des assets</summary>
 				<div className="mt-2 space-y-1 font-mono break-all">
+					<p>modèle : {cutin.model_g4mg}</p>
 					<p>texture : {cutin.texture_g4tx}</p>
 					<p>son : {cutin.sound_cfg}</p>
 					<p>effets : {cutin.effects_dir}</p>

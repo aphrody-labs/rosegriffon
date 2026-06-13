@@ -436,6 +436,32 @@ export function item_lookup(item_config_json) {
 }
 
 /**
+ * Décode une piste de lip-sync `.p3lip` (visèmes datés) en JSON, in-browser.
+ * @param {Uint8Array} bytes
+ * @returns {string}
+ */
+export function lip_to_json(bytes) {
+    let deferred3_0;
+    let deferred3_1;
+    try {
+        const ptr0 = passArray8ToWasm0(bytes, wasm.__wbindgen_malloc);
+        const len0 = WASM_VECTOR_LEN;
+        const ret = wasm.lip_to_json(ptr0, len0);
+        var ptr2 = ret[0];
+        var len2 = ret[1];
+        if (ret[3]) {
+            ptr2 = 0; len2 = 0;
+            throw takeFromExternrefTable0(ret[2]);
+        }
+        deferred3_0 = ptr2;
+        deferred3_1 = len2;
+        return getStringFromWasm0(ptr2, len2);
+    } finally {
+        wasm.__wbindgen_free(deferred3_0, deferred3_1, 1);
+    }
+}
+
+/**
  * Avance la machine à états du match d'un tick (transition nominale).
  *
  * Porte la FSM 11 états de `CSceneSoccer` (`nie-core::match_fsm::tick`).

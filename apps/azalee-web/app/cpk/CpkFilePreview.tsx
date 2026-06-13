@@ -110,7 +110,7 @@ function PreviewBody(props: CpkFilePreviewProps & { previewKind: CpkPreviewKind 
 
 	if (previewKind === "movie") {
 		// Vidéo USM (CRI Sofdec2) démuxée + remuxée en MP4 H.264 par nie-model-serve
-		// (`/video/`) → lisible nativement. `preload="none"` : décodage au clic.
+		// (`/video/`) → lisible nativement. `preload="metadata"` : décodage au clic.
 		return (
 			<div className="flex flex-col items-center gap-3 p-6 text-center">
 				<p className="text-xs text-on-surface-variant">
@@ -119,7 +119,7 @@ function PreviewBody(props: CpkFilePreviewProps & { previewKind: CpkPreviewKind 
 				{/* eslint-disable-next-line jsx-a11y/media-has-caption */}
 				<video
 					controls
-					preload="none"
+					preload="metadata"
 					className="w-full max-w-2xl rounded-lg"
 					src={cpkVideoUrl(path)}
 				/>
