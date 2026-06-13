@@ -55,6 +55,9 @@ const DX11_DUMP_ROOT =
   "/home/ubuntu/.local/share/Steam/iecode/inazuma/data/dx11";
 // Décodeur live (iecode-cdn) — fallback quand le fichier dump est absent ou vide.
 const LIVE_ORIGIN = process.env.VARIANTS_LIVE_ORIGIN ?? "http://127.0.0.1:8788";
+// 2e décodeur live (niers / nie-model-serve, route `/tex/<rel>.png`) — couvre des
+// formats g4tx que iecode-cdn rate (ex. textures `_animal`). Essayé si 8788 échoue.
+const NIERS_ORIGIN = process.env.VARIANTS_NIERS_ORIGIN ?? "http://127.0.0.1:8790";
 // Cache disque des variantes WebP.
 const CACHE_ROOT = process.env.VARIANTS_CACHE_ROOT ?? "/var/cache/cdn-variants";
 
@@ -136,13 +139,25 @@ async function fetchSource(logical: string): Promise<Uint8Array | null> {
     }
   }
 
-  // Fallback live : iecode-cdn décode G4TX→PNG (ou octets bruts). Il sert /dx11/...
+  // Fallback live 1 : iecode-cdn décode G4TX→PNG (ou octets bruts). Il sert /dx11/...
   // ET /g4tx/... selon la surface. On proxifie le même path logique.
-  const liveUrl = `${LIVE_ORIGIN}/${logical}`;
+  const fromIecode = await fetchLive(`${LIVE_ORIGIN}/${logical}`);
+  if (fromIecode) return fromIecode;
+
+  // Fallback live 2 : niers (nie-model-serve `/tex/<rel>.png`) — décode des g4tx que
+  // iecode-cdn rate (textures `_animal`…). Uniquement pour la surface dx11 (g4tx→png).
+  if (logical.startsWith("dx11/")) {
+    const fromNiers = await fetchLive(`${NIERS_ORIGIN}/tex/${logical}`);
+    if (fromNiers) return fromNiers;
+  }
+
+  return null;
+}
+
+/** Récupère les octets d'une URL de décodeur live (timeout + bornes de taille). `null` si échec. */
+async function fetchLive(url: string): Promise<Uint8Array | null> {
   try {
-    const res = await fetch(liveUrl, {
-      signal: AbortSignal.timeout(LIVE_TIMEOUT_MS),
-    });
+    const res = await fetch(url, { signal: AbortSignal.timeout(LIVE_TIMEOUT_MS) });
     if (!res.ok) return null;
     const buf = new Uint8Array(await res.arrayBuffer());
     if (buf.byteLength === 0 || buf.byteLength > MAX_SOURCE_BYTES) return null;
