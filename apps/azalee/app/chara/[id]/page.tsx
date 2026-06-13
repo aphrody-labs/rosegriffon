@@ -13,6 +13,7 @@ import { resolveCharaStats } from "@/lib/wiki/chara-stats";
 import { wikiService } from "@/lib/wiki-service";
 import { compareVariants } from "@rose-griffon/inagle";
 import { CharaAssetsSection } from "@/components/wiki/CharaAssetsSection";
+import { AphrodyDossierSection } from "@/components/wiki/AphrodyDossierSection";
 import { CharaVariantsComparison } from "@/components/wiki/CharaVariantsComparison";
 
 /**
@@ -674,6 +675,12 @@ export default async function PlayerDetailPage({ params }: { params: Promise<{ i
 			{player.internalCode && (
 				<div className="mt-6">
 					<CharaAssetsSection internalCode={player.internalCode} />
+				</div>
+			)}
+
+			{player.internalCode && (
+				<div className="mt-6">
+					<AphrodyDossierSection internalCode={player.internalCode} />
 				</div>
 			)}
 
