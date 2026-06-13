@@ -3,7 +3,9 @@ export const dynamic = "force-dynamic";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import type { OverrideSkillData } from "@/components/wiki/OverrideSkillSection";
+import { SkillCutinSection } from "@/components/wiki/SkillCutinSection";
 import { SkillDetail } from "@/components/wiki/SkillDetail";
+import { getSkillCutin } from "@/lib/skills-cutin";
 import { createClient } from "@/lib/supabase/server";
 import { wikiService } from "@/lib/wiki-service";
 
@@ -144,6 +146,9 @@ export default async function MoveDetailPage({ params }: { params: Promise<{ id:
 	const overrideSkills: OverrideSkillData[] =
 		await wikiService.getOverrideSkillsForSkill(skillHexId);
 
+	// Assets de cut-in (niers : modèle 3D, telop, son) — clé = code interne `skill_id_str`.
+	const cutinEntry = getSkillCutin((skill as any).internalCode || id);
+
 	const breadcrumbJsonLd = {
 		"@context": "https://schema.org",
 		"@type": "BreadcrumbList",
@@ -174,6 +179,11 @@ export default async function MoveDetailPage({ params }: { params: Promise<{ id:
 				relatedSkills={relatedSkills}
 				overrideSkills={overrideSkills}
 			/>
+			{cutinEntry?.cutin && (
+				<div className="mt-6">
+					<SkillCutinSection cutin={cutinEntry.cutin} skillName={name} />
+				</div>
+			)}
 		</>
 	);
 }
