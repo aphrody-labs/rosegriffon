@@ -99,6 +99,7 @@
 		"pg": "catalog:",
 		"radix-ui": "catalog:",
 		"react": "catalog:",
+		"react-arborist": "^3.10.4",
 		"react-day-picker": "catalog:",
 		"react-dom": "catalog:",
 		"react-hook-form": "catalog:",

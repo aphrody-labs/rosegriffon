@@ -36,13 +36,14 @@ export interface CpkFilePreviewProps {
 	name: string;
 	ext: string;
 	path: string;
-	cpk: string;
+	/** Archive CPK source (métadonnée d'affichage ; absente quand ouvert depuis l'arbre). */
+	cpk?: string;
 	/** Famille de contenu CDN brute (image|model|raw) issue de la lib serveur. */
 	kind: "image" | "model" | "raw";
 	/** URL CDN du contenu décodé (ou null). */
 	assetUrl: string | null;
 	/** URL vignette WebP (images uniquement, ou null). */
-	thumbUrl: string | null;
+	thumbUrl?: string | null;
 }
 
 export function CpkFilePreview(props: CpkFilePreviewProps) {
@@ -60,7 +61,7 @@ export function CpkFilePreview(props: CpkFilePreviewProps) {
 				<MetaRow label="Type" value={previewKindLabel(previewKind)} />
 				<MetaRow label="Extension" value={`.${ext}`} mono />
 				<MetaRow label="Nom" value={name} mono />
-				<MetaRow label="Archive CPK" value={cpk} mono truncate />
+				{cpk && <MetaRow label="Archive CPK" value={cpk} mono truncate />}
 				<MetaRow label="Chemin" value={path} mono truncate full />
 			</dl>
 
