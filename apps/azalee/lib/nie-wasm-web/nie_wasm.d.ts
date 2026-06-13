@@ -2,6 +2,13 @@
 /* eslint-disable */
 
 /**
+ * Point d'entrée **auto-exécuté à l'instanciation** du module (attribut `start`,
+ * best practice wasm-bindgen) : installe le hook de panique sans dépendre d'un
+ * appel JS explicite — toute panique reste lisible même si l'hôte oublie l'init.
+ */
+export function __wasm_start(): void;
+
+/**
  * Décode un audio CRI (HCA/ADX/AWB/ACB, octets bruts) en **WAV PCM16**, in-browser.
  */
 export function audio_to_wav(bytes: Uint8Array): Uint8Array;
@@ -126,7 +133,8 @@ export function g4tx_to_png(bytes: Uint8Array): Uint8Array;
  *
  * Appeler cette fonction UNE FOIS au démarrage (après `await init()`) pour que
  * toute panique Rust apparaisse dans la console du navigateur avec un message
- * lisible au lieu d'une erreur Wasm opaque.
+ * lisible au lieu d'une erreur Wasm opaque. Conservée pour compat ; le hook est
+ * désormais aussi installé automatiquement par [`__wasm_start`] (best practice).
  */
 export function init_panic_hook(): void;
 
@@ -261,6 +269,7 @@ export interface InitOutput {
     readonly single_stat: (a: number, b: number, c: number, d: number, e: number) => number;
     readonly skill_lookup: (a: number, b: number, c: number, d: number) => [number, number, number, number];
     readonly utf_table_json: (a: number, b: number) => [number, number, number, number];
+    readonly __wasm_start: () => void;
     readonly init_panic_hook: () => void;
     readonly __wbindgen_free: (a: number, b: number, c: number) => void;
     readonly __wbindgen_malloc: (a: number, b: number) => number;
