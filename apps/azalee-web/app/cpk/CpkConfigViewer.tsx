@@ -10,6 +10,7 @@ import { useEffect, useState } from "react";
 import { Icon } from "@/components/ui/Icon";
 import { CpkFormationViewer } from "@/app/cpk/CpkFormationViewer";
 import { CpkJsonTree } from "@/app/cpk/CpkJsonTree";
+import { CpkTypedTable } from "@/app/cpk/CpkTypedTable";
 import { cpkCfgUrl, cpkRawUrl } from "@/lib/cpk/shared";
 import { cfgbinTyped } from "@/lib/cpk-wasm";
 
@@ -112,12 +113,12 @@ export function CpkConfigViewer({ path }: { path: string }) {
 		);
 	}
 
-	// Famille typée reconnue → arbre JSON des structures nommées.
+	// Famille typée reconnue → table (si liste d'objets) ou arbre JSON (sinon).
 	if (state.status === "typed" && family) {
 		return (
 			<div>
 				<FamilyBadge family={family} />
-				<CpkJsonTree data={data} rootLabel={family} />
+				<CpkTypedTable data={data} />
 			</div>
 		);
 	}

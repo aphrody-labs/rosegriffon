@@ -154,6 +154,11 @@ export function item_lookup(item_config_json: string): string;
 export function match_tick(state: string, is_training: boolean, end_counter: number): string;
 
 /**
+ * Assemble une paire G4MD+G4MG (octets bruts) en GLB, in-browser.
+ */
+export function model_to_glb(g4md: Uint8Array, g4mg: Uint8Array): Uint8Array;
+
+/**
  * Déchiffre et parse un fichier de sauvegarde IEVR, retourne un JSON résumé.
  *
  * La save ne quitte PAS le navigateur : tout le traitement est effectué
@@ -244,6 +249,7 @@ export interface InitOutput {
     readonly g4tx_to_png: (a: number, b: number) => [number, number, number, number];
     readonly item_lookup: (a: number, b: number) => [number, number, number, number];
     readonly match_tick: (a: number, b: number, c: number, d: number) => [number, number, number, number];
+    readonly model_to_glb: (a: number, b: number, c: number, d: number) => [number, number, number, number];
     readonly parse_save_json: (a: number, b: number, c: number, d: number) => [number, number, number, number];
     readonly rarity_to_growth_rank: (a: number) => number;
     readonly single_stat: (a: number, b: number, c: number, d: number, e: number) => number;

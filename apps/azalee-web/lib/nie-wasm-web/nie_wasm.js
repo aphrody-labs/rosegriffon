@@ -472,6 +472,26 @@ export function match_tick(state, is_training, end_counter) {
 }
 
 /**
+ * Assemble une paire G4MD+G4MG (octets bruts) en GLB, in-browser.
+ * @param {Uint8Array} g4md
+ * @param {Uint8Array} g4mg
+ * @returns {Uint8Array}
+ */
+export function model_to_glb(g4md, g4mg) {
+    const ptr0 = passArray8ToWasm0(g4md, wasm.__wbindgen_malloc);
+    const len0 = WASM_VECTOR_LEN;
+    const ptr1 = passArray8ToWasm0(g4mg, wasm.__wbindgen_malloc);
+    const len1 = WASM_VECTOR_LEN;
+    const ret = wasm.model_to_glb(ptr0, len0, ptr1, len1);
+    if (ret[3]) {
+        throw takeFromExternrefTable0(ret[2]);
+    }
+    var v3 = getArrayU8FromWasm0(ret[0], ret[1]).slice();
+    wasm.__wbindgen_free(ret[0], ret[1] * 1, 1);
+    return v3;
+}
+
+/**
  * Déchiffre et parse un fichier de sauvegarde IEVR, retourne un JSON résumé.
  *
  * La save ne quitte PAS le navigateur : tout le traitement est effectué
