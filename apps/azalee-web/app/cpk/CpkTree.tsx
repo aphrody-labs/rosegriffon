@@ -8,7 +8,7 @@
  * - Style Material 3 : rangées 36px, state-layer hover/focus, sélection `primary container`,
  *   icônes typées par extension. Fond `surface container` (nav rail M3).
  */
-import { Tree, type NodeRendererProps } from "react-arborist";
+import { Tree, type NodeRendererProps, type TreeApi } from "react-arborist";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Icon } from "@/components/ui/Icon";
 import { cpkPreviewKind } from "@/lib/cpk/shared";
@@ -85,22 +85,34 @@ export function CpkTree({
 	initialPath,
 	onSelectFile,
 	onSelectDir,
+	onMultiSelect,
 }: {
 	initialPath?: string;
 	onSelectFile?: (node: CpkNode) => void;
 	onSelectDir?: (node: CpkNode) => void;
+	onMultiSelect?: (nodes: CpkNode[]) => void;
 }) {
 	const [data, setData] = useState<CpkNode[]>([]);
 	const [size, setSize] = useState({ w: 320, h: 600 });
-	// Ouvre d'emblée les ancêtres d'un deep-link (révèle le fichier sélectionné).
-	const initialOpenState =
-		initialPath && initialPath !== "data"
-			? Object.fromEntries(ancestorPaths(initialPath).slice(0, -1).map((p) => [p, true]))
-			: undefined;
 	const boxRef = useRef<HTMLDivElement>(null);
+	const treeRef = useRef<TreeApi<CpkNode> | null>(null);
+	const revealedRef = useRef(false);
 	// Évite les états périmés dans les callbacks async.
 	const dataRef = useRef<CpkNode[]>([]);
 	dataRef.current = data;
+
+	// Une fois les ancêtres chargés, révèle + scrolle vers le fichier deep-linké (une seule fois).
+	useEffect(() => {
+		if (revealedRef.current || !initialPath || initialPath === "data" || data.length === 0) return;
+		const t = treeRef.current;
+		if (!t) return;
+		for (const anc of ancestorPaths(initialPath).slice(0, -1)) t.open(anc);
+		if (/\.[a-z0-9]+$/i.test(initialPath)) {
+			t.select(initialPath);
+			t.scrollTo(initialPath, "center");
+		}
+		revealedRef.current = true;
+	}, [data, initialPath]);
 
 	// Dimensionne l'arbre à son conteneur (react-arborist exige width/height).
 	useEffect(() => {
@@ -156,6 +168,7 @@ export function CpkTree({
 	return (
 		<div ref={boxRef} className="h-full w-full">
 			<Tree<CpkNode>
+				ref={treeRef}
 				data={data}
 				idAccessor="id"
 				childrenAccessor="children"
@@ -164,11 +177,11 @@ export function CpkTree({
 				indent={14}
 				width={size.w}
 				height={size.h}
-				initialOpenState={initialOpenState}
 				disableDrag
 				disableEdit
 				onToggle={onToggle}
 				onActivate={onActivate}
+				onSelect={(nodes) => onMultiSelect?.(nodes.map((n) => n.data))}
 			>
 				{Row}
 			</Tree>
