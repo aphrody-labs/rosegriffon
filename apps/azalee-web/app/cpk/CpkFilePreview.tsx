@@ -23,6 +23,7 @@ import { CpkAudioViewer } from "@/app/cpk/CpkAudioViewer";
 import { CpkConfigViewer } from "@/app/cpk/CpkConfigViewer";
 import { CpkHexViewer } from "@/app/cpk/CpkHexViewer";
 import { CpkImageViewer } from "@/app/cpk/CpkImageViewer";
+import { CpkPackageViewer } from "@/app/cpk/CpkPackageViewer";
 import {
 	cpkPreviewKind,
 	cpkRawUrl,
@@ -173,6 +174,11 @@ function PreviewBody(props: CpkFilePreviewProps & { previewKind: CpkPreviewKind 
 
 	if (previewKind === "config") {
 		return <CpkConfigViewer path={path} />;
+	}
+
+	if (previewKind === "package") {
+		// Archive G4PK (~45k fichiers) : liste des sous-fichiers décodée in-browser (wasm).
+		return <CpkPackageViewer path={path} />;
 	}
 
 	// raw : dump hexadécimal des premiers Ko (offset | hex | ASCII).
