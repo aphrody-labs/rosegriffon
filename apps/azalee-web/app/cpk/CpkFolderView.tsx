@@ -7,10 +7,15 @@
  * (`CAP`) + « afficher plus » pour les dossiers volumineux (jusqu'à ~15k fichiers directs).
  */
 import { useEffect, useMemo, useState } from "react";
+import { CpkModelThumb } from "@/app/cpk/CpkModelThumb";
 import { Icon } from "@/components/ui/Icon";
 import { cpkPreviewKind, cpkThumbUrl } from "@/lib/cpk/shared";
 
 const CAP = 300;
+const CDN = "https://cdn.rosegriffon.fr";
+// Sous-domaines `common/chr/_<sub>/` dont chaque sous-dossier est un modèle servable en GLB
+// (route `/model-chr/<sub>/<code>`). Quand on liste un tel dossier, on rend une galerie 3D.
+const MODEL_PARENT_SUBS = new Set(["waza", "item", "animal", "keshin", "armd"]);
 
 interface Item {
 	id: string;
@@ -114,6 +119,11 @@ export function CpkFolderView({
 	}
 
 	const shown = sorted.slice(0, limit);
+	// Galerie 3D : si le dossier courant est un parent de modèles (`…/_waza`, `…/_item`, …),
+	// chaque sous-dossier est un code de modèle servi en GLB → aperçu 3D lazy par vignette.
+	const modelSubMatch = dir.match(/(?:^|\/)_([a-z]+)$/);
+	const modelSub =
+		modelSubMatch && MODEL_PARENT_SUBS.has(modelSubMatch[1]) ? modelSubMatch[1] : null;
 	const open = (it: Item) =>
 		it.kind === "dir" ? onOpenDir(it.id) : onOpenFile(it.id, it.ext ?? "", it.name);
 
@@ -138,6 +148,11 @@ export function CpkFolderView({
 											alt={it.name}
 											loading="lazy"
 											className="w-full h-full object-contain [image-rendering:auto]"
+										/>
+									) : modelSub && it.kind === "dir" ? (
+										<CpkModelThumb
+											glbUrl={`${CDN}/model-chr/${modelSub}/${it.name}.glb`}
+											name={it.name}
 										/>
 									) : (
 										<Icon
