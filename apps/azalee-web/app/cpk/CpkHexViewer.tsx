@@ -2,23 +2,34 @@
 
 /**
  * Visualiseur hexadécimal d'un fichier brut du CPK : `offset | 16 octets hex | ASCII`.
- * Récupère les octets décompressés via `/raw` (nie-model-serve) et n'affiche que les
- * premiers Ko (les CPK contiennent des binaires lourds — pas de dump intégral).
+ * Deux sources possibles : une `url` `/raw` (nie-model-serve, fetch) OU des octets `bytes`
+ * **déjà en mémoire** (ex. config viewer qui a déjà téléchargé le fichier — évite un 2e
+ * téléchargement intégral). N'affiche que les premiers Ko (binaires lourds, pas de dump complet).
  */
 import { useEffect, useState } from "react";
 
 /** Nombre maximal d'octets affichés (16 octets/ligne). */
 const MAX_BYTES = 16 * 256; // 4 Ko
 
-export function CpkHexViewer({ url }: { url: string }) {
+export function CpkHexViewer({ url, bytes: source }: { url?: string; bytes?: Uint8Array }) {
 	const [bytes, setBytes] = useState<Uint8Array | null>(null);
 	const [total, setTotal] = useState<number | null>(null);
 	const [error, setError] = useState(false);
 
 	useEffect(() => {
+		setError(false);
+		// Source en mémoire → aucun téléchargement (le caller a déjà les octets).
+		if (source) {
+			setTotal(source.byteLength);
+			setBytes(source.subarray(0, MAX_BYTES));
+			return;
+		}
+		if (!url) {
+			setError(true);
+			return;
+		}
 		let cancelled = false;
 		setBytes(null);
-		setError(false);
 		fetch(url)
 			.then((r) => (r.ok ? r.arrayBuffer() : Promise.reject(new Error(String(r.status)))))
 			.then((buf) => {
@@ -31,7 +42,7 @@ export function CpkHexViewer({ url }: { url: string }) {
 		return () => {
 			cancelled = true;
 		};
-	}, [url]);
+	}, [url, source]);
 
 	if (error) {
 		return (

@@ -23,6 +23,7 @@ import {
 /** Icône Material Symbols selon le type de nœud / l'extension. */
 function nodeIcon(node: CpkNode, open: boolean): string {
 	if (node.kind === "dir") return open ? "folder_open" : "folder";
+	if (node.kind === "more") return "more_horiz";
 	switch (cpkPreviewKind(node.ext ?? "")) {
 		case "image":
 			return "image";
@@ -43,14 +44,19 @@ function nodeIcon(node: CpkNode, open: boolean): string {
 }
 
 /** Rangée M3 d'un nœud (indentation via `style` arborist). */
-function Row({ node, style, dragHandle, tree }: NodeRendererProps<CpkNode>) {
+function Row({ node, style, dragHandle }: NodeRendererProps<CpkNode>) {
 	const data = node.data;
 	const selected = node.isSelected;
 	return (
 		<div
 			ref={dragHandle}
 			style={style}
-			onClick={() => (node.isInternal ? node.toggle() : node.activate())}
+			// Dossier : déplie ET ouvre dans le panneau central (sinon le clic ne faisait que
+			// déplier l'arbre, sans jamais montrer le contenu). Fichier/sentinelle : active.
+			onClick={() => {
+				if (node.isInternal) node.toggle();
+				node.activate();
+			}}
 			className={`group flex items-center gap-1.5 h-9 pr-2 rounded-full cursor-pointer select-none text-sm transition-colors ${
 				selected
 					? "bg-primary-container text-on-primary-container"
@@ -71,7 +77,9 @@ function Row({ node, style, dragHandle, tree }: NodeRendererProps<CpkNode>) {
 				size={18}
 				className={`shrink-0 ${selected ? "text-on-primary-container" : "text-on-surface-variant"}`}
 			/>
-			<span className="truncate flex-1">{data.name}</span>
+			<span className={`truncate flex-1 ${data.kind === "more" ? "italic text-on-surface-variant/80" : ""}`}>
+				{data.name}
+			</span>
 			{data.kind === "dir" && typeof data.count === "number" && (
 				<span className="shrink-0 text-[11px] tabular-nums text-on-surface-variant/70">
 					{data.count.toLocaleString("fr")}
@@ -159,8 +167,11 @@ export function CpkTree({
 
 	const onActivate = useCallback(
 		(node: { data: CpkNode }) => {
-			if (node.data.kind === "file") onSelectFile?.(node.data);
-			else onSelectDir?.(node.data);
+			const d = node.data;
+			if (d.kind === "file") onSelectFile?.(d);
+			// Sentinelle « … N de plus » → ouvre le dossier parent dans la grille paginée.
+			else if (d.kind === "more") onSelectDir?.({ id: d.parent ?? "data", name: "", kind: "dir" });
+			else onSelectDir?.(d);
 		},
 		[onSelectFile, onSelectDir],
 	);

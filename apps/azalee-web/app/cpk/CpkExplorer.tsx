@@ -13,7 +13,6 @@
  * Multi-sélection (arborist) → floating toolbar M3. Viewers wasm natifs via `CpkFilePreview`.
  */
 import { useCallback, useEffect, useRef, useState } from "react";
-import Link from "next/link";
 import { Icon } from "@/components/ui/Icon";
 import { CpkFilePreview } from "@/app/cpk/CpkFilePreview";
 import { CpkFolderView } from "@/app/cpk/CpkFolderView";
@@ -39,20 +38,27 @@ function Breadcrumb({ path, onCrumb }: { path: string; onCrumb: (id: string) => 
 			>
 				CPK
 			</button>
-			{segs.map((s, i) => (
-				<span key={i} className="flex items-center gap-0.5 shrink-0">
-					<Icon name="chevron_right" size={16} className="text-on-surface-variant/50" />
-					<button
-						type="button"
-						onClick={() => onCrumb(`data/${segs.slice(0, i + 1).join("/")}`)}
-						className={`px-2 py-1 rounded-full hover:bg-on-surface/[0.08] ${
-							i === segs.length - 1 ? "text-on-surface font-medium" : ""
-						}`}
-					>
-						{segLabel(s)}
-					</button>
-				</span>
-			))}
+			{segs.map((s, i) => {
+				// Le dernier segment = emplacement courant (dossier ou fichier sélectionné) : NON
+				// cliquable. Sinon, sur un fichier, `onCrumb(fichier)` ouvrirait un « dossier vide ».
+				const isLast = i === segs.length - 1;
+				return (
+					<span key={i} className="flex items-center gap-0.5 shrink-0">
+						<Icon name="chevron_right" size={16} className="text-on-surface-variant/50" />
+						{isLast ? (
+							<span className="px-2 py-1 text-on-surface font-medium">{segLabel(s)}</span>
+						) : (
+							<button
+								type="button"
+								onClick={() => onCrumb(`data/${segs.slice(0, i + 1).join("/")}`)}
+								className="px-2 py-1 rounded-full hover:bg-on-surface/[0.08]"
+							>
+								{segLabel(s)}
+							</button>
+						)}
+					</span>
+				);
+			})}
 		</nav>
 	);
 }
@@ -74,30 +80,34 @@ export function CpkExplorer({ initialPath }: { initialPath?: string }) {
 	const [sort, setSort] = useState<"name" | "type">("name");
 	const [multi, setMulti] = useState<CpkNode[]>([]);
 
-	// Recherche globale (debounced).
+	// Recherche globale (debounced + garde anti out-of-order).
 	const [query, setQuery] = useState("");
 	const [results, setResults] = useState<FileSel[] | null>(null);
+	const searchSeq = useRef(0);
 	useEffect(() => {
 		const q = query.trim();
 		if (q.length < 2) {
 			setResults(null);
 			return;
 		}
+		const seq = ++searchSeq.current;
 		const id = setTimeout(() => {
 			fetch(`/api/cpk?q=${encodeURIComponent(q)}`)
 				.then((r) => (r.ok ? r.json() : null))
 				.then((j) => {
-					if (j?.files) {
-						setResults(
-							j.files.map((f: { name: string; ext: string; path: string }) => ({
-								id: f.path,
-								name: f.name,
-								ext: f.ext,
-							})),
-						);
-					}
+					// Ignore une réponse périmée (frappe plus récente déjà partie).
+					if (seq !== searchSeq.current) return;
+					setResults(
+						(j?.files ?? []).map((f: { name: string; ext: string; path: string }) => ({
+							id: f.path,
+							name: f.name,
+							ext: f.ext,
+						})),
+					);
 				})
-				.catch(() => setResults([]));
+				.catch(() => {
+					if (seq === searchSeq.current) setResults([]);
+				});
 		}, 250);
 		return () => clearTimeout(id);
 	}, [query]);
@@ -125,6 +135,22 @@ export function CpkExplorer({ initialPath }: { initialPath?: string }) {
 
 	const openFile = useCallback(
 		(id: string, ext: string, name: string) => {
+			// Ferme une recherche active : sinon le panneau de résultats masque la preview
+			// (le rendu central teste `results !== null` AVANT `selected`).
+			setQuery("");
+			setResults(null);
+			// Aligne l'onglet sur le dossier parent du fichier (fermer la fiche → bon dossier ;
+			// vrai pour les ouvertures depuis l'arbre où le parent diffère de l'onglet actif).
+			const parent = id.split("/").slice(0, -1).join("/") || "data";
+			setTabs((t) => {
+				const i = t.indexOf(parent);
+				if (i >= 0) {
+					setActiveTab(i);
+					return t;
+				}
+				setActiveTab(t.length);
+				return [...t, parent];
+			});
 			setSelected({ id, name, ext });
 			syncUrl(id);
 		},
@@ -135,12 +161,18 @@ export function CpkExplorer({ initialPath }: { initialPath?: string }) {
 	const onSelectDir = useCallback((node: CpkNode) => openDir(node.id), [openDir]);
 
 	const closeTab = (i: number) => {
-		setTabs((t) => {
-			if (t.length === 1) return t;
-			const next = t.filter((_, k) => k !== i);
-			setActiveTab((a) => (a >= next.length ? next.length - 1 : a > i ? a - 1 : a));
-			return next;
-		});
+		if (tabs.length === 1) return;
+		const next = tabs.filter((_, k) => k !== i);
+		const newActive =
+			activeTab >= next.length ? next.length - 1 : activeTab > i ? activeTab - 1 : activeTab;
+		setTabs(next);
+		setActiveTab(newActive);
+		// Fermer l'onglet actif → l'URL et une éventuelle fiche fichier doivent suivre le
+		// nouveau dossier actif (sinon URL périmée + preview orpheline).
+		if (i === activeTab) {
+			setSelected(null);
+			syncUrl(next[newActive] ?? "data");
+		}
 	};
 
 	const selectedFiles = multi.filter((n) => n.kind === "file");

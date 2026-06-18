@@ -43,8 +43,7 @@ type Decoded =
 	| { kind: "package"; pkg: G4pkParsed }
 	| { kind: "audio"; url: string }
 	| { kind: "hex"; text: string }
-	| { kind: "loading" }
-	| { kind: "error" };
+	| { kind: "loading" };
 
 export function CpkBytesPreview({ bytes, name }: { bytes: Uint8Array; name: string }) {
 	const [state, setState] = useState<Decoded>({ kind: "loading" });
@@ -98,9 +97,6 @@ export function CpkBytesPreview({ bytes, name }: { bytes: Uint8Array; name: stri
 				<div className="animate-spin rounded-full size-5 border-b-2 border-primary" />
 			</div>
 		);
-	}
-	if (state.kind === "error") {
-		return <p className="p-3 text-xs text-on-surface-variant">Sous-fichier non décodable.</p>;
 	}
 	if (state.kind === "image") {
 		return (

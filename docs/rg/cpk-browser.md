@@ -93,21 +93,29 @@ Index couvrants posés : `idx_cpk_dir` (fichiers directs d'un répertoire), `idx
 
 | Requête | Réponse |
 |---|---|
-| `GET /api/cpk?path=<dir>` | `{ dir, dirs[], files[] }` — sous-dossiers (compte récursif) + fichiers directs |
+| `GET /api/cpk?path=<dir>[&limit=&offset=]` | `{ dir, dirs[], files[], fileTotal, fileOffset }` — sous-dossiers complets (compte récursif) + **page** de fichiers directs (`listDirPaged`, défaut `limit=1000`, plafond `5000`) |
 | `GET /api/cpk?path=<file>&meta=1` | métadonnées du fichier + `assetUrl`/`thumbUrl` CDN |
+| `GET /api/cpk?q=<terme>` | recherche par sous-chaîne de nom (bornée à 200) |
 
 Garde-fou : tout `path` contenant `..` → 400 (borné au sous-arbre `data/`).
+
+**Pagination serveur réelle** (et non un slice client) : un répertoire peut avoir des dizaines de
+milliers de fichiers directs (`common/sound/ja` ≈ 15 443). La grille (`CpkFolderView`) charge une
+page puis fetch `&offset=` à « Afficher plus » ; l'arbre (`CpkTree`/`tree.ts`) borne à `TREE_FILE_CAP`
+(500) fichiers par dossier et pousse une sentinelle « … N de plus » qui ouvre le dossier dans la grille.
 
 ## Route `/cpk/[[...path]]`
 
 Catch-all (`force-dynamic`, pas de prerender de 250 k chemins). Pour un chemin donné :
 
-- **Fichier** (feuille de l'index) → fiche `CpkFilePreview` (preview selon le type).
-- **Répertoire** → listing **paginé** `listDirPaged` (sous-dossiers complets + page de 200 fichiers ;
-  `fileTotal` pour paginer — indispensable pour `common/event` ≈ 55 k fichiers).
-- **Inexistant** (ni fichier ni répertoire peuplé, hors racine) → `notFound()`.
+- **Fichier** (feuille de l'index) → l'explorateur ouvre la fiche `CpkFilePreview` (preview par type).
+- **Répertoire** → l'explorateur ouvre la grille/liste paginée du dossier.
+- **Inexistant** (ni fichier ni répertoire peuplé, hors racine) → `notFound()` (validé serveur via
+  `listDirPaged(indexPath, 1, 0)` : 404 si zéro sous-dossier ET zéro fichier).
 
-Fil d'Ariane cliquable, racine `/cpk` (common + dx11 avec comptes).
+Le rendu est porté par l'îlot client `CpkExplorer` (arbre virtualisé + onglets + grille + preview) ;
+la page serveur ne fait que la validation 404 et les `generateMetadata`. Fil d'Ariane cliquable
+(dernier segment = emplacement courant, non cliquable), racine `/cpk` (common + dx11 avec comptes).
 
 ## Preview par type (`lib/cpk/shared.ts` + `CpkFilePreview.tsx`)
 
