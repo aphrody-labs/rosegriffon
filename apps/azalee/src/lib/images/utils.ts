@@ -951,7 +951,7 @@ const MODEL_FULL_GLB_BASE = "https://cdn.rosegriffon.fr/model-full";
 // Version du pipeline d'assemblage 3D : les GLB sont servis `Cache-Control: immutable`
 // (1 an) — sans cache-buster, un navigateur garde l'ancien modèle après une amélioration
 // du pipeline. Bumper à CHAQUE évolution de l'assemblage. v3 = corps+visage+UNIFORME texturés.
-const MODEL_FULL_VERSION = "4";
+const MODEL_FULL_VERSION = "5";
 
 /**
  * Résout l'URL du modèle 3D COMPLET (corps+face+uniforme) d'un personnage.
