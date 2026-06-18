@@ -1058,6 +1058,18 @@ export function listServedChrModelCodes(sub: ChrModelSub): string[] {
 }
 
 /**
+ * URL CDN de la **texture** (g4tx→png live) d'un modèle chr générique
+ * (`/dx11/chr/_<sub>/<code>/<code>.png`). Le maillage `/model-chr/` n'embarque PAS la texture, on
+ * l'expose donc séparément (affichage + téléchargement). Gardé sur le manifeste des codes servis ;
+ * `null` si non servi. Toutes les textures n'existent pas (ex. _item : 208/235) → le `<img>` du
+ * consommateur doit gérer `onError`. Variantes redimensionnées via `?w=&format=webp` (cdn-variants).
+ */
+export function getChrModelTextureUrl(sub: ChrModelSub, code: string | undefined | null): string | null {
+	if (!code || !CHR_MODEL_CODES[sub]?.has(code)) return null;
+	return `https://cdn.rosegriffon.fr/dx11/chr/_${sub}/${code}/${code}.png`;
+}
+
+/**
  * URL de fallback générique — pointe vers /ievr.webp qui existe en public/.
  * (Le dossier /images/placeholders/ n'a jamais été créé ; ces 3 paths
  * étaient des 404 silencieux dans les Image fallbacks de characters/skills/items.)
