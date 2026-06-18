@@ -129,6 +129,7 @@ export const navigationItems: NavItem[] = [
 		// Médias : galerie d'illustrations + modèles 3D (esprits/armures + objets/animaux).
 		children: [
 			{ label: "nav.wiki.gallery", path: "/gallery", icon: "image" },
+			{ label: "nav.wiki.videos", path: "/videos", icon: "movie" },
 			{ label: "nav.wiki.keshin_models", path: "/keshin", icon: "view_in_ar" },
 			{ label: "nav.wiki.models", path: "/modeles", icon: "deployed_code" },
 		],
@@ -148,6 +149,11 @@ export const navigationItems: NavItem[] = [
 	},
 	{
 		children: [
+			{
+				label: "nav.tools.stats",
+				path: "/tools/stats",
+				icon: "calculate",
+			},
 			{
 				label: "nav.tools.compare",
 				path: "/tools/compare",
