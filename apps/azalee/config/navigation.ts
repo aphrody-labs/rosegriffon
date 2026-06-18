@@ -175,6 +175,7 @@ export const navigationItems: NavItem[] = [
 				path: "/save",
 				icon: "save",
 			},
+			{ label: "nav.tools.demo", path: "/demo", icon: "view_in_ar" },
 		],
 		icon: "build",
 		label: "nav.tools",
@@ -225,7 +226,7 @@ export const mobileNavItems: NavItem[] = [
 		path: "/news",
 	},
 	{
-		activePaths: ["/tools"],
+		activePaths: ["/tools", "/demo"],
 		icon: "build",
 		label: "nav.tools",
 		path: "/tools",
