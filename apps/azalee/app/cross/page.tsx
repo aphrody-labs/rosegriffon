@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import Image from "next/image";
-import Link from "next/link";
 import { Play, ExternalLink } from "lucide-react";
 import { Badge, Card, CardContent, CardHeader, CardTitle } from "@rose-griffon/ui";
 import { crossData } from "./data";

@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import Image from "next/image";
-import { Image as ImageIcon, View, ShieldCheck, Database, Layers, Maximize2, X, Cpu } from "lucide-react";
+import { Image as ImageIcon, ShieldCheck, Database, Maximize2, X, Cpu } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, Badge } from "@rose-griffon/ui";
 
 interface AssetTab {

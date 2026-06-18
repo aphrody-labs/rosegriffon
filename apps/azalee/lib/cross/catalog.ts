@@ -107,7 +107,7 @@ function buildSqlite(db: Database, srcPath: string): void {
 						JSON.stringify(entry.deps || [])
 					);
 				}
-			} catch (e) {
+			} catch {
 				// Ignorer les lignes corrompues
 			}
 		}
@@ -161,7 +161,7 @@ export function searchCatalog(
 		let parsedDeps: string[] = [];
 		try {
 			parsedDeps = JSON.parse(r.deps);
-		} catch (e) {
+		} catch {
 			// fallback
 		}
 		return {
@@ -187,7 +187,7 @@ export function getAsset(guid: string): CatalogAsset | null {
 	let parsedDeps: string[] = [];
 	try {
 		parsedDeps = JSON.parse(row.deps);
-	} catch (e) {
+	} catch {
 		// fallback
 	}
 
