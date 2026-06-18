@@ -1,14 +1,15 @@
 "use client";
 
 /**
- * ORCHESTRATEUR de la démo 3D (`/demo`). Généralise `CutinViewer` : réutilise le MÊME moteur
- * `CutinScene` (R3F + caméra scénarisée + Bloom + Theatre + export MP4) comme scène unique, et
- * n'ajoute qu'une couche d'orchestration au-dessus de l'infra existante (`lib/cutin/*`,
- * `lib/nie-engine`, `lib/cpk/shared`, `lib/skills-cutin`).
+ * ORCHESTRATEUR de la démo 3D (`/demo`). PIÈCE CENTRALE = une scène 3D COMPOSÉE qui montre le
+ * JOUEUR (`model-full`) ET l'EFFET 3D de sa super-technique (`waza`) réunis dans la MÊME scène
+ * (le personnage entouré de son hissatsu), avec caméra cinématique, telop, Bloom, voix, et un
+ * bouton « Générer la vidéo » qui exporte la scène en MP4.
  *
- * CONTRAINTE (vérifiée dans `CutinScene.fitObject`) : chaque GLB est recentré/normalisé à ~2 u
- * INDIVIDUELLEMENT → la scène n'affiche qu'UNE option à la fois (forme seule = mesh normal ; cut-in
- * = waza + couches d'effet superposées). La composition spatiale perso+waza est hors-scope.
+ * CONTRAINTE (vérifiée dans `CutinScene.fitObject`) : ce composant-là normalise CHAQUE GLB à ~2 u
+ * INDIVIDUELLEMENT → impossible d'y composer joueur+effet. La scène centrale utilise donc le
+ * NOUVEAU `ComposedHissatsuScene` à PLACEMENT EXPLICITE (joueur pieds au sol, effet à l'échelle
+ * relative autour du torse). Le reste de la démo (formes/stats/voix/textures) est réutilisé tel quel.
  *
  * Frontière stricte : que des libs PURES/client-safe ; la scène R3F est chargée via
  * `next/dynamic { ssr:false }` et montée À LA DEMANDE (lazy).
@@ -26,9 +27,8 @@ import {
 import { fetchCutinManifest } from "@/lib/cutin/listing";
 import { loadCutinStoryboard } from "@/lib/cutin/decode";
 import { createTheatreSequencer } from "@/lib/cutin/theatre-sequencer";
-import type { CutinGlbLayer, CutinManifest } from "@/lib/cutin/types";
 import { getSkillCutin } from "@/lib/skills-cutin";
-import type { CutinSceneHandle } from "@/components/wiki/cutin/CutinScene";
+import type { CutinSceneHandle } from "./ComposedHissatsuScene";
 import { DemoModelSelector } from "./DemoModelSelector";
 import { DemoSkillsSection } from "./DemoSkillsSection";
 import { DemoStatsPanel } from "./DemoStatsPanel";
@@ -36,8 +36,8 @@ import { DemoTextureGallery } from "./DemoTextureGallery";
 import { DemoVoicePlayer } from "./DemoVoicePlayer";
 import type { DemoData, DemoModelOption, DemoSkill } from "./types";
 
-// La scène R3F n'est chargée QUE côté client (chunk WebGL/wasm lourd) — jamais en SSR.
-const CutinScene = dynamic(() => import("@/components/wiki/cutin/CutinScene"), {
+// La scène composée n'est chargée QUE côté client (chunk WebGL/wasm lourd) — jamais en SSR.
+const ComposedHissatsuScene = dynamic(() => import("./ComposedHissatsuScene"), {
 	ssr: false,
 	loading: () => <SceneSkeleton />,
 });
@@ -56,37 +56,6 @@ function nextPaint(): Promise<void> {
 	return new Promise((resolve) => {
 		requestAnimationFrame(() => requestAnimationFrame(() => resolve()));
 	});
-}
-
-/** Couche GLB depuis une option (URL directe, aucun décode — cf. `mainModelLayer`). */
-function optionLayer(o: DemoModelOption): CutinGlbLayer {
-	return { id: o.id, blobUrl: o.glbUrl, fromEffect: o.fromEffect, revocable: false };
-}
-
-/** Manifeste stub pour une FORME : `CutinScene` ne lit que `manifest.eventId` (clé du sheet). */
-function formManifest(code: string): CutinManifest {
-	return {
-		eventId: `demo-${code}`,
-		effectsDir: "",
-		modelGlbUrl: "",
-		cameraG4cmUrl: null,
-		layers: [],
-		telops: [],
-		soundRawUrl: null,
-	};
-}
-
-/** Manifeste stub pour un waza sans entrée cut-in résolvable (mesh seul, caméra générique). */
-function wazaStubManifest(o: DemoModelOption): CutinManifest {
-	return {
-		eventId: o.eventIdName ?? o.id,
-		effectsDir: "",
-		modelGlbUrl: o.glbUrl,
-		cameraG4cmUrl: null,
-		layers: [],
-		telops: [],
-		soundRawUrl: null,
-	};
 }
 
 export function DemoExperience({ data }: { data: DemoData }): React.JSX.Element {
@@ -120,18 +89,18 @@ export function DemoExperience({ data }: { data: DemoData }): React.JSX.Element 
 	}, [data.forms, data.skills]);
 
 	const optionById = useMemo(() => new Map(options.map((o) => [o.id, o])), [options]);
-	const skillByEvent = useMemo(
-		() => new Map(data.skills.map((s) => [s.eventIdName, s])),
-		[data.skills],
-	);
 
-	// --- État scène (calque sur CutinViewer). ---
+	// --- État scène : DEUX sélections indépendantes (joueur + technique) composées ensemble. ---
 	const [mounted, setMounted] = useState(false);
-	const [selectedId, setSelectedId] = useState<string>(options[0]?.id ?? "");
-	const [manifest, setManifest] = useState<CutinManifest | null>(null);
+	const [playerCode, setPlayerCode] = useState<string>(data.forms[0]?.code ?? "c01001900");
+	const [skillEvent, setSkillEvent] = useState<string>(
+		data.skills.find((s) => s.eventIdName === "ev60_00340" && s.has3d)?.eventIdName ??
+			data.skills.find((s) => s.has3d)?.eventIdName ??
+			"",
+	);
+	// `selectedId` ne sert qu'au surlignage du sélecteur (dernière vignette cliquée).
+	const [selectedId, setSelectedId] = useState<string>(`form:${data.forms[0]?.code ?? ""}`);
 	const [storyboard, setStoryboard] = useState<CutinStoryboard | null>(null);
-	const [glbLayers, setGlbLayers] = useState<CutinGlbLayer[]>([]);
-	const [visibility, setVisibility] = useState<Record<string, boolean>>({});
 	const [activeTelop, setActiveTelop] = useState<string | null>(null);
 
 	const [bloom, setBloom] = useState(true);
@@ -146,59 +115,54 @@ export function DemoExperience({ data }: { data: DemoData }): React.JSX.Element 
 	const canExport = useMemo(() => isVideoExportSupported(), []);
 
 	const handleRef = useRef<CutinSceneHandle | null>(null);
-	const currentOption = optionById.get(selectedId);
 
-	// --- Chargement de l'option courante une fois la scène montée (forme synchrone, waza async). ---
+	// --- Dérivés : forme (joueur) + technique (effet) couramment composés. ---
+	const currentForm = useMemo(
+		() => data.forms.find((f) => f.code === playerCode) ?? data.forms[0],
+		[data.forms, playerCode],
+	);
+	const currentSkill = useMemo(
+		() => data.skills.find((s) => s.eventIdName === skillEvent) ?? null,
+		[data.skills, skillEvent],
+	);
+	const playerUrl = currentForm?.modelGlbUrl ?? "";
+	const effectUrl = currentSkill?.wazaGlbUrl ?? "";
+
+	// --- Chargement du storyboard caméra (clé = technique courante). ---
 	useEffect(() => {
 		if (!mounted) return;
-		const opt = optionById.get(selectedId);
-		if (!opt) return;
-
-		if (opt.kind === "form") {
-			setManifest(formManifest(opt.code));
+		const skill = data.skills.find((s) => s.eventIdName === skillEvent) ?? null;
+		if (!skill) {
 			setStoryboard(defaultCutinShots());
-			setGlbLayers([optionLayer(opt)]);
-			setVisibility({ [opt.id]: true });
 			setActiveTelop(null);
-			setPlaying(true);
-			setScrubSec(null);
 			return;
 		}
-
-		// Cut-in : on réutilise l'infra (manifeste réel → eventId + caméra g4cm + telops).
 		const ac = new AbortController();
 		(async () => {
 			try {
-				const skill = opt.eventIdName ? skillByEvent.get(opt.eventIdName) : undefined;
-				const cutin = skill ? (getSkillCutin(skill.skillIdStr)?.cutin ?? null) : null;
-				let m: CutinManifest;
+				const cutin = getSkillCutin(skill.skillIdStr)?.cutin ?? null;
 				let story: CutinStoryboard;
 				if (cutin) {
-					m = await fetchCutinManifest(cutin, ac.signal);
+					// On ne lit le manifeste QUE pour fournir le storyboard caméra (g4cm) — les g4pk
+					// ne sont PAS décodés (la géométrie de l'effet vient du GLB waza assemblé).
+					const m = await fetchCutinManifest(cutin, ac.signal);
 					story = await loadCutinStoryboard(m, ac.signal);
 				} else {
-					m = wazaStubManifest(opt);
 					story = defaultCutinShots();
 				}
 				if (ac.signal.aborted) return;
-				setManifest(m);
 				setStoryboard(story);
-				setGlbLayers([optionLayer(opt)]);
-				setVisibility({ [opt.id]: true });
-				setActiveTelop(skill?.telopUrl ?? null);
+				setActiveTelop(skill.telopUrl ?? null);
 				setPlaying(true);
 				setScrubSec(null);
 			} catch (err) {
 				if (err instanceof DOMException && err.name === "AbortError") return;
-				// Repli : mesh seul + caméra générique.
-				setManifest(wazaStubManifest(opt));
 				setStoryboard(defaultCutinShots());
-				setGlbLayers([optionLayer(opt)]);
-				setVisibility({ [opt.id]: true });
+				setActiveTelop(skill.telopUrl ?? null);
 			}
 		})();
 		return () => ac.abort();
-	}, [mounted, selectedId, optionById, skillByEvent]);
+	}, [mounted, skillEvent, data.skills]);
 
 	// Slider/overlay : suit la position de la timeline pendant la lecture.
 	useEffect(() => {
@@ -218,15 +182,23 @@ export function DemoExperience({ data }: { data: DemoData }): React.JSX.Element 
 		handleRef.current = h;
 	}, []);
 
-	// Sélection d'une option (forme ou waza) → monte la scène si besoin.
-	const onSelect = useCallback((id: string) => {
-		setMounted(true);
-		setSelectedId(id);
-	}, []);
+	// Sélection d'une vignette : forme → change le JOUEUR, waza → change la TECHNIQUE composée.
+	const onSelect = useCallback(
+		(id: string) => {
+			setMounted(true);
+			setSelectedId(id);
+			const o = optionById.get(id);
+			if (!o) return;
+			if (o.kind === "form") setPlayerCode(o.code);
+			else setSkillEvent(o.code);
+		},
+		[optionById],
+	);
 
-	// Lancement d'un cut-in depuis la section Techniques (pilote la scène héro).
+	// Lancement d'une technique depuis la section Techniques → change l'effet composé dans la scène.
 	const launchCutin = useCallback((skill: DemoSkill) => {
 		setMounted(true);
+		setSkillEvent(skill.eventIdName);
 		setSelectedId(`waza:${skill.eventIdName}`);
 		// Remonte vers la scène pour voir le résultat.
 		if (typeof window !== "undefined") window.scrollTo({ top: 0, behavior: "smooth" });
@@ -252,7 +224,7 @@ export function DemoExperience({ data }: { data: DemoData }): React.JSX.Element 
 		});
 	}, []);
 
-	// Export MP4 (copie de CutinViewer.handleExport) + piste audio = voix de la forme courante.
+	// Génération de la vidéo MP4 de la scène composée + piste audio = voix de la forme courante.
 	const handleExport = useCallback(async () => {
 		const h = handleRef.current;
 		if (!h || !storyboard || exporting) return;
@@ -265,7 +237,7 @@ export function DemoExperience({ data }: { data: DemoData }): React.JSX.Element 
 		h.setFrameloop("never");
 		try {
 			let audio: CutinAudioSource | undefined;
-			const voiceUrl = currentOption?.voiceUrl;
+			const voiceUrl = currentForm?.voiceUrl;
 			if (voiceUrl) {
 				const r = await fetch(voiceUrl);
 				if (r.ok) audio = { wav: new Uint8Array(await r.arrayBuffer()) }; // `/audio` renvoie du WAV
@@ -279,7 +251,7 @@ export function DemoExperience({ data }: { data: DemoData }): React.JSX.Element 
 				audio,
 				onProgress: (done, total) => setExportPct(done / total),
 			});
-			downloadBlob(blob, `aphrodi_${currentOption?.code ?? "demo"}`);
+			downloadBlob(blob, `aphrodi_${currentSkill?.eventIdName ?? "demo"}`);
 		} catch {
 			/* échec d'encodage : on retombe sur l'état interactif sans bloquer l'UI */
 		} finally {
@@ -287,7 +259,7 @@ export function DemoExperience({ data }: { data: DemoData }): React.JSX.Element 
 			setExporting(false);
 			setPlaying(true);
 		}
-	}, [storyboard, exporting, currentOption]);
+	}, [storyboard, exporting, currentForm, currentSkill]);
 
 	const duration = storyboard?.duration ?? 0;
 	const fps = storyboard?.fps ?? 60;
@@ -317,16 +289,15 @@ export function DemoExperience({ data }: { data: DemoData }): React.JSX.Element 
 									<Sparkles className="size-10 text-primary transition-transform group-hover:scale-110" />
 									<span className="text-sm font-semibold">Charger la scène 3D</span>
 									<span className="text-xs text-on-surface-variant">
-										modèles · cut-ins · timeline · export MP4
+										joueur + super-technique · caméra · export MP4
 									</span>
 								</span>
 							</button>
-						) : storyboard && manifest ? (
-							<CutinScene
-								manifest={manifest}
+						) : storyboard && playerUrl && effectUrl ? (
+							<ComposedHissatsuScene
+								playerUrl={playerUrl}
+								effectUrl={effectUrl}
 								storyboard={storyboard}
-								glbLayers={glbLayers}
-								visibility={visibility}
 								bloom={bloom}
 								orbit={orbit && !exporting}
 								playing={playing}
@@ -423,14 +394,24 @@ export function DemoExperience({ data }: { data: DemoData }): React.JSX.Element 
 								>
 									<RotateCcw className="size-3" /> Reset
 								</button>
-								{currentOption && (
+								{currentForm && (
 									<a
-										href={currentOption.glbUrl}
-										download={`${currentOption.code}.glb`}
+										href={currentForm.modelGlbUrl}
+										download={`${currentForm.code}.glb`}
 										className="inline-flex items-center gap-1 rounded-full bg-surface-container-high px-2.5 py-1 text-xs font-medium text-on-surface-variant hover:bg-surface-container-highest"
-										title="Télécharger le modèle (GLB)"
+										title="Télécharger le modèle du joueur (GLB)"
 									>
-										<Download className="size-3" /> GLB
+										<Download className="size-3" /> Joueur
+									</a>
+								)}
+								{currentSkill && (
+									<a
+										href={currentSkill.wazaGlbUrl}
+										download={`${currentSkill.eventIdName}.glb`}
+										className="inline-flex items-center gap-1 rounded-full bg-surface-container-high px-2.5 py-1 text-xs font-medium text-on-surface-variant hover:bg-surface-container-highest"
+										title="Télécharger l'effet de la technique (GLB)"
+									>
+										<Download className="size-3" /> Effet
 									</a>
 								)}
 								{canExport && (
@@ -439,14 +420,16 @@ export function DemoExperience({ data }: { data: DemoData }): React.JSX.Element 
 										onClick={() => void handleExport()}
 										disabled={exporting}
 										className="inline-flex items-center gap-1 rounded-full bg-primary px-2.5 py-1 text-xs font-medium text-on-primary hover:opacity-90 disabled:opacity-50"
-										title="Exporter en MP4 (avec voix si forme)"
+										title="Générer la vidéo MP4 de la scène (avec voix)"
 									>
 										{exporting ? (
 											<Loader2 className="size-3 animate-spin" />
 										) : (
 											<Film className="size-3" />
 										)}
-										{exporting ? `Export ${Math.round(exportPct * 100)}%` : "Exporter MP4"}
+										{exporting
+											? `Vidéo ${Math.round(exportPct * 100)}%`
+											: "Générer la vidéo"}
 									</button>
 								)}
 							</div>
@@ -458,12 +441,12 @@ export function DemoExperience({ data }: { data: DemoData }): React.JSX.Element 
 				<div className="space-y-4">
 					<div className="space-y-2">
 						<h2 className="text-sm font-bold text-on-surface">
-							Modèles ({options.length}) — un à la fois
+							Modèles ({options.length}) — joueur + technique
 						</h2>
 						<DemoModelSelector options={options} selectedId={selectedId} onSelect={onSelect} />
 						<p className="text-[11px] text-on-surface-variant/70">
-							Chaque GLB est recentré individuellement : la scène affiche une forme OU un cut-in à la
-							fois (pas de composition spatiale).
+							Joueur + sa super-technique composés dans la même scène : une vignette « forme »
+							change le joueur, une vignette « cut-in » change l'effet autour de lui.
 						</p>
 					</div>
 					<DemoVoicePlayer forms={data.forms} />
@@ -473,10 +456,10 @@ export function DemoExperience({ data }: { data: DemoData }): React.JSX.Element 
 			{/* Statistiques (moteur niers). */}
 			<DemoStatsPanel forms={data.forms} precomputed={data.precomputedStats} />
 
-			{/* Techniques (pilotent la scène héro). */}
+			{/* Techniques (changent l'effet composé dans la scène). */}
 			<DemoSkillsSection
 				skills={data.skills}
-				activeEventId={currentOption?.eventIdName ?? null}
+				activeEventId={skillEvent || null}
 				onPlayCutin={launchCutin}
 			/>
 
