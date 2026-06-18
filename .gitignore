@@ -157,6 +157,10 @@ playwright-report/
 # RAG ingestion state (local, idempotence reprise)
 .rag-ingest-state.json
 
+# Outillage RE local (Cross APK) — jamais tracké : binaire frida-server (~111M) + scripts Frida
+/frida-server
+/scripts/pairip-bypass.js
+
 # A2A coord mailbox : artefacts de runtime des sous-agents llm-agents (format figé par ai.json + docs)
 tools/llm-agents/workspace/.coord/*.jsonl
 tools/llm-agents/workspace/.coord/heartbeat-*.txt

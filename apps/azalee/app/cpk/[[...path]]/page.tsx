@@ -52,13 +52,10 @@ export async function generateMetadata({
 
 export default async function CpkPage({
 	params,
-	searchParams,
 }: {
 	params: Promise<{ path?: string[] }>;
-	searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
 	const { path } = await params;
-	const sp = await searchParams;
 	const indexPath = indexPathFromSegments(path);
 
 	if (indexPath.includes("..")) {

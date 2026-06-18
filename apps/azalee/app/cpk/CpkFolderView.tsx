@@ -2,16 +2,21 @@
 
 /**
  * Vue du contenu d'un dossier CPK — **grille** (elevated cards M3 12dp, thumbnails) ou **liste**
- * (M3 list items), avec **tri** (nom / type). Sous-dossiers + fichiers du dossier courant, fetchés
- * via `/api/cpk?path=`. Clic dossier → navigation ; clic fichier → preview. Rendu borné
- * (`CAP`) + « afficher plus » pour les dossiers volumineux (jusqu'à ~15k fichiers directs).
+ * (M3 list items), avec **tri** (nom / type). Sous-dossiers (toujours complets) + fichiers du
+ * dossier courant **paginés côté serveur** (`/api/cpk?path=&limit=&offset=`). Clic dossier →
+ * navigation ; clic fichier → preview.
+ *
+ * Pagination serveur réelle (et non un simple `slice` client) : un répertoire peut compter des
+ * dizaines de milliers de fichiers directs (`common/sound/ja` ≈ 15 443) — « Afficher plus » fetch
+ * la **page suivante** depuis le serveur au lieu de tout télécharger d'un coup.
  */
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { CpkModelThumb } from "@/app/cpk/CpkModelThumb";
 import { Icon } from "@/components/ui/Icon";
 import { cpkPreviewKind, cpkThumbUrl } from "@/lib/cpk/shared";
 
-const CAP = 300;
+/** Taille de page de fichiers (doit rester ≤ MAX_LIMIT de l'API). */
+const PAGE = 500;
 const CDN = "https://cdn.rosegriffon.fr";
 // Sous-domaines `common/chr/_<sub>/` dont chaque sous-dossier est un modèle servable en GLB
 // (route `/model-chr/<sub>/<code>`). Quand on liste un tel dossier, on rend une galerie 3D.
@@ -23,6 +28,13 @@ interface Item {
 	kind: "dir" | "file";
 	ext?: string;
 	count?: number;
+}
+
+interface ApiListing {
+	dir: string;
+	dirs: { name: string; count: number }[];
+	files: { name: string; ext: string; path: string }[];
+	fileTotal?: number;
 }
 
 function itemIcon(it: Item): string {
@@ -59,66 +71,83 @@ export function CpkFolderView({
 	onOpenDir: (id: string) => void;
 	onOpenFile: (id: string, ext: string, name: string) => void;
 }) {
-	const [items, setItems] = useState<Item[] | null>(null);
-	const [limit, setLimit] = useState(CAP);
+	const [dirs, setDirs] = useState<Item[]>([]);
+	const [files, setFiles] = useState<Item[]>([]);
+	const [fileTotal, setFileTotal] = useState(0);
+	const [loading, setLoading] = useState(true);
+	const [loadingMore, setLoadingMore] = useState(false);
+	// Identité du dossier courant : invalide les réponses de fetch périmées (navigation rapide).
+	const dirRef = useRef(dir);
+	dirRef.current = dir;
 
 	useEffect(() => {
 		let on = true;
-		setItems(null);
-		setLimit(CAP);
-		fetch(`/api/cpk?path=${encodeURIComponent(dir)}`)
-			.then((r) => (r.ok ? r.json() : null))
+		setLoading(true);
+		setDirs([]);
+		setFiles([]);
+		setFileTotal(0);
+		fetch(`/api/cpk?path=${encodeURIComponent(dir)}&limit=${PAGE}`)
+			.then((r) => (r.ok ? (r.json() as Promise<ApiListing>) : null))
 			.then((j) => {
-				if (!on || !j) return;
-				const dirs: Item[] = (j.dirs ?? []).map((d: { name: string; count: number }) => ({
-					id: `${dir}/${d.name}`,
-					name: d.name,
-					kind: "dir" as const,
-					count: d.count,
-				}));
-				const files: Item[] = (j.files ?? []).map(
-					(f: { name: string; ext: string; path: string }) => ({
-						id: f.path,
-						name: f.name,
-						kind: "file" as const,
-						ext: f.ext,
-					}),
-				);
-				setItems([...dirs, ...files]);
+				if (!on) return;
+				if (j) {
+					setDirs((j.dirs ?? []).map((d) => ({ id: `${dir}/${d.name}`, name: d.name, kind: "dir", count: d.count })));
+					setFiles((j.files ?? []).map((f) => ({ id: f.path, name: f.name, kind: "file", ext: f.ext })));
+					setFileTotal(j.fileTotal ?? (j.files?.length ?? 0));
+				}
+				setLoading(false);
 			})
-			.catch(() => on && setItems([]));
+			.catch(() => on && setLoading(false));
 		return () => {
 			on = false;
 		};
 	}, [dir]);
 
+	const loadMore = () => {
+		if (loadingMore || files.length >= fileTotal) return;
+		const offset = files.length;
+		const base = dir;
+		setLoadingMore(true);
+		fetch(`/api/cpk?path=${encodeURIComponent(base)}&limit=${PAGE}&offset=${offset}`)
+			.then((r) => (r.ok ? (r.json() as Promise<ApiListing>) : null))
+			.then((j) => {
+				// Ignore une page périmée (l'utilisateur a changé de dossier entre-temps).
+				if (dirRef.current !== base) return;
+				if (j?.files) {
+					setFiles((f) => [
+						...f,
+						...j.files.map((x) => ({ id: x.path, name: x.name, kind: "file" as const, ext: x.ext })),
+					]);
+				}
+			})
+			.finally(() => {
+				if (dirRef.current === base) setLoadingMore(false);
+			});
+	};
+
 	const sorted = useMemo(() => {
-		if (!items) return [];
-		const arr = [...items];
-		arr.sort((a, b) => {
-			// Dossiers d'abord, toujours.
-			if (a.kind !== b.kind) return a.kind === "dir" ? -1 : 1;
-			if (sort === "type" && a.kind === "file") {
+		const ds = [...dirs].sort((a, b) => a.name.localeCompare(b.name, "fr", { numeric: true }));
+		const fs = [...files].sort((a, b) => {
+			if (sort === "type") {
 				const e = (a.ext ?? "").localeCompare(b.ext ?? "");
 				if (e !== 0) return e;
 			}
 			return a.name.localeCompare(b.name, "fr", { numeric: true });
 		});
-		return arr;
-	}, [items, sort]);
+		return [...ds, ...fs];
+	}, [dirs, files, sort]);
 
-	if (items === null) {
+	if (loading) {
 		return (
 			<div className="flex items-center justify-center p-12">
 				<div className="animate-spin rounded-full size-7 border-b-2 border-primary" />
 			</div>
 		);
 	}
-	if (items.length === 0) {
+	if (sorted.length === 0) {
 		return <p className="p-8 text-center text-sm text-on-surface-variant">Dossier vide.</p>;
 	}
 
-	const shown = sorted.slice(0, limit);
 	// Galerie 3D : si le dossier courant est un parent de modèles (`…/_waza`, `…/_item`, …),
 	// chaque sous-dossier est un code de modèle servi en GLB → aperçu 3D lazy par vignette.
 	const modelSubMatch = dir.match(/(?:^|\/)_([a-z]+)$/);
@@ -126,12 +155,13 @@ export function CpkFolderView({
 		modelSubMatch && MODEL_PARENT_SUBS.has(modelSubMatch[1]) ? modelSubMatch[1] : null;
 	const open = (it: Item) =>
 		it.kind === "dir" ? onOpenDir(it.id) : onOpenFile(it.id, it.ext ?? "", it.name);
+	const remaining = fileTotal - files.length;
 
 	return (
 		<div className="space-y-4">
 			{view === "grid" ? (
 				<div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 gap-2">
-					{shown.map((it) => {
+					{sorted.map((it) => {
 						const thumb = it.kind === "file" ? cpkThumbUrl(it.id, it.ext, 240) : null;
 						return (
 							<button
@@ -178,7 +208,7 @@ export function CpkFolderView({
 				</div>
 			) : (
 				<ul className="divide-y divide-outline-variant/10">
-					{shown.map((it) => (
+					{sorted.map((it) => (
 						<li key={it.id}>
 							<button
 								type="button"
@@ -204,14 +234,16 @@ export function CpkFolderView({
 				</ul>
 			)}
 
-			{sorted.length > limit && (
+			{remaining > 0 && (
 				<div className="text-center">
 					<button
 						type="button"
-						onClick={() => setLimit((l) => l + CAP)}
-						className="h-9 px-4 rounded-full bg-surface-container-high text-on-surface text-sm hover:bg-surface-container-highest transition-colors"
+						onClick={loadMore}
+						disabled={loadingMore}
+						className="inline-flex items-center gap-2 h-9 px-4 rounded-full bg-surface-container-high text-on-surface text-sm hover:bg-surface-container-highest transition-colors disabled:opacity-60"
 					>
-						Afficher plus ({(sorted.length - limit).toLocaleString("fr")} restants)
+						{loadingMore && <div className="animate-spin rounded-full size-4 border-b-2 border-primary" />}
+						Afficher plus ({remaining.toLocaleString("fr")} restants)
 					</button>
 				</div>
 			)}

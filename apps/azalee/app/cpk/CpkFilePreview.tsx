@@ -65,9 +65,13 @@ export function CpkFilePreview(props: CpkFilePreviewProps) {
 				<MetaRow label="Chemin" value={path} mono truncate full />
 			</dl>
 
-			{/* Liens CDN */}
+			{/* Liens CDN. Le lien « contenu décodé » n'est montré que pour les images : la branche
+			    image de `cpkAssetUrl` (g4tx → /dx11/<…>.png) est vérifiée 200, alors que la branche
+			    model (/model-full/<code>.glb) 404 pour les codes non assemblables (uniforme/visage —
+			    le viewer 3D fait l'assemblage in-browser + propose son propre GLB), et la branche raw
+			    pointe sur /raw, identique au bouton « Télécharger l'original » ci-dessous. */}
 			<div className="flex flex-wrap gap-2">
-				{assetUrl && (
+				{assetUrl && props.kind === "image" && (
 					<a
 						href={assetUrl}
 						target="_blank"
@@ -75,7 +79,7 @@ export function CpkFilePreview(props: CpkFilePreviewProps) {
 						className="inline-flex items-center gap-2 h-11 sm:h-10 px-4 rounded-full bg-primary text-on-primary text-sm font-semibold hover:opacity-90 transition"
 					>
 						<Icon name="open_in_new" size={16} />
-						Contenu décodé (CDN)
+						PNG décodé (CDN)
 					</a>
 				)}
 				<a

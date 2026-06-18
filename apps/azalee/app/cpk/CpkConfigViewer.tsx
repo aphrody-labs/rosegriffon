@@ -38,6 +38,10 @@ interface State {
 	status: "loading" | "typed" | "generic" | "error";
 	family?: string | null;
 	data?: unknown;
+	/** Origine d'un rendu `generic` : `wasm` = RDBN/T2B brut, `cfg` = décodage serveur /cfg. */
+	source?: "wasm" | "cfg";
+	/** Octets bruts déjà téléchargés (rendu hex sans 2e téléchargement sur binaire opaque). */
+	bytes?: Uint8Array;
 }
 
 export function CpkConfigViewer({ path }: { path: string }) {
@@ -51,16 +55,17 @@ export function CpkConfigViewer({ path }: { path: string }) {
 			const filename = path.split("/").pop() ?? path;
 			// 1. Décodage typé NATIF IN-BROWSER (wasm nie-data) depuis les octets bruts (/raw).
 			//    Mêmes parseurs Rust que le jeu — aucune dépendance à la route serveur /typed.
+			let rawBytes: Uint8Array | undefined;
 			try {
 				const res = await fetch(cpkRawUrl(path));
 				if (res.ok) {
-					const bytes = new Uint8Array(await res.arrayBuffer());
-					const body = await cfgbinTyped(bytes, filename);
+					rawBytes = new Uint8Array(await res.arrayBuffer());
+					const body = await cfgbinTyped(rawBytes, filename);
 					if (cancelled) return;
 					if (body.family) {
 						setState({ status: "typed", family: body.family, data: body.data });
 					} else {
-						setState({ status: "generic", family: null, data: body.generic });
+						setState({ status: "generic", family: null, data: body.generic, source: "wasm" });
 					}
 					return;
 				}
@@ -72,9 +77,10 @@ export function CpkConfigViewer({ path }: { path: string }) {
 				const res = await fetch(cpkCfgUrl(path));
 				if (!res.ok) throw new Error(String(res.status));
 				const body = (await res.json()) as unknown;
-				if (!cancelled) setState({ status: "generic", family: null, data: body });
+				if (!cancelled) setState({ status: "generic", family: null, data: body, source: "cfg" });
 			} catch {
-				if (!cancelled) setState({ status: "error" });
+				// Binaire opaque : aperçu hex à partir des octets DÉJÀ en main (aucun 2e fetch).
+				if (!cancelled) setState({ status: "error", bytes: rawBytes });
 			}
 		})();
 
@@ -94,6 +100,7 @@ export function CpkConfigViewer({ path }: { path: string }) {
 	if (state.status === "error") {
 		// Pas un cfg.bin RDBN/T2B (ex. .objbin/.fxbin/.bin binaire opaque) → dump hexadécimal
 		// utile plutôt qu'un cul-de-sac. Le bouton de téléchargement vit dans CpkFilePreview.
+		// On réutilise les octets déjà fetchés (state.bytes) ; repli /raw si le 1er fetch a échoué.
 		return (
 			<div>
 				<div className="px-4 pt-3">
@@ -101,7 +108,11 @@ export function CpkConfigViewer({ path }: { path: string }) {
 						<Icon name="memory" size={14} /> Binaire opaque — aperçu hexadécimal
 					</span>
 				</div>
-				<CpkHexViewer url={cpkRawUrl(path)} />
+				{state.bytes ? (
+					<CpkHexViewer bytes={state.bytes} />
+				) : (
+					<CpkHexViewer url={cpkRawUrl(path)} />
+				)}
 			</div>
 		);
 	}
@@ -128,12 +139,15 @@ export function CpkConfigViewer({ path }: { path: string }) {
 		);
 	}
 
-	// Générique (RDBN/T2B brut ou /cfg) → arbre JSON.
+	// Générique → arbre JSON. Le libellé reflète l'origine réelle du décodage.
 	return (
 		<div>
 			<div className="px-4 pt-3">
 				<span className="inline-flex items-center gap-1.5 rounded-full bg-surface-container-high px-3 py-1 text-xs text-on-surface-variant">
-					<Icon name="data_object" size={14} /> Config binaire brute (RDBN / T2B)
+					<Icon name="data_object" size={14} />
+					{state.source === "cfg"
+						? "Config décodée (serveur)"
+						: "Config binaire brute (RDBN / T2B)"}
 				</span>
 			</div>
 			<CpkJsonTree data={data} rootLabel="config" />

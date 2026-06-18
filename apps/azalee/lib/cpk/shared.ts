@@ -12,8 +12,9 @@
  * fichier CPK live. Mapping validé par probe HTTP (vérité terrain) :
  *   - g4tx (100 % sous `data/dx11/`) → `/dx11/<path-après-data/dx11/>.png`
  *     (décodage g4tx→png live ; 200 image/png mesuré).
- *   - g4md/g4mg → `/model/<code>.glb` (assemblage glTF live ; 200 mesuré).
- *   - autre → `/g4tx/<path>` (route raw-decode CDN ; peut 404 si non couvert).
+ *   - g4md/g4mg → `/model-full/<code>.glb` (assemblage glTF live ; 200 pour les
+ *     codes assemblables, 404 sinon → cf. note sur la branche model).
+ *   - autre → `/raw/<path>` (bytes décompressés bruts du CPK).
  */
 
 /** Une ligne de l'index CPK (forme exposée par l'API/lib). */
@@ -94,8 +95,10 @@ export function cpkAssetUrl(path: string, ext?: string): string | null {
 
 	if (kind === "model") {
 		// `/model-full/<code>.glb` — assemblage glTF live (corps+visage+uniforme) par
-		// nie-model-serve. `code` = basename sans extension (ex. `n031708`). L'ancienne
-		// route `/model/` n'existe pas côté serveur (404) ; `/model-full/` est la vraie.
+		// nie-model-serve. `code` = basename sans extension (ex. `n031708`). ⚠ 404 pour les
+		// codes non assemblables (uniforme `n0…`, visage, props) : la fiche fichier ne montre
+		// donc PAS ce lien pour les modèles (cf. CpkFilePreview) — le viewer 3D assemble
+		// in-browser et propose son propre GLB. Mapping conservé pour `CpkFileMeta.assetUrl`.
 		const base = name.replace(/\.(g4md|g4mg)$/i, "");
 		return `${CDN_BASE}/model-full/${base}.glb`;
 	}
@@ -110,28 +113,6 @@ export function cpkAssetUrl(path: string, ext?: string): string | null {
  */
 export function cpkCfgUrl(path: string): string {
 	return `${CDN_BASE}/cfg/${path}.json`;
-}
-
-/**
- * URL du décodage **typé** d'un `cfg.bin` (`/typed/<vfs-path>.json`) — nie-model-serve
- * dispatche vers le parseur de famille `nie-data` (formation, skill, item, mission…) et
- * renvoie `{ family, data }` (structures de jeu nommées), ou `{ family: null, key, generic }`
- * si aucune famille typée ne correspond (le caller bascule sur l'arbre JSON brut).
- */
-export function cpkTypedUrl(path: string): string {
-	return `${CDN_BASE}/typed/${path}.json`;
-}
-
-/** Réponse de `/typed` : soit une famille reconnue + données typées, soit un repli générique. */
-export interface CpkTypedResponse {
-	/** Nom de la famille de jeu (`"formation"`, `"item"`…) ou `null` si non typée. */
-	family: string | null;
-	/** Données typées de la famille (présent si `family` non nul). */
-	data?: unknown;
-	/** Clé de fichier dérivée (présent si `family` nul) — aide au diagnostic. */
-	key?: string;
-	/** RDBN/T2B brut (forme iecode) si aucune famille typée. */
-	generic?: unknown;
 }
 
 /** URL des bytes bruts décompressés du CPK (`/raw/<vfs-path>`) — texte, download, lecteurs. */
@@ -236,7 +217,8 @@ export type CpkPreviewKind =
 	| "raw";
 
 const TEXT_EXTS = new Set(["txt", "json", "xml", "csv", "lua", "cfg", "ini", "yml", "yaml"]);
-const CONFIG_EXTS = new Set(["bin", "objbin", "fxbin", "mevbin", "cfg.bin"]);
+// `ext` = dernier segment après le point (cf. materialize.ts), donc `foo.cfg.bin` → ext `bin`.
+const CONFIG_EXTS = new Set(["bin", "objbin", "fxbin", "mevbin"]);
 const SOUND_EXTS = new Set(["acb", "awb", "hca", "wav", "at9"]);
 const MOVIE_EXTS = new Set(["usm", "mp4", "webm", "bk2"]);
 /** Archives G4PK (paquets de sous-fichiers) — listées par le viewer paquet. */
@@ -268,28 +250,4 @@ export function previewKindLabel(kind: CpkPreviewKind): string {
 		raw: "Fichier",
 	};
 	return labels[kind];
-}
-
-/**
- * Code de modèle 3D (basename sans extension) éligible à un viewer
- * `/model-full/<code>.glb` (assemblage corps+visage+uniforme live par le CDN).
- *
- * Vérité terrain (préfixes des codes de l'index `common/chr/`) :
- *   - `c0xxxxxxx` → personnages jouables (face + corps).
- *   - `n0xxxxxx`  → uniformes / pièces d'armure (`common/chr/_uniform/`).
- *   - `ke/ks/wmm…`→ keshin / soul / miximax (modèles d'invocation).
- * On embarque le viewer pour ces préfixes ; sinon (props, décor map…) on se
- * contente d'un lien `/model/<code>.glb` (pas d'assemblage full pertinent).
- */
-export function modelFullCode(name: string): string | null {
-	const base = name.replace(/\.(g4md|g4mg|g4pkm|g4pk)$/i, "");
-	if (/^c\d{8}$/i.test(base)) return base; // personnage jouable
-	if (/^n\d{6,7}$/i.test(base)) return base; // uniforme / armure
-	if (/^(ke|ks|wmm|wks|wss)\w+/i.test(base)) return base; // keshin / soul / miximax
-	return null;
-}
-
-/** URL CDN du GLB assemblé complet (corps+visage+uniforme) pour un code perso. */
-export function modelFullUrl(code: string): string {
-	return `${CDN_BASE}/model-full/${code}.glb`;
 }
