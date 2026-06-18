@@ -5,6 +5,7 @@ import { ChrModelGallery } from "@/components/wiki/ChrModelGallery";
 import {
 	type ChrModelSub,
 	getChrModelGlbUrl,
+	getChrModelTextureUrl,
 	listServedChrModelCodes,
 } from "@/lib/images/utils";
 import { resolveModelCodeName } from "@/lib/wiki/game-text";
@@ -36,7 +37,7 @@ function buildEntries(sub: ChrModelSub) {
 		const glbUrl = getChrModelGlbUrl(sub, code);
 		if (!glbUrl) return [];
 		const { name } = resolveModelCodeName(code);
-		return [{ code, glbUrl, name }];
+		return [{ code, glbUrl, name, textureUrl: getChrModelTextureUrl(sub, code) }];
 	});
 }
 
@@ -50,8 +51,9 @@ export default function ChrModelsPage() {
 			<div>
 				<h1 className="type-headline-small text-on-surface">Modèles 3D — chr</h1>
 				<p className="type-body-medium text-on-surface-variant mt-1">
-					Maillages 3D des techniques, objets et animaux, assemblés live depuis les
-					fichiers du jeu (CPK). Les codes sont les identifiants internes.
+					Maillages 3D + textures des techniques, objets et animaux, assemblés live depuis les
+					fichiers du jeu (CPK). Modèle (GLB) et texture (PNG) téléchargeables. Les codes sont
+					les identifiants internes (events `common/chr/_waza`…).
 				</p>
 			</div>
 
