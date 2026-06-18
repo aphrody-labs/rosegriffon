@@ -5,7 +5,7 @@ import { notFound } from "next/navigation";
 import type { OverrideSkillData } from "@/components/wiki/OverrideSkillSection";
 import { SkillCutinSection } from "@/components/wiki/SkillCutinSection";
 import { SkillDetail } from "@/components/wiki/SkillDetail";
-import { getSkillCutin } from "@/lib/skills-cutin";
+import { cutinHasAssets, getSkillCutin } from "@/lib/skills-cutin";
 import { createClient } from "@/lib/supabase/server";
 import { wikiService } from "@/lib/wiki-service";
 
@@ -181,7 +181,11 @@ export default async function MoveDetailPage({ params }: { params: Promise<{ id:
 			/>
 			{cutinEntry?.cutin && (
 				<div className="mt-6">
-					<SkillCutinSection cutin={cutinEntry.cutin} skillName={name} />
+					<SkillCutinSection
+						cutin={cutinEntry.cutin}
+						skillName={name}
+						assetsAvailable={cutinHasAssets(cutinEntry.cutin.event_id_name)}
+					/>
 				</div>
 			)}
 		</>

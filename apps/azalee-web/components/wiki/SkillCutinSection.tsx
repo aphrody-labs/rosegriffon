@@ -53,7 +53,32 @@ function CutinEffects({ dir }: { dir: string }) {
 	);
 }
 
-export function SkillCutinSection({ cutin, skillName }: { cutin: SkillCutin; skillName: string }) {
+/** Chip de téléchargement (texture/telop PNG), réutilisable. */
+function DownloadChip({ href, filename }: { href: string; filename: string }) {
+	return (
+		<a
+			href={href}
+			download={filename}
+			className="inline-flex items-center gap-1 rounded-full bg-surface-container-high px-2.5 py-1 text-xs font-medium text-on-surface-variant hover:text-on-surface hover:bg-surface-container-highest transition-colors"
+			title="Télécharger (PNG)"
+		>
+			<Icon name="download" size={12} /> PNG
+		</a>
+	);
+}
+
+export function SkillCutinSection({
+	cutin,
+	skillName,
+	assetsAvailable,
+}: {
+	cutin: SkillCutin;
+	skillName: string;
+	/** Le modèle 3D + la texture `_waza` existent dans cette build (vérifié serveur via l'index
+	    CPK) : ~157/992 hissatsu. Faux → on n'affiche ni le viewer ni la texture (sinon 404/broken). */
+	assetsAvailable: boolean;
+}) {
+	const [telopError, setTelopError] = useState(false);
 	// Telop préféré : fr puis en puis 1re langue dispo (g4tx→png via le CDN /dx11).
 	const telopPath =
 		cutin.telop_by_lang.find(([l]) => l === "fr")?.[1] ??
@@ -72,34 +97,51 @@ export function SkillCutinSection({ cutin, skillName }: { cutin: SkillCutin; ski
 				<span className="text-xs font-mono text-on-surface-variant">({cutin.event_id_name})</span>
 			</h2>
 
-			{telopUrl && (
+			{telopUrl && !telopError && (
 				<div>
-					<p className="text-xs text-on-surface-variant mb-1">Telop (nom rendu)</p>
+					<div className="flex items-center justify-between mb-1">
+						<p className="text-xs text-on-surface-variant">Telop (nom rendu)</p>
+						<DownloadChip href={telopUrl} filename={`${cutin.event_id_name}_telop.png`} />
+					</div>
 					{/* eslint-disable-next-line @next/next/no-img-element */}
-					<img src={telopUrl} alt={`Telop ${skillName}`} loading="lazy" className="max-h-24 w-auto" />
+					<img
+						src={telopUrl}
+						alt={`Telop ${skillName}`}
+						loading="lazy"
+						className="max-h-24 w-auto"
+						onError={() => setTelopError(true)}
+					/>
 				</div>
 			)}
 
-			<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-				<div>
-					<p className="text-xs text-on-surface-variant mb-1">
-						Modèle 3D du cut-in (chr/_waza, texturé)
-					</p>
-					<CharacterModelViewer glbUrl={modelUrl} name={skillName} inline />
-				</div>
-				{textureUrl && (
+			{/* Modèle 3D + texture : affichés UNIQUEMENT si l'asset `_waza` existe dans cette build
+			    (gate serveur `assetsAvailable`). Sinon (835/992 hissatsu sans cut-in 3D), on évite un
+			    viewer « indisponible » + une image cassée. Le GLB est téléchargeable via le viewer. */}
+			{assetsAvailable && (
+				<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 					<div>
-						<p className="text-xs text-on-surface-variant mb-1">Texture (dx11/chr/_waza)</p>
-						{/* eslint-disable-next-line @next/next/no-img-element */}
-						<img
-							src={textureUrl}
-							alt={`Texture ${skillName}`}
-							loading="lazy"
-							className="w-full max-w-xs rounded-lg bg-surface-container [image-rendering:pixelated]"
-						/>
+						<p className="text-xs text-on-surface-variant mb-1">
+							Modèle 3D du cut-in (chr/_waza, texturé)
+						</p>
+						<CharacterModelViewer glbUrl={modelUrl} name={skillName} inline />
 					</div>
-				)}
-			</div>
+					{textureUrl && (
+						<div>
+							<div className="flex items-center justify-between mb-1">
+								<p className="text-xs text-on-surface-variant">Texture (dx11/chr/_waza)</p>
+								<DownloadChip href={textureUrl} filename={`${cutin.event_id_name}.png`} />
+							</div>
+							{/* eslint-disable-next-line @next/next/no-img-element */}
+							<img
+								src={textureUrl}
+								alt={`Texture ${skillName}`}
+								loading="lazy"
+								className="w-full max-w-xs rounded-lg bg-surface-container [image-rendering:pixelated]"
+							/>
+						</div>
+					)}
+				</div>
+			)}
 
 			<CutinEffects dir={cutin.effects_dir} />
 

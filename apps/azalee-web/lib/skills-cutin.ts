@@ -7,6 +7,7 @@
  * tous déjà servis live par `nie-model-serve` (`/raw`, `/tex`, `/model-*`).
  */
 import skillsCutinData from "@/data/skills-cutin.json";
+import skillsCutinServed from "@/data/skills-cutin-served.json";
 
 /** Chemins VFS des assets de cut-in d'un hissatsu. */
 export interface SkillCutin {
@@ -51,4 +52,18 @@ const byCode = new Map<string, SkillCutinEntry>(
 /** Renvoie l'entrée cut-in d'un skill par son code interne (`skill_id_str`, ex. `whs00340`). */
 export function getSkillCutin(codeOrId: string): SkillCutinEntry | null {
 	return byCode.get(codeOrId) ?? null;
+}
+
+/** Ensemble des `event_id_name` dont le modèle 3D + texture `_waza` existent dans cette build. */
+const servedEvents = new Set<string>((skillsCutinServed as { events: string[] }).events);
+
+/**
+ * `true` si le cut-in 3D (modèle `/model-chr/waza/<event>.glb` + texture) est réellement servi par
+ * le CDN pour cet `event_id_name` (gate anti-404, ~142 events / ~890). Source : manifeste
+ * `skills-cutin-served.json` (généré depuis l'index CPK, `scripts/build-skills-cutin-served.ts`).
+ * Client-safe (import JSON pur). Permet à la fiche de n'afficher le viewer/texture que là où ils
+ * existent — au lieu d'un viewer « indisponible » + image cassée sur les ~835 hissatsu sans cut-in.
+ */
+export function cutinHasAssets(eventIdName: string | null | undefined): boolean {
+	return eventIdName ? servedEvents.has(eventIdName) : false;
 }

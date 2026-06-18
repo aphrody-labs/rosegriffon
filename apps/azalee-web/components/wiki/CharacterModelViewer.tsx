@@ -1,6 +1,6 @@
 "use client";
 
-import { Box } from "lucide-react";
+import { Box, Download } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import {
 	Button,
@@ -124,6 +124,20 @@ export default function CharacterModelViewer({ glbUrl, name, inline }: Character
 		};
 	}, [active, ready, glbUrl, name]);
 
+	// Bouton de téléchargement du GLB (assemblage complet texturé) — affiché dès que le
+	// modèle est chargé sans erreur. Couvre tous les usages du viewer (perso, keshin, cut-in).
+	const downloadBtn = ready && !errored && (
+		<a
+			href={glbUrl}
+			download={`${name ?? "modele"}.glb`}
+			onClick={(e) => e.stopPropagation()}
+			className="absolute top-2 right-2 z-10 inline-flex items-center gap-1 rounded-full bg-surface/70 backdrop-blur px-2.5 py-1 text-xs font-medium text-on-surface hover:bg-surface border border-outline-variant/30 transition-colors"
+			title="Télécharger le modèle 3D (GLB)"
+		>
+			<Download className="size-3" /> GLB
+		</a>
+	);
+
 	// Corps du viewer (boîte 3:4 + spinner/erreur/aide) — partagé inline et en dialog.
 	const viewerBody = (
 		<div className="aspect-[3/4] relative bg-surface-container-high rounded-xl overflow-hidden">
@@ -138,6 +152,7 @@ export default function CharacterModelViewer({ glbUrl, name, inline }: Character
 					<span className="text-sm text-on-surface-variant">Modèle 3D indisponible.</span>
 				</div>
 			)}
+			{downloadBtn}
 			{ready && !errored && (
 				<div className="absolute bottom-3 left-0 right-0 text-center pointer-events-none">
 					<span className="text-xs text-on-surface-variant/60 bg-surface/40 px-2 py-1 rounded">
@@ -191,6 +206,17 @@ export default function CharacterModelViewer({ glbUrl, name, inline }: Character
 								Modèle 3D indisponible.
 							</span>
 						</div>
+					)}
+
+					{ready && !errored && (
+						<a
+							href={glbUrl}
+							download={`${name ?? "modele"}.glb`}
+							className="absolute bottom-3 right-3 z-10 inline-flex items-center gap-1 rounded-full bg-surface/70 backdrop-blur px-2.5 py-1 text-xs font-medium text-on-surface hover:bg-surface border border-outline-variant/30 transition-colors"
+							title="Télécharger le modèle 3D (GLB)"
+						>
+							<Download className="size-3" /> GLB
+						</a>
 					)}
 
 					{ready && !errored && (
