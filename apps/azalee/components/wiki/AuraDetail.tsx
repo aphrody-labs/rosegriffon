@@ -139,11 +139,26 @@ export function AuraDetail({ aura, category, subTypeInfo, prevAura, nextAura }: 
 							</>
 						)}
 						{/* Modèle 3D COMPLET keshin (corps+armure+textures) — monté seulement
-						    si un modèle assemblé est servi (gate manifeste, anti-404). */}
+						    si un modèle assemblé est servi (gate manifeste, anti-404). Le GLB est
+						    téléchargeable depuis le viewer (bouton dans le dialog). */}
 						{aura.modelGlbUrl && (
 							<div className="absolute bottom-1 right-1 rounded-full bg-black/40 backdrop-blur-sm border border-white/20">
 								<CharacterModelViewer glbUrl={aura.modelGlbUrl} name={aura.displayName} />
 							</div>
+						)}
+						{/* Téléchargement de l'image (icône/telop décodée PNG). */}
+						{imageUrl && !imgError && (
+							<a
+								href={imageUrl}
+								download
+								target="_blank"
+								rel="noreferrer"
+								onClick={(e) => e.stopPropagation()}
+								className="absolute top-2 right-2 inline-flex items-center gap-1 rounded-full bg-surface/70 backdrop-blur px-2.5 py-1 text-xs font-medium text-on-surface hover:bg-surface border border-outline-variant/30 transition-colors"
+								title="Télécharger l'image"
+							>
+								<Icon name="download" size={12} /> PNG
+							</a>
 						)}
 					</div>
 
