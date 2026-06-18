@@ -2,12 +2,12 @@
 
 import { formatDistanceToNow } from "date-fns";
 import { fr } from "date-fns/locale";
-import { Bell, FileText, Megaphone } from "lucide-react";
+import { Bell, FileText, type LucideIcon, Megaphone } from "lucide-react";
 import Link from "next/link";
 import { markAsRead } from "@/app/actions/notifications";
 import { cn } from "@/lib/utils";
 
-const TYPE_ICONS: Record<string, React.ElementType> = {
+const TYPE_ICONS: Record<string, LucideIcon> = {
 	announcement: Megaphone,
 	article: FileText,
 	default: Bell,

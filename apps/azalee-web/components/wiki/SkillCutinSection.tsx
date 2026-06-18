@@ -7,17 +7,13 @@
  * g4tx→png) et la liste des **effets d'event** (`common/event/<grp>/<ev>/`, g4pk). Données :
  * `skills-cutin.json` (+ `/api/cpk` pour le listing d'effets).
  */
-import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
 import { Icon } from "@/components/ui/Icon";
+// Viewer cut-in composé (scène R3F + timeline + export MP4). C'est lui qui gère le
+// `next/dynamic { ssr:false }` de la scène et le repli `<CharacterModelViewer>` interne.
+import { CutinViewer } from "@/components/wiki/cutin/CutinViewer";
 import { cpkAssetUrl } from "@/lib/cpk/shared";
 import type { SkillCutin } from "@/lib/skills-cutin";
-
-const CharacterModelViewer = dynamic(() => import("@/components/wiki/CharacterModelViewer"), {
-	ssr: false,
-});
-
-const CDN = "https://cdn.rosegriffon.fr";
 
 /** Liste des effets g4pk d'un event de cut-in (via l'API d'index CPK). */
 function CutinEffects({ dir }: { dir: string }) {
@@ -85,8 +81,6 @@ export function SkillCutinSection({
 		cutin.telop_by_lang.find(([l]) => l === "en")?.[1] ??
 		cutin.telop_by_lang[0]?.[1];
 	const telopUrl = telopPath ? cpkAssetUrl(telopPath) : null;
-	// Modèle assemblé serveur (g4pkm→g4md + g4mg + texture) ; bien plus fiable qu'in-browser.
-	const modelUrl = `${CDN}/model-chr/waza/${cutin.event_id_name}.glb`;
 	const textureUrl = cpkAssetUrl(cutin.texture_g4tx);
 
 	return (
@@ -114,16 +108,17 @@ export function SkillCutinSection({
 				</div>
 			)}
 
-			{/* Modèle 3D + texture : affichés UNIQUEMENT si l'asset `_waza` existe dans cette build
-			    (gate serveur `assetsAvailable`). Sinon (835/992 hissatsu sans cut-in 3D), on évite un
-			    viewer « indisponible » + une image cassée. Le GLB est téléchargeable via le viewer. */}
+			{/* Scène cut-in composée + texture : affichées UNIQUEMENT si l'asset `_waza` existe dans
+			    cette build (gate serveur `assetsAvailable`). Sinon (835/992 hissatsu sans cut-in 3D),
+			    on évite un viewer « indisponible » + une image cassée. Le viewer gère lui-même le
+			    chargement lazy de la scène R3F + le repli model-viewer. */}
 			{assetsAvailable && (
 				<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 					<div>
 						<p className="text-xs text-on-surface-variant mb-1">
-							Modèle 3D du cut-in (chr/_waza, texturé)
+							Scène cut-in (modèle 3D composé · timeline · export MP4)
 						</p>
-						<CharacterModelViewer glbUrl={modelUrl} name={skillName} inline />
+						<CutinViewer cutin={cutin} skillName={skillName} />
 					</div>
 					{textureUrl && (
 						<div>
