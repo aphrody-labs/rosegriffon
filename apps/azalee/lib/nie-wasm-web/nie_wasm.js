@@ -1,6 +1,90 @@
 /* @ts-self-types="./nie_wasm.d.ts" */
 
 /**
+ * Le JEU niers jouable dans le navigateur : pilote la machine à états [`nie_app::GameState`]
+ * (Title → MainMenu → Match → Story → …) et rend chaque écran en framebuffer RGBA8 `W*H*4` que JS
+ * peint sur un `<canvas>` (`ctx.putImageData`). Cœur 100 % Rust ; les octets de police sont fournis
+ * par JS (fetch des assets) via [`WasmGame::new`].
+ */
+export class WasmGame {
+    __destroy_into_raw() {
+        const ptr = this.__wbg_ptr;
+        this.__wbg_ptr = 0;
+        WasmGameFinalization.unregister(this);
+        return ptr;
+    }
+    free() {
+        const ptr = this.__destroy_into_raw();
+        wasm.__wbg_wasmgame_free(ptr, 0);
+    }
+    /**
+     * Hauteur du framebuffer (px).
+     * @returns {number}
+     */
+    get height() {
+        const ret = wasm.wasmgame_height(this.__wbg_ptr);
+        return ret >>> 0;
+    }
+    /**
+     * Construit le jeu depuis les octets de la police (`font.cfg.bin` + `font.g4tx`, fetchés par JS).
+     * @param {Uint8Array} font_cfg
+     * @param {Uint8Array} font_g4tx
+     */
+    constructor(font_cfg, font_g4tx) {
+        const ptr0 = passArray8ToWasm0(font_cfg, wasm.__wbindgen_malloc);
+        const len0 = WASM_VECTOR_LEN;
+        const ptr1 = passArray8ToWasm0(font_g4tx, wasm.__wbindgen_malloc);
+        const len1 = WASM_VECTOR_LEN;
+        const ret = wasm.wasmgame_new(ptr0, len0, ptr1, len1);
+        if (ret[2]) {
+            throw takeFromExternrefTable0(ret[1]);
+        }
+        this.__wbg_ptr = ret[0];
+        WasmGameFinalization.register(this, this.__wbg_ptr, this);
+        return this;
+    }
+    /**
+     * Rend la frame `frame_idx` du playthrough (modulo la durée totale) en RGBA8 `W*H*4`.
+     * @param {number} frame_idx
+     * @returns {Uint8Array}
+     */
+    render_frame(frame_idx) {
+        const ret = wasm.wasmgame_render_frame(this.__wbg_ptr, frame_idx);
+        var v1 = getArrayU8FromWasm0(ret[0], ret[1]).slice();
+        wasm.__wbindgen_free(ret[0], ret[1] * 1, 1);
+        return v1;
+    }
+    /**
+     * Rend le menu principal avec l'option `sel` surlignée (navigation interactive web). RGBA8 `W*H*4`.
+     * @param {number} sel
+     * @returns {Uint8Array}
+     */
+    render_menu(sel) {
+        const ret = wasm.wasmgame_render_menu(this.__wbg_ptr, sel);
+        var v1 = getArrayU8FromWasm0(ret[0], ret[1]).slice();
+        wasm.__wbindgen_free(ret[0], ret[1] * 1, 1);
+        return v1;
+    }
+    /**
+     * Nombre total de frames du playthrough scripté (boucle Title→Menu→Match→Story→…).
+     * @returns {number}
+     */
+    get total_frames() {
+        const ret = wasm.wasmgame_total_frames(this.__wbg_ptr);
+        return ret >>> 0;
+    }
+    /**
+     * Largeur du framebuffer (px).
+     * @returns {number}
+     */
+    get width() {
+        const ret = wasm.wasmgame_width(this.__wbg_ptr);
+        return ret >>> 0;
+    }
+}
+if (Symbol.dispose) WasmGame.prototype[Symbol.dispose] = WasmGame.prototype.free;
+
+/**
  * Point d'entrée **auto-exécuté à l'instanciation** du module (attribut `start`,
  * best practice wasm-bindgen) : installe le hook de panique sans dépendre d'un
  * appel JS explicite — toute panique reste lisible même si l'hôte oublie l'init.
@@ -682,6 +766,9 @@ export function utf_table_json(bytes) {
 function __wbg_get_imports() {
     const import0 = {
         __proto__: null,
+        __wbg___wbindgen_throw_ea4887a5f8f9a9db: function(arg0, arg1) {
+            throw new Error(getStringFromWasm0(arg0, arg1));
+        },
         __wbg_error_a6fa202b58aa1cd3: function(arg0, arg1) {
             let deferred0_0;
             let deferred0_1;
@@ -724,6 +811,10 @@ function __wbg_get_imports() {
         "./nie_wasm_bg.js": import0,
     };
 }
+
+const WasmGameFinalization = (typeof FinalizationRegistry === 'undefined')
+    ? { register: () => {}, unregister: () => {} }
+    : new FinalizationRegistry(ptr => wasm.__wbg_wasmgame_free(ptr, 1));
 
 function getArrayU8FromWasm0(ptr, len) {
     ptr = ptr >>> 0;
