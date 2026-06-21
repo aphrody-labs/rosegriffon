@@ -1,10 +1,11 @@
 /* @ts-self-types="./nie_wasm.d.ts" */
 
 /**
- * Le JEU niers jouable dans le navigateur : pilote la machine à états [`nie_app::GameState`]
- * (Title → MainMenu → Match → Story → …) et rend chaque écran en framebuffer RGBA8 `W*H*4` que JS
- * peint sur un `<canvas>` (`ctx.putImageData`). Cœur 100 % Rust ; les octets de police sont fournis
- * par JS (fetch des assets) via [`WasmGame::new`].
+ * Le JEU niers complet, jouable au clavier dans le navigateur — 100 % Rust → wasm.
+ *
+ * Machine à états INTERACTIVE (écran-titre → menu principal → **vrai match** [moteur nie-runtime :
+ * physique, 22 joueurs, ballon, buts] → mode histoire), pilotée par les touches, rendue en framebuffer
+ * RGBA8 `W*H*4` unifié que JS peint plein écran. Pas un playthrough scripté : le joueur navigue et joue.
  */
 export class WasmGame {
     __destroy_into_raw() {
@@ -26,7 +27,28 @@ export class WasmGame {
         return ret >>> 0;
     }
     /**
+     * `true` si un match est en cours (pour l'overlay de score côté UI).
+     * @returns {boolean}
+     */
+    get in_match() {
+        const ret = wasm.wasmgame_in_match(this.__wbg_ptr);
+        return ret !== 0;
+    }
+    /**
+     * Commande de menu IEVR RÉELLE (cf. `MENU_CMD_INFO` des cfg.bin + `input_ctrl`) :
+     * `CMD_FCS_MTX_{UP,DOWN,LEFT,RIGHT}` (navigation), `CMD_ENTER`/`CMD_SUB_ENTER` (valider),
+     * `CMD_BACK`/`CMD_CANCEL` (retour). Le mapping **clavier / souris / manette** → ces commandes
+     * se fait côté front (couche d'input). Le moteur ne connaît que les commandes du jeu.
+     * @param {string} cmd
+     */
+    input(cmd) {
+        const ptr0 = passStringToWasm0(cmd, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        const len0 = WASM_VECTOR_LEN;
+        wasm.wasmgame_input(this.__wbg_ptr, ptr0, len0);
+    }
+    /**
      * Construit le jeu depuis les octets de la police (`font.cfg.bin` + `font.g4tx`, fetchés par JS).
+     * Démarre sur l'écran-titre.
      * @param {Uint8Array} font_cfg
      * @param {Uint8Array} font_g4tx
      */
@@ -44,34 +66,31 @@ export class WasmGame {
         return this;
     }
     /**
-     * Rend la frame `frame_idx` du playthrough (modulo la durée totale) en RGBA8 `W*H*4`.
-     * @param {number} frame_idx
+     * Rend l'écran courant en framebuffer RGBA8 `W*H*4`.
      * @returns {Uint8Array}
      */
-    render_frame(frame_idx) {
-        const ret = wasm.wasmgame_render_frame(this.__wbg_ptr, frame_idx);
+    render() {
+        const ret = wasm.wasmgame_render(this.__wbg_ptr);
         var v1 = getArrayU8FromWasm0(ret[0], ret[1]).slice();
         wasm.__wbindgen_free(ret[0], ret[1] * 1, 1);
         return v1;
     }
     /**
-     * Rend le menu principal avec l'option `sel` surlignée (navigation interactive web). RGBA8 `W*H*4`.
-     * @param {number} sel
-     * @returns {Uint8Array}
+     * Score du match en cours `[domicile, extérieur]` (zéros hors match).
+     * @returns {Uint32Array}
      */
-    render_menu(sel) {
-        const ret = wasm.wasmgame_render_menu(this.__wbg_ptr, sel);
-        var v1 = getArrayU8FromWasm0(ret[0], ret[1]).slice();
-        wasm.__wbindgen_free(ret[0], ret[1] * 1, 1);
+    score() {
+        const ret = wasm.wasmgame_score(this.__wbg_ptr);
+        var v1 = getArrayU32FromWasm0(ret[0], ret[1]).slice();
+        wasm.__wbindgen_free(ret[0], ret[1] * 4, 4);
         return v1;
     }
     /**
-     * Nombre total de frames du playthrough scripté (boucle Title→Menu→Match→Story→…).
-     * @returns {number}
+     * Avance le temps de `dt` secondes : la physique du match tourne quand un match est en cours.
+     * @param {number} dt
      */
-    get total_frames() {
-        const ret = wasm.wasmgame_total_frames(this.__wbg_ptr);
-        return ret >>> 0;
+    update(dt) {
+        wasm.wasmgame_update(this.__wbg_ptr, dt);
     }
     /**
      * Largeur du framebuffer (px).
@@ -816,6 +835,11 @@ const WasmGameFinalization = (typeof FinalizationRegistry === 'undefined')
     ? { register: () => {}, unregister: () => {} }
     : new FinalizationRegistry(ptr => wasm.__wbg_wasmgame_free(ptr, 1));
 
+function getArrayU32FromWasm0(ptr, len) {
+    ptr = ptr >>> 0;
+    return getUint32ArrayMemory0().subarray(ptr / 4, ptr / 4 + len);
+}
+
 function getArrayU8FromWasm0(ptr, len) {
     ptr = ptr >>> 0;
     return getUint8ArrayMemory0().subarray(ptr / 1, ptr / 1 + len);
@@ -831,6 +855,14 @@ function getDataViewMemory0() {
 
 function getStringFromWasm0(ptr, len) {
     return decodeText(ptr >>> 0, len);
+}
+
+let cachedUint32ArrayMemory0 = null;
+function getUint32ArrayMemory0() {
+    if (cachedUint32ArrayMemory0 === null || cachedUint32ArrayMemory0.byteLength === 0) {
+        cachedUint32ArrayMemory0 = new Uint32Array(wasm.memory.buffer);
+    }
+    return cachedUint32ArrayMemory0;
 }
 
 let cachedUint8ArrayMemory0 = null;
@@ -926,6 +958,7 @@ function __wbg_finalize_init(instance, module) {
     wasm = instance.exports;
     wasmModule = module;
     cachedDataViewMemory0 = null;
+    cachedUint32ArrayMemory0 = null;
     cachedUint8ArrayMemory0 = null;
     wasm.__wbindgen_start();
     return wasm;

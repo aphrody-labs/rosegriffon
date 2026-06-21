@@ -2,34 +2,47 @@
 /* eslint-disable */
 
 /**
- * Le JEU niers jouable dans le navigateur : pilote la machine à états [`nie_app::GameState`]
- * (Title → MainMenu → Match → Story → …) et rend chaque écran en framebuffer RGBA8 `W*H*4` que JS
- * peint sur un `<canvas>` (`ctx.putImageData`). Cœur 100 % Rust ; les octets de police sont fournis
- * par JS (fetch des assets) via [`WasmGame::new`].
+ * Le JEU niers complet, jouable au clavier dans le navigateur — 100 % Rust → wasm.
+ *
+ * Machine à états INTERACTIVE (écran-titre → menu principal → **vrai match** [moteur nie-runtime :
+ * physique, 22 joueurs, ballon, buts] → mode histoire), pilotée par les touches, rendue en framebuffer
+ * RGBA8 `W*H*4` unifié que JS peint plein écran. Pas un playthrough scripté : le joueur navigue et joue.
  */
 export class WasmGame {
     free(): void;
     [Symbol.dispose](): void;
     /**
+     * Commande de menu IEVR RÉELLE (cf. `MENU_CMD_INFO` des cfg.bin + `input_ctrl`) :
+     * `CMD_FCS_MTX_{UP,DOWN,LEFT,RIGHT}` (navigation), `CMD_ENTER`/`CMD_SUB_ENTER` (valider),
+     * `CMD_BACK`/`CMD_CANCEL` (retour). Le mapping **clavier / souris / manette** → ces commandes
+     * se fait côté front (couche d'input). Le moteur ne connaît que les commandes du jeu.
+     */
+    input(cmd: string): void;
+    /**
      * Construit le jeu depuis les octets de la police (`font.cfg.bin` + `font.g4tx`, fetchés par JS).
+     * Démarre sur l'écran-titre.
      */
     constructor(font_cfg: Uint8Array, font_g4tx: Uint8Array);
     /**
-     * Rend la frame `frame_idx` du playthrough (modulo la durée totale) en RGBA8 `W*H*4`.
+     * Rend l'écran courant en framebuffer RGBA8 `W*H*4`.
      */
-    render_frame(frame_idx: number): Uint8Array;
+    render(): Uint8Array;
     /**
-     * Rend le menu principal avec l'option `sel` surlignée (navigation interactive web). RGBA8 `W*H*4`.
+     * Score du match en cours `[domicile, extérieur]` (zéros hors match).
      */
-    render_menu(sel: number): Uint8Array;
+    score(): Uint32Array;
+    /**
+     * Avance le temps de `dt` secondes : la physique du match tourne quand un match est en cours.
+     */
+    update(dt: number): void;
     /**
      * Hauteur du framebuffer (px).
      */
     readonly height: number;
     /**
-     * Nombre total de frames du playthrough scripté (boucle Title→Menu→Match→Story→…).
+     * `true` si un match est en cours (pour l'overlay de score côté UI).
      */
-    readonly total_frames: number;
+    readonly in_match: boolean;
     /**
      * Largeur du framebuffer (px).
      */
@@ -306,10 +319,12 @@ export interface InitOutput {
     readonly skill_lookup: (a: number, b: number, c: number, d: number) => [number, number, number, number];
     readonly utf_table_json: (a: number, b: number) => [number, number, number, number];
     readonly wasmgame_height: (a: number) => number;
+    readonly wasmgame_in_match: (a: number) => number;
+    readonly wasmgame_input: (a: number, b: number, c: number) => void;
     readonly wasmgame_new: (a: number, b: number, c: number, d: number) => [number, number, number];
-    readonly wasmgame_render_frame: (a: number, b: number) => [number, number];
-    readonly wasmgame_render_menu: (a: number, b: number) => [number, number];
-    readonly wasmgame_total_frames: (a: number) => number;
+    readonly wasmgame_render: (a: number) => [number, number];
+    readonly wasmgame_score: (a: number) => [number, number];
+    readonly wasmgame_update: (a: number, b: number) => void;
     readonly wasmgame_width: (a: number) => number;
     readonly __wasm_start: () => void;
     readonly init_panic_hook: () => void;
