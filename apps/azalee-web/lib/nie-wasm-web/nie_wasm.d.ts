@@ -2,6 +2,41 @@
 /* eslint-disable */
 
 /**
+ * Le JEU niers jouable dans le navigateur : pilote la machine à états [`nie_app::GameState`]
+ * (Title → MainMenu → Match → Story → …) et rend chaque écran en framebuffer RGBA8 `W*H*4` que JS
+ * peint sur un `<canvas>` (`ctx.putImageData`). Cœur 100 % Rust ; les octets de police sont fournis
+ * par JS (fetch des assets) via [`WasmGame::new`].
+ */
+export class WasmGame {
+    free(): void;
+    [Symbol.dispose](): void;
+    /**
+     * Construit le jeu depuis les octets de la police (`font.cfg.bin` + `font.g4tx`, fetchés par JS).
+     */
+    constructor(font_cfg: Uint8Array, font_g4tx: Uint8Array);
+    /**
+     * Rend la frame `frame_idx` du playthrough (modulo la durée totale) en RGBA8 `W*H*4`.
+     */
+    render_frame(frame_idx: number): Uint8Array;
+    /**
+     * Rend le menu principal avec l'option `sel` surlignée (navigation interactive web). RGBA8 `W*H*4`.
+     */
+    render_menu(sel: number): Uint8Array;
+    /**
+     * Hauteur du framebuffer (px).
+     */
+    readonly height: number;
+    /**
+     * Nombre total de frames du playthrough scripté (boucle Title→Menu→Match→Story→…).
+     */
+    readonly total_frames: number;
+    /**
+     * Largeur du framebuffer (px).
+     */
+    readonly width: number;
+}
+
+/**
  * Point d'entrée **auto-exécuté à l'instanciation** du module (attribut `start`,
  * best practice wasm-bindgen) : installe le hook de panique sans dépendre d'un
  * appel JS explicite — toute panique reste lisible même si l'hôte oublie l'init.
@@ -245,6 +280,7 @@ export type InitInput = RequestInfo | URL | Response | BufferSource | WebAssembl
 
 export interface InitOutput {
     readonly memory: WebAssembly.Memory;
+    readonly __wbg_wasmgame_free: (a: number, b: number) => void;
     readonly audio_to_wav: (a: number, b: number) => [number, number, number, number];
     readonly aura_lookup: (a: number, b: number, c: number, d: number) => [number, number, number, number];
     readonly calculate_stats: (a: number, b: number, c: number, d: number, e: number, f: number) => [number, number];
@@ -269,6 +305,12 @@ export interface InitOutput {
     readonly single_stat: (a: number, b: number, c: number, d: number, e: number) => number;
     readonly skill_lookup: (a: number, b: number, c: number, d: number) => [number, number, number, number];
     readonly utf_table_json: (a: number, b: number) => [number, number, number, number];
+    readonly wasmgame_height: (a: number) => number;
+    readonly wasmgame_new: (a: number, b: number, c: number, d: number) => [number, number, number];
+    readonly wasmgame_render_frame: (a: number, b: number) => [number, number];
+    readonly wasmgame_render_menu: (a: number, b: number) => [number, number];
+    readonly wasmgame_total_frames: (a: number) => number;
+    readonly wasmgame_width: (a: number) => number;
     readonly __wasm_start: () => void;
     readonly init_panic_hook: () => void;
     readonly __wbindgen_free: (a: number, b: number, c: number) => void;
