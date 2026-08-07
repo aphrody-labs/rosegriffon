@@ -10,6 +10,7 @@
 		"./service": "./src/service.ts",
 		"./redis": "./src/redis.ts",
 		"./rag": "./src/rag.ts",
+		"./rag-store": "./src/rag-store.ts",
 		"./storage": "./src/storage.ts",
 		"./types": "./src/types.ts"
 	},

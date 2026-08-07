@@ -27,7 +27,7 @@ export {
 	type RagSource,
 	type RagPgResult,
 	type IngestStats,
-} from "./rag-store-pg";
+} from "./rag-store-local";
 export { chunkBySource, chunkTweet, type SourceKind, type Chunk } from "./rag-chunkers";
 export { embedBatch, embedOne, type EmbedBackend } from "./rag-embed";
 

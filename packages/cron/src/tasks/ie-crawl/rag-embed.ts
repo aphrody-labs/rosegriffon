@@ -4,20 +4,21 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-// Abstraction d'embedding unifiée pour le RAG pgvector (dimension 1024 = BGE-M3).
+// Abstraction d'embedding unifiée pour le RAG local (dimension 384 = e5-small natif).
 //
 // Résolution (par ordre) :
-//   1. RAG_EMBED_URL  → sidecar self-host BGE-M3 (`POST /embed {texts}` → {embeddings})
-//   2. OPENAI_API_KEY → text-embedding-3-small, RE-PROJETÉ déterministe en 1024
-//   3. fallback Feature-Hashing 1024-dim L2-normalisé (dev only, pas de sémantique)
+//   1. RAG_EMBED_URL  → sidecar self-host e5-small (`POST /embed {texts}` → {embeddings})
+//   2. OPENAI_API_KEY → text-embedding-3-small, RE-PROJETÉ déterministe en 384
+//   3. fallback Feature-Hashing 384-dim L2-normalisé (dev only, pas de sémantique)
 //
-// Le store pgvector attend STRICTEMENT 1024 dims (halfvec(1024)). Toute source
-// de dimension différente est ramenée à 1024 par projection de hachage stable
-// (random-ish mais déterministe) pour rester insérable. La qualité réelle vient
-// du sidecar BGE-M3 (cf. UNIFIED-RAG-PLAN §4.3) ; les fallbacks gardent le
-// pipeline fonctionnel et testable sans modèle ni clé.
+// Le store local (bun:sqlite, `@rose-griffon/db/rag-store`) attend 384 dims —
+// c'est la dimension NATIVE du sidecar e5-small, plus de zero-pad vers 1024
+// (cet artifice n'existait que pour coller au type `halfvec(1024)` pgvector,
+// abandonné le 2026-08-06, cf. docs/rag-unified.md). Toute source de dimension
+// différente (OpenAI 1536, etc.) est ramenée à 384 par projection de hachage
+// stable (random-ish mais déterministe) pour rester insérable.
 
-export const RAG_EMBED_DIM = 1024;
+export const RAG_EMBED_DIM = 384;
 
 function hashStringToRange(str: string, range: number): number {
 	let hash = 0;

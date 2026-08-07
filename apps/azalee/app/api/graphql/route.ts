@@ -2,7 +2,6 @@ import { useGraphQlJit } from "@envelop/graphql-jit";
 import { useResponseCache } from "@graphql-yoga/plugin-response-cache";
 import { createSchema, createYoga } from "graphql-yoga";
 import { ragSearch, type RagSourceKind } from "@rose-griffon/db/rag";
-import { createAdminClient } from "@/lib/supabase/admin";
 import { wikiService } from "@/lib/wiki-service";
 
 const typeDefs = `
@@ -131,8 +130,7 @@ const resolvers = {
 	},
 	Query: {
 		ragSearch: async (_: any, { query, k, kinds }: any) => {
-			const supabase = createAdminClient();
-			const rows = await ragSearch(supabase as any, query, {
+			const rows = await ragSearch(query, {
 				k: k ?? 10,
 				kinds: kinds as RagSourceKind[] | undefined,
 			});

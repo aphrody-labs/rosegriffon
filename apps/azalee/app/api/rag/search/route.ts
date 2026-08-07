@@ -1,9 +1,8 @@
 import { ragSearch, type RagSourceKind } from "@rose-griffon/db/rag";
-import { createAdminClient } from "@/lib/supabase/admin";
 
 // RAG unifié — endpoint REST additif (cf. iecode/re/rag/UNIFIED-RAG-PLAN.md §5).
 // POST /api/rag/search  { query: string, k?: number, kinds?: string[] }
-// Recherche hybride pgvector (dense HNSW + lexical tsvector, fusion RRF).
+// Recherche hybride locale (dense cosine + lexicale FTS5, fusion RRF).
 
 interface RagSearchBody {
 	query?: string;
@@ -28,8 +27,7 @@ export async function POST(req: Request): Promise<Response> {
 	const kinds = Array.isArray(body.kinds) ? (body.kinds as RagSourceKind[]) : undefined;
 
 	try {
-		const supabase = createAdminClient();
-		const results = await ragSearch(supabase as any, query, { k, kinds });
+		const results = await ragSearch(query, { k, kinds });
 		return Response.json({ query, count: results.length, results });
 	} catch (err) {
 		return Response.json(
@@ -41,6 +39,6 @@ export async function POST(req: Request): Promise<Response> {
 
 export const GET = () =>
 	Response.json(
-		{ message: "POST { query, k?, kinds? } to search the unified RAG (pgvector hybrid)." },
+		{ message: "POST { query, k?, kinds? } to search the unified RAG (local hybrid)." },
 		{ status: 200 }
 	);

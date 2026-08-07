@@ -13,7 +13,7 @@
 
 import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
-import { ingestSources, ragHybridSearch, type RagSource } from "./rag-store-pg";
+import { ingestSources, ragHybridSearch, type RagSource } from "./rag-store-local";
 
 const DATA = "/home/ubuntu/niers/data";
 const SAMPLE = 3;
