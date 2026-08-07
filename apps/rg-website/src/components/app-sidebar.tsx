@@ -10,13 +10,11 @@ import { SidebarUser } from "@/components/sidebar/molecules/SidebarUser";
 import { SidebarNavLinks } from "@/components/sidebar/organisms/SidebarNavLinks";
 import { SocialLinksSkeleton } from "@/components/sidebar/skeletons/SocialLinksSkeleton";
 import { Separator, Sidebar, SidebarContent, SidebarFooter, SidebarHeader } from "@rose-griffon/ui";
-import { assoMenu, contactMenu, exploreMenu } from "@/lib/sidebar-config";
+import { assoMenu, contactMenu } from "@/lib/sidebar-config";
 
 const SocialLinks = lazy(() => import("@/components/sidebar/organisms/SocialLinks"));
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-	const showExplore = exploreMenu.items.length > 0;
-
 	return (
 		<Sidebar collapsible="offcanvas" {...props}>
 			<SidebarContent className="flex flex-col overflow-x-hidden bg-sidebar text-sidebar-foreground">
@@ -45,13 +43,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
 				<div className="custom-scrollbar flex-1 space-y-1 overflow-y-auto overflow-x-hidden py-4">
 					<SidebarNavLinks title={assoMenu.label} items={assoMenu.items} />
-
-					{showExplore && (
-						<>
-							<Separator className="mx-3 my-2 bg-sidebar-border/40" />
-							<SidebarNavLinks title={exploreMenu.label} items={exploreMenu.items} />
-						</>
-					)}
 
 					<Separator className="mx-3 my-2 bg-sidebar-border/40" />
 					<SidebarNavLinks title={contactMenu.label} items={contactMenu.items} />

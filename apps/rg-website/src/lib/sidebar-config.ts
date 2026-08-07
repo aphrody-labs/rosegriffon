@@ -176,14 +176,6 @@ export const assoMenu: MenuSection = {
 };
 
 /**
- * Configuration du menu "Explorer"
- */
-export const exploreMenu: MenuSection = {
-	items: [],
-	label: "Explorer",
-};
-
-/**
  * Configuration du menu "Nous concernant"
  * Call-to-actions organisés par priorité
  */
