@@ -1,30 +1,17 @@
-import { createPublicClient, createClient as createServerClient } from "@/lib/supabase/server";
+import { getPgPool } from "@/lib/db/pg";
 
 export const FEATURE_SHOW_DISCORD_EVENTS = "feature_show_discord_events";
 
-interface SupabaseLike {
-	from: (table: string) => {
-		select: (cols: string) => {
-			eq: (
-				col: string,
-				val: string
-			) => {
-				single: () => Promise<{
-					data: { value: unknown } | null;
-					error: unknown;
-				}>;
-			};
-		};
-	};
-}
-
 /**
- * Fetch a global setting value (cookies-aware client — bascule la page en dynamic).
+ * Fetch a global setting value.
+ * Lecture Postgres DIRECTE (bypass le Data API PostgREST — cf. lib/db/pg.ts) :
+ * ce Data API a été restreint (`exceed_storage_size_quota`) pendant 7+ jours
+ * début août 2026, cassant ces pages en boucle, alors que la connexion
+ * Postgres directe restait fonctionnelle tout du long.
  */
 export async function getSetting<T = unknown>(key: string, defaultValue: T): Promise<T> {
 	try {
-		const supabase = (await createServerClient()) as unknown as SupabaseLike;
-		return await fetchSetting(supabase, key, defaultValue);
+		return await fetchSetting(key, defaultValue);
 	} catch (error) {
 		console.warn(`Error fetching setting ${key}:`, error);
 		return defaultValue;
@@ -32,26 +19,32 @@ export async function getSetting<T = unknown>(key: string, defaultValue: T): Pro
 }
 
 /**
- * Fetch a public setting value sans cookies — laisse Next statifier la page (ISR/SSG).
- * À utiliser sur les pages publiques (home, marketing) où aucune donnée user n'est lue.
+ * Fetch a public setting value. Alias de `getSetting` : la lecture Postgres
+ * directe n'a pas de notion de client "cookies-aware" vs "public" — les deux
+ * variantes sont conservées pour préserver la signature/l'usage des appelants.
  */
 export async function getPublicSetting<T = unknown>(key: string, defaultValue: T): Promise<T> {
 	try {
-		return await fetchSetting(createPublicClient() as unknown as SupabaseLike, key, defaultValue);
+		return await fetchSetting(key, defaultValue);
 	} catch (error) {
 		console.warn(`Error fetching public setting ${key}:`, error);
 		return defaultValue;
 	}
 }
 
-async function fetchSetting<T>(supabase: SupabaseLike, key: string, defaultValue: T): Promise<T> {
-	const { data, error } = await supabase.from("settings").select("value").eq("key", key).single();
+async function fetchSetting<T>(key: string, defaultValue: T): Promise<T> {
+	const pool = getPgPool();
+	const { rows } = await pool.query<{ value: unknown }>(
+		"SELECT value FROM settings WHERE key = $1 LIMIT 1",
+		[key]
+	);
 
-	if (error || !data) {
+	const row = rows[0];
+	if (!row) {
 		return defaultValue;
 	}
 
-	const { value } = data;
+	const { value } = row;
 
 	if (typeof defaultValue === "boolean" && typeof value === "string") {
 		if (value === "true") {
