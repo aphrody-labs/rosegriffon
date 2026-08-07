@@ -11,7 +11,7 @@ set -uo pipefail
 
 SVC="azalee-web.service"
 URL="http://127.0.0.1:3003/"
-MEM_RESTART_GIB=16   # cap Max=18G → restart propre avant l'OOM-kill brutal
+MEM_RESTART_GIB=26   # cap Max=28G (relevé 2026-08-06) → restart propre avant l'OOM-kill brutal
 
 state="$(systemctl show "$SVC" -p ActiveState --value 2>/dev/null)"
 sub="$(systemctl show "$SVC" -p SubState --value 2>/dev/null)"
