@@ -12,6 +12,7 @@
 		"./rag": "./src/rag.ts",
 		"./rag-store": "./src/rag-store.ts",
 		"./storage": "./src/storage.ts",
+		"./stats": "./src/services/stats.ts",
 		"./types": "./src/types.ts"
 	},
 	"publishConfig": {
