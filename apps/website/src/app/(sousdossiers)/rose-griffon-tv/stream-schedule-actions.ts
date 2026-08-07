@@ -1,7 +1,7 @@
 "use server";
 
+import { getPgPool } from "@/lib/db/pg";
 import { createLogger } from "@/lib/logger";
-import { createClient } from "@/lib/supabase/server";
 import type { StreamSchedule } from "@rose-griffon/types";
 
 const logger = createLogger("stream-schedule");
@@ -17,21 +17,23 @@ function isValidTimeFormat(time: unknown): boolean {
 
 /**
  * Récupère tous les horaires de stream groupés par jour
+ *
+ * Lecture Postgres DIRECTE (bypass le Data API PostgREST) — cf. lib/db/pg.ts.
  */
 export async function getSchedulesByDay(): Promise<Record<string, StreamSchedule[]>> {
 	try {
-		const supabase = await createClient();
+		const pool = getPgPool();
 
 		logger.debug("Récupération des horaires actifs");
 
-		const { data: schedules, error } = await supabase
-			.from("stream_schedules")
-			.select("*")
-			.eq("status", "active")
-			.order("day_of_week", { ascending: true })
-			.order("start_time", { ascending: true });
-
-		if (error) {
+		let schedules: StreamSchedule[];
+		try {
+			const result = await pool.query<StreamSchedule>(
+				`SELECT * FROM stream_schedules WHERE status = $1 ORDER BY day_of_week ASC, start_time ASC`,
+				["active"]
+			);
+			schedules = result.rows;
+		} catch (error) {
 			logger.error("Erreur lors de la récupération des horaires actifs:", error);
 			return {};
 		}
@@ -67,14 +69,15 @@ export async function getSchedulesByDay(): Promise<Record<string, StreamSchedule
 		);
 
 		// Ajouter les "à venir"
-		const { data: comingSoon, error: comingSoonError } = await supabase
-			.from("stream_schedules")
-			.select("*")
-			.eq("status", "coming_soon")
-			.order("created_at", { ascending: false });
-
-		if (comingSoonError) {
-			logger.warn("Erreur lors de la récupération des streams à venir:", comingSoonError);
+		let comingSoon: StreamSchedule[] | undefined;
+		try {
+			const result = await pool.query<StreamSchedule>(
+				`SELECT * FROM stream_schedules WHERE status = $1 ORDER BY created_at DESC`,
+				["coming_soon"]
+			);
+			comingSoon = result.rows;
+		} catch (error) {
+			logger.warn("Erreur lors de la récupération des streams à venir:", error);
 		}
 
 		if (comingSoon && comingSoon.length > 0) {
@@ -91,20 +94,22 @@ export async function getSchedulesByDay(): Promise<Record<string, StreamSchedule
 
 /**
  * Récupère tous les horaires de stream sans groupement
+ *
+ * Lecture Postgres DIRECTE (bypass le Data API PostgREST) — cf. lib/db/pg.ts.
  */
 export async function getAllSchedules(): Promise<StreamSchedule[]> {
 	try {
-		const supabase = await createClient();
+		const pool = getPgPool();
 
 		logger.debug("Récupération de tous les horaires");
 
-		const { data: schedules, error } = await supabase
-			.from("stream_schedules")
-			.select("*")
-			.order("day_of_week", { ascending: true })
-			.order("start_time", { ascending: true });
-
-		if (error) {
+		let schedules: StreamSchedule[];
+		try {
+			const result = await pool.query<StreamSchedule>(
+				`SELECT * FROM stream_schedules ORDER BY day_of_week ASC, start_time ASC`
+			);
+			schedules = result.rows;
+		} catch (error) {
 			logger.error("Erreur lors de la récupération de tous les horaires:", error);
 			return [];
 		}

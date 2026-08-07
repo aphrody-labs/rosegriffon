@@ -3,45 +3,14 @@ import { createClient as createSupabaseAdmin } from "@supabase/supabase-js";
 import { betterAuth } from "better-auth";
 import { nextCookies } from "better-auth/next-js";
 import { bearer, genericOAuth, oAuthProxy, twoFactor } from "better-auth/plugins";
-import { Pool } from "pg";
-
 import { commonAuthOptions, ensureUserProfile } from "@rose-griffon/auth";
+import { getPgPool } from "@/lib/db/pg";
 import { fetchIdentity, parseIdentityWithMemberships } from "@/lib/patreon/client";
 import { encryptToken } from "@/lib/patreon/encryption";
 import { SCOPES_CREATOR, SCOPES_PATRON } from "@/lib/patreon/types";
 import type { Database } from "@rose-griffon/db";
 
-const getDatabaseURL = () => {
-	const url = process.env.DATABASE_URL;
-	if (!url || url.startsWith("eyJ2Ijo") || url === "undefined" || url === "null") {
-		throw new Error(
-			"DATABASE_URL absent ou corrompu : une chaîne de connexion Postgres valide est requise (cf. variables d'environnement Vercel).",
-		);
-	}
-	// Vercel serverless est IPv4-only ; l'hôte direct Supabase (db.<ref>.supabase.co) est IPv6-only
-	// → DNS getaddrinfo ENOTFOUND. On réécrit vers le pooler Supavisor en mode transaction (IPv4, port 6543),
-	// en DÉRIVANT depuis l'URL directe — aucun secret en dur, donc résilient à un scrub d'historique.
-	// EN SELF-HOST VPS (rosegriffon.fr / azalee.rosegriffon.fr) l'IPv6 est dispo et le pooler Supavisor
-	// ne résout plus de façon fiable → on GARDE l'URL directe. Le rewrite n'a lieu que sous Vercel.
-	if (process.env.VERCEL === "1") {
-		const direct = url.match(
-			/^postgres(?:ql)?:\/\/([^:]+):([^@]+)@db\.([a-z0-9]+)\.supabase\.co:\d+\/([^?]+)(?:\?.*)?$/,
-		);
-		if (direct) {
-			const [, , password, ref, db] = direct;
-			const region = process.env.SUPABASE_REGION ?? "eu-west-1";
-			return `postgresql://postgres.${ref}:${password}@aws-0-${region}.pooler.supabase.com:6543/${db}`;
-		}
-	}
-	return url;
-};
-
-const pool = new Pool({
-	connectionString: getDatabaseURL(),
-	connectionTimeoutMillis: 5_000,
-	idleTimeoutMillis: 30_000,
-	max: 10,
-});
+const pool = getPgPool();
 
 // Lazy getter for Supabase admin to prevent top-level execution during build
 let _supabaseAdmin: ReturnType<typeof createSupabaseAdmin<Database>> | null = null;

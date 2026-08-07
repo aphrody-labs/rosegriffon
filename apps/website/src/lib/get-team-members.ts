@@ -1,7 +1,7 @@
 "use server";
 
 import { getEnv } from "@/lib/env";
-import { createAdminClient } from "@/lib/supabase/server";
+import { getPgPool } from "@/lib/db/pg";
 
 export interface TeamMemberResponse {
 	metadata: {
@@ -13,39 +13,38 @@ export interface TeamMemberResponse {
 	url: string;
 }
 
+interface TeamMemberRow {
+	display_index: number | null;
+	member_link: string | null;
+	name: string;
+	role: string | null;
+	image_url: string | null;
+}
+
 /**
- * Fetches team members from Supabase based on the team ID
+ * Fetches team members via connexion Postgres DIRECTE (bypass le Data API PostgREST de
+ * Supabase, cf. apps/website/src/lib/db/pg.ts) based on the team ID
  * @param teamId - ID of the team to fetch (e.g., "loreteam", "productionteam")
  * @returns Array of team members with their metadata and image URLs
  */
 export default async function getTeamMembers(teamId: string): Promise<TeamMemberResponse[]> {
 	try {
-		const supabase = createAdminClient();
-
-		if (!supabase) {
-			console.error("Failed to create Supabase admin client");
-			return [];
-		}
+		const pool = getPgPool();
 
 		// Ne charge que les membres actifs et trie par display_index puis nom
 		// (tri secondaire pour les ex-aequo / display_index null).
-		const { data, error } = await supabase
-			.from("team_members")
-			.select("*")
-			.eq("team_id", teamId)
-			.eq("is_active", true)
-			.order("display_index", { ascending: true, nullsFirst: false })
-			.order("name", { ascending: true });
-
-		if (error) {
-			console.error(`Error fetching ${teamId} members from Supabase:`, error);
-			return [];
-		}
+		const { rows } = await pool.query<TeamMemberRow>(
+			`SELECT display_index, member_link, name, role, image_url
+			 FROM team_members
+			 WHERE team_id = $1 AND is_active = true
+			 ORDER BY display_index ASC NULLS LAST, name ASC`,
+			[teamId]
+		);
 
 		// Transform database records to TeamMemberResponse format
 		const supabaseUrl = getEnv("NEXT_PUBLIC_SUPABASE_URL");
 
-		return (data || []).map((member) => {
+		return (rows || []).map((member) => {
 			// Fix image URLs that contain {url} placeholder or double https://
 			let imageUrl = member.image_url || "";
 

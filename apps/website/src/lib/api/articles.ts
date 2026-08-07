@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server";
+import { getPgPool } from "@/lib/db/pg";
 import type { Tables } from "@rose-griffon/db";
 
 export type Article = Tables<"articles">;
@@ -21,6 +21,8 @@ export interface ArticlesResponse {
 	};
 }
 
+type ArticleRow = Article & { full_count: string };
+
 export async function getArticles({
 	page = 1,
 	limit = 10,
@@ -28,92 +30,111 @@ export async function getArticles({
 	category,
 	query,
 }: GetArticlesOptions = {}): Promise<ArticlesResponse> {
-	const supabase = await createClient();
+	const pool = getPgPool();
 	const from = (page - 1) * limit;
-	const to = from + limit - 1;
 
-	let queryBuilder = supabase
-		.from("articles")
-		.select("*", { count: "exact" })
-		.eq("app", "website")
-		.order("created_at", { ascending: false })
-		.range(from, to);
+	const conditions: string[] = ["app = $1"];
+	const params: unknown[] = ["website"];
 
 	if (status && status !== "all") {
-		queryBuilder = queryBuilder.eq("status", status);
+		params.push(status);
+		conditions.push(`status = $${params.length}`);
 	}
 
 	if (category && category !== "all") {
-		queryBuilder = queryBuilder.eq("category", category);
+		params.push(category);
+		conditions.push(`category = $${params.length}`);
 	}
 
 	if (query) {
-		queryBuilder = queryBuilder.or(
-			`title.ilike.%${query}%,excerpt.ilike.%${query}%,category.ilike.%${query}%`
-		);
+		params.push(`%${query}%`);
+		const idx = params.length;
+		conditions.push(`(title ILIKE $${idx} OR excerpt ILIKE $${idx} OR category ILIKE $${idx})`);
 	}
 
-	const { data, count, error } = await queryBuilder;
+	const whereClause = conditions.join(" AND ");
 
-	if (error) {
+	params.push(limit);
+	const limitIdx = params.length;
+	params.push(from);
+	const offsetIdx = params.length;
+
+	try {
+		const { rows } = await pool.query<ArticleRow>(
+			`SELECT *, count(*) OVER() AS full_count
+			 FROM articles
+			 WHERE ${whereClause}
+			 ORDER BY created_at DESC
+			 LIMIT $${limitIdx} OFFSET $${offsetIdx}`,
+			params
+		);
+
+		const [firstRow] = rows;
+		const total = firstRow ? Number(firstRow.full_count) : 0;
+		const data: Article[] = rows.map(({ full_count: _full_count, ...rest }) => rest);
+
+		return {
+			data,
+			meta: {
+				limit,
+				page,
+				total,
+				totalPages: Math.ceil(total / limit),
+			},
+		};
+	} catch (error) {
 		console.error("Error fetching articles:", error);
 		return {
 			data: [],
 			meta: { limit, page, total: 0, totalPages: 0 },
 		};
 	}
-
-	const total = count || 0;
-
-	return {
-		data: data || [],
-		meta: {
-			limit,
-			page,
-			total,
-			totalPages: Math.ceil(total / limit),
-		},
-	};
 }
 
 export async function getArticleBySlug(slug: string): Promise<Article | null> {
-	const supabase = await createClient();
-	const { data, error } = await supabase
-		.from("articles")
-		.select("*")
-		.eq("slug", slug)
-		.eq("app", "website")
-		.single();
+	const pool = getPgPool();
 
-	if (error) {
+	try {
+		const { rows } = await pool.query<Article>(
+			"SELECT * FROM articles WHERE slug = $1 AND app = $2 LIMIT 1",
+			[slug, "website"]
+		);
+
+		const [article] = rows;
+		if (!article) {
+			console.error(`Error fetching article with slug ${slug}: not found`);
+			return null;
+		}
+
+		return article;
+	} catch (error) {
 		console.error(`Error fetching article with slug ${slug}:`, error);
 		return null;
 	}
-
-	return data;
 }
 
 export async function getArticleStats() {
-	const supabase = await createClient();
-	const { data, error } = await supabase
-		.from("articles")
-		.select("status, category")
-		.eq("app", "website");
+	const pool = getPgPool();
 
-	if (error) {
+	try {
+		const { rows } = await pool.query<Pick<Article, "status" | "category">>(
+			"SELECT status, category FROM articles WHERE app = $1",
+			["website"]
+		);
+
+		const total = rows.length;
+		const published = rows.filter((a) => a.status === "published").length;
+		const draft = rows.filter((a) => a.status === "draft").length;
+		const categories = [...new Set(rows.map((a) => a.category).filter(Boolean))] as string[];
+
+		return {
+			categories,
+			draft,
+			published,
+			total,
+		};
+	} catch (error) {
 		console.error("Error fetching article stats:", error);
 		return { categories: [], draft: 0, published: 0, total: 0 };
 	}
-
-	const total = data.length;
-	const published = data.filter((a) => a.status === "published").length;
-	const draft = data.filter((a) => a.status === "draft").length;
-	const categories = [...new Set(data.map((a) => a.category).filter(Boolean))] as string[];
-
-	return {
-		categories,
-		draft,
-		published,
-		total,
-	};
 }
