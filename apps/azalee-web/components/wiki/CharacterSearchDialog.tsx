@@ -309,10 +309,15 @@ export function CharacterSearchDialog({
 					>
 						{results.map((result) => {
 							const elemIcon = result.element ? getSkillElementIconUrl(result.element) : null;
+							// value unique par slug : sinon cmdk confond les versions d’un même nom
+							// (Byron IE / Ares / GO → un seul item sélectionnable)
+							const seriesLabel = result.series
+								? result.series.replace(/^Inazuma Eleven\s*/i, "").trim() || result.series
+								: undefined;
 							return (
 								<CommandItem
 									key={result.slug}
-									value={result.name}
+									value={`${result.name} ${seriesLabel || ""} ${result.rarity || ""} ${result.slug}`}
 									onSelect={() => {
 										onSelect(result.slug, result.name);
 										onOpenChange(false);
@@ -356,6 +361,11 @@ export function CharacterSearchDialog({
 									<div className="flex-1 min-w-0">
 										<span className="font-medium text-sm text-[var(--md-sys-color-on-surface)] truncate block">
 											{result.name}
+											{seriesLabel && seriesLabel !== "Inazuma Eleven" && (
+												<span className="ml-1.5 font-semibold text-[var(--md-sys-color-primary)]">
+													({seriesLabel})
+												</span>
+											)}
 										</span>
 										<div className="flex items-center gap-1.5 text-[10px] text-[var(--md-sys-color-on-surface-variant)]">
 											{result.position && (
