@@ -7,6 +7,7 @@
 import { XClient, XSession, type Tweet } from "@aphrody-code/x";
 import { createSupabaseServiceClient } from "@rose-griffon/db/service";
 import type { Json } from "@rose-griffon/db";
+import { sql } from "../../lib/db.js";
 import { getOfficialXAccounts, loadBxcXCookieHeader } from "./x-accounts";
 
 type MediaItem = {
@@ -121,17 +122,15 @@ export async function crawlTwitter(): Promise<{
 		// Charger le cache d'IDs depuis la DB pour éviter les requêtes API userByScreenName inutiles
 		const usernameToUserMap = new Map<string, { id: string; name: string }>();
 		try {
-			const { data: existingTweets } = await supabase
-				.from("tweets")
-				.select("author_id, author_name, author_username");
-			if (existingTweets) {
-				for (const t of existingTweets) {
-					if (t.author_username && t.author_id) {
-						usernameToUserMap.set(t.author_username.toLowerCase(), {
-							id: t.author_id,
-							name: t.author_name || t.author_username,
-						});
-					}
+			const existingTweets = await sql<
+				{ author_id: string | null; author_name: string | null; author_username: string | null }[]
+			>`SELECT author_id, author_name, author_username FROM tweets`;
+			for (const t of existingTweets) {
+				if (t.author_username && t.author_id) {
+					usernameToUserMap.set(t.author_username.toLowerCase(), {
+						id: t.author_id,
+						name: t.author_name || t.author_username,
+					});
 				}
 			}
 			console.log(`[Crawl Twitter] Cache d'IDs chargé depuis la DB (${usernameToUserMap.size} profils trouvés).`);
@@ -264,11 +263,10 @@ export async function crawlTwitter(): Promise<{
 					let isUserThread = group.some((t) => t.id === convId);
 
 					if (!isUserThread && group.length > 0) {
-						const { data: dbHead } = await supabase
-							.from("tweets")
-							.select("author_username")
-							.eq("id", convId)
-							.maybeSingle();
+						const dbHeadRows = await sql<
+							{ author_username: string | null }[]
+						>`SELECT author_username FROM tweets WHERE id = ${convId} LIMIT 1`;
+						const dbHead = dbHeadRows[0];
 
 						if (dbHead) {
 							isUserThread = dbHead.author_username?.toLowerCase() === screenName.toLowerCase();
@@ -460,15 +458,11 @@ export async function crawlTwitter(): Promise<{
 					// tweet_count existant et on saute l'upsert s'il régresse.
 					const existingCounts = new Map<string, number>();
 					try {
-						const { data: existingRows } = await supabase
-							.from("tweets")
-							.select("id, tweet_count")
-							.in(
-								"id",
-								uniqueTweets.map((t) => t.id)
-							);
-						for (const r of existingRows ?? []) {
-							existingCounts.set(r.id as string, (r.tweet_count as number) ?? 0);
+						const existingRows = await sql<
+							{ id: string; tweet_count: number | null }[]
+						>`SELECT id, tweet_count FROM tweets WHERE id IN ${sql(uniqueTweets.map((t) => t.id))}`;
+						for (const r of existingRows) {
+							existingCounts.set(r.id, r.tweet_count ?? 0);
 						}
 					} catch (e) {
 						console.warn(

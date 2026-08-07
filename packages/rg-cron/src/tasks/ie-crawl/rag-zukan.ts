@@ -6,8 +6,8 @@
 
 import type { ZukanCharacterDetail } from "@aphrody-code/zukan";
 import { crawlerTracker, getEmbedding, vectorStore } from "@rose-griffon/db/redis";
-import { createSupabaseServiceClient } from "@rose-griffon/db/service";
 import { chunkText, computeStringHash } from "./rag-utils";
+import { sql } from "../../lib/db.js";
 
 // Centre le RAG sur le mirror Zukan : indexe les personnages du Zukan officiel
 // (table `inagle_characters`, données corrigées par le remap zukan_hash/zukan_order
@@ -58,30 +58,11 @@ const STAT_LABELS: ReadonlyArray<[keyof DBCharRow, string]> = [
 	["stat_intelligence", "Intelligence"],
 ];
 
-const SELECT_COLUMNS = [
-	"id",
-	"name_fr",
-	"name_en",
-	"name_ja",
-	"position",
-	"element",
-	"gender",
-	"rarity_label",
-	"series",
-	"zukan_order",
-	"zukan_hash",
-	"description_fr",
-	"description_en",
-	"description_ja",
-	"stat_frappe",
-	"stat_controle",
-	"stat_technique",
-	"stat_pression",
-	"stat_physique",
-	"stat_agilite",
-	"stat_intelligence",
-	"stat_total",
-].join(",");
+// Colonnes lues sur `inagle_characters` (cf. requête SQL paginée ci-dessous) :
+// id, name_fr, name_en, name_ja, position, element, gender, rarity_label, series,
+// zukan_order, zukan_hash, description_fr, description_en, description_ja,
+// stat_frappe, stat_controle, stat_technique, stat_pression, stat_physique,
+// stat_agilite, stat_intelligence, stat_total
 
 /** Mappe une ligne `inagle_characters` vers la forme canonique de la SDK Zukan. */
 function toZukanDetail(c: DBCharRow): ZukanCharacterDetail {
@@ -138,27 +119,33 @@ function displayName(c: DBCharRow, detail: ZukanCharacterDetail): string {
  */
 export async function indexZukanCharacters(): Promise<{ processed: number; errors: number }> {
 	console.log("[RAG Zukan] Indexation des personnages du Zukan (mirror corrigé)…");
-	const supabase = createSupabaseServiceClient();
 
 	let processed = 0;
 	let errors = 0;
 	let from = 0;
 
 	for (;;) {
-		const { data, error } = await supabase
-			.from("inagle_characters")
-			.select(SELECT_COLUMNS)
-			.not("zukan_order", "is", null)
-			.order("zukan_order", { ascending: true })
-			.range(from, from + PAGE_SIZE - 1);
-
-		if (error) {
-			console.error("[RAG Zukan] Lecture des personnages échouée :", error.message);
+		let rows: DBCharRow[];
+		try {
+			rows = await sql<DBCharRow[]>`
+				SELECT id, name_fr, name_en, name_ja, position, element, gender, rarity_label, series,
+				       zukan_order, zukan_hash, description_fr, description_en, description_ja,
+				       stat_frappe, stat_controle, stat_technique, stat_pression, stat_physique,
+				       stat_agilite, stat_intelligence, stat_total
+				FROM inagle_characters
+				WHERE zukan_order IS NOT NULL
+				ORDER BY zukan_order ASC
+				LIMIT ${PAGE_SIZE} OFFSET ${from}
+			`;
+		} catch (err) {
+			console.error(
+				"[RAG Zukan] Lecture des personnages échouée :",
+				err instanceof Error ? err.message : err
+			);
 			errors++;
 			break;
 		}
 
-		const rows = (data ?? []) as unknown as DBCharRow[];
 		if (rows.length === 0) break;
 
 		for (const c of rows) {

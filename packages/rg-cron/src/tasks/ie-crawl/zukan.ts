@@ -6,6 +6,7 @@
 
 import { createSupabaseServiceClient, cache } from "@rose-griffon/db";
 import { buildOrderMap, crawlZukanOrderPages } from "@rose-griffon/inagle/zukan/order";
+import { sql } from "../../lib/db.js";
 
 // Le scraper d'ordre (navigation bxc + parsing cheerio des pages chara_param) est
 // désormais unifié dans `@rose-griffon/inagle/zukan/order` (leaf, hors barrel car
@@ -57,14 +58,10 @@ export async function crawlZukanOrder(): Promise<{
 		// Mise à jour de la table inagle_characters dans Supabase
 		let updatedCount = 0;
 
-		// Récupérer les personnages de la DB pour mapper par zukan_hash
-		const { data: dbChars, error: selectError } = await client
-			.from("inagle_characters")
-			.select("id, zukan_hash, name_en");
-
-		if (selectError) {
-			throw new Error(`Erreur de lecture DB : ${selectError.message}`);
-		}
+		// Récupérer les personnages de la DB pour mapper par zukan_hash (lecture Postgres directe)
+		const dbChars = await sql<
+			{ id: string; zukan_hash: string | null; name_en: string | null }[]
+		>`SELECT id, zukan_hash, name_en FROM inagle_characters`;
 
 		if (dbChars && dbChars.length > 0) {
 			// Créer une map hash -> order

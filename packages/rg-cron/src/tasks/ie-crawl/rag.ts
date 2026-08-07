@@ -8,11 +8,11 @@ import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import * as cheerio from "cheerio";
 import { vectorStore, getEmbedding, crawlerTracker, cache } from "@rose-griffon/db/redis";
-import { createSupabaseServiceClient } from "@rose-griffon/db/service";
 import { indexZukanCharacters } from "./rag-zukan";
 import { chunkText, computeStringHash } from "./rag-utils";
 import { ingestSources, type RagSource } from "./rag-store-local";
 import { chunkBySource, type SourceKind } from "./rag-chunkers";
+import { sql } from "../../lib/db.js";
 
 interface DBTweetRow {
 	id: string;
@@ -635,16 +635,10 @@ export async function runRagSync(): Promise<{
 		console.log("[RAG Sync] Récupération des tweets depuis la base de données...");
 		let dbTweets: DBTweetRow[] = [];
 		try {
-			const supabase = createSupabaseServiceClient();
-			const { data, error } = await supabase
-				.from("tweets")
-				.select("id, author_username, author_name, text, created_at, metrics, media, translation, category");
-			if (error) {
-				console.error("[RAG Sync] Erreur lors de la récupération des tweets :", error);
-				errors++;
-			} else if (data) {
-				dbTweets = data as DBTweetRow[];
-			}
+			dbTweets = await sql<DBTweetRow[]>`
+				SELECT id, author_username, author_name, text, created_at, metrics, media, translation, category
+				FROM tweets
+			`;
 		} catch (err) {
 			console.error("[RAG Sync] Exception lors de la récupération des tweets :", err);
 			errors++;
