@@ -2,9 +2,17 @@ import { Button, Card, CardContent, CardHeader, CardTitle, Input } from "@rose-g
 import Link from "next/link";
 
 import { Newspaper, Search } from "@/lib/icons-config";
-import { createClient } from "@/lib/supabase/server";
+import { getPgPool } from "@/lib/db/pg";
 
 export const dynamic = "force-dynamic";
+
+interface SearchArticleRow {
+	id: string;
+	title: string;
+	slug: string;
+	excerpt: string | null;
+	created_at: string | null;
+}
 
 export default async function SearchPage({
 	searchParams,
@@ -14,19 +22,27 @@ export default async function SearchPage({
 	const { q } = await searchParams;
 	const query = q || "";
 
-	const supabase = await createClient();
-	let articles = null;
+	let articles: SearchArticleRow[] | null = null;
 
 	if (query) {
-		// Recherche dans les articles
-		const articlesResult = await supabase
-			.from("articles")
-			.select("id, title, slug, excerpt, created_at")
-			.or(`title.ilike.%${query}%,content.ilike.%${query}%,excerpt.ilike.%${query}%`)
-			.eq("status", "published")
-			.eq("app", "website")
-			.limit(10);
-		articles = articlesResult.data;
+		// Recherche dans les articles — lecture Postgres DIRECTE (bypass le Data
+		// API PostgREST — cf. lib/db/pg.ts).
+		try {
+			const pool = getPgPool();
+			const like = `%${query}%`;
+			const { rows } = await pool.query<SearchArticleRow>(
+				`SELECT id, title, slug, excerpt, created_at
+				 FROM articles
+				 WHERE (title ILIKE $1 OR content ILIKE $1 OR excerpt ILIKE $1)
+				 AND status = $2
+				 AND app = $3
+				 LIMIT 10`,
+				[like, "published", "website"]
+			);
+			articles = rows;
+		} catch (error) {
+			console.error("Error searching articles:", error);
+		}
 	}
 
 	const hasResults = (articles?.length || 0) > 0;

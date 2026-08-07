@@ -5,7 +5,8 @@ import { PatreonConnectionCard } from "@/components/patreon/PatreonConnectionCar
 import { PatreonMembershipCard } from "@/components/patreon/PatreonMembershipCard";
 import { BreadcrumbSchema, ProfileSchema } from "@/components/shared/StructuredData";
 import { getServerUser } from "@/lib/auth-helpers";
-import { createAdminClient, createClient } from "@/lib/supabase/server";
+import { getPgPool } from "@/lib/db/pg";
+import { createAdminClient } from "@/lib/supabase/server";
 
 import { ProfileAbout } from "./_components/profile-about";
 import { ProfileActivity } from "./_components/profile-activity";
@@ -13,9 +14,21 @@ import { ProfileBanner } from "./_components/profile-banner";
 import { ProfileIdentity } from "./_components/profile-identity";
 import { ProfileQuickLinks } from "./_components/profile-quick-links";
 
+import type { Tables } from "@rose-griffon/db";
 import type { Metadata } from "next";
 
 export const dynamic = "force-dynamic";
+
+type Profile = Tables<"profiles">;
+type Chronicle = Pick<
+	Tables<"chronicles">,
+	"id" | "slug" | "title" | "excerpt" | "created_at"
+>;
+type TeamMemberRow = Pick<Tables<"team_members">, "role" | "team_name">;
+interface StaffMember {
+	role?: string;
+	team_name?: string;
+}
 
 export async function generateMetadata({
 	params,
@@ -23,12 +36,14 @@ export async function generateMetadata({
 	params: Promise<{ username: string }>;
 }): Promise<Metadata> {
 	const { username } = await params;
-	const supabase = await createClient();
-	const { data: profile } = await supabase
-		.from("profiles")
-		.select("full_name, username, avatar_url, bio")
-		.eq("username", username)
-		.single();
+	const pool = getPgPool();
+	const { rows } = await pool.query<
+		Pick<Profile, "full_name" | "username" | "avatar_url" | "bio">
+	>(
+		"SELECT full_name, username, avatar_url, bio FROM profiles WHERE username = $1 LIMIT 1",
+		[username]
+	);
+	const profile = rows[0];
 
 	if (!profile) {
 		return { title: "Profil introuvable · Rose Griffon" };
@@ -64,40 +79,57 @@ export default async function UserProfilePage({
 	params: Promise<{ username: string }>;
 }) {
 	const { username } = await params;
-	const supabase = await createClient();
+	const pool = getPgPool();
 	const user = await getServerUser();
 
-	const { data: profile, error } = await supabase
-		.from("profiles")
-		.select("*")
-		.eq("username", username)
-		.single();
+	let profile: Profile | null = null;
+	try {
+		const { rows } = await pool.query<Profile>(
+			"SELECT * FROM profiles WHERE username = $1 LIMIT 1",
+			[username]
+		);
+		profile = rows[0] ?? null;
+	} catch (error) {
+		console.error("Error fetching profile:", error);
+	}
 
-	if (error || !profile) {
+	if (!profile) {
 		notFound();
 	}
 
 	const isOwnProfile = user?.id === profile.id;
 
-	const { data: recentChronicles } = await supabase
-		.from("chronicles")
-		.select("id, slug, title, excerpt, created_at")
-		.eq("author_id", profile.id)
-		.eq("published", true)
-		.order("created_at", { ascending: false })
-		.limit(5);
+	let activities: Chronicle[] = [];
+	try {
+		const { rows } = await pool.query<Chronicle>(
+			`SELECT id, slug, title, excerpt, created_at
+			 FROM chronicles
+			 WHERE author_id = $1 AND published = true
+			 ORDER BY created_at DESC
+			 LIMIT 5`,
+			[profile.id]
+		);
+		activities = rows;
+	} catch (error) {
+		console.error("Error fetching recent chronicles:", error);
+	}
 
-	const activities = recentChronicles ?? [];
-
-	let staffMember: { role?: string; team_name?: string } | null = null;
+	let staffMember: StaffMember | null = null;
 	if (profile.discord_id) {
-		const { data: staffData } = await supabase
-			.from("team_members")
-			.select("role, team_name")
-			.eq("discord_user_id", profile.discord_id)
-			.eq("is_active", true)
-			.maybeSingle();
-		staffMember = staffData;
+		try {
+			const { rows } = await pool.query<TeamMemberRow>(
+				`SELECT role, team_name FROM team_members
+				 WHERE discord_user_id = $1 AND is_active = true
+				 LIMIT 1`,
+				[profile.discord_id]
+			);
+			const row = rows[0];
+			staffMember = row
+				? { role: row.role ?? undefined, team_name: row.team_name ?? undefined }
+				: null;
+		} catch (error) {
+			console.error("Error fetching staff member:", error);
+		}
 	}
 
 	let patreonLinked = false;
@@ -131,12 +163,12 @@ export default async function UserProfilePage({
 				items={[
 					{ item: "/", name: "Accueil" },
 					{ item: "/profil", name: "Profils" },
-					{ item: `/profil/${username}`, name: profile.username },
+					{ item: `/profil/${username}`, name: profile.username ?? username },
 				]}
 			/>
 			<ProfileSchema
-				name={profile.full_name || profile.username}
-				username={profile.username}
+				name={profile.full_name || profile.username || username}
+				username={profile.username ?? username}
 				image={profile.avatar_url || undefined}
 				description={profile.bio || undefined}
 				url={`https://rosegriffon.fr/profil/${username}`}
@@ -152,7 +184,7 @@ export default async function UserProfilePage({
 
 			<div className="container mx-auto px-4 pt-8 sm:px-6 sm:pt-10 lg:px-8">
 				<ProfileIdentity
-					username={profile.username}
+					username={profile.username ?? username}
 					fullName={profile.full_name}
 					avatarUrl={profile.avatar_url}
 					bio={profile.bio}

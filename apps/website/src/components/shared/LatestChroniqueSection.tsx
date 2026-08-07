@@ -5,20 +5,25 @@ import Image from "next/image";
 import Link from "next/link";
 
 import { ArrowRight, Calendar, Eye, Newspaper } from "@/lib/icons-config";
-import { createPublicClient } from "@/lib/supabase/server";
+import { getPgPool } from "@/lib/db/pg";
+import type { Article } from "@/lib/api/articles";
 
 export async function LatestChroniqueSection() {
-	const supabase = createPublicClient();
+	// Récupérer la dernière chronique publiée — lecture Postgres DIRECTE
+	// (bypass le Data API PostgREST de Supabase, cf. lib/db/pg.ts).
+	const pool = getPgPool();
 
-	// Récupérer la dernière chronique publiée
-	const { data: latestChronique } = await supabase
-		.from("articles")
-		.select("*")
-		.eq("status", "published")
-		.eq("app", "website")
-		.order("created_at", { ascending: false })
-		.limit(1)
-		.single();
+	let latestChronique: Article | null;
+	try {
+		const { rows } = await pool.query<Article>(
+			`SELECT * FROM articles WHERE status = $1 AND app = $2 ORDER BY created_at DESC LIMIT 1`,
+			["published", "website"]
+		);
+		latestChronique = rows[0] ?? null;
+	} catch (error) {
+		console.error("Error fetching latest chronique:", error);
+		latestChronique = null;
+	}
 
 	if (!latestChronique) {
 		return null;

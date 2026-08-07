@@ -1,6 +1,6 @@
 "use server";
 
-import { createClient } from "@/lib/supabase/server";
+import { getPgPool } from "@/lib/db/pg";
 
 export interface SearchResult {
 	id: string;
@@ -9,21 +9,33 @@ export interface SearchResult {
 	type: "article" | "chronicle";
 }
 
+interface SearchTitleRow {
+	id: string;
+	title: string;
+	slug: string;
+}
+
 export async function searchContent(query: string): Promise<SearchResult[]> {
 	if (!query || query.length < 2) {
 		return [];
 	}
 
-	const supabase = await createClient();
-
-	// Recherche dans les articles
-	const { data: articles } = await supabase
-		.from("articles")
-		.select("id, title, slug")
-		.ilike("title", `%${query}%`)
-		.eq("status", "published")
-		.eq("app", "website")
-		.limit(3);
+	// Recherche dans les articles — lecture Postgres DIRECTE (bypass le Data API
+	// PostgREST — cf. lib/db/pg.ts).
+	let articles: SearchTitleRow[] = [];
+	try {
+		const pool = getPgPool();
+		const { rows } = await pool.query<SearchTitleRow>(
+			`SELECT id, title, slug
+			 FROM articles
+			 WHERE title ILIKE $1 AND status = $2 AND app = $3
+			 LIMIT 3`,
+			[`%${query}%`, "published", "website"]
+		);
+		articles = rows;
+	} catch (error) {
+		console.error("Error searching article titles:", error);
+	}
 
 	const results: SearchResult[] = [];
 

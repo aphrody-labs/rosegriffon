@@ -1,8 +1,8 @@
 import { getCalendarEvents } from "@/lib/api/events";
 import { apiError, apiSuccess } from "@/lib/api-response";
+import { getPgPool } from "@/lib/db/pg";
 import { createLogger } from "@/lib/logger";
 import { withRateLimit } from "@/lib/rate-limit";
-import { createClient } from "@/lib/supabase/server";
 import type { CalendarEvent } from "@/types/api";
 
 // Configuration du cache - revalider toutes les 5 minutes
@@ -10,19 +10,37 @@ export const revalidate = 300;
 
 const logger = createLogger("calendar-events");
 
+interface EventRow {
+	id: string;
+	title: string;
+	description: string | null;
+	location: string | null;
+	start_time: string;
+	end_time: string;
+	image_url: string | null;
+	created_at: string;
+	updated_at: string;
+}
+
 async function calendarEventsHandler() {
 	try {
 		logger.debug("Fetching calendar events via API route");
 
-		// 1. Try fetching from Supabase (Source of Truth)
-		const supabase = await createClient();
-		const { data: dbEvents, error } = await supabase
-			.from("events")
-			.select("*")
-			.order("start_time", { ascending: true });
+		// 1. Try fetching from Postgres direct (Source of Truth)
+		let dbEvents: EventRow[] = [];
+		try {
+			const pool = getPgPool();
+			const { rows } = await pool.query<EventRow>(
+				"SELECT * FROM events ORDER BY start_time ASC"
+			);
+			dbEvents = rows;
+		} catch (error) {
+			logger.error("Error fetching events from Postgres", error);
+			dbEvents = [];
+		}
 
-		if (!error && dbEvents && dbEvents.length > 0) {
-			logger.info(`${dbEvents.length} event(s) retrieved from Supabase (DB Source)`);
+		if (dbEvents.length > 0) {
+			logger.info(`${dbEvents.length} event(s) retrieved from Postgres (DB Source)`);
 
 			const mappedEvents: CalendarEvent[] = dbEvents.map((e) => ({
 				description: e.description,
@@ -43,7 +61,7 @@ async function calendarEventsHandler() {
 		}
 
 		// 2. Fallback to Google Calendar if DB is empty
-		logger.info("Supabase events empty or error, falling back to Google Calendar");
+		logger.info("Postgres events empty or error, falling back to Google Calendar");
 		const events = await getCalendarEvents();
 		logger.info(`${events.length} event(s) retrieved from Google`);
 		return apiSuccess({ events });

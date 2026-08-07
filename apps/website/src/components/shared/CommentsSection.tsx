@@ -14,7 +14,7 @@ import {
 import { MessageSquare, Trash2, Send, ShieldAlert, Award } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { authClient } from "@/lib/auth-client";
-import { addCommentAction, deleteCommentAction } from "@/app/actions/comments";
+import { addCommentAction, deleteCommentAction, getCommentsAction } from "@/app/actions/comments";
 import { toast } from "sonner";
 
 interface CommentProfile {
@@ -56,17 +56,12 @@ export function CommentsSection({ targetId, targetType, className = "" }: Commen
 		async function loadComments() {
 			try {
 				setIsLoading(true);
-				const { data, error } = await supabase
-					.from("comments")
-					.select("*, profiles(username, avatar_url, role, badges)")
-					.eq("target_id", targetId)
-					.eq("target_type", targetType)
-					.order("created_at", { ascending: true });
+				const { data, error } = await getCommentsAction(targetId, targetType);
 
 				if (error) {
 					console.error("Error loading comments:", error);
 					toast.error("Impossible de charger les commentaires.");
-				} else if (data) {
+				} else {
 					setComments(data as unknown as Comment[]);
 				}
 			} catch (err) {
@@ -77,7 +72,7 @@ export function CommentsSection({ targetId, targetType, className = "" }: Commen
 		}
 
 		loadComments();
-	}, [targetId, targetType, supabase]);
+	}, [targetId, targetType]);
 
 	// S'abonner aux changements en temps réel
 	useEffect(() => {

@@ -7,7 +7,7 @@ import Link from "next/link";
 
 import { WikiPagination } from "@/components/shared/WikiPagination";
 
-import { createClient } from "@/lib/supabase/server";
+import { getPgPool } from "@/lib/db/pg";
 import { cn } from "@/lib/utils";
 import { parseSearchParams } from "@/lib/validations";
 
@@ -21,9 +21,14 @@ interface DiscordMember {
 	avatar_url: string | null;
 	joined_at: string | null;
 	premium_since: string | null;
-	roles: string[]; // Stored as jsonb in DB, treated as string[] at runtime
+	roles: string[]; // Stored as text[] en DB
 	is_bot: boolean | null;
 	updated_at: string | null;
+}
+
+interface DiscordRoleRow {
+	role_id: string;
+	position: number | null;
 }
 
 // --- Constants ---
@@ -164,10 +169,9 @@ export default async function CommunityPage({
 	const query = typeof params.q === "string" ? params.q : "";
 	const { page: currentPage } = parseSearchParams(params);
 
-	const supabase = await createClient();
+	const pool = getPgPool();
 
 	// 0. Fetch Roles for hierarchy
-	const { data: rolesData } = await supabase.from("discord_roles").select("role_id, position");
 	const roleMap = new Map<string, number>();
 
 	// Default priorities if DB is empty or missing roles
@@ -176,23 +180,37 @@ export default async function CommunityPage({
 	roleMap.set(MOD_RESP_ROLE_ID, 8000);
 	roleMap.set(MEDAILLE_ROLE_ID, 5000);
 
-	if (rolesData) {
-		rolesData.forEach((r: { role_id: string; position: number }) =>
-			roleMap.set(r.role_id, r.position)
+	try {
+		const { rows: rolesData } = await pool.query<DiscordRoleRow>(
+			"SELECT role_id, position FROM discord_roles"
 		);
+		rolesData.forEach((r) => roleMap.set(r.role_id, r.position ?? 0));
+	} catch (error) {
+		console.error("Error fetching discord_roles:", error);
 	}
 
 	// 1. Fetch ALL members
-	let mainQuery = supabase.from("discord_members").select("*").eq("is_bot", false);
+	const memberConditions: string[] = ["is_bot = false"];
+	const memberParams: unknown[] = [];
 
 	if (query) {
-		mainQuery = mainQuery.or(
-			`username.ilike.%${query}%,display_name.ilike.%${query}%,nickname.ilike.%${query}%`
+		memberParams.push(`%${query}%`);
+		const idx = memberParams.length;
+		memberConditions.push(
+			`(username ILIKE $${idx} OR display_name ILIKE $${idx} OR nickname ILIKE $${idx})`
 		);
 	}
 
-	const { data: allMembersRaw } = await mainQuery;
-	const allMembers = (allMembersRaw || []) as unknown as DiscordMember[];
+	let allMembers: DiscordMember[] = [];
+	try {
+		const { rows: allMembersRaw } = await pool.query<DiscordMember>(
+			`SELECT * FROM discord_members WHERE ${memberConditions.join(" AND ")}`,
+			memberParams
+		);
+		allMembers = allMembersRaw;
+	} catch (error) {
+		console.error("Error fetching discord_members:", error);
+	}
 
 	// 2. Sort by Highest Role Position
 	const getHighestRole = (m: DiscordMember) => {

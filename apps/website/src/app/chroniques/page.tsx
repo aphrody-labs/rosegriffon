@@ -18,8 +18,8 @@ import Link from "next/link";
 import { BreadcrumbSchema } from "@/components/shared/StructuredData";
 
 import { getArticles } from "@/lib/api/articles";
+import { getPgPool } from "@/lib/db/pg";
 import { getPatreonFeedForViewer } from "@/lib/patreon/feed";
-import { createAdminClient } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
 
@@ -167,17 +167,25 @@ export default async function ChroniquesListPage({
 
 	const patreonPosts = isPatreonFilter ? patreonFeed.posts : [];
 
-	// Counts par catégorie pour masquer les filtres vides — bypass RLS pour stats agrégées
-	const adminClient = createAdminClient();
-	const { data: categoryRows } = adminClient
-		? await adminClient.from("articles").select("category").eq("status", "published")
-		: { data: null };
+	// Counts par catégorie pour masquer les filtres vides — lecture Postgres
+	// DIRECTE (bypass le Data API PostgREST — cf. lib/db/pg.ts).
+	let categoryRows: { category: string | null }[] = [];
+	try {
+		const pool = getPgPool();
+		const result = await pool.query<{ category: string | null }>(
+			"SELECT category FROM articles WHERE status = $1",
+			["published"]
+		);
+		categoryRows = result.rows;
+	} catch (error) {
+		console.error("Error fetching article category counts:", error);
+	}
 	const categoryCounts = new Map<string, number>();
-	for (const row of categoryRows ?? []) {
+	for (const row of categoryRows) {
 		const key = row.category ?? "";
 		categoryCounts.set(key, (categoryCounts.get(key) ?? 0) + 1);
 	}
-	const totalPublished = categoryRows?.length ?? 0;
+	const totalPublished = categoryRows.length;
 	const visibleCategories = categories.filter(
 		(cat) => cat.value === "" || (categoryCounts.get(cat.value) ?? 0) > 0
 	);
