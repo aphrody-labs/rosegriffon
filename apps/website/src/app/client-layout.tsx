@@ -72,7 +72,11 @@ function SidebarWrapper({ children }: { children: React.ReactNode }) {
 	};
 
 	return (
-		<SidebarProvider open={sidebarOpen} onOpenChange={handleOpenChange}>
+		<SidebarProvider
+			open={sidebarOpen}
+			onOpenChange={handleOpenChange}
+			style={{ "--sidebar-width": "14rem" } as React.CSSProperties}
+		>
 			{children}
 		</SidebarProvider>
 	);

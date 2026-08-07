@@ -5,8 +5,6 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { persistQueryClient } from "@tanstack/react-query-persist-client";
 import React from "react";
 
-import { SidebarProvider } from "@rose-griffon/ui";
-
 export function Providers({ children }: { children: React.ReactNode }) {
 	const [queryClient] = React.useState(
 		() =>
@@ -29,9 +27,8 @@ export function Providers({ children }: { children: React.ReactNode }) {
 		});
 	}, [queryClient]);
 
-	return (
-		<QueryClientProvider client={queryClient}>
-			<SidebarProvider>{children}</SidebarProvider>
-		</QueryClientProvider>
-	);
+	// Le SidebarProvider réel (état contrôlé + persistance) vit dans
+	// SidebarWrapper (client-layout.tsx) — un second ici serait un doublon
+	// (double listener clavier ⌘B, double cookie, double TooltipProvider).
+	return <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>;
 }
