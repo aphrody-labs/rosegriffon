@@ -2,6 +2,7 @@ import { getPopularArticles, getPopularTags, getTrendingArticles } from "@/app/a
 import { getCommentCounts } from "@/app/actions/comments";
 import { getReactionCounts } from "@/app/actions/reactions";
 import { getContinueReading } from "@/app/actions/reading-history";
+import { getPgPool } from "@/lib/db/pg";
 import { sanitizeNewsSearchQuery } from "@/lib/news-search";
 import { createClient } from "@/lib/supabase/server";
 import { parseSearchParams } from "@/lib/validations";
@@ -35,20 +36,21 @@ export default async function NewsFeedPage({
 	let featuredArticles: FeedItem[] = [];
 	const featuredIds = new Set<string>();
 
+	// Lecture `articles` Postgres DIRECTE (bypass le Data API PostgREST — cf.
+	// lib/db/pg.ts). `tweets` reste sur le client Supabase (cf. tweetsPromise).
+	const pool = getPgPool();
+
 	// Featured (page 1, no filter, no search) — on prend le plus récent par
 	// `published_at` pour rester cohérent avec le tri du feed (cf. ci-dessous).
 	if (currentPage === 1 && !categoryFilter && !searchQuery) {
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		const { data: featured } = await (supabase as any)
-			.from("articles")
-			.select(
-				"id, title, slug, excerpt, created_at, published_at, featured_image_url, category, author_id"
-			)
-			.eq("status", "published")
-			.eq("app", "azalee")
-			.order("published_at", { ascending: false, nullsFirst: false })
-			.order("created_at", { ascending: false })
-			.limit(1);
+		const { rows: featured } = await pool.query(
+			`SELECT id, title, slug, excerpt, created_at, published_at, featured_image_url, category, author_id
+			 FROM articles
+			 WHERE status = $1 AND app = $2
+			 ORDER BY published_at DESC NULLS LAST, created_at DESC
+			 LIMIT 1`,
+			["published", "azalee"]
+		);
 
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		const featuredArr = (featured as any[]) || [];
@@ -80,62 +82,63 @@ export default async function NewsFeedPage({
 	const articleRangeStart = (currentPage - 1) * ITEMS_PER_PAGE;
 	const articleRangeEnd = articleRangeStart + ITEMS_PER_PAGE - 1;
 
-	// On utilise PostgREST `.or` pour trier par `coalesce(published_at, created_at)`
-	// Côté DB ? Pas exposé directement — on trie par `published_at desc nulls last`
-	// Puis `created_at desc` qui matche l'ordre attendu côté client.
+	// Lecture Postgres DIRECTE (bypass le Data API PostgREST — cf. lib/db/pg.ts).
+	// On trie par `published_at desc nulls last` puis `created_at desc` qui
+	// matche l'ordre attendu côté client (équivalent au double `.order()` PostgREST).
 	const articlesPromise = includeArticles
 		? (async () => {
-				// eslint-disable-next-line @typescript-eslint/no-explicit-any
-				let query = (supabase as any)
-					.from("articles")
-					.select(
-						"id, title, slug, excerpt, created_at, published_at, featured_image_url, category, author_id",
-						{ count: "exact" }
-					)
-					.eq("status", "published")
-					.eq("app", "azalee")
-					.order("published_at", { ascending: false, nullsFirst: false })
-					.order("created_at", { ascending: false });
+				const conditions: string[] = ["status = $1", "app = $2"];
+				const params: unknown[] = ["published", "azalee"];
 
 				if (searchQuery) {
-					query = query.textSearch("search_vector", searchQuery, {
-						config: "french",
-					});
+					params.push(searchQuery);
+					conditions.push(`search_vector @@ to_tsquery('french', $${params.length})`);
 				}
 				if (categoryFilter && categoryFilter !== "Tweet") {
-					query = query.eq("category", categoryFilter);
+					params.push(categoryFilter);
+					conditions.push(`category = $${params.length}`);
 				}
-				if (featuredIds.size > 0) {
-					for (const id of featuredIds) {
-						query = query.neq("id", id);
-					}
+				for (const id of featuredIds) {
+					params.push(id);
+					conditions.push(`id <> $${params.length}`);
 				}
-				query = query.range(articleRangeStart, articleRangeEnd);
 
-				// eslint-disable-next-line @typescript-eslint/no-explicit-any
-				const { data, count, error } = (await query) as any;
-				if (error) {
-					if ((error as { code?: string }).code === "PGRST103") {
-						return { items: [] as FeedItem[], total: 0 };
-					}
+				params.push(ITEMS_PER_PAGE);
+				const limitIdx = params.length;
+				params.push(articleRangeStart);
+				const offsetIdx = params.length;
+
+				try {
+					const { rows } = await pool.query(
+						`SELECT id, title, slug, excerpt, created_at, published_at, featured_image_url, category, author_id,
+							count(*) OVER() AS full_count
+						 FROM articles
+						 WHERE ${conditions.join(" AND ")}
+						 ORDER BY published_at DESC NULLS LAST, created_at DESC
+						 LIMIT $${limitIdx} OFFSET $${offsetIdx}`,
+						params
+					);
+
+					const total = rows[0] ? Number((rows[0] as { full_count: string }).full_count) : 0;
+					const items: FeedItem[] = (rows as any[]).map(
+						// eslint-disable-next-line @typescript-eslint/no-explicit-any
+						(a: any) => ({
+							author_id: a.author_id,
+							category: a.category,
+							date: a.published_at || a.created_at,
+							excerpt: a.excerpt,
+							id: a.id,
+							image: a.featured_image_url,
+							slug: a.slug,
+							title: a.title,
+							type: "article",
+						})
+					);
+					return { items, total };
+				} catch (error) {
 					console.error("Error fetching articles:", error);
 					return { items: [] as FeedItem[], total: 0 };
 				}
-				const items: FeedItem[] = (data || []).map(
-					// eslint-disable-next-line @typescript-eslint/no-explicit-any
-					(a: any) => ({
-						author_id: a.author_id,
-						category: a.category,
-						date: a.published_at || a.created_at,
-						excerpt: a.excerpt,
-						id: a.id,
-						image: a.featured_image_url,
-						slug: a.slug,
-						title: a.title,
-						type: "article",
-					})
-				);
-				return { items, total: count || 0 };
 			})()
 		: Promise.resolve({ items: [] as FeedItem[], total: 0 });
 

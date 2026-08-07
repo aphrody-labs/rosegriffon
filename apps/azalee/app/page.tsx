@@ -8,6 +8,7 @@ import { NetworkSection } from "@/components/home/NetworkSection";
 import { ToolsPreview } from "@/components/home/ToolsPreview";
 import { WikiCarousel } from "@/components/home/WikiCarousel";
 import type { WikiSectionStats } from "@/components/home/WikiCarousel";
+import { getPgPool } from "@/lib/db/pg";
 import { createClient } from "@/lib/supabase/server";
 
 export const metadata: Metadata = {
@@ -37,11 +38,15 @@ export const revalidate = 300; // Cache for 5 minutes
 
 export default async function HomePage() {
 	const supabase = await createClient();
+	const pool = getPgPool();
 
 	// Fetch pinned articles, latest articles, tweets, and wiki counts in parallel
+	// Lecture `articles` Postgres DIRECTE (bypass le Data API PostgREST — cf.
+	// lib/db/pg.ts) ; `tweets` + `inagle_*` restent sur le client Supabase (Proxy
+	// SQLite pour les inagle_*, cf. lib/supabase/server.ts).
 	const [
-		{ data: pinnedArticles },
-		{ data: latestArticles },
+		{ rows: pinnedArticles },
+		{ rows: latestArticles },
 		{ data: latestTweets },
 		{ count: charactersCount },
 		{ count: skillsCount },
@@ -50,20 +55,20 @@ export default async function HomePage() {
 		{ count: soulsCount },
 		{ count: passivesCount },
 	] = await Promise.all([
-		supabase
-			.from("articles")
-			.select("*")
-			.eq("status", "published")
-			.eq("app", "azalee")
-			.order("published_at", { ascending: false })
-			.limit(1),
-		supabase
-			.from("articles")
-			.select("*")
-			.eq("status", "published")
-			.eq("app", "azalee")
-			.order("published_at", { ascending: false })
-			.range(1, 3),
+		pool.query(
+			`SELECT * FROM articles
+			 WHERE status = $1 AND app = $2
+			 ORDER BY published_at DESC
+			 LIMIT 1`,
+			["published", "azalee"]
+		),
+		pool.query(
+			`SELECT * FROM articles
+			 WHERE status = $1 AND app = $2
+			 ORDER BY published_at DESC
+			 LIMIT 3 OFFSET 1`,
+			["published", "azalee"]
+		),
 		supabase
 			.from("tweets")
 			.select("id, text, translation, created_at, author_username, author_name, media")

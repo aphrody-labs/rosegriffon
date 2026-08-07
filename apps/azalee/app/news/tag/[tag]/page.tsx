@@ -7,7 +7,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Badge, Button } from "@rose-griffon/ui";
 import { WikiPagination } from "@/components/wiki/WikiPagination";
-import { createClient } from "@/lib/supabase/server";
+import { getPgPool } from "@/lib/db/pg";
 import { parseSearchParams } from "@/lib/validations";
 
 const ITEMS_PER_PAGE = 12;
@@ -30,30 +30,33 @@ export default async function TagPage({ params, searchParams }: TagPageProps) {
 	const { tag } = await params;
 	const decodedTag = decodeURIComponent(tag);
 	const { page: currentPage } = parseSearchParams(await searchParams);
-	const supabase = await createClient();
 
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	const client = supabase as any;
+	// Lecture Postgres DIRECTE (bypass le Data API PostgREST — cf. lib/db/pg.ts).
+	const pool = getPgPool();
 
 	// Count
-	const { count } = await client
-		.from("articles")
-		.select("*", { count: "exact", head: true })
-		.eq("status", "published")
-		.eq("app", "azalee")
-		.contains("tags", [decodedTag]);
+	const { rows: countRows } = await pool.query<{ count: string }>(
+		`SELECT count(*) AS count FROM articles WHERE status = $1 AND app = $2 AND tags @> $3`,
+		["published", "azalee", [decodedTag]]
+	);
 
-	const totalItems = count || 0;
+	const totalItems = countRows[0] ? Number(countRows[0].count) : 0;
 
 	// Data
-	const { data: articles } = await client
-		.from("articles")
-		.select("id, title, slug, excerpt, published_at, featured_image_url, category, tags, author_id")
-		.eq("status", "published")
-		.eq("app", "azalee")
-		.contains("tags", [decodedTag])
-		.order("published_at", { ascending: false })
-		.range((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE - 1);
+	const { rows: articles } = await pool.query(
+		`SELECT id, title, slug, excerpt, published_at, featured_image_url, category, tags, author_id
+		 FROM articles
+		 WHERE status = $1 AND app = $2 AND tags @> $3
+		 ORDER BY published_at DESC
+		 LIMIT $4 OFFSET $5`,
+		[
+			"published",
+			"azalee",
+			[decodedTag],
+			ITEMS_PER_PAGE,
+			(currentPage - 1) * ITEMS_PER_PAGE,
+		]
+	);
 
 	return (
 		<div className="space-y-8 pb-16">

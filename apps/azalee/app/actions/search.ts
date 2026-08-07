@@ -1,6 +1,8 @@
 "use server";
 
+import type { QueryResultRow } from "pg";
 import { isKana, toKatakana } from "wanakana";
+import { getPgPool } from "@/lib/db/pg";
 import {
 	getAuraImageUrl,
 	getCharacterFaceUrl,
@@ -147,26 +149,59 @@ export async function searchGlobal(
 		),
 	]);
 
-	// Separate queries for non-game content (teams, articles, patch notes)
-	const [teams, articles, patchNotes] = await Promise.all([
+	// Separate queries for non-game content (teams, articles, patch notes).
+	// `articles`/`patch_notes` ne sont PAS des tables `inagle_*` : elles passent en
+	// Postgres DIRECT (bypass le Data API PostgREST — cf. lib/db/pg.ts) au lieu du
+	// Proxy `createClient()`. `inagle_teams` reste inchangé (redirigé vers le
+	// miroir SQLite par le Proxy).
+	const pool = getPgPool();
+	// Comme le client Supabase (qui ne throw jamais, il renvoie { data: null, error }),
+	// on avale les erreurs pg ici pour ne pas faire planter toute la recherche globale
+	// si `articles`/`patch_notes` sont indisponibles — même résilience qu'avant.
+	const safeQuery = async <T extends QueryResultRow>(sql: string, params: unknown[]): Promise<T[]> => {
+		try {
+			const { rows } = await pool.query<T>(sql, params);
+			return rows;
+		} catch (error) {
+			console.error("searchGlobal pg query error:", error);
+			return [];
+		}
+	};
+	const [teams, articlesRows, patchNotesRows] = await Promise.all([
 		(supabase as any)
 			.from("inagle_teams")
 			.select("id, name_fr, name_en, name_ja, sheet_data")
 			.or(orFilter)
 			.limit(8),
-		(supabase as any)
-			.from("articles")
-			.select("id, title, slug, excerpt, category")
-			.eq("status", "published")
-			.eq("app", "azalee")
-			.ilike("title", q)
-			.limit(5),
-		(supabase as any)
-			.from("patch_notes")
-			.select("id, title, title_fr, date, platform")
-			.or(`title.ilike.${q},title_fr.ilike.${q}`)
-			.limit(5),
+		safeQuery<{
+			id: string;
+			title: string;
+			slug: string;
+			excerpt: string | null;
+			category: string | null;
+		}>(
+			`SELECT id, title, slug, excerpt, category
+			 FROM articles
+			 WHERE status = $1 AND app = $2 AND title ILIKE $3
+			 LIMIT 5`,
+			["published", "azalee", q]
+		),
+		safeQuery<{
+			id: string;
+			title: string;
+			title_fr: string | null;
+			date: string;
+			platform: unknown;
+		}>(
+			`SELECT id, title, title_fr, date, platform
+			 FROM patch_notes
+			 WHERE title ILIKE $1 OR title_fr ILIKE $1
+			 LIMIT 5`,
+			[q]
+		),
 	]);
+	const articles = { data: articlesRows };
+	const patchNotes = { data: patchNotesRows };
 
 	const rawResults: GlobalSearchResult[] = [];
 

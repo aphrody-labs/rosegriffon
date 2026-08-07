@@ -8,7 +8,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Avatar, AvatarFallback, AvatarImage, Button } from "@rose-griffon/ui";
 import { getServerSession } from "@/lib/auth-helpers";
-import { createClient } from "@/lib/supabase/server";
+import { getProfileByUsername, getProfileMetaByUsername } from "@/lib/db/profiles";
 
 interface ProfilePageProps {
 	params: Promise<{
@@ -18,13 +18,7 @@ interface ProfilePageProps {
 
 export async function generateMetadata({ params }: ProfilePageProps): Promise<Metadata> {
 	const { username } = await params;
-	const supabase = await createClient();
-
-	const { data: profile } = await (supabase as any)
-		.from("profiles")
-		.select("full_name, bio")
-		.eq("username", username)
-		.single();
+	const profile = await getProfileMetaByUsername(username);
 
 	if (!profile) {
 		return {
@@ -41,14 +35,9 @@ export async function generateMetadata({ params }: ProfilePageProps): Promise<Me
 
 export default async function ProfilePage({ params }: ProfilePageProps) {
 	const { username } = await params;
-	const supabase = await createClient();
 
 	// Fetch target profile
-	const { data: profile } = await (supabase as any)
-		.from("profiles")
-		.select("*")
-		.eq("username", username)
-		.single();
+	const profile = await getProfileByUsername(username);
 
 	if (!profile) {
 		notFound();

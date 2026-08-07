@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-import { createClient } from "@/lib/supabase/server";
+import { getPgPool } from "@/lib/db/pg";
 
 // Top N tags les + utilisés sur articles publiés (app=azalee).
 // Agrège côté JS (volume articles azalee modeste — ~1k rows max).
@@ -8,28 +8,30 @@ import { createClient } from "@/lib/supabase/server";
 //   Array<{ tag: string; count: number }>
 export const revalidate = 600; // 10 min — pas critique de l'avoir frais
 
+interface ArticleTagsRow {
+	tags: string[] | null;
+}
+
 export async function GET(request: Request) {
 	const { searchParams } = new URL(request.url);
 	const limitRaw = Number.parseInt(searchParams.get("limit") || "15", 10);
 	const limit = Number.isFinite(limitRaw) ? Math.max(1, Math.min(limitRaw, 50)) : 15;
 
-	const supabase = await createClient();
-
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	const { data, error } = await (supabase as any)
-		.from("articles")
-		.select("tags")
-		.eq("status", "published")
-		.eq("app", "azalee")
-		.not("tags", "is", null);
-
-	if (error) {
+	let rows: ArticleTagsRow[];
+	try {
+		const pool = getPgPool();
+		const result = await pool.query<ArticleTagsRow>(
+			`SELECT tags FROM articles WHERE status = $1 AND app = $2 AND tags IS NOT NULL`,
+			["published", "azalee"]
+		);
+		rows = result.rows;
+	} catch {
 		return NextResponse.json([], { status: 200 });
 	}
 
 	const counts = new Map<string, number>();
-	for (const row of data ?? []) {
-		const { tags } = row as { tags?: string[] | null };
+	for (const row of rows) {
+		const { tags } = row;
 		if (!Array.isArray(tags)) {
 			continue;
 		}

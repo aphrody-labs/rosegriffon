@@ -8,6 +8,7 @@ import type {
 } from "@rose-griffon/inagle/types/database";
 import { createClient } from "@supabase/supabase-js";
 import { unstable_cache } from "next/cache";
+import { getPgPool } from "@/lib/db/pg";
 import { getMiximaxImageUrl, resolveAssetUrl, resolveAuraTelopUrl } from "@/lib/images";
 
 import { createSqliteClient } from "./supabase/sqlite-client";
@@ -442,6 +443,43 @@ function mapPassiveRow(row: any): any {
 	};
 }
 
+interface MerchProductRow {
+	id: string;
+	name: string;
+	description: string | null;
+	price: number | string;
+	image_url: string | null;
+	stock: number | null;
+	is_active: boolean | null;
+	created_at: string | Date | null;
+}
+
+/**
+ * Lecture Postgres DIRECTE (bypass le Data API PostgREST de Supabase) — cf.
+ * lib/db/pg.ts. Catalogue boutique public consommé par `app/soutenir/page.tsx`.
+ * `price` (numeric Postgres) revient en string via le driver `pg` (contrairement
+ * à PostgREST/supabase-js qui le sérialise en nombre JSON) et `created_at`
+ * (timestamptz) revient en `Date` (contrairement à la string ISO PostgREST) —
+ * les deux sont normalisés ici pour préserver exactement la forme renvoyée
+ * jusqu'ici par supabase-js.
+ */
+async function getMerchProducts(): Promise<MerchProductRow[]> {
+	try {
+		const pool = getPgPool();
+		const { rows } = await pool.query<MerchProductRow>(
+			"SELECT * FROM merch_products WHERE is_active = true"
+		);
+		return rows.map((row) => ({
+			...row,
+			created_at: row.created_at instanceof Date ? row.created_at.toISOString() : row.created_at,
+			price: typeof row.price === "string" ? Number(row.price) : row.price,
+		}));
+	} catch (error) {
+		console.error("Error fetching merch products:", error);
+		return [];
+	}
+}
+
 export const apiClient = {
 	inagle: {
 		getCharacters,
@@ -497,6 +535,6 @@ export const apiClient = {
 		},
 	},
 	shop: {
-		getProducts: () => fetchTable<any>("merch_products"),
+		getProducts: getMerchProducts,
 	},
 };

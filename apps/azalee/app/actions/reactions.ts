@@ -1,6 +1,7 @@
 "use server";
 
 import { getServerSession } from "@/lib/auth-helpers";
+import { getPgPool } from "@/lib/db/pg";
 import { REACTION_TYPES } from "@/lib/reaction-types";
 import type { ReactionType } from "@/lib/reaction-types";
 import { createClient } from "@/lib/supabase/server";
@@ -50,6 +51,7 @@ export async function toggleReaction(
 
 /**
  * Récupère les compteurs de réactions pour un seul type (rétrocompatible)
+ * Lecture Postgres DIRECTE (bypass le Data API PostgREST — cf. lib/db/pg.ts).
  */
 export async function getReactionCounts(
 	articleIds: string[],
@@ -59,26 +61,23 @@ export async function getReactionCounts(
 		return {};
 	}
 
-	const supabase = await createClient();
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	const client = supabase as any;
-
 	const session = await getServerSession();
 	const userId = session?.user?.id;
-
-	// Get all reactions for these articles
-	const { data: reactions } = await client
-		.from("article_reactions")
-		.select("article_id, user_id")
-		.in("article_id", articleIds)
-		.eq("reaction_type", reactionType);
 
 	const result: Record<string, { count: number; userReacted: boolean }> = {};
 	for (const id of articleIds) {
 		result[id] = { count: 0, userReacted: false };
 	}
 
-	if (reactions) {
+	const pool = getPgPool();
+
+	try {
+		// Get all reactions for these articles
+		const { rows: reactions } = await pool.query<{ article_id: string; user_id: string }>(
+			"SELECT article_id, user_id FROM article_reactions WHERE article_id = ANY($1) AND reaction_type = $2",
+			[articleIds, reactionType]
+		);
+
 		for (const r of reactions) {
 			if (!result[r.article_id]) {
 				result[r.article_id] = { count: 0, userReacted: false };
@@ -88,6 +87,8 @@ export async function getReactionCounts(
 				result[r.article_id].userReacted = true;
 			}
 		}
+	} catch (error) {
+		console.error("getReactionCounts error:", error);
 	}
 
 	return result;
@@ -95,28 +96,27 @@ export async function getReactionCounts(
 
 /**
  * Récupère TOUS les types de réactions pour un article (pour la page détail)
+ * Lecture Postgres DIRECTE (bypass le Data API PostgREST — cf. lib/db/pg.ts).
  */
 export async function getAllReactionCounts(
 	articleId: string
 ): Promise<Record<ReactionType, { count: number; userReacted: boolean }>> {
-	const supabase = await createClient();
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	const client = supabase as any;
-
 	const session = await getServerSession();
 	const userId = session?.user?.id;
-
-	const { data: reactions } = await client
-		.from("article_reactions")
-		.select("reaction_type, user_id")
-		.eq("article_id", articleId);
 
 	const result = {} as Record<ReactionType, { count: number; userReacted: boolean }>;
 	for (const type of REACTION_TYPES) {
 		result[type] = { count: 0, userReacted: false };
 	}
 
-	if (reactions) {
+	const pool = getPgPool();
+
+	try {
+		const { rows: reactions } = await pool.query<{ reaction_type: string; user_id: string }>(
+			"SELECT reaction_type, user_id FROM article_reactions WHERE article_id = $1",
+			[articleId]
+		);
+
 		for (const r of reactions) {
 			const type = r.reaction_type as ReactionType;
 			if (result[type]) {
@@ -126,6 +126,8 @@ export async function getAllReactionCounts(
 				}
 			}
 		}
+	} catch (error) {
+		console.error("getAllReactionCounts error:", error);
 	}
 
 	return result;

@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server";
+import { getPgPool } from "@/lib/db/pg";
 
 const BASE_URL = "https://azalee.rosegriffon.fr";
 
@@ -11,51 +11,67 @@ function escapeXml(str: string): string {
 		.replaceAll("'", "&apos;");
 }
 
-export async function GET() {
-	const supabase = await createClient();
+interface ArticleFeedRow {
+	id: string;
+	title: string;
+	slug: string;
+	excerpt: string | null;
+	published_at: string | null;
+	created_at: string | null;
+	category: string | null;
+	featured_image_url: string | null;
+	author_id: string | null;
+}
 
-	const { data: articles } = await supabase
-		.from("articles")
-		.select(
-			"id, title, slug, excerpt, published_at, created_at, category, featured_image_url, author_id"
-		)
-		.eq("status", "published")
-		.eq("app", "azalee")
-		.order("published_at", { ascending: false, nullsFirst: false })
-		.order("created_at", { ascending: false })
-		.limit(50);
+interface ProfileNameRow {
+	id: string;
+	full_name: string | null;
+}
+
+export async function GET() {
+	let articles: ArticleFeedRow[] = [];
+	try {
+		const pool = getPgPool();
+		const { rows } = await pool.query<ArticleFeedRow>(
+			`SELECT id, title, slug, excerpt, published_at, created_at, category, featured_image_url, author_id
+			 FROM articles
+			 WHERE status = $1 AND app = $2
+			 ORDER BY published_at DESC NULLS LAST, created_at DESC
+			 LIMIT 50`,
+			["published", "azalee"]
+		);
+		articles = rows;
+	} catch (error) {
+		console.error("Error fetching articles for feed.xml:", error);
+	}
 
 	// Récupérer les profils auteurs en bloc (pas de FK déclarée → join manuel).
 	const authorIds = [
-		...new Set(
-			(articles || []).map((a: any) => a.author_id).filter((id): id is string => Boolean(id))
-		),
+		...new Set(articles.map((a) => a.author_id).filter((id): id is string => Boolean(id))),
 	];
 
 	let authorMap = new Map<string, { full_name: string | null }>();
 	if (authorIds.length > 0) {
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		const { data: profiles } = await (supabase as any)
-			.from("profiles")
-			.select("id, full_name")
-			.in("id", authorIds);
-		authorMap = new Map(
-			(profiles || []).map(
-				// eslint-disable-next-line @typescript-eslint/no-explicit-any
-				(p: any) => [p.id as string, { full_name: p.full_name as string | null }]
-			)
-		);
+		try {
+			const pool = getPgPool();
+			const { rows: profiles } = await pool.query<ProfileNameRow>(
+				`SELECT id, full_name FROM profiles WHERE id = ANY($1::uuid[])`,
+				[authorIds]
+			);
+			authorMap = new Map(profiles.map((p) => [p.id, { full_name: p.full_name }]));
+		} catch (error) {
+			console.error("Error fetching author profiles for feed.xml:", error);
+		}
 	}
 
-	const items = (articles || [])
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		.map((a: any) => {
+	const items = articles
+		.map((a) => {
 			const dateSrc = a.published_at || a.created_at;
 			const pubDate = dateSrc ? new Date(dateSrc).toUTCString() : "";
 			const imageTag = a.featured_image_url
 				? `<enclosure url="${escapeXml(a.featured_image_url)}" type="image/webp" length="0"/>`
 				: "";
-			const author = authorMap.get(a.author_id)?.full_name || "Azalée";
+			const author = (a.author_id && authorMap.get(a.author_id)?.full_name) || "Azalée";
 
 			return `    <item>
       <title>${escapeXml(a.title)}</title>
@@ -71,8 +87,7 @@ export async function GET() {
 		.join("\n");
 
 	const lastBuildDate = (() => {
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		const first = articles?.[0] as any;
+		const first = articles[0];
 		const src = first?.published_at || first?.created_at;
 		return src ? new Date(src).toUTCString() : new Date().toUTCString();
 	})();

@@ -1,8 +1,20 @@
 import { NextResponse } from "next/server";
 import { sanitizeNewsSearchQuery } from "@/lib/news-search";
-import { createClient } from "@/lib/supabase/server";
+import { getPgPool } from "@/lib/db/pg";
 
 const VALID_CATEGORIES = new Set(["announcement", "event", "critique", "community"]);
+
+interface ArticleFeedRow {
+	id: string;
+	title: string;
+	slug: string;
+	excerpt: string | null;
+	created_at: string | null;
+	published_at: string | null;
+	featured_image_url: string | null;
+	category: string | null;
+	author_id: string | null;
+}
 
 export async function GET(request: Request) {
 	const { searchParams } = new URL(request.url);
@@ -12,37 +24,37 @@ export async function GET(request: Request) {
 	const category = rawCategory && VALID_CATEGORIES.has(rawCategory) ? rawCategory : null;
 	const q = sanitizeNewsSearchQuery(searchParams.get("q"));
 
-	const supabase = await createClient();
 	const from = (page - 1) * limit;
 
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	let query = (supabase as any)
-		.from("articles")
-		.select(
-			"id, title, slug, excerpt, created_at, published_at, featured_image_url, category, author_id"
-		)
-		.eq("status", "published")
-		.eq("app", "azalee")
-		.order("published_at", { ascending: false, nullsFirst: false })
-		.order("created_at", { ascending: false })
-		.range(from, from + limit - 1);
+	const conditions: string[] = ["status = $1", "app = $2"];
+	const params: unknown[] = ["published", "azalee"];
 
 	if (category) {
-		query = query.eq("category", category);
+		params.push(category);
+		conditions.push(`category = $${params.length}`);
 	}
 	if (q) {
-		query = query.textSearch("search_vector", q, { config: "french" });
+		params.push(q);
+		conditions.push(`search_vector @@ to_tsquery('french', $${params.length})`);
 	}
 
-	const { data, error } = await query;
+	params.push(limit);
+	const limitIdx = params.length;
+	params.push(from);
+	const offsetIdx = params.length;
 
-	if (error) {
-		return NextResponse.json({ error: error.message }, { status: 500 });
-	}
+	try {
+		const pool = getPgPool();
+		const { rows } = await pool.query<ArticleFeedRow>(
+			`SELECT id, title, slug, excerpt, created_at, published_at, featured_image_url, category, author_id
+			 FROM articles
+			 WHERE ${conditions.join(" AND ")}
+			 ORDER BY published_at DESC NULLS LAST, created_at DESC
+			 LIMIT $${limitIdx} OFFSET $${offsetIdx}`,
+			params
+		);
 
-	const items = (data || []).map(
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		(a: any) => ({
+		const items = rows.map((a) => ({
 			author_id: a.author_id,
 			category: a.category,
 			date: a.published_at || a.created_at,
@@ -52,8 +64,11 @@ export async function GET(request: Request) {
 			slug: a.slug,
 			title: a.title,
 			type: "article",
-		})
-	);
+		}));
 
-	return NextResponse.json({ hasMore: items.length === limit, items });
+		return NextResponse.json({ hasMore: items.length === limit, items });
+	} catch (error) {
+		const message = error instanceof Error ? error.message : "Unknown error";
+		return NextResponse.json({ error: message }, { status: 500 });
+	}
 }

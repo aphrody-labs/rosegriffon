@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { requireEditorOrFail } from "@/lib/auth-helpers";
+import { getPgPool } from "@/lib/db/pg";
 import { createClient } from "@/lib/supabase/server";
 
 const APP_SCOPE = "azalee";
@@ -353,45 +354,30 @@ export async function duplicateArticle(
 
 /**
  * Récupère les tags populaires (scope public).
+ * Lecture Postgres DIRECTE (bypass le Data API PostgREST — cf. lib/db/pg.ts).
+ * La RPC `get_popular_tags` n'existe PAS côté Postgres (vérifié via pg_proc) —
+ * on reproduit directement en SQL la même agrégation que l'ancien fallback
+ * client-side (tags non-null des articles publiés, comptés puis triés desc).
  */
 export async function getPopularTags(limit = 30): Promise<Array<{ tag: string; count: number }>> {
-	const supabase = await createClient();
+	const pool = getPgPool();
 
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	const { data, error } = await (supabase as any).rpc("get_popular_tags", {
-		tag_limit: limit,
-	});
+	try {
+		const { rows } = await pool.query<{ tag: string; count: string }>(
+			`SELECT tag, COUNT(*) AS count
+			 FROM articles, unnest(tags) AS tag
+			 WHERE status = $1 AND app = $2 AND tags IS NOT NULL
+			 GROUP BY tag
+			 ORDER BY count DESC
+			 LIMIT $3`,
+			["published", APP_SCOPE, limit]
+		);
 
-	if (error) {
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		const { data: articles } = await (supabase as any)
-			.from("articles")
-			.select("tags")
-			.eq("status", "published")
-			.eq("app", APP_SCOPE)
-			.not("tags", "is", null);
-
-		if (!articles) {
-			return [];
-		}
-
-		const tagCounts = new Map<string, number>();
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		for (const article of articles as any[]) {
-			if (Array.isArray(article.tags)) {
-				for (const tag of article.tags) {
-					tagCounts.set(tag, (tagCounts.get(tag) || 0) + 1);
-				}
-			}
-		}
-
-		return [...tagCounts.entries()]
-			.map(([tag, count]) => ({ count, tag }))
-			.toSorted((a, b) => b.count - a.count)
-			.slice(0, limit);
+		return rows.map((row) => ({ count: Number(row.count), tag: row.tag }));
+	} catch (error) {
+		console.error("Error fetching popular tags:", error);
+		return [];
 	}
-
-	return data || [];
 }
 
 /**
@@ -410,40 +396,29 @@ export async function getTrendingArticles(limit = 5): Promise<
 		trending_score: number;
 	}>
 > {
-	const supabase = await createClient();
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	const { data, error } = await (supabase as any).rpc("get_trending_articles", {
-		days_window: 14,
-		result_limit: limit,
-	});
+	const pool = getPgPool();
 
-	if (error) {
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		const { data: articles } = await (supabase as any)
-			.from("articles")
-			.select("id, title, slug, excerpt, featured_image_url, category, view_count, published_at")
-			.eq("status", "published")
-			.eq("app", APP_SCOPE)
-			.gte("published_at", new Date(Date.now() - 14 * 86_400_000).toISOString())
-			.order("view_count", { ascending: false })
-			.limit(limit);
+	try {
+		// `get_trending_articles(days_window, result_limit)` existe en tant que
+		// fonction SQL Postgres (vérifié via pg_proc) — on l'appelle en direct au
+		// lieu de la RPC PostgREST, comportement identique (même fonction).
+		const { rows } = await pool.query<{
+			id: string;
+			title: string;
+			slug: string;
+			excerpt: string | null;
+			featured_image_url: string | null;
+			category: string | null;
+			view_count: number;
+			published_at: string | null;
+			trending_score: number;
+		}>("SELECT * FROM get_trending_articles($1, $2)", [14, limit]);
 
-		if (!articles) {
-			return [];
-		}
-		const now = Date.now();
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		return (articles as any[]).map((a) => {
-			const publishedAt = a.published_at ? new Date(a.published_at).getTime() : now;
-			const ageDays = Math.max(1, (now - publishedAt) / 86_400_000);
-			return {
-				...a,
-				trending_score: (a.view_count || 0) / ageDays,
-			};
-		});
+		return rows;
+	} catch (error) {
+		console.error("Error fetching trending articles:", error);
+		return [];
 	}
-
-	return data || [];
 }
 
 /**
@@ -458,17 +433,29 @@ export async function getPopularArticles(limit = 5): Promise<
 		view_count: number;
 	}>
 > {
-	const supabase = await createClient();
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	const { data } = await (supabase as any)
-		.from("articles")
-		.select("id, title, slug, category, view_count")
-		.eq("status", "published")
-		.eq("app", APP_SCOPE)
-		.order("view_count", { ascending: false })
-		.limit(limit);
+	const pool = getPgPool();
 
-	return data || [];
+	try {
+		const { rows } = await pool.query<{
+			id: string;
+			title: string;
+			slug: string;
+			category: string | null;
+			view_count: number;
+		}>(
+			`SELECT id, title, slug, category, view_count
+			 FROM articles
+			 WHERE status = $1 AND app = $2
+			 ORDER BY view_count DESC
+			 LIMIT $3`,
+			["published", APP_SCOPE, limit]
+		);
+
+		return rows;
+	} catch (error) {
+		console.error("Error fetching popular articles:", error);
+		return [];
+	}
 }
 
 /**
@@ -490,69 +477,74 @@ export async function getRelatedArticles(
 		category: string | null;
 	}>
 > {
-	const supabase = await createClient();
-	const results = new Map<string, unknown>();
+	const pool = getPgPool();
+	type RelatedArticleRow = {
+		id: string;
+		title: string;
+		slug: string;
+		excerpt: string | null;
+		featured_image_url: string | null;
+		published_at: string | null;
+		category: string | null;
+	};
+	const results = new Map<string, RelatedArticleRow>();
+	const SELECT_COLS = "id, title, slug, excerpt, featured_image_url, published_at, category";
 
 	// 1. Par tags communs
 	if (tags && tags.length > 0) {
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		const { data } = await (supabase as any)
-			.from("articles")
-			.select("id, title, slug, excerpt, featured_image_url, published_at, category")
-			.eq("status", "published")
-			.eq("app", APP_SCOPE)
-			.neq("id", articleId)
-			.overlaps("tags", tags)
-			.order("published_at", { ascending: false })
-			.limit(limit);
-
-		if (data) {
-			// eslint-disable-next-line @typescript-eslint/no-explicit-any
-			for (const item of data as any[]) {
+		try {
+			const { rows } = await pool.query<RelatedArticleRow>(
+				`SELECT ${SELECT_COLS}
+				 FROM articles
+				 WHERE status = $1 AND app = $2 AND id <> $3 AND tags && $4
+				 ORDER BY published_at DESC
+				 LIMIT $5`,
+				["published", APP_SCOPE, articleId, tags, limit]
+			);
+			for (const item of rows) {
 				results.set(item.id, item);
 			}
+		} catch (error) {
+			console.error("Error fetching related articles by tags:", error);
 		}
 	}
 
 	// 2. Compléter par catégorie si pas assez
 	if (results.size < limit && category) {
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		const { data } = await (supabase as any)
-			.from("articles")
-			.select("id, title, slug, excerpt, featured_image_url, published_at, category")
-			.eq("status", "published")
-			.eq("app", APP_SCOPE)
-			.eq("category", category)
-			.neq("id", articleId)
-			.order("published_at", { ascending: false })
-			.limit(limit);
-
-		if (data) {
-			// eslint-disable-next-line @typescript-eslint/no-explicit-any
-			for (const item of data as any[]) {
+		try {
+			const { rows } = await pool.query<RelatedArticleRow>(
+				`SELECT ${SELECT_COLS}
+				 FROM articles
+				 WHERE status = $1 AND app = $2 AND category = $3 AND id <> $4
+				 ORDER BY published_at DESC
+				 LIMIT $5`,
+				["published", APP_SCOPE, category, articleId, limit]
+			);
+			for (const item of rows) {
 				if (results.size < limit) {
 					results.set(item.id, item);
 				}
 			}
+		} catch (error) {
+			console.error("Error fetching related articles by category:", error);
 		}
 	}
 
 	// 3. Compléter par articles récents si toujours pas assez.
-	// On utilise `.neq` séquentiellement pour éviter d'injecter une chaîne arbitraire dans `.not("id","in",...)`.
+	// On exclut les ids déjà retenus côté JS (comme l'ancien code), pas via un IN
+	// dynamique, pour éviter d'injecter une liste arbitraire dans le SQL.
 	if (results.size < limit) {
 		const excludeIds = new Set([articleId, ...results.keys()]);
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		const { data } = await (supabase as any)
-			.from("articles")
-			.select("id, title, slug, excerpt, featured_image_url, published_at, category")
-			.eq("status", "published")
-			.eq("app", APP_SCOPE)
-			.order("published_at", { ascending: false })
-			.limit(limit + excludeIds.size);
-
-		if (data) {
-			// eslint-disable-next-line @typescript-eslint/no-explicit-any
-			for (const item of data as any[]) {
+		try {
+			const { rows } = await pool.query<RelatedArticleRow>(
+				`SELECT ${SELECT_COLS}
+				 FROM articles
+				 WHERE status = $1 AND app = $2
+				 ORDER BY published_at DESC
+				 LIMIT $3`,
+				["published", APP_SCOPE, limit + excludeIds.size]
+			);
+			for (const item of rows) {
 				if (results.size >= limit) {
 					break;
 				}
@@ -560,11 +552,12 @@ export async function getRelatedArticles(
 					results.set(item.id, item);
 				}
 			}
+		} catch (error) {
+			console.error("Error fetching related articles fallback:", error);
 		}
 	}
 
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	return [...results.values()] as any[];
+	return [...results.values()];
 }
 
 /**

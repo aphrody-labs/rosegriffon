@@ -1,6 +1,7 @@
 "use server";
 
 import { requireAdmin } from "@/lib/auth-helpers";
+import { getPgPool } from "@/lib/db/pg";
 import { createClient } from "@/lib/supabase/server";
 
 export interface SeriesInfo {
@@ -70,50 +71,60 @@ export async function getSeries(slug: string): Promise<SeriesWithArticles | null
  * Récupère la série associée à un article ainsi que tous les autres articles de cette série.
  * Retourne aussi l'index de position (currentIndex) de l'article dans la série.
  * Retourne null si l'article n'appartient à aucune série.
- * Accès public.
+ * Accès public. Lecture Postgres DIRECTE (bypass le Data API PostgREST — cf. lib/db/pg.ts).
  */
 export async function getArticleSeries(
 	articleId: string
 ): Promise<(SeriesWithArticles & { currentIndex: number }) | null> {
-	const supabase = await createClient();
+	const pool = getPgPool();
 
-	// Vérifier si l'article a une série
-	const { data: article, error: articleError } = await supabase
-		.from("articles")
-		.select("id, series_id, series_order")
-		.eq("id", articleId)
-		.single();
+	try {
+		// Vérifier si l'article a une série
+		const { rows: articleRows } = await pool.query<{
+			id: string;
+			series_id: string | null;
+			series_order: number | null;
+		}>("SELECT id, series_id, series_order FROM articles WHERE id = $1 LIMIT 1", [articleId]);
 
-	if (articleError || !article || !article.series_id) {
+		const article = articleRows[0];
+		if (!article || !article.series_id) {
+			return null;
+		}
+
+		// Récupérer les infos de la série
+		const { rows: seriesRows } = await pool.query<SeriesInfo>(
+			`SELECT id, title, slug, description, cover_image_url, author_id
+			 FROM article_series
+			 WHERE id = $1
+			 LIMIT 1`,
+			[article.series_id]
+		);
+
+		const series = seriesRows[0];
+		if (!series) {
+			return null;
+		}
+
+		// Récupérer tous les articles de la série
+		const { rows: seriesArticles } = await pool.query<SeriesArticle>(
+			`SELECT id, title, slug, excerpt, featured_image_url, category, published_at, series_order
+			 FROM articles
+			 WHERE series_id = $1
+			 ORDER BY series_order ASC`,
+			[series.id]
+		);
+
+		const currentIndex = seriesArticles.findIndex((a) => a.id === articleId);
+
+		return {
+			articles: seriesArticles,
+			currentIndex: currentIndex >= 0 ? currentIndex : 0,
+			series,
+		};
+	} catch (error) {
+		console.error("getArticleSeries error:", error);
 		return null;
 	}
-
-	// Récupérer les infos de la série
-	const { data: series, error: seriesError } = await supabase
-		.from("article_series")
-		.select("id, title, slug, description, cover_image_url, author_id")
-		.eq("id", article.series_id)
-		.single();
-
-	if (seriesError || !series) {
-		return null;
-	}
-
-	// Récupérer tous les articles de la série
-	const { data: articles } = await supabase
-		.from("articles")
-		.select("id, title, slug, excerpt, featured_image_url, category, published_at, series_order")
-		.eq("series_id", series.id)
-		.order("series_order", { ascending: true });
-
-	const seriesArticles: SeriesArticle[] = articles || [];
-	const currentIndex = seriesArticles.findIndex((a) => a.id === articleId);
-
-	return {
-		articles: seriesArticles,
-		currentIndex: currentIndex >= 0 ? currentIndex : 0,
-		series,
-	};
 }
 
 /**
