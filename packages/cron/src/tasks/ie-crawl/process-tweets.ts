@@ -1,6 +1,8 @@
 import { createSupabaseServiceClient } from "@rose-griffon/db/service";
+import type { Tables } from "@rose-griffon/db";
 import { join } from "node:path";
 import { grokChat } from "./grok-oidc";
+import { sql } from "../../lib/db.js";
 
 interface MediaItem {
 	url: string;
@@ -189,14 +191,9 @@ export async function processTweets() {
 		);
 	}
 
-	// Fetch all tweets
+	// Fetch all tweets (lecture Postgres directe)
 	console.log("[DB] Fetching tweets...");
-	const { data: tweets, error: fetchErr } = await supabase.from("tweets").select("*");
-
-	if (fetchErr) {
-		console.error("[DB] Failed to fetch tweets:", fetchErr);
-		return;
-	}
+	const tweets = await sql<Tables<"tweets">[]>`SELECT * FROM tweets`;
 
 	console.log(`[DB] Fetched ${tweets.length} tweets.`);
 
