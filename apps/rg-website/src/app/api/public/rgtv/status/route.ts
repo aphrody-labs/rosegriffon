@@ -1,6 +1,13 @@
-import { createClient } from "@/lib/supabase/server";
+import { getPgPool } from "@/lib/db/pg";
 
 export const dynamic = "force-dynamic";
+
+interface ScheduleSlotRow {
+  start_time: string | null;
+  end_time: string | null;
+  streamer_name: string;
+  category: string | null;
+}
 
 const {TWITCH_CLIENT_ID} = process.env;
 const {TWITCH_CLIENT_SECRET} = process.env;
@@ -245,24 +252,32 @@ export async function GET(request: Request) {
     }
   }
 
-  // Planning depuis Supabase — uniquement pour la chaîne primaire (RGTV)
+  // Planning depuis Postgres (direct, bypass Data API Supabase) — uniquement pour la chaîne primaire (RGTV)
   let nextStream: unknown = null;
   let currentScheduled: unknown = null;
   if (isPrimaryChannel) {
-    const supabase = await createClient();
     const today = new Date().getDay();
     const nowTime = new Date().toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" });
 
-    const { data: schedule } = await supabase
-      .from("stream_schedules")
-      .select("start_time, end_time, streamer_name, category")
-      .eq("day_of_week", today)
-      .eq("status", "active")
-      .order("start_time", { ascending: true });
+    let schedule: ScheduleSlotRow[] = [];
+    try {
+      const pool = getPgPool();
+      const result = await pool.query<ScheduleSlotRow>(
+        `SELECT start_time, end_time, streamer_name, category
+         FROM stream_schedules
+         WHERE day_of_week = $1 AND status = $2
+         ORDER BY start_time ASC`,
+        [today, "active"]
+      );
+      schedule = result.rows;
+    } catch (dbError) {
+      console.error("Erreur Postgres Schedule:", dbError);
+    }
 
-    nextStream = schedule?.find((s) => s.start_time > nowTime) || null;
+    nextStream = schedule.find((s) => s.start_time && s.start_time > nowTime) || null;
     currentScheduled =
-      schedule?.find((s) => s.start_time <= nowTime && s.end_time > nowTime) || null;
+      schedule.find((s) => s.start_time && s.end_time && s.start_time <= nowTime && s.end_time > nowTime) ||
+      null;
   }
 
   return Response.json({

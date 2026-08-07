@@ -8,6 +8,8 @@ import { CommentsSection } from "@/components/shared/CommentsSection";
 
 import type { Metadata } from "next";
 
+import type { Article } from "@/lib/api/articles";
+import { getPgPool } from "@/lib/db/pg";
 import { createClient } from "@/lib/supabase/server";
 
 import { ShareButtons } from "./components/ShareButtons";
@@ -15,16 +17,23 @@ import { ShareButtons } from "./components/ShareButtons";
 // ⚡ ISR - Revalidation toutes les 15 minutes
 export const revalidate = 900;
 
+// Lecture Postgres DIRECTE (bypass le Data API PostgREST — cf. lib/db/pg.ts).
+type ArticleMetaRow = Pick<Article, "title" | "excerpt" | "featured_image_url">;
+
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
 	const { slug } = await params;
-	const supabase = await createClient();
-	const { data: article } = await supabase
-		.from("articles")
-		.select("title, excerpt, featured_image_url")
-		.eq("slug", slug)
-		.eq("status", "published")
-		.eq("app", "website")
-		.single();
+
+	let article: ArticleMetaRow | null = null;
+	try {
+		const pool = getPgPool();
+		const { rows } = await pool.query<ArticleMetaRow>(
+			"SELECT title, excerpt, featured_image_url FROM articles WHERE slug = $1 AND status = $2 AND app = $3 LIMIT 1",
+			[slug, "published", "website"]
+		);
+		article = rows[0] ?? null;
+	} catch (error) {
+		console.error(`Error fetching metadata for article ${slug}:`, error);
+	}
 
 	if (!article) {
 		return { title: "Article introuvable · Rose Griffon" };
@@ -55,16 +64,20 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 
 export default async function ChroniquePage({ params }: { params: Promise<{ slug: string }> }) {
 	const { slug } = await params;
-	const supabase = await createClient();
 
-	// 1. Essayer de trouver dans les articles
-	const { data: articleData } = await supabase
-		.from("articles")
-		.select("*")
-		.eq("slug", slug)
-		.eq("status", "published")
-		.eq("app", "website")
-		.single();
+	// 1. Essayer de trouver dans les articles — lecture Postgres DIRECTE
+	// (bypass le Data API PostgREST — cf. lib/db/pg.ts).
+	let articleData: Article | null = null;
+	try {
+		const pool = getPgPool();
+		const { rows } = await pool.query<Article>(
+			"SELECT * FROM articles WHERE slug = $1 AND status = $2 AND app = $3 LIMIT 1",
+			[slug, "published", "website"]
+		);
+		articleData = rows[0] ?? null;
+	} catch (error) {
+		console.error(`Error fetching article ${slug}:`, error);
+	}
 
 	if (!articleData) {
 		notFound();
@@ -72,8 +85,10 @@ export default async function ChroniquePage({ params }: { params: Promise<{ slug
 
 	const content = articleData;
 
-	// Incrémenter vues
+	// Incrémenter vues — ÉCRITURE, hors scope de la migration Postgres directe :
+	// reste sur le client Supabase (RPC, contourne le rate-limit RLS d'écriture).
 	try {
+		const supabase = await createClient();
 		await supabase.rpc("increment_article_views", {
 			article_id: content.id,
 		});
@@ -81,7 +96,7 @@ export default async function ChroniquePage({ params }: { params: Promise<{ slug
 		console.error("Failed to increment views:", error);
 	}
 
-	const publishedDate = content.published_at || content.created_at;
+	const publishedDate = content.published_at || content.created_at || "";
 	const viewCount = content.view_count || 0;
 	const featuredImage = content.featured_image_url;
 
@@ -99,7 +114,7 @@ export default async function ChroniquePage({ params }: { params: Promise<{ slug
 				description={content.excerpt || ""}
 				image={featuredImage ? [featuredImage] : []}
 				datePublished={publishedDate}
-				dateModified={content.updated_at}
+				dateModified={content.updated_at ?? undefined}
 				authorName="Rose Griffon"
 				url={`https://rosegriffon.fr/chroniques/${slug}`}
 			/>

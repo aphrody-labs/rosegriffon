@@ -1,8 +1,9 @@
 import { NextResponse } from "next/server";
 
 import { getCalendarEvents } from "@/lib/api/events";
-import { createClient } from "@/lib/supabase/server";
+import { getPgPool } from "@/lib/db/pg";
 import type { CalendarEvent } from "@/types/api";
+import type { StreamSchedule } from "@rose-griffon/types";
 
 // Types pour notre réponse unifiée
 interface ScheduleSegment {
@@ -16,15 +17,17 @@ interface ScheduleSegment {
 
 export async function GET() {
 	try {
-		// 1. Récupérer le planning récurrent depuis Supabase
-		const supabase = await createClient();
-		const { data: recurringSchedules, error: dbError } = await supabase
-			.from("stream_schedules")
-			.select("*")
-			.eq("status", "active");
-
-		if (dbError) {
-			console.error("Erreur Supabase Schedule:", dbError);
+		// 1. Récupérer le planning récurrent depuis Postgres (direct, bypass Data API Supabase)
+		let recurringSchedules: StreamSchedule[] | null = null;
+		try {
+			const pool = getPgPool();
+			const { rows } = await pool.query<StreamSchedule>(
+				`SELECT * FROM stream_schedules WHERE status = $1`,
+				["active"]
+			);
+			recurringSchedules = rows;
+		} catch (dbError) {
+			console.error("Erreur Postgres Schedule:", dbError);
 		}
 
 		// 2. Récupérer les événements ponctuels depuis Google Calendar
