@@ -52,6 +52,13 @@ cookies.tsv
 /data/backups/*.sqlite
 /data/backups/*.sqlite-shm
 /data/backups/*.sqlite-wal
+/data/backups/*.dump
+
+# Store RAG local (bun:sqlite, régénérable via scripts/rag-migrate-to-local.ts
+# ou ré-ingestion cron ie-crawl — cf. docs/rag-unified.md)
+/data/rag/*.sqlite
+/data/rag/*.sqlite-shm
+/data/rag/*.sqlite-wal
 
 
 # OS & IDE
@@ -97,3 +104,4 @@ yarn-error.log*
 /public/inazuma-cross/audio/
 /public/inazuma-cross/textures/
 /app/cross/donnees/page.tsx.bak
+public/assets/font/

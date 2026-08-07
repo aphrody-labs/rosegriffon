@@ -11,7 +11,7 @@ import { vectorStore, getEmbedding, crawlerTracker, cache } from "@rose-griffon/
 import { createSupabaseServiceClient } from "@rose-griffon/db/service";
 import { indexZukanCharacters } from "./rag-zukan";
 import { chunkText, computeStringHash } from "./rag-utils";
-import { ingestSources, type RagSource } from "./rag-store-pg";
+import { ingestSources, type RagSource } from "./rag-store-local";
 import { chunkBySource, type SourceKind } from "./rag-chunkers";
 
 interface DBTweetRow {

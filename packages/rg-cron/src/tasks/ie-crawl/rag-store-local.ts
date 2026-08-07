@@ -4,11 +4,15 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-// Store vectoriel pgvector (Supabase `inagle_rag_chunks` + RPC `rag_hybrid_search`).
-// Remplace à terme le vectorStore Redis O(n) (cf. UNIFIED-RAG-PLAN §2/§4.2).
-// Le store Redis reste branché en parallèle (compat) ; la prod lit pgvector.
+// Store vectoriel LOCAL (bun:sqlite, `@rose-griffon/db/rag-store`).
+// Remplace le store pgvector Supabase (`inagle_rag_chunks` + RPC
+// `rag_hybrid_search`) qui avait fait dépasser le quota storage du plan free
+// (592 Mo à lui seul) et cassé azalee-web/website-web/rg-cron pendant 7+
+// jours (migré le 2026-08-06, cf. docs/rag-unified.md).
+// Le store Redis (`@rose-griffon/db/redis`) reste branché en parallèle (cache
+// généraliste, pas le RAG).
 
-import { createSupabaseServiceClient } from "@rose-griffon/db/service";
+import { upsertChunks, hybridSearch, type RagChunkRow } from "@rose-griffon/db/rag-store";
 import { computeStringHash } from "./rag-utils";
 import { chunkBySource, type SourceKind } from "./rag-chunkers";
 import { embedBatch, embedOne, RAG_EMBED_DIM, type EmbedBackend } from "./rag-embed";
@@ -33,17 +37,8 @@ export interface IngestStats {
 	backend: EmbedBackend;
 }
 
-/** Sérialise un vecteur 1024 au format texte pgvector `[a,b,…]`. */
-function toPgVector(vec: number[]): string {
-	if (vec.length !== RAG_EMBED_DIM) {
-		throw new Error(`embedding dim ${vec.length} != ${RAG_EMBED_DIM}`);
-	}
-	return `[${vec.join(",")}]`;
-}
-
-/** Ingestion idempotente d'un lot de sources dans pgvector. */
+/** Ingestion idempotente d'un lot de sources dans le store local. */
 export async function ingestSources(sources: RagSource[]): Promise<IngestStats> {
-	const supabase = createSupabaseServiceClient();
 	const stats: IngestStats = { sources: 0, chunks: 0, skipped: 0, backend: "hash" };
 
 	for (const src of sources) {
@@ -61,8 +56,11 @@ export async function ingestSources(sources: RagSource[]): Promise<IngestStats> 
 		const { backend, vectors } = await embedBatch(texts);
 		stats.backend = backend;
 
-		const rows = chunks.map((c, i) => {
+		const rows: RagChunkRow[] = chunks.map((c, i) => {
 			const content = texts[i]!;
+			if (vectors[i]!.length !== RAG_EMBED_DIM) {
+				throw new Error(`embedding dim ${vectors[i]!.length} != ${RAG_EMBED_DIM}`);
+			}
 			return {
 				id: `${src.sourceId}#${c.index}`,
 				source_id: src.sourceId,
@@ -71,18 +69,20 @@ export async function ingestSources(sources: RagSource[]): Promise<IngestStats> 
 				url: src.url ?? null,
 				lang: src.lang ?? null,
 				content,
-				embedding: toPgVector(vectors[i]!),
+				embedding: vectors[i]!,
 				meta: { ...(src.meta ?? {}), symbol: c.symbol ?? null },
 				content_hash: computeStringHash(content),
 				buildid: src.buildid ?? null,
 			};
 		});
 
-		const { error } = await (supabase as any)
-			.from("inagle_rag_chunks")
-			.upsert(rows, { onConflict: "id" });
-		if (error) {
-			console.error(`[RAG PG] upsert échec pour ${src.sourceId}:`, error.message);
+		try {
+			upsertChunks(rows);
+		} catch (err) {
+			console.error(
+				`[RAG local] upsert échec pour ${src.sourceId}:`,
+				err instanceof Error ? err.message : err
+			);
 			stats.skipped++;
 			continue;
 		}
@@ -104,23 +104,16 @@ export interface RagPgResult {
 	score: number;
 }
 
-/** Recherche hybride (dense HNSW + lexical tsvector, fusion RRF) via la RPC. */
+/** Recherche hybride (dense cosine ∥ lexicale FTS5, fusion RRF) sur le store local. */
 export async function ragHybridSearch(
 	query: string,
 	opts: { k?: number; kinds?: SourceKind[] } = {}
 ): Promise<RagPgResult[]> {
-	const supabase = createSupabaseServiceClient();
 	const { vector } = await embedOne(query);
-
-	const { data, error } = await (supabase as any).rpc("rag_hybrid_search", {
-		q_text: query,
-		q_emb: toPgVector(vector),
-		k: opts.k ?? 10,
-		kinds: opts.kinds ?? null,
-	});
-	if (error) {
-		console.error("[RAG PG] rag_hybrid_search échec:", error.message);
+	try {
+		return hybridSearch(vector, query, { k: opts.k, kinds: opts.kinds });
+	} catch (err) {
+		console.error("[RAG local] hybridSearch échec:", err instanceof Error ? err.message : err);
 		return [];
 	}
-	return (data ?? []) as RagPgResult[];
 }

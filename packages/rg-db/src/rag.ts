@@ -4,32 +4,26 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-// RAG unifié pgvector — couche partagée (db) consommable par azalee (GraphQL /
-// REST / server actions) ET le cron. Recherche hybride dense (HNSW cosine) +
-// lexical (tsvector) fusionnée par RRF via la RPC Postgres `rag_hybrid_search`.
-// Voir iecode/re/rag/UNIFIED-RAG-PLAN.md.
+// RAG unifié — couche partagée (db) consommable par azalee (GraphQL / REST /
+// server actions) ET le cron. Recherche hybride dense (cosine) + lexicale
+// (FTS5) fusionnée par RRF sur le store LOCAL (`./rag-store.ts`, bun:sqlite).
+//
+// Migré depuis pgvector Supabase (`inagle_rag_chunks` + RPC `rag_hybrid_search`)
+// le 2026-08-06 : ce store à lui seul pesait 592 Mo sur les 606 Mo du quota
+// storage du plan free, restant le projet (azalee-web/website-web/rg-cron en
+// échec pendant 7+ jours). Voir docs/rag-unified.md.
 //
 // Additif : ne remplace PAS `getEmbedding`/`vectorStore` de ./redis. Le store
-// Redis reste branché ; cette voie lit `inagle_rag_chunks` (pgvector).
+// Redis reste branché en parallèle (cache généraliste, pas le RAG).
 
-export const RAG_EMBED_DIM = 1024;
+import { hybridSearch, RAG_LOCAL_DIM, type RagChunkResult, type RagSourceKind } from "./rag-store";
 
-export type RagSourceKind =
-	| "lua"
-	| "cfg"
-	| "json"
-	| "ts"
-	| "sqlite"
-	| "code"
-	| "web"
-	| "tweet"
-	| "doc"
-	| "asset"
-	| "text";
+export type { RagChunkResult, RagSourceKind };
+export const RAG_EMBED_DIM = RAG_LOCAL_DIM;
 
 /**
  * Format enrichi tweet pour chunk RAG (auteur + date + métriques + texte).
- * Utilisé par ingestion cron (x/tweets) pour brancher sur pgvector avec contexte complet.
+ * Utilisé par ingestion cron (x/tweets) pour brancher sur le store RAG avec contexte complet.
  * Additif (ne change pas ragSearch/embed).
  */
 export function formatTweetForRag(t: {
@@ -55,23 +49,6 @@ export function formatTweetForRag(t: {
 	return `[tweet ${t.id}] ${u}${n}${d}${m}${mediaNote}\n${t.text || ""}`.trim();
 }
 
-export interface RagChunkResult {
-	id: string;
-	source_id: string;
-	source_kind: string;
-	title: string | null;
-	url: string | null;
-	lang: string | null;
-	content: string;
-	meta: Record<string, unknown>;
-	score: number;
-}
-
-/** Client Supabase minimal requis (service ou anon). */
-export interface RagSupabaseClient {
-	rpc: (fn: string, args: Record<string, unknown>) => Promise<{ data: unknown; error: unknown }>;
-}
-
 function hashStringToRange(str: string, range: number): number {
 	let hash = 0;
 	for (let i = 0; i < str.length; i++) {
@@ -82,8 +59,9 @@ function hashStringToRange(str: string, range: number): number {
 }
 
 /**
- * Embedding requête 1024-dim. Résolution : sidecar BGE-M3 (`RAG_EMBED_URL`) →
- * OpenAI text-embedding-3-small (re-projeté) → Feature-Hashing déterministe.
+ * Embedding requête (384-dim, e5-small natif). Résolution : sidecar e5
+ * (`RAG_EMBED_URL`) → OpenAI text-embedding-3-small (re-projeté) →
+ * Feature-Hashing déterministe.
  * Doit rester aligné sur `cron/.../rag-embed.ts` (même algorithme de hashing).
  */
 export async function ragEmbedQuery(text: string): Promise<number[]> {
@@ -133,7 +111,7 @@ export async function ragEmbedQuery(text: string): Promise<number[]> {
 		}
 	}
 
-	// Feature hashing 1024-dim.
+	// Feature hashing dim.
 	const vector = new Array<number>(dim).fill(0);
 	const words = text
 		.toLowerCase()
@@ -167,27 +145,17 @@ function normalize(vec: number[], dim: number): number[] {
 	return vec.map((v) => v / norm);
 }
 
-function toPgVector(vec: number[]): string {
-	return `[${vec.join(",")}]`;
-}
-
-/** Recherche RAG hybride (dense + lexical, RRF) sur `inagle_rag_chunks`. */
+/** Recherche RAG hybride (dense + lexicale, RRF) sur le store local. */
 export async function ragSearch(
-	supabase: RagSupabaseClient,
 	query: string,
 	opts: { k?: number; kinds?: RagSourceKind[] } = {}
 ): Promise<RagChunkResult[]> {
 	if (!query || query.trim().length < 2) return [];
 	const emb = await ragEmbedQuery(query);
-	const { data, error } = await supabase.rpc("rag_hybrid_search", {
-		q_text: query,
-		q_emb: toPgVector(emb),
-		k: opts.k ?? 10,
-		kinds: opts.kinds ?? null,
-	});
-	if (error) {
-		console.warn("[db/rag] rag_hybrid_search échec:", (error as { message?: string })?.message);
+	try {
+		return hybridSearch(emb, query, { k: opts.k, kinds: opts.kinds });
+	} catch (err) {
+		console.warn("[db/rag] hybridSearch échec:", err instanceof Error ? err.message : err);
 		return [];
 	}
-	return (data as RagChunkResult[]) ?? [];
 }
