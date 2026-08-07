@@ -6,10 +6,93 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
+import { getPgPool } from "@/lib/db/pg";
 import { getAuthorInfo } from "@/lib/author";
 
 export const dynamic = "force-dynamic";
+
+interface TweetMedia {
+	type?: string;
+	url?: string;
+	video_url?: string;
+	preview_url?: string;
+	original_url?: string;
+}
+
+interface TweetRawTweet {
+	id?: string;
+	translation?: string;
+	fullText?: string;
+	text?: string;
+	media?: TweetMedia[];
+}
+
+interface TweetRow {
+	id: string;
+	text: string | null;
+	translation: string | null;
+	author_id: string | null;
+	author_username: string | null;
+	author_name: string | null;
+	category: string | null;
+	created_at: string;
+	is_thread: boolean | null;
+	media: TweetMedia[] | null;
+	metrics: Record<string, unknown> | null;
+	quoted_tweets: unknown[] | null;
+	raw_tweets: TweetRawTweet[] | null;
+	tweet_count: number | null;
+	updated_at: string | null;
+}
+
+type TweetMetaRow = Pick<
+	TweetRow,
+	"text" | "translation" | "author_username" | "author_name" | "media" | "raw_tweets"
+>;
+
+const AZALEE_USERNAME = "Azalee_IE";
+
+async function getTweetMetaById(id: string): Promise<TweetMetaRow | null> {
+	const pool = getPgPool();
+	const { rows } = await pool.query<TweetMetaRow>(
+		`SELECT text, translation, author_username, author_name, media, raw_tweets
+		 FROM tweets
+		 WHERE id = $1 AND author_username = $2
+		 LIMIT 1`,
+		[id, AZALEE_USERNAME]
+	);
+	return rows[0] ?? null;
+}
+
+async function getTweetMetaByThreadId(id: string): Promise<TweetMetaRow | null> {
+	const pool = getPgPool();
+	const { rows } = await pool.query<TweetMetaRow>(
+		`SELECT text, translation, author_username, author_name, media, raw_tweets
+		 FROM tweets
+		 WHERE raw_tweets @> $1::jsonb AND author_username = $2
+		 LIMIT 1`,
+		[JSON.stringify([{ id }]), AZALEE_USERNAME]
+	);
+	return rows[0] ?? null;
+}
+
+async function getTweetById(id: string): Promise<TweetRow | null> {
+	const pool = getPgPool();
+	const { rows } = await pool.query<TweetRow>(
+		`SELECT * FROM tweets WHERE id = $1 AND author_username = $2 LIMIT 1`,
+		[id, AZALEE_USERNAME]
+	);
+	return rows[0] ?? null;
+}
+
+async function getTweetByThreadId(id: string): Promise<TweetRow | null> {
+	const pool = getPgPool();
+	const { rows } = await pool.query<TweetRow>(
+		`SELECT * FROM tweets WHERE raw_tweets @> $1::jsonb AND author_username = $2 LIMIT 1`,
+		[JSON.stringify([{ id }]), AZALEE_USERNAME]
+	);
+	return rows[0] ?? null;
+}
 
 function extractTitleAndBody(text: string): { title: string; body: string } {
 	const paragraphs = text.split(/\n\n+/).filter(Boolean);
@@ -28,24 +111,10 @@ export async function generateMetadata({
 	params: Promise<{ id: string }>;
 }): Promise<Metadata> {
 	const { id } = await params;
-	const supabase = await createClient();
-	let { data: tweet } = await (supabase as any)
-		.from("tweets")
-		.select("text, translation, author_username, author_name, media, raw_tweets")
-		.eq("id", id)
-		.eq("author_username", "Azalee_IE")
-		.maybeSingle();
+	let tweet = await getTweetMetaById(id);
 
 	if (!tweet) {
-		const { data: threadTweet } = await (supabase as any)
-			.from("tweets")
-			.select("text, translation, author_username, author_name, media, raw_tweets")
-			.contains("raw_tweets", [{ id }])
-			.eq("author_username", "Azalee_IE")
-			.maybeSingle();
-		if (threadTweet) {
-			tweet = threadTweet;
-		}
+		tweet = await getTweetMetaByThreadId(id);
 	}
 
 	const { title } = extractTitleAndBody(tweet?.translation || tweet?.text || "");
@@ -212,24 +281,10 @@ function formatSectionText(text: string, isFirstSection = false) {
 
 export default async function TweetPage({ params }: { params: Promise<{ id: string }> }) {
 	const { id } = await params;
-	const supabase = await createClient();
-	let { data: tweet } = await (supabase as any)
-		.from("tweets")
-		.select("*")
-		.eq("id", id)
-		.eq("author_username", "Azalee_IE")
-		.maybeSingle();
+	let tweet = await getTweetById(id);
 
 	if (!tweet) {
-		const { data: threadTweet } = await (supabase as any)
-			.from("tweets")
-			.select("*")
-			.contains("raw_tweets", [{ id }])
-			.eq("author_username", "Azalee_IE")
-			.maybeSingle();
-		if (threadTweet) {
-			tweet = threadTweet;
-		}
+		tweet = await getTweetByThreadId(id);
 	}
 
 	if (!tweet) {
@@ -245,7 +300,7 @@ export default async function TweetPage({ params }: { params: Promise<{ id: stri
 	const heroIsVideo = firstMedia?.type === "video" || !!firstMedia?.video_url;
 	const heroImage = heroIsVideo ? firstMedia?.preview_url : firstMedia?.url;
 	const readTime = estimateReadTime(tweet.translation || tweet.text || "");
-	const isThread = tweet.is_thread && tweet.tweet_count > 1;
+	const isThread = tweet.is_thread && (tweet.tweet_count ?? 0) > 1;
 	const publishedDate = tweet.created_at;
 
 	const rawTweets: any[] = isThread && Array.isArray(tweet.raw_tweets) ? tweet.raw_tweets : [];

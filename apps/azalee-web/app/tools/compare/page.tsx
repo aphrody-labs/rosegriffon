@@ -158,8 +158,9 @@ async function resolveCharacter(idOrSlug: string | undefined): Promise<CompareCh
 	}
 
 	// 2) Fallback legacy : base_slug / groupVariants (liens sans suffixe hex)
-	let baseChar: any = null;
-	let variant: any = null;
+	// (pas d'initialiseur : les deux branches ci-dessous assignent toujours avant lecture)
+	let baseChar: any;
+	let variant: any;
 
 	if (exactRow) {
 		// Mapper la row exacte seule → stats/skills de CETTE version, pas d’un sibling

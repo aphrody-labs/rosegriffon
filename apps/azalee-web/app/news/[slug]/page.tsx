@@ -38,6 +38,7 @@ import { SeriesNavigation } from "@/components/news/SeriesNavigation";
 import { TableOfContents } from "@/components/news/TableOfContents";
 import { Badge } from "@rose-griffon/ui";
 import { isRemoteAvatar } from "@/lib/avatar";
+import { getPgPool } from "@/lib/db/pg";
 import { extractTableOfContents } from "@/lib/lexical-utils";
 
 interface ArticlePageProps {
@@ -99,70 +100,79 @@ function estimateReadTime(content: string): number {
 }
 
 async function getNews(slug: string, isPreview = false) {
-	const { createAdminClient } = await import("@/lib/supabase/admin");
-	const supabase = createAdminClient();
+	const pool = getPgPool();
+
+	const params: unknown[] = [slug, "azalee"];
+	let sql = "SELECT * FROM articles WHERE slug = $1 AND app = $2";
+	if (!isPreview) {
+		params.push("published");
+		sql += ` AND status = $${params.length}`;
+	}
+	sql += " LIMIT 1";
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	let query: any = supabase.from("articles").select("*").eq("slug", slug).eq("app", "azalee");
-
-	if (!isPreview) {
-		query = query.eq("status", "published");
+	let news: any;
+	try {
+		const { rows } = await pool.query(sql, params);
+		news = rows[0];
+	} catch (error) {
+		console.error(`Error fetching article ${slug}:`, error);
+		return null;
 	}
-
-	const { data: news, error } = await query.maybeSingle();
-	if (error || !news) {
+	if (!news) {
 		return null;
 	}
 
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	if ((news as any).author_id) {
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		const { data: profile } = await (supabase as any)
-			.from("profiles")
-			.select("full_name, avatar_url, bio, username")
-			.eq("id", (news as { author_id: string }).author_id)
-			.maybeSingle();
-		(news as { author: unknown }).author = profile || null;
+	if (news.author_id) {
+		try {
+			const { rows: profileRows } = await pool.query(
+				"SELECT full_name, avatar_url, bio, username FROM profiles WHERE id = $1 LIMIT 1",
+				[news.author_id]
+			);
+			news.author = profileRows[0] || null;
+		} catch (error) {
+			console.error(`Error fetching author profile for article ${slug}:`, error);
+			news.author = null;
+		}
 	} else {
-		(news as { author: unknown }).author = null;
+		news.author = null;
 	}
 
 	// Enrichit chaque co_author qui a un profile_id : ajoute profile_username
 	// (lien /profil/<username>) + privilegie le full_name/avatar_url du
 	// Profile s'il existe (potentiellement plus a jour que le snapshot Discord).
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	const co = (news as any).co_authors;
+	const co = news.co_authors;
 	if (Array.isArray(co) && co.length > 0) {
 		const profileIds = co
 			// eslint-disable-next-line @typescript-eslint/no-explicit-any
 			.map((c: any) => c?.profile_id)
 			.filter((x: unknown): x is string => typeof x === "string");
 		if (profileIds.length > 0) {
-			// eslint-disable-next-line @typescript-eslint/no-explicit-any
-			const { data: linked } = await (supabase as any)
-				.from("profiles")
-				.select("id, username, full_name, avatar_url")
-				.in("id", profileIds);
-			// eslint-disable-next-line @typescript-eslint/no-explicit-any
-			const byId = new Map<string, any>(
+			try {
+				const { rows: linked } = await pool.query(
+					"SELECT id, username, full_name, avatar_url FROM profiles WHERE id = ANY($1)",
+					[profileIds]
+				);
 				// eslint-disable-next-line @typescript-eslint/no-explicit-any
-				((linked ?? []) as any[]).map((p) => [p.id, p])
-			);
-			// eslint-disable-next-line @typescript-eslint/no-explicit-any
-			(news as any).co_authors = co.map((c: any) => {
-				const p = c?.profile_id ? byId.get(c.profile_id) : null;
-				return p
-					? {
-							...c,
-							profile_username: p.username ?? null,
-							name: p.full_name || c.name,
-							// Snapshot Discord (c.avatar_url) prioritaire — il est fraichement
-							// Fetched a la creation du brouillon. Le profile.avatar_url peut
-							// Etre stale (Kaen a change son avatar Discord depuis l'OAuth).
-							avatar_url: c.avatar_url || p.avatar_url,
-						}
-					: c;
-			});
+				const byId = new Map<string, any>(linked.map((p) => [p.id, p]));
+				// eslint-disable-next-line @typescript-eslint/no-explicit-any
+				news.co_authors = co.map((c: any) => {
+					const p = c?.profile_id ? byId.get(c.profile_id) : null;
+					return p
+						? {
+								...c,
+								profile_username: p.username ?? null,
+								name: p.full_name || c.name,
+								// Snapshot Discord (c.avatar_url) prioritaire — il est fraichement
+								// Fetched a la creation du brouillon. Le profile.avatar_url peut
+								// Etre stale (Kaen a change son avatar Discord depuis l'OAuth).
+								avatar_url: c.avatar_url || p.avatar_url,
+							}
+						: c;
+				});
+			} catch (error) {
+				console.error(`Error fetching co-authors profiles for article ${slug}:`, error);
+			}
 		}
 	}
 
@@ -176,38 +186,43 @@ async function getNews(slug: string, isPreview = false) {
  * pour produire les balises meta/OpenGraph).
  */
 async function getNewsMeta(slug: string, isPreview = false) {
-	const { createAdminClient } = await import("@/lib/supabase/admin");
-	const supabase = createAdminClient();
+	const pool = getPgPool();
+
+	const params: unknown[] = [slug, "azalee"];
+	let sql =
+		"SELECT id, slug, title, excerpt, meta_title, meta_description, featured_image_url, featured_image_alt, status, category, published_at, updated_at, created_at, author_id FROM articles WHERE slug = $1 AND app = $2";
+	if (!isPreview) {
+		params.push("published");
+		sql += ` AND status = $${params.length}`;
+	}
+	sql += " LIMIT 1";
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	let query: any = supabase
-		.from("articles")
-		.select(
-			"id, slug, title, excerpt, meta_title, meta_description, featured_image_url, featured_image_alt, status, category, published_at, updated_at, created_at, author_id"
-		)
-		.eq("slug", slug)
-		.eq("app", "azalee");
-
-	if (!isPreview) {
-		query = query.eq("status", "published");
+	let news: any;
+	try {
+		const { rows } = await pool.query(sql, params);
+		news = rows[0];
+	} catch (error) {
+		console.error(`Error fetching article meta ${slug}:`, error);
+		return null;
 	}
-
-	const { data: news, error } = await query.maybeSingle();
-	if (error || !news) {
+	if (!news) {
 		return null;
 	}
 
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	if ((news as any).author_id) {
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		const { data: profile } = await (supabase as any)
-			.from("profiles")
-			.select("full_name")
-			.eq("id", (news as { author_id: string }).author_id)
-			.maybeSingle();
-		(news as { author: unknown }).author = profile || null;
+	if (news.author_id) {
+		try {
+			const { rows: profileRows } = await pool.query(
+				"SELECT full_name FROM profiles WHERE id = $1 LIMIT 1",
+				[news.author_id]
+			);
+			news.author = profileRows[0] || null;
+		} catch (error) {
+			console.error(`Error fetching author meta for article ${slug}:`, error);
+			news.author = null;
+		}
 	} else {
-		(news as { author: unknown }).author = null;
+		news.author = null;
 	}
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -228,14 +243,12 @@ async function isCurrentUserAdmin(): Promise<boolean> {
 			return false;
 		}
 
-		const { createAdminClient } = await import("@/lib/supabase/admin");
-		const supabase = createAdminClient();
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		const { data: profile } = await (supabase as any)
-			.from("profiles")
-			.select("role, discord_id")
-			.eq("id", session.user.id)
-			.maybeSingle();
+		const pool = getPgPool();
+		const { rows: profileRows } = await pool.query<{ role: string | null; discord_id: string | null }>(
+			"SELECT role, discord_id FROM profiles WHERE id = $1 LIMIT 1",
+			[session.user.id]
+		);
+		const profile = profileRows[0];
 
 		if (!profile) {
 			return false;

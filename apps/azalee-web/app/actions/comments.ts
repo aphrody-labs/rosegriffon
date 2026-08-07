@@ -2,6 +2,7 @@
 
 import { getServerSession } from "@/lib/auth-helpers";
 import { isAdminRole } from "@/lib/auth-roles";
+import { getPgPool } from "@/lib/db/pg";
 import { createClient } from "@/lib/supabase/server";
 
 export interface Comment {
@@ -519,42 +520,31 @@ export async function pinComment(commentId: string): Promise<{ is_pinned: boolea
 
 /**
  * Retourne le nombre total de commentaires (y compris réponses) pour un article.
+ * Lecture Postgres DIRECTE (bypass le Data API PostgREST — cf. lib/db/pg.ts).
  */
 export async function getCommentCount(articleId: string): Promise<number> {
-	const supabase = await createClient();
-	const { count, error } = await supabase
-		.from("article_comments")
-		.select("id", { count: "exact", head: true })
-		.eq("article_id", articleId);
+	const pool = getPgPool();
 
-	if (error) {
+	try {
+		const { rows } = await pool.query<{ count: string }>(
+			"SELECT COUNT(*) AS count FROM article_comments WHERE article_id = $1",
+			[articleId]
+		);
+
+		return Number(rows[0]?.count ?? 0);
+	} catch (error) {
 		console.error("getCommentCount error:", error);
 		return 0;
 	}
-
-	return count || 0;
 }
 
 /**
  * Version batch de getCommentCount — retourne une map articleId → nombre de commentaires.
  * Utilisé sur le fil d'actualité pour afficher les compteurs sur les cartes.
+ * Lecture Postgres DIRECTE (bypass le Data API PostgREST — cf. lib/db/pg.ts).
  */
 export async function getCommentCounts(articleIds: string[]): Promise<Record<string, number>> {
 	if (articleIds.length === 0) {
-		return {};
-	}
-
-	const supabase = await createClient();
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	const client = supabase as any;
-
-	const { data, error } = await client
-		.from("article_comments")
-		.select("article_id")
-		.in("article_id", articleIds);
-
-	if (error) {
-		console.error("getCommentCounts error:", error);
 		return {};
 	}
 
@@ -563,13 +553,23 @@ export async function getCommentCounts(articleIds: string[]): Promise<Record<str
 		result[id] = 0;
 	}
 
-	if (data) {
-		for (const row of data as Array<{ article_id: string }>) {
+	const pool = getPgPool();
+
+	try {
+		const { rows } = await pool.query<{ article_id: string }>(
+			"SELECT article_id FROM article_comments WHERE article_id = ANY($1)",
+			[articleIds]
+		);
+
+		for (const row of rows) {
 			result[row.article_id] = (result[row.article_id] || 0) + 1;
 		}
-	}
 
-	return result;
+		return result;
+	} catch (error) {
+		console.error("getCommentCounts error:", error);
+		return {};
+	}
 }
 
 /**
