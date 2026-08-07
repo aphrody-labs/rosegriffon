@@ -1,6 +1,6 @@
 {
 	"name": "@rose-griffon/types",
-	"version": "0.1.0",
+	"version": "0.2.0",
 	"description": "Types métier partagés (roles, user, discord) — source unique de vérité bot/azalee/website",
 	"type": "module",
 	"exports": {

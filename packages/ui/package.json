@@ -1,6 +1,6 @@
 {
 	"name": "@rose-griffon/ui",
-	"version": "0.1.0",
+	"version": "0.2.0",
 	"description": "Composants shadcn/ui partagés (new-york style, Tailwind v4)",
 	"type": "module",
 	"sideEffects": [
