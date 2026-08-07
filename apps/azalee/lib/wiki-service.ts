@@ -2134,24 +2134,41 @@ export const wikiService = {
 			}
 		}
 
-		// Deduplicate and sort variants inside each character by age (youngest first)
+		// Deduplicate and sort variants inside each character by age (youngest first).
+		// Clé alignée sur getCharacterForms : poste + élément + rareté + heroType +
+		// internalCode + series. Sans series/internalCode, Byron IE et Byron Ares
+		// (même MF/Normal) se fusionnaient → comparateur / fiche affichaient la même
+		// version pour les deux slugs.
 		for (const char of grouped.values()) {
 			const seenVariants = new Set<string>();
 			const dedupedVariants: typeof char.variants = [];
+			const variantKey = (v: (typeof char.variants)[number]) => {
+				const vv = v as unknown as {
+					internalCode?: string;
+					series?: string;
+					heroType?: string;
+				};
+				return `${v.position}|${v.element}|${v.rarity}|${vv.heroType || ""}|${vv.internalCode || ""}|${vv.series || ""}`;
+			};
 			for (const v of char.variants) {
-				const vKey = `${v.position}|${v.element}|${v.rarity}|${v.internalCode || ""}`;
+				const vKey = variantKey(v);
 				if (!seenVariants.has(vKey)) {
 					seenVariants.add(vKey);
 					dedupedVariants.push(v);
 				} else {
-					const idx = dedupedVariants.findIndex(
-						(x) => `${x.position}|${x.element}|${x.rarity}|${x.internalCode || ""}` === vKey
-					);
-					if (
-						idx !== -1 &&
-						!(dedupedVariants[idx] as unknown as { sheetData?: unknown }).sheetData &&
-						(v as unknown as { sheetData?: unknown }).sheetData
-					) {
+					const idx = dedupedVariants.findIndex((x) => variantKey(x) === vKey);
+					if (idx === -1) {
+						continue;
+					}
+					const current = dedupedVariants[idx] as unknown as {
+						sheetData?: unknown;
+						skills?: unknown[];
+					};
+					const candidate = v as unknown as { sheetData?: unknown; skills?: unknown[] };
+					const currentSkills = Array.isArray(current.skills) ? current.skills.length : 0;
+					const candidateSkills = Array.isArray(candidate.skills) ? candidate.skills.length : 0;
+					// Préférer la variante avec sheetData, sinon celle avec le plus de skills
+					if ((!current.sheetData && candidate.sheetData) || candidateSkills > currentSkills) {
 						dedupedVariants[idx] = v;
 					}
 				}
@@ -2300,6 +2317,11 @@ export const wikiService = {
 			slug: char.slug,
 			zukanHash,
 			zukanOrder: char.zukan_order,
+			// Nécessaire pour groupVariants : sans ça, IE / GO / Ares (même poste+rareté)
+			// se collapsaient en une seule variante (internalCode toujours "").
+			internalCode: originalCode,
+			series: char.series || undefined,
+			heroType: char.hero_type || undefined,
 		};
 
 		const isBasara = char.rarity_label === "BASARA";

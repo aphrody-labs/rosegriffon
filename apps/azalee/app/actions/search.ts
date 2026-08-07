@@ -438,6 +438,8 @@ export interface CompareSearchResult {
 	element?: string;
 	position?: string;
 	rarity?: string;
+	/** Série (IE / GO / Ares…) — indispensable pour distinguer les versions d’un même perso */
+	series?: string;
 	imageUrl?: string;
 	zukanHash?: string;
 	totalStats: number;
@@ -463,7 +465,7 @@ export async function searchCompareCharacters(
 	let dbQuery = (supabase as any)
 		.from("inagle_characters")
 		.select(
-			"id, slug, name_fr, name_en, name_ja, position, element, rarity_label, internal_code, zukan_hash, stat_frappe, stat_controle, stat_technique, stat_pression, stat_physique, stat_agilite, stat_intelligence"
+			"id, slug, name_fr, name_en, name_ja, position, element, rarity_label, series, internal_code, zukan_hash, stat_frappe, stat_controle, stat_technique, stat_pression, stat_physique, stat_agilite, stat_intelligence"
 		)
 		.not("stat_frappe", "is", null);
 
@@ -521,6 +523,9 @@ export async function searchCompareCharacters(
 			name: c.name_fr || c.name_en || c.id,
 			position: c.position || undefined,
 			rarity: c.rarity_label || undefined,
+			series: c.series || undefined,
+			// Toujours le slug de la VARIANTE (pas base_slug) pour que le comparateur
+			// charge la bonne version (Byron IE ≠ Byron Ares).
 			slug: c.slug || c.id,
 			totalStats: total,
 			zukanHash: c.zukan_hash || undefined,

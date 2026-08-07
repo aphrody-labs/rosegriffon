@@ -90,38 +90,111 @@ async function inheritSkillsFromSibling(charaId: string, currentId: string): Pro
 	return [];
 }
 
+/** Normalise poste FR/EN → code court (MF/FW/…) pour l’UI du comparateur */
+const POSITION_TO_CODE: Record<string, string> = {
+	Attaquant: "FW",
+	ATT: "FW",
+	FW: "FW",
+	Défenseur: "DF",
+	Defenseur: "DF",
+	DEF: "DF",
+	DF: "DF",
+	Gardien: "GK",
+	GAR: "GK",
+	GK: "GK",
+	Milieu: "MF",
+	MIL: "MF",
+	MF: "MF",
+};
+
+/** Normalise élément FR/EN → clé sprite (Forest/Fire/…) */
+const ELEMENT_TO_CODE: Record<string, string> = {
+	Feu: "Fire",
+	Fire: "Fire",
+	Forêt: "Forest",
+	Foret: "Forest",
+	Forest: "Forest",
+	Montagne: "Mountain",
+	Mountain: "Mountain",
+	Vent: "Wind",
+	Wind: "Wind",
+	Néant: "Void",
+	Neant: "Void",
+	Void: "Void",
+};
+
+function formatCompareName(baseName: string, series?: string, rarity?: string): string {
+	const tags: string[] = [];
+	if (series && series !== "Inazuma Eleven") {
+		// Court labels pour les séries non-IE1 (Ares, GO, Orion…)
+		tags.push(series.replace(/^Inazuma Eleven\s*/i, "").trim() || series);
+	}
+	if (rarity && rarity !== "Normal") {
+		tags.push(rarity);
+	}
+	return tags.length > 0 ? `${baseName} (${tags.join(" · ")})` : baseName;
+}
+
 async function resolveCharacter(idOrSlug: string | undefined): Promise<CompareCharacter | null> {
 	if (!idOrSlug) {
 		return null;
 	}
 
-	// MÊME chaîne de résolution que la fiche perso (app/chara/[id]/page.tsx) :
-	// base_slug → slug variante → id brut. Sinon le comparateur résout une AUTRE
-	// variante que celle affichée sur la fiche → stats/skills/image désynchronisés.
-	let baseChar = await wikiService.getCharacterByBaseSlug(idOrSlug);
-	if (!baseChar) {
-		baseChar = await wikiService.getCharacterBySlug(idOrSlug);
-	}
-	if (!baseChar) {
-		baseChar = await wikiService.getCharacter(idOrSlug);
-	}
-	if (!baseChar) {
-		return null;
+	// 1) Lookup EXACT par slug ou id (le comparateur cible toujours une version précise).
+	//    On évite de passer par base_slug en premier : getCharacterByBaseSlug + variants[0]
+	//    collapsait Byron IE / Ares / GO sur la même variante.
+	const supabase = await createClient();
+	let { data: exactRow } = await supabase
+		.from("inagle_characters")
+		.select("*")
+		.eq("slug", idOrSlug)
+		.maybeSingle();
+	if (!exactRow) {
+		({ data: exactRow } = await supabase
+			.from("inagle_characters")
+			.select("*")
+			.eq("id", idOrSlug)
+			.maybeSingle());
 	}
 
-	// Sélection de la variante alignée sur la fiche : variante dont le charaParamId
-	// matche l'id demandé, sinon variants[0] (la plus jeune après groupVariants).
-	const variants = (baseChar.variants as any[]) || [];
-	const matchedVariant = variants.find((v) => v.charaParamId === idOrSlug) || variants[0];
+	// 2) Fallback legacy : base_slug / groupVariants (liens sans suffixe hex)
+	let baseChar: any = null;
+	let variant: any = null;
 
-	const variant = matchedVariant;
-	if (!variant) {
+	if (exactRow) {
+		// Mapper la row exacte seule → stats/skills de CETTE version, pas d’un sibling
+		baseChar = wikiService.mapDbCharacterToBase(exactRow);
+		variant = baseChar?.variants?.[0] ?? null;
+	} else {
+		// MÊME chaîne que la fiche perso (app/chara/[id]/page.tsx)
+		baseChar = await wikiService.getCharacterByBaseSlug(idOrSlug);
+		if (!baseChar) {
+			baseChar = await wikiService.getCharacterBySlug(idOrSlug);
+		}
+		if (!baseChar) {
+			baseChar = await wikiService.getCharacter(idOrSlug);
+		}
+		if (!baseChar) {
+			return null;
+		}
+		// Aligné fiche : match charaParamId OU slug variante
+		const variants = (baseChar.variants as any[]) || [];
+		variant =
+			variants.find((v) => v.charaParamId === idOrSlug || v.slug === idOrSlug) || variants[0];
+	}
+
+	if (!baseChar || !variant) {
 		return null;
 	}
 
 	const stats = variant.stats?.lv99 || {};
-	const sd = variant.sheetData || (baseChar as any).sheetData || {};
+	// IMPORTANT : sheetData de la variante uniquement (pas baseChar.sheetData = youngest)
+	const sd = variant.sheetData || {};
 	const isBasara = variant.rarity === "BASARA" || (variant.rarityCode ?? 0) >= 20;
+	const series = variant.series || (baseChar as any).series || undefined;
+	const variantSlug = variant.slug || variant.charaParamId || idOrSlug;
+	const variantInternalCode =
+		variant.internalCode || (baseChar as any).internalCode || (baseChar as any).charaId || undefined;
 
 	// Resolve skills — multiple fallback strategies
 	let skills: SkillInfo[] = [];
@@ -153,8 +226,9 @@ async function resolveCharacter(idOrSlug: string | undefined): Promise<CompareCh
 		}
 
 		// 3) Fallback: inherit from a sibling variant with the same chara_id
+		//    (même chara_id = même série/version de base, pas cross-Ares)
 		if (skills.length === 0) {
-			const charaId = (baseChar as any).charaId || (baseChar as any).internalCode;
+			const charaId = exactRow?.chara_id || (baseChar as any).charaId || (baseChar as any).internalCode;
 			if (charaId) {
 				skills = await inheritSkillsFromSibling(charaId, variant.charaParamId || idOrSlug);
 			}
@@ -171,17 +245,24 @@ async function resolveCharacter(idOrSlug: string | undefined): Promise<CompareCh
 		return true;
 	});
 
+	const baseName = baseChar.names?.fr || baseChar.names?.en || exactRow?.name_fr || "Inconnu";
+	const rarity = variant.rarity || exactRow?.rarity_label || "Normal";
+	const rawPosition = variant.position || exactRow?.position || "MF";
+	const rawElement = variant.element || exactRow?.element || "Void";
+
 	return {
-		element: variant.element || "Void",
-		image: baseChar.image || variant.image || null,
-		internalCode: (baseChar as any).internalCode || (baseChar as any).charaId || undefined,
-		name: baseChar.names.fr || baseChar.names.en || "Inconnu",
-		nameEn: baseChar.names.en || undefined,
-		nameJa: baseChar.names.ja || undefined,
-		position: variant.position || "MF",
-		rarity: variant.rarity || "Normal",
+		element: ELEMENT_TO_CODE[rawElement] || rawElement || "Void",
+		image: variant.image || baseChar.image || null,
+		internalCode: variantInternalCode,
+		name: formatCompareName(baseName, series, rarity),
+		nameEn: baseChar.names?.en || exactRow?.name_en || undefined,
+		nameJa: baseChar.names?.ja || exactRow?.name_ja || undefined,
+		position: POSITION_TO_CODE[rawPosition] || rawPosition || "MF",
+		rarity,
 		skills,
-		slug: (baseChar as any).slug || idOrSlug,
+		// Identité de la VARIANTE sélectionnée (pas le slug du plus jeune après groupVariants)
+		// → swap / re-sélection du 2e perso ne réécrit plus char1 sur la mauvaise version.
+		slug: variantSlug,
 		stats: {
 			agility: stats.agility || 0,
 			control: stats.control || 0,
@@ -225,7 +306,7 @@ async function resolveCharacter(idOrSlug: string | undefined): Promise<CompareCh
 				}
 			: undefined,
 		teamName: (baseChar as any).teamName || undefined,
-		zukanHash: baseChar.zukanHash || variant.zukanHash || undefined,
+		zukanHash: variant.zukanHash || baseChar.zukanHash || undefined,
 	};
 }
 
