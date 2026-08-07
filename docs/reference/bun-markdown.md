@@ -10,7 +10,7 @@ status: "stable"
   **Unstable API** — This API is under active development and may change in future versions of Bun.
 </Callout>
 
-Bun includes a fast, built-in Markdown parser written in Zig. It supports GitHub Flavored Markdown (GFM) extensions and provides three APIs:
+Bun includes a fast, built-in Markdown parser written in Rust. It supports GitHub Flavored Markdown (GFM) extensions and provides three APIs:
 
 - `Bun.markdown.html()` — render Markdown to an HTML string
 - `Bun.markdown.render()` — render Markdown with custom callbacks for each element
@@ -57,9 +57,9 @@ All available options:
 
 | Option                 | Default | Description                                                 |
 | ---------------------- | ------- | ----------------------------------------------------------- |
-| `tables`               | `false` | GFM tables                                                  |
-| `strikethrough`        | `false` | GFM strikethrough (`~~text~~`)                              |
-| `tasklists`            | `false` | GFM task lists (`- [x] item`)                               |
+| `tables`               | `true`  | GFM tables                                                  |
+| `strikethrough`        | `true`  | GFM strikethrough (`~~text~~`)                              |
+| `tasklists`            | `true`  | GFM task lists (`- [x] item`)                               |
 | `autolinks`            | `false` | Enable autolinks — see [Autolinks](#autolinks)              |
 | `headings`             | `false` | Heading IDs and autolinks — see [Heading IDs](#heading-ids) |
 | `hardSoftBreaks`       | `false` | Treat soft line breaks as hard breaks                       |
@@ -258,7 +258,7 @@ const result = Bun.markdown.render("```js\nconsole.log('hi')\n```", {
 
 ### Parser options
 
-Parser options are passed as a separate third argument:
+Pass parser options as a separate third argument:
 
 ```ts
 const result = Bun.markdown.render(
@@ -374,7 +374,7 @@ function Markdown({ text }: { text: string }) {
 
 ### Parser options
 
-All [parser options](#options) are passed as the third argument:
+Pass any of the [parser options](#options) as the third argument:
 
 ```tsx
 const el = Bun.markdown.react("## Hello World", undefined, {

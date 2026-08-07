@@ -48,6 +48,12 @@ Note: :octocat: stands for the GitHub page and :gem: stands for the RubyGems pag
 - [Text w/ Instructions Syntax Samples](https://github.com/texti/texti.github.io/tree/master/samples)  - Idea - let's take a wikipedia page (in wikitext markup) and rewrite in markdown, latex, and yes, text w/ instructions!
 
 
+**Carve** (web: <https://markup-carve.github.io/carve/>, github: <https://github.com/markup-carve/carve>) - by Mark Scherer (Germany); a post-markdown lightweight markup language deriving from djot and commonmark. It distinguishes three separate inline marks - `*strong*`, `/emphasis/`, and `_underline_` - and adds math, definition lists, footnotes, citations, cross-references, and generic containers, with multiple engine implementations in JavaScript, Rust, and PHP.
+
+- [Carve Playground & Docs](https://markup-carve.github.io/carve/)
+- [Awesome Carve](https://github.com/markup-carve/awesome-carve) - curated list of Carve resources, tools, and libraries
+
+
 
 Yes, you can!  Add your improved beyond markdown light markup syntax / language here.
 
@@ -252,6 +258,7 @@ Character encoding
 
 - [Markdown Cheatsheet :octocat:](https://github.com/adam-p/markdown-here/wiki/Markdown-Cheatsheet)
 - [The Ultimate Markdown Cheat Sheet](https://github.com/lifeparticle/Markdown-Cheatsheet)
+- [Markdown Cheat Sheet & Flavor Compatibility Matrix](https://www.markdowntools.io/cheat-sheet) - Cross-platform cheat sheet with GitHub / Obsidian / Jupyter / Discord / Slack support states per feature, plus printable PDFs.
 
 ### Markdown Getting Started Guides / Tutorials
 
@@ -330,6 +337,7 @@ to be done
 ### Markdown Lint / Style Rule Checker
 
 - [ai-slop-detect](https://github.com/antydizajn/ai-slop-detect) - Free Python CLI that flags AI-generated text patterns in markdown and prose (em-dashes, ChatGPT phrases like "leverage" / "cutting-edge", punctuation density, zero-width unicode tells). EN+PL, MIT, GitHub Action included.
+- [darnlink](https://github.com/txemi/darnlink) - Python CLI that repairs Markdown links whose target moved (anchored by a UUID) and robustifies plain ones; report-only pre-commit/CI gate. GitHub Action & pre-commit hook included.
 - [markdownlint](https://github.com/DavidAnson/markdownlint) - A Node.js style checker and lint tool for Markdown/CommonMark files offering a good set of defaults. Allows for customization.
 - [mdformat](https://github.com/executablebooks/mdformat) - CommonMark compliant Markdown formatter
 - [mdlint]() to be done
@@ -499,6 +507,7 @@ JavaScript / Node.js
 More
 
 - [heckyesmarkdown.com](http://heckyesmarkdown.com) - instantly convert a webpage to markdown; the service presents a simple interface that converts any reasonable web page into markdown (note: the service seems to use the Readability API to remove all the non-content cruft from the source page before proceeding with markdownification)
+- [Markdown Web Clipper :octocat:](https://github.com/Tigrandza/markdown-web-clipper) - free, MIT-licensed Chrome extension that converts any webpage to clean Markdown (tables, code blocks, math, footnotes) and saves it to a local folder, GitHub Gist, or the clipboard
 
 ### Source Code to Markdown
 
