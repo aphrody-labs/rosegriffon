@@ -18,6 +18,7 @@
 		"registry": "https://npm.pkg.github.com"
 	},
 	"scripts": {
+		"lint": "bunx oxlint -c ../../.oxlintrc.json src",
 		"type-check": "tsc --noEmit"
 	},
 	"dependencies": {
