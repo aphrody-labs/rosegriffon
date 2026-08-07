@@ -4,7 +4,6 @@ import { getReactionCounts } from "@/app/actions/reactions";
 import { getContinueReading } from "@/app/actions/reading-history";
 import { getPgPool } from "@/lib/db/pg";
 import { sanitizeNewsSearchQuery } from "@/lib/news-search";
-import { createClient } from "@/lib/supabase/server";
 import { parseSearchParams } from "@/lib/validations";
 import { NewsFeedClient } from "./news-client";
 import type { FeedItem } from "./news-client";
@@ -27,7 +26,6 @@ export default async function NewsFeedPage({
 }) {
 	const searchParamsValue = await searchParams;
 	const { page: currentPage } = parseSearchParams(searchParamsValue);
-	const supabase = await createClient();
 	const rawCategory = searchParamsValue.category as string | undefined;
 	const categoryFilter = rawCategory && VALID_CATEGORIES.has(rawCategory) ? rawCategory : undefined;
 	const rawQuery = (searchParamsValue.q as string | undefined) || "";
@@ -36,8 +34,8 @@ export default async function NewsFeedPage({
 	let featuredArticles: FeedItem[] = [];
 	const featuredIds = new Set<string>();
 
-	// Lecture `articles` Postgres DIRECTE (bypass le Data API PostgREST — cf.
-	// lib/db/pg.ts). `tweets` reste sur le client Supabase (cf. tweetsPromise).
+	// Lecture `articles` + `tweets` Postgres DIRECTE (bypass le Data API PostgREST
+	// — cf. lib/db/pg.ts).
 	const pool = getPgPool();
 
 	// Featured (page 1, no filter, no search) — on prend le plus récent par
@@ -80,7 +78,6 @@ export default async function NewsFeedPage({
 	const tweetsAllowed = includeTweets && !searchQuery;
 
 	const articleRangeStart = (currentPage - 1) * ITEMS_PER_PAGE;
-	const articleRangeEnd = articleRangeStart + ITEMS_PER_PAGE - 1;
 
 	// Lecture Postgres DIRECTE (bypass le Data API PostgREST — cf. lib/db/pg.ts).
 	// On trie par `published_at desc nulls last` puis `created_at desc` qui
@@ -144,45 +141,45 @@ export default async function NewsFeedPage({
 
 	const tweetsPromise = tweetsAllowed
 		? (async () => {
-				// eslint-disable-next-line @typescript-eslint/no-explicit-any
-				const { data, count, error } = (await (supabase as any)
-					.from("tweets")
-					.select(
-						"id, text, translation, created_at, author_username, author_name, media, quoted_tweets, raw_tweets",
-						{
-							count: "exact",
-						}
-					)
-					.eq("author_username", "Azalee_IE")
-					.order("created_at", { ascending: false })
-					.range(articleRangeStart, articleRangeEnd)) as any;
-				if (error) {
-					if ((error as { code?: string }).code === "PGRST103") {
-						return { items: [] as FeedItem[], total: 0 };
-					}
+				// Lecture Postgres DIRECTE (bypass le Data API PostgREST — cf. lib/db/pg.ts).
+				try {
+					const { rows } = await pool.query(
+						`SELECT id, text, translation, created_at, author_username, author_name, media,
+							quoted_tweets, raw_tweets, count(*) OVER() AS full_count
+						 FROM tweets
+						 WHERE author_username = $1
+						 ORDER BY created_at DESC
+						 LIMIT $2 OFFSET $3`,
+						["Azalee_IE", ITEMS_PER_PAGE, articleRangeStart]
+					);
+					// eslint-disable-next-line @typescript-eslint/no-explicit-any
+					const data = rows as any[];
+					const count = data[0] ? Number((data[0] as { full_count: string }).full_count) : 0;
+					const items: FeedItem[] = data.map(
+						// eslint-disable-next-line @typescript-eslint/no-explicit-any
+						(t: any) => ({
+							author_id: t.author_username,
+							author_name: t.author_name,
+							author_username: t.author_username,
+							category: "Tweet",
+							date: t.created_at,
+							excerpt: t.translation || t.text,
+							id: t.id,
+							image:
+								t.media && t.media.length > 0 ? t.media[0].preview_url || t.media[0].url : null,
+							media: t.media || [],
+							quotedTweets: t.quoted_tweets || [],
+							slug: t.id,
+							threadTweets: t.raw_tweets || [],
+							title: "",
+							type: "tweet",
+						})
+					);
+					return { items, total: count };
+				} catch (error) {
 					console.error("Error fetching tweets:", error);
 					return { items: [] as FeedItem[], total: 0 };
 				}
-				const items: FeedItem[] = (data || []).map(
-					// eslint-disable-next-line @typescript-eslint/no-explicit-any
-					(t: any) => ({
-						author_id: t.author_username,
-						author_name: t.author_name,
-						author_username: t.author_username,
-						category: "Tweet",
-						date: t.created_at,
-						excerpt: t.translation || t.text,
-						id: t.id,
-						image: t.media && t.media.length > 0 ? t.media[0].preview_url || t.media[0].url : null,
-						media: t.media || [],
-						quotedTweets: t.quoted_tweets || [],
-						slug: t.id,
-						threadTweets: t.raw_tweets || [],
-						title: "",
-						type: "tweet",
-					})
-				);
-				return { items, total: count || 0 };
 			})()
 		: Promise.resolve({ items: [] as FeedItem[], total: 0 });
 

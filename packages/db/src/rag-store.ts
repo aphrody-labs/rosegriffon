@@ -22,7 +22,15 @@
 // Fichier partagé par deux process séparés (rg-cron = écrivain, azalee-web =
 // lecteur) → WAL + busy_timeout pour l'accès concurrent multi-process.
 
-import { Database } from "bun:sqlite";
+// `import type` (PAS un import de valeur) : s'efface entièrement à la compilation,
+// donc zéro `require("bun:sqlite")` émis au chargement du module. Nécessaire car
+// azalee build sous Node (cf. scripts/next-build.sh — bug de prerender Bun sur
+// /_global-error) : un import de VALEUR ferait planter "Collecting page data" dès
+// que /api/rag/search ou /api/graphql sont dans le trace, `bun:sqlite` n'existant
+// pas sous Node. `getDb()` charge le vrai constructeur en lazy, guardé `typeof Bun`
+// (jamais atteint au build ni sous Node runtime — azalee-web/rg-cron tournent tous
+// deux sous Bun en prod, cf. lib/supabase/sqlite-client.ts pour le même pattern).
+import type { Database } from "bun:sqlite";
 import { existsSync, mkdirSync } from "node:fs";
 import path from "node:path";
 
@@ -84,9 +92,16 @@ let db: Database | null = null;
 
 function getDb(): Database {
 	if (db) return db;
+	if (typeof Bun === "undefined") {
+		throw new Error(
+			"[rag-store] bun:sqlite indisponible (runtime Node) — le store RAG local ne tourne que sous Bun (azalee-web / rg-cron)."
+		);
+	}
 	const p = resolveStorePath();
 	mkdirSync(path.dirname(p), { recursive: true });
-	const handle = new Database(p, { create: true });
+	// eslint-disable-next-line @typescript-eslint/no-require-imports -- lazy load bun:sqlite sous garde Bun (cf. commentaire d'import ci-dessus)
+	const { Database: DBConstructor } = require("bun:sqlite");
+	const handle: Database = new DBConstructor(p, { create: true });
 	handle.run("PRAGMA journal_mode = WAL;");
 	handle.run("PRAGMA synchronous = NORMAL;");
 	handle.run("PRAGMA busy_timeout = 5000;");

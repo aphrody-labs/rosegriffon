@@ -41,13 +41,13 @@ export default async function HomePage() {
 	const pool = getPgPool();
 
 	// Fetch pinned articles, latest articles, tweets, and wiki counts in parallel
-	// Lecture `articles` Postgres DIRECTE (bypass le Data API PostgREST — cf.
-	// lib/db/pg.ts) ; `tweets` + `inagle_*` restent sur le client Supabase (Proxy
-	// SQLite pour les inagle_*, cf. lib/supabase/server.ts).
+	// Lecture `articles` + `tweets` Postgres DIRECTE (bypass le Data API PostgREST
+	// — cf. lib/db/pg.ts) ; `inagle_*` reste sur le client Supabase (Proxy SQLite,
+	// cf. lib/supabase/server.ts).
 	const [
 		{ rows: pinnedArticles },
 		{ rows: latestArticles },
-		{ data: latestTweets },
+		{ rows: latestTweets },
 		{ count: charactersCount },
 		{ count: skillsCount },
 		{ count: itemsCount },
@@ -69,12 +69,14 @@ export default async function HomePage() {
 			 LIMIT 3 OFFSET 1`,
 			["published", "azalee"]
 		),
-		supabase
-			.from("tweets")
-			.select("id, text, translation, created_at, author_username, author_name, media")
-			.eq("author_username", "Azalee_IE")
-			.order("created_at", { ascending: false })
-			.limit(6),
+		pool.query(
+			`SELECT id, text, translation, created_at, author_username, author_name, media
+			 FROM tweets
+			 WHERE author_username = $1
+			 ORDER BY created_at DESC
+			 LIMIT 6`,
+			["Azalee_IE"]
+		),
 		supabase.from("inagle_characters").select("id", { count: "exact", head: true }),
 		supabase.from("inagle_skills").select("id", { count: "exact", head: true }),
 		supabase.from("inagle_items").select("id", { count: "exact", head: true }),
