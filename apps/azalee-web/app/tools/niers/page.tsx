@@ -1,16 +1,16 @@
 import type { Metadata } from "next";
 import { Button } from "@rose-griffon/ui";
 import { Icon } from "@/components/ui/Icon";
+import { getLatestNiersDesktopRelease, type NiersDesktopRelease } from "@/lib/niers-releases";
 
-const RELEASE_TAG = "v0.4.0";
-const RELEASE_BASE = `https://github.com/aphrody-code/niers/releases/download/${RELEASE_TAG}`;
-const RELEASE_URL = `https://github.com/aphrody-code/niers/releases/tag/${RELEASE_TAG}`;
+// Page 100 % DYNAMIQUE côté données de version : `getLatestNiersDesktopRelease()` (source partagée
+// avec `/tools/niers/latest.json`, l'endpoint updater Tauri) résout la dernière release GitHub à
+// chaque revalidation — plus aucune version/tag/nom de fichier en dur à mettre à jour manuellement
+// ici après une nouvelle release niers (cf. `scripts/release-desktop.sh` côté dépôt niers).
+export const revalidate = 3600; // NIERS_RELEASE_REVALIDATE (littéral requis — segment config Next.js statiquement analysé)
 
-const DOWNLOADS = {
-	blenderZip: `${RELEASE_BASE}/niers-1.1.0.zip`,
-	msi: `${RELEASE_BASE}/niers_0.4.0_x64_en-US.msi`,
-	setupExe: `${RELEASE_BASE}/niers_0.4.0_x64-setup.exe`,
-};
+const GITHUB_REPO_URL = "https://github.com/aphrody-code/niers";
+const BLENDER_ADDON_VERSION = "1.1.0"; // versionné indépendamment de l'app (blender_manifest.toml, tools/niers/)
 
 export const metadata: Metadata = {
 	alternates: { canonical: "/tools/niers" },
@@ -42,7 +42,38 @@ function FeatureItem({ icon, children }: { icon: string; children: React.ReactNo
 	);
 }
 
-export default function NiersToolPage() {
+/** Bouton de téléchargement — désactivé + libellé explicite si la release GitHub est indisponible
+ * (panne API, aucune release signée publiée) plutôt qu'un lien mort silencieux. */
+function DownloadButton({
+	asset,
+	children,
+	variant,
+}: {
+	asset: { url: string } | null;
+	children: React.ReactNode;
+	variant?: "outline";
+}) {
+	if (!asset) {
+		return (
+			<Button disabled size="default" variant={variant}>
+				<Icon name="download" size={18} />
+				Indisponible
+			</Button>
+		);
+	}
+	return (
+		<Button asChild size="default" variant={variant}>
+			<a href={asset.url} download>
+				<Icon name="download" size={18} />
+				{children}
+			</a>
+		</Button>
+	);
+}
+
+export default async function NiersToolPage() {
+	const release: NiersDesktopRelease | null = await getLatestNiersDesktopRelease();
+
 	return (
 		<div className="w-full space-y-10">
 			<header className="space-y-2">
@@ -73,21 +104,15 @@ export default function NiersToolPage() {
 							<Icon name="folder_open" size={22} className="text-primary" />
 							niers — application desktop
 						</h2>
-						<p className="type-body-small text-on-surface-variant">Windows x64 · Tauri · v0.4.0</p>
+						<p className="type-body-small text-on-surface-variant">
+							Windows x64 · Tauri{release ? ` · v${release.version}` : ""}
+						</p>
 					</div>
 					<div className="flex flex-wrap gap-2">
-						<Button asChild size="default">
-							<a href={DOWNLOADS.msi} download>
-								<Icon name="download" size={18} />
-								Télécharger (.msi)
-							</a>
-						</Button>
-						<Button asChild variant="outline" size="default">
-							<a href={DOWNLOADS.setupExe} download>
-								<Icon name="download" size={18} />
-								.exe (NSIS)
-							</a>
-						</Button>
+						<DownloadButton asset={release?.msi ?? null}>Télécharger (.msi)</DownloadButton>
+						<DownloadButton asset={release?.nsis ?? null} variant="outline">
+							.exe (NSIS)
+						</DownloadButton>
 					</div>
 				</div>
 
@@ -129,14 +154,9 @@ export default function NiersToolPage() {
 							<Icon name="extension" size={22} className="text-primary" />
 							niers — extension Blender
 						</h2>
-						<p className="type-body-small text-on-surface-variant">Blender 4.2+ · v1.0.22</p>
+						<p className="type-body-small text-on-surface-variant">Blender 4.2+ · v{BLENDER_ADDON_VERSION}</p>
 					</div>
-					<Button asChild size="default">
-						<a href={DOWNLOADS.blenderZip} download>
-							<Icon name="download" size={18} />
-							Télécharger (.zip)
-						</a>
-					</Button>
+					<DownloadButton asset={release?.blenderZip ?? null}>Télécharger (.zip)</DownloadButton>
 				</div>
 
 				<ul className="
@@ -160,11 +180,25 @@ export default function NiersToolPage() {
 				</div>
 			</section>
 
+			{!release && (
+				<p className="type-body-small text-error">
+					Impossible de récupérer la dernière release depuis GitHub pour le moment — réessayez plus
+					tard, ou téléchargez directement depuis{" "}
+					<a href={`${GITHUB_REPO_URL}/releases`} className="
+       underline underline-offset-2
+       hover:no-underline
+     ">
+						la page des releases
+					</a>
+					.
+				</p>
+			)}
+
 			<p className="type-body-small text-on-surface-variant max-w-2xl">
 				niers lit les fichiers de votre propre installation locale du jeu ; aucun asset n'est
-				redistribué. Assets et données du jeu © Level-5. Code source et{" "}
+				redistribué. Code source et{" "}
 				<a
-					href={RELEASE_URL}
+					href={release?.releaseUrl ?? `${GITHUB_REPO_URL}/releases`}
 					className="
        text-primary underline underline-offset-2
        hover:no-underline
@@ -174,7 +208,7 @@ export default function NiersToolPage() {
 				</a>{" "}
 				sur{" "}
 				<a
-					href="https://github.com/aphrody-code/niers"
+					href={GITHUB_REPO_URL}
 					className="
        text-primary underline underline-offset-2
        hover:no-underline
