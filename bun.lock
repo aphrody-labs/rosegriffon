@@ -311,6 +311,7 @@
         "@types/react": "catalog:",
         "@types/react-dom": "catalog:",
         "@vitejs/plugin-react": "catalog:",
+        "babel-plugin-react-compiler": "catalog:",
         "jsdom": "catalog:",
         "oxlint": "catalog:",
         "shadcn": "catalog:",
@@ -455,7 +456,7 @@
     },
     "packages/db": {
       "name": "@rose-griffon/db",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "dependencies": {
         "@rose-griffon/types": "workspace:*",
         "@supabase/ssr": "catalog:",
@@ -587,7 +588,7 @@
     },
     "packages/types": {
       "name": "@rose-griffon/types",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "dependencies": {
         "zod": "catalog:",
       },
@@ -598,7 +599,7 @@
     },
     "packages/ui": {
       "name": "@rose-griffon/ui",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "dependencies": {
         "@radix-ui/react-accordion": "catalog:",
         "@radix-ui/react-alert-dialog": "catalog:",
