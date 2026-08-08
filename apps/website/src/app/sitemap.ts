@@ -26,7 +26,6 @@ const ROUTES: Array<{
 	{ path: "/nous-soutenir", priority: 0.7, changeFrequency: "monthly" },
 	{ path: "/charte-engagements", priority: 0.4, changeFrequency: "yearly" },
 	{ path: "/cellule-de-mediation", priority: 0.3, changeFrequency: "yearly" },
-	{ path: "/mentions-legales", priority: 0.3, changeFrequency: "yearly" },
 	{ path: "/legal/cgu", priority: 0.3, changeFrequency: "yearly" },
 	{ path: "/legal/confidentialite", priority: 0.3, changeFrequency: "yearly" },
 ];
