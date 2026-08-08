@@ -16,7 +16,14 @@ const CharacterModelViewer = dynamic(() => import("@/components/wiki/CharacterMo
 
 const CDN = "https://cdn.rosegriffon.fr";
 
-export function CharaAssetsSection({ internalCode }: { internalCode: string }) {
+export function CharaAssetsSection({
+	internalCode,
+	displayName,
+}: {
+	internalCode: string;
+	/** Nom lisible du personnage — utilisé pour l'alt/titre/nom de fichier du viewer 3D, jamais le code interne. */
+	displayName?: string;
+}) {
 	const [voiceFailed, setVoiceFailed] = useState(false);
 	if (!internalCode || !/^c\d{6,9}$/i.test(internalCode)) return null;
 
@@ -27,15 +34,14 @@ export function CharaAssetsSection({ internalCode }: { internalCode: string }) {
 		<section className="rounded-3xl border border-outline-variant/20 bg-surface-container-low/40 p-5 space-y-4">
 			<h2 className="flex items-center gap-2 text-fluid-title-md font-bold text-on-surface">
 				<Icon name="deployed_code" size={20} className="text-primary" />
-				Assets du jeu{" "}
-				<span className="text-xs font-mono text-on-surface-variant">({internalCode})</span>
+				Assets du jeu
 			</h2>
 
 			<div>
 				<p className="text-xs text-on-surface-variant mb-1">
 					Modèle 3D (corps + visage + uniforme)
 				</p>
-				<CharacterModelViewer glbUrl={glbUrl} name={internalCode} inline />
+				<CharacterModelViewer glbUrl={glbUrl} name={displayName || "personnage"} inline />
 			</div>
 
 			{!voiceFailed && (

@@ -345,33 +345,6 @@ export function AuraDetail({ aura, category, subTypeInfo, prevAura, nextAura }: 
 							</div>
 						)}
 
-					{/* Technical Info */}
-					<div className="pt-6 border-t border-outline-variant/10">
-						<div className="flex flex-wrap gap-6 text-xs text-on-surface-variant/60 font-mono">
-							<div className="flex flex-col">
-								<span className="uppercase tracking-wider font-bold opacity-50 mb-0.5">
-									ID Interne
-								</span>
-								<span>{aura.auraId}</span>
-							</div>
-							{aura.assetCode && (
-								<div className="flex flex-col">
-									<span className="uppercase tracking-wider font-bold opacity-50 mb-0.5">
-										Code Asset
-									</span>
-									<span>{aura.assetCode}</span>
-								</div>
-							)}
-							{aura.sheetData && (
-								<div className="flex flex-col">
-									<span className="uppercase tracking-wider font-bold opacity-50 mb-0.5">
-										Correspondance
-									</span>
-									<span>{aura.sheetData.matchedName}</span>
-								</div>
-							)}
-						</div>
-					</div>
 				</div>
 			</div>
 

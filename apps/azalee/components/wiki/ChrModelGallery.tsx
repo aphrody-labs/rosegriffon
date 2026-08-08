@@ -3,6 +3,7 @@
 import { Download, PawPrint, Sparkles, Swords } from "lucide-react";
 import { useState } from "react";
 import InlineModelViewer from "@/components/wiki/InlineModelViewer";
+import { downloadName } from "@/lib/download-filename";
 import { cn } from "@/lib/utils";
 
 interface ModelEntry {
@@ -24,6 +25,7 @@ interface ChrModelGalleryProps {
 function ModelCard({ entry }: { entry: ModelEntry }) {
 	const [texError, setTexError] = useState(false);
 	const showTexture = Boolean(entry.textureUrl) && !texError;
+	const fileName = downloadName(entry.name, "modele");
 	return (
 		<div className="group rounded-2xl overflow-hidden bg-surface-container border border-outline-variant/20 hover:border-primary/40 transition-all duration-200">
 			{/* Vrai modèle 3D rendu INLINE (monté quand visible, démonté hors-champ). */}
@@ -44,13 +46,12 @@ function ModelCard({ entry }: { entry: ModelEntry }) {
 			<div className="p-3 border-t border-outline-variant/10 space-y-2">
 				<div>
 					<p className="type-title-small text-on-surface truncate">{entry.name}</p>
-					<p className="type-body-small text-on-surface-variant/60 font-mono">{entry.code}</p>
 				</div>
 				{/* Téléchargements : modèle (GLB) + texture (PNG). */}
 				<div className="flex flex-wrap items-center gap-1.5">
 					<a
 						href={entry.glbUrl}
-						download={`${entry.code}.glb`}
+						download={`${fileName}.glb`}
 						className="inline-flex items-center gap-1 rounded-full bg-surface-container-high px-2.5 py-1 text-xs font-medium text-on-surface-variant hover:text-on-surface hover:bg-surface-container-highest transition-colors"
 						title="Télécharger le modèle 3D (GLB)"
 					>
@@ -59,7 +60,7 @@ function ModelCard({ entry }: { entry: ModelEntry }) {
 					{showTexture && (
 						<a
 							href={entry.textureUrl ?? "#"}
-							download={`${entry.code}.png`}
+							download={`${fileName}.png`}
 							className="inline-flex items-center gap-1 rounded-full bg-surface-container-high px-2.5 py-1 text-xs font-medium text-on-surface-variant hover:text-on-surface hover:bg-surface-container-highest transition-colors"
 							title="Télécharger la texture (PNG)"
 						>

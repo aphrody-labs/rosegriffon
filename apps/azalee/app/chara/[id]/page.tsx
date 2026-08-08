@@ -674,7 +674,7 @@ export default async function PlayerDetailPage({ params }: { params: Promise<{ i
 
 			{player.internalCode && (
 				<div className="mt-6">
-					<CharaAssetsSection internalCode={player.internalCode} />
+					<CharaAssetsSection internalCode={player.internalCode} displayName={charName} />
 				</div>
 			)}
 
