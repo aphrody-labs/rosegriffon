@@ -59,12 +59,6 @@ export default function Footer() {
 					<div className="flex flex-col items-center sm:items-start gap-2">
 						<h3 className="text-sm font-semibold text-foreground mb-1">Informations légales</h3>
 						<Link
-							href="/mentions-legales"
-							className="text-sm text-muted-foreground hover:text-foreground hover:underline transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-sm"
-						>
-							Mentions légales
-						</Link>
-						<Link
 							href="/legal/cgu"
 							className="text-sm text-muted-foreground hover:text-foreground hover:underline transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-sm"
 						>

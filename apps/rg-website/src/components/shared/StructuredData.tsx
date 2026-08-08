@@ -29,12 +29,12 @@ export function ImageObjectSchema({
 	const schema: WithContext<ImageObject> = {
 		"@context": "https://schema.org",
 		"@type": "ImageObject",
-		acquireLicensePage: "https://rosegriffon.fr/mentions-legales",
+		acquireLicensePage: "https://rosegriffon.fr/legal/cgu",
 		author: author ? { "@type": "Person", name: author } : undefined,
 		contentUrl: url,
 		datePublished: datePublished,
 		description: description,
-		license: "https://rosegriffon.fr/mentions-legales",
+		license: "https://rosegriffon.fr/legal/cgu",
 		name: name,
 	};
 
