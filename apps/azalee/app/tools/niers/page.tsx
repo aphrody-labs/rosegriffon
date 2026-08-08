@@ -2,14 +2,14 @@ import type { Metadata } from "next";
 import { Button } from "@rose-griffon/ui";
 import { Icon } from "@/components/ui/Icon";
 
-const RELEASE_TAG = "v0.1.0";
+const RELEASE_TAG = "v0.4.0";
 const RELEASE_BASE = `https://github.com/aphrody-code/niers/releases/download/${RELEASE_TAG}`;
 const RELEASE_URL = `https://github.com/aphrody-code/niers/releases/tag/${RELEASE_TAG}`;
 
 const DOWNLOADS = {
-	blenderZip: `${RELEASE_BASE}/niers-1.0.22.zip`,
-	msi: `${RELEASE_BASE}/niers_0.1.0_x64_en-US.msi`,
-	setupExe: `${RELEASE_BASE}/niers_0.1.0_x64-setup.exe`,
+	blenderZip: `${RELEASE_BASE}/niers-1.1.0.zip`,
+	msi: `${RELEASE_BASE}/niers_0.4.0_x64_en-US.msi`,
+	setupExe: `${RELEASE_BASE}/niers_0.4.0_x64-setup.exe`,
 };
 
 export const metadata: Metadata = {
@@ -73,7 +73,7 @@ export default function NiersToolPage() {
 							<Icon name="folder_open" size={22} className="text-primary" />
 							niers — application desktop
 						</h2>
-						<p className="type-body-small text-on-surface-variant">Windows x64 · Tauri · v0.1.0</p>
+						<p className="type-body-small text-on-surface-variant">Windows x64 · Tauri · v0.4.0</p>
 					</div>
 					<div className="flex flex-wrap gap-2">
 						<Button asChild size="default">
@@ -149,8 +149,8 @@ export default function NiersToolPage() {
 						→ Installer depuis un fichier.
 					</FeatureItem>
 					<FeatureItem icon="person_search">
-						Panneau « Level-5 » : recherche et import de personnages et techniques par nom ou
-						catégorie, sans quitter Blender.
+						Panneau « niers » : recherche de personnages et techniques (local + API/GraphQL
+						azalee) et import direct par nom ou catégorie, sans quitter Blender.
 					</FeatureItem>
 				</ul>
 
