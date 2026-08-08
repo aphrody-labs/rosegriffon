@@ -27,7 +27,6 @@ function ModelCard({ entry }: { entry: ModelEntry }) {
 			</div>
 			<div className="p-3 border-t border-outline-variant/10">
 				<p className="type-title-small text-on-surface truncate">{entry.name}</p>
-				<p className="type-body-small text-on-surface-variant/60 font-mono">{entry.code}</p>
 			</div>
 		</div>
 	);

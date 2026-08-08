@@ -104,7 +104,6 @@ export function ItemDetail({ item, itemName, itemDesc }: ItemDetailProps) {
 	const descJA = item.descriptions?.ja || (item as any).description_JA;
 	const { rarity } = item as any;
 	const rarityLabel = rarity ? RARITY_LABELS[String(rarity)] || String(rarity) : null;
-	const { internalCode } = item as any;
 	const { price } = item as any;
 	const sheetData = (item as any).sheetData as CommunitySheetData | null;
 	const exchangeRecipes = (item as any).exchangeRecipes as Array<{
@@ -352,15 +351,6 @@ export function ItemDetail({ item, itemName, itemDesc }: ItemDetailProps) {
 							</div>
 						</div>
 					)}
-
-					{/* Technical Info */}
-					<div className="pt-4 border-t border-outline-variant/10">
-						<div className="flex flex-wrap gap-4 text-xs text-on-surface-variant/60 font-mono">
-							<span>ID: {item.itemId}</span>
-							{internalCode && <span>Code: {internalCode}</span>}
-							{sheetData?.matchedName && <span>Sheet: {sheetData.matchedName}</span>}
-						</div>
-					</div>
 				</div>
 			</div>
 

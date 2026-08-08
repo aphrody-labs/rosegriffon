@@ -1,53 +1,19 @@
 "use client";
 
 /**
- * Section "Cut-in" d'une fiche hissatsu : affiche **tous** les assets du cut-in servis live par
+ * Section "Cut-in" d'une fiche hissatsu : affiche les assets du cut-in servis live par
  * niers — le **telop** (nom rendu, g4tx→png), le **modèle 3D** du cut-in (`chr/_waza`, assemblé
- * serveur depuis g4pkm→g4md + g4mg + texture g4tx embarquée), la **texture** (`dx11/chr/_waza`,
- * g4tx→png) et la liste des **effets d'event** (`common/event/<grp>/<ev>/`, g4pk). Données :
- * `skills-cutin.json` (+ `/api/cpk` pour le listing d'effets).
+ * serveur depuis g4pkm→g4md + g4mg + texture g4tx embarquée) et la **texture** (`dx11/chr/_waza`,
+ * g4tx→png). Données : `skills-cutin.json`.
  */
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Icon } from "@/components/ui/Icon";
 // Viewer cut-in composé (scène R3F + timeline + export MP4). C'est lui qui gère le
 // `next/dynamic { ssr:false }` de la scène et le repli `<CharacterModelViewer>` interne.
 import { CutinViewer } from "@/components/wiki/cutin/CutinViewer";
 import { cpkAssetUrl } from "@/lib/cpk/shared";
+import { downloadName } from "@/lib/download-filename";
 import type { SkillCutin } from "@/lib/skills-cutin";
-
-/** Liste des effets g4pk d'un event de cut-in (via l'API d'index CPK). */
-function CutinEffects({ dir }: { dir: string }) {
-	const [files, setFiles] = useState<string[] | null>(null);
-	useEffect(() => {
-		let on = true;
-		fetch(`/api/cpk?path=${encodeURIComponent(dir.replace(/\/$/, ""))}`)
-			.then((r) => (r.ok ? r.json() : null))
-			.then((j) => {
-				if (on && j?.files) setFiles(j.files.map((f: { name: string }) => f.name));
-			})
-			.catch(() => on && setFiles([]));
-		return () => {
-			on = false;
-		};
-	}, [dir]);
-
-	if (!files) return null;
-	const g4pk = files.filter((f) => f.endsWith(".g4pk"));
-	return (
-		<details className="text-xs">
-			<summary className="cursor-pointer text-on-surface-variant hover:text-on-surface">
-				Effets d'event ({g4pk.length} g4pk · {files.length} fichiers)
-			</summary>
-			<ul className="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-x-4 font-mono text-on-surface-variant/80 max-h-60 overflow-y-auto">
-				{files.map((f) => (
-					<li key={f} className="truncate">
-						{f}
-					</li>
-				))}
-			</ul>
-		</details>
-	);
-}
 
 /** Chip de téléchargement (texture/telop PNG), réutilisable. */
 function DownloadChip({ href, filename }: { href: string; filename: string }) {
@@ -87,15 +53,14 @@ export function SkillCutinSection({
 		<section className="rounded-3xl border border-outline-variant/20 bg-surface-container-low/40 p-5 space-y-4">
 			<h2 className="flex items-center gap-2 text-fluid-title-md font-bold text-on-surface">
 				<Icon name="auto_awesome" size={20} className="text-primary" />
-				Cut-in{" "}
-				<span className="text-xs font-mono text-on-surface-variant">({cutin.event_id_name})</span>
+				Cut-in
 			</h2>
 
 			{telopUrl && !telopError && (
 				<div>
 					<div className="flex items-center justify-between mb-1">
 						<p className="text-xs text-on-surface-variant">Telop (nom rendu)</p>
-						<DownloadChip href={telopUrl} filename={`${cutin.event_id_name}_telop.png`} />
+						<DownloadChip href={telopUrl} filename={`${downloadName(skillName, "technique")}_telop.png`} />
 					</div>
 					{/* eslint-disable-next-line @next/next/no-img-element */}
 					<img
@@ -124,7 +89,7 @@ export function SkillCutinSection({
 						<div>
 							<div className="flex items-center justify-between mb-1">
 								<p className="text-xs text-on-surface-variant">Texture (dx11/chr/_waza)</p>
-								<DownloadChip href={textureUrl} filename={`${cutin.event_id_name}.png`} />
+								<DownloadChip href={textureUrl} filename={`${downloadName(skillName, "technique")}.png`} />
 							</div>
 							{/* eslint-disable-next-line @next/next/no-img-element */}
 							<img
@@ -138,18 +103,6 @@ export function SkillCutinSection({
 				</div>
 			)}
 
-			<CutinEffects dir={cutin.effects_dir} />
-
-			<details className="text-xs text-on-surface-variant">
-				<summary className="cursor-pointer hover:text-on-surface">Chemins des assets</summary>
-				<div className="mt-2 space-y-1 font-mono break-all">
-					<p>modèle : {cutin.model_g4mg}</p>
-					<p>texture : {cutin.texture_g4tx}</p>
-					<p>son : {cutin.sound_cfg}</p>
-					<p>effets : {cutin.effects_dir}</p>
-					<p>telop : {cutin.telop_by_lang.map(([l]) => l).join(", ")}</p>
-				</div>
-			</details>
 		</section>
 	);
 }

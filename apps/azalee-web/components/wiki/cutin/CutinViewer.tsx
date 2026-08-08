@@ -20,6 +20,7 @@ import dynamic from "next/dynamic";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import CharacterModelViewer from "@/components/wiki/CharacterModelViewer";
 import { cpkAssetUrl } from "@/lib/cpk/shared";
+import { downloadName } from "@/lib/download-filename";
 import type { CutinStoryboard } from "@/lib/cutin/camera";
 import { decodeEffectLayer, loadCutinStoryboard, mainModelLayer } from "@/lib/cutin/decode";
 import {
@@ -224,7 +225,7 @@ export function CutinViewer({ cutin, skillName }: CutinViewerProps): React.JSX.E
 				renderAt,
 				onProgress: (done, total) => setExportPct(done / total),
 			});
-			downloadBlob(blob, `${cutin.event_id_name}_cutin`);
+			downloadBlob(blob, `${downloadName(skillName, "cutin")}_cutin`);
 		} catch {
 			/* échec d'encodage : on retombe sur l'état interactif sans bloquer l'UI */
 		} finally {
@@ -232,7 +233,7 @@ export function CutinViewer({ cutin, skillName }: CutinViewerProps): React.JSX.E
 			setExporting(false);
 			setPlaying(true);
 		}
-	}, [storyboard, exporting, cutin.event_id_name]);
+	}, [storyboard, exporting, skillName]);
 
 	// --- Repli garanti si les données échouent (model-viewer mono-modèle). ---
 	if (loadError) {
@@ -402,7 +403,7 @@ export function CutinViewer({ cutin, skillName }: CutinViewerProps): React.JSX.E
 				</button>
 				<a
 					href={modelUrl}
-					download={`${cutin.event_id_name}.glb`}
+					download={`${downloadName(skillName, "cutin")}.glb`}
 					className="inline-flex items-center gap-1 rounded-full bg-surface-container-high px-2.5 py-1 text-xs font-medium text-on-surface-variant hover:bg-surface-container-highest"
 					title="Télécharger le modèle waza (GLB)"
 				>

@@ -44,9 +44,6 @@ export function AphrodyDossierSection({ internalCode }: { internalCode?: string 
 				<h2 className="flex items-center gap-2 text-fluid-title-md font-bold text-on-surface">
 					<Icon name="auto_awesome" size={20} className="text-primary" />
 					Dossier Aphrody
-					<span className="text-xs font-mono text-on-surface-variant">
-						({dossier.series.map((s) => s.code).join(" · ")})
-					</span>
 				</h2>
 				<p className="text-sm text-on-surface-variant">
 					{id.name_ja} — « {id.nickname_en} » · {dossier.profile.epithet_ja} (
@@ -79,7 +76,6 @@ export function AphrodyDossierSection({ internalCode }: { internalCode?: string 
 							)}
 							<div className="min-w-0">
 								<p className="text-sm font-semibold text-on-surface truncate">{s.label}</p>
-								<p className="text-xs font-mono text-on-surface-variant">{s.code}</p>
 							</div>
 						</div>
 					);
@@ -151,7 +147,6 @@ export function AphrodyDossierSection({ internalCode }: { internalCode?: string 
 									<p className="font-mono text-sm text-on-surface">{code}</p>
 								)}
 								<div className="flex flex-wrap gap-x-4 gap-y-0.5 text-xs text-on-surface-variant">
-									<span className="font-mono">{code}</span>
 									<span>Lv {t.learn_level}</span>
 									<span>Puiss. {t.info.power_min}–{t.info.power_max}</span>
 									<span>TP {t.info.consume_tp}</span>

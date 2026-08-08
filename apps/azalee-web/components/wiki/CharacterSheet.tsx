@@ -1088,15 +1088,6 @@ export function CharacterSheet({
 					)}
 				</div>
 			</section>
-
-			{/* Technical Footer */}
-			<div className="px-6 py-3 rounded-2xl bg-surface-container-high/30 border border-outline-variant/10 flex flex-col gap-1 text-[10px] font-mono text-on-surface-variant/40">
-				<span className="uppercase tracking-widest font-black opacity-40">
-					Identifiants techniques
-				</span>
-				<span>ID: {avatarUrl}</span>
-				{zukanHash && <span>Zukan: {zukanHash}</span>}
-			</div>
 		</div>
 	);
 }

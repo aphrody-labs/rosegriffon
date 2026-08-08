@@ -195,9 +195,6 @@ export function PassiveDetailView({ passive }: { passive: PassiveDetailData }) {
 									<th className="text-left font-bold px-4 py-2.5 text-xs uppercase tracking-wider">
 										Valeur
 									</th>
-									<th className="text-left font-bold px-4 py-2.5 text-xs uppercase tracking-wider">
-										Identifiant
-									</th>
 									<th className="text-left font-bold px-4 py-2.5 text-xs uppercase tracking-wider hidden md:table-cell">
 										Texte
 									</th>
@@ -223,9 +220,6 @@ export function PassiveDetailView({ passive }: { passive: PassiveDetailData }) {
 														actuel
 													</span>
 												)}
-											</td>
-											<td className="px-4 py-2.5 font-mono text-xs text-on-surface-variant">
-												{f.string_id}
 											</td>
 											<td className="px-4 py-2.5 text-xs text-on-surface-variant whitespace-pre-line hidden md:table-cell">
 												{f.description.fr ?? f.description.en ?? ""}
