@@ -4,6 +4,11 @@ Bot Discord Rose Griffon — slash commands publiques (event, planning, chroniqu
 
 Restauré depuis `vps@c4d47a683^:apps/rg-bot/`, modernisé pour le monorepo `~/rg/` (Turborepo + Bun + Supabase + catalog).
 
+> **Ce bot n'est plus déployé.** La source est conservée et compile, mais
+> l'unité `rg-bot.service` n'existe plus sur le VPS et la synchronisation des
+> membres passe désormais par le cron. Ne pas tenter de le remettre en service
+> sans demande explicite.
+
 ## Commandes
 
 ```bash
