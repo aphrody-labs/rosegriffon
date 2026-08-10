@@ -8,7 +8,7 @@
  *
  *   bun apps/azalee/scripts/ops/diff-drizzle-facade.ts
  */
-import { SqliteQueryBuilder as NewBuilder } from "../../lib/supabase/sqlite-client";
+import { SqliteQueryBuilder as NewBuilder } from "@rose-griffon/azalee/db";
 import { SqliteQueryBuilder as OldBuilder } from "./_sqlite-client-old";
 
 const dbPath = "/home/ubuntu/rg/apps/azalee/data/backups/mirror.sqlite";

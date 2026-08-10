@@ -23,7 +23,7 @@ export async function runInaglePush(): Promise<{ success: boolean; error?: strin
 export async function runSQLiteBackup(): Promise<{ success: boolean; error?: string }> {
 	console.log("[Cron DB] Démarrage de la sauvegarde Supabase vers SQLite local...");
 	try {
-		await $`bun run --filter @rose-griffon/azalee backup:supabase`.cwd("/home/ubuntu/rg");
+		await $`bun run --filter @rose-griffon/azalee-web backup:supabase`.cwd("/home/ubuntu/rg");
 		console.log("[Cron DB] Sauvegarde SQLite réussie.");
 		return { success: true };
 	} catch (err: unknown) {

@@ -3,7 +3,7 @@
 import { CircleDot, Sparkles } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { getSkillElementIconUrl } from "@/lib/images";
+import { getSkillElementIconUrl } from "@rose-griffon/azalee/images";
 import { cn } from "@/lib/utils";
 
 // Interface simplifiée pour l'affichage (compatible avec Wiki et MyTeam)

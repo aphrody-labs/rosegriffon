@@ -4,7 +4,7 @@
  * Material Design 3 component for highlighting matched portions of text
  */
 
-import { highlightMatches } from "@/lib/search/fuzzy-match";
+import { highlightMatches } from "@rose-griffon/azalee/search/fuzzy-match";
 import { cn } from "@/lib/utils";
 
 interface SearchResultHighlightProps {

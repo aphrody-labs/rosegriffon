@@ -13,7 +13,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { CpkModelThumb } from "@/app/cpk/CpkModelThumb";
 import { Icon } from "@/components/ui/Icon";
-import { cpkPreviewKind, cpkThumbUrl } from "@/lib/cpk/shared";
+import { cpkPreviewKind, cpkThumbUrl } from "@rose-griffon/azalee/cpk/shared";
 
 /** Taille de page de fichiers (doit rester ≤ MAX_LIMIT de l'API). */
 const PAGE = 500;

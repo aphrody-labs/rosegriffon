@@ -16,8 +16,8 @@ import {
 	CommandList,
 } from "@rose-griffon/ui";
 import { SearchResultRow } from "@/components/wiki/SearchResultRow";
-import { TYPE_LABELS_PLURAL } from "@/lib/search/search-ui-config";
-import type { SearchContext } from "@/lib/search/smart-search";
+import { TYPE_LABELS_PLURAL } from "@rose-griffon/azalee/search/search-ui-config";
+import type { SearchContext } from "@rose-griffon/azalee/search/smart-search";
 import { cn } from "@/lib/utils";
 
 /**

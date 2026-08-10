@@ -3,7 +3,7 @@
 import { ClipboardList } from "lucide-react";
 import Image from "next/image";
 import { useState } from "react";
-import { getCharacterFaceUrl } from "@/lib/images";
+import { getCharacterFaceUrl } from "@rose-griffon/azalee/images";
 
 interface CoachFaceProps {
 	/**

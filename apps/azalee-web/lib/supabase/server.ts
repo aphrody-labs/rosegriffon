@@ -3,7 +3,7 @@ import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
 import { mintSupabaseJwt } from "@/lib/supabase/jwt";
 import type { Database } from "@rose-griffon/db";
-import { createSqliteClient } from "./sqlite-client";
+import { createSqliteClient } from "@rose-griffon/azalee/db";
 
 const PLACEHOLDER_URL = "https://isbkaeltubqittywibeh.supabase.co";
 const PLACEHOLDER_ANON_JWT =

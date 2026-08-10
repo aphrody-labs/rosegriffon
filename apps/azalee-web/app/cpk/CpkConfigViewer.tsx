@@ -12,7 +12,7 @@ import { CpkFormationViewer } from "@/app/cpk/CpkFormationViewer";
 import { CpkHexViewer } from "@/app/cpk/CpkHexViewer";
 import { CpkJsonTree } from "@/app/cpk/CpkJsonTree";
 import { CpkTypedTable } from "@/app/cpk/CpkTypedTable";
-import { cpkCfgUrl, cpkRawUrl } from "@/lib/cpk/shared";
+import { cpkCfgUrl, cpkRawUrl } from "@rose-griffon/azalee/cpk/shared";
 import { cfgbinTyped } from "@/lib/cpk-wasm";
 
 /** Libellé humain d'une famille de jeu (badge). */

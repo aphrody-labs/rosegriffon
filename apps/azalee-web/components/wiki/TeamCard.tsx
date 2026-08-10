@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 import { Icon } from "@/components/ui/Icon";
-import { SEASON_LABELS, SERIES_LABELS, type TeamListItem } from "@/lib/wiki/teams-shared";
+import { SEASON_LABELS, SERIES_LABELS, type TeamListItem } from "@rose-griffon/azalee/wiki/teams-shared";
 import { cn } from "@/lib/utils";
 
 interface TeamCardProps {

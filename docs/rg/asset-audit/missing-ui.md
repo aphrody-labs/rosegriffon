@@ -20,7 +20,7 @@ Note : le website **n'active pas** `NEXT_PUBLIC_CDN_URL` en prod (sinon ces asse
 ## Azalee (`apps/azalee`) — la quasi-totalité des assets est dynamique (DB → résolveur)
 
 Les images de contenu ne sont pas des `src=` statiques : elles sont construites à l'exécution par
-`apps/azalee/src/lib/images/utils.ts`. Toutes les fonctions ci-dessous pointent vers
+`packages/azalee/src/images/utils.ts`. Toutes les fonctions ci-dessous pointent vers
 `cdn.rosegriffon.fr/dx11/menu/**` ou `…/static/azalee/menu/**` → **404 en prod** (cf. CDN).
 
 | Fonction | Cible construite | État prod |

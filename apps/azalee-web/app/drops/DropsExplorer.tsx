@@ -3,14 +3,14 @@
 import { useMemo, useState } from "react";
 import { Icon } from "@/components/ui/Icon";
 import { DropsCard } from "@/components/wiki/DropsCard";
-import { normalizeText } from "@/lib/search-utils";
+import { normalizeText } from "@rose-griffon/azalee/search/utils";
 import { cn } from "@/lib/utils";
 import {
 	type DropsPageData,
 	type SpiritGroup,
 	type TeamBean,
 	dropCategoryLabel,
-} from "@/lib/wiki/drops-shared";
+} from "@rose-griffon/azalee/wiki/drops-shared";
 
 type Tab = "drops" | "spirits" | "beans";
 

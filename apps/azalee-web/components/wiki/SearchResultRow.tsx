@@ -7,8 +7,8 @@ import { Badge } from "@rose-griffon/ui";
 import { Icon } from "@/components/ui/Icon";
 import { RarityBadge } from "@/components/ui/rarity-badge";
 import { SearchResultHighlight } from "@/components/wiki/SearchResultHighlight";
-import { getSkillElementIconUrl } from "@/lib/images";
-import { LANG_BADGE_STYLES, TYPE_LABELS } from "@/lib/search/search-ui-config";
+import { getSkillElementIconUrl } from "@rose-griffon/azalee/images";
+import { LANG_BADGE_STYLES, TYPE_LABELS } from "@rose-griffon/azalee/search/search-ui-config";
 import { cn } from "@/lib/utils";
 
 interface SearchResultRowProps {

@@ -3,7 +3,7 @@
 import NextImage from "next/image";
 import NextLink from "next/link";
 import { SafeImage } from "@/components/ui/SafeImage";
-import { getCharacterFaceUrl, getSkillElementIconUrl } from "@/lib/images";
+import { getCharacterFaceUrl, getSkillElementIconUrl } from "@rose-griffon/azalee/images";
 import { cn } from "@/lib/utils";
 
 interface FormSelectorForm {

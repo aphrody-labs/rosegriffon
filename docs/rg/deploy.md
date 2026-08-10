@@ -294,9 +294,9 @@ Dans Discord, taper `/sync` (commande admin) → doit répondre "Sync terminé :
 
 ---
 
-## Déploiement Self-Host sur le VPS (Port 3003) pour @rose-griffon/azalee
+## Déploiement Self-Host sur le VPS (Port 3003) pour @rose-griffon/azalee-web
 
-Bien que le workflow initial prévoyait un déploiement sur Vercel, l'application `@rose-griffon/azalee` est actuellement hébergée sur le VPS de production, écoutant sur le port local `3003` derrière un reverse-proxy Nginx.
+Bien que le workflow initial prévoyait un déploiement sur Vercel, l'application `@rose-griffon/azalee-web` est actuellement hébergée sur le VPS de production, écoutant sur le port local `3003` derrière un reverse-proxy Nginx.
 
 ### Procédure de mise en production (en une commande)
 

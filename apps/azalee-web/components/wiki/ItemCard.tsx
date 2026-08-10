@@ -5,7 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 import { Icon } from "@/components/ui/Icon";
-import { getItemIconUrl, PLACEHOLDERS, resolveAssetUrl } from "@/lib/images";
+import { getItemIconUrl, PLACEHOLDERS, resolveAssetUrl } from "@rose-griffon/azalee/images";
 import { cn } from "@/lib/utils";
 
 export interface ItemCardProps {

@@ -20,9 +20,9 @@ import {
 	HISSATSU_ELEMENT_FR,
 	HISSATSU_TYPE_FR,
 	translatePassiveEffect,
-} from "@/lib/aura-translations";
-import { resolveAssetUrl } from "@/lib/images";
-import { japaneseToRomaji } from "@/lib/japanese-romaji";
+} from "@rose-griffon/azalee/text/aura-translations";
+import { resolveAssetUrl } from "@rose-griffon/azalee/images";
+import { japaneseToRomaji } from "@rose-griffon/azalee/text/japanese-romaji";
 
 interface SheetData {
 	matchedName?: string;

@@ -1,7 +1,7 @@
 # Audit CDN — `cdn.rosegriffon.fr` (2026-06-03)
 
 Méthode : `curl -sI` sur un échantillon représentatif des URLs **réellement résolues** par
-`apps/azalee/src/lib/images/utils.ts` (le résolveur central) + les assets `public/` du website.
+`packages/azalee/src/images/utils.ts` (le résolveur central) + les assets `public/` du website.
 Distinction stricte **vérifié 404** vs **supposé**.
 
 ## Constat majeur (VÉRIFIÉ) — le CDN ne sert RIEN

@@ -8,7 +8,7 @@ Ce document présente l'architecture globale, le pipeline de données, l'alignem
 
 ## 1. Vue d'Ensemble & Architecture
 
-`@rose-griffon/inagle` sert de couche d'abstraction de données (Data Access Layer) partagée par l'application Next.js ([@rose-griffon/azalee](file:///home/ubuntu/rg/apps/azalee)) et les tâches périodiques du démon de fond ([@rose-griffon/cron](file:///home/ubuntu/rg/packages/cron)).
+`@rose-griffon/inagle` sert de couche d'abstraction de données (Data Access Layer) partagée par l'application Next.js ([@rose-griffon/azalee-web](file:///home/ubuntu/rg/apps/azalee)) et les tâches périodiques du démon de fond ([@rose-griffon/cron](file:///home/ubuntu/rg/packages/cron)).
 
 ### Structure du Code source ([packages/inagle/src](file:///home/ubuntu/rg/packages/inagle/src))
 ```

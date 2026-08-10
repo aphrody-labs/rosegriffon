@@ -8,7 +8,7 @@
  */
 import { useMemo, useState } from "react";
 import { Icon } from "@/components/ui/Icon";
-import { cpkRawUrl, cpkVideoUrl } from "@/lib/cpk/shared";
+import { cpkRawUrl, cpkVideoUrl } from "@rose-griffon/azalee/cpk/shared";
 
 export interface MovieEntry {
 	/** Chemin d'index complet (`data/common/movie/<name>.usm`). */

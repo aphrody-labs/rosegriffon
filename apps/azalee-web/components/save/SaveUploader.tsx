@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useCallback, useMemo, useRef, useState } from "react";
 import { Icon } from "@/components/ui/Icon";
-import { resolveRoster, type ResolvedChara } from "@/lib/roster-resolver";
+import { resolveRoster, type ResolvedChara } from "@rose-griffon/azalee/game/roster-resolver";
 import { parseSave, type SaveSummary } from "@/lib/save-reader";
 import { cn } from "@/lib/utils";
 

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Icon } from "@/components/ui/Icon";
-import { SHOP_CATEGORY_FR } from "@/lib/wiki/shops-shared";
+import { SHOP_CATEGORY_FR } from "@rose-griffon/azalee/wiki/shops-shared";
 import { cn } from "@/lib/utils";
 
 /** Icône Material par catégorie d'objet (réutilise le mapping ItemCard). */

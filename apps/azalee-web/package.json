@@ -1,5 +1,5 @@
 {
-	"name": "@rose-griffon/azalee",
+	"name": "@rose-griffon/azalee-web",
 	"version": "0.1.0",
 	"private": true,
 	"scripts": {
@@ -60,6 +60,7 @@
 		"@react-three/fiber": "^9.6.1",
 		"@react-three/postprocessing": "^3.0.4",
 		"@rose-griffon/assets": "workspace:*",
+		"@rose-griffon/azalee": "workspace:*",
 		"@rose-griffon/auth": "workspace:*",
 		"@rose-griffon/better-auth-steam": "workspace:*",
 		"@rose-griffon/db": "workspace:*",
