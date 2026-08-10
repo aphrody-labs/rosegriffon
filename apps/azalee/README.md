@@ -95,8 +95,8 @@ update-exchange-costs.ts     # 1 652 items + 685 skills
 ## Développement
 
 ```bash
-pnpm install
-pnpm dev            # localhost:3000 (Turbopack)
+bun install            # à la racine du monorepo
+bun run azalee:dev     # http://localhost:3000
 ```
 
 <details>
@@ -122,26 +122,32 @@ VAPID_PRIVATE_KEY=
 
 ## Commandes
 
-| Commande                 | Description                          |
-| :----------------------- | :----------------------------------- |
-| `pnpm dev`               | Serveur de dev (Turbopack)           |
-| `pnpm build`             | Build production                     |
-| `pnpm lint`              | ESLint (`eslint .`, pas `next lint`) |
-| `pnpm type-check`        | Vérification TypeScript              |
-| `pnpm test`              | Tests unitaires (Vitest)             |
-| `pnpm sync:inagle`       | Sync données inagle vers Supabase    |
-| `pnpm crawl:topics`      | Crawler topics communautaires        |
-| `pnpm crawl:patch-notes` | Crawler patch notes du jeu           |
-| `pnpm crawl:zukan`       | Crawler données zukan                |
-| `pnpm docker:build`      | Build image Docker                   |
+Toutes en **Bun** — jamais `npm`, `pnpm` ni `yarn`.
+
+| Commande | Description |
+| --- | --- |
+| `bun run dev` | serveur de développement (Turbopack) |
+| `bun run build` | build de production (standalone) |
+| `bun run lint` | oxlint puis eslint |
+| `bun run type-check` | `tsc --noEmit` |
+| `bun test src tests` | tests de l'app |
+| `bun run sync:inagle` | synchronise les données inagle vers Supabase |
+| `bun run backup:supabase` | dump Supabase → SQLite |
+
+Les données du jeu s'interrogent par le CLI de la bibliothèque :
+`bun packages/azalee/src/cli.ts --help`.
 
 ## Déploiement
 
+Auto-hébergé sur le VPS, **pas** de Vercel ni de Docker :
+
 ```bash
-docker compose build --no-cache azalee
-docker compose up -d --no-deps azalee
-docker exec rg-nginx nginx -s reload
+bash scripts/ship-azalee.sh     # build → standalone → azalee-web.service (:3003)
 ```
+
+Le script ignore le code de sortie 132 de Next 16 sous Bun (crash à la sortie
+du processus **après** un build réussi). Procédures complètes, diagnostic et
+interdits : [`docs/deploy.md`](../../docs/deploy.md).
 
 ## Licence
 
