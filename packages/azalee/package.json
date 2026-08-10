@@ -52,6 +52,8 @@
 		"./game": "./src/game/index.ts",
 		"./game/*": "./src/game/*.ts",
 		"./rag": "./src/rag.ts",
+		"./remote": "./src/remote/index.ts",
+		"./remote/*": "./src/remote/*.ts",
 		"./server": "./src/server/index.ts",
 		"./server/*": "./src/server/*.ts",
 		"./data/*": "./src/data/*",
@@ -96,7 +98,6 @@
 		"@rose-griffon/inagle": "workspace:*",
 		"@supabase/supabase-js": "catalog:",
 		"commander": "catalog:",
-		"dotenv": "catalog:",
 		"drizzle-orm": "^0.45.2",
 		"wanakana": "catalog:"
 	},

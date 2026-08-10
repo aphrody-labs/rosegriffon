@@ -1,0 +1,40 @@
+[Unit]
+# azalee-api — API HTTP headless de la bibliothèque @rose-griffon/azalee,
+# exposée derrière nginx sur https://api.rosegriffon.fr/azalee/.
+#
+# Sert les MÊMES données que le wiki web (miroir SQLite inagle_*, index CPK,
+# index de texte de jeu) en JSON pur, sans Next. C'est la source de repli du
+# CLI `azalee` et d'un GUI Tauri quand la machine cliente n'a ni base locale
+# ni dump du jeu.
+#
+# Installation :
+#   sudo cp infra/systemd/azalee-api.service /etc/systemd/system/
+#   sudo systemctl daemon-reload && sudo systemctl enable --now azalee-api.service
+Description=azalee-api — API headless du wiki Azalée (Bun, lecture seule)
+After=network.target
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+User=ubuntu
+Group=ubuntu
+WorkingDirectory=/home/ubuntu/rg
+Environment=PATH=/home/ubuntu/.bun/bin:/usr/local/bin:/usr/bin:/bin
+Environment=AZALEE_PORT=8807
+Environment=AZALEE_HOST=127.0.0.1
+# Miroir épinglé — même source que azalee-web (cf. drop-in azalee-web.service).
+Environment=SQLITE_DB_PATH=/home/ubuntu/rg/apps/azalee/data/backups/mirror.sqlite
+Environment=AZALEE_DATA_DIR=/home/ubuntu/rg/apps/azalee/data
+ExecStart=/home/ubuntu/.bun/bin/bun packages/azalee/src/server/main.ts
+Restart=always
+RestartSec=5
+
+# Lecture seule : le service n'écrit que ses SQLite matérialisés en tmpfs.
+ProtectSystem=strict
+ProtectHome=read-only
+PrivateTmp=false
+ReadWritePaths=/tmp
+NoNewPrivileges=true
+
+[Install]
+WantedBy=multi-user.target

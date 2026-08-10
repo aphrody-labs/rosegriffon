@@ -27,9 +27,18 @@ import { getTrophiesList, getTrophy } from "../wiki/trophies";
 import { resolveTextAll } from "../wiki/game-text";
 import { wikiService } from "../wiki/service";
 
+/**
+ * Port d'écoute par défaut de l'API headless.
+ *
+ * Aligné sur le plan d'adressage des outils internes du VPS
+ * (`api.rosegriffon.fr` : n2b 8802, shai 8803, cdn 8804, cdn-variants 8805,
+ * rag-api 8806, azalee-api **8807**). 3010 est déjà pris par un autre service.
+ */
+export const DEFAULT_AZALEE_PORT = 8807;
+
 /** Options du serveur headless. */
 export interface AzaleeServerOptions {
-	/** Port d'écoute (défaut : `AZALEE_PORT` ou 3010). */
+	/** Port d'écoute (défaut : `AZALEE_PORT` ou `DEFAULT_AZALEE_PORT`). */
 	port?: number;
 	/** Interface d'écoute (défaut : `127.0.0.1` — local, adapté au sidecar Tauri). */
 	hostname?: string;
@@ -345,7 +354,7 @@ export async function handleAzaleeRequest(
  * ```
  */
 export function createAzaleeServer(options: AzaleeServerOptions = {}) {
-	const port = options.port ?? Number.parseInt(process.env.AZALEE_PORT ?? "3010", 10);
+	const port = options.port ?? Number.parseInt(process.env.AZALEE_PORT ?? String(DEFAULT_AZALEE_PORT), 10);
 	const hostname = options.hostname ?? process.env.AZALEE_HOST ?? "127.0.0.1";
 	return Bun.serve({
 		port,

@@ -4,11 +4,25 @@
 		"noEmit": true,
 		"declaration": false,
 		"noUncheckedIndexedAccess": false,
-		"types": ["bun"],
-		"lib": ["ESNext", "DOM", "DOM.Iterable"],
+		"types": [
+			"bun"
+		],
+		"lib": [
+			"ESNext",
+			"DOM",
+			"DOM.Iterable"
+		],
 		"allowImportingTsExtensions": true,
-		"baseUrl": "."
+		"baseUrl": ".",
+		"moduleDetection": "force"
 	},
-	"include": ["src/**/*.ts", "test/**/*.ts", "scripts/**/*.ts"],
-	"exclude": ["node_modules", "dist"]
+	"include": [
+		"src/**/*.ts",
+		"test/**/*.ts",
+		"scripts/**/*.ts"
+	],
+	"exclude": [
+		"node_modules",
+		"dist"
+	]
 }
