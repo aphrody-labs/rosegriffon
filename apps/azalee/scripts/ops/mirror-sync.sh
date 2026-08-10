@@ -38,7 +38,15 @@ echo "[mirror-sync] rétention OK ; restants: $(ls -1 "$BACKUPS"/supabase-*.sqli
 
 # Restart pour que le singleton readonly rouvre le nouveau miroir.
 sudo systemctl restart azalee-web.service
-sleep 4
-HC=$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:3003/api/health || echo 000)
+
+# Next met parfois plus de quatre secondes à répondre après un redémarrage :
+# une sonde unique renvoyait alors 503 et faisait échouer l'unité alors que la
+# synchronisation, elle, avait réussi. On attend jusqu'à 60 s.
+HC=000
+for _ in $(seq 1 30); do
+  sleep 2
+  HC=$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:3003/api/health || echo 000)
+  [ "$HC" = "200" ] && break
+done
 echo "[mirror-sync] restart OK, health=$HC"
-[ "$HC" = "200" ] || { echo "[mirror-sync] WARN health!=200"; exit 1; }
+[ "$HC" = "200" ] || { echo "[mirror-sync] WARN health!=200 après 60 s"; exit 1; }
