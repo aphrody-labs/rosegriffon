@@ -1,362 +1,142 @@
-# Deploy guide — Rose Griffon monorepo
-
-Procédure complète pour passer le monorepo `rose-griffon/rg` en prod. **À exécuter manuellement** par l'admin, dans l'ordre. Chaque étape est isolée et réversible.
-
-État pré-deploy attendu (après initial migration, validé 2026-05-17) :
-
-- `https://github.com/rose-griffon/rg` privé, branch `main` à jour
-- 8 commits initial migration, `turbo run type-check` + `turbo run lint` verts (6/6)
-- Vercel projects `rg-azalee` + `rg-website` **créés** dans le scope `aphrody`, env vars `production` poussés, framework `nextjs`, rootDirectory configuré
-- Service systemd `rg-bot.service` **installé** dans `/etc/systemd/system/` (daemon-reload fait), **PAS encore démarré**
-- Anciens projets Vercel `azalee` / `rosegriffon` toujours en prod sur leurs domaines custom
-- VPS submodules `apps/azalee` / `apps/rosegriffon` toujours en place (figés, pointers Git intacts)
-
+---
+title: "Déploiement et exploitation"
+description: "Procédures de déploiement des applications et services Rose Griffon sur le VPS"
+scope: ["monorepo", "ops"]
+status: "stable"
 ---
 
-## Workflow stable (post-incident 2026-05-18)
+# Déploiement et exploitation
 
-**Modèle "git-Vercel decoupling"** — désormais le repo `rg/` est isolé de Vercel.
+Tout tourne sur un **seul VPS**, derrière nginx, en services systemd lancés par
+l'utilisateur `ubuntu`. Il n'y a plus aucun déploiement Vercel : les deux
+applications Next ont été rapatriées en auto-hébergement.
 
-| Action                                                                 | Effet sur Vercel                  |
-| ---------------------------------------------------------------------- | --------------------------------- |
-| `git push origin main` (n'importe qui)                                 | **AUCUN** — auto-deploy disabled  |
-| `git push origin <tag>`                                                | **AUCUN** — idem                  |
-| Pushes en boucle (autre session Claude / alias git `bot@bunlight.com`) | **AUCUN** — idem                  |
-| Appel API `POST /v13/deployments` avec SHA explicite                   | **1 deploy production déclenché** |
-| Vercel CLI `vercel --prod`                                             | idem                              |
+**Aucun `git push` ne déploie quoi que ce soit.** Un déploiement est toujours
+une commande explicite sur la machine.
 
-**Principe** : n'importe quelle session Claude (commits sous alias git `bot@bunlight.com` ou autres) peut push librement sur `main`. Vercel ne réagit jamais. Pour déployer = appel API explicit avec SHA validé.
+## Services
 
-**Workflow recommandé pour shipper :**
+| Service systemd | Port | Rôle | Build nécessaire |
+| --- | --- | --- | --- |
+| `azalee-web` | 3003 | wiki Azalée (Next 16 standalone) | oui |
+| `website-web` | 3004 | site principal (Next 16 standalone) | oui |
+| `azalee-api` | 8807 | API JSON headless du wiki (41 routes) | non |
+| `rg-mcp` | 8808 | serveur Model Context Protocol | non |
+| `rag-api` | 8806 | recherche sémantique locale | non |
+| `rg-rag-embed` | 8799 | service d'embeddings auto-hébergé | non |
+| `rg-cdn` | 8804 | CDN images (`/images`, `/upload`) | non |
+| `cdn-variants` | 8805 | redimensionnement + WebP à la volée | non |
+| `iecode-cdn` | 8788 | décodage **live** des archives CPK du jeu | non |
+| `nie-model-serve` | 8790 | modèles 3D assemblés à la volée | non (binaire Rust) |
+| `rg-cron` | — | tâches planifiées | non |
+| `azalee-mirror-sync` | — | rafraîchissement quotidien du miroir SQLite | non |
 
-```bash
-# 1. Identifier un SHA stable (HEAD du moment, ou après validation type-check/test)
-cd ~/rg && git log --oneline -1
-SHA=$(git rev-parse main)
+Domaines : `rosegriffon.fr`, `azalee.rosegriffon.fr`, `api.rosegriffon.fr`
+(passerelle des outils internes), `cdn.rosegriffon.fr`, `mcp.rosegriffon.fr`.
+Les configurations nginx et les unités systemd sont versionnées dans
+[`infra/`](../infra).
 
-# 2. Tag pour traçabilité (optionnel mais recommandé)
-git tag -a rg-prod-$(date +%Y-%m-%d-%H%M) $SHA -m "deploy prod"
-git push origin --tags
-
-# 3. Trigger deploy via API (cf. étape 1.bis ci-dessous pour le payload)
-```
-
-**Historique tags prod :**
-
-- `rg-prod-2026-05-18-01` → SHA `24b913c` (dead code purge + ts-check OK)
-
----
-
-## État actuel (2026-05-18 01:32 CET, mis à jour après incident)
-
-**Incident migration (résolu) :** un cycle de pushes rapides (~1 commit/6min, identité git `bot@bunlight.com` d'une session Claude parallèle) a annulé tous les builds rg-\* successifs avant qu'aucun n'aboutisse READY. Les domains custom avaient été pré-attachés à rg-azalee/rg-website avec TXT verification mismatch → 404 DEPLOYMENT_NOT_FOUND sur les 3 domains.
-
-**Résolution appliquée (sans rien casser, 100% réversible) :**
-
-1. **Domains rollback** : `azalee.rosegriffon.fr`, `rosegriffon.fr`, `www.rosegriffon.fr` retransférés aux anciens projects `azalee`/`rosegriffon`. Anciens deploys READY (commits `fd75f75a` azalee + `c231b48d` website du 10 mai) servent à nouveau la prod (3/3 HTTP 200 OK).
-2. **DNS TXT** : `_vercel.rosegriffon.fr` mis à jour via OVH API REST (CLI `ovhcloud` bugué, contournement signed curl). 3 records correspondant aux codes vérification des anciens projects.
-3. **Auto-deploy disabled** sur `rg-azalee` + `rg-website` via `PATCH /v9/projects/{id} {gitProviderOptions: {createDeployments: "disabled"}}` → les pushes sur `rose-griffon/rg main` ne triggers plus aucun build. Cycle CANCELED stoppé.
-4. **Tag stable `rg-prod-2026-05-18-01`** créé sur SHA `24b913c` + 2 deploys API REST triggers pour valider le workflow tag-based isolé.
-
-**Pour reprendre la migration sereinement :**
-
-- Les nouveaux projects sont en pause, prêts à recevoir un deploy manuel quand le repo `rg/` sera stable
-- Voir Étape 1.bis (procédure deploy manuel) ci-dessous
-- Une fois 1 READY validé → re-swap domains via Étape 2
-
----
-
-## Étape 1.bis — Deploy manuel (auto-deploy disabled)
-
-Auto-deploy est **disabled** sur rg-azalee + rg-website. Pour déclencher un build, soit :
-
-**A. Via API Vercel (recommandé, depuis n'importe où) :**
+## Déployer une application Next
 
 ```bash
-export VERCEL_TOKEN=$(grep "^VERCEL_TOKEN=" /home/ubuntu/rg/.env | cut -d= -f2)
-TEAM=team_guWQJZI4ZmSLj2K3RWuU4VqM
-SHA=$(cd ~/rg && git rev-parse main)
-
-# Trigger deploy production rg-azalee
-curl -X POST "https://api.vercel.com/v13/deployments?teamId=${TEAM}" \
-  -H "Authorization: Bearer ${VERCEL_TOKEN}" \
-  -H "Content-Type: application/json" \
-  -d "{\"name\":\"rg-azalee\",\"target\":\"production\",\"gitSource\":{\"type\":\"github\",\"repoId\":\"1241626917\",\"ref\":\"main\",\"sha\":\"${SHA}\"},\"project\":\"prj_XAwaDaX0ugQaqcleEiJ0BFfrtKfT\"}"
-
-# Trigger deploy production rg-website (même payload, project + name différents)
+bash scripts/ship-azalee.sh      # wiki
+bash scripts/ship-website.sh     # site principal
 ```
 
-**B. Via Vercel CLI :**
+Chaque script enchaîne : build Next → copie du bundle standalone (`public/`,
+`.next/static`, `data/`) → redémarrage du service → vérification de santé
+locale.
+
+Avant de lancer, vérifier :
 
 ```bash
-cd ~/rg
-vercel --prod --cwd apps/azalee --yes
-vercel --prod --cwd apps/website --yes
+bun run type-check
+bun run lint
 ```
 
-**C. Réactiver temporairement auto-deploy** (uniquement quand tu sais qu'un seul push va arriver) :
+### Deux pièges qui font croire à un échec
+
+1. **Code de sortie 132 (« Illegal instruction ») après un build réussi.**
+   Next 16 sous Bun plante à la sortie du processus. Le script l'ignore si le
+   `BUILD_ID` et le `server.js` standalone existent. Ce n'est pas un échec.
+2. **« Another next build process is already running ».** Un seul build à la
+   fois : `pkill -f next-build.sh` avant de relancer.
+
+### Symptôme classique après déploiement
+
+Les fragments `/_next/static/*` répondent 500 avec un type MIME `text/plain` :
+le dossier `static` du build standalone n'a pas été copié. Correctif :
+relancer le script de déploiement.
+
+## Déployer un service sans build
+
+Les services qui lisent directement les sources se rechargent d'un
+redémarrage :
 
 ```bash
-curl -X PATCH "https://api.vercel.com/v9/projects/prj_XAwaDaX0ugQaqcleEiJ0BFfrtKfT?teamId=${TEAM}" \
-  -H "Authorization: Bearer ${VERCEL_TOKEN}" \
-  -H "Content-Type: application/json" \
-  -d '{"gitProviderOptions":{"createDeployments":"enabled"}}'
-# Push 1 commit, attendre READY, puis re-disable.
+sudo systemctl restart azalee-api.service   # API headless du wiki
+sudo systemctl restart rg-mcp.service       # serveur MCP
+sudo systemctl restart rg-cron.service      # tâches planifiées
 ```
 
----
-
-## Étape 1 — Valider les nouveaux projets Vercel (preview deploy)
-
-Les projets Vercel `rg-azalee` et `rg-website` ont été créés et configurés via API, mais **aucun deploy n'a été déclenché** pour ne pas risquer de casser quoi que ce soit. Avant de basculer la prod, il faut valider que le build passe.
+Installer ou mettre à jour une unité et sa configuration nginx :
 
 ```bash
-# Depuis ~/rg/ (workspace racine — important pour la résolution workspace deps)
-cd ~/rg
+sudo cp infra/systemd/<unité>.service /etc/systemd/system/
+sudo systemctl daemon-reload && sudo systemctl restart <unité>.service
 
-# Trigger preview deploy azalee
-vercel --yes --cwd apps/azalee
-# Attendu : URL preview rg-azalee-xxx.vercel.app, build vert (~5-10 min sur 1ère build cold)
-
-# Trigger preview deploy website
-vercel --yes --cwd apps/website
-# Attendu : URL preview rg-website-xxx.vercel.app, build vert
+sudo cp infra/nginx/<vhost>.conf /etc/nginx/conf.d/
+sudo nginx -t && sudo systemctl reload nginx
 ```
 
-**Si le deploy échoue avec "path does not exist"** : le link Vercel a été fait depuis le sous-dossier `apps/azalee/` au lieu de la racine, ce qui fait que le rootDirectory `apps/azalee` est résolu à `apps/azalee/apps/azalee`. Fix :
+`nginx -t` **avant** tout rechargement : une configuration invalide empêche
+nginx de recharger et laisse l'ancienne en place — mais un vhost qui référence
+un certificat absent fait échouer *toute* la configuration.
+
+Le serveur MCP dispose d'un script d'installation dédié
+(`scripts/mcp/install.sh serveur`) qui gère jetons, unité et vhosts ; voir
+[`mcp.md`](mcp.md).
+
+## Diagnostiquer
 
 ```bash
-# Unlink puis re-link depuis la racine du monorepo (~/rg/)
-rm -rf ~/rg/apps/azalee/.vercel ~/rg/apps/website/.vercel
-cd ~/rg
-vercel link --project rg-azalee --scope aphrody --yes
-# Quand demandé pour le path : taper `apps/azalee` (mais ce n'est plus interactif avec --yes,
-# faut peut-être passer par le dashboard Vercel pour set le rootDirectory à `apps/azalee`)
+systemctl status <unité>
+journalctl -u <unité> -n 100 --no-pager -p err
+curl -s -o /dev/null -w '%{http_code}\n' https://azalee.rosegriffon.fr/
 ```
 
-Alternative dashboard : https://vercel.com/aphrody/rg-azalee/settings → Root Directory → `apps/azalee` → Save.
-
-**Vérifier le preview deploy** :
-
-- Pages clés azalee : `/`, `/wiki`, `/wiki/zukan`, `/dashboard` (auth requise — utiliser un compte test)
-- Pages clés website : `/`, `/articles`, `/equipe`, `/rose-griffon-tv`, `/dashboard`
-- Pas d'erreur 500, console browser propre (warnings tolérés)
-
----
-
-## Étape 2 — Bascule du domaine custom (vraie prod)
-
-Une fois les preview validés, transférer les domaines custom des anciens projets vers les nouveaux. **C'est l'étape critique — DNS ne sera pas affecté (déjà sur Vercel `76.76.21.21`), mais le projet qui sert le trafic change.**
-
-### Pour `azalee.rosegriffon.fr` :
-
-```bash
-# 1. Retirer le domaine du projet azalee (ancien)
-vercel domains rm azalee.rosegriffon.fr --scope aphrody
-
-# 2. L'ajouter au projet rg-azalee (nouveau)
-cd ~/rg/apps/azalee
-vercel domains add azalee.rosegriffon.fr --scope aphrody
-```
-
-Vercel détecte automatiquement que le DNS pointe déjà vers son infra (apex A `76.76.21.21`) — aucune modif DNS Cloudflare requise.
-
-### Pour `rosegriffon.fr` (apex + www) :
-
-```bash
-vercel domains rm rosegriffon.fr --scope aphrody
-vercel domains rm www.rosegriffon.fr --scope aphrody
-
-cd ~/rg/apps/website
-vercel domains add rosegriffon.fr --scope aphrody
-vercel domains add www.rosegriffon.fr --scope aphrody
-```
-
-### Promouvoir le preview en production :
-
-```bash
-# Depuis ~/rg/, deploy --prod sur chacun
-vercel --prod --yes --cwd apps/azalee
-vercel --prod --yes --cwd apps/website
-```
-
-### Test de fumée prod :
-
-```bash
-curl -sIL https://azalee.rosegriffon.fr | head -3      # 200 OK attendu
-curl -sIL https://rosegriffon.fr | head -3             # 200 OK attendu
-```
-
-Si KO : remettre les domains sur les anciens projets (rollback immédiat).
-
----
-
-## Étape 3 — Retirer les submodules vps (cleanup)
-
-**Une fois la prod stable sur les nouveaux projets (24-48h recommandé)**, retirer les submodules `apps/azalee` et `apps/rosegriffon` du repo `aphrody-code/vps`.
-
-```bash
-cd ~/vps
-
-# 1. Désinstaller les submodules (libère .git/modules/)
-git submodule deinit -f apps/azalee
-git submodule deinit -f apps/rosegriffon
-
-# 2. Retirer du tracking git (supprime aussi les dossiers)
-git rm -f apps/azalee
-git rm -f apps/rosegriffon
-
-# 3. Nettoyer .git/modules (orphelins)
-rm -rf .git/modules/apps/azalee .git/modules/apps/rosegriffon
-
-# 4. Mettre à jour .gitmodules (retirer les 2 entrées)
-# (manuel : éditer .gitmodules, retirer les sections [submodule "apps/azalee"] et [submodule "apps/rosegriffon"])
-
-# 5. Commit
-git add .gitmodules apps/azalee apps/rosegriffon
-git commit -m "chore: retirer submodules apps/azalee + apps/rosegriffon (migrés vers rose-griffon/rg)"
-git push origin main
-```
-
-**Vérifier** : `bash scripts/ops/check-status.sh` (apps/azalee + apps/rosegriffon ne doivent plus apparaître dans le scan mrx).
-
----
-
-## Étape 4 — Activer rg-bot
-
-Le service systemd est **déjà installé** à `/etc/systemd/system/rg-bot.service`, daemon-reload fait. Le fichier `.env` est créé à `/home/ubuntu/rg/apps/bot/.env` avec 4 vars Supabase pré-remplies depuis le projet website.
-
-**Manquent** (à fournir avant start) :
-
-- `DISCORD_BOT_TOKEN` — créer une application Discord https://discord.com/developers/applications → New Application "Rose Griffon Bot" → Bot tab → Reset Token → copier
-- `DISCORD_CLIENT_ID` — Application ID (visible sur General Information)
-- `WEBSITE_API_URL` — `https://rosegriffon.fr/api/bot` (URL du website pour les services `website.ts`)
-- `WEBSITE_URL` — `https://rosegriffon.fr`
-- `BOT_API_TOKEN` — secret partagé entre le bot et le website pour authentifier les calls `/api/bot/*` (générer via `openssl rand -hex 32`)
-
-### Compléter le .env (sans leak dans la conv shell) :
-
-```bash
-# Édit interactif — ne pas cat le file après !
-nano /home/ubuntu/rg/apps/bot/.env
-
-# Ajouter les 5 vars manquantes :
-# DISCORD_BOT_TOKEN=...
-# DISCORD_CLIENT_ID=...
-# WEBSITE_API_URL=https://rosegriffon.fr/api/bot
-# WEBSITE_URL=https://rosegriffon.fr
-# BOT_API_TOKEN=...
-```
-
-### Inviter le bot dans le serveur Discord Rose Griffon :
-
-```
-https://discord.com/api/oauth2/authorize?client_id=<DISCORD_CLIENT_ID>&permissions=8&scope=bot+applications.commands
-```
-
-(permissions=8 = administrateur, ajuster selon besoin réel)
-
-### Démarrer + monitor :
-
-```bash
-sudo systemctl start rg-bot.service
-sudo systemctl status rg-bot.service       # Doit afficher "active (running)"
-journalctl -u rg-bot.service -f -n 50      # Suivre les logs
-```
-
-### Auto-restart au boot (recommandé) :
-
-```bash
-sudo systemctl enable rg-bot.service
-```
-
-### Smoke test :
-
-Dans Discord, taper `/sync` (commande admin) → doit répondre "Sync terminé : N members synchronisés".
-
----
-
-## Rollback
-
-### Vercel
-
-- Bascule domain ratée → `vercel domains rm` puis re-ajouter sur l'ancien projet (`azalee` / `rosegriffon`)
-- Build cassé → `vercel rollback https://<ancien-deploy>.vercel.app --scope aphrody`
-
-### VPS submodules
-
-- `git revert <sha>` puis `git submodule update --init apps/azalee apps/rosegriffon`
-
-### Bot
-
-- `sudo systemctl stop rg-bot.service` + `sudo systemctl disable rg-bot.service`
-- Le bot ne touche aucune table critique en lecture seule pour les services initiaux
-
----
-
-## Déploiement Self-Host sur le VPS (Port 3003) pour @rose-griffon/azalee-web
-
-Bien que le workflow initial prévoyait un déploiement sur Vercel, l'application `@rose-griffon/azalee-web` est actuellement hébergée sur le VPS de production, écoutant sur le port local `3003` derrière un reverse-proxy Nginx.
-
-### Procédure de mise en production (en une commande)
-
-Pour compiler, préparer les assets autonomes, redémarrer le service systemd et valider l'état du serveur web, lancez le script automatisé depuis la racine du monorepo :
-
-```bash
-bash scripts/ship-azalee.sh
-```
-
-### Détail des étapes sous-jacentes
-
-Si vous devez débugger ou exécuter les étapes manuellement :
-
-1. **Build de l'application Next.js 16** (avec Turbopack en mode standalone) :
-
-   ```bash
-   cd apps/azalee
-   bun --env-file=../../.env.local run build --turbopack
-   ```
-
-   _Note : Le build standalone génère les fichiers traces optimisés dans `.next/standalone`._
-
-2. **Copie des dossiers exclus du tracing Next.js** (publics, statiques et VFS de données) via le script local :
-
-   ```bash
-   bash scripts/deploy-azalee.sh
-   ```
-
-   _Ce script pré-crée également `.next/cache` et `.bun-cache` à l'emplacement standalone pour éviter des erreurs système de type EROFS/EACCES._
-
-3. **Redémarrage du service systemd** :
-
-   ```bash
-   sudo systemctl restart azalee-web.service
-   ```
-
-   _Pour consulter l'état du service et les logs live :_
-
-   ```bash
-   sudo systemctl status azalee-web.service
-   journalctl -u azalee-web.service -f -n 50
-   ```
-
-4. **Vérification du Healthcheck** :
-   Vérifiez que le serveur local répond bien sur son port interne :
-   ```bash
-   curl -I http://127.0.0.1:3003/
-   ```
-
----
-
-## Checklist finale (à cocher dans l'ordre)
-
-- [ ] Preview deploy azalee (rg-azalee) : URL accessible, build vert, smoke test OK
-- [ ] Preview deploy website (rg-website) : idem
-- [ ] Bascule domain `azalee.rosegriffon.fr` → rg-azalee
-- [ ] Bascule domain `rosegriffon.fr` + `www.rosegriffon.fr` → rg-website
-- [ ] Promote preview → prod (deploy --prod)
-- [ ] 24-48h de monitoring : pas d'erreur 500, Vercel analytics OK
-- [ ] Retrait submodules vps (commit + push)
-- [ ] DISCORD_BOT_TOKEN + DISCORD_CLIENT_ID + BOT_API_TOKEN fournis dans `.env` bot
-- [ ] `systemctl start rg-bot.service` + smoke test Discord
-- [ ] `systemctl enable rg-bot.service` (auto-restart au boot)
+| Symptôme | Cause probable |
+| --- | --- |
+| `502` sur un domaine | le service derrière nginx est arrêté ou en boucle |
+| `500` avec du HTML | erreur applicative — lire le journal du service |
+| wiki en `504` | plafond mémoire de l'unité atteint |
+| `rg-cron` en boucle | `packages/inagle/dist` supprimé → `bun run build --filter=@rose-griffon/inagle` puis redémarrer |
+| asset du jeu en 404 sur le CDN | le dump est incomplet : le décodage doit passer par le service live, ne jamais rétablir un `=404` dans nginx |
+| unité `failed` mais travail réussi | sonde de santé trop précoce après redémarrage — lire le journal jusqu'au bout |
+
+Le serveur MCP expose ces vérifications en outils (`ops_status`, `ops_logs`,
+`ops_http`), utilisables depuis n'importe quelle machine.
+
+## Données
+
+Le miroir SQLite des tables `inagle_*` est rafraîchi chaque nuit par
+`azalee-mirror-sync.timer` : dump Supabase → validation → échange atomique du
+lien `mirror.sqlite` → rétention de deux snapshots → redémarrage des services
+concernés. Les consommateurs de la bibliothèque détectent aussi le changement
+de fichier tout seuls (vérification d'inode), donc un processus long ne sert
+jamais un snapshot périmé.
+
+Corriger une donnée du jeu ne se fait **jamais** dans le miroir : la source est
+`packages/inagle`, poussée vers Supabase, puis répliquée. Voir
+[`database.md`](database.md) et [`azalee-lib.md`](azalee-lib.md).
+
+## Ce qu'il ne faut jamais faire
+
+- **Supprimer un `dist/` ou un `.next/` servi par un service.** Effacer
+  `packages/inagle/dist` casse `rg-cron` ; effacer `apps/azalee/.next` met le
+  wiki en 500.
+- **Créer un lien symbolique sortant de la racine du dépôt.** Turbopack les
+  refuse et le build d'azalée échoue — le service reste alors sur un build
+  supprimé et l'application devient inutilisable dans le navigateur.
+- **Régénérer `bun.lock` avec un Bun 1.4.** La CI et la production lisent du
+  `lockfileVersion: 1` ; la v2 leur est illisible.
