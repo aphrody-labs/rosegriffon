@@ -34,7 +34,13 @@ export interface Formation {
 // GK is always at the same position across all formations
 const GK: PositionCoord = { index: 10, left: 40, role: "GK", top: 43 };
 
-const LEGACY_FORMATIONS: Formation[] = [
+/**
+ * Formations « héritées » (8) : leurs `id` textuels (`diamond442`, `box442`…)
+ * sont persistés dans `user_teams.formation_id` et dans les URLs de partage —
+ * ils constituent donc la seule table de coordonnées que le CLI (`team-builder`)
+ * doit consulter, sans se laisser élargir par les 83 formations du jeu.
+ */
+export const LEGACY_FORMATIONS: Formation[] = [
 	{
 		id: "diamond442",
 		label: "4-4-2",

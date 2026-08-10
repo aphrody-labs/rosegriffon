@@ -8,5 +8,6 @@ export * from "./aura-translations";
 export * from "./download-filename";
 export * from "./format-description";
 export * from "./gaiji";
+export * from "./japanese-detect";
 export * from "./japanese-romaji";
 export * from "./translations";
