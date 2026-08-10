@@ -40,10 +40,10 @@ Les licences notées « aucune (pas de fichier) » signifient qu'aucun fichier
 code est public mais sans licence open-source explicite (tous droits réservés
 par défaut). Vérifié via `gh api repos/<owner>/<repo>`.
 
-### C#
+### C\#
 
 | Outil | Repo | Formats | État | Licence | Pertinence IEVR |
-|---|---|---|---|---|---|
+| --- | --- | --- | --- | --- | --- |
 | **Kuriimu2** | `FanTranslatorsInternational/Kuriimu2` | Archives + textures + texte multi-jeux, plugins Level-5 (XPCK, IMGC, cfg.bin, T2B…) | Actif (commit 2026-06) | déclarée côté dépôt | Indirecte (3DS Level-5) |
 | **Kuriimu (v1)** | `IcySon55/Kuriimu` | Idem v1, large parc de plugins Level-5 hérités | Actif (2026-05) | déclarée | Indirecte |
 | **StudioElevenLib** | `Tiniifan/StudioElevenLib` | XPCK, XFSP, ARC0, IMGC, MBN, MTRC, XMPR/XPVB/XPVI (mesh), RES/XRES, CMR1/CMR2, T2B, CfgBin, compressions LZ10/Huffman/RLE/ZLib | Actif (2026-05) | MIT | Indirecte (back-end du Blender addon 3DS) |
@@ -67,7 +67,7 @@ par défaut). Vérifié via `gh api repos/<owner>/<repo>`.
 ### Rust
 
 | Outil | Repo | Formats | État | Licence | Pertinence IEVR |
-|---|---|---|---|---|---|
+| --- | --- | --- | --- | --- | --- |
 | **IEVR-Toolbox** | `Telmo26/IEVR-Toolbox` | Dump/repack du filesystem CPK d'IEVR, déchiffrement CPK + `cpk_list.cfg.bin`, dump partiel par regex ; portage Rust parallèle de Viola + CriFsV2Lib | Actif (2026-04) | aucune (pas de fichier) | **Directe** |
 | **ievr_cfg_bin_editor** | `Telmo26/ievr_cfg_bin_editor` | Lib + GUI de lecture/édition des `cfg.bin` Level-5 (crate `ievr_cfg_bin_editor_core`) | Actif (2026-04) | aucune | **Directe** |
 | **ievr_dataminer** | `Telmo26/ievr_dataminer` | Datamine perso (élément, position, archétype, stats) + texte multi-langue d'IEVR → SQLite ; s'appuie sur IEVR-Toolbox (extraction) + `ievr_cfg_bin_editor_core` (parse cfg.bin) | Actif (2026-02) | aucune | **Directe** |
@@ -83,7 +83,7 @@ Rust for performance » (vérifié via `gh api`).
 ### Python
 
 | Outil | Repo | Formats | État | Licence | Pertinence IEVR |
-|---|---|---|---|---|---|
+| --- | --- | --- | --- | --- | --- |
 | **studio_eleven** | `Tiniifan/studio_eleven` | Blender addon : XPRM (mesh 3D), XPCK (archive), XMTN/XIMA/XMTM (anims), XCMA (caméra) — jeux **3DS** | Actif (2026-05) | déclarée | Indirecte (3DS, formats ≠ G4* IEVR) |
 | **studio26** | `Tiniifan/studio26` | Successeur WIP du Blender addon Level-5 | Actif (2026-05) | aucune | Indirecte |
 | **IEVR Noesis Script** | `AFGRocha/Inazuma-Eleven-Victory-Road-Noesis-Script` | Script Noesis d'import des modèles IEVR (G4* / mesh PC) | Actif (2026-02) | aucune | **Directe** (mesh/textures IEVR via Noesis) |
@@ -97,7 +97,7 @@ Rust for performance » (vérifié via `gh api`).
 ### C++
 
 | Outil | Repo | Formats | État | Licence | Pertinence IEVR |
-|---|---|---|---|---|---|
+| --- | --- | --- | --- | --- | --- |
 | **vgmstream** | `vgmstream/vgmstream` | Lecture/décodage de centaines de formats audio jeux : **HCA, ADX, AWB, ACB, USM (audio)**, etc. | Très actif (2026-06) | déclarée | **Transverse** (référence audio IEVR) |
 | **PyCriCodecs (back-end)** | `Youjose/PyCriCodecs` | Back-end C++ des codecs CRIWARE (cf. Python) | Actif (2026-04) | déclarée | **Transverse** |
 | **vgaudio-cpp** | `hozuki/vgaudio-cpp` | Portage C++ de VGAudio (HCA/ADX…) | 2026-02 | déclarée | Transverse |
@@ -106,7 +106,7 @@ Rust for performance » (vérifié via `gh api`).
 ### TypeScript / JavaScript
 
 | Outil | Repo | Formats | État | Licence | Pertinence IEVR |
-|---|---|---|---|---|---|
+| --- | --- | --- | --- | --- | --- |
 | **inagle** (maison) | local `packages/inagle` | Parser TS du `cfg.bin` IEVR + g4tx ; ~70 domaines de gamedata, crc32 hash | Actif (privé) | MIT (`packages/inagle/LICENSE`) | **Directe** |
 | **CriTools** | `kohos/CriTools` | Extraction audio CRIWARE en JS (ACB/AWB/HCA/USM) | Actif (2026-05) | déclarée | **Transverse** |
 | **vitorfdl/game-inazuma-eleven** | `vitorfdl/game-inazuma-eleven` | Wiki + TeamBuilder IEVR (consomme un dataset, pas RE) | 2026-03 | aucune | Indirecte (front data) |
@@ -122,7 +122,7 @@ génération Level-5 (3DS) ou partiellement ; « ❌ » = aucun outil externe m�
 identifié pour la variante IEVR.
 
 | Format IEVR | Type | Outils externes | Statut |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | **CPK** (archive CRIWARE) | Conteneur | IEVR-Toolbox (Rust), Viola, CriFsV2Lib, YACpkTool, PyCriCodecs, vgmstream | ✅ (dont chiffrement IEVR via Viola/IEVR-Toolbox) |
 | **cfg.bin** (gamedata) | Config binaire | ievr_cfg_bin_editor (Rust), ievr_dataminer, CfgBinEditor (C#), Kuriimu | ✅ (générique + IEVR-spécifique) |
 | **HCA** | Audio | vgmstream, VGAudio, SonicAudioTools, PyCriCodecs, CriTools | ✅ |

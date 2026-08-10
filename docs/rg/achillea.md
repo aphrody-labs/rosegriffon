@@ -11,7 +11,7 @@ cross-site entre les **3 sites**.
 ## 0. État vérifié (tests live — 2026-06-04)
 
 | Endpoint | Résultat | Note |
-|---|---|---|
+| --- | --- | --- |
 | `https://rosegriffon.fr/` | **200** HTML | Next.js SSR (lang fr) |
 | `https://azalee.rosegriffon.fr/` | **200** HTML | Next.js SSR (dark) |
 | `https://api.rosegriffon.fr/health` | **200** `{"status":"ok"}` | stub |
@@ -31,7 +31,7 @@ cross-site entre les **3 sites**.
 ## 1. Écosystème — les 3 sites
 
 | Site | Domaine | Stack | Rôle |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | **website** | `rosegriffon.fr` | Next.js 16 (`apps/website`) | site principal RG : shop, chroniques, articles |
 | **azalee** | `azalee.rosegriffon.fr` | Next.js 16 (`apps/azalee`) | wiki Inazuma (personnages, items, keshins…) |
 | **achillea** | `achillea-web.vercel.app` | Angular 21 (repo `rose-griffon/achillea`) | dashboard communautaire : clans, tournois, ranked, casts |
@@ -97,11 +97,11 @@ invalidation centralisée.
 ## 4. SEO Achillea — calqué sur le monorepo RG
 
 Achillea est une **SPA Angular (CSR, pas de SSR)** → handicap SEO majeur (HTML quasi vide au crawl).
-Aligner sur l'approche `docs/SEO-PLAN.md` (website + azalee, **vérifié** : `generateMetadata`,
+Aligner sur l'approche `docs/la stratégie SEO du dépôt` (website + azalee, **vérifié** : `generateMetadata`,
 `StructuredData` JSON-LD, `sitemap.ts` dans les deux apps) :
 
 | Levier | website / azalee (réf.) | Achillea (à faire) |
-|---|---|---|
+| --- | --- | --- |
 | Rendu | SSR/SSG Next.js | **Prerender Angular** (`@angular/ssr`) sur les routes publiques (`/clans/:id`, `/tournaments/:id`, `/chara/...`) |
 | `<title>` / meta | `generateMetadata` par page | service `Title`/`Meta` Angular + `@angular/ssr` ; titres uniques par entité |
 | Open Graph / Twitter | oui | balises OG/Twitter par route (image via CDN) |
@@ -111,7 +111,7 @@ Aligner sur l'approche `docs/SEO-PLAN.md` (website + azalee, **vérifié** : `ge
 | `robots.txt` | oui | ✅ déjà présent (statique) |
 
 > **Priorité** : sans prerender, Google n'indexe que l'index. `@angular/ssr` (prerender des pages entité)
-> = gain SEO #1, puis sitemap + JSON-LD + OG. Réutiliser les conventions titres/OG de `SEO-PLAN.md`.
+> = gain SEO #1, puis sitemap + JSON-LD + OG. Réutiliser les conventions titres/OG de `la stratégie SEO du dépôt`.
 
 ## 5. Intégration cross-site (home des 3 sites)
 
@@ -168,7 +168,7 @@ export const RG_SITES = [
 
 ## Références
 
-- [docs/SEO-PLAN.md](SEO-PLAN.md) · [docs/REPO_MAP.md](REPO_MAP.md) · [docs/deploy.md](deploy.md)
+- docs/la stratégie SEO du dépôt · [docs/REPO_MAP.md](REPO_MAP.md) · [docs/deploy.md](deploy.md)
 - CDN : endpoint `cdn.rosegriffon.fr` (`cdn.service`, content-addressé `/images/<hash>` + `/upload`) ·
   nginx `conf.d/cdn.rosegriffon.conf`, `api.rosegriffon.conf`
 - Repo Achillea : `rose-griffon/achillea` (front `apps/web`, bot `apps/bot`, `docs/vercel.md`, `docs/supabase-prod.md`)

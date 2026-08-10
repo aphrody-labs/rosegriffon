@@ -59,7 +59,7 @@ prerendue) → le require ne s'exécute qu'au runtime Bun de prod. Même garde q
 ## Frontière server-only / client-safe (stricte)
 
 | Module | Touche | `import "server-only"` ? | Importable depuis `"use client"` ? |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | `lib/cpk/index.ts` | `bun:sqlite`, Node fs/zlib | **OUI** | NON |
 | `lib/cpk/materialize.ts` | `bun:sqlite` (schéma/insert) | non (le script générateur l'importe aussi hors Next) | NON |
 | `lib/cpk/shared.ts` | rien (types + URL CDN purs) | non | **OUI** |
@@ -74,7 +74,7 @@ prerendue) → le require ne s'exécute qu'au runtime Bun de prod. Même garde q
 Chaque chemin `data/dx11/menu/.../c.g4tx` + son CPK est décomposé en colonnes :
 
 | Colonne | Sens |
-|---|---|
+| --- | --- |
 | `path` | chemin complet (avec préfixe `data/`) |
 | `top` | 1er segment logique (préfixe `data/` retiré) → `common` / `dx11` / `movie` / `font` |
 | `sub` | 2e segment logique |
@@ -92,7 +92,7 @@ Index couvrants posés : `idx_cpk_dir` (fichiers directs d'un répertoire), `idx
 `runtime = "nodejs"` + `dynamic = "force-dynamic"` (bun:sqlite, pas Edge). Cache court `s-maxage=300`.
 
 | Requête | Réponse |
-|---|---|
+| --- | --- |
 | `GET /api/cpk?path=<dir>[&limit=&offset=]` | `{ dir, dirs[], files[], fileTotal, fileOffset }` — sous-dossiers complets (compte récursif) + **page** de fichiers directs (`listDirPaged`, défaut `limit=1000`, plafond `5000`) |
 | `GET /api/cpk?path=<file>&meta=1` | métadonnées du fichier + `assetUrl`/`thumbUrl` CDN |
 | `GET /api/cpk?q=<terme>` | recherche par sous-chaîne de nom (bornée à 200) |
@@ -122,7 +122,7 @@ la page serveur ne fait que la validation 404 et les `generateMetadata`. Fil d'A
 `cpkPreviewKind(ext)` classe l'extension → rendu :
 
 | Famille | Extensions | Rendu | URL CDN |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | `image` | `g4tx` | `<img>` / vignette WebP | `/dx11/<reste>.png` (g4tx→png live), thumb `?w=400&format=webp` |
 | `model` | `g4md`, `g4mg` | viewer 3D `<model-viewer>` (si code éligible) | `/model-full/<code>.glb` (assemblage corps+visage+uniforme) ou `/model/<code>.glb` |
 | `text` | `txt json xml csv lua cfg ini yml yaml` | bloc texte | — |

@@ -13,7 +13,7 @@ Référence canonique des deux arbres d'assets personnages d'**Inazuma Eleven: V
 ## 1. L'index (source de vérité)
 
 | Index | Accès | Rôle | Métrique |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | **Redis db3 `iev:file:index`** | `redis-cli -n 3 HGETALL iev:file:index` (HASH path→cpk) | Index maître de l'arbre du jeu | **250 800** entrées |
 | **`iev:tex:<path>`** | HASH (W/H/format/mips/textures) | Dimensions des g4tx | 2002 clés (792 sous `dx11/chr`) |
 | **`iev:cpk:<id>:toc`** | HASH | TOC déchiffré par CPK | 921 TOC |
@@ -34,7 +34,7 @@ Sous-dossiers, partitionnés par **ère** (`01_ie1`, `02_ie2`, `03_ie3`, `04_go1
 `07_ares`, `08_orion`, `11_victory`, `20_edit` = créateur de perso, `21_mannequin`, `22_combo`) :
 
 | Dossier | Fichiers | Contenu | Codes distincts |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | `_face` | 12 482 | têtes/visages `c<NNNNNNNN>` | **5617** internalCodes |
 | `_uniform` | 5 255 | uniformes : préfixes `u`(fielder)/`sk`(keeper)/`n`/`m`/`f`/`g`/`s` | 1870 |
 | `_waza` | 833 | effets de techniques | — |
@@ -82,7 +82,7 @@ Modèle complet d'un joueur = **CORPS + VISAGE + UNIFORME** (+ textures, + skinn
 Roster : 6148 perso, **5710 internal_codes** non-nuls distincts, **5644 au format `c…`**.
 
 | Couverture | Compte | % |
-|---|---|---|
+| --- | --- | --- |
 | Perso avec **face-model** (`common/chr/_face` g4md/g4mg) | 5369 | **95,1 %** |
 | Perso avec **face-texture** (`dx11/chr/_face` g4tx) | 5368 | 95,1 % |
 | Perso avec **GLB face pré-converti** (`dx11/model/c*.glb`) | 5365/5485 | **97,8 %** |

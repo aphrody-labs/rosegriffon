@@ -1,66 +1,79 @@
 # Documentation — monorepo Rose Griffon
 
-Index unifié de la documentation du dépôt. Les docs sont regroupées par domaine.
-Convention : `*.md` est gitignoré sauf `docs/**` — c'est ici que vit toute la doc partagée.
+Index de la documentation partagée. Convention du dépôt : `*.md` est gitignoré
+**sauf** `docs/**`, les `README.md` de paquet et quelques exceptions listées
+dans `.gitignore` — c'est donc ici que vit toute la doc de fond.
 
-> Le `CLAUDE.md` racine reste la source de vérité pour les **conventions** (commits FR,
-> Bun obligatoire, pièges critiques). Cet index ne le duplique pas — il l'aiguille.
+> Les **conventions** (commits en français sur une ligne, Bun obligatoire,
+> pièges critiques) vivent dans le `CLAUDE.md` racine, non versionné. Cet
+> index ne les duplique pas.
 
-## Feuilles de route & plans
-
-| Doc | Portée |
-|-----|--------|
-| [PLAN.md](PLAN.md) | Roadmap maître : état (✅/⏳) par application et package, prochaines étapes. |
-| [IECODE-INAGLE-PLAN.md](IECODE-INAGLE-PLAN.md) | Plan assets & données iecode + inagle (CDN, trous de données, roadmap priorisée). |
-| [SEO-PLAN.md](SEO-PLAN.md) | Plan SEO website + azalee + marque personnelle « yoyo ». |
-
-## Architecture & cartographie
+## Architecture et données
 
 | Doc | Portée |
-|-----|--------|
-| [REPO_MAP.md](REPO_MAP.md) | Cartographie du monorepo : applications, packages, dépendances croisées. **Référence structurelle.** |
-| [database.md](database.md) | Architecture base de données & cache hybride (Supabase Cloud ↔ miroir SQLite embarqué). |
+| --- | --- |
+| [REPO_MAP.md](REPO_MAP.md) | Cartographie du monorepo : applications, paquets, dépendances croisées. Généré par `bun run docs:map`. |
+| [database.md](database.md) | Base de données et cache hybride : Supabase Cloud ↔ miroir SQLite embarqué. |
+| [decision-archi-donnees-azalee.md](decision-archi-donnees-azalee.md) | Décision d'architecture : passage de la couche données d'Azalée sur Drizzle. |
+| [architecture-unifiee-ievr.md](architecture-unifiee-ievr.md) | Vue d'ensemble de la chaîne IEVR : extraction, stockage, rendu. |
 
-## Données & wiki (Azalée)
-
-| Doc | Portée |
-|-----|--------|
-| [inagle.md](inagle.md) | Package `@rose-griffon/inagle` : parser binaire CPK/G4TX, API, pipeline de données. |
-| [azalee-lib.md](azalee-lib.md) | Package `@rose-griffon/azalee` : extraction du cœur du wiki en bibliothèque Bun (contrat client-safe/serveur, façades Next, voie CLI + Tauri). |
-| [wiki-filters.md](wiki-filters.md) | Filtres & détails du wiki ; contournement des colonnes NULL `inagle_skills` (category/element FR). |
-
-## Déploiement & opérations
+## Wiki Azalée et bibliothèque
 
 | Doc | Portée |
-|-----|--------|
-| [deploy.md](deploy.md) | Guide de déploiement (website → Vercel manuel, azalee → VPS self-host, cron systemd). |
+| --- | --- |
+| [azalee-lib.md](azalee-lib.md) | `@rose-griffon/azalee` : cœur du wiki en bibliothèque Bun (racine client-safe, `/server`, `/remote`). |
+| [azalee-tauri.md](azalee-tauri.md) | Recette d'intégration Tauri : sidecar Bun compilé, CSP, cycle de vie, mode dégradé. |
+| [wiki-filters.md](wiki-filters.md) | Filtres du wiki et contournement des colonnes NULL de `inagle_skills`. |
+| [cpk-browser.md](cpk-browser.md) | Navigateur des 250 800 fichiers des archives CPK : index, routes, prévisualisation. |
+| [tools/README.md](tools/README.md) | Outils communautaires (comparateur, équipe aléatoire, traducteur). |
 
-## Audits
-
-| Doc | Portée |
-|-----|--------|
-| [UI-UX-AUDIT.md](UI-UX-AUDIT.md) | Audit UI/UX & responsive (website + azalee + package UI). |
-| [asset-audit/](asset-audit/) | Snapshots d'audit assets 2026-06-03 (tables `inagle_*`, CDN, références UI) — détail de [IECODE-INAGLE-PLAN.md](IECODE-INAGLE-PLAN.md). |
-
-## Intégration écosystème
+## Données du jeu (extraction)
 
 | Doc | Portée |
-|-----|--------|
-| [achillea.md](achillea.md) | Intégration d'Achillea (3e site) dans l'écosystème RG (API/CDN/SEO/cross-site). |
+| --- | --- |
+| [gamedata-coverage.md](gamedata-coverage.md) | **Plan durable** de couverture de l'extraction : ce qui est parsé, poussé, ce qui manque. |
+| [inagle.md](inagle.md) | `@rose-griffon/inagle` : parser binaire CPK/G4TX, API, pipeline. |
+| [iecode-inagle-supabase.md](iecode-inagle-supabase.md) | Chaîne complète iecode → inagle → Supabase : tables, correspondances, procédures. |
+| [chr.md](chr.md) | Format des modèles de personnage et assemblage 3D. |
+| [lvl5.md](lvl5.md) | Formats propriétaires Level-5 : CPK, G4TX, cfgbin, gaiji. |
 
-## Outils
+## Exploitation
 
 | Doc | Portée |
-|-----|--------|
-| [tools/README.md](tools/README.md) | Outils communautaires Azalée (comparateur, équipe aléatoire, traducteur) + captures. |
+| --- | --- |
+| [deploy.md](deploy.md) | Déploiement et exploitation : services, procédures, diagnostic, interdits. |
+| [mcp.md](mcp.md) | Serveur MCP du monorepo : mise en service, connexion distante, portées. |
+| [rag-unified.md](rag-unified.md) | Recherche sémantique unifiée : embeddings auto-hébergés, graphe de liens, ingestion. |
 
-## Référence externe (auto-générée — ne pas éditer à la main)
+## Écosystème
 
-Le cron `external-docs` (`packages/cron/src/tasks/ie-crawl/external-docs.ts`) crawle ces
-documentations externes pour le RAG/LLM et les régénère dans `docs/reference/`. Toute édition
+| Doc | Portée |
+| --- | --- |
+| [achillea.md](achillea.md) | Intégration d'Achillea (troisième site) : API, CDN, SEO, liens croisés. |
+
+## Référence externe (générée — ne pas éditer)
+
+La tâche cron `external-docs`
+(`packages/cron/src/tasks/ie-crawl/external-docs.ts`) récupère ces
+documentations pour le RAG et les régénère dans `reference/`. Toute édition
 manuelle y sera écrasée.
 
 | Doc | Source |
-|-----|--------|
-| [reference/awesome-markdown.md](reference/awesome-markdown.md) | `github.com/mundimark/awesome-markdown`. |
-| [reference/bun-markdown.md](reference/bun-markdown.md) | `github.com/oven-sh/bun` (`docs/runtime/markdown.mdx`). |
+| --- | --- |
+| [reference/awesome-markdown.md](reference/awesome-markdown.md) | `github.com/mundimark/awesome-markdown` |
+| [reference/bun-markdown.md](reference/bun-markdown.md) | `github.com/oven-sh/bun` |
+| [reference/better-auth-readme.md](reference/better-auth-readme.md) | `better-auth.com` |
+| [reference/better-auth-session.md](reference/better-auth-session.md) | `better-auth.com` (sessions) |
+| [reference/discordjs-readme.md](reference/discordjs-readme.md) | `discord.js.org` |
+| [reference/turborepo-readme.md](reference/turborepo-readme.md) | `turborepo.dev` |
+| [reference/inazuma-index-readme.md](reference/inazuma-index-readme.md) | index communautaire IEVR |
+| [reference/secteur-v-readme.md](reference/secteur-v-readme.md) | communauté Secteur V |
+
+## Vérifier la documentation
+
+```bash
+bun run docs:map           # régénère REPO_MAP.md depuis les package.json
+bun run docs:check-links   # liens internes cassés
+bun run docs:lint          # markdownlint
+bun run docs:build         # les trois d'affilée
+```
