@@ -114,6 +114,8 @@ Table exacte du champ `exports` de `package.json`.
 | `@rose-griffon/azalee/game` | `src/game/index.ts` | client-safe — formations, genre, règles d'équipe, cut-ins, emblèmes |
 | `@rose-griffon/azalee/game/*` | `src/game/*.ts` | client-safe — `formations`, `team-rules`, `team-types`, `skills-cutin`, … |
 | `@rose-griffon/azalee/data/*` | `src/data/*` | client-safe — JSON figés (`passives-full.json`, manifestes…) |
+| `@rose-griffon/azalee/remote` | `src/remote/index.ts` | **client-safe** — client HTTP typé de l'API (41 routes), erreurs typées, sonde `/health` |
+| `@rose-griffon/azalee/remote/*` | `src/remote/*.ts` | client-safe — `client`, `transport`, `errors`, `types` |
 | `@rose-griffon/azalee/config` | `src/config.ts` | serveur — résolution des artefacts runtime |
 | `@rose-griffon/azalee/db` | `src/db/index.ts` | serveur — client SQLite + injection de fournisseur |
 | `@rose-griffon/azalee/db/*` | `src/db/*.ts` | serveur — `provider`, `sqlite-client` |
@@ -126,8 +128,8 @@ Table exacte du champ `exports` de `package.json`.
 | `@rose-griffon/azalee/cross` | `src/cross/index.ts` | serveur — Inazuma Eleven Cross (Unity/Addressables) |
 | `@rose-griffon/azalee/cross/*` | `src/cross/*.ts` | serveur / client (`data-shared`, `assets-shared`) |
 | `@rose-griffon/azalee/rag` | `src/rag.ts` | serveur — recherche sémantique (embeddings self-host + Redis) |
-| `@rose-griffon/azalee/server` | `src/server/index.ts` | serveur — surface agrégée + API HTTP |
-| `@rose-griffon/azalee/server/*` | `src/server/*.ts` | serveur — `serve` |
+| `@rose-griffon/azalee/server` | `src/server/index.ts` | serveur — surface agrégée + API HTTP + résolution de source |
+| `@rose-griffon/azalee/server/*` | `src/server/*.ts` | serveur — `serve`, `source` |
 | `@rose-griffon/azalee/package.json` | `package.json` | métadonnées |
 
 Règle : un fichier `<x>.ts` qui touche `bun:sqlite`/`node:fs` a toujours son
@@ -324,6 +326,62 @@ const { data } = await res.json();
 
 Attendre `GET /health` avant le premier appel : la matérialisation des index CPK
 et texte se fait au premier accès.
+
+Recette complète et vérifiée (compilation du sidecar, `externalBin`, CSP,
+capacités, cycle de vie, mode dégradé) : [`docs/azalee-tauri.md`](../../docs/azalee-tauri.md).
+
+## Client distant et repli automatique
+
+Les mêmes 41 routes sont accessibles par un **client HTTP typé, client-safe**
+(`bun build --target=browser` : 4 modules, 12,2 Ko) : c'est ce qu'importe une
+webview Tauri, ou le CLI d'une machine sans miroir SQLite ni dump du jeu.
+
+```ts
+import { createAzaleeClient, isAzaleeNotFound } from "@rose-griffon/azalee/remote";
+
+// Défaut : AZALEE_API_URL, sinon https://api.rosegriffon.fr/azalee
+const api = createAzaleeClient();
+const { data, total } = await api.characters({ q: "Mark", limit: 24 });
+```
+
+Les réponses sont typées **à partir des fonctions serveur** qui les produisent
+(`Awaited<ReturnType<typeof wikiService.getCharactersList>>`…) : le client ne
+peut pas dériver du serveur. Délai d'attente 15 s, `AbortSignal`, reprise des
+échecs transitoires (`408`/`425`/`429`/`5xx`, réseau, `Retry-After` honoré) et
+erreurs typées `AzaleeRemoteError` (`kind`, `status`, `url`, `detail`).
+
+Côté serveur, `createAzaleeData` choisit seul la source :
+
+```ts
+import { createAzaleeData } from "@rose-griffon/azalee/server";
+
+const data = createAzaleeData();          // "auto"
+console.log(data.source, "|", data.reason);
+// local | source locale retenue : miroir SQLite présent (…/data/backups/mirror.sqlite)
+
+const teams = await data.teams();         // 208 — depuis le disque, zéro socket
+```
+
+| Mode | Comportement |
+|------|--------------|
+| `auto` (défaut) | local si le miroir (ou un client injecté) est là, sinon distant ; bascule à chaud si une lecture locale échoue |
+| `local` | `handleAzaleeRequest` en appel direct — aucun socket |
+| `remote` | `fetch` vers `baseUrl` |
+
+Le mode local passe par le **même** routeur que l'API HTTP : aucune logique de
+lecture n'est dupliquée entre les deux sources. Un `404` ne déclenche jamais de
+repli — c'est une réponse, pas une panne.
+
+Dans une webview, où `createAzaleeData` (serveur) n'est pas importable,
+`resolveAzaleeBaseUrl` joue le même rôle en HTTP pur :
+
+```ts
+import { AZALEE_DEFAULT_API_URL, resolveAzaleeBaseUrl } from "@rose-griffon/azalee/remote";
+
+const picked = await resolveAzaleeBaseUrl(["http://127.0.0.1:3010", AZALEE_DEFAULT_API_URL], {
+  requireLocalData: true, // écarte un sidecar dont /health renvoie mirror:null
+});
+```
 
 ## CLI `azalee`
 

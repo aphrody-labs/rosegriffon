@@ -23,7 +23,8 @@
 			"@rose-griffon/db/redis": [
 				"./types/workspace-shims.d.ts"
 			]
-		}
+		},
+		"moduleDetection": "force"
 	},
 	"include": [
 		"src/**/*.ts",
