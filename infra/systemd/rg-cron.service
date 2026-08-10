@@ -1,4 +1,13 @@
 [Unit]
+# rg-cron — démon de tâches planifiées du monorepo (Bun.cron).
+#
+# Publication programmée, préchauffage des pages, synchronisation Discord,
+# sauvegardes, crawl, SEO. Le démon tourne en continu et déclenche ses tâches
+# lui-même : il n'y a pas de timer systemd par tâche.
+#
+# Installation :
+#   sudo cp infra/systemd/rg-cron.service /etc/systemd/system/
+#   sudo systemctl daemon-reload && sudo systemctl restart rg-cron.service
 Description=Rose Griffon Cron Daemon (Bun + Bun.cron)
 After=network-online.target
 Wants=network-online.target
@@ -8,39 +17,67 @@ Type=simple
 User=ubuntu
 Group=ubuntu
 WorkingDirectory=/home/ubuntu/rg/packages/cron
-# Charge les variables d'env décryptées de production (DATABASE_URL, SUPABASE_SERVICE_ROLE_KEY, CRON_SECRET, etc.)
-EnvironmentFile=/home/ubuntu/rg/apps/website/.env.production.local
+EnvironmentFile=/home/ubuntu/rg/.env.local
 Environment=NODE_ENV=production
+
+# `PATH` est OBLIGATOIRE : systemd n'en fournit pas qui contienne
+# `/home/ubuntu/.bun/bin`. Sans lui, toute commande `bun …` lancée par une
+# tâche échoue avec le code 127 (« command not found ») — c'est ce qui a
+# silencieusement cassé les sauvegardes nocturnes. Le code utilise en plus
+# `process.execPath`, mais un PATH correct reste nécessaire aux scripts
+# appelés en cascade.
+Environment=PATH=/home/ubuntu/.bun/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+
+# Cibles publiques. Le code a les mêmes valeurs en repli, mais les rendre
+# explicites permet de basculer un environnement sans recompiler.
 Environment=AZALEE_URL=https://azalee.rosegriffon.fr
 Environment=WEBSITE_URL=https://rosegriffon.fr
 Environment=API_URL=https://api.rosegriffon.fr
 Environment=CDN_URL=https://cdn.rosegriffon.fr
+
 ExecStart=/home/ubuntu/.bun/bin/bun run src/index.ts
 Restart=on-failure
-RestartSec=10s
+RestartSec=5s
+TimeoutStopSec=15s
+KillMode=mixed
 StandardOutput=journal
 StandardError=journal
 SyslogIdentifier=rg-cron
 
-# Resource limits (cohérent avec rg-bot.service)
-LimitNOFILE=65536
+# ── Limites de ressources ──
+LimitNOFILE=131072
+TasksMax=512
 MemoryMax=1G
 MemoryHigh=768M
+MemoryLow=256M
 CPUWeight=200
+IOWeight=200
+OOMScoreAdjust=-300
 
-# Hardening systemd
+# ── Durcissement (MemoryDenyWriteExecute INTERDIT — casse le JIT de Bun) ──
 ProtectSystem=strict
 ProtectHome=read-only
-ReadWritePaths=/var/www/cdn/static/azalee/public /var/www/cdn/static/website/public /tmp /home/ubuntu/rg /home/ubuntu/.bxc
+# Les deux répertoires du CDN sont la cible de la tâche `cdn` : sans eux,
+# `ProtectSystem=strict` rend la copie impossible et un nouvel asset partagé
+# n'atteint jamais le CDN.
+ReadWritePaths=/home/ubuntu/rg /tmp /home/ubuntu/.bxc /var/www/cdn/static/azalee/public /var/www/cdn/static/website/public
 PrivateTmp=true
 PrivateDevices=true
 ProtectKernelTunables=true
 ProtectKernelModules=true
 ProtectControlGroups=true
 RestrictNamespaces=true
+RestrictRealtime=true
 RestrictSUIDSGID=true
 LockPersonality=true
 NoNewPrivileges=true
+ProcSubset=pid
+ProtectProc=invisible
+RemoveIPC=true
+CapabilityBoundingSet=
+AmbientCapabilities=
+SystemCallFilter=@system-service ~@obsolete @privileged
+SystemCallErrorNumber=EPERM
 
 [Install]
 WantedBy=multi-user.target
