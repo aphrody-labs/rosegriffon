@@ -26,19 +26,95 @@ type SqliteLike = {
 };
 
 let _sqliteDb: SqliteLike | null = null;
+let _openedPath: string | null = null;
+let _openedFingerprint = "";
+let _lastFreshnessCheck = 0;
+
+/** Intervalle minimal entre deux vérifications de fraîcheur du miroir. */
+const FRESHNESS_INTERVAL_MS = 5_000;
+
+/**
+ * Empreinte du fichier réellement ouvert : inode, date de modification et
+ * taille. Le `mirror.sqlite` est un **lien symbolique** que la synchronisation
+ * quotidienne fait pointer sur un nouveau snapshot, puis elle purge les
+ * anciens (rétention 2).
+ */
+function fingerprintOf(path: string): string {
+	try {
+		// `statSync` existe sous Bun comme sous Node ; la version asynchrone de
+		// `Bun.file()` ne conviendrait pas dans ce chemin synchrone.
+		// eslint-disable-next-line @typescript-eslint/no-require-imports -- accès synchrone au système de fichiers
+		const { statSync } = require("node:fs") as { statSync: (p: string) => { ino: number; mtimeMs: number; size: number } };
+		const info = statSync(path);
+		return `${info.ino}:${info.mtimeMs}:${info.size}`;
+	} catch {
+		return "";
+	}
+}
+
+/**
+ * Invalide le handle si le miroir a été remplacé sous nos pieds.
+ *
+ * `azalee-web` est redémarré par la synchronisation, mais pas les autres
+ * consommateurs de la lib (`azalee-api`, `rg-mcp`, un CLI qui tourne longtemps,
+ * un sidecar Tauri) : sans cette vérification, ils continuaient à servir le
+ * snapshot ouvert au démarrage — et après deux nuits, un fichier supprimé.
+ */
+function invalidateIfMirrorChanged(): void {
+	if (!_sqliteDb) return;
+
+	// Le chemin est comparé à CHAQUE accès, sans appel système : un
+	// `configureAzalee({ mirrorPath })` explicite doit prendre effet
+	// immédiatement, pas après l'intervalle de fraîcheur.
+	const path = getSqlitePath();
+	if (path === _openedPath) {
+		// Même chemin : seule l'empreinte du fichier peut avoir changé (swap du
+		// lien symbolique). Ce contrôle-là coûte un `stat`, donc on l'espace.
+		const now = Date.now();
+		if (now - _lastFreshnessCheck < FRESHNESS_INTERVAL_MS) return;
+		_lastFreshnessCheck = now;
+		if (fingerprintOf(path ?? "") === _openedFingerprint) return;
+	}
+
+	const ancien = _sqliteDb as unknown as { close?: () => void };
+	_sqliteDb = null;
+	_drizzle = null;
+	// Les lectures sont synchrones : aucune requête n'est en vol ici. Fermer
+	// libère le descripteur ; un échec n'est pas bloquant (le GC s'en chargera).
+	try {
+		ancien.close?.();
+	} catch {
+		/* handle déjà fermé ou moteur sans close() */
+	}
+}
+
 function getSqliteDb(): Database {
+	invalidateIfMirrorChanged();
 	if (_sqliteDb) return _sqliteDb as unknown as Database;
 	const dbPath = getSqlitePath();
 	if (!dbPath) {
 		throw new Error("No SQLite database backup found");
 	}
+	_openedPath = dbPath;
+	_openedFingerprint = fingerprintOf(dbPath);
+	_lastFreshnessCheck = Date.now();
 
 	if (typeof Bun !== "undefined") {
 		// Runtime Bun (prod `azalee-web.service`) → bun:sqlite natif.
 		// eslint-disable-next-line @typescript-eslint/no-require-imports -- lazy load bun:sqlite sous garde Bun
 		const { Database: DBConstructor } = require("bun:sqlite");
 		const db = new DBConstructor(dbPath, { readonly: true }) as SqliteLike;
-		db.exec("PRAGMA journal_mode = WAL");
+		// `journal_mode` est une écriture sur l'en-tête du fichier : sur une base
+		// qui n'est pas déjà en WAL, la poser depuis une connexion en lecture
+		// seule lève `SQLITE_READONLY`. Les snapshots de production sont en WAL
+		// (le pragma est alors un simple accusé de réception), mais une base
+		// fournie par un tiers — poste de dev, sidecar Tauri — ne l'est pas
+		// forcément : le mode par défaut fonctionne très bien en lecture.
+		try {
+			db.exec("PRAGMA journal_mode = WAL");
+		} catch {
+			/* base non-WAL ouverte en lecture seule : on garde son mode d'origine */
+		}
 		db.exec("PRAGMA temp_store = MEMORY");
 		_sqliteDb = db;
 		return _sqliteDb as unknown as Database;
