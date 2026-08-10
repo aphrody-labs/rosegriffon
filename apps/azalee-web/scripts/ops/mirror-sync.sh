@@ -39,6 +39,14 @@ echo "[mirror-sync] rétention OK ; restants: $(ls -1 "$BACKUPS"/supabase-*.sqli
 # Restart pour que le singleton readonly rouvre le nouveau miroir.
 sudo systemctl restart azalee-web.service
 
+# Les autres consommateurs du miroir détectent désormais le swap tout seuls
+# (vérification d'inode dans `packages/azalee/src/db/sqlite-client.ts`), mais un
+# redémarrage leur évite d'attendre l'intervalle de fraîcheur et repart sur un
+# descripteur propre. Ils sont sans état : l'interruption est imperceptible.
+for unite in azalee-api.service rg-mcp.service; do
+  systemctl is-active --quiet "$unite" && sudo systemctl restart "$unite" && echo "[mirror-sync] $unite redémarré"
+done
+
 # Next met parfois plus de quatre secondes à répondre après un redémarrage :
 # une sonde unique renvoyait alors 503 et faisait échouer l'unité alors que la
 # synchronisation, elle, avait réussi. On attend jusqu'à 60 s.
