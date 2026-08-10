@@ -127,6 +127,9 @@ scratch/
 .env.bak.*
 data/backups/
 **/data/backups/
+# `/data` à la RACINE = artefacts générés (glossary.json, dumps, bases de
+# travail). Ancré : `apps/azalee/data/` reste versionné, lui.
+/data/
 *.sqlite
 *.sqlite3
 *.sqlite-shm
