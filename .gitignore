@@ -89,6 +89,10 @@ copilot-instructions.md
 !apps/*/README.md
 # Corpus + runbook des sous-agents llm-agents (doc demandée, trackable)
 !tools/llm-agents/**/*.md
+# Serveur MCP : les fiches de contexte et la skill Claude SONT le livrable du
+# paquet (servies en ressources MCP, installées chez le client) — versionnées.
+!packages/mcp/context/**/*.md
+!packages/mcp/skill/**/*.md
 # SEO : llms.txt / llm.txt / llms-full.txt + clé IndexNow (publics par design)
 !apps/*/public/llms.txt
 !apps/*/public/llm.txt

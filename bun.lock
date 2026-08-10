@@ -429,7 +429,6 @@
         "@rose-griffon/inagle": "workspace:*",
         "@supabase/supabase-js": "catalog:",
         "commander": "catalog:",
-        "dotenv": "catalog:",
         "drizzle-orm": "^0.45.2",
         "wanakana": "catalog:",
       },
@@ -552,6 +551,23 @@
       },
       "devDependencies": {
         "@types/node": "catalog:",
+        "typescript": "catalog:",
+      },
+    },
+    "packages/mcp": {
+      "name": "@rose-griffon/mcp",
+      "version": "1.0.0",
+      "bin": {
+        "rg-mcp": "./src/cli.ts",
+      },
+      "dependencies": {
+        "@rose-griffon/azalee": "workspace:*",
+        "zod": "catalog:",
+      },
+      "devDependencies": {
+        "@rose-griffon/config": "workspace:*",
+        "@types/bun": "catalog:",
+        "oxlint": "catalog:",
         "typescript": "catalog:",
       },
     },
@@ -1791,6 +1807,8 @@
     "@rose-griffon/inagle": ["@rose-griffon/inagle@workspace:packages/inagle"],
 
     "@rose-griffon/inagle-cross": ["@rose-griffon/inagle-cross@workspace:packages/inagle-cross"],
+
+    "@rose-griffon/mcp": ["@rose-griffon/mcp@workspace:packages/mcp"],
 
     "@rose-griffon/menu-render": ["@rose-griffon/menu-render@workspace:packages/menu-render"],
 
