@@ -20,7 +20,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { CpkExplorer } from "@/app/cpk/CpkExplorer";
 import { fileMeta, listDirPaged } from "@/lib/cpk/index";
-import { normalizeDir, segLabel } from "@/lib/cpk/shared";
+import { normalizeDir, segLabel } from "@rose-griffon/azalee/cpk/shared";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";

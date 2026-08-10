@@ -3,7 +3,7 @@
 import type { MovesetSkill } from "@/components/wiki/MovesetList";
 import { getServerSession } from "@/lib/auth-helpers";
 import { createClient } from "@/lib/supabase/server";
-import type { SavedTeam, TeamData } from "@/lib/team-types";
+import type { SavedTeam, TeamData } from "@rose-griffon/azalee/game/team-types";
 import { wikiService } from "@/lib/wiki-service";
 
 /** Save a new team */

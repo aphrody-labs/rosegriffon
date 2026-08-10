@@ -10,8 +10,8 @@
  */
 import type { Metadata } from "next";
 import dossier from "@/data/aphrody-dossier.json";
-import { cpkAssetUrl, cpkAudioUrl, cpkThumbUrl } from "@/lib/cpk/shared";
-import { cutinHasAssets, getSkillCutin } from "@/lib/skills-cutin";
+import { cpkAssetUrl, cpkAudioUrl, cpkThumbUrl } from "@rose-griffon/azalee/cpk/shared";
+import { cutinHasAssets, getSkillCutin } from "@rose-griffon/azalee/game/skills-cutin";
 import { DemoExperience } from "@/components/wiki/demo/DemoExperience";
 import type {
 	DemoData,

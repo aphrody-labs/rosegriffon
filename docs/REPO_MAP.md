@@ -14,7 +14,7 @@ Ce document cartographie la structure complète du monorepo **Rose Griffon**. Il
 
 Applications autonomes prêtes à être déployées :
 
-### 📁 [@rose-griffon/azalee](file:///apps/azalee)
+### 📁 [@rose-griffon/azalee-web](file:///apps/azalee)
 * **Chemin :** `apps/azalee`
 * **Description :** Aucune description fournie.
 * **Version :** `0.1.0`

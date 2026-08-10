@@ -7,10 +7,11 @@ Monorepo **Rose Griffon** — site communautaire + wiki IEVR + bot Discord. Stac
 ```
 rg/
 ├── apps/
-│   ├── azalee/        # Wiki Inazuma Eleven Victory Road (azalee.rosegriffon.fr)
+│   ├── azalee/        # Wiki Inazuma Eleven Victory Road (azalee.rosegriffon.fr) — @rose-griffon/azalee-web
 │   ├── website/       # Site principal (rosegriffon.fr)
 │   └── bot/           # Bot Discord (Bun + discordx + tsyringe)
 ├── packages/
+│   ├── azalee/        # Bibliothèque Bun du wiki : données, index CPK/texte, CLI `azalee`, API headless (sans Next)
 │   ├── ui/            # Composants shadcn partagés (57 composants new-york style)
 │   ├── db/            # Client Supabase + types Database générés
 │   ├── auth/          # Logique d'authentification et guards partagés (better-auth)
@@ -46,7 +47,8 @@ bun run build           # Build tous les workspaces (turbo)
 bun run lint            # oxlint + eslint
 bun run type-check      # tsc --noEmit partout
 bun run test            # bun test (tests d'intégration & unitaires) + vitest
-bun run azalee test     # Lance la suite complète de vérifications natives du Wiki (bxc, APIs, pages)
+azalee test             # Suite complète de vérifications natives du Wiki (bxc, APIs, pages) — CLI de packages/azalee
+bun --filter @rose-griffon/azalee test   # Tests de la bibliothèque (miroir SQLite, index CPK, API headless)
 ```
 
 Lancer un seul workspace en dev :

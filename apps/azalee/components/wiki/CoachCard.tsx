@@ -5,7 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 import { ElementIcon } from "@/components/wiki/ElementIcon";
-import { getCharacterFaceUrl } from "@/lib/images";
+import { getCharacterFaceUrl } from "@rose-griffon/azalee/images";
 import { cn } from "@/lib/utils";
 
 export interface CoachCardProps {

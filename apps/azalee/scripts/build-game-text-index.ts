@@ -35,7 +35,7 @@ import path from "node:path";
 import { gzipSync } from "node:zlib";
 import { loadTextFileRaw } from "@rose-griffon/inagle/parsers/universal-text";
 import { formatGameText } from "../lib/game-text/format";
-import { buildSqliteFromEntries, type TextEntry } from "@/lib/game-text/materialize";
+import { buildSqliteFromEntries, type TextEntry } from "@rose-griffon/azalee/game-text/materialize";
 
 // --- Catégorisation des dicts racine ---------------------------------------
 //

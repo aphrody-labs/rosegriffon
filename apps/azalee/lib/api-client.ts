@@ -9,9 +9,9 @@ import type {
 import { createClient } from "@supabase/supabase-js";
 import { unstable_cache } from "next/cache";
 import { getPgPool } from "@/lib/db/pg";
-import { getMiximaxImageUrl, resolveAssetUrl, resolveAuraTelopUrl } from "@/lib/images";
+import { getMiximaxImageUrl, resolveAssetUrl, resolveAuraTelopUrl } from "@rose-griffon/azalee/images";
 
-import { createSqliteClient } from "./supabase/sqlite-client";
+import { createSqliteClient } from "@rose-griffon/azalee/db";
 
 // Lazy getter for Supabase to prevent top-level execution during build
 let _supabase: ReturnType<typeof createClient> | null = null;

@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { getSkillIconUrl } from "@/lib/images";
+import { getSkillIconUrl } from "@rose-griffon/azalee/images";
 import { cn } from "@/lib/utils";
 
 interface ElementIconProps {

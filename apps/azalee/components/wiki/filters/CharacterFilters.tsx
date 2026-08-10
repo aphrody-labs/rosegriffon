@@ -1,5 +1,5 @@
 import { useLanguage } from "@/components/providers/language-provider";
-import { getSkillCategoryIconUrl } from "@/lib/images";
+import { getSkillCategoryIconUrl } from "@rose-griffon/azalee/images";
 import { FilterChips } from "../FilterChips";
 import { RarityFilterChips } from "./RarityFilterChips";
 import { TeamFilter } from "./TeamFilter";

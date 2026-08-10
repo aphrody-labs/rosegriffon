@@ -10,7 +10,7 @@
 import { Fragment, useEffect, useState } from "react";
 import { Icon } from "@/components/ui/Icon";
 import { CpkBytesPreview } from "@/app/cpk/CpkBytesPreview";
-import { cpkRawUrl } from "@/lib/cpk/shared";
+import { cpkRawUrl } from "@rose-griffon/azalee/cpk/shared";
 import { g4pkParse, type G4pkParsed } from "@/lib/cpk-wasm";
 
 function humanSize(n: number): string {

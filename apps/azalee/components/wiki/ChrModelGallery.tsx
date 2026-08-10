@@ -3,7 +3,7 @@
 import { Download, PawPrint, Sparkles, Swords } from "lucide-react";
 import { useState } from "react";
 import InlineModelViewer from "@/components/wiki/InlineModelViewer";
-import { downloadName } from "@/lib/download-filename";
+import { downloadName } from "@rose-griffon/azalee/text/download-filename";
 import { cn } from "@/lib/utils";
 
 interface ModelEntry {

@@ -65,7 +65,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        workspace: ["@rose-griffon/website", "@rose-griffon/azalee", "@rose-griffon/cron"]
+        workspace: ["@rose-griffon/website", "@rose-griffon/azalee-web", "@rose-griffon/cron"]
     steps:
       - uses: actions/checkout@v4
 

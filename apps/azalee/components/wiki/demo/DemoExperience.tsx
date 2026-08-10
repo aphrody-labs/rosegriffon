@@ -27,7 +27,7 @@ import {
 import { fetchCutinManifest } from "@/lib/cutin/listing";
 import { loadCutinStoryboard } from "@/lib/cutin/decode";
 import { createTheatreSequencer } from "@/lib/cutin/theatre-sequencer";
-import { getSkillCutin } from "@/lib/skills-cutin";
+import { getSkillCutin } from "@rose-griffon/azalee/game/skills-cutin";
 import type { CutinSceneHandle } from "./ComposedHissatsuScene";
 import { DemoModelSelector } from "./DemoModelSelector";
 import { DemoSkillsSection } from "./DemoSkillsSection";

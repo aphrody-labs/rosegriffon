@@ -32,7 +32,7 @@
       },
     },
     "apps/azalee": {
-      "name": "@rose-griffon/azalee",
+      "name": "@rose-griffon/azalee-web",
       "version": "0.1.0",
       "dependencies": {
         "@better-auth/agent-auth": "catalog:",
@@ -77,6 +77,7 @@
         "@react-three/postprocessing": "^3.0.4",
         "@rose-griffon/assets": "workspace:*",
         "@rose-griffon/auth": "workspace:*",
+        "@rose-griffon/azalee": "workspace:*",
         "@rose-griffon/better-auth-steam": "workspace:*",
         "@rose-griffon/db": "workspace:*",
         "@rose-griffon/inagle": "workspace:*",
@@ -415,6 +416,29 @@
         "react": "catalog:",
         "typescript": "catalog:",
         "vitest": "catalog:",
+      },
+    },
+    "packages/azalee": {
+      "name": "@rose-griffon/azalee",
+      "version": "1.0.0",
+      "bin": {
+        "azalee": "./src/cli.ts",
+      },
+      "dependencies": {
+        "@rose-griffon/db": "workspace:*",
+        "@rose-griffon/inagle": "workspace:*",
+        "@supabase/supabase-js": "catalog:",
+        "commander": "catalog:",
+        "dotenv": "catalog:",
+        "drizzle-orm": "^0.45.2",
+        "wanakana": "catalog:",
+      },
+      "devDependencies": {
+        "@rose-griffon/config": "workspace:*",
+        "@types/bun": "catalog:",
+        "@types/node": "catalog:",
+        "oxlint": "catalog:",
+        "typescript": "catalog:",
       },
     },
     "packages/better-auth-steam": {
@@ -1736,7 +1760,9 @@
 
     "@rose-griffon/auth": ["@rose-griffon/auth@workspace:packages/auth"],
 
-    "@rose-griffon/azalee": ["@rose-griffon/azalee@workspace:apps/azalee"],
+    "@rose-griffon/azalee": ["@rose-griffon/azalee@workspace:packages/azalee"],
+
+    "@rose-griffon/azalee-web": ["@rose-griffon/azalee-web@workspace:apps/azalee"],
 
     "@rose-griffon/better-auth-steam": ["@rose-griffon/better-auth-steam@workspace:packages/better-auth-steam"],
 

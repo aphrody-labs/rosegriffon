@@ -10,16 +10,16 @@ import { CommonSpriteIcon } from "@/components/ui/CommonSpriteIcon";
 import { RarityBadge } from "@/components/ui/rarity-badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@rose-griffon/ui";
 import type { SpriteCommonKey } from "@/config/sprites-common";
-import { formatDescription } from "@/lib/format-description";
-import { isFemaleGender } from "@/lib/gender";
-import type { GenderValue } from "@/lib/gender";
+import { formatDescription } from "@rose-griffon/azalee/text/format-description";
+import { isFemaleGender } from "@rose-griffon/azalee/game/gender";
+import type { GenderValue } from "@rose-griffon/azalee/game/gender";
 import {
 	getCharacterImageUrl,
 	getCharacterModelFullGlbUrl,
 	getEmblemImageUrl,
 	getSkillCategoryIconUrl,
-} from "@/lib/images";
-import { TEAM_EMBLEM_MAP } from "@/lib/team-emblem-map";
+} from "@rose-griffon/azalee/images";
+import { TEAM_EMBLEM_MAP } from "@rose-griffon/azalee/game/team-emblem-map";
 import { cn } from "@/lib/utils";
 import CharacterModelViewer from "./CharacterModelViewer";
 import { CharacterStatsPopover } from "./CharacterStatsPopover";

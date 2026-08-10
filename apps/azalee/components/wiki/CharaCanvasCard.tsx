@@ -21,7 +21,7 @@ const Rect = RKRect as unknown as React.FC<any>;
 const Group = RKGroup as unknown as React.FC<any>;
 const KonvaImage = RKImage as unknown as React.FC<any>;
 const Text = RKText as unknown as React.FC<any>;
-import { getCharacterImageUrl } from "@/lib/images";
+import { getCharacterImageUrl } from "@rose-griffon/azalee/images";
 import { cn } from "@/lib/utils";
 
 /* ── Constants ────────────────────────────────────────────── */

@@ -5,7 +5,7 @@ import { notFound } from "next/navigation";
 import type { OverrideSkillData } from "@/components/wiki/OverrideSkillSection";
 import { SkillCutinSection } from "@/components/wiki/SkillCutinSection";
 import { SkillDetail } from "@/components/wiki/SkillDetail";
-import { cutinHasAssets, getSkillCutin } from "@/lib/skills-cutin";
+import { cutinHasAssets, getSkillCutin } from "@rose-griffon/azalee/game/skills-cutin";
 import { createClient } from "@/lib/supabase/server";
 import { wikiService } from "@/lib/wiki-service";
 

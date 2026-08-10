@@ -26,6 +26,7 @@ Convention : `*.md` est gitignoré sauf `docs/**` — c'est ici que vit toute la
 | Doc | Portée |
 |-----|--------|
 | [inagle.md](inagle.md) | Package `@rose-griffon/inagle` : parser binaire CPK/G4TX, API, pipeline de données. |
+| [azalee-lib.md](azalee-lib.md) | Package `@rose-griffon/azalee` : extraction du cœur du wiki en bibliothèque Bun (contrat client-safe/serveur, façades Next, voie CLI + Tauri). |
 | [wiki-filters.md](wiki-filters.md) | Filtres & détails du wiki ; contournement des colonnes NULL `inagle_skills` (category/element FR). |
 
 ## Déploiement & opérations

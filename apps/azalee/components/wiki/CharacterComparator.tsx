@@ -14,7 +14,7 @@ import {
 	getCharacterImageUrl,
 	getSkillCategoryIconUrl,
 	getSkillElementIconUrl,
-} from "@/lib/images";
+} from "@rose-griffon/azalee/images";
 import { cn } from "@/lib/utils";
 
 // ---------- Types ----------

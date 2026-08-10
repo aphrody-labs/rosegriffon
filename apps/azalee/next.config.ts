@@ -105,6 +105,7 @@ const nextConfig: NextConfig = {
 				},
 			}),
 	transpilePackages: [
+		"@rose-griffon/azalee",
 		"@rose-griffon/ui",
 		"@rose-griffon/db",
 		"@rose-griffon/types",

@@ -11,7 +11,7 @@ import {
 	CATEGORY_LABELS,
 	type Trophy,
 	type TrophyCategory,
-} from "@/lib/wiki/trophies-shared";
+} from "@rose-griffon/azalee/wiki/trophies-shared";
 
 export const metadata: Metadata = {
 	alternates: { canonical: "/succes" },

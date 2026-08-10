@@ -4,10 +4,10 @@ import { useDraggable } from "@dnd-kit/core";
 import { CSS } from "@dnd-kit/utilities";
 import { Icon } from "@/components/ui/Icon";
 import { SafeImage } from "@/components/ui/SafeImage";
-import { ROLE_COLORS, ROLE_LABELS } from "@/lib/formations";
-import type { TeamMember } from "@/lib/team-types";
+import { ROLE_COLORS, ROLE_LABELS } from "@rose-griffon/azalee/game/formations";
+import type { TeamMember } from "@rose-griffon/azalee/game/team-types";
 import { cn } from "@/lib/utils";
-import { getCharacterImageUrl } from "@/lib/images";
+import { getCharacterImageUrl } from "@rose-griffon/azalee/images";
 
 interface PlayerSlotProps {
 	member: TeamMember;

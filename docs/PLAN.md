@@ -14,7 +14,7 @@ Le monorepo dissocie les applications Vercel (`website`) des services VPS (`azal
 
 ## 2. Applications (apps/)
 
-### 📱 @rose-griffon/azalee
+### 📱 @rose-griffon/azalee-web
 
 _Wiki Inazuma Eleven Victory Road (déployé sur `azalee.rosegriffon.fr` via le VPS port 3003 / Nginx)_
 

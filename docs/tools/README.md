@@ -74,7 +74,7 @@ Le plan de refactorisation mené par les subagents cible les points suivants :
    - Ajout d'animations fluides au survol et lors des transitions de pages (View Transitions).
    - Remplacement des grilles basiques par des layouts asymétriques plus modernes.
 
-3. **Intégration au CLI (`bin/azalee.ts`)** :
+3. **Intégration au CLI (`packages/azalee/src/cli.ts`)** :
    - Pour chaque outil web, ajout d'une commande CLI équivalente permettant de valider les algorithmes (interpolation, génération d'équipe aléatoire, traductions, construction d'équipe) directement dans le terminal.
    - Les commandes doivent supporter le format texte ASCII stylisé et l'option `--json` pour l'analyse automatisée.
 
@@ -87,28 +87,28 @@ Le plan de refactorisation mené par les subagents cible les points suivants :
 1. **Traducteur (`azalee translate`)** :
    ```bash
    # Traduction interactive ou par argument
-   bun bin/azalee.ts translate "Mark Evans"
-   bun bin/azalee.ts translate "Fire Tornado" --json
+   bun packages/azalee/src/cli.ts translate "Mark Evans"
+   bun packages/azalee/src/cli.ts translate "Fire Tornado" --json
    ```
 
 2. **Comparateur (`azalee compare`)** :
    ```bash
    # Compare les stats de deux joueurs à un niveau donné (par défaut 99)
-   bun bin/azalee.ts compare "Mark Evans" "Axel Blaze" --level 50
-   bun bin/azalee.ts compare "c01000100" "c01000020" --json
+   bun packages/azalee/src/cli.ts compare "Mark Evans" "Axel Blaze" --level 50
+   bun packages/azalee/src/cli.ts compare "c01000100" "c01000020" --json
    ```
 
 3. **Équipe Aléatoire (`azalee random-team`)** :
    ```bash
    # Génère une équipe avec filtres
-   bun bin/azalee.ts random-team --formation "4-3-3" --element "Fire" --playstyle "Breach"
-   bun bin/azalee.ts random-team --json
+   bun packages/azalee/src/cli.ts random-team --formation "4-3-3" --element "Fire" --playstyle "Breach"
+   bun packages/azalee/src/cli.ts random-team --json
    ```
 
 4. **Team Builder (`azalee team-builder`)** :
    ```bash
    # Gère et affiche les équipes enregistrées
-   bun bin/azalee.ts team-builder list
-   bun bin/azalee.ts team-builder show <team_id>
-   bun bin/azalee.ts team-builder generate --formation "3-5-2"
+   bun packages/azalee/src/cli.ts team-builder list
+   bun packages/azalee/src/cli.ts team-builder show <team_id>
+   bun packages/azalee/src/cli.ts team-builder generate --formation "3-5-2"
    ```

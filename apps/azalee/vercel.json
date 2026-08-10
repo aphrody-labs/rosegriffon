@@ -3,8 +3,8 @@
 	"framework": "nextjs",
 	"bunVersion": "1.x",
 	"installCommand": "cd ../.. && bun install --no-save",
-	"ignoreCommand": "cd ../.. && npx turbo-ignore @rose-griffon/azalee --fallback=HEAD^1",
-	"buildCommand": "cd ../.. && turbo run build --filter=@rose-griffon/azalee... --cache=local:rw",
+	"ignoreCommand": "cd ../.. && npx turbo-ignore @rose-griffon/azalee-web --fallback=HEAD^1",
+	"buildCommand": "cd ../.. && turbo run build --filter=@rose-griffon/azalee-web... --cache=local:rw",
 	"env": {
 		"NEXT_PUBLIC_SUPABASE_URL": "https://isbkaeltubqittywibeh.supabase.co"
 	},

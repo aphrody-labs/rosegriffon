@@ -8,7 +8,7 @@ import { Badge } from "@rose-griffon/ui";
 import { CommonSpriteIcon } from "@/components/ui/CommonSpriteIcon";
 import { ElementIcon } from "@/components/wiki/ElementIcon";
 import type { SpriteCommonKey } from "@/config/sprites-common";
-import { getAuraImageUrl, resolveAssetUrl } from "@/lib/images";
+import { getAuraImageUrl, resolveAssetUrl } from "@rose-griffon/azalee/images";
 import { cn } from "@/lib/utils";
 
 export interface AuraCardProps {

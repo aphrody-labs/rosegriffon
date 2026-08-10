@@ -4,9 +4,9 @@ import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 import { Icon } from "@/components/ui/Icon";
-import type { DropEntry } from "@/lib/wiki/drops-shared";
-import { dropCategoryLabel, dropSourceLabel } from "@/lib/wiki/drops-shared";
-import { getItemIconUrl, PLACEHOLDERS, resolveAssetUrl } from "@/lib/images";
+import type { DropEntry } from "@rose-griffon/azalee/wiki/drops-shared";
+import { dropCategoryLabel, dropSourceLabel } from "@rose-griffon/azalee/wiki/drops-shared";
+import { getItemIconUrl, PLACEHOLDERS, resolveAssetUrl } from "@rose-griffon/azalee/images";
 import { cn } from "@/lib/utils";
 
 export interface DropsCardProps {

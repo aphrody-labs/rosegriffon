@@ -11,9 +11,9 @@ import { Icon } from "@/components/ui/Icon";
 // Viewer cut-in composé (scène R3F + timeline + export MP4). C'est lui qui gère le
 // `next/dynamic { ssr:false }` de la scène et le repli `<CharacterModelViewer>` interne.
 import { CutinViewer } from "@/components/wiki/cutin/CutinViewer";
-import { cpkAssetUrl } from "@/lib/cpk/shared";
-import { downloadName } from "@/lib/download-filename";
-import type { SkillCutin } from "@/lib/skills-cutin";
+import { cpkAssetUrl } from "@rose-griffon/azalee/cpk/shared";
+import { downloadName } from "@rose-griffon/azalee/text/download-filename";
+import type { SkillCutin } from "@rose-griffon/azalee/game/skills-cutin";
 
 /** Chip de téléchargement (texture/telop PNG), réutilisable. */
 function DownloadChip({ href, filename }: { href: string; filename: string }) {

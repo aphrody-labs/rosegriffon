@@ -9,7 +9,7 @@ import { Icon } from "@/components/ui/Icon";
 import { RarityBadge } from "@/components/ui/rarity-badge";
 import { SafeImage } from "@/components/ui/SafeImage";
 import type { SpriteCommonKey } from "@/config/sprites-common";
-import { getCharacterImageUrl } from "@/lib/images";
+import { getCharacterImageUrl } from "@rose-griffon/azalee/images";
 import { cn } from "@/lib/utils";
 
 // ---------- Constants ----------

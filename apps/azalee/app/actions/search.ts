@@ -10,11 +10,11 @@ import {
 	getItemImageUrl,
 	getSkillImageUrl,
 	resolveAssetUrl,
-} from "@/lib/images";
-import { smartSearch } from "@/lib/search/smart-search";
-import type { GlobalSearchResult, SearchContext } from "@/lib/search/smart-search";
+} from "@rose-griffon/azalee/images";
+import { smartSearch } from "@rose-griffon/azalee/search/smart-search";
+import type { GlobalSearchResult, SearchContext } from "@rose-griffon/azalee/search/smart-search";
 import { createClient } from "@/lib/supabase/server";
-import { TACTIC_FR, translateEffect } from "@/lib/translations";
+import { TACTIC_FR, translateEffect } from "@rose-griffon/azalee/text/translations";
 
 const TYPE_CONFIG: Record<string, { label: string; icon: string; urlPrefix: string }> = {
 	article: { icon: "newspaper", label: "Actualité", urlPrefix: "/news" },

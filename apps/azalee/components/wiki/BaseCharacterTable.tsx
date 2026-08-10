@@ -10,8 +10,8 @@ import { RarityBadge } from "@/components/ui/rarity-badge";
 import { SafeImage } from "@/components/ui/SafeImage";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@rose-griffon/ui";
 import type { SpriteCommonKey } from "@/config/sprites-common";
-import { isFemaleGender } from "@/lib/gender";
-import { getCharacterImageUrl, getSkillCategoryIconUrl } from "@/lib/images";
+import { isFemaleGender } from "@rose-griffon/azalee/game/gender";
+import { getCharacterImageUrl, getSkillCategoryIconUrl } from "@rose-griffon/azalee/images";
 import { cn } from "@/lib/utils";
 import { CharacterStatsPopover } from "./CharacterStatsPopover";
 

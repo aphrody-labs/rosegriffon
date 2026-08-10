@@ -14,8 +14,8 @@ import {
 import Image from "next/image";
 import { useState } from "react";
 import { Icon } from "@/components/ui/Icon";
-import { PLACEHOLDERS, resolveAssetUrl } from "@/lib/images";
-import { japaneseToRomaji } from "@/lib/japanese-romaji";
+import { PLACEHOLDERS, resolveAssetUrl } from "@rose-griffon/azalee/images";
+import { japaneseToRomaji } from "@rose-griffon/azalee/text/japanese-romaji";
 
 const RARITY_LABELS: Record<string, string> = {
 	"1": "Normal",

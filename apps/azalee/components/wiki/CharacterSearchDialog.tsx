@@ -14,7 +14,7 @@ import {
 	CommandList,
 	Skeleton,
 } from "@rose-griffon/ui";
-import { getSkillCategoryIconUrl, getSkillElementIconUrl } from "@/lib/images";
+import { getSkillCategoryIconUrl, getSkillElementIconUrl } from "@rose-griffon/azalee/images";
 import { cn } from "@/lib/utils";
 
 interface CharacterSearchDialogProps {

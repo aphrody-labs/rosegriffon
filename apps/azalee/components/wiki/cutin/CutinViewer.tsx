@@ -19,8 +19,8 @@ import { Box, Download, Film, Loader2, Pause, Play, RotateCcw, Sparkles } from "
 import dynamic from "next/dynamic";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import CharacterModelViewer from "@/components/wiki/CharacterModelViewer";
-import { cpkAssetUrl } from "@/lib/cpk/shared";
-import { downloadName } from "@/lib/download-filename";
+import { cpkAssetUrl } from "@rose-griffon/azalee/cpk/shared";
+import { downloadName } from "@rose-griffon/azalee/text/download-filename";
 import type { CutinStoryboard } from "@/lib/cutin/camera";
 import { decodeEffectLayer, loadCutinStoryboard, mainModelLayer } from "@/lib/cutin/decode";
 import {
@@ -31,7 +31,7 @@ import {
 import { fetchCutinManifest } from "@/lib/cutin/listing";
 import { createTheatreSequencer } from "@/lib/cutin/theatre-sequencer";
 import type { CutinGlbLayer, CutinManifest } from "@/lib/cutin/types";
-import type { SkillCutin } from "@/lib/skills-cutin";
+import type { SkillCutin } from "@rose-griffon/azalee/game/skills-cutin";
 import type { CutinSceneHandle } from "./CutinScene";
 
 const CutinScene = dynamic(() => import("@/components/wiki/cutin/CutinScene"), {

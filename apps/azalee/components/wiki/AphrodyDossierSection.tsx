@@ -9,8 +9,8 @@
  * `skills-cutin.json`), auras. Ne s'affiche que pour Aphrody (code interne ∈ 3 séries).
  */
 import dossier from "@/data/aphrody-dossier.json";
-import { cpkAssetUrl } from "@/lib/cpk/shared";
-import { getSkillCutin } from "@/lib/skills-cutin";
+import { cpkAssetUrl } from "@rose-griffon/azalee/cpk/shared";
+import { getSkillCutin } from "@rose-griffon/azalee/game/skills-cutin";
 import { Icon } from "@/components/ui/Icon";
 
 const ELEMENT: Record<number, string> = {

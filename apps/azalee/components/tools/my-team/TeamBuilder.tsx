@@ -20,9 +20,9 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import { deleteTeam, saveTeam, updateTeam } from "@/app/actions/teams";
 import { Icon } from "@/components/ui/Icon";
-import { FORMATIONS, ROLE_COLORS } from "@/lib/formations";
-import type { Formation } from "@/lib/formations";
-import type { SavedTeam, TeamData, TeamMember } from "@/lib/team-types";
+import { FORMATIONS, ROLE_COLORS } from "@rose-griffon/azalee/game/formations";
+import type { Formation } from "@rose-griffon/azalee/game/formations";
+import type { SavedTeam, TeamData, TeamMember } from "@rose-griffon/azalee/game/team-types";
 import { cn } from "@/lib/utils";
 import { CharacterPicker, CharacterPickerOverlay } from "./CharacterPicker";
 import type { PickerCharacter } from "./CharacterPicker";
@@ -30,7 +30,7 @@ import { FormationField } from "./FormationField";
 import { PlayerDetailPanel } from "./PlayerDetailPanel";
 import { PlayerSlotOverlay } from "./PlayerSlot";
 import { TeamStats } from "./TeamStats";
-import { calculateElementSynergies } from "@/lib/team-rules";
+import { calculateElementSynergies } from "@rose-griffon/azalee/game/team-rules";
 
 /* ── Types ────────────────────────────────────────────────── */
 
