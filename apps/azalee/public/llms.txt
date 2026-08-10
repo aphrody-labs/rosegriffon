@@ -1,30 +1,116 @@
-# Azalée — Wiki Inazuma Eleven: Victory Road
+# Rose Griffon Documentation Index
 
-> Wiki francophone consacré à Inazuma Eleven: Victory Road (IEVR), maintenu par l'association Rose Griffon. Base de données complète : personnages, techniques, objets, auras, tactiques et actualités.
+Bienvenue dans la documentation technique de Rose Griffon. Ce fichier sert d'index structuré pour les assistants IA (Gemini, Claude, GPT) et pointe vers le contenu complet.
 
-Wiki : https://azalee.rosegriffon.fr
-Association : Rose Griffon — https://rosegriffon.fr
-Développeur & fondateur : yoyo — https://x.com/yoyo__goat
-Généré le : 2026-08-10
+* **Documentation complète consolidée (un seul fichier) :** [llms-full.txt](file:///docs/llms-full.txt)
 
-## Sections principales
+## Sommaire de la documentation
 
-- [Personnages](https://azalee.rosegriffon.fr/chara) : fiches des joueurs et personnages.
-- [Techniques](https://azalee.rosegriffon.fr/skill) : techniques spéciales (tirs, dribbles, blocs, gardiens).
-- [Objets](https://azalee.rosegriffon.fr/item) : objets et équipements.
-- [Auras](https://azalee.rosegriffon.fr/aura) : esprits guerriers, totems, miximax, éveils, changements de mode.
-- [Passifs](https://azalee.rosegriffon.fr/passive) : compétences passives.
-- [Tactiques](https://azalee.rosegriffon.fr/tactic) : tactiques d'équipe.
-- [Actualités](https://azalee.rosegriffon.fr/news) : news et patch-notes du jeu.
-- [Outils](https://azalee.rosegriffon.fr/tools) : comparateur, équipe aléatoire, traducteur.
+- **[Cartographie du Monorepo](file:///docs/REPO_MAP.md)**
+  - *Description :* Structure et dépendances des packages et applications du monorepo Rose Griffon
+  - *Scope :* `monorepo` (Statut : `stable`)
 
-## Réseaux & liens
+- **[Achillea — intégration dans l'écosystème Rose Griffon](file:///docs/achillea.md)**
+  - *Description :* Aucune description fournie.
+  - *Scope :* `general` (Statut : `stable`)
 
-- Site Rose Griffon : https://rosegriffon.fr
-- X / Twitter Azalée : https://x.com/Azalee_IE
-- Développeur (yoyo) : https://x.com/yoyo__goat
+- **[Architecture unifiée du toolkit IEVR](file:///docs/architecture-unifiee-ievr.md)**
+  - *Description :* Aucune description fournie.
+  - *Scope :* `general` (Statut : `stable`)
 
-## Ressources
+- **[`@rose-griffon/azalee` — extraction du cœur du wiki en bibliothèque](file:///docs/azalee-lib.md)**
+  - *Description :* Aucune description fournie.
+  - *Scope :* `general` (Statut : `stable`)
 
-- [Sitemap](https://azalee.rosegriffon.fr/sitemap.xml)
-- [robots.txt](https://azalee.rosegriffon.fr/robots.txt)
+- **[Azalée dans une application Tauri v2 — sidecar Bun et client distant](file:///docs/azalee-tauri.md)**
+  - *Description :* Aucune description fournie.
+  - *Scope :* `general` (Statut : `stable`)
+
+- **[`chr` — assets personnages IEVR (référence complète)](file:///docs/chr.md)**
+  - *Description :* Aucune description fournie.
+  - *Scope :* `general` (Statut : `stable`)
+
+- **[Navigateur CPK (azalee) — architecture du miroir de fichiers IEVR](file:///docs/cpk-browser.md)**
+  - *Description :* Aucune description fournie.
+  - *Scope :* `general` (Statut : `stable`)
+
+- **[Architecture de Base de Données & Cache Hybride (docs/database.md)](file:///docs/database.md)**
+  - *Description :* Aucune description fournie.
+  - *Scope :* `general` (Statut : `stable`)
+
+- **[Décision : architecture de données azalée](file:///docs/decision-archi-donnees-azalee.md)**
+  - *Description :* Aucune description fournie.
+  - *Scope :* `general` (Statut : `stable`)
+
+- **[Déploiement et exploitation](file:///docs/deploy.md)**
+  - *Description :* Procédures de déploiement des applications et services Rose Griffon sur le VPS
+  - *Scope :* `monorepo`, `ops` (Statut : `stable`)
+
+- **[Couverture des données de jeu IEVR — matrice maître (objectif `/goal`)](file:///docs/gamedata-coverage.md)**
+  - *Description :* Aucune description fournie.
+  - *Scope :* `general` (Statut : `stable`)
+
+- **[iecode → inagle → Supabase → azalee — référence unifiée du pipeline data IEVR](file:///docs/iecode-inagle-supabase.md)**
+  - *Description :* Aucune description fournie.
+  - *Scope :* `general` (Statut : `stable`)
+
+- **[Documentation du Package `@rose-griffon/inagle`](file:///docs/inagle.md)**
+  - *Description :* Aucune description fournie.
+  - *Scope :* `general` (Statut : `stable`)
+
+- **[Cartographie des outils de reverse-engineering Level-5 / IEVR](file:///docs/lvl5.md)**
+  - *Description :* Aucune description fournie.
+  - *Scope :* `general` (Statut : `stable`)
+
+- **[Serveur MCP Rose Griffon — exploitation et connexion distante](file:///docs/mcp.md)**
+  - *Description :* Aucune description fournie.
+  - *Scope :* `general` (Statut : `stable`)
+
+- **[RAG unifié IEVR — architecture & exploitation](file:///docs/rag-unified.md)**
+  - *Description :* Aucune description fournie.
+  - *Scope :* `general` (Statut : `stable`)
+
+- **[Documentation — monorepo Rose Griffon](file:///docs/README.md)**
+  - *Description :* Aucune description fournie.
+  - *Scope :* `general` (Statut : `stable`)
+
+- **[Awesome Markdown](file:///docs/reference/awesome-markdown.md)**
+  - *Description :* Index de ressources Markdown de référence compilé par mundimark (outils, extensions, spécifications).
+  - *Scope :* `markdown`, `ref` (Statut : `stable`)
+
+- **[Better Auth Overview](file:///docs/reference/better-auth-readme.md)**
+  - *Description :* Documentation de base de Better Auth.
+  - *Scope :* `better-auth`, `auth`, `ref` (Statut : `stable`)
+
+- **[Better Auth Session Management](file:///docs/reference/better-auth-session.md)**
+  - *Description :* Concepts de gestion de session dans Better Auth.
+  - *Scope :* `better-auth`, `auth`, `session` (Statut : `stable`)
+
+- **[Bun Markdown Runtime API](file:///docs/reference/bun-markdown.md)**
+  - *Description :* Parse and render Markdown with Bun's built-in Markdown API, supporting GFM extensions and custom rendering callbacks
+  - *Scope :* `bun`, `markdown`, `runtime` (Statut : `stable`)
+
+- **[Discord.js Reference](file:///docs/reference/discordjs-readme.md)**
+  - *Description :* Documentation de base de Discord.js pour le développement de bots Discord.
+  - *Scope :* `discord`, `bot`, `ref` (Statut : `stable`)
+
+- **[Inazuma Index](file:///docs/reference/inazuma-index-readme.md)**
+  - *Description :* Index communautaire des statistiques et techniques Inazuma Eleven.
+  - *Scope :* `inazuma-eleven`, `wiki`, `index`, `ref` (Statut : `stable`)
+
+- **[Secteur V E-Sport](file:///docs/reference/secteur-v-readme.md)**
+  - *Description :* Présentation de la plateforme compétitive Secteur V ELO.
+  - *Scope :* `inazuma-eleven`, `esport`, `secteur-v`, `ref` (Statut : `stable`)
+
+- **[Turborepo Reference](file:///docs/reference/turborepo-readme.md)**
+  - *Description :* Présentation et usage de Turborepo pour la gestion de monorepos.
+  - *Scope :* `turborepo`, `monorepo`, `ref` (Statut : `stable`)
+
+- **[Documentation des Outils d'Azalée](file:///docs/tools/README.md)**
+  - *Description :* Aucune description fournie.
+  - *Scope :* `general` (Statut : `stable`)
+
+- **[Gestion des filtres et détails du Wiki (Azalée)](file:///docs/wiki-filters.md)**
+  - *Description :* Aucune description fournie.
+  - *Scope :* `general` (Statut : `stable`)
+

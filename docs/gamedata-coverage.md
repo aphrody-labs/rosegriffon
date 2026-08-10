@@ -18,7 +18,7 @@
 ## Matrice de couverture (catégorie → source → parseur inagle → table DB → statut)
 
 | Catégorie | Config source | Parseur inagle | Table `inagle_*` | Statut |
-|---|---|---|---|---|
+| --- | --- | --- | --- | --- |
 | Personnages | `chara_param`, `chara_base`, … | chara-param, chara-base… | `inagle_characters` | **FAIT** |
 | Skills (techniques) | `skill_config` | skill-config, real-skill-config | `inagle_skills` | **FAIT** |
 | Auras | `aura_skill_config` | change-aura-skill-config | `inagle_auras` | **FAIT** |
@@ -60,7 +60,7 @@ Le `/goal` ne s'arrête pas à la DB : la donnée doit être **navigable**. Éta
 `inagle_*` dans des pages azalee (vérifié 2026-06-06, routes réelles sous `apps/azalee/app/`).
 
 | Table `inagle_*` | Page azalee | Statut |
-|---|---|---|
+| --- | --- | --- |
 | `inagle_characters` | `/chara` (+ `/chara/[id]`) | **SURFACÉ** |
 | `inagle_skills` | `/skill` (+ détail) | **SURFACÉ** |
 | `inagle_auras` | `/aura` (+ détail) | **SURFACÉ** |
@@ -137,7 +137,7 @@ video waza) demandent un **nouveau parseur**. Plus : vérifier les drop-rates **
 ## Batches (découpage exécutable en workflows dynamiques)
 
 | Batch | Contenu | Domaine (évite conflits) | Statut |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | **B1** | Catégories nommées : uniformes, shops, tricks, tactiques spéciales, telop waza, video waza, emblèmes → table + parseur + push + COUNT + câblage | `rg/packages/inagle` + Supabase | **FAIT** (`8ec292d` ; 384/2331/9/85/926/4/2 vérifiés ; RLS+policy `Public Read` 7/7 ; type-check vert) |
 | **B2** | Reste parseur→DB (8 catégories) | `rg/packages/inagle` + Supabase | **FAIT** (`99e3c25` ; 23/14/86/5/30/5080/228/1 vérifiés ; RLS+`Public Read` 8/8 dès création ; type-check vert ; bonus fix parser constellation) |
 | **B3** | **Taux de drop** : audit configs drop + existant `inagle_drops_*`, combler le vrai gap | `rg/packages/inagle` + Supabase | **FAIT** (`d54cdf5` ; `inagle_drop_rates` **177** vérifié REST = 10 emission + 54 spirit + 113 treasure ; RLS ; AUCUNE dimension élément-attribut dans les octets → « élément » du /goal = chaque item/objet) |

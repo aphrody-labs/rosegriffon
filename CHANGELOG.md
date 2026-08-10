@@ -2,6 +2,29 @@
 
 Toutes les évolutions notables du monorepo `rg`. Format : [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/) + [SemVer](https://semver.org/lang/fr/).
 
+## [0.4.0] — 2026-08-10
+
+### Ajouté
+
+- **`@rose-griffon/azalee` — le wiki devient une bibliothèque Bun** : le cœur du wiki (données, index CPK, index de texte, recherche, CLI, API HTTP headless) quitte l'app Next pour `packages/azalee`. Racine client-safe bundlable dans un navigateur, `/server` pour l'accès disque et base, `/remote` pour un client HTTP typé avec repli automatique quand la machine n'a ni miroir ni dump. L'app Next est renommée `@rose-griffon/azalee-web` et consomme la bibliothèque.
+- **API headless du wiki en service** : `azalee-api.service` (:8807) sert les 41 routes JSON derrière `api.rosegriffon.fr/azalee`.
+- **`@rose-griffon/mcp` — serveur Model Context Protocol du monorepo** : implémentation Bun native sans dépendance Node, conforme à la révision `2026-07-28` de la spécification **et** aux révisions à handshake encore parlées par les clients. 26 outils (données du jeu, SQL borné, fichiers du jeu, dépôt, production), ressources de contexte, prompts. Deux portées décidées par le jeton présenté : lecture seule, ou administration (écriture, suppression, exécution de commandes).
+- **Connexion distante permanente** : `rg-mcp.service` (:8808) derrière `mcp.rosegriffon.fr`, avec scripts d'installation bash et PowerShell pour brancher un Claude Code d'une autre machine.
+- **Plugin Claude `rose-griffon`** (`plugins/rose-griffon`) : installe d'un coup le serveur MCP, cinq skills, deux agents et un hook qui restaure `lockfileVersion: 1` après un `bun install`.
+- **CLI `azalee` modularisé** : le monolithe de 4 500 lignes éclate en modules par commande, avec des types d'options exportés et les règles de jeu remontées dans la bibliothèque. Surface de commandes identique, vérifiée sortie par sortie.
+
+### Corrigé
+
+- **Miroir SQLite périmé dans les services longs** : `azalee-api` et `rg-mcp` gardaient le fichier ouvert au démarrage et servaient un snapshot supprimé après deux rotations. La bibliothèque détecte désormais le remplacement du fichier et rouvre la base.
+- **`azalee-mirror-sync` en échec** alors que la synchronisation réussissait : la sonde de santé unique tombait sur un service Next encore en train de démarrer.
+- **`azalee glossary-rebuild`** cherchait le script de reconstruction à un chemin inexistant.
+- Correctifs de recherche floue (clé de cache ignorant le seuil, langue japonaise, suggestions).
+
+### Supprimé
+
+- Documents de planification et d'audit datés, périmés ou redondants : `PLAN.md`, `SEO-PLAN.md`, `UI-UX-AUDIT.md`, `IECODE-INAGLE-PLAN.md`, `asset-audit/`, et les doublons de `docs/reference/`. La couverture d'extraction durable reste dans `docs/gamedata-coverage.md`.
+- Le guide de déploiement Vercel : les deux applications sont auto-hébergées sur le VPS.
+
 ## [0.3.0] — 2026-06-03
 
 ### Ajouté

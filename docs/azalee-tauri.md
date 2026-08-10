@@ -307,7 +307,7 @@ répond, y compris un sidecar vide.
 Trois politiques possibles, par ordre de confort :
 
 | Politique | Comportement | Quand |
-|-----------|--------------|-------|
+| ----------- | -------------- | ------- |
 | Sidecar seul | Rapide, hors ligne, mais inutilisable sans données | Poste de contributeur |
 | Distant seul | Toujours des données, dépend du réseau | Application légère |
 | Repli (recommandé) | Sidecar si données locales, sinon API publique | Distribution grand public |
@@ -357,7 +357,7 @@ for (let i = 0; i < 40; i++) {
 ## 10. Ce qui a été vérifié
 
 | Élément | Résultat |
-|---------|----------|
+| --------- | ---------- |
 | `bun build --target=browser src/remote/index.ts` | 4 modules, 12,16 Ko, aucun `node:*`/`bun:*` |
 | `bun build --target=browser src/index.ts` (racine) | 50 modules, 2,67 Mo — inchangé |
 | Compilation du sidecar + suffixe de triplet | `azalee-x86_64-unknown-linux-gnu`, 80 Mo, démarre |

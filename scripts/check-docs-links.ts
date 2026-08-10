@@ -35,6 +35,13 @@ async function checkLinks() {
 		// Ignorer les fichiers de bundle générés qui contiennent beaucoup de liens absolus virtuels
 		if (file.endsWith("llms.txt") || file.endsWith("llms-full.txt")) continue;
 
+		// `docs/reference/` est recopié depuis des documentations externes par la
+		// tâche cron `external-docs` : ses liens pointent vers les sites d'origine
+		// (`/docs/concepts/...`, `./LICENSE.md`) et n'ont aucun sens ici. Les
+		// vérifier ne signalerait que du bruit qu'on ne peut pas corriger — toute
+		// édition manuelle y est de toute façon écrasée.
+		if (file.includes("/docs/reference/")) continue;
+
 		const content = await readFile(file, "utf-8");
 		const relativeFile = file.replace(ROOT_DIR, "").replace(/^\//, "");
 		const fileDir = dirname(file);

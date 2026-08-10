@@ -68,7 +68,7 @@ Le pipeline unifié est une chaîne unique. Pour chaque étape, l'implémentatio
 ## 3. Tableau des duplications
 
 | Capacité | Référence actuelle | Portage Rust (niers) | Statut |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | Téléchargement Steam natif | iecode `Steam/Content/` (SteamKit2) | `nie-steam` (steamroom) | FAIT (33 tests, fidélité C# vérifiée) |
 | CPK / @UTF / CRILAYLA | iecode `Formats/Criware/CriFs/` | `nie-formats` cpk.rs/crilayla.rs | FAIT (validé byte-à-byte, 300/300 g4tx) |
 | g4tx/g4md/g4mg/g4pk/g4ra/g4sk | iecode `Formats/Level5/` | `nie-formats` g4*.rs | FAIT (g4mg TODO `G4mgParser.cs:253` côté C#) |

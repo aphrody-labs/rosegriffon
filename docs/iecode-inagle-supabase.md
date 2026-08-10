@@ -65,7 +65,7 @@ Arborescence clé (`iecode/src/IECODE.Core/`) :
 **Magics et offsets documentés** (extraits des parsers réels, vérifiés octet par octet) :
 
 | Format | Magic (LE u32 / octets) | Endianness | Notes header |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | CPK | `0x204B5043` `"CPK "` | mixte | suivi d'une table @UTF (CpkHeader/TOC/ETOC/ITOC), fichiers compressés CRILAYLA |
 | @UTF | `0x46545540` `"@UTF"` | **Big** | table colonne/ligne CRIWARE ; magic chiffré `0xF5F39E1F` (TableDecryptor) |
 | ACB | `"@UTF"` | Big | Audio Cue Bank (table @UTF racine) |
@@ -308,7 +308,7 @@ PK `id uuid`, `stripe_session_id NOT NULL`. Montants en centimes `amount_subtota
 `installed_version` non-NULL = réellement activées :
 
 | Extension | Version | Schéma | Rôle |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | **vector** (pgvector) | **0.8.0** | `public` | type `vector`/`halfvec`, index ivfflat + **HNSW** (sous-tend le RAG) |
 | pg_trgm | 1.6 | `public` | similarité trigram |
 | pgcrypto | 1.3 | `extensions` | fonctions crypto |
@@ -345,7 +345,7 @@ Migrations `20260603120209 unified_rag_pgvector` + `20260603185129 enable_rls_re
 ### 3.5 Row counts (tables clés, COUNT(*) réel)
 
 | Table | Lignes | Note |
-|---|---|---|
+| --- | --- | --- |
 | inagle_game_assets | 40 471 | annexe assets (tous exists=true) |
 | inagle_rag_chunks | 8 815 | 100% embeddés halfvec(1024) + tsv |
 | inagle_characters | 6 148 | dont 55 jouables (is_controllable) |
