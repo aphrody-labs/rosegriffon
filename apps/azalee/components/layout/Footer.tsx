@@ -7,7 +7,7 @@ const socialIconClass =
 
 export function Footer() {
 	return (
-		<footer className="bg-surface-container border-t border-outline-variant/5 w-full mt-auto pb-20 md:pb-0">
+		<footer className="bg-surface-container border-t border-outline-variant/5 w-full mt-auto">
 			<div className="mx-auto w-full max-w-[1800px] px-4 md:px-8 lg:px-12 py-6 lg:py-12">
 				{/* Liens - grille 2 colonnes sur mobile, 4 sur desktop */}
 				<div className="grid grid-cols-2 lg:grid-cols-4 gap-6 md:gap-12 text-left">
