@@ -1,6 +1,6 @@
 "use client";
 
-import { Check, CircleUser, Download, LayoutDashboard, Menu, Moon, Sun, User, X } from "lucide-react";
+import { Check, CircleUser, Download, LayoutDashboard, Menu, Moon, User, X } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -202,11 +202,10 @@ function MobileHeader({ isHome }: { isHome: boolean }) {
 const AZALEE_THEMES: {
 	id: string;
 	label: string;
-	icon?: typeof Sun;
+	icon?: typeof Moon;
 	image?: string;
 }[] = [
-	{ id: "light", label: "Azalée clair", icon: Sun },
-	{ id: "dark", label: "Azalée sombre", icon: Moon },
+	{ id: "dark", label: "Azalée", image: "/emote/RG_Reika_zukan.webp" },
 	{ id: "roy", label: "Roy", image: "/emote/RG_Roy_salut.webp" },
 	{ id: "gaelle", label: "Gaëlle", image: "/emote/RG_Gaelle_salut.webp" },
 ];
@@ -234,7 +233,7 @@ function ThemeToggle({ className }: { className?: string }) {
 		);
 	}
 
-	const active = AZALEE_THEMES.find((entry) => entry.id === theme) ?? AZALEE_THEMES[1]!;
+	const active = AZALEE_THEMES.find((entry) => entry.id === theme) ?? AZALEE_THEMES[0]!;
 	const ActiveIcon = active.icon;
 
 	return (

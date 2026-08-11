@@ -16,8 +16,10 @@ import Image from "next/image";
 
 import { useTheme } from "@/contexts/theme-context";
 
-/** Ordre d'affichage : les deux mascottes RG, puis les deux déclinaisons Azalée. */
-const THEME_ORDER: ThemeType[] = ["roy", "gaelle", "azalee-light", "azalee-dark"];
+/** Ordre d'affichage : les deux mascottes RG, puis Azalée (sombre uniquement —
+ * la déclinaison claire reste définie dans le design system mais n'est plus
+ * proposée à l'utilisateur). */
+const THEME_ORDER: ThemeType[] = ["roy", "gaelle", "azalee-dark"];
 
 const FALLBACK_THEME: ThemeType = "roy";
 
