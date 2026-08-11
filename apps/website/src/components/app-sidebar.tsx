@@ -5,15 +5,21 @@ import Link from "next/link";
 import type React from "react";
 import { Suspense, lazy } from "react";
 
-import { SidebarSearch } from "@/components/sidebar/molecules/SidebarSearch";
-import { SidebarUser } from "@/components/sidebar/molecules/SidebarUser";
 import { SidebarNavLinks } from "@/components/sidebar/organisms/SidebarNavLinks";
 import { SocialLinksSkeleton } from "@/components/sidebar/skeletons/SocialLinksSkeleton";
-import { Separator, Sidebar, SidebarContent, SidebarFooter, SidebarHeader } from "@rose-griffon/ui";
+import { Separator, Sidebar, SidebarContent, SidebarHeader } from "@rose-griffon/ui";
 import { assoMenu, contactMenu } from "@/lib/sidebar-config";
 
 const SocialLinks = lazy(() => import("@/components/sidebar/organisms/SocialLinks"));
 
+/**
+ * Barre latérale du site : navigation, et rien d'autre.
+ *
+ * La recherche, le sélecteur de thème et le menu de compte vivaient AUSSI ici,
+ * en doublon de la barre supérieure : deux champs de recherche, deux bascules de
+ * thème et deux chemins vers le profil à l'écran en même temps. La barre
+ * supérieure en est désormais l'unique propriétaire.
+ */
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 	return (
 		<Sidebar collapsible="offcanvas" {...props}>
@@ -37,8 +43,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 							Rose Griffon
 						</span>
 					</Link>
-
-					<SidebarSearch />
 				</SidebarHeader>
 
 				<div className="custom-scrollbar flex-1 space-y-1 overflow-y-auto overflow-x-hidden py-4">
@@ -53,10 +57,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 						</Suspense>
 					</div>
 				</div>
-
-				<SidebarFooter className="gap-2 border-t border-sidebar-border/40 px-3 py-2">
-					<SidebarUser />
-				</SidebarFooter>
 			</SidebarContent>
 		</Sidebar>
 	);
