@@ -1,4 +1,0 @@
-{
-	"extends": "@rose-griffon/iecode-config/tsconfig-bun.json",
-	"include": ["src/**/*.ts", "types/**/*.d.ts"]
-}

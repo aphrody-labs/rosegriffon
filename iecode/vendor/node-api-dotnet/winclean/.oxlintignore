@@ -1,4 +1,0 @@
-# Generated Win32 bindings, generated .NET typedefs, helper build outputs.
-win32/*.gen.ts
-dotnet-host/**
-tools/**

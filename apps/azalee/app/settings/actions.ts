@@ -1,66 +1,90 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { z } from "zod";
+
 import { logAudit } from "@/lib/audit";
 import { getServerSession } from "@/lib/auth-helpers";
-import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 
-export async function updateProfile(formData: FormData) {
+/**
+ * Actions du compte.
+ *
+ * Écriture en **service-role** après vérification de session : depuis la
+ * fermeture PII des `profiles` (11/8/2026), la table n'est plus accessible en
+ * `anon` et le client anonyme échouait en 42501 — sans erreur visible côté
+ * interface, la sauvegarde semblait réussir sans rien écrire.
+ *
+ * Chaque action ne touche QUE ses propres colonnes.
+ */
+
+const profileSchema = z.object({
+	badges: z.array(z.string()).max(3),
+	banner_url: z.string().optional().or(z.literal("")),
+	bio: z.string().max(500).optional(),
+	full_name: z.string().optional(),
+	twitter_handle: z.string().optional(),
+	username: z
+		.string()
+		.min(3, "Le nom d'utilisateur doit faire au moins 3 caractères.")
+		.max(20, "Le nom d'utilisateur ne peut pas dépasser 20 caractères."),
+	website: z.string().url("URL invalide").optional().or(z.literal("")),
+});
+
+export async function updateProfile(
+	values: z.infer<typeof profileSchema>
+): Promise<{ error?: string }> {
 	const session = await getServerSession();
 	if (!session?.user) {
-		return { error: "Non autorisé" };
+		return { error: "Session expirée — reconnecte-toi." };
 	}
 
-	const username = formData.get("username") as string;
-	const full_name = formData.get("full_name") as string;
-	const bio = formData.get("bio") as string;
-	const website = formData.get("website") as string;
+	const parsed = profileSchema.safeParse(values);
+	if (!parsed.success) {
+		return { error: parsed.error.issues[0]?.message ?? "Données invalides." };
+	}
 
-	const supabase = await createClient();
-	const { error } = await supabase
+	const { error } = await createAdminClient()
 		.from("profiles")
-		.update({
-			bio,
-			full_name,
-			updated_at: new Date().toISOString(),
-			username,
-			website,
-		})
+		.update({ ...parsed.data, updated_at: new Date().toISOString() })
 		.eq("id", session.user.id);
 
 	if (error) {
-		return { error: error.message };
+		if (error.code === "23505") {
+			return { error: "Ce nom d'utilisateur est déjà pris." };
+		}
+		console.error("[compte] mise à jour du profil impossible", error);
+		return { error: "Erreur lors de la mise à jour du profil." };
 	}
 
-	await logAudit(session.user.id, "profile_update", {
-		fields: { bio, full_name, username, website },
-	});
-
+	await logAudit(session.user.id, "profile_update", { fields: Object.keys(parsed.data) });
 	revalidatePath("/settings");
-	revalidatePath("/dashboard/settings");
-	return { success: true };
+	revalidatePath(`/profil/${parsed.data.username}`);
+	return {};
 }
 
-export async function updateAvatar(url: string) {
+/**
+ * Enregistre l'URL d'avatar déjà téléversée.
+ *
+ * L'identifiant vient de la session, jamais d'un paramètre : sinon n'importe
+ * quel appelant pourrait réécrire l'avatar d'un autre compte.
+ */
+export async function updateAvatarUrl(avatarUrl: string): Promise<{ error?: string }> {
 	const session = await getServerSession();
 	if (!session?.user) {
-		return { error: "Non autorisé" };
+		return { error: "Session expirée — reconnecte-toi." };
 	}
 
-	const supabase = await createClient();
-	const { error } = await supabase
+	const { error } = await createAdminClient()
 		.from("profiles")
-		.update({
-			avatar_url: url,
-			updated_at: new Date().toISOString(),
-		})
+		.update({ avatar_url: avatarUrl, updated_at: new Date().toISOString() })
 		.eq("id", session.user.id);
 
 	if (error) {
-		return { error: error.message };
+		console.error("[compte] mise à jour de l'avatar impossible", error);
+		return { error: "Impossible d'enregistrer le nouvel avatar." };
 	}
 
 	revalidatePath("/settings");
-	revalidatePath("/dashboard/settings");
-	return { success: true };
+	return {};
 }

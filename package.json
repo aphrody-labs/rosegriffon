@@ -2,12 +2,11 @@
 	"name": "@rose-griffon/monorepo",
 	"version": "0.1.0",
 	"private": true,
-	"description": "Rose Griffon monorepo — site communautaire (azalee wiki IEVR + website rosegriffon + bot Discord). Stack Next 16.2 / React 19.2 / Bun 1.3 / Supabase / Turborepo.",
+	"description": "Rose Griffon monorepo \u2014 site communautaire (azalee wiki IEVR + website rosegriffon + bot Discord). Stack Next 16.2 / React 19.2 / Bun 1.3 / Supabase / Turborepo.",
 	"workspaces": {
 		"packages": [
 			"apps/*",
-			"packages/*",
-			"iecode/packages/*"
+			"packages/*"
 		],
 		"catalog": {
 			"next": "16.3.0-canary.37",
@@ -214,17 +213,7 @@
 		"docs:check-links": "bun scripts/check-docs-links.ts",
 		"docs:lint": "bunx markdownlint-cli2 \"docs/**/*.md\" \"plugins/**/*.md\" \"!docs/reference/**\"",
 		"docs:build": "bun run docs:map && bun run docs:bundle && bun run docs:check-links && bun run docs:lint",
-		"iecode:dotnet:build": "dotnet build iecode/IECODE.sln -c Release",
-		"iecode:dotnet:test": "dotnet test iecode/IECODE.sln -c Release",
-		"iecode:napi:build": "dotnet build iecode/vendor/node-api-dotnet/NodeApi.sln -c Release",
-		"iecode:sync:gamedata": "bun iecode/scripts/sync-gamedata.ts",
-		"inagle:manifest:game-assets": "bun scripts/inagle/pipeline/generate-game-assets-manifest.ts",
-		"iecode:scrape": "bun iecode/packages/steam-sync/src/cli.ts",
-		"iecode:steam:sync": "bun iecode/packages/steam-sync/src/cli.ts",
-		"iecode:steam:depots": "bun iecode/packages/steam-sync/src/cli.ts --list",
-		"iecode:data:accumulate": "bun iecode/packages/pipeline/src/cli.ts accumulate",
-		"iecode:data:export": "bun iecode/packages/pipeline/src/cli.ts export",
-		"iecode:data:serve": "bun iecode/packages/pipeline/src/cli.ts serve"
+		"inagle:manifest:game-assets": "bun scripts/inagle/pipeline/generate-game-assets-manifest.ts"
 	},
 	"dependencies": {
 		"@streamparser/json": "^0.0.22",

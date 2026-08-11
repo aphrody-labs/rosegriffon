@@ -1,7 +1,7 @@
 {
 	"name": "@rose-griffon/ui",
 	"version": "0.2.0",
-	"description": "Composants shadcn/ui partagés (new-york style, Tailwind v4)",
+	"description": "Composants shadcn/ui partag\u00e9s (new-york style, Tailwind v4)",
 	"type": "module",
 	"sideEffects": [
 		"*.css"
@@ -22,7 +22,7 @@
 		"type-check": "tsc --noEmit"
 	},
 	"dependencies": {
-		"@rose-griffon/db": "workspace:*",
+		"@hookform/resolvers": "catalog:",
 		"@radix-ui/react-accordion": "catalog:",
 		"@radix-ui/react-alert-dialog": "catalog:",
 		"@radix-ui/react-aspect-ratio": "catalog:",
@@ -49,6 +49,7 @@
 		"@radix-ui/react-toggle": "catalog:",
 		"@radix-ui/react-toggle-group": "catalog:",
 		"@radix-ui/react-tooltip": "catalog:",
+		"@rose-griffon/db": "workspace:*",
 		"@tanstack/react-table": "catalog:",
 		"class-variance-authority": "catalog:",
 		"clsx": "catalog:",
@@ -64,7 +65,8 @@
 		"recharts": "catalog:",
 		"sonner": "catalog:",
 		"tailwind-merge": "catalog:",
-		"vaul": "catalog:"
+		"vaul": "catalog:",
+		"zod": "catalog:"
 	},
 	"devDependencies": {
 		"@types/bun": "catalog:",

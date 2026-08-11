@@ -1,4 +1,3 @@
-import { Button } from "@rose-griffon/ui";
 import type { Metadata } from "next";
 import dynamicImport from "next/dynamic";
 import { Suspense } from "react";
@@ -13,7 +12,6 @@ import { AchilleaBanner } from "@/components/home/AchilleaBanner";
 import { AzaleeBanner } from "@/components/home/AzaleeBanner";
 import { NextEventBanner } from "@/components/home/NextEventBanner";
 import { RgtvBanner } from "@/components/home/RgtvBanner";
-import RgEmote from "@/components/shared/emotes/RgEmote";
 import { FeaturedTweets } from "@/components/shared/FeaturedTweets";
 import { LatestChroniqueSection } from "@/components/shared/LatestChroniqueSection";
 import { MotionSection } from "@/components/shared/MotionSection";
@@ -24,17 +22,15 @@ import FusionBlock from "@/components/shared/FusionBlock";
 import { getCalendarEvents } from "@/lib/api/events";
 import { getPublicSetting } from "@/lib/api/settings";
 
-// Lazy loading pour composants lourds (below-the-fold)
+// Lazy loading pour composants lourds (below-the-fold).
+// Les squelettes utilisent `bg-muted` : un dégradé `gray-*` resterait clair sur
+// le thème Azalée sombre.
 const ProjectsSection = dynamicImport(() => import("@/components/shared/ProjectsSection"), {
-	loading: () => (
-		<div className="h-96 animate-pulse bg-linear-to-r from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-700 rounded-3xl" />
-	),
+	loading: () => <div className="h-96 animate-pulse rounded-3xl bg-muted" />,
 });
 
-const DiscordBlock = dynamicImport(() => import("@/components/shared/DiscordBlock"), {
-	loading: () => (
-		<div className="h-64 sm:h-72 animate-pulse bg-linear-to-r from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-700 rounded-3xl" />
-	),
+const DiscordSection = dynamicImport(() => import("@/components/shared/DiscordSection"), {
+	loading: () => <div className="h-64 animate-pulse rounded-3xl bg-muted sm:h-72" />,
 });
 
 export const metadata: Metadata = {
@@ -229,11 +225,11 @@ export default async function Home() {
 							<div className="space-y-2 sm:space-y-3 lg:space-y-4 flex flex-col justify-center h-full">
 								<h1
 									id="about-heading"
-									className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold leading-tight text-gray-900 dark:text-white"
+									className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold leading-tight text-foreground"
 								>
 									{introTitle}
 								</h1>
-								<p className="text-sm sm:text-base md:text-lg leading-relaxed text-gray-700 dark:text-gray-300">
+								<p className="text-sm sm:text-base md:text-lg leading-relaxed text-muted-foreground">
 									{introText}
 								</p>
 							</div>
@@ -298,78 +294,12 @@ export default async function Home() {
 						className="w-full space-y-4 md:space-y-8 lg:space-y-10"
 						aria-labelledby="community-heading"
 					>
-						<div className="text-center space-y-2 max-w-7xl mx-auto px-4">
-							<h2
-								id="community-heading"
-								className="text-2xl md:text-3xl font-bold bg-clip-text text-transparent bg-linear-to-r from-[#C83C51] via-[#921044] to-[#FECD50] dark:from-[#FECD50] dark:via-[#C83C51] dark:to-[#FECD50]"
-							>
-								{communityTitle}
-							</h2>
-
-							<p className="text-muted-foreground text-base md:text-lg max-w-2xl mx-auto">
-								{communitySubtitle}
-							</p>
-						</div>
-
-						{/* Discord */}
-
-						<div className="max-w-7xl mx-auto px-4 w-full">
-							<DiscordBlock>
-								<div className="space-y-3">
-									<div className="flex items-center gap-3">
-										<div className="p-2.5 rounded-xl bg-indigo-500/10">
-											<RgEmote name="roy-salut" size={32} animated className="size-8" />
-										</div>
-
-										<div>
-											<h3 className="text-xl font-bold text-indigo-600 dark:text-indigo-400">
-												Discord
-											</h3>
-
-											<p className="text-xs font-medium text-muted-foreground">
-												{communityDescription}
-											</p>
-										</div>
-									</div>
-
-									<p className="text-base text-muted-foreground leading-relaxed">
-										Rejoignez notre serveur Discord pour discuter avec la communauté Rose Griffon,
-										participer à nos événements et rester informés de toutes nos actualités en temps
-										réel.
-									</p>
-
-									<div className="flex flex-wrap gap-2">
-										{["💬 Discussion", "🎮 Gaming", "🎉 Événements"].map((tag) => (
-											<span
-												key={tag}
-												className="px-2.5 py-0.5 rounded-full bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 dark:text-indigo-300 text-xs font-medium border border-indigo-100 dark:border-indigo-800"
-											>
-												{tag}
-											</span>
-										))}
-									</div>
-
-									<div className="pt-1">
-										<Button
-											asChild
-											className="bg-[#5865F2] hover:bg-[#4752C4] text-white font-bold w-full sm:w-auto h-10"
-											size="default"
-										>
-											<a
-												href="https://discord.gg/8X8eQfBMkt"
-												target="_blank"
-												rel="noopener noreferrer"
-											>
-												<svg className="size-4 mr-2" fill="currentColor" viewBox="0 0 24 24">
-													<path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515a.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0a12.64 12.64 0 0 0-.617-1.25a.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057a19.9 19.9 0 0 0 5.993 3.03a.078.078 0 0 0 .084-.028a14.09 14.09 0 0 0 1.226-1.994a.076.076 0 0 0-.041-.106a13.107 13.107 0 0 1-1.872-.892a.077.077 0 0 1-.008-.128a10.2 10.2 0 0 0 .372-.292a.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127a12.299 12.299 0 0 1-1.873.892a.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028a19.839 19.839 0 0 0 6.002-3.03a.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419c0-1.333.956-2.419 2.157-2.419c1.21 0 2.176 1.096 2.157 2.42c0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419c0-1.333.955-2.419 2.157-2.419c1.21 0 2.176 1.096 2.157 2.42c0 1.333-.946 2.418-2.157 2.418z" />
-												</svg>
-												Rejoindre le serveur
-											</a>
-										</Button>
-									</div>
-								</div>
-							</DiscordBlock>
-						</div>
+						{/* Implémentation unique du bloc Discord : titre, widget et CTA. */}
+						<DiscordSection
+							titre={communityTitle}
+							sousTitre={communitySubtitle}
+							accroche={communityDescription}
+						/>
 
 						{/* Tweets à la une */}
 

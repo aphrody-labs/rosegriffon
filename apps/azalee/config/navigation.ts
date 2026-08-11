@@ -145,10 +145,9 @@ export const navigationItems: NavItem[] = [
 		path: "/gallery",
 	},
 	{
-		// Explorer le jeu : données brutes des CPK + écrans de menu reconstruits.
+		// Explorer le jeu : données brutes des CPK.
 		children: [
 			{ label: "nav.wiki.cpk_browser", path: "/cpk", icon: "account_tree" },
-			{ label: "nav.wiki.game_menus", path: "/menu/100_mainmenu", icon: "grid_view" },
 		],
 		icon: "travel_explore",
 		label: "nav.section.explore",
@@ -217,7 +216,6 @@ export const mobileNavItems: NavItem[] = [
 			"/drops",
 			"/keshin",
 			"/modeles",
-			"/menu",
 			"/cpk",
 			"/wiki",
 			"/search",

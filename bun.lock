@@ -77,12 +77,9 @@
         "@rose-griffon/assets": "workspace:*",
         "@rose-griffon/auth": "workspace:*",
         "@rose-griffon/azalee": "workspace:*",
-        "@rose-griffon/better-auth-steam": "workspace:*",
         "@rose-griffon/db": "workspace:*",
         "@rose-griffon/inagle": "workspace:*",
         "@rose-griffon/inagle-cross": "workspace:*",
-        "@rose-griffon/menu-render": "workspace:*",
-        "@rose-griffon/menu-render-webgpu": "workspace:*",
         "@rose-griffon/types": "workspace:*",
         "@rose-griffon/ui": "workspace:*",
         "@sentry/nextjs": "catalog:",
@@ -326,80 +323,6 @@
         "vitest": "catalog:",
       },
     },
-    "iecode/packages/cdn": {
-      "name": "@rose-griffon/iecode-cdn",
-      "version": "0.1.0",
-      "bin": {
-        "iecode-cdn": "./src/cli.ts",
-      },
-      "dependencies": {
-        "@rose-griffon/iecode-core": "workspace:*",
-      },
-      "devDependencies": {
-        "@rose-griffon/iecode-config": "workspace:*",
-        "@types/bun": "catalog:",
-        "oxlint": "catalog:",
-        "typescript": "catalog:",
-      },
-    },
-    "iecode/packages/core": {
-      "name": "@rose-griffon/iecode-core",
-      "version": "0.1.0",
-      "dependencies": {
-        "node-api-dotnet": "file:../../vendor/node-api-dotnet/out/pkg/node-api-dotnet",
-      },
-      "devDependencies": {
-        "@rose-griffon/iecode-config": "workspace:*",
-        "@types/bun": "catalog:",
-        "oxlint": "catalog:",
-        "typescript": "catalog:",
-      },
-    },
-    "iecode/packages/pipeline": {
-      "name": "@rose-griffon/iecode-pipeline",
-      "version": "0.1.0",
-      "bin": {
-        "iecode-data": "./src/cli.ts",
-      },
-      "dependencies": {
-        "@rose-griffon/iecode-inagle": "workspace:*",
-        "@rose-griffon/iecode-steam-sync": "workspace:*",
-        "valibot": "catalog:",
-      },
-      "devDependencies": {
-        "@rose-griffon/iecode-config": "workspace:*",
-        "@types/bun": "catalog:",
-        "oxlint": "catalog:",
-        "typescript": "catalog:",
-      },
-    },
-    "iecode/packages/runtime-harness": {
-      "name": "@rose-griffon/iecode-runtime-harness",
-      "version": "0.1.0",
-      "devDependencies": {
-        "@rose-griffon/iecode-config": "workspace:*",
-        "@types/bun": "catalog:",
-        "oxlint": "catalog:",
-        "typescript": "catalog:",
-      },
-    },
-    "iecode/packages/steam-sync": {
-      "name": "@rose-griffon/iecode-steam-sync",
-      "version": "0.1.0",
-      "bin": {
-        "steam-sync": "./src/cli.ts",
-      },
-      "dependencies": {
-        "@aphrody-code/bxc": "^0.6.0",
-        "@rose-griffon/iecode-core": "workspace:*",
-      },
-      "devDependencies": {
-        "@rose-griffon/iecode-config": "workspace:*",
-        "@types/bun": "catalog:",
-        "oxlint": "catalog:",
-        "typescript": "catalog:",
-      },
-    },
     "packages/assets": {
       "name": "@rose-griffon/assets",
       "version": "0.1.0",
@@ -444,18 +367,6 @@
         "typescript": "catalog:",
       },
     },
-    "packages/better-auth-steam": {
-      "name": "@rose-griffon/better-auth-steam",
-      "version": "0.1.0",
-      "dependencies": {
-        "better-auth": "catalog:",
-        "zod": "catalog:",
-      },
-      "devDependencies": {
-        "@types/bun": "catalog:",
-        "typescript": "catalog:",
-      },
-    },
     "packages/config": {
       "name": "@rose-griffon/config",
       "version": "0.1.0",
@@ -493,25 +404,6 @@
         "@types/bun": "catalog:",
         "typescript": "catalog:",
         "vitest": "catalog:",
-      },
-    },
-    "packages/iecode-config": {
-      "name": "@rose-griffon/iecode-config",
-      "version": "0.1.0",
-    },
-    "packages/iecode-inagle": {
-      "name": "@rose-griffon/iecode-inagle",
-      "version": "0.1.0",
-      "dependencies": {
-        "@rose-griffon/inagle": "workspace:*",
-        "fengari": "catalog:",
-        "valibot": "catalog:",
-      },
-      "devDependencies": {
-        "@rose-griffon/iecode-config": "workspace:*",
-        "@types/bun": "catalog:",
-        "oxlint": "catalog:",
-        "typescript": "catalog:",
       },
     },
     "packages/inagle": {
@@ -575,50 +467,6 @@
         "typescript": "catalog:",
       },
     },
-    "packages/menu-render": {
-      "name": "@rose-griffon/menu-render",
-      "version": "0.1.0",
-      "dependencies": {
-        "@rose-griffon/iecode-inagle": "workspace:*",
-        "fengari": "catalog:",
-      },
-      "devDependencies": {
-        "@rose-griffon/iecode-config": "workspace:*",
-        "@types/bun": "catalog:",
-        "@types/react": "catalog:",
-        "@types/react-dom": "catalog:",
-        "oxlint": "catalog:",
-        "react": "catalog:",
-        "react-dom": "catalog:",
-        "typescript": "catalog:",
-      },
-      "peerDependencies": {
-        "react": ">=18.0.0",
-        "react-dom": ">=18.0.0",
-      },
-    },
-    "packages/menu-render-webgpu": {
-      "name": "@rose-griffon/menu-render-webgpu",
-      "version": "0.1.0",
-      "dependencies": {
-        "@rose-griffon/menu-render": "workspace:*",
-      },
-      "devDependencies": {
-        "@rose-griffon/iecode-config": "workspace:*",
-        "@types/bun": "catalog:",
-        "@types/react": "catalog:",
-        "@types/react-dom": "catalog:",
-        "@webgpu/types": "catalog:",
-        "oxlint": "catalog:",
-        "react": "catalog:",
-        "react-dom": "catalog:",
-        "typescript": "catalog:",
-      },
-      "peerDependencies": {
-        "react": ">=18.0.0",
-        "react-dom": ">=18.0.0",
-      },
-    },
     "packages/patreon-bun": {
       "name": "@rose-griffon/patreon-bun",
       "version": "0.20.1",
@@ -645,6 +493,7 @@
       "name": "@rose-griffon/ui",
       "version": "0.2.0",
       "dependencies": {
+        "@hookform/resolvers": "catalog:",
         "@radix-ui/react-accordion": "catalog:",
         "@radix-ui/react-alert-dialog": "catalog:",
         "@radix-ui/react-aspect-ratio": "catalog:",
@@ -688,6 +537,7 @@
         "sonner": "catalog:",
         "tailwind-merge": "catalog:",
         "vaul": "catalog:",
+        "zod": "catalog:",
       },
       "devDependencies": {
         "@types/bun": "catalog:",
@@ -1778,8 +1628,6 @@
 
     "@rose-griffon/azalee-web": ["@rose-griffon/azalee-web@workspace:apps/azalee"],
 
-    "@rose-griffon/better-auth-steam": ["@rose-griffon/better-auth-steam@workspace:packages/better-auth-steam"],
-
     "@rose-griffon/bot": ["@rose-griffon/bot@workspace:apps/bot"],
 
     "@rose-griffon/config": ["@rose-griffon/config@workspace:packages/config"],
@@ -1788,29 +1636,11 @@
 
     "@rose-griffon/db": ["@rose-griffon/db@workspace:packages/db"],
 
-    "@rose-griffon/iecode-cdn": ["@rose-griffon/iecode-cdn@workspace:iecode/packages/cdn"],
-
-    "@rose-griffon/iecode-config": ["@rose-griffon/iecode-config@workspace:packages/iecode-config"],
-
-    "@rose-griffon/iecode-core": ["@rose-griffon/iecode-core@workspace:iecode/packages/core"],
-
-    "@rose-griffon/iecode-inagle": ["@rose-griffon/iecode-inagle@workspace:packages/iecode-inagle"],
-
-    "@rose-griffon/iecode-pipeline": ["@rose-griffon/iecode-pipeline@workspace:iecode/packages/pipeline"],
-
-    "@rose-griffon/iecode-runtime-harness": ["@rose-griffon/iecode-runtime-harness@workspace:iecode/packages/runtime-harness"],
-
-    "@rose-griffon/iecode-steam-sync": ["@rose-griffon/iecode-steam-sync@workspace:iecode/packages/steam-sync"],
-
     "@rose-griffon/inagle": ["@rose-griffon/inagle@workspace:packages/inagle"],
 
     "@rose-griffon/inagle-cross": ["@rose-griffon/inagle-cross@workspace:packages/inagle-cross"],
 
     "@rose-griffon/mcp": ["@rose-griffon/mcp@workspace:packages/mcp"],
-
-    "@rose-griffon/menu-render": ["@rose-griffon/menu-render@workspace:packages/menu-render"],
-
-    "@rose-griffon/menu-render-webgpu": ["@rose-griffon/menu-render-webgpu@workspace:packages/menu-render-webgpu"],
 
     "@rose-griffon/patreon-bun": ["@rose-griffon/patreon-bun@workspace:packages/patreon-bun"],
 
@@ -4141,8 +3971,6 @@
     "@rollup/plugin-commonjs/estree-walker": ["estree-walker@2.0.2", "", {}, "sha512-Rfkk/Mp/DL7JVje3u18FxFujQlTNR2q6QfMSMB7AvCBx91NGj/ba3kCfza0f6dVDbw7YlRf/nDrn7pQrCCyQ/w=="],
 
     "@rollup/pluginutils/estree-walker": ["estree-walker@2.0.2", "", {}, "sha512-Rfkk/Mp/DL7JVje3u18FxFujQlTNR2q6QfMSMB7AvCBx91NGj/ba3kCfza0f6dVDbw7YlRf/nDrn7pQrCCyQ/w=="],
-
-    "@rose-griffon/iecode-core/node-api-dotnet": ["node-api-dotnet@file:iecode/vendor/node-api-dotnet/out/pkg/node-api-dotnet", {}],
 
     "@scalar/themes/@scalar/types": ["@scalar/types@0.1.7", "", { "dependencies": { "@scalar/openapi-types": "0.2.0", "@unhead/schema": "^1.11.11", "nanoid": "^5.1.5", "type-fest": "^4.20.0", "zod": "^3.23.8" } }, "sha512-irIDYzTQG2KLvFbuTI8k2Pz/R4JR+zUUSykVTbEMatkzMmVFnn1VzNSMlODbadycwZunbnL2tA27AXed9URVjw=="],
 

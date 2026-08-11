@@ -1,9 +1,8 @@
-import { Button, Card, CardContent } from "@rose-griffon/ui";
+import { Button, Card, CardContent, DiscordIcon } from "@rose-griffon/ui";
 import { Zap } from "lucide-react";
 import localFont from "next/font/local";
 import Image from "next/image";
 
-import DiscordIcon from "@/shared/icons/discord";
 
 // Load local font
 const humane = localFont({

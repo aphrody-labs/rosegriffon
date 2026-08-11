@@ -136,6 +136,28 @@
 	--color-surface-container: var(--md-sys-color-surface-container);
 	--color-surface-container-high: var(--md-sys-color-surface-container-high);
 	--color-surface-container-highest: var(--md-sys-color-surface-container-highest);
+
+	/* ─── Couleurs de marque Rose Griffon ────────────────────────────────── */
+	/* Le pont vit ici et non dans le `globals.css` d'une app : les composants
+	 * partagés (page « Mon compte », en-têtes de section…) s'en servent, donc
+	 * `bg-rg-or` doit être généré côté website ET côté azalée. Les variables
+	 * source sont déclarées plus bas dans `@layer base :root`. */
+	--color-rg-marine: var(--rg-marine);
+	--color-rg-marine-clair: var(--rg-marine-clair);
+	--color-rg-or: var(--rg-griffon);
+	--color-rg-rose: var(--rg-rose);
+	--color-rg-brique: var(--rg-brique);
+	--color-rg-brique-clair: var(--rg-brique-clair);
+	--color-rg-sur-marine: var(--rg-sur-marine);
+	--color-succes: var(--rg-succes);
+	--color-info: var(--rg-info);
+	--color-alerte: var(--rg-alerte);
+
+	/* Couleurs de marque tierces — constantes imposées par chaque marque, pas
+	 * des choix de design system : elles ne varient donc pas selon le thème. */
+	--color-discord: #5865f2;
+	--color-patreon: #ff424d;
+	--color-twitch: #9146ff;
 }
 
 @keyframes accordion-down {
@@ -310,6 +332,10 @@
 		--accent: oklch(0.8 0.1 80);
 		--accent-foreground: oklch(0.2 0.05 250);
 		--destructive: oklch(0.577 0.245 27.325);
+		/* Texte posé SUR `--destructive`. Absent des thèmes RG jusqu'ici, alors que
+		 * la variante `destructive` du Badge partagé s'en sert : elle rendait son
+		 * libellé sans couleur. Blanc cassé, comme sur les deux thèmes Azalée. */
+		--destructive-foreground: oklch(0.985 0 0);
 		--border: oklch(0.9 0.02 250);
 		--input: oklch(0.9 0.02 250);
 		--ring: oklch(0.45 0.12 250);
@@ -381,6 +407,10 @@
 		--accent: oklch(0.8 0.12 50);
 		--accent-foreground: oklch(0.25 0.15 25);
 		--destructive: oklch(0.35 0.2 15);
+		/* Texte posé SUR `--destructive`. Absent des thèmes RG jusqu'ici, alors que
+		 * la variante `destructive` du Badge partagé s'en sert : elle rendait son
+		 * libellé sans couleur. Blanc cassé, comme sur les deux thèmes Azalée. */
+		--destructive-foreground: oklch(0.985 0 0);
 		--border: oklch(0.88 0.05 30);
 		--input: oklch(0.88 0.05 30);
 		--ring: oklch(0.5 0.18 25);

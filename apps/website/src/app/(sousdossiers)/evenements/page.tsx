@@ -1,7 +1,7 @@
 "use client";
 
 // External libraries
-import { Button } from "@rose-griffon/ui";
+import { Button, DiscordIcon } from "@rose-griffon/ui";
 import { useState } from "react";
 
 import {
@@ -13,7 +13,6 @@ import {
 } from "@/components/shared/PageShell";
 import { BreadcrumbSchema } from "@/components/shared/StructuredData";
 import { Calendar, MapPin, Search, Tag, X } from "@/lib/icons-config";
-import DiscordIcon from "@/shared/icons/discord";
 
 // Internal components
 import DiscordEventsList from "./_components/DiscordEventsList";

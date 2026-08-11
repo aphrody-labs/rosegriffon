@@ -3,7 +3,13 @@ import { createClient as createSupabaseAdmin } from "@supabase/supabase-js";
 import { betterAuth } from "better-auth";
 import { nextCookies } from "better-auth/next-js";
 import { bearer, genericOAuth, twoFactor } from "better-auth/plugins";
-import { commonAuthOptions, ensureUserProfile, googleProvider } from "@rose-griffon/auth";
+import {
+	commonAuthOptions,
+	createAccountOptions,
+	ensureUserProfile,
+	googleProvider,
+} from "@rose-griffon/auth";
+import { sendEmail } from "@/lib/email";
 import { getPgPool } from "@/lib/db/pg";
 import { fetchIdentity, parseIdentityWithMemberships } from "@/lib/patreon/client";
 import { encryptToken } from "@/lib/patreon/encryption";
@@ -71,6 +77,45 @@ export const auth = betterAuth({
 		"build-placeholder-secret-not-used-at-runtime-only-prevents-prerender-throw",
 
 	...commonAuthOptions,
+
+	// Réétalé explicitement : redéfinir `user` remplacerait l'objet hérité du
+	// spread ci-dessus, donc la correspondance des colonnes. `createAccountOptions`
+	// active le changement d'adresse et la suppression de compte, désactivés par
+	// défaut dans Better Auth.
+	user: {
+		...commonAuthOptions.user,
+		...createAccountOptions({ appName: "Rose Griffon", sendEmail }),
+	},
+
+	// Le changement d'adresse d'un compte déjà vérifié exige un envoi de
+	// vérification côté Better Auth : sans ce bloc, l'endpoint refuse la demande
+	// avec « Verification email isn't enabled ».
+	emailVerification: {
+		sendVerificationEmail: async ({ user, url }: { user: { email: string }; url: string }) => {
+			await sendEmail({
+				html: `<!DOCTYPE html><html lang="fr"><head><meta charset="utf-8"></head>
+<body style="margin:0;padding:24px;background:#f5f5f5;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;color:#1a1a1a">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td align="center">
+    <table role="presentation" width="100%" style="max-width:480px;background:#ffffff;border-radius:16px;overflow:hidden">
+      <tr><td style="padding:32px 28px 16px">
+        <h1 style="margin:0 0 12px;font-size:20px;font-weight:700">Confirme ton adresse</h1>
+        <p style="margin:0;font-size:15px;line-height:1.55;color:#4a4a4a">Vérifie <strong>${user.email}</strong> pour activer toutes les fonctions de ton compte.</p>
+      </td></tr>
+      <tr><td style="padding:0 28px 28px" align="center">
+        <a href="${url}" style="display:inline-block;padding:13px 32px;background:#a14b3f;color:#ffffff;font-size:15px;font-weight:600;text-decoration:none;border-radius:999px">Vérifier mon adresse</a>
+        <p style="margin:18px 0 0;font-size:12px;line-height:1.5;color:#8a8a8a">Lien valable une heure. Si tu n'es pas à l'origine de cette demande, ignore ce message.</p>
+      </td></tr>
+      <tr><td style="padding:14px 28px;border-top:1px solid #ececec" align="center">
+        <p style="margin:0;font-size:11px;color:#8a8a8a">Rose Griffon</p>
+      </td></tr>
+    </table>
+  </td></tr></table>
+</body></html>`,
+				subject: "Confirme ton adresse — Rose Griffon",
+				to: user.email,
+			});
+		},
+	},
 
 	socialProviders: {
 		discord: {

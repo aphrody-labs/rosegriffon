@@ -1,7 +1,7 @@
 // UI & Navigation
 
 // Social & Identity
-export { default as DiscordBlock } from "./DiscordBlock";
+export { default as DiscordSection, INVITATION_DISCORD } from "./DiscordSection";
 export { default as EdgeSwipeDetector } from "./EdgeSwipeDetector";
 // Content Sections
 export { default as EventCard } from "./EventCard";
@@ -14,6 +14,7 @@ export * from "./LatestChroniqueSection";
 export { default as MobileWatermark } from "./MobileWatermark";
 // Coque commune des pages (conteneur, bannière de marque, sections)
 export * from "./PageShell";
+export * from "./ProjectCard";
 export { default as ProjectsSection } from "./ProjectsSection";
 export { default as SocialLinks } from "./SocialLinks";
 export * from "./StructuredData";
