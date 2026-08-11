@@ -575,7 +575,7 @@ export function Shell({
 	if (isEditorPage || isFullscreenPage) {
 		return (
 			<AuthProvider initialUser={user} initialProfile={profile}>
-				<div className="fixed inset-0 z-40 bg-background">{children}</div>
+				<div className="fixed inset-0 z-40 overflow-y-auto overscroll-contain bg-background pb-[env(safe-area-inset-bottom)]">{children}</div>
 			</AuthProvider>
 		);
 	}
@@ -590,7 +590,7 @@ export function Shell({
 				{!isCompact && <DesktopTopBar />}
 
 				{/* Main Layout - Adaptive based on screen size */}
-				<div className={cn("flex w-full bg-surface min-h-screen", !isCompact && "pt-14")}>
+				<div className={cn("flex w-full bg-surface min-h-[100dvh]", !isCompact && "pt-14")}>
 					{/* NAVIGATION RAIL (MEDIUM SCREENS) */}
 					{isMedium && <AzaleeNavigationRail />}
 

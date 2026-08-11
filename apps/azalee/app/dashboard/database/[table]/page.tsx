@@ -20,7 +20,10 @@ export default async function GenericTablePage({
 
 	const supabase = await createClient();
 
-	// Validate table name to prevent SQL injection (basic whitelist)
+	// Liste blanche (anti-injection). Elle DOIT couvrir toutes les tables
+	// référencées par un lien `/dashboard/database/<t>` du dépôt : trois tuiles
+	// de l'accueil et de l'index DB pointaient vers des tables absentes d'ici
+	// et tombaient en 404 alors que leur compteur s'affichait correctement.
 	const allowedTables = [
 		"inagle_characters",
 		"inagle_skills",
@@ -28,9 +31,12 @@ export default async function GenericTablePage({
 		"inagle_items",
 		"inagle_auras",
 		"inagle_keshins",
+		"inagle_keshins_clean",
 		"inagle_souls",
 		"inagle_miximax",
 		"inagle_awakenings",
+		"inagle_passives",
+		"inagle_formations",
 	];
 	if (!allowedTables.includes(table)) {
 		return notFound();

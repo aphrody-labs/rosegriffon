@@ -8,8 +8,12 @@ import { useSupabase } from "@/hooks/use-supabase";
 import { authClient } from "@/lib/auth-client";
 import { ADMIN_ROLES } from "@/lib/auth-roles";
 import type { Database } from "@rose-griffon/db";
+import { PUBLIC_PROFILE_COLUMNS, type PublicProfile } from "@rose-griffon/db";
 
-export type AzaleeProfile = Database["public"]["Tables"]["profiles"]["Row"];
+// Le client navigateur (clé anon) ne lit QUE les colonnes publiques :
+// typer avec la ligne complète promettait adresse et e-mail, que la
+// requête ne ramène jamais depuis la fermeture PII.
+export type AzaleeProfile = PublicProfile;
 
 // Better Auth user type
 export interface BetterAuthUser {
@@ -53,7 +57,10 @@ export function AuthProvider({
 			try {
 				const { data, error } = await supabase
 					.from("profiles")
-					.select("*")
+					// Depuis la fermeture PII, un `select("*")` en clé anon échoue
+					// entièrement (42501) : profile restait null, donc avatar générique
+					// pour tous et `isAdmin` toujours faux (bouton Admin jamais affiché).
+					.select(PUBLIC_PROFILE_COLUMNS)
 					.eq("id", userId)
 					.maybeSingle();
 

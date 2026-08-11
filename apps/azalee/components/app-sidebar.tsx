@@ -30,7 +30,7 @@ import { useAuth } from "./providers/AuthProvider";
 import { CommonSpriteIcon } from "./ui/CommonSpriteIcon";
 import { GameSpriteIcon } from "./ui/GameSpriteIcon";
 
-export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
+export function AppSidebar({ className, ...props }: React.ComponentProps<typeof Sidebar>) {
 	const { isAdmin } = useAuth();
 	const { state: _state } = useSidebar();
 	const pathname = usePathname();
@@ -49,8 +49,16 @@ export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
 		return true;
 	});
 
+	// Le spread arrivait APRÈS className : la classe passée par le Shell écrasait
+	// celle du composant au lieu de la compléter, et la bordure droite par défaut
+	// du composant partagé réapparaissait. On fusionne désormais les deux.
 	return (
-		<Sidebar collapsible="icon" className="border-none bg-surface" variant="sidebar" {...props}>
+		<Sidebar
+			collapsible="icon"
+			variant="sidebar"
+			className={cn("border-none bg-surface", className)}
+			{...props}
+		>
 			<div className="absolute inset-0 bg-surface -z-10" />
 
 			{/* NAVIGATION CONTENT */}

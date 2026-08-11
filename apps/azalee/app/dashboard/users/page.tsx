@@ -226,8 +226,8 @@ export default async function UsersPage({
 										colSpan={6}
 										className="py-24 sm:py-32 text-center bg-surface-container-lowest"
 									>
-										<div className="flex flex-col items-center gap-3 sm:gap-4 text-on-surface-variant opacity-30 px-4">
-											<UserX size={48} aria-hidden="true" />
+										<div className="flex flex-col items-center gap-3 px-4 text-on-surface-variant sm:gap-4">
+											<UserX size={48} className="text-on-surface-variant/40" aria-hidden="true" />
 											<p className="font-black font-sans uppercase tracking-tighter text-base sm:text-lg">
 												Aucun utilisateur
 											</p>

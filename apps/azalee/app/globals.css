@@ -80,9 +80,11 @@
 	unicode-range: U+0020-007F, U+00A0-00FF;
 }
 
-html {
-	font-size: 16px;
-	overscroll-behavior-y: contain;
+@layer base {
+	html {
+		font-size: 16px;
+		overscroll-behavior-y: contain;
+	}
 }
 
 /* ── Light Theme ───────────────────────────────────────── */
@@ -452,11 +454,18 @@ html {
 
 /* ── Base ──────────────────────────────────────────────── */
 
-body {
-	background-color: var(--color-background);
-	color: var(--color-on-background);
-	font-family: var(--font-sans);
-	-webkit-tap-highlight-color: transparent;
+/* Source de vérité unique pour le fond et la couleur du texte : les tokens MD3.
+ * Ce bloc était hors couche et écrasait un `@apply bg-background text-foreground`
+ * placé, lui, dans `@layer base` — ce dernier n'a jamais pu s'appliquer, et les
+ * deux systèmes divergeaient en silence dès qu'un thème ne redéfinissait que
+ * l'un des deux jeux de tokens. */
+@layer base {
+	body {
+		background-color: var(--color-background);
+		color: var(--color-on-background);
+		font-family: var(--font-sans);
+		-webkit-tap-highlight-color: transparent;
+	}
 }
 
 button,
@@ -479,9 +488,6 @@ a,
 @layer base {
 	* {
 		@apply border-outline-variant;
-	}
-	body {
-		@apply bg-background text-foreground;
 	}
 }
 
