@@ -30,6 +30,7 @@ absolues déjà stockées en base :
 
 ```
 /rest/v1/      → 127.0.0.1:8809   (PostgREST)
+/graphql/v1    → 127.0.0.1:8809   (/rpc/graphql, profil graphql_public)
 /storage/v1/   → 127.0.0.1:8810   (rg-storage)
 /realtime/v1/  → 127.0.0.1:8812   (rg-realtime, SSE)
 ```
@@ -106,6 +107,50 @@ Piège : le fichier `htpasswd` doit être lisible par le groupe de l'utilisateur
 des workers nginx — ici `nobody:nogroup`, pas `www-data`. Sinon nginx renvoie
 **500** (et non 401) sur toute requête *authentifiée*, avec un
 `13: Permission denied` dans `studio.rosegriffon.fr.error.log`.
+
+## API GraphQL
+
+`pg_graphql` 1.6.1 (paquet officiel `.deb` pour PG 18) génère une API GraphQL
+sur tout le schéma `public`. PostgREST publie `graphql_public.graphql()` en RPC,
+nginx la présente sous `/graphql/v1` — même adresse que chez Supabase.
+Mise en place : `apps/website/sql/migrations/20260811_pg_graphql.sql`.
+
+**Drapeau à connaître** : depuis pg_graphql **1.6.0 l'introspection est
+désactivée par défaut**. Sans elle, les requêtes de données fonctionnent
+normalement mais tout `__schema` / `__type` répond
+`Unknown field "__schema" on type Query` — symptôme trompeur qui fait chercher
+un problème de droits ou de `search_path`. Elle s'active par un commentaire de
+schéma, pas par une option de configuration :
+
+```sql
+COMMENT ON SCHEMA public IS '@graphql({"introspection": true})';
+```
+
+C'est ce qui permet à l'onglet GraphQL de Studio (GraphiQL) de peupler son
+explorateur. 228 champs sont exposés.
+
+## Documentation d'API du projet
+
+La section « API Docs » de Studio n'est bridée par **aucun** drapeau : elle lit
+la spec OpenAPI que PostgREST génère (135 chemins, 120 définitions — tout le
+schéma `public`).
+
+Un réglage compte : sans `openapi-server-proxy-uri`, la spec s'annonce avec
+`host: 127.0.0.1:8809` et `schemes: ["http"]`, c'est-à-dire l'adresse de boucle
+locale, ce qui rend la doc inutilisable pour un client externe. D'où, dans
+`/etc/postgrest.conf` :
+
+```
+openapi-server-proxy-uri = "https://supabase.rosegriffon.fr/rest/v1"
+```
+
+La spec annonce alors `host: supabase.rosegriffon.fr:443`, `basePath: /rest/v1`,
+`schemes: ["https"]`.
+
+Note d'exposition : `openapi-mode = "ignore-privileges"` (le défaut de Supabase
+Cloud) publie la forme complète du schéma, introspection GraphQL comprise. Les
+**données** restent protégées par les 170 policies RLS ; seule la structure est
+publique, exactement comme avant la migration.
 
 ## Base de données
 
