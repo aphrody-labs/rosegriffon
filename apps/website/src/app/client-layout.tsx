@@ -4,11 +4,19 @@ import { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import { SidebarInset, SidebarProvider, Toaster, useBreakpoint, useSidebar } from "@rose-griffon/ui";
 import { WebsiteNavigationRail } from "@/components/layout/WebsiteNavigationRail";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { PanelLeftClose, PanelLeftOpen } from "lucide-react";
 
 /** Largeur de la sidebar desktop — source unique (CSS var + décalage du bouton). */
 const SIDEBAR_WIDTH = "14rem";
 
+/**
+ * Bouton de repli de la barre latérale.
+ *
+ * C'était une pastille de 20 px à 60 % d'opacité, quasi invisible : le wiki a un
+ * vrai bouton de 40 px dans sa barre supérieure et personne ne trouvait
+ * l'équivalent ici. Même gabarit désormais (40 px, cible tactile conforme),
+ * icône explicite de panneau plutôt qu'un chevron, et libellé au survol.
+ */
 function CustomSidebarTrigger() {
 	const { open, toggleSidebar } = useSidebar();
 	const [mounted, setMounted] = useState(false);
@@ -17,21 +25,31 @@ function CustomSidebarTrigger() {
 		setMounted(true);
 	}, []);
 
+	// Rendu différé : `open` est restauré depuis un cookie côté client, l'afficher
+	// au premier rendu serveur produirait une icône qui saute après hydratation.
 	if (!mounted) return null;
 
 	return (
 		<button
+			type="button"
 			onClick={toggleSidebar}
+			title={open ? "Réduire le menu" : "Déployer le menu"}
+			aria-label={open ? "Réduire le menu" : "Déployer le menu"}
+			aria-expanded={open}
 			className={cn(
-				"fixed top-[26px] z-50 rounded-full flex items-center justify-center transition-all duration-300 ease-in-out",
-				"size-5 text-foreground/50 hover:text-foreground hover:bg-foreground/10 active:bg-foreground/20 cursor-pointer",
-				"bg-background/80 backdrop-blur-xs border border-border/40 shadow-xs",
-				"opacity-60 hover:opacity-100 hover:scale-105 active:scale-95",
-				open ? "left-[calc(var(--sidebar-width)-10px)]" : "left-3"
+				"fixed top-4 z-50 flex size-10 items-center justify-center rounded-full",
+				"border border-border bg-background/90 text-muted-foreground shadow-sm backdrop-blur-sm",
+				"transition-[left,color,background-color] duration-300 ease-in-out",
+				"hover:bg-muted hover:text-foreground active:scale-95",
+				"focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-hidden",
+				open ? "left-[calc(var(--sidebar-width)-1.25rem)]" : "left-4"
 			)}
-			aria-label={open ? "Fermer le menu" : "Ouvrir le menu"}
 		>
-			{open ? <ChevronLeft size={12} /> : <ChevronRight size={12} />}
+			{open ? (
+				<PanelLeftClose className="size-5" aria-hidden />
+			) : (
+				<PanelLeftOpen className="size-5" aria-hidden />
+			)}
 		</button>
 	);
 }
@@ -169,7 +187,7 @@ export default function ClientLayout({
 								</div>
 							</SidebarInset>
 
-							{!shouldHideSidebar && isExpanded && <CustomSidebarTrigger />}
+							{!shouldHideSidebar && !isCompact && <CustomSidebarTrigger />}
 						</SidebarWrapper>
 						<Toaster richColors position="top-right" />
 					</ProfileProvider>

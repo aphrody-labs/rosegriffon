@@ -530,6 +530,11 @@ export function Shell({
 		pathname.startsWith("/dashboard/news/") &&
 		(pathname.includes("/new") || pathname.split("/").length > 3);
 	const isFullscreenPage = pathname === "/login";
+	// L'espace d'administration a sa PROPRE barre latérale (le composant partagé
+	// `AdminSidebar`, monté par `app/dashboard/layout.tsx`, comme `/admin` côté
+	// site principal). Afficher en plus la barre du wiki en donnerait deux côte à
+	// côte et écraserait le contenu.
+	const isDashboard = pathname.startsWith("/dashboard");
 
 	// Service Worker registration
 	useEffect(() => {
@@ -591,10 +596,10 @@ export function Shell({
 				{/* Main Layout - Adaptive based on screen size */}
 				<div className={cn("flex w-full bg-surface min-h-[100dvh]", !isCompact && "pt-14")}>
 					{/* NAVIGATION RAIL (MEDIUM SCREENS) */}
-					{isMedium && <AzaleeNavigationRail />}
+					{isMedium && !isDashboard && <AzaleeNavigationRail />}
 
 					{/* SIDEBAR (EXPANDED OR COMPACT SCREENS) */}
-					{(isExpanded || isCompact) && (
+					{(isExpanded || isCompact) && !isDashboard && (
 						<AppSidebar
 							variant="sidebar"
 							// `inset-y-0` + une hauteur explicite sur-contraint la boîte : le
@@ -608,17 +613,17 @@ export function Shell({
 					<SidebarInset
 						className={cn(
 							"flex-1 min-w-0 bg-surface-container flex flex-col transition-all duration-300",
-							isMedium && "ml-20" // Décalage du rail, actif dès 600px comme lui
+							isMedium && !isDashboard && "ml-20" // Décalage du rail, actif dès 600px comme lui
 						)}
 					>
 						{/* Mobile Header (Only visible on Compact) */}
-						{isCompact && <MobileHeader isHome={pathname === "/"} />}
+						{isCompact && !isDashboard && <MobileHeader isHome={pathname === "/"} />}
 
 						<main
 							id="main-content"
 							className={cn(
 								"flex-1 overflow-y-auto overflow-x-hidden scrollbar-hide flex flex-col",
-								isCompact ? "pt-[calc(4rem+env(safe-area-inset-top))]" : "pt-0"
+								isCompact && !isDashboard ? "pt-[calc(4rem+env(safe-area-inset-top))]" : "pt-0"
 							)}
 						>
 							<PullToRefresh>
@@ -628,7 +633,9 @@ export function Shell({
 								<div
 									className={cn(
 										"vt-page-content mx-auto w-full max-w-[1800px] flex-1 px-4 md:px-8 lg:px-12",
-										isCompact ? "pb-[calc(6rem+env(safe-area-inset-bottom))]" : "pb-6"
+										isCompact && !isDashboard
+											? "pb-[calc(6rem+env(safe-area-inset-bottom))]"
+											: "pb-6"
 									)}
 								>
 									{children}
@@ -639,8 +646,8 @@ export function Shell({
 					</SidebarInset>
 				</div>
 
-				{/* BOTTOM NAV (COMPACT SCREENS) */}
-				{isCompact && (
+				{/* BOTTOM NAV (COMPACT SCREENS) — hors administration, qui a la sienne */}
+				{isCompact && !isDashboard && (
 					<div className="fixed bottom-0 left-0 right-0 z-50">
 						<MaterialBottomNav />
 					</div>
