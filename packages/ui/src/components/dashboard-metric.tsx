@@ -47,7 +47,6 @@ export function DashboardMetric({
 				)}
 			>
 				{typeof icon === "function" ? (
-					// @ts-ignore - Lucide icon component
 					React.createElement(icon, { className: "size-6", fill: "currentColor" })
 				) : (
 					icon
