@@ -1,5 +1,5 @@
 import { DashboardGrid, QuickActionCard } from "@rose-griffon/ui";
-import { BookOpen, Calendar, Image as ImageIcon, Settings, Shield, Users } from "lucide-react";
+import { BookOpen, Calendar, Database, Image as ImageIcon, Settings, Shield, Users } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
 interface QuickAction {
@@ -12,39 +12,46 @@ interface QuickAction {
 
 const ACTIONS: QuickAction[] = [
 	{
-		accent: "text-sky-500",
+		accent: "text-info",
 		description: "Comptes, rôles, sanctions",
 		href: "/admin/users",
 		icon: Users,
 		title: "Utilisateurs",
 	},
 	{
-		accent: "text-violet-500",
+		accent: "text-secondary-foreground",
 		description: "Articles, brouillons, séries",
 		href: "/admin/chroniques",
 		icon: BookOpen,
 		title: "Chroniques",
 	},
 	{
-		accent: "text-amber-500",
+		accent: "text-alerte",
 		description: "Calendrier et planning streams",
 		href: "/admin/events",
 		icon: Calendar,
 		title: "Événements",
 	},
 	{
-		accent: "text-emerald-500",
+		accent: "text-succes",
 		description: "Membres équipe et rôles",
 		href: "/admin/staff",
 		icon: Shield,
 		title: "Staff",
 	},
 	{
-		accent: "text-rose-500",
+		accent: "text-rg-rose",
 		description: "Upload, galeries, modération",
 		href: "/admin/media",
 		icon: ImageIcon,
 		title: "Médias",
+	},
+	{
+		accent: "text-info",
+		description: "Services, schéma, sécurité, stockage",
+		href: "/admin/base",
+		icon: Database,
+		title: "Infrastructure",
 	},
 	{
 		accent: "text-muted-foreground",

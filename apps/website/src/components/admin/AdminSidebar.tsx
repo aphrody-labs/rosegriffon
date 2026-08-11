@@ -3,6 +3,7 @@
 import {
 	BookOpen,
 	Calendar,
+	Database,
 	Heart,
 	Home,
 	Image as ImageIcon,
@@ -40,6 +41,7 @@ const adminNavItems: NavItem[] = [
 		icon: Heart,
 		title: "Patreon",
 	},
+	{ href: "/admin/base", icon: Database, title: "Infrastructure" },
 	{ href: "/admin/settings", icon: Settings, title: "Configuration" },
 ];
 
