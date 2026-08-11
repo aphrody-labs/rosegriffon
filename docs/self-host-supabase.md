@@ -143,7 +143,10 @@ reconstruits depuis les sources d'origine :
 | `tweets` | 6 423 | 5 529 re-téléchargés depuis `pbs.twimg.com` (`scripts/ops/refetch-tweet-media.ts`). Le reste correspond à des vidéos ou à des médias supprimés côté Twitter. |
 | `patreon` | 26 | À re-synchroniser via l'API Patreon (`apps/website/scripts/patreon-images-sync.ts`) : les URLs d'origine sont signées et expirées. |
 | `assets` | 4 | Deux logos partenaires et deux photos d'équipe, non récupérables automatiquement. |
-| `article` | 3 | Couverture d'un article et ses vignettes, non récupérables : à re-téléverser. |
+| `article` | 0 | Bucket purgé. La couverture perdue a été remplacée par un visuel du jeu servi par le CDN ; les trois lignes d'index orphelines ont été retirées via l'API Storage. |
+
+Sur les images de `gallery_img2`, toujours passer par la variante `?w=<largeur>&format=webp`
+du CDN : l'originale est un PNG de 9,3 Mo, la variante 1600 px pèse 42 Ko.
 
 ## Temps réel
 
