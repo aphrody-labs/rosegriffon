@@ -37,10 +37,12 @@ export async function generateMetadata({
 }): Promise<Metadata> {
 	const { username } = await params;
 	const pool = getPgPool();
-	const { rows } = await pool.query<
-		Pick<Profile, "full_name" | "username" | "avatar_url" | "bio">
-	>(
-		"SELECT full_name, username, avatar_url, bio FROM profiles WHERE username = $1 LIMIT 1",
+	// Le nom réel et le pays sont hors de la liste blanche publique depuis la
+	// fermeture PII du 11/8/2026. Cette page lit pourtant la base avec le rôle
+	// propriétaire (`getPgPool`), qui contourne à la fois la RLS et les droits
+	// par colonne : la restriction doit donc être appliquée ici, dans la requête.
+	const { rows } = await pool.query<Pick<Profile, "username" | "avatar_url" | "bio">>(
+		"SELECT username, avatar_url, bio FROM profiles WHERE username = $1 LIMIT 1",
 		[username]
 	);
 	const profile = rows[0];
@@ -49,7 +51,7 @@ export async function generateMetadata({
 		return { title: "Profil introuvable · Rose Griffon" };
 	}
 
-	const displayName = profile.full_name || profile.username || username;
+	const displayName = profile.username || username;
 	const title = `Profil de ${displayName} · Rose Griffon`;
 	const description = profile.bio || `Découvrez le profil de ${displayName} sur Rose Griffon.`;
 	const image = profile.avatar_url || "/opengraph-image.png";
@@ -84,8 +86,13 @@ export default async function UserProfilePage({
 
 	let profile: Profile | null = null;
 	try {
+		// Projection explicite sur les colonnes publiques : un `SELECT *` remontait
+		// aussi l'e-mail, le nom réel, l'adresse postale et l'identifiant Patreon,
+		// dont deux étaient rendus sur cette page sans authentification.
 		const { rows } = await pool.query<Profile>(
-			"SELECT * FROM profiles WHERE username = $1 LIMIT 1",
+			`SELECT id, updated_at, username, avatar_url, role, website, discord_id,
+			        bio, banner_url, twitter_handle, badges
+			   FROM profiles WHERE username = $1 LIMIT 1`,
 			[username]
 		);
 		profile = rows[0] ?? null;
@@ -167,7 +174,7 @@ export default async function UserProfilePage({
 				]}
 			/>
 			<ProfileSchema
-				name={profile.full_name || profile.username || username}
+				name={profile.username || username}
 				username={profile.username ?? username}
 				image={profile.avatar_url || undefined}
 				description={profile.bio || undefined}
@@ -185,7 +192,6 @@ export default async function UserProfilePage({
 			<div className="container mx-auto px-4 pt-8 sm:px-6 sm:pt-10 lg:px-8">
 				<ProfileIdentity
 					username={profile.username ?? username}
-					fullName={profile.full_name}
 					avatarUrl={profile.avatar_url}
 					bio={profile.bio}
 					role={profile.role}
@@ -214,7 +220,6 @@ export default async function UserProfilePage({
 					<aside className="md:col-span-1">
 						<ProfileAbout
 							role={profile.role}
-							country={profile.country}
 							updatedAt={profile.updated_at}
 							staffMember={staffMember}
 						/>

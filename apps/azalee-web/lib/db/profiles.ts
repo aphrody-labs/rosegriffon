@@ -7,23 +7,40 @@ import { getPgPool } from "@/lib/db/pg";
 // le `.single()` Supabase pour le cas nominal.
 
 export interface ProfileMeta {
-	full_name: string | null;
 	bio: string | null;
 }
 
-// `SELECT *` reproduit exactement la forme retournée par `.from("profiles").select("*")`
-// (toutes les colonnes, y compris celles ajoutées après le dernier snapshot de schéma) —
-// pas de liste de colonnes figée ici pour éviter toute dérive de schéma. Typé en
-// `Record<string, any>` (comme l'ancien `(supabase as any)`) : la page consommatrice
-// indexe des colonnes potentiellement nullable (`roleConfig[profile.role]`) sans guard.
-export type ProfileRow = Record<string, any>;
+// Projection explicite sur les colonnes publiques.
+//
+// Ces requêtes passent par `getPgPool()`, qui se connecte avec le rôle propriétaire
+// `rg` : elles contournent donc À LA FOIS la RLS et les droits par colonne posés par la
+// fermeture PII du 11/8/2026. Un `SELECT *` republiait ici, sur une page sans
+// authentification, l'e-mail, le nom réel, l'adresse postale et l'identifiant Patreon.
+// La restriction ne peut pas venir de la base sur ce chemin : elle doit être écrite ici.
+export interface ProfileRow {
+	id: string;
+	updated_at: string | null;
+	username: string | null;
+	avatar_url: string | null;
+	role: string | null;
+	website: string | null;
+	discord_id: string | null;
+	bio: string | null;
+	banner_url: string | null;
+	twitter_handle: string | null;
+	badges: string[] | null;
+}
+
+/** Les mêmes colonnes que `PUBLIC_PROFILE_COLUMNS` de `@rose-griffon/db`. */
+const COLONNES_PUBLIQUES =
+	"id, updated_at, username, avatar_url, role, website, discord_id, bio, banner_url, twitter_handle, badges";
 
 /** Utilisé par `generateMetadata` — mêmes colonnes que l'ancien `.select("full_name, bio")`. */
 export async function getProfileMetaByUsername(username: string): Promise<ProfileMeta | null> {
 	try {
 		const pool = getPgPool();
 		const { rows } = await pool.query<ProfileMeta>(
-			"SELECT full_name, bio FROM profiles WHERE username = $1 LIMIT 1",
+			"SELECT bio FROM profiles WHERE username = $1 LIMIT 1",
 			[username]
 		);
 		return rows[0] ?? null;
@@ -38,7 +55,7 @@ export async function getProfileByUsername(username: string): Promise<ProfileRow
 	try {
 		const pool = getPgPool();
 		const { rows } = await pool.query<ProfileRow>(
-			"SELECT * FROM profiles WHERE username = $1 LIMIT 1",
+			`SELECT ${COLONNES_PUBLIQUES} FROM profiles WHERE username = $1 LIMIT 1`,
 			[username]
 		);
 		return rows[0] ?? null;

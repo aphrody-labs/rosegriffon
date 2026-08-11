@@ -10,12 +10,11 @@ interface StaffMember {
 
 interface ProfileAboutProps {
 	role: string | null;
-	country: string | null;
 	updatedAt: string | null;
 	staffMember: StaffMember | null;
 }
 
-export function ProfileAbout({ role, country, updatedAt, staffMember }: ProfileAboutProps) {
+export function ProfileAbout({ role, updatedAt, staffMember }: ProfileAboutProps) {
 	return (
 		<Card>
 			<CardContent className="p-6">
@@ -41,12 +40,6 @@ export function ProfileAbout({ role, country, updatedAt, staffMember }: ProfileA
 						<dt className="text-muted-foreground">Rôle</dt>
 						<dd className="font-medium capitalize text-foreground">{role || "Membre"}</dd>
 					</div>
-					{country && (
-						<div className="flex items-center justify-between">
-							<dt className="text-muted-foreground">Pays</dt>
-							<dd className="font-medium text-foreground">{country}</dd>
-						</div>
-					)}
 					<div className="flex items-center justify-between">
 						<dt className="text-muted-foreground">Dernière activité</dt>
 						<dd className="font-medium text-foreground">
