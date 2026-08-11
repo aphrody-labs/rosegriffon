@@ -1,6 +1,6 @@
 /**
  * Instance Stripe partagée pour le shop Rose Griffon.
- * Singleton process-level (Vercel/serverless re-use entre invocations chaudes).
+ * Singleton process-level (réutilisé entre invocations chaudes).
  * Mode auto : utilise STRIPE_SECRET_KEY (sk_test_… ou sk_live_…).
  */
 import Stripe from "stripe";

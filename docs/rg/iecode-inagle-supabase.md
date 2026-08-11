@@ -217,7 +217,7 @@ Pur (découplé du FS). Stats : `Kc Cr Tc Pr Ps Ag It` (Kick/Control/Technique/P
 
 ### 2.7 cli-push.ts (push vers Supabase)
 
-Commande `inagle push` (`registerPushCommand`). Deux adapters : `SupabaseAdapter` (API, génère un token service_role depuis `JWT_SECRET` si besoin) et `PostgresAdapter` (DB directe, upsert chunké 50, `ON CONFLICT DO UPDATE`). Garde-fous env : rejette les blobs scellés Vercel (`startsWith("eyJ2Ijo")`). Importeurs : characters, skills, items, passives, auras, teams, formations, quests, drops, gallery, costumes, opponent-teams, capsules, exp-table, growth-tables, + export story-text.
+Commande `inagle push` (`registerPushCommand`). Deux adapters : `SupabaseAdapter` (API, génère un token service_role depuis `JWT_SECRET` si besoin) et `PostgresAdapter` (DB directe, upsert chunké 50, `ON CONFLICT DO UPDATE`). Garde-fous env : rejette les blobs scellés (`startsWith("eyJ2Ijo")`). Importeurs : characters, skills, items, passives, auras, teams, formations, quests, drops, gallery, costumes, opponent-teams, capsules, exp-table, growth-tables, + export story-text.
 
 Points sensibles :
 - **Préservation des colonnes curatées hors-pipeline** : avant `delete+reinsert`, snapshot de `sheet_data` + `zukan_order` (characters) et `sheet_data` (items), réinjectés par id pour ne pas écraser la donnée communautaire/officielle. Les movesets natifs sont fusionnés dans `sheet_data`.

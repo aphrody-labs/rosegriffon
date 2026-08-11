@@ -292,7 +292,7 @@ Bun.cron("0 8 * * *", async () => {
 
 // 7. SEO — Régénération des fichiers llms.txt/llm.txt (fraîcheur) : tous les jours à 5h45 UTC.
 // NB : régénère les fichiers publics dans le checkout local (canonique). La mise en
-// ligne effective dépend d'un redeploy Vercel (commit du repo) ; sur le VPS, cela
+// ligne effective dépend d'un redéploiement (commit du repo) ; sur le VPS, cela
 // rafraîchit la copie servie localement si applicable.
 Bun.cron("45 5 * * *", async () => {
 	await executeTask("seo:llms-txt", runSeoLlmsTxt);

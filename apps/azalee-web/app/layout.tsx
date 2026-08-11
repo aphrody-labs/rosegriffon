@@ -1,7 +1,5 @@
 import Script from "next/script";
 import { Geist, Geist_Mono } from "next/font/google";
-import { Analytics } from "@vercel/analytics/react";
-import { SpeedInsights } from "@vercel/speed-insights/next";
 
 import { LanguageProvider } from "@/components/providers/language-provider";
 import { SupabaseProvider } from "@/components/providers/SupabaseProvider";
@@ -187,8 +185,6 @@ export default function RootLayout({
 						<Toaster />
 					</ThemeProvider>
 				</LanguageProvider>
-				<Analytics />
-				<SpeedInsights />
 			</body>
 		</html>
 	);

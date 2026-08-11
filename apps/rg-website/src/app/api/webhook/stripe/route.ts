@@ -24,7 +24,7 @@ export async function POST(req: NextRequest) {
 		console.warn("[stripe-webhook] STRIPE_WEBHOOK_SECRET missing — rejecting");
 		return NextResponse.json({ error: "Not configured" }, { status: 503 });
 	}
-	// Garde : un secret au mauvais format (ex. valeur scellée Vercel "eyJ2Ijo…" au lieu de "whsec_…")
+	// Garde : un secret au mauvais format (ex. valeur scellée "eyJ2Ijo…" au lieu de "whsec_…")
 	// ferait planter constructEvent en 500 ; on rejette proprement en 503 + log explicite.
 	if (!secret.startsWith("whsec_")) {
 		console.error(

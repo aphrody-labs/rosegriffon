@@ -1,26 +1,13 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { get } from "@vercel/edge-config";
 import { absoluteUrl } from "@/lib/site-url";
 
 const PROTECTED_PATHS = ["/dashboard", "/settings"];
 const API_PROTECTED_PATHS = ["/api/dashboard"];
 
 export async function proxy(request: NextRequest) {
-	// 1. Zero-latency maintenance mode via Edge Config
-	try {
-		if (process.env.EDGE_CONFIG) {
-			const isMaintenanceMode = await get<boolean>("maintenanceMode");
-			if (isMaintenanceMode && request.nextUrl.pathname !== "/maintenance") {
-				// Use a generic maintenance URL or one specific to Azalée if created
-				const url = request.nextUrl.clone();
-				url.pathname = "/maintenance";
-				return NextResponse.rewrite(url);
-			}
-		}
-	} catch (error) {
-		console.error("[Middleware] Edge Config Error:", error);
-	}
+	// Le mode maintenance est servi par nginx (location @maintenance sur
+	// 502/503/504), pas par l'application : rien à vérifier ici.
 
 	const { pathname } = request.nextUrl;
 

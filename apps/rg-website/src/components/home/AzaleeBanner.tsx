@@ -46,9 +46,8 @@ export function AzaleeBanner({
 							fill
 							priority
 							// L'image peut être distante (OG cross-site azalee.rosegriffon.fr/opengraph-image.png,
-							// réglable via home_azalee_image). L'optimiseur Vercel renvoie 402 (quota) sur ces
-							// distants → unoptimized pour qu'elle s'affiche (cf. piège images.qualities/402).
-							unoptimized
+							// réglable via home_azalee_image). L'hôte est déclaré dans `images.remotePatterns`,
+							// et l'optimiseur tourne sur notre VPS : une grande bannière vaut la ré-encode.
 							className="object-cover object-center transition-transform duration-700 group-hover:scale-105 group-hover:rotate-1"
 							sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 640px"
 						/>

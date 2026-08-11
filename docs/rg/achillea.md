@@ -1,7 +1,7 @@
 # Achillea — intégration dans l'écosystème Rose Griffon
 
 Design / plan d'intégration d'**Achillea** (dashboard communautaire Inazuma Eleven — repo séparé
-`rose-griffon/achillea`, front **Angular 21** sur Vercel) dans l'écosystème RG : API distante sur
+`rose-griffon/achillea`, front **Angular 21** auto-hébergé) dans l'écosystème RG : API distante sur
 `api.rosegriffon.fr`, assets sur `cdn.rosegriffon.fr`, SEO aligné sur le monorepo RG, et intégration
 cross-site entre les **3 sites**.
 
@@ -22,7 +22,7 @@ cross-site entre les **3 sites**.
 | `…/api/auth/me` · `…/api/ranked/me` | **401** | auth-gated (attendu) |
 | `https://cdn.rosegriffon.fr/` | **404** | pas de listing |
 | `cdn.rosegriffon.fr/images/<hash invalide>` | **403** | validation content-addressed |
-| `https://achillea-web.vercel.app/api/health` | **200** | front → ranked |
+| `https://achillea.rosegriffon.fr/` | **200** | front Achillea (nginx, VPS `51.255.162.6`) |
 
 > ⚠️ **Images legacy mortes** : d'anciennes lignes `image` (ancienne prod Achillea) pointent sur
 > `https://api.alessf.fr/images/<id>` qui **ne répond plus (000)**. Le bot actuel écrit pourtant sur
@@ -34,7 +34,7 @@ cross-site entre les **3 sites**.
 | --- | --- | --- | --- |
 | **website** | `rosegriffon.fr` | Next.js 16 (`apps/website`) | site principal RG : shop, chroniques, articles |
 | **azalee** | `azalee.rosegriffon.fr` | Next.js 16 (`apps/azalee`) | wiki Inazuma (personnages, items, keshins…) |
-| **achillea** | `achillea-web.vercel.app` | Angular 21 (repo `rose-griffon/achillea`) | dashboard communautaire : clans, tournois, ranked, casts |
+| **achillea** | `achillea.rosegriffon.fr` | Angular 21 (repo `rose-griffon/achillea`) | dashboard communautaire : clans, tournois, ranked, casts |
 
 Infra partagée : `api.rosegriffon.fr` (stub nginx, `/health`), `cdn.rosegriffon.fr` (service CDN d'images
 `cdn.service`), backend Achillea sur `ranked.rosegriffon.fr` (bot Bun :4002/:4000).
@@ -42,7 +42,7 @@ Infra partagée : `api.rosegriffon.fr` (stub nginx, `/health`), `cdn.rosegriffon
 ## 2. API distante Achillea sur `api.rosegriffon.fr`
 
 Aujourd'hui l'API Achillea est exposée sur **`ranked.rosegriffon.fr/api/*`** (consommée par le front via
-rewrites Vercel). `api.rosegriffon.fr` n'est qu'un **stub** (`/health`, vérifié). Objectif : en faire la
+les rewrites de son nginx). `api.rosegriffon.fr` n'est qu'un **stub** (`/health`, vérifié). Objectif : en faire la
 **passerelle API unifiée** de l'écosystème, avec un préfixe par produit.
 
 ### Proposition
@@ -83,7 +83,7 @@ invalide — vérifié).
 
 **Reste à faire** :
 - **Assets statiques du front** (`apps/web/public/` — `ranks/`, `flags/`, `achillea-banner.png`, animations…)
-  encore servis par **Vercel** → à migrer sur le CDN partagé (même `/upload`).
+  encore servis par le VPS Achillea → à migrer sur le CDN partagé (même `/upload`).
 - **URLs legacy** (`api.alessf.fr`, host mort) référencées dans la table `image` → réécrire vers `cdn.rosegriffon.fr`.
 
 ### Front Angular
@@ -91,7 +91,7 @@ invalide — vérifié).
   (le préconnect `__RANKED_ORIGIN__` couvre déjà `ranked.`).
 
 ### Bénéfices
-Pipeline d'images unifié (cartes déjà dessus), cache long partagé, moins de Fast Data Transfer Vercel,
+Pipeline d'images unifié (cartes déjà dessus), cache long partagé, moins de bande passante sur le VPS Achillea,
 invalidation centralisée.
 
 ## 4. SEO Achillea — calqué sur le monorepo RG
@@ -130,7 +130,7 @@ cohérent, mutualisé.
 export const RG_SITES = [
   { id: "website", name: "Rose Griffon", url: "https://rosegriffon.fr", desc: "Le hub de la communauté" },
   { id: "azalee",  name: "Azalée",       url: "https://azalee.rosegriffon.fr", desc: "Le wiki Inazuma Eleven" },
-  { id: "achillea",name: "Achillea",     url: "https://achillea-web.vercel.app", desc: "Clans, tournois & ranked" },
+  { id: "achillea",name: "Achillea",     url: "https://achillea.rosegriffon.fr", desc: "Clans, tournois & ranked" },
 ] as const;
 ```
 
@@ -142,7 +142,7 @@ export const RG_SITES = [
 ### c. SEO du maillage
 - Liens **réciproques** crawlables entre les 3 domaines (autorité partagée).
 - `Organization` JSON-LD avec `sameAs` listant les 3 domaines + réseaux.
-- Domaine custom recommandé `achillea.rosegriffon.fr` (le `.vercel.app` dilue le SEO).
+- Domaine `achillea.rosegriffon.fr` en place (200, nginx) — le sous-domaine RG consolide le SEO.
 
 ## 6. Cron & types (écosystème)
 
@@ -171,4 +171,4 @@ export const RG_SITES = [
 - docs/la stratégie SEO du dépôt · [docs/REPO_MAP.md](REPO_MAP.md) · [docs/deploy.md](deploy.md)
 - CDN : endpoint `cdn.rosegriffon.fr` (`cdn.service`, content-addressé `/images/<hash>` + `/upload`) ·
   nginx `conf.d/cdn.rosegriffon.conf`, `api.rosegriffon.conf`
-- Repo Achillea : `rose-griffon/achillea` (front `apps/web`, bot `apps/bot`, `docs/vercel.md`, `docs/supabase-prod.md`)
+- Repo Achillea : `rose-griffon/achillea` (front `apps/web`, bot `apps/bot`, `docs/supabase-prod.md`)

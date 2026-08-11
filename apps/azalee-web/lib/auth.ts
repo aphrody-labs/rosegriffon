@@ -3,7 +3,7 @@ import { createSupabaseServiceClient } from "@rose-griffon/db/service";
 import bcrypt from "bcryptjs";
 import { betterAuth } from "better-auth";
 import { nextCookies } from "better-auth/next-js";
-import { bearer, oAuthProxy, twoFactor } from "better-auth/plugins";
+import { bearer, twoFactor } from "better-auth/plugins";
 import { agentAuth } from "@better-auth/agent-auth";
 import { steam } from "@rose-griffon/better-auth-steam";
 import { Pool } from "pg";
@@ -54,12 +54,7 @@ function createAuth() {
 		trustedOrigins: [
 			getPublicOrigin(),
 			"https://azalee.rosegriffon.fr",
-			"https://rg-azalee.vercel.app",
-			"https://rg-azalee-aphrody.vercel.app",
-			"https://rg-azalee-git-main-aphrody.vercel.app",
-			"https://rg-azalee-*-aphrody.vercel.app",
 			process.env.BETTER_AUTH_URL ?? "https://azalee.rosegriffon.fr",
-			process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "",
 			"http://localhost:3000",
 			"http://localhost:3001",
 		].filter((v, i, a) => v && a.indexOf(v) === i),
@@ -333,14 +328,6 @@ function createAuth() {
 				issuer: "Azalée",
 			}),
 			bearer(),
-			// oAuthProxy UNIQUEMENT sur les déploiements preview Vercel : il proxifie
-			// le callback OAuth via le domaine de prod (dont l'URL de redirection est
-			// la seule enregistrée chez Discord/Google). Sur le domaine de prod lui-même,
-			// ce round-trip + encrypt/decrypt s'interpose dans le flow et empêche le
-			// set-cookie de session → session non persistée après login. cf. docs better-auth.
-			...(process.env.VERCEL_ENV === "preview"
-				? [oAuthProxy({ productionURL: "https://azalee.rosegriffon.fr" })]
-				: []),
 			// Login Steam (OpenID 2.0) + vue compte IEVR (app 2799860) via Steam Web API.
 			// Steam n'expose PAS d'OAuth2/OIDC public → plugin custom OpenID 2.0 (cf.
 			// @rose-griffon/better-auth-steam). webApiKey lu depuis STEAM_WEB_API_KEY.

@@ -5,7 +5,7 @@ import { Pool } from "pg";
 // disponibilité du Data API (ex. `exceed_storage_size_quota` a restreint le
 // Data API pendant 7+ jours début août 2026 alors que la connexion Postgres
 // directe restait fonctionnelle tout du long — cf. docs/rag-unified.md).
-// Azalée tourne exclusivement en self-host VPS (jamais Vercel) : pas de
+// Azalée tourne exclusivement en self-host VPS : pas de
 // réécriture pooler nécessaire (IPv6 direct dispo, cf. lib/auth.ts).
 // Miroir de apps/website/src/lib/db/pg.ts (même pattern, adapté azalee).
 

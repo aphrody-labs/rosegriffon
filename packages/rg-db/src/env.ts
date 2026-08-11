@@ -1,4 +1,4 @@
-// Centralisation env Supabase + safety fallbacks (build Vercel sans vars / Next prerender).
+// Centralisation env Supabase + replis de sécurité (build sans vars / prerender Next).
 // Source unique pour browser/server/service — éviter de répéter les heuristiques.
 
 // Repli quand aucune URL n'est configurée. Depuis la sortie de Supabase, la
@@ -37,12 +37,11 @@ function isValidKey(value: string | undefined | null): value is string {
 	);
 }
 
-/** True quand on prerender côté Vercel sans env runtime. */
+/** True pendant un prerender de build, sans variables d'environnement runtime. */
 export function isBuildPhase(): boolean {
 	return (
 		process.env.NEXT_PHASE === "phase-production-build" ||
-		(process.env.VERCEL_ENV === undefined &&
-			process.env.NODE_ENV === "production" &&
+		(process.env.NODE_ENV === "production" &&
 			!isValidKey(process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ?? null))
 	);
 }

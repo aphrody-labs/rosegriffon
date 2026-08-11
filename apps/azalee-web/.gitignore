@@ -75,10 +75,9 @@ yarn-error.log*
 .pnpm-debug.log*
 
 # misc
-.vercel
 /lib/generated/prisma
 
-# Deploy (Vercel-like atomic deploys)
+# Déploiements atomiques
 .deployments/
 .current
 

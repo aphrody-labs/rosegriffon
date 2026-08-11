@@ -1,6 +1,6 @@
 # Décision : architecture de données azalée
 
-Statut : PROPOSÉE — 2026-06-05. Cible : `apps/azalee` (wiki IEVR, self-host VPS, NON Vercel).
+Statut : PROPOSÉE — 2026-06-05. Cible : `apps/azalee` (wiki IEVR, self-host VPS).
 
 ## 1. Contexte
 
