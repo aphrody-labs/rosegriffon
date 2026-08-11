@@ -1,6 +1,7 @@
 "use client";
 
-import { Button, Separator } from "@rose-griffon/ui";
+import { Button, Separator, useSidebar } from "@rose-griffon/ui";
+import { PanelLeftClose, PanelLeftOpen } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -27,7 +28,35 @@ interface HeaderProps {
 	showThemeToggle?: boolean;
 	showUserMenu?: boolean;
 	isMobile?: boolean;
+	/** Affiche le bouton de repli de la barre latérale (masqué là où il n'y en a pas). */
+	showSidebarToggle?: boolean;
 	className?: string;
+}
+
+/**
+ * Bouton de repli de la barre latérale, posé dans la barre supérieure.
+ *
+ * Même gabarit que celui du wiki (40 px, cible tactile conforme) et même icône
+ * de panneau, pour que le geste soit identique d'un site à l'autre.
+ */
+function HeaderSidebarToggle() {
+	const { open, toggleSidebar } = useSidebar();
+	return (
+		<button
+			type="button"
+			onClick={toggleSidebar}
+			title={open ? "Réduire le menu" : "Déployer le menu"}
+			aria-label={open ? "Réduire le menu" : "Déployer le menu"}
+			aria-expanded={open}
+			className="flex size-10 shrink-0 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-hidden active:scale-95"
+		>
+			{open ? (
+				<PanelLeftClose className="size-5" aria-hidden />
+			) : (
+				<PanelLeftOpen className="size-5" aria-hidden />
+			)}
+		</button>
+	);
 }
 
 export function Header({
@@ -36,6 +65,7 @@ export function Header({
 	showThemeToggle = true,
 	showUserMenu = true,
 	isMobile = false,
+	showSidebarToggle = false,
 	className,
 }: HeaderProps) {
 	const { profile } = useSidebarAuth();
@@ -114,7 +144,10 @@ export function Header({
 	return (
 		<header className={baseClasses}>
 			<div className="flex items-center gap-2 md:gap-3 lg:gap-4 px-3 sm:px-4 md:px-5 py-2 md:py-3">
-				{/* Spacer gauche - la sidebar indique déjà la page active */}
+				{/* Bascule de la barre latérale, à gauche — même geste que sur le wiki.
+				    Elle remplace la pastille flottante de 20 px, que personne ne trouvait. */}
+				{showSidebarToggle && <HeaderSidebarToggle />}
+				{/* La sidebar indique déjà la page active : pas de fil d'Ariane ici. */}
 				<div className="flex-1 min-w-0" />
 
 				{/* Section centre - Recherche (desktop uniquement) */}

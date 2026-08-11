@@ -4,55 +4,9 @@ import { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import { SidebarInset, SidebarProvider, Toaster, useBreakpoint, useSidebar } from "@rose-griffon/ui";
 import { WebsiteNavigationRail } from "@/components/layout/WebsiteNavigationRail";
-import { PanelLeftClose, PanelLeftOpen } from "lucide-react";
 
 /** Largeur de la sidebar desktop — source unique (CSS var + décalage du bouton). */
 const SIDEBAR_WIDTH = "14rem";
-
-/**
- * Bouton de repli de la barre latérale.
- *
- * C'était une pastille de 20 px à 60 % d'opacité, quasi invisible : le wiki a un
- * vrai bouton de 40 px dans sa barre supérieure et personne ne trouvait
- * l'équivalent ici. Même gabarit désormais (40 px, cible tactile conforme),
- * icône explicite de panneau plutôt qu'un chevron, et libellé au survol.
- */
-function CustomSidebarTrigger() {
-	const { open, toggleSidebar } = useSidebar();
-	const [mounted, setMounted] = useState(false);
-
-	useEffect(() => {
-		setMounted(true);
-	}, []);
-
-	// Rendu différé : `open` est restauré depuis un cookie côté client, l'afficher
-	// au premier rendu serveur produirait une icône qui saute après hydratation.
-	if (!mounted) return null;
-
-	return (
-		<button
-			type="button"
-			onClick={toggleSidebar}
-			title={open ? "Réduire le menu" : "Déployer le menu"}
-			aria-label={open ? "Réduire le menu" : "Déployer le menu"}
-			aria-expanded={open}
-			className={cn(
-				"fixed top-4 z-50 flex size-10 items-center justify-center rounded-full",
-				"border border-border bg-background/90 text-muted-foreground shadow-sm backdrop-blur-sm",
-				"transition-[left,color,background-color] duration-300 ease-in-out",
-				"hover:bg-muted hover:text-foreground active:scale-95",
-				"focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-hidden",
-				open ? "left-[calc(var(--sidebar-width)-1.25rem)]" : "left-4"
-			)}
-		>
-			{open ? (
-				<PanelLeftClose className="size-5" aria-hidden />
-			) : (
-				<PanelLeftOpen className="size-5" aria-hidden />
-			)}
-		</button>
-	);
-}
 
 import { SkipToContent } from "@/components/accessibility/SkipToContent";
 import { AppSidebar } from "@/components/app-sidebar";
@@ -166,9 +120,16 @@ export default function ClientLayout({
 								>
 									{/* Le kit admin fournit son propre en-tête mobile : sans cette garde,
 									    les deux se superposaient sur /admin (z-40 contre z-30). */}
-									{isCompact && !shouldHideSidebar && (
-										<Header isMobile showSearch={false} showCart={false} />
-									)}
+									{/* Barre supérieure montée à TOUTES les tailles — même système que
+									    le wiki. Elle n'existait qu'en mobile : sur desktop il n'y avait
+									    ni recherche, ni statut de direct, et la bascule de menu se
+									    réduisait à une pastille flottante de 20 px. */}
+									{!shouldHideSidebar &&
+										(isCompact ? (
+											<Header isMobile showSearch={false} showCart={false} />
+										) : (
+											<Header showSidebarToggle />
+										))}
 									<div className="flex-1 w-full">
 										{/* `SidebarInset` est déjà un <main> : ici un <div> (un <main>
 										    imbriqué est invalide et casse la cible du lien d'évitement). */}
@@ -187,7 +148,6 @@ export default function ClientLayout({
 								</div>
 							</SidebarInset>
 
-							{!shouldHideSidebar && !isCompact && <CustomSidebarTrigger />}
 						</SidebarWrapper>
 						<Toaster richColors position="top-right" />
 					</ProfileProvider>
