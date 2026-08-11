@@ -4,16 +4,12 @@ import "./globals.css";
 
 import { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
-import {
-	BREAKPOINTS,
-	SidebarInset,
-	SidebarProvider,
-	Toaster,
-	useBreakpoint,
-	useSidebar,
-} from "@rose-griffon/ui";
+import { SidebarInset, SidebarProvider, Toaster, useBreakpoint, useSidebar } from "@rose-griffon/ui";
 import { WebsiteNavigationRail } from "@/components/layout/WebsiteNavigationRail";
-import { Menu, ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+
+/** Largeur de la sidebar desktop — source unique (CSS var + décalage du bouton). */
+const SIDEBAR_WIDTH = "14rem";
 
 function CustomSidebarTrigger() {
 	const { open, toggleSidebar } = useSidebar();
@@ -33,7 +29,7 @@ function CustomSidebarTrigger() {
 				"size-5 text-foreground/50 hover:text-foreground hover:bg-foreground/10 active:bg-foreground/20 cursor-pointer",
 				"bg-background/80 backdrop-blur-xs border border-border/40 shadow-xs",
 				"opacity-60 hover:opacity-100 hover:scale-105 active:scale-95",
-				open ? "left-[214px]" : "left-3"
+				open ? "left-[calc(var(--sidebar-width)-10px)]" : "left-3"
 			)}
 			aria-label={open ? "Fermer le menu" : "Ouvrir le menu"}
 		>
@@ -59,10 +55,6 @@ import { useSidebarStore } from "@/stores/sidebar-store";
 
 function SidebarWrapper({ children }: { children: React.ReactNode }) {
 	const { isOpen, setSidebarOpen } = useSidebarStore();
-	const breakpoint = useBreakpoint();
-	const isCompact = breakpoint === "compact";
-	const isMedium = breakpoint === "medium";
-	const isExpanded = breakpoint === "expanded" || breakpoint === "large";
 
 	// Utilise l'état local/persisté pour toutes les tailles d'écran afin de permettre le masquage sur desktop
 	const sidebarOpen = isOpen;
@@ -75,7 +67,7 @@ function SidebarWrapper({ children }: { children: React.ReactNode }) {
 		<SidebarProvider
 			open={sidebarOpen}
 			onOpenChange={handleOpenChange}
-			style={{ "--sidebar-width": "14rem" } as React.CSSProperties}
+			style={{ "--sidebar-width": SIDEBAR_WIDTH } as React.CSSProperties}
 		>
 			{children}
 		</SidebarProvider>
@@ -87,7 +79,6 @@ export default function ClientLayout({
 }: Readonly<{
 	children: React.ReactNode;
 }>) {
-	const { isOpen } = useSidebarStore();
 	const breakpoint = useBreakpoint();
 	const isCompact = breakpoint === "compact";
 	const isMedium = breakpoint === "medium";
@@ -115,31 +106,37 @@ export default function ClientLayout({
 							{/* NAVIGATION RAIL (MEDIUM SCREENS) */}
 							{isMedium && !shouldHideSidebar && <WebsiteNavigationRail />}
 
-							{/* SIDEBAR (EXPANDED SCREENS) */}
-							{!shouldHideSidebar && <AppSidebar className={cn("hidden", isExpanded && "block")} />}
+							{/* SIDEBAR — tiroir modal en compact, panneau fixe en expanded.
+							    En medium c'est le rail qui prend le relais : monter la sidebar
+							    ici la rendrait quand même visible (ses classes internes sont
+							    `hidden md:flex`, donc dès 768px) par-dessus le contenu. */}
+							{!shouldHideSidebar && !isMedium && <AppSidebar />}
 
 							<SidebarNavigationHandler />
 							<EdgeSwipeDetector />
 
+							{/* Pas de marge gauche manuelle en expanded : <Sidebar> pose déjà un
+							    « gap » de --sidebar-width dans le flux, qui décale l'inset. En
+							    ajouter une seconde doublait le décalage et écrasait le contenu. */}
 							<SidebarInset
-								className={cn(
-									"transition-all duration-300 min-w-0",
-									isMedium && "ml-20",
-									isExpanded && isOpen && "ml-[224px]"
-								)}
+								className={cn("transition-all duration-300 min-w-0", isMedium && "ml-20")}
 							>
+								{/* La réserve de 4rem en bas ne vaut que si la barre de navigation
+								    basse est réellement montée (compact). Elle était coupée à `lg:`
+								    (1024px) alors que la barre disparaît dès 600px : 4rem de vide
+								    en bas de page sur toute la plage tablette. */}
 								<div
 									className={cn(
 										"flex flex-col min-h-[100dvh] w-full",
-										"pb-[calc(4rem+env(safe-area-inset-bottom))] lg:pb-0"
+										isCompact && !shouldHideSidebar && "pb-[calc(4rem+env(safe-area-inset-bottom))]"
 									)}
 								>
 									{isCompact && <Header isMobile showSearch={false} showCart={false} />}
 									<div className="flex-1 w-full">
-										<div className="min-h-full w-full overflow-x-hidden">
-											<main id="main-content" className="flex-1 w-full">
-												{children}
-											</main>
+										{/* `SidebarInset` est déjà un <main> : ici un <div> (un <main>
+										    imbriqué est invalide et casse la cible du lien d'évitement). */}
+										<div id="main-content" className="min-h-full w-full flex-1 overflow-x-hidden">
+											{children}
 										</div>
 									</div>
 									<Footer />

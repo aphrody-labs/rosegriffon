@@ -9,6 +9,8 @@ import type { EventCategory, EventData } from "../useEvents";
 interface EventsListProps {
 	events: EventData[];
 	isLoading: boolean;
+	/** Vrai si une recherche est active : change le message d'état vide. */
+	isFiltered?: boolean;
 }
 
 const CATEGORY_COLORS: Record<
@@ -38,16 +40,16 @@ const CATEGORY_COLORS: Record<
 };
 
 const DEFAULT_COLOR = {
-	bg: "bg-gray-100 dark:bg-gray-800",
-	border: "border-gray-200 dark:border-gray-700",
-	text: "text-gray-700 dark:text-gray-300",
+	bg: "bg-muted",
+	border: "border-border",
+	text: "text-muted-foreground",
 };
 
-function EventsList({ events, isLoading }: EventsListProps) {
+function EventsList({ events, isLoading, isFiltered = false }: EventsListProps) {
 	if (isLoading) {
 		return (
 			<div className="flex flex-col items-center justify-center py-12 gap-4">
-				<div className="animate-spin rounded-full size-10 border-b-2 border-gaelle-blue mr-2" />
+				<div className="animate-spin rounded-full size-10 border-b-2 border-primary" />
 				<p className="text-muted-foreground animate-pulse font-medium">
 					Recherche des événements...
 				</p>
@@ -57,13 +59,15 @@ function EventsList({ events, isLoading }: EventsListProps) {
 
 	if (events.length === 0) {
 		return (
-			<div className="py-12 text-center rounded-2xl border-2 border-dashed border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
-				<Info className="size-10 text-gray-400 mx-auto mb-3" />
-				<p className="text-gray-600 dark:text-gray-400 font-bold text-lg">
-					Aucun événement trouvé pour le moment.
+			<div className="rounded-2xl border-2 border-dashed border-border bg-muted/40 py-12 text-center">
+				<Info className="mx-auto mb-3 size-10 text-muted-foreground" aria-hidden />
+				<p className="text-lg font-bold text-foreground">
+					{isFiltered ? "Aucun événement ne correspond à cette recherche." : "Aucun événement pour le moment."}
 				</p>
-				<p className="text-sm text-gray-500 mt-1 italic">
-					Pensez à vérifier les événements Discord ou à réinitialiser vos filtres.
+				<p className="mt-1 text-sm text-muted-foreground">
+					{isFiltered
+						? "Essayez un autre mot-clé ou réinitialisez le filtre."
+						: "Le calendrier public sera mis à jour dès la prochaine date annoncée — les rendez-vous communautaires restent visibles dans la section Discord ci-dessus."}
 				</p>
 			</div>
 		);
@@ -90,9 +94,9 @@ function EventsList({ events, isLoading }: EventsListProps) {
 					<div
 						key={index}
 						className={cn(
-							"group relative flex flex-col bg-white dark:bg-gray-800 rounded-3xl overflow-hidden border transition-all duration-500 hover:shadow-2xl hover:-translate-y-2",
+							"group relative flex flex-col bg-card rounded-3xl overflow-hidden border transition-all duration-500 hover:shadow-2xl hover:-translate-y-2",
 							colors.border,
-							event.type === "today" && "ring-4 ring-offset-4 ring-blue-500 shadow-blue-500/20"
+							event.type === "today" && "ring-4 ring-offset-4 ring-offset-card ring-primary shadow-primary/20"
 						)}
 					>
 						{/* Status Strip */}
@@ -100,10 +104,10 @@ function EventsList({ events, isLoading }: EventsListProps) {
 							className={cn(
 								"h-2 w-full",
 								event.type === "today"
-									? "bg-blue-500"
+									? "bg-primary"
 									: event.type === "upcoming"
-										? "bg-green-500"
-										: "bg-gray-400"
+										? "bg-secondary"
+										: "bg-muted-foreground/40"
 							)}
 						/>
 
@@ -119,20 +123,20 @@ function EventsList({ events, isLoading }: EventsListProps) {
 									{event.category}
 								</span>
 								{event.type === "today" && (
-									<span className="animate-pulse px-3 py-1 bg-blue-500 text-white text-[10px] font-black rounded-full uppercase tracking-widest">
+									<span className="animate-pulse px-3 py-1 bg-primary text-primary-foreground text-[10px] font-black rounded-full uppercase tracking-widest">
 										AUJOURD'HUI
 									</span>
 								)}
 							</div>
 
-							<h3 className="text-2xl font-bold text-gray-900 dark:text-white leading-tight group-hover:text-gaelle-blue transition-colors font-brad-bun-r tracking-tight">
+							<h3 className="text-2xl font-bold text-foreground leading-tight group-hover:text-primary transition-colors font-brad-bun-r tracking-tight">
 								{event.name}
 							</h3>
 
-							<div className="space-y-3 text-sm text-gray-600 dark:text-gray-300 font-medium">
+							<div className="space-y-3 text-sm text-muted-foreground font-medium">
 								<div className="flex items-center gap-3">
-									<div className="p-1.5 rounded-lg bg-gray-100 dark:bg-gray-700">
-										<Calendar className="size-4 shrink-0 text-gaelle-blue" />
+									<div className="p-1.5 rounded-lg bg-muted">
+										<Calendar className="size-4 shrink-0 text-primary" />
 									</div>
 									<span>
 										{event.startDateFormatted.split(" ")[0]}
@@ -141,15 +145,15 @@ function EventsList({ events, isLoading }: EventsListProps) {
 									</span>
 								</div>
 								<div className="flex items-center gap-3">
-									<div className="p-1.5 rounded-lg bg-gray-100 dark:bg-gray-700">
-										<Clock className="size-4 shrink-0 text-gaelle-blue" />
+									<div className="p-1.5 rounded-lg bg-muted">
+										<Clock className="size-4 shrink-0 text-primary" />
 									</div>
 									<span>{event.startDateFormatted.split(" ").slice(1).join(" ")}</span>
 								</div>
 								<div className="flex flex-col gap-3">
 									<div className="flex items-start gap-3">
-										<div className="p-1.5 rounded-lg bg-gray-100 dark:bg-gray-700 mt-0.5">
-											<MapPin className="size-4 shrink-0 text-gaelle-blue" />
+										<div className="p-1.5 rounded-lg bg-muted mt-0.5">
+											<MapPin className="size-4 shrink-0 text-primary" />
 										</div>
 										<span className="line-clamp-2 leading-relaxed">{event.location}</span>
 									</div>
@@ -157,7 +161,7 @@ function EventsList({ events, isLoading }: EventsListProps) {
 									{event.name.toLowerCase().includes("epitanime") && (
 										<Link
 											href="/epita-map"
-											className="ml-10 inline-flex items-center gap-2 text-xs font-bold text-blue-600 dark:text-blue-400 hover:underline hover:text-blue-700 dark:hover:text-blue-300 transition-colors"
+											className="ml-10 inline-flex items-center gap-2 text-xs font-bold text-primary hover:underline hover:opacity-80 transition-colors"
 										>
 											<Map className="size-3" />
 											Voir le plan du campus
@@ -167,8 +171,8 @@ function EventsList({ events, isLoading }: EventsListProps) {
 							</div>
 
 							{event.description && (
-								<div className="mt-auto pt-5 border-t border-gray-100 dark:border-gray-700">
-									<p className="text-sm text-gray-500 dark:text-gray-400 line-clamp-4 italic leading-relaxed">
+								<div className="mt-auto pt-5 border-t border-border">
+									<p className="text-sm text-muted-foreground line-clamp-4 italic leading-relaxed">
 										{event.description}
 									</p>
 								</div>
