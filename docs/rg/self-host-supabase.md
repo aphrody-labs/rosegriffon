@@ -39,6 +39,27 @@ Inclus dans les vhosts `azalee.rosegriffon.fr`, `rosegriffon.fr` et
 routes sur `127.0.0.1:8811`, point d'entrée des scripts serveur
 (`SUPABASE_INTERNAL_URL`).
 
+### Sous-domaines dédiés
+
+`infra/nginx/supabase.rosegriffon.conf` ajoute quatre noms publics, un seul
+certificat, enregistrements A chez OVH vers `51.77.147.152` :
+
+| Nom | Rôle |
+| --- | --- |
+| `supabase.rosegriffon.fr` | remplaçant exact de `https://<ref>.supabase.co` — `/rest/v1`, `/storage/v1`, `/realtime/v1` sous leurs préfixes ; racine en 404 |
+| `db.rosegriffon.fr` | PostgREST seul, à la racine (`/articles?select=…`) |
+| `storage.rosegriffon.fr` | fichiers seuls, à la racine (`/object/public/<bucket>/<chemin>`) |
+| `realtime.rosegriffon.fr` | flux SSE seul, à la racine (`/stream?table=…`) |
+
+Ces noms **s'ajoutent** aux routes servies sur l'origine des applications, ils
+ne les remplacent pas : `NEXT_PUBLIC_SUPABASE_URL` reste volontairement sur
+l'origine de chaque app. Y basculer réintroduirait une requête préalable CORS
+sur chaque appel navigateur, pour un gain purement cosmétique — les
+sous-domaines servent aux clients externes, aux scripts et au débogage.
+
+Renouvellement du certificat : `certbot` avec l'authentificateur `nginx`, le
+bloc HTTP du vhost sert `/.well-known/acme-challenge/` depuis `/var/www/html`.
+
 Variables d'environnement :
 
 | Variable | Valeur |
