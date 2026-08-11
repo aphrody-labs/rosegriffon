@@ -343,7 +343,7 @@ export default async function DashboardPage() {
 	const scheduledData = (scheduledArticles.data || []) as any[];
 
 	return (
-		<div className="space-y-6 sm:space-y-8 pb-24 sm:pb-8">
+		<div className="space-y-6 sm:space-y-8">
 			<DashboardPageHeader
 				title="Vue d'ensemble"
 				icon={<Icon name="dashboard" size={20} />}

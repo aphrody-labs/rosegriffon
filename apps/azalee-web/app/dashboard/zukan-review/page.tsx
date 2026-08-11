@@ -99,7 +99,7 @@ export default async function ZukanReviewPage() {
 	} | null;
 
 	return (
-		<div className="space-y-6 sm:space-y-8 pb-24 sm:pb-8">
+		<div className="space-y-6 sm:space-y-8">
 			<DashboardPageHeader
 				breadcrumbs={[{ href: "/dashboard", label: "Tableau de bord" }, { label: "Audit Zukan" }]}
 				title="Audit Zukan — Images"

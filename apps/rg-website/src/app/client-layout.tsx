@@ -51,13 +51,26 @@ import { Providers } from "@/lib/providers";
 import { cn } from "@/lib/utils";
 import { useSidebarStore } from "@/stores/sidebar-store";
 
-function SidebarWrapper({ children }: { children: React.ReactNode }) {
+function SidebarWrapper({
+	children,
+	isMedium,
+}: {
+	children: React.ReactNode;
+	isMedium: boolean;
+}) {
 	const { isOpen, setSidebarOpen } = useSidebarStore();
+	// En « medium » le rail occupe déjà la colonne : la sidebar y est un tiroir
+	// que l'on ouvre à la demande. Elle ne doit donc PAS suivre la préférence
+	// persistée du desktop (sinon elle s'ouvrirait d'office par-dessus le rail).
+	const [mediumOpen, setMediumOpen] = useState(false);
 
-	// Utilise l'état local/persisté pour toutes les tailles d'écran afin de permettre le masquage sur desktop
-	const sidebarOpen = isOpen;
+	const sidebarOpen = isMedium ? mediumOpen : isOpen;
 
 	const handleOpenChange = (open: boolean) => {
+		if (isMedium) {
+			setMediumOpen(open);
+			return;
+		}
 		setSidebarOpen(open);
 	};
 
@@ -101,18 +114,18 @@ export default function ClientLayout({
 			<Providers>
 				<AuthProvider>
 					<ProfileProvider>
-						<SidebarWrapper>
+						<SidebarWrapper isMedium={isMedium}>
 							{/* Accessibilité: lien pour sauter au contenu principal */}
 							<SkipToContent />
 
 							{/* NAVIGATION RAIL (MEDIUM SCREENS) */}
 							{showRail && <WebsiteNavigationRail />}
 
-							{/* SIDEBAR — tiroir modal en compact, panneau fixe en expanded.
-							    En medium c'est le rail qui prend le relais : monter la sidebar
-							    ici la rendrait quand même visible (ses classes internes sont
-							    `hidden md:flex`, donc dès 768px) par-dessus le contenu. */}
-							{!shouldHideSidebar && !isMedium && <AppSidebar />}
+							{/* SIDEBAR — tiroir en compact, tiroir à la demande en medium
+							    (le bouton « Menu » du rail l'ouvre), panneau fixe en expanded.
+							    Elle doit être montée aussi en medium : sans elle, ce bouton
+							    basculait un état sans panneau et ne faisait rien. */}
+							{!shouldHideSidebar && <AppSidebar />}
 
 							<SidebarNavigationHandler />
 							<EdgeSwipeDetector />

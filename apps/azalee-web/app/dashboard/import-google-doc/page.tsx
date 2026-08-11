@@ -4,7 +4,7 @@ import { Icon } from "@/components/ui/Icon";
 
 export default function ImportGoogleDocPage() {
 	return (
-		<div className="space-y-6 sm:space-y-8 pb-24 sm:pb-8">
+		<div className="space-y-6 sm:space-y-8">
 			<DashboardPageHeader
 				breadcrumbs={[
 					{ href: "/dashboard", label: "Tableau de bord" },

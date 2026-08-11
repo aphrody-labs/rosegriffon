@@ -18,7 +18,7 @@ export default async function SettingsPage() {
 		.single();
 
 	return (
-		<div className="space-y-6 sm:space-y-8 pb-24 sm:pb-8 max-w-4xl">
+		<div className="space-y-6 sm:space-y-8 max-w-4xl">
 			<DashboardPageHeader
 				breadcrumbs={[{ href: "/dashboard", label: "Tableau de bord" }, { label: "Paramètres" }]}
 				title="Paramètres"

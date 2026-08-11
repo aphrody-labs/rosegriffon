@@ -1,7 +1,7 @@
 "use client";
 
 import { ChevronRight } from "lucide-react";
-import React, { useEffect, useMemo } from "react";
+import React, { useEffect, useMemo, useRef } from "react";
 
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@rose-griffon/ui";
 import { getBadgeVariant, sidebarTransitions } from "@/lib/sidebar-config";
@@ -78,12 +78,17 @@ export const SidebarCollapsibleItem = React.forwardRef<HTMLDivElement, SidebarCo
 			}
 		}, [isHydrated, openSections, sectionKey]);
 
-		// Auto-expand if child is active
+		// Auto-ouverture quand on ARRIVE sur une page de la section. L'effet
+		// dépendait aussi de `isOpen` : replier la section la rouvrait aussitôt,
+		// tant qu'on restait sur une de ses pages. On ne réagit donc qu'à la
+		// transition de `isActive`.
+		const wasActive = useRef(isActive);
 		useEffect(() => {
-			if (isActive && !isOpen) {
+			if (isActive && !wasActive.current && !isOpen) {
 				toggleSection(sectionKey);
 				onExpandChange?.(true);
 			}
+			wasActive.current = isActive;
 		}, [isActive, isOpen, toggleSection, sectionKey, onExpandChange]);
 
 		const handleToggle = () => {

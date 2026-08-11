@@ -2,7 +2,7 @@ import { Skeleton } from "@rose-griffon/ui";
 
 export default function DashboardLoading() {
 	return (
-		<div className="space-y-6 sm:space-y-8 pb-24 sm:pb-8">
+		<div className="space-y-6 sm:space-y-8">
 			{/* Header skeleton */}
 			<div className="space-y-3">
 				<div className="flex items-center gap-4">
