@@ -1,6 +1,6 @@
+import { createAdminClient } from "@/lib/supabase/admin";
 import { NextResponse } from "next/server";
 import { getServerSession } from "@/lib/auth-helpers";
-import { createClient } from "@/lib/supabase/server";
 
 export async function GET() {
 	const session = await getServerSession();
@@ -8,7 +8,8 @@ export async function GET() {
 
 	let profile = null;
 	if (user) {
-		const supabase = await createClient();
+		// `full_name` fait partie des colonnes personnelles fermées à `anon`.
+		const supabase = createAdminClient();
 		const { data } = await supabase
 			.from("profiles")
 			.select("username, avatar_url, full_name, role")

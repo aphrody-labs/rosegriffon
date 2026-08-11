@@ -1,9 +1,9 @@
+import { createAdminClient } from "@/lib/supabase/admin";
 import type { Metadata } from "next";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { getServerSession } from "@/lib/auth-helpers";
-import { createClient } from "@/lib/supabase/server";
 import { SettingsClient } from "./SettingsClient";
 
 export const metadata: Metadata = {
@@ -17,7 +17,10 @@ export default async function SettingsPage() {
 		redirect("/login?returnTo=/settings");
 	}
 
-	const supabase = await createClient();
+	// Le profil complet contient des données personnelles : `anon` n'y a plus accès
+	// (cf. apps/website/sql/migrations/20260811_profiles_pii.sql). La session est
+	// vérifiée juste au-dessus, on lit donc en service-role.
+	const supabase = createAdminClient();
 	const { data: profile } = await supabase
 		.from("profiles")
 		.select("*")

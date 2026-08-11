@@ -12,7 +12,18 @@ DECLARE
   payload   jsonb;
   row_new   jsonb := CASE WHEN TG_OP = 'DELETE' THEN NULL ELSE to_jsonb(NEW) END;
   row_old   jsonb := CASE WHEN TG_OP = 'INSERT' THEN NULL ELSE to_jsonb(OLD) END;
+  -- Colonnes personnelles à ne JAMAIS diffuser : le flux SSE de rg-realtime
+  -- n'est pas authentifié (n'importe qui peut s'abonner à une table), donc
+  -- tout ce qui part d'ici est public. Miroir de la liste blanche appliquée
+  -- aux droits `anon` (20260811_profiles_pii.sql).
+  prives   text[] := ARRAY['email', 'full_name', 'address_line1', 'address_line2',
+                           'city', 'postal_code', 'country', 'patreon_id'];
 BEGIN
+  IF TG_TABLE_NAME = 'profiles' THEN
+    row_new := row_new - prives;
+    row_old := row_old - prives;
+  END IF;
+
   payload := jsonb_build_object(
     'schema',    TG_TABLE_SCHEMA,
     'table',     TG_TABLE_NAME,

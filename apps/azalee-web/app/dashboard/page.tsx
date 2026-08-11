@@ -68,7 +68,7 @@ export default async function DashboardPage() {
 			.eq("app", "azalee")
 			.eq("status", "archived"),
 		client.from("articles").select("view_count").eq("app", "azalee").eq("status", "published"),
-		client.from("profiles").select("*", { count: "exact", head: true }),
+		client.from("profiles").select("id", { count: "exact", head: true }),
 		client.from("inagle_characters").select("*", { count: "exact", head: true }),
 		client.from("inagle_skills").select("*", { count: "exact", head: true }),
 		client

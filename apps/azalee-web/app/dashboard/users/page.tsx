@@ -16,7 +16,7 @@ import {
 } from "@rose-griffon/ui";
 import { Icon } from "@/components/ui/Icon";
 import { WikiPagination } from "@/components/wiki/WikiPagination";
-import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { parseSearchParams } from "@/lib/validations";
 import { UserActions } from "./UserActions";
 import { UsersFilters } from "./UsersFilters";
@@ -38,13 +38,14 @@ export default async function UsersPage({
 	const params = await searchParams;
 	const { page: currentPage, q } = parseSearchParams(params);
 	const role = typeof params.role === "string" ? params.role : "";
-	const supabase = await createClient();
+	// Filtres et colonnes personnelles (email, full_name) : service-role, après le garde admin.
+	const supabase = createAdminClient();
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	const client = supabase as any;
 
 	// Count
-	let countQuery = client.from("profiles").select("*", { count: "exact", head: true });
+	let countQuery = client.from("profiles").select("id", { count: "exact", head: true });
 	if (q) {
 		countQuery = countQuery.or(`username.ilike.%${q}%,email.ilike.%${q}%,full_name.ilike.%${q}%`);
 	}

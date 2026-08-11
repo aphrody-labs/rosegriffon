@@ -111,7 +111,7 @@ export function useProfile(userId?: string | null) {
 		}
 
 		try {
-			const { data, error } = await supabase.from("profiles").select("*").eq("id", userId).single();
+			const { data, error } = await supabase.from("profiles").select("id, updated_at, username, avatar_url, role, website, discord_id, bio, banner_url, twitter_handle, badges").eq("id", userId).single();
 
 			if (error) {
 				console.error("[useProfile] Erreur lors de la récupération:", error);
