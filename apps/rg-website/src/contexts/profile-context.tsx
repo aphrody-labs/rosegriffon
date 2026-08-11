@@ -4,9 +4,12 @@ import { createContext, useCallback, useContext, useEffect, useState } from "rea
 
 import { useAuth } from "@/contexts/auth-context";
 import { useProfileSync, useUpdateProfile } from "@/hooks/use-profile-sync";
-import type { Database } from "@rose-griffon/db";
+import { PUBLIC_PROFILE_COLUMNS, type PublicProfile } from "@rose-griffon/db";
 
-type Profile = Database["public"]["Tables"]["profiles"]["Row"];
+// Le client navigateur (clé anon) ne peut lire QUE les colonnes publiques :
+// typer le contexte avec la ligne complète promettait des champs (adresse,
+// e-mail) que la requête ne ramène jamais.
+type Profile = PublicProfile;
 
 interface ProfileContextType {
 	profile: Profile | null;
@@ -48,7 +51,9 @@ export function ProfileProvider({ children }: { children: React.ReactNode }) {
 
 			const { data, error: fetchError } = await supabase
 				.from("profiles")
-				.select("*")
+				// `select("*")` échoue en 42501 depuis la fermeture PII : le contexte
+				// restait en erreur permanente pour tout utilisateur connecté.
+				.select(PUBLIC_PROFILE_COLUMNS)
 				.eq("id", user.id)
 				.single();
 

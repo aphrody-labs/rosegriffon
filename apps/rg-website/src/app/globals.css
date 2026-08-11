@@ -597,154 +597,160 @@
 /* ============================================ */
 
 /* Thème Inazuma Eleven Classic - Orange/Bleu */
-.ie-classic {
-	--background: oklch(0.98 0.01 80); /* Warm white */
-	--foreground: oklch(0.2 0.05 40); /* Dark brown */
-	--card: oklch(1 0 0);
-	--card-foreground: oklch(0.2 0.05 40);
-	--popover: oklch(1 0 0);
-	--popover-foreground: oklch(0.2 0.05 40);
-	--primary: oklch(0.65 0.18 50); /* IE Orange */
-	--primary-foreground: oklch(0.98 0 0);
-	--secondary: oklch(0.55 0.15 240); /* IE Blue */
-	--secondary-foreground: oklch(0.98 0 0);
-	--muted: oklch(0.95 0.01 80);
-	--muted-foreground: oklch(0.5 0.02 40);
-	--accent: oklch(0.7 0.2 45); /* Bright orange */
-	--accent-foreground: oklch(0.98 0 0);
-	--destructive: oklch(0.577 0.245 27.325);
-	--border: oklch(0.88 0.02 80);
-	--input: oklch(0.88 0.02 80);
-	--ring: oklch(0.65 0.18 50);
+/* Thèmes de section legacy — DOIVENT rester en couche.
+ * Hors `@layer`, ces quatre blocs battaient n'importe quel thème de
+ * `@rose-griffon/ui` quelle que soit la spécificité. `.azalee` est appliqué
+ * sur une carte de `ProjectsSection` : le garder scopé, mais layered. */
+@layer base {
+	.ie-classic {
+		--background: oklch(0.98 0.01 80); /* Warm white */
+		--foreground: oklch(0.2 0.05 40); /* Dark brown */
+		--card: oklch(1 0 0);
+		--card-foreground: oklch(0.2 0.05 40);
+		--popover: oklch(1 0 0);
+		--popover-foreground: oklch(0.2 0.05 40);
+		--primary: oklch(0.65 0.18 50); /* IE Orange */
+		--primary-foreground: oklch(0.98 0 0);
+		--secondary: oklch(0.55 0.15 240); /* IE Blue */
+		--secondary-foreground: oklch(0.98 0 0);
+		--muted: oklch(0.95 0.01 80);
+		--muted-foreground: oklch(0.5 0.02 40);
+		--accent: oklch(0.7 0.2 45); /* Bright orange */
+		--accent-foreground: oklch(0.98 0 0);
+		--destructive: oklch(0.577 0.245 27.325);
+		--border: oklch(0.88 0.02 80);
+		--input: oklch(0.88 0.02 80);
+		--ring: oklch(0.65 0.18 50);
 
-	/* Sidebar IE themed */
-	--sidebar: oklch(0.65 0.18 50); /* IE Orange */
-	--sidebar-foreground: #ffffff;
-	--sidebar-primary: oklch(0.55 0.15 240); /* IE Blue */
-	--sidebar-primary-foreground: #ffffff;
-	--sidebar-accent: rgba(255, 255, 255, 0.15);
-	--sidebar-accent-foreground: #ffffff;
-	--sidebar-border: rgba(255, 255, 255, 0.2);
-	--sidebar-ring: rgba(255, 255, 255, 0.3);
-}
+		/* Sidebar IE themed */
+		--sidebar: oklch(0.65 0.18 50); /* IE Orange */
+		--sidebar-foreground: #ffffff;
+		--sidebar-primary: oklch(0.55 0.15 240); /* IE Blue */
+		--sidebar-primary-foreground: #ffffff;
+		--sidebar-accent: rgba(255, 255, 255, 0.15);
+		--sidebar-accent-foreground: #ffffff;
+		--sidebar-border: rgba(255, 255, 255, 0.2);
+		--sidebar-ring: rgba(255, 255, 255, 0.3);
+	}
 
-/* Thème Victory Road Modern - Cyan/Blanc */
-.vr-modern {
-	--background: oklch(0.99 0.005 220); /* Cool white */
-	--foreground: oklch(0.25 0.03 220); /* Dark blue-gray */
-	--card: oklch(1 0 0);
-	--card-foreground: oklch(0.25 0.03 220);
-	--popover: oklch(1 0 0);
-	--popover-foreground: oklch(0.25 0.03 220);
-	--primary: oklch(0.6 0.15 200); /* VR Cyan */
-	--primary-foreground: oklch(0.98 0 0);
-	--secondary: oklch(0.75 0.1 210); /* Light blue */
-	--secondary-foreground: oklch(0.25 0.03 220);
-	--muted: oklch(0.96 0.01 220);
-	--muted-foreground: oklch(0.5 0.02 220);
-	--accent: oklch(0.65 0.18 195); /* Bright cyan */
-	--accent-foreground: oklch(0.98 0 0);
-	--destructive: oklch(0.577 0.245 27.325);
-	--border: oklch(0.9 0.02 220);
-	--input: oklch(0.9 0.02 220);
-	--ring: oklch(0.6 0.15 200);
+	/* Thème Victory Road Modern - Cyan/Blanc */
+	.vr-modern {
+		--background: oklch(0.99 0.005 220); /* Cool white */
+		--foreground: oklch(0.25 0.03 220); /* Dark blue-gray */
+		--card: oklch(1 0 0);
+		--card-foreground: oklch(0.25 0.03 220);
+		--popover: oklch(1 0 0);
+		--popover-foreground: oklch(0.25 0.03 220);
+		--primary: oklch(0.6 0.15 200); /* VR Cyan */
+		--primary-foreground: oklch(0.98 0 0);
+		--secondary: oklch(0.75 0.1 210); /* Light blue */
+		--secondary-foreground: oklch(0.25 0.03 220);
+		--muted: oklch(0.96 0.01 220);
+		--muted-foreground: oklch(0.5 0.02 220);
+		--accent: oklch(0.65 0.18 195); /* Bright cyan */
+		--accent-foreground: oklch(0.98 0 0);
+		--destructive: oklch(0.577 0.245 27.325);
+		--border: oklch(0.9 0.02 220);
+		--input: oklch(0.9 0.02 220);
+		--ring: oklch(0.6 0.15 200);
 
-	/* Sidebar VR themed */
-	--sidebar: oklch(0.6 0.15 200); /* VR Cyan */
-	--sidebar-foreground: #ffffff;
-	--sidebar-primary: oklch(0.5 0.12 195);
-	--sidebar-primary-foreground: #ffffff;
-	--sidebar-accent: rgba(255, 255, 255, 0.15);
-	--sidebar-accent-foreground: #ffffff;
-	--sidebar-border: rgba(255, 255, 255, 0.2);
-	--sidebar-ring: rgba(255, 255, 255, 0.3);
-}
+		/* Sidebar VR themed */
+		--sidebar: oklch(0.6 0.15 200); /* VR Cyan */
+		--sidebar-foreground: #ffffff;
+		--sidebar-primary: oklch(0.5 0.12 195);
+		--sidebar-primary-foreground: #ffffff;
+		--sidebar-accent: rgba(255, 255, 255, 0.15);
+		--sidebar-accent-foreground: #ffffff;
+		--sidebar-border: rgba(255, 255, 255, 0.2);
+		--sidebar-ring: rgba(255, 255, 255, 0.3);
+	}
 
-/* Thème Rose Griffon Pride - Rose/Noir */
-.rg-pride {
-	--background: oklch(0.97 0.02 350); /* Warm white with pink tint */
-	--foreground: oklch(0.15 0.02 350); /* Almost black */
-	--card: oklch(1 0 0);
-	--card-foreground: oklch(0.15 0.02 350);
-	--popover: oklch(1 0 0);
-	--popover-foreground: oklch(0.15 0.02 350);
-	--primary: oklch(0.45 0.12 10); /* RG Red-brown */
-	--primary-foreground: oklch(0.98 0 0);
-	--secondary: oklch(0.65 0.1 340); /* Rose */
-	--secondary-foreground: oklch(0.98 0 0);
-	--muted: oklch(0.93 0.02 350);
-	--muted-foreground: oklch(0.45 0.02 350);
-	--accent: oklch(0.7 0.12 350); /* Bright rose */
-	--accent-foreground: oklch(0.98 0 0);
-	--destructive: oklch(0.577 0.245 27.325);
-	--border: oklch(0.85 0.03 350);
-	--input: oklch(0.85 0.03 350);
-	--ring: oklch(0.45 0.12 10);
+	/* Thème Rose Griffon Pride - Rose/Noir */
+	.rg-pride {
+		--background: oklch(0.97 0.02 350); /* Warm white with pink tint */
+		--foreground: oklch(0.15 0.02 350); /* Almost black */
+		--card: oklch(1 0 0);
+		--card-foreground: oklch(0.15 0.02 350);
+		--popover: oklch(1 0 0);
+		--popover-foreground: oklch(0.15 0.02 350);
+		--primary: oklch(0.45 0.12 10); /* RG Red-brown */
+		--primary-foreground: oklch(0.98 0 0);
+		--secondary: oklch(0.65 0.1 340); /* Rose */
+		--secondary-foreground: oklch(0.98 0 0);
+		--muted: oklch(0.93 0.02 350);
+		--muted-foreground: oklch(0.45 0.02 350);
+		--accent: oklch(0.7 0.12 350); /* Bright rose */
+		--accent-foreground: oklch(0.98 0 0);
+		--destructive: oklch(0.577 0.245 27.325);
+		--border: oklch(0.85 0.03 350);
+		--input: oklch(0.85 0.03 350);
+		--ring: oklch(0.45 0.12 10);
 
-	/* Sidebar RG themed (original) */
-	--sidebar: #a14b3f; /* Rose Griffon red-brown */
-	--sidebar-foreground: #ffffff;
-	--sidebar-primary: #8a3f35;
-	--sidebar-primary-foreground: #ffffff;
-	--sidebar-accent: rgba(255, 255, 255, 0.15);
-	--sidebar-accent-foreground: #ffffff;
-	--sidebar-border: rgba(255, 255, 255, 0.2);
-	--sidebar-ring: rgba(255, 255, 255, 0.3);
-}
+		/* Sidebar RG themed (original) */
+		--sidebar: #a14b3f; /* Rose Griffon red-brown */
+		--sidebar-foreground: #ffffff;
+		--sidebar-primary: #8a3f35;
+		--sidebar-primary-foreground: #ffffff;
+		--sidebar-accent: rgba(255, 255, 255, 0.15);
+		--sidebar-accent-foreground: #ffffff;
+		--sidebar-border: rgba(255, 255, 255, 0.2);
+		--sidebar-ring: rgba(255, 255, 255, 0.3);
+	}
 
-/* ============================================ */
-/* THÈME AZALÉE (INAZUMA DARK & VIBRANT)        */
-/* Ref: Charte Graphique Octobre 2025           */
-/* ============================================ */
-.azalee {
-	/* Polices */
-	--font-primary: var(--font-noto-sans);
-	--font-secondary: var(--font-lato);
+	/* ============================================ */
+	/* THÈME AZALÉE (INAZUMA DARK & VIBRANT)        */
+	/* Ref: Charte Graphique Octobre 2025           */
+	/* ============================================ */
+	.azalee {
+		/* Polices */
+		--font-primary: var(--font-noto-sans);
+		--font-secondary: var(--font-lato);
 
-	/* Palette de base */
-	--background: #240112; /* Aubergine très sombre */
-	--foreground: #ffffff; /* Texte blanc */
+		/* Palette de base */
+		--background: #240112; /* Aubergine très sombre */
+		--foreground: #ffffff; /* Texte blanc */
 
-	/* Surfaces & Bordures (Pourpre structurel) */
-	--card: #681229;
-	--card-foreground: #ffffff;
-	--popover: #681229;
-	--popover-foreground: #ffffff;
-	--border: #681229;
-	--input: #681229;
+		/* Surfaces & Bordures (Pourpre structurel) */
+		--card: #681229;
+		--card-foreground: #ffffff;
+		--popover: #681229;
+		--popover-foreground: #ffffff;
+		--border: #681229;
+		--input: #681229;
 
-	/* Couleurs d'accentuation */
-	--primary: #fecd50; /* Jaune dominant */
-	--primary-foreground: #240112; /* Texte sombre sur jaune */
+		/* Couleurs d'accentuation */
+		--primary: #fecd50; /* Jaune dominant */
+		--primary-foreground: #240112; /* Texte sombre sur jaune */
 
-	--secondary: #c83c51; /* Rose/Rouge */
-	--secondary-foreground: #ffffff;
+		--secondary: #c83c51; /* Rose/Rouge */
+		--secondary-foreground: #ffffff;
 
-	--accent: #921044; /* Magenta foncé */
-	--accent-foreground: #ffffff;
+		--accent: #921044; /* Magenta foncé */
+		--accent-foreground: #ffffff;
 
-	--muted: #4a0d1f;
-	--muted-foreground: #c83c51;
+		--muted: #4a0d1f;
+		--muted-foreground: #c83c51;
 
-	--destructive: #921044;
-	--ring: #fecd50;
+		--destructive: #921044;
+		--ring: #fecd50;
 
-	/* Graphiques */
-	--chart-1: #fecd50;
-	--chart-2: #c83c51;
-	--chart-3: #921044;
-	--chart-4: #681229;
-	--chart-5: #ffffff;
+		/* Graphiques */
+		--chart-1: #fecd50;
+		--chart-2: #c83c51;
+		--chart-3: #921044;
+		--chart-4: #681229;
+		--chart-5: #ffffff;
 
-	/* Sidebar Spécifique */
-	--sidebar: #240112;
-	--sidebar-foreground: #ffffff;
-	--sidebar-primary: #fecd50;
-	--sidebar-primary-foreground: #240112;
-	--sidebar-accent: #681229;
-	--sidebar-accent-foreground: #fecd50;
-	--sidebar-border: #681229;
-	--sidebar-ring: #fecd50;
+		/* Sidebar Spécifique */
+		--sidebar: #240112;
+		--sidebar-foreground: #ffffff;
+		--sidebar-primary: #fecd50;
+		--sidebar-primary-foreground: #240112;
+		--sidebar-accent: #681229;
+		--sidebar-accent-foreground: #fecd50;
+		--sidebar-border: #681229;
+		--sidebar-ring: #fecd50;
+	}
 }
 
 /* ============================================ */
@@ -773,9 +779,17 @@
 
 /* Optimisations tactiles */
 @media (hover: none) and (pointer: coarse) {
-	/* Augmenter zones tactiles */
-	button,
-	a {
+	/* Zones tactiles — règle OPT-IN volontairement restreinte.
+	 * Elle visait `button, a` sans distinction, hors couche : elle écrasait
+	 * donc silencieusement `size-5`, `h-8`, `size-9`… de Tailwind (les
+	 * utilitaires vivent en `@layer utilities`, et une règle hors couche
+	 * l'emporte). Le chevron `size-5` de la sidebar devenait un rond de 44px
+	 * débordant de son ancrage, et les puces `px-2 py-0.5 text-xs` des blocs
+	 * de 44px de haut. On ne l'applique plus qu'aux éléments qui ne fixent
+	 * pas eux-mêmes leur taille. */
+	button:not([class*="size-"]):not([class*="h-"]):not([class*="min-h-"]),
+	a[role="button"]:not([class*="size-"]):not([class*="h-"]):not([class*="min-h-"]),
+	.touch-target {
 		min-height: 44px; /* Recommandation Apple */
 		min-width: 44px;
 	}

@@ -44,7 +44,9 @@ export function CommentForm({
 	const isEmpty = content.trim().length === 0;
 
 	const avatarSrc = profile?.avatar_url ?? user?.image ?? null;
-	const displayName = profile?.full_name ?? profile?.username ?? user?.name ?? null;
+	// `full_name` n'est pas dans la liste blanche des colonnes lisibles en clé
+	// anon : le lire renvoyait toujours undefined. On part du pseudo public.
+	const displayName = profile?.username ?? user?.name ?? null;
 
 	const autoResize = (el: HTMLTextAreaElement) => {
 		el.style.height = "auto";

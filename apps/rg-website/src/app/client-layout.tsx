@@ -1,7 +1,5 @@
 "use client";
 
-import "./globals.css";
-
 import { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import { SidebarInset, SidebarProvider, Toaster, useBreakpoint, useSidebar } from "@rose-griffon/ui";
@@ -94,6 +92,10 @@ export default function ClientLayout({
 
 	const shouldHideSidebar = isAdminPage || isShopPage || isAuthPage;
 
+	// Le rail n'existe qu'au breakpoint « medium » ET hors pages sans chrome :
+	// toute réservation de place doit suivre exactement cette condition.
+	const showRail = isMedium && !shouldHideSidebar;
+
 	return (
 		<ThemeProvider>
 			<Providers>
@@ -104,7 +106,7 @@ export default function ClientLayout({
 							<SkipToContent />
 
 							{/* NAVIGATION RAIL (MEDIUM SCREENS) */}
-							{isMedium && !shouldHideSidebar && <WebsiteNavigationRail />}
+							{showRail && <WebsiteNavigationRail />}
 
 							{/* SIDEBAR — tiroir modal en compact, panneau fixe en expanded.
 							    En medium c'est le rail qui prend le relais : monter la sidebar
@@ -119,7 +121,7 @@ export default function ClientLayout({
 							    « gap » de --sidebar-width dans le flux, qui décale l'inset. En
 							    ajouter une seconde doublait le décalage et écrasait le contenu. */}
 							<SidebarInset
-								className={cn("transition-all duration-300 min-w-0", isMedium && "ml-20")}
+								className={cn("transition-all duration-300 min-w-0", showRail && "ml-20")}
 							>
 								{/* La réserve de 4rem en bas ne vaut que si la barre de navigation
 								    basse est réellement montée (compact). Elle était coupée à `lg:`
@@ -131,7 +133,11 @@ export default function ClientLayout({
 										isCompact && !shouldHideSidebar && "pb-[calc(4rem+env(safe-area-inset-bottom))]"
 									)}
 								>
-									{isCompact && <Header isMobile showSearch={false} showCart={false} />}
+									{/* Le kit admin fournit son propre en-tête mobile : sans cette garde,
+									    les deux se superposaient sur /admin (z-40 contre z-30). */}
+									{isCompact && !shouldHideSidebar && (
+										<Header isMobile showSearch={false} showCart={false} />
+									)}
 									<div className="flex-1 w-full">
 										{/* `SidebarInset` est déjà un <main> : ici un <div> (un <main>
 										    imbriqué est invalide et casse la cible du lien d'évitement). */}
