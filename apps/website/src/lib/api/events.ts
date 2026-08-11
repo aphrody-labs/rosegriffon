@@ -1,9 +1,21 @@
 import { google } from "googleapis";
 import type { calendar_v3 } from "googleapis";
 
+import { createLogger } from "@/lib/logger";
 import type { CalendarEvent } from "@/types/api";
 
 const SCOPES = ["https://www.googleapis.com/auth/calendar.readonly"];
+
+const logger = createLogger("google-calendar");
+
+/**
+ * Un secret scellé qui a écrasé le plaintext se reconnaît à son préfixe. Sans
+ * ce garde-fou l'appel échoue en silence et la page Événements reste
+ * désespérément vide sans qu'aucune trace n'explique pourquoi.
+ */
+function isSealedBlob(value: string): boolean {
+	return value.startsWith("eyJ2Ijoi");
+}
 
 /**
  * Fetch scheduled events directly from Discord API
@@ -24,8 +36,27 @@ export async function getCalendarEvents(): Promise<CalendarEvent[]> {
 		const privateKey = process.env.GOOGLE_PRIVATE_KEY;
 		const calendarId = process.env.GOOGLE_EVENTS_CALENDAR_ID; // ← Calendrier Événements
 
+		const requis: [string, string | undefined][] = [
+			["GOOGLE_CLIENT_EMAIL", clientEmail],
+			["GOOGLE_PRIVATE_KEY", privateKey],
+			["GOOGLE_EVENTS_CALENDAR_ID", calendarId],
+		];
+
+		const manquants = requis.filter(([, v]) => !v).map(([k]) => k);
+		if (manquants.length > 0) {
+			logger.warn(`Google Calendar non configuré, variables absentes : ${manquants.join(", ")}`);
+			return [];
+		}
+
+		const scelles = requis.filter(([, v]) => v && isSealedBlob(v)).map(([k]) => k);
+		if (scelles.length > 0) {
+			logger.error(
+				`Google Calendar inutilisable : ${scelles.join(", ")} contient un blob de secret scellé (eyJ2Ijoi…) au lieu de la valeur en clair. Restaurer le plaintext dans apps/website/.env.production.local puis rebuild.`
+			);
+			return [];
+		}
+
 		if (!clientEmail || !privateKey || !calendarId) {
-			// Missing configuration, return empty array
 			return [];
 		}
 

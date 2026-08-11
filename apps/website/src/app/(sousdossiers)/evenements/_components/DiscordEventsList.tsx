@@ -25,7 +25,7 @@ function DiscordEventsList({ events, isLoading }: DiscordEventsListProps) {
 	if (events.length === 0) {
 		return (
 			<div className="py-8 text-center">
-				<p className="text-gray-600 dark:text-gray-400">
+				<p className="text-muted-foreground">
 					Aucun événement Discord programmé pour le moment.
 				</p>
 			</div>
@@ -72,10 +72,10 @@ function DiscordEventCard({ event }: { event: DiscordScheduledEvent }) {
 				<Badge
 					variant={statusColor === "green" ? "default" : "secondary"}
 					className={`
-            ${statusColor === "blue" ? "bg-blue-500 text-white" : ""}
-            ${statusColor === "green" ? "bg-green-500 text-white" : ""}
-            ${statusColor === "gray" ? "bg-gray-500 text-white" : ""}
-            ${statusColor === "red" ? "bg-red-500 text-white" : ""}
+            ${statusColor === "blue" ? "bg-info text-rg-sur-marine" : ""}
+            ${statusColor === "green" ? "bg-succes text-rg-sur-marine" : ""}
+            ${statusColor === "gray" ? "bg-muted-foreground text-background" : ""}
+            ${statusColor === "red" ? "bg-destructive text-rg-sur-marine" : ""}
           `}
 				>
 					{statusLabel}
@@ -96,11 +96,11 @@ function DiscordEventCard({ event }: { event: DiscordScheduledEvent }) {
 			)}
 
 			{/* Titre */}
-			<h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3 pr-24">{event.name}</h3>
+			<h3 className="text-xl font-bold text-foreground mb-3 pr-24">{event.name}</h3>
 
 			{/* Description */}
 			{event.description && (
-				<p className="text-sm text-gray-600 dark:text-gray-300 mb-4 line-clamp-3">
+				<p className="text-sm text-muted-foreground mb-4 line-clamp-3">
 					{event.description}
 				</p>
 			)}
@@ -108,7 +108,7 @@ function DiscordEventCard({ event }: { event: DiscordScheduledEvent }) {
 			{/* Informations */}
 			<div className="space-y-2 text-sm">
 				{/* Date de début */}
-				<div className="flex items-center gap-2 text-gray-700 dark:text-gray-300">
+				<div className="flex items-center gap-2 text-muted-foreground">
 					<Calendar className="size-4 text-purple-600" />
 					<span className="font-medium">Début:</span>
 					<span>{formatDate(startDate)}</span>
@@ -116,7 +116,7 @@ function DiscordEventCard({ event }: { event: DiscordScheduledEvent }) {
 
 				{/* Date de fin si disponible */}
 				{endDate && (
-					<div className="flex items-center gap-2 text-gray-700 dark:text-gray-300">
+					<div className="flex items-center gap-2 text-muted-foreground">
 						<Calendar className="size-4 text-purple-600" />
 						<span className="font-medium">Fin:</span>
 						<span>{formatDate(endDate)}</span>
@@ -125,7 +125,7 @@ function DiscordEventCard({ event }: { event: DiscordScheduledEvent }) {
 
 				{/* Localisation pour les événements externes */}
 				{event.entityMetadata?.location && (
-					<div className="flex items-center gap-2 text-gray-700 dark:text-gray-300">
+					<div className="flex items-center gap-2 text-muted-foreground">
 						<MapPin className="size-4 text-purple-600" />
 						<span className="font-medium">Lieu:</span>
 						<span>{event.entityMetadata.location}</span>
@@ -134,7 +134,7 @@ function DiscordEventCard({ event }: { event: DiscordScheduledEvent }) {
 
 				{/* Nombre de participants */}
 				{event.userCount > 0 && (
-					<div className="flex items-center gap-2 text-gray-700 dark:text-gray-300">
+					<div className="flex items-center gap-2 text-muted-foreground">
 						<Users className="size-4 text-purple-600" />
 						<span className="font-medium">Participants:</span>
 						<span>{event.userCount}</span>
@@ -157,7 +157,7 @@ function DiscordEventCard({ event }: { event: DiscordScheduledEvent }) {
 								/>
 							</div>
 						)}
-						<span className="text-xs text-gray-600 dark:text-gray-400">
+						<span className="text-xs text-muted-foreground">
 							Créé par {event.creator.username}
 						</span>
 					</div>

@@ -43,8 +43,15 @@ export default function GoogleMapEvents({ events, isLoading }: GoogleMapEventsPr
 						return;
 					}
 
+					// Marqueurs et infobulle sont injectés en HTML brut dans le DOM de Google
+					// Maps : Tailwind ne les atteint pas. On y branche donc directement les
+					// variables CSS du thème, qui, elles, cascadent jusque-là.
 					const markerColor =
-						event.type === "upcoming" ? "#22c55e" : event.type === "today" ? "#3b82f6" : "#ef4444";
+						event.type === "upcoming"
+							? "var(--rg-succes)"
+							: event.type === "today"
+								? "var(--rg-info)"
+								: "var(--destructive)";
 
 					let icon = "RG";
 					switch (event.category) {
@@ -69,7 +76,7 @@ export default function GoogleMapEvents({ events, isLoading }: GoogleMapEventsPr
 					const markerElement = document.createElement("div");
 					markerElement.className = "marker-content";
 					markerElement.innerHTML = `
-            <div style="background-color: ${markerColor}; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; border: 2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3);">
+            <div style="background-color: ${markerColor}; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--rg-sur-marine); font-weight: bold; border: 2px solid var(--rg-sur-marine); box-shadow: 0 2px 4px color-mix(in oklch, var(--foreground) 30%, transparent);">
               <span style="font-size: 14px;">${icon}</span>
             </div>
           `;
@@ -83,14 +90,14 @@ export default function GoogleMapEvents({ events, isLoading }: GoogleMapEventsPr
 
 					const infoContent = `
             <div style="padding: 12px; max-width: 250px; font-family: inherit;">
-              <h3 style="font-size: 16px; font-weight: 700; margin-bottom: 4px; color: #111827;">${event.name}</h3>
-              <p style="font-size: 13px; color: #4B5563; margin-bottom: 4px;">
+              <h3 style="font-size: 16px; font-weight: 700; margin-bottom: 4px; color: var(--foreground);">${event.name}</h3>
+              <p style="font-size: 13px; color: var(--muted-foreground); margin-bottom: 4px;">
                 <strong>Date:</strong> ${event.date}
               </p>
-              <p style="font-size: 13px; color: #4B5563; margin-bottom: 8px;">
+              <p style="font-size: 13px; color: var(--muted-foreground); margin-bottom: 8px;">
                 <strong>Lieu:</strong> ${event.location}
               </p>
-              <div style="display: inline-block; padding: 2px 8px; border-radius: 12px; background-color: #F3F4F6; font-size: 11px; font-weight: 600; color: #374151;">
+              <div style="display: inline-block; padding: 2px 8px; border-radius: 12px; background-color: var(--muted); font-size: 11px; font-weight: 600; color: var(--muted-foreground);">
                 ${event.category}
               </div>
             </div>
@@ -125,12 +132,12 @@ export default function GoogleMapEvents({ events, isLoading }: GoogleMapEventsPr
 	const showLoading = isLoading || !isLoaded;
 
 	return (
-		<div className="relative w-full h-[400px] md:h-[500px] rounded-2xl overflow-hidden border-2 border-gray-100 dark:border-gray-800 shadow-inner bg-gray-50 dark:bg-gray-900">
+		<div className="relative w-full h-[400px] md:h-[500px] rounded-2xl overflow-hidden border-2 border-border shadow-inner bg-muted/40">
 			{showLoading && (
-				<div className="absolute inset-0 z-20 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm flex items-center justify-center">
+				<div className="absolute inset-0 z-20 bg-background/80 backdrop-blur-sm flex items-center justify-center">
 					<div className="flex flex-col items-center gap-3">
-						<div className="animate-spin rounded-full size-10 border-b-2 border-blue-600" />
-						<p className="text-sm font-medium text-gray-600 dark:text-gray-300">
+						<div className="animate-spin rounded-full size-10 border-b-2 border-primary" />
+						<p className="text-sm font-medium text-muted-foreground">
 							{isLoading ? "Localisation des événements..." : "Chargement de la carte..."}
 						</p>
 					</div>

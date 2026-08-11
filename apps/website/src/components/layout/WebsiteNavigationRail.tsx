@@ -17,10 +17,14 @@ export function WebsiteNavigationRail() {
 		{ href: "/rose-griffon-tv", icon: RGTVIcon, label: "RG TV" },
 	];
 
+	// Visibilité pilotée par le layout, qui ne monte le rail qu'au breakpoint
+	// « medium » (600–839px). Les classes `hidden md:flex lg:hidden` qui étaient
+	// posées ici en plus laissaient, entre 600 et 767px, une bande de 80px vide :
+	// le layout réservait la place (`ml-20`) d'un rail que le CSS masquait.
 	return (
 		<NavigationRail
 			aria-label="Navigation principale"
-			className="fixed left-0 top-0 bottom-0 z-50 border-r border-border/40 hidden md:flex lg:hidden bg-background/95 backdrop-blur-xl"
+			className="fixed left-0 top-0 bottom-0 z-50 flex border-r border-border/40 bg-background/95 backdrop-blur-xl"
 		>
 			<div className="pt-4 pb-2">
 				<NavigationRailItem

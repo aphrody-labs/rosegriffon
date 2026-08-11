@@ -54,7 +54,13 @@ export async function GET() {
 
 		if (!res.ok) {
 			console.warn(`[discord/scheduled-events] discord api ${res.status} ${res.statusText}`);
-			return NextResponse.json({ data: { events: [] }, success: true });
+			// `reason` explicite : sans lui, une liste vide pour cause d'API en
+			// erreur est indiscernable d'un serveur sans événement programmé.
+			return NextResponse.json({
+				data: { events: [] },
+				reason: `discord_api_${res.status}`,
+				success: true,
+			});
 		}
 
 		const raw = (await res.json()) as DiscordScheduledEventRaw[];
