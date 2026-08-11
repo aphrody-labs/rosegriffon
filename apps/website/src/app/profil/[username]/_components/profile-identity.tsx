@@ -7,7 +7,6 @@ import TwitterIcon from "@/shared/icons/twitter";
 
 interface ProfileIdentityProps {
 	username: string;
-	fullName: string | null;
 	avatarUrl: string | null;
 	bio: string | null;
 	role: string | null;
@@ -47,7 +46,6 @@ const BADGE_MAP: Record<string, { label: string; icon: LucideIcon; color: string
 
 export function ProfileIdentity({
 	username,
-	fullName,
 	avatarUrl,
 	bio,
 	role,
@@ -73,7 +71,7 @@ export function ProfileIdentity({
 			<div className="flex-1 space-y-2 text-center md:pt-2 md:text-left">
 				<div className="flex flex-col items-center gap-3 md:flex-row md:flex-wrap">
 					<h1 className="break-words text-2xl font-bold text-foreground sm:text-3xl">
-						{fullName || username}
+						{username}
 					</h1>
 
 					{/* Affichage des badges esthétiques sélectionnés */}

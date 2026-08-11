@@ -29,7 +29,7 @@ export async function generateMetadata({ params }: ProfilePageProps): Promise<Me
 	const item = profile as any;
 	return {
 		description: item.bio || `Découvrez le profil de ${username} sur Azalée.`,
-		title: `${item.full_name || username} (@${username}) | Azalée`,
+		title: `@${username} | Azalée`,
 	};
 }
 
@@ -68,7 +68,7 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
 		superadmin: { color: "bg-primary text-on-primary", icon: Shield, label: "Fondateur" },
 	};
 
-	const role = roleConfig[profile.role] || roleConfig.default;
+	const role = roleConfig[profile.role ?? ""] || roleConfig.default;
 	const RoleIcon = role.icon;
 
 	return (
@@ -114,7 +114,7 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
 								<div className="min-w-0">
 									<div className="flex items-center gap-3 flex-wrap">
 										<h1 className="text-2xl sm:text-3xl font-black tracking-tight text-on-surface truncate">
-											{profile.full_name || profile.username || "Membre"}
+											{profile.username || "Membre"}
 										</h1>
 										<span
 											className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${role.color}`}
@@ -156,10 +156,10 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
 								<div className="flex items-center gap-2">
 									<CalendarDays className="size-4" />A rejoint en {joinedDate}
 								</div>
-								{profile.email && !isOwner
-									? null
-									: isOwner &&
-										currentUser?.email && (
+								{/* L'adresse n'est plus lue depuis le profil : seule celle de la
+								    session est affichée, et uniquement à son propriétaire. */}
+								{isOwner &&
+									currentUser?.email && (
 											<div className="flex items-center gap-2">
 												<Mail className="size-4" />
 												<span className="truncate max-w-[200px]">{currentUser.email}</span>
