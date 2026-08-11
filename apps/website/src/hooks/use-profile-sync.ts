@@ -1,8 +1,8 @@
 "use client";
 
-import type { RealtimeChannel } from "@supabase/supabase-js";
 import { useCallback, useEffect, useMemo } from "react";
 
+import { subscribeTable } from "@/lib/realtime";
 import { createClient } from "@/lib/supabase/client";
 import type { Database } from "@rose-griffon/db";
 
@@ -19,150 +19,27 @@ interface UseProfileSyncOptions {
  * Écoute les événements INSERT, UPDATE, DELETE du table profiles
  */
 export function useProfileSync({ userId, onProfileChange, enabled = true }: UseProfileSyncOptions) {
-	// Memoize the Supabase client so it doesn't change between renders
-	const supabase = useMemo(() => createClient(), []);
-
 	useEffect(() => {
 		// Ne pas s'abonner si pas d'userId ou si désactivé
-		if (!userId || !enabled) {
-			return;
-		}
+		if (!userId || !enabled) return;
 
-		let channel: RealtimeChannel | null = null;
-		let reconnectTimeout: NodeJS.Timeout | null = null;
-		let isUnmounted = false;
-
-		const subscribeToProfileChanges = async () => {
-			try {
-				// Nettoyer le canal existant si présent
-				if (channel) {
-					await supabase.removeChannel(channel);
-					channel = null;
-				}
-
-				// S'abonner aux changements de profil de l'utilisateur
-				channel = supabase
-					.channel(`profile:${userId}`, {
-						config: {
-							broadcast: { self: true },
-							presence: { key: userId },
-						},
-					})
-					.on(
-						"postgres_changes",
-						{
-							event: "*", // Écouter INSERT, UPDATE, DELETE
-							filter: `id=eq.${userId}`,
-							schema: "public",
-							table: "profiles",
-						},
-						(payload) => {
-							if (process.env.NODE_ENV === "development") {
-								console.info("[useProfileSync] Changement reçu:", payload.eventType);
-							}
-
-							// Appeler le callback si fourni
-							if (payload.new && onProfileChange) {
-								onProfileChange(payload.new as Profile);
-							}
-
-							// Gérer la suppression du profil
-							if (payload.eventType === "DELETE" && onProfileChange) {
-								console.warn("[useProfileSync] Le profil a été supprimé");
-								// Optionnellement, appeler le callback avec null ou une valeur par défaut
-							}
-						}
-					)
-					.subscribe((status, err) => {
-						if (process.env.NODE_ENV === "development") {
-							console.info(`[useProfileSync] Statut du canal: ${status}`, err ?? "");
-						}
-
-						switch (status) {
-							case "SUBSCRIBED": {
-								if (process.env.NODE_ENV === "development") {
-									console.info(`[useProfileSync] ✅ Abonné au profil ${userId}`);
-								}
-								break;
-							}
-
-							case "CHANNEL_ERROR": {
-								// Ne pas logger en warning pour éviter le spam console si c'est juste un token expiré
-								// Le listener onAuthStateChange gérera la reconnexion proprement
-								if (process.env.NODE_ENV === "development") {
-									console.warn("[useProfileSync] ⚠️ Erreur du canal (connexion perdue):", err);
-								}
-
-								// On laisse le auth listener gérer le refresh token,
-								// mais on garde un retry basique au cas où
-								if (!isUnmounted) {
-									reconnectTimeout = setTimeout(() => {
-										subscribeToProfileChanges();
-									}, 5000);
-								}
-								break;
-							}
-
-							case "TIMED_OUT": {
-								console.warn("[useProfileSync] ⏱️ Timeout de connexion");
-								// Réessayer après 2 secondes si pas démonté
-								if (!isUnmounted) {
-									reconnectTimeout = setTimeout(() => {
-										subscribeToProfileChanges();
-									}, 2000);
-								}
-								break;
-							}
-
-							case "CLOSED": {
-								if (process.env.NODE_ENV === "development") {
-									console.info("[useProfileSync] Canal fermé");
-								}
-								break;
-							}
-
-							default: {
-								// Gérer les autres statuts ou erreurs
-								if (err) {
-									console.error("[useProfileSync] ❌ Erreur:", err);
-									if (!isUnmounted) {
-										reconnectTimeout = setTimeout(() => {
-											subscribeToProfileChanges();
-										}, 5000);
-									}
-								}
-								break;
-							}
-						}
-					});
-			} catch (error) {
-				console.error("[useProfileSync] Erreur lors de la souscription:", error);
-				// Réessayer après 5 secondes en cas d'erreur
-				if (!isUnmounted) {
-					reconnectTimeout = setTimeout(() => {
-						subscribeToProfileChanges();
-					}, 5000);
-				}
-			}
-		};
-
-		subscribeToProfileChanges();
-
-		// Cleanup
-		return () => {
-			isUnmounted = true;
-
-			if (reconnectTimeout) {
-				clearTimeout(reconnectTimeout);
+		// Le flux SSE de rg-realtime gère lui-même la reconnexion (EventSource) :
+		// plus de machinerie de retry ni de statuts de canal à surveiller.
+		return subscribeTable<Profile>({ filter: `id=eq.${userId}`, table: "profiles" }, (event) => {
+			if (process.env.NODE_ENV === "development") {
+				console.info("[useProfileSync] Changement reçu:", event.eventType);
 			}
 
-			if (channel) {
-				supabase.removeChannel(channel).catch((error) => {
-					console.error("[useProfileSync] Erreur lors du nettoyage:", error);
-				});
+			if (event.eventType === "DELETE") {
+				console.warn("[useProfileSync] Le profil a été supprimé");
+				return;
 			}
-		};
-	}, [userId, enabled, onProfileChange, supabase]);
+
+			if (event.new && onProfileChange) {
+				onProfileChange(event.new);
+			}
+		});
+	}, [userId, enabled, onProfileChange]);
 }
 
 /**

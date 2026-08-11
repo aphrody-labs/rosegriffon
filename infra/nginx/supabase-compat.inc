@@ -1,0 +1,66 @@
+# ══════════════════════════════════════════════════════════
+# Compatibilité Supabase self-host — à inclure dans un vhost
+# ══════════════════════════════════════════════════════════
+#
+# Expose sur le domaine hôte les deux surfaces que `@supabase/supabase-js`
+# attend, servies par nos propres services :
+#   /rest/v1/     → rg-postgrest.service  (PostgREST 12.2 sur la base rg locale)
+#   /storage/v1/  → rg-storage.service    (Bun, fichiers sur /var/www/rg-storage)
+#
+# Inclure ce fichier dans le vhost de chaque app permet de pointer
+# NEXT_PUBLIC_SUPABASE_URL sur l'origine de l'app elle-même : aucune requête
+# cross-origin, et les URLs absolues déjà enregistrées en base
+# (https://azalee.rosegriffon.fr/storage/v1/object/public/…) restent valables.
+#
+# Usage :
+#   include /etc/nginx/conf.d/supabase-compat.inc;
+
+location /rest/v1/ {
+    proxy_pass http://127.0.0.1:8809/;
+    proxy_http_version 1.1;
+    proxy_set_header Host $host;
+    proxy_set_header Connection "";
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+    proxy_connect_timeout 3s;
+    proxy_read_timeout 60s;
+
+    # PostgREST n'émet pas d'en-têtes CORS : on les pose ici pour les clients
+    # navigateur d'une autre origine (le website interroge parfois azalee).
+    if ($request_method = OPTIONS) {
+        add_header Access-Control-Allow-Origin  "*" always;
+        add_header Access-Control-Allow-Methods "GET, POST, PATCH, PUT, DELETE, HEAD, OPTIONS" always;
+        add_header Access-Control-Allow-Headers "authorization, apikey, content-type, prefer, range, x-client-info, accept-profile, content-profile" always;
+        add_header Access-Control-Max-Age       "86400" always;
+        add_header Content-Length 0;
+        return 204;
+    }
+    add_header Access-Control-Allow-Origin   "*" always;
+    add_header Access-Control-Expose-Headers "content-range, content-location, range-unit" always;
+}
+
+location /realtime/v1/ {
+    proxy_pass http://127.0.0.1:8812/;
+    proxy_http_version 1.1;
+    proxy_set_header Host $host;
+    proxy_set_header Connection "";
+    # Flux SSE : jamais de tampon, jamais de coupure sur inactivité.
+    proxy_buffering off;
+    proxy_cache off;
+    proxy_read_timeout 3600s;
+    add_header X-Accel-Buffering no;
+}
+
+location /storage/v1/ {
+    proxy_pass http://127.0.0.1:8810/;
+    proxy_http_version 1.1;
+    proxy_set_header Host $host;
+    proxy_set_header Connection "";
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+    proxy_connect_timeout 3s;
+    proxy_read_timeout 300s;
+    # Les uploads d'images passent par ici (avatars, médias d'article).
+    client_max_body_size 512m;
+    proxy_request_buffering off;
+}
