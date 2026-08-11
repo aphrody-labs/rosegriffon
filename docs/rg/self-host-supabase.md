@@ -152,6 +152,52 @@ Cloud) publie la forme complète du schéma, introspection GraphQL comprise. Les
 **données** restent protégées par les 170 policies RLS ; seule la structure est
 publique, exactement comme avant la migration.
 
+## Serveur MCP
+
+`packages/mcp` expose la pile à un agent via quatre outils de lecture
+(`packages/mcp/src/tools/supabase.ts`) :
+
+| Outil | Ce qu'il ouvre |
+| --- | --- |
+| `live_tables` | tables, vues et fonctions exposées, colonnes comprises |
+| `live_select` | lecture d'une table avec filtres PostgREST et total exact |
+| `live_graphql` | requête GraphQL, introspection incluse |
+| `live_storage` | buckets, objets et URL publiques |
+
+Ils complètent les outils `db_*`, qui restent sur le miroir SQLite : celui-ci
+est rapide et hors-ligne mais ne couvre que les 65 tables `inagle_*` du jeu et
+date du dernier dump nocturne. Les outils `live_*` atteignent les 120 tables du
+schéma `public` — articles, équipes, quêtes, boutiques, tweets, membres — à la
+seconde près.
+
+**Ils utilisent la clé `anon`, jamais celle de service.** L'agent hérite donc
+exactement des droits d'un visiteur anonyme : les policies RLS s'appliquent et
+les colonnes personnelles de `profiles` restent hors de portée. Vérifié :
+`live_select` sur `profiles` avec `select=email` ou `select=*` renvoie
+`42501 permission denied`, tandis que `username, role` passe.
+
+## Données personnelles
+
+Deux fuites ont été trouvées et fermées le 11/8/2026, toutes deux héritées de
+la configuration Supabase d'origine :
+
+1. **API REST** — la policy `Public profiles are viewable by everyone`
+   (`USING (true)`) combinée à un `GRANT SELECT` au niveau **table** rendait les
+   e-mails et adresses postales des 31 comptes lisibles par quiconque, la clé
+   `anon` étant publique par conception. Correctif :
+   `apps/website/sql/migrations/20260811_profiles_pii.sql`.
+   Piège : un GRANT au niveau table masque tout `REVOKE` par colonne — il faut
+   révoquer la table **avant** de re-granter la liste blanche, sinon la
+   révocation est silencieusement sans effet.
+2. **Flux temps réel** — le trigger `rg_realtime_notify()` diffusait la ligne
+   entière, e-mail compris, sur un flux SSE non authentifié. Il retire
+   désormais les colonnes personnelles pour `profiles`.
+
+Conséquence assumée : `select=*` sur `profiles` échoue pour `anon`. Les appels
+applicatifs qui lisaient des données personnelles passent au client
+service-role, après vérification de session — ce qu'ils auraient dû faire dès
+le départ.
+
 ## Base de données
 
 `public` (120 tables, 172 fonctions, 170 politiques RLS), `auth` et `storage`
