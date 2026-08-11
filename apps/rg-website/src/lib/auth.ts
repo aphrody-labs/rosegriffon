@@ -25,7 +25,7 @@ function getSupabaseAdmin() {
 		process.env.NEXT_PUBLIC_SUPABASE_URL.startsWith("http") &&
 		!process.env.NEXT_PUBLIC_SUPABASE_URL.startsWith("eyJ2Ijo")
 			? process.env.NEXT_PUBLIC_SUPABASE_URL
-			: "https://isbkaeltubqittywibeh.supabase.co";
+			: (typeof window === "undefined" ? "http://127.0.0.1:8811" : window.location.origin);
 
 	const key =
 		process.env.SUPABASE_SERVICE_ROLE_KEY &&

@@ -90,7 +90,7 @@ export function SupabaseProvider({
 			process.env.NEXT_PUBLIC_SUPABASE_URL !== "null" &&
 			process.env.NEXT_PUBLIC_SUPABASE_URL.startsWith("http")
 				? process.env.NEXT_PUBLIC_SUPABASE_URL
-				: "https://isbkaeltubqittywibeh.supabase.co";
+				: (typeof window === "undefined" ? "http://127.0.0.1:8811" : window.location.origin);
 
 		const supabaseAnonKey =
 			process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY &&

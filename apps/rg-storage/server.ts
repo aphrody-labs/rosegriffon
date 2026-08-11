@@ -13,6 +13,7 @@ import { createHmac, timingSafeEqual } from "node:crypto";
 import { mkdir, rename, rm, stat } from "node:fs/promises";
 import { dirname, join as pathJoin, normalize as pathNormalize, resolve } from "node:path";
 import { SQL } from "bun";
+import { boundaryOf, extractFilePart } from "./multipart";
 
 const PORT = Number(process.env.RG_STORAGE_PORT ?? 8810);
 const HOST = process.env.RG_STORAGE_HOST ?? "127.0.0.1";
@@ -149,8 +150,20 @@ async function indexObject(bucket: string, name: string, size: number, mime: str
 		  set metadata = excluded.metadata, updated_at = now(), version = excluded.version`;
 }
 
+/**
+ * Retire une ligne d'index.
+ *
+ * Le trigger `storage.protect_delete` hérité de Supabase refuse toute
+ * suppression directe tant que le drapeau de session `storage.allow_delete_query`
+ * ne vaut pas `true` — c'est le garde-fou contre les purges accidentelles, et
+ * l'API Storage est justement la seule autorisée à le lever. On le pose donc
+ * localement à la transaction plutôt que de retirer le trigger.
+ */
 async function unindexObject(bucket: string, name: string) {
-	await sql`delete from storage.objects where bucket_id = ${bucket} and name = ${name}`;
+	await sql.begin(async (tx) => {
+		await tx`select set_config('storage.allow_delete_query', 'true', true)`;
+		await tx`delete from storage.objects where bucket_id = ${bucket} and name = ${name}`;
+	});
 }
 
 // ───────────────────────── URL signées ─────────────────────────
@@ -379,18 +392,22 @@ async function handle(req: Request): Promise<Response> {
 			if (!upsert && (await Bun.file(full).exists())) {
 				return fail(409, "Duplicate", "The resource already exists");
 			}
-			// storage-js envoie soit un multipart (`file`), soit le corps brut.
+			// storage-js envoie un multipart dont le champ fichier porte un nom
+			// VIDE (`body.append("", blob)`) ; d'autres clients utilisent `file`.
+			// On prend donc la première entrée qui est un fichier, quel que soit
+			// son nom, et on retombe sur le corps brut hors multipart.
 			const contentType = req.headers.get("content-type") ?? "";
-			let bytes: ArrayBuffer;
+			let bytes: Uint8Array;
 			let mime = contentType;
 			if (contentType.startsWith("multipart/form-data")) {
-				const form = await req.formData();
-				const file = form.get("file");
-				if (!(file instanceof File)) return fail(400, "InvalidRequest", "Missing file part");
-				bytes = await file.arrayBuffer();
-				mime = file.type || "application/octet-stream";
+				const marker = boundaryOf(contentType);
+				if (!marker) return fail(400, "InvalidRequest", "Missing multipart boundary");
+				const part = extractFilePart(new Uint8Array(await req.arrayBuffer()), marker);
+				if (!part) return fail(400, "InvalidRequest", "Missing file part");
+				bytes = part.bytes;
+				mime = part.mime;
 			} else {
-				bytes = await req.arrayBuffer();
+				bytes = new Uint8Array(await req.arrayBuffer());
 			}
 			await mkdir(dirname(full), { recursive: true });
 			await Bun.write(full, bytes);

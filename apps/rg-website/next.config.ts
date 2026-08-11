@@ -130,15 +130,17 @@ const nextConfig: NextConfig = {
 	},
 
 	async rewrites() {
-		const supabaseUrl =
+		// Storage self-host : nginx intercepte déjà /storage/v1/ et le route vers
+		// rg-storage.service (127.0.0.1:8810). Ce rewrite reste le filet de repli
+		// quand l'app est servie sans nginx devant (dev local, healthcheck direct).
+		const storageUrl =
 			process.env.SUPABASE_INTERNAL_URL ||
 			process.env.NEXT_PUBLIC_SUPABASE_URL ||
-			"https://isbkaeltubqittywibeh.supabase.co";
+			"http://127.0.0.1:8811";
 
-		// Safety check: ensure destination starts with https://
-		const destination = supabaseUrl.startsWith("http")
-			? `${supabaseUrl}/storage/v1/:path*`
-			: `https://isbkaeltubqittywibeh.supabase.co/storage/v1/:path*`;
+		const destination = storageUrl.startsWith("http")
+			? `${storageUrl}/storage/v1/:path*`
+			: `http://127.0.0.1:8811/storage/v1/:path*`;
 
 		return [
 			{

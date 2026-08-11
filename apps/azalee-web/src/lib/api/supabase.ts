@@ -17,7 +17,7 @@ function isValidKey(v: string | undefined | null): v is string {
 	);
 }
 
-const PLACEHOLDER_URL = "https://isbkaeltubqittywibeh.supabase.co";
+const PLACEHOLDER_URL = (typeof window === "undefined" ? "http://127.0.0.1:8811" : window.location.origin);
 const PLACEHOLDER_SERVICE_KEY =
 	"***REDACTED-SERVICE-ROLE***";
 

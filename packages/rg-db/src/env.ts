@@ -1,7 +1,13 @@
 // Centralisation env Supabase + safety fallbacks (build Vercel sans vars / Next prerender).
 // Source unique pour browser/server/service — éviter de répéter les heuristiques.
 
-const PLACEHOLDER_URL = "https://isbkaeltubqittywibeh.supabase.co";
+// Repli quand aucune URL n'est configurée. Depuis la sortie de Supabase, la
+// pile (`/rest/v1`, `/storage/v1`, `/realtime/v1`) est servie sur l'origine de
+// l'app elle-même — donc `window.location.origin` côté navigateur, et le point
+// d'entrée interne du VPS côté serveur. Cf. docs/self-host-supabase.md.
+const INTERNAL_URL = "http://127.0.0.1:8811";
+const PLACEHOLDER_URL =
+	typeof window === "undefined" ? INTERNAL_URL : window.location.origin;
 const PLACEHOLDER_ANON_JWT =
 	"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlzYmthZWx0dWJxaXR0eXdpYmVoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY1NDYyNzUsImV4cCI6MjA5MjEyMjI3NX0.eAyJfqREb8Kh5F_yLf5Jp43S2qOil4qUcqFTLQiExx0";
 
