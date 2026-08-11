@@ -6,8 +6,11 @@
 --
 -- Application : psql -d rg -f apps/website/sql/migrations/20260811_realtime_notify.sql
 
+-- `search_path` figé : la fonction est SECURITY DEFINER, donc elle s'exécute avec
+-- les droits de son propriétaire. Sans cette clause, un rôle appelant peut placer
+-- un schéma sous son contrôle devant `public` et détourner un appel non qualifié.
 CREATE OR REPLACE FUNCTION public.rg_realtime_notify() RETURNS trigger
-LANGUAGE plpgsql SECURITY DEFINER AS $$
+LANGUAGE plpgsql SECURITY DEFINER SET search_path = pg_catalog, public AS $$
 DECLARE
   payload   jsonb;
   row_new   jsonb := CASE WHEN TG_OP = 'DELETE' THEN NULL ELSE to_jsonb(NEW) END;
