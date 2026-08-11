@@ -74,6 +74,11 @@ export function useTheme() {
 		isRoy: ctx.theme === "roy",
 		isGaelle: ctx.theme === "gaelle",
 		isAzalee: ctx.theme?.startsWith("azalee") ?? false,
-		colors: THEMES[ctx.theme as ThemeType]?.colors,
+		// TOUJOURS une palette définie. Au rendu serveur (et avant hydratation)
+		// `ctx.theme` est `undefined` : la version optionnelle renvoyait
+		// `undefined`, et tout consommateur qui lit `colors.primary` — la page
+		// RG TV en compte une trentaine — plantait en
+		// « undefined is not an object ».
+		colors: THEMES[ctx.theme as ThemeType]?.colors ?? THEMES.roy.colors,
 	};
 }
