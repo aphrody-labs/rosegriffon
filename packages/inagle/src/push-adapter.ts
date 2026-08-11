@@ -178,11 +178,14 @@ export class PostgresAdapter implements DataAdapter {
  * les blobs scellés `eyJ2Ijo…`. .env est chargé par Bun (cwd /home/ubuntu/rg).
  */
 export function resolveSupabaseClient() {
-	let url =
-		process.env.SUPABASE_URL ||
-		process.env.NEXT_PUBLIC_SUPABASE_URL ||
-		(typeof window === "undefined" ? "http://127.0.0.1:8811" : window.location.origin);
-	if (!isValidUrl(url)) url = (typeof window === "undefined" ? "http://127.0.0.1:8811" : window.location.origin);
+	// Repli sur la passerelle interne de la pile self-host. Ce paquet tourne côté
+	// Bun/Node sans lib DOM : on interroge `globalThis` plutôt que `window`.
+	const origineDefaut =
+		"location" in globalThis
+			? (globalThis as unknown as { location: { origin: string } }).location.origin
+			: "http://127.0.0.1:8811";
+	let url = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL || origineDefaut;
+	if (!isValidUrl(url)) url = origineDefaut;
 
 	let key = process.env.SUPABASE_SERVICE_ROLE_KEY;
 	const jwtSecret = process.env.JWT_SECRET || process.env.SUPABASE_JWT_SECRET;

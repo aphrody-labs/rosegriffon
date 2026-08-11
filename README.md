@@ -88,6 +88,27 @@ internes s'écrivent `workspace:*`, jamais une version figée.
 Imports internes : `@rose-griffon/ui`, `@rose-griffon/db`,
 `@rose-griffon/types`, `@rose-griffon/azalee`, `@rose-griffon/config/*`.
 
+## Travailler avec un agent
+
+[`PROMPT.md`](PROMPT.md) est le prompt d'amorçage à donner à un agent (Claude
+Code ou autre) qui intervient sur ce dépôt : règles non négociables, boucle de
+travail, pièges qui ont déjà causé une panne, et comment vérifier son travail
+plutôt que de l'affirmer.
+
+Il est versionné, contrairement à `CLAUDE.md` qui reste la mémoire **locale**
+d'une machine — chemins, notes d'incident, contexte d'environnement.
+
+Le dépôt fournit aussi un serveur MCP (`packages/mcp`) qui expose les données du
+jeu, la base, les fichiers extraits et l'exploitation sous forme d'outils, ainsi
+qu'un plugin Claude prêt à installer :
+
+```bash
+claude plugin marketplace add .
+claude plugin install rose-griffon@rose-griffon
+```
+
+Détails et portées d'accès : [`docs/mcp.md`](docs/mcp.md).
+
 ## Documentation
 
 L'index complet est dans [`docs/README.md`](docs/README.md). Points d'entrée
