@@ -17,6 +17,10 @@ export interface ProfileMeta {
 // fermeture PII du 11/8/2026. Un `SELECT *` republiait ici, sur une page sans
 // authentification, l'e-mail, le nom réel, l'adresse postale et l'identifiant Patreon.
 // La restriction ne peut pas venir de la base sur ce chemin : elle doit être écrite ici.
+//
+// `claimed_at IS NOT NULL` exclut les profils pré-créés depuis Discord : ils existent
+// pour être réclamés à la première connexion, pas pour publier 2043 pages au nom de
+// personnes qui ne se sont jamais inscrites.
 export interface ProfileRow {
 	id: string;
 	updated_at: string | null;
@@ -40,7 +44,7 @@ export async function getProfileMetaByUsername(username: string): Promise<Profil
 	try {
 		const pool = getPgPool();
 		const { rows } = await pool.query<ProfileMeta>(
-			"SELECT bio FROM profiles WHERE username = $1 LIMIT 1",
+			"SELECT bio FROM profiles WHERE username = $1 AND claimed_at IS NOT NULL LIMIT 1",
 			[username]
 		);
 		return rows[0] ?? null;
@@ -55,7 +59,7 @@ export async function getProfileByUsername(username: string): Promise<ProfileRow
 	try {
 		const pool = getPgPool();
 		const { rows } = await pool.query<ProfileRow>(
-			`SELECT ${COLONNES_PUBLIQUES} FROM profiles WHERE username = $1 LIMIT 1`,
+			`SELECT ${COLONNES_PUBLIQUES} FROM profiles WHERE username = $1 AND claimed_at IS NOT NULL LIMIT 1`,
 			[username]
 		);
 		return rows[0] ?? null;

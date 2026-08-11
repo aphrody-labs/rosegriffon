@@ -42,7 +42,7 @@ export async function generateMetadata({
 	// propriétaire (`getPgPool`), qui contourne à la fois la RLS et les droits
 	// par colonne : la restriction doit donc être appliquée ici, dans la requête.
 	const { rows } = await pool.query<Pick<Profile, "username" | "avatar_url" | "bio">>(
-		"SELECT username, avatar_url, bio FROM profiles WHERE username = $1 LIMIT 1",
+		"SELECT username, avatar_url, bio FROM profiles WHERE username = $1 AND claimed_at IS NOT NULL LIMIT 1",
 		[username]
 	);
 	const profile = rows[0];
@@ -92,7 +92,7 @@ export default async function UserProfilePage({
 		const { rows } = await pool.query<Profile>(
 			`SELECT id, updated_at, username, avatar_url, role, website, discord_id,
 			        bio, banner_url, twitter_handle, badges
-			   FROM profiles WHERE username = $1 LIMIT 1`,
+			   FROM profiles WHERE username = $1 AND claimed_at IS NOT NULL LIMIT 1`,
 			[username]
 		);
 		profile = rows[0] ?? null;

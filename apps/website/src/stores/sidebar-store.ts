@@ -134,9 +134,12 @@ export const useSidebarStore = create<SidebarStore>()(
 		{
 			name: "sidebar-storage",
 			storage: createJSONStorage(() => safeStorage),
-			// Persister à la fois isOpen et openSections maintenant
+			// `isOpen` n'est délibérément PAS persisté : la barre latérale doit être
+			// déployée à chaque arrivée sur le site. Un repli fait un jour restait
+			// mémorisé indéfiniment et la navigation principale semblait avoir disparu.
+			// Le repli reste possible pendant la session, il ne survit simplement pas au
+			// rechargement. Seules les sections dépliées sont mémorisées.
 			partialize: (state) => ({
-				isOpen: state.isOpen,
 				openSections: state.openSections,
 			}),
 			onRehydrateStorage: () => (state) => {

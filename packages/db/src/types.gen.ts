@@ -3634,6 +3634,7 @@ export type Database = {
           avatar_url: string | null
           badges: string[] | null
           banner_url: string | null
+          claimed_at: string | null
           bio: string | null
           city: string | null
           country: string | null
@@ -3655,6 +3656,7 @@ export type Database = {
           avatar_url?: string | null
           badges?: string[] | null
           banner_url?: string | null
+          claimed_at?: string | null
           bio?: string | null
           city?: string | null
           country?: string | null
@@ -3676,6 +3678,7 @@ export type Database = {
           avatar_url?: string | null
           badges?: string[] | null
           banner_url?: string | null
+          claimed_at?: string | null
           bio?: string | null
           city?: string | null
           country?: string | null
