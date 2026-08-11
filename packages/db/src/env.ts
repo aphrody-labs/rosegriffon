@@ -5,9 +5,13 @@
 // pile (`/rest/v1`, `/storage/v1`, `/realtime/v1`) est servie sur l'origine de
 // l'app elle-même — donc `window.location.origin` côté navigateur, et le point
 // d'entrée interne du VPS côté serveur. Cf. docs/self-host-supabase.md.
+// `window` n'est pas typé dans les paquets sans lib DOM (serveur MCP, scripts
+// Bun) : on interroge `globalThis` pour rester compilable partout.
 const INTERNAL_URL = "http://127.0.0.1:8811";
 const PLACEHOLDER_URL =
-	typeof window === "undefined" ? INTERNAL_URL : window.location.origin;
+	"location" in globalThis
+		? (globalThis as unknown as { location: { origin: string } }).location.origin
+		: INTERNAL_URL;
 const PLACEHOLDER_ANON_JWT =
 	"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlzYmthZWx0dWJxaXR0eXdpYmVoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY1NDYyNzUsImV4cCI6MjA5MjEyMjI3NX0.eAyJfqREb8Kh5F_yLf5Jp43S2qOil4qUcqFTLQiExx0";
 
