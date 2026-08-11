@@ -16,6 +16,8 @@
 -- `now()` : sans cela, un cron arrêté depuis deux heures ferait passer tout le
 -- serveur pour parti.
 
+\set ON_ERROR_STOP on
+
 begin;
 
 alter table public.discord_members
@@ -48,10 +50,20 @@ delete from public.profiles p
    and p.claimed_at is null
    and d.left_at is not null;
 
--- Les ancres orphelines partent avec eux : `auth.users` n'est plus qu'une table
--- d'ancrage de clés étrangères, une ligne sans profil ni compte n'y sert à rien.
+-- Les ancres synthétiques partent avec eux.
+--
+-- Le prédicat est borné à NOS ancres — celles dont l'identifiant est l'uuid v5
+-- dérivé d'un discord_id. Un « supprime toute ligne auth.users sans profil »
+-- serait une mine : `auth.users` porte 22 clés étrangères, dont une quinzaine en
+-- ON DELETE CASCADE (patreon_memberships, reading_history, article_comments,
+-- chronicles, user_preferences…). Le jour où un profil disparaît sans que le
+-- compte disparaisse, un tel DELETE emporterait silencieusement les données
+-- métier de la personne.
 delete from auth.users a
- where not exists (select 1 from public.profiles p where p.id = a.id)
+ using public.discord_members d
+ where a.id = public.rg_uuid_membre_discord(d.discord_id)
+   and d.left_at is not null
+   and not exists (select 1 from public.profiles p where p.id = a.id)
    and not exists (select 1 from public."user" u where u.id::text = a.id::text);
 
 commit;
