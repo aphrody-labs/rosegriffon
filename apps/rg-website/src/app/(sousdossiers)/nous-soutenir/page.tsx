@@ -1,17 +1,27 @@
+import { Button, Card, CardContent, CardHeader, CardTitle } from "@rose-griffon/ui";
+import type { Metadata } from "next";
+import Link from "next/link";
+
+import { PublicTiers } from "@/components/patreon/PublicTiers";
 import {
-	ChevronRight,
+	heroPrimaryButtonClass,
+	heroSecondaryButtonClass,
+	PageContainer,
+	PageHero,
+	SectionCard,
+	SectionHeading,
+} from "@/components/shared/PageShell";
+import { BreadcrumbSchema, OrganizationSchema } from "@/components/shared/StructuredData";
+import {
 	ExternalLink,
 	Eye,
 	Heart,
+	Mail,
 	Megaphone,
 	Sparkles,
 	Trophy,
 	Users,
-} from "lucide-react";
-import type { Metadata } from "next";
-
-import { PublicTiers } from "@/components/patreon/PublicTiers";
-import { BreadcrumbSchema, OrganizationSchema } from "@/components/shared/StructuredData";
+} from "@/lib/icons-config";
 
 export const metadata: Metadata = {
 	description:
@@ -22,7 +32,8 @@ export const metadata: Metadata = {
 	},
 	openGraph: {
 		title: "Nous soutenir · Rose Griffon",
-		description: "Rose Griffon est porté par sa communauté. Soutenez l'association via Patreon (mensuel) ou PayPal (don ponctuel). Transparence garantie.",
+		description:
+			"Rose Griffon est porté par sa communauté. Soutenez l'association via Patreon (mensuel) ou PayPal (don ponctuel). Transparence garantie.",
 		url: "https://rosegriffon.fr/nous-soutenir",
 		type: "website",
 		images: [
@@ -38,29 +49,6 @@ export const metadata: Metadata = {
 
 export const dynamic = "force-dynamic";
 
-const SUPPORT_OPTIONS = [
-	{
-		cta: "Devenir mécène",
-		desc: "Rejoignez nos mécènes sur Patreon pour un soutien régulier. Accédez à des contenus exclusifs, des coulisses et participez activement à la vie de l'association.",
-		external: true,
-		href: "https://patreon.com/RoseGriffon",
-		key: "patreon",
-		subtitle: "Mécénat récurrent",
-		title: "Soutien mensuel via Patreon",
-		variant: "primary" as const,
-	},
-	{
-		cta: "Faire un don",
-		desc: "Vous souhaitez faire un don unique pour soutenir nos actions ? PayPal vous permet de contribuer facilement et en toute sécurité, quel que soit le montant.",
-		external: true,
-		href: "https://www.paypal.com/paypalme/rosegriffon",
-		key: "paypal",
-		subtitle: "Coup de main one-shot",
-		title: "Don ponctuel via PayPal",
-		variant: "secondary" as const,
-	},
-];
-
 const WHY_CARDS = [
 	{
 		desc: "Articles, chroniques, lives, événements — tout ce contenu est gratuit pour la communauté grâce à vos soutiens.",
@@ -68,12 +56,12 @@ const WHY_CARDS = [
 		title: "Faire vivre Inazuma Eleven en France",
 	},
 	{
-		desc: "Achilléa fait grandir l'e-sport IE en France. Tournois, coaching, format — tout ça coûte du temps et du matos.",
+		desc: "Achilléa fait grandir l'e-sport IE en France. Tournois, coaching, format — tout ça coûte du temps et du matériel.",
 		icon: Trophy,
 		title: "Une scène compétitive structurée",
 	},
 	{
-		desc: "Tous les contributeurs RG sont bénévoles. Vos dons financent les outils, l'infra, le matos — pas les salaires.",
+		desc: "Tous les contributeurs RG sont bénévoles. Vos dons financent les outils, l'infrastructure, le matériel — pas les salaires.",
 		icon: Users,
 		title: "Une équipe de bénévoles",
 	},
@@ -86,7 +74,7 @@ const TRANSPARENCY = [
 		title: "Événements communautaires",
 	},
 	{
-		desc: "Azalée (chroniques + chaîne), Rose Griffon TV. Outils de prod, hébergement.",
+		desc: "Azalée (chroniques + chaîne), Rose Griffon TV. Outils de production, hébergement.",
 		icon: Sparkles,
 		title: "Projets médiatiques",
 	},
@@ -96,31 +84,44 @@ const TRANSPARENCY = [
 		title: "Développement e-sport",
 	},
 	{
-		desc: "Serveurs, CDN, sites, bots Discord. Tout est self-hosted pour rester maître du data.",
+		desc: "Serveurs, CDN, sites, bots Discord. Tout est auto-hébergé pour rester maîtres de nos données.",
 		icon: Eye,
 		title: "Infrastructure technique",
 	},
 ];
 
-function CtaButton({ option }: { option: (typeof SUPPORT_OPTIONS)[number] }) {
-	const baseClass =
-		"inline-flex items-center gap-2 rounded-full px-6 py-3 font-semibold transition-all hover:scale-[1.02] active:scale-[0.98]";
-	const variants = {
-		primary: "bg-[#FF424D] text-white hover:bg-[#e63b46] shadow-lg",
-		secondary: "bg-[#0070BA] text-white hover:bg-[#005ea6]",
-	} as const;
-	const className = `${baseClass} ${variants[option.variant]}`;
-
+/** Carte d'information — même surface, même bordure, même rayon sur toute la page. */
+function InfoCard({
+	icon: Icon,
+	title,
+	desc,
+}: {
+	icon: typeof Trophy;
+	title: string;
+	desc: string;
+}) {
 	return (
-		<a href={option.href} target="_blank" rel="noopener noreferrer" className={className}>
-			{option.cta} <ExternalLink className="size-4" />
-		</a>
+		<Card className="h-full gap-3 shadow-sm transition-shadow hover:shadow-md">
+			<CardHeader>
+				{/* Un seul enfant : au-delà de 448 px de conteneur le CardHeader partagé
+				    bascule en ligne, ce qui poserait le titre à droite de l’icône. */}
+				<div>
+					<span className="block w-fit rounded-lg bg-primary/10 p-2 text-primary">
+						<Icon className="size-6" aria-hidden />
+					</span>
+					<CardTitle className="mt-3 text-fluid-headline-md leading-tight">{title}</CardTitle>
+				</div>
+			</CardHeader>
+			<CardContent>
+				<p className="text-fluid-body-md text-muted-foreground">{desc}</p>
+			</CardContent>
+		</Card>
 	);
 }
 
 export default function NousSoutenirPage() {
 	return (
-		<>
+		<PageContainer>
 			<BreadcrumbSchema
 				items={[
 					{ name: "Accueil", item: "/" },
@@ -128,149 +129,158 @@ export default function NousSoutenirPage() {
 				]}
 			/>
 			<OrganizationSchema />
-			<div className="min-h-screen bg-background text-foreground">
-			{/* Hero */}
-			<section className="relative overflow-hidden">
-				<div
-					className="absolute inset-0 opacity-20 dark:opacity-30"
-					style={{
-						background:
-							"radial-gradient(circle at 25% 25%, rgba(201,169,88,0.4), transparent 55%), radial-gradient(circle at 75% 65%, rgba(229,74,74,0.25), transparent 50%)",
-					}}
-				/>
-				<div className="relative mx-auto max-w-5xl px-6 py-24 text-center">
-					<div className="mb-4 inline-flex items-center gap-2 rounded-full border border-[#c9a958]/40 bg-[#c9a958]/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-wider text-[#a08540] dark:text-[#c9a958]">
-						<Heart className="h-3.5 w-3.5" /> Communauté & soutien
-					</div>
-					<h1 className="text-4xl font-bold sm:text-5xl md:text-6xl">
-						<span className="bg-linear-to-r from-[#a08540] via-[#c9a958] to-[#a08540] bg-clip-text text-transparent dark:from-[#c9a958] dark:via-[#dab86a] dark:to-[#c9a958]">
-							Nous soutenir
-						</span>
-					</h1>
-					<p className="mx-auto mt-6 max-w-2xl text-lg text-muted-foreground">
-						Rose Griffon est{" "}
-						<strong className="text-foreground">une association à but non lucratif</strong> portée
-						par une équipe de bénévoles. Vos soutiens financent les projets, pas les salaires.
-					</p>
-					<div className="mt-10 flex flex-wrap items-center justify-center gap-3">
-						<a
-							href="#tiers"
-							className="rounded-full bg-[#c9a958] px-6 py-3 font-semibold text-[#0c1730] transition hover:bg-[#dab86a]"
-						>
-							Voir les paliers
-						</a>
-						<a
-							href="#transparence"
-							className="rounded-full border border-border px-6 py-3 font-medium text-foreground transition hover:bg-muted"
-						>
-							Où va l'argent ↓
-						</a>
-					</div>
-				</div>
-			</section>
 
-			{/* Tiers Patreon — remontés en haut, chaque pack a son bouton dédié */}
-			<section id="tiers" className="mx-auto max-w-6xl px-6 pb-8 pt-4 scroll-mt-16 sm:pt-8">
-				<div className="mb-10 text-center">
-					<h2 className="text-3xl font-bold">Les paliers de mécénat</h2>
-					<p className="mt-3 text-muted-foreground">
-						3 paliers principaux sur Patreon — Roy, Gaëlle, Evans. Chaque palier a son propre bouton
-						pour choisir directement.
-					</p>
-				</div>
+			<PageHero
+				icon={<Heart className="size-7 shrink-0 text-rg-or md:size-8" aria-hidden />}
+				eyebrow="Communauté & soutien"
+				title="Nous soutenir"
+				description="Rose Griffon est une association à but non lucratif portée par une équipe de bénévoles. Vos soutiens financent les projets, pas les salaires."
+				actions={
+					<>
+						<Button asChild className={heroPrimaryButtonClass}>
+							<a href="#tiers">Voir les paliers</a>
+						</Button>
+						<Button asChild variant="outline" className={heroSecondaryButtonClass}>
+							<a href="#transparence">Où va votre soutien ?</a>
+						</Button>
+					</>
+				}
+			/>
+
+			{/* Paliers Patreon — seul endroit de la page où l'on part vers Patreon. */}
+			<section id="tiers" aria-labelledby="paliers-titre" className="scroll-mt-24">
+				<SectionHeading
+					id="paliers-titre"
+					icon={<Heart className="size-6" aria-hidden />}
+					iconClassName="bg-primary text-primary-foreground shadow-primary/20"
+					title="Les paliers de mécénat"
+					subtitle="Trois paliers principaux sur Patreon — Roy, Gaëlle, Evans — plus deux options complémentaires. Chaque palier a son propre bouton."
+				/>
 				<PublicTiers />
 				<p className="mx-auto mt-8 max-w-2xl text-center text-xs text-muted-foreground">
-					Patreon prélève une commission de 8 à 12% + frais de paiement. Pour maximiser le soutien
-					net à l'association, un don unique PayPal est plus efficace côté frais.
+					Patreon prélève une commission de 8 à 12 % plus les frais de paiement. Pour maximiser le
+					soutien net à l&apos;association, un don unique PayPal est plus efficace côté frais.
 				</p>
 			</section>
 
-			{/* Why */}
-			<section className="mx-auto max-w-5xl px-6 py-16">
+			{/* Pourquoi nous soutenir */}
+			<section aria-labelledby="pourquoi">
+				<SectionHeading
+					id="pourquoi"
+					icon={<Megaphone className="size-6" aria-hidden />}
+					iconClassName="bg-secondary text-secondary-foreground shadow-secondary/20"
+					title="Pourquoi nous soutenir ?"
+					subtitle="Ce que votre contribution rend possible au quotidien."
+				/>
 				<div className="grid gap-6 md:grid-cols-3">
-					{WHY_CARDS.map((card, i) => (
-						<div
-							key={i}
-							className="rounded-2xl border border-border bg-card p-6 text-card-foreground"
-						>
-							<card.icon className="size-6 text-[#c9a958]" />
-							<h3 className="mt-4 font-bold">{card.title}</h3>
-							<p className="mt-2 text-sm text-muted-foreground">{card.desc}</p>
-						</div>
+					{WHY_CARDS.map((card) => (
+						<InfoCard key={card.title} icon={card.icon} title={card.title} desc={card.desc} />
 					))}
 				</div>
 			</section>
 
-			{/* 2 options (Patreon récurrent vs PayPal one-shot) */}
-			<section id="options" className="mx-auto max-w-5xl px-6 py-16">
-				<div className="mb-10 text-center">
-					<h2 className="text-3xl font-bold">Autres façons de nous soutenir</h2>
-					<p className="mt-3 text-muted-foreground">
-						Préférez un soutien mensuel libre ou un don ponctuel.
-					</p>
-				</div>
+			{/* Don ponctuel & contact — pas de second bouton Patreon : les paliers
+			    ci-dessus sont déjà l'unique porte d'entrée vers le mécénat. */}
+			<section aria-labelledby="autres">
+				<SectionHeading
+					id="autres"
+					icon={<Sparkles className="size-6" aria-hidden />}
+					iconClassName="bg-primary text-primary-foreground shadow-primary/20"
+					title="Autres façons de nous soutenir"
+					subtitle="Un coup de main ponctuel, ou simplement une question à nous poser."
+				/>
 				<div className="grid gap-6 md:grid-cols-2">
-					{SUPPORT_OPTIONS.map((opt) => (
-						<div
-							key={opt.key}
-							className="rounded-2xl border border-border bg-card p-6 text-card-foreground"
-						>
-							<h3 className="text-lg font-bold">{opt.title}</h3>
-							<p className="mt-1 text-xs uppercase tracking-wider text-[#a08540] dark:text-[#c9a958]">
-								{opt.subtitle}
-							</p>
-							<p className="mt-4 text-sm text-muted-foreground">{opt.desc}</p>
-							<div className="mt-6">
-								<CtaButton option={opt} />
+					<Card className="h-full shadow-sm">
+						<CardHeader>
+							<div>
+								<CardTitle className="text-fluid-headline-md">Don ponctuel via PayPal</CardTitle>
+								<p className="mt-1 text-xs font-semibold tracking-wider text-primary uppercase">
+									Coup de main unique
+								</p>
 							</div>
-						</div>
-					))}
+						</CardHeader>
+						<CardContent className="space-y-6">
+							<p className="text-fluid-body-md text-muted-foreground">
+								Vous souhaitez faire un don unique pour soutenir nos actions ? PayPal vous permet de
+								contribuer facilement et en toute sécurité, quel que soit le montant.
+							</p>
+							<Button
+								asChild
+								size="lg"
+								className="h-auto min-h-12 w-full rounded-full py-3 whitespace-normal sm:w-auto"
+							>
+								<a
+									href="https://www.paypal.com/paypalme/rosegriffon"
+									target="_blank"
+									rel="noopener noreferrer"
+								>
+									Faire un don
+									<ExternalLink className="size-4" aria-hidden />
+								</a>
+							</Button>
+						</CardContent>
+					</Card>
+
+					<Card className="h-full shadow-sm">
+						<CardHeader>
+							<div>
+								<CardTitle className="text-fluid-headline-md">
+									Mécénat, dons en nature, presse
+								</CardTitle>
+								<p className="mt-1 text-xs font-semibold tracking-wider text-primary uppercase">
+									Nous écrire
+								</p>
+							</div>
+						</CardHeader>
+						<CardContent className="space-y-6">
+							<p className="text-fluid-body-md text-muted-foreground">
+								Entreprise, association, média ou simple curieux : écrivez-nous et nous
+								construirons ensemble la forme de soutien la plus utile.
+							</p>
+							<Button
+								asChild
+								variant="secondary"
+								size="lg"
+								className="h-auto min-h-12 w-full rounded-full py-3 whitespace-normal sm:w-auto"
+							>
+								<Link href="/a-propos/contact">
+									<Mail className="size-4" aria-hidden />
+									Nous contacter
+								</Link>
+							</Button>
+						</CardContent>
+					</Card>
 				</div>
 			</section>
 
 			{/* Transparence */}
-			<section id="transparence" className="mx-auto max-w-5xl px-6 py-16">
-				<div className="mb-10 text-center">
-					<h2 className="text-3xl font-bold">Où va votre soutien ?</h2>
-					<p className="mt-3 text-muted-foreground">
-						Bilan financier annuel partagé en assemblée générale. Pour toute question,
-						contactez-nous.
-					</p>
-				</div>
+			<section id="transparence" aria-labelledby="transparence-titre" className="scroll-mt-24">
+				<SectionHeading
+					id="transparence-titre"
+					icon={<Eye className="size-6" aria-hidden />}
+					iconClassName="bg-secondary text-secondary-foreground shadow-secondary/20"
+					title="Où va votre soutien ?"
+					subtitle="Bilan financier annuel partagé en assemblée générale."
+				/>
 				<div className="grid gap-6 md:grid-cols-2">
-					{TRANSPARENCY.map((card, i) => (
-						<div
-							key={i}
-							className="rounded-2xl border border-border bg-card p-6 text-card-foreground"
-						>
-							<card.icon className="size-6 text-[#c9a958]" />
-							<h3 className="mt-4 font-bold">{card.title}</h3>
-							<p className="mt-2 text-sm text-muted-foreground">{card.desc}</p>
-						</div>
+					{TRANSPARENCY.map((card) => (
+						<InfoCard key={card.title} icon={card.icon} title={card.title} desc={card.desc} />
 					))}
 				</div>
 			</section>
 
-			{/* Footer CTA */}
-			<section className="mx-auto max-w-3xl px-6 py-12 text-center">
-				<div className="rounded-3xl border border-[#c9a958]/40 bg-card p-10">
-					<Heart className="mx-auto size-8 text-[#c9a958]" />
-					<h2 className="mt-3 text-2xl font-bold">Merci de faire vivre RG</h2>
-					<p className="mt-3 text-muted-foreground">
-						Chaque soutien — petit ou grand — fait avancer la communauté.
-					</p>
-					<div className="mt-6">
-						<a
-							href="#options"
-							className="inline-flex items-center gap-2 rounded-full bg-[#c9a958] px-6 py-3 font-semibold text-[#0c1730] hover:bg-[#dab86a]"
-						>
-							Comment soutenir
-							<ChevronRight className="size-4" />
-						</a>
-					</div>
-				</div>
-			</section>
-		</div>
-		</>
+			{/* Remerciement — bloc de clôture, sans bouton : chaque action de la page
+			    existe déjà une seule fois plus haut. */}
+			<SectionCard className="text-center">
+				<Heart className="mx-auto size-8 text-primary" aria-hidden />
+				<h2 className="mt-3 text-fluid-headline-lg font-bold text-foreground">
+					Merci de faire vivre Rose Griffon
+				</h2>
+				<p className="mx-auto mt-3 max-w-2xl text-fluid-body-md text-muted-foreground">
+					Chaque soutien — petit ou grand — fait avancer la communauté. Les comptes de
+					l&apos;association sont présentés chaque année à ses adhérents.
+				</p>
+			</SectionCard>
+		</PageContainer>
 	);
 }

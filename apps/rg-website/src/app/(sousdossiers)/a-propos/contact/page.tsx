@@ -23,11 +23,15 @@ import { useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
+import { PageContainer, PageHero, SectionCard } from "@/components/shared/PageShell";
+import { BreadcrumbSchema } from "@/components/shared/StructuredData";
+import { Mail } from "@/lib/icons-config";
+
 import { sendContactEmail } from "./actions";
 import { contactFormSchema } from "./schema";
 import type { ContactFormValues } from "./schema";
 
-// Taille maximale de fichier en octets (5MB)
+// Taille maximale de fichier en octets (5 Mo)
 const MAX_FILE_SIZE = 5 * 1024 * 1024;
 
 export default function ContactPage() {
@@ -81,15 +85,15 @@ export default function ContactPage() {
 		},
 	});
 
-	// Formatter la taille du fichier en format lisible
+	// Formatter la taille du fichier en unités françaises (octets, Ko, Mo, Go)
 	const formatFileSize = (bytes: number): string => {
 		if (bytes === 0) {
-			return "0 Bytes";
+			return "0 octet";
 		}
 		const k = 1024;
-		const sizes = ["Bytes", "KB", "MB", "GB"];
+		const unites = ["octets", "Ko", "Mo", "Go"];
 		const i = Math.floor(Math.log(bytes) / Math.log(k));
-		return `${Number.parseFloat((bytes / k ** i).toFixed(2))} ${sizes[i]}`;
+		return `${Number.parseFloat((bytes / k ** i).toFixed(2))} ${unites[i]}`;
 	};
 
 	async function onSubmit(data: ContactFormValues) {
@@ -126,85 +130,74 @@ export default function ContactPage() {
 	}
 
 	return (
-		<div className="flex flex-col mb-8">
-			<div className="flex flex-col gap-6 px-2 sm:px-4 py-4">
-				<div className="space-y-2 sm:space-y-4">
-					<h1 className="text-4xl lg:text-5xl font-bold">Nous contacter</h1>
-					<p className="text-muted-foreground text-base lg:text-lg">
-						Vous avez une question, une suggestion ou souhaitez collaborer avec nous ?
-						N&apos;hésitez pas à nous contacter en remplissant le formulaire ci-dessous.
-					</p>
-				</div>
+		<PageContainer>
+			<BreadcrumbSchema
+				items={[
+					{ item: "/", name: "Accueil" },
+					{ item: "/a-propos", name: "À propos" },
+					{ item: "/a-propos/contact", name: "Nous contacter" },
+				]}
+			/>
 
-				<div className="border rounded-lg p-4 sm:p-8 bg-card">
-					<Form {...form}>
-						<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-							<div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-								<div className="space-y-8">
-									<FormField
-										control={form.control}
-										name="title"
-										render={({ field }) => (
-											<FormItem>
-												<FormLabel>Titre du message*</FormLabel>
-												<FormControl>
-													<Input placeholder="Entrez le titre de votre message" {...field} />
-												</FormControl>
-												<FormDescription>Un titre concis qui résume votre demande.</FormDescription>
-												<FormMessage />
-											</FormItem>
-										)}
-									/>
+			<PageHero
+				icon={<Mail className="size-7 shrink-0 text-rg-or md:size-8" aria-hidden />}
+				eyebrow="Association Rose Griffon"
+				title="Nous contacter"
+				description="Une question, une suggestion ou une envie de collaborer ? Remplissez le formulaire ci-dessous : nous lisons chaque message et revenons vers vous dès que possible."
+			/>
 
-									<FormField
-										control={form.control}
-										name="subject"
-										render={({ field }) => (
-											<FormItem>
-												<FormLabel>Sujet*</FormLabel>
-												<Select onValueChange={field.onChange} defaultValue={field.value}>
-													<FormControl>
-														<SelectTrigger>
-															<SelectValue placeholder="Sélectionnez un sujet" />
-														</SelectTrigger>
-													</FormControl>
-													<SelectContent>
-														<SelectItem value="Information sur l'association">
-															Information sur l&apos;association
-														</SelectItem>
-														<SelectItem value="Collaboration">Collaboration</SelectItem>
-														<SelectItem value="Don et soutien">Don et soutien</SelectItem>
-														<SelectItem value="Événements à venir">Événements à venir</SelectItem>
-														<SelectItem value="Adhésion">Adhésion</SelectItem>
-														<SelectItem value="Demande de presse">Demande de presse</SelectItem>
-														<SelectItem value="Support technique">Support technique</SelectItem>
-														<SelectItem value="Autres">Autres (préciser dans le titre)</SelectItem>
-													</SelectContent>
-												</Select>
-												<FormDescription>
-													Choisissez le sujet qui correspond le mieux à votre demande.
-												</FormDescription>
-												<FormMessage />
-											</FormItem>
-										)}
-									/>
-								</div>
+			<SectionCard>
+				<p className="mb-6 text-sm text-muted-foreground">
+					Les champs suivis d&apos;un astérisque (*) sont obligatoires.
+				</p>
+				<Form {...form}>
+					<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+						<div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+							<div className="space-y-8">
+								<FormField
+									control={form.control}
+									name="title"
+									render={({ field }) => (
+										<FormItem>
+											<FormLabel>Titre du message*</FormLabel>
+											<FormControl>
+												<Input placeholder="Entrez le titre de votre message" {...field} />
+											</FormControl>
+											<FormDescription>Un titre concis qui résume votre demande.</FormDescription>
+											<FormMessage />
+										</FormItem>
+									)}
+								/>
 
 								<FormField
 									control={form.control}
-									name="description"
+									name="subject"
 									render={({ field }) => (
 										<FormItem>
-											<FormLabel>Description*</FormLabel>
-											<FormControl>
-												<Textarea
-													placeholder="Détaillez votre demande ici..."
-													className="min-h-[120px] sm:min-h-[150px] resize-y"
-													{...field}
-												/>
-											</FormControl>
+											<FormLabel>Sujet*</FormLabel>
+											<Select onValueChange={field.onChange} defaultValue={field.value}>
+												<FormControl>
+													<SelectTrigger>
+														<SelectValue placeholder="Sélectionnez un sujet" />
+													</SelectTrigger>
+												</FormControl>
+												<SelectContent>
+													<SelectItem value="Information sur l'association">
+														Information sur l&apos;association
+													</SelectItem>
+													<SelectItem value="Collaboration">Collaboration</SelectItem>
+													<SelectItem value="Don et soutien">Don et soutien</SelectItem>
+													<SelectItem value="Événements à venir">Événements à venir</SelectItem>
+													<SelectItem value="Adhésion">Adhésion</SelectItem>
+											<SelectItem value="Bénévolat">Bénévolat</SelectItem>
+											<SelectItem value="Témoignage">Témoignage</SelectItem>
+													<SelectItem value="Demande de presse">Demande de presse</SelectItem>
+													<SelectItem value="Support technique">Support technique</SelectItem>
+													<SelectItem value="Autres">Autres (préciser dans le titre)</SelectItem>
+												</SelectContent>
+											</Select>
 											<FormDescription>
-												Décrivez votre demande en détail pour que nous puissions mieux vous aider.
+												Choisissez le sujet qui correspond le mieux à votre demande.
 											</FormDescription>
 											<FormMessage />
 										</FormItem>
@@ -214,66 +207,90 @@ export default function ContactPage() {
 
 							<FormField
 								control={form.control}
-								name="file"
-								render={({ field: { onChange, ...fieldProps } }) => (
-									<FormItem className="mb-6 sm:mb-8">
-										<FormLabel>Pièce jointe (optionnel)</FormLabel>
+								name="description"
+								render={({ field }) => (
+									<FormItem>
+										<FormLabel>Description*</FormLabel>
 										<FormControl>
-											<Input
-												type="file"
-												accept=".pdf,.docx,.txt,.jpg,.jpeg,.png,.gif"
-												onChange={(e) => {
-													const file = e.target.files?.[0];
-													if (file) {
-														setFileSize(file.size);
-														if (file.size > MAX_FILE_SIZE) {
-															toast.warning("Attention: fichier volumineux", {
-																description: `Ce fichier dépasse la limite de ${formatFileSize(
-																	MAX_FILE_SIZE
-																)}.`,
-															});
-														}
-													} else {
-														setFileSize(0);
-													}
-													onChange(file || null);
-												}}
-												{...fieldProps}
+											<Textarea
+												placeholder="Détaillez votre demande ici..."
+												className="min-h-[120px] sm:min-h-[150px] resize-y"
+												{...field}
 											/>
 										</FormControl>
 										<FormDescription>
-											Formats acceptés: PDF, DOCX, images (JPG, PNG, GIF) et TXT.
-											{fileSize > 0 && (
-												<span
-													className={
-														fileSize > MAX_FILE_SIZE
-															? "text-red-500 font-medium block mt-1"
-															: "block mt-1"
-													}
-												>
-													Taille actuelle: {formatFileSize(fileSize)}.
-												</span>
-											)}
-											<span className="block mt-1">Taille maximale: 5MB.</span>
+											Décrivez votre demande en détail pour que nous puissions mieux vous aider.
 										</FormDescription>
 										<FormMessage />
 									</FormItem>
 								)}
 							/>
+						</div>
 
-							<div className="flex justify-center">
-								<Button
-									type="submit"
-									className="w-full md:w-auto md:px-8 bg-green-600 hover:bg-green-700 text-base py-2 h-auto"
-									disabled={mutation.isPending}
-								>
-									{mutation.isPending ? "Envoi en cours..." : "Envoyer le message"}
-								</Button>
-							</div>
-						</form>
-					</Form>
-				</div>
-			</div>
-		</div>
+						<FormField
+							control={form.control}
+							name="file"
+							// `value` est volontairement écarté : React refuse qu'on pilote la
+							// valeur d'un `<input type="file">` (avertissement + valeur ignorée).
+							render={({ field: { onChange, value: _value, ...fieldProps } }) => (
+								<FormItem>
+									<FormLabel>Pièce jointe (optionnel)</FormLabel>
+									<FormControl>
+										<Input
+											type="file"
+											accept=".pdf,.docx,.txt,.jpg,.jpeg,.png,.gif"
+											onChange={(e) => {
+												const file = e.target.files?.[0];
+												if (file) {
+													setFileSize(file.size);
+													if (file.size > MAX_FILE_SIZE) {
+														toast.warning("Attention : fichier volumineux", {
+															description: `Ce fichier dépasse la limite de ${formatFileSize(
+																MAX_FILE_SIZE
+															)}.`,
+														});
+													}
+												} else {
+													setFileSize(0);
+												}
+												onChange(file || null);
+											}}
+											{...fieldProps}
+										/>
+									</FormControl>
+									<FormDescription>
+										Formats acceptés : PDF, DOCX, images (JPG, PNG, GIF) et TXT. Taille maximale :{" "}
+										{formatFileSize(MAX_FILE_SIZE)}.
+										{fileSize > 0 && (
+											<span
+												className={
+													fileSize > MAX_FILE_SIZE
+														? "mt-1 block font-medium text-destructive"
+														: "mt-1 block"
+												}
+											>
+												Taille actuelle : {formatFileSize(fileSize)}.
+											</span>
+										)}
+									</FormDescription>
+									<FormMessage />
+								</FormItem>
+							)}
+						/>
+
+						<div className="flex justify-center">
+							<Button
+								type="submit"
+								size="lg"
+								className="h-12 w-full sm:w-auto sm:px-10"
+								disabled={mutation.isPending}
+							>
+								{mutation.isPending ? "Envoi en cours…" : "Envoyer le message"}
+							</Button>
+						</div>
+					</form>
+				</Form>
+			</SectionCard>
+		</PageContainer>
 	);
 }

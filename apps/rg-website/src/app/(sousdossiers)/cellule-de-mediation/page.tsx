@@ -1,144 +1,170 @@
 import { Button, Card, CardContent, CardHeader, CardTitle } from "@rose-griffon/ui";
+import type { Metadata } from "next";
 import Image from "next/image";
+import Link from "next/link";
 
-import { Mail, Scale, Shield, Users } from "@/lib/icons-config";
+import { PageContainer, PageHero, SectionCard } from "@/components/shared/PageShell";
+import { BreadcrumbSchema } from "@/components/shared/StructuredData";
+import { Mail, MessageCircle, Scale, Shield, Users } from "@/lib/icons-config";
 
-export default function RejoindreRGPage() {
+export const metadata: Metadata = {
+	title: "Cellule de médiation · Rose Griffon",
+	description:
+		"Un espace neutre, confidentiel et indépendant du staff dirigeant : missions de la cellule de médiation Rose Griffon et comment la contacter.",
+	alternates: {
+		canonical: "https://rosegriffon.fr/cellule-de-mediation",
+	},
+	openGraph: {
+		title: "Cellule de médiation · Rose Griffon",
+		description:
+			"Un espace neutre, confidentiel et indépendant pour le bien-être de tous les membres de Rose Griffon.",
+		url: "https://rosegriffon.fr/cellule-de-mediation",
+		type: "website",
+	},
+};
+
+const ADRESSE_MEDIATION = "rosegriffon.mediation@gmail.com";
+
+/** Les trois missions de la cellule. */
+const MISSIONS = [
+	{
+		id: "contact",
+		titre: "Contact direct & confidentiel",
+		texte:
+			"Les membres peuvent contacter la cellule via une adresse mail dédiée pour tout sujet : conflits internes, harcèlement, ou problèmes affectant la vie associative.",
+	},
+	{
+		id: "ecoute",
+		titre: "Écoute & dialogue",
+		texte:
+			"La cellule agit comme tiers de confiance pour organiser un dialogue neutre et respectueux, cherchant une solution amiable pour préserver l'ambiance générale.",
+	},
+	{
+		id: "autonomie",
+		titre: "Autonomie décisionnelle",
+		texte:
+			"Elle gère ses équipes de façon autonome. Si nécessaire et avec l'accord de la victime, elle peut remonter les informations aux instances compétentes pour décision officielle.",
+	},
+];
+
+export default function CelluleDeMediationPage() {
 	return (
-		<div className="min-h-screen bg-linear-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-950">
-			{/* Hero Section */}
-			<div className="bg-gaelle-blue text-white py-16 mb-12">
-				<div className="container mx-auto px-4">
-					<div className="max-w-4xl mx-auto text-center">
-						<h1 className="text-4xl lg:text-6xl font-bold mb-6">Cellule de Médiation</h1>
-						<p className="text-xl lg:text-2xl text-blue-100 max-w-2xl mx-auto">
-							Un espace neutre, confidentiel et indépendant pour le bien-être de tous les membres.
-						</p>
-					</div>
-				</div>
-			</div>
+		<PageContainer>
+			<BreadcrumbSchema
+				items={[
+					{ item: "/", name: "Accueil" },
+					{ item: "/cellule-de-mediation", name: "Cellule de médiation" },
+				]}
+			/>
 
-			<div className="container mx-auto px-4 pb-16">
-				{/* Introduction */}
-				<div className="max-w-4xl mx-auto mb-16">
-					<div className="bg-white dark:bg-gray-800 rounded-2xl p-8 shadow-sm border border-gray-100 dark:border-gray-700">
-						<h2 className="text-2xl lg:text-3xl font-bold mb-6 text-gaelle-blue dark:text-blue-400 flex items-center gap-3">
-							<Shield className="size-8" />
-							Qu&apos;est-ce que la cellule de médiation RG ?
-						</h2>
-						<p className="text-lg text-gray-700 dark:text-gray-300 leading-relaxed text-justify">
-							La cellule de médiation RG est une structure interne à l’association Rose Griffon,
-							fonctionnant de manière{" "}
-							<span className="font-semibold text-gaelle-blue dark:text-blue-400">
-								totalement indépendante
-							</span>{" "}
-							du staff dirigeant. Elle a été créée pour garantir un espace neutre et impartial, une
-							écoute confidentielle hors de la chaîne de commandement habituelle, et une gestion
-							autonome des conflits.
-						</p>
-					</div>
-				</div>
+			<PageHero
+				icon={<Shield className="size-7 shrink-0 text-rg-or md:size-8" aria-hidden />}
+				eyebrow="Indépendante du staff dirigeant"
+				title="Cellule de médiation"
+				description="Un espace neutre, confidentiel et indépendant pour le bien-être de tous les membres."
+			/>
 
-				<div className="grid grid-cols-1 xl:grid-cols-2 gap-8 max-w-6xl mx-auto">
-					{/* Missions Card */}
-					<Card className="border-t-4 border-t-gaelle-blue shadow-lg hover:shadow-xl transition-shadow duration-300">
-						<CardHeader className="pb-2">
-							<CardTitle className="flex items-center gap-3 text-2xl lg:text-3xl text-gray-800 dark:text-gray-100">
-								<Scale className="size-8 text-gaelle-blue" />
-								Ses missions principales
-							</CardTitle>
-						</CardHeader>
+			{/* Introduction */}
+			<SectionCard>
+				<h2 className="mb-4 flex items-center gap-3 text-fluid-headline-lg font-bold text-foreground">
+					<span className="rounded-lg bg-primary p-2 text-primary-foreground shadow-lg shadow-primary/20">
+						<Scale className="size-6" aria-hidden />
+					</span>
+					Qu&apos;est-ce que la cellule de médiation RG ?
+				</h2>
+				<p className="text-fluid-body-lg leading-relaxed text-muted-foreground">
+					La cellule de médiation RG est une structure interne à l&apos;association Rose Griffon,
+					fonctionnant de manière{" "}
+					<strong className="font-semibold text-foreground">totalement indépendante</strong> du staff
+					dirigeant. Elle a été créée pour garantir un espace neutre et impartial, une écoute
+					confidentielle hors de la chaîne de commandement habituelle, et une gestion autonome des
+					conflits.
+				</p>
+			</SectionCard>
 
-						<CardContent className="pt-6 space-y-6">
-							<div className="flex gap-4 items-start p-4 rounded-lg bg-blue-50 dark:bg-blue-900/20">
-								<div className="bg-gaelle-blue text-white size-8 rounded-full flex items-center justify-center shrink-0 font-bold">
-									1
-								</div>
-								<p className="text-base lg:text-lg text-gray-700 dark:text-gray-300">
-									<span className="font-semibold block mb-1 text-gray-900 dark:text-white">
-										Contact direct & confidentiel
-									</span>
-									Les membres peuvent contacter la cellule via une adresse mail dédiée pour tout
-									sujet : conflits internes, harcèlement, ou problèmes affectant la vie associative.
-								</p>
-							</div>
+			<div className="grid grid-cols-1 gap-8 xl:grid-cols-2">
+				{/* Missions */}
+				<Card className="flex flex-col border-t-4 border-t-primary shadow-lg transition-shadow duration-300 hover:shadow-xl">
+					<CardHeader>
+						<CardTitle className="flex items-center gap-3 text-fluid-headline-md font-bold">
+							<Users className="size-7 shrink-0 text-primary" aria-hidden />
+							Ses missions principales
+						</CardTitle>
+					</CardHeader>
 
-							<div className="flex gap-4 items-start p-4 rounded-lg bg-blue-50 dark:bg-blue-900/20">
-								<div className="bg-gaelle-blue text-white size-8 rounded-full flex items-center justify-center shrink-0 font-bold">
-									2
-								</div>
-								<p className="text-base lg:text-lg text-gray-700 dark:text-gray-300">
-									<span className="font-semibold block mb-1 text-gray-900 dark:text-white">
-										Écoute & Dialogue
-									</span>
-									La cellule agit comme tiers de confiance pour organiser un dialogue neutre et
-									respectueux, cherchant une solution amiable pour préserver l&apos;ambiance
-									générale.
-								</p>
-							</div>
-
-							<div className="flex gap-4 items-start p-4 rounded-lg bg-blue-50 dark:bg-blue-900/20">
-								<div className="bg-gaelle-blue text-white size-8 rounded-full flex items-center justify-center shrink-0 font-bold">
-									3
-								</div>
-								<p className="text-base lg:text-lg text-gray-700 dark:text-gray-300">
-									<span className="font-semibold block mb-1 text-gray-900 dark:text-white">
-										Autonomie décisionnelle
-									</span>
-									Elle gère ses équipes de façon autonome. Si nécessaire et avec l&apos;accord de la
-									victime, elle peut remonter les informations aux instances compétentes pour
-									décision officielle.
-								</p>
-							</div>
-						</CardContent>
-					</Card>
-
-					{/* Contact Card */}
-					<Card className="border-t-4 border-t-amber-500 shadow-lg hover:shadow-xl transition-shadow duration-300 flex flex-col">
-						<CardHeader>
-							<CardTitle className="flex items-center gap-3 text-2xl lg:text-3xl text-gray-800 dark:text-gray-100">
-								<Users className="size-8 text-amber-500" />
-								Besoin d&apos;en parler ?
-							</CardTitle>
-						</CardHeader>
-						<CardContent className="flex-1 flex flex-col items-center justify-center text-center p-8">
-							<p className="mb-8 text-lg text-gray-600 dark:text-gray-400 max-w-md">
-								L&apos;équipe de médiation est là pour vous écouter en toute bienveillance et
-								confidentialité. N&apos;hésitez pas à nous contacter.
-							</p>
-
-							<div className="relative size-64 mb-8 animate-in fade-in zoom-in duration-700">
-								<Image
-									src="/emote.webp"
-									alt="Médiation Rose Griffon"
-									fill
-									sizes="(max-width: 768px) 100vw, 300px"
-									className="object-contain drop-shadow-xl"
-								/>
-							</div>
-
-							<Button
-								asChild
-								size="lg"
-								className="w-full max-w-sm text-lg h-14 bg-amber-500 hover:bg-amber-600 text-white shadow-md hover:shadow-lg transition-all transform hover:-translate-y-1"
+					<CardContent className="flex grow flex-col gap-4">
+						{MISSIONS.map((mission, index) => (
+							<div
+								key={mission.id}
+								className="flex items-start gap-4 rounded-lg border border-border bg-muted p-4"
 							>
-								<a
-									href="mailto:Rosegriffon.mediation@Gmail.com"
-									target="_blank"
-									rel="noopener noreferrer"
-									className="flex items-center justify-center gap-3"
+								<span
+									className="flex size-8 shrink-0 items-center justify-center rounded-full bg-primary font-bold text-primary-foreground"
+									aria-hidden
 								>
-									<Mail className="size-6" />
-									Contacter la cellule
-								</a>
-							</Button>
-							<p className="mt-4 text-sm text-gray-500 dark:text-gray-400">
-								Réponse sous 48h ouvrées
-							</p>
-						</CardContent>
-					</Card>
-				</div>
+									{index + 1}
+								</span>
+								<p className="text-fluid-body-md text-muted-foreground">
+									<strong className="mb-1 block font-semibold text-foreground">
+										{mission.titre}
+									</strong>
+									{mission.texte}
+								</p>
+							</div>
+						))}
+					</CardContent>
+				</Card>
+
+				{/* Contact */}
+				<Card className="flex flex-col border-t-4 border-t-secondary shadow-lg transition-shadow duration-300 hover:shadow-xl">
+					<CardHeader>
+						<CardTitle className="flex items-center gap-3 text-fluid-headline-md font-bold">
+							<MessageCircle className="size-7 shrink-0 text-secondary" aria-hidden />
+							Besoin d&apos;en parler ?
+						</CardTitle>
+					</CardHeader>
+					<CardContent className="flex grow flex-col items-center justify-center gap-6 text-center">
+						<p className="max-w-md text-fluid-body-md text-muted-foreground">
+							L&apos;équipe de médiation est là pour vous écouter en toute bienveillance et
+							confidentialité. N&apos;hésitez pas à nous contacter.
+						</p>
+
+						<div className="relative aspect-square w-full max-w-56">
+							<Image
+								src="/emote.webp"
+								alt=""
+								fill
+								sizes="(max-width: 640px) 60vw, 224px"
+								className="object-contain drop-shadow-xl"
+							/>
+						</div>
+
+						<Button
+							asChild
+							size="lg"
+							className="h-auto min-h-14 w-full max-w-sm py-3 text-base whitespace-normal"
+						>
+							<a href={`mailto:${ADRESSE_MEDIATION}`}>
+								<Mail className="size-5" aria-hidden />
+								Écrire à la cellule
+							</a>
+						</Button>
+						<p className="text-sm text-muted-foreground">
+							<span className="block break-all font-medium text-foreground">
+								{ADRESSE_MEDIATION}
+							</span>
+							Réponse sous 48 h ouvrées.
+						</p>
+						<p className="text-sm text-muted-foreground">
+							Votre demande ne relève pas de la médiation ?{" "}
+							<Link href="/a-propos/contact" className="font-medium text-primary underline">
+								Utilisez le formulaire de contact
+							</Link>
+							.
+						</p>
+					</CardContent>
+				</Card>
 			</div>
-		</div>
+		</PageContainer>
 	);
 }

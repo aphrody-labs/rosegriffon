@@ -12,7 +12,7 @@ import { ADMIN_ROLES } from "@/lib/auth-roles";
 import { getIPIntelligence } from "@/lib/ip-intelligence";
 import { getPublicOrigin } from "@/lib/site-url";
 import { sendEmail } from "@/src/lib/email";
-import { commonAuthOptions, ensureUserProfile } from "@rose-griffon/auth";
+import { commonAuthOptions, ensureUserProfile, googleProvider } from "@rose-griffon/auth";
 
 export { ensureUserProfile } from "@rose-griffon/auth";
 
@@ -162,10 +162,7 @@ function createAuth() {
 				// affiche l'écran d'autorisation et marche pour tout le monde.
 				prompt: "consent",
 			},
-			google: {
-				clientId: process.env.GOOGLE_CLIENT_ID!,
-				clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
-			},
+			...googleProvider,
 		},
 
 		rateLimit: {
