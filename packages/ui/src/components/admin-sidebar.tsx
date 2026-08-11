@@ -47,6 +47,10 @@ export function AdminSidebar({
 	subtitle = "Rose Griffon",
 	footer,
 	showCreatorItems = false,
+	// Le prop était déclaré dans l'interface mais jamais lu : les trois ancres de
+	// retour étaient figées sur "/admin", ce qui interdisait à azalee (dont
+	// l'espace d'administration vit sous /dashboard) d'adopter ce composant.
+	baseHref = "/admin",
 }: AdminSidebarProps) {
 	const pathname = usePathname();
 	const [openSubmenu, setOpenSubmenu] = React.useState<string | null>(null);
@@ -139,7 +143,7 @@ export function AdminSidebar({
 		<>
 			{/* Mobile Header */}
 			<div className="fixed top-0 left-0 right-0 z-30 flex h-16 items-center justify-between border-b border-sidebar-border bg-sidebar px-4 shadow-sm lg:hidden">
-				<Link href="/admin" className="flex items-center gap-2">
+				<Link href={baseHref} className="flex items-center gap-2">
 					<div className="flex size-8 items-center justify-center rounded-lg bg-sidebar-foreground/15">
 						<Shield className="size-4 text-sidebar-foreground" />
 					</div>
@@ -150,7 +154,7 @@ export function AdminSidebar({
 			{/* Desktop Sidebar */}
 			<aside className="sticky top-0 hidden h-screen w-64 flex-col border-r border-sidebar-border bg-sidebar lg:flex">
 				<div className="border-b border-sidebar-border p-4">
-					<Link href="/admin" className="flex items-center gap-3">
+					<Link href={baseHref} className="flex items-center gap-3">
 						{logo || (
 							<div className="flex size-9 items-center justify-center rounded-lg bg-sidebar-foreground/15">
 								<Shield className="size-4 text-sidebar-foreground" />
@@ -171,10 +175,10 @@ export function AdminSidebar({
 			{/* Mobile Bottom Navigation (optional, app can use its own) */}
 			<div className="pb-safe fixed bottom-0 left-0 right-0 z-50 flex items-center justify-around border-t border-sidebar-border bg-sidebar px-4 py-2 lg:hidden">
 				<Link
-					href="/admin"
+					href={baseHref}
 					className={cn(
 						"flex flex-col items-center gap-1 rounded-lg p-2 transition-colors",
-						pathname === "/admin" ? "text-sidebar-foreground" : "text-sidebar-foreground/80"
+						pathname === baseHref ? "text-sidebar-foreground" : "text-sidebar-foreground/80"
 					)}
 				>
 					<Home className="size-5" />

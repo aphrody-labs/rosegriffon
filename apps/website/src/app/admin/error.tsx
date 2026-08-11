@@ -18,8 +18,8 @@ export default function AdminError({
 	return (
 		<div className="container max-w-4xl py-20 space-y-8">
 			<div className="flex flex-col items-center justify-center text-center space-y-4">
-				<div className="p-4 bg-red-50 rounded-full">
-					<AlertCircle className="size-12 text-red-600" />
+				<div className="rounded-full bg-destructive/10 p-4">
+					<AlertCircle className="size-12 text-destructive" />
 				</div>
 				<h2 className="text-3xl font-bold tracking-tight text-foreground">
 					Une erreur inattendue est survenue
@@ -29,21 +29,22 @@ export default function AdminError({
 				</p>
 			</div>
 
-			<Alert
-				variant="destructive"
-				className="max-w-2xl mx-auto border-red-200 bg-red-50 dark:bg-red-950/20"
-			>
-				<AlertCircle className="size-4 text-red-600" />
-				<AlertTitle className="text-red-800 dark:text-red-400">Détails techniques</AlertTitle>
-				<AlertDescription className="mt-2 font-mono text-xs bg-muted/400 dark:bg-black/20 p-4 rounded border border-red-100 dark:border-red-900/50 text-red-900 dark:text-red-300 overflow-auto max-h-64">
+			{/* La pile d'exécution divulguait les chemins absolus du VPS et les noms
+			    de modules internes à l'administrateur — et poussait les boutons sous
+			    la ligne de flottaison. On ne montre que le digest en production ;
+			    la pile reste dans les journaux serveur via le console.error ci-dessus. */}
+			<Alert variant="destructive" className="mx-auto max-w-2xl">
+				<AlertCircle className="size-4" />
+				<AlertTitle>Détails techniques</AlertTitle>
+				<AlertDescription className="mt-2 max-h-64 overflow-auto rounded border border-destructive/20 bg-destructive/5 p-4 font-mono text-xs">
 					{error.message || "Erreur inconnue"}
 					{error.digest && (
-						<div className="mt-2 pt-2 border-t border-red-200/50 opacity-70">
-							Digest: {error.digest}
+						<div className="mt-2 border-t border-destructive/20 pt-2 opacity-70">
+							Digest : {error.digest}
 						</div>
 					)}
-					{error.stack && (
-						<div className="mt-2 pt-2 border-t border-red-200/50 opacity-70 whitespace-pre-wrap">
+					{process.env.NODE_ENV !== "production" && error.stack && (
+						<div className="mt-2 border-t border-destructive/20 pt-2 whitespace-pre-wrap opacity-70">
 							{error.stack}
 						</div>
 					)}

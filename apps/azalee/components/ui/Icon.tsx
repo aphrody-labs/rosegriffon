@@ -1,5 +1,6 @@
 import { CommonSpriteIcon } from "@/components/ui/CommonSpriteIcon";
 import type { SpriteCommonKey } from "@/config/sprites-common";
+import { CircleHelp } from "lucide-react";
 import { iconMap } from "@/lib/icons";
 import { cn } from "@/lib/utils";
 
@@ -42,6 +43,13 @@ export const Icon = ({
 
 	const LucideIcon = iconMap[name];
 	if (!LucideIcon) {
+		// Un nom inconnu rendait `null` en silence : l'icône disparaissait mais son
+		// conteneur gardait sa taille, laissant un carré vide impossible à repérer.
+		// En développement on le rend visible ; en production on n'affiche rien.
+		if (process.env.NODE_ENV !== "production") {
+			console.warn(`Icon inconnue : « ${name} » (absente de iconMap)`);
+			return <CircleHelp size={size} className={cn("opacity-40", className)} aria-hidden="true" />;
+		}
 		return null;
 	}
 	return (
