@@ -19,12 +19,7 @@
 			"@rose-griffon/types": ["../../packages/types/src/index.ts"],
 			"@rose-griffon/types/*": ["../../packages/types/src/*"],
 			"@rose-griffon/auth": ["../../packages/auth/src/index.ts"],
-			"@rose-griffon/auth/*": ["../../packages/auth/src/*"],
-			"@rose-griffon/better-auth-steam": ["../../packages/better-auth-steam/src/index.ts"],
-			"@rose-griffon/better-auth-steam/client": [
-				"../../packages/better-auth-steam/src/client.ts"
-			],
-			"@rose-griffon/better-auth-steam/*": ["../../packages/better-auth-steam/src/*"]
+			"@rose-griffon/auth/*": ["../../packages/auth/src/*"]
 		},
 		"incremental": true,
 		"plugins": [

@@ -529,7 +529,7 @@ export function Shell({
 	const isEditorPage =
 		pathname.startsWith("/dashboard/news/") &&
 		(pathname.includes("/new") || pathname.split("/").length > 3);
-	const isFullscreenPage = pathname === "/login" || pathname.startsWith("/menu");
+	const isFullscreenPage = pathname === "/login";
 
 	// Service Worker registration
 	useEffect(() => {

@@ -5,14 +5,18 @@ import { betterAuth } from "better-auth";
 import { nextCookies } from "better-auth/next-js";
 import { bearer, twoFactor } from "better-auth/plugins";
 import { agentAuth } from "@better-auth/agent-auth";
-import { steam } from "@rose-griffon/better-auth-steam";
 import { Pool } from "pg";
 import { logAudit } from "@/lib/audit";
 import { ADMIN_ROLES } from "@/lib/auth-roles";
 import { getIPIntelligence } from "@/lib/ip-intelligence";
 import { getPublicOrigin } from "@/lib/site-url";
 import { sendEmail } from "@/src/lib/email";
-import { commonAuthOptions, ensureUserProfile, googleProvider } from "@rose-griffon/auth";
+import {
+	commonAuthOptions,
+	createAccountOptions,
+	ensureUserProfile,
+	googleProvider,
+} from "@rose-griffon/auth";
 
 export { ensureUserProfile } from "@rose-griffon/auth";
 
@@ -50,6 +54,16 @@ function createAuth() {
 			"build-placeholder-secret-not-used-at-runtime-only-prevents-prerender-throw",
 
 		...commonAuthOptions,
+
+		// Le spread ci-dessus apporte la correspondance des colonnes ; il faut la
+		// réétaler ici, sinon redéfinir `user` l'emporterait entièrement.
+		// `createAccountOptions` active le changement d'adresse et la suppression
+		// de compte, désactivés par défaut dans Better Auth : les boutons
+		// correspondants de `/settings` échouaient donc systématiquement.
+		user: {
+			...commonAuthOptions.user,
+			...createAccountOptions({ appName: "Azalée", sendEmail }),
+		},
 
 		trustedOrigins: [
 			getPublicOrigin(),
@@ -178,7 +192,7 @@ function createAuth() {
 			...commonAuthOptions.account,
 			accountLinking: {
 				enabled: true,
-				trustedProviders: ["google", "discord", "steam"],
+				trustedProviders: ["google", "discord"],
 			},
 		},
 
@@ -325,10 +339,6 @@ function createAuth() {
 				issuer: "Azalée",
 			}),
 			bearer(),
-			// Login Steam (OpenID 2.0) + vue compte IEVR (app 2799860) via Steam Web API.
-			// Steam n'expose PAS d'OAuth2/OIDC public → plugin custom OpenID 2.0 (cf.
-			// @rose-griffon/better-auth-steam). webApiKey lu depuis STEAM_WEB_API_KEY.
-			steam({ realm: getBetterAuthURL() }),
 			nextCookies(),
 		],
 	});

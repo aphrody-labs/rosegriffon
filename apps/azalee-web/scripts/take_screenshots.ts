@@ -22,7 +22,6 @@ const PAGES = {
 	gallery: "http://127.0.0.1:3003/gallery",
 	save: "http://127.0.0.1:3003/save",
 	cpk: "http://127.0.0.1:3003/cpk",
-	menu: "http://127.0.0.1:3003/menu/100_mainmenu",
 	quete: "http://127.0.0.1:3003/quete",
 	"quete-classroom": "http://127.0.0.1:3003/quete/0x8933A62B",
 	succes: "http://127.0.0.1:3003/succes",

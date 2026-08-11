@@ -385,6 +385,15 @@
 	--shadow-level-5: 0px 8px 12px 6px rgba(0, 0, 0, 0.15), 0px 4px 4px 0px rgba(0, 0, 0, 0.3);
 
 	/* Shadcn tokens */
+	/* `primary-foreground` et `secondary-foreground` étaient absents de ce pont :
+	 * les utilitaires n'étaient donc jamais générés et les composants partagés
+	 * qui s'appuient dessus (variantes `default`/`secondary` de Button et Badge,
+	 * Tooltip, Switch…) rendaient leur libellé sans couleur de texte — ambre
+	 * clair sur fond clair. Vérifié à 0 règle dans le CSS servi. Ils pointent sur
+	 * les paires M3 pour rester cohérents avec `--color-primary`/`--color-secondary`
+	 * ci-dessus, qui viennent eux aussi de `md-sys`. */
+	--color-primary-foreground: var(--md-sys-color-on-primary);
+	--color-secondary-foreground: var(--md-sys-color-on-secondary);
 	--color-destructive: hsl(var(--destructive));
 	--color-destructive-foreground: hsl(var(--destructive-foreground));
 	--color-muted: hsl(var(--muted));

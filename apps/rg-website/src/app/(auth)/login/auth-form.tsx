@@ -1,6 +1,6 @@
 "use client";
 
-import { Button } from "@rose-griffon/ui";
+import { Button, DiscordIcon, GoogleIcon, PatreonIcon } from "@rose-griffon/ui";
 import { Loader2 } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
@@ -8,7 +8,6 @@ import { useState } from "react";
 
 import { authClient } from "@/lib/auth-client";
 
-import { DiscordIcon, GoogleIcon, PatreonIcon } from "./_components/social-icons";
 
 type Provider = "discord" | "google" | "patreon";
 
@@ -63,12 +62,12 @@ export function AuthForm() {
 				size="lg"
 				onClick={() => signIn("discord")}
 				disabled={isLoading}
-				className="h-12 w-full gap-3 bg-[#5865F2] font-semibold text-white shadow-md hover:bg-[#4752c4]"
+				className="h-12 w-full gap-3 bg-discord font-semibold text-rg-sur-marine shadow-md hover:bg-discord/90"
 			>
 				{loadingProvider === "discord" ? (
 					<Loader2 className="size-5 animate-spin" aria-hidden="true" />
 				) : (
-					<DiscordIcon />
+					<DiscordIcon className="size-5" />
 				)}
 				{loadingProvider === "discord" ? "Connexion en cours…" : "Se connecter avec Discord"}
 			</Button>
@@ -84,7 +83,7 @@ export function AuthForm() {
 				{loadingProvider === "google" ? (
 					<Loader2 className="size-5 animate-spin" aria-hidden="true" />
 				) : (
-					<GoogleIcon />
+					<GoogleIcon className="size-5" />
 				)}
 				{loadingProvider === "google" ? "Connexion en cours…" : "Se connecter avec Google"}
 			</Button>
@@ -94,12 +93,12 @@ export function AuthForm() {
 				size="lg"
 				onClick={() => signIn("patreon")}
 				disabled={isLoading}
-				className="h-12 w-full gap-3 bg-[#e63b46] font-semibold text-white shadow-md hover:bg-[#c8323b]"
+				className="h-12 w-full gap-3 bg-patreon font-semibold text-rg-sur-marine shadow-md hover:bg-patreon/90"
 			>
 				{loadingProvider === "patreon" ? (
 					<Loader2 className="size-5 animate-spin" aria-hidden="true" />
 				) : (
-					<PatreonIcon />
+					<PatreonIcon className="size-5" />
 				)}
 				{loadingProvider === "patreon" ? "Redirection…" : "Lier mon compte Patreon"}
 			</Button>

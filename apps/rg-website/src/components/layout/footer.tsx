@@ -1,6 +1,6 @@
+import { DiscordIcon } from "@rose-griffon/ui";
 import Link from "next/link";
 
-import DiscordIcon from "@/shared/icons/discord";
 import TwitterIcon from "@/shared/icons/twitter";
 
 export default function Footer() {
@@ -92,13 +92,12 @@ export default function Footer() {
 								href="https://discord.gg/TYzQvbByv4"
 								target="_blank"
 								rel="noopener noreferrer"
-								className="group relative p-3 rounded-full bg-muted hover:bg-[#5865F2] transition-all duration-300 hover:scale-110 hover:shadow-lg focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+								className="group relative p-3 rounded-full bg-muted hover:bg-discord transition-all duration-300 hover:scale-110 hover:shadow-lg focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
 								aria-label="Discord Rose Griffon"
 							>
 								<DiscordIcon
-									width={24}
-									height={24}
-									className="text-muted-foreground group-hover:text-white transition-colors duration-300"
+									title="Discord"
+									className="size-6 text-muted-foreground group-hover:text-rg-sur-marine transition-colors duration-300"
 								/>
 							</Link>
 							<Link

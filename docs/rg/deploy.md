@@ -26,8 +26,7 @@ une commande explicite sur la machine.
 | `rg-rag-embed` | 8799 | service d'embeddings auto-hébergé | non |
 | `rg-cdn` | 8804 | CDN images (`/images`, `/upload`) | non |
 | `cdn-variants` | 8805 | redimensionnement + WebP à la volée | non |
-| `iecode-cdn` | 8788 | décodage **live** des archives CPK du jeu | non |
-| `nie-model-serve` | 8790 | modèles 3D assemblés à la volée | non (binaire Rust) |
+| `nie-model-serve` | 8790 | modèles 3D assemblés à la volée, décodage **live** des textures des archives CPK | non (binaire Rust) |
 | `rg-cron` | — | tâches planifiées | non |
 | `azalee-mirror-sync` | — | rafraîchissement quotidien du miroir SQLite | non |
 

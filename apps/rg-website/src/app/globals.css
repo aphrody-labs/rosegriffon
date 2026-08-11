@@ -2,6 +2,13 @@
 @import "tw-animate-css";
 @import "@rose-griffon/ui/styles.css";
 
+/* La détection automatique de Tailwind s'arrête à la racine du projet et ignore
+ * `node_modules`, où `@rose-griffon/ui` est un lien symbolique : sans ce
+ * `@source`, les utilitaires employés uniquement par les composants partagés
+ * (page « Mon compte », largeurs de sidebar en variables CSS…) ne sont jamais
+ * générés. Azalée déclare la même source. */
+@source "../../../../packages/ui/src";
+
 /* Font Faces from Supabase Assets */
 @font-face {
 	font-family: "Super Cartoon";
@@ -61,6 +68,11 @@
 	--color-input: var(--input);
 	--color-border: var(--border);
 	--color-destructive: var(--destructive);
+	/* Absent de ce pont jusqu'ici : la variante `destructive` du Badge partagé
+	 * s'affichait sans couleur de texte (0 règle `.text-destructive-foreground`
+	 * dans le CSS servi). La variable source est déclarée dans le `:root` de
+	 * packages/ui/src/styles.css. */
+	--color-destructive-foreground: var(--destructive-foreground);
 	--color-accent-foreground: var(--accent-foreground);
 	--color-accent: var(--accent);
 	--color-muted-foreground: var(--muted-foreground);
@@ -74,24 +86,12 @@
 	--color-card-foreground: var(--card-foreground);
 	--color-card: var(--card);
 
-	/* DA Rose Griffon — tokens de marque exposés en utilitaires Tailwind
-	 * (`bg-rg-marine`, `text-rg-or`…). Source : packages/ui/src/styles.css.
-	 * Constants d'un thème à l'autre : réservés aux surfaces de marque. */
-	--color-rg-marine: var(--rg-marine);
-	--color-rg-marine-clair: var(--rg-marine-clair);
-	--color-rg-or: var(--rg-griffon);
-	--color-rg-brique: var(--rg-brique);
-	--color-rg-brique-clair: var(--rg-brique-clair);
-	--color-rg-rose: var(--rg-rose);
-	--color-rg-sur-marine: var(--rg-sur-marine);
-
-	/* États sémantiques (succès / info / alerte) — l'erreur passe par `destructive`. */
-	--color-succes: var(--rg-succes);
-	--color-info: var(--rg-info);
-	--color-alerte: var(--rg-alerte);
-
-	/* Couleur de marque Discord (imposée par leurs guidelines, pas thémable). */
-	--color-discord: #5865f2;
+	/* Les tokens de marque RG (`bg-rg-marine`, `text-rg-or`…), les états
+	 * sémantiques (`succes`/`info`/`alerte`) et les couleurs de marque tierces
+	 * (`discord`, `patreon`, `twitch`, `steam`) sont déclarés une seule fois dans
+	 * le `@theme inline` de packages/ui/src/styles.css, importé ci-dessus : les
+	 * dupliquer ici les ferait diverger du wiki, qui utilise les mêmes
+	 * composants partagés. */
 
 	/* Custom brand colors */
 	--color-gaelle-blue: #2f6e9c;
@@ -147,6 +147,10 @@
 		--accent: oklch(0.97 0 0);
 		--accent-foreground: oklch(0.205 0 0);
 		--destructive: oklch(0.577 0.245 27.325);
+		/* Texte posé SUR `--destructive` : la variante `destructive` du Badge
+		 * partagé s'en sert. Sans lui, l'utilitaire ne produisait aucune règle.
+		 */
+		--destructive-foreground: oklch(0.985 0 0);
 		--border: oklch(0.922 0 0);
 		--input: oklch(0.922 0 0);
 		--ring: oklch(0.708 0 0);
@@ -619,6 +623,10 @@
 		--accent: oklch(0.7 0.2 45); /* Bright orange */
 		--accent-foreground: oklch(0.98 0 0);
 		--destructive: oklch(0.577 0.245 27.325);
+		/* Texte posé SUR `--destructive` : la variante `destructive` du Badge
+		 * partagé s'en sert. Sans lui, l'utilitaire ne produisait aucune règle.
+		 */
+		--destructive-foreground: oklch(0.985 0 0);
 		--border: oklch(0.88 0.02 80);
 		--input: oklch(0.88 0.02 80);
 		--ring: oklch(0.65 0.18 50);
@@ -651,6 +659,10 @@
 		--accent: oklch(0.65 0.18 195); /* Bright cyan */
 		--accent-foreground: oklch(0.98 0 0);
 		--destructive: oklch(0.577 0.245 27.325);
+		/* Texte posé SUR `--destructive` : la variante `destructive` du Badge
+		 * partagé s'en sert. Sans lui, l'utilitaire ne produisait aucune règle.
+		 */
+		--destructive-foreground: oklch(0.985 0 0);
 		--border: oklch(0.9 0.02 220);
 		--input: oklch(0.9 0.02 220);
 		--ring: oklch(0.6 0.15 200);
@@ -683,6 +695,10 @@
 		--accent: oklch(0.7 0.12 350); /* Bright rose */
 		--accent-foreground: oklch(0.98 0 0);
 		--destructive: oklch(0.577 0.245 27.325);
+		/* Texte posé SUR `--destructive` : la variante `destructive` du Badge
+		 * partagé s'en sert. Sans lui, l'utilitaire ne produisait aucune règle.
+		 */
+		--destructive-foreground: oklch(0.985 0 0);
 		--border: oklch(0.85 0.03 350);
 		--input: oklch(0.85 0.03 350);
 		--ring: oklch(0.45 0.12 10);
@@ -733,6 +749,10 @@
 		--muted-foreground: #c83c51;
 
 		--destructive: #921044;
+		/* Texte posé SUR `--destructive` : la variante `destructive` du Badge
+		 * partagé s'en sert. Sans lui, l'utilitaire ne produisait aucune règle.
+		 */
+		--destructive-foreground: oklch(0.985 0 0);
 		--ring: #fecd50;
 
 		/* Graphiques */

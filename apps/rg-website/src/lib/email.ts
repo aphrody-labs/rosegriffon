@@ -32,6 +32,41 @@ const transporter = nodemailer.createTransport({
 });
 
 /**
+ * Envoi générique, réutilisé par Better Auth (vérification d'adresse,
+ * confirmation de suppression de compte). Les envois transactionnels de la
+ * boutique ci-dessous gardent leur propre gabarit.
+ */
+export async function sendEmail({
+	to,
+	subject,
+	html,
+	text,
+}: {
+	to: string;
+	subject: string;
+	html: string;
+	text?: string;
+}) {
+	if (!process.env.SMTP_USER || !process.env.SMTP_PASSWORD) {
+		console.warn("[email] identifiants SMTP absents — message non envoyé à", to);
+		return;
+	}
+	try {
+		return await transporter.sendMail({
+			from: process.env.SMTP_FROM || '"Rose Griffon" <contact@rosegriffon.fr>',
+			html,
+			subject,
+			// Repli texte brut : certains clients refusent un message sans partie texte.
+			text: text ?? html.replaceAll(/<[^>]*>/g, " ").replaceAll(/\s+/g, " ").trim(),
+			to,
+		});
+	} catch (error) {
+		console.error("[email] envoi impossible", error);
+		throw error;
+	}
+}
+
+/**
  * Envoyer un email de confirmation de commande
  */
 export async function sendOrderConfirmationEmail(data: OrderConfirmationData) {

@@ -9,8 +9,10 @@ import {
 	CardDescription,
 	CardHeader,
 	CardTitle,
+	DiscordIcon,
 	Separator,
 	Skeleton,
+	TwitchIcon,
 } from "@rose-griffon/ui";
 import Image from "next/image";
 import Link from "next/link";
@@ -19,7 +21,7 @@ import { Suspense } from "react";
 
 import { AlertCircle, CheckCircle } from "@/lib/icons-config";
 
-import { DiscordIcon, TwitchIcon, XIcon, YouTubeIcon } from "./_components/social-icons";
+import { XIcon, YouTubeIcon } from "./_components/social-icons";
 import { AuthForm } from "./auth-form";
 
 function safeDecode(value: string | null | undefined): string | null {
@@ -116,7 +118,7 @@ function LoginPageContent() {
 											className="size-10 rounded-full"
 										>
 											<a href={href} target="_blank" rel="noopener noreferrer" aria-label={label}>
-												<Icon size={16} />
+												<Icon className="size-4" />
 											</a>
 										</Button>
 									))}

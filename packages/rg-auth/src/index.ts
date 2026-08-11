@@ -191,6 +191,13 @@ export const googleProvider = {
 	},
 } as const;
 
+export {
+	type AccountEmailMessage,
+	type AccountEmailSender,
+	type AccountOptionsInput,
+	createAccountOptions,
+} from "./account-options";
+
 /**
  * Common field mappings for Better Auth tables.
  * Ensures consistent column names across all apps.

@@ -1,121 +1,106 @@
-import { Button } from "@rose-griffon/ui";
-import { ArrowLeft } from "lucide-react";
-import Link from "next/link";
+import { resolveAccountTab, type AccountSession, type AccountTabId } from "@rose-griffon/ui";
+import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 
 import { auth } from "@/lib/auth";
-import { getServerSession, getServerUser } from "@/lib/auth-helpers";
-import { createAdminClient, createClient } from "@/lib/supabase/server";
+import { getServerSession } from "@/lib/auth-helpers";
+import { createAdminClient } from "@/lib/supabase/server";
 
-import { AddressSection } from "./sections/address-section";
-import { AccountTabs } from "./sections/account-tabs";
-import type { AccountTabValue } from "./sections/account-tabs";
-import { ConnectionsSection } from "./sections/connections-section";
-import type { LinkedAccount } from "./sections/connections-section";
-import { ProfileSection } from "./sections/profile-section";
-import { SecuritySection } from "./sections/security-section";
-import type { SessionItem } from "./sections/security-section";
+import { AccountClient } from "./account-client";
 
 export const dynamic = "force-dynamic";
 
-const VALID_TABS: readonly AccountTabValue[] = ["profile", "address", "connections", "security"];
+const TABS: readonly AccountTabId[] = ["profile", "address", "connections", "security"];
 
 export default async function AccountPage({
 	searchParams,
 }: {
 	searchParams: Promise<{ tab?: string }>;
 }) {
-	const user = await getServerUser();
-	if (!user) {
+	const session = await getServerSession();
+	if (!session?.user) {
 		redirect("/login");
 	}
+	const user = session.user;
 
-	const { tab: rawTab } = await searchParams;
-	const initialTab: AccountTabValue = (VALID_TABS as readonly string[]).includes(rawTab ?? "")
-		? (rawTab as AccountTabValue)
-		: "profile";
+	const { tab } = await searchParams;
 
-	const supabase = await createClient();
-	const { data: profile } = await supabase.from("profiles").select("*").eq("id", user.id).single();
-
+	// Service-role : la page édite des colonnes hors liste blanche publique
+	// (adresse postale, nom complet). Depuis la fermeture PII du 11/8/2026 un
+	// client anon échoue en 42501 sur `profiles`, ce qui renvoyait un profil
+	// `null` et affichait un formulaire vide. La session est vérifiée ci-dessus
+	// et la requête est filtrée sur l'identifiant de session.
 	const admin = createAdminClient();
-	const accountsRes = admin
-		? await admin.from("account").select("provider_id, created_at, scope").eq("user_id", user.id)
-		: { data: null };
-	const accounts: LinkedAccount[] = (accountsRes.data ?? []).map((row) => {
-		const r = row as {
-			provider_id: string;
-			created_at: string;
-			scope: string | null;
-		};
-		return {
-			createdAt: r.created_at,
-			provider: r.provider_id,
-			scope: r.scope,
-		};
-	});
+	const { data: profileRow, error: profileError } = await admin
+		.from("profiles")
+		.select("*")
+		.eq("id", user.id)
+		.maybeSingle();
 
-	const session = await getServerSession();
-	const currentSessionId = session?.session?.id ?? null;
-	const sessionsRaw = admin
-		? await admin
-				.from("session")
-				.select("id, created_at, expires_at, ip_address, user_agent")
-				.eq("user_id", user.id)
-				.order("created_at", { ascending: false })
-		: { data: null };
-	const sessions: SessionItem[] = (sessionsRaw.data ?? []).map((row) => {
-		const r = row as {
-			id: string;
-			created_at: string;
-			expires_at: string;
-			ip_address: string | null;
-			user_agent: string | null;
-		};
-		return {
-			createdAt: r.created_at,
-			currentSessionId: r.id === currentSessionId,
-			expiresAt: r.expires_at,
-			id: r.id,
-			ipAddress: r.ip_address,
-			userAgent: r.user_agent,
-		};
-	});
+	if (profileError) {
+		console.error("[compte] lecture du profil impossible", profileError);
+	}
 
-	void auth;
+	const profile = (profileRow ?? {}) as Record<string, unknown>;
+	const str = (key: string) => (typeof profile[key] === "string" ? (profile[key] as string) : "");
 
-	const profileTyped = profile as { username?: string } | null;
-	const backHref = profileTyped?.username ? `/profil/${profileTyped.username}` : "/";
+	const { data: accountRows } = await admin
+		.from("account")
+		.select("provider_id, created_at, scope")
+		.eq("user_id", user.id);
+
+	// `listSessions` renvoie le `token` de chaque session — la clé qu'attend
+	// `revokeSession`. La lecture directe de la table ne remontait que l'`id`,
+	// que l'endpoint ne trouve pas : la révocation ne faisait rien tout en
+	// répondant « succès ».
+	let sessions: AccountSession[] = [];
+	try {
+		const list = await auth.api.listSessions({ headers: await headers() });
+		sessions = (list ?? []).map((s) => ({
+			createdAt: new Date(s.createdAt).toISOString(),
+			current: s.token === session.session.token,
+			expiresAt: s.expiresAt ? new Date(s.expiresAt).toISOString() : null,
+			ipAddress: s.ipAddress ?? null,
+			token: s.token,
+			userAgent: s.userAgent ?? null,
+		}));
+	} catch (error) {
+		console.error("[compte] liste des sessions indisponible", error);
+	}
+
+	const username = str("username");
 
 	return (
-		<div className="min-h-screen bg-muted/30">
-			<div className="container mx-auto max-w-5xl p-4 sm:p-6 lg:p-8">
-				<nav aria-label="Retour" className="mb-4">
-					<Button variant="ghost" size="sm" asChild className="-ml-2">
-						<Link href={backHref}>
-							<ArrowLeft className="mr-2 size-4" aria-hidden="true" />
-							Retour à mon profil
-						</Link>
-					</Button>
-				</nav>
-
-				<header className="mb-6 space-y-1">
-					<h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
-						Paramètres du compte
-					</h1>
-					<p className="text-sm text-muted-foreground">
-						Connecté en tant que <span className="font-medium text-foreground">{user.email}</span>
-					</p>
-				</header>
-
-				<AccountTabs
-					initial={initialTab}
-					profile={<ProfileSection profile={profile} />}
-					address={<AddressSection profile={profile} />}
-					connections={<ConnectionsSection accounts={accounts} />}
-					security={<SecuritySection sessions={sessions} />}
-				/>
-			</div>
-		</div>
+		<AccountClient
+			userId={user.id}
+			email={user.email}
+			initialTab={resolveAccountTab(tab, TABS)}
+			backHref={username ? `/profil/${username}` : "/dashboard"}
+			avatarUrl={str("avatar_url") || null}
+			username={username || null}
+			role={str("role") || null}
+			twoFactorEnabled={Boolean((user as { twoFactorEnabled?: boolean }).twoFactorEnabled)}
+			profile={{
+				badges: Array.isArray(profile.badges) ? (profile.badges as string[]) : [],
+				banner_url: str("banner_url"),
+				bio: str("bio"),
+				full_name: str("full_name"),
+				twitter_handle: str("twitter_handle"),
+				username,
+				website: str("website"),
+			}}
+			address={{
+				address_line1: str("address_line1"),
+				address_line2: str("address_line2"),
+				city: str("city"),
+				country: str("country"),
+				postal_code: str("postal_code"),
+			}}
+			accounts={(accountRows ?? []).map((row) => {
+				const r = row as { provider_id: string; created_at: string; scope: string | null };
+				return { createdAt: r.created_at, provider: r.provider_id, scope: r.scope };
+			})}
+			sessions={sessions}
+		/>
 	);
 }

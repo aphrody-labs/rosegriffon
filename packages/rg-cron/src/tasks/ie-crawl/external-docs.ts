@@ -172,26 +172,6 @@ status: "stable"
 			console.warn("[Crawl External Docs] Failed to fetch Secteur V README:", err);
 		}
 
-		// 7. Fetch Better Auth Steam Plugin Docs
-		try {
-			console.log("[Crawl External Docs] Fetching Better Auth Steam Plugin Docs...");
-			const steamRes = await fetch("https://raw.githubusercontent.com/better-auth/better-auth/main/docs/content/docs/plugins/steam.mdx");
-			if (steamRes.ok) {
-				const content = await steamRes.text();
-				const frontmatter = `---
-title: "Better Auth Steam Plugin"
-description: "Documentation de l'intégration Steam dans Better Auth."
-scope: ["better-auth", "auth", "steam", "ref"]
-status: "stable"
----
-
-`;
-				await writeFile(join(REFERENCE_DIR, "better-auth-steam-docs.md"), frontmatter + content);
-				console.log("[Crawl External Docs] Fichier better-auth-steam-docs.md enregistré.");
-			}
-		} catch (err) {
-			console.warn("[Crawl External Docs] Failed to fetch Better Auth Steam Plugin Docs:", err);
-		}
 
 		// 8. Fetch Turborepo README
 		try {

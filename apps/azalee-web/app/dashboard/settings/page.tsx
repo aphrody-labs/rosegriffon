@@ -1,32 +1,14 @@
-import { AdminPageHeader as DashboardPageHeader } from "@rose-griffon/ui";
-import { SettingsForm } from "@/components/dashboard/settings-form";
-import { getServerSession } from "@/lib/auth-helpers";
-import { createClient } from "@/lib/supabase/server";
-import { Icon } from "@/components/ui/Icon";
+import { redirect } from "next/navigation";
 
-export default async function SettingsPage() {
-	const session = await getServerSession();
-	if (!session?.user) {
-		return null;
-	}
-
-	const supabase = await createClient();
-	const { data: profile } = await supabase
-		.from("profiles")
-		.select("*")
-		.eq("id", session.user.id)
-		.single();
-
-	return (
-		<div className="space-y-6 sm:space-y-8 max-w-4xl">
-			<DashboardPageHeader
-				breadcrumbs={[{ href: "/dashboard", label: "Tableau de bord" }, { label: "Paramètres" }]}
-				title="Paramètres"
-				subtitle="Gérer votre profil et préférences"
-				icon={<Icon name="settings" size={20} />}
-			/>
-
-			{profile && <SettingsForm initialProfile={profile} userEmail={session.user.email} />}
-		</div>
-	);
+/**
+ * Ancienne troisième implémentation des réglages.
+ *
+ * Le wiki en avait deux (`/settings` et `/dashboard/settings`, via
+ * `components/dashboard/settings-form.tsx`) qui éditaient les mêmes colonnes
+ * avec des formulaires, des validations et des bogues différents. Tout est
+ * regroupé sur `/settings`, qui partage désormais ses composants avec le site
+ * principal ; ce chemin est conservé pour ne pas casser les liens existants.
+ */
+export default function DashboardSettingsPage() {
+	redirect("/settings");
 }

@@ -97,8 +97,6 @@ const nextConfig: NextConfig = {
 		"@rose-griffon/config",
 		"@rose-griffon/auth",
 		"@rose-griffon/assets",
-		"@rose-griffon/menu-render",
-		"@rose-griffon/menu-render-webgpu",
 	],
 
 	// Packages Node.js natifs exclus du bundling serveur
@@ -158,11 +156,6 @@ const nextConfig: NextConfig = {
 				destination: "/tools/random-team",
 				permanent: true,
 				source: "/random-team",
-			},
-			{
-				destination: "/menu/100_mainmenu",
-				permanent: true,
-				source: "/menu",
 			},
 			{
 				destination: "/news",
