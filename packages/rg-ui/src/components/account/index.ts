@@ -15,7 +15,8 @@ export {
 export { AccountDangerZone } from "./account-danger-zone";
 export { AVAILABLE_BADGES, AccountProfileForm, MAX_BADGES } from "./account-profile-form";
 export { AccountSessions, describeUserAgent } from "./account-sessions";
-export { ACCOUNT_TAB_IDS, AccountShell, resolveAccountTab } from "./account-shell";
+export { AccountShell } from "./account-shell";
+export { ACCOUNT_TAB_IDS, resolveAccountTab } from "./tabs";
 export type {
 	AccountActionResult,
 	AccountAddressValues,

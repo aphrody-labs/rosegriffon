@@ -105,14 +105,3 @@ export function AccountShell({
 		</div>
 	);
 }
-
-/** Onglets valides, pour valider le `?tab=` reçu côté serveur. */
-export const ACCOUNT_TAB_IDS = ["profile", "address", "connections", "security"] as const;
-
-/** Normalise un `?tab=` arbitraire vers un onglet réellement monté. */
-export function resolveAccountTab(
-	raw: string | undefined,
-	available: readonly AccountTabId[]
-): AccountTabId {
-	return available.includes(raw as AccountTabId) ? (raw as AccountTabId) : (available[0] ?? "profile");
-}

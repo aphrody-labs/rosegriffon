@@ -108,6 +108,16 @@ export async function ensureUserProfile(
 		const patreonId = patreonAccount?.account_id || null;
 
 		if (existing) {
+			// Première connexion sur un profil pré-créé depuis Discord : il devient
+			// « réclamé », ce qui le rend visible publiquement (policy « Profils réclamés
+			// visibles par tous »). Tant que personne ne s'y connecte, il reste masqué.
+			if (!existing.claimed_at) {
+				await db
+					.from("profiles")
+					.update({ claimed_at: new Date().toISOString() })
+					.eq("id", user.id);
+			}
+
 			// Update avatar/name/provider IDs if changed
 			const hasAvatarChanged = user.image !== existing.avatar_url;
 			const hasNameChanged = user.name !== existing.full_name;
@@ -127,6 +137,28 @@ export async function ensureUserProfile(
 					.eq("id", user.id);
 			}
 			return existing;
+		}
+
+		// Adoption d'un profil pré-créé depuis Discord.
+		//
+		// `profiles_discord_id_key` est UNIQUE : si un profil pré-créé porte déjà ce
+		// `discord_id` sous un autre identifiant, l'insertion ci-dessous échouerait en
+		// 23505 et la personne se retrouverait sans profil. Un profil non réclamé ne
+		// contient que des données issues de Discord (pseudo, avatar) — rien de saisi par
+		// un humain — et n'a par construction aucune ligne dépendante, puisque personne ne
+		// s'y est jamais authentifié. On le libère donc avant de créer le profil réel.
+		if (discordId) {
+			const { error: liberation } = await db
+				.from("profiles")
+				.delete()
+				.eq("discord_id", discordId)
+				.is("claimed_at", null);
+			if (liberation) {
+				console.error(
+					`[@rose-griffon/auth] libération du profil pré-créé ${discordId} impossible:`,
+					liberation.message
+				);
+			}
 		}
 
 		// Generate a clean username
@@ -149,6 +181,9 @@ export async function ensureUserProfile(
 					role: options.defaultRole || "member",
 					discord_id: discordId,
 					patreon_id: patreonId,
+					// Profil réel, par opposition à un profil pré-créé depuis Discord :
+					// il est visible publiquement dès maintenant.
+					claimed_at: new Date().toISOString(),
 					updated_at: new Date().toISOString(),
 				},
 				{ onConflict: "id" }
