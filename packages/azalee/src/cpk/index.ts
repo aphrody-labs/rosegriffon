@@ -310,9 +310,16 @@ export function searchFiles(query: string, limit = 200): CpkFile[] {
 	const q = query.trim().toLowerCase();
 	if (q.length < 2) return [];
 	const db = getDb();
+	// Recherche sur le CHEMIN complet, pas seulement le nom de fichier : c'est le
+	// contrat annoncé, et un dossier comme `telop_waza` ou `220_img` ne porte le
+	// nom d'aucun fichier — la recherche renvoyait donc zéro résultat sur 11 208
+	// fichiers réellement présents, ce qui fait conclure à tort qu'ils n'existent
+	// pas. Le chemin se termine par le nom : chercher un nom continue de marcher.
+	// L'ordre reste `length(name)` d'abord, pour que la correspondance la plus
+	// précise remonte en tête.
 	const rows = db
 		.query(
-			"SELECT path, name, ext, cpk FROM cpk_index WHERE name LIKE ?1 ESCAPE '\\' ORDER BY length(name), name LIMIT ?2",
+			"SELECT path, name, ext, cpk FROM cpk_index WHERE path LIKE ?1 ESCAPE '\\' ORDER BY length(name), name LIMIT ?2",
 		)
 		.all(`%${q.replace(/[%_\\]/g, "\\$&")}%`, limit) as {
 		path: string;
