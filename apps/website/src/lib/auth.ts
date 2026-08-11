@@ -2,7 +2,7 @@ import crypto from "node:crypto";
 import { createClient as createSupabaseAdmin } from "@supabase/supabase-js";
 import { betterAuth } from "better-auth";
 import { nextCookies } from "better-auth/next-js";
-import { bearer, genericOAuth, oAuthProxy, twoFactor } from "better-auth/plugins";
+import { bearer, genericOAuth, twoFactor } from "better-auth/plugins";
 import { commonAuthOptions, ensureUserProfile } from "@rose-griffon/auth";
 import { getPgPool } from "@/lib/db/pg";
 import { fetchIdentity, parseIdentityWithMemberships } from "@/lib/patreon/client";
@@ -117,12 +117,7 @@ export const auth = betterAuth({
 	trustedOrigins: [
 		"https://rosegriffon.fr",
 		"https://www.rosegriffon.fr",
-		"https://rg-website.vercel.app",
-		"https://rg-website-aphrody.vercel.app",
-		"https://rg-website-git-main-aphrody.vercel.app",
-		"https://rg-website-*-aphrody.vercel.app",
 		process.env.BETTER_AUTH_URL ?? "https://rosegriffon.fr",
-		process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "",
 		"http://localhost:3000",
 		"http://localhost:3001",
 	].filter((v, i, a) => v && a.indexOf(v) === i),
@@ -191,13 +186,6 @@ export const auth = betterAuth({
 			issuer: "Rose Griffon",
 		}),
 		bearer(),
-		// oAuthProxy UNIQUEMENT sur les déploiements preview Vercel : sur le domaine
-		// de prod il s'interpose dans le callback OAuth (round-trip + encrypt/decrypt)
-		// et empêche le set-cookie de session → session non persistée après login,
-		// admin/dashboard inaccessible. cf. docs better-auth (oAuthProxy = preview/dev).
-		...(process.env.VERCEL_ENV === "preview"
-			? [oAuthProxy({ productionURL: "https://rosegriffon.fr" })]
-			: []),
 		genericOAuth({
 			config: [
 				{

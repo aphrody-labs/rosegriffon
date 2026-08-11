@@ -38,8 +38,6 @@ yarn-error.log*
 !.env.example
 credentials-calendar.json
 
-# Vercel
-.vercel
 
 # TypeScript
 *.tsbuildinfo

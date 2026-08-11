@@ -222,7 +222,6 @@ export const commonAuthOptions = {
 	advanced: {
 		// Cookies Secure uniquement en prod : en dev local (http://localhost),
 		// un cookie Secure n'est jamais renvoyé par le navigateur → login cassé.
-		// Sur Vercel (preview + prod), NODE_ENV vaut toujours "production".
 		useSecureCookies: process.env.NODE_ENV === "production",
 		// crossSubDomainCookies DÉSACTIVÉ : website (rosegriffon.fr) et azalee
 		// (azalee.rosegriffon.fr) ont des instances Better Auth séparées (tables

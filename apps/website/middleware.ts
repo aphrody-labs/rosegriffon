@@ -1,24 +1,12 @@
 import { getSessionCookie } from "better-auth/cookies";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { get } from "@vercel/edge-config";
 
 const PROTECTED_PATHS = ["/dashboard", "/admin", "/profil/settings"];
 
 export async function middleware(request: NextRequest) {
-	// 1. Zero-latency maintenance mode via Edge Config
-	try {
-		// Only check if EDGE_CONFIG is available in the environment
-		if (process.env.EDGE_CONFIG) {
-			const isMaintenanceMode = await get<boolean>("maintenanceMode");
-			if (isMaintenanceMode && request.nextUrl.pathname !== "/maintenance") {
-				request.nextUrl.pathname = `/maintenance`;
-				return NextResponse.rewrite(request.nextUrl);
-			}
-		}
-	} catch (error) {
-		console.error("[Middleware] Edge Config Error:", error);
-	}
+	// Le mode maintenance est servi par nginx (location @maintenance sur
+	// 502/503/504), pas par l'application : rien à vérifier ici.
 
 	const { pathname } = request.nextUrl;
 	const isProtected = PROTECTED_PATHS.some((p) => pathname.startsWith(p));

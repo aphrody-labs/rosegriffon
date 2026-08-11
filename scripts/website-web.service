@@ -1,6 +1,6 @@
 # website-web.service — site Next.js 16 (monorepo rg) self-host VPS
 # Reverse-proxy nginx rosegriffon.fr/www -> 127.0.0.1:3004.
-# Prérequis : build standalone présent (~/rg/apps/website/.next/standalone) + .env (Vercel pull, VERCEL* retirés).
+# Prérequis : build standalone présent (~/rg/apps/website/.next/standalone) + .env.
 # Source de vérité tenue en repo (scripts/website-web.service) ; copie installée dans /etc/systemd/system/.
 [Unit]
 Description=Website rosegriffon.fr (Next.js 16, Bun runtime)
@@ -22,7 +22,7 @@ Environment=PORT=3004
 Environment=HOSTNAME=127.0.0.1
 Environment=BUN_RUNTIME_TRANSPILER_CACHE_PATH=/home/ubuntu/rg/apps/website/.bun-cache
 
-# Build `output: "standalone"` (!VERCEL) : serveur autonome, PAS `next start`.
+# Build `output: "standalone"` : serveur autonome, PAS `next start`.
 # Prérequis deploy (scripts/deploy-website.sh) après `next build` :
 #   cp -r .next/static .next/standalone/apps/website/.next/static
 #   cp -r public        .next/standalone/apps/website/public

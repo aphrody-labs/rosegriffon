@@ -8,7 +8,7 @@ status: "stable"
 # Déploiement et exploitation
 
 Tout tourne sur un **seul VPS**, derrière nginx, en services systemd lancés par
-l'utilisateur `ubuntu`. Il n'y a plus aucun déploiement Vercel : les deux
+l'utilisateur `ubuntu`. Il n'y a aucun déploiement externe : les deux
 applications Next ont été rapatriées en auto-hébergement.
 
 **Aucun `git push` ne déploie quoi que ce soit.** Un déploiement est toujours

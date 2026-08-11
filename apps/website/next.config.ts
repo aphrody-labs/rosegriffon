@@ -10,24 +10,16 @@ const bundleAnalyzer = withBundleAnalyzer({
 const CDN_URL = process.env.NEXT_PUBLIC_CDN_URL?.trim() || "";
 const CDN_LOADER = CDN_URL && process.env.NEXT_PUBLIC_CDN_LOADER === "1";
 
-const IS_VERCEL = process.env.VERCEL === "1";
 
 const nextConfig: NextConfig = {
 	reactCompiler: true,
 
-	...(IS_VERCEL
-		? {
-				turbopack: {
-					root: path.resolve(process.cwd(), "../../"),
-				},
-			}
-		: {
-				output: "standalone",
-				outputFileTracingRoot: path.resolve(process.cwd(), "../../"),
-				turbopack: {
-					root: path.resolve(process.cwd(), "../../"),
-				},
-			}),
+	// Sortie standalone : l'app est servie par systemd derrière nginx.
+	output: "standalone",
+	outputFileTracingRoot: path.resolve(process.cwd(), "../../"),
+	turbopack: {
+		root: path.resolve(process.cwd(), "../../"),
+	},
 
 	compress: false,
 	...(CDN_URL && { assetPrefix: CDN_URL }),
@@ -190,13 +182,6 @@ const nextConfig: NextConfig = {
 	},
 	images: {
 		formats: ["image/avif", "image/webp"],
-		// L'optimiseur d'images Vercel a épuisé son quota sur le projet rg-website :
-		// /_next/image renvoie 402 OPTIMIZED_IMAGE_REQUEST_PAYMENT_REQUIRED pour TOUTES
-		// les images (locales `public/` ET distantes), cassant l'intégralité des visuels
-		// du site (bannières, avatars, OG cross-site azalee/achillea, photos d'équipe…).
-		// On sert les images en mode non-optimisé : les assets `public/` (déjà en .webp)
-		// et les URLs distantes whitelistées passent en direct, sans /_next/image → 200.
-		unoptimized: true,
 		// Next 16 : seules les valeurs `quality` listées ici sont acceptées par
 		// l'optimiseur (défaut = [75]). Les composants utilisent q=70/90/95/100 ;
 		// sans cette liste l'optimiseur renvoie 400 INVALID_IMAGE_OPTIMIZE_REQUEST

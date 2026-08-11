@@ -21,7 +21,7 @@
 
 /* ── Largeur du Sidebar @rosegriffon/ui (fix bulletproof) ──────────────────
  * Tailwind ne génère pas de façon fiable les utilitaires `w-(--sidebar-width)`
- * du package scanné (hors root-directory Vercel). Sans largeur, le sidebar-gap
+ * du package scanné (hors répertoire racine du build). Sans largeur, le sidebar-gap
  * reste à 0 et le sidebar fixe recouvre le contenu au lieu de le pousser.
  * On force ici la largeur via les data-slot, en suivant l'état data-collapsible.
  * Mobile (Sheet) n'a pas ces slots → non affecté. */

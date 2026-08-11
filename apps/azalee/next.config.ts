@@ -2,8 +2,6 @@ import type { NextConfig } from "next";
 import path from "node:path";
 import { withSentryConfig } from "@sentry/nextjs";
 
-const IS_VERCEL = process.env.VERCEL === "1";
-
 // CDN externe — décharge .next/static/ + assets public/ vers cdn.rosegriffon.fr.
 const CDN_URL = process.env.NEXT_PUBLIC_CDN_URL?.trim() || "";
 const CDN_ORIGIN = CDN_URL ? new URL(CDN_URL).origin : "";
@@ -85,20 +83,12 @@ const nextConfig: NextConfig = {
 		}),
 	},
 
-	// Output standalone pour systemd VPS — Vercel package son runtime.
-	...(IS_VERCEL
-		? {
-				turbopack: {
-					root: path.resolve(__dirname, "../../"),
-				},
-			}
-		: {
-				output: "standalone" as const,
-				outputFileTracingRoot: path.resolve(__dirname, "../../"),
-				turbopack: {
-					root: path.resolve(__dirname, "../../"),
-				},
-			}),
+	// Sortie standalone : l'app est servie par systemd derrière nginx.
+	output: "standalone" as const,
+	outputFileTracingRoot: path.resolve(__dirname, "../../"),
+	turbopack: {
+		root: path.resolve(__dirname, "../../"),
+	},
 	transpilePackages: [
 		"@rose-griffon/azalee",
 		"@rose-griffon/ui",

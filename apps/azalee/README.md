@@ -139,7 +139,7 @@ Les données du jeu s'interrogent par le CLI de la bibliothèque :
 
 ## Déploiement
 
-Auto-hébergé sur le VPS, **pas** de Vercel ni de Docker :
+Auto-hébergé sur le VPS, derrière nginx :
 
 ```bash
 bash scripts/ship-azalee.sh     # build → standalone → azalee-web.service (:3003)

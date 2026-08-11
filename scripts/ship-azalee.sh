@@ -40,7 +40,7 @@ echo "▸ [3/4] restart azalee-web.service…"
 sudo systemctl restart azalee-web.service
 
 echo "▸ [4/4] healthcheck local port 3003 …"
-# Le nom de domaine azalee.rosegriffon.fr pouvant pointer sur Vercel,
+# Le domaine public pouvant être servi par un cache,
 # nous vérifions l'instance VPS locale sur le port 3003 directement.
 LOCAL_URL="http://127.0.0.1:3003/"
 for i in $(seq 1 15); do

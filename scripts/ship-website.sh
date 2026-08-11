@@ -3,7 +3,7 @@
 #   build (Next 16 standalone, runtime Node) → deploy static/public → restart → healthcheck.
 # Idempotent. Usage : bash scripts/ship-website.sh
 # Calqué sur ship-azalee.sh. Le build passe par scripts/next-build.sh (Node, PAS Bun,
-# VERCEL unset → output:"standalone"). Service = website-web.service (port 3004).
+# Service = website-web.service (port 3004).
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"

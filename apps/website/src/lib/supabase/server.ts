@@ -26,7 +26,7 @@ export function createPublicClient(): SupabaseClient {
 	let supabaseAnonKey =
 		process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-	// Safety: Vercel might pass encrypted JSON or empty string during build.
+	// Sécurité : une valeur scellée ou vide peut arriver ici — string during build.
 	if (
 		!supabaseUrl ||
 		supabaseUrl === "undefined" ||

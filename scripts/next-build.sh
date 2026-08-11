@@ -15,17 +15,12 @@
 #   sur les milliers de fiches perso. Résolu : `node:sqlite` (`DatabaseSync`,
 #   Node >= 22) via `process.getBuiltinModule` côté build.
 #
-#   `VERCEL` est UNSET de force : la session/env du VPS peut exporter `VERCEL=1`
-#   (token OIDC Vercel CLI), ce qui fait basculer next.config.ts sur la branche
-#   Vercel (PAS de `output: standalone`) → server.js jamais produit.
-#
 # On valide le succès sur la PRÉSENCE d'un BUILD_ID FRAIS + server.js.
 set -uo pipefail
 
 NODE_BIN="${NODE_BIN:-/usr/bin/node}"
 # Sur le VPS, /usr/bin/node (v22+) existe et est requis (azalee self-host).
-# Sur Vercel (image de build Node 24.x), node n'est PAS à /usr/bin/node →
-# fallback sur le node du PATH (toujours du vrai Node ici, jamais Bun).
+# Ailleurs, fallback sur le node du PATH (toujours du vrai Node ici, jamais Bun).
 if [ ! -x "$NODE_BIN" ]; then
 	NODE_BIN="$(command -v node || true)"
 fi
@@ -42,8 +37,7 @@ BUILD_TMP="${BUILD_TMP:-$HOME/.azalee-build-tmp}"
 mkdir -p "$BUILD_TMP"
 
 build_start=$(date +%s)
-env -u VERCEL -u VERCEL_OIDC_TOKEN \
-	TMPDIR="$BUILD_TMP" \
+env TMPDIR="$BUILD_TMP" \
 	NODE_ENV=production NODE_NO_WARNINGS=1 \
 	"$NODE_BIN" node_modules/next/dist/bin/next build --turbopack "$@"
 rc=$?

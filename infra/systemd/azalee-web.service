@@ -26,7 +26,7 @@ Environment=PGDATABASE=rose_griffon
 Environment=PGUSER=ubuntu
 Environment=BUN_RUNTIME_TRANSPILER_CACHE_PATH=/home/ubuntu/rg/apps/azalee/.bun-cache
 
-# Build `output: "standalone"` (!VERCEL) : serveur autonome, PAS `next start`.
+# Build `output: "standalone"` : serveur autonome, PAS `next start`.
 # Prérequis deploy (runbook cutover) après `next build` :
 #   cp -r .next/static   .next/standalone/apps/azalee/.next/static
 #   cp -r public         .next/standalone/apps/azalee/public

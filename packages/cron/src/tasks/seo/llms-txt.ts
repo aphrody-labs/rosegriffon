@@ -16,7 +16,7 @@
  *                       website, alternates.types["text/markdown"]).
  *
  * Les fichiers sont écrits dans apps/website/public et apps/azalee/public, donc
- * servis statiquement par Vercel à la racine de chaque domaine. La régénération
+ * servis statiquement à la racine de chaque domaine. La régénération
  * via cron garde la date `Généré le …` fraîche (signal de fraîcheur).
  *
  * Ce qui est garanti : des fichiers à jour et conformes au standard, lisibles

@@ -9,7 +9,6 @@ bun.lockb
 # Next.js
 .next/
 out/
-.vercel/
 
 # Build outputs
 dist/
@@ -112,7 +111,6 @@ supabase/.temp/
 
 # Sentry
 .sentryclirc
-.vercel
 .env*.local
 
 # Gemini

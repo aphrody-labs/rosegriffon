@@ -8,7 +8,7 @@ const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/
  * and all existing RLS policies continue to work unchanged.
  *
  * Le secret est lu au moment de l'appel (pas en top-level) pour éviter
- * de crasher le build Vercel quand l'env var n'est pas disponible côté
+ * de crasher le build quand l'env var n'est pas disponible côté
  * prerender de routes qui n'utilisent jamais ce module.
  */
 export function mintSupabaseJwt(userId: string): string {

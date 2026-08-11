@@ -4,8 +4,6 @@ import type { Metadata, Viewport } from "next";
 
 import { lato, notoSans, poppins, roboto } from "@/lib/fonts";
 import { Geist } from "next/font/google";
-import { Analytics } from "@vercel/analytics/react";
-import { SpeedInsights } from "@vercel/speed-insights/next";
 
 import ClientLayout from "./client-layout";
 
@@ -186,8 +184,6 @@ export default function RootLayout({
 				suppressHydrationWarning
 			>
 				<ClientLayout>{children}</ClientLayout>
-				<Analytics />
-				<SpeedInsights />
 			</body>
 		</html>
 	);

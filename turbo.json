@@ -7,10 +7,7 @@
 		"HOME",
 		"TERM",
 		"CI",
-		"GITHUB_ACTIONS",
-		"VERCEL",
-		"VERCEL_URL",
-		"VERCEL_ENV"
+		"GITHUB_ACTIONS"
 	],
 	"ui": "tui",
 	"cacheDir": ".turbo/cache",
@@ -50,8 +47,6 @@
 				"SENTRY_AUTH_TOKEN",
 				"NEXT_PUBLIC_CDN_URL",
 				"NEXT_PUBLIC_CDN_LOADER",
-				"EDGE_CONFIG",
-				"VERCEL_GIT_COMMIT_SHA",
 				"NODE_AUTH_TOKEN"
 			]
 		},
