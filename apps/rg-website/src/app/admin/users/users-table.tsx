@@ -17,6 +17,7 @@ import {
 	getSortedRowModel,
 	useReactTable,
 } from "@tanstack/react-table";
+import * as React from "react";
 import type { ColumnDef, SortingState } from "@tanstack/react-table";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -143,6 +144,8 @@ export function UsersTable({ users: initialUsers }: UsersTableProps) {
 		replace(`/admin/users?${params.toString()}`);
 	};
 
+	const searchTimer = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+
 	return (
 		<div className="space-y-4">
 			<div className="flex items-center gap-2">
@@ -152,9 +155,13 @@ export function UsersTable({ users: initialUsers }: UsersTableProps) {
 						placeholder="Rechercher par email..."
 						defaultValue={searchParams?.get("query")?.toString()}
 						onChange={(e) => {
+							// La fonction de nettoyage retournée par un `onChange` n'est
+							// jamais appelée (ce n'est pas un `useEffect`) : aucun timer
+							// n'était annulé, et taper « martin » déclenchait six
+							// navigations successives. On garde le timer dans une ref.
 							const { value } = e.target;
-							const timeoutId = setTimeout(() => handleSearch(value), 300);
-							return () => clearTimeout(timeoutId);
+							if (searchTimer.current) clearTimeout(searchTimer.current);
+							searchTimer.current = setTimeout(() => handleSearch(value), 300);
 						}}
 						className="pl-10"
 					/>

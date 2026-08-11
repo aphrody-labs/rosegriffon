@@ -271,7 +271,9 @@ export default async function DashboardPage() {
 		},
 		{
 			description: "Configuration du dashboard",
-			href: "/settings",
+			// Pointait vers /settings (préférences du compte public) : l'admin
+			// quittait le dashboard, sans sidebar ni fil d'Ariane.
+			href: "/dashboard/settings",
 			icon: "settings",
 			label: "Paramètres",
 		},
