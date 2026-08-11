@@ -74,6 +74,41 @@ export function isStaff(role: string | null | undefined): boolean {
 import { createSupabaseServiceClient } from "@rose-griffon/db/service";
 
 /**
+ * Renvoie un pseudo libre dérivé du candidat.
+ *
+ * Suffixe déterministe tiré de l'identifiant plutôt qu'un compteur : deux
+ * inscriptions simultanées sur le même candidat n'obtiennent pas le même
+ * suffixe, et un rejeu retombe sur la même valeur.
+ */
+async function trouverPseudoLibre(
+	db: SupabaseClient<Database>,
+	candidat: string,
+	userId: string
+): Promise<string> {
+	const propositions = [
+		candidat,
+		`${candidat.slice(0, 22)}-${userId.replace(/-/g, "").slice(0, 6)}`,
+		`membre-${userId.replace(/-/g, "").slice(0, 12)}`,
+	];
+
+	for (const proposition of propositions) {
+		const { data, error } = await db
+			.from("profiles")
+			.select("id")
+			.eq("username", proposition)
+			.maybeSingle();
+		// En cas d'erreur de lecture on ne peut pas conclure : passer à la
+		// proposition suivante vaut mieux que réserver un pseudo peut-être pris.
+		if (!error && !data) {
+			return proposition;
+		}
+	}
+
+	// Dernier recours : l'identifiant complet, unique par construction.
+	return `membre-${userId.replace(/-/g, "")}`;
+}
+
+/**
  * Ensures a profile exists in Supabase for the given user.
  * Standardizes username generation and initial role assignment.
  */
@@ -176,12 +211,23 @@ export async function ensureUserProfile(
 			user.email?.split("@")[0]?.slice(0, 30) ||
 			`user-${user.id.slice(0, 8)}`;
 
+		// Le pseudo doit être LIBRE avant l'insertion.
+		//
+		// `onConflict: "id"` ne couvre pas `profiles_username_key` : une collision de
+		// pseudo lève un 23505 que le `catch` transforme en `return null`, et les deux
+		// appelants ignorent cette valeur — la personne est authentifiée mais n'a aucun
+		// profil. Le risque est devenu concret avec la pré-création : 1870 pseudos
+		// Discord sont désormais réservés, et Better Auth dérive justement `user.name`
+		// du handle Discord. Une inscription Google, Steam ou e-mail par un membre du
+		// serveur tombait donc pile dessus.
+		const usernameLibre = await trouverPseudoLibre(db, username, user.id);
+
 		const { data: newProfile, error } = await db
 			.from("profiles")
 			.upsert(
 				{
 					id: user.id,
-					username,
+					username: usernameLibre,
 					full_name: user.name || "",
 					avatar_url: user.image || null,
 					role: options.defaultRole || "member",
@@ -198,8 +244,11 @@ export async function ensureUserProfile(
 			.single();
 
 		if (error) {
+			// Échec bruyant et qualifié : les deux appelants ignorent la valeur de
+			// retour, donc un `return null` silencieux laissait une personne
+			// authentifiée sans profil, sans que rien ne le signale.
 			console.error(
-				`[@rose-griffon/auth] Failed to create profile for user ${user.id}:`,
+				`[@rose-griffon/auth] création du profil impossible pour ${user.id} (pseudo « ${usernameLibre} », code ${error.code ?? "?"}):`,
 				error.message
 			);
 			return null;
