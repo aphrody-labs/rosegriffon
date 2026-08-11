@@ -140,7 +140,7 @@ export default async function NewsListPage({
 		: "La liste des actualités est vide. Commencez par créer votre premier article ou importez un thread.";
 
 	return (
-		<div className="space-y-6 sm:space-y-8 pb-24 sm:pb-8">
+		<div className="space-y-6 sm:space-y-8">
 			<DashboardPageHeader
 				breadcrumbs={[{ href: "/dashboard", label: "Tableau de bord" }, { label: "Actualités" }]}
 				title="Actualités"

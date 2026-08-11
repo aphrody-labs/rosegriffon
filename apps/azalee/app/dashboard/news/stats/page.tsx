@@ -21,7 +21,7 @@ export default async function NewsStatsPage() {
 		stats.totalPublished > 0 ? Math.round(stats.totalViews / stats.totalPublished) : 0;
 
 	return (
-		<div className="space-y-8 pb-24 sm:pb-8">
+		<div className="space-y-8">
 			<DashboardPageHeader
 				breadcrumbs={[
 					{ href: "/dashboard", label: "Tableau de bord" },

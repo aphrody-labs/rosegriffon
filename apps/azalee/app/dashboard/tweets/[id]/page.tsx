@@ -24,7 +24,7 @@ export default async function TweetEditorPage({ params }: { params: Promise<{ id
 	}
 
 	return (
-		<div className="space-y-6 sm:space-y-8 pb-24 sm:pb-8">
+		<div className="space-y-6 sm:space-y-8">
 			<Link
 				href="/dashboard/tweets"
 				className="flex items-center gap-2 text-sm text-on-surface-variant hover:text-primary transition-colors"

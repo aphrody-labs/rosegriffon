@@ -1,5 +1,6 @@
 "use client";
 
+import { usePathname } from "next/navigation";
 import React from "react";
 
 import { SidebarCollapsibleItem } from "@/components/sidebar/molecules/SidebarCollapsibleItem";
@@ -31,6 +32,9 @@ export const SidebarNavLinks = React.memo(({ title, items }: SidebarNavLinksProp
 		return null;
 	}
 
+	const pathname = usePathname();
+
+
 	return (
 		<SidebarGroup className="px-1">
 			<SidebarGroupLabel className="px-3 py-1 text-xs font-semibold uppercase tracking-wider text-sidebar-foreground/75">
@@ -51,7 +55,12 @@ export const SidebarNavLinks = React.memo(({ title, items }: SidebarNavLinksProp
 										icon={
 											<item.icon className="size-4 md:w-5 md:h-5 transition-all duration-200" />
 										}
-										// badge={item.badge} // Badge removed
+										// `isActive` n'était jamais transmis : la section restait
+										// repliée et non surlignée même sur une de ses sous-pages,
+										// et l'auto-ouverture documentée ne s'exécutait jamais.
+										isActive={item.items.some(
+											(sub) => pathname === sub.url || pathname.startsWith(`${sub.url}/`)
+										)}
 										description={item.description}
 										ariaLabel={item.ariaLabel}
 									>

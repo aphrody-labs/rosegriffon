@@ -178,8 +178,13 @@ function RecursiveNavItem({
 	const buttonClass = cn(
 		"relative overflow-hidden w-full transition-all duration-200 group",
 		"rounded-xl focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 outline-hidden",
+		// En mode rail, la cva partagée impose `group-data-[collapsible=icon]:size-8!`
+		// et `:p-2!`. tailwind-merge ne fusionne pas des classes de préfixes de
+		// variante différents, et le `!` gagne en CSS : sans reprendre EXACTEMENT
+		// le même préfixe, le bouton retombait à 32×32px dans un rail de 80px et
+		// l'`overflow-hidden` rognait l'icône de 24px.
 		isCollapsed && depth === 0
-			? "h-[56px] flex-col justify-center px-1 gap-1"
+			? "h-[56px] flex-col justify-center px-1 gap-1 group-data-[collapsible=icon]:size-auto! group-data-[collapsible=icon]:h-14! group-data-[collapsible=icon]:w-full! group-data-[collapsible=icon]:p-1!"
 			: "h-11 px-4 gap-3 justify-start",
 		isActive
 			? "bg-secondary-container text-on-secondary-container font-bold"

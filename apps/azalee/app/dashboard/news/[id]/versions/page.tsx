@@ -34,7 +34,7 @@ export default async function VersionsPage({ params }: VersionsPageProps) {
 	const versions = await getArticleVersions(article.id);
 
 	return (
-		<div className="space-y-6 pb-24 sm:pb-8">
+		<div className="space-y-6">
 			<DashboardPageHeader
 				breadcrumbs={[
 					{ href: "/dashboard", label: "Tableau de bord" },

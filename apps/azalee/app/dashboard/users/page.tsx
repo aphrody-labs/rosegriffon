@@ -91,7 +91,7 @@ export default async function UsersPage({
 	}
 
 	return (
-		<div className="space-y-6 sm:space-y-8 pb-24 sm:pb-8">
+		<div className="space-y-6 sm:space-y-8">
 			<DashboardPageHeader
 				breadcrumbs={[{ href: "/dashboard", label: "Tableau de bord" }, { label: "Utilisateurs" }]}
 				title="Communauté"

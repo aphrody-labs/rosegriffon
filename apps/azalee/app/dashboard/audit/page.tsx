@@ -42,7 +42,7 @@ export default async function AuditPage({ searchParams }: PageProps) {
 	const totalPages = Math.ceil((count || 0) / PAGE_SIZE);
 
 	return (
-		<div className="space-y-6 sm:space-y-8 pb-24 sm:pb-8">
+		<div className="space-y-6 sm:space-y-8">
 			<DashboardPageHeader
 				breadcrumbs={[
 					{ href: "/dashboard", label: "Tableau de bord" },
