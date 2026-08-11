@@ -1,5 +1,5 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
-import type { Database } from "@rose-griffon/db";
+import { PUBLIC_PROFILE_COLUMNS, type Database, type PublicProfile } from "@rose-griffon/db";
 import { ADMIN_ROLES } from "@rose-griffon/types";
 
 type Profile = Database["public"]["Tables"]["profiles"]["Row"];
@@ -7,18 +7,25 @@ type Profile = Database["public"]["Tables"]["profiles"]["Row"];
 /**
  * Common logic to resolve a profile from a Better Auth user,
  * handling the mismatch between Better Auth IDs and Supabase profiles.
+ *
+ * Ne sélectionne QUE les colonnes publiques : un `select("*")` échoue
+ * intégralement en 42501 avec un client anon depuis la fermeture PII des
+ * `profiles` (11/8/2026). La fonction sert aux décisions d'autorisation
+ * (`requireAdmin`), donc l'échec silencieux renvoyait `null` et refusait
+ * l'accès à tous les administrateurs. `role` et `discord_id` — les deux seules
+ * colonnes réellement lues par les appelants — sont dans la liste blanche.
  */
 export async function resolveProfile(
 	supabase: SupabaseClient<Database>,
 	user: { id: string; email?: string | null }
-): Promise<Profile | null> {
-	const tryFetch = async (column: keyof Profile, value: string): Promise<Profile | null> => {
+): Promise<PublicProfile | null> {
+	const tryFetch = async (column: string, value: string): Promise<PublicProfile | null> => {
 		const { data } = await supabase
 			.from("profiles")
-			.select("*")
-			.eq(column as string, value)
+			.select(PUBLIC_PROFILE_COLUMNS)
+			.eq(column, value)
 			.maybeSingle();
-		return data as Profile | null;
+		return (data as PublicProfile | null) ?? null;
 	};
 
 	// 1. Direct ID match
@@ -39,7 +46,9 @@ export async function resolveProfile(
 		}
 	}
 
-	// 3. Email fallback
+	// 3. Repli e-mail — ne fonctionne qu'avec un client service : `email` est hors
+	// liste blanche, donc filtrer dessus est refusé à un client anon (échec
+	// silencieux, `data` vaut null, ce qui est le comportement voulu ici).
 	if (!profile && user.email) {
 		profile = await tryFetch("email", user.email);
 	}
@@ -161,6 +170,26 @@ export async function ensureUserProfile(
 		return null;
 	}
 }
+
+/**
+ * Provider Google partagé par les deux apps.
+ *
+ * Les apps redéfinissent entièrement `socialProviders` (l'objet remplace celui
+ * du spread `...commonAuthOptions`), donc la seule façon de mutualiser un
+ * provider est de l'étaler explicitement : `socialProviders: { ...googleProvider, discord: {…} }`.
+ *
+ * ⚠ Le client OAuth (projet `rgfr-8927d`) est commun aux deux origines : chacune
+ * doit déclarer son URI de rappel COMPLET dans la console Google Cloud —
+ * `https://rosegriffon.fr/api/auth/callback/google` et
+ * `https://azalee.rosegriffon.fr/api/auth/callback/google`. Une origine nue ne
+ * suffit pas, Google exige une correspondance exacte (`redirect_uri_mismatch`).
+ */
+export const googleProvider = {
+	google: {
+		clientId: process.env.GOOGLE_CLIENT_ID ?? "",
+		clientSecret: process.env.GOOGLE_CLIENT_SECRET ?? "",
+	},
+} as const;
 
 /**
  * Common field mappings for Better Auth tables.

@@ -3,7 +3,7 @@ import { createClient as createSupabaseAdmin } from "@supabase/supabase-js";
 import { betterAuth } from "better-auth";
 import { nextCookies } from "better-auth/next-js";
 import { bearer, genericOAuth, twoFactor } from "better-auth/plugins";
-import { commonAuthOptions, ensureUserProfile } from "@rose-griffon/auth";
+import { commonAuthOptions, ensureUserProfile, googleProvider } from "@rose-griffon/auth";
 import { getPgPool } from "@/lib/db/pg";
 import { fetchIdentity, parseIdentityWithMemberships } from "@/lib/patreon/client";
 import { encryptToken } from "@/lib/patreon/encryption";
@@ -102,6 +102,7 @@ export const auth = betterAuth({
 			},
 			scope: ["user:read:email", "user:read:follows", "user:read:subscriptions"],
 		},
+		...googleProvider,
 	},
 
 	// rateLimit hérité de commonAuthOptions (enabled, window 10s, max 100).
@@ -110,7 +111,7 @@ export const auth = betterAuth({
 		...commonAuthOptions.account,
 		accountLinking: {
 			enabled: true,
-			trustedProviders: ["discord", "twitch", "patreon"],
+			trustedProviders: ["discord", "google", "twitch", "patreon"],
 		},
 	},
 

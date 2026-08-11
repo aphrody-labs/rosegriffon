@@ -8,9 +8,9 @@ import { useState } from "react";
 
 import { authClient } from "@/lib/auth-client";
 
-import { DiscordIcon, PatreonIcon } from "./_components/social-icons";
+import { DiscordIcon, GoogleIcon, PatreonIcon } from "./_components/social-icons";
 
-type Provider = "discord" | "patreon";
+type Provider = "discord" | "google" | "patreon";
 
 function safeRedirect(raw: string | null | undefined): string {
 	if (!raw) {
@@ -32,16 +32,7 @@ export function AuthForm() {
 		setLoadingProvider(provider);
 		setError(null);
 		try {
-			const res =
-				provider === "discord"
-					? await authClient.signIn.social({
-							callbackURL: redirectTo,
-							provider: "discord",
-						})
-					: await authClient.signIn.social({
-							callbackURL: redirectTo,
-							provider: "patreon",
-						});
+			const res = await authClient.signIn.social({ callbackURL: redirectTo, provider });
 			const err = (res as { error?: { message?: string } | null })?.error;
 			if (err) {
 				setError(err.message ?? `Erreur lors de la connexion ${provider}.`);
@@ -80,6 +71,22 @@ export function AuthForm() {
 					<DiscordIcon />
 				)}
 				{loadingProvider === "discord" ? "Connexion en cours…" : "Se connecter avec Discord"}
+			</Button>
+
+			<Button
+				type="button"
+				size="lg"
+				variant="outline"
+				onClick={() => signIn("google")}
+				disabled={isLoading}
+				className="h-12 w-full gap-3 border-border bg-card font-semibold text-foreground shadow-md hover:bg-muted"
+			>
+				{loadingProvider === "google" ? (
+					<Loader2 className="size-5 animate-spin" aria-hidden="true" />
+				) : (
+					<GoogleIcon />
+				)}
+				{loadingProvider === "google" ? "Connexion en cours…" : "Se connecter avec Google"}
 			</Button>
 
 			<Button

@@ -1,11 +1,18 @@
+import { Button, Card, CardContent, CardDescription, CardHeader, CardTitle } from "@rose-griffon/ui";
+import type { Metadata } from "next";
+import Image from "next/image";
+import Link from "next/link";
+
+import { getAllTeamMembers } from "@/app/admin/staff/actions";
 import {
-	Button,
-	Card,
-	CardContent,
-	CardDescription,
-	CardHeader,
-	CardTitle,
-} from "@rose-griffon/ui";
+	heroPrimaryButtonClass,
+	heroSecondaryButtonClass,
+	PageContainer,
+	PageHero,
+	SectionCard,
+	SectionHeading,
+} from "@/components/shared/PageShell";
+import { BreadcrumbSchema } from "@/components/shared/StructuredData";
 import {
 	ArrowRight,
 	Award,
@@ -17,419 +24,351 @@ import {
 	MessageCircle,
 	Shield,
 	Sparkles,
+	UserPlus,
 	Users,
-} from "lucide-react";
-import Image from "next/image";
-
-import { getAllTeamMembers } from "@/app/admin/staff/actions";
+} from "@/lib/icons-config";
 
 export const dynamic = "force-dynamic";
+
+export const metadata: Metadata = {
+	title: "Rejoindre Rose Griffon · Recrutement",
+	description:
+		"Rose Griffon recrute : staff convention, artistes, développeurs, rédacteurs et community managers pour Azalée, modérateurs Discord. Conditions, postes ouverts et processus de candidature.",
+	alternates: {
+		canonical: "https://rosegriffon.fr/a-propos/rejoindre-rg",
+	},
+	openGraph: {
+		title: "Rejoindre Rose Griffon · Recrutement",
+		description:
+			"Contribuez à l'essor de la communauté Inazuma Eleven en France selon vos disponibilités.",
+		url: "https://rosegriffon.fr/a-propos/rejoindre-rg",
+		type: "website",
+	},
+};
+
+/**
+ * Les trois formulaires de candidature. Ils n'apparaissent QU'UNE fois sur la
+ * page, dans la section « Candidater » : la version précédente les répétait à
+ * l'identique dans la bannière et dans le pied de page (mêmes URL, libellés
+ * différents), soit deux fois le même contrôle par écran.
+ */
+const CANDIDATURES = [
+	{
+		id: "rose-griffon",
+		href: "https://forms.gle/NK2RkbZa3WzsoHkw5",
+		label: "Rejoindre Rose Griffon",
+		variant: "default" as const,
+		logo: { src: "/RG_Logo_V2.5.webp", alt: "" },
+	},
+	{
+		id: "azalee",
+		href: "https://forms.gle/cLSGYcF1JAWB83Qn6",
+		label: "Rejoindre Azalée",
+		variant: "secondary" as const,
+		logo: { src: "/azale.webp", alt: "" },
+	},
+	{
+		id: "moderation",
+		href: "https://forms.gle/JjiptG8aQybDnHni8",
+		label: "Rejoindre la modération",
+		variant: "outline" as const,
+		logo: null,
+	},
+];
+
+/** Pré-requis. Le titre court était présent dans les données mais jamais affiché. */
+const CONDITIONS = [
+	{
+		id: "age",
+		titre: "18 ans minimum",
+		texte:
+			"Être majeur (18 ans révolus). Cette condition est stricte pour des raisons légales et organisationnelles.",
+	},
+	{
+		id: "mobilite",
+		titre: "Mobilité ou compétences",
+		texte:
+			"Pour l'association Rose Griffon : être mobile pour les événements physiques (conventions) ou avoir des compétences spécifiques (art, développement, musique).",
+	},
+	{
+		id: "media",
+		titre: "Plume, réseaux ou graphisme",
+		texte:
+			"Pour le média Azalée : avoir une plume (rédaction), savoir gérer des réseaux (community management) ou créer des visuels (graphisme).",
+	},
+	{
+		id: "discord",
+		titre: "Expérience Discord",
+		texte:
+			"Pour la modération : avoir de l'expérience dans la gestion de communautés Discord et faire preuve de sang-froid.",
+	},
+];
+
+/** Postes ouverts, par structure. */
+const POSTES = [
+	{
+		id: "asso",
+		titre: "Rose Griffon (association)",
+		texte:
+			"Staff convention, artistes, musiciens, développeurs, bricoleurs. Aidez-nous à faire vivre la licence sur le terrain comme en ligne.",
+	},
+	{
+		id: "azalee",
+		titre: "Média Azalée",
+		texte:
+			"Rédacteurs, community managers, graphistes et correcteurs. Rejoignez l'équipe qui couvre l'actualité Inazuma Eleven.",
+	},
+	{
+		id: "moderation",
+		titre: "Modération",
+		texte:
+			"Gardiens de la communauté Discord. Expérience requise pour maintenir un environnement sain et bienveillant.",
+	},
+];
+
+/** Le parcours de candidature, en trois temps. */
+const ETAPES = [
+	{
+		id: "candidature",
+		icon: Mail,
+		numero: "01",
+		titre: "Candidature",
+		texte: "Remplissez le formulaire en ligne avec vos motivations.",
+	},
+	{
+		id: "entretien",
+		icon: Users,
+		numero: "02",
+		titre: "Entretien",
+		texte: "Échange convivial avec un responsable pour faire connaissance.",
+	},
+	{
+		id: "integration",
+		icon: Award,
+		numero: "03",
+		titre: "Intégration",
+		texte: "Bienvenue ! Vous recevez vos accès et rejoignez l'équipe.",
+	},
+];
 
 export default async function RejoindreRGPage() {
 	const { data: members } = await getAllTeamMembers();
 	// `getAllTeamMembers` retourne aussi les inactifs (côté admin), on ne compte que les actifs.
-	const activeMembersCount = members ? members.filter((m) => m.is_active !== false).length : 50; // Fallback to 50 if fetch fails
+	const activeMembersCount = members ? members.filter((m) => m.is_active !== false).length : 50; // Repli à 50 si la requête échoue
 	const discordMemberCount = 3000;
+
+	const STATS = [
+		{ id: "adherents", icon: Users, label: "Adhérents", value: activeMembersCount },
+		{ id: "discord", icon: MessageCircle, label: "Membres Discord", value: discordMemberCount },
+		{ id: "regions", icon: MapPin, label: "Rayonnement", value: "France" },
+		{ id: "passion", icon: Heart, label: "Passion", value: "100 %" },
+	];
+
 	return (
-		<div className="container mx-auto py-6 px-4 lg:px-8 space-y-8">
-			{/* Hero Section */}
-			<div className="relative overflow-hidden rounded-3xl p-6 md:p-8 lg:p-10 shadow-2xl isolate">
-				{/* Background Image */}
-				<div className="absolute inset-0 z-0">
-					<Image
-						src="/stand.webp"
-						alt="Bannière Rose Griffon"
-						fill
-						className="object-cover"
-						priority
-					/>
-					{/* Gradient plus sombre pour assurer la lisibilité */}
-					<div className="absolute inset-0 bg-linear-to-r from-[#2f6e9c]/95 to-[#1a4c70]/90 mix-blend-multiply" />
-					<div className="absolute inset-0 bg-black/50" />
+		<PageContainer>
+			<BreadcrumbSchema
+				items={[
+					{ item: "/", name: "Accueil" },
+					{ item: "/a-propos", name: "À propos" },
+					{ item: "/a-propos/rejoindre-rg", name: "Rejoindre Rose Griffon" },
+				]}
+			/>
+
+			<PageHero
+				icon={<Sparkles className="size-7 shrink-0 text-rg-or md:size-8" aria-hidden />}
+				eyebrow="Recrutement ouvert"
+				title="Rejoignez l'aventure Rose Griffon"
+				description="Une association dynamique et passionnée qui recherche constamment de nouveaux talents. Contribuez à l'essor de la communauté Inazuma Eleven en France, selon vos disponibilités."
+				image={{ src: "/stand.webp" }}
+				actions={
+					<>
+						<Button asChild className={heroPrimaryButtonClass}>
+							<a href="#candidater">
+								Candidater
+								<ArrowRight className="size-5" aria-hidden />
+							</a>
+						</Button>
+						<Button asChild variant="outline" className={heroSecondaryButtonClass}>
+							<a href="#postes">Voir les postes ouverts</a>
+						</Button>
+					</>
+				}
+			/>
+
+			{/* Chiffres clés */}
+			<section aria-labelledby="chiffres">
+				<h2 id="chiffres" className="sr-only">
+					L&apos;association en chiffres
+				</h2>
+				<div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+					{STATS.map((stat) => (
+						<Card key={stat.id} className="py-4 shadow-lg transition-shadow hover:shadow-xl">
+							<CardContent className="flex flex-col items-center gap-3 text-center">
+								<span className="rounded-2xl bg-primary/10 p-3 text-primary">
+									<stat.icon className="size-6" aria-hidden />
+								</span>
+								<div>
+									<p className="text-2xl font-black text-foreground">{stat.value}</p>
+									<p className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
+										{stat.label}
+									</p>
+								</div>
+							</CardContent>
+						</Card>
+					))}
 				</div>
+			</section>
 
-				{/* Background Effects */}
-				<div
-					className="absolute inset-0 opacity-20 mix-blend-overlay pointer-events-none z-0"
-					style={{ backgroundImage: "url(/images/noise.svg)" }}
-				/>
-
-				<div className="relative z-10">
-					<div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-muted border border-border backdrop-blur-md mb-4">
-						<Sparkles className="size-4 text-[#FECD50] animate-pulse" />
-						<span className="text-white font-medium text-sm uppercase tracking-wide">
-							Recrutement Ouvert
-						</span>
-					</div>
-
-					<h1 className="text-4xl md:text-5xl lg:text-6xl font-black mb-4 text-white tracking-tight font-[family-name:var(--font-poppins)] drop-shadow-lg">
-						Rejoignez l'aventure <br />
-						<span className="text-transparent bg-clip-text bg-linear-to-r from-white to-white/80">
-							Rose Griffon
-						</span>
-					</h1>
-
-					<p className="text-lg md:text-xl text-blue-50/95 max-w-2xl mb-6 leading-relaxed font-semibold drop-shadow-md font-[family-name:var(--font-lato)]">
-						Une association dynamique et passionnée qui recherche constamment de nouveaux talents.
-						Contribuez à l'essor de la communauté Inazuma Eleven en France selon vos disponibilités.
-					</p>
-
-					<div className="flex flex-col sm:flex-row gap-4 flex-wrap">
-						<Button
-							asChild
-							size="lg"
-							className="bg-white text-[#2f6e9c] hover:bg-blue-50 font-bold text-base shadow-lg hover:shadow-xl transition-all hover:-translate-y-1 rounded-xl h-14 px-8"
-						>
-							<a
-								href="https://forms.gle/NK2RkbZa3WzsoHkw5"
-								target="_blank"
-								rel="noopener noreferrer"
-								className="flex items-center gap-3"
-							>
-								<Image
-									src="/RG_Logo_V2.5.webp"
-									alt="Rose Griffon Logo"
-									width={24}
-									height={24}
-									className="rounded-full"
-								/>
-								Rejoindre Rose Griffon
-								<ArrowRight className="size-5" />
-							</a>
-						</Button>
-
-						<Button
-							asChild
-							size="lg"
-							className="bg-[#C83C51] text-white hover:bg-[#a0283a] font-bold text-base shadow-lg hover:shadow-xl transition-all hover:-translate-y-1 rounded-xl h-14 px-8 border border-border"
-						>
-							<a
-								href="https://forms.gle/cLSGYcF1JAWB83Qn6"
-								target="_blank"
-								rel="noopener noreferrer"
-								className="flex items-center gap-3"
-							>
-								<Image
-									src="/azale.webp"
-									alt="Azalée Logo"
-									width={24}
-									height={24}
-									className="rounded-full bg-white p-0.5"
-								/>
-								Rejoindre Azalée
-								<ArrowRight className="size-5" />
-							</a>
-						</Button>
-
-						<Button
-							asChild
-							size="lg"
-							variant="outline"
-							className="bg-muted backdrop-blur-sm text-white border-border hover:bg-white hover:text-[#2f6e9c] font-bold text-base shadow-lg hover:shadow-xl transition-all hover:-translate-y-1 rounded-xl h-14 px-8"
-						>
-							<a
-								href="https://forms.gle/JjiptG8aQybDnHni8"
-								target="_blank"
-								rel="noopener noreferrer"
-								className="flex items-center gap-3"
-							>
-								<Shield className="size-5" />
-								Équipe Modération
-								<ArrowRight className="size-5" />
-							</a>
-						</Button>
-					</div>
-				</div>
-			</div>
-
-			{/* Stats Section */}
-			<div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-				{[
-					{
-						bg: "bg-blue-500/10",
-						color: "text-blue-500",
-						icon: Users,
-						label: "adherents",
-						value: activeMembersCount,
-					},
-					{
-						bg: "bg-purple-500/10",
-						color: "text-purple-500",
-						icon: MessageCircle,
-						label: "Membres Discord",
-						value: discordMemberCount,
-					},
-					{
-						bg: "bg-green-500/10",
-						color: "text-green-500",
-						icon: MapPin,
-						label: "Régions",
-						value: "France",
-					},
-					{
-						bg: "bg-red-500/10",
-						color: "text-red-500",
-						icon: Heart,
-						label: "Passion",
-						value: "100%",
-					},
-				].map((stat, index) => (
-					<Card
-						key={index}
-						className="border-none shadow-lg hover:shadow-xl transition-all duration-300 bg-white dark:bg-zinc-900/50 group"
-					>
-						<CardContent className="p-4 flex flex-col items-center text-center gap-3">
-							<div
-								className={`p-3 rounded-2xl ${stat.bg} ${stat.color} group-hover:scale-110 transition-transform duration-300`}
-							>
-								<stat.icon className="size-6" />
+			{/* Conditions & postes */}
+			<section aria-labelledby="profils" className="grid grid-cols-1 gap-6 lg:grid-cols-2 lg:gap-8">
+				<h2 id="profils" className="sr-only">
+					Conditions d&apos;intégration et postes ouverts
+				</h2>
+				<Card className="flex h-full flex-col border-t-4 border-t-primary shadow-lg">
+					<CardHeader>
+						{/* Un seul enfant : le CardHeader partagé bascule en ligne au-delà de
+						    448 px de conteneur, ce qui mettrait la description à droite du titre. */}
+						<div>
+							<div className="mb-2 flex items-center gap-3">
+								<span className="rounded-xl bg-primary/10 p-2.5 text-primary">
+									<CheckCircle className="size-6" aria-hidden />
+								</span>
+								<CardTitle className="text-fluid-headline-md font-bold">
+									Conditions d&apos;intégration
+								</CardTitle>
 							</div>
-							<div>
-								<p className="text-2xl font-black text-gray-900 dark:text-white mb-0.5">
-									{stat.value}
-								</p>
-								<p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-									{stat.label}
-								</p>
-							</div>
-						</CardContent>
-					</Card>
-				))}
-			</div>
-
-			{/* Main Content Grid */}
-			<div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
-				{/* Conditions d'intégration */}
-				<Card className="border-0 shadow-xl bg-white dark:bg-zinc-900 overflow-hidden h-full flex flex-col">
-					<div className="h-1.5 bg-linear-to-r from-[#2f6e9c] to-[#a14b3f]" />
-					<CardHeader className="pb-2">
-						<div className="flex items-center gap-3 mb-2">
-							<div className="p-2.5 rounded-xl bg-[#2f6e9c]/10 text-[#2f6e9c]">
-								<CheckCircle className="size-6" />
-							</div>
-							<CardTitle className="text-2xl font-bold">Conditions d&apos;intégration</CardTitle>
+							<CardDescription>Les pré-requis pour rejoindre l&apos;aventure.</CardDescription>
 						</div>
-						<CardDescription>Les pré-requis pour rejoindre l&apos;aventure</CardDescription>
 					</CardHeader>
 
-					<CardContent className="space-y-3 pt-4 grow">
-						{[
-							{
-								highlight: "18 ans minimum",
-								text: "Être majeur (18 ans révolus). Cette condition est stricte pour des raisons légales et organisationnelles.",
-							},
-							{
-								highlight: "Mobilité ou Compétences",
-								text: "Pour l'association Rose Griffon : Être mobile pour les événements IRL (conventions) ou avoir des compétences spécifiques (art, dev, musique).",
-							},
-							{
-								highlight: "Plume, Social ou Graphisme",
-								text: "Pour le média Azalée : Avoir une plume (Rédacteur), savoir gérer des réseaux (CM) ou créer des visuels (Graphiste).",
-							},
-							{
-								highlight: "Expérience Discord",
-								text: "Pour la Modération : Avoir de l'expérience dans la gestion de communautés Discord et faire preuve de sang-froid.",
-							},
-						].map((item, i) => (
+					<CardContent className="flex grow flex-col gap-3">
+						{CONDITIONS.map((condition) => (
 							<div
-								key={i}
-								className="flex gap-4 p-3 rounded-xl bg-gray-50 dark:bg-zinc-800/50 hover:bg-blue-50 dark:hover:bg-blue-900/10 transition-colors border border-transparent hover:border-blue-100 dark:hover:border-blue-900/30"
+								key={condition.id}
+								className="rounded-xl border border-border bg-muted p-3 transition-colors hover:bg-accent"
 							>
-								<div className="shrink-0 mt-1">
-									<div className="h-2.5 w-2.5 rounded-full bg-[#2f6e9c]" />
-								</div>
-								<p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">
-									{item.text}
+								<p className="font-semibold text-foreground">{condition.titre}</p>
+								<p className="mt-1 text-sm leading-relaxed text-muted-foreground">
+									{condition.texte}
 								</p>
 							</div>
 						))}
 					</CardContent>
 				</Card>
 
-				{/* Postes Ouverts */}
-				<Card className="border-0 shadow-xl bg-white dark:bg-zinc-900 overflow-hidden h-full flex flex-col">
-					<div className="h-1.5 bg-linear-to-r from-[#a14b3f] to-[#FECD50]" />
-					<CardHeader className="pb-2">
-						<div className="flex items-center gap-3 mb-2">
-							<div className="p-2.5 rounded-xl bg-[#a14b3f]/10 text-[#a14b3f]">
-								<Briefcase className="size-6" />
+				<Card
+					id="postes"
+					className="flex h-full scroll-mt-24 flex-col border-t-4 border-t-secondary shadow-lg"
+				>
+					<CardHeader>
+						<div>
+							<div className="mb-2 flex items-center gap-3">
+								<span className="rounded-xl bg-secondary/10 p-2.5 text-secondary">
+									<Briefcase className="size-6" aria-hidden />
+								</span>
+								<CardTitle className="text-fluid-headline-md font-bold">Postes ouverts</CardTitle>
 							</div>
-							<CardTitle className="text-2xl font-bold">Postes Ouverts</CardTitle>
+							<CardDescription>Les rôles que nous recherchons activement.</CardDescription>
 						</div>
-						<CardDescription>Les rôles que nous recherchons activement</CardDescription>
 					</CardHeader>
 
-					<CardContent className="space-y-3 pt-4 grow">
-						<div className="group p-4 rounded-xl border border-gray-100 dark:border-zinc-800 hover:border-[#2f6e9c] hover:bg-blue-50/50 dark:hover:bg-blue-900/10 transition-all duration-300">
-							<h3 className="text-lg font-bold text-[#2f6e9c] mb-1 flex items-center gap-2">
-								<span className="size-2 rounded-full bg-[#2f6e9c]" />
-								Rose Griffon (Asso)
-							</h3>
-							<p className="text-gray-600 dark:text-gray-300 text-sm">
-								Staff Convention, Artistes, Musiciens, Développeurs, Bricoleurs. Aidez-nous à faire
-								vivre la licence IRL et en ligne !
-							</p>
-						</div>
-
-						<div className="group p-4 rounded-xl border border-gray-100 dark:border-zinc-800 hover:border-[#a14b3f] hover:bg-red-50/50 dark:hover:bg-red-900/10 transition-all duration-300">
-							<h3 className="text-lg font-bold text-[#a14b3f] mb-1 flex items-center gap-2">
-								<span className="size-2 rounded-full bg-[#a14b3f]" />
-								Média Azalée
-							</h3>
-							<p className="text-gray-600 dark:text-gray-300 text-sm">
-								<strong>Rédacteurs</strong>, <strong>Community Managers</strong>,{" "}
-								<strong>Graphistes</strong> et <strong>Correcteurs</strong>. Rejoignez l'équipe qui
-								couvre l'actualité Inazuma Eleven.
-							</p>
-						</div>
-
-						<div className="group p-4 rounded-xl border border-gray-100 dark:border-zinc-800 hover:border-[#FECD50] hover:bg-yellow-50/50 dark:hover:bg-yellow-900/10 transition-all duration-300">
-							<h3 className="text-lg font-bold text-amber-600 dark:text-[#FECD50] mb-1 flex items-center gap-2">
-								<span className="size-2 rounded-full bg-[#FECD50]" />
-								Modération
-							</h3>
-							<p className="text-gray-600 dark:text-gray-300 text-sm">
-								Gardiens de la communauté Discord. Expérience requise pour maintenir un
-								environnement sain et bienveillant.
-							</p>
-						</div>
+					<CardContent className="flex grow flex-col gap-3">
+						{POSTES.map((poste) => (
+							<div
+								key={poste.id}
+								className="rounded-xl border border-border p-4 transition-colors hover:border-secondary hover:bg-accent"
+							>
+								<h3 className="mb-1 flex items-center gap-2 text-lg font-bold text-foreground">
+									<span className="size-2 shrink-0 rounded-full bg-secondary" aria-hidden />
+									{poste.titre}
+								</h3>
+								<p className="text-sm text-muted-foreground">{poste.texte}</p>
+							</div>
+						))}
 					</CardContent>
 				</Card>
-			</div>
+			</section>
 
-			{/* Processus de candidature */}
-			<div className="py-8">
-				<div className="text-center max-w-3xl mx-auto mb-8 space-y-3">
-					<h2 className="text-3xl md:text-4xl font-black text-gray-900 dark:text-white">
-						Comment nous rejoindre ?
-					</h2>
-					<p className="text-lg text-muted-foreground">
-						Un processus simple et transparent en 3 étapes
-					</p>
-				</div>
+			{/* Processus */}
+			<section aria-labelledby="processus">
+				<SectionHeading
+					id="processus"
+					icon={<UserPlus className="size-6" aria-hidden />}
+					iconClassName="bg-primary text-primary-foreground shadow-primary/20"
+					title="Comment nous rejoindre ?"
+					subtitle="Un processus simple et transparent, en trois étapes."
+				/>
+				<ol className="grid grid-cols-1 gap-6 md:grid-cols-3">
+					{ETAPES.map((etape) => (
+						<li key={etape.id}>
+							<Card className="h-full py-6 shadow-lg transition-shadow hover:shadow-xl">
+								<CardContent className="flex flex-col items-center gap-2 text-center">
+									<span className="mb-2 flex size-14 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+										<etape.icon className="size-7" aria-hidden />
+									</span>
+									<span className="text-xs font-bold tracking-wide text-muted-foreground uppercase">
+										Étape {etape.numero}
+									</span>
+									<h3 className="text-lg font-bold text-foreground">{etape.titre}</h3>
+									<p className="text-sm leading-relaxed text-muted-foreground">{etape.texte}</p>
+								</CardContent>
+							</Card>
+						</li>
+					))}
+				</ol>
+			</section>
 
-				<div className="grid grid-cols-1 md:grid-cols-3 gap-6 relative">
-					{/* Connecting Line (Desktop) */}
-					<div className="hidden md:block absolute top-12 left-[16%] right-[16%] h-0.5 bg-linear-to-r from-gray-200 via-[#2f6e9c] to-gray-200 dark:from-gray-800 dark:to-gray-800 z-0" />
+			{/* Candidater — unique emplacement des trois formulaires */}
+			<SectionCard id="candidater" className="text-center">
+				<h2 className="text-fluid-headline-xl font-black tracking-tight text-foreground">
+					Prêt à écrire l&apos;histoire avec nous ?
+				</h2>
+				<p className="mx-auto mt-4 max-w-2xl text-fluid-body-lg leading-relaxed text-muted-foreground">
+					Que vous soyez artiste, organisateur, développeur ou simplement passionné, il y a une
+					place pour vous chez Rose Griffon. Choisissez le formulaire qui correspond à votre profil.
+				</p>
 
-					{[
-						{
-							bg: "bg-blue-500/10",
-							color: "text-blue-500",
-							description: "Remplissez le formulaire en ligne avec vos motivations.",
-							icon: Mail,
-							step: "01",
-							title: "Candidature",
-						},
-						{
-							bg: "bg-purple-500/10",
-							color: "text-purple-500",
-							description: "Échange convivial avec un responsable pour faire connaissance.",
-							icon: Users,
-							step: "02",
-							title: "Entretien",
-						},
-						{
-							bg: "bg-green-500/10",
-							color: "text-green-500",
-							description: "Bienvenue ! Vous recevez vos accès et rejoignez l'équipe.",
-							icon: Award,
-							step: "03",
-							title: "Intégration",
-						},
-					].map((item, index) => (
-						<div key={index} className="relative z-10 group">
-							<div className="flex flex-col items-center text-center p-6 rounded-3xl bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 shadow-lg hover:shadow-2xl hover:-translate-y-2 transition-all duration-300">
-								<div
-									className={`size-14 rounded-2xl ${item.bg} ${item.color} flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300 shadow-inner`}
-								>
-									<item.icon className="size-7" />
-								</div>
-								<span className="text-xs font-bold text-muted-foreground mb-2 opacity-50">
-									ÉTAPE {item.step}
-								</span>
-								<h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">
-									{item.title}
-								</h3>
-								<p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
-									{item.description}
-								</p>
-							</div>
-						</div>
+				<div className="mt-8 flex flex-col flex-wrap items-stretch justify-center gap-4 sm:flex-row sm:items-center">
+					{CANDIDATURES.map((candidature) => (
+						<Button
+							key={candidature.id}
+							asChild
+							size="lg"
+							variant={candidature.variant}
+							// `whitespace-normal` : sans lui, un libellé long déborde du bouton à 320 px.
+							className="h-auto min-h-14 rounded-2xl px-5 py-3 text-base font-bold whitespace-normal sm:px-8"
+						>
+							<a href={candidature.href} target="_blank" rel="noopener noreferrer">
+								{candidature.logo ? (
+									<Image
+										src={candidature.logo.src}
+										alt={candidature.logo.alt}
+										width={24}
+										height={24}
+										className="size-6 rounded-full"
+									/>
+								) : (
+									<Shield className="size-5" aria-hidden />
+								)}
+								{candidature.label}
+								<ArrowRight className="size-5" aria-hidden />
+							</a>
+						</Button>
 					))}
 				</div>
-			</div>
 
-			{/* CTA Section */}
-			<div
-				id="candidature"
-				className="relative overflow-hidden rounded-3xl bg-[#a14b3f] p-6 md:p-10 shadow-2xl text-center isolate"
-			>
-				<div
-					className="absolute inset-0 opacity-20 mix-blend-overlay pointer-events-none"
-					style={{ backgroundImage: "url(/images/noise.svg)" }}
-				/>
-				<div className="absolute top-0 right-0 size-96 bg-[#FECD50] rounded-full blur-[150px] opacity-20 pointer-events-none" />
-				<div className="absolute bottom-0 left-0 size-96 bg-[#2f6e9c] rounded-full blur-[150px] opacity-30 pointer-events-none" />
-
-				<div className="relative z-10 max-w-4xl mx-auto space-y-6">
-					<h2 className="text-3xl md:text-4xl lg:text-5xl font-black text-white tracking-tight">
-						Prêt à écrire l'histoire avec nous ?
-					</h2>
-
-					<p className="text-lg md:text-xl text-white/90 max-w-2xl mx-auto leading-relaxed font-medium">
-						Que vous soyez artiste, organisateur, développeur ou simplement passionné, il y a une
-						place pour vous chez Rose Griffon.
-					</p>
-
-					<div className="flex flex-col sm:flex-row gap-4 justify-center items-center pt-4">
-						<Button
-							asChild
-							size="lg"
-							className="bg-white text-[#a14b3f] hover:bg-red-50 font-bold text-lg h-16 px-10 rounded-2xl shadow-xl hover:shadow-2xl transition-all hover:scale-105"
-						>
-							<a
-								href="https://forms.gle/NK2RkbZa3WzsoHkw5"
-								target="_blank"
-								rel="noopener noreferrer"
-								className="flex items-center gap-3"
-							>
-								<Image
-									src="/RG_Logo_V2.5.webp"
-									alt="Rose Griffon Logo"
-									width={32}
-									height={32}
-									className="rounded-full"
-								/>
-								Candidater maintenant
-								<ArrowRight className="size-6" />
-							</a>
-						</Button>
-
-						<Button
-							asChild
-							size="lg"
-							variant="outline"
-							className="bg-black/20 backdrop-blur-md text-white border-border hover:bg-muted font-bold text-lg h-16 px-8 rounded-2xl transition-all hover:scale-105"
-						>
-							<a
-								href="https://forms.gle/JjiptG8aQybDnHni8"
-								target="_blank"
-								rel="noopener noreferrer"
-								className="flex items-center gap-3"
-							>
-								<Shield className="size-6" />
-								Devenir Modérateur
-							</a>
-						</Button>
-					</div>
-
-					<p className="text-muted-foreground text-sm font-medium flex items-center justify-center gap-2">
-						<span className="size-2 rounded-full bg-green-400 animate-pulse" />
-						Réponse sous 48h en moyenne
-					</p>
-				</div>
-			</div>
-		</div>
+				<p className="mt-6 flex items-center justify-center gap-2 text-sm font-medium text-muted-foreground">
+					<span className="size-2 shrink-0 animate-pulse rounded-full bg-succes" aria-hidden />
+					Réponse sous 48 h en moyenne
+				</p>
+				<p className="mt-2 text-sm text-muted-foreground">
+					Une question avant de candidater ?{" "}
+					<Link href="/a-propos/contact" className="font-medium text-primary underline">
+						Écrivez-nous
+					</Link>
+					.
+				</p>
+			</SectionCard>
+		</PageContainer>
 	);
 }
