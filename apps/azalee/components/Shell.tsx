@@ -1,6 +1,6 @@
 "use client";
 
-import { CircleUser, Download, LayoutDashboard, Menu, Moon, Sun, User, X } from "lucide-react";
+import { Check, CircleUser, Download, LayoutDashboard, Menu, Moon, Sun, User, X } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -15,7 +15,16 @@ import { NotificationBell } from "@/components/news/NotificationBell";
 import { AuthProvider, useAuth } from "@/components/providers/AuthProvider";
 import { useLanguage } from "@/components/providers/language-provider";
 import { PullToRefresh } from "@/components/ui/pull-to-refresh";
-import { SidebarInset, SidebarProvider, useBreakpoint, useSidebar } from "@rose-griffon/ui";
+import {
+	DropdownMenu,
+	DropdownMenuContent,
+	DropdownMenuItem,
+	DropdownMenuTrigger,
+	SidebarInset,
+	SidebarProvider,
+	useBreakpoint,
+	useSidebar,
+} from "@rose-griffon/ui";
 import { AzaleeNavigationRail } from "@/components/navigation/AzaleeNavigationRail";
 import { GlobalSearch } from "@/components/wiki/GlobalSearch";
 import { cn } from "@/lib/utils";
@@ -184,7 +193,24 @@ function MobileHeader({ isHome }: { isHome: boolean }) {
 
 /**
  * THEME TOGGLE
+ *
+ * `light`/`dark` = palette Azalée (globals.css `:root` / `:root.dark`).
+ * `roy`/`gaelle` = thèmes Rose Griffon partagés, fournis par
+ * `@rose-griffon/ui/styles.css` et retraduits en triplets HSL dans
+ * `app/globals.css` (contrat de tokens propre à azalee).
  */
+const AZALEE_THEMES: {
+	id: string;
+	label: string;
+	icon?: typeof Sun;
+	image?: string;
+}[] = [
+	{ id: "light", label: "Azalée clair", icon: Sun },
+	{ id: "dark", label: "Azalée sombre", icon: Moon },
+	{ id: "roy", label: "Roy", image: "/emote/RG_Roy_salut.webp" },
+	{ id: "gaelle", label: "Gaëlle", image: "/emote/RG_Gaelle_salut.webp" },
+];
+
 function ThemeToggle({ className }: { className?: string }) {
 	const { setTheme, theme } = useTheme();
 	const { t } = useLanguage();
@@ -208,27 +234,67 @@ function ThemeToggle({ className }: { className?: string }) {
 		);
 	}
 
-	// azalee pilote son palette via la classe `dark` (globals.css `:root.dark`),
-	// PAS via des noms de thème custom. Défaut = "dark".
-	const isDark = theme !== "light";
+	const active = AZALEE_THEMES.find((entry) => entry.id === theme) ?? AZALEE_THEMES[1]!;
+	const ActiveIcon = active.icon;
 
 	return (
-		<button
-			onClick={() => setTheme(isDark ? "light" : "dark")}
-			className={cn(
-				"relative size-12 md:size-10 rounded-full flex items-center justify-center text-on-surface-variant",
-				"hover:bg-on-surface/[0.08] active:bg-on-surface/[0.12] transition-all duration-300",
-				className
-			)}
-			aria-label={isDark ? t("theme.toggle_light") : t("theme.toggle_dark")}
-			title={isDark ? t("theme.light") : t("theme.dark")}
-		>
-			{isDark ? (
-				<Sun className="size-6 md:size-5" aria-hidden="true" />
-			) : (
-				<Moon className="size-6 md:size-5" aria-hidden="true" />
-			)}
-		</button>
+		<DropdownMenu>
+			<DropdownMenuTrigger asChild>
+				<button
+					type="button"
+					className={cn(
+						"relative size-12 md:size-10 rounded-full flex items-center justify-center text-on-surface-variant",
+						"hover:bg-on-surface/[0.08] active:bg-on-surface/[0.12] transition-all duration-300",
+						className
+					)}
+					aria-label={t("theme.toggle_light")}
+					title={active.label}
+				>
+					{ActiveIcon ? (
+						<ActiveIcon className="size-6 md:size-5" aria-hidden="true" />
+					) : (
+						<Image
+							src={active.image!}
+							alt=""
+							width={24}
+							height={24}
+							unoptimized
+							className="size-6 md:size-5 object-contain"
+						/>
+					)}
+				</button>
+			</DropdownMenuTrigger>
+			<DropdownMenuContent align="end" className="w-48">
+				{AZALEE_THEMES.map((entry) => {
+					const Icon = entry.icon;
+					return (
+						<DropdownMenuItem
+							key={entry.id}
+							onClick={() => setTheme(entry.id)}
+							className="gap-2.5"
+							aria-current={entry.id === active.id ? "true" : undefined}
+						>
+							{Icon ? (
+								<Icon className="size-4 shrink-0" aria-hidden="true" />
+							) : (
+								<Image
+									src={entry.image!}
+									alt=""
+									width={20}
+									height={20}
+									unoptimized
+									className="size-5 shrink-0 object-contain"
+								/>
+							)}
+							<span className="flex-1 truncate">{entry.label}</span>
+							{entry.id === active.id && (
+								<Check className="size-4 shrink-0 opacity-70" aria-hidden="true" />
+							)}
+						</DropdownMenuItem>
+					);
+				})}
+			</DropdownMenuContent>
+		</DropdownMenu>
 	);
 }
 
