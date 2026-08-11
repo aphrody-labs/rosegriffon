@@ -201,8 +201,14 @@ export async function initDiscord(): Promise<Client | null> {
 		client.on("guildMemberRemove", async (member) => {
 			if (member.guild.id !== GUILD_ID) return;
 			console.log(`[Discord] Membre parti : ${member.user.tag}`);
-			// Supprimer ou marquer comme inactif/supprimé si nécessaire, ou simplement rafraîchir
-			await sql`DELETE FROM discord_members WHERE discord_id = ${member.id}`.catch(err => console.error("[guildMemberRemove] delete failed:", err));
+			// Marquage plutôt que suppression : un DELETE perdait `joined_at` et
+			// l'historique de rôles, et surtout ne rattrapait jamais les départs
+			// survenus pendant une coupure du démon — 173 lignes fantômes constatées
+			// le 11/8/2026. Le profil pré-créé correspondant part avec.
+			await sql`UPDATE discord_members SET left_at = now(), updated_at = now() WHERE discord_id = ${member.id}`
+				.catch((err) => console.error("[guildMemberRemove] marquage du départ impossible:", err));
+			await sql`DELETE FROM profiles WHERE discord_id = ${member.id} AND claimed_at IS NULL`
+				.catch((err) => console.error("[guildMemberRemove] retrait du profil pré-créé impossible:", err));
 			const guild = client.guilds.cache.get(GUILD_ID);
 			if (guild) notifyTelemetryUpdate(computeTelemetry(guild));
 		});
@@ -312,6 +318,8 @@ async function syncUserImage(discordId: string, avatarUrl: string | null): Promi
 export interface SyncReport {
 	fetched: number;
 	upserted: number;
+	/** Membres marqués comme partis par la réconciliation de ce balayage. */
+	partis: number;
 	errors: { discordId: string; reason: string }[];
 	durationMs: number;
 }
@@ -353,9 +361,46 @@ export async function syncAllMembers(guild: Guild): Promise<SyncReport> {
 		}
 	}
 
+	// Réconciliation : tout membre que ce balayage complet n'a pas vu a quitté le
+	// serveur. Sans cette étape, seuls les départs observés en direct étaient
+	// enregistrés, et le démon manque forcément ceux de ses coupures.
+	let partis = 0;
+	try {
+		const sortis = await sql`
+			UPDATE discord_members
+			   SET left_at = now()
+			 WHERE left_at IS NULL
+			   AND updated_at < ${new Date(start).toISOString()}::timestamptz
+			RETURNING discord_id`;
+		partis = sortis.length;
+		if (partis > 0) {
+			await sql`
+				DELETE FROM profiles
+				 WHERE claimed_at IS NULL
+				   AND discord_id IN (
+				       SELECT discord_id FROM discord_members WHERE left_at IS NOT NULL
+				   )`;
+		}
+	} catch (err) {
+		console.error("[discord] réconciliation des départs impossible:", err);
+	}
+
+	// L'invariant « tout membre actuel a un profil » est maintenu ici plutôt que
+	// par un trigger : un trigger tournerait à chaque ligne de chaque balayage et
+	// ferait échouer la synchro entière à la moindre exception.
+	try {
+		const [res] = await sql`SELECT * FROM rg_precreer_profils_discord()`;
+		if (res?.crees) {
+			console.log(`[discord] ${res.crees} profil(s) pré-créé(s)`);
+		}
+	} catch (err) {
+		console.error("[discord] pré-création des profils impossible:", err);
+	}
+
 	return {
 		fetched: members.size,
 		upserted,
+		partis,
 		errors,
 		durationMs: Date.now() - start,
 	};
