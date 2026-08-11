@@ -19,7 +19,8 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { authClient } from "@/lib/auth-client";
-import { LogOut, Settings, UserCircle } from "@/lib/icons-config";
+import { LogOut, Settings, ShieldCheck, UserCircle } from "@/lib/icons-config";
+import { isAdmin as isAdminRole } from "@rose-griffon/auth";
 import type { PublicProfile } from "@rose-griffon/db";
 
 type Profile = PublicProfile;
@@ -38,6 +39,9 @@ interface UserAccountPopupProps {
 
 export function UserAccountPopup({ user, profile, loading = false }: UserAccountPopupProps) {
 	const [isLoggingOut, setIsLoggingOut] = useState(false);
+	// `ADMIN_ROLES` fait autorité : coder « admin » en dur excluait superadmin,
+	// editor et moderator, qui ont pourtant accès à l'administration.
+	const estAdmin = isAdminRole(profile?.role);
 	const router = useRouter();
 
 	const handleLogout = async () => {
@@ -97,18 +101,30 @@ export function UserAccountPopup({ user, profile, loading = false }: UserAccount
 				{/* Navigation principale */}
 				<DropdownMenuGroup>
 					<DropdownMenuItem asChild>
-						<Link href="/profil" className="flex items-center gap-2 cursor-pointer">
+						<Link href="/profil" className="flex cursor-pointer items-center gap-2">
 							<UserCircle className="size-4" />
-							<span>Mon Profil</span>
+							<span>Mon profil</span>
 						</Link>
 					</DropdownMenuItem>
 
 					<DropdownMenuItem asChild>
-						<Link href="/dashboard/account" className="flex items-center gap-2 cursor-pointer">
+						<Link href="/dashboard/account" className="flex cursor-pointer items-center gap-2">
 							<Settings className="size-4" />
 							<span>Paramètres</span>
 						</Link>
 					</DropdownMenuItem>
+
+					{/* L'accès à l'administration n'existait que dans le pied de la barre
+					    latérale, retiré parce qu'il doublonnait ce menu. Il est repris ici
+					    pour ne pas disparaître avec lui. */}
+					{estAdmin && (
+						<DropdownMenuItem asChild>
+							<Link href="/admin" className="flex cursor-pointer items-center gap-2">
+								<ShieldCheck className="size-4" />
+								<span>Administration</span>
+							</Link>
+						</DropdownMenuItem>
+					)}
 				</DropdownMenuGroup>
 
 				<DropdownMenuSeparator />

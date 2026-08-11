@@ -50,13 +50,16 @@ export default function AdminSidebar({ showPatreon = false }: { showPatreon?: bo
 		<SharedAdminSidebar
 			items={adminNavItems}
 			showCreatorItems={showPatreon}
+			// `/dashboard` n'est qu'une redirection vers `/profil/<pseudo>` : deux
+			// chemins pour la même page. On pointe directement sur les paramètres du
+			// compte, la seule destination distincte.
 			footer={
 				<Link
-					href="/dashboard"
+					href="/dashboard/account"
 					className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-sidebar-foreground/80 transition-colors hover:bg-sidebar-accent/50 hover:text-sidebar-foreground"
 				>
 					<Home className="size-4" />
-					<span>Compte personnel</span>
+					<span>Mon compte</span>
 				</Link>
 			}
 		/>
