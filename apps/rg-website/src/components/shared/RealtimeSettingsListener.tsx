@@ -3,36 +3,20 @@
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 
-import { createClient } from "@/lib/supabase/client";
+import { subscribeTable } from "@/lib/realtime";
 
+/**
+ * Rafraîchit les composants serveur dès qu'un réglage change en base.
+ * Adossé au service rg-realtime (SSE) depuis la migration hors Supabase.
+ */
 export function RealtimeSettingsListener() {
 	const router = useRouter();
-	const supabase = createClient();
 
 	useEffect(() => {
-		// Listen to changes in the 'settings' table
-		const channel = supabase
-			.channel("settings-realtime")
-			.on(
-				"postgres_changes",
-				{
-					event: "*", // Listen to INSERT, UPDATE, DELETE
-					schema: "public",
-					table: "settings",
-				},
-				() => {
-					// Refresh the current route server components
-					router.refresh();
-					// Optional: Show a toast to indicate live update (can be removed if too noisy)
-					// Toast.info("Contenu mis à jour en temps réel");
-				}
-			)
-			.subscribe();
+		return subscribeTable({ table: "settings" }, () => {
+			router.refresh();
+		});
+	}, [router]);
 
-		return () => {
-			supabase.removeChannel(channel);
-		};
-	}, [supabase, router]);
-
-	return null; // Headless component
+	return null; // Composant sans rendu
 }

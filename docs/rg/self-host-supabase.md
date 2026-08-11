@@ -1,0 +1,133 @@
+# Sortie de Supabase — pile self-host sur le VPS
+
+Le projet Supabase Cloud a été restreint pour dépassement du quota de stockage
+(`exceed_storage_size_quota`, 3,99 Go sur un plafond de 1 Go), ce qui a coupé
+**toute** l'API du projet — Storage *et* Data API PostgREST, y compris avec la
+clé `service_role`. Seule la connexion Postgres directe restait ouverte.
+
+L'ensemble a donc été rapatrié sur le VPS. Aucun appel ne sort plus vers
+`*.supabase.co`.
+
+## Ce qui remplace quoi
+
+| Service Supabase | Remplacement self-host | Port | Unité systemd |
+| --- | --- | --- | --- |
+| Postgres géré | PostgreSQL 18 local, base `rg` | 5432 | `postgresql.service` |
+| Data API (`/rest/v1`) | PostgREST 12.2.12 (binaire natif) | 8809 | `rg-postgrest.service` |
+| Storage (`/storage/v1`) | `apps/storage/server.ts` (Bun, fichiers sur disque) | 8810 | `rg-storage.service` |
+| Realtime (`postgres_changes`) | `apps/realtime/server.ts` (SSE + `LISTEN/NOTIFY`) | 8812 | `rg-realtime.service` |
+
+Le code applicatif n'a **pas** été réécrit : `@supabase/supabase-js` continue de
+fonctionner tel quel parce que la version de PostgREST est la même que celle de
+Supabase Cloud et que `SUPABASE_JWT_SECRET` — que nous possédions déjà — signe
+les clés `anon` et `service_role` existantes. Elles restent valides.
+
+## Routage
+
+`infra/nginx/supabase-compat.inc` expose les trois surfaces sur l'origine de
+chaque application, ce qui évite tout cross-origin et garde valides les URLs
+absolues déjà stockées en base :
+
+```
+/rest/v1/      → 127.0.0.1:8809   (PostgREST)
+/storage/v1/   → 127.0.0.1:8810   (rg-storage)
+/realtime/v1/  → 127.0.0.1:8812   (rg-realtime, SSE)
+```
+
+Inclus dans les vhosts `azalee.rosegriffon.fr`, `rosegriffon.fr` et
+`api.rosegriffon.fr`. `infra/nginx/supabase-internal.conf` monte les mêmes
+routes sur `127.0.0.1:8811`, point d'entrée des scripts serveur
+(`SUPABASE_INTERNAL_URL`).
+
+Variables d'environnement :
+
+| Variable | Valeur |
+| --- | --- |
+| `NEXT_PUBLIC_SUPABASE_URL` | l'origine de l'app (`https://azalee.rosegriffon.fr`, `https://rosegriffon.fr`) |
+| `SUPABASE_INTERNAL_URL` | `http://127.0.0.1:8811` |
+| `DATABASE_URL` | `postgresql://rg:<motdepasse>@127.0.0.1:5432/rg` |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `SUPABASE_JWT_SECRET` | inchangées |
+
+## Base de données
+
+`public` (120 tables, 172 fonctions, 170 politiques RLS), `auth` et `storage`
+ont été restaurés à l'identique — 145 tables sur 145 avec le même nombre de
+lignes que la source. Les rôles `anon`, `authenticated`, `service_role` et
+`authenticator` sont recréés avec les mêmes droits, et les quatre fonctions
+d'aide `auth.uid()` / `auth.role()` / `auth.email()` / `auth.jwt()` lisent les
+claims injectés par PostgREST : **les politiques RLS s'appliquent inchangées**.
+
+Extensions requises : `pg_trgm`, `vector` (paquet `postgresql-18-pgvector`),
+`pgcrypto` et `uuid-ossp` (schéma `extensions`).
+
+## Stockage des fichiers
+
+Racine : `/var/www/rg-storage/<bucket>/<chemin>`. L'index reste la table
+`storage.objects`, ce qui préserve les listings et les URLs publiques déjà
+enregistrées en base.
+
+Le service implémente le sous-ensemble de l'API consommé par le monorepo :
+`upload`, `update`, `remove` (simple et par lots), `list`, `move`, `copy`,
+`createSignedUrl`, téléchargement public, signé et authentifié, lecture des
+buckets, requêtes `Range` et `ETag`. Les autorisations reproduisent les
+politiques RLS d'origine : lecture publique sur les buckets publics, écriture
+réservée au `service_role` ou aux administrateurs, dossier personnel imposé sur
+`avatars`.
+
+### Reconstruction des fichiers
+
+Le Storage étant devenu inaccessible avant la migration, les octets ont été
+reconstruits depuis les sources d'origine :
+
+| Bucket | Objets | État |
+| --- | --- | --- |
+| `tweets` | 6 423 | 5 529 re-téléchargés depuis `pbs.twimg.com` (`scripts/ops/refetch-tweet-media.ts`). Le reste correspond à des vidéos ou à des médias supprimés côté Twitter. |
+| `patreon` | 26 | À re-synchroniser via l'API Patreon (`apps/website/scripts/patreon-images-sync.ts`) : les URLs d'origine sont signées et expirées. |
+| `assets` | 4 | Deux logos partenaires et deux photos d'équipe, non récupérables automatiquement. |
+| `article` | 3 | Couverture d'un article et ses vignettes, non récupérables : à re-téléverser. |
+
+## Temps réel
+
+Le trigger `public.rg_realtime_notify()`
+(`apps/website/sql/migrations/20260811_realtime_notify.sql`) publie chaque
+changement des tables `comments`, `settings` et `profiles` sur le canal
+`rg_realtime`. `rg-realtime` tient l'écoute et rediffuse en SSE avec le même
+filtrage que `postgres_changes` (`table`, `schema`, `colonne=eq.valeur`). Les
+charges utiles dépassant la limite de 8 000 octets de `NOTIFY` sont réduites aux
+identifiants et marquées `truncated`.
+
+Côté navigateur, `apps/website/src/lib/realtime.ts` expose `subscribeTable()` ;
+`EventSource` gère la reconnexion. Les quatre points d'appel
+(`CommentsSection`, `RealtimeSettingsListener`, `useTableBroadcast`,
+`useProfileBroadcast` / `use-profile-sync`) ont été basculés dessus.
+
+## Exploitation
+
+```bash
+systemctl status rg-postgrest rg-storage rg-realtime
+curl -s http://127.0.0.1:8811/health
+curl -s http://127.0.0.1:8810/health
+curl -s http://127.0.0.1:8812/health
+```
+
+Secrets : `/etc/postgrest.conf`, `/etc/rg-storage.env`, `/etc/rg-realtime.env`
+(tous en 0600).
+
+Le miroir SQLite (`azalee-mirror-sync.timer`) et les sauvegardes continuent de
+fonctionner sans modification : ils passent par `DATABASE_URL`, qui pointe
+désormais sur la base locale.
+
+## Pièges
+
+- **Ne pas régénérer les clés** `anon` / `service_role` sans mettre à jour
+  `jwt-secret` dans `/etc/postgrest.conf` et `SUPABASE_JWT_SECRET` dans
+  `/etc/rg-storage.env` : les trois doivent rester cohérents.
+- **`Bun.SQL` n'expose pas `LISTEN`/`NOTIFY`** (1.4.0) — `rg-realtime` utilise
+  `pg`, déjà présent dans le monorepo.
+- **PostgREST doit rester en 12.2.x**, la version servie par Supabase Cloud :
+  la 16 change des comportements de réponse que `postgrest-js` interprète.
+- **Les chemins `/storage/v1/object/public/menu/...`** encore présents dans
+  `inagle_skills.image_url` (1 002) et `inagle_teams.emblem_url` (208) ne
+  concernent pas ce bucket : `resolveAssetUrl()` les réécrit vers le CDN.
+- **Sauvegardes de la migration** : `/home/ubuntu/rg-migration-backup/`
+  (dumps, index `storage.objects`, fichiers d'environnement d'avant bascule).

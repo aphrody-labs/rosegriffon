@@ -1,7 +1,6 @@
-import type { RealtimeChannel } from "@supabase/supabase-js";
-import { useEffect, useRef } from "react";
+import { useEffect } from "react";
 
-import { createClient } from "@/lib/supabase/client";
+import { subscribeTable } from "@/lib/realtime";
 
 export interface BroadcastTableEvent<T> {
 	type: "INSERT" | "UPDATE" | "DELETE";
@@ -18,6 +17,12 @@ export interface UseTableBroadcastOptions<T = Record<string, unknown>> {
 	onDelete?: (data: T) => void;
 }
 
+/**
+ * Abonnement aux changements d'une table Postgres.
+ *
+ * Adossé au service rg-realtime (SSE + LISTEN/NOTIFY) depuis la migration
+ * hors Supabase — la signature est inchangée pour les appelants.
+ */
 export function useTableBroadcast<T = Record<string, unknown>>({
 	table,
 	schema = "public",
@@ -26,55 +31,22 @@ export function useTableBroadcast<T = Record<string, unknown>>({
 	onUpdate,
 	onDelete,
 }: UseTableBroadcastOptions<T>) {
-	const channelRef = useRef<RealtimeChannel | null>(null);
-
 	useEffect(() => {
-		const supabase = createClient();
-		const channelName = filter ? `${table}:${filter}` : table;
-
-		const channel = supabase.channel(channelName, {
-			config: { broadcast: { self: true } },
-		});
-
-		channel
-			.on(
-				"postgres_changes" as unknown as never,
-				{
-					event: "*",
-					filter,
-					schema,
-					table,
-				},
-				(payload: unknown) => {
-					const typedPayload = payload as {
-						eventType: string;
-						new?: T;
-						old?: T;
-					};
-					const event = typedPayload.eventType as "INSERT" | "UPDATE" | "DELETE";
-
-					switch (event) {
-						case "INSERT": {
-							onInsert?.(typedPayload.new as T);
-							break;
-						}
-						case "UPDATE": {
-							onUpdate?.(typedPayload.new as T);
-							break;
-						}
-						case "DELETE": {
-							onDelete?.(typedPayload.old as T);
-							break;
-						}
-					}
+		return subscribeTable<T>({ filter, schema, table }, (event) => {
+			switch (event.eventType) {
+				case "INSERT": {
+					if (event.new) onInsert?.(event.new);
+					break;
 				}
-			)
-			.subscribe();
-
-		channelRef.current = channel;
-
-		return () => {
-			supabase.removeChannel(channel);
-		};
+				case "UPDATE": {
+					if (event.new) onUpdate?.(event.new);
+					break;
+				}
+				case "DELETE": {
+					if (event.old) onDelete?.(event.old);
+					break;
+				}
+			}
+		});
 	}, [table, schema, filter, onInsert, onUpdate, onDelete]);
 }

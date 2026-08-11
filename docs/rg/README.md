@@ -13,7 +13,7 @@ dans `.gitignore` — c'est donc ici que vit toute la doc de fond.
 | Doc | Portée |
 | --- | --- |
 | [REPO_MAP.md](REPO_MAP.md) | Cartographie du monorepo : applications, paquets, dépendances croisées. Généré par `bun run docs:map`. |
-| [database.md](database.md) | Base de données et cache hybride : Supabase Cloud ↔ miroir SQLite embarqué. |
+| [database.md](database.md) | Base de données et cache hybride : Postgres self-host ↔ miroir SQLite embarqué. |
 | [decision-archi-donnees-azalee.md](decision-archi-donnees-azalee.md) | Décision d'architecture : passage de la couche données d'Azalée sur Drizzle. |
 | [architecture-unifiee-ievr.md](architecture-unifiee-ievr.md) | Vue d'ensemble de la chaîne IEVR : extraction, stockage, rendu. |
 
@@ -42,6 +42,7 @@ dans `.gitignore` — c'est donc ici que vit toute la doc de fond.
 | Doc | Portée |
 | --- | --- |
 | [deploy.md](deploy.md) | Déploiement et exploitation : services, procédures, diagnostic, interdits. |
+| [self-host-supabase.md](self-host-supabase.md) | Sortie de Supabase : PostgreSQL local, PostgREST, Storage et Realtime auto-hébergés. |
 | [mcp.md](mcp.md) | Serveur MCP du monorepo : mise en service, connexion distante, portées. |
 | [rag-unified.md](rag-unified.md) | Recherche sémantique unifiée : embeddings auto-hébergés, graphe de liens, ingestion. |
 

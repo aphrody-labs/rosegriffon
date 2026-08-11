@@ -13,6 +13,7 @@ import {
 } from "@rose-griffon/ui";
 import { MessageSquare, Trash2, Send, ShieldAlert, Award } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
+import { subscribeTable } from "@/lib/realtime";
 import { authClient } from "@/lib/auth-client";
 import { addCommentAction, deleteCommentAction, getCommentsAction } from "@/app/actions/comments";
 import { toast } from "sonner";
@@ -34,6 +35,9 @@ interface Comment {
 	updated_at: string;
 	profiles: CommentProfile | null;
 }
+
+/** Ligne brute de `public.comments` telle que diffusée par rg-realtime. */
+type CommentRow = Omit<Comment, "profiles">;
 
 interface CommentsSectionProps {
 	targetId: string;
@@ -74,67 +78,58 @@ export function CommentsSection({ targetId, targetType, className = "" }: Commen
 		loadComments();
 	}, [targetId, targetType]);
 
-	// S'abonner aux changements en temps réel
+	// S'abonner aux changements en temps réel (service rg-realtime, SSE)
 	useEffect(() => {
-		const channel = supabase
-			.channel(`comments:${targetType}:${targetId}`)
-			.on(
-				"postgres_changes",
-				{
-					event: "*",
-					schema: "public",
-					table: "comments",
-					filter: `target_id=eq.${targetId}`,
-				},
-				async (payload) => {
-					if (payload.eventType === "INSERT") {
-						const inserted = payload.new;
-						if (inserted.target_type !== targetType) return;
+		return subscribeTable<CommentRow>(
+			{ filter: `target_id=eq.${targetId}`, table: "comments" },
+			async (event) => {
+				if (event.eventType === "INSERT") {
+					const inserted = event.new;
+					if (!inserted || inserted.target_type !== targetType) return;
 
-						// Récupérer les informations de profil de l'auteur
-						const { data: profile } = await supabase
-							.from("profiles")
-							.select("username, avatar_url, role, badges")
-							.eq("id", inserted.user_id)
-							.maybeSingle();
+					// Récupérer les informations de profil de l'auteur
+					const { data: profile } = await supabase
+						.from("profiles")
+						.select("username, avatar_url, role, badges")
+						.eq("id", inserted.user_id)
+						.maybeSingle();
 
-						const enriched: Comment = {
-							id: inserted.id,
-							content: inserted.content,
-							target_id: inserted.target_id,
-							target_type: inserted.target_type,
-							user_id: inserted.user_id,
-							created_at: inserted.created_at,
-							updated_at: inserted.updated_at,
-							profiles: profile as CommentProfile | null,
-						};
+					const enriched: Comment = {
+						id: inserted.id,
+						content: inserted.content,
+						target_id: inserted.target_id,
+						target_type: inserted.target_type,
+						user_id: inserted.user_id,
+						created_at: inserted.created_at,
+						updated_at: inserted.updated_at,
+						profiles: profile as CommentProfile | null,
+					};
 
-						setComments((prev) => {
-							if (prev.some((c) => c.id === enriched.id)) return prev;
-							return [...prev, enriched];
-						});
+					setComments((prev) => {
+						if (prev.some((c) => c.id === enriched.id)) return prev;
+						return [...prev, enriched];
+					});
 
-						// Scroller tout en bas si c'est pour un stream (tchat live)
-						if (targetType === "stream") {
-							setTimeout(() => {
-								commentsEndRef.current?.scrollIntoView({ behavior: "smooth" });
-							}, 100);
-						}
-					} else if (payload.eventType === "DELETE") {
-						setComments((prev) => prev.filter((c) => c.id !== payload.old.id));
-					} else if (payload.eventType === "UPDATE") {
-						const updated = payload.new;
-						setComments((prev) =>
-							prev.map((c) => (c.id === updated.id ? { ...c, content: updated.content, updated_at: updated.updated_at } : c))
-						);
+					// Scroller tout en bas si c'est pour un stream (tchat live)
+					if (targetType === "stream") {
+						setTimeout(() => {
+							commentsEndRef.current?.scrollIntoView({ behavior: "smooth" });
+						}, 100);
 					}
+				} else if (event.eventType === "DELETE") {
+					const removed = event.old;
+					if (removed) setComments((prev) => prev.filter((c) => c.id !== removed.id));
+				} else if (event.eventType === "UPDATE") {
+					const updated = event.new;
+					if (!updated) return;
+					setComments((prev) =>
+						prev.map((c) =>
+							c.id === updated.id ? { ...c, content: updated.content, updated_at: updated.updated_at } : c
+						)
+					);
 				}
-			)
-			.subscribe();
-
-		return () => {
-			supabase.removeChannel(channel);
-		};
+			}
+		);
 	}, [targetId, targetType, supabase]);
 
 	// Scroller en bas au chargement initial ou lors de nouveaux messages (pour le stream)
