@@ -7,6 +7,7 @@ import { requireAdmin } from "@/lib/auth-helpers";
 import { createClient } from "@/lib/supabase/server";
 import { ZukanReviewClient } from "./ZukanReviewClient";
 import type { ZukanCandidate } from "./ZukanReviewClient";
+import { Icon } from "@/components/ui/Icon";
 
 export const metadata: Metadata = {
 	description: "Vérification des correspondances zukan/images des personnages.",
@@ -103,29 +104,29 @@ export default async function ZukanReviewPage() {
 				breadcrumbs={[{ href: "/dashboard", label: "Tableau de bord" }, { label: "Audit Zukan" }]}
 				title="Audit Zukan — Images"
 				subtitle={`Couverture globale : ${coverage}% (${matched.toLocaleString("fr-FR")} / ${total.toLocaleString("fr-FR")})`}
-				icon="image_search"
+				icon={<Icon name="image_search" size={20} />}
 			/>
 
 			{/* Live metrics */}
 			<div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-				<DashboardMetricCard label="Personnages" value={total} icon="group" />
+				<DashboardMetricCard label="Personnages" value={total} icon={<Icon name="group" size={20} />} />
 				<DashboardMetricCard
 					label="Avec image Zukan"
 					value={matched}
-					icon="check_circle"
+					icon={<Icon name="check_circle" size={20} />}
 					accentColor="bg-green-500/15 text-green-600"
 					description={`${coverage}% de couverture`}
 				/>
 				<DashboardMetricCard
 					label="Sans image"
 					value={missing}
-					icon="image_not_supported"
+					icon={<Icon name="image_not_supported" size={20} />}
 					accentColor="bg-red-500/15 text-red-500"
 				/>
 				<DashboardMetricCard
 					label="Problèmes détectés"
 					value={auditData?.metadata.totalIssues || 0}
-					icon="warning"
+					icon={<Icon name="warning" size={20} />}
 					accentColor="bg-amber-500/15 text-amber-600"
 					description={
 						auditData

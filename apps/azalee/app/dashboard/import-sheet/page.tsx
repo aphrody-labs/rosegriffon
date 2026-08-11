@@ -1,5 +1,6 @@
 import { AdminPageHeader as DashboardPageHeader } from "@rose-griffon/ui";
 import { ImportSheetForm } from "./ImportSheetForm";
+import { Icon } from "@/components/ui/Icon";
 
 export default function ImportSheetPage() {
 	return (
@@ -11,7 +12,7 @@ export default function ImportSheetPage() {
 				]}
 				title="Import Tableur"
 				subtitle="Convertir Sheet ou CSV en tableau"
-				icon="table_chart"
+				icon={<Icon name="table_chart" size={20} />}
 			/>
 
 			<ImportSheetForm />

@@ -145,7 +145,7 @@ export default async function NewsListPage({
 				breadcrumbs={[{ href: "/dashboard", label: "Tableau de bord" }, { label: "Actualités" }]}
 				title="Actualités"
 				subtitle={headerSubtitle}
-				icon="newspaper"
+				icon={<Icon name="newspaper" size={20} />}
 				actions={
 					<>
 						<DriveImportButton />

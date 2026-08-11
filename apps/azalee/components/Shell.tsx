@@ -133,7 +133,7 @@ function MobileHeader({ isHome }: { isHome: boolean }) {
 	return (
 		<header
 			className={cn(
-				"fixed top-0 left-0 right-0 z-40 flex h-16 items-center gap-2 px-4 pt-safe md:hidden",
+				"fixed top-0 left-0 right-0 z-40 flex h-[calc(4rem+env(safe-area-inset-top))] items-center gap-2 px-4 pt-safe md:hidden",
 				"transition-[background-color,box-shadow] duration-300 motion-standard",
 				isScrolled ? "bg-surface-container/90 backdrop-blur-xl elevation-1" : "bg-surface"
 			)}
@@ -396,7 +396,9 @@ function DesktopTopBar() {
 	const title = getTitle();
 
 	return (
-		<header className="hidden md:flex fixed top-0 left-0 right-0 z-[60] h-14 items-center justify-between px-4 bg-surface/80 backdrop-blur-xl border-b border-outline-variant/5">
+		// `hidden md:flex` en plus du montage `!isCompact` laissait 600–767px sans
+		// aucune barre : le CSS masquait ce que React avait monté.
+		<header className="fixed top-0 left-0 right-0 z-[60] flex h-14 items-center justify-between px-4 bg-surface/80 backdrop-blur-xl border-b border-outline-variant/5">
 			{/* Left: Burger + Logo + (Optional) Title */}
 			<div className="flex items-center gap-1 min-w-[200px]">
 				<button
@@ -596,7 +598,10 @@ export function Shell({
 					{(isExpanded || isCompact) && (
 						<AppSidebar
 							variant="sidebar"
-							className={cn("hidden", isExpanded && "md:flex !h-[calc(100vh-3.5rem)]")}
+							// `inset-y-0` + une hauteur explicite sur-contraint la boîte : le
+							// navigateur lâche `bottom` et la sidebar repart de y=0, sous la top
+							// bar (z-60) qui avale son premier item. On la décale, on ne la rogne pas.
+							className={cn(isExpanded && "top-14! h-auto!")}
 						/>
 					)}
 
@@ -604,7 +609,7 @@ export function Shell({
 					<SidebarInset
 						className={cn(
 							"flex-1 min-w-0 bg-surface-container flex flex-col transition-all duration-300",
-							isMedium && "md:ml-20" // Offset for Navigation Rail
+							isMedium && "ml-20" // Décalage du rail, actif dès 600px comme lui
 						)}
 					>
 						{/* Mobile Header (Only visible on Compact) */}
@@ -614,11 +619,19 @@ export function Shell({
 							id="main-content"
 							className={cn(
 								"flex-1 overflow-y-auto overflow-x-hidden scrollbar-hide flex flex-col",
-								isCompact ? "pt-16" : "pt-0"
+								isCompact ? "pt-[calc(4rem+env(safe-area-inset-top))]" : "pt-0"
 							)}
 						>
 							<PullToRefresh>
-								<div className="vt-page-content mx-auto w-full max-w-[1800px] px-4 pb-24 md:px-8 lg:px-12 md:pb-6 flex-1">
+								{/* La réserve du bas ne vaut que si la barre de navigation basse est
+								    réellement montée (compact) : `md:pb-6` coupait à 768px alors
+								    que la barre disparaît dès 600px. */}
+								<div
+									className={cn(
+										"vt-page-content mx-auto w-full max-w-[1800px] flex-1 px-4 md:px-8 lg:px-12",
+										isCompact ? "pb-[calc(6rem+env(safe-area-inset-bottom))]" : "pb-6"
+									)}
+								>
 									{children}
 								</div>
 							</PullToRefresh>

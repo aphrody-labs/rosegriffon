@@ -47,7 +47,7 @@ export function AdminPageHeader({
 			<div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
 				<div className="flex items-start gap-3">
 					{icon && (
-						<div className="mt-1 flex size-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+						<div className="mt-1 flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-primary/10 text-primary [&>svg]:size-5">
 							{icon}
 						</div>
 					)}

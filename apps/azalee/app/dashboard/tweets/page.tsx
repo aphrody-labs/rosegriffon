@@ -18,7 +18,7 @@ export default async function TweetsPage() {
 				breadcrumbs={[{ href: "/dashboard", label: "Tableau de bord" }, { label: "Tweets" }]}
 				title="Tweets"
 				subtitle="Gérer le feed Twitter (X)"
-				icon="tag"
+				icon={<Icon name="tag" size={20} />}
 				actions={
 					<Button asChild className="rounded-full">
 						<Link href="/dashboard/tweets/new">

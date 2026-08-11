@@ -2,6 +2,7 @@ import { requireAdmin } from "@/lib/auth-helpers";
 import { createClient } from "@/lib/supabase/server";
 import { AdminPageHeader as DashboardPageHeader } from "@rose-griffon/ui";
 import { VerificationClient } from "./VerificationClient";
+import { Icon } from "@/components/ui/Icon";
 
 export const dynamic = "force-dynamic";
 
@@ -63,7 +64,7 @@ export default async function VerificationPage() {
 				]}
 				title="Modération & Traduction"
 				subtitle={`${totalIssues} entité${totalIssues !== 1 ? "s" : ""} nécessitent une traduction française`}
-				icon="verified"
+				icon={<Icon name="verified" size={20} />}
 			/>
 
 			<VerificationClient

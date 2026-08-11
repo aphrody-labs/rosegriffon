@@ -147,7 +147,7 @@ export function MaterialBottomNav() {
 			aria-label="Navigation mobile"
 			className={cn(
 				"fixed bottom-0 left-0 right-0 z-50",
-				"h-20 pb-safe",
+				"h-[calc(5rem+env(safe-area-inset-bottom))] pb-safe",
 				"bg-surface-container/85 backdrop-blur-xl",
 				"border-t border-outline-variant/5",
 				"md:hidden"

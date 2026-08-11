@@ -30,7 +30,7 @@ export default async function NewsStatsPage() {
 				]}
 				title="Statistiques"
 				subtitle="Vue d'ensemble des performances des articles"
-				icon="bar_chart"
+				icon={<Icon name="bar_chart" size={20} />}
 			/>
 
 			{/* Stats cards */}
@@ -38,19 +38,19 @@ export default async function NewsStatsPage() {
 				<DashboardMetricCard
 					label="Total articles"
 					value={stats.totalArticles}
-					icon="description"
+					icon={<Icon name="description" size={20} />}
 					description={`${stats.totalPublished} publiés · ${stats.totalDrafts} brouillons · ${stats.totalScheduled} programmés · ${stats.totalArchived} archivés`}
 				/>
 				<DashboardMetricCard
 					label="Vues totales"
 					value={stats.totalViews.toLocaleString("fr-FR")}
-					icon="visibility"
+					icon={<Icon name="visibility" size={20} />}
 					accentColor="bg-blue-500/15 text-blue-600"
 				/>
 				<DashboardMetricCard
 					label="Vues / article"
 					value={avgViews.toLocaleString("fr-FR")}
-					icon="analytics"
+					icon={<Icon name="analytics" size={20} />}
 					accentColor="bg-green-500/15 text-green-600"
 					description="Moyenne par article publié"
 				/>
@@ -61,7 +61,7 @@ export default async function NewsStatsPage() {
 							? `${Math.round((stats.totalPublished / stats.totalArticles) * 100)}%`
 							: "—"
 					}
-					icon="publish"
+					icon={<Icon name="publish" size={20} />}
 					accentColor="bg-amber-500/15 text-amber-600"
 					description={`${stats.totalDrafts} brouillon${stats.totalDrafts !== 1 ? "s" : ""} en attente`}
 				/>

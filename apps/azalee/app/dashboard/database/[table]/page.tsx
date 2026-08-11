@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { AdminPageHeader as DashboardPageHeader } from "@rose-griffon/ui";
 import { createClient } from "@/lib/supabase/server";
 import { DatabaseTableClient } from "./DatabaseTableClient";
+import { Icon } from "@/components/ui/Icon";
 
 export default async function GenericTablePage({
 	params,
@@ -61,7 +62,7 @@ export default async function GenericTablePage({
 				]}
 				title={table}
 				subtitle={`${(count || 0).toLocaleString("fr-FR")} enregistrements · ${allColumns.length} colonnes`}
-				icon="table_chart"
+				icon={<Icon name="table_chart" size={20} />}
 			/>
 
 			<DatabaseTableClient

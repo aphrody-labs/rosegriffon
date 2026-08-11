@@ -219,14 +219,17 @@ function RecursiveNavItem({
 		return (
 			<Collapsible open={isOpen} onOpenChange={setIsOpen} className="w-full">
 				<SidebarMenuItem>
-					<div className="flex items-center w-full">
-						<SidebarMenuButton
-							asChild
-							isActive={isActive}
-							tooltip={t(item.label)}
-							className={cn(buttonClass, "flex-1 min-w-0 !pr-0")}
-						>
-							<Link href={item.path} aria-current={isActive ? "page" : undefined}>
+					{/* Un entête `groupOnly` n'a pas de route derrière lui : toute la
+					    ligne devient le déclencheur du repli, au lieu d'un lien vers une
+					    404 flanqué d'un second bouton chevron qui, lui, fonctionnait. */}
+					{item.groupOnly ? (
+						<CollapsibleTrigger asChild>
+							<SidebarMenuButton
+								isActive={isActive}
+								tooltip={t(item.label)}
+								className={cn(buttonClass, "w-full")}
+								aria-expanded={isOpen}
+							>
 								<div className={iconClass}>
 									<NavIcon
 										item={item}
@@ -237,24 +240,60 @@ function RecursiveNavItem({
 								</div>
 								<span
 									className={cn(
-										"whitespace-nowrap transition-all duration-300 font-medium truncate flex-1 text-sm",
+										"whitespace-nowrap transition-all duration-300 font-medium truncate flex-1 text-left text-sm",
 										isActive ? "font-bold" : ""
 									)}
 								>
 									{t(item.label)}
 								</span>
-							</Link>
-						</SidebarMenuButton>
-						<CollapsibleTrigger asChild>
-							<button className="size-9 flex items-center justify-center rounded-lg text-on-surface-variant/50 hover:text-on-surface-variant hover:bg-on-surface/[0.08] transition-colors shrink-0">
 								<ChevronRight
 									size={18}
-									className={cn("transition-transform duration-200", isOpen ? "rotate-90" : "")}
+									className={cn(
+										"shrink-0 text-on-surface-variant/50 transition-transform duration-200",
+										isOpen ? "rotate-90" : ""
+									)}
 									aria-hidden="true"
 								/>
-							</button>
+							</SidebarMenuButton>
 						</CollapsibleTrigger>
-					</div>
+					) : (
+						<div className="flex items-center w-full">
+							<SidebarMenuButton
+								asChild
+								isActive={isActive}
+								tooltip={t(item.label)}
+								className={cn(buttonClass, "flex-1 min-w-0 !pr-0")}
+							>
+								<Link href={item.path} aria-current={isActive ? "page" : undefined}>
+									<div className={iconClass}>
+										<NavIcon
+											item={item}
+											isActive={Boolean(isActive)}
+											isCollapsed={isCollapsed}
+											depth={depth}
+										/>
+									</div>
+									<span
+										className={cn(
+											"whitespace-nowrap transition-all duration-300 font-medium truncate flex-1 text-sm",
+											isActive ? "font-bold" : ""
+										)}
+									>
+										{t(item.label)}
+									</span>
+								</Link>
+							</SidebarMenuButton>
+							<CollapsibleTrigger asChild>
+								<button className="size-9 flex items-center justify-center rounded-lg text-on-surface-variant/50 hover:text-on-surface-variant hover:bg-on-surface/[0.08] transition-colors shrink-0">
+									<ChevronRight
+										size={18}
+										className={cn("transition-transform duration-200", isOpen ? "rotate-90" : "")}
+										aria-hidden="true"
+									/>
+								</button>
+							</CollapsibleTrigger>
+						</div>
+					)}
 					<CollapsibleContent className="overflow-hidden data-[state=closed]:animate-collapsible-up data-[state=open]:animate-collapsible-down">
 						<SidebarMenu className="mt-1 ml-4 border-l-2 border-outline-variant/20 pl-2 space-y-1">
 							{item.children.map((child) => (
@@ -272,6 +311,11 @@ function RecursiveNavItem({
 		);
 	}
 
+	// Sidebar repliée : le branchement `Collapsible` ci-dessus est court-circuité.
+	// Un entête de groupe redeviendrait alors un lien vers une route inexistante,
+	// et ses enfants seraient inatteignables — on renvoie vers le premier enfant.
+	const href = item.groupOnly ? (item.children?.[0]?.path ?? item.path) : item.path;
+
 	return (
 		<SidebarMenuItem>
 			<SidebarMenuButton
@@ -280,7 +324,7 @@ function RecursiveNavItem({
 				tooltip={t(item.label)}
 				className={buttonClass}
 			>
-				<Link href={item.path} aria-current={isActive ? "page" : undefined}>
+				<Link href={href} aria-current={isActive ? "page" : undefined}>
 					{itemContent}
 				</Link>
 			</SidebarMenuButton>
