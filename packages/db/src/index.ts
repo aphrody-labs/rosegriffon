@@ -8,6 +8,7 @@
 export * from "./browser";
 export * from "./server";
 export * from "./service";
+export * from "./profiles";
 export * from "./storage";
 export * from "./services/stats";
 export * from "./redis";

@@ -82,7 +82,7 @@ export default async function AdminDashboardPage() {
 		upcomingEventsListRes,
 		signupsTimelineRes,
 	] = await Promise.all([
-		supabase.from("profiles").select("*", { count: "exact", head: true }),
+		supabase.from("profiles").select("id", { count: "exact", head: true }),
 		supabase
 			.from("user")
 			.select("*", { count: "exact", head: true })

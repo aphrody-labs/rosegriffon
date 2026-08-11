@@ -20,14 +20,17 @@ import { useState } from "react";
 
 import { authClient } from "@/lib/auth-client";
 import { LogOut, Settings, UserCircle } from "@/lib/icons-config";
-import type { Database } from "@rose-griffon/db";
+import type { PublicProfile } from "@rose-griffon/db";
 
-type Profile = Database["public"]["Tables"]["profiles"]["Row"];
+type Profile = PublicProfile;
 
 interface UserAccountPopupProps {
 	user: {
 		id: string;
 		email?: string;
+		/** Nom porté par la session Better Auth — remplace `profiles.full_name`,
+		 *  devenu illisible côté client (colonne personnelle). */
+		name?: string;
 	};
 	profile: Profile | null;
 	loading?: boolean;
@@ -54,7 +57,9 @@ export function UserAccountPopup({ user, profile, loading = false }: UserAccount
 		return <Skeleton className="size-14 rounded-full" />;
 	}
 
-	const displayName = profile?.full_name || user.email?.split("@")[0] || "Utilisateur";
+	// `full_name` n'est plus lisible côté client (colonne personnelle) : le nom
+	// vient de la session Better Auth, qui est celle de l'utilisateur courant.
+	const displayName = user.name || profile?.username || user.email?.split("@")[0] || "Utilisateur";
 	const avatarUrl = profile?.avatar_url;
 	const initials = displayName
 		.split(" ")

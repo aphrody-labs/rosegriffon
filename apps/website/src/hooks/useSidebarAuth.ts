@@ -6,9 +6,9 @@ import { useEffect } from "react";
 
 import { authClient } from "@/lib/auth-client";
 import { createClient } from "@/lib/supabase/client";
-import type { Database } from "@rose-griffon/db";
+import { PUBLIC_PROFILE_COLUMNS, type PublicProfile } from "@rose-griffon/db";
 
-type Profile = Database["public"]["Tables"]["profiles"]["Row"];
+type Profile = PublicProfile;
 type AuthUser = typeof authClient.$Infer.Session.user;
 
 interface UseSidebarAuthReturn {
@@ -37,7 +37,7 @@ export function useSidebarAuth(): UseSidebarAuthReturn {
 			if (!user?.id) return null;
 			// 3 stratégies de bridge (Better Auth user.id ≠ profiles.id legacy Supabase) :
 			// 1. direct id match  2. Discord account_id  3. email
-			const direct = await supabase.from("profiles").select("*").eq("id", user.id).maybeSingle();
+			const direct = await supabase.from("profiles").select(PUBLIC_PROFILE_COLUMNS).eq("id", user.id).maybeSingle();
 			if (direct.data) return direct.data;
 
 			const account = await supabase
@@ -50,20 +50,18 @@ export function useSidebarAuth(): UseSidebarAuthReturn {
 			if (discordId) {
 				const viaDiscord = await supabase
 					.from("profiles")
-					.select("*")
+					.select(PUBLIC_PROFILE_COLUMNS)
 					.eq("discord_id", discordId)
 					.maybeSingle();
 				if (viaDiscord.data) return viaDiscord.data;
 			}
 
-			if (user.email) {
-				const viaEmail = await supabase
-					.from("profiles")
-					.select("*")
-					.eq("email", user.email)
-					.maybeSingle();
-				if (viaEmail.data) return viaEmail.data;
-			}
+			// Le repli par e-mail a été retiré : côté navigateur le rôle est `anon`,
+			// qui n'a plus accès aux colonnes personnelles de `profiles` (cf.
+			// apps/website/sql/migrations/20260811_profiles_pii.sql), et filtrer sur
+			// `email` depuis le client offrait un oracle d'énumération des comptes.
+			// Les deux stratégies restantes (id direct, puis compte Discord) couvrent
+			// le pont Better Auth ↔ profils Supabase historiques.
 			return null;
 		},
 		queryKey: ["auth", "profile", user?.id],
