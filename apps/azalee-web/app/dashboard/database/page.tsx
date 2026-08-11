@@ -10,6 +10,7 @@ import {
 import { ElementChartLoader } from "./ElementChartLoader";
 import { apiClient } from "@/lib/api-client";
 import { createClient } from "@/lib/supabase/server";
+import { Icon } from "@/components/ui/Icon";
 
 export default async function DatabasePage() {
 	const supabase = await createClient();
@@ -105,7 +106,7 @@ export default async function DatabasePage() {
 				]}
 				title="Base de données"
 				subtitle="Accès brut aux tables Wiki"
-				icon="database"
+				icon={<Icon name="database" size={20} />}
 				actions={
 					<div className="flex gap-2">
 						<Link

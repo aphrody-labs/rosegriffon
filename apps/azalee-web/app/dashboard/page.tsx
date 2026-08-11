@@ -344,7 +344,7 @@ export default async function DashboardPage() {
 		<div className="space-y-6 sm:space-y-8 pb-24 sm:pb-8">
 			<DashboardPageHeader
 				title="Vue d'ensemble"
-				icon="dashboard"
+				icon={<Icon name="dashboard" size={20} />}
 				subtitle="Administration Azalée"
 			/>
 
@@ -353,27 +353,27 @@ export default async function DashboardPage() {
 				<DashboardMetricCard
 					label="Articles"
 					value={articles.count || 0}
-					icon="newspaper"
+					icon={<Icon name="newspaper" size={20} />}
 					href="/dashboard/news"
 					description={`${published.count || 0} publiés · ${drafts.count || 0} brouillons`}
 				/>
 				<DashboardMetricCard
 					label="Vues totales"
 					value={totalViews}
-					icon="visibility"
+					icon={<Icon name="visibility" size={20} />}
 					href="/dashboard/news/stats"
 					accentColor="bg-blue-500/15 text-blue-600"
 				/>
 				<DashboardMetricCard
 					label="Utilisateurs"
 					value={profiles.count || 0}
-					icon="group"
+					icon={<Icon name="group" size={20} />}
 					href="/dashboard/users"
 				/>
 				<DashboardMetricCard
 					label="Personnages"
 					value={characters.count || 0}
-					icon="person"
+					icon={<Icon name="person" size={20} />}
 					href="/dashboard/database/inagle_characters"
 					description={`${(skills.count || 0).toLocaleString("fr-FR")} techniques`}
 				/>

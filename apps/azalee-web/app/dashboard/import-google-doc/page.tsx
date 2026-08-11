@@ -1,5 +1,6 @@
 import { AdminPageHeader as DashboardPageHeader } from "@rose-griffon/ui";
 import { ImportDocForm } from "./ImportDocForm";
+import { Icon } from "@/components/ui/Icon";
 
 export default function ImportGoogleDocPage() {
 	return (
@@ -11,7 +12,7 @@ export default function ImportGoogleDocPage() {
 				]}
 				title="Import Google Doc"
 				subtitle="Convertir un document Google en article"
-				icon="description"
+				icon={<Icon name="description" size={20} />}
 			/>
 
 			<ImportDocForm />

@@ -4,6 +4,7 @@ import Link from "next/link";
 import type React from "react";
 import { AdminPageHeader as DashboardPageHeader, Badge } from "@rose-griffon/ui";
 import { createClient } from "@/lib/supabase/server";
+import { Icon } from "@/components/ui/Icon";
 
 export const dynamic = "force-dynamic";
 
@@ -149,7 +150,7 @@ export default async function ImageValidationPage({
 				]}
 				title={title}
 				subtitle={subtitle}
-				icon="image_search"
+				icon={<Icon name="image_search" size={20} />}
 			/>
 
 			{/* Filters */}

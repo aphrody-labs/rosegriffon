@@ -1,3 +1,4 @@
+import type * as React from "react";
 import Link from "next/link";
 import type { LucideIcon } from "lucide-react";
 import { cn } from "../lib/utils";
@@ -6,7 +7,8 @@ interface DashboardStatsCardProps {
 	title?: string;
 	label?: string; // Alias for Azalee
 	value: string | number;
-	icon: LucideIcon | string;
+	/** Composant Lucide, ou nœud déjà rendu (ex. une icône applicative). */
+	icon: LucideIcon | React.ReactNode;
 	description?: string;
 	href?: string;
 	trend?: {
@@ -57,11 +59,11 @@ export function DashboardStatsCard({
 				<div
 					className={cn("rounded-lg p-2.5", accentVariants[finalAccent] || accentVariants.primary)}
 				>
-					{typeof Icon === "string" ? (
-						<span className="material-icons size-5 text-center leading-none">{Icon}</span>
-					) : (
-						<Icon className="size-5" />
-					)}
+					{/* La branche « chaîne » s'appuyait sur une police `material-icons`
+					    qui n'est déclarée dans aucune des deux apps : le nom de l'icône
+					    s'affichait en toutes lettres, débordant de son carré de 20px.
+					    On n'accepte plus qu'un composant Lucide ou un nœud déjà rendu. */}
+					{typeof Icon === "function" ? <Icon className="size-5" /> : Icon}
 				</div>
 				{trend && (
 					<span

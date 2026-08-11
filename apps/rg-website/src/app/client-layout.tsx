@@ -139,7 +139,11 @@ export default function ClientLayout({
 											{children}
 										</div>
 									</div>
-									<Footer />
+									{/* /shop rend son propre pied de page (thémé DA boutique) dans
+									    son layout : sans cette garde, les six routes du tunnel
+									    d'achat empilaient deux `contentinfo` — rupture visuelle et
+									    liens légaux annoncés deux fois par les lecteurs d'écran. */}
+									{!isShopPage && <Footer />}
 									<MobileWatermark />
 									{/* Affiche la barre de nav du bas uniquement sur mobile, hors shop/auth/admin */}
 									{isCompact && !shouldHideSidebar && <MobileBottomNavigation />}

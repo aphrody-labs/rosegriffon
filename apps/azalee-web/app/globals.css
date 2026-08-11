@@ -45,6 +45,18 @@
 
 @custom-variant dark (&:is(.dark, .dark *));
 
+/* Zones sûres iOS. `pt-safe` / `pb-safe` étaient déjà utilisées par l'en-tête
+ * mobile et la barre basse alors qu'aucun plugin ni token ne les générait :
+ * les classes étaient purement inertes, et comme le layout déclare
+ * `viewportFit: "cover"`, la barre du haut passait réellement sous l'encoche. */
+@utility pt-safe {
+	padding-top: env(safe-area-inset-top);
+}
+
+@utility pb-safe {
+	padding-bottom: env(safe-area-inset-bottom);
+}
+
 /* ── Font Faces ────────────────────────────────────────── */
 /* Google Sans Flex is loaded via Next.js localFont (woff2) in layout.tsx */
 

@@ -3,6 +3,7 @@ import { getArticleVersions, restoreArticleVersion } from "@/app/actions/article
 import { AdminPageHeader as DashboardPageHeader } from "@rose-griffon/ui";
 import { createClient } from "@/lib/supabase/server";
 import { VersionsList } from "./VersionsList";
+import { Icon } from "@/components/ui/Icon";
 
 interface VersionsPageProps {
 	params: Promise<{ id: string }>;
@@ -43,7 +44,7 @@ export default async function VersionsPage({ params }: VersionsPageProps) {
 				]}
 				title="Historique des versions"
 				subtitle={`${versions.length} version${versions.length !== 1 ? "s" : ""} pour "${article.title}"`}
-				icon="history"
+				icon={<Icon name="history" size={20} />}
 			/>
 
 			{versions.length > 0 ? (

@@ -3,6 +3,7 @@ import { AdminPageHeader as DashboardPageHeader } from "@rose-griffon/ui";
 import { requireAdmin } from "@/lib/auth-helpers";
 import { createClient } from "@/lib/supabase/server";
 import { AuditTable } from "./AuditTable";
+import { Icon } from "@/components/ui/Icon";
 
 export const metadata: Metadata = {
 	description: "Journal des événements de sécurité.",
@@ -49,7 +50,7 @@ export default async function AuditPage({ searchParams }: PageProps) {
 				]}
 				title="Journal d'audit"
 				subtitle={`${count || 0} entrée${(count || 0) !== 1 ? "s" : ""}`}
-				icon="policy"
+				icon={<Icon name="policy" size={20} />}
 			/>
 
 			<AuditTable

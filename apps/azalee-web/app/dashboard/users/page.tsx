@@ -96,7 +96,7 @@ export default async function UsersPage({
 				breadcrumbs={[{ href: "/dashboard", label: "Tableau de bord" }, { label: "Utilisateurs" }]}
 				title="Communauté"
 				subtitle={`${totalItems} membre${totalItems !== 1 ? "s" : ""}`}
-				icon="group"
+				icon={<Icon name="group" size={20} />}
 			/>
 
 			{/* Search & role filters */}

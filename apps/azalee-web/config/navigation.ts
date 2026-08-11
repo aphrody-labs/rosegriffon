@@ -9,6 +9,13 @@ export interface NavItem {
 	adminOnly?: boolean;
 	defaultOpen?: boolean;
 	children?: NavItem[];
+	/**
+	 * Entête de groupe : l'item n'est PAS une destination, seulement un
+	 * déclencheur de repli. Les quatre groupes du dashboard (`content`,
+	 * `social`, `tools`, `security`) n'ont aucune route derrière eux — sans ce
+	 * drapeau, `app-sidebar.tsx` en faisait des liens qui tombaient en 404.
+	 */
+	groupOnly?: boolean;
 	/** Additional path prefixes that mark this item as active (for mobile nav) */
 	activePaths?: string[];
 }
@@ -266,6 +273,7 @@ export const dashboardItems: NavItem[] = [
 			},
 		],
 		icon: "edit_note",
+		groupOnly: true,
 		label: "nav.dashboard.content",
 		path: "/dashboard/content",
 	},
@@ -279,6 +287,7 @@ export const dashboardItems: NavItem[] = [
 			},
 		],
 		icon: "share",
+		groupOnly: true,
 		label: "nav.dashboard.social",
 		path: "/dashboard/social",
 	},
@@ -297,6 +306,7 @@ export const dashboardItems: NavItem[] = [
 			},
 		],
 		icon: "build",
+		groupOnly: true,
 		label: "nav.dashboard.tools",
 		path: "/dashboard/tools",
 	},
@@ -310,6 +320,7 @@ export const dashboardItems: NavItem[] = [
 			},
 		],
 		icon: "shield",
+		groupOnly: true,
 		label: "nav.dashboard.security",
 		path: "/dashboard/security",
 	},

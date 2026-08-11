@@ -2,6 +2,7 @@ import { AdminPageHeader as DashboardPageHeader } from "@rose-griffon/ui";
 import { SettingsForm } from "@/components/dashboard/settings-form";
 import { getServerSession } from "@/lib/auth-helpers";
 import { createClient } from "@/lib/supabase/server";
+import { Icon } from "@/components/ui/Icon";
 
 export default async function SettingsPage() {
 	const session = await getServerSession();
@@ -22,7 +23,7 @@ export default async function SettingsPage() {
 				breadcrumbs={[{ href: "/dashboard", label: "Tableau de bord" }, { label: "Paramètres" }]}
 				title="Paramètres"
 				subtitle="Gérer votre profil et préférences"
-				icon="settings"
+				icon={<Icon name="settings" size={20} />}
 			/>
 
 			{profile && <SettingsForm initialProfile={profile} userEmail={session.user.email} />}

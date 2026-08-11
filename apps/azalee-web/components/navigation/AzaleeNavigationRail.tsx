@@ -24,10 +24,14 @@ export function AzaleeNavigationRail() {
 		return true;
 	});
 
+	// Visibilité pilotée par le Shell, qui ne monte le rail qu'au breakpoint
+	// « medium » (600–839px). Les classes `hidden md:flex lg:hidden` posées ici en
+	// plus le masquaient de 600 à 767px, plage où ni la sidebar ni la barre basse
+	// ne sont montées : plus aucune navigation possible.
 	return (
 		<NavigationRail
 			aria-label="Navigation principale"
-			className="fixed left-0 top-14 bottom-0 z-50 border-r border-outline-variant/10 hidden md:flex lg:hidden"
+			className="fixed left-0 top-14 bottom-0 z-50 flex overflow-y-auto border-r border-outline-variant/10"
 		>
 			{filteredNavItems.map((item) => {
 				const LucideIcon = iconMap[item.icon];
