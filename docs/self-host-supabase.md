@@ -69,6 +69,44 @@ Variables d'environnement :
 | `DATABASE_URL` | `postgresql://rg:<motdepasse>@127.0.0.1:5432/rg` |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `SUPABASE_JWT_SECRET` | inchangées |
 
+## Studio
+
+`studio.rosegriffon.fr` sert le vrai Supabase Studio, branché sur notre pile.
+Deux conteneurs (`infra/docker/supabase-studio.yml`), en réseau hôte parce
+qu'ils doivent joindre des services qui n'écoutent que sur la boucle locale :
+
+| Conteneur | Port | Rôle |
+| --- | --- | --- |
+| `rg-pg-meta` | 8813 | introspection Postgres (`supabase/postgres-meta`) |
+| | 8814 | port d'admin de pg-meta, **non configurable** (= `PG_META_PORT + 1`) |
+| `rg-studio` | 8815 | interface Next (`supabase/studio`) |
+
+Ce qui fonctionne, vérifié bout en bout : **éditeur SQL** (requêtes réelles sur
+la base), **éditeur de tables**, **policies RLS**, **rôles et extensions**,
+**explorateur de stockage** (il liste nos buckets et nos objets à travers
+`rg-storage`), et même la section **Auth**, que Studio lit directement dans
+`auth.users` via pg-meta. La section **Logs** reste vide : elle demande
+Logflare, qui n'est pas dans notre pile (`NEXT_PUBLIC_ENABLE_LOGS=false`).
+
+Studio se connecte à Postgres avec le rôle `rg`, propriétaire de tous les
+objets applicatifs — pas superutilisateur. L'installation d'extensions et la
+gestion des rôles système sont donc en lecture seule ; tout le travail
+applicatif passe.
+
+**Studio donne un accès complet en écriture à la base.** Il est protégé par
+authentification HTTP basique (`/etc/nginx/studio.htpasswd`, identifiants dans
+`/etc/rg-studio.env`), et les deux conteneurs n'écoutent que sur `127.0.0.1`.
+
+```bash
+sudo docker compose --env-file /etc/rg-studio-stack.env \
+     -f infra/docker/supabase-studio.yml up -d
+```
+
+Piège : le fichier `htpasswd` doit être lisible par le groupe de l'utilisateur
+des workers nginx — ici `nobody:nogroup`, pas `www-data`. Sinon nginx renvoie
+**500** (et non 401) sur toute requête *authentifiée*, avec un
+`13: Permission denied` dans `studio.rosegriffon.fr.error.log`.
+
 ## Base de données
 
 `public` (120 tables, 172 fonctions, 170 politiques RLS), `auth` et `storage`
