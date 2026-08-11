@@ -1,23 +1,28 @@
 "use client";
 
-import { Button } from "@rose-griffon/ui";
+import {
+	Button,
+	DropdownMenu,
+	DropdownMenuContent,
+	DropdownMenuItem,
+	DropdownMenuLabel,
+	DropdownMenuSeparator,
+	DropdownMenuTrigger,
+	THEMES,
+	type ThemeType,
+} from "@rose-griffon/ui";
+import { Check } from "lucide-react";
 import Image from "next/image";
 
 import { useTheme } from "@/contexts/theme-context";
 
-const THEME_METADATA = {
-	gaelle: {
-		icon: "/emote/RG_Gaelle_salut.webp",
-		name: "Gaëlle",
-	},
-	roy: {
-		icon: "/emote/RG_Roy_salut.webp",
-		name: "Roy",
-	},
-};
+/** Ordre d'affichage : les deux mascottes RG, puis les deux déclinaisons Azalée. */
+const THEME_ORDER: ThemeType[] = ["roy", "gaelle", "azalee-light", "azalee-dark"];
+
+const FALLBACK_THEME: ThemeType = "roy";
 
 export function ThemeToggle() {
-	const { theme, toggleTheme, mounted } = useTheme();
+	const { theme, setTheme, mounted } = useTheme();
 
 	if (!mounted) {
 		return (
@@ -33,27 +38,58 @@ export function ThemeToggle() {
 		);
 	}
 
-	const currentTheme = THEME_METADATA[theme as keyof typeof THEME_METADATA] ?? THEME_METADATA.roy;
+	const activeTheme = THEME_ORDER.includes(theme as ThemeType)
+		? (theme as ThemeType)
+		: FALLBACK_THEME;
+	const current = THEMES[activeTheme];
 
 	return (
-		<Button
-			variant="ghost"
-			size="icon"
-			onClick={toggleTheme}
-			className="h-11 w-11 sm:h-9 sm:w-9 md:h-10 md:w-10 relative overflow-hidden rounded-full hover:bg-sidebar-accent/20 transition-all duration-300 group"
-			title={`Thème actuel : ${currentTheme.name} (Cliquer pour changer)`}
-		>
-			<div className="relative size-6 sm:h-7 sm:w-7 transition-transform duration-500 ease-in-out group-hover:rotate-12 group-active:rotate-180">
-				<Image
-					src={currentTheme.icon}
-					alt={`Thème ${currentTheme.name}`}
-					fill
-					className="object-contain"
-					priority
-					unoptimized
-				/>
-			</div>
-			<span className="sr-only">Changer de thème</span>
-		</Button>
+		<DropdownMenu>
+			<DropdownMenuTrigger asChild>
+				<Button
+					variant="ghost"
+					size="icon"
+					className="group relative h-11 w-11 overflow-hidden rounded-full transition-all duration-300 hover:bg-sidebar-accent/20 sm:h-9 sm:w-9 md:h-10 md:w-10"
+					title={`Thème actuel : ${current.name}`}
+					aria-label={`Thème actuel : ${current.name}. Changer de thème`}
+				>
+					<div className="relative size-6 transition-transform duration-500 ease-in-out group-hover:rotate-12 sm:h-7 sm:w-7">
+						<Image
+							src={current.icon}
+							alt=""
+							fill
+							className="object-contain"
+							priority
+							unoptimized
+						/>
+					</div>
+					<span className="sr-only">Changer de thème</span>
+				</Button>
+			</DropdownMenuTrigger>
+
+			<DropdownMenuContent align="end" className="w-52">
+				<DropdownMenuLabel>Thème</DropdownMenuLabel>
+				<DropdownMenuSeparator />
+				{THEME_ORDER.map((id) => {
+					const meta = THEMES[id];
+					const isActive = id === activeTheme;
+
+					return (
+						<DropdownMenuItem
+							key={id}
+							onClick={() => setTheme(id)}
+							className="gap-2.5"
+							aria-current={isActive ? "true" : undefined}
+						>
+							<span className="relative size-6 shrink-0">
+								<Image src={meta.icon} alt="" fill className="object-contain" unoptimized />
+							</span>
+							<span className="flex-1 truncate">{meta.name}</span>
+							{isActive && <Check className="size-4 shrink-0 opacity-70" aria-hidden />}
+						</DropdownMenuItem>
+					);
+				})}
+			</DropdownMenuContent>
+		</DropdownMenu>
 	);
 }

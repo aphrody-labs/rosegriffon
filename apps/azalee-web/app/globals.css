@@ -75,175 +75,254 @@ html {
 
 /* ── Light Theme ───────────────────────────────────────── */
 
-:root {
-	--md-sys-color-primary: #f2a93b;
-	--md-sys-color-on-primary: #2a1519;
-	--md-sys-color-primary-container: #ffe08b;
-	--md-sys-color-on-primary-container: #2a1519;
+/* Palettes de tokens — DOIVENT rester dans `@layer base`.
+ * `@rose-griffon/ui/styles.css` (importé plus haut) publie les thèmes partagés
+ * `.roy` / `.gaelle` / `.theme-azalee-*` dans cette même couche. Une règle hors
+ * couche l'emporte sur TOUTE règle en couche, quelle que soit la spécificité :
+ * un `:root` non-layered figerait la palette et le sélecteur de thème
+ * n'aurait plus aucun effet visible. */
+@layer base {
+	:root {
+		--md-sys-color-primary: #f2a93b;
+		--md-sys-color-on-primary: #2a1519;
+		--md-sys-color-primary-container: #ffe08b;
+		--md-sys-color-on-primary-container: #2a1519;
 
-	--md-sys-color-secondary: #a92335;
-	--md-sys-color-on-secondary: #ffffff;
-	--md-sys-color-secondary-container: #ffdad6;
-	--md-sys-color-on-secondary-container: #410006;
+		--md-sys-color-secondary: #a92335;
+		--md-sys-color-on-secondary: #ffffff;
+		--md-sys-color-secondary-container: #ffdad6;
+		--md-sys-color-on-secondary-container: #410006;
 
-	--md-sys-color-tertiary: #2f4f4f;
-	--md-sys-color-on-tertiary: #ffffff;
-	--md-sys-color-tertiary-container: #b1ecec;
-	--md-sys-color-on-tertiary-container: #002020;
+		--md-sys-color-tertiary: #2f4f4f;
+		--md-sys-color-on-tertiary: #ffffff;
+		--md-sys-color-tertiary-container: #b1ecec;
+		--md-sys-color-on-tertiary-container: #002020;
 
-	--md-sys-color-error: #ba1a1a;
-	--md-sys-color-on-error: #ffffff;
-	--md-sys-color-error-container: #ffdad6;
-	--md-sys-color-on-error-container: #93000a;
+		--md-sys-color-error: #ba1a1a;
+		--md-sys-color-on-error: #ffffff;
+		--md-sys-color-error-container: #ffdad6;
+		--md-sys-color-on-error-container: #93000a;
 
-	--md-sys-color-background: #fff8f5;
-	--md-sys-color-on-background: #221a15;
+		--md-sys-color-background: #fff8f5;
+		--md-sys-color-on-background: #221a15;
 
-	--md-sys-color-surface: #fff8f5;
-	--md-sys-color-on-surface: #221a15;
-	--md-sys-color-surface-variant: #f4ded3;
-	--md-sys-color-on-surface-variant: #52443c;
+		--md-sys-color-surface: #fff8f5;
+		--md-sys-color-on-surface: #221a15;
+		--md-sys-color-surface-variant: #f4ded3;
+		--md-sys-color-on-surface-variant: #52443c;
 
-	--md-sys-color-outline: #84746a;
-	--md-sys-color-outline-variant: #d7c3b7;
+		--md-sys-color-outline: #84746a;
+		--md-sys-color-outline-variant: #d7c3b7;
 
-	--md-sys-color-scrim: #000000;
-	--md-sys-color-inverse-surface: #382e29;
-	--md-sys-color-inverse-on-surface: #feede5;
-	--md-sys-color-inverse-primary: #ffb786;
+		--md-sys-color-scrim: #000000;
+		--md-sys-color-inverse-surface: #382e29;
+		--md-sys-color-inverse-on-surface: #feede5;
+		--md-sys-color-inverse-primary: #ffb786;
 
-	--md-sys-color-surface-dim: #e7d7ce;
-	--md-sys-color-surface-bright: #fff8f5;
-	--md-sys-color-surface-container-lowest: #ffffff;
-	--md-sys-color-surface-container-low: #fff1ea;
-	--md-sys-color-surface-container: #fcebe2;
-	--md-sys-color-surface-container-high: #f6e5dc;
-	--md-sys-color-surface-container-highest: #f0dfd7;
+		--md-sys-color-surface-dim: #e7d7ce;
+		--md-sys-color-surface-bright: #fff8f5;
+		--md-sys-color-surface-container-lowest: #ffffff;
+		--md-sys-color-surface-container-low: #fff1ea;
+		--md-sys-color-surface-container: #fcebe2;
+		--md-sys-color-surface-container-high: #f6e5dc;
+		--md-sys-color-surface-container-highest: #f0dfd7;
 
-	/* Shadcn compatibility */
-	--background: 15 100% 98%;
-	--foreground: 25 24% 11%;
-	--card: 15 100% 98%;
-	--card-foreground: 25 24% 11%;
-	--popover: 15 100% 98%;
-	--popover-foreground: 25 24% 11%;
-	--primary: 36 89% 59%;
-	--primary-foreground: 348 33% 12%;
-	--secondary: 352 66% 40%;
-	--secondary-foreground: 0 0% 100%;
-	--muted: 20 57% 89%;
-	--muted-foreground: 52 14% 28%;
-	--accent: 21 82% 94%;
-	--accent-foreground: 25 24% 11%;
-	--destructive: 0 75% 42%;
-	--destructive-foreground: 0 0% 100%;
-	--border: 22 31% 78%;
-	--input: 22 31% 78%;
-	--ring: 36 89% 59%;
-	--radius: 1.5rem;
-	--sidebar: 15 100% 98%;
-	--sidebar-foreground: 25 24% 11%;
-	--sidebar-primary: 36 89% 59%;
-	--sidebar-primary-foreground: 348 33% 12%;
-	--sidebar-accent: 21 82% 94%;
-	--sidebar-accent-foreground: 25 24% 11%;
-	--sidebar-border: 22 31% 85%;
-	--sidebar-ring: 36 89% 59%;
-}
+		/* Shadcn compatibility */
+		--background: 15 100% 98%;
+		--foreground: 25 24% 11%;
+		--card: 15 100% 98%;
+		--card-foreground: 25 24% 11%;
+		--popover: 15 100% 98%;
+		--popover-foreground: 25 24% 11%;
+		--primary: 36 89% 59%;
+		--primary-foreground: 348 33% 12%;
+		--secondary: 352 66% 40%;
+		--secondary-foreground: 0 0% 100%;
+		--muted: 20 57% 89%;
+		--muted-foreground: 52 14% 28%;
+		--accent: 21 82% 94%;
+		--accent-foreground: 25 24% 11%;
+		--destructive: 0 75% 42%;
+		--destructive-foreground: 0 0% 100%;
+		--border: 22 31% 78%;
+		--input: 22 31% 78%;
+		--ring: 36 89% 59%;
+		--radius: 1.5rem;
+		--sidebar: 15 100% 98%;
+		--sidebar-foreground: 25 24% 11%;
+		--sidebar-primary: 36 89% 59%;
+		--sidebar-primary-foreground: 348 33% 12%;
+		--sidebar-accent: 21 82% 94%;
+		--sidebar-accent-foreground: 25 24% 11%;
+		--sidebar-border: 22 31% 85%;
+		--sidebar-ring: 36 89% 59%;
+	}
 
-/* ── Dark Theme ────────────────────────────────────────── */
+	/* ── Dark Theme ────────────────────────────────────────── */
 
-:root.dark {
-	--md-sys-color-primary: #ffc66c;
-	--md-sys-color-on-primary: #412d00;
-	--md-sys-color-primary-container: #5d4200;
-	--md-sys-color-on-primary-container: #ffe0aa;
+	:root.dark {
+		--md-sys-color-primary: #ffc66c;
+		--md-sys-color-on-primary: #412d00;
+		--md-sys-color-primary-container: #5d4200;
+		--md-sys-color-on-primary-container: #ffe0aa;
 
-	--md-sys-color-secondary: #ffb2be;
-	--md-sys-color-on-secondary: #5e1123;
-	--md-sys-color-secondary-container: #7c2939;
-	--md-sys-color-on-secondary-container: #ffd9df;
+		--md-sys-color-secondary: #ffb2be;
+		--md-sys-color-on-secondary: #5e1123;
+		--md-sys-color-secondary-container: #7c2939;
+		--md-sys-color-on-secondary-container: #ffd9df;
 
-	--md-sys-color-tertiary: #edc26e;
-	--md-sys-color-on-tertiary: #422d00;
-	--md-sys-color-tertiary-container: #5e4200;
-	--md-sys-color-on-tertiary-container: #ffdea6;
+		--md-sys-color-tertiary: #edc26e;
+		--md-sys-color-on-tertiary: #422d00;
+		--md-sys-color-tertiary-container: #5e4200;
+		--md-sys-color-on-tertiary-container: #ffdea6;
 
-	--md-sys-color-error: #ffb4ab;
-	--md-sys-color-on-error: #690005;
-	--md-sys-color-error-container: #93000a;
-	--md-sys-color-on-error-container: #ffdad6;
+		--md-sys-color-error: #ffb4ab;
+		--md-sys-color-on-error: #690005;
+		--md-sys-color-error-container: #93000a;
+		--md-sys-color-on-error-container: #ffdad6;
 
-	--md-sys-color-background: #1a120d;
-	--md-sys-color-on-background: #ede0db;
+		--md-sys-color-background: #1a120d;
+		--md-sys-color-on-background: #ede0db;
 
-	--md-sys-color-surface: #1a120d;
-	--md-sys-color-on-surface: #ede0db;
-	--md-sys-color-surface-variant: #52443c;
-	--md-sys-color-on-surface-variant: #d7c3b7;
+		--md-sys-color-surface: #1a120d;
+		--md-sys-color-on-surface: #ede0db;
+		--md-sys-color-surface-variant: #52443c;
+		--md-sys-color-on-surface-variant: #d7c3b7;
 
-	--md-sys-color-outline: #9f8d83;
-	--md-sys-color-outline-variant: #52443c;
+		--md-sys-color-outline: #9f8d83;
+		--md-sys-color-outline-variant: #52443c;
 
-	--md-sys-color-scrim: #000000;
-	--md-sys-color-inverse-surface: #ede0db;
-	--md-sys-color-inverse-on-surface: #1a120d;
-	--md-sys-color-inverse-primary: #8b5023;
+		--md-sys-color-scrim: #000000;
+		--md-sys-color-inverse-surface: #ede0db;
+		--md-sys-color-inverse-on-surface: #1a120d;
+		--md-sys-color-inverse-primary: #8b5023;
 
-	--md-sys-color-surface-dim: #1a120d;
-	--md-sys-color-surface-bright: #413732;
-	--md-sys-color-surface-container-lowest: #140d09;
-	--md-sys-color-surface-container-low: #221a15;
-	--md-sys-color-surface-container: #271e19;
-	--md-sys-color-surface-container-high: #322823;
-	--md-sys-color-surface-container-highest: #3d332d;
+		--md-sys-color-surface-dim: #1a120d;
+		--md-sys-color-surface-bright: #413732;
+		--md-sys-color-surface-container-lowest: #140d09;
+		--md-sys-color-surface-container-low: #221a15;
+		--md-sys-color-surface-container: #271e19;
+		--md-sys-color-surface-container-high: #322823;
+		--md-sys-color-surface-container-highest: #3d332d;
 
-	/* Shadcn dark */
-	--background: 25 30% 8%;
-	--foreground: 25 20% 90%;
-	--card: 25 30% 10%;
-	--card-foreground: 25 20% 90%;
-	--popover: 25 30% 10%;
-	--popover-foreground: 25 20% 90%;
-	--primary: 25 100% 76%;
-	--primary-foreground: 25 100% 15%;
-	--secondary: 25 20% 80%;
-	--secondary-foreground: 25 30% 20%;
-	--muted: 25 20% 15%;
-	--muted-foreground: 25 10% 70%;
-	--accent: 25 30% 15%;
-	--accent-foreground: 25 20% 90%;
-	--destructive: 0 100% 83%;
-	--destructive-foreground: 0 100% 16%;
-	--border: 25 20% 20%;
-	--input: 25 20% 20%;
-	--ring: 25 100% 76%;
-	--sidebar: 25 30% 8%;
-	--sidebar-foreground: 25 20% 90%;
-	--sidebar-primary: 25 100% 76%;
-	--sidebar-primary-foreground: 25 100% 15%;
-	--sidebar-accent: 25 30% 15%;
-	--sidebar-accent-foreground: 25 20% 90%;
-	--sidebar-border: 25 20% 20%;
-	--sidebar-ring: 25 100% 76%;
+		/* Shadcn dark */
+		--background: 25 30% 8%;
+		--foreground: 25 20% 90%;
+		--card: 25 30% 10%;
+		--card-foreground: 25 20% 90%;
+		--popover: 25 30% 10%;
+		--popover-foreground: 25 20% 90%;
+		--primary: 25 100% 76%;
+		--primary-foreground: 25 100% 15%;
+		--secondary: 25 20% 80%;
+		--secondary-foreground: 25 30% 20%;
+		--muted: 25 20% 15%;
+		--muted-foreground: 25 10% 70%;
+		--accent: 25 30% 15%;
+		--accent-foreground: 25 20% 90%;
+		--destructive: 0 100% 83%;
+		--destructive-foreground: 0 100% 16%;
+		--border: 25 20% 20%;
+		--input: 25 20% 20%;
+		--ring: 25 100% 76%;
+		--sidebar: 25 30% 8%;
+		--sidebar-foreground: 25 20% 90%;
+		--sidebar-primary: 25 100% 76%;
+		--sidebar-primary-foreground: 25 100% 15%;
+		--sidebar-accent: 25 30% 15%;
+		--sidebar-accent-foreground: 25 20% 90%;
+		--sidebar-border: 25 20% 20%;
+		--sidebar-ring: 25 100% 76%;
 
-	/* MD3 Surface Tint dark mode — primary tonal overlays (1%, 3%, 8%, 11%) */
-	--md-sys-color-surface-container-low: color-mix(
-		in oklch,
-		#221a15 99%,
-		var(--md-sys-color-primary)
-	);
-	--md-sys-color-surface-container: color-mix(in oklch, #271e19 97%, var(--md-sys-color-primary));
-	--md-sys-color-surface-container-high: color-mix(
-		in oklch,
-		#322823 92%,
-		var(--md-sys-color-primary)
-	);
-	--md-sys-color-surface-container-highest: color-mix(
-		in oklch,
-		#3d332d 89%,
-		var(--md-sys-color-primary)
-	);
+		/* MD3 Surface Tint dark mode — primary tonal overlays (1%, 3%, 8%, 11%) */
+		--md-sys-color-surface-container-low: color-mix(
+			in oklch,
+			#221a15 99%,
+			var(--md-sys-color-primary)
+		);
+		--md-sys-color-surface-container: color-mix(in oklch, #271e19 97%, var(--md-sys-color-primary));
+		--md-sys-color-surface-container-high: color-mix(
+			in oklch,
+			#322823 92%,
+			var(--md-sys-color-primary)
+		);
+		--md-sys-color-surface-container-highest: color-mix(
+			in oklch,
+			#3d332d 89%,
+			var(--md-sys-color-primary)
+		);
+	}
+
+	/* Les thèmes RG partagés (`@rose-griffon/ui/styles.css`) exposent leurs tokens
+	 * shadcn en couleurs CSS. Azalee, lui, les consomme via `hsl(var(--x))` :
+	 * il faut donc redéclarer ces tokens en TRIPLETS HSL, sinon `hsl(#344e8c)`
+	 * est invalide et toute la surface passe en transparent. Les tokens MD3
+	 * (`--md-sys-color-*`) sont pris tels quels depuis le package. */
+	/* ── Thème Roy (partagé avec rosegriffon.fr) ─────────────────────────────────────── */
+
+	:root.roy,
+	:root.theme-roy {
+		--background: 37 46.3% 95.4%;
+		--foreground: 210 89% 9%;
+		--card: 0 0% 100%;
+		--card-foreground: 210 89% 9%;
+		--popover: 0 0% 100%;
+		--popover-foreground: 210 89% 9%;
+		--primary: 207 83.1% 31.8%;
+		--primary-foreground: 180 0% 98%;
+		--secondary: 38 63.8% 66%;
+		--secondary-foreground: 210 89% 9%;
+		--muted: 37 29.4% 92.8%;
+		--muted-foreground: 211 24.2% 40.1%;
+		--accent: 38 63.8% 66%;
+		--accent-foreground: 210 89% 9%;
+		--destructive: 357 100% 45.3%;
+		--destructive-foreground: 0 0% 100%;
+		--border: 211 36.4% 87.8%;
+		--input: 211 36.4% 87.8%;
+		--ring: 207 83.1% 31.8%;
+		--sidebar: 222 45.8% 37.6%;
+		--sidebar-foreground: 0 0% 100%;
+		--sidebar-primary: 36 100% 71.6%;
+		--sidebar-primary-foreground: 213 43.3% 24.9%;
+		--sidebar-accent: 220 42% 43.9%;
+		--sidebar-accent-foreground: 0 0% 100%;
+		--sidebar-border: 220 37.1% 48%;
+		--sidebar-ring: 36 100% 71.6%;
+	}
+
+	/* ── Thème Gaëlle (partagé avec rosegriffon.fr) ─────────────────────────────────────── */
+
+	:root.gaelle,
+	:root.theme-gaelle {
+		--background: 17 100% 93.9%;
+		--foreground: 0 100% 16.6%;
+		--card: 0 0% 100%;
+		--card-foreground: 0 100% 16.6%;
+		--popover: 0 0% 100%;
+		--popover-foreground: 0 100% 16.6%;
+		--primary: 358 67.9% 41.9%;
+		--primary-foreground: 180 0% 98%;
+		--secondary: 22 95.5% 72.4%;
+		--secondary-foreground: 0 100% 16.6%;
+		--muted: 15 68.7% 90.4%;
+		--muted-foreground: 4 36% 42.6%;
+		--accent: 22 95.5% 72.4%;
+		--accent-foreground: 0 100% 16.6%;
+		--destructive: 351 100% 25.9%;
+		--destructive-foreground: 0 0% 100%;
+		--border: 9 75.7% 86.9%;
+		--input: 9 75.7% 86.9%;
+		--ring: 358 67.9% 41.9%;
+		--sidebar: 11 75.1% 39.4%;
+		--sidebar-foreground: 0 0% 100%;
+		--sidebar-primary: 36 100% 71.6%;
+		--sidebar-primary-foreground: 356 100% 23.3%;
+		--sidebar-accent: 12 67.1% 45.3%;
+		--sidebar-accent-foreground: 0 0% 100%;
+		--sidebar-border: 13 60% 50%;
+		--sidebar-ring: 36 100% 71.6%;
+	}
 }
 
 /* ── Tailwind Theme Tokens ─────────────────────────────── */

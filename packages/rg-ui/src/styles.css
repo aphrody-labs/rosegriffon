@@ -158,10 +158,24 @@
 
 @layer base {
 	:root {
-		/* Rose Griffon — branding tokens (seed M3) */
+		/* Rose Griffon — branding tokens (seed M3).
+		 * Ces quatre teintes sont la DA de l'association : elles ne suivent PAS
+		 * le thème (une bannière de marque reste identique en Roy comme en
+		 * Azalée sombre). Elles existent en tokens pour qu'aucun composant
+		 * n'ait à écrire l'hexadécimal en dur. */
 		--rg-marine: oklch(0.2 0.05 264); /* #0c1730 — neutral dark */
 		--rg-rose: oklch(0.65 0.22 0); /* #e91e63 — primary seed */
-		--rg-griffon: oklch(0.78 0.13 90); /* #d4af37 — tertiary seed */
+		--rg-griffon: oklch(0.78 0.13 90); /* #d4af37 — or, tertiary seed */
+		--rg-brique: oklch(0.5 0.11 30); /* #a14b3f — rouge brique RG */
+		--rg-marine-clair: oklch(0.31 0.07 264); /* #16264a — dégradé de marine */
+		--rg-sur-marine: oklch(0.98 0.004 90); /* blanc cassé — texte sur marine */
+
+		/* États sémantiques partagés (succès / info / alerte). L'erreur passe par
+		 * `--destructive`, déjà thémé. Sans ces tokens, les composants retombent
+		 * sur `bg-green-500` & consorts, qui ignorent le thème. */
+		--rg-succes: oklch(0.62 0.15 150);
+		--rg-info: oklch(0.6 0.14 240);
+		--rg-alerte: oklch(0.75 0.15 75);
 
 		/* ─── M3 sys-color — LIGHT scheme (35 tokens) ────────────────────── */
 		--md-sys-color-primary: oklch(0.5 0.22 0);

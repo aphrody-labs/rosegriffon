@@ -92,6 +92,15 @@ export default function RootLayout({
 	return (
 		<html lang="fr" className="dark" suppressHydrationWarning>
 			<head>
+				{/* Pré-application du thème avant hydratation (évite le FOUC).
+				    Le <html> est rendu en `dark` côté serveur (thème par défaut) ; sans
+				    ce script, un visiteur en Roy/Gaëlle/clair verrait d'abord la palette
+				    sombre. next-themes prend le relais une fois monté. */}
+				<script
+					dangerouslySetInnerHTML={{
+						__html: `(function(){try{var k='azalee-theme',d='dark',s=['light','dark','roy','gaelle'];var t=localStorage.getItem(k);if(!t||s.indexOf(t)===-1)t=d;var e=document.documentElement;s.forEach(function(c){e.classList.remove(c)});e.classList.add(t);}catch(e){}})();`,
+					}}
+				/>
 				{/* Material Symbols: self-hosted in globals.css, no external CSS needed */}
 				<link rel="preconnect" href="https://www.googletagmanager.com" />
 				<link rel="author" href="/humans.txt" />
@@ -172,7 +181,7 @@ export default function RootLayout({
 					<ThemeProvider
 						attribute="class"
 						defaultTheme="dark"
-						themes={["light", "dark"]}
+						themes={["light", "dark", "roy", "gaelle"]}
 						storageKey="azalee-theme"
 						enableSystem={false}
 						disableTransitionOnChange
