@@ -42,7 +42,7 @@ export const THEMES = {
 		},
 	},
 	"azalee-dark": {
-		name: "Azalée sombre",
+		name: "Azalée",
 		icon: "/emote/RG_Reika_zukan.webp",
 		colors: {
 			primary: "#FFC66C",
