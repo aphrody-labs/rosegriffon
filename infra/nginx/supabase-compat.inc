@@ -39,6 +39,31 @@ location /rest/v1/ {
     add_header Access-Control-Expose-Headers "content-range, content-location, range-unit" always;
 }
 
+# API GraphQL auto-générée par pg_graphql, exposée comme chez Supabase :
+# PostgREST publie `graphql_public.graphql()` en RPC, on la présente sous
+# /graphql/v1 avec le profil de schéma qui va bien.
+location = /graphql/v1 {
+    proxy_pass http://127.0.0.1:8809/rpc/graphql;
+    proxy_http_version 1.1;
+    proxy_set_header Host $host;
+    proxy_set_header Connection "";
+    proxy_set_header Accept-Profile  graphql_public;
+    proxy_set_header Content-Profile graphql_public;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+    proxy_connect_timeout 3s;
+    proxy_read_timeout 60s;
+
+    if ($request_method = OPTIONS) {
+        add_header Access-Control-Allow-Origin  "*" always;
+        add_header Access-Control-Allow-Methods "POST, OPTIONS" always;
+        add_header Access-Control-Allow-Headers "authorization, apikey, content-type, x-client-info" always;
+        add_header Content-Length 0;
+        return 204;
+    }
+    add_header Access-Control-Allow-Origin "*" always;
+}
+
 location /realtime/v1/ {
     proxy_pass http://127.0.0.1:8812/;
     proxy_http_version 1.1;
