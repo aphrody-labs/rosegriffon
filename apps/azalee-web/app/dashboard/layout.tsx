@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
+import { DashboardSidebar } from "@/components/dashboard/DashboardSidebar";
 import { getServerSession, hasMedailleAzaleeRole } from "@/lib/auth-helpers";
 import { ADMIN_ROLES } from "@/lib/auth-roles";
 import { createClient } from "@/lib/supabase/server";
@@ -35,5 +36,17 @@ export default async function DashboardLayout({ children }: { children: React.Re
 		redirect("/");
 	}
 
-	return <div className="flex flex-col h-full min-h-[calc(100vh-4rem)]">{children}</div>;
+	// Même structure que `/admin` du site principal : barre d'administration
+	// dédiée à gauche, contenu à droite. L'autorisation vient d'être vérifiée
+	// ci-dessus côté serveur, la barre est donc toujours rendue — contrairement
+	// à l'ancienne permutation d'entrées dans la barre principale, filtrée par un
+	// `isAdmin` client qui vidait la navigation dès qu'il retombait à faux.
+	return (
+		<div className="flex min-h-[calc(100dvh-4rem)] w-full">
+			<DashboardSidebar />
+			<div className="min-w-0 flex-1 overflow-x-hidden pt-16 pb-20 lg:pt-0 lg:pb-0">
+				{children}
+			</div>
+		</div>
+	);
 }
