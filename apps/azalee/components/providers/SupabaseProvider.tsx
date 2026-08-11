@@ -74,15 +74,29 @@ export function SupabaseProvider({
 	}, [token]);
 
 	const client = useMemo(() => {
-		const opts: Parameters<typeof createClient>[2] = token
-			? {
-					global: {
-						headers: {
-							Authorization: `Bearer ${token}`,
+		const opts: Parameters<typeof createClient>[2] = {
+			// Ce client sert UNIQUEMENT à lire des données : l'identité vient de Better
+			// Auth, jamais de GoTrue. Sans ces trois drapeaux, chaque changement de jeton
+			// reconstruit un client GoTrue complet qui s'accroche à la même clé de
+			// stockage que le client partagé de `@rose-griffon/db/browser` — d'où
+			// l'avertissement « Multiple GoTrueClient instances detected in the same
+			// browser context », et un risque réel de comportement indéfini entre les
+			// deux instances concurrentes.
+			auth: {
+				autoRefreshToken: false,
+				detectSessionInUrl: false,
+				persistSession: false,
+			},
+			...(token
+				? {
+						global: {
+							headers: {
+								Authorization: `Bearer ${token}`,
+							},
 						},
-					},
-				}
-			: undefined;
+					}
+				: {}),
+		};
 
 		const supabaseUrl =
 			process.env.NEXT_PUBLIC_SUPABASE_URL &&
