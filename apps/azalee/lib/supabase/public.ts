@@ -1,7 +1,7 @@
 import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@rose-griffon/db";
 
-const PLACEHOLDER_URL = "https://isbkaeltubqittywibeh.supabase.co";
+const PLACEHOLDER_URL = (typeof window === "undefined" ? "http://127.0.0.1:8811" : window.location.origin);
 const PLACEHOLDER_ANON_JWT =
 	"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlzYmthZWx0dWJxaXR0eXdpYmVoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY1NDYyNzUsImV4cCI6MjA5MjEyMjI3NX0.eAyJfqREb8Kh5F_yLf5Jp43S2qOil4qUcqFTLQiExx0";
 

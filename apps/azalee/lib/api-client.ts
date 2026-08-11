@@ -30,7 +30,7 @@ function getSupabase(): ReturnType<typeof createClient> {
 			: process.env.NEXT_PUBLIC_SUPABASE_URL &&
 				  process.env.NEXT_PUBLIC_SUPABASE_URL.startsWith("http")
 				? process.env.NEXT_PUBLIC_SUPABASE_URL
-				: "https://isbkaeltubqittywibeh.supabase.co";
+				: (typeof window === "undefined" ? "http://127.0.0.1:8811" : window.location.origin);
 
 	const key =
 		process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY &&

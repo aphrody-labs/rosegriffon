@@ -181,8 +181,8 @@ export function resolveSupabaseClient() {
 	let url =
 		process.env.SUPABASE_URL ||
 		process.env.NEXT_PUBLIC_SUPABASE_URL ||
-		"https://isbkaeltubqittywibeh.supabase.co";
-	if (!isValidUrl(url)) url = "https://isbkaeltubqittywibeh.supabase.co";
+		(typeof window === "undefined" ? "http://127.0.0.1:8811" : window.location.origin);
+	if (!isValidUrl(url)) url = (typeof window === "undefined" ? "http://127.0.0.1:8811" : window.location.origin);
 
 	let key = process.env.SUPABASE_SERVICE_ROLE_KEY;
 	const jwtSecret = process.env.JWT_SECRET || process.env.SUPABASE_JWT_SECRET;

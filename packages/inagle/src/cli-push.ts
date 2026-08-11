@@ -82,7 +82,7 @@ export function registerPushCommand(program: Command) {
 				adapter = new PostgresAdapter(options.dbUrl);
 			} else {
 				let SUPABASE_URL =
-					options.url || process.env.SUPABASE_URL || "https://isbkaeltubqittywibeh.supabase.co";
+					options.url || process.env.SUPABASE_URL || "http://127.0.0.1:8811";
 				let SUPABASE_KEY = options.key || process.env.SUPABASE_SERVICE_ROLE_KEY;
 				const JWT_SECRET =
 					options.jwtSecret || process.env.JWT_SECRET || process.env.SUPABASE_JWT_SECRET;
@@ -101,7 +101,7 @@ export function registerPushCommand(program: Command) {
 					!val.startsWith("eyJ2Ijo");
 
 				if (!isValidUrl(SUPABASE_URL)) {
-					SUPABASE_URL = "https://isbkaeltubqittywibeh.supabase.co";
+					SUPABASE_URL = "http://127.0.0.1:8811";
 				}
 
 				if (!isValidKey(SUPABASE_KEY)) {

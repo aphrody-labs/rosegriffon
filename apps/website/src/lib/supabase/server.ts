@@ -34,7 +34,7 @@ export function createPublicClient(): SupabaseClient {
 		!supabaseUrl.startsWith("http") ||
 		supabaseUrl.startsWith("eyJ2Ijo")
 	) {
-		supabaseUrl = "https://isbkaeltubqittywibeh.supabase.co";
+		supabaseUrl = (typeof window === "undefined" ? "http://127.0.0.1:8811" : window.location.origin);
 	}
 
 	if (

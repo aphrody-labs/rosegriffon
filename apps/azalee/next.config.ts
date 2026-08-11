@@ -60,11 +60,6 @@ const nextConfig: NextConfig = {
 			},
 			{
 				protocol: "https",
-				hostname: "mpfpbojuqtbjpehwlwfp.supabase.co",
-				pathname: "/**",
-			},
-			{
-				protocol: "https",
 				hostname: "lh3.googleusercontent.com",
 				pathname: "/**",
 			},
@@ -222,10 +217,10 @@ const nextConfig: NextConfig = {
 			// (lecteur de sauvegarde /save, renderer menu webgpu) sous CSP strict.
 			`script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'${cdnSrc} https://www.googletagmanager.com https://www.google-analytics.com${isDev ? " 'unsafe-eval'" : ""}`,
 			`style-src 'self' 'unsafe-inline'${cdnSrc}`,
-			`img-src 'self' blob: data:${cdnSrc} ${ASSET_CDN_ORIGIN} https://dxi4wb638ujep.cloudfront.net https://*.inazuma.jp https://*.supabase.co https://lh3.googleusercontent.com https://cdn.discordapp.com https://pbs.twimg.com`,
+			`img-src 'self' blob: data:${cdnSrc} ${ASSET_CDN_ORIGIN} https://dxi4wb638ujep.cloudfront.net https://*.inazuma.jp https://lh3.googleusercontent.com https://cdn.discordapp.com https://pbs.twimg.com`,
 			`media-src 'self' blob: data:${cdnSrc} ${ASSET_CDN_ORIGIN} https://dxi4wb638ujep.cloudfront.net https://*.inazuma.jp https://video.twimg.com https://pbs.twimg.com`,
 			`font-src 'self'${cdnSrc} ${ASSET_CDN_ORIGIN}`,
-			`connect-src 'self' blob:${cdnSrc} ${ASSET_CDN_ORIGIN} https://www.google-analytics.com https://www.googletagmanager.com https://*.supabase.co wss://*.supabase.co`,
+			`connect-src 'self' blob:${cdnSrc} ${ASSET_CDN_ORIGIN} https://www.google-analytics.com https://www.googletagmanager.com`,
 			"frame-src 'none'",
 			"frame-ancestors 'none'",
 			"base-uri 'self'",
