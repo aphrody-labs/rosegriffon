@@ -148,16 +148,22 @@ export async function ensureUserProfile(
 		// un humain — et n'a par construction aucune ligne dépendante, puisque personne ne
 		// s'y est jamais authentifié. On le libère donc avant de créer le profil réel.
 		if (discordId) {
-			const { error: liberation } = await db
-				.from("profiles")
-				.delete()
-				.eq("discord_id", discordId)
-				.is("claimed_at", null);
+			// La suppression passe par une fonction SQL et non par un `.delete()`
+			// filtré sur `claimed_at`, car ce prédicat seul ne distingue pas un profil
+			// pré-créé d'un profil RÉEL mal initialisé : la fonction exige en plus que
+			// l'identifiant soit l'uuid v5 dérivé du `discord_id` et que le profil ne
+			// porte aucun contenu saisi par un humain.
+			const { data: liberes, error: liberation } = await db.rpc(
+				"rg_liberer_profil_discord",
+				{ p_discord_id: discordId }
+			);
 			if (liberation) {
 				console.error(
 					`[@rose-griffon/auth] libération du profil pré-créé ${discordId} impossible:`,
 					liberation.message
 				);
+			} else if (liberes) {
+				console.info(`[@rose-griffon/auth] profil pré-créé ${discordId} adopté`);
 			}
 		}
 

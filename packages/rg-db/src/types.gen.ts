@@ -4303,6 +4303,18 @@ export type Database = {
       }
     }
     Functions: {
+      rg_liberer_profil_discord: {
+        Args: { p_discord_id: string }
+        Returns: number
+      }
+      rg_precreer_profils_discord: {
+        Args: Record<PropertyKey, never>
+        Returns: { crees: number; mis_a_jour: number }[]
+      }
+      rg_uuid_membre_discord: {
+        Args: { p_discord_id: string }
+        Returns: string
+      }
       check_rate_limit: {
         Args: {
           p_action: string
