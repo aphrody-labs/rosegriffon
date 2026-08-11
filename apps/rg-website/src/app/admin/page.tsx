@@ -62,14 +62,12 @@ export default async function AdminDashboardPage() {
 	}
 
 	const now = new Date();
-	const oneDayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
 	const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
 	const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
 	const nowIso = now.toISOString();
 
 	const [
 		usersCountRes,
-		newUsersTodayRes,
 		newUsersWeekRes,
 		articlesCountRes,
 		draftsCountRes,
@@ -77,16 +75,14 @@ export default async function AdminDashboardPage() {
 		upcomingEventsCountRes,
 		activeSessionsRes,
 		patreonLinkedRes,
+		activePatronsRes,
+		discordSyncRes,
 		recentUsersRaw,
 		recentArticlesRes,
 		upcomingEventsListRes,
 		signupsTimelineRes,
 	] = await Promise.all([
 		supabase.from("profiles").select("id", { count: "exact", head: true }),
-		supabase
-			.from("user")
-			.select("*", { count: "exact", head: true })
-			.gt("created_at", oneDayAgo.toISOString()),
 		supabase
 			.from("user")
 			.select("*", { count: "exact", head: true })
@@ -103,6 +99,19 @@ export default async function AdminDashboardPage() {
 			.from("account")
 			.select("user_id", { count: "exact", head: true })
 			.eq("provider_id", "patreon"),
+		// Soutien réel : palier engagé des patrons actifs, pas le simple nombre
+		// de comptes reliés (un ancien patron reste relié).
+		supabase
+			.from("patreon_memberships")
+			.select("currently_entitled_cents")
+			.eq("patron_status", "active_patron"),
+		// Santé de la synchronisation Discord : sans elle, le cron peut échouer
+		// des jours sans que personne ne le voie.
+		supabase
+			.from("discord_sync_logs")
+			.select("status, total_members, error_count, created_at")
+			.order("created_at", { ascending: false })
+			.limit(1),
 		supabase
 			.from("user")
 			.select("id, created_at")
@@ -127,7 +136,6 @@ export default async function AdminDashboardPage() {
 	]);
 
 	const usersCount = usersCountRes.count ?? 0;
-	const newUsersToday = newUsersTodayRes.count ?? 0;
 	const newUsersWeek = newUsersWeekRes.count ?? 0;
 	const articlesCount = articlesCountRes.count ?? 0;
 	const draftsCount = draftsCountRes.count ?? 0;
@@ -136,6 +144,25 @@ export default async function AdminDashboardPage() {
 	const activeSessions = activeSessionsRes.count ?? 0;
 	const patreonLinked = patreonLinkedRes.count ?? 0;
 	const signupsTimeline = buildDailySignups(signupsTimelineRes.data ?? []);
+
+	const activePatrons = (activePatronsRes.data ?? []) as { currently_entitled_cents: number | null }[];
+	const monthlySupportCents = activePatrons.reduce((sum, p) => sum + (p.currently_entitled_cents ?? 0), 0);
+	const monthlySupport = new Intl.NumberFormat("fr-FR", {
+		currency: "EUR",
+		maximumFractionDigits: 0,
+		style: "currency",
+	}).format(monthlySupportCents / 100);
+
+	const lastSync = ((discordSyncRes.data ?? [])[0] ?? null) as {
+		status: string | null;
+		total_members: number | null;
+		error_count: number | null;
+		created_at: string | null;
+	} | null;
+	const syncOk = lastSync?.status === "success" && (lastSync.error_count ?? 0) === 0;
+	const syncAge = lastSync?.created_at
+		? Math.round((now.getTime() - new Date(lastSync.created_at).getTime()) / 60_000)
+		: null;
 
 	const recentUserIds = (recentUsersRaw.data ?? []).map((u) => u.id);
 	const profilesRes = recentUserIds.length > 0
@@ -175,11 +202,17 @@ export default async function AdminDashboardPage() {
 					accent="sky"
 				/>
 				<StatsCard
-					title="Inscriptions 24h"
-					value={newUsersToday}
-					description="Nouveaux comptes du jour"
+					title="Membres Discord"
+					value={lastSync?.total_members ?? 0}
+					description={
+						lastSync
+							? syncOk
+								? `Synchronisé il y a ${syncAge} min`
+								: `Dernière synchro en échec (${lastSync.error_count ?? 0} erreurs)`
+							: "Aucune synchronisation enregistrée"
+					}
 					icon={Activity}
-					accent="emerald"
+					accent={syncOk ? "emerald" : "rose"}
 				/>
 				<StatsCard
 					title="Sessions actives"
@@ -224,12 +257,12 @@ export default async function AdminDashboardPage() {
 					accent="amber"
 				/>
 				<StatsCard
-					title="À venir"
-					value={upcomingEventsCount}
-					description="Événements futurs"
-					icon={CalendarClock}
-					href="/admin/events"
-					accent="emerald"
+					title="Soutien mensuel"
+					value={monthlySupport}
+					description={`${activePatrons.length} patron${activePatrons.length > 1 ? "s" : ""} actif${activePatrons.length > 1 ? "s" : ""} · ${upcomingEventsCount} événement${upcomingEventsCount > 1 ? "s" : ""} à venir`}
+					icon={Heart}
+					href="/admin/patreon"
+					accent="rose"
 				/>
 			</DashboardGrid>
 
@@ -243,7 +276,7 @@ export default async function AdminDashboardPage() {
 					title="Utilisateurs récents"
 					href="/admin/users"
 					icon={UserPlus}
-					accent="bg-sky-500/10 text-sky-600"
+					accent="bg-info/10 text-info"
 					items={recentUsers.map((u) => ({
 						date: u.created_at || undefined,
 						id: u.id,
@@ -255,7 +288,7 @@ export default async function AdminDashboardPage() {
 					title="Articles récents"
 					href="/admin/chroniques"
 					icon={FileText}
-					accent="bg-violet-500/10 text-violet-600"
+					accent="bg-secondary/15 text-secondary-foreground"
 					items={(recentArticlesRes.data ?? []).map((a) => ({
 						date: (a.published_at || a.updated_at) ?? undefined,
 						id: a.id,
@@ -274,7 +307,7 @@ export default async function AdminDashboardPage() {
 					title="Événements à venir"
 					href="/admin/events"
 					icon={Calendar}
-					accent="bg-amber-500/10 text-amber-600"
+					accent="bg-alerte/15 text-alerte"
 					items={(upcomingEventsListRes.data ?? []).map((e) => ({
 						date: e.start_time,
 						id: e.id,

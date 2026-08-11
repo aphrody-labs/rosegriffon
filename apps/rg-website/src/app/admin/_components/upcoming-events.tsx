@@ -32,7 +32,7 @@ export function UpcomingEvents({ events }: { events: UpcomingEvent[] }) {
 						{events.map((e) => (
 							<li key={e.id} className="flex items-start gap-3 py-3 first:pt-0 last:pb-0">
 								<div
-									className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400"
+									className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-alerte/15 text-alerte"
 									aria-hidden="true"
 								>
 									<CalendarClock className="size-4" />

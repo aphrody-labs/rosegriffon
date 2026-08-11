@@ -1,7 +1,7 @@
 {
 	"name": "@rose-griffon/db",
 	"version": "0.2.0",
-	"description": "Client Supabase partagé + Database types générés (site + bot)",
+	"description": "Client Supabase partag\u00e9 + Database types g\u00e9n\u00e9r\u00e9s (site + bot)",
 	"type": "module",
 	"exports": {
 		".": "./src/index.ts",
@@ -13,7 +13,8 @@
 		"./rag-store": "./src/rag-store.ts",
 		"./storage": "./src/storage.ts",
 		"./stats": "./src/services/stats.ts",
-		"./types": "./src/types.ts"
+		"./types": "./src/types.ts",
+		"./platform": "./src/platform.ts"
 	},
 	"publishConfig": {
 		"access": "restricted",

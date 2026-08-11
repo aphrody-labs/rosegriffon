@@ -39,7 +39,7 @@ export function RecentArticles({ articles }: { articles: RecentArticle[] }) {
 								<li key={a.id} className="py-3 first:pt-0 last:pb-0">
 									<div className="flex items-start gap-3">
 										<div
-											className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-violet-500/10 text-violet-600 dark:text-violet-400"
+											className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-secondary/15 text-secondary-foreground"
 											aria-hidden="true"
 										>
 											<FileText className="size-4" />

@@ -20,13 +20,22 @@ interface DashboardStatsCardProps {
 	className?: string;
 }
 
+/**
+ * Accents des cartes.
+ *
+ * Ils pointaient sur la palette Tailwind brute (`sky-500`, `violet-500`…) :
+ * les cartes gardaient donc les mêmes teintes quel que soit le thème actif, et
+ * juraient avec Roy, Gaëlle et Azalée. Les noms de clés sont conservés pour ne
+ * pas casser les appelants, mais chacun renvoie désormais vers un token du
+ * design system, donc vers une couleur qui suit le thème.
+ */
 const accentVariants = {
 	primary: "bg-primary/10 text-primary",
-	emerald: "bg-emerald-500/10 text-emerald-600",
-	sky: "bg-sky-500/10 text-sky-600",
-	rose: "bg-rose-500/10 text-rose-600",
-	amber: "bg-amber-500/10 text-amber-600",
-	violet: "bg-violet-500/10 text-violet-600",
+	emerald: "bg-succes/10 text-succes",
+	sky: "bg-info/10 text-info",
+	rose: "bg-rg-rose/10 text-rg-rose",
+	amber: "bg-alerte/15 text-alerte",
+	violet: "bg-secondary/15 text-secondary-foreground",
 };
 
 /**
@@ -69,7 +78,7 @@ export function DashboardStatsCard({
 					<span
 						className={cn(
 							"text-xs font-medium",
-							trend.value > 0 ? "text-emerald-600" : "text-rose-600"
+							trend.value > 0 ? "text-succes" : "text-destructive"
 						)}
 					>
 						{trend.value > 0 ? "+" : ""}
