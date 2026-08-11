@@ -5,6 +5,7 @@ import {
 	CalendarClock,
 	Eye,
 	FileText,
+	FolderOpen,
 	Heart,
 	LayoutDashboard,
 	MonitorSmartphone,
@@ -19,6 +20,8 @@ import {
 	DashboardStatsCard as StatsCard,
 } from "@rose-griffon/ui";
 import { createAdminClient } from "@/lib/supabase/server";
+
+import { describeMimeType, listRecentDriveFiles } from "@/lib/google/drive";
 
 import { QuickActions } from "./_components/quick-actions";
 import { SignupsChart } from "./_components/signups-chart";
@@ -134,6 +137,10 @@ export default async function AdminDashboardPage() {
 			.gte("created_at", thirtyDaysAgo.toISOString())
 			.order("created_at", { ascending: true }),
 	]);
+
+	// Drive partagé : lu via le compte de service, indépendamment de la connexion
+	// Google des visiteurs. Dégrade en liste vide si Google est injoignable.
+	const driveFiles = await listRecentDriveFiles(5);
 
 	const usersCount = usersCountRes.count ?? 0;
 	const newUsersWeek = newUsersWeekRes.count ?? 0;
@@ -268,7 +275,7 @@ export default async function AdminDashboardPage() {
 
 			<SignupsChart data={signupsTimeline} />
 
-			<section aria-labelledby="recent-title" className="grid gap-6 lg:grid-cols-3">
+			<section aria-labelledby="recent-title" className="grid gap-6 lg:grid-cols-2 xl:grid-cols-4">
 				<h2 id="recent-title" className="sr-only">
 					Activité récente
 				</h2>
@@ -313,6 +320,18 @@ export default async function AdminDashboardPage() {
 						id: e.id,
 						subtitle: e.location || "Lieu non précisé",
 						title: e.title,
+					}))}
+				/>
+				<RecentListCard
+					title="Drive partagé"
+					href="https://drive.google.com/drive/my-drive"
+					icon={FolderOpen}
+					accent="bg-succes/10 text-succes"
+					items={driveFiles.map((file) => ({
+						date: file.modifiedTime ?? undefined,
+						id: file.id,
+						subtitle: describeMimeType(file.mimeType),
+						title: file.name,
 					}))}
 				/>
 			</section>
