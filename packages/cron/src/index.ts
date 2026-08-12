@@ -21,6 +21,11 @@ import { runSeoLlmsTxt } from "./tasks/seo/llms-txt";
 import { collecterAudienceAchillea } from "./tasks/stats/achillea";
 import { initDiscord, getDiscordTelemetry, onTelemetryUpdate, getDiscordClient, GUILD_ID } from "./lib/discord";
 import { runDiscordSync, runDiscordChannelScan } from "./tasks/discord";
+import {
+	runDiscordMessagesSync,
+	runDiscordMessagesBackfill,
+	brancherVeilleMessagesTempsReel,
+} from "./tasks/discord-messages";
 import { ServerWebSocket } from "bun";
 import { createSupabaseServiceClient } from "@rosegriffon/db/service";
 import { resolveProfile, isAdmin } from "@rosegriffon/auth";
@@ -88,7 +93,14 @@ console.log(`⏰ Heure actuelle : ${new Date().toISOString()}`);
 console.log("==================================================================");
 
 // Initialisation du client Discord
-await initDiscord();
+const clientDiscord = await initDiscord();
+
+// Veille des salons Discord suivis : les événements de la passerelle écrivent
+// immédiatement en base, le trigger Postgres `rg_realtime_notify()` diffuse
+// ensuite vers `rg-realtime` (SSE) et donc vers le site.
+if (clientDiscord) {
+	brancherVeilleMessagesTempsReel(clientDiscord);
+}
 
 // ─── METRICS & STATS D'EXÉCUTION ─────────────────────────────────────────────
 const metrics = {
@@ -208,6 +220,10 @@ if (args.includes("--run")) {
 		await executeTask("discord:sync", runDiscordSync);
 	} else if (task === "discord:scan") {
 		await executeTask("discord:scan", runDiscordChannelScan);
+	} else if (task === "discord:messages" || task === "discord-messages") {
+		await executeTask("discord:messages", runDiscordMessagesSync);
+	} else if (task === "discord:backfill" || task === "discord-backfill") {
+		await executeTask("discord:backfill", runDiscordMessagesBackfill);
 	} else if (task === "seo:indexnow") {
 		await executeTask("seo:indexnow", runSeoIndexNow);
 	} else if (task === "seo:llms-txt" || task === "seo:llms") {
@@ -230,12 +246,13 @@ if (args.includes("--run")) {
 		await executeTask("reminders", () => triggerPatreonReminders("announce"));
 		await executeTask("discord:sync", runDiscordSync);
 		await executeTask("discord:scan", runDiscordChannelScan);
+		await executeTask("discord:messages", runDiscordMessagesSync);
 		await executeTask("seo:llms-txt", runSeoLlmsTxt);
 		await executeTask("seo:indexnow", runSeoIndexNow);
 		await executeTask("stats:achillea", collecterAudienceAchillea);
 	} else {
 		console.error(
-			`❌ Tâche inconnue : ${task}. Choisissez parmi : db, cdn, crawl, rag, x-search, query, publish, github-publish, patreon, reminders, warm, discord, discord:scan, seo, seo:indexnow, seo:llms-txt, stats:achillea, backup:postgres, backup:pg, all.`
+			`❌ Tâche inconnue : ${task}. Choisissez parmi : db, cdn, crawl, rag, x-search, query, publish, github-publish, patreon, reminders, warm, discord, discord:scan, discord:messages, discord:backfill, seo, seo:indexnow, seo:llms-txt, stats:achillea, backup:postgres, backup:pg, all.`
 		);
 	}
 	process.exit(0);
@@ -256,6 +273,15 @@ Bun.cron("*/30 * * * *", async () => {
 // 2b. Synchronisation Discord (membres, rôles, staff) : toutes les 30 minutes
 Bun.cron("*/30 * * * *", async () => {
 	await executeTask("discord:sync", runDiscordSync);
+});
+
+// 2c. Veille des salons Discord suivis : toutes les 5 minutes.
+// Filet de sécurité du temps réel : les événements de la passerelle sont perdus
+// pendant un redémarrage du démon ou une coupure de la connexion Discord, et le
+// repli sans intents privilégiés n'en reçoit aucun. Ce rattrapage REST rejoue
+// tout ce qui a été manqué (messages, éditions, réactions).
+Bun.cron("*/5 * * * *", async () => {
+	await executeTask("discord:messages", runDiscordMessagesSync);
 });
 
 // 3. Synchronisation Inagle DB & SQLite Backup : tous les jours à 2h00 UTC
@@ -440,6 +466,8 @@ const server = Bun.serve({
 					"warm",
 					"discord",
 					"discord:scan",
+					"discord:messages",
+					"discord:backfill",
 					"seo:indexnow",
 					"seo:llms-txt",
 					"stats:achillea",
@@ -458,6 +486,8 @@ const server = Bun.serve({
 					reminders: "0 8 * * *",
 					discord: "*/30 * * * *",
 					"discord:scan": "manuel",
+					"discord:messages": "*/5 * * * *",
+					"discord:backfill": "manuel",
 				},
 			});
 		}
@@ -483,6 +513,10 @@ const server = Bun.serve({
 				discord: runDiscordSync,
 				"discord:scan": runDiscordChannelScan,
 				"discord-scan": runDiscordChannelScan,
+				"discord:messages": runDiscordMessagesSync,
+				"discord-messages": runDiscordMessagesSync,
+				"discord:backfill": runDiscordMessagesBackfill,
+				"discord-backfill": runDiscordMessagesBackfill,
 				"seo:indexnow": runSeoIndexNow,
 				"seo-indexnow": runSeoIndexNow,
 				"seo:llms-txt": runSeoLlmsTxt,

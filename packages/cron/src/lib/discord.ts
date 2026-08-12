@@ -124,6 +124,41 @@ export function computeTelemetry(guild: Guild): DiscordTelemetry {
 	};
 }
 
+/** Intents historiques du démon : télémétrie, membres, présences, salons vocaux. */
+const INTENTS_HISTORIQUES = [
+	IntentsBitField.Flags.Guilds,
+	IntentsBitField.Flags.GuildMembers,
+	IntentsBitField.Flags.GuildPresences,
+	IntentsBitField.Flags.GuildVoiceStates,
+];
+
+/** Intents supplémentaires exigés par la veille des salons suivis. */
+const INTENTS_VEILLE_MESSAGES = [
+	IntentsBitField.Flags.GuildMessages,
+	IntentsBitField.Flags.MessageContent,
+	IntentsBitField.Flags.GuildMessageReactions,
+];
+
+const PARTIALS_HISTORIQUES = [Partials.GuildMember, Partials.User];
+const PARTIALS_VEILLE_MESSAGES = [Partials.Message, Partials.Channel, Partials.Reaction];
+
+let veilleTempsReelDisponible = false;
+
+/**
+ * Indique si la passerelle a bien obtenu les intents de la veille des messages.
+ * À `false`, l'archivage des salons se limite au rattrapage REST périodique.
+ */
+export function laVeilleTempsReelEstDisponible(): boolean {
+	return veilleTempsReelDisponible;
+}
+
+/** Reconnaît le refus d'un intent privilégié (fermeture 4014 de la passerelle). */
+function estRefusDIntents(err: unknown): boolean {
+	const code = (err as { code?: unknown } | null)?.code;
+	const message = err instanceof Error ? err.message : String(err);
+	return code === "DisallowedIntents" || /disallowed intents|privileged intent|4014/i.test(message);
+}
+
 export async function initDiscord(): Promise<Client | null> {
 	if (!DISCORD_TOKEN) {
 		console.warn("⚠ DISCORD_TOKEN is not set. Discord integration disabled.");
@@ -137,24 +172,53 @@ export async function initDiscord(): Promise<Client | null> {
 
 	console.log("[Discord] Initialisation du client Discord...");
 
+	// Première tentative avec les intents étendus (messages, contenu, réactions).
+	const etendu = await connecterClient(true);
+	if (etendu.client) {
+		veilleTempsReelDisponible = true;
+		return etendu.client;
+	}
+
+	// GARDE-FOU : si le portail développeur n'autorise pas ces intents privilégiés,
+	// Discord ferme la connexion et le démon cron ENTIER ne démarrerait plus. On
+	// retente donc avec le jeu d'intents historique, quitte à perdre le temps réel.
+	if (!etendu.intentsRefuses) return null;
+
+	console.warn(
+		"⚠ [Discord] Intents messages refusés par Discord (GuildMessages / MessageContent / GuildMessageReactions non activés sur le portail développeur)."
+	);
+	console.warn(
+		"⚠ [Discord] Reconnexion avec les intents historiques : la veille des salons est DÉGRADÉE en simple rattrapage REST (aucun événement temps réel, uniquement la synchro périodique)."
+	);
+	const replique = await connecterClient(false);
+	return replique.client;
+}
+
+/** Construit un client, branche ses écouteurs et le connecte. */
+function connecterClient(
+	avecVeilleMessages: boolean
+): Promise<{ client: Client | null; intentsRefuses: boolean }> {
 	const client = new Client({
-		intents: [
-			IntentsBitField.Flags.Guilds,
-			IntentsBitField.Flags.GuildMembers,
-			IntentsBitField.Flags.GuildPresences,
-			IntentsBitField.Flags.GuildVoiceStates,
-		],
-		partials: [Partials.GuildMember, Partials.User],
+		intents: avecVeilleMessages
+			? [...INTENTS_HISTORIQUES, ...INTENTS_VEILLE_MESSAGES]
+			: INTENTS_HISTORIQUES,
+		partials: avecVeilleMessages
+			? [...PARTIALS_HISTORIQUES, ...PARTIALS_VEILLE_MESSAGES]
+			: PARTIALS_HISTORIQUES,
 	});
 
-	return new Promise<Client | null>((resolve) => {
+	return new Promise<{ client: Client | null; intentsRefuses: boolean }>((resolve) => {
 		client.once("ready", async () => {
 			console.log(`✓ Discord connecté en tant que ${client.user?.tag}`);
-			
+			// Affectation ici AUSSI : `ready` peut précéder la résolution de
+			// `login()`, et les tâches lancées juste après `initDiscord()` appellent
+			// `getDiscordClient()` sans attendre.
+			discordClient = client;
+
 			const guild = client.guilds.cache.get(GUILD_ID);
 			if (!guild) {
 				console.warn(`⚠ Bot n'est pas dans le serveur avec l'ID : ${GUILD_ID}`);
-				resolve(client);
+				resolve({ client, intentsRefuses: false });
 				return;
 			}
 
@@ -170,7 +234,7 @@ export async function initDiscord(): Promise<Client | null> {
 			} catch (err) {
 				console.error("✗ Échec du chargement initial des membres:", err);
 			}
-			resolve(client);
+			resolve({ client, intentsRefuses: false });
 		});
 
 		// Événements en temps réel pour la télémétrie
@@ -229,8 +293,14 @@ export async function initDiscord(): Promise<Client | null> {
 				discordClient = client;
 			})
 			.catch((err) => {
-				console.error("✗ Échec de la connexion Discord:", err);
-				resolve(null);
+				const intentsRefuses = estRefusDIntents(err);
+				if (!intentsRefuses) {
+					console.error("✗ Échec de la connexion Discord:", err);
+				}
+				// Le client à moitié connecté doit être libéré avant toute nouvelle
+				// tentative, sinon sa reconnexion automatique rejoue le même refus.
+				void client.destroy().catch(() => {});
+				resolve({ client: null, intentsRefuses });
 			});
 	});
 }

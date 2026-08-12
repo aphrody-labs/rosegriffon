@@ -1,11 +1,19 @@
 "use client";
 
 import {
+	AdminPageHeader,
+	Badge,
 	Button,
 	Card,
 	CardContent,
 	CardHeader,
 	CardTitle,
+	Empty,
+	EmptyContent,
+	EmptyDescription,
+	EmptyHeader,
+	EmptyMedia,
+	EmptyTitle,
 	Input,
 	Select,
 	SelectContent,
@@ -13,7 +21,6 @@ import {
 	SelectTrigger,
 	SelectValue,
 	DashboardStatsCard as StatsCard,
-	AdminPageHeader,
 } from "@rosegriffon/ui";
 import {
 	ArrowDownAZ,
@@ -29,537 +36,550 @@ import {
 	Trash2,
 	Users as UsersIcon,
 } from "lucide-react";
-import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState, useTransition } from "react";
 import { toast } from "sonner";
 
 import { ConfirmationDialog } from "@/components/admin/confirmation-dialog";
 import { AdminDataGrid } from "@/components/admin/shared/AdminDataGrid";
 
-import { deleteTeamMember, updateTeamMember } from "./actions";
+import { deleteTeamMember, setTeamMemberActive } from "./actions";
 import type { TeamMember } from "./actions";
+import { AvatarMembre } from "./AvatarMembre";
+import { comparerMembres, comparerMembresParNom, SOURCE_DISCORD } from "./staff-schema";
 import { StaffMemberCard } from "./StaffMemberCard";
+import { EQUIPES, libelleEquipe, NOMBRE_EQUIPES, rangEquipe } from "./teams";
 import { TeamMemberDialog } from "./TeamMemberDialog";
-
-const TEAM_LABELS: Record<string, string> = {
-	achilleateam: "Équipe Achilléa",
-	assoteam: "Membres de l'Association",
-	azaleeteam: "Équipe Azalée",
-	bureauteam: "Bureau de l'Association",
-	collabteam: "Partenaires & Collaborateurs",
-	dessinateurteam: "Équipe Dessinateur",
-	loreteam: "Équipe Lore",
-	mediationteam: "Cellule de Médiation",
-	productionteam: "Équipe Production",
-	socialteam: "Équipe Réseaux",
-};
 
 interface StaffClientPageProps {
 	initialMembers: TeamMember[];
 }
 
+type ModeAffichage = "grille" | "liste";
+type ModeTri = "ordre" | "nom";
+
+/** Une section de la page : un groupe de membres et son titre. */
+interface Section {
+	cle: string;
+	titre: string;
+	membres: TeamMember[];
+	/** Les membres inactifs se valident/réactivent au lieu de se désactiver. */
+	inactifs: boolean;
+}
+
+interface OptionsColonnes {
+	section: Section;
+	enCours: boolean;
+	onBasculer: (membre: TeamMember, actif: boolean) => void;
+	onEditer: (membre: TeamMember) => void;
+	onSupprimer: (membre: TeamMember) => void;
+}
+
+/**
+ * Colonnes du tableau (vue liste).
+ *
+ * Défini hors du composant : trois jeux de colonnes quasi identiques étaient
+ * recopiés dans le rendu (imports Discord, équipes, désactivés), chacun avec ses
+ * propres oublis — l'un n'avait ni `title` ni `aria-label` sur ses boutons
+ * d'action, un autre n'affichait pas l'équipe.
+ */
+function construireColonnes({
+	section,
+	enCours,
+	onBasculer,
+	onEditer,
+	onSupprimer,
+}: OptionsColonnes) {
+	return [
+		{
+			cell: (membre: TeamMember) => (
+				<AvatarMembre
+					src={membre.image_url}
+					alt={`Photo de ${membre.name}`}
+					taille={40}
+					attenue={section.inactifs}
+				/>
+			),
+			className: "w-[60px]",
+			header: "Photo",
+		},
+		{
+			cell: (membre: TeamMember) => (
+				<span className="font-medium wrap-break-word">{membre.name}</span>
+			),
+			header: "Nom",
+		},
+		{
+			cell: (membre: TeamMember) => membre.role,
+			header: "Rôle",
+		},
+		{
+			cell: (membre: TeamMember) => libelleEquipe(membre.team_id),
+			className: "hidden sm:table-cell",
+			header: "Équipe",
+		},
+		{
+			cell: (membre: TeamMember) =>
+				membre.discord_user_id ? (
+					<a
+						href={`https://discord.com/users/${membre.discord_user_id}`}
+						target="_blank"
+						rel="noopener noreferrer"
+						className="font-mono text-xs text-discord hover:underline"
+					>
+						{membre.discord_user_id}
+						<span className="sr-only"> — ouvrir le profil Discord</span>
+					</a>
+				) : (
+					<span className="text-xs text-on-surface-variant">—</span>
+				),
+			className: "hidden md:table-cell",
+			header: "Discord",
+		},
+		{
+			cell: (membre: TeamMember) => (
+				<span className="tabular-nums">{membre.display_index ?? "—"}</span>
+			),
+			className: "hidden lg:table-cell w-[80px]",
+			header: "Ordre",
+		},
+		{
+			cell: (membre: TeamMember) => (
+				<div className="flex flex-wrap justify-end gap-1">
+					{section.inactifs ? (
+						<Button
+							variant="outline"
+							size="sm"
+							disabled={enCours}
+							onClick={() => onBasculer(membre, true)}
+						>
+							{membre.source === SOURCE_DISCORD ? (
+								<Check className="mr-1 size-4" aria-hidden="true" />
+							) : (
+								<RotateCcw className="mr-1 size-4" aria-hidden="true" />
+							)}
+							{membre.source === SOURCE_DISCORD ? "Valider" : "Réactiver"}
+							<span className="sr-only"> {membre.name}</span>
+						</Button>
+					) : (
+						<Button
+							variant="ghost"
+							size="icon"
+							aria-label={`Désactiver ${membre.name}`}
+							title={`Désactiver ${membre.name}`}
+							disabled={enCours}
+							onClick={() => onBasculer(membre, false)}
+						>
+							<EyeOff className="size-4 text-alerte" aria-hidden="true" />
+						</Button>
+					)}
+					<Button
+						variant="ghost"
+						size="icon"
+						aria-label={`Modifier ${membre.name}`}
+						title={`Modifier ${membre.name}`}
+						disabled={enCours}
+						onClick={() => onEditer(membre)}
+					>
+						<Edit className="size-4" aria-hidden="true" />
+					</Button>
+					<Button
+						variant="ghost"
+						size="icon"
+						aria-label={`Supprimer ${membre.name}`}
+						title={`Supprimer ${membre.name}`}
+						disabled={enCours}
+						onClick={() => onSupprimer(membre)}
+					>
+						<Trash2 className="size-4 text-destructive" aria-hidden="true" />
+					</Button>
+				</div>
+			),
+			className: "text-right w-[160px]",
+			header: "Actions",
+		},
+	];
+}
+
 export function StaffClientPage({ initialMembers }: StaffClientPageProps) {
 	const router = useRouter();
-	const [members, setMembers] = useState<TeamMember[]>(initialMembers);
-	const [dialogOpen, setDialogOpen] = useState(false);
-	const [selectedMember, setSelectedMember] = useState<TeamMember | undefined>();
-	const [searchQuery, setSearchQuery] = useState("");
-	const [selectedTeam, setSelectedTeam] = useState<string>("all");
-	const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
-	const [sortMode, setSortMode] = useState<"order" | "name">("order");
-	const [deleteConfirmation, setDeleteConfirmation] = useState<{
+	const [membres, setMembres] = useState<TeamMember[]>(initialMembers);
+	const [dialogueOuvert, setDialogueOuvert] = useState(false);
+	const [membreSelectionne, setMembreSelectionne] = useState<TeamMember | undefined>();
+	const [recherche, setRecherche] = useState("");
+	const [equipeFiltre, setEquipeFiltre] = useState<string>("toutes");
+	const [modeAffichage, setModeAffichage] = useState<ModeAffichage>("grille");
+	const [modeTri, setModeTri] = useState<ModeTri>("ordre");
+	const [enCours, demarrerTransition] = useTransition();
+	const [confirmationSuppression, setConfirmationSuppression] = useState<{
 		open: boolean;
-		member?: TeamMember;
+		membre?: TeamMember;
 	}>({ open: false });
 
 	useEffect(() => {
-		setMembers(initialMembers);
+		setMembres(initialMembers);
 	}, [initialMembers]);
 
-	const handleAdd = () => {
-		setSelectedMember(undefined);
-		setDialogOpen(true);
+	const ouvrirCreation = () => {
+		setMembreSelectionne(undefined);
+		setDialogueOuvert(true);
 	};
 
-	const handleEdit = (member: TeamMember) => {
-		setSelectedMember(member);
-		setDialogOpen(true);
+	const ouvrirEdition = (membre: TeamMember) => {
+		setMembreSelectionne(membre);
+		setDialogueOuvert(true);
 	};
 
-	const confirmDelete = (member: TeamMember) => {
-		setDeleteConfirmation({ member, open: true });
+	const demanderSuppression = (membre: TeamMember) => {
+		setConfirmationSuppression({ membre, open: true });
 	};
 
-	const handleDelete = async () => {
-		if (!deleteConfirmation.member) {
+	const supprimer = async () => {
+		const membre = confirmationSuppression.membre;
+		if (!membre) {
 			return;
 		}
-		const { member } = deleteConfirmation;
 
-		const { error } = await deleteTeamMember(member.id);
+		const { error } = await deleteTeamMember(membre.id);
 		if (error) {
 			toast.error("Erreur lors de la suppression", { description: error });
-		} else {
-			toast.success("Membre supprimé avec succès");
-			// Optimistic update
-			setMembers((prev) => prev.filter((m) => m.id !== member.id));
-			router.refresh();
-		}
-		setDeleteConfirmation({ open: false });
-	};
-
-	const handleSetActive = async (member: TeamMember, isActive: boolean) => {
-		const { error } = await updateTeamMember(member.id, {
-			is_active: isActive,
-		});
-		if (error) {
-			toast.error(isActive ? "Erreur lors de la réactivation" : "Erreur lors de la désactivation", {
-				description: error,
-			});
 			return;
 		}
-		toast.success(isActive ? "Membre réactivé" : "Membre désactivé");
-		setMembers((prev) => prev.map((m) => (m.id === member.id ? { ...m, is_active: isActive } : m)));
-		router.refresh();
+
+		toast.success(`${membre.name} a été supprimé`);
+		setMembres((precedents) => precedents.filter((m) => m.id !== membre.id));
+		setConfirmationSuppression({ open: false });
+		demarrerTransition(() => router.refresh());
 	};
 
-	const handleApprove = (member: TeamMember) => handleSetActive(member, true);
-	const handleDeactivate = (member: TeamMember) => handleSetActive(member, false);
-
-	const handleSuccess = () => {
-		router.refresh();
-	};
-
-	// Distingue les imports Discord à valider (source='discord-sync')
-	// Des staff désactivés volontairement (autres `is_active=false`).
-	const inactiveMembers = members.filter((m) => m.is_active === false);
-	const pendingMembers = inactiveMembers.filter((m) => m.source === "discord-sync");
-	const deactivatedMembers = inactiveMembers.filter((m) => m.source !== "discord-sync");
-
-	// Filtrer les membres actifs.
-	const q = searchQuery.toLowerCase().trim();
-	const activeMembers = members.filter((m) => {
-		if (m.is_active === false) {
-			return false;
-		}
-		const matchesSearch =
-			!q ||
-			m.name.toLowerCase().includes(q) ||
-			m.role.toLowerCase().includes(q) ||
-			(m.discord_user_id ?? "").toLowerCase().includes(q);
-		const matchesTeam = selectedTeam === "all" || m.team_id === selectedTeam;
-		return matchesSearch && matchesTeam;
-	});
-
-	// Grouper par équipe.
-	const membersByTeam = activeMembers.reduce(
-		(acc, member) => {
-			if (!acc[member.team_id]) {
-				acc[member.team_id] = [];
+	const basculerActivation = (membre: TeamMember, actif: boolean) => {
+		demarrerTransition(async () => {
+			const { error } = await setTeamMemberActive(membre.id, actif);
+			if (error) {
+				toast.error(actif ? "Erreur lors de la réactivation" : "Erreur lors de la désactivation", {
+					description: error,
+				});
+				return;
 			}
-			acc[member.team_id]?.push(member);
-			return acc;
-		},
-		{} as Record<string, TeamMember[]>
-	);
+			toast.success(actif ? `${membre.name} est de nouveau visible` : `${membre.name} est masqué`);
+			setMembres((precedents) =>
+				precedents.map((m) => (m.id === membre.id ? { ...m, is_active: actif } : m))
+			);
+			router.refresh();
+		});
+	};
 
-	const sortMembers = (list: TeamMember[]) =>
-		[...list].toSorted((a, b) =>
-			sortMode === "name"
-				? a.name.localeCompare(b.name, "fr")
-				: (a.display_index ?? 999) - (b.display_index ?? 999)
+	const apresEnregistrement = () => {
+		demarrerTransition(() => router.refresh());
+	};
+
+	const reinitialiserFiltres = () => {
+		setRecherche("");
+		setEquipeFiltre("toutes");
+	};
+
+	// ── Statistiques : calculées sur l'ensemble, jamais sur le filtre ────────
+	const inactifs = useMemo(() => membres.filter((m) => m.is_active === false), [membres]);
+	const actifs = useMemo(() => membres.filter((m) => m.is_active !== false), [membres]);
+	const nombreEnAttente = inactifs.filter((m) => m.source === SOURCE_DISCORD).length;
+	const nombreDesactives = inactifs.length - nombreEnAttente;
+	const equipesPeuplees = new Set(actifs.map((m) => m.team_id)).size;
+
+	// ── Filtrage : la recherche porte AUSSI sur les membres inactifs ─────────
+	const sections = useMemo<Section[]>(() => {
+		const requete = recherche.toLowerCase().trim();
+		const correspond = (membre: TeamMember) => {
+			const parRecherche =
+				!requete ||
+				membre.name.toLowerCase().includes(requete) ||
+				membre.role.toLowerCase().includes(requete) ||
+				(membre.discord_user_id ?? "").toLowerCase().includes(requete);
+			const parEquipe = equipeFiltre === "toutes" || membre.team_id === equipeFiltre;
+			return parRecherche && parEquipe;
+		};
+
+		const comparateur = modeTri === "nom" ? comparerMembresParNom : comparerMembres;
+		const trier = (liste: TeamMember[]) => liste.toSorted(comparateur);
+
+		const retenus = membres.filter(correspond);
+		const enAttente = retenus.filter(
+			(m) => m.is_active === false && m.source === SOURCE_DISCORD
+		);
+		const desactives = retenus.filter(
+			(m) => m.is_active === false && m.source !== SOURCE_DISCORD
 		);
 
-	const populatedTeamsCount = new Set(
-		members.filter((m) => m.is_active !== false).map((m) => m.team_id)
-	).size;
+		const parEquipe = new Map<string, TeamMember[]>();
+		for (const membre of retenus) {
+			if (membre.is_active === false) {
+				continue;
+			}
+			const groupe = parEquipe.get(membre.team_id);
+			if (groupe) {
+				groupe.push(membre);
+			} else {
+				parEquipe.set(membre.team_id, [membre]);
+			}
+		}
+
+		const resultat: Section[] = [];
+		if (enAttente.length > 0) {
+			resultat.push({
+				cle: "en-attente",
+				inactifs: true,
+				membres: trier(enAttente),
+				titre: `Imports Discord à valider (${enAttente.length})`,
+			});
+		}
+		for (const [idEquipe, liste] of [...parEquipe.entries()].toSorted(
+			(a, b) => rangEquipe(a[0]) - rangEquipe(b[0])
+		)) {
+			resultat.push({
+				cle: idEquipe,
+				inactifs: false,
+				membres: trier(liste),
+				titre: `${libelleEquipe(idEquipe)} (${liste.length})`,
+			});
+		}
+		if (desactives.length > 0) {
+			resultat.push({
+				cle: "desactives",
+				inactifs: true,
+				membres: trier(desactives),
+				titre: `Désactivés (${desactives.length})`,
+			});
+		}
+		return resultat;
+	}, [membres, recherche, equipeFiltre, modeTri]);
+
+	const nombreAffiche = sections.reduce((total, section) => total + section.membres.length, 0);
+	const filtreActif = recherche.trim() !== "" || equipeFiltre !== "toutes";
+
+	const colonnes = (section: Section) =>
+		construireColonnes({
+			enCours,
+			onBasculer: basculerActivation,
+			onEditer: ouvrirEdition,
+			onSupprimer: demanderSuppression,
+			section,
+		});
 
 	return (
 		<div className="space-y-8">
 			<AdminPageHeader
-				icon={<UsersIcon className="size-5" />}
-				title="Gestion du Staff"
+				icon={<UsersIcon className="size-5" aria-hidden="true" />}
+				title="Gestion du staff"
 				description="Gérez les membres de toutes les équipes Rose Griffon"
 				actions={
-					<Button onClick={handleAdd}>
-						<Plus className="mr-2 size-4" />
+					<Button onClick={ouvrirCreation}>
+						<Plus className="mr-2 size-4" aria-hidden="true" />
 						Ajouter un membre
 					</Button>
 				}
 			/>
 
-			{/* Stats rapides */}
 			<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-				<StatsCard
-					title="Actifs"
-					value={members.filter((m) => m.is_active !== false).length}
-					icon={UsersIcon}
-					accent="emerald"
-				/>
-				<StatsCard title="À valider" value={pendingMembers.length} icon={Check} accent="amber" />
-				<StatsCard
-					title="Désactivés"
-					value={deactivatedMembers.length}
-					icon={EyeOff}
-					accent="rose"
-				/>
+				<StatsCard title="Actifs" value={actifs.length} icon={UsersIcon} accent="emerald" />
+				<StatsCard title="À valider" value={nombreEnAttente} icon={Check} accent="amber" />
+				<StatsCard title="Désactivés" value={nombreDesactives} icon={EyeOff} accent="rose" />
 				<StatsCard
 					title="Équipes"
-					value={`${populatedTeamsCount} / ${Object.keys(TEAM_LABELS).length}`}
+					value={`${equipesPeuplees} / ${NOMBRE_EQUIPES}`}
 					icon={LayoutGrid}
 					accent="sky"
 				/>
 			</div>
 
-			{/* Filtres */}
-			<div className="flex flex-col sm:flex-row gap-4">
+			<div className="flex flex-col gap-4 sm:flex-row">
 				<div className="relative flex-1">
-					<Search className="absolute left-2.5 top-2.5 size-4 text-muted-foreground" />
+					<Search
+						className="absolute left-2.5 top-2.5 size-4 text-on-surface-variant"
+						aria-hidden="true"
+					/>
+					<label htmlFor="recherche-staff" className="sr-only">
+						Rechercher un membre par nom, rôle ou identifiant Discord
+					</label>
 					<Input
+						id="recherche-staff"
+						type="search"
 						placeholder="Nom, rôle, ID Discord…"
 						className="pl-9"
-						value={searchQuery}
-						onChange={(e) => setSearchQuery(e.target.value)}
+						value={recherche}
+						onChange={(evenement) => setRecherche(evenement.target.value)}
 					/>
 				</div>
-				<Select value={selectedTeam} onValueChange={setSelectedTeam}>
-					<SelectTrigger className="w-full sm:w-[250px]">
+				<Select value={equipeFiltre} onValueChange={setEquipeFiltre}>
+					<SelectTrigger className="w-full sm:w-[250px]" aria-label="Filtrer par équipe">
 						<SelectValue placeholder="Toutes les équipes" />
 					</SelectTrigger>
 					<SelectContent>
-						<SelectItem value="all">Toutes les équipes</SelectItem>
-						{Object.entries(TEAM_LABELS).map(([value, label]) => (
-							<SelectItem key={value} value={value}>
-								{label}
+						<SelectItem value="toutes">Toutes les équipes</SelectItem>
+						{EQUIPES.map((equipe) => (
+							<SelectItem key={equipe.id} value={equipe.id}>
+								{equipe.libelle}
 							</SelectItem>
 						))}
 					</SelectContent>
 				</Select>
-				<div className="flex items-center border rounded-md overflow-hidden bg-background">
+				<div
+					className="flex items-center overflow-hidden rounded-md border border-outline-variant bg-background"
+					role="group"
+					aria-label="Options d'affichage"
+				>
 					<Button
 						variant="ghost"
 						size="icon"
-						title={
-							sortMode === "order"
-								? "Tri par ordre (cliquer pour A-Z)"
-								: "Tri A-Z (cliquer pour ordre)"
+						aria-label={
+							modeTri === "ordre" ? "Trier par ordre alphabétique" : "Trier par ordre d'affichage"
 						}
-						className="rounded-none size-10"
-						onClick={() => setSortMode((s) => (s === "order" ? "name" : "order"))}
+						title={
+							modeTri === "ordre" ? "Trier par ordre alphabétique" : "Trier par ordre d'affichage"
+						}
+						className="size-10 rounded-none"
+						onClick={() => setModeTri((mode) => (mode === "ordre" ? "nom" : "ordre"))}
 					>
-						{sortMode === "order" ? (
-							<ArrowUp01 className="size-4" />
+						{modeTri === "ordre" ? (
+							<ArrowUp01 className="size-4" aria-hidden="true" />
 						) : (
-							<ArrowDownAZ className="size-4" />
+							<ArrowDownAZ className="size-4" aria-hidden="true" />
 						)}
 					</Button>
-					<div className="w-[1px] h-6 bg-border" />
+					<div className="h-6 w-px bg-outline-variant" />
 					<Button
 						variant="ghost"
 						size="icon"
-						title="Vue liste"
-						className={`rounded-none size-10 ${viewMode === "list" ? "bg-muted" : ""}`}
-						onClick={() => setViewMode("list")}
+						aria-label="Affichage en liste"
+						aria-pressed={modeAffichage === "liste"}
+						title="Affichage en liste"
+						className={
+							modeAffichage === "liste"
+								? "size-10 rounded-none bg-surface-container-high"
+								: "size-10 rounded-none"
+						}
+						onClick={() => setModeAffichage("liste")}
 					>
-						<List className="size-4" />
+						<List className="size-4" aria-hidden="true" />
 					</Button>
-					<div className="w-[1px] h-6 bg-border" />
+					<div className="h-6 w-px bg-outline-variant" />
 					<Button
 						variant="ghost"
 						size="icon"
-						title="Vue grille"
-						className={`rounded-none size-10 ${viewMode === "grid" ? "bg-muted" : ""}`}
-						onClick={() => setViewMode("grid")}
+						aria-label="Affichage en grille"
+						aria-pressed={modeAffichage === "grille"}
+						title="Affichage en grille"
+						className={
+							modeAffichage === "grille"
+								? "size-10 rounded-none bg-surface-container-high"
+								: "size-10 rounded-none"
+						}
+						onClick={() => setModeAffichage("grille")}
 					>
-						<LayoutGrid className="size-4" />
+						<LayoutGrid className="size-4" aria-hidden="true" />
 					</Button>
 				</div>
 			</div>
 
-			{/* Imports Discord à valider */}
-			{pendingMembers.length > 0 && (
-				<AdminDataGrid
-					title={`Imports Discord à valider (${pendingMembers.length})`}
-					data={sortMembers(pendingMembers)}
-					columns={[
-						{
-							cell: (member) => (
-								<div className="relative size-10 rounded-full overflow-hidden bg-muted">
-									{member.image_url ? (
-										<Image src={member.image_url} alt={member.name} fill className="object-cover" />
-									) : (
-										<div className="w-full h-full flex items-center justify-center text-muted-foreground">
-											<UsersIcon className="size-5" />
-										</div>
-									)}
-								</div>
-							),
-							className: "w-[60px]",
-							header: "Photo",
-						},
-						{
-							accessorKey: "name",
-							className: "font-medium",
-							header: "Nom",
-						},
-						{
-							accessorKey: "role",
-							header: "Rôle détecté",
-						},
-						{
-							cell: (member) => TEAM_LABELS[member.team_id] || member.team_id,
-							header: "Équipe suggérée",
-						},
-						{
-							cell: (member) => (
-								<div className="flex justify-end gap-2">
-									<Button
-										variant="outline"
-										size="sm"
-										className="text-green-600 border-green-200 hover:bg-green-50"
-										onClick={() => handleApprove(member)}
-									>
-										<Check className="size-4 mr-1" />
-										Valider
-									</Button>
-									<Button variant="ghost" size="icon" onClick={() => handleEdit(member)}>
-										<Edit className="size-4" />
-									</Button>
-									<Button variant="ghost" size="icon" onClick={() => confirmDelete(member)}>
-										<Trash2 className="size-4 text-red-500" />
-									</Button>
-								</div>
-							),
-							className: "text-right w-[180px]",
-							header: "Actions",
-						},
-					]}
-				/>
-			)}
-
-			{/* Liste par équipe */}
-			{Object.keys(membersByTeam).length === 0 && pendingMembers.length === 0 ? (
+			{/* Deux vides distincts : une base sans membre n'est pas une recherche
+			    sans résultat. L'ancienne page proposait « Ajouter le premier
+			    membre » alors que la base en comptait 129. */}
+			{nombreAffiche === 0 ? (
 				<Card>
-					<CardContent className="py-12 text-center">
-						<UsersIcon className="size-12 mx-auto mb-4 text-muted-foreground" />
-						<p className="text-muted-foreground">Aucun membre pour le moment</p>
-						<Button onClick={handleAdd} className="mt-4">
-							<Plus className="size-4 mr-2" />
-							Ajouter le premier membre
-						</Button>
+					<CardContent className="py-12">
+						<Empty>
+							<EmptyHeader>
+								<EmptyMedia variant="icon">
+									<UsersIcon className="size-6" aria-hidden="true" />
+								</EmptyMedia>
+								<EmptyTitle>
+									{filtreActif ? "Aucun membre ne correspond" : "Aucun membre pour le moment"}
+								</EmptyTitle>
+								<EmptyDescription>
+									{filtreActif
+										? "Aucun membre ne correspond à cette recherche ou à cette équipe."
+										: "Ajoutez un premier membre pour qu'il apparaisse sur le site public."}
+								</EmptyDescription>
+							</EmptyHeader>
+							<EmptyContent>
+								{filtreActif ? (
+									<Button variant="outline" onClick={reinitialiserFiltres}>
+										<RotateCcw className="mr-2 size-4" aria-hidden="true" />
+										Réinitialiser les filtres
+									</Button>
+								) : (
+									<Button onClick={ouvrirCreation}>
+										<Plus className="mr-2 size-4" aria-hidden="true" />
+										Ajouter le premier membre
+									</Button>
+								)}
+							</EmptyContent>
+						</Empty>
 					</CardContent>
 				</Card>
 			) : (
-				viewMode === "list" &&
-				Object.entries(membersByTeam)
-					.toSorted((a, b) =>
-						(TEAM_LABELS[a[0]] || a[0]).localeCompare(TEAM_LABELS[b[0]] || b[0], "fr")
-					)
-					.map(([teamId, teamMembers]) => (
-						<AdminDataGrid
-							key={teamId}
-							title={`${TEAM_LABELS[teamId] || teamId} (${teamMembers.length})`}
-							data={sortMembers(teamMembers)}
-							columns={[
-								{
-									cell: (member) => (
-										<div className="relative size-10 rounded-full overflow-hidden bg-muted">
-											{member.image_url ? (
-												<Image
-													src={member.image_url}
-													alt={member.name}
-													fill
-													className="object-cover"
-												/>
-											) : (
-												<div className="w-full h-full flex items-center justify-center text-muted-foreground">
-													<UsersIcon className="size-5" />
-												</div>
-											)}
-										</div>
-									),
-									className: "w-[60px]",
-									header: "Photo",
-								},
-								{
-									accessorKey: "name",
-									className: "font-medium",
-									header: "Nom",
-								},
-								{
-									accessorKey: "role",
-									header: "Rôle",
-								},
-								{
-									cell: (member) =>
-										member.discord_user_id ? (
-											<a
-												href={`https://discord.com/users/${member.discord_user_id}`}
-												target="_blank"
-												rel="noopener noreferrer"
-												className="text-xs text-indigo-600 hover:underline font-mono dark:text-indigo-400"
-												title="Ouvrir le profil Discord"
-											>
-												{member.discord_user_id}
-											</a>
-										) : (
-											<span className="text-xs text-muted-foreground">—</span>
-										),
-									className: "hidden md:table-cell",
-									header: "Discord",
-								},
-								{
-									accessorKey: "display_index",
-									cell: (member) => member.display_index ?? "-",
-									className: "w-[80px]",
-									header: "Ordre",
-								},
-								{
-									cell: (member) => (
-										<div className="flex justify-end gap-1">
-											<Button
-												variant="ghost"
-												size="icon"
-												title="Modifier"
-												onClick={() => handleEdit(member)}
-											>
-												<Edit className="size-4" />
-											</Button>
-											<Button
-												variant="ghost"
-												size="icon"
-												title="Désactiver"
-												onClick={() => handleDeactivate(member)}
-											>
-												<EyeOff className="size-4 text-orange-500" />
-											</Button>
-											<Button
-												variant="ghost"
-												size="icon"
-												title="Supprimer"
-												onClick={() => confirmDelete(member)}
-											>
-												<Trash2 className="size-4 text-red-500" />
-											</Button>
-										</div>
-									),
-									className: "text-right w-[140px]",
-									header: "Actions",
-								},
-							]}
-						/>
-					))
-			)}
+				<div className="space-y-8">
+					{filtreActif && (
+						<p className="text-sm text-on-surface-variant" aria-live="polite">
+							{nombreAffiche} membre{nombreAffiche > 1 ? "s" : ""} affiché
+							{nombreAffiche > 1 ? "s" : ""} sur {membres.length}.
+						</p>
+					)}
 
-			{/* Désactivés */}
-			{deactivatedMembers.length > 0 && (
-				<AdminDataGrid
-					title={`Désactivés (${deactivatedMembers.length})`}
-					data={sortMembers(deactivatedMembers)}
-					columns={[
-						{
-							cell: (member) => (
-								<div className="relative size-10 rounded-full overflow-hidden bg-muted opacity-60">
-									{member.image_url ? (
-										<Image src={member.image_url} alt={member.name} fill className="object-cover" />
-									) : (
-										<div className="w-full h-full flex items-center justify-center text-muted-foreground">
-											<UsersIcon className="size-5" />
-										</div>
-									)}
-								</div>
-							),
-							className: "w-[60px]",
-							header: "Photo",
-						},
-						{
-							accessorKey: "name",
-							className: "font-medium text-muted-foreground",
-							header: "Nom",
-						},
-						{ accessorKey: "role", header: "Rôle" },
-						{
-							cell: (member) => TEAM_LABELS[member.team_id] || member.team_id,
-							header: "Équipe",
-						},
-						{
-							cell: (member) => (
-								<div className="flex justify-end gap-1">
-									<Button
-										variant="outline"
-										size="sm"
-										title="Réactiver"
-										onClick={() => handleApprove(member)}
-									>
-										<RotateCcw className="size-4 mr-1" />
-										Réactiver
-									</Button>
-									<Button
-										variant="ghost"
-										size="icon"
-										title="Supprimer"
-										onClick={() => confirmDelete(member)}
-									>
-										<Trash2 className="size-4 text-red-500" />
-									</Button>
-								</div>
-							),
-							className: "text-right w-[180px]",
-							header: "Actions",
-						},
-					]}
-				/>
+					{sections.map((section) =>
+						modeAffichage === "liste" ? (
+							<AdminDataGrid
+								key={section.cle}
+								title={section.titre}
+								data={section.membres}
+								columns={colonnes(section)}
+							/>
+						) : (
+							<Card key={section.cle} className="border-none bg-transparent shadow-none">
+								<CardHeader className="px-0 pt-0">
+									<CardTitle className="flex flex-wrap items-center gap-2 text-xl">
+										{section.titre}
+										{section.inactifs && (
+											<Badge variant="outline" className="border-alerte/40 text-alerte">
+												Non visibles sur le site
+											</Badge>
+										)}
+									</CardTitle>
+								</CardHeader>
+								<CardContent className="px-0">
+									<div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+										{section.membres.map((membre) => (
+											<StaffMemberCard
+												key={membre.id}
+												member={membre}
+												teamLabel={libelleEquipe(membre.team_id)}
+												onEdit={ouvrirEdition}
+												onDelete={demanderSuppression}
+												onToggleActive={basculerActivation}
+												disabled={enCours}
+											/>
+										))}
+									</div>
+								</CardContent>
+							</Card>
+						)
+					)}
+				</div>
 			)}
-
-			{/* Grid View Implementation */}
-			{viewMode === "grid" &&
-				Object.entries(membersByTeam)
-					.toSorted((a, b) =>
-						(TEAM_LABELS[a[0]] || a[0]).localeCompare(TEAM_LABELS[b[0]] || b[0], "fr")
-					)
-					.map(([teamId, teamMembers]) => (
-						<Card key={teamId} className="bg-transparent border-none shadow-none">
-							<CardHeader className="px-0 pt-6">
-								<CardTitle className="text-xl flex items-center gap-2">
-									{TEAM_LABELS[teamId] || teamId}
-									<span className="text-sm font-normal text-muted-foreground bg-muted px-2 py-0.5 rounded-full">
-										{teamMembers.length}
-									</span>
-								</CardTitle>
-							</CardHeader>
-							<CardContent className="px-0">
-								<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-									{sortMembers(teamMembers).map((member) => (
-										<StaffMemberCard
-											key={member.id}
-											member={member}
-											teamLabel={TEAM_LABELS[teamId] || teamId}
-											onEdit={handleEdit}
-											onDelete={confirmDelete}
-											onDeactivate={handleDeactivate}
-										/>
-									))}
-								</div>
-							</CardContent>
-						</Card>
-					))}
 
 			<TeamMemberDialog
-				open={dialogOpen}
-				onOpenChange={setDialogOpen}
-				member={selectedMember}
-				onSuccess={handleSuccess}
+				open={dialogueOuvert}
+				onOpenChange={setDialogueOuvert}
+				member={membreSelectionne}
+				onSuccess={apresEnregistrement}
 			/>
 
 			<ConfirmationDialog
-				open={deleteConfirmation.open}
-				onCancel={() => setDeleteConfirmation({ open: false })}
+				open={confirmationSuppression.open}
+				onCancel={() => setConfirmationSuppression({ open: false })}
 				title="Supprimer un membre"
-				message={`Êtes-vous sûr de vouloir supprimer ${deleteConfirmation.member?.name} ?`}
+				message={`Êtes-vous sûr de vouloir supprimer ${confirmationSuppression.membre?.name ?? "ce membre"} ? Cette action est définitive.`}
 				confirmText="Supprimer"
 				danger
-				onConfirm={handleDelete}
+				onConfirm={supprimer}
 			/>
 		</div>
 	);

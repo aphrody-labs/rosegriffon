@@ -23,6 +23,8 @@ const ROUTES: Array<{
 	{ path: "/evenements", priority: 0.8, changeFrequency: "weekly" },
 	{ path: "/chroniques", priority: 0.8, changeFrequency: "weekly" },
 	{ path: "/community", priority: 0.6, changeFrequency: "weekly" },
+	{ path: "/sondages", priority: 0.6, changeFrequency: "weekly" },
+	{ path: "/iergday", priority: 0.7, changeFrequency: "daily" },
 	{ path: "/nous-soutenir", priority: 0.7, changeFrequency: "monthly" },
 	{ path: "/charte-engagements", priority: 0.4, changeFrequency: "yearly" },
 	{ path: "/cellule-de-mediation", priority: 0.3, changeFrequency: "yearly" },

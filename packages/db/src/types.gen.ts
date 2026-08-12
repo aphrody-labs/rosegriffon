@@ -744,6 +744,57 @@ export type Database = {
           },
         ]
       }
+      discord_channels: {
+        Row: {
+          backfill_complete: boolean
+          channel_id: string
+          guild_id: string
+          icon_emoji: string | null
+          last_message_id: string | null
+          message_count: number
+          name: string
+          parent_id: string | null
+          position: number | null
+          suivi: boolean
+          synced_at: string | null
+          topic: string | null
+          type: number
+          updated_at: string
+        }
+        Insert: {
+          backfill_complete?: boolean
+          channel_id: string
+          guild_id: string
+          icon_emoji?: string | null
+          last_message_id?: string | null
+          message_count?: number
+          name: string
+          parent_id?: string | null
+          position?: number | null
+          suivi?: boolean
+          synced_at?: string | null
+          topic?: string | null
+          type?: number
+          updated_at?: string
+        }
+        Update: {
+          backfill_complete?: boolean
+          channel_id?: string
+          guild_id?: string
+          icon_emoji?: string | null
+          last_message_id?: string | null
+          message_count?: number
+          name?: string
+          parent_id?: string | null
+          position?: number | null
+          suivi?: boolean
+          synced_at?: string | null
+          topic?: string | null
+          type?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       discord_members: {
         Row: {
           avatar_url: string | null
@@ -782,6 +833,89 @@ export type Database = {
           username?: string
         }
         Relationships: []
+      }
+      discord_messages: {
+        Row: {
+          attachments: Json
+          author_avatar_url: string | null
+          author_display_name: string | null
+          author_id: string
+          author_is_bot: boolean
+          author_username: string
+          channel_id: string
+          content: string
+          created_at: string
+          deleted_at: string | null
+          edited_at: string | null
+          embeds: Json
+          guild_id: string
+          mentions: Json
+          message_id: string
+          pinned: boolean
+          poll: Json | null
+          reactions: Json
+          reference_message_id: string | null
+          stickers: Json
+          synced_at: string
+          type: number
+        }
+        Insert: {
+          attachments?: Json
+          author_avatar_url?: string | null
+          author_display_name?: string | null
+          author_id: string
+          author_is_bot?: boolean
+          author_username: string
+          channel_id: string
+          content?: string
+          created_at: string
+          deleted_at?: string | null
+          edited_at?: string | null
+          embeds?: Json
+          guild_id: string
+          mentions?: Json
+          message_id: string
+          pinned?: boolean
+          poll?: Json | null
+          reactions?: Json
+          reference_message_id?: string | null
+          stickers?: Json
+          synced_at?: string
+          type?: number
+        }
+        Update: {
+          attachments?: Json
+          author_avatar_url?: string | null
+          author_display_name?: string | null
+          author_id?: string
+          author_is_bot?: boolean
+          author_username?: string
+          channel_id?: string
+          content?: string
+          created_at?: string
+          deleted_at?: string | null
+          edited_at?: string | null
+          embeds?: Json
+          guild_id?: string
+          mentions?: Json
+          message_id?: string
+          pinned?: boolean
+          poll?: Json | null
+          reactions?: Json
+          reference_message_id?: string | null
+          stickers?: Json
+          synced_at?: string
+          type?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "discord_messages_channel_id_fkey"
+            columns: ["channel_id"]
+            isOneToOne: false
+            referencedRelation: "discord_channels"
+            referencedColumns: ["channel_id"]
+          },
+        ]
       }
       discord_roles: {
         Row: {

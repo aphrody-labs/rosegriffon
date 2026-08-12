@@ -1,6 +1,7 @@
 "use client";
 
 import {
+	Badge,
 	Button,
 	Card,
 	CardContent,
@@ -13,56 +14,59 @@ import {
 	DropdownMenuSeparator,
 	DropdownMenuTrigger,
 } from "@rosegriffon/ui";
-import { Check, Edit, EyeOff, MoreHorizontal, Trash2, Users as UsersIcon } from "lucide-react";
-import Image from "next/image";
+import { Check, Edit, EyeOff, MoreHorizontal, RotateCcw, Trash2 } from "lucide-react";
 
 import type { TeamMember } from "./actions";
+import { AvatarMembre } from "./AvatarMembre";
+import { SOURCE_DISCORD } from "./staff-schema";
 
 interface StaffMemberCardProps {
 	member: TeamMember;
 	teamLabel: string;
 	onEdit: (member: TeamMember) => void;
 	onDelete: (member: TeamMember) => void;
-	onApprove?: (member: TeamMember) => void;
-	onDeactivate?: (member: TeamMember) => void;
+	/** Bascule l'activation ; `actif` est l'état visé. */
+	onToggleActive: (member: TeamMember, actif: boolean) => void;
+	/** Verrouille les commandes pendant qu'une action serveur est en cours. */
+	disabled?: boolean;
 }
+
+/** Rôle générique posé par la synchronisation Discord, à préciser à la main. */
+const ROLE_PROVISOIRE = "Staff";
 
 export function StaffMemberCard({
 	member,
 	teamLabel,
 	onEdit,
 	onDelete,
-	onApprove,
-	onDeactivate,
+	onToggleActive,
+	disabled = false,
 }: StaffMemberCardProps) {
-	const isPending = member.is_active === false;
-	const isDiscordImport = member.source === "discord-sync";
-	const isPlaceholderRole = member.role === "Staff";
+	const estInactif = member.is_active === false;
+	const estImportDiscord = member.source === SOURCE_DISCORD;
+	const estEnAttente = estInactif && estImportDiscord;
+	const roleProvisoire = member.role === ROLE_PROVISOIRE;
+
+	const libelleValidation = estEnAttente ? "Valider" : "Réactiver";
 
 	return (
 		<Card
-			className={`overflow-hidden transition-all hover:shadow-md ${isPending ? "border-orange-200 bg-orange-50/30" : ""}`}
+			className={
+				estInactif
+					? "overflow-hidden border-alerte/40 bg-alerte/5 transition-shadow hover:shadow-md"
+					: "overflow-hidden transition-shadow hover:shadow-md"
+			}
 		>
 			<CardHeader className="p-0">
-				<div className="relative h-24 bg-linear-to-r from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-900">
+				<div className="relative h-24 bg-linear-to-r from-surface-container to-surface-container-high">
 					<div className="absolute -bottom-10 left-1/2 -translate-x-1/2">
-						<div
-							className={`relative size-20 overflow-hidden rounded-full border-4 shadow-sm ${isPending ? "border-orange-100" : "border-background"}`}
-						>
-							{member.image_url ? (
-								<Image
-									src={member.image_url}
-									alt={member.name}
-									fill
-									sizes="80px"
-									className="object-cover"
-								/>
-							) : (
-								<div className="flex h-full w-full items-center justify-center bg-muted text-muted-foreground">
-									<UsersIcon className="size-8" />
-								</div>
-							)}
-						</div>
+						<AvatarMembre
+							src={member.image_url}
+							alt={`Photo de ${member.name}`}
+							taille={80}
+							attenue={estInactif}
+							className={estInactif ? "border-4 border-alerte/40" : "border-4 border-background"}
+						/>
 					</div>
 					<div className="absolute right-2 top-2">
 						<DropdownMenu>
@@ -70,35 +74,40 @@ export function StaffMemberCard({
 								<Button
 									variant="ghost"
 									size="icon"
-									className="size-8 text-muted-foreground hover:text-foreground hover:bg-muted/400"
+									className="size-8 text-on-surface-variant hover:bg-surface-container-highest hover:text-foreground"
+									aria-label={`Actions pour ${member.name}`}
+									disabled={disabled}
 								>
-									<MoreHorizontal className="size-4" />
+									<MoreHorizontal className="size-4" aria-hidden="true" />
 								</Button>
 							</DropdownMenuTrigger>
 							<DropdownMenuContent align="end">
 								<DropdownMenuLabel>Actions</DropdownMenuLabel>
-								{onApprove && (
-									<DropdownMenuItem onClick={() => onApprove(member)} className="text-green-600">
-										<Check className="mr-2 size-4" />
-										Valider
+								{estInactif ? (
+									<DropdownMenuItem onClick={() => onToggleActive(member, true)}>
+										{estEnAttente ? (
+											<Check className="mr-2 size-4" aria-hidden="true" />
+										) : (
+											<RotateCcw className="mr-2 size-4" aria-hidden="true" />
+										)}
+										{libelleValidation}
 									</DropdownMenuItem>
-								)}
-								<DropdownMenuItem onClick={() => onEdit(member)}>
-									<Edit className="mr-2 size-4" />
-									Modifier
-								</DropdownMenuItem>
-								{onDeactivate && !isPending && (
-									<DropdownMenuItem onClick={() => onDeactivate(member)}>
-										<EyeOff className="mr-2 size-4" />
+								) : (
+									<DropdownMenuItem onClick={() => onToggleActive(member, false)}>
+										<EyeOff className="mr-2 size-4" aria-hidden="true" />
 										Désactiver
 									</DropdownMenuItem>
 								)}
+								<DropdownMenuItem onClick={() => onEdit(member)}>
+									<Edit className="mr-2 size-4" aria-hidden="true" />
+									Modifier
+								</DropdownMenuItem>
 								<DropdownMenuSeparator />
 								<DropdownMenuItem
 									onClick={() => onDelete(member)}
 									className="text-destructive focus:text-destructive"
 								>
-									<Trash2 className="mr-2 size-4" />
+									<Trash2 className="mr-2 size-4" aria-hidden="true" />
 									Supprimer
 								</DropdownMenuItem>
 							</DropdownMenuContent>
@@ -106,15 +115,20 @@ export function StaffMemberCard({
 					</div>
 				</div>
 			</CardHeader>
-			<CardContent className="mt-12 text-center p-4 pt-10 pb-2">
-				<h3 className="font-semibold text-lg leading-tight">{member.name}</h3>
+
+			<CardContent className="mt-12 p-4 pb-2 pt-10 text-center">
+				<h3 className="text-lg font-semibold leading-tight wrap-break-word">{member.name}</h3>
 				<p
-					className={`text-sm font-medium ${isPlaceholderRole ? "text-orange-500 italic" : "text-muted-foreground"}`}
-					title={isPlaceholderRole ? "Rôle à préciser" : undefined}
+					className={
+						roleProvisoire
+							? "text-sm font-medium italic text-alerte"
+							: "text-sm font-medium text-on-surface-variant"
+					}
+					title={roleProvisoire ? "Rôle générique à préciser" : undefined}
 				>
 					{member.role}
 				</p>
-				<p className="text-xs text-muted-foreground/70 mt-1">{teamLabel}</p>
+				<p className="mt-1 text-xs text-on-surface-variant/70">{teamLabel}</p>
 
 				<div className="mt-3 flex flex-wrap justify-center gap-1">
 					{member.discord_user_id && (
@@ -122,31 +136,38 @@ export function StaffMemberCard({
 							href={`https://discord.com/users/${member.discord_user_id}`}
 							target="_blank"
 							rel="noopener noreferrer"
-							className="inline-flex items-center rounded-full bg-indigo-50 px-2 py-0.5 text-xs font-medium text-indigo-700 hover:bg-indigo-100 dark:bg-indigo-900/30 dark:text-indigo-300 dark:hover:bg-indigo-900/50"
-							title={`Ouvrir le profil Discord ${member.discord_user_id}`}
+							className="inline-flex items-center rounded-full bg-discord/10 px-2 py-0.5 text-xs font-medium text-discord hover:bg-discord/20"
 						>
 							Lié à Discord
+							<span className="sr-only"> — ouvrir le profil {member.discord_user_id}</span>
 						</a>
 					)}
-					{isDiscordImport && (
-						<span className="inline-flex items-center rounded-full bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-700 dark:bg-amber-900/30 dark:text-amber-300">
+					{estImportDiscord && (
+						<Badge variant="outline" className="border-alerte/40 text-alerte">
 							Import Discord
-						</span>
+						</Badge>
 					)}
+					{estInactif && !estEnAttente && <Badge variant="secondary">Désactivé</Badge>}
 				</div>
 			</CardContent>
-			<CardFooter className="p-4 pt-2 flex justify-center pb-6">
-				{onApprove ? (
+
+			<CardFooter className="flex flex-col gap-2 p-4 pb-6 pt-2">
+				{estInactif ? (
 					<Button
 						size="sm"
-						onClick={() => onApprove(member)}
-						className="w-full bg-green-600 hover:bg-green-700"
+						className="w-full"
+						disabled={disabled}
+						onClick={() => onToggleActive(member, true)}
 					>
-						<Check className="mr-2 size-4" />
-						Valider
+						{estEnAttente ? (
+							<Check className="mr-2 size-4" aria-hidden="true" />
+						) : (
+							<RotateCcw className="mr-2 size-4" aria-hidden="true" />
+						)}
+						{libelleValidation}
 					</Button>
 				) : (
-					<div className="text-xs text-muted-foreground">
+					<div className="text-xs text-on-surface-variant">
 						Ordre&nbsp;: {member.display_index ?? "—"}
 					</div>
 				)}
