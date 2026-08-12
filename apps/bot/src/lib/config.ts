@@ -2,9 +2,24 @@
 // Fallback DISCORD_GUILD_ID : Bun n'expand pas `GUILD_ID=$DISCORD_GUILD_ID`
 // dans .env (passe la string littérale). On lit les 2 et on filtre les valeurs
 // qui ressemblent à une référence shell non résolue ($VAR).
-import { resolveGuildId } from "@rosegriffon/types/discord";
+import { resolveGuildId, resolveGuildIds } from "@rosegriffon/types/discord";
 
 export const GUILD_ID = resolveGuildId(Bun.env as Record<string, string | undefined>);
+
+/**
+ * Guildes sur lesquelles les slash commands sont enregistrées.
+ *
+ * `GUILD_ID` reste la guilde PRINCIPALE et ne change pas de sens : c'est elle
+ * seule que la synchronisation des membres regarde (les membres d'Azalée n'ont
+ * rien à faire dans `discord_members`). Cette liste-ci ne sert qu'à savoir où
+ * les commandes doivent apparaître.
+ *
+ * Les commandes d'administration peuvent y figurer sans risque : leur garde
+ * (`lib/rbac.ts` → `requireRgAdmin`) résout le profil RG en base via la table
+ * `account` de Better Auth et vérifie son rôle. Elle ne dépend d'aucun rôle
+ * Discord, donc elle protège identiquement sur un serveur comme sur l'autre.
+ */
+export const GUILD_IDS = resolveGuildIds(Bun.env as Record<string, string | undefined>);
 
 export const SYNC_INTERVAL_MS = Number(Bun.env.SYNC_INTERVAL_MS ?? 30 * 60 * 1000);
 
