@@ -1,5 +1,5 @@
 import { DashboardGrid, QuickActionCard } from "@rose-griffon/ui";
-import { BookOpen, Calendar, Database, Image as ImageIcon, Settings, Shield, Users } from "lucide-react";
+import { BarChart3, BookOpen, Calendar, Database, Image as ImageIcon, Settings, Shield, Users } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
 interface QuickAction {
@@ -45,6 +45,13 @@ const ACTIONS: QuickAction[] = [
 		href: "/admin/media",
 		icon: ImageIcon,
 		title: "Médias",
+	},
+	{
+		accent: "text-succes",
+		description: "Audience et contenu, domaine par domaine",
+		href: "/admin/stats",
+		icon: BarChart3,
+		title: "Statistiques",
 	},
 	{
 		accent: "text-info",
