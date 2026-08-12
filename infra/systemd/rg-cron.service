@@ -60,7 +60,10 @@ ProtectHome=read-only
 # Les deux répertoires du CDN sont la cible de la tâche `cdn` : sans eux,
 # `ProtectSystem=strict` rend la copie impossible et un nouvel asset partagé
 # n'atteint jamais le CDN.
-ReadWritePaths=/home/ubuntu/rg /tmp /home/ubuntu/.bxc /var/www/cdn/static/azalee/public /var/www/cdn/static/website/public
+# `/var/lib/rg` : cache de la collecte d'audience du second serveur, lu par la
+# page /admin/stats. Sans cette entrée, `ProtectSystem=strict` le rend en
+# lecture seule et la tâche `stats:achillea` échoue en EROFS.
+ReadWritePaths=/home/ubuntu/rg /tmp /home/ubuntu/.bxc /var/www/cdn/static/azalee/public /var/www/cdn/static/website/public /var/lib/rg
 PrivateTmp=true
 PrivateDevices=true
 ProtectKernelTunables=true
