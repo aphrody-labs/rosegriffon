@@ -20,7 +20,7 @@ import { useState } from "react";
 
 import { authClient } from "@/lib/auth-client";
 import { LogOut, Settings, ShieldCheck, UserCircle } from "@/lib/icons-config";
-import { isAdmin as isAdminRole } from "@rose-griffon/auth";
+import { ADMIN_ROLES } from "@rose-griffon/types";
 import type { PublicProfile } from "@rose-griffon/db";
 
 type Profile = PublicProfile;
@@ -41,7 +41,12 @@ export function UserAccountPopup({ user, profile, loading = false }: UserAccount
 	const [isLoggingOut, setIsLoggingOut] = useState(false);
 	// `ADMIN_ROLES` fait autorité : coder « admin » en dur excluait superadmin,
 	// editor et moderator, qui ont pourtant accès à l'administration.
-	const estAdmin = isAdminRole(profile?.role);
+	//
+	// La constante vient de `@rose-griffon/types` et non du helper `isAdmin` de
+	// `@rose-griffon/auth` : ce paquet-là tire `@rose-griffon/db/service`, donc le
+	// client Supabase en rôle service. L'importer depuis un composant client
+	// l'embarquerait dans le bundle du navigateur.
+	const estAdmin = (ADMIN_ROLES as readonly string[]).includes(profile?.role ?? "");
 	const router = useRouter();
 
 	const handleLogout = async () => {

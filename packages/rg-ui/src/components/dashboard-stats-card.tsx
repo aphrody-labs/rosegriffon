@@ -1,4 +1,5 @@
 import type * as React from "react";
+import { isValidElement } from "react";
 import Link from "next/link";
 import type { LucideIcon } from "lucide-react";
 import { cn } from "../lib/utils";
@@ -39,6 +40,38 @@ const accentVariants = {
 };
 
 /**
+ * Affiche une icône fournie soit comme TYPE de composant, soit déjà rendue.
+ *
+ * Le discriminant est `isValidElement`, jamais `typeof === "function"` : les
+ * icônes `lucide-react` sont des `forwardRef`, donc des objets.
+ */
+function renderIcone(icone: React.ReactNode | LucideIcon): React.ReactNode {
+	if (!icone) {
+		return null;
+	}
+	if (isValidElement(icone)) {
+		return icone;
+	}
+	const Composant = icone as React.ComponentType<{ className?: string }>;
+	return <Composant className="size-5" />;
+}
+
+/**
+ * Une icône Lucide n'est PAS une fonction.
+ *
+ * `lucide-react` expose des composants `forwardRef`, c'est-à-dire des OBJETS
+ * (`{$$typeof, render, displayName}`). Le test `typeof icon === "function"`
+ * était donc toujours faux : la branche « nœud déjà rendu » s'exécutait et
+ * injectait l'objet brut comme enfant React. Au rendu serveur cela passait
+ * inaperçu — React ignore l'objet — mais la sérialisation du flux RSC échouait
+ * avec « Functions cannot be passed directly to Client Components », une fois
+ * par icône distincte, et l'hydratation du tableau de bord tombait.
+ *
+ * Le bon test est l'inverse : si c'est déjà un élément React, on l'affiche tel
+ * quel ; sinon c'est un TYPE de composant (fonction ou forwardRef) qu'il faut
+ * instancier.
+ */
+/**
  * Shared Metric/Stats card for Dashboards.
  */
 export function DashboardStatsCard({
@@ -72,7 +105,7 @@ export function DashboardStatsCard({
 					    qui n'est déclarée dans aucune des deux apps : le nom de l'icône
 					    s'affichait en toutes lettres, débordant de son carré de 20px.
 					    On n'accepte plus qu'un composant Lucide ou un nœud déjà rendu. */}
-					{typeof Icon === "function" ? <Icon className="size-5" /> : Icon}
+					{renderIcone(Icon)}
 				</div>
 				{trend && (
 					<span
