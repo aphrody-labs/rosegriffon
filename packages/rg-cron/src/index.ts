@@ -18,6 +18,7 @@ import {
 } from "./tasks/api";
 import { runSeoIndexNow } from "./tasks/seo/indexnow";
 import { runSeoLlmsTxt } from "./tasks/seo/llms-txt";
+import { collecterAudienceAchillea } from "./tasks/stats/achillea";
 import { initDiscord, getDiscordTelemetry, onTelemetryUpdate, getDiscordClient, GUILD_ID } from "./lib/discord";
 import { runDiscordSync, runDiscordChannelScan } from "./tasks/discord";
 import { ServerWebSocket } from "bun";
@@ -211,6 +212,8 @@ if (args.includes("--run")) {
 		await executeTask("seo:indexnow", runSeoIndexNow);
 	} else if (task === "seo:llms-txt" || task === "seo:llms") {
 		await executeTask("seo:llms-txt", runSeoLlmsTxt);
+	} else if (task === "stats:achillea" || task === "stats") {
+		await executeTask("stats:achillea", collecterAudienceAchillea);
 	} else if (task === "seo") {
 		await executeTask("seo:llms-txt", runSeoLlmsTxt);
 		await executeTask("seo:indexnow", runSeoIndexNow);
@@ -229,9 +232,10 @@ if (args.includes("--run")) {
 		await executeTask("discord:scan", runDiscordChannelScan);
 		await executeTask("seo:llms-txt", runSeoLlmsTxt);
 		await executeTask("seo:indexnow", runSeoIndexNow);
+		await executeTask("stats:achillea", collecterAudienceAchillea);
 	} else {
 		console.error(
-			`❌ Tâche inconnue : ${task}. Choisissez parmi : db, cdn, crawl, rag, x-search, query, publish, github-publish, patreon, reminders, warm, discord, discord:scan, seo, seo:indexnow, seo:llms-txt, backup:postgres, backup:pg, all.`
+			`❌ Tâche inconnue : ${task}. Choisissez parmi : db, cdn, crawl, rag, x-search, query, publish, github-publish, patreon, reminders, warm, discord, discord:scan, seo, seo:indexnow, seo:llms-txt, stats:achillea, backup:postgres, backup:pg, all.`
 		);
 	}
 	process.exit(0);
@@ -429,6 +433,7 @@ const server = Bun.serve({
 					"discord:scan",
 					"seo:indexnow",
 					"seo:llms-txt",
+					"stats:achillea",
 				],
 				schedules: {
 					publish: "*/15 * * * *",
@@ -439,6 +444,7 @@ const server = Bun.serve({
 					"github-publish": "30 4 * * *",
 					crawl: "0 5 * * *",
 					"seo:llms-txt": "45 5 * * *",
+				"stats:achillea": "*/15 * * * *",
 					"seo:indexnow": "0 6 * * *",
 					reminders: "0 8 * * *",
 					discord: "*/30 * * * *",

@@ -5,7 +5,12 @@ import type { Metadata, Viewport } from "next";
 import { lato, notoSans, poppins, roboto } from "@/lib/fonts";
 import { Geist } from "next/font/google";
 
+import { GoogleTagManager } from "@next/third-parties/google";
+
 import ClientLayout from "./client-layout";
+
+/** Conteneur Google Tag Manager. Absent = aucune balise injectée. */
+const GTM_ID = process.env.NEXT_PUBLIC_GTM_ID;
 
 const geistSans = Geist({
 	display: "swap",
@@ -183,6 +188,13 @@ export default function RootLayout({
 				className={`${geistSans.variable} ${roboto.className} ${roboto.variable} ${poppins.variable} ${notoSans.variable} ${lato.variable}`}
 				suppressHydrationWarning
 			>
+			{/* Google Tag Manager — composant officiel de `@next/third-parties`.
+			    Il injecte le script du conteneur ET l'`<iframe>` de repli `noscript`,
+			    en respectant la stratégie de chargement de Next : pas de balise collée
+			    à la main dans le `<head>`, qui bloquerait le rendu.
+			    L'identifiant vient de l'environnement : sans lui, rien n'est chargé,
+			    ce qui laisse les environnements de développement propres. */}
+				{GTM_ID && <GoogleTagManager gtmId={GTM_ID} />}
 				<ClientLayout>{children}</ClientLayout>
 			</body>
 		</html>

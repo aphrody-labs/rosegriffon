@@ -23,6 +23,7 @@
 	"dependencies": {
 		"@googlemaps/js-api-loader": "catalog:",
 		"@hookform/resolvers": "catalog:",
+		"@next/third-parties": "^16.3.0",
 		"@origin-space/image-cropper": "catalog:",
 		"@radix-ui/react-accordion": "catalog:",
 		"@radix-ui/react-alert-dialog": "catalog:",
