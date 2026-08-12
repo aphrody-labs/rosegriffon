@@ -5,7 +5,7 @@
 // aucune confiance ici. Chaque normalisateur est défensif (champ manquant,
 // type inattendu, URL non http(s)) et renvoie une forme stable au rendu.
 
-import { couleurDiscord, urlSureOuNull } from "./url";
+import { couleurDiscord, urlPubliableOuNull, urlSureOuNull } from "./url";
 
 // ── Salons ──────────────────────────────────────────────────────────────────
 
@@ -167,10 +167,21 @@ export function dateIso(valeur: unknown): string | null {
 
 const EXTENSIONS_IMAGE = /\.(png|jpe?g|gif|webp|avif|bmp)(\?|$)/i;
 
+/*
+ * ⚠ UNE PIÈCE JOINTE SANS URL DURABLE N'EST PAS PUBLIÉE.
+ * `discord_messages.attachments` recopie les URL de l'API Discord telles
+ * quelles, or elles sont SIGNÉES et expirent en moins de 24 h (168 des 566
+ * messages archivés en portent une, mesuré le 12/8/2026). La route publique
+ * `/api/discord/messages` les servait à un tiers qui les aurait trouvées mortes
+ * le lendemain. On les écarte donc ici, au normaliseur, et pas dans la route :
+ * un futur écran qui lirait ces messages hériterait sinon de la même fuite.
+ * Le remède définitif est la recopie dans le bucket `assets`, comme pour les
+ * visuels de sondage ; d'ici là, mieux vaut ne rien servir qu'un lien mort.
+ */
 function normaliserPieceJointe(brut: unknown): PieceJointeDiscord | null {
 	const source = objet(brut);
 	if (!source) return null;
-	const url = urlSureOuNull(source.url) ?? urlSureOuNull(source.proxy_url);
+	const url = urlPubliableOuNull(source.url) ?? urlPubliableOuNull(source.proxy_url);
 	if (!url) return null;
 	const nom = chaine(source.filename, 256) ?? "fichier";
 	const typeMime = chaine(source.content_type, 128);
@@ -187,10 +198,11 @@ function normaliserPieceJointe(brut: unknown): PieceJointeDiscord | null {
 	};
 }
 
+/** Même règle que pour les pièces jointes : une image d'encart signée est écartée. */
 function normaliserMedia(brut: unknown): MediaEncart | null {
 	const source = objet(brut);
 	if (!source) return null;
-	const url = urlSureOuNull(source.url) ?? urlSureOuNull(source.proxy_url);
+	const url = urlPubliableOuNull(source.url) ?? urlPubliableOuNull(source.proxy_url);
 	if (!url) return null;
 	return { hauteur: entier(source.height), largeur: entier(source.width), url };
 }
