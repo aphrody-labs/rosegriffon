@@ -8,6 +8,7 @@
 	],
 	"exports": {
 		".": "./src/index.ts",
+		"./tokens": "./src/tokens.ts",
 		"./lib/utils": "./src/lib/utils.ts",
 		"./styles.css": "./src/styles.css",
 		"./hooks/*": "./src/hooks/*.ts",
@@ -19,7 +20,9 @@
 	},
 	"scripts": {
 		"lint": "bunx oxlint -c ../../.oxlintrc.json src",
-		"type-check": "tsc --noEmit"
+		"type-check": "tsc --noEmit",
+		"test": "bun test test",
+		"tokens": "bun scripts/generer-tokens.ts"
 	},
 	"dependencies": {
 		"@hookform/resolvers": "catalog:",
