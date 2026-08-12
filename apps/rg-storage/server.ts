@@ -140,11 +140,23 @@ function diskPath(bucket: string, name: string): string | null {
 
 // ───────────────────────── Index Postgres ─────────────────────────
 
-/** Insère ou met à jour la ligne d'index d'un objet. */
+/**
+ * Insère ou met à jour la ligne d'index d'un objet.
+ *
+ * ⚠ ON BINDE L'OBJET, jamais `JSON.stringify(...)`. Bun sérialise déjà un objet
+ * vers JSON pour un paramètre jsonb ; passer une chaîne l'encode une SECONDE fois
+ * et écrit un jsonb de type `string`, dont `metadata->>'mimetype'` vaut NULL.
+ * Mesuré sur cette base le 12/8/2026 :
+ *   `${JSON.stringify(o)}::jsonb` -> jsonb_typeof = "string", mimetype = NULL
+ *   `${o}::jsonb`                 -> jsonb_typeof = "object", mimetype = "image/webp"
+ * C'est ce défaut qui a laissé 5535 des 6423 lignes du bucket `tweets` sans type
+ * MIME exploitable dans l'index. Même forme que
+ * `packages/cron/src/tasks/ie-crawl/tweet-media-storage.ts`, qui, lui, était juste.
+ */
 async function indexObject(bucket: string, name: string, size: number, mime: string) {
 	await sql`
 		insert into storage.objects (bucket_id, name, metadata, created_at, updated_at, last_accessed_at, version)
-		values (${bucket}, ${name}, ${JSON.stringify({ size, mimetype: mime, cacheControl: "max-age=3600" })}::jsonb,
+		values (${bucket}, ${name}, ${{ size, mimetype: mime, cacheControl: "max-age=3600" }},
 		        now(), now(), now(), gen_random_uuid()::text)
 		on conflict (bucket_id, name) do update
 		  set metadata = excluded.metadata, updated_at = now(), version = excluded.version`;
