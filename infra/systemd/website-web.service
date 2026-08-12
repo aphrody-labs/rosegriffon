@@ -1,0 +1,85 @@
+# website-web.service — site rosegriffon.fr (Next 16 standalone, runtime Bun) — SLOT A.
+#
+# Slot de production derrière l'amont nginx `website_web`
+# (/etc/nginx/rg-upstreams/website_web.conf) ; doublure de bascule :
+# `website-web-b.service` (:3014).
+#
+# Le service lit une **version figée** publiée sous
+# /home/ubuntu/rg-releases/website/releases/<version> (lien `slot-a`), jamais le dépôt :
+# un build en cours ne peut donc pas retirer sous ses pieds un fragment de route au
+# processus qui sert les visiteurs.
+#
+# Installation : `bun scripts/ops/deploy.ts install website`.
+[Unit]
+Description=Website rosegriffon.fr (Next.js 16, Bun runtime) — slot A
+After=network.target network-online.target
+Wants=network-online.target
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+User=ubuntu
+Group=ubuntu
+WorkingDirectory=/home/ubuntu/rg-releases/website/slot-a/apps/website
+
+EnvironmentFile=-/home/ubuntu/rg/apps/website/.env
+Environment=NODE_ENV=production
+Environment=PORT=3004
+# Boucle locale uniquement : nginx (local) est le seul à proxifier.
+Environment=HOSTNAME=127.0.0.1
+Environment=BUN_RUNTIME_TRANSPILER_CACHE_PATH=/home/ubuntu/rg-releases/website/bun-cache
+
+ExecStart=/home/ubuntu/.bun/bin/bun /home/ubuntu/rg-releases/website/slot-a/apps/website/server.js
+
+TimeoutStopSec=60
+KillMode=mixed
+KillSignal=SIGTERM
+# Bun quitte en 143 (128+SIGTERM) au lieu de mourir du signal : sans cette ligne,
+# systemd marque l'unité `failed` à chaque arrêt propre, ce qui pollue le diagnostic.
+SuccessExitStatus=143
+Restart=always
+RestartSec=3
+
+# Ressources (Next SSR/ISR — RSS attendu ~400-800 MiB)
+MemoryHigh=2560M
+MemoryMax=4G
+MemorySwapMax=512M
+MemoryLow=256M
+TasksMax=2048
+OOMScoreAdjust=-200
+CPUWeight=150
+IOWeight=150
+
+# Durcissement (compatible JIT — PAS de MemoryDenyWriteExecute, qui casse le JIT Bun/V8)
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=read-only
+PrivateTmp=true
+PrivateDevices=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectKernelLogs=true
+ProtectControlGroups=true
+ProtectHostname=true
+ProtectClock=true
+ProtectProc=invisible
+ProcSubset=pid
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+RestrictNamespaces=true
+RestrictSUIDSGID=true
+RestrictRealtime=true
+LockPersonality=true
+CapabilityBoundingSet=
+AmbientCapabilities=
+SystemCallArchitectures=native
+SystemCallFilter=@system-service
+SystemCallFilter=~@obsolete @privileged
+ReadWritePaths=/home/ubuntu/rg-releases/website
+
+LimitNOFILE=131072
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=website-web
+
+[Install]
+WantedBy=multi-user.target

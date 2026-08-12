@@ -25,10 +25,10 @@ if git diff --name-only | grep -q "characters.json"; then
     # Rebuild Next.js standalone server
     CI=true bun run build
     
-    # Restart the Next.js service
-    echo "🔄 Restarting web service..."
-    sudo -n systemctl restart azalee-web.service
-    echo "✅ Service restarted successfully."
+    # Republication sans coupure (bascule bleu/vert) au lieu d'un restart brutal.
+    echo "🔄 Publication de la nouvelle version..."
+    bun /home/ubuntu/rg/scripts/ops/deploy.ts deploy azalee --no-build --no-gate
+    echo "✅ Nouvelle version en ligne."
 else
     echo "✨ No changes detected in characters.json. Skipping build and restart."
 fi

@@ -71,13 +71,23 @@ bun packages/mcp/src/cli.ts --list       # inventaire du serveur MCP
 VPS derrière nginx :
 
 ```bash
-bash scripts/ship-azalee.sh      # wiki  → azalee-web.service   (:3003)
-bash scripts/ship-website.sh     # site  → website-web.service  (:3004)
+bun run deploy                   # wiki + site, sans coupure de service
+bun run deploy azalee            # une seule surface
+bun run deploy:status            # version servie, slots, mémoire, santé publique
 ```
 
+La publication est **bleu/vert** : le nouveau build démarre sur un second port,
+est sondé, puis nginx bascule — le site ne tombe à aucun moment (mesuré :
+1 558 requêtes pendant un déploiement complet, 0 erreur). `preview` /
+`promote` permettent de valider une version sur le domaine public, derrière un
+cookie, avant de la passer en production ; `rollback` revient à la précédente.
+`bash scripts/ship-azalee.sh` et `ship-website.sh` restent valables : ils
+délèguent à cette mécanique.
+
 Les services sans build (API headless, serveur MCP, CDN, cron) se rechargent
-par un simple `sudo systemctl restart <unité>`. Procédures complètes,
-diagnostic et pièges : [`docs/deploy.md`](docs/deploy.md).
+par un simple `sudo systemctl restart <unité>`. Mécanique complète et pièges :
+[`docs/deploiement-sans-coupure.md`](docs/deploiement-sans-coupure.md) ;
+exploitation générale : [`docs/deploy.md`](docs/deploy.md).
 
 ## Workspaces & catalog
 

@@ -1,0 +1,149 @@
+name: Publier en production
+
+# Rose Griffon est auto-hébergé : aucun runner GitHub n'a — ni ne doit avoir — de shell
+# sur le VPS. Ce workflow ne construit donc rien lui-même ; il **déclenche** la
+# publication bleu/vert (`scripts/ops/deploy.ts`) via le serveur MCP du monorepo, qui
+# tourne déjà sur la machine, puis suit son avancement jusqu'au bout.
+#
+# Conséquence directe : le déploiement reste identique qu'il parte d'ici, d'un shell sur
+# le VPS (`bun run deploy`) ou d'un agent MCP. Une seule mécanique, un seul chemin de
+# code, donc un seul comportement à garantir.
+#
+# Prérequis (une fois) :
+#   - secret de dépôt `RG_MCP_ADMIN_TOKEN` = le jeton d'administration du serveur MCP
+#     (celui du `.env` du dépôt sur le VPS — équivalent d'un accès SSH, ne jamais le
+#     mettre dans une variable, seulement dans un secret) ;
+#   - variable de dépôt `DEPLOY_ON_PUSH` = `true` pour publier automatiquement à chaque
+#     poussée sur `main`. Absente, seule la publication manuelle est possible.
+
+on:
+  workflow_dispatch:
+    inputs:
+      app:
+        description: Surface à publier
+        type: choice
+        options: [all, azalee, website]
+        default: all
+      mode:
+        description: Nature de la publication
+        type: choice
+        options: [deploy, reload, rollback, preview, promote, preview-off]
+        default: deploy
+      build:
+        description: Reconstruire (décocher pour republier les artefacts existants)
+        type: boolean
+        default: true
+      release:
+        description: Version visée (retour arrière ou promotion)
+        type: string
+        required: false
+  push:
+    branches: [main]
+    paths:
+      - apps/**
+      - packages/**
+      - infra/**
+      - scripts/ops/deploy.ts
+      - package.json
+      - bun.lock
+
+concurrency:
+  # Jamais deux publications concurrentes : le script pose de toute façon un verrou par
+  # application, mais mieux vaut ne pas empiler les exécutions ici.
+  group: publication-production
+  cancel-in-progress: false
+
+jobs:
+  publier:
+    if: github.event_name == 'workflow_dispatch' || vars.DEPLOY_ON_PUSH == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      MCP_URL: https://mcp.rosegriffon.fr/mcp
+      APP: ${{ inputs.app || 'all' }}
+      MODE: ${{ inputs.mode || 'deploy' }}
+      BUILD: ${{ inputs.build == null && 'true' || inputs.build }}
+      RELEASE: ${{ inputs.release }}
+    steps:
+      - name: Vérifier le jeton d'administration
+        env:
+          RG_MCP_ADMIN_TOKEN: ${{ secrets.RG_MCP_ADMIN_TOKEN }}
+        run: |
+          if [ -z "$RG_MCP_ADMIN_TOKEN" ]; then
+            echo "::error::secret RG_MCP_ADMIN_TOKEN absent — publication impossible depuis GitHub."
+            exit 1
+          fi
+
+      - name: Synchroniser le dépôt du VPS sur le commit poussé
+        if: env.MODE == 'deploy' || env.MODE == 'preview'
+        env:
+          RG_MCP_ADMIN_TOKEN: ${{ secrets.RG_MCP_ADMIN_TOKEN }}
+        run: |
+          set -euo pipefail
+          # `--ff-only` : on refuse de fusionner quoi que ce soit sur le VPS. Si le dépôt
+          # local a divergé, la publication s'arrête ici plutôt que de publier un état
+          # que personne n'a relu.
+          reponse=$(curl -sS -X POST "$MCP_URL" \
+            -H "Authorization: Bearer $RG_MCP_ADMIN_TOKEN" \
+            -H 'Content-Type: application/json' \
+            -H 'Accept: application/json' \
+            -d '{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"shell_run","arguments":{"command":"git fetch --prune && git pull --ff-only && git rev-parse HEAD","timeoutMs":180000}}}')
+          echo "$reponse" | jq -r '.result.content[]?.text // .error.message'
+          echo "$reponse" | jq -e '.result.isError != true' > /dev/null
+
+      - name: Lancer la publication
+        env:
+          RG_MCP_ADMIN_TOKEN: ${{ secrets.RG_MCP_ADMIN_TOKEN }}
+        run: |
+          set -euo pipefail
+          arguments=$(jq -nc --arg app "$APP" --arg mode "$MODE" --arg release "$RELEASE" \
+            --argjson build "$BUILD" \
+            '{app:$app, mode:$mode, build:$build} + (if $release == "" then {} else {release:$release} end)')
+          reponse=$(curl -sS -X POST "$MCP_URL" \
+            -H "Authorization: Bearer $RG_MCP_ADMIN_TOKEN" \
+            -H 'Content-Type: application/json' \
+            -H 'Accept: application/json' \
+            -d "$(jq -nc --argjson args "$arguments" \
+              '{jsonrpc:"2.0",id:2,method:"tools/call",params:{name:"deploy_run",arguments:$args}}')")
+          echo "$reponse" | jq -r '.result.content[]?.text // .error.message'
+          echo "$reponse" | jq -e '.result.isError != true' > /dev/null
+
+      - name: Suivre la publication jusqu'à son terme
+        env:
+          RG_MCP_ADMIN_TOKEN: ${{ secrets.RG_MCP_ADMIN_TOKEN }}
+        run: |
+          set -euo pipefail
+          # La publication est détachée sur le VPS (un build dépasse la durée d'un appel
+          # MCP) : on interroge son état jusqu'à ce que plus aucune surface ne travaille.
+          for tentative in $(seq 1 120); do
+            sleep 20
+            etat=$(curl -sS -X POST "$MCP_URL" \
+              -H "Authorization: Bearer $RG_MCP_ADMIN_TOKEN" \
+              -H 'Content-Type: application/json' \
+              -H 'Accept: application/json' \
+              -d '{"jsonrpc":"2.0","id":3,"method":"tools/call","params":{"name":"deploy_status","arguments":{"app":"all"}}}' \
+              | jq -c '.result.structuredContent')
+            encours=$(echo "$etat" | jq '[.apps[] | select(.running)] | length')
+            echo "tentative $tentative — surfaces en cours : $encours"
+            if [ "$encours" = "0" ] && [ "$tentative" -gt 1 ]; then
+              echo "$etat" | jq -r '.apps[] | "\(.app) : version \(.release) · slot \(.live) · public \(.publicStatus)"'
+              # Une publication qui se termine avec un point d'entrée en erreur doit
+              # échouer ici, sinon le voyant vert de GitHub mentirait.
+              echo "$etat" | jq -e '[.apps[] | select(.publicStatus >= 400 or .publicStatus == 0)] | length == 0' > /dev/null
+              exit 0
+            fi
+          done
+          echo "::error::publication toujours en cours après 40 minutes"
+          exit 1
+
+      - name: Journal en cas d'échec
+        if: failure()
+        env:
+          RG_MCP_ADMIN_TOKEN: ${{ secrets.RG_MCP_ADMIN_TOKEN }}
+        run: |
+          curl -sS -X POST "$MCP_URL" \
+            -H "Authorization: Bearer $RG_MCP_ADMIN_TOKEN" \
+            -H 'Content-Type: application/json' \
+            -H 'Accept: application/json' \
+            -d '{"jsonrpc":"2.0","id":4,"method":"tools/call","params":{"name":"deploy_status","arguments":{"app":"all","logLines":60}}}' \
+            | jq -r '.result.structuredContent.journaux // {} | to_entries[] | "── \(.key) ──\n\(.value.tail // "aucun journal")"'
