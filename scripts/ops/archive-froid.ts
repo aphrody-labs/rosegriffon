@@ -184,6 +184,25 @@ async function recuperer(nom: string): Promise<void> {
 	console.log(`ok      ${entree.fichiers} fichiers restaurés (copie distante conservée)`);
 }
 
+/**
+ * Supprime définitivement une entrée du stockage secondaire.
+ *
+ * À n'employer que sur ce qui n'a plus de raison d'exister — une archive gardée
+ * « au cas où » coûte moins cher qu'un rapatriement impossible. La suppression
+ * retire aussi le témoin laissé côté principal, sinon il pointerait dans le vide.
+ */
+async function supprimer(nom: string): Promise<void> {
+	const index = await lireIndex();
+	const entree = index.find((e) => e.nom === nom || e.source === nom);
+	if (!entree) throw new Error(`entrée inconnue : ${nom} (voir « lister »)`);
+
+	const cible = `${RACINE}/${entree.nom}`;
+	await $`ssh -o BatchMode=yes ${HOTE} rm -rf ${cible}`;
+	await $`rm -f ${`${entree.source}${TEMOIN}`}`.nothrow().quiet();
+	await ecrireIndex(index.filter((e) => e.nom !== entree.nom));
+	console.log(`supprimé ${taille(entree.octets)} — ${entree.nom}`);
+}
+
 /** Affiche l'inventaire de l'archive. */
 async function lister(): Promise<void> {
 	const index = await lireIndex();
@@ -225,6 +244,12 @@ switch (commande) {
 		await recuperer(arguments_[0]);
 		break;
 	}
+	case "supprimer": {
+		if (arguments_.length === 0) throw new Error("usage : supprimer <nom...>");
+		for (const nom of arguments_) await supprimer(nom);
+		await espace();
+		break;
+	}
 	case "lister":
 		await lister();
 		break;
@@ -236,6 +261,7 @@ switch (commande) {
 			"archive-froid — stockage secondaire sur le second VPS\n\n" +
 				"  pousser <chemin...>  déporte et libère la place (vérifié avant suppression)\n" +
 				"  recuperer <nom>      rapatrie à l'emplacement d'origine\n" +
+				"  supprimer <nom...>   efface définitivement du stockage secondaire\n" +
 				"  lister               inventaire de ce qui est déporté\n" +
 				"  espace               place disponible des deux côtés"
 		);
