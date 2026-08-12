@@ -3,6 +3,27 @@ import Link from "next/link";
 import { ArrowRight, type LucideIcon } from "lucide-react";
 import { cn } from "../lib/utils";
 
+/**
+ * Affiche une icône fournie soit comme TYPE de composant, soit déjà rendue.
+ *
+ * Une icône `lucide-react` est un `forwardRef`, donc un OBJET : le test
+ * `typeof icon === "function"` était toujours faux et l'objet brut finissait
+ * comme enfant React. Invisible au rendu serveur, mais la sérialisation du flux
+ * RSC échouait en « Functions cannot be passed directly to Client Components »
+ * et l'hydratation du tableau de bord tombait. Le bon discriminant est
+ * `isValidElement`.
+ */
+function renderIcone(icone: React.ReactNode | LucideIcon): React.ReactNode {
+	if (!icone) {
+		return null;
+	}
+	if (React.isValidElement(icone)) {
+		return icone;
+	}
+	const Composant = icone as React.ComponentType<{ className?: string; fill?: string }>;
+	return <Composant className="size-6" fill="currentColor" />;
+}
+
 interface DashboardMetricProps {
 	label: string;
 	value: string | number;
@@ -46,11 +67,7 @@ export function DashboardMetric({
 					iconBg
 				)}
 			>
-				{typeof icon === "function" ? (
-					React.createElement(icon, { className: "size-6", fill: "currentColor" })
-				) : (
-					icon
-				)}
+				{renderIcone(icon)}
 			</div>
 			<div className="min-w-0 flex-1">
 				<p className="text-sm text-muted-foreground">{label}</p>
