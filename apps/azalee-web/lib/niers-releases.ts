@@ -1,12 +1,12 @@
 /**
- * Résolveur de la dernière release desktop **niers** (GitHub Releases, `aphrody-code/niers`) —
+ * Résolveur de la dernière release desktop **niers** (GitHub Releases, `aphrody-code/nie`) —
  * source UNIQUE pour `/tools/niers` (page de download) **et** `/tools/niers/latest.json`
  * (manifeste updater Tauri) : azalee n'a plus besoin d'être redéployée à chaque nouvelle version
  * niers, la dernière release publiée (non-draft/non-prerelease) qui embarque un installeur NSIS
  * signé (`*-setup.exe` + `.sig`) devient automatiquement la version proposée.
  */
 
-const REPO = "aphrody-code/niers";
+const REPO = "aphrody-code/nie";
 
 /** Évite de marteler l'API GitHub (rate-limit anonyme 60 req/h/IP) — même valeur pour la page et le JSON. */
 export const NIERS_RELEASE_REVALIDATE = 3600;

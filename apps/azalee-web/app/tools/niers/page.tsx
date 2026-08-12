@@ -9,7 +9,7 @@ import { getLatestNiersDesktopRelease, type NiersDesktopRelease } from "@/lib/ni
 // ici après une nouvelle release niers (cf. `scripts/release-desktop.sh` côté dépôt niers).
 export const revalidate = 3600; // NIERS_RELEASE_REVALIDATE (littéral requis — segment config Next.js statiquement analysé)
 
-const GITHUB_REPO_URL = "https://github.com/aphrody-code/niers";
+const GITHUB_REPO_URL = "https://github.com/aphrody-code/nie";
 const BLENDER_ADDON_VERSION = "1.1.0"; // versionné indépendamment de l'app (blender_manifest.toml, tools/niers/)
 
 export const metadata: Metadata = {
