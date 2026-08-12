@@ -8,6 +8,7 @@ import { runInaglePush, runSQLiteBackup, runPostgresBackup } from "./tasks/db";
 import { syncCdnAssets } from "./tasks/cdn";
 import { runIeCrawl } from "./tasks/ie-crawl";
 import { crawlTwitterSearch } from "./tasks/ie-crawl/harvest-search";
+import { crawlHashtagCampaigns } from "./tasks/ie-crawl/hashtag-harvest";
 import { runRagSync, queryRag, ragGroundedQuery, ingestWikiCorpus } from "./tasks/ie-crawl/rag-index";
 import {
 	triggerPublishScheduled,
@@ -26,6 +27,7 @@ import {
 	runDiscordMessagesBackfill,
 	brancherVeilleMessagesTempsReel,
 } from "./tasks/discord-messages";
+import { runDiscordPollsImport } from "./tasks/discord-polls";
 import { ServerWebSocket } from "bun";
 import { createSupabaseServiceClient } from "@rosegriffon/db/service";
 import { resolveProfile, isAdmin } from "@rosegriffon/auth";
@@ -224,6 +226,14 @@ if (args.includes("--run")) {
 		await executeTask("discord:messages", runDiscordMessagesSync);
 	} else if (task === "discord:backfill" || task === "discord-backfill") {
 		await executeTask("discord:backfill", runDiscordMessagesBackfill);
+	} else if (task === "discord:polls" || task === "discord-polls" || task === "sondages") {
+		await executeTask("discord:polls", () => runDiscordPollsImport());
+	} else if (task === "x:campagnes" || task === "x-campagnes" || task === "campagnes") {
+		// `--run x:campagnes <slug>` restreint la récolte à une seule campagne.
+		const slug = args[taskIdx + 1];
+		await executeTask("x:campagnes", () =>
+			crawlHashtagCampaigns(slug && !slug.startsWith("-") ? { slug } : {})
+		);
 	} else if (task === "seo:indexnow") {
 		await executeTask("seo:indexnow", runSeoIndexNow);
 	} else if (task === "seo:llms-txt" || task === "seo:llms") {
@@ -247,12 +257,14 @@ if (args.includes("--run")) {
 		await executeTask("discord:sync", runDiscordSync);
 		await executeTask("discord:scan", runDiscordChannelScan);
 		await executeTask("discord:messages", runDiscordMessagesSync);
+		await executeTask("discord:polls", () => runDiscordPollsImport());
+		await executeTask("x:campagnes", () => crawlHashtagCampaigns());
 		await executeTask("seo:llms-txt", runSeoLlmsTxt);
 		await executeTask("seo:indexnow", runSeoIndexNow);
 		await executeTask("stats:achillea", collecterAudienceAchillea);
 	} else {
 		console.error(
-			`❌ Tâche inconnue : ${task}. Choisissez parmi : db, cdn, crawl, rag, x-search, query, publish, github-publish, patreon, reminders, warm, discord, discord:scan, discord:messages, discord:backfill, seo, seo:indexnow, seo:llms-txt, stats:achillea, backup:postgres, backup:pg, all.`
+			`❌ Tâche inconnue : ${task}. Choisissez parmi : db, cdn, crawl, rag, x-search, x:campagnes, query, publish, github-publish, patreon, reminders, warm, discord, discord:scan, discord:messages, discord:backfill, discord:polls, seo, seo:indexnow, seo:llms-txt, stats:achillea, backup:postgres, backup:pg, all.`
 		);
 	}
 	process.exit(0);
@@ -282,6 +294,24 @@ Bun.cron("*/30 * * * *", async () => {
 // tout ce qui a été manqué (messages, éditions, réactions).
 Bun.cron("*/5 * * * *", async () => {
 	await executeTask("discord:messages", runDiscordMessagesSync);
+});
+
+// 2d. Extraction des sondages EasyPoll : toutes les heures, à la minute 10.
+// L'import relit les encarts déjà archivés — il ne rattrape donc jamais plus que
+// ce que la veille (2c) a écrit, d'où le décalage volontaire de 5 minutes.
+// EasyPoll RÉÉCRIT son encart quand un sondage se clôt : sans repasse régulière,
+// la page publique resterait bloquée sur « résultats masqués » indéfiniment.
+Bun.cron("10 * * * *", async () => {
+	await executeTask("discord:polls", () => runDiscordPollsImport());
+});
+
+// 2e. Récolte des campagnes à hashtag sur X : toutes les heures, à la minute 20.
+// Cadence choisie sur une contrainte mesurée, pas par confort : l'API renvoie des
+// 429 dès 6 à 8 pages consécutives, et la récolte doit rester le SEUL scan X en
+// cours. La minute 20 évite les créneaux chargés (:00, :15, :30) et le crawl
+// officiel de 5h00. La reprise est incrémentale (curseur persisté par campagne).
+Bun.cron("20 * * * *", async () => {
+	await executeTask("x:campagnes", () => crawlHashtagCampaigns());
 });
 
 // 3. Synchronisation Inagle DB & SQLite Backup : tous les jours à 2h00 UTC
@@ -468,6 +498,8 @@ const server = Bun.serve({
 					"discord:scan",
 					"discord:messages",
 					"discord:backfill",
+					"discord:polls",
+					"x:campagnes",
 					"seo:indexnow",
 					"seo:llms-txt",
 					"stats:achillea",
@@ -488,6 +520,8 @@ const server = Bun.serve({
 					"discord:scan": "manuel",
 					"discord:messages": "*/5 * * * *",
 					"discord:backfill": "manuel",
+					"discord:polls": "10 * * * *",
+					"x:campagnes": "20 * * * *",
 				},
 			});
 		}
@@ -517,6 +551,10 @@ const server = Bun.serve({
 				"discord-messages": runDiscordMessagesSync,
 				"discord:backfill": runDiscordMessagesBackfill,
 				"discord-backfill": runDiscordMessagesBackfill,
+				"discord:polls": () => runDiscordPollsImport(),
+				"discord-polls": () => runDiscordPollsImport(),
+				"x:campagnes": () => crawlHashtagCampaigns(),
+				"x-campagnes": () => crawlHashtagCampaigns(),
 				"seo:indexnow": runSeoIndexNow,
 				"seo-indexnow": runSeoIndexNow,
 				"seo:llms-txt": runSeoLlmsTxt,
