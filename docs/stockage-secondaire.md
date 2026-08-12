@@ -79,11 +79,22 @@ Et surtout, le trafic : sur les sept jours de journaux nginx conservés,
 ### Trou préexistant à corriger
 
 Ces 394 requêtes en échec ne sont pas causées par le déport : elles échouaient
-déjà. Ce sont des **sous-textures** d'atlas G4TX (`whs00810_whs00810.png`,
-`u11727100_l_u11727100_1.png`, `icon_item07_uni_u031801.png`) que demandent la
-galerie et le navigateur CPK d'azalée, et que ni le dump ni le décodeur ne
-produisent — `nie-model-serve` décode un G4TX entier, pas une sous-texture nommée.
-C'est le seul manque réel sur cette surface.
+déjà. Azalée demande des **sous-textures** d'atlas G4TX sous la forme
+`<atlas>_<texture>.png` — `whs00810_whs00810.png`, `u11727100_l_u11727100_1.png`,
+`icon_item07_uni_u031801.png` — que `nie-model-serve` ne sait pas produire : il
+décode un G4TX entier, pas une texture nommée à l'intérieur.
+
+La démonstration est nette sur un même fichier :
+
+```
+/dx11/menu/220_img/telop_waza/fr/whs00810.png            200  175 331 octets
+/dx11/menu/220_img/telop_waza/fr/whs00810_whs00810.png   404
+```
+
+L'atlas existe bien (`data/dx11/menu/220_img/telop_waza/<langue>/whs00810.g4tx`
+est dans l'index CPK) et se décode ; seule la forme composée échoue. Le correctif
+appartient au décodeur (`/tex` de `nie-model-serve`) : reconnaître le suffixe et
+extraire la sous-texture. Non traité ici.
 
 nginx était déjà prêt pour ça : `location ^~ /dx11/` fait
 `try_files $uri @cpk_live`, et `@cpk_live` proxifie vers le décodeur. Le dump
