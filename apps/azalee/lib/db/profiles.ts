@@ -35,7 +35,7 @@ export interface ProfileRow {
 	badges: string[] | null;
 }
 
-/** Les mêmes colonnes que `PUBLIC_PROFILE_COLUMNS` de `@rose-griffon/db`. */
+/** Les mêmes colonnes que `PUBLIC_PROFILE_COLUMNS` de `@rosegriffon/db`. */
 const COLONNES_PUBLIQUES =
 	"id, updated_at, username, avatar_url, role, website, discord_id, bio, banner_url, twitter_handle, badges";
 

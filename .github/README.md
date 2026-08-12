@@ -58,5 +58,5 @@ font donc localement, avant de pousser :
 ```sh
 bun run build          # construit tout le monorepo
 bun test               # suite Bun native
-bun --filter @rose-griffon/<app> type-check
+bun --filter @rosegriffon/<app> type-check
 ```

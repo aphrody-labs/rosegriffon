@@ -2,7 +2,7 @@
 
 import type { SerializedEditorState } from "lexical";
 import Image from "next/image";
-import { Button } from "@rose-griffon/ui";
+import { Button } from "@rosegriffon/ui";
 import { X } from "@/lib/icons-config";
 import { CATEGORIES } from "./constants";
 import { LexicalRenderer } from "./LexicalRenderer";

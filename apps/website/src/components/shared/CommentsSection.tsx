@@ -10,7 +10,7 @@ import {
 	CardContent,
 	Textarea,
 	Badge,
-} from "@rose-griffon/ui";
+} from "@rosegriffon/ui";
 import { MessageSquare, Trash2, Send, ShieldAlert, Award } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { subscribeTable } from "@/lib/realtime";

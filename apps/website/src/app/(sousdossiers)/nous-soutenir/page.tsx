@@ -1,4 +1,4 @@
-import { Button, Card, CardContent, CardHeader, CardTitle } from "@rose-griffon/ui";
+import { Button, Card, CardContent, CardHeader, CardTitle } from "@rosegriffon/ui";
 import type { Metadata } from "next";
 import Link from "next/link";
 

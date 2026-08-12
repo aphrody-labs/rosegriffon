@@ -13,15 +13,15 @@ import {
 	AvatarFallback,
 	AvatarImage,
 	Skeleton,
-} from "@rose-griffon/ui";
+} from "@rosegriffon/ui";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { authClient } from "@/lib/auth-client";
 import { LogOut, Settings, ShieldCheck, UserCircle } from "@/lib/icons-config";
-import { ADMIN_ROLES } from "@rose-griffon/types";
-import type { PublicProfile } from "@rose-griffon/db";
+import { ADMIN_ROLES } from "@rosegriffon/types";
+import type { PublicProfile } from "@rosegriffon/db";
 
 type Profile = PublicProfile;
 
@@ -42,8 +42,8 @@ export function UserAccountPopup({ user, profile, loading = false }: UserAccount
 	// `ADMIN_ROLES` fait autorité : coder « admin » en dur excluait superadmin,
 	// editor et moderator, qui ont pourtant accès à l'administration.
 	//
-	// La constante vient de `@rose-griffon/types` et non du helper `isAdmin` de
-	// `@rose-griffon/auth` : ce paquet-là tire `@rose-griffon/db/service`, donc le
+	// La constante vient de `@rosegriffon/types` et non du helper `isAdmin` de
+	// `@rosegriffon/auth` : ce paquet-là tire `@rosegriffon/db/service`, donc le
 	// client Supabase en rôle service. L'importer depuis un composant client
 	// l'embarquerait dans le bundle du navigateur.
 	const estAdmin = (ADMIN_ROLES as readonly string[]).includes(profile?.role ?? "");

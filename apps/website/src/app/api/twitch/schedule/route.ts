@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 import { getCalendarEvents } from "@/lib/api/events";
 import { getPgPool } from "@/lib/db/pg";
 import type { CalendarEvent } from "@/types/api";
-import type { StreamSchedule } from "@rose-griffon/types";
+import type { StreamSchedule } from "@rosegriffon/types";
 
 // Types pour notre réponse unifiée
 interface ScheduleSegment {

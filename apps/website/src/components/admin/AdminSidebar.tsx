@@ -12,8 +12,8 @@ import {
 	Shield,
 	Users,
 } from "lucide-react";
-import type { NavItem } from "@rose-griffon/ui";
-import { AdminSidebar as SharedAdminSidebar } from "@rose-griffon/ui";
+import type { NavItem } from "@rosegriffon/ui";
+import { AdminSidebar as SharedAdminSidebar } from "@rosegriffon/ui";
 import Link from "next/link";
 
 const adminNavItems: NavItem[] = [

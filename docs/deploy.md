@@ -109,7 +109,7 @@ curl -s -o /dev/null -w '%{http_code}\n' https://azalee.rosegriffon.fr/
 | `502` sur un domaine | le service derrière nginx est arrêté ou en boucle |
 | `500` avec du HTML | erreur applicative — lire le journal du service |
 | wiki en `504` | plafond mémoire de l'unité atteint |
-| `rg-cron` en boucle | `packages/inagle/dist` supprimé → `bun run build --filter=@rose-griffon/inagle` puis redémarrer |
+| `rg-cron` en boucle | `packages/inagle/dist` supprimé → `bun run build --filter=@rosegriffon/inagle` puis redémarrer |
 | asset du jeu en 404 sur le CDN | le dump est incomplet : le décodage doit passer par le service live, ne jamais rétablir un `=404` dans nginx |
 | unité `failed` mais travail réussi | sonde de santé trop précoce après redémarrage — lire le journal jusqu'au bout |
 

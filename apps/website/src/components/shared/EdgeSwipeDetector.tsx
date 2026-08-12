@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from "react";
 
-import { useSidebar } from "@rose-griffon/ui";
+import { useSidebar } from "@rosegriffon/ui";
 
 /**
  * Détecte les swipes depuis le bord gauche de l'écran pour ouvrir la sidebar sur mobile

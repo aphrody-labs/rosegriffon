@@ -10,8 +10,8 @@ import {
 	TabsContent,
 	TabsList,
 	TabsTrigger,
-} from "@rose-griffon/ui";
-import { formatBytes } from "@rose-griffon/db/platform";
+} from "@rosegriffon/ui";
+import { formatBytes } from "@rosegriffon/db/platform";
 import { BarChart3, CheckCircle2, ExternalLink, Gauge, Users, XCircle } from "lucide-react";
 import Link from "next/link";
 

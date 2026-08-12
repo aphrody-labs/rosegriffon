@@ -10,7 +10,7 @@ import {
 	Input,
 	Textarea,
 	Label,
-} from "@rose-griffon/ui";
+} from "@rosegriffon/ui";
 import { useRouter } from "next/navigation";
 import { useActionState, useState } from "react";
 import { toast } from "sonner";
@@ -19,7 +19,7 @@ import { createEvent, deleteEvent, updateEvent } from "@/app/admin/events/action
 import { ConfirmationDialog } from "@/components/admin/confirmation-dialog";
 
 import { Loader2, Trash2 } from "@/lib/icons-config";
-import type { Tables } from "@rose-griffon/db";
+import type { Tables } from "@rosegriffon/db";
 
 interface EventFormProps {
 	event?: Tables<"events">;

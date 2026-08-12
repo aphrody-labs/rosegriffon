@@ -12,7 +12,7 @@ import {
 	DropdownMenuLabel,
 	DropdownMenuSeparator,
 	DropdownMenuTrigger,
-} from "@rose-griffon/ui";
+} from "@rosegriffon/ui";
 import { Check, Edit, EyeOff, MoreHorizontal, Trash2, Users as UsersIcon } from "lucide-react";
 import Image from "next/image";
 

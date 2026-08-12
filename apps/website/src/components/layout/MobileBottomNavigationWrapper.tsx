@@ -1,6 +1,6 @@
 "use client";
 
-import { useIsMobile } from "@rose-griffon/ui";
+import { useIsMobile } from "@rosegriffon/ui";
 
 import { MobileBottomNavigation } from "./MobileBottomNavigation";
 

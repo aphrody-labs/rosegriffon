@@ -1,4 +1,4 @@
-# @rose-griffon/bot
+# @rosegriffon/bot
 
 Bot Discord Rose Griffon — slash commands publiques (event, planning, chronique, profil, staff, member, azalee) + admin (stats, user, article, event, stream, settings, team) + sync membres → DB Supabase + génération cartes canvas.
 
@@ -56,7 +56,7 @@ src/
 │   ├── syncMembers.ts    upsert discord_members + sync user.image via account bridge
 │   └── teamPhotos.ts     sync avatars staff (team_members) — 3 tables propagées
 ├── lib/
-│   ├── db.ts             expose `supabase` (@rose-griffon/db service) + `sql` (Bun.SQL legacy)
+│   ├── db.ts             expose `supabase` (@rosegriffon/db service) + `sql` (Bun.SQL legacy)
 │   ├── api.ts            client HTTP /api/bot/v1/* du site Next (alternative à db direct)
 │   ├── cache.ts          Redis (Bun.RedisClient) + fallback in-memory
 │   ├── rbac.ts           requireRgAdmin/Strict — résout discord_id → profile.role
@@ -73,14 +73,14 @@ src/
 
 ## Liens monorepo
 
-- [`@rose-griffon/db`](../../packages/db) — client Supabase partagé (browser/server/service + Database types générés)
-- [`@rose-griffon/config`](../../packages/config) — tsconfig (`tsconfig-bun.json`), oxlintrc, eslint base
+- [`@rosegriffon/db`](../../packages/db) — client Supabase partagé (browser/server/service + Database types générés)
+- [`@rosegriffon/config`](../../packages/config) — tsconfig (`tsconfig-bun.json`), oxlintrc, eslint base
 
 ## Couche DB — Bun.SQL + Supabase client
 
 Le bot utilise **deux** chemins d'accès DB selon le contexte de la query :
 
-- **`supabase`** (de `@rose-griffon/db/service`) : client Supabase service-role typé. Préférer pour les queries simples (`from().select()`, `.insert()`, `.rpc()`) — bénéficie du type-checking sur les colonnes via `Database`.
+- **`supabase`** (de `@rosegriffon/db/service`) : client Supabase service-role typé. Préférer pour les queries simples (`from().select()`, `.insert()`, `.rpc()`) — bénéficie du type-checking sur les colonnes via `Database`.
 - **`sql`** (de `bun`) : connexion Postgres directe via `DATABASE_URL` (pooler Supabase). Préférer pour les queries SQL complexes (CTE, fenêtres, jointures multi-niveaux) où le query builder Supabase serait verbeux ou impossible.
 
 Les deux clients pointent sur la **même DB Supabase**. Voir `src/lib/db.ts`.

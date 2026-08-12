@@ -9,7 +9,7 @@ import type {
 	PlanningRow,
 	Article,
 	DiscordMember,
-} from "@rose-griffon/types";
+} from "@rosegriffon/types";
 
 const TEAM_CACHE_TTL_MS = 5 * 60_000;
 

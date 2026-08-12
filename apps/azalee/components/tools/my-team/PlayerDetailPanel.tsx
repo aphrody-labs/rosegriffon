@@ -11,11 +11,11 @@ import { MovesetList } from "@/components/wiki/MovesetList";
 import type { MovesetSkill } from "@/components/wiki/MovesetList";
 import { MiniStatHeptagon } from "@/components/wiki/StatHeptagon";
 import type { SpriteCommonKey } from "@/config/sprites-common";
-import { ROLE_COLORS, ROLE_LABELS } from "@rose-griffon/azalee/game/formations";
-import type { Formation } from "@rose-griffon/azalee/game/formations";
-import type { TeamMember } from "@rose-griffon/azalee/game/team-types";
-import { getCharacterImageUrl } from "@rose-griffon/azalee/images";
-import { getPositionMatchFactor, recalculateMemberStats } from "@rose-griffon/azalee/game/team-rules";
+import { ROLE_COLORS, ROLE_LABELS } from "@rosegriffon/azalee/game/formations";
+import type { Formation } from "@rosegriffon/azalee/game/formations";
+import type { TeamMember } from "@rosegriffon/azalee/game/team-types";
+import { getCharacterImageUrl } from "@rosegriffon/azalee/images";
+import { getPositionMatchFactor, recalculateMemberStats } from "@rosegriffon/azalee/game/team-rules";
 
 const ELEMENT_SPRITE: Record<string, SpriteCommonKey> = {
 	Fire: "fire",

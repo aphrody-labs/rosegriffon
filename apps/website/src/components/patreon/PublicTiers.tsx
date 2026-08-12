@@ -1,4 +1,4 @@
-import { Button } from "@rose-griffon/ui";
+import { Button } from "@rosegriffon/ui";
 
 import { Check, ExternalLink } from "@/lib/icons-config";
 import { cn } from "@/lib/utils";

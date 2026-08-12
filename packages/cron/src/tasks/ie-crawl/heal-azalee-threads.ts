@@ -1,6 +1,6 @@
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { XClient, XSession } from "@aphrody-code/x";
-import { createSupabaseServiceClient } from "@rose-griffon/db/service";
+import { createSupabaseServiceClient } from "@rosegriffon/db/service";
 import { syncThread } from "./sync-specific-thread";
 
 // Répare en masse les threads Azalee tronqués (timeline collapse / thread()

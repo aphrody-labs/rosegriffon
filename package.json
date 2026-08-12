@@ -1,5 +1,5 @@
 {
-	"name": "@rose-griffon/monorepo",
+	"name": "@rosegriffon/monorepo",
 	"version": "0.1.0",
 	"private": true,
 	"description": "Rose Griffon monorepo \u2014 site communautaire (azalee wiki IEVR + website rosegriffon + bot Discord). Stack Next 16.2 / React 19.2 / Bun 1.3 / Supabase / Turborepo.",
@@ -202,8 +202,8 @@
 		"clean": "turbo run clean && rm -rf node_modules .turbo",
 		"format": "oxfmt .",
 		"format:check": "oxfmt --check .",
-		"azalee:dev": "bun --filter @rose-griffon/azalee-web dev",
-		"website:dev": "bun --filter @rose-griffon/website dev",
+		"azalee:dev": "bun --filter @rosegriffon/azalee-web dev",
+		"website:dev": "bun --filter @rosegriffon/website dev",
 		"rag:poc": "bun packages/cron/src/tasks/ie-crawl/rag-poc.ts",
 		"rag:ingest": "bun scripts/rag-ingest.ts",
 		"images:compress": "bun scripts/ops/compress-images.ts",

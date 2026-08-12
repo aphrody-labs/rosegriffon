@@ -2,8 +2,8 @@ import { createClient as createSupabaseClient, type SupabaseClient } from "@supa
 import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
 import { mintSupabaseJwt } from "@/lib/supabase/jwt";
-import type { Database } from "@rose-griffon/db";
-import { createSqliteClient } from "@rose-griffon/azalee/db";
+import type { Database } from "@rosegriffon/db";
+import { createSqliteClient } from "@rosegriffon/azalee/db";
 
 const PLACEHOLDER_URL = (typeof window === "undefined" ? "http://127.0.0.1:8811" : window.location.origin);
 const PLACEHOLDER_ANON_JWT =

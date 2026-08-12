@@ -1,4 +1,4 @@
-import type { BaseCharacter, Item, Skill, Team } from "@rose-griffon/inagle";
+import type { BaseCharacter, Item, Skill, Team } from "@rosegriffon/inagle";
 
 export interface VerificationResult {
 	isValid: boolean;

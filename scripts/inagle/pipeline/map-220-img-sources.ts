@@ -12,7 +12,7 @@
  */
 
 import { join, relative } from "node:path";
-import { DATA_ROOT } from "@rose-griffon/inagle/core/paths.ts";
+import { DATA_ROOT } from "@rosegriffon/inagle/core/paths.ts";
 
 // ---------------------------------------------------------------------------
 // Types

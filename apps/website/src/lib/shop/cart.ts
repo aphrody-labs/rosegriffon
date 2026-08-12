@@ -18,7 +18,7 @@ import { revalidatePath } from "next/cache";
 import { getProduct, getVariantPrice } from "./products";
 import type { Product } from "./products";
 import { getServerUser } from "@/lib/auth-helpers";
-import { cache as redisCache } from "@rose-griffon/db/redis";
+import { cache as redisCache } from "@rosegriffon/db/redis";
 
 const COOKIE_NAME = "rg_cart";
 const COOKIE_MAX_AGE = 60 * 60 * 24 * 30; // 30 jours

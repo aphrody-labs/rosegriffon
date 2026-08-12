@@ -1,8 +1,8 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { DATA_ROOT } from "@rose-griffon/inagle/core/paths.ts";
-import { preloadCharacterEnrichment } from "@rose-griffon/inagle/entities/character.ts";
+import { DATA_ROOT } from "@rosegriffon/inagle/core/paths.ts";
+import { preloadCharacterEnrichment } from "@rosegriffon/inagle/entities/character.ts";
 import {
 	buildCapsuleDatabase,
 	buildChangeAuraSkillDatabase,
@@ -23,9 +23,9 @@ import {
 	buildSceneArchiveDatabase,
 	buildStadiumDatabase,
 	buildCharaMenuResourceDatabase,
-} from "@rose-griffon/inagle/parsers/index.js";
-import { buildOverrideSkillDatabase } from "@rose-griffon/inagle/parsers/override-skill-config.ts";
-import { createInagleService } from "@rose-griffon/inagle/service.ts";
+} from "@rosegriffon/inagle/parsers/index.js";
+import { buildOverrideSkillDatabase } from "@rosegriffon/inagle/parsers/override-skill-config.ts";
+import { createInagleService } from "@rosegriffon/inagle/service.ts";
 
 const __dirname = import.meta.dir;
 const ENTRIES_DIR = path.resolve(__dirname, "../../../packages/inagle/src/entries");

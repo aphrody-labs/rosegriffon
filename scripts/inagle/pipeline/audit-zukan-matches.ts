@@ -16,7 +16,7 @@ import {
 	auditNormPos as normPos,
 	auditSpearmanCorrelation as spearmanCorrelation,
 	auditZukanGameToSeries as zukanGameToSeries,
-} from "@rose-griffon/inagle/zukan/audit.ts";
+} from "@rosegriffon/inagle/zukan/audit.ts";
 import dotenv from "dotenv";
 import { Client } from "pg";
 

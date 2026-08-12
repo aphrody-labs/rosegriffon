@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { getPgPool } from "@/lib/db/pg";
-import type { StreamSchedule } from "@rose-griffon/types";
+import type { StreamSchedule } from "@rosegriffon/types";
 
 // Planning hebdo — change rarement, 1h ISR suffit.
 export const revalidate = 3600;

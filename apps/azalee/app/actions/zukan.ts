@@ -1,6 +1,6 @@
 "use server";
 
-import type { Character } from "@rose-griffon/inagle";
+import type { Character } from "@rosegriffon/inagle";
 import { apiClient } from "@/lib/api-client";
 
 type CharacterWithSpirit = Character & { spirit?: { type?: string } };

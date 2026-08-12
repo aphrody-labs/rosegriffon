@@ -14,7 +14,7 @@ import {
 	auditNormPos as normPos,
 	auditSpearmanCorrelation as spearmanCorrelation,
 	auditZukanGameToSeries as zukanGameToSeries,
-} from "@rose-griffon/inagle/zukan/audit.ts";
+} from "@rosegriffon/inagle/zukan/audit.ts";
 
 const PARAM_EN = "/home/ubuntu/niers/data/zukan/param_en.json";
 const PARAM_JA = "/home/ubuntu/niers/data/zukan/param_ja.json";

@@ -13,7 +13,7 @@ import {
 	TabsTrigger,
 	Textarea,
 	Separator,
-} from "@rose-griffon/ui";
+} from "@rosegriffon/ui";
 import { Sparkles } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";

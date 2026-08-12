@@ -5,8 +5,8 @@
  */
 
 import { Browser, Page } from "@aphrody-code/bxc";
-import { createSupabaseServiceClient } from "@rose-griffon/db/service";
-import type { Json } from "@rose-griffon/db";
+import { createSupabaseServiceClient } from "@rosegriffon/db/service";
+import type { Json } from "@rosegriffon/db";
 import { loadBxcXCookies, loadBxcXCookieHeader } from "./x-accounts";
 import { processTweets } from "./process-tweets";
 import * as cheerio from "cheerio";

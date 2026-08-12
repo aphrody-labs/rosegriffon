@@ -1,6 +1,6 @@
 {
-	"name": "@rose-griffon/auth",
-	"version": "0.1.0",
+	"name": "@rosegriffon/auth",
+	"version": "0.1.1",
 	"description": "Shared authentication logic and guards for Rose Griffon apps",
 	"type": "module",
 	"exports": {
@@ -8,16 +8,16 @@
 		"./server": "./src/server.ts"
 	},
 	"publishConfig": {
-		"access": "restricted",
-		"registry": "https://npm.pkg.github.com"
+		"access": "public",
+		"registry": "https://registry.npmjs.org"
 	},
 	"scripts": {
 		"type-check": "tsc --noEmit",
 		"test": "vitest run"
 	},
 	"dependencies": {
-		"@rose-griffon/db": "workspace:*",
-		"@rose-griffon/types": "workspace:*",
+		"@rosegriffon/db": "workspace:*",
+		"@rosegriffon/types": "workspace:*",
 		"@supabase/supabase-js": "catalog:",
 		"better-auth": "catalog:",
 		"zod": "catalog:"

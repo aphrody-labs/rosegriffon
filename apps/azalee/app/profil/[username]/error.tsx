@@ -3,7 +3,7 @@
 import { AlertCircle, Home, RefreshCw } from "lucide-react";
 import Link from "next/link";
 import { useEffect } from "react";
-import { Button } from "@rose-griffon/ui";
+import { Button } from "@rosegriffon/ui";
 
 export default function Error({
 	error,

@@ -5,7 +5,7 @@ import type { PatreonTokenResponse } from "@/lib/patreon/types";
  * Helper unifié de rafraîchissement de tokens OAuth (grant_type=refresh_token).
  *
  * Constat (audit du 2026-06) : le POST réel vers le token endpoint Patreon
- * vit déjà à UN seul endroit — `@rose-griffon/patreon-bun` (`oauth.refreshToken`),
+ * vit déjà à UN seul endroit — `@rosegriffon/patreon-bun` (`oauth.refreshToken`),
  * exposé via `@/lib/patreon/client::refreshAccessToken`. Aucun fetch dupliqué.
  *
  * Ce qui ÉTAIT dupliqué dans 3 fichiers (`sync.ts`, `live.ts`, `export.ts`) :

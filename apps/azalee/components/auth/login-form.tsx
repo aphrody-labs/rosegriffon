@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
-import { Button, Input } from "@rose-griffon/ui";
+import { Button, Input } from "@rosegriffon/ui";
 import { authClient } from "@/lib/auth-client";
 
 type AuthMode = "login" | "signup" | "forgot-password";

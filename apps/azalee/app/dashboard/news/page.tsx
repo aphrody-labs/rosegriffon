@@ -8,7 +8,7 @@ import {
 	EmptyHeader,
 	EmptyMedia,
 	EmptyTitle,
-} from "@rose-griffon/ui";
+} from "@rosegriffon/ui";
 import { NewsListClient } from "@/components/dashboard/news/NewsListClient";
 import { Icon } from "@/components/ui/Icon";
 import { WikiPagination } from "@/components/wiki/WikiPagination";

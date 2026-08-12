@@ -8,7 +8,7 @@
 import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
 import { Icon } from "@/components/ui/Icon";
-import { cpkRawUrl } from "@rose-griffon/azalee/cpk/shared";
+import { cpkRawUrl } from "@rosegriffon/azalee/cpk/shared";
 import { modelToGlb } from "@/lib/cpk-wasm";
 
 const CharacterModelViewer = dynamic(() => import("@/components/wiki/CharacterModelViewer"), {

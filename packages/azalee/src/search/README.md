@@ -17,7 +17,7 @@ Les noms existent en français, anglais et japonais : une requête doit trouver
 ## Utilisation
 
 ```ts
-import { smartSearch } from "@rose-griffon/azalee/search";
+import { smartSearch } from "@rosegriffon/azalee/search";
 
 const resultats = await smartSearch("tornade", { limit: 10, minScore: 0.5 });
 ```

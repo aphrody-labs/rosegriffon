@@ -9,7 +9,7 @@
 // granularité sémantique propre (fonction, entité, déclaration, ligne).
 
 import { chunkText } from "./rag-utils";
-import { formatTweetForRag } from "@rose-griffon/db/rag";
+import { formatTweetForRag } from "@rosegriffon/db/rag";
 
 export type SourceKind =
 	| "lua"

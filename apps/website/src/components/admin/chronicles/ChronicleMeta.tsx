@@ -8,7 +8,7 @@ import {
 	SelectValue,
 	Textarea,
 	Label,
-} from "@rose-griffon/ui";
+} from "@rosegriffon/ui";
 import { Crop, ImageIcon, Loader2, Trash2, Upload } from "lucide-react";
 import Image from "next/image";
 import { useRef, useState } from "react";

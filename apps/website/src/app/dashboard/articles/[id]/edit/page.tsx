@@ -1,6 +1,6 @@
 export const dynamic = "force-dynamic";
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@rose-griffon/ui";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@rosegriffon/ui";
 import { ArrowLeft, PenSquare } from "lucide-react";
 import Link from "next/link";
 import { redirect } from "next/navigation";

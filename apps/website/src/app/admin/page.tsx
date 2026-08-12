@@ -18,7 +18,7 @@ import {
 	DashboardGrid,
 	RecentListCard,
 	DashboardStatsCard as StatsCard,
-} from "@rose-griffon/ui";
+} from "@rosegriffon/ui";
 import { createAdminClient } from "@/lib/supabase/server";
 
 import { describeMimeType, listRecentDriveFiles } from "@/lib/google/drive";

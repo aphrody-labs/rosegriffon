@@ -1,6 +1,6 @@
 {
-	"name": "@rose-griffon/patreon-bun",
-	"version": "0.20.1",
+	"name": "@rosegriffon/patreon-bun",
+	"version": "0.20.2",
 	"description": "Bun-only TypeScript library for the V2 Patreon API. Fork of patreon-api.ts (ghostrider-05) for Rose Griffon.",
 	"keywords": [
 		"bun",
@@ -42,8 +42,8 @@
 		}
 	},
 	"publishConfig": {
-		"access": "restricted",
-		"registry": "https://npm.pkg.github.com"
+		"access": "public",
+		"registry": "https://registry.npmjs.org"
 	},
 	"scripts": {
 		"build:js": "bun build src/index.ts --outdir dist --target bun --format esm",

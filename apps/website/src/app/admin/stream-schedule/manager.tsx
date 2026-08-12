@@ -12,7 +12,7 @@ import {
 	SelectTrigger,
 	SelectValue,
 	Label,
-} from "@rose-griffon/ui";
+} from "@rosegriffon/ui";
 import { Calendar, Edit2, Plus, RefreshCw, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -20,8 +20,8 @@ import { toast } from "sonner";
 
 import { AdminCard } from "@/components/admin/shared/AdminCard";
 
-import type { StreamSchedule } from "@rose-griffon/types";
-import type { Database, Insert, Tables, Update } from "@rose-griffon/db";
+import type { StreamSchedule } from "@rosegriffon/types";
+import type { Database, Insert, Tables, Update } from "@rosegriffon/db";
 
 import { addSchedule, deleteSchedule, syncWithGoogleCalendar, updateSchedule } from "./actions";
 

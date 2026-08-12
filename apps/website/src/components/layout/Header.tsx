@@ -1,6 +1,6 @@
 "use client";
 
-import { Button, Separator, useSidebar } from "@rose-griffon/ui";
+import { Button, Separator, useSidebar } from "@rosegriffon/ui";
 import { PanelLeftClose, PanelLeftOpen } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";

@@ -154,7 +154,7 @@ export async function deleteUserData(userId: string): Promise<{
 
 	// Supprimer l'utilisateur auth.users en dernier via l'API admin
 	try {
-		const { createSupabaseServiceClient } = await import("@rose-griffon/db/service");
+		const { createSupabaseServiceClient } = await import("@rosegriffon/db/service");
 		const adminClient = createSupabaseServiceClient();
 		const { error: authError } = await adminClient.auth.admin.deleteUser(userId);
 

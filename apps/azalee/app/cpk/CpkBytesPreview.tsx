@@ -13,7 +13,7 @@
  */
 import { useEffect, useMemo, useState } from "react";
 import { CpkJsonTree } from "@/app/cpk/CpkJsonTree";
-import { cpkPreviewKind } from "@rose-griffon/azalee/cpk/shared";
+import { cpkPreviewKind } from "@rosegriffon/azalee/cpk/shared";
 import { audioToWav, cfgbinTyped, g4pkParse, g4txToPng, type G4pkParsed } from "@/lib/cpk-wasm";
 
 function hexDump(bytes: Uint8Array, max = 16 * 64): string {

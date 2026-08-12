@@ -5,7 +5,7 @@ import {
 	DashboardStatsCard as DashboardMetricCard,
 	AdminPageHeader as DashboardPageHeader,
 	Badge,
-} from "@rose-griffon/ui";
+} from "@rosegriffon/ui";
 import { Icon } from "@/components/ui/Icon";
 import { createClient } from "@/lib/supabase/server";
 

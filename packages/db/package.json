@@ -1,6 +1,6 @@
 {
-	"name": "@rose-griffon/db",
-	"version": "0.2.0",
+	"name": "@rosegriffon/db",
+	"version": "0.2.1",
 	"description": "Client Supabase partag\u00e9 + Database types g\u00e9n\u00e9r\u00e9s (site + bot)",
 	"type": "module",
 	"exports": {
@@ -17,8 +17,8 @@
 		"./platform": "./src/platform.ts"
 	},
 	"publishConfig": {
-		"access": "restricted",
-		"registry": "https://npm.pkg.github.com"
+		"access": "public",
+		"registry": "https://registry.npmjs.org"
 	},
 	"scripts": {
 		"types:gen": "supabase gen types typescript --project-id isbkaeltubqittywibeh > src/types.gen.ts",
@@ -26,7 +26,7 @@
 		"test": "vitest run"
 	},
 	"dependencies": {
-		"@rose-griffon/types": "workspace:*",
+		"@rosegriffon/types": "workspace:*",
 		"@supabase/ssr": "catalog:",
 		"@supabase/supabase-js": "catalog:"
 	},

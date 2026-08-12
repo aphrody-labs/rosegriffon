@@ -1,4 +1,4 @@
-# @rose-griffon/azalee
+# @rosegriffon/azalee
 
 Bibliothèque Bun du wiki **Azalée** (Inazuma Eleven: Victory Road) : le cœur métier
 de l'encyclopédie, extrait de l'application Next et utilisable **sans aucun framework**.
@@ -7,7 +7,7 @@ Un seul socle de données alimente désormais trois cibles :
 
 | Cible | Ce qu'elle importe |
 |-------|--------------------|
-| Wiki web (`@rose-griffon/azalee-web`, Next 16) | la lib entière, derrière des façades `server-only` |
+| Wiki web (`@rosegriffon/azalee-web`, Next 16) | la lib entière, derrière des façades `server-only` |
 | CLI `azalee` (`src/cli.ts`) | la surface serveur, en Bun pur |
 | GUI Tauri (sidecar Bun + webview) | la racine client-safe côté webview, `azalee serve` côté sidecar |
 
@@ -23,7 +23,7 @@ Dans le monorepo, c'est une dépendance workspace :
 // apps/<app>/package.json
 {
   "dependencies": {
-    "@rose-griffon/azalee": "workspace:*"
+    "@rosegriffon/azalee": "workspace:*"
   }
 }
 ```
@@ -31,7 +31,7 @@ Dans le monorepo, c'est une dépendance workspace :
 Hors monorepo (registre GitHub Packages, cf. `publishConfig`) :
 
 ```bash
-bun add @rose-griffon/azalee
+bun add @rosegriffon/azalee
 ```
 
 Runtime requis : **Bun ≥ 1.3.14** (`engines`). Node ≥ 22 fonctionne pour la couche
@@ -43,7 +43,7 @@ C'est le contrat structurant du package.
 
 ### Racine — client-safe
 
-`@rose-griffon/azalee` ne contient **que** du code pur : types, règles de jeu,
+`@rosegriffon/azalee` ne contient **que** du code pur : types, règles de jeu,
 résolution d'URLs CDN, glossaire de traduction FR, recherche floue. Aucun
 `bun:sqlite`, aucun `node:fs`, aucun accès réseau au chargement. Elle se bundle
 donc dans une webview Tauri, un navigateur ou un worker.
@@ -54,7 +54,7 @@ import {
   translateEffect,
   getCharacterFaceUrl,
   getCharacterModelFullGlbUrl,
-} from "@rose-griffon/azalee";
+} from "@rosegriffon/azalee";
 
 FORMATIONS.length;                            // 91 (83 formations du jeu + 8 legacy)
 translateEffect("Shot AT +10%");              // "Tir ATT +10%"
@@ -72,11 +72,11 @@ le module qui la lit.
 
 ### `/server` — accès données réel
 
-`@rose-griffon/azalee/server` ouvre le miroir SQLite, matérialise les index CPK et
+`@rosegriffon/azalee/server` ouvre le miroir SQLite, matérialise les index CPK et
 texte, et expose l'API HTTP headless. Runtime Bun (ou Node ≥ 22).
 
 ```ts
-import { wikiService, resolveMirrorPath, resolveDataDir } from "@rose-griffon/azalee/server";
+import { wikiService, resolveMirrorPath, resolveDataDir } from "@rosegriffon/azalee/server";
 
 resolveMirrorPath(); // /home/ubuntu/rg/apps/azalee/data/backups/mirror.sqlite
 resolveDataDir();    // /home/ubuntu/rg/apps/azalee/data
@@ -90,9 +90,9 @@ data[0]?.names.fr;     // "Mark Evans"
 Les listes du wiki renvoient toutes la même enveloppe `{ data, total, page, limit }`.
 
 ```ts
-import { getTeamsList, getTeamDetail } from "@rose-griffon/azalee/wiki/teams";
-import { listDirPaged, searchFiles, totalFiles } from "@rose-griffon/azalee/cpk";
-import { searchText, categoryStats } from "@rose-griffon/azalee/game-text";
+import { getTeamsList, getTeamDetail } from "@rosegriffon/azalee/wiki/teams";
+import { listDirPaged, searchFiles, totalFiles } from "@rosegriffon/azalee/cpk";
+import { searchText, categoryStats } from "@rosegriffon/azalee/game-text";
 
 totalFiles();                          // 250800 fichiers indexés dans les CPK
 listDirPaged("data/dx11/menu", 50, 0); // pagination d'un dossier CPK
@@ -105,32 +105,32 @@ Table exacte du champ `exports` de `package.json`.
 
 | Sous-chemin | Cible | Nature |
 |-------------|-------|--------|
-| `@rose-griffon/azalee` | `src/index.ts` | **client-safe** — jeu, images, recherche, texte, types `*-shared` |
-| `@rose-griffon/azalee/images` | `src/images/index.ts` | client-safe — résolution d'URLs CDN (visages, modèles, icônes, vidéos) |
-| `@rose-griffon/azalee/search` | `src/search/index.ts` | client-safe — fuzzy match + recherche intelligente |
-| `@rose-griffon/azalee/search/*` | `src/search/*.ts` | client-safe — `utils`, `fuzzy-match`, `smart-search`, `search-ui-config` |
-| `@rose-griffon/azalee/text` | `src/text/index.ts` | client-safe — glossaire FR, descriptions, romaji, gaiji |
-| `@rose-griffon/azalee/text/*` | `src/text/*.ts` | client-safe — `translations`, `format-description`, `japanese-romaji`, `download-filename`, `aura-translations`, `gaiji` |
-| `@rose-griffon/azalee/game` | `src/game/index.ts` | client-safe — formations, genre, règles d'équipe, cut-ins, emblèmes |
-| `@rose-griffon/azalee/game/*` | `src/game/*.ts` | client-safe — `formations`, `team-rules`, `team-types`, `skills-cutin`, … |
-| `@rose-griffon/azalee/data/*` | `src/data/*` | client-safe — JSON figés (`passives-full.json`, manifestes…) |
-| `@rose-griffon/azalee/remote` | `src/remote/index.ts` | **client-safe** — client HTTP typé de l'API (41 routes), erreurs typées, sonde `/health` |
-| `@rose-griffon/azalee/remote/*` | `src/remote/*.ts` | client-safe — `client`, `transport`, `errors`, `types` |
-| `@rose-griffon/azalee/config` | `src/config.ts` | serveur — résolution des artefacts runtime |
-| `@rose-griffon/azalee/db` | `src/db/index.ts` | serveur — client SQLite + injection de fournisseur |
-| `@rose-griffon/azalee/db/*` | `src/db/*.ts` | serveur — `provider`, `sqlite-client` |
-| `@rose-griffon/azalee/wiki` | `src/wiki/index.ts` | serveur — toutes les sections du wiki |
-| `@rose-griffon/azalee/wiki/*` | `src/wiki/*.ts` | serveur (ou client pour les `*-shared`) — `service`, `teams`, `shops`, `quests`, `coaches`, `stadiums`, `drops`, `gacha`, `trophies`, `invocation`, `chara-stats`, `game-text` |
-| `@rose-griffon/azalee/cpk` | `src/cpk/index.ts` | serveur — index des 250 800 fichiers CPK |
-| `@rose-griffon/azalee/cpk/*` | `src/cpk/*.ts` | serveur / client (`shared`, `tree`) |
-| `@rose-griffon/azalee/game-text` | `src/game-text/index.ts` | serveur — index du texte de jeu |
-| `@rose-griffon/azalee/game-text/*` | `src/game-text/*.ts` | serveur / client (`shared`, `format`) |
-| `@rose-griffon/azalee/cross` | `src/cross/index.ts` | serveur — Inazuma Eleven Cross (Unity/Addressables) |
-| `@rose-griffon/azalee/cross/*` | `src/cross/*.ts` | serveur / client (`data-shared`, `assets-shared`) |
-| `@rose-griffon/azalee/rag` | `src/rag.ts` | serveur — recherche sémantique (embeddings self-host + Redis) |
-| `@rose-griffon/azalee/server` | `src/server/index.ts` | serveur — surface agrégée + API HTTP + résolution de source |
-| `@rose-griffon/azalee/server/*` | `src/server/*.ts` | serveur — `serve`, `source` |
-| `@rose-griffon/azalee/package.json` | `package.json` | métadonnées |
+| `@rosegriffon/azalee` | `src/index.ts` | **client-safe** — jeu, images, recherche, texte, types `*-shared` |
+| `@rosegriffon/azalee/images` | `src/images/index.ts` | client-safe — résolution d'URLs CDN (visages, modèles, icônes, vidéos) |
+| `@rosegriffon/azalee/search` | `src/search/index.ts` | client-safe — fuzzy match + recherche intelligente |
+| `@rosegriffon/azalee/search/*` | `src/search/*.ts` | client-safe — `utils`, `fuzzy-match`, `smart-search`, `search-ui-config` |
+| `@rosegriffon/azalee/text` | `src/text/index.ts` | client-safe — glossaire FR, descriptions, romaji, gaiji |
+| `@rosegriffon/azalee/text/*` | `src/text/*.ts` | client-safe — `translations`, `format-description`, `japanese-romaji`, `download-filename`, `aura-translations`, `gaiji` |
+| `@rosegriffon/azalee/game` | `src/game/index.ts` | client-safe — formations, genre, règles d'équipe, cut-ins, emblèmes |
+| `@rosegriffon/azalee/game/*` | `src/game/*.ts` | client-safe — `formations`, `team-rules`, `team-types`, `skills-cutin`, … |
+| `@rosegriffon/azalee/data/*` | `src/data/*` | client-safe — JSON figés (`passives-full.json`, manifestes…) |
+| `@rosegriffon/azalee/remote` | `src/remote/index.ts` | **client-safe** — client HTTP typé de l'API (41 routes), erreurs typées, sonde `/health` |
+| `@rosegriffon/azalee/remote/*` | `src/remote/*.ts` | client-safe — `client`, `transport`, `errors`, `types` |
+| `@rosegriffon/azalee/config` | `src/config.ts` | serveur — résolution des artefacts runtime |
+| `@rosegriffon/azalee/db` | `src/db/index.ts` | serveur — client SQLite + injection de fournisseur |
+| `@rosegriffon/azalee/db/*` | `src/db/*.ts` | serveur — `provider`, `sqlite-client` |
+| `@rosegriffon/azalee/wiki` | `src/wiki/index.ts` | serveur — toutes les sections du wiki |
+| `@rosegriffon/azalee/wiki/*` | `src/wiki/*.ts` | serveur (ou client pour les `*-shared`) — `service`, `teams`, `shops`, `quests`, `coaches`, `stadiums`, `drops`, `gacha`, `trophies`, `invocation`, `chara-stats`, `game-text` |
+| `@rosegriffon/azalee/cpk` | `src/cpk/index.ts` | serveur — index des 250 800 fichiers CPK |
+| `@rosegriffon/azalee/cpk/*` | `src/cpk/*.ts` | serveur / client (`shared`, `tree`) |
+| `@rosegriffon/azalee/game-text` | `src/game-text/index.ts` | serveur — index du texte de jeu |
+| `@rosegriffon/azalee/game-text/*` | `src/game-text/*.ts` | serveur / client (`shared`, `format`) |
+| `@rosegriffon/azalee/cross` | `src/cross/index.ts` | serveur — Inazuma Eleven Cross (Unity/Addressables) |
+| `@rosegriffon/azalee/cross/*` | `src/cross/*.ts` | serveur / client (`data-shared`, `assets-shared`) |
+| `@rosegriffon/azalee/rag` | `src/rag.ts` | serveur — recherche sémantique (embeddings self-host + Redis) |
+| `@rosegriffon/azalee/server` | `src/server/index.ts` | serveur — surface agrégée + API HTTP + résolution de source |
+| `@rosegriffon/azalee/server/*` | `src/server/*.ts` | serveur — `serve`, `source` |
+| `@rosegriffon/azalee/package.json` | `package.json` | métadonnées |
 
 Règle : un fichier `<x>.ts` qui touche `bun:sqlite`/`node:fs` a toujours son
 jumeau pur `<x>-shared.ts`. **Ce sont les `-shared` qu'un composant client importe.**
@@ -181,7 +181,7 @@ Note : `AZALEE_DATA_DIR` / `AZALEE_CACHE_DIR` couvrent la résolution de `config
 Priorité maximale, au démarrage de l'hôte ou du CLI :
 
 ```ts
-import { configureAzalee, getAzaleeConfig, resetAzaleeConfig } from "@rose-griffon/azalee/config";
+import { configureAzalee, getAzaleeConfig, resetAzaleeConfig } from "@rosegriffon/azalee/config";
 
 configureAzalee({
   dataDir: "/srv/azalee/data",
@@ -198,7 +198,7 @@ propre client — c'est ce que fait le wiki web, qui route les tables `inagle_*`
 vers le miroir et tout le reste (éditorial, social, `tweets`…) vers PostgREST.
 
 ```ts
-import { setDatabaseProvider, hasDatabaseProvider } from "@rose-griffon/azalee/db";
+import { setDatabaseProvider, hasDatabaseProvider } from "@rosegriffon/azalee/db";
 import { createClient } from "@/lib/supabase/server";
 
 setDatabaseProvider(createClient); // fabrique sync ou async
@@ -226,7 +226,7 @@ Options : `-p, --port` (défaut `3010`), `-H, --host` (défaut `127.0.0.1`),
 `--cors <origin>` (défaut `*`), `-j, --json`.
 
 ```ts
-import { createAzaleeServer, handleAzaleeRequest } from "@rose-griffon/azalee/server";
+import { createAzaleeServer, handleAzaleeRequest } from "@rosegriffon/azalee/server";
 
 const server = createAzaleeServer({ port: 3010, hostname: "127.0.0.1", cors: true });
 console.log(server.url.href);
@@ -318,7 +318,7 @@ let (_rx, _child) = sidecar.spawn()?;
 
 ```ts
 // webview : la logique pure vient du bundle, les données du sidecar
-import { getCharacterFaceUrl, translateEffect } from "@rose-griffon/azalee";
+import { getCharacterFaceUrl, translateEffect } from "@rosegriffon/azalee";
 
 const res = await fetch("http://127.0.0.1:3010/api/characters?q=Mark&limit=24");
 const { data } = await res.json();
@@ -337,7 +337,7 @@ Les mêmes 41 routes sont accessibles par un **client HTTP typé, client-safe**
 webview Tauri, ou le CLI d'une machine sans miroir SQLite ni dump du jeu.
 
 ```ts
-import { createAzaleeClient, isAzaleeNotFound } from "@rose-griffon/azalee/remote";
+import { createAzaleeClient, isAzaleeNotFound } from "@rosegriffon/azalee/remote";
 
 // Défaut : AZALEE_API_URL, sinon https://api.rosegriffon.fr/azalee
 const api = createAzaleeClient();
@@ -353,7 +353,7 @@ erreurs typées `AzaleeRemoteError` (`kind`, `status`, `url`, `detail`).
 Côté serveur, `createAzaleeData` choisit seul la source :
 
 ```ts
-import { createAzaleeData } from "@rose-griffon/azalee/server";
+import { createAzaleeData } from "@rosegriffon/azalee/server";
 
 const data = createAzaleeData();          // "auto"
 console.log(data.source, "|", data.reason);
@@ -376,7 +376,7 @@ Dans une webview, où `createAzaleeData` (serveur) n'est pas importable,
 `resolveAzaleeBaseUrl` joue le même rôle en HTTP pur :
 
 ```ts
-import { AZALEE_DEFAULT_API_URL, resolveAzaleeBaseUrl } from "@rose-griffon/azalee/remote";
+import { AZALEE_DEFAULT_API_URL, resolveAzaleeBaseUrl } from "@rosegriffon/azalee/remote";
 
 const picked = await resolveAzaleeBaseUrl(["http://127.0.0.1:3010", AZALEE_DEFAULT_API_URL], {
   requireLocalData: true, // écarte un sidecar dont /health renvoie mirror:null
@@ -388,7 +388,7 @@ const picked = await resolveAzaleeBaseUrl(["http://127.0.0.1:3010", AZALEE_DEFAU
 ```bash
 bun packages/azalee/src/cli.ts <commande>      # depuis la racine du dépôt
 bun run --cwd packages/azalee cli <commande>   # via le script du package
-bun --filter @rose-griffon/azalee cli          # via le filtre workspace
+bun --filter @rosegriffon/azalee cli          # via le filtre workspace
 ```
 
 Le champ `bin` déclare `azalee` → `src/cli.ts` ; `publishConfig` le bascule sur
@@ -470,11 +470,11 @@ systématiquement la configuration explicite et les variables d'environnement
 touchées — le miroir SQLite est un singleton de processus, une fuite de
 configuration casserait les fichiers de test suivants.
 
-Le build de publication substitue les types de `@rose-griffon/db` par les shims de
+Le build de publication substitue les types de `@rosegriffon/db` par les shims de
 `types/workspace-shims.d.ts` : ce package workspace exporte ses **sources TS** (pas
 de `dist`), et `tsc` refuse alors d'émettre des déclarations pour des fichiers hors
 `rootDir` (TS6059). Conséquence assumée : dans les `.d.ts` publiés, les types venant
-de `@rose-griffon/db` sont dégradés ; le comportement runtime est identique. Le
+de `@rosegriffon/db` sont dégradés ; le comportement runtime est identique. Le
 type-check de développement, lui, utilise les vrais types.
 
 Publication : registre `npm.pkg.github.com`, `prepublishOnly` déclenche le build,

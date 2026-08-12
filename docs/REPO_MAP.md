@@ -14,7 +14,7 @@ Ce document cartographie la structure complète du monorepo **Rose Griffon**. Il
 
 Applications autonomes prêtes à être déployées :
 
-### 📁 [@rose-griffon/azalee-web](file:///apps/azalee)
+### 📁 [@rosegriffon/azalee-web](file:///apps/azalee)
 * **Chemin :** `apps/azalee`
 * **Description :** Aucune description fournie.
 * **Version :** `0.1.0`
@@ -38,8 +38,8 @@ Applications autonomes prêtes à être déployées :
   - `bun run sync:full` : `bun scripts/ops/sync-supabase-to-sqlite.ts --full --deletes`
 
 * **Dépendances internes & externes :**
-  - **Dependencies :** `@better-auth/agent-auth`, `@dnd-kit/core`, `@dnd-kit/sortable`, `@dnd-kit/utilities`, `@envelop/graphql-jit`, `@graphql-yoga/plugin-response-cache`, `@lexical/code`, `@lexical/file`, `@lexical/html`, `@lexical/link`, `@lexical/list`, `@lexical/markdown`, `@lexical/react`, `@lexical/rich-text`, `@lexical/table`, `@lexical/utils`, `@markdoc/markdoc`, `@radix-ui/react-accordion`, `@radix-ui/react-alert-dialog`, `@radix-ui/react-avatar`, `@radix-ui/react-checkbox`, `@radix-ui/react-collapsible`, `@radix-ui/react-dialog`, `@radix-ui/react-dropdown-menu`, `@radix-ui/react-label`, `@radix-ui/react-popover`, `@radix-ui/react-progress`, `@radix-ui/react-radio-group`, `@radix-ui/react-select`, `@radix-ui/react-separator`, `@radix-ui/react-slider`, `@radix-ui/react-slot`, `@radix-ui/react-switch`, `@radix-ui/react-tabs`, `@radix-ui/react-toggle`, `@radix-ui/react-toggle-group`, `@radix-ui/react-tooltip`, `@react-three/drei`, `@react-three/fiber`, `@react-three/postprocessing`, `@rose-griffon/assets`, `@rose-griffon/azalee`, `@rose-griffon/auth`, `@rose-griffon/better-auth-steam`, `@rose-griffon/db`, `@rose-griffon/inagle`, `@rose-griffon/inagle-cross`, `@rose-griffon/menu-render`, `@rose-griffon/menu-render-webgpu`, `@rose-griffon/types`, `@rose-griffon/ui`, `@sentry/nextjs`, `@supabase/supabase-js`, `@theatre/core`, `@theatre/r3f`, `@types/nodemailer`, `bcryptjs`, `better-auth`, `cheerio`, `class-variance-authority`, `clsx`, `cmdk`, `csv-parse`, `date-fns`, `drizzle-orm`, `embla-carousel-react`, `googleapis`, `graphql`, `graphql-yoga`, `html-to-image`, `input-otp`, `jsonwebtoken`, `kysely`, `lexical`, `lucide-react`, `motion`, `mp4-muxer`, `next`, `next-themes`, `node-ipinfo`, `nodemailer`, `pg`, `radix-ui`, `react`, `react-arborist`, `react-day-picker`, `react-dom`, `react-hook-form`, `react-image-crop`, `react-konva`, `react-resizable-panels`, `recharts`, `sharp`, `sonner`, `tailwind-merge`, `three`, `use-image`, `vaul`, `wanakana`, `web-push`, `zod`
-  - **DevDependencies :** `@next/bundle-analyzer`, `@playwright/test`, `@rose-griffon/config`, `@tailwindcss/postcss`, `@tailwindcss/typography`, `@testing-library/jest-dom`, `@theatre/studio`, `@types/bun`, `@types/jsonwebtoken`, `@types/node`, `@types/pg`, `@types/react`, `@types/react-dom`, `@types/three`, `@types/web-push`, `@vitejs/plugin-react`, `@webgpu/types`, `babel-plugin-react-compiler`, `drizzle-kit`, `jsdom`, `oxlint`, `tailwindcss`, `tailwindcss-animate`, `turbo`, `typescript`, `vitest`
+  - **Dependencies :** `@better-auth/agent-auth`, `@dnd-kit/core`, `@dnd-kit/sortable`, `@dnd-kit/utilities`, `@envelop/graphql-jit`, `@graphql-yoga/plugin-response-cache`, `@lexical/code`, `@lexical/file`, `@lexical/html`, `@lexical/link`, `@lexical/list`, `@lexical/markdown`, `@lexical/react`, `@lexical/rich-text`, `@lexical/table`, `@lexical/utils`, `@markdoc/markdoc`, `@radix-ui/react-accordion`, `@radix-ui/react-alert-dialog`, `@radix-ui/react-avatar`, `@radix-ui/react-checkbox`, `@radix-ui/react-collapsible`, `@radix-ui/react-dialog`, `@radix-ui/react-dropdown-menu`, `@radix-ui/react-label`, `@radix-ui/react-popover`, `@radix-ui/react-progress`, `@radix-ui/react-radio-group`, `@radix-ui/react-select`, `@radix-ui/react-separator`, `@radix-ui/react-slider`, `@radix-ui/react-slot`, `@radix-ui/react-switch`, `@radix-ui/react-tabs`, `@radix-ui/react-toggle`, `@radix-ui/react-toggle-group`, `@radix-ui/react-tooltip`, `@react-three/drei`, `@react-three/fiber`, `@react-three/postprocessing`, `@rosegriffon/assets`, `@rosegriffon/azalee`, `@rosegriffon/auth`, `@rosegriffon/better-auth-steam`, `@rosegriffon/db`, `@rosegriffon/inagle`, `@rosegriffon/inagle-cross`, `@rosegriffon/menu-render`, `@rosegriffon/menu-render-webgpu`, `@rosegriffon/types`, `@rosegriffon/ui`, `@sentry/nextjs`, `@supabase/supabase-js`, `@theatre/core`, `@theatre/r3f`, `@types/nodemailer`, `bcryptjs`, `better-auth`, `cheerio`, `class-variance-authority`, `clsx`, `cmdk`, `csv-parse`, `date-fns`, `drizzle-orm`, `embla-carousel-react`, `googleapis`, `graphql`, `graphql-yoga`, `html-to-image`, `input-otp`, `jsonwebtoken`, `kysely`, `lexical`, `lucide-react`, `motion`, `mp4-muxer`, `next`, `next-themes`, `node-ipinfo`, `nodemailer`, `pg`, `radix-ui`, `react`, `react-arborist`, `react-day-picker`, `react-dom`, `react-hook-form`, `react-image-crop`, `react-konva`, `react-resizable-panels`, `recharts`, `sharp`, `sonner`, `tailwind-merge`, `three`, `use-image`, `vaul`, `wanakana`, `web-push`, `zod`
+  - **DevDependencies :** `@next/bundle-analyzer`, `@playwright/test`, `@rosegriffon/config`, `@tailwindcss/postcss`, `@tailwindcss/typography`, `@testing-library/jest-dom`, `@theatre/studio`, `@types/bun`, `@types/jsonwebtoken`, `@types/node`, `@types/pg`, `@types/react`, `@types/react-dom`, `@types/three`, `@types/web-push`, `@vitejs/plugin-react`, `@webgpu/types`, `babel-plugin-react-compiler`, `drizzle-kit`, `jsdom`, `oxlint`, `tailwindcss`, `tailwindcss-animate`, `turbo`, `typescript`, `vitest`
 
 ---
 
@@ -83,12 +83,12 @@ Applications autonomes prêtes à être déployées :
   - `bun run dev` : `bun --watch server.ts`
 
 * **Dépendances internes & externes :**
-  - **Dependencies :** `@rose-griffon/db`
+  - **Dependencies :** `@rosegriffon/db`
   - **DevDependencies :** Aucune
 
 ---
 
-### 📁 [@rose-griffon/bot](file:///apps/bot)
+### 📁 [@rosegriffon/bot](file:///apps/bot)
 * **Chemin :** `apps/bot`
 * **Description :** Bot Discord Rose Griffon — slash commands public + admin, sync members, canvas cards
 * **Version :** `0.1.0`
@@ -107,12 +107,12 @@ Applications autonomes prêtes à être déployées :
   - `bun run smoke:canvas` : `bun src/scripts/smoke-canvas.ts`
 
 * **Dépendances internes & externes :**
-  - **Dependencies :** `@aphrody-code/canvas`, `@rose-griffon/db`, `@rose-griffon/types`, `@rpbey/discordx`, `@supabase/supabase-js`, `discord.js`, `reflect-metadata`, `zod`
-  - **DevDependencies :** `@rose-griffon/config`, `@types/bun`, `oxlint`, `typescript`, `vitest`
+  - **Dependencies :** `@aphrody-code/canvas`, `@rosegriffon/db`, `@rosegriffon/types`, `@rpbey/discordx`, `@supabase/supabase-js`, `discord.js`, `reflect-metadata`, `zod`
+  - **DevDependencies :** `@rosegriffon/config`, `@types/bun`, `oxlint`, `typescript`, `vitest`
 
 ---
 
-### 📁 [@rose-griffon/website](file:///apps/website)
+### 📁 [@rosegriffon/website](file:///apps/website)
 * **Chemin :** `apps/website`
 * **Description :** Aucune description fournie.
 * **Version :** `1.4.0`
@@ -136,8 +136,8 @@ Applications autonomes prêtes à être déployées :
   - `bun run supabase:types` : `supabase gen types typescript --project-id isbkaeltubqittywibeh > src/types/supabase.ts`
 
 * **Dépendances internes & externes :**
-  - **Dependencies :** `@googlemaps/js-api-loader`, `@hookform/resolvers`, `@origin-space/image-cropper`, `@radix-ui/react-accordion`, `@radix-ui/react-alert-dialog`, `@radix-ui/react-aspect-ratio`, `@radix-ui/react-avatar`, `@radix-ui/react-checkbox`, `@radix-ui/react-collapsible`, `@radix-ui/react-context-menu`, `@radix-ui/react-dialog`, `@radix-ui/react-dropdown-menu`, `@radix-ui/react-hover-card`, `@radix-ui/react-label`, `@radix-ui/react-menubar`, `@radix-ui/react-navigation-menu`, `@radix-ui/react-popover`, `@radix-ui/react-progress`, `@radix-ui/react-radio-group`, `@radix-ui/react-scroll-area`, `@radix-ui/react-select`, `@radix-ui/react-separator`, `@radix-ui/react-slider`, `@radix-ui/react-slot`, `@radix-ui/react-switch`, `@radix-ui/react-tabs`, `@radix-ui/react-toggle`, `@radix-ui/react-toggle-group`, `@radix-ui/react-tooltip`, `@rose-griffon/assets`, `@rose-griffon/auth`, `@rose-griffon/db`, `@rose-griffon/patreon-bun`, `@rose-griffon/types`, `@rose-griffon/ui`, `@sentry/nextjs`, `@stripe/stripe-js`, `@supabase/ssr`, `@supabase/supabase-js`, `@tanstack/query-sync-storage-persister`, `@tanstack/react-query`, `@tanstack/react-query-persist-client`, `@tanstack/react-table`, `@tiptap/core`, `@tiptap/extension-placeholder`, `@tiptap/starter-kit`, `@types/nodemailer`, `@types/pg`, `@types/pica`, `better-auth`, `browser-image-compression`, `class-variance-authority`, `clsx`, `cmdk`, `date-fns`, `discord-api-types`, `discord.js`, `embla-carousel-react`, `googleapis`, `input-otp`, `kysely`, `lucide-react`, `motion`, `next`, `nodemailer`, `pg`, `pica`, `react`, `react-day-picker`, `react-dom`, `react-dropzone`, `react-easy-crop`, `react-hook-form`, `react-icons`, `react-quill-new`, `react-resizable-panels`, `react-tweet`, `react-twitch-embed`, `recharts`, `schema-dts`, `sonner`, `stripe`, `swr`, `tailwind-merge`, `tw-animate-css`, `vaul`, `zod`, `zustand`
-  - **DevDependencies :** `@next/bundle-analyzer`, `@rose-griffon/config`, `@tailwindcss/postcss`, `@testing-library/jest-dom`, `@testing-library/react`, `@types/google.maps`, `@types/node`, `@types/react`, `@types/react-dom`, `@vitejs/plugin-react`, `babel-plugin-react-compiler`, `jsdom`, `oxlint`, `shadcn`, `sharp`, `tailwindcss`, `typescript`, `vitest`
+  - **Dependencies :** `@googlemaps/js-api-loader`, `@hookform/resolvers`, `@origin-space/image-cropper`, `@radix-ui/react-accordion`, `@radix-ui/react-alert-dialog`, `@radix-ui/react-aspect-ratio`, `@radix-ui/react-avatar`, `@radix-ui/react-checkbox`, `@radix-ui/react-collapsible`, `@radix-ui/react-context-menu`, `@radix-ui/react-dialog`, `@radix-ui/react-dropdown-menu`, `@radix-ui/react-hover-card`, `@radix-ui/react-label`, `@radix-ui/react-menubar`, `@radix-ui/react-navigation-menu`, `@radix-ui/react-popover`, `@radix-ui/react-progress`, `@radix-ui/react-radio-group`, `@radix-ui/react-scroll-area`, `@radix-ui/react-select`, `@radix-ui/react-separator`, `@radix-ui/react-slider`, `@radix-ui/react-slot`, `@radix-ui/react-switch`, `@radix-ui/react-tabs`, `@radix-ui/react-toggle`, `@radix-ui/react-toggle-group`, `@radix-ui/react-tooltip`, `@rosegriffon/assets`, `@rosegriffon/auth`, `@rosegriffon/db`, `@rosegriffon/patreon-bun`, `@rosegriffon/types`, `@rosegriffon/ui`, `@sentry/nextjs`, `@stripe/stripe-js`, `@supabase/ssr`, `@supabase/supabase-js`, `@tanstack/query-sync-storage-persister`, `@tanstack/react-query`, `@tanstack/react-query-persist-client`, `@tanstack/react-table`, `@tiptap/core`, `@tiptap/extension-placeholder`, `@tiptap/starter-kit`, `@types/nodemailer`, `@types/pg`, `@types/pica`, `better-auth`, `browser-image-compression`, `class-variance-authority`, `clsx`, `cmdk`, `date-fns`, `discord-api-types`, `discord.js`, `embla-carousel-react`, `googleapis`, `input-otp`, `kysely`, `lucide-react`, `motion`, `next`, `nodemailer`, `pg`, `pica`, `react`, `react-day-picker`, `react-dom`, `react-dropzone`, `react-easy-crop`, `react-hook-form`, `react-icons`, `react-quill-new`, `react-resizable-panels`, `react-tweet`, `react-twitch-embed`, `recharts`, `schema-dts`, `sonner`, `stripe`, `swr`, `tailwind-merge`, `tw-animate-css`, `vaul`, `zod`, `zustand`
+  - **DevDependencies :** `@next/bundle-analyzer`, `@rosegriffon/config`, `@tailwindcss/postcss`, `@testing-library/jest-dom`, `@testing-library/react`, `@types/google.maps`, `@types/node`, `@types/react`, `@types/react-dom`, `@vitejs/plugin-react`, `babel-plugin-react-compiler`, `jsdom`, `oxlint`, `shadcn`, `sharp`, `tailwindcss`, `typescript`, `vitest`
 
 ---
 
@@ -176,9 +176,9 @@ Applications autonomes prêtes à être déployées :
 
 Packages partagés consommés par les applications :
 
-### 📁 [@rose-griffon/iecode-config](file:///packages/iecode-config)
+### 📁 [@rosegriffon/iecode-config](file:///packages/iecode-config)
 * **Chemin :** `packages/iecode-config`
-* **Description :** Configs partagées iecode : presets tsconfig + oxlint (même pattern que @rose-griffon/config).
+* **Description :** Configs partagées iecode : presets tsconfig + oxlint (même pattern que @rosegriffon/config).
 * **Version :** `0.1.0`
 
 * **Scripts disponibles :**
@@ -190,7 +190,7 @@ Packages partagés consommés par les applications :
 
 ---
 
-### 📁 [@rose-griffon/azalee](file:///packages/azalee)
+### 📁 [@rosegriffon/azalee](file:///packages/azalee)
 * **Chemin :** `packages/azalee`
 * **Description :** Bibliothèque Bun du wiki Azalée (Inazuma Eleven: Victory Road) — accès données via miroir SQLite, index CPK, index de texte de jeu, résolution d'URLs CDN, recherche floue et CLI.
 * **Version :** `1.0.0`
@@ -211,12 +211,12 @@ Packages partagés consommés par les applications :
   - `bun run prepublishOnly` : `bun run build`
 
 * **Dépendances internes & externes :**
-  - **Dependencies :** `@rose-griffon/db`, `@rose-griffon/inagle`, `@supabase/supabase-js`, `commander`, `drizzle-orm`, `wanakana`
-  - **DevDependencies :** `@rose-griffon/config`, `@types/bun`, `@types/node`, `oxlint`, `typescript`
+  - **Dependencies :** `@rosegriffon/db`, `@rosegriffon/inagle`, `@supabase/supabase-js`, `commander`, `drizzle-orm`, `wanakana`
+  - **DevDependencies :** `@rosegriffon/config`, `@types/bun`, `@types/node`, `oxlint`, `typescript`
 
 ---
 
-### 📁 [@rose-griffon/auth](file:///packages/auth)
+### 📁 [@rosegriffon/auth](file:///packages/auth)
 * **Chemin :** `packages/auth`
 * **Description :** Shared authentication logic and guards for Rose Griffon apps
 * **Version :** `0.1.0`
@@ -228,12 +228,12 @@ Packages partagés consommés par les applications :
   - `bun run test` : `vitest run`
 
 * **Dépendances internes & externes :**
-  - **Dependencies :** `@rose-griffon/db`, `@rose-griffon/types`, `@supabase/supabase-js`, `better-auth`, `zod`
+  - **Dependencies :** `@rosegriffon/db`, `@rosegriffon/types`, `@supabase/supabase-js`, `better-auth`, `zod`
   - **DevDependencies :** `@types/bun`, `next`, `react`, `typescript`, `vitest`
 
 ---
 
-### 📁 [@rose-griffon/config](file:///packages/config)
+### 📁 [@rosegriffon/config](file:///packages/config)
 * **Chemin :** `packages/config`
 * **Description :** Configs partagées : tsconfig, eslint, oxlint, tailwind preset
 * **Version :** `0.1.0`
@@ -247,7 +247,7 @@ Packages partagés consommés par les applications :
 
 ---
 
-### 📁 [@rose-griffon/cron](file:///packages/cron)
+### 📁 [@rosegriffon/cron](file:///packages/cron)
 * **Chemin :** `packages/cron`
 * **Description :** Daemon de tâches planifiées (cron) pour la maintenance DB, CDN et API
 * **Version :** `0.1.0`
@@ -262,12 +262,12 @@ Packages partagés consommés par les applications :
   - `bun run lint` : `bunx oxlint -c ../../.oxlintrc.json src`
 
 * **Dépendances internes & externes :**
-  - **Dependencies :** `@aphrody-code/bxc`, `@aphrody-code/x`, `@aphrody-code/zukan`, `@asteasolutions/zod-to-openapi`, `@rose-griffon/auth`, `@rose-griffon/db`, `@rose-griffon/inagle`, `@rose-griffon/types`, `cheerio`, `discord.js`, `zod`
+  - **Dependencies :** `@aphrody-code/bxc`, `@aphrody-code/x`, `@aphrody-code/zukan`, `@asteasolutions/zod-to-openapi`, `@rosegriffon/auth`, `@rosegriffon/db`, `@rosegriffon/inagle`, `@rosegriffon/types`, `cheerio`, `discord.js`, `zod`
   - **DevDependencies :** `@types/bun`, `typescript`
 
 ---
 
-### 📁 [@rose-griffon/types](file:///packages/types)
+### 📁 [@rosegriffon/types](file:///packages/types)
 * **Chemin :** `packages/types`
 * **Description :** Types métier partagés (roles, user, discord) — source unique de vérité bot/azalee/website
 * **Version :** `0.2.0`
@@ -279,11 +279,11 @@ Packages partagés consommés par les applications :
 
 * **Dépendances internes & externes :**
   - **Dependencies :** `zod`
-  - **DevDependencies :** `@rose-griffon/config`, `typescript`
+  - **DevDependencies :** `@rosegriffon/config`, `typescript`
 
 ---
 
-### 📁 [@rose-griffon/inagle-cross](file:///packages/inagle-cross)
+### 📁 [@rosegriffon/inagle-cross](file:///packages/inagle-cross)
 * **Chemin :** `packages/inagle-cross`
 * **Description :** API de données et de rétro-conception pour Inazuma Eleven Cross — types, schémas, et analyseurs d'assets
 * **Version :** `0.1.0`
@@ -299,7 +299,7 @@ Packages partagés consommés par les applications :
 
 ---
 
-### 📁 [@rose-griffon/db](file:///packages/db)
+### 📁 [@rosegriffon/db](file:///packages/db)
 * **Chemin :** `packages/db`
 * **Description :** Client Supabase partagé + Database types générés (site + bot)
 * **Version :** `0.2.0`
@@ -312,12 +312,12 @@ Packages partagés consommés par les applications :
   - `bun run test` : `vitest run`
 
 * **Dépendances internes & externes :**
-  - **Dependencies :** `@rose-griffon/types`, `@supabase/ssr`, `@supabase/supabase-js`
+  - **Dependencies :** `@rosegriffon/types`, `@supabase/ssr`, `@supabase/supabase-js`
   - **DevDependencies :** `@types/bun`, `typescript`, `vitest`
 
 ---
 
-### 📁 [@rose-griffon/inagle](file:///packages/inagle)
+### 📁 [@rosegriffon/inagle](file:///packages/inagle)
 * **Chemin :** `packages/inagle`
 * **Description :** Universal Game Data API for Inazuma Eleven: Victory Road — parsers, types, and tools for IEVR game data
 * **Version :** `1.2.0`
@@ -343,7 +343,7 @@ Packages partagés consommés par les applications :
 
 ---
 
-### 📁 [@rose-griffon/assets](file:///packages/assets)
+### 📁 [@rosegriffon/assets](file:///packages/assets)
 * **Chemin :** `packages/assets`
 * **Description :** Shared static assets for Rose Griffon apps
 * **Version :** `0.1.0`
@@ -357,7 +357,7 @@ Packages partagés consommés par les applications :
 
 ---
 
-### 📁 [@rose-griffon/ui](file:///packages/ui)
+### 📁 [@rosegriffon/ui](file:///packages/ui)
 * **Chemin :** `packages/ui`
 * **Description :** Composants shadcn/ui partagés (new-york style, Tailwind v4)
 * **Version :** `0.2.0`
@@ -369,14 +369,14 @@ Packages partagés consommés par les applications :
   - `bun run type-check` : `tsc --noEmit`
 
 * **Dépendances internes & externes :**
-  - **Dependencies :** `@rose-griffon/db`, `@radix-ui/react-accordion`, `@radix-ui/react-alert-dialog`, `@radix-ui/react-aspect-ratio`, `@radix-ui/react-avatar`, `@radix-ui/react-checkbox`, `@radix-ui/react-collapsible`, `@radix-ui/react-context-menu`, `@radix-ui/react-dialog`, `@radix-ui/react-dropdown-menu`, `@radix-ui/react-hover-card`, `@radix-ui/react-label`, `@radix-ui/react-menubar`, `@radix-ui/react-navigation-menu`, `@radix-ui/react-popover`, `@radix-ui/react-progress`, `@radix-ui/react-radio-group`, `@radix-ui/react-scroll-area`, `@radix-ui/react-select`, `@radix-ui/react-separator`, `@radix-ui/react-slider`, `@radix-ui/react-slot`, `@radix-ui/react-switch`, `@radix-ui/react-tabs`, `@radix-ui/react-toggle`, `@radix-ui/react-toggle-group`, `@radix-ui/react-tooltip`, `@tanstack/react-table`, `class-variance-authority`, `clsx`, `cmdk`, `date-fns`, `embla-carousel-react`, `input-otp`, `lucide-react`, `next-themes`, `react-day-picker`, `react-hook-form`, `react-resizable-panels`, `recharts`, `sonner`, `tailwind-merge`, `vaul`
+  - **Dependencies :** `@rosegriffon/db`, `@radix-ui/react-accordion`, `@radix-ui/react-alert-dialog`, `@radix-ui/react-aspect-ratio`, `@radix-ui/react-avatar`, `@radix-ui/react-checkbox`, `@radix-ui/react-collapsible`, `@radix-ui/react-context-menu`, `@radix-ui/react-dialog`, `@radix-ui/react-dropdown-menu`, `@radix-ui/react-hover-card`, `@radix-ui/react-label`, `@radix-ui/react-menubar`, `@radix-ui/react-navigation-menu`, `@radix-ui/react-popover`, `@radix-ui/react-progress`, `@radix-ui/react-radio-group`, `@radix-ui/react-scroll-area`, `@radix-ui/react-select`, `@radix-ui/react-separator`, `@radix-ui/react-slider`, `@radix-ui/react-slot`, `@radix-ui/react-switch`, `@radix-ui/react-tabs`, `@radix-ui/react-toggle`, `@radix-ui/react-toggle-group`, `@radix-ui/react-tooltip`, `@tanstack/react-table`, `class-variance-authority`, `clsx`, `cmdk`, `date-fns`, `embla-carousel-react`, `input-otp`, `lucide-react`, `next-themes`, `react-day-picker`, `react-hook-form`, `react-resizable-panels`, `recharts`, `sonner`, `tailwind-merge`, `vaul`
   - **DevDependencies :** `@types/bun`, `@types/react`, `@types/react-dom`, `tailwindcss`, `typescript`
 
 ---
 
-### 📁 [@rose-griffon/iecode-inagle](file:///packages/iecode-inagle)
+### 📁 [@rosegriffon/iecode-inagle](file:///packages/iecode-inagle)
 * **Chemin :** `packages/iecode-inagle`
-* **Description :** Accès Bun au vrai inagle (@rose-griffon/inagle) — Game Data API IEVR (parsers cfg.bin/CPK/G4TX) : characters, skills, items, teams, quests, drops, zukan…
+* **Description :** Accès Bun au vrai inagle (@rosegriffon/inagle) — Game Data API IEVR (parsers cfg.bin/CPK/G4TX) : characters, skills, items, teams, quests, drops, zukan…
 * **Version :** `0.1.0`
 * **Points d'entrée clés :**
   - [`src/index.ts`](file:///packages/iecode-inagle/src/index.ts)
@@ -389,14 +389,14 @@ Packages partagés consommés par les applications :
   - `bun run clean` : `rm -rf *.tsbuildinfo`
 
 * **Dépendances internes & externes :**
-  - **Dependencies :** `@rose-griffon/inagle`, `fengari`, `valibot`
-  - **DevDependencies :** `@rose-griffon/iecode-config`, `@types/bun`, `oxlint`, `typescript`
+  - **Dependencies :** `@rosegriffon/inagle`, `fengari`, `valibot`
+  - **DevDependencies :** `@rosegriffon/iecode-config`, `@types/bun`, `oxlint`, `typescript`
 
 ---
 
-### 📁 [@rose-griffon/menu-render-webgpu](file:///packages/menu-render-webgpu)
+### 📁 [@rosegriffon/menu-render-webgpu](file:///packages/menu-render-webgpu)
 * **Chemin :** `packages/menu-render-webgpu`
-* **Description :** Renderer WebGPU 2D pixel-perfect pour les écrans de menu IEVR (quads texturés instanciés, projection ortho 1280×720, sampler nearest, premultiplied alpha, blend par drawType, z-order painter par drawPriority). Fallback DOM <GameMenu> de @rose-griffon/menu-render.
+* **Description :** Renderer WebGPU 2D pixel-perfect pour les écrans de menu IEVR (quads texturés instanciés, projection ortho 1280×720, sampler nearest, premultiplied alpha, blend par drawType, z-order painter par drawPriority). Fallback DOM <GameMenu> de @rosegriffon/menu-render.
 * **Version :** `0.1.0`
 * **Points d'entrée clés :**
   - [`src/index.ts`](file:///packages/menu-render-webgpu/src/index.ts)
@@ -409,12 +409,12 @@ Packages partagés consommés par les applications :
   - `bun run clean` : `rm -rf *.tsbuildinfo`
 
 * **Dépendances internes & externes :**
-  - **Dependencies :** `@rose-griffon/menu-render`
-  - **DevDependencies :** `@rose-griffon/iecode-config`, `@types/bun`, `@types/react`, `@types/react-dom`, `@webgpu/types`, `oxlint`, `react`, `react-dom`, `typescript`
+  - **Dependencies :** `@rosegriffon/menu-render`
+  - **DevDependencies :** `@rosegriffon/iecode-config`, `@types/bun`, `@types/react`, `@types/react-dom`, `@webgpu/types`, `oxlint`, `react`, `react-dom`, `typescript`
 
 ---
 
-### 📁 [@rose-griffon/menu-render](file:///packages/menu-render)
+### 📁 [@rosegriffon/menu-render](file:///packages/menu-render)
 * **Chemin :** `packages/menu-render`
 * **Description :** Renderer React pixel-perfect pour les écrans de menu IEVR depuis un menu-layout.json (canvas 1280×720, sprites G4TX, transforms absolus, z-order drawPriority).
 * **Version :** `0.1.0`
@@ -429,12 +429,12 @@ Packages partagés consommés par les applications :
   - `bun run clean` : `rm -rf *.tsbuildinfo`
 
 * **Dépendances internes & externes :**
-  - **Dependencies :** `@rose-griffon/iecode-inagle`, `fengari`
-  - **DevDependencies :** `@rose-griffon/iecode-config`, `@types/bun`, `@types/react`, `@types/react-dom`, `oxlint`, `react`, `react-dom`, `typescript`
+  - **Dependencies :** `@rosegriffon/iecode-inagle`, `fengari`
+  - **DevDependencies :** `@rosegriffon/iecode-config`, `@types/bun`, `@types/react`, `@types/react-dom`, `oxlint`, `react`, `react-dom`, `typescript`
 
 ---
 
-### 📁 [@rose-griffon/better-auth-steam](file:///packages/better-auth-steam)
+### 📁 [@rosegriffon/better-auth-steam](file:///packages/better-auth-steam)
 * **Chemin :** `packages/better-auth-steam`
 * **Description :** Plugin Better Auth « steam » : login Steam OpenID 2.0 + vue compte IEVR (Steam Web API, app 2799860)
 * **Version :** `0.1.0`
@@ -451,7 +451,7 @@ Packages partagés consommés par les applications :
 
 ---
 
-### 📁 [@rose-griffon/patreon-bun](file:///packages/patreon-bun)
+### 📁 [@rosegriffon/patreon-bun](file:///packages/patreon-bun)
 * **Chemin :** `packages/patreon-bun`
 * **Description :** Bun-only TypeScript library for the V2 Patreon API. Fork of patreon-api.ts (ghostrider-05) for Rose Griffon.
 * **Version :** `0.20.1`
@@ -470,7 +470,7 @@ Packages partagés consommés par les applications :
 
 ---
 
-### 📁 [@rose-griffon/mcp](file:///packages/mcp)
+### 📁 [@rosegriffon/mcp](file:///packages/mcp)
 * **Chemin :** `packages/mcp`
 * **Description :** Serveur MCP du monorepo Rose Griffon — implémentation Bun native (zéro dépendance Node) de la révision 2026-07-28 et des révisions à handshake, exposant les données Azalée/IEVR et l'état du monorepo
 * **Version :** `1.0.0`
@@ -485,8 +485,8 @@ Packages partagés consommés par les applications :
   - `bun run type-check` : `tsc --noEmit`
 
 * **Dépendances internes & externes :**
-  - **Dependencies :** `@rose-griffon/azalee`, `zod`
-  - **DevDependencies :** `@rose-griffon/config`, `@types/bun`, `oxlint`, `typescript`
+  - **Dependencies :** `@rosegriffon/azalee`, `zod`
+  - **DevDependencies :** `@rosegriffon/config`, `@types/bun`, `oxlint`, `typescript`
 
 ---
 

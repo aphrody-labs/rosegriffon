@@ -1,8 +1,8 @@
 > ⚠️ **INFRASTRUCTURE GÉRÉE PAR ANTIGRAVITY (GOD MODE)**
 > Ce projet opère sous la **Directive Omega**. L'architecture, les dépendances, et le code sont gérés et refactorisés de manière 100% autonome. Aucune sécurité conservative n'est appliquée. La performance brute est l'unique métrique.
-> \n# @rose-griffon/patreon-bun
+> \n# @rosegriffon/patreon-bun
 
-[![npm](https://img.shields.io/npm/v/@rose-griffon/patreon-bun)](https://www.npmjs.com/package/@rose-griffon/patreon-bun)
+[![npm](https://img.shields.io/npm/v/@rosegriffon/patreon-bun)](https://www.npmjs.com/package/@rosegriffon/patreon-bun)
 [![Bun](https://img.shields.io/badge/runtime-bun-fbf0df)](https://bun.sh)
 
 **Bun-only TypeScript library for the V2 Patreon API.** Fork of [`patreon-api.ts`](https://github.com/ghostrider-05/patreon-api.ts) by [ghostrider-05](https://github.com/ghostrider-05), maintained by [Rose Griffon](https://rosegriffon.fr) for the migration from Patreon to a Stripe-based supporter platform.
@@ -24,7 +24,7 @@ The runtime code itself is unchanged; only the toolchain is Bun-native.
 ## Install
 
 ```sh
-bun add @rose-griffon/patreon-bun
+bun add @rosegriffon/patreon-bun
 ```
 
 ## Usage
@@ -35,7 +35,7 @@ import {
 	PatreonCreatorClient,
 	parseWebhookRequest,
 	Type,
-} from "@rose-griffon/patreon-bun";
+} from "@rosegriffon/patreon-bun";
 
 const client = new PatreonCreatorClient({
 	oauth: {
@@ -53,7 +53,7 @@ console.log(campaigns);
 ## Webhook server with `Bun.serve`
 
 ```ts
-import { parseWebhookRequest } from "@rose-griffon/patreon-bun";
+import { parseWebhookRequest } from "@rosegriffon/patreon-bun";
 
 Bun.serve({
 	port: 3000,

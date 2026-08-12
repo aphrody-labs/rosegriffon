@@ -5,7 +5,7 @@ import { useEffect } from "react";
 /**
  * Boundary d'erreur GLOBALE (remplace tout le document quand le root layout lui-même
  * échoue). Doit rendre ses propres <html>/<body> et rester TOTALEMENT autonome :
- * aucun composant à contexte (pas de @rose-griffon/ui, pas de provider parent) — sinon
+ * aucun composant à contexte (pas de @rosegriffon/ui, pas de provider parent) — sinon
  * le prerender du `/_global-error` de Next 16 crashe (`useContext` null à l'export).
  * Styles 100% inline aux couleurs DA Rose Griffon (marine / or / Azalée) car le CSS
  * global n'est pas garanti disponible à ce niveau.

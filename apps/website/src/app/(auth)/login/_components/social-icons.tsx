@@ -4,7 +4,7 @@ import type { SVGProps } from "react";
  * Logos propres à l'écran de connexion.
  *
  * Discord, Google, Patreon, Twitch et Steam vivent désormais dans
- * `@rose-griffon/ui` (`brand-icons.tsx`) : ce fichier ne conserve que les deux
+ * `@rosegriffon/ui` (`brand-icons.tsx`) : ce fichier ne conserve que les deux
  * logos sans équivalent dans le package, avec la même signature `SVGProps`
  * pour rester interchangeables avec eux.
  */

@@ -1,7 +1,7 @@
 {
-	"name": "@rose-griffon/inagle",
-	"version": "1.2.0",
-	"description": "Universal Game Data API for Inazuma Eleven: Victory Road — parsers, types, and tools for IEVR game data",
+	"name": "@rosegriffon/inagle",
+	"version": "2.0.2",
+	"description": "Universal Game Data API for Inazuma Eleven: Victory Road \u2014 parsers, types, and tools for IEVR game data",
 	"keywords": [
 		"cfg-bin",
 		"game-data",
@@ -42,20 +42,8 @@
 		}
 	},
 	"publishConfig": {
-		"main": "./dist/index.js",
-		"types": "./dist/index.d.ts",
-		"exports": {
-			".": {
-				"import": "./dist/index.js",
-				"types": "./dist/index.d.ts"
-			},
-			"./*": {
-				"import": "./dist/*.js",
-				"types": "./dist/*.d.ts"
-			}
-		},
 		"access": "public",
-		"registry": "https://npm.pkg.github.com"
+		"registry": "https://registry.npmjs.org"
 	},
 	"scripts": {
 		"build": "bun run tsc -p tsconfig.build.json",

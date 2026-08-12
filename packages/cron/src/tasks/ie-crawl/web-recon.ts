@@ -712,7 +712,7 @@ function buildLlmsTxt(d: {
 
 > Recon exhaustif de ${d.root} et de l'écosystème lié (www.inazuma.jp, zukan.inazuma.jp, CDN IIJ/CloudFront).
 > Jeu LEVEL-5 (Steam app id 2799860). Site statique multilingue server-rendered (openresty) derrière l'IIJ CDN.
-> Généré par @rose-griffon/cron ie-crawl/web-recon (moteur bxc 0.6.0, profil http/curl-impersonate).
+> Généré par @rosegriffon/cron ie-crawl/web-recon (moteur bxc 0.6.0, profil http/curl-impersonate).
 
 ## Vue d'ensemble
 

@@ -156,7 +156,7 @@ graph TD
 	const all = [...apps, ...packages];
 	for (const item of all) {
 		const workspaceDeps = item.dependencies.filter(
-			(d) => d.startsWith("@rose-griffon/") || d.startsWith("@aphrody-code/")
+			(d) => d.startsWith("@rosegriffon/") || d.startsWith("@aphrody-code/")
 		);
 		for (const dep of workspaceDeps) {
 			md += `    ${item.name.replace(/[@/-]/g, "_")} --> ${dep.replace(/[@/-]/g, "_")}\n`;

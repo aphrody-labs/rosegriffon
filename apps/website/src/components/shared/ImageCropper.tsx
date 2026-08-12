@@ -8,7 +8,7 @@ import {
 	DialogHeader,
 	DialogTitle,
 	Slider,
-} from "@rose-griffon/ui";
+} from "@rosegriffon/ui";
 import { useCallback, useState } from "react";
 import Cropper from "react-easy-crop";
 import type { Area } from "react-easy-crop";

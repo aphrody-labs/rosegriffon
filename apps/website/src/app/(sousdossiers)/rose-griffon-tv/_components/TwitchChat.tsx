@@ -9,7 +9,7 @@ import {
 	Avatar,
 	AvatarFallback,
 	AvatarImage,
-} from "@rose-griffon/ui";
+} from "@rosegriffon/ui";
 import { AnimatePresence, motion } from "motion/react";
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";

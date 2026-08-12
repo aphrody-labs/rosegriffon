@@ -1,9 +1,9 @@
 @import "tailwindcss";
 @import "tw-animate-css";
-@import "@rose-griffon/ui/styles.css";
+@import "@rosegriffon/ui/styles.css";
 
 /* La détection automatique de Tailwind s'arrête à la racine du projet et ignore
- * `node_modules`, où `@rose-griffon/ui` est un lien symbolique : sans ce
+ * `node_modules`, où `@rosegriffon/ui` est un lien symbolique : sans ce
  * `@source`, les utilitaires employés uniquement par les composants partagés
  * (page « Mon compte », largeurs de sidebar en variables CSS…) ne sont jamais
  * générés. Azalée déclare la même source. */
@@ -122,7 +122,7 @@
 /* Valeurs par défaut (aucune classe de thème sur <html>).
  * IMPORTANT — ce bloc DOIT rester dans `@layer base` : les thèmes
  * (`.roy`, `.gaelle`, `.theme-azalee-*`) sont fournis par
- * `@rose-griffon/ui/styles.css`, lui aussi dans `@layer base`. Une règle
+ * `@rosegriffon/ui/styles.css`, lui aussi dans `@layer base`. Une règle
  * hors couche l'emporte sur TOUTE règle en couche, quelle que soit la
  * spécificité : `:root` non-layered figeait les tokens et le sélecteur de
  * thème ne changeait plus rien à l'écran. */
@@ -604,7 +604,7 @@
 /* Thème Inazuma Eleven Classic - Orange/Bleu */
 /* Thèmes de section legacy — DOIVENT rester en couche.
  * Hors `@layer`, ces quatre blocs battaient n'importe quel thème de
- * `@rose-griffon/ui` quelle que soit la spécificité. `.azalee` est appliqué
+ * `@rosegriffon/ui` quelle que soit la spécificité. `.azalee` est appliqué
  * sur une carte de `ProjectsSection` : le garder scopé, mais layered. */
 @layer base {
 	.ie-classic {

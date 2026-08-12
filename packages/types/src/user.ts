@@ -1,10 +1,10 @@
 /**
- * Types User/Profile partagés — réexporte la source unique depuis @rose-griffon/db
+ * Types User/Profile partagés — réexporte la source unique depuis @rosegriffon/db
  * (Database types générés par Supabase CLI). Évite la duplication
  * `type Profile = Database["public"]["Tables"]["profiles"]["Row"]` qui était
  * répétée dans 9+ fichiers website.
  */
-import type { Database } from "@rose-griffon/db";
+import type { Database } from "@rosegriffon/db";
 import type { RgRole } from "./roles";
 
 /** Profile Supabase canonique (row de la table public.profiles). */

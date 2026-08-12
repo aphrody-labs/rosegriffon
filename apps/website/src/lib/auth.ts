@@ -8,13 +8,13 @@ import {
 	createAccountOptions,
 	ensureUserProfile,
 	googleProvider,
-} from "@rose-griffon/auth";
+} from "@rosegriffon/auth";
 import { sendEmail } from "@/lib/email";
 import { getPgPool } from "@/lib/db/pg";
 import { fetchIdentity, parseIdentityWithMemberships } from "@/lib/patreon/client";
 import { encryptToken } from "@/lib/patreon/encryption";
 import { SCOPES_CREATOR, SCOPES_PATRON } from "@/lib/patreon/types";
-import type { Database } from "@rose-griffon/db";
+import type { Database } from "@rosegriffon/db";
 
 const pool = getPgPool();
 

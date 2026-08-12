@@ -1,4 +1,4 @@
-import { Button, Card, CardContent, DiscordIcon } from "@rose-griffon/ui";
+import { Button, Card, CardContent, DiscordIcon } from "@rosegriffon/ui";
 import { Zap } from "lucide-react";
 import localFont from "next/font/local";
 import Image from "next/image";

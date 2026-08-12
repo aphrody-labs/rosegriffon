@@ -16,7 +16,7 @@ import {
 	type AccountProfileValues,
 	type AccountSession,
 	type AccountTabId,
-} from "@rose-griffon/ui";
+} from "@rosegriffon/ui";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
@@ -43,7 +43,7 @@ interface AccountClientProps {
 /**
  * Câblage côté site principal de la page « Mon compte » partagée.
  *
- * Toute la présentation vient de `@rose-griffon/ui` : ce fichier ne contient
+ * Toute la présentation vient de `@rosegriffon/ui` : ce fichier ne contient
  * que ce qui est propre au site — instance Better Auth, stockage Supabase,
  * fournisseurs OAuth proposés et actions serveur.
  */

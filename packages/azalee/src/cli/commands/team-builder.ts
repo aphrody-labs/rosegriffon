@@ -4,7 +4,7 @@
  * Actions : `list`, `show <id>`, `delete <id>`, `save <name> <code>`,
  * `generate`. Les compositions vivent dans la table `user_teams` (PostgreSQL),
  * partagées avec l'éditeur web ; le code de partage utilise le codec commun
- * `@rose-griffon/azalee/game` (`encodeTeamCode` / `decodeTeamCode`).
+ * `@rosegriffon/azalee/game` (`encodeTeamCode` / `decodeTeamCode`).
  */
 
 import type { Command } from "commander";

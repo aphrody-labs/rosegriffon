@@ -9,7 +9,7 @@
  *
  * Le module ne choisit PAS son pilote : il reçoit une fonction `query`. Le
  * serveur MCP l'adosse à `Bun.SQL`, le site à son pool `pg`. C'est aussi ce qui
- * évite d'ajouter une dépendance de base à `@rose-griffon/db`, consommé par le
+ * évite d'ajouter une dépendance de base à `@rosegriffon/db`, consommé par le
  * bot et les tâches planifiées.
  */
 

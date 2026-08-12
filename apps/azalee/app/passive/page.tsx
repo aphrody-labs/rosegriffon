@@ -26,8 +26,8 @@ import type {
 import { WikiSearchToolbar } from "@/components/wiki/WikiSearchToolbar";
 import type { SpriteCommonKey } from "@/config/sprites-common";
 import passiveData from "@/data/passive-sheets.json";
-import passivesFullData from "@rose-griffon/azalee/data/passives-full.json";
-import { normalizeText } from "@rose-griffon/azalee/search/utils";
+import passivesFullData from "@rosegriffon/azalee/data/passives-full.json";
+import { normalizeText } from "@rosegriffon/azalee/search/utils";
 import { parseSearchParams } from "@/lib/validations";
 import { passiveCategory } from "@/lib/wiki-service";
 

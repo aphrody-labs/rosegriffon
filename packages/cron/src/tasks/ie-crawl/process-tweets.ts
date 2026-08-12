@@ -1,5 +1,5 @@
-import { createSupabaseServiceClient } from "@rose-griffon/db/service";
-import type { Tables } from "@rose-griffon/db";
+import { createSupabaseServiceClient } from "@rosegriffon/db/service";
+import type { Tables } from "@rosegriffon/db";
 import { join } from "node:path";
 import { grokChat } from "./grok-oidc";
 import { sql } from "../../lib/db.js";

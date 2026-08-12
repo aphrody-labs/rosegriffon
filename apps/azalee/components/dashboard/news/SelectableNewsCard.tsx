@@ -16,7 +16,7 @@ import {
 	ContextMenuSubContent,
 	ContextMenuSubTrigger,
 	ContextMenuTrigger,
-} from "@rose-griffon/ui";
+} from "@rosegriffon/ui";
 import {
 	Archive,
 	CheckCircle,

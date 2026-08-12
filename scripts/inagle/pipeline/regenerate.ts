@@ -1,9 +1,9 @@
 import { mkdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
-import { DATA_ROOT, PATHS } from "@rose-griffon/inagle/core/paths.ts";
-import { buildItemsDatabaseAsync } from "@rose-griffon/inagle/items/api.ts";
-import { buildSkillDatabase } from "@rose-griffon/inagle/skills/mapper.ts";
-import { buildTeamsDatabase } from "@rose-griffon/inagle/teams/api.ts";
+import { DATA_ROOT, PATHS } from "@rosegriffon/inagle/core/paths.ts";
+import { buildItemsDatabaseAsync } from "@rosegriffon/inagle/items/api.ts";
+import { buildSkillDatabase } from "@rosegriffon/inagle/skills/mapper.ts";
+import { buildTeamsDatabase } from "@rosegriffon/inagle/teams/api.ts";
 
 async function regenerate() {
 	console.log("🚀 Regenerating entities from raw gamedata...");

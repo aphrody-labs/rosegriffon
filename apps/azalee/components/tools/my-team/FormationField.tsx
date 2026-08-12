@@ -3,14 +3,14 @@
 import { useDroppable } from "@dnd-kit/core";
 import { Icon } from "@/components/ui/Icon";
 import { SafeImage } from "@/components/ui/SafeImage";
-import { BENCH_SLOTS, ROLE_COLORS, ROLE_LABELS } from "@rose-griffon/azalee/game/formations";
-import type { Formation, PositionCoord } from "@rose-griffon/azalee/game/formations";
-import type { TeamMember } from "@rose-griffon/azalee/game/team-types";
+import { BENCH_SLOTS, ROLE_COLORS, ROLE_LABELS } from "@rosegriffon/azalee/game/formations";
+import type { Formation, PositionCoord } from "@rosegriffon/azalee/game/formations";
+import type { TeamMember } from "@rosegriffon/azalee/game/team-types";
 import { cn } from "@/lib/utils";
-import { getCharacterImageUrl } from "@rose-griffon/azalee/images";
+import { getCharacterImageUrl } from "@rosegriffon/azalee/images";
 import { PlayerSlot } from "./PlayerSlot";
-import { getPositionMatchFactor } from "@rose-griffon/azalee/game/team-rules";
-import type { ElementLink } from "@rose-griffon/azalee/game/team-rules";
+import { getPositionMatchFactor } from "@rosegriffon/azalee/game/team-rules";
+import type { ElementLink } from "@rosegriffon/azalee/game/team-rules";
 
 const ELEMENT_COLORS: Record<string, string> = {
 	Fire: "#ef4444",

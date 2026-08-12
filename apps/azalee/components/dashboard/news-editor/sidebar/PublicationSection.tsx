@@ -15,7 +15,7 @@ import {
 	SelectItem,
 	SelectTrigger,
 	SelectValue,
-} from "@rose-griffon/ui";
+} from "@rosegriffon/ui";
 import { CalendarClock } from "@/lib/icons-config";
 import { cn } from "@/lib/utils";
 import { CATEGORIES, STATUS_OPTIONS } from "../constants";

@@ -4,15 +4,15 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-// Store vectoriel LOCAL (bun:sqlite, `@rose-griffon/db/rag-store`).
+// Store vectoriel LOCAL (bun:sqlite, `@rosegriffon/db/rag-store`).
 // Remplace le store pgvector Supabase (`inagle_rag_chunks` + RPC
 // `rag_hybrid_search`) qui avait fait dépasser le quota storage du plan free
 // (592 Mo à lui seul) et cassé azalee-web/website-web/rg-cron pendant 7+
 // jours (migré le 2026-08-06, cf. docs/rag-unified.md).
-// Le store Redis (`@rose-griffon/db/redis`) reste branché en parallèle (cache
+// Le store Redis (`@rosegriffon/db/redis`) reste branché en parallèle (cache
 // généraliste, pas le RAG).
 
-import { upsertChunks, hybridSearch, type RagChunkRow } from "@rose-griffon/db/rag-store";
+import { upsertChunks, hybridSearch, type RagChunkRow } from "@rosegriffon/db/rag-store";
 import { computeStringHash } from "./rag-utils";
 import { chunkBySource, type SourceKind } from "./rag-chunkers";
 import { embedBatch, embedOne, RAG_EMBED_DIM, type EmbedBackend } from "./rag-embed";

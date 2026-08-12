@@ -1,4 +1,4 @@
-import { createInagleService } from "@rose-griffon/inagle/service.ts";
+import { createInagleService } from "@rosegriffon/inagle/service.ts";
 
 const inagleService = await createInagleService();
 const passives = inagleService.skills.passiveAll();

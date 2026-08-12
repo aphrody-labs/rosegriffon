@@ -1,6 +1,6 @@
 "use client";
 
-import { Button } from "@rose-griffon/ui";
+import { Button } from "@rosegriffon/ui";
 import { Share2 } from "lucide-react";
 import { toast } from "sonner";
 

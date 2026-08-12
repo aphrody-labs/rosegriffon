@@ -1,6 +1,6 @@
 "use client";
 
-import { Alert, AlertDescription, AlertTitle, Button } from "@rose-griffon/ui";
+import { Alert, AlertDescription, AlertTitle, Button } from "@rosegriffon/ui";
 import { AlertCircle, Home, RefreshCcw } from "lucide-react";
 import { useEffect } from "react";
 

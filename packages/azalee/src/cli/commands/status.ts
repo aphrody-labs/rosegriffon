@@ -5,7 +5,7 @@ import os from "node:os";
 
 import type { Command } from "commander";
 
-import { getRedisClient } from "@rose-griffon/db/redis";
+import { getRedisClient } from "@rosegriffon/db/redis";
 
 import {
 	colors,

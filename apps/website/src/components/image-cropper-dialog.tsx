@@ -8,7 +8,7 @@ import {
 	DialogFooter,
 	DialogHeader,
 	DialogTitle,
-} from "@rose-griffon/ui";
+} from "@rosegriffon/ui";
 import { Cropper } from "@origin-space/image-cropper";
 import * as React from "react";
 

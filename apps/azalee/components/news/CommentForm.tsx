@@ -7,7 +7,7 @@ import { useRef, useState, useTransition } from "react";
 import { toast } from "sonner";
 import { createComment } from "@/app/actions/comments";
 import { useAuth } from "@/components/providers/AuthProvider";
-import { Button } from "@rose-griffon/ui";
+import { Button } from "@rosegriffon/ui";
 import { isRemoteAvatar } from "@/lib/avatar";
 import { cn } from "@/lib/utils";
 

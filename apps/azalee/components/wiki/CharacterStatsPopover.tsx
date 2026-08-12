@@ -1,8 +1,8 @@
 "use client";
 
-import type { GameCharacterStats } from "@rose-griffon/inagle";
+import type { GameCharacterStats } from "@rosegriffon/inagle";
 import { BarChart3 } from "lucide-react";
-import { Button, Popover, PopoverContent, PopoverTrigger } from "@rose-griffon/ui";
+import { Button, Popover, PopoverContent, PopoverTrigger } from "@rosegriffon/ui";
 import { cn } from "@/lib/utils";
 
 interface CharacterStatsPopoverProps {

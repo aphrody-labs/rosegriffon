@@ -6,7 +6,7 @@ import {
 	Avatar,
 	AvatarFallback,
 	AvatarImage,
-} from "@rose-griffon/ui";
+} from "@rosegriffon/ui";
 import { formatDistanceToNow } from "date-fns";
 import { fr } from "date-fns/locale";
 import { ArrowRight } from "lucide-react";

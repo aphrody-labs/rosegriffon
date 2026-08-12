@@ -7,7 +7,7 @@
  *
  * @example
  * ```typescript
- * import { createSkillsAPI } from '@rose-griffon/inagle/skills';
+ * import { createSkillsAPI } from '@rosegriffon/inagle/skills';
  *
  * const skills = createSkillsAPI();
  * console.log(skills.meta.totalSkills); // 2458

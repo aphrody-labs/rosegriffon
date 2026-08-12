@@ -1,7 +1,7 @@
 {
-	"name": "@rose-griffon/cron",
+	"name": "@rosegriffon/cron",
 	"version": "0.1.0",
-	"description": "Daemon de tâches planifiées (cron) pour la maintenance DB, CDN et API",
+	"description": "Daemon de t\u00e2ches planifi\u00e9es (cron) pour la maintenance DB, CDN et API",
 	"type": "module",
 	"main": "./src/index.ts",
 	"exports": {
@@ -18,10 +18,10 @@
 		"@aphrody-code/x": "catalog:",
 		"@aphrody-code/zukan": "catalog:",
 		"@asteasolutions/zod-to-openapi": "catalog:",
-		"@rose-griffon/auth": "workspace:*",
-		"@rose-griffon/db": "workspace:*",
-		"@rose-griffon/inagle": "workspace:*",
-		"@rose-griffon/types": "workspace:*",
+		"@rosegriffon/auth": "workspace:*",
+		"@rosegriffon/db": "workspace:*",
+		"@rosegriffon/inagle": "workspace:*",
+		"@rosegriffon/types": "workspace:*",
 		"cheerio": "catalog:",
 		"discord.js": "catalog:",
 		"zod": "catalog:"
@@ -29,5 +29,9 @@
 	"devDependencies": {
 		"@types/bun": "catalog:",
 		"typescript": "catalog:"
+	},
+	"publishConfig": {
+		"access": "public",
+		"registry": "https://registry.npmjs.org"
 	}
 }

@@ -1,6 +1,6 @@
-# Documentation du Package `@rose-griffon/inagle`
+# Documentation du Package `@rosegriffon/inagle`
 
-Le package `@rose-griffon/inagle` (situé dans [packages/inagle/](file:///packages/inagle)) est l'API universelle et le moteur d'analyse de données de jeu pour **Inazuma Eleven: Victory Road (IEVR)** au sein du monorepo Rose Griffon.
+Le package `@rosegriffon/inagle` (situé dans [packages/inagle/](file:///packages/inagle)) est l'API universelle et le moteur d'analyse de données de jeu pour **Inazuma Eleven: Victory Road (IEVR)** au sein du monorepo Rose Griffon.
 
 Ce document présente l'architecture globale, le pipeline de données, l'alignement avec la base de données et les mécanismes de tests natifs.
 
@@ -8,7 +8,7 @@ Ce document présente l'architecture globale, le pipeline de données, l'alignem
 
 ## 1. Vue d'Ensemble & Architecture
 
-`@rose-griffon/inagle` sert de couche d'abstraction de données (Data Access Layer) partagée par l'application Next.js ([@rose-griffon/azalee-web](file:///apps/azalee)) et les tâches périodiques du démon de fond ([@rose-griffon/cron](file:///packages/cron)).
+`@rosegriffon/inagle` sert de couche d'abstraction de données (Data Access Layer) partagée par l'application Next.js ([@rosegriffon/azalee-web](file:///apps/azalee)) et les tâches périodiques du démon de fond ([@rosegriffon/cron](file:///packages/cron)).
 
 ### Structure du Code source ([packages/inagle/src](file:///packages/inagle/src))
 ```

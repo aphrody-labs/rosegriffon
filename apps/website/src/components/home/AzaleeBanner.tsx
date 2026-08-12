@@ -1,4 +1,4 @@
-import { Button, Card, CardContent } from "@rose-griffon/ui";
+import { Button, Card, CardContent } from "@rosegriffon/ui";
 import { BookOpen, Newspaper } from "lucide-react";
 import Image from "next/image";
 

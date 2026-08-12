@@ -10,9 +10,9 @@
  * Module pur / client-safe : aucun import server-only ; tout passe par `fetch` et les
  * helpers d'URL purs de `lib/cpk/shared`.
  */
-import { cpkAssetUrl, cpkRawUrl } from "@rose-griffon/azalee/cpk/shared";
-import type { CpkFile } from "@rose-griffon/azalee/cpk/shared";
-import type { SkillCutin } from "@rose-griffon/azalee/game/skills-cutin";
+import { cpkAssetUrl, cpkRawUrl } from "@rosegriffon/azalee/cpk/shared";
+import type { CpkFile } from "@rosegriffon/azalee/cpk/shared";
+import type { SkillCutin } from "@rosegriffon/azalee/game/skills-cutin";
 import type { CutinLayerDescriptor, CutinManifest } from "./types";
 
 /** Origine du CDN qui sert les GLB waza assemblés (nie-model-serve). */

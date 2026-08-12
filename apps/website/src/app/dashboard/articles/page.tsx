@@ -8,7 +8,7 @@ import {
 	CardDescription,
 	CardHeader,
 	CardTitle,
-} from "@rose-griffon/ui";
+} from "@rosegriffon/ui";
 import { Calendar, ChevronRight, Edit, Eye, FileText, PenSquare, Plus, Trash2 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";

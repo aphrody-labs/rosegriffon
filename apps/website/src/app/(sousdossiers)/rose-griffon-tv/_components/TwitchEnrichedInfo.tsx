@@ -8,7 +8,7 @@ import {
 	TabsContent,
 	TabsList,
 	TabsTrigger,
-} from "@rose-griffon/ui";
+} from "@rosegriffon/ui";
 import { motion } from "motion/react";
 import { Calendar, Clock, Eye, Gamepad2, TrendingUp, Users } from "lucide-react";
 import Image from "next/image";

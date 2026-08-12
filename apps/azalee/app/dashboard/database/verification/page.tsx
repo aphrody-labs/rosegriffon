@@ -1,6 +1,6 @@
 import { requireAdmin } from "@/lib/auth-helpers";
 import { createClient } from "@/lib/supabase/server";
-import { AdminPageHeader as DashboardPageHeader } from "@rose-griffon/ui";
+import { AdminPageHeader as DashboardPageHeader } from "@rosegriffon/ui";
 import { VerificationClient } from "./VerificationClient";
 import { Icon } from "@/components/ui/Icon";
 

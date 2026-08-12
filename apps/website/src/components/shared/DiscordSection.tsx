@@ -1,6 +1,6 @@
 "use client";
 
-import { Button, DiscordIcon } from "@rose-griffon/ui";
+import { Button, DiscordIcon } from "@rosegriffon/ui";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 
@@ -17,7 +17,7 @@ import RgEmote from "@/components/shared/emotes/RgEmote";
  * (`bg-card`, `bg-muted`, `text-foreground`, `border-border`…), donc la section
  * suit les thèmes Roy, Gaëlle et Azalée. Seule l'identité de marque Discord —
  * le logo et l'aplat d'accent du bouton — conserve `bg-discord` / `text-discord`,
- * constantes de marque exposées en tokens par `@rose-griffon/ui`.
+ * constantes de marque exposées en tokens par `@rosegriffon/ui`.
  */
 
 /** Serveur Rose Griffon interrogé via le widget public de Discord. */

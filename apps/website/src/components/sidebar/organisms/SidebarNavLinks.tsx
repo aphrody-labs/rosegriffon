@@ -11,7 +11,7 @@ import {
 	SidebarGroupLabel,
 	SidebarMenu,
 	SidebarMenuItem,
-} from "@rose-griffon/ui";
+} from "@rosegriffon/ui";
 import type { MenuItem } from "@/lib/sidebar-config";
 
 interface SidebarNavLinksProps {

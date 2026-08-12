@@ -1,4 +1,4 @@
-import { DashboardGrid, QuickActionCard } from "@rose-griffon/ui";
+import { DashboardGrid, QuickActionCard } from "@rosegriffon/ui";
 import { BarChart3, BookOpen, Calendar, Database, Image as ImageIcon, Settings, Shield, Users } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 

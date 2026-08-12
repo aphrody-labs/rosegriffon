@@ -8,7 +8,7 @@
 // Conséquence pratique : demander `select("*")` ou l'une de ces colonnes avec un
 // client navigateur ou serveur non privilégié fait échouer la requête ENTIÈRE
 // avec un `42501 permission denied for table profiles`. Passer par
-// `@rose-griffon/db/service` (service-role) quand la donnée personnelle est
+// `@rosegriffon/db/service` (service-role) quand la donnée personnelle est
 // réellement nécessaire, après avoir vérifié la session.
 
 import type { Database } from "./types.gen";

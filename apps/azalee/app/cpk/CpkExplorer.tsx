@@ -17,8 +17,8 @@ import { Icon } from "@/components/ui/Icon";
 import { CpkFilePreview } from "@/app/cpk/CpkFilePreview";
 import { CpkFolderView } from "@/app/cpk/CpkFolderView";
 import { CpkTree } from "@/app/cpk/CpkTree";
-import { cpkAssetKind, cpkAssetUrl, cpkRawUrl, cpkPreviewKind, segLabel } from "@rose-griffon/azalee/cpk/shared";
-import type { CpkNode } from "@rose-griffon/azalee/cpk/tree";
+import { cpkAssetKind, cpkAssetUrl, cpkRawUrl, cpkPreviewKind, segLabel } from "@rosegriffon/azalee/cpk/shared";
+import type { CpkNode } from "@rosegriffon/azalee/cpk/tree";
 
 interface FileSel {
 	id: string;

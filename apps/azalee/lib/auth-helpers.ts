@@ -2,8 +2,8 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
-import { isAdmin, resolveProfile } from "@rose-griffon/auth";
-import { MEDAILLE_AZALEE_ROLE_ID } from "@rose-griffon/types";
+import { isAdmin, resolveProfile } from "@rosegriffon/auth";
+import { MEDAILLE_AZALEE_ROLE_ID } from "@rosegriffon/types";
 
 /**
  * Get the current Better Auth session server-side.
@@ -92,7 +92,7 @@ export async function hasMedailleAzaleeRole(
 	if (!discordId) {
 		return false;
 	}
-	const { createSupabaseServiceClient } = await import("@rose-griffon/db/service");
+	const { createSupabaseServiceClient } = await import("@rosegriffon/db/service");
 	const supabase = createSupabaseServiceClient();
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	const { data } = (await (supabase as any)

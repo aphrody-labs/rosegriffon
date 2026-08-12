@@ -18,7 +18,7 @@
 //
 // Aucune PII : données de jeu publiques (personnages/techniques), pas de membres.
 
-import { createSupabaseServiceClient } from "@rose-griffon/db/service";
+import { createSupabaseServiceClient } from "@rosegriffon/db/service";
 import { ingestSources, type RagSource } from "./rag-store-local";
 
 const PAGE_SIZE = 1000;

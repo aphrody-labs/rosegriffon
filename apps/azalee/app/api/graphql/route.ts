@@ -1,7 +1,7 @@
 import { useGraphQlJit } from "@envelop/graphql-jit";
 import { useResponseCache } from "@graphql-yoga/plugin-response-cache";
 import { createSchema, createYoga } from "graphql-yoga";
-import { ragSearch, type RagSourceKind } from "@rose-griffon/db/rag";
+import { ragSearch, type RagSourceKind } from "@rosegriffon/db/rag";
 import { wikiService } from "@/lib/wiki-service";
 
 const typeDefs = `

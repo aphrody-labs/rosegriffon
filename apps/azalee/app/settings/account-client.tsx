@@ -15,7 +15,7 @@ import {
 	type AccountProfileValues,
 	type AccountSession,
 	type AccountTabId,
-} from "@rose-griffon/ui";
+} from "@rosegriffon/ui";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 

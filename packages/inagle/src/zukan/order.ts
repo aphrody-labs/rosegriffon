@@ -12,7 +12,7 @@
  * ⚠️ CONTRAINTE BARREL : ce module tire `@aphrody-code/bxc`. Il NE DOIT JAMAIS
  * être ré-exporté par `zukan/index.ts` ni `src/index.ts` (le barrel est
  * value-importé en runtime par Azalée → bundle Next cassé). Importer en leaf :
- *   import { crawlZukanOrderPages } from "@rose-griffon/inagle/zukan/order";
+ *   import { crawlZukanOrderPages } from "@rosegriffon/inagle/zukan/order";
  *
  * Le helper pur `buildOrderMap` (sans bxc) est aussi exporté ici pour les
  * scripts qui crawlent en `fetch()` statique (cf. crawl-zukan-order.ts).

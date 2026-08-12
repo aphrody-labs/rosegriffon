@@ -9,7 +9,7 @@ tourner. Tout est en **Bun**, tout tourne sur un seul VPS.
 ```
 rg/
 ├── apps/
-│   ├── azalee/          # Wiki IEVR (azalee.rosegriffon.fr) — @rose-griffon/azalee-web
+│   ├── azalee/          # Wiki IEVR (azalee.rosegriffon.fr) — @rosegriffon/azalee-web
 │   ├── website/         # Site principal (rosegriffon.fr)
 │   ├── cdn/             # Serveur d'images du CDN
 │   ├── cdn-variants/    # Redimensionnement + WebP à la volée
@@ -39,7 +39,7 @@ rg/
 | --- | --- |
 | Runtime | Bun (1.3.14 en CI et en production) |
 | Front | Next 16 + React 19, compilateur React actif |
-| Style | Tailwind v4 + design system `@rose-griffon/ui` |
+| Style | Tailwind v4 + design system `@rosegriffon/ui` |
 | Données | Supabase Postgres + miroir SQLite embarqué |
 | Auth | better-auth (Discord, Google, Steam) |
 | Lint | oxlint + eslint |
@@ -85,8 +85,8 @@ Le `catalog:` du `package.json` racine est la source unique de vérité pour les
 versions partagées : toute dépendance commune passe par lui. Les dépendances
 internes s'écrivent `workspace:*`, jamais une version figée.
 
-Imports internes : `@rose-griffon/ui`, `@rose-griffon/db`,
-`@rose-griffon/types`, `@rose-griffon/azalee`, `@rose-griffon/config/*`.
+Imports internes : `@rosegriffon/ui`, `@rosegriffon/db`,
+`@rosegriffon/types`, `@rosegriffon/azalee`, `@rosegriffon/config/*`.
 
 ## Travailler avec un agent
 

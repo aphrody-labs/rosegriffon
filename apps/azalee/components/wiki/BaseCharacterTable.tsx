@@ -1,6 +1,6 @@
 "use client";
 
-import type { BaseCharacter } from "@rose-griffon/inagle";
+import type { BaseCharacter } from "@rosegriffon/inagle";
 import { CircleDot, Sparkles } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -8,10 +8,10 @@ import { useLanguage } from "@/components/providers/language-provider";
 import { CommonSpriteIcon } from "@/components/ui/CommonSpriteIcon";
 import { RarityBadge } from "@/components/ui/rarity-badge";
 import { SafeImage } from "@/components/ui/SafeImage";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@rose-griffon/ui";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@rosegriffon/ui";
 import type { SpriteCommonKey } from "@/config/sprites-common";
-import { isFemaleGender } from "@rose-griffon/azalee/game/gender";
-import { getCharacterImageUrl, getSkillCategoryIconUrl } from "@rose-griffon/azalee/images";
+import { isFemaleGender } from "@rosegriffon/azalee/game/gender";
+import { getCharacterImageUrl, getSkillCategoryIconUrl } from "@rosegriffon/azalee/images";
 import { cn } from "@/lib/utils";
 import { CharacterStatsPopover } from "./CharacterStatsPopover";
 

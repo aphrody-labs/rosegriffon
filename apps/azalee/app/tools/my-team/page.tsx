@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import type { PickerCharacter } from "@/components/tools/my-team/CharacterPicker";
 import { getServerSession } from "@/lib/auth-helpers";
-import { getCharacterImageUrl } from "@rose-griffon/azalee/images";
+import { getCharacterImageUrl } from "@rosegriffon/azalee/images";
 import { wikiService } from "@/lib/wiki-service";
 import { TeamBuilderLoader } from "./TeamBuilderLoader";
 

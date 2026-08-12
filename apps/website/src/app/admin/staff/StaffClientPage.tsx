@@ -14,7 +14,7 @@ import {
 	SelectValue,
 	DashboardStatsCard as StatsCard,
 	AdminPageHeader,
-} from "@rose-griffon/ui";
+} from "@rosegriffon/ui";
 import {
 	ArrowDownAZ,
 	ArrowUp01,

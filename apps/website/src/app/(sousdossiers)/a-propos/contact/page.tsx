@@ -16,7 +16,7 @@ import {
 	FormItem,
 	FormLabel,
 	FormMessage,
-} from "@rose-griffon/ui";
+} from "@rosegriffon/ui";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
 import { useRef, useState } from "react";

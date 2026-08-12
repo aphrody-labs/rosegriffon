@@ -1,6 +1,6 @@
 # Azalée dans une application Tauri v2 — sidecar Bun et client distant
 
-> **Cap** : `@rose-griffon/azalee` doit alimenter une application de bureau **même quand la machine de
+> **Cap** : `@rosegriffon/azalee` doit alimenter une application de bureau **même quand la machine de
 > l'utilisateur n'a ni miroir SQLite ni dump du jeu**. La bibliothèque expose donc deux voies vers les
 > mêmes 41 routes : un **sidecar Bun** local (données du disque, zéro réseau) et un **client HTTP typé**
 > vers l'API publique. Le choix entre les deux est automatique.
@@ -13,9 +13,9 @@ Tout ce qui suit a été exécuté sur ce dépôt le 2026-08-10 ; les sorties re
 ┌───────────────────────── application Tauri v2 ─────────────────────────┐
 │                                                                        │
 │  webview (bundle navigateur)                                           │
-│    @rose-griffon/azalee            → règles de jeu, URLs CDN, i18n,     │
+│    @rosegriffon/azalee            → règles de jeu, URLs CDN, i18n,     │
 │                                      recherche floue (2,67 Mo)         │
-│    @rose-griffon/azalee/remote     → client HTTP typé (12,2 Ko)        │
+│    @rosegriffon/azalee/remote     → client HTTP typé (12,2 Ko)        │
 │            │                                                           │
 │            │ resolveAzaleeBaseUrl([sidecar, api publique])             │
 │            ▼                                                           │
@@ -235,9 +235,9 @@ import {
   createAzaleeClient,
   isAzaleeNotFound,
   resolveAzaleeBaseUrl,
-} from "@rose-griffon/azalee/remote";
+} from "@rosegriffon/azalee/remote";
 // La logique pure vient du bundle, jamais du réseau.
-import { getCharacterFaceUrl, translateEffect } from "@rose-griffon/azalee";
+import { getCharacterFaceUrl, translateEffect } from "@rosegriffon/azalee";
 
 const SIDECAR = "http://127.0.0.1:3010";
 
@@ -318,7 +318,7 @@ Un CLI ou un service Bun n'a pas besoin de sonder en HTTP : `createAzaleeData` i
 choisit la source, avec la même surface de lecture que le client distant.
 
 ```ts
-import { createAzaleeData } from "@rose-griffon/azalee/server";
+import { createAzaleeData } from "@rosegriffon/azalee/server";
 
 const data = createAzaleeData();          // mode "auto"
 console.log(data.source, "|", data.reason);
@@ -345,7 +345,7 @@ La matérialisation des index CPK et de texte se fait au **premier accès** (SQL
 appel de données.
 
 ```ts
-import { probeAzaleeApi } from "@rose-griffon/azalee/remote";
+import { probeAzaleeApi } from "@rosegriffon/azalee/remote";
 
 for (let i = 0; i < 40; i++) {
   const health = await probeAzaleeApi(SIDECAR, { timeoutMs: 500 });

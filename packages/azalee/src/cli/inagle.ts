@@ -10,7 +10,7 @@
 import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";
 
-import { createInagleService } from "@rose-griffon/inagle/service";
+import { createInagleService } from "@rosegriffon/inagle/service";
 
 import { getSqlitePath, openReadonlyDatabase } from "./context";
 

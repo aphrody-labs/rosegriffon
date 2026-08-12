@@ -1,4 +1,4 @@
-import { ragSearch, type RagSourceKind } from "@rose-griffon/db/rag";
+import { ragSearch, type RagSourceKind } from "@rosegriffon/db/rag";
 
 // RAG unifié — endpoint REST additif (cf. iecode/re/rag/UNIFIED-RAG-PLAN.md §5).
 // POST /api/rag/search  { query: string, k?: number, kinds?: string[] }

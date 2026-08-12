@@ -31,7 +31,7 @@
       },
     },
     "apps/azalee": {
-      "name": "@rose-griffon/azalee-web",
+      "name": "@rosegriffon/azalee-web",
       "version": "0.1.0",
       "dependencies": {
         "@better-auth/agent-auth": "catalog:",
@@ -75,14 +75,14 @@
         "@react-three/drei": "^10.7.7",
         "@react-three/fiber": "^9.6.1",
         "@react-three/postprocessing": "^3.0.4",
-        "@rose-griffon/assets": "workspace:*",
-        "@rose-griffon/auth": "workspace:*",
-        "@rose-griffon/azalee": "workspace:*",
-        "@rose-griffon/db": "workspace:*",
-        "@rose-griffon/inagle": "workspace:*",
-        "@rose-griffon/inagle-cross": "workspace:*",
-        "@rose-griffon/types": "workspace:*",
-        "@rose-griffon/ui": "workspace:*",
+        "@rosegriffon/assets": "workspace:*",
+        "@rosegriffon/auth": "workspace:*",
+        "@rosegriffon/azalee": "workspace:*",
+        "@rosegriffon/db": "workspace:*",
+        "@rosegriffon/inagle": "workspace:*",
+        "@rosegriffon/inagle-cross": "workspace:*",
+        "@rosegriffon/types": "workspace:*",
+        "@rosegriffon/ui": "workspace:*",
         "@sentry/nextjs": "catalog:",
         "@supabase/supabase-js": "catalog:",
         "@theatre/core": "^0.7.2",
@@ -137,7 +137,7 @@
       "devDependencies": {
         "@next/bundle-analyzer": "catalog:",
         "@playwright/test": "catalog:",
-        "@rose-griffon/config": "workspace:*",
+        "@rosegriffon/config": "workspace:*",
         "@tailwindcss/postcss": "catalog:",
         "@tailwindcss/typography": "catalog:",
         "@testing-library/jest-dom": "catalog:",
@@ -164,12 +164,12 @@
       },
     },
     "apps/bot": {
-      "name": "@rose-griffon/bot",
+      "name": "@rosegriffon/bot",
       "version": "0.1.0",
       "dependencies": {
         "@aphrody-code/canvas": "catalog:",
-        "@rose-griffon/db": "workspace:*",
-        "@rose-griffon/types": "workspace:*",
+        "@rosegriffon/db": "workspace:*",
+        "@rosegriffon/types": "workspace:*",
         "@rpbey/discordx": "catalog:",
         "@supabase/supabase-js": "catalog:",
         "discord.js": "catalog:",
@@ -177,7 +177,7 @@
         "zod": "catalog:",
       },
       "devDependencies": {
-        "@rose-griffon/config": "workspace:*",
+        "@rosegriffon/config": "workspace:*",
         "@types/bun": "catalog:",
         "oxlint": "catalog:",
         "typescript": "catalog:",
@@ -196,7 +196,7 @@
       "name": "rag-api",
       "version": "0.1.0",
       "dependencies": {
-        "@rose-griffon/db": "workspace:*",
+        "@rosegriffon/db": "workspace:*",
       },
     },
     "apps/realtime": {
@@ -211,7 +211,7 @@
       "version": "0.1.0",
     },
     "apps/website": {
-      "name": "@rose-griffon/website",
+      "name": "@rosegriffon/website",
       "version": "1.4.0",
       "dependencies": {
         "@googlemaps/js-api-loader": "catalog:",
@@ -244,12 +244,12 @@
         "@radix-ui/react-toggle": "catalog:",
         "@radix-ui/react-toggle-group": "catalog:",
         "@radix-ui/react-tooltip": "catalog:",
-        "@rose-griffon/assets": "workspace:*",
-        "@rose-griffon/auth": "workspace:*",
-        "@rose-griffon/db": "workspace:*",
-        "@rose-griffon/patreon-bun": "workspace:*",
-        "@rose-griffon/types": "workspace:*",
-        "@rose-griffon/ui": "workspace:*",
+        "@rosegriffon/assets": "workspace:*",
+        "@rosegriffon/auth": "workspace:*",
+        "@rosegriffon/db": "workspace:*",
+        "@rosegriffon/patreon-bun": "workspace:*",
+        "@rosegriffon/types": "workspace:*",
+        "@rosegriffon/ui": "workspace:*",
         "@sentry/nextjs": "catalog:",
         "@stripe/stripe-js": "catalog:",
         "@supabase/ssr": "catalog:",
@@ -306,7 +306,7 @@
       },
       "devDependencies": {
         "@next/bundle-analyzer": "catalog:",
-        "@rose-griffon/config": "workspace:*",
+        "@rosegriffon/config": "workspace:*",
         "@tailwindcss/postcss": "catalog:",
         "@testing-library/jest-dom": "catalog:",
         "@testing-library/react": "catalog:",
@@ -326,15 +326,15 @@
       },
     },
     "packages/assets": {
-      "name": "@rose-griffon/assets",
-      "version": "0.1.0",
+      "name": "@rosegriffon/assets",
+      "version": "0.1.1",
     },
     "packages/auth": {
-      "name": "@rose-griffon/auth",
-      "version": "0.1.0",
+      "name": "@rosegriffon/auth",
+      "version": "0.1.1",
       "dependencies": {
-        "@rose-griffon/db": "workspace:*",
-        "@rose-griffon/types": "workspace:*",
+        "@rosegriffon/db": "workspace:*",
+        "@rosegriffon/types": "workspace:*",
         "@supabase/supabase-js": "catalog:",
         "better-auth": "catalog:",
         "zod": "catalog:",
@@ -348,21 +348,21 @@
       },
     },
     "packages/azalee": {
-      "name": "@rose-griffon/azalee",
+      "name": "@rosegriffon/azalee",
       "version": "1.0.0",
       "bin": {
         "azalee": "./src/cli.ts",
       },
       "dependencies": {
-        "@rose-griffon/db": "workspace:*",
-        "@rose-griffon/inagle": "workspace:*",
+        "@rosegriffon/db": "workspace:*",
+        "@rosegriffon/inagle": "workspace:*",
         "@supabase/supabase-js": "catalog:",
         "commander": "catalog:",
         "drizzle-orm": "^0.45.2",
         "wanakana": "catalog:",
       },
       "devDependencies": {
-        "@rose-griffon/config": "workspace:*",
+        "@rosegriffon/config": "workspace:*",
         "@types/bun": "catalog:",
         "@types/node": "catalog:",
         "oxlint": "catalog:",
@@ -370,21 +370,21 @@
       },
     },
     "packages/config": {
-      "name": "@rose-griffon/config",
-      "version": "0.1.0",
+      "name": "@rosegriffon/config",
+      "version": "0.1.1",
     },
     "packages/cron": {
-      "name": "@rose-griffon/cron",
+      "name": "@rosegriffon/cron",
       "version": "0.1.0",
       "dependencies": {
         "@aphrody-code/bxc": "catalog:",
         "@aphrody-code/x": "catalog:",
         "@aphrody-code/zukan": "catalog:",
         "@asteasolutions/zod-to-openapi": "catalog:",
-        "@rose-griffon/auth": "workspace:*",
-        "@rose-griffon/db": "workspace:*",
-        "@rose-griffon/inagle": "workspace:*",
-        "@rose-griffon/types": "workspace:*",
+        "@rosegriffon/auth": "workspace:*",
+        "@rosegriffon/db": "workspace:*",
+        "@rosegriffon/inagle": "workspace:*",
+        "@rosegriffon/types": "workspace:*",
         "cheerio": "catalog:",
         "discord.js": "catalog:",
         "zod": "catalog:",
@@ -395,10 +395,10 @@
       },
     },
     "packages/db": {
-      "name": "@rose-griffon/db",
-      "version": "0.2.0",
+      "name": "@rosegriffon/db",
+      "version": "0.2.1",
       "dependencies": {
-        "@rose-griffon/types": "workspace:*",
+        "@rosegriffon/types": "workspace:*",
         "@supabase/ssr": "catalog:",
         "@supabase/supabase-js": "catalog:",
       },
@@ -409,8 +409,8 @@
       },
     },
     "packages/inagle": {
-      "name": "@rose-griffon/inagle",
-      "version": "1.2.0",
+      "name": "@rosegriffon/inagle",
+      "version": "2.0.2",
       "bin": {
         "inagle": "./dist/cli.js",
       },
@@ -442,7 +442,7 @@
       },
     },
     "packages/inagle-cross": {
-      "name": "@rose-griffon/inagle-cross",
+      "name": "@rosegriffon/inagle-cross",
       "version": "0.1.0",
       "dependencies": {
         "zod": "catalog:",
@@ -453,25 +453,25 @@
       },
     },
     "packages/mcp": {
-      "name": "@rose-griffon/mcp",
+      "name": "@rosegriffon/mcp",
       "version": "1.0.0",
       "bin": {
         "rg-mcp": "./src/cli.ts",
       },
       "dependencies": {
-        "@rose-griffon/azalee": "workspace:*",
+        "@rosegriffon/azalee": "workspace:*",
         "zod": "catalog:",
       },
       "devDependencies": {
-        "@rose-griffon/config": "workspace:*",
+        "@rosegriffon/config": "workspace:*",
         "@types/bun": "catalog:",
         "oxlint": "catalog:",
         "typescript": "catalog:",
       },
     },
     "packages/patreon-bun": {
-      "name": "@rose-griffon/patreon-bun",
-      "version": "0.20.1",
+      "name": "@rosegriffon/patreon-bun",
+      "version": "0.20.2",
       "devDependencies": {
         "@types/bun": "catalog:",
         "msw": "catalog:",
@@ -481,19 +481,19 @@
       },
     },
     "packages/types": {
-      "name": "@rose-griffon/types",
-      "version": "0.2.0",
+      "name": "@rosegriffon/types",
+      "version": "0.2.1",
       "dependencies": {
         "zod": "catalog:",
       },
       "devDependencies": {
-        "@rose-griffon/config": "workspace:*",
+        "@rosegriffon/config": "workspace:*",
         "typescript": "catalog:",
       },
     },
     "packages/ui": {
-      "name": "@rose-griffon/ui",
-      "version": "0.2.0",
+      "name": "@rosegriffon/ui",
+      "version": "0.2.1",
       "dependencies": {
         "@hookform/resolvers": "catalog:",
         "@radix-ui/react-accordion": "catalog:",
@@ -522,7 +522,7 @@
         "@radix-ui/react-toggle": "catalog:",
         "@radix-ui/react-toggle-group": "catalog:",
         "@radix-ui/react-tooltip": "catalog:",
-        "@rose-griffon/db": "workspace:*",
+        "@rosegriffon/db": "workspace:*",
         "@tanstack/react-table": "catalog:",
         "class-variance-authority": "catalog:",
         "clsx": "catalog:",
@@ -1624,35 +1624,35 @@
 
     "@rollup/rollup-win32-x64-msvc": ["@rollup/rollup-win32-x64-msvc@4.61.1", "", { "os": "win32", "cpu": "x64" }, "sha512-X+zaP2x+j4RXGfbp/seSoRHWnPxzApilDszisZxbYH5C/jTxFhCtDNdPGZb9lJyYPs24wGxruPF7Y+sIXt9Gzw=="],
 
-    "@rose-griffon/assets": ["@rose-griffon/assets@workspace:packages/assets"],
+    "@rosegriffon/assets": ["@rosegriffon/assets@workspace:packages/assets"],
 
-    "@rose-griffon/auth": ["@rose-griffon/auth@workspace:packages/auth"],
+    "@rosegriffon/auth": ["@rosegriffon/auth@workspace:packages/auth"],
 
-    "@rose-griffon/azalee": ["@rose-griffon/azalee@workspace:packages/azalee"],
+    "@rosegriffon/azalee": ["@rosegriffon/azalee@workspace:packages/azalee"],
 
-    "@rose-griffon/azalee-web": ["@rose-griffon/azalee-web@workspace:apps/azalee"],
+    "@rosegriffon/azalee-web": ["@rosegriffon/azalee-web@workspace:apps/azalee"],
 
-    "@rose-griffon/bot": ["@rose-griffon/bot@workspace:apps/bot"],
+    "@rosegriffon/bot": ["@rosegriffon/bot@workspace:apps/bot"],
 
-    "@rose-griffon/config": ["@rose-griffon/config@workspace:packages/config"],
+    "@rosegriffon/config": ["@rosegriffon/config@workspace:packages/config"],
 
-    "@rose-griffon/cron": ["@rose-griffon/cron@workspace:packages/cron"],
+    "@rosegriffon/cron": ["@rosegriffon/cron@workspace:packages/cron"],
 
-    "@rose-griffon/db": ["@rose-griffon/db@workspace:packages/db"],
+    "@rosegriffon/db": ["@rosegriffon/db@workspace:packages/db"],
 
-    "@rose-griffon/inagle": ["@rose-griffon/inagle@workspace:packages/inagle"],
+    "@rosegriffon/inagle": ["@rosegriffon/inagle@workspace:packages/inagle"],
 
-    "@rose-griffon/inagle-cross": ["@rose-griffon/inagle-cross@workspace:packages/inagle-cross"],
+    "@rosegriffon/inagle-cross": ["@rosegriffon/inagle-cross@workspace:packages/inagle-cross"],
 
-    "@rose-griffon/mcp": ["@rose-griffon/mcp@workspace:packages/mcp"],
+    "@rosegriffon/mcp": ["@rosegriffon/mcp@workspace:packages/mcp"],
 
-    "@rose-griffon/patreon-bun": ["@rose-griffon/patreon-bun@workspace:packages/patreon-bun"],
+    "@rosegriffon/patreon-bun": ["@rosegriffon/patreon-bun@workspace:packages/patreon-bun"],
 
-    "@rose-griffon/types": ["@rose-griffon/types@workspace:packages/types"],
+    "@rosegriffon/types": ["@rosegriffon/types@workspace:packages/types"],
 
-    "@rose-griffon/ui": ["@rose-griffon/ui@workspace:packages/ui"],
+    "@rosegriffon/ui": ["@rosegriffon/ui@workspace:packages/ui"],
 
-    "@rose-griffon/website": ["@rose-griffon/website@workspace:apps/website"],
+    "@rosegriffon/website": ["@rosegriffon/website@workspace:apps/website"],
 
     "@rpbey/di": ["@rpbey/di@0.1.1", "https://npm.pkg.github.com/download/@rpbey/di/0.1.1/59577ca17abaa842dcfc1563e3a023eb815cfefd", { "dependencies": { "tsyringe": "^4.10.0", "typedi": "^0.10.0" } }, "sha512-mqowgfXFGihMCnBO96T9bh4qr1XtZDzXa8Rx+PedaoDzfrmlAXCl0DM5hyJiK0AfmL+XsvjdtVJ72dlfBZFZbA=="],
 

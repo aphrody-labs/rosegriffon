@@ -2,7 +2,7 @@
 
 import { getPgPool } from "@/lib/db/pg";
 import { createLogger } from "@/lib/logger";
-import type { StreamSchedule } from "@rose-griffon/types";
+import type { StreamSchedule } from "@rosegriffon/types";
 
 const logger = createLogger("stream-schedule");
 

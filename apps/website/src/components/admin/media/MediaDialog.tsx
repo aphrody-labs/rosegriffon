@@ -11,7 +11,7 @@ import {
 	TabsList,
 	TabsTrigger,
 	ScrollArea,
-} from "@rose-griffon/ui";
+} from "@rosegriffon/ui";
 import { Loader2, Smile, Upload } from "lucide-react";
 import { useRef, useState } from "react";
 import { toast } from "sonner";

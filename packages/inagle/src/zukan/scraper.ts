@@ -7,7 +7,7 @@
 // Surface canonique unifiée pour l'accès Zukan live : on ré-expose la SDK
 // `@aphrody-code/zukan` (extraite de bxc) afin que TOUS les clients du monorepo
 // (cron, scripts, apps) importent le scraper Zukan depuis un seul point —
-// `@rose-griffon/inagle` — plutôt que de réimplémenter des crawls ad hoc.
+// `@rosegriffon/inagle` — plutôt que de réimplémenter des crawls ad hoc.
 //
 // La SDK fournit `ZukanScraper` (getCharacterList / getCharacterDetail) et les
 // types `ZukanCharacterRef` / `ZukanCharacterDetail`. Les parsers locaux

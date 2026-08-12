@@ -6,7 +6,7 @@ import type * as React from "react";
 import { useRef } from "react";
 import type { JSX } from "react";
 
-import { Button } from "@rose-griffon/ui";
+import { Button } from "@rosegriffon/ui";
 
 function clamp(value: number, min: number, max: number) {
 	return Math.min(Math.max(value, min), max);

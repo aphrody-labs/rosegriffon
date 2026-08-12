@@ -6,7 +6,7 @@ import { ChevronRight, Loader2, RefreshCw } from "lucide-react";
 import { useCallback, useEffect, useRef, useState, useTransition } from "react";
 import { getPatchNoteDetail, getPatchNotes } from "@/app/actions/news";
 import type { PatchNoteDetail, PatchNoteSummary } from "@/app/actions/news";
-import { ScrollArea } from "@rose-griffon/ui";
+import { ScrollArea } from "@rosegriffon/ui";
 import { cn } from "@/lib/utils";
 import { PatchNoteViewer } from "./PatchNoteViewer";
 

@@ -90,18 +90,18 @@ const nextConfig: NextConfig = {
 		root: path.resolve(__dirname, "../../"),
 	},
 	transpilePackages: [
-		"@rose-griffon/azalee",
-		"@rose-griffon/ui",
-		"@rose-griffon/db",
-		"@rose-griffon/types",
-		"@rose-griffon/config",
-		"@rose-griffon/auth",
-		"@rose-griffon/assets",
+		"@rosegriffon/azalee",
+		"@rosegriffon/ui",
+		"@rosegriffon/db",
+		"@rosegriffon/types",
+		"@rosegriffon/config",
+		"@rosegriffon/auth",
+		"@rosegriffon/assets",
 	],
 
 	// Packages Node.js natifs exclus du bundling serveur
 	serverExternalPackages: [
-		"@rose-griffon/inagle",
+		"@rosegriffon/inagle",
 		"better-auth",
 		"@better-auth/kysely-adapter",
 		"kysely",

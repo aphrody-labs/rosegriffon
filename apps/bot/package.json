@@ -1,5 +1,5 @@
 {
-	"name": "@rose-griffon/bot",
+	"name": "@rosegriffon/bot",
 	"version": "0.1.0",
 	"private": true,
 	"description": "Bot Discord Rose Griffon — slash commands public + admin, sync members, canvas cards",
@@ -17,8 +17,8 @@
 	},
 	"dependencies": {
 		"@aphrody-code/canvas": "catalog:",
-		"@rose-griffon/db": "workspace:*",
-		"@rose-griffon/types": "workspace:*",
+		"@rosegriffon/db": "workspace:*",
+		"@rosegriffon/types": "workspace:*",
 		"@rpbey/discordx": "catalog:",
 		"@supabase/supabase-js": "catalog:",
 		"discord.js": "catalog:",
@@ -26,7 +26,7 @@
 		"zod": "catalog:"
 	},
 	"devDependencies": {
-		"@rose-griffon/config": "workspace:*",
+		"@rosegriffon/config": "workspace:*",
 		"@types/bun": "catalog:",
 		"oxlint": "catalog:",
 		"typescript": "catalog:",

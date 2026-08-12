@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
-import { SidebarInset, SidebarProvider, Toaster, useBreakpoint, useSidebar } from "@rose-griffon/ui";
+import { SidebarInset, SidebarProvider, Toaster, useBreakpoint, useSidebar } from "@rosegriffon/ui";
 import { WebsiteNavigationRail } from "@/components/layout/WebsiteNavigationRail";
 
 /** Largeur de la sidebar desktop — source unique (CSS var + décalage du bouton). */

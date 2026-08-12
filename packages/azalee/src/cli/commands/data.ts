@@ -101,7 +101,7 @@ export function registerDataCommand(program: Command): void {
 		.action(() => {
 			const ok = runDataStep(
 				"data load (Supabase → miroir SQLite)",
-				`bun --filter @rose-griffon/azalee-web backup:supabase`,
+				`bun --filter @rosegriffon/azalee-web backup:supabase`,
 			);
 			process.exit(ok ? 0 : 1);
 		});
@@ -124,8 +124,8 @@ export function registerDataCommand(program: Command): void {
 		.command("typecheck")
 		.description("Type-check strict (azalee + inagle, tsc --noEmit)")
 		.action(() => {
-			const a = runDataStep("typecheck azalee", `bun --filter @rose-griffon/azalee-web type-check`);
-			const b = runDataStep("typecheck inagle", `bun --filter @rose-griffon/inagle type-check`);
+			const a = runDataStep("typecheck azalee", `bun --filter @rosegriffon/azalee-web type-check`);
+			const b = runDataStep("typecheck inagle", `bun --filter @rosegriffon/inagle type-check`);
 			process.exit(a && b ? 0 : 1);
 		});
 
@@ -177,9 +177,9 @@ export function registerDataCommand(program: Command): void {
 					`bun packages/inagle/src/cli.ts push --env ${AZALEE_ENV}`,
 					{ DATA_ROOT: DATA_ROOT_DEFAULT, DATA_PATH: DATA_ROOT_DEFAULT },
 				],
-				["load", `bun --filter @rose-griffon/azalee-web backup:supabase`, {}],
-				["typecheck azalee", `bun --filter @rose-griffon/azalee-web type-check`, {}],
-				["typecheck inagle", `bun --filter @rose-griffon/inagle type-check`, {}],
+				["load", `bun --filter @rosegriffon/azalee-web backup:supabase`, {}],
+				["typecheck azalee", `bun --filter @rosegriffon/azalee-web type-check`, {}],
+				["typecheck inagle", `bun --filter @rosegriffon/inagle type-check`, {}],
 			];
 			for (const [label, cmd, env] of steps) {
 				if (!runDataStep(label, cmd, env)) {

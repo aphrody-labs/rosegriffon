@@ -1,4 +1,4 @@
-import { Skeleton } from "@rose-griffon/ui";
+import { Skeleton } from "@rosegriffon/ui";
 
 export default function Loading() {
 	return (

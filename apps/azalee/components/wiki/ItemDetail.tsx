@@ -1,6 +1,6 @@
 "use client";
 
-import type { Item } from "@rose-griffon/inagle";
+import type { Item } from "@rosegriffon/inagle";
 import {
 	ArrowRightLeft,
 	Backpack,
@@ -14,8 +14,8 @@ import {
 import Image from "next/image";
 import { useState } from "react";
 import { Icon } from "@/components/ui/Icon";
-import { PLACEHOLDERS, resolveAssetUrl } from "@rose-griffon/azalee/images";
-import { japaneseToRomaji } from "@rose-griffon/azalee/text/japanese-romaji";
+import { PLACEHOLDERS, resolveAssetUrl } from "@rosegriffon/azalee/images";
+import { japaneseToRomaji } from "@rosegriffon/azalee/text/japanese-romaji";
 
 const RARITY_LABELS: Record<string, string> = {
 	"1": "Normal",

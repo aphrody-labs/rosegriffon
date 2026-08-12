@@ -5,7 +5,7 @@
  * Point d'entrée volontairement mince : il construit le programme
  * (`src/cli/program.ts`) et l'exécute. Toute la logique vit dans
  * `src/cli/commands/*` (une commande par module) et dans la bibliothèque
- * `@rose-griffon/azalee` pour ce qui relève des règles de jeu.
+ * `@rosegriffon/azalee` pour ce qui relève des règles de jeu.
  *
  * APIs Bun natives de bout en bout (`Bun.SQL`, `bun:sqlite`, `Bun.spawn`,
  * `Bun.file`) : les variables d'environnement (`.env`, `.env.local`) sont

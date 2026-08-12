@@ -1,6 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "../types.gen";
-import type { DashboardStats } from "@rose-griffon/types";
+import type { DashboardStats } from "@rosegriffon/types";
 
 interface CountResult {
 	count: number | null;

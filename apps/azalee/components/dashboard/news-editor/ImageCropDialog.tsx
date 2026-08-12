@@ -14,7 +14,7 @@ import {
 	DialogFooter,
 	DialogHeader,
 	DialogTitle,
-} from "@rose-griffon/ui";
+} from "@rosegriffon/ui";
 import { cn } from "@/lib/utils";
 import "react-image-crop/dist/ReactCrop.css";
 import { CROP_RATIO_PRESETS } from "./constants";

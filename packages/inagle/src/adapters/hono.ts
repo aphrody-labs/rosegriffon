@@ -28,7 +28,7 @@ export async function createInagleAppAsync() {
 	// Root / Info
 	app.get("/", (c) => {
 		return c.json({
-			name: "@rose-griffon/inagle",
+			name: "@rosegriffon/inagle",
 			version: "0.3.0",
 			description: "Universal Game Data API for Inazuma Eleven: Victory Road",
 			stats: {

@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 
-import { Skeleton, StorageImage } from "@rose-griffon/ui";
+import { Skeleton, StorageImage } from "@rosegriffon/ui";
 
 const PLACEHOLDER = "/RG_Logo_V2.5.webp";
 

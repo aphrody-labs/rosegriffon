@@ -21,7 +21,7 @@ Le flux part des binaires bruts du jeu (extraits de Steam via iecode) et finit d
                                  │ (cfg.bin.json + JSON pré-traités, PAS un dump brut)
                                  ▼
 ┌──────────────────────────────────────────────────────────────────────────────┐
-│ inagle (@rose-griffon/inagle, Bun/TS) — parse / join / calcul des données      │
+│ inagle (@rosegriffon/inagle, Bun/TS) — parse / join / calcul des données      │
 │  src/parsers/* ──▶ src/entities/* ──▶ stat-calculator ──▶ mapper-aura          │
 │  createInagleService()  : characters / skills / items / auras / teams / …      │
 └───────────────────────────────┬──────────────────────────────────────────────┘
@@ -43,7 +43,7 @@ Le flux part des binaires bruts du jeu (extraits de Steam via iecode) et finit d
 └──────────────────────────────────────────────────────────────────────────────┘
 ```
 
-Orchestration cron (systemd `rg-cron.service`, **pas** pg_cron côté DB) : `packages/cron/src/tasks/db.ts` enchaîne `runInaglePush()` (= `bun run --filter @rose-griffon/inagle push`) puis `runSQLiteBackup()` (= `azalee backup:supabase`, régénère le miroir). Le cron lit/écrit aussi `inagle_rag_chunks` pour le RAG et remappe l'ordre zukan via les subpaths leaf `@rose-griffon/inagle/zukan/order`.
+Orchestration cron (systemd `rg-cron.service`, **pas** pg_cron côté DB) : `packages/cron/src/tasks/db.ts` enchaîne `runInaglePush()` (= `bun run --filter @rosegriffon/inagle push`) puis `runSQLiteBackup()` (= `azalee backup:supabase`, régénère le miroir). Le cron lit/écrit aussi `inagle_rag_chunks` pour le RAG et remappe l'ordre zukan via les subpaths leaf `@rosegriffon/inagle/zukan/order`.
 
 Idempotence Steam : le pipeline iecode est gardé par le **buildid Steam** (`.build-snapshot.json`) ; côté RAG, la clé de dédup est `(source_id, content_hash)`.
 
@@ -101,15 +101,15 @@ Arborescence clé (`iecode/src/IECODE.Core/`) :
 
 ### 1.3 Pont Bun ↔ .NET
 
-`@rose-griffon/iecode-core` (`iecode/packages/core/src/index.ts`) : `loadIecode()` charge `IECODE.Core.dll` (Release net10.0) via `node-api-dotnet` et **fusionne tous les namespaces** → `dotnet.IECODE.Core.*` + `dotnet.System.*` accessibles depuis Bun (pas de `bun:ffi`). Pièges baked-in : pose `DOTNET_ROLL_FORWARD=LatestMajor` avant l'init CLR (le host cible net8/9), résolution des assemblies dépendantes (ImageSharp/EF/SharpGLTF) via listener `resolving` sur le dossier de build, `CopyLocalLockFileAssemblies=true` requis sinon échec de résolution. Typedefs générés par `gen:types` (assainit le TS invalide des constructs C#).
+`@rosegriffon/iecode-core` (`iecode/packages/core/src/index.ts`) : `loadIecode()` charge `IECODE.Core.dll` (Release net10.0) via `node-api-dotnet` et **fusionne tous les namespaces** → `dotnet.IECODE.Core.*` + `dotnet.System.*` accessibles depuis Bun (pas de `bun:ffi`). Pièges baked-in : pose `DOTNET_ROLL_FORWARD=LatestMajor` avant l'init CLR (le host cible net8/9), résolution des assemblies dépendantes (ImageSharp/EF/SharpGLTF) via listener `resolving` sur le dossier de build, `CopyLocalLockFileAssemblies=true` requis sinon échec de résolution. Typedefs générés par `gen:types` (assainit le TS invalide des constructs C#).
 
 ### 1.4 CLI `iecode` (`IECODE.CLI/Program.cs`, System.CommandLine)
 
 ~40 sous-commandes. Acquisition/data : `info`, `download <appId> [-o] [--list] [--branch] [--os] [--depot] [--token-store]`, `steam-build`, `sync` (download+dump), `dump` (extraction CPK sélective, `--preset --smart`), `extract`, `pack`, `pipeline`, `dump-gamedata`, `generate-gamedata-classes`. Formats : `g4tx`, `g4pk`, `g4md`, `g4mg`, `g4ra`, `utf`, `audio`, `usm`, `convert`, `format`, `shader`, `lua`, `menu`, `mevbin`, `p3lip`, `agi`, `scene`, `crypto`, `config`/`cfg`, `analyze`, `search`, `mem`, `cdn`, `benchmark`, `passive-skill`, **`export-knowledge`** (→ JSON catalogue pour niers).
 
-### 1.5 Flow data headless (`@rose-griffon/iecode-pipeline`)
+### 1.5 Flow data headless (`@rosegriffon/iecode-pipeline`)
 
-Unifie **acquire** (steam-sync : download depots + dump CPK) + **parse/serve** (délégué à `@rose-griffon/inagle`, ~50 cfg.bin, 12 domaines, 6000+ persos / 2900+ skills — **non dupliqué en C#**), gardé par le **buildid Steam** (idempotence via `.build-snapshot.json`). API : `accumulate()` (check build → download+dump si update → corpus), `exportCorpus()` (chaque domaine → `<domaine>.json` + `corpus.json`), `serve()` (HTTP inagle headless), `getRemoteBuildId()`. CLI `iecode-data accumulate|export|serve|version`. Données de dev : `/home/ubuntu/niers/data` (corpus parsé, **PAS** un dump Steam brut). `@rose-griffon/iecode-steam-sync` pilote le CLI natif (`syncApp`/`listDepots`) + scrape store via `@aphrody-code/bxc`. Packages annexes : `iecode-cdn` (résolveur G4TX→PNG lossless pour `cdn.rosegriffon.fr/dx11/menu/**`), `iecode-runtime-harness` (exécution live headless — RE mémoire uniquement, **pas requis** par le pipeline data), `menu-render` (renderer React pixel-perfect des écrans menu depuis menu-layout.json), `iecode-inagle`, `iecode-config`.
+Unifie **acquire** (steam-sync : download depots + dump CPK) + **parse/serve** (délégué à `@rosegriffon/inagle`, ~50 cfg.bin, 12 domaines, 6000+ persos / 2900+ skills — **non dupliqué en C#**), gardé par le **buildid Steam** (idempotence via `.build-snapshot.json`). API : `accumulate()` (check build → download+dump si update → corpus), `exportCorpus()` (chaque domaine → `<domaine>.json` + `corpus.json`), `serve()` (HTTP inagle headless), `getRemoteBuildId()`. CLI `iecode-data accumulate|export|serve|version`. Données de dev : `/home/ubuntu/niers/data` (corpus parsé, **PAS** un dump Steam brut). `@rosegriffon/iecode-steam-sync` pilote le CLI natif (`syncApp`/`listDepots`) + scrape store via `@aphrody-code/bxc`. Packages annexes : `iecode-cdn` (résolveur G4TX→PNG lossless pour `cdn.rosegriffon.fr/dx11/menu/**`), `iecode-runtime-harness` (exécution live headless — RE mémoire uniquement, **pas requis** par le pipeline data), `menu-render` (renderer React pixel-perfect des écrans menu depuis menu-layout.json), `iecode-inagle`, `iecode-config`.
 
 ### 1.6 Capacités réelles vs gaps, et exploitable par niers
 
@@ -135,7 +135,7 @@ Fichiers de référence (absolus) : `/home/ubuntu/rg/iecode/src/IECODE.Core/Form
 
 ## 2. inagle — parse / calcul des données
 
-API universelle de données de jeu pour IEVR. Package `@rose-griffon/inagle` v1.2.0 (`packages/inagle`), **package émetteur** (`tsc` → `dist/` + subpath exports `./*`, son `dist/` doit exister sinon `rg-cron` et `azalee-web` cassent). Bun-natif (`Bun.file`, `Bun.Glob.scanSync`, `bun:sqlite`). Rôle : transformer le dump cfg.bin du jeu (`/home/ubuntu/niers/data`) en entités typées, puis pousser vers Supabase d'où azalee lit via un miroir SQLite embarqué.
+API universelle de données de jeu pour IEVR. Package `@rosegriffon/inagle` v1.2.0 (`packages/inagle`), **package émetteur** (`tsc` → `dist/` + subpath exports `./*`, son `dist/` doit exister sinon `rg-cron` et `azalee-web` cassent). Bun-natif (`Bun.file`, `Bun.Glob.scanSync`, `bun:sqlite`). Rôle : transformer le dump cfg.bin du jeu (`/home/ubuntu/niers/data`) en entités typées, puis pousser vers Supabase d'où azalee lit via un miroir SQLite embarqué.
 
 ### 2.1 Flux de données global
 
@@ -225,12 +225,12 @@ Points sensibles :
 - **Auras** : source de vérité = parse natif (`loadAuraSkills`) s'il est ≥ au snapshot du service ; hissatsu natif écrit dans `sheet_data.hissatsu` (ce que `getAura` côté azalee consomme), réparti par sous-type vers `inagle_keshins/souls/awakenings/mode_changes/miximax/auras`.
 - Skills filtrés : exclut catégories passif (6/"Passive") et stat-boost (9). Vidéos depuis `skill-videos.json` (`.wmv`→`.webm`).
 
-Déclenché par cron : `packages/cron/src/tasks/db.ts` → `runInaglePush()` = `bun run --filter @rose-griffon/inagle push`, puis `runSQLiteBackup()` = `azalee backup:supabase` qui régénère le miroir SQLite.
+Déclenché par cron : `packages/cron/src/tasks/db.ts` → `runInaglePush()` = `bun run --filter @rosegriffon/inagle push`, puis `runSQLiteBackup()` = `azalee backup:supabase` qui régénère le miroir SQLite.
 
 ### 2.8 Consommation par azalee + cron
 
 - **azalee n'importe PAS le runtime de parsing** (`createInagleService`) — il importe seulement les **types** et constantes (`apps/azalee/lib/wiki-service.ts` : `import type { BaseCharacter, Item, Skill, Team }`, `ElementNames`, `CATEGORY_NAMES`, et le JSON `change_aura_skills.json`). La donnée vient des **tables `inagle_*`** lues via `lib/supabase/sqlite-client.ts` (miroir SQLite embarqué `apps/azalee/data/backups/supabase-*.sqlite`, sélectionne le plus récent ; override `SQLITE_DB_PATH`) ou Supabase. `lib/wiki-service.ts` est la couche d'accès (listes/filtres/getAura/getSkill…).
-- **cron** consomme inagle de deux façons : (a) exécute le push (`db.ts`) ; (b) importe des subpaths leaf (`@rose-griffon/inagle/zukan/order` pour `buildOrderMap`/`crawlZukanOrderPages`) et lit/écrit les tables `inagle_characters/inagle_skills/inagle_rag_chunks` pour le RAG et le remap zukan. Le `dist/` d'inagle doit exister (subpath exports) sinon `rg-cron` crash-loop.
+- **cron** consomme inagle de deux façons : (a) exécute le push (`db.ts`) ; (b) importe des subpaths leaf (`@rosegriffon/inagle/zukan/order` pour `buildOrderMap`/`crawlZukanOrderPages`) et lit/écrit les tables `inagle_characters/inagle_skills/inagle_rag_chunks` pour le RAG et le remap zukan. Le `dist/` d'inagle doit exister (subpath exports) sinon `rg-cron` crash-loop.
 
 **Piège NULL `category_id`/`element_id`** : sur `inagle_skills`, `category_id` et `element_id` sont à **NULL** en base. La résolution se fait via les **colonnes texte FR** : `wiki-service.ts` filtre `query.eq("category", searchCat)` (ligne ~1497) après mapping `shoot/block/dribble/catch` → nom FR via `CATEGORY_NAMES`. À noter : pour les **auras** (`inagle_auras` etc.), `element_id` **est** peuplé et filtré via `.eq/.in("element_id", …)` avec `getElementIds()` (Néant mappe 0 ET 5) — spécifique aux auras, pas aux skills. Voir `docs/wiki-filters.md`.
 

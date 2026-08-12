@@ -22,8 +22,8 @@ import { collecterAudienceAchillea } from "./tasks/stats/achillea";
 import { initDiscord, getDiscordTelemetry, onTelemetryUpdate, getDiscordClient, GUILD_ID } from "./lib/discord";
 import { runDiscordSync, runDiscordChannelScan } from "./tasks/discord";
 import { ServerWebSocket } from "bun";
-import { createSupabaseServiceClient } from "@rose-griffon/db/service";
-import { resolveProfile, isAdmin } from "@rose-griffon/auth";
+import { createSupabaseServiceClient } from "@rosegriffon/db/service";
+import { resolveProfile, isAdmin } from "@rosegriffon/auth";
 import { getOpenApiDocument, getSwaggerHtml } from "./lib/openapi";
 
 // ─── LOGGER GLOBALE INTERCEPTION ET STREAMING WEBSOCKET ──────────────────────

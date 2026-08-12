@@ -2,7 +2,7 @@
 
 import type * as React from "react";
 import { Cell, PieChart, Pie as RcPie, Tooltip as RcTooltip, ResponsiveContainer } from "recharts";
-import { Card, CardContent, CardHeader, CardTitle } from "@rose-griffon/ui";
+import { Card, CardContent, CardHeader, CardTitle } from "@rosegriffon/ui";
 
 // Cast to FC<any> to absorb React 19 / recharts 2.x typings drift (TS2607/TS2786).
 // Remove once recharts ships React 19-compatible types.

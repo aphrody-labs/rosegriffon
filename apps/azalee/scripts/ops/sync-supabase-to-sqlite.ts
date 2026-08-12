@@ -25,7 +25,7 @@
  *
  * Env : DATABASE_URL (pg local, schéma) + SUPABASE URL/SERVICE_ROLE_KEY (données).
  */
-import { createSupabaseServiceClient } from "@rose-griffon/db/service";
+import { createSupabaseServiceClient } from "@rosegriffon/db/service";
 import { Database } from "bun:sqlite";
 import { readdirSync } from "node:fs";
 import path from "node:path";

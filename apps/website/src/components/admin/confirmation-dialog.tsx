@@ -8,7 +8,7 @@ import {
 	DialogFooter,
 	DialogHeader,
 	DialogTitle,
-} from "@rose-griffon/ui";
+} from "@rosegriffon/ui";
 import { useState } from "react";
 
 import { AlertTriangle } from "@/lib/icons-config";

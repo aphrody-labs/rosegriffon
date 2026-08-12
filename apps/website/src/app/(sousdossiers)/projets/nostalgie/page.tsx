@@ -18,7 +18,7 @@ import {
 	Slider,
 	StorageImage,
 	Switch,
-} from "@rose-griffon/ui";
+} from "@rosegriffon/ui";
 import {
 	CheckCircle2,
 	CloudUpload,

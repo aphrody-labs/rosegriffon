@@ -1,7 +1,7 @@
 "use client";
 
 // External libraries
-import { Button, DiscordIcon } from "@rose-griffon/ui";
+import { Button, DiscordIcon } from "@rosegriffon/ui";
 import { useState } from "react";
 
 import {

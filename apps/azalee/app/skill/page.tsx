@@ -6,7 +6,7 @@ import { SkillFilterBar } from "@/components/wiki/filters/SkillFilterBar";
 import { MoveCard } from "@/components/wiki/MoveCard";
 import { WikiPagination } from "@/components/wiki/WikiPagination";
 import { WikiSearchToolbar } from "@/components/wiki/WikiSearchToolbar";
-import { getSkillCategoryIconUrl } from "@rose-griffon/azalee/images";
+import { getSkillCategoryIconUrl } from "@rosegriffon/azalee/images";
 import { parseSearchParams } from "@/lib/validations";
 import { wikiService } from "@/lib/wiki-service";
 

@@ -10,7 +10,7 @@ import {
 	DropdownMenuTrigger,
 	THEMES,
 	type ThemeType,
-} from "@rose-griffon/ui";
+} from "@rosegriffon/ui";
 import { Check } from "lucide-react";
 import Image from "next/image";
 

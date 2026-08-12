@@ -2,7 +2,7 @@ import { ChevronLeft, ChevronRight, ImageOff, List, Star, Users } from "lucide-r
 import Image from "next/image";
 import Link from "next/link";
 import type React from "react";
-import { AdminPageHeader as DashboardPageHeader, Badge } from "@rose-griffon/ui";
+import { AdminPageHeader as DashboardPageHeader, Badge } from "@rosegriffon/ui";
 import { createClient } from "@/lib/supabase/server";
 import { Icon } from "@/components/ui/Icon";
 

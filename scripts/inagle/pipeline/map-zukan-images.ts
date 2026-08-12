@@ -21,7 +21,7 @@ import {
 	normElem,
 	normPos,
 	zukanGameToSeries,
-} from "@rose-griffon/inagle/zukan/matcher.ts";
+} from "@rosegriffon/inagle/zukan/matcher.ts";
 import * as cheerio from "cheerio";
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-expect-error — no types for kuroshiro

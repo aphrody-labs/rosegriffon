@@ -17,10 +17,10 @@
 		],
 		"allowImportingTsExtensions": false,
 		"paths": {
-			"@rose-griffon/db": [
+			"@rosegriffon/db": [
 				"./types/workspace-shims.d.ts"
 			],
-			"@rose-griffon/db/redis": [
+			"@rosegriffon/db/redis": [
 				"./types/workspace-shims.d.ts"
 			]
 		},

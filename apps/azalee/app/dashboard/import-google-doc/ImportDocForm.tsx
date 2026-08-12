@@ -12,7 +12,7 @@ import {
 	CardTitle,
 	Input,
 	Label,
-} from "@rose-griffon/ui";
+} from "@rosegriffon/ui";
 import { importDriveFolder, importGoogleDoc } from "./actions";
 
 export function ImportDocForm() {

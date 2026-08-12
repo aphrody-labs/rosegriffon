@@ -15,7 +15,7 @@ import {
 	AdminPageHeader,
 	PaginationControls,
 	StorageImage,
-} from "@rose-griffon/ui";
+} from "@rosegriffon/ui";
 import { BarChart3, Calendar, Eye, FileText, Filter, Plus, Search } from "lucide-react";
 import Link from "next/link";
 

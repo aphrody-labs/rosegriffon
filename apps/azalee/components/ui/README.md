@@ -1,6 +1,6 @@
 # Composants UI spécifiques au wiki
 
-Ce dossier ne duplique pas `@rose-griffon/ui` : il ne contient que les
+Ce dossier ne duplique pas `@rosegriffon/ui` : il ne contient que les
 composants **propres au wiki**, ceux qui n'ont de sens qu'avec les données du
 jeu et qui n'ont donc pas leur place dans le design system partagé.
 
@@ -16,7 +16,7 @@ jeu et qui n'ont donc pas leur place dans le design system partagé.
 | `fade-in` · `pull-to-refresh` | Deux primitives d'interaction propres à l'app |
 
 Tout le reste — boutons, cartes, dialogues, champs, navigation — vient de
-**`@rose-griffon/ui`**, importé directement (`import { Button } from
-"@rose-griffon/ui"`). Ajouter ici un composant générique serait une
+**`@rosegriffon/ui`**, importé directement (`import { Button } from
+"@rosegriffon/ui"`). Ajouter ici un composant générique serait une
 régression : il doit aller dans le paquet partagé, où les deux sites en
 profitent.

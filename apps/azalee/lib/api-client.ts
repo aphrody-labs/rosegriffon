@@ -1,17 +1,17 @@
-import type { BaseCharacter, CharacterVariant, MultiLevelStats, Skill } from "@rose-griffon/inagle";
+import type { BaseCharacter, CharacterVariant, MultiLevelStats, Skill } from "@rosegriffon/inagle";
 import type {
 	InagleCharacter,
 	InagleDrop,
 	InagleItem,
 	InagleKizunaItem,
 	InagleTactic,
-} from "@rose-griffon/inagle/types/database";
+} from "@rosegriffon/inagle/types/database";
 import { createClient } from "@supabase/supabase-js";
 import { unstable_cache } from "next/cache";
 import { getPgPool } from "@/lib/db/pg";
-import { getMiximaxImageUrl, resolveAssetUrl, resolveAuraTelopUrl } from "@rose-griffon/azalee/images";
+import { getMiximaxImageUrl, resolveAssetUrl, resolveAuraTelopUrl } from "@rosegriffon/azalee/images";
 
-import { createSqliteClient } from "@rose-griffon/azalee/db";
+import { createSqliteClient } from "@rosegriffon/azalee/db";
 
 // Lazy getter for Supabase to prevent top-level execution during build
 let _supabase: ReturnType<typeof createClient> | null = null;

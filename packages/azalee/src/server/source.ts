@@ -172,7 +172,7 @@ function fallbackTransport(
  * locales.
  *
  * ```ts
- * import { createAzaleeData } from "@rose-griffon/azalee/server";
+ * import { createAzaleeData } from "@rosegriffon/azalee/server";
  *
  * const data = createAzaleeData();          // auto
  * console.log(data.source, data.reason);    // "local" | "remote"

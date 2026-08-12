@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { AdminPageHeader as DashboardPageHeader } from "@rose-griffon/ui";
+import { AdminPageHeader as DashboardPageHeader } from "@rosegriffon/ui";
 import { requireAdmin } from "@/lib/auth-helpers";
 import { createClient } from "@/lib/supabase/server";
 import { AuditTable } from "./AuditTable";

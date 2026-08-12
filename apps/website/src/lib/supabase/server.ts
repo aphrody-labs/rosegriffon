@@ -1,4 +1,4 @@
-// Wrapper rétro-compat — délègue à `@rose-griffon/db/{server,service}`. L'API publique
+// Wrapper rétro-compat — délègue à `@rosegriffon/db/{server,service}`. L'API publique
 // `createClient()` / `createAdminClient()` / `createPublicClient()` est conservée
 // Pour ne pas casser les ~50 call sites de l'app.
 //
@@ -7,8 +7,8 @@
 // Supabase courant (ex: profiles.created_at, articles.tags). Trade-off assumé
 // Le temps de la migration : les call sites restent typés `any`, à durcir par
 // Vague avec types stricts opt-in.
-import { createSupabaseServerClient } from "@rose-griffon/db/server";
-import { createSupabaseServiceClient } from "@rose-griffon/db/service";
+import { createSupabaseServerClient } from "@rosegriffon/db/server";
+import { createSupabaseServiceClient } from "@rosegriffon/db/service";
 import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { cookies } from "next/headers";
