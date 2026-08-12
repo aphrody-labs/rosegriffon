@@ -1,121 +1,153 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { isAdmin, resolveProfile } from "@rosegriffon/auth";
+import type { Database } from "@rosegriffon/db";
+
 import { logAdminAction } from "@/lib/admin-logger";
 import { getServerUser } from "@/lib/auth-helpers";
-import { createAdminClient, createClient } from "@/lib/supabase/server";
-import type { Database } from "@rosegriffon/db";
+import { createAdminClient } from "@/lib/supabase/server";
+
+import {
+	avecNomEquipe,
+	BUCKET_IMAGES,
+	construireCheminImage,
+	construireUrlPubliqueAsset,
+	comparerMembres,
+	premierMessage,
+	schemaIdentifiant,
+	schemaMembre,
+	schemaMiseAJourMembre,
+	SOURCE_ADMIN,
+	validerFichierImage,
+} from "./staff-schema";
+import type { EntreeMembre } from "./staff-schema";
 
 export type TeamMember = Database["public"]["Tables"]["team_members"]["Row"];
 
-export type TeamMemberInput = Omit<
-	Database["public"]["Tables"]["team_members"]["Insert"],
-	"id" | "created_at" | "updated_at"
->;
+export type TeamMemberInput = EntreeMembre;
+
+/** Pages publiques qui affichent des membres du staff. */
+const CHEMINS_A_REVALIDER = [
+	"/notre-equipe",
+	"/notre-equipe/staff",
+	"/notre-equipe/association",
+	"/notre-equipe/partenaires",
+	"/admin/staff",
+];
+
+function revaliderPagesStaff(): void {
+	for (const chemin of CHEMINS_A_REVALIDER) {
+		revalidatePath(chemin);
+	}
+}
 
 /**
- * Récupère tous les membres d'équipe
+ * Garde d'administration partagée par toutes les actions de ce module.
+ *
+ * Les actions vérifiaient le rôle avec `profiles.role === "admin"` sur un
+ * `eq("id", user.id)` brut. Deux pannes : le mappage identité Better Auth →
+ * profil (par `discord_id`, puis e-mail) était court-circuité, et le rôle
+ * attendu était plus strict que celui de la garde de page
+ * (`AdminLayout` → `requireAdmin` → `ADMIN_ROLES`). Un `moderator` ou un
+ * `editor` accédait donc à la page puis se voyait refuser chaque action.
+ */
+async function exigerAdmin(): Promise<{ ok: true } | { ok: false; message: string }> {
+	const user = await getServerUser();
+	if (!user) {
+		return { message: "Non authentifié", ok: false };
+	}
+
+	const admin = createAdminClient();
+	const profil = await resolveProfile(admin, user);
+
+	if (!profil || !isAdmin(profil.role)) {
+		return { message: "Permissions insuffisantes", ok: false };
+	}
+
+	return { ok: true };
+}
+
+/**
+ * Récupère tous les membres d'équipe, actifs comme inactifs.
+ *
+ * La lecture passait par `createClient()`, c'est-à-dire le client à cookies. Or
+ * l'authentification du site est Better Auth : aucune session Supabase n'est
+ * posée, le client reste donc en rôle `anon` et subit la policy
+ * « Active team members viewable by everyone » (`USING (is_active = true)`).
+ * Les 7 membres désactivés — dont les imports Discord en attente de validation —
+ * étaient invisibles, ce qui vidait par construction les sections « À valider »
+ * et « Désactivés ». D'où la lecture en client service, derrière la garde admin.
  */
 export async function getAllTeamMembers(): Promise<{
 	data: TeamMember[] | null;
 	error: string | null;
 }> {
 	try {
-		const supabase = await createClient();
+		const garde = await exigerAdmin();
+		if (!garde.ok) {
+			return { data: null, error: garde.message };
+		}
 
-		const { data, error } = await supabase
-			.from("team_members")
-			.select("*")
-			.order("team_id", { ascending: true })
-			.order("display_index", { ascending: true });
+		const admin = createAdminClient();
+		const { data, error } = await admin.from("team_members").select("*");
 
 		if (error) {
-			console.error("Error fetching team members:", error);
+			console.error("[staff] échec de lecture des membres :", error);
 			return { data: null, error: error.message };
 		}
 
-		return { data, error: null };
+		// Tri appliqué ici plutôt qu'en SQL : c'est exactement le comparateur du
+		// site public (`display_index` croissant, NULL en dernier, puis nom).
+		const membres = ((data ?? []) as TeamMember[]).toSorted(comparerMembres);
+
+		return { data: membres, error: null };
 	} catch (error) {
-		console.error("Unexpected error fetching team members:", error);
+		console.error("[staff] erreur inattendue à la lecture des membres :", error);
 		return { data: null, error: "Une erreur inattendue est survenue" };
 	}
 }
 
 /**
- * Récupère les membres d'une équipe spécifique
- */
-export async function getTeamMembersByTeamId(teamId: string): Promise<{
-	data: TeamMember[] | null;
-	error: string | null;
-}> {
-	try {
-		const supabase = await createClient();
-
-		const { data, error } = await supabase
-			.from("team_members")
-			.select("*")
-			.eq("team_id", teamId)
-			.order("display_index", { ascending: true });
-
-		if (error) {
-			console.error("Error fetching team members:", error);
-			return { data: null, error: error.message };
-		}
-
-		return { data, error: null };
-	} catch (error) {
-		console.error("Unexpected error fetching team members:", error);
-		return { data: null, error: "Une erreur inattendue est survenue" };
-	}
-}
-
-/**
- * Crée un nouveau membre d'équipe
+ * Crée un nouveau membre d'équipe.
  */
 export async function createTeamMember(input: TeamMemberInput): Promise<{
 	data: TeamMember | null;
 	error: string | null;
 }> {
 	try {
-		// Vérifier les permissions admin (Better Auth → bridge service_role)
-		const user = await getServerUser();
-		if (!user) {
-			return { data: null, error: "Non authentifié" };
+		const garde = await exigerAdmin();
+		if (!garde.ok) {
+			return { data: null, error: garde.message };
 		}
+
+		const analyse = schemaMembre.safeParse(input);
+		if (!analyse.success) {
+			return { data: null, error: premierMessage(analyse.error) };
+		}
+
+		const valeurs = { ...avecNomEquipe(analyse.data), source: SOURCE_ADMIN };
 
 		const admin = createAdminClient();
-		const { data: profile } = await admin
-			.from("profiles")
-			.select("role")
-			.eq("id", user.id)
-			.single();
-
-		if (profile?.role !== "admin") {
-			return { data: null, error: "Permissions insuffisantes" };
-		}
-
-		const { data, error } = await admin.from("team_members").insert(input).select().single();
+		const { data, error } = await admin.from("team_members").insert(valeurs).select().single();
 
 		if (error) {
-			console.error("Error creating team member:", error);
+			console.error("[staff] échec de création d'un membre :", error);
 			return { data: null, error: error.message };
 		}
 
-		await logAdminAction("create", "team_member", String(data.id), input);
+		await logAdminAction("create", "team_member", String(data.id), valeurs);
+		revaliderPagesStaff();
 
-		revalidatePath("/notre-equipe");
-		revalidatePath("/notre-equipe/staff");
-		revalidatePath("/admin/staff");
-
-		return { data, error: null };
+		return { data: data as TeamMember, error: null };
 	} catch (error) {
-		console.error("Unexpected error creating team member:", error);
+		console.error("[staff] erreur inattendue à la création d'un membre :", error);
 		return { data: null, error: "Une erreur inattendue est survenue" };
 	}
 }
 
 /**
- * Met à jour un membre d'équipe
+ * Met à jour un membre d'équipe.
  */
 export async function updateTeamMember(
 	id: string,
@@ -125,136 +157,151 @@ export async function updateTeamMember(
 	error: string | null;
 }> {
 	try {
-		const user = await getServerUser();
-		if (!user) {
-			return { data: null, error: "Non authentifié" };
+		const garde = await exigerAdmin();
+		if (!garde.ok) {
+			return { data: null, error: garde.message };
 		}
+
+		const identifiant = schemaIdentifiant.safeParse(id);
+		if (!identifiant.success) {
+			return { data: null, error: premierMessage(identifiant.error) };
+		}
+
+		const analyse = schemaMiseAJourMembre.safeParse(input);
+		if (!analyse.success) {
+			return { data: null, error: premierMessage(analyse.error) };
+		}
+
+		if (Object.keys(analyse.data).length === 0) {
+			return { data: null, error: "Aucune modification à enregistrer." };
+		}
+
+		const valeurs = avecNomEquipe(analyse.data);
 
 		const admin = createAdminClient();
-		const { data: profile } = await admin
-			.from("profiles")
-			.select("role")
-			.eq("id", user.id)
-			.single();
-
-		if (profile?.role !== "admin") {
-			return { data: null, error: "Permissions insuffisantes" };
-		}
-
 		const { data, error } = await admin
 			.from("team_members")
-			.update(input)
-			.eq("id", id)
+			.update(valeurs)
+			.eq("id", identifiant.data)
 			.select()
 			.single();
 
 		if (error) {
-			console.error("Error updating team member:", error);
+			console.error("[staff] échec de mise à jour d'un membre :", error);
 			return { data: null, error: error.message };
 		}
 
-		await logAdminAction("update", "team_member", id, input);
+		await logAdminAction("update", "team_member", identifiant.data, valeurs);
+		revaliderPagesStaff();
 
-		revalidatePath("/notre-equipe");
-		revalidatePath("/notre-equipe/staff");
-		revalidatePath("/admin/staff");
-
-		return { data, error: null };
+		return { data: data as TeamMember, error: null };
 	} catch (error) {
-		console.error("Unexpected error updating team member:", error);
+		console.error("[staff] erreur inattendue à la mise à jour d'un membre :", error);
 		return { data: null, error: "Une erreur inattendue est survenue" };
 	}
 }
 
 /**
- * Supprime un membre d'équipe
+ * Active ou désactive un membre — la seule mutation déclenchée d'un clic.
+ *
+ * Action dédiée plutôt qu'un `updateTeamMember` partiel : le client n'a alors
+ * aucun moyen d'envoyer une charge utile arbitraire depuis un bouton.
+ */
+export async function setTeamMemberActive(
+	id: string,
+	actif: boolean
+): Promise<{ data: TeamMember | null; error: string | null }> {
+	return updateTeamMember(id, { is_active: actif });
+}
+
+/**
+ * Supprime un membre d'équipe.
  */
 export async function deleteTeamMember(id: string): Promise<{
 	success: boolean;
 	error: string | null;
 }> {
 	try {
-		const user = await getServerUser();
-		if (!user) {
-			return { error: "Non authentifié", success: false };
+		const garde = await exigerAdmin();
+		if (!garde.ok) {
+			return { error: garde.message, success: false };
+		}
+
+		const identifiant = schemaIdentifiant.safeParse(id);
+		if (!identifiant.success) {
+			return { error: premierMessage(identifiant.error), success: false };
 		}
 
 		const admin = createAdminClient();
-		const { data: profile } = await admin
-			.from("profiles")
-			.select("role")
-			.eq("id", user.id)
-			.single();
-
-		if (profile?.role !== "admin") {
-			return { error: "Permissions insuffisantes", success: false };
-		}
-
-		const { error } = await admin.from("team_members").delete().eq("id", id);
+		const { error } = await admin.from("team_members").delete().eq("id", identifiant.data);
 
 		if (error) {
-			console.error("Error deleting team member:", error);
+			console.error("[staff] échec de suppression d'un membre :", error);
 			return { error: error.message, success: false };
 		}
 
-		await logAdminAction("delete", "team_member", id, {});
-
-		revalidatePath("/notre-equipe");
-		revalidatePath("/notre-equipe/staff");
-		revalidatePath("/admin/staff");
+		await logAdminAction("delete", "team_member", identifiant.data, {});
+		revaliderPagesStaff();
 
 		return { error: null, success: true };
 	} catch (error) {
-		console.error("Unexpected error deleting team member:", error);
+		console.error("[staff] erreur inattendue à la suppression d'un membre :", error);
 		return { error: "Une erreur inattendue est survenue", success: false };
 	}
 }
 
 /**
- * Upload une image de profil pour un membre d'équipe dans Supabase Storage
+ * Envoie une photo de membre dans le bucket Storage `assets`.
+ *
+ * L'URL renvoyée est reconstruite sur une origine publique : `getPublicUrl()`
+ * du client service s'appuie sur `SUPABASE_INTERNAL_URL`
+ * (`http://127.0.0.1:8811`), une adresse qu'aucun navigateur ne peut atteindre
+ * et qui n'est pas déclarée dans `images.remotePatterns` — `next/image` refusait
+ * donc de l'afficher.
  */
 export async function uploadTeamMemberImage(file: File): Promise<{
 	url: string | null;
 	error: string | null;
 }> {
 	try {
-		const user = await getServerUser();
-		if (!user) {
-			return { error: "Non authentifié", url: null };
+		const garde = await exigerAdmin();
+		if (!garde.ok) {
+			return { error: garde.message, url: null };
 		}
+
+		if (!(file instanceof File)) {
+			return { error: "Aucun fichier reçu.", url: null };
+		}
+
+		const controle = validerFichierImage(file);
+		if (!controle.ok) {
+			return { error: controle.message, url: null };
+		}
+
+		const graine = `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 8)}`;
+		const chemin = construireCheminImage(file.type, graine);
 
 		const admin = createAdminClient();
-		const { data: profile } = await admin
-			.from("profiles")
-			.select("role")
-			.eq("id", user.id)
-			.single();
-
-		if (profile?.role !== "admin") {
-			return { error: "Permissions insuffisantes", url: null };
-		}
-
-		const fileExt = file.name.split(".").pop();
-		const fileName = `${Date.now()}-${Math.random().toString(36).slice(7)}.${fileExt}`;
-		const filePath = `team-members/${fileName}`;
-
-		const { error: uploadError } = await admin.storage.from("assets").upload(filePath, file, {
+		const { error: erreurEnvoi } = await admin.storage.from(BUCKET_IMAGES).upload(chemin, file, {
 			cacheControl: "3600",
+			contentType: file.type,
 			upsert: false,
 		});
 
-		if (uploadError) {
-			console.error("Error uploading image:", uploadError);
-			return { error: uploadError.message, url: null };
+		if (erreurEnvoi) {
+			console.error("[staff] échec d'envoi de l'image :", erreurEnvoi);
+			return { error: erreurEnvoi.message, url: null };
 		}
 
-		const {
-			data: { publicUrl },
-		} = admin.storage.from("assets").getPublicUrl(filePath);
+		const url = construireUrlPubliqueAsset(chemin, [
+			process.env.NEXT_PUBLIC_SUPABASE_URL,
+			process.env.NEXT_PUBLIC_BASE_URL,
+			process.env.BETTER_AUTH_URL,
+		]);
 
-		return { error: null, url: publicUrl };
+		return { error: null, url };
 	} catch (error) {
-		console.error("Unexpected error uploading image:", error);
+		console.error("[staff] erreur inattendue à l'envoi de l'image :", error);
 		return { error: "Une erreur inattendue est survenue", url: null };
 	}
 }

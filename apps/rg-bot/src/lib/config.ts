@@ -8,6 +8,27 @@ export const GUILD_ID = resolveGuildId(Bun.env as Record<string, string | undefi
 
 export const SYNC_INTERVAL_MS = Number(Bun.env.SYNC_INTERVAL_MS ?? 30 * 60 * 1000);
 
+/**
+ * Partage des responsabilités avec `rg-cron.service`.
+ *
+ * Les deux démons ouvrent une passerelle Discord avec LE MÊME jeton, donc les
+ * deux reçoivent tous les événements du serveur. Pour éviter les doublons
+ * visibles par les membres et les doubles écritures en base, la répartition
+ * est la suivante :
+ *
+ *   - `rg-cron` garde la synchronisation (membres, rôles, avatars du staff
+ *     toutes les 30 min et sur `guildMemberAdd`/`Update`/`userUpdate`), la
+ *     télémétrie (présences, salons vocaux), la veille des messages et le
+ *     serveur HTTP d'annonces (`POST :3006/announce`).
+ *   - `rg-bot` garde ce que le cron ne fait PAS : les interactions, c'est-à-dire
+ *     l'enregistrement et l'exécution des slash commands.
+ *
+ * Ce drapeau ne sert qu'à rendre le partage réversible : le passer à `1`
+ * redonne au bot la synchronisation automatique, à n'activer que si le cron
+ * cesse de l'assurer (sinon chaque membre est écrit deux fois).
+ */
+export const BOT_SYNC_MEMBRES = Bun.env.BOT_SYNC_MEMBRES === "1";
+
 export const REDIS_URL = Bun.env.REDIS_URL ?? "redis://127.0.0.1:6379/1";
 
 export function requireEnv(key: string): string {

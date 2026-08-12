@@ -17,8 +17,11 @@
 
 import { XClient, XSession, type Tweet } from "@aphrody-code/x";
 import { createSupabaseServiceClient } from "@rosegriffon/db/service";
-import type { Json } from "@rosegriffon/db";
 import { ingestSources, type RagSource } from "./rag-store-local";
+// Conversion tweet → ligne de `public.tweets` : mutualisée dans `tweet-row.ts`
+// (le code y est repris à l'identique) pour que la récolte de campagnes à hashtag
+// produise exactement le même jsonb `media` que cette veille-ci.
+import { tweetToRow, type DBTweetRow } from "./tweet-row";
 import { loadBxcXCookieHeader } from "./x-accounts";
 
 // Requêtes "Latest" couvrant officiel + news + communauté, multi-langue.
@@ -60,47 +63,6 @@ export const IE_SEARCH_QUERIES: readonly string[] = [
 	"(#InazumaEleven OR #VictoryRoad) (gameplay OR update OR DLC OR reveal) -filter:replies min_faves:3",
 ] as const;
 
-type MediaItem = {
-	id: string;
-	type: string;
-	url?: string;
-	original_url?: string;
-	video_url?: string;
-	preview_url?: string;
-	width?: number;
-	height?: number;
-	[key: string]: string | number | boolean | null | undefined;
-};
-
-function mapMedia(m: {
-	id?: string;
-	type?: string;
-	url?: string;
-	video_url?: string;
-	preview_url?: string;
-	width?: number;
-	height?: number;
-}): MediaItem {
-	const out: MediaItem = {
-		id: m.id ?? "",
-		type: m.type ?? "",
-		url: m.url,
-		original_url: m.url,
-	};
-	if (m.video_url) out.video_url = m.video_url;
-	if (m.preview_url) out.preview_url = m.preview_url;
-	if (typeof m.width === "number") out.width = m.width;
-	if (typeof m.height === "number") out.height = m.height;
-	return out;
-}
-
-// Date de publication depuis l'ID Snowflake (epoch Twitter = 1288834974657 ms)
-// en repli quand created_at manque — ne JAMAIS retomber sur la date de crawl.
-function snowflakeToIso(id: string): string {
-	const ms = (BigInt(id) >> 22n) + 1288834974657n;
-	return new Date(Number(ms)).toISOString();
-}
-
 // Garde-fou anti-bruit : on ne garde que le contenu informatif Inazuma Eleven.
 const IE_KEYWORDS = [
 	"inazuma",
@@ -133,50 +95,6 @@ function isInformativeIeTweet(t: Tweet): boolean {
 	// Doit mentionner Inazuma Eleven d'une manière ou d'une autre.
 	if (!IE_KEYWORDS.some((k) => lower.includes(k))) return false;
 	return true;
-}
-
-type DBTweetRow = {
-	id: string;
-	author_id: string;
-	author_name: string;
-	author_username: string;
-	created_at: string;
-	text: string;
-	is_thread: boolean;
-	tweet_count: number;
-	metrics: Json | null;
-	media: Json | null;
-	quoted_tweets: Json | null;
-	raw_tweets: Json | null;
-	updated_at: string;
-};
-
-function tweetToRow(t: Tweet): DBTweetRow {
-	const createdAtIso = t.created_at
-		? new Date(t.created_at).toISOString()
-		: snowflakeToIso(t.id);
-	const media = (t.media || []).map((m: any) => mapMedia(m));
-	return {
-		id: t.id,
-		author_id: t.author_id || t.author?.id || "",
-		author_name: t.author?.name || t.author?.username || "",
-		author_username: t.author?.username || "",
-		created_at: createdAtIso,
-		text: t.text || "",
-		is_thread: false,
-		tweet_count: 1,
-		metrics: {
-			reply_count: t.reply_count,
-			retweet_count: t.retweet_count,
-			like_count: t.like_count,
-			quote_count: t.quote_count,
-			view_count: t.view_count,
-		},
-		media,
-		quoted_tweets: t.quoted_tweet ? JSON.parse(JSON.stringify(t.quoted_tweet)) : null,
-		raw_tweets: null,
-		updated_at: new Date().toISOString(),
-	};
 }
 
 function rowToRagSource(row: DBTweetRow): RagSource {

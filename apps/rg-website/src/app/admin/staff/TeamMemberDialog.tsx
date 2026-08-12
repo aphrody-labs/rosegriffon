@@ -3,18 +3,18 @@
 import {
 	Button,
 	Input,
+	Label,
+	ResponsiveDialog,
 	Select,
 	SelectContent,
 	SelectItem,
 	SelectTrigger,
 	SelectValue,
+	Switch,
 	Tabs,
 	TabsContent,
 	TabsList,
 	TabsTrigger,
-	Label,
-	ResponsiveDialog,
-	Switch,
 } from "@rosegriffon/ui";
 import { Upload, X } from "lucide-react";
 import Image from "next/image";
@@ -23,6 +23,13 @@ import { toast } from "sonner";
 
 import { createTeamMember, updateTeamMember, uploadTeamMemberImage } from "./actions";
 import type { TeamMember } from "./actions";
+import {
+	messagesParChamp,
+	schemaMembre,
+	TYPES_IMAGE_ACCEPTES,
+	validerFichierImage,
+} from "./staff-schema";
+import { EQUIPES } from "./teams";
 
 interface TeamMemberDialogProps {
 	open: boolean;
@@ -31,312 +38,362 @@ interface TeamMemberDialogProps {
 	onSuccess: () => void;
 }
 
-const TEAM_OPTIONS = [
-	{ label: "Bureau de l'Association", value: "bureauteam" },
-	{ label: "Membres de l'Association", value: "assoteam" },
-	{ label: "Équipe Lore", value: "loreteam" },
-	{ label: "Équipe Dessinateur", value: "dessinateurteam" },
-	{ label: "Équipe Production", value: "productionteam" },
-	{ label: "Équipe Réseaux", value: "socialteam" },
-	{ label: "Équipe Achilléa", value: "achilleateam" },
-	{ label: "Équipe Azalée", value: "azaleeteam" },
-	{ label: "Cellule de Médiation", value: "mediationteam" },
-	{ label: "Partenaires & Collaborateurs", value: "collabteam" },
-];
+interface Formulaire {
+	discord_user_id: string;
+	display_index: string;
+	image_url: string;
+	is_active: boolean;
+	member_link: string;
+	name: string;
+	role: string;
+	team_id: string;
+}
+
+function formulaireDepuis(membre?: TeamMember): Formulaire {
+	return {
+		discord_user_id: membre?.discord_user_id ?? "",
+		display_index: membre?.display_index?.toString() ?? "",
+		image_url: membre?.image_url ?? "",
+		is_active: membre?.is_active ?? true,
+		member_link: membre?.member_link ?? "",
+		name: membre?.name ?? "",
+		role: membre?.role ?? "",
+		team_id: membre?.team_id ?? "",
+	};
+}
+
+/** Onglet où se trouve chaque champ — sert à ramener l'utilisateur sur l'erreur. */
+const ONGLET_PAR_CHAMP: Record<string, "general" | "details"> = {
+	discord_user_id: "details",
+	display_index: "details",
+	image_url: "details",
+	is_active: "general",
+	member_link: "details",
+	name: "general",
+	role: "general",
+	team_id: "general",
+};
 
 export function TeamMemberDialog({ open, onOpenChange, member, onSuccess }: TeamMemberDialogProps) {
-	const [loading, setLoading] = useState(false);
-	const [formData, setFormData] = useState({
-		discord_user_id: member?.discord_user_id || "",
-		display_index: member?.display_index?.toString() || "",
-		image_url: member?.image_url || "",
-		is_active: member?.is_active ?? true,
-		member_link: member?.member_link || "",
-		name: member?.name || "",
-		role: member?.role || "",
-		team_id: member?.team_id || "",
-	});
-	const [imageFile, setImageFile] = useState<File | null>(null);
-	const [previewUrl, setPreviewUrl] = useState<string>(member?.image_url || "");
+	const [enregistrement, setEnregistrement] = useState(false);
+	const [formulaire, setFormulaire] = useState<Formulaire>(() => formulaireDepuis(member));
+	const [erreurs, setErreurs] = useState<Record<string, string>>({});
+	const [fichier, setFichier] = useState<File | null>(null);
+	const [apercu, setApercu] = useState<string>(member?.image_url ?? "");
+	const [onglet, setOnglet] = useState<"general" | "details">("general");
 
-	// Reset form when dialog opens/closes or member changes
+	// Réinitialise le formulaire à chaque ouverture ou changement de membre.
 	useEffect(() => {
 		if (open) {
-			setFormData({
-				discord_user_id: member?.discord_user_id || "",
-				display_index: member?.display_index?.toString() || "",
-				image_url: member?.image_url || "",
-				is_active: member?.is_active ?? true,
-				member_link: member?.member_link || "",
-				name: member?.name || "",
-				role: member?.role || "",
-				team_id: member?.team_id || "",
-			});
-			setPreviewUrl(member?.image_url || "");
-			setImageFile(null);
+			setFormulaire(formulaireDepuis(member));
+			setApercu(member?.image_url ?? "");
+			setFichier(null);
+			setErreurs({});
+			setOnglet("general");
 		}
 	}, [open, member]);
 
-	const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-		const file = e.target.files?.[0];
-		if (file) {
-			setImageFile(file);
-			const reader = new FileReader();
-			reader.onloadend = () => {
-				setPreviewUrl(reader.result as string);
-			};
-			reader.readAsDataURL(file);
+	// L'aperçu passait par un `FileReader` : une image de 4 Mo finissait en base64
+	// dans l'état React (≈5,3 Mo de chaîne). Une URL d'objet coûte quelques
+	// octets, et `next/image` la sert telle quelle (les `blob:` ne sont jamais
+	// optimisées). Elle doit être révoquée pour ne pas fuir.
+	useEffect(() => {
+		if (!fichier) {
+			return;
 		}
+		const url = URL.createObjectURL(fichier);
+		setApercu(url);
+		return () => URL.revokeObjectURL(url);
+	}, [fichier]);
+
+	const modifier = <C extends keyof Formulaire>(champ: C, valeur: Formulaire[C]) => {
+		setFormulaire((precedent) => ({ ...precedent, [champ]: valeur }));
+		setErreurs(({ [champ]: _, ...reste }) => reste);
 	};
 
-	const handleRemoveImage = () => {
-		setImageFile(null);
-		setPreviewUrl("");
-		setFormData({ ...formData, image_url: "" });
+	const choisirFichier = (evenement: React.ChangeEvent<HTMLInputElement>) => {
+		const choisi = evenement.target.files?.[0];
+		if (!choisi) {
+			return;
+		}
+		const controle = validerFichierImage(choisi);
+		if (!controle.ok) {
+			toast.error("Image refusée", { description: controle.message });
+			evenement.target.value = "";
+			return;
+		}
+		setFichier(choisi);
 	};
 
-	const handleSubmit = async (e: React.FormEvent) => {
-		e.preventDefault();
-		setLoading(true);
+	const retirerImage = () => {
+		setFichier(null);
+		setApercu("");
+		modifier("image_url", "");
+	};
 
+	const enregistrer = async (evenement: React.FormEvent) => {
+		evenement.preventDefault();
+		setErreurs({});
+
+		// Validation locale AVANT tout envoi : inutile de téléverser une image
+		// pour se faire refuser sur un champ obligatoire vide.
+		const controle = schemaMembre.safeParse(formulaire);
+		if (!controle.success) {
+			const parChamp = messagesParChamp(controle.error);
+			setErreurs(parChamp);
+			const premierChamp = Object.keys(parChamp)[0];
+			if (premierChamp && ONGLET_PAR_CHAMP[premierChamp]) {
+				setOnglet(ONGLET_PAR_CHAMP[premierChamp]);
+			}
+			toast.error("Formulaire incomplet", {
+				description: Object.values(parChamp)[0] ?? "Vérifiez les champs signalés.",
+			});
+			return;
+		}
+
+		setEnregistrement(true);
 		try {
-			let finalImageUrl = formData.image_url;
+			let urlImage = formulaire.image_url;
 
-			// Upload de l'image si un fichier est sélectionné
-			if (imageFile) {
-				const { url, error } = await uploadTeamMemberImage(imageFile);
+			if (fichier) {
+				const { url, error } = await uploadTeamMemberImage(fichier);
 				if (error) {
-					toast.error("Erreur lors de l'upload de l'image", {
-						description: error,
-					});
-					setLoading(false);
+					toast.error("Erreur lors de l'envoi de l'image", { description: error });
 					return;
 				}
-				finalImageUrl = url || "";
+				urlImage = url ?? "";
 			}
 
-			const teamName =
-				TEAM_OPTIONS.find((t) => t.value === formData.team_id)?.label || formData.team_id;
-
-			const memberData = {
-				discord_user_id: formData.discord_user_id || undefined,
-				display_index: formData.display_index ? parseInt(formData.display_index, 10) : undefined,
-				image_url: finalImageUrl,
-				is_active: formData.is_active,
-				member_link: formData.member_link || undefined,
-				name: formData.name,
-				role: formData.role,
-				team_id: formData.team_id,
-				team_name: teamName,
+			// Les champs vidés partent en chaîne vide, que le schéma serveur
+			// convertit en NULL : envoyer `undefined` (comportement précédent) les
+			// faisait disparaître de la charge utile, donc rien n'était jamais effacé.
+			const donnees = {
+				discord_user_id: formulaire.discord_user_id,
+				display_index: formulaire.display_index,
+				image_url: urlImage,
+				is_active: formulaire.is_active,
+				member_link: formulaire.member_link,
+				name: formulaire.name,
+				role: formulaire.role,
+				team_id: formulaire.team_id,
 			};
 
-			if (member) {
-				// Mise à jour
-				const { error } = await updateTeamMember(member.id, memberData);
-				if (error) {
-					toast.error("Erreur lors de la mise à jour", {
-						description: error,
-					});
-					setLoading(false);
-					return;
-				}
-				toast.success("Membre mis à jour avec succès");
-			} else {
-				// Création
-				const { error } = await createTeamMember(memberData);
-				if (error) {
-					toast.error("Erreur lors de la création", {
-						description: error,
-					});
-					setLoading(false);
-					return;
-				}
-				toast.success("Membre créé avec succès");
+			const { error } = member
+				? await updateTeamMember(member.id, donnees)
+				: await createTeamMember(donnees);
+
+			if (error) {
+				toast.error(member ? "Erreur lors de la mise à jour" : "Erreur lors de la création", {
+					description: error,
+				});
+				return;
 			}
 
+			toast.success(member ? `${formulaire.name} a été mis à jour` : `${formulaire.name} a été créé`);
 			onSuccess();
 			onOpenChange(false);
-		} catch (error) {
-			console.error("Error submitting form:", error);
+		} catch (erreur) {
+			console.error("[staff] échec de l'enregistrement du formulaire :", erreur);
 			toast.error("Une erreur est survenue");
 		} finally {
-			setLoading(false);
+			setEnregistrement(false);
 		}
 	};
+
+	const messageErreur = (champ: keyof Formulaire) =>
+		erreurs[champ] ? (
+			<p id={`${champ}-erreur`} className="text-xs text-destructive">
+				{erreurs[champ]}
+			</p>
+		) : null;
+
+	const proprietesChamp = (champ: keyof Formulaire) => ({
+		"aria-describedby": erreurs[champ] ? `${champ}-erreur` : undefined,
+		"aria-invalid": erreurs[champ] ? true : undefined,
+	});
 
 	return (
 		<ResponsiveDialog
 			open={open}
 			onOpenChange={onOpenChange}
-			title={`${member ? "Modifier" : "Ajouter"} un membre d'équipe`}
-			description="Remplissez les informations du membre d'équipe. Les champs marqués d'un * sont obligatoires."
+			title={member ? "Modifier un membre d'équipe" : "Ajouter un membre d'équipe"}
+			description="Renseignez les informations du membre. Les champs marqués d'un astérisque sont obligatoires."
 		>
-			<form onSubmit={handleSubmit} className="p-1">
-				<Tabs defaultValue="general" className="w-full">
-					<TabsList className="grid w-full grid-cols-2 mb-4">
-						<TabsTrigger value="general">Infos Générales</TabsTrigger>
-						<TabsTrigger value="details">Détails & Image</TabsTrigger>
+			<form onSubmit={enregistrer} className="p-1" noValidate>
+				<Tabs value={onglet} onValueChange={(valeur) => setOnglet(valeur as "general" | "details")}>
+					<TabsList className="mb-4 grid w-full grid-cols-2">
+						<TabsTrigger value="general">Informations générales</TabsTrigger>
+						<TabsTrigger value="details">Photo et détails</TabsTrigger>
 					</TabsList>
 
 					<TabsContent value="general" className="space-y-4">
-						{/* Équipe */}
 						<div className="space-y-2">
 							<Label htmlFor="team_id">
-								Équipe <span className="text-red-500">*</span>
+								Équipe <span aria-hidden="true">*</span>
+								<span className="sr-only">(obligatoire)</span>
 							</Label>
 							<Select
-								value={formData.team_id}
-								onValueChange={(value) => setFormData({ ...formData, team_id: value })}
+								value={formulaire.team_id}
+								onValueChange={(valeur) => modifier("team_id", valeur)}
 							>
-								<SelectTrigger>
+								<SelectTrigger id="team_id" {...proprietesChamp("team_id")}>
 									<SelectValue placeholder="Sélectionnez une équipe" />
 								</SelectTrigger>
 								<SelectContent>
-									{TEAM_OPTIONS.map((team) => (
-										<SelectItem key={team.value} value={team.value}>
-											{team.label}
+									{EQUIPES.map((equipe) => (
+										<SelectItem key={equipe.id} value={equipe.id}>
+											{equipe.libelle}
 										</SelectItem>
 									))}
 								</SelectContent>
 							</Select>
+							{messageErreur("team_id")}
 						</div>
 
-						{/* Nom */}
 						<div className="space-y-2">
 							<Label htmlFor="name">
-								Nom <span className="text-red-500">*</span>
+								Nom <span aria-hidden="true">*</span>
+								<span className="sr-only">(obligatoire)</span>
 							</Label>
 							<Input
 								id="name"
-								value={formData.name}
-								onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-								placeholder="Ex: Jean Dupont"
-								required
+								value={formulaire.name}
+								onChange={(evenement) => modifier("name", evenement.target.value)}
+								placeholder="Ex. : Jean Dupont"
+								maxLength={80}
+								{...proprietesChamp("name")}
 							/>
+							{messageErreur("name")}
 						</div>
 
-						{/* Rôle */}
 						<div className="space-y-2">
 							<Label htmlFor="role">
-								Rôle <span className="text-red-500">*</span>
+								Rôle <span aria-hidden="true">*</span>
+								<span className="sr-only">(obligatoire)</span>
 							</Label>
 							<Input
 								id="role"
-								value={formData.role}
-								onChange={(e) => setFormData({ ...formData, role: e.target.value })}
-								placeholder="Ex: Développeur, Dessinateur..."
-								required
+								value={formulaire.role}
+								onChange={(evenement) => modifier("role", evenement.target.value)}
+								placeholder="Ex. : Développeur, Dessinateur…"
+								maxLength={80}
+								{...proprietesChamp("role")}
 							/>
+							{messageErreur("role")}
 						</div>
 
-						{/* Actif */}
-						<div className="flex items-center space-x-2 pt-2">
+						<div className="flex items-center gap-2 pt-2">
 							<Switch
 								id="is_active"
-								checked={formData.is_active}
-								onCheckedChange={(checked) => setFormData({ ...formData, is_active: checked })}
+								checked={formulaire.is_active}
+								onCheckedChange={(coche) => modifier("is_active", coche)}
 							/>
-							<Label htmlFor="is_active">Membre actif (visible sur le site)</Label>
+							<Label htmlFor="is_active">Membre actif (visible sur le site public)</Label>
 						</div>
 					</TabsContent>
 
 					<TabsContent value="details" className="space-y-4">
-						{/* Image */}
 						<div className="space-y-2">
-							<Label>Image de profil</Label>
-							<div className="flex items-start gap-4">
-								{previewUrl ? (
-									<div className="relative size-24 rounded-full overflow-hidden border-2 border-border shrink-0">
+							<Label htmlFor="photo">Photo de profil</Label>
+							<div className="flex flex-col items-start gap-4 xs:flex-row">
+								{apercu ? (
+									<div className="relative size-24 shrink-0 overflow-hidden rounded-full border-2 border-outline-variant">
 										<Image
-											src={previewUrl}
-											alt="Preview"
+											src={apercu}
+											alt="Aperçu de la photo du membre"
 											fill
 											sizes="96px"
 											className="object-cover"
+											unoptimized
 										/>
 										<Button
 											type="button"
 											variant="destructive"
 											size="icon"
-											className="absolute top-1 right-1 size-5"
-											onClick={handleRemoveImage}
+											className="absolute right-1 top-1 size-5"
+											aria-label="Retirer la photo"
+											onClick={retirerImage}
 										>
-											<X className="size-3" />
+											<X className="size-3" aria-hidden="true" />
 										</Button>
 									</div>
 								) : (
-									<div className="size-24 rounded-full border-2 border-dashed border-border flex items-center justify-center shrink-0">
-										<Upload className="size-6 text-muted-foreground" />
+									<div className="flex size-24 shrink-0 items-center justify-center rounded-full border-2 border-dashed border-outline-variant">
+										<Upload className="size-6 text-on-surface-variant" aria-hidden="true" />
 									</div>
 								)}
-								<div className="flex-1 space-y-2">
+								<div className="w-full flex-1 space-y-2">
 									<Input
+										id="photo"
 										type="file"
-										accept="image/*"
-										onChange={handleImageChange}
+										accept={TYPES_IMAGE_ACCEPTES.join(",")}
+										onChange={choisirFichier}
 										className="text-sm"
 									/>
-									<p className="text-xs text-muted-foreground">
-										Format recommandé : PNG ou JPG, 400x400px
+									<p className="text-xs text-on-surface-variant">
+										PNG, JPEG, WebP, AVIF ou GIF — 400 × 400 px recommandé, 4 Mo maximum.
 									</p>
+									{messageErreur("image_url")}
 								</div>
 							</div>
 						</div>
 
-						{/* Index d'affichage */}
-						<div className="grid grid-cols-2 gap-4">
+						<div className="grid grid-cols-1 gap-4 xs:grid-cols-2">
 							<div className="space-y-2">
-								<Label htmlFor="display_index">Ordre</Label>
+								<Label htmlFor="display_index">Ordre d'affichage</Label>
 								<Input
 									id="display_index"
 									type="number"
-									value={formData.display_index}
-									onChange={(e) => setFormData({ ...formData, display_index: e.target.value })}
+									inputMode="numeric"
+									min={0}
+									max={32767}
+									value={formulaire.display_index}
+									onChange={(evenement) => modifier("display_index", evenement.target.value)}
 									placeholder="1"
+									{...proprietesChamp("display_index")}
 								/>
+								{messageErreur("display_index")}
 							</div>
-							{/* Discord User ID */}
 							<div className="space-y-2">
-								<Label htmlFor="discord_user_id">ID Discord</Label>
+								<Label htmlFor="discord_user_id">Identifiant Discord</Label>
 								<Input
 									id="discord_user_id"
-									value={formData.discord_user_id}
-									onChange={(e) =>
-										setFormData({
-											...formData,
-											discord_user_id: e.target.value,
-										})
-									}
-									placeholder="1234..."
+									inputMode="numeric"
+									value={formulaire.discord_user_id}
+									onChange={(evenement) => modifier("discord_user_id", evenement.target.value)}
+									placeholder="123456789012345678"
+									{...proprietesChamp("discord_user_id")}
 								/>
+								{messageErreur("discord_user_id")}
 							</div>
 						</div>
 
-						{/* Lien membre */}
 						<div className="space-y-2">
-							<Label htmlFor="member_link">Lien Profil (optionnel)</Label>
+							<Label htmlFor="member_link">Lien vers un profil (facultatif)</Label>
 							<Input
 								id="member_link"
 								type="url"
-								value={formData.member_link}
-								onChange={(e) => setFormData({ ...formData, member_link: e.target.value })}
-								placeholder="https://..."
+								value={formulaire.member_link}
+								onChange={(evenement) => modifier("member_link", evenement.target.value)}
+								placeholder="https://…"
+								{...proprietesChamp("member_link")}
 							/>
+							{messageErreur("member_link")}
 						</div>
 					</TabsContent>
 				</Tabs>
 
-				<div className="mt-6 flex justify-end gap-2">
+				<div className="mt-6 flex flex-col justify-end gap-2 xs:flex-row">
 					<Button
 						type="button"
 						variant="outline"
 						onClick={() => onOpenChange(false)}
-						disabled={loading}
+						disabled={enregistrement}
 					>
 						Annuler
 					</Button>
-					<Button type="submit" disabled={loading}>
-						{loading ? "Enregistrement..." : member ? "Mettre à jour" : "Créer"}
+					<Button type="submit" disabled={enregistrement}>
+						{enregistrement ? "Enregistrement…" : member ? "Mettre à jour" : "Créer"}
 					</Button>
 				</div>
 			</form>
