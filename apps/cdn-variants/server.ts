@@ -118,8 +118,13 @@ function webpHeaders(extra: Record<string, string> = {}): Record<string, string>
 
 /**
  * Récupère les octets source d'un asset `<surface>/<path>` (surface = dx11 ou g4tx).
- * 1) fichier dump disque non vide ; 2) décodeur live iecode-cdn.
+ * 1) fichier dump disque non vide ; 2) décodeur live niers (`nie-model-serve`).
  * `logical` est sans le slash initial (ex. `dx11/menu/220_img/gallery_img2/x.png`).
+ *
+ * Le dump n'est plus qu'un cache : depuis l'archivage de `data/dx11/menu` sur le
+ * stockage secondaire (12 Go, 69 624 PNG pré-décodés), la quasi-totalité des
+ * requêtes passe par le décodeur. Sa sortie a été vérifiée pixel pour pixel
+ * identique au dump (RMSE nul), à latence égale et pour un PNG plus compact.
  */
 async function fetchSource(logical: string): Promise<Uint8Array | null> {
   // dx11/<rest> → fichier dump DX11_DUMP_ROOT/<rest>
@@ -139,19 +144,18 @@ async function fetchSource(logical: string): Promise<Uint8Array | null> {
     }
   }
 
-  // Fallback live 1 : iecode-cdn décode G4TX→PNG (ou octets bruts). Il sert /dx11/...
-  // ET /g4tx/... selon la surface. On proxifie le même path logique.
-  const fromIecode = await fetchLive(`${LIVE_ORIGIN}/${logical}`);
-  if (fromIecode) return fromIecode;
+  // Décodeur live : niers (`nie-model-serve /tex/<rel>`) décode le G4TX depuis les
+  // CPK. Il est PRIMAIRE — l'ancien décodeur iecode-cdn (:8788, pont Bun→.NET) a été
+  // retiré du dépôt le 11/8/2026 et le port ne répond plus ; l'appeler d'abord
+  // ajoutait un aller-retour perdu sur chaque miss, devenu le cas courant.
+  // Surface `dx11/…` → `/tex/dx11/…` ; surface `g4tx/<rest>` → `/tex/<rest>`
+  // (même réécriture que nginx).
+  const cible = logical.startsWith("g4tx/") ? logical.slice("g4tx/".length) : logical;
+  const depuisNiers = await fetchLive(`${NIERS_ORIGIN}/tex/${cible}`);
+  if (depuisNiers) return depuisNiers;
 
-  // Fallback live 2 : niers (nie-model-serve `/tex/<rel>.png`) — décode des g4tx que
-  // iecode-cdn rate (textures `_animal`…). Uniquement pour la surface dx11 (g4tx→png).
-  if (logical.startsWith("dx11/")) {
-    const fromNiers = await fetchLive(`${NIERS_ORIGIN}/tex/${logical}`);
-    if (fromNiers) return fromNiers;
-  }
-
-  return null;
+  // Repli historique, conservé au cas où un décodeur serait remis sur LIVE_ORIGIN.
+  return await fetchLive(`${LIVE_ORIGIN}/${logical}`);
 }
 
 /** Récupère les octets d'une URL de décodeur live (timeout + bornes de taille). `null` si échec. */

@@ -45,6 +45,7 @@ dans `.gitignore` — c'est donc ici que vit toute la doc de fond.
 | [self-host-supabase.md](self-host-supabase.md) | Sortie de Supabase : PostgreSQL local, PostgREST, Storage et Realtime auto-hébergés. |
 | [mcp.md](mcp.md) | Serveur MCP du monorepo : mise en service, connexion distante, portées. |
 | [rag-unified.md](rag-unified.md) | Recherche sémantique unifiée : embeddings auto-hébergés, graphe de liens, ingestion. |
+| [stockage-secondaire.md](stockage-secondaire.md) | Le second VPS en archive froide : outil de déport, ce qui est déporté, ce qui ne doit pas l'être. |
 
 ## Écosystème
 
