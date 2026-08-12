@@ -201,6 +201,8 @@ const APPS: Record<string, AppConfig> = {
 
 let logFile: string | null = null;
 let logChain: Promise<unknown> = Promise.resolve();
+/** En sortie JSON, la trace part sur stderr : stdout ne doit contenir QUE le document. */
+let logToStderr = false;
 
 function stamp(): string {
 	return new Date().toISOString().replace(/[:.]/gu, "-").replace("Z", "");
@@ -208,7 +210,7 @@ function stamp(): string {
 
 function log(line: string): void {
 	const entry = `${new Date().toISOString()} ${line}`;
-	process.stdout.write(`${entry}\n`);
+	(logToStderr ? process.stderr : process.stdout).write(`${entry}\n`);
 	const destination = logFile;
 	if (!destination) return;
 	// Le journal ne doit ni bloquer la boucle d'événements, ni faire échouer un
@@ -1437,6 +1439,7 @@ async function main(): Promise<number> {
 		allowLowMemory: options.includes("--allow-low-memory"),
 	};
 
+	logToStderr = flags.json;
 	if (command === "status") return (await commandStatus(apps, flags)) ? 0 : 1;
 	if (command === "releases") return (await commandReleases(apps)) ? 0 : 1;
 
