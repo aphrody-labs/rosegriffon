@@ -13,6 +13,8 @@ rg/
 │   ├── website/         # Site principal (rosegriffon.fr)
 │   ├── cdn/             # Serveur d'images du CDN
 │   ├── cdn-variants/    # Redimensionnement + WebP à la volée
+│   ├── storage/         # API de stockage compatible Supabase (fichiers locaux)
+│   ├── realtime/        # Diffusion SSE des changements Postgres (LISTEN/NOTIFY)
 │   ├── rag-api/         # Recherche sémantique locale
 │   └── bot/             # Bot Discord — source conservée, NON déployé
 ├── packages/
@@ -20,14 +22,13 @@ rg/
 │   ├── mcp/             # Serveur Model Context Protocol du monorepo
 │   ├── inagle/          # Parser binaire CPK/G4TX + pipeline de données du jeu
 │   ├── inagle-cross/    # Catalogue Inazuma Eleven Cross (jeu mobile)
-│   ├── menu-render/     # Rendu des écrans de menu du jeu
 │   ├── cron/            # Tâches planifiées (SEO, synchronisations)
 │   ├── ui/              # Design system partagé (shadcn, Tailwind v4)
-│   ├── db/ auth/ types/ # Client Supabase, guards better-auth, schémas zod
+│   ├── db/ auth/ types/ # Client base de données, guards better-auth, schémas zod
+│   ├── assets/          # Assets statiques partagés
 │   ├── patreon-bun/     # Client API Patreon v2
 │   └── config/          # Presets tsconfig / eslint / oxlint / tailwind
 ├── plugins/rose-griffon/# Plugin Claude Code : MCP, skills, agents, hook
-├── iecode/              # Toolkit de rétro-ingénierie C#/.NET + pont Bun
 ├── docs/                # Documentation technique
 ├── infra/               # Unités systemd et configurations nginx
 └── scripts/             # Scripts d'exploitation et de déploiement
@@ -37,10 +38,10 @@ rg/
 
 | | |
 | --- | --- |
-| Runtime | Bun (1.3.14 en CI et en production) |
+| Runtime | Bun (1.3.14 minimum, en production comme en local) |
 | Front | Next 16 + React 19, compilateur React actif |
 | Style | Tailwind v4 + design system `@rosegriffon/ui` |
-| Données | Supabase Postgres + miroir SQLite embarqué |
+| Données | PostgreSQL 18 auto-hébergé + PostgREST, Storage et Realtime maison ; miroir SQLite embarqué côté wiki |
 | Auth | better-auth (Discord, Google, Steam) |
 | Lint | oxlint + eslint |
 | Tests | `bun test` natif |
@@ -67,8 +68,8 @@ bun packages/mcp/src/cli.ts --list       # inventaire du serveur MCP
 
 ## Déploiement
 
-**Aucun push ne déploie.** Les deux applications sont auto-hébergées sur le
-VPS derrière nginx :
+Les deux applications sont auto-hébergées sur le VPS derrière nginx, et se
+publient d'une seule commande :
 
 ```bash
 bun run deploy                   # wiki + site, sans coupure de service
@@ -83,6 +84,13 @@ est sondé, puis nginx bascule — le site ne tombe à aucun moment (mesuré :
 cookie, avant de la passer en production ; `rollback` revient à la précédente.
 `bash scripts/ship-azalee.sh` et `ship-website.sh` restent valables : ils
 délèguent à cette mécanique.
+
+La même mécanique se pilote à distance par le serveur MCP (`deploy_status` en
+lecture, `deploy_run` en portée `admin`) ou par
+[`.github/workflows/deploy.yml`](.github/workflows/deploy.yml) — le runner ne
+construit rien, il déclenche la publication sur le VPS puis en suit l'état. Une
+poussée sur `main` ne publie **que** si la variable de dépôt `DEPLOY_ON_PUSH`
+vaut `true` ; sinon le déclenchement reste manuel.
 
 Les services sans build (API headless, serveur MCP, CDN, cron) se rechargent
 par un simple `sudo systemctl restart <unité>`. Mécanique complète et pièges :
@@ -126,6 +134,8 @@ les plus utiles :
 
 - [`docs/azalee-lib.md`](docs/azalee-lib.md) — la bibliothèque du wiki ;
 - [`docs/deploy.md`](docs/deploy.md) — exploitation et déploiement ;
+- [`docs/deploiement-sans-coupure.md`](docs/deploiement-sans-coupure.md) — la
+  publication bleu/vert, la prévisualisation et le retour arrière ;
 - [`docs/mcp.md`](docs/mcp.md) — serveur MCP et connexion distante ;
 - [`docs/gamedata-coverage.md`](docs/gamedata-coverage.md) — couverture de
   l'extraction des données du jeu.
