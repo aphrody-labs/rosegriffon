@@ -165,11 +165,12 @@
     },
     "apps/bot": {
       "name": "@rosegriffon/bot",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "dependencies": {
         "@aphrody-code/canvas": "catalog:",
         "@rosegriffon/db": "workspace:*",
         "@rosegriffon/types": "workspace:*",
+        "@rosegriffon/ui": "workspace:*",
         "@rpbey/discordx": "catalog:",
         "@supabase/supabase-js": "catalog:",
         "discord.js": "catalog:",
