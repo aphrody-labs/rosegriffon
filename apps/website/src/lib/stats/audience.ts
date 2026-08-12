@@ -1,7 +1,5 @@
 import "server-only";
 
-import { createReadStream, existsSync } from "node:fs";
-import { createInterface } from "node:readline";
 
 /**
  * Agrégation de l'audience par domaine, lue depuis le journal nginx unifié.
@@ -12,6 +10,12 @@ import { createInterface } from "node:readline";
  * champs séparés par des tabulations — aucun des champs journalisés ne peut en
  * contenir, contrairement aux espaces et guillemets du format `combined`, qui
  * imposent une expression régulière fragile.
+ *
+ * LECTURE
+ * `Bun.file().stream()` plutôt que `node:fs` + `node:readline` : le monorepo
+ * impose les APIs Bun natives, et le découpage en lignes se fait ici sur le flux
+ * décodé à la volée — mémoire bornée quelle que soit la taille du journal, là où
+ * un `.text()` chargerait les douze mégaoctets d'une journée d'un coup.
  *
  * POURQUOI PAS DE BASE DE DONNÉES
  * Le journal EST la source. Recopier chaque requête en base coûterait plus cher
@@ -81,6 +85,35 @@ function nouvelAccumulateur(): Accumulateur {
 		requetes: 0,
 		visiteurs: new Set(),
 	};
+}
+
+/**
+ * Découpe un fichier en lignes, sans jamais le charger entièrement.
+ *
+ * `BunFile.stream()` livre des `Uint8Array` dont les frontières ne coïncident
+ * pas avec les fins de ligne : le reste de chunk est donc conservé d'une
+ * itération à l'autre. `TextDecoder` en mode `stream` gère au passage les
+ * caractères multi-octets coupés en deux — un pseudo accentué à cheval sur deux
+ * chunks produirait sinon un caractère de remplacement.
+ */
+async function* lignes(fichier: ReturnType<typeof Bun.file>): AsyncGenerator<string> {
+	const decodeur = new TextDecoder();
+	let reste = "";
+
+	for await (const morceau of fichier.stream()) {
+		reste += decodeur.decode(morceau as Uint8Array, { stream: true });
+		let coupure = reste.indexOf("\n");
+		while (coupure !== -1) {
+			yield reste.slice(0, coupure);
+			reste = reste.slice(coupure + 1);
+			coupure = reste.indexOf("\n");
+		}
+	}
+
+	reste += decodeur.decode();
+	if (reste) {
+		yield reste;
+	}
 }
 
 /** Centile sur une série déjà triée. */
@@ -158,20 +191,18 @@ export async function lireAudience(heures = 24): Promise<RapportAudience> {
 	let tronque = false;
 	let journalDisponible = false;
 
-	const fichiers = [CHEMIN_JOURNAL_PRECEDENT, CHEMIN_JOURNAL].filter((f) => existsSync(f));
-
-	for (const fichier of fichiers) {
-		journalDisponible = true;
+	for (const chemin of [CHEMIN_JOURNAL_PRECEDENT, CHEMIN_JOURNAL]) {
 		if (tronque) {
 			break;
 		}
-		try {
-			const flux = createInterface({
-				crlfDelay: Number.POSITIVE_INFINITY,
-				input: createReadStream(fichier, { encoding: "utf8" }),
-			});
+		const fichier = Bun.file(chemin);
+		if (!(await fichier.exists())) {
+			continue;
+		}
+		journalDisponible = true;
 
-			for await (const ligne of flux) {
+		try {
+			for await (const ligne of lignes(fichier)) {
 				if (lignesLues >= MAX_LIGNES) {
 					tronque = true;
 					break;
@@ -246,9 +277,8 @@ export async function lireAudience(heures = 24): Promise<RapportAudience> {
 					acc.referents.set(source, (acc.referents.get(source) ?? 0) + 1);
 				}
 			}
-			flux.close();
 		} catch (error) {
-			console.error(`[stats] lecture de ${fichier} impossible`, error);
+			console.error(`[stats] lecture de ${chemin} impossible`, error);
 		}
 	}
 
