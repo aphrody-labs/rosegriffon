@@ -308,6 +308,15 @@ Bun.cron("0 6 * * *", async () => {
 	await executeTask("seo:indexnow", runSeoIndexNow);
 });
 
+// 9. Statistiques — rapatriement de l'audience du second serveur, toutes les 15 min.
+// `achillea.rosegriffon.fr` et `ranked.rosegriffon.fr` sont servis par un autre VPS :
+// leur journal nginx n'est pas lisible d'ici. L'onglet Statistiques affiche une
+// fenêtre de 24 h — un décalage plus long rendrait « les dernières heures » faux
+// de façon visible pour ces deux domaines.
+Bun.cron("*/15 * * * *", async () => {
+	await executeTask("stats:achillea", collecterAudienceAchillea);
+});
+
 console.log("✅ Toutes les tâches cron ont été planifiées avec succès.");
 
 // ─── SERVEUR HTTP + WEBSOCKETS (BUN.SERVE) ───────────────────────────────────
@@ -444,7 +453,7 @@ const server = Bun.serve({
 					"github-publish": "30 4 * * *",
 					crawl: "0 5 * * *",
 					"seo:llms-txt": "45 5 * * *",
-				"stats:achillea": "*/15 * * * *",
+					"stats:achillea": "*/15 * * * *",
 					"seo:indexnow": "0 6 * * *",
 					reminders: "0 8 * * *",
 					discord: "*/30 * * * *",
