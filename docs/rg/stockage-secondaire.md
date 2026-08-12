@@ -39,14 +39,43 @@ Variables : `RG_ARCHIVE_HOTE`, `RG_ARCHIVE_RACINE`, `RG_ARCHIVE_MOTIF`.
 | --- | --- | --- |
 | `data/dx11/menu` (69 624 PNG) | 12 Go | Cache pur — voir ci-dessous |
 | `niers/var/niers.sqlite` | 6,8 Go | Base de reverse-engineering, lue seulement par `nie-cli` et `nie-explorer` en développement ; aucune unité systemd ne la référence |
-| `niers/data/cross-apk/{tools,work,download}` | 3,3 Go | Outils et intermédiaires d'extraction de l'APK Cross ; l'extraction est terminée (`EXTRACTED.done`) et `extract/` reste en local pour la phase Il2CppDumper |
 | `niers/var/ghidra-proj` | 450 Mo | Projet Ghidra, outillage hors ligne |
 | `niers/data/backups` | 105 Mo | Sauvegardes de données inagle |
 
 Purges locales complémentaires : `~/.cache/puppeteer` (641 Mo — un Chromium
-orphelin, aucune référence dans le dépôt ; seul `bxc` est utilisé pour les tests et
-le scraping), `node-gyp`, `pip`, les miroirs SQLite azalée au-delà des deux plus
-récents, et les journaux systemd ramenés à 100 Mo.
+orphelin, aucune référence dans le dépôt), `node-gyp`, `pip`, les miroirs SQLite
+azalée au-delà des deux plus récents, et les journaux systemd ramenés à 100 Mo.
+
+## Suppressions définitives — chaîne APK Android et navigateurs
+
+Retiré le 12 août 2026, sans passer par l'archive : ce n'est pas du froid à garder.
+
+**Chaîne d'extraction de l'APK Cross (≈ 5 Go).** L'arborescence
+`niers/data/cross-apk` (1,6 Go local), les trois lots déjà déportés (3,3 Go sur le
+stockage secondaire), l'unité `cross-apk-fetch.{service,timer}` et les paquets
+Android du système (`adb`, `apksigner`, `libapksig-java`, `android-udev-rules`,
+`/usr/lib/android-sdk`).
+
+Ce qui reste, et qui suffit : les données **dérivées** de cette extraction sont
+committées et légères — `packages/azalee/src/data/cross/*.json` (1,6 Mo) et
+`packages/inagle-cross` (1,8 Mo). La page `/cross` d'azalée continue de répondre
+200 ; aucun module du dépôt ne lisait `niers/data/cross-apk` à l'exécution.
+
+Une seule perte : le test `hca_ievr_dechiffrement_cle_correcte` de
+`nie-model-serve`, derrière la feature `real-audio`, pointait un `.awb` de cet
+arbre comme fixture. Il était déjà opt-in et non distribué.
+
+**Navigateurs (≈ 870 Mo).** Deux Chrome complets cohabitaient sur une machine sans
+écran. Purgé : le paquet `google-chrome-stable` (`/opt/google/chrome`, 432 Mo) et
+les profils inutilisés `~/.config/google-chrome` (239 Mo) et `~/.config/chromium`
+(198 Mo) — aucun descripteur ouvert, dernière écriture en mai et août.
+
+Conservé : `/usr/local/chrome` (Chrome **for Testing** 147), la cible des liens
+`google-chrome` et `chromium` du `PATH`. C'est le navigateur d'automatisation, et
+`bxc` — trois services en cours, dont deux crawlers 24/7 — est le seul outil
+toléré pour les tests et le scraping. Ses journaux ne mentionnent Chrome nulle
+part sur trois jours (il travaille en `lightpanda` et `curl-impersonate`), mais le
+retirer casserait le repli d'un service en production pour 370 Mo.
 
 ## Le cas `data/dx11/menu` — pourquoi 12 Go étaient redondants
 
