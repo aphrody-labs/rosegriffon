@@ -2,11 +2,11 @@
  * Recherche sémantique (RAG) sur la base de connaissances Inazuma.
  *
  * S'appuie sur le sidecar d'embeddings self-host et le vector store Redis
- * exposés par `@rose-griffon/db/redis` — aucune clé d'API, aucun service
+ * exposés par `@rosegriffon/db/redis` — aucune clé d'API, aucun service
  * externe. Utilisable par le CLI (`azalee rag`), l'API headless et une GUI.
  */
 
-import { getEmbedding, vectorStore } from "@rose-griffon/db/redis";
+import { getEmbedding, vectorStore } from "@rosegriffon/db/redis";
 
 /** Un extrait pertinent renvoyé par la recherche sémantique. */
 export interface RagResult {

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import {
 	DashboardStatsCard as DashboardMetricCard,
 	AdminPageHeader as DashboardPageHeader,
-} from "@rose-griffon/ui";
+} from "@rosegriffon/ui";
 import { requireAdmin } from "@/lib/auth-helpers";
 import { createClient } from "@/lib/supabase/server";
 import { ZukanReviewClient } from "./ZukanReviewClient";

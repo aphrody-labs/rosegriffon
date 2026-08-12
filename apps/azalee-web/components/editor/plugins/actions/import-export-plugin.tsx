@@ -27,7 +27,7 @@ import {
 	DropdownMenuLabel,
 	DropdownMenuSeparator,
 	DropdownMenuTrigger,
-} from "@rose-griffon/ui";
+} from "@rosegriffon/ui";
 
 const ALL_TRANSFORMERS = [IMAGE, ...TRANSFORMERS];
 

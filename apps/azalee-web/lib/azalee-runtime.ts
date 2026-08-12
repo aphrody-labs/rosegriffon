@@ -1,7 +1,7 @@
 import "server-only";
 
 /**
- * Branchement de la bibliothèque `@rose-griffon/azalee` sur le runtime Next.
+ * Branchement de la bibliothèque `@rosegriffon/azalee` sur le runtime Next.
  *
  * La lib lit par défaut le **miroir SQLite** seul (mode CLI / sidecar Tauri).
  * Dans le wiki web on injecte le client Supabase enveloppé du `Proxy` maison :
@@ -13,7 +13,7 @@ import "server-only";
  * donc garantie avant le premier accès données, quelle que soit la route.
  */
 
-import { setDatabaseProvider } from "@rose-griffon/azalee/db";
+import { setDatabaseProvider } from "@rosegriffon/azalee/db";
 import { createClient } from "@/lib/supabase/server";
 
 setDatabaseProvider(createClient);

@@ -10,7 +10,7 @@ import {
 	DialogHeader,
 	DialogTitle,
 	DialogTrigger,
-} from "@rose-griffon/ui";
+} from "@rosegriffon/ui";
 
 export function LoginDialog({ children }: { children: React.ReactNode }) {
 	const [open, setOpen] = useState(false);

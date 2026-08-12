@@ -3,7 +3,7 @@
 import { createClient } from "@supabase/supabase-js";
 import { createContext, useContext, useEffect, useMemo, useRef, useState } from "react";
 import type { ReactNode } from "react";
-import type { Database } from "@rose-griffon/db";
+import type { Database } from "@rosegriffon/db";
 
 type SupabaseClient = ReturnType<typeof createClient<Database>>;
 
@@ -78,7 +78,7 @@ export function SupabaseProvider({
 			// Ce client sert UNIQUEMENT à lire des données : l'identité vient de Better
 			// Auth, jamais de GoTrue. Sans ces trois drapeaux, chaque changement de jeton
 			// reconstruit un client GoTrue complet qui s'accroche à la même clé de
-			// stockage que le client partagé de `@rose-griffon/db/browser` — d'où
+			// stockage que le client partagé de `@rosegriffon/db/browser` — d'où
 			// l'avertissement « Multiple GoTrueClient instances detected in the same
 			// browser context », et un risque réel de comportement indéfini entre les
 			// deux instances concurrentes.

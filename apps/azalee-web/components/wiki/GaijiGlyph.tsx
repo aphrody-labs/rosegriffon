@@ -3,7 +3,7 @@
  * background-position sur l'atlas décodé (CDN), mis à l'échelle à la hauteur demandée. Pur (pas de
  * `"use client"`), utilisable serveur ou client. Données : `lib/gaiji-shared.ts` (niers → azalee).
  */
-import { GAIJI, GAIJI_ATLAS, GROWTH_TYPE_GLYPHS, type GaijiKey } from "@rose-griffon/azalee/text/gaiji";
+import { GAIJI, GAIJI_ATLAS, GROWTH_TYPE_GLYPHS, type GaijiKey } from "@rosegriffon/azalee/text/gaiji";
 
 /** Un glyphe gaiji unique, rendu à `size` px de haut. */
 export function GaijiGlyph({

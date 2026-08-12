@@ -1,6 +1,6 @@
 "use client";
 
-import { Button, DiscordIcon, GoogleIcon, PatreonIcon } from "@rose-griffon/ui";
+import { Button, DiscordIcon, GoogleIcon, PatreonIcon } from "@rosegriffon/ui";
 import { Loader2 } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";

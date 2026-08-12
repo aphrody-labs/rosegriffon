@@ -4,7 +4,7 @@ import { createContext, useCallback, useContext, useEffect, useState } from "rea
 
 import { useAuth } from "@/contexts/auth-context";
 import { useProfileSync, useUpdateProfile } from "@/hooks/use-profile-sync";
-import { PUBLIC_PROFILE_COLUMNS, type PublicProfile } from "@rose-griffon/db";
+import { PUBLIC_PROFILE_COLUMNS, type PublicProfile } from "@rosegriffon/db";
 
 // Le client navigateur (clé anon) ne peut lire QUE les colonnes publiques :
 // typer le contexte avec la ligne complète promettait des champs (adresse,

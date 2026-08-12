@@ -1,6 +1,6 @@
 "use client";
 
-import type { Skill } from "@rose-griffon/inagle";
+import type { Skill } from "@rosegriffon/inagle";
 import {
 	AlertCircle,
 	ArrowLeft,
@@ -23,9 +23,9 @@ import { Icon } from "@/components/ui/Icon";
 import { OverrideSkillSection } from "@/components/wiki/OverrideSkillSection";
 import type { OverrideSkillData } from "@/components/wiki/OverrideSkillSection";
 import { SkillVideoActions } from "@/components/wiki/SkillVideoActions";
-import { getSkillIconUrl, getSkillImageUrl } from "@rose-griffon/azalee/images";
-import { japaneseToRomaji } from "@rose-griffon/azalee/text/japanese-romaji";
-import { SHOP_FR } from "@rose-griffon/azalee/text/translations";
+import { getSkillIconUrl, getSkillImageUrl } from "@rosegriffon/azalee/images";
+import { japaneseToRomaji } from "@rosegriffon/azalee/text/japanese-romaji";
+import { SHOP_FR } from "@rosegriffon/azalee/text/translations";
 
 // Translation maps for community sheet data
 const SKILL_TYPE_FR: Record<string, string> = {

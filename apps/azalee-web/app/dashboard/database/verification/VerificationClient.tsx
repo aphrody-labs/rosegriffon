@@ -14,7 +14,7 @@ import {
 	TableHeader,
 	TableRow,
 	Badge,
-} from "@rose-griffon/ui";
+} from "@rosegriffon/ui";
 import { createClient } from "@/lib/supabase/client";
 
 interface VerificationClientProps {

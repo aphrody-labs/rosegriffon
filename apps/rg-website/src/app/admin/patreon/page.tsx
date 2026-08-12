@@ -8,7 +8,7 @@ import {
 	TabsTrigger,
 	DashboardStatsCard as StatsCard,
 	AdminPageHeader,
-} from "@rose-griffon/ui";
+} from "@rosegriffon/ui";
 import { AlertCircle, BarChart3, Heart, RefreshCw, TrendingUp, Users } from "lucide-react";
 
 import { PatreonAdminActions } from "@/components/patreon/admin/PatreonAdminActions";

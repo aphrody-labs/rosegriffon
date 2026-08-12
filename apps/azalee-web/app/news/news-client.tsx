@@ -21,7 +21,7 @@ import {
 	EmptyHeader,
 	EmptyMedia,
 	EmptyTitle,
-} from "@rose-griffon/ui";
+} from "@rosegriffon/ui";
 import { SearchBar } from "@/components/ui/search-bar";
 import { WikiPagination } from "@/components/wiki/WikiPagination";
 import { ExternalLink, Newspaper, Twitter, X } from "@/lib/icons-config";

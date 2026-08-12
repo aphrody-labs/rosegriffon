@@ -7,7 +7,7 @@ import { Suspense, lazy } from "react";
 
 import { SidebarNavLinks } from "@/components/sidebar/organisms/SidebarNavLinks";
 import { SocialLinksSkeleton } from "@/components/sidebar/skeletons/SocialLinksSkeleton";
-import { Separator, Sidebar, SidebarContent, SidebarHeader } from "@rose-griffon/ui";
+import { Separator, Sidebar, SidebarContent, SidebarHeader } from "@rosegriffon/ui";
 import { assoMenu, contactMenu } from "@/lib/sidebar-config";
 
 const SocialLinks = lazy(() => import("@/components/sidebar/organisms/SocialLinks"));

@@ -2,7 +2,7 @@
 
 import type { Command } from "commander";
 
-import { cache } from "@rose-griffon/db/redis";
+import { cache } from "@rosegriffon/db/redis";
 
 import { colors, errorMessage, reportError, restoreLogs, suppressLogs } from "../context";
 import { exitUnlessRepl } from "../repl-state";

@@ -17,7 +17,7 @@
  * La palette `:root` par défaut ci-dessous reste la palette MD3 azalee (seed #F89C5A)
  * pour préserver le rendu d'origine ; `.theme-azalee-light` / `.theme-azalee-dark`
  * de @rosegriffon/ui exposent la même palette pour usage par d'autres apps du monorepo. */
-@import "@rose-griffon/ui/styles.css";
+@import "@rosegriffon/ui/styles.css";
 
 /* ── Largeur du Sidebar @rosegriffon/ui (fix bulletproof) ──────────────────
  * Tailwind ne génère pas de façon fiable les utilitaires `w-(--sidebar-width)`
@@ -90,7 +90,7 @@
 /* ── Light Theme ───────────────────────────────────────── */
 
 /* Palettes de tokens — DOIVENT rester dans `@layer base`.
- * `@rose-griffon/ui/styles.css` (importé plus haut) publie les thèmes partagés
+ * `@rosegriffon/ui/styles.css` (importé plus haut) publie les thèmes partagés
  * `.roy` / `.gaelle` / `.theme-azalee-*` dans cette même couche. Une règle hors
  * couche l'emporte sur TOUTE règle en couche, quelle que soit la spécificité :
  * un `:root` non-layered figerait la palette et le sélecteur de thème
@@ -267,7 +267,7 @@
 		);
 	}
 
-	/* Les thèmes RG partagés (`@rose-griffon/ui/styles.css`) exposent leurs tokens
+	/* Les thèmes RG partagés (`@rosegriffon/ui/styles.css`) exposent leurs tokens
 	 * shadcn en couleurs CSS. Azalee, lui, les consomme via `hsl(var(--x))` :
 	 * il faut donc redéclarer ces tokens en TRIPLETS HSL, sinon `hsl(#344e8c)`
 	 * est invalide et toute la surface passe en transparent. Les tokens MD3

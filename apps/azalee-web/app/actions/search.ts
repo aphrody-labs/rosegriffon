@@ -10,11 +10,11 @@ import {
 	getItemImageUrl,
 	getSkillImageUrl,
 	resolveAssetUrl,
-} from "@rose-griffon/azalee/images";
-import { smartSearch } from "@rose-griffon/azalee/search/smart-search";
-import type { GlobalSearchResult, SearchContext } from "@rose-griffon/azalee/search/smart-search";
+} from "@rosegriffon/azalee/images";
+import { smartSearch } from "@rosegriffon/azalee/search/smart-search";
+import type { GlobalSearchResult, SearchContext } from "@rosegriffon/azalee/search/smart-search";
 import { createClient } from "@/lib/supabase/server";
-import { TACTIC_FR, translateEffect } from "@rose-griffon/azalee/text/translations";
+import { TACTIC_FR, translateEffect } from "@rosegriffon/azalee/text/translations";
 
 const TYPE_CONFIG: Record<string, { label: string; icon: string; urlPrefix: string }> = {
 	article: { icon: "newspaper", label: "Actualité", urlPrefix: "/news" },
@@ -109,7 +109,7 @@ export async function searchGlobal(
 
 	const getRagPromise = async () => {
 		try {
-			const { getEmbedding, vectorStore } = require("@rose-griffon/db/redis");
+			const { getEmbedding, vectorStore } = require("@rosegriffon/db/redis");
 			const questionEmbedding = await getEmbedding(sanitized);
 			return await vectorStore.search("inazuma-news", questionEmbedding, 10, sanitized);
 		} catch (e) {
@@ -859,7 +859,7 @@ export async function searchRagOnly(query: string): Promise<any[]> {
 	// 2. Corpus sémantique actus / tweets — complément.
 	const newsPromise = (async () => {
 		try {
-			const { getEmbedding, vectorStore } = require("@rose-griffon/db/redis");
+			const { getEmbedding, vectorStore } = require("@rosegriffon/db/redis");
 			const questionEmbedding = await getEmbedding(sanitized);
 			const results = await vectorStore.search("inazuma-news", questionEmbedding, 8, sanitized);
 			return (

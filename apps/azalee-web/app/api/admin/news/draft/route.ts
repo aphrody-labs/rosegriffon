@@ -1,4 +1,4 @@
-import { ADMIN_ROLES } from "@rose-griffon/types/roles";
+import { ADMIN_ROLES } from "@rosegriffon/types/roles";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";

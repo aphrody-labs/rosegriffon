@@ -12,7 +12,7 @@ import {
 	CommandInput,
 	CommandItem,
 	CommandList,
-} from "@rose-griffon/ui";
+} from "@rosegriffon/ui";
 import { useFilterNavigation } from "@/lib/hooks/use-filter-navigation";
 import { cn } from "@/lib/utils";
 

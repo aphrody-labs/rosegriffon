@@ -5,7 +5,7 @@ import {
 	CardDescription,
 	CardHeader,
 	CardTitle,
-} from "@rose-griffon/ui";
+} from "@rosegriffon/ui";
 import type { Metadata } from "next";
 import Link from "next/link";
 

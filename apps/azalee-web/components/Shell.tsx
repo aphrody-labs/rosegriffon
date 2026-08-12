@@ -24,7 +24,7 @@ import {
 	SidebarProvider,
 	useBreakpoint,
 	useSidebar,
-} from "@rose-griffon/ui";
+} from "@rosegriffon/ui";
 import { AzaleeNavigationRail } from "@/components/navigation/AzaleeNavigationRail";
 import { GlobalSearch } from "@/components/wiki/GlobalSearch";
 import { cn } from "@/lib/utils";
@@ -196,7 +196,7 @@ function MobileHeader({ isHome }: { isHome: boolean }) {
  *
  * `light`/`dark` = palette Azalée (globals.css `:root` / `:root.dark`).
  * `roy`/`gaelle` = thèmes Rose Griffon partagés, fournis par
- * `@rose-griffon/ui/styles.css` et retraduits en triplets HSL dans
+ * `@rosegriffon/ui/styles.css` et retraduits en triplets HSL dans
  * `app/globals.css` (contrat de tokens propre à azalee).
  */
 const AZALEE_THEMES: {

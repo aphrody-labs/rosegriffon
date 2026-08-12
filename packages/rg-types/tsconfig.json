@@ -1,5 +1,5 @@
 {
-	"extends": "@rose-griffon/config/tsconfig-base.json",
+	"extends": "@rosegriffon/config/tsconfig-base.json",
 	"compilerOptions": {
 		"outDir": "dist",
 		"noEmit": true,
@@ -8,8 +8,8 @@
 		"ignoreDeprecations": "6.0",
 		"rootDir": "..",
 		"paths": {
-			"@rose-griffon/db": ["../db/src/index.ts"],
-			"@rose-griffon/db/*": ["../db/src/*"]
+			"@rosegriffon/db": ["../db/src/index.ts"],
+			"@rosegriffon/db/*": ["../db/src/*"]
 		}
 	},
 	"include": ["src/**/*.ts"],

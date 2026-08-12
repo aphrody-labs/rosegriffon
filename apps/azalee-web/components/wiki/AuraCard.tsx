@@ -4,11 +4,11 @@ import { CircleDot, Sparkles } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
-import { Badge } from "@rose-griffon/ui";
+import { Badge } from "@rosegriffon/ui";
 import { CommonSpriteIcon } from "@/components/ui/CommonSpriteIcon";
 import { ElementIcon } from "@/components/wiki/ElementIcon";
 import type { SpriteCommonKey } from "@/config/sprites-common";
-import { getAuraImageUrl, resolveAssetUrl } from "@rose-griffon/azalee/images";
+import { getAuraImageUrl, resolveAssetUrl } from "@rosegriffon/azalee/images";
 import { cn } from "@/lib/utils";
 
 export interface AuraCardProps {

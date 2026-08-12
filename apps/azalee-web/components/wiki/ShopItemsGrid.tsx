@@ -4,9 +4,9 @@ import Image from "next/image";
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { Icon } from "@/components/ui/Icon";
-import { getItemIconUrl, PLACEHOLDERS, resolveAssetUrl } from "@rose-griffon/azalee/images";
+import { getItemIconUrl, PLACEHOLDERS, resolveAssetUrl } from "@rosegriffon/azalee/images";
 import { cn } from "@/lib/utils";
-import { SHOP_CATEGORY_FR, type ShopItem } from "@rose-griffon/azalee/wiki/shops-shared";
+import { SHOP_CATEGORY_FR, type ShopItem } from "@rosegriffon/azalee/wiki/shops-shared";
 
 const CATEGORY_ICON: Record<string, string> = {
 	accessory: "diamond",

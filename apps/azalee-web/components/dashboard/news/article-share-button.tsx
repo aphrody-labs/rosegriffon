@@ -6,7 +6,7 @@ import { useCallback, useEffect, useState, useTransition } from "react";
 import { toast } from "sonner";
 import type { SharePlatform } from "@/app/actions/share-tracking";
 import { trackShare } from "@/app/actions/share-tracking";
-import { Popover, PopoverContent, PopoverTrigger } from "@rose-griffon/ui";
+import { Popover, PopoverContent, PopoverTrigger } from "@rosegriffon/ui";
 import { cn } from "@/lib/utils";
 
 interface ArticleShareButtonProps {

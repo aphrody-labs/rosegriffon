@@ -1,5 +1,5 @@
-import type { BaseCharacter, Item, Skill, Team } from "@rose-griffon/inagle";
-import { ElementNames } from "@rose-griffon/inagle/core/types";
+import type { BaseCharacter, Item, Skill, Team } from "@rosegriffon/inagle";
+import { ElementNames } from "@rosegriffon/inagle/core/types";
 import changeAuraSkills from "../data/change-aura-skills.json";
 import menuGalleryManifest from "../data/menu-gallery-manifest.json";
 import itemEnrichmentData from "../data/item-enrichment.json";
@@ -12,7 +12,7 @@ interface ItemEnrichment {
 	maxStack?: number;
 }
 const ITEM_ENRICHMENT = itemEnrichmentData as Record<string, ItemEnrichment>;
-import type { Database } from "@rose-griffon/db";
+import type { Database } from "@rosegriffon/db";
 import {
 	extractKeshinModelCode,
 	galleryVariantUrl,

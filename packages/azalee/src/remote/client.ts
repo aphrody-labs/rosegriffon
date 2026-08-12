@@ -7,7 +7,7 @@
  * dans une webview Tauri, un navigateur ou un worker.
  *
  * ```ts
- * import { createAzaleeClient } from "@rose-griffon/azalee/remote";
+ * import { createAzaleeClient } from "@rosegriffon/azalee/remote";
  *
  * // API publique (défaut)
  * const api = createAzaleeClient();

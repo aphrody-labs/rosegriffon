@@ -4,7 +4,7 @@ import { ArrowLeft, Flame, Hourglass, Map, Store, Timer, Zap } from "lucide-reac
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
-import { SHOP_FR, translateEffect } from "@rose-griffon/azalee/text/translations";
+import { SHOP_FR, translateEffect } from "@rosegriffon/azalee/text/translations";
 
 interface Tactic {
 	slug: string;

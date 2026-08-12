@@ -6,7 +6,7 @@ import {
 	Card,
 	CardContent,
 	CardTitle,
-} from "@rose-griffon/ui";
+} from "@rosegriffon/ui";
 import { ElementChartLoader } from "./ElementChartLoader";
 import { apiClient } from "@/lib/api-client";
 import { createClient } from "@/lib/supabase/server";

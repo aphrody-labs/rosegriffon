@@ -262,7 +262,7 @@ export function listRoutes(): string[] {
 	return ROUTES.map((r) => `/${r.segments.join("/")}`).sort();
 }
 
-route("", () => ({ name: "@rose-griffon/azalee", routes: listRoutes() }));
+route("", () => ({ name: "@rosegriffon/azalee", routes: listRoutes() }));
 
 // --- Résolution ------------------------------------------------------------
 
@@ -349,7 +349,7 @@ export async function handleAzaleeRequest(
  * Démarre le serveur HTTP headless (Bun natif).
  *
  * ```ts
- * import { createAzaleeServer } from "@rose-griffon/azalee/server";
+ * import { createAzaleeServer } from "@rosegriffon/azalee/server";
  * createAzaleeServer({ port: 3010 }); // sidecar Tauri
  * ```
  */

@@ -14,7 +14,7 @@ import { ProfileBanner } from "./_components/profile-banner";
 import { ProfileIdentity } from "./_components/profile-identity";
 import { ProfileQuickLinks } from "./_components/profile-quick-links";
 
-import type { Tables } from "@rose-griffon/db";
+import type { Tables } from "@rosegriffon/db";
 import type { Metadata } from "next";
 
 export const dynamic = "force-dynamic";

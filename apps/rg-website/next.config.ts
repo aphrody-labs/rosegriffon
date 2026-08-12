@@ -24,13 +24,13 @@ const nextConfig: NextConfig = {
 	compress: false,
 	...(CDN_URL && { assetPrefix: CDN_URL }),
 	transpilePackages: [
-		"@rose-griffon/ui",
-		"@rose-griffon/db",
-		"@rose-griffon/types",
-		"@rose-griffon/config",
-		"@rose-griffon/patreon-bun",
-		"@rose-griffon/auth",
-		"@rose-griffon/assets",
+		"@rosegriffon/ui",
+		"@rosegriffon/db",
+		"@rosegriffon/types",
+		"@rosegriffon/config",
+		"@rosegriffon/patreon-bun",
+		"@rosegriffon/auth",
+		"@rosegriffon/assets",
 	],
 
 	typescript: {

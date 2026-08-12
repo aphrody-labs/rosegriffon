@@ -43,7 +43,7 @@ import {
 	TabsContent,
 	TabsList,
 	TabsTrigger,
-} from "@rose-griffon/ui";
+} from "@rosegriffon/ui";
 
 export type InsertImagePayload = Readonly<ImagePayload>;
 

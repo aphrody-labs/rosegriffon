@@ -8,7 +8,7 @@ import {
 	SelectItem,
 	SelectTrigger,
 	SelectValue,
-} from "@rose-griffon/ui";
+} from "@rosegriffon/ui";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { CheckCircle2, Loader2, RefreshCw, Search, Star } from "lucide-react";

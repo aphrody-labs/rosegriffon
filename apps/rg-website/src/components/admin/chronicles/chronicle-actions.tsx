@@ -16,7 +16,7 @@ import {
 	AlertDialogFooter,
 	AlertDialogHeader,
 	AlertDialogTitle,
-} from "@rose-griffon/ui";
+} from "@rosegriffon/ui";
 import Link from "next/link";
 import { useState } from "react";
 import { toast } from "sonner";

@@ -9,7 +9,7 @@ import {
 	SelectItem,
 	SelectTrigger,
 	SelectValue,
-} from "@rose-griffon/ui";
+} from "@rosegriffon/ui";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { ChevronDown, ChevronRight, ExternalLink, MapPin, Search, Star } from "lucide-react";

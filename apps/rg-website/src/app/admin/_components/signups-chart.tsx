@@ -8,12 +8,12 @@ import {
 	ChartContainer,
 	ChartTooltip,
 	ChartTooltipContent,
-} from "@rose-griffon/ui";
+} from "@rosegriffon/ui";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from "recharts";
 
-import type { ChartConfig } from "@rose-griffon/ui";
+import type { ChartConfig } from "@rosegriffon/ui";
 
 export interface SignupPoint {
 	date: string;

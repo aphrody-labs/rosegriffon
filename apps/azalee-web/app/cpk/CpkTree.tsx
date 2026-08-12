@@ -11,14 +11,14 @@
 import { Tree, type NodeRendererProps, type TreeApi } from "react-arborist";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Icon } from "@/components/ui/Icon";
-import { cpkPreviewKind } from "@rose-griffon/azalee/cpk/shared";
+import { cpkPreviewKind } from "@rosegriffon/azalee/cpk/shared";
 import {
 	type CpkNode,
 	ancestorPaths,
 	fetchChildren,
 	isUnloaded,
 	setChildren,
-} from "@rose-griffon/azalee/cpk/tree";
+} from "@rosegriffon/azalee/cpk/tree";
 
 /** Icône Material Symbols selon le type de nœud / l'extension. */
 function nodeIcon(node: CpkNode, open: boolean): string {
@@ -157,7 +157,7 @@ export function CpkTree({
 
 	const onToggle = useCallback(async (id: string) => {
 		// react-arborist appelle onToggle APRÈS le changement d'état d'ouverture.
-		const { findNode } = await import("@rose-griffon/azalee/cpk/tree");
+		const { findNode } = await import("@rosegriffon/azalee/cpk/tree");
 		const node = findNode(dataRef.current, id);
 		if (node && isUnloaded(node)) {
 			const kids = await fetchChildren(id);

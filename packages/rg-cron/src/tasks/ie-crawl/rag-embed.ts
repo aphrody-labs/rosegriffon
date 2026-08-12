@@ -11,7 +11,7 @@
 //   2. OPENAI_API_KEY → text-embedding-3-small, RE-PROJETÉ déterministe en 384
 //   3. fallback Feature-Hashing 384-dim L2-normalisé (dev only, pas de sémantique)
 //
-// Le store local (bun:sqlite, `@rose-griffon/db/rag-store`) attend 384 dims —
+// Le store local (bun:sqlite, `@rosegriffon/db/rag-store`) attend 384 dims —
 // c'est la dimension NATIVE du sidecar e5-small, plus de zero-pad vers 1024
 // (cet artifice n'existait que pour coller au type `halfvec(1024)` pgvector,
 // abandonné le 2026-08-06, cf. docs/rag-unified.md). Toute source de dimension

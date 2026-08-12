@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import { FadeInItem, FadeInStagger } from "@/components/ui/fade-in";
 import { TeamCard } from "@/components/wiki/TeamCard";
 import { Icon } from "@/components/ui/Icon";
-import { SERIES_LABELS, type TeamListItem } from "@rose-griffon/azalee/wiki/teams-shared";
+import { SERIES_LABELS, type TeamListItem } from "@rosegriffon/azalee/wiki/teams-shared";
 import { cn } from "@/lib/utils";
 
 interface TeamsListClientProps {

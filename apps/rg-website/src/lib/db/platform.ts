@@ -1,12 +1,12 @@
 import "server-only";
 
-import type { SqlQuery } from "@rose-griffon/db/platform";
+import type { SqlQuery } from "@rosegriffon/db/platform";
 
 import { getPgPool } from "./pg";
 
 /**
  * Adapte le pool `pg` du site à la signature attendue par
- * `@rose-griffon/db/platform`.
+ * `@rosegriffon/db/platform`.
  *
  * Les requêtes d'inspection vivent dans le paquet partagé pour que le tableau
  * de bord d'administration et le serveur MCP racontent exactement la même

@@ -1,5 +1,5 @@
 {
-	"extends": "@rose-griffon/config/tsconfig-nextjs.json",
+	"extends": "@rosegriffon/config/tsconfig-nextjs.json",
 	"compilerOptions": {
 		"baseUrl": ".",
 		"noImplicitOverride": false,
@@ -14,12 +14,12 @@
 		"types": ["node", "react", "react-dom", "@webgpu/types"],
 		"paths": {
 			"@/*": ["./src/*", "./*"],
-			"@rose-griffon/db": ["../../packages/db/src/index.ts"],
-			"@rose-griffon/db/*": ["../../packages/db/src/*"],
-			"@rose-griffon/types": ["../../packages/types/src/index.ts"],
-			"@rose-griffon/types/*": ["../../packages/types/src/*"],
-			"@rose-griffon/auth": ["../../packages/auth/src/index.ts"],
-			"@rose-griffon/auth/*": ["../../packages/auth/src/*"]
+			"@rosegriffon/db": ["../../packages/db/src/index.ts"],
+			"@rosegriffon/db/*": ["../../packages/db/src/*"],
+			"@rosegriffon/types": ["../../packages/types/src/index.ts"],
+			"@rosegriffon/types/*": ["../../packages/types/src/*"],
+			"@rosegriffon/auth": ["../../packages/auth/src/index.ts"],
+			"@rosegriffon/auth/*": ["../../packages/auth/src/*"]
 		},
 		"incremental": true,
 		"plugins": [

@@ -2,7 +2,7 @@
 
 import type { Command } from "commander";
 
-import { buildAuraHashSet } from "@rose-griffon/inagle/skills/mapper-aura";
+import { buildAuraHashSet } from "@rosegriffon/inagle/skills/mapper-aura";
 
 import { interpolateVariantStats } from "../../game/stats-interpolation";
 import type { CharaStats } from "../../wiki/chara-stats-shared";

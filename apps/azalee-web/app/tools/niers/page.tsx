@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Button } from "@rose-griffon/ui";
+import { Button } from "@rosegriffon/ui";
 import { Icon } from "@/components/ui/Icon";
 import { getLatestNiersDesktopRelease, type NiersDesktopRelease } from "@/lib/niers-releases";
 

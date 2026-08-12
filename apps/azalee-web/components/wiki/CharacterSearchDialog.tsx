@@ -13,8 +13,8 @@ import {
 	CommandItem,
 	CommandList,
 	Skeleton,
-} from "@rose-griffon/ui";
-import { getSkillCategoryIconUrl, getSkillElementIconUrl } from "@rose-griffon/azalee/images";
+} from "@rosegriffon/ui";
+import { getSkillCategoryIconUrl, getSkillElementIconUrl } from "@rosegriffon/azalee/images";
 import { cn } from "@/lib/utils";
 
 interface CharacterSearchDialogProps {

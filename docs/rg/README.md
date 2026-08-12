@@ -21,7 +21,7 @@ dans `.gitignore` — c'est donc ici que vit toute la doc de fond.
 
 | Doc | Portée |
 | --- | --- |
-| [azalee-lib.md](azalee-lib.md) | `@rose-griffon/azalee` : cœur du wiki en bibliothèque Bun (racine client-safe, `/server`, `/remote`). |
+| [azalee-lib.md](azalee-lib.md) | `@rosegriffon/azalee` : cœur du wiki en bibliothèque Bun (racine client-safe, `/server`, `/remote`). |
 | [azalee-tauri.md](azalee-tauri.md) | Recette d'intégration Tauri : sidecar Bun compilé, CSP, cycle de vie, mode dégradé. |
 | [wiki-filters.md](wiki-filters.md) | Filtres du wiki et contournement des colonnes NULL de `inagle_skills`. |
 | [cpk-browser.md](cpk-browser.md) | Navigateur des 250 800 fichiers des archives CPK : index, routes, prévisualisation. |
@@ -32,7 +32,7 @@ dans `.gitignore` — c'est donc ici que vit toute la doc de fond.
 | Doc | Portée |
 | --- | --- |
 | [gamedata-coverage.md](gamedata-coverage.md) | **Plan durable** de couverture de l'extraction : ce qui est parsé, poussé, ce qui manque. |
-| [inagle.md](inagle.md) | `@rose-griffon/inagle` : parser binaire CPK/G4TX, API, pipeline. |
+| [inagle.md](inagle.md) | `@rosegriffon/inagle` : parser binaire CPK/G4TX, API, pipeline. |
 | [iecode-inagle-supabase.md](iecode-inagle-supabase.md) | Chaîne complète iecode → inagle → Supabase : tables, correspondances, procédures. |
 | [chr.md](chr.md) | Format des modèles de personnage et assemblage 3D. |
 | [lvl5.md](lvl5.md) | Formats propriétaires Level-5 : CPK, G4TX, cfgbin, gaiji. |

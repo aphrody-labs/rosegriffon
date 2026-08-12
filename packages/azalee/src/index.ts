@@ -1,5 +1,5 @@
 /**
- * `@rose-griffon/azalee` — cœur de l'encyclopédie Azalée (Inazuma Eleven:
+ * `@rosegriffon/azalee` — cœur de l'encyclopédie Azalée (Inazuma Eleven:
  * Victory Road), utilisable sans aucun framework.
  *
  * **Cette racine est client-safe** : uniquement des types, des règles de jeu
@@ -8,14 +8,14 @@
  * webview Tauri, un navigateur ou un worker.
  *
  * L'accès réel aux données (miroir SQLite, index CPK, index de texte, API HTTP)
- * vit dans `@rose-griffon/azalee/server`, réservé à un runtime Bun/Node.
+ * vit dans `@rosegriffon/azalee/server`, réservé à un runtime Bun/Node.
  *
  * ```ts
  * // Frontend (Tauri, navigateur) — pur
- * import { FORMATIONS, translateEffect, getCharacterFaceUrl } from "@rose-griffon/azalee";
+ * import { FORMATIONS, translateEffect, getCharacterFaceUrl } from "@rosegriffon/azalee";
  *
  * // Backend (CLI, sidecar Tauri, serveur) — accès données
- * import { wikiService, createAzaleeServer } from "@rose-griffon/azalee/server";
+ * import { wikiService, createAzaleeServer } from "@rosegriffon/azalee/server";
  * ```
  */
 

@@ -30,7 +30,7 @@ import {
 	SelectItem,
 	SelectTrigger,
 	SelectValue,
-} from "@rose-griffon/ui";
+} from "@rosegriffon/ui";
 import { banUser, changeUserRole } from "./actions";
 
 interface UserActionsProps {

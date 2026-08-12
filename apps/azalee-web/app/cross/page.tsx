@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import { Play, ExternalLink } from "lucide-react";
-import { Badge, Card, CardContent, CardHeader, CardTitle } from "@rose-griffon/ui";
+import { Badge, Card, CardContent, CardHeader, CardTitle } from "@rosegriffon/ui";
 import { crossData } from "./data";
 import { Reveal, RevealGroup, RevealChild, StampPop, KenBurns, Float, Carousel } from "./motion";
 import { CrossGallery } from "./CrossGallery";

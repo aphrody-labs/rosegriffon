@@ -11,7 +11,7 @@ import {
 	CardTitle,
 	Input,
 	Skeleton,
-} from "@rose-griffon/ui";
+} from "@rosegriffon/ui";
 import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";

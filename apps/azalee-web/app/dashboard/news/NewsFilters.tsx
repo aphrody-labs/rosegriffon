@@ -24,7 +24,7 @@ import {
 	Tooltip,
 	TooltipContent,
 	TooltipTrigger,
-} from "@rose-griffon/ui";
+} from "@rosegriffon/ui";
 import { Icon } from "@/components/ui/Icon";
 import {
 	Check as CheckIcon,

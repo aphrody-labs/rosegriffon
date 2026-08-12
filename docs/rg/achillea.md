@@ -121,7 +121,7 @@ cohérent, mutualisé.
 ### a. Composant partagé « écosystème »
 - Ajouter dans **`packages/ui`** un composant `EcosystemNav` / `EcosystemFooter` (logo + lien + 1 phrase),
   réutilisé par `website` et `azalee` (porté en Angular pour Achillea).
-- **Source unique** des sites exportée depuis **`packages/ui`** (`@rose-griffon/config` est réservé au
+- **Source unique** des sites exportée depuis **`packages/ui`** (`@rosegriffon/config` est réservé au
   tooling : tsconfig/tailwind/oxlint, pas de data runtime — vérifié). Atout : Achillea embarque déjà
   `rg-logo.png` + `azalee-logo.png` dans `apps/web/public/` (cross-branding amorcé).
 
@@ -152,7 +152,7 @@ export const RG_SITES = [
 - **Cron Achillea** = interne au bot (décorateur `@Schedule` maison basé sur `cron` + tsyringe :
   backup DB, rappels casts, transitions de phases…). Séparé du cron RG.
 - **Types** : deux paquets de contrats distincts, sans recouvrement —
-  `@rose-griffon/types` (`article`, `stream`, `team`, `stats`, `user`, `roles`, `event`…) côté RG ;
+  `@rosegriffon/types` (`article`, `stream`, `team`, `stats`, `user`, `roles`, `event`…) côté RG ;
   `@achillea/types` (enums `clanState`, `clanMemberRole`, `userRole`, `eventEnums`) côté Achillea.
   Pour qu'un site RG consomme l'API Achillea de façon typée, publier/partager un sous-ensemble de contrat
   (DTO `clans`/`tournaments`) — sinon typage manuel côté consommateur.

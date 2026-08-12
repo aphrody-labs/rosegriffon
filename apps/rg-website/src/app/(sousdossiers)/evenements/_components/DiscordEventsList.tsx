@@ -1,6 +1,6 @@
 "use client";
 
-import { Badge } from "@rose-griffon/ui";
+import { Badge } from "@rosegriffon/ui";
 import { Calendar, MapPin, Users } from "lucide-react";
 import Image from "next/image";
 

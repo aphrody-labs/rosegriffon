@@ -28,9 +28,9 @@ import {
 	getEmblemImageUrl,
 	getSkillCategoryIconUrl,
 	getSkillElementIconUrl,
-} from "@rose-griffon/azalee/images";
-import { japaneseToRomaji } from "@rose-griffon/azalee/text/japanese-romaji";
-import { TEAM_EMBLEM_MAP } from "@rose-griffon/azalee/game/team-emblem-map";
+} from "@rosegriffon/azalee/images";
+import { japaneseToRomaji } from "@rosegriffon/azalee/text/japanese-romaji";
+import { TEAM_EMBLEM_MAP } from "@rosegriffon/azalee/game/team-emblem-map";
 import { cn } from "@/lib/utils";
 import CharacterModelViewer from "./CharacterModelViewer";
 import { FormSelector } from "./FormSelector";

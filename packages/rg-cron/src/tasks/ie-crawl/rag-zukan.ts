@@ -5,7 +5,7 @@
  */
 
 import type { ZukanCharacterDetail } from "@aphrody-code/zukan";
-import { crawlerTracker, getEmbedding, vectorStore } from "@rose-griffon/db/redis";
+import { crawlerTracker, getEmbedding, vectorStore } from "@rosegriffon/db/redis";
 import { chunkText, computeStringHash } from "./rag-utils";
 import { sql } from "../../lib/db.js";
 

@@ -4,17 +4,17 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { createSupabaseServiceClient, cache } from "@rose-griffon/db";
-import { buildOrderMap, crawlZukanOrderPages } from "@rose-griffon/inagle/zukan/order";
+import { createSupabaseServiceClient, cache } from "@rosegriffon/db";
+import { buildOrderMap, crawlZukanOrderPages } from "@rosegriffon/inagle/zukan/order";
 import { sql } from "../../lib/db.js";
 
 // Le scraper d'ordre (navigation bxc + parsing cheerio des pages chara_param) est
-// désormais unifié dans `@rose-griffon/inagle/zukan/order` (leaf, hors barrel car
+// désormais unifié dans `@rosegriffon/inagle/zukan/order` (leaf, hors barrel car
 // il tire @aphrody-code/bxc). Ce fichier ne garde que l'orchestration prod :
 // diff Redis + écriture `zukan_order` sur Supabase. Comportement identique.
 
 /** @deprecated Réexport de compatibilité — type unifié dans le module order. */
-export type { ZukanOrderCharacter as ZukanCharacter } from "@rose-griffon/inagle/zukan/order";
+export type { ZukanOrderCharacter as ZukanCharacter } from "@rosegriffon/inagle/zukan/order";
 
 export async function crawlZukanOrder(): Promise<{
 	success: boolean;

@@ -9,7 +9,7 @@ import {
 	DialogHeader,
 	DialogTitle,
 	DialogTrigger,
-} from "@rose-griffon/ui";
+} from "@rosegriffon/ui";
 
 interface CharacterModelViewerProps {
 	/** URL absolue du GLB complet (cdn.rosegriffon.fr/model-full/<code>.glb, nie-model-serve). */

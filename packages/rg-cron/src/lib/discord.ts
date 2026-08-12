@@ -5,7 +5,7 @@
 
 import { Client, IntentsBitField, Partials, ActivityType, type Guild, type GuildMember, type User } from "discord.js";
 import { sql } from "./db.js";
-import { resolveGuildId } from "@rose-griffon/types/discord";
+import { resolveGuildId } from "@rosegriffon/types/discord";
 
 export const GUILD_ID = resolveGuildId(Bun.env as Record<string, string | undefined>);
 export const DISCORD_TOKEN = Bun.env.DISCORD_BOT_TOKEN || Bun.env.DISCORD_TOKEN;

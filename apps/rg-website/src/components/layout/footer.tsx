@@ -1,4 +1,4 @@
-import { DiscordIcon } from "@rose-griffon/ui";
+import { DiscordIcon } from "@rosegriffon/ui";
 import Link from "next/link";
 
 import TwitterIcon from "@/shared/icons/twitter";

@@ -30,7 +30,7 @@ import {
 	cpkVideoUrl,
 	previewKindLabel,
 	type CpkPreviewKind,
-} from "@rose-griffon/azalee/cpk/shared";
+} from "@rosegriffon/azalee/cpk/shared";
 
 export interface CpkFilePreviewProps {
 	name: string;

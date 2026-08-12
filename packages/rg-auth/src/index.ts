@@ -1,6 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { PUBLIC_PROFILE_COLUMNS, type Database, type PublicProfile } from "@rose-griffon/db";
-import { ADMIN_ROLES } from "@rose-griffon/types";
+import { PUBLIC_PROFILE_COLUMNS, type Database, type PublicProfile } from "@rosegriffon/db";
+import { ADMIN_ROLES } from "@rosegriffon/types";
 
 type Profile = Database["public"]["Tables"]["profiles"]["Row"];
 
@@ -71,7 +71,7 @@ export function isStaff(role: string | null | undefined): boolean {
 	return role === "admin" || role === "staff";
 }
 
-import { createSupabaseServiceClient } from "@rose-griffon/db/service";
+import { createSupabaseServiceClient } from "@rosegriffon/db/service";
 
 /**
  * Renvoie un pseudo libre dérivé du candidat.
@@ -194,11 +194,11 @@ export async function ensureUserProfile(
 			);
 			if (liberation) {
 				console.error(
-					`[@rose-griffon/auth] libération du profil pré-créé ${discordId} impossible:`,
+					`[@rosegriffon/auth] libération du profil pré-créé ${discordId} impossible:`,
 					liberation.message
 				);
 			} else if (liberes) {
-				console.info(`[@rose-griffon/auth] profil pré-créé ${discordId} adopté`);
+				console.info(`[@rosegriffon/auth] profil pré-créé ${discordId} adopté`);
 			}
 		}
 
@@ -248,7 +248,7 @@ export async function ensureUserProfile(
 			// retour, donc un `return null` silencieux laissait une personne
 			// authentifiée sans profil, sans que rien ne le signale.
 			console.error(
-				`[@rose-griffon/auth] création du profil impossible pour ${user.id} (pseudo « ${usernameLibre} », code ${error.code ?? "?"}):`,
+				`[@rosegriffon/auth] création du profil impossible pour ${user.id} (pseudo « ${usernameLibre} », code ${error.code ?? "?"}):`,
 				error.message
 			);
 			return null;
@@ -256,7 +256,7 @@ export async function ensureUserProfile(
 
 		return newProfile;
 	} catch (err) {
-		console.error(`[@rose-griffon/auth] Exception in ensureUserProfile for ${user.id}:`, err);
+		console.error(`[@rosegriffon/auth] Exception in ensureUserProfile for ${user.id}:`, err);
 		return null;
 	}
 }

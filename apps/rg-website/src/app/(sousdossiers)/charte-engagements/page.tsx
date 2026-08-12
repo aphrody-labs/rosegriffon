@@ -1,4 +1,4 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@rose-griffon/ui";
+import { Card, CardContent, CardHeader, CardTitle } from "@rosegriffon/ui";
 import type { Metadata } from "next";
 
 import { PageContainer, PageHero, SectionCard, SectionHeading } from "@/components/shared/PageShell";

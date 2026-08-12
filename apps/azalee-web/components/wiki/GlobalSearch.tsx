@@ -14,10 +14,10 @@ import {
 	CommandInput,
 	CommandItem,
 	CommandList,
-} from "@rose-griffon/ui";
+} from "@rosegriffon/ui";
 import { SearchResultRow } from "@/components/wiki/SearchResultRow";
-import { TYPE_LABELS_PLURAL } from "@rose-griffon/azalee/search/search-ui-config";
-import type { SearchContext } from "@rose-griffon/azalee/search/smart-search";
+import { TYPE_LABELS_PLURAL } from "@rosegriffon/azalee/search/search-ui-config";
+import type { SearchContext } from "@rosegriffon/azalee/search/smart-search";
 import { cn } from "@/lib/utils";
 
 /**

@@ -8,7 +8,7 @@
  */
 import { useEffect, useState } from "react";
 import { Icon } from "@/components/ui/Icon";
-import { cpkAudioUrl, cpkRawUrl } from "@rose-griffon/azalee/cpk/shared";
+import { cpkAudioUrl, cpkRawUrl } from "@rosegriffon/azalee/cpk/shared";
 import { audioToWav } from "@/lib/cpk-wasm";
 
 export function CpkAudioViewer({ path }: { path: string }) {

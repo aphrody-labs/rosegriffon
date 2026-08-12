@@ -17,7 +17,7 @@ import {
 	TabsList,
 	TabsTrigger,
 	Textarea,
-} from "@rose-griffon/ui";
+} from "@rosegriffon/ui";
 import { importCsv, importGoogleSheet } from "./actions";
 
 export function ImportSheetForm() {

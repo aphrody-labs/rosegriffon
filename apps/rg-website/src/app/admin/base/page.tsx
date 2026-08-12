@@ -12,7 +12,7 @@ import {
 	TableHead,
 	TableHeader,
 	TableRow,
-} from "@rose-griffon/ui";
+} from "@rosegriffon/ui";
 import {
 	formatBytes,
 	getAdvisors,
@@ -21,7 +21,7 @@ import {
 	listMigrations,
 	listStorageBuckets,
 	listTables,
-} from "@rose-griffon/db/platform";
+} from "@rosegriffon/db/platform";
 import { AlertTriangle, CheckCircle2, Database, HardDrive, Info, XCircle } from "lucide-react";
 
 import { getStackHealth, pgQuery } from "@/lib/db/platform";
@@ -45,7 +45,7 @@ const LEVEL_STYLE = {
  * Elle expose dans le navigateur ce que le serveur MCP offrait jusqu'ici au
  * seul agent : inventaire des tables, extensions, migrations, audit de
  * sécurité et stockage. Les requêtes viennent du module partagé
- * `@rose-griffon/db/platform`, si bien que l'agent et l'interface ne peuvent
+ * `@rosegriffon/db/platform`, si bien que l'agent et l'interface ne peuvent
  * pas diverger.
  *
  * Tout est en lecture seule : l'écriture de schéma reste réservée au jeton

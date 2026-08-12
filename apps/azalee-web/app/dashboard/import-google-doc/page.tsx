@@ -1,4 +1,4 @@
-import { AdminPageHeader as DashboardPageHeader } from "@rose-griffon/ui";
+import { AdminPageHeader as DashboardPageHeader } from "@rosegriffon/ui";
 import { ImportDocForm } from "./ImportDocForm";
 import { Icon } from "@/components/ui/Icon";
 

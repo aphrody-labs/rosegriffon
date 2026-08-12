@@ -1,7 +1,7 @@
 "use client";
 
 import { useLanguage } from "@/components/providers/language-provider";
-import { formatDescription } from "@rose-griffon/azalee/text/format-description";
+import { formatDescription } from "@rosegriffon/azalee/text/format-description";
 import { CharacterSheet } from "./CharacterSheet";
 import type { CharacterSheetStats, SheetData } from "./CharacterSheet";
 import type { MovesetSkill } from "./MovesetList";

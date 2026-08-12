@@ -47,13 +47,13 @@ mock.module("next/headers", () => ({ cookies }));
 const revalidatePath = mock();
 mock.module("next/cache", () => ({ revalidatePath }));
 
-// Mock @rose-griffon/db/redis
+// Mock @rosegriffon/db/redis
 const redisCache = {
 	del: mock(),
 	get: mock(),
 	set: mock(),
 };
-mock.module("@rose-griffon/db/redis", () => ({ cache: redisCache }));
+mock.module("@rosegriffon/db/redis", () => ({ cache: redisCache }));
 
 // Mock @/lib/auth-helpers (le module réel charge @/lib/auth → betterAuth/Pool ;
 // on le mocke entièrement pour ne jamais évaluer ces effets de bord).

@@ -1,4 +1,4 @@
-import { Badge, Card, CardContent } from "@rose-griffon/ui";
+import { Badge, Card, CardContent } from "@rosegriffon/ui";
 import { format, formatDistanceToNow } from "date-fns";
 import { fr } from "date-fns/locale";
 import {

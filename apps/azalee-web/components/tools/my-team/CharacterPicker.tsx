@@ -9,7 +9,7 @@ import { RarityBadge } from "@/components/ui/rarity-badge";
 import { SafeImage } from "@/components/ui/SafeImage";
 import type { SpriteCommonKey } from "@/config/sprites-common";
 import { cn } from "@/lib/utils";
-import { getCharacterImageUrl } from "@rose-griffon/azalee/images";
+import { getCharacterImageUrl } from "@rosegriffon/azalee/images";
 
 /* ── Types ────────────────────────────────────────────────── */
 

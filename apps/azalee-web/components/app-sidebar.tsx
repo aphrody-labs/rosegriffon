@@ -19,7 +19,7 @@ import {
 	SidebarMenuItem,
 	SidebarRail,
 	useSidebar,
-} from "@rose-griffon/ui";
+} from "@rosegriffon/ui";
 import { dashboardItems, navigationItems } from "@/config/navigation";
 import type { NavItem } from "@/config/navigation";
 import type { GameIconKey } from "@/config/game-icons";

@@ -18,7 +18,7 @@ import {
 	SelectItem,
 	SelectTrigger,
 	SelectValue,
-} from "@rose-griffon/ui";
+} from "@rosegriffon/ui";
 
 interface BulkActionsBarProps {
 	selectedCount: number;

@@ -1,4 +1,4 @@
-# `@rose-griffon/azalee` — extraction du cœur du wiki en bibliothèque
+# `@rosegriffon/azalee` — extraction du cœur du wiki en bibliothèque
 
 Note d'architecture. Décrit **pourquoi** le cœur métier d'Azalée a quitté
 `apps/azalee`, **ce qui a bougé**, le **contrat client-safe / serveur**, et la voie
@@ -26,8 +26,8 @@ une webview et une surface serveur qui ne dépend que de Bun.
 
 ## Ce qui a bougé
 
-Le paquet npm reprend le nom historique `@rose-griffon/azalee` ; l'application Next
-est renommée **`@rose-griffon/azalee-web`** (dossier `apps/azalee` inchangé).
+Le paquet npm reprend le nom historique `@rosegriffon/azalee` ; l'application Next
+est renommée **`@rosegriffon/azalee-web`** (dossier `apps/azalee` inchangé).
 
 | Ancien chemin | Nouveau chemin |
 | --- | --- |
@@ -63,7 +63,7 @@ Modules **créés** par l'extraction, sans équivalent antérieur :
 | `scripts/copy-data.ts` | Recopie `src/data/**` → `dist/data/**` après émission TS |
 | `scripts/build-standalone.ts` | Compile le CLI en binaire autonome (`bun build --compile`) |
 | `scripts/sync-inagle-entries.ts` | Resynchronise les entrées inagle embarquées |
-| `types/workspace-shims.d.ts` | Shims de types `@rose-griffon/db` pour le build de publication (TS6059) |
+| `types/workspace-shims.d.ts` | Shims de types `@rosegriffon/db` pour le build de publication (TS6059) |
 | `test/config.test.ts` | Couverture de la résolution d'artefacts sur les vrais artefacts machine |
 
 Ce qui **reste dans l'app** : tout ce qui est spécifiquement Next ou spécifiquement
@@ -101,8 +101,8 @@ bun build --target=browser packages/azalee/src/index.ts --outdir /tmp/azalee-bro
 Deux modes, selon la pureté du module.
 
 **1. Import direct** pour tout ce qui est pur — 94 fichiers de `apps/azalee` importent
-la lib. Sous-chemins les plus sollicités : `@rose-griffon/azalee/images` (32 imports),
-`@rose-griffon/azalee/cpk/shared` (18), `@rose-griffon/azalee/game/formations` (9),
+la lib. Sous-chemins les plus sollicités : `@rosegriffon/azalee/images` (32 imports),
+`@rosegriffon/azalee/cpk/shared` (18), `@rosegriffon/azalee/game/formations` (9),
 puis `text/*`, `search/*`, `game/*` et les `wiki/*-shared`. Aucune façade : ces
 modules n'ont rien de Next.
 
@@ -115,14 +115,14 @@ import "server-only";
 
 import "@/lib/azalee-runtime";
 
-export * from "@rose-griffon/azalee/wiki/teams";
+export * from "@rosegriffon/azalee/wiki/teams";
 ```
 
 ```ts
 // apps/azalee/lib/cpk/index.ts — pas d'accès DB, donc pas d'injection
 import "server-only";
 
-export * from "@rose-griffon/azalee/cpk";
+export * from "@rosegriffon/azalee/cpk";
 ```
 
 L'injection est centralisée dans un module unique, importé par chaque façade — elle
@@ -132,7 +132,7 @@ est donc garantie avant le premier accès données, quelle que soit la route :
 // apps/azalee/lib/azalee-runtime.ts
 import "server-only";
 
-import { setDatabaseProvider } from "@rose-griffon/azalee/db";
+import { setDatabaseProvider } from "@rosegriffon/azalee/db";
 import { createClient } from "@/lib/supabase/server";
 
 setDatabaseProvider(createClient);
@@ -155,7 +155,7 @@ Façades présentes : `lib/wiki-service.ts`, `lib/wiki/{teams,shops,quests,coach
 ## La voie CLI et GUI Tauri, sans Next
 
 ```text
-                    @rose-griffon/azalee (racine, pur)
+                    @rosegriffon/azalee (racine, pur)
                      ┌──────────────┴──────────────┐
               webview Tauri                    app Next (client)
                      │                              │
@@ -163,7 +163,7 @@ Façades présentes : `lib/wiki-service.ts`, `lib/wiki/{teams,shops,quests,coach
                      ▼                              ▼
         azalee serve (sidecar Bun)          façades lib/** + provider
                      └──────────────┬──────────────┘
-                       @rose-griffon/azalee/server
+                       @rosegriffon/azalee/server
                                     │
                      miroir SQLite · index CPK · index texte
 ```

@@ -2,7 +2,7 @@
 
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import Link from "next/link";
-import { Button } from "@rose-griffon/ui";
+import { Button } from "@rosegriffon/ui";
 
 const ACTION_LABELS: Record<string, { label: string; color: string }> = {
 	login: { color: "bg-blue-500/10 text-blue-700", label: "Connexion" },

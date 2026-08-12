@@ -9,7 +9,7 @@ import {
 	DrawerHeader,
 	DrawerTitle,
 	DrawerTrigger,
-} from "@rose-griffon/ui";
+} from "@rosegriffon/ui";
 import type { TocItem } from "@/lib/lexical-utils";
 
 interface MobileTableOfContentsProps {

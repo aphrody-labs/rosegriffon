@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-import { Button } from "@rose-griffon/ui";
+import { Button } from "@rosegriffon/ui";
 
 import ImageWithSkeleton from "@/components/shared/ImageWithSkeleton";
 import { TeamStructuredData } from "@/components/shared/StructuredData";

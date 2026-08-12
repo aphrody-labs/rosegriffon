@@ -1,6 +1,6 @@
 "use client";
 
-import type { MultiLevelStats } from "@rose-griffon/inagle";
+import type { MultiLevelStats } from "@rosegriffon/inagle";
 import { CircleDot } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -8,18 +8,18 @@ import { SafeImage } from "@/components/ui/SafeImage";
 import { useLanguage } from "@/components/providers/language-provider";
 import { CommonSpriteIcon } from "@/components/ui/CommonSpriteIcon";
 import { RarityBadge } from "@/components/ui/rarity-badge";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@rose-griffon/ui";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@rosegriffon/ui";
 import type { SpriteCommonKey } from "@/config/sprites-common";
-import { formatDescription } from "@rose-griffon/azalee/text/format-description";
-import { isFemaleGender } from "@rose-griffon/azalee/game/gender";
-import type { GenderValue } from "@rose-griffon/azalee/game/gender";
+import { formatDescription } from "@rosegriffon/azalee/text/format-description";
+import { isFemaleGender } from "@rosegriffon/azalee/game/gender";
+import type { GenderValue } from "@rosegriffon/azalee/game/gender";
 import {
 	getCharacterImageUrl,
 	getCharacterModelFullGlbUrl,
 	getEmblemImageUrl,
 	getSkillCategoryIconUrl,
-} from "@rose-griffon/azalee/images";
-import { TEAM_EMBLEM_MAP } from "@rose-griffon/azalee/game/team-emblem-map";
+} from "@rosegriffon/azalee/images";
+import { TEAM_EMBLEM_MAP } from "@rosegriffon/azalee/game/team-emblem-map";
 import { cn } from "@/lib/utils";
 import CharacterModelViewer from "./CharacterModelViewer";
 import { CharacterStatsPopover } from "./CharacterStatsPopover";

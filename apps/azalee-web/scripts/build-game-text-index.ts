@@ -6,7 +6,7 @@
  *
  * Source de vérité = les dictionnaires `*.cfg.bin.json` décodés du dump
  * (`<DATA_ROOT>/common/text/<lang>/`), parsés via la machinerie EXISTANTE
- * `@rose-griffon/inagle` (`loadTextFileRaw` — gère TEXT_INFO et NOUN_INFO, toutes
+ * `@rosegriffon/inagle` (`loadTextFileRaw` — gère TEXT_INFO et NOUN_INFO, toutes
  * les locales). Le hashId (`crc32` hex d'une clé de texte) est la clé de jointure
  * réutilisée partout dans les configs gamedata.
  *
@@ -33,9 +33,9 @@ import { Database } from "bun:sqlite";
 import { existsSync, mkdirSync, readdirSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { gzipSync } from "node:zlib";
-import { loadTextFileRaw } from "@rose-griffon/inagle/parsers/universal-text";
+import { loadTextFileRaw } from "@rosegriffon/inagle/parsers/universal-text";
 import { formatGameText } from "../lib/game-text/format";
-import { buildSqliteFromEntries, type TextEntry } from "@rose-griffon/azalee/game-text/materialize";
+import { buildSqliteFromEntries, type TextEntry } from "@rosegriffon/azalee/game-text/materialize";
 
 // --- Catégorisation des dicts racine ---------------------------------------
 //

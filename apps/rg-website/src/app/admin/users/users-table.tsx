@@ -10,7 +10,7 @@ import {
 	TableHead,
 	TableHeader,
 	TableRow,
-} from "@rose-griffon/ui";
+} from "@rosegriffon/ui";
 import {
 	flexRender,
 	getCoreRowModel,
@@ -25,7 +25,7 @@ import { toast } from "sonner";
 
 import { useTableBroadcast } from "@/hooks";
 import { ArrowUpDown, Search } from "@/lib/icons-config";
-import type { Database } from "@rose-griffon/db";
+import type { Database } from "@rosegriffon/db";
 
 import { UserEditDialog } from "./user-edit-dialog";
 

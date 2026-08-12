@@ -27,7 +27,7 @@ import {
 	DropdownMenuItem,
 	DropdownMenuSeparator,
 	DropdownMenuTrigger,
-} from "@rose-griffon/ui";
+} from "@rosegriffon/ui";
 import { cn } from "@/lib/utils";
 import { STATUS_OPTIONS } from "./constants";
 

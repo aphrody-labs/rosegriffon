@@ -34,7 +34,7 @@ import {
 	DialogFooter,
 	DialogHeader,
 	DialogTitle,
-} from "@rose-griffon/ui";
+} from "@rosegriffon/ui";
 
 export function Toolbar() {
 	const {

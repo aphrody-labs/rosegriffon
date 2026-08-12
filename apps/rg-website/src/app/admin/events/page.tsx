@@ -6,14 +6,14 @@ import {
 	CardTitle,
 	AdminPageHeader,
 	PaginationControls,
-} from "@rose-griffon/ui";
+} from "@rosegriffon/ui";
 import { Calendar, Plus } from "lucide-react";
 import Link from "next/link";
 
 import { SyncEventsButton } from "@/components/admin/events/sync-button";
 
 import { createAdminClient } from "@/lib/supabase/server";
-import type { Tables } from "@rose-griffon/db";
+import type { Tables } from "@rosegriffon/db";
 
 export const dynamic = "force-dynamic";
 

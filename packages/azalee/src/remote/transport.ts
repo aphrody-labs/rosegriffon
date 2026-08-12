@@ -22,7 +22,7 @@ export const AZALEE_DEFAULT_API_URL = "https://api.rosegriffon.fr/azalee";
 export const AZALEE_SIDECAR_API_URL = "http://127.0.0.1:3010";
 
 /** En-tête d'identification par défaut (ignoré par les navigateurs, honoré par Bun/Node/Tauri). */
-export const AZALEE_USER_AGENT = "@rose-griffon/azalee (+https://azalee.rosegriffon.fr)";
+export const AZALEE_USER_AGENT = "@rosegriffon/azalee (+https://azalee.rosegriffon.fr)";
 
 /**
  * Transport bas niveau : `Request` → `Response`. Par défaut le `fetch` global,

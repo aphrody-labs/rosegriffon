@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { ChevronDown, ChevronUp, Check, X, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
-import type { VariantComparisonResult } from "@rose-griffon/inagle";
+import type { VariantComparisonResult } from "@rosegriffon/inagle";
 
 interface CharaVariantsComparisonProps {
 	comparisons: VariantComparisonResult[];

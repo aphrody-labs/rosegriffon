@@ -10,7 +10,7 @@ import {
 	TableHead,
 	TableHeader,
 	TableRow,
-} from "@rose-griffon/ui";
+} from "@rosegriffon/ui";
 import type { ReactNode } from "react";
 
 import { cn } from "@/lib/utils";

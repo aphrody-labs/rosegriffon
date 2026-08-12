@@ -5,8 +5,8 @@
  */
 
 import { XClient, XSession, type Tweet } from "@aphrody-code/x";
-import { createSupabaseServiceClient } from "@rose-griffon/db/service";
-import type { Json } from "@rose-griffon/db";
+import { createSupabaseServiceClient } from "@rosegriffon/db/service";
+import type { Json } from "@rosegriffon/db";
 import { sql } from "../../lib/db.js";
 import { getOfficialXAccounts, loadBxcXCookieHeader } from "./x-accounts";
 

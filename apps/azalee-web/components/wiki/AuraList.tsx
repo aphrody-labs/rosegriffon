@@ -9,8 +9,8 @@ import { AuraCard } from "@/components/wiki/AuraCard";
 import { WikiPagination } from "@/components/wiki/WikiPagination";
 import { WikiSearchToolbar } from "@/components/wiki/WikiSearchToolbar";
 import type { SpriteCommonKey } from "@/config/sprites-common";
-import { translatePassiveEffect } from "@rose-griffon/azalee/text/aura-translations";
-import { normalizeText } from "@rose-griffon/azalee/search/utils";
+import { translatePassiveEffect } from "@rosegriffon/azalee/text/aura-translations";
+import { normalizeText } from "@rosegriffon/azalee/search/utils";
 import { cn } from "@/lib/utils";
 
 const ITEMS_PER_PAGE = 48;

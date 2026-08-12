@@ -7,7 +7,7 @@ import {
 	getChrModelGlbUrl,
 	getChrModelTextureUrl,
 	listServedChrModelCodes,
-} from "@rose-griffon/azalee/images";
+} from "@rosegriffon/azalee/images";
 import { resolveModelCodeName } from "@/lib/wiki/game-text";
 
 export const metadata: Metadata = {

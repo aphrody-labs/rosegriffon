@@ -3,9 +3,9 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import { isKana, toKatakana, toHiragana } from "wanakana";
-import { japaneseToRomaji } from "@rose-griffon/azalee/text/japanese-romaji";
+import { japaneseToRomaji } from "@rosegriffon/azalee/text/japanese-romaji";
 import { createClient } from "@/lib/supabase/server";
-import { TACTIC_FR } from "@rose-griffon/azalee/text/translations";
+import { TACTIC_FR } from "@rosegriffon/azalee/text/translations";
 
 export interface TranslationResult {
 	id: string;

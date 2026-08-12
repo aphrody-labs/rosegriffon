@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import {
 	DashboardStatsCard as DashboardMetricCard,
 	AdminPageHeader as DashboardPageHeader,
-} from "@rose-griffon/ui";
+} from "@rosegriffon/ui";
 import { Icon } from "@/components/ui/Icon";
 import { getServerSession } from "@/lib/auth-helpers";
 import { createClient } from "@/lib/supabase/server";

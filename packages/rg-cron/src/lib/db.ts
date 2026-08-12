@@ -4,14 +4,14 @@
  */
 
 import { SQL } from "bun";
-import { createSupabaseServiceClient } from "@rose-griffon/db/service";
+import { createSupabaseServiceClient } from "@rosegriffon/db/service";
 
 export const supabase = createSupabaseServiceClient();
 
 const databaseUrl = Bun.env.DATABASE_URL;
 if (!databaseUrl) {
 	throw new Error(
-		"[@rose-griffon/cron] DATABASE_URL is required (Supabase Postgres pooler URL)"
+		"[@rosegriffon/cron] DATABASE_URL is required (Supabase Postgres pooler URL)"
 	);
 }
 

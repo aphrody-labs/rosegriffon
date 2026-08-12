@@ -1,6 +1,6 @@
 "use client";
 
-import type { BaseCharacter } from "@rose-griffon/inagle";
+import type { BaseCharacter } from "@rosegriffon/inagle";
 import Image from "next/image";
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -9,7 +9,7 @@ import { Icon } from "@/components/ui/Icon";
 import { RarityBadge } from "@/components/ui/rarity-badge";
 import { SafeImage } from "@/components/ui/SafeImage";
 import type { SpriteCommonKey } from "@/config/sprites-common";
-import { getCharacterImageUrl } from "@rose-griffon/azalee/images";
+import { getCharacterImageUrl } from "@rosegriffon/azalee/images";
 import { cn } from "@/lib/utils";
 
 // ---------- Constants ----------

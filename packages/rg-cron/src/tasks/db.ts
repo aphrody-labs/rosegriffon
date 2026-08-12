@@ -28,7 +28,7 @@ const RACINE = "/home/ubuntu/rg";
 export async function runInaglePush(): Promise<{ success: boolean; error?: string }> {
 	console.log("[Cron DB] Démarrage de la synchronisation Inagle avec la base de données...");
 	try {
-		await $`${BUN} run --filter @rose-griffon/inagle push`.cwd(RACINE);
+		await $`${BUN} run --filter @rosegriffon/inagle push`.cwd(RACINE);
 		console.log("[Cron DB] Synchronisation réussie.");
 		return { success: true };
 	} catch (err: unknown) {
@@ -43,7 +43,7 @@ export async function runInaglePush(): Promise<{ success: boolean; error?: strin
 export async function runSQLiteBackup(): Promise<{ success: boolean; error?: string }> {
 	console.log("[Cron DB] Démarrage de la sauvegarde Supabase vers SQLite local...");
 	try {
-		await $`${BUN} run --filter @rose-griffon/azalee-web backup:supabase`.cwd(RACINE);
+		await $`${BUN} run --filter @rosegriffon/azalee-web backup:supabase`.cwd(RACINE);
 		console.log("[Cron DB] Sauvegarde SQLite réussie.");
 		return { success: true };
 	} catch (err: unknown) {

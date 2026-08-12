@@ -1,23 +1,23 @@
 /**
  * Shims de types pour le **build de publication** uniquement.
  *
- * `@rose-griffon/db` est un package workspace qui exporte ses **sources TS**
+ * `@rosegriffon/db` est un package workspace qui exporte ses **sources TS**
  * (pas de `dist`). En émission de déclarations, `tsc` refuse alors des fichiers
  * hors `rootDir` (TS6059). Le type-check de développement
  * (`tsconfig.json`, sans `rootDir`) utilise les VRAIS types ; seul
  * `tsconfig.build.json` substitue ces shims pour produire `dist/`.
  *
  * Conséquence assumée : dans les `.d.ts` publiés, les types venant de
- * `@rose-griffon/db` sont dégradés. Le comportement runtime est identique.
+ * `@rosegriffon/db` sont dégradés. Le comportement runtime est identique.
  */
 
-declare module "@rose-griffon/db" {
+declare module "@rosegriffon/db" {
 	/** Schéma Supabase généré — dégradé dans le build de publication. */
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	export type Database = any;
 }
 
-declare module "@rose-griffon/db/redis" {
+declare module "@rosegriffon/db/redis" {
 	export const cache: {
 		get<T>(key: string): Promise<T | null>;
 		set<T>(key: string, value: T, ttl?: number): Promise<void>;

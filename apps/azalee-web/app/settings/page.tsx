@@ -1,4 +1,4 @@
-import { resolveAccountTab, type AccountSession, type AccountTabId } from "@rose-griffon/ui";
+import { resolveAccountTab, type AccountSession, type AccountTabId } from "@rosegriffon/ui";
 import type { Metadata } from "next";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";

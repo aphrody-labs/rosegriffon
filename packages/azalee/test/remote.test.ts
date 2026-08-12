@@ -226,7 +226,7 @@ describe("couverture — une méthode par route de serve.ts", () => {
 describe("bout en bout — Bun.serve + handleAzaleeRequest", () => {
 	test("l'index publie le nom du package et ses 41 routes", async () => {
 		const index = await client.index();
-		expect(index.name).toBe("@rose-griffon/azalee");
+		expect(index.name).toBe("@rosegriffon/azalee");
 		expect(index.routes).toEqual(listRoutes());
 	});
 
@@ -424,7 +424,7 @@ describe("robustesse du transport", () => {
 		await createAzaleeClient({ baseUrl: "http://ua.test", transport }).health();
 		await createAzaleeClient({ baseUrl: "http://ua.test", transport, userAgent: null }).health();
 		await createAzaleeClient({ baseUrl: "http://ua.test", transport, userAgent: "gui-azalee/1.0" }).health();
-		expect(captured[0]).toContain("@rose-griffon/azalee");
+		expect(captured[0]).toContain("@rosegriffon/azalee");
 		expect(captured[1]).toBeNull();
 		expect(captured[2]).toBe("gui-azalee/1.0");
 	});

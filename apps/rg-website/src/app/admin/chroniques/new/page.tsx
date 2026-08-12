@@ -1,6 +1,6 @@
 "use client";
 
-import { Card, AdminPageHeader } from "@rose-griffon/ui";
+import { Card, AdminPageHeader } from "@rosegriffon/ui";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 

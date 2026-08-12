@@ -5,7 +5,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getTrophy, getTrophyNeighbors } from "@/lib/wiki/trophies";
-import { CATEGORY_LABELS, type Trophy } from "@rose-griffon/azalee/wiki/trophies-shared";
+import { CATEGORY_LABELS, type Trophy } from "@rosegriffon/azalee/wiki/trophies-shared";
 
 export async function generateMetadata({
 	params,

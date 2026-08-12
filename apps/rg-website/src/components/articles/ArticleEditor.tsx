@@ -10,7 +10,7 @@ import {
 	SelectValue,
 	Textarea,
 	Label,
-} from "@rose-griffon/ui";
+} from "@rosegriffon/ui";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useState } from "react";

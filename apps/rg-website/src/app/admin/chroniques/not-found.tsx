@@ -1,4 +1,4 @@
-import { Button } from "@rose-griffon/ui";
+import { Button } from "@rosegriffon/ui";
 import { FileQuestion } from "lucide-react";
 import Link from "next/link";
 

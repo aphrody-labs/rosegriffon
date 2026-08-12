@@ -7,7 +7,7 @@ import type { GameIconKey } from "@/config/game-icons";
 import { useLanguage } from "@/components/providers/language-provider";
 import { dashboardItems, navigationItems } from "@/config/navigation";
 import { iconMap } from "@/lib/icons";
-import { NavigationRail, NavigationRailItem } from "@rose-griffon/ui";
+import { NavigationRail, NavigationRailItem } from "@rosegriffon/ui";
 import { useAuth } from "@/components/providers/AuthProvider";
 
 export function AzaleeNavigationRail() {

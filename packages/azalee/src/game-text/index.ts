@@ -6,7 +6,7 @@
  * Source : NDJSON gzippés trackés `data/game-text-names.ndjson.gz` (43+ dicts
  * racine, ~3,5 Mo) + `data/game-text-dialogue.ndjson.gz` (event/map/phase/purpose,
  * ~2,1 Mo), générés par `scripts/build-game-text-index.ts` depuis le dump via
- * `@rose-griffon/inagle`. Au premier accès on MATÉRIALISE la table `text` dans un
+ * `@rosegriffon/inagle`. Au premier accès on MATÉRIALISE la table `text` dans un
  * SQLite de cache (singleton process-local) puis on requête en O(log n).
  *
  * ⚠ module **serveur** : ne JAMAIS importer ce module depuis un composant

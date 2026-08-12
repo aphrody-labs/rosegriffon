@@ -1,6 +1,6 @@
 "use client";
 
-import { AdminSidebar, type NavItem } from "@rose-griffon/ui";
+import { AdminSidebar, type NavItem } from "@rosegriffon/ui";
 import {
 	Database,
 	FileSpreadsheet,

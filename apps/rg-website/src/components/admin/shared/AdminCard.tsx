@@ -1,4 +1,4 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@rose-griffon/ui";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@rosegriffon/ui";
 import { cn } from "@/lib/utils";
 
 interface AdminCardProps extends React.ComponentPropsWithoutRef<typeof Card> {

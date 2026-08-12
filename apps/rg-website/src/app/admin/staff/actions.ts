@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { logAdminAction } from "@/lib/admin-logger";
 import { getServerUser } from "@/lib/auth-helpers";
 import { createAdminClient, createClient } from "@/lib/supabase/server";
-import type { Database } from "@rose-griffon/db";
+import type { Database } from "@rosegriffon/db";
 
 export type TeamMember = Database["public"]["Tables"]["team_members"]["Row"];
 

@@ -6,7 +6,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { CommonSpriteIcon } from "@/components/ui/CommonSpriteIcon";
 import type { SpriteCommonKey } from "@/config/sprites-common";
-import { getSkillImageUrl } from "@rose-griffon/azalee/images";
+import { getSkillImageUrl } from "@rosegriffon/azalee/images";
 import { cn } from "@/lib/utils";
 
 const ELEMENT_SPRITE: Record<string, SpriteCommonKey> = {

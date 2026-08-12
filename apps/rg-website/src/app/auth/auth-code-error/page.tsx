@@ -11,7 +11,7 @@ import {
 	CardDescription,
 	CardHeader,
 	CardTitle,
-} from "@rose-griffon/ui";
+} from "@rosegriffon/ui";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 

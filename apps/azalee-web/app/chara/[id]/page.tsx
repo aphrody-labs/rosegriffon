@@ -8,10 +8,10 @@ import { CharacterSheetWithLevel } from "@/components/wiki/CharacterSheetWithLev
 import { HowToObtain } from "@/components/wiki/HowToObtain";
 import type { MovesetSkill } from "@/components/wiki/MovesetList";
 import { AuraCard } from "@/components/wiki/AuraCard";
-import { formatDescription, formatJapaneseName } from "@rose-griffon/azalee/text/format-description";
+import { formatDescription, formatJapaneseName } from "@rosegriffon/azalee/text/format-description";
 import { resolveCharaStats } from "@/lib/wiki/chara-stats";
 import { wikiService } from "@/lib/wiki-service";
-import { compareVariants } from "@rose-griffon/inagle";
+import { compareVariants } from "@rosegriffon/inagle";
 import { CharaAssetsSection } from "@/components/wiki/CharaAssetsSection";
 import { AphrodyDossierSection } from "@/components/wiki/AphrodyDossierSection";
 import { CharaVariantsComparison } from "@/components/wiki/CharaVariantsComparison";

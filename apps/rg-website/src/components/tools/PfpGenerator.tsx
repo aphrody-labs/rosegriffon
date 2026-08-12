@@ -10,7 +10,7 @@ import {
 	CardTitle,
 	DiscordIcon,
 	Input,
-} from "@rose-griffon/ui";
+} from "@rosegriffon/ui";
 import { Download, Image as ImageIcon, User as UserIcon } from "lucide-react";
 import NextImage from "next/image";
 import { useEffect, useRef, useState } from "react";

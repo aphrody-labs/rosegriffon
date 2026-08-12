@@ -15,7 +15,7 @@ import {
 	Textarea,
 	Label,
 	Separator,
-} from "@rose-griffon/ui";
+} from "@rosegriffon/ui";
 import { Loader2, Save } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";

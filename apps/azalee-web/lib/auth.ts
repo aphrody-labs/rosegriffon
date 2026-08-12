@@ -1,5 +1,5 @@
 import crypto from "node:crypto";
-import { createSupabaseServiceClient } from "@rose-griffon/db/service";
+import { createSupabaseServiceClient } from "@rosegriffon/db/service";
 import bcrypt from "bcryptjs";
 import { betterAuth } from "better-auth";
 import { nextCookies } from "better-auth/next-js";
@@ -16,9 +16,9 @@ import {
 	createAccountOptions,
 	ensureUserProfile,
 	googleProvider,
-} from "@rose-griffon/auth";
+} from "@rosegriffon/auth";
 
-export { ensureUserProfile } from "@rose-griffon/auth";
+export { ensureUserProfile } from "@rosegriffon/auth";
 
 const getDatabaseURL = () => {
 	let url = process.env.DATABASE_URL;

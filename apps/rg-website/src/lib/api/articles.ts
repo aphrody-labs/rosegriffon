@@ -1,5 +1,5 @@
 import { getPgPool } from "@/lib/db/pg";
-import type { Tables } from "@rose-griffon/db";
+import type { Tables } from "@rosegriffon/db";
 
 export type Article = Tables<"articles">;
 

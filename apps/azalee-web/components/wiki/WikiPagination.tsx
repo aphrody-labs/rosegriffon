@@ -10,7 +10,7 @@ import {
 	PaginationLink,
 	PaginationNext,
 	PaginationPrevious,
-} from "@rose-griffon/ui";
+} from "@rosegriffon/ui";
 import { cn } from "@/lib/utils";
 
 interface WikiPaginationProps {

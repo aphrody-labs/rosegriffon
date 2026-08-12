@@ -4,11 +4,11 @@ import { useMemo } from "react";
 import { CommonSpriteIcon } from "@/components/ui/CommonSpriteIcon";
 import { Icon } from "@/components/ui/Icon";
 import type { SpriteCommonKey } from "@/config/sprites-common";
-import { ROLE_COLORS, ROLE_LABELS } from "@rose-griffon/azalee/game/formations";
-import type { Formation } from "@rose-griffon/azalee/game/formations";
-import type { TeamMember } from "@rose-griffon/azalee/game/team-types";
+import { ROLE_COLORS, ROLE_LABELS } from "@rosegriffon/azalee/game/formations";
+import type { Formation } from "@rosegriffon/azalee/game/formations";
+import type { TeamMember } from "@rosegriffon/azalee/game/team-types";
 import { cn } from "@/lib/utils";
-import { recalculateMemberStats, calculateElementSynergies } from "@rose-griffon/azalee/game/team-rules";
+import { recalculateMemberStats, calculateElementSynergies } from "@rosegriffon/azalee/game/team-rules";
 
 const ELEMENT_SPRITE: Record<string, SpriteCommonKey> = {
 	Fire: "fire",

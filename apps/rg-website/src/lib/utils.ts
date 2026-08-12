@@ -1,5 +1,5 @@
 /**
- * Re-export depuis @rose-griffon/ui — backward-compat pour les imports existants.
+ * Re-export depuis @rosegriffon/ui — backward-compat pour les imports existants.
  * Source canonique = packages/ui/src/lib/utils.ts
  */
-export * from "@rose-griffon/ui";
+export * from "@rosegriffon/ui";

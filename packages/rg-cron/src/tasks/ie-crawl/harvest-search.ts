@@ -16,8 +16,8 @@
 // Lecture/recherche seule : on ne publie RIEN.
 
 import { XClient, XSession, type Tweet } from "@aphrody-code/x";
-import { createSupabaseServiceClient } from "@rose-griffon/db/service";
-import type { Json } from "@rose-griffon/db";
+import { createSupabaseServiceClient } from "@rosegriffon/db/service";
+import type { Json } from "@rosegriffon/db";
 import { ingestSources, type RagSource } from "./rag-store-local";
 import { loadBxcXCookieHeader } from "./x-accounts";
 

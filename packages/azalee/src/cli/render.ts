@@ -4,12 +4,12 @@
  * Couche **présentation pure** : chaque fonction reçoit une entité inagle et
  * renvoie un bloc de texte encadré, prêt à être écrit sur stdout. Aucune
  * décision métier ici — l'interpolation des stats, les libellés de
- * personnalité et de catégorie d'objet viennent de `@rose-griffon/azalee/game`.
+ * personnalité et de catégorie d'objet viennent de `@rosegriffon/azalee/game`.
  *
  * Largeur de référence : 78 colonnes utiles dans un cadre de 80.
  */
 
-import { buildAuraHashSet } from "@rose-griffon/inagle/skills/mapper-aura";
+import { buildAuraHashSet } from "@rosegriffon/inagle/skills/mapper-aura";
 
 import { PERSONALITY_NAMES } from "../game/personality";
 import { getItemCategoryLabel } from "../game/item-categories";

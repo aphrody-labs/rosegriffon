@@ -1,6 +1,6 @@
 "use client";
 
-import { Button, Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@rose-griffon/ui";
+import { Button, Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@rosegriffon/ui";
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 

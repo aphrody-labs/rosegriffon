@@ -15,7 +15,7 @@ import {
 	Label,
 	ResponsiveDialog,
 	Switch,
-} from "@rose-griffon/ui";
+} from "@rosegriffon/ui";
 import { Upload, X } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useState } from "react";

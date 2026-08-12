@@ -4,7 +4,7 @@
  *
  * `tsc` ne recopie que les JSON réellement *importés* : sans cette étape, un
  * fichier de données consommé uniquement via le sous-chemin public
- * `@rose-griffon/azalee/data/<x>.json` manquerait du package publié.
+ * `@rosegriffon/azalee/data/<x>.json` manquerait du package publié.
  */
 
 import { cp, mkdir } from "node:fs/promises";

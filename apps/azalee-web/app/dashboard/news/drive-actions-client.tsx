@@ -4,7 +4,7 @@ import { CloudDownload, Loader2 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { importDriveFolder } from "@/app/dashboard/import-google-doc/actions";
-import { Button } from "@rose-griffon/ui";
+import { Button } from "@rosegriffon/ui";
 
 export function DriveImportButton() {
 	const [loading, setLoading] = useState(false);

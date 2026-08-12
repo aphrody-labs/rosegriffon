@@ -6,7 +6,7 @@ import { useEffect } from "react";
 
 import { authClient } from "@/lib/auth-client";
 import { createClient } from "@/lib/supabase/client";
-import { PUBLIC_PROFILE_COLUMNS, type PublicProfile } from "@rose-griffon/db";
+import { PUBLIC_PROFILE_COLUMNS, type PublicProfile } from "@rosegriffon/db";
 
 type Profile = PublicProfile;
 type AuthUser = typeof authClient.$Infer.Session.user;

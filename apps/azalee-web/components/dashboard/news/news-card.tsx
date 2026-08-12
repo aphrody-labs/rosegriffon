@@ -5,7 +5,7 @@ import { fr } from "date-fns/locale";
 import Image from "next/image";
 import Link from "next/link";
 import { NewsActions } from "@/components/dashboard/news-actions";
-import { Badge } from "@rose-griffon/ui";
+import { Badge } from "@rosegriffon/ui";
 import { Icon } from "@/components/ui/Icon";
 
 import type { NewsItem } from "@/types/news";

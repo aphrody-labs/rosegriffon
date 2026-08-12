@@ -14,7 +14,7 @@ import {
 	TabsContent,
 	TabsList,
 	TabsTrigger,
-} from "@rose-griffon/ui";
+} from "@rosegriffon/ui";
 import { useState } from "react";
 import { Toaster, toast } from "sonner";
 
