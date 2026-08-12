@@ -1,3 +1,4 @@
+import { GoogleTagManager } from "@next/third-parties/google";
 import Script from "next/script";
 import { Geist, Geist_Mono } from "next/font/google";
 
@@ -19,6 +20,9 @@ const geistMono = Geist_Mono({
 });
 
 import type { Metadata, Viewport } from "next";
+
+/** Conteneur Google Tag Manager. Absent = aucune balise injectée. */
+const GTM_ID = process.env.NEXT_PUBLIC_GTM_ID;
 
 export const metadata: Metadata = {
 	alternates: {
@@ -177,6 +181,12 @@ export default function RootLayout({
 				}}
 			/>
 			<body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+				{/* Google Tag Manager — composant officiel de `@next/third-parties`.
+				    Il injecte le script du conteneur ET l'`<iframe>` de repli `noscript`,
+				    en suivant la stratégie de chargement de Next plutôt qu'une balise
+				    collée à la main dans le `<head>`, qui bloquerait le rendu.
+				    La CSP de `next.config.ts` autorise déjà googletagmanager.com. */}
+				{GTM_ID && <GoogleTagManager gtmId={GTM_ID} />}
 				<LanguageProvider>
 					<ThemeProvider
 						attribute="class"

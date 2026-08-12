@@ -316,3 +316,54 @@ export async function lireAudience(heures = 24): Promise<RapportAudience> {
 		tronque,
 	};
 }
+
+/**
+ * Audience des domaines servis par le SECOND serveur.
+ *
+ * `achillea.rosegriffon.fr` et `ranked.rosegriffon.fr` tournent sur un autre
+ * VPS : leur journal n'est pas lisible d'ici. La tâche planifiée
+ * `stats:achillea` le tire par SSH toutes les quinze minutes, l'agrège et écrit
+ * le résultat dans ce fichier. On le lit tel quel plutôt que d'ouvrir une
+ * connexion SSH depuis le rendu d'une page.
+ */
+const CHEMIN_DISTANT = "/var/lib/rg/achillea-audience.json";
+
+export interface AudienceDistante {
+	collecteLe: string;
+	domaines: StatsDomaine[];
+}
+
+export async function lireAudienceDistante(): Promise<AudienceDistante | null> {
+	try {
+		const fichier = Bun.file(CHEMIN_DISTANT);
+		if (!(await fichier.exists())) {
+			return null;
+		}
+		const brut = (await fichier.json()) as {
+			collecteLe?: string;
+			domaines?: Partial<StatsDomaine>[];
+		};
+		return {
+			collecteLe: brut.collecteLe ?? "",
+			domaines: (brut.domaines ?? []).map((d) => ({
+				erreurs4xx: d.erreurs4xx ?? 0,
+				erreurs5xx: d.erreurs5xx ?? 0,
+				host: d.host ?? "",
+				medianeMs: d.medianeMs ?? 0,
+				octets: d.octets ?? 0,
+				p95Ms: d.p95Ms ?? 0,
+				requetes: d.requetes ?? 0,
+				// Le collecteur distant ne remonte ni référents ni statut de cache :
+				// ils exigeraient de transférer bien plus de lignes pour une page qui
+				// n'en affiche que le sommet.
+				tauxCache: null,
+				topChemins: d.topChemins ?? [],
+				topReferents: [],
+				visiteurs: d.visiteurs ?? 0,
+			})),
+		};
+	} catch (error) {
+		console.error("[stats] lecture de l'audience distante impossible", error);
+		return null;
+	}
+}

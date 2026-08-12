@@ -15,7 +15,7 @@ import { formatBytes } from "@rose-griffon/db/platform";
 import { BarChart3, CheckCircle2, ExternalLink, Gauge, Users, XCircle } from "lucide-react";
 import Link from "next/link";
 
-import { lireAudience, type StatsDomaine } from "@/lib/stats/audience";
+import { lireAudience, lireAudienceDistante, type StatsDomaine } from "@/lib/stats/audience";
 import { lireSites, type Site } from "@/lib/stats/sites";
 
 export const dynamic = "force-dynamic";
@@ -87,19 +87,27 @@ function CarteAudience({ stats }: { stats: StatsDomaine }) {
  * explicitement plutôt que de laisser croire à une chute d'audience.
  */
 export default async function StatsPage() {
-	const [audience, sites] = await Promise.all([lireAudience(FENETRE_HEURES), lireSites()]);
+	const [audience, sites, distante] = await Promise.all([
+		lireAudience(FENETRE_HEURES),
+		lireSites(),
+		lireAudienceDistante(),
+	]);
 
-	const parDomaine = new Map(audience.domaines.map((d) => [d.host, d]));
+	// Les domaines du second serveur rejoignent les locaux : la page ne fait plus
+	// de différence à l'affichage, seule la fraîcheur diffère (collecte toutes les
+	// quinze minutes contre lecture directe du journal ici).
+	const tousDomaines = [...audience.domaines, ...(distante?.domaines ?? [])];
+	const parDomaine = new Map(tousDomaines.map((d) => [d.host, d]));
 	// Domaines vus dans le journal mais absents de l'inventaire : sous-domaines
 	// techniques (db., storage., realtime.) ou hôtes inattendus. On les montre
 	// plutôt que de les taire — un hôte inconnu qui reçoit du trafic est en soi
 	// une information.
 	const connus = new Set(sites.map((s) => s.domaine));
-	const autres = audience.domaines.filter((d) => !connus.has(d.host));
+	const autres = tousDomaines.filter((d) => !connus.has(d.host));
 
-	const totalRequetes = audience.domaines.reduce((s, d) => s + d.requetes, 0);
-	const totalOctets = audience.domaines.reduce((s, d) => s + d.octets, 0);
-	const totalVisiteurs = audience.domaines.reduce((s, d) => s + d.visiteurs, 0);
+	const totalRequetes = tousDomaines.reduce((s, d) => s + d.requetes, 0);
+	const totalOctets = tousDomaines.reduce((s, d) => s + d.octets, 0);
+	const totalVisiteurs = tousDomaines.reduce((s, d) => s + d.visiteurs, 0);
 
 	return (
 		<div className="mx-auto max-w-7xl space-y-8 px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
@@ -132,6 +140,9 @@ export default async function StatsPage() {
 						{nombre(audience.lignesLues)} requêtes analysées depuis le{" "}
 						{new Date(audience.depuis).toLocaleString("fr-FR")}
 						{audience.tronque && " — lecture tronquée, le journal dépasse le plafond d'analyse"}.
+						{distante?.collecteLe
+							? ` Second serveur collecté le ${new Date(distante.collecteLe).toLocaleString("fr-FR")}.`
+							: " Le second serveur n'a pas encore été collecté."}
 					</CardDescription>
 				</CardHeader>
 				<CardContent className="grid grid-cols-2 gap-3 sm:grid-cols-4">
@@ -139,7 +150,7 @@ export default async function StatsPage() {
 						{ label: "Requêtes", valeur: nombre(totalRequetes) },
 						{ label: "Visiteurs uniques", valeur: nombre(totalVisiteurs) },
 						{ label: "Trafic sortant", valeur: formatBytes(totalOctets) },
-						{ label: "Domaines actifs", valeur: nombre(audience.domaines.length) },
+						{ label: "Domaines actifs", valeur: nombre(tousDomaines.length) },
 					].map((m) => (
 						<div key={m.label} className="rounded-lg border border-border p-4">
 							<p className="text-xs text-muted-foreground">{m.label}</p>
@@ -204,7 +215,7 @@ export default async function StatsPage() {
 										<p className="text-sm text-muted-foreground">
 											{site.local
 												? "Aucune requête enregistrée sur cette période."
-												: "Domaine servi par un autre serveur : son journal d'accès n'est pas lisible d'ici, seule sa disponibilité publique est mesurée."}
+												: "Second serveur : sa collecte n'a pas encore tourné. La tâche `stats:achillea` s'exécute toutes les quinze minutes."}
 										</p>
 									)}
 

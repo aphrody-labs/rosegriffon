@@ -25,7 +25,7 @@ export interface Site {
 	nom: string;
 	domaine: string;
 	role: string;
-	/** `null` = hébergé ailleurs, donc pas de sonde possible depuis ce serveur. */
+	/** `false` = servi par le second VPS : audience collectée par SSH, pas lue en direct. */
 	local: boolean;
 	statut: { ok: boolean; code: number | null; latenceMs: number | null; erreur?: string };
 	metriques: MetriqueSite[];
@@ -134,14 +134,14 @@ export async function lireSites(): Promise<Site[]> {
 		},
 		{
 			domaine: "achillea.rosegriffon.fr",
-			// Second VPS (51.255.162.6) : ni son journal nginx ni sa base ne sont
-			// accessibles d'ici. On sonde ce qui l'est — sa disponibilité publique —
-			// et on le dit, plutôt que d'afficher des zéros qui passeraient pour des
-			// mesures.
+			// Second VPS (51.255.162.6). Son journal nginx est désormais rapatrié par
+			// la tâche `stats:achillea` (SSH, toutes les 15 minutes) : l'audience est
+			// donc réelle, seule sa fraîcheur diffère. Sa base, elle, reste hors de
+			// portée — d'où l'absence de métriques de contenu.
 			local: false,
 			metriques: [],
 			nom: "Achillea",
-			role: "Hébergé sur un second serveur — audience et contenu non instrumentés ici",
+			role: "Hébergé sur un second serveur — audience collectée par SSH toutes les 15 minutes",
 			statut: statutAchillea,
 		},
 		{
