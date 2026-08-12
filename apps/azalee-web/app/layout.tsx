@@ -172,19 +172,13 @@ export default function RootLayout({
 					}}
 				/>
 			</head>
-			<Script
-				id="gtm"
-				strategy="lazyOnload"
-				dangerouslySetInnerHTML={{
-					// eslint-disable-next-line quotes
-					__html: `(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','GTM-WLLFJZF8');`,
-				}}
-			/>
 			<body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
 				{/* Google Tag Manager — composant officiel de `@next/third-parties`.
-				    Il injecte le script du conteneur ET l'`<iframe>` de repli `noscript`,
-				    en suivant la stratégie de chargement de Next plutôt qu'une balise
-				    collée à la main dans le `<head>`, qui bloquerait le rendu.
+				    Il remplace un `<Script>` écrit à la main qui codait en dur le
+				    conteneur `GTM-WLLFJZF8` : l'identifiant vient désormais de
+				    l'environnement, et le composant injecte aussi l'`<iframe>` de repli
+				    `noscript` que la version manuelle avait oubliée — les visiteurs sans
+				    JavaScript n'étaient pas comptés.
 				    La CSP de `next.config.ts` autorise déjà googletagmanager.com. */}
 				{GTM_ID && <GoogleTagManager gtmId={GTM_ID} />}
 				<LanguageProvider>
