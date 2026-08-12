@@ -6,8 +6,19 @@
  * (snowflakes Discord, pas des secrets cryptographiques).
  */
 
-/** Guild Rose Griffon (Rose Griffon 🌹 - Inazuma Eleven FR). */
-export const RG_GUILD_ID = "1252886898988192266" as const;
+/**
+ * Guild Rose Griffon (« Rose Griffon 🌹 - Inazuma Eleven FR »).
+ *
+ * Valeur vérifiée contre l'API (`GET /users/@me/guilds` avec le jeton du bot).
+ * Elle valait `1252886898988192266`, qui n'est le serveur de personne : le repli
+ * ne se voyait pas parce que `DISCORD_GUILD_ID` est toujours posé en production,
+ * mais il aurait enregistré les commandes sur une guilde étrangère le jour où
+ * l'env aurait manqué.
+ */
+export const RG_GUILD_ID = "1072991720268111892" as const;
+
+/** Guild Azalée (« 𝓐𝔃𝓪𝓵𝓮́𝓮 🌸 »), second serveur servi par le même bot. */
+export const AZALEE_GUILD_ID = "1349526851672080414" as const;
 
 /**
  * Discord role IDs publics/utilitaires.
@@ -42,4 +53,26 @@ export function resolveGuildId(env: Record<string, string | undefined>): string 
 	// Filtre les valeurs qui ressemblent à $VAR non-expanded (Bun .env piège)
 	if (fromEnv && !fromEnv.startsWith("$")) return fromEnv;
 	return RG_GUILD_ID;
+}
+
+/**
+ * Résout TOUTES les guildes que le bot doit servir, la principale en tête.
+ *
+ * Pourquoi une liste : discordx n'enregistre les slash commands que sur les
+ * guildes listées dans `botGuilds`. Tant que la liste ne contenait que Rose
+ * Griffon, ajouter le bot ailleurs donnait un bot présent, en ligne, et
+ * strictement muet — aucune commande n'apparaissait.
+ *
+ * `DISCORD_EXTRA_GUILD_IDS` accepte une liste séparée par des virgules ; Azalée
+ * y est de toute façon ajoutée par défaut. Les doublons et les valeurs
+ * non-numériques sont écartés (même piège `$VAR` non substitué que ci-dessus).
+ */
+export function resolveGuildIds(env: Record<string, string | undefined>): string[] {
+	const principale = resolveGuildId(env);
+	const supplementaires = (env.DISCORD_EXTRA_GUILD_IDS ?? "")
+		.split(",")
+		.map((v) => v.trim())
+		.filter((v) => /^\d{15,25}$/.test(v));
+
+	return [...new Set([principale, AZALEE_GUILD_ID, ...supplementaires])];
 }
