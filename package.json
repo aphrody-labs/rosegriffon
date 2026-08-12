@@ -2,7 +2,7 @@
 	"name": "@rosegriffon/monorepo",
 	"version": "0.1.0",
 	"private": true,
-	"description": "Rose Griffon monorepo \u2014 site communautaire (azalee wiki IEVR + website rosegriffon + bot Discord). Stack Next 16.2 / React 19.2 / Bun 1.3 / Supabase / Turborepo.",
+	"description": "Rose Griffon monorepo — site communautaire (azalee wiki IEVR + website rosegriffon + bot Discord). Stack Next 16.2 / React 19.2 / Bun 1.3 / Supabase / Turborepo.",
 	"workspaces": {
 		"packages": [
 			"apps/*",
@@ -247,7 +247,17 @@
 		"wanakana": "^5.3.1"
 	},
 	"overrides": {
-		"kysely": "0.28.2"
+		"kysely": "0.28.2",
+		"@aphrody-code/bxc": "npm:@aphrody/bxc@^0.6.7",
+		"@aphrody-code/zukan": "npm:@aphrody/zukan@^0.1.5",
+		"@aphrody-code/x": "npm:@aphrody/x@^1.0.10",
+		"@aphrody-code/xcom": "npm:@aphrody/xcom@^0.1.6",
+		"@aphrody-code/xai": "npm:@aphrody/xai@^1.0.5",
+		"@aphrody-code/fut": "npm:@aphrody/fut@^0.1.5",
+		"@aphrody-code/challonge": "npm:@aphrody/challonge@^0.1.6",
+		"@aphrody-code/voiranime": "npm:@aphrody/voiranime@^0.1.5",
+		"@aphrody-code/worldbeyblade": "npm:@aphrody/worldbeyblade@^0.1.5",
+		"@aphrody-code/canvas": "npm:@aphrody/canvas@0.1.99"
 	},
 	"engines": {
 		"bun": ">=1.3.14"

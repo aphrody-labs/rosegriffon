@@ -121,7 +121,7 @@ export default async function NiersToolPage() {
       sm:grid-cols-2
       gap-x-6 gap-y-3
     ">
-					<FeatureItem icon="explore">
+					<FeatureItem icon="folder_open">
 						Explorateur du système de fichiers virtuel du jeu (dx11 + packs CPK), avec description
 						précise du rôle de chaque dossier.
 					</FeatureItem>
@@ -130,16 +130,77 @@ export default async function NiersToolPage() {
 						sans faux positifs.
 					</FeatureItem>
 					<FeatureItem icon="view_in_ar">
-						Prévisualisation de modèles 3D, textures, vidéos et sons directement dans l'application.
+						Prévisualisation de modèles 3D, textures, vidéos et sons directement dans
+						l'application, avec inspecteur redimensionnable.
 					</FeatureItem>
-					<FeatureItem icon="construction">
+					<FeatureItem icon="build">
 						Gestion de mods avec zone de préparation, avant écriture dans le dossier du jeu.
 					</FeatureItem>
 					<FeatureItem icon="save">Visualiseur et export de fichiers de sauvegarde.</FeatureItem>
-					<FeatureItem icon="cloud">
+					<FeatureItem icon="link">
 						Recherche en ligne connectée à Azalée (personnages, techniques, objets, auras).
 					</FeatureItem>
+					<FeatureItem icon="translate">
+						Données de configuration lues avec leurs vrais noms de champs, balises du moteur et
+						furigana résolues en français, anglais et japonais.
+					</FeatureItem>
 				</ul>
+			</section>
+
+			{/* Ligne de commande */}
+			<section className="
+     rounded-xl bg-surface-container elevation-1 p-5
+     sm:p-8
+     space-y-6
+   ">
+				<div className="flex flex-wrap items-start justify-between gap-4">
+					<div className="space-y-1">
+						<h2 className="type-title-large text-on-surface flex items-center gap-2">
+							<Icon name="deployed_code" size={22} className="text-primary" />
+							niers — ligne de commande
+						</h2>
+						<p className="type-body-small text-on-surface-variant">
+							Windows · Linux · incluse dans le code source
+						</p>
+					</div>
+				</div>
+
+				<ul className="
+      grid grid-cols-1
+      sm:grid-cols-2
+      gap-x-6 gap-y-3
+    ">
+					<FeatureItem icon="image">
+						<code className="type-body-small">niers convert</code> — textures du jeu vers PNG, WebP
+						sans perte, GIF, JPEG, BMP, TGA, TIFF ou QOI.
+					</FeatureItem>
+					<FeatureItem icon="grid_view">
+						Atlas d'icônes exportés en feuille CSS, SVG autonome ou manifeste JSON, régions et
+						coordonnées lues dans le fichier du jeu.
+					</FeatureItem>
+					<FeatureItem icon="graphic_eq">
+						Audio du jeu décodé en WAV — HCA, ADX, ACB et AWB, y compris les sons diffusés depuis
+						un fichier voisin.
+					</FeatureItem>
+					<FeatureItem icon="inventory_2">
+						<code className="type-body-small">niers viola</code> — extraction, empaquetage et
+						fusion de mods au champ, avec presets de sélection.
+					</FeatureItem>
+					<FeatureItem icon="download">
+						<code className="type-body-small">niers steam</code> — récupération du jeu et de ses
+						composants depuis Steam.
+					</FeatureItem>
+					<FeatureItem icon="info">
+						<code className="type-body-small">niers info</code> — état de l'installation :
+						empreinte du binaire, volume du système de fichiers virtuel, composants de lancement.
+					</FeatureItem>
+				</ul>
+
+				<div className="rounded-lg bg-surface-container-high p-4 type-body-small text-on-surface-variant">
+					La ligne de commande se construit depuis le code source :{" "}
+					<code>cargo build -p nie-cli --release</code>. Elle ne redistribue aucun asset — elle lit
+					votre propre installation du jeu.
+				</div>
 			</section>
 
 			{/* Extension Blender */}
@@ -168,7 +229,7 @@ export default async function NiersToolPage() {
 						Format Extensions Blender officiel (blender_manifest.toml) — installation via Extensions
 						→ Installer depuis un fichier.
 					</FeatureItem>
-					<FeatureItem icon="person_search">
+					<FeatureItem icon="image_search">
 						Panneau « niers » : recherche de personnages et techniques (local + API/GraphQL
 						azalee) et import direct par nom ou catégorie, sans quitter Blender.
 					</FeatureItem>
