@@ -36,8 +36,11 @@ echo "[mirror-sync] mirror.sqlite -> $(basename "$OUT")"
 ls -1t "$BACKUPS"/supabase-*.sqlite 2>/dev/null | tail -n +3 | xargs -r rm -f
 echo "[mirror-sync] rétention OK ; restants: $(ls -1 "$BACKUPS"/supabase-*.sqlite | wc -l)"
 
-# Restart pour que le singleton readonly rouvre le nouveau miroir.
-sudo systemctl restart azalee-web.service
+# Republication sans coupure pour que le singleton readonly rouvre le nouveau miroir.
+# `reload` rejoue la bascule bleu/vert sur la version déjà en production : le nouveau
+# processus est démarré et sondé à côté de l'ancien, nginx ne bascule qu'ensuite. Un
+# `systemctl restart` rendait le wiki injoignable chaque nuit le temps du démarrage.
+/home/ubuntu/.bun/bin/bun /home/ubuntu/rg/scripts/ops/deploy.ts reload azalee
 
 # Les autres consommateurs du miroir détectent désormais le swap tout seuls
 # (vérification d'inode dans `packages/azalee/src/db/sqlite-client.ts`), mais un

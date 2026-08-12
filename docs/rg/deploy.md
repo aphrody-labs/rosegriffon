@@ -38,20 +38,20 @@ Les configurations nginx et les unités systemd sont versionnées dans
 ## Déployer une application Next
 
 ```bash
-bash scripts/ship-azalee.sh      # wiki
-bash scripts/ship-website.sh     # site principal
+bun run deploy            # wiki + site
+bun run deploy azalee     # une seule surface
+bun run deploy:status     # version servie, slots, mémoire, santé publique
 ```
 
-Chaque script enchaîne : build Next → copie du bundle standalone (`public/`,
-`.next/static`, `data/`) → redémarrage du service → vérification de santé
-locale.
+La publication est **bleu/vert et sans coupure** : type-check, build, assemblage
+d'une version figée, démarrage sur un second port, sondes réelles, bascule nginx,
+puis extinction de l'ancien processus. Détail de la mécanique, de la
+prévisualisation et du retour arrière :
+[`deploiement-sans-coupure.md`](deploiement-sans-coupure.md).
 
-Avant de lancer, vérifier :
-
-```bash
-bun run type-check
-bun run lint
-```
+`bash scripts/ship-azalee.sh` et `bash scripts/ship-website.sh` restent valables :
+ce sont désormais des enveloppes autour de la même commande. Le type-check est
+exécuté par le déploiement lui-même (`--no-gate` pour le sauter).
 
 ### Deux pièges qui font croire à un échec
 
