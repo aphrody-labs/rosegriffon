@@ -2,6 +2,7 @@
 
 import {
 	BookOpen,
+	BarChart3,
 	Calendar,
 	Database,
 	Heart,
@@ -41,6 +42,7 @@ const adminNavItems: NavItem[] = [
 		icon: Heart,
 		title: "Patreon",
 	},
+	{ href: "/admin/stats", icon: BarChart3, title: "Statistiques" },
 	{ href: "/admin/base", icon: Database, title: "Infrastructure" },
 	{ href: "/admin/settings", icon: Settings, title: "Configuration" },
 ];
