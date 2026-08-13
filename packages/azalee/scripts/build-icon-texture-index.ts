@@ -82,6 +82,7 @@ interface Parsed {
 	relative: string;
 	mains: string[];
 	regions: string[];
+	dims: Array<[number, number]>;
 	bytes: number;
 }
 
@@ -101,15 +102,20 @@ async function fetchAndParse(cpkPath: string): Promise<Parsed | { failure: strin
 	try {
 		const g4tx = parseG4tx(bytes);
 		const mains: string[] = [];
+		const dims: Array<[number, number]> = [];
 		const regions: string[] = [];
 		for (const texture of g4tx.textures) {
-			if (texture.name) mains.push(texture.name);
+			if (texture.name) {
+				mains.push(texture.name);
+				dims.push([texture.width, texture.height]);
+			}
 			for (const sub of texture.subTextures) if (sub.name) regions.push(sub.name);
 		}
 		return {
 			relative: cpkPath.replace(/^data\/dx11\/menu\//, ""),
 			mains,
 			regions,
+			dims,
 			bytes: bytes.length,
 		};
 	} catch (error) {
@@ -155,7 +161,7 @@ for (const entry of ok) {
 	mainTotal += entry.mains.length;
 	regionTotal += entry.regions.length;
 	downloaded += entry.bytes;
-	const row: IconIndexEntry = [entry.relative, entry.mains, entry.regions];
+	const row: IconIndexEntry = [entry.relative, entry.mains, entry.regions, entry.dims];
 	lines.push(JSON.stringify(row));
 }
 

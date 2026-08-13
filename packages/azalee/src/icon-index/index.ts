@@ -18,7 +18,9 @@ import { readFileSync } from "node:fs";
 import { gunzipSync } from "node:zlib";
 import { resolveDataFile } from "../config";
 import {
+	iconTextureUrl,
 	normalizeTextureName,
+	selectMainTexture,
 	type IconIndexEntry,
 	type IconTextureKind,
 	type IconTextureRef,
@@ -35,6 +37,8 @@ interface LoadedIndex {
 	byName: Map<string, IconTextureRef[]>;
 	/** chemin du conteneur → ses entrées. */
 	byContainer: Map<string, IconIndexEntry>;
+	/** basename du `.g4tx` normalisé → conteneurs portant ce nom (repli). */
+	byBasename: Map<string, IconIndexEntry[]>;
 	/** Nombre total de noms indexés (principales + régions, doublons compris). */
 	textureCount: number;
 }
@@ -54,7 +58,7 @@ function readEntries(): IconIndexEntry[] {
 	for (const line of ndjson.split("\n")) {
 		if (!line) continue;
 		const parsed = JSON.parse(line) as IconIndexEntry;
-		if (Array.isArray(parsed) && parsed.length === 3) entries.push(parsed);
+		if (Array.isArray(parsed) && parsed.length === 4) entries.push(parsed);
 	}
 	return entries;
 }
@@ -88,6 +92,7 @@ function load(): LoadedIndex {
 
 	const byName = new Map<string, IconTextureRef[]>();
 	const byContainer = new Map<string, IconIndexEntry>();
+	const byBasename = new Map<string, IconIndexEntry[]>();
 	let textureCount = 0;
 
 	const entries = readEntries();
@@ -100,6 +105,14 @@ function load(): LoadedIndex {
 	for (const entry of entries) {
 		const [g4txPath, mains, regions] = entry;
 		byContainer.set(g4txPath, entry);
+
+		const basename = normalizeTextureName(g4txPath.split("/").pop() ?? "");
+		if (basename) {
+			const bucket = byBasename.get(basename);
+			if (bucket) bucket.push(entry);
+			else byBasename.set(basename, [entry]);
+		}
+
 		const push = (textureName: string, kind: IconTextureKind): void => {
 			const key = normalizeTextureName(textureName);
 			if (!key) return;
@@ -112,7 +125,7 @@ function load(): LoadedIndex {
 		for (const name of regions) push(name, "region");
 	}
 
-	cache = { byName, byContainer, textureCount };
+	cache = { byName, byContainer, byBasename, textureCount };
 	return cache;
 }
 
@@ -129,24 +142,48 @@ export function resetIconIndex(): void {
  * "coa_animal_an000100", kind: "main" }` — le vrai conteneur, pas celui écrit en
  * base. Passer le résultat à `iconTextureUrl()` pour obtenir l'URL CDN.
  *
- * En cas d'homonymie entre conteneurs, rend le candidat le plus prioritaire
- * (cf. `CONTAINER_PRIORITY`) ; `resolveIconTextureAll()` rend la liste complète.
+ * Deux étapes, dans l'ordre :
+ *
+ * 1. **nom de texture** — le nom figure dans la table de chaînes d'un conteneur,
+ *    comme texture principale (`main`) ou comme région d'atlas (`region`). En cas
+ *    d'homonymie entre conteneurs, rend le candidat le plus prioritaire (cf.
+ *    `CONTAINER_PRIORITY`) ; `resolveIconTextureAll()` rend la liste complète.
+ * 2. **basename de conteneur** — repli pour les familles où le code métier nomme
+ *    le `.g4tx` et non la texture (plaques de nom : l'objet `nm03103` désigne
+ *    `25_icon_nameplate/nm03103.g4tx`, dont les textures s'appellent
+ *    `nm03103_01`/`_02`). On rejoue alors `selectMainTexture()`, réplique exacte
+ *    de `select_main_texture` côté Rust, pour désigner la texture à servir.
  *
  * @returns la résolution, ou `null` si le nom n'existe dans aucun conteneur indexé.
  */
 export function resolveIconTexture(textureName: string): IconTextureRef | null {
-	return load().byName.get(normalizeTextureName(textureName))?.[0] ?? null;
+	return resolveIconTextureAll(textureName)[0] ?? null;
 }
 
-/** Toutes les résolutions d'un nom de texture, par priorité décroissante. */
+/**
+ * Toutes les résolutions d'un nom, par priorité décroissante : d'abord les
+ * correspondances par nom de texture, puis le repli par basename de conteneur.
+ */
 export function resolveIconTextureAll(textureName: string): IconTextureRef[] {
-	return load().byName.get(normalizeTextureName(textureName)) ?? [];
+	const index = load();
+	const key = normalizeTextureName(textureName);
+	const direct = index.byName.get(key);
+	if (direct?.length) return direct;
+
+	const containers = index.byBasename.get(key);
+	if (!containers?.length) return [];
+	const refs: IconTextureRef[] = [];
+	for (const entry of containers) {
+		const main = selectMainTexture(entry);
+		if (main) refs.push({ g4txPath: entry[0], textureName: main, kind: "main" });
+	}
+	return refs;
 }
 
 /** URL CDN directe d'un nom de texture, ou `null` s'il n'est pas indexé. */
 export function resolveIconTextureUrl(textureName: string): string | null {
 	const ref = resolveIconTexture(textureName);
-	return ref ? `https://cdn.rosegriffon.fr/dx11/menu/${ref.g4txPath}/${ref.textureName}.png` : null;
+	return ref ? iconTextureUrl(ref) : null;
 }
 
 /** Contenu d'un conteneur indexé (`[chemin, principales, régions]`), ou `null`. */

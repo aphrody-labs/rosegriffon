@@ -31,6 +31,8 @@ export * from "./cross/assets-shared";
 export * from "./cross/data-shared";
 export * from "./game-text/format";
 export * from "./game-text/shared";
+export * from "./icon-index/g4tx-header";
+export * from "./icon-index/shared";
 export * from "./wiki/chara-stats-shared";
 export * from "./wiki/drops-shared";
 export * from "./wiki/gacha-shared";
