@@ -464,7 +464,7 @@ export function champsTexteMultilingue(entree: TexteMultilingue): ChampEmbed[] {
  * Le nom du champ porte l'identifiant et la catégorie : ce sont les deux clés
  * qui permettent d'aller plus loin (`/rag texte 0x…` pour les trois langues).
  */
-export function champsRecherheTexte(entrees: readonly EntreeTexte[], budgetRestant: number): ChampsResultats {
+export function champsRechercheTexte(entrees: readonly EntreeTexte[], budgetRestant: number): ChampsResultats {
 	const champs: ChampEmbed[] = [];
 	let budget = budgetRestant;
 	const taille = longueurExtrait(entrees.length);

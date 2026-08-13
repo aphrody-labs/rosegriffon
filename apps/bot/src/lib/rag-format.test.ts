@@ -13,7 +13,7 @@ import {
 	blocCode,
 	blocSondes,
 	bornerEntier,
-	champsRecherheTexte,
+	champsRechercheTexte,
 	champsTexteMultilingue,
 	compacterLignes,
 	construireChampsResultats,
@@ -390,7 +390,7 @@ describe("champsTexteMultilingue", () => {
 	});
 });
 
-describe("champsRecherheTexte", () => {
+describe("champsRechercheTexte", () => {
 	// Fixture réelle — GET /api/text?q=Mark%20Evans&limit=3
 	const entrees = [
 		{ hashId: "0x069E1584", locale: "fr", category: "staffroll", value: "Mark Evans" },
@@ -399,14 +399,14 @@ describe("champsRecherheTexte", () => {
 	];
 
 	test("porte l'identifiant et la catégorie, les deux clés pour aller plus loin", () => {
-		const { champs, affiches } = champsRecherheTexte(entrees, LIMITES_EMBED.total);
+		const { champs, affiches } = champsRechercheTexte(entrees, LIMITES_EMBED.total);
 		expect(affiches).toBe(3);
 		expect(champs[0]?.name).toBe("0x069E1584 · staffroll");
 		expect(champs[0]?.value).toBe("Mark Evans");
 	});
 
 	test("une valeur vide devient un tiret plutôt qu'un champ refusé par Discord", () => {
-		const { champs } = champsRecherheTexte(
+		const { champs } = champsRechercheTexte(
 			[{ hashId: "0x1", locale: "fr", category: "menu", value: "" }],
 			LIMITES_EMBED.total
 		);
@@ -414,7 +414,7 @@ describe("champsRecherheTexte", () => {
 	});
 
 	test("s'arrête au budget", () => {
-		const { affiches, ignores } = champsRecherheTexte(entrees, 40);
+		const { affiches, ignores } = champsRechercheTexte(entrees, 40);
 		expect(affiches).toBeLessThan(3);
 		expect(affiches + ignores).toBe(3);
 	});

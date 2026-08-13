@@ -414,7 +414,11 @@ export class SondageCommand {
 		})
 		periode: string | undefined,
 		@SlashOption({
+			// Bornée à 120 caractères : c'est exactement ce que `listerSondages`
+			// envoie à la base (le motif ILIKE est tronqué à 120). Sans cette borne,
+			// l'embed annoncerait comme filtre une saisie dont seul le début a servi.
 			description: "Texte à chercher dans la question",
+			maxLength: 120,
 			name: "recherche",
 			required: false,
 			type: ApplicationCommandOptionType.String,
