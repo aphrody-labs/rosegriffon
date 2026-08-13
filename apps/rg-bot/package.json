@@ -17,6 +17,7 @@
 	},
 	"dependencies": {
 		"@aphrody-code/canvas": "catalog:",
+		"@rosegriffon/azalee": "workspace:*",
 		"@rosegriffon/db": "workspace:*",
 		"@rosegriffon/types": "workspace:*",
 		"@rosegriffon/ui": "workspace:*",

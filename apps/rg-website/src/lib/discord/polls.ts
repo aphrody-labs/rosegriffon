@@ -36,6 +36,17 @@ const SONDAGES_PAR_PAGE_MAX = 48;
 /** Longueur maximale acceptée pour la recherche (au-delà, on tronque). */
 const RECHERCHE_MAX = 120;
 
+/*
+ * ⚠ « EN COURS » EXIGE UNE DATE DE FIN, PAS SEULEMENT `ended = false`.
+ * `discord_polls.ended` est `not null default false` : il vaut donc `false`
+ * autant pour un sondage qui tourne que pour les 25 sondages de 2023-2024
+ * reconstitués depuis les réactions, dont l'encart n'a jamais publié de clôture.
+ * Les compter « en cours » faisait annoncer « 25 en cours » en août 2026 sur des
+ * sondages clos depuis deux ans. Le marqueur qui distingue les deux est
+ * `ends_at` : présente sur les 26 encarts complets, absente sur les 25 autres.
+ * Même règle que `etatSondage()` dans `polls-types.ts` — les deux doivent bouger
+ * ensemble.
+ */
 export type StatutSondage = "tous" | "en-cours" | "termines";
 
 const STATUTS: readonly StatutSondage[] = ["tous", "en-cours", "termines"];
@@ -293,7 +304,7 @@ export async function listerSondages(
 				WHERE ($1::text IS NULL OR p.question ILIKE '%' || $1 || '%')
 					AND (
 						$2::text = 'tous'
-						OR ($2::text = 'en-cours' AND p.ended = false)
+						OR ($2::text = 'en-cours' AND p.ended = false AND p.ends_at IS NOT NULL)
 						OR ($2::text = 'termines' AND p.ended = true)
 					)
 			)
@@ -319,6 +330,8 @@ export interface CompteursSondages {
 	total: number;
 	enCours: number;
 	termines: number;
+	/** Sondages dont l'encart n'a jamais publié d'état (ni clôture, ni date de fin). */
+	etatInconnu: number;
 }
 
 /** Compteurs d'en-tête, en une seule requête. */
@@ -328,21 +341,24 @@ export async function compterSondages(): Promise<CompteursSondages> {
 			total: string;
 			en_cours: string;
 			termines: string;
+			etat_inconnu: string;
 		}>(
 			`SELECT count(*) AS total,
-				count(*) FILTER (WHERE p.ended = false) AS en_cours,
-				count(*) FILTER (WHERE p.ended = true) AS termines
+				count(*) FILTER (WHERE p.ended = false AND p.ends_at IS NOT NULL) AS en_cours,
+				count(*) FILTER (WHERE p.ended = true) AS termines,
+				count(*) FILTER (WHERE p.ended = false AND p.ends_at IS NULL) AS etat_inconnu
 			FROM discord_polls p
 			JOIN discord_channels c ON c.channel_id = p.channel_id AND c.suivi = true`
 		);
 		return {
 			enCours: entierOuNull(rows[0]?.en_cours) ?? 0,
+			etatInconnu: entierOuNull(rows[0]?.etat_inconnu) ?? 0,
 			termines: entierOuNull(rows[0]?.termines) ?? 0,
 			total: entierOuNull(rows[0]?.total) ?? 0,
 		};
 	} catch (error) {
 		console.error("[sondages] comptage impossible", error);
-		return { enCours: 0, termines: 0, total: 0 };
+		return { enCours: 0, etatInconnu: 0, termines: 0, total: 0 };
 	}
 }
 

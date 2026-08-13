@@ -135,6 +135,14 @@ interface LigneCampagne {
 	slug: string;
 	titre: string;
 	hashtags: string[];
+	/**
+	 * Hashtags récoltés MAIS JAMAIS AFFICHÉS (`x_campagnes.hashtags_rattrapage`) :
+	 * la coquille d'un visuel, une variante orthographique répandue. Un participant
+	 * qui recopie l'affiche fautive doit quand même rejoindre la galerie ; en
+	 * revanche la page ne montre jamais ces hashtags — `queries.ts` ne les
+	 * sélectionne pas et ramène `hashtag_trouve` à NULL quand il en vient un.
+	 */
+	hashtags_rattrapage: string[];
 	requetes: string[];
 }
 
@@ -201,6 +209,20 @@ function trouverHashtag(texte: string, hashtags: readonly string[]): string | nu
 }
 
 /**
+ * Tous les hashtags qui font MORDRE un post : les affichables ET ceux de
+ * rattrapage.
+ *
+ * La distinction est purement éditoriale — elle vit dans l'affichage, pas dans la
+ * récolte. Un post qui porte la coquille d'une affiche est un post de la campagne :
+ * l'écarter punirait le participant d'une faute de frappe qui n'est pas la sienne.
+ * C'est `apps/website/src/lib/x-campagnes/queries.ts` qui empêche ces hashtags
+ * d'atteindre l'écran, jamais cette fonction.
+ */
+function hashtagsRecoltes(campagne: LigneCampagne): string[] {
+	return [...(campagne.hashtags ?? []), ...(campagne.hashtags_rattrapage ?? [])];
+}
+
+/**
  * Clé de curseur. La PK de `x_campagne_curseurs` est (campagne, requête), or les
  * deux produits paginent INDÉPENDAMMENT le même texte de requête : sans le suffixe
  * de produit, les deux boucles s'écraseraient l'une l'autre et reprendraient sur le
@@ -256,7 +278,7 @@ export async function crawlHashtagCampaigns(options: OptionsRecolte = {}): Promi
 
 	try {
 		const campagnes: LigneCampagne[] = await sql`
-			select slug, titre, hashtags, requetes
+			select slug, titre, hashtags, hashtags_rattrapage, requetes
 			  from public.x_campagnes
 			 where actif and (${slug ?? null}::text is null or slug = ${slug ?? null}::text)
 			 order by principale desc, debut_le desc nulls last, slug`;
@@ -338,16 +360,20 @@ async function recolterCampagne(
 		arret: "epuise",
 	};
 
-	const hashtags = campagne.hashtags ?? [];
+	// Le repli sur `hashtags.map(…)` couvre TOUS les hashtags recherchés, rattrapage
+	// compris : une campagne sans `requetes` doit tout de même interroger X sur ses
+	// variantes, sinon le filet ne récolte rien.
+	const hashtags = hashtagsRecoltes(campagne);
 	const requetes = campagne.requetes?.length ? campagne.requetes : hashtags.map((h) => `#${h}`);
-	if (hashtags.length === 0) {
+	if ((campagne.hashtags ?? []).length === 0) {
 		stats.arret = "erreur";
 		stats.erreur = "campagne sans hashtag";
 		return stats;
 	}
 
+	const rattrapage = campagne.hashtags_rattrapage ?? [];
 	console.log(
-		`[Campagnes X] « ${campagne.titre} » (${campagne.slug}) — ${requetes.length} requête(s) × ${PRODUITS.length} produit(s), hashtags : ${hashtags.map((h) => `#${h}`).join(", ")}`
+		`[Campagnes X] « ${campagne.titre} » (${campagne.slug}) — ${requetes.length} requête(s) × ${PRODUITS.length} produit(s), hashtags : ${(campagne.hashtags ?? []).map((h) => `#${h}`).join(", ")}${rattrapage.length > 0 ? ` (+ rattrapage silencieux : ${rattrapage.map((h) => `#${h}`).join(", ")})` : ""}`
 	);
 
 	// Dédoublonnage à l'échelle de la campagne : un même post remonte presque
@@ -602,7 +628,7 @@ async function paginer(
 			// Deux filtres, tous deux nécessaires : au moins une image, ET le hashtag
 			// réellement présent dans le texte du post.
 			if (!porteUneImage(t)) continue;
-			const hashtag = trouverHashtag(t.text, campagne.hashtags);
+			const hashtag = trouverHashtag(t.text, hashtagsRecoltes(campagne));
 			if (!hashtag) continue;
 			retenus.set(t.id, { tweet: t, hashtag });
 			ajoutes++;

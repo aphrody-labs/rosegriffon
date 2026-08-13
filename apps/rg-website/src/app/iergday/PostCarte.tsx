@@ -55,9 +55,14 @@ const FOCUS_VIGNETTE =
 	"focus-visible:outline-4 focus-visible:-outline-offset-4 focus-visible:outline-primary";
 
 /*
- * Lien « Voir sur X ». `min-h-11` (44 px) comme TOUTES les autres cibles de la
- * page : le `min-h-8` d'origine passait bien le minimum WCAG 2.5.8 (24 px), mais
- * en faisait la seule cible plus petite que les autres sous le doigt.
+ * Lien « Voir sur X ». `min-h-11` comme les autres cibles tactiles de la page :
+ * le `min-h-8` d'origine passait bien le minimum WCAG 2.5.8 (24 px), mais en
+ * faisait la seule cible plus petite que les autres sous le doigt.
+ *
+ * ⚠ `min-h-11` ne vaut PAS 44 px partout : la police racine du site est fluide
+ * (`globals.css`, 14 px à 320 px, 15 px à 375 px), donc `2.75rem` mesure 39 px à
+ * 320 px et 41 px à 375 px — vérifié au navigateur. C'est au-dessus du minimum
+ * WCAG, mais l'uniformité s'entend en `rem`, pas en pixels.
  */
 const LIEN_VERS_X =
 	"inline-flex min-h-11 items-center gap-1 rounded-full px-2 text-xs font-semibold text-primary transition-colors hover:bg-primary/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary";

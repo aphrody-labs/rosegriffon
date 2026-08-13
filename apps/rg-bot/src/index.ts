@@ -14,6 +14,11 @@ import "./commands/member.ts";
 // `stream_schedules`, deux tables bien présentes en base.
 import "./commands/azalee.ts";
 import "./commands/planning.ts";
+// Veille X (`/tweets`), données de jeu IEVR via `@rosegriffon/azalee` (`/ievr`)
+// et pilotage de rg-cron par la socket UNIX (`/cron`).
+import "./commands/tweets.ts";
+import "./commands/ievr.ts";
+import "./commands/admin/cron.ts";
 import "./commands/admin/stats.ts";
 import "./commands/admin/user.ts";
 import "./commands/admin/article.ts";
@@ -24,6 +29,7 @@ import "./commands/admin/team.ts";
 import "./events/ready.ts";
 import "./events/memberEvents.ts";
 import { DISCORD_TOKEN, GUILD_IDS } from "./lib/config";
+import { demarrerNotifieurTweets } from "./services/tweetsNotifier";
 
 // Intents minimaux. `GuildPresences` (privilégié) a été retiré : le bot ne lit
 // aucune présence — c'est `rg-cron.service` qui tient la télémétrie. Le garder
@@ -63,6 +69,11 @@ client.once("ready", async () => {
 	}
 
 	console.log(`✓ Logged in as ${client.user?.tag}`);
+
+	// Notification des nouveaux tweets. Démarrée APRÈS `ready` : le drain a
+	// besoin d'un client capable de résoudre un salon. Le bot est le SEUL
+	// écrivain Discord pour les tweets — rg-cron se contente de signaler.
+	demarrerNotifieurTweets(client);
 });
 
 client.on("interactionCreate", async (interaction) => {

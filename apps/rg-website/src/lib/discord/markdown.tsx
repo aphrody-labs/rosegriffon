@@ -120,12 +120,19 @@ function rendreNoeud(noeud: NoeudInline, cle: string): React.ReactNode {
 			);
 		}
 		case "mention-role": {
+			/*
+			 * AUCUNE COULEUR EN LIGNE. La couleur d'un rôle Discord est un entier
+			 * arbitraire, choisi sans la moindre garantie de contraste avec nos
+			 * surfaces : sur les 93 rôles du serveur, `Joueur Débutant` (#fff498),
+			 * `RGK` (#fff400) et `Gagnants Tournois` (#fff300) tombent à 1,13:1 sur
+			 * fond clair — c'est-à-dire illisible. Rien ne bornait cette valeur, ni
+			 * `couleurDiscord()` (qui accepte tout de 1 à 0xFFFFFF), ni le rendu.
+			 * `CLASSE_MENTION` distingue déjà une mention du texte courant, avec des
+			 * jetons du design system qui suivent les quatre thèmes. `noeud.couleur`
+			 * reste renseigné pour le diagnostic ; ne pas le recâbler sur `style`.
+			 */
 			return (
-				<span
-					key={cle}
-					className={CLASSE_MENTION}
-					style={noeud.couleur ? { color: noeud.couleur } : undefined}
-				>
+				<span key={cle} className={CLASSE_MENTION}>
 					@{noeud.nom}
 				</span>
 			);
