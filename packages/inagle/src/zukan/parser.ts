@@ -10,6 +10,7 @@ import type {
 	ZukanItem,
 	ZukanPositionType,
 	ZukanSkill,
+	ZukanSkillVideo,
 	ZukanTeam,
 } from "./types.js";
 import { GAME_KEYS, GAME_TO_SERIES } from "./types.js";
@@ -63,17 +64,23 @@ const MAPS = {
  */
 const CDN_ROOT = "https://dxi4wb638ujep.cloudfront.net/1";
 
-function normalizeImagePath(src: string | null): string | null {
+/**
+ * Normalise un chemin d'asset zukan en URL absolue.
+ *
+ * L'extension `.wmv` annoncée par le site est SYSTÉMATIQUEMENT servie en 403 par
+ * CloudFront. Le même hash existe en `.webm` (200 sur 100 % du catalogue mesuré)
+ * et pèse la moitié du `.mp4` : c'est donc `.webm` qu'on stocke et qu'on sert.
+ */
+export function normalizeImagePath(src: string | null): string | null {
 	if (!src) return null;
-	if (src.startsWith("http")) return src;
+
+	// `.wmv` -> `.webm` : même chemin/hash, seule extension réellement servie.
+	const swapWmv = (u: string) => (u.endsWith(".wmv") ? `${u.slice(0, -4)}.webm` : u);
+
+	if (src.startsWith("http")) return swapWmv(src);
 
 	// Cleanup path
-	let normalized = src.replace(/^(\.\.\/)+/, "");
-
-	// Convert .wmv to .mp4 for better compatibility
-	if (normalized.endsWith(".wmv")) {
-		normalized = normalized.replace(".wmv", ".mp4");
-	}
+	const normalized = swapWmv(src.replace(/^(\.\.\/)+/, ""));
 
 	return `${CDN_ROOT}/${normalized}`;
 }
@@ -276,10 +283,17 @@ export async function parseCharacterModelPage(filePath: string): Promise<{ model
 }
 
 /**
- * Parses a skill list page
+ * Parse le HTML d'une page de liste de techniques (`/{locale}/skill/`).
+ *
+ * Le HTML est rendu côté serveur : un `fetch()` statique suffit, aucun navigateur
+ * headless n'est nécessaire ici (contrairement à `chara_param`).
+ *
+ * Une technique peut exposer PLUSIEURS vidéos dans son `.btnBox` (236 sur 895
+ * en ont deux) : on les collecte TOUTES, avec le libellé du bouton comme
+ * variante. `figure.movie` ne sert que de repli — son lien duplique la première
+ * entrée du `.btnBox`.
  */
-export async function parseSkillListPage(filePath: string): Promise<ZukanSkill[]> {
-	const html = fs.readFileSync(filePath, "utf-8");
+export function parseSkillListHtml(html: string): ZukanSkill[] {
 	const $ = cheerio.load(html);
 	const skills: ZukanSkill[] = [];
 
@@ -287,31 +301,40 @@ export async function parseSkillListPage(filePath: string): Promise<ZukanSkill[]
 		const name = $(li).find(".nameBox .name").text().trim();
 		const lBox = $(li).find(".lBox.skillLbox");
 
-		// Video URL
-		// Sometimes there are multiple buttons. We take the first one for the main video.
-		const videoLink = lBox.find("a[data-movie-url]").first();
+		// Toutes les variantes vidéo du `.btnBox` (1 ou 2), repli sur `figure.movie`.
+		const btnLinks = lBox.find(".btnBox a[data-movie-url]");
+		const movieLinks = btnLinks.length ? btnLinks : lBox.find("figure.movie a[data-movie-url]");
 
-		let videoUrl = videoLink.attr("data-movie-url") || null;
-		let posterUrl = videoLink.attr("data-poster-url") || null;
+		const videos: ZukanSkillVideo[] = [];
+		movieLinks.each((position, a) => {
+			const el = $(a);
+			const videoUrl = normalizeImagePath(el.attr("data-movie-url") || null);
+			if (!videoUrl) return;
+			videos.push({
+				label: el.text().trim() || "Movie",
+				position,
+				posterUrl: normalizeImagePath(el.attr("data-poster-url") || null),
+				videoUrl,
+			});
+		});
 
-		// Type (extracted from the button text, e.g. "Defence")
-		const typeLink = lBox.find(".btnBox .btnMovie").first();
-		const type = typeLink.text().trim() || "Unknown";
+		const primary = videos[0] ?? null;
+		const videoUrl = primary?.videoUrl ?? null;
+		const posterUrl = primary?.posterUrl ?? null;
+
+		// Type (libellé du premier bouton, ex. "Defence")
+		const type = primary?.label ?? "Unknown";
 
 		// Image/Thumbnail
 		const picture = lBox.find("picture");
-		let thumbnailUrl =
+		const thumbnailUrl = normalizeImagePath(
 			picture.find('source[type="image/webp"]').attr("srcset") ||
-			picture.find("img").attr("src") ||
-			null;
+				picture.find("img").attr("src") ||
+				null
+		);
 
 		// Description
 		const description = $(li).find(".rBox .description").text().trim();
-
-		// Normalize paths
-		videoUrl = normalizeImagePath(videoUrl);
-		posterUrl = normalizeImagePath(posterUrl);
-		thumbnailUrl = normalizeImagePath(thumbnailUrl);
 
 		// ID Generation
 		// Use video filename if available (it acts as a unique ID from AWS/CloudFront), otherwise name slug
@@ -338,11 +361,19 @@ export async function parseSkillListPage(filePath: string): Promise<ZukanSkill[]
 				videoUrl,
 				posterUrl,
 				thumbnailUrl,
+				videos,
 			});
 		}
 	});
 
 	return skills;
+}
+
+/**
+ * Parses a skill list page
+ */
+export async function parseSkillListPage(filePath: string): Promise<ZukanSkill[]> {
+	return parseSkillListHtml(fs.readFileSync(filePath, "utf-8"));
 }
 
 /**

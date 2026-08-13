@@ -72,15 +72,35 @@ export interface ZukanCharacter {
 	}[];
 }
 
+/**
+ * Une vidéo de technique telle que publiée par zukan.inazuma.jp.
+ *
+ * 236 techniques sur 895 exposent DEUX vidéos dans leur `.btnBox`
+ * (Shot/Success/Failure/Defence/Offence/Shot Block) : le libellé du bouton est
+ * la seule chose qui les distingue, on le conserve donc tel quel.
+ */
+export interface ZukanSkillVideo {
+	/** Libellé du bouton (variante) : "Shot", "Success", "Failure", "Defence", "Offence", "Shot Block". */
+	label: string;
+	/** Rang d'apparition dans le `.btnBox` (0 = vidéo principale). */
+	position: number;
+	videoUrl: string | null;
+	posterUrl: string | null;
+}
+
 export interface ZukanSkill {
 	id: string;
 	name: string;
 	type: string; // e.g. "Shoot", "Dribble", "Block", "Catch"
 	description?: string;
 	element: ZukanElementType | null;
+	/** Vidéo principale (= `videos[0]`), conservée pour compatibilité. */
 	videoUrl: string | null;
+	/** Poster de la vidéo principale (= `videos[0]`), conservé pour compatibilité. */
 	posterUrl: string | null;
 	thumbnailUrl: string | null;
+	/** Toutes les variantes vidéo de la technique (1 ou 2 en pratique). */
+	videos: ZukanSkillVideo[];
 }
 
 export interface ZukanItem {

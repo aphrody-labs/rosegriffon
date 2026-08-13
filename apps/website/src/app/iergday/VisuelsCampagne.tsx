@@ -25,6 +25,15 @@ import { type DocumentVisionne, Visionneuse } from "./Visionneuse";
  * juste à côté — `note_affiche`, lue en base, jamais écrite ici : c'est un fait
  * sur CETTE affiche, pas une règle de la page.
  *
+ * ── LES PROPORTIONS VIENNENT DU FICHIER, PAS D'UNE CONSTANTE ───────────────
+ * Un cadre de proportions fixes borde chaque document de bandes vides : à 3/4,
+ * l'affiche IERG Day (1051 × 1447, soit 0,726) perdait une bande sur chaque
+ * bord, et la carte des règles (1600 × 2197) aussi. Les tailles sont désormais
+ * MESURÉES côté serveur (`lib/images/dimensions.ts`) et transmises ici : le
+ * cadre épouse exactement l'image, quelles que soient les proportions du visuel
+ * de la campagne suivante. Sans mesure (`null`), on retombe sur un cadre — pas
+ * sur une page cassée.
+ *
  * La visionneuse n'est PAS réécrite ici : c'est `Visionneuse.tsx`, la même que
  * celle de la galerie, qui montre des `DocumentVisionne`. Ces visuels-là
  * n'existent pas comme publications X — les faire passer pour des `PostCampagne`
@@ -49,10 +58,18 @@ const TAILLES_VIGNETTE =
 const TAILLES_GRAND = "(max-width: 767px) 100vw, 32rem";
 
 /**
+ * Proportions de repli quand la mesure du fichier a échoué.
+ *
+ * Les visuels de campagne sont des portraits (affiche, carte de règles) ; ce
+ * cadre n'est utilisé que le temps qu'une image injoignable redevienne lisible.
+ */
+const RATIO_REPLI = 3 / 4;
+
+/**
  * Deux présentations, un seul composant.
  *
- * `colonne` — les deux visuels en petit, dans la colonne étroite de « Comment
- * participer » : ils y sont un rappel, pas le sujet.
+ * `colonne` — les deux visuels en petit, dans une colonne étroite : ils y sont
+ * un rappel, pas le sujet.
  *
  * `grand` — l'affiche à la taille où elle se lit VRAIMENT. Une affiche est un
  * document composé pour être vu en entier : réduite à 226 px de côté dans une
@@ -61,15 +78,23 @@ const TAILLES_GRAND = "(max-width: 767px) 100vw, 32rem";
  */
 export type PresentationVisuels = "colonne" | "grand";
 
+/** Taille réelle d'un visuel, mesurée côté serveur. */
+export interface TailleVisuel {
+	largeur: number;
+	hauteur: number;
+}
+
 /** Une vignette cliquable. Le pictogramme signale qu'on peut agrandir. */
 function Vignette({
 	document,
 	onOuvrir,
 	grand = false,
+	taille = null,
 }: {
 	document: DocumentVisionne;
 	onOuvrir: () => void;
 	grand?: boolean;
+	taille?: TailleVisuel | null;
 }) {
 	const image = document.images[0];
 	if (!image) {
@@ -83,33 +108,50 @@ function Vignette({
 			className="group block w-full cursor-zoom-in overflow-hidden rounded-[24px] border-2 border-rg-or/40 bg-surface-container-low text-left shadow-[0_4px_0_0_rgba(0,0,0,0.5)] transition-transform duration-300 motion-safe:hover:-translate-y-1 focus-visible:outline-4 focus-visible:-outline-offset-4 focus-visible:outline-primary"
 		>
 			{/*
-			 * `ratio={3 / 4}` en grand : les deux visuels sont des portraits (l'affiche
-			 * fait 1063 × 1483, la carte des règles 8334 × 11443). Un carré leur
-			 * ajoutait deux bandes vides d'un quart de hauteur chacune. `object-contain`
-			 * dans les deux cas : un document ne se recadre pas, il se lit entier.
+			 * Taille RÉELLE quand on la connaît : `width`/`height` donnent à Next les
+			 * bonnes proportions, `h-auto w-full` laisse l'image occuper la colonne
+			 * sans bande vide au-dessus ni en dessous. Le navigateur réserve la place
+			 * exacte avant le chargement — pas de saut de mise en page pour autant.
 			 */}
-			<AspectRatio ratio={grand ? 3 / 4 : 1}>
+			{taille ? (
 				<Image
 					src={image.src}
 					alt={image.alt}
-					fill
+					width={taille.largeur}
+					height={taille.hauteur}
 					sizes={grand ? TAILLES_GRAND : TAILLES_VIGNETTE}
 					priority={grand}
-					className="object-contain"
+					className="h-auto w-full"
 				/>
-			</AspectRatio>
+			) : (
+				<AspectRatio ratio={RATIO_REPLI}>
+					<Image
+						src={image.src}
+						alt={image.alt}
+						fill
+						sizes={grand ? TAILLES_GRAND : TAILLES_VIGNETTE}
+						priority={grand}
+						className="object-contain"
+					/>
+				</AspectRatio>
+			)}
 			{/*
 			 * Les libellés PASSENT À LA LIGNE, ils ne sont pas coupés : entre 1024 et
 			 * 1280 px la tuile ne fait qu'une centaine de pixels de large, et
 			 * `truncate` y amputait « Les règles, en image » de 43 % — « Les règle… »
 			 * juste sous une affiche déjà illisible à cette taille.
+			 *
+			 * ⚠ PAS DE SOUS-TITRE EN PRÉSENTATION `grand`. Il porte le titre de la
+			 * campagne, déjà écrit en toutes lettres dans la bannière quelques
+			 * centaines de pixels plus haut — deux fois sous deux visuels, cela
+			 * faisait trois occurrences du même texte sur un seul écran.
 			 */}
 			<span className="flex items-center justify-between gap-2 border-t border-outline-variant/40 px-4 py-3">
 				<span className="min-w-0">
 					<span className="block text-sm font-bold leading-tight break-words text-on-surface">
 						{document.titre}
 					</span>
-					{document.sousTitre && (
+					{!grand && document.sousTitre && (
 						<span className="mt-0.5 block text-xs leading-tight break-words text-on-surface-variant">
 							{document.sousTitre}
 						</span>
@@ -130,6 +172,8 @@ export function VisuelsCampagne({
 	imageReglement,
 	noteAffiche,
 	presentation = "colonne",
+	tailleAffiche = null,
+	tailleReglement = null,
 }: {
 	slug: string;
 	titreCampagne: string;
@@ -142,6 +186,9 @@ export function VisuelsCampagne({
 	noteAffiche: string | null;
 	/** Taille d'affichage. Voir `PresentationVisuels`. */
 	presentation?: PresentationVisuels;
+	/** Tailles mesurées côté serveur (`lib/images/dimensions.ts`). */
+	tailleAffiche?: TailleVisuel | null;
+	tailleReglement?: TailleVisuel | null;
 }) {
 	const [indexOuvert, setIndexOuvert] = useState<number | null>(null);
 
@@ -183,23 +230,30 @@ export function VisuelsCampagne({
 		return null;
 	}
 
+	const grand = presentation === "grand";
+	const tailles: Record<string, TailleVisuel | null> = {
+		affiche: tailleAffiche,
+		reglement: tailleReglement,
+	};
+
 	return (
 		<>
 			{/*
-			 * ⚠ PAS DE `flex` SUR LE `li`, et une seule colonne entre `lg` et `xl`.
-			 * Ces tuiles vivent dans la colonne étroite de « Comment participer »,
-			 * dont la hauteur est celle du règlement d'à côté. Un `li` en `flex`
-			 * étirait le `<button>` sur toute cette hauteur, et un bouton centre son
-			 * contenu : à 1024 px la carte faisait 553 px de haut pour une image de
-			 * 130 px — 65 % de vide bordé d'or, mesuré au navigateur. Sans `flex`, la
-			 * carte reprend la hauteur de son contenu ; `lg:grid-cols-1` lui rend au
-			 * passage une largeur lisible (280 px au lieu de 134) là où deux colonnes
-			 * ne tenaient pas.
+			 * ⚠ PAS DE `flex` SUR LE `li`, et une seule colonne entre `lg` et `xl` en
+			 * présentation `colonne`. Un `li` en `flex` étire le `<button>` sur toute
+			 * la hauteur de la rangée, et un bouton centre son contenu : à 1024 px la
+			 * carte faisait 553 px de haut pour une image de 130 px — 65 % de vide
+			 * bordé d'or, mesuré au navigateur. Sans `flex`, la carte reprend la
+			 * hauteur de son contenu.
+			 *
+			 * En présentation `grand`, `items-start` joue le même rôle sur la grille :
+			 * les deux documents n'ont pas exactement les mêmes proportions, et sans
+			 * lui la plus courte des deux cartes s'étirerait à la hauteur de l'autre.
 			 */}
 			<ul
 				className={
-					presentation === "grand"
-						? "mx-auto grid list-none grid-cols-1 gap-6 p-0 md:max-w-5xl md:grid-cols-2"
+					grand
+						? "mx-auto grid list-none grid-cols-1 items-start gap-6 p-0 md:max-w-5xl md:grid-cols-2"
 						: "grid list-none grid-cols-1 gap-4 p-0 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2"
 				}
 			>
@@ -207,7 +261,8 @@ export function VisuelsCampagne({
 					<li key={document.cle}>
 						<Vignette
 							document={document}
-							grand={presentation === "grand"}
+							grand={grand}
+							taille={tailles[document.cle] ?? null}
 							onOuvrir={() => setIndexOuvert(position)}
 						/>
 						{document.cle === "affiche" && noteAffiche && (

@@ -27,6 +27,7 @@ import {
 } from "@/components/shared/PageShell";
 import { BreadcrumbSchema } from "@/components/shared/StructuredData";
 import { WikiPagination } from "@/components/shared/WikiPagination";
+import { dimensionsImage } from "@/lib/images/dimensions";
 import { parseSearchParams } from "@/lib/validations";
 import {
 	chargerCampagne,
@@ -292,10 +293,16 @@ export default async function IergDayPage({
 		);
 	}
 
-	const [stats, posts, enAvant] = await Promise.all([
+	const [stats, posts, enAvant, tailleAffiche, tailleReglement] = await Promise.all([
 		compterPostsCampagne(campagne.slug),
 		listerPostsCampagne(campagne.slug, pageCourante, POSTS_PAR_PAGE),
 		pageCourante === 1 ? listerPostsEnAvant(campagne.slug, 6) : Promise.resolve([]),
+		// Les proportions RÉELLES des visuels, lues dans l'en-tête des fichiers.
+		// Les deviner (un cadre carré, puis 3/4) bordait chaque document de bandes
+		// vides ; les écrire en dur serait faux dès la campagne suivante, dont les
+		// visuels seront téléversés par l'équipe sans passer par le code.
+		dimensionsImage(campagne.imageAffiche),
+		dimensionsImage(campagne.imageReglement),
 	]);
 
 	const etat = etatCampagne(campagne);
@@ -420,19 +427,19 @@ export default async function IergDayPage({
 				<SelecteurCampagne campagnes={campagnes} slugActif={campagne.slug} />
 
 				{/*
-				 * L'AFFICHE, EN GRAND, AVANT TOUT LE RESTE.
+				 * LES VISUELS, EN GRAND, AVANT TOUT LE RESTE — ET UNE SEULE FOIS.
 				 *
 				 * L'affiche et la carte des règles ne sont pas une illustration de la
 				 * page : ce sont les documents officiels de la campagne, et ils portent
 				 * les seules informations qu'un participant doit avoir (le hashtag, la
-				 * date de fin, ce qui est autorisé). Elles n'existaient qu'en vignette
-				 * de 226 px dans la colonne de « Comment participer », où rien de tout
-				 * cela ne se lit. Elles restent AUSSI là-bas — en rappel, à côté du
-				 * règlement en clair — mais la première chose qu'on voit sous la
-				 * bannière est désormais l'affiche elle-même.
+				 * date de fin, ce qui est autorisé). Ils étaient rendus DEUX FOIS — ici
+				 * en grand, et de nouveau en vignettes de 226 px dans la colonne de
+				 * « Comment participer », où rien de tout cela ne se lit. Le rappel a
+				 * été supprimé : il n'ajoutait rien, et sa colonne restait à moitié
+				 * vide sous le règlement d'à côté.
 				 *
-				 * La bannière, elle, ne la montre pas : `PageHero` recadre son image en
-				 * `object-cover` sous un voile marine à 90 % — c'est un décor, par
+				 * La bannière, elle, ne les montre pas : `PageHero` recadre son image
+				 * en `object-cover` sous un voile marine à 90 % — c'est un décor, par
 				 * construction illisible.
 				 */}
 				{(campagne.imageAffiche || campagne.imageReglement) && (
@@ -442,7 +449,7 @@ export default async function IergDayPage({
 							icon={<ImageIcon className="size-5" aria-hidden />}
 							iconClassName="bg-primary text-on-primary"
 							title="L'affiche"
-							subtitle="Les visuels officiels de la campagne. Cliquez pour les ouvrir en plein écran."
+							subtitle="Cliquez pour les ouvrir en plein écran."
 						/>
 						<VisuelsCampagne
 							slug={campagne.slug}
@@ -453,6 +460,8 @@ export default async function IergDayPage({
 							imageReglement={campagne.imageReglement}
 							noteAffiche={campagne.noteAffiche}
 							presentation="grand"
+							tailleAffiche={tailleAffiche}
+							tailleReglement={tailleReglement}
 						/>
 					</section>
 				)}
@@ -473,49 +482,52 @@ export default async function IergDayPage({
 							subtitle={sousTitreParticipation}
 						/>
 
-						<div className="grid gap-6 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
-							<div className="space-y-4">
-								<ReglementCampagne reglement={campagne.reglement} />
+						{/*
+						 * UNE SEULE COLONNE. La grille `3fr / 2fr` n'existait que pour
+						 * loger le rappel des visuels à droite ; celui-ci retiré, la
+						 * seconde colonne ne contenait plus que du vide, et la première
+						 * s'en trouvait rétrécie de 40 % sans raison. `max-w-3xl` garde
+						 * une longueur de ligne lisible sur grand écran — un règlement
+						 * étalé sur 1 400 px ne se lit pas mieux, il se lit moins bien.
+						 */}
+						<div className="max-w-3xl space-y-4">
+							<ReglementCampagne reglement={campagne.reglement} />
 
-								{/*
-								 * Ce que le mur collecte VRAIMENT. Le règlement autorise plusieurs
-								 * réseaux, la récolte n'en interroge qu'un (`hashtag-harvest.ts`
-								 * interroge X, et il n'existe aucun collecteur Instagram ici).
-								 * Laisser croire qu'une participation Instagram apparaîtra dans
-								 * cette galerie serait un mensonge — la liste des réseaux est lue
-								 * dans le règlement, pas écrite en dur.
-								 */}
-								<div className="flex items-start gap-3 rounded-2xl border border-outline-variant/60 bg-surface-container-low p-4">
-									<Info className="mt-0.5 size-5 shrink-0 text-primary" aria-hidden />
-									<p className="text-sm leading-relaxed text-on-surface-variant">
-										{reseauxAutres.length > 0 ? (
-											<>
-												Le règlement accepte aussi {listerEnFrancais(reseauxAutres)}.{" "}
-												<strong className="font-semibold text-on-surface">
-													Ce mur ne collecte que&nbsp;X
-												</strong>{" "}
-												: une création publiée sur {listerEnFrancais(reseauxAutres)} compte pour
-												la campagne, mais elle n&apos;apparaîtra pas dans cette galerie.
-											</>
-										) : (
-											<>
-												Ce mur ne collecte que les publications X
-												{libelleHashtagPrincipal ? ` portant ${libelleHashtagPrincipal}` : ""}.
-											</>
-										)}
-									</p>
-								</div>
+							{/*
+							 * Ce que le mur collecte VRAIMENT.
+							 *
+							 * Il a DEUX sources, pas une : les publications X portant le hashtag
+							 * (`ie-crawl/hashtag-harvest.ts`) et les créations déposées dans le
+							 * salon Discord de la campagne (`tasks/campagnes-discord.ts`) — les
+							 * deux remontent dans la même galerie (`lib/x-campagnes/queries.ts`).
+							 * Ce paragraphe n'en annonçait qu'une, et rendait donc invisible la
+							 * seule voie qui n'exige pas de compte X.
+							 *
+							 * En revanche, il n'existe AUCUN collecteur Instagram dans ce dépôt :
+							 * laisser croire qu'une participation Instagram apparaîtra ici serait
+							 * un mensonge. La liste des réseaux est lue dans le règlement de la
+							 * campagne, jamais écrite en dur.
+							 */}
+							<div className="flex items-start gap-3 rounded-2xl border border-outline-variant/60 bg-surface-container-low p-4">
+								<Info className="mt-0.5 size-5 shrink-0 text-primary" aria-hidden />
+								<p className="text-sm leading-relaxed text-on-surface-variant">
+									Cette galerie rassemble les publications&nbsp;X
+									{libelleHashtagPrincipal ? ` portant ${libelleHashtagPrincipal}` : ""}
+									{campagne.salonsDepot.length > 0
+										? " et les créations déposées dans le salon Discord de la campagne"
+										: ""}
+									.{" "}
+									{reseauxAutres.length > 0 && (
+										<>
+											Le règlement accepte aussi {listerEnFrancais(reseauxAutres)}&nbsp;:{" "}
+											<strong className="font-semibold text-on-surface">
+												une création publiée là-bas compte pour la campagne
+											</strong>
+											, mais elle n&apos;apparaîtra pas dans cette galerie.
+										</>
+									)}
+								</p>
 							</div>
-
-							<VisuelsCampagne
-								slug={campagne.slug}
-								titreCampagne={campagne.titre}
-								description={campagne.description}
-								reglement={campagne.reglement}
-								imageAffiche={campagne.imageAffiche}
-								imageReglement={campagne.imageReglement}
-								noteAffiche={campagne.noteAffiche}
-							/>
 						</div>
 					</section>
 				)}
