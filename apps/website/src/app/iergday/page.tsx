@@ -10,7 +10,6 @@ import {
 import {
 	Hash,
 	ImageIcon,
-	Info,
 	Sparkles,
 	Users,
 } from "lucide-react";
@@ -41,8 +40,6 @@ import {
 	formaterDateHeureParis,
 	formaterDateParis,
 	hashtagsAffichables,
-	listerEnFrancais,
-	reseauxHorsX,
 	urlPublicationX,
 	urlRechercheX,
 } from "@/lib/x-campagnes/types";
@@ -51,7 +48,6 @@ import { BoutonsParticiper } from "./BoutonsParticiper";
 import { CampagneGalerie } from "./CampagneGalerie";
 import { CompteARebours } from "./CompteARebours";
 import { HashtagsCopiables } from "./HashtagsCopiables";
-import { ReglementCampagne } from "./ReglementCampagne";
 import { SelecteurCampagne } from "./SelecteurCampagne";
 import { VisuelsCampagne } from "./VisuelsCampagne";
 
@@ -203,7 +199,14 @@ export async function generateMetadata({
 }
 
 /**
- * Compteur de la bannière — une PUCE, pas une tuile.
+ * Compteur — une PUCE, pas une tuile.
+ *
+ * ⚠ TOKENS DE SURFACE, PAS LES COULEURS DE LA BANNIÈRE. Ces puces vivaient dans
+ * `PageHero`, sur son dégradé marine : `text-rg-sur-marine` (blanc cassé) y était
+ * le bon choix. La bannière retirée, elles se sont retrouvées sur le fond de
+ * page — blanc cassé sur blanc, donc **illisibles en thèmes Roy et Gaëlle
+ * clairs**. Une couleur de marque ne suit pas le sélecteur de thème ; les tokens
+ * de surface, si.
  *
  * ⚠ NI LA VALEUR NI LE LIBELLÉ NE SONT COUPÉS. La valeur affiche parfois une
  * durée (« 22 minutes ») et non un nombre : couper « 22 minu… » serait pire que
@@ -225,10 +228,10 @@ function Compteur({
 	libelle: string;
 }) {
 	return (
-		<span className="inline-flex items-center gap-1.5 rounded-full border border-rg-or/40 bg-rg-sur-marine/10 px-3 py-1.5 text-xs backdrop-blur-sm">
-			<Icone className="size-3.5 shrink-0 text-rg-or" aria-hidden />
-			<strong className="font-bold tabular-nums text-rg-sur-marine">{valeur}</strong>
-			<span className="text-rg-sur-marine/80">{libelle}</span>
+		<span className="inline-flex items-center gap-1.5 rounded-full border border-outline-variant/60 bg-surface-container-low px-3 py-1.5 text-xs">
+			<Icone className="size-3.5 shrink-0 text-primary" aria-hidden />
+			<strong className="font-bold tabular-nums text-on-surface">{valeur}</strong>
+			<span className="text-on-surface-variant">{libelle}</span>
 		</span>
 	);
 }
@@ -329,12 +332,6 @@ export default async function IergDayPage({
 	const dernierePage = Math.max(1, Math.ceil(stats.posts / POSTS_PAR_PAGE));
 	const pageHorsBornes = stats.posts > 0 && posts.length === 0;
 
-	// Ce que la page a d'autre à montrer qu'une grille : les documents officiels.
-	const aReglement = campagne.reglement.length > 0;
-	const aVisuels = Boolean(campagne.imageAffiche || campagne.imageReglement);
-	const aParticipation = aReglement || aVisuels;
-	// Réseaux, autres que X, que le règlement de CETTE campagne accepte.
-	const reseauxAutres = reseauxHorsX(campagne.reglement);
 	/*
 	 * Il n'y a plus de sous-titre sous « Participer ». L'ancien annonçait « Les
 	 * règles de la campagne, et le hashtag à ne pas oublier : #IERGDay » — deux
@@ -439,11 +436,15 @@ export default async function IergDayPage({
 				 * en décor par construction illisible, tout en répétant son texte.
 				 */}
 				{(campagne.imageAffiche || campagne.imageReglement) && (
-					<section aria-labelledby="titre-affiche">
+					<section aria-label="Visuels officiels de la campagne">
 						{/* Pas de sous-titre « cliquez pour agrandir » : le pictogramme de
 						    la vignette le dit déjà, et une phrase de plus au-dessus de
 						    l'affiche, c'est l'affiche qui descend d'autant sur mobile. */}
-						<TitreSection id="titre-affiche">L&apos;affiche</TitreSection>
+						{/* Pas de titre : une affiche n'a pas besoin qu'on annonce que
+						    c'en est une, et la ligne poussait le visuel d'autant plus bas
+						    sur mobile. Le libellé de chaque vignette suffit à les
+						    distinguer, et `aria-labelledby` est remplacé par un
+						    `aria-label` puisqu'il n'y a plus d'élément à désigner. */}
 						<VisuelsCampagne
 							slug={campagne.slug}
 							titreCampagne={campagne.titre}
@@ -460,53 +461,25 @@ export default async function IergDayPage({
 				)}
 
 				{/*
-				 * « Comment participer » AVANT la galerie : quand la campagne est ouverte
-				 * et que le mur est encore vide, c'est la seule chose qui a de la valeur
-				 * pour le visiteur. Les campagnes archivées n'ont pas de règlement en
-				 * base : la section ne s'affiche tout simplement pas pour elles.
+				 * ── PAS DE RÈGLEMENT EN TEXTE SUR LA PAGE ───────────────────────────
+				 *
+				 * Les trois règles et l'interdiction de l'IA étaient rendues en clair,
+				 * numérotées, juste sous la carte « Règles » qui les écrit déjà — et
+				 * qui est affichée en grand deux sections plus haut. C'était le même
+				 * contenu deux fois sur un seul écran.
+				 *
+				 * ⚠ LE TEXTE N'EST PAS PERDU POUR AUTANT, et c'est ce qui rend le
+				 * retrait acceptable : `VisuelsCampagne` passe `reglement` à la
+				 * visionneuse en guise de LÉGENDE du document. Les règles restent donc
+				 * lisibles par un lecteur d'écran, indexables, et sélectionnables — au
+				 * clic sur la carte, là où l'on vient justement les lire. Les retirer
+				 * SANS ce relais laisserait le règlement en pixels seulement, ce qu'un
+				 * lecteur d'écran ne sait pas lire.
+				 *
+				 * La note de portée (« la galerie ne collecte pas Instagram ») a suivi
+				 * le même chemin : elle est désormais SOUS le bouton Instagram, à
+				 * l'endroit exact où elle sert.
 				 */}
-				{aParticipation && (
-					<section id="participer" aria-labelledby="titre-participer" className="scroll-mt-24">
-						<TitreSection id="titre-participer">
-							Participer
-							{libelleHashtagPrincipal && (
-								<span className="ml-2 font-mono text-sm font-normal text-primary">
-									{libelleHashtagPrincipal}
-								</span>
-							)}
-						</TitreSection>
-
-						{/*
-						 * UNE SEULE COLONNE. La grille `3fr / 2fr` n'existait que pour
-						 * loger le rappel des visuels à droite ; celui-ci retiré, la
-						 * seconde colonne ne contenait plus que du vide, et la première
-						 * s'en trouvait rétrécie de 40 % sans raison. `max-w-3xl` garde
-						 * une longueur de ligne lisible sur grand écran — un règlement
-						 * étalé sur 1 400 px ne se lit pas mieux, il se lit moins bien.
-						 */}
-						<div className="max-w-3xl space-y-4">
-							<ReglementCampagne reglement={campagne.reglement} />
-
-							{/*
-							 * Ce que la galerie collecte VRAIMENT, en UNE ligne.
-							 *
-							 * C'était un encart de six lignes avec pictogramme. Le fait à dire
-							 * tient en une phrase, et il doit être dit : la galerie montre X et
-							 * le salon Discord, mais il n'existe AUCUN collecteur Instagram
-							 * dans ce dépôt. Le supprimer au nom de la sobriété ferait croire
-							 * à une couverture qui n'existe pas — une page minimaliste peut
-							 * être courte, pas fausse.
-							 */}
-							<p className="text-xs leading-relaxed text-muted-foreground">
-								Galerie alimentée par X
-								{campagne.salonsDepot.length > 0 && " et le salon Discord"}
-								{reseauxAutres.length > 0 &&
-									` — une création sur ${listerEnFrancais(reseauxAutres)} compte pour la campagne mais n'apparaît pas ici`}
-								.
-							</p>
-						</div>
-					</section>
-				)}
 
 				{enAvant.length > 0 && (
 					<section aria-labelledby="titre-a-la-une">
@@ -611,11 +584,6 @@ export default async function IergDayPage({
 											</a>
 										</Button>
 									</>
-								)}
-								{etat !== "terminee" && aParticipation && (
-									<Button asChild variant="outline">
-										<Link href="#participer">Relire les règles</Link>
-									</Button>
 								)}
 								{campagneDeRepli && (
 									<Button asChild variant="link">
