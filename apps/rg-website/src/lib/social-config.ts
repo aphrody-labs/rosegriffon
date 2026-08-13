@@ -45,7 +45,7 @@ export const socialConfig = [
 		shortName: "IG",
 		url: "https://www.instagram.com/rose_griffonfr",
 	},
-		{
+	{
 		ariaLabel: "Suivre Rose Griffon sur TikTok",
 		color: "hover:bg-black dark:hover:bg-gray-800",
 		iconColor: "#000000",
