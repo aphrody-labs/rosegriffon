@@ -31,7 +31,7 @@
 -- pagination X grossissent à chaque run et franchiraient ce seuil. Ils vivent donc
 -- dans `x_campagne_curseurs`, table de plomberie interne — ni publique, ni temps réel.
 --
--- Application : psql "$DATABASE_URL" -f apps/website/supabase/migrations/20260812_campagnes_x.sql
+-- Application : psql "$DATABASE_URL" -f apps/website/supabase/migrations/20260812_01_campagnes_x.sql
 -- (« psql -d rg » échoue sur cette instance : il n'existe pas de rôle `ubuntu`.
 --  L'en-tête « psql -d rg » des migrations voisines est erroné, ne pas le recopier.)
 

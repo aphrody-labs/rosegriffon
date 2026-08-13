@@ -99,8 +99,11 @@ export function FiltresSondages({
 					</>
 				) : (
 					<>
-						{total} sondage{total > 1 ? "s" : ""} archivé{total > 1 ? "s" : ""} · {enCours} en
-						cours
+						{total} sondage{total > 1 ? "s" : ""} archivé{total > 1 ? "s" : ""}
+						{/* « en cours » ne s'affiche que s'il y en a vraiment. Le compteur
+						    portait auparavant les sondages sans état publié, ce qui annonçait
+						    « 25 en cours » sur des sondages clos depuis 2023. */}
+						{enCours > 0 && ` · ${enCours} en cours`}
 					</>
 				)}
 			</p>

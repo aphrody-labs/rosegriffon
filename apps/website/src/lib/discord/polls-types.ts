@@ -53,8 +53,16 @@ export interface Sondage {
 	poll_id: string;
 	provider: FournisseurSondage;
 	source: SourceSondage;
-	/** Langue de l'encart analysé : la quasi-totalité est en anglais dans une
-	 *  page française, d'où le `lang` posé sur la question au rendu. */
+	/**
+	 * Langue d'INTERFACE de l'encart EasyPoll, jamais celle de la question.
+	 *
+	 * Elle est déduite des en-têtes du bot (« Choices » ⇒ en, « Choix » ⇒ fr,
+	 * défaut « en ») : deux sondages portant la MÊME question française sont
+	 * classés l'un « fr », l'autre « en ». Valeur de DIAGNOSTIC — ne jamais la
+	 * recâbler sur un attribut `lang`, ce serait annoncer 48 questions françaises
+	 * comme anglaises. Pour marquer vraiment la langue du texte, il faudrait la
+	 * détecter sur `question`.
+	 */
 	language: "fr" | "en" | null;
 	message_id: string | null;
 	channel_id: string;
@@ -123,9 +131,55 @@ export function gagnant(sondage: Sondage): OptionSondage | null {
 	return premier.votes === second.votes ? null : premier;
 }
 
-/** « Terminé » / « En cours ». */
+/**
+ * État d'un sondage — TROIS valeurs, parce que la base n'en connaît que deux et
+ * que la troisième est la vérité pour la moitié du corpus.
+ *
+ * `ended` vaut `false` PAR DÉFAUT dès que l'encart ne porte pas de ligne « Poll
+ * already ended » : c'est le cas des 25 sondages reconstitués à partir des
+ * réactions (2023-08 → 2024-04), qui n'ont jamais publié ni clôture ni date de
+ * fin. Les afficher « En cours » en 2026 revient à affirmer ce que l'encart n'a
+ * jamais dit. `ends_at IS NULL` est le marqueur exact : les 26 sondages issus
+ * d'un encart complet en portent tous une, les 25 autres aucune.
+ */
+export type EtatSondage = "termine" | "en-cours" | "inconnu";
+
+export function etatSondage(sondage: Sondage): EtatSondage {
+	if (sondage.ended) return "termine";
+	return sondage.ends_at === null ? "inconnu" : "en-cours";
+}
+
+/** « Terminé » / « En cours » / « État non publié ». */
 export function libelleEtat(sondage: Sondage): string {
-	return sondage.ended ? "Terminé" : "En cours";
+	switch (etatSondage(sondage)) {
+		case "termine": {
+			return "Terminé";
+		}
+		case "en-cours": {
+			return "En cours";
+		}
+		default: {
+			return "État non publié";
+		}
+	}
+}
+
+/**
+ * Variante de `Badge` pour l'état : le vert (`success`) est réservé à ce qui
+ * tourne VRAIMENT. Un état non publié prend une pastille neutre.
+ */
+export function varianteBadgeEtat(sondage: Sondage): "secondary" | "success" | "outline" {
+	switch (etatSondage(sondage)) {
+		case "termine": {
+			return "secondary";
+		}
+		case "en-cours": {
+			return "success";
+		}
+		default: {
+			return "outline";
+		}
+	}
 }
 
 /** Libellé du nombre de choix autorisés par personne (0 = illimité). */

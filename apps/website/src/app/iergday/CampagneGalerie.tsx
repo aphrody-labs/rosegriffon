@@ -1,11 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
 import type { PostCampagne } from "@/lib/x-campagnes/types";
 
 import { PostCarte } from "./PostCarte";
-import { Visionneuse } from "./Visionneuse";
+import { documentDepuisPost, Visionneuse } from "./Visionneuse";
 
 /*
  * Îlot interactif de la galerie : il détient l'index ouvert et monte la
@@ -23,6 +23,9 @@ const CARTES_PRIORITAIRES = 4;
 
 export function CampagneGalerie({ posts }: { posts: PostCampagne[] }) {
 	const [indexOuvert, setIndexOuvert] = useState<number | null>(null);
+	// La visionneuse est générique (elle montre aussi l'affiche et la carte des
+	// règles) : c'est ici qu'une publication devient un document visionnable.
+	const documents = useMemo(() => posts.map(documentDepuisPost), [posts]);
 
 	if (posts.length === 0) {
 		return null;
@@ -44,7 +47,7 @@ export function CampagneGalerie({ posts }: { posts: PostCampagne[] }) {
 			</ul>
 
 			<Visionneuse
-				posts={posts}
+				documents={documents}
 				index={indexOuvert}
 				onFermer={() => setIndexOuvert(null)}
 				onNaviguer={setIndexOuvert}

@@ -50,7 +50,8 @@
  */
 
 import { sql } from "../lib/db.js";
-import { appelDiscordOuNull, resignerPiecesJointes } from "../lib/discord-rest.js";
+import { appelDiscordOuNull } from "../lib/discord-rest.js";
+import { telechargerPieceJointeDiscord, televerserObjet } from "../lib/storage-assets.js";
 import { DISCORD_TOKEN } from "../lib/discord.js";
 
 const PREFIXE = "[Cron Sondages]";
@@ -988,66 +989,28 @@ function extraireUuid(composants: unknown): string | null {
 	return extraireUuid(noeud.components);
 }
 
-/** Base du service Storage self-host (jamais l'origine publique côté serveur). */
-function baseStorage(): string {
-	const brut = Bun.env.SUPABASE_INTERNAL_URL || "http://127.0.0.1:8811";
-	return brut.replace(/\/+$/, "");
-}
-
 /**
  * Recopie un visuel dans le bucket public `assets`.
  *
- * `x-upsert: true` rend l'opération rejouable à l'infini sur le même chemin
- * déterministe. Sur 403/404 l'URL signée est simplement périmée : Discord sait
- * la re-signer, on retente UNE fois avant d'abandonner.
+ * Le téléchargement (avec re-signature de l'URL périmée) et l'écriture dans le
+ * Storage vivent dans `lib/storage-assets.ts` : la récolte des créations de
+ * campagne fait exactement la même chose, et deux copies de ce traitement
+ * finiraient par diverger sur la gestion d'une URL expirée.
  */
 async function televerserVisuel(
 	salonId: string,
 	chemin: string,
 	visuel: VisuelRattache
 ): Promise<{ ok: boolean; motif?: string }> {
-	const cle = Bun.env.SUPABASE_SERVICE_ROLE_KEY;
-	if (!cle) return { ok: false, motif: "SUPABASE_SERVICE_ROLE_KEY absente" };
+	const fichier = await telechargerPieceJointeDiscord(
+		salonId,
+		visuel.url,
+		TAILLE_VISUEL_MAX,
+		visuel.content_type
+	);
+	if (!fichier.ok) return { ok: false, motif: fichier.motif };
 
-	let url = visuel.url;
-	let reponse = await fetch(url).catch(() => null);
-
-	if (!reponse || reponse.status === 403 || reponse.status === 404) {
-		const fraiches = await resignerPiecesJointes(salonId, [url]);
-		const fraiche = fraiches?.[0];
-		if (!fraiche) return { ok: false, motif: "URL Discord périmée et non re-signable" };
-		url = fraiche;
-		reponse = await fetch(url).catch(() => null);
-	}
-
-	if (!reponse?.ok) {
-		return { ok: false, motif: `téléchargement Discord ${reponse?.status ?? "injoignable"}` };
-	}
-
-	const type = reponse.headers.get("content-type") ?? visuel.content_type;
-	if (!type.startsWith("image/")) return { ok: false, motif: `type non image (${type})` };
-
-	const octets = await reponse.arrayBuffer();
-	if (octets.byteLength > TAILLE_VISUEL_MAX) {
-		return { ok: false, motif: `visuel trop lourd (${octets.byteLength} o)` };
-	}
-
-	const envoi = await fetch(`${baseStorage()}/storage/v1/object/${BUCKET_VISUELS}/${chemin}`, {
-		method: "POST",
-		headers: {
-			authorization: `Bearer ${cle}`,
-			apikey: cle,
-			"content-type": type,
-			"x-upsert": "true",
-		},
-		body: octets,
-	}).catch(() => null);
-
-	if (!envoi?.ok) {
-		const texte = await envoi?.text().catch(() => "");
-		return { ok: false, motif: `Storage ${envoi?.status ?? "injoignable"} ${(texte ?? "").slice(0, 120)}` };
-	}
-	return { ok: true };
+	return televerserObjet(BUCKET_VISUELS, chemin, fichier.octets, fichier.typeMime);
 }
 
 /** Écrit un sondage et ses choix. Une transaction par sondage. */

@@ -34,6 +34,7 @@ import {
 	libelleParticipation,
 	lienMessageDiscord,
 	resumeQuestion,
+	varianteBadgeEtat,
 } from "@/lib/discord/polls-types";
 
 import { ResultatsSondage } from "../_components/ResultatsSondage";
@@ -134,12 +135,15 @@ export default async function PageSondage({ params }: { params: Promise<{ pollId
 				]}
 			/>
 
+			{/* Pas de `lang` sur la question : `discord_polls.language` décrit la langue
+			    d'INTERFACE de l'encart EasyPoll, pas celle du texte publié (48 questions
+			    françaises y sont marquées « en »). Cf. le commentaire de CarteSondage. */}
 			<PageHero
 				description={`${libelleEtat(sondage)}${participation ? ` · ${participation}` : ""} · ${libelleChoixAutorises(sondage)}`}
 				eyebrow={`Sondage nº ${sondage.poll_id}`}
 				icon={<BarChart3 className="size-6 text-rg-or" aria-hidden />}
 				title={
-					<span lang={sondage.language ?? undefined}>
+					<span>
 						<TexteDiscordInline contenu={sondage.question} contexte={contexte} />
 					</span>
 				}
@@ -157,7 +161,12 @@ export default async function PageSondage({ params }: { params: Promise<{ pollId
 				<figure className="space-y-2">
 					<Image
 						src={sondage.visuel.url}
-						alt={sondage.visuel.alt ?? ""}
+						// Même règle que sur la carte de liste : 11 des 15 questions
+						// illustrées désignent l'image, un `alt` vide la rendrait
+						// invisible aux lecteurs d'écran.
+						alt={
+							sondage.visuel.alt ?? `Visuel du sondage : ${resumeQuestion(sondage.question, 80)}`
+						}
 						width={sondage.visuel.width ?? 1600}
 						height={sondage.visuel.height ?? 1200}
 						sizes="(max-width: 1280px) 100vw, 1280px"
@@ -198,9 +207,7 @@ export default async function PageSondage({ params }: { params: Promise<{ pollId
 					</h2>
 					<dl className="space-y-3">
 						<LigneMeta intitule="État">
-							<Badge variant={sondage.ended ? "secondary" : "success"}>
-								{libelleEtat(sondage)}
-							</Badge>
+							<Badge variant={varianteBadgeEtat(sondage)}>{libelleEtat(sondage)}</Badge>
 						</LigneMeta>
 						<LigneMeta intitule="Choix autorisés">{libelleChoixAutorises(sondage)}</LigneMeta>
 						<LigneMeta

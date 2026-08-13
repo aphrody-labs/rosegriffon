@@ -9,6 +9,7 @@ import { syncCdnAssets } from "./tasks/cdn";
 import { runIeCrawl } from "./tasks/ie-crawl";
 import { crawlTwitterSearch } from "./tasks/ie-crawl/harvest-search";
 import { crawlHashtagCampaigns } from "./tasks/ie-crawl/hashtag-harvest";
+import { recolterCreationsDiscord } from "./tasks/campagnes-discord";
 import { runRagSync, queryRag, ragGroundedQuery, ingestWikiCorpus } from "./tasks/ie-crawl/rag-index";
 import {
 	triggerPublishScheduled,
@@ -32,6 +33,7 @@ import { ServerWebSocket } from "bun";
 import { createSupabaseServiceClient } from "@rosegriffon/db/service";
 import { resolveProfile, isAdmin } from "@rosegriffon/auth";
 import { getOpenApiDocument, getSwaggerHtml } from "./lib/openapi";
+import { demarrerPontBot } from "./lib/bot-signal";
 
 // ─── LOGGER GLOBALE INTERCEPTION ET STREAMING WEBSOCKET ──────────────────────
 const wsConnections = new Set<ServerWebSocket<any>>();
@@ -234,6 +236,18 @@ if (args.includes("--run")) {
 		await executeTask("x:campagnes", () =>
 			crawlHashtagCampaigns(slug && !slug.startsWith("-") ? { slug } : {})
 		);
+	} else if (
+		task === "campagnes:discord" ||
+		task === "campagnes-discord" ||
+		task === "discord:campagnes"
+	) {
+		// `--run campagnes:discord <slug>` restreint la récolte à une seule campagne.
+		const slugDiscord = args[taskIdx + 1];
+		await executeTask("campagnes:discord", () =>
+			recolterCreationsDiscord(
+				slugDiscord && !slugDiscord.startsWith("-") ? { slug: slugDiscord } : {}
+			)
+		);
 	} else if (task === "seo:indexnow") {
 		await executeTask("seo:indexnow", runSeoIndexNow);
 	} else if (task === "seo:llms-txt" || task === "seo:llms") {
@@ -259,12 +273,13 @@ if (args.includes("--run")) {
 		await executeTask("discord:messages", runDiscordMessagesSync);
 		await executeTask("discord:polls", () => runDiscordPollsImport());
 		await executeTask("x:campagnes", () => crawlHashtagCampaigns());
+		await executeTask("campagnes:discord", () => recolterCreationsDiscord());
 		await executeTask("seo:llms-txt", runSeoLlmsTxt);
 		await executeTask("seo:indexnow", runSeoIndexNow);
 		await executeTask("stats:achillea", collecterAudienceAchillea);
 	} else {
 		console.error(
-			`❌ Tâche inconnue : ${task}. Choisissez parmi : db, cdn, crawl, rag, x-search, x:campagnes, query, publish, github-publish, patreon, reminders, warm, discord, discord:scan, discord:messages, discord:backfill, discord:polls, seo, seo:indexnow, seo:llms-txt, stats:achillea, backup:postgres, backup:pg, all.`
+			`❌ Tâche inconnue : ${task}. Choisissez parmi : db, cdn, crawl, rag, x-search, x:campagnes, query, publish, github-publish, patreon, reminders, warm, discord, discord:scan, discord:messages, discord:backfill, discord:polls, campagnes:discord, seo, seo:indexnow, seo:llms-txt, stats:achillea, backup:postgres, backup:pg, all.`
 		);
 	}
 	process.exit(0);
@@ -312,6 +327,16 @@ Bun.cron("10 * * * *", async () => {
 // officiel de 5h00. La reprise est incrémentale (curseur persisté par campagne).
 Bun.cron("20 * * * *", async () => {
 	await executeTask("x:campagnes", () => crawlHashtagCampaigns());
+});
+
+// 2f. Récolte des créations Discord des campagnes : toutes les heures, minute 25.
+// Cinq minutes APRÈS la récolte X (minute 20), et vingt minutes après la veille
+// des salons : la tâche relit `discord_messages`, elle ne peut donc jamais
+// remonter plus que ce que la veille a déjà archivé. Elle n'appelle Discord que
+// pour recopier une image jamais vue — une passe sans nouveauté ne fait qu'une
+// requête SQL.
+Bun.cron("25 * * * *", async () => {
+	await executeTask("campagnes:discord", () => recolterCreationsDiscord());
 });
 
 // 3. Synchronisation Inagle DB & SQLite Backup : tous les jours à 2h00 UTC
@@ -500,6 +525,7 @@ const server = Bun.serve({
 					"discord:backfill",
 					"discord:polls",
 					"x:campagnes",
+					"campagnes:discord",
 					"seo:indexnow",
 					"seo:llms-txt",
 					"stats:achillea",
@@ -522,6 +548,7 @@ const server = Bun.serve({
 					"discord:backfill": "manuel",
 					"discord:polls": "10 * * * *",
 					"x:campagnes": "20 * * * *",
+					"campagnes:discord": "25 * * * *",
 				},
 			});
 		}
@@ -555,6 +582,8 @@ const server = Bun.serve({
 				"discord-polls": () => runDiscordPollsImport(),
 				"x:campagnes": () => crawlHashtagCampaigns(),
 				"x-campagnes": () => crawlHashtagCampaigns(),
+				"campagnes:discord": () => recolterCreationsDiscord(),
+				"campagnes-discord": () => recolterCreationsDiscord(),
 				"seo:indexnow": runSeoIndexNow,
 				"seo-indexnow": runSeoIndexNow,
 				"seo:llms-txt": runSeoLlmsTxt,
@@ -755,6 +784,16 @@ Bun.serve({
 			});
 		}
 	}
+});
+
+// Pont natif vers rg-bot : socket UNIX (`/var/lib/rg/cron.sock`), verbes de
+// lecture + `task.run` gardé, et poussée `tweets.signal` au bot. Aucune surface
+// HTTP n'est modifiée et aucun port n'est ouvert. Cf. `lib/ipc-unix.ts`.
+demarrerPontBot({
+	metriques: () => metrics,
+	telemetrie: getDiscordTelemetry,
+	executer: executeTask,
+	queryRag,
 });
 
 console.log(`📣 Serveur HTTP d'annonces Discord à l'écoute sur le port ${ANNOUNCE_PORT}`);

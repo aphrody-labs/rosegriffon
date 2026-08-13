@@ -4,29 +4,53 @@ import { getPgPool } from "@/lib/db/pg";
 
 import {
 	type Campagne,
+	type DepotCampagne,
 	entierPositif,
 	extraireImages,
+	type ImageCampagne,
 	type MetriquesPost,
 	type PostCampagne,
 	type StatsCampagne,
+	urlImageAsset,
 } from "./types";
 
 /*
- * Lectures serveur des campagnes à hashtag X.
+ * Lectures serveur des campagnes : publications X ET créations Discord.
  *
  * ⚠ `getPgPool()` se connecte avec le rôle `rg`, PROPRIÉTAIRE des tables : la RLS
- * ne s'applique donc pas (exemption propriétaire). Les clauses `publiee` et
- * `not masque` doivent figurer EXPLICITEMENT dans chaque requête — s'appuyer sur
- * les policies publierait les campagnes dépubliées et les posts modérés.
+ * ne s'applique donc pas (exemption propriétaire). Les clauses `publiee`,
+ * `not masque`, `deleted_at is null` et `suivi` doivent figurer EXPLICITEMENT
+ * dans chaque requête — s'appuyer sur les policies publierait les campagnes
+ * dépubliées, les publications modérées, les messages effacés de Discord et les
+ * salons retirés de la veille.
+ *
+ * DEUX SOURCES, UN SEUL TYPE. Mesuré le 12/8/2026 : aucune des 12 998 lignes de
+ * `public.tweets` ne porte `#inazumarg`, `#inatoberrg*` ni `#iergday` — les cinq
+ * campagnes archivées n'ont donc RIEN à montrer côté X, leurs créations ayant été
+ * déposées sur Discord. Les deux sources remontent dans le même `PostCampagne`,
+ * discriminé par `source` : c'est le composant qui se branche dessus, jamais la
+ * page qui devine.
  *
  * Chaque requête est enveloppée dans un try/catch avec repli neutre : la page
  * publique ne doit jamais renvoyer une 500 parce que Postgres a hoqueté
  * (même motif que `app/community/page.tsx`).
  */
 
-/** Colonnes de campagne, une seule fois : les trois requêtes lisent la même chose. */
-const COLONNES_CAMPAGNE = `slug, titre, sur_titre, description, image_couverture, hashtags,
-	       debut_le, fin_le, actif, principale, collecte_le`;
+/**
+ * Colonnes de campagne, une seule fois : les trois requêtes lisent la même chose.
+ *
+ * ⚠ `hashtags_rattrapage` en est ABSENTE, et doit le rester. Cette colonne porte
+ * les variantes récoltées en silence (la coquille `#InazumaRGday` de l'affiche
+ * IERG Day, par exemple) : la récolte les lit, l'écran jamais. Ne pas la
+ * sélectionner est ce qui garantit que la page n'a AUCUN moyen de l'afficher.
+ * Côté lecture, elle ne sert qu'en ARGUMENT de `x_masquer_hashtags()` (cf.
+ * `SELECT_POSTS`), pour retirer ces variantes du texte des posts — jamais en
+ * résultat.
+ */
+const COLONNES_CAMPAGNE = `slug, titre, sur_titre, description, image_couverture,
+	       image_affiche, image_reglement, note_affiche, reglement, hashtags,
+	       hashtags_affichage, salons_depot, debut_le, fin_le, actif, principale,
+	       collecte_le`;
 
 interface LigneCampagne {
 	slug: string;
@@ -34,7 +58,13 @@ interface LigneCampagne {
 	sur_titre: string | null;
 	description: string | null;
 	image_couverture: string | null;
+	image_affiche: string | null;
+	image_reglement: string | null;
+	note_affiche: string | null;
+	reglement: string[] | null;
 	hashtags: string[] | null;
+	hashtags_affichage: string[] | null;
+	salons_depot: string[] | null;
 	debut_le: Date | string | null;
 	fin_le: Date | string | null;
 	actif: boolean;
@@ -42,16 +72,38 @@ interface LigneCampagne {
 	collecte_le: Date | string | null;
 }
 
-interface LignePost {
-	tweet_id: string;
+/**
+ * Une ligne de la galerie, X ou Discord — la forme COMMUNE des deux moitiés de
+ * l'`union all`. Les colonnes qui n'ont de sens que d'un côté (métriques,
+ * identifiants de salon) sont `null` de l'autre : Postgres exige que les deux
+ * branches aient la même arité, et un `null` typé dit exactement la vérité
+ * (« X ne publie pas de nom de salon », « Discord ne publie pas de métriques »).
+ */
+interface LigneCreation {
+	source: "x" | "discord";
+	/** Identifiant natif : `tweets.id` ou `discord_messages.message_id`. */
+	identifiant: string;
 	hashtag_trouve: string | null;
 	mis_en_avant: boolean;
 	publie_le: Date | string | null;
-	author_username: string | null;
-	author_name: string | null;
-	text: string | null;
+	auteur_nom: string | null;
+	auteur_pseudo: string | null;
+	texte: string | null;
+	/** `tweets.media` côté X, `campagne_creations_discord.images` côté Discord. */
 	media: unknown;
 	metrics: unknown;
+	salon_id: string | null;
+	salon_nom: string | null;
+	guild_id: string | null;
+}
+
+/** Une entrée de `campagne_creations_discord.images` (jsonb). */
+interface ImageDiscordStockee {
+	chemin?: string | null;
+	nom?: string | null;
+	largeur?: number | null;
+	hauteur?: number | null;
+	url_origine?: string | null;
 }
 
 /*
@@ -81,29 +133,87 @@ function versCampagne(ligne: LigneCampagne): Campagne {
 		description: ligne.description,
 		finLe: versISO(ligne.fin_le),
 		hashtags: ligne.hashtags ?? [],
+		hashtagsAffichage: ligne.hashtags_affichage ?? [],
+		imageAffiche: ligne.image_affiche,
 		imageCouverture: ligne.image_couverture,
+		imageReglement: ligne.image_reglement,
+		noteAffiche: ligne.note_affiche,
 		principale: ligne.principale,
+		reglement: ligne.reglement ?? [],
+		salonsDepot: ligne.salons_depot ?? [],
 		slug: ligne.slug,
 		surTitre: ligne.sur_titre,
 		titre: ligne.titre,
 	};
 }
 
-function versPost(ligne: LignePost): PostCampagne {
+/**
+ * Images d'une création Discord, telles qu'elles sont SERVABLES.
+ *
+ * Une entrée sans `chemin` est une recopie encore en échec : son seul lien
+ * connu est l'URL `cdn.discordapp.com` signée, périmée en moins de 24 h. On ne
+ * la rend donc pas — l'écran préfère une création de moins à une image morte.
+ * `url_origine` (débarrassée de sa signature) n'alimente que `source`, utilisée
+ * pour le téléchargement quand notre copie manque : elle est déjà écartée par
+ * `next/image` faute d'hôte autorisé, et sert de trace de provenance.
+ */
+function imagesDiscord(brut: unknown): ImageCampagne[] {
+	if (!Array.isArray(brut)) {
+		return [];
+	}
+	const images: ImageCampagne[] = [];
+	for (const entree of brut) {
+		if (!entree || typeof entree !== "object") {
+			continue;
+		}
+		const image = entree as ImageDiscordStockee;
+		const src = urlImageAsset(image.chemin);
+		if (!src) {
+			continue;
+		}
+		images.push({
+			hauteur: typeof image.hauteur === "number" ? image.hauteur : null,
+			largeur: typeof image.largeur === "number" ? image.largeur : null,
+			source: src,
+			src,
+		});
+	}
+	return images;
+}
+
+function versPost(ligne: LigneCreation): PostCampagne {
+	const commun = {
+		auteurNom: ligne.auteur_nom ?? ligne.auteur_pseudo ?? "Anonyme",
+		hashtagTrouve: ligne.hashtag_trouve,
+		misEnAvant: ligne.mis_en_avant,
+		publieLe: versISO(ligne.publie_le),
+		texte: ligne.texte ?? "",
+	};
+
+	if (ligne.source === "discord") {
+		return {
+			...commun,
+			auteurPseudo: ligne.auteur_pseudo,
+			guildId: ligne.guild_id ?? "",
+			images: imagesDiscord(ligne.media),
+			messageId: ligne.identifiant,
+			salonId: ligne.salon_id ?? "",
+			salonNom: ligne.salon_nom,
+			source: "discord",
+		};
+	}
+
 	const metriques =
 		ligne.metrics && typeof ligne.metrics === "object" && !Array.isArray(ligne.metrics)
 			? (ligne.metrics as MetriquesPost)
 			: null;
 	return {
-		auteurNom: ligne.author_name ?? ligne.author_username ?? "Anonyme",
-		auteurPseudo: ligne.author_username ?? "",
-		hashtagTrouve: ligne.hashtag_trouve,
+		...commun,
+		auteurPseudo: ligne.auteur_pseudo ?? "",
 		images: extraireImages(ligne.media),
 		metriques,
-		misEnAvant: ligne.mis_en_avant,
-		publieLe: versISO(ligne.publie_le),
-		texte: ligne.text ?? "",
-		tweetId: ligne.tweet_id,
+		source: "x",
+		tweetId: ligne.identifiant,
 	};
 }
 
@@ -176,6 +286,7 @@ export async function compterPostsCampagne(slug: string): Promise<StatsCampagne>
 			        max(p.publie_le)                       as derniere
 			   from public.x_campagne_posts p
 			   join public.tweets t on t.id = p.tweet_id
+			   join public.x_campagnes c on c.slug = p.campagne_slug and c.publiee
 			  where p.campagne_slug = $1 and not p.masque and p.a_media`,
 			[slug]
 		);
@@ -202,10 +313,49 @@ export async function compterPostsCampagne(slug: string): Promise<StatsCampagne>
  * `tweet_id desc` en second critère rend la pagination déterministe (deux posts
  * à la même seconde ne peuvent pas permuter d'une page à l'autre).
  */
-const SELECT_POSTS = `select p.tweet_id, p.hashtag_trouve, p.mis_en_avant, p.publie_le,
-	       t.author_username, t.author_name, t.text, t.media, t.metrics
+/*
+ * ⚠ LE HASHTAG D'UN POST N'EST RENDU QUE S'IL EST AFFICHABLE.
+ * `x_campagne_posts.hashtag_trouve` enregistre CELUI QUI A MORDU, y compris un
+ * hashtag de rattrapage (`x_campagnes.hashtags_rattrapage` : coquille d'un visuel,
+ * variante fautive). Le rendre tel quel afficherait la faute sur la carte du post,
+ * exactement ce que le rattrapage silencieux cherche à éviter. Le `case` ci-dessous
+ * le ramène à NULL quand il ne fait pas partie des hashtags publics de la campagne.
+ * Le filtrage est fait ICI, en SQL, et pas dans le composant : un futur écran qui
+ * lirait ces posts hériterait sinon de la fuite.
+ *
+ * Quand il est affichable, il ressort dans la CASSE de la campagne
+ * (`hashtags_affichage`, aligné index par index sur `hashtags`) et non dans celle
+ * qu'a tapée l'auteur : la carte annonce « #InazumaDay » là où le post écrivait
+ * « #inazumaday ». `hashtags_affichage` vide → indice hors bornes → NULL →
+ * `coalesce` retombe sur la forme normalisée, ce qui reste exact.
+ *
+ * ⚠ LE TEXTE DU POST EST LE SECOND CHEMIN, ET IL EXISTE VRAIMENT.
+ * Masquer `hashtag_trouve` ne suffit pas : `t.text` est rendu tel quel dans
+ * l'extrait de la carte (`PostCarte`) et dans la légende de la visionneuse, donc
+ * le premier participant qui recopie la coquille d'un visuel la reproduit sur
+ * notre page — exactement ce que le rattrapage silencieux cherche à éviter.
+ * `x_masquer_hashtags()` retire du texte les seuls hashtags de rattrapage de LA
+ * campagne concernée (les autres hashtags de l'auteur, eux, ne nous appartiennent
+ * pas et restent intacts). C'est fait ICI, en SQL, avec `c.hashtags_rattrapage`
+ * qui n'est jamais RENVOYÉE : la colonne reste hors de portée du rendu, et un
+ * futur écran qui lirait ces posts hériterait du masquage plutôt que de la fuite.
+ *
+ * La jointure sur `x_campagnes` sert aussi à REPOSER `c.publiee` : `getPgPool()` se
+ * connecte en rôle propriétaire, donc SANS RLS (cf. l'avertissement en tête de
+ * fichier). Sans elle, ces requêtes publieraient les posts d'une campagne dépubliée
+ * à qui en connaîtrait le slug.
+ */
+const SELECT_POSTS = `select p.tweet_id, p.mis_en_avant, p.publie_le,
+	       case when p.hashtag_trouve = any(c.hashtags)
+	            then coalesce(c.hashtags_affichage[array_position(c.hashtags, p.hashtag_trouve)],
+	                          p.hashtag_trouve)
+	       end as hashtag_trouve,
+	       t.author_username, t.author_name,
+	       public.x_masquer_hashtags(t.text, c.hashtags_rattrapage) as text,
+	       t.media, t.metrics
 	  from public.x_campagne_posts p
-	  join public.tweets t on t.id = p.tweet_id`;
+	  join public.tweets t on t.id = p.tweet_id
+	  join public.x_campagnes c on c.slug = p.campagne_slug and c.publiee`;
 
 /** Page de la galerie, chronologique stricte (posts avec image, non masqués). */
 export async function listerPostsCampagne(
