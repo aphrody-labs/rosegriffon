@@ -28,7 +28,11 @@
  * justesse au pixel.
  */
 import { Discord, Slash, SlashChoice, SlashGroup, SlashOption } from "@rpbey/discordx";
-import { ApplicationCommandOptionType, type ChatInputCommandInteraction } from "discord.js";
+import {
+	ApplicationCommandOptionType,
+	type ChatInputCommandInteraction,
+	type EmbedBuilder,
+} from "discord.js";
 
 import { cached } from "../lib/cache";
 import {
@@ -58,6 +62,42 @@ const URL_STREAMS = "https://rosegriffon.fr/rose-griffon-tv";
 
 /** L'agenda bouge à l'échelle de la semaine : 10 minutes de cache sont sans risque. */
 const TTL_AGENDA_MS = 10 * 60_000;
+
+/**
+ * Budget global d'un embed, marge de sûreté comprise.
+ *
+ * Discord additionne titre + description + NOM ET VALEUR DE TOUS LES CHAMPS +
+ * pied ; au-delà de 6 000 caractères il rejette le message ENTIER, pas le champ
+ * fautif. Borner chaque champ ne suffit donc pas : dix événements à 250 + 1 000
+ * caractères font 12 500. On garde 200 caractères de marge pour le pied et les
+ * séparateurs que Discord compte à sa façon.
+ */
+const BUDGET_EMBED = 5800;
+
+interface ChampEmbed {
+	name: string;
+	value: string;
+}
+
+/**
+ * Ajoute des champs à un embed tant que le budget total le permet.
+ *
+ * Renvoie le nombre de champs réellement posés, pour que l'appelant puisse le
+ * dire au lecteur plutôt que de laisser croire à une liste complète.
+ */
+function ajouterChamps(embed: EmbedBuilder, champs: readonly ChampEmbed[], deja: number): number {
+	let reste = BUDGET_EMBED - deja;
+	let poses = 0;
+	for (const champ of champs) {
+		if (poses >= 25) break;
+		const cout = champ.name.length + champ.value.length;
+		if (cout > reste) break;
+		reste -= cout;
+		embed.addFields({ ...champ, inline: false });
+		poses++;
+	}
+	return poses;
+}
 
 async function agendaDuSite(): Promise<EvenementCalendrier[]> {
 	return await cached("agenda:evenements", TTL_AGENDA_MS, async () => {
@@ -146,27 +186,31 @@ export class AgendaCommand {
 
 			// Le repli est ANNONCÉ : sans cette phrase, un membre qui demande « à
 			// venir » et reçoit des dates de 2025 croit à un bug d'affichage.
-			if (choix.repli) {
-				embed.setDescription(
-					"Aucun rendez-vous à venir n'est encore inscrit à l'agenda. Voici les derniers passés."
-				);
-			}
+			const avertissement = choix.repli
+				? "Aucun rendez-vous à venir n'est encore inscrit à l'agenda. Voici les derniers passés."
+				: "";
+			if (avertissement) embed.setDescription(avertissement);
 
-			// 25 champs maximum par embed ; l'option en autorise 10 au plus.
-			for (const evenement of choix.evenements) {
+			const champs = choix.evenements.map((evenement) => {
 				const details = [formaterPlageEvenement(evenement)];
 				if (evenement.lieu) details.push(`📍 ${evenement.lieu}`);
 				const description = nettoyerHtml(evenement.description);
 				if (description) details.push(description);
-				embed.addFields({
+				return {
 					name: truncate(evenement.titre, 250),
 					value: truncate(details.join("\n"), 1000),
-					inline: false,
-				});
-			}
+				};
+			});
+			const poses = ajouterChamps(embed, champs, titre.length + avertissement.length);
 
+			// Le pied dit ce qui est affiché ET ce qui existe : une liste tronquée
+			// par le budget de l'embed ne doit pas passer pour l'agenda complet.
+			const reste = champs.length - poses;
 			embed.setFooter({
-				text: `${choix.total} événement${choix.total > 1 ? "s" : ""} à l'agenda · rosegriffon.fr`,
+				text: truncate(
+					`${choix.total} événement${choix.total > 1 ? "s" : ""} à l'agenda${reste > 0 ? ` · ${reste} non affiché${reste > 1 ? "s" : ""}, faute de place` : ""} · rosegriffon.fr`,
+					2000
+				),
 			});
 			await interaction.editReply({ embeds: [embed] });
 		} catch (err) {
@@ -207,24 +251,29 @@ export class AgendaCommand {
 				return;
 			}
 
-			const embed = rgEmbed()
-				.setTitle(
-					jour === undefined ? "Planning hebdomadaire" : `Planning — ${libelleJour(jour)}`
-				)
-				.setURL(URL_STREAMS)
-				.setFooter({
-					text: `${lignes.length} stream${lignes.length > 1 ? "s" : ""} programmé${lignes.length > 1 ? "s" : ""} · rosegriffon.fr`,
-				});
+			const titre =
+				jour === undefined ? "Planning hebdomadaire" : `Planning — ${libelleJour(jour)}`;
+			const embed = rgEmbed().setTitle(titre).setURL(URL_STREAMS);
 
-			// Un champ par jour : au pire 7, très loin des 25 autorisés, et chacun
-			// borné à 1 024 caractères comme l'exige Discord.
-			for (const section of grouperParJour(lignes)) {
-				embed.addFields({
+			// Un champ par jour : au pire 7, très loin des 25 autorisés, chacun borné
+			// à 1 024 caractères — et l'ensemble borné au budget global de l'embed,
+			// car 7 × 1 024 dépasserait les 6 000 caractères tolérés au total.
+			const sections = grouperParJour(lignes);
+			const poses = ajouterChamps(
+				embed,
+				sections.map((section) => ({
 					name: section.libelle,
 					value: truncate(section.lignes.map(ligneStream).join("\n"), 1000),
-					inline: false,
-				});
-			}
+				})),
+				titre.length
+			);
+			const reste = sections.length - poses;
+			embed.setFooter({
+				text: truncate(
+					`${lignes.length} stream${lignes.length > 1 ? "s" : ""} programmé${lignes.length > 1 ? "s" : ""}${reste > 0 ? ` · ${reste} jour${reste > 1 ? "s" : ""} non affiché${reste > 1 ? "s" : ""}, faute de place` : ""} · rosegriffon.fr`,
+					2000
+				),
+			});
 
 			await interaction.editReply({ embeds: [embed] });
 		} catch (err) {
