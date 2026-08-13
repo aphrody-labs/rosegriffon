@@ -205,23 +205,51 @@ const PREFIXES_VARIANTES = ["/dx11/", "/g4tx/"];
 /**
  * Chemins du CDN dont on a MESURÉ qu'ils ne servent rien d'affichable.
  *
- * - `200_icon/02_icon_item/` : les icônes d'objet sont des sous-textures d'un
- *   atlas ; seule la planche entière est servie, pas l'objet demandé (404).
- * - `icon_chr/` sans le préfixe `200_icon/10_` : forme héritée du dump, 404 —
- *   `corrigerCheminIconeChr` la répare quand elle en a la forme exacte ; ce qui
- *   passe malgré tout est un cas non prévu, donc non servi.
+ * `icon_chr/` sans le préfixe `200_icon/10_` : forme héritée du dump, 404 —
+ * `corrigerCheminIconeChr` la répare quand elle en a la forme exacte ; ce qui
+ * passe malgré tout est un cas non prévu, donc non servi.
+ *
+ * ⚠ `200_icon/02_icon_item/` N'EST PLUS mort. Les icônes d'objet sont bien des
+ * textures d'un conteneur, mais le CDN sait désormais en extraire une seule
+ * (`…/icon_item05.g4tx/eq_ac0100101.png`) : c'est cette forme que sert l'API.
+ * Seule l'ancienne forme du dump, qui collait le nom du conteneur à celui de la
+ * texture (`icon_item05_eq_ac0105301.png`), reste en 404 — voir `estFormeDump`.
  */
-const PREFIXES_MORTS = ["/dx11/menu/200_icon/02_icon_item/", "/dx11/menu/icon_chr/"];
+const PREFIXES_MORTS = ["/dx11/menu/icon_chr/"];
+
+/**
+ * Vrai pour un chemin au nommage du DUMP archivé : `<conteneur>_<texture>.png`.
+ *
+ * Le dump aplatissait chaque conteneur en un fichier par texture, en préfixant
+ * le nom de la texture par celui du conteneur. Ce nommage n'existe dans AUCUN
+ * des 250 800 chemins du CPK : il est mort par construction, et le décodage
+ * live ne peut rien en faire.
+ *
+ * On le reconnaît à la répétition du même radical (`icon_item05_eq_…` n'en a
+ * pas, mais `k000520_l_k000520_l00` oui) ou, sous `02_icon_item/`, à l'absence
+ * du segment `.g4tx/` qui désigne une texture nommée.
+ */
+function estFormeDump(chemin: string): boolean {
+	if (chemin.startsWith("/dx11/menu/200_icon/02_icon_item/") && !chemin.includes(".g4tx/")) {
+		return true;
+	}
+	return /\/([A-Za-z0-9]+)_\1(?:_|\.)/.test(chemin);
+}
 
 /**
  * Répare le chemin d'une icône de personnage, d'aura ou d'esprit guerrier.
  *
  * `…/menu/icon_chr/<famille>/<code>_l_<code>[_N]_l00.png`
- *   → `…/menu/200_icon/10_icon_chr/<famille>/<code>_l.png`
+ *   → `…/menu/200_icon/10_icon_chr/<famille>/<code>_l.g4tx/<code>[_N]_l00.png`
  *
  * Les deux fautes de l'URL héritée sont corrigées d'un coup : le dossier
- * (`200_icon/10_` manquant) et le nom de fichier (base répétée + suffixe de
- * niveau de détail `_l00`).
+ * (`200_icon/10_` manquant) et le nommage du dump (conteneur collé à la texture).
+ *
+ * ⚠ On garde le NOM DE LA TEXTURE au lieu de retomber sur le fichier entier.
+ * Un visage est un conteneur à DEUX textures (`_1_l00` = portrait, `_2_l00` =
+ * seconde pose) : demander le fichier entier laisse le CDN choisir, et il rend
+ * `_2_l00` (mesuré, md5 distincts). Pour les auras, conteneur mono-texture, les
+ * deux formes rendent le même octet — la forme nommée est donc correcte partout.
  */
 export function corrigerCheminIconeChr(chemin: string): string {
 	if (!chemin.includes("/menu/icon_chr/")) {
@@ -229,8 +257,9 @@ export function corrigerCheminIconeChr(chemin: string): string {
 	}
 	const repare = chemin.replace("/menu/icon_chr/", "/menu/200_icon/10_icon_chr/");
 	return repare.replace(
-		/\/([A-Za-z0-9]+)_l_\1(?:_\d+)?_l\d+(\.[A-Za-z0-9]+)$/,
-		(_tout, base: string, extension: string) => `/${base}_l${extension}`
+		/\/([A-Za-z0-9]+)_l_(\1(?:_\d+)?_l\d+)(\.[A-Za-z0-9]+)$/,
+		(_tout, base: string, texture: string, extension: string) =>
+			`/${base}_l.g4tx/${texture}${extension}`
 	);
 }
 
@@ -239,7 +268,7 @@ export function corrigerCheminIconeChr(chemin: string): string {
  *
  * Enchaîne : rejet du non-absolu (l'API renvoie `/ievr.webp` en repli), réparation
  * du dossier `icon_chr`, réparation du nom doublé, rejet des chemins prouvés
- * morts, puis demande de variante WebP au CDN.
+ * morts et de ce qui reste au nommage du dump, puis demande de variante WebP.
  *
  * `largeur` est indispensable sur les grandes illustrations : une planche
  * `gallery_img2` brute pèse jusqu'à 12 Mo, sa variante `w=400` ~13 Ko.
@@ -264,7 +293,10 @@ export function imageJeu(
 
 	adresse.pathname = corrigerNomDouble(corrigerCheminIconeChr(adresse.pathname));
 
-	if (adresse.hostname === HOTE_CDN && PREFIXES_MORTS.some((p) => adresse.pathname.startsWith(p))) {
+	if (
+		adresse.hostname === HOTE_CDN &&
+		(PREFIXES_MORTS.some((p) => adresse.pathname.startsWith(p)) || estFormeDump(adresse.pathname))
+	) {
 		return null;
 	}
 	if (

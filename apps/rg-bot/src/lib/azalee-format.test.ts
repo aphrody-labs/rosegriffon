@@ -172,21 +172,25 @@ describe("decouperEnChamps", () => {
 
 describe("corrigerCheminIconeChr", () => {
 	test("répare le dossier ET le nom d'une icône d'esprit guerrier", () => {
-		// Origine `/api/auras/esprits-guerriers` → 404 ; forme corrigée → 200 (63 011 octets).
+		// Origine `/api/auras/esprits-guerriers` → 404 ; forme corrigée → 200.
 		expect(corrigerCheminIconeChr("/dx11/menu/icon_chr/aura_fs/k000520_l_k000520_l00.png")).toBe(
-			"/dx11/menu/200_icon/10_icon_chr/aura_fs/k000520_l.png"
+			"/dx11/menu/200_icon/10_icon_chr/aura_fs/k000520_l.g4tx/k000520_l00.png"
 		);
 	});
 
 	test("répare une icône de totem", () => {
+		// Mesuré 200, 71 973 octets, image/png.
 		expect(corrigerCheminIconeChr("/dx11/menu/icon_chr/aura_soul/a000250_l_a000250_l00.png")).toBe(
-			"/dx11/menu/200_icon/10_icon_chr/aura_soul/a000250_l.png"
+			"/dx11/menu/200_icon/10_icon_chr/aura_soul/a000250_l.g4tx/a000250_l00.png"
 		);
 	});
 
-	test("répare un visage, suffixe de niveau de détail compris", () => {
+	test("garde la texture du visage plutôt que le conteneur entier", () => {
+		// Un visage a DEUX textures : `_1_l00` (portrait) et `_2_l00` (seconde pose).
+		// Demander le conteneur entier laisse le CDN choisir, et il rend `_2_l00`.
+		// Forme nommée mesurée 200, 23 802 octets, image/png.
 		expect(corrigerCheminIconeChr("/dx11/menu/icon_chr/face/c05026530_l_c05026530_1_l00.png")).toBe(
-			"/dx11/menu/200_icon/10_icon_chr/face/c05026530_l.png"
+			"/dx11/menu/200_icon/10_icon_chr/face/c05026530_l.g4tx/c05026530_1_l00.png"
 		);
 	});
 
@@ -228,19 +232,34 @@ describe("imageJeu", () => {
 		);
 	});
 
-	test("répare l'icône d'aura et n'y met pas de variante inutile", () => {
+	test("répare l'icône d'aura et lui demande sa variante", () => {
+		// Mesuré 200, 11 088 octets, image/webp.
 		expect(
 			imageJeu(
 				"https://cdn.rosegriffon.fr/dx11/menu/icon_chr/aura_fs/k000520_l_k000520_l00.png",
 				200
 			)
 		).toBe(
-			"https://cdn.rosegriffon.fr/dx11/menu/200_icon/10_icon_chr/aura_fs/k000520_l.png?w=200&format=webp"
+			"https://cdn.rosegriffon.fr/dx11/menu/200_icon/10_icon_chr/aura_fs/k000520_l.g4tx/k000520_l00.png?w=200&format=webp"
 		);
 	});
 
-	test("refuse une sous-texture d'atlas d'objet", () => {
-		// Mesuré 404 sur 3 objets ; seule la planche entière `icon_item05.png` est servie.
+	test("laisse passer une icône d'objet en texture nommée", () => {
+		// C'est la forme que sert l'API depuis que le CDN sait extraire une texture
+		// d'un conteneur. Mesuré 200, 9 006 octets, image/webp.
+		expect(
+			imageJeu(
+				"https://cdn.rosegriffon.fr/dx11/menu/200_icon/02_icon_item/icon_item05.g4tx/eq_ac0100101.png",
+				200
+			)
+		).toBe(
+			"https://cdn.rosegriffon.fr/dx11/menu/200_icon/02_icon_item/icon_item05.g4tx/eq_ac0100101.png?w=200&format=webp"
+		);
+	});
+
+	test("refuse le nommage du dump archivé", () => {
+		// Le dump collait le nom du conteneur à celui de la texture. Ce nommage
+		// n'existe dans aucun des 250 800 chemins du CPK : 404 par construction.
 		expect(
 			imageJeu(
 				"https://cdn.rosegriffon.fr/dx11/menu/200_icon/02_icon_item/icon_item05_eq_ac0105301.png"
