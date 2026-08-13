@@ -16,11 +16,9 @@ import Link from "next/link";
  *    envoyer le participant sur un écran vide en lui laissant croire qu'il a
  *    raté quelque chose. Le hashtag copiable est juste au-dessus, à un geste.
  *
- * ⚠ ET INSTAGRAM N'EST PAS COLLECTÉ. Aucun moyen automatique de récolter un
- * hashtag Instagram n'existe aujourd'hui (mesuré le 13/8/2026 : `?__a=1` rend
- * une enveloppe d'erreur, GraphQL 401, l'API officielle demande une revue Meta
- * de plusieurs semaines). La note sous les boutons le dit — un bouton qui laisse
- * croire à une collecte inexistante est pire que pas de bouton du tout.
+ * Instagram n'est pas collecté automatiquement : aucun moyen ne le permet
+ * aujourd'hui (mesuré le 13/8/2026, cf. `docs/insta.md`). Le libellé « Ouvrir »
+ * plutôt que « Poster » est ce qui reste pour ne rien promettre de faux.
  */
 export function BoutonsParticiper({
 	urlX,
@@ -40,50 +38,43 @@ export function BoutonsParticiper({
 		"inline-flex min-h-11 items-center gap-2 rounded-full px-4 text-sm font-bold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary";
 
 	return (
-		<div className="space-y-1.5">
-			<div className="flex flex-wrap gap-2">
-				{urlX && (
-					<Link
-						href={urlX}
-						target="_blank"
-						rel="noopener noreferrer"
-						aria-label={`Rédiger une publication sur X avec ${hashtag} (nouvel onglet)`}
-						className={`${base} bg-primary text-on-primary hover:bg-primary/90`}
-					>
-						<XIcon className="size-4" aria-hidden />
-						Poster sur X
-					</Link>
-				)}
-
-				{depotDiscord && (
-					<Link
-						href={depotDiscord.url}
-						target="_blank"
-						rel="noopener noreferrer"
-						aria-label={`Ouvrir le salon ${depotDiscord.nom ?? "de dépôt"} sur Discord (nouvel onglet)`}
-						className={`${base} border border-outline-variant/60 bg-surface-container-low text-on-surface hover:bg-surface-container`}
-					>
-						<DiscordIcon className="size-4" aria-hidden />
-						Poster sur Discord
-					</Link>
-				)}
-
+		<div className="flex flex-wrap gap-2">
+			{urlX && (
 				<Link
-					href="https://www.instagram.com/"
+					href={urlX}
 					target="_blank"
 					rel="noopener noreferrer"
-					aria-label="Ouvrir Instagram (nouvel onglet). Instagram ne permet pas de pré-remplir une publication."
+					aria-label={`Rédiger une publication sur X avec ${hashtag} (nouvel onglet)`}
+					className={`${base} bg-primary text-on-primary hover:bg-primary/90`}
+				>
+					<XIcon className="size-4" aria-hidden />
+					Poster sur X
+				</Link>
+			)}
+
+			{depotDiscord && (
+				<Link
+					href={depotDiscord.url}
+					target="_blank"
+					rel="noopener noreferrer"
+					aria-label={`Ouvrir le salon ${depotDiscord.nom ?? "de dépôt"} sur Discord (nouvel onglet)`}
 					className={`${base} border border-outline-variant/60 bg-surface-container-low text-on-surface hover:bg-surface-container`}
 				>
-					<InstagramIcon className="size-4" aria-hidden />
-					Ouvrir Instagram
+					<DiscordIcon className="size-4" aria-hidden />
+					Poster sur Discord
 				</Link>
-			</div>
+			)}
 
-			<p className="text-xs text-on-surface-variant">
-				Sur Instagram, colle le hashtag toi-même&nbsp;: la publication ne peut pas être
-				pré-remplie, et elle n&apos;arrive pas dans la galerie automatiquement.
-			</p>
+			<Link
+				href="https://www.instagram.com/"
+				target="_blank"
+				rel="noopener noreferrer"
+				aria-label="Ouvrir Instagram (nouvel onglet). Instagram ne permet pas de pré-remplir une publication."
+				className={`${base} border border-outline-variant/60 bg-surface-container-low text-on-surface hover:bg-surface-container`}
+			>
+				<InstagramIcon className="size-4" aria-hidden />
+				Ouvrir Instagram
+			</Link>
 		</div>
 	);
 }
