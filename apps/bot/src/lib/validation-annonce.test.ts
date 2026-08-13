@@ -13,6 +13,7 @@
 
 import { describe, expect, test } from "bun:test";
 
+import { PROFILS } from "./profil";
 import {
 	decoderValidation,
 	encoderValidation,
@@ -22,6 +23,15 @@ import {
 } from "./validation-annonce";
 
 const TWEET = "2087918181033574427";
+
+/**
+ * Salon de destination réel, lu au REGISTRE et non recopié.
+ *
+ * `profil.test.ts` refuse tout identifiant de guilde ou de salon écrit en dur
+ * ailleurs que dans `profil.ts` : un jour où le salon change, un littéral ici
+ * ferait passer ce test-ci en décrivant une destination qui n'existe plus.
+ */
+const SALON_ANNONCE = PROFILS.azalee.annoncePosts!.salonId;
 
 describe("aller-retour d'un identifiant de bouton", () => {
 	test("ce qui est encodé se relit à l'identique", () => {
@@ -79,11 +89,11 @@ describe("ce que la carte raconte", () => {
 	test("la question nomme l'auteur ET le salon de destination", () => {
 		const texte = texteCarteValidation({
 			auteur: "Azalee_IE",
-			salonAnnonce: "1349528692086276148",
+			salonAnnonce: SALON_ANNONCE,
 			url: `https://x.com/Azalee_IE/status/${TWEET}`,
 		});
 		expect(texte).toContain("Azalee_IE");
-		expect(texte).toContain("<#1349528692086276148>");
+		expect(texte).toContain(`<#${SALON_ANNONCE}>`);
 		expect(texte).toContain(TWEET);
 	});
 
