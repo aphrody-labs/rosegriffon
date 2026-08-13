@@ -57,12 +57,14 @@
  * aucun identifiant de salon, et le registre reste le seul endroit où l'on
  * regarde pour savoir qui publie où.
  */
+import { ActionRowBuilder, ButtonBuilder, ButtonStyle } from "discord.js";
 import type { Client, EmbedBuilder, SendableChannels } from "discord.js";
 
 // Type seulement : l'import est erasé à la compilation, le pont cron n'entre
 // donc PAS dans le graphe de ce module (voir l'import paresseux plus bas).
 import type { EvenementIpc } from "../lib/cron-ipc";
 import { rgEmbed } from "../lib/embeds";
+import { encoderValidation, texteCarteValidation } from "../lib/validation-annonce";
 import {
 	corpsTweet,
 	dateTweet,
@@ -77,6 +79,7 @@ import {
 	urlTweet,
 	type FiltreTweets,
 	type LigneTweet,
+	CLE_PAUSE_TWEETS,
 } from "../lib/tweets-format";
 import {
 	CANAL_NOTIFICATION,
@@ -89,6 +92,7 @@ import {
 	salonAnnonce,
 	tweetsAPublier,
 	type AnnoncePosts,
+	curseursEnPause,
 } from "./tweets";
 
 /** Rattrapage périodique — la garantie, indépendante de toute poussée. */
@@ -99,6 +103,8 @@ const DELAI_APRES_SIGNAL_MS = 15_000;
 
 export type EtatDrain =
 	| "inactif"
+	/** Cartes de validation déposées ; rien n'est publié tant que personne n'a cliqué. */
+	| "propose"
 	| "amorce"
 	| "rien"
 	| "publie"
@@ -318,6 +324,26 @@ export async function resoudreSalon(
  *                           mono-profil (`/tweets test`, `/staff veille`)
  *                           gardent exactement leur comportement.
  */
+/**
+ * Les deux boutons d'une carte de validation, ou `null` si l'identifiant ne
+ * tient pas dans la limite de Discord.
+ *
+ * Vert à gauche, gris à droite : l'action qui PUBLIE est celle qui se distingue,
+ * et le refus reste neutre — on ne colore pas en rouge un geste éditorial
+ * ordinaire.
+ */
+export function rangeeValidation(tweetId: string): ActionRowBuilder<ButtonBuilder>[] | null {
+	const oui = encoderValidation(tweetId, "ok");
+	const non = encoderValidation(tweetId, "non");
+	if (!oui || !non) return null;
+	return [
+		new ActionRowBuilder<ButtonBuilder>().addComponents(
+			new ButtonBuilder().setCustomId(oui).setLabel("Annoncer").setStyle(ButtonStyle.Success),
+			new ButtonBuilder().setCustomId(non).setLabel("Ignorer").setStyle(ButtonStyle.Secondary)
+		),
+	];
+}
+
 export async function drainerTweets(
 	client: Client,
 	options: { salonForce?: string; simulation?: boolean; annonce?: AnnoncePosts } = {}
@@ -334,6 +360,18 @@ export async function drainerTweets(
 		// ne retrouverait pas — ce serait une amorce à chaque redémarrage, donc
 		// des posts perdus en silence.
 		const canal = normaliserCanal(annonce.curseur);
+		// PAUSE PAR PROFIL, relue à chaque drain. C'est la seule façon de couper un
+		// bot sans couper l'autre : l'interrupteur `filtre.actif` vit dans le
+		// réglage PARTAGÉ et ferait taire les deux. Une simulation reste permise —
+		// on veut pouvoir vérifier ce qui SERAIT publié pendant la pause.
+		if (canal && !options.simulation && (await curseursEnPause()).includes(canal)) {
+			return {
+				etat: "inactif",
+				candidats: 0,
+				publies: 0,
+				detail: `Annonces suspendues pour le curseur « ${canal} » (réglage ${CLE_PAUSE_TWEETS}).`,
+			};
+		}
 		if (!canal) {
 			return {
 				etat: "echec",
@@ -344,10 +382,24 @@ export async function drainerTweets(
 					"dans le registre de profils (minuscules, chiffres, `-` ou `_`, 32 caractères au plus).",
 			};
 		}
-		const filtre = await lireFiltreNotification();
-		if (!filtre.actif && !options.simulation) {
+		const filtrePartage = await lireFiltreNotification();
+		if (!filtrePartage.actif && !options.simulation) {
 			return { etat: "inactif", candidats: 0, publies: 0 };
 		}
+
+		// ── LA LISTE DE COMPTES DU PROFIL L'EMPORTE ─────────────────────────────
+		// Le réglage partagé porte huit comptes : c'est la bonne liste pour une
+		// veille thématique, pas pour un salon d'annonce de MARQUE. Le salon
+		// d'Azalée ne parle que d'Azalée — y voir arriver un post de
+		// `@rose_griffon` est une erreur d'adressage, pas un choix éditorial.
+		//
+		// Seule `comptes` est remplacée : l'interrupteur, les catégories exclues et
+		// le seuil de synthèse restent communs, ils décrivent la POLITIQUE
+		// d'annonce, pas sa destination.
+		const filtre =
+			annonce.comptes && annonce.comptes.length > 0
+				? { ...filtrePartage, comptes: [...annonce.comptes] }
+				: filtrePartage;
 
 		// ⚠ En simulation, AUCUNE écriture — pas même la création du curseur, qui
 		// est une écriture de production : `/tweets test` affirme « le curseur n'a
@@ -421,6 +473,59 @@ export async function drainerTweets(
 				await avancerCurseur(canal, attendu, borneFinale, dernier.id, retenus.length);
 			}
 			return { etat: "resume", candidats: candidats.length, publies: retenus.length };
+		}
+
+		// ── VALIDATION HUMAINE : on PROPOSE, on ne publie pas ───────────────────
+		// Quand le profil déclare un salon de validation, le drain n'annonce plus
+		// rien de lui-même. Il dépose une carte par post, et l'annonce ne part
+		// qu'au clic (`commands/validation.ts`).
+		//
+		// ⚠ LE CURSEUR AVANCE QUAND MÊME. Sans ça, le même post serait proposé
+		// toutes les cinq minutes jusqu'à ce que quelqu'un tranche — c'est-à-dire
+		// une carte de plus toutes les cinq minutes dans un salon de communauté.
+		if (annonce.salonValidation && !options.simulation) {
+			const { salon: salonValidation, raison: raisonValidation } = await resoudreSalon(
+				client,
+				annonce.salonValidation
+			);
+			if (!salonValidation) {
+				// On n'avance PAS le curseur : le salon de validation est
+				// peut-être momentanément injoignable, et les posts doivent être
+				// reproposés une fois qu'il l'est de nouveau.
+				return {
+					etat: "sans-salon",
+					candidats: candidats.length,
+					publies: 0,
+					detail: `Salon de validation \`${annonce.salonValidation}\` injoignable : ${raisonValidation ?? "le bot doit y voir et y écrire"}.`,
+				};
+			}
+
+			let proposes = 0;
+			for (const tweet of retenus) {
+				const composants = rangeeValidation(tweet.id);
+				if (!composants) {
+					// `encoderValidation` a refusé : plutôt que d'envoyer une carte
+					// aux boutons morts, on passe. Le cas est théorique (un id de
+					// tweet est numérique et court), mais un composant refusé ferait
+					// échouer le message ENTIER.
+					continue;
+				}
+				await salonValidation.send({
+					content: texteCarteValidation({
+						auteur: tweet.author_username ?? "inconnu",
+						salonAnnonce: annonce.salon.trim(),
+						url: urlTweet(tweet),
+					}),
+					components: composants,
+					allowedMentions: { parse: [] },
+					enforceNonce: true,
+					nonce: nonceLot(tweet.id, 1),
+				});
+				proposes += 1;
+			}
+
+			await avancerCurseur(canal, attendu, borneFinale, dernier.id, 0);
+			return { etat: "propose", candidats: candidats.length, publies: proposes };
 		}
 
 		// ── Envoi détaillé, par TRANCHES ────────────────────────────────────────
