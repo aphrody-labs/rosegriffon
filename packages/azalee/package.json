@@ -42,6 +42,8 @@
 		"./cpk/*": "./src/cpk/*.ts",
 		"./game-text": "./src/game-text/index.ts",
 		"./game-text/*": "./src/game-text/*.ts",
+		"./icon-index": "./src/icon-index/index.ts",
+		"./icon-index/*": "./src/icon-index/*.ts",
 		"./cross": "./src/cross/index.ts",
 		"./cross/*": "./src/cross/*.ts",
 		"./images": "./src/images/index.ts",
