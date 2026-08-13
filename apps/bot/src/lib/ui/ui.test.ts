@@ -294,12 +294,25 @@ describe("pagination : boutons", () => {
 		expect(composants[1]).toMatchObject({ label: "2 / 3", disabled: true });
 	});
 
-	test("cinq composants au-delà, avec les sauts désactivés aux extrémités", () => {
-		const rangees = rangeePagination({ prefixe: "az", page: 1, pages: 20, identifiant });
+	test("cinq composants au milieu d'une longue liste", () => {
+		const rangees = rangeePagination({ prefixe: "az", page: 10, pages: 20, identifiant });
 		const composants = rangees[0]!.toJSON().components;
 		expect(composants).toHaveLength(5);
-		expect(composants[0]).toMatchObject({ disabled: true });
+		expect(composants[0]).toMatchObject({ disabled: false });
 		expect(composants[4]).toMatchObject({ disabled: false });
+	});
+
+	test("aux EXTRÉMITÉS, le saut redondant disparaît — il ferait doublon", () => {
+		// ⚠ CE TEST ATTENDAIT 5 COMPOSANTS SUR LA PAGE 1, et validait ainsi le
+		// défaut : « ⏮ première » et « ◀ précédente » visent tous deux la page 1,
+		// donc portent le MÊME `customId`, et Discord refuse le message entier
+		// (400 `COMPONENT_CUSTOM_ID_DUPLICATED`). `/x liste` était cassée en
+		// production, sur la première page — celle que tout le monde voit.
+		const premiere = rangeePagination({ prefixe: "az", page: 1, pages: 20, identifiant });
+		expect(premiere[0]!.toJSON().components).toHaveLength(4);
+
+		const derniere = rangeePagination({ prefixe: "az", page: 20, pages: 20, identifiant });
+		expect(derniere[0]!.toJSON().components).toHaveLength(4);
 	});
 
 	test("le bouton de lien passe en seconde rangée quand la première est pleine", () => {
@@ -328,5 +341,77 @@ describe("horodatage natif", () => {
 		expect(ilYA(new Date(1_700_000_000_000))).toBe("<t:1700000000:R>");
 		expect(ilYA(null)).toBe("—");
 		expect(ilYA("pas une date")).toBe("—");
+	});
+});
+
+describe("aucun customId dupliqué dans une rangée", () => {
+	/*
+	 * Deux boutons d'une même rangée ne peuvent pas partager un `customId` :
+	 * Discord refuse alors le message ENTIER (400 `Invalid Form Body`,
+	 * `COMPONENT_CUSTOM_ID_DUPLICATED`), embed compris, et le membre ne voit
+	 * rien. Constaté en production le 13/8/2026 sur `/x liste`.
+	 *
+	 * L'identifiant EST l'état : « aller à la page 1 » et « page précédente »
+	 * produisent la même chaîne dès que la page précédente est la page 1. La
+	 * collision touchait donc les pages 1, 2, N-1 et N — y compris la première,
+	 * celle que tout le monde voit.
+	 */
+
+	/** Tous les `customId` d'une rangée rendue, à plat. */
+	function identifiants(rangees: ReturnType<typeof rangeePagination>): string[] {
+		return rangees.flatMap((rangee) =>
+			rangee.components.map((bouton) => {
+				const donnees = bouton.toJSON() as { custom_id?: string; url?: string };
+				return donnees.custom_id ?? donnees.url ?? "";
+			})
+		);
+	}
+
+	test("aucune page d'une liste paginée ne produit de doublon", () => {
+		// On balaie toutes les pages de plusieurs tailles de liste, dont celles qui
+		// encadrent le seuil d'apparition des sauts.
+		for (const pages of [1, 2, 5, 6, 7, 17, 100]) {
+			for (let page = 1; page <= pages; page++) {
+				const ids = identifiants(
+					rangeePagination({
+						identifiant: (cible) => encoderEtat("tw", ["liste", cible]),
+						page,
+						pages,
+						prefixe: "tw",
+					})
+				);
+				expect(new Set(ids).size, `pages=${pages} page=${page} → ${ids.join(" ")}`).toBe(
+					ids.length
+				);
+			}
+		}
+	});
+
+	test("le saut redondant DISPARAÎT au lieu d'être renommé", () => {
+		// Sur la page 2, « ⏮ première » mène là où « ◀ précédente » mène déjà :
+		// le garder avec un identifiant inerte laisserait un bouton qui ment sur ce
+		// qu'il fait.
+		const [rangee] = rangeePagination({
+			identifiant: (cible) => encoderEtat("tw", ["liste", cible]),
+			page: 2,
+			pages: 17,
+			prefixe: "tw",
+		});
+		const emojis = rangee!.components.map(
+			(b) => (b.toJSON() as { emoji?: { name?: string } }).emoji?.name ?? ""
+		);
+		expect(emojis).not.toContain("⏮️");
+		expect(emojis).toContain("◀️");
+		expect(emojis).toContain("⏭️");
+	});
+
+	test("au milieu d'une longue liste, les quatre sauts et flèches coexistent", () => {
+		const [rangee] = rangeePagination({
+			identifiant: (cible) => encoderEtat("tw", ["liste", cible]),
+			page: 9,
+			pages: 17,
+			prefixe: "tw",
+		});
+		expect(rangee!.components).toHaveLength(5);
 	});
 });

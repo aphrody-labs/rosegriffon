@@ -70,9 +70,26 @@ export function rangeePagination(
 		return options.lien ? [rangeeLien(options.lien)] : [];
 	}
 
+	// ⚠ DEUX BOUTONS D'UNE MÊME RANGÉE NE PEUVENT PAS PARTAGER UN `customId`.
+	// Discord refuse alors le message ENTIER (400 `Invalid Form Body`,
+	// `COMPONENT_CUSTOM_ID_DUPLICATED`) — embed compris. Le membre ne voit rien,
+	// pas même une erreur partielle.
+	//
+	// Or l'identifiant EST l'état : « aller à la page 1 » et « page précédente »
+	// produisent la même chaîne dès que la page précédente EST la page 1. La
+	// collision arrivait donc sur quatre pages sur N — 1, 2, N-1 et N — c'est-à-dire
+	// y compris la toute première, celle que tout le monde voit. Constaté le
+	// 13/8/2026 sur `/x liste`, et vrai de la même façon sur `/azalee`, `/cpk`,
+	// `/cdn` et `/sondage`, qui partagent cette rangée.
+	//
+	// Le saut est RETIRÉ quand il fait doublon, jamais renommé : à ce moment-là il
+	// n'apporte rien (la flèche voisine mène déjà au même endroit), et lui donner
+	// un identifiant inerte laisserait un bouton qui ment sur ce qu'il fait.
 	const avecSauts = pages > SEUIL_SAUTS;
-	const idPremier = avecSauts ? options.identifiant(1) : null;
-	const idDernier = avecSauts ? options.identifiant(pages) : null;
+	const idPremierBrut = avecSauts ? options.identifiant(1) : null;
+	const idDernierBrut = avecSauts ? options.identifiant(pages) : null;
+	const idPremier = idPremierBrut === idPrecedent ? null : idPremierBrut;
+	const idDernier = idDernierBrut === idSuivant ? null : idDernierBrut;
 
 	const boutons: ButtonBuilder[] = [];
 	if (idPremier) {
