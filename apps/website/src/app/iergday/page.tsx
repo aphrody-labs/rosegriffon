@@ -449,7 +449,6 @@ export default async function IergDayPage({
 							slug={campagne.slug}
 							titreCampagne={campagne.titre}
 							description={campagne.description}
-							reglement={campagne.reglement}
 							imageAffiche={campagne.imageAffiche}
 							imageReglement={campagne.imageReglement}
 							noteAffiche={campagne.noteAffiche}

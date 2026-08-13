@@ -167,7 +167,6 @@ export function VisuelsCampagne({
 	slug,
 	titreCampagne,
 	description,
-	reglement,
 	imageAffiche,
 	imageReglement,
 	noteAffiche,
@@ -178,8 +177,6 @@ export function VisuelsCampagne({
 	slug: string;
 	titreCampagne: string;
 	description: string | null;
-	/** Règles en clair — servent de légende accessible à la carte des règles. */
-	reglement: string[];
 	imageAffiche: string | null;
 	imageReglement: string | null;
 	/** Rectification à afficher sous l'affiche (`x_campagnes.note_affiche`). */
@@ -216,15 +213,15 @@ export function VisuelsCampagne({
 				cle: "reglement",
 				etiquette,
 				images: [{ alt: etiquette, source: imageReglement, src: imageReglement }],
-				// Le texte de l'image, en clair : c'est la même liste que la section
-				// « Comment participer », lue depuis la base.
-				legende: reglement.length > 0 ? reglement.map((regle) => `• ${regle}`).join("\n") : null,
+					// Pas de légende : le règlement a été retiré de la page, visionneuse
+				// comprise. La carte « Règles » se lit dans l'image.
+				legende: null,
 				sousTitre: titreCampagne,
 				titre: "Les règles, en image",
 			});
 		}
 		return liste;
-	}, [slug, titreCampagne, description, noteAffiche, reglement, imageAffiche, imageReglement]);
+	}, [slug, titreCampagne, description, noteAffiche, imageAffiche, imageReglement]);
 
 	if (documents.length === 0) {
 		return null;
