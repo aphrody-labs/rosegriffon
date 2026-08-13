@@ -269,11 +269,15 @@ export const PROFILS: Readonly<Record<NomProfil, Profil>> = Object.freeze({
 			urlBase: "https://rosegriffon.fr",
 			variableUrlBase: "WEBSITE_URL",
 		},
-		annoncePosts: {
-			salonId: "",
-			variableSalon: "DISCORD_NEWS_CHANNEL_ID",
-			curseur: "discord",
-		},
+		// Le bot Rose Griffon N'ANNONCE RIEN. Décision explicite du 13/8/2026 :
+		// l'annonce des posts X appartient au bot Azalée et à lui seul.
+		//
+		// Elle est prise ICI, dans le registre, et non en désactivant le réglage
+		// partagé `settings['tweets.notification'].actif` : ce réglage est UNE
+		// ligne pour les deux profils, donc le couper pour Rose Griffon couperait
+		// aussi Azalée. `null` veut dire « ce profil n'annonce pas » — le
+		// notifieur ne démarre pas du tout, aucun minuteur, aucun curseur.
+		annoncePosts: null,
 	}),
 	azalee: Object.freeze({
 		nom: "azalee",
