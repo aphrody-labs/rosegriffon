@@ -95,7 +95,11 @@ export const TACHES_ADMIN: readonly string[] = [
  * noire serait contournable en écrivant `discord-backfill`.
  */
 export function normaliserNomTache(nom: string): string {
-	return nom.trim().toLowerCase().replaceAll("-", ":").replace(/^github:/, "github-");
+	return nom
+		.trim()
+		.toLowerCase()
+		.replaceAll("-", ":")
+		.replace(/^github:/, "github-");
 }
 
 /** Nom canonique du catalogue, ou `null` si la tâche n'existe pas. */

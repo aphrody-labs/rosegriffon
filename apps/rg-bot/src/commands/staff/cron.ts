@@ -20,16 +20,12 @@ import {
 } from "discord.js";
 
 import { appelerCron } from "../../lib/cron-ipc";
-import {
-	TACHES_CRON,
-	niveauTache,
-	resoudreTache,
-	suggererTaches,
-} from "../../lib/cron-taches";
+import { TACHES_CRON, niveauTache, resoudreTache, suggererTaches } from "../../lib/cron-taches";
 import { rgEmbed } from "../../lib/embeds";
 import { blocJson, borner, formaterDuree, formaterNombre, horodatageRelatif } from "./format";
 import { differerEnPrive, exigerDroits, messagePanne } from "./garde";
 import "./racine";
+import { echec, piedTexte, repondre } from "../../lib/ui";
 
 interface DerniereExecution {
 	time?: string;
@@ -51,7 +47,8 @@ function formaterExecution(derniere: DerniereExecution | null | undefined): stri
 	if (!derniere?.time) {
 		return "jamais exécutée depuis le dernier démarrage du démon";
 	}
-	const duree = typeof derniere.durationMs === "number" ? ` en ${formaterDuree(derniere.durationMs)}` : "";
+	const duree =
+		typeof derniere.durationMs === "number" ? ` en ${formaterDuree(derniere.durationMs)}` : "";
 	const verdict = derniere.success ? "succès" : `**échec** — ${borner(derniere.error ?? "?", 200)}`;
 	return `${horodatageRelatif(derniere.time)}${duree} · ${verdict}`;
 }
@@ -99,13 +96,15 @@ export class StaffCronCommand {
 					rgEmbed()
 						.setTitle(`rg-cron — ${noms.length} tâches`)
 						.setDescription(borner(lignes, 4_000))
-						.setFooter({
-							text: "⛔ jamais depuis Discord · 🔒 admin uniquement · • admin ou staff — lancement : /administration cron lancer",
-						}),
+						.setFooter(
+							piedTexte({
+								note: "⛔ jamais depuis Discord · 🔒 admin uniquement · • admin ou staff — lancement : /administration cron lancer",
+							})
+						),
 				],
 			});
 		} catch (err) {
-			await interaction.editReply({ content: `❌ ${messagePanne(err)}` });
+			await repondre(interaction, echec("Le service n'a pas répondu", messagePanne(err)));
 		}
 	}
 
@@ -144,7 +143,7 @@ export class StaffCronCommand {
 				],
 			});
 		} catch (err) {
-			await interaction.editReply({ content: `❌ ${messagePanne(err)}` });
+			await repondre(interaction, echec("Le service n'a pas répondu", messagePanne(err)));
 		}
 	}
 
@@ -198,7 +197,7 @@ export class StaffCronCommand {
 				],
 			});
 		} catch (err) {
-			await interaction.editReply({ content: `❌ ${messagePanne(err)}` });
+			await repondre(interaction, echec("Le service n'a pas répondu", messagePanne(err)));
 		}
 	}
 
@@ -213,9 +212,13 @@ export class StaffCronCommand {
 				cmd: "telemetry.discord",
 			});
 			if (!reponse.success) {
-				await interaction.editReply({
-					content: `❌ ${reponse.error ?? "Télémétrie indisponible : la passerelle du démon n'est pas prête."}`,
-				});
+				await repondre(
+					interaction,
+					echec(
+						"La commande a échoué",
+						reponse.error ?? "Télémétrie indisponible : la passerelle du démon n'est pas prête."
+					)
+				);
 				return;
 			}
 			await interaction.editReply({
@@ -226,7 +229,7 @@ export class StaffCronCommand {
 				],
 			});
 		} catch (err) {
-			await interaction.editReply({ content: `❌ ${messagePanne(err)}` });
+			await repondre(interaction, echec("Le service n'a pas répondu", messagePanne(err)));
 		}
 	}
 }

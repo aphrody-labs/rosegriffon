@@ -179,7 +179,9 @@ export async function lireEtatApplication(
 
 	const historique = Array.isArray(etat.history)
 		? etat.history
-				.filter((entree): entree is Record<string, unknown> => !!entree && typeof entree === "object")
+				.filter(
+					(entree): entree is Record<string, unknown> => !!entree && typeof entree === "object"
+				)
 				.map(
 					(entree): ActionDeploiement => ({
 						at: texte(entree.at) ?? "",

@@ -44,6 +44,7 @@ import { borner, formaterDuree, formaterNombre, horodatageRelatif } from "../sta
 import { differerEnPrive, exigerDroits, messagePanne } from "../staff/garde";
 import { comparerMembres, departSuspect, type EtatMembreEnBase } from "./valeurs";
 import "./racine";
+import { echec, piedTexte, repondre } from "../../lib/ui";
 
 /** Ce que la base sait des membres avant le balayage. */
 async function lireEtatEnBase(): Promise<EtatMembreEnBase[]> {
@@ -197,9 +198,11 @@ export class AdministrationSynchroniserCommand {
 					{ name: "Retours", value: formaterNombre(resume.revenus.length), inline: true },
 					{ name: "Départs", value: noteDeparts }
 				)
-				.setFooter({
-					text: "Les profils non réclamés ne sont PAS supprimés ici — c'est le rôle de la tâche discord du cron",
-				});
+				.setFooter(
+					piedTexte({
+						note: "Les profils non réclamés ne sont PAS supprimés ici — c'est le rôle de la tâche discord du cron",
+					})
+				);
 
 			if (echecs.length > 0) {
 				embed.addFields({
@@ -215,7 +218,7 @@ export class AdministrationSynchroniserCommand {
 			}
 			await interaction.editReply({ embeds: [embed] });
 		} catch (err) {
-			await interaction.editReply({ content: `❌ ${messagePanne(err)}` });
+			await repondre(interaction, echec("Le service n'a pas répondu", messagePanne(err)));
 		}
 	}
 
@@ -331,7 +334,7 @@ export class AdministrationSynchroniserCommand {
 				],
 			});
 		} catch (err) {
-			await interaction.editReply({ content: `❌ ${messagePanne(err)}` });
+			await repondre(interaction, echec("Le service n'a pas répondu", messagePanne(err)));
 		}
 	}
 }

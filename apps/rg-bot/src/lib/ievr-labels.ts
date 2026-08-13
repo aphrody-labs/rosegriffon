@@ -123,7 +123,10 @@ const SYNONYMES_RARETE = tableSynonymes<RareteFr>({
 	Basara: "BASARA",
 });
 
-function resoudre<T extends string>(table: Map<string, T>, saisie: string | null | undefined): T | null {
+function resoudre<T extends string>(
+	table: Map<string, T>,
+	saisie: string | null | undefined
+): T | null {
 	if (!saisie) {
 		return null;
 	}

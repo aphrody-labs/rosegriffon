@@ -396,10 +396,7 @@ export class MembreCommand {
 					`${lignes.length} membre${lignes.length > 1 ? "s" : ""} pour « ${truncate(texte.trim(), 60)} »`
 				)
 				.setDescription(
-					truncate(
-						lignes.map((l) => ligneMembreDiscord(l, l.profil !== null)).join("\n"),
-						4000
-					)
+					truncate(lignes.map((l) => ligneMembreDiscord(l, l.profil !== null)).join("\n"), 4000)
 				);
 
 			// La carte image reprend la DA de l'ancienne `/member` (30 lignes au plus).

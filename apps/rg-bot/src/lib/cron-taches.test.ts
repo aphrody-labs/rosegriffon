@@ -56,7 +56,14 @@ describe("normalisation", () => {
 describe("niveauTache", () => {
 	test("les 4 tâches destructrices sont interdites, quelle que soit l'écriture", () => {
 		expect(TACHES_INTERDITES).toEqual(["db", "crawl", "github-publish", "discord:backfill"]);
-		for (const nom of ["db", "crawl", "github-publish", "discord:backfill", "discord-backfill", "github:publish"]) {
+		for (const nom of [
+			"db",
+			"crawl",
+			"github-publish",
+			"discord:backfill",
+			"discord-backfill",
+			"github:publish",
+		]) {
 			expect(niveauTache(nom)).toBe("interdit");
 		}
 	});
@@ -68,7 +75,15 @@ describe("niveauTache", () => {
 	});
 
 	test("les tâches qui écrivent en production ou consomment un quota exigent admin", () => {
-		for (const nom of ["publish", "patreon", "reminders", "cdn", "rag", "seo:indexnow", "x:campagnes"]) {
+		for (const nom of [
+			"publish",
+			"patreon",
+			"reminders",
+			"cdn",
+			"rag",
+			"seo:indexnow",
+			"x:campagnes",
+		]) {
 			expect(niveauTache(nom)).toBe("admin-strict");
 		}
 	});

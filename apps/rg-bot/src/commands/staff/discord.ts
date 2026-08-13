@@ -83,6 +83,7 @@ import {
 } from "./format";
 import { differerEnPrive, exigerDroits, messagePanne } from "./garde";
 import "./racine";
+import { echec, pied, piedTexte, repondre } from "../../lib/ui";
 
 /** Les trois listes assez longues pour mériter des boutons de page. */
 const VUES_PAGINEES = ["roles", "bannissements", "invitations"] as const;
@@ -217,7 +218,10 @@ function ligneRole(role: Role, membres: number): string {
 }
 
 /** Une ligne de bannissement : le pseudo, l'identifiant, le motif. Rien d'autre. */
-function ligneBannissement(banni: { user: { username: string; id: string }; reason?: string | null }): string {
+function ligneBannissement(banni: {
+	user: { username: string; id: string };
+	reason?: string | null;
+}): string {
 	const motif = banni.reason?.trim();
 	return (
 		`**${echapperMarkdown(borner(banni.user.username, 60))}** — \`${banni.user.id}\`\n` +
@@ -338,9 +342,11 @@ async function rendreRoles(
 					)
 				: "Ce serveur n'a aucun rôle."
 		)
-		.setFooter({
-			text: `Page ${courante}/${pages} · effectifs relevés sur ${formaterNombre(membres.total)} membres, en cache 5 min`,
-		});
+		.setFooter(
+			piedTexte({
+				note: `Page ${courante}/${pages} · effectifs relevés sur ${formaterNombre(membres.total)} membres, en cache 5 min`,
+			})
+		);
 
 	return { embeds: [embed], components: boutonsDePage("roles", courante, pages, graine) };
 }
@@ -382,7 +388,7 @@ async function rendreBannissements(
 				"la liste affichée n'est plus complète. Passe par un export si le besoin est réel.",
 		});
 	}
-	embed.setFooter({ text: `Page ${courante}/${pages} · lu en direct, aucun cache` });
+	pied(embed, { page: courante, pages: pages, note: "lu en direct, aucun cache" });
 
 	return { embeds: [embed], components: boutonsDePage("bannissements", courante, pages, graine) };
 }
@@ -419,9 +425,11 @@ async function rendreInvitations(
 				? assemblerPageInspection(tranche.map(ligneInvitation))
 				: "Aucune invitation active. Le serveur n'est joignable que par une URL personnalisée ou une découverte."
 		)
-		.setFooter({
-			text: `Page ${courante}/${pages} · ${formaterNombre(usagesCumules)} arrivées cumulées par ces liens`,
-		});
+		.setFooter(
+			piedTexte({
+				note: `Page ${courante}/${pages} · ${formaterNombre(usagesCumules)} arrivées cumulées par ces liens`,
+			})
+		);
 
 	return { embeds: [embed], components: boutonsDePage("invitations", courante, pages, graine) };
 }
@@ -533,8 +541,7 @@ export class StaffDiscordCommand {
 					},
 					{
 						name: "Expressions",
-						value:
-							`${formaterNombre(emojis.size)} émoji(s)\n${formaterNombre(autocollants.size)} autocollant(s)`,
+						value: `${formaterNombre(emojis.size)} émoji(s)\n${formaterNombre(autocollants.size)} autocollant(s)`,
 						inline: true,
 					},
 					{
@@ -564,7 +571,9 @@ export class StaffDiscordCommand {
 					{
 						name: `Fonctionnalités (${guild.features.length})`,
 						value: listeCourte(
-							guild.features.map(libelleFonctionnaliteGuilde).toSorted((a, b) => a.localeCompare(b, "fr")),
+							guild.features
+								.map(libelleFonctionnaliteGuilde)
+								.toSorted((a, b) => a.localeCompare(b, "fr")),
 							40,
 							1_000,
 							"*aucune*"
@@ -576,12 +585,12 @@ export class StaffDiscordCommand {
 			if (icone) {
 				embed.setThumbnail(icone);
 			}
-			embed.setFooter({
-				text: "Rendu par l'API à l'instant · les compteurs historiques (messages, arrivées sur 30 j) sont dans /staff stats discord",
+			pied(embed, {
+				note: "Rendu par l'API à l'instant · les compteurs historiques (messages, arrivées sur 30 j) sont dans /staff stats discord",
 			});
 			await interaction.editReply({ embeds: [embed] });
 		} catch (err) {
-			await interaction.editReply({ content: `❌ ${messagePanne(err)}` });
+			await repondre(interaction, echec("Le service n'a pas répondu", messagePanne(err)));
 		}
 	}
 
@@ -609,11 +618,9 @@ export class StaffDiscordCommand {
 			return;
 		}
 		try {
-			await interaction.editReply(
-				await rendreRoles(guild, page ?? 1, interaction.user.id)
-			);
+			await interaction.editReply(await rendreRoles(guild, page ?? 1, interaction.user.id));
 		} catch (err) {
-			await interaction.editReply({ content: `❌ ${messagePanne(err)}` });
+			await repondre(interaction, echec("Le service n'a pas répondu", messagePanne(err)));
 		}
 	}
 
@@ -668,9 +675,7 @@ export class StaffDiscordCommand {
 				.filter((salon) => salon.type === ChannelType.GuildCategory)
 				.toSorted((a, b) => a.rawPosition - b.rawPosition);
 			const retenues =
-				categorie === undefined
-					? categories
-					: categories.filter((salon) => salon.id === categorie);
+				categorie === undefined ? categories : categories.filter((salon) => salon.id === categorie);
 
 			if (categorie !== undefined && retenues.length === 0) {
 				await interaction.editReply({
@@ -683,7 +688,9 @@ export class StaffDiscordCommand {
 
 			const enfants = (parentId: string | null) =>
 				salons
-					.filter((salon) => salon.type !== ChannelType.GuildCategory && salon.parentId === parentId)
+					.filter(
+						(salon) => salon.type !== ChannelType.GuildCategory && salon.parentId === parentId
+					)
 					.toSorted((a, b) => a.rawPosition - b.rawPosition);
 
 			const blocs: string[] = [];
@@ -703,7 +710,9 @@ export class StaffDiscordCommand {
 					`**${pictoTypeSalon(laCategorie.type)} ${echapperMarkdown(borner(laCategorie.name, 60))}** — ${dedans.length}\n` +
 						(dedans.length > 0
 							? dedans
-									.map((salon) => `   ${pictoTypeSalon(salon.type)} ${echapperMarkdown(salon.name)}`)
+									.map(
+										(salon) => `   ${pictoTypeSalon(salon.type)} ${echapperMarkdown(salon.name)}`
+									)
 									.join("\n")
 							: "   *catégorie vide*")
 				);
@@ -721,14 +730,16 @@ export class StaffDiscordCommand {
 						: `Catégorie ${borner(retenues[0]!.name, 100)}`
 				)
 				.setDescription(borner(arbre.length > 0 ? arbre : "Ce serveur n'a aucun salon.", 4_000))
-				.setFooter({
-					text: tronque
-						? "Arborescence tronquée — relance avec l'option « categorie » pour voir une catégorie en entier"
-						: "Les fils ne sont pas listés : ils naissent et meurent trop vite pour un inventaire",
-				});
+				.setFooter(
+					piedTexte({
+						note: tronque
+							? "Arborescence tronquée — relance avec l'option « categorie » pour voir une catégorie en entier"
+							: "Les fils ne sont pas listés : ils naissent et meurent trop vite pour un inventaire",
+					})
+				);
 			await interaction.editReply({ embeds: [embed] });
 		} catch (err) {
-			await interaction.editReply({ content: `❌ ${messagePanne(err)}` });
+			await repondre(interaction, echec("Le service n'a pas répondu", messagePanne(err)));
 		}
 	}
 
@@ -756,11 +767,9 @@ export class StaffDiscordCommand {
 			return;
 		}
 		try {
-			await interaction.editReply(
-				await rendreBannissements(guild, page ?? 1, interaction.user.id)
-			);
+			await interaction.editReply(await rendreBannissements(guild, page ?? 1, interaction.user.id));
 		} catch (err) {
-			await interaction.editReply({ content: `❌ ${messagePanne(err)}` });
+			await repondre(interaction, echec("Le service n'a pas répondu", messagePanne(err)));
 		}
 	}
 
@@ -788,11 +797,9 @@ export class StaffDiscordCommand {
 			return;
 		}
 		try {
-			await interaction.editReply(
-				await rendreInvitations(guild, page ?? 1, interaction.user.id)
-			);
+			await interaction.editReply(await rendreInvitations(guild, page ?? 1, interaction.user.id));
 		} catch (err) {
-			await interaction.editReply({ content: `❌ ${messagePanne(err)}` });
+			await repondre(interaction, echec("Le service n'a pas répondu", messagePanne(err)));
 		}
 	}
 
@@ -814,8 +821,7 @@ export class StaffDiscordCommand {
 			const manquantes = permissionsManquantes(bot.permissions, "journal");
 			if (manquantes.length > 0) {
 				await interaction.editReply({
-					content:
-						`Le bot ne peut pas lire le journal d'audit : il lui manque **${manquantes.join("**, **")}**.`,
+					content: `Le bot ne peut pas lire le journal d'audit : il lui manque **${manquantes.join("**, **")}**.`,
 				});
 				return;
 			}
@@ -832,7 +838,8 @@ export class StaffDiscordCommand {
 					: "*auteur inconnu*";
 				const cible = entree.targetId ? ` → \`${entree.targetId}\`` : "";
 				const motif = entree.reason?.trim();
-				const detail = motif && motif.length > 0 ? `\n   └ ${echapperMarkdown(borner(motif, 160))}` : "";
+				const detail =
+					motif && motif.length > 0 ? `\n   └ ${echapperMarkdown(borner(motif, 160))}` : "";
 				return `${libelleEvenementAudit(entree.action)} · ${auteur}${cible} · ${horodatageRelatif(entree.createdAt)}${detail}`;
 			});
 
@@ -843,12 +850,14 @@ export class StaffDiscordCommand {
 						? assemblerPageInspection(lignes)
 						: "Le journal d'audit est vide : aucune action administrative récente."
 				)
-				.setFooter({
-					text: "Pseudo et identifiant seulement · le détail des changements reste dans Discord",
-				});
+				.setFooter(
+					piedTexte({
+						note: "Pseudo et identifiant seulement · le détail des changements reste dans Discord",
+					})
+				);
 			await interaction.editReply({ embeds: [embed] });
 		} catch (err) {
-			await interaction.editReply({ content: `❌ ${messagePanne(err)}` });
+			await repondre(interaction, echec("Le service n'a pas répondu", messagePanne(err)));
 		}
 	}
 
@@ -943,12 +952,14 @@ export class StaffDiscordCommand {
 						})(),
 					}
 				)
-				.setFooter({
-					text: "Un rang égal est déjà un refus : Discord exige un rôle STRICTEMENT plus haut · intents ouverts : Guilds, GuildMembers",
-				});
+				.setFooter(
+					piedTexte({
+						note: "Un rang égal est déjà un refus : Discord exige un rôle STRICTEMENT plus haut · intents ouverts : Guilds, GuildMembers",
+					})
+				);
 			await interaction.editReply({ embeds: [embed] });
 		} catch (err) {
-			await interaction.editReply({ content: `❌ ${messagePanne(err)}` });
+			await repondre(interaction, echec("Le service n'a pas répondu", messagePanne(err)));
 		}
 	}
 
@@ -974,7 +985,8 @@ export class StaffDiscordCommand {
 		}
 		if (etat.graine !== interaction.user.id) {
 			await interaction.reply({
-				content: "Cette liste a été demandée par quelqu'un d'autre. Lance la tienne avec `/staff discord`.",
+				content:
+					"Cette liste a été demandée par quelqu'un d'autre. Lance la tienne avec `/staff discord`.",
 				flags: MessageFlags.Ephemeral,
 			});
 			return;

@@ -69,6 +69,7 @@ import {
 	verifierPlageTemporelle,
 } from "./valeurs";
 import "./racine-gestion";
+import { echec, piedTexte, repondre } from "../../lib/ui";
 
 /** Les neuf colonnes de `events`, sans exception : la table n'en a pas d'autre. */
 interface EvenementAdmin {
@@ -252,8 +253,7 @@ export class AdministrationEvenementCommand {
 		if (!(await exigerDroits(interaction))) {
 			return;
 		}
-		const choisie: PorteeEvenement =
-			portee === "passes" || portee === "tous" ? portee : "a-venir";
+		const choisie: PorteeEvenement = portee === "passes" || portee === "tous" ? portee : "a-venir";
 		try {
 			const [evenements, total] = await Promise.all([
 				listerEvenements(choisie, nombre ?? 10),
@@ -277,12 +277,14 @@ export class AdministrationEvenementCommand {
 			const embed = rgEmbed()
 				.setTitle(`${evenements.length} événement${evenements.length > 1 ? "s" : ""} — ${libelle}`)
 				.setDescription(borner(evenements.map(ligneEvenement).join("\n\n"), 4_000))
-				.setFooter({
-					text: `${total} événement${total > 1 ? "s" : ""} en base · source de rosegriffon.fr/evenements`,
-				});
+				.setFooter(
+					piedTexte({
+						note: `${total} événement${total > 1 ? "s" : ""} en base · source de rosegriffon.fr/evenements`,
+					})
+				);
 			await interaction.editReply({ embeds: [embed] });
 		} catch (err) {
-			await interaction.editReply({ content: `❌ ${messagePanne(err)}` });
+			await repondre(interaction, echec("Le service n'a pas répondu", messagePanne(err)));
 		}
 	}
 
@@ -348,7 +350,7 @@ export class AdministrationEvenementCommand {
 		}
 		const plage = verifierPlageTemporelle(debutLu, finLue);
 		if (plage) {
-			await interaction.editReply({ content: `❌ ${plage}` });
+			await repondre(interaction, echec("La commande a échoué", plage));
 			return;
 		}
 		const imageLue = lireChampTextuel(image);
@@ -369,7 +371,9 @@ export class AdministrationEvenementCommand {
 				          created_at, updated_at
 			`;
 			if (!cree) {
-				await interaction.editReply({ content: "❌ La base n'a rendu aucune ligne à l'insertion." });
+				await interaction.editReply({
+					content: "❌ La base n'a rendu aucune ligne à l'insertion.",
+				});
 				return;
 			}
 
@@ -391,12 +395,14 @@ export class AdministrationEvenementCommand {
 			// l'autocomplétion de `modifier` qu'au bout de trente secondes.
 			invalidate(CLEF_INDEX);
 
-			const embed = ficheEvenement(cree).setFooter({
-				text: "Créé · la table `events` prend désormais le pas sur l'agenda Google",
-			});
+			const embed = ficheEvenement(cree).setFooter(
+				piedTexte({
+					note: "Créé · la table `events` prend désormais le pas sur l'agenda Google",
+				})
+			);
 			await interaction.editReply({ content: "✅ Événement créé.", embeds: [embed] });
 		} catch (err) {
-			await interaction.editReply({ content: `❌ ${messagePanne(err)}` });
+			await repondre(interaction, echec("Le service n'a pas répondu", messagePanne(err)));
 		}
 	}
 
@@ -483,13 +489,18 @@ export class AdministrationEvenementCommand {
 		const finLue = fin === undefined ? null : analyserDate(fin);
 		if ((debut !== undefined && !debutLu) || (fin !== undefined && !finLue)) {
 			await interaction.editReply({
-				content: refusDeDate(debut === undefined || debutLu !== null, fin === undefined || finLue !== null),
+				content: refusDeDate(
+					debut === undefined || debutLu !== null,
+					fin === undefined || finLue !== null
+				),
 			});
 			return;
 		}
 		// Un titre est `NOT NULL` en base : le vider ferait échouer l'écriture.
 		if (titreLu.fourni && titreLu.valeur === null) {
-			await interaction.editReply({ content: "❌ Le titre ne peut pas être vidé : il est obligatoire." });
+			await interaction.editReply({
+				content: "❌ Le titre ne peut pas être vidé : il est obligatoire.",
+			});
 			return;
 		}
 		if (imageLue.fourni && imageLue.valeur !== null && !urlAcceptable(imageLue.valeur)) {
@@ -527,7 +538,7 @@ export class AdministrationEvenementCommand {
 			const finFinale = finLue ?? new Date(avant.end_time);
 			const plage = verifierPlageTemporelle(debutFinal, finFinale);
 			if (plage) {
-				await interaction.editReply({ content: `❌ ${plage}` });
+				await repondre(interaction, echec("La commande a échoué", plage));
 				return;
 			}
 
@@ -570,10 +581,10 @@ export class AdministrationEvenementCommand {
 			});
 
 			invalidate(CLEF_INDEX);
-			const embed = ficheEvenement(apres).setFooter({ text: "Modifié" });
+			const embed = ficheEvenement(apres).setFooter(piedTexte({ note: "Modifié" }));
 			await interaction.editReply({ content: "✅ Événement mis à jour.", embeds: [embed] });
 		} catch (err) {
-			await interaction.editReply({ content: `❌ ${messagePanne(err)}` });
+			await repondre(interaction, echec("Le service n'a pas répondu", messagePanne(err)));
 		}
 	}
 
@@ -661,7 +672,7 @@ export class AdministrationEvenementCommand {
 				content: `🗑 **${truncate(supprime.title, 120)}** supprimé de l'agenda.\n${suite}`,
 			});
 		} catch (err) {
-			await interaction.editReply({ content: `❌ ${messagePanne(err)}` });
+			await repondre(interaction, echec("Le service n'a pas répondu", messagePanne(err)));
 		}
 	}
 }

@@ -85,6 +85,7 @@ import {
 	type Sondage,
 	type StatutSondage,
 } from "../lib/sondage-format";
+import { echec, pied, repondre } from "../lib/ui";
 
 /** Sondages par page de liste : cinq tiennent largement dans une description. */
 const PAR_PAGE = 5;
@@ -136,8 +137,7 @@ async function listerSondages(etat: EtatListeSondages): Promise<PageSondages> {
 	const statut = normaliserStatut(etat.statut);
 	const periode = normaliserPeriode(etat.periode);
 	const brut = etat.recherche?.trim() ?? "";
-	const motif =
-		brut.length > 0 ? `%${brut.slice(0, 120).replace(/[\\%_]/g, "\\$&")}%` : null;
+	const motif = brut.length > 0 ? `%${brut.slice(0, 120).replace(/[\\%_]/g, "\\$&")}%` : null;
 	const page = Math.max(1, Math.trunc(etat.page));
 	const decalage = (page - 1) * PAR_PAGE;
 
@@ -260,7 +260,7 @@ async function rendrePage(etat: EtatListeSondages): Promise<InteractionEditReply
 				? `\n\n≈ ${estimations} ${estimations === 1 ? "décompte est une estimation" : "décomptes sont des estimations"} reconstituée${estimations === 1 ? "" : "s"} depuis les réactions archivées, pas un résultat officiel.`
 				: "";
 		embed.setDescription(truncate(`${corps}${note}`, 4096));
-		embed.setFooter({ text: `Page ${page}/${pages} · rosegriffon.fr` });
+		pied(embed, { page: page, pages: pages });
 	}
 
 	const composants: Array<ActionRowBuilder<ButtonBuilder>> = [];
@@ -357,14 +357,17 @@ function rendreSondage(sondage: Sondage): InteractionEditReplyOptions {
 	if (sondage.visuel) {
 		embed.setImage(sondage.visuel.url);
 	}
-	embed.setFooter({
-		text: `${sondage.pollId} · ${sondage.source === "reactions" ? "décompte estimé" : "décompte publié par le bot"} · rosegriffon.fr`,
+	pied(embed, {
+		note: `${sondage.pollId} · ${sondage.source === "reactions" ? "décompte estimé" : "décompte publié par le bot"} · rosegriffon.fr`,
 	});
 	return { embeds: [embed] };
 }
 
 @Discord()
-@SlashGroup({ description: "Les sondages du serveur : archive, résultats et participation", name: "sondage" })
+@SlashGroup({
+	description: "Les sondages du serveur : archive, résultats et participation",
+	name: "sondage",
+})
 @SlashGroup("sondage")
 export class SondageCommand {
 	@Slash({
@@ -399,9 +402,7 @@ export class SondageCommand {
 						...annees.map((an) => ({ name: `Année ${an}`, value: String(an) })),
 					];
 					await interaction.respond(
-						propositions
-							.filter((entree) => entree.name.toLowerCase().includes(saisie))
-							.slice(0, 25)
+						propositions.filter((entree) => entree.name.toLowerCase().includes(saisie)).slice(0, 25)
 					);
 				} catch {
 					await interaction.respond([]);
@@ -445,9 +446,10 @@ export class SondageCommand {
 				})
 			);
 		} catch (err) {
-			await interaction.editReply({
-				content: `❌ Lecture des sondages impossible : ${err instanceof Error ? err.message : String(err)}`,
-			});
+			await repondre(
+				interaction,
+				echec("Lecture des sondages impossible", err instanceof Error ? err.message : String(err))
+			);
 		}
 	}
 
@@ -523,9 +525,10 @@ export class SondageCommand {
 			}
 			await interaction.editReply(rendreSondage(sondage));
 		} catch (err) {
-			await interaction.editReply({
-				content: `❌ Lecture du sondage impossible : ${err instanceof Error ? err.message : String(err)}`,
-			});
+			await repondre(
+				interaction,
+				echec("Lecture du sondage impossible", err instanceof Error ? err.message : String(err))
+			);
 		}
 	}
 }

@@ -74,8 +74,12 @@ describe("profilDemande", () => {
 	test("une valeur inconnue LÈVE au lieu de retomber sur rg", () => {
 		// Le repli silencieux démarrerait un second bot Rose Griffon avec le jeton
 		// du premier : chaque interaction traitée deux fois, et rien pour le dire.
-		expect(() => profilDemande({ [VARIABLE_PROFIL]: "azalée" })).toThrow(/n'est pas un profil connu/);
-		expect(() => profilDemande({ [VARIABLE_PROFIL]: "azale" })).toThrow(/Valeurs acceptées : rg, azalee/);
+		expect(() => profilDemande({ [VARIABLE_PROFIL]: "azalée" })).toThrow(
+			/n'est pas un profil connu/
+		);
+		expect(() => profilDemande({ [VARIABLE_PROFIL]: "azale" })).toThrow(
+			/Valeurs acceptées : rg, azalee/
+		);
 	});
 
 	test("estNomProfil ne reconnaît que les deux profils", () => {
@@ -199,9 +203,9 @@ describe("annonce des posts X", () => {
 			salonAnnonceDuProfil(PROFILS.azalee, { AZALEE_DISCORD_NEWS_CHANNEL_ID: "222222222222222222" })
 		).toBe("222222222222222222");
 		// Une valeur qui n'est pas un flocon (nom de salon, $VAR) est ignorée.
-		expect(salonAnnonceDuProfil(PROFILS.azalee, { AZALEE_DISCORD_NEWS_CHANNEL_ID: "#annonces" })).toBe(
-			"1349528692086276148"
-		);
+		expect(
+			salonAnnonceDuProfil(PROFILS.azalee, { AZALEE_DISCORD_NEWS_CHANNEL_ID: "#annonces" })
+		).toBe("1349528692086276148");
 	});
 
 	test("rg n'annonce RIEN, même si un salon traîne dans l'environnement", () => {
@@ -210,7 +214,9 @@ describe("annonce des posts X", () => {
 		// deux partagent le réglage `settings['tweets.notification']`.
 		expect(PROFILS.rg.annoncePosts).toBeNull();
 		expect(salonAnnonceDuProfil(PROFILS.rg, {})).toBeNull();
-		expect(salonAnnonceDuProfil(PROFILS.rg, { DISCORD_NEWS_CHANNEL_ID: "333333333333333333" })).toBeNull();
+		expect(
+			salonAnnonceDuProfil(PROFILS.rg, { DISCORD_NEWS_CHANNEL_ID: "333333333333333333" })
+		).toBeNull();
 	});
 
 	test("le registre s'assemble en `ProfilAnnonceur` sans rien réécrire", () => {
@@ -308,7 +314,9 @@ function commandesRacines(source: string): string[] {
 
 /** Sources des modules d'un profil, lues en parallèle. */
 function sourcesDuProfil(nom: NomProfil): Promise<string[]> {
-	return Promise.all(PROFILS[nom].modules.map((chemin) => Bun.file(fichierDuModule(chemin)).text()));
+	return Promise.all(
+		PROFILS[nom].modules.map((chemin) => Bun.file(fichierDuModule(chemin)).text())
+	);
 }
 
 async function commandesDuProfil(nom: NomProfil): Promise<Set<string>> {
@@ -427,7 +435,15 @@ describe("modules de commandes", () => {
 		// La communauté, l'administration — et `/staff`, la consultation de
 		// l'exploitation : elle parle des services Rose Griffon, elle vit donc sur
 		// le bot Rose Griffon.
-		for (const commande of ["administration", "gestion", "moderation", "agenda", "staff", "membre", "sondage"]) {
+		for (const commande of [
+			"administration",
+			"gestion",
+			"moderation",
+			"agenda",
+			"staff",
+			"membre",
+			"sondage",
+		]) {
 			expect(`${commande}:${rg.has(commande)}`).toBe(`${commande}:true`);
 		}
 	});

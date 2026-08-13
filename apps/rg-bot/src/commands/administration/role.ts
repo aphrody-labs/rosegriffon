@@ -98,6 +98,7 @@ import { borner, echapperMarkdown } from "../staff/format";
 import { differerEnPrive, exigerDroits, messagePanne } from "../staff/garde";
 import { analyserIdConfirmation, construireIdConfirmation } from "./valeurs";
 import "./racine-moderation";
+import { echec, pied, piedTexte, refus as accesRefuse, repondre } from "../../lib/ui";
 
 /**
  * Délai laissé pour cliquer « Confirmer ».
@@ -156,7 +157,9 @@ async function contexteServeur(
 	return { guilde, bot, positionBot: bot.roles.highest.position };
 }
 
-type ResolutionRole = { readonly ok: true; readonly role: Role } | { readonly ok: false; readonly raison: string };
+type ResolutionRole =
+	| { readonly ok: true; readonly role: Role }
+	| { readonly ok: false; readonly raison: string };
 
 /** Retrouve le rôle désigné par l'option textuelle. */
 async function lireRole(guilde: Guild, saisie: string): Promise<ResolutionRole> {
@@ -175,7 +178,10 @@ async function lireRole(guilde: Guild, saisie: string): Promise<ResolutionRole> 
 	// une erreur d'API, c'est un `null` qu'il faut traiter.
 	const role = await guilde.roles.fetch(identifiant);
 	if (!role) {
-		return { ok: false, raison: `Aucun rôle \`${identifiant}\` sur ce serveur. Il a peut-être été supprimé entre-temps.` };
+		return {
+			ok: false,
+			raison: `Aucun rôle \`${identifiant}\` sur ce serveur. Il a peut-être été supprimé entre-temps.`,
+		};
 	}
 	return { ok: true, role };
 }
@@ -452,19 +458,20 @@ export class AdministrationRoleCommand {
 			}
 			const resolution = await lireRole(contexte.guilde, roleSaisi);
 			if (!resolution.ok) {
-				await interaction.editReply({ content: `🚫 ${resolution.raison}` });
+				await repondre(interaction, accesRefuse(resolution.raison));
 				return;
 			}
 			const role = resolution.role;
 			const refus = refusSurRole(contexte, role);
 			if (refus) {
-				await interaction.editReply({ content: `🚫 ${refus}` });
+				await repondre(interaction, accesRefuse(refus));
 				return;
 			}
 			const membre = await recupererMembre(contexte.guilde, cible.id);
 			if (!membre) {
 				await interaction.editReply({
-					content: "🚫 Ce compte n'est pas (ou plus) membre du serveur : il n'y a aucun rôle à lui donner.",
+					content:
+						"🚫 Ce compte n'est pas (ou plus) membre du serveur : il n'y a aucun rôle à lui donner.",
 				});
 				return;
 			}
@@ -482,7 +489,7 @@ export class AdministrationRoleCommand {
 			const pouvoirs = pouvoirsDuRole(role);
 			const refusRang = refusRangInsuffisant(admin, pouvoirs);
 			if (refusRang) {
-				await interaction.editReply({ content: `🚫 ${refusRang}` });
+				await repondre(interaction, accesRefuse(refusRang));
 				return;
 			}
 			if (exigeRoleAdminRg(role.permissions)) {
@@ -525,7 +532,10 @@ export class AdministrationRoleCommand {
 		} catch (err) {
 			// `components: []` : la confirmation des rôles à pouvoirs a pu poser des
 			// boutons, et un bouton laissé sur un message d'erreur reste cliquable.
-			await interaction.editReply({ content: `❌ ${messageRefus(err)}`, components: [] });
+			await repondre(interaction, {
+				components: [],
+				...echec("Action refusée", messageRefus(err)),
+			});
 		}
 	}
 
@@ -567,19 +577,20 @@ export class AdministrationRoleCommand {
 			}
 			const resolution = await lireRole(contexte.guilde, roleSaisi);
 			if (!resolution.ok) {
-				await interaction.editReply({ content: `🚫 ${resolution.raison}` });
+				await repondre(interaction, accesRefuse(resolution.raison));
 				return;
 			}
 			const role = resolution.role;
 			const refus = refusSurRole(contexte, role);
 			if (refus) {
-				await interaction.editReply({ content: `🚫 ${refus}` });
+				await repondre(interaction, accesRefuse(refus));
 				return;
 			}
 			const membre = await recupererMembre(contexte.guilde, cible.id);
 			if (!membre) {
 				await interaction.editReply({
-					content: "🚫 Ce compte n'est pas (ou plus) membre du serveur : il ne porte plus aucun rôle ici.",
+					content:
+						"🚫 Ce compte n'est pas (ou plus) membre du serveur : il ne porte plus aucun rôle ici.",
 				});
 				return;
 			}
@@ -610,7 +621,7 @@ export class AdministrationRoleCommand {
 				],
 			});
 		} catch (err) {
-			await interaction.editReply({ content: `❌ ${messageRefus(err)}` });
+			await repondre(interaction, echec("Action refusée", messageRefus(err)));
 		}
 	}
 
@@ -679,7 +690,10 @@ export class AdministrationRoleCommand {
 				return;
 			}
 
-			const raison = motifAudit({ auteur: auteurAudit(interaction), motif: `Création du rôle ${nomPropre}` });
+			const raison = motifAudit({
+				auteur: auteurAudit(interaction),
+				motif: `Création du rôle ${nomPropre}`,
+			});
 			const role = await contexte.guilde.roles.create({
 				name: nomPropre,
 				// `colors.primaryColor`, pas `color` : `Role.setColor`/`RoleData.color`
@@ -724,13 +738,15 @@ export class AdministrationRoleCommand {
 									"du serveur si besoin.",
 							}
 						)
-						.setFooter({
-							text: "Créé tout en bas de la liste des rôles : remonte-le à la main pour qu'il prenne le pas sur d'autres.",
-						}),
+						.setFooter(
+							piedTexte({
+								note: "Créé tout en bas de la liste des rôles : remonte-le à la main pour qu'il prenne le pas sur d'autres.",
+							})
+						),
 				],
 			});
 		} catch (err) {
-			await interaction.editReply({ content: `❌ ${messageRefus(err)}` });
+			await repondre(interaction, echec("Action refusée", messageRefus(err)));
 		}
 	}
 
@@ -767,13 +783,13 @@ export class AdministrationRoleCommand {
 			}
 			const resolution = await lireRole(contexte.guilde, roleSaisi);
 			if (!resolution.ok) {
-				await interaction.editReply({ content: `🚫 ${resolution.raison}` });
+				await repondre(interaction, accesRefuse(resolution.raison));
 				return;
 			}
 			const role = resolution.role;
 			const refus = refusSurRole(contexte, role);
 			if (refus) {
-				await interaction.editReply({ content: `🚫 ${refus}` });
+				await repondre(interaction, accesRefuse(refus));
 				return;
 			}
 
@@ -825,7 +841,10 @@ export class AdministrationRoleCommand {
 				components: [],
 			});
 		} catch (err) {
-			await interaction.editReply({ content: `❌ ${messageRefus(err)}`, components: [] });
+			await repondre(interaction, {
+				components: [],
+				...echec("Action refusée", messageRefus(err)),
+			});
 		}
 	}
 
@@ -860,13 +879,13 @@ export class AdministrationRoleCommand {
 			}
 			const resolution = await lireRole(contexte.guilde, roleSaisi);
 			if (!resolution.ok) {
-				await interaction.editReply({ content: `🚫 ${resolution.raison}` });
+				await repondre(interaction, accesRefuse(resolution.raison));
 				return;
 			}
 			const role = resolution.role;
 			const refus = refusSurRole(contexte, role);
 			if (refus) {
-				await interaction.editReply({ content: `🚫 ${refus}` });
+				await repondre(interaction, accesRefuse(refus));
 				return;
 			}
 			const nomPropre = normaliserNomRole(nom);
@@ -911,7 +930,7 @@ export class AdministrationRoleCommand {
 				],
 			});
 		} catch (err) {
-			await interaction.editReply({ content: `❌ ${messageRefus(err)}` });
+			await repondre(interaction, echec("Action refusée", messageRefus(err)));
 		}
 	}
 
@@ -940,7 +959,8 @@ export class AdministrationRoleCommand {
 		cibleSaisie: string,
 		@SlashOption({
 			name: "simulation",
-			description: "VRAI (défaut) : compte les membres sans rien écrire. FAUX : distribue vraiment.",
+			description:
+				"VRAI (défaut) : compte les membres sans rien écrire. FAUX : distribue vraiment.",
 			type: ApplicationCommandOptionType.Boolean,
 			required: false,
 		})
@@ -975,7 +995,8 @@ export class AdministrationRoleCommand {
 			}
 			if (source.role.id === destination.role.id) {
 				await interaction.editReply({
-					content: "🚫 Le rôle source et le rôle à donner sont le même : l'opération n'aurait aucun effet.",
+					content:
+						"🚫 Le rôle source et le rôle à donner sont le même : l'opération n'aurait aucun effet.",
 				});
 				return;
 			}
@@ -1018,7 +1039,9 @@ export class AdministrationRoleCommand {
 			}
 
 			const apercu = rgEmbed()
-				.setTitle(enSimulation ? "Simulation — rien n'a été écrit" : "Distribuer ce rôle en masse ?")
+				.setTitle(
+					enSimulation ? "Simulation — rien n'a été écrit" : "Distribuer ce rôle en masse ?"
+				)
 				.setDescription(entete)
 				.addFields(
 					{ name: "Membres à traiter", value: `**${plan.aTraiter}**`, inline: true },
@@ -1055,8 +1078,8 @@ export class AdministrationRoleCommand {
 			}
 
 			if (enSimulation) {
-				apercu.setFooter({
-					text: "Relance avec simulation:Faux pour distribuer réellement.",
+				pied(apercu, {
+					note: "Relance avec simulation:Faux pour distribuer réellement.",
 				});
 				await interaction.editReply({ embeds: [apercu] });
 				return;
@@ -1155,7 +1178,10 @@ export class AdministrationRoleCommand {
 				components: [],
 			});
 		} catch (err) {
-			await interaction.editReply({ content: `❌ ${messageRefus(err)}`, components: [] });
+			await repondre(interaction, {
+				components: [],
+				...echec("Action refusée", messageRefus(err)),
+			});
 		}
 	}
 }

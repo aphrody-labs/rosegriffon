@@ -102,7 +102,8 @@ async function lireEtat(): Promise<EtatPatreon> {
 
 	let derniere = 0;
 	for (const ligne of lignes) {
-		const date = ligne.fetched_at instanceof Date ? ligne.fetched_at : new Date(ligne.fetched_at ?? "");
+		const date =
+			ligne.fetched_at instanceof Date ? ligne.fetched_at : new Date(ligne.fetched_at ?? "");
 		const temps = date.getTime();
 		if (Number.isFinite(temps) && temps > derniere) derniere = temps;
 	}

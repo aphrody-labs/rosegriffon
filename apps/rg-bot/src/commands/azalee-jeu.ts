@@ -102,6 +102,7 @@ import {
 	resoudreRarete,
 	suggerer,
 } from "../lib/ievr-labels";
+import { echec, pied, repondre } from "../lib/ui";
 
 // --- Vues des réponses de l'API -------------------------------------------
 
@@ -615,29 +616,37 @@ async function stadesConnus(): Promise<FicheStade[]> {
 
 /** Les 15 magasins, avec leur ventilation par catégorie. */
 async function magasinsConnus(): Promise<EntreeMagasin[]> {
-	return await cached<EntreeMagasin[]>("azalee:magasins", 10 * 60_000, async () =>
-		((await azalee().shops()) ?? []) as unknown as EntreeMagasin[]
+	return await cached<EntreeMagasin[]>(
+		"azalee:magasins",
+		10 * 60_000,
+		async () => ((await azalee().shops()) ?? []) as unknown as EntreeMagasin[]
 	);
 }
 
 /** Les 102 entraîneurs / coordinateurs de la table `inagle_coaches`. */
 async function entraineursConnus(): Promise<FicheEntraineur[]> {
-	return await cached<FicheEntraineur[]>("azalee:entraineurs", 10 * 60_000, async () =>
-		((await azalee().coaches()) ?? []) as unknown as FicheEntraineur[]
+	return await cached<FicheEntraineur[]>(
+		"azalee:entraineurs",
+		10 * 60_000,
+		async () => ((await azalee().coaches()) ?? []) as unknown as FicheEntraineur[]
 	);
 }
 
 /** Les 30 signes d'invocation et leurs taux. */
 async function signesInvocation(): Promise<SigneInvocation[]> {
-	return await cached<SigneInvocation[]>("azalee:invocation", 30 * 60_000, async () =>
-		((await azalee().invocation()) ?? []) as unknown as SigneInvocation[]
+	return await cached<SigneInvocation[]>(
+		"azalee:invocation",
+		30 * 60_000,
+		async () => ((await azalee().invocation()) ?? []) as unknown as SigneInvocation[]
 	);
 }
 
 /** Toutes les données de drops (123 lots concrets, 19 groupes d'esprits, 98 fèves). */
 async function donneesDrops(): Promise<DonneesDrops> {
-	return await cached<DonneesDrops>("azalee:drops", 30 * 60_000, async () =>
-		(await azalee().drops()) as unknown as DonneesDrops
+	return await cached<DonneesDrops>(
+		"azalee:drops",
+		30 * 60_000,
+		async () => (await azalee().drops()) as unknown as DonneesDrops
 	);
 }
 
@@ -727,7 +736,10 @@ async function rendreGalerie(etat: EtatListeAzalee): Promise<InteractionEditRepl
 	const resultat =
 		page === parametres.page
 			? premier
-			: ((await azalee().gallery({ ...parametres, page } as never)) as unknown as Page<EntreeGalerie>);
+			: ((await azalee().gallery({
+					...parametres,
+					page,
+				} as never)) as unknown as Page<EntreeGalerie>);
 	const entrees = resultat.data ?? [];
 	const pages = nombreDePages(total, PAR_PAGE);
 
@@ -763,7 +775,7 @@ async function rendreGalerie(etat: EtatListeAzalee): Promise<InteractionEditRepl
 			embed.setImage(apercu);
 		}
 	}
-	embed.setFooter({ text: `Page ${page}/${pages} · azalee.rosegriffon.fr` });
+	pied(embed, { page: page, pages: pages });
 	return { embeds: [embed], components: boutonsPagination(etat, page, pages) };
 }
 
@@ -787,7 +799,9 @@ async function rendreDrops(etat: EtatListeAzalee): Promise<InteractionEditReplyO
 
 	const compteurs = donnees.counts ?? {};
 	const embed = rgEmbed()
-		.setTitle(`Taux de drop — ${formaterNombre(filtres.length)} lot${filtres.length > 1 ? "s" : ""}`)
+		.setTitle(
+			`Taux de drop — ${formaterNombre(filtres.length)} lot${filtres.length > 1 ? "s" : ""}`
+		)
 		.setURL(urlWiki("/drops"));
 	if (etat.filtre || etat.recherche) {
 		embed.setAuthor({
@@ -833,12 +847,14 @@ async function rendreDrops(etat: EtatListeAzalee): Promise<InteractionEditReplyO
 		typeof compteurs.spiritGroups === "number"
 			? `${formaterNombre(compteurs.spiritGroups)} groupes d'esprits`
 			: null,
-		typeof compteurs.beans === "number" ? `${formaterNombre(compteurs.beans)} fèves d'équipe` : null,
+		typeof compteurs.beans === "number"
+			? `${formaterNombre(compteurs.beans)} fèves d'équipe`
+			: null,
 	]);
 	if (resume.length > 0) {
 		embed.addFields({ name: "Ensemble des données", value: truncate(resume, 1000) });
 	}
-	embed.setFooter({ text: `Page ${page}/${pages} · azalee.rosegriffon.fr` });
+	pied(embed, { page: page, pages: pages });
 	return { embeds: [embed], components: boutonsPagination(etat, page, pages) };
 }
 
@@ -890,7 +906,7 @@ async function rendreCoordinateurs(etat: EtatListeAzalee): Promise<InteractionEd
 			)
 		);
 	}
-	embed.setFooter({ text: `Page ${page}/${pages} · azalee.rosegriffon.fr` });
+	pied(embed, { page: page, pages: pages });
 	return { embeds: [embed], components: boutonsPagination(etat, page, pages) };
 }
 
@@ -900,12 +916,14 @@ async function rendreCoordinateurs(etat: EtatListeAzalee): Promise<InteractionEd
  * Tout l'état d'une liste tient dans l'identifiant du bouton : aucune mémoire de
  * processus, donc un redémarrage du bot ne laisse jamais de bouton mort.
  */
-const VUES_PAGINEES: Record<string, (etat: EtatListeAzalee) => Promise<InteractionEditReplyOptions>> =
-	{
-		galerie: rendreGalerie,
-		drops: rendreDrops,
-		coordinateur: rendreCoordinateurs,
-	};
+const VUES_PAGINEES: Record<
+	string,
+	(etat: EtatListeAzalee) => Promise<InteractionEditReplyOptions>
+> = {
+	galerie: rendreGalerie,
+	drops: rendreDrops,
+	coordinateur: rendreCoordinateurs,
+};
 
 @Discord()
 @SlashGroup({
@@ -916,7 +934,8 @@ const VUES_PAGINEES: Record<string, (etat: EtatListeAzalee) => Promise<Interacti
 export class AzaleeJeuCommand {
 	@Slash({
 		name: "perso",
-		description: "Fiche d'un personnage d'Inazuma Eleven: Victory Road : poste, élément, statistiques",
+		description:
+			"Fiche d'un personnage d'Inazuma Eleven: Victory Road : poste, élément, statistiques",
 	})
 	async perso(
 		@SlashOption({
@@ -974,7 +993,9 @@ export class AzaleeJeuCommand {
 				retenues.toSorted((a, b) => totalStats(b) - totalStats(a))[0] ?? ({} as VariantePerso);
 			const slug = String(perso.baseSlug ?? perso.slug ?? nom);
 
-			const embed = rgEmbed().setTitle(texteFr(perso.names)).setURL(urlWiki(`/chara/${slug}`));
+			const embed = rgEmbed()
+				.setTitle(texteFr(perso.names))
+				.setURL(urlWiki(`/chara/${slug}`));
 
 			const resume = truncate(nettoyerTexteJeu(texteFr(perso.descriptions, "")), 400);
 			if (resume.length > 0) {
@@ -1029,9 +1050,7 @@ export class AzaleeJeuCommand {
 			const contexte = joindre([
 				equipe ? `Équipe **${equipe}**` : null,
 				perso.series ? `Série **${perso.series}**` : null,
-				perso.constellation?.names
-					? `Signe **${texteFr(perso.constellation.names, "?")}**`
-					: null,
+				perso.constellation?.names ? `Signe **${texteFr(perso.constellation.names, "?")}**` : null,
 				variantes.length > 1
 					? `${variantes.length} variantes${raretes.length > 1 ? ` (${raretes.join(", ")})` : ""}`
 					: null,
@@ -1065,7 +1084,7 @@ export class AzaleeJeuCommand {
 			}
 			await interaction.editReply({ embeds: [embed] });
 		} catch (err) {
-			await interaction.editReply({ content: `❌ ${messageErreurAzalee(err)}` });
+			await repondre(interaction, echec("Données de jeu indisponibles", messageErreurAzalee(err)));
 		}
 	}
 
@@ -1187,7 +1206,7 @@ export class AzaleeJeuCommand {
 			}
 			await interaction.editReply({ embeds: [embed] });
 		} catch (err) {
-			await interaction.editReply({ content: `❌ ${messageErreurAzalee(err)}` });
+			await repondre(interaction, echec("Données de jeu indisponibles", messageErreurAzalee(err)));
 		}
 	}
 
@@ -1244,9 +1263,7 @@ export class AzaleeJeuCommand {
 				libelleCategorieObjet(objet.category)
 					? `Catégorie **${libelleCategorieObjet(objet.category)}**`
 					: null,
-				typeof objet.price === "number"
-					? `Prix **${objet.price.toLocaleString("fr-FR")}**`
-					: null,
+				typeof objet.price === "number" ? `Prix **${objet.price.toLocaleString("fr-FR")}**` : null,
 				objet.internalCode ? `Code \`${objet.internalCode}\`` : null,
 			]);
 			if (fiche.length > 0) {
@@ -1275,7 +1292,7 @@ export class AzaleeJeuCommand {
 			}
 			await interaction.editReply({ embeds: [embed] });
 		} catch (err) {
-			await interaction.editReply({ content: `❌ ${messageErreurAzalee(err)}` });
+			await repondre(interaction, echec("Données de jeu indisponibles", messageErreurAzalee(err)));
 		}
 	}
 
@@ -1313,7 +1330,8 @@ export class AzaleeJeuCommand {
 					const [trouvee] = classerPropositions(
 						await equipesConnues(),
 						texte,
-						(candidate) => `${candidate.name ?? ""} ${candidate.nameEn ?? ""} ${candidate.nameJa ?? ""}`,
+						(candidate) =>
+							`${candidate.name ?? ""} ${candidate.nameEn ?? ""} ${candidate.nameJa ?? ""}`,
 						1
 					);
 					return trouvee?.id ? String(trouvee.id) : null;
@@ -1355,7 +1373,7 @@ export class AzaleeJeuCommand {
 			}
 			await interaction.editReply({ embeds: [embed] });
 		} catch (err) {
-			await interaction.editReply({ content: `❌ ${messageErreurAzalee(err)}` });
+			await repondre(interaction, echec("Données de jeu indisponibles", messageErreurAzalee(err)));
 		}
 	}
 
@@ -1388,7 +1406,8 @@ export class AzaleeJeuCommand {
 				{
 					titre: "Personnages",
 					lignes: (resultat.characters ?? []).map(
-						(perso) => `[${texteFr(perso.names)}](${urlWiki(`/chara/${perso.baseSlug ?? perso.slug}`)})`
+						(perso) =>
+							`[${texteFr(perso.names)}](${urlWiki(`/chara/${perso.baseSlug ?? perso.slug}`)})`
 					),
 				},
 				{
@@ -1424,7 +1443,7 @@ export class AzaleeJeuCommand {
 			}
 			await interaction.editReply({ embeds: [embed] });
 		} catch (err) {
-			await interaction.editReply({ content: `❌ ${messageErreurAzalee(err)}` });
+			await repondre(interaction, echec("Données de jeu indisponibles", messageErreurAzalee(err)));
 		}
 	}
 
@@ -1478,14 +1497,20 @@ export class AzaleeJeuCommand {
 		try {
 			const type: SlugAura | null = resoudreTypeAura(famille);
 			if (!type) {
-				await interaction.editReply({
-					content: `❌ Famille d'aura inconnue. Choisis parmi : ${TYPES_AURA.map((t) => t.libelle).join(", ")}.`,
-				});
+				await repondre(
+					interaction,
+					echec(
+						"Valeur inconnue",
+						`Famille d'aura inconnue. Choisis parmi : ${TYPES_AURA.map((t) => t.libelle).join(", ")}.`
+					)
+				);
 				return;
 			}
 
 			if (!nom) {
-				const liste = (await azalee().auras(type, { limit: 25 } as never)) as unknown as Page<EntreeAura>;
+				const liste = (await azalee().auras(type, {
+					limit: 25,
+				} as never)) as unknown as Page<EntreeAura>;
 				const entrees = liste.data ?? [];
 				const embed = rgEmbed()
 					.setTitle(`${libelleTypeAura(type)} — ${formaterNombre(liste.total ?? entrees.length)}`)
@@ -1500,8 +1525,8 @@ export class AzaleeJeuCommand {
 								3800
 							)
 				);
-				embed.setFooter({
-					text: "Relance la commande avec l'option « nom » pour ouvrir une fiche · azalee.rosegriffon.fr",
+				pied(embed, {
+					note: "Relance la commande avec l'option « nom » pour ouvrir une fiche · azalee.rosegriffon.fr",
 				});
 				await interaction.editReply({ embeds: [embed] });
 				return;
@@ -1555,13 +1580,16 @@ export class AzaleeJeuCommand {
 			}
 			await interaction.editReply({ embeds: [embed] });
 		} catch (err) {
-			await interaction.editReply({ content: `❌ ${messageErreurAzalee(err)}` });
+			await repondre(interaction, echec("Données de jeu indisponibles", messageErreurAzalee(err)));
 		}
 	}
 
 	// --- Tactiques ---------------------------------------------------------
 
-	@Slash({ name: "tactique", description: "Fiche d'une tactique spéciale : effets, durée, recharge" })
+	@Slash({
+		name: "tactique",
+		description: "Fiche d'une tactique spéciale : effets, durée, recharge",
+	})
 	async tactique(
 		@SlashOption({
 			name: "nom",
@@ -1590,7 +1618,10 @@ export class AzaleeJeuCommand {
 			const tactique = await ouvrirFiche<FicheTactique>(
 				async (cle) => (await azalee().tactic(cle)) as unknown as FicheTactique,
 				async (texte) => {
-					const liste = (await azalee().tactics({ q: texte, limit: 1 } as never)) as unknown as Page<EntreeTactique>;
+					const liste = (await azalee().tactics({
+						q: texte,
+						limit: 1,
+					} as never)) as unknown as Page<EntreeTactique>;
 					const trouvee = (liste.data ?? [])[0];
 					return trouvee?.itemId ? String(trouvee.itemId) : null;
 				},
@@ -1643,7 +1674,7 @@ export class AzaleeJeuCommand {
 			}
 			await interaction.editReply({ embeds: [embed] });
 		} catch (err) {
-			await interaction.editReply({ content: `❌ ${messageErreurAzalee(err)}` });
+			await repondre(interaction, echec("Données de jeu indisponibles", messageErreurAzalee(err)));
 		}
 	}
 
@@ -1683,7 +1714,10 @@ export class AzaleeJeuCommand {
 			const passif = await ouvrirFiche<FichePassif>(
 				async (cle) => (await azalee().passive(cle)) as unknown as FichePassif,
 				async (texte) => {
-					const liste = (await azalee().passives({ q: texte, limit: 1 } as never)) as unknown as Page<FichePassif>;
+					const liste = (await azalee().passives({
+						q: texte,
+						limit: 1,
+					} as never)) as unknown as Page<FichePassif>;
 					const trouve = (liste.data ?? [])[0];
 					return trouve?.passive_id ? String(trouve.passive_id) : null;
 				},
@@ -1724,7 +1758,7 @@ export class AzaleeJeuCommand {
 			}
 			await interaction.editReply({ embeds: [embed] });
 		} catch (err) {
-			await interaction.editReply({ content: `❌ ${messageErreurAzalee(err)}` });
+			await repondre(interaction, echec("Données de jeu indisponibles", messageErreurAzalee(err)));
 		}
 	}
 
@@ -1804,7 +1838,7 @@ export class AzaleeJeuCommand {
 			}
 			await interaction.editReply({ embeds: [embed] });
 		} catch (err) {
-			await interaction.editReply({ content: `❌ ${messageErreurAzalee(err)}` });
+			await repondre(interaction, echec("Données de jeu indisponibles", messageErreurAzalee(err)));
 		}
 	}
 
@@ -1850,7 +1884,8 @@ export class AzaleeJeuCommand {
 				const [trouve] = classerPropositions(
 					await entraineursConnus(),
 					nom,
-					(candidat) => `${candidat.name ?? ""} ${candidat.nameRomaji ?? ""} ${candidat.nameKanji ?? ""}`,
+					(candidat) =>
+						`${candidat.name ?? ""} ${candidat.nameRomaji ?? ""} ${candidat.nameKanji ?? ""}`,
 					1
 				);
 				coach = trouve ?? null;
@@ -1881,7 +1916,10 @@ export class AzaleeJeuCommand {
 			if (bonus.length > 0) {
 				// `inagle_manager_passives.stat` et `.requirements` n'existent qu'en
 				// anglais dans les données du jeu.
-				embed.addFields({ name: "Effet — libellés non traduits dans le jeu", value: truncate(bonus, 1000) });
+				embed.addFields({
+					name: "Effet — libellés non traduits dans le jeu",
+					value: truncate(bonus, 1000),
+				});
 			}
 
 			const progression = joindre([
@@ -1912,7 +1950,7 @@ export class AzaleeJeuCommand {
 			}
 			await interaction.editReply({ embeds: [embed] });
 		} catch (err) {
-			await interaction.editReply({ content: `❌ ${messageErreurAzalee(err)}` });
+			await repondre(interaction, echec("Données de jeu indisponibles", messageErreurAzalee(err)));
 		}
 	}
 
@@ -1976,13 +2014,16 @@ export class AzaleeJeuCommand {
 			}
 			await interaction.editReply({ embeds: [embed] });
 		} catch (err) {
-			await interaction.editReply({ content: `❌ ${messageErreurAzalee(err)}` });
+			await repondre(interaction, echec("Données de jeu indisponibles", messageErreurAzalee(err)));
 		}
 	}
 
 	// --- Succès ------------------------------------------------------------
 
-	@Slash({ name: "succes", description: "Fiche d'un succès ou d'un trophée : condition d'obtention" })
+	@Slash({
+		name: "succes",
+		description: "Fiche d'un succès ou d'un trophée : condition d'obtention",
+	})
 	async succes(
 		@SlashOption({
 			name: "nom",
@@ -2051,7 +2092,7 @@ export class AzaleeJeuCommand {
 			}
 			await interaction.editReply({ embeds: [embed] });
 		} catch (err) {
-			await interaction.editReply({ content: `❌ ${messageErreurAzalee(err)}` });
+			await repondre(interaction, echec("Données de jeu indisponibles", messageErreurAzalee(err)));
 		}
 	}
 
@@ -2085,9 +2126,7 @@ export class AzaleeJeuCommand {
 			}
 			if (lots.length === 0) {
 				embed.setDescription(
-					lot
-						? "Aucun lot ne porte ce hash."
-						: "La table des capsules ne contient aucun lot."
+					lot ? "Aucun lot ne porte ce hash." : "La table des capsules ne contient aucun lot."
 				);
 			} else {
 				// ⚠ `contentRef` ne résout vers AUCUNE table extraite : la
@@ -2112,18 +2151,21 @@ export class AzaleeJeuCommand {
 					),
 				});
 			}
-			embed.setFooter({
-				text: "Les références de contenu ne sont résolues par aucune table extraite du jeu · azalee.rosegriffon.fr",
+			pied(embed, {
+				note: "Les références de contenu ne sont résolues par aucune table extraite du jeu · azalee.rosegriffon.fr",
 			});
 			await interaction.editReply({ embeds: [embed] });
 		} catch (err) {
-			await interaction.editReply({ content: `❌ ${messageErreurAzalee(err)}` });
+			await repondre(interaction, echec("Données de jeu indisponibles", messageErreurAzalee(err)));
 		}
 	}
 
 	// --- Costumes ----------------------------------------------------------
 
-	@Slash({ name: "costume", description: "Costumes de personnage : types et modèles 3D référencés" })
+	@Slash({
+		name: "costume",
+		description: "Costumes de personnage : types et modèles 3D référencés",
+	})
 	async costume(
 		@SlashOption({
 			name: "recherche",
@@ -2169,18 +2211,21 @@ export class AzaleeJeuCommand {
 					),
 				});
 			}
-			embed.setFooter({
-				text: "Les hachages de modèle ne pointent vers aucun chemin d'image extrait · azalee.rosegriffon.fr",
+			pied(embed, {
+				note: "Les hachages de modèle ne pointent vers aucun chemin d'image extrait · azalee.rosegriffon.fr",
 			});
 			await interaction.editReply({ embeds: [embed] });
 		} catch (err) {
-			await interaction.editReply({ content: `❌ ${messageErreurAzalee(err)}` });
+			await repondre(interaction, echec("Données de jeu indisponibles", messageErreurAzalee(err)));
 		}
 	}
 
 	// --- Invocation --------------------------------------------------------
 
-	@Slash({ name: "invocation", description: "Taux d'invocation par signe : légendaire, rare, commun" })
+	@Slash({
+		name: "invocation",
+		description: "Taux d'invocation par signe : légendaire, rare, commun",
+	})
 	async invocation(
 		@SlashOption({
 			name: "signe",
@@ -2189,10 +2234,8 @@ export class AzaleeJeuCommand {
 			required: false,
 			autocomplete: (interaction: AutocompleteInteraction) =>
 				repondreSuggestions(interaction, async () =>
-					classerPropositions(
-						await signesInvocation(),
-						saisie(interaction),
-						(signe) => String(signe.name ?? "")
+					classerPropositions(await signesInvocation(), saisie(interaction), (signe) =>
+						String(signe.name ?? "")
 					).map((signe) => ({
 						name: truncate(`${signe.name ?? "Signe"} (${signe.totalChars ?? 0})`, 100),
 						value: String(signe.signNo ?? ""),
@@ -2220,8 +2263,8 @@ export class AzaleeJeuCommand {
 						3800
 					)
 				);
-				embed.setFooter({
-					text: "Relance la commande avec l'option « signe » pour les taux détaillés · azalee.rosegriffon.fr",
+				pied(embed, {
+					note: "Relance la commande avec l'option « signe » pour les taux détaillés · azalee.rosegriffon.fr",
 				});
 				await interaction.editReply({ embeds: [embed] });
 				return;
@@ -2254,7 +2297,7 @@ export class AzaleeJeuCommand {
 			}
 			await interaction.editReply({ embeds: [embed] });
 		} catch (err) {
-			await interaction.editReply({ content: `❌ ${messageErreurAzalee(err)}` });
+			await repondre(interaction, echec("Données de jeu indisponibles", messageErreurAzalee(err)));
 		}
 	}
 
@@ -2290,13 +2333,16 @@ export class AzaleeJeuCommand {
 				})
 			);
 		} catch (err) {
-			await interaction.editReply({ content: `❌ ${messageErreurAzalee(err)}` });
+			await repondre(interaction, echec("Données de jeu indisponibles", messageErreurAzalee(err)));
 		}
 	}
 
 	// --- Magasins ----------------------------------------------------------
 
-	@Slash({ name: "magasin", description: "Magasins du jeu : catalogue et ventilation par catégorie" })
+	@Slash({
+		name: "magasin",
+		description: "Magasins du jeu : catalogue et ventilation par catégorie",
+	})
 	async magasin(
 		@SlashOption({
 			name: "nom",
@@ -2390,10 +2436,10 @@ export class AzaleeJeuCommand {
 			if (articles.length > 0) {
 				// Deux champs au plus : un catalogue de 547 articles ne rentre pas
 				// dans un embed, et le dépassement ferait échouer l'envoi entier.
-				const blocs = decouperEnChamps(
-					[articles.slice(0, 120).join(" · ")],
-					{ maxParChamp: 1000, maxChamps: 2 }
-				);
+				const blocs = decouperEnChamps([articles.slice(0, 120).join(" · ")], {
+					maxParChamp: 1000,
+					maxChamps: 2,
+				});
 				blocs.forEach((bloc, index) => {
 					embed.addFields({
 						name: index === 0 ? `Aperçu du catalogue (${articles.length})` : "Suite",
@@ -2403,7 +2449,7 @@ export class AzaleeJeuCommand {
 			}
 			await interaction.editReply({ embeds: [embed] });
 		} catch (err) {
-			await interaction.editReply({ content: `❌ ${messageErreurAzalee(err)}` });
+			await repondre(interaction, echec("Données de jeu indisponibles", messageErreurAzalee(err)));
 		}
 	}
 
@@ -2449,7 +2495,7 @@ export class AzaleeJeuCommand {
 				})
 			);
 		} catch (err) {
-			await interaction.editReply({ content: `❌ ${messageErreurAzalee(err)}` });
+			await repondre(interaction, echec("Données de jeu indisponibles", messageErreurAzalee(err)));
 		}
 	}
 
@@ -2536,7 +2582,7 @@ export class AzaleeJeuCommand {
 			}
 			await interaction.editReply({ embeds: [embed] });
 		} catch (err) {
-			await interaction.editReply({ content: `❌ ${messageErreurAzalee(err)}` });
+			await repondre(interaction, echec("Données de jeu indisponibles", messageErreurAzalee(err)));
 		}
 	}
 

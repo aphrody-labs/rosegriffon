@@ -81,7 +81,11 @@ export function normaliserCanal(nom: string | null | undefined): string | null {
  * réglage partagé, à défaut de `DISCORD_NEWS_CHANNEL_ID`.
  */
 export function annonceHistorique(): AnnoncePosts {
-	return { salon: Bun.env.DISCORD_NEWS_CHANNEL_ID?.trim() ?? "", curseur: CANAL_NOTIFICATION, roleMention: null };
+	return {
+		salon: Bun.env.DISCORD_NEWS_CHANNEL_ID?.trim() ?? "",
+		curseur: CANAL_NOTIFICATION,
+		roleMention: null,
+	};
 }
 
 /**
@@ -103,8 +107,7 @@ export function salonAnnonce(
 	annonce: AnnoncePosts,
 	filtre: Pick<FiltreTweets, "salon">
 ): string | null {
-	const duReglage =
-		annonce.curseur === CANAL_NOTIFICATION ? (filtre.salon ?? "").trim() : "";
+	const duReglage = annonce.curseur === CANAL_NOTIFICATION ? (filtre.salon ?? "").trim() : "";
 	const choisi = duReglage.length > 0 ? duReglage : annonce.salon.trim();
 	return choisi.length > 0 ? choisi : null;
 }
@@ -127,7 +130,9 @@ const CLE_CACHE_CATEGORIES = "tweets:categories";
  * PARAMÈTRE lié (`$n::text[]`), jamais du SQL concaténé.
  */
 export function litteralTexteArray(valeurs: readonly string[]): string {
-	const echappees = valeurs.map((valeur) => `"${valeur.replaceAll("\\", "\\\\").replaceAll('"', '\\"')}"`);
+	const echappees = valeurs.map(
+		(valeur) => `"${valeur.replaceAll("\\", "\\\\").replaceAll('"', '\\"')}"`
+	);
 	return `{${echappees.join(",")}}`;
 }
 
@@ -266,7 +271,9 @@ export interface Curseur {
  * présent, et `cree: true` fait sortir le drain avant tout envoi.
  */
 export async function assurerCurseur(canal = CANAL_NOTIFICATION): Promise<Curseur> {
-	const inseres = await sql<Array<{ canal: string; curseur_le: Date; dernier_tweet_id: string | null; annonces: number }>>`
+	const inseres = await sql<
+		Array<{ canal: string; curseur_le: Date; dernier_tweet_id: string | null; annonces: number }>
+	>`
 		INSERT INTO public.tweet_notification_curseurs (canal, curseur_le)
 		VALUES (${canal}, now())
 		ON CONFLICT (canal) DO NOTHING
@@ -285,7 +292,9 @@ export async function assurerCurseur(canal = CANAL_NOTIFICATION): Promise<Curseu
 			cree: true,
 		};
 	}
-	const lignes = await sql<Array<{ canal: string; curseur_le: Date; dernier_tweet_id: string | null; annonces: number }>>`
+	const lignes = await sql<
+		Array<{ canal: string; curseur_le: Date; dernier_tweet_id: string | null; annonces: number }>
+	>`
 		SELECT canal, curseur_le, dernier_tweet_id, annonces
 		FROM public.tweet_notification_curseurs
 		WHERE canal = ${canal}
@@ -303,7 +312,9 @@ export async function assurerCurseur(canal = CANAL_NOTIFICATION): Promise<Curseu
 
 /** Curseur sans création : `null` s'il n'existe pas encore. */
 export async function lireCurseur(canal = CANAL_NOTIFICATION): Promise<Curseur | null> {
-	const lignes = await sql<Array<{ curseur_le: Date; dernier_tweet_id: string | null; annonces: number }>>`
+	const lignes = await sql<
+		Array<{ curseur_le: Date; dernier_tweet_id: string | null; annonces: number }>
+	>`
 		SELECT curseur_le, dernier_tweet_id, annonces
 		FROM public.tweet_notification_curseurs
 		WHERE canal = ${canal}

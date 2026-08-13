@@ -56,6 +56,7 @@ import { borner, formaterNombre, horodatageAbsolu } from "../staff/format";
 import { differerEnPrive, exigerDroits, messagePanne } from "../staff/garde";
 import { construirePatchVeille } from "./valeurs";
 import "./racine";
+import { echec, piedTexte, repondre } from "../../lib/ui";
 
 /** Comptes X connus de l'archive — pour ne pas suivre un pseudo mal orthographié. */
 async function suggererComptes(interaction: AutocompleteInteraction): Promise<void> {
@@ -123,7 +124,8 @@ async function suggererCategories(interaction: AutocompleteInteraction): Promise
 export class AdministrationVeilleCommand {
 	@Slash({
 		name: "regler",
-		description: "Change la notification des posts X : salon, comptes, filtre, curseur (rôle admin)",
+		description:
+			"Change la notification des posts X : salon, comptes, filtre, curseur (rôle admin)",
 	})
 	async regler(
 		@SlashOption({
@@ -207,9 +209,13 @@ export class AdministrationVeilleCommand {
 			if (salon) {
 				const { salon: joignable, raison } = await resoudreSalon(interaction.client, salon.id);
 				if (!joignable) {
-					await interaction.editReply({
-						content: `❌ Rien n'a été enregistré. ${borner(raison ?? "Salon injoignable.", 1_500)}`,
-					});
+					await repondre(
+						interaction,
+						echec(
+							"Rien n'a été fait",
+							`Rien n'a été enregistré. ${borner(raison ?? "Salon injoignable.", 1_500)}`
+						)
+					);
 					return;
 				}
 			}
@@ -329,14 +335,14 @@ export class AdministrationVeilleCommand {
 						1_000
 					),
 				})
-				.setFooter({ text: "État complet et curseur : /staff veille suivi" });
+				.setFooter(piedTexte({ note: "État complet et curseur : /staff veille suivi" }));
 
 			if (ligneCurseur !== null) {
 				embed.addFields({ name: "Curseur", value: borner(ligneCurseur, 1_000) });
 			}
 			await interaction.editReply({ embeds: [embed] });
 		} catch (err) {
-			await interaction.editReply({ content: `❌ ${messagePanne(err)}` });
+			await repondre(interaction, echec("Le service n'a pas répondu", messagePanne(err)));
 		}
 	}
 }

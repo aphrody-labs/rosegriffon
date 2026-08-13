@@ -25,6 +25,16 @@
  * le télécharger, et on ne le fait pas.
  */
 
+import { formaterOctets as formaterOctetsUi } from "./ui/nombres";
+import {
+	MAX_CUSTOM_ID as MAX_CUSTOM_ID_UI,
+	bornerPage as bornerPageUi,
+	decoderEtat,
+	encoderEtat,
+	nombreDePages as nombreDePagesUi,
+	pageDecodee,
+} from "./ui/etat";
+
 // ─── Variantes d'image ──────────────────────────────────────────────────────
 
 /**
@@ -148,7 +158,10 @@ export function normaliserCheminAsset(saisie: string, baseCdn: string): Resoluti
 
 	let segments: string[];
 	try {
-		segments = chemin.split("/").filter((s) => s.length > 0).map(decodeSegment);
+		segments = chemin
+			.split("/")
+			.filter((s) => s.length > 0)
+			.map(decodeSegment);
 	} catch {
 		return { ok: false, raison: "Chemin illisible (encodage invalide)." };
 	}
@@ -379,7 +392,9 @@ export function choisirTextureModele(
 	});
 
 	const choisi = trie[0];
-	return typeof choisi === "string" ? `/${choisi.slice("data/".length).replace(/\.g4tx$/i, ".png")}` : null;
+	return typeof choisi === "string"
+		? `/${choisi.slice("data/".length).replace(/\.g4tx$/i, ".png")}`
+		: null;
 }
 
 // ─── Galerie ────────────────────────────────────────────────────────────────
@@ -423,10 +438,7 @@ export const GALERIE_PAR_PAGE = 4;
 
 /** Nombre total de pages pour un total d'éléments. */
 export function nombreDePages(total: number, parPage: number): number {
-	if (parPage <= 0) {
-		return 1;
-	}
-	return Math.max(1, Math.ceil(Math.max(0, total) / parPage));
+	return nombreDePagesUi(total, parPage);
 }
 
 /**
@@ -436,28 +448,19 @@ export function nombreDePages(total: number, parPage: number): number {
  * que la catégorie est vide alors qu'il a simplement dépassé la fin.
  */
 export function bornerPage(page: number, total: number, parPage: number): number {
-	const pages = nombreDePages(total, parPage);
-	if (!Number.isFinite(page)) {
-		return 1;
-	}
-	return Math.min(pages, Math.max(1, Math.trunc(page)));
+	return bornerPageUi(page, total, parPage);
 }
 
 /** Préfixe du `customId` des boutons de pagination de la galerie. */
 export const PREFIXE_BOUTON_GALERIE = "cdng";
 
 /** Longueur maximale d'un `customId` Discord. */
-export const MAX_CUSTOM_ID = 100;
+export const MAX_CUSTOM_ID = MAX_CUSTOM_ID_UI;
 
 export interface EtatGalerie {
 	page: number;
 	categorie: string | null;
 	recherche: string | null;
-}
-
-/** Retire les séparateurs d'un morceau transporté dans un `customId`. */
-function sansSeparateur(valeur: string | null | undefined): string {
-	return (valeur ?? "").replaceAll("|", " ").trim();
 }
 
 /**
@@ -469,29 +472,24 @@ function sansSeparateur(valeur: string | null | undefined): string {
  * les boutons plutôt que d'envoyer un composant qui sera refusé.
  */
 export function encoderEtatGalerie(etat: EtatGalerie): string | null {
-	const identifiant = [
-		PREFIXE_BOUTON_GALERIE,
-		String(Math.max(1, Math.trunc(etat.page))),
-		sansSeparateur(etat.categorie),
-		sansSeparateur(etat.recherche),
-	].join("|");
-	return identifiant.length <= MAX_CUSTOM_ID ? identifiant : null;
+	return encoderEtat(PREFIXE_BOUTON_GALERIE, [
+		Math.max(1, Math.trunc(etat.page)),
+		etat.categorie,
+		etat.recherche,
+	]);
 }
 
 /** Décode un `customId` produit par `encoderEtatGalerie`. `null` si ce n'en est pas un. */
 export function decoderEtatGalerie(customId: string): EtatGalerie | null {
-	const morceaux = customId.split("|");
-	if (morceaux.length !== 4 || morceaux[0] !== PREFIXE_BOUTON_GALERIE) {
-		return null;
-	}
-	const page = Number.parseInt(morceaux[1] ?? "", 10);
-	if (!Number.isFinite(page) || page < 1) {
+	const champs = decoderEtat(PREFIXE_BOUTON_GALERIE, customId, 3);
+	const page = pageDecodee(champs?.[0]);
+	if (!champs || page === null) {
 		return null;
 	}
 	return {
 		page,
-		categorie: morceaux[2] || null,
-		recherche: morceaux[3] || null,
+		categorie: champs[1] || null,
+		recherche: champs[2] || null,
 	};
 }
 
@@ -505,18 +503,7 @@ export function decoderEtatGalerie(customId: string): EtatGalerie | null {
  * documentation incomparables avec ceux qu'affiche le bot.
  */
 export function formaterOctets(octets: number | null | undefined): string {
-	if (typeof octets !== "number" || !Number.isFinite(octets) || octets < 0) {
-		return "taille inconnue";
-	}
-	const unites = ["o", "Ko", "Mo", "Go"];
-	let valeur = octets;
-	let rang = 0;
-	while (valeur >= 1024 && rang < unites.length - 1) {
-		valeur /= 1024;
-		rang += 1;
-	}
-	const nombre = rang === 0 ? String(Math.round(valeur)) : valeur.toFixed(1).replace(".", ",");
-	return `${nombre} ${unites[rang]}`;
+	return formaterOctetsUi(octets, "taille inconnue");
 }
 
 /** `true` si le type MIME annoncé est bien celui d'une image. */

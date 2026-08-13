@@ -68,9 +68,8 @@ await mock.module("./tweets", () => ({
 	},
 }));
 
-const { drainerTweets, demarrerNotifieurTweets, ligneJournal, resoudreSalon } = await import(
-	"./tweetsNotifier"
-);
+const { drainerTweets, demarrerNotifieurTweets, ligneJournal, resoudreSalon } =
+	await import("./tweetsNotifier");
 const { annonceHistorique, normaliserCanal, salonAnnonce } = servicesReels;
 
 // ── Doublures ──────────────────────────────────────────────────────────────
@@ -101,7 +100,11 @@ function clientFactice(
 				}
 				return {
 					isSendable: () => comportement.nonEcrivable !== true,
-					send: async (options: { embeds?: unknown[]; nonce?: unknown; enforceNonce?: unknown }) => {
+					send: async (options: {
+						embeds?: unknown[];
+						nonce?: unknown;
+						enforceNonce?: unknown;
+					}) => {
 						envois.push({
 							salonId: id,
 							nonce: options.nonce,
@@ -157,7 +160,9 @@ beforeEach(() => {
 });
 
 /** Capture `console.info`/`console.warn` le temps d'un appel. */
-async function sansJournal<T>(action: () => T | Promise<T>): Promise<{ valeur: T; lignes: string[] }> {
+async function sansJournal<T>(
+	action: () => T | Promise<T>
+): Promise<{ valeur: T; lignes: string[] }> {
 	const lignes: string[] = [];
 	const infoOrigine = console.info;
 	const warnOrigine = console.warn;
@@ -273,20 +278,29 @@ describe("ligneJournal", () => {
 			contexte,
 			null
 		);
-		const repris = ligneJournal({ etat: "rien", candidats: 0, publies: 0 }, contexte, bloque.empreinte);
+		const repris = ligneJournal(
+			{ etat: "rien", candidats: 0, publies: 0 },
+			contexte,
+			bloque.empreinte
+		);
 		expect(repris.ligne).toContain("la cause du blocage précédent a disparu");
 		expect(repris.empreinte).toBeNull();
 
-		const suivant = ligneJournal({ etat: "rien", candidats: 0, publies: 0 }, contexte, repris.empreinte);
+		const suivant = ligneJournal(
+			{ etat: "rien", candidats: 0, publies: 0 },
+			contexte,
+			repris.empreinte
+		);
 		expect(suivant.ligne).toBeNull();
 	});
 
 	test("une publication et une amorce sont toujours tracées", () => {
-		expect(ligneJournal({ etat: "publie", candidats: 2, publies: 2 }, contexte, null).ligne).toContain(
-			"2/2"
-		);
 		expect(
-			ligneJournal({ etat: "amorce", candidats: 0, publies: 0, detail: "créé" }, contexte, null).ligne
+			ligneJournal({ etat: "publie", candidats: 2, publies: 2 }, contexte, null).ligne
+		).toContain("2/2");
+		expect(
+			ligneJournal({ etat: "amorce", candidats: 0, publies: 0, detail: "créé" }, contexte, null)
+				.ligne
 		).toContain("amorce");
 	});
 });
@@ -355,7 +369,9 @@ describe("drainerTweets — un curseur par profil", () => {
 	test("un curseur mal nommé arrête le drain avant toute écriture", async () => {
 		const envois: Envoi[] = [];
 		const { valeur: resultat } = await sansJournal(() =>
-			drainerTweets(clientFactice(envois), { annonce: { salon: SALON_AZALEE, curseur: "Az alée !" } })
+			drainerTweets(clientFactice(envois), {
+				annonce: { salon: SALON_AZALEE, curseur: "Az alée !" },
+			})
 		);
 
 		expect(resultat.etat).toBe("echec");
@@ -373,7 +389,9 @@ describe("drainerTweets — un curseur par profil", () => {
 		const envois: Envoi[] = [];
 
 		const { valeur: resultat } = await sansJournal(() =>
-			drainerTweets(clientFactice(envois, { echec: "Unknown Channel" }), { annonce: ANNONCE_AZALEE })
+			drainerTweets(clientFactice(envois, { echec: "Unknown Channel" }), {
+				annonce: ANNONCE_AZALEE,
+			})
 		);
 
 		expect(resultat.etat).toBe("sans-salon");

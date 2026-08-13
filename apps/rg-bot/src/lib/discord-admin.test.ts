@@ -185,7 +185,13 @@ describe("empechementHierarchie", () => {
 	});
 
 	test("chaque empêchement a une explication non vide", () => {
-		for (const cas of ["soi-meme", "le-bot", "proprietaire", "role-superieur", "role-egal"] as const) {
+		for (const cas of [
+			"soi-meme",
+			"le-bot",
+			"proprietaire",
+			"role-superieur",
+			"role-egal",
+		] as const) {
 			expect(expliquerEmpechement(cas).length).toBeGreaterThan(20);
 		}
 	});
@@ -450,15 +456,13 @@ describe("manquantesParmi", () => {
 
 	test("nomme ce qui manque pour lire les invitations", () => {
 		const lecteur = new PermissionsBitField(PermissionFlagsBits.ViewChannel);
-		expect(manquantesParmi(lecteur, PERMISSIONS_LECTURE_INVITATIONS)).toEqual([
-			"Gérer le serveur",
-		]);
+		expect(manquantesParmi(lecteur, PERMISSIONS_LECTURE_INVITATIONS)).toEqual(["Gérer le serveur"]);
 	});
 
 	test("ne réclame pas une permission déjà détenue", () => {
-		expect(manquantesParmi(PermissionFlagsBits.ManageGuild, PERMISSIONS_LECTURE_INVITATIONS)).toEqual(
-			[]
-		);
+		expect(
+			manquantesParmi(PermissionFlagsBits.ManageGuild, PERMISSIONS_LECTURE_INVITATIONS)
+		).toEqual([]);
 	});
 });
 
@@ -963,7 +967,11 @@ describe("resumerPurge", () => {
 	});
 
 	test("avoue une recherche tronquée plutôt que de laisser croire à un salon vide", () => {
-		const resume = resumerPurge({ ...base, examines: PAGES_MAX_PURGE * TAILLE_PAGE_MESSAGES, tronque: true });
+		const resume = resumerPurge({
+			...base,
+			examines: PAGES_MAX_PURGE * TAILLE_PAGE_MESSAGES,
+			tronque: true,
+		});
 		expect(resume).toContain(`${PAGES_MAX_PURGE} pages`);
 		expect(resume).toContain("500 messages parcourus");
 	});
@@ -972,10 +980,10 @@ describe("resumerPurge", () => {
 describe("referencesSalon", () => {
 	test("nomme chaque endroit où l'identifiant est câblé", () => {
 		const sources = {
-			"DISCORD_NEWS_CHANNEL_ID": "111",
+			DISCORD_NEWS_CHANNEL_ID: "111",
 			"DISCORD_CHANNELS.ANNONCES": "111",
 			"settings['tweets.notification'].salon": "222",
-			"DISCORD_WIKI_ANNOUNCEMENTS_CHANNEL_ID": undefined,
+			DISCORD_WIKI_ANNOUNCEMENTS_CHANNEL_ID: undefined,
 		};
 		expect(referencesSalon("111", sources)).toEqual([
 			"DISCORD_NEWS_CHANNEL_ID",
@@ -1013,8 +1021,9 @@ describe("assemblerPageInspection", () => {
 		// caractères font 7 000 caractères, la description d'un embed est plafonnée
 		// à 4 096, et la page suivante reprend à l'indice 26 — les entrées coupées
 		// ne seraient JAMAIS affichables.
-		const lignes = Array.from({ length: MAX_LIGNES_PAGE_INSPECTION }, (_, rang) =>
-			`entrée ${rang + 1} ${"x".repeat(300)}`
+		const lignes = Array.from(
+			{ length: MAX_LIGNES_PAGE_INSPECTION },
+			(_, rang) => `entrée ${rang + 1} ${"x".repeat(300)}`
 		);
 		const assemble = assemblerPageInspection(lignes);
 		expect(assemble.length).toBeLessThanOrEqual(4_096);

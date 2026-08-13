@@ -94,12 +94,8 @@ import {
 	urlVariante,
 } from "../lib/cdn-format";
 import { rgEmbed, truncate } from "../lib/embeds";
-import {
-	SERVICES,
-	ServiceIndisponibleError,
-	appelService,
-	sonderServices,
-} from "../lib/services";
+import { SERVICES, ServiceIndisponibleError, appelService, sonderServices } from "../lib/services";
+import { echec, pied, repondre } from "../lib/ui";
 
 /** Base publique du CDN — `CDN_URL`, sinon `https://cdn.rosegriffon.fr`. */
 const CDN = SERVICES.cdn.publique;
@@ -410,7 +406,7 @@ async function rendrePageGalerie(etat: EtatGalerie): Promise<{
 			? `${criteres}\n\nAucune illustration ne correspond.`
 			: `${criteres}\n\nVignettes servies en WebP \`?w=${LARGEUR_VIGNETTE}\` ; le titre de chaque illustration mène à sa version \`?w=${LARGEUR_PLEINE}\`.`
 	);
-	entete.setFooter({ text: `Page ${page}/${pages} · cdn.rosegriffon.fr` });
+	pied(entete, { page: page, pages: pages });
 
 	const embeds: EmbedBuilder[] = [entete];
 	for (const illustration of illustrations) {
@@ -490,7 +486,7 @@ export class CdnCommand {
 
 		const resolution = normaliserCheminAsset(chemin, CDN);
 		if (!resolution.ok) {
-			await interaction.editReply({ content: `❌ ${resolution.raison}` });
+			await repondre(interaction, echec("La commande a échoué", resolution.raison));
 			return;
 		}
 
@@ -514,7 +510,10 @@ export class CdnCommand {
 			}
 
 			const nom = resolution.chemin.slice(resolution.chemin.lastIndexOf("/") + 1);
-			const embed = rgEmbed().setTitle(truncate(nom, 200)).setURL(urlAffichee).setImage(urlAffichee);
+			const embed = rgEmbed()
+				.setTitle(truncate(nom, 200))
+				.setURL(urlAffichee)
+				.setImage(urlAffichee);
 
 			embed.setDescription(
 				resolution.variante
@@ -544,14 +543,14 @@ export class CdnCommand {
 			}
 
 			if (resolution.depuisCpk) {
-				embed.setFooter({
-					text: "Chemin d'index CPK reconnu : le .g4tx a été résolu vers l'image décodée.",
+				pied(embed, {
+					note: "Chemin d'index CPK reconnu : le .g4tx a été résolu vers l'image décodée.",
 				});
 			}
 
 			await interaction.editReply({ embeds: [embed] });
 		} catch (err) {
-			await interaction.editReply({ content: `❌ ${messageErreurReseau(err)}` });
+			await repondre(interaction, echec("Le CDN n'a pas répondu", messageErreurReseau(err)));
 		}
 	}
 
@@ -575,7 +574,7 @@ export class CdnCommand {
 
 		const resolution = normaliserCodeModele(code);
 		if ("raison" in resolution) {
-			await interaction.editReply({ content: `❌ ${resolution.raison}` });
+			await repondre(interaction, echec("La commande a échoué", resolution.raison));
 			return;
 		}
 
@@ -640,7 +639,7 @@ export class CdnCommand {
 			});
 			await interaction.editReply({ embeds: [embed], files: [fichier] });
 		} catch (err) {
-			await interaction.editReply({ content: `❌ ${messageErreurReseau(err)}` });
+			await repondre(interaction, echec("Le CDN n'a pas répondu", messageErreurReseau(err)));
 		}
 	}
 
@@ -707,7 +706,7 @@ export class CdnCommand {
 				})
 			);
 		} catch (err) {
-			await interaction.editReply({ content: `❌ ${messageErreurAzalee(err)}` });
+			await repondre(interaction, echec("Données de jeu indisponibles", messageErreurAzalee(err)));
 		}
 	}
 
@@ -745,7 +744,7 @@ export class CdnCommand {
 		} catch (err) {
 			// Sans ce filet, une panne inattendue laisserait l'interaction sur
 			// « réfléchit… » pendant quinze minutes, sans un mot d'explication.
-			await interaction.editReply({ content: `❌ ${messageErreurReseau(err)}` });
+			await repondre(interaction, echec("Le CDN n'a pas répondu", messageErreurReseau(err)));
 		}
 	}
 

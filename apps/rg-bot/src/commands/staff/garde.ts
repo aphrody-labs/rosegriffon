@@ -28,6 +28,7 @@ import { MessageFlags, type ChatInputCommandInteraction } from "discord.js";
 import { NotAdminError, requireRgAdmin, requireRgAdminStrict, type RgAdmin } from "../../lib/rbac";
 import { CronInjoignableError, cheminSocketCron } from "../../lib/cron-ipc";
 import { ServiceIndisponibleError } from "../../lib/services";
+import { refus as accesRefuse, repondre } from "../../lib/ui";
 
 export type { RgAdmin };
 
@@ -64,7 +65,7 @@ export async function exigerDroits(
 			err instanceof NotAdminError
 				? err.message
 				: "Impossible de vérifier tes droits : la base des profils n'a pas répondu.";
-		await interaction.editReply({ content: `🚫 ${message}` });
+		await repondre(interaction, accesRefuse(message));
 		return null;
 	}
 }

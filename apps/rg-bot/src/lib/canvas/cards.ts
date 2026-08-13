@@ -20,13 +20,7 @@ import {
 	RAYONS,
 	VISUELS,
 } from "./theme";
-import {
-	assainir,
-	decouperEnLignes,
-	initiale,
-	premierTexteUtilisable,
-	tronquer,
-} from "./texte";
+import { assainir, decouperEnLignes, initiale, premierTexteUtilisable, tronquer } from "./texte";
 import {
 	dessinerFilet,
 	dessinerFond,
@@ -279,8 +273,7 @@ export function planifierGrilleEquipe(total: number, lignesRole = 1): PlanGrille
 		HAUT_CARTE_EQUIPE +
 		Math.min(Math.max(lignesRole, 1), MAX_LIGNES_ROLE) * INTERLIGNE_ROLE +
 		RESPIRATION;
-	const corps =
-		affiches === 0 ? HAUTEUR_ETAT_VIDE : lignes * (hauteurCarte + ECART) - ECART;
+	const corps = affiches === 0 ? HAUTEUR_ETAT_VIDE : lignes * (hauteurCarte + ECART) - ECART;
 	return {
 		colonnes,
 		lignes,
@@ -459,7 +452,9 @@ export async function renderProfileCard(p: ProfileCardData): Promise<Buffer> {
 	await dessinerFond(ctx, L, hauteur);
 
 	// Bannière : image de couverture, ou dégradé brique de repli.
-	const banniere = p.banner_url ? await drawCoveredImage(ctx, p.banner_url, 0, 0, L, HAUTEUR_BANNIERE) : false;
+	const banniere = p.banner_url
+		? await drawCoveredImage(ctx, p.banner_url, 0, 0, L, HAUTEUR_BANNIERE)
+		: false;
 	if (!banniere) {
 		const degrade = ctx.createLinearGradient(0, 0, L, HAUTEUR_BANNIERE);
 		degrade.addColorStop(0, PALETTE.brique);
@@ -739,9 +734,7 @@ export async function renderChroniqueList(
 ): Promise<Buffer> {
 	ensureFonts();
 	const corps =
-		rows.length === 0
-			? HAUTEUR_ETAT_VIDE
-			: rows.length * (HAUTEUR_CARTE_CHRONIQUE + ECART) - ECART;
+		rows.length === 0 ? HAUTEUR_ETAT_VIDE : rows.length * (HAUTEUR_CARTE_CHRONIQUE + ECART) - ECART;
 	const hauteur = HAUTEUR_ENTETE + RESPIRATION + corps + RESPIRATION + HAUTEUR_PIED;
 
 	const canvas = createCanvas(L, hauteur);

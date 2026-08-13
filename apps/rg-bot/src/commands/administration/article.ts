@@ -65,6 +65,7 @@ import {
 	type StatutArticle,
 } from "./valeurs";
 import "./racine-gestion";
+import { echec, piedTexte, repondre } from "../../lib/ui";
 
 /**
  * Colonnes énumérées une par une.
@@ -284,12 +285,14 @@ export class AdministrationArticleCommand {
 			const embed = rgEmbed()
 				.setTitle(`${articles.length} article${articles.length > 1 ? "s" : ""}${filtre}`)
 				.setDescription(descriptionListe(articles))
-				.setFooter({
-					text: `${repartition} · publier avec /administration article publier`,
-				});
+				.setFooter(
+					piedTexte({
+						note: `${repartition} · publier avec /administration article publier`,
+					})
+				);
 			await interaction.editReply({ embeds: [embed] });
 		} catch (err) {
-			await interaction.editReply({ content: `❌ ${messagePanne(err)}` });
+			await repondre(interaction, echec("Le service n'a pas répondu", messagePanne(err)));
 		}
 	}
 
@@ -427,15 +430,17 @@ export class AdministrationArticleCommand {
 						inline: true,
 					}
 				)
-				.setFooter({
-					text:
-						apres.status === "published"
-							? "Visible du public · l'adresse ci-dessus est celle que voient les visiteurs"
-							: "Retiré du public · l'adresse ci-dessus répondra 404 aux visiteurs",
-				});
+				.setFooter(
+					piedTexte({
+						note:
+							apres.status === "published"
+								? "Visible du public · l'adresse ci-dessus est celle que voient les visiteurs"
+								: "Retiré du public · l'adresse ci-dessus répondra 404 aux visiteurs",
+					})
+				);
 			await interaction.editReply({ embeds: [embed] });
 		} catch (err) {
-			await interaction.editReply({ content: `❌ ${messagePanne(err)}` });
+			await repondre(interaction, echec("Le service n'a pas répondu", messagePanne(err)));
 		}
 	}
 }

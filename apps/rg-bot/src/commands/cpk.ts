@@ -38,14 +38,14 @@ import {
 	ActionRowBuilder,
 	ApplicationCommandOptionType,
 	AttachmentBuilder,
-	ButtonBuilder,
-	ButtonStyle,
-	MessageFlags,
 	type AutocompleteInteraction,
+	ButtonBuilder,
 	type ButtonInteraction,
+	ButtonStyle,
 	type ChatInputCommandInteraction,
 	type EmbedBuilder,
 	type InteractionEditReplyOptions,
+	MessageFlags,
 } from "discord.js";
 
 import type { AzaleeRequestOptions } from "@rosegriffon/azalee/remote";
@@ -54,25 +54,28 @@ import { azalee, isAzaleeNotFound, messageErreurAzalee, urlWiki } from "../lib/a
 import { cached } from "../lib/cache";
 import { rgEmbed, truncate } from "../lib/embeds";
 import {
+	type ApercuCpk,
 	apercuCpk,
 	bornerOffset,
 	cheminParent,
 	cheminWiki,
 	correspondPrefixe,
+	type CpkDir,
+	type CpkFile,
 	decoderParcours,
 	decoderRecherche,
 	decouperSaisieDossier,
 	encoderParcours,
 	encoderRecherche,
-	entierLisible,
 	ENTREES_PAR_PAGE,
+	entierLisible,
 	estRacine,
 	extraitConfig,
+	liensContenu,
 	ligneAriane,
 	ligneDossier,
 	ligneFichier,
 	ligneResultat,
-	liensContenu,
 	MAX_VALEUR_AUTOCOMPLETION,
 	methodeRefusee,
 	MOTIF_MINIMUM,
@@ -80,17 +83,17 @@ import {
 	nomPieceJointe,
 	normaliserChemin,
 	numeroPage,
-	octetsLisibles,
 	OCTETS_APERCU_CONFIG,
+	octetsLisibles,
 	PLAFOND_RECHERCHE,
+	PREFIXE_BOUTON_PARCOURS,
+	PREFIXE_BOUTON_RECHERCHE,
 	RESULTATS_PAR_PAGE,
 	resumerConfig,
 	tientEnPieceJointe,
 	tranchePage,
-	type ApercuCpk,
-	type CpkDir,
-	type CpkFile,
 } from "../lib/cpk-format";
+import { echec, pied, rangeePagination, repondre } from "../lib/ui";
 
 // ─── Accès aux données, mis en cache ────────────────────────────────────────
 
@@ -150,11 +153,7 @@ async function squeletteDossier(
 }
 
 /** Tranche de fichiers directs d'un dossier. */
-async function fichiersDossier(
-	chemin: string,
-	offset: number,
-	limite: number
-): Promise<CpkFile[]> {
+async function fichiersDossier(chemin: string, offset: number, limite: number): Promise<CpkFile[]> {
 	if (limite <= 0) {
 		return [];
 	}
@@ -251,9 +250,7 @@ async function sonderContenu(url: string, delaiMs = DELAI_CDN_MS): Promise<Sonde
 	try {
 		return await cached(`cpk:sonde:${url}`, TTL_SONDE_MS, async () => {
 			const tete = await interrogerContenu(url, "HEAD", delaiMs);
-			return methodeRefusee(tete.statut)
-				? await interrogerContenu(url, "GET", delaiMs)
-				: tete;
+			return methodeRefusee(tete.statut) ? await interrogerContenu(url, "GET", delaiMs) : tete;
 		});
 	} catch {
 		return null;
@@ -308,34 +305,27 @@ async function lireCorpsBorne(url: string, maxOctets: number): Promise<CorpsBorn
 
 // ─── Rendu : parcours d'un dossier ──────────────────────────────────────────
 
-/** Boutons « précédent / suivant » d'une pagination, ou rien si une seule page. */
+/**
+ * Boutons d'une pagination, ou rien si une seule page.
+ *
+ * Les deux identifiants attendus sont ceux des pages VOISINES ; la trousse
+ * reconstruit elle-même les sauts de bout de liste à partir de `identifiant`,
+ * qu'on lui donne sous la forme d'une fonction de page.
+ */
 function boutonsPagination(
-	idPrecedent: string | null,
-	idSuivant: string | null,
+	prefixe: string,
+	identifiant: (page: number) => string | null,
 	page: number,
 	pages: number
 ): Array<ActionRowBuilder<ButtonBuilder>> {
-	if (pages <= 1 || idPrecedent === null || idSuivant === null) {
-		return [];
-	}
-	return [
-		new ActionRowBuilder<ButtonBuilder>().addComponents(
-			new ButtonBuilder()
-				.setCustomId(idPrecedent)
-				.setLabel("Précédent")
-				.setStyle(ButtonStyle.Secondary)
-				.setDisabled(page <= 1),
-			new ButtonBuilder()
-				.setCustomId(idSuivant)
-				.setLabel("Suivant")
-				.setStyle(ButtonStyle.Secondary)
-				.setDisabled(page >= pages)
-		),
-	];
+	return rangeePagination({ prefixe, page, pages, identifiant });
 }
 
 /** Construit la réponse d'une page de `/cpk parcourir`. */
-async function rendreParcours(chemin: string, offsetDemande: number): Promise<InteractionEditReplyOptions> {
+async function rendreParcours(
+	chemin: string,
+	offsetDemande: number
+): Promise<InteractionEditReplyOptions> {
 	const propre = normaliserChemin(chemin);
 	const squelette = await squeletteDossier(propre);
 	const total = squelette.dirs.length + squelette.fileTotal;
@@ -373,17 +363,8 @@ async function rendreParcours(chemin: string, offsetDemande: number): Promise<In
 	}
 
 	const offset = bornerOffset(offsetDemande, total, ENTREES_PAR_PAGE);
-	const tranche = tranchePage(
-		squelette.dirs.length,
-		squelette.fileTotal,
-		offset,
-		ENTREES_PAR_PAGE
-	);
-	const fichiers = await fichiersDossier(
-		propre,
-		tranche.offsetFichiers,
-		tranche.limiteFichiers
-	);
+	const tranche = tranchePage(squelette.dirs.length, squelette.fileTotal, offset, ENTREES_PAR_PAGE);
+	const fichiers = await fichiersDossier(propre, tranche.offsetFichiers, tranche.limiteFichiers);
 
 	const lignes = [
 		...squelette.dirs.slice(tranche.debutDossiers, tranche.finDossiers).map(ligneDossier),
@@ -410,13 +391,13 @@ async function rendreParcours(chemin: string, offsetDemande: number): Promise<In
 			].join("\n"),
 		});
 	}
-	embed.setFooter({ text: `Page ${page}/${pages} · azalee.rosegriffon.fr` });
+	pied(embed, { page: page, pages: pages });
 
 	return {
 		embeds: [embed],
 		components: boutonsPagination(
-			encoderParcours({ chemin: propre, offset: offset - ENTREES_PAR_PAGE }),
-			encoderParcours({ chemin: propre, offset: offset + ENTREES_PAR_PAGE }),
+			PREFIXE_BOUTON_PARCOURS,
+			(cible) => encoderParcours({ chemin: propre, offset: (cible - 1) * ENTREES_PAR_PAGE }),
 			page,
 			pages
 		),
@@ -426,7 +407,10 @@ async function rendreParcours(chemin: string, offsetDemande: number): Promise<In
 // ─── Rendu : recherche ──────────────────────────────────────────────────────
 
 /** Construit la réponse d'une page de `/cpk chercher`. */
-async function rendreRecherche(motif: string, offsetDemande: number): Promise<InteractionEditReplyOptions> {
+async function rendreRecherche(
+	motif: string,
+	offsetDemande: number
+): Promise<InteractionEditReplyOptions> {
 	const propre = motif.trim();
 	const embed = rgEmbed().setTitle(`🔎 Fichiers du jeu — « ${truncate(propre, 100)} »`);
 
@@ -474,15 +458,17 @@ async function rendreRecherche(motif: string, offsetDemande: number): Promise<In
 			value: `Le motif en renvoie au moins ${entierLisible(PLAFOND_RECHERCHE)} ; affinez-le pour voir le reste.`,
 		});
 	}
-	embed.setFooter({
-		text: `Page ${page}/${pages} · ${entierLisible(resultats.length)} résultat${resultats.length > 1 ? "s" : ""}`,
+	pied(embed, {
+		page,
+		pages,
+		note: `${entierLisible(resultats.length)} résultat${resultats.length > 1 ? "s" : ""}`,
 	});
 
 	return {
 		embeds: [embed],
 		components: boutonsPagination(
-			encoderRecherche({ motif: propre, offset: offset - RESULTATS_PAR_PAGE }),
-			encoderRecherche({ motif: propre, offset: offset + RESULTATS_PAR_PAGE }),
+			PREFIXE_BOUTON_RECHERCHE,
+			(cible) => encoderRecherche({ motif: propre, offset: (cible - 1) * RESULTATS_PAR_PAGE }),
 			page,
 			pages
 		),
@@ -674,7 +660,7 @@ export class CpkCommand {
 				await rendreParcours(chemin ?? "", ((page ?? 1) - 1) * ENTREES_PAR_PAGE)
 			);
 		} catch (err) {
-			await interaction.editReply({ content: `❌ ${messageErreurAzalee(err)}` });
+			await repondre(interaction, echec("Données de jeu indisponibles", messageErreurAzalee(err)));
 		}
 	}
 
@@ -707,7 +693,7 @@ export class CpkCommand {
 				await rendreRecherche(motif, ((page ?? 1) - 1) * RESULTATS_PAR_PAGE)
 			);
 		} catch (err) {
-			await interaction.editReply({ content: `❌ ${messageErreurAzalee(err)}` });
+			await repondre(interaction, echec("Données de jeu indisponibles", messageErreurAzalee(err)));
 		}
 	}
 
@@ -766,11 +752,8 @@ export class CpkCommand {
 			}
 
 			const total = await totalIndexe();
-			embed.setFooter({
-				text:
-					total === null
-						? "azalee.rosegriffon.fr"
-						: `${entierLisible(total)} fichiers indexés · azalee.rosegriffon.fr`,
+			pied(embed, {
+				note: total === null ? null : `${entierLisible(total)} fichiers indexés`,
 			});
 
 			await interaction.editReply(
@@ -786,7 +769,7 @@ export class CpkCommand {
 				});
 				return;
 			}
-			await interaction.editReply({ content: `❌ ${messageErreurAzalee(err)}` });
+			await repondre(interaction, echec("Données de jeu indisponibles", messageErreurAzalee(err)));
 		}
 	}
 

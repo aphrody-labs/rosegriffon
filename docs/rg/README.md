@@ -45,6 +45,7 @@ dans `.gitignore` — c'est donc ici que vit toute la doc de fond.
 | [deploiement-sans-coupure.md](deploiement-sans-coupure.md) | Publication bleu/vert : slots, versions, prévisualisation, et les trois pièges qui cassent une prod pendant un déploiement. |
 | [self-host-supabase.md](self-host-supabase.md) | Sortie de Supabase : PostgreSQL local, PostgREST, Storage et Realtime auto-hébergés. |
 | [bot-azalee.md](bot-azalee.md) | Second bot Discord (serveur Azalée) sur le même code que le bot Rose Griffon : profils, jeton, invitation, curseur d'annonce. |
+| [bot-format.md](bot-format.md) | Charte de présentation des deux bots : trousse `lib/ui`, couleurs, icônes, pagination, limites de l'API, patron d'une commande. |
 | [mcp.md](mcp.md) | Serveur MCP du monorepo : mise en service, connexion distante, portées. |
 | [rag-unified.md](rag-unified.md) | Recherche sémantique unifiée : embeddings auto-hébergés, graphe de liens, ingestion. |
 | [stockage-secondaire.md](stockage-secondaire.md) | Le second VPS en archive froide : outil de déport, ce qui est déporté, ce qui ne doit pas l'être. |

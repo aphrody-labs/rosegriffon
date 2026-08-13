@@ -386,9 +386,9 @@ describe("construirePatchVeille", () => {
 			"fan-content",
 			"leak",
 		]);
-		expect(construirePatchVeille(avant, { inclure: "Fan-Content" }).patch.categories_exclues).toEqual(
-			[]
-		);
+		expect(
+			construirePatchVeille(avant, { inclure: "Fan-Content" }).patch.categories_exclues
+		).toEqual([]);
 	});
 
 	test("chaque changement dit d'où l'on vient", () => {
@@ -430,12 +430,18 @@ describe("comparerMembres", () => {
 	});
 });
 
-
 describe("confidentialité des profils", () => {
 	test("l'e-mail et l'adresse postale sont déclarés privés", () => {
 		// Les six colonnes réellement présentes dans `profiles` (relevé du
 		// 13/8/2026) et qui décrivent une personne hors de nos bases.
-		for (const colonne of ["email", "address_line1", "address_line2", "city", "postal_code", "country"]) {
+		for (const colonne of [
+			"email",
+			"address_line1",
+			"address_line2",
+			"city",
+			"postal_code",
+			"country",
+		]) {
 			expect(estColonneProfilPrivee(colonne)).toBe(true);
 		}
 	});
@@ -669,7 +675,10 @@ describe("urlIllustrationAbsolue", () => {
 	test("laisse passer une URL CDN déjà absolue", () => {
 		// Valeur réelle de l'article `critique-communautaire-de-inazuma-eleven-victory-road`.
 		expect(
-			urlIllustrationAbsolue("https://cdn.rosegriffon.fr/dx11/menu/220_img", "https://rosegriffon.fr")
+			urlIllustrationAbsolue(
+				"https://cdn.rosegriffon.fr/dx11/menu/220_img",
+				"https://rosegriffon.fr"
+			)
 		).toBe("https://cdn.rosegriffon.fr/dx11/menu/220_img");
 	});
 

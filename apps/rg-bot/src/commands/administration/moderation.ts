@@ -94,6 +94,7 @@ import {
 	type ProfilAffichable,
 } from "./valeurs";
 import "./racine-moderation";
+import { echec, piedTexte, refus as accesRefuse, repondre } from "../../lib/ui";
 
 /** Délai laissé pour confirmer une action irréversible. */
 const DELAI_CONFIRMATION_MS = 60_000;
@@ -540,7 +541,7 @@ export class AdministrationModerationCommand {
 				cible,
 			});
 			if (refus) {
-				await interaction.editReply({ content: `🚫 ${refus}` });
+				await repondre(interaction, accesRefuse(refus));
 				return;
 			}
 
@@ -585,7 +586,7 @@ export class AdministrationModerationCommand {
 						inline: true,
 					}
 				)
-				.setFooter({ text: "Action irréversible · 60 secondes pour confirmer" });
+				.setFooter(piedTexte({ note: "Action irréversible · 60 secondes pour confirmer" }));
 
 			const decision = await confirmer(interaction, apercu, "Bannir");
 			if (decision === null) {
@@ -653,14 +654,19 @@ export class AdministrationModerationCommand {
 							{ name: "Notification privée", value: remise, inline: true },
 							{ name: "Compte rosegriffon.fr", value: truncate(compte, 1_000) }
 						)
-						.setFooter({
-							text: "Journal d'audit Discord + admin_audit_log · lever avec /administration moderation debannir",
-						}),
+						.setFooter(
+							piedTexte({
+								note: "Journal d'audit Discord + admin_audit_log · lever avec /administration moderation debannir",
+							})
+						),
 					alerteJournal
 				)
 			);
 		} catch (err) {
-			await interaction.editReply({ content: `❌ ${messageApi(err)}`, components: [], embeds: [] });
+			await repondre(interaction, {
+				components: [],
+				...echec("Discord a refusé l'action", messageApi(err)),
+			});
 		}
 	}
 
@@ -706,9 +712,10 @@ export class AdministrationModerationCommand {
 
 			const manquantes = permissionsManquantes(contexte.moi.permissions.bitfield, "bannir");
 			if (manquantes.length > 0) {
-				await interaction.editReply({
-					content: `🚫 Le bot n'a pas la permission **${manquantes.join(", ")}** sur ce serveur.`,
-				});
+				await repondre(
+					interaction,
+					accesRefuse(`Le bot n'a pas la permission **${manquantes.join(", ")}** sur ce serveur.`)
+				);
 				return;
 			}
 
@@ -760,15 +767,17 @@ export class AdministrationModerationCommand {
 									value: motifOrigine ? truncate(motifOrigine, 1_000) : "*aucun motif enregistré*",
 								}
 							)
-							.setFooter({
-								text: "Le compte peut revenir avec une invitation · il n'est pas réinvité automatiquement",
-							}),
+							.setFooter(
+								piedTexte({
+									note: "Le compte peut revenir avec une invitation · il n'est pas réinvité automatiquement",
+								})
+							),
 						alerteJournal
 					),
 				],
 			});
 		} catch (err) {
-			await interaction.editReply({ content: `❌ ${messageApi(err)}` });
+			await repondre(interaction, echec("Discord a refusé l'action", messageApi(err)));
 		}
 	}
 
@@ -815,7 +824,7 @@ export class AdministrationModerationCommand {
 				cible,
 			});
 			if (refus) {
-				await interaction.editReply({ content: `🚫 ${refus}` });
+				await repondre(interaction, accesRefuse(refus));
 				return;
 			}
 
@@ -832,9 +841,11 @@ export class AdministrationModerationCommand {
 						inline: true,
 					}
 				)
-				.setFooter({
-					text: "L'expulsion retire le membre et ses rôles · 60 secondes pour confirmer",
-				});
+				.setFooter(
+					piedTexte({
+						note: "L'expulsion retire le membre et ses rôles · 60 secondes pour confirmer",
+					})
+				);
 
 			const decision = await confirmer(interaction, apercu, "Expulser");
 			if (decision === null) {
@@ -877,14 +888,19 @@ export class AdministrationModerationCommand {
 							{ name: "Motif", value: truncate(motif, 1_000) },
 							{ name: "Notification privée", value: remise, inline: true }
 						)
-						.setFooter({
-							text: "Le membre peut revenir avec une invitation · pour l'en empêcher, bannis-le",
-						}),
+						.setFooter(
+							piedTexte({
+								note: "Le membre peut revenir avec une invitation · pour l'en empêcher, bannis-le",
+							})
+						),
 					alerteJournal
 				)
 			);
 		} catch (err) {
-			await interaction.editReply({ content: `❌ ${messageApi(err)}`, components: [], embeds: [] });
+			await repondre(interaction, {
+				components: [],
+				...echec("Discord a refusé l'action", messageApi(err)),
+			});
 		}
 	}
 
@@ -948,7 +964,7 @@ export class AdministrationModerationCommand {
 				cible,
 			});
 			if (refus) {
-				await interaction.editReply({ content: `🚫 ${refus}` });
+				await repondre(interaction, accesRefuse(refus));
 				return;
 			}
 
@@ -994,7 +1010,9 @@ export class AdministrationModerationCommand {
 					{ name: "Notification privée", value: remise, inline: true },
 					{ name: "Motif", value: truncate(motif, 1_000) }
 				)
-				.setFooter({ text: "Lever avant terme : /administration moderation leverexclusion" });
+				.setFooter(
+					piedTexte({ note: "Lever avant terme : /administration moderation leverexclusion" })
+				);
 			ajouterAlerteJournal(embed, alerteJournal);
 			if (exclusionEnCours) {
 				embed.addFields({
@@ -1004,7 +1022,7 @@ export class AdministrationModerationCommand {
 			}
 			await interaction.editReply({ embeds: [embed] });
 		} catch (err) {
-			await interaction.editReply({ content: `❌ ${messageApi(err)}` });
+			await repondre(interaction, echec("Discord a refusé l'action", messageApi(err)));
 		}
 	}
 
@@ -1049,7 +1067,7 @@ export class AdministrationModerationCommand {
 				cible,
 			});
 			if (refus) {
-				await interaction.editReply({ content: `🚫 ${refus}` });
+				await repondre(interaction, accesRefuse(refus));
 				return;
 			}
 
@@ -1096,13 +1114,15 @@ export class AdministrationModerationCommand {
 									inline: true,
 								}
 							)
-							.setFooter({ text: "Le membre peut de nouveau écrire, réagir et parler en vocal" }),
+							.setFooter(
+								piedTexte({ note: "Le membre peut de nouveau écrire, réagir et parler en vocal" })
+							),
 						alerteJournal
 					),
 				],
 			});
 		} catch (err) {
-			await interaction.editReply({ content: `❌ ${messageApi(err)}` });
+			await repondre(interaction, echec("Discord a refusé l'action", messageApi(err)));
 		}
 	}
 
@@ -1140,7 +1160,7 @@ export class AdministrationModerationCommand {
 				cibleEstBot: cible.id === contexte.moi.id,
 			});
 			if (empechement) {
-				await interaction.editReply({ content: `🚫 ${expliquerEmpechement(empechement)}` });
+				await repondre(interaction, accesRefuse(expliquerEmpechement(empechement)));
 				return;
 			}
 			if (!cible.utilisateur) {
@@ -1187,17 +1207,19 @@ export class AdministrationModerationCommand {
 									inline: true,
 								}
 							)
-							.setFooter({
-								text: transmis
-									? "Consigné dans admin_audit_log · aucune trace côté Discord (ce n'est pas une sanction)"
-									: "Consigné dans admin_audit_log · le membre n'a PAS été prévenu, préviens-le autrement",
-							}),
+							.setFooter(
+								piedTexte({
+									note: transmis
+										? "Consigné dans admin_audit_log · aucune trace côté Discord (ce n'est pas une sanction)"
+										: "Consigné dans admin_audit_log · le membre n'a PAS été prévenu, préviens-le autrement",
+								})
+							),
 						alerteJournal
 					),
 				],
 			});
 		} catch (err) {
-			await interaction.editReply({ content: `❌ ${messageApi(err)}` });
+			await repondre(interaction, echec("Discord a refusé l'action", messageApi(err)));
 		}
 	}
 }

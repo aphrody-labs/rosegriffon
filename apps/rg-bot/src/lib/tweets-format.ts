@@ -5,7 +5,20 @@
  * décidable sans base (faut-il annoncer ce tweet ? quelle image ? quelle page ?)
  * vit ici et se teste sans démarrer quoi que ce soit. Les accès base sont dans
  * `services/tweets.ts`, l'envoi dans `services/tweetsNotifier.ts`.
+ *
+ * Le comptage des pages, la grammaire du `customId` et la troncature sont
+ * délégués à la trousse de présentation (`lib/ui/etat.ts`, `lib/ui/texte.ts`) :
+ * ce sont les mêmes règles pour les cinq surfaces paginées du bot.
  */
+import { borner, ilYA } from "./ui/texte";
+import {
+	MAX_CUSTOM_ID as MAX_CUSTOM_ID_UI,
+	bornerPage as bornerPageUi,
+	decoderEtat,
+	encoderEtat,
+	nombreDePages as nombreDePagesUi,
+	pageDecodee,
+} from "./ui/etat";
 
 /** Ligne de `public.tweets`, réduite aux colonnes que le bot lit. */
 export interface LigneTweet {
@@ -131,7 +144,8 @@ export function decouperEnLots<T extends { length: number }>(
 		const taille = Math.max(0, element.length);
 		// Un élément seul plus gros que la borne part quand même seul : le tronquer
 		// ici serait une décision de rendu prise au mauvais endroit.
-		const debordement = courant.length > 0 && (courant.length >= maxParLot || poids + taille > maxCaracteres);
+		const debordement =
+			courant.length > 0 && (courant.length >= maxParLot || poids + taille > maxCaracteres);
 		if (debordement) {
 			lots.push(courant);
 			courant = [];
@@ -349,7 +363,13 @@ export function imagesTweet(media: unknown): ImageTweet[] {
 		if (item.type !== "photo") {
 			continue;
 		}
-		const candidats = [item.storage_url, item.url, item.preview_url, item.previewUrl, item.original_url]
+		const candidats = [
+			item.storage_url,
+			item.url,
+			item.preview_url,
+			item.previewUrl,
+			item.original_url,
+		]
 			.filter(estChaineNonVide)
 			.map((valeur) => valeur.trim());
 		const stockee = candidats.find((valeur) => valeur.includes(CHEMIN_STOCKAGE));
@@ -413,10 +433,7 @@ export function texteSansLienMedia(texte: string | null | undefined): string {
 
 /** Coupe proprement, avec une ellipse, sans jamais dépasser `max`. */
 export function couper(texte: string, max: number): string {
-	if (texte.length <= max) {
-		return texte;
-	}
-	return `${texte.slice(0, Math.max(0, max - 1)).trimEnd()}…`;
+	return borner(texte, max);
 }
 
 /**
@@ -481,11 +498,7 @@ export function dateTweet(tweet: LigneTweet): Date | null {
 
 /** Horodatage Discord relatif (`<t:…:R>`), qui se localise chez chaque membre. */
 export function horodatageDiscord(tweet: LigneTweet): string {
-	const date = dateTweet(tweet);
-	if (!date) {
-		return "—";
-	}
-	return `<t:${Math.floor(date.getTime() / 1000)}:R>`;
+	return ilYA(dateTweet(tweet));
 }
 
 /** Ligne d'un tweet dans la liste paginée. */
@@ -506,10 +519,7 @@ export function ligneListe(tweet: LigneTweet, maxTexte = 180): string {
 
 /** Nombre total de pages pour un total et une taille de page donnés (jamais 0). */
 export function nombreDePages(total: number, parPage: number): number {
-	if (parPage <= 0) {
-		return 1;
-	}
-	return Math.max(1, Math.ceil(Math.max(0, total) / parPage));
+	return nombreDePagesUi(total, parPage);
 }
 
 /**
@@ -520,11 +530,7 @@ export function nombreDePages(total: number, parPage: number): number {
  * garde que `entierPositif` côté site (`lib/x-campagnes/types.ts`).
  */
 export function bornerPage(page: number, total: number, parPage: number): number {
-	const pages = nombreDePages(total, parPage);
-	if (!Number.isFinite(page)) {
-		return 1;
-	}
-	return Math.min(pages, Math.max(1, Math.trunc(page)));
+	return bornerPageUi(page, total, parPage);
 }
 
 /** Décompte par auteur, du plus prolifique au moins, pour la synthèse d'un gros lot. */
@@ -545,18 +551,13 @@ export function compterParAuteur(tweets: LigneTweet[]): Array<{ compte: string; 
 export const PREFIXE_BOUTON_TWEETS = "tw";
 
 /** Longueur maximale d'un `customId` Discord. */
-export const MAX_CUSTOM_ID = 100;
+export const MAX_CUSTOM_ID = MAX_CUSTOM_ID_UI;
 
 export interface EtatListeTweets {
 	page: number;
 	auteur: string | null;
 	categorie: string | null;
 	recherche: string | null;
-}
-
-/** `|` est le séparateur : on le retire des valeurs plutôt que de l'échapper. */
-function sansSeparateur(valeur: string | null | undefined): string {
-	return (valeur ?? "").replaceAll("|", " ").trim();
 }
 
 /**
@@ -568,31 +569,26 @@ function sansSeparateur(valeur: string | null | undefined): string {
  * seraient pires que pas de boutons du tout.
  */
 export function encoderEtatListe(etat: EtatListeTweets): string | null {
-	const identifiant = [
-		PREFIXE_BOUTON_TWEETS,
-		String(Math.max(1, Math.trunc(etat.page))),
-		sansSeparateur(etat.auteur),
-		sansSeparateur(etat.categorie),
-		sansSeparateur(etat.recherche),
-	].join("|");
-	return identifiant.length <= MAX_CUSTOM_ID ? identifiant : null;
+	return encoderEtat(PREFIXE_BOUTON_TWEETS, [
+		etat.page,
+		etat.auteur,
+		etat.categorie,
+		etat.recherche,
+	]);
 }
 
 /** Décode un `customId` produit par `encoderEtatListe`. `null` si ce n'en est pas un. */
 export function decoderEtatListe(customId: string): EtatListeTweets | null {
-	const morceaux = customId.split("|");
-	if (morceaux.length !== 5 || morceaux[0] !== PREFIXE_BOUTON_TWEETS) {
-		return null;
-	}
-	const page = Number.parseInt(morceaux[1] ?? "", 10);
-	if (!Number.isFinite(page) || page < 1) {
+	const champs = decoderEtat(PREFIXE_BOUTON_TWEETS, customId, 4);
+	const page = pageDecodee(champs?.[0]);
+	if (!champs || page === null) {
 		return null;
 	}
 	return {
 		page,
-		auteur: morceaux[2] || null,
-		categorie: morceaux[3] || null,
-		recherche: morceaux[4] || null,
+		auteur: champs[1] || null,
+		categorie: champs[2] || null,
+		recherche: champs[3] || null,
 	};
 }
 

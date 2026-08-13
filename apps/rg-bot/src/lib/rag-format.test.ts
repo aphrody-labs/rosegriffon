@@ -279,7 +279,9 @@ describe("titreResultat / nomChampResultat", () => {
 	});
 
 	test("un titre absent retombe sur l'identifiant de source", () => {
-		expect(titreResultat(resultat({ title: null, source_id: "poc-doc-inagle.md" }))).toBe("poc-doc-inagle.md");
+		expect(titreResultat(resultat({ title: null, source_id: "poc-doc-inagle.md" }))).toBe(
+			"poc-doc-inagle.md"
+		);
 	});
 
 	test("un titre démesuré reste sous la limite de nom de champ", () => {
@@ -291,7 +293,9 @@ describe("titreResultat / nomChampResultat", () => {
 describe("valeurChampResultat", () => {
 	test("ne dépasse jamais la limite de valeur de champ", () => {
 		const enorme = resultat({ source_kind: "lua", title: "gros.lua", content: "x".repeat(50_000) });
-		expect(valeurChampResultat(enorme, 5_000).length).toBeLessThanOrEqual(LIMITES_EMBED.valeurChamp);
+		expect(valeurChampResultat(enorme, 5_000).length).toBeLessThanOrEqual(
+			LIMITES_EMBED.valeurChamp
+		);
 	});
 
 	test("le code part en bloc de code, la prose non", () => {
@@ -309,7 +313,12 @@ describe("valeurChampResultat", () => {
 
 describe("construireChampsResultats", () => {
 	const beaucoup = Array.from({ length: 40 }, (_, i) =>
-		resultat({ id: `r${i}`, source_id: `r${i}`, title: `Résultat ${i}`, content: `[doc] Résultat\n${"y".repeat(2_000)}` })
+		resultat({
+			id: `r${i}`,
+			source_id: `r${i}`,
+			title: `Résultat ${i}`,
+			content: `[doc] Résultat\n${"y".repeat(2_000)}`,
+		})
 	);
 
 	test("ne dépasse jamais 25 champs, quelle que soit la demande", () => {
@@ -332,7 +341,10 @@ describe("construireChampsResultats", () => {
 	});
 
 	test("numérote à partir de 1 dans l'ordre du moteur", () => {
-		const { champs } = construireChampsResultats([FRAGMENT_WIKI, FRAGMENT_LUA], LIMITES_EMBED.total);
+		const { champs } = construireChampsResultats(
+			[FRAGMENT_WIKI, FRAGMENT_LUA],
+			LIMITES_EMBED.total
+		);
 		expect(champs[0]?.name.startsWith("1. ")).toBe(true);
 		expect(champs[1]?.name.startsWith("2. ")).toBe(true);
 	});
@@ -347,12 +359,18 @@ describe("descriptionRecherche", () => {
 	});
 
 	test("nomme le type quand il est filtré", () => {
-		expect(descriptionRecherche({ query: "q", count: 1, results: [] }, "lua")).toContain("script Lua");
+		expect(descriptionRecherche({ query: "q", count: 1, results: [] }, "lua")).toContain(
+			"script Lua"
+		);
 	});
 
 	test("dit clairement qu'il n'y a rien plutôt que d'afficher zéro résultat muet", () => {
-		expect(descriptionRecherche({ query: "q", count: 0, results: [] }, "asset")).toContain("Aucun fragment");
-		expect(descriptionRecherche({ query: "q", count: 0, results: [] }, "asset")).toContain("ressource");
+		expect(descriptionRecherche({ query: "q", count: 0, results: [] }, "asset")).toContain(
+			"Aucun fragment"
+		);
+		expect(descriptionRecherche({ query: "q", count: 0, results: [] }, "asset")).toContain(
+			"ressource"
+		);
 	});
 });
 
@@ -377,7 +395,13 @@ describe("identifiants de texte du jeu", () => {
 
 describe("champsTexteMultilingue", () => {
 	// Fixture réelle — GET /api/text/0x11E1AD03
-	const entree = { hashId: "0x11E1AD03", category: "chara", en: "Mark Evans", fr: "Mark Evans", ja: "円堂 守" };
+	const entree = {
+		hashId: "0x11E1AD03",
+		category: "chara",
+		en: "Mark Evans",
+		fr: "Mark Evans",
+		ja: "円堂 守",
+	};
 
 	test("rend une ligne par langue, dans l'ordre fr → en → ja", () => {
 		const champs = champsTexteMultilingue(entree);
@@ -422,12 +446,16 @@ describe("champsRechercheTexte", () => {
 
 describe("sondes de type", () => {
 	test("zéro résultat prouve un type vide", () => {
-		expect(ligneSonde({ type: "asset", renvoyes: 0, plafond: K_MAX_RAG })).toContain("aucun fragment");
+		expect(ligneSonde({ type: "asset", renvoyes: 0, plafond: K_MAX_RAG })).toContain(
+			"aucun fragment"
+		);
 	});
 
 	test("sous le plafond, le décompte est EXACT", () => {
 		// Mesuré le 13/8/2026 : kinds=lua, k=50 → count = 18.
-		expect(espacesNormalisees(ligneSonde({ type: "lua", renvoyes: 18, plafond: K_MAX_RAG }))).toContain("18 fragments");
+		expect(
+			espacesNormalisees(ligneSonde({ type: "lua", renvoyes: 18, plafond: K_MAX_RAG }))
+		).toContain("18 fragments");
 	});
 
 	test("au plafond, on ne prétend pas connaître le total", () => {
@@ -484,7 +512,9 @@ describe("nombreFr / dateFr", () => {
 
 	test("une date réelle est rendue en heure de Paris", () => {
 		// 2026-08-13T05:23:57Z = 07:23 à Paris (UTC+2 en été).
-		expect(espacesNormalisees(dateFr(new Date("2026-08-13T05:23:57.174Z")))).toContain("13 août 2026");
+		expect(espacesNormalisees(dateFr(new Date("2026-08-13T05:23:57.174Z")))).toContain(
+			"13 août 2026"
+		);
 		expect(espacesNormalisees(dateFr(new Date("2026-08-13T05:23:57.174Z")))).toContain("07:23");
 	});
 });

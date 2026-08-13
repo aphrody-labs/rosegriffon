@@ -31,10 +31,7 @@
  * mauvais endroit.
  */
 import { Discord, Slash, SlashChoice, SlashGroup, SlashOption } from "@rpbey/discordx";
-import {
-	ApplicationCommandOptionType,
-	type ChatInputCommandInteraction,
-} from "discord.js";
+import { ApplicationCommandOptionType, type ChatInputCommandInteraction } from "discord.js";
 
 import { appelerCron } from "../../lib/cron-ipc";
 import { rgEmbed } from "../../lib/embeds";
@@ -52,6 +49,7 @@ import {
 } from "./format";
 import { differerEnPrive, exigerDroits, expliquerRefusScrape, messagePanne } from "./garde";
 import "./racine";
+import { echec, pied, piedTexte, repondre } from "../../lib/ui";
 
 /** Marge de la socket au-delà du délai que le verbe s'accorde. */
 const MARGE_IPC_MS = 10_000;
@@ -126,9 +124,10 @@ export class StaffWebCommand {
 		try {
 			const reponse = await appelerVerbe("scrape.page", { url, profil });
 			if (!reponse.success) {
-				await interaction.editReply({
-					content: `❌ ${expliquerRefusScrape(reponse.code, reponse.error)}`,
-				});
+				await repondre(
+					interaction,
+					echec("Lecture impossible", expliquerRefusScrape(reponse.code, reponse.error))
+				);
 				return;
 			}
 			const adresse = typeof reponse.url === "string" ? reponse.url : url;
@@ -161,14 +160,16 @@ export class StaffWebCommand {
 						inline: true,
 					}
 				)
-				.setFooter({
-					text:
-						`Rendu en ${formaterLatence(reponse.ms ?? 0)}` +
-						(reponse.tronque === true ? " · markdown tronqué à 3500 caractères" : ""),
-				});
+				.setFooter(
+					piedTexte({
+						note:
+							`Rendu en ${formaterLatence(reponse.ms ?? 0)}` +
+							(reponse.tronque === true ? " · markdown tronqué à 3500 caractères" : ""),
+					})
+				);
 			await interaction.editReply({ embeds: [embed] });
 		} catch (err) {
-			await interaction.editReply({ content: `❌ ${messagePanne(err)}` });
+			await repondre(interaction, echec("Le service n'a pas répondu", messagePanne(err)));
 		}
 	}
 
@@ -200,9 +201,10 @@ export class StaffWebCommand {
 		try {
 			const reponse = await appelerVerbe("scrape.google", { requete, limite });
 			if (!reponse.success) {
-				await interaction.editReply({
-					content: `❌ ${expliquerRefusScrape(reponse.code, reponse.error)}`,
-				});
+				await repondre(
+					interaction,
+					echec("Lecture impossible", expliquerRefusScrape(reponse.code, reponse.error))
+				);
 				return;
 			}
 			const resultats = Array.isArray(reponse.resultats)
@@ -213,7 +215,9 @@ export class StaffWebCommand {
 				.setDescription(
 					resultats.length > 0
 						? borner(
-								resultats.map((resultat, rang) => ligneResultatWeb(resultat, rang + 1)).join("\n\n"),
+								resultats
+									.map((resultat, rang) => ligneResultatWeb(resultat, rang + 1))
+									.join("\n\n"),
 								3_900
 							)
 						: "Aucun résultat."
@@ -224,12 +228,14 @@ export class StaffWebCommand {
 					// un relevé Google.
 					value: libelleMoteur(reponse.moteur),
 				})
-				.setFooter({
-					text: `Requête « ${borner(String(reponse.requete ?? requete), 80)} » · ${formaterLatence(reponse.ms ?? 0)}`,
-				});
+				.setFooter(
+					piedTexte({
+						note: `Requête « ${borner(String(reponse.requete ?? requete), 80)} » · ${formaterLatence(reponse.ms ?? 0)}`,
+					})
+				);
 			await interaction.editReply({ embeds: [embed] });
 		} catch (err) {
-			await interaction.editReply({ content: `❌ ${messagePanne(err)}` });
+			await repondre(interaction, echec("Le service n'a pas répondu", messagePanne(err)));
 		}
 	}
 
@@ -254,9 +260,10 @@ export class StaffWebCommand {
 		try {
 			const reponse = await appelerVerbe("scrape.recon", { url });
 			if (!reponse.success) {
-				await interaction.editReply({
-					content: `❌ ${expliquerRefusScrape(reponse.code, reponse.error)}`,
-				});
+				await repondre(
+					interaction,
+					echec("Lecture impossible", expliquerRefusScrape(reponse.code, reponse.error))
+				);
 				return;
 			}
 			const adresse = typeof reponse.urlFinale === "string" ? reponse.urlFinale : url;
@@ -324,12 +331,12 @@ export class StaffWebCommand {
 				});
 			}
 
-			embed.setFooter({
-				text: `Diagnostic maison en ${formaterLatence(reponse.ms ?? 0)} · aucun en-tête d'authentification n'est affiché`,
+			pied(embed, {
+				note: `Diagnostic maison en ${formaterLatence(reponse.ms ?? 0)} · aucun en-tête d'authentification n'est affiché`,
 			});
 			await interaction.editReply({ embeds: [embed] });
 		} catch (err) {
-			await interaction.editReply({ content: `❌ ${messagePanne(err)}` });
+			await repondre(interaction, echec("Le service n'a pas répondu", messagePanne(err)));
 		}
 	}
 }

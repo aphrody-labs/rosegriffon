@@ -62,7 +62,9 @@ const client = new Client({
 	// échouer l'enregistrement des commandes (l'API refuse une guilde inconnue)
 	// et priverait AUSSI l'autre serveur des siennes. Ici, une guilde pas encore
 	// autorisée est simplement ignorée, et prise en compte au redémarrage suivant.
-	botGuilds: [(bot: Client) => bot.guilds.cache.map((g) => g.id).filter((id) => GUILD_IDS.includes(id))],
+	botGuilds: [
+		(bot: Client) => bot.guilds.cache.map((g) => g.id).filter((id) => GUILD_IDS.includes(id)),
+	],
 });
 
 /**
@@ -226,7 +228,10 @@ async function arreter(signal: string): Promise<void> {
 	try {
 		await client.destroy();
 	} catch (err) {
-		console.error("✗ fermeture de la passerelle Discord :", err instanceof Error ? err.message : err);
+		console.error(
+			"✗ fermeture de la passerelle Discord :",
+			err instanceof Error ? err.message : err
+		);
 	}
 
 	closeCache();
@@ -236,7 +241,10 @@ async function arreter(signal: string): Promise<void> {
 		// bloquer l'arrêt du service au-delà de ce délai.
 		await sql.close({ timeout: 5 });
 	} catch (err) {
-		console.error("✗ fermeture de la connexion Postgres :", err instanceof Error ? err.message : err);
+		console.error(
+			"✗ fermeture de la connexion Postgres :",
+			err instanceof Error ? err.message : err
+		);
 	}
 
 	process.exit(0);

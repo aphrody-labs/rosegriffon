@@ -604,7 +604,9 @@ export function demarrerNotifieurTweets(client: Client, profil?: ProfilAnnonceur
 		// relit à la demande.
 		if (evenement.event === "task.done") {
 			const verdict = evenement.success ? "succès" : `échec — ${String(evenement.error ?? "?")}`;
-			console.info(`[cron-ipc] tâche « ${String(evenement.nom)} » terminée : ${verdict} (${String(evenement.durationMs)} ms)`);
+			console.info(
+				`[cron-ipc] tâche « ${String(evenement.nom)} » terminée : ${verdict} (${String(evenement.durationMs)} ms)`
+			);
 			return;
 		}
 		if (evenement.event !== "tweets.signal") {

@@ -65,7 +65,11 @@ describe("lireFiltreTweets", () => {
 	});
 
 	test("un réglage corrompu ne fait ni taire ni emballer la notification", () => {
-		const filtre = lireFiltreTweets({ actif: "oui", comptes: "inazuma_project", max_par_lot: "beaucoup" });
+		const filtre = lireFiltreTweets({
+			actif: "oui",
+			comptes: "inazuma_project",
+			max_par_lot: "beaucoup",
+		});
 		expect(filtre.actif).toBe(false); // seul `true` strict allume
 		expect(filtre.comptes).toEqual([...FILTRE_TWEETS_DEFAUT.comptes]);
 		expect(filtre.max_par_lot).toBe(FILTRE_TWEETS_DEFAUT.max_par_lot);
@@ -92,11 +96,15 @@ describe("tweetEstNotifiable", () => {
 	});
 
 	test("un compte hors liste blanche ne passe pas", () => {
-		expect(tweetEstNotifiable(tweet({ author_username: "JavierSolero16" }), filtreActif)).toBe(false);
+		expect(tweetEstNotifiable(tweet({ author_username: "JavierSolero16" }), filtreActif)).toBe(
+			false
+		);
 	});
 
 	test("la casse du pseudo n'a aucun sens sur X", () => {
-		expect(tweetEstNotifiable(tweet({ author_username: "INAZUMA_PROJECT" }), filtreActif)).toBe(true);
+		expect(tweetEstNotifiable(tweet({ author_username: "INAZUMA_PROJECT" }), filtreActif)).toBe(
+			true
+		);
 	});
 
 	test("`leak` est refusé même si le réglage l'autorise", () => {
@@ -166,13 +174,17 @@ describe("médias", () => {
 	test("une URL relative hors Storage est refusée : Discord ne la résoudrait pas", () => {
 		expect(urlMediaAbsolue("/ievr.webp")).toBeNull();
 		expect(urlMediaAbsolue("javascript:alert(1)")).toBeNull();
-		expect(urlMediaAbsolue("https://cdn.rosegriffon.fr/x.png")).toBe("https://cdn.rosegriffon.fr/x.png");
+		expect(urlMediaAbsolue("https://cdn.rosegriffon.fr/x.png")).toBe(
+			"https://cdn.rosegriffon.fr/x.png"
+		);
 	});
 });
 
 describe("formaterMetriques", () => {
 	test("n'affiche que les compteurs non nuls", () => {
-		expect(formaterMetriques({ like_count: 12, view_count: 0, retweet_count: 3 })).toBe("♥ 12 · RT 3");
+		expect(formaterMetriques({ like_count: 12, view_count: 0, retweet_count: 3 })).toBe(
+			"♥ 12 · RT 3"
+		);
 	});
 
 	test("rend null quand tout est à zéro ou absent", () => {
@@ -219,9 +231,15 @@ describe("texte", () => {
 describe("ligneListe", () => {
 	test("porte l'auteur cliquable, l'horodatage et les étiquettes", () => {
 		const ligne = ligneListe(
-			tweet({ is_thread: true, tweet_count: 4, media: [{ type: "photo", url: "https://pbs.twimg.com/a.jpg" }] })
+			tweet({
+				is_thread: true,
+				tweet_count: 4,
+				media: [{ type: "photo", url: "https://pbs.twimg.com/a.jpg" }],
+			})
 		);
-		expect(ligne).toContain("[@inazuma_project](https://x.com/inazuma_project/status/2087621938692677991)");
+		expect(ligne).toContain(
+			"[@inazuma_project](https://x.com/inazuma_project/status/2087621938692677991)"
+		);
 		expect(ligne).toContain("fil de 4");
 		expect(ligne).toContain("1 image");
 		expect(ligne).toContain("*news*");
@@ -270,7 +288,12 @@ describe("boutons de pagination", () => {
 	});
 
 	test("un état sans filtre se relit avec des nulls", () => {
-		const identifiant = encoderEtatListe({ page: 1, auteur: null, categorie: null, recherche: null });
+		const identifiant = encoderEtatListe({
+			page: 1,
+			auteur: null,
+			categorie: null,
+			recherche: null,
+		});
 		expect(decoderEtatListe(identifiant!)).toEqual({
 			page: 1,
 			auteur: null,
@@ -303,8 +326,12 @@ describe("boutons de pagination", () => {
 
 describe("regroupement d'un gros lot", () => {
 	const lot: LigneTweet[] = [
-		...Array.from({ length: 8 }, (_, i) => tweet({ id: `a${i}`, author_username: "inazuma_project" })),
-		...Array.from({ length: 4 }, (_, i) => tweet({ id: `b${i}`, author_username: "inazuma_cross" })),
+		...Array.from({ length: 8 }, (_, i) =>
+			tweet({ id: `a${i}`, author_username: "inazuma_project" })
+		),
+		...Array.from({ length: 4 }, (_, i) =>
+			tweet({ id: `b${i}`, author_username: "inazuma_cross" })
+		),
 	];
 
 	test("compte par auteur, du plus prolifique au moins", () => {
@@ -315,7 +342,9 @@ describe("regroupement d'un gros lot", () => {
 	});
 
 	test("la synthèse annonce le total et la répartition", () => {
-		expect(resumeLot(lot)).toBe("**12 nouveaux tweets** — @inazuma_project (8), @inazuma_cross (4)");
+		expect(resumeLot(lot)).toBe(
+			"**12 nouveaux tweets** — @inazuma_project (8), @inazuma_cross (4)"
+		);
 	});
 
 	test("tient le pire lot mesuré (245 posts en une minute)", () => {
