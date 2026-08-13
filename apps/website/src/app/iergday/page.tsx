@@ -7,10 +7,7 @@ import {
 	EmptyMedia,
 	EmptyTitle,
 } from "@rosegriffon/ui";
-import { formatDistanceToNowStrict } from "date-fns";
-import { fr } from "date-fns/locale";
 import {
-	CalendarRange,
 	ClipboardList,
 	Hash,
 	ImageIcon,
@@ -306,8 +303,6 @@ export default async function IergDayPage({
 	const hashtags = hashtagsAffichables(campagne);
 	const hashtagPrincipal = campagne.hashtags[0] ?? "";
 	const libelleHashtagPrincipal = hashtags[0]?.libelle ?? "";
-	const collecte = campagne.collecteLe ? new Date(campagne.collecteLe) : null;
-	const collecteValide = collecte && !Number.isNaN(collecte.getTime()) ? collecte : null;
 	// Une autre campagne, déjà remplie, vers laquelle renvoyer si celle-ci est vide.
 	const campagneDeRepli = campagnes.find((autre) => autre.slug !== campagne.slug) ?? null;
 	// Distinguer « la campagne est vide » de « on a demandé une page qui n'existe pas ».
@@ -391,7 +386,16 @@ export default async function IergDayPage({
 						/>
 					)}
 
-					<div className="mt-6 grid grid-cols-1 gap-3 xs:grid-cols-2 lg:grid-cols-3">
+					{/*
+					 * ⚠ PAS DE COMPTEUR « depuis la dernière récolte ».
+					 * C'était l'âge du dernier passage de notre collecteur — une donnée
+					 * d'exploitation, pas une information de campagne. Elle n'apprenait
+					 * rien à un visiteur (« 5 minutes » ne dit ni combien de créations
+					 * ont été postées, ni quand), et elle mentait par omission sur les
+					 * campagnes archivées, dont la récolte n'a jamais rien pu ramener.
+					 * `x_campagnes.collecte_le` reste écrite en base pour le cron.
+					 */}
+					<div className="mt-6 grid grid-cols-1 gap-3 xs:grid-cols-2">
 						<Compteur
 							icone={ImageIcon}
 							valeur={String(stats.posts)}
@@ -401,16 +405,6 @@ export default async function IergDayPage({
 							icone={Users}
 							valeur={String(stats.auteurs)}
 							libelle={stats.auteurs > 1 ? "participants" : "participant"}
-						/>
-						{/* Durée SANS « il y a » (`Strict`, pas `addSuffix`) : la valeur d'un
-						    compteur doit tenir sur une ligne à 375 px, et le libellé porte
-						    déjà le sens (« depuis la dernière récolte »). */}
-						<Compteur
-							icone={CalendarRange}
-							valeur={
-								collecteValide ? formatDistanceToNowStrict(collecteValide, { locale: fr }) : "Jamais"
-							}
-							libelle={collecteValide ? "depuis la dernière récolte" : "aucune récolte à ce jour"}
 						/>
 					</div>
 
