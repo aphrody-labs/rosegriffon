@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 
-import type { PostCampagne } from "@/lib/x-campagnes/types";
+import { clePost, type PostCampagne } from "@/lib/x-campagnes/types";
 
 import { PostCarte } from "./PostCarte";
 import { documentDepuisPost, Visionneuse } from "./Visionneuse";
@@ -36,7 +36,7 @@ export function CampagneGalerie({ posts }: { posts: PostCampagne[] }) {
 			{/* 320 px → 1 colonne, 375 px → 2, 1024 px → 3, 1280 px → 4. */}
 			<ul className="grid list-none grid-cols-1 gap-4 p-0 xs:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
 				{posts.map((post, position) => (
-					<li key={post.tweetId} className="flex">
+					<li key={clePost(post)} className="flex">
 						<PostCarte
 							post={post}
 							priorite={position < CARTES_PRIORITAIRES}

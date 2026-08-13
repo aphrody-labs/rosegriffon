@@ -4,7 +4,6 @@ import { getPgPool } from "@/lib/db/pg";
 
 import {
 	type Campagne,
-	type DepotCampagne,
 	entierPositif,
 	extraireImages,
 	type ImageCampagne,
@@ -370,7 +369,7 @@ export async function listerPostsCampagne(
 	const taille = entierPositif(parPage, 24);
 	const offset = (entierPositif(page, 1) - 1) * taille;
 	try {
-		const { rows } = await getPgPool().query<LignePost>(
+		const { rows } = await getPgPool().query<LigneCreation>(
 			`${SELECT_POSTS}
 			 where p.campagne_slug = $1 and not p.masque and p.a_media
 			 order by p.publie_le desc, p.tweet_id desc
@@ -391,7 +390,7 @@ export async function listerPostsCampagne(
  */
 export async function listerPostsEnAvant(slug: string, limite = 6): Promise<PostCampagne[]> {
 	try {
-		const { rows } = await getPgPool().query<LignePost>(
+		const { rows } = await getPgPool().query<LigneCreation>(
 			`${SELECT_POSTS}
 			 where p.campagne_slug = $1 and p.mis_en_avant and not p.masque and p.a_media
 			 order by p.publie_le desc, p.tweet_id desc

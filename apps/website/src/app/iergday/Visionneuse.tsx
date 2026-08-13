@@ -13,7 +13,13 @@ import { ChevronLeft, ChevronRight, Download, ExternalLink, Loader2, X } from "l
 import Image from "next/image";
 import { useCallback, useEffect, useRef, useState } from "react";
 
-import { extraitTexte, type PostCampagne, urlPostX } from "@/lib/x-campagnes/types";
+import {
+	clePost,
+	extraitTexte,
+	type PostCampagne,
+	urlMessageDiscord,
+	urlPostX,
+} from "@/lib/x-campagnes/types";
 
 /*
  * LA visionneuse plein écran de la page — il n'y en a qu'une, et il ne doit y en
@@ -84,10 +90,22 @@ export function documentDepuisPost(post: PostCampagne): DocumentVisionne {
 	const date = post.publieLe ? new Date(post.publieLe) : null;
 	const dateLisible =
 		date && !Number.isNaN(date.getTime()) ? format(date, "d MMMM yyyy", { locale: fr }) : null;
-	const pseudoSur = `@${post.auteurPseudo}`;
+	/*
+	 * ⚠ LES DEUX SOURCES NE DÉSIGNENT PAS LEURS AUTEURS DE LA MÊME FAÇON.
+	 * Sur X, `auteurPseudo` est le @ public, il fait partie de l'identité affichée.
+	 * Sur Discord, il peut être absent (`string | null`) et n'est de toute façon
+	 * pas ce qu'on montre : l'attribution se fait au NOM D'AFFICHAGE, celui que la
+	 * personne a choisi sur le serveur. Écrire « @ » devant un nom d'affichage
+	 * Discord fabriquerait un pseudo qui n'existe pas.
+	 */
+	const surX = post.source === "x";
+	const pseudoSur = surX ? `@${post.auteurPseudo}` : post.auteurNom;
+	const reseau = surX ? "X" : "le serveur Discord";
+	const identifiant = surX ? post.tweetId : post.messageId;
+	const racineNom = (surX ? post.auteurPseudo : post.auteurNom).replace(/[^\w-]+/g, "");
 	return {
-		baseNomFichier: `${post.auteurPseudo.replace(/[^\w-]+/g, "") || "post"}-${post.tweetId}`,
-		cle: post.tweetId,
+		baseNomFichier: `${racineNom || "post"}-${identifiant}`,
+		cle: clePost(post),
 		etiquette: `Publication de ${pseudoSur}`,
 		/*
 		 * ⚠ NOTRE COPIE EST LA PLEINE RÉSOLUTION, PAS L'ORIGINAL DE X.
@@ -102,16 +120,29 @@ export function documentDepuisPost(post: PostCampagne): DocumentVisionne {
 		 * (vérifié), le repli sur l'original reste donc l'exception.
 		 */
 		images: post.images.map((image, position) => ({
-			alt: `Image ${position + 1} sur ${post.images.length} publiée sur X par ${pseudoSur}`,
+			alt: `Image ${position + 1} sur ${post.images.length} publiée sur ${reseau} par ${pseudoSur}`,
 			source: image.src || image.source,
 			src: image.src,
 		})),
 		legende: extraitTexte(post.texte, 400),
-		lien: {
-			ariaLabel: `Voir la publication de ${pseudoSur} sur X (nouvel onglet)`,
-			href: urlPostX(post.auteurPseudo, post.tweetId),
-			libelle: "Voir sur X",
-		},
+		/*
+		 * Un lien vers un message Discord n'a de sens QUE pour qui est déjà sur le
+		 * serveur : `discord.com/channels/…` renvoie les autres vers un écran de
+		 * connexion, sur un salon qu'ils ne peuvent pas voir. On le propose quand
+		 * même — le visiteur qui est membre y va d'un clic — mais son libellé le
+		 * dit, au lieu de promettre une page publique comme le fait « Voir sur X ».
+		 */
+		lien: surX
+			? {
+					ariaLabel: `Voir la publication de ${pseudoSur} sur X (nouvel onglet)`,
+					href: urlPostX(post.auteurPseudo, post.tweetId),
+					libelle: "Voir sur X",
+				}
+			: {
+					ariaLabel: `Ouvrir le message de ${pseudoSur} dans Discord (nouvel onglet, réservé aux membres du serveur)`,
+					href: urlMessageDiscord(post.guildId, post.salonId, post.messageId),
+					libelle: "Ouvrir dans Discord",
+				},
 		sousTitre: dateLisible ? `${pseudoSur} · ${dateLisible}` : pseudoSur,
 		titre: post.auteurNom,
 	};
