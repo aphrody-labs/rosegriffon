@@ -18,7 +18,35 @@ const dossier = mkdtempSync(join(tmpdir(), "rg-ipc-"));
 const chemin = join(dossier, "cron.sock");
 Bun.env.RG_CRON_SOCKET = chemin;
 
-const { demarrerIpcUnix } = await import("../../../../packages/cron/src/lib/ipc-unix.ts");
+/**
+ * Contrat MINIMAL du pont, redéclaré ici plutôt qu'importé.
+ *
+ * ⚠ Le spécificateur d'import ci-dessous est volontairement calculé, pas
+ * littéral : `packages/cron/src/lib/ipc-unix.ts` route désormais les verbes de
+ * scraping vers `tasks/ie-crawl/scrape-service.ts`, qui charge `@aphrody/bxc`
+ * et `@aphrody/x`. Avec un chemin littéral, `tsc -p apps/bot` suivait la chaîne
+ * et type-vérifiait les SOURCES de ces deux dépendances (elles supposent le DOM
+ * et ont leurs propres erreurs) : le bot héritait de 14 erreurs qui ne lui
+ * appartiennent pas. Un spécificateur calculé arrête la traversée ; le test,
+ * lui, charge exactement le même module au même chemin.
+ */
+interface PontIpcTest {
+	arreter(): void;
+	abonnes(): number;
+	diffuser(evenement: { event: string; [cle: string]: unknown }): void;
+}
+
+interface DependancesIpcTest {
+	metriques(): unknown;
+	telemetrie(): unknown;
+	catalogue(): { taches: string[]; schedules: Record<string, string> };
+	lancerTache(nom: string): Promise<{ success: boolean; error?: string }> | null;
+}
+
+const cheminIpcUnix = new URL("../../../../packages/cron/src/lib/ipc-unix.ts", import.meta.url).href;
+const { demarrerIpcUnix } = (await import(cheminIpcUnix)) as {
+	demarrerIpcUnix: (deps: DependancesIpcTest) => PontIpcTest;
+};
 const { abonnerCron, appelerCron, cronDisponible, CHEMIN_SOCKET_CRON } = await import("./cron-ipc.ts");
 
 /** Tâche factice : se termine quand le test le décide. */
