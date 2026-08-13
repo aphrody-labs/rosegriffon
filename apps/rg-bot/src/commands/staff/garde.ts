@@ -26,7 +26,7 @@
 import { MessageFlags, type ChatInputCommandInteraction } from "discord.js";
 
 import { NotAdminError, requireRgAdmin, requireRgAdminStrict, type RgAdmin } from "../../lib/rbac";
-import { CronInjoignableError, CHEMIN_SOCKET_CRON } from "../../lib/cron-ipc";
+import { CronInjoignableError, cheminSocketCron } from "../../lib/cron-ipc";
 import { ServiceIndisponibleError } from "../../lib/services";
 
 export type { RgAdmin };
@@ -81,7 +81,7 @@ export async function exigerDroits(
 export function messagePanne(err: unknown): string {
 	if (err instanceof CronInjoignableError) {
 		return (
-			`Le démon de tâches est injoignable (socket \`${CHEMIN_SOCKET_CRON}\`, unité ` +
+			`Le démon de tâches est injoignable (socket \`${cheminSocketCron()}\`, unité ` +
 			"`rg-cron.service`). Ce n'est pas la cible qui est en panne : c'est notre pont. " +
 			"La socket n'existe qu'après un redémarrage du démon avec le pont branché — " +
 			"`sudo systemctl restart rg-cron.service`."

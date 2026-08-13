@@ -328,12 +328,57 @@ export function urlVisage(codeInterne: string | null | undefined): string | null
 	return `https://${HOTE_CDN}/dx11/menu/200_icon/10_icon_chr/face/${base}_l.png`;
 }
 
-/** Modèle 3D complet assemblé en direct depuis les CPK (corps + visage + uniforme). */
+/**
+ * Modèle 3D complet assemblé en direct depuis les CPK (corps + visage + uniforme).
+ *
+ * ⚠ SEULS les codes de personnage `c` + 8 chiffres sont servis. Mesuré le
+ * 13/8/2026 sur `nie-model-serve` : 11/11 codes `c########` répondent 200
+ * (345 à 480 Ko), tandis que `COORD_55` (entraîneur), `k000520`, `ka000520` et
+ * `wkk00520` (esprit guerrier) répondent tous 404. La forme précédente
+ * (`^[A-Za-z0-9]+$`) posait donc un lien mort dans l'embed dès qu'on l'appliquait
+ * à autre chose qu'un joueur — et un embed Discord n'a pas d'`onError`.
+ *
+ * ⚠ SUFFIXE DE VARIANTE : la fiche détaillée d'un personnage sert des variantes
+ * dont le code porte le numéro de jeu de paramètres (`c01000010_5000`, la
+ * variante Mark Evans retenue par `/azalee perso`). Ce code-là répond **404** ;
+ * seul le code de base répond 200. On le retire donc, exactement comme
+ * `urlVisage` — sans quoi la fiche du personnage le plus consulté du wiki
+ * affichait un lien de modèle 3D mort.
+ *
+ * Vérifié en base : les 5 130 personnages de `/api/characters` ont TOUS un
+ * `internalCode` de la forme `c########` (1 000 lignes échantillonnées sur
+ * 5 pages, une seule forme distincte). Le resserrage ne retire donc aucun
+ * modèle réellement servi.
+ */
 export function urlModele3d(code: string | null | undefined): string | null {
-	if (typeof code !== "string" || !/^[A-Za-z0-9]+$/.test(code.trim()) || code.trim().length === 0) {
+	if (typeof code !== "string") {
 		return null;
 	}
-	return `https://${HOTE_CDN}/model-full/${code.trim()}.glb`;
+	const base = code.trim().replace(/_\d{4}$/, "");
+	if (!/^c\d{8}$/i.test(base)) {
+		return null;
+	}
+	return `https://${HOTE_CDN}/model-full/${base}.glb`;
+}
+
+/**
+ * Illustration d'une quête, forgée depuis le code d'image de `/api/quests`.
+ *
+ * L'API ne sert PAS d'URL pour les quêtes : `image` vaut un code nu
+ * (`story_img001_l01`). Le fichier vit dans `220_img/quest_img/` — mesuré :
+ * `data/dx11/menu/220_img/quest_img/story_img001_l01.g4tx` est présent dans
+ * l'index CPK et `…/story_img001_l01.png?w=800&format=webp` répond 200
+ * (27 338 octets). 45 des 182 quêtes n'ont pas de code : on renvoie `null`.
+ */
+export function urlIllustrationQuete(code: string | null | undefined): string | null {
+	if (typeof code !== "string") {
+		return null;
+	}
+	const propre = code.trim();
+	if (!/^[A-Za-z0-9_]+$/.test(propre) || propre.length === 0) {
+		return null;
+	}
+	return `https://${HOTE_CDN}/dx11/menu/220_img/quest_img/${propre}.png`;
 }
 
 // --- Familles d'auras ------------------------------------------------------
@@ -374,6 +419,108 @@ export function resoudreTypeAura(saisie: string | null | undefined): SlugAura | 
 	}
 	const parLibelle = TYPES_AURA.find((t) => normaliserLibelle(t.libelle) === aiguille);
 	return parLibelle?.slug ?? null;
+}
+
+// --- Galerie ---------------------------------------------------------------
+
+/**
+ * Catégories d'illustration acceptées par `/api/gallery?category=…`.
+ *
+ * Les valeurs ET les libellés sont recopiés de `GALLERY_CATEGORIES`
+ * (`packages/azalee/src/wiki/service.ts`), source canonique du wiki — ce module
+ * ne peut pas l'importer, `service.ts` ouvrant `bun:sqlite`. Effectifs MESURÉS
+ * le 13/8/2026 (`/api/gallery?category=<v>&limit=1`, champ `total`) : aucune
+ * catégorie ne répond `{"data":[],"total":0}`.
+ */
+export const CATEGORIES_GALERIE = [
+	{ valeur: "story", libelle: "Histoire", total: 242 },
+	{ valeur: "chronicle", libelle: "Chroniques", total: 29 },
+	{ valeur: "special", libelle: "Spéciales", total: 53 },
+	{ valeur: "kizuna", libelle: "Liens", total: 2 },
+	{ valeur: "other", libelle: "Autres", total: 34 },
+	{ valeur: "gallery_img2", libelle: "Galerie", total: 363 },
+	{ valeur: "ev_pic", libelle: "Événements", total: 70 },
+	{ valeur: "stadium", libelle: "Stades", total: 202 },
+	{ valeur: "vsroute_map", libelle: "Cartes route", total: 88 },
+	{ valeur: "hlp", libelle: "Aide", total: 306 },
+	{ valeur: "telop_waza", libelle: "Techniques", total: 1341 },
+] as const;
+
+/** Libellé français d'une catégorie d'illustration, ou la valeur brute. */
+export function libelleCategorieGalerie(valeur: string | null | undefined): string {
+	return (
+		CATEGORIES_GALERIE.find((c) => c.valeur === valeur)?.libelle ?? String(valeur ?? "Illustration")
+	);
+}
+
+/**
+ * Catégorie d'illustration valide, ou `null`.
+ *
+ * Une catégorie inventée fait répondre `{"data":[],"total":0}` : on préfère
+ * ignorer le filtre plutôt que rendre une liste vide sans explication.
+ */
+export function resoudreCategorieGalerie(saisie: string | null | undefined): string | null {
+	if (typeof saisie !== "string") {
+		return null;
+	}
+	const aiguille = normaliserLibelle(saisie);
+	const trouvee = CATEGORIES_GALERIE.find(
+		(c) => c.valeur === aiguille || normaliserLibelle(c.libelle) === aiguille
+	);
+	return trouvee?.valeur ?? null;
+}
+
+// --- Quêtes et succès ------------------------------------------------------
+
+/** Libellé français du genre d'une quête (`kind` de `/api/quests` : 137 `main`, 45 `side`). */
+export function libelleGenreQuete(kind: string | null | undefined): string {
+	if (kind === "main") {
+		return "Quête principale";
+	}
+	if (kind === "side") {
+		return "Quête annexe";
+	}
+	return "Quête";
+}
+
+/**
+ * Libellé français d'une catégorie de succès.
+ *
+ * Valeurs réelles de `/api/trophies` (228 lignes) : `trophy` 52, `activity` 176.
+ */
+export function libelleCategorieSucces(categorie: string | null | undefined): string {
+	if (categorie === "trophy") {
+		return "Trophée";
+	}
+	if (categorie === "activity") {
+		return "Activité";
+	}
+	return String(categorie ?? "Succès");
+}
+
+// --- Coordinateurs ---------------------------------------------------------
+
+/**
+ * Libellé français du rôle de banc d'un coordinateur.
+ *
+ * ⚠ `/api/coordinators` sert le rôle en ANGLAIS dans `variants[].rarity`
+ * (mesuré sur les 102 lignes : `Manager` 68, `Coordinator` 31, `Coach` 3), là où
+ * `/api/coaches` le traduit déjà dans `roleFr`. Les trois libellés ci-dessous
+ * sont ceux de `ROLE_FR` (`packages/azalee/src/wiki/coaches.ts`), source
+ * canonique du wiki — ce module ne peut pas l'importer, `coaches.ts` ouvrant
+ * `bun:sqlite`. « Coach » et « Manager » sont volontairement identiques en
+ * français : c'est le choix du wiki, pas un oubli de traduction.
+ */
+export function libelleRoleCoordinateur(role: string | null | undefined): string | null {
+	if (typeof role !== "string" || role.trim().length === 0) {
+		return null;
+	}
+	const roles: Record<string, string> = {
+		coach: "Coach",
+		coordinator: "Coordinateur",
+		manager: "Manager",
+	};
+	return roles[normaliserLibelle(role)] ?? role;
 }
 
 // --- Pagination ------------------------------------------------------------

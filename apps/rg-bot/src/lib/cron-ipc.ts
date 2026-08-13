@@ -33,8 +33,24 @@
  */
 import type { Socket } from "bun";
 
-/** Chemin de la socket. Doit rester identique côté cron (`lib/ipc-unix.ts`). */
-export const CHEMIN_SOCKET_CRON = Bun.env.RG_CRON_SOCKET ?? "/var/lib/rg/cron.sock";
+/** Chemin de la socket quand `RG_CRON_SOCKET` n'est pas posé — celui du service. */
+export const CHEMIN_SOCKET_CRON_DEFAUT = "/var/lib/rg/cron.sock";
+
+/**
+ * Chemin de la socket. Doit rester identique côté cron (`lib/ipc-unix.ts`).
+ *
+ * Résolu à CHAQUE APPEL, et non figé à l'import. La différence n'est pas
+ * théorique : `bun test` exécute tous les fichiers de tests dans un SEUL
+ * processus, donc le premier module qui chargeait celui-ci gelait le chemin
+ * pour tous les autres. Un test qui pose `RG_CRON_SOCKET` vers une socket
+ * temporaire avant d'importer voyait alors `/var/lib/rg/cron.sock` — le chemin
+ * de production — parce qu'un test précédent (une commande `/staff`, par
+ * exemple) avait déjà déclenché l'import. Le coût d'une lecture d'environnement
+ * par connexion est nul devant celui d'un test qui ment.
+ */
+export function cheminSocketCron(): string {
+	return Bun.env.RG_CRON_SOCKET ?? CHEMIN_SOCKET_CRON_DEFAUT;
+}
 
 /** Requête JSON, une par ligne. `cmd` est le verbe. */
 export interface RequeteIpc {
@@ -102,7 +118,7 @@ export async function appelerCron<T extends ReponseIpc = ReponseIpc>(
 		}
 
 		Bun.connect<undefined>({
-			unix: CHEMIN_SOCKET_CRON,
+			unix: cheminSocketCron(),
 			socket: {
 				open(ouverte) {
 					socket = ouverte;
@@ -140,7 +156,7 @@ export async function appelerCron<T extends ReponseIpc = ReponseIpc>(
 			finir(() =>
 				rejeter(
 					new CronInjoignableError(
-						`Socket ${CHEMIN_SOCKET_CRON} injoignable — rg-cron.service n'expose le pont qu'après un redémarrage (${
+						`Socket ${cheminSocketCron()} injoignable — rg-cron.service n'expose le pont qu'après un redémarrage (${
 							err instanceof Error ? err.message : String(err)
 						}).`
 					)
@@ -204,13 +220,13 @@ export function abonnerCron(surEvenement: (evenement: EvenementIpc) => void): ()
 		}
 		let tampon = "";
 		Bun.connect<undefined>({
-			unix: CHEMIN_SOCKET_CRON,
+			unix: cheminSocketCron(),
 			socket: {
 				open(ouverte) {
 					socketAbonnement = ouverte;
 					tentatives = 0;
 					ouverte.write(`${JSON.stringify({ cmd: "subscribe" })}\n`);
-					console.info("[cron-ipc] abonné au pont", CHEMIN_SOCKET_CRON);
+					console.info("[cron-ipc] abonné au pont", cheminSocketCron());
 				},
 				data(_ouverte, donnees) {
 					tampon += donnees.toString();

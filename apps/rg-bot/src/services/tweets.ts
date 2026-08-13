@@ -5,6 +5,12 @@
  * données de jeu) : ils vivent dans `public.tweets`, alimentée par la récolte du
  * cron. Ce module est la seule porte d'entrée du bot vers cette table ; tout ce
  * qui est décidable sans base est dans `lib/tweets-format.ts`.
+ *
+ * Le curseur d'annonce est PAR PROFIL (voir `AnnoncePosts` plus bas) : le même
+ * programme sert Rose Griffon et Azalée, chacun avec son salon et sa ligne de
+ * curseur. Toutes les fonctions de curseur prennent donc un `canal` ; leur
+ * valeur par défaut reste celle du profil historique pour que les appelants
+ * mono-profil (`/staff veille`, `/administration veille`) restent justes.
  */
 import { cached, invalidate } from "../lib/cache";
 import { sql } from "../lib/db";
@@ -18,8 +24,88 @@ import {
 	type LigneTweet,
 } from "../lib/tweets-format";
 
-/** Canal logique par défaut du curseur (un seul flux Discord aujourd'hui). */
+/**
+ * Canal du curseur du profil HISTORIQUE (Rose Griffon).
+ *
+ * ⚠ Ce n'est plus « le » canal, c'est celui d'un profil parmi d'autres. Depuis
+ * qu'un second processus (profil `azalee`) annonce les mêmes posts sur son
+ * propre serveur, chaque profil possède SA ligne dans
+ * `tweet_notification_curseurs` — la table est clefée par `canal`
+ * (`tweet_notification_curseurs_pkey PRIMARY KEY, btree (canal)`, relevé le
+ * 13/8/2026), donc deux profils = deux positions indépendantes, et aucun ne
+ * consomme les posts de l'autre.
+ *
+ * La valeur reste `"discord"` : c'est la ligne déjà en base (créée le
+ * 12/8/2026 à 23:54:18 UTC) et la renommer relancerait une amorce, donc une
+ * journée d'arriéré non annoncée.
+ */
 export const CANAL_NOTIFICATION = "discord";
+
+/**
+ * Où un profil annonce les nouveaux posts, et sous quel curseur.
+ *
+ * Volontairement réduit à deux champs : le registre de profils
+ * (`lib/profil.ts`) décrit bien plus (jeton, guildes, modules, marque), mais le
+ * notifieur n'a besoin que de ça. Le type est donc satisfait STRUCTURELLEMENT
+ * par le `annoncePosts` du registre — aucun des deux modules n'a besoin
+ * d'importer l'autre, et l'identifiant du salon Azalée n'est écrit qu'à un seul
+ * endroit : le registre.
+ */
+export interface AnnoncePosts {
+	/** Salon Discord de destination, sur la guilde servie par ce profil. */
+	readonly salon: string;
+	/** Nom du curseur en base (`canal`). Un par profil, jamais partagé. */
+	readonly curseur: string;
+}
+
+/**
+ * Nom de curseur acceptable, ou `null`.
+ *
+ * `canal` est la clé primaire de la table : une valeur vide, avec des espaces
+ * ou en capitales créerait une ligne fantôme que personne ne retrouverait, et
+ * deux graphies du même profil donneraient deux positions — donc un rejeu.
+ * On normalise (minuscules, sans espaces autour) et on refuse le reste plutôt
+ * que d'écrire n'importe quoi dans une clé primaire.
+ */
+export function normaliserCanal(nom: string | null | undefined): string | null {
+	const propre = (nom ?? "").trim().toLowerCase();
+	return /^[a-z0-9][a-z0-9_-]{0,31}$/.test(propre) ? propre : null;
+}
+
+/**
+ * Annonce du profil historique, quand aucun profil n'est fourni.
+ *
+ * Conserve exactement le comportement d'avant les profils : le salon vient du
+ * réglage partagé, à défaut de `DISCORD_NEWS_CHANNEL_ID`.
+ */
+export function annonceHistorique(): AnnoncePosts {
+	return { salon: Bun.env.DISCORD_NEWS_CHANNEL_ID?.trim() ?? "", curseur: CANAL_NOTIFICATION };
+}
+
+/**
+ * Salon effectif d'un profil : registre d'abord, réglage partagé pour le seul
+ * profil historique.
+ *
+ * `settings['tweets.notification']` est UNE ligne, partagée par les deux
+ * processus. Ses champs éditoriaux (comptes suivis, catégories exclues, seuil,
+ * interrupteur) valent légitimement pour les deux. `salon`, lui, est une
+ * DESTINATION : un salon appartient à une guilde, il ne peut pas être partagé.
+ *
+ * Il garde donc son sens pour le seul canal pour lequel il a été écrit — celui
+ * de Rose Griffon, où `/administration veille regler salon:` continue de le
+ * poser. Pour tout autre profil, le salon vient exclusivement du registre :
+ * sans cette règle, régler le salon côté Rose Griffon détournerait l'annonce
+ * d'Azalée vers un salon d'un serveur où son bot n'est même pas présent.
+ */
+export function salonAnnonce(
+	annonce: AnnoncePosts,
+	filtre: Pick<FiltreTweets, "salon">
+): string | null {
+	const duReglage =
+		annonce.curseur === CANAL_NOTIFICATION ? (filtre.salon ?? "").trim() : "";
+	const choisi = duReglage.length > 0 ? duReglage : annonce.salon.trim();
+	return choisi.length > 0 ? choisi : null;
+}
 
 /** Colonnes lues. `raw_tweets` est volontairement exclue : plusieurs ko par ligne, inutile ici. */
 const COLONNES = `id, text, created_at, author_username, author_name, media, metrics, is_thread, tweet_count, translation, category`;
@@ -171,6 +257,11 @@ export interface Curseur {
  * 12 998 tweets de l'archive, d'un coup, dans un salon de ~1984 membres.
  * `ON CONFLICT DO NOTHING` rend la création idempotente même si deux drains se
  * croisent au démarrage.
+ *
+ * Le verrou vaut IDENTIQUEMENT pour un canal neuf : le tout premier démarrage
+ * du profil Azalée insère sa ligne à `now()` et repart de là. Il n'annonce donc
+ * ni l'archive, ni ce que Rose Griffon a déjà publié — il commence à son propre
+ * présent, et `cree: true` fait sortir le drain avant tout envoi.
  */
 export async function assurerCurseur(canal = CANAL_NOTIFICATION): Promise<Curseur> {
 	const inseres = await sql<Array<{ canal: string; curseur_le: Date; dernier_tweet_id: string | null; annonces: number }>>`
@@ -295,6 +386,9 @@ export async function tweetsAPublier(
  *
  * Appelé APRÈS la publication : si l'envoi Discord échoue, le curseur ne bouge
  * pas et le drain suivant réessaie.
+ *
+ * L'exclusion porte sur `(canal, curseur_le)` : elle départage deux drains du
+ * MÊME profil, et ne gêne jamais un autre profil, qui écrit sa propre ligne.
  *
  * @returns `false` si un autre drain a déjà avancé le curseur.
  */

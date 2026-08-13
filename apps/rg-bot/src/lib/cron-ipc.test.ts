@@ -47,7 +47,7 @@ const cheminIpcUnix = new URL("../../../../packages/cron/src/lib/ipc-unix.ts", i
 const { demarrerIpcUnix } = (await import(cheminIpcUnix)) as {
 	demarrerIpcUnix: (deps: DependancesIpcTest) => PontIpcTest;
 };
-const { abonnerCron, appelerCron, cronDisponible, CHEMIN_SOCKET_CRON } = await import("./cron-ipc.ts");
+const { abonnerCron, appelerCron, cronDisponible, cheminSocketCron } = await import("./cron-ipc.ts");
 
 /** Tâche factice : se termine quand le test le décide. */
 let terminerTache: ((resultat: { success: boolean; error?: string }) => void) | null = null;
@@ -73,7 +73,7 @@ const pont = demarrerIpcUnix({
 });
 
 beforeAll(() => {
-	expect(CHEMIN_SOCKET_CRON).toBe(chemin);
+	expect(cheminSocketCron()).toBe(chemin);
 });
 
 afterAll(() => {
