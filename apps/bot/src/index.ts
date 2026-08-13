@@ -104,7 +104,16 @@ client.once("clientReady", async () => {
 	try {
 		await client.initApplicationCommands();
 	} catch (err) {
-		console.error("✗ initApplicationCommands failed:", err instanceof Error ? err.message : err);
+		// `Invalid Form Body` seul est indiagnosticable : Discord met le CHEMIN du
+		// champ fautif (`3.options.1.description`) dans `rawError.errors`, que
+		// `err.message` n'expose pas. Sans lui, on cherche à l'aveugle parmi
+		// soixante sous-commandes.
+		const brut = (err as { rawError?: unknown }).rawError;
+		console.error(
+			"✗ initApplicationCommands failed:",
+			err instanceof Error ? err.message : err,
+			brut ? `\n  détail : ${JSON.stringify(brut)}` : ""
+		);
 	}
 
 	// Dire OÙ les commandes ont atterri, et surtout où elles manquent : un bot en

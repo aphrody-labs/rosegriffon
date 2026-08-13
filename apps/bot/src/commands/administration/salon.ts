@@ -122,7 +122,7 @@ import {
 	decrireChangement,
 	urlIllustrationAbsolue,
 } from "./valeurs";
-import "./racine";
+import "./racine-moderation";
 
 // ─── Constantes locales ─────────────────────────────────────────────────────
 
@@ -555,9 +555,9 @@ async function recolterPourPurge(
 @SlashGroup({
 	name: "salon",
 	description: "Tenue des salons : créer, renommer, verrouiller, purger, annoncer, supprimer",
-	root: "administration",
+	root: "moderation",
 })
-@SlashGroup("salon", "administration")
+@SlashGroup("salon", "moderation")
 export class AdministrationSalonCommand {
 	@Slash({
 		name: "creer",

@@ -64,7 +64,7 @@ import {
 	libelleStatutArticle,
 	type StatutArticle,
 } from "./valeurs";
-import "./racine";
+import "./racine-gestion";
 
 /**
  * Colonnes énumérées une par une.
@@ -212,9 +212,9 @@ function descriptionListe(articles: readonly ArticleAdmin[]): string {
 @SlashGroup({
 	name: "article",
 	description: "Publier, dépublier ou archiver un article des deux sites",
-	root: "administration",
+	root: "gestion",
 })
-@SlashGroup("article", "administration")
+@SlashGroup("article", "gestion")
 export class AdministrationArticleCommand {
 	@Slash({
 		name: "liste",

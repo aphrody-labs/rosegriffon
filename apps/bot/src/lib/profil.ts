@@ -207,6 +207,8 @@ const MODULES_AZALEE = [
  */
 const MODULES_RG = [
 	"commands/administration/racine.ts",
+	"commands/administration/racine-gestion.ts",
+	"commands/administration/racine-moderation.ts",
 	"commands/administration/article.ts",
 	"commands/administration/cron.ts",
 	"commands/administration/equipe.ts",

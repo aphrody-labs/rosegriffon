@@ -93,7 +93,7 @@ import {
 	verifierActionSurProfil,
 	type ProfilAffichable,
 } from "./valeurs";
-import "./racine";
+import "./racine-moderation";
 
 /** Délai laissé pour confirmer une action irréversible. */
 const DELAI_CONFIRMATION_MS = 60_000;
@@ -472,9 +472,9 @@ function ajouterAlerteJournal(embed: EmbedBuilder, alerte: string | null): Embed
 @SlashGroup({
 	name: "moderation",
 	description: "Modération du SERVEUR DISCORD : bannir, expulser, exclure, avertir",
-	root: "administration",
+	root: "moderation",
 })
-@SlashGroup("moderation", "administration")
+@SlashGroup("moderation", "moderation")
 export class AdministrationModerationCommand {
 	@Slash({
 		name: "bannir",

@@ -68,7 +68,7 @@ import {
 	lireChampTextuel,
 	verifierPlageTemporelle,
 } from "./valeurs";
-import "./racine";
+import "./racine-gestion";
 
 /** Les neuf colonnes de `events`, sans exception : la table n'en a pas d'autre. */
 interface EvenementAdmin {
@@ -223,9 +223,9 @@ function ficheEvenement(evenement: EvenementAdmin) {
 @SlashGroup({
 	name: "evenement",
 	description: "Créer, modifier ou supprimer un événement de l'agenda public",
-	root: "administration",
+	root: "gestion",
 })
-@SlashGroup("evenement", "administration")
+@SlashGroup("evenement", "gestion")
 export class AdministrationEvenementCommand {
 	@Slash({ name: "liste", description: "Les événements enregistrés dans la table `events`" })
 	async liste(
