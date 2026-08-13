@@ -98,10 +98,19 @@ export function documentDepuisPost(post: PostCampagne): DocumentVisionne {
 	 * personne a choisi sur le serveur. Écrire « @ » devant un nom d'affichage
 	 * Discord fabriquerait un pseudo qui n'existe pas.
 	 */
+	// Un branchement par source : « pas X donc Discord » rangeait Instagram du
+	// mauvais côté et fabriquait un lien `discord.com/channels/…` vers un message
+	// qui n'existe pas.
 	const surX = post.source === "x";
 	const pseudoSur = surX ? `@${post.auteurPseudo}` : post.auteurNom;
-	const reseau = surX ? "X" : "le serveur Discord";
-	const identifiant = surX ? post.tweetId : post.messageId;
+	const reseau =
+		post.source === "x" ? "X" : post.source === "discord" ? "le serveur Discord" : "Instagram";
+	const identifiant =
+		post.source === "x"
+			? post.tweetId
+			: post.source === "discord"
+				? post.messageId
+				: post.shortcode;
 	const racineNom = (surX ? post.auteurPseudo : post.auteurNom).replace(/[^\w-]+/g, "");
 	return {
 		baseNomFichier: `${racineNom || "post"}-${identifiant}`,
@@ -138,11 +147,17 @@ export function documentDepuisPost(post: PostCampagne): DocumentVisionne {
 					href: urlPostX(post.auteurPseudo, post.tweetId),
 					libelle: "Voir sur X",
 				}
-			: {
-					ariaLabel: `Ouvrir le message de ${pseudoSur} dans Discord (nouvel onglet, réservé aux membres du serveur)`,
-					href: urlMessageDiscord(post.guildId, post.salonId, post.messageId),
-					libelle: "Ouvrir dans Discord",
-				},
+			: post.source === "discord"
+				? {
+						ariaLabel: `Ouvrir le message de ${pseudoSur} dans Discord (nouvel onglet, réservé aux membres du serveur)`,
+						href: urlMessageDiscord(post.guildId, post.salonId, post.messageId),
+						libelle: "Ouvrir dans Discord",
+					}
+				: {
+						ariaLabel: `Voir la publication de ${pseudoSur} sur Instagram (nouvel onglet)`,
+						href: post.permalien,
+						libelle: "Voir sur Instagram",
+					},
 		sousTitre: dateLisible ? `${pseudoSur} · ${dateLisible}` : pseudoSur,
 		titre: post.auteurNom,
 	};

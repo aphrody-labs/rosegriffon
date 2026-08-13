@@ -66,13 +66,13 @@ export function HashtagsCopiables({ hashtags }: { hashtags: HashtagAffichable[] 
 								type="button"
 								onClick={() => void copier(hashtag.libelle)}
 								aria-label={`Copier le hashtag ${hashtag.libelle}`}
-								className="inline-flex min-h-11 max-w-full items-center gap-2 rounded-full border border-rg-or/60 bg-rg-sur-marine/10 px-4 text-sm font-bold text-rg-sur-marine backdrop-blur-sm transition-colors hover:border-rg-or hover:bg-rg-sur-marine/20 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rg-or"
+								className="inline-flex min-h-11 max-w-full items-center gap-2 rounded-full border border-primary/50 bg-surface-container-low px-4 text-sm font-bold text-on-surface transition-colors hover:border-primary hover:bg-surface-container focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
 							>
 								<span className="truncate">{hashtag.libelle}</span>
 								{copieCeluiCi ? (
-									<Check className="size-4 shrink-0 text-rg-or" aria-hidden />
+									<Check className="size-4 shrink-0 text-primary" aria-hidden />
 								) : (
-									<Copy className="size-4 shrink-0 text-rg-or/80" aria-hidden />
+									<Copy className="size-4 shrink-0 text-primary/80" aria-hidden />
 								)}
 							</button>
 						</li>
@@ -81,7 +81,7 @@ export function HashtagsCopiables({ hashtags }: { hashtags: HashtagAffichable[] 
 			</ul>
 
 			{/* Un seul message, annoncé poliment : ni infobulle, ni alerte modale. */}
-			<p aria-live="polite" className="mt-2 min-h-5 text-xs text-rg-sur-marine/80">
+			<p aria-live="polite" className="mt-1 min-h-4 text-xs text-on-surface-variant">
 				{copie
 					? `${copie} copié dans le presse-papier.`
 					: echec

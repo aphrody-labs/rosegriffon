@@ -18,8 +18,6 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 import {
-	heroPrimaryButtonClass,
-	heroSecondaryButtonClass,
 	PageContainer,
 	PageHero,
 } from "@/components/shared/PageShell";
@@ -353,66 +351,33 @@ export default async function IergDayPage({
 				]}
 			/>
 
-			<PageContainer>
-				<PageHero
-					eyebrow={campagne.surTitre ?? "Campagne communautaire"}
-					icon={<Hash className="size-6 text-rg-or" aria-hidden />}
-					title={campagne.titre}
-					description={campagne.description ?? undefined}
-					image={campagne.imageCouverture ? { src: campagne.imageCouverture } : undefined}
-					actions={
-						etat !== "terminee" && hashtagPrincipal ? (
-							<>
-								{/* « Participer », c'est PUBLIER : `intent/post` ouvre la fenêtre de
-								    rédaction de X, hashtag déjà saisi. Ce bouton menait au fil de
-								    recherche — c'est-à-dire, pour une campagne qui vient d'être
-								    annoncée, à un écran vide. */}
-								<Button asChild className={heroPrimaryButtonClass}>
-									<a
-										href={urlPublicationX(libelleHashtagPrincipal || hashtagPrincipal)}
-										target="_blank"
-										rel="noopener noreferrer"
-									>
-										Participer sur X
-									</a>
-								</Button>
-								{aParticipation ? (
-									<Button asChild variant="ghost" className={heroSecondaryButtonClass}>
-										<Link href="#participer">Lire les règles</Link>
-									</Button>
-								) : (
-									<Button asChild variant="ghost" className={heroSecondaryButtonClass}>
-										<Link href="/community">Découvrir la communauté</Link>
-									</Button>
-								)}
-							</>
-						) : undefined
-					}
-				>
+			<PageContainer className="space-y-8 py-6 sm:space-y-10">
+				{/*
+				 * ── PAS DE BANNIÈRE. TOUT EST SUR L'AFFICHE. ────────────────────────
+				 *
+				 * Elle répétait en texte ce que l'affiche dit déjà en toutes lettres
+				 * juste dessous : le sur-titre, le titre, la consigne (« postez une
+				 * image mettant en scène un OC »), la date de fin. Sur un téléphone,
+				 * ces quatre lignes plus le fond décoratif occupaient le premier écran
+				 * ENTIER — l'affiche, elle, commençait sous la ligne de flottaison.
+				 *
+				 * ⚠ LE TITRE N'EST PAS SUPPRIMÉ, IL EST RENDU AUX SEULS OUTILS QUI EN
+				 * ONT BESOIN. Une page sans `<h1>` n'a pas de titre pour un lecteur
+				 * d'écran ni pour un moteur de recherche, et le texte d'une image n'en
+				 * tient pas lieu : aucun des deux ne lit les pixels. `sr-only` le garde
+				 * dans le document sans le peindre.
+				 */}
+				<h1 className="sr-only">
+					{campagne.surTitre ? `${campagne.surTitre} — ${campagne.titre}` : campagne.titre}
+				</h1>
+
+				{/* Les trois seules choses que l'affiche NE dit pas : le hashtag
+				    copiable d'un geste, ce qui a déjà été déposé, et le temps qui
+				    reste. */}
+				<div className="space-y-3">
 					<HashtagsCopiables hashtags={hashtags} />
 
-					{rebours && (
-						<CompteARebours
-							cibleIso={rebours.cibleIso}
-							libelle={rebours.libelle}
-							libelleEcoule={rebours.libelleEcoule}
-							echeance={rebours.echeance}
-						/>
-					)}
-
-					{/*
-					 * ⚠ PAS DE COMPTEUR « depuis la dernière récolte ».
-					 * C'était l'âge du dernier passage de notre collecteur — une donnée
-					 * d'exploitation, pas une information de campagne. Elle n'apprenait
-					 * rien à un visiteur (« 5 minutes » ne dit ni combien de créations
-					 * ont été postées, ni quand), et elle mentait par omission sur les
-					 * campagnes archivées, dont la récolte n'a jamais rien pu ramener.
-					 * `x_campagnes.collecte_le` reste écrite en base pour le cron.
-					 */}
-					{/* Les deux compteurs et la période sur UNE rangée qui se replie :
-					    trois blocs empilés poussaient l'affiche sous la ligne de flottaison
-					    de tous les téléphones. */}
-					<div className="mt-4 flex flex-wrap items-center gap-2">
+					<div className="flex flex-wrap items-center gap-2">
 						<Compteur
 							icone={ImageIcon}
 							valeur={String(stats.posts)}
@@ -424,14 +389,23 @@ export default async function IergDayPage({
 							libelle={stats.auteurs > 1 ? "participants" : "participant"}
 						/>
 						{periode && (
-							<span className="text-xs text-rg-sur-marine/80">
+							<span className="text-xs text-on-surface-variant">
 								{periode}
 								{etat === "a-venir" && " · pas encore commencé"}
 								{etat === "terminee" && " · terminée"}
 							</span>
 						)}
 					</div>
-				</PageHero>
+
+					{rebours && (
+						<CompteARebours
+							cibleIso={rebours.cibleIso}
+							libelle={rebours.libelle}
+							libelleEcoule={rebours.libelleEcoule}
+							echeance={rebours.echeance}
+						/>
+					)}
+				</div>
 
 				<SelecteurCampagne campagnes={campagnes} slugActif={campagne.slug} />
 
@@ -447,9 +421,9 @@ export default async function IergDayPage({
 				 * été supprimé : il n'ajoutait rien, et sa colonne restait à moitié
 				 * vide sous le règlement d'à côté.
 				 *
-				 * La bannière, elle, ne les montre pas : `PageHero` recadre son image
-				 * en `object-cover` sous un voile marine à 90 % — c'est un décor, par
-				 * construction illisible.
+				 * Il n'y a plus de bannière au-dessus : elle recadrait cette même
+				 * affiche en `object-cover` sous un voile marine à 90 %, c'est-à-dire
+				 * en décor par construction illisible, tout en répétant son texte.
 				 */}
 				{(campagne.imageAffiche || campagne.imageReglement) && (
 					<section aria-labelledby="titre-affiche">

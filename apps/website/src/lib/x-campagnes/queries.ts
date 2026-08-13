@@ -79,7 +79,7 @@ interface LigneCampagne {
  * (« X ne publie pas de nom de salon », « Discord ne publie pas de métriques »).
  */
 interface LigneCreation {
-	source: "x" | "discord";
+	source: "x" | "discord" | "instagram";
 	/** Identifiant natif : `tweets.id` ou `discord_messages.message_id`. */
 	identifiant: string;
 	hashtag_trouve: string | null;
@@ -94,6 +94,8 @@ interface LigneCreation {
 	salon_id: string | null;
 	salon_nom: string | null;
 	guild_id: string | null;
+	/** Permalien Instagram — `null` pour les deux autres sources. */
+	permalien: string | null;
 }
 
 /** Une entrée de `campagne_creations_discord.images` (jsonb). */
@@ -182,12 +184,33 @@ function imagesDiscord(brut: unknown): ImageCampagne[] {
 
 function versPost(ligne: LigneCreation): PostCampagne {
 	const commun = {
-		auteurNom: ligne.auteur_nom ?? ligne.auteur_pseudo ?? "Anonyme",
+		// ⚠ `||` ET NON `??`. Mesuré le 13/8/2026 : 55 des 451 créations Discord ont
+		// un `author_display_name` VIDE (chaîne vide, pas `null`) — `??` les
+		// laissait passer telles quelles et la carte s'affichait sans nom d'auteur.
+		// Aucune création n'est réellement anonyme : `author_username` est renseigné
+		// sur les 451 lignes Discord comme sur les 493 lignes X (compté en base).
+		// Le repli final ne devrait donc jamais servir ; il rend une chaîne vide
+		// plutôt qu'un « Anonyme » qui affirmerait quelque chose de faux.
+		auteurNom: ligne.auteur_nom || ligne.auteur_pseudo || "",
 		hashtagTrouve: ligne.hashtag_trouve,
 		misEnAvant: ligne.mis_en_avant,
 		publieLe: versISO(ligne.publie_le),
 		texte: ligne.texte ?? "",
 	};
+
+	if (ligne.source === "instagram") {
+		return {
+			...commun,
+			auteurPseudo: ligne.auteur_pseudo,
+			// Même forme de stockage que Discord : un tableau d'objets portant le
+			// `chemin` dans le bucket `assets`. Les URL `cdninstagram.com` sont
+			// signées et expirent, elles ne sont jamais servies.
+			images: imagesDiscord(ligne.media),
+			permalien: ligne.permalien ?? "",
+			shortcode: ligne.identifiant,
+			source: "instagram",
+		};
+	}
 
 	if (ligne.source === "discord") {
 		return {
@@ -344,17 +367,79 @@ export async function compterPostsCampagne(slug: string): Promise<StatsCampagne>
  * fichier). Sans elle, ces requêtes publieraient les posts d'une campagne dépubliée
  * à qui en connaîtrait le slug.
  */
-const SELECT_POSTS = `select p.tweet_id, p.mis_en_avant, p.publie_le,
+const SELECT_POSTS = `
+	select 'x'::text as source, p.tweet_id as identifiant, p.mis_en_avant, p.publie_le,
 	       case when p.hashtag_trouve = any(c.hashtags)
 	            then coalesce(c.hashtags_affichage[array_position(c.hashtags, p.hashtag_trouve)],
 	                          p.hashtag_trouve)
 	       end as hashtag_trouve,
-	       t.author_username, t.author_name,
-	       public.x_masquer_hashtags(t.text, c.hashtags_rattrapage) as text,
-	       t.media, t.metrics
+	       t.author_username as auteur_pseudo, t.author_name as auteur_nom,
+	       public.x_masquer_hashtags(t.text, c.hashtags_rattrapage) as texte,
+	       t.media, t.metrics,
+	       null::text as salon_id, null::text as salon_nom, null::text as guild_id,
+	       null::text as permalien,
+	       p.campagne_slug, p.masque, p.a_media
 	  from public.x_campagne_posts p
 	  join public.tweets t on t.id = p.tweet_id
-	  join public.x_campagnes c on c.slug = p.campagne_slug and c.publiee`;
+	  join public.x_campagnes c on c.slug = p.campagne_slug and c.publiee
+
+	union all
+
+	select 'discord'::text, d.message_id, d.mis_en_avant, d.publie_le,
+	       case when d.hashtag_trouve = any(c.hashtags)
+	            then coalesce(c.hashtags_affichage[array_position(c.hashtags, d.hashtag_trouve)],
+	                          d.hashtag_trouve)
+	       end,
+	       m.author_username, m.author_display_name,
+	       public.x_masquer_hashtags(m.content, c.hashtags_rattrapage),
+	       d.images, null::jsonb,
+	       m.channel_id, s.name, m.guild_id,
+	       null::text,
+	       d.campagne_slug, d.masque, d.a_media
+	  from public.campagne_creations_discord d
+	  join public.discord_messages m on m.message_id = d.message_id
+	  join public.discord_channels s on s.channel_id = m.channel_id
+	  join public.x_campagnes c on c.slug = d.campagne_slug and c.publiee
+	 where m.deleted_at is null and s.suivi
+
+	union all
+
+	select 'instagram'::text, i.shortcode, i.mis_en_avant, i.publie_le,
+	       case when i.hashtag_trouve = any(c.hashtags)
+	            then coalesce(c.hashtags_affichage[array_position(c.hashtags, i.hashtag_trouve)],
+	                          i.hashtag_trouve)
+	       end,
+	       i.auteur_pseudo, i.auteur_pseudo,
+	       public.x_masquer_hashtags(i.legende, c.hashtags_rattrapage),
+	       i.images, null::jsonb,
+	       null::text, null::text, null::text,
+	       i.permalink,
+	       i.campagne_slug, i.masque, i.a_media
+	  from public.campagne_creations_instagram i
+	  join public.x_campagnes c on c.slug = i.campagne_slug and c.publiee`;
+
+/**
+ * La galerie, TOUTES SOURCES — enveloppe de l'`union all` ci-dessus.
+ *
+ * ⚠ CE QUE CETTE UNION RÉPARE. Jusqu'au 13/8/2026, `SELECT_POSTS` n'interrogeait
+ * que `x_campagne_posts`. Mesuré ce jour-là : **450 créations Discord** étaient
+ * en base, non masquées, avec image ré-hébergée — et INVISIBLES sur le site. Les
+ * six campagnes archivées affichaient toutes « Aucune publication » alors que
+ * leurs créations avaient bien été récoltées ; le mapper `versPost` savait déjà
+ * les traduire, mais aucune requête ne les lui donnait.
+ *
+ * Les trois branches ont la même arité et le même ORDRE de colonnes : Postgres
+ * l'exige, et un décalage d'une colonne mettrait silencieusement le pseudo dans
+ * le texte. Les colonnes qui n'ont de sens que d'un côté sont `null` TYPÉES —
+ * `null` tout court laisserait Postgres deviner le type et refuser l'union.
+ *
+ * Les gardes de publication sont RECOPIÉES dans chaque branche
+ * (`c.publiee`, `not masque`, `a_media`, `m.deleted_at is null`, `s.suivi`) :
+ * `getPgPool()` se connecte en rôle propriétaire, donc SANS RLS. Sans elles, la
+ * page publierait les créations d'une campagne dépubliée, d'un salon retiré de
+ * la veille ou masquées par un modérateur.
+ */
+const GALERIE = `select * from (${SELECT_POSTS}) as creations`;
 
 /** Page de la galerie, chronologique stricte (posts avec image, non masqués). */
 export async function listerPostsCampagne(
@@ -370,9 +455,9 @@ export async function listerPostsCampagne(
 	const offset = (entierPositif(page, 1) - 1) * taille;
 	try {
 		const { rows } = await getPgPool().query<LigneCreation>(
-			`${SELECT_POSTS}
-			 where p.campagne_slug = $1 and not p.masque and p.a_media
-			 order by p.publie_le desc, p.tweet_id desc
+			`${GALERIE}
+			 where campagne_slug = $1 and not masque and a_media
+			 order by publie_le desc, identifiant desc
 			 limit $2 offset $3`,
 			[slug, taille, offset]
 		);
@@ -391,9 +476,9 @@ export async function listerPostsCampagne(
 export async function listerPostsEnAvant(slug: string, limite = 6): Promise<PostCampagne[]> {
 	try {
 		const { rows } = await getPgPool().query<LigneCreation>(
-			`${SELECT_POSTS}
-			 where p.campagne_slug = $1 and p.mis_en_avant and not p.masque and p.a_media
-			 order by p.publie_le desc, p.tweet_id desc
+			`${GALERIE}
+			 where campagne_slug = $1 and mis_en_avant and not masque and a_media
+			 order by publie_le desc, identifiant desc
 			 limit $2`,
 			[slug, entierPositif(limite, 6)]
 		);
