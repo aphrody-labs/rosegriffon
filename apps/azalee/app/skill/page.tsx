@@ -189,6 +189,7 @@ export default async function SkillsPage({
 								element={skill.elementName?.fr}
 								videoUrl={skill.videoUrl || undefined}
 								posterUrl={skill.posterUrl || undefined}
+								thumbnailUrl={skill.thumbnailUrl || undefined}
 								imageUrl={skill.image}
 								shop={skill.shop || undefined}
 								className="h-full"
