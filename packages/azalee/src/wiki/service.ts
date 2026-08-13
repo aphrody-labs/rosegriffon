@@ -1817,6 +1817,10 @@ export const wikiService = {
 				categoryName: categoryInfo,
 				image: resolveAssetUrl(h.image_url) || h.image_url,
 				videoUrl: h.video_url || null,
+				// Vidéo officielle zukan : `poster_url` est la vraie image d'attente
+				// (image extraite de la vidéo), `thumbnail_url` sa vignette webp légère.
+				posterUrl: h.poster_url || null,
+				thumbnailUrl: h.thumbnail_url || null,
 				// Community sheet data (from match-skills enrichment or nested sheetData)
 				sheetData:
 					sd.sheetData ||
@@ -1969,6 +1973,9 @@ export const wikiService = {
 				image: resolveAssetUrl(h.image_url) || h.image_url,
 				videoUrl: h.video_url || null,
 				posterUrl: h.poster_url || null,
+				// Vignette webp zukan (~6 Ko) : c'est elle qu'on veut dans une grille de 60,
+				// pas le poster jpg (~70 Ko).
+				thumbnailUrl: h.thumbnail_url || null,
 				shop: (() => {
 					const s = (h.sheet_data as any)?.shop;
 					return s ? SHOP_FR[s] || s : null;

@@ -29,6 +29,15 @@
 
 begin;
 
+-- La vignette webp de la liste zukan est UNE par technique (pas une par variante) :
+-- elle reste donc sur `inagle_skills`, là où la liste du wiki la lit déjà en `select *`.
+-- ~6 Ko contre ~70 Ko pour le poster jpg : c'est elle qu'on veut dans une grille de 60.
+alter table public.inagle_skills
+	add column if not exists thumbnail_url text;
+
+comment on column public.inagle_skills.thumbnail_url is
+	'Vignette webp zukan (~6 Ko) affichée dans la grille des techniques.';
+
 create table if not exists public.inagle_skill_videos (
 	skill_id text not null references public.inagle_skills (id) on delete cascade,
 	-- Rang d'apparition dans le `.btnBox` de zukan. 0 = vidéo principale, celle
@@ -39,9 +48,6 @@ create table if not exists public.inagle_skill_videos (
 	label text not null,
 	video_url text not null,
 	poster_url text,
-	-- Vignette webp de la liste (une seule par technique, recopiée sur chaque
-	-- variante pour que la table se suffise à elle-même côté affichage).
-	thumbnail_url text,
 	-- D'où vient la ligne : `zukan` (scrapée) ou `dreamscape` (reskin qui réutilise
 	-- l'animation d'un move parent). Dire lequel évite de confondre une donnée
 	-- constatée avec une donnée déduite.
@@ -63,6 +69,12 @@ comment on column public.inagle_skill_videos.label is
 	'Libellé du bouton zukan : Shot / Success / Failure / Defence / Offence / Shot Block.';
 comment on column public.inagle_skill_videos.source is
 	'zukan = constatée sur le site ; dreamscape = animation empruntée au move parent.';
+
+-- Reprise : la vignette a d'abord été posée sur les variantes avant d'être
+-- reconnue comme un attribut de la technique. Retirée ici pour qu'une seconde
+-- application de cette migration converge vers le schéma décrit plus haut.
+alter table public.inagle_skill_videos
+	drop column if exists thumbnail_url;
 
 -- La lecture de la fiche : toutes les variantes d'une technique, dans l'ordre.
 create index if not exists inagle_skill_videos_skill_idx
