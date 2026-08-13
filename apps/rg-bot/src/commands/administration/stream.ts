@@ -63,7 +63,7 @@ import {
 	lireChampTextuel,
 	ordreAffichageJour,
 } from "./valeurs";
-import "./racine";
+import "./racine-gestion";
 
 /**
  * Les colonnes de `stream_schedules`.
@@ -170,9 +170,9 @@ function ficheCreneau(creneau: CreneauAdmin) {
 @SlashGroup({
 	name: "stream",
 	description: "Gérer les créneaux du planning Rose Griffon TV",
-	root: "administration",
+	root: "gestion",
 })
-@SlashGroup("stream", "administration")
+@SlashGroup("stream", "gestion")
 export class AdministrationStreamCommand {
 	@Slash({ name: "liste", description: "Le planning complet, du lundi au dimanche" })
 	async liste(

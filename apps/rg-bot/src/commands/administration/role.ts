@@ -97,7 +97,7 @@ import { rgEmbed } from "../../lib/embeds";
 import { borner, echapperMarkdown } from "../staff/format";
 import { differerEnPrive, exigerDroits, messagePanne } from "../staff/garde";
 import { analyserIdConfirmation, construireIdConfirmation } from "./valeurs";
-import "./racine";
+import "./racine-moderation";
 
 /**
  * Délai laissé pour cliquer « Confirmer ».
@@ -410,9 +410,9 @@ async function confirmer(
 @SlashGroup({
 	name: "role",
 	description: "Distribution des rôles Discord : attribution, création, suppression",
-	root: "administration",
+	root: "moderation",
 })
-@SlashGroup("role", "administration")
+@SlashGroup("role", "moderation")
 export class AdministrationRoleCommand {
 	@Slash({ name: "donner", description: "Donne un rôle à un membre du serveur" })
 	async donner(
