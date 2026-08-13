@@ -183,12 +183,17 @@ function listeDeChaines(valeur: unknown, repli: string[]): string[] {
  * faute de frappe dans l'éditeur de table ne doit pas faire taire ni emballer la
  * notification.
  *
- * ⚠ `max_par_lot` est borné par `MAX_EMBEDS_PAR_MESSAGE` (10), PAS par
- * `PLAFOND_DRAIN` (50, qui est le plafond du drain, pas celui d'un message).
- * `/tweets regler` plafonne déjà à 10, mais l'`UPDATE settings` direct est un
- * chemin d'administration documenté : il pouvait poser 50 et rendre tout envoi
- * impossible (`50035`). Au-delà du seuil, c'est de toute façon l'embed de
- * synthèse qui part, jamais 50 embeds.
+ * ⚠ `max_par_lot` n'est PAS une taille de message : c'est le SEUIL au-delà
+ * duquel le drain remplace le détail par un embed de synthèse
+ * (`services/tweetsNotifier.ts` : `if (retenus.length > filtre.max_par_lot)`).
+ * L'envoi détaillé, lui, repasse toujours par `decouperEnLots`, qui borne
+ * chaque message à `MAX_EMBEDS_PAR_MESSAGE` (10) embeds et
+ * `MAX_CARACTERES_PAR_MESSAGE` (6 000) caractères : un seuil élevé ne peut donc
+ * pas produire un rejet `50035`. Le borner à 10 n'avait aucun fondement et
+ * écrasait silencieusement un réglage posé par `UPDATE settings` (chemin
+ * d'administration documenté). La seule borne qui ait un sens est
+ * `PLAFOND_DRAIN` (50) : un drain ne ramène jamais plus de lignes que ça
+ * (`services/tweets.ts`), donc au-delà le seuil ne changerait plus rien.
  */
 export function lireFiltreTweets(valeur: unknown): FiltreTweets {
 	if (!valeur || typeof valeur !== "object" || Array.isArray(valeur)) {
@@ -203,7 +208,7 @@ export function lireFiltreTweets(valeur: unknown): FiltreTweets {
 			...FILTRE_TWEETS_DEFAUT.categories_exclues,
 		]),
 		max_par_lot: Number.isFinite(max)
-			? Math.min(MAX_EMBEDS_PAR_MESSAGE, Math.max(1, Math.trunc(max)))
+			? Math.min(PLAFOND_DRAIN, Math.max(1, Math.trunc(max)))
 			: FILTRE_TWEETS_DEFAUT.max_par_lot,
 		salon: estChaineNonVide(brut.salon) ? brut.salon.trim() : null,
 	};

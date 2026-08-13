@@ -18,7 +18,9 @@ import { BOT_SYNC_MEMBRES, GUILD_ID, SYNC_INTERVAL_MS } from "../lib/config";
  */
 @Discord()
 export class ReadyEvent {
-	@Once({ event: "ready" })
+	// `clientReady` : `ready` est déprécié en discord.js 14.26 et ne sera plus
+	// émis en v15 (cf. `index.ts`).
+	@Once({ event: "clientReady" })
 	async ready([client]: [Client]) {
 		console.log(`✓ Prêt en tant que ${client.user?.tag} — ${client.guilds.cache.size} serveur(s)`);
 

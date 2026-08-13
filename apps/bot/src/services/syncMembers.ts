@@ -27,6 +27,10 @@ export function memberToRow(member: GuildMember): MemberRow {
 		premium_since: member.premiumSince?.toISOString() ?? null,
 		roles: roleIds,
 		is_bot: member.user.bot,
+		// La ligne décrit un membre que la passerelle vient de nous rendre : il est
+		// présent, donc sans date de départ. La colonne `left_at` (migration
+		// `20260811_discord_departs.sql`) remplace la suppression de la ligne.
+		left_at: null,
 		updated_at: new Date().toISOString(),
 	};
 }
@@ -54,6 +58,11 @@ async function upsertRow(row: MemberRow): Promise<void> {
       premium_since = EXCLUDED.premium_since,
       roles = EXCLUDED.roles,
       is_bot = EXCLUDED.is_bot,
+      -- Un retour efface la date de départ : sans cette ligne, un membre revenu
+      -- restait compté comme parti (les statistiques du site filtrent sur
+      -- left_at IS NULL) et son profil non réclamé pouvait être supprimé par la
+      -- réconciliation des départs du cron.
+      left_at = NULL,
       updated_at = NOW()
   `;
 }
