@@ -11,6 +11,7 @@ import { crawlTwitterSearch } from "./tasks/ie-crawl/harvest-search";
 import { crawlTwitter } from "./tasks/ie-crawl/twitter";
 import { crawlHashtagCampaigns } from "./tasks/ie-crawl/hashtag-harvest";
 import { recolterCreationsDiscord } from "./tasks/campagnes-discord";
+import { relayerCampagnesDiscord } from "./tasks/campagnes-relais-discord";
 import { runRagSync, queryRag, ragGroundedQuery, ingestWikiCorpus } from "./tasks/ie-crawl/rag-index";
 import {
 	triggerPublishScheduled,
@@ -193,6 +194,7 @@ const DELAIS_TACHES_MS: Record<string, number> = {
 	cdn: 3600_000,
 	"x:campagnes": 3600_000,
 	"campagnes:discord": 3600_000,
+	"campagnes:relais": 900_000,
 	"seo:llms-txt": 3600_000,
 	// Timelines des comptes officiels (`x-accounts.ts`). Elle EXISTAIT dans
 	// `tasks/ie-crawl/twitter.ts` mais n'était câblée à aucune tâche : les
@@ -427,6 +429,12 @@ if (indexRun >= 0) {
 				},
 			};
 		});
+	} else if (task === "campagnes:relais" || task === "campagnes-relais" || task === "relais") {
+		// `--run campagnes:relais <slug>` restreint le relais à une seule campagne.
+		const slug = Bun.argv[indexRun + 2];
+		await executeTask("campagnes:relais", () =>
+			relayerCampagnesDiscord(slug && !slug.startsWith("-") ? { slug } : {})
+		);
 	} else if (task === "discord:backfill" || task === "discord-backfill") {
 		await executeTask("discord:backfill", runDiscordMessagesBackfill);
 	} else if (task === "discord:polls" || task === "discord-polls" || task === "sondages") {
@@ -475,12 +483,13 @@ if (indexRun >= 0) {
 		await executeTask("discord:polls", () => runDiscordPollsImport());
 		await executeTask("x:campagnes", () => crawlHashtagCampaigns());
 		await executeTask("campagnes:discord", () => recolterCreationsDiscord());
+		await executeTask("campagnes:relais", () => relayerCampagnesDiscord());
 		await executeTask("seo:llms-txt", runSeoLlmsTxt);
 		await executeTask("seo:indexnow", runSeoIndexNow);
 		await executeTask("stats:achillea", collecterAudienceAchillea);
 	} else {
 		console.error(
-			`❌ Tâche inconnue : ${task}. Choisissez parmi : db, cdn, crawl, rag, x, x-search, x:campagnes, query, publish, github-publish, patreon, reminders, warm, discord, discord:scan, discord:archives, discord:messages, discord:backfill, discord:polls, campagnes:discord, seo, seo:indexnow, seo:llms-txt, stats:achillea, backup:postgres, backup:pg, all.`
+			`❌ Tâche inconnue : ${task}. Choisissez parmi : db, cdn, crawl, rag, x, x-search, x:campagnes, query, publish, github-publish, patreon, reminders, warm, discord, discord:scan, discord:archives, discord:messages, discord:backfill, discord:polls, campagnes:discord, campagnes:relais, seo, seo:indexnow, seo:llms-txt, stats:achillea, backup:postgres, backup:pg, all.`
 		);
 	}
 	process.exit(0);
@@ -727,6 +736,7 @@ const server = Bun.serve({
 					"discord:polls",
 					"x:campagnes",
 					"campagnes:discord",
+					"campagnes:relais",
 					"seo:indexnow",
 					"seo:llms-txt",
 					"stats:achillea",
@@ -750,6 +760,7 @@ const server = Bun.serve({
 					"discord:polls": "10 * * * *",
 					"x:campagnes": "20 * * * *",
 					"campagnes:discord": "25 * * * *",
+					"campagnes:relais": "*/15 * * * *",
 				},
 			});
 		}
@@ -792,6 +803,8 @@ const server = Bun.serve({
 				"x-campagnes": () => crawlHashtagCampaigns(),
 				"campagnes:discord": () => recolterCreationsDiscord(),
 				"campagnes-discord": () => recolterCreationsDiscord(),
+				"campagnes:relais": () => relayerCampagnesDiscord(),
+				"campagnes-relais": () => relayerCampagnesDiscord(),
 				"seo:indexnow": runSeoIndexNow,
 				"seo-indexnow": runSeoIndexNow,
 				"seo:llms-txt": runSeoLlmsTxt,

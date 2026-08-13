@@ -39,6 +39,7 @@ import {
 	type MediaItem,
 } from "./tweet-row";
 import { fermerStockage, rehebergerMediasTweet } from "./tweet-media-storage";
+import { apparierHashtag, requetesVariantes, variantesRecherche } from "./hashtag-variantes";
 import { loadBxcXCookieHeader } from "./x-accounts";
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -102,6 +103,8 @@ export interface StatsCampagne {
 	recus: number;
 	/** Tweets uniques retenus (image + hashtag présent). */
 	avecImage: number;
+	/** Parmi eux, ceux retenus sur une graphie FAUTIVE du hashtag. */
+	surFaute: number;
 	tweetsUpsert: number;
 	rattachements: number;
 	imagesRehebergees: number;
@@ -150,6 +153,9 @@ interface LigneCampagne {
 interface Retenu {
 	tweet: Tweet;
 	hashtag: string;
+	/** Graphie réellement écrite par l'auteur, et son nombre de fautes. */
+	ecrit: string;
+	fautes: number;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -193,19 +199,18 @@ function message(err: unknown): string {
 }
 
 /**
- * Le texte contient-il l'un des hashtags de la campagne ?
+ * Filtres d'une requête de campagne, hashtag retiré.
  *
- * On ne se fie PAS au seul retour de X : `filter:images` et le produit « Top »
- * remontent aussi des citations et des réponses dans lesquelles le hashtag est
- * porté par un AUTRE post. Renvoie le hashtag trouvé (minuscules, sans croisillon),
- * ou null.
+ * `#IERGDay -filter:replies since:2026-07-01` → `-filter:replies since:2026-07-01`.
+ * Les requêtes de variantes doivent porter EXACTEMENT les mêmes bornes que celles
+ * déclarées en base : sans le `since:`, une variante rapatrierait toute
+ * l'histoire du hashtag, y compris les éditions précédentes de la campagne.
  */
-function trouverHashtag(texte: string, hashtags: readonly string[]): string | null {
-	const bas = (texte || "").toLowerCase();
-	for (const h of hashtags) {
-		if (bas.includes(`#${h}`)) return h;
-	}
-	return null;
+export function filtresDeRequete(requete: string): string {
+	return (requete || "")
+		.replace(/^\s*\([^)]*\)\s*/, "") // groupe `(#a OR #b)` en tête
+		.replace(/^\s*#[\p{L}\p{N}_]+\s*/u, "") // ou hashtag simple en tête
+		.trim();
 }
 
 /**
@@ -353,6 +358,7 @@ async function recolterCampagne(
 		pages: 0,
 		recus: 0,
 		avecImage: 0,
+		surFaute: 0,
 		tweetsUpsert: 0,
 		rattachements: 0,
 		imagesRehebergees: 0,
@@ -364,16 +370,31 @@ async function recolterCampagne(
 	// compris : une campagne sans `requetes` doit tout de même interroger X sur ses
 	// variantes, sinon le filet ne récolte rien.
 	const hashtags = hashtagsRecoltes(campagne);
-	const requetes = campagne.requetes?.length ? campagne.requetes : hashtags.map((h) => `#${h}`);
+	const declarees = campagne.requetes?.length ? campagne.requetes : hashtags.map((h) => `#${h}`);
 	if ((campagne.hashtags ?? []).length === 0) {
 		stats.arret = "erreur";
 		stats.erreur = "campagne sans hashtag";
 		return stats;
 	}
 
+	// ── LES FAUTES DE FRAPPE SE DEMANDENT, ELLES NE SE DEVINENT PAS ────────────
+	// L'index de X est EXACT : `#IERGDay` ne rendra jamais `#IERGDya`. Une faute
+	// qu'on n'a pas demandée est une création perdue, définitivement. On ajoute
+	// donc UNE requête par campagne, groupée en `OR` — X facture la page, pas le
+	// terme, donc douze graphies coûtent le prix d'une. Les requêtes déclarées en
+	// base restent en tête et ne sont jamais remplacées : ce sont elles qui
+	// portent la vérité éditoriale de la campagne.
+	const filtres = filtresDeRequete(declarees[0] ?? "");
+	const dejaDemandees = new Set(declarees.map((r) => r.toLowerCase()));
+	const variantes = hashtags.flatMap((h) => variantesRecherche(h));
+	const requetesFautes = requetesVariantes(variantes, filtres).filter(
+		(r) => !dejaDemandees.has(r.toLowerCase())
+	);
+	const requetes = [...declarees, ...requetesFautes];
+
 	const rattrapage = campagne.hashtags_rattrapage ?? [];
 	console.log(
-		`[Campagnes X] « ${campagne.titre} » (${campagne.slug}) — ${requetes.length} requête(s) × ${PRODUITS.length} produit(s), hashtags : ${(campagne.hashtags ?? []).map((h) => `#${h}`).join(", ")}${rattrapage.length > 0 ? ` (+ rattrapage silencieux : ${rattrapage.map((h) => `#${h}`).join(", ")})` : ""}`
+		`[Campagnes X] « ${campagne.titre} » (${campagne.slug}) — ${requetes.length} requête(s) × ${PRODUITS.length} produit(s), hashtags : ${(campagne.hashtags ?? []).map((h) => `#${h}`).join(", ")}${rattrapage.length > 0 ? ` (+ rattrapage silencieux : ${rattrapage.map((h) => `#${h}`).join(", ")})` : ""}${requetesFautes.length > 0 ? ` (+ ${requetesFautes.length} requête(s) de fautes de frappe : ${variantes.slice(1, 6).map((v) => `#${v}`).join(", ")}…)` : ""}`
 	);
 
 	// Dédoublonnage à l'échelle de la campagne : un même post remonte presque
@@ -395,8 +416,9 @@ async function recolterCampagne(
 	}
 
 	stats.avecImage = retenus.size;
+	stats.surFaute = [...retenus.values()].filter((r) => r.fautes > 0).length;
 	console.log(
-		`[Campagnes X] ${campagne.slug} : ${stats.recus} reçus, ${retenus.size} post(s) unique(s) avec image.`
+		`[Campagnes X] ${campagne.slug} : ${stats.recus} reçus, ${retenus.size} post(s) unique(s) avec image${stats.surFaute > 0 ? `, dont ${stats.surFaute} sur une graphie fautive du hashtag` : ""}.`
 	);
 
 	if (retenus.size === 0) {
@@ -627,10 +649,21 @@ async function paginer(
 			if (retenus.has(t.id)) continue;
 			// Deux filtres, tous deux nécessaires : au moins une image, ET le hashtag
 			// réellement présent dans le texte du post.
+			//
+			// L'appariement TOLÈRE LES FAUTES DE FRAPPE (`#IERGDya`, `#IERG_Day`,
+			// `#iergday2026`) : un participant qui recopie le hashtag d'une affiche
+			// sur un téléphone n'a pas à perdre sa création pour une lettre. Le filet
+			// s'applique à TOUT ce que X renvoie, y compris aux posts ramenés par
+			// ricochet par une autre requête.
 			if (!porteUneImage(t)) continue;
-			const hashtag = trouverHashtag(t.text, hashtagsRecoltes(campagne));
-			if (!hashtag) continue;
-			retenus.set(t.id, { tweet: t, hashtag });
+			const appariement = apparierHashtag(t.text, hashtagsRecoltes(campagne));
+			if (!appariement) continue;
+			retenus.set(t.id, {
+				tweet: t,
+				hashtag: appariement.hashtag,
+				ecrit: appariement.ecrit,
+				fautes: appariement.fautes,
+			});
 			ajoutes++;
 			if (retenus.size >= limite) break;
 		}
