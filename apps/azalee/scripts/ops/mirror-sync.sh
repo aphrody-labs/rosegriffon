@@ -46,7 +46,13 @@ echo "[mirror-sync] rétention OK ; restants: $(ls -1 "$BACKUPS"/supabase-*.sqli
 # (vérification d'inode dans `packages/azalee/src/db/sqlite-client.ts`), mais un
 # redémarrage leur évite d'attendre l'intervalle de fraîcheur et repart sur un
 # descripteur propre. Ils sont sans état : l'interruption est imperceptible.
-for unite in azalee-api.service rg-mcp.service; do
+#
+# `nie-model-serve` est un consommateur depuis qu'on lui passe `--db` (il sert
+# /story-scene depuis le miroir). Étant en Rust, il n'a PAS la vérification
+# d'inode ci-dessus : sans redémarrage il garderait un descripteur ouvert sur le
+# dump précédent, que la rétention (garde 2) finit par délier — /story-scene se
+# figerait alors sur des données mortes sans rien signaler.
+for unite in azalee-api.service rg-mcp.service nie-model-serve.service; do
   systemctl is-active --quiet "$unite" && sudo systemctl restart "$unite" && echo "[mirror-sync] $unite redémarré"
 done
 
