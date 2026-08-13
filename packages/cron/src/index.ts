@@ -8,6 +8,7 @@ import { runInaglePush, runSQLiteBackup, runPostgresBackup } from "./tasks/db";
 import { syncCdnAssets } from "./tasks/cdn";
 import { runIeCrawl } from "./tasks/ie-crawl";
 import { crawlTwitterSearch } from "./tasks/ie-crawl/harvest-search";
+import { crawlTwitter } from "./tasks/ie-crawl/twitter";
 import { crawlHashtagCampaigns } from "./tasks/ie-crawl/hashtag-harvest";
 import { recolterCreationsDiscord } from "./tasks/campagnes-discord";
 import { runRagSync, queryRag, ragGroundedQuery, ingestWikiCorpus } from "./tasks/ie-crawl/rag-index";
@@ -191,6 +192,14 @@ const DELAIS_TACHES_MS: Record<string, number> = {
 	"x:campagnes": 3600_000,
 	"campagnes:discord": 3600_000,
 	"seo:llms-txt": 3600_000,
+	// Timelines des comptes officiels (`x-accounts.ts`). Elle EXISTAIT dans
+	// `tasks/ie-crawl/twitter.ts` mais n'était câblée à aucune tâche : les
+	// timelines n'étaient donc jamais collectées, et `@Azalee_IE` est resté figé
+	// au 23/07/2026 pendant trois semaines pendant que `x-search` — qui collecte
+	// par REQUÊTE, pas par compte — donnait l'illusion d'une veille à jour.
+	// Toutes les heures, un seul compte, un seul post : le strict nécessaire pour
+	// que l'annonce Discord d'Azalée parte, sans rejouer l'archive déjà en base.
+	x: 3600_000,
 	"x-search": 3600_000,
 };
 
@@ -360,6 +369,10 @@ if (indexRun >= 0) {
 		await executeTask("crawl", runIeCrawl);
 	} else if (task === "rag") {
 		await executeTask("rag", runRagSync);
+	} else if (task === "x" || task === "twitter" || task === "x:timelines") {
+		// UNIQUEMENT le dernier post d'`@Azalee_IE`. C'est la seule veille qui doit
+		// être fraîche : c'est elle qui alimente l'annonce Discord du bot Azalée.
+		await executeTask("x", () => crawlTwitter({ comptes: ["Azalee_IE"], parCompte: 1 }));
 	} else if (task === "x-search" || task === "x:search") {
 		await executeTask("x-search", crawlTwitterSearch);
 	} else if (task === "rag:wiki" || task === "rag-wiki") {
@@ -449,7 +462,7 @@ if (indexRun >= 0) {
 		await executeTask("stats:achillea", collecterAudienceAchillea);
 	} else {
 		console.error(
-			`❌ Tâche inconnue : ${task}. Choisissez parmi : db, cdn, crawl, rag, x-search, x:campagnes, query, publish, github-publish, patreon, reminders, warm, discord, discord:scan, discord:messages, discord:backfill, discord:polls, campagnes:discord, seo, seo:indexnow, seo:llms-txt, stats:achillea, backup:postgres, backup:pg, all.`
+			`❌ Tâche inconnue : ${task}. Choisissez parmi : db, cdn, crawl, rag, x, x-search, x:campagnes, query, publish, github-publish, patreon, reminders, warm, discord, discord:scan, discord:messages, discord:backfill, discord:polls, campagnes:discord, seo, seo:indexnow, seo:llms-txt, stats:achillea, backup:postgres, backup:pg, all.`
 		);
 	}
 	process.exit(0);

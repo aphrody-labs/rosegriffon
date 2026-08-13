@@ -91,14 +91,21 @@ type DBTweetRow = {
 	updated_at: string;
 };
 
-export async function crawlTwitter(): Promise<{
+export async function crawlTwitter(options: {
+	comptes?: readonly string[];
+	parCompte?: number;
+} = {}): Promise<{
 	success: boolean;
 	count?: number;
 	error?: string;
 }> {
 	// Multi-comptes officiels (additif, source x-accounts.ts — mis à jour après discovery bxc x + search).
 	// Inclut les comptes validés (principaux + fallback low-activity pour complétude historique).
-	const screenNames = getOfficialXAccounts();
+	// Par défaut, tous les comptes officiels. La veille horaire, elle, ne demande
+	// QUE le dernier post d'`@Azalee_IE` : l'archive des autres comptes est déjà
+	// en base, et re-parcourir vingt timelines toutes les heures ne ferait que
+	// consommer le quota X pour ré-écrire des lignes identiques.
+	const screenNames = options.comptes ? [...options.comptes] : getOfficialXAccounts();
 	console.log(
 		`[Crawl Twitter] Démarrage de la synchronisation des tweets de : ${screenNames.join(", ")}...`
 	);
@@ -177,7 +184,16 @@ export async function crawlTwitter(): Promise<{
 				console.log(`[Crawl Twitter] Crawl historique complet de @${screenName}...`);
 				// rg cron + bxc x : MAX plus élevé pour AkihiroHino (CEO Level-5, tweets clés pour Azalée wiki + RAG).
 				// "peuple tout les tweets" via pagination userTweets + bxc cookie natif.
-				const MAX_TWEETS_PER_ACCOUNT = screenName === "AkihiroHino" ? 5000 : 1200;
+				// `parCompte` borne la moisson : la veille horaire ne demande qu'UN
+				// post (le dernier), là où un rattrapage d'archive en demande 1200.
+				// Sans cette borne, la veille repaginait toute la timeline chaque
+				// heure — vingt pages d'API X pour, au mieux, une ligne nouvelle.
+				const MAX_TWEETS_PER_ACCOUNT =
+					options.parCompte && options.parCompte > 0
+						? options.parCompte
+						: screenName === "AkihiroHino"
+							? 5000
+							: 1200;
 				const fetchedTweets: Tweet[] = [];
 				const seenTimelineIds = new Set<string>();
 				let cursor: string | undefined;
@@ -192,7 +208,7 @@ export async function crawlTwitter(): Promise<{
 						// Timeout dur : un backoff interne de userTweets ne doit pas
 						// bloquer le crawl indéfiniment (sinon hang sans throw).
 						page = await Promise.race([
-							client.userTweets(user.id, 100, cursor),
+							client.userTweets(user.id, Math.min(100, MAX_TWEETS_PER_ACCOUNT), cursor),
 							new Promise<never>((_, rej) =>
 								setTimeout(() => rej(new Error("userTweets() timeout")), 20000)
 							),
