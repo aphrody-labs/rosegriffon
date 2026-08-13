@@ -19,7 +19,7 @@ export const socialConfig = [
 		iconColor: "#5865F2",
 		name: "Discord",
 		shortName: "DC",
-		url: "https://discord.gg/TYzQvbByv4",
+		url: "https://discord.com/invite/rosegriffon",
 	},
 	{
 		ariaLabel: "Suivre Rose Griffon TV sur Twitch",
@@ -44,5 +44,13 @@ export const socialConfig = [
 		name: "Instagram",
 		shortName: "IG",
 		url: "https://www.instagram.com/rose_griffonfr",
+	},
+		{
+		ariaLabel: "Suivre Rose Griffon sur TikTok",
+		color: "hover:bg-black dark:hover:bg-gray-800",
+		iconColor: "#000000",
+		name: "TikTok",
+		shortName: "Tk",
+		url: "https://www.tiktok.com/@rose_griffon",
 	},
 ];

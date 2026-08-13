@@ -24,7 +24,7 @@ import RgEmote from "@/components/shared/emotes/RgEmote";
 const ID_SERVEUR_DISCORD = "1072991720268111892";
 
 /** Invitation unique de la communauté (le widget n'en renvoie pas toujours). */
-export const INVITATION_DISCORD = "https://discord.gg/8X8eQfBMkt";
+export const INVITATION_DISCORD = "https://discord.com/invite/rosegriffon";
 
 /** Points forts affichés sous la description. */
 const ATOUTS = ["Discussion", "Gaming", "Événements"] as const;

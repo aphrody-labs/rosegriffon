@@ -42,13 +42,34 @@ import { type DocumentVisionne, Visionneuse } from "./Visionneuse";
 const TAILLES_VIGNETTE =
 	"(max-width: 639px) 100vw, (max-width: 1023px) 50vw, (max-width: 1279px) 30vw, 16vw";
 
+/**
+ * En présentation `grand`, les deux documents occupent une pleine largeur sur
+ * mobile et une demi-largeur d'un conteneur plafonné à 64 rem au-delà.
+ */
+const TAILLES_GRAND = "(max-width: 767px) 100vw, 32rem";
+
+/**
+ * Deux présentations, un seul composant.
+ *
+ * `colonne` — les deux visuels en petit, dans la colonne étroite de « Comment
+ * participer » : ils y sont un rappel, pas le sujet.
+ *
+ * `grand` — l'affiche à la taille où elle se lit VRAIMENT. Une affiche est un
+ * document composé pour être vu en entier : réduite à 226 px de côté dans une
+ * colonne, son titre reste lisible mais ni la date de fin, ni le hashtag, ni la
+ * consigne ne le sont — c'est-à-dire exactement ce qu'elle est là pour dire.
+ */
+export type PresentationVisuels = "colonne" | "grand";
+
 /** Une vignette cliquable. Le pictogramme signale qu'on peut agrandir. */
 function Vignette({
 	document,
 	onOuvrir,
+	grand = false,
 }: {
 	document: DocumentVisionne;
 	onOuvrir: () => void;
+	grand?: boolean;
 }) {
 	const image = document.images[0];
 	if (!image) {
@@ -61,12 +82,19 @@ function Vignette({
 			aria-label={`Agrandir : ${document.etiquette}`}
 			className="group block w-full cursor-zoom-in overflow-hidden rounded-[24px] border-2 border-rg-or/40 bg-surface-container-low text-left shadow-[0_4px_0_0_rgba(0,0,0,0.5)] transition-transform duration-300 motion-safe:hover:-translate-y-1 focus-visible:outline-4 focus-visible:-outline-offset-4 focus-visible:outline-primary"
 		>
-			<AspectRatio ratio={1}>
+			{/*
+			 * `ratio={3 / 4}` en grand : les deux visuels sont des portraits (l'affiche
+			 * fait 1063 × 1483, la carte des règles 8334 × 11443). Un carré leur
+			 * ajoutait deux bandes vides d'un quart de hauteur chacune. `object-contain`
+			 * dans les deux cas : un document ne se recadre pas, il se lit entier.
+			 */}
+			<AspectRatio ratio={grand ? 3 / 4 : 1}>
 				<Image
 					src={image.src}
 					alt={image.alt}
 					fill
-					sizes={TAILLES_VIGNETTE}
+					sizes={grand ? TAILLES_GRAND : TAILLES_VIGNETTE}
+					priority={grand}
 					className="object-contain"
 				/>
 			</AspectRatio>
@@ -101,6 +129,7 @@ export function VisuelsCampagne({
 	imageAffiche,
 	imageReglement,
 	noteAffiche,
+	presentation = "colonne",
 }: {
 	slug: string;
 	titreCampagne: string;
@@ -111,6 +140,8 @@ export function VisuelsCampagne({
 	imageReglement: string | null;
 	/** Rectification à afficher sous l'affiche (`x_campagnes.note_affiche`). */
 	noteAffiche: string | null;
+	/** Taille d'affichage. Voir `PresentationVisuels`. */
+	presentation?: PresentationVisuels;
 }) {
 	const [indexOuvert, setIndexOuvert] = useState<number | null>(null);
 
@@ -165,10 +196,20 @@ export function VisuelsCampagne({
 			 * passage une largeur lisible (280 px au lieu de 134) là où deux colonnes
 			 * ne tenaient pas.
 			 */}
-			<ul className="grid list-none grid-cols-1 gap-4 p-0 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
+			<ul
+				className={
+					presentation === "grand"
+						? "mx-auto grid list-none grid-cols-1 gap-6 p-0 md:max-w-5xl md:grid-cols-2"
+						: "grid list-none grid-cols-1 gap-4 p-0 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2"
+				}
+			>
 				{documents.map((document, position) => (
 					<li key={document.cle}>
-						<Vignette document={document} onOuvrir={() => setIndexOuvert(position)} />
+						<Vignette
+							document={document}
+							grand={presentation === "grand"}
+							onOuvrir={() => setIndexOuvert(position)}
+						/>
 						{document.cle === "affiche" && noteAffiche && (
 							<p className="mt-2 flex items-start gap-2 rounded-2xl border border-error/50 bg-error-container px-3 py-2 text-xs leading-relaxed text-on-error-container">
 								<TriangleAlert className="mt-0.5 size-4 shrink-0" aria-hidden />
