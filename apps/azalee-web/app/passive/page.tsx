@@ -32,6 +32,7 @@ import { parseSearchParams } from "@/lib/validations";
 import { passiveCategory } from "@/lib/wiki-service";
 
 export const metadata: Metadata = {
+	alternates: { canonical: "/passive" },
 	description:
 		"Guide complet des passifs : joueur, personnalisé, coordinateur et manager. Valeurs par rareté et style de jeu.",
 	title: "Talents & Passifs | Codex Stratégique - Azalée",

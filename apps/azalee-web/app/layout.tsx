@@ -1,5 +1,4 @@
 import { GoogleTagManager } from "@next/third-parties/google";
-import Script from "next/script";
 import { Geist, Geist_Mono } from "next/font/google";
 
 import { LanguageProvider } from "@/components/providers/language-provider";
@@ -25,8 +24,13 @@ import type { Metadata, Viewport } from "next";
 const GTM_ID = process.env.NEXT_PUBLIC_GTM_ID;
 
 export const metadata: Metadata = {
+	// PAS de `canonical` ici : les métadonnées d'un layout sont héritées par tous
+	// les segments enfants qui ne les redéfinissent pas. Un `canonical: "/"` en
+	// racine faisait donc pointer la balise canonique de TOUTE page dépourvue
+	// d'`alternates` vers l'accueil (constaté en prod sur /aura, /passive,
+	// /soutenir…) — l'équivalent d'une désindexation. Chaque page porte son
+	// propre canonique ; l'accueil déclare le sien dans `app/page.tsx`.
 	alternates: {
-		canonical: "/",
 		types: {
 			"application/rss+xml": "/news/feed.xml",
 		},

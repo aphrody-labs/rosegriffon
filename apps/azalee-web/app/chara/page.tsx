@@ -1,6 +1,7 @@
 export const dynamic = "force-dynamic";
 
 import type { Metadata } from "next";
+import { buildCanonical, LIST_CANONICAL_KEYS } from "@/lib/seo";
 import { parseSearchParams } from "@/lib/validations";
 import { wikiService } from "@/lib/wiki-service";
 import { PlayersClient } from "./players-client";
@@ -40,7 +41,7 @@ export async function generateMetadata({
 
 	return {
 		alternates: {
-			canonical: `/chara${rawParams ? `?${new URLSearchParams(rawParams as Record<string, string>).toString()}` : ""}`,
+			canonical: buildCanonical("/chara", rawParams, LIST_CANONICAL_KEYS),
 		},
 		description: `Base de données des joueurs Inazuma Eleven: Victory Road. ${filters.length > 0 ? `Filtres : ${filters.join(", ")}. ` : ""}Retrouvez les stats, techniques et méthodes de recrutement de tous les personnages.`,
 		openGraph: {

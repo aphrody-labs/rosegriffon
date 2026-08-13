@@ -6,6 +6,7 @@ import { ItemFilterBar } from "@/components/wiki/filters/ItemFilterBar";
 import { ItemCard } from "@/components/wiki/ItemCard";
 import { WikiPagination } from "@/components/wiki/WikiPagination";
 import { WikiSearchToolbar } from "@/components/wiki/WikiSearchToolbar";
+import { buildCanonical } from "@/lib/seo";
 import { parseSearchParams } from "@/lib/validations";
 import { wikiService } from "@/lib/wiki-service";
 
@@ -15,9 +16,10 @@ export async function generateMetadata({
 	searchParams: Promise<Record<string, string | string[] | undefined>>;
 }): Promise<Metadata> {
 	const rawParams = await searchParams;
-	const { q, category, page } = parseSearchParams(rawParams) as any;
+	const { q, category } = parseSearchParams(rawParams);
+	const page = typeof rawParams.page === "string" ? rawParams.page : undefined;
 
-	const activeCategory = (category as string) || "shoes";
+	const activeCategory = category || "shoes";
 	const categoryLabel = CATEGORIES.find((t) => t.value === activeCategory)?.label || "Équipements";
 
 	let title = `${categoryLabel} - Objets`;
@@ -25,14 +27,21 @@ export async function generateMetadata({
 		title += ` : "${q}"`;
 	}
 
-	const pageNum = page ? Number.parseInt(page.toString(), 10) : 1;
+	const pageNum = page ? Number.parseInt(page, 10) : 1;
 	if (pageNum > 1) {
 		title += ` (Page ${pageNum})`;
 	}
 
 	return {
 		alternates: {
-			canonical: `/item?category=${activeCategory}${page ? `&page=${page}` : ""}`,
+			// `page` vient des paramètres BRUTS : `parseSearchParams` lui donne un
+			// défaut de 1, si bien que la page nue `/item` se canonicalisait vers
+			// `/item?category=shoes&page=1` — une URL qui n'est pas celle servie.
+			canonical: buildCanonical(
+				"/item",
+				{ category: activeCategory, page },
+				["category", "page"]
+			),
 		},
 		description: `Liste complète des ${categoryLabel.toLowerCase()} et objets dans Inazuma Eleven: Victory Road. Localisation, stats et effets.`,
 		title: `${title} | Inazuma Eleven Victory Road - Azalée`,

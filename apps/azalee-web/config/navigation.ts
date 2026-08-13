@@ -128,6 +128,12 @@ export const navigationItems: NavItem[] = [
 		path: "/quete",
 	},
 	{
+		// Table d'expérience du jeu (`inagle_exp_table`) : courbe + calculateurs.
+		icon: "trending_up",
+		label: "nav.wiki.levels",
+		path: "/niveau",
+	},
+	{
 		icon: "emoji_events",
 		label: "nav.wiki.trophies",
 		path: "/succes",
@@ -214,6 +220,7 @@ export const mobileNavItems: NavItem[] = [
 			"/entraineur",
 			"/stade",
 			"/drops",
+			"/niveau",
 			"/keshin",
 			"/modeles",
 			"/cpk",

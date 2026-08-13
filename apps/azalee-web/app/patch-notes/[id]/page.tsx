@@ -14,6 +14,7 @@ export async function generateMetadata({
 	const note = await getPatchNoteDetail(id);
 	const title = note?.title || "Patch Note";
 	return {
+		alternates: { canonical: `/patch-notes/${id}` },
 		description: `Détail de la mise à jour : ${title}. Inazuma Eleven: Victory Road.`,
 		title: `${title} | Azalée`,
 	};

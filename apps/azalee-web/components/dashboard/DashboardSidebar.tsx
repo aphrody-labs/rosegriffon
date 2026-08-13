@@ -14,6 +14,7 @@ import {
 	Users,
 } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
 
 /**
  * Barre latérale de l'espace d'administration du wiki.
@@ -79,13 +80,15 @@ export function DashboardSidebar() {
 				<Image src="/logo.webp" alt="" width={28} height={28} className="object-contain" />
 			}
 			footer={
-				<a
+				// `Link` et non `<a>` : la navigation interne restait un rechargement
+				// complet du document (perte du cache routeur et du prefetch).
+				<Link
 					href="/"
-					className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+					className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-on-surface-variant transition-colors hover:bg-surface-container-high hover:text-on-surface"
 				>
 					<Home className="size-4 shrink-0" aria-hidden />
 					Retour au wiki
-				</a>
+				</Link>
 			}
 		/>
 	);

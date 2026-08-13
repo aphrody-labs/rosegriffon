@@ -11,6 +11,7 @@ import type { FeedItem } from "./news-client";
 export const dynamic = "force-dynamic";
 
 export const metadata = {
+	alternates: { canonical: "/news" },
 	description: "Toutes les dernières actualités, traductions exclusives, interviews et analyses détaillées sur le jeu Inazuma Eleven: Victory Road par l'équipe Azalée.",
 	title: "Actualités | Azalée",
 };
