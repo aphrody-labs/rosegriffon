@@ -29,12 +29,7 @@ import {
 } from "discord.js";
 
 import { rgEmbed } from "../../lib/embeds";
-import {
-	SERVICES,
-	TOUS_LES_SERVICES,
-	sonderServices,
-	type NomService,
-} from "../../lib/services";
+import { SERVICES, TOUS_LES_SERVICES, sonderServices, type NomService } from "../../lib/services";
 import {
 	borner,
 	formaterLatence,
@@ -46,6 +41,7 @@ import {
 import { APPLICATIONS_DEPLOYEES, lireEtatDeploiement, type EtatApplication } from "./deploiement";
 import { differerEnPrive, exigerDroits, messagePanne } from "./garde";
 import "./racine";
+import { echec, pied, repondre } from "../../lib/ui";
 
 /** Un service inconnu ne doit pas se transformer en appel vers une base vide. */
 function resoudreService(saisie: string): NomService | null {
@@ -116,12 +112,12 @@ export class StaffServicesCommand {
 					),
 				});
 			}
-			embed.setFooter({
-				text: "Une seule tentative, 3 s de délai — un tableau de bord, pas un diagnostic",
+			pied(embed, {
+				note: "Une seule tentative, 3 s de délai — un tableau de bord, pas un diagnostic",
 			});
 			await interaction.editReply({ embeds: [embed] });
 		} catch (err) {
-			await interaction.editReply({ content: `❌ ${messagePanne(err)}` });
+			await repondre(interaction, echec("Le service n'a pas répondu", messagePanne(err)));
 		}
 	}
 
@@ -190,13 +186,13 @@ export class StaffServicesCommand {
 					}
 				);
 			if (nom === "mcp") {
-				embed.setFooter({
-					text: "Supervision seule : le bot n'envoie jamais de verbe au MCP (portée d'écriture = accès SSH)",
+				pied(embed, {
+					note: "Supervision seule : le bot n'envoie jamais de verbe au MCP (portée d'écriture = accès SSH)",
 				});
 			}
 			await interaction.editReply({ embeds: [embed] });
 		} catch (err) {
-			await interaction.editReply({ content: `❌ ${messagePanne(err)}` });
+			await repondre(interaction, echec("Le service n'a pas répondu", messagePanne(err)));
 		}
 	}
 
@@ -212,9 +208,7 @@ export class StaffServicesCommand {
 		try {
 			const [etats, sondes] = await Promise.all([
 				lireEtatDeploiement(),
-				sonderServices(
-					APPLICATIONS_DEPLOYEES.map((application) => SERVICES[application.service])
-				),
+				sonderServices(APPLICATIONS_DEPLOYEES.map((application) => SERVICES[application.service])),
 			]);
 
 			const embed = rgEmbed()
@@ -235,7 +229,9 @@ export class StaffServicesCommand {
 				const lignes = [
 					`Version : \`${etat.version?.identifiant ?? "inconnue"}\``,
 					`Précédente : \`${etat.versionPrecedente?.identifiant ?? "aucune"}\``,
-					etat.commit ? `Commit : \`${etat.commit.slice(0, 12)}\` sur \`${etat.branche ?? "?"}\`` : null,
+					etat.commit
+						? `Commit : \`${etat.commit.slice(0, 12)}\` sur \`${etat.branche ?? "?"}\``
+						: null,
 					etat.assembleeLe ? `Assemblée : ${horodatageAbsolu(etat.assembleeLe)}` : null,
 					etat.unite ? `Unité servie : \`${etat.unite}\`` : null,
 					etat.misAJourLe ? `Bascule : ${horodatageRelatif(etat.misAJourLe)}` : null,
@@ -255,12 +251,12 @@ export class StaffServicesCommand {
 				embed.addFields({ name: etat.titre, value: borner(lignes.join("\n"), 1_000) });
 			}
 
-			embed.setFooter({
-				text: "Lu dans state.json, live.env et RELEASE.json · mémoire et état systemd : bun run deploy status",
+			pied(embed, {
+				note: "Lu dans state.json, live.env et RELEASE.json · mémoire et état systemd : bun run deploy status",
 			});
 			await interaction.editReply({ embeds: [embed] });
 		} catch (err) {
-			await interaction.editReply({ content: `❌ ${messagePanne(err)}` });
+			await repondre(interaction, echec("Le service n'a pas répondu", messagePanne(err)));
 		}
 	}
 }

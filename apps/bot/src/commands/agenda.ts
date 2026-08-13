@@ -50,6 +50,7 @@ import {
 import { sql } from "../lib/db";
 import { rgEmbed, truncate } from "../lib/embeds";
 import { appelService, ServiceIndisponibleError } from "../lib/services";
+import { pied } from "../lib/ui";
 
 /** Enveloppe de `apiSuccess()` côté site : `{ success, data: { events } }`. */
 interface ReponseCalendrier {
@@ -135,7 +136,10 @@ function messageErreur(err: unknown): string {
 })
 @SlashGroup("agenda")
 export class AgendaCommand {
-	@Slash({ name: "evenements", description: "Les rendez-vous Rose Griffon (conventions, meet-ups)" })
+	@Slash({
+		name: "evenements",
+		description: "Les rendez-vous Rose Griffon (conventions, meet-ups)",
+	})
 	async evenements(
 		@SlashChoice(
 			{ name: "À venir", value: "a-venir" },
@@ -206,8 +210,8 @@ export class AgendaCommand {
 			// Le pied dit ce qui est affiché ET ce qui existe : une liste tronquée
 			// par le budget de l'embed ne doit pas passer pour l'agenda complet.
 			const reste = champs.length - poses;
-			embed.setFooter({
-				text: truncate(
+			pied(embed, {
+				note: truncate(
 					`${choix.total} événement${choix.total > 1 ? "s" : ""} à l'agenda${reste > 0 ? ` · ${reste} non affiché${reste > 1 ? "s" : ""}, faute de place` : ""} · rosegriffon.fr`,
 					2000
 				),
@@ -268,8 +272,8 @@ export class AgendaCommand {
 				titre.length
 			);
 			const reste = sections.length - poses;
-			embed.setFooter({
-				text: truncate(
+			pied(embed, {
+				note: truncate(
 					`${lignes.length} stream${lignes.length > 1 ? "s" : ""} programmé${lignes.length > 1 ? "s" : ""}${reste > 0 ? ` · ${reste} jour${reste > 1 ? "s" : ""} non affiché${reste > 1 ? "s" : ""}, faute de place` : ""} · rosegriffon.fr`,
 					2000
 				),

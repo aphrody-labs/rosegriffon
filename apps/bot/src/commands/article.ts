@@ -61,6 +61,7 @@ import {
 } from "../lib/communaute-format";
 import { sql } from "../lib/db";
 import { rgEmbed, truncate } from "../lib/embeds";
+import { piedTexte } from "../lib/ui";
 
 /** Colonnes énumérées une par une : la table ne contient pas de PII, on reste explicite. */
 interface Article extends LigneArticle {
@@ -98,7 +99,10 @@ const LARGEUR_IMAGE_CDN = 1600;
  * Ce qui ne donne pas une URL `http(s)` valide est écarté plutôt que passé à
  * Discord, qui rejetterait l'embed entier.
  */
-function imageArticle(app: string | null | undefined, brut: string | null | undefined): string | null {
+function imageArticle(
+	app: string | null | undefined,
+	brut: string | null | undefined
+): string | null {
 	const valeur = brut?.trim();
 	if (!valeur) return null;
 	let url: URL;
@@ -451,7 +455,9 @@ export class ArticleCommand {
 		}
 		const apps = appsDemandees(site);
 		const filtre = categorieDemandee(categorie);
-		const portee = filtre ? `${libellePortee(apps)} · ${truncate(filtre, 40)}` : libellePortee(apps);
+		const portee = filtre
+			? `${libellePortee(apps)} · ${truncate(filtre, 40)}`
+			: libellePortee(apps);
 		try {
 			// Le motif est échappé côté SQL : les jokers `%` et `_` d'une saisie
 			// libre transformeraient sinon la recherche en « tout afficher ».
@@ -471,7 +477,7 @@ export class ArticleCommand {
 					)
 				)
 				.setDescription(descriptionListe(articles))
-				.setFooter({ text: truncate(`Recherche sur ${portee} · rosegriffon.fr`, 2000) });
+				.setFooter(piedTexte({ note: truncate(`Recherche sur ${portee} · rosegriffon.fr`, 2000) }));
 			await interaction.editReply({ embeds: [embed] });
 		} catch (err) {
 			await interaction.editReply({ content: messageErreur(err) });

@@ -64,6 +64,7 @@ import {
 	ordreAffichageJour,
 } from "./valeurs";
 import "./racine-gestion";
+import { echec, pied, piedTexte, repondre } from "../../lib/ui";
 
 /**
  * Les colonnes de `stream_schedules`.
@@ -144,7 +145,9 @@ function ligneCreneau(creneau: CreneauAdmin): string {
 /** Fiche d'un créneau, réutilisée par ajout et modification. */
 function ficheCreneau(creneau: CreneauAdmin) {
 	return rgEmbed()
-		.setTitle(`${libelleJourSemaine(creneau.day_of_week)} — ${truncate(creneau.streamer_name, 100)}`)
+		.setTitle(
+			`${libelleJourSemaine(creneau.day_of_week)} — ${truncate(creneau.streamer_name, 100)}`
+		)
 		.addFields(
 			{ name: "Horaire", value: plageHoraire(creneau.start_time, creneau.end_time), inline: true },
 			// Une catégorie vide (chaîne vide posée par le formulaire du site) ferait
@@ -227,12 +230,12 @@ export class AdministrationStreamCommand {
 					value: borner(lignes.map(ligneCreneau).join("\n"), 1_000),
 				});
 			}
-			embed.setFooter({
-				text: `${publics} visible${publics > 1 ? "s" : ""} du public sur ${creneaux.length} · rosegriffon.fr/rose-griffon-tv`,
+			pied(embed, {
+				note: `${publics} visible${publics > 1 ? "s" : ""} du public sur ${creneaux.length} · rosegriffon.fr/rose-griffon-tv`,
 			});
 			await interaction.editReply({ embeds: [embed] });
 		} catch (err) {
-			await interaction.editReply({ content: `❌ ${messagePanne(err)}` });
+			await repondre(interaction, echec("Le service n'a pas répondu", messagePanne(err)));
 		}
 	}
 
@@ -326,7 +329,9 @@ export class AdministrationStreamCommand {
 				          category, status, notes, updated_at
 			`;
 			if (!cree) {
-				await interaction.editReply({ content: "❌ La base n'a rendu aucune ligne à l'insertion." });
+				await interaction.editReply({
+					content: "❌ La base n'a rendu aucune ligne à l'insertion.",
+				});
 				return;
 			}
 
@@ -350,14 +355,16 @@ export class AdministrationStreamCommand {
 			// l'autocomplétion de `modifier` qu'au bout de trente secondes.
 			invalidate(CLEF_INDEX);
 
-			const embed = ficheCreneau(cree).setFooter({
-				text: estCreneauPublic(cree.status)
-					? "Créé et visible sur rosegriffon.fr/rose-griffon-tv"
-					: "Créé mais MASQUÉ du planning public — passe-le en « Actif » pour l'afficher",
-			});
+			const embed = ficheCreneau(cree).setFooter(
+				piedTexte({
+					note: estCreneauPublic(cree.status)
+						? "Créé et visible sur rosegriffon.fr/rose-griffon-tv"
+						: "Créé mais MASQUÉ du planning public — passe-le en « Actif » pour l'afficher",
+				})
+			);
 			await interaction.editReply({ content: "✅ Créneau ajouté.", embeds: [embed] });
 		} catch (err) {
-			await interaction.editReply({ content: `❌ ${messagePanne(err)}` });
+			await repondre(interaction, echec("Le service n'a pas répondu", messagePanne(err)));
 		}
 	}
 
@@ -538,17 +545,19 @@ export class AdministrationStreamCommand {
 			});
 
 			invalidate(CLEF_INDEX);
-			const embed = ficheCreneau(apres).setFooter({
-				text:
-					estCreneauPublic(avant.status) === estCreneauPublic(apres.status)
-						? "Modifié"
-						: estCreneauPublic(apres.status)
-							? "Modifié · le créneau est désormais VISIBLE du public"
-							: "Modifié · le créneau est désormais MASQUÉ du planning public",
-			});
+			const embed = ficheCreneau(apres).setFooter(
+				piedTexte({
+					note:
+						estCreneauPublic(avant.status) === estCreneauPublic(apres.status)
+							? "Modifié"
+							: estCreneauPublic(apres.status)
+								? "Modifié · le créneau est désormais VISIBLE du public"
+								: "Modifié · le créneau est désormais MASQUÉ du planning public",
+				})
+			);
 			await interaction.editReply({ content: "✅ Créneau mis à jour.", embeds: [embed] });
 		} catch (err) {
-			await interaction.editReply({ content: `❌ ${messagePanne(err)}` });
+			await repondre(interaction, echec("Le service n'a pas répondu", messagePanne(err)));
 		}
 	}
 
@@ -635,7 +644,7 @@ export class AdministrationStreamCommand {
 					`${truncate(supprime.streamer_name, 60)}`,
 			});
 		} catch (err) {
-			await interaction.editReply({ content: `❌ ${messagePanne(err)}` });
+			await repondre(interaction, echec("Le service n'a pas répondu", messagePanne(err)));
 		}
 	}
 }

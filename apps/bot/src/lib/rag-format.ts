@@ -174,7 +174,12 @@ export function requeteValide(requete: string): boolean {
 }
 
 /** Ramène un entier dans un intervalle, avec repli sur le défaut si non fini. */
-export function bornerEntier(valeur: number | null | undefined, min: number, max: number, defaut: number): number {
+export function bornerEntier(
+	valeur: number | null | undefined,
+	min: number,
+	max: number,
+	defaut: number
+): number {
 	if (valeur === null || valeur === undefined || !Number.isFinite(valeur)) {
 		return defaut;
 	}
@@ -304,7 +309,10 @@ export function titreResultat(resultat: ResultatRag): string {
 
 /** Nom du champ d'un résultat : rang, type, titre. */
 export function nomChampResultat(resultat: ResultatRag, rang: number): string {
-	return tronquer(`${rang}. [${libelleType(resultat.source_kind)}] ${titreResultat(resultat)}`, LIMITES_EMBED.nomChamp);
+	return tronquer(
+		`${rang}. [${libelleType(resultat.source_kind)}] ${titreResultat(resultat)}`,
+		LIMITES_EMBED.nomChamp
+	);
 }
 
 /**
@@ -326,7 +334,10 @@ export function valeurChampResultat(resultat: ResultatRag, taille: number): stri
 	const lien = lienResultat(resultat);
 	lignes.push(lien ? `🔗 ${lien}` : `📄 \`${sourceLisible(resultat)}\``);
 
-	const langue = typeof resultat.lang === "string" && resultat.lang.length > 0 ? ` · langue ${resultat.lang}` : "";
+	const langue =
+		typeof resultat.lang === "string" && resultat.lang.length > 0
+			? ` · langue ${resultat.lang}`
+			: "";
 	lignes.push(`score ${formaterScore(resultat.score)}${langue}`);
 
 	return tronquer(lignes.join("\n"), LIMITES_EMBED.valeurChamp);
@@ -464,7 +475,10 @@ export function champsTexteMultilingue(entree: TexteMultilingue): ChampEmbed[] {
  * Le nom du champ porte l'identifiant et la catégorie : ce sont les deux clés
  * qui permettent d'aller plus loin (`/rag texte 0x…` pour les trois langues).
  */
-export function champsRechercheTexte(entrees: readonly EntreeTexte[], budgetRestant: number): ChampsResultats {
+export function champsRechercheTexte(
+	entrees: readonly EntreeTexte[],
+	budgetRestant: number
+): ChampsResultats {
 	const champs: ChampEmbed[] = [];
 	let budget = budgetRestant;
 	const taille = longueurExtrait(entrees.length);
@@ -474,7 +488,9 @@ export function champsRechercheTexte(entrees: readonly EntreeTexte[], budgetRest
 			break;
 		}
 		const name = tronquer(`${entree.hashId} · ${entree.category}`, LIMITES_EMBED.nomChamp);
-		const value = tronquer(compacterLignes(entree.value ?? ""), Math.min(taille, LIMITES_EMBED.valeurChamp)) || "—";
+		const value =
+			tronquer(compacterLignes(entree.value ?? ""), Math.min(taille, LIMITES_EMBED.valeurChamp)) ||
+			"—";
 		const cout = name.length + value.length;
 		if (cout > budget) {
 			break;
@@ -566,7 +582,10 @@ export function dateFr(valeur: Date | number | null): string {
  * information et un chiffre inventé : le total n'est pas celui de l'index toutes
  * langues confondues.
  */
-export function resumerCategoriesTexte(stats: readonly StatCategorieTexte[], nombre = 8): {
+export function resumerCategoriesTexte(
+	stats: readonly StatCategorieTexte[],
+	nombre = 8
+): {
 	total: number;
 	categories: number;
 	tete: string;

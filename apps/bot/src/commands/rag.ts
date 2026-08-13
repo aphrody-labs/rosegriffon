@@ -60,6 +60,7 @@ import {
 	type TypeRag,
 } from "../lib/rag-format";
 import { appelService, ServiceIndisponibleError } from "../lib/services";
+import { echec, repondre } from "../lib/ui";
 
 /**
  * Marge réservée hors champs dans le budget de 6 000 caractères : le pied de
@@ -164,7 +165,8 @@ function messageErreur(err: unknown): string {
 export class RagCommand {
 	@Slash({
 		name: "question",
-		description: "Poser une question en français au corpus indexé et en recevoir les extraits pertinents",
+		description:
+			"Poser une question en français au corpus indexé et en recevoir les extraits pertinents",
 	})
 	async question(
 		@SlashOption({
@@ -177,7 +179,10 @@ export class RagCommand {
 		})
 		questionBrute: string,
 		@SlashChoice(
-			...TYPES_RAG.map((type) => ({ name: `${LIBELLE_TYPE[type]} (${type})`, value: type as string }))
+			...TYPES_RAG.map((type) => ({
+				name: `${LIBELLE_TYPE[type]} (${type})`,
+				value: type as string,
+			}))
 		)
 		@SlashOption({
 			name: "type",
@@ -205,9 +210,13 @@ export class RagCommand {
 			return;
 		}
 		if (typeBrut !== undefined && !estTypeRag(typeBrut)) {
-			await interaction.editReply({
-				content: `❌ Type inconnu. Types acceptés : ${TYPES_RAG.map((t) => `\`${t}\``).join(", ")}.`,
-			});
+			await repondre(
+				interaction,
+				echec(
+					"Valeur inconnue",
+					`Type inconnu. Types acceptés : ${TYPES_RAG.map((t) => `\`${t}\``).join(", ")}.`
+				)
+			);
 			return;
 		}
 
@@ -234,7 +243,9 @@ export class RagCommand {
 				);
 			}
 			if (reponse.count === 0) {
-				notes.push("*Reformulez avec des mots du jeu (nom de personnage, de technique, de fichier) ou retirez le filtre `type`.*");
+				notes.push(
+					"*Reformulez avec des mots du jeu (nom de personnage, de technique, de fichier) ou retirez le filtre `type`.*"
+				);
 			}
 			embed.setDescription(tronquer(notes.join("\n"), LIMITES_EMBED.description));
 			if (champs.length > 0) {
@@ -243,13 +254,14 @@ export class RagCommand {
 
 			await interaction.editReply({ embeds: [embed] });
 		} catch (err) {
-			await interaction.editReply({ content: `❌ ${messageErreur(err)}` });
+			await repondre(interaction, echec("Recherche impossible", messageErreur(err)));
 		}
 	}
 
 	@Slash({
 		name: "texte",
-		description: "Chercher une chaîne du jeu, ou retrouver un identifiant de texte dans les trois langues",
+		description:
+			"Chercher une chaîne du jeu, ou retrouver un identifiant de texte dans les trois langues",
 	})
 	async texte(
 		@SlashOption({
@@ -262,7 +274,10 @@ export class RagCommand {
 		})
 		rechercheBrute: string,
 		@SlashChoice(
-			...(["fr", "en", "ja"] as const).map((langue) => ({ name: LIBELLE_LANGUE[langue], value: langue as string }))
+			...(["fr", "en", "ja"] as const).map((langue) => ({
+				name: LIBELLE_LANGUE[langue],
+				value: langue as string,
+			}))
 		)
 		@SlashOption({
 			name: "langue",
@@ -308,10 +323,14 @@ export class RagCommand {
 			const entrees = await cached<EntreeTexte[]>(
 				`rag:texte:${langue}:${nombre}:${recherche.toLowerCase()}`,
 				10 * 60_000,
-				async () => (await azalee().text({ q: recherche, locale: langue, limit: nombre })) as EntreeTexte[]
+				async () =>
+					(await azalee().text({ q: recherche, locale: langue, limit: nombre })) as EntreeTexte[]
 			);
 
-			const titre = tronquer(`Texte du jeu — « ${recherche} » en ${LIBELLE_LANGUE[langue]}`, LIMITES_EMBED.titre);
+			const titre = tronquer(
+				`Texte du jeu — « ${recherche} » en ${LIBELLE_LANGUE[langue]}`,
+				LIMITES_EMBED.titre
+			);
 			const embed = rgEmbed().setTitle(titre);
 
 			if (entrees.length === 0) {
@@ -326,16 +345,21 @@ export class RagCommand {
 			const budget = Math.max(0, LIMITES_EMBED.total - titre.length - entete.length - MARGE_EMBED);
 			const { champs, ignores } = champsRechercheTexte(entrees, budget);
 
-			const notes = [entete, "*Reprenez un identifiant dans `/rag texte` pour lire la chaîne en français, anglais et japonais.*"];
+			const notes = [
+				entete,
+				"*Reprenez un identifiant dans `/rag texte` pour lire la chaîne en français, anglais et japonais.*",
+			];
 			if (ignores > 0) {
-				notes.push(`*${nombreFr(ignores)} entrée${ignores > 1 ? "s" : ""} écartée${ignores > 1 ? "s" : ""} faute de place.*`);
+				notes.push(
+					`*${nombreFr(ignores)} entrée${ignores > 1 ? "s" : ""} écartée${ignores > 1 ? "s" : ""} faute de place.*`
+				);
 			}
 			embed.setDescription(tronquer(notes.join("\n"), LIMITES_EMBED.description));
 			embed.addFields(champs);
 
 			await interaction.editReply({ embeds: [embed] });
 		} catch (err) {
-			await interaction.editReply({ content: `❌ ${messageErreur(err)}` });
+			await repondre(interaction, echec("Recherche impossible", messageErreur(err)));
 		}
 	}
 
@@ -443,7 +467,7 @@ export class RagCommand {
 
 			await interaction.editReply({ embeds: [embed] });
 		} catch (err) {
-			await interaction.editReply({ content: `❌ ${messageErreur(err)}` });
+			await repondre(interaction, echec("Recherche impossible", messageErreur(err)));
 		}
 	}
 }

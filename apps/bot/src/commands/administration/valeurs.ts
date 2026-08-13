@@ -98,7 +98,10 @@ export function analyserDate(saisie: unknown): Date | null {
 	// On n'accepte que les formes ancrées sur une date ISO : `01/05/2026` est
 	// ambigu (jour/mois ou mois/jour), et `new Date` le résout différemment
 	// selon la locale du moteur.
-	const forme = /^(\d{4})-(\d{2})-(\d{2})([T ]\d{2}:\d{2}(:\d{2})?(\.\d+)?(Z|[+-]\d{2}:?\d{2})?)?$/.exec(propre);
+	const forme =
+		/^(\d{4})-(\d{2})-(\d{2})([T ]\d{2}:\d{2}(:\d{2})?(\.\d+)?(Z|[+-]\d{2}:?\d{2})?)?$/.exec(
+			propre
+		);
 	if (!forme) {
 		return null;
 	}
@@ -423,7 +426,9 @@ export function construirePatchVeille(
 		const restants = comptes.filter((compte) => clefCompte(compte) !== cible);
 		if (restants.length !== comptes.length) {
 			comptes = restants;
-			changements.push(`Compte retiré du suivi : \`@${modifications.retirer.trim().replace(/^@/, "")}\``);
+			changements.push(
+				`Compte retiré du suivi : \`@${modifications.retirer.trim().replace(/^@/, "")}\``
+			);
 		}
 	}
 	if (comptes.length !== avant.comptes.length || comptes.some((c, i) => c !== avant.comptes[i])) {
@@ -736,7 +741,13 @@ export function estConfirme(saisie: unknown): boolean {
 	}
 	// NFD sépare la lettre de son accent, la plage U+0300–U+036F retire les
 	// diacritiques : « OUI », « oui » et un « oùi » malheureux valent tous accord.
-	return saisie.trim().toLowerCase().normalize("NFD").replaceAll(/[\u0300-\u036f]/g, "") === "oui";
+	return (
+		saisie
+			.trim()
+			.toLowerCase()
+			.normalize("NFD")
+			.replaceAll(/[\u0300-\u036f]/g, "") === "oui"
+	);
 }
 
 // ─── Ce qu'un salon Discord n'a PAS le droit de voir ────────────────────────
@@ -871,7 +882,9 @@ export const ROLES_ATTRIBUABLES: readonly string[] = Object.freeze(
 );
 
 /** Autorisation accordée, ou refusée avec sa raison — jamais un simple booléen. */
-export type Verdict = { readonly autorise: true } | { readonly autorise: false; readonly raison: string };
+export type Verdict =
+	| { readonly autorise: true }
+	| { readonly autorise: false; readonly raison: string };
 
 /**
  * Décide si une action d'administration sur un profil est recevable.
@@ -1066,7 +1079,8 @@ export function validerIdentifiantDiscordFacultatif(
 	if (!estIdentifiantDiscord(propre)) {
 		return {
 			ok: false,
-			raison: "L'identifiant Discord doit être composé de 17 à 20 chiffres (clic droit › Copier l'identifiant).",
+			raison:
+				"L'identifiant Discord doit être composé de 17 à 20 chiffres (clic droit › Copier l'identifiant).",
 		};
 	}
 	return { ok: true, valeur: propre };
@@ -1101,10 +1115,7 @@ export function encoderEtatBouton(
 }
 
 /** Relit un `custom_id` produit par `encoderEtatBouton`. `null` = pas à nous. */
-export function decoderEtatBouton(
-	prefixe: string,
-	id: unknown
-): Record<string, string> | null {
+export function decoderEtatBouton(prefixe: string, id: unknown): Record<string, string> | null {
 	if (typeof id !== "string") {
 		return null;
 	}

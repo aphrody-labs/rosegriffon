@@ -47,6 +47,7 @@ import {
 	refusValeurReglage,
 } from "./valeurs";
 import "./racine";
+import { echec, piedTexte, refus as accesRefuse, repondre } from "../../lib/ui";
 
 /**
  * Propositions d'autocomplétion : les clés RÉELLES de la table.
@@ -97,13 +98,18 @@ export class AdministrationReglagesCommand {
 			}
 			const embed = rgEmbed()
 				.setTitle(`Réglages — ${lignes.length} clés`)
-				.setFooter({ text: "Lecture : /administration reglages lire · écriture : … ecrire" });
+				.setFooter(
+					piedTexte({ note: "Lecture : /administration reglages lire · écriture : … ecrire" })
+				);
 
 			// Une clé + sa description dépasse vite les 4 096 caractères d'une
 			// description d'embed quand la table grossit : on découpe en champs
 			// bornés plutôt que de risquer un envoi refusé en entier.
 			const corps = lignes
-				.map((ligne) => `\`${ligne.key}\` — ${borner(ligne.description ?? bornerValeur(ligne.value), 120)}`)
+				.map(
+					(ligne) =>
+						`\`${ligne.key}\` — ${borner(ligne.description ?? bornerValeur(ligne.value), 120)}`
+				)
 				.join("\n");
 			// 5 champs de 1 000 caractères au plus : le total d'un embed est plafonné
 			// à 6 000 par Discord, titre et pied compris.
@@ -116,7 +122,7 @@ export class AdministrationReglagesCommand {
 			}
 			await interaction.editReply({ embeds: [embed] });
 		} catch (err) {
-			await interaction.editReply({ content: `❌ ${messagePanne(err)}` });
+			await repondre(interaction, echec("Le service n'a pas répondu", messagePanne(err)));
 		}
 	}
 
@@ -167,7 +173,7 @@ export class AdministrationReglagesCommand {
 				],
 			});
 		} catch (err) {
-			await interaction.editReply({ content: `❌ ${messagePanne(err)}` });
+			await repondre(interaction, echec("Le service n'a pas répondu", messagePanne(err)));
 		}
 	}
 
@@ -186,7 +192,7 @@ export class AdministrationReglagesCommand {
 		clef: string,
 		@SlashOption({
 			name: "valeur",
-			description: "Valeur JSON (60, true, \"texte\", {…}) ; sinon rangée telle quelle en chaîne",
+			description: 'Valeur JSON (60, true, "texte", {…}) ; sinon rangée telle quelle en chaîne',
 			type: ApplicationCommandOptionType.String,
 			required: true,
 		})
@@ -242,7 +248,7 @@ export class AdministrationReglagesCommand {
 			// seule façon de ne pas perdre le réglage sans message.
 			const refus = refusValeurReglage(cle, lue.valeur);
 			if (refus) {
-				await interaction.editReply({ content: `🚫 ${borner(refus, 1_800)}` });
+				await repondre(interaction, accesRefuse(borner(refus, 1_800)));
 				return;
 			}
 			await setSetting(cle, lue.valeur, description);
@@ -273,11 +279,13 @@ export class AdministrationReglagesCommand {
 					name: "Valeur relue en base",
 					value: blocJson(apres?.value ?? lue.valeur, 1_000),
 				})
-				.setFooter({
-					text: lue.json
-						? "Saisie lue comme du JSON · écriture tracée dans admin_audit_log"
-						: "Saisie rangée en chaîne (ce n'était pas du JSON) · écriture tracée dans admin_audit_log",
-				});
+				.setFooter(
+					piedTexte({
+						note: lue.json
+							? "Saisie lue comme du JSON · écriture tracée dans admin_audit_log"
+							: "Saisie rangée en chaîne (ce n'était pas du JSON) · écriture tracée dans admin_audit_log",
+					})
+				);
 
 			if (cle === CLE_REGLAGE_TWEETS) {
 				// Écrire ce réglage à la main court-circuite la vérification du salon
@@ -292,7 +300,7 @@ export class AdministrationReglagesCommand {
 			}
 			await interaction.editReply({ embeds: [embed] });
 		} catch (err) {
-			await interaction.editReply({ content: `❌ ${messagePanne(err)}` });
+			await repondre(interaction, echec("Le service n'a pas répondu", messagePanne(err)));
 		}
 	}
 }

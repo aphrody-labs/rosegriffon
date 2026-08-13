@@ -39,13 +39,7 @@
  * salon Discord n'est pas un droit d'exploitation, c'est un droit d'édition du
  * site. La consultation reste ouverte à `staff` sous `/staff`, l'écriture non.
  */
-import {
-	Discord,
-	Slash,
-	SlashChoice,
-	SlashGroup,
-	SlashOption,
-} from "@rpbey/discordx";
+import { Discord, Slash, SlashChoice, SlashGroup, SlashOption } from "@rpbey/discordx";
 import {
 	ApplicationCommandOptionType,
 	type AutocompleteInteraction,
@@ -72,6 +66,7 @@ import {
 	type ResultatValidation,
 } from "./valeurs";
 import "./racine";
+import { echec, piedTexte, refus as accesRefuse, repondre } from "../../lib/ui";
 
 /**
  * Valeur écrite dans `team_members.source`.
@@ -245,7 +240,8 @@ export class AdministrationEquipeCommand {
 		discord: string | undefined,
 		@SlashOption({
 			name: "image",
-			description: "URL du portrait (à défaut : l'avatar Discord, via /administration equipe photos)",
+			description:
+				"URL du portrait (à défaut : l'avatar Discord, via /administration equipe photos)",
 			type: ApplicationCommandOptionType.String,
 			required: false,
 			maxLength: 1000,
@@ -286,7 +282,7 @@ export class AdministrationEquipeCommand {
 		];
 		const refus = controles.find((controle) => !controle.ok);
 		if (refus && !refus.ok) {
-			await interaction.editReply({ content: `🚫 ${refus.raison}` });
+			await repondre(interaction, accesRefuse(refus.raison));
 			return;
 		}
 		const [nomValide, roleValide, imageValide, lienValide, discordValide, ordreValide] =
@@ -358,15 +354,17 @@ export class AdministrationEquipeCommand {
 								`Identifiant : \`${cree.id}\``,
 							].join("\n")
 						)
-						.setFooter({
-							text: imageValide.valeur
-								? "Le site reprendra la fiche à sa prochaine revalidation."
-								: "Sans portrait : /administration equipe photos ira chercher l'avatar Discord.",
-						}),
+						.setFooter(
+							piedTexte({
+								note: imageValide.valeur
+									? "Le site reprendra la fiche à sa prochaine revalidation."
+									: "Sans portrait : /administration equipe photos ira chercher l'avatar Discord.",
+							})
+						),
 				],
 			});
 		} catch (err) {
-			await interaction.editReply({ content: `❌ ${messagePanne(err)}` });
+			await repondre(interaction, echec("Le service n'a pas répondu", messagePanne(err)));
 		}
 	}
 
@@ -443,7 +441,7 @@ export class AdministrationEquipeCommand {
 		try {
 			const resolution = await resoudreMembre(membre);
 			if (!resolution.ok) {
-				await interaction.editReply({ content: `🚫 ${resolution.raison}` });
+				await repondre(interaction, accesRefuse(resolution.raison));
 				return;
 			}
 			const cible = resolution.valeur;
@@ -455,7 +453,7 @@ export class AdministrationEquipeCommand {
 			if (nom !== undefined) {
 				const controle = validerTexteMembre("nom", nom);
 				if (!controle.ok) {
-					await interaction.editReply({ content: `🚫 ${controle.raison}` });
+					await repondre(interaction, accesRefuse(controle.raison));
 					return;
 				}
 				nomValide = controle.valeur;
@@ -467,7 +465,7 @@ export class AdministrationEquipeCommand {
 			if (role !== undefined) {
 				const controle = validerTexteMembre("role", role);
 				if (!controle.ok) {
-					await interaction.editReply({ content: `🚫 ${controle.raison}` });
+					await repondre(interaction, accesRefuse(controle.raison));
 					return;
 				}
 				roleValide = controle.valeur;
@@ -479,7 +477,7 @@ export class AdministrationEquipeCommand {
 			if (image !== undefined) {
 				const controle = validerUrlMembre("image", effacer(image));
 				if (!controle.ok) {
-					await interaction.editReply({ content: `🚫 ${controle.raison}` });
+					await repondre(interaction, accesRefuse(controle.raison));
 					return;
 				}
 				imageValide = controle.valeur;
@@ -491,7 +489,7 @@ export class AdministrationEquipeCommand {
 			if (lien !== undefined) {
 				const controle = validerUrlMembre("lien", effacer(lien));
 				if (!controle.ok) {
-					await interaction.editReply({ content: `🚫 ${controle.raison}` });
+					await repondre(interaction, accesRefuse(controle.raison));
 					return;
 				}
 				lienValide = controle.valeur;
@@ -503,7 +501,7 @@ export class AdministrationEquipeCommand {
 			if (ordre !== undefined) {
 				const controle = validerOrdreAffichage(ordre);
 				if (!controle.ok) {
-					await interaction.editReply({ content: `🚫 ${controle.raison}` });
+					await repondre(interaction, accesRefuse(controle.raison));
 					return;
 				}
 				ordreValide = controle.valeur;
@@ -566,11 +564,11 @@ export class AdministrationEquipeCommand {
 					rgEmbed()
 						.setTitle(`Membre modifié — ${borner(echapperMarkdown(cible.name), 80)}`)
 						.setDescription(borner(changements.join("\n"), 4_000))
-						.setFooter({ text: `Identifiant ${abregerIdentifiant(cible.id)}` }),
+						.setFooter(piedTexte({ note: `Identifiant ${abregerIdentifiant(cible.id)}` })),
 				],
 			});
 		} catch (err) {
-			await interaction.editReply({ content: `❌ ${messagePanne(err)}` });
+			await repondre(interaction, echec("Le service n'a pas répondu", messagePanne(err)));
 		}
 	}
 
@@ -605,7 +603,7 @@ export class AdministrationEquipeCommand {
 		try {
 			const resolution = await resoudreMembre(membre);
 			if (!resolution.ok) {
-				await interaction.editReply({ content: `🚫 ${resolution.raison}` });
+				await repondre(interaction, accesRefuse(resolution.raison));
 				return;
 			}
 			const cible = resolution.valeur;
@@ -640,7 +638,7 @@ export class AdministrationEquipeCommand {
 					`désormais ${actif ? "visible sur le site" : "masqué du site"}.`,
 			});
 		} catch (err) {
-			await interaction.editReply({ content: `❌ ${messagePanne(err)}` });
+			await repondre(interaction, echec("Le service n'a pas répondu", messagePanne(err)));
 		}
 	}
 
@@ -668,7 +666,7 @@ export class AdministrationEquipeCommand {
 		try {
 			const resolution = await resoudreMembre(membre);
 			if (!resolution.ok) {
-				await interaction.editReply({ content: `🚫 ${resolution.raison}` });
+				await repondre(interaction, accesRefuse(resolution.raison));
 				return;
 			}
 			const cible = resolution.valeur;
@@ -707,7 +705,7 @@ export class AdministrationEquipeCommand {
 				},
 			});
 		} catch (err) {
-			await interaction.editReply({ content: `❌ ${messagePanne(err)}` });
+			await repondre(interaction, echec("Le service n'a pas répondu", messagePanne(err)));
 		}
 	}
 
@@ -767,7 +765,7 @@ export class AdministrationEquipeCommand {
 
 			await interaction.editReply({ embeds: [embed] });
 		} catch (err) {
-			await interaction.editReply({ content: `❌ ${messagePanne(err)}` });
+			await repondre(interaction, echec("Le service n'a pas répondu", messagePanne(err)));
 		}
 	}
 }

@@ -101,7 +101,8 @@ describe("formaterOctets", () => {
 	test("choisit l'unité binaire", () => {
 		expect(formaterOctets(512)).toBe("512 o");
 		// 65 911 octets = le poids réel de la page inazuma.jp mesuré par scrape.recon.
-		expect(formaterOctets(65_911)).toBe("64,4 Ko");
+		// Une décimale seulement sous 10, règle unifiée de `lib/ui/nombres.ts`.
+		expect(formaterOctets(65_911)).toBe("64 Ko");
 		expect(formaterOctets(2_000_000)).toBe("1,9 Mo");
 	});
 
@@ -273,7 +274,9 @@ describe("ligneResultatWeb", () => {
 			2
 		);
 		expect(ligne).toContain("**2.**");
-		expect(ligne).toContain("(https://store.steampowered.com/app/2799860/INAZUMA_ELEVEN_Victory_Road/)");
+		expect(ligne).toContain(
+			"(https://store.steampowered.com/app/2799860/INAZUMA_ELEVEN_Victory_Road/)"
+		);
 		expect(ligne).toContain("Relive past Inazuma Eleven matches");
 	});
 
@@ -301,7 +304,9 @@ describe("lignePostX et formaterPortee", () => {
 
 	test("compose auteur, lien, date relative et portée", () => {
 		const ligne = lignePostX(POST_REEL);
-		expect(ligne).toContain("[@inazuma_project](https://x.com/inazuma_project/status/2087460043658821924)");
+		expect(ligne).toContain(
+			"[@inazuma_project](https://x.com/inazuma_project/status/2087460043658821924)"
+		);
 		expect(ligne).toContain("<t:1786524232:R>");
 		expect(ligne.replace(/\s+/g, " ")).toContain("❤ 1 085");
 	});
@@ -343,10 +348,7 @@ describe("trierPostsParDate", () => {
 			{ id: "2074045952747548797", date: "2026-07-06T08:21:03.000Z" },
 			{ id: "2087460043658821924", date: "2026-08-12T08:43:52.000Z" },
 		]);
-		expect(trie.map((post) => post.id)).toEqual([
-			"2087460043658821924",
-			"2074045952747548797",
-		]);
+		expect(trie.map((post) => post.id)).toEqual(["2087460043658821924", "2074045952747548797"]);
 	});
 
 	test("une date absente ou illisible ne passe pas pour la plus récente", () => {

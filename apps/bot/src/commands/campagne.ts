@@ -74,6 +74,7 @@ import {
 	type PostCampagne,
 	type StatsCampagne,
 } from "../lib/sondage-format";
+import { echec, pied, repondre } from "../lib/ui";
 
 /** Campagnes par page : sept existent aujourd'hui, cinq gardent l'embed lisible. */
 const PAR_PAGE = 5;
@@ -313,7 +314,7 @@ async function rendrePage(etat: EtatListeCampagnes): Promise<InteractionEditRepl
 				4096
 			)
 		);
-		embed.setFooter({ text: `Page ${page}/${pages} · rosegriffon.fr` });
+		pied(embed, { page: page, pages: pages });
 	}
 
 	const composants: Array<ActionRowBuilder<ButtonBuilder>> = [];
@@ -377,7 +378,10 @@ function rendreCampagne(
 	embed.addFields({
 		inline: false,
 		name: "Participations",
-		value: truncate(vide ? `${ligneParticipations(stats)}\n${vide}` : ligneParticipations(stats), 1024),
+		value: truncate(
+			vide ? `${ligneParticipations(stats)}\n${vide}` : ligneParticipations(stats),
+			1024
+		),
 	});
 
 	// Les métriques n'ont de sens que s'il y a des publications X : « 0 · 0 · 0 »
@@ -438,8 +442,8 @@ function rendreCampagne(
 	}
 
 	const etat = etatCampagne(campagne);
-	embed.setFooter({
-		text: `${campagne.slug} · ${etat === "en-cours" && campagne.actif ? "récolte en cours" : "récolte close"} · rosegriffon.fr`,
+	pied(embed, {
+		note: `${campagne.slug} · ${etat === "en-cours" && campagne.actif ? "récolte en cours" : "récolte close"} · rosegriffon.fr`,
 	});
 	return { embeds: [embed] };
 }
@@ -475,13 +479,12 @@ export class CampagneCommand {
 	) {
 		await interaction.deferReply();
 		try {
-			await interaction.editReply(
-				await rendrePage({ enCours: enCours === true, page: page ?? 1 })
-			);
+			await interaction.editReply(await rendrePage({ enCours: enCours === true, page: page ?? 1 }));
 		} catch (err) {
-			await interaction.editReply({
-				content: `❌ Lecture des campagnes impossible : ${err instanceof Error ? err.message : String(err)}`,
-			});
+			await repondre(
+				interaction,
+				echec("Lecture des campagnes impossible", err instanceof Error ? err.message : String(err))
+			);
 		}
 	}
 
@@ -521,8 +524,7 @@ export class CampagneCommand {
 						campagnes
 							.filter(
 								(entree) =>
-									entree.titre.toLowerCase().includes(saisie) ||
-									entree.slug.includes(saisie)
+									entree.titre.toLowerCase().includes(saisie) || entree.slug.includes(saisie)
 							)
 							.slice(0, 25)
 							.map((entree) => ({
@@ -556,13 +558,12 @@ export class CampagneCommand {
 				dernieresPublications(propre, POSTS_MONTRES),
 				participantsLesPlusActifs(propre, TOP_AUTEURS),
 			]);
-			await interaction.editReply(
-				rendreCampagne(trouvee.campagne, trouvee.stats, posts, actifs)
-			);
+			await interaction.editReply(rendreCampagne(trouvee.campagne, trouvee.stats, posts, actifs));
 		} catch (err) {
-			await interaction.editReply({
-				content: `❌ Lecture de la campagne impossible : ${err instanceof Error ? err.message : String(err)}`,
-			});
+			await repondre(
+				interaction,
+				echec("Lecture de la campagne impossible", err instanceof Error ? err.message : String(err))
+			);
 		}
 	}
 }

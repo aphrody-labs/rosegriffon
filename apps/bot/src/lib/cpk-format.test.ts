@@ -390,12 +390,12 @@ describe("apercuCpk", () => {
 	});
 
 	test("un son et une vidéo passent par leurs décodeurs dédiés", () => {
-		expect(apercuCpk({ path: "data/common/sound_asset/ja/c05021090.acb", ext: "acb" })).toMatchObject(
-			{
-				famille: "sound",
-				contenu: "https://cdn.rosegriffon.fr/audio/data/common/sound_asset/ja/c05021090.acb",
-			}
-		);
+		expect(
+			apercuCpk({ path: "data/common/sound_asset/ja/c05021090.acb", ext: "acb" })
+		).toMatchObject({
+			famille: "sound",
+			contenu: "https://cdn.rosegriffon.fr/audio/data/common/sound_asset/ja/c05021090.acb",
+		});
 		expect(apercuCpk({ path: "data/movie/op.usm", ext: "usm" })).toMatchObject({
 			famille: "movie",
 			contenu: "https://cdn.rosegriffon.fr/video/data/movie/op.usm",
@@ -443,7 +443,9 @@ describe("liensContenu", () => {
 		// laisseraient croire à un décodage qui n'existe pas.
 		const apercu = apercuCpk({ path: "data/common/map/w/w90i001/cam/cam.g4pk", ext: "g4pk" });
 		const lignes = liensContenu(apercu);
-		expect(lignes).toContain("https://cdn.rosegriffon.fr/raw/data/common/map/w/w90i001/cam/cam.g4pk");
+		expect(lignes).toContain(
+			"https://cdn.rosegriffon.fr/raw/data/common/map/w/w90i001/cam/cam.g4pk"
+		);
 		expect(lignes.split("https://").length - 1).toBe(1);
 		expect(lignes).toContain("Aucun décodeur");
 	});

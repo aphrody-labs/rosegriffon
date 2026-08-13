@@ -1,19 +1,44 @@
-import { EmbedBuilder } from "discord.js";
-import { RG_BRAND_HEX, RG_COLOR, RG_FOOTER, RG_BASE_URL } from "./config";
+/**
+ * Ancien point d'entrée des embeds — conservé comme FAÇADE de `lib/ui`.
+ *
+ * Les 127 appels à `rgEmbed()` répartis dans les commandes continuent de
+ * fonctionner à l'identique, mais rendent désormais l'embed de la trousse :
+ * couleur du profil, pied portant la marque ET son icône, horodatage. Aucune
+ * commande n'a eu à changer pour en profiter.
+ *
+ * ⚠ POUR TOUT NOUVEAU CODE : importer `lib/ui` directement. On y trouve
+ * `fiche()` (budget des 6 000 caractères tenu à l'ajout), `piedDeCommande()`
+ * (provenance `/agenda semaine` dans le pied), les charges de réponse
+ * (`succes`, `echec`, `vide`) et la pagination normalisée. Ce fichier ne
+ * garde que ce qui était déjà appelé ailleurs.
+ */
+import type { EmbedBuilder } from "discord.js";
 
+import { RG_BASE_URL } from "./config";
+import { borner, creerEmbed, pied } from "./ui";
+
+/** Embed nu à la marque du profil, pied et horodatage compris. */
 export function rgEmbed(): EmbedBuilder {
-	return new EmbedBuilder().setColor(RG_COLOR).setFooter({ text: RG_FOOTER });
+	return pied(creerEmbed());
 }
 
+/** @deprecated Utiliser `borner` de `lib/ui` — même comportement, nom français. */
 export function truncate(text: string | null | undefined, max = 200): string {
-	if (!text) return "";
-	return text.length > max ? `${text.slice(0, max - 1).trimEnd()}…` : text;
+	return borner(text, max);
 }
 
+/** Lien absolu vers le site du profil actif. */
 export function rgUrl(path: string): string {
 	return `${RG_BASE_URL}${path.startsWith("/") ? path : `/${path}`}`;
 }
 
+/**
+ * Date en toutes lettres, dans le fuseau du SERVEUR.
+ *
+ * @deprecated Préférer `ilYA()` / `leJour()` de `lib/ui` : ces horodatages
+ * natifs sont recalculés dans le fuseau du LECTEUR et ne vieillissent pas dans
+ * l'historique du salon.
+ */
 export function fmtDate(d: Date | string | null): string {
 	if (!d) return "—";
 	const date = typeof d === "string" ? new Date(d) : d;

@@ -179,8 +179,7 @@ export function dessinerTitreCartoon(
 	ctx.font = `${options.taille}px ${options.police}`;
 	// Troncature après avoir posé la police du titre : mesurée avec la police en
 	// cours d'appel, un nom long passait le contrôle puis débordait de l'image.
-	const rendu =
-		options.largeurMax === undefined ? texte : tronquer(ctx, texte, options.largeurMax);
+	const rendu = options.largeurMax === undefined ? texte : tronquer(ctx, texte, options.largeurMax);
 	ctx.textBaseline = "alphabetic";
 	ctx.textAlign = "left";
 	ctx.lineJoin = "round";

@@ -185,9 +185,9 @@ describe("corrigerCheminIconeChr", () => {
 	});
 
 	test("répare un visage, suffixe de niveau de détail compris", () => {
-		expect(
-			corrigerCheminIconeChr("/dx11/menu/icon_chr/face/c05026530_l_c05026530_1_l00.png")
-		).toBe("/dx11/menu/200_icon/10_icon_chr/face/c05026530_l.png");
+		expect(corrigerCheminIconeChr("/dx11/menu/icon_chr/face/c05026530_l_c05026530_1_l00.png")).toBe(
+			"/dx11/menu/200_icon/10_icon_chr/face/c05026530_l.png"
+		);
 	});
 
 	test("laisse intact un chemin qui n'est pas une icône de personnage", () => {
@@ -211,7 +211,9 @@ describe("imageJeu", () => {
 				"https://cdn.rosegriffon.fr/dx11/menu/220_img/stadium/img_room_s90g001_img_room_s90g001.png?w=400&format=webp",
 				400
 			)
-		).toBe("https://cdn.rosegriffon.fr/dx11/menu/220_img/stadium/img_room_s90g001.png?w=400&format=webp");
+		).toBe(
+			"https://cdn.rosegriffon.fr/dx11/menu/220_img/stadium/img_room_s90g001.png?w=400&format=webp"
+		);
 	});
 
 	test("demande une variante WebP sur les grandes illustrations", () => {
@@ -228,14 +230,21 @@ describe("imageJeu", () => {
 
 	test("répare l'icône d'aura et n'y met pas de variante inutile", () => {
 		expect(
-			imageJeu("https://cdn.rosegriffon.fr/dx11/menu/icon_chr/aura_fs/k000520_l_k000520_l00.png", 200)
-		).toBe("https://cdn.rosegriffon.fr/dx11/menu/200_icon/10_icon_chr/aura_fs/k000520_l.png?w=200&format=webp");
+			imageJeu(
+				"https://cdn.rosegriffon.fr/dx11/menu/icon_chr/aura_fs/k000520_l_k000520_l00.png",
+				200
+			)
+		).toBe(
+			"https://cdn.rosegriffon.fr/dx11/menu/200_icon/10_icon_chr/aura_fs/k000520_l.png?w=200&format=webp"
+		);
 	});
 
 	test("refuse une sous-texture d'atlas d'objet", () => {
 		// Mesuré 404 sur 3 objets ; seule la planche entière `icon_item05.png` est servie.
 		expect(
-			imageJeu("https://cdn.rosegriffon.fr/dx11/menu/200_icon/02_icon_item/icon_item05_eq_ac0105301.png")
+			imageJeu(
+				"https://cdn.rosegriffon.fr/dx11/menu/200_icon/02_icon_item/icon_item05_eq_ac0105301.png"
+			)
 		).toBeNull();
 		expect(imageJeu("https://cdn.rosegriffon.fr/dx11/menu/200_icon/02_icon_item/.webp")).toBeNull();
 	});
@@ -256,7 +265,9 @@ describe("imageJeu", () => {
 describe("cheminCpkDepuisUrl", () => {
 	test("retrouve le fichier source d'une illustration de quête", () => {
 		expect(
-			cheminCpkDepuisUrl("https://cdn.rosegriffon.fr/dx11/menu/220_img/quest_img/story_img001_l01.png")
+			cheminCpkDepuisUrl(
+				"https://cdn.rosegriffon.fr/dx11/menu/220_img/quest_img/story_img001_l01.png"
+			)
 		).toBe("data/dx11/menu/220_img/quest_img/story_img001_l01.g4tx");
 	});
 
@@ -270,7 +281,9 @@ describe("cheminCpkDepuisUrl", () => {
 
 	test("renvoie null hors du décodage CPK", () => {
 		expect(cheminCpkDepuisUrl("https://cdn.rosegriffon.fr/model-full/k000520.glb")).toBeNull();
-		expect(cheminCpkDepuisUrl("https://dxi4wb638ujep.cloudfront.net/1/k/v/w/vwj02v5fvcs.png")).toBeNull();
+		expect(
+			cheminCpkDepuisUrl("https://dxi4wb638ujep.cloudfront.net/1/k/v/w/vwj02v5fvcs.png")
+		).toBeNull();
 		expect(cheminCpkDepuisUrl(null)).toBeNull();
 	});
 });

@@ -123,6 +123,7 @@ import {
 	urlIllustrationAbsolue,
 } from "./valeurs";
 import "./racine-moderation";
+import { echec, repondre } from "../../lib/ui";
 
 // ─── Constantes locales ─────────────────────────────────────────────────────
 
@@ -196,9 +197,7 @@ interface Contexte {
  *
  * `GuildMemberManager.fetchMe(options?: BaseFetchOptions): Promise<GuildMember>`
  */
-async function contexteGuilde(
-	interaction: ChatInputCommandInteraction
-): Promise<Contexte | null> {
+async function contexteGuilde(interaction: ChatInputCommandInteraction): Promise<Contexte | null> {
 	const guild = interaction.guild;
 	if (!guild) {
 		await interaction.editReply({
@@ -211,9 +210,7 @@ async function contexteGuilde(
 		try {
 			moi = await guild.members.fetchMe();
 		} catch (err) {
-			await interaction.editReply({
-				content: `❌ Impossible de lire le membre du bot sur ce serveur : ${messagePanne(err)}`,
-			});
+			await repondre(interaction, echec("Le bot ne se voit pas sur ce serveur", messagePanne(err)));
 			return null;
 		}
 	}
@@ -612,11 +609,15 @@ export class AdministrationSalonCommand {
 
 		const choix = lireTypeSalon(type);
 		if (!choix) {
-			await interaction.editReply({
-				content: `❌ Type inconnu. Les trois valeurs possibles : ${TYPES_SALON_CREABLES.map(
-					(t) => `\`${t.valeur}\``
-				).join(", ")}.`,
-			});
+			await repondre(
+				interaction,
+				echec(
+					"Valeur inconnue",
+					`Type inconnu. Les trois valeurs possibles : ${TYPES_SALON_CREABLES.map(
+						(t) => `\`${t.valeur}\``
+					).join(", ")}.`
+				)
+			);
 			return;
 		}
 
@@ -626,16 +627,16 @@ export class AdministrationSalonCommand {
 		const manquantes = manquantesParmi(moi.permissions.bitfield, PERMISSIONS_TENUE);
 		if (manquantes.length > 0) {
 			await interaction.editReply({
-				content:
-					`🚫 Le bot n'a pas **${manquantes.join(", ")}** sur ce serveur : il ne peut pas créer de salon.`,
+				content: `🚫 Le bot n'a pas **${manquantes.join(", ")}** sur ce serveur : il ne peut pas créer de salon.`,
 			});
 			return;
 		}
 		if (categorie) {
 			if (categorie.type !== ChannelType.GuildCategory) {
-				await interaction.editReply({
-					content: `❌ ${nommerSalon(categorie)} n'est pas une catégorie.`,
-				});
+				await repondre(
+					interaction,
+					echec("Salon incompatible", `${nommerSalon(categorie)} n'est pas une catégorie.`)
+				);
 				return;
 			}
 			const refus = refusPermissions(moi, categorie, PERMISSIONS_TENUE);
@@ -725,7 +726,7 @@ export class AdministrationSalonCommand {
 			}
 			await interaction.editReply({ embeds: [embed] });
 		} catch (err) {
-			await interaction.editReply({ content: `❌ ${expliquerRefusSalon(err)}` });
+			await repondre(interaction, echec("Salon inaccessible", expliquerRefusSalon(err)));
 		}
 	}
 
@@ -824,7 +825,7 @@ export class AdministrationSalonCommand {
 					(apres.name === nom.trim() ? "" : "\nDiscord a réécrit le nom saisi."),
 			});
 		} catch (err) {
-			await interaction.editReply({ content: `❌ ${expliquerRefusSalon(err)}` });
+			await repondre(interaction, echec("Salon inaccessible", expliquerRefusSalon(err)));
 		}
 	}
 
@@ -837,11 +838,7 @@ export class AdministrationSalonCommand {
 			name: "salon",
 			description: "Salon à verrouiller",
 			type: ApplicationCommandOptionType.Channel,
-			channelTypes: [
-				ChannelType.GuildText,
-				ChannelType.GuildAnnouncement,
-				ChannelType.GuildVoice,
-			],
+			channelTypes: [ChannelType.GuildText, ChannelType.GuildAnnouncement, ChannelType.GuildVoice],
 			required: true,
 		})
 		salon: GuildBasedChannel,
@@ -929,7 +926,7 @@ export class AdministrationSalonCommand {
 				);
 			await interaction.editReply({ embeds: [embed] });
 		} catch (err) {
-			await interaction.editReply({ content: `❌ ${expliquerRefusSalon(err)}` });
+			await repondre(interaction, echec("Salon inaccessible", expliquerRefusSalon(err)));
 		}
 	}
 
@@ -942,11 +939,7 @@ export class AdministrationSalonCommand {
 			name: "salon",
 			description: "Salon à déverrouiller",
 			type: ApplicationCommandOptionType.Channel,
-			channelTypes: [
-				ChannelType.GuildText,
-				ChannelType.GuildAnnouncement,
-				ChannelType.GuildVoice,
-			],
+			channelTypes: [ChannelType.GuildText, ChannelType.GuildAnnouncement, ChannelType.GuildVoice],
 			required: true,
 		})
 		salon: GuildBasedChannel,
@@ -1043,7 +1036,7 @@ export class AdministrationSalonCommand {
 			}
 			await interaction.editReply({ embeds: [embed] });
 		} catch (err) {
-			await interaction.editReply({ content: `❌ ${expliquerRefusSalon(err)}` });
+			await repondre(interaction, echec("Salon inaccessible", expliquerRefusSalon(err)));
 		}
 	}
 
@@ -1053,11 +1046,7 @@ export class AdministrationSalonCommand {
 			name: "salon",
 			description: "Salon concerné",
 			type: ApplicationCommandOptionType.Channel,
-			channelTypes: [
-				ChannelType.GuildText,
-				ChannelType.GuildAnnouncement,
-				ChannelType.GuildVoice,
-			],
+			channelTypes: [ChannelType.GuildText, ChannelType.GuildAnnouncement, ChannelType.GuildVoice],
 			required: true,
 		})
 		salon: GuildBasedChannel,
@@ -1094,9 +1083,10 @@ export class AdministrationSalonCommand {
 			return;
 		}
 		if (!estSalonEcrit(cible)) {
-			await interaction.editReply({
-				content: `❌ Une catégorie n'a pas de mode lent : ${nommerSalon(cible)}.`,
-			});
+			await repondre(
+				interaction,
+				echec("Salon incompatible", `Une catégorie n'a pas de mode lent : ${nommerSalon(cible)}.`)
+			);
 			return;
 		}
 
@@ -1105,9 +1095,13 @@ export class AdministrationSalonCommand {
 		// de borne continue d'accepter l'ancienne valeur. On revérifie.
 		const lenteur = normaliserLenteur(secondes);
 		if (lenteur === null) {
-			await interaction.editReply({
-				content: `❌ Le mode lent va de 0 à ${MAX_LENTEUR_SECONDES} secondes (6 heures).`,
-			});
+			await repondre(
+				interaction,
+				echec(
+					"Valeur hors bornes",
+					`Le mode lent va de 0 à ${MAX_LENTEUR_SECONDES} secondes (6 heures).`
+				)
+			);
 			return;
 		}
 		const avant = cible.rateLimitPerUser ?? 0;
@@ -1145,7 +1139,7 @@ export class AdministrationSalonCommand {
 						: ""),
 			});
 		} catch (err) {
-			await interaction.editReply({ content: `❌ ${expliquerRefusSalon(err)}` });
+			await repondre(interaction, echec("Salon inaccessible", expliquerRefusSalon(err)));
 		}
 	}
 
@@ -1158,11 +1152,7 @@ export class AdministrationSalonCommand {
 			name: "salon",
 			description: "Salon à purger",
 			type: ApplicationCommandOptionType.Channel,
-			channelTypes: [
-				ChannelType.GuildText,
-				ChannelType.GuildAnnouncement,
-				ChannelType.GuildVoice,
-			],
+			channelTypes: [ChannelType.GuildText, ChannelType.GuildAnnouncement, ChannelType.GuildVoice],
 			required: true,
 		})
 		salon: GuildBasedChannel,
@@ -1207,9 +1197,13 @@ export class AdministrationSalonCommand {
 			return;
 		}
 		if (!estSalonEcrit(cible)) {
-			await interaction.editReply({
-				content: `❌ Une catégorie ne porte pas de messages : ${nommerSalon(cible)}.`,
-			});
+			await repondre(
+				interaction,
+				echec(
+					"Salon incompatible",
+					`Une catégorie ne porte pas de messages : ${nommerSalon(cible)}.`
+				)
+			);
 			return;
 		}
 
@@ -1265,9 +1259,7 @@ export class AdministrationSalonCommand {
 					},
 					{
 						name: "Plus ancien du lot",
-						value: horodatageRelatif(
-							retenus[retenus.length - 1]?.createdAt ?? null
-						),
+						value: horodatageRelatif(retenus[retenus.length - 1]?.createdAt ?? null),
 						inline: true,
 					},
 					{
@@ -1317,10 +1309,10 @@ export class AdministrationSalonCommand {
 				components: [],
 			});
 		} catch (err) {
-			await interaction.editReply({
-				content: `❌ ${expliquerRefusSalon(err)}`,
+			await repondre(interaction, {
 				embeds: [],
 				components: [],
+				...echec("Salon inaccessible", expliquerRefusSalon(err)),
 			});
 		}
 	}
@@ -1387,9 +1379,10 @@ export class AdministrationSalonCommand {
 			return;
 		}
 		if (!estSalonPublication(cible)) {
-			await interaction.editReply({
-				content: `❌ ${nommerSalon(cible)} ne peut pas recevoir d'annonce.`,
-			});
+			await repondre(
+				interaction,
+				echec("Salon incompatible", `${nommerSalon(cible)} ne peut pas recevoir d'annonce.`)
+			);
 			return;
 		}
 
@@ -1457,7 +1450,7 @@ export class AdministrationSalonCommand {
 				embeds: [annonce],
 			});
 		} catch (err) {
-			await interaction.editReply({ content: `❌ ${expliquerRefusSalon(err)}` });
+			await repondre(interaction, echec("Salon inaccessible", expliquerRefusSalon(err)));
 		}
 	}
 
@@ -1535,8 +1528,7 @@ export class AdministrationSalonCommand {
 				return;
 			}
 
-			const enfants =
-				cible.type === ChannelType.GuildCategory ? cible.children.cache.size : 0;
+			const enfants = cible.type === ChannelType.GuildCategory ? cible.children.cache.size : 0;
 			const embed = rgEmbed()
 				.setTitle("Suppression de salon — à confirmer")
 				.setDescription(

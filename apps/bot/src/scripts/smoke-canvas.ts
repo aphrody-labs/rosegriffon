@@ -127,7 +127,11 @@ async function scenariosSynthetiques(): Promise<void> {
 		await renderTeamGrid(
 			[
 				{ name: "Koltilasko", role: "Président", image_url: null },
-				{ name: PSEUDO_EXTREME, role: "Responsable communication et réseaux sociaux", image_url: AVATAR_ROMPU },
+				{
+					name: PSEUDO_EXTREME,
+					role: "Responsable communication et réseaux sociaux",
+					image_url: AVATAR_ROMPU,
+				},
 				{ name: "Gaëlle", role: "Trésorière", image_url: null },
 				{ name: "Roy", role: "", image_url: null },
 				{ name: "Azalée", role: "Rédactrice en chef du wiki", image_url: null },

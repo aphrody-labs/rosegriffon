@@ -254,9 +254,7 @@ describe("codes de modèle 3D", () => {
 	});
 
 	test("URL du modèle", () => {
-		expect(urlModele(CDN, "c01000010")).toBe(
-			"https://cdn.rosegriffon.fr/model-full/c01000010.glb"
-		);
+		expect(urlModele(CDN, "c01000010")).toBe("https://cdn.rosegriffon.fr/model-full/c01000010.glb");
 	});
 
 	test("libellés français des familles", () => {
@@ -278,7 +276,11 @@ describe("choix de la texture d'aperçu d'un modèle", () => {
 	// Extrait RÉEL de `GET /api/cpk/search?q=c01000010&limit=10`.
 	const fichiersPersonnage = [
 		{ path: "data/common/sound_asset/ja/c01000010.acb", ext: "acb", name: "c01000010.acb" },
-		{ path: "data/common/chr/_face/01_ie1/c01000010/c01000010.g4md", ext: "g4md", name: "c01000010.g4md" },
+		{
+			path: "data/common/chr/_face/01_ie1/c01000010/c01000010.g4md",
+			ext: "g4md",
+			name: "c01000010.g4md",
+		},
 		{
 			path: "data/dx11/chr/_face/01_ie1/c01000010/c01000010.g4tx",
 			ext: "g4tx",
@@ -415,9 +417,7 @@ describe("pagination de la galerie", () => {
 	});
 
 	test("au-delà de 100 caractères, aucun bouton n'est proposé", () => {
-		expect(
-			encoderEtatGalerie({ page: 1, categorie: null, recherche: "x".repeat(120) })
-		).toBeNull();
+		expect(encoderEtatGalerie({ page: 1, categorie: null, recherche: "x".repeat(120) })).toBeNull();
 	});
 
 	test("un customId étranger n'est jamais décodé", () => {
@@ -431,19 +431,24 @@ describe("pagination de la galerie", () => {
 	test("le préfixe et la limite Discord sont ceux annoncés", () => {
 		expect(PREFIXE_BOUTON_GALERIE).toBe("cdng");
 		expect(MAX_CUSTOM_ID).toBe(100);
-		expect((encoderEtatGalerie({ page: 1, categorie: "menu", recherche: null }) ?? "").length)
-			.toBeLessThanOrEqual(MAX_CUSTOM_ID);
+		expect(
+			(encoderEtatGalerie({ page: 1, categorie: "menu", recherche: null }) ?? "").length
+		).toBeLessThanOrEqual(MAX_CUSTOM_ID);
 	});
 });
 
 describe("mise en forme", () => {
+	// Une décimale seulement sous 10, comme partout ailleurs dans le bot depuis
+	// l'unification (`lib/ui/nombres.ts`) : au-delà, le dixième de mégaoctet
+	// n'apprend rien, et deux commandes ne doivent pas peser le même fichier
+	// différemment (« 11,0 Mo » ici contre « 11 Mo » sur `/cpk`).
 	test("tailles réelles rendues en français", () => {
 		expect(formaterOctets(192)).toBe("192 o");
 		expect(formaterOctets(6_650)).toBe("6,5 Ko");
-		expect(formaterOctets(97_882)).toBe("95,6 Ko");
-		expect(formaterOctets(459_968)).toBe("449,2 Ko");
+		expect(formaterOctets(97_882)).toBe("96 Ko");
+		expect(formaterOctets(459_968)).toBe("449 Ko");
 		expect(formaterOctets(1_955_520)).toBe("1,9 Mo");
-		expect(formaterOctets(11_494_007)).toBe("11,0 Mo");
+		expect(formaterOctets(11_494_007)).toBe("11 Mo");
 		expect(formaterOctets(0)).toBe("0 o");
 	});
 
@@ -474,7 +479,11 @@ describe("mise en forme", () => {
 describe("description des sondes de santé", () => {
 	test("charge réelle de rg-cdn.service", () => {
 		// {"ok":true,"storage":"/var/www/cdn/images","assetsManifest":null}
-		const lignes = decrireSanteCdn({ ok: true, storage: "/var/www/cdn/images", assetsManifest: null });
+		const lignes = decrireSanteCdn({
+			ok: true,
+			storage: "/var/www/cdn/images",
+			assetsManifest: null,
+		});
 		expect(lignes[0]).toContain("/var/www/cdn/images");
 		expect(lignes[1]).toContain("aucun");
 	});

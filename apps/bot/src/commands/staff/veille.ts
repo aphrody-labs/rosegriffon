@@ -27,10 +27,7 @@
  * démon ne répond pas » alors qu'il travaille encore.
  */
 import { Discord, Slash, SlashGroup, SlashOption } from "@rpbey/discordx";
-import {
-	ApplicationCommandOptionType,
-	type ChatInputCommandInteraction,
-} from "discord.js";
+import { ApplicationCommandOptionType, type ChatInputCommandInteraction } from "discord.js";
 
 import { appelerCron } from "../../lib/cron-ipc";
 import { rgEmbed } from "../../lib/embeds";
@@ -49,6 +46,7 @@ import {
 } from "./format";
 import { differerEnPrive, exigerDroits, expliquerRefusScrape, messagePanne } from "./garde";
 import "./racine";
+import { echec, pied, piedTexte, repondre } from "../../lib/ui";
 
 /**
  * Marge ajoutée au délai du verbe pour l'attente côté bot.
@@ -154,10 +152,10 @@ export class StaffVeilleCommand {
 					value: "**aucun** — ni réglage en base, ni `DISCORD_NEWS_CHANNEL_ID`.",
 				});
 			}
-			embed.setFooter({ text: "Réglage : /administration veille regler" });
+			pied(embed, { note: "Réglage : /administration veille regler" });
 			await interaction.editReply({ embeds: [embed] });
 		} catch (err) {
-			await interaction.editReply({ content: `❌ ${messagePanne(err)}` });
+			await repondre(interaction, echec("Le service n'a pas répondu", messagePanne(err)));
 		}
 	}
 
@@ -179,9 +177,10 @@ export class StaffVeilleCommand {
 		try {
 			const reponse = await appelerVerbe("x.profil", { pseudo });
 			if (!reponse.success) {
-				await interaction.editReply({
-					content: `❌ ${expliquerRefusScrape(reponse.code, reponse.error)}`,
-				});
+				await repondre(
+					interaction,
+					echec("Lecture impossible", expliquerRefusScrape(reponse.code, reponse.error))
+				);
 				return;
 			}
 			const fiche = (reponse.fiche ?? {}) as Record<string, unknown>;
@@ -201,7 +200,7 @@ export class StaffVeilleCommand {
 					`${
 						typeof fiche.nom === "string" && fiche.nom.length > 0
 							? borner(fiche.nom, 200)
-							: (nomCompte || "compte X")
+							: nomCompte || "compte X"
 					}${fiche.certifie === true ? " ✔" : ""}`
 				)
 				.setDescription(
@@ -218,15 +217,12 @@ export class StaffVeilleCommand {
 					},
 					{
 						name: "Abonnements",
-						value: formaterNombre(
-							typeof fiche.abonnements === "number" ? fiche.abonnements : null
-						),
+						value: formaterNombre(typeof fiche.abonnements === "number" ? fiche.abonnements : null),
 						inline: true,
 					},
 					{
 						name: "Compte créé",
-						value:
-							typeof fiche.creeLe === "string" ? horodatageAbsolu(fiche.creeLe) : "—",
+						value: typeof fiche.creeLe === "string" ? horodatageAbsolu(fiche.creeLe) : "—",
 						inline: true,
 					},
 					{
@@ -235,7 +231,9 @@ export class StaffVeilleCommand {
 						inline: true,
 					}
 				)
-				.setFooter({ text: `Lu en direct chez X en ${formaterLatence(reponse.ms ?? 0)}` });
+				.setFooter(
+					piedTexte({ note: `Lu en direct chez X en ${formaterLatence(reponse.ms ?? 0)}` })
+				);
 			if (lien) {
 				embed.setURL(lien);
 			}
@@ -244,7 +242,7 @@ export class StaffVeilleCommand {
 			}
 			await interaction.editReply({ embeds: [embed] });
 		} catch (err) {
-			await interaction.editReply({ content: `❌ ${messagePanne(err)}` });
+			await repondre(interaction, echec("Le service n'a pas répondu", messagePanne(err)));
 		}
 	}
 
@@ -275,9 +273,10 @@ export class StaffVeilleCommand {
 		try {
 			const reponse = await appelerVerbe("x.posts", { pseudo, limite });
 			if (!reponse.success) {
-				await interaction.editReply({
-					content: `❌ ${expliquerRefusScrape(reponse.code, reponse.error)}`,
-				});
+				await repondre(
+					interaction,
+					echec("Lecture impossible", expliquerRefusScrape(reponse.code, reponse.error))
+				);
 				return;
 			}
 			// X place le post ÉPINGLÉ en tête et le service ne trie pas : sans ce
@@ -291,7 +290,9 @@ export class StaffVeilleCommand {
 				.setTitle(
 					`${compte ? `@${compte}` : "Compte X"} — ${posts.length} post${posts.length > 1 ? "s" : ""}`
 				)
-				.setFooter({ text: `Lu en direct chez X en ${formaterLatence(reponse.ms ?? 0)}` });
+				.setFooter(
+					piedTexte({ note: `Lu en direct chez X en ${formaterLatence(reponse.ms ?? 0)}` })
+				);
 			if (compte) {
 				embed.setURL(`https://x.com/${compte}`);
 			}
@@ -306,14 +307,15 @@ export class StaffVeilleCommand {
 				for (const post of posts) {
 					const [valeur] = decouperEnChamps(lignePostX(post), 1_024, 1);
 					embed.addFields({
-						name: typeof post.date === "string" ? `📅 ${post.date.slice(0, 10)}` : "📅 date inconnue",
+						name:
+							typeof post.date === "string" ? `📅 ${post.date.slice(0, 10)}` : "📅 date inconnue",
 						value: valeur ?? "—",
 					});
 				}
 			}
 			await interaction.editReply({ embeds: [embed] });
 		} catch (err) {
-			await interaction.editReply({ content: `❌ ${messagePanne(err)}` });
+			await repondre(interaction, echec("Le service n'a pas répondu", messagePanne(err)));
 		}
 	}
 
@@ -348,9 +350,10 @@ export class StaffVeilleCommand {
 		try {
 			const reponse = await appelerVerbe("x.recherche", { requete, limite });
 			if (!reponse.success) {
-				await interaction.editReply({
-					content: `❌ ${expliquerRefusScrape(reponse.code, reponse.error)}`,
-				});
+				await repondre(
+					interaction,
+					echec("Lecture impossible", expliquerRefusScrape(reponse.code, reponse.error))
+				);
 				return;
 			}
 			// Le verbe demande le tri « Latest » à X, mais rien ne garantit l'ordre
@@ -362,7 +365,9 @@ export class StaffVeilleCommand {
 			const embed = rgEmbed()
 				.setTitle(`Recherche X — ${posts.length} résultat${posts.length > 1 ? "s" : ""}`)
 				.setDescription(`Requête : « ${borner(requete, 200)} » · tri **le plus récent**.`)
-				.setFooter({ text: `Lu en direct chez X en ${formaterLatence(reponse.ms ?? 0)}` });
+				.setFooter(
+					piedTexte({ note: `Lu en direct chez X en ${formaterLatence(reponse.ms ?? 0)}` })
+				);
 
 			if (posts.length === 0) {
 				embed.addFields({
@@ -383,7 +388,7 @@ export class StaffVeilleCommand {
 			}
 			await interaction.editReply({ embeds: [embed] });
 		} catch (err) {
-			await interaction.editReply({ content: `❌ ${messagePanne(err)}` });
+			await repondre(interaction, echec("Le service n'a pas répondu", messagePanne(err)));
 		}
 	}
 }

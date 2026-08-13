@@ -21,6 +21,21 @@
  * ────────────────────────────────────────────────────────────────────────────
  */
 
+import {
+	formaterNombre as formaterNombreUi,
+	formaterPourcentage as formaterPourcentageUi,
+} from "./ui/nombres";
+import { borner, ilYA, leJour } from "./ui/texte";
+import {
+	MAX_CUSTOM_ID as MAX_CUSTOM_ID_UI,
+	bornerPage as bornerPageUi,
+	decoderEtat,
+	encoderEtat,
+	nombreDePages as nombreDePagesUi,
+	pageDecodee,
+	sansSeparateur,
+} from "./ui/etat";
+
 // ─── Utilitaires communs ────────────────────────────────────────────────────
 
 /**
@@ -58,10 +73,9 @@ export function decimal(valeur: unknown): number | null {
 
 /** Entier groupé à la française (« 14 098 »). */
 export function formaterNombre(valeur: number | null | undefined): string {
-	if (valeur === null || valeur === undefined || !Number.isFinite(valeur)) {
-		return "—";
-	}
-	return Math.trunc(valeur).toLocaleString("fr-FR");
+	return typeof valeur === "number" && Number.isFinite(valeur)
+		? formaterNombreUi(Math.trunc(valeur))
+		: "—";
 }
 
 /** Accorde un nom au pluriel simple. */
@@ -85,23 +99,17 @@ export function versDate(valeur: Date | string | null | undefined): Date | null 
 
 /** Horodatage relatif Discord (`<t:1234:R>`), ou `—`. */
 export function horodatageRelatif(valeur: Date | string | null | undefined): string {
-	const date = versDate(valeur);
-	return date ? `<t:${Math.floor(date.getTime() / 1000)}:R>` : "—";
+	return ilYA(versDate(valeur));
 }
 
 /** Horodatage date longue Discord (`<t:1234:D>`), ou `—`. */
 export function horodatageDate(valeur: Date | string | null | undefined): string {
-	const date = versDate(valeur);
-	return date ? `<t:${Math.floor(date.getTime() / 1000)}:D>` : "—";
+	return leJour(versDate(valeur), "D");
 }
 
 /** Coupe proprement un texte, en posant une ellipse. */
 export function couper(texte: string, max: number): string {
-	if (max <= 0) {
-		return "";
-	}
-	const propre = texte.replace(/\s+/g, " ").trim();
-	return propre.length <= max ? propre : `${propre.slice(0, max - 1).trimEnd()}…`;
+	return max <= 0 ? "" : borner(texte.replace(/\s+/g, " ").trim(), max);
 }
 
 /**
@@ -362,8 +370,7 @@ export function normaliserSondage(ligne: LigneSondage, origine: string): Sondage
 		provider: ligne.provider === "discord" ? "discord" : "easypoll",
 		question: ligne.question,
 		resultsHidden: ligne.results_hidden === true,
-		source:
-			ligne.source === "reactions" ? "reactions" : ligne.source === "api" ? "api" : "embed",
+		source: ligne.source === "reactions" ? "reactions" : ligne.source === "api" ? "api" : "embed",
 		totalVoters: entier(ligne.total_voters),
 		totalVotes: entier(ligne.total_votes),
 		visuel: urlVisuel
@@ -436,10 +443,7 @@ export function aDesResultats(sondage: Pick<Sondage, "totalVotes" | "options">):
  *    vaut environ la moitié du total des votes (mesuré : 67 participants pour
  *    120 votes), et diviser par lui donnerait des barres au-delà de 100 %.
  */
-export function pourcentage(
-	option: OptionSondage,
-	sondage: Pick<Sondage, "totalVotes">
-): number {
+export function pourcentage(option: OptionSondage, sondage: Pick<Sondage, "totalVotes">): number {
 	const total = sondage.totalVotes;
 	if (option.votes === null || total === null || total <= 0) {
 		return 0;
@@ -499,10 +503,7 @@ export function barre(pourcent: number, largeur = 12): string {
 
 /** Pourcentage à une décimale, à la française (« 25,8 % »). */
 export function formaterPourcentage(valeur: number): string {
-	if (!Number.isFinite(valeur)) {
-		return "0 %";
-	}
-	return `${valeur.toLocaleString("fr-FR", { maximumFractionDigits: 1 })} %`;
+	return formaterPourcentageUi(valeur, { decimales: 1, absent: "0 %" });
 }
 
 /**
@@ -540,9 +541,7 @@ export function estEstimation(sondage: Pick<Sondage, "source">): boolean {
  * C'est l'exigence centrale de `/sondage voir` : un décompte reconstitué depuis
  * les réactions archivées ne doit jamais passer pour un résultat officiel.
  */
-export function mentionSource(
-	sondage: Pick<Sondage, "source" | "resultsHidden">
-): string | null {
+export function mentionSource(sondage: Pick<Sondage, "source" | "resultsHidden">): string | null {
 	if (estEstimation(sondage)) {
 		return (
 			"⚠️ **Estimation, pas un résultat officiel.** Ce sondage n'a jamais publié ses " +
@@ -762,7 +761,9 @@ function chaines(valeur: unknown): string[] {
 	if (!Array.isArray(valeur)) {
 		return [];
 	}
-	return valeur.filter((entree): entree is string => typeof entree === "string" && entree.length > 0);
+	return valeur.filter(
+		(entree): entree is string => typeof entree === "string" && entree.length > 0
+	);
 }
 
 /**
@@ -866,7 +867,9 @@ export function hashtagsAffichables(
 
 /** Chemin public d'une campagne sur le site. */
 export function cheminCampagne(campagne: Pick<Campagne, "principale" | "slug">): string {
-	return campagne.principale ? "/iergday" : `/iergday?campagne=${encodeURIComponent(campagne.slug)}`;
+	return campagne.principale
+		? "/iergday"
+		: `/iergday?campagne=${encodeURIComponent(campagne.slug)}`;
 }
 
 /** Slug acceptable : ce que la base contient, rien d'autre. */
@@ -889,7 +892,9 @@ export interface StatsCampagne {
 }
 
 /** Ligne « métriques » d'un embed de campagne. */
-export function ligneMetriques(stats: Pick<StatsCampagne, "jaime" | "repartages" | "vues">): string {
+export function ligneMetriques(
+	stats: Pick<StatsCampagne, "jaime" | "repartages" | "vues">
+): string {
 	return `❤️ ${formaterNombre(stats.jaime)} · 🔁 ${formaterNombre(stats.repartages)} · 👁️ ${formaterNombre(stats.vues)}`;
 }
 
@@ -1013,29 +1018,18 @@ export function lignePost(post: PostCampagne): string {
 // ─── Pagination par boutons ─────────────────────────────────────────────────
 
 /** Limite Discord sur un `customId`. */
-export const MAX_CUSTOM_ID = 100;
+export const MAX_CUSTOM_ID = MAX_CUSTOM_ID_UI;
 
 export const PREFIXE_BOUTON_SONDAGES = "sdg";
 export const PREFIXE_BOUTON_CAMPAGNES = "cmp";
 
 export function nombreDePages(total: number, parPage: number): number {
-	const taille = Math.max(1, Math.trunc(parPage));
-	return Math.max(1, Math.ceil(Math.max(0, Math.trunc(total)) / taille));
+	return nombreDePagesUi(Math.trunc(total), Math.max(1, Math.trunc(parPage)));
 }
 
 /** Ramène une page dans les bornes réelles du jeu de résultats. */
 export function bornerPage(page: number, total: number, parPage: number): number {
-	const pages = nombreDePages(total, parPage);
-	const demandee = Math.trunc(page);
-	if (!Number.isFinite(demandee) || demandee < 1) {
-		return 1;
-	}
-	return Math.min(demandee, pages);
-}
-
-/** Retire de quoi casser l'encodage `a|b|c` d'un `customId`. */
-function sansSeparateur(valeur: string | null): string {
-	return (valeur ?? "").replaceAll("|", " ").trim();
+	return bornerPageUi(page, Math.trunc(total), Math.max(1, Math.trunc(parPage)));
 }
 
 export interface EtatListeSondages {
@@ -1055,30 +1049,25 @@ export interface EtatListeSondages {
  * plutôt que d'envoyer un composant que Discord rejetterait.
  */
 export function encoderEtatSondages(etat: EtatListeSondages): string | null {
-	const identifiant = [
-		PREFIXE_BOUTON_SONDAGES,
-		String(Math.max(1, Math.trunc(etat.page))),
+	return encoderEtat(PREFIXE_BOUTON_SONDAGES, [
+		Math.max(1, Math.trunc(etat.page)),
 		normaliserStatut(etat.statut),
 		sansSeparateur(etat.periode) || "tout",
-		sansSeparateur(etat.recherche),
-	].join("|");
-	return identifiant.length <= MAX_CUSTOM_ID ? identifiant : null;
+		etat.recherche,
+	]);
 }
 
 export function decoderEtatSondages(customId: string): EtatListeSondages | null {
-	const morceaux = customId.split("|");
-	if (morceaux.length !== 5 || morceaux[0] !== PREFIXE_BOUTON_SONDAGES) {
-		return null;
-	}
-	const page = Number.parseInt(morceaux[1] ?? "", 10);
-	if (!Number.isFinite(page) || page < 1) {
+	const champs = decoderEtat(PREFIXE_BOUTON_SONDAGES, customId, 4);
+	const page = pageDecodee(champs?.[0]);
+	if (!champs || page === null) {
 		return null;
 	}
 	return {
 		page,
-		periode: morceaux[3] || "tout",
-		recherche: morceaux[4] || null,
-		statut: normaliserStatut(morceaux[2]),
+		periode: champs[2] || "tout",
+		recherche: champs[3] || null,
+		statut: normaliserStatut(champs[1]),
 	};
 }
 
@@ -1089,22 +1078,17 @@ export interface EtatListeCampagnes {
 }
 
 export function encoderEtatCampagnes(etat: EtatListeCampagnes): string | null {
-	const identifiant = [
-		PREFIXE_BOUTON_CAMPAGNES,
-		String(Math.max(1, Math.trunc(etat.page))),
+	return encoderEtat(PREFIXE_BOUTON_CAMPAGNES, [
+		Math.max(1, Math.trunc(etat.page)),
 		etat.enCours ? "1" : "0",
-	].join("|");
-	return identifiant.length <= MAX_CUSTOM_ID ? identifiant : null;
+	]);
 }
 
 export function decoderEtatCampagnes(customId: string): EtatListeCampagnes | null {
-	const morceaux = customId.split("|");
-	if (morceaux.length !== 3 || morceaux[0] !== PREFIXE_BOUTON_CAMPAGNES) {
+	const champs = decoderEtat(PREFIXE_BOUTON_CAMPAGNES, customId, 2);
+	const page = pageDecodee(champs?.[0]);
+	if (!champs || page === null) {
 		return null;
 	}
-	const page = Number.parseInt(morceaux[1] ?? "", 10);
-	if (!Number.isFinite(page) || page < 1) {
-		return null;
-	}
-	return { enCours: morceaux[2] === "1", page };
+	return { enCours: champs[1] === "1", page };
 }

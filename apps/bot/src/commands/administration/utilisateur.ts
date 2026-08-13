@@ -80,6 +80,7 @@ import {
 	verifierActionSurProfil,
 } from "./valeurs";
 import "./racine";
+import { echec, piedTexte, refus as accesRefuse, repondre } from "../../lib/ui";
 
 /** Dix profils par page : la description d'un embed tient 4 096 caractères. */
 const TAILLE_PAGE = 10;
@@ -184,7 +185,7 @@ export async function demanderConfirmation(
 	const embed = rgEmbed()
 		.setTitle(borner(options.titre, 256))
 		.setDescription(borner(options.description, 4_096))
-		.setFooter({ text: `Sans réponse dans les 2 minutes, rien ne sera fait.` });
+		.setFooter(piedTexte({ note: `Sans réponse dans les 2 minutes, rien ne sera fait.` }));
 
 	await interaction.editReply({
 		embeds: [embed],
@@ -332,12 +333,15 @@ async function rendrePageProfils(
 	const embed = rgEmbed()
 		.setTitle(`Profils — ${total.toLocaleString("fr-FR")}`)
 		.setDescription(lignes.map((ligne) => ligneProfil(ligne)).join("\n"))
-		.setFooter({
-			text:
-				`Page ${page}/${pages}` +
-				(filtres.length > 0 ? ` · ${filtres.join(" · ")}` : "") +
-				" · ni e-mail ni adresse : un salon n'est pas un espace privé",
-		});
+		.setFooter(
+			piedTexte({
+				page,
+				pages,
+				note:
+					(filtres.length > 0 ? `${filtres.join(" · ")} · ` : "") +
+					"ni e-mail ni adresse : un salon n'est pas un espace privé",
+			})
+		);
 
 	const etatCommun = { q: recherche ?? "", r: role ?? "" };
 	const idPrecedent = encoderEtatBouton(PREFIXE_PAGE_PROFILS, {
@@ -465,7 +469,8 @@ async function preparerChangementDeRole(
 ): Promise<void> {
 	if (cle === null) {
 		await interaction.editReply({
-			content: "Indique un membre (mention) ou un identifiant (uuid de profil ou identifiant Discord).",
+			content:
+				"Indique un membre (mention) ou un identifiant (uuid de profil ou identifiant Discord).",
 		});
 		return;
 	}
@@ -502,7 +507,7 @@ async function preparerChangementDeRole(
 		nouveauRole,
 	});
 	if (!verdict.autorise) {
-		await interaction.editReply({ content: `🚫 ${verdict.raison}` });
+		await repondre(interaction, accesRefuse(verdict.raison));
 		return;
 	}
 
@@ -590,7 +595,7 @@ export class AdministrationUtilisateurCommand {
 				await rendrePageProfils(recherche?.trim() || null, role ?? null, 0)
 			);
 		} catch (err) {
-			await interaction.editReply({ content: `❌ ${messagePanne(err)}` });
+			await repondre(interaction, echec("Le service n'a pas répondu", messagePanne(err)));
 		}
 	}
 
@@ -688,9 +693,11 @@ export class AdministrationUtilisateurCommand {
 						inline: true,
 					}
 				)
-				.setFooter({
-					text: "Ni e-mail ni adresse : ces colonnes ne sont même pas lues par cette commande.",
-				});
+				.setFooter(
+					piedTexte({
+						note: "Ni e-mail ni adresse : ces colonnes ne sont même pas lues par cette commande.",
+					})
+				);
 
 			if (profil.bio) {
 				embed.addFields({ name: "Bio", value: borner(echapperMarkdown(profil.bio), 1_000) });
@@ -718,7 +725,7 @@ export class AdministrationUtilisateurCommand {
 
 			await interaction.editReply({ embeds: [embed] });
 		} catch (err) {
-			await interaction.editReply({ content: `❌ ${messagePanne(err)}` });
+			await repondre(interaction, echec("Le service n'a pas répondu", messagePanne(err)));
 		}
 	}
 
@@ -758,19 +765,13 @@ export class AdministrationUtilisateurCommand {
 			return;
 		}
 		try {
-			await preparerChangementDeRole(
-				interaction,
-				acteur,
-				cleDemandee(membre, identifiant),
-				role,
-				{
-					titre: "Changer le rôle de ce profil ?",
-					libelle: "Changer le rôle",
-					action: "utilisateur.role",
-				}
-			);
+			await preparerChangementDeRole(interaction, acteur, cleDemandee(membre, identifiant), role, {
+				titre: "Changer le rôle de ce profil ?",
+				libelle: "Changer le rôle",
+				action: "utilisateur.role",
+			});
 		} catch (err) {
-			await interaction.editReply({ content: `❌ ${messagePanne(err)}` });
+			await repondre(interaction, echec("Le service n'a pas répondu", messagePanne(err)));
 		}
 	}
 
@@ -823,7 +824,7 @@ export class AdministrationUtilisateurCommand {
 				}
 			);
 		} catch (err) {
-			await interaction.editReply({ content: `❌ ${messagePanne(err)}` });
+			await repondre(interaction, echec("Le service n'a pas répondu", messagePanne(err)));
 		}
 	}
 
@@ -871,7 +872,7 @@ export class AdministrationUtilisateurCommand {
 				}
 			);
 		} catch (err) {
-			await interaction.editReply({ content: `❌ ${messagePanne(err)}` });
+			await repondre(interaction, echec("Le service n'a pas répondu", messagePanne(err)));
 		}
 	}
 

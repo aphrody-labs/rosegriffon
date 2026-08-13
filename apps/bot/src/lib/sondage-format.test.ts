@@ -97,7 +97,13 @@ const LIGNE_OFFICIELLE: LigneSondage = {
 	max_choices: 3,
 	message_id: "1532068756304433290",
 	options: [
-		{ emoji: "🥞", label: "Goldie Lemmon / Nanobana Kinako", percentage: 20.8, position: 0, votes: 25 },
+		{
+			emoji: "🥞",
+			label: "Goldie Lemmon / Nanobana Kinako",
+			percentage: 20.8,
+			position: 0,
+			votes: 25,
+		},
 		{ emoji: "🌸", label: "Shinohara Raika", percentage: 25.8, position: 1, votes: 31 },
 		{ emoji: "🐰", label: "Fei Rune", percentage: 11.7, position: 2, votes: 14 },
 		{ emoji: "🕵️", label: "Tori Vanguard / Zaizen Touko", percentage: 7.5, position: 3, votes: 9 },
@@ -133,7 +139,13 @@ const LIGNE_ESTIMEE: LigneSondage = {
 	max_choices: 1,
 	message_id: null,
 	options: [
-		{ emoji: "🌸", label: "Cerise Blossom / Nozaki Sakura", percentage: null, position: 0, votes: 11 },
+		{
+			emoji: "🌸",
+			label: "Cerise Blossom / Nozaki Sakura",
+			percentage: null,
+			position: 0,
+			votes: 11,
+		},
 		{ emoji: "🟣", label: "Tezcat / Shuu", percentage: null, position: 1, votes: 50 },
 		{ emoji: "🐰", label: "Fey Rune", percentage: null, position: 2, votes: 42 },
 	],
@@ -256,14 +268,12 @@ describe("normalisation des valeurs base", () => {
 describe("visuels republiables", () => {
 	test("une pièce jointe Discord est refusée, signée ou non", () => {
 		expect(
-			estUrlDiscordSignee(
-				"https://cdn.discordapp.com/attachments/1/2/x.png?ex=abc&is=def&hm=123"
-			)
+			estUrlDiscordSignee("https://cdn.discordapp.com/attachments/1/2/x.png?ex=abc&is=def&hm=123")
 		).toBe(true);
 		expect(estUrlDiscordSignee("https://media.discordapp.net/attachments/1/2/x.png")).toBe(true);
-		expect(estUrlDiscordSignee("https://rosegriffon.fr/storage/v1/object/public/assets/a.png")).toBe(
-			false
-		);
+		expect(
+			estUrlDiscordSignee("https://rosegriffon.fr/storage/v1/object/public/assets/a.png")
+		).toBe(false);
 		expect(estUrlDiscordSignee("pas une url")).toBe(false);
 	});
 
@@ -424,7 +434,9 @@ describe("sondage — résultats", () => {
 	});
 
 	test("pourcentage vaut 0 quand le décompte manque", () => {
-		expect(pourcentage({ emoji: null, label: "x", percentage: null, position: 0, votes: null }, officiel)).toBe(0);
+		expect(
+			pourcentage({ emoji: null, label: "x", percentage: null, position: 0, votes: null }, officiel)
+		).toBe(0);
 		expect(pourcentage(officiel.options[0] as OptionSondage, { totalVotes: 0 })).toBe(0);
 	});
 
@@ -451,7 +463,10 @@ describe("sondage — résultats", () => {
 
 	test("gagnant est nul sans résultats ou avec un choix unique", () => {
 		expect(
-			gagnant({ options: [{ emoji: null, label: "A", percentage: null, position: 0, votes: 5 }], totalVotes: 5 })
+			gagnant({
+				options: [{ emoji: null, label: "A", percentage: null, position: 0, votes: 5 }],
+				totalVotes: 5,
+			})
 		).toBeNull();
 	});
 });
@@ -671,12 +686,12 @@ describe("campagne", () => {
 
 	test("la période se dit avec ce qui est connu", () => {
 		expect(periodeCampagne(campagne)).toContain("du <t:");
-		expect(periodeCampagne({ debutLe: null, finLe: new Date("2026-08-22T21:59:59.000Z") })).toContain(
-			"jusqu'au"
-		);
-		expect(periodeCampagne({ debutLe: new Date("2023-08-01T22:00:00.000Z"), finLe: null })).toContain(
-			"depuis le"
-		);
+		expect(
+			periodeCampagne({ debutLe: null, finLe: new Date("2026-08-22T21:59:59.000Z") })
+		).toContain("jusqu'au");
+		expect(
+			periodeCampagne({ debutLe: new Date("2023-08-01T22:00:00.000Z"), finLe: null })
+		).toContain("depuis le");
 		expect(periodeCampagne({ debutLe: null, finLe: null })).toBeNull();
 	});
 
@@ -824,9 +839,9 @@ describe("pagination", () => {
 	test("l'état d'une liste de campagnes fait l'aller-retour", () => {
 		const id = encoderEtatCampagnes({ enCours: true, page: 2 });
 		expect(decoderEtatCampagnes(id as string)).toEqual({ enCours: true, page: 2 });
-		expect(decoderEtatCampagnes(encoderEtatCampagnes({ enCours: false, page: 1 }) as string)).toEqual(
-			{ enCours: false, page: 1 }
-		);
+		expect(
+			decoderEtatCampagnes(encoderEtatCampagnes({ enCours: false, page: 1 }) as string)
+		).toEqual({ enCours: false, page: 1 });
 	});
 
 	test("les deux familles de boutons ne se confondent pas", () => {

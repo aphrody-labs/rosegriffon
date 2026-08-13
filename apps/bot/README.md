@@ -36,6 +36,21 @@ et permissions, jeton, démarrage, vérification) :
 [`docs/bot-azalee.md`](../../docs/bot-azalee.md). Unité systemd :
 [`infra/systemd/azalee-bot.service`](../../infra/systemd/azalee-bot.service).
 
+## Présentation : la trousse `src/lib/ui`
+
+Toutes les réponses des deux bots passent par une seule trousse — couleurs,
+icônes, pieds de page, bornage aux limites de l'API, pagination et charges de
+réponse (`succes`, `echec`, `vide`, `refus`). Aucune commande n'écrit une
+couleur, une émoji d'état ni une limite Discord en dur :
+
+```ts
+import { differer, echec, fiche, piedDeCommande, rangeePagination, repondre } from "../lib/ui";
+```
+
+La charte complète (patron d'une commande, palette, règles de nommage, ce qui
+est éphémère) : [`docs/bot-format.md`](../../docs/bot-format.md).
+`bun test src/lib/ui` la couvre.
+
 ## Commandes
 
 ```bash

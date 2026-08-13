@@ -415,14 +415,29 @@ export function choisirEvenements(
 		.toSorted((a, b) => b.debut.getTime() - a.debut.getTime());
 
 	if (periode === "passes") {
-		return { periode: "passes", evenements: passes.slice(0, max), repli: false, total: tous.length };
+		return {
+			periode: "passes",
+			evenements: passes.slice(0, max),
+			repli: false,
+			total: tous.length,
+		};
 	}
 	if (periode === "tous") {
 		const ordonnes = tous.toSorted((a, b) => b.debut.getTime() - a.debut.getTime());
-		return { periode: "tous", evenements: ordonnes.slice(0, max), repli: false, total: tous.length };
+		return {
+			periode: "tous",
+			evenements: ordonnes.slice(0, max),
+			repli: false,
+			total: tous.length,
+		};
 	}
 	if (aVenir.length > 0) {
-		return { periode: "a-venir", evenements: aVenir.slice(0, max), repli: false, total: tous.length };
+		return {
+			periode: "a-venir",
+			evenements: aVenir.slice(0, max),
+			repli: false,
+			total: tous.length,
+		};
 	}
 	return { periode: "passes", evenements: passes.slice(0, max), repli: true, total: tous.length };
 }

@@ -48,6 +48,7 @@ import {
 	messageAnnonce,
 	messagePing,
 	nombreDePages,
+	PREFIXE_BOUTON_TWEETS,
 	texteSansLienMedia,
 	urlTweet,
 	type LigneTweet,
@@ -55,6 +56,7 @@ import {
 } from "../lib/tweets-format";
 import { auteursConnus, categoriesConnues, listerTweets, lireTweet } from "../services/tweets";
 import { resoudreSalon } from "../services/tweetsNotifier";
+import { pied, rangeePagination } from "../lib/ui";
 
 /** Posts par page. 5 lignes tiennent largement dans les 4 096 caractères d'une description. */
 const PAR_PAGE = 5;
@@ -120,7 +122,9 @@ async function rendrePage(etat: EtatListeTweets): Promise<InteractionEditReplyOp
 	const pages = nombreDePages(resultat.total, PAR_PAGE);
 
 	const embed = rgEmbed()
-		.setTitle(`Archive X — ${resultat.total.toLocaleString("fr-FR")} post${resultat.total > 1 ? "s" : ""}`)
+		.setTitle(
+			`Archive X — ${resultat.total.toLocaleString("fr-FR")} post${resultat.total > 1 ? "s" : ""}`
+		)
 		.setURL("https://rosegriffon.fr/iergday");
 	if (criteres.length > 0) {
 		embed.setAuthor({ name: `Filtres : ${truncate(criteres, 200)}` });
@@ -138,34 +142,16 @@ async function rendrePage(etat: EtatListeTweets): Promise<InteractionEditReplyOp
 	}
 	// Le pied est posé dans les deux cas : « page 1/1 » sur une liste vide reste
 	// une information, et son absence donnait deux rendus différents pour rien.
-	embed.setFooter({ text: `Page ${page}/${pages} · rosegriffon.fr` });
+	pied(embed, { page: page, pages: pages });
 
-	const composants: Array<ActionRowBuilder<ButtonBuilder>> = [];
-	const idPrecedent = encoderEtatListe({ ...etat, page: page - 1 });
-	const idSuivant = encoderEtatListe({ ...etat, page: page + 1 });
-	if (pages > 1 && idPrecedent && idSuivant) {
-		composants.push(
-			new ActionRowBuilder<ButtonBuilder>().addComponents(
-				new ButtonBuilder()
-					.setCustomId(idPrecedent)
-					.setLabel("Précédent")
-					.setStyle(ButtonStyle.Secondary)
-					.setDisabled(page <= 1),
-				// Repère de position, jamais cliquable : sur mobile le pied de l'embed
-				// se lit mal, et sans lui on ne sait pas où l'on est dans 2 618 pages.
-				new ButtonBuilder()
-					.setCustomId("x-page-repere")
-					.setLabel(`${page} / ${pages}`)
-					.setStyle(ButtonStyle.Secondary)
-					.setDisabled(true),
-				new ButtonBuilder()
-					.setCustomId(idSuivant)
-					.setLabel("Suivant")
-					.setStyle(ButtonStyle.Secondary)
-					.setDisabled(page >= pages)
-			)
-		);
-	}
+	// Boutons de la trousse : mêmes glyphes, même repère de position et mêmes
+	// sauts de bout de liste que sur `/azalee`, `/cpk`, `/cdn` et `/sondage`.
+	const composants = rangeePagination({
+		prefixe: PREFIXE_BOUTON_TWEETS,
+		page,
+		pages,
+		identifiant: (cible) => encoderEtatListe({ ...etat, page: cible }),
+	});
 	return { embeds: [embed], components: composants };
 }
 
@@ -183,7 +169,10 @@ export const ANNONCEURS_AUTORISES: ReadonlySet<string> = new Set([
 ]);
 
 @Discord()
-@SlashGroup({ name: "x", description: "Archive des posts X récoltés par la veille : parcours et consultation" })
+@SlashGroup({
+	name: "x",
+	description: "Archive des posts X récoltés par la veille : parcours et consultation",
+})
 @SlashGroup("x")
 export class XCommand {
 	@Slash({ name: "liste", description: "Parcourt l'archive des posts X, avec filtres et pages" })
@@ -311,9 +300,13 @@ export class XCommand {
 					await interaction.respond(
 						resultat.lignes.map((tweet) => {
 							const auteur = tweet.author_username ? `@${tweet.author_username}` : "compte inconnu";
-							const extrait = texteSansLienMedia(tweet.translation) || texteSansLienMedia(tweet.text);
+							const extrait =
+								texteSansLienMedia(tweet.translation) || texteSansLienMedia(tweet.text);
 							// 100 caractères est la borne DURE d'un libellé de proposition.
-							return { name: couper(`${auteur} · ${extrait || "(sans texte)"}`, 100), value: tweet.id };
+							return {
+								name: couper(`${auteur} · ${extrait || "(sans texte)"}`, 100),
+								value: tweet.id,
+							};
 						})
 					);
 				} catch (err) {
@@ -366,7 +359,11 @@ export class XCommand {
 			}
 			embed.addFields({ name: "Publié", value: horodatageDiscord(tweet), inline: true });
 			if (tweet.category) {
-				embed.addFields({ name: "Catégorie", value: truncate(tweet.category, 1_024), inline: true });
+				embed.addFields({
+					name: "Catégorie",
+					value: truncate(tweet.category, 1_024),
+					inline: true,
+				});
 			}
 			if (tweet.is_thread) {
 				embed.addFields({
@@ -413,7 +410,10 @@ export class XCommand {
 	 *
 	 * Réservée au staff : elle écrit dans un salon public.
 	 */
-	@Slash({ name: "annoncer", description: "Récolter le dernier post d'un compte et l'annoncer maintenant (réservé)" })
+	@Slash({
+		name: "annoncer",
+		description: "Récolter le dernier post d'un compte et l'annoncer maintenant (réservé)",
+	})
 	async annoncer(
 		@SlashOption({
 			name: "compte",

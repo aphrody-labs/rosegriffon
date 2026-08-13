@@ -143,7 +143,10 @@ export function dureeLisible(ms: number): string {
  */
 export function motifAudit(opts: { auteur: string; motif?: string | null }): string {
 	const motif = opts.motif?.trim();
-	const base = motif && motif.length > 0 ? `${motif} — demandé par ${opts.auteur}` : `Demandé par ${opts.auteur}`;
+	const base =
+		motif && motif.length > 0
+			? `${motif} — demandé par ${opts.auteur}`
+			: `Demandé par ${opts.auteur}`;
 	return base.length > LIMITE_MOTIF_AUDIT ? `${base.slice(0, LIMITE_MOTIF_AUDIT - 1)}…` : base;
 }
 
@@ -862,9 +865,7 @@ export interface DiagnosticAction {
  * plutôt que de deviner laquelle des dix permissions manque, on les rend
  * toutes, avec leur verdict.
  */
-export function diagnostiquerActions(
-	possedees: PermissionsBitField | bigint
-): DiagnosticAction[] {
+export function diagnostiquerActions(possedees: PermissionsBitField | bigint): DiagnosticAction[] {
 	return (Object.keys(PERMISSIONS_PAR_ACTION) as ActionDiscord[]).map((action) => {
 		const manquantes = permissionsManquantes(possedees, action);
 		return {
@@ -1733,7 +1734,9 @@ export function resumerPurge(bilan: BilanPurge): string {
 	if (bilan.plafonne) {
 		phrases.push(`La demande a été ramenée au plafond de ${MAX_SUPPRESSION_MASSE} de l'API.`);
 	}
-	phrases.push(`${bilan.examines} message${bilan.examines > 1 ? "s" : ""} parcouru${bilan.examines > 1 ? "s" : ""}.`);
+	phrases.push(
+		`${bilan.examines} message${bilan.examines > 1 ? "s" : ""} parcouru${bilan.examines > 1 ? "s" : ""}.`
+	);
 	if (bilan.tronque) {
 		phrases.push(
 			`La recherche s'est arrêtée après ${PAGES_MAX_PURGE} pages : il peut rester des messages plus anciens.`

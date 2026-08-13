@@ -47,6 +47,14 @@ import {
 	type CpkPreviewKind,
 } from "@rosegriffon/azalee/cpk/shared";
 
+import { entierLisible as entierLisibleUi, formaterOctets } from "./ui/nombres";
+import {
+	MAX_CUSTOM_ID as MAX_CUSTOM_ID_UI,
+	decoderEtat,
+	encoderEtat,
+	nombreDePages as nombreDePagesUi,
+} from "./ui/etat";
+
 export type { CpkDir, CpkFile, CpkPreviewKind };
 
 // ─── Constantes de cadrage ──────────────────────────────────────────────────
@@ -92,7 +100,7 @@ export const OCTETS_APERCU_CONFIG = 256 * 1024;
 export const CARACTERES_EXTRAIT = 900;
 
 /** Longueur maximale d'un `customId` Discord. */
-export const MAX_CUSTOM_ID = 100;
+export const MAX_CUSTOM_ID = MAX_CUSTOM_ID_UI;
 
 /**
  * Longueur maximale d'une valeur d'autocomplétion Discord.
@@ -167,8 +175,7 @@ export function filAriane(chemin: string): EtapeAriane[] {
 	let cumul = "";
 	for (const [index, segment] of segments.entries()) {
 		cumul = cumul === "" ? segment : `${cumul}/${segment}`;
-		const libelle =
-			index === 0 ? segment : index === 1 ? topLabel(segment) : segLabel(segment);
+		const libelle = index === 0 ? segment : index === 1 ? topLabel(segment) : segLabel(segment);
 		etapes.push({ libelle, chemin: cumul });
 	}
 	return etapes;
@@ -201,10 +208,7 @@ export function cheminWiki(chemin: string): string {
 
 /** Nombre de pages nécessaires pour `total` entrées. */
 export function nombreDePages(total: number, parPage: number): number {
-	if (parPage <= 0) {
-		return 1;
-	}
-	return Math.max(1, Math.ceil(Math.max(0, total) / parPage));
+	return nombreDePagesUi(total, parPage);
 }
 
 /**
@@ -287,11 +291,6 @@ export interface EtatRecherche {
 	offset: number;
 }
 
-/** `|` sépare les champs : on le retire des valeurs plutôt que de l'échapper. */
-function sansSeparateur(valeur: string): string {
-	return valeur.replaceAll("|", " ").trim();
-}
-
 /**
  * Encode l'état d'un parcours dans un `customId`.
  *
@@ -300,45 +299,35 @@ function sansSeparateur(valeur: string): string {
  * reste néanmoins possible : le membre peut taper un chemin plus long.
  */
 export function encoderParcours(etat: EtatParcours): string | null {
-	const identifiant = [
-		PREFIXE_BOUTON_PARCOURS,
-		String(Math.max(0, Math.trunc(etat.offset))),
-		sansSeparateur(etat.chemin),
-	].join("|");
-	return identifiant.length <= MAX_CUSTOM_ID ? identifiant : null;
+	return encoderEtat(PREFIXE_BOUTON_PARCOURS, [Math.max(0, Math.trunc(etat.offset)), etat.chemin]);
 }
 
 /** Décode un `customId` produit par `encoderParcours`. `null` si ce n'en est pas un. */
 export function decoderParcours(customId: string): EtatParcours | null {
-	const morceaux = customId.split("|");
-	if (morceaux.length !== 3 || morceaux[0] !== PREFIXE_BOUTON_PARCOURS) {
+	const champs = decoderEtat(PREFIXE_BOUTON_PARCOURS, customId, 2);
+	if (!champs) {
 		return null;
 	}
-	const offset = Number.parseInt(morceaux[1] ?? "", 10);
+	const offset = Number.parseInt(champs[0] ?? "", 10);
 	if (!Number.isFinite(offset) || offset < 0) {
 		return null;
 	}
-	return { offset, chemin: morceaux[2] ?? "" };
+	return { offset, chemin: champs[1] ?? "" };
 }
 
 /** Encode l'état d'une recherche dans un `customId` (`null` si le motif est trop long). */
 export function encoderRecherche(etat: EtatRecherche): string | null {
-	const identifiant = [
-		PREFIXE_BOUTON_RECHERCHE,
-		String(Math.max(0, Math.trunc(etat.offset))),
-		sansSeparateur(etat.motif),
-	].join("|");
-	return identifiant.length <= MAX_CUSTOM_ID ? identifiant : null;
+	return encoderEtat(PREFIXE_BOUTON_RECHERCHE, [Math.max(0, Math.trunc(etat.offset)), etat.motif]);
 }
 
 /** Décode un `customId` produit par `encoderRecherche`. */
 export function decoderRecherche(customId: string): EtatRecherche | null {
-	const morceaux = customId.split("|");
-	if (morceaux.length !== 3 || morceaux[0] !== PREFIXE_BOUTON_RECHERCHE) {
+	const champs = decoderEtat(PREFIXE_BOUTON_RECHERCHE, customId, 2);
+	if (!champs) {
 		return null;
 	}
-	const offset = Number.parseInt(morceaux[1] ?? "", 10);
-	const motif = morceaux[2] ?? "";
+	const offset = Number.parseInt(champs[0] ?? "", 10);
+	const motif = champs[1] ?? "";
 	if (!Number.isFinite(offset) || offset < 0 || motif.length < MOTIF_MINIMUM) {
 		return null;
 	}
@@ -396,40 +385,12 @@ export function correspondPrefixe(nom: string, filtre: string): boolean {
  * rendent toute assertion de test fragile ; on formate donc à la main.
  */
 export function entierLisible(valeur: number): string {
-	if (!Number.isFinite(valeur)) {
-		return "—";
-	}
-	const signe = valeur < 0 ? "-" : "";
-	const chiffres = String(Math.abs(Math.trunc(valeur)));
-	let rendu = "";
-	for (let i = 0; i < chiffres.length; i++) {
-		if (i > 0 && (chiffres.length - i) % 3 === 0) {
-			rendu += " ";
-		}
-		rendu += chiffres[i];
-	}
-	return signe + rendu;
+	return entierLisibleUi(valeur);
 }
 
 /** Taille en octets rendue lisible (`12 Mo`, `171 Ko`, `7,3 Ko`). */
 export function octetsLisibles(octets: number | null | undefined): string {
-	if (typeof octets !== "number" || !Number.isFinite(octets) || octets < 0) {
-		return "taille inconnue";
-	}
-	const unites = ["o", "Ko", "Mo", "Go"];
-	let valeur = octets;
-	let rang = 0;
-	while (valeur >= 1024 && rang < unites.length - 1) {
-		valeur /= 1024;
-		rang += 1;
-	}
-	const rendu =
-		rang === 0
-			? String(Math.round(valeur))
-			: valeur < 10
-				? valeur.toFixed(1).replace(".", ",")
-				: valeur.toFixed(0);
-	return `${rendu} ${unites[rang]}`;
+	return formaterOctets(octets, "taille inconnue");
 }
 
 /** Vrai si un contenu de cette taille peut partir en pièce jointe Discord. */

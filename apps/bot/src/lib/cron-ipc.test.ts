@@ -43,11 +43,13 @@ interface DependancesIpcTest {
 	lancerTache(nom: string): Promise<{ success: boolean; error?: string }> | null;
 }
 
-const cheminIpcUnix = new URL("../../../../packages/cron/src/lib/ipc-unix.ts", import.meta.url).href;
+const cheminIpcUnix = new URL("../../../../packages/cron/src/lib/ipc-unix.ts", import.meta.url)
+	.href;
 const { demarrerIpcUnix } = (await import(cheminIpcUnix)) as {
 	demarrerIpcUnix: (deps: DependancesIpcTest) => PontIpcTest;
 };
-const { abonnerCron, appelerCron, cronDisponible, cheminSocketCron } = await import("./cron-ipc.ts");
+const { abonnerCron, appelerCron, cronDisponible, cheminSocketCron } =
+	await import("./cron-ipc.ts");
 
 /** Tâche factice : se termine quand le test le décide. */
 let terminerTache: ((resultat: { success: boolean; error?: string }) => void) | null = null;
@@ -57,7 +59,9 @@ const pont = demarrerIpcUnix({
 	metriques: () => ({
 		startedAt: "2026-08-12T17:00:00.000Z",
 		tasksTriggered: 3,
-		lastExecution: { "discord:messages": { time: "2026-08-12T22:00:00.000Z", durationMs: 3030, success: true } },
+		lastExecution: {
+			"discord:messages": { time: "2026-08-12T22:00:00.000Z", durationMs: 3030, success: true },
+		},
 	}),
 	telemetrie: () => ({ membres: 1984 }),
 	catalogue: () => ({ taches: ["warm", "db"], schedules: { warm: "*/30 * * * *" } }),
@@ -89,7 +93,11 @@ describe("verbes de lecture", () => {
 	});
 
 	test("tasks.list rend le catalogue du démon", async () => {
-		const reponse = await appelerCron<{ success: boolean; taches: string[]; schedules: Record<string, string> }>({
+		const reponse = await appelerCron<{
+			success: boolean;
+			taches: string[];
+			schedules: Record<string, string>;
+		}>({
 			cmd: "tasks.list",
 		});
 		expect(reponse.taches).toEqual(["warm", "db"]);

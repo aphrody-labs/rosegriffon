@@ -23,6 +23,7 @@ import { getAdminStats } from "../../services/admin";
 import { formaterNombre, horodatageRelatif } from "./format";
 import { differerEnPrive, exigerDroits, messagePanne } from "./garde";
 import "./racine";
+import { echec, piedTexte, repondre } from "../../lib/ui";
 
 /** Compteurs du serveur Discord, tels que le cron les a synchronisés. */
 interface StatsDiscord {
@@ -77,7 +78,11 @@ async function statsDiscord(): Promise<StatsDiscord> {
 }
 
 @Discord()
-@SlashGroup({ name: "stats", description: "Compteurs du site et du serveur Discord", root: "staff" })
+@SlashGroup({
+	name: "stats",
+	description: "Compteurs du site et du serveur Discord",
+	root: "staff",
+})
 @SlashGroup("stats", "staff")
 export class StaffStatsCommand {
 	@Slash({ name: "site", description: "Profils, articles, événements et équipe de rosegriffon.fr" })
@@ -120,12 +125,14 @@ export class StaffStatsCommand {
 						inline: true,
 					}
 				)
-				.setFooter({
-					text: "Compteurs mis en cache 30 s · aucune donnée personnelle affichée",
-				});
+				.setFooter(
+					piedTexte({
+						note: "Compteurs mis en cache 30 s · aucune donnée personnelle affichée",
+					})
+				);
 			await interaction.editReply({ embeds: [embed] });
 		} catch (err) {
-			await interaction.editReply({ content: `❌ ${messagePanne(err)}` });
+			await repondre(interaction, echec("Le service n'a pas répondu", messagePanne(err)));
 		}
 	}
 
@@ -181,12 +188,14 @@ export class StaffStatsCommand {
 						inline: true,
 					}
 				)
-				.setFooter({
-					text: "Décomptes agrégés uniquement — le rattachement d'un membre à son vote n'est jamais lu",
-				});
+				.setFooter(
+					piedTexte({
+						note: "Décomptes agrégés uniquement — le rattachement d'un membre à son vote n'est jamais lu",
+					})
+				);
 			await interaction.editReply({ embeds: [embed] });
 		} catch (err) {
-			await interaction.editReply({ content: `❌ ${messagePanne(err)}` });
+			await repondre(interaction, echec("Le service n'a pas répondu", messagePanne(err)));
 		}
 	}
 }

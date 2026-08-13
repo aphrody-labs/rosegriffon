@@ -21,6 +21,14 @@
 
 import type { SondeService } from "../../lib/services";
 
+import {
+	formaterDuree as formaterDureeUi,
+	formaterLatence as formaterLatenceUi,
+	formaterNombre as formaterNombreUi,
+	formaterOctets as formaterOctetsUi,
+} from "../../lib/ui/nombres";
+import { borner as bornerUi, decouper, echapper, ilYA, leJour } from "../../lib/ui/texte";
+
 /** Vert quand ça répond, rouge sinon. Le texte reste lisible sans la couleur. */
 export function pastilleEtat(ok: boolean): string {
 	return ok ? "🟢" : "🔴";
@@ -31,49 +39,22 @@ export function pastilleEtat(ok: boolean): string {
  * rien d'utile : on passe aux secondes avec une décimale.
  */
 export function formaterLatence(ms: number): string {
-	if (!Number.isFinite(ms) || ms < 0) {
-		return "—";
-	}
-	return ms < 1_000 ? `${Math.round(ms)} ms` : `${(ms / 1_000).toFixed(1).replace(".", ",")} s`;
+	return formaterLatenceUi(ms);
 }
 
 /** Durée lisible pour une exécution de tâche (jusqu'aux minutes). */
 export function formaterDuree(ms: number | null | undefined): string {
-	if (typeof ms !== "number" || !Number.isFinite(ms) || ms < 0) {
-		return "—";
-	}
-	if (ms < 1_000) {
-		return `${Math.round(ms)} ms`;
-	}
-	if (ms < 60_000) {
-		return `${(ms / 1_000).toFixed(1).replace(".", ",")} s`;
-	}
-	const minutes = Math.floor(ms / 60_000);
-	const secondes = Math.round((ms % 60_000) / 1_000);
-	return `${minutes} min ${secondes} s`;
+	return formaterDureeUi(ms);
 }
 
 /** Entier en français (espace insécable fine entre les milliers). */
 export function formaterNombre(valeur: number | null | undefined): string {
-	return typeof valeur === "number" && Number.isFinite(valeur)
-		? valeur.toLocaleString("fr-FR")
-		: "—";
+	return formaterNombreUi(valeur);
 }
 
 /** Poids en unités binaires françaises (Ko = 1024 octets, usage informatique). */
 export function formaterOctets(octets: number | null | undefined): string {
-	if (typeof octets !== "number" || !Number.isFinite(octets) || octets < 0) {
-		return "—";
-	}
-	const unites = ["o", "Ko", "Mo", "Go"];
-	let valeur = octets;
-	let rang = 0;
-	while (valeur >= 1024 && rang < unites.length - 1) {
-		valeur /= 1024;
-		rang += 1;
-	}
-	const arrondi = rang === 0 ? String(Math.round(valeur)) : valeur.toFixed(1).replace(".", ",");
-	return `${arrondi} ${unites[rang]}`;
+	return formaterOctetsUi(octets);
 }
 
 /**
@@ -83,26 +64,12 @@ export function formaterOctets(octets: number | null | undefined): string {
  * quelqu'un relit le message : un embed reste affiché des heures.
  */
 export function horodatageRelatif(valeur: string | Date | null | undefined): string {
-	if (!valeur) {
-		return "—";
-	}
-	const instant = valeur instanceof Date ? valeur : new Date(valeur);
-	if (Number.isNaN(instant.getTime())) {
-		return "—";
-	}
-	return `<t:${Math.floor(instant.getTime() / 1_000)}:R>`;
+	return ilYA(valeur);
 }
 
 /** Horodatage absolu natif de Discord (fuseau du lecteur). */
 export function horodatageAbsolu(valeur: string | Date | null | undefined): string {
-	if (!valeur) {
-		return "—";
-	}
-	const instant = valeur instanceof Date ? valeur : new Date(valeur);
-	if (Number.isNaN(instant.getTime())) {
-		return "—";
-	}
-	return `<t:${Math.floor(instant.getTime() / 1_000)}:f>`;
+	return leJour(valeur, "f");
 }
 
 export interface VersionDeployee {
@@ -143,9 +110,7 @@ export function analyserRelease(identifiant: string | null | undefined): Version
 /** Une ligne d'état de service, prête à empiler dans une description d'embed. */
 export function ligneSonde(sonde: SondeService): string {
 	const tete = `${pastilleEtat(sonde.ok)} \`${sonde.service.nom}\` — ${sonde.service.titre}`;
-	const mesure = sonde.ok
-		? formaterLatence(sonde.latenceMs)
-		: (sonde.erreur ?? "injoignable");
+	const mesure = sonde.ok ? formaterLatence(sonde.latenceMs) : (sonde.erreur ?? "injoignable");
 	const unite = sonde.service.unite ? ` · \`${sonde.service.unite}\`` : "";
 	const detail = sonde.ok && sonde.detail ? `\n   └ ${sonde.detail}` : "";
 	return `${tete} · ${mesure}${unite}${detail}`;
@@ -159,28 +124,7 @@ export function ligneSonde(sonde: SondeService): string {
  * embed refusé par l'API.
  */
 export function decouperEnChamps(texte: string, limite = 1_024, maxChamps = 5): string[] {
-	const lignes = texte.split("\n");
-	const champs: string[] = [];
-	let courant = "";
-	for (const ligne of lignes) {
-		// Une ligne seule plus longue que la limite ne peut pas être placée
-		// telle quelle : on la tronque, sinon le champ entier serait refusé.
-		const morceau = ligne.length > limite ? `${ligne.slice(0, limite - 1)}…` : ligne;
-		const candidat = courant.length === 0 ? morceau : `${courant}\n${morceau}`;
-		if (candidat.length > limite) {
-			champs.push(courant);
-			courant = morceau;
-			if (champs.length >= maxChamps) {
-				return champs.slice(0, maxChamps);
-			}
-		} else {
-			courant = candidat;
-		}
-	}
-	if (courant.length > 0) {
-		champs.push(courant);
-	}
-	return champs.slice(0, maxChamps);
+	return decouper(texte, limite, maxChamps);
 }
 
 /**
@@ -204,10 +148,7 @@ export function blocJson(valeur: unknown, limite = 1_400): string {
 
 /** Coupe un texte sans jamais dépasser la limite, ellipse comprise. */
 export function borner(texte: string | null | undefined, limite: number): string {
-	if (!texte) {
-		return "";
-	}
-	return texte.length > limite ? `${texte.slice(0, Math.max(0, limite - 1)).trimEnd()}…` : texte;
+	return bornerUi(texte, limite);
 }
 
 /**
@@ -217,10 +158,7 @@ export function borner(texte: string | null | undefined, limite: number): string
  * l'embed, et un `](` bien placé fabrique un lien vers n'importe où.
  */
 export function echapperMarkdown(texte: string | null | undefined): string {
-	if (!texte) {
-		return "";
-	}
-	return texte.replace(/([\\*_~`|[\]()>#-])/g, "\\$1");
+	return echapper(texte);
 }
 
 export interface ResultatRechercheWeb {
@@ -282,11 +220,11 @@ export interface PostXAffichable {
 
 /** Une ligne de post X : auteur, date relative, texte borné, portée. */
 export function lignePostX(post: PostXAffichable): string {
-	const auteur = typeof post.auteur === "string" && post.auteur ? `@${post.auteur}` : "compte inconnu";
+	const auteur =
+		typeof post.auteur === "string" && post.auteur ? `@${post.auteur}` : "compte inconnu";
 	const url = typeof post.url === "string" ? post.url : "";
 	const entete = url ? `[${auteur}](${url})` : auteur;
-	const quand =
-		typeof post.date === "string" ? ` · ${horodatageRelatif(post.date)}` : "";
+	const quand = typeof post.date === "string" ? ` · ${horodatageRelatif(post.date)}` : "";
 	const texte = borner(echapperMarkdown(typeof post.texte === "string" ? post.texte : ""), 300);
 	const portee = formaterPortee(post);
 	return `**${entete}**${quand}\n${texte || "*(sans texte)*"}\n${portee}`;

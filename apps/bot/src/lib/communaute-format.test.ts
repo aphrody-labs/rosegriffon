@@ -243,11 +243,7 @@ describe("planning des streams", () => {
 			category: null,
 			notes: null,
 		}));
-		expect(grouperParJour(lignes).map((s) => s.libelle)).toEqual([
-			"Lundi",
-			"Samedi",
-			"Dimanche",
-		]);
+		expect(grouperParJour(lignes).map((s) => s.libelle)).toEqual(["Lundi", "Samedi", "Dimanche"]);
 	});
 
 	test("les deux streams du samedi réel sont triés par heure", () => {
@@ -338,7 +334,9 @@ describe("événements de l'agenda", () => {
 
 	test("une entrée sans début est écartée, pas rendue vide", () => {
 		expect(normaliserEvenement({ summary: "Sans date" })).toBeNull();
-		expect(normaliserEvenement({ summary: "Bancale", start: { date: "n'importe quoi" } })).toBeNull();
+		expect(
+			normaliserEvenement({ summary: "Bancale", start: { date: "n'importe quoi" } })
+		).toBeNull();
 	});
 
 	test("un titre absent reçoit un libellé, jamais « undefined »", () => {

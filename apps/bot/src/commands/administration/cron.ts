@@ -39,6 +39,7 @@ import { borner, horodatageRelatif } from "../staff/format";
 import { differerEnPrive, exigerDroits, messagePanne } from "../staff/garde";
 import { urlIllustrationAbsolue } from "./valeurs";
 import "./racine";
+import { echec, refus as accesRefuse, repondre } from "../../lib/ui";
 
 /** Une ligne de `public.articles`, réduite à ce qu'une annonce affiche. */
 interface ArticleAnnoncable {
@@ -153,7 +154,7 @@ export class AdministrationCronCommand {
 		const nom = resoudreTache(tache);
 		const niveau = niveauTache(tache);
 		if (!nom || niveau === "interdit") {
-			await interaction.editReply({ content: `🚫 ${raisonRefus(tache)}` });
+			await repondre(interaction, accesRefuse(raisonRefus(tache)));
 			return;
 		}
 
@@ -187,9 +188,10 @@ export class AdministrationCronCommand {
 				profileId: admin.profileId,
 			});
 			if (!reponse.success) {
-				await interaction.editReply({
-					content: `❌ ${borner(reponse.error ?? "Refusé par le démon.", 1_500)}`,
-				});
+				await repondre(
+					interaction,
+					echec("La commande a échoué", borner(reponse.error ?? "Refusé par le démon.", 1_500))
+				);
 				return;
 			}
 			await interaction.editReply({
@@ -198,7 +200,7 @@ export class AdministrationCronCommand {
 					`fond : le verdict n'arrive qu'à la fin, et se relit avec \`/staff cron statut ${nom}\`.`,
 			});
 		} catch (err) {
-			await interaction.editReply({ content: `❌ ${messagePanne(err)}` });
+			await repondre(interaction, echec("Le service n'a pas répondu", messagePanne(err)));
 		}
 	}
 
@@ -317,9 +319,13 @@ export class AdministrationCronCommand {
 			// d'environnement définie ne dit rien de ses droits sur le salon.
 			const { salon: destination, raison } = await resoudreSalon(interaction.client, salonId);
 			if (!destination) {
-				await interaction.editReply({
-					content: `❌ Rien n'a été publié. ${borner(raison ?? "Salon injoignable.", 1_500)}`,
-				});
+				await repondre(
+					interaction,
+					echec(
+						"Rien n'a été fait",
+						`Rien n'a été publié. ${borner(raison ?? "Salon injoignable.", 1_500)}`
+					)
+				);
 				return;
 			}
 
@@ -361,7 +367,7 @@ export class AdministrationCronCommand {
 				content: `✓ Annonce publiée dans <#${salonId}> — ${message.url}`,
 			});
 		} catch (err) {
-			await interaction.editReply({ content: `❌ ${messagePanne(err)}` });
+			await repondre(interaction, echec("Le service n'a pas répondu", messagePanne(err)));
 		}
 	}
 }

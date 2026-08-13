@@ -34,6 +34,11 @@
  */
 import { corrigerNomDouble } from "./azalee";
 import {
+	formaterNombre as formaterNombreUi,
+	formaterPourcentage as formaterPourcentageUi,
+} from "./ui/nombres";
+import { joindre } from "./ui/texte";
+import {
 	normaliserLibelle,
 	resoudreCategorieTechnique,
 	resoudreElement,
@@ -105,27 +110,21 @@ export function nettoyerRubis(texte: string | null | undefined): string {
 	return texte.replaceAll(/\[([^\][/]+)\/[^\][]*\]/g, "$1");
 }
 
-/** Assemble `a · b · c` en ignorant les morceaux absents ou vides. */
-export function joindre(morceaux: Array<string | null | undefined>, separateur = " · "): string {
-	return morceaux
-		.filter((m): m is string => typeof m === "string" && m.trim().length > 0)
-		.join(separateur);
-}
+/**
+ * Assemble `a · b · c` en ignorant les morceaux absents ou vides.
+ *
+ * @deprecated Réexport de `joindre` (`lib/ui`), gardé pour les appels existants.
+ */
+export { joindre };
 
 /** Nombre au format français, sans décimale superflue. */
 export function formaterNombre(valeur: number | null | undefined): string {
-	if (typeof valeur !== "number" || !Number.isFinite(valeur)) {
-		return "—";
-	}
-	return valeur.toLocaleString("fr-FR", { maximumFractionDigits: 2 });
+	return formaterNombreUi(valeur, { decimales: 2 });
 }
 
 /** Pourcentage au format français (`0.4972…` → `0,5 %` pour 3 chiffres significatifs). */
 export function formaterPourcentage(valeur: number | null | undefined, decimales = 2): string {
-	if (typeof valeur !== "number" || !Number.isFinite(valeur)) {
-		return "—";
-	}
-	return `${valeur.toLocaleString("fr-FR", { maximumFractionDigits: decimales })} %`;
+	return formaterPourcentageUi(valeur, { decimales });
 }
 
 /** Libellés français des sept statistiques, dans l'ordre d'affichage du wiki. */
