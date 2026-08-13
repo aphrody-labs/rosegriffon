@@ -5,12 +5,14 @@
  */
 
 import {
+	BarChart3,
 	Building,
 	Handshake,
 	Heart,
 	Mail,
 	MapPin,
 	Newspaper,
+	Palette,
 	PencilLine,
 	ScrollText,
 	Sparkles,
@@ -170,6 +172,27 @@ export const assoMenu: MenuSection = {
 			icon: MapPin,
 			description: "Nos événements à venir",
 			ariaLabel: "Voir nos événements",
+		},
+		/*
+		 * Ces deux pages EXISTAIENT et répondaient 200 sans être atteignables :
+		 * elles ne figuraient que dans `sitemap.ts`, donc seuls un moteur de
+		 * recherche ou quelqu'un qui connaissait l'URL par cœur y arrivaient.
+		 * Ce fichier est la SEULE source du menu principal — le rail et la barre
+		 * mobile n'en montrent que les quatre premières entrées.
+		 */
+		{
+			title: "Campagnes",
+			url: "/iergday",
+			icon: Palette,
+			description: "Les créations de la communauté",
+			ariaLabel: "Voir les campagnes de créations",
+		},
+		{
+			title: "Sondages",
+			url: "/sondages",
+			icon: BarChart3,
+			description: "Les votes du serveur Discord",
+			ariaLabel: "Consulter les sondages",
 		},
 	],
 	label: "L'association",
