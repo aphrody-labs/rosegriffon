@@ -34,6 +34,16 @@ import { createSupabaseServiceClient } from "@rosegriffon/db/service";
 import { resolveProfile, isAdmin } from "@rosegriffon/auth";
 import { getOpenApiDocument, getSwaggerHtml } from "./lib/openapi";
 import { demarrerPontBot } from "./lib/bot-signal";
+import { registreExecutions, type OrigineExecution } from "./lib/executions";
+import {
+	echecsPersistanceHistorique,
+	enregistrerExecutionEnBase,
+	historiqueRecent,
+	motifVeillePersistance,
+	persistanceEnVeille,
+} from "./lib/executions-postgres";
+import { signalerDecisionAlerte } from "./lib/alertes-cron";
+import { rendreMetriquesPrometheus } from "./lib/prometheus";
 
 // ─── LOGGER GLOBALE INTERCEPTION ET STREAMING WEBSOCKET ──────────────────────
 const wsConnections = new Set<ServerWebSocket<any>>();
@@ -96,22 +106,50 @@ console.log("🚀 Initialisation du Daemon Cron Rose Griffon (Mode Autonome)");
 console.log(`⏰ Heure actuelle : ${new Date().toISOString()}`);
 console.log("==================================================================");
 
+// ─── DIALOGUE CLI MANUEL — ARGUMENTS ─────────────────────────────────────────
+// Lus AVANT la passerelle Discord : la connexion charge ~2000 membres et leurs
+// présences, ce qui coûte plusieurs secondes et une bonne part du `MemoryMax=1G`
+// de l'unité. Une exécution manuelle de `seo:indexnow` ou de `db` n'en a aucun
+// besoin ; seules les tâches ci-dessous lisent réellement `getDiscordClient()`
+// (`tasks/discord.ts` et `tasks/ie-crawl/discord.ts` sont les deux seuls
+// appelants du dépôt). En mode démon, la passerelle est toujours montée.
+const args = process.argv.slice(2);
+const indexRun = args.indexOf("--run");
+const tacheCli = indexRun >= 0 ? args[indexRun + 1] : undefined;
+
+/** Une tâche a-t-elle besoin de la passerelle Discord connectée ? */
+function exigeLaPasserelleDiscord(tache: string | undefined): boolean {
+	if (!tache) return true; // mode démon : tout est planifié, la passerelle est requise.
+	return tache.startsWith("discord") || tache === "crawl" || tache === "all";
+}
+
 // Initialisation du client Discord
-const clientDiscord = await initDiscord();
+const clientDiscord = exigeLaPasserelleDiscord(tacheCli) ? await initDiscord() : null;
+if (!clientDiscord && tacheCli) {
+	console.log(`[Cron Runner] Passerelle Discord non requise pour « ${tacheCli} » : démarrage direct.`);
+}
 
 // Veille des salons Discord suivis : les événements de la passerelle écrivent
 // immédiatement en base, le trigger Postgres `rg_realtime_notify()` diffuse
 // ensuite vers `rg-realtime` (SSE) et donc vers le site.
-if (clientDiscord) {
+if (clientDiscord && !tacheCli) {
 	brancherVeilleMessagesTempsReel(clientDiscord);
 }
 
 // ─── METRICS & STATS D'EXÉCUTION ─────────────────────────────────────────────
+// Cet objet reste la surface historique (`GET /metrics.json`, verbe IPC
+// `metrics`, `task.status` du pont bot lisent `lastExecution`). Il n'est PAS
+// remplacé : il est doublé par `registreExecutions` (compteurs par tâche,
+// échecs consécutifs) et par l'historique persisté en base.
 const metrics = {
 	startedAt: new Date().toISOString(),
 	tasksTriggered: 0,
 	tasksSucceeded: 0,
 	tasksFailed: 0,
+	/** Lancements refusés parce que la même tâche tournait déjà. */
+	tasksSkipped: 0,
+	/** Exécutions abandonnées sur dépassement du délai maximal. */
+	tasksTimedOut: 0,
 	lastExecution: {} as Record<
 		string,
 		{ time: string; durationMs: number; success: boolean; error?: string }
@@ -119,17 +157,100 @@ const metrics = {
 };
 
 /**
- * Enveloppe l'exécution d'une tâche pour l'enregistrer dans les métriques et logger les durées.
+ * Délai maximal par défaut d'une tâche, en millisecondes.
+ *
+ * AUCUNE tâche n'en avait : un `fetch` sans `signal` ou un `ssh` bloqué
+ * suspendait `executeTask` indéfiniment. Les conséquences sont mesurables — le
+ * verrou du pont IPC (`lib/ipc-unix.ts`) n'est relâché qu'au retour de
+ * `executeTask`, donc une tâche pendue interdisait DÉFINITIVEMENT tout nouveau
+ * lancement de ce nom depuis Discord, et son échec restait invisible.
+ *
+ * HONNÊTETÉ SUR LA PORTÉE : le délai libère le SUIVI (métriques, historique,
+ * alerte, verrou), il n'interrompt pas la promesse sous-jacente — JavaScript ne
+ * le permet pas. Les annulations réelles sont posées au plus près des I/O :
+ * `AbortSignal.timeout` sur les `fetch` des tâches et `kill()` sur le `ssh` de
+ * `stats:achillea`.
+ */
+const DELAI_TACHE_DEFAUT_MS = 30 * 60_000;
+
+/**
+ * Délais spécifiques, calés sur la durée réellement observée de ces tâches :
+ * elles parcourent un dump complet, une base entière ou tout un historique
+ * Discord, et 30 minutes les couperaient en plein travail légitime.
+ */
+const DELAIS_TACHES_MS: Record<string, number> = {
+	crawl: 4 * 3600_000,
+	rag: 2 * 3600_000,
+	"rag:wiki": 2 * 3600_000,
+	"db:sync": 2 * 3600_000,
+	"db:sqlite-backup": 2 * 3600_000,
+	"db:postgres-backup": 2 * 3600_000,
+	"discord:backfill": 4 * 3600_000,
+	"discord:scan": 3600_000,
+	cdn: 3600_000,
+	"x:campagnes": 3600_000,
+	"campagnes:discord": 3600_000,
+	"seo:llms-txt": 3600_000,
+	"x-search": 3600_000,
+};
+
+function delaiMaximalTache(nom: string): number {
+	const surcharge = Number.parseInt(Bun.env.CRON_DELAI_TACHE_MS ?? "", 10);
+	if (Number.isFinite(surcharge) && surcharge > 0) return surcharge;
+	return DELAIS_TACHES_MS[nom] ?? DELAI_TACHE_DEFAUT_MS;
+}
+
+/** Levée quand une tâche dépasse son délai maximal. */
+class ErreurDelaiDepasse extends Error {
+	constructor(nom: string, delaiMs: number) {
+		super(`Délai maximal dépassé (${Math.round(delaiMs / 1000)} s) pour la tâche « ${nom} ».`);
+		this.name = "ErreurDelaiDepasse";
+	}
+}
+
+/**
+ * Exécutions en vol, nom de tâche → instant de départ.
+ *
+ * `lib/ipc-unix.ts` documentait déjà le trou : son verrou ne couvrait que les
+ * lancements venus du pont, si bien que deux `POST /tasks/db/run` — ou un cron
+ * qui repasse avant la fin du précédent (`discord:messages` toutes les 5 min) —
+ * lançaient deux exécutions concurrentes sur les mêmes tables. Le verrou est
+ * désormais posé ici, sur le seul point de passage commun.
+ */
+const tachesEnVol = new Map<string, number>();
+
+/**
+ * Enveloppe l'exécution d'une tâche : verrou d'unicité, délai maximal,
+ * métriques, historique persisté et alerte sur échec répété.
  */
 async function executeTask(
 	name: string,
-	fn: () => Promise<any>
+	fn: () => Promise<any>,
+	origine: OrigineExecution = "planifie"
 ): Promise<{ success: boolean; error?: string }> {
+	const depuis = tachesEnVol.get(name);
+	if (depuis !== undefined) {
+		const secondes = Math.round((Date.now() - depuis) / 1000);
+		metrics.tasksSkipped++;
+		registreExecutions.noterIgnoree(name);
+		const message = `La tâche « ${name} » tourne déjà (depuis ${secondes} s) : lancement ignoré.`;
+		console.warn(`[Cron Runner] ${message}`);
+		return { success: false, error: message };
+	}
+
 	console.log(`[Cron Runner] Début de la tâche : ${name}`);
 	metrics.tasksTriggered++;
 	const start = Date.now();
+	tachesEnVol.set(name, start);
+
+	let minuteur: ReturnType<typeof setTimeout> | undefined;
+	const delaiMs = delaiMaximalTache(name);
+
 	try {
-		const res = await fn();
+		const expiration = new Promise<never>((_, rejeter) => {
+			minuteur = setTimeout(() => rejeter(new ErreurDelaiDepasse(name, delaiMs)), delaiMs);
+		});
+		const res = await Promise.race([fn(), expiration]);
 		const duration = Date.now() - start;
 		const isSuccess = res && typeof res === "object" && "success" in res ? res.success : true;
 		const errorMsg = res && typeof res === "object" && "error" in res ? res.error : undefined;
@@ -142,22 +263,33 @@ async function executeTask(
 				success: true,
 			};
 			console.log(`[Cron Runner] Tâche complétée avec succès : ${name} en ${duration}ms`);
+			consignerExecution({ nom: name, debutLe: start, dureeMs: duration, succes: true, origine });
 			return { success: true };
-		} else {
-			metrics.tasksFailed++;
-			metrics.lastExecution[name] = {
-				time: new Date().toISOString(),
-				durationMs: duration,
-				success: false,
-				error: errorMsg,
-			};
-			console.error(`[Cron Runner] Échec de la tâche : ${name} en ${duration}ms : ${errorMsg}`);
-			return { success: false, error: errorMsg };
 		}
+
+		metrics.tasksFailed++;
+		metrics.lastExecution[name] = {
+			time: new Date().toISOString(),
+			durationMs: duration,
+			success: false,
+			error: errorMsg,
+		};
+		console.error(`[Cron Runner] Échec de la tâche : ${name} en ${duration}ms : ${errorMsg}`);
+		consignerExecution({
+			nom: name,
+			debutLe: start,
+			dureeMs: duration,
+			succes: false,
+			erreur: typeof errorMsg === "string" ? errorMsg : errorMsg ? String(errorMsg) : undefined,
+			origine,
+		});
+		return { success: false, error: errorMsg };
 	} catch (err: any) {
 		const duration = Date.now() - start;
-		const errorMsg = err.message || String(err);
+		const errorMsg = err?.message || String(err);
+		const expiree = err instanceof ErreurDelaiDepasse;
 		metrics.tasksFailed++;
+		if (expiree) metrics.tasksTimedOut++;
 		metrics.lastExecution[name] = {
 			time: new Date().toISOString(),
 			durationMs: duration,
@@ -168,15 +300,53 @@ async function executeTask(
 			`[Cron Runner] Erreur critique lors de la tâche : ${name} en ${duration}ms :`,
 			err
 		);
+		consignerExecution({
+			nom: name,
+			debutLe: start,
+			dureeMs: duration,
+			succes: false,
+			erreur: errorMsg,
+			origine,
+			expiree,
+		});
 		return { success: false, error: errorMsg };
+	} finally {
+		clearTimeout(minuteur);
+		tachesEnVol.delete(name);
+	}
+}
+
+/**
+ * Consigne une exécution terminée : registre en mémoire, historique en base,
+ * alerte Discord si la série d'échecs franchit le seuil.
+ *
+ * Volontairement NON attendue par `executeTask` : ni l'écriture d'historique ni
+ * l'appel Discord ne doivent rallonger — ou faire échouer — une tâche de
+ * production. Les deux chemins avalent déjà leurs propres erreurs ; le `catch`
+ * final n'est qu'une ceinture.
+ */
+function consignerExecution(resultat: Parameters<typeof registreExecutions.noter>[0]): void {
+	let decision: ReturnType<typeof registreExecutions.noter>;
+	try {
+		decision = registreExecutions.noter(resultat);
+	} catch (err) {
+		console.warn("[Cron Runner] registre d'exécutions indisponible :", err);
+		return;
+	}
+	void enregistrerExecutionEnBase(resultat).catch((err) =>
+		console.warn("[Cron Runner] historique non écrit :", err)
+	);
+	if (decision.type !== "aucune") {
+		void signalerDecisionAlerte(decision).catch((err) =>
+			console.warn("[Cron Runner] alerte non envoyée :", err)
+		);
 	}
 }
 
 // ─── DIALOGUE CLI MANUEL ─────────────────────────────────────────────────────
-const args = process.argv.slice(2);
-if (args.includes("--run")) {
-	const taskIdx = args.indexOf("--run") + 1;
-	const task = args[taskIdx];
+if (indexRun >= 0) {
+	const taskIdx = indexRun + 1;
+	const task = tacheCli;
 	console.log(`🏃 Exécution manuelle de la tâche : ${task}`);
 
 	if (task === "db") {

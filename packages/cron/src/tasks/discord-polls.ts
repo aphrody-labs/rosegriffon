@@ -143,8 +143,18 @@ export interface SondageExtrait {
 	raw: unknown | null;
 	created_at: Date;
 	options: OptionExtraite[];
-	/** Anomalies NON bloquantes, remontées dans les stats. Jamais silencieuses. */
+	/**
+	 * ANOMALIES non bloquantes : ce que l'encart contenait et que la grammaire
+	 * n'a pas su lire. C'est le canari d'une quatrième ère, donc ce canal doit
+	 * rester VIDE en régime normal — mesuré le 13/8/2026 : 0 anomalie sur les 51
+	 * sondages du salon. Tout ce qui est simplement *bon à savoir* va dans
+	 * `notes`, sinon le canari serait rouge en permanence et n'avertirait plus de
+	 * rien (c'était le cas avec la note de reconstitution : 25 entrées sur 51,
+	 * alors que le journal n'en affiche que cinq).
+	 */
 	avertissements: string[];
+	/** Informations de traitement, attendues et sans gravité. */
+	notes: string[];
 }
 
 export interface VisuelRattache {
