@@ -2,20 +2,23 @@
 /* eslint-disable */
 
 /**
- * Le JEU niers complet, jouable au clavier dans le navigateur — 100 % Rust → wasm.
+ * Machine à états d'écran interactive, rendue en WebAssembly.
  *
- * Machine à états INTERACTIVE (écran-titre → menu principal → **vrai match** [moteur nie-runtime :
- * physique, 22 joueurs, ballon, buts] → mode histoire), pilotée par les touches, rendue en framebuffer
- * RGBA8 `W*H*4` unifié que JS peint plein écran. Pas un playthrough scripté : le joueur navigue et joue.
+ * Écran-titre → menu → match simulé (`nie-runtime` : physique, 22 joueurs, ballon, buts) → mode
+ * histoire, pilotée au clavier, rendue dans un framebuffer RGBA8 `W*H*4` que JS peint.
+ *
+ * ⚠ **Ce n'est pas le jeu.** Le rendu est un placeholder 2D : il ne ressemble pas à l'UI d'IEVR,
+ * parce que le vrai menu n'est pas dans les fichiers — il est construit à l'exécution par le
+ * menu-manager C++ qui pilote Lua via `funcLuaMenuCommand`, boucle non encore portée. Et le
+ * modèle de but de `match_sim` reste nominal. Ne pas présenter cette surface comme un jeu
+ * jouable : ce qu'elle prouve, c'est que la logique portée tourne en wasm.
  */
 export class WasmGame {
     free(): void;
     [Symbol.dispose](): void;
     /**
-     * Commande de menu IEVR RÉELLE (cf. `MENU_CMD_INFO` des cfg.bin + `input_ctrl`) :
-     * `CMD_FCS_MTX_{UP,DOWN,LEFT,RIGHT}` (navigation), `CMD_ENTER`/`CMD_SUB_ENTER` (valider),
-     * `CMD_BACK`/`CMD_CANCEL` (retour). Le mapping **clavier / souris / manette** → ces commandes
-     * se fait côté front (couche d'input). Le moteur ne connaît que les commandes du jeu.
+     * Commande de menu IEVR (CMD_FCS_*, CMD_ENTER, CMD_BACK…). Le mapping clavier/souris/manette
+     * → commande vit côté front ; la FSM (transitions) vit dans `nie_app::flow` (dédup Phase 5).
      */
     input(cmd: string): void;
     /**
@@ -32,7 +35,7 @@ export class WasmGame {
      */
     score(): Uint32Array;
     /**
-     * Avance le temps de `dt` secondes : la physique du match tourne quand un match est en cours.
+     * Avance le temps de `dt` s : la physique du match tourne quand un match est en cours.
      */
     update(dt: number): void;
     /**
@@ -172,6 +175,15 @@ export function g4pk_parse_json(bytes: Uint8Array): string;
 export function g4tx_info_json(bytes: Uint8Array): string;
 
 /**
+ * Feuille de sprites d'un atlas `.g4tx` : régions nommées avec leur rectangle, en JSON.
+ *
+ * `g4tx_info_json` rend la structure brute du conteneur ; celle-ci rend ce qu'une interface
+ * attend — un manifeste `{nom, largeur, hauteur, sprites[{nom, classe, x, y, largeur, hauteur}]}`
+ * directement consommable pour positionner une icône, avec ou sans CSS.
+ */
+export function g4tx_sprite_sheet_json(bytes: Uint8Array): string;
+
+/**
  * Décode un `.g4tx` (octets bruts) en PNG (octets), in-browser.
  */
 export function g4tx_to_png(bytes: Uint8Array): Uint8Array;
@@ -308,6 +320,7 @@ export interface InitOutput {
     readonly g4mg_extract_json: (a: number, b: number, c: number, d: number) => [number, number, number, number];
     readonly g4pk_parse_json: (a: number, b: number) => [number, number, number, number];
     readonly g4tx_info_json: (a: number, b: number) => [number, number, number, number];
+    readonly g4tx_sprite_sheet_json: (a: number, b: number) => [number, number, number, number];
     readonly g4tx_to_png: (a: number, b: number) => [number, number, number, number];
     readonly item_lookup: (a: number, b: number) => [number, number, number, number];
     readonly lip_to_json: (a: number, b: number) => [number, number, number, number];
