@@ -92,8 +92,8 @@ function Chiffre({
 	alerte?: boolean;
 }) {
 	return (
-		<div className="rounded-lg border border-border bg-card px-3 py-2">
-			<p className={`text-xl font-bold leading-tight ${alerte ? "text-destructive" : ""}`}>
+		<div className="rounded-lg border border-border bg-card px-2.5 py-1.5">
+			<p className={`text-base font-bold leading-tight tabular-nums ${alerte ? "text-destructive" : ""}`}>
 				{valeur}
 			</p>
 			<p className="text-xs leading-tight text-muted-foreground">{libelle}</p>
@@ -199,16 +199,15 @@ export function GestionCampagne({
 
 				<Card>
 					<CardHeader>
-						<CardTitle>Créations récentes</CardTitle>
-						<CardDescription>
-							Les 40 dernières, masquées comprises — c&apos;est ici, et nulle part ailleurs, que
-							le masquage se voit et se corrige.
+						<CardTitle className="text-sm">Créations récentes</CardTitle>
+						<CardDescription className="text-xs">
+							Les 40 dernières, masquées comprises.
 						</CardDescription>
 					</CardHeader>
 					<CardContent className="space-y-3">
 						{creations.length === 0 ? (
 							<p className="py-6 text-center text-sm text-muted-foreground">
-								Aucune création à ce jour. Rien n&apos;est inventé en attendant.
+								Aucune création à ce jour.
 							</p>
 						) : (
 							creations.map((creation) => (
@@ -350,7 +349,7 @@ export function GestionCampagne({
 						return (
 							<Card key={salon.salonId}>
 								<CardHeader>
-									<CardTitle className="flex flex-wrap items-center gap-2 text-base">
+									<CardTitle className="flex flex-wrap items-center gap-2 text-sm">
 										{enPanne ? (
 											<XCircle className="size-4 text-destructive" />
 										) : (
@@ -361,10 +360,10 @@ export function GestionCampagne({
 											{depot ? "Dépôt public" : "Suivi du staff"}
 										</Badge>
 									</CardTitle>
-									<CardDescription>
+									<CardDescription className="text-xs">
 										{depot
-											? "Les membres y déposent leurs créations ; la veille les archive, la récolte les rattache."
-											: "Le bot y dépose chaque création relayée. Il n'a pas besoin d'y être sous veille."}
+											? "Les membres y déposent ; la veille archive, la récolte rattache."
+											: "Le bot y dépose les relais. Pas besoin de veille."}
 									</CardDescription>
 								</CardHeader>
 								<CardContent className="space-y-3">
@@ -407,11 +406,10 @@ export function GestionCampagne({
 			<TabsContent value="taches" className="space-y-4">
 				<Card>
 					<CardHeader>
-						<CardTitle>Tâches cron de la campagne</CardTitle>
-						<CardDescription>
-							Le daemon répond immédiatement et travaille en tâche de fond&nbsp;: un lancement
-							réussi confirme le <strong>démarrage</strong>, pas le résultat. Les compteurs de
-							l&apos;onglet Suivi disent l&apos;issue au rafraîchissement suivant.
+						<CardTitle className="text-sm">Tâches cron de la campagne</CardTitle>
+						<CardDescription className="text-xs">
+							Le daemon travaille en tâche de fond&nbsp;: un lancement confirme le démarrage, pas
+							le résultat.
 						</CardDescription>
 					</CardHeader>
 					<CardContent className="space-y-2">
@@ -462,9 +460,9 @@ export function GestionCampagne({
 
 				<Card>
 					<CardHeader>
-						<CardTitle>Identité et visuels</CardTitle>
-						<CardDescription>
-							Tout ce que la page publique affiche vient d&apos;ici, jamais du code.
+						<CardTitle className="text-sm">Identité et visuels</CardTitle>
+						<CardDescription className="text-xs">
+							Tout ce qu&apos;affiche la page publique vient d&apos;ici.
 						</CardDescription>
 					</CardHeader>
 					<CardContent className="grid gap-4 sm:grid-cols-2">
@@ -540,14 +538,11 @@ export function GestionCampagne({
 
 				<Card>
 					<CardHeader>
-						<CardTitle>Hashtags</CardTitle>
-						<CardDescription>
-							Minuscules, sans croisillon. La <strong>casse d&apos;affichage</strong> doit lister
-							exactement les mêmes hashtags, dans le même ordre — seule la casse diffère. Les{" "}
-							<strong>variantes de rattrapage</strong> sont récoltées mais jamais affichées&nbsp;:
-							y mettre la coquille d&apos;une affiche évite de punir un participant qui l&apos;a
-							recopiée. Les fautes de frappe ordinaires (transposition, lettre avalée) sont
-							rattrapées automatiquement, il est inutile de les lister.
+						<CardTitle className="text-sm">Hashtags</CardTitle>
+						<CardDescription className="text-xs">
+							Minuscules, sans croisillon. L&apos;affichage ne change que la casse. Les variantes
+							sont récoltées sans jamais être montrées&nbsp;; les fautes de frappe ordinaires sont
+							rattrapées toutes seules.
 						</CardDescription>
 					</CardHeader>
 					<CardContent className="grid gap-4 sm:grid-cols-3">
@@ -583,11 +578,9 @@ export function GestionCampagne({
 
 				<Card>
 					<CardHeader>
-						<CardTitle>Salons, dates et diffusion</CardTitle>
-						<CardDescription>
-							Le salon de dépôt est <strong>public</strong>&nbsp;; le salon de suivi reçoit les
-							relais du bot. Ne jamais mettre le même identifiant dans les deux&nbsp;: le bot
-							republierait dans le salon public ce qu&apos;un membre vient d&apos;y poster.
+						<CardTitle className="text-sm">Salons, dates et diffusion</CardTitle>
+						<CardDescription className="text-xs">
+							Dépôt = public, suivi = staff. Jamais le même identifiant dans les deux.
 						</CardDescription>
 					</CardHeader>
 					<CardContent className="grid gap-4 sm:grid-cols-2">
@@ -634,8 +627,7 @@ export function GestionCampagne({
 								onChange={(e) => champ("relaisDepuis")(e.target.value)}
 							/>
 							<p className="text-xs text-muted-foreground">
-								Garde anti-déluge. Reculer cette date fait repartir dans le salon de suivi toutes
-								les créations antérieures qui n&apos;y sont pas encore passées.
+								Garde anti-déluge. Reculer cette date fait repartir les créations antérieures.
 							</p>
 						</div>
 						<div className="flex items-center gap-3">
