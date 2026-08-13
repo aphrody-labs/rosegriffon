@@ -1,0 +1,326 @@
+/**
+ * Mise en forme des surfaces `/staff` — module PUR.
+ *
+ * ── POURQUOI UN MODULE À PART ──────────────────────────────────────────────
+ * Les commandes d'exploitation passent leur temps à traduire des scalaires en
+ * phrases : une latence en millisecondes, un poids en octets, un identifiant de
+ * version de 40 caractères, une liste de technologies. Écrite dans le corps
+ * d'un `@Slash`, cette logique n'est atteignable qu'en lançant un bot et en
+ * cliquant dans Discord — donc jamais testée, donc fausse tôt ou tard.
+ *
+ * Ici : aucune base, aucun réseau, aucun `discord.js`. Tout se vérifie dans
+ * `format.test.ts`, en millisecondes.
+ *
+ * ── LES LIMITES DISCORD SONT DURES ─────────────────────────────────────────
+ * 25 champs par embed, 1024 caractères par champ, 4096 pour la description,
+ * 6000 au total. Un seul dépassement fait échouer l'envoi ENTIER (le membre ne
+ * voit rien, pas même une erreur partielle). `decouperEnChamps` existe pour
+ * ça : une longue liste devient plusieurs champs bornés plutôt qu'un champ
+ * refusé.
+ */
+
+import type { SondeService } from "../../lib/services";
+
+/** Vert quand ça répond, rouge sinon. Le texte reste lisible sans la couleur. */
+export function pastilleEtat(ok: boolean): string {
+	return ok ? "🟢" : "🔴";
+}
+
+/**
+ * Latence lisible. Au-delà de la seconde, les millisecondes ne disent plus
+ * rien d'utile : on passe aux secondes avec une décimale.
+ */
+export function formaterLatence(ms: number): string {
+	if (!Number.isFinite(ms) || ms < 0) {
+		return "—";
+	}
+	return ms < 1_000 ? `${Math.round(ms)} ms` : `${(ms / 1_000).toFixed(1).replace(".", ",")} s`;
+}
+
+/** Durée lisible pour une exécution de tâche (jusqu'aux minutes). */
+export function formaterDuree(ms: number | null | undefined): string {
+	if (typeof ms !== "number" || !Number.isFinite(ms) || ms < 0) {
+		return "—";
+	}
+	if (ms < 1_000) {
+		return `${Math.round(ms)} ms`;
+	}
+	if (ms < 60_000) {
+		return `${(ms / 1_000).toFixed(1).replace(".", ",")} s`;
+	}
+	const minutes = Math.floor(ms / 60_000);
+	const secondes = Math.round((ms % 60_000) / 1_000);
+	return `${minutes} min ${secondes} s`;
+}
+
+/** Entier en français (espace insécable fine entre les milliers). */
+export function formaterNombre(valeur: number | null | undefined): string {
+	return typeof valeur === "number" && Number.isFinite(valeur)
+		? valeur.toLocaleString("fr-FR")
+		: "—";
+}
+
+/** Poids en unités binaires françaises (Ko = 1024 octets, usage informatique). */
+export function formaterOctets(octets: number | null | undefined): string {
+	if (typeof octets !== "number" || !Number.isFinite(octets) || octets < 0) {
+		return "—";
+	}
+	const unites = ["o", "Ko", "Mo", "Go"];
+	let valeur = octets;
+	let rang = 0;
+	while (valeur >= 1024 && rang < unites.length - 1) {
+		valeur /= 1024;
+		rang += 1;
+	}
+	const arrondi = rang === 0 ? String(Math.round(valeur)) : valeur.toFixed(1).replace(".", ",");
+	return `${arrondi} ${unites[rang]}`;
+}
+
+/**
+ * Horodatage relatif natif de Discord (`<t:…:R>`), qui se recalcule côté client.
+ *
+ * Écrire « il y a 3 minutes » en dur donnerait une phrase fausse dès que
+ * quelqu'un relit le message : un embed reste affiché des heures.
+ */
+export function horodatageRelatif(valeur: string | Date | null | undefined): string {
+	if (!valeur) {
+		return "—";
+	}
+	const instant = valeur instanceof Date ? valeur : new Date(valeur);
+	if (Number.isNaN(instant.getTime())) {
+		return "—";
+	}
+	return `<t:${Math.floor(instant.getTime() / 1_000)}:R>`;
+}
+
+/** Horodatage absolu natif de Discord (fuseau du lecteur). */
+export function horodatageAbsolu(valeur: string | Date | null | undefined): string {
+	if (!valeur) {
+		return "—";
+	}
+	const instant = valeur instanceof Date ? valeur : new Date(valeur);
+	if (Number.isNaN(instant.getTime())) {
+		return "—";
+	}
+	return `<t:${Math.floor(instant.getTime() / 1_000)}:f>`;
+}
+
+export interface VersionDeployee {
+	/** Identifiant complet, tel qu'il figure dans `state.json`. */
+	readonly identifiant: string;
+	/** Instant d'assemblage extrait de l'identifiant, ou `null` s'il est illisible. */
+	readonly assembleeLe: Date | null;
+	/** Suffixe = `BUILD_ID` de Next. Peut commencer par un tiret. */
+	readonly buildId: string;
+}
+
+/**
+ * Décompose un identifiant de version produit par `scripts/ops/deploy.ts`.
+ *
+ * Forme réelle mesurée sur le VPS : `2026-08-13T00-34-03-769-Va8uc-iExl92JKgLHQVQ0`
+ * et `2026-08-13T04-30-50-225--vqFzJdyvSX8PnQUwsi1a` — le `BUILD_ID` de Next
+ * peut lui-même commencer par un tiret (alphabet base64url), d'où le double
+ * tiret. Découper sur le dernier `-` donnerait donc un identifiant tronqué.
+ */
+export function analyserRelease(identifiant: string | null | undefined): VersionDeployee | null {
+	if (typeof identifiant !== "string" || identifiant.trim().length === 0) {
+		return null;
+	}
+	const brut = identifiant.trim();
+	const trouve = /^(\d{4}-\d{2}-\d{2})T(\d{2})-(\d{2})-(\d{2})-(\d{3})-(.*)$/.exec(brut);
+	if (!trouve) {
+		return { identifiant: brut, assembleeLe: null, buildId: brut };
+	}
+	const [, jour, heures, minutes, secondes, millisecondes, buildId] = trouve;
+	const instant = new Date(`${jour}T${heures}:${minutes}:${secondes}.${millisecondes}Z`);
+	return {
+		identifiant: brut,
+		assembleeLe: Number.isNaN(instant.getTime()) ? null : instant,
+		buildId: buildId ?? "",
+	};
+}
+
+/** Une ligne d'état de service, prête à empiler dans une description d'embed. */
+export function ligneSonde(sonde: SondeService): string {
+	const tete = `${pastilleEtat(sonde.ok)} \`${sonde.service.nom}\` — ${sonde.service.titre}`;
+	const mesure = sonde.ok
+		? formaterLatence(sonde.latenceMs)
+		: (sonde.erreur ?? "injoignable");
+	const unite = sonde.service.unite ? ` · \`${sonde.service.unite}\`` : "";
+	const detail = sonde.ok && sonde.detail ? `\n   └ ${sonde.detail}` : "";
+	return `${tete} · ${mesure}${unite}${detail}`;
+}
+
+/**
+ * Découpe un texte long en plusieurs valeurs de champ d'embed.
+ *
+ * La coupe se fait sur les sauts de ligne : couper au milieu d'un mot produit
+ * des lignes illisibles, et couper au milieu d'un lien Markdown produit un
+ * embed refusé par l'API.
+ */
+export function decouperEnChamps(texte: string, limite = 1_024, maxChamps = 5): string[] {
+	const lignes = texte.split("\n");
+	const champs: string[] = [];
+	let courant = "";
+	for (const ligne of lignes) {
+		// Une ligne seule plus longue que la limite ne peut pas être placée
+		// telle quelle : on la tronque, sinon le champ entier serait refusé.
+		const morceau = ligne.length > limite ? `${ligne.slice(0, limite - 1)}…` : ligne;
+		const candidat = courant.length === 0 ? morceau : `${courant}\n${morceau}`;
+		if (candidat.length > limite) {
+			champs.push(courant);
+			courant = morceau;
+			if (champs.length >= maxChamps) {
+				return champs.slice(0, maxChamps);
+			}
+		} else {
+			courant = candidat;
+		}
+	}
+	if (courant.length > 0) {
+		champs.push(courant);
+	}
+	return champs.slice(0, maxChamps);
+}
+
+/**
+ * Bloc de code JSON borné.
+ *
+ * La clôture ``` ``` `` est comptée AVANT de tronquer : sinon une charge à la
+ * limite exacte perdait sa clôture et le reste de l'embed passait en code.
+ */
+export function blocJson(valeur: unknown, limite = 1_400): string {
+	let texte: string;
+	try {
+		texte = JSON.stringify(valeur, null, 2) ?? String(valeur);
+	} catch {
+		texte = String(valeur);
+	}
+	const enveloppe = "```json\n\n```".length;
+	const utile = Math.max(0, limite - enveloppe);
+	const coupe = texte.length > utile ? `${texte.slice(0, Math.max(0, utile - 1))}…` : texte;
+	return `\`\`\`json\n${coupe}\n\`\`\``;
+}
+
+/** Coupe un texte sans jamais dépasser la limite, ellipse comprise. */
+export function borner(texte: string | null | undefined, limite: number): string {
+	if (!texte) {
+		return "";
+	}
+	return texte.length > limite ? `${texte.slice(0, Math.max(0, limite - 1)).trimEnd()}…` : texte;
+}
+
+/**
+ * Neutralise le Markdown d'un texte venu de l'extérieur (page web, post X).
+ *
+ * Sans ça, un titre contenant `**` ou `[texte](url)` réécrit la mise en forme de
+ * l'embed, et un `](` bien placé fabrique un lien vers n'importe où.
+ */
+export function echapperMarkdown(texte: string | null | undefined): string {
+	if (!texte) {
+		return "";
+	}
+	return texte.replace(/([\\*_~`|[\]()>#-])/g, "\\$1");
+}
+
+export interface ResultatRechercheWeb {
+	titre?: unknown;
+	url?: unknown;
+	extrait?: unknown;
+}
+
+/** Une ligne de résultat de recherche web : titre cliquable + extrait. */
+export function ligneResultatWeb(resultat: ResultatRechercheWeb, rang: number): string {
+	const url = typeof resultat.url === "string" ? resultat.url : "";
+	const titre = borner(
+		echapperMarkdown(typeof resultat.titre === "string" && resultat.titre ? resultat.titre : url),
+		120
+	);
+	const extrait = borner(
+		echapperMarkdown(typeof resultat.extrait === "string" ? resultat.extrait : ""),
+		200
+	);
+	const entete = url ? `**${rang}.** [${titre}](${url})` : `**${rang}.** ${titre}`;
+	return extrait.length > 0 ? `${entete}\n   ${extrait}` : entete;
+}
+
+export interface PostXAffichable {
+	id?: unknown;
+	url?: unknown;
+	auteur?: unknown;
+	auteurNom?: unknown;
+	date?: unknown;
+	texte?: unknown;
+	likes?: unknown;
+	retweets?: unknown;
+	reponses?: unknown;
+	vues?: unknown;
+	medias?: unknown;
+}
+
+/** Une ligne de post X : auteur, date relative, texte borné, portée. */
+export function lignePostX(post: PostXAffichable): string {
+	const auteur = typeof post.auteur === "string" && post.auteur ? `@${post.auteur}` : "compte inconnu";
+	const url = typeof post.url === "string" ? post.url : "";
+	const entete = url ? `[${auteur}](${url})` : auteur;
+	const quand =
+		typeof post.date === "string" ? ` · ${horodatageRelatif(post.date)}` : "";
+	const texte = borner(echapperMarkdown(typeof post.texte === "string" ? post.texte : ""), 300);
+	const portee = formaterPortee(post);
+	return `**${entete}**${quand}\n${texte || "*(sans texte)*"}\n${portee}`;
+}
+
+/** Compteurs d'un post X, en une ligne. Omet ce que X n'a pas renvoyé. */
+export function formaterPortee(post: PostXAffichable): string {
+	const morceaux: string[] = [];
+	if (typeof post.likes === "number") {
+		morceaux.push(`❤ ${formaterNombre(post.likes)}`);
+	}
+	if (typeof post.retweets === "number") {
+		morceaux.push(`🔁 ${formaterNombre(post.retweets)}`);
+	}
+	if (typeof post.reponses === "number") {
+		morceaux.push(`💬 ${formaterNombre(post.reponses)}`);
+	}
+	if (typeof post.vues === "number") {
+		morceaux.push(`👁 ${formaterNombre(post.vues)}`);
+	}
+	if (typeof post.medias === "number" && post.medias > 0) {
+		morceaux.push(`🖼 ${post.medias}`);
+	}
+	return morceaux.join(" · ");
+}
+
+/** En-têtes HTTP d'infrastructure, en bloc `clé : valeur` borné. */
+export function formaterEnTetes(entetes: unknown, limite = 900): string {
+	if (!entetes || typeof entetes !== "object") {
+		return "*aucun*";
+	}
+	const lignes = Object.entries(entetes as Record<string, unknown>)
+		.filter(([, valeur]) => typeof valeur === "string")
+		.map(([clef, valeur]) => `\`${clef}\` : ${borner(String(valeur), 90)}`);
+	if (lignes.length === 0) {
+		return "*aucun*";
+	}
+	return borner(lignes.join("\n"), limite);
+}
+
+/** Liste courte séparée par des points médians, bornée en nombre ET en longueur. */
+export function listeCourte(
+	valeurs: unknown,
+	maximum = 12,
+	limite = 900,
+	vide = "*aucune*"
+): string {
+	if (!Array.isArray(valeurs) || valeurs.length === 0) {
+		return vide;
+	}
+	const propres = valeurs.filter((v): v is string => typeof v === "string" && v.length > 0);
+	if (propres.length === 0) {
+		return vide;
+	}
+	const gardees = propres.slice(0, maximum);
+	const reste = propres.length - gardees.length;
+	const texte = gardees.join(" · ") + (reste > 0 ? ` … +${reste}` : "");
+	return borner(texte, limite);
+}
