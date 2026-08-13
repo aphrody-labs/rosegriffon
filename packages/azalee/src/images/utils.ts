@@ -1,24 +1,80 @@
 /**
  * Utilitaires légers pour la génération d'URLs d'images de jeu.
  * Fonctionne côté client et serveur.
+ *
+ * ## Adressage : chemins CPK réels, plus jamais le nommage du dump
+ *
+ * Le dump PNG pré-extrait (`dx11/menu/**`) est parti en archive froide. Les
+ * assets sont désormais décodés **live depuis les CPK** par `nie-model-serve`
+ * derrière `cdn.rosegriffon.fr`. Ce service expose deux formes, et deux seulement :
+ *
+ * ```text
+ * 1:1              https://cdn.rosegriffon.fr/dx11/menu/<chemin>.png
+ *                  → data/dx11/menu/<chemin>.g4tx, texture principale
+ * texture nommée   https://cdn.rosegriffon.fr/dx11/menu/<chemin>.g4tx/<texture>.png
+ *                  → sélection par nom (conteneur multi-textures) ou rognage
+ *                    du rectangle nommé (atlas spatial)
+ * ```
+ *
+ * Le dump, lui, nommait ses fichiers `<basename_g4tx>_<nom_texture>.png` — un
+ * nommage qui n'existe dans AUCUN chemin CPK. Toute URL de cette forme est un 404
+ * garanti : elles ont toutes été retirées d'ici. Les manifestes servant de
+ * garde-fous sont régénérés depuis `apps/azalee/data/cpk-index.ndjson.gz`
+ * (250 800 chemins réels) et non plus depuis `inagle_game_assets`, dont les
+ * 40 471 lignes `exists = 1` décrivent le dump disparu.
  */
 import characterFaceManifest from "../data/character-face-manifest.json";
 import characterModelManifest from "../data/character-model-manifest.json";
 import chrModelManifest from "../data/chr-model-manifest.json";
 import itemImageManifest from "../data/item-image-manifest.json";
 import keshinModelManifest from "../data/keshin-model-manifest.json";
+import menuAssetManifest from "../data/menu-asset-manifest.json";
 import miximaxIconManifest from "../data/miximax-icon-manifest.json";
 
-const ITEM_IMAGE_MANIFEST = itemImageManifest as Record<string, string>;
+/**
+ * Manifeste objets : `internal_code` → conteneur `.g4tx` + nom de texture réels
+ * (cf. `scripts/build-item-image-manifest.ts`). Une valeur numérique désigne le
+ * conteneur, la texture portant alors le nom de l'objet ; un couple
+ * `[index, nom]` couvre les textures au nom différent du code (plaques `nm*`).
+ *
+ * Il remplace l'ancienne table de familles `internal_code` → `icon_item<NN>_` :
+ * le dossier écrit en base est FAUX pour 522 objets sur 1300 (les `em*` vivent
+ * dans `01_icon_emblem`, les `coa_animal_*` dans `22_icon_town`, les `ds*` dans
+ * `20_icon_deco`, les `nm*` dans `25_icon_nameplate`).
+ */
+const ITEM_IMAGE_MANIFEST = itemImageManifest as unknown as {
+	containers: string[];
+	items: Record<string, number | [number, string]>;
+};
+
+/**
+ * Garde-fous d'assets menu, générés depuis l'index CPK réel
+ * (`scripts/build-menu-asset-manifest.ts`). Chaque famille liste les basenames
+ * `.g4tx` qui existent VRAIMENT ; un code absent → placeholder, jamais une URL
+ * forgée en 404.
+ */
+const MENU_ASSETS = menuAssetManifest as {
+	emblems: string[];
+	telop: { en: string[]; fr: string[] };
+	aura: { armed: string[]; fs: string[]; mixi: string[]; soul: string[] };
+	uniformsPersonal: string[];
+};
+
+const EMBLEM_NAMES = new Set(MENU_ASSETS.emblems);
+const TELOP_FR = new Set(MENU_ASSETS.telop.fr);
+const TELOP_EN = new Set(MENU_ASSETS.telop.en);
+const AURA_FS_CODES = new Set(MENU_ASSETS.aura.fs);
+const AURA_SOUL_CODES = new Set(MENU_ASSETS.aura.soul);
+const AURA_MIXI_CODES = new Set(MENU_ASSETS.aura.mixi);
 
 /**
  * Correspondance code Miximax (`icon_code` `c05028XXX` ou `asset_code` base `wmm00XXX`)
- * → code d'icône RÉEL du dump dx11 (`ca/cn/cp/iau`). Généré par
+ * → code d'icône RÉEL des CPK (`ca/cn/cp/iau`). Généré par
  * `scripts/build-miximax-icon-manifest.ts` (cf. ce fichier pour la dérivation
  * `config.skillId2` → `inagle_chara_menu_resource` → fichier disque).
  *
  * `inagle_miximax.icon_code` vaut `c05028XXX` (dérivé du code perso) mais AUCUN fichier
- * `c05028XXX_l_..._l00.png` n'existe : les 17 vrais fichiers portent des codes
+ * `c05028XXX` n'existe : les 17 vrais conteneurs portent des codes
  * hétérogènes non dérivables par règle. Seules les entrées présentes ici ont un fichier
  * sur disque — un code absent → placeholder (le caller bascule sur telop/image_url), pas
  * un 404 forgé.
@@ -27,10 +83,10 @@ const MIXIMAX_ICON_MANIFEST = miximaxIconManifest as Record<string, string>;
 
 /**
  * Set EXHAUSTIF des codes de base `c<NNNNNNNN>` qui possèdent réellement un visage
- * variant-1 dans le dump dx11, d'après `inagle_game_assets` (table-of-truth des URL
- * servies, 40471 lignes ; 5677 faces variant-1). Régénéré par
- * `scripts/build-character-face-manifest.ts`. Sert de gate à `getCharacterFaceUrl`
- * pour éviter les 404 silencieux → placeholder des persos sans face (azalee-3).
+ * variant-1. Vérifié contre l'index CPK : **5677/5677** ont bien un conteneur
+ * `200_icon/10_icon_chr/face/<code>_l.g4tx` (le CPK en compte 5678, le surplus étant
+ * `face_ban00`, non nominatif). Régénéré par `scripts/build-character-face-manifest.ts`.
+ * Sert de gate à `getCharacterFaceUrl` : placeholder pour les persos sans visage.
  */
 const CHARACTER_FACE_CODES = new Set(characterFaceManifest as string[]);
 
@@ -57,237 +113,199 @@ const KESHIN_MODEL_CODES = new Set((keshinModelManifest as { keshin: string[] })
 const ARMURE_MODEL_CODES = new Set((keshinModelManifest as { armures: string[] }).armures);
 
 /**
- * Set EXHAUSTIF des codes uniforme `u<NNNNNNNN>` (8 chiffres) qui possèdent réellement
- * un fichier d'icône dans le dump dx11 `menu/icon_chr/uniform/`. Vérité terrain : scan
- * des 24966 PNG du dossier (db-5, 2026-06-04). Sur 5677 personnages, seuls **303**
- * uniformes existent en forme `u<8>_l_u<8>_{1,2}.png` (front+back).
+ * Set EXHAUSTIF des codes uniforme PERSONNELS `u<NNNNNNNN>` (8 chiffres) qui possèdent
+ * un fichier `200_icon/10_icon_chr/uniform/u<8>_l.g4tx` dans les CPK. Généré depuis
+ * l'index CPK (`menu-asset-manifest.json`) : **303 codes**, identiques au scan du dump
+ * d'origine (`diff` = vide, 303/303) — l'allowlist était juste, seule l'URL était fausse.
  *
- * Le code uniforme dérive du code perso par swap de préfixe `c<NNNNNNNN>` → `u<NNNNNNNN>`
- * (vérifié : 295/303 des `u<8>` ont un perso `c<8>` correspondant). MAIS la dérivation
- * `c→u` ne suffit PAS comme garde-fou : ~5380 persos n'ont AUCUN fichier uniforme et le
- * swap produisait une URL `u<8>_l_u<8>_1.png` en 404 garanti (mesuré 0/10 avant gate).
+ * Le code uniforme dérive du code perso par swap de préfixe `c<8>` → `u<8>`. Le gate
+ * reste POSITIF : ~5380 persos n'ont AUCUN uniforme personnel et renvoient une chaîne
+ * vide (le caller affiche le portrait/placeholder), jamais un 404 forgé.
  *
- * Donc : gate POSITIF (allowlist) — tout perso dont le `u<8>` n'est pas listé renvoie une
- * chaîne vide (le caller affiche le portrait/placeholder au lieu d'un 404 silencieux).
- * Aligné sur le même garde-fou que `CHARACTER_FACE_CODES` / `CHARACTER_MODEL_CODES`.
+ * ⚠ Ne PAS décomposer un `u<8>` en `u<6>_<NN>` : les uniformes personnels (303) et les
+ * kits d'équipe (`u<6>_<NN>_<NN>_l`, 10910) sont deux namespaces DISJOINTS.
  */
-const CHARACTER_UNIFORM_CODES = new Set<string>([
-	"u01000310", "u01002610", "u02024500", "u02024700", "u02024720", "u02024730", "u02024740", "u02024750",
-	"u02029500", "u03030080", "u03039500", "u04000100", "u04000360", "u04000370", "u04000380", "u05020110",
-	"u05020120", "u05020270", "u05020280", "u05020290", "u05020320", "u05020321", "u05020330", "u05020340",
-	"u05020350", "u05020380", "u05020390", "u05024610", "u05024620", "u05024670", "u05024671", "u05026520",
-	"u05026530", "u05026550", "u05026570", "u05026580", "u05026590", "u05026710", "u05026730", "u05026740",
-	"u05026750", "u05026760", "u05029510", "u05029520", "u05029710", "u05029720", "u06030210", "u06030220",
-	"u06030221", "u06030230", "u06030240", "u06031520", "u06031720", "u06031920", "u06037390", "u06037410",
-	"u06037420", "u06037430", "u06039010", "u06039011", "u06039020", "u06039030", "u06039050", "u06039060",
-	"u06039090", "u06039100", "u06039110", "u06039130", "u06039140", "u06039150", "u06039180", "u06039190",
-	"u06039200", "u06039210", "u06039220", "u06039230", "u06039290", "u06039291", "u06039300", "u06039320",
-	"u07160500", "u08060090", "u11010010", "u11010011", "u11010020", "u11010030", "u11010040", "u11010050",
-	"u11010051", "u11010060", "u11010070", "u11010072", "u11010090", "u11010100", "u11010110", "u11010120",
-	"u11010170", "u11010190", "u11010510", "u11020010", "u11020020", "u11020500", "u11020510", "u11020520",
-	"u11030010", "u11030011", "u11030020", "u11030021", "u11030030", "u11030040", "u11030140", "u11030150",
-	"u11030500", "u11030510", "u11040010", "u11040020", "u11040040", "u11040050", "u11040060", "u11040070",
-	"u11040090", "u11050500", "u11050510", "u11060500", "u11060510", "u11070500", "u11070510", "u11080500",
-	"u11090500", "u11090510", "u11100500", "u11100510", "u11110500", "u11110510", "u11120040", "u11120510",
-	"u11130010", "u11130060", "u11130090", "u11130110", "u11130510", "u11140500", "u11140510", "u11140520",
-	"u11140530", "u11150500", "u11150510", "u11160500", "u11170500", "u11180500", "u11180510", "u11190500",
-	"u11200500", "u11210510", "u11220500", "u11220510", "u11230010", "u11500010", "u11500011", "u11500040",
-	"u11500050", "u11500060", "u11500061", "u11500070", "u11500080", "u11500090", "u11500110", "u11500120",
-	"u11500130", "u11500140", "u11500150", "u11500170", "u11500180", "u11500190", "u11500200", "u11500210",
-	"u11500240", "u11500500", "u11500501", "u11500510", "u11500520", "u11500530", "u11500540", "u11500680",
-	"u11500690", "u11500860", "u11500870", "u11500890", "u11600010", "u11600020", "u11600021", "u11600030",
-	"u11600050", "u11600060", "u11600110", "u11600120", "u11700150", "u11801010", "u11801020", "u11801030",
-	"u11801040", "u11801060", "u11801070", "u11801080", "u11801090", "u11801100", "u11801110", "u11801120",
-	"u11801130", "u11802010", "u11802020", "u11802030", "u11802040", "u11802050", "u11802060", "u11802070",
-	"u11803010", "u11803020", "u11803030", "u11803040", "u11803050", "u11803060", "u11803070", "u11803080",
-	"u11803090", "u11804010", "u11804020", "u11804030", "u11804040", "u11804050", "u11804060", "u11804070",
-	"u11804080", "u11805010", "u11806010", "u11806020", "u11806030", "u11806040", "u11806050", "u11806060",
-	"u11806070", "u11806080", "u11806090", "u11807010", "u11807030", "u11807040", "u11807050", "u11807060",
-	"u11807070", "u11807080", "u11807090", "u11807100", "u11807110", "u11807120", "u11807130", "u11807140",
-	"u11807150", "u11807160", "u11807170", "u11807180", "u11807190", "u11807200", "u11807210", "u11807220",
-	"u11807240", "u11807260", "u11808010", "u11808020", "u11808030", "u11808040", "u11808050", "u11808060",
-	"u11808070", "u11808080", "u11808090", "u11808100", "u11808110", "u11808120", "u11808130", "u11808140",
-	"u11808150", "u11808160", "u11808170", "u11901080", "u11901090", "u11902060", "u11902070", "u11902080",
-	"u11903020", "u11903040", "u11904030", "u11905030", "u11907050", "u11907060", "u11907070", "u11907080",
-	"u11908020", "u11908030", "u11908040", "u11908050", "u11908060", "u11908120", "u11908130",
-]);
+const CHARACTER_UNIFORM_CODES = new Set<string>(MENU_ASSETS.uniformsPersonal);
 
 // Constantes globales
 export const CDN_URL = process.env.NEXT_PUBLIC_ASSET_URL || "https://azalee.rosegriffon.fr";
 export const CDN_ASSETS = CDN_URL; // Alias pour compatibilité
-// Dump PNG dx11 brut (alias nginx → /home/.../inazuma/data/dx11/menu/).
-// Tout le contenu menu vit ici : 200_icon/ 220_img/ icon_chr/ … (cf. cdn-2).
-const MENU_DUMP_BASE = "https://cdn.rosegriffon.fr/dx11/menu";
 
-// L'ancien CDN cdn.rosegriffon.fr/static/azalee/menu/ est vide (404, cf. cdn-2).
-// Fallback de resolveAssetUrl et export public pointent désormais sur le dump dx11.
-const MENU_BASE = MENU_DUMP_BASE;
-export const MENU_BUCKET_URL = MENU_DUMP_BASE;
+/** Racine CDN du namespace menu — décodage live des CPK par `nie-model-serve`. */
+const MENU_CDN_BASE = "https://cdn.rosegriffon.fr/dx11/menu";
+export const MENU_BUCKET_URL = MENU_CDN_BASE;
+
+/** Racine des icônes de personnage (visages, uniformes, auras, miximax, coachs). */
+const ICON_CHR_BASE = "200_icon/10_icon_chr";
+
+/**
+ * URL d'un fichier menu **1:1** : `<chemin>.g4tx` → `<chemin>.png`. À réserver aux
+ * conteneurs à texture unique (illustrations `220_img/**`, emblèmes) où la sélection
+ * de la texture principale est sans ambiguïté.
+ */
+function menuFileUrl(relativePath: string): string {
+	return `${MENU_CDN_BASE}/${relativePath}.png`;
+}
+
+/**
+ * URL d'une **texture nommée** dans un conteneur : `<chemin>.g4tx/<texture>.png`.
+ * Obligatoire dès qu'un conteneur porte plusieurs textures (visages `_1_l00`/`_2_l00`,
+ * uniformes `_1`/`_2`, icônes d'objets) — sans le nom, le service retombe sur la plus
+ * grande par aire et sert une image arbitraire.
+ */
+function menuTextureUrl(g4txPath: string, textureName: string): string {
+	// Le chemin est accepté avec ou sans son extension (le manifeste objets la porte).
+	const base = g4txPath.endsWith(".g4tx") ? g4txPath.slice(0, -".g4tx".length) : g4txPath;
+	return `${MENU_CDN_BASE}/${base}.g4tx/${textureName}.png`;
+}
 
 // Prefixe Supabase Storage legacy stocke en DB (cf. inagle_skills.image_url
 // — ~1010 lignes, 2026-04). Rewrite transparent vers le CDN local.
 const LEGACY_STORAGE_PREFIX = "/storage/v1/object/public/menu/";
 
 /**
- * Mappe un path legacy `200_icon/10_icon_chr/<folder>/<file>.webp` (DB Supabase)
- * vers le dump PNG dx11 quand un mapping est connu.
- */
-
-/**
- * Table famille `internal_code` → préfixe `icon_itemNN_` réel des PNG dans le dump
- * dx11 `200_icon/02_icon_item/`. Vérité terrain : le nom de fichier disque n'est PAS
- * `<internal_code>.png` mais `icon_item<NN>_<internal_code>.png`, où `<NN>` est
- * déterministe par famille (db-4, 2026-06-03 — scan exhaustif des 828 PNG).
+ * Résout un `internal_code` d'objet vers son **couple (conteneur, texture)** réel,
+ * ou `null` si l'objet n'a d'icône nulle part dans les CPK (367 codes sur 1667 —
+ * trou de données du jeu, vérifié absent des 250 800 chemins indexés).
  *
- * Ex. : `eq_ac0105001` → `icon_item05_eq_ac0105001.png`.
- *
- * Ordonné préfixe-le-plus-long-d'abord pour éviter les collisions (`eq_sh` avant `eq`,
- * `tk_*` avant `tr`). Les familles ABSENTES du dump (`ht`/`ti`/`ss_ps`/`ds`/`coi_*`/`nm`/
- * `fm`/`st`/`em` côté item) renvoient `null` → pas d'URL 404 forgée, le caller bascule
- * sur le placeholder. (`em` = emblème : son vrai fichier vit dans `01_icon_emblem`, pas
- * ici ; `ht`/`ss_ps` = tactiques/special_skill sans icône d'item dédiée.)
+ * La résolution vient du manifeste `item-image-manifest.json`, construit en
+ * interrogeant l'index texture → conteneur. Elle remplace l'ancienne dérivation par
+ * famille (`eq_ac` → `icon_item05_…`) qui supposait à la fois un nom de fichier de
+ * dump et un dossier — tous deux faux.
  */
-const ITEM_ICON_PREFIXES: ReadonlyArray<readonly [string, string]> = [
-	["performance_type_", "icon_item01"],
-	["icon_item_nameplate", "icon_item90"],
-	["eq_sh", "icon_item03"],
-	["eq_mi", "icon_item04"],
-	["eq_ac", "icon_item05"],
-	["eq_sp", "icon_item08"],
-	["uni_u", "icon_item07"],
-	["cos_u", "icon_item09"],
-	["btl_re", "icon_item02"],
-	["test_tk", "icon_item10"],
-	["tk_bb", "icon_item10"],
-	["tk_hr", "icon_item10"],
-	["tk_ki", "icon_item10"],
-	["tk_si", "icon_item10"],
-	["tk_st", "icon_item10"],
-	["tk_tr", "icon_item10"],
-	["tk_vi", "icon_item10"],
-	["abl_", "icon_item01"],
-	["abl", "icon_item01"],
-	["ke", "icon_item02"],
-	["gd", "icon_item01"],
-	["ex", "icon_item01"],
-	["tr", "icon_item10"],
-];
-
-/**
- * Trous de données (data-gaps) PROUVÉS de la famille chaussures `eq_sh` : `internal_code`
- * présents en DB (`inagle_items`) dont AUCUN fichier `icon_item03_<code>.png` n'existe
- * dans le dump dx11 (db-5, 2026-06-04 — scan des 203 PNG `eq_sh` du dossier
- * `200_icon/02_icon_item/`). Toutes les variantes voisines de la série `eq_sh11<NNN>01`
- * existent ; seules ces 24 variantes-là n'ont pas été extraites (vérifié : 0 fichier sous
- * AUCUNE forme, pas de transform récupérable).
- *
- * Le préfixe `eq_sh` matche `icon_item03` (cf. `ITEM_ICON_PREFIXES`) et le nom de fichier
- * = `icon_item03_<internal_code>.png` (la règle de suffixe est DÉJÀ correcte : le code DB
- * porte le `01` final, le fichier aussi). Donc il ne s'agit pas d'un mapping à corriger
- * mais d'un gap : on renvoie `null` (→ placeholder propre) au lieu d'un 404 forgé.
- */
-const ITEM_ICON_GAPS = new Set<string>([
-	"eq_sh1100101", "eq_sh1100201", "eq_sh1100501", "eq_sh1100601", "eq_sh1101001", "eq_sh1101101",
-	"eq_sh1101501", "eq_sh1101601", "eq_sh1101701", "eq_sh1102201", "eq_sh1102301", "eq_sh1102801",
-	"eq_sh1103001", "eq_sh1103701", "eq_sh1104101", "eq_sh1104401", "eq_sh1104501", "eq_sh1104701",
-	"eq_sh1104801", "eq_sh1105201", "eq_sh1105301", "eq_sh1106301", "eq_sh1106601", "eq_sh1106701",
-]);
-
-/**
- * Items « important » `gd120<NNN>` : sur les 89 codes en DB (`inagle_items`), seul
- * `gd120001` possède une icône réelle dans le CPK (vérité terrain : scan via le décodeur
- * live `iecode-cdn:8788` lisant directement le CPK, 2026-06-05 — 1 existe / 90 absents).
- * Les `gd120002..091` n'ont AUCUN fichier (ni dump pré-extrait, ni CPK → le fallback live
- * Stream ne les couvre pas) : forger `icon_item01_gd120<NNN>.png` = 404 garanti.
- *
- * `gd120001` n'est PAS une icône générique (carte stade « Legend » spécifique), on ne peut
- * donc PAS la réutiliser pour les autres important. Gate : tout `gd120*` ≠ `gd120001`
- * renvoie `null` → le caller bascule sur le placeholder propre (`/ievr.webp`) au lieu d'un
- * 404 silencieux. Aligné sur le même garde-fou que `ITEM_ICON_GAPS` / `eq_sh`.
- */
-function isMissingImportantIcon(internalCode: string): boolean {
-	return internalCode.startsWith("gd120") && internalCode !== "gd120001";
+export function resolveItemIcon(
+	internalCode: string
+): { g4txPath: string; textureName: string } | null {
+	const entry = ITEM_IMAGE_MANIFEST.items[internalCode];
+	if (entry === undefined) {
+		return null;
+	}
+	const [index, name] = typeof entry === "number" ? [entry, internalCode] : entry;
+	const g4txPath = ITEM_IMAGE_MANIFEST.containers[index];
+	return g4txPath ? { g4txPath, textureName: name } : null;
 }
 
 /**
- * Résout le vrai nom de fichier PNG (sans extension) d'un `internal_code` d'item, ou
- * `null` si aucune famille connue ne correspond (= pas d'icône d'item dans le dump) OU si
- * le code est un data-gap connu (`ITEM_ICON_GAPS` / important `gd120*` sans icône — fichier
- * absent du CPK → 404 forgé).
+ * URL CDN d'un emblème par son nom de fichier réel (`em010003`, `em0001_s`…).
+ * Conteneur à texture unique → forme 1:1. `null` si le nom n'existe pas dans les
+ * 542 emblèmes du CPK (gate anti-404).
  */
-export function itemIconFileBase(internalCode: string): string | null {
-	if (ITEM_ICON_GAPS.has(internalCode) || isMissingImportantIcon(internalCode)) {
-		return null;
-	}
-	for (const [fam, prefix] of ITEM_ICON_PREFIXES) {
-		if (internalCode.startsWith(fam)) {
-			return `${prefix}_${internalCode}`;
-		}
-	}
+function emblemFileUrl(name: string): string | null {
+	return EMBLEM_NAMES.has(name) ? menuFileUrl(`200_icon/01_icon_emblem/${name}`) : null;
+}
+
+/**
+ * URL CDN d'un telop de technique. Le dossier `220_img/telop_waza/` n'a que deux
+ * langues servies (`fr` 1243 fichiers, `en` 1247) : on privilégie `fr` puis on
+ * retombe sur `en`. `null` si le code n'a aucun telop (144 techniques sur 1002).
+ */
+function telopUrl(code: string): string | null {
+	if (TELOP_FR.has(code)) return menuFileUrl(`220_img/telop_waza/fr/${code}`);
+	if (TELOP_EN.has(code)) return menuFileUrl(`220_img/telop_waza/en/${code}`);
 	return null;
 }
 
+/** Dossiers d'icônes d'aura de `200_icon/10_icon_chr/` adressables par code. */
+type AuraFolder = "aura_fs" | "aura_soul" | "aura_mixi";
+
+/**
+ * URL CDN d'une icône d'aura (`aura_fs`/`aura_soul`/`aura_mixi`). Le conteneur
+ * `<base>_l.g4tx` porte une texture unique nommée `<base>_l00` : on l'adresse par son
+ * nom (forme nommée) plutôt qu'en 1:1, pour ne dépendre d'aucune heuristique côté
+ * service. `null` si le code n'existe pas (gate anti-404).
+ */
+const AURA_GATES: Record<AuraFolder, Set<string>> = {
+	aura_fs: AURA_FS_CODES,
+	aura_mixi: AURA_MIXI_CODES,
+	aura_soul: AURA_SOUL_CODES,
+};
+
+function auraIconUrl(folder: AuraFolder, base: string): string | null {
+	if (!AURA_GATES[folder].has(base)) return null;
+	return menuTextureUrl(`${ICON_CHR_BASE}/${folder}/${base}_l`, `${base}_l00`);
+}
+
+/**
+ * Réécrit un `image_url` legacy de la DB (chemins du bucket Supabase `menu/…webp`,
+ * hérités du dump) vers le vrai chemin CPK. Rend `null` quand aucune correspondance
+ * réelle n'existe : mieux vaut un placeholder qu'une URL forgée en 404.
+ */
 function mapLegacyMenuPath(menuPath: string): string | null {
 	const chrMatch = menuPath.match(/^200_icon\/10_icon_chr\/([^/]+)\/([^/]+?)_l(?:_[^.]+)?\.webp$/);
 	if (chrMatch) {
-		const folder = chrMatch[1];
-		const base = chrMatch[2];
-		if (folder.startsWith("aura_")) {
-			// Même contrainte que getAuraImageUrl : le dump n'a que les icônes ×10.
-			// On arrondit le numéro du base (`k000721` → `k000720`) à la famille
-			// existante, sinon les formes évoluées (…721/…2025) renvoient un 404.
+		const folder = chrMatch[1] as string;
+		const base = chrMatch[2] as string;
+		if (folder === "aura_fs" || folder === "aura_soul" || folder === "aura_mixi") {
+			// Même contrainte que getAuraImageUrl : le jeu n'a que les icônes « famille »
+			// (numéro multiple de 10). On arrondit (`k000721` → `k000720`), sinon les
+			// formes évoluées (…721/…2025) n'ont aucun fichier.
 			const auraBase = base.replace(/^([ka])(\d+)$/, (_m, p, n) => `${p}${auraFamilyBase(n)}`);
-			return `${MENU_DUMP_BASE}/icon_chr/${folder}/${auraBase}_l_${auraBase}_l00.png`;
+			return auraIconUrl(folder, auraBase);
 		}
 		if (folder === "face") {
-			return `${MENU_DUMP_BASE}/icon_chr/face/${base}_l_${base}_1_l00.png`;
+			return CHARACTER_FACE_CODES.has(base) ? characterFaceUrl(base) : null;
 		}
 		if (folder === "uniform") {
-			return `${MENU_DUMP_BASE}/icon_chr/uniform/${base}_l_${base}_1.png`;
+			return CHARACTER_UNIFORM_CODES.has(base) ? uniformIconUrl(base) : null;
 		}
 		return null;
 	}
-	const emMatch = menuPath.match(/^200_icon\/01_icon_emblem\/(em[0-9]+)\.webp$/);
+	const emMatch = menuPath.match(/^200_icon\/01_icon_emblem\/(em[0-9a-z_]+)\.webp$/i);
 	if (emMatch) {
-		const code = emMatch[1];
-		return `${MENU_DUMP_BASE}/200_icon/01_icon_emblem/${code}_${code}.png`;
+		// Les `emblem_url` en `0x<CRC>.webp` (208/208 des équipes) ne correspondent à AUCUN
+		// nom d'emblème : ce CRC est celui de l'identifiant d'équipe, pas d'un fichier
+		// (0/208 présents dans emblem-crc-map). Ils tombent donc en `null` — trou de données
+		// réel, pas un problème d'adressage.
+		return emblemFileUrl(emMatch[1] as string);
+	}
+	// Plaques de nom : `inagle_nameplates.image_path` stocke le chemin SANS extension
+	// (`200_icon/25_icon_nameplate/nm04201`). Le conteneur porte deux textures de même
+	// taille (`_01`/`_02`) → forme nommée obligatoire, résolue par le manifeste.
+	const plateMatch = menuPath.match(/^200_icon\/25_icon_nameplate\/([^/.]+)$/);
+	if (plateMatch) {
+		const ref = resolveItemIcon(plateMatch[1] as string);
+		return ref ? menuTextureUrl(ref.g4txPath, ref.textureName) : null;
 	}
 	const itemMatch = menuPath.match(/^200_icon\/02_icon_item\/(.+)\.webp$/);
 	if (itemMatch) {
-		// Le DB stocke `image_url = 200_icon/02_icon_item/<internal_code>.webp`, mais le
-		// fichier disque est `icon_item<NN>_<internal_code>.png` (db-4). On mappe via la
-		// table des familles ; sans correspondance → null (placeholder, pas de 404 forgé).
-		const fileBase = itemIconFileBase(itemMatch[1]);
-		return fileBase ? `${MENU_DUMP_BASE}/200_icon/02_icon_item/${fileBase}.png` : null;
+		// Le dossier écrit en base est FAUX pour 40 % du catalogue : on passe par le
+		// manifeste (conteneur + texture réels), jamais par le chemin stocké.
+		const ref = resolveItemIcon(itemMatch[1] as string);
+		return ref ? menuTextureUrl(ref.g4txPath, ref.textureName) : null;
 	}
-	const telopMatch = menuPath.match(/^220_img\/telop_waza\/(fr|en)\/([^/]+)\.webp$/);
+	const telopMatch = menuPath.match(/^220_img\/telop_waza\/[a-z_]+\/([^/]+)\.webp$/);
 	if (telopMatch) {
-		const lang = telopMatch[1];
-		const raw = telopMatch[2];
+		// Le nom stocké porte un suffixe de variante du dump (`whd00030_0`) et parfois le
+		// doublage (`x_x`) : on revient au code nu avant de consulter le gate. Les formes
+		// dérivées (`whd00390_or`, `whd00900_mm`) n'ont pas de telop propre mais réutilisent
+		// celui de leur technique de base — d'où le second essai (65 lignes récupérées).
+		const raw = telopMatch[1] as string;
 		const dupMatch = raw.match(/^(.+)_\1$/);
-		const filename = dupMatch
-			? `${dupMatch[1]}_${dupMatch[1]}`
-			: ((c) => `${c}_${c}`)(raw.replace(/_0$/, ""));
-		return `${MENU_DUMP_BASE}/220_img/telop_waza/${lang}/${filename}.png`;
+		const code = dupMatch ? (dupMatch[1] as string) : raw.replace(/_0$/, "");
+		return telopUrl(code) ?? telopUrl(code.replace(/_[a-z]+$/i, ""));
 	}
 	return null;
 }
 
 /**
- * Résout un path de dump déjà débarrassé de son préfixe (`200_icon/…webp`).
- * Pour une icône d'item d'une famille INCONNUE (pas de fichier `icon_item<NN>_…` sur
- * disque), on renvoie le placeholder au lieu de re-forger le `.webp` brut (qui serait un
- * 404 garanti — le dump ne sert que des PNG `icon_item<NN>_`). Sinon, fallback dump brut.
+ * Résout un path legacy déjà débarrassé de son préfixe (`200_icon/…webp`).
+ *
+ * Sans correspondance dans les CPK, on renvoie le **placeholder** : re-forger le
+ * `.webp` du bucket disparu serait un 404 garanti. Le repli « chemin brut » n'est
+ * conservé que pour les chemins qui désignent déjà un fichier CPK (`.png`) — tout
+ * `.webp` non résolu est un vestige du dump.
  */
 function mapStrippedMenuPath(stripped: string): string {
 	const mapped = mapLegacyMenuPath(stripped);
 	if (mapped) {
 		return mapped;
 	}
-	if (/^200_icon\/02_icon_item\/.+\.webp$/.test(stripped)) {
+	// Seul un `.png` déjà correct peut passer tel quel : tout le reste (`.webp` du bucket
+	// disparu, chemin de dossier, chemin sans extension non reconnu) serait un 404.
+	if (!stripped.endsWith(".png")) {
 		return PLACEHOLDERS.item;
 	}
-	return `${MENU_BASE}/${stripped}`;
+	return `${MENU_CDN_BASE}/${stripped}`;
 }
 
 /** Resolve a potentially relative asset path to a full URL. */
@@ -299,8 +317,8 @@ export function resolveAssetUrl(path: string | null | undefined): string | null 
 		return mapStrippedMenuPath(path.slice(LEGACY_STORAGE_PREFIX.length));
 	}
 	// Forme legacy DB raccourcie `/menu/200_icon/…​.webp` (sans le préfixe storage
-	// complet) : c'est un chemin de dump, pas une route locale. On retire `/menu/`
-	// et on route vers le mapper dump comme les autres webp — sinon le `startsWith("/")`
+	// complet) : c'est un chemin d'asset, pas une route locale. On retire `/menu/`
+	// et on route vers le mapper legacy comme les autres webp — sinon le `startsWith("/")`
 	// ci-dessous le renverrait tel quel vers une route azalee inexistante (404).
 	// Cas réel : 42 keshins sans `asset_code` pointant vers les emblèmes em0001-em0004.
 	if (path.startsWith("/menu/")) {
@@ -313,12 +331,12 @@ export function resolveAssetUrl(path: string | null | undefined): string | null 
 }
 
 /**
- * URL d'une illustration de galerie (`inagle_gallery.img_path`) depuis le dump dx11.
+ * URL d'une illustration de galerie (`inagle_gallery.img_path`).
  *
- * Vérité terrain (`inagle_game_assets`, db-2026-06-05) : les 360 illustrations vivent
- * dans `menu/220_img/gallery_img2/` et le nom de fichier réel double le `img_path`
- * (pattern `<imgPath>_<imgPath>.png`, ex. `img_story_ev01_main_0010_img_story_ev01_main_0010.png`).
- * Couverture vérifiée 360/360 (HTTP 200 sur le CDN `cdn.rosegriffon.fr/dx11/menu/`).
+ * Vérité terrain (index CPK) : les illustrations vivent en
+ * `dx11/menu/220_img/gallery_img2/<img_path>.g4tx` — 363 fichiers, conteneur à
+ * texture unique portant le nom du fichier → forme 1:1. Les 360 `img_path` de
+ * `inagle_gallery` sont tous présents (360/360).
  *
  * Renvoie `null` pour un `img_path` vide → le caller bascule sur le placeholder.
  */
@@ -326,7 +344,7 @@ export function getGalleryImageUrl(imgPath: string | undefined | null): string |
 	if (!imgPath) {
 		return null;
 	}
-	return `${MENU_DUMP_BASE}/220_img/gallery_img2/${imgPath}_${imgPath}.png`;
+	return menuFileUrl(`220_img/gallery_img2/${imgPath}`);
 }
 
 /**
@@ -369,16 +387,22 @@ export function galleryVariantUrl(
 }
 
 /**
- * URL d'un visage de personnage depuis le dump dx11 brut.
- * Pattern fichier : `icon_chr/face/{base}_l_{base}_1_l00.png` (variant 1 par défaut).
+ * URL du **portrait** d'un personnage (visage « large », variante 1).
  *
- * Gate sur `inagle_game_assets` (azalee-3) : si le code de base n'a pas de face
- * variant-1 dans la table-of-truth des assets servis (`CHARACTER_FACE_CODES`), on
- * renvoie directement `PLACEHOLDERS.character` au lieu de produire une URL qui
- * déclencherait un 404 silencieux résorbé par le `<Image onError>` côté client.
+ * Chemin réel : `200_icon/10_icon_chr/face/<code>_l.g4tx`, conteneur à DEUX textures
+ * (`<code>_1_l00` = portrait, `<code>_2_l00` = seconde pose). Il faut donc la forme
+ * NOMMÉE : en 1:1 le service départage par aire, les deux textures font la même
+ * taille, et il sert `_2_l00` — le mauvais portrait (md5 différents, mesuré).
  */
-const CHR_DUMP_BASE = "https://cdn.rosegriffon.fr/dx11/menu/icon_chr";
+function characterFaceUrl(baseCode: string): string {
+	return menuTextureUrl(`${ICON_CHR_BASE}/face/${baseCode}_l`, `${baseCode}_1_l00`);
+}
 
+/**
+ * URL du portrait d'un personnage, gardée par `CHARACTER_FACE_CODES` (5677 codes,
+ * 5677/5677 présents dans les CPK) : un code sans visage rend `PLACEHOLDERS.character`
+ * au lieu d'une URL qui déclencherait un 404 silencieux côté `<Image onError>`.
+ */
 export function getCharacterFaceUrl(
 	charaId: string | undefined | null,
 	_unused?: string | null
@@ -386,95 +410,76 @@ export function getCharacterFaceUrl(
 	if (!charaId) {
 		return PLACEHOLDERS.character;
 	}
-	// Strip _5000/_5100/etc. suffix — dump only has base code face icons
+	// Strip _5000/_5100/etc. suffix — seuls les codes de base ont un visage.
 	const baseCode = charaId.replace(/_\d{4}$/, "");
 	if (!CHARACTER_FACE_CODES.has(baseCode)) {
 		return PLACEHOLDERS.character;
 	}
-	return `${CHR_DUMP_BASE}/face/${baseCode}_l_${baseCode}_1_l00.png`;
+	return characterFaceUrl(baseCode);
 }
 // Alias pour compatibilité
 export const getCharacterImageUrl = getCharacterFaceUrl;
 
 /**
  * Dérive le code uniforme `u<8>` d'un code perso et le retourne UNIQUEMENT s'il a un
- * fichier réel dans le dump (`CHARACTER_UNIFORM_CODES`). Sinon `null` → le caller ne
- * tente pas d'URL (évite un 404 garanti : la dérivation `c→u` ne matche que 303/5677
- * persos). Le code uniforme = code perso préfixe `c` → `u` (vérité terrain db-5).
+ * fichier réel (`CHARACTER_UNIFORM_CODES`, 303 codes). Sinon `null` → le caller ne
+ * tente pas d'URL. Le code uniforme = code perso, préfixe `c` → `u`.
  */
 function resolveUniformCode(charaId: string | undefined | null): string | null {
 	if (!charaId) {
 		return null;
 	}
-	// Strip suffixe de variante (_5000/_5100…) — le dump n'a que le code de base.
+	// Strip suffixe de variante (_5000/_5100…) — seul le code de base a un uniforme.
 	const baseCode = charaId.replace(/_\d{4}$/, "");
 	const uniformCode = baseCode.startsWith("c") ? `u${baseCode.slice(1)}` : baseCode;
 	return CHARACTER_UNIFORM_CODES.has(uniformCode) ? uniformCode : null;
 }
 
 /**
- * URL d'un uniforme de personnage (vue de face).
- * Pattern fichier : `icon_chr/uniform/u{NNNNNNNN}_l_u{NNNNNNNN}_1.png` (préfixe `c` → `u`).
- * Gate sur `CHARACTER_UNIFORM_CODES` : chaîne vide si le perso n'a pas d'uniforme dans le
- * dump (au lieu d'un 404 forgé). Le caller affiche le portrait/placeholder à la place.
+ * URL de l'icône d'un uniforme depuis son code de fichier (`u11010010`).
+ *
+ * Chemin réel : `200_icon/10_icon_chr/uniform/<code>_l.g4tx`, DEUX textures
+ * (vérifié sur les 12483 fichiers du dossier, 12483/12483 conformes) :
+ *   - `<code>_1` = le maillot (jamais vide, 0/12483 plats) → c'est celui qu'on sert ;
+ *   - `<code>_2` = le MASQUE DE POSE DE L'EMBLÈME (vide dans 516/12483). Ce n'est
+ *     PAS une vue de dos — d'où la suppression de `getCharacterUniformBackUrl`.
+ *
+ * La forme 1:1 est INTERDITE ici : les deux textures font 256×256, le départage par
+ * aire sert `_2` (le masque), prouvé au pixel près.
+ */
+function uniformIconUrl(code: string): string {
+	return menuTextureUrl(`${ICON_CHR_BASE}/uniform/${code}_l`, `${code}_1`);
+}
+
+/**
+ * URL de l'uniforme PERSONNEL d'un personnage. Gate sur `CHARACTER_UNIFORM_CODES` :
+ * chaîne vide si le perso n'en a pas (le caller affiche le portrait/placeholder).
+ *
+ * Couverture mesurée : 364/6062 persos (6,0 %). Les autres portent le kit de leur
+ * équipe (`u<6>_<NN>_<NN>_l`, namespace DISJOINT résolu par le CRC de
+ * `inagle_uniforms` → manifeste modèle) : ce chemin-là n'est pas encore câblé.
  */
 export function getCharacterUniformUrl(charaId: string | undefined | null): string {
 	const uniformCode = resolveUniformCode(charaId);
 	if (!uniformCode) {
 		return "";
 	}
-	return `${CHR_DUMP_BASE}/uniform/${uniformCode}_l_${uniformCode}_1.png`;
+	return uniformIconUrl(uniformCode);
 }
 
 /**
- * URL du dos de l'uniforme (variant 2). Même gate que la vue de face.
- */
-export function getCharacterUniformBackUrl(charaId: string | undefined | null): string {
-	const uniformCode = resolveUniformCode(charaId);
-	if (!uniformCode) {
-		return "";
-	}
-	return `${CHR_DUMP_BASE}/uniform/${uniformCode}_l_${uniformCode}_2.png`;
-}
-
-/**
- * Allowlist EXHAUSTIVE des codes de techniques qui possèdent réellement un fichier
- * telop dans le dump dx11 `220_img/telop_waza/fr/{code}_{code}.png` (db-3, 2026-06-03).
+ * URL du **telop** (bandeau du nom) d'une technique.
  *
- * Cross-référence fichier-par-fichier du dump complet (310 PNG telop) contre les 1002
- * `internal_code` de `inagle_skills` : seuls **16** codes ont un telop. Les fichiers
- * `wht*` du dump (67) sont un autre jeu (titres romanisés, hors `internal_code`) → exclus.
- * Les 986 autres skills (la majorité des `whs*`/`whd*`, tous les `rh[dkos]*` et
- * `swap_skill_waza_*`) n'ont AUCUN telop → l'URL `{code}_{code}.png` serait un 404 garanti.
+ * Chemin réel : `220_img/telop_waza/<lang>/<code>.g4tx`, conteneur à texture unique
+ * portant le nom du fichier → forme 1:1. Deux langues seulement sont livrées avec le
+ * jeu (`fr` 1243, `en` 1247) : on privilégie `fr`, repli `en`.
  *
- * Donc : gate POSITIF (allowlist) — tout code hors liste renvoie le placeholder, jamais
- * une URL 404. Aligné sur `inagle_skills.has_telop` (16 true / 986 false / 1002 total)
- * et `image_url` (NULL = sans telop). Cf. docs/asset-audit/azalee-tables-gaps.md §7.
- */
-const SKILLS_WITH_TELOP = new Set([
-	"whk00050",
-	"whk00080",
-	"whk00090",
-	"whk00100",
-	"whk00110",
-	"who00010",
-	"who00020",
-	"who00030",
-	"who00040",
-	"who00060",
-	"who00070",
-	"who00080",
-	"who00090",
-	"who00100",
-	"who00110",
-	"who00190",
-]);
-
-/**
- * URL d'une technique (image telop) — dump dx11 brut.
- * Pattern fichier : `220_img/telop_waza/fr/{code}_{code}.png`.
- * Renvoie le placeholder pour tout code sans telop dans le dump (db-3) afin que
- * l'UI affiche un visuel propre au lieu d'un 404.
+ * Couverture mesurée sur `inagle_skills` : 858 techniques ont un telop `fr`, 861 en
+ * comptant le repli `en`, sur 1002. Les 141 restantes (`rh*`, `swap_skill_waza_*`,
+ * placeholders) n'en ont AUCUN → placeholder, jamais une URL forgée.
+ *
+ * ⚠ L'ancienne allowlist codée en dur ne contenait que **16** codes : elle avait été
+ * établie sur un dump partiel (310 PNG) et privait 842 techniques de leur bandeau.
  */
 export function getSkillImageUrl(
 	skillId: string | undefined | null,
@@ -483,44 +488,42 @@ export function getSkillImageUrl(
 	if (!skillId) {
 		return "";
 	}
-	// Normalisation : retire le suffixe variant `_<lettres>` (ex. `who00060_or` → `who00060`).
-	const baseCode = skillId.replace(/_[a-z]+$/i, "");
-	if (!SKILLS_WITH_TELOP.has(baseCode)) {
-		return PLACEHOLDERS.skill;
-	}
-	return `${MENU_DUMP_BASE}/220_img/telop_waza/fr/${baseCode}_${baseCode}.png`;
+	// Le code peut porter un suffixe de variante (`who00060_or`, `whd00900_mm`) qui
+	// existe parfois comme fichier à part entière : on tente le code tel quel d'abord.
+	return telopUrl(skillId) ?? telopUrl(skillId.replace(/_[a-z]+$/i, "")) ?? PLACEHOLDERS.skill;
 }
 
 /**
- * URL d'un objet — dump dx11 brut.
+ * URL de l'icône d'un objet, à partir de son `internal_code` (`eq_ac0105001`,
+ * `ke000033`, `em040022`…).
  *
- * Le nom de fichier disque est `icon_item<NN>_<internal_code>.png` (db-4), résolu via
- * `itemIconFileBase`. On attend donc un `internal_code` (`eq_ac0105001`, `ke000033`…),
- * pas un id hex (`0x002B6B38`) : un id hex ne matche aucune famille → placeholder, ce
- * qui est le comportement voulu côté fallback (l'icône réelle vient de `image_url` via
- * `resolveAssetUrl`). Un mapping explicite optionnel via `item-image-manifest.json`
- * reste prioritaire.
+ * Résolution par manifeste (conteneur `.g4tx` + nom de texture réels) : 1300 des 1667
+ * codes de `inagle_items` sont couverts, répartis sur 5 dossiers dont 522 hors du
+ * `02_icon_item` écrit en base. Repli emblème pour les `em*` non manifestés. Un id hex
+ * (`0x002B6B38`) ne matche rien → placeholder, comportement voulu (l'icône vient alors
+ * de `image_url` via `resolveAssetUrl`).
  */
 export function getItemImageUrl(itemId: string): string {
 	if (!itemId) {
 		return "";
 	}
-	const mapped = ITEM_IMAGE_MANIFEST[itemId];
-	if (mapped) {
-		return `${MENU_DUMP_BASE}/${mapped}.png`;
+	const ref = resolveItemIcon(itemId);
+	if (ref) {
+		return menuTextureUrl(ref.g4txPath, ref.textureName);
 	}
-	const fileBase = itemIconFileBase(itemId);
-	if (fileBase) {
-		return `${MENU_DUMP_BASE}/200_icon/02_icon_item/${fileBase}.png`;
-	}
-	return PLACEHOLDERS.item;
+	return emblemFileUrl(itemId) ?? PLACEHOLDERS.item;
 }
 // Alias
 export const getItemIconUrl = getItemImageUrl;
 
 /**
- * URL d'un emblème d'équipe — dump dx11 brut.
- * Pattern : `200_icon/01_icon_emblem/em{N}_em{N}.png`.
+ * URL d'un emblème d'équipe.
+ *
+ * Chemin réel : `200_icon/01_icon_emblem/<nom>.g4tx`, conteneur à texture unique →
+ * forme 1:1. Le nom vient de `emblem-crc-map.json` (`crc32_std(nom) → nom`, 542
+ * emblèmes du CPK). Un identifiant numérique est complété en `em<4 chiffres>` (7
+ * emblèmes seulement portent cette forme courte). Gate sur les noms réels : chaîne
+ * vide si l'emblème n'existe pas, jamais une URL 404.
  */
 export function getEmblemImageUrl(emblemId: string | number | undefined | null): string {
 	if (!emblemId && emblemId !== 0) {
@@ -539,7 +542,7 @@ export function getEmblemImageUrl(emblemId: string | number | undefined | null):
 	if (!emCode) {
 		return "";
 	}
-	return `${MENU_DUMP_BASE}/200_icon/01_icon_emblem/${emCode}_${emCode}.png`;
+	return emblemFileUrl(emCode) ?? "";
 }
 // Alias
 export const getTeamEmblemUrl = getEmblemImageUrl;
@@ -678,22 +681,19 @@ export function getSkillVideoUrl(skillId: string | undefined | null): string {
 }
 
 /**
- * URL d'une Aura (Keshin, Soul, Armed, ...) depuis le dump dx11 brut servi
- * par cdn.rosegriffon.fr (alias nginx → /home/.../inazuma/data/dx11/).
+ * URL d'une Aura (Keshin, Soul, Armed…), décodée live depuis les CPK.
  *
- * Pattern fichier sur disque : `{base}_l_{base}_l00.png`.
- *   - Keshins (wks/wkk/wkd/wko/wkt) → aura_fs/k{padded6}
- *   - Souls   (wss/wso/wsd/wsk)    → aura_soul/a{padded6}
- *   - Armed   (was/wak/wad/wao)    → aura_soul/a{padded6}  (mapping wa→c non fiable)
+ * Chemin réel : `200_icon/10_icon_chr/<dossier>/<base>_l.g4tx`, texture unique nommée
+ * `<base>_l00` (vérifié sur les 331 conteneurs d'aura : 331/331 conformes).
+ *   - Keshins (wks/wkk/wkd/wko/wkt) + Keshin-armé (wak/wao/wad) → `aura_fs/k<6>`
+ *   - Souls   (wss/wso/wsd/wsk)                                 → `aura_soul/a<6>`
  */
-const AURA_DUMP_BASE = CHR_DUMP_BASE;
-
 /**
  * Extrait la partie numérique d'un asset_code keshin/soul/armed en retirant le
  * préfixe `w[ksad][a-z]` ET tout suffixe de variante.
  *
- * Les codes réels portent des suffixes de variante hétérogènes que le fichier
- * disque (base-only `{base}_l_{base}_l00.png`) ne reflète pas :
+ * Les codes réels portent des suffixes de variante hétérogènes que le conteneur
+ * CPK (base-only `<base>_l.g4tx`) ne reflète pas :
  *   - digits   : `was00290_1`
  *   - alpha-num : `was00240_b1`, `wad00650_h2`, `was00303_h1`
  *   - stage     : `wks02020_st0701`, `wks02060_st0901`
@@ -706,8 +706,8 @@ function auraBaseNum(assetCode: string, prefix: RegExp): string | null {
 }
 
 /**
- * Le dump dx11 ne contient que les icônes d'aura « famille » : tous les fichiers
- * de `aura_fs/`/`aura_soul/` portent un numéro **multiple de 10** (vérifié dump :
+ * Le jeu ne contient que les icônes d'aura « famille » : tous les conteneurs de
+ * `aura_fs/`/`aura_soul/` portent un numéro **multiple de 10** (index CPK :
  * 98 + 56 fichiers, 0 numéro non-×10). Les formes évoluées / éveillées / armées
  * (…721, …651, …672, …2025) n'ont PAS d'icône propre : l'icône réutilisée est
  * celle de la famille. On arrondit donc le numéro à la dizaine inférieure, ce qui
@@ -725,21 +725,17 @@ export function getAuraImageUrl(assetCode: string | undefined | null, _subType?:
 		return "";
 	}
 
-	const buildAuraUrl = (folder: string, base: string): string =>
-		`${AURA_DUMP_BASE}/${folder}/${base}_l_${base}_l00.png`;
-
 	// Keshins : tous les `wk*` (wks/wkk/wkd/wko/wkt) + les variantes Keshin-armé
-	// `wak/wao/wad` vivent dans `aura_fs/k{N}` (vérifié sur dump + image_url DB :
-	// 70 lignes wak/wao/wad → 0 aura_soul). Seuls les Souls/Soul-armé `ws*`/`was*`
-	// vivent dans `aura_soul/a{N}`. L'ancien code routait TOUT `wa*` (sauf wap) vers
-	// aura_soul → 404 garanti pour wak/wao/wad (db-1, corrigé 2026-06).
+	// `wak/wao/wad` vivent dans `aura_fs/k{N}` ; seuls les Souls `ws*` vivent dans
+	// `aura_soul/a{N}`. Couverture mesurée : 174/174 keshins et 56/56 souls dotés
+	// d'un `asset_code` exploitable trouvent leur icône (gate `AURA_*_CODES`).
 	if (assetCode.startsWith("wk") || /^wa[kod]/.test(assetCode)) {
 		const num = auraBaseNum(assetCode, /^w[ka][a-z]/);
 		if (num) {
-			return buildAuraUrl("aura_fs", `k${auraFamilyBase(num)}`);
+			return auraIconUrl("aura_fs", `k${auraFamilyBase(num)}`) ?? "";
 		}
 	}
-	// Souls `ws*` (wss/wso/wsd/wsk) → aura_soul/a{N} (cohérent sur tout le dump).
+	// Souls `ws*` (wss/wso/wsd/wsk) → aura_soul/a{N} (cohérent sur tout le dossier).
 	// MAIS les Soul-armé `was*` (Warrior Armed Spirit, 66 keshins) sont répartis sans
 	// règle dérivable entre aura_fs/k{N} (12 codes) et aura_soul/a{N} (18 codes) : on
 	// NE dérive donc PAS `was*` ici — on renvoie "" pour laisser `image_url` (DB,
@@ -748,7 +744,7 @@ export function getAuraImageUrl(assetCode: string | undefined | null, _subType?:
 	if (assetCode.startsWith("ws")) {
 		const num = auraBaseNum(assetCode, /^ws[a-z]/);
 		if (num) {
-			return buildAuraUrl("aura_soul", `a${auraFamilyBase(num)}`);
+			return auraIconUrl("aura_soul", `a${auraFamilyBase(num)}`) ?? "";
 		}
 	}
 
@@ -756,16 +752,16 @@ export function getAuraImageUrl(assetCode: string | undefined | null, _subType?:
 }
 
 /**
- * URL d'une icône Miximax (visage personnage) depuis le dossier `aura_mixi` du dump dx11.
- * Pattern fichier : `{realIcon}_l_{realIcon}_l00.png`.
+ * URL d'une icône Miximax (visage personnage) du dossier `aura_mixi`.
+ * Chemin réel : `<realIcon>_l.g4tx`, texture nommée `<realIcon>_l00`.
  *
  * L'argument est l'`icon_code` (`c05028XXX`) OU l'`asset_code` (`wmm00XXX[_variant]`) de
  * `inagle_miximax`. Aucun de ces deux codes n'est le nom de fichier réel : les 17 vrais
- * fichiers du dump portent des codes hétérogènes (`ca0201`, `cn0221`, `cp1811`,
+ * fichiers portent des codes hétérogènes (`ca0201`, `cn0221`, `cp1811`,
  * `iau0010a`…) NON dérivables par règle. On traduit donc via `MIXIMAX_ICON_MANIFEST`
  * (issu de `config.skillId2` → `inagle_chara_menu_resource`). Un code absent du manifeste
- * = pas de fichier sur disque → chaîne vide (le caller bascule sur telop/image_url ou le
- * placeholder), jamais un 404 forgé. Corrige le bug `c05028XXX_l_..._l00.png` (404 garanti).
+ * = pas de fichier dans les CPK → chaîne vide (le caller bascule sur telop/image_url ou
+ * le placeholder), jamais un 404 forgé.
  */
 export function getMiximaxIconUrl(iconCode: string | undefined | null): string {
 	if (!iconCode) {
@@ -777,7 +773,7 @@ export function getMiximaxIconUrl(iconCode: string | undefined | null): string {
 	if (!realIcon) {
 		return "";
 	}
-	return `${AURA_DUMP_BASE}/aura_mixi/${realIcon}_l_${realIcon}_l00.png`;
+	return auraIconUrl("aura_mixi", realIcon) ?? "";
 }
 
 /**
@@ -797,7 +793,7 @@ function isStaleMiximaxTelopUrl(imageUrl: string | undefined | null): boolean {
 
 /**
  * Résout l'icône d'un miximax à partir de son `icon_code`/`asset_code` (via le manifeste
- * des vrais fichiers `aura_mixi` du dump) en IGNORANT tout `image_url` DB issu de l'ancien
+ * des vrais conteneurs `aura_mixi`) en IGNORANT tout `image_url` DB issu de l'ancien
  * mapping naïf telop (`aura_mixi_c05028*` = bannière d'un autre perso). Retourne le
  * placeholder si aucun fichier réel n'existe — jamais le bandeau d'un perso étranger.
  *
@@ -830,8 +826,7 @@ export function getMiximaxImageUrl(
 
 /**
  * Résout l'URL telop (grande image) d'une aura à partir de son asset_code.
- * Les fichiers du bucket utilisent le pattern {code}_{code}.webp avec des préfixes
- * différents de ceux stockés en DB.
+ * Le nom de fichier CPK utilise des préfixes différents de ceux stockés en DB.
  *
  * Mapping :
  * - Keshins (wks/wkk/wkd/wko/wkt):  wk*{N} -> k{N padded 6 digits} (telop k{N} == numéro keshin)
@@ -843,7 +838,7 @@ export function getMiximaxImageUrl(
  * Miximax `wmm` : AUCUN telop (retourne null). L'ancien code dérivait `wmm00<NNN>` →
  * `aura_mixi_c05028<NNN>` (ou `aura_mixi_c<charId>` pour les codes longs). Or
  * `c05028<NNN>` est l'internal_code d'un PERSONNAGE LÉGENDAIRE d'un AUTRE set
- * (c05028100 = Ryoma Nishiki…), et les telops `aura_mixi_*` du dump forment un set
+ * (c05028100 = Ryoma Nishiki…), et les telops `aura_mixi_*` forment un set
  * FERMÉ tied à ces persos — ils ne correspondent PAS aux miximax `wmm` de Victory Road.
  * Conséquence : Arthur (wmm00100) affichait le bandeau de Ryoma (faux). Il n'existe
  * PAS de telop_waza valide pour un miximax `wmm` → on ne dérive plus rien (null) ;
@@ -878,7 +873,7 @@ export function resolveAuraTelopUrl(assetCode: string | undefined | null): strin
 	} else if (assetCode.startsWith("mode_change_")) {
 		bucketCode = assetCode;
 	} else if (assetCode.includes("awakening")) {
-		// Awakenings : pas de telop dédié dans le dump → placeholder `aura_power01`.
+		// Awakenings : pas de telop dédié dans le jeu → placeholder `aura_power01`.
 		bucketCode = "aura_power01";
 	}
 
@@ -886,8 +881,10 @@ export function resolveAuraTelopUrl(assetCode: string | undefined | null): strin
 		return null;
 	}
 
-	// Dump PNG dx11 brut. Pattern : `220_img/telop_waza/fr/{code}_{code}.png`.
-	return `${MENU_DUMP_BASE}/220_img/telop_waza/fr/${bucketCode}_${bucketCode}.png`;
+	// Forme 1:1 du contrat CPK : `220_img/telop_waza/<lang>/<code>.g4tx` → `<code>.png`.
+	// Gate sur les fichiers réels (98 `k*`, 56 `a*`, 9 `mode_change_*`, 9 `aura_power*`
+	// en `fr`) : un code sans telop rend `null` au lieu d'une URL 404.
+	return telopUrl(bucketCode);
 }
 
 /**
@@ -922,7 +919,7 @@ const MODEL_GLB_BASE = "https://cdn.rosegriffon.fr/model";
 /**
  * Résout l'URL du modèle 3D GLB d'un personnage à partir de son code interne
  * (`internalCode`/`charaParamId`, ex `c01000010`). Le basename du GLB = basename du
- * .g4mg `_face` du dump = ce code. Gate sur `CHARACTER_MODEL_CODES` (manifeste des GLB
+ * .g4mg `_face` = ce code. Gate sur `CHARACTER_MODEL_CODES` (manifeste des GLB
  * réellement exportés) : renvoie `null` si aucun modèle n'existe → le caller garde le
  * fallback image et ne monte pas le viewer 3D (évite tout 404).
  */
@@ -930,7 +927,7 @@ export function getCharacterModelGlbUrl(code: string | undefined | null): string
 	if (!code) {
 		return null;
 	}
-	// Strip suffixe de variante éventuel (_5000/_5100…) — le dump n'a que le code de base.
+	// Strip suffixe de variante éventuel (_5000/_5100…) — seul le code de base a un modèle.
 	const base = code.replace(/_\d{4}$/, "");
 	if (!CHARACTER_MODEL_CODES.has(base)) {
 		return null;

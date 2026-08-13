@@ -23,7 +23,6 @@ import type { SpriteCommonKey } from "@/config/sprites-common";
 import {
 	getCharacterFaceUrl,
 	getCharacterModelFullGlbUrl,
-	getCharacterUniformBackUrl,
 	getCharacterUniformUrl,
 	getEmblemImageUrl,
 	getSkillCategoryIconUrl,
@@ -291,7 +290,6 @@ export function CharacterSheet({
 	const displayPosition = POSITION_MAP[position] || "MIL";
 	const { t: _t } = useLanguage();
 	const [activeMoveset, setActiveMoveset] = useState<"default" | "alt">("default");
-	const [uniformSide, setUniformSide] = useState<"front" | "back">("front");
 	const [uniformError, setUniformError] = useState(false);
 	const [level, setLevel] = useState<number>(99);
 
@@ -388,9 +386,9 @@ export function CharacterSheet({
 	// servi sur cdn.rosegriffon.fr/model-full/<code>.glb.
 	// null si aucun modèle exporté → pas de bouton 3D (fallback portrait image).
 	const modelGlbUrl = internalCode ? getCharacterModelFullGlbUrl(internalCode) : null;
-	const uniformFrontUrl = internalCode ? getCharacterUniformUrl(internalCode) : null;
-	const uniformBackUrl = internalCode ? getCharacterUniformBackUrl(internalCode) : null;
-	const uniformUrl = uniformSide === "back" ? uniformBackUrl : uniformFrontUrl;
+	// Une seule vue : le conteneur `u<8>_l.g4tx` porte le maillot (`_1`) et le MASQUE
+	// de pose de l'emblème (`_2`) — pas un dos. Le sélecteur devant/dos a donc disparu.
+	const uniformUrl = internalCode ? getCharacterUniformUrl(internalCode) : null;
 
 	// Total stats
 	const totalStats =
@@ -645,30 +643,9 @@ export function CharacterSheet({
 									onError={() => setUniformError(true)}
 								/>
 							</div>
-							<div className="flex bg-black/30 rounded-full p-0.5 backdrop-blur-sm">
-								<button
-									onClick={() => setUniformSide("front")}
-									className={cn(
-										"px-3 py-1 sm:px-2 sm:py-0.5 rounded-full text-[10px] font-bold transition-all min-h-8 sm:min-h-0",
-										uniformSide === "front"
-											? "bg-white text-slate-900"
-											: "text-white/60 hover:text-white/90"
-									)}
-								>
-									Devant
-								</button>
-								<button
-									onClick={() => setUniformSide("back")}
-									className={cn(
-										"px-3 py-1 sm:px-2 sm:py-0.5 rounded-full text-[10px] font-bold transition-all min-h-8 sm:min-h-0",
-										uniformSide === "back"
-											? "bg-white text-slate-900"
-											: "text-white/60 hover:text-white/90"
-									)}
-								>
-									Dos
-								</button>
-							</div>
+							<span className="text-[10px] font-bold uppercase tracking-wider text-white/60">
+								Uniforme
+							</span>
 						</div>
 					)}
 				</div>

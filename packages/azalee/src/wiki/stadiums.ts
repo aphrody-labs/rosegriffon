@@ -78,11 +78,16 @@ function genericTitle(index: number | null, code: string): string {
 }
 
 /**
- * URL CDN du PNG plein cadre d'un stade. Le fichier menu suit le pattern
- * `<code>_<code>.png` (vérifié : les 81 codes existent dans le manifeste menu).
+ * URL CDN du PNG plein cadre d'un stade.
+ *
+ * Chemin réel dans les CPK : `220_img/stadium/<code>.g4tx`, conteneur à texture
+ * unique portant le nom du fichier → forme 1:1 du contrat CDN. Les 81 `image_path`
+ * de `inagle_stadiums` sont tous présents (81/81 dans l'index CPK).
+ *
+ * ⚠ Le doublage `<code>_<code>.png` était le nommage du dump archivé : 404 partout.
  */
 function stadiumImageUrl(code: string): string {
-	return `${STADIUM_CDN_BASE}/${code}_${code}.png`;
+	return `${STADIUM_CDN_BASE}/${code}.png`;
 }
 
 function rowToStadium(row: StadiumRow): Stadium {
