@@ -169,6 +169,19 @@ async function rendrePage(etat: EtatListeTweets): Promise<InteractionEditReplyOp
 	return { embeds: [embed], components: composants };
 }
 
+/**
+ * Les seules personnes autorisées à déclencher une annonce publique.
+ *
+ * Relevés dans `discord_members` le 13/8/2026 : `yoyo__goat` (Yoyo),
+ * `inazo__` (Inazo), `koltilasko` (Kolti). On garde l'IDENTIFIANT et non le
+ * pseudo : un pseudo Discord se change en un clic, un identifiant jamais.
+ */
+export const ANNONCEURS_AUTORISES: ReadonlySet<string> = new Set([
+	"281114294152724491", // yoyo__goat
+	"531549483067244566", // inazo__
+	"299502648317444096", // koltilasko
+]);
+
 @Discord()
 @SlashGroup({ name: "x", description: "Archive des posts X récoltés par la veille : parcours et consultation" })
 @SlashGroup("x")
@@ -400,7 +413,7 @@ export class XCommand {
 	 *
 	 * Réservée au staff : elle écrit dans un salon public.
 	 */
-	@Slash({ name: "annoncer", description: "Récolter le dernier post d'un compte et l'annoncer maintenant (staff)" })
+	@Slash({ name: "annoncer", description: "Récolter le dernier post d'un compte et l'annoncer maintenant (réservé)" })
 	async annoncer(
 		@SlashOption({
 			name: "compte",
@@ -413,6 +426,17 @@ export class XCommand {
 		interaction: ChatInputCommandInteraction
 	): Promise<void> {
 		await interaction.deferReply({ flags: MessageFlags.Ephemeral });
+		// Liste NOMINATIVE, en plus du rôle Rose Griffon : cette commande publie
+		// dans un salon public et mentionne un rôle — c'est-à-dire qu'elle notifie
+		// tout le serveur. Un rôle « admin » se donne et se retire au fil de l'eau ;
+		// ici on veut exactement trois personnes, et qu'un quatrième administrateur
+		// nommé demain n'en hérite pas sans décision explicite.
+		if (!ANNONCEURS_AUTORISES.has(interaction.user.id)) {
+			await interaction.editReply({
+				content: "⛔ Cette commande est réservée à Yoyo, Inazo et Kolti.",
+			});
+			return;
+		}
 		try {
 			await requireRgAdmin(interaction.user.id);
 		} catch (err) {
