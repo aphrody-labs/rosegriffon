@@ -1,11 +1,16 @@
 /* @ts-self-types="./nie_wasm.d.ts" */
 
 /**
- * Le JEU niers complet, jouable au clavier dans le navigateur — 100 % Rust → wasm.
+ * Machine à états d'écran interactive, rendue en WebAssembly.
  *
- * Machine à états INTERACTIVE (écran-titre → menu principal → **vrai match** [moteur nie-runtime :
- * physique, 22 joueurs, ballon, buts] → mode histoire), pilotée par les touches, rendue en framebuffer
- * RGBA8 `W*H*4` unifié que JS peint plein écran. Pas un playthrough scripté : le joueur navigue et joue.
+ * Écran-titre → menu → match simulé (`nie-runtime` : physique, 22 joueurs, ballon, buts) → mode
+ * histoire, pilotée au clavier, rendue dans un framebuffer RGBA8 `W*H*4` que JS peint.
+ *
+ * ⚠ **Ce n'est pas le jeu.** Le rendu est un placeholder 2D : il ne ressemble pas à l'UI d'IEVR,
+ * parce que le vrai menu n'est pas dans les fichiers — il est construit à l'exécution par le
+ * menu-manager C++ qui pilote Lua via `funcLuaMenuCommand`, boucle non encore portée. Et le
+ * modèle de but de `match_sim` reste nominal. Ne pas présenter cette surface comme un jeu
+ * jouable : ce qu'elle prouve, c'est que la logique portée tourne en wasm.
  */
 export class WasmGame {
     __destroy_into_raw() {
@@ -35,10 +40,8 @@ export class WasmGame {
         return ret !== 0;
     }
     /**
-     * Commande de menu IEVR RÉELLE (cf. `MENU_CMD_INFO` des cfg.bin + `input_ctrl`) :
-     * `CMD_FCS_MTX_{UP,DOWN,LEFT,RIGHT}` (navigation), `CMD_ENTER`/`CMD_SUB_ENTER` (valider),
-     * `CMD_BACK`/`CMD_CANCEL` (retour). Le mapping **clavier / souris / manette** → ces commandes
-     * se fait côté front (couche d'input). Le moteur ne connaît que les commandes du jeu.
+     * Commande de menu IEVR (CMD_FCS_*, CMD_ENTER, CMD_BACK…). Le mapping clavier/souris/manette
+     * → commande vit côté front ; la FSM (transitions) vit dans `nie_app::flow` (dédup Phase 5).
      * @param {string} cmd
      */
     input(cmd) {
@@ -86,7 +89,7 @@ export class WasmGame {
         return v1;
     }
     /**
-     * Avance le temps de `dt` secondes : la physique du match tourne quand un match est en cours.
+     * Avance le temps de `dt` s : la physique du match tourne quand un match est en cours.
      * @param {number} dt
      */
     update(dt) {
@@ -474,6 +477,36 @@ export function g4tx_info_json(bytes) {
         const ptr0 = passArray8ToWasm0(bytes, wasm.__wbindgen_malloc);
         const len0 = WASM_VECTOR_LEN;
         const ret = wasm.g4tx_info_json(ptr0, len0);
+        var ptr2 = ret[0];
+        var len2 = ret[1];
+        if (ret[3]) {
+            ptr2 = 0; len2 = 0;
+            throw takeFromExternrefTable0(ret[2]);
+        }
+        deferred3_0 = ptr2;
+        deferred3_1 = len2;
+        return getStringFromWasm0(ptr2, len2);
+    } finally {
+        wasm.__wbindgen_free(deferred3_0, deferred3_1, 1);
+    }
+}
+
+/**
+ * Feuille de sprites d'un atlas `.g4tx` : régions nommées avec leur rectangle, en JSON.
+ *
+ * `g4tx_info_json` rend la structure brute du conteneur ; celle-ci rend ce qu'une interface
+ * attend — un manifeste `{nom, largeur, hauteur, sprites[{nom, classe, x, y, largeur, hauteur}]}`
+ * directement consommable pour positionner une icône, avec ou sans CSS.
+ * @param {Uint8Array} bytes
+ * @returns {string}
+ */
+export function g4tx_sprite_sheet_json(bytes) {
+    let deferred3_0;
+    let deferred3_1;
+    try {
+        const ptr0 = passArray8ToWasm0(bytes, wasm.__wbindgen_malloc);
+        const len0 = WASM_VECTOR_LEN;
+        const ret = wasm.g4tx_sprite_sheet_json(ptr0, len0);
         var ptr2 = ret[0];
         var len2 = ret[1];
         if (ret[3]) {
