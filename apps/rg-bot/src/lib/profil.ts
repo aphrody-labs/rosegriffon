@@ -115,6 +115,41 @@ export interface AnnoncePostsProfil {
 	 * posté en spoiler dans un message à part.
 	 */
 	roleMention: string | null;
+	/**
+	 * Salon où DEMANDER avant de publier, `null` pour publier directement.
+	 *
+	 * ── POURQUOI UNE VALIDATION HUMAINE ────────────────────────────────────
+	 * Le compte suivi ne publie pas que des annonces : il retweete, il répond,
+	 * il commente. Les deux formes les plus bruyantes sont filtrées
+	 * automatiquement (`estRetweet`, `estReponse`), mais aucun filtre écrit à
+	 * l'avance ne dira jamais si un post donné MÉRITE de notifier deux mille
+	 * personnes. Un humain le sait en une seconde ; c'est donc lui qui décide.
+	 *
+	 * Quand ce salon est posé, le drain n'annonce plus rien de lui-même : il
+	 * dépose une carte de validation, et l'annonce ne part qu'au clic. Le
+	 * curseur, lui, avance quand même — sans quoi le même post serait proposé
+	 * toutes les cinq minutes jusqu'à ce que quelqu'un tranche.
+	 */
+	salonValidation: string | null;
+	/**
+	 * Comptes X annoncés par CE profil, `null` pour suivre le réglage partagé.
+	 *
+	 * ── POURQUOI UNE LISTE PAR PROFIL ──────────────────────────────────────
+	 * `settings['tweets.notification'].comptes` est UNE ligne pour les deux
+	 * bots : elle porte aujourd'hui huit comptes (Level5, les comptes officiels
+	 * Inazuma, Rose Griffon, Azalée). C'est la bonne liste pour une veille
+	 * thématique — ce n'est pas la bonne pour un salon d'annonce de MARQUE.
+	 *
+	 * Le salon d'annonce d'Azalée ne parle que d'Azalée : y voir arriver un post
+	 * de `@rose_griffon` ou de `@Level5Hub` est une erreur d'adressage, pas un
+	 * choix éditorial. (Constaté le 13/8/2026 : la première carte de validation
+	 * proposée portait un post de `@rose_griffon`.)
+	 *
+	 * La liste vit dans le REGISTRE et non en base : c'est l'identité du bot,
+	 * pas un réglage d'exploitation. Un profil qui annoncerait soudain un autre
+	 * compte doit être une décision lue dans le code, pas un UPDATE oublié.
+	 */
+	comptes: readonly string[] | null;
 }
 
 export interface Profil {
@@ -196,6 +231,10 @@ const MODULES_AZALEE = [
 	"commands/rag.ts",
 	"commands/cdn.ts",
 	"commands/x.ts",
+	// Les boutons de la carte de validation d'annonce. Ce module ne déclare
+	// aucune commande — seulement un `@ButtonComponent` —, mais discordx doit
+	// l'importer pour que ses boutons répondent.
+	"commands/validation-annonce.ts",
 ] as const;
 
 /**
@@ -256,6 +295,20 @@ const MODULES_RG = [
  * n'a aucun moyen de savoir laquelle il déclenche.
  */
 const SALON_ANNONCE_AZALEE = "1349528692086276148";
+
+/**
+ * Salon où le bot Azalée DEMANDE avant d'annoncer (`🌿📰〡général-azalée`).
+ *
+ * Les DEUX salons vivent sur la même guilde, `1072991720268111892` (Rose
+ * Griffon) — vérifié le 13/8/2026 par `GET /channels/{id}` : le salon d'annonce
+ * `1349528692086276148` est `🌸〡𝓐𝔃𝓪𝓵𝓮́𝓮`, HTTP 200, `guild_id` identique.
+ *
+ * ⚠ Ne pas confondre avec l'avertissement de démarrage « Guilde(s)
+ * configurée(s) mais non rejointe(s) : 1349526851672080414 » : cette guilde-là
+ * est une AUTRE entrée du registre, sans rapport avec l'annonce. La déduire du
+ * journal mènerait à croire la publication impossible alors qu'elle fonctionne.
+ */
+const SALON_VALIDATION_AZALEE = "1220382147811082340";
 
 export const PROFILS: Readonly<Record<NomProfil, Profil>> = Object.freeze({
 	rg: Object.freeze({
@@ -320,6 +373,13 @@ export const PROFILS: Readonly<Record<NomProfil, Profil>> = Object.freeze({
 			variableSalon: "AZALEE_DISCORD_NEWS_CHANNEL_ID",
 			curseur: "azalee",
 			roleMention: "1359506615765827744",
+			// `🌿📰〡général-azalée`, sur le serveur Rose Griffon. Rien ne part dans
+			// le salon d'annonce sans qu'un humain ait cliqué ici.
+			salonValidation: SALON_VALIDATION_AZALEE,
+			// UNIQUEMENT les posts d'Azalée. Le salon d'annonce porte la marque
+			// Azalée : les sept autres comptes du réglage partagé (Level5, comptes
+			// officiels Inazuma, Rose Griffon) n'ont rien à y faire.
+			comptes: ["Azalee_IE"],
 		},
 	}),
 });

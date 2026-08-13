@@ -33,6 +33,15 @@ let filtreCourant: FiltreTweets;
 let curseurCourant: Curseur | null;
 let tweetsCourants: LigneTweet[];
 let avancementAccepte: boolean;
+/**
+ * Curseurs suspendus, DOUBLÉS.
+ *
+ * Sans ce double, `curseursEnPause()` interroge la VRAIE table `settings` : le
+ * jour où un profil y est mis en pause en production, la moitié de ces tests
+ * bascule en « inactif » et échoue sans que rien n'ait changé dans le code.
+ * C'est arrivé le 13/8/2026, quelques minutes après la mise en pause d'Azalée.
+ */
+let pauseCourante: string[];
 
 interface Appels {
 	filtre: number;
@@ -44,6 +53,7 @@ let appels: Appels;
 
 await mock.module("./tweets", () => ({
 	...servicesReels,
+	curseursEnPause: async (): Promise<string[]> => pauseCourante,
 	lireFiltreNotification: async (): Promise<FiltreTweets> => {
 		appels.filtre += 1;
 		return filtreCourant;
@@ -157,6 +167,7 @@ beforeEach(() => {
 	curseurCourant = curseurFactice("discord", "2026-08-13T00:00:00.000Z", false);
 	tweetsCourants = [];
 	avancementAccepte = true;
+	pauseCourante = [];
 	appels = { filtre: 0, assurer: [], lire: [], avance: [] };
 });
 
@@ -588,5 +599,118 @@ describe("ni retweet, ni réponse dans un salon d'annonces", () => {
 		expect(estAnnoncable("RT @x: coucou")).toBe(false);
 		expect(estAnnoncable("@x coucou")).toBe(false);
 		expect(estAnnoncable("La mise à jour 7.1.0 est sortie ⚡️")).toBe(true);
+	});
+});
+
+describe("pause par profil", () => {
+	/*
+	 * `FiltreTweets.actif` existe déjà, mais il vit dans le réglage PARTAGÉ :
+	 * le baisser couperait les DEUX bots. Cette pause-ci porte sur un curseur,
+	 * donc sur un seul profil — c'est ce qui a permis de suspendre Azalée le
+	 * 13/8/2026 sans faire taire Rose Griffon.
+	 */
+
+	test("un curseur suspendu ne publie RIEN et le dit", async () => {
+		pauseCourante = ["azalee"];
+		tweetsCourants = [tweetFactice("1", "2026-08-13T10:00:00Z")];
+		const envois: Envoi[] = [];
+
+		const { valeur: resultat } = await sansJournal(() =>
+			drainerTweets(clientFactice(envois), { annonce: ANNONCE_AZALEE })
+		);
+
+		expect(resultat.etat).toBe("inactif");
+		expect(resultat.publies).toBe(0);
+		expect(envois).toHaveLength(0);
+	});
+
+	test("suspendre un profil n'en suspend AUCUN autre", async () => {
+		// C'est toute la raison d'être de ce réglage : le bot Rose Griffon doit
+		// continuer à faire son travail pendant qu'on répare celui d'Azalée.
+		pauseCourante = ["azalee"];
+		tweetsCourants = [tweetFactice("1", "2026-08-13T10:00:00Z")];
+		const envois: Envoi[] = [];
+
+		// Sans `annonce`, le drain retombe sur le profil HISTORIQUE (curseur
+		// `discord`), c'est-à-dire le bot Rose Griffon.
+		const { valeur: resultat } = await sansJournal(() =>
+			drainerTweets(clientFactice(envois), {})
+		);
+
+		expect(resultat.etat).not.toBe("inactif");
+	});
+
+	test("un réglage vide ou illisible NE SUSPEND RIEN", async () => {
+		// Un réglage cassé ne doit pas faire taire les bots en silence : c'est la
+		// panne la plus difficile à voir, puisqu'elle ressemble à « rien à annoncer ».
+		pauseCourante = [];
+		tweetsCourants = [tweetFactice("1", "2026-08-13T10:00:00Z")];
+
+		const { valeur: resultat } = await sansJournal(() =>
+			drainerTweets(clientFactice([]), { annonce: ANNONCE_AZALEE })
+		);
+
+		expect(resultat.etat).not.toBe("inactif");
+	});
+});
+
+describe("liste de comptes par profil", () => {
+	/*
+	 * Le salon d'annonce d'Azalée porte la marque Azalée. Le réglage PARTAGÉ,
+	 * lui, suit huit comptes (Level5, comptes officiels Inazuma, Rose Griffon,
+	 * Azalée) : c'est la bonne liste pour une veille thématique, pas pour un
+	 * salon d'annonce. Constaté le 13/8/2026 — la première carte de validation
+	 * proposée portait un post de `@rose_griffon`.
+	 */
+
+	/** Le profil Azalée tel que le registre le déclare : un seul compte. */
+	const ANNONCE_AZALEE_MARQUE = {
+		...ANNONCE_AZALEE,
+		comptes: ["Azalee_IE"],
+	} as const;
+
+	test("un post d'un AUTRE compte n'est pas retenu", async () => {
+		tweetsCourants = [{ ...tweetFactice("1", "2026-08-13T10:00:00Z"), author_username: "rose_griffon" }];
+		const envois: Envoi[] = [];
+
+		const { valeur: resultat } = await sansJournal(() =>
+			drainerTweets(clientFactice(envois), { annonce: ANNONCE_AZALEE_MARQUE })
+		);
+
+		expect(resultat.publies).toBe(0);
+		expect(envois).toHaveLength(0);
+	});
+
+	test("un post du compte de la marque est retenu", async () => {
+		tweetsCourants = [{ ...tweetFactice("1", "2026-08-13T10:00:00Z"), author_username: "Azalee_IE" }];
+		const envois: Envoi[] = [];
+
+		const { valeur: resultat } = await sansJournal(() =>
+			drainerTweets(clientFactice(envois), { annonce: ANNONCE_AZALEE_MARQUE })
+		);
+
+		expect(resultat.publies).toBe(1);
+	});
+
+	test("sans liste déclarée, le réglage PARTAGÉ s'applique — le profil historique ne change pas", async () => {
+		// Rose Griffon n'a pas de liste propre : son comportement doit rester
+		// exactement celui d'avant cette option. Le réglage partagé du test suit
+		// `inazuma_project`, et c'est bien lui qui décide.
+		tweetsCourants = [tweetFactice("1", "2026-08-13T10:00:00Z")];
+
+		const { valeur: publie } = await sansJournal(() =>
+			drainerTweets(clientFactice([]), { annonce: ANNONCE_AZALEE })
+		);
+		expect(publie.publies).toBe(1);
+
+		// Et le même post, sous une liste de profil qui ne le contient pas, ne part
+		// pas : c'est bien la liste du PROFIL qui l'emporte quand elle existe.
+		curseurCourant = curseurFactice("azalee", "2026-08-13T00:00:00.000Z", false);
+		tweetsCourants = [tweetFactice("2", "2026-08-13T11:00:00Z")];
+
+		const { valeur: ecarte } = await sansJournal(() =>
+			drainerTweets(clientFactice([]), { annonce: ANNONCE_AZALEE_MARQUE })
+		);
+		expect(ecarte.publies).toBe(0);
 	});
 });

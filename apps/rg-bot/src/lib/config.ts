@@ -163,6 +163,8 @@ export const PROFIL_ANNONCEUR: {
 		readonly salon: string;
 		readonly curseur: string;
 		readonly roleMention: string | null;
+		readonly salonValidation: string | null;
+		readonly comptes: readonly string[] | null;
 	} | null;
 } = {
 	nom: PROFIL.nom,
@@ -171,6 +173,8 @@ export const PROFIL_ANNONCEUR: {
 				salon: SALON_ANNONCE_POSTS ?? "",
 				curseur: PROFIL.annoncePosts.curseur,
 				roleMention: PROFIL.annoncePosts.roleMention,
+				salonValidation: PROFIL.annoncePosts.salonValidation,
+				comptes: PROFIL.annoncePosts.comptes,
 			}
 		: null,
 };

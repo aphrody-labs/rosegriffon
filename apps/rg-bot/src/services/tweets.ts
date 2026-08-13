@@ -15,6 +15,7 @@
 import { cached, invalidate } from "../lib/cache";
 import { sql } from "../lib/db";
 import {
+	CLE_PAUSE_TWEETS,
 	CLE_REGLAGE_TWEETS,
 	FILTRE_TWEETS_DEFAUT,
 	PLAFOND_DRAIN,
@@ -58,6 +59,18 @@ export interface AnnoncePosts {
 	readonly curseur: string;
 	/** Rôle mentionné dans un message séparé après l'annonce, `null` si aucun. */
 	readonly roleMention?: string | null;
+	/**
+	 * Salon où DEMANDER avant de publier, `null`/absent pour publier directement.
+	 *
+	 * Quand il est posé, le drain ne publie plus rien lui-même : il dépose une
+	 * carte de validation, et l'annonce ne part qu'au clic d'un humain habilité.
+	 */
+	readonly salonValidation?: string | null;
+	/**
+	 * Comptes X annoncés par ce profil, `null`/absent pour suivre le réglage
+	 * partagé. Un salon d'annonce de marque ne relaie que sa marque.
+	 */
+	readonly comptes?: readonly string[] | null;
 }
 
 /**
@@ -116,8 +129,11 @@ export function salonAnnonce(
 const COLONNES = `id, text, created_at, author_username, author_name, media, metrics, is_thread, tweet_count, translation, category`;
 
 const TTL_REGLAGE_MS = 30_000;
+/** Court : la reprise d'un profil doit être effective en moins d'une minute. */
+const TTL_PAUSE_MS = 20_000;
 const TTL_SUGGESTIONS_MS = 10 * 60_000;
 const CLE_CACHE_REGLAGE = "tweets:reglage";
+const CLE_CACHE_PAUSE = "tweets:pause";
 const CLE_CACHE_AUTEURS = "tweets:auteurs";
 const CLE_CACHE_CATEGORIES = "tweets:categories";
 
@@ -212,6 +228,43 @@ export async function lireTweet(id: string): Promise<LigneTweet | null> {
 // ─── Réglage de notification (table `settings`) ─────────────────────────────
 
 /** Réglage courant, mis en cache brièvement (Redis partagé du bot). */
+/**
+ * Curseurs d'annonce MIS EN PAUSE, lus en base.
+ *
+ * ── POURQUOI PAR CURSEUR, ET PAS L'INTERRUPTEUR GÉNÉRAL ────────────────────
+ * `FiltreTweets.actif` existe déjà, mais il vit dans le réglage PARTAGÉ
+ * (`settings['tweets.notification']`) : le baisser couperait les annonces des
+ * DEUX profils. Or on a besoin de suspendre un seul bot — celui d'Azalée
+ * annonçait des posts indésirables pendant que celui de Rose Griffon faisait
+ * correctement son travail.
+ *
+ * La liste est en BASE, pas en variable d'environnement : suspendre ou relancer
+ * un profil ne doit pas demander un redéploiement, et surtout pas un
+ * redémarrage — c'est précisément quand quelque chose déraille qu'on veut
+ * pouvoir couper en une requête.
+ *
+ * Relue à chaque drain (TTL court) : la reprise est donc effective en moins
+ * d'une minute, sans toucher au service.
+ */
+export async function curseursEnPause(): Promise<string[]> {
+	const brut = await cached<unknown>(CLE_CACHE_PAUSE, TTL_PAUSE_MS, async () => {
+		const lignes = await sql<Array<{ value: unknown }>>`
+			SELECT value FROM public.settings WHERE key = ${CLE_PAUSE_TWEETS} LIMIT 1
+		`;
+		return lignes[0]?.value ?? null;
+	});
+
+	// Deux formes acceptées : `["azalee"]` et `{"curseurs":["azalee"]}`. Une
+	// valeur illisible NE MET RIEN EN PAUSE — un réglage cassé ne doit pas faire
+	// taire tous les bots en silence.
+	const liste = Array.isArray(brut)
+		? brut
+		: typeof brut === "object" && brut !== null && Array.isArray((brut as { curseurs?: unknown }).curseurs)
+			? ((brut as { curseurs: unknown[] }).curseurs)
+			: [];
+	return liste.filter((v): v is string => typeof v === "string" && v.trim().length > 0).map((v) => v.trim().toLowerCase());
+}
+
 export async function lireFiltreNotification(): Promise<FiltreTweets> {
 	const brut = await cached<unknown>(CLE_CACHE_REGLAGE, TTL_REGLAGE_MS, async () => {
 		const lignes = await sql<Array<{ value: unknown }>>`

@@ -96,6 +96,14 @@ export interface MetriquesTweet {
 /** Clé de `public.settings` qui pilote la notification. */
 export const CLE_REGLAGE_TWEETS = "tweets.notification";
 
+/**
+ * Réglage des curseurs d'annonce SUSPENDUS (`settings`).
+ *
+ * Distinct de `CLE_REGLAGE_TWEETS`, qui est partagé par les deux profils : ici on
+ * suspend UN bot sans faire taire l'autre. Valeur attendue : `["azalee"]`.
+ */
+export const CLE_PAUSE_TWEETS = "tweets.notification.pause";
+
 /** Réglage de la notification des nouveaux tweets. */
 export interface FiltreTweets {
 	/** Interrupteur général : à `false`, le bot ne publie plus rien (sans redéploiement). */
