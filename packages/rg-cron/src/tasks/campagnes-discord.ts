@@ -117,7 +117,14 @@ export interface StatsCampagneDiscord {
 	imagesEchouees: number;
 	/** Lignes écrites (insertions + mises à jour). */
 	rattachements: number;
-	/** Salons de dépôt déclarés mais absents de la veille (accès Discord manquant). */
+	/**
+	 * Salons de dépôt déclarés dont aucun message n'a été récolté.
+	 *
+	 * Ce n'est PAS forcément un défaut d'accès : un salon sous veille, à jour et
+	 * vide tombe ici aussi — c'est l'état normal d'une campagne qui vient
+	 * d'ouvrir. `diagnostiquerSalons` tranche entre les trois cas au moment de
+	 * l'écrire dans le journal.
+	 */
 	salonsInaccessibles: string[];
 }
 
@@ -399,6 +406,49 @@ export async function recolterCreationsDiscord(
 	}
 }
 
+/**
+ * Dit POURQUOI un salon de dépôt n'a rendu aucun message.
+ *
+ * L'ancien message unique — « le bot n'y a pas encore accès » — était faux dès
+ * que la veille avait fait son travail : le salon `🍰〡iergday`, créé le jour
+ * même de l'ouverture de la campagne, était sous veille, à jour, et VIDE. Le
+ * diagnostic envoyait vérifier des permissions parfaitement en ordre au lieu de
+ * dire la seule chose vraie : personne n'a encore rien déposé.
+ */
+async function diagnostiquerSalons(salons: readonly string[]): Promise<string[]> {
+	// `jsonb_array_elements_text` et NON `= ANY($1::text[])` : Bun.SQL sérialise
+	// un tableau JS en JSON, pas en littéral de tableau Postgres, et `ANY` échoue
+	// alors sur « malformed array literal » (même piège que `marquerSupprimes`
+	// dans `tasks/discord-messages.ts`, où il est déjà documenté).
+	const etats = (await sql`
+		select channel_id, name, suivi, backfill_complete, message_count
+		  from public.discord_channels
+		 where channel_id in (select jsonb_array_elements_text(${salons as string[]}))
+	`) as Array<{
+		channel_id: string;
+		name: string;
+		suivi: boolean;
+		backfill_complete: boolean;
+		message_count: number | null;
+	}>;
+	const parId = new Map(etats.map((etat) => [etat.channel_id, etat]));
+
+	return salons.map((salon) => {
+		const etat = parId.get(salon);
+		if (!etat) {
+			return `salon de dépôt ${salon} inconnu de la veille — il sera armé à la prochaine passe de « discord:messages ».`;
+		}
+		const nom = etat.name || salon;
+		if (!etat.suivi) {
+			return `salon de dépôt ${nom} (${salon}) déclaré mais PAS sous veille — « discord:messages » l'armera, ou le bot n'y a pas accès.`;
+		}
+		if (!etat.backfill_complete) {
+			return `salon de dépôt ${nom} (${salon}) sous veille, historique en cours de remontée — rien à récolter avant la fin.`;
+		}
+		return `salon de dépôt ${nom} (${salon}) sous veille et à jour, mais VIDE : aucune création déposée à ce jour. Rien n'est inventé en attendant.`;
+	});
+}
+
 /** Récolte une campagne : sélection, ré-hébergement des images, écriture. */
 async function recolterCampagne(
 	campagne: LigneCampagne,
@@ -509,9 +559,9 @@ async function recolterCampagne(
 	}
 
 	if (stats.salonsInaccessibles.length > 0) {
-		console.warn(
-			`${PREFIXE} ${campagne.slug} : ${stats.salonsInaccessibles.length} salon(s) de dépôt sans aucun message archivé (${stats.salonsInaccessibles.join(", ")}) — le bot n'y a pas encore accès, rien n'est inventé en attendant.`
-		);
+		for (const ligne of await diagnostiquerSalons(stats.salonsInaccessibles)) {
+			console.warn(`${PREFIXE} ${campagne.slug} : ${ligne}`);
+		}
 	}
 
 	if (lignes.length === 0) {
@@ -681,7 +731,7 @@ if (import.meta.main) {
 		console.log(
 			`  ${detail.slug.padEnd(20)} retenus=${detail.retenus} hashtag=${detail.parHashtag} salon=${detail.parSalon} ` +
 				`rattachements=${detail.rattachements} images=${detail.imagesRehebergees}(+${detail.imagesDejaLa} en stock, ${detail.imagesEchouees} en échec)` +
-				`${detail.salonsInaccessibles.length > 0 ? ` salons_sans_acces=${detail.salonsInaccessibles.join("/")}` : ""}`
+				`${detail.salonsInaccessibles.length > 0 ? ` salons_sans_creation=${detail.salonsInaccessibles.join("/")}` : ""}`
 		);
 	}
 	console.log(

@@ -21,6 +21,25 @@
  * La liste des salons est lue en base (`discord_channels.suivi`), jamais codée
  * en dur ; `DISCORD_SALONS_SUIVIS` (identifiants séparés par des virgules) permet
  * d'en armer d'autres avant la synchro.
+ *
+ * ── ON SUIT AUSSI DES CATÉGORIES ENTIÈRES ───────────────────────────────────
+ * Armer les salons UN PAR UN ne tient pas pour l'archive du serveur : la
+ * catégorie « Archives » compte 29 salons (relevé le 13/8/2026 sur
+ * `GET /guilds/{id}/channels`), dont trois seulement étaient suivis. Les
+ * créations des campagnes passées y dorment — c'est la SEULE source qui existe
+ * pour elles, aucune n'a transité par X (cf. `tasks/campagnes-discord.ts`) — et
+ * chaque salon rouvert plus tard aurait demandé une intervention manuelle.
+ * `CATEGORIES_SUIVIES` déclare donc des catégories dont TOUS les salons
+ * textuels sont archivés ; l'appartenance est relue à chaque passe, donc un
+ * salon déplacé dans l'archive est pris automatiquement à la passe suivante.
+ *
+ * ── ET ON NE REMONTE PAS 29 HISTORIQUES D'UN COUP ───────────────────────────
+ * La veille tourne toutes les 5 minutes. Remonter l'historique complet de 26
+ * nouveaux salons dans la même passe, c'est dépasser le délai maximal de la
+ * tâche et se faire tuer en plein travail — pour recommencer de zéro cinq
+ * minutes plus tard. `BACKFILLS_PAR_PASSE` borne le nombre d'historiques
+ * REMONTÉS par passe ; les autres salons sont quand même rafraîchis et
+ * rattrapés, ils prennent simplement leur tour.
  */
 
 import type {
@@ -43,6 +62,42 @@ const PAUSE_PAGE_MS = 150;
 const REGROUPEMENT_REACTIONS_MS = 1500;
 /** Nombre maximal de pages remontées en une passe de rattrapage (garde-fou). */
 const PAGES_MAX = 500;
+
+/**
+ * Catégories dont TOUS les salons textuels sont archivés.
+ *
+ * `1180594177063526441` = « Archives » du serveur Rose Griffon : 29 salons au
+ * 13/8/2026, dont les salons de dépôt des campagnes passées (`⚡〡inazuma-rg`,
+ * `⚡〡inazuma-rg2`, `⚡〡inatober-rg`) et tous les événements terminés
+ * (`⚡〡souvenirs-d-été`, `🎉〡concours`, `🏟〡route-du-sacre`…).
+ *
+ * `DISCORD_CATEGORIES_SUIVIES` AJOUTE à cette liste (elle ne la remplace pas) :
+ * une catégorie retirée d'ici doit l'être en connaissance de cause, pas par
+ * l'oubli d'une variable d'environnement sur un serveur.
+ */
+export const CATEGORIES_SUIVIES = ["1180594177063526441"] as const;
+
+/**
+ * Types de salons Discord dont les messages sont archivables.
+ *
+ * 0 = textuel, 5 = annonces, 15 = forum. Sont écartés : le vocal (2) et le
+ * stage (13), qui n'ont pas d'historique de messages exploitable ici, et les
+ * fils (11/12), qui ne figurent pas dans `GET /guilds/{id}/channels`.
+ */
+const TYPES_ARCHIVABLES = new Set([0, 5, 15]);
+
+/**
+ * Historiques complets remontés par passe.
+ *
+ * Deux salons d'archive suffisent à occuper une passe de cinq minutes sans
+ * risquer le délai maximal de la tâche ; les 26 salons armés d'un coup se
+ * remplissent donc en une heure et demie de passes ordinaires, sans qu'aucune
+ * ne soit tuée en cours de route.
+ */
+const BACKFILLS_PAR_PASSE = Math.max(
+	1,
+	Number.parseInt(Bun.env.DISCORD_BACKFILLS_PAR_PASSE ?? "2", 10) || 2
+);
 
 // ─── FORMES BRUTES DE L'API DISCORD ──────────────────────────────────────────
 
@@ -110,6 +165,8 @@ export interface StatsVeille {
 	salons: StatsSalonVeille[];
 	inseres: number;
 	mis_a_jour: number;
+	/** Historiques non remontés dans cette passe, faute de budget. */
+	backfills_differes?: number;
 	durationMs: number;
 }
 
@@ -298,6 +355,136 @@ async function armerSalonsDepuisEnv(): Promise<void> {
 	console.info(`${PREFIXE} ${identifiants.length} salon(s) armé(s) via DISCORD_SALONS_SUIVIS.`);
 }
 
+/**
+ * Arme les salons de DÉPÔT déclarés par les campagnes (`x_campagnes.salons_depot`).
+ *
+ * ── POURQUOI C'EST ICI ET PAS DANS UNE VARIABLE D'ENVIRONNEMENT ────────────
+ * `tasks/campagnes-discord.ts` rattache une création à une campagne quand elle
+ * a été déposée dans l'un de ses salons — mais il ne lit PAS Discord : il lit
+ * `discord_messages`, que remplit cette veille. Déclarer un salon de dépôt sans
+ * le mettre sous veille, c'est donc une campagne qui restera vide pour
+ * toujours, sans qu'aucune des deux tâches ne signale d'erreur (la récolte
+ * compte simplement le salon parmi ses « salons inaccessibles »).
+ *
+ * En armant ici ce que la campagne déclare, ouvrir une campagne devient UN seul
+ * geste : poser le salon dans `x_campagnes.salons_depot`. La chaîne
+ * veille → récolte → page se branche toute seule.
+ */
+export async function armerSalonsDeDepot(): Promise<string[]> {
+	if (!GUILD_ID) return [];
+
+	const lignes = await sql<Array<{ salon: string; nouveau: boolean }>>`
+		WITH declares AS (
+			SELECT DISTINCT unnest(salons_depot) AS salon
+			  FROM x_campagnes
+			 WHERE salons_depot IS NOT NULL
+		)
+		INSERT INTO discord_channels (channel_id, guild_id, name, suivi)
+		SELECT salon, ${GUILD_ID}, salon, true FROM declares
+		ON CONFLICT (channel_id) DO UPDATE SET suivi = true, updated_at = now()
+		RETURNING channel_id AS salon, (xmax = 0) AS nouveau
+	`;
+	const nouveaux = lignes.filter((ligne) => ligne.nouveau).map((ligne) => ligne.salon);
+	if (nouveaux.length > 0) {
+		console.info(
+			`${PREFIXE} ${nouveaux.length} salon(s) de dépôt de campagne armé(s) : ${nouveaux.join(", ")}`
+		);
+	}
+	return nouveaux;
+}
+
+/** Catégories à suivre : le registre du code, plus celles de l'environnement. */
+export function categoriesSuivies(
+	env: Record<string, string | undefined> = Bun.env as Record<string, string | undefined>
+): string[] {
+	const supplement = (env.DISCORD_CATEGORIES_SUIVIES ?? "")
+		.split(",")
+		.map((valeur) => valeur.trim())
+		.filter((valeur) => /^\d{15,25}$/.test(valeur));
+	return [...new Set([...CATEGORIES_SUIVIES, ...supplement])];
+}
+
+/**
+ * Un salon de catégorie suivie est-il archivable ?
+ *
+ * Fonction PURE, testée seule : c'est elle qui décide ce qui entre dans
+ * `discord_messages`, et se tromper de type revient soit à manquer une archive,
+ * soit à demander l'historique d'un salon vocal (404 à chaque passe, toutes les
+ * cinq minutes).
+ */
+export function estSalonArchivable(
+	salon: { type?: number | null; parent_id?: string | null },
+	categories: readonly string[]
+): boolean {
+	if (typeof salon.type !== "number" || !TYPES_ARCHIVABLES.has(salon.type)) {
+		return false;
+	}
+	return Boolean(salon.parent_id) && categories.includes(salon.parent_id as string);
+}
+
+/**
+ * Arme tous les salons textuels des catégories suivies.
+ *
+ * L'appartenance est relue à CHAQUE passe : un salon déplacé dans l'archive
+ * entre en veille tout seul. L'inverse n'est pas vrai — un salon sorti de
+ * l'archive garde `suivi = true`, parce que ses messages sont déjà archivés et
+ * que cesser de les rattraper les figerait à moitié à jour.
+ */
+export async function armerSalonsDeCategories(): Promise<{
+	examines: number;
+	armes: string[];
+	deja: number;
+}> {
+	const categories = categoriesSuivies();
+	if (categories.length === 0 || !GUILD_ID) {
+		return { examines: 0, armes: [], deja: 0 };
+	}
+
+	const salons = await appelDiscord<SalonBrut[]>(`/guilds/${GUILD_ID}/channels`);
+	const candidats = salons.filter((salon) => estSalonArchivable(salon, categories));
+	const armes: string[] = [];
+	let deja = 0;
+
+	for (const salon of candidats) {
+		// `suivi` n'est jamais remis à `false` ici : cette requête ARME, elle ne
+		// désarme pas. Le nom, le type et la position sont écrits au passage, ce
+		// qui évite une ligne portant l'identifiant en guise de nom jusqu'au
+		// premier rafraîchissement.
+		const [ligne] = await sql<Array<{ nouveau: boolean }>>`
+			INSERT INTO discord_channels (channel_id, guild_id, name, type, parent_id, position, suivi)
+			VALUES (
+				${salon.id},
+				${salon.guild_id ?? GUILD_ID},
+				${salon.name ?? salon.id},
+				${salon.type ?? 0},
+				${salon.parent_id ?? null},
+				${salon.position ?? null},
+				true
+			)
+			ON CONFLICT (channel_id) DO UPDATE SET
+				name = EXCLUDED.name,
+				type = EXCLUDED.type,
+				parent_id = EXCLUDED.parent_id,
+				position = EXCLUDED.position,
+				suivi = true,
+				updated_at = now()
+			RETURNING (xmax = 0) AS nouveau, discord_channels.suivi
+		`;
+		if (ligne?.nouveau) {
+			armes.push(salon.name ?? salon.id);
+		} else {
+			deja += 1;
+		}
+	}
+
+	if (armes.length > 0) {
+		console.info(
+			`${PREFIXE} ${armes.length} salon(s) d'archive armé(s) : ${armes.slice(0, 10).join(", ")}${armes.length > 10 ? "…" : ""}`
+		);
+	}
+	return { examines: candidats.length, armes, deja };
+}
+
 /** Lit la liste des salons suivis en base et met à jour l'ensemble en mémoire. */
 async function chargerSalonsSuivis(): Promise<SalonSuivi[]> {
 	const salons = await sql<SalonSuivi[]>`
@@ -447,6 +634,20 @@ export async function runDiscordMessagesSync(): Promise<{
 
 	try {
 		await armerSalonsDepuisEnv();
+		// Les catégories entières AVANT la lecture de la liste : un salon d'archive
+		// ajouté depuis la dernière passe entre en veille dès celle-ci.
+		try {
+			await armerSalonsDeCategories();
+			await armerSalonsDeDepot();
+		} catch (err) {
+			// L'armement est un CONFORT (il ajoute des salons) ; la veille des
+			// salons déjà suivis, elle, est la mission. Une panne Discord sur
+			// `GET /guilds/{id}/channels` ne doit pas la faire échouer.
+			console.warn(
+				`${PREFIXE} Armement des catégories impossible :`,
+				err instanceof Error ? err.message : err
+			);
+		}
 		const salons = await chargerSalonsSuivis();
 
 		if (salons.length === 0) {
@@ -460,6 +661,18 @@ export async function runDiscordMessagesSync(): Promise<{
 		const rapport: StatsSalonVeille[] = [];
 		let inseresTotal = 0;
 		let majTotal = 0;
+		/**
+		 * Historiques restant à remonter dans CETTE passe.
+		 *
+		 * Sans ce budget, armer une catégorie de 29 salons demandait 26 remontées
+		 * d'historique dans la même passe : la tâche dépassait son délai maximal,
+		 * se faisait tuer, et repartait de zéro cinq minutes plus tard — donc
+		 * jamais aucun salon d'archive complet. Les salons non retenus sont quand
+		 * même rafraîchis et rattrapés ; ils prennent leur tour à la passe
+		 * suivante.
+		 */
+		let budgetBackfill = BACKFILLS_PAR_PASSE;
+		let backfillsDifferes = 0;
 
 		for (const salon of salons) {
 			const compteurs: Compteurs = { inseres: 0, mis_a_jour: 0 };
@@ -470,7 +683,10 @@ export async function runDiscordMessagesSync(): Promise<{
 				await rafraichirSalon(salon);
 
 				// b/c. Historique complet, puis rattrapage incrémental.
-				if (!salon.backfill_complete) {
+				if (!salon.backfill_complete && budgetBackfill <= 0) {
+					backfillsDifferes += 1;
+				} else if (!salon.backfill_complete) {
+					budgetBackfill -= 1;
 					const lus = await remonterHistorique(salon, compteurs);
 					backfillComplet = true;
 					console.info(`${PREFIXE} ${salon.name} : historique remonté (${lus} messages lus).`);
@@ -518,10 +734,17 @@ export async function runDiscordMessagesSync(): Promise<{
 			}
 		}
 
+		if (backfillsDifferes > 0) {
+			console.info(
+				`${PREFIXE} ${backfillsDifferes} historique(s) reporté(s) à la prochaine passe (budget : ${BACKFILLS_PAR_PASSE}).`
+			);
+		}
+
 		const stats: StatsVeille = {
 			salons: rapport,
 			inseres: inseresTotal,
 			mis_a_jour: majTotal,
+			backfills_differes: backfillsDifferes,
 			durationMs: Date.now() - debut,
 		};
 
