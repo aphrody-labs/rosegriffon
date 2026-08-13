@@ -31,7 +31,10 @@ import {
 	type InteractionEditReplyOptions,
 } from "discord.js";
 
+import { appelerCron } from "../lib/cron-ipc";
 import { rgEmbed, truncate } from "../lib/embeds";
+import { NotAdminError, requireRgAdmin } from "../lib/rbac";
+import { PROFIL_ANNONCEUR } from "../lib/config";
 import {
 	bornerPage,
 	corpsTweet,
@@ -42,12 +45,16 @@ import {
 	horodatageDiscord,
 	imagesTweet,
 	ligneListe,
+	messageAnnonce,
+	messagePing,
 	nombreDePages,
 	texteSansLienMedia,
 	urlTweet,
+	type LigneTweet,
 	type EtatListeTweets,
 } from "../lib/tweets-format";
 import { auteursConnus, categoriesConnues, listerTweets, lireTweet } from "../services/tweets";
+import { resoudreSalon } from "../services/tweetsNotifier";
 
 /** Posts par page. 5 lignes tiennent largement dans les 4 096 caractères d'une description. */
 const PAR_PAGE = 5;
@@ -374,6 +381,101 @@ export class XCommand {
 			await interaction.editReply({ embeds: [embed, ...compagnons] });
 		} catch (err) {
 			await repondreErreur(interaction, "voir", err);
+		}
+	}
+
+	/**
+	 * `/x annoncer` — récolte le DERNIER post et le publie tout de suite.
+	 *
+	 * La veille horaire (`rg-cron`, tâche `x`) suffit au quotidien ; cette
+	 * commande sert quand on ne veut pas l'attendre : elle interroge X EN DIRECT
+	 * par le pont cron (verbe `x.posts`, un seul post), puis publie dans le salon
+	 * d'annonce du profil.
+	 *
+	 * Le message suit le motif du salon À LA LETTRE, et c'est tout l'intérêt :
+	 * une amorce suivie de l'URL `fixvx.com` — c'est Discord qui déplie alors
+	 * l'aperçu complet (texte intégral, image en pleine résolution, auteur) —
+	 * puis le ping du rôle en SPOILER, dans un message séparé. Un embed fabriqué
+	 * ici afficherait moins que ce que le miroir sait montrer.
+	 *
+	 * Réservée au staff : elle écrit dans un salon public.
+	 */
+	@Slash({ name: "annoncer", description: "Récolter le dernier post d'un compte et l'annoncer maintenant (staff)" })
+	async annoncer(
+		@SlashOption({
+			name: "compte",
+			description: "Compte X à récolter (défaut : Azalee_IE)",
+			type: ApplicationCommandOptionType.String,
+			required: false,
+			maxLength: 15,
+		})
+		compte: string | undefined,
+		interaction: ChatInputCommandInteraction
+	): Promise<void> {
+		await interaction.deferReply({ flags: MessageFlags.Ephemeral });
+		try {
+			await requireRgAdmin(interaction.user.id);
+		} catch (err) {
+			await interaction.editReply({
+				content: err instanceof NotAdminError ? `⛔ ${err.message}` : "⛔ Droits insuffisants.",
+			});
+			return;
+		}
+
+		const annonce = PROFIL_ANNONCEUR.annoncePosts;
+		if (!annonce || annonce.salon.length === 0) {
+			await interaction.editReply({
+				content:
+					"Ce bot n'a pas de salon d'annonce dans son registre de profils : il n'y a nulle part où publier.",
+			});
+			return;
+		}
+
+		const pseudo = (compte ?? "Azalee_IE").trim().replace(/^@/, "");
+
+		try {
+			// Un seul post : la veille a déjà l'archive, et X limite le débit.
+			const reponse = await appelerCron<{
+				success: boolean;
+				error?: string;
+				posts?: Array<{ id: string; texte?: string; date?: string; url?: string }>;
+			}>({ cmd: "x.posts", pseudo, limite: 1 }, { timeoutMs: 50_000 });
+
+			if (!reponse.success) {
+				await interaction.editReply({
+					content: `La récolte a échoué : ${truncate(reponse.error ?? "raison inconnue", 300)}`,
+				});
+				return;
+			}
+
+			const post = reponse.posts?.[0];
+			if (!post) {
+				await interaction.editReply({ content: `Aucun post trouvé pour @${pseudo}.` });
+				return;
+			}
+
+			const { salon, raison } = await resoudreSalon(interaction.client, annonce.salon);
+			if (!salon) {
+				await interaction.editReply({
+					content: `Salon d'annonce \`${annonce.salon}\` injoignable : ${raison ?? "le bot doit y voir et y écrire"}.`,
+				});
+				return;
+			}
+
+			const ligne = { id: post.id, author_username: pseudo, text: post.texte ?? "" } as LigneTweet;
+			await salon.send({ content: messageAnnonce(ligne) });
+			if (annonce.roleMention) {
+				await salon.send({
+					content: messagePing(annonce.roleMention),
+					allowedMentions: { roles: [annonce.roleMention] },
+				});
+			}
+
+			await interaction.editReply({
+				content: `✅ Post \`${post.id}\` de @${pseudo} annoncé dans <#${annonce.salon}>${annonce.roleMention ? " avec le ping du rôle" : ""}.`,
+			});
+		} catch (err) {
+			await repondreErreur(interaction, "annoncer", err);
 		}
 	}
 }
