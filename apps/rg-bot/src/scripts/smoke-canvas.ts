@@ -12,7 +12,6 @@
  * écrits dans le dépôt.
  */
 
-import { mkdirSync } from "node:fs";
 import { resolve } from "node:path";
 
 import type * as ServicesSite from "../services/website";
@@ -29,6 +28,8 @@ const SORTIE = resolve(Bun.env.CANVAS_SMOKE_DIR ?? "/tmp/rg-canvas");
 
 async function ecrire(nom: string, png: Buffer): Promise<void> {
 	const chemin = `${SORTIE}/${nom}.png`;
+	// `Bun.write` crée le dossier parent (`createPath` vaut `true` par défaut) :
+	// le `mkdirSync` qui suivait la déclaration ne servait à rien.
 	await Bun.write(chemin, png);
 	console.log(`${nom} octets=${png.length} chemin=${chemin}`);
 }
@@ -209,7 +210,6 @@ async function scenariosProduction(): Promise<void> {
 	}
 }
 
-mkdirSync(SORTIE, { recursive: true });
 const debut = Date.now();
 await scenariosSynthetiques();
 await scenariosProduction();

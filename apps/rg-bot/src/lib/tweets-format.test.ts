@@ -10,6 +10,8 @@ import { describe, expect, test } from "bun:test";
 import {
 	CATEGORIES_INTERDITES,
 	FILTRE_TWEETS_DEFAUT,
+	MAX_CARACTERES_PAR_MESSAGE,
+	MAX_EMBEDS_PAR_MESSAGE,
 	PLAFOND_DRAIN,
 	bornerPage,
 	categoriesBannies,
@@ -17,6 +19,7 @@ import {
 	corpsTweet,
 	couper,
 	decoderEtatListe,
+	decouperEnLots,
 	encoderEtatListe,
 	formaterMetriques,
 	imagesTweet,
@@ -24,6 +27,7 @@ import {
 	lireFiltreTweets,
 	memeCompte,
 	nombreDePages,
+	nonceLot,
 	resumeLot,
 	texteSansLienMedia,
 	tweetEstNotifiable,
@@ -317,5 +321,67 @@ describe("regroupement d'un gros lot", () => {
 	test("tient le pire lot mesuré (245 posts en une minute)", () => {
 		const gros = Array.from({ length: 245 }, (_, i) => tweet({ id: `c${i}` }));
 		expect(resumeLot(gros)).toContain("**245 nouveaux tweets**");
+	});
+});
+
+describe("decouperEnLots", () => {
+	/** Faux embed : seul `length` compte, c'est ce que Discord facture. */
+	const embed = (length: number) => ({ length });
+
+	test("découpe à 10 embeds, la borne dure d'un message Discord", () => {
+		const lots = decouperEnLots(
+			Array.from({ length: 23 }, () => embed(10)),
+			MAX_EMBEDS_PAR_MESSAGE,
+			MAX_CARACTERES_PAR_MESSAGE
+		);
+		expect(lots.map((l) => l.length)).toEqual([10, 10, 3]);
+	});
+
+	test("découpe aussi sur les 6 000 caractères : six gros posts ne tiennent pas", () => {
+		const lots = decouperEnLots(Array.from({ length: 6 }, () => embed(1_150)));
+		expect(lots.map((l) => l.length)).toEqual([5, 1]);
+		for (const lot of lots) {
+			expect(lot.reduce((n, e) => n + e.length, 0)).toBeLessThanOrEqual(MAX_CARACTERES_PAR_MESSAGE);
+		}
+	});
+
+	test("un embed seul plus gros que la borne part quand même, jamais tronqué ici", () => {
+		expect(decouperEnLots([embed(9_000)])).toEqual([[{ length: 9_000 }]]);
+	});
+
+	test("aucun élément : aucun message", () => {
+		expect(decouperEnLots([])).toEqual([]);
+	});
+
+	/**
+	 * Le filet qui rend le seuil `max_par_lot` inoffensif : même poussé au
+	 * plafond de drain par un `UPDATE settings`, l'envoi détaillé reste découpé
+	 * en messages qu'un `send` accepte. C'est ce qui justifie de borner
+	 * `lireFiltreTweets` sur `PLAFOND_DRAIN` et non sur 10.
+	 */
+	test("un seuil au plafond de drain reste envoyable", () => {
+		const seuil = lireFiltreTweets({ max_par_lot: PLAFOND_DRAIN }).max_par_lot;
+		expect(seuil).toBe(PLAFOND_DRAIN);
+		const lots = decouperEnLots(Array.from({ length: seuil }, () => embed(500)));
+		for (const lot of lots) {
+			expect(lot.length).toBeLessThanOrEqual(MAX_EMBEDS_PAR_MESSAGE);
+			expect(lot.reduce((n, e) => n + e.length, 0)).toBeLessThanOrEqual(MAX_CARACTERES_PAR_MESSAGE);
+		}
+		expect(lots.reduce((n, lot) => n + lot.length, 0)).toBe(seuil);
+	});
+});
+
+describe("nonceLot", () => {
+	test("déterministe pour un même lot, et distinct par tranche", () => {
+		expect(nonceLot("2087621938692677991")).toBe(nonceLot("2087621938692677991"));
+		expect(nonceLot("2087621938692677991", 1)).not.toBe(nonceLot("2087621938692677991"));
+	});
+
+	test("ne dépasse jamais les 25 caractères admis par Discord", () => {
+		expect(nonceLot("9".repeat(64), 9).length).toBeLessThanOrEqual(25);
+	});
+
+	test("les caractères hors [0-9A-Za-z] sont retirés", () => {
+		expect(nonceLot("20876-2193/8692 677991")).toBe("tw0-087621938692677991");
 	});
 });
