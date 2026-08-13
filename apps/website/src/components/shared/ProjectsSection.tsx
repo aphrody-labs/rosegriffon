@@ -28,7 +28,10 @@ export default function ProjectsSection() {
 				</p>
 			</div>
 
-			<div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 lg:gap-8">
+			{/* Quatre cartes depuis l'ajout d'IERG Day : en trois colonnes, la
+			    quatrième restait seule sur sa rangée. 1 / 2 / 4 tombe juste à chaque
+			    palier — et l'étape `xl` évite quatre colonnes de 230 px à 1024. */}
+			<div className="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-4 lg:gap-8">
 				{PROJETS_ACCUEIL.map((projet) => (
 					<ProjectCard key={projet.slug} projet={projet} />
 				))}

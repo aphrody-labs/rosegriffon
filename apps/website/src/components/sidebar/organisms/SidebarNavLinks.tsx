@@ -27,12 +27,18 @@ interface SidebarNavLinksProps {
  * @param {MenuItem[]} items - La liste des items de menu à afficher.
  */
 export const SidebarNavLinks = React.memo(({ title, items }: SidebarNavLinksProps) => {
-	// Protection si items est vide ou invalide
+	// ⚠ LE HOOK D'ABORD, LA SORTIE ENSUITE.
+	// `usePathname()` vivait APRÈS le `return null` de garde : un groupe vide en
+	// rendait un de moins que le rendu précédent, et React apparie les hooks par
+	// leur ORDRE d'appel. Un groupe qui se vide (filtre, droits, chargement) puis
+	// se remplit décalait donc toute la liste de hooks du composant — un état
+	// appartenant soudain à un autre hook, sans erreur visible.
+	const pathname = usePathname();
+
+	// Protection si items est vide ou invalide.
 	if (!items || !Array.isArray(items) || items.length === 0) {
 		return null;
 	}
-
-	const pathname = usePathname();
 
 
 	return (

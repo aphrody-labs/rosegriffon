@@ -59,6 +59,7 @@ import {
 	Gift,
 	Globe,
 	Handshake,
+	Hash,
 	Heart,
 	// Navigation & Actions
 	Home,
@@ -357,6 +358,7 @@ export {
 	Gift,
 	Globe,
 	Handshake,
+	Hash,
 	Heart,
 	// Navigation
 	Home,

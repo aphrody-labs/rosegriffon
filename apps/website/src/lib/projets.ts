@@ -3,7 +3,7 @@ import type { ComponentType, SVGProps } from "react";
 import { PfpIcon } from "@/components/sidebar/atoms/PfpIcon";
 
 import type { EMOTES } from "@/lib/emotes";
-import { Palette, Smile, Users } from "@/lib/icons-config";
+import { Hash, Palette, Smile, Users } from "@/lib/icons-config";
 
 /**
  * Source unique des projets Rose Griffon.
@@ -36,6 +36,22 @@ export interface Projet {
 }
 
 export const PROJETS: Projet[] = [
+	{
+		// EN TÊTE tant que la campagne est ouverte : c'est le seul projet de cette
+		// liste qui ait une date de fin, et un participant qui arrive après le
+		// 22/08/2026 n'a plus rien à y faire. Les outils permanents, eux, seront
+		// encore là le mois prochain.
+		badge: "Campagne en cours",
+		description:
+			"Un mois de célébration pour les 18 ans d'Inazuma Eleven : postez votre OC avec #IERGDay et rejoignez la fresque collaborative de la communauté.",
+		emote: "roy-coeur",
+		href: "/iergday",
+		icone: Hash,
+		image: "https://rosegriffon.fr/storage/v1/object/public/assets/campagnes/iergday/affiche-v2.webp",
+		slug: "iergday",
+		surAccueil: true,
+		titre: "IERG Day",
+	},
 	{
 		badge: "Nouveau",
 		description:
