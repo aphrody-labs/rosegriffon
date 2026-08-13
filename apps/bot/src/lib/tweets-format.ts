@@ -35,6 +35,48 @@ export interface LigneTweet {
 	category: string | null;
 }
 
+/**
+ * UN RETWEET N'EST PAS UNE PUBLICATION DU COMPTE.
+ *
+ * Le texte d'un retweet commence par `RT @pseudo:` — c'est la forme que rend
+ * l'API de X, et elle n'a pas changé. Annoncer un retweet dans le salon
+ * d'annonces, c'est annoncer le post de QUELQU'UN D'AUTRE sous le nom du compte
+ * suivi : le membre clique en croyant lire Azalée et tombe ailleurs.
+ */
+export function estRetweet(texte: string | null | undefined): boolean {
+	return /^RT @[A-Za-z0-9_]{1,15}:/.test((texte ?? "").trimStart());
+}
+
+/**
+ * UNE RÉPONSE N'EST PAS UNE ANNONCE.
+ *
+ * X place les pseudos mentionnés en TÊTE du texte d'une réponse
+ * (`@compte merci !`). Ces messages sont la moitié d'une conversation : sortis
+ * de leur fil, ils sont incompréhensibles, et ils arrivent par dizaines là où le
+ * salon attend quelques annonces par jour.
+ *
+ * ⚠ LA RÈGLE EST ÉTROITE, ET DOIT LE RESTER. Un post ORDINAIRE qui commence par
+ * une mention (« @inazuma_project vient d'annoncer… ») serait écarté à tort si
+ * l'on élargissait — c'est pourquoi on n'écarte que ce qui commence par une ou
+ * plusieurs mentions ET rien d'autre avant, jamais un post contenant une mention
+ * quelque part.
+ */
+export function estReponse(texte: string | null | undefined): boolean {
+	return /^(@[A-Za-z0-9_]{1,15}[\s,]+)+\S/.test((texte ?? "").trimStart());
+}
+
+/**
+ * Ce post a-t-il sa place dans un salon d'annonces ?
+ *
+ * UNE SEULE définition, partagée par la veille automatique
+ * (`services/tweets.ts`) et par `/x annoncer` (`commands/x.ts`). Deux copies
+ * divergeraient : la veille filtrerait, la commande manuelle publierait quand
+ * même — et c'est exactement ce qui s'est produit avant cette fonction.
+ */
+export function estAnnoncable(texte: string | null | undefined): boolean {
+	return !estRetweet(texte) && !estReponse(texte);
+}
+
 /** Média retenu pour un embed : une image, avec son URL absolue. */
 export interface ImageTweet {
 	url: string;

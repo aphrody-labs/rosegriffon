@@ -22,6 +22,7 @@
 import { afterAll, beforeEach, describe, expect, mock, test } from "bun:test";
 import type { Client } from "discord.js";
 
+import { estAnnoncable, estReponse, estRetweet } from "../lib/tweets-format";
 import type { FiltreTweets, LigneTweet } from "../lib/tweets-format";
 import type { Curseur } from "./tweets";
 
@@ -536,5 +537,56 @@ describe("demarrerNotifieurTweets", () => {
 		expect(lignes[0]).toContain("curseur");
 		expect(appels.filtre).toBe(0);
 		expect(() => arreter()).not.toThrow();
+	});
+});
+
+describe("ni retweet, ni réponse dans un salon d'annonces", () => {
+	/*
+	 * Le bot Azalée annonçait les retweets et les réponses de @Azalee_IE dans le
+	 * salon d'annonces. Un retweet y publie le post de QUELQU'UN D'AUTRE sous le
+	 * nom du compte suivi ; une réponse est la moitié d'une conversation,
+	 * incompréhensible hors de son fil et bien plus fréquente qu'une annonce.
+	 *
+	 * Les deux se reconnaissent au TEXTE : `public.tweets` ne porte aucune colonne
+	 * qui les distingue (relevé le 13/8/2026 — ni `is_retweet`, ni `in_reply_to`).
+	 */
+
+	test("un retweet est reconnu", () => {
+		expect(estRetweet("RT @inazuma_project: La mise à jour est là")).toBe(true);
+		expect(estRetweet("  RT @Level5Hub: annonce")).toBe(true);
+	});
+
+	test("un post qui PARLE d'un retweet n'en est pas un", () => {
+		// La règle doit rester étroite : trop large, elle fait disparaître de vraies
+		// annonces sans que personne ne le sache.
+		expect(estRetweet("Merci pour vos RT @inazuma_project !")).toBe(false);
+		expect(estRetweet("RT sans deux-points @machin")).toBe(false);
+	});
+
+	test("une réponse est reconnue, y compris à plusieurs comptes", () => {
+		expect(estReponse("@inazuma_cross merci !")).toBe(true);
+		expect(estReponse("@a @b @c oui")).toBe(true);
+		expect(estReponse("  @Azalee_IE bien joué")).toBe(true);
+	});
+
+	test("un post ORDINAIRE qui commence par une mention reste annonçable", () => {
+		// C'est le faux positif à ne pas commettre : « @inazuma_project vient
+		// d'annoncer… » est une annonce, pas une réponse. On ne peut pas les
+		// distinguer par le seul texte, et le doute profite à la publication —
+		// mieux vaut une annonce de trop qu'une annonce perdue en silence.
+		expect(estReponse("Voici la mise à jour de @inazuma_project")).toBe(false);
+		expect(estReponse("La mise à jour 7.1.0 de Victory Road est sortie ⚡️")).toBe(false);
+	});
+
+	test("un texte vide ou absent est annonçable — ce n'est pas ce filtre qui l'écarte", () => {
+		expect(estRetweet(null)).toBe(false);
+		expect(estReponse(undefined)).toBe(false);
+		expect(estAnnoncable("")).toBe(true);
+	});
+
+	test("estAnnoncable réunit les deux règles", () => {
+		expect(estAnnoncable("RT @x: coucou")).toBe(false);
+		expect(estAnnoncable("@x coucou")).toBe(false);
+		expect(estAnnoncable("La mise à jour 7.1.0 est sortie ⚡️")).toBe(true);
 	});
 });
