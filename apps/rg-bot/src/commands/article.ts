@@ -28,6 +28,15 @@
  * `website,azalee` et Postgres répond « malformed array literal ». La forme qui
  * marche est `app IN ${sql(tableau)}`, qui développe en liste de paramètres
  * liés. Mesuré, pas supposé.
+ *
+ * ── PIÈGE IMAGE RELATIVE ───────────────────────────────────────────────────
+ * `articles.featured_image_url` n'est PAS toujours une URL absolue : sur les
+ * trois articles publiés, `mise-a-jour-du-site` porte `/rgtv/jude.webp`. Or
+ * `EmbedBuilder.setImage("/rgtv/jude.webp")` LÈVE (« Received one or more
+ * errors ») — `/article lire mise-a-jour-du-site` tombait donc dans son `catch`
+ * et affichait un message d'erreur au lieu de l'article. `imageArticle` résout
+ * le chemin contre l'origine du site qui publie, et borne au passage les images
+ * du CDN (voir plus bas).
  */
 import { Discord, Slash, SlashChoice, SlashGroup, SlashOption } from "@rpbey/discordx";
 import {
@@ -68,12 +77,55 @@ const CHOIX_SITE = [
 /** Suffisamment court pour qu'une publication apparaisse vite, assez long pour tenir une rafale. */
 const TTL_LISTE_MS = 3 * 60_000;
 
-async function derniersArticles(apps: readonly AppArticle[], limite: number): Promise<Article[]> {
+/**
+ * Largeur demandée aux variantes du CDN.
+ *
+ * Une image `cdn.rosegriffon.fr` servie SANS `?w=` sort en original : la
+ * couverture de l'article Azalée pèse 12 Mo en PNG brut contre ~42 Ko en
+ * `?w=1600&format=webp`. Discord refuse de charger la première dans un embed.
+ */
+const LARGEUR_IMAGE_CDN = 1600;
+
+/**
+ * URL d'illustration exploitable dans un embed, ou `null`.
+ *
+ * Trois cas mesurés sur les articles publiés le 13/8/2026 :
+ *  - `/rgtv/jude.webp` — chemin RELATIF, résolu contre l'origine du site qui
+ *    publie l'article (vérifié 200 sur `https://rosegriffon.fr/rgtv/jude.webp`) ;
+ *  - `https://cdn.rosegriffon.fr/…png` — complété en `?w=…&format=webp` s'il
+ *    manque, sans jamais écraser une largeur déjà choisie ;
+ *  - tout le reste (`https://pbs.twimg.com/…`) est laissé intact.
+ * Ce qui ne donne pas une URL `http(s)` valide est écarté plutôt que passé à
+ * Discord, qui rejetterait l'embed entier.
+ */
+function imageArticle(app: string | null | undefined, brut: string | null | undefined): string | null {
+	const valeur = brut?.trim();
+	if (!valeur) return null;
+	let url: URL;
+	try {
+		url = new URL(valeur, `${siteArticle(app).base}/`);
+	} catch {
+		return null;
+	}
+	if (url.protocol !== "https:" && url.protocol !== "http:") return null;
+	if (url.hostname === "cdn.rosegriffon.fr" && !url.searchParams.has("w")) {
+		url.searchParams.set("w", String(LARGEUR_IMAGE_CDN));
+		if (!url.searchParams.has("format")) url.searchParams.set("format", "webp");
+	}
+	return url.toString();
+}
+
+async function derniersArticles(
+	apps: readonly AppArticle[],
+	categorie: string | null,
+	limite: number
+): Promise<Article[]> {
 	return await sql<Article[]>`
 		SELECT id::text, title::text, slug::text, excerpt, category::text, app,
 		       featured_image_url, published_at, view_count
 		FROM articles
 		WHERE status = 'published' AND app IN ${sql([...apps])}
+		  AND (${categorie}::text IS NULL OR category ILIKE ${categorie})
 		ORDER BY published_at DESC NULLS LAST
 		LIMIT ${limite}
 	`;
@@ -90,6 +142,7 @@ async function derniersArticles(apps: readonly AppArticle[], limite: number): Pr
  */
 async function chercherArticles(
 	apps: readonly AppArticle[],
+	categorie: string | null,
 	motif: string,
 	limite: number
 ): Promise<Article[]> {
@@ -98,6 +151,7 @@ async function chercherArticles(
 		       featured_image_url, published_at, view_count
 		FROM articles
 		WHERE status = 'published' AND app IN ${sql([...apps])}
+		  AND (${categorie}::text IS NULL OR category ILIKE ${categorie})
 		  AND (title ILIKE ${motif} OR excerpt ILIKE ${motif} OR content ILIKE ${motif})
 		ORDER BY published_at DESC NULLS LAST
 		LIMIT ${limite}
@@ -126,6 +180,52 @@ async function indexAutocompletion(): Promise<Array<{ title: string; slug: strin
 			LIMIT 100
 		`;
 	});
+}
+
+/**
+ * Catégories réellement publiées, pour l'autocomplétion.
+ *
+ * `/chronique list` et `/azalee latest` acceptaient toutes deux un filtre de
+ * catégorie en texte libre : la fusion aurait perdu cette capacité. On la rend,
+ * en la nourrissant de la colonne `articles.category` — relevé du 13/8/2026 :
+ * `coulisses` (2 articles) et `critique` (1). Proposer les valeurs réelles évite
+ * qu'un membre tape « chronique » et reçoive un vide inexplicable.
+ */
+async function categoriesPubliees(): Promise<string[]> {
+	return await cached("article:categories", TTL_LISTE_MS, async () => {
+		const lignes = await sql<Array<{ category: string }>>`
+			SELECT DISTINCT category::text
+			FROM articles
+			WHERE status = 'published' AND category IS NOT NULL AND category <> ''
+			ORDER BY category
+		`;
+		return lignes.map((l) => l.category);
+	});
+}
+
+/** Autocomplétion de l'option `categorie`, bornée aux 25 propositions de Discord. */
+async function completerCategorie(interaction: AutocompleteInteraction): Promise<void> {
+	try {
+		const saisie = String(interaction.options.getFocused() ?? "")
+			.trim()
+			.toLowerCase();
+		const categories = await categoriesPubliees();
+		await interaction.respond(
+			categories
+				.filter((c) => saisie.length === 0 || c.toLowerCase().includes(saisie))
+				.slice(0, 25)
+				.map((c) => ({ name: truncate(c, 100), value: truncate(c, 100) }))
+		);
+	} catch {
+		// Sans réponse, le champ reste figé sur « chargement… » côté client.
+		await interaction.respond([]);
+	}
+}
+
+/** Normalise l'option `categorie` : vide ou absente vaut « toutes ». */
+function categorieDemandee(choix: string | null | undefined): string | null {
+	const propre = choix?.trim();
+	return propre && propre.length > 0 ? propre : null;
 }
 
 /** Une ligne d'article dans un embed : titre cliquable, site, catégorie, date. */
@@ -178,6 +278,14 @@ export class ArticleCommand {
 		})
 		site: string | undefined,
 		@SlashOption({
+			name: "categorie",
+			description: "Ne garder qu'une catégorie (coulisses, critique…)",
+			type: ApplicationCommandOptionType.String,
+			required: false,
+			autocomplete: completerCategorie,
+		})
+		categorie: string | undefined,
+		@SlashOption({
 			name: "nombre",
 			description: "Nombre d'articles (1 à 10, 5 par défaut)",
 			type: ApplicationCommandOptionType.Integer,
@@ -190,17 +298,25 @@ export class ArticleCommand {
 	) {
 		await interaction.deferReply();
 		const apps = appsDemandees(site);
+		const filtre = categorieDemandee(categorie);
 		try {
-			const articles = await derniersArticles(apps, nombre ?? 5);
+			const articles = await derniersArticles(apps, filtre, nombre ?? 5);
 			if (articles.length === 0) {
 				await interaction.editReply({
-					content: `Aucun article publié sur ${libellePortee(apps)} pour le moment.`,
+					content: filtre
+						? `Aucun article publié en catégorie « ${truncate(filtre, 60)} » sur ${libellePortee(apps)}.`
+						: `Aucun article publié sur ${libellePortee(apps)} pour le moment.`,
 				});
 				return;
 			}
 
+			const portee = filtre
+				? `${libellePortee(apps)} · ${truncate(filtre, 40)}`
+				: libellePortee(apps);
 			const embed = rgEmbed()
-				.setTitle(`${articles.length} article${articles.length > 1 ? "s" : ""} — ${libellePortee(apps)}`)
+				.setTitle(
+					truncate(`${articles.length} article${articles.length > 1 ? "s" : ""} — ${portee}`, 250)
+				)
 				.setURL(siteArticle(apps.length === 1 ? apps[0] : "website").base)
 				.setDescription(descriptionListe(articles));
 
@@ -216,10 +332,12 @@ export class ArticleCommand {
 						excerpt: resumeArticle(a, 220) || null,
 						category: a.category ?? siteArticle(a.app).libelle,
 						views_count: a.view_count,
-						featured_image: a.featured_image_url,
+						// Même normalisation que pour l'embed : un chemin relatif ne se
+						// télécharge pas, la vignette tombait sur le pictogramme de repli.
+						featured_image: imageArticle(a.app, a.featured_image_url),
 						created_at: a.published_at,
 					})),
-					apps.length === 1 ? libellePortee(apps) : undefined
+					filtre ? portee : apps.length === 1 ? libellePortee(apps) : undefined
 				);
 				fichiers = [new AttachmentBuilder(png, { name: "rg-articles.png" })];
 			} catch (err) {
@@ -288,7 +406,8 @@ export class ArticleCommand {
 					{ name: "Publié le", value: dateCourte(article.published_at), inline: true },
 					{ name: "Vues", value: String(article.view_count ?? 0), inline: true }
 				);
-			if (article.featured_image_url) embed.setImage(article.featured_image_url);
+			const illustration = imageArticle(article.app, article.featured_image_url);
+			if (illustration) embed.setImage(illustration);
 
 			await interaction.editReply({ embeds: [embed] });
 		} catch (err) {
@@ -314,6 +433,14 @@ export class ArticleCommand {
 			required: false,
 		})
 		site: string | undefined,
+		@SlashOption({
+			name: "categorie",
+			description: "Ne garder qu'une catégorie (coulisses, critique…)",
+			type: ApplicationCommandOptionType.String,
+			required: false,
+			autocomplete: completerCategorie,
+		})
+		categorie: string | undefined,
 		interaction: ChatInputCommandInteraction
 	) {
 		await interaction.deferReply();
@@ -323,21 +450,28 @@ export class ArticleCommand {
 			return;
 		}
 		const apps = appsDemandees(site);
+		const filtre = categorieDemandee(categorie);
+		const portee = filtre ? `${libellePortee(apps)} · ${truncate(filtre, 40)}` : libellePortee(apps);
 		try {
 			// Le motif est échappé côté SQL : les jokers `%` et `_` d'une saisie
 			// libre transformeraient sinon la recherche en « tout afficher ».
 			const motif = `%${terme.replaceAll(/[\\%_]/g, (c) => `\\${c}`)}%`;
-			const articles = await chercherArticles(apps, motif, 10);
+			const articles = await chercherArticles(apps, filtre, motif, 10);
 			if (articles.length === 0) {
 				await interaction.editReply({
-					content: `Aucun article ne parle de « ${truncate(terme, 80)} » sur ${libellePortee(apps)}.`,
+					content: `Aucun article ne parle de « ${truncate(terme, 80)} » sur ${portee}.`,
 				});
 				return;
 			}
 			const embed = rgEmbed()
-				.setTitle(`« ${truncate(terme, 60)} » — ${articles.length} résultat${articles.length > 1 ? "s" : ""}`)
+				.setTitle(
+					truncate(
+						`« ${truncate(terme, 60)} » — ${articles.length} résultat${articles.length > 1 ? "s" : ""}`,
+						250
+					)
+				)
 				.setDescription(descriptionListe(articles))
-				.setFooter({ text: `Recherche sur ${libellePortee(apps)} · rosegriffon.fr` });
+				.setFooter({ text: truncate(`Recherche sur ${portee} · rosegriffon.fr`, 2000) });
 			await interaction.editReply({ embeds: [embed] });
 		} catch (err) {
 			await interaction.editReply({ content: messageErreur(err) });
