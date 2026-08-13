@@ -1038,6 +1038,10 @@ const CHR_MODEL_CODES: Record<ChrModelSub, Set<string>> = {
 	waza: new Set((chrModelManifest as { waza: string[] }).waza),
 };
 
+/** Basename RÉEL du `.g4tx` de texture par code (relevé sur l'index CPK, cf. `getChrModelTextureUrl`). */
+const CHR_MODEL_TEXTURES = (chrModelManifest as { textures?: Record<string, Record<string, string>> })
+	.textures ?? {};
+
 /**
  * Résout l'URL du modèle 3D générique d'un sous-domaine chr (`/model-chr/<sub>/<code>.glb`),
  * gardé sur le manifeste des codes réellement servis (gate anti-404). Renvoie `null` si le
@@ -1055,15 +1059,22 @@ export function listServedChrModelCodes(sub: ChrModelSub): string[] {
 }
 
 /**
- * URL CDN de la **texture** (g4tx→png live) d'un modèle chr générique
- * (`/dx11/chr/_<sub>/<code>/<code>.png`). Le maillage `/model-chr/` n'embarque PAS la texture, on
- * l'expose donc séparément (affichage + téléchargement). Gardé sur le manifeste des codes servis ;
- * `null` si non servi. Toutes les textures n'existent pas (ex. _item : 208/235) → le `<img>` du
- * consommateur doit gérer `onError`. Variantes redimensionnées via `?w=&format=webp` (cdn-variants).
+ * URL CDN de la **texture** (g4tx→png live) d'un modèle chr générique. Le maillage
+ * `/model-chr/` n'embarque PAS la texture : on l'expose séparément (affichage + téléchargement).
+ *
+ * Le nom du fichier n'est PAS toujours celui du dossier — 11 objets n'existent qu'en
+ * `<code>_10`/`_20` (variantes de niveau de détail) — et 27 objets n'ont aucune texture.
+ * On passe donc par la carte `textures` du manifeste, relevée sur l'index CPK, au lieu de
+ * forger `<code>/<code>.png` : ces 38 cas rendaient un 404. Couverture réelle : waza 272/272,
+ * item 208/235, animal 2/2. `null` = pas de texture, l'appelant n'affiche pas d'image.
+ *
+ * Variantes redimensionnées via `?w=&format=webp` (cdn-variants).
  */
 export function getChrModelTextureUrl(sub: ChrModelSub, code: string | undefined | null): string | null {
 	if (!code || !CHR_MODEL_CODES[sub]?.has(code)) return null;
-	return `https://cdn.rosegriffon.fr/dx11/chr/_${sub}/${code}/${code}.png`;
+	const base = CHR_MODEL_TEXTURES[sub]?.[code];
+	if (!base) return null;
+	return `https://cdn.rosegriffon.fr/dx11/chr/_${sub}/${code}/${base}.png`;
 }
 
 /**
