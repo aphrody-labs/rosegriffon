@@ -1,3 +1,18 @@
+// Types du schéma PostgreSQL — FICHIER GÉNÉRÉ, NE PAS ÉDITER À LA MAIN.
+//
+// Régénération : `bun run --filter @rosegriffon/db types:gen`
+// (script `packages/db/scripts/types-gen.ts` → endpoint `/generators/typescript`
+// de pg-meta en local, le générateur même de `supabase gen types typescript`).
+//
+// Toute correction se fait EN BASE puis par régénération : une retouche à la
+// main est effacée au prochain passage et fait mentir le type sans prévenir.
+//
+// Pas de bloc `__InternalSupabase.PostgrestVersion` ici : `@supabase/supabase-js`
+// retombe alors sur `'12'`, ce qui correspond au PostgREST réellement servi
+// (12.2.12, cf. l'en-tête `Server:` de `127.0.0.1:8809`). L'ancienne valeur
+// `"14.5"` héritée de Supabase Cloud autorisait `.maxAffected()` au typage
+// alors que le serveur ne sait pas l'honorer.
+
 export type Json =
   | string
   | number
@@ -7,11 +22,6 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instantiate createClient with right options
-  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
-  __InternalSupabase: {
-    PostgrestVersion: "14.5"
-  }
   public: {
     Tables: {
       account: {
@@ -64,7 +74,6 @@ export type Database = {
           {
             foreignKeyName: "account_user_id_fkey"
             columns: ["user_id"]
-            isOneToOne: false
             referencedRelation: "user"
             referencedColumns: ["id"]
           },
@@ -159,14 +168,12 @@ export type Database = {
           {
             foreignKeyName: "agent_hostId_fkey"
             columns: ["hostId"]
-            isOneToOne: false
             referencedRelation: "agentHost"
             referencedColumns: ["id"]
           },
           {
             foreignKeyName: "agent_userId_fkey"
             columns: ["userId"]
-            isOneToOne: false
             referencedRelation: "user"
             referencedColumns: ["id"]
           },
@@ -216,21 +223,18 @@ export type Database = {
           {
             foreignKeyName: "agentCapabilityGrant_agentId_fkey"
             columns: ["agentId"]
-            isOneToOne: false
             referencedRelation: "agent"
             referencedColumns: ["id"]
           },
           {
             foreignKeyName: "agentCapabilityGrant_deniedBy_fkey"
             columns: ["deniedBy"]
-            isOneToOne: false
             referencedRelation: "user"
             referencedColumns: ["id"]
           },
           {
             foreignKeyName: "agentCapabilityGrant_grantedBy_fkey"
             columns: ["grantedBy"]
-            isOneToOne: false
             referencedRelation: "user"
             referencedColumns: ["id"]
           },
@@ -292,7 +296,6 @@ export type Database = {
           {
             foreignKeyName: "agentHost_userId_fkey"
             columns: ["userId"]
-            isOneToOne: false
             referencedRelation: "user"
             referencedColumns: ["id"]
           },
@@ -363,21 +366,18 @@ export type Database = {
           {
             foreignKeyName: "approvalRequest_agentId_fkey"
             columns: ["agentId"]
-            isOneToOne: false
             referencedRelation: "agent"
             referencedColumns: ["id"]
           },
           {
             foreignKeyName: "approvalRequest_hostId_fkey"
             columns: ["hostId"]
-            isOneToOne: false
             referencedRelation: "agentHost"
             referencedColumns: ["id"]
           },
           {
             foreignKeyName: "approvalRequest_userId_fkey"
             columns: ["userId"]
-            isOneToOne: false
             referencedRelation: "user"
             referencedColumns: ["id"]
           },
@@ -469,14 +469,12 @@ export type Database = {
           {
             foreignKeyName: "article_comments_article_id_fkey"
             columns: ["article_id"]
-            isOneToOne: false
             referencedRelation: "articles"
             referencedColumns: ["id"]
           },
           {
             foreignKeyName: "article_comments_parent_id_fkey"
             columns: ["parent_id"]
-            isOneToOne: false
             referencedRelation: "article_comments"
             referencedColumns: ["id"]
           },
@@ -553,7 +551,7 @@ export type Database = {
           pinned: boolean | null
           published_at: string | null
           scheduled_at: string | null
-          search_vector: unknown
+          search_vector: unknown | null
           series_id: string | null
           series_order: number
           share_count: number
@@ -580,7 +578,7 @@ export type Database = {
           pinned?: boolean | null
           published_at?: string | null
           scheduled_at?: string | null
-          search_vector?: unknown
+          search_vector?: unknown | null
           series_id?: string | null
           series_order?: number
           share_count?: number
@@ -607,7 +605,7 @@ export type Database = {
           pinned?: boolean | null
           published_at?: string | null
           scheduled_at?: string | null
-          search_vector?: unknown
+          search_vector?: unknown | null
           series_id?: string | null
           series_order?: number
           share_count?: number
@@ -622,7 +620,6 @@ export type Database = {
           {
             foreignKeyName: "articles_series_id_fkey"
             columns: ["series_id"]
-            isOneToOne: false
             referencedRelation: "article_series"
             referencedColumns: ["id"]
           },
@@ -657,6 +654,61 @@ export type Database = {
           user_id?: string | null
         }
         Relationships: []
+      }
+      campagne_creations_discord: {
+        Row: {
+          a_media: boolean
+          campagne_slug: string
+          collecte_le: string
+          hashtag_trouve: string | null
+          images: Json
+          masque: boolean
+          message_id: string
+          mis_en_avant: boolean
+          motif_masquage: string | null
+          nb_images: number
+          publie_le: string | null
+        }
+        Insert: {
+          a_media?: boolean
+          campagne_slug: string
+          collecte_le?: string
+          hashtag_trouve?: string | null
+          images?: Json
+          masque?: boolean
+          message_id: string
+          mis_en_avant?: boolean
+          motif_masquage?: string | null
+          nb_images?: number
+          publie_le?: string | null
+        }
+        Update: {
+          a_media?: boolean
+          campagne_slug?: string
+          collecte_le?: string
+          hashtag_trouve?: string | null
+          images?: Json
+          masque?: boolean
+          message_id?: string
+          mis_en_avant?: boolean
+          motif_masquage?: string | null
+          nb_images?: number
+          publie_le?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "campagne_creations_discord_campagne_slug_fkey"
+            columns: ["campagne_slug"]
+            referencedRelation: "x_campagnes"
+            referencedColumns: ["slug"]
+          },
+          {
+            foreignKeyName: "campagne_creations_discord_message_id_fkey"
+            columns: ["message_id"]
+            referencedRelation: "discord_messages"
+            referencedColumns: ["message_id"]
+          },
+        ]
       }
       chronicles: {
         Row: {
@@ -738,8 +790,44 @@ export type Database = {
           {
             foreignKeyName: "comment_reports_comment_id_fkey"
             columns: ["comment_id"]
-            isOneToOne: false
             referencedRelation: "article_comments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      comments: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          target_id: string
+          target_type: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          target_id: string
+          target_type: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          target_id?: string
+          target_type?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "comments_user_id_fkey"
+            columns: ["user_id"]
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -802,6 +890,7 @@ export type Database = {
           display_name: string | null
           is_bot: boolean | null
           joined_at: string | null
+          left_at: string | null
           nickname: string | null
           premium_since: string | null
           roles: string[] | null
@@ -814,6 +903,7 @@ export type Database = {
           display_name?: string | null
           is_bot?: boolean | null
           joined_at?: string | null
+          left_at?: string | null
           nickname?: string | null
           premium_since?: string | null
           roles?: string[] | null
@@ -826,6 +916,7 @@ export type Database = {
           display_name?: string | null
           is_bot?: boolean | null
           joined_at?: string | null
+          left_at?: string | null
           nickname?: string | null
           premium_since?: string | null
           roles?: string[] | null
@@ -911,9 +1002,182 @@ export type Database = {
           {
             foreignKeyName: "discord_messages_channel_id_fkey"
             columns: ["channel_id"]
-            isOneToOne: false
             referencedRelation: "discord_channels"
             referencedColumns: ["channel_id"]
+          },
+        ]
+      }
+      discord_poll_options: {
+        Row: {
+          emoji: string | null
+          label: string
+          percentage: number | null
+          poll_id: string
+          position: number
+          votes: number | null
+        }
+        Insert: {
+          emoji?: string | null
+          label: string
+          percentage?: number | null
+          poll_id: string
+          position: number
+          votes?: number | null
+        }
+        Update: {
+          emoji?: string | null
+          label?: string
+          percentage?: number | null
+          poll_id?: string
+          position?: number
+          votes?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "discord_poll_options_poll_id_fkey"
+            columns: ["poll_id"]
+            referencedRelation: "discord_polls"
+            referencedColumns: ["poll_id"]
+          },
+        ]
+      }
+      discord_poll_votes: {
+        Row: {
+          poll_id: string
+          position: number
+          user_id: string
+          voted_at: string | null
+        }
+        Insert: {
+          poll_id: string
+          position: number
+          user_id: string
+          voted_at?: string | null
+        }
+        Update: {
+          poll_id?: string
+          position?: number
+          user_id?: string
+          voted_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "discord_poll_votes_poll_id_fkey"
+            columns: ["poll_id"]
+            referencedRelation: "discord_polls"
+            referencedColumns: ["poll_id"]
+          },
+        ]
+      }
+      discord_polls: {
+        Row: {
+          channel_id: string
+          command: string | null
+          created_at: string
+          creator_id: string | null
+          creator_username: string | null
+          ended: boolean
+          ends_at: string | null
+          guild_id: string
+          language: string | null
+          locked: boolean
+          max_choices: number
+          message_id: string | null
+          poll_id: string
+          provider: string
+          question: string
+          raw: Json | null
+          results_hidden: boolean
+          source: string
+          total_voters: number | null
+          total_votes: number | null
+          updated_at: string
+          uuid: string | null
+          visual_alt: string | null
+          visual_attachment_id: string | null
+          visual_height: number | null
+          visual_message_id: string | null
+          visual_path: string | null
+          visual_width: number | null
+        }
+        Insert: {
+          channel_id: string
+          command?: string | null
+          created_at: string
+          creator_id?: string | null
+          creator_username?: string | null
+          ended?: boolean
+          ends_at?: string | null
+          guild_id: string
+          language?: string | null
+          locked?: boolean
+          max_choices?: number
+          message_id?: string | null
+          poll_id: string
+          provider?: string
+          question: string
+          raw?: Json | null
+          results_hidden?: boolean
+          source?: string
+          total_voters?: number | null
+          total_votes?: number | null
+          updated_at?: string
+          uuid?: string | null
+          visual_alt?: string | null
+          visual_attachment_id?: string | null
+          visual_height?: number | null
+          visual_message_id?: string | null
+          visual_path?: string | null
+          visual_width?: number | null
+        }
+        Update: {
+          channel_id?: string
+          command?: string | null
+          created_at?: string
+          creator_id?: string | null
+          creator_username?: string | null
+          ended?: boolean
+          ends_at?: string | null
+          guild_id?: string
+          language?: string | null
+          locked?: boolean
+          max_choices?: number
+          message_id?: string | null
+          poll_id?: string
+          provider?: string
+          question?: string
+          raw?: Json | null
+          results_hidden?: boolean
+          source?: string
+          total_voters?: number | null
+          total_votes?: number | null
+          updated_at?: string
+          uuid?: string | null
+          visual_alt?: string | null
+          visual_attachment_id?: string | null
+          visual_height?: number | null
+          visual_message_id?: string | null
+          visual_path?: string | null
+          visual_width?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "discord_polls_channel_id_fkey"
+            columns: ["channel_id"]
+            referencedRelation: "discord_channels"
+            referencedColumns: ["channel_id"]
+          },
+          {
+            foreignKeyName: "discord_polls_message_id_fkey"
+            columns: ["message_id"]
+            referencedRelation: "discord_messages"
+            referencedColumns: ["message_id"]
+          },
+          {
+            foreignKeyName: "discord_polls_visual_message_id_fkey"
+            columns: ["visual_message_id"]
+            referencedRelation: "discord_messages"
+            referencedColumns: ["message_id"]
           },
         ]
       }
@@ -1238,6 +1502,36 @@ export type Database = {
         }
         Relationships: []
       }
+      inagle_boost_groups: {
+        Row: {
+          config_index: number
+          data: Json | null
+          duration: number | null
+          id: string
+          resolved_spirit_ids: Json | null
+          spirit_indices: Json | null
+          updated_at: string | null
+        }
+        Insert: {
+          config_index: number
+          data?: Json | null
+          duration?: number | null
+          id: string
+          resolved_spirit_ids?: Json | null
+          spirit_indices?: Json | null
+          updated_at?: string | null
+        }
+        Update: {
+          config_index?: number
+          data?: Json | null
+          duration?: number | null
+          id?: string
+          resolved_spirit_ids?: Json | null
+          spirit_indices?: Json | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       inagle_capsules: {
         Row: {
           data: Json | null
@@ -1490,6 +1784,54 @@ export type Database = {
         }
         Relationships: []
       }
+      inagle_constellations: {
+        Row: {
+          character_count: number
+          character_ids: string[]
+          data: Json
+          id: string
+          idx: number
+          name_en: string | null
+          name_fr: string | null
+          name_ja: string | null
+          texture_layer: string | null
+          texture_rare_star: string | null
+          texture_star: string | null
+          texture_star_after: string | null
+          updated_at: string
+        }
+        Insert: {
+          character_count?: number
+          character_ids?: string[]
+          data: Json
+          id: string
+          idx: number
+          name_en?: string | null
+          name_fr?: string | null
+          name_ja?: string | null
+          texture_layer?: string | null
+          texture_rare_star?: string | null
+          texture_star?: string | null
+          texture_star_after?: string | null
+          updated_at?: string
+        }
+        Update: {
+          character_count?: number
+          character_ids?: string[]
+          data?: Json
+          id?: string
+          idx?: number
+          name_en?: string | null
+          name_fr?: string | null
+          name_ja?: string | null
+          texture_layer?: string | null
+          texture_rare_star?: string | null
+          texture_star?: string | null
+          texture_star_after?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       inagle_coordinators: {
         Row: {
           buff: string | null
@@ -1601,6 +1943,39 @@ export type Database = {
         }
         Relationships: []
       }
+      inagle_drop_rates: {
+        Row: {
+          drop_rarity: number | null
+          id: string
+          item_id: string | null
+          rarity: number | null
+          source: string
+          source_id: string
+          updated_at: string
+          weight: number
+        }
+        Insert: {
+          drop_rarity?: number | null
+          id: string
+          item_id?: string | null
+          rarity?: number | null
+          source: string
+          source_id: string
+          updated_at?: string
+          weight: number
+        }
+        Update: {
+          drop_rarity?: number | null
+          id?: string
+          item_id?: string | null
+          rarity?: number | null
+          source?: string
+          source_id?: string
+          updated_at?: string
+          weight?: number
+        }
+        Relationships: []
+      }
       inagle_drops: {
         Row: {
           fixed_beans: string | null
@@ -1703,6 +2078,144 @@ export type Database = {
         }
         Relationships: []
       }
+      inagle_emblems: {
+        Row: {
+          base_path: string | null
+          data: Json | null
+          emblem_id: string
+          emblem_name: string
+          is_template: boolean
+          large_file_path: string | null
+          large_tex_name: string | null
+          small_file_path: string | null
+          small_tex_name: string | null
+          updated_at: string
+        }
+        Insert: {
+          base_path?: string | null
+          data?: Json | null
+          emblem_id: string
+          emblem_name: string
+          is_template?: boolean
+          large_file_path?: string | null
+          large_tex_name?: string | null
+          small_file_path?: string | null
+          small_tex_name?: string | null
+          updated_at?: string
+        }
+        Update: {
+          base_path?: string | null
+          data?: Json | null
+          emblem_id?: string
+          emblem_name?: string
+          is_template?: boolean
+          large_file_path?: string | null
+          large_tex_name?: string | null
+          small_file_path?: string | null
+          small_tex_name?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      inagle_event_subtitles: {
+        Row: {
+          data: Json | null
+          episode: string
+          event_id: string
+          line_index: number
+          line_label: string | null
+          lip_sync: string | null
+          show_end: number
+          show_start: number
+          subtitle_langs: string[]
+          t3: number
+          t4: number
+          text_en: string | null
+          text_fr: string | null
+          text_hash: number
+          text_hash_u: string
+          text_ja: string | null
+          updated_at: string
+        }
+        Insert: {
+          data?: Json | null
+          episode: string
+          event_id: string
+          line_index: number
+          line_label?: string | null
+          lip_sync?: string | null
+          show_end: number
+          show_start: number
+          subtitle_langs?: string[]
+          t3: number
+          t4: number
+          text_en?: string | null
+          text_fr?: string | null
+          text_hash: number
+          text_hash_u: string
+          text_ja?: string | null
+          updated_at?: string
+        }
+        Update: {
+          data?: Json | null
+          episode?: string
+          event_id?: string
+          line_index?: number
+          line_label?: string | null
+          lip_sync?: string | null
+          show_end?: number
+          show_start?: number
+          subtitle_langs?: string[]
+          t3?: number
+          t4?: number
+          text_en?: string | null
+          text_fr?: string | null
+          text_hash?: number
+          text_hash_u?: string
+          text_ja?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      inagle_events: {
+        Row: {
+          data: Json | null
+          dialogue_langs: string[]
+          episode: string
+          event_id: string
+          has_map: boolean
+          has_subtitle: boolean
+          line_count: number
+          subtitle_langs: string[]
+          subtitle_rows: number
+          updated_at: string
+        }
+        Insert: {
+          data?: Json | null
+          dialogue_langs?: string[]
+          episode: string
+          event_id: string
+          has_map?: boolean
+          has_subtitle?: boolean
+          line_count?: number
+          subtitle_langs?: string[]
+          subtitle_rows?: number
+          updated_at?: string
+        }
+        Update: {
+          data?: Json | null
+          dialogue_langs?: string[]
+          episode?: string
+          event_id?: string
+          has_map?: boolean
+          has_subtitle?: boolean
+          line_count?: number
+          subtitle_langs?: string[]
+          subtitle_rows?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       inagle_exp_table: {
         Row: {
           level: number
@@ -1795,8 +2308,10 @@ export type Database = {
       }
       inagle_game_assets: {
         Row: {
+          bucket: string | null
           buildid: number | null
           cpk: string | null
+          exists: boolean
           kind: string | null
           path: string
           sha256: string | null
@@ -1804,8 +2319,10 @@ export type Database = {
           updated_at: string | null
         }
         Insert: {
+          bucket?: string | null
           buildid?: number | null
           cpk?: string | null
+          exists?: boolean
           kind?: string | null
           path: string
           sha256?: string | null
@@ -1813,8 +2330,10 @@ export type Database = {
           updated_at?: string | null
         }
         Update: {
+          bucket?: string | null
           buildid?: number | null
           cpk?: string | null
+          exists?: boolean
           kind?: string | null
           path?: string
           sha256?: string | null
@@ -2065,6 +2584,7 @@ export type Database = {
           description_fr: string | null
           description_ja: string | null
           element_id: number | null
+          has_asset: boolean | null
           id: string
           image_url: string | null
           name_en: string | null
@@ -2082,6 +2602,7 @@ export type Database = {
           description_fr?: string | null
           description_ja?: string | null
           element_id?: number | null
+          has_asset?: boolean | null
           id: string
           image_url?: string | null
           name_en?: string | null
@@ -2099,6 +2620,7 @@ export type Database = {
           description_fr?: string | null
           description_ja?: string | null
           element_id?: number | null
+          has_asset?: boolean | null
           id?: string
           image_url?: string | null
           name_en?: string | null
@@ -2132,6 +2654,45 @@ export type Database = {
           power?: number | null
           shop?: string | null
           size?: string | null
+        }
+        Relationships: []
+      }
+      inagle_lua_scripts: {
+        Row: {
+          calls: Json | null
+          category: string | null
+          crc32_numbers: Json | null
+          functions: Json | null
+          hash: string | null
+          id: string
+          name: string
+          strings: Json | null
+          updated_at: string | null
+          version: string | null
+        }
+        Insert: {
+          calls?: Json | null
+          category?: string | null
+          crc32_numbers?: Json | null
+          functions?: Json | null
+          hash?: string | null
+          id: string
+          name: string
+          strings?: Json | null
+          updated_at?: string | null
+          version?: string | null
+        }
+        Update: {
+          calls?: Json | null
+          category?: string | null
+          crc32_numbers?: Json | null
+          functions?: Json | null
+          hash?: string | null
+          id?: string
+          name?: string
+          strings?: Json | null
+          updated_at?: string | null
+          version?: string | null
         }
         Relationships: []
       }
@@ -2204,6 +2765,39 @@ export type Database = {
         }
         Relationships: []
       }
+      inagle_missions: {
+        Row: {
+          code: string
+          data: Json
+          mission_id: string
+          name_en: string | null
+          name_fr: string | null
+          name_id: string | null
+          name_ja: string | null
+          updated_at: string
+        }
+        Insert: {
+          code: string
+          data: Json
+          mission_id: string
+          name_en?: string | null
+          name_fr?: string | null
+          name_id?: string | null
+          name_ja?: string | null
+          updated_at?: string
+        }
+        Update: {
+          code?: string
+          data?: Json
+          mission_id?: string
+          name_en?: string | null
+          name_fr?: string | null
+          name_id?: string | null
+          name_ja?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       inagle_miximax: {
         Row: {
           asset_code: string | null
@@ -2212,6 +2806,7 @@ export type Database = {
           description_fr: string | null
           description_ja: string | null
           element_id: number | null
+          has_asset: boolean | null
           icon_code: string | null
           id: string
           image_url: string | null
@@ -2230,6 +2825,7 @@ export type Database = {
           description_fr?: string | null
           description_ja?: string | null
           element_id?: number | null
+          has_asset?: boolean | null
           icon_code?: string | null
           id: string
           image_url?: string | null
@@ -2248,6 +2844,7 @@ export type Database = {
           description_fr?: string | null
           description_ja?: string | null
           element_id?: number | null
+          has_asset?: boolean | null
           icon_code?: string | null
           id?: string
           image_url?: string | null
@@ -2639,51 +3236,30 @@ export type Database = {
         }
         Relationships: []
       }
-      inagle_rag_chunks: {
+      inagle_rag_edges: {
         Row: {
-          buildid: number | null
-          content: string
-          content_hash: string
-          content_tsv: unknown
-          created_at: string | null
-          embedding: unknown
-          id: string
-          lang: string | null
+          created_at: string
+          dst: string
           meta: Json
-          source_id: string
-          source_kind: string
-          title: string | null
-          url: string | null
+          relation: string
+          src: string
+          weight: number
         }
         Insert: {
-          buildid?: number | null
-          content: string
-          content_hash: string
-          content_tsv?: unknown
-          created_at?: string | null
-          embedding?: unknown
-          id: string
-          lang?: string | null
+          created_at?: string
+          dst: string
           meta?: Json
-          source_id: string
-          source_kind: string
-          title?: string | null
-          url?: string | null
+          relation: string
+          src: string
+          weight?: number
         }
         Update: {
-          buildid?: number | null
-          content?: string
-          content_hash?: string
-          content_tsv?: unknown
-          created_at?: string | null
-          embedding?: unknown
-          id?: string
-          lang?: string | null
+          created_at?: string
+          dst?: string
           meta?: Json
-          source_id?: string
-          source_kind?: string
-          title?: string | null
-          url?: string | null
+          relation?: string
+          src?: string
+          weight?: number
         }
         Relationships: []
       }
@@ -2720,6 +3296,102 @@ export type Database = {
         }
         Relationships: []
       }
+      inagle_shops: {
+        Row: {
+          data: Json | null
+          id: string
+          item_db_id: string | null
+          item_hex: string
+          item_id: number
+          item_name_en: string | null
+          item_name_fr: string | null
+          item_name_ja: string | null
+          name_en: string | null
+          name_fr: string | null
+          name_hash: number
+          name_ja: string | null
+          shop_id: number
+          slot_index: number | null
+          updated_at: string
+        }
+        Insert: {
+          data?: Json | null
+          id: string
+          item_db_id?: string | null
+          item_hex: string
+          item_id: number
+          item_name_en?: string | null
+          item_name_fr?: string | null
+          item_name_ja?: string | null
+          name_en?: string | null
+          name_fr?: string | null
+          name_hash: number
+          name_ja?: string | null
+          shop_id: number
+          slot_index?: number | null
+          updated_at?: string
+        }
+        Update: {
+          data?: Json | null
+          id?: string
+          item_db_id?: string | null
+          item_hex?: string
+          item_id?: number
+          item_name_en?: string | null
+          item_name_fr?: string | null
+          item_name_ja?: string | null
+          name_en?: string | null
+          name_fr?: string | null
+          name_hash?: number
+          name_ja?: string | null
+          shop_id?: number
+          slot_index?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      inagle_skill_technic: {
+        Row: {
+          data: Json
+          formation_chara_len: number
+          formation_type: number
+          id: string
+          lose_sub_motion_name_crc: string
+          lose_type: number
+          shoot_curve_angle: number
+          shoot_curve_height_rate: number
+          shoot_curve_mid_rate: number
+          updated_at: string
+          win_sub_motion_name_crc: string
+        }
+        Insert: {
+          data: Json
+          formation_chara_len: number
+          formation_type: number
+          id: string
+          lose_sub_motion_name_crc: string
+          lose_type: number
+          shoot_curve_angle: number
+          shoot_curve_height_rate: number
+          shoot_curve_mid_rate: number
+          updated_at?: string
+          win_sub_motion_name_crc: string
+        }
+        Update: {
+          data?: Json
+          formation_chara_len?: number
+          formation_type?: number
+          id?: string
+          lose_sub_motion_name_crc?: string
+          lose_type?: number
+          shoot_curve_angle?: number
+          shoot_curve_height_rate?: number
+          shoot_curve_mid_rate?: number
+          updated_at?: string
+          win_sub_motion_name_crc?: string
+        }
+        Relationships: []
+      }
       inagle_skills: {
         Row: {
           category: string | null
@@ -2734,6 +3406,7 @@ export type Database = {
           evolution_type: string | null
           foul_rate: number | null
           growth_type: string | null
+          has_telop: boolean
           hash_id: string | null
           id: string
           image_url: string | null
@@ -2769,6 +3442,7 @@ export type Database = {
           evolution_type?: string | null
           foul_rate?: number | null
           growth_type?: string | null
+          has_telop?: boolean
           hash_id?: string | null
           id: string
           image_url?: string | null
@@ -2804,6 +3478,7 @@ export type Database = {
           evolution_type?: string | null
           foul_rate?: number | null
           growth_type?: string | null
+          has_telop?: boolean
           hash_id?: string | null
           id?: string
           image_url?: string | null
@@ -2882,6 +3557,63 @@ export type Database = {
         }
         Relationships: []
       }
+      inagle_special_tactics: {
+        Row: {
+          data: Json | null
+          description_en: string | null
+          description_fr: string | null
+          description_ja: string | null
+          element: string | null
+          element_id: number
+          id: string
+          internal_code: string | null
+          name_en: string | null
+          name_fr: string | null
+          name_ja: string | null
+          partner_count: number
+          partner_ids: Json
+          power: number
+          recast_time: number
+          updated_at: string
+        }
+        Insert: {
+          data?: Json | null
+          description_en?: string | null
+          description_fr?: string | null
+          description_ja?: string | null
+          element?: string | null
+          element_id?: number
+          id: string
+          internal_code?: string | null
+          name_en?: string | null
+          name_fr?: string | null
+          name_ja?: string | null
+          partner_count?: number
+          partner_ids?: Json
+          power?: number
+          recast_time?: number
+          updated_at?: string
+        }
+        Update: {
+          data?: Json | null
+          description_en?: string | null
+          description_fr?: string | null
+          description_ja?: string | null
+          element?: string | null
+          element_id?: number
+          id?: string
+          internal_code?: string | null
+          name_en?: string | null
+          name_fr?: string | null
+          name_ja?: string | null
+          partner_count?: number
+          partner_ids?: Json
+          power?: number
+          recast_time?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       inagle_stadiums: {
         Row: {
           condition: string | null
@@ -2906,6 +3638,78 @@ export type Database = {
           id?: string
           image_path?: string | null
           updated_at?: string | null
+        }
+        Relationships: []
+      }
+      inagle_star_signs: {
+        Row: {
+          chara_param_id: string
+          chara_rarity: number
+          data: Json
+          enable_cond: string
+          is_remarkable: boolean
+          rate_boost_a: number
+          rate_boost_b: number
+          rate_boost_c: number
+          rate_boost_d: number
+          rate_default: number
+          updated_at: string
+        }
+        Insert: {
+          chara_param_id: string
+          chara_rarity: number
+          data?: Json
+          enable_cond?: string
+          is_remarkable?: boolean
+          rate_boost_a?: number
+          rate_boost_b?: number
+          rate_boost_c?: number
+          rate_boost_d?: number
+          rate_default?: number
+          updated_at?: string
+        }
+        Update: {
+          chara_param_id?: string
+          chara_rarity?: number
+          data?: Json
+          enable_cond?: string
+          is_remarkable?: boolean
+          rate_boost_a?: number
+          rate_boost_b?: number
+          rate_boost_c?: number
+          rate_boost_d?: number
+          rate_default?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      inagle_super_tactics: {
+        Row: {
+          conditions: Json | null
+          crc_id: string
+          data: Json
+          id: string
+          idx: number
+          kind: string
+          updated_at: string
+        }
+        Insert: {
+          conditions?: Json | null
+          crc_id: string
+          data: Json
+          id: string
+          idx: number
+          kind: string
+          updated_at?: string
+        }
+        Update: {
+          conditions?: Json | null
+          crc_id?: string
+          data?: Json
+          id?: string
+          idx?: number
+          kind?: string
+          updated_at?: string
         }
         Relationships: []
       }
@@ -2981,6 +3785,54 @@ export type Database = {
         }
         Relationships: []
       }
+      inagle_team_build: {
+        Row: {
+          build_level: number | null
+          build_type: number | null
+          data: Json
+          effect_id: string | null
+          effect_ref_id: string | null
+          id: string
+          idx: number
+          multiplier: number | null
+          section: string
+          threshold: number | null
+          type: number | null
+          updated_at: string
+          value: number | null
+        }
+        Insert: {
+          build_level?: number | null
+          build_type?: number | null
+          data: Json
+          effect_id?: string | null
+          effect_ref_id?: string | null
+          id: string
+          idx: number
+          multiplier?: number | null
+          section: string
+          threshold?: number | null
+          type?: number | null
+          updated_at?: string
+          value?: number | null
+        }
+        Update: {
+          build_level?: number | null
+          build_type?: number | null
+          data?: Json
+          effect_id?: string | null
+          effect_ref_id?: string | null
+          id?: string
+          idx?: number
+          multiplier?: number | null
+          section?: string
+          threshold?: number | null
+          type?: number | null
+          updated_at?: string
+          value?: number | null
+        }
+        Relationships: []
+      }
       inagle_teams: {
         Row: {
           country_code: string | null
@@ -3043,6 +3895,201 @@ export type Database = {
           region?: string | null
           series?: string | null
           sheet_data?: Json | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      inagle_telop_waza: {
+        Row: {
+          blank_left_index: number
+          blank_right_index: number
+          data: Json | null
+          eldorado_id: string | null
+          left_blanks: Json
+          right_blanks: Json
+          skill_id: string
+          updated_at: string
+        }
+        Insert: {
+          blank_left_index: number
+          blank_right_index: number
+          data?: Json | null
+          eldorado_id?: string | null
+          left_blanks?: Json
+          right_blanks?: Json
+          skill_id: string
+          updated_at?: string
+        }
+        Update: {
+          blank_left_index?: number
+          blank_right_index?: number
+          data?: Json | null
+          eldorado_id?: string | null
+          left_blanks?: Json
+          right_blanks?: Json
+          skill_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      inagle_tricks: {
+        Row: {
+          data: Json | null
+          event_id: string | null
+          event_id_name: string | null
+          fail_event_id: string | null
+          fail_event_id_name: string | null
+          id: string
+          name_ja: string | null
+          trick_category: number | null
+          trick_category_name: string | null
+          trick_id_name: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          data?: Json | null
+          event_id?: string | null
+          event_id_name?: string | null
+          fail_event_id?: string | null
+          fail_event_id_name?: string | null
+          id: string
+          name_ja?: string | null
+          trick_category?: number | null
+          trick_category_name?: string | null
+          trick_id_name?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          data?: Json | null
+          event_id?: string | null
+          event_id_name?: string | null
+          fail_event_id?: string | null
+          fail_event_id_name?: string | null
+          id?: string
+          name_ja?: string | null
+          trick_category?: number | null
+          trick_category_name?: string | null
+          trick_id_name?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      inagle_trophies: {
+        Row: {
+          code: string
+          data: Json
+          desc_en: string | null
+          desc_fr: string | null
+          desc_ja: string | null
+          name_en: string | null
+          name_fr: string | null
+          name_ja: string | null
+          trophy_id: string
+          updated_at: string
+        }
+        Insert: {
+          code: string
+          data?: Json
+          desc_en?: string | null
+          desc_fr?: string | null
+          desc_ja?: string | null
+          name_en?: string | null
+          name_fr?: string | null
+          name_ja?: string | null
+          trophy_id: string
+          updated_at?: string
+        }
+        Update: {
+          code?: string
+          data?: Json
+          desc_en?: string | null
+          desc_fr?: string | null
+          desc_ja?: string | null
+          name_en?: string | null
+          name_fr?: string | null
+          name_ja?: string | null
+          trophy_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      inagle_uniforms: {
+        Row: {
+          data: Json | null
+          model_count: number
+          model_start: number
+          models: Json
+          name_id: string
+          type_id: number | null
+          updated_at: string
+        }
+        Insert: {
+          data?: Json | null
+          model_count: number
+          model_start: number
+          models?: Json
+          name_id: string
+          type_id?: number | null
+          updated_at?: string
+        }
+        Update: {
+          data?: Json | null
+          model_count?: number
+          model_start?: number
+          models?: Json
+          name_id?: string
+          type_id?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      inagle_video_waza: {
+        Row: {
+          bgm_name: string | null
+          caption_end_frame: number | null
+          caption_id: string | null
+          caption_name: string | null
+          caption_start_frame: number | null
+          data: Json | null
+          event_id: string
+          fede_in_time: number | null
+          fede_out_time: number | null
+          id: string
+          menu_id: string | null
+          movie_path: string | null
+          staffroll_data_name: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          bgm_name?: string | null
+          caption_end_frame?: number | null
+          caption_id?: string | null
+          caption_name?: string | null
+          caption_start_frame?: number | null
+          data?: Json | null
+          event_id: string
+          fede_in_time?: number | null
+          fede_out_time?: number | null
+          id: string
+          menu_id?: string | null
+          movie_path?: string | null
+          staffroll_data_name?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          bgm_name?: string | null
+          caption_end_frame?: number | null
+          caption_id?: string | null
+          caption_name?: string | null
+          caption_start_frame?: number | null
+          data?: Json | null
+          event_id?: string
+          fede_in_time?: number | null
+          fede_out_time?: number | null
+          id?: string
+          menu_id?: string | null
+          movie_path?: string | null
+          staffroll_data_name?: string | null
           updated_at?: string | null
         }
         Relationships: []
@@ -3202,7 +4249,6 @@ export type Database = {
           {
             foreignKeyName: "orders_user_id_fkey"
             columns: ["user_id"]
-            isOneToOne: false
             referencedRelation: "user"
             referencedColumns: ["id"]
           },
@@ -3636,7 +4682,6 @@ export type Database = {
           {
             foreignKeyName: "patreon_post_images_patreon_post_id_fkey"
             columns: ["patreon_post_id"]
-            isOneToOne: false
             referencedRelation: "patreon_post_events"
             referencedColumns: ["patreon_post_id"]
           },
@@ -3723,44 +4768,6 @@ export type Database = {
         }
         Relationships: []
       }
-      comments: {
-        Row: {
-          content: string
-          created_at: string
-          id: string
-          target_id: string
-          target_type: string
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          content: string
-          created_at?: string
-          id?: string
-          target_id: string
-          target_type: string
-          updated_at?: string
-          user_id: string
-        }
-        Update: {
-          content?: string
-          created_at?: string
-          id?: string
-          target_id?: string
-          target_type?: string
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "comments_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       profiles: {
         Row: {
           address_line1: string | null
@@ -3768,9 +4775,9 @@ export type Database = {
           avatar_url: string | null
           badges: string[] | null
           banner_url: string | null
-          claimed_at: string | null
           bio: string | null
           city: string | null
+          claimed_at: string | null
           country: string | null
           discord_id: string | null
           email: string | null
@@ -3790,9 +4797,9 @@ export type Database = {
           avatar_url?: string | null
           badges?: string[] | null
           banner_url?: string | null
-          claimed_at?: string | null
           bio?: string | null
           city?: string | null
+          claimed_at?: string | null
           country?: string | null
           discord_id?: string | null
           email?: string | null
@@ -3812,9 +4819,9 @@ export type Database = {
           avatar_url?: string | null
           badges?: string[] | null
           banner_url?: string | null
-          claimed_at?: string | null
           bio?: string | null
           city?: string | null
+          claimed_at?: string | null
           country?: string | null
           discord_id?: string | null
           email?: string | null
@@ -3877,7 +4884,6 @@ export type Database = {
           {
             foreignKeyName: "reading_history_article_id_fkey"
             columns: ["article_id"]
-            isOneToOne: false
             referencedRelation: "articles"
             referencedColumns: ["id"]
           },
@@ -3918,7 +4924,6 @@ export type Database = {
           {
             foreignKeyName: "session_user_id_fkey"
             columns: ["user_id"]
-            isOneToOne: false
             referencedRelation: "user"
             referencedColumns: ["id"]
           },
@@ -3971,7 +4976,6 @@ export type Database = {
           {
             foreignKeyName: "share_tracking_article_id_fkey"
             columns: ["article_id"]
-            isOneToOne: false
             referencedRelation: "articles"
             referencedColumns: ["id"]
           },
@@ -4106,6 +5110,30 @@ export type Database = {
         }
         Relationships: []
       }
+      tweet_notification_curseurs: {
+        Row: {
+          annonces: number
+          canal: string
+          curseur_le: string
+          dernier_tweet_id: string | null
+          maj_le: string
+        }
+        Insert: {
+          annonces?: number
+          canal: string
+          curseur_le: string
+          dernier_tweet_id?: string | null
+          maj_le?: string
+        }
+        Update: {
+          annonces?: number
+          canal?: string
+          curseur_le?: string
+          dernier_tweet_id?: string | null
+          maj_le?: string
+        }
+        Relationships: []
+      }
       tweets: {
         Row: {
           author_id: string | null
@@ -4168,6 +5196,7 @@ export type Database = {
           id: string
           image: string | null
           name: string
+          steam_id: string | null
           two_factor_backup_codes: string | null
           two_factor_enabled: boolean
           two_factor_secret: string | null
@@ -4180,6 +5209,7 @@ export type Database = {
           id: string
           image?: string | null
           name: string
+          steam_id?: string | null
           two_factor_backup_codes?: string | null
           two_factor_enabled?: boolean
           two_factor_secret?: string | null
@@ -4192,6 +5222,7 @@ export type Database = {
           id?: string
           image?: string | null
           name?: string
+          steam_id?: string | null
           two_factor_backup_codes?: string | null
           two_factor_enabled?: boolean
           two_factor_secret?: string | null
@@ -4267,7 +5298,6 @@ export type Database = {
           {
             foreignKeyName: "user_teams_user_id_fkey"
             columns: ["user_id"]
-            isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
@@ -4324,6 +5354,170 @@ export type Database = {
           field_path?: string
           id?: string
           value?: Json
+        }
+        Relationships: []
+      }
+      x_campagne_curseurs: {
+        Row: {
+          campagne_slug: string
+          curseur: string | null
+          dernier_arret: string | null
+          dernier_id: string | null
+          maj_le: string
+          pages_lues: number
+          requete: string
+        }
+        Insert: {
+          campagne_slug: string
+          curseur?: string | null
+          dernier_arret?: string | null
+          dernier_id?: string | null
+          maj_le?: string
+          pages_lues?: number
+          requete: string
+        }
+        Update: {
+          campagne_slug?: string
+          curseur?: string | null
+          dernier_arret?: string | null
+          dernier_id?: string | null
+          maj_le?: string
+          pages_lues?: number
+          requete?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "x_campagne_curseurs_campagne_slug_fkey"
+            columns: ["campagne_slug"]
+            referencedRelation: "x_campagnes"
+            referencedColumns: ["slug"]
+          },
+        ]
+      }
+      x_campagne_posts: {
+        Row: {
+          a_media: boolean
+          campagne_slug: string
+          collecte_le: string
+          hashtag_trouve: string | null
+          masque: boolean
+          mis_en_avant: boolean
+          motif_masquage: string | null
+          nb_images: number
+          publie_le: string | null
+          tweet_id: string
+        }
+        Insert: {
+          a_media?: boolean
+          campagne_slug: string
+          collecte_le?: string
+          hashtag_trouve?: string | null
+          masque?: boolean
+          mis_en_avant?: boolean
+          motif_masquage?: string | null
+          nb_images?: number
+          publie_le?: string | null
+          tweet_id: string
+        }
+        Update: {
+          a_media?: boolean
+          campagne_slug?: string
+          collecte_le?: string
+          hashtag_trouve?: string | null
+          masque?: boolean
+          mis_en_avant?: boolean
+          motif_masquage?: string | null
+          nb_images?: number
+          publie_le?: string | null
+          tweet_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "x_campagne_posts_campagne_slug_fkey"
+            columns: ["campagne_slug"]
+            referencedRelation: "x_campagnes"
+            referencedColumns: ["slug"]
+          },
+          {
+            foreignKeyName: "x_campagne_posts_tweet_id_fkey"
+            columns: ["tweet_id"]
+            referencedRelation: "tweets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      x_campagnes: {
+        Row: {
+          actif: boolean
+          collecte_le: string | null
+          created_at: string
+          debut_le: string | null
+          description: string | null
+          fin_le: string | null
+          hashtags: string[]
+          hashtags_affichage: string[]
+          hashtags_rattrapage: string[]
+          image_affiche: string | null
+          image_couverture: string | null
+          image_reglement: string | null
+          note_affiche: string | null
+          principale: boolean
+          publiee: boolean
+          reglement: string[]
+          requetes: string[]
+          salons_depot: string[]
+          slug: string
+          sur_titre: string | null
+          titre: string
+          updated_at: string
+        }
+        Insert: {
+          actif?: boolean
+          collecte_le?: string | null
+          created_at?: string
+          debut_le?: string | null
+          description?: string | null
+          fin_le?: string | null
+          hashtags: string[]
+          hashtags_affichage?: string[]
+          hashtags_rattrapage?: string[]
+          image_affiche?: string | null
+          image_couverture?: string | null
+          image_reglement?: string | null
+          note_affiche?: string | null
+          principale?: boolean
+          publiee?: boolean
+          reglement?: string[]
+          requetes?: string[]
+          salons_depot?: string[]
+          slug: string
+          sur_titre?: string | null
+          titre: string
+          updated_at?: string
+        }
+        Update: {
+          actif?: boolean
+          collecte_le?: string | null
+          created_at?: string
+          debut_le?: string | null
+          description?: string | null
+          fin_le?: string | null
+          hashtags?: string[]
+          hashtags_affichage?: string[]
+          hashtags_rattrapage?: string[]
+          image_affiche?: string | null
+          image_couverture?: string | null
+          image_reglement?: string | null
+          note_affiche?: string | null
+          principale?: boolean
+          publiee?: boolean
+          reglement?: string[]
+          requetes?: string[]
+          salons_depot?: string[]
+          slug?: string
+          sur_titre?: string | null
+          titre?: string
+          updated_at?: string
         }
         Relationships: []
       }
@@ -4437,69 +5631,116 @@ export type Database = {
       }
     }
     Functions: {
-      rg_liberer_profil_discord: {
-        Args: { p_discord_id: string }
-        Returns: number
-      }
-      rg_precreer_profils_discord: {
-        Args: Record<PropertyKey, never>
-        Returns: { crees: number; mis_a_jour: number }[]
-      }
-      rg_uuid_membre_discord: {
-        Args: { p_discord_id: string }
-        Returns: string
+      binary_quantize: {
+        Args: { "": string } | { "": unknown }
+        Returns: unknown
       }
       check_rate_limit: {
         Args: {
-          p_action: string
           p_max_count?: number
-          p_user_id: string
           p_window_minutes?: number
+          p_user_id: string
+          p_action: string
         }
         Returns: boolean
       }
-      generate_article_slug: { Args: { title: string }; Returns: string }
+      generate_article_slug: {
+        Args: { title: string }
+        Returns: string
+      }
       get_comment_counts: {
         Args: { article_ids: string[] }
         Returns: {
-          article_id: string
           count: number
+          article_id: string
         }[]
       }
       get_my_patreon_status: {
-        Args: never
+        Args: Record<PropertyKey, never>
         Returns: {
           currently_entitled_cents: number
-          discount_percent: number
           is_active: boolean
-          is_free_trial: boolean
-          is_gifted: boolean
-          next_charge_date: string
           status: string
           tier_titles: string[]
+          next_charge_date: string
+          is_free_trial: boolean
+          is_gifted: boolean
+          discount_percent: number
         }[]
       }
       get_share_counts: {
         Args: { p_article_ids: string[] }
         Returns: {
+          total: number
           article_id: string
           by_platform: Json
-          total: number
         }[]
       }
       get_trending_articles: {
         Args: { days_window?: number; result_limit?: number }
         Returns: {
-          category: string
           excerpt: string
-          featured_image_url: string
-          id: string
-          published_at: string
-          slug: string
-          title: string
           trending_score: number
+          title: string
+          id: string
+          slug: string
+          featured_image_url: string
+          category: string
           view_count: number
+          published_at: string
         }[]
+      }
+      gtrgm_compress: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      gtrgm_decompress: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      gtrgm_in: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      gtrgm_options: {
+        Args: { "": unknown }
+        Returns: undefined
+      }
+      gtrgm_out: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      halfvec_avg: {
+        Args: { "": number[] }
+        Returns: unknown
+      }
+      halfvec_out: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      halfvec_send: {
+        Args: { "": unknown }
+        Returns: string
+      }
+      halfvec_typmod_in: {
+        Args: { "": unknown[] }
+        Returns: number
+      }
+      hnsw_bit_support: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      hnsw_halfvec_support: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      hnsw_sparsevec_support: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      hnswhandler: {
+        Args: { "": unknown }
+        Returns: unknown
       }
       increment_article_views: {
         Args: { article_id: string }
@@ -4509,37 +5750,116 @@ export type Database = {
         Args: { p_article_id: string; p_platform: string }
         Returns: undefined
       }
-      is_active_patron: { Args: { uid: string }; Returns: boolean }
-      is_admin: { Args: never; Returns: boolean }
+      is_active_patron: {
+        Args: { uid: string }
+        Returns: boolean
+      }
+      is_admin: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
+      ivfflat_bit_support: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      ivfflat_halfvec_support: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      ivfflathandler: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      l2_norm: {
+        Args: { "": unknown } | { "": unknown }
+        Returns: number
+      }
+      l2_normalize: {
+        Args: { "": string } | { "": unknown } | { "": unknown }
+        Returns: string
+      }
       patreon_heartbeat: {
-        Args: { p_event_id: string; p_success: boolean; p_trigger: string }
+        Args: { p_success: boolean; p_trigger: string; p_event_id: string }
         Returns: undefined
       }
-      rag_hybrid_search: {
-        Args: {
-          k?: number
-          kinds?: string[]
-          q_emb: unknown
-          q_text: string
-          rrf_k?: number
-        }
+      rg_libelle_equipe: {
+        Args: { id_equipe: string }
+        Returns: string
+      }
+      rg_liberer_profil_discord: {
+        Args: { p_discord_id: string }
+        Returns: number
+      }
+      rg_precreer_profils_discord: {
+        Args: Record<PropertyKey, never>
         Returns: {
-          content: string
-          id: string
-          lang: string
-          meta: Json
-          score: number
-          source_id: string
-          source_kind: string
-          title: string
-          url: string
+          crees: number
+          mis_a_jour: number
         }[]
       }
-      show_limit: { Args: never; Returns: number }
-      show_trgm: { Args: { "": string }; Returns: string[] }
+      rg_uuid_membre_discord: {
+        Args: { p_discord_id: string }
+        Returns: string
+      }
+      set_limit: {
+        Args: { "": number }
+        Returns: number
+      }
+      show_limit: {
+        Args: Record<PropertyKey, never>
+        Returns: number
+      }
+      show_trgm: {
+        Args: { "": string }
+        Returns: string[]
+      }
+      sparsevec_out: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      sparsevec_send: {
+        Args: { "": unknown }
+        Returns: string
+      }
+      sparsevec_typmod_in: {
+        Args: { "": unknown[] }
+        Returns: number
+      }
       upsert_reading_progress: {
-        Args: { p_article_id: string; p_progress: number; p_user_id: string }
+        Args: { p_user_id: string; p_article_id: string; p_progress: number }
         Returns: undefined
+      }
+      vector_avg: {
+        Args: { "": number[] }
+        Returns: string
+      }
+      vector_dims: {
+        Args: { "": string } | { "": unknown }
+        Returns: number
+      }
+      vector_norm: {
+        Args: { "": string }
+        Returns: number
+      }
+      vector_out: {
+        Args: { "": string }
+        Returns: unknown
+      }
+      vector_send: {
+        Args: { "": string }
+        Returns: string
+      }
+      vector_typmod_in: {
+        Args: { "": unknown[] }
+        Returns: number
+      }
+      x_masquer_hashtags: {
+        Args: { tags: string[]; texte: string }
+        Returns: string
+      }
+      x_regles_non_vides: {
+        Args: { regles: string[] }
+        Returns: boolean
       }
     }
     Enums: {
