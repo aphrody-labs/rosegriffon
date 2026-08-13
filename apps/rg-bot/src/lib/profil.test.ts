@@ -418,10 +418,16 @@ describe("modules de commandes", () => {
 	test("les commandes attendues sont bien du bon côté", async () => {
 		const [rg, azalee] = await Promise.all([commandesDuProfil("rg"), commandesDuProfil("azalee")]);
 
-		for (const commande of ["azalee", "cpk", "rag", "cdn", "x", "staff"]) {
+		// Le wiki et le jeu — plus `/article`, dont la lecture publique relève de
+		// l'actualité du wiki, tandis que son ÉCRITURE reste `/gestion article`
+		// côté Rose Griffon.
+		for (const commande of ["azalee", "cpk", "rag", "cdn", "x", "article"]) {
 			expect(`${commande}:${azalee.has(commande)}`).toBe(`${commande}:true`);
 		}
-		for (const commande of ["administration", "agenda", "article", "membre", "sondage"]) {
+		// La communauté, l'administration — et `/staff`, la consultation de
+		// l'exploitation : elle parle des services Rose Griffon, elle vit donc sur
+		// le bot Rose Griffon.
+		for (const commande of ["administration", "gestion", "moderation", "agenda", "staff", "membre", "sondage"]) {
 			expect(`${commande}:${rg.has(commande)}`).toBe(`${commande}:true`);
 		}
 	});
