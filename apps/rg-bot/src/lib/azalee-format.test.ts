@@ -37,6 +37,12 @@ import {
 	urlIllustrationQuete,
 	urlModele3d,
 	urlVisage,
+	COULEURS_ELEMENT,
+	couleurElement,
+	emojiCategorie,
+	emojiElement,
+	emojiPosition,
+	titreFiche,
 } from "./azalee-format";
 
 describe("texteFr", () => {
@@ -498,5 +504,45 @@ describe("classerPropositions", () => {
 		const beaucoup = Array.from({ length: 100 }, (_v, i) => ({ nom: `equipe ${i}` }));
 		expect(classerPropositions(beaucoup, "", (e) => e.nom)).toHaveLength(25);
 		expect(classerPropositions(beaucoup, "equipe", (e) => e.nom)).toHaveLength(25);
+	});
+});
+
+describe("identité visuelle des fiches", () => {
+	test("la couleur suit l'élément, quelle que soit la langue rendue par l'API", () => {
+		// L'API rend l'élément en fr, en ou ja selon la route : la couleur ne doit
+		// pas dépendre de laquelle on regarde.
+		expect(couleurElement("Feu")).toBe(0xa1_4b_3f);
+		expect(couleurElement("Fire")).toBe(0xa1_4b_3f);
+		expect(couleurElement("火")).toBe(0xa1_4b_3f);
+		expect(couleurElement("Montagne")).toBe(0xd4_af_37);
+		// `Aucun` est la seconde écriture du néant en base (9 lignes).
+		expect(couleurElement("Aucun")).toBe(COULEURS_ELEMENT.Néant);
+	});
+
+	test("un élément inconnu ne force aucune couleur", () => {
+		// `null` laisse l'embed garder la couleur du profil plutôt que d'inventer.
+		expect(couleurElement("Ténèbres")).toBeNull();
+		expect(couleurElement(null)).toBeNull();
+		expect(couleurElement("")).toBeNull();
+	});
+
+	test("chaque élément, catégorie et position a son émoji", () => {
+		expect(emojiElement("Vent")).toBe("🌪️");
+		expect(emojiElement("Wind")).toBe("🌪️");
+		expect(emojiCategorie("Tir")).toBe("⚽");
+		expect(emojiCategorie("Shoot")).toBe("⚽");
+		expect(emojiPosition("Gardien")).toBe("🧤");
+		// Inconnu : chaîne vide, jamais un émoji par défaut trompeur.
+		expect(emojiElement("Ténèbres")).toBe("");
+		expect(emojiCategorie(null)).toBe("");
+	});
+
+	test("le titre reste sous la limite de Discord et n'ouvre pas sur une espace", () => {
+		expect(titreFiche("Mark Evans", "🔥", "Attaquant")).toBe("🔥 Mark Evans — Attaquant");
+		expect(titreFiche("Mark Evans", "", null)).toBe("Mark Evans");
+		expect(titreFiche("Mark Evans", null, "")).toBe("Mark Evans");
+		const long = titreFiche("x".repeat(400), "🔥", "Attaquant");
+		expect(long.length).toBe(250);
+		expect(long.endsWith("…")).toBe(true);
 	});
 });

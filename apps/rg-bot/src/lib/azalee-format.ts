@@ -33,7 +33,12 @@
  * il n'y a pas d'image ».
  */
 import { corrigerNomDouble } from "./azalee";
-import { normaliserLibelle } from "./ievr-labels";
+import {
+	normaliserLibelle,
+	resoudreCategorieTechnique,
+	resoudreElement,
+	resoudrePosition,
+} from "./ievr-labels";
 
 /** Champ multilingue tel que servi par l'API (`names`, `descriptions`, …). */
 export interface Multilingue {
@@ -635,4 +640,88 @@ export function classerPropositions<T>(
 		}
 	}
 	return [...debuts, ...milieux].slice(0, max);
+}
+
+// ─── Identité visuelle des fiches ───────────────────────────────────────────
+
+/**
+ * Couleur d'une fiche selon son élément.
+ *
+ * Le wiki colore chaque fiche par élément : c'est le repère le plus rapide dans
+ * une liste, avant même de lire le titre. Un embed uniformément orange perd
+ * cette information alors qu'elle est gratuite. Les teintes reprennent la
+ * charte Rose Griffon (marine `#0c1730`, or `#d4af37`, brique `#a14b3f`,
+ * Azalée `#F89C5A`) déclinée par élément, et non des couleurs inventées.
+ */
+export const COULEURS_ELEMENT: Readonly<Record<string, number>> = Object.freeze({
+	Feu: 0xa1_4b_3f,
+	Vent: 0x5b_8f_b9,
+	Forêt: 0x4c_8b_5a,
+	Montagne: 0xd4_af_37,
+	Néant: 0x0c_17_30,
+});
+
+/** Couleur d'embed pour un élément, `null` si l'élément est inconnu. */
+export function couleurElement(element: string | null | undefined): number | null {
+	const canonique = resoudreElement(element);
+	return canonique ? (COULEURS_ELEMENT[canonique] ?? null) : null;
+}
+
+/**
+ * Émoji d'un élément.
+ *
+ * Émojis UNICODE, pas des émojis personnalisés du serveur : le bot Azalée doit
+ * pouvoir afficher une fiche sur n'importe quel serveur, y compris un où il n'a
+ * pas la permission « Utiliser des émojis externes ».
+ */
+export const EMOJIS_ELEMENT: Readonly<Record<string, string>> = Object.freeze({
+	Feu: "🔥",
+	Vent: "🌪️",
+	Forêt: "🌳",
+	Montagne: "⛰️",
+	Néant: "✨",
+});
+
+export function emojiElement(element: string | null | undefined): string {
+	const canonique = resoudreElement(element);
+	return canonique ? (EMOJIS_ELEMENT[canonique] ?? "") : "";
+}
+
+/** Émoji d'une catégorie de technique (tir, dribble, défense, arrêt). */
+export const EMOJIS_CATEGORIE: Readonly<Record<string, string>> = Object.freeze({
+	Tir: "⚽",
+	Dribble: "💨",
+	Défense: "🛡️",
+	Arrêt: "🧤",
+});
+
+export function emojiCategorie(categorie: string | null | undefined): string {
+	const canonique = resoudreCategorieTechnique(categorie);
+	return canonique ? (EMOJIS_CATEGORIE[canonique] ?? "") : "";
+}
+
+/** Émoji d'une position de joueur. */
+export const EMOJIS_POSITION: Readonly<Record<string, string>> = Object.freeze({
+	Gardien: "🧤",
+	Défenseur: "🛡️",
+	Milieu: "🎯",
+	Attaquant: "⚽",
+});
+
+export function emojiPosition(position: string | null | undefined): string {
+	const canonique = resoudrePosition(position);
+	return canonique ? (EMOJIS_POSITION[canonique] ?? "") : "";
+}
+
+/**
+ * Titre d'une fiche : émoji, nom, puis la mention discrète qui situe la fiche.
+ *
+ * Discord tronque un titre à 256 caractères ; on borne à 250 pour laisser la
+ * place à l'ellipse. L'émoji n'est ajouté que s'il est connu — un titre qui
+ * commence par une espace orpheline est pire que pas d'émoji du tout.
+ */
+export function titreFiche(nom: string, emoji?: string | null, mention?: string | null): string {
+	const debut = emoji && emoji.length > 0 ? `${emoji} ${nom}` : nom;
+	const complet = mention && mention.length > 0 ? `${debut} — ${mention}` : debut;
+	return complet.length > 250 ? `${complet.slice(0, 249).trimEnd()}…` : complet;
 }

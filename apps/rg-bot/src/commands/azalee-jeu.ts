@@ -87,6 +87,7 @@ import {
 	urlIllustrationQuete,
 	urlModele3d,
 	urlVisage,
+	couleurElement,
 } from "../lib/azalee-format";
 import { cached } from "../lib/cache";
 import { rgEmbed, truncate } from "../lib/embeds";
@@ -1051,6 +1052,13 @@ export class AzaleeJeuCommand {
 				embed.setThumbnail(portrait);
 			}
 
+			// Même repère que sur les techniques : la couleur dit l'élément avant la
+			// lecture. `meilleure` est la variante retenue pour la fiche.
+			const couleurPerso = couleurElement(meilleure.element);
+			if (couleurPerso !== null) {
+				embed.setColor(couleurPerso);
+			}
+
 			const modele = urlModele3d(codeVisage ?? null);
 			if (modele) {
 				embed.addFields({ name: "Modèle 3D complet", value: modele });
@@ -1160,6 +1168,15 @@ export class AzaleeJeuCommand {
 			}
 			if (technique.videoUrl) {
 				embed.addFields({ name: "Vidéo", value: truncate(technique.videoUrl, 500) });
+			}
+
+			// La fiche prend la couleur de son élément — c'est le repère que le wiki
+			// utilise dans ses listes, et il est gratuit ici. Élément inconnu :
+			// `couleurElement` rend `null` et l'embed garde la couleur du profil
+			// plutôt que d'inventer une teinte.
+			const couleurTechnique = couleurElement(texteFr(technique.elementName, ""));
+			if (couleurTechnique !== null) {
+				embed.setColor(couleurTechnique);
 			}
 
 			// Le télop d'une technique est un bandeau 1728×352 (~330 Ko en PNG brut) :
