@@ -65,6 +65,8 @@ export interface MoveCardProps {
 	className?: string;
 	videoUrl?: string;
 	posterUrl?: string;
+	/** Vignette webp zukan (~6 Ko) — préférée au poster jpg (~70 Ko) dans la grille. */
+	thumbnailUrl?: string;
 	shop?: string;
 }
 
@@ -79,12 +81,15 @@ export function MoveCard({
 	className,
 	videoUrl,
 	posterUrl,
+	thumbnailUrl,
 	shop,
 }: MoveCardProps) {
 	const [imgError, setImgError] = useState(false);
 
 	const telopUrl = getSkillImageUrl(id);
-	const displayImage = posterUrl || telopUrl;
+	// Vignette webp d'abord : ~6 Ko contre ~70 Ko pour le poster jpg, soit une
+	// grille de 60 techniques à ~0,4 Mo au lieu de ~4 Mo.
+	const displayImage = thumbnailUrl || posterUrl || telopUrl;
 	const elSprite = element ? ELEMENT_SPRITE[element] : undefined;
 	const borderAccent = element
 		? ELEMENT_ACCENT[element] || "border-outline-variant/20"

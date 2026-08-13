@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 import type { OverrideSkillData } from "@/components/wiki/OverrideSkillSection";
 import { SkillCutinSection } from "@/components/wiki/SkillCutinSection";
 import { SkillDetail } from "@/components/wiki/SkillDetail";
+import type { SkillVideoVariant } from "@/components/wiki/SkillVideoPlayer";
 import { cutinHasAssets, getSkillCutin } from "@rosegriffon/azalee/game/skills-cutin";
 import { createClient } from "@/lib/supabase/server";
 import { wikiService } from "@/lib/wiki-service";
@@ -59,6 +60,34 @@ async function enrichSkillFromDbColumns(skill: Record<string, unknown>): Promise
 		skill.hashId = row.hash_id ?? null;
 	} catch {
 		// Mirror/Postgres unavailable — fall back to whatever getSkill returned.
+	}
+}
+
+/**
+ * Variantes vidéo officielles de la technique (`inagle_skill_videos`).
+ *
+ * 236 techniques sur les 895 publiées par zukan ont DEUX vidéos (réussite/échec,
+ * défense/contre-tir) : `inagle_skills.video_url` ne peut en porter qu'une, la
+ * table de liaison porte les autres. Lecture sur la même source que le reste de
+ * la fiche (miroir SQLite en prod, Postgres sinon).
+ */
+async function fetchSkillVideos(skillId: string): Promise<SkillVideoVariant[]> {
+	try {
+		const supabase = await createClient();
+		const { data } = await supabase
+			.from("inagle_skill_videos")
+			.select("position, label, video_url, poster_url")
+			.eq("skill_id", skillId)
+			.order("position", { ascending: true });
+		return (data ?? []).map((row) => ({
+			label: row.label,
+			posterUrl: row.poster_url,
+			position: row.position,
+			videoUrl: row.video_url,
+		}));
+	} catch {
+		// Miroir/Postgres indisponible — la fiche retombe sur `skill.videoUrl`.
+		return [];
 	}
 }
 
@@ -149,6 +178,9 @@ export default async function MoveDetailPage({ params }: { params: Promise<{ id:
 	// Assets de cut-in (niers : modèle 3D, telop, son) — clé = code interne `skill_id_str`.
 	const cutinEntry = getSkillCutin((skill as any).internalCode || id);
 
+	// Vidéos officielles zukan (1 ou 2 variantes selon la technique).
+	const videos = await fetchSkillVideos((skill as any).skillId || id);
+
 	const breadcrumbJsonLd = {
 		"@context": "https://schema.org",
 		"@type": "BreadcrumbList",
@@ -178,6 +210,7 @@ export default async function MoveDetailPage({ params }: { params: Promise<{ id:
 				element={element}
 				relatedSkills={relatedSkills}
 				overrideSkills={overrideSkills}
+				videos={videos}
 			/>
 			{cutinEntry?.cutin && (
 				<div className="mt-6">

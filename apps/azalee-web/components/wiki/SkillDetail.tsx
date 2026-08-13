@@ -23,6 +23,8 @@ import { Icon } from "@/components/ui/Icon";
 import { OverrideSkillSection } from "@/components/wiki/OverrideSkillSection";
 import type { OverrideSkillData } from "@/components/wiki/OverrideSkillSection";
 import { SkillVideoActions } from "@/components/wiki/SkillVideoActions";
+import { SkillVideoPlayer } from "@/components/wiki/SkillVideoPlayer";
+import type { SkillVideoVariant } from "@/components/wiki/SkillVideoPlayer";
 import { getSkillIconUrl, getSkillImageUrl } from "@rosegriffon/azalee/images";
 import { japaneseToRomaji } from "@rosegriffon/azalee/text/japanese-romaji";
 import { SHOP_FR } from "@rosegriffon/azalee/text/translations";
@@ -69,6 +71,8 @@ interface SkillDetailProps {
 	element: string;
 	relatedSkills: Skill[];
 	overrideSkills?: OverrideSkillData[];
+	/** Variantes vidéo officielles (`inagle_skill_videos`), lues côté serveur. */
+	videos?: SkillVideoVariant[];
 }
 
 function SkillImage({ src, alt }: { src: string; alt: string }) {
@@ -112,6 +116,7 @@ export function SkillDetail({
 	element,
 	relatedSkills,
 	overrideSkills,
+	videos,
 }: SkillDetailProps) {
 	const imageUrl = getSkillImageUrl(skill.skillIDStr, (skill as any).image);
 	const sheetData = (skill as any).sheetData as CommunitySheetData | undefined;
@@ -137,7 +142,7 @@ export function SkillDetail({
 				{/* Left Column: Main Content */}
 				<div className="space-y-4">
 					{/* Video Player Section */}
-					<VideoSection skill={skill} name={name} imageUrl={imageUrl} />
+					<VideoSection skill={skill} name={name} imageUrl={imageUrl} videos={videos} />
 
 					{/* Title + Alt Names */}
 					<div>
@@ -205,45 +210,55 @@ export function SkillDetail({
 	);
 }
 
-function VideoSection({ skill, name, imageUrl }: { skill: Skill; name: string; imageUrl: string }) {
-	const [videoError, setVideoError] = useState(false);
+function VideoSection({
+	skill,
+	name,
+	imageUrl,
+	videos,
+}: {
+	skill: Skill;
+	name: string;
+	imageUrl: string;
+	videos?: SkillVideoVariant[];
+}) {
 	const [skillImgError, setSkillImgError] = useState(false);
 
+	// Les variantes viennent de `inagle_skill_videos` ; à défaut (technique non
+	// peuplée, ou lecture DB indisponible) on retombe sur la vidéo principale
+	// portée par la colonne scalaire.
+	const posterUrl = (skill as any).posterUrl as string | null | undefined;
+	const variants: SkillVideoVariant[] =
+		videos && videos.length > 0
+			? videos
+			: skill.videoUrl
+				? [{ label: "Movie", position: 0, posterUrl: posterUrl ?? null, videoUrl: skill.videoUrl }]
+				: [];
+
+	if (variants.length > 0) {
+		return <SkillVideoPlayer videos={variants} skillName={name} fallbackPoster={imageUrl} />;
+	}
+
 	return (
-		<div className="w-full rounded-2xl overflow-hidden shadow-lg border border-outline-variant/20 bg-black aspect-video relative group">
-			{skill.videoUrl && !videoError ? (
-				<video
-					src={skill.videoUrl}
-					controls
-					autoPlay
-					muted
-					className="w-full h-full object-contain"
-					poster={imageUrl || undefined}
-					onError={() => setVideoError(true)}
-				>
-					Votre navigateur ne supporte pas la lecture de vidéos.
-				</video>
-			) : (
-				<div className="w-full h-full flex flex-col items-center justify-center bg-surface-container-high/50 text-on-surface-variant/50">
-					{imageUrl && !skillImgError ? (
-						<div className="relative w-full h-full p-12">
-							<Image
-								src={imageUrl}
-								alt={name}
-								fill
-								sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-								className="object-contain filter drop-shadow-md opacity-80"
-								onError={() => setSkillImgError(true)}
-							/>
-						</div>
-					) : (
-						<>
-							<Icon name={getCategoryIcon(skill.category)} size={96} className="sm:hidden" />
-							<Icon name={getCategoryIcon(skill.category)} size={144} className="hidden sm:block" />
-						</>
-					)}
-				</div>
-			)}
+		<div className="w-full rounded-2xl overflow-hidden shadow-lg border border-outline-variant/20 bg-surface-container-highest aspect-video relative group">
+			<div className="w-full h-full flex flex-col items-center justify-center bg-surface-container-high/50 text-on-surface-variant/50">
+				{imageUrl && !skillImgError ? (
+					<div className="relative w-full h-full p-12">
+						<Image
+							src={imageUrl}
+							alt={name}
+							fill
+							sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+							className="object-contain filter drop-shadow-md opacity-80"
+							onError={() => setSkillImgError(true)}
+						/>
+					</div>
+				) : (
+					<>
+						<Icon name={getCategoryIcon(skill.category)} size={96} className="sm:hidden" />
+						<Icon name={getCategoryIcon(skill.category)} size={144} className="hidden sm:block" />
+					</>
+				)}
+			</div>
 		</div>
 	);
 }
