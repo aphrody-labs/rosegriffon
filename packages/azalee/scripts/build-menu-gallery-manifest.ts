@@ -1,41 +1,42 @@
 #!/usr/bin/env bun
 /**
- * Génère `data/menu-gallery-manifest.json` (tracké git) : la liste exhaustive des
- * illustrations du dossier jeu `dx11/menu/220_img/<dir>/` qui ne sont PAS déjà
- * exposées par la galerie DB (`inagle_gallery` / `inagle_scene_archives`).
+ * Génère `src/data/menu-gallery-manifest.json` (tracké git) : la liste exhaustive
+ * des illustrations des dossiers jeu `dx11/menu/220_img/<dir>/`.
  *
- * Les fichiers du dump sont nommés en doublé `<nom>_<nom>.png` → l'URL CDN est
- * DIRECTE, sans aucune transformation :
- *   https://cdn.rosegriffon.fr/dx11/menu/220_img/<dir>/<filename>.png
- * (le CDN sert ces assets live depuis les CPK — couverture vérifiée HTTP 200).
+ * Source = l'**index CPK** (`apps/azalee/data/cpk-index.ndjson.gz`, chemins réels
+ * des 250 800 fichiers), et non plus un scan du dump PNG pré-extrait : ce dump a
+ * été archivé, et son nommage `<nom>_<nom>.png` n'existe dans AUCUN chemin CPK —
+ * il produisait 404 sur toute la galerie.
  *
- * Sortie = `{ items: GalleryManifestItem[], counts: Record<dir, number> }` où chaque
- * item porte `{ id, dir, file, title, category }`. Le `file` est le nom RÉEL du
- * fichier (avec le doublé + l'extension), le `title` est dérivé du basename nettoyé.
+ * Chaque illustration est un conteneur `.g4tx` à texture unique portant le nom du
+ * fichier (vérifié par sondage d'en-tête : `gallery_img2`, `stadium`, `ev_pic`,
+ * `vsroute_map`, `telop_waza` → 1 texture principale, nom == basename). L'URL CDN
+ * est donc la forme 1:1 du contrat :
  *
- * Run : `bun scripts/build-menu-gallery-manifest.ts`
+ *     https://cdn.rosegriffon.fr/dx11/menu/220_img/<dir>/<nom>.png
+ *
+ * Run : `bun packages/azalee/scripts/build-menu-gallery-manifest.ts`
  */
+import { readFileSync } from "node:fs";
 import path from "node:path";
+import { gunzipSync } from "node:zlib";
+import { resolveDataFile } from "../src/config";
 
-/** Données figées du package (`packages/azalee/src/data`). */
 const DATA_DIR = path.resolve(import.meta.dir, "../src/data");
-
-const MENU_ROOT =
-	process.env.IEVR_MENU_ROOT ?? `${process.env.DATA_PATH ?? "/home/ubuntu/niers/data"}/dx11/menu`;
+const CPK_INDEX = "cpk-index.ndjson.gz";
+const IMG_ROOT = "data/dx11/menu/220_img/";
 
 /**
- * Dossiers du dump à indexer. `subdirs` liste les sous-dossiers à scanner sous le
- * dossier racine (pour `telop_waza` les illustrations vivent dans `fr/` et `en/`).
- * Le `dir` stocké dans le manifeste est le chemin relatif sous `220_img/` (segment
- * de langue inclus) → l'URL CDN se construit sans ambiguïté.
+ * Dossiers indexés. `dir` est le chemin relatif sous `220_img/` (segment de langue
+ * inclus) → l'URL CDN se construit sans ambiguïté.
  */
-const MENU_DIRS: ReadonlyArray<{ category: string; root: string; subdirs?: string[] }> = [
-	{ category: "gallery_img2", root: "gallery_img2" },
-	{ category: "ev_pic", root: "ev_pic" },
-	{ category: "stadium", root: "stadium" },
-	{ category: "vsroute_map", root: "vsroute_map" },
-	{ category: "hlp", root: "hlp" },
-	{ category: "telop_waza", root: "telop_waza", subdirs: ["fr", "en"] },
+const MENU_DIRS: ReadonlyArray<{ category: string; dirs: string[] }> = [
+	{ category: "gallery_img2", dirs: ["gallery_img2"] },
+	{ category: "ev_pic", dirs: ["ev_pic"] },
+	{ category: "stadium", dirs: ["stadium"] },
+	{ category: "vsroute_map", dirs: ["vsroute_map"] },
+	{ category: "hlp", dirs: ["hlp"] },
+	{ category: "telop_waza", dirs: ["telop_waza/fr", "telop_waza/en"] },
 ];
 
 interface GalleryManifestItem {
@@ -46,78 +47,62 @@ interface GalleryManifestItem {
 	category: string;
 }
 
-/**
- * Dérive le nom logique d'un fichier doublé `<nom>_<nom>.png` → `<nom>`.
- * Si le pattern doublé n'est pas détecté, on retombe sur le basename sans extension.
- */
-function logicalName(file: string): string {
-	const base = file.replace(/\.png$/i, "");
-	const half = Math.floor((base.length - 1) / 2);
-	if (base.length % 2 === 1) {
-		const left = base.slice(0, half);
-		const right = base.slice(half + 1);
-		if (base[half] === "_" && left === right) {
-			return left;
-		}
-	}
-	return base;
-}
-
 /** Titre lisible : retire les préfixes décoratifs, remplace `_` par espaces, Title Case. */
-function titleOf(file: string): string {
-	const cleaned = logicalName(file)
+function titleOf(name: string): string {
+	const cleaned = name
 		.replace(/^(img_|back_|hlp_|grid_)/, "")
 		.replaceAll("_", " ")
 		.trim();
-	return cleaned.replace(/\b\w/g, (c) => c.toUpperCase()) || logicalName(file);
+	return cleaned.replace(/\b\w/g, (c) => c.toUpperCase()) || name;
+}
+
+const src = resolveDataFile(CPK_INDEX);
+if (!src) {
+	console.error(`[gallery-manifest] ${CPK_INDEX} introuvable (apps/azalee/data/).`);
+	process.exit(1);
+}
+
+/** `220_img/<dir>` → basenames `.g4tx` DIRECTEMENT dedans (pas de descente récursive). */
+const byDir = new Map<string, string[]>();
+for (const line of gunzipSync(readFileSync(src)).toString("utf8").split("\n")) {
+	if (!line) continue;
+	const p = (JSON.parse(line) as [string, string])[0];
+	if (!p.startsWith(IMG_ROOT) || !p.endsWith(".g4tx")) continue;
+	const rest = p.slice(IMG_ROOT.length, -".g4tx".length);
+	const slash = rest.lastIndexOf("/");
+	if (slash < 0) continue;
+	const dir = rest.slice(0, slash);
+	const name = rest.slice(slash + 1);
+	const bucket = byDir.get(dir);
+	if (bucket) bucket.push(name);
+	else byDir.set(dir, [name]);
 }
 
 const items: GalleryManifestItem[] = [];
 const counts: Record<string, number> = {};
 
 for (const def of MENU_DIRS) {
-	const scanDirs = def.subdirs
-		? def.subdirs.map((s) => ({ rel: `${def.root}/${s}`, fs: `${def.root}/${s}` }))
-		: [{ rel: def.root, fs: def.root }];
-
-	let dirCount = 0;
-	for (const sd of scanDirs) {
-		const files: string[] = [];
-		try {
-			const glob = new Bun.Glob("*.png");
-			for await (const f of glob.scan({ cwd: `${MENU_ROOT}/220_img/${sd.fs}` })) {
-				files.push(f);
-			}
-		} catch {
-			console.warn(`Skip missing dir: 220_img/${sd.fs}`);
-			continue;
-		}
-		files.sort();
-		for (const file of files) {
-			// Filtre les PNG 0-octet : g4tx indécodables (pré-extracteur a écrit un
-			// fichier vide ; le décodeur live hang aussi dessus). Les lister donnerait
-			// des vignettes mortes + un hang 30s du service de variantes (sharp sur 0
-			// octet → 504) qui bloque le pool de connexions du navigateur.
-			if (Bun.file(`${MENU_ROOT}/220_img/${sd.fs}/${file}`).size === 0) {
-				continue;
-			}
+	let n = 0;
+	for (const dir of def.dirs) {
+		const names = (byDir.get(dir) ?? []).slice().sort();
+		for (const name of names) {
 			items.push({
-				id: `menu_${sd.rel.replaceAll("/", "_")}_${logicalName(file)}`,
-				dir: sd.rel,
-				file,
-				title: titleOf(file),
+				id: `menu_${dir.replaceAll("/", "_")}_${name}`,
+				dir,
+				file: `${name}.png`,
+				title: titleOf(name),
 				category: def.category,
 			});
-			dirCount++;
+			n += 1;
 		}
 	}
-	counts[def.category] = dirCount;
-	console.log(`Scanned ${def.category}: ${dirCount} files`);
+	counts[def.category] = n;
+	console.log(`${def.category.padEnd(14)} ${n}`);
 }
 
 const out = path.join(DATA_DIR, "menu-gallery-manifest.json");
 await Bun.write(out, `${JSON.stringify({ counts, items }, null, 2)}\n`);
 
 console.log("");
-console.log(`Total menu illustrations: ${items.length}`);
-console.log(`Written: ${out}`);
+console.log(`total illustrations menu : ${items.length}`);
+console.log(`écrit : ${out}`);

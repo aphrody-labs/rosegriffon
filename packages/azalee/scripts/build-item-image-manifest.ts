@@ -1,162 +1,88 @@
 #!/usr/bin/env bun
 /**
- * Génère `data/item-image-manifest.json` : mapping `internal_code → path/filename`
- * (relatif à `cdn.rosegriffon.fr/dx11/menu/`) pour les items dont l'`image_url` DB
- * ne pointe pas vers un fichier réel.
+ * Génère `src/data/item-image-manifest.json` : `internal_code` d'objet →
+ * **(conteneur `.g4tx`, nom de texture)** réels dans les CPK.
  *
- * Stratégie de match (ordonnée) :
- *   1. Path DB `image_url` directement (extension swap webp→png).
- *   2. Item dossier : `200_icon/02_icon_item/{*}_{internal_code}.png` ou `{internal_code}.png`.
- *   3. Skill telop : `220_img/telop_waza/fr|en/{internal_code}_{internal_code}.png` (cas des
- *      items qui partagent le code avec un skill, ex: `wao00930`, `who00150`).
+ * Pourquoi un manifeste plutôt qu'une règle : le dossier écrit en base
+ * (`image_url = 200_icon/02_icon_item/<code>.webp`) est FAUX pour 522 objets sur
+ * 1300 — `coa_animal_an000100` vit dans `22_icon_town/icon_animal.g4tx`, les `em*`
+ * dans `01_icon_emblem/`, les `ds*` dans `20_icon_deco/`, les plaques `nm*` dans
+ * `25_icon_nameplate/`. Le seul localisateur fiable est le couple (conteneur, nom
+ * de texture), fourni par l'index `icon-texture-index.ndjson.gz`.
  *
- * Le manifest stocke un path relatif depuis `dx11/menu/` (ex: `200_icon/02_icon_item/icon_item10_tk_hr000007`).
- * Run : `bun scripts/build-item-image-manifest.ts`
+ * Sources :
+ *  - miroir SQLite `apps/azalee/data/backups/mirror.sqlite` (`inagle_items`) ;
+ *  - index texture → conteneur (`@rose-griffon/azalee/icon-index`).
+ *
+ * Format (compact, pour ne pas gonfler le bundle navigateur — `utils.ts` est
+ * client-safe et importe ce JSON statiquement) :
+ *
+ * ```json
+ * { "containers": ["200_icon/02_icon_item/icon_item05.g4tx", …],
+ *   "items": { "eq_ac0100101": 0, "nm03103": [7, "nm03103_01"] } }
+ * ```
+ * une valeur numérique = index de conteneur, la texture portant le nom de l'objet ;
+ * un couple `[index, nom]` = texture au nom différent du code.
+ *
+ * L'URL finale est `<CDN>/dx11/menu/<conteneur>/<texture>.png` (contrat de texture
+ * nommée servi par `nie-model-serve`).
+ *
+ * Run : `bun packages/azalee/scripts/build-item-image-manifest.ts`
  */
+import { Database } from "bun:sqlite";
 import path from "node:path";
+import { resolveMirrorPath } from "../src/config";
+import { resolveIconTexture } from "../src/icon-index";
 
-/** Données figées du package (`packages/azalee/src/data`). */
 const DATA_DIR = path.resolve(import.meta.dir, "../src/data");
+const OUT = path.join(DATA_DIR, "item-image-manifest.json");
 
-const MENU_ROOT =
-	process.env.IEVR_MENU_ROOT ??
-	`${process.env.DATA_PATH ?? "/home/ubuntu/niers/data"}/dx11/menu`;
-
-const SCAN_DIRS = ["200_icon/02_icon_item", "220_img/telop_waza/fr", "220_img/telop_waza/en"];
-
-const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!;
-
-if (!SUPABASE_URL || !SUPABASE_KEY) {
-	console.error("Missing NEXT_PUBLIC_SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY");
+const mirror = resolveMirrorPath();
+if (!mirror) {
+	console.error("[item-manifest] miroir SQLite introuvable (apps/azalee/data/backups/).");
 	process.exit(1);
 }
 
-// Index : { filename → relative path under menu/ } pour chaque scan dir.
-// Plusieurs dirs peuvent contenir le même filename → priorité à l'ordre de SCAN_DIRS.
-const fileIndex = new Map<string, string>();
-const dirIndexes: Record<string, Set<string>> = {};
+const db = new Database(mirror, { readonly: true });
+const rows = db
+	.query("select internal_code from inagle_items where internal_code is not null and internal_code != ''")
+	.all() as Array<{ internal_code: string }>;
 
-for (const dir of SCAN_DIRS) {
-	const set = new Set<string>();
-	try {
-		const glob = new Bun.Glob("*.png");
-		for await (const f of glob.scan({ cwd: `${MENU_ROOT}/${dir}` })) {
-			set.add(f);
-			if (!fileIndex.has(f)) {
-				fileIndex.set(f, `${dir}/${f}`);
-			}
-		}
-	} catch {
-		console.warn(`Skip missing dir: ${dir}`);
-	}
-	dirIndexes[dir] = set;
-	console.log(`Scanned ${dir}: ${set.size} files`);
-}
-console.log(`Total unique filenames: ${fileIndex.size}`);
+const codes = [...new Set(rows.map((r) => r.internal_code.trim()).filter(Boolean))].sort();
 
-// Pagination Supabase.
-const items: Array<{ internal_code: string | null; image_url: string | null }> = [];
-const PAGE = 1000;
-for (let offset = 0; ; offset += PAGE) {
-	const r = await fetch(
-		`${SUPABASE_URL}/rest/v1/inagle_items?select=internal_code,image_url&limit=${PAGE}&offset=${offset}`,
-		{
-			headers: {
-				Authorization: `Bearer ${SUPABASE_KEY}`,
-				apikey: SUPABASE_KEY,
-			},
-		}
-	);
-	if (!r.ok) {
-		console.error(`Supabase fetch failed: ${r.status} ${await r.text()}`);
-		process.exit(1);
-	}
-	const page: typeof items = await r.json();
-	items.push(...page);
-	if (page.length < PAGE) {
-		break;
-	}
-}
-console.log(`DB items: ${items.length}`);
-
-const manifest: Record<string, string> = {};
-let viaDirect = 0;
-let viaInternalCode = 0;
-let viaSkillTelop = 0;
+const containers: string[] = [];
+const containerIndex = new Map<string, number>();
+const items: Record<string, number | [number, string]> = {};
+const byFolder = new Map<string, number>();
 let unresolved = 0;
-const unresolvedSamples: string[] = [];
 
-for (const it of items) {
-	const code = it.internal_code;
-	if (!code) {
+for (const code of codes) {
+	const ref = resolveIconTexture(code);
+	if (!ref) {
+		unresolved += 1;
 		continue;
 	}
-
-	// 1. DB image_url direct match.
-	if (it.image_url) {
-		const dbFilename = it.image_url.replace(/^.*\//, "").replace(/\.webp$/, ".png");
-		// Tente toutes les dirs scannées dans l'ordre.
-		const matchedDir = SCAN_DIRS.find((d) => dirIndexes[d]?.has(dbFilename));
-		if (matchedDir) {
-			// Si c'est dans 02_icon_item ET le filename matche le default (pas besoin de manifest), skip.
-			const defaultPath = `200_icon/02_icon_item/${code}.png`;
-			const realPath = `${matchedDir}/${dbFilename}`;
-			if (realPath !== defaultPath) {
-				manifest[code] = realPath.replace(/\.png$/, "");
-			}
-			viaDirect++;
-			continue;
-		}
+	let idx = containerIndex.get(ref.g4txPath);
+	if (idx === undefined) {
+		idx = containers.length;
+		containers.push(ref.g4txPath);
+		containerIndex.set(ref.g4txPath, idx);
 	}
-
-	// 2. Items dir : *_${code}.png ou ${code}.png.
-	const itemSet = dirIndexes["200_icon/02_icon_item"];
-	if (itemSet) {
-		const exact = `${code}.png`;
-		if (itemSet.has(exact)) {
-			// Match par défaut (code seul) — pas besoin de manifest.
-			viaInternalCode++;
-			continue;
-		}
-		const suffix = `_${code}.png`;
-		const found = [...itemSet].find((f) => f.endsWith(suffix));
-		if (found) {
-			manifest[code] = `200_icon/02_icon_item/${found.replace(/\.png$/, "")}`;
-			viaInternalCode++;
-			continue;
-		}
-	}
-
-	// 3. Skill telop : ${code}_${code}.png dans fr/ puis en/.
-	for (const dir of ["220_img/telop_waza/fr", "220_img/telop_waza/en"]) {
-		const candidate = `${code}_${code}.png`;
-		if (dirIndexes[dir]?.has(candidate)) {
-			manifest[code] = `${dir}/${code}_${code}`;
-			viaSkillTelop++;
-			break;
-		}
-	}
-	if (manifest[code]) {
-		continue;
-	}
-
-	unresolved++;
-	if (unresolvedSamples.length < 15) {
-		unresolvedSamples.push(code);
-	}
+	items[code] = ref.textureName === code ? idx : [idx, ref.textureName];
+	const folder = ref.g4txPath.split("/").slice(0, 2).join("/");
+	byFolder.set(folder, (byFolder.get(folder) ?? 0) + 1);
 }
 
-const out = path.join(DATA_DIR, "item-image-manifest.json");
-await Bun.write(out, JSON.stringify(manifest, null, 2));
+await Bun.write(
+	OUT,
+	`${JSON.stringify({ containers, items: Object.fromEntries(Object.entries(items).sort()) }, null, 2)}\n`,
+);
 
-console.log("");
-console.log(`Manifest entries: ${Object.keys(manifest).length}`);
-console.log(`Resolved via DB image_url (no manifest needed): ${viaDirect}`);
-console.log(`Resolved via internal_code lookup: ${viaInternalCode}`);
-console.log(`Resolved via skill telop fallback: ${viaSkillTelop}`);
-console.log(`Unresolved: ${unresolved}`);
-if (unresolvedSamples.length > 0) {
-	console.log(`Unresolved samples: ${unresolvedSamples.join(", ")}`);
+console.log(`codes objets distincts : ${codes.length}`);
+console.log(`résolus                : ${Object.keys(items).length}`);
+console.log(`non résolus            : ${unresolved}`);
+console.log(`conteneurs distincts   : ${containers.length}`);
+for (const [folder, n] of [...byFolder].sort((a, b) => b[1] - a[1])) {
+	console.log(`  ${String(n).padStart(5)}  ${folder}`);
 }
-console.log(`Written: ${out}`);
+console.log(`écrit : ${OUT}`);
