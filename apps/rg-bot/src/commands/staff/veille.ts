@@ -43,6 +43,8 @@ import {
 	formaterNombre,
 	horodatageAbsolu,
 	lignePostX,
+	normaliserPseudoX,
+	trierPostsParDate,
 	type PostXAffichable,
 } from "./format";
 import { differerEnPrive, exigerDroits, expliquerRefusScrape, messagePanne } from "./garde";
@@ -183,21 +185,32 @@ export class StaffVeilleCommand {
 				return;
 			}
 			const fiche = (reponse.fiche ?? {}) as Record<string, unknown>;
-			const nomCompte = typeof fiche.pseudo === "string" ? fiche.pseudo : pseudo;
+			// Le pseudo sert à fabriquer une URL de repli : il doit passer la même
+			// grille que le service (`[A-Za-z0-9_]{1,15}`). Un pseudo brut saisi avec
+			// une espace ferait lever `setURL` et ferait perdre TOUT l'embed alors
+			// que l'appel, lui, avait réussi.
+			const nomCompte = normaliserPseudoX(fiche.pseudo) || normaliserPseudoX(pseudo);
+			const lien =
+				typeof fiche.url === "string" && fiche.url.startsWith("https://")
+					? fiche.url
+					: nomCompte
+						? `https://x.com/${nomCompte}`
+						: null;
 			const embed = rgEmbed()
 				.setTitle(
-					`${typeof fiche.nom === "string" ? borner(fiche.nom, 200) : nomCompte}${
-						fiche.certifie === true ? " ✔" : ""
-					}`
+					`${
+						typeof fiche.nom === "string" && fiche.nom.length > 0
+							? borner(fiche.nom, 200)
+							: (nomCompte || "compte X")
+					}${fiche.certifie === true ? " ✔" : ""}`
 				)
-				.setURL(typeof fiche.url === "string" ? fiche.url : `https://x.com/${nomCompte}`)
 				.setDescription(
 					typeof fiche.description === "string" && fiche.description.length > 0
 						? borner(fiche.description, 1_000)
 						: "*(pas de biographie)*"
 				)
 				.addFields(
-					{ name: "Pseudo", value: `@${nomCompte}`, inline: true },
+					{ name: "Pseudo", value: nomCompte ? `@${nomCompte}` : "—", inline: true },
 					{
 						name: "Abonnés",
 						value: formaterNombre(typeof fiche.abonnes === "number" ? fiche.abonnes : null),
@@ -223,6 +236,9 @@ export class StaffVeilleCommand {
 					}
 				)
 				.setFooter({ text: `Lu en direct chez X en ${formaterLatence(reponse.ms ?? 0)}` });
+			if (lien) {
+				embed.setURL(lien);
+			}
 			if (typeof fiche.avatar === "string" && fiche.avatar.startsWith("https://")) {
 				embed.setThumbnail(fiche.avatar);
 			}
@@ -264,12 +280,21 @@ export class StaffVeilleCommand {
 				});
 				return;
 			}
-			const posts = Array.isArray(reponse.posts) ? (reponse.posts as PostXAffichable[]) : [];
-			const compte = typeof reponse.pseudo === "string" ? reponse.pseudo : pseudo;
+			// X place le post ÉPINGLÉ en tête et le service ne trie pas : sans ce
+			// tri, « derniers posts » affichait un post de juillet au-dessus d'un
+			// post d'août (mesuré sur @inazuma_project le 13/8/2026).
+			const posts = trierPostsParDate(
+				Array.isArray(reponse.posts) ? (reponse.posts as PostXAffichable[]) : []
+			);
+			const compte = normaliserPseudoX(reponse.pseudo) || normaliserPseudoX(pseudo);
 			const embed = rgEmbed()
-				.setTitle(`@${compte} — ${posts.length} post${posts.length > 1 ? "s" : ""}`)
-				.setURL(`https://x.com/${compte}`)
+				.setTitle(
+					`${compte ? `@${compte}` : "Compte X"} — ${posts.length} post${posts.length > 1 ? "s" : ""}`
+				)
 				.setFooter({ text: `Lu en direct chez X en ${formaterLatence(reponse.ms ?? 0)}` });
+			if (compte) {
+				embed.setURL(`https://x.com/${compte}`);
+			}
 
 			if (posts.length === 0) {
 				embed.setDescription(
@@ -328,7 +353,12 @@ export class StaffVeilleCommand {
 				});
 				return;
 			}
-			const posts = Array.isArray(reponse.posts) ? (reponse.posts as PostXAffichable[]) : [];
+			// Le verbe demande le tri « Latest » à X, mais rien ne garantit l'ordre
+			// de la charge rendue : on le rétablit ici, sinon la mention « tri le
+			// plus récent » ci-dessous serait une promesse invérifiée.
+			const posts = trierPostsParDate(
+				Array.isArray(reponse.posts) ? (reponse.posts as PostXAffichable[]) : []
+			);
 			const embed = rgEmbed()
 				.setTitle(`Recherche X — ${posts.length} résultat${posts.length > 1 ? "s" : ""}`)
 				.setDescription(`Requête : « ${borner(requete, 200)} » · tri **le plus récent**.`)

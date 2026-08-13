@@ -55,9 +55,12 @@ async function statsDiscord(): Promise<StatsDiscord> {
       SELECT
         (SELECT count(*) FROM discord_members WHERE is_bot = false AND left_at IS NULL)::int   AS membres,
         (SELECT count(*) FROM discord_members WHERE is_bot = true)::int                        AS bots,
-        (SELECT count(*) FROM discord_members WHERE left_at IS NOT NULL)::int                  AS partis,
+        -- « partis » et « arrivées » sont affichés SOUS le décompte des membres,
+        -- qui exclut les bots : les compter ici sans le même filtre ferait un
+        -- bloc dont les trois lignes ne parlent pas de la même population.
+        (SELECT count(*) FROM discord_members WHERE is_bot = false AND left_at IS NOT NULL)::int AS partis,
         (SELECT count(*) FROM discord_members
-           WHERE joined_at >= NOW() - INTERVAL '30 days')::int                                 AS arrivees_30j,
+           WHERE is_bot = false AND joined_at >= NOW() - INTERVAL '30 days')::int               AS arrivees_30j,
         (SELECT count(*) FROM discord_members WHERE premium_since IS NOT NULL)::int            AS boosteurs,
         (SELECT count(*) FROM discord_channels)::int                                           AS salons,
         (SELECT count(*) FROM discord_channels WHERE suivi = true)::int                        AS salons_suivis,
