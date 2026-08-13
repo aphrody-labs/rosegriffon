@@ -56,6 +56,8 @@ export interface AnnoncePosts {
 	readonly salon: string;
 	/** Nom du curseur en base (`canal`). Un par profil, jamais partagé. */
 	readonly curseur: string;
+	/** Rôle mentionné dans un message séparé après l'annonce, `null` si aucun. */
+	readonly roleMention?: string | null;
 }
 
 /**
@@ -79,7 +81,7 @@ export function normaliserCanal(nom: string | null | undefined): string | null {
  * réglage partagé, à défaut de `DISCORD_NEWS_CHANNEL_ID`.
  */
 export function annonceHistorique(): AnnoncePosts {
-	return { salon: Bun.env.DISCORD_NEWS_CHANNEL_ID?.trim() ?? "", curseur: CANAL_NOTIFICATION };
+	return { salon: Bun.env.DISCORD_NEWS_CHANNEL_ID?.trim() ?? "", curseur: CANAL_NOTIFICATION, roleMention: null };
 }
 
 /**

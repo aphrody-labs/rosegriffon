@@ -159,10 +159,18 @@ export const CURSEUR_ANNONCE_POSTS = PROFIL.annoncePosts?.curseur ?? null;
  */
 export const PROFIL_ANNONCEUR: {
 	readonly nom: string;
-	readonly annoncePosts: { readonly salon: string; readonly curseur: string } | null;
+	readonly annoncePosts: {
+		readonly salon: string;
+		readonly curseur: string;
+		readonly roleMention: string | null;
+	} | null;
 } = {
 	nom: PROFIL.nom,
 	annoncePosts: PROFIL.annoncePosts
-		? { salon: SALON_ANNONCE_POSTS ?? "", curseur: PROFIL.annoncePosts.curseur }
+		? {
+				salon: SALON_ANNONCE_POSTS ?? "",
+				curseur: PROFIL.annoncePosts.curseur,
+				roleMention: PROFIL.annoncePosts.roleMention,
+			}
 		: null,
 };
