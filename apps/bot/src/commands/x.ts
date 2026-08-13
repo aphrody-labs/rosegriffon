@@ -1,0 +1,379 @@
+/**
+ * `/x` — l'ARCHIVE des posts X récoltés par le cron, consultable dans Discord.
+ *
+ *  - `/x liste` : parcours paginé de l'archive, filtrable par compte, par
+ *    catégorie et par texte (l'original ET la traduction française) ;
+ *  - `/x voir`  : un post précis, avec ses images, sa traduction et sa portée.
+ *
+ * PÉRIMÈTRE — cette commande ne fait QUE lire l'archive rangée dans
+ * `public.tweets`. Tout ce qui touche à la NOTIFICATION (état du suivi,
+ * réglages) et tout ce qui interroge X EN DIRECT vit ailleurs, par construction :
+ * ce qui se consulte est sous `/staff veille`, ce qui se modifie est sous
+ * `/administration veille`. Rien de tout cela ne doit revenir ici : `/x` est
+ * ouvert à tous les membres, les deux autres sont réservés au staff.
+ *
+ * Toute la logique décidable sans base (rendu d'une ligne, choix des images,
+ * bornage des pages, encodage de l'état des boutons) vit dans
+ * `lib/tweets-format.ts`, qui est pur et couvert par ses propres tests. Ce
+ * fichier ne fait que du câblage Discord.
+ */
+import { ButtonComponent, Discord, Slash, SlashGroup, SlashOption } from "@rpbey/discordx";
+import {
+	ActionRowBuilder,
+	ApplicationCommandOptionType,
+	ButtonBuilder,
+	ButtonStyle,
+	EmbedBuilder,
+	MessageFlags,
+	type AutocompleteInteraction,
+	type ButtonInteraction,
+	type ChatInputCommandInteraction,
+	type InteractionEditReplyOptions,
+} from "discord.js";
+
+import { rgEmbed, truncate } from "../lib/embeds";
+import {
+	bornerPage,
+	corpsTweet,
+	couper,
+	decoderEtatListe,
+	encoderEtatListe,
+	formaterMetriques,
+	horodatageDiscord,
+	imagesTweet,
+	ligneListe,
+	nombreDePages,
+	texteSansLienMedia,
+	urlTweet,
+	type EtatListeTweets,
+} from "../lib/tweets-format";
+import { auteursConnus, categoriesConnues, listerTweets, lireTweet } from "../services/tweets";
+
+/** Posts par page. 5 lignes tiennent largement dans les 4 096 caractères d'une description. */
+const PAR_PAGE = 5;
+
+/** Images montrées au maximum sur un post. Discord n'agrège pas au-delà de 4. */
+const MAX_IMAGES = 4;
+
+/**
+ * Réponse d'erreur.
+ *
+ * Le message brut d'une erreur Postgres (fragment de requête, nom d'hôte du
+ * pooler) n'a rien à faire dans un salon public : il est journalisé côté
+ * service, et le membre reçoit une phrase utile. Ne lève jamais — un `editReply`
+ * qui échoue à son tour ne doit pas remonter en exception non capturée.
+ */
+async function repondreErreur(
+	interaction: ChatInputCommandInteraction,
+	contexte: string,
+	err: unknown
+): Promise<void> {
+	console.error(`[x] ${contexte} :`, err);
+	try {
+		await interaction.editReply({
+			content: "❌ L'archive des posts est momentanément illisible. Réessaie dans un instant.",
+			embeds: [],
+			components: [],
+		});
+	} catch (secondaire) {
+		console.error("[x] réponse d'erreur impossible :", secondaire);
+	}
+}
+
+/** Construit la réponse (embed + boutons) d'une page de liste. */
+async function rendrePage(etat: EtatListeTweets): Promise<InteractionEditReplyOptions> {
+	const premier = await listerTweets({
+		auteur: etat.auteur,
+		categorie: etat.categorie,
+		recherche: etat.recherche,
+		page: etat.page,
+		parPage: PAR_PAGE,
+	});
+	// Une page demandée au-delà de la dernière ne doit pas répondre « vide » :
+	// on la ramène dans les bornes et on relit.
+	const page = bornerPage(etat.page, premier.total, PAR_PAGE);
+	const resultat =
+		page === premier.page
+			? premier
+			: await listerTweets({
+					auteur: etat.auteur,
+					categorie: etat.categorie,
+					recherche: etat.recherche,
+					page,
+					parPage: PAR_PAGE,
+				});
+
+	const criteres = [
+		etat.auteur ? `@${etat.auteur}` : null,
+		etat.categorie,
+		etat.recherche ? `« ${etat.recherche} »` : null,
+	]
+		.filter(Boolean)
+		.join(" · ");
+	const pages = nombreDePages(resultat.total, PAR_PAGE);
+
+	const embed = rgEmbed()
+		.setTitle(`Archive X — ${resultat.total.toLocaleString("fr-FR")} post${resultat.total > 1 ? "s" : ""}`)
+		.setURL("https://rosegriffon.fr/iergday");
+	if (criteres.length > 0) {
+		embed.setAuthor({ name: `Filtres : ${truncate(criteres, 200)}` });
+	}
+	if (resultat.lignes.length === 0) {
+		// Une réponse vide sans explication se lit comme une panne. On dit
+		// laquelle des deux situations on est, selon qu'un filtre est posé.
+		embed.setDescription(
+			criteres.length > 0
+				? "Aucun post ne correspond à ces filtres. Essaie sans le filtre de compte, ou avec un texte plus court."
+				: "L'archive ne contient aucun post."
+		);
+	} else {
+		embed.setDescription(resultat.lignes.map((tweet) => ligneListe(tweet)).join("\n\n"));
+	}
+	// Le pied est posé dans les deux cas : « page 1/1 » sur une liste vide reste
+	// une information, et son absence donnait deux rendus différents pour rien.
+	embed.setFooter({ text: `Page ${page}/${pages} · rosegriffon.fr` });
+
+	const composants: Array<ActionRowBuilder<ButtonBuilder>> = [];
+	const idPrecedent = encoderEtatListe({ ...etat, page: page - 1 });
+	const idSuivant = encoderEtatListe({ ...etat, page: page + 1 });
+	if (pages > 1 && idPrecedent && idSuivant) {
+		composants.push(
+			new ActionRowBuilder<ButtonBuilder>().addComponents(
+				new ButtonBuilder()
+					.setCustomId(idPrecedent)
+					.setLabel("Précédent")
+					.setStyle(ButtonStyle.Secondary)
+					.setDisabled(page <= 1),
+				// Repère de position, jamais cliquable : sur mobile le pied de l'embed
+				// se lit mal, et sans lui on ne sait pas où l'on est dans 2 618 pages.
+				new ButtonBuilder()
+					.setCustomId("x-page-repere")
+					.setLabel(`${page} / ${pages}`)
+					.setStyle(ButtonStyle.Secondary)
+					.setDisabled(true),
+				new ButtonBuilder()
+					.setCustomId(idSuivant)
+					.setLabel("Suivant")
+					.setStyle(ButtonStyle.Secondary)
+					.setDisabled(page >= pages)
+			)
+		);
+	}
+	return { embeds: [embed], components: composants };
+}
+
+@Discord()
+@SlashGroup({ name: "x", description: "Archive des posts X récoltés par la veille : parcours et consultation" })
+@SlashGroup("x")
+export class XCommand {
+	@Slash({ name: "liste", description: "Parcourt l'archive des posts X, avec filtres et pages" })
+	async liste(
+		@SlashOption({
+			name: "compte",
+			description: "Compte X dont on veut les posts (sans @)",
+			type: ApplicationCommandOptionType.String,
+			required: false,
+			autocomplete: async (interaction: AutocompleteInteraction) => {
+				try {
+					const saisie = String(interaction.options.getFocused() ?? "").toLowerCase();
+					const auteurs = await auteursConnus();
+					await interaction.respond(
+						auteurs
+							.filter((a) => a.toLowerCase().includes(saisie))
+							.slice(0, 25)
+							.map((a) => ({ name: `@${a}`, value: a }))
+					);
+				} catch (err) {
+					console.error("[x] autocomplétion des comptes :", err);
+					await interaction.respond([]);
+				}
+			},
+		})
+		compte: string | undefined,
+		@SlashOption({
+			name: "categorie",
+			description: "Catégorie du post (news, patch-note, media…)",
+			type: ApplicationCommandOptionType.String,
+			required: false,
+			autocomplete: async (interaction: AutocompleteInteraction) => {
+				try {
+					const saisie = String(interaction.options.getFocused() ?? "").toLowerCase();
+					const categories = await categoriesConnues();
+					await interaction.respond(
+						categories
+							.filter((c) => c.toLowerCase().includes(saisie))
+							.slice(0, 25)
+							.map((c) => ({ name: c, value: c }))
+					);
+				} catch (err) {
+					console.error("[x] autocomplétion des catégories :", err);
+					await interaction.respond([]);
+				}
+			},
+		})
+		categorie: string | undefined,
+		@SlashOption({
+			name: "recherche",
+			description: "Texte à chercher (dans l'original ET dans la traduction)",
+			type: ApplicationCommandOptionType.String,
+			required: false,
+		})
+		recherche: string | undefined,
+		@SlashOption({
+			name: "page",
+			description: "Numéro de page",
+			type: ApplicationCommandOptionType.Integer,
+			required: false,
+			minValue: 1,
+		})
+		page: number | undefined,
+		interaction: ChatInputCommandInteraction
+	) {
+		await interaction.deferReply();
+		try {
+			await interaction.editReply(
+				await rendrePage({
+					page: page ?? 1,
+					auteur: compte ?? null,
+					categorie: categorie ?? null,
+					recherche: recherche ?? null,
+				})
+			);
+		} catch (err) {
+			await repondreErreur(interaction, "liste", err);
+		}
+	}
+
+	/**
+	 * Boutons de pagination. Tout l'état tient dans le `customId` : aucune
+	 * mémoire de processus à conserver, donc un redémarrage du bot ne laisse
+	 * jamais de boutons morts.
+	 */
+	@ButtonComponent({ id: /^tw\|/ })
+	async paginer(interaction: ButtonInteraction) {
+		const etat = decoderEtatListe(interaction.customId);
+		if (!etat) {
+			await interaction.reply({
+				content: "Pagination illisible — relance `/x liste`.",
+				flags: MessageFlags.Ephemeral,
+			});
+			return;
+		}
+		await interaction.deferUpdate();
+		try {
+			await interaction.editReply(await rendrePage(etat));
+		} catch (err) {
+			console.error("[x] pagination :", err);
+			await interaction.followUp({
+				content: "❌ L'archive des posts est momentanément illisible. Réessaie dans un instant.",
+				flags: MessageFlags.Ephemeral,
+			});
+		}
+	}
+
+	@Slash({ name: "voir", description: "Affiche un post archivé : images, traduction et portée" })
+	async voir(
+		@SlashOption({
+			name: "post",
+			description: "Identifiant du post X, ou quelques mots pour le retrouver",
+			type: ApplicationCommandOptionType.String,
+			required: true,
+			autocomplete: async (interaction: AutocompleteInteraction) => {
+				// Personne ne connaît un identifiant X par cœur : la saisie sert de
+				// recherche, et la valeur renvoyée est l'identifiant exact.
+				try {
+					const saisie = String(interaction.options.getFocused() ?? "").trim();
+					const resultat = await listerTweets({
+						recherche: saisie.length >= 2 ? saisie : null,
+						page: 1,
+						parPage: 10,
+					});
+					await interaction.respond(
+						resultat.lignes.map((tweet) => {
+							const auteur = tweet.author_username ? `@${tweet.author_username}` : "compte inconnu";
+							const extrait = texteSansLienMedia(tweet.translation) || texteSansLienMedia(tweet.text);
+							// 100 caractères est la borne DURE d'un libellé de proposition.
+							return { name: couper(`${auteur} · ${extrait || "(sans texte)"}`, 100), value: tweet.id };
+						})
+					);
+				} catch (err) {
+					console.error("[x] autocomplétion des posts :", err);
+					await interaction.respond([]);
+				}
+			},
+		})
+		post: string,
+		interaction: ChatInputCommandInteraction
+	) {
+		await interaction.deferReply();
+		try {
+			const identifiant = post.trim();
+			const tweet = await lireTweet(identifiant);
+			if (!tweet) {
+				await interaction.editReply({
+					content:
+						`Aucun post archivé sous l'identifiant \`${truncate(identifiant, 40)}\`. ` +
+						"Passe par la liste de suggestions, ou par `/x liste` pour retrouver le post.",
+				});
+				return;
+			}
+
+			const auteur = tweet.author_username ? `@${tweet.author_username}` : "Post X";
+			const images = imagesTweet(tweet.media);
+			// 126 posts de l'archive n'ont pour tout texte que leur `https://t.co/…`,
+			// que `texteSansLienMedia` retire : `corpsTweet` rend alors la chaîne
+			// vide, et `setDescription("")` LÈVE (discord.js exige au moins un
+			// caractère). Sans ce repli, `/x voir` répondait « archive illisible »
+			// sur des posts parfaitement lisibles, image comprise.
+			const corps = corpsTweet(tweet, 1_500);
+			const description =
+				corps.length > 0
+					? corps
+					: images.length > 0
+						? `*Ce post n'a pas de texte : il ne porte que ${images.length > 1 ? "ses images" : "son image"}.*`
+						: "*Ce post n'a pas de texte.*";
+			const embed = rgEmbed()
+				.setTitle(truncate(tweet.author_name ? `${tweet.author_name} (${auteur})` : auteur, 256))
+				.setURL(urlTweet(tweet))
+				.setDescription(description);
+
+			if (images[0]) {
+				embed.setImage(images[0].url);
+			}
+			const metriques = formaterMetriques(tweet.metrics);
+			if (metriques) {
+				embed.addFields({ name: "Portée", value: truncate(metriques, 1_024) });
+			}
+			embed.addFields({ name: "Publié", value: horodatageDiscord(tweet), inline: true });
+			if (tweet.category) {
+				embed.addFields({ name: "Catégorie", value: truncate(tweet.category, 1_024), inline: true });
+			}
+			if (tweet.is_thread) {
+				embed.addFields({
+					name: "Fil",
+					value: `${tweet.tweet_count ?? 1} post${(tweet.tweet_count ?? 1) > 1 ? "s" : ""}`,
+					inline: true,
+				});
+			}
+
+			// Un post porte jusqu'à 4 photos et n'en montrer qu'une perdait le reste.
+			// Discord agrège en une galerie les embeds qui partagent la même `url` :
+			// les compagnons ne portent donc QUE l'url et l'image — leur donner un
+			// pied ou une couleur afficherait des doublons si l'agrégation n'a pas
+			// lieu (client trop ancien).
+			const compagnons = images
+				.slice(1, MAX_IMAGES)
+				.map((image) => new EmbedBuilder().setURL(urlTweet(tweet)).setImage(image.url));
+			if (images.length > MAX_IMAGES) {
+				embed.addFields({
+					name: "Images",
+					value: `${MAX_IMAGES} affichées sur ${images.length} — les autres sont sur [le post d'origine](${urlTweet(tweet)}).`,
+				});
+			}
+
+			await interaction.editReply({ embeds: [embed, ...compagnons] });
+		} catch (err) {
+			await repondreErreur(interaction, "voir", err);
+		}
+	}
+}
