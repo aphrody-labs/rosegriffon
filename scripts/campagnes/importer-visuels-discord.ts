@@ -181,16 +181,14 @@ const VISUELS: readonly Visuel[] = [
 		legende:
 			"Triptyque publié le 25 septembre 2024, en même temps que le lien du Mural réunissant toutes les participations.",
 	},
-	{
-		slug: "inazuma-rg-2",
-		messageId: "1279380328368046112",
-		piece: 0,
-		fichier: "01_Annonce.png",
-		cle: "cloture",
-		titre: "Dernier jour du #InazumaRG2",
-		legende:
-			"Visuel de l'annonce du 31 août 2024 : dernier jour pour rendre sa participation, 10 à 15 jours de tolérance pour les créations entamées.",
-	},
+	// ⚠ PAS D'ENTRÉE `cloture` POUR CETTE CAMPAGNE, et ce n'est pas un oubli.
+	// L'annonce du dernier jour (message 1279380328368046112) joint bien une image
+	// nommée `01_Annonce.png`, mais l'association y a REPUBLIÉ son affiche de
+	// lancement : les deux fichiers sont identiques octet pour octet, md5
+	// c4b23c150c22832ff16b29175a363491 des deux côtés (téléchargés depuis Discord
+	// après rafraîchissement des URL signées, le 13/8/2026). L'importer aurait
+	// écrit 5,5 Mo en double dans le Storage, et la page aurait montré deux fois
+	// la même affiche sous deux titres différents.
 
 	// ── inatober-rg-2024 — octobre 2024 ──
 	{
