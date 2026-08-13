@@ -49,8 +49,72 @@ export interface IconTextureRef {
 	kind: IconTextureKind;
 }
 
-/** Une ligne de l'artefact `icon-texture-index.ndjson.gz`. */
-export type IconIndexEntry = [g4txPath: string, mainTextures: string[], regions: string[]];
+/**
+ * Une ligne de l'artefact `icon-texture-index.ndjson.gz`.
+ *
+ * `mainDims` est parallèle à `mainTextures` (`[largeur, hauteur]` par texture) :
+ * il permet de rejouer hors-ligne la sélection de `select_main_texture` (Rust)
+ * quand on n'adresse qu'un conteneur, sans re-télécharger ses octets.
+ */
+export type IconIndexEntry = [
+	g4txPath: string,
+	mainTextures: string[],
+	regions: string[],
+	mainDims: Array<[width: number, height: number]>,
+];
+
+/**
+ * Vrai si une texture principale est un **placeholder** à ne pas servir :
+ * minuscule (≤ 4 px de côté, les `4×4` de Level-5) ou nom contenant `dmy`.
+ * Réplique `is_dummy_texture` de `nie_formats::g4tx`.
+ */
+export function isDummyTexture(name: string, width: number, height: number): boolean {
+	if (width <= 4 && height <= 4) return true;
+	return name.toLowerCase().includes("dmy");
+}
+
+/**
+ * Sélectionne la texture principale « évidente » d'un conteneur, en rejouant
+ * `select_main_texture` (Rust) : nom == basename du `.g4tx` (insensible à la
+ * casse), sinon plus grande texture non-dummy par aire, sinon plus grande tout
+ * court. Rend `null` si le conteneur n'a aucune texture principale.
+ */
+export function selectMainTexture(entry: IconIndexEntry): string | null {
+	const [g4txPath, mains, , dims] = entry;
+	if (mains.length === 0) return null;
+	const basename = (g4txPath.split("/").pop() ?? "").replace(/\.g4tx$/i, "");
+
+	const exact = mains.find((name) => name.toLowerCase() === basename.toLowerCase());
+	if (exact) return exact;
+
+	const area = (i: number): number => {
+		const d = dims[i];
+		return d ? d[0] * d[1] : 0;
+	};
+	let best = -1;
+	let bestArea = -1;
+	for (let i = 0; i < mains.length; i += 1) {
+		const name = mains[i] as string;
+		const d = dims[i] ?? [0, 0];
+		if (isDummyTexture(name, d[0], d[1])) continue;
+		if (area(i) > bestArea) {
+			bestArea = area(i);
+			best = i;
+		}
+	}
+	if (best >= 0) return mains[best] as string;
+
+	// Tout est dummy : plus grande quelconque.
+	best = 0;
+	bestArea = area(0);
+	for (let i = 1; i < mains.length; i += 1) {
+		if (area(i) > bestArea) {
+			bestArea = area(i);
+			best = i;
+		}
+	}
+	return mains[best] as string;
+}
 
 /**
  * URL CDN d'une texture nommée dans un conteneur g4tx.

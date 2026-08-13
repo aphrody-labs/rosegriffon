@@ -1,28 +1,34 @@
 /**
  * map-missing-skill-videos.ts
  *
- * Audit + comble les `inagle_skills` réels (internal_code wh%/rh%) sans vidéo.
+ * Peuple les vidéos officielles des techniques `inagle_skills` depuis
+ * `zukan.inazuma.jp`.
  *
- * Source vidéo officielle : scrape `zukan.inazuma.jp` dans /tmp/zukan/.
- * Chaque page skill (en) liste 50 skills via <li> : nom EN + data-movie-url (.wmv)
- * + data-poster-url (.jpg) pointant sur dxi4wb638ujep.cloudfront.net.
- * La DB stocke la version .webm (même path/hash, ext swap — CloudFront sert les deux).
+ * SOURCE : deux `fetch()` statiques (`/{en,ja}/skill/?per_page=500&page={1,2}`).
+ * Le catalogue est rendu côté serveur — l'ancien répertoire scrappé
+ * `/tmp/zukan/**` n'existe plus et n'est plus nécessaire.
  *
- * Deux stratégies de comblage :
- *  1. Match par nom EN exact contre les pages zukan (.wmv -> .webm).
- *  2. Variantes "Dreamscape" (夢限定 / "Rêve :") = reskins qui réutilisent
- *     l'animation du move de base. On copie video_url/poster_url du move parent.
+ * MATCHING, dans cet ordre :
+ *  1. nom EN normalisé ;
+ *  2. nom JA normalisé (secours pour les libellés EN divergents) ;
+ *  3. variantes « Dreamscape » (夢限定 / « Rêve : ») = reskins qui réutilisent
+ *     l'animation du move de base — on recopie ses vidéos.
+ * Rien d'autre : une technique sans correspondance reste NULL. On ne fabrique
+ * pas de correspondance approximative.
  *
- * Écriture : UNIQUEMENT inagle_skills.video_url / poster_url.
+ * ÉCRITURE :
+ *  - `inagle_skills.video_url` / `poster_url` = vidéo PRINCIPALE (position 0) ;
+ *  - `inagle_skill_videos` = TOUTES les variantes (236 techniques en ont deux,
+ *    ce qu'une colonne scalaire ne peut pas porter).
+ *    Cf. apps/website/sql/migrations/20260813_inagle_skill_videos.sql
  *
- * Usage : bun packages/inagle/src/zukan/map-missing-skill-videos.ts [--apply]
+ * Usage : bun packages/inagle/src/zukan/map-missing-skill-videos.ts [--apply] [--all]
  *   sans --apply : dry-run (audit + plan, aucune écriture).
+ *   --all : traite toutes les techniques, pas seulement celles sans vidéo.
  */
-import fs from "node:fs";
-import path from "node:path";
-import { createSupabaseServiceClient } from "../../../db/src/service.js";
-
-const ZUKAN_SKILL_DIR = "/tmp/zukan/zukan.inazuma.jp/en/skill";
+import { SQL } from "bun";
+import { fetchZukanSkillIndex, normalizeSkillName } from "./skill-videos.js";
+import type { ZukanSkill, ZukanSkillVideo } from "./types.js";
 
 // Dreamscape (夢限定) reskins -> move de base dont on réutilise l'animation.
 const DREAMSCAPE_BASE: Record<string, string> = {
@@ -31,123 +37,187 @@ const DREAMSCAPE_BASE: Record<string, string> = {
 	whs00061: "whs00060", // Rêve : Choc du dragon <- Dragon Crash
 };
 
-function normalize(name: string): string {
-	return name
-		.replace(/<[^>]+>/g, "")
-		.trim()
-		.toLowerCase();
+interface SkillRow {
+	id: string;
+	internal_code: string | null;
+	name_en: string | null;
+	name_fr: string | null;
+	name_ja: string | null;
+	video_url: string | null;
+	poster_url: string | null;
 }
 
-/** Parse toutes les pages skill EN -> Map nom_en(normalisé) -> { videoUrl, posterUrl }. */
-function buildZukanNameMap(): Map<string, { videoUrl: string; posterUrl: string }> {
-	const map = new Map<string, { videoUrl: string; posterUrl: string }>();
-	if (!fs.existsSync(ZUKAN_SKILL_DIR)) {
-		console.warn(`[map] zukan scrape introuvable: ${ZUKAN_SKILL_DIR}`);
-		return map;
-	}
-	const files = fs.readdirSync(ZUKAN_SKILL_DIR).filter((f) => f.endsWith(".html"));
-	const re =
-		/<span class="name"><ruby>(.*?)<\/ruby><\/span>[\s\S]*?data-movie-url="([^"]+)" data-poster-url="([^"]+)"/g;
+interface Plan {
+	id: string;
+	via: string;
+	videos: ZukanSkillVideo[];
+	thumbnailUrl: string | null;
+	source: "zukan" | "dreamscape";
+}
 
-	for (const file of files) {
-		const html = fs.readFileSync(path.join(ZUKAN_SKILL_DIR, file), "utf-8");
-		let m: RegExpExecArray | null;
-		// biome-ignore lint/suspicious/noAssignInExpressions: exec loop idiom
-		while ((m = re.exec(html)) !== null) {
-			const key = normalize(m[1]);
-			if (!key || map.has(key)) {
-				continue;
-			}
-			const wmv = m[2].split("_external/").pop() ?? "";
-			const jpg = m[3].split("_external/").pop() ?? "";
-			// .wmv -> .webm (même hash, CloudFront sert les deux)
-			const videoUrl = `https://${wmv}`.replace(/\.wmv$/, ".webm");
-			map.set(key, { posterUrl: `https://${jpg}`, videoUrl });
-		}
-	}
-	return map;
+function planFor(
+	row: SkillRow,
+	skill: ZukanSkill,
+	via: string,
+	source: "zukan" | "dreamscape"
+): Plan | null {
+	if (skill.videos.length === 0) return null;
+	return { id: row.id, source, thumbnailUrl: skill.thumbnailUrl, via, videos: skill.videos };
 }
 
 async function main() {
 	const apply = process.argv.includes("--apply");
-	const supabase = createSupabaseServiceClient();
+	const all = process.argv.includes("--all");
 
-	const { data: skills, error } = await supabase
-		.from("inagle_skills")
-		.select("id, internal_code, name_en, name_fr, video_url, poster_url")
-		.or("internal_code.like.wh%,internal_code.like.rh%");
-	if (error) {
-		console.error("Erreur lecture inagle_skills:", error);
-		return;
+	const databaseUrl = process.env.DATABASE_URL;
+	if (!databaseUrl) {
+		console.error("DATABASE_URL manquante.");
+		process.exit(1);
 	}
+	const sql = new SQL(databaseUrl);
 
-	const missing = (skills ?? []).filter((s) => !s.video_url);
-	console.log(`Skills réels: ${skills?.length} — sans vidéo: ${missing.length}`);
+	// Les techniques réelles du jeu : `wh%` (waza) et `rh%` (moves de base).
+	// Les `swap_skill_waza_*` sont des emplacements techniques, pas des techniques.
+	const rows = (await sql`
+		select id, internal_code, name_en, name_fr, name_ja, video_url, poster_url
+		from inagle_skills
+		where internal_code like 'wh%' or internal_code like 'rh%'
+		order by internal_code
+	`) as unknown as SkillRow[];
 
-	const zukanByName = buildZukanNameMap();
-	console.log(`Noms zukan parsés: ${zukanByName.size}`);
+	const targets = all ? rows : rows.filter((r) => !r.video_url);
+	console.log(`Techniques réelles: ${rows.length} — à traiter: ${targets.length}`);
 
-	// Index DB par internal_code pour résoudre les bases Dreamscape.
-	const byCode = new Map((skills ?? []).map((s) => [s.internal_code, s]));
+	const index = await fetchZukanSkillIndex();
+	console.log(
+		`zukan: ${index.en.length} techniques EN, ${index.ja.length} JA — ` +
+			`${index.en.filter((s) => s.videos.length > 1).length} avec 2 vidéos`
+	);
 
-	const updates: Array<{ id: string; video_url: string; poster_url: string; via: string }> = [];
-	const unresolved: typeof missing = [];
+	const plans: Plan[] = [];
+	const unresolved: SkillRow[] = [];
+	const byCode = new Map(rows.map((r) => [r.internal_code ?? "", r]));
+	const planById = new Map<string, Plan>();
 
-	for (const s of missing) {
-		// 1) Dreamscape reuse
-		const baseCode = s.internal_code ? DREAMSCAPE_BASE[s.internal_code] : undefined;
-		if (baseCode) {
-			const base = byCode.get(baseCode);
-			if (base?.video_url) {
-				updates.push({
-					id: s.id,
-					poster_url: base.poster_url ?? "",
-					via: `dreamscape<-${baseCode}`,
-					video_url: base.video_url,
-				});
+	for (const row of targets) {
+		// 1) nom EN
+		const en = row.name_en ? index.byNameEn.get(normalizeSkillName(row.name_en)) : undefined;
+		if (en) {
+			const p = planFor(row, en, "name_en", "zukan");
+			if (p) {
+				plans.push(p);
+				planById.set(row.id, p);
 				continue;
 			}
 		}
-		// 2) Match nom EN
-		const hit = s.name_en ? zukanByName.get(normalize(s.name_en)) : undefined;
-		if (hit) {
-			updates.push({
-				id: s.id,
-				poster_url: hit.posterUrl,
-				via: "name_en",
-				video_url: hit.videoUrl,
+		// 2) nom JA
+		const ja = row.name_ja ? index.byNameJa.get(normalizeSkillName(row.name_ja)) : undefined;
+		if (ja) {
+			const p = planFor(row, ja, "name_ja", "zukan");
+			if (p) {
+				plans.push(p);
+				planById.set(row.id, p);
+				continue;
+			}
+		}
+		unresolved.push(row);
+	}
+
+	// 3) Dreamscape : reskins qui empruntent l'animation de leur move parent.
+	const stillMissing: SkillRow[] = [];
+	for (const row of unresolved) {
+		const baseCode = row.internal_code ? DREAMSCAPE_BASE[row.internal_code] : undefined;
+		const base = baseCode ? byCode.get(baseCode) : undefined;
+		if (!base) {
+			stillMissing.push(row);
+			continue;
+		}
+		// La base a soit été planifiée dans cette passe, soit déjà des vidéos en DB.
+		const basePlan = planById.get(base.id);
+		if (basePlan) {
+			plans.push({
+				id: row.id,
+				source: "dreamscape",
+				thumbnailUrl: basePlan.thumbnailUrl,
+				via: `dreamscape<-${baseCode}`,
+				videos: basePlan.videos,
 			});
 			continue;
 		}
-		unresolved.push(s);
+		const baseEn = base.name_en ? index.byNameEn.get(normalizeSkillName(base.name_en)) : undefined;
+		if (baseEn?.videos.length) {
+			plans.push({
+				id: row.id,
+				source: "dreamscape",
+				thumbnailUrl: baseEn.thumbnailUrl,
+				via: `dreamscape<-${baseCode}`,
+				videos: baseEn.videos,
+			});
+			continue;
+		}
+		stillMissing.push(row);
 	}
 
-	console.log(`\nÀ combler (${updates.length}):`);
-	for (const u of updates) {
-		console.log(`  ${u.id}  via ${u.via}  -> ${u.video_url}`);
+	const multi = plans.filter((p) => p.videos.length > 1).length;
+	const totalVideos = plans.reduce((n, p) => n + p.videos.length, 0);
+	console.log(
+		`\nPlanifié: ${plans.length} techniques, ${totalVideos} vidéos (${multi} techniques à 2 vidéos)`
+	);
+	const viaCount = new Map<string, number>();
+	for (const p of plans) {
+		const key = p.via.startsWith("dreamscape") ? "dreamscape" : p.via;
+		viaCount.set(key, (viaCount.get(key) ?? 0) + 1);
 	}
-	console.log(`\nSans vidéo upstream (${unresolved.length}):`);
-	for (const s of unresolved) {
+	for (const [k, v] of viaCount) console.log(`  via ${k}: ${v}`);
+
+	console.log(`\nSans vidéo upstream (${stillMissing.length}) — laissés NULL:`);
+	for (const s of stillMissing) {
 		console.log(`  ${s.internal_code}  ${s.name_fr ?? ""} (${s.name_en ?? ""})`);
 	}
 
 	if (!apply) {
 		console.log("\n[dry-run] relancer avec --apply pour écrire.");
+		await sql.end();
 		return;
 	}
 
-	for (const u of updates) {
-		const patch: { video_url: string; poster_url?: string } = { video_url: u.video_url };
-		if (u.poster_url) {
-			patch.poster_url = u.poster_url;
-		}
-		const { error: upErr } = await supabase.from("inagle_skills").update(patch).eq("id", u.id);
-		if (upErr) {
-			console.error(`  ✗ ${u.id}:`, upErr.message);
-		} else {
-			console.log(`  ✓ ${u.id}`);
+	let skillsUpdated = 0;
+	let videosUpserted = 0;
+	for (const p of plans) {
+		const primary = p.videos[0];
+		if (!primary?.videoUrl) continue;
+		await sql`
+			update inagle_skills
+			   set video_url = ${primary.videoUrl},
+			       poster_url = ${primary.posterUrl},
+			       updated_at = now()
+			 where id = ${p.id}
+		`;
+		skillsUpdated++;
+		for (const v of p.videos) {
+			if (!v.videoUrl) continue;
+			await sql`
+				insert into inagle_skill_videos
+					(skill_id, position, label, video_url, poster_url, thumbnail_url, source)
+				values (${p.id}, ${v.position}, ${v.label}, ${v.videoUrl}, ${v.posterUrl}, ${p.thumbnailUrl}, ${p.source})
+				on conflict (skill_id, position) do update
+					set label = excluded.label,
+					    video_url = excluded.video_url,
+					    poster_url = excluded.poster_url,
+					    thumbnail_url = excluded.thumbnail_url,
+					    source = excluded.source,
+					    updated_at = now()
+			`;
+			videosUpserted++;
 		}
 	}
+
+	console.log(`\ninagle_skills mis à jour: ${skillsUpdated}`);
+	console.log(`inagle_skill_videos écrits: ${videosUpserted}`);
+	await sql.end();
 }
 
-main().catch(console.error);
+main().catch((e) => {
+	console.error(e);
+	process.exit(1);
+});

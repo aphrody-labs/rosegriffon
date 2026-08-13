@@ -549,6 +549,17 @@ Bun.cron("25 * * * *", async () => {
 	await executeTask("campagnes:discord", () => recolterCreationsDiscord());
 });
 
+// 2g. Relais des créations vers le salon de suivi : tous les quarts d'heure.
+//
+// PLUS SOUVENT QUE LES DEUX RÉCOLTES, ET C'EST VOULU. Le relais ne va chercher
+// nulle part : il lit ce que les récoltes ont déjà écrit et poste ce qui manque.
+// Une passe à vide coûte deux requêtes SQL. Le caler sur l'heure comme les
+// récoltes ferait attendre jusqu'à soixante minutes une création déjà en base —
+// pendant une campagne, c'est la différence entre un fil vivant et un digest.
+Bun.cron("*/15 * * * *", async () => {
+	await executeTask("campagnes:relais", () => relayerCampagnesDiscord());
+});
+
 // 3. Synchronisation Inagle DB & SQLite Backup : tous les jours à 2h00 UTC
 Bun.cron("0 2 * * *", async () => {
 	await executeTask("db:sync", runInaglePush);
