@@ -147,6 +147,22 @@ interface LigneCampagne {
 	 */
 	hashtags_rattrapage: string[];
 	requetes: string[];
+	/**
+	 * Comptes X de l'organisateur (`x_campagnes.comptes_organisateurs`).
+	 *
+	 * ⚠ L'ANNONCE D'UNE CAMPAGNE N'EST PAS UNE CRÉATION DE LA CAMPAGNE. Le tweet
+	 * qui lance l'opération porte le hashtag ET l'affiche : sans cette liste, il
+	 * devient la première « création » de la galerie, et le compteur public
+	 * annonce « 1 création, 1 participant » avant que quiconque ait participé.
+	 * (Mesuré le 13/8/2026 sur `#IERGDay` : le seul post retenu à l'ouverture
+	 * était l'annonce de `@rose_griffon`, dont l'image est déjà publiée comme
+	 * `image_affiche`.)
+	 *
+	 * Le pendant Discord de cette règle existe depuis le 12/8/2026 dans
+	 * `tasks/campagnes-discord.ts` — les salons d'annonces (type 5) y sont
+	 * écartés pour exactement la même raison.
+	 */
+	comptes_organisateurs: string[];
 }
 
 /** Tweet retenu, avec le hashtag de la campagne qui l'a fait mordre. */
@@ -211,6 +227,24 @@ export function filtresDeRequete(requete: string): string {
 		.replace(/^\s*\([^)]*\)\s*/, "") // groupe `(#a OR #b)` en tête
 		.replace(/^\s*#[\p{L}\p{N}_]+\s*/u, "") // ou hashtag simple en tête
 		.trim();
+}
+
+/**
+ * Le post vient-il d'un compte de l'organisateur ?
+ *
+ * Fonction PURE. La comparaison est insensible à la casse et tolère le `@` :
+ * un pseudo X n'a pas de casse significative, et la colonne est remplie à la
+ * main depuis l'écran d'administration.
+ */
+export function estCompteOrganisateur(
+	tweet: { username?: string | null; author?: { username?: string | null } | null },
+	campagne: { comptes_organisateurs?: readonly string[] | null }
+): boolean {
+	const comptes = campagne.comptes_organisateurs ?? [];
+	if (comptes.length === 0) return false;
+	const pseudo = (tweet.username ?? tweet.author?.username ?? "").replace(/^@+/, "").toLowerCase();
+	if (!pseudo) return false;
+	return comptes.some((c) => (c || "").replace(/^@+/, "").toLowerCase() === pseudo);
 }
 
 /**
@@ -283,7 +317,7 @@ export async function crawlHashtagCampaigns(options: OptionsRecolte = {}): Promi
 
 	try {
 		const campagnes: LigneCampagne[] = await sql`
-			select slug, titre, hashtags, hashtags_rattrapage, requetes
+			select slug, titre, hashtags, hashtags_rattrapage, requetes, comptes_organisateurs
 			  from public.x_campagnes
 			 where actif and (${slug ?? null}::text is null or slug = ${slug ?? null}::text)
 			 order by principale desc, debut_le desc nulls last, slug`;
@@ -656,6 +690,9 @@ async function paginer(
 			// s'applique à TOUT ce que X renvoie, y compris aux posts ramenés par
 			// ricochet par une autre requête.
 			if (!porteUneImage(t)) continue;
+			// L'annonce de la campagne porte le hashtag et l'affiche : sans ce
+			// filtre, elle devient la première « création » du mur.
+			if (estCompteOrganisateur(t, campagne)) continue;
 			const appariement = apparierHashtag(t.text, hashtagsRecoltes(campagne));
 			if (!appariement) continue;
 			retenus.set(t.id, {

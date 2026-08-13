@@ -20,6 +20,7 @@
 
 import { describe, expect, test } from "bun:test";
 
+import { estCompteOrganisateur } from "./hashtag-harvest.js";
 import {
 	apparierHashtag,
 	distanceFaute,
@@ -214,5 +215,44 @@ describe("empaquetage en requêtes X", () => {
 
 	test("aucune graphie, aucune requête", () => {
 		expect(requetesVariantes([])).toEqual([]);
+	});
+});
+
+describe("comptes de l'organisateur", () => {
+	// L'annonce d'une campagne porte le hashtag ET l'affiche : sans ce filtre,
+	// elle devient la première « création » du mur et le compteur public annonce
+	// « 1 création, 1 participant » avant toute participation. Constaté en vrai le
+	// 13/8/2026 : le seul post retenu à l'ouverture de #IERGDay était
+	// https://x.com/rose_griffon/status/2087918181033574427.
+	const CAMPAGNE = { comptes_organisateurs: ["rose_griffon"] };
+
+	test("le compte de l'organisateur est écarté", () => {
+		expect(estCompteOrganisateur({ author: { username: "rose_griffon" } }, CAMPAGNE)).toBe(true);
+	});
+
+	test("la casse et le @ ne changent rien", () => {
+		expect(estCompteOrganisateur({ author: { username: "Rose_Griffon" } }, CAMPAGNE)).toBe(true);
+		expect(estCompteOrganisateur({ author: { username: "rose_griffon" } }, {
+			comptes_organisateurs: ["@Rose_Griffon"],
+		})).toBe(true);
+	});
+
+	test("un participant N'EST PAS écarté", () => {
+		// La règle doit être étroite : élargir ne serait pas « prudent », ce serait
+		// faire disparaître la création d'un membre sans que personne ne le sache.
+		expect(estCompteOrganisateur({ author: { username: "yoyo__goat" } }, CAMPAGNE)).toBe(false);
+		expect(estCompteOrganisateur({ author: { username: "rose_griffonfr" } }, CAMPAGNE)).toBe(false);
+	});
+
+	test("sans liste déclarée, rien n'est écarté", () => {
+		expect(estCompteOrganisateur({ author: { username: "rose_griffon" } }, {})).toBe(false);
+		expect(
+			estCompteOrganisateur({ author: { username: "rose_griffon" } }, { comptes_organisateurs: [] })
+		).toBe(false);
+	});
+
+	test("un post sans auteur n'est jamais écarté par ce chemin", () => {
+		expect(estCompteOrganisateur({}, CAMPAGNE)).toBe(false);
+		expect(estCompteOrganisateur({ author: null }, CAMPAGNE)).toBe(false);
 	});
 });
