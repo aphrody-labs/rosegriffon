@@ -25,6 +25,8 @@ import { collecterAudienceAchillea } from "./tasks/stats/achillea";
 import { initDiscord, getDiscordTelemetry, onTelemetryUpdate, getDiscordClient, GUILD_ID } from "./lib/discord";
 import { runDiscordSync, runDiscordChannelScan } from "./tasks/discord";
 import {
+	armerSalonsDeCategories,
+	armerSalonsDeDepot,
 	runDiscordMessagesSync,
 	runDiscordMessagesBackfill,
 	brancherVeilleMessagesTempsReel,
@@ -409,6 +411,22 @@ if (indexRun >= 0) {
 		await executeTask("discord:scan", runDiscordChannelScan);
 	} else if (task === "discord:messages" || task === "discord-messages") {
 		await executeTask("discord:messages", runDiscordMessagesSync);
+	} else if (task === "discord:archives" || task === "discord-archives") {
+		// Armement seul : utile pour vérifier ce que la veille prendra en charge
+		// (elle l'exécute déjà à chaque passe) sans attendre cinq minutes.
+		await executeTask("discord:archives", async () => {
+			const categories = await armerSalonsDeCategories();
+			const depots = await armerSalonsDeDepot();
+			return {
+				success: true,
+				stats: {
+					salonsExamines: categories.examines,
+					salonsArmes: categories.armes,
+					salonsDejaSuivis: categories.deja,
+					salonsDepotArmes: depots,
+				},
+			};
+		});
 	} else if (task === "discord:backfill" || task === "discord-backfill") {
 		await executeTask("discord:backfill", runDiscordMessagesBackfill);
 	} else if (task === "discord:polls" || task === "discord-polls" || task === "sondages") {
@@ -462,7 +480,7 @@ if (indexRun >= 0) {
 		await executeTask("stats:achillea", collecterAudienceAchillea);
 	} else {
 		console.error(
-			`❌ Tâche inconnue : ${task}. Choisissez parmi : db, cdn, crawl, rag, x, x-search, x:campagnes, query, publish, github-publish, patreon, reminders, warm, discord, discord:scan, discord:messages, discord:backfill, discord:polls, campagnes:discord, seo, seo:indexnow, seo:llms-txt, stats:achillea, backup:postgres, backup:pg, all.`
+			`❌ Tâche inconnue : ${task}. Choisissez parmi : db, cdn, crawl, rag, x, x-search, x:campagnes, query, publish, github-publish, patreon, reminders, warm, discord, discord:scan, discord:archives, discord:messages, discord:backfill, discord:polls, campagnes:discord, seo, seo:indexnow, seo:llms-txt, stats:achillea, backup:postgres, backup:pg, all.`
 		);
 	}
 	process.exit(0);
@@ -759,6 +777,13 @@ const server = Bun.serve({
 				"discord-scan": runDiscordChannelScan,
 				"discord:messages": runDiscordMessagesSync,
 				"discord-messages": runDiscordMessagesSync,
+				"discord:archives": async () => ({
+					success: true,
+					stats: {
+						categories: await armerSalonsDeCategories(),
+						depots: await armerSalonsDeDepot(),
+					},
+				}),
 				"discord:backfill": runDiscordMessagesBackfill,
 				"discord-backfill": runDiscordMessagesBackfill,
 				"discord:polls": () => runDiscordPollsImport(),
