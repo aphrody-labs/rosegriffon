@@ -12,9 +12,15 @@
  * l'intérêt de la fusion.
  *
  * ── LIGNE ROUGE VIE PRIVÉE ─────────────────────────────────────────────────
- * `profiles` contient `email`, `address_line1`, `address_line2`, `city`,
- * `postal_code`, `country`. Aucune de ces colonnes ne sort d'ici, pour
- * personne, administrateur compris. Deux barrières, volontairement redondantes :
+ * `profiles` contient `email`, `full_name`, `address_line1`, `address_line2`,
+ * `city`, `postal_code`, `country`, `patreon_id`. Aucune de ces colonnes ne sort
+ * d'ici, pour personne, administrateur compris — ce sont EXACTEMENT celles que
+ * le rôle `anon` n'a plus le droit de lire depuis le 11/8/2026 (droits par
+ * colonne relevés en base le 13/8/2026 ; cf. `CLES_PII_PROFIL`). `full_name` en
+ * fait partie : la migration le nomme « nom complet », et 2 des 33 valeurs
+ * renseignées sont bel et bien un prénom suivi d'un nom. Le titre de l'embed
+ * s'appuie donc sur le PSEUDO, jamais sur l'état civil.
+ * Deux barrières, volontairement redondantes :
  *
  *   1. les requêtes ci-dessous énumèrent leurs colonnes une par une — il n'y a
  *      pas un seul `SELECT *` dans ce fichier ;
@@ -68,7 +74,6 @@ import { rgEmbed, truncate } from "../lib/embeds";
 interface ProfilPublic extends Record<string, unknown> {
 	id: string;
 	username: string | null;
-	full_name: string | null;
 	avatar_url: string | null;
 	banner_url: string | null;
 	bio: string | null;
@@ -96,7 +101,7 @@ async function profilPar(cle: string): Promise<ProfilPublic | null> {
 	// `id` est un uuid : comparer en texte évite une erreur de conversion quand
 	// la saisie est un pseudo ou un identifiant Discord.
 	const lignes = await sql<ProfilPublic[]>`
-		SELECT id::text, username, full_name, avatar_url, banner_url, bio, role,
+		SELECT id::text, username, avatar_url, banner_url, bio, role,
 		       twitter_handle, website, discord_id, badges, claimed_at::text
 		FROM profiles
 		WHERE username = ${cle} OR discord_id = ${cle} OR id::text = ${cle}
@@ -104,6 +109,24 @@ async function profilPar(cle: string): Promise<ProfilPublic | null> {
 	`;
 	const profil = lignes[0];
 	return profil ? (assainirProfil(profil) as ProfilPublic) : null;
+}
+
+/**
+ * Repli sur le PSEUDO DISCORD.
+ *
+ * Un membre lit le pseudo de quelqu'un dans Discord et le tape ici ; or c'est le
+ * pseudo du SITE que `profiles` indexe, et les deux divergent sur 3 des
+ * 1 832 comptes liés (`fox.xx17` → `zever2emedunom_75078`, `imsupercrazy` →
+ * `icanseefix`, `ayouninho.yb` → `ay78.`). Sans ce repli, ces trois-là
+ * s'entendent répondre que le compte n'existe pas alors qu'il existe : la
+ * fusion des deux moitiés doit justement servir à ça.
+ */
+async function profilParPseudoDiscord(pseudo: string): Promise<ProfilPublic | null> {
+	const lignes = await sql<Array<{ discord_id: string }>>`
+		SELECT discord_id FROM discord_members WHERE username = ${pseudo} LIMIT 1
+	`;
+	const identifiant = lignes[0]?.discord_id;
+	return identifiant ? await profilPar(identifiant) : null;
 }
 
 async function membrePar(cle: string): Promise<LigneMembreDiscord | null> {
@@ -140,7 +163,7 @@ export class MembreCommand {
 	async profil(
 		@SlashOption({
 			name: "qui",
-			description: "Pseudo du site, identifiant Discord ou identifiant de compte",
+			description: "Pseudo du site ou de Discord, identifiant Discord, identifiant de compte",
 			type: ApplicationCommandOptionType.String,
 			required: false,
 		})
@@ -152,7 +175,9 @@ export class MembreCommand {
 		// d'usage le plus courant, et il ne réclame aucune saisie.
 		const cle = (qui ?? interaction.user.id).trim();
 		try {
-			const profil = await profilPar(cle);
+			// Deux passes : d'abord les clés du SITE, puis le pseudo Discord — un
+			// membre tape le plus souvent le pseudo qu'il a sous les yeux.
+			const profil = (await profilPar(cle)) ?? (await profilParPseudoDiscord(cle));
 			if (!profil) {
 				await interaction.editReply({
 					content: qui
@@ -165,7 +190,7 @@ export class MembreCommand {
 			const membre = profil.discord_id ? await membrePar(profil.discord_id) : null;
 
 			const embed = rgEmbed()
-				.setTitle(truncate(profil.full_name || profil.username || "Membre Rose Griffon", 250))
+				.setTitle(truncate(profil.username || "Membre Rose Griffon", 250))
 				.setDescription(truncate(profil.bio, 1500) || "Ce compte n'a pas encore de présentation.")
 				.addFields(
 					{ name: "Pseudo", value: profil.username ?? "—", inline: true },
@@ -230,7 +255,10 @@ export class MembreCommand {
 			try {
 				const png = await renderProfileCard({
 					username: profil.username,
-					full_name: profil.full_name,
+					// `renderProfileCard` met le nom complet en gros titre : on lui en
+					// refuse un. La carte retombe sur le pseudo, comme l'embed — et la
+					// colonne n'est de toute façon plus lue.
+					full_name: null,
 					avatar_url: profil.avatar_url,
 					banner_url: profil.banner_url,
 					bio: profil.bio,

@@ -31,8 +31,9 @@
  *     en base (`discord_roles`), donc on rend les vrais noms, ordonnés par
  *     position décroissante comme dans Discord.
  *
- *  4. `/profil` lisait `profiles`, table qui contient `email`, `address_line1`,
- *     `address_line2`, `city`, `postal_code`, `country`. VOIR PLUS BAS.
+ *  4. `/profil` lisait `profiles`, table qui contient `email`, `full_name`,
+ *     `address_line1`, `address_line2`, `city`, `postal_code`, `country`,
+ *     `patreon_id`. VOIR PLUS BAS.
  *
  * ── LIGNE ROUGE VIE PRIVÉE ─────────────────────────────────────────────────
  * `assainirProfil` retire les colonnes personnelles de tout objet profil avant
@@ -432,18 +433,34 @@ export function choisirEvenements(
  * Colonnes de `profiles` qui ne sortent JAMAIS du serveur, quel que soit le
  * demandeur, administrateur compris.
  *
- * Ce sont exactement les colonnes fermées côté REST par la migration
- * `20260811_profiles_pii.sql`. Les répéter ici garde la même frontière quand la
+ * Ce sont exactement les colonnes fermées côté REST le 11/8/2026. La liste n'est
+ * pas recopiée de mémoire : elle est le COMPLÉMENT des droits réellement posés
+ * en base, relevés le 13/8/2026 —
+ *
+ *   select column_name from information_schema.column_privileges
+ *    where table_name='profiles' and grantee='anon' and privilege_type='SELECT';
+ *   → avatar_url badges banner_url bio discord_id id role twitter_handle
+ *     updated_at username website
+ *
+ * — c'est-à-dire tout ce que `PUBLIC_PROFILE_COLUMNS` (`@rosegriffon/db`) laisse
+ * lire. `full_name` et `patreon_id` sont fermés au même titre que l'e-mail et
+ * l'adresse postale : le « nom complet » est nommément cité par la migration
+ * comme donnée personnelle. Les répéter ici garde la même frontière quand la
  * lecture passe par la connexion Postgres directe du bot, qui, elle, contourne
  * les droits par colonne.
+ *
+ * `phone` n'existe pas (encore) dans la table : la clé est listée pour que
+ * l'ajout d'une colonne de téléphone soit filtré dès le premier jour.
  */
 export const CLES_PII_PROFIL: readonly string[] = Object.freeze([
 	"email",
+	"full_name",
 	"address_line1",
 	"address_line2",
 	"city",
 	"postal_code",
 	"country",
+	"patreon_id",
 	"phone",
 ]);
 
