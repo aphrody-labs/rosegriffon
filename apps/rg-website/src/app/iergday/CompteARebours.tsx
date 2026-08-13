@@ -52,11 +52,11 @@ function Case({
 	abrege: string;
 }) {
 	return (
-		<div className="rounded-2xl border border-rg-or/40 bg-rg-sur-marine/10 px-2 py-2 text-center backdrop-blur-sm xs:px-3">
-			<p className="text-fluid-headline-md font-bold leading-tight text-rg-sur-marine tabular-nums">
+		<div className="rounded-2xl border border-outline-variant/60 bg-surface-container-low px-2 py-2 text-center xs:px-3">
+			<p className="text-lg font-bold leading-tight text-on-surface tabular-nums sm:text-xl">
 				{valeur === null ? "--" : String(valeur).padStart(2, "0")}
 			</p>
-			<p className="text-[0.65rem] leading-tight text-rg-sur-marine/80 xs:text-xs">
+			<p className="text-[0.65rem] leading-tight text-on-surface-variant xs:text-xs">
 				<span className="sm:hidden">{abrege}</span>
 				<span className="hidden sm:inline">
 					{valeur !== null && valeur === 1 ? singulier : pluriel}
@@ -113,10 +113,10 @@ export function CompteARebours({
 	}, [cibleIso]);
 
 	return (
-		<div className="mt-6 rounded-2xl border border-rg-or/40 bg-rg-sur-marine/5 p-4 backdrop-blur-sm">
+		<div className="rounded-2xl border border-outline-variant/60 bg-surface-container-low p-3">
 			<div className="flex items-center gap-2">
-				<Timer className="size-4 shrink-0 text-rg-or" aria-hidden />
-				<p className="text-xs font-semibold uppercase tracking-wide text-rg-or">
+				<Timer className="size-4 shrink-0 text-primary" aria-hidden />
+				<p className="text-xs font-semibold uppercase tracking-wide text-primary">
 					{ecoule ? libelleEcoule : libelle}
 				</p>
 			</div>
@@ -143,7 +143,7 @@ export function CompteARebours({
 				</div>
 			)}
 
-			<p className="mt-3 text-sm text-rg-sur-marine/85">
+			<p className="mt-2 text-xs text-on-surface-variant">
 				<time dateTime={cibleIso}>{echeance}</time>
 			</p>
 		</div>

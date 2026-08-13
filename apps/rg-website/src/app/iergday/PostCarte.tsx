@@ -121,20 +121,38 @@ export function PostCarte({
 	 *   - le lien : `discord.com/channels/…` n'est ouvrable que par un membre du
 	 *     serveur. Le libellé le dit au lieu de promettre une page publique.
 	 */
+	// ⚠ UN BRANCHEMENT PAR SOURCE, JAMAIS « pas X donc Discord ». C'était un
+	// ternaire binaire, et l'arrivée d'une troisième source l'a fait ranger
+	// Instagram du côté Discord — TypeScript l'a refusé, ce qui est exactement ce
+	// que l'union est là pour faire. Un `switch` oblige à traiter chaque cas.
 	const surX = post.source === "x";
-	const auteurSecondaire = surX ? `@${post.auteurPseudo}` : (post.salonNom ?? "Serveur Discord");
-	const reseau = surX ? "X" : "Discord";
-	const lien = surX
-		? {
-				ariaLabel: `Voir la publication de @${post.auteurPseudo} sur X (nouvel onglet)`,
-				href: urlPostX(post.auteurPseudo, post.tweetId),
-				libelle: "Voir sur X",
-			}
-		: {
-				ariaLabel: `Ouvrir le message de ${post.auteurNom} dans Discord (nouvel onglet, réservé aux membres du serveur)`,
-				href: urlMessageDiscord(post.guildId, post.salonId, post.messageId),
-				libelle: "Ouvrir dans Discord",
-			};
+	const auteurSecondaire =
+		post.source === "x"
+			? `@${post.auteurPseudo}`
+			: post.source === "discord"
+				? (post.salonNom ?? "Serveur Discord")
+				: post.auteurPseudo
+					? `@${post.auteurPseudo}`
+					: "Instagram";
+	const reseau = post.source === "x" ? "X" : post.source === "discord" ? "Discord" : "Instagram";
+	const lien =
+		post.source === "x"
+			? {
+					ariaLabel: `Voir la publication de @${post.auteurPseudo} sur X (nouvel onglet)`,
+					href: urlPostX(post.auteurPseudo, post.tweetId),
+					libelle: "Voir sur X",
+				}
+			: post.source === "discord"
+				? {
+						ariaLabel: `Ouvrir le message de ${post.auteurNom} dans Discord (nouvel onglet, réservé aux membres du serveur)`,
+						href: urlMessageDiscord(post.guildId, post.salonId, post.messageId),
+						libelle: "Ouvrir dans Discord",
+					}
+				: {
+						ariaLabel: `Voir la publication de ${post.auteurNom} sur Instagram (nouvel onglet)`,
+						href: post.permalien,
+						libelle: "Voir sur Instagram",
+					};
 
 	return (
 		<Card className="group w-full flex-1 gap-0 overflow-hidden rounded-[24px] border-2 border-rg-or/40 bg-surface-container-low py-0 shadow-[0_4px_0_0_rgba(0,0,0,0.5)] transition-transform duration-300 motion-safe:hover:-translate-y-1">

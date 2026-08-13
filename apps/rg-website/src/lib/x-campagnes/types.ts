@@ -138,7 +138,7 @@ export interface MetriquesPost {
  * chantier répare. Le type est donc une UNION, et le rendu doit se brancher
  * dessus (`post.source === "discord"`), jamais deviner.
  */
-export type SourceCreation = "x" | "discord";
+export type SourceCreation = "x" | "discord" | "instagram";
 
 /** Ce que les deux sources ont réellement en commun. */
 interface BasePostCampagne {
@@ -190,8 +190,25 @@ export interface PostCampagneDiscord extends BasePostCampagne {
 	auteurPseudo: string | null;
 }
 
+/**
+ * Une création déposée sur Instagram.
+ *
+ * ⚠ PAS DE MÉTRIQUES. `like_count` n'existe que via l'API Graph officielle, que
+ * nous n'avons pas : afficher un compteur à zéro serait un chiffre inventé. Le
+ * champ est donc absent du type, pas mis à zéro — la carte ne peut pas
+ * l'afficher par accident.
+ */
+export interface PostCampagneInstagram extends BasePostCampagne {
+	source: "instagram";
+	/** Identifiant de la publication chez Instagram (`Db_AxXAlywQ`). */
+	shortcode: string;
+	permalien: string;
+	/** Pseudo Instagram, saisi par le déposant. `null` si inconnu. */
+	auteurPseudo: string | null;
+}
+
 /** Publication rattachée à une campagne, quelle que soit sa source. */
-export type PostCampagne = PostCampagneX | PostCampagneDiscord;
+export type PostCampagne = PostCampagneX | PostCampagneDiscord | PostCampagneInstagram;
 
 /**
  * Clé stable et unique d'une publication, toutes sources confondues.
@@ -201,7 +218,17 @@ export type PostCampagne = PostCampagneX | PostCampagneDiscord;
  * n'interdit une collision dans une liste qui mélange les deux.
  */
 export function clePost(post: PostCampagne): string {
-	return post.source === "x" ? `x-${post.tweetId}` : `discord-${post.messageId}`;
+	// Un `switch` et non un ternaire : à la troisième source, un ternaire binaire
+	// rangeait silencieusement Instagram avec Discord, et deux créations d'un même
+	// numéro se seraient écrasées dans la liste.
+	switch (post.source) {
+		case "x":
+			return `x-${post.tweetId}`;
+		case "discord":
+			return `discord-${post.messageId}`;
+		case "instagram":
+			return `instagram-${post.shortcode}`;
+	}
 }
 
 /**
