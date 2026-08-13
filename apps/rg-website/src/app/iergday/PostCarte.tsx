@@ -11,6 +11,7 @@ import {
 	extraitTexte,
 	formaterNombre,
 	type PostCampagne,
+	urlMessageDiscord,
 	urlPostX,
 } from "@/lib/x-campagnes/types";
 
@@ -106,19 +107,48 @@ export function PostCarte({
 	const date = post.publieLe ? new Date(post.publieLe) : null;
 	const dateValide = date && !Number.isNaN(date.getTime()) ? date : null;
 
+	/*
+	 * ⚠ UNE CRÉATION DISCORD N'EST PAS UN TWEET DÉGUISÉ.
+	 * Trois choses ne se transposent PAS d'un réseau à l'autre, et les forcer
+	 * reviendrait à afficher des chiffres et des identités inventés :
+	 *   - le « @pseudo » : sur Discord l'attribution se fait au nom d'affichage,
+	 *     et `auteurPseudo` peut carrément être absent. La seconde ligne annonce
+	 *     donc le SALON de dépôt, qui est l'information vraie et utile ;
+	 *   - les métriques : Discord ne publie ni « j'aime » ni repartages. Les
+	 *     réactions d'un message ne sont pas la même chose, et les peindre sous
+	 *     les pictogrammes de X leur donnerait un sens qu'elles n'ont pas. La
+	 *     rangée disparaît, elle n'affiche pas des zéros ;
+	 *   - le lien : `discord.com/channels/…` n'est ouvrable que par un membre du
+	 *     serveur. Le libellé le dit au lieu de promettre une page publique.
+	 */
+	const surX = post.source === "x";
+	const auteurSecondaire = surX ? `@${post.auteurPseudo}` : (post.salonNom ?? "Serveur Discord");
+	const reseau = surX ? "X" : "Discord";
+	const lien = surX
+		? {
+				ariaLabel: `Voir la publication de @${post.auteurPseudo} sur X (nouvel onglet)`,
+				href: urlPostX(post.auteurPseudo, post.tweetId),
+				libelle: "Voir sur X",
+			}
+		: {
+				ariaLabel: `Ouvrir le message de ${post.auteurNom} dans Discord (nouvel onglet, réservé aux membres du serveur)`,
+				href: urlMessageDiscord(post.guildId, post.salonId, post.messageId),
+				libelle: "Ouvrir dans Discord",
+			};
+
 	return (
 		<Card className="group w-full flex-1 gap-0 overflow-hidden rounded-[24px] border-2 border-rg-or/40 bg-surface-container-low py-0 shadow-[0_4px_0_0_rgba(0,0,0,0.5)] transition-transform duration-300 motion-safe:hover:-translate-y-1">
 			<button
 				type="button"
 				onClick={onOuvrir}
-				aria-label={`Agrandir la publication de @${post.auteurPseudo}`}
+				aria-label={`Agrandir la publication de ${post.auteurNom}`}
 				className={`relative block w-full cursor-zoom-in overflow-hidden ${FOCUS_VIGNETTE}`}
 			>
 				<AspectRatio ratio={4 / 5}>
 					{image ? (
 						<Image
 							src={image.src}
-							alt={`Image publiée sur X par @${post.auteurPseudo}`}
+							alt={`Image publiée sur ${reseau} par ${post.auteurNom}`}
 							fill
 							sizes={TAILLES_VIGNETTE}
 							quality={70}
@@ -153,7 +183,7 @@ export function PostCarte({
 			<div className="flex flex-1 flex-col gap-2 p-4">
 				<div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
 					<span className="truncate text-sm font-bold text-on-surface">{post.auteurNom}</span>
-					<span className="truncate text-xs text-on-surface-variant">@{post.auteurPseudo}</span>
+					<span className="truncate text-xs text-on-surface-variant">{auteurSecondaire}</span>
 				</div>
 
 				{dateValide && (
@@ -167,24 +197,32 @@ export function PostCarte({
 				)}
 
 				<div className="mt-auto flex flex-wrap items-center justify-between gap-2 pt-2">
-					<div className="flex items-center gap-3 text-xs text-on-surface-variant">
-						<Metrique icone={Heart} valeur={post.metriques?.like_count} libelle="j'aime" />
-						<Metrique icone={Repeat2} valeur={post.metriques?.retweet_count} libelle="repartages" />
-						<Metrique
-							icone={MessageCircle}
-							valeur={post.metriques?.reply_count}
-							libelle="réponses"
-						/>
-					</div>
+					{post.source === "x" ? (
+						<div className="flex items-center gap-3 text-xs text-on-surface-variant">
+							<Metrique icone={Heart} valeur={post.metriques?.like_count} libelle="j'aime" />
+							<Metrique
+								icone={Repeat2}
+								valeur={post.metriques?.retweet_count}
+								libelle="repartages"
+							/>
+							<Metrique
+								icone={MessageCircle}
+								valeur={post.metriques?.reply_count}
+								libelle="réponses"
+							/>
+						</div>
+					) : (
+						<span className="text-xs text-on-surface-variant">Déposé sur Discord</span>
+					)}
 
 					<a
-						href={urlPostX(post.auteurPseudo, post.tweetId)}
+						href={lien.href}
 						target="_blank"
 						rel="noopener noreferrer"
-						aria-label={`Voir la publication de @${post.auteurPseudo} sur X (nouvel onglet)`}
+						aria-label={lien.ariaLabel}
 						className={LIEN_VERS_X}
 					>
-						Voir sur X
+						{lien.libelle}
 						<ExternalLink className="size-3.5" aria-hidden />
 					</a>
 				</div>
