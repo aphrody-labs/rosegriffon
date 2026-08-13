@@ -27,6 +27,7 @@
  */
 import { chmodSync, unlinkSync } from "node:fs";
 import type { Socket } from "bun";
+import { estVerbeScrape, servirVerbeScrape } from "../tasks/ie-crawl/scrape-service";
 
 /** Chemin de la socket. Doit rester identique côté bot (`apps/bot/src/lib/cron-ipc.ts`). */
 export const CHEMIN_SOCKET_CRON = Bun.env.RG_CRON_SOCKET ?? "/var/lib/rg/cron.sock";
@@ -188,6 +189,17 @@ export function demarrerIpcUnix(deps: DependancesIpc): PontIpc {
 			}
 
 			default: {
+				// Verbes de scraping (`scrape.*`, `x.*`) : les moteurs
+				// `@aphrody-code/bxc` et `@aphrody-code/x` vivent ici, pas dans le
+				// bot, et n'y seront pas installés (le fichier de verrouillage doit
+				// rester en version 1). `servirVerbeScrape` ne lève jamais : il
+				// porte ses propres délais, ses propres plafonds de débit et rend
+				// toujours une réponse — un scraping ne peut donc pas arrêter le
+				// démon ni monopoliser la machine. Contrat détaillé en tête de
+				// `tasks/ie-crawl/scrape-service.ts`.
+				if (estVerbeScrape(verbe)) {
+					return await servirVerbeScrape(verbe, requete);
+				}
 				return { success: false, error: `Commande inconnue : « ${verbe} ».`, code: "verbe_inconnu" };
 			}
 		}
