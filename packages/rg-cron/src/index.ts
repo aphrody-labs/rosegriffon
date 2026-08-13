@@ -23,6 +23,7 @@ import {
 import { runSeoIndexNow } from "./tasks/seo/indexnow";
 import { runSeoLlmsTxt } from "./tasks/seo/llms-txt";
 import { collecterAudienceAchillea } from "./tasks/stats/achillea";
+import { rafraichirVideosTechniques } from "./tasks/zukan-videos";
 import { initDiscord, getDiscordTelemetry, onTelemetryUpdate, getDiscordClient, GUILD_ID } from "./lib/discord";
 import { runDiscordSync, runDiscordChannelScan } from "./tasks/discord";
 import {
@@ -461,6 +462,8 @@ if (indexRun >= 0) {
 		await executeTask("seo:indexnow", runSeoIndexNow);
 	} else if (task === "seo:llms-txt" || task === "seo:llms") {
 		await executeTask("seo:llms-txt", runSeoLlmsTxt);
+	} else if (task === "zukan:videos" || task === "zukan-videos") {
+		await executeTask("zukan:videos", rafraichirVideosTechniques);
 	} else if (task === "stats:achillea" || task === "stats") {
 		await executeTask("stats:achillea", collecterAudienceAchillea);
 	} else if (task === "seo") {
@@ -820,6 +823,8 @@ const server = Bun.serve({
 				"seo-indexnow": runSeoIndexNow,
 				"seo:llms-txt": runSeoLlmsTxt,
 				"seo-llms-txt": runSeoLlmsTxt,
+				"zukan:videos": rafraichirVideosTechniques,
+				"zukan-videos": rafraichirVideosTechniques,
 			};
 
 			const taskFn = runnerMap[taskName];
