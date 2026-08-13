@@ -204,11 +204,13 @@ describe("annonce des posts X", () => {
 		);
 	});
 
-	test("rg garde DISCORD_NEWS_CHANNEL_ID, et rien sans lui", () => {
+	test("rg n'annonce RIEN, même si un salon traîne dans l'environnement", () => {
+		// `annoncePosts: null` prime sur toute variable : c'est ce qui garantit que
+		// le bot Rose Griffon reste muet pendant qu'Azalée publie, alors que les
+		// deux partagent le réglage `settings['tweets.notification']`.
+		expect(PROFILS.rg.annoncePosts).toBeNull();
 		expect(salonAnnonceDuProfil(PROFILS.rg, {})).toBeNull();
-		expect(salonAnnonceDuProfil(PROFILS.rg, { DISCORD_NEWS_CHANNEL_ID: "333333333333333333" })).toBe(
-			"333333333333333333"
-		);
+		expect(salonAnnonceDuProfil(PROFILS.rg, { DISCORD_NEWS_CHANNEL_ID: "333333333333333333" })).toBeNull();
 	});
 
 	test("le registre s'assemble en `ProfilAnnonceur` sans rien réécrire", () => {
@@ -227,26 +229,24 @@ describe("annonce des posts X", () => {
 		expect(annonceur.annoncePosts?.salon).toBe("1349528692086276148");
 		expect(annonceur.annoncePosts?.curseur).toBe("azalee");
 
-		// Rose Griffon sans `DISCORD_NEWS_CHANNEL_ID` : salon VIDE, pas `null`.
-		// Un `annoncePosts: null` voudrait dire « ce profil n'annonce pas » et
-		// couperait le notifieur historique, dont le salon vient du réglage
-		// partagé en base.
-		const historique: ProfilAnnonceur = {
-			nom: PROFILS.rg.nom,
-			annoncePosts: {
-				salon: salonAnnonceDuProfil(PROFILS.rg, {}) ?? "",
-				curseur: PROFILS.rg.annoncePosts?.curseur ?? "",
-			},
-		};
-		expect(historique.annoncePosts).toEqual({ salon: "", curseur: "discord" });
+		// Rose Griffon : `annoncePosts: null` traverse tel quel jusqu'au notifieur,
+		// qui ne démarre alors NI minuteur NI abonnement. C'est ce `null` qui rend
+		// le bot Rose Griffon muet sans toucher au réglage partagé en base — donc
+		// sans faire taire Azalée du même geste.
+		const muet: ProfilAnnonceur = { nom: PROFILS.rg.nom, annoncePosts: null };
+		expect(muet.annoncePosts).toBeNull();
+		expect(PROFILS.rg.annoncePosts).toBeNull();
 	});
 
-	test("les deux curseurs sont distincts", () => {
-		// Un curseur partagé ferait que le premier bot qui publie prive l'autre
-		// serveur du post : le curseur EST la mémoire de ce qui a été annoncé.
-		expect(PROFILS.rg.annoncePosts?.curseur).toBe("discord");
+	test("un seul profil annonce, et son curseur lui est propre", () => {
+		// Le curseur EST la mémoire de ce qui a été annoncé. Un seul annonceur
+		// aujourd'hui (Azalée) ; le jour où Rose Griffon reprendrait la parole, son
+		// curseur devra être DIFFÉRENT, sinon le premier qui publie prive l'autre
+		// serveur du post.
 		expect(PROFILS.azalee.annoncePosts?.curseur).toBe("azalee");
-		expect(PROFILS.rg.annoncePosts?.curseur).not.toBe(PROFILS.azalee.annoncePosts?.curseur);
+		const annonceurs = Object.values(PROFILS).filter((p) => p.annoncePosts !== null);
+		expect(annonceurs.map((p) => p.nom)).toEqual(["azalee"]);
+		expect(new Set(annonceurs.map((p) => p.annoncePosts?.curseur)).size).toBe(annonceurs.length);
 	});
 });
 
