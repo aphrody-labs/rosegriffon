@@ -71,11 +71,13 @@ const CDN_ROOT = "https://dxi4wb638ujep.cloudfront.net/1";
  * CloudFront. Le même hash existe en `.webm` (200 sur 100 % du catalogue mesuré)
  * et pèse la moitié du `.mp4` : c'est donc `.webm` qu'on stocke et qu'on sert.
  */
+/** `.wmv` -> `.webm` : même chemin/hash, seule extension réellement servie. */
+function swapWmv(url: string): string {
+	return url.endsWith(".wmv") ? `${url.slice(0, -4)}.webm` : url;
+}
+
 export function normalizeImagePath(src: string | null): string | null {
 	if (!src) return null;
-
-	// `.wmv` -> `.webm` : même chemin/hash, seule extension réellement servie.
-	const swapWmv = (u: string) => (u.endsWith(".wmv") ? `${u.slice(0, -4)}.webm` : u);
 
 	if (src.startsWith("http")) return swapWmv(src);
 
