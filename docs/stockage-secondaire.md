@@ -105,25 +105,36 @@ Et surtout, le trafic : sur les sept jours de journaux nginx conservés,
 > réellement absent. De même, échantillonner les chemins des journaux sans filtrer
 > sur le code de retour donne surtout des chemins qui échouaient déjà.
 
-### Trou préexistant à corriger
+### Trou préexistant — corrigé depuis
 
-Ces 394 requêtes en échec ne sont pas causées par le déport : elles échouaient
-déjà. Azalée demande des **sous-textures** d'atlas G4TX sous la forme
+Ces 394 requêtes en échec n'étaient pas causées par le déport : elles échouaient
+déjà. Azalée demandait des **textures nommées** de conteneurs G4TX sous la forme
 `<atlas>_<texture>.png` — `whs00810_whs00810.png`, `u11727100_l_u11727100_1.png`,
-`icon_item07_uni_u031801.png` — que `nie-model-serve` ne sait pas produire : il
-décode un G4TX entier, pas une texture nommée à l'intérieur.
+`icon_item07_uni_u031801.png` — un nommage propre à l'ancien dump disque, qui
+n'existe dans aucun chemin CPK et que `nie-model-serve` ne savait pas produire :
+il décodait un G4TX entier, pas une texture nommée à l'intérieur.
 
-La démonstration est nette sur un même fichier :
+Le décodeur sait désormais sélectionner une texture par son nom, et le nom passe
+par le **chemin** (le service supprime la query string avant tout routage, une API
+en `?tex=` était donc impossible). Contrat retenu :
 
 ```
-/dx11/menu/220_img/telop_waza/fr/whs00810.png            200  175 331 octets
-/dx11/menu/220_img/telop_waza/fr/whs00810_whs00810.png   404
+/dx11/menu/<chemin>.png                     → fichier 1:1  (data/dx11/menu/<chemin>.g4tx)
+/dx11/menu/<chemin>.g4tx/<texture>.png      → texture nommée dans le conteneur
 ```
 
-L'atlas existe bien (`data/dx11/menu/220_img/telop_waza/<langue>/whs00810.g4tx`
-est dans l'index CPK) et se décode ; seule la forme composée échoue. Le correctif
-appartient au décodeur (`/tex` de `nie-model-serve`) : reconnaître le suffixe et
-extraire la sous-texture. Non traité ici.
+Mesuré sur un même fichier :
+
+```
+/dx11/menu/220_img/telop_waza/fr/whs00810.png             200  173 166 octets
+/dx11/menu/220_img/telop_waza/fr/whs00810.g4tx/whs00810.png  200  173 166 octets
+/dx11/menu/220_img/telop_waza/fr/whs00810_whs00810.png    404   (forme du dump, abandonnée)
+```
+
+La sélection est réelle et non un repli sur la plus grande texture : deux textures
+du conteneur `200_icon/02_icon_item/icon_item05.g4tx` (80 textures nommées)
+rendent bien deux images distinctes (`eq_ac0100101` et `eq_ac0108001`, md5
+différents). L'ancienne forme composée par underscore reste volontairement en 404.
 
 nginx était déjà prêt pour ça : `location ^~ /dx11/` fait
 `try_files $uri @cpk_live`, et `@cpk_live` proxifie vers le décodeur. Le dump

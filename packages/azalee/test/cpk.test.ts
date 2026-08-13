@@ -210,8 +210,11 @@ describe("cpk/shared — helpers purs (client-safe)", () => {
 	});
 
 	test("cpkAssetUrl route image / modèle / brut", () => {
-		expect(cpkAssetUrl("data/dx11/menu/icon_chr/face/c01000010_l.g4tx")).toBe(
-			"https://cdn.rosegriffon.fr/dx11/menu/icon_chr/face/c01000010_l.png",
+		// Chemin réel de l'index CPK : le namespace est `200_icon/10_icon_chr`
+		// (18 504 fichiers), jamais `icon_chr` — ce dernier était le nommage du
+		// dump disque archivé, absent des CPK.
+		expect(cpkAssetUrl("data/dx11/menu/200_icon/10_icon_chr/face/c01000010_l.g4tx")).toBe(
+			"https://cdn.rosegriffon.fr/dx11/menu/200_icon/10_icon_chr/face/c01000010_l.png",
 		);
 		expect(cpkAssetUrl("data/common/chr/c01000010/c01000010_face.g4mg")).toBe(
 			"https://cdn.rosegriffon.fr/model-full/c01000010_face.glb",
