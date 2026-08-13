@@ -30,7 +30,7 @@ import { rgEmbed } from "../lib/embeds";
 import {
 	blocSondes,
 	bornerEntier,
-	champsRecherheTexte,
+	champsRechercheTexte,
 	champsTexteMultilingue,
 	construireChampsResultats,
 	dateFr,
@@ -324,7 +324,7 @@ export class RagCommand {
 
 			const entete = `**${nombreFr(entrees.length)}** entrée${entrees.length > 1 ? "s" : ""} — les premières de l'index, correspondance exacte.`;
 			const budget = Math.max(0, LIMITES_EMBED.total - titre.length - entete.length - MARGE_EMBED);
-			const { champs, ignores } = champsRecherheTexte(entrees, budget);
+			const { champs, ignores } = champsRechercheTexte(entrees, budget);
 
 			const notes = [entete, "*Reprenez un identifiant dans `/rag texte` pour lire la chaîne en français, anglais et japonais.*"];
 			if (ignores > 0) {

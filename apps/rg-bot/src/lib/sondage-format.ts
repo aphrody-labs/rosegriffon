@@ -121,6 +121,13 @@ const EMOJI_PERSONNALISE = /<a?:[A-Za-z0-9_~]+:\d+>/g;
  * échappement, une paire d'astérisques dans un pseudo passe le reste de l'embed
  * en italique. On échappe aussi `|` (spoiler) et `>` en début de ligne (citation).
  * Les émojis personnalisés sont préservés (cf. `EMOJI_PERSONNALISE`).
+ *
+ * ⚠ `[` et `]` sont échappés EUX AUSSI, et pas par excès de zèle : la plupart de
+ * ces textes finissent dans le libellé d'un lien masqué (`[libellé](url)`, cf.
+ * `ligneListeSondage`, `ligneListeCampagne`, `lignePost`). Un crochet fermant
+ * dans une question terminerait le libellé trop tôt et déverserait l'URL brute
+ * dans l'embed. Aucune question ne le fait aujourd'hui, mais l'archive grossit à
+ * chaque passe du cron et la question suivante n'est pas sous notre contrôle.
  */
 export function echapperMarkdown(texte: string): string {
 	const morceaux: string[] = [];
@@ -139,7 +146,7 @@ export function echapperMarkdown(texte: string): string {
 }
 
 function echapperBrut(fragment: string): string {
-	return fragment.replace(/([\\*_`~|])/g, "\\$1").replace(/^>/gm, "\\>");
+	return fragment.replace(/([\\*_`~|[\]])/g, "\\$1").replace(/^>/gm, "\\>");
 }
 
 /**
