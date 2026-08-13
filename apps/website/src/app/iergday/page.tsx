@@ -8,7 +8,6 @@ import {
 	EmptyTitle,
 } from "@rosegriffon/ui";
 import {
-	ClipboardList,
 	Hash,
 	ImageIcon,
 	Info,
@@ -23,7 +22,6 @@ import {
 	heroSecondaryButtonClass,
 	PageContainer,
 	PageHero,
-	SectionHeading,
 } from "@/components/shared/PageShell";
 import { BreadcrumbSchema } from "@/components/shared/StructuredData";
 import { WikiPagination } from "@/components/shared/WikiPagination";
@@ -205,15 +203,17 @@ export async function generateMetadata({
 }
 
 /**
- * Compteur de la bannière — même gabarit pour les trois, aucune couleur en dur.
+ * Compteur de la bannière — une PUCE, pas une tuile.
  *
  * ⚠ NI LA VALEUR NI LE LIBELLÉ NE SONT COUPÉS. La valeur affiche parfois une
  * durée (« 22 minutes ») et non un nombre : couper « 22 minu… » serait pire que
- * de la laisser passer à la ligne. Le libellé, lui, portait encore `truncate` et
- * sautait au point de rupture même que la DA vise : à 375 px, en
- * `xs:grid-cols-2`, il ne reste qu'une centaine de pixels et l'écran affichait
- * « publications a… », « depuis la der… » (mesuré : −38 % et −40 %). Les deux
- * passent donc à la ligne, la tuile s'adapte en hauteur.
+ * de la laisser passer à la ligne. À 375 px il ne reste qu'une centaine de
+ * pixels par colonne, et `truncate` amputait « publications a… » de 38 %.
+ *
+ * Mobile d'abord : les deux compteurs tiennent sur UNE ligne dès 320 px parce
+ * qu'ils sont écrits en ligne (`chiffre libellé`) au lieu d'empiler une valeur
+ * en gros au-dessus d'un libellé en petit. C'est deux fois moins de hauteur pour
+ * la même information.
  */
 function Compteur({
 	icone: Icone,
@@ -225,15 +225,27 @@ function Compteur({
 	libelle: string;
 }) {
 	return (
-		<div className="flex items-center gap-3 rounded-2xl border border-rg-or/40 bg-rg-sur-marine/10 px-4 py-3 backdrop-blur-sm">
-			<Icone className="size-5 shrink-0 text-rg-or" aria-hidden />
-			<div className="min-w-0">
-				<p className="text-fluid-headline-md font-bold leading-tight break-words text-rg-sur-marine">
-					{valeur}
-				</p>
-				<p className="text-xs leading-tight text-rg-sur-marine/80">{libelle}</p>
-			</div>
-		</div>
+		<span className="inline-flex items-center gap-1.5 rounded-full border border-rg-or/40 bg-rg-sur-marine/10 px-3 py-1.5 text-xs backdrop-blur-sm">
+			<Icone className="size-3.5 shrink-0 text-rg-or" aria-hidden />
+			<strong className="font-bold tabular-nums text-rg-sur-marine">{valeur}</strong>
+			<span className="text-rg-sur-marine/80">{libelle}</span>
+		</span>
+	);
+}
+
+/**
+ * Titre de section — volontairement plus petit que `SectionHeading`.
+ *
+ * `SectionHeading` pose un `text-fluid-headline-lg` avec pastille d'icône et
+ * sous-titre : trois lignes de décor pour annoncer une grille d'images. Sur
+ * mobile, ces en-têtes occupaient à eux seuls le premier écran. Ici : un mot,
+ * une taille de corps de texte, rien d'autre.
+ */
+function TitreSection({ id, children }: { id: string; children: React.ReactNode }) {
+	return (
+		<h2 id={id} className="mb-3 text-base font-bold text-foreground sm:text-lg">
+			{children}
+		</h2>
 	);
 }
 
@@ -269,14 +281,14 @@ export default async function IergDayPage({
 						{ item: "/iergday", name: "Campagnes" },
 					]}
 				/>
-				<PageContainer>
+				<PageContainer className="space-y-8 py-6 sm:space-y-10">
 					<PageHero
 						eyebrow="Campagne communautaire"
 						icon={<Hash className="size-6 text-rg-or" aria-hidden />}
 						title="Mur communautaire"
 						description="Les créations publiées sur X avec le hashtag d'une campagne Rose Griffon se retrouvent ici."
 					/>
-					<Empty className="rounded-[32px] border-2 border-dashed border-outline-variant/40 bg-surface-container-lowest py-20">
+					<Empty className="rounded-3xl border-2 border-dashed border-outline-variant/40 bg-surface-container-lowest py-10 sm:py-16">
 						<EmptyHeader>
 							<EmptyMedia variant="icon">
 								<Hash className="size-8" aria-hidden />
@@ -323,17 +335,12 @@ export default async function IergDayPage({
 	// Réseaux, autres que X, que le règlement de CETTE campagne accepte.
 	const reseauxAutres = reseauxHorsX(campagne.reglement);
 	/*
-	 * Sous-titre de « Comment participer ». Il ne doit RIEN annoncer que le
-	 * règlement rendu vingt pixels plus bas contredit : « Une image, le hashtag, et
-	 * c'est tout » était faux pour IERG Day, dont la règle 1 exige une mise en scène
-	 * d'OC et la règle 4 interdit l'IA. Le seul résumé honnête d'un règlement qu'on
-	 * ne connaît pas à l'avance, c'est de dire qu'il y en a un.
+	 * Il n'y a plus de sous-titre sous « Participer ». L'ancien annonçait « Les
+	 * règles de la campagne, et le hashtag à ne pas oublier : #IERGDay » — deux
+	 * informations déjà présentes à l'écran, la première sous forme de la liste
+	 * numérotée juste dessous, la seconde dans le titre lui-même et dans la
+	 * bannière. Le hashtag est désormais posé À CÔTÉ du titre, une fois.
 	 */
-	const sousTitreParticipation = aReglement
-		? `Les règles de la campagne${libelleHashtagPrincipal ? `, et le hashtag à ne pas oublier : ${libelleHashtagPrincipal}` : ""}.`
-		: libelleHashtagPrincipal
-			? `Le hashtag à ne pas oublier : ${libelleHashtagPrincipal}.`
-			: undefined;
 
 	const rebours = choisirRebours(campagne, etat);
 
@@ -402,26 +409,28 @@ export default async function IergDayPage({
 					 * campagnes archivées, dont la récolte n'a jamais rien pu ramener.
 					 * `x_campagnes.collecte_le` reste écrite en base pour le cron.
 					 */}
-					<div className="mt-6 grid grid-cols-1 gap-3 xs:grid-cols-2">
+					{/* Les deux compteurs et la période sur UNE rangée qui se replie :
+					    trois blocs empilés poussaient l'affiche sous la ligne de flottaison
+					    de tous les téléphones. */}
+					<div className="mt-4 flex flex-wrap items-center gap-2">
 						<Compteur
 							icone={ImageIcon}
 							valeur={String(stats.posts)}
-							libelle={stats.posts > 1 ? "publications avec image" : "publication avec image"}
+							libelle={stats.posts > 1 ? "créations" : "création"}
 						/>
 						<Compteur
 							icone={Users}
 							valeur={String(stats.auteurs)}
 							libelle={stats.auteurs > 1 ? "participants" : "participant"}
 						/>
+						{periode && (
+							<span className="text-xs text-rg-sur-marine/80">
+								{periode}
+								{etat === "a-venir" && " · pas encore commencé"}
+								{etat === "terminee" && " · terminée"}
+							</span>
+						)}
 					</div>
-
-					{periode && (
-						<p className="mt-4 text-sm text-rg-sur-marine/80">
-							{periode}
-							{etat === "a-venir" && " · la campagne n'a pas encore commencé"}
-							{etat === "terminee" && " · campagne terminée"}
-						</p>
-					)}
 				</PageHero>
 
 				<SelecteurCampagne campagnes={campagnes} slugActif={campagne.slug} />
@@ -444,13 +453,10 @@ export default async function IergDayPage({
 				 */}
 				{(campagne.imageAffiche || campagne.imageReglement) && (
 					<section aria-labelledby="titre-affiche">
-						<SectionHeading
-							id="titre-affiche"
-							icon={<ImageIcon className="size-5" aria-hidden />}
-							iconClassName="bg-primary text-on-primary"
-							title="L'affiche"
-							subtitle="Cliquez pour les ouvrir en plein écran."
-						/>
+						{/* Pas de sous-titre « cliquez pour agrandir » : le pictogramme de
+						    la vignette le dit déjà, et une phrase de plus au-dessus de
+						    l'affiche, c'est l'affiche qui descend d'autant sur mobile. */}
+						<TitreSection id="titre-affiche">L&apos;affiche</TitreSection>
 						<VisuelsCampagne
 							slug={campagne.slug}
 							titreCampagne={campagne.titre}
@@ -474,13 +480,14 @@ export default async function IergDayPage({
 				 */}
 				{aParticipation && (
 					<section id="participer" aria-labelledby="titre-participer" className="scroll-mt-24">
-						<SectionHeading
-							id="titre-participer"
-							icon={<ClipboardList className="size-5" aria-hidden />}
-							iconClassName="bg-primary text-on-primary"
-							title="Comment participer"
-							subtitle={sousTitreParticipation}
-						/>
+						<TitreSection id="titre-participer">
+							Participer
+							{libelleHashtagPrincipal && (
+								<span className="ml-2 font-mono text-sm font-normal text-primary">
+									{libelleHashtagPrincipal}
+								</span>
+							)}
+						</TitreSection>
 
 						{/*
 						 * UNE SEULE COLONNE. La grille `3fr / 2fr` n'existait que pour
@@ -494,69 +501,42 @@ export default async function IergDayPage({
 							<ReglementCampagne reglement={campagne.reglement} />
 
 							{/*
-							 * Ce que le mur collecte VRAIMENT.
+							 * Ce que la galerie collecte VRAIMENT, en UNE ligne.
 							 *
-							 * Il a DEUX sources, pas une : les publications X portant le hashtag
-							 * (`ie-crawl/hashtag-harvest.ts`) et les créations déposées dans le
-							 * salon Discord de la campagne (`tasks/campagnes-discord.ts`) — les
-							 * deux remontent dans la même galerie (`lib/x-campagnes/queries.ts`).
-							 * Ce paragraphe n'en annonçait qu'une, et rendait donc invisible la
-							 * seule voie qui n'exige pas de compte X.
-							 *
-							 * En revanche, il n'existe AUCUN collecteur Instagram dans ce dépôt :
-							 * laisser croire qu'une participation Instagram apparaîtra ici serait
-							 * un mensonge. La liste des réseaux est lue dans le règlement de la
-							 * campagne, jamais écrite en dur.
+							 * C'était un encart de six lignes avec pictogramme. Le fait à dire
+							 * tient en une phrase, et il doit être dit : la galerie montre X et
+							 * le salon Discord, mais il n'existe AUCUN collecteur Instagram
+							 * dans ce dépôt. Le supprimer au nom de la sobriété ferait croire
+							 * à une couverture qui n'existe pas — une page minimaliste peut
+							 * être courte, pas fausse.
 							 */}
-							<div className="flex items-start gap-3 rounded-2xl border border-outline-variant/60 bg-surface-container-low p-4">
-								<Info className="mt-0.5 size-5 shrink-0 text-primary" aria-hidden />
-								<p className="text-sm leading-relaxed text-on-surface-variant">
-									Cette galerie rassemble les publications&nbsp;X
-									{libelleHashtagPrincipal ? ` portant ${libelleHashtagPrincipal}` : ""}
-									{campagne.salonsDepot.length > 0
-										? " et les créations déposées dans le salon Discord de la campagne"
-										: ""}
-									.{" "}
-									{reseauxAutres.length > 0 && (
-										<>
-											Le règlement accepte aussi {listerEnFrancais(reseauxAutres)}&nbsp;:{" "}
-											<strong className="font-semibold text-on-surface">
-												une création publiée là-bas compte pour la campagne
-											</strong>
-											, mais elle n&apos;apparaîtra pas dans cette galerie.
-										</>
-									)}
-								</p>
-							</div>
+							<p className="text-xs leading-relaxed text-muted-foreground">
+								Galerie alimentée par X
+								{campagne.salonsDepot.length > 0 && " et le salon Discord"}
+								{reseauxAutres.length > 0 &&
+									` — une création sur ${listerEnFrancais(reseauxAutres)} compte pour la campagne mais n'apparaît pas ici`}
+								.
+							</p>
 						</div>
 					</section>
 				)}
 
 				{enAvant.length > 0 && (
 					<section aria-labelledby="titre-a-la-une">
-						<SectionHeading
-							id="titre-a-la-une"
-							icon={<Sparkles className="size-5" aria-hidden />}
-							iconClassName="bg-primary text-on-primary"
-							title="À la une"
-							subtitle="Les créations mises en avant par l'équipe."
-						/>
+						<TitreSection id="titre-a-la-une">À la une</TitreSection>
 						<CampagneGalerie posts={enAvant} />
 					</section>
 				)}
 
 				<section aria-labelledby="titre-publications">
-					<SectionHeading
-						id="titre-publications"
-						icon={<ImageIcon className="size-5" aria-hidden />}
-						iconClassName="bg-primary text-on-primary"
-						title="Les publications"
-						subtitle={
-							stats.posts > 0
-								? `${stats.posts} publication${stats.posts > 1 ? "s" : ""} avec image, de la plus récente à la plus ancienne.`
-								: undefined
-						}
-					/>
+					<TitreSection id="titre-publications">
+						Les créations
+						{stats.posts > 0 && (
+							<span className="ml-2 text-sm font-normal text-muted-foreground tabular-nums">
+								{stats.posts}
+							</span>
+						)}
+					</TitreSection>
 
 					{posts.length > 0 ? (
 						<CampagneGalerie posts={posts} />
@@ -566,16 +546,13 @@ export default async function IergDayPage({
 						 * publications, il ne faut donc surtout pas inviter à « publier sur X ».
 						 * On le dit, et la pagination rendue plus bas ramène au début.
 						 */
-						<Empty className="rounded-[32px] border-2 border-dashed border-outline-variant/40 bg-surface-container-lowest py-20">
+						<Empty className="rounded-3xl border-2 border-dashed border-outline-variant/40 bg-surface-container-lowest py-10 sm:py-16">
 							<EmptyHeader>
 								<EmptyMedia variant="icon">
 									<Hash className="size-8" aria-hidden />
 								</EmptyMedia>
 								<EmptyTitle>Cette page n&apos;existe pas</EmptyTitle>
-								<EmptyDescription>
-									La galerie s&apos;arrête à la page {dernierePage}. Revenez au début pour
-									parcourir les publications.
-								</EmptyDescription>
+								<EmptyDescription>La galerie s&apos;arrête à la page {dernierePage}.</EmptyDescription>
 							</EmptyHeader>
 							<EmptyContent className="flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
 								<Button asChild>
@@ -589,7 +566,7 @@ export default async function IergDayPage({
 						 * terminée sans récolte ne doit surtout PAS inviter à publier, et
 						 * une campagne ouverte mérite mieux qu'un « aucun post » laconique.
 						 */
-						<Empty className="rounded-[32px] border-2 border-dashed border-outline-variant/40 bg-surface-container-lowest py-20">
+						<Empty className="rounded-3xl border-2 border-dashed border-outline-variant/40 bg-surface-container-lowest py-10 sm:py-16">
 							<EmptyHeader>
 								<EmptyMedia variant="icon">
 									{etat === "terminee" ? (
@@ -607,15 +584,15 @@ export default async function IergDayPage({
 								</EmptyTitle>
 								<EmptyDescription>
 									{etat === "terminee" ? (
-										"Cette campagne est close et aucune publication n'a été récoltée pour elle."
+										"Aucune création n'a été récoltée."
 									) : libelleHashtagPrincipal ? (
 										<>
-											Publiez une image sur X avec{" "}
+											Publiez une image avec{" "}
 											<strong className="text-on-surface">{libelleHashtagPrincipal}</strong> : elle
-											rejoindra cette galerie automatiquement, sans rien demander à personne.
+											arrive ici toute seule.
 										</>
 									) : (
-										"Cette campagne n'a pas encore de hashtag publié."
+										"Pas encore de hashtag publié."
 									)}
 								</EmptyDescription>
 							</EmptyHeader>

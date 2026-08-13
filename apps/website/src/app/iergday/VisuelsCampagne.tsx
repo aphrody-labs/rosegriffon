@@ -146,9 +146,9 @@ function Vignette({
 			 * centaines de pixels plus haut — deux fois sous deux visuels, cela
 			 * faisait trois occurrences du même texte sur un seul écran.
 			 */}
-			<span className="flex items-center justify-between gap-2 border-t border-outline-variant/40 px-4 py-3">
+			<span className="flex items-center justify-between gap-2 border-t border-outline-variant/40 px-3 py-2">
 				<span className="min-w-0">
-					<span className="block text-sm font-bold leading-tight break-words text-on-surface">
+					<span className="block text-xs font-bold leading-tight break-words text-on-surface">
 						{document.titre}
 					</span>
 					{!grand && document.sousTitre && (

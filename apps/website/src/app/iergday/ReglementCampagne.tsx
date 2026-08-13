@@ -24,7 +24,7 @@ export function ReglementCampagne({ reglement }: { reglement: string[] }) {
 	}
 
 	return (
-		<ol className="grid list-none gap-3 p-0">
+		<ol className="grid list-none gap-2 p-0">
 			{reglement.map((regle, position) => {
 				const interdiction = estInterdiction(regle);
 				return (
@@ -34,7 +34,7 @@ export function ReglementCampagne({ reglement }: { reglement: string[] }) {
 						// alors deux clés identiques (React n'en rendrait qu'une proprement).
 						key={`${position}-${regle}`}
 						className={cn(
-							"flex items-start gap-3 rounded-2xl border p-4",
+							"flex items-start gap-2.5 rounded-xl border p-3",
 							interdiction
 								? "border-error/50 bg-error-container"
 								: "border-outline-variant/60 bg-surface-container-low"
@@ -42,16 +42,16 @@ export function ReglementCampagne({ reglement }: { reglement: string[] }) {
 					>
 						<span
 							className={cn(
-								"flex size-8 shrink-0 items-center justify-center rounded-full text-sm font-bold",
+								"flex size-6 shrink-0 items-center justify-center rounded-full text-xs font-bold",
 								interdiction ? "bg-error text-on-error" : "bg-primary text-on-primary"
 							)}
 							aria-hidden
 						>
-							{interdiction ? <Ban className="size-4" /> : position + 1}
+							{interdiction ? <Ban className="size-3.5" /> : position + 1}
 						</span>
 						<p
 							className={cn(
-								"text-fluid-body-md leading-relaxed",
+								"text-sm leading-snug",
 								interdiction ? "font-semibold text-on-error-container" : "text-on-surface"
 							)}
 						>
