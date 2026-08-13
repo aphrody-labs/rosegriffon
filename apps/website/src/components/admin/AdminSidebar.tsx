@@ -5,6 +5,7 @@ import {
 	BarChart3,
 	Calendar,
 	Database,
+	Hash,
 	Heart,
 	Home,
 	Image as ImageIcon,
@@ -36,6 +37,7 @@ const adminNavItems: NavItem[] = [
 		title: "Événements",
 	},
 	{ href: "/admin/media", icon: ImageIcon, title: "Médias" },
+	{ href: "/admin/iergday", icon: Hash, title: "Campagne hashtag" },
 	{
 		creatorOnly: true,
 		href: "/admin/patreon",
