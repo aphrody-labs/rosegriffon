@@ -28,6 +28,7 @@ import { parseSearchParams } from "@/lib/validations";
 import {
 	chargerCampagne,
 	compterPostsCampagne,
+	lienDepotDiscord,
 	listerCampagnesPubliees,
 	listerPostsCampagne,
 	listerPostsEnAvant,
@@ -46,6 +47,7 @@ import {
 	urlRechercheX,
 } from "@/lib/x-campagnes/types";
 
+import { BoutonsParticiper } from "./BoutonsParticiper";
 import { CampagneGalerie } from "./CampagneGalerie";
 import { CompteARebours } from "./CompteARebours";
 import { HashtagsCopiables } from "./HashtagsCopiables";
@@ -303,7 +305,7 @@ export default async function IergDayPage({
 		);
 	}
 
-	const [stats, posts, enAvant, tailleAffiche, tailleReglement] = await Promise.all([
+	const [stats, posts, enAvant, tailleAffiche, tailleReglement, depotDiscord] = await Promise.all([
 		compterPostsCampagne(campagne.slug),
 		listerPostsCampagne(campagne.slug, pageCourante, POSTS_PAR_PAGE),
 		pageCourante === 1 ? listerPostsEnAvant(campagne.slug, 6) : Promise.resolve([]),
@@ -313,6 +315,7 @@ export default async function IergDayPage({
 		// visuels seront téléversés par l'équipe sans passer par le code.
 		dimensionsImage(campagne.imageAffiche),
 		dimensionsImage(campagne.imageReglement),
+		lienDepotDiscord(campagne.slug),
 	]);
 
 	const etat = etatCampagne(campagne);
@@ -377,6 +380,18 @@ export default async function IergDayPage({
 				<div className="space-y-3">
 					<HashtagsCopiables hashtags={hashtags} />
 
+					{etat !== "terminee" && (
+						<BoutonsParticiper
+							urlX={
+								hashtagPrincipal
+									? urlPublicationX(libelleHashtagPrincipal || hashtagPrincipal)
+									: null
+							}
+							depotDiscord={depotDiscord}
+							hashtag={libelleHashtagPrincipal || `#${hashtagPrincipal}`}
+						/>
+					)}
+
 					<div className="flex flex-wrap items-center gap-2">
 						<Compteur
 							icone={ImageIcon}
@@ -406,8 +421,6 @@ export default async function IergDayPage({
 						/>
 					)}
 				</div>
-
-				<SelecteurCampagne campagnes={campagnes} slugActif={campagne.slug} />
 
 				{/*
 				 * LES VISUELS, EN GRAND, AVANT TOUT LE RESTE — ET UNE SEULE FOIS.
@@ -634,6 +647,22 @@ export default async function IergDayPage({
 						</div>
 					)}
 				</section>
+
+				{/*
+				 * LE SÉLECTEUR EN PIED, PAS EN TÊTE.
+				 *
+				 * Il affichait le titre de la campagne courante en pastille pleine —
+				 * juste au-dessus de l'affiche, qui l'écrit déjà en gros. C'était le
+				 * dernier doublon de texte de la page. Ce n'est pas un en-tête : c'est
+				 * de la navigation VERS LES AUTRES campagnes, et sa place est là où
+				 * l'on arrive quand on a fini de regarder celle-ci.
+				 */}
+				{campagnes.length > 1 && (
+					<section aria-labelledby="titre-campagnes" className="border-t border-outline-variant/40 pt-6">
+						<TitreSection id="titre-campagnes">Les autres campagnes</TitreSection>
+						<SelecteurCampagne campagnes={campagnes} slugActif={campagne.slug} />
+					</section>
+				)}
 			</PageContainer>
 		</>
 	);
