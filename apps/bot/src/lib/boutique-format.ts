@@ -240,6 +240,72 @@ export function catalogueParCategorie(
 		.toSorted((a, b) => a.libelle.localeCompare(b.libelle, "fr"));
 }
 
+/* ─────────────────────────── Limites DURES de Discord ─────────────────────── */
+
+/** Un embed ne peut pas porter plus de 25 champs. */
+export const MAX_CHAMPS_EMBED = 25;
+/** Ni plus de 1 024 caractères par champ. */
+export const MAX_VALEUR_CHAMP = 1024;
+/**
+ * Ni plus de 6 000 caractères au TOTAL (titre + description + tous les champs +
+ * pied). Un dépassement ne rogne rien : Discord refuse le message ENTIER, et le
+ * membre reste devant « l'application n'a pas répondu ».
+ */
+export const MAX_TOTAL_EMBED = 6000;
+
+export interface ChampEmbed {
+	nom: string;
+	valeur: string;
+}
+
+export interface ChampsCatalogue {
+	champs: ChampEmbed[];
+	/** Familles laissées de côté faute de place. 0 dans le cas normal. */
+	omises: number;
+}
+
+/** Coupe à `max` caractères en signalant la coupe, sans dépasser d'un signe. */
+function borner(texte: string, max: number): string {
+	return texte.length > max ? `${texte.slice(0, max - 1).trimEnd()}…` : texte;
+}
+
+/**
+ * Champs de l'embed `/boutique catalogue`, bornés par les TROIS limites d'un
+ * coup : 25 champs, 1 024 caractères par champ, 6 000 au total.
+ *
+ * Les 12 produits d'aujourd'hui tiennent en 1 581 caractères (mesuré le
+ * 13/8/2026), très loin des 6 000 : ce plafond n'est pas là pour le catalogue
+ * actuel mais pour le suivant. Le catalogue vit dans le code du site, il grossit
+ * sans que personne ne repasse par ici, et le jour où la somme franchit 6 000 la
+ * commande ne rendrait pas une liste tronquée — elle ne rendrait plus RIEN.
+ * `omises` permet à l'appelant de le dire au lieu de mentir par omission.
+ */
+export function champsCatalogue(
+	groupes: ReadonlyArray<{ libelle: string; produits: readonly ProduitBoutique[] }>,
+	budget: number,
+	base = BASE_BOUTIQUE
+): ChampsCatalogue {
+	const champs: ChampEmbed[] = [];
+	let reste = Math.max(0, budget);
+	let omises = 0;
+
+	for (const groupe of groupes) {
+		const nom = `${groupe.libelle} (${groupe.produits.length})`;
+		const valeur = borner(
+			groupe.produits.map((produit) => ligneCatalogue(produit, base)).join("\n"),
+			MAX_VALEUR_CHAMP
+		);
+		const cout = nom.length + valeur.length;
+		if (champs.length >= MAX_CHAMPS_EMBED || cout > reste) {
+			omises += 1;
+			continue;
+		}
+		reste -= cout;
+		champs.push({ nom, valeur });
+	}
+	return { champs, omises };
+}
+
 const LIBELLES_STOCK: Record<EtatStock, string> = {
 	"in-stock": "En stock",
 	limited: "Édition limitée",

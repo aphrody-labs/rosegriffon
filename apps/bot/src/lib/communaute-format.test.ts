@@ -447,33 +447,68 @@ describe("événements de l'agenda", () => {
 // ─── Vie privée ────────────────────────────────────────────────────────────
 
 describe("profils — barrière de vie privée", () => {
-	test("les colonnes fermées par la migration PII sont toutes listées", () => {
-		for (const clef of ["email", "address_line1", "address_line2", "city", "postal_code", "country"]) {
+	/**
+	 * Colonnes que le rôle `anon` a le droit de lire, relevées en base le
+	 * 13/8/2026 (`information_schema.column_privileges`). Tout le reste de
+	 * `profiles` est fermé, donc doit figurer dans `CLES_PII_PROFIL`.
+	 */
+	const COLONNES_PUBLIQUES = [
+		"avatar_url",
+		"badges",
+		"banner_url",
+		"bio",
+		"discord_id",
+		"id",
+		"role",
+		"twitter_handle",
+		"updated_at",
+		"username",
+		"website",
+	];
+
+	test("les colonnes fermées au rôle `anon` sont toutes listées", () => {
+		for (const clef of [
+			"email",
+			"full_name",
+			"address_line1",
+			"address_line2",
+			"city",
+			"postal_code",
+			"country",
+			"patreon_id",
+		]) {
 			expect(CLES_PII_PROFIL).toContain(clef);
 		}
 	});
 
-	test("assainirProfil retire e-mail et adresse postale, garde le reste", () => {
+	test("aucune colonne publique n'a été fermée par excès de zèle", () => {
+		for (const clef of COLONNES_PUBLIQUES) {
+			expect(CLES_PII_PROFIL).not.toContain(clef);
+		}
+	});
+
+	test("assainirProfil retire e-mail, nom complet et adresse postale, garde le reste", () => {
 		const propre = assainirProfil({
 			username: "yoyo__goat",
-			full_name: null,
+			full_name: "Prénom Nom",
 			email: "prive@example.com",
 			address_line1: "1 rue de la Paix",
 			address_line2: null,
 			city: "Paris",
 			postal_code: "75002",
 			country: "FR",
+			patreon_id: "42",
 			role: "superadmin",
 			discord_id: "123",
 		});
 		expect(propre).toEqual({
 			username: "yoyo__goat",
-			full_name: null,
 			role: "superadmin",
 			discord_id: "123",
 		});
 		expect(JSON.stringify(propre)).not.toContain("example.com");
 		expect(JSON.stringify(propre)).not.toContain("75002");
+		expect(JSON.stringify(propre)).not.toContain("Prénom Nom");
 	});
 
 	test("un profil déjà propre traverse sans perte", () => {

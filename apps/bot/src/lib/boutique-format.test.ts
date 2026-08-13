@@ -23,6 +23,7 @@ import {
 	CATALOGUE,
 	CATEGORIES,
 	catalogueParCategorie,
+	champsCatalogue,
 	chercherProduits,
 	classerStatutPatron,
 	compterParStatut,
@@ -35,6 +36,9 @@ import {
 	libelleStock,
 	ligneCatalogue,
 	lignePalier,
+	MAX_CHAMPS_EMBED,
+	MAX_TOTAL_EMBED,
+	MAX_VALEUR_CHAMP,
 	normaliser,
 	paliersDeLAdhesion,
 	resumerAdhesion,
@@ -71,18 +75,25 @@ function adhesion(patch: Partial<AdhesionPatreon> = {}): AdhesionPatreon {
 
 /** Les 11 lignes réelles de `patreon_memberships`, réduites aux colonnes non personnelles. */
 const ADHESIONS_REELLES: AdhesionPatreon[] = [
+	// ⚠ Cette première ligne prélève à l'ANNÉE (`pledge_cadence = 12`), pas au
+	// mois : c'est la seule des onze, et c'est le seul jeu d'essai qui couvre la
+	// branche annuelle de `formaterCadence`.
 	adhesion({
 		currently_entitled_cents: 14_542,
+		last_charge_date: "2025-10-20",
 		last_charge_status: "Paid",
 		lifetime_support_cents: 14_542,
 		next_charge_date: "2026-10-20",
 		patron_status: "active_patron",
+		pledge_cadence: 12,
 		pledge_start: "2025-10-20",
 		tier_amounts_cents: [1450],
 		tier_titles: [PALIER_EVANS],
 	}),
 	adhesion({
 		currently_entitled_cents: 1450,
+		last_charge_date: "2026-04-12",
+		last_charge_status: "Paid",
 		lifetime_support_cents: 20_920,
 		next_charge_date: "2026-05-12",
 		patron_status: "active_patron",
@@ -92,6 +103,8 @@ const ADHESIONS_REELLES: AdhesionPatreon[] = [
 	}),
 	adhesion({
 		currently_entitled_cents: 1450,
+		last_charge_date: "2026-05-02",
+		last_charge_status: "Paid",
 		lifetime_support_cents: 21_027,
 		next_charge_date: "2026-05-26",
 		patron_status: "active_patron",
@@ -99,10 +112,32 @@ const ADHESIONS_REELLES: AdhesionPatreon[] = [
 		tier_amounts_cents: [1450],
 		tier_titles: [PALIER_EVANS],
 	}),
-	adhesion({ lifetime_support_cents: 15_631, patron_status: "former_patron" }),
-	adhesion({ lifetime_support_cents: 1526, patron_status: "former_patron" }),
-	adhesion({ lifetime_support_cents: 9122, patron_status: "former_patron" }),
-	adhesion({ lifetime_support_cents: 5100, patron_status: "former_patron" }),
+	// Un dernier prélèvement REFUSÉ ne fait pas de cette ligne un « paiement
+	// refusé » : c'est `patron_status` qui classe, et il dit « ancien soutien ».
+	adhesion({
+		last_charge_date: "2026-03-10",
+		last_charge_status: "Declined",
+		lifetime_support_cents: 15_631,
+		patron_status: "former_patron",
+	}),
+	adhesion({
+		last_charge_date: "2025-12-15",
+		last_charge_status: "Paid",
+		lifetime_support_cents: 1526,
+		patron_status: "former_patron",
+	}),
+	adhesion({
+		last_charge_date: "2026-03-03",
+		last_charge_status: "Paid",
+		lifetime_support_cents: 9122,
+		patron_status: "former_patron",
+	}),
+	adhesion({
+		last_charge_date: "2025-12-19",
+		last_charge_status: "Paid",
+		lifetime_support_cents: 5100,
+		patron_status: "former_patron",
+	}),
 	adhesion(),
 	adhesion(),
 	adhesion(),
@@ -160,6 +195,64 @@ describe("catalogue", () => {
 
 	test("une famille inconnue ne renvoie rien plutôt que tout", () => {
 		expect(catalogueParCategorie("peluche")).toEqual([]);
+	});
+});
+
+describe("champs de l'embed catalogue — les trois limites Discord", () => {
+	const groupes = catalogueParCategorie();
+
+	test("le catalogue réel passe en entier, sans rien omettre", () => {
+		const { champs, omises } = champsCatalogue(groupes, MAX_TOTAL_EMBED - 300);
+		expect(omises).toBe(0);
+		expect(champs.length).toBe(groupes.length);
+		expect(champs.map((c) => c.nom)).toContain(`Stickers (3)`);
+	});
+
+	test("la somme des champs reste sous le budget, et chacun sous 1 024", () => {
+		const { champs } = champsCatalogue(groupes, MAX_TOTAL_EMBED - 300);
+		const total = champs.reduce((n, c) => n + c.nom.length + c.valeur.length, 0);
+		expect(total).toBeLessThanOrEqual(MAX_TOTAL_EMBED - 300);
+		for (const champ of champs) {
+			expect(champ.valeur.length).toBeLessThanOrEqual(MAX_VALEUR_CHAMP);
+		}
+	});
+
+	test("un budget trop court écarte des familles au lieu de faire échouer l'envoi", () => {
+		const { champs, omises } = champsCatalogue(groupes, 400);
+		expect(champs.length).toBeGreaterThan(0);
+		expect(champs.length).toBeLessThan(groupes.length);
+		expect(omises).toBe(groupes.length - champs.length);
+		const total = champs.reduce((n, c) => n + c.nom.length + c.valeur.length, 0);
+		expect(total).toBeLessThanOrEqual(400);
+	});
+
+	test("un budget nul n'affiche rien et le dit, plutôt que de mentir", () => {
+		const { champs, omises } = champsCatalogue(groupes, 0);
+		expect(champs).toEqual([]);
+		expect(omises).toBe(groupes.length);
+	});
+
+	test("plus de 25 familles : les 25 premières passent, le reste est compté", () => {
+		const gonfle = Array.from({ length: 30 }, (_, i) => ({
+			libelle: `Famille ${i}`,
+			produits: [CATALOGUE[0] as (typeof CATALOGUE)[number]],
+		}));
+		const { champs, omises } = champsCatalogue(gonfle, 1_000_000);
+		expect(champs.length).toBe(MAX_CHAMPS_EMBED);
+		expect(omises).toBe(5);
+	});
+
+	test("une famille interminable est coupée au caractère près, pas rejetée", () => {
+		const enorme = [
+			{
+				libelle: "Tout",
+				produits: Array.from({ length: 200 }, () => CATALOGUE[0] as (typeof CATALOGUE)[number]),
+			},
+		];
+		const { champs } = champsCatalogue(enorme, MAX_TOTAL_EMBED);
+		expect(champs).toHaveLength(1);
+		expect(champs[0]!.valeur.length).toBe(MAX_VALEUR_CHAMP);
+		expect(champs[0]!.valeur.endsWith("…")).toBe(true);
 	});
 });
 
@@ -435,11 +528,18 @@ describe("fiche personnelle d'un soutien", () => {
 		const parNom = new Map(champs.map((c) => [c.nom, espaces(c.valeur)]));
 		expect(parNom.get("Statut")).toBe("Soutien actif");
 		expect(parNom.get("Palier")).toBe(PALIER_EVANS);
-		expect(parNom.get("Engagement en cours")).toBe("145,42 € (mensuel)");
+		expect(parNom.get("Engagement en cours")).toBe("145,42 € (annuel)");
 		expect(parNom.get("Soutien cumulé")).toBe("145,42 €");
 		expect(parNom.get("Depuis le")).toBe("20 octobre 2025");
 		expect(parNom.get("Prochain prélèvement")).toBe("20 octobre 2026");
-		expect(parNom.get("Dernier prélèvement")).toBe("réglé");
+		expect(parNom.get("Dernier prélèvement")).toBe("20 octobre 2025 · réglé");
+	});
+
+	test("un prélèvement refusé n'est pas maquillé, mais ne change pas le statut", () => {
+		const refuse = ADHESIONS_REELLES[3] as AdhesionPatreon;
+		const parNom = new Map(resumerAdhesion(refuse).map((c) => [c.nom, espaces(c.valeur)]));
+		expect(parNom.get("Statut")).toBe("Ancien soutien");
+		expect(parNom.get("Dernier prélèvement")).toBe("10 mars 2026 · refusé");
 	});
 
 	test("un ancien soutien n'annonce pas de prochain prélèvement", () => {

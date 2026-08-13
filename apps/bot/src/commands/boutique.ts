@@ -25,11 +25,14 @@ import {
 	CATALOGUE,
 	CATEGORIES,
 	catalogueParCategorie,
+	champsCatalogue,
 	chercherProduits,
 	formaterEuros,
 	formaterFourchettePrix,
 	libelleStock,
-	ligneCatalogue,
+	MAX_CHAMPS_EMBED,
+	MAX_TOTAL_EMBED,
+	MAX_VALEUR_CHAMP,
 	normaliser,
 	trouverProduit,
 	urlFicheProduit,
@@ -39,9 +42,11 @@ import {
 import { rgEmbed, truncate } from "../lib/embeds";
 
 /** Limites DURES de Discord : les dépasser fait échouer l'envoi ENTIER du message. */
-const MAX_CHAMPS = 25;
-const MAX_VALEUR_CHAMP = 1024;
 const MAX_DESCRIPTION = 4096;
+/** Une liste d'autocomplétion est refusée AU-DELÀ de 25 propositions. */
+const MAX_PROPOSITIONS = 25;
+/** Et chaque proposition (libellé comme valeur) est bornée à 100 caractères. */
+const MAX_LONGUEUR_PROPOSITION = 100;
 
 /** Saisie courante de l'option en cours d'autocomplétion. */
 function saisie(interaction: AutocompleteInteraction): string {
@@ -61,14 +66,22 @@ async function repondreSuggestions(
 		await interaction.respond(
 			produire()
 				.filter((choix) => choix.value.length > 0)
-				.slice(0, 25)
+				.slice(0, MAX_PROPOSITIONS)
 				.map((choix) => ({
-					name: truncate(choix.name, 100),
-					value: truncate(choix.value, 100),
+					name: truncate(choix.name, MAX_LONGUEUR_PROPOSITION),
+					value: truncate(choix.value, MAX_LONGUEUR_PROPOSITION),
 				}))
 		);
 	} catch {
-		await interaction.respond([]);
+		// Le repli peut échouer lui aussi — jeton d'autocomplétion expiré, ou
+		// réponse déjà envoyée. Le laisser lever produirait un rejet non attrapé
+		// dans le gestionnaire d'événement de discordx ; or il n'y a plus rien à
+		// sauver côté membre : le champ se contentera de ne rien proposer.
+		try {
+			await interaction.respond([]);
+		} catch (err) {
+			console.warn("[boutique] autocomplétion impossible :", err);
+		}
 	}
 }
 
@@ -121,26 +134,31 @@ export class CommandesBoutique {
 		const nombreDeProduits = groupes.reduce((total, groupe) => total + groupe.produits.length, 0);
 		const prixMini = formaterEuros(Math.min(...CATALOGUE.map((p) => p.prixCents)));
 		const prixMaxi = formaterEuros(Math.max(...CATALOGUE.map((p) => p.prixMaxCents)));
-		const embed = rgEmbed()
-			.setTitle("Boutique Rose Griffon")
-			.setURL(`${BASE_BOUTIQUE}/shop`)
-			.setDescription(
-				truncate(
-					categorie
-						? `${nombreDeProduits} produit${nombreDeProduits > 1 ? "s" : ""} dans cette famille. Commande sur ${BASE_BOUTIQUE}/shop.`
-						: `${nombreDeProduits} produits, de ${prixMini} à ${prixMaxi}. Commande sur ${BASE_BOUTIQUE}/shop.`,
-					MAX_DESCRIPTION
-				)
-			);
+		const titre = "Boutique Rose Griffon";
+		const entete = categorie
+			? `${nombreDeProduits} produit${nombreDeProduits > 1 ? "s" : ""} dans cette famille. Commande sur ${BASE_BOUTIQUE}/shop.`
+			: `${nombreDeProduits} produits, de ${prixMini} à ${prixMaxi}. Commande sur ${BASE_BOUTIQUE}/shop.`;
 
-		for (const groupe of groupes.slice(0, MAX_CHAMPS)) {
-			embed.addFields({
-				name: `${groupe.libelle} (${groupe.produits.length})`,
-				value: truncate(
-					groupe.produits.map((produit) => ligneCatalogue(produit)).join("\n"),
-					MAX_VALEUR_CHAMP
-				),
-			});
+		// Le budget des champs, c'est les 6 000 caractères de l'embed MOINS ce qui
+		// est déjà écrit ailleurs (titre, description, pied de page) — sinon la
+		// somme peut franchir la limite et Discord refuse le message entier.
+		const { champs, omises } = champsCatalogue(
+			groupes,
+			MAX_TOTAL_EMBED - titre.length - entete.length - 200
+		);
+		const accordOmises = omises > 1 ? "s" : "";
+		const description =
+			omises > 0
+				? `${entete}\n(${omises} famille${accordOmises} non affichée${accordOmises}, faute de place.)`
+				: entete;
+
+		const embed = rgEmbed()
+			.setTitle(titre)
+			.setURL(`${BASE_BOUTIQUE}/shop`)
+			.setDescription(truncate(description, MAX_DESCRIPTION));
+
+		for (const champ of champs.slice(0, MAX_CHAMPS_EMBED)) {
+			embed.addFields({ name: champ.nom, value: truncate(champ.valeur, MAX_VALEUR_CHAMP) });
 		}
 
 		const premier = groupes[0]?.produits[0];
