@@ -94,7 +94,11 @@ export class StaffServicesCommand {
 
 			const embed = rgEmbed()
 				.setTitle(`Services internes — ${debout}/${sondes.length} répondent`)
-				.setDescription(sondes.map(ligneSonde).join("\n"));
+				// 1069 caractères mesurés le 13/8/2026 avec les dix services debout,
+				// mais le détail vient des sondes elles-mêmes : une charge de santé
+				// bavarde suffirait à franchir les 4096 et l'embed ENTIER serait
+				// refusé. On borne plutôt que d'espérer.
+				.setDescription(borner(sondes.map(ligneSonde).join("\n"), 4_000));
 
 			if (tombes.length > 0) {
 				// L'unité systemd est la SEULE information actionnable en panne :
@@ -216,12 +220,15 @@ export class StaffServicesCommand {
 			const embed = rgEmbed()
 				.setTitle("Déploiement bleu/vert — versions servies")
 				.setDescription(
-					etats
-						.map((etat, rang) => {
-							const sonde = sondes[rang];
-							return ligneApplication(etat, sonde?.ok ?? false, sonde?.latenceMs ?? 0);
-						})
-						.join("\n")
+					borner(
+						etats
+							.map((etat, rang) => {
+								const sonde = sondes[rang];
+								return ligneApplication(etat, sonde?.ok ?? false, sonde?.latenceMs ?? 0);
+							})
+							.join("\n"),
+						4_000
+					)
 				);
 
 			for (const etat of etats) {

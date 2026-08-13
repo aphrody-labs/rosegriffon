@@ -30,8 +30,11 @@ import {
 	ligneResultatWeb,
 	ligneSonde,
 	listeCourte,
+	normaliserPseudoX,
 	pastilleEtat,
+	trierPostsParDate,
 } from "./format";
+import { analyserLiveEnv } from "./deploiement";
 
 const SERVICE_FICTIF: DescriptionService = {
 	nom: "azalee-api",
@@ -310,6 +313,86 @@ describe("lignePostX et formaterPortee", () => {
 	test("les compteurs absents ne sont pas affichés à zéro", () => {
 		expect(formaterPortee({ likes: 3 }).replace(/\s+/g, " ")).toBe("❤ 3");
 		expect(formaterPortee({})).toBe("");
+	});
+});
+
+describe("normaliserPseudoX", () => {
+	test("accepte les écritures réelles d'un même compte", () => {
+		expect(normaliserPseudoX("inazuma_project")).toBe("inazuma_project");
+		expect(normaliserPseudoX("@inazuma_project")).toBe("inazuma_project");
+		expect(normaliserPseudoX(" https://x.com/inazuma_project/status/2087 ")).toBe(
+			"inazuma_project"
+		);
+	});
+
+	test("refuse ce qui ne peut pas être un pseudo X", () => {
+		// Une espace ferait lever `setURL` et emporterait TOUT l'embed.
+		expect(normaliserPseudoX("toto tata")).toBe("");
+		expect(normaliserPseudoX("a".repeat(16))).toBe("");
+		expect(normaliserPseudoX("")).toBe("");
+		expect(normaliserPseudoX(undefined)).toBe("");
+		expect(normaliserPseudoX(42)).toBe("");
+	});
+});
+
+describe("trierPostsParDate", () => {
+	test("remet le post épinglé à sa vraie place chronologique", () => {
+		// Ordre RÉEL rendu par `x.posts` sur @inazuma_project le 13/8/2026 :
+		// l'épinglé du 6 juillet arrivait AVANT le post du 12 août.
+		const trie = trierPostsParDate([
+			{ id: "2074045952747548797", date: "2026-07-06T08:21:03.000Z" },
+			{ id: "2087460043658821924", date: "2026-08-12T08:43:52.000Z" },
+		]);
+		expect(trie.map((post) => post.id)).toEqual([
+			"2087460043658821924",
+			"2074045952747548797",
+		]);
+	});
+
+	test("une date absente ou illisible ne passe pas pour la plus récente", () => {
+		const trie = trierPostsParDate([
+			{ id: "sans-date" },
+			{ id: "recent", date: "2026-08-12T08:43:52.000Z" },
+			{ id: "illisible", date: "hier" },
+		]);
+		expect(trie[0]?.id).toBe("recent");
+		expect(trie.map((post) => post.id)).toHaveLength(3);
+	});
+
+	test("ne modifie pas le tableau reçu", () => {
+		const source = [
+			{ id: "a", date: "2026-07-06T08:21:03.000Z" },
+			{ id: "b", date: "2026-08-12T08:43:52.000Z" },
+		];
+		trierPostsParDate(source);
+		expect(source.map((post) => post.id)).toEqual(["a", "b"]);
+	});
+});
+
+describe("analyserLiveEnv", () => {
+	test("lit le live.env réel du slot azalee", () => {
+		// Contenu exact de /home/ubuntu/rg-releases/azalee/live.env le 13/8/2026.
+		expect(
+			analyserLiveEnv(
+				"# Généré par scripts/ops/deploy.ts — slot actuellement servi par nginx.\n" +
+					"LIVE_SLOT=a\n" +
+					"LIVE_UNIT=azalee-web.service\n" +
+					"LIVE_PORT=3003\n" +
+					"LIVE_RELEASE=2026-08-13T00-34-03-769-Va8uc-iExl92JKgLHQVQ0\n"
+			)
+		).toEqual({
+			LIVE_SLOT: "a",
+			LIVE_UNIT: "azalee-web.service",
+			LIVE_PORT: "3003",
+			LIVE_RELEASE: "2026-08-13T00-34-03-769-Va8uc-iExl92JKgLHQVQ0",
+		});
+	});
+
+	test("garde les « = » d'une valeur et ignore les lignes sans clé", () => {
+		expect(analyserLiveEnv("A=1=2\n\n=orphelin\n   \nB=  espacé  ")).toEqual({
+			A: "1=2",
+			B: "espacé",
+		});
 	});
 });
 

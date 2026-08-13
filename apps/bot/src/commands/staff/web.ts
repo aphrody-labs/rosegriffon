@@ -148,7 +148,10 @@ export class StaffWebCommand {
 						inline: true,
 					},
 					{
-						name: "Source",
+						// Le contrat le dit : `octets` = poids UTF-8 du HTML SOURCE, pas
+						// le poids du markdown affiché ni celui de la page avec ses
+						// ressources. Le libellé doit donc le nommer.
+						name: "HTML source",
 						value: formaterOctets(typeof reponse.octets === "number" ? reponse.octets : null),
 						inline: true,
 					},

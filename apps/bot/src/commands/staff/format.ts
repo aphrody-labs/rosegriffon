@@ -244,6 +244,28 @@ export function ligneResultatWeb(resultat: ResultatRechercheWeb, rang: number): 
 	return extrait.length > 0 ? `${entete}\n   ${extrait}` : entete;
 }
 
+/**
+ * Normalise un pseudo X comme le fait le service de scraping.
+ *
+ * Le contrat de `validerPseudo` (`scrape-service.ts`) n'accepte que
+ * `[A-Za-z0-9_]{1,15}`. Le bot doit appliquer la MÊME règle avant de fabriquer
+ * une URL de repli : `setURL("https://x.com/toto tata")` fait lever
+ * `EmbedBuilder`, et l'embed entier est perdu là où l'appel, lui, avait réussi.
+ *
+ * @returns le pseudo sans `@` ni préfixe d'URL, ou `""` s'il est inexploitable.
+ */
+export function normaliserPseudoX(brut: unknown): string {
+	if (typeof brut !== "string") {
+		return "";
+	}
+	const nettoye = brut
+		.trim()
+		.replace(/^https?:\/\/(?:www\.)?(?:x|twitter)\.com\//i, "")
+		.replace(/[/?#].*$/, "")
+		.replace(/^@/, "");
+	return /^[A-Za-z0-9_]{1,15}$/.test(nettoye) ? nettoye : "";
+}
+
 export interface PostXAffichable {
 	id?: unknown;
 	url?: unknown;
@@ -268,6 +290,35 @@ export function lignePostX(post: PostXAffichable): string {
 	const texte = borner(echapperMarkdown(typeof post.texte === "string" ? post.texte : ""), 300);
 	const portee = formaterPortee(post);
 	return `**${entete}**${quand}\n${texte || "*(sans texte)*"}\n${portee}`;
+}
+
+/**
+ * Trie des posts X du plus récent au plus ancien.
+ *
+ * ── POURQUOI CE TRI EXISTE ─────────────────────────────────────────────────
+ * X ne rend PAS une chronologie triée : il place d'abord le post ÉPINGLÉ, puis
+ * le reste. `verbeXPosts` le dit noir sur blanc (« X sert la chronologie avec
+ * ses épingles ») et ne trie pas non plus. Mesuré le 13/8/2026 sur
+ * `@inazuma_project` : le premier post rendu datait du 6/7/2026, le second du
+ * 12/8/2026. Une commande qui s'appelle « derniers posts » affichait donc un
+ * post plus ancien en tête — la donnée était juste, la lecture était fausse.
+ *
+ * Les posts sans date lisible partent à la fin plutôt que de se retrouver
+ * arbitrairement en tête : une date absente n'est pas une date récente.
+ */
+export function trierPostsParDate<T extends PostXAffichable>(posts: readonly T[]): T[] {
+	// Un repère FINI, pas `-Infinity` : deux posts sans date donneraient
+	// `-Infinity - -Infinity = NaN`, et un comparateur qui rend NaN laisse le tri
+	// au bon vouloir du moteur.
+	const SANS_DATE = Number.MIN_SAFE_INTEGER;
+	function instant(post: T): number {
+		if (typeof post.date !== "string") {
+			return SANS_DATE;
+		}
+		const valeur = new Date(post.date).getTime();
+		return Number.isNaN(valeur) ? SANS_DATE : valeur;
+	}
+	return posts.toSorted((a, b) => instant(b) - instant(a));
 }
 
 /** Compteurs d'un post X, en une ligne. Omet ce que X n'a pas renvoyé. */
