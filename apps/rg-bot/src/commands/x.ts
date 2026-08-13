@@ -45,6 +45,8 @@ import {
 	horodatageDiscord,
 	imagesTweet,
 	ligneListe,
+	estAnnoncable,
+	estRetweet,
 	messageAnnonce,
 	messagePing,
 	nombreDePages,
@@ -482,6 +484,17 @@ export class XCommand {
 			if (!salon) {
 				await interaction.editReply({
 					content: `Salon d'annonce \`${annonce.salon}\` injoignable : ${raison ?? "le bot doit y voir et y écrire"}.`,
+				});
+				return;
+			}
+
+			// Le DERNIER post d'un compte est souvent un retweet ou une réponse : la
+			// commande le prendrait tel quel et l'annoncerait au serveur entier,
+			// ping du rôle compris. Même règle que la veille automatique, même
+			// fonction — jamais une seconde copie qui divergerait.
+			if (!estAnnoncable(post.texte)) {
+				await interaction.editReply({
+					content: `Le dernier post de @${pseudo} est ${estRetweet(post.texte) ? "un retweet" : "une réponse"} : il n'a pas sa place dans un salon d'annonces. Rien n'a été publié.`,
 				});
 				return;
 			}

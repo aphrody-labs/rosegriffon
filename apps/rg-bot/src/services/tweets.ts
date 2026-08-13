@@ -378,6 +378,19 @@ export async function tweetsAPublier(
 		  AND created_at > now() - make_interval(hours => ${FENETRE_RATTRAPAGE_HEURES})
 		  AND lower(author_username) = ANY(${comptes}::text[])
 		  AND (category IS NULL OR lower(category) <> ALL(${bannies}::text[]))
+		  -- NI RETWEET, NI REPONSE. Un retweet annonce le post de QUELQU'UN
+		  -- D'AUTRE sous le nom du compte suivi ; une reponse est la moitie d'une
+		  -- conversation, incomprehensible hors de son fil et bien plus frequente
+		  -- qu'une annonce. Les deux formes sont reconnues a leur TEXTE, parce que
+		  -- public.tweets ne porte aucune colonne qui les distingue (releve le
+		  -- 13/8/2026 : ni is_retweet, ni in_reply_to).
+		  --
+		  -- Ces deux motifs sont le miroir SQL de estRetweet/estReponse
+		  -- (lib/tweets-format.ts). Les deux doivent bouger ensemble : le test
+		  -- tweetsNotifier.test.ts couvre la version TypeScript, et c'est elle
+		  -- qui fait foi pour la commande /x annoncer.
+		  AND text !~ '^\s*RT @[A-Za-z0-9_]{1,15}:'
+		  AND text !~ '^\s*(@[A-Za-z0-9_]{1,15}[[:space:],]+)+[^[:space:]]'
 		ORDER BY created_at ASC, id ASC
 		LIMIT ${limite}
 	`;
