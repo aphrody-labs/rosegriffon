@@ -420,6 +420,44 @@ export default async function IergDayPage({
 				<SelecteurCampagne campagnes={campagnes} slugActif={campagne.slug} />
 
 				{/*
+				 * L'AFFICHE, EN GRAND, AVANT TOUT LE RESTE.
+				 *
+				 * L'affiche et la carte des règles ne sont pas une illustration de la
+				 * page : ce sont les documents officiels de la campagne, et ils portent
+				 * les seules informations qu'un participant doit avoir (le hashtag, la
+				 * date de fin, ce qui est autorisé). Elles n'existaient qu'en vignette
+				 * de 226 px dans la colonne de « Comment participer », où rien de tout
+				 * cela ne se lit. Elles restent AUSSI là-bas — en rappel, à côté du
+				 * règlement en clair — mais la première chose qu'on voit sous la
+				 * bannière est désormais l'affiche elle-même.
+				 *
+				 * La bannière, elle, ne la montre pas : `PageHero` recadre son image en
+				 * `object-cover` sous un voile marine à 90 % — c'est un décor, par
+				 * construction illisible.
+				 */}
+				{(campagne.imageAffiche || campagne.imageReglement) && (
+					<section aria-labelledby="titre-affiche">
+						<SectionHeading
+							id="titre-affiche"
+							icon={<ImageIcon className="size-5" aria-hidden />}
+							iconClassName="bg-primary text-on-primary"
+							title="L'affiche"
+							subtitle="Les visuels officiels de la campagne. Cliquez pour les ouvrir en plein écran."
+						/>
+						<VisuelsCampagne
+							slug={campagne.slug}
+							titreCampagne={campagne.titre}
+							description={campagne.description}
+							reglement={campagne.reglement}
+							imageAffiche={campagne.imageAffiche}
+							imageReglement={campagne.imageReglement}
+							noteAffiche={campagne.noteAffiche}
+							presentation="grand"
+						/>
+					</section>
+				)}
+
+				{/*
 				 * « Comment participer » AVANT la galerie : quand la campagne est ouverte
 				 * et que le mur est encore vide, c'est la seule chose qui a de la valeur
 				 * pour le visiteur. Les campagnes archivées n'ont pas de règlement en
