@@ -100,6 +100,75 @@ export async function appelDiscordOuNull<T>(chemin: string): Promise<T | null> {
 	}
 }
 
+/** Encart Discord, réduit aux champs que ce dépôt utilise réellement. */
+export interface EncartDiscord {
+	title?: string;
+	description?: string;
+	url?: string;
+	color?: number;
+	timestamp?: string;
+	footer?: { text: string };
+	fields?: Array<{ name: string; value: string; inline?: boolean }>;
+}
+
+/**
+ * Publie un message dans un salon.
+ *
+ * C'est le PENDANT EN ÉCRITURE de {@link appelDiscord} : même jeton, mêmes
+ * en-têtes, même respect du `retry_after`. Elle existe pour que les alertes
+ * d'exploitation n'aient pas à monter un client discord.js — le démon en a
+ * déjà un, mais il n'est pas connecté en ligne de commande et la passerelle
+ * peut être tombée précisément quand l'alerte doit partir.
+ *
+ * Ne lève JAMAIS : une alerte qui plante le rapporteur d'alertes serait pire
+ * que pas d'alerte du tout. Rend `null` en cas d'échec, après l'avoir journalisé.
+ *
+ * `allowed_mentions` est forcé à « aucune mention » : un message d'alerte
+ * reprend un texte d'erreur arbitraire, qui pourrait contenir `@everyone`.
+ */
+export async function publierMessageDiscord(
+	salonId: string,
+	charge: { content?: string; embeds?: EncartDiscord[] },
+	tentative = 0
+): Promise<{ id: string } | null> {
+	try {
+		const reponse = await fetch(`${API_DISCORD}/channels/${salonId}/messages`, {
+			method: "POST",
+			headers: entetes({ "Content-Type": "application/json" }),
+			body: JSON.stringify({ ...charge, allowed_mentions: { parse: [] } }),
+			signal: AbortSignal.timeout(15_000),
+		});
+
+		if (reponse.status === 429 && tentative < TENTATIVES_429) {
+			const corps = (await reponse.json().catch(() => ({}))) as { retry_after?: number };
+			const attente = Math.ceil((corps.retry_after ?? 1) * 1000) + 250;
+			await Bun.sleep(attente);
+			return publierMessageDiscord(salonId, charge, tentative + 1);
+		}
+
+		if (reponse.status >= 500 && tentative < TENTATIVES_5XX) {
+			await Bun.sleep(1000 * (tentative + 1));
+			return publierMessageDiscord(salonId, charge, tentative + 1);
+		}
+
+		if (!reponse.ok) {
+			const texte = await reponse.text().catch(() => "");
+			console.warn(
+				`[Discord REST] publication refusée dans ${salonId} : ${reponse.status} ${texte.slice(0, 200)}`
+			);
+			return null;
+		}
+
+		return (await reponse.json()) as { id: string };
+	} catch (err) {
+		console.warn(
+			`[Discord REST] publication impossible dans ${salonId} :`,
+			err instanceof Error ? err.message : err
+		);
+		return null;
+	}
+}
+
 /**
  * Re-signe des URL de pièces jointes périmées.
  *
