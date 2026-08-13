@@ -20,6 +20,10 @@ const { data } = await supabase.from("profiles").select("*");
 
 ## Scripts
 
-- `types:gen` : Régénère les types TypeScript depuis l'instance Supabase distante.
+- `types:gen` : Régénère `src/types.gen.ts` depuis la base PostgreSQL **locale**
+  (`scripts/types-gen.ts` → générateur pg-meta sur `127.0.0.1:8813`, celui-là même
+  qu'appelait `supabase gen types typescript` avant la bascule self-host). Le
+  fichier produit est commité ; toute retouche à la main est effacée au prochain
+  passage, donc une correction de type se fait en base puis par régénération.
 - `type-check` : Vérifie la validité des types du package.
-- `test` : Lance les tests unitaires via Vitest.
+- `test` : Lance les tests unitaires (`bun test`).

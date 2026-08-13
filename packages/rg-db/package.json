@@ -21,9 +21,9 @@
 		"registry": "https://registry.npmjs.org"
 	},
 	"scripts": {
-		"types:gen": "supabase gen types typescript --project-id isbkaeltubqittywibeh > src/types.gen.ts",
+		"types:gen": "bun scripts/types-gen.ts",
 		"type-check": "tsc --noEmit",
-		"test": "vitest run"
+		"test": "bun test"
 	},
 	"dependencies": {
 		"@rosegriffon/types": "workspace:*",

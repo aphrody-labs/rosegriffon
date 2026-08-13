@@ -1,41 +1,41 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { beforeEach, describe, expect, it } from "bun:test";
 import { getAssetUrl } from "./storage";
 
 describe("getAssetUrl", () => {
-	const originalEnv = process.env;
+	const envOrigine = { ...process.env };
 
 	beforeEach(() => {
-		process.env = { ...originalEnv };
+		process.env = { ...envOrigine };
 		process.env.NEXT_PUBLIC_SUPABASE_URL = "https://test.supabase.co";
 	});
 
-	it("should return empty string if path is empty", () => {
+	it("rend une chaîne vide quand le chemin est vide", () => {
 		expect(getAssetUrl("")).toBe("");
 	});
 
-	it("should return absolute URLs as-is", () => {
+	it("laisse passer les URL absolues telles quelles", () => {
 		const url = "https://example.com/image.png";
 		expect(getAssetUrl(url)).toBe(url);
 	});
 
-	it("should return data URLs as-is", () => {
+	it("laisse passer les URL `data:` telles quelles", () => {
 		const url = "data:image/png;base64,123";
 		expect(getAssetUrl(url)).toBe(url);
 	});
 
-	it("should construct Supabase storage URL for relative paths", () => {
+	it("construit l'URL de stockage pour un chemin relatif", () => {
 		expect(getAssetUrl("logo.png")).toBe(
 			"https://test.supabase.co/storage/v1/object/public/assets/logo.png"
 		);
 	});
 
-	it("should handle leading slashes in relative paths", () => {
+	it("absorbe le slash de tête d'un chemin relatif", () => {
 		expect(getAssetUrl("/avatars/user.png")).toBe(
 			"https://test.supabase.co/storage/v1/object/public/assets/avatars/user.png"
 		);
 	});
 
-	it("should return path as-is if NEXT_PUBLIC_SUPABASE_URL is missing", () => {
+	it("rend le chemin inchangé quand NEXT_PUBLIC_SUPABASE_URL manque", () => {
 		delete process.env.NEXT_PUBLIC_SUPABASE_URL;
 		expect(getAssetUrl("logo.png")).toBe("logo.png");
 	});
