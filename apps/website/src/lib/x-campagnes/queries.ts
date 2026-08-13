@@ -239,6 +239,45 @@ function versPost(ligne: LigneCreation): PostCampagne {
 	};
 }
 
+/**
+ * Le salon de dépôt PUBLIC de la campagne, prêt à être ouvert.
+ *
+ * ── POURQUOI UNE REQUÊTE, ET PAS UNE CONSTANTE ─────────────────────────────
+ * L'identifiant du salon vit déjà dans `x_campagnes.salons_depot` ; ce qui
+ * manque pour en faire un lien, c'est la GUILDE — `discord.com/channels/` en a
+ * besoin, et elle n'est nulle part dans la campagne. On la lit dans
+ * `discord_channels`, c'est-à-dire là où la veille l'a écrite : une constante
+ * serait fausse le jour où l'association ouvre un second serveur.
+ *
+ * ⚠ `suivi` EST EXIGÉ. Un salon retiré de la veille n'est plus archivé : y
+ * envoyer un participant lui promettrait que sa création rejoindra la galerie,
+ * ce qui serait faux. Mieux vaut ne pas afficher le bouton.
+ */
+export async function lienDepotDiscord(
+	slug: string
+): Promise<{ url: string; nom: string | null } | null> {
+	try {
+		const { rows } = await getPgPool().query<{ channel_id: string; guild_id: string | null; name: string | null }>(
+			`select c.channel_id, c.guild_id, c.name
+			   from public.x_campagnes camp
+			   join public.discord_channels c on c.channel_id = any(camp.salons_depot)
+			  where camp.slug = $1 and camp.publiee and c.suivi and c.guild_id is not null
+			  order by c.position nulls last
+			  limit 1`,
+			[slug]
+		);
+		const ligne = rows[0];
+		if (!ligne?.guild_id) return null;
+		return {
+			nom: ligne.name,
+			url: `https://discord.com/channels/${ligne.guild_id}/${ligne.channel_id}`,
+		};
+	} catch (error) {
+		console.error("Erreur de lecture du salon de dépôt :", error);
+		return null;
+	}
+}
+
 /** Toutes les campagnes publiées — alimente le sélecteur de campagne. */
 export async function listerCampagnesPubliees(): Promise<Campagne[]> {
 	try {
