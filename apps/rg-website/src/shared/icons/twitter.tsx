@@ -1,3 +1,16 @@
+import { XIcon } from "@rosegriffon/ui";
+
+/**
+ * Logo X — RÉ-EXPORT, plus une seconde copie du tracé.
+ *
+ * Ce fichier dessinait le même `path` que `XIcon` de `@rosegriffon/ui`,
+ * caractère pour caractère. Deux copies, c'est deux occasions de diverger : le
+ * jour où la marque change son logo, l'une est corrigée et l'autre reste.
+ *
+ * La signature d'origine (`width`/`height` en nombres, export par défaut) est
+ * conservée telle quelle — cinq fichiers l'appellent ainsi, et les migrer
+ * n'apporterait rien de plus que ce ré-export.
+ */
 interface TwitterIconProps {
 	width?: number;
 	height?: number;
@@ -5,18 +18,5 @@ interface TwitterIconProps {
 }
 
 export default function TwitterIcon({ width, height, className }: TwitterIconProps) {
-	return (
-		<svg
-			role="img"
-			viewBox="0 0 24 24"
-			xmlns="http://www.w3.org/2000/svg"
-			width={width ?? 24}
-			height={height ?? 24}
-			className={className}
-			fill="currentColor"
-		>
-			<title>X</title>
-			<path d="M18.901 1.153h3.68l-8.04 9.19L24 22.846h-7.406l-5.8-7.584-6.638 7.584H.474l8.6-9.83L0 1.154h7.594l5.243 6.932ZM17.61 20.644h2.039L6.486 3.24H4.298Z" />
-		</svg>
-	);
+	return <XIcon title="X" width={width ?? 24} height={height ?? 24} className={className} />;
 }
