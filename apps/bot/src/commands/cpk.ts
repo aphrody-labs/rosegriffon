@@ -25,9 +25,13 @@
  *    `/model-full/ear001.glb` répond **404** : tous les modèles ne sont pas
  *    assemblables. La fiche SONDE avant d'annoncer quoi que ce soit.
  *  - `/cfg/<chemin>.json` peut peser **4 079 928 octets** → lecture bornée.
- *  - `/cfg/` et `/raw/` répondent **405** à une requête HEAD ; `/dx11/` et
- *    `/model-full/` l'acceptent. On ne sonde donc la taille que là où c'est
- *    possible, et on télécharge borné ailleurs.
+ *  - **HEAD ne suffit jamais à conclure.** `/cfg/`, `/raw/` et `/model-full/`
+ *    répondent **405** dès que nginx ne trouve pas le fichier sur disque :
+ *    `HEAD /model-full/c11010034.glb` → 405 alors que `GET` du même → 200,
+ *    `model/gltf-binary`, 70 936 octets. Seuls 5 655 des 15 533 codes de
+ *    modèle de l'index ont un GLB pré-posé ; conclure sur un 405 ferait donc
+ *    annoncer « pas de modèle » sur près des deux tiers de l'index. Le sondage
+ *    retombe donc sur un `GET` dont le corps est relâché (cf. `methodeRefusee`).
  */
 import { ButtonComponent, Discord, Slash, SlashGroup, SlashOption } from "@rpbey/discordx";
 import {
@@ -68,7 +72,9 @@ import {
 	ligneDossier,
 	ligneFichier,
 	ligneResultat,
+	liensContenu,
 	MAX_VALEUR_AUTOCOMPLETION,
+	methodeRefusee,
 	MOTIF_MINIMUM,
 	nombreDePages,
 	nomPieceJointe,
@@ -81,6 +87,7 @@ import {
 	resumerConfig,
 	tientEnPieceJointe,
 	tranchePage,
+	type ApercuCpk,
 	type CpkDir,
 	type CpkFile,
 } from "../lib/cpk-format";
@@ -93,8 +100,18 @@ const TTL_INDEX_MS = 10 * 60 * 1000;
 /** Durée de cache d'un sondage CDN (le décodage est en cache disque côté CDN). */
 const TTL_SONDE_MS = 10 * 60 * 1000;
 
-/** Délai maximal accordé au CDN — au-delà, on rend la fiche sans l'aperçu. */
+/** Délai maximal accordé au CDN pour une image ou une config — au-delà, on rend la fiche sans l'aperçu. */
 const DELAI_CDN_MS = 6_000;
+
+/**
+ * Délai accordé à l'assemblage d'un modèle 3D.
+ *
+ * Un GLB absent du disque est reconstruit depuis les CPK (géométrie + textures
+ * BC1-7 converties) : c'est sans commune mesure avec un décodage de texture, et
+ * 6 s suffiraient tout juste aux modèles déjà posés. `/cdn modele` retient le
+ * même budget. Discord laisse 15 min après `deferReply`, la marge est gratuite.
+ */
+const DELAI_MODELE_MS = 90_000;
 
 /**
  * Contraintes des appels d'autocomplétion.
@@ -190,7 +207,7 @@ async function totalIndexe(): Promise<number | null> {
 
 // ─── Sondage du CDN ─────────────────────────────────────────────────────────
 
-/** Ce qu'une requête HEAD sur le CDN apprend d'un contenu décodé. */
+/** Ce qu'un sondage d'en-têtes apprend d'un contenu décodé par le CDN. */
 interface SondeContenu {
 	statut: number;
 	octets: number | null;
@@ -198,24 +215,45 @@ interface SondeContenu {
 }
 
 /**
- * Sonde un contenu décodé par HEAD.
+ * Interroge une URL et n'en garde QUE les en-têtes.
  *
- * Réservé aux préfixes qui acceptent la méthode (`/dx11/`, `/model-full/`) :
- * `/cfg/` et `/raw/` renvoient 405, ce qui se lirait à tort comme « absent ».
+ * Le corps est relâché sans être lu : `content-length` et `content-type` sont
+ * déjà là, et un GLB froid ou un PNG de galerie pèsent plusieurs mégaoctets
+ * qu'il serait absurde de faire transiter pour afficher une taille.
  */
-async function sonderContenu(url: string): Promise<SondeContenu | null> {
+async function interrogerContenu(
+	url: string,
+	methode: "HEAD" | "GET",
+	delaiMs: number
+): Promise<SondeContenu> {
+	const reponse = await fetch(url, { method: methode, signal: AbortSignal.timeout(delaiMs) });
+	await reponse.body?.cancel().catch(() => undefined);
+	const longueur = Number.parseInt(reponse.headers.get("content-length") ?? "", 10);
+	return {
+		statut: reponse.status,
+		octets: Number.isFinite(longueur) ? longueur : null,
+		type: reponse.headers.get("content-type"),
+	};
+}
+
+/**
+ * Sonde un contenu décodé.
+ *
+ * On tente HEAD d'abord — c'est gratuit pour le CDN quand il l'accepte (une
+ * variante `?w=` répond 200 même à froid). Mais `/model-full/`, `/cfg/` et
+ * `/raw/` répondent **405** dès que nginx ne trouve pas le fichier sur disque :
+ * ce refus de MÉTHODE ne dit rien de l'existence du contenu, et le lire comme
+ * une absence ferait annoncer « pas de modèle » sur les deux tiers de l'index
+ * (mesuré : `HEAD /model-full/c11010034.glb` → 405, `GET` → 200, 70 936 o).
+ * On retombe donc sur un GET dont le corps est immédiatement relâché.
+ */
+async function sonderContenu(url: string, delaiMs = DELAI_CDN_MS): Promise<SondeContenu | null> {
 	try {
-		return await cached(`cpk:tete:${url}`, TTL_SONDE_MS, async () => {
-			const reponse = await fetch(url, {
-				method: "HEAD",
-				signal: AbortSignal.timeout(DELAI_CDN_MS),
-			});
-			const longueur = Number.parseInt(reponse.headers.get("content-length") ?? "", 10);
-			return {
-				statut: reponse.status,
-				octets: Number.isFinite(longueur) ? longueur : null,
-				type: reponse.headers.get("content-type"),
-			};
+		return await cached(`cpk:sonde:${url}`, TTL_SONDE_MS, async () => {
+			const tete = await interrogerContenu(url, "HEAD", delaiMs);
+			return methodeRefusee(tete.statut)
+				? await interrogerContenu(url, "GET", delaiMs)
+				: tete;
 		});
 	} catch {
 		return null;
@@ -481,16 +519,18 @@ async function garnirImage(embed: EmbedBuilder, image: string, original: string)
 /** Aperçu d'un modèle : pièce jointe si elle tient, lien sinon. */
 async function garnirModele(
 	embed: EmbedBuilder,
-	glb: string
+	apercu: ApercuCpk
 ): Promise<AttachmentBuilder | null> {
-	const sonde = await sonderContenu(glb);
+	const glb = apercu.contenu;
+	const sonde = await sonderContenu(glb, DELAI_MODELE_MS);
 	if (sonde === null || sonde.statut !== 200) {
 		embed.addFields({
 			name: "Modèle 3D",
 			value: [
-				"Ce modèle n'est pas assemblable en glTF complet (visage, uniforme ou accessoire",
+				"Ce fichier n'est pas assemblable en glTF complet (visage, uniforme ou accessoire",
 				"servi seul) — le CDN répond en échec sur `/model-full/`.",
-				"Le navigateur du wiki sait, lui, l'assembler dans le viewer 3D.",
+				"Le navigateur du wiki sait, lui, l'assembler dans son viewer 3D.",
+				`[Octets bruts du CPK](${apercu.brut})`,
 			].join("\n"),
 		});
 		return null;
@@ -498,7 +538,7 @@ async function garnirModele(
 
 	const taille = octetsLisibles(sonde.octets);
 	if (sonde.octets !== null && tientEnPieceJointe(sonde.octets)) {
-		const octets = await telechargerBorne(glb);
+		const octets = await telechargerBorne(glb, DELAI_MODELE_MS);
 		if (octets !== null) {
 			embed.addFields({
 				name: "Modèle 3D",
@@ -547,9 +587,9 @@ async function garnirConfig(embed: EmbedBuilder, json: string): Promise<void> {
 }
 
 /** Télécharge un contenu en refusant tout ce qui dépasse le seuil de pièce jointe. */
-async function telechargerBorne(url: string): Promise<Buffer | null> {
+async function telechargerBorne(url: string, delaiMs = DELAI_CDN_MS): Promise<Buffer | null> {
 	try {
-		const reponse = await fetch(url, { signal: AbortSignal.timeout(DELAI_CDN_MS) });
+		const reponse = await fetch(url, { signal: AbortSignal.timeout(delaiMs) });
 		if (!reponse.ok) {
 			return null;
 		}
@@ -718,17 +758,11 @@ export class CpkCommand {
 			if (apercu.famille === "image" && apercu.image !== null) {
 				await garnirImage(embed, apercu.image, apercu.contenu);
 			} else if (apercu.modele3d) {
-				piece = await garnirModele(embed, apercu.contenu);
+				piece = await garnirModele(embed, apercu);
 			} else if (apercu.configJson) {
 				await garnirConfig(embed, apercu.contenu);
 			} else {
-				embed.addFields({
-					name: "Contenu",
-					value: [
-						`[${apercu.libelle} décodé par le CDN](${apercu.contenu})`,
-						`[Octets bruts du CPK](${apercu.brut})`,
-					].join("\n"),
-				});
+				embed.addFields({ name: "Contenu", value: truncate(liensContenu(apercu), 1_000) });
 			}
 
 			const total = await totalIndexe();

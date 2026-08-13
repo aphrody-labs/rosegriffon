@@ -27,7 +27,9 @@ import {
 	ligneDossier,
 	ligneFichier,
 	ligneResultat,
+	liensContenu,
 	MAX_CUSTOM_ID,
+	methodeRefusee,
 	nombreDePages,
 	nomPieceJointe,
 	normaliserChemin,
@@ -410,6 +412,57 @@ describe("apercuCpk", () => {
 		expect(apercu.brut).toBe(
 			"https://cdn.rosegriffon.fr/raw/data/common/event/ev60/ev60_10080/ev60_10080.g4pk"
 		);
+	});
+});
+
+describe("methodeRefusee", () => {
+	test("un 405 dit « méthode refusée », jamais « contenu absent »", () => {
+		// Relevé décisif du 13/8/2026 :
+		//   HEAD https://cdn.rosegriffon.fr/model-full/c11010034.glb → 405
+		//   GET  https://cdn.rosegriffon.fr/model-full/c11010034.glb → 200,
+		//        model/gltf-binary, 70 936 octets.
+		// Conclure sur le HEAD annoncerait « pas de modèle » pour un modèle qui
+		// existe — et ce cas couvre 9 878 des 15 533 codes de modèle de l'index,
+		// ceux dont le GLB n'est pas déjà posé dans le cache disque de nginx.
+		expect(methodeRefusee(405)).toBe(true);
+		expect(methodeRefusee(501)).toBe(true);
+	});
+
+	test("un 404 et un 200 restent des réponses sur le contenu", () => {
+		// `/model-full/ear001.glb` → 404 : celui-là n'est réellement pas assemblable.
+		expect(methodeRefusee(404)).toBe(false);
+		expect(methodeRefusee(200)).toBe(false);
+		expect(methodeRefusee(500)).toBe(false);
+	});
+});
+
+describe("liensContenu", () => {
+	test("un format sans décodeur n'annonce qu'un seul lien", () => {
+		// `.g4pk` : `contenu` vaut `brut` (mesuré : /raw/data/common/map/w/w90i001/
+		// cam/cam.g4pk → 200, 1 664 octets). Deux libellés pour la même URL
+		// laisseraient croire à un décodage qui n'existe pas.
+		const apercu = apercuCpk({ path: "data/common/map/w/w90i001/cam/cam.g4pk", ext: "g4pk" });
+		const lignes = liensContenu(apercu);
+		expect(lignes).toContain("https://cdn.rosegriffon.fr/raw/data/common/map/w/w90i001/cam/cam.g4pk");
+		expect(lignes.split("https://").length - 1).toBe(1);
+		expect(lignes).toContain("Aucun décodeur");
+	});
+
+	test("un format décodé montre le décodage ET les octets bruts", () => {
+		// Vidéo : /video/data/common/movie/ev01_00050.usm → 200 video/mp4.
+		const apercu = apercuCpk({ path: "data/common/movie/ev01_00050.usm", ext: "usm" });
+		const lignes = liensContenu(apercu);
+		expect(lignes).toContain("https://cdn.rosegriffon.fr/video/data/common/movie/ev01_00050.usm");
+		expect(lignes).toContain("https://cdn.rosegriffon.fr/raw/data/common/movie/ev01_00050.usm");
+		expect(lignes).toContain("Vidéo");
+	});
+
+	test("le bloc tient dans un champ d'embed", () => {
+		const apercu = apercuCpk({
+			path: `data/common/event/${"x".repeat(180)}.g4pk`,
+			ext: "g4pk",
+		});
+		expect(liensContenu(apercu).length).toBeLessThanOrEqual(1_024);
 	});
 });
 

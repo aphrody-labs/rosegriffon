@@ -31,10 +31,37 @@
  *     redémarrage tombé entre l'envoi et l'écriture du curseur, ne produisent
  *     pas deux annonces. Le booléen `drainEnCours` ne protège, lui, que d'un
  *     seul processus — il ne suffit pas.
+ *
+ * ── UN DRAIN PAR PROFIL, ET SEULEMENT UN ───────────────────────────────────
+ * Le même programme sert deux serveurs sous deux identités Discord : profil
+ * `rg` (Rose Griffon) et profil `azalee`. Chacun annonce les mêmes posts, mais
+ * dans SON salon, sur SON serveur — et surtout derrière SON curseur
+ * (`AnnoncePosts.curseur`, une ligne par profil dans
+ * `tweet_notification_curseurs`, table clefée par `canal`).
+ *
+ * Les quatre verrous ci-dessus restent entiers PAR PROFIL, et rien n'est
+ * partagé entre profils :
+ *   - le curseur est une ligne distincte, donc un profil ne consomme jamais les
+ *     posts de l'autre et ne peut pas le faire taire ;
+ *   - l'amorce à `now()` vaut aussi pour un canal neuf : le premier démarrage
+ *     d'Azalée part de son propre présent, sans rejouer l'archive ni ce que
+ *     Rose Griffon a déjà publié ;
+ *   - l'échange-comparaison porte sur `(canal, curseur_le)` : il départage deux
+ *     drains du même profil et ignore l'autre ;
+ *   - le `nonce` est comparé par salon : deux profils publient dans deux salons
+ *     distincts, la déduplication de l'un ne peut pas supprimer l'annonce de
+ *     l'autre.
+ *
+ * Le salon et le nom du curseur viennent du REGISTRE DE PROFILS
+ * (`lib/profil.ts`), jamais d'une constante écrite ici : ce fichier ne connaît
+ * aucun identifiant de salon, et le registre reste le seul endroit où l'on
+ * regarde pour savoir qui publie où.
  */
 import type { Client, EmbedBuilder, SendableChannels } from "discord.js";
 
-import { abonnerCron } from "../lib/cron-ipc";
+// Type seulement : l'import est erasé à la compilation, le pont cron n'entre
+// donc PAS dans le graphe de ce module (voir l'import paresseux plus bas).
+import type { EvenementIpc } from "../lib/cron-ipc";
 import { rgEmbed } from "../lib/embeds";
 import {
 	corpsTweet,
@@ -51,11 +78,15 @@ import {
 } from "../lib/tweets-format";
 import {
 	CANAL_NOTIFICATION,
+	annonceHistorique,
 	assurerCurseur,
 	avancerCurseur,
 	lireCurseur,
 	lireFiltreNotification,
+	normaliserCanal,
+	salonAnnonce,
 	tweetsAPublier,
+	type AnnoncePosts,
 } from "./tweets";
 
 /** Rattrapage périodique — la garantie, indépendante de toute poussée. */
@@ -86,6 +117,86 @@ let drainEnCours = false;
 let minuteurFilet: ReturnType<typeof setInterval> | null = null;
 let minuteurSignal: ReturnType<typeof setTimeout> | null = null;
 let couperAbonnement: (() => void) | null = null;
+/** Dernier message d'exception journalisé — évite d'écrire la même pile toutes les 5 min. */
+let derniereErreur: string | null = null;
+
+/**
+ * Le profil qui annonce, tel que le registre `lib/profil.ts` le décrit.
+ *
+ * On prend le PROFIL, pas son salon : `annoncePosts` absent veut dire « ce
+ * profil n'annonce rien », et c'est une information que le salon seul ne peut
+ * pas porter. Passer `profil.annoncePosts` avec un `?? annonceHistorique()`
+ * oublié quelque part enverrait le bot Azalée publier dans le salon de Rose
+ * Griffon ; passer le profil rend ce contresens impossible à écrire.
+ *
+ * Le type n'est qu'un sous-ensemble structurel du profil complet : ce module
+ * n'importe pas le registre, et le registre n'importe pas ce module.
+ */
+export interface ProfilAnnonceur {
+	/** Nom du profil (`rg`, `azalee`) — sert au journal, rien d'autre. */
+	readonly nom?: string;
+	/** Salon + curseur d'annonce. Absent ou `null` = ce profil n'annonce pas. */
+	readonly annoncePosts?: AnnoncePosts | null;
+}
+
+/** États dont la cause DURE : les rejournaliser à chaque tour noierait le journal. */
+const ETATS_PERSISTANTS: ReadonlySet<EtatDrain> = new Set<EtatDrain>([
+	"sans-salon",
+	"echec",
+	"concurrent",
+]);
+
+export interface TraceJournal {
+	/** Ligne à écrire, ou `null` pour rester muet ce tour-ci. */
+	ligne: string | null;
+	/** Empreinte à mémoriser pour le tour suivant (`null` = état nominal). */
+	empreinte: string | null;
+	niveau: "info" | "warn";
+}
+
+/**
+ * Décide ce qu'un tour de drain met dans le journal — fonction PURE.
+ *
+ * Le cas normal d'un premier démarrage est « le bot n'est pas encore invité sur
+ * la guilde Azalée », donc `sans-salon` à chaque tour, indéfiniment. Le dire
+ * une fois est un diagnostic ; le dire toutes les 5 minutes est une panne de
+ * journal — et ça enterre les lignes qui comptent.
+ *
+ * La règle : un état persistant n'est écrit que lorsque sa cause CHANGE
+ * (l'empreinte porte l'état ET son détail), et le retour à la normale est
+ * signalé une fois, pour qu'un silence ne se lise jamais comme un oubli.
+ */
+export function ligneJournal(
+	resultat: ResultatDrain,
+	contexte: { origine: string; canal: string },
+	precedent: string | null
+): TraceJournal {
+	const detail = resultat.detail ? ` — ${resultat.detail}` : "";
+	const base = `[tweets:${contexte.canal}] drain (${contexte.origine}) : ${resultat.etat}, ${resultat.publies}/${resultat.candidats}${detail}`;
+
+	if (ETATS_PERSISTANTS.has(resultat.etat)) {
+		const empreinte = `${resultat.etat}|${resultat.detail ?? ""}`;
+		if (empreinte === precedent) {
+			return { ligne: null, empreinte, niveau: "warn" };
+		}
+		return {
+			ligne: `${base} (répétition silencieuse tant que la cause dure)`,
+			empreinte,
+			niveau: "warn",
+		};
+	}
+
+	const reprise = precedent !== null;
+	const digneDeTrace = resultat.publies > 0 || resultat.etat === "amorce";
+	if (!reprise && !digneDeTrace) {
+		return { ligne: null, empreinte: null, niveau: "info" };
+	}
+	return {
+		ligne: reprise ? `${base} — la cause du blocage précédent a disparu.` : base,
+		empreinte: null,
+		niveau: "info",
+	};
+}
 
 /** Embed d'un tweet : traduction en tête, lien vers l'original, image, métriques. */
 export function embedTweet(tweet: LigneTweet): EmbedBuilder {
@@ -137,6 +248,23 @@ export function embedResume(tweets: LigneTweet[], filtre: FiltreTweets): EmbedBu
 }
 
 /**
+ * Dernier refus journalisé, par salon.
+ *
+ * Un salon injoignable est le cas NORMAL au premier démarrage d'un profil : le
+ * bot Azalée n'est pas encore invité sur sa guilde, donc `channels.fetch` lève
+ * à chaque tour du filet. On garde le diagnostic, on supprime la boucle.
+ */
+const refusParSalon = new Map<string, string>();
+
+function journaliserRefus(salonId: string, raison: string): void {
+	if (refusParSalon.get(salonId) === raison) {
+		return;
+	}
+	refusParSalon.set(salonId, raison);
+	console.warn(`[tweets] ${raison} (répétition silencieuse tant que la cause dure)`);
+}
+
+/**
  * Résout le salon de destination, et dit POURQUOI quand ça échoue.
  *
  * Le cas mesuré n'est pas théorique : `DISCORD_NEWS_CHANNEL_ID` pointe sur un
@@ -144,6 +272,11 @@ export function embedResume(tweets: LigneTweet[], filtre: FiltreTweets): EmbedBu
  * pas été ajouté → l'API répond `50001 Missing Access`. Sans explication, le
  * symptôme se lit « la notification ne marche pas », alors que c'est un droit
  * Discord à donner au bot, pas une ligne de code à changer.
+ *
+ * Le second profil ajoute un cas tout aussi ordinaire : `10003 Unknown Channel`
+ * tant que le bot Azalée n'a pas été autorisé sur sa guilde. La raison est donc
+ * toujours RENVOYÉE à l'appelant (qui l'affiche ou la résume), mais elle n'est
+ * écrite au journal qu'au premier passage et à chaque changement de cause.
  */
 export async function resoudreSalon(
 	client: Client,
@@ -152,38 +285,63 @@ export async function resoudreSalon(
 	try {
 		const salon = await client.channels.fetch(salonId);
 		if (salon?.isSendable()) {
+			refusParSalon.delete(salonId);
 			return { salon };
 		}
 		const raison = `Le salon ${salonId} existe mais le bot ne peut pas y écrire (salon non textuel, ou permission « Envoyer des messages » absente).`;
-		console.warn(`[tweets] ${raison}`);
+		journaliserRefus(salonId, raison);
 		return { salon: null, raison };
 	} catch (err) {
 		const message = err instanceof Error ? err.message : String(err);
 		const droits = /missing access|50001/i.test(message)
 			? " — le bot ne voit pas ce salon : donne à son rôle la permission « Voir le salon » (et « Envoyer des messages ») dessus."
-			: "";
+			: /unknown channel|10003/i.test(message)
+				? " — salon inconnu de ce bot : il n'est probablement pas encore invité sur le serveur du profil (URL OAuth2), ou l'identifiant du registre de profils est faux."
+				: "";
 		const raison = `Salon ${salonId} injoignable (${message})${droits}`;
-		console.warn(`[tweets] ${raison}`);
+		journaliserRefus(salonId, raison);
 		return { salon: null, raison };
 	}
 }
 
 /**
- * Draine le curseur une fois. Idempotent : deux appels simultanés ne publient
- * jamais deux fois (garde `drainEnCours` + curseur avancé après l'envoi).
+ * Draine le curseur d'UN profil, une fois. Idempotent : deux appels simultanés
+ * ne publient jamais deux fois (garde `drainEnCours` + curseur avancé après
+ * l'envoi).
  *
  * @param options.salonForce salon de destination imposé (`/tweets test`).
  * @param options.simulation ne publie pas et n'avance PAS le curseur.
+ * @param options.annonce    salon + curseur du profil ; à défaut, le profil
+ *                           historique (Rose Griffon), pour que les appelants
+ *                           mono-profil (`/tweets test`, `/staff veille`)
+ *                           gardent exactement leur comportement.
  */
 export async function drainerTweets(
 	client: Client,
-	options: { salonForce?: string; simulation?: boolean } = {}
+	options: { salonForce?: string; simulation?: boolean; annonce?: AnnoncePosts } = {}
 ): Promise<ResultatDrain> {
 	if (drainEnCours) {
 		return { etat: "concurrent", candidats: 0, publies: 0 };
 	}
 	drainEnCours = true;
+	let echecCeTour = false;
 	try {
+		const annonce = options.annonce ?? annonceHistorique();
+		// Le nom du curseur est une CLÉ PRIMAIRE : un registre mal rempli doit
+		// s'arrêter net, pas insérer une ligne fantôme que le prochain démarrage
+		// ne retrouverait pas — ce serait une amorce à chaque redémarrage, donc
+		// des posts perdus en silence.
+		const canal = normaliserCanal(annonce.curseur);
+		if (!canal) {
+			return {
+				etat: "echec",
+				candidats: 0,
+				publies: 0,
+				detail:
+					`Nom de curseur inutilisable (« ${annonce.curseur} ») : corrige \`annoncePosts.curseur\` ` +
+					"dans le registre de profils (minuscules, chiffres, `-` ou `_`, 32 caractères au plus).",
+			};
+		}
 		const filtre = await lireFiltreNotification();
 		if (!filtre.actif && !options.simulation) {
 			return { etat: "inactif", candidats: 0, publies: 0 };
@@ -192,16 +350,13 @@ export async function drainerTweets(
 		// ⚠ En simulation, AUCUNE écriture — pas même la création du curseur, qui
 		// est une écriture de production : `/tweets test` affirme « le curseur n'a
 		// pas bougé », cette affirmation doit rester vraie.
-		const curseur = options.simulation
-			? await lireCurseur(CANAL_NOTIFICATION)
-			: await assurerCurseur(CANAL_NOTIFICATION);
+		const curseur = options.simulation ? await lireCurseur(canal) : await assurerCurseur(canal);
 		if (!curseur) {
 			return {
 				etat: "amorce",
 				candidats: 0,
 				publies: 0,
-				detail:
-					"Aucun curseur en base : il sera créé à `now()` au premier drain réel, sans rejouer l'archive.",
+				detail: `Aucun curseur « ${canal} » en base : il sera créé à \`now()\` au premier drain réel, sans rejouer l'archive.`,
 			};
 		}
 		if (curseur.cree) {
@@ -209,7 +364,7 @@ export async function drainerTweets(
 				etat: "amorce",
 				candidats: 0,
 				publies: 0,
-				detail: `Curseur initialisé à ${curseur.curseurLe.toISOString()} — l'archive ne sera pas rejouée.`,
+				detail: `Curseur « ${canal} » initialisé à ${curseur.curseurLe.toISOString()} — ni l'archive ni l'arriéré ne seront rejoués.`,
 			};
 		}
 
@@ -219,13 +374,16 @@ export async function drainerTweets(
 			return { etat: "rien", candidats: 0, publies: 0 };
 		}
 
-		const salonId = options.salonForce ?? filtre.salon ?? Bun.env.DISCORD_NEWS_CHANNEL_ID ?? "";
+		const salonId = options.salonForce ?? salonAnnonce(annonce, filtre) ?? "";
 		if (salonId.length === 0) {
 			return {
 				etat: "sans-salon",
 				candidats: candidats.length,
 				publies: 0,
-				detail: "Aucun salon configuré (`settings['tweets.notification'].salon` ni `DISCORD_NEWS_CHANNEL_ID`).",
+				detail:
+					canal === CANAL_NOTIFICATION
+						? "Aucun salon configuré (`settings['tweets.notification'].salon`, `DISCORD_NEWS_CHANNEL_ID`, ni `annoncePosts.salon` du profil)."
+						: `Aucun salon d'annonce pour le profil au curseur « ${canal} » : renseigne \`annoncePosts.salon\` dans le registre de profils.`,
 			};
 		}
 		const { salon, raison } = await resoudreSalon(client, salonId);
@@ -246,7 +404,7 @@ export async function drainerTweets(
 
 		if (retenus.length === 0) {
 			if (!options.simulation) {
-				await avancerCurseur(CANAL_NOTIFICATION, attendu, borneFinale, dernier.id, 0);
+				await avancerCurseur(canal, attendu, borneFinale, dernier.id, 0);
 			}
 			return { etat: "rien", candidats: candidats.length, publies: 0 };
 		}
@@ -258,7 +416,7 @@ export async function drainerTweets(
 					enforceNonce: true,
 					nonce: nonceLot(dernier.id),
 				});
-				await avancerCurseur(CANAL_NOTIFICATION, attendu, borneFinale, dernier.id, retenus.length);
+				await avancerCurseur(canal, attendu, borneFinale, dernier.id, retenus.length);
 			}
 			return { etat: "resume", candidats: candidats.length, publies: retenus.length };
 		}
@@ -284,12 +442,12 @@ export async function drainerTweets(
 				// republié après un redémarrage tombé entre l'envoi et l'écriture du
 				// curseur — la seule fenêtre de doublon qui restait.
 				await salon.send({ embeds: lot, enforceNonce: true, nonce: nonceLot(idBorne, index) });
-				const avance = await avancerCurseur(CANAL_NOTIFICATION, attendu, borne, idBorne, lot.length);
+				const avance = await avancerCurseur(canal, attendu, borne, idBorne, lot.length);
 				if (!avance) {
 					// Un autre drain a bougé le curseur pendant l'envoi : on s'arrête là
 					// plutôt que d'écraser sa position et de tout ré-annoncer.
 					console.warn(
-						`[tweets] curseur déplacé par un autre drain — arrêt après ${consommes}/${retenus.length} posts.`
+						`[tweets:${canal}] curseur déplacé par un autre drain — arrêt après ${consommes}/${retenus.length} posts.`
 					);
 					return { etat: "concurrent", candidats: candidats.length, publies: consommes };
 				}
@@ -301,51 +459,120 @@ export async function drainerTweets(
 
 		return { etat: "publie", candidats: candidats.length, publies };
 	} catch (err) {
-		console.error("[tweets] drain en échec :", err);
-		return {
-			etat: "echec",
-			candidats: 0,
-			publies: 0,
-			detail: err instanceof Error ? err.message : String(err),
-		};
+		// Une panne qui dure (base injoignable) revient à CHAQUE tour du filet :
+		// la trace complète n'est écrite qu'au premier passage, puis tant que la
+		// cause change. Sans ça, cinq minutes suffisent à noyer le journal du
+		// service sous la même pile d'appels.
+		const message = err instanceof Error ? err.message : String(err);
+		echecCeTour = true;
+		if (message !== derniereErreur) {
+			derniereErreur = message;
+			console.error("[tweets] drain en échec :", err);
+		}
+		return { etat: "echec", candidats: 0, publies: 0, detail: message };
 	} finally {
+		if (!echecCeTour) {
+			derniereErreur = null;
+		}
 		drainEnCours = false;
 	}
 }
 
 /**
- * Démarre le notifieur : amorce du curseur, filet de 5 minutes, abonnement aux
- * poussées du cron. Renvoie la fonction d'arrêt.
+ * Démarre le notifieur DU PROFIL COURANT : amorce du curseur, filet de
+ * 5 minutes, abonnement aux poussées du cron. Renvoie la fonction d'arrêt.
+ *
+ * @param profil profil issu de `lib/profil.ts`. Omis = profil historique (Rose
+ *   Griffon), pour que l'appel d'origine garde son sens. Fourni SANS
+ *   `annoncePosts` = ce profil n'annonce pas : rien ne démarre, et c'est dit
+ *   une seule fois.
  */
-export function demarrerNotifieurTweets(client: Client): () => void {
+export function demarrerNotifieurTweets(client: Client, profil?: ProfilAnnonceur): () => void {
+	const nom = profil?.nom ?? "rg";
+	const annonce = profil === undefined ? annonceHistorique() : (profil.annoncePosts ?? null);
+
+	// Aucun salon d'annonce : c'est un choix de configuration valable (un profil
+	// peut n'exposer que des commandes). On ne lance donc NI minuteur NI
+	// abonnement — sans quoi le journal répéterait « sans-salon » toutes les cinq
+	// minutes pour un bot qui n'a jamais eu à publier.
+	if (!annonce) {
+		console.info(
+			`[tweets] profil « ${nom} » : aucun salon d'annonce dans le registre (\`annoncePosts\` absent) — notifieur non démarré, aucun post ne sera publié.`
+		);
+		return () => {};
+	}
+
+	const canal = normaliserCanal(annonce.curseur);
+	if (!canal) {
+		// Refuser de démarrer plutôt que d'écrire une clé primaire douteuse : un
+		// curseur qu'on ne sait pas relire, c'est une amorce à chaque redémarrage,
+		// donc des posts silencieusement perdus.
+		console.warn(
+			`[tweets] profil « ${nom} » : \`annoncePosts.curseur\` inutilisable (« ${annonce.curseur} ») — notifieur non démarré. Attendu : minuscules, chiffres, \`-\` ou \`_\`, 32 caractères au plus.`
+		);
+		return () => {};
+	}
+
+	console.info(
+		`[tweets:${canal}] notifieur démarré pour le profil « ${nom} » — salon ${
+			annonce.salon.trim().length > 0 ? annonce.salon.trim() : "issu du réglage partagé"
+		}, filet toutes les ${Math.round(INTERVALLE_FILET_MS / 60_000)} min.`
+	);
+
+	// Mémoire de la dernière cause journalisée : c'est elle qui transforme une
+	// boucle d'erreurs en une seule ligne suivie d'un silence.
+	let empreinteJournal: string | null = null;
+
 	const drainer = (origine: string): void => {
 		void (async () => {
-			const resultat = await drainerTweets(client);
-			// Un drain qui ne trouve rien est le cas nominal : le journaliser toutes
-			// les 5 minutes noierait le journal du service. Un échec, un salon
-			// injoignable ou une collision, eux, doivent laisser une trace.
-			if (
-				resultat.publies > 0 ||
-				resultat.etat === "amorce" ||
-				resultat.etat === "sans-salon" ||
-				resultat.etat === "echec" ||
-				resultat.etat === "concurrent"
-			) {
-				const detail = resultat.detail ? ` — ${resultat.detail}` : "";
-				console.info(
-					`[tweets] drain (${origine}) : ${resultat.etat}, ${resultat.publies}/${resultat.candidats}${detail}`
-				);
+			const resultat = await drainerTweets(client, { annonce });
+			const trace = ligneJournal(resultat, { origine, canal }, empreinteJournal);
+			empreinteJournal = trace.empreinte;
+			if (trace.ligne) {
+				if (trace.niveau === "warn") {
+					console.warn(trace.ligne);
+				} else {
+					console.info(trace.ligne);
+				}
 			}
 		})();
 	};
 
-	// Amorce immédiate : crée le curseur à `now()` si la table est vierge, pour
-	// que le tout premier drain réel ne puisse jamais rattraper l'archive.
+	// Amorce immédiate : crée la ligne de curseur de CE profil à `now()` si elle
+	// n'existe pas, pour que son tout premier drain réel ne puisse jamais
+	// rattraper l'archive — ni l'arriéré déjà annoncé par l'autre profil.
 	drainer("démarrage");
 
 	minuteurFilet = setInterval(() => drainer("filet"), INTERVALLE_FILET_MS);
 
-	couperAbonnement = abonnerCron((evenement) => {
+	// Le signal du cron dit « de nouveaux posts sont en base », pas « publie
+	// ceci » : les deux profils peuvent l'écouter sans se marcher dessus, chacun
+	// drainant ensuite son propre curseur.
+	//
+	// ⚠ Import PARESSEUX, et c'est délibéré. `lib/cron-ipc` fige le chemin de sa
+	// socket (`RG_CRON_SOCKET`) au moment où il est chargé : le faire entrer dans
+	// le graphe de tout module qui importe seulement `resoudreSalon` (trois
+	// commandes le font) fixait ce chemin bien avant qu'un notifieur en ait
+	// besoin. On ne charge donc le pont qu'ici, au seul moment où on s'y abonne.
+	let abandonne = false;
+	void import("../lib/cron-ipc")
+		.then(({ abonnerCron }) => {
+			// L'arrêt a pu être demandé pendant le chargement : ne pas ouvrir une
+			// socket que plus personne ne fermera.
+			if (abandonne) {
+				return;
+			}
+			couperAbonnement = abonnerCron(surEvenementCron);
+		})
+		.catch((err: unknown) => {
+			// Le pont est une OPTIMISATION (réactivité) : sans lui, le filet de
+			// 5 minutes garantit toujours l'annonce. On le dit, et on continue.
+			console.warn(
+				`[tweets:${canal}] pont cron indisponible (${err instanceof Error ? err.message : String(err)}) — seul le filet de rattrapage reste actif.`
+			);
+		});
+
+	function surEvenementCron(evenement: EvenementIpc): void {
 		// `task.done` est la réponse différée d'un `/cron lancer` : le pont ne sait
 		// pas dans quel salon la commande a été tapée (et le jeton d'interaction
 		// peut avoir expiré), donc le verdict va au journal, d'où `/cron statut` le
@@ -368,9 +595,10 @@ export function demarrerNotifieurTweets(client: Client): () => void {
 			minuteurSignal = null;
 			drainer("signal");
 		}, DELAI_APRES_SIGNAL_MS);
-	});
+	}
 
 	return () => {
+		abandonne = true;
 		if (minuteurFilet) {
 			clearInterval(minuteurFilet);
 			minuteurFilet = null;

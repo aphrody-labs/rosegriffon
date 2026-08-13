@@ -123,6 +123,18 @@ const DELAI_MODELE_MS = 90_000;
 /** Vignette d'aperçu d'un modèle : la plus petite largeur servie suffit. */
 const LARGEUR_APERCU: LargeurVariante = 200;
 
+/**
+ * Budget d'un appel d'AUTOCOMPLÉTION à l'API Azalée.
+ *
+ * Discord n'accorde que 3 s à une suggestion, alors que le client partagé de
+ * `lib/azalee.ts` est calibré sur la rotation nocturne d'`azalee-api.service`
+ * (4 tentatives × 8 s, plus les attentes entre essais → plus de 30 s au pire).
+ * Sans ce plafond, une API lente laisserait le champ figé sur « chargement… »
+ * jusqu'à ce que Discord abandonne. Une suggestion ratée n'a aucune
+ * conséquence : le membre peut taper le chemin ou le code à la main.
+ */
+const APPEL_AUTOCOMPLETION = { attempts: 1, timeoutMs: 1_500 } as const;
+
 /** Choix de largeur proposés par `/cdn image` — la liste fermée du service. */
 const CHOIX_LARGEUR = LARGEURS_VARIANTE.map((largeur) => ({
 	name: `${largeur} px`,
@@ -257,7 +269,10 @@ interface EntreeCpk {
  */
 async function suggererTextures(texte: string): Promise<Array<{ name: string; value: string }>> {
 	const requete = texte.trim().length >= 2 ? texte.trim() : "220_img/";
-	const fichiers = (await azalee().cpkSearch({ q: requete, limit: 120 })) as EntreeCpk[];
+	const fichiers = (await azalee().cpkSearch(
+		{ q: requete, limit: 120 },
+		APPEL_AUTOCOMPLETION
+	)) as EntreeCpk[];
 	const propositions: Array<{ name: string; value: string }> = [];
 	for (const fichier of fichiers) {
 		const chemin = cheminCdnDepuisCpk(fichier.path);
@@ -296,10 +311,10 @@ async function suggererCodesModele(texte: string): Promise<Array<{ name: string;
 	const propre = texte.trim();
 
 	if (/^k/i.test(propre)) {
-		const fichiers = (await azalee().cpkSearch({
-			q: propre.length >= 2 ? propre : "chr/_k",
-			limit: 200,
-		})) as EntreeCpk[];
+		const fichiers = (await azalee().cpkSearch(
+			{ q: propre.length >= 2 ? propre : "chr/_k", limit: 200 },
+			APPEL_AUTOCOMPLETION
+		)) as EntreeCpk[];
 		const codes = new Set<string>();
 		for (const fichier of fichiers) {
 			const dossier = (fichier.path ?? "").match(/chr\/_(?:keshin|armd)\/(k[a-z]?[0-9]+)\//i);
@@ -316,7 +331,10 @@ async function suggererCodesModele(texte: string): Promise<Array<{ name: string;
 		}));
 	}
 
-	const liste = await azalee().characters({ q: propre || "a", limit: 25 } as never);
+	const liste = await azalee().characters(
+		{ q: propre || "a", limit: 25 } as never,
+		APPEL_AUTOCOMPLETION
+	);
 	return (liste.data as unknown as EntreePerso[])
 		.filter((perso) => typeof perso.internalCode === "string" && perso.internalCode.length > 0)
 		.map((perso) => ({
@@ -722,7 +740,17 @@ export class CdnCommand {
 	})
 	async etat(interaction: ChatInputCommandInteraction) {
 		await interaction.deferReply();
+		try {
+			await interaction.editReply(await this.rendreEtat());
+		} catch (err) {
+			// Sans ce filet, une panne inattendue laisserait l'interaction sur
+			// « réfléchit… » pendant quinze minutes, sans un mot d'explication.
+			await interaction.editReply({ content: `❌ ${messageErreurReseau(err)}` });
+		}
+	}
 
+	/** Construit l'embed d'état, sondes comprises. */
+	private async rendreEtat(): Promise<{ embeds: EmbedBuilder[] }> {
 		const [sondes, sante, sonde] = await Promise.all([
 			sonderServices([SERVICES.cdn, SERVICES["cdn-variantes"]]),
 			this.santeCdn(),
@@ -757,7 +785,7 @@ export class CdnCommand {
 			value: truncate(sonde, 1000),
 		});
 
-		await interaction.editReply({ embeds: [embed] });
+		return { embeds: [embed] };
 	}
 
 	/** Charges de santé des deux services, telles qu'ils les renvoient. */

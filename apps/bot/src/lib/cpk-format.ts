@@ -26,8 +26,10 @@
  *     404. Tous les modèles ne sont pas assemblables : la fiche doit sonder.
  *   - `/cfg/<chemin>.json` répond 200 mais peut peser 4 079 928 o
  *     (`chara_param_1.03.66.00.cfg.bin`) → lecture BORNÉE obligatoire.
- *   - `/cfg/` et `/raw/` refusent HEAD (**405**) ; `/dx11/` et `/model-full/`
- *     l'acceptent. Le sondage de taille ne vaut donc que pour ces deux-là.
+ *   - `HEAD` n'est accepté QUE sur une variante `?w=` (`cdn-variants.service`
+ *     répond 200, y compris à froid). `/cfg/`, `/raw/` **et `/model-full/`**
+ *     répondent **405** dès que nginx ne trouve pas le fichier sur disque : le
+ *     sondage par `HEAD` doit donc toujours pouvoir retomber sur un `GET`.
  */
 import {
 	cpkAssetUrl,
@@ -435,6 +437,25 @@ export function tientEnPieceJointe(octets: number | null | undefined): boolean {
 	return typeof octets === "number" && octets > 0 && octets <= SEUIL_PIECE_JOINTE_OCTETS;
 }
 
+/**
+ * Vrai si le CDN a refusé la MÉTHODE, pas la ressource.
+ *
+ * Mesuré le 13/8/2026, et c'est le piège central de ce fichier :
+ * `nie-model-serve` répond **405 à toute requête HEAD**, même pour un modèle
+ * parfaitement assemblable. `HEAD /model-full/c11010034.glb` → **405** ;
+ * `GET` du même → **200 `model/gltf-binary`, 70 936 octets**. nginx ne répond
+ * 200 en HEAD que lorsque le GLB est déjà posé sur disque
+ * (`try_files $uri @model_live`, `alias /home/ubuntu/niers/var/model-cache/`),
+ * ce qui ne couvre que **5 655 des 15 533 codes de modèle de l'index**.
+ *
+ * Lire un 405 comme « ce contenu n'existe pas » ferait donc annoncer « pas de
+ * modèle » sur près des deux tiers de l'index — d'où la retombée sur un `GET`
+ * dont on relâche le corps.
+ */
+export function methodeRefusee(statut: number): boolean {
+	return statut === 405 || statut === 501;
+}
+
 /** Nom de fichier d'une pièce jointe, dérivé d'une URL de contenu. */
 export function nomPieceJointe(url: string, repli: string): string {
 	const sansRequete = url.split("?")[0] ?? url;
@@ -529,6 +550,27 @@ export function apercuCpk(entree: EntreeApercu): ApercuCpk {
 		return { ...base, contenu: cpkVideoUrl(entree.path), image: null };
 	}
 	return { ...base, contenu: brut, image: null };
+}
+
+/**
+ * Liens à montrer pour un contenu que la fiche n'affiche pas elle-même
+ * (texte, archive G4PK, son, vidéo).
+ *
+ * Quand aucun décodeur ne couvre le format, `contenu` EST déjà l'URL des octets
+ * bruts : afficher deux fois la même URL sous deux libellés différents ferait
+ * croire à deux ressources, dont une « décodée » qui n'existe pas.
+ */
+export function liensContenu(apercu: ApercuCpk): string {
+	if (apercu.contenu === apercu.brut) {
+		return [
+			`[Octets bruts du CPK](${apercu.brut})`,
+			"Aucun décodeur du CDN ne couvre ce format : le fichier est servi tel qu'il sort de l'archive.",
+		].join("\n");
+	}
+	return [
+		`[${apercu.libelle} — décodage à la demande](${apercu.contenu})`,
+		`[Octets bruts du CPK](${apercu.brut})`,
+	].join("\n");
 }
 
 // ─── Configs binaires décodées ──────────────────────────────────────────────

@@ -10,6 +10,7 @@ import { describe, expect, test } from "bun:test";
 
 import {
 	bornerPage,
+	CATEGORIES_GALERIE,
 	cheminCpkDepuisUrl,
 	classerPropositions,
 	corrigerCheminIconeChr,
@@ -20,14 +21,20 @@ import {
 	formaterPourcentage,
 	imageJeu,
 	joindre,
+	libelleCategorieGalerie,
+	libelleCategorieSucces,
+	libelleGenreQuete,
+	libelleRoleCoordinateur,
 	libelleTypeAura,
 	ligneStats,
 	nettoyerRubis,
 	nettoyerTexteJeu,
 	nombreDePages,
+	resoudreCategorieGalerie,
 	resoudreTypeAura,
 	texteFr,
 	TYPES_AURA,
+	urlIllustrationQuete,
 	urlModele3d,
 	urlVisage,
 } from "./azalee-format";
@@ -282,9 +289,115 @@ describe("urlVisage / urlModele3d", () => {
 		expect(urlVisage(null)).toBeNull();
 	});
 
-	test("forge l'URL du modèle 3D complet", () => {
-		expect(urlModele3d("k000520")).toBe("https://cdn.rosegriffon.fr/model-full/k000520.glb");
+	test("forge l'URL du modèle 3D complet d'un personnage", () => {
+		// 11/11 codes `c########` mesurés à 200 sur `nie-model-serve` (345–480 Ko).
+		expect(urlModele3d("c01000010")).toBe("https://cdn.rosegriffon.fr/model-full/c01000010.glb");
+		expect(urlModele3d("c05026530")).toBe("https://cdn.rosegriffon.fr/model-full/c05026530.glb");
+	});
+
+	test("retire le suffixe de variante de paramètres", () => {
+		// `c01000010_5000` est la variante retenue par `/azalee perso` pour Mark
+		// Evans : `/model-full/c01000010_5000.glb` répond 404, la base répond 200.
+		expect(urlModele3d("c01000010_5000")).toBe(
+			"https://cdn.rosegriffon.fr/model-full/c01000010.glb"
+		);
+	});
+
+	test("refuse tout code dont le modèle n'est PAS servi", () => {
+		// Mesuré 404 : entraîneur, esprit guerrier sous ses trois écritures.
+		expect(urlModele3d("COORD_55")).toBeNull();
+		expect(urlModele3d("k000520")).toBeNull();
+		expect(urlModele3d("ka000520")).toBeNull();
+		expect(urlModele3d("wkk00520")).toBeNull();
 		expect(urlModele3d("a b")).toBeNull();
+		expect(urlModele3d(null)).toBeNull();
+	});
+});
+
+describe("urlIllustrationQuete", () => {
+	test("forge le chemin réellement servi", () => {
+		// Mesuré : la variante w=800 répond 200 (27 338 octets).
+		expect(urlIllustrationQuete("story_img001_l01")).toBe(
+			"https://cdn.rosegriffon.fr/dx11/menu/220_img/quest_img/story_img001_l01.png"
+		);
+		expect(urlIllustrationQuete("game_img01")).toBe(
+			"https://cdn.rosegriffon.fr/dx11/menu/220_img/quest_img/game_img01.png"
+		);
+	});
+
+	test("refuse une quête sans code d'image (45 des 182)", () => {
+		expect(urlIllustrationQuete(null)).toBeNull();
+		expect(urlIllustrationQuete("")).toBeNull();
+		expect(urlIllustrationQuete("../../etc/passwd")).toBeNull();
+	});
+});
+
+describe("catégories de galerie", () => {
+	test("les onze valeurs sont celles acceptées par l'API", () => {
+		expect(CATEGORIES_GALERIE.map((c) => c.valeur)).toEqual([
+			"story",
+			"chronicle",
+			"special",
+			"kizuna",
+			"other",
+			"gallery_img2",
+			"ev_pic",
+			"stadium",
+			"vsroute_map",
+			"hlp",
+			"telop_waza",
+		]);
+	});
+
+	test("aucune catégorie annoncée n'est vide", () => {
+		for (const categorie of CATEGORIES_GALERIE) {
+			expect(categorie.total).toBeGreaterThan(0);
+		}
+	});
+
+	test("résout par valeur et par libellé, sans accent ni casse", () => {
+		expect(resoudreCategorieGalerie("story")).toBe("story");
+		expect(resoudreCategorieGalerie("Chroniques")).toBe("chronicle");
+		expect(resoudreCategorieGalerie("EVENEMENTS")).toBe("ev_pic");
+	});
+
+	test("refuse une catégorie inconnue plutôt que de renvoyer du vide", () => {
+		expect(resoudreCategorieGalerie("illustrations")).toBeNull();
+		expect(resoudreCategorieGalerie(null)).toBeNull();
+	});
+
+	test("libelle une catégorie connue", () => {
+		expect(libelleCategorieGalerie("telop_waza")).toBe("Techniques");
+		expect(libelleCategorieGalerie("inconnue")).toBe("inconnue");
+	});
+});
+
+describe("libelleRoleCoordinateur", () => {
+	test("traduit les trois rôles réellement servis par /api/coordinators", () => {
+		// Mesuré sur les 102 lignes : Manager 68, Coordinator 31, Coach 3.
+		expect(libelleRoleCoordinateur("Coordinator")).toBe("Coordinateur");
+		expect(libelleRoleCoordinateur("Manager")).toBe("Manager");
+		expect(libelleRoleCoordinateur("Coach")).toBe("Coach");
+	});
+
+	test("laisse passer un rôle inconnu et ignore l'absence", () => {
+		expect(libelleRoleCoordinateur("Sponsor")).toBe("Sponsor");
+		expect(libelleRoleCoordinateur("")).toBeNull();
+		expect(libelleRoleCoordinateur(null)).toBeNull();
+	});
+});
+
+describe("libellés de quête et de succès", () => {
+	test("traduit les deux genres réels de quête", () => {
+		expect(libelleGenreQuete("main")).toBe("Quête principale");
+		expect(libelleGenreQuete("side")).toBe("Quête annexe");
+		expect(libelleGenreQuete(null)).toBe("Quête");
+	});
+
+	test("traduit les deux catégories réelles de succès", () => {
+		expect(libelleCategorieSucces("trophy")).toBe("Trophée");
+		expect(libelleCategorieSucces("activity")).toBe("Activité");
+		expect(libelleCategorieSucces("autre")).toBe("autre");
 	});
 });
 
