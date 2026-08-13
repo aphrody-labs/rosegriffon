@@ -108,6 +108,13 @@ export interface AnnoncePostsProfil {
 	 * post : le curseur EST la mémoire de « ce qui a déjà été annoncé ».
 	 */
 	curseur: string;
+	/**
+	 * Rôle mentionné après l'annonce, `null` si aucun.
+	 *
+	 * Relevé dans le salon `1349528692086276148` : `<@&1359506615765827744>`,
+	 * posté en spoiler dans un message à part.
+	 */
+	roleMention: string | null;
 }
 
 export interface Profil {
@@ -312,6 +319,7 @@ export const PROFILS: Readonly<Record<NomProfil, Profil>> = Object.freeze({
 			salonId: SALON_ANNONCE_AZALEE,
 			variableSalon: "AZALEE_DISCORD_NEWS_CHANNEL_ID",
 			curseur: "azalee",
+			roleMention: "1359506615765827744",
 		},
 	}),
 });

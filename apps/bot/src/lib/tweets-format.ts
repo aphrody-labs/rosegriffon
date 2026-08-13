@@ -259,6 +259,50 @@ export function urlTweet(tweet: Pick<LigneTweet, "id" | "author_username">): str
 	return `https://x.com/${auteur}/status/${tweet.id}`;
 }
 
+/**
+ * URL `fixvx` du post — celle qui fait déplier un aperçu COMPLET par Discord.
+ *
+ * Discord ne déplie plus les liens `x.com` : ni texte intégral, ni image. Le
+ * salon d'annonce d'Azalée contourne ça depuis toujours en publiant l'URL
+ * `fixvx.com`, un miroir qui sert les métadonnées Open Graph que Discord sait
+ * lire — l'aperçu obtenu porte alors le texte entier, l'image en `?name=orig`
+ * et l'auteur. C'est le motif relevé sur les vrais messages du salon d’annonce d’Azalée
+ * du salon d’annonce d’Azalée, et il est reproduit à la lettre ici.
+ *
+ * `?s=20` est conservé tel quel : c'est ce que le partage mobile de X ajoute,
+ * et c'est ce que portent les messages existants.
+ */
+export function urlFixvx(tweet: Pick<LigneTweet, "id" | "author_username">): string {
+	const auteur = tweet.author_username?.trim().replace(/^@/, "") || "i";
+	return `https://fixvx.com/${auteur}/status/${tweet.id}?s=20`;
+}
+
+/**
+ * Le message d'annonce : une amorce courte, puis l'URL qui porte l'aperçu.
+ *
+ * L'amorce reprend la première phrase du post — c'est ce que font les messages
+ * du salon (« Mosaique collaborative : <url> »). Sans elle, la ligne se réduit
+ * à une URL nue et le fil devient illisible quand l'aperçu tarde à charger.
+ */
+export function messageAnnonce(tweet: LigneTweet, maxAmorce = 120): string {
+	const texte = texteSansLienMedia(tweet.text).split(/\r?\n/)[0]?.trim() ?? "";
+	const amorce = texte.length > maxAmorce ? `${texte.slice(0, maxAmorce - 1).trimEnd()}…` : texte;
+	const url = urlFixvx(tweet);
+	return amorce.length > 0 ? `${amorce} : ${url}` : url;
+}
+
+/**
+ * Mention de rôle en SPOILER, dans son propre message.
+ *
+ * Deux détails repris du salon, et aucun n'est cosmétique : le ping part dans un
+ * message SÉPARÉ (le mettre dans le message d'annonce empêcherait Discord d'en
+ * déplier l'aperçu proprement), et il est entouré de `||` pour rester discret
+ * dans le fil.
+ */
+export function messagePing(roleId: string): string {
+	return `||<@&${roleId}> ||`;
+}
+
 /** Segment de chemin des médias ré-hébergés dans le Storage self-host. */
 const CHEMIN_STOCKAGE = "/storage/v1/object/public/tweets/";
 

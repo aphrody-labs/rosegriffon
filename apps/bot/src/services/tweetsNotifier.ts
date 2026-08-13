@@ -69,6 +69,8 @@ import {
 	decouperEnLots,
 	formaterMetriques,
 	imagesTweet,
+	messageAnnonce,
+	messagePing,
 	nonceLot,
 	resumeLot,
 	tweetEstNotifiable,
@@ -438,10 +440,33 @@ export async function drainerTweets(
 			const idBorne = final ? dernier.id : dernierDuLot.id;
 
 			if (!options.simulation) {
-				// `enforceNonce` : Discord déduplique côté serveur si le même lot est
-				// republié après un redémarrage tombé entre l'envoi et l'écriture du
-				// curseur — la seule fenêtre de doublon qui restait.
-				await salon.send({ embeds: lot, enforceNonce: true, nonce: nonceLot(idBorne, index) });
+				// ── LE MOTIF DU SALON, À LA LETTRE ──────────────────────────────
+				// On ne compose PLUS d'embed maison. Les messages du salon
+				// d’annonce d’Azalée publient une amorce suivie de l'URL
+				// `fixvx.com`, et c'est Discord qui déplie alors un aperçu complet
+				// (texte intégral, image en `?name=orig`, auteur) à partir des
+				// métadonnées du miroir. Un embed fabriqué à partir de la base ne
+				// peut pas égaler ça : la ligne archivée n'a ni la vidéo, ni le fil,
+				// ni la carte de citation.
+				// Un message PAR POST : deux aperçus dans un même message ne se
+				// déplient pas tous les deux.
+				for (const [rang, tweet] of retenus.slice(publies, consommes).entries()) {
+					await salon.send({
+						content: messageAnnonce(tweet),
+						enforceNonce: true,
+						nonce: nonceLot(tweet.id, index * 100 + rang),
+					});
+				}
+				// Le ping part APRÈS, dans son propre message et en spoiler —
+				// l'inclure dans l'annonce empêcherait l'aperçu de se déplier.
+				if (annonce.roleMention) {
+					await salon.send({
+						content: messagePing(annonce.roleMention),
+						allowedMentions: { roles: [annonce.roleMention] },
+						enforceNonce: true,
+						nonce: nonceLot(idBorne, index * 100 + 99),
+					});
+				}
 				const avance = await avancerCurseur(canal, attendu, borne, idBorne, lot.length);
 				if (!avance) {
 					// Un autre drain a bougé le curseur pendant l'envoi : on s'arrête là
