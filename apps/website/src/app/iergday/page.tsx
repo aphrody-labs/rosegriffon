@@ -46,6 +46,7 @@ import {
 
 import { BoutonsParticiper } from "./BoutonsParticiper";
 import { CampagneGalerie } from "./CampagneGalerie";
+import { DepotInstagram } from "./DepotInstagram";
 import { CompteARebours } from "./CompteARebours";
 import { HashtagsCopiables } from "./HashtagsCopiables";
 import { SelecteurCampagne } from "./SelecteurCampagne";
@@ -378,15 +379,21 @@ export default async function IergDayPage({
 					<HashtagsCopiables hashtags={hashtags} />
 
 					{etat !== "terminee" && (
-						<BoutonsParticiper
-							urlX={
-								hashtagPrincipal
-									? urlPublicationX(libelleHashtagPrincipal || hashtagPrincipal)
-									: null
-							}
-							depotDiscord={depotDiscord}
-							hashtag={libelleHashtagPrincipal || `#${hashtagPrincipal}`}
-						/>
+						<>
+							<BoutonsParticiper
+								urlX={
+									hashtagPrincipal
+										? urlPublicationX(libelleHashtagPrincipal || hashtagPrincipal)
+										: null
+								}
+								depotDiscord={depotDiscord}
+								hashtag={libelleHashtagPrincipal || `#${hashtagPrincipal}`}
+							/>
+							{/* La seule voie qui demande un geste de plus : Instagram n'est
+							    pas récoltable, le participant dépose donc lui-même. Replié
+							    par défaut — c'est la voie minoritaire. */}
+							<DepotInstagram slug={campagne.slug} />
+						</>
 					)}
 
 					<div className="flex flex-wrap items-center gap-2">

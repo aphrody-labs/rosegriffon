@@ -22,12 +22,12 @@
  *                 fautes de frappe comprises (`ie-crawl/hashtag-variantes.ts`).
  *  - `discord`  : `campagne_creations_discord` × `discord_messages` — le salon
  *                 de dépôt de la campagne.
- *  - `instagram`: DÉCLARÉE, JAMAIS PEUPLÉE. Le règlement autorise Instagram,
- *                 mais il n'existe aucun collecteur Instagram dans ce dépôt (ni
- *                 ici, ni dans `ie-crawl/`). La valeur existe dans le schéma
- *                 pour que le jour où un collecteur écrira, le relais n'ait rien
- *                 à changer. Prétendre le contraire ferait croire à une
- *                 couverture qui n'existe pas.
+ *  - `instagram`: `campagne_creations_instagram` — les créations DÉPOSÉES à la
+ *                 main par les participants. Il n'existe aucun collecteur
+ *                 automatique Instagram, et il ne peut pas en exister
+ *                 aujourd'hui : toutes les portes sont fermées à un client non
+ *                 connecté (mesures dans `docs/insta.md`). Le lien est vérifié à
+ *                 l'oEmbed public au moment du dépôt, l'image ré-hébergée.
  *
  * ── CE QUI REND CETTE TÂCHE SÛRE ───────────────────────────────────────────
  *  1. IDEMPOTENCE. `x_campagne_relais` mémorise chaque (campagne, source,
@@ -429,6 +429,61 @@ async function creationsDiscord(campagne: LigneCampagne): Promise<Creation[]> {
 	}));
 }
 
+/**
+ * Les créations Instagram déposées à la main, pas encore relayées.
+ *
+ * ── PAS DE JOINTURE, CONTRAIREMENT AUX DEUX AUTRES ─────────────────────────
+ * `x_campagne_posts` et `campagne_creations_discord` sont des tables
+ * d'ASSOCIATION : le contenu vit ailleurs (`tweets`, `discord_messages`). La
+ * table Instagram, elle, porte tout — parce qu'il n'existe aucun collecteur
+ * amont où le contenu pourrait vivre. C'est le participant qui l'a saisi.
+ *
+ * `auteur_pseudo` peut être NULL : le déposant n'est pas obligé de se nommer, et
+ * l'API Graph (le jour où elle alimentera cette table) ne rend pas ce champ.
+ * « auteur inconnu » est alors exact — pas un repli qui masque une lacune.
+ */
+async function creationsInstagram(campagne: LigneCampagne): Promise<Creation[]> {
+	const lignes = (await sql`
+		select i.shortcode,
+		       i.permalink,
+		       i.hashtag_trouve,
+		       i.masque,
+		       i.publie_le,
+		       i.legende,
+		       i.images,
+		       i.auteur_pseudo
+		  from public.campagne_creations_instagram i
+		 where i.campagne_slug = ${campagne.slug}
+		   and (${campagne.relais_depuis ?? null}::timestamptz is null
+		        or i.publie_le >= ${campagne.relais_depuis ?? null}::timestamptz)
+		   and not exists (
+		         select 1 from public.x_campagne_relais r
+		          where r.campagne_slug = i.campagne_slug
+		            and r.source = 'instagram'
+		            and r.reference_id = i.shortcode)`) as Array<{
+		shortcode: string;
+		permalink: string;
+		hashtag_trouve: string | null;
+		masque: boolean;
+		publie_le: Date;
+		legende: string | null;
+		images: unknown;
+		auteur_pseudo: string | null;
+	}>;
+
+	return lignes.map((l) => ({
+		source: "instagram" as const,
+		reference: l.shortcode,
+		lien: l.permalink,
+		auteur: l.auteur_pseudo ? `@${l.auteur_pseudo}` : "auteur inconnu",
+		texte: l.legende ?? "",
+		image: premiereImageDiscord(l.images),
+		hashtag: l.hashtag_trouve,
+		publieLe: l.publie_le,
+		masque: l.masque,
+	}));
+}
+
 // ─── Relais ──────────────────────────────────────────────────────────────────
 
 /** Relaie les campagnes actives qui déclarent un salon de relais. */
@@ -498,9 +553,11 @@ async function relayerCampagne(
 	// décroissant, un rattrapage de dix créations les afficherait à l'envers. Le
 	// tri est fait ICI et non en SQL : deux requêtes triées séparément se
 	// concaténeraient en deux blocs, pas en une chronologie.
-	const creations = [...(await creationsX(campagne)), ...(await creationsDiscord(campagne))].sort(
-		(a, b) => new Date(a.publieLe).getTime() - new Date(b.publieLe).getTime()
-	);
+	const creations = [
+		...(await creationsX(campagne)),
+		...(await creationsDiscord(campagne)),
+		...(await creationsInstagram(campagne)),
+	].sort((a, b) => new Date(a.publieLe).getTime() - new Date(b.publieLe).getTime());
 
 	stats.candidats = creations.length;
 	if (creations.length === 0) {
