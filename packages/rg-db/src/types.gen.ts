@@ -3392,6 +3392,47 @@ export type Database = {
         }
         Relationships: []
       }
+      inagle_skill_videos: {
+        Row: {
+          created_at: string
+          label: string
+          poster_url: string | null
+          position: number
+          skill_id: string
+          source: string
+          updated_at: string
+          video_url: string
+        }
+        Insert: {
+          created_at?: string
+          label: string
+          poster_url?: string | null
+          position?: number
+          skill_id: string
+          source?: string
+          updated_at?: string
+          video_url: string
+        }
+        Update: {
+          created_at?: string
+          label?: string
+          poster_url?: string | null
+          position?: number
+          skill_id?: string
+          source?: string
+          updated_at?: string
+          video_url?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "inagle_skill_videos_skill_id_fkey"
+            columns: ["skill_id"]
+            isOneToOne: false
+            referencedRelation: "inagle_skills"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       inagle_skills: {
         Row: {
           category: string | null
@@ -3425,6 +3466,7 @@ export type Database = {
           skill_effect_bit_flag: number | null
           tags: string[] | null
           tension_cost: number | null
+          thumbnail_url: string | null
           tp_cost: number | null
           updated_at: string | null
           video_url: string | null
@@ -3461,6 +3503,7 @@ export type Database = {
           skill_effect_bit_flag?: number | null
           tags?: string[] | null
           tension_cost?: number | null
+          thumbnail_url?: string | null
           tp_cost?: number | null
           updated_at?: string | null
           video_url?: string | null
@@ -3497,6 +3540,7 @@ export type Database = {
           skill_effect_bit_flag?: number | null
           tags?: string[] | null
           tension_cost?: number | null
+          thumbnail_url?: string | null
           tp_cost?: number | null
           updated_at?: string | null
           video_url?: string | null
