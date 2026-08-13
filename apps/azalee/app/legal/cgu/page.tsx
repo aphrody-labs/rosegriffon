@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
+	alternates: { canonical: "/legal/cgu" },
 	description: "Conditions générales d'utilisation du site Azalée et des services Rose Griffon.",
 	title: "Conditions générales d'utilisation - Azalée",
 };

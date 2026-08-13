@@ -7,6 +7,7 @@ import { MoveCard } from "@/components/wiki/MoveCard";
 import { WikiPagination } from "@/components/wiki/WikiPagination";
 import { WikiSearchToolbar } from "@/components/wiki/WikiSearchToolbar";
 import { getSkillCategoryIconUrl } from "@rosegriffon/azalee/images";
+import { buildCanonical, LIST_CANONICAL_KEYS } from "@/lib/seo";
 import { parseSearchParams } from "@/lib/validations";
 import { wikiService } from "@/lib/wiki-service";
 
@@ -50,7 +51,7 @@ export async function generateMetadata({
 
 	return {
 		alternates: {
-			canonical: `/skill${rawParams ? `?${new URLSearchParams(rawParams as Record<string, string>).toString()}` : ""}`,
+			canonical: buildCanonical("/skill", rawParams, LIST_CANONICAL_KEYS),
 		},
 		description: `Base de données des techniques spéciales (Hissatsu)${filters.length > 0 ? ` filtrée par ${filters.join(", ")}` : ""}. Puissance, tension et effets.`,
 		title: `${title} | Inazuma Eleven Victory Road - Azalée`,

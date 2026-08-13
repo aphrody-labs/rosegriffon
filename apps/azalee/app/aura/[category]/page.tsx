@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { AuraList } from "@/components/wiki/AuraList";
+import { buildCanonical, LIST_CANONICAL_KEYS } from "@/lib/seo";
 import { parseSearchParams } from "@/lib/validations";
 import { wikiService } from "@/lib/wiki-service";
 
@@ -53,7 +54,7 @@ export async function generateMetadata({
 
 	return {
 		alternates: {
-			canonical: `/aura/${category}${rawParams ? `?${new URLSearchParams(rawParams as Record<string, string>).toString()}` : ""}`,
+			canonical: buildCanonical(`/aura/${category}`, rawParams, LIST_CANONICAL_KEYS),
 		},
 		description: `Liste complète des ${config.title.toLowerCase()}${filters.length > 0 ? ` filtrée par ${filters.join(", ")}` : ""}.`,
 		title: `${title} | Inazuma Eleven Victory Road - Azalée`,

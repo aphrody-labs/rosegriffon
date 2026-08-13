@@ -13,6 +13,7 @@ const X_ACCOUNT = "https://x.com/inazuma_cross";
 const YT_PLAYLIST = "https://www.youtube.com/playlist?list=PLlapDTT9GR4TwdLT5pbq88rfeuKXe3XLv";
 
 export const metadata: Metadata = {
+	alternates: { canonical: "/cross" },
 	title: "Inazuma Eleven Cross — le nouveau jeu mobile | Azalée",
 	description:
 		"Inazuma Eleven Cross (イナズマイレブン クロス), le jeu mobile Level-5 × Aiming, lancement le 9 juin 2026. Traduction factuelle du site officiel inazuma-cross.jp + tweets récents @inazuma_cross. Jeu distinct d'Inazuma Eleven: Victory Road.",

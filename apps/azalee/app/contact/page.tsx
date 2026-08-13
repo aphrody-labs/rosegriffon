@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
+	alternates: { canonical: "/contact" },
 	description: "Contactez l'équipe Rose Griffon par email ou via notre serveur Discord.",
 	title: "Contact - Azalée",
 };

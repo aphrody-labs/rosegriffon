@@ -114,7 +114,14 @@ async function ensureWasm(): Promise<void> {
 			// dans le bundle Next — fetch same-origin est plus robuste.
 			await init({ module_or_path: fetch(WASM_URL) });
 			init_panic_hook();
-		})();
+		})().catch((cause: unknown) => {
+			// Sans ce reset, un échec ponctuel (réseau coupé, binaire non encore
+			// déployé) empoisonnait la promesse pour toute la durée de vie de
+			// l'onglet : chaque appel ultérieur rejouait la MÊME erreur, sans
+			// jamais retenter le chargement.
+			initPromise = null;
+			throw new Error(`Chargement du module wasm impossible (${WASM_URL}).`, { cause });
+		});
 	}
 	return initPromise;
 }

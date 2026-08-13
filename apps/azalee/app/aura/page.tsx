@@ -8,6 +8,7 @@ import type { SpriteCommonKey } from "@/config/sprites-common";
 import { cn } from "@/lib/utils";
 
 export const metadata: Metadata = {
+	alternates: { canonical: "/aura" },
 	description: "Explorez les Esprits Guerriers, Totems, Miximax et autres pouvoirs spéciaux.",
 	title: "Hyper Techniques - Azalée",
 };

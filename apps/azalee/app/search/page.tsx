@@ -12,6 +12,9 @@ export async function generateMetadata({
 	const { q } = parseSearchParams(await searchParams);
 
 	return {
+		// La requête reste dans le canonique (chaque recherche est une page distincte) ;
+		// sans `q`, on canonicalise vers l'URL nue — jamais vers un `/search?` vide.
+		alternates: { canonical: q ? `/search?q=${encodeURIComponent(q.toString())}` : "/search" },
 		description:
 			"Explorez la base de données complète : joueurs, techniques, hyper techniques, objets, passifs, tactiques et équipes.",
 		title: q

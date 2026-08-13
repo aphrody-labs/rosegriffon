@@ -12,6 +12,7 @@ import { getPgPool } from "@/lib/db/pg";
 import { createClient } from "@/lib/supabase/server";
 
 export const metadata: Metadata = {
+	alternates: { canonical: "/" },
 	description:
 		"L'information la plus précise autour d'Inazuma Eleven. Stats, techniques, et actualités en français.",
 	openGraph: {

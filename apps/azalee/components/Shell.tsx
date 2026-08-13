@@ -27,6 +27,7 @@ import {
 } from "@rosegriffon/ui";
 import { AzaleeNavigationRail } from "@/components/navigation/AzaleeNavigationRail";
 import { GlobalSearch } from "@/components/wiki/GlobalSearch";
+import { isRemoteAvatar } from "@/lib/avatar";
 import { cn } from "@/lib/utils";
 import type { AzaleeProfile, BetterAuthUser } from "./providers/AuthProvider";
 
@@ -57,6 +58,7 @@ function MobileAvatar({
 					height={48}
 					className="w-full h-full object-cover"
 					onError={() => setImgError(true)}
+					unoptimized={isRemoteAvatar(profile!.avatar_url)}
 				/>
 			) : (
 				<User size={24} className="text-primary" aria-hidden="true" />
@@ -333,6 +335,7 @@ function DesktopAvatar({
 					height={36}
 					className="w-full h-full object-cover"
 					onError={() => setImgError(true)}
+					unoptimized={isRemoteAvatar(profile!.avatar_url)}
 				/>
 			) : (
 				<User size={18} className="text-primary" aria-hidden="true" />

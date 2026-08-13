@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Card, CardContent, CardHeader, CardTitle } from "@rosegriffon/ui";
 
 export const metadata: Metadata = {
+	alternates: { canonical: "/charte" },
 	description:
 		"Les valeurs et engagements de Rose Griffon : crédit, transparence, inclusion et respect.",
 	title: "Charte d'engagements - Azalée",
