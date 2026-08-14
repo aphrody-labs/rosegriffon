@@ -14,6 +14,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { lsOrNull } from "@rosegriffon/azalee/cpk/live";
+import { MediaCount, MediaEmpty, MediaHeader } from "@/components/wiki/MediaShell";
 import { cpkAssetUrl, cpkThumbUrl, segLabel } from "@rosegriffon/azalee/cpk/shared";
 
 export const dynamic = "force-dynamic";
@@ -58,10 +59,15 @@ export default async function TexturesPage({
 
 	if (!listing) {
 		return (
-			<div className="rounded-[32px] border border-dashed border-outline-variant bg-surface-container-low py-20 text-center">
-				<p className="italic text-on-surface-variant">
+			<div className="w-full space-y-5">
+				<MediaHeader
+					title="Textures"
+					active="/textures"
+					description="Le corpus complet des textures du jeu, décodées en PNG à la volée et parcourues par dossier."
+				/>
+				<MediaEmpty>
 					Le VFS du jeu est momentanément injoignable — les textures ne peuvent pas être listées.
-				</p>
+				</MediaEmpty>
 			</div>
 		);
 	}
@@ -72,9 +78,15 @@ export default async function TexturesPage({
 
 	return (
 		<div className="w-full space-y-5">
-			<header className="space-y-1">
-				<h1 className="text-fluid-headline-md font-extrabold text-on-surface">Textures</h1>
-				<nav className="flex flex-wrap items-center gap-1 text-sm text-on-surface-variant">
+			<MediaHeader
+				title="Textures"
+				active="/textures"
+				description="Le corpus complet des textures du jeu, décodées en PNG à la volée et parcourues par dossier."
+			>
+				<nav
+					aria-label="Fil d'Ariane"
+					className="flex flex-wrap items-center gap-1 pt-1 text-sm text-on-surface-variant"
+				>
 					<Link href="/textures" className="hover:text-primary">
 						dx11
 					</Link>
@@ -95,7 +107,7 @@ export default async function TexturesPage({
 						{listing.role.role} — {listing.role.status}
 					</p>
 				)}
-			</header>
+			</MediaHeader>
 
 			{listing.dirs.length > 0 && (
 				<ul className="flex flex-wrap gap-2">
@@ -116,11 +128,12 @@ export default async function TexturesPage({
 			)}
 
 			{listing.fileTotal > 0 && (
-				<p className="px-1 text-xs font-medium uppercase tracking-wider text-on-surface-variant">
-					{textures.length.toLocaleString("fr")} texture{textures.length > 1 ? "s" : ""} sur{" "}
-					{listing.fileTotal.toLocaleString("fr")} fichier
-					{listing.fileTotal > 1 ? "s" : ""} — page {page} sur {pages}
-				</p>
+				<MediaCount
+					left={`${textures.length.toLocaleString("fr")} texture${
+						textures.length > 1 ? "s" : ""
+					} sur ${listing.fileTotal.toLocaleString("fr")} fichier${listing.fileTotal > 1 ? "s" : ""}`}
+					right={`Page ${page} sur ${pages}`}
+				/>
 			)}
 
 			{textures.length > 0 ? (

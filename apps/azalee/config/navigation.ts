@@ -139,9 +139,12 @@ export const navigationItems: NavItem[] = [
 		path: "/succes",
 	},
 	{
-		// Médias : galerie d'illustrations + modèles 3D (esprits/armures + objets/animaux).
+		// Médias : illustrations curées, corpus complet des textures, banques sonores,
+		// cinématiques, et modèles 3D (esprits/armures + objets/animaux).
 		children: [
 			{ label: "nav.wiki.gallery", path: "/gallery", icon: "image" },
+			{ label: "nav.wiki.textures", path: "/textures", icon: "texture" },
+			{ label: "nav.wiki.sounds", path: "/sons", icon: "graphic_eq" },
 			{ label: "nav.wiki.videos", path: "/videos", icon: "movie" },
 			{ label: "nav.wiki.keshin_models", path: "/keshin", icon: "view_in_ar" },
 			{ label: "nav.wiki.models", path: "/modeles", icon: "deployed_code" },
