@@ -230,16 +230,15 @@ export function prochainRang(niveau: number): Rang | null {
  * concours de spam : sans lui, quinze messages d'un mot rapportent quinze fois
  * plus qu'un vrai échange. Une minute est la valeur de fait du domaine, et elle
  * a le mérite d'être invisible pour qui discute normalement.
+ *
+ * Les valeurs viennent de `@rosegriffon/types/bot` : ce sont les MÊMES que
+ * celles du schéma des réglages, et le formulaire du site les affiche comme
+ * « valeur par défaut ». Les redéclarer ici les ferait diverger le jour où l'un
+ * des deux bouge — et personne ne verrait qu'un serveur gagne 15–25 XP quand
+ * l'interface promet autre chose.
  */
-export const GAIN_DEFAUT = Object.freeze({
-	/** Fourchette d'XP d'un message éligible. */
-	minimum: 15,
-	maximum: 25,
-	/** Délai avant qu'un nouveau message rapporte. */
-	delaiSecondes: 60,
-	/** Jetons Kizuna offerts à chaque montée de niveau, multipliés par le niveau. */
-	jetonsParNiveau: 10,
-} as const);
+export { GAIN_XP_DEFAUT as GAIN_DEFAUT } from "@rosegriffon/types/bot";
+import { GAIN_XP_DEFAUT as GAIN_DEFAUT } from "@rosegriffon/types/bot";
 
 export interface ReglesGain {
 	minimum: number;

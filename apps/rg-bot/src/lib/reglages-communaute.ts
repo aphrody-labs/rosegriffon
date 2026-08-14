@@ -1,259 +1,37 @@
 /**
- * Réglages de communauté d'une guilde — le schéma, et lui seul.
+ * Réglages de communauté d'une guilde — RÉEXPORT du contrat partagé.
  *
- * ── POURQUOI UN DOCUMENT JSON VALIDÉ, ET PAS DES COLONNES ──────────────────
- * `bot_reglages_guilde.valeurs` est un `jsonb`. Le choix est assumé : ces
- * réglages changent au rythme des envies du staff, et une colonne par option
- * voudrait dire une migration par idée. Le prix à payer, c'est qu'une colonne
- * `jsonb` n'a AUCUN schéma — n'importe quel `UPDATE` maladroit peut y écrire
- * `{"niveaux": "oui"}` et la lecture suivante lèvera loin de la cause.
+ * ── POURQUOI CE FICHIER NE CONTIENT PLUS LE SCHÉMA ─────────────────────────
+ * `bot_reglages_guilde.valeurs` est un `jsonb`, et il a désormais DEUX
+ * écrivains : les commandes `/administration réglages` du bot, et le formulaire
+ * `/admin/bot/reglages` du site. Un schéma défini ici et recopié là-bas serait
+ * la garantie qu'un jour le formulaire écrit une valeur que le bot refuse de
+ * relire — et comme `lireReglages` ne lève jamais, le bot retomberait
+ * silencieusement sur ses défauts en effaçant en pratique tout réglage posé.
  *
- * Ce module est le contrepoids : le schéma vit ici, en zod, et il s'applique
- * DANS LES DEUX SENS — à l'écriture (refuser une valeur aberrante) comme à la
- * lecture (un document ancien, partiel ou corrompu retombe sur les défauts au
- * lieu de faire tomber une commande).
+ * Le schéma vit donc dans `@rosegriffon/types/bot`, une seule fois, et les deux
+ * surfaces l'appliquent à l'identique. Ce module reste en place parce qu'une
+ * quarantaine de fichiers l'importent par ce chemin : le déplacer aurait
+ * transformé un refactor de contrat en un balayage de tout `apps/bot`.
  *
- * ── MODULE PUR ─────────────────────────────────────────────────────────────
- * Aucune E/S, aucun `discord.js`. Les identifiants réels de la guilde Rose
- * Griffon ne sont PAS ici : ils sont semés en base par la migration
- * `20260814_bot_communaute_reglages.sql`. Un réglage est une donnée, pas une
- * constante de code — le staff doit pouvoir déplacer un salon sans déploiement.
+ * Rien à ajouter ici. Toute évolution du schéma se fait dans
+ * `packages/types/src/bot.ts`.
  */
-import { z } from "zod";
-
-import { GAIN_DEFAUT } from "./experience";
-
-/** Un flocon Discord, tel qu'il arrive d'une option de commande ou de la base. */
-const flocon = z.string().regex(/^\d{15,25}$/, "identifiant Discord attendu");
-
-/** Liste de flocons, dédoublonnée — deux fois le même rôle n'a aucun sens. */
-const flocons = z
-	.array(flocon)
-	.default([])
-	.transform((liste) => [...new Set(liste)]);
-
-/**
- * Où annoncer une montée de niveau.
- *
- * ── LE DÉFAUT EST « AUCUNE », ET C'EST VOLONTAIRE ──────────────────────────
- * `place` (dans le salon où le message a été envoyé) est le défaut des bots du
- * marché. Sur un serveur de deux mille membres, il transforme chaque salon en
- * flux d'annonces : c'est LA raison pour laquelle les communautés finissent par
- * couper leur bot de niveaux. `salon` centralise le bruit, `prive` l'envoie en
- * message direct, `aucune` n'en fait aucun.
- *
- * Ici le défaut est `aucune` : un bot qui s'installe ne doit RIEN publier tant
- * que le staff n'a pas dit où. Le membre voit sa progression avec `/profil`,
- * quand il la demande.
- */
-export const LIEUX_ANNONCE = ["salon", "place", "prive", "aucune"] as const;
-
-export type LieuAnnonce = (typeof LIEUX_ANNONCE)[number];
-
-const reglagesNiveaux = z
-	.object({
-		actif: z.boolean().default(true),
-		/** Salon d'annonce quand `annonce = "salon"`. */
-		salonAnnonce: flocon.nullable().default(null),
-		annonce: z.enum(LIEUX_ANNONCE).default("aucune"),
-		/**
-		 * N'annoncer QUE les niveaux multiples de cette valeur.
-		 *
-		 * Sans ce filtre, un membre actif déclenche une annonce tous les deux ou
-		 * trois jours en début de courbe — et deux mille membres actifs, c'est un
-		 * salon inutilisable. À 5, on ne fête que ce qui se fête : les paliers
-		 * ronds. `1` rétablit l'annonce à chaque niveau.
-		 */
-		palierAnnonce: z.number().int().min(1).max(100).default(5),
-		/**
-		 * Annoncer aussi les CHANGEMENTS DE RANG (Normal → Expérimenté → Héros →
-		 * BASARA), même hors palier. Trois fois dans une vie de membre : c'est le
-		 * genre d'événement qui mérite un message.
-		 */
-		annoncerRang: z.boolean().default(true),
-		/** Salons qui ne rapportent aucune XP (bots, journaux, vitrines). */
-		salonsExclus: flocons,
-		/** Rôles qui ne gagnent pas d'XP (bots, comptes de service). */
-		rolesExclus: flocons,
-		gain: z
-			.object({
-				minimum: z.number().int().min(0).max(1_000).default(GAIN_DEFAUT.minimum),
-				maximum: z.number().int().min(0).max(1_000).default(GAIN_DEFAUT.maximum),
-				delaiSecondes: z.number().int().min(0).max(3_600).default(GAIN_DEFAUT.delaiSecondes),
-			})
-			.prefault({}),
-	})
-	.prefault({});
-
-const reglagesTickets = z
-	.object({
-		actif: z.boolean().default(true),
-		/** Salon qui porte le panneau d'ouverture, et parent des fils de tickets. */
-		salonPanneau: flocon.nullable().default(null),
-		/** Salon où part la carte de fermeture. */
-		salonHistorique: flocon.nullable().default(null),
-		/** Catégorie de salons « Support » — utile en mode `salon` seulement. */
-		categorieSupport: flocon.nullable().default(null),
-		/** Rôles qui prennent en charge les tickets ordinaires. */
-		rolesStaff: flocons,
-		/** Rôles qui voient AUSSI les tickets sensibles (signalements). */
-		rolesDirection: flocons,
-		/**
-		 * `fil` reprend le fonctionnement en place (ticketsbot crée des fils) ;
-		 * `salon` crée un vrai salon dans la catégorie Support. Le défaut est `fil` :
-		 * un serveur est plafonné à 500 salons, jamais aux fils.
-		 */
-		mode: z.enum(["fil", "salon"]).default("fil"),
-	})
-	.prefault({});
-
-/**
- * Où souhaiter la bienvenue.
- *
- * `aucune` par défaut, comme les annonces de niveau : un bot fraîchement
- * installé ne publie rien tant que le staff ne lui a pas dit où. Un serveur qui
- * reçoit vingt arrivées par jour n'a peut-être aucune envie de vingt messages.
- */
-export const LIEUX_BIENVENUE = ["salon", "prive", "aucune"] as const;
-
-export type LieuBienvenue = (typeof LIEUX_BIENVENUE)[number];
-
-const reglagesAccueil = z
-	.object({
-		actif: z.boolean().default(true),
-		lieu: z.enum(LIEUX_BIENVENUE).default("aucune"),
-		/** Salon d'accueil quand `lieu = "salon"`. */
-		salon: flocon.nullable().default(null),
-		/**
-		 * Texte du message. `{membre}` est remplacé par la mention, `{serveur}` par
-		 * le nom du serveur, `{compte}` par le nombre de membres.
-		 * `null` = le texte par défaut du bot.
-		 */
-		texte: z.string().max(1_000).nullable().default(null),
-		/**
-		 * Rôle posé à l'arrivée. Il passe par la MÊME garde stricte que les
-		 * récompenses de niveau : un rôle d'arrivée est distribué automatiquement à
-		 * tout le monde, c'est la surface la plus large qui existe.
-		 */
-		roleArrivee: flocon.nullable().default(null),
-		/** Joindre la carte image d'accueil. */
-		carte: z.boolean().default(true),
-	})
-	.prefault({});
-
-/**
- * Boîte à suggestions.
- *
- * `salon` à `null` par défaut : la boîte est FERMÉE tant qu'un administrateur
- * n'a pas dit où les suggestions doivent atterrir. C'est la règle d'activation
- * manuelle — une commande publique qui publie dans un salon ne s'ouvre pas
- * toute seule.
- */
-const reglagesSuggestions = z
-	.object({
-		actif: z.boolean().default(true),
-		salon: flocon.nullable().default(null),
-	})
-	.prefault({});
-
-const reglagesKizuna = z
-	.object({
-		actif: z.boolean().default(true),
-		/** Salon où annoncer les recrutements remarquables (Héros, BASARA). */
-		salonAnnonce: flocon.nullable().default(null),
-	})
-	.prefault({});
-
-export const SchemaReglages = z
-	.object({
-		niveaux: reglagesNiveaux,
-		tickets: reglagesTickets,
-		kizuna: reglagesKizuna,
-		accueil: reglagesAccueil,
-		suggestions: reglagesSuggestions,
-	})
-	.prefault({});
-
-export type ReglagesCommunaute = z.infer<typeof SchemaReglages>;
-
-/** Le document par défaut — celui d'une guilde qui n'a jamais rien réglé. */
-export const REGLAGES_DEFAUT: ReglagesCommunaute = SchemaReglages.parse({});
-
-/**
- * Lit un document venu de la base.
- *
- * Ne lève JAMAIS. Un `jsonb` illisible ou obsolète rend les défauts : une
- * commande de profil ne doit pas tomber parce qu'un réglage de tickets a été
- * mal écrit il y a six mois. Le problème se voit dans le journal, pas dans la
- * figure du membre.
- */
-export function lireReglages(brut: unknown): ReglagesCommunaute {
-	const resultat = SchemaReglages.safeParse(brut ?? {});
-	if (resultat.success) {
-		return resultat.data;
-	}
-	console.warn(
-		"[reglages] document illisible, retour aux défauts :",
-		resultat.error.issues.map((probleme) => `${probleme.path.join(".")} ${probleme.message}`).join(" · ")
-	);
-	return REGLAGES_DEFAUT;
-}
-
-/**
- * Valide un document AVANT écriture. Ici, on lève : une écriture est un acte
- * volontaire, et la refuser en disant pourquoi vaut mieux que d'enregistrer une
- * valeur qui sera silencieusement ignorée à la relecture.
- */
-export function validerReglages(brut: unknown): ReglagesCommunaute {
-	return SchemaReglages.parse(brut);
-}
-
-/**
- * Fusionne une modification partielle dans un document existant.
- *
- * Fusion PROFONDE sur les trois sections, superficielle en dessous : régler
- * `niveaux.annonce` ne doit pas effacer `niveaux.salonsExclus`, mais remplacer
- * `niveaux.salonsExclus` doit bien le remplacer et non l'additionner (sinon on
- * ne pourrait jamais retirer une exclusion).
- */
-export function fusionnerReglages(
-	actuels: ReglagesCommunaute,
-	modification: {
-		niveaux?: Partial<ReglagesCommunaute["niveaux"]>;
-		tickets?: Partial<ReglagesCommunaute["tickets"]>;
-		kizuna?: Partial<ReglagesCommunaute["kizuna"]>;
-		accueil?: Partial<ReglagesCommunaute["accueil"]>;
-		suggestions?: Partial<ReglagesCommunaute["suggestions"]>;
-	}
-): ReglagesCommunaute {
-	return validerReglages({
-		accueil: { ...actuels.accueil, ...modification.accueil },
-		suggestions: { ...actuels.suggestions, ...modification.suggestions },
-		kizuna: { ...actuels.kizuna, ...modification.kizuna },
-		niveaux: { ...actuels.niveaux, ...modification.niveaux },
-		tickets: { ...actuels.tickets, ...modification.tickets },
-	});
-}
-
-/**
- * Les réglages sont-ils exploitables pour les tickets ?
- *
- * Rendu comme une liste de manques plutôt qu'un booléen : le staff a besoin de
- * savoir CE QU'IL RESTE à poser, pas seulement que ça ne marche pas.
- */
-export function manquesTickets(reglages: ReglagesCommunaute): string[] {
-	const manques: string[] = [];
-	if (!reglages.tickets.salonPanneau) {
-		manques.push("le salon du panneau (`salon-panneau`)");
-	}
-	if (!reglages.tickets.salonHistorique) {
-		manques.push("le salon d'historique (`salon-historique`)");
-	}
-	if (reglages.tickets.rolesStaff.length === 0 && reglages.tickets.rolesDirection.length === 0) {
-		manques.push("au moins un rôle de prise en charge (`role-staff`)");
-	}
-	if (reglages.tickets.mode === "salon" && !reglages.tickets.categorieSupport) {
-		manques.push("la catégorie Support (`categorie`), obligatoire en mode salon");
-	}
-	return manques;
-}
+export {
+	fusionnerReglages,
+	LIEUX_ANNONCE,
+	LIEUX_BIENVENUE,
+	lireReglages,
+	manquesParSection,
+	manquesTickets,
+	REGLAGES_DEFAUT,
+	SchemaReglages,
+	SchemaModificationReglages,
+	SECTIONS_REGLAGES,
+	validerReglages,
+	type LieuAnnonce,
+	type LieuBienvenue,
+	type ModificationReglages,
+	type ReglagesCommunaute,
+	type SectionReglages,
+} from "@rosegriffon/types/bot";

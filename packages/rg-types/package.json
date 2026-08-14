@@ -8,6 +8,8 @@
 		"./roles": "./src/roles.ts",
 		"./user": "./src/user.ts",
 		"./discord": "./src/discord.ts",
+		"./bot": "./src/bot.ts",
+		"./cron": "./src/cron.ts",
 		"./article": "./src/article.ts",
 		"./stats": "./src/stats.ts",
 		"./visitor": "./src/visitor.ts",
