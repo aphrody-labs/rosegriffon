@@ -89,16 +89,23 @@ en clair, donc aucune résolution par pseudo. Leur XP est le seuil OFFICIEL du
 palier annoncé (table `noctaly.com/table`), un minorant réel et non la valeur
 exacte de l'instant.
 
-C'est tout ce qui était atteignable :
+C'était tout ce qui était atteignable **sans clé et sans session** :
 
 - l'API de Noctaly (`GET /api/v1/guilds/{id}/users/{id}/level-profile`) répond
   **401** sans clé (testé en direct), et la clé s'obtient par une connexion
-  humaine sur leur tableau de bord ; la page publique du classement charge ses
-  données côté client (rien dans le HTML brut) et se limite au top 100 ;
+  humaine sur leur tableau de bord ;
 - Noctaly n'a été activé sur le serveur que le **11/3/2026** : les 3 salons
   paginés en entier jusqu'à 2023 n'ont RIEN trouvé avant cette date, ce qui a
   justifié d'arrêter les 3 autres dès qu'ils y remontaient sans rien trouver
   de plus.
+
+> ⚠ **Une affirmation de cette page était fausse** et a coûté du temps : « la
+> page publique du classement charge ses données côté client (rien dans le HTML
+> brut) ». Vérifié le 14/8/2026 : les profils sont **dans le rendu serveur**,
+> sous la propriété `initProfiles` de la charge React. Ils n'apparaissent pas
+> dans une lecture naïve du HTML parce que Next dépose sa charge en fragments
+> échappés (`self.__next_f.push([1,"…"])`) qu'il faut recoller avant de
+> chercher. Voir la section suivante.
 
 **Piège trouvé et évité** : deux comptes différents partagent un pseudo
 quasi identique, « IceCream » (toujours sur le serveur) et « Icecream »
@@ -119,17 +126,83 @@ expose en lecture, une fois la clé posée dans `apps/bot/.env`
 | `GET …/users/{id}/eco-profile?items&chests&dailyStreak` | 1 requête / membre | `serie_quotidienne`, monnaie → jetons (taux explicite) |
 | `GET …/items` et `GET …/chests` | 2 requêtes en tout | catalogue archivé tel quel |
 
-**Il n'existe aucune route de liste** : ni classement, ni export, ni
+**Il n'existe aucune route de liste dans l'API** : ni classement, ni export, ni
 pagination. L'import est donc une boucle d'une à deux requêtes par membre sur
 les 1 834 humains présents de `discord_members`.
 
 **Le 429 coûte une heure, pas une seconde.** La documentation annonce 50 req/s
 mais aussi un `retryAfter` de 3600 et une mise en liste noire pour les
-applications qui insistent. D'où trois choix : cadence par défaut à **10 req/s**
-(un cinquième du plafond), arrêt à `MARGE_QUOTA` requêtes de la limite avec
-attente du `X-RateLimit-Reset-After`, et **interruption pure et simple** sur un
-429 plutôt qu'un réessai. L'import étant idempotent, reprendre plus tard ne
-coûte rien.
+applications qui insistent. D'où trois choix : cadence alignée sur le quota
+**mesuré**, arrêt à `MARGE_QUOTA` requêtes de la limite avec attente du
+`X-RateLimit-Reset-After`, et **interruption pure et simple** sur un 429 plutôt
+qu'un réessai. L'import étant idempotent, reprendre plus tard ne coûte rien.
+
+> ⚠ **La documentation se trompe d'un facteur vingt-cinq.** Mesuré le 14/8/2026
+> avec une vraie clé : les en-têtes annoncent `X-RateLimit-Limit: 120` et
+> `X-RateLimit-Reset-After: 60`, et `Remaining` décroît d'une unité par requête.
+> Le plafond réel est de **120 requêtes par fenêtre de 60 secondes**, soit
+> **2 par seconde**, pas 50. La cadence par défaut (`CADENCE_DEFAUT`) vaut donc
+> 2 : réglée sur la documentation, elle vidait le quota en douze secondes puis
+> passait le reste de l'import à attendre, en frôlant le 429 à chaque
+> redémarrage de fenêtre. Un import complet dure ~15 minutes, pas 3.
+
+### La seconde source : le classement public
+
+La page `noctaly.com/fr/leaderboard/{guildID}` publie **cent profils complets**
+dans son rendu serveur, avec exactement les champs de `level-profile` :
+
+```json
+{"userID":"…","username":"…","avatarID":"…",
+ "level":26,"xp":44480,"messages":4977,"reactions":231,"voiceMinutes":298}
+```
+
+Le `xp` de cette source est bien l'XP **totale** — croisé avec l'API sur le même
+membre : le classement dit `xp: 44480`, l'API répond `totalXp: 44480` (et
+`xp: 3855` pour l'intra-niveau, que le classement ne publie pas et dont l'import
+ne se sert pas).
+
+Trois propriétés en font une source utile et non un pis-aller :
+
+1. **Cent profils suffisent.** Sur la guilde Rose Griffon, le 1ᵉʳ a 44 480 XP et
+   le **100ᵉ en a 120**, soit le niveau 0. Au-delà, il n'y a rien de
+   significatif à importer.
+2. **Les quatre tris élargissent la couverture.** `?sort=level|messages|voice|reactions`
+   rendent quatre top-100 différents : leur union donne **163 membres
+   distincts** au lieu de 100. La fusion garde le maximum de chaque compteur.
+3. **Elle amorce l'import par API.** L'ordre du classement devient l'ordre
+   d'interrogation : si le quota interrompt l'import, ce qui est fait est ce qui
+   comptait.
+
+Deux contraintes à connaître :
+
+- **Cloudflare juge sur l'empreinte TLS.** Le `fetch` de Bun reçoit `403` avec
+  `cf-mitigated: challenge` sur toutes les pages HTML de noctaly.com, là où
+  `curl` passe en 200. Aucun en-tête n'y change rien. L'import passe donc par un
+  sous-processus `curl` pour cette source — et par `fetch` pour l'API, qui n'est
+  PAS derrière ce défi.
+- **La page exige une session.** En anonyme elle répond 200 mais sans profils
+  (0 au lieu de 100). Les cookies vivent dans `.secrets/noctaly-cookies.json`
+  (jamais versionné) et **expirent** : sans eux, cette source rend simplement
+  zéro profil, ce qui n'est pas une panne.
+
+Sans clé API, l'import ne s'arrête plus : il tourne en **mode dégradé** sur
+cette seule source au lieu de sortir en erreur.
+
+### Le module d'économie est éteint — et le savoir divise l'import par deux
+
+`GET /guilds/{id}/items` répond `400 {"code":"module_disabled"}` sur ce serveur,
+et `eco-profile` répond `404` pour chaque membre. L'import sonde donc **une
+fois** ce catalogue : si le module est éteint, la passe d'économie entière est
+abandonnée.
+
+Sans cette sonde, l'import posait une seconde question par membre — mille huit
+cents requêtes — dont la réponse était connue d'avance. À 120 requêtes par
+minute, ce n'était pas « un peu de réseau » : c'était le double de la durée et
+le double des occasions de déclencher un 429.
+
+Le statut HTTP seul ne suffit pas à trancher (400 ne distingue pas un module
+éteint d'une requête malformée) : c'est le champ `code` du corps qui porte
+l'information, d'où le second paramètre de `classerReponse`.
 
 **Tout est archivé brut avant d'être interprété.** `bot_import_noctaly` garde
 les deux réponses JSON verbatim, `bot_import_noctaly_catalogue` les deux
