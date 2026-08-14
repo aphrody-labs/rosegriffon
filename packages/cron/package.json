@@ -1,7 +1,7 @@
 {
 	"name": "@rosegriffon/cron",
 	"version": "0.1.0",
-	"description": "Daemon de t\u00e2ches planifi\u00e9es (cron) pour la maintenance DB, CDN et API",
+	"description": "Daemon de tâches planifiées (cron) pour la maintenance DB, CDN et API",
 	"private": true,
 	"type": "module",
 	"main": "./src/index.ts",
@@ -11,7 +11,7 @@
 	"scripts": {
 		"start": "bun src/index.ts",
 		"build": "bun build src/index.ts --compile --minify --sourcemap --bytecode --format esm --external @aphrody-code/bxc --external @aphrody-code/bxc/google --external @aphrody-code/bxc/internal/html-utils --outfile dist/rg-cron",
-		"type-check": "tsc -p tsconfig.typecheck.json --noEmit",
+		"type-check": "bun --bun tsc -p tsconfig.typecheck.json --noEmit",
 		"lint": "bunx oxlint -c ../../.oxlintrc.json src"
 	},
 	"dependencies": {

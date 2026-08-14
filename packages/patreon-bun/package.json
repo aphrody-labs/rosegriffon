@@ -47,7 +47,7 @@
 	},
 	"scripts": {
 		"build:js": "bun build src/index.ts --outdir dist --target bun --format esm",
-		"build:types": "tsc --emitDeclarationOnly --noCheck",
+		"build:types": "bun --bun tsc --emitDeclarationOnly --noCheck",
 		"build": "bun run build:js && bun run build:types",
 		"prepublishOnly": "bun run build"
 	},

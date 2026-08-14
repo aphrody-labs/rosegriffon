@@ -1,7 +1,7 @@
 {
 	"name": "@rosegriffon/inagle",
 	"version": "2.0.2",
-	"description": "Universal Game Data API for Inazuma Eleven: Victory Road \u2014 parsers, types, and tools for IEVR game data",
+	"description": "Universal Game Data API for Inazuma Eleven: Victory Road — parsers, types, and tools for IEVR game data",
 	"keywords": [
 		"cfg-bin",
 		"game-data",
@@ -46,7 +46,7 @@
 		"registry": "https://registry.npmjs.org"
 	},
 	"scripts": {
-		"build": "bun run tsc -p tsconfig.build.json",
+		"build": "bun --bun tsc -p tsconfig.build.json",
 		"cli": "bun src/cli.ts",
 		"entries": "bun src/scripts/generate-entries.ts",
 		"push": "bun src/cli.ts push",
@@ -56,7 +56,7 @@
 		"test": "bun test",
 		"lint": "bunx oxlint -c ../../.oxlintrc.json -A style -A pedantic -A restriction src",
 		"lint:fix": "bunx oxlint -c ../../.oxlintrc.json -A style -A pedantic -A restriction --fix src",
-		"type-check": "tsc -p tsconfig.build.json --noEmit"
+		"type-check": "bun --bun tsc -p tsconfig.build.json --noEmit"
 	},
 	"dependencies": {
 		"@aphrody-code/bxc": "catalog:",

@@ -1,7 +1,7 @@
 {
 	"name": "@rosegriffon/azalee",
 	"version": "1.0.0",
-	"description": "Biblioth\u00e8que Bun du wiki Azal\u00e9e (Inazuma Eleven: Victory Road) \u2014 acc\u00e8s donn\u00e9es via miroir SQLite, index CPK, index de texte de jeu, r\u00e9solution d'URLs CDN, recherche floue et CLI.",
+	"description": "Bibliothèque Bun du wiki Azalée (Inazuma Eleven: Victory Road) — accès données via miroir SQLite, index CPK, index de texte de jeu, résolution d'URLs CDN, recherche floue et CLI.",
 	"keywords": [
 		"azalee",
 		"bun",
@@ -66,7 +66,7 @@
 		"registry": "https://registry.npmjs.org"
 	},
 	"scripts": {
-		"build": "bun run tsc -p tsconfig.build.json && bun scripts/copy-data.ts",
+		"build": "bun --bun tsc -p tsconfig.build.json && bun scripts/copy-data.ts",
 		"cli": "bun src/cli.ts",
 		"compile": "bun scripts/build-standalone.ts",
 		"serve": "bun src/cli.ts serve",
@@ -74,7 +74,7 @@
 		"test": "bun test",
 		"lint": "bunx oxlint -c ../../.oxlintrc.json -A style -A pedantic -A restriction src",
 		"lint:fix": "bunx oxlint -c ../../.oxlintrc.json -A style -A pedantic -A restriction --fix src",
-		"type-check": "tsc --noEmit",
+		"type-check": "bun --bun tsc --noEmit",
 		"clean": "rm -rf dist *.tsbuildinfo",
 		"prepublishOnly": "bun run build"
 	},
