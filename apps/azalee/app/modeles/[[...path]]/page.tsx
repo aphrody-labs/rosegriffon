@@ -19,7 +19,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { MediaCount, MediaEmpty, MediaHeader } from "@/components/wiki/MediaShell";
 import InlineModelViewer from "@/components/wiki/InlineModelViewer";
-import { lsOrNull } from "@rosegriffon/azalee/cpk/live";
+import { cpkExplorerHref, lsOrNull } from "@rosegriffon/azalee/cpk/live";
 import { cpkThumbUrl } from "@rosegriffon/azalee/cpk/shared";
 import {
 	MODEL_FAMILIES,
@@ -259,16 +259,27 @@ async function Fiche({ famille, code }: { famille: ModelFamily; code: string }) 
 				<InlineModelViewer glbUrl={modelGlbUrl(famille, code)} name={entree?.name ?? code} />
 			</div>
 
-			<p className="px-1 text-xs text-on-surface-variant">
+			<section className="rounded-2xl border border-outline-variant bg-surface-container-low p-4">
+				<h2 className="mb-2 text-sm font-medium text-on-surface">Télécharger</h2>
 				<a
 					href={modelGlbUrl(famille, code)}
 					download={`${code}.glb`}
-					className="text-primary hover:underline"
+					className="inline-flex items-center gap-1.5 rounded-full border border-outline-variant bg-surface-container px-3 py-1.5 text-xs text-on-surface transition hover:border-primary/50 hover:bg-surface-container-high"
 				>
-					Télécharger le GLB
-				</a>{" "}
-				— maillage, squelette et textures dans un seul fichier glTF binaire.
-			</p>
+					<span className="font-medium uppercase">glb</span>
+				</a>
+				<p className="mt-2 text-xs text-on-surface-variant">
+					glTF binaire — maillage, squelette et textures dans un seul fichier.
+					{texDir && (
+						<>
+							{" "}
+							<Link href={cpkExplorerHref(texDir)} className="text-primary hover:underline">
+								Voir les fichiers d'origine dans l'explorateur CPK
+							</Link>
+						</>
+					)}
+				</p>
+			</section>
 
 			{g4tx.length > 0 && (
 				<>
