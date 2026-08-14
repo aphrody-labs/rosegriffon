@@ -15,23 +15,18 @@ const BASE_URL = "https://azalee.rosegriffon.fr";
 
 const AURA_CATEGORIES = ["esprits-guerriers", "totems", "miximax", "eveil", "changement-mode"];
 
-const AURA_TYPE_MAP: Record<string, string> = {
-	"changement-mode": "ModeChange",
-	"esprits-guerriers": "Keshin",
-	eveil: "Awakening",
-	miximax: "Miximax",
-	totems: "Soul",
-};
-
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 	const supabase = getSupabaseClient();
 
 	// Fetch all IDs in parallel — using correct column names
-	const [characters, skills, items, auras, tactics, articles, tags] = await Promise.all([
+	const [characters, skills, items, articles, tags] = await Promise.all([
+		// `base_slug` et non `slug` : la forme canonique est celle que le site lie
+		// lui-même (5 204 valeurs), pas la variante suffixée du hash (6 148) — publier
+		// la seconde donnait un plan de site dont aucune URL n'était celle du maillage.
 		supabase
 			.from("inagle_characters")
-			.select("slug, updated_at")
-			.not("slug", "is", null)
+			.select("base_slug, updated_at")
+			.not("base_slug", "is", null)
 			.order("updated_at", { ascending: false }),
 		supabase
 			.from("inagle_skills")
@@ -40,15 +35,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 		supabase
 			.from("inagle_items")
 			.select("id, created_at")
-			.order("created_at", { ascending: false }),
-		supabase
-			.from("inagle_keshins")
-			.select("id, sub_type, created_at")
-			.order("created_at", { ascending: false }),
-		supabase
-			.from("inagle_items")
-			.select("id, created_at")
-			.eq("category", "special_tactics")
 			.order("created_at", { ascending: false }),
 		supabase
 			.from("articles")
@@ -97,6 +83,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 		{ changeFrequency: "weekly" as const, priority: 0.6, url: "/modeles/waza" },
 		{ changeFrequency: "weekly" as const, priority: 0.6, url: "/modeles/item" },
 		{ changeFrequency: "weekly" as const, priority: 0.6, url: "/modeles/armd" },
+		// Sixième famille de modèles, oubliée alors que les cinq autres sont listées.
+		{ changeFrequency: "weekly" as const, priority: 0.6, url: "/modeles/animal" },
 		{ changeFrequency: "weekly" as const, priority: 0.6, url: "/gallery" },
 		{ changeFrequency: "weekly" as const, priority: 0.6, url: "/textures" },
 		{ changeFrequency: "weekly" as const, priority: 0.6, url: "/sons" },
@@ -174,7 +162,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 				changeFrequency: "monthly",
 				lastModified: c.updated_at ? new Date(c.updated_at) : new Date(),
 				priority: 0.8,
-				url: `${BASE_URL}/chara/${c.slug}`,
+				url: `${BASE_URL}/chara/${c.base_slug}`,
 			});
 		}
 	}
@@ -182,6 +170,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 	// Skills
 	if (skills.data) {
 		for (const s of skills.data) {
+			// Les identifiants suffixés `_or` sont écartés de la liste par le service
+			// (`getSkillsList`) : les annoncer produisait 34 URLs orphelines, hors de
+			// toute navigation, pour des doublons de technique.
+			if (typeof s.id === "string" && s.id.endsWith("_or")) continue;
 			entries.push({
 				changeFrequency: "monthly",
 				lastModified: s.created_at ? new Date(s.created_at) : new Date(),
@@ -203,34 +195,61 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 		}
 	}
 
-	// Auras (keshins, souls, miximax, etc.)
-	if (auras.data) {
-		const typeToCategory: Record<string, string> = {};
-		for (const [cat, type] of Object.entries(AURA_TYPE_MAP)) {
-			typeToCategory[type] = cat;
-		}
-
-		for (const a of auras.data) {
-			const category = typeToCategory[a.sub_type] || "esprits-guerriers";
-			entries.push({
-				changeFrequency: "monthly",
-				lastModified: a.created_at ? new Date(a.created_at) : new Date(),
-				priority: 0.6,
-				url: `${BASE_URL}/aura/${category}/${a.id}`,
-			});
+	// Hyper-techniques — une catégorie à la fois, par le même service que les pages.
+	// L'ancienne requête lisait `inagle_keshins` en triant sur `created_at`, colonne
+	// qui n'existe pas sur cette table : elle échouait, le garde `if (auras.data)`
+	// avalait l'erreur, et AUCUNE fiche d'aura n'était annoncée. Passer par
+	// `getAurasList` fait d'une pierre deux coups : les cinq familles sont couvertes
+	// (et pas seulement les esprits), et les identifiants sont ceux que les pages
+	// résolvent réellement (`keshin_0x…`, `soul_0x…`, …), pas des hash nus.
+	for (const categorie of AURA_CATEGORIES) {
+		try {
+			for (let page = 1; ; page += 1) {
+				const { data, total } = await wikiService.getAurasList({
+					limit: 200,
+					page,
+					typeSlug: categorie,
+				});
+				for (const aura of data) {
+					entries.push({
+						changeFrequency: "monthly",
+						lastModified: new Date(),
+						priority: 0.6,
+						url: `${BASE_URL}/aura/${categorie}/${encodeURIComponent(String(aura.id))}`,
+					});
+				}
+				if (data.length === 0 || page * 200 >= total) break;
+			}
+		} catch (erreur) {
+			console.error(`[sitemap] auras ${categorie} indisponibles :`, erreur);
 		}
 	}
 
-	// Tactics
-	if (tactics.data) {
-		for (const t of tactics.data) {
-			entries.push({
-				changeFrequency: "monthly",
-				lastModified: t.created_at ? new Date(t.created_at) : new Date(),
-				priority: 0.6,
-				url: `${BASE_URL}/tactic/${t.id}`,
+	// Tactiques — par le service, donc par `internal_code` (`wht…`). L'ancienne
+	// requête publiait les identifiants hexadécimaux d'`inagle_items` filtrés sur
+	// `special_tactics` : 70 URLs qui ne résolvaient rien côté tactique, et qui
+	// doublonnaient les fiches `/item/<même id>`.
+	try {
+		for (let page = 1; ; page += 1) {
+			const { data, total } = await wikiService.getTacticsList({
+				category: "special_tactics",
+				limit: 200,
+				page,
 			});
+			for (const tactique of data) {
+				const id = (tactique as { itemId?: string }).itemId;
+				if (!id) continue;
+				entries.push({
+					changeFrequency: "monthly",
+					lastModified: new Date(),
+					priority: 0.6,
+					url: `${BASE_URL}/tactic/${encodeURIComponent(id)}`,
+				});
+			}
+			if (data.length === 0 || page * 200 >= total) break;
 		}
+	} catch (erreur) {
+		console.error("[sitemap] tactiques indisponibles :", erreur);
 	}
 
 	// Articles / News

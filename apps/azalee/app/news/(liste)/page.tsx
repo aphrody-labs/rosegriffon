@@ -5,8 +5,8 @@ import { getContinueReading } from "@/app/actions/reading-history";
 import { getPgPool } from "@/lib/db/pg";
 import { sanitizeNewsSearchQuery } from "@/lib/news-search";
 import { parseSearchParams } from "@/lib/validations";
-import { NewsFeedClient } from "./news-client";
-import type { FeedItem } from "./news-client";
+import { NewsFeedClient } from "../news-client";
+import type { FeedItem } from "../news-client";
 
 export const dynamic = "force-dynamic";
 

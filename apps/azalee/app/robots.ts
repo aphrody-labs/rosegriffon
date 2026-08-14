@@ -7,14 +7,42 @@ export default function robots(): MetadataRoute.Robots {
 		rules: [
 			{
 				// /api/llm/* = contexte IA (CLAUDE.md/GEMINI.md/Grok) : autorisé (allow plus spécifique que disallow /api/).
-				allow: ["/", "/api/llm/"],
-				disallow: ["/dashboard/", "/api/", "/auth/", "/login", "/settings"],
+				// `/api/og/` : les cartes de partage des 5 204 fiches de personnage sont
+				// servies depuis là ; interdites, elles laissaient chaque partage sans
+				// visuel. Comme `/api/llm/`, l'autorisation précède l'interdiction.
+				allow: ["/", "/api/llm/", "/api/og/"],
+				disallow: [
+					"/dashboard/",
+					"/api/",
+					"/auth/",
+					"/login",
+					"/settings",
+					// Pages de compte : elles exposent la biographie d'un membre en
+					// description, sans intérêt d'index et sans consentement demandé.
+					"/profil/",
+					// Page technique, sans contenu propre.
+					"/maintenance",
+				],
 				userAgent: "*",
 			},
 			{
 				// Crawlers IA explicitement autorisés (condition pour l'ingestion LLM)
-				allow: ["/", "/api/llm/"],
-				disallow: ["/dashboard/", "/api/", "/auth/", "/login", "/settings"],
+				// `/api/og/` : les cartes de partage des 5 204 fiches de personnage sont
+				// servies depuis là ; interdites, elles laissaient chaque partage sans
+				// visuel. Comme `/api/llm/`, l'autorisation précède l'interdiction.
+				allow: ["/", "/api/llm/", "/api/og/"],
+				disallow: [
+					"/dashboard/",
+					"/api/",
+					"/auth/",
+					"/login",
+					"/settings",
+					// Pages de compte : elles exposent la biographie d'un membre en
+					// description, sans intérêt d'index et sans consentement demandé.
+					"/profil/",
+					// Page technique, sans contenu propre.
+					"/maintenance",
+				],
 				userAgent: [
 					"GPTBot",
 					"ChatGPT-User",
