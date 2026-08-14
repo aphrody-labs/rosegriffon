@@ -122,12 +122,71 @@
  *   corriger avec `UPDATE bot_recompenses_niveau SET cumulable = true WHERE
  *   guild_id = '<RG_GUILD_ID>'` (cf. @rosegriffon/types/discord).
  *
+ * ── PASSE 2 : `--source=historique` ─────────────────────────────────────────
+ *   Deuxième passe demandée après le premier import, sur le seul point qui
+ *   manquait : élargir la couverture SANS clé API humaine, en dépouillant
+ *   l'historique complet des salons où Noctaly a répondu (pas seulement le
+ *   dernier `/leaderboard`).
+ *
+ *   Méthode : pagination intégrale (`before=`) de chaque salon via
+ *   `GET /channels/{id}/messages`, ~5 req/s (cadence choisie pour ne pas
+ *   gêner `rg-bot.service`/`azalee-bot.service` qui partagent le même jeton
+ *   et donc le même compartiment de rate-limit Discord — d'où les pauses
+ *   « rate limited » observées pendant le scan, absorbées par une reprise
+ *   automatique sur l'en-tête `retry_after`), en ne gardant que les messages
+ *   `author.id = 875811233616519219`. Chaque `/rank` donne l'XP EXACTE d'UN
+ *   membre (attachement `card.png`, dont le texte « XP TOTAL » est lu
+ *   visuellement) ; chaque `/leaderboard` en donne dix, arrondis à la
+ *   centaine par Noctaly à l'affichage ; chaque embed « Niveau supérieur »
+ *   donne un niveau annoncé sans XP exacte — dans ce cas on retient le seuil
+ *   OFFICIEL de ce palier (colonne « Total XP » de noctaly.com/table, jamais
+ *   inventé) comme minorant, explicitement marqué `seuil-officiel-palier`.
+ *
+ *   Salons couverts (pagination intégrale, jusqu'au premier message) :
+ *     - #🤖〡bots (1135698156835852369) : 6 119 messages, 31/7/2023→13/8/2026,
+ *       19 messages Noctaly (tous entre le 11/3/2026 et le 9/8/2026).
+ *     - #💬〡général (1135528098146816010), #📷〡médias (1135660042025193472),
+ *       #🤪〡memes-inazuma (1140743411901661275) : sondés positifs sur le
+ *       dernier lot de 100 messages, paginés intégralement.
+ *     - #🕵〡présentations, #🧐〡sondages, #🌹〡rose-griffon : sondés à 0 message
+ *       Noctaly sur leur dernier lot de 100 → écartés (règle : deux salons
+ *       d'affilée sans résultat arrêtent la piste, cf. le detail dans le
+ *       commit).
+ *   Résolution pseudo → ID Discord réel : `GET /guilds/{id}/members/search`,
+ *   confirmée par recoupement (date d'entrée sur le serveur cohérente avec le
+ *   niveau observé, ou global_name+nick exact) — jamais un pseudo assigné
+ *   sans recoupement. Deux pseudos rencontrés n'ont PAS pu être résolus
+ *   (plusieurs comptes candidats sans certitude, ou pseudo à caractères
+ *   Unicode décoratifs non cherchable) : listés comme non-résolus plutôt que
+ *   devinés, cf. `MESURES_NON_RESOLUES` plus bas.
+ *
+ *   Piste 3 (endpoint public de noctaly.com) : le JS servi par la page
+ *   `/leaderboard/<guild>` a été inspecté (tous les chunks `_next/static`
+ *   téléchargés et grep'és) — aucun endpoint public distinct de l'API
+ *   documentée n'y est visible en clair (les fetch trouvés sont soit le
+ *   routeur RSC interne de Next.js, soit un wrapper générique dans le module
+ *   de dashboard). Le seul endpoint concret trouvé est celui déjà documenté
+ *   plus haut, `GET https://noctaly.com/api/v1/guilds/{id}/users/{id}/level-
+ *   profile` — **testé en direct sans clé** : réponse `HTTP 401
+ *   {"code":"unauthenticated","message":"You are not authenticated."}`.
+ *   Confirme la conclusion de la passe 1 (empiriquement, pas seulement via
+ *   le SDK). Aucun contournement tenté.
+ *
+ *   Fusion en base : `xp = GREATEST(bot_profils.xp, EXCLUDED.xp)` — une
+ *   mesure ancienne retrouvée par ce scan ne doit jamais écraser une valeur
+ *   plus fraîche déjà en base (le niveau suit la même règle via `niveauPour`
+ *   appliqué à la XP retenue après le `GREATEST`, recalculé côté SQL avec un
+ *   `CASE` — voir `importerHistorique`).
+ *
  * ── UTILISATION ──────────────────────────────────────────────────────────
- *   bun apps/bot/src/scripts/import-xp-tiers.ts --essai   # rien n'est écrit
- *   bun apps/bot/src/scripts/import-xp-tiers.ts            # écrit réellement
- *   Idempotent : `ON CONFLICT (guild_id, discord_id) DO UPDATE` pour les
- *   profils, `ON CONFLICT (guild_id, niveau, role_id) DO UPDATE` pour les
- *   récompenses — relancer ce script ne duplique rien.
+ *   bun apps/bot/src/scripts/import-xp-tiers.ts --essai   # top 10, rien écrit
+ *   bun apps/bot/src/scripts/import-xp-tiers.ts            # top 10, écrit
+ *   bun apps/bot/src/scripts/import-xp-tiers.ts --source=historique --essai
+ *   bun apps/bot/src/scripts/import-xp-tiers.ts --source=historique
+ *   Idempotent dans les deux modes : `ON CONFLICT (guild_id, discord_id) DO
+ *   UPDATE` pour les profils (avec `GREATEST` en mode historique — jamais de
+ *   downgrade), `ON CONFLICT (guild_id, niveau) DO UPDATE` pour les
+ *   récompenses — relancer ce script ne duplique rien et ne rétrograde rien.
  */
 import { RG_GUILD_ID } from "@rosegriffon/types/discord";
 
@@ -188,7 +247,80 @@ const PALIERS_ROLES_NOCTALY: readonly PalierRoleNoctaly[] = [
 	{ palierNoctaly: 60, xpNoctaly: 411_650, roleTextuel: "1086619301714329720" },
 ] as const;
 
+/** Comment la valeur d'XP d'une mesure historique a été obtenue. */
+type Precision = "exacte" | "arrondie-centaine" | "seuil-officiel-palier";
+
+interface MesureHistorique {
+	pseudo: string;
+	/** Résolu via GET /guilds/{id}/members/search, recoupé (dates/pseudo exact) — jamais deviné. */
+	discordId: string;
+	/** XP retenue pour ce membre — déjà la plus fraîche parmi tous ses sightings. */
+	xp: number;
+	/** Niveau Noctaly annoncé à ce moment (traçabilité seule, jamais écrit dans bot_profils.niveau). */
+	niveauNoctaly: number;
+	/** Horodatage ISO du message source le plus récent retenu. */
+	mesureLe: string;
+	precision: Precision;
+	/** ID du message Discord source, pour audit. */
+	sourceMessageId: string;
+	/** Salon source. */
+	sourceChannel: string;
+}
+
+/**
+ * Chaque membre n'apparaît qu'une fois : quand plusieurs sightings existaient
+ * (plusieurs `/leaderboard` au fil du temps, un `/rank` puis un
+ * `/leaderboard` plus tard…), seul le plus RÉCENT est gardé ici — la
+ * fusion « ne jamais rétrograder » est de toute façon refaite en SQL avec
+ * `GREATEST` au cas où une valeur plus fraîche existe déjà en base depuis la
+ * passe 1.
+ */
+const HISTORIQUE_NOCTALY: readonly MesureHistorique[] = [
+	// #🤖〡bots — /leaderboard du 9/8/2026 (déjà en base depuis la passe 1, réécrit ici à l'identique)
+	{ pseudo: "Mioleen_", discordId: "435479810731409408", xp: 44_400, niveauNoctaly: 26, mesureLe: "2026-08-09T16:17:09.953Z", precision: "arrondie-centaine", sourceMessageId: "1536045686259323010", sourceChannel: "#🤖〡bots" },
+	{ pseudo: "Ichigo Kurosaki", discordId: "593493079911170068", xp: 28_800, niveauNoctaly: 22, mesureLe: "2026-08-09T16:17:09.953Z", precision: "arrondie-centaine", sourceMessageId: "1536045686259323010", sourceChannel: "#🤖〡bots" },
+	{ pseudo: "Inazo", discordId: "531549483067244566", xp: 15_900, niveauNoctaly: 18, mesureLe: "2026-08-09T16:17:09.953Z", precision: "arrondie-centaine", sourceMessageId: "1536045686259323010", sourceChannel: "#🤖〡bots" },
+	{ pseudo: "IceCream", discordId: "831595693986021388", xp: 10_500, niveauNoctaly: 15, mesureLe: "2026-08-09T16:17:09.953Z", precision: "arrondie-centaine", sourceMessageId: "1536045686259323010", sourceChannel: "#🤖〡bots" },
+	{ pseudo: "Rishar", discordId: "254337557272330241", xp: 9_200, niveauNoctaly: 14, mesureLe: "2026-08-09T16:17:09.953Z", precision: "arrondie-centaine", sourceMessageId: "1536045686259323010", sourceChannel: "#🤖〡bots" },
+	{ pseudo: "Yoyo", discordId: "281114294152724491", xp: 8_700, niveauNoctaly: 14, mesureLe: "2026-08-09T16:17:09.953Z", precision: "arrondie-centaine", sourceMessageId: "1536045686259323010", sourceChannel: "#🤖〡bots" },
+	{ pseudo: "Dash", discordId: "563787814483918858", xp: 7_800, niveauNoctaly: 13, mesureLe: "2026-08-09T16:17:09.953Z", precision: "arrondie-centaine", sourceMessageId: "1536045686259323010", sourceChannel: "#🤖〡bots" },
+	{ pseudo: "ploufy !!", discordId: "987039164988030976", xp: 6_900, niveauNoctaly: 12, mesureLe: "2026-08-09T16:17:09.953Z", precision: "arrondie-centaine", sourceMessageId: "1536045686259323010", sourceChannel: "#🤖〡bots" },
+	{ pseudo: "yuan yuan", discordId: "779044049374019594", xp: 6_000, niveauNoctaly: 12, mesureLe: "2026-08-09T16:17:09.953Z", precision: "arrondie-centaine", sourceMessageId: "1536045686259323010", sourceChannel: "#🤖〡bots" },
+	{ pseudo: "Pegeto", discordId: "768526829279510529", xp: 5_500, niveauNoctaly: 11, mesureLe: "2026-08-09T16:17:09.953Z", precision: "arrondie-centaine", sourceMessageId: "1536045686259323010", sourceChannel: "#🤖〡bots" },
+	// #🤖〡bots — /leaderboard antérieurs, membres jamais revus dans un lot plus récent
+	{ pseudo: "Kokoro", discordId: "1237047037435056281", xp: 4_800, niveauNoctaly: 10, mesureLe: "2026-08-01T16:36:04.366Z", precision: "arrondie-centaine", sourceMessageId: "1533151341407506544", sourceChannel: "#🤖〡bots" },
+	{ pseudo: "Illu", discordId: "672528206565474346", xp: 3_400, niveauNoctaly: 9, mesureLe: "2026-05-01T22:13:17.226Z", precision: "arrondie-centaine", sourceMessageId: "1499896520538063078", sourceChannel: "#🤖〡bots" },
+	{ pseudo: "Lindą — every end… (nick Linda)", discordId: "817549867072356352", xp: 2_600, niveauNoctaly: 8, mesureLe: "2026-04-26T14:25:45.567Z", precision: "arrondie-centaine", sourceMessageId: "1497966924024385687", sourceChannel: "#🤖〡bots" },
+	{ pseudo: "Hassane", discordId: "411591320147066881", xp: 1_400, niveauNoctaly: 5, mesureLe: "2026-04-07T17:54:01.553Z", precision: "arrondie-centaine", sourceMessageId: "1491133966541918249", sourceChannel: "#🤖〡bots" },
+	{ pseudo: "Masamune Kadoya", discordId: "1244715598102138970", xp: 180, niveauNoctaly: 1, mesureLe: "2026-03-14T03:47:24.860Z", precision: "arrondie-centaine", sourceMessageId: "1482223600994881669", sourceChannel: "#🤖〡bots" },
+	// #🤖〡bots — /rank (carte individuelle, XP exacte lue sur "XP TOTAL")
+	{ pseudo: "IshakShyGuy", discordId: "1381331001724108892", xp: 285, niveauNoctaly: 2, mesureLe: "2026-04-07T18:04:08.604Z", precision: "seuil-officiel-palier", sourceMessageId: "1491136512698351722", sourceChannel: "#🤖〡bots" },
+	{ pseudo: "dee (fusaku master)", discordId: "504630658463694848", xp: 140, niveauNoctaly: 1, mesureLe: "2026-03-26T03:13:13.313Z", precision: "exacte", sourceMessageId: "1486563650570420325", sourceChannel: "#🤖〡bots" },
+	// #🤪〡memes-inazuma — embeds "Niveau supérieur" (mention directe de l'ID, pas de résolution nécessaire)
+	{ pseudo: "Keirakira", discordId: "215800314094157824", xp: 1_960, niveauNoctaly: 7, mesureLe: "2026-08-04T09:50:25.134Z", precision: "seuil-officiel-palier", sourceMessageId: "1534136418866171996", sourceChannel: "#🤪〡memes-inazuma" },
+	{ pseudo: "Dleez", discordId: "165739958928146432", xp: 3_225, niveauNoctaly: 9, mesureLe: "2026-07-29T17:08:57.335Z", precision: "seuil-officiel-palier", sourceMessageId: "1532072453042606303", sourceChannel: "#🤪〡memes-inazuma" },
+	{ pseudo: "Nowshad", discordId: "433035940416716810", xp: 125, niveauNoctaly: 1, mesureLe: "2026-06-06T20:47:16.392Z", precision: "seuil-officiel-palier", sourceMessageId: "1512920837592846647", sourceChannel: "#🤪〡memes-inazuma" },
+] as const;
+
+/**
+ * Pseudos rencontrés dans l'historique mais volontairement NON importés :
+ * aucun ID Discord fiable n'a pu leur être assigné (zéro invention plutôt
+ * qu'un mauvais compte crédité de l'XP d'un autre).
+ */
+const MESURES_NON_RESOLUES: ReadonlyArray<{ pseudo: string; raison: string }> = [
+	{
+		pseudo: "mimi",
+		raison:
+			"3 comptes du serveur ont exactement global_name=\"mimi\" (stsra, miminariz, miwee_) ; comparaison des avatars actuels avec l'avatar affiché sur la carte Noctaly du 14/3→26/4/2026 non concluante pour départager.",
+	},
+	{
+		pseudo: "⼁M@∃⼁⼁",
+		raison: "Pseudo à caractères Unicode décoratifs (bloc de présentation) — non cherchable de façon fiable via members/search.",
+	},
+] as const;
+
 const essai = Bun.argv.includes("--essai");
+const sourceHistorique = Bun.argv.includes("--source=historique");
 
 function ligne(discordId: string, xp: number): { discordId: string; xp: number; niveau: number } {
 	return { discordId, xp, niveau: niveauPour(xp) };
@@ -217,6 +349,40 @@ async function importerProfils(): Promise<number> {
 	return ecrites;
 }
 
+/**
+ * Passe `--source=historique` : fusionne chaque mesure retrouvée dans
+ * l'historique des salons, sans jamais rétrograder une valeur plus fraîche
+ * déjà en base. `GREATEST` sur `xp` ET sur `niveau` donne un résultat
+ * cohérent car `niveauPour` est monotone non décroissante en XP : le niveau
+ * le plus élevé des deux correspond toujours à l'XP la plus élevée des deux.
+ */
+async function importerHistorique(): Promise<number> {
+	let ecrites = 0;
+	for (const mesure of HISTORIQUE_NOCTALY) {
+		const niveau = niveauPour(mesure.xp);
+		console.log(
+			`  ${mesure.pseudo.padEnd(32)} xp ${String(mesure.xp).padStart(6)} (${mesure.precision}) ` +
+				`→ niveau jeu ${niveau} · mesuré le ${mesure.mesureLe.slice(0, 10)} (${mesure.sourceChannel})`
+		);
+		if (!essai) {
+			await sql`
+				INSERT INTO bot_profils (guild_id, discord_id, xp, niveau, maj_le)
+				VALUES (${GUILD_ID}, ${mesure.discordId}, ${mesure.xp}, ${niveau}, now())
+				ON CONFLICT (guild_id, discord_id) DO UPDATE SET
+					xp = GREATEST(bot_profils.xp, EXCLUDED.xp),
+					niveau = GREATEST(bot_profils.niveau, EXCLUDED.niveau),
+					maj_le = now()
+			`;
+		}
+		ecrites++;
+	}
+	if (MESURES_NON_RESOLUES.length > 0) {
+		console.log("\nNon résolus (aucun ID fiable, aucune écriture) :");
+		for (const m of MESURES_NON_RESOLUES) console.log(`  ${m.pseudo} — ${m.raison}`);
+	}
+	return ecrites;
+}
+
 async function importerRecompenses(): Promise<number> {
 	let ecrites = 0;
 	for (const palier of PALIERS_ROLES_NOCTALY) {
@@ -239,10 +405,13 @@ async function importerRecompenses(): Promise<number> {
 	return ecrites;
 }
 
-console.log(`=== Import XP tiers (Noctaly → bot_profils) ${essai ? "[--essai, rien n'est écrit]" : ""} ===\n`);
+console.log(
+	`=== Import XP tiers (Noctaly → bot_profils) ${sourceHistorique ? "[source=historique] " : "[source=top10] "}` +
+		`${essai ? "[--essai, rien n'est écrit]" : ""} ===\n`
+);
 
-console.log("Profils (top 10 du 9/8/2026) :");
-const profilsEcrits = await importerProfils();
+console.log(sourceHistorique ? "Profils (fusion de l'historique complet) :" : "Profils (top 10 du 9/8/2026) :");
+const profilsEcrits = sourceHistorique ? await importerHistorique() : await importerProfils();
 
 console.log("\nRécompenses de rôle par palier :");
 const recompensesEcrites = await importerRecompenses();

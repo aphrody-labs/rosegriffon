@@ -258,6 +258,7 @@ const MODULES_RG = [
 	"commands/administration/role.ts",
 	"commands/administration/salon.ts",
 	"commands/administration/sondage.ts",
+	"commands/administration/ticket.ts",
 	"commands/administration/stream.ts",
 	"commands/administration/synchroniser.ts",
 	"commands/administration/utilisateur.ts",
@@ -279,6 +280,7 @@ const MODULES_RG = [
 	"commands/profil.ts",
 	"commands/kizuna.ts",
 	"commands/collection.ts",
+	"commands/ticket.ts",
 ] as const;
 
 /**
