@@ -1,0 +1,19 @@
+[Unit]
+Description=PostgREST — API REST compatible Supabase sur la base rg locale
+After=network.target postgresql.service
+Requires=postgresql.service
+
+[Service]
+Type=simple
+ExecStart=/usr/local/bin/postgrest /etc/postgrest.conf
+Restart=always
+RestartSec=2
+User=postgrest
+Group=postgrest
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,19 @@
+[Unit]
+Description=RG RAG embedding sidecar (multilingual-e5-small, local)
+After=network.target
+
+[Service]
+Type=simple
+User=ubuntu
+WorkingDirectory=/home/ubuntu/.rg-rag-embed
+Environment=RAG_EMBED_PORT=8799
+Environment=HF_HUB_CACHE=/home/ubuntu/niers/data/.hf-cache
+Environment=TRANSFORMERS_CACHE=/home/ubuntu/niers/data/.hf-cache
+Environment=HF_HUB_OFFLINE=0
+ExecStart=/home/ubuntu/.bun/bin/bun /home/ubuntu/.rg-rag-embed/server.ts
+Restart=on-failure
+RestartSec=5
+MemoryMax=8G
+
+[Install]
+WantedBy=multi-user.target

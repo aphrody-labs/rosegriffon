@@ -1,7 +1,6 @@
 [Unit]
 # rg-mcp — serveur MCP du monorepo Rose Griffon (@rose-griffon/mcp),
-# exposé derrière nginx sur https://mcp.rosegriffon.fr/ (et
-# https://api.rosegriffon.fr/mcp).
+# exposé derrière nginx sur https://api.rosegriffon.fr/mcp.
 #
 # C'est ce que contacte un Claude Code exécuté sur une autre machine : il y
 # trouve les données du jeu (wiki Azalée, miroir SQLite, index CPK, texte du

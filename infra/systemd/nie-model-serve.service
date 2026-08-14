@@ -1,0 +1,30 @@
+# --db : miroir SQLite inagle_* (le meme que sert azalee-web). Sans lui, /story-scene
+# repond 503 « miroir SQLite absent » : la resolution automatique ne le trouve pas
+# depuis WorkingDirectory=/home/ubuntu/niers.
+# --uniform-map : resolution des uniformes (CRC32 -> G4MD+G4TX).
+[Unit]
+Description=nie-model-serve — assemblage GLB IEVR live (corps+face+uniforme depuis CPK)
+After=network.target iecode-cdn.service
+
+[Service]
+Type=simple
+User=ubuntu
+Group=ubuntu
+WorkingDirectory=/home/ubuntu/niers
+ExecStart=/home/ubuntu/niers/target/release/nie-model-serve \
+    --game-dir /home/ubuntu/.local/share/Steam/iecode/inazuma \
+    --glb-dir  /home/ubuntu/.local/share/Steam/iecode/inazuma/data/dx11/model \
+    --crc-manifest /home/ubuntu/niers/var/model-crc-manifest.ndjson \
+    --body-manifest /home/ubuntu/niers/var/body-type-manifest.ndjson \
+    --cache-dir /home/ubuntu/niers/var/model-cache \
+    --uniform-map /home/ubuntu/niers/var/uniform-model-map.ndjson \
+    --db /home/ubuntu/rg/apps/azalee/data/backups/mirror.sqlite \
+    --port 8790 --preload
+Environment=RUST_LOG=info
+Environment=NIE_CPK_CACHE_BUDGET_GIB=8
+Restart=always
+RestartSec=5s
+LimitNOFILE=4096
+
+[Install]
+WantedBy=multi-user.target
