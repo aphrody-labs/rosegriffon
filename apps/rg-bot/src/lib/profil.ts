@@ -225,7 +225,11 @@ export interface Profil {
  * commandes eux-mêmes.
  */
 const MODULES_AZALEE = [
-	"commands/article.ts",
+	// `/article` n'est PAS ici : il lit les articles des DEUX sites, pas seulement
+	// ceux du jeu, et son pendant d'écriture (`/gestion article`) vit déjà chez le
+	// bot Rose Griffon. Le laisser au profil Azalée séparait la lecture de
+	// l'écriture entre deux identités Discord, ce qui n'a aucun sens pour le
+	// staff qui utilise les deux dans la même minute. Cf. `docs/bot-commandes.md`.
 	"commands/azalee-jeu.ts",
 	"commands/cpk.ts",
 	"commands/rag.ts",
@@ -265,6 +269,9 @@ const MODULES_RG = [
 	"commands/administration/utilisateur.ts",
 	"commands/administration/veille.ts",
 	"commands/agenda.ts",
+	// Lecture publique des articles des deux sites. Son pendant d'écriture est
+	// `commands/administration/article.ts`, juste au-dessus.
+	"commands/article.ts",
 	"commands/staff/racine.ts",
 	"commands/staff/cron.ts",
 	"commands/staff/discord.ts",

@@ -297,6 +297,20 @@ describe("marque", () => {
  * (`/staff cron statut` reste sous `/staff`). C'est cette distinction qui rend
  * la disjonction mesurable au lieu d'être postulée.
  */
+/**
+ * Les commandes de PREMIER NIVEAU déclarées par un fichier.
+ *
+ * Deux formes coexistent dans le dépôt, et il faut les deux :
+ *
+ *   - `@SlashGroup({ name: "kizuna" })` — une racine à sous-commandes. Les
+ *     déclarations portant `root:` sont ignorées : ce sont des sous-groupes
+ *     (`/gestion ticket`), pas des racines.
+ *   - `@Slash({ name: "profil" })` sur une classe SANS `@SlashGroup` — une
+ *     commande plate. `/profil` et `/classement` sont dans ce cas, et une
+ *     détection qui ne regardait que les groupes les rendait invisibles au
+ *     test : le contrôle de disjonction des deux bots passait alors sans les
+ *     voir.
+ */
 function commandesRacines(source: string): string[] {
 	const noms: string[] = [];
 	for (const bloc of source.matchAll(/@SlashGroup\(\s*\{([\s\S]*?)\}\s*\)/g)) {
@@ -307,6 +321,20 @@ function commandesRacines(source: string): string[] {
 		const nom = /\bname\s*:\s*"([^"]+)"/.exec(corps);
 		if (nom?.[1]) {
 			noms.push(nom[1]);
+		}
+	}
+
+	// Découpe par classe décorée : une commande plate n'est plate que si SA
+	// classe ne porte aucun `@SlashGroup`.
+	for (const classe of source.split("@Discord()").slice(1)) {
+		if (/@SlashGroup\(/.test(classe)) {
+			continue;
+		}
+		for (const bloc of classe.matchAll(/@Slash\(\s*\{([\s\S]*?)\}\s*\)/g)) {
+			const nom = /\bname\s*:\s*"([^"]+)"/.exec(bloc[1] ?? "");
+			if (nom?.[1]) {
+				noms.push(nom[1]);
+			}
 		}
 	}
 	return noms;
@@ -426,12 +454,15 @@ describe("modules de commandes", () => {
 	test("les commandes attendues sont bien du bon côté", async () => {
 		const [rg, azalee] = await Promise.all([commandesDuProfil("rg"), commandesDuProfil("azalee")]);
 
-		// Le wiki et le jeu — plus `/article`, dont la lecture publique relève de
-		// l'actualité du wiki, tandis que son ÉCRITURE reste `/gestion article`
-		// côté Rose Griffon.
-		for (const commande of ["azalee", "cpk", "rag", "cdn", "x", "article"]) {
+		// Le wiki et le jeu, et RIEN d'autre. `/article` a rejoint le bot Rose
+		// Griffon le 14/8/2026 : il lit les articles des DEUX sites, et son pendant
+		// d'écriture (`/gestion article`) vivait déjà là. Séparer la lecture de
+		// l'écriture entre deux identités Discord n'avait aucun sens pour le staff,
+		// qui utilise les deux dans la même minute (cf. `docs/bot-commandes.md`).
+		for (const commande of ["azalee", "cpk", "rag", "cdn", "x"]) {
 			expect(`${commande}:${azalee.has(commande)}`).toBe(`${commande}:true`);
 		}
+		expect(`article:${azalee.has("article")}`).toBe("article:false");
 		// La communauté, l'administration — et `/staff`, la consultation de
 		// l'exploitation : elle parle des services Rose Griffon, elle vit donc sur
 		// le bot Rose Griffon.
@@ -443,9 +474,27 @@ describe("modules de commandes", () => {
 			"staff",
 			"membre",
 			"sondage",
+			"article",
+			// La vie de communauté, arrivée le 14/8/2026.
+			"profil",
+			"classement",
+			"kizuna",
+			"collection",
+			"personnaliser",
+			"ticket",
 		]) {
 			expect(`${commande}:${rg.has(commande)}`).toBe(`${commande}:true`);
 		}
+	});
+
+	test("aucune racine n'est servie par les DEUX bots à la fois", async () => {
+		// Les deux bots vivent sur le même serveur. Deux `/article` dans la même
+		// liste d'autocomplétion, le membre n'a aucun moyen de savoir laquelle il
+		// déclenche — c'est la raison d'être de la disjonction, et elle ne se voit
+		// pas en lisant les deux listes de modules côte à côte.
+		const [rg, azalee] = await Promise.all([commandesDuProfil("rg"), commandesDuProfil("azalee")]);
+		const communes = [...rg].filter((commande) => azalee.has(commande));
+		expect(communes.toSorted()).toEqual([]);
 	});
 });
 
