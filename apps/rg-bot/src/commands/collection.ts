@@ -33,7 +33,11 @@ import {
 import { getCharacterFaceUrl, resolveAssetUrl } from "@rosegriffon/azalee";
 
 import { formaterJetons, verifierDepense } from "../lib/kizuna";
-import { renderCarteTirage } from "../lib/canvas/communaute";
+import {
+	CASES_PAR_CARTE,
+	renderCarteCollection,
+	renderCarteTirage,
+} from "../lib/canvas/communaute";
 import {
 	libelleCompletion,
 	ordreRarete,
@@ -187,6 +191,15 @@ export class CollectionCommand {
 		})
 		membre: User | undefined,
 		@SlashOption({
+			description: "Page de la grille (24 joueurs par page)",
+			maxValue: 300,
+			minValue: 1,
+			name: "page",
+			required: false,
+			type: ApplicationCommandOptionType.Integer,
+		})
+		page: number | undefined,
+		@SlashOption({
 			description: "Afficher la collection dans le salon (privé par défaut)",
 			name: "partager",
 			required: false,
@@ -224,35 +237,46 @@ export class CollectionCommand {
 				collection.map((joueur) => ({ objetId: joueur.id, rarete: joueur.rarete })),
 				recense
 			);
+
+			// La page demandée, du plus rare au plus commun — c'est l'ordre dans
+			// lequel on regarde une collection, et le seul qui rende la grille
+			// lisible d'un coup d'œil.
+			const trie = collection.toSorted(
+				(a, b) => ordreRarete(b.rarete) - ordreRarete(a.rarete) || a.nom.localeCompare(b.nom, "fr")
+			);
+			const pages = Math.max(1, Math.ceil(trie.length / CASES_PAR_CARTE));
+			const numero = Math.min(pages, Math.max(1, Math.floor(page ?? 1)));
+			const tranche = trie.slice((numero - 1) * CASES_PAR_CARTE, numero * CASES_PAR_CARTE);
+
+			const image = await renderCarteCollection(
+				cible.displayName,
+				tranche.map((joueur) => ({
+					element: joueur.element,
+					nom: joueur.nom,
+					portraitUrl: portraitDe(joueur.code),
+					rarete: joueur.rarete,
+				})),
+				{
+					completion: libelleCompletion(resume, recense),
+					note: `${entierLisible(collection.length)} joueur${collection.length > 1 ? "s" : ""} recruté${collection.length > 1 ? "s" : ""}`,
+				}
+			);
+
+			// Le décompte par rareté reste en texte : c'est ce qu'on compare entre
+			// deux membres, et une image ne se lit pas par un lecteur d'écran.
 			const carte = fiche({
 				description: libelleCompletion(resume, recense),
 				icone: "collection",
 				titre: `Collection de ${cible.displayName}`,
 			});
-
-			// Un champ par rareté, du plus rare au plus commun : c'est l'ordre dans
-			// lequel on regarde une collection.
 			for (const entree of resume.parRarete.toReversed()) {
-				if (entree.nombre === 0) {
-					continue;
-				}
-				const joueurs = collection
-					.filter((joueur) => rareteDe(joueur.rarete).code === entree.rarete.code)
-					.map((joueur) => joueur.nom);
-				carte.bloc(
-					`${entree.rarete.nom} — ${entierLisible(entree.nombre)}`,
-					joueurs.join(" · "),
-					entree.rarete.code >= 10 ? 3 : 1
-				);
-			}
-			if (carte.tronquee) {
-				carte.champ(
-					"Liste écourtée",
-					"La collection ne tient pas dans un message. Le wiki en montrera bientôt le détail."
-				);
+				carte.champ(entree.rarete.nom, entierLisible(entree.nombre), { enLigne: true });
 			}
 
-			await interaction.editReply({ embeds: [piedDeCommande(carte.embed, interaction)] });
+			await interaction.editReply({
+				embeds: [piedDeCommande(carte.embed, interaction, { page: numero, pages })],
+				files: [new AttachmentBuilder(image, { name: `collection-${cible.id}.png` })],
+			});
 		} catch (err) {
 			await repondre(
 				interaction,
