@@ -66,9 +66,21 @@ réellement passe par lui — jamais par un salon vu par les membres.
 
 ### Import de l'XP — état réel
 
-`apps/bot/src/scripts/import-xp-tiers.ts` a récupéré **65 membres sur ~1 902**
-(3,4 %). Deux modes : le premier (top 10, image `/leaderboard` du 9/8/2026,
-XP arrondie à la centaine) puis `--source=historique`, qui a dépouillé
+> **Fait le 14/8/2026 : 283 profils en base.** La clé API a été créée sur le
+> tableau de bord Noctaly, et l'import complet a tourné : **1 834 membres
+> interrogés, 271 profils importés**, 51 sans XP, 1 512 inconnus de Noctaly,
+> 322 archives brutes. `bot_profils` porte désormais **283 lignes toutes
+> porteuses d'XP**, XP maximale 44 480, niveau 32.
+>
+> Le reste de cette section décrit ce qui a été fait AVANT la clé, et pourquoi
+> une partie des XP reste un minorant : c'est ce que la colonne « source » du
+> classement (`/admin/bot/membres`) rend visible.
+
+#### Avant la clé — le dépouillement de l'historique
+
+`apps/bot/src/scripts/import-xp-tiers.ts` avait récupéré **65 membres sur
+~1 902** (3,4 %). Deux modes : le premier (top 10, image `/leaderboard` du
+9/8/2026, XP arrondie à la centaine) puis `--source=historique`, qui a dépouillé
 l'historique COMPLET de six salons plutôt qu'un seul instantané — fusion
 `GREATEST(xp, ...)` en base, une mesure ancienne ne rétrograde jamais une
 valeur plus fraîche déjà écrite.
@@ -188,6 +200,13 @@ Deux contraintes à connaître :
 Sans clé API, l'import ne s'arrête plus : il tourne en **mode dégradé** sur
 cette seule source au lieu de sortir en erreur.
 
+**Ce que le classement ne remplace pas.** Mesuré sur l'import complet : le
+classement connaissait 163 membres, l'API en a trouvé **271** avec de l'XP. Les
+108 de différence sont des membres sortis des quatre top-100 — chacun sous les
+120 XP du centième, mais bien réels. Le classement est donc une **amorce
+excellente et une source de secours honnête**, pas un substitut à la boucle
+complète : il couvre 60 % des profils pour 4 requêtes au lieu de 1 834.
+
 ### Le module d'économie est éteint — et le savoir divise l'import par deux
 
 `GET /guilds/{id}/items` répond `400 {"code":"module_disabled"}` sur ce serveur,
@@ -203,6 +222,30 @@ le double des occasions de déclencher un 429.
 Le statut HTTP seul ne suffit pas à trancher (400 ne distingue pas un module
 éteint d'une requête malformée) : c'est le champ `code` du corps qui porte
 l'information, d'où le second paramètre de `classerReponse`.
+
+Gain mesuré sur l'import complet du 14/8/2026 : **1 834 requêtes évitées**, la
+moitié du total. L'import est passé de ~30 minutes annoncées à 15.
+
+### Où ça se regarde — `/admin/bot/membres`
+
+Le classement importé n'était visible que depuis Discord, dix lignes à la fois.
+La page `/admin/bot/membres` l'expose en entier : pagination, quatre tris (XP,
+jetons gagnés, messages, activité récente), et surtout une colonne **source**.
+
+Cette colonne n'est pas décorative. Elle se déduit de l'archive, qui est
+auto-descriptive — la réponse d'API porte `totalXp`, l'entrée de classement
+porte `userID`, et l'absence d'archive signale le dépouillement d'historique :
+
+| Source | Nature de l'XP | Compte au 14/8/2026 |
+|---|---|---:|
+| API Noctaly | valeur exacte | 160 |
+| Classement public | exacte, datée du dernier rendu | 0 |
+| Historique des salons | **minorant** (seuil du palier annoncé) | 12 |
+
+Afficher un classement sans dire d'où vient chaque ligne inviterait à comparer
+des valeurs qui ne sont pas de même nature. L'en-tête de la page donne aussi la
+couverture réelle (profils avec XP / humains présents) — la seule façon de
+répondre à « est-ce que l'import est fini ? ».
 
 **Tout est archivé brut avant d'être interprété.** `bot_import_noctaly` garde
 les deux réponses JSON verbatim, `bot_import_noctaly_catalogue` les deux
