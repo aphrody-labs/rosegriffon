@@ -141,6 +141,21 @@ const reglagesAccueil = z
 	})
 	.prefault({});
 
+/**
+ * Boîte à suggestions.
+ *
+ * `salon` à `null` par défaut : la boîte est FERMÉE tant qu'un administrateur
+ * n'a pas dit où les suggestions doivent atterrir. C'est la règle d'activation
+ * manuelle — une commande publique qui publie dans un salon ne s'ouvre pas
+ * toute seule.
+ */
+const reglagesSuggestions = z
+	.object({
+		actif: z.boolean().default(true),
+		salon: flocon.nullable().default(null),
+	})
+	.prefault({});
+
 const reglagesKizuna = z
 	.object({
 		actif: z.boolean().default(true),
@@ -155,6 +170,7 @@ export const SchemaReglages = z
 		tickets: reglagesTickets,
 		kizuna: reglagesKizuna,
 		accueil: reglagesAccueil,
+		suggestions: reglagesSuggestions,
 	})
 	.prefault({});
 
@@ -207,10 +223,12 @@ export function fusionnerReglages(
 		tickets?: Partial<ReglagesCommunaute["tickets"]>;
 		kizuna?: Partial<ReglagesCommunaute["kizuna"]>;
 		accueil?: Partial<ReglagesCommunaute["accueil"]>;
+		suggestions?: Partial<ReglagesCommunaute["suggestions"]>;
 	}
 ): ReglagesCommunaute {
 	return validerReglages({
 		accueil: { ...actuels.accueil, ...modification.accueil },
+		suggestions: { ...actuels.suggestions, ...modification.suggestions },
 		kizuna: { ...actuels.kizuna, ...modification.kizuna },
 		niveaux: { ...actuels.niveaux, ...modification.niveaux },
 		tickets: { ...actuels.tickets, ...modification.tickets },
