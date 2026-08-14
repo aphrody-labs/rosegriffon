@@ -18,6 +18,7 @@ site, et **quatre pages** sous `/admin`.
 | Réglages éditables seulement par slash command | `/admin/bot/reglages` — les cinq sections, avec des noms de salons au lieu de flocons |
 | Aucune vue de l'état des deux bots | `/admin/bot` — passerelle, latence, serveurs, mémoire, commandes |
 | Aucun inventaire des slash commands hors du code | `/admin/bot/commandes` — lu dans les processus, filtrable |
+| Classement visible seulement dans Discord, dix lignes à la fois | `/admin/bot/membres` — 283 profils, 4 tris, provenance de chaque XP |
 | Tâches cron déclenchables depuis Discord seulement | `/admin/cron` — catalogue, planification, déclenchement |
 
 ---
@@ -191,9 +192,37 @@ empêché personne de poster la requête à la main.
 | Chemin | Contenu |
 | --- | --- |
 | `/admin/bot` | Les deux profils (identité, uptime, latence, serveurs, mémoire), les compteurs de communauté, et ce qu'il reste à configurer |
+| `/admin/bot/membres` | Classement paginé : 4 tris, rang calculé en SQL, **provenance de chaque XP** |
 | `/admin/bot/reglages` | Les cinq sections, un bouton d'enregistrement chacune |
 | `/admin/bot/commandes` | Catalogue filtrable par texte, profil et portée |
 | `/admin/cron` | Les 22 tâches par famille, avec leur planification et leur bouton |
+
+### `/admin/bot/membres` — la provenance est une donnée
+
+Trois imports successifs ont alimenté `bot_profils`, et **toutes les XP ne se
+valent pas** : celle de l'API Noctaly est exacte, celle reconstituée depuis les
+annonces « Niveau supérieur » retrouvées dans les salons est un **minorant** (le
+seuil du palier, pas la valeur réelle). Un classement qui mélangerait les deux
+sans le dire inviterait à des comparaisons fausses.
+
+La provenance se déduit de l'archive, sans colonne supplémentaire : la réponse
+d'API porte `totalXp`, l'entrée de classement porte `userID`, et l'absence
+d'archive signale l'historique. Voir `couvertureImport()` et `provenanceDe()`
+dans `apps/website/src/lib/bot/membres.ts`.
+
+⚠ **Coupure serveur / client obligatoire.** `lib/bot/membres.ts` porte
+`import "server-only"` (il ouvre le pool Postgres) ; le tableau est un îlot
+`"use client"` qui a besoin des mêmes libellés et des mêmes types. Ceux-ci
+vivent donc dans `lib/bot/membres-shared.ts`, que l'îlot importe DIRECTEMENT.
+Passer par le module serveur ferait échouer le build sur un `Can't resolve 'fs'`
+très loin de sa cause — c'est le patron déjà retenu pour `lib/wiki/<x>-shared.ts`
+et `lib/cpk/`.
+
+Le rang vient d'un `row_number()` calculé sur le même tri que l'affichage : le
+déduire de l'index de page donnerait un rang juste par accident, et faux dès
+qu'une ligne est filtrée. Les tris sont une correspondance **fermée** vers des
+clauses `ORDER BY` — la valeur vient d'un paramètre d'URL, et une colonne
+concaténée dans du SQL est une injection qui attend son tour.
 
 Une **guilde configurée mais non rejointe** est signalée en tête de
 `/admin/bot` : c'est la panne la plus silencieuse du bot — le service tourne, le
