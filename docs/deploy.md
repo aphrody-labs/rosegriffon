@@ -35,6 +35,40 @@ Domaines : `rosegriffon.fr`, `azalee.rosegriffon.fr`, `api.rosegriffon.fr`
 Les configurations nginx et les unités systemd sont versionnées dans
 [`infra/`](../infra).
 
+Chaque service actif porte un **plafond mémoire**. Avant le 14/8/2026, huit d'entre eux
+tournaient en `MemoryMax=infinity` : une fuite dans n'importe lequel épuisait les 45 Gio
+de l'hôte, et c'est l'OOM killer **global** qui choisissait sa victime — il a tué
+`nie-model-serve` à 02 h 16 ce jour-là, alors que sa propre limite de 24 Gio n'était pas
+approchée. Les surfaces publiques sont à `OOMScoreAdjust=-200`, les gros consommateurs
+sans visiteur (`nie-model-serve`, `rg-rag-embed`) à `+300` : si l'hôte manque de mémoire,
+ce sont eux qui tombent, pas le wiki.
+
+De même, tous les démons sont en `Restart=always` et non `on-failure` : une sortie en
+code 0 — fin de boucle inattendue, exception avalée — laissait le service mort sans
+qu'aucune unité n'apparaisse en échec.
+
+### Vérifier que la machine et le dépôt disent la même chose
+
+```bash
+bun run infra:check     # dérive dépôt ↔ machine, sort en 1 si elle réapparaît
+bun run infra:pull      # importe la machine dans infra/
+bun run infra:diff <nom>
+```
+
+Quatre familles sont suivies : unités systemd (services **et** timers), vhosts nginx,
+réglages `sysctl`, rotation `logrotate`. La commande refuse aussi tout secret inscrit en
+dur dans une unité — ils doivent tous passer par `EnvironmentFile=`.
+
+### Cache partagé des pages de catalogue
+
+Les routes de catalogue d'azalée (`/chara`, `/skill`, `/item`…) se déclarent `no-store`
+alors qu'elles rendent un miroir de données de jeu qui ne bouge qu'aux imports : trois
+visites de `/chara` coûtaient trois rendus complets (0,449 / 0,458 / 0,434 s). Un
+micro-cache nginx d'une minute les sert désormais en **41 ms**. Il est **contourné** dès
+que la requête porte un cookie de session, et nginx refuse par défaut de mettre en cache
+une réponse qui pose un `Set-Cookie` : une page personnalisée ne peut pas être servie à
+quelqu'un d'autre. Voir `infra/nginx/00-rg-cache.conf`.
+
 ## Déployer une application Next
 
 ```bash
@@ -128,6 +162,53 @@ jamais un snapshot périmé.
 Corriger une donnée du jeu ne se fait **jamais** dans le miroir : la source est
 `packages/inagle`, poussée vers Supabase, puis répliquée. Voir
 [`database.md`](database.md) et [`azalee-lib.md`](azalee-lib.md).
+
+## Sauvegardes
+
+`rg-sauvegarde.timer` tourne chaque nuit à 03 h 15 (`scripts/ops/sauvegarde.ts`) :
+
+1. **rôles** (`pg_dumpall --globals-only`) puis **chaque base** en format custom ;
+2. **relecture** de chaque archive (`pg_restore --list`) ;
+3. **restauration réelle** de la base `rg` dans une base jetable, dont on compte les
+   tables et les lignes avant de la supprimer — une archive qui se liste bien peut
+   encore refuser de se restaurer ;
+4. **envoi hors machine** vers l'archive froide, plus les **fichiers utilisateurs**
+   (`/var/www/rg-storage`, 5,4 Gio) en incrémental `--link-dest`.
+
+Pourquoi ce niveau de méfiance : au 14/8/2026 la base `rg` — comptes, commandes,
+adhésions, wiki — n'avait **aucune** sauvegarde, et les derniers fichiers du disque,
+datés du 14 mai, faisaient 385 octets. Un dump jamais relu n'est pas une sauvegarde,
+c'est un fichier.
+
+Les fichiers utilisateurs ne gardent que **3 copies** contre 7 pour les bases : ils pèsent
+5,4 Gio et l'archive froide n'a que 5,4 Gio de marge. Mieux vaut trois jours de recul
+qu'un disque plein le jour où on en a besoin.
+
+```bash
+bun scripts/ops/sauvegarde.ts            # complet
+bun scripts/ops/sauvegarde.ts --local    # sans envoi distant
+bun scripts/ops/sauvegarde.ts --verifier # revérifie les archives présentes
+```
+
+## Surveillance
+
+`Restart=always` ne couvre que les crashs : il ne voit pas le cas « processus vivant mais
+figé », qui produit un 504 persistant. `rg-watchdog@<service>.timer` sonde donc, toutes
+les 60 s, neuf services : trois sondes HTTP consécutives, redémarrage si les trois
+échouent, plus un redémarrage préventif si la mémoire du cgroup approche son plafond.
+
+Il s'abstient pendant un déploiement (`deploy.lock`), pendant un redémarrage déjà en
+cours, et sur une **5xx applicative** — un 500 signale une application vivante mais
+fautive, qu'un redémarrage ferait boucler sans rien corriger.
+
+Un seul service était surveillé avant le 14/8/2026 ; la table des ports et des seuils
+vit dans `scripts/rg-watchdog.sh`, pour qu'ajouter un service soit une ligne et non un
+fichier de plus à laisser dériver.
+
+```bash
+sudo ./scripts/rg-watchdog.sh nie-model-serve   # essai à blanc, n'agit que si nécessaire
+systemctl list-timers 'rg-watchdog@*'
+```
 
 ## Ce qu'il ne faut jamais faire
 

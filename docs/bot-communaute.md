@@ -14,17 +14,17 @@ ne charge aucun de ces modules.
 >    administrateur ou un modérateur. Une migration ne l'allume pas, un défaut
 >    de code ne l'allume pas, et un salon ne se devine jamais par son nom.
 
-### Ce qui est déjà validé, et ne doit pas être coupé
+## Ce qui est déjà validé, et ne doit pas être coupé
 
 | Publication automatique | Décidé le | Garde en place |
-|---|---|---|
+| --- | --- | --- |
 | **Posts X du bot Azalée** (`🌸〡𝓐𝔃𝓪𝓵𝓮́𝓮`) | validé | carte de validation humaine dans `🌿📰〡général-azalée` — rien ne part sans un clic |
 | **Relais des créations iergday** (`⚙🍰〡iergday-staff`) | validé | salon de STAFF, pas public ; `relais_depuis` borne le déluge |
 
 Tout le reste (annonces de niveau, accueil, recrutements remarquables, annonces
 d'articles) est **éteint** tant qu'un humain ne l'a pas allumé.
 
-### Le défaut que cette règle a fait trouver
+## Le défaut que cette règle a fait trouver
 
 `packages/cron/src/index.ts` exposait un service HTTP d'annonces (port 3006)
 avec trois problèmes, corrigés le 14/8/2026 :
@@ -60,7 +60,7 @@ réellement passe par lui — jamais par un salon vu par les membres.
 ## 1. Ce qui a été repris de l'existant
 
 | Service en place | Ce qu'on en garde | Ce qu'on corrige |
-|---|---|---|
+| --- | --- | --- |
 | **Noctaly** (niveaux, app `875811233616519219`) | la courbe d'activité, les paliers de rôle, l'XP des membres retrouvée | la courbe devient celle **du jeu** (`inagle_exp_table`) ; l'annonce ne part plus dans le salon du message |
 | **ticketsbot.net** (tickets, depuis le 16/4/2023) | les fils privés, le salon d'historique, la numérotation (reprise à **86**) | plus aucune transcription chez un tiers ; le motif de fermeture devient **obligatoire** |
 
@@ -86,7 +86,7 @@ l'historique COMPLET de six salons plutôt qu'un seul instantané — fusion
 valeur plus fraîche déjà écrite.
 
 | Salon | Couverture | Trouvé |
-|---|---|---:|
+| --- | --- | ---: |
 | `#🤖〡bots` | intégrale, 2023→2026 | 19 (`/rank` + `/leaderboard`) |
 | `#🤪〡memes-inazuma` | intégrale, 2023→2026 | 3 |
 | `#🎈〡questions` | intégrale, 2023→2026 | 1 |
@@ -237,7 +237,7 @@ auto-descriptive — la réponse d'API porte `totalXp`, l'entrée de classement
 porte `userID`, et l'absence d'archive signale le dépouillement d'historique :
 
 | Source | Nature de l'XP | Compte au 14/8/2026 |
-|---|---|---:|
+| --- | --- | ---: |
 | API Noctaly | valeur exacte | 160 |
 | Classement public | exacte, datée du dernier rendu | 0 |
 | Historique des salons | **minorant** (seuil du palier annoncé) | 12 |
@@ -296,7 +296,7 @@ n'est pas décoratif : monter de niveau sur le Discord coûte exactement ce que 
 coûte en jeu.
 
 | Niveau | XP cumulée | ≈ messages (20 XP / min) |
-|---:|---:|---:|
+| ---: | ---: | ---: |
 | 10 | 2 422 | 121 |
 | 20 | 12 291 | 615 |
 | 30 | 38 310 | 1 916 |
@@ -365,7 +365,7 @@ fr « Jeton Kizuna », en « Bond Token », ja « キズナトークン ».
 **Trois sources, et l'absence délibérée d'une quatrième :**
 
 | Source | Détail |
-|---|---|
+| --- | --- |
 | `quotidien` | 25 jetons, +5 par jour consécutif, prime plafonnée à +50 au 11ᵉ jour |
 | `montee-niveau` | 10 × le niveau atteint |
 | `don` | de 1 à 5 000 par don, 10 000 par jour et par membre |
@@ -395,7 +395,7 @@ données du jeu, à égalité de chances. Il n'y a donc aucun taux à annoncer :
 rareté observée est celle du jeu, et elle est vérifiable sur le wiki.
 
 | Rareté | Effectif | Part | Remboursement d'un doublon |
-|---|---:|---:|---:|
+| --- | ---: | ---: | ---: |
 | Normal | 5 747 | 94,4 % | 30 |
 | Expérimenté | 150 | 2,5 % | 100 |
 | Héros | 122 | 2,0 % | 250 |
@@ -443,7 +443,7 @@ et la panne est silencieuse.
 ### Membres — privées par défaut, `partager: true` pour publier
 
 | Commande | Effet |
-|---|---|
+| --- | --- |
 | `/profil [membre] [partager]` | carte de progression (plaque du jeu en fond, joueur fétiche, rang) |
 | `/classement [critere] [page] [partager]` | niveaux ou jetons Kizuna |
 | `/kizuna solde\|quotidien\|donner\|journal` | solde, passage du jour, don, historique |
@@ -462,7 +462,7 @@ membres ordinaires (confort d'interface) ; `exigerDroits` lit le rôle réel dan
 `profiles` (la vraie garde).
 
 | Commande | Effet |
-|---|---|
+| --- | --- |
 | `/gestion niveaux reglages\|recompense\|retirer\|annonce\|salon` | progression et récompenses |
 | `/gestion ticket reglages\|poser\|role\|diagnostic\|panneau\|encours` | tickets |
 | `/gestion sondage creer\|cloturer` | sondages natifs Discord |
@@ -474,7 +474,7 @@ membres ordinaires (confort d'interface) ; `exigerDroits` lit le rôle réel dan
 `apps/website/sql/migrations/20260814_bot_communaute.sql` (+ `_reglages`, `_kizuna`).
 
 | Table | Contenu | Lisible publiquement ? |
-|---|---|---|
+| --- | --- | --- |
 | `bot_profils` | XP, niveau, jetons, cosmétiques équipés | **oui**, colonnes de classement seulement |
 | `bot_journal_kizuna` | mouvements signés | **non** — c'est un graphe social |
 | `bot_inventaire` | joueurs et plaques possédés | **non** |

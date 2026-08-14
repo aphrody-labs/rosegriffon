@@ -21,10 +21,26 @@ profil décide de cinq choses, et de rien d'autre :
 | Ce que le profil décide | Profil `rg` | Profil `azalee` |
 | --- | --- | --- |
 | Jeton lu (donc identité Discord) | `DISCORD_BOT_TOKEN` | `AZALEE_DISCORD_BOT_TOKEN` |
-| Guilde(s) d'enregistrement des commandes | `1072991720268111892` (+ Azalée) | `1349526851672080414` seule |
+| Portée des commandes | par guilde : RG, Azalée, Achillea | **globale** — tout serveur qui invite le bot |
 | Commandes chargées | communauté + `/administration` | données de jeu, archive X, `/staff` |
 | Marque des embeds (couleur, pied de page, URL de base) | `#a14b3f`, `rosegriffon.fr`, `WEBSITE_URL` | `#F89C5A`, `azalee.rosegriffon.fr`, `AZALEE_WEBSITE_URL` |
 | Salon d'annonce des posts X et nom du curseur | `DISCORD_NEWS_CHANNEL_ID`, curseur `discord` | salon `1349528692086276148` (ou `AZALEE_DISCORD_NEWS_CHANNEL_ID`), curseur `azalee` |
+
+**Pourquoi deux portées différentes.** Le bot Rose Griffon administre *une* communauté
+(membres, niveaux, accueil) : ses commandes n'ont aucun sens sur un serveur dont il ne
+connaît ni les membres ni les rôles, il reste donc enregistré serveur par serveur. Le bot
+Azalée sert le wiki — les mêmes fiches partout, aucune configuration propre à un serveur —
+et son application est **publique** (`bot_public: true`). Tant qu'il enregistrait ses
+commandes par guilde, un serveur qui l'invitait voyait un bot en ligne et **strictement
+muet** : c'est ce qui est arrivé à Achillea le 14/8/2026, absent de la liste codée en dur.
+Depuis, ses commandes sont publiées globalement — inviter le bot suffit, sans commit ni
+redéploiement.
+
+Deux conséquences à connaître. Discord met quelques minutes à propager une modification
+globale, là où une guilde est instantanée. Et surtout, Discord **additionne** les deux
+portées : les anciennes commandes de guilde doivent être effacées, sinon chaque commande
+apparaît en double sans qu'on puisse dire laquelle répond. Le service le fait au démarrage
+(`clearApplicationCommands`) et l'annonce dans son journal.
 
 Chaque profil a ses **propres** variables d'environnement pour la marque et le
 salon, et ce n'est pas une coquetterie : les deux services lisent le même

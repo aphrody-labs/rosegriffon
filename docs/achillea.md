@@ -5,8 +5,39 @@ Design / plan d'intégration d'**Achillea** (dashboard communautaire Inazuma Ele
 `api.rosegriffon.fr`, assets sur `cdn.rosegriffon.fr`, SEO aligné sur le monorepo RG, et intégration
 cross-site entre les **3 sites**.
 
-> Statut : **document de conception** (rien n'est encore implémenté ici). Le code Achillea vit dans
-> son propre repo ; ce doc décrit les points de contact côté monorepo RG.
+> Statut : **document de conception** pour les sections 1 à 7. La première passerelle réelle,
+> elle, est en service depuis le 14/8/2026 — voir la section ci-dessous. Le code Achillea vit
+> dans son propre dépôt ; ce doc décrit les points de contact côté monorepo RG.
+
+## Passerelle en service — guildes, rôles et salons (14/8/2026)
+
+Le bot Achillea expose `GET /guilds`, `/guilds/stats` et `/guilds/:id` (métadonnées d'un
+serveur Discord **avec** ses rôles et ses salons). Le monorepo RG les consomme désormais.
+
+**Deux choses étaient cassées, et ne le sont plus.** Le contrôleur `/guilds` se disait,
+en commentaire, alimenté par `scripts/ops/discord/scan-guilds.ts --db` — un script qui
+n'existait pas : `guild_role` et `guild_channel` étaient vides, les 76 lignes de `guild`
+avaient toutes leurs colonnes de scan à `NULL`, et l'API répondait `{"data":[],"total":0}`.
+Le script a été écrit côté Achillea et branché sur son refresh nocturne ; le premier
+passage a relevé **102 rôles et 113 salons** pour le serveur Achillea. Et un serveur jamais
+scanné répond `200` avec des champs nuls : la commande le **dit** au lieu d'afficher une
+fiche vide qui ressemblerait à un serveur désert.
+
+**Côté RG, en deux couches.** `apps/bot/src/services/achillea.ts` porte le transport et
+des schémas **Zod** — aucun type TypeScript ne traverse la frontière entre les deux
+dépôts, donc un `fetch` nu rendrait `any` et une colonne renommée là-bas s'afficherait
+ici en `undefined` des mois plus tard. Les schémas produisent les types **et** vérifient
+la réponse à l'exécution : une dérive devient une erreur nommée, avec le champ fautif.
+`apps/bot/src/lib/achillea-format.ts` porte la mise en forme (types de salons, groupement
+par catégorie, découpage au budget de 1 024 caractères d'un champ d'embed), testée sans
+Discord.
+
+Commandes : `/achillea serveur`, `/achillea roles`, `/achillea salons`, `/achillea scan`.
+
+L'adresse de l'API est configurable par `ACHILLEA_API_URL` ; par défaut la boucle locale
+(`http://127.0.0.1:4000`), les deux bots tournant sur la même machine. **Cette section
+corrige la table ci-dessous** : Achillea n'est plus servi depuis le VPS `51.255.162.6`,
+son bot et son front tournent sur le VPS principal.
 
 ## 0. État vérifié (tests live — 2026-06-04)
 
