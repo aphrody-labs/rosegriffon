@@ -157,12 +157,20 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
 	// Characters
 	if (characters.data) {
+		// Un `base_slug` est partagé par toutes les variantes d'un même personnage
+		// (326 slugs en regroupent plusieurs, « unknown » à lui seul en réunit 53) :
+		// sans déduplication, la même URL serait annoncée jusqu'à 58 fois. On garde
+		// la ligne la plus récemment mise à jour, les lignes arrivant déjà triées.
+		const vus = new Set<string>();
 		for (const c of characters.data) {
+			const slug = c.base_slug;
+			if (!slug || vus.has(slug)) continue;
+			vus.add(slug);
 			entries.push({
 				changeFrequency: "monthly",
 				lastModified: c.updated_at ? new Date(c.updated_at) : new Date(),
 				priority: 0.8,
-				url: `${BASE_URL}/chara/${c.base_slug}`,
+				url: `${BASE_URL}/chara/${slug}`,
 			});
 		}
 	}
