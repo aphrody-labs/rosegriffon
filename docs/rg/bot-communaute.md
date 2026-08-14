@@ -272,7 +272,39 @@ classement.
 
 ---
 
-## 9. Permissions du bot — Administrator, et c'est voulu
+## 9. Menus de rôles en libre-service
+
+`/gestion roles creer` pose un panneau dans un salon ; les membres y prennent et
+y rendent leurs rôles eux-mêmes, en **menu déroulant** (25 rôles) ou en
+**boutons** (5). C'est ce qui remplace les « rôles à réaction » d'un bot tiers :
+une réaction ne dit pas ce qu'elle donne, se retire par mégarde, et ne sait pas
+répondre.
+
+**C'est la surface la plus exposée du bot** — n'importe qui clique, sans qu'un
+humain intervienne, pendant des mois. Les rôles proposables passent donc par la
+**même garde stricte** que les récompenses de niveau (§3), et ils y passent
+**deux fois** : à l'ajout au menu, et à chaque clic (un rôle peut gagner des
+permissions après avoir été mis au menu — ce jour-là, rien n'alerte personne).
+
+Trois détails qui ne se devinent pas :
+
+- un menu déroulant Discord rend la **sélection complète**, pas le changement :
+  le calcul se fait par différence, sinon un rôle décoché n'est jamais retiré ;
+- `minValues: 0` est ce qui rend le menu **réversible** — sans lui, Discord
+  exige au moins une option et personne ne peut tout retirer ;
+- le menu ne touche **que ses propres rôles** : un rôle obtenu ailleurs
+  (récompense de niveau, rôle de staff) n'est jamais retiré parce qu'il n'était
+  pas coché ici.
+
+Retirer un rôle d'un menu, ou supprimer le menu, **ne dépouille personne** : les
+membres qui l'avaient pris le gardent.
+
+`bot_menus_roles` ne contient **aucune trace de qui a pris quel rôle** — Discord
+tient déjà cette information, et la dupliquer chez nous en ferait un historique
+de préférences (pronoms, centres d'intérêt, âge) consultable des années plus
+tard.
+
+## 10. Permissions du bot — Administrator, et c'est voulu
 
 Le bot Rose Griffon porte la permission **Administrator** sur le serveur.
 
@@ -288,7 +320,7 @@ gain nul — le vrai verrou d'accès n'est pas Discord, c'est `requireRgAdmin`
 attribue AUTOMATIQUEMENT (§3) — pas ce qu'il peut faire quand un administrateur
 Rose Griffon le lui demande.
 
-## 10. Exploitation
+## 11. Exploitation
 
 ```bash
 # après toute modification de apps/bot
