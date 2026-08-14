@@ -181,6 +181,9 @@ describe("guildes", () => {
 		expect(guildes).toContain(RG_GUILD_ID);
 		expect(guildes).toContain(AZALEE_GUILD_ID);
 		expect(guildes).toContain("111111111111111111");
+		// Achillea fait partie des guildes servies par défaut : le bot y est présent, et
+		// avant le 14/8/2026 il y était en ligne sans une seule commande.
+		expect(guildes).toContain(ACHILLEA_GUILD_ID);
 	});
 
 	test("azalee ignore les guildes supplémentaires posées pour le bot RG", () => {
