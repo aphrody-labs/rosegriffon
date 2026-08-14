@@ -23,6 +23,7 @@ dans `.gitignore` — c'est donc ici que vit toute la doc de fond.
 | --- | --- |
 | [azalee-lib.md](azalee-lib.md) | `@rosegriffon/azalee` : cœur du wiki en bibliothèque Bun (racine client-safe, `/server`, `/remote`). |
 | [azalee-tauri.md](azalee-tauri.md) | Recette d'intégration Tauri : sidecar Bun compilé, CSP, cycle de vie, mode dégradé. |
+| [azalee-plan-correctifs.md](azalee-plan-correctifs.md) | Audit vérifié du wiki (navigation, URLs, référencement, interface, trous de données) et plan de correction, avec ce qui est livré et ce qui reste. |
 | [wiki-filters.md](wiki-filters.md) | Filtres du wiki et contournement des colonnes NULL de `inagle_skills`. |
 | [cpk-browser.md](cpk-browser.md) | Navigateur des 250 800 fichiers des archives CPK : index, routes, prévisualisation. |
 | [tools/README.md](tools/README.md) | Outils communautaires (comparateur, équipe aléatoire, traducteur). |

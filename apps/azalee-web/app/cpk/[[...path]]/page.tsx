@@ -25,9 +25,17 @@ import { normalizeDir, segLabel } from "@rosegriffon/azalee/cpk/shared";
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 
-/** Reconstitue le chemin d'index (`data/...`) depuis les segments d'URL. */
+/**
+ * Reconstitue le chemin d'index (`data/...`) depuis les segments d'URL.
+ *
+ * Les segments arrivent DÉJÀ décodés : Next décode chaque segment d'un catch-all dans
+ * `getRouteMatcher` (`shared/lib/router/utils/route-matcher.js`). Redécoder ici était donc
+ * un second décodage, qui cassait deux fois : `/cpk/data/100%25` levait une `URIError` sur
+ * `decodeURIComponent("100%")` (page d'erreur), et `/cpk/data/dx11/menu%252Fmisc` devenait
+ * silencieusement le chemin `dx11/menu/misc` au lieu du fichier littéral `menu%2Fmisc`.
+ */
 function indexPathFromSegments(segments: string[] | undefined): string {
-	const rel = (segments ?? []).map((s) => decodeURIComponent(s)).join("/");
+	const rel = (segments ?? []).join("/");
 	if (rel === "" || rel === "data") return "data";
 	return rel.startsWith("data/") ? rel : `data/${rel}`;
 }
@@ -40,10 +48,14 @@ export async function generateMetadata({
 	const { path } = await params;
 	const indexPath = indexPathFromSegments(path);
 	const rel = indexPath.replace(/^data\/?/, "");
-	const last = rel.split("/").filter(Boolean).pop();
+	const parts = rel.split("/").filter(Boolean);
+	const last = parts[parts.length - 1];
 	const title = last ? segLabel(last) : "Fichiers CPK";
+	// Le chemin d'index est décodé : ré-encoder segment par segment pour que la canonique
+	// reste une URL valide même sur un nom de fichier contenant `%`, `#` ou une espace.
+	const canonicalPath = parts.map((s) => encodeURIComponent(s)).join("/");
 	return {
-		alternates: { canonical: `/cpk${rel ? `/${rel}` : ""}` },
+		alternates: { canonical: `/cpk${canonicalPath ? `/${canonicalPath}` : ""}` },
 		description:
 			"Navigateur complet des archives CPK d'Inazuma Eleven: Victory Road — textures, modèles 3D, sons, vidéos et données de jeu, décodés à la volée par le CDN.",
 		title: `${title} | Fichiers CPK · Inazuma Eleven Victory Road - Azalée`,

@@ -49,6 +49,18 @@ export function buildCanonical(
  * Clés de filtre communes aux listes du wiki (sous-ensemble de
  * `searchParamsSchema` : uniquement celles qui changent réellement le contenu
  * listé, `view`/`tab` étant de la préférence d'affichage).
+ *
+ * Trois clés ont été retirées de cette liste :
+ *
+ * - `sort` et `perPage` ne changent pas le CONTENU, seulement son ordre ou son
+ *   découpage. Les y laisser faisait de `?sort=name` et `?sort=power` deux pages
+ *   canoniques distinctes pour exactement les mêmes lignes.
+ * - `q` est une recherche interne : chaque requête tapée devenait une page
+ *   canonique de plus, sur un espace non borné. Une page de résultats se
+ *   rattache à sa liste.
+ *
+ * `page` reste : les pages d'une série paginée sont bien des documents
+ * différents, chacun canonique de lui-même.
  */
 export const LIST_CANONICAL_KEYS = [
 	"category",
@@ -56,12 +68,9 @@ export const LIST_CANONICAL_KEYS = [
 	"gender",
 	"grade",
 	"page",
-	"perPage",
 	"position",
 	"rarity",
 	"role",
 	"series",
-	"sort",
 	"type",
-	"q",
 ] as const;

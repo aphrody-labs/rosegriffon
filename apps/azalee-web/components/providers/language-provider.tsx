@@ -41,6 +41,14 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
 		}
 	};
 
+	// La langue déclarée par le document doit suivre celle qui est réellement
+	// affichée. `<html lang="fr">` est figé dans le gabarit racine : un lecteur
+	// d'écran annonçait du japonais avec une voix française, et le navigateur
+	// choisissait une police latine pour des kanji.
+	useEffect(() => {
+		document.documentElement.lang = language;
+	}, [language]);
+
 	// Load dictionary dynamically for non-default languages
 	useEffect(() => {
 		if (language === "fr") {
