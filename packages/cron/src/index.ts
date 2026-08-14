@@ -35,6 +35,7 @@ import {
 	brancherVeilleMessagesTempsReel,
 } from "./tasks/discord-messages";
 import { runDiscordPollsImport } from "./tasks/discord-polls";
+import { runNoctalyImport } from "./tasks/discord-noctaly";
 import { ServerWebSocket } from "bun";
 import { createSupabaseServiceClient } from "@rosegriffon/db/service";
 import { resolveProfile, isAdmin } from "@rosegriffon/auth";
@@ -442,6 +443,8 @@ if (indexRun >= 0) {
 		await executeTask("discord:backfill", runDiscordMessagesBackfill);
 	} else if (task === "discord:polls" || task === "discord-polls" || task === "sondages") {
 		await executeTask("discord:polls", () => runDiscordPollsImport());
+	} else if (task === "noctaly:import" || task === "noctaly-import" || task === "noctaly") {
+		await executeTask("noctaly:import", runNoctalyImport);
 	} else if (task === "x:campagnes" || task === "x-campagnes" || task === "campagnes") {
 		// `--run x:campagnes <slug>` restreint la récolte à une seule campagne.
 		const slug = args[taskIdx + 1];
@@ -507,7 +510,7 @@ if (indexRun >= 0) {
 		await executeTask("stats:achillea", collecterAudienceAchillea);
 	} else {
 		console.error(
-			`❌ Tâche inconnue : ${task}. Choisissez parmi : db, cdn, crawl, rag, x, x-search, x:campagnes, query, publish, github-publish, patreon, reminders, warm, discord, discord:scan, discord:archives, discord:messages, discord:backfill, discord:polls, campagnes:discord, campagnes:instagram, campagnes:relais, seo, seo:indexnow, seo:llms-txt, stats:achillea, backup:postgres, backup:pg, all.`
+			`❌ Tâche inconnue : ${task}. Choisissez parmi : db, cdn, crawl, rag, x, x-search, x:campagnes, query, publish, github-publish, patreon, reminders, warm, discord, discord:scan, discord:archives, discord:messages, discord:backfill, discord:polls, noctaly:import, campagnes:discord, campagnes:instagram, campagnes:relais, seo, seo:indexnow, seo:llms-txt, stats:achillea, backup:postgres, backup:pg, all.`
 		);
 	}
 	process.exit(0);
@@ -780,6 +783,7 @@ const server = Bun.serve({
 					"discord:messages",
 					"discord:backfill",
 					"discord:polls",
+					"noctaly:import",
 					"x:campagnes",
 					"campagnes:discord",
 					"campagnes:instagram",
@@ -805,6 +809,7 @@ const server = Bun.serve({
 					"discord:messages": "*/5 * * * *",
 					"discord:backfill": "manuel",
 					"discord:polls": "10 * * * *",
+					"noctaly:import": "manuel",
 					"x:campagnes": "20 * * * *",
 					"campagnes:discord": "25 * * * *",
 					"campagnes:instagram": "35 * * * *",
@@ -847,6 +852,8 @@ const server = Bun.serve({
 				"discord-backfill": runDiscordMessagesBackfill,
 				"discord:polls": () => runDiscordPollsImport(),
 				"discord-polls": () => runDiscordPollsImport(),
+				"noctaly:import": runNoctalyImport,
+				"noctaly-import": runNoctalyImport,
 				"x:campagnes": () => crawlHashtagCampaigns(),
 				"x-campagnes": () => crawlHashtagCampaigns(),
 				"campagnes:discord": () => recolterCreationsDiscord(),
