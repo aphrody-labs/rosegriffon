@@ -655,6 +655,147 @@ export async function renderCarteClassement(
 	return await canvas.encode("png");
 }
 
+// ─── Collection ─────────────────────────────────────────────────────────────
+
+export interface CaseCollection {
+	nom: string;
+	portraitUrl: string | null;
+	rarete: unknown;
+	element: string | null;
+}
+
+/** Six colonnes : c'est ce qui tient en 1 200 px avec un portrait encore lisible. */
+export const COLONNES_COLLECTION = 6;
+/** Quatre rangées : au-delà, l'image dépasse la hauteur affichée par Discord sans clic. */
+export const RANGEES_COLLECTION = 4;
+/** Joueurs par carte. Le reste part sur la page suivante. */
+export const CASES_PAR_CARTE = COLONNES_COLLECTION * RANGEES_COLLECTION;
+
+const COTE_CASE = 168;
+const GOUTTIERE = 16;
+const HAUTEUR_CASE = COTE_CASE + 46;
+
+/**
+ * La collection en grille, portraits réels du jeu.
+ *
+ * ── POURQUOI UNE GRILLE ET PAS UNE LISTE ───────────────────────────────────
+ * Une collection se REGARDE. Écrite en liste de noms dans un embed, elle ne dit
+ * rien : « Rumba Mansurov · Kanchu Ko · Janus » ne se distingue pas d'une liste
+ * de courses. En grille de portraits, la rareté saute aux yeux (c'est la couleur
+ * du cadre), les doublons de série se voient, et le membre reconnaît ses prises.
+ *
+ * Chaque portrait est chargé depuis le CDN qui décode les CPK en direct. Un
+ * portrait manquant laisse une case vide encadrée, jamais un trou : la grille
+ * garde sa forme même si le CDN est lent.
+ */
+export async function renderCarteCollection(
+	pseudo: string,
+	cases: readonly CaseCollection[],
+	options: { note?: string; completion?: string } = {}
+): Promise<Buffer> {
+	ensureFonts();
+
+	const visibles = cases.slice(0, CASES_PAR_CARTE);
+	const rangees = Math.max(1, Math.ceil(visibles.length / COLONNES_COLLECTION));
+	const hauteurGrille = rangees * HAUTEUR_CASE + (rangees - 1) * GOUTTIERE + RESPIRATION * 2;
+	const hauteur = HAUTEUR_ENTETE_CLASSEMENT + hauteurGrille + 24 + HAUTEUR_PIED;
+
+	const canvas = createCanvas(L, hauteur);
+	const ctx = canvas.getContext("2d");
+	await dessinerFond(ctx, L, hauteur);
+
+	ctx.save();
+	ctx.textAlign = "left";
+	ctx.textBaseline = "alphabetic";
+	ctx.font = `bold 14px ${POLICES.corps}`;
+	ctx.fillStyle = PALETTE.or;
+	ctx.fillText(MARQUE_CANVAS.surtitre, MARGE, 46);
+	dessinerTitreCartoon(
+		ctx,
+		`Collection de ${assainir(pseudo, POLICES.display) || "Membre"}`,
+		MARGE,
+		100,
+		{
+			largeurMax: L - MARGE * 2,
+			police: POLICES.display,
+			remplissage: PALETTE.surFond,
+			taille: 42,
+		}
+	);
+	if (options.completion) {
+		ctx.font = `18px ${POLICES.corps}`;
+		ctx.fillStyle = PALETTE.or;
+		ctx.textAlign = "right";
+		ctx.fillText(options.completion, L - MARGE, 100);
+		ctx.textAlign = "left";
+	}
+	ctx.fillStyle = PALETTE.or;
+	ctx.fillRect(MARGE, HAUTEUR_ENTETE_CLASSEMENT - 22, L - MARGE * 2, 3);
+	ctx.fillStyle = PALETTE.briqueClair;
+	ctx.fillRect(MARGE, HAUTEUR_ENTETE_CLASSEMENT - 22, 140, 3);
+	ctx.restore();
+
+	const yGrille = HAUTEUR_ENTETE_CLASSEMENT;
+	dessinerPanneau(ctx, MARGE, yGrille, L - MARGE * 2, hauteurGrille, { rayon: RAYONS.lg });
+
+	// La grille est centrée dans le panneau : une dernière rangée incomplète
+	// reste alignée à gauche, comme le reste, plutôt que de flotter au milieu.
+	const largeurGrille =
+		COLONNES_COLLECTION * COTE_CASE + (COLONNES_COLLECTION - 1) * GOUTTIERE;
+	const xGrille = MARGE + (L - MARGE * 2 - largeurGrille) / 2;
+
+	for (const [index, joueur] of visibles.entries()) {
+		const colonne = index % COLONNES_COLLECTION;
+		const rangee = Math.floor(index / COLONNES_COLLECTION);
+		const x = xGrille + colonne * (COTE_CASE + GOUTTIERE);
+		const y = yGrille + RESPIRATION + rangee * (HAUTEUR_CASE + GOUTTIERE);
+		const rarete = rareteDe(joueur.rarete);
+		const couleur = teinte(rarete.teinte);
+
+		fillRoundedRect(ctx, x, y, COTE_CASE, COTE_CASE, RAYONS.md, PALETTE.carteAlt);
+		const dessine = joueur.portraitUrl
+			? await drawCoveredImage(ctx, joueur.portraitUrl, x, y, COTE_CASE, COTE_CASE, RAYONS.md)
+			: false;
+		if (!dessine) {
+			ctx.save();
+			ctx.textAlign = "center";
+			ctx.textBaseline = "middle";
+			ctx.font = `${Math.round(COTE_CASE * 0.4)}px ${POLICES.display}`;
+			ctx.fillStyle = PALETTE.texteAttenue;
+			ctx.fillText(initiale(joueur.nom, POLICES.display), x + COTE_CASE / 2, y + COTE_CASE / 2);
+			ctx.textAlign = "left";
+			ctx.textBaseline = "alphabetic";
+			ctx.restore();
+		}
+		// Le cadre porte la rareté : c'est la seule information qu'on lit sur une
+		// grille de vingt-quatre portraits.
+		strokeRoundedRect(ctx, x + 1.5, y + 1.5, COTE_CASE - 3, COTE_CASE - 3, RAYONS.md, couleur, 3);
+
+		ctx.save();
+		ctx.textAlign = "center";
+		ctx.textBaseline = "alphabetic";
+		ctx.font = `15px ${POLICES.corps}`;
+		ctx.fillStyle = PALETTE.texte;
+		ctx.fillText(
+			tronquer(ctx, assainir(joueur.nom, POLICES.corps) || "Joueur", COTE_CASE),
+			x + COTE_CASE / 2,
+			y + COTE_CASE + 22
+		);
+		ctx.font = `13px ${POLICES.corps}`;
+		ctx.fillStyle = couleur;
+		ctx.fillText(
+			tronquer(ctx, joueur.element ? `${rarete.nom} · ${joueur.element}` : rarete.nom, COTE_CASE),
+			x + COTE_CASE / 2,
+			y + COTE_CASE + 40
+		);
+		ctx.textAlign = "left";
+		ctx.restore();
+	}
+
+	dessinerPied(ctx, hauteur, options.note);
+	return await canvas.encode("png");
+}
+
 // ─── Recrutement ────────────────────────────────────────────────────────────
 
 export interface DonneesCarteTirage {
