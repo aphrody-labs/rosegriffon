@@ -4,7 +4,7 @@
  *
  * ── LE BOT IDENTIFIÉ : NOCTALY (application Discord 875811233616519219) ────
  * Identification croisée, aucune supposition :
- *   - `GET /guilds/1072991720268111892/integrations` (jeton DISCORD_BOT_TOKEN)
+ *   - `GET /guilds/{RG_GUILD_ID}/integrations` (jeton DISCORD_BOT_TOKEN)
  *     liste Noctaly avec pour description officielle Discord : « Text, Voice
  *     & Reaction XP • Reaction Roles • Ban Appeal • Auto Leaderboard • Custom
  *     Bot • Moderation • Logs • Support 26 Languages ».
@@ -66,7 +66,7 @@
  *     le 9/8/2026 dans #🤖〡bots, message 1536045686259323010, généré par la
  *     commande `/leaderboard` de yoyo__goat) a pu être récupéré : lu
  *     visuellement sur l'image, puis chaque pseudo résolu en ID Discord réel
- *     via `GET /guilds/1072991720268111892/members/search?query=<pseudo>`.
+ *     via `GET /guilds/{RG_GUILD_ID}/members/search?query=<pseudo>`.
  *     C'est 10 comptes sur ~1 902 membres (`approximate_member_count` de la
  *     guilde au 14/8/2026) : moins de 1 %.
  *   LES ~1 892 AUTRES MEMBRES NE SONT PAS RÉCUPÉRABLES PAR CE SCRIPT. Pour
@@ -120,7 +120,7 @@
  *   on importe `cumulable = false` (le défaut de fabrique de Noctaly) plutôt
  *   que de deviner. Si un humain confirme que RG a activé « Stack Roles »,
  *   corriger avec `UPDATE bot_recompenses_niveau SET cumulable = true WHERE
- *   guild_id = '1072991720268111892'`.
+ *   guild_id = '<RG_GUILD_ID>'` (cf. @rosegriffon/types/discord).
  *
  * ── UTILISATION ──────────────────────────────────────────────────────────
  *   bun apps/bot/src/scripts/import-xp-tiers.ts --essai   # rien n'est écrit
@@ -129,10 +129,12 @@
  *   profils, `ON CONFLICT (guild_id, niveau, role_id) DO UPDATE` pour les
  *   récompenses — relancer ce script ne duplique rien.
  */
+import { RG_GUILD_ID } from "@rosegriffon/types/discord";
+
 import { niveauPour } from "../lib/experience";
 import { sql } from "../lib/db";
 
-const GUILD_ID = "1072991720268111892";
+const GUILD_ID = RG_GUILD_ID;
 
 interface EntreeClassement {
 	/** Pseudo affiché sur la carte de classement Noctaly (source visuelle). */
