@@ -37,6 +37,7 @@ import {
 import { runDiscordPollsImport } from "./tasks/discord-polls";
 import { runNoctalyImport } from "./tasks/discord-noctaly";
 import { ServerWebSocket } from "bun";
+import { CATALOGUE_TACHES, PLANIFICATIONS, TACHES_CRON } from "@rosegriffon/types/cron";
 import { createSupabaseServiceClient } from "@rosegriffon/db/service";
 import { resolveProfile, isAdmin } from "@rosegriffon/auth";
 import { getOpenApiDocument, getSwaggerHtml } from "./lib/openapi";
@@ -765,56 +766,19 @@ const server = Bun.serve({
 			return new Response("Non autorisé", { status: 401 });
 		}
 
-		// 4. Liste des tâches
+		// 4. Liste des tâches — servie depuis le CATALOGUE PARTAGÉ.
+		//
+		// Elle était recopiée ici à la main, et c'est ainsi qu'elle a divergé du
+		// catalogue du bot (dix-huit noms d'un côté, vingt-deux de l'autre). Une
+		// seule source désormais : `@rosegriffon/types/cron`, que le bot et le
+		// site lisent aussi. Le catalogue porte en plus le libellé, la famille,
+		// la durée indicative et le niveau d'accès — d'où `catalogue`, à côté des
+		// deux champs historiques que d'anciens clients attendent encore.
 		if (url.pathname === "/tasks" && req.method === "GET") {
 			return Response.json({
-				tasks: [
-					"db",
-					"cdn",
-					"crawl",
-					"rag",
-					"publish",
-					"github-publish",
-					"patreon",
-					"reminders",
-					"warm",
-					"discord",
-					"discord:scan",
-					"discord:messages",
-					"discord:backfill",
-					"discord:polls",
-					"noctaly:import",
-					"x:campagnes",
-					"campagnes:discord",
-					"campagnes:instagram",
-					"campagnes:relais",
-					"seo:indexnow",
-					"seo:llms-txt",
-					"stats:achillea",
-				],
-				schedules: {
-					publish: "*/15 * * * *",
-					warm: "*/30 * * * *",
-					db: "0 2 * * *",
-					patreon: "0 3 * * *",
-					cdn: "0 4 * * *",
-					"github-publish": "30 4 * * *",
-					crawl: "0 5 * * *",
-					"seo:llms-txt": "45 5 * * *",
-					"stats:achillea": "*/15 * * * *",
-					"seo:indexnow": "0 6 * * *",
-					reminders: "0 8 * * *",
-					discord: "*/30 * * * *",
-					"discord:scan": "manuel",
-					"discord:messages": "*/5 * * * *",
-					"discord:backfill": "manuel",
-					"discord:polls": "10 * * * *",
-					"noctaly:import": "manuel",
-					"x:campagnes": "20 * * * *",
-					"campagnes:discord": "25 * * * *",
-					"campagnes:instagram": "35 * * * *",
-					"campagnes:relais": "*/15 * * * *",
-				},
+				tasks: TACHES_CRON,
+				schedules: PLANIFICATIONS,
+				catalogue: CATALOGUE_TACHES,
 			});
 		}
 
@@ -866,6 +830,13 @@ const server = Bun.serve({
 				"seo-indexnow": runSeoIndexNow,
 				"seo:llms-txt": runSeoLlmsTxt,
 				"seo-llms-txt": runSeoLlmsTxt,
+				// Annoncée par `GET /tasks` et planifiée toutes les 15 min depuis sa
+				// création, mais absente d'ici : `POST /tasks/stats:achillea/run`
+				// répondait 400 « Tâche inconnue » sur une tâche qui tourne toute la
+				// journée. Relevé par `catalogue.test.ts`, qui relie désormais les
+				// trois listes.
+				"stats:achillea": collecterAudienceAchillea,
+				"stats-achillea": collecterAudienceAchillea,
 				"zukan:videos": rafraichirVideosTechniques,
 				"zukan-videos": rafraichirVideosTechniques,
 			};
