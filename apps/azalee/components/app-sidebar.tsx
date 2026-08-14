@@ -20,7 +20,7 @@ import {
 	SidebarRail,
 	useSidebar,
 } from "@rosegriffon/ui";
-import { dashboardItems, navigationItems } from "@/config/navigation";
+import { dashboardItems, estItemActif, navigationItems } from "@/config/navigation";
 import type { NavItem } from "@/config/navigation";
 import type { GameIconKey } from "@/config/game-icons";
 import type { SpriteCommonKey } from "@/config/sprites-common";
@@ -42,12 +42,14 @@ export function AppSidebar({ className, ...props }: React.ComponentProps<typeof 
 		setMounted(true);
 	}, []);
 
-	const filteredNavItems = currentNavItems.filter((item) => {
-		if (item.adminOnly) {
-			return isAdmin;
-		}
-		return true;
-	});
+	// Les entrées réservées à l'administration dépendent d'une session lue côté
+	// client : elles seules attendent le montage. Le reste du menu est rendu dès
+	// le serveur — auparavant, un `mounted &&` gardait TOUTE la liste, si bien que
+	// le HTML initial ne contenait aucun lien de navigation (rien à explorer pour
+	// un robot, et une colonne vide le temps de l'hydratation).
+	const filteredNavItems = currentNavItems.filter(
+		(item) => !item.adminOnly || (mounted && isAdmin)
+	);
 
 	// Le spread arrivait APRÈS className : la classe passée par le Shell écrasait
 	// celle du composant au lieu de la compléter, et la bordure droite par défaut
@@ -66,10 +68,9 @@ export function AppSidebar({ className, ...props }: React.ComponentProps<typeof 
 				<SidebarGroup>
 					<SidebarGroupContent>
 						<SidebarMenu className="gap-1">
-							{mounted &&
-								filteredNavItems.map((item) => (
-									<NavItemWithAnimation key={item.path} item={item} pathname={pathname} />
-								))}
+							{filteredNavItems.map((item) => (
+								<NavItemWithAnimation key={item.path} item={item} pathname={pathname} />
+							))}
 						</SidebarMenu>
 					</SidebarGroupContent>
 				</SidebarGroup>
@@ -169,8 +170,7 @@ function RecursiveNavItem({
 	depth?: number;
 }) {
 	const { t } = useLanguage();
-	const isActive =
-		pathname === item.path || item.children?.some((child) => pathname.startsWith(child.path));
+	const isActive = estItemActif(pathname, item);
 	const [isOpen, setIsOpen] = React.useState(isActive || Boolean(item.defaultOpen));
 	const { state, isMobile } = useSidebar();
 	const isCollapsed = state === "collapsed" && !isMobile;
