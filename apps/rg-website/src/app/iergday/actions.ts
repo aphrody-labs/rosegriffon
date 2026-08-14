@@ -32,13 +32,17 @@
  *     suivante (`campagnes:relais`) : rien n'entre sans qu'un humain le voie.
  */
 
+import {
+	analyserPermalien,
+	hashtagDansLegende,
+	normaliserPseudo,
+	verifierPublication,
+} from "@rosegriffon/types/instagram";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
 import { getServerUser } from "@/lib/auth-helpers";
 import { getPgPool } from "@/lib/db/pg";
-import { verifierPublication } from "@/lib/instagram/oembed";
-import { analyserPermalien, hashtagDansLegende, normaliserPseudo } from "@/lib/instagram/permalien";
 import { createAdminClient } from "@/lib/supabase/server";
 
 /** Retour uniforme du formulaire. */
@@ -158,7 +162,14 @@ export async function deposerCreationInstagram(donnees: FormData): Promise<Resul
 		// dépôt (`indeterminee`) : le staff verra la création arriver dans son salon
 		// de suivi et tranchera. Faire payer au participant une panne qui n'est pas
 		// la sienne serait le pire des deux mondes.
-		const verification = await verifierPublication(lien.permalien);
+		// Les règles (analyse du lien, verdict) vivent dans
+		// `@rosegriffon/types/instagram` : le cron `campagnes:instagram` REVALIDE
+		// plus tard exactement les mêmes liens, et deux lectures divergentes
+		// laisseraient un post supprimé affiché — ou masqueraient la galerie sur
+		// une panne de Meta.
+		const verification = await verifierPublication(lien.permalien, {
+			base: process.env.INSTAGRAM_OEMBED_URL,
+		});
 		if (verification.verdict === "introuvable") {
 			return { error: verification.message, success: false };
 		}

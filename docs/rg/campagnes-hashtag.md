@@ -12,14 +12,18 @@ quelques jours avant le lancement.
 | --- | --- | --- |
 | X (le hashtag) | `packages/cron/src/tasks/ie-crawl/hashtag-harvest.ts` | `x_campagne_posts` × `tweets` |
 | Discord (salon de dépôt) | `packages/cron/src/tasks/campagnes-discord.ts` | `campagne_creations_discord` × `discord_messages` |
-| Instagram | **aucun** | — |
+| Instagram (dépôt manuel) | **aucun collecteur possible** — formulaire `/iergday` | `campagne_creations_instagram` |
 
-Instagram est autorisé par le règlement de certaines campagnes, mais **il n'existe
-aucun collecteur Instagram dans ce dépôt**. La page `/iergday` le dit en clair au
-visiteur, et la valeur `instagram` existe dans le schéma du relais pour que le
-jour où un collecteur écrira, rien n'ait à changer.
+Instagram est autorisé par le règlement, mais **aucun collecteur de hashtag
+Instagram n'existe** : toutes les portes sont fermées à un client non connecté, et
+l'API officielle demande une revue Meta de plusieurs semaines (mesures et
+décision dans [insta.md](insta.md)). C'est donc le participant qui dépose son
+permalien et son image, ce qui rend l'attribution **exacte** — l'API Graph, elle,
+ne rend même pas le pseudo. La tâche `campagnes:instagram` revérifie ensuite ces
+liens toutes les 12 h : sans elle, un post supprimé chez Instagram laisserait une
+carte morte dans la galerie pour toujours.
 
-Les deux sources remontent dans la même galerie publique
+Les trois sources remontent dans la même galerie publique
 (`apps/website/src/lib/x-campagnes/queries.ts`), discriminées par `source`.
 
 ## Anticiper les fautes de frappe
@@ -104,9 +108,10 @@ salons de `salons_depot` : rien d'autre à faire.
 ## Commandes
 
 ```bash
-bun packages/cron/src/index.ts --run x:campagnes [slug]        # récolte X
-bun packages/cron/src/index.ts --run campagnes:discord [slug]  # récolte Discord
-bun packages/cron/src/index.ts --run campagnes:relais [slug]   # relais
+bun packages/cron/src/index.ts --run x:campagnes [slug]         # récolte X
+bun packages/cron/src/index.ts --run campagnes:discord [slug]   # récolte Discord
+bun packages/cron/src/index.ts --run campagnes:instagram [slug] # revalidation Instagram
+bun packages/cron/src/index.ts --run campagnes:relais [slug]    # relais
 bun packages/cron/src/tasks/campagnes-relais-discord.ts --campagne iergday --dry
 ```
 

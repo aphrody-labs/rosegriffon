@@ -134,16 +134,21 @@ façon fiable et gratuite :
 
 | Fichier | Rôle | Réseau ? |
 | --- | --- | --- |
-| `apps/website/src/lib/instagram/permalien.ts` | analyse d'un permalien, normalisation du pseudo, hashtag dans la légende | non — **pur** |
-| `apps/website/src/lib/instagram/oembed-shared.ts` | traduction d'une réponse oEmbed en verdict | non — **pur** |
-| `apps/website/src/lib/instagram/oembed.ts` | l'appel à Meta (`import "server-only"`) | oui |
+| `packages/types/src/instagram.ts` | analyse d'un permalien, pseudo, hashtag, **verdict**, appel oEmbed | l'appel seul |
 | `apps/website/src/app/iergday/actions.ts` | server action `deposerCreationInstagram` | oui |
+| `apps/website/src/app/iergday/DepotInstagram.tsx` | l'îlot client (formulaire replié) | non |
+| `packages/cron/src/tasks/campagnes-instagram.ts` | revalidation périodique (`campagnes:instagram`) | oui |
 
-> Le découpage `<x>.ts` / `<x>-shared.ts` n'est pas décoratif : `server-only`
-> n'est fourni qu'au moment du bundle par Next, donc un test qui importe le
-> module serveur échoue sur « Cannot find package 'server-only' ». La logique qui
-> mérite d'être testée vit du côté pur. **22 tests**
-> (`bun test apps/website/src/lib/instagram/`).
+> **Pourquoi ces règles vivent dans `@rosegriffon/types` et pas dans l'app.**
+> Deux surfaces posent la MÊME question à Meta : le site quand un membre dépose,
+> le cron quand il revérifie des heures plus tard. Deux lectures divergentes du
+> verdict laisseraient un post supprimé affiché — ou, dans l'autre sens,
+> masqueraient toute la galerie sur une panne. Le module est pur ou
+> web-standard (`fetch`, `URL`, `AbortSignal`), donc importable des deux côtés,
+> et le point d'entrée oEmbed est un **paramètre** plutôt qu'une lecture
+> d'environnement : un module partagé ne devine pas dans quel processus il
+> tourne. **33 tests** (`bun test packages/types/src/instagram.test.ts`), dont
+> l'appel réseau lui-même, mesuré contre un `Bun.serve` local.
 
 **Formes de permalien acceptées** — un participant colle ce que son appli lui
 donne, et les formes diffèrent :
@@ -220,6 +225,52 @@ Et la campagne est **relue en base** (ouverte, publiée, non close) plutôt que
 crue sur parole : le champ caché du formulaire vient du navigateur, donc de
 personne.
 
+### 4.5 La revalidation — `campagnes:instagram`
+
+`packages/cron/src/tasks/campagnes-instagram.ts`, **toutes les heures à la
+minute 35**.
+
+Les deux autres sources se corrigent seules : un tweet supprimé disparaît de
+`tweets`, un message Discord effacé porte un `deleted_at` que la galerie filtre.
+**Instagram ne nous dit rien.** Notre ligne est une photographie prise au moment
+du dépôt ; l'auteur peut ensuite supprimer son post ou passer son compte en
+privé, et la galerie continuerait d'afficher une carte qui mène à un 404.
+
+| Verdict oEmbed | Ligne libre | Masquée par le cron | Masquée par un humain |
+| --- | --- | --- | --- |
+| **publique** | rien | **restaurée** | **rien** |
+| **introuvable** | **masquée** | rien | rien |
+| **indeterminee** | rien | rien | rien |
+
+Trois règles, et chacune répare un dégât précis :
+
+1. **Une panne de Meta n'est pas une suppression.** `indeterminee` ne masque
+   rien **et n'écrit même pas `verifie_le`** : la ligne repasse à la passe
+   suivante. Traiter une coupure comme un retrait viderait la galerie entière
+   en une passe, sans qu'aucune interface ne dise pourquoi.
+2. **On ne défait jamais une décision humaine.** Le masquage automatique porte
+   un motif unique — `post retiré par son auteur, ou compte passé en privé` —
+   qui sert de **signature** : lui seul est restaurable. ⚠ Le reformuler sans
+   migrer les lignes existantes les rendrait définitivement non restaurables.
+3. **`a_media` veut dire « image servable ».** Chaque `images[].chemin` est
+   contrôlé en `HEAD` dans le bucket ; si l'objet a disparu, la ligne retombe à
+   `a_media = false` plutôt que d'afficher une vignette cassée.
+
+`verifie_le` (migration `20260814_campagne_creations_instagram_verifie_le.sql`)
+donne l'ordre de passage : jamais vérifié d'abord, puis le plus ancien. Fraîcheur
+de **12 h**, plafond de **60 lignes** par passe — une passe sans changement ne
+coûte qu'une requête SQL. La minute 35 tombe **après** la récolte Discord (25) et
+**avant** le relais de la minute 45 : une création masquée ici ne part donc jamais
+dans le salon de suivi comme si elle était encore en ligne.
+
+> **Elle ne ré-héberge rien, et c'est délibéré.** Pour une ligne d'origine
+> `formulaire` — les seules qui existent — l'unique copie de l'image était
+> l'envoi du membre : `images[].url_origine` porte le **permalien** (une page
+> HTML), pas une URL de média. Il n'y a littéralement rien à retélécharger.
+> Écrire un téléchargeur pour `origine = 'graph_api'` (zéro ligne, API non
+> accordée) livrerait du code que rien n'a jamais exercé. La tâche constate,
+> corrige le compteur, et le dit dans son journal.
+
 ⚠ `masque`, `motif_masquage` et `mis_en_avant` sont **absents** de la clause
 `do update` de l'upsert — même règle que les deux autres sources. Sans ça, un
 membre dont la création vient d'être retirée la ferait réapparaître en la
@@ -230,32 +281,26 @@ redéposant.
 | Pièce | État |
 | --- | --- |
 | Table + migration | **fait**, appliquée |
-| `permalien.ts` (+ 16 tests) | **fait** |
-| `oembed.ts` / `oembed-shared.ts` (+ 6 tests) | **fait** |
+| Colonne `verifie_le` + index d'ordre de passage | **fait**, appliquée le 14/8/2026 |
+| `@rosegriffon/types/instagram` (+ 33 tests) | **fait** |
 | Server action `deposerCreationInstagram` | **fait** |
 | Type `PostCampagneInstagram`, `clePost` | **fait** |
 | Galerie : `SELECT_POSTS` union des 3 sources | **fait**, déployé |
 | Cartes et visionneuse : branchement par source | **fait**, déployé |
 | `x_campagne_relais.source = 'instagram'` | **accepté** par le schéma |
-| **Formulaire dans `/iergday`** | **reste à faire** |
-| **`creationsInstagram()` dans le relais** | **reste à faire** |
-| **Tâche cron `campagnes:instagram`** | **reste à faire** |
+| Formulaire dans `/iergday` (`DepotInstagram.tsx`) | **fait**, déployé |
+| `creationsInstagram()` dans le relais | **fait** |
+| Tâche cron `campagnes:instagram` (+ 8 tests) | **fait** |
 
-### Ce qu'il reste, précisément
+La chaîne est complète : un membre dépose → le lien est vérifié chez Meta →
+l'image est ré-hébergée → le staff le voit dans son salon de suivi à la passe
+suivante → la publication est recontrôlée toutes les 12 h tant qu'elle vit.
 
-- **Le formulaire** : un îlot client appelant `deposerCreationInstagram`
-  (`FormData` — la seule forme qui transporte un fichier jusqu'à une server
-  action sans route API ni second aller-retour). Champs : permalien, pseudo
-  (facultatif), légende (facultative), image.
-- **Le relais** : une fonction `creationsInstagram(campagne)` dans
-  `packages/cron/src/tasks/campagnes-relais-discord.ts`, décalquée de
-  `creationsDiscord` (~40 lignes, pas de jointure — la table se suffit).
-  `lien` = `permalink`, `auteur` = `'@' + auteur_pseudo`. Puis l'ajouter au tri
-  chronologique de `relayerCampagne`. **Déjà prêts** : `SourceCreation` inclut
-  `"instagram"`, et `LIBELLE_SOURCE.instagram = "sur Instagram"`.
-- **La tâche cron** : revalider les permaliens via oEmbed (un post supprimé ou
-  passé en privé → `masque = true`, motif « post retiré par son auteur ») et
-  ré-héberger ce qui manque. Cadence `25 * * * *` comme son homologue Discord.
+**Ce qui reste ouvert, et ne dépend pas de nous :** la chaîne Meta (compte pro +
+Page Facebook + App Review) pour `ig_hashtag_search`, à lancer pour Inatober en
+octobre. Le jour où elle est accordée, `origine = 'graph_api'` s'insère à côté de
+`formulaire` sans toucher au reste — la clé primaire dédoublonne une publication
+à la fois déposée et récoltée.
 
 ## 6. Ce que la page dit au visiteur, et pourquoi
 
@@ -272,15 +317,23 @@ une étape.
 ## 7. Commandes
 
 ```bash
-# Les tests des briques pures (22)
-bun test apps/website/src/lib/instagram/
+# Les règles partagées (33 tests) et la décision de modération (8 tests)
+bun test packages/types/src/instagram.test.ts
+bun test packages/cron/src/tasks/campagnes-instagram.test.ts
+
+# Revalider à la main — `--dry` interroge Meta sans rien écrire
+bun packages/cron/src/tasks/campagnes-instagram.ts --campagne iergday --dry
+bun packages/cron/src/index.ts --run campagnes:instagram [slug]
+#   --tout        ignore la fraîcheur de 12 h et revérifie toute la table
+#   --limite <n>  plafond de lignes par passe (défaut 60)
 
 # Vérifier un permalien à la main
 curl -s -o /dev/null -w "%{http_code}\n" \
   "https://graph.facebook.com/v23.0/instagram_oembed?url=https://www.instagram.com/p/<code>/&omitscript=true"
 
-# Appliquer la migration (rejouable)
+# Appliquer les migrations (rejouables)
 psql "$DATABASE_URL" -f apps/website/sql/migrations/20260813_campagne_creations_instagram.sql
+psql "$DATABASE_URL" -f apps/website/sql/migrations/20260814_campagne_creations_instagram_verifie_le.sql
 ```
 
 ## 8. Voir aussi
