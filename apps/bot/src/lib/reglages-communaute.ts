@@ -107,6 +107,40 @@ const reglagesTickets = z
 	})
 	.prefault({});
 
+/**
+ * Où souhaiter la bienvenue.
+ *
+ * `aucune` par défaut, comme les annonces de niveau : un bot fraîchement
+ * installé ne publie rien tant que le staff ne lui a pas dit où. Un serveur qui
+ * reçoit vingt arrivées par jour n'a peut-être aucune envie de vingt messages.
+ */
+export const LIEUX_BIENVENUE = ["salon", "prive", "aucune"] as const;
+
+export type LieuBienvenue = (typeof LIEUX_BIENVENUE)[number];
+
+const reglagesAccueil = z
+	.object({
+		actif: z.boolean().default(true),
+		lieu: z.enum(LIEUX_BIENVENUE).default("aucune"),
+		/** Salon d'accueil quand `lieu = "salon"`. */
+		salon: flocon.nullable().default(null),
+		/**
+		 * Texte du message. `{membre}` est remplacé par la mention, `{serveur}` par
+		 * le nom du serveur, `{compte}` par le nombre de membres.
+		 * `null` = le texte par défaut du bot.
+		 */
+		texte: z.string().max(1_000).nullable().default(null),
+		/**
+		 * Rôle posé à l'arrivée. Il passe par la MÊME garde stricte que les
+		 * récompenses de niveau : un rôle d'arrivée est distribué automatiquement à
+		 * tout le monde, c'est la surface la plus large qui existe.
+		 */
+		roleArrivee: flocon.nullable().default(null),
+		/** Joindre la carte image d'accueil. */
+		carte: z.boolean().default(true),
+	})
+	.prefault({});
+
 const reglagesKizuna = z
 	.object({
 		actif: z.boolean().default(true),
@@ -120,6 +154,7 @@ export const SchemaReglages = z
 		niveaux: reglagesNiveaux,
 		tickets: reglagesTickets,
 		kizuna: reglagesKizuna,
+		accueil: reglagesAccueil,
 	})
 	.prefault({});
 
@@ -171,9 +206,11 @@ export function fusionnerReglages(
 		niveaux?: Partial<ReglagesCommunaute["niveaux"]>;
 		tickets?: Partial<ReglagesCommunaute["tickets"]>;
 		kizuna?: Partial<ReglagesCommunaute["kizuna"]>;
+		accueil?: Partial<ReglagesCommunaute["accueil"]>;
 	}
 ): ReglagesCommunaute {
 	return validerReglages({
+		accueil: { ...actuels.accueil, ...modification.accueil },
 		kizuna: { ...actuels.kizuna, ...modification.kizuna },
 		niveaux: { ...actuels.niveaux, ...modification.niveaux },
 		tickets: { ...actuels.tickets, ...modification.tickets },

@@ -45,6 +45,7 @@ const MODULES_EVENEMENTS_RG = [
 	"events/ready.ts",
 	"events/memberEvents.ts",
 	"events/experience.ts",
+	"events/accueil.ts",
 ] as const;
 
 const client = new Client({
