@@ -47,8 +47,12 @@ RestartSec=5
 # Plafonds plus bas que le slot A : une instance fraîche n'a pas le cache accumulé
 # d'un processus vieux de plusieurs jours, et les deux slots coexistent quelques
 # minutes seulement.
+# Aligné sur le slot A (14/8/2026, 8/12 Gio) : les deux slots servent le MÊME
+# application et tournent parfois en même temps, le temps d'une bascule. Laisser la
+# doublure à un plafond plus haut que le slot de production n'avait aucune raison
+# d'être et ajoutait 2 Gio à la somme des plafonds de l'hôte.
 MemoryHigh=8G
-MemoryMax=14G
+MemoryMax=12G
 MemorySwapMax=512M
 MemoryLow=256M
 TasksMax=2048

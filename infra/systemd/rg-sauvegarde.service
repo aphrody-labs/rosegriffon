@@ -13,7 +13,7 @@ Wants=network-online.target
 Type=oneshot
 User=ubuntu
 WorkingDirectory=/home/ubuntu/rg
-ExecStart=/home/ubuntu/.bun/bin/bun scripts/ops/sauvegarde-postgres.ts
+ExecStart=/home/ubuntu/.bun/bin/bun scripts/ops/sauvegarde.ts
 # La restauration de contrôle crée une base jetable : lui laisser du temps sans bloquer
 # indéfiniment si Postgres ne répond plus.
 TimeoutStartSec=1800

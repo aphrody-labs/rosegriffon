@@ -1,6 +1,12 @@
 #!/usr/bin/env bun
 /**
- * sauvegarde-postgres.ts — sauvegarde vérifiée des bases du VPS, sur place et hors machine.
+ * sauvegarde.ts — sauvegarde vérifiée de l'état de la production : bases Postgres ET
+ * fichiers déposés par les utilisateurs, sur place puis hors machine.
+ *
+ * Le fichier s'appelait `sauvegarde-postgres.ts` tant qu'il ne couvrait que les bases.
+ * Il a été renommé le 14/8/2026 en même temps qu'on lui a ajouté /var/www/rg-storage :
+ * un nom qui promet moins que ce qu'il fait laisse croire à un trou qui n'existe plus,
+ * et un nom qui promet plus est bien pire.
  *
  * Pourquoi ce script existe
  * -------------------------
@@ -25,9 +31,9 @@
  *
  * Usage
  * -----
- *   bun scripts/ops/sauvegarde-postgres.ts            # sauvegarde + vérification + envoi
- *   bun scripts/ops/sauvegarde-postgres.ts --local    # sans envoi distant
- *   bun scripts/ops/sauvegarde-postgres.ts --verifier # revérifie les archives existantes
+ *   bun scripts/ops/sauvegarde.ts            # sauvegarde + vérification + envoi
+ *   bun scripts/ops/sauvegarde.ts --local    # sans envoi distant
+ *   bun scripts/ops/sauvegarde.ts --verifier # revérifie les archives existantes
  */
 
 import { $ } from "bun";
@@ -36,9 +42,29 @@ import { mkdir, readdir, stat, unlink } from "node:fs/promises";
 const DESTINATION = "/var/backups/postgres";
 const HÔTE_FROID = "ubuntu@51.255.162.6";
 const DOSSIER_FROID = "/srv/rg-archive/postgres";
+/**
+ * Fichiers déposés par les utilisateurs, servis par `rg-storage.service`.
+ *
+ * La base ne contient QUE leurs métadonnées : `storage.objects` décrit 7 476 objets,
+ * mais les octets vivent ici. Restaurer le dump seul rendrait une base qui référence
+ * des fichiers disparus — une sauvegarde qui a l'air complète et ne l'est pas.
+ */
+const FICHIERS_UTILISATEURS = "/var/www/rg-storage";
+const FICHIERS_FROID = "/srv/rg-archive/rg-storage";
 /** Bases système : leur contenu est recréé par l'installation, seuls les rôles comptent. */
 const BASES_IGNORÉES = new Set(["template0", "template1", "postgres"]);
 const COPIES_GARDÉES = 7;
+/**
+ * Copies gardées pour les FICHIERS, moins nombreuses que pour les bases.
+ *
+ * Un dump compressé pèse 14 Mio, les fichiers utilisateurs 5,4 Gio — et l'archive
+ * froide n'avait plus que 5,4 Gio de libre après la première copie (95 % d'occupation,
+ * mesuré le 14/8/2026). `--link-dest` rend les copies suivantes quasi gratuites tant
+ * que les fichiers ne changent pas, mais « quasi » n'est pas « toujours » : trois jours
+ * de recul sur des fichiers qui bougent peu valent mieux que sept jours et un disque
+ * plein, où c'est la sauvegarde du jour qui échoue.
+ */
+const COPIES_FICHIERS_GARDÉES = 3;
 
 const drapeaux = new Set(process.argv.slice(2));
 const horodatage = new Date().toISOString().replaceAll(/[:.]/gu, "-").slice(0, 16);
@@ -191,6 +217,67 @@ async function rotation(): Promise<void> {
 	}
 }
 
+/**
+ * Copie incrémentale des fichiers utilisateurs vers l'archive froide.
+ *
+ * `--link-dest` pointe sur la copie précédente : tout fichier inchangé devient un lien
+ * dur au lieu d'un doublon, si bien qu'une deuxième sauvegarde de 5,4 Gio n'occupe que
+ * ce qui a réellement bougé. Chaque copie reste pourtant complète et navigable — on
+ * restaure un jour donné sans rejouer une chaîne d'incréments.
+ *
+ * Elle part APRÈS le dump : une base plus récente que les fichiers qu'elle décrit
+ * référencerait des objets pas encore copiés, alors que l'inverse est sans danger.
+ */
+async function sauverFichiersUtilisateurs(): Promise<void> {
+	// `Bun.file(...).exists()` répond FAUX sur un répertoire : la première version de
+	// cette fonction annonçait donc « rien à copier » alors que les 5,4 Gio étaient là,
+	// et sortait en succès. Un faux vert sur une sauvegarde est pire que pas de
+	// sauvegarde du tout — on croit être couvert. D'où `stat` et un test de répertoire.
+	const source = await stat(FICHIERS_UTILISATEURS).catch(() => null);
+	if (!source?.isDirectory()) {
+		erreur(`${FICHIERS_UTILISATEURS} introuvable ou n'est pas un répertoire — rien n'est copié`);
+		return;
+	}
+	const cible = `${FICHIERS_FROID}/${horodatage}`;
+	const préparation = await $`ssh -o BatchMode=yes -o ConnectTimeout=8 ${HÔTE_FROID} mkdir -p ${FICHIERS_FROID}`
+		.nothrow()
+		.quiet();
+	if (préparation.exitCode !== 0) {
+		erreur(`archive froide injoignable — les fichiers utilisateurs ne sont copiés NULLE PART`);
+		return;
+	}
+
+	const envoi =
+		await $`rsync -a --delete --timeout=600 --link-dest=${FICHIERS_FROID}/courant ${FICHIERS_UTILISATEURS}/ ${HÔTE_FROID}:${cible}/`
+			.nothrow()
+			.quiet();
+	if (envoi.exitCode !== 0) {
+		erreur(`copie des fichiers utilisateurs en échec : ${envoi.stderr.toString().slice(0, 300)}`);
+		return;
+	}
+
+	// `courant` désigne la copie de référence du prochain --link-dest. Sans lui, chaque
+	// sauvegarde repartirait de zéro et l'archive grossirait de 5,4 Gio par jour.
+	await $`ssh -o BatchMode=yes ${HÔTE_FROID} ${`rm -f ${FICHIERS_FROID}/courant && ln -s ${horodatage} ${FICHIERS_FROID}/courant`}`
+		.nothrow()
+		.quiet();
+
+	// Rotation distante : les copies au-delà des sept dernières partent, `courant` exclu.
+	await $`ssh -o BatchMode=yes ${HÔTE_FROID} ${`cd ${FICHIERS_FROID} && ls -1d 20* 2>/dev/null | sort | head -n -${COPIES_FICHIERS_GARDÉES} | xargs -r rm -rf`}`
+		.nothrow()
+		.quiet();
+
+	const mesure = (
+		await $`ssh -o BatchMode=yes ${HÔTE_FROID} ${`du -sh ${FICHIERS_FROID} && du -sh ${cible}`}`
+			.nothrow()
+			.quiet()
+	).stdout
+		.toString()
+		.trim()
+		.replaceAll("\n", " · ");
+	log(`  ✓ fichiers       ${mesure || cible}`);
+}
+
 async function envoyerHorsMachine(): Promise<void> {
 	const joignable =
 		await $`ssh -o BatchMode=yes -o ConnectTimeout=8 ${HÔTE_FROID} mkdir -p ${DOSSIER_FROID}`
@@ -259,7 +346,11 @@ if (drapeaux.has("--verifier")) {
 	if (principale) {await restaurationDeContrôle(principale[1], principale[0]);}
 
 	await rotation();
-	if (!drapeaux.has("--local")) {await envoyerHorsMachine();}
+	if (!drapeaux.has("--local")) {
+		await envoyerHorsMachine();
+		log("fichiers utilisateurs");
+		await sauverFichiersUtilisateurs();
+	}
 }
 
 log(
