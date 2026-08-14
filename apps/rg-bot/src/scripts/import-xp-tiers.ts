@@ -69,15 +69,18 @@
  *     via `GET /guilds/{RG_GUILD_ID}/members/search?query=<pseudo>`.
  *     C'est 10 comptes sur ~1 902 membres (`approximate_member_count` de la
  *     guilde au 14/8/2026) : moins de 1 %.
- *   LES ~1 892 AUTRES MEMBRES NE SONT PAS RÉCUPÉRABLES PAR CE SCRIPT. Pour
- *   les obtenir, deux voies, toutes deux humaines :
+ *   Cette seule image ne suffisait pas : la PASSE 2 ci-dessous (section
+ *   « --source=historique ») élargit la couverture à 65 membres SANS clé API,
+ *   en dépouillant l'historique complet des salons plutôt qu'un seul
+ *   instantané. Le reste des ~1 902 membres n'est toujours récupérable que
+ *   par une voie humaine :
  *     1. Un membre du staff RG génère une clé API sur noctaly.com/dashboard,
  *        puis on itère `GET /guilds/{id}/users/{id}/level-profile` sur les
  *        `discord_id` de `discord_members` (limite documentée : 50 req/s).
  *     2. Si le dashboard propose un export (CSV/JSON) — non documenté
  *        publiquement, à vérifier de visu — un humain le télécharge et on
  *        écrit un second script qui le lit.
- *   Aucun chiffre au-delà de ce TOP 10 n'a été inventé.
+ *   Aucun chiffre n'a été inventé, dans cette passe comme dans la suivante.
  *
  * ── CORRESPONDANCE DE COURBE ─────────────────────────────────────────────
  *   L'XP est importée BRUTE, telle qu'affichée par Noctaly (imprécise à la
@@ -142,23 +145,54 @@
  *   OFFICIEL de ce palier (colonne « Total XP » de noctaly.com/table, jamais
  *   inventé) comme minorant, explicitement marqué `seuil-officiel-palier`.
  *
- *   Salons couverts (pagination intégrale, jusqu'au premier message) :
- *     - #🤖〡bots (1135698156835852369) : 6 119 messages, 31/7/2023→13/8/2026,
- *       19 messages Noctaly (tous entre le 11/3/2026 et le 9/8/2026).
- *     - #💬〡général (1135528098146816010), #📷〡médias (1135660042025193472),
- *       #🤪〡memes-inazuma (1140743411901661275) : sondés positifs sur le
- *       dernier lot de 100 messages, paginés intégralement.
- *     - #🕵〡présentations, #🧐〡sondages, #🌹〡rose-griffon : sondés à 0 message
- *       Noctaly sur leur dernier lot de 100 → écartés (règle : deux salons
- *       d'affilée sans résultat arrêtent la piste, cf. le detail dans le
- *       commit).
- *   Résolution pseudo → ID Discord réel : `GET /guilds/{id}/members/search`,
- *   confirmée par recoupement (date d'entrée sur le serveur cohérente avec le
- *   niveau observé, ou global_name+nick exact) — jamais un pseudo assigné
- *   sans recoupement. Deux pseudos rencontrés n'ont PAS pu être résolus
- *   (plusieurs comptes candidats sans certitude, ou pseudo à caractères
- *   Unicode décoratifs non cherchable) : listés comme non-résolus plutôt que
- *   devinés, cf. `MESURES_NON_RESOLUES` plus bas.
+ *   Salons couverts, avec les 8 candidats sondés sur leur dernier lot de 100
+ *   messages d'abord (règle : deux salons d'affilée sans résultat arrêtent la
+ *   piste) :
+ *     - #🤖〡bots (1135698156835852369) : pagination COMPLÈTE, 6 119 messages,
+ *       31/7/2023→13/8/2026, 19 messages Noctaly (`/rank` + `/leaderboard`,
+ *       tous entre le 11/3/2026 et le 9/8/2026).
+ *     - #🤪〡memes-inazuma (1140743411901661275) : pagination COMPLÈTE, 3 119
+ *       messages, 14/8/2023→4/8/2026, 3 embeds « Niveau supérieur ».
+ *     - #🎈〡questions (1136022956619866176) : pagination COMPLÈTE, 1 089
+ *       messages, 1/8/2023→14/8/2026, 1 embed (Inazo, dominé par une mesure
+ *       plus fraîche déjà connue — rien de nouveau).
+ *     - #💬〡général (1135528098146816010, 207 messages Noctaly retrouvés),
+ *       #📷〡médias (1135660042025193472, 45), #🎨〡vos-fanarts
+ *       (1084588796403777617, 7) : pagination ARRÊTÉE une fois remonté au
+ *       11-17/3/2026 sans un seul message Noctaly plus ancien — cohérent avec
+ *       les 3 salons ci-dessus, entièrement paginés jusqu'à 2023, où le plus
+ *       ancien message Noctaly ne descend JAMAIS sous le 11/3/2026 : le module
+ *       de niveaux a manifestement été activé/réinitialisé ce jour-là sur
+ *       cette guilde. Continuer plus loin en arrière n'aurait rien trouvé de
+ *       plus — la charge inutile sur l'API (partagée avec les deux bots de
+ *       prod) a été évitée sur cette base.
+ *     - #🕵〡présentations, #🧐〡sondages, #🌹〡rose-griffon : 0 message Noctaly
+ *       sur leur dernier lot de 100 → écartés sans pagination complète.
+ *   Ces 3 derniers salons scannés en entier (#🤖〡bots, #🤪〡memes-inazuma,
+ *   #🎈〡questions) ne contenaient QUE des embeds « Niveau supérieur » côté
+ *   salons de discussion générale — aucun `/rank` ni `/leaderboard` en dehors
+ *   de #🤖〡bots (logique : ce sont des commandes délibérées, tapées dans le
+ *   salon dédié, alors que la montée de niveau est un sous-produit de la
+ *   conversation normale, annoncée n'importe où). Chaque embed mentionne
+ *   directement l'ID Discord du membre (`<@id>`) : aucune résolution par
+ *   pseudo n'a donc été nécessaire pour ces 262 messages.
+ *   Résolution pseudo → ID Discord réel (uniquement pour les captures
+ *   `/rank`/`/leaderboard`, sans mention directe) : `GET /guilds/{id}/
+ *   members/search`, confirmée par recoupement (date d'entrée sur le serveur
+ *   cohérente avec le niveau observé, ou global_name+nick exact) — jamais un
+ *   pseudo assigné sans recoupement. Un pseudo n'a PAS pu être résolu
+ *   (caractères Unicode décoratifs non cherchables, aucun embed direct pour
+ *   trancher) : cf. `MESURES_NON_RESOLUES` plus bas.
+ *   ⚠ Piège trouvé et évité : deux comptes différents affichent un pseudo
+ *   quasi identique, « IceCream » (831595693986021388, toujours sur le
+ *   serveur, du top 10) et « Icecream » (403127934480809995, progression
+ *   niveau 12→15 entre mars et mai 2026 dans #💬〡général). Le second répond
+ *   `404 Unknown Member` à `GET /guilds/{id}/members/{id}` — il a quitté RG,
+ *   ce qui explique aussi pourquoi `members/search` ne le trouvait pas lors du
+ *   premier passage. Vérifié avant d'écrire quoi que ce soit : sans ce
+ *   contrôle, l'XP des deux comptes aurait fusionné à tort sur un seul membre
+ *   actuel. Les deux sont importés séparément (le second annoté « parti du
+ *   serveur » dans son pseudo).
  *
  *   Piste 3 (endpoint public de noctaly.com) : le JS servi par la page
  *   `/leaderboard/<guild>` a été inspecté (tous les chunks `_next/static`
@@ -174,9 +208,15 @@
  *
  *   Fusion en base : `xp = GREATEST(bot_profils.xp, EXCLUDED.xp)` — une
  *   mesure ancienne retrouvée par ce scan ne doit jamais écraser une valeur
- *   plus fraîche déjà en base (le niveau suit la même règle via `niveauPour`
- *   appliqué à la XP retenue après le `GREATEST`, recalculé côté SQL avec un
- *   `CASE` — voir `importerHistorique`).
+ *   plus fraîche déjà en base. `niveau` suit un `GREATEST` séparé sur la
+ *   valeur déjà calculée par `niveauPour()` de chaque côté : correct car
+ *   `niveauPour` est monotone non décroissante en XP (voir le commentaire de
+ *   `importerHistorique`), donc le plus grand des deux niveaux correspond
+ *   toujours à la plus grande des deux XP — pas besoin d'un `CASE` SQL.
+ *
+ *   Résultat de cette passe : 65 membres distincts couverts au total (contre
+ *   10 après la passe 1), soit environ 3,4 % des ~1 902 membres de la guilde
+ *   — le reste demeure hors de portée sans clé API humaine (cf. plus haut).
  *
  * ── UTILISATION ──────────────────────────────────────────────────────────
  *   bun apps/bot/src/scripts/import-xp-tiers.ts --essai   # top 10, rien écrit
@@ -276,46 +316,95 @@ interface MesureHistorique {
  * passe 1.
  */
 const HISTORIQUE_NOCTALY: readonly MesureHistorique[] = [
-	// #🤖〡bots — /leaderboard du 9/8/2026 (déjà en base depuis la passe 1, réécrit ici à l'identique)
-	{ pseudo: "Mioleen_", discordId: "435479810731409408", xp: 44_400, niveauNoctaly: 26, mesureLe: "2026-08-09T16:17:09.953Z", precision: "arrondie-centaine", sourceMessageId: "1536045686259323010", sourceChannel: "#🤖〡bots" },
-	{ pseudo: "Ichigo Kurosaki", discordId: "593493079911170068", xp: 28_800, niveauNoctaly: 22, mesureLe: "2026-08-09T16:17:09.953Z", precision: "arrondie-centaine", sourceMessageId: "1536045686259323010", sourceChannel: "#🤖〡bots" },
-	{ pseudo: "Inazo", discordId: "531549483067244566", xp: 15_900, niveauNoctaly: 18, mesureLe: "2026-08-09T16:17:09.953Z", precision: "arrondie-centaine", sourceMessageId: "1536045686259323010", sourceChannel: "#🤖〡bots" },
-	{ pseudo: "IceCream", discordId: "831595693986021388", xp: 10_500, niveauNoctaly: 15, mesureLe: "2026-08-09T16:17:09.953Z", precision: "arrondie-centaine", sourceMessageId: "1536045686259323010", sourceChannel: "#🤖〡bots" },
-	{ pseudo: "Rishar", discordId: "254337557272330241", xp: 9_200, niveauNoctaly: 14, mesureLe: "2026-08-09T16:17:09.953Z", precision: "arrondie-centaine", sourceMessageId: "1536045686259323010", sourceChannel: "#🤖〡bots" },
-	{ pseudo: "Yoyo", discordId: "281114294152724491", xp: 8_700, niveauNoctaly: 14, mesureLe: "2026-08-09T16:17:09.953Z", precision: "arrondie-centaine", sourceMessageId: "1536045686259323010", sourceChannel: "#🤖〡bots" },
-	{ pseudo: "Dash", discordId: "563787814483918858", xp: 7_800, niveauNoctaly: 13, mesureLe: "2026-08-09T16:17:09.953Z", precision: "arrondie-centaine", sourceMessageId: "1536045686259323010", sourceChannel: "#🤖〡bots" },
-	{ pseudo: "ploufy !!", discordId: "987039164988030976", xp: 6_900, niveauNoctaly: 12, mesureLe: "2026-08-09T16:17:09.953Z", precision: "arrondie-centaine", sourceMessageId: "1536045686259323010", sourceChannel: "#🤖〡bots" },
-	{ pseudo: "yuan yuan", discordId: "779044049374019594", xp: 6_000, niveauNoctaly: 12, mesureLe: "2026-08-09T16:17:09.953Z", precision: "arrondie-centaine", sourceMessageId: "1536045686259323010", sourceChannel: "#🤖〡bots" },
-	{ pseudo: "Pegeto", discordId: "768526829279510529", xp: 5_500, niveauNoctaly: 11, mesureLe: "2026-08-09T16:17:09.953Z", precision: "arrondie-centaine", sourceMessageId: "1536045686259323010", sourceChannel: "#🤖〡bots" },
-	// #🤖〡bots — /leaderboard antérieurs, membres jamais revus dans un lot plus récent
-	{ pseudo: "Kokoro", discordId: "1237047037435056281", xp: 4_800, niveauNoctaly: 10, mesureLe: "2026-08-01T16:36:04.366Z", precision: "arrondie-centaine", sourceMessageId: "1533151341407506544", sourceChannel: "#🤖〡bots" },
-	{ pseudo: "Illu", discordId: "672528206565474346", xp: 3_400, niveauNoctaly: 9, mesureLe: "2026-05-01T22:13:17.226Z", precision: "arrondie-centaine", sourceMessageId: "1499896520538063078", sourceChannel: "#🤖〡bots" },
-	{ pseudo: "Lindą — every end… (nick Linda)", discordId: "817549867072356352", xp: 2_600, niveauNoctaly: 8, mesureLe: "2026-04-26T14:25:45.567Z", precision: "arrondie-centaine", sourceMessageId: "1497966924024385687", sourceChannel: "#🤖〡bots" },
-	{ pseudo: "Hassane", discordId: "411591320147066881", xp: 1_400, niveauNoctaly: 5, mesureLe: "2026-04-07T17:54:01.553Z", precision: "arrondie-centaine", sourceMessageId: "1491133966541918249", sourceChannel: "#🤖〡bots" },
-	{ pseudo: "Masamune Kadoya", discordId: "1244715598102138970", xp: 180, niveauNoctaly: 1, mesureLe: "2026-03-14T03:47:24.860Z", precision: "arrondie-centaine", sourceMessageId: "1482223600994881669", sourceChannel: "#🤖〡bots" },
-	// #🤖〡bots — /rank (carte individuelle, XP exacte lue sur "XP TOTAL")
-	{ pseudo: "IshakShyGuy", discordId: "1381331001724108892", xp: 285, niveauNoctaly: 2, mesureLe: "2026-04-07T18:04:08.604Z", precision: "seuil-officiel-palier", sourceMessageId: "1491136512698351722", sourceChannel: "#🤖〡bots" },
-	{ pseudo: "dee (fusaku master)", discordId: "504630658463694848", xp: 140, niveauNoctaly: 1, mesureLe: "2026-03-26T03:13:13.313Z", precision: "exacte", sourceMessageId: "1486563650570420325", sourceChannel: "#🤖〡bots" },
-	// #🤪〡memes-inazuma — embeds "Niveau supérieur" (mention directe de l'ID, pas de résolution nécessaire)
-	{ pseudo: "Keirakira", discordId: "215800314094157824", xp: 1_960, niveauNoctaly: 7, mesureLe: "2026-08-04T09:50:25.134Z", precision: "seuil-officiel-palier", sourceMessageId: "1534136418866171996", sourceChannel: "#🤪〡memes-inazuma" },
-	{ pseudo: "Dleez", discordId: "165739958928146432", xp: 3_225, niveauNoctaly: 9, mesureLe: "2026-07-29T17:08:57.335Z", precision: "seuil-officiel-palier", sourceMessageId: "1532072453042606303", sourceChannel: "#🤪〡memes-inazuma" },
-	{ pseudo: "Nowshad", discordId: "433035940416716810", xp: 125, niveauNoctaly: 1, mesureLe: "2026-06-06T20:47:16.392Z", precision: "seuil-officiel-palier", sourceMessageId: "1512920837592846647", sourceChannel: "#🤪〡memes-inazuma" },
+	// 65 membres distincts, triés par XP décroissante. Sources : /leaderboard et /rank
+	// de #🤖〡bots (arrondie-centaine ou exacte), embeds « Niveau supérieur » de
+	// #🤖〡bots, #🤪〡memes-inazuma, #💬〡général, #📷〡médias, #🎨〡vos-fanarts
+	// (seuil-officiel-palier — mention directe de l'ID, aucune résolution requise).
+	// « Icecream (parti du serveur) » et « IceCream » (831595693986021388, déjà
+	// dans le top 10) sont deux comptes DIFFÉRENTS malgré le pseudo quasi
+	// identique : le premier répond 404 "Unknown Member" à l'API (a quitté RG),
+	// vérifié avant import — sans cette vérification les deux XP auraient
+	// fusionné à tort sur un seul membre.
+	{ pseudo: "Mioleen_", discordId: "435479810731409408", xp: 44400, niveauNoctaly: 26, mesureLe: "2026-08-09T16:17:09.953Z", precision: "arrondie-centaine", sourceMessageId: "1536045686259323010", sourceChannel: "#🤖〡bots" },
+	{ pseudo: "Ichigo Kurosaki", discordId: "593493079911170068", xp: 28800, niveauNoctaly: 22, mesureLe: "2026-08-09T16:17:09.953Z", precision: "arrondie-centaine", sourceMessageId: "1536045686259323010", sourceChannel: "#🤖〡bots" },
+	{ pseudo: "Inazo", discordId: "531549483067244566", xp: 15900, niveauNoctaly: 18, mesureLe: "2026-08-09T16:17:09.953Z", precision: "arrondie-centaine", sourceMessageId: "1536045686259323010", sourceChannel: "#🤖〡bots" },
+	{ pseudo: "IceCream", discordId: "831595693986021388", xp: 10500, niveauNoctaly: 15, mesureLe: "2026-08-09T16:17:09.953Z", precision: "arrondie-centaine", sourceMessageId: "1536045686259323010", sourceChannel: "#🤖〡bots" },
+	{ pseudo: "Icecream (parti du serveur)", discordId: "403127934480809995", xp: 10100, niveauNoctaly: 15, mesureLe: "2026-05-09T08:02:10.643000+00:00", precision: "seuil-officiel-palier", sourceMessageId: "1502581434689261579", sourceChannel: "#💬〡général" },
+	{ pseudo: "Rishar", discordId: "254337557272330241", xp: 9200, niveauNoctaly: 14, mesureLe: "2026-08-09T16:17:09.953Z", precision: "arrondie-centaine", sourceMessageId: "1536045686259323010", sourceChannel: "#🤖〡bots" },
+	{ pseudo: "Yoyo", discordId: "281114294152724491", xp: 8700, niveauNoctaly: 14, mesureLe: "2026-08-09T16:17:09.953Z", precision: "arrondie-centaine", sourceMessageId: "1536045686259323010", sourceChannel: "#🤖〡bots" },
+	{ pseudo: "Dash", discordId: "563787814483918858", xp: 7800, niveauNoctaly: 13, mesureLe: "2026-08-09T16:17:09.953Z", precision: "arrondie-centaine", sourceMessageId: "1536045686259323010", sourceChannel: "#🤖〡bots" },
+	{ pseudo: "ploufy !!", discordId: "987039164988030976", xp: 6900, niveauNoctaly: 12, mesureLe: "2026-08-09T16:17:09.953Z", precision: "arrondie-centaine", sourceMessageId: "1536045686259323010", sourceChannel: "#🤖〡bots" },
+	{ pseudo: "yuan yuan", discordId: "779044049374019594", xp: 6000, niveauNoctaly: 12, mesureLe: "2026-08-09T16:17:09.953Z", precision: "arrondie-centaine", sourceMessageId: "1536045686259323010", sourceChannel: "#🤖〡bots" },
+	{ pseudo: "Pegeto", discordId: "768526829279510529", xp: 5500, niveauNoctaly: 11, mesureLe: "2026-08-09T16:17:09.953Z", precision: "arrondie-centaine", sourceMessageId: "1536045686259323010", sourceChannel: "#🤖〡bots" },
+	{ pseudo: "Kokoro", discordId: "1237047037435056281", xp: 4025, niveauNoctaly: 10, mesureLe: "2026-04-17T10:27:24.858000+00:00", precision: "seuil-officiel-palier", sourceMessageId: "1494645451713155102", sourceChannel: "#💬〡général" },
+	{ pseudo: "dee ✮⋆˙☆", discordId: "504630658463694848", xp: 3225, niveauNoctaly: 9, mesureLe: "2026-08-09T19:20:34.897000+00:00", precision: "seuil-officiel-palier", sourceMessageId: "1536091844339957841", sourceChannel: "#💬〡général" },
+	{ pseudo: "Illu", discordId: "672528206565474346", xp: 3225, niveauNoctaly: 9, mesureLe: "2026-05-13T19:30:50.514000+00:00", precision: "seuil-officiel-palier", sourceMessageId: "1504204294252138567", sourceChannel: "#💬〡général" },
+	{ pseudo: "Keirakira", discordId: "215800314094157824", xp: 2540, niveauNoctaly: 8, mesureLe: "2026-08-09T12:37:43.151000+00:00", precision: "seuil-officiel-palier", sourceMessageId: "1535990460689154058", sourceChannel: "#💬〡général" },
+	{ pseudo: "Dleez", discordId: "165739958928146432", xp: 2540, niveauNoctaly: 8, mesureLe: "2026-07-10T19:30:33.469000+00:00", precision: "seuil-officiel-palier", sourceMessageId: "1525222718965026967", sourceChannel: "#💬〡général" },
+	{ pseudo: "Hassane", discordId: "411591320147066881", xp: 2540, niveauNoctaly: 8, mesureLe: "2026-06-02T17:44:57.687000+00:00", precision: "seuil-officiel-palier", sourceMessageId: "1511425405876310077", sourceChannel: "#💬〡général" },
+	{ pseudo: "every end…", discordId: "817549867072356352", xp: 2540, niveauNoctaly: 8, mesureLe: "2026-04-15T20:28:52.689000+00:00", precision: "seuil-officiel-palier", sourceMessageId: "1494072039315869806", sourceChannel: "#💬〡général" },
+	{ pseudo: "mimi", discordId: "690108029387014147", xp: 2540, niveauNoctaly: 8, mesureLe: "2026-03-19T17:23:25.273000+00:00", precision: "seuil-officiel-palier", sourceMessageId: "1484240895178964993", sourceChannel: "#📷〡médias" },
+	{ pseudo: "✧˚Karu˚✧", discordId: "198209347589898240", xp: 1960, niveauNoctaly: 7, mesureLe: "2026-08-01T23:17:17.918000+00:00", precision: "seuil-officiel-palier", sourceMessageId: "1533252313202823209", sourceChannel: "#📷〡médias" },
+	{ pseudo: "IshakShyGuy", discordId: "1381331001724108892", xp: 1960, niveauNoctaly: 7, mesureLe: "2026-06-04T16:52:06.094000+00:00", precision: "seuil-officiel-palier", sourceMessageId: "1512136878982430832", sourceChannel: "#💬〡général" },
+	{ pseudo: "𝐇𝐚𝐭𝐜𝐡𝐢𝐧", discordId: "874819138323877908", xp: 1960, niveauNoctaly: 7, mesureLe: "2026-05-29T17:23:26.939000+00:00", precision: "seuil-officiel-palier", sourceMessageId: "1509970440624537670", sourceChannel: "#💬〡général" },
+	{ pseudo: "Kanawaki", discordId: "607845344780222494", xp: 1075, niveauNoctaly: 5, mesureLe: "2026-07-09T10:20:49.253000+00:00", precision: "seuil-officiel-palier", sourceMessageId: "1524721985270059089", sourceChannel: "#💬〡général" },
+	{ pseudo: "Cieran/FujoRin || COMMS CLOSED", discordId: "309031721016229890", xp: 1075, niveauNoctaly: 5, mesureLe: "2026-06-24T12:05:48.544000+00:00", precision: "seuil-officiel-palier", sourceMessageId: "1519312588427755561", sourceChannel: "#💬〡général" },
+	{ pseudo: "El Titi", discordId: "466308871926054932", xp: 1075, niveauNoctaly: 5, mesureLe: "2026-05-31T20:27:46.123000+00:00", precision: "seuil-officiel-palier", sourceMessageId: "1510741601935298672", sourceChannel: "#💬〡général" },
+	{ pseudo: "Aerithia 🪻", discordId: "457650485315371020", xp: 1075, niveauNoctaly: 5, mesureLe: "2026-05-31T18:34:05.186000+00:00", precision: "seuil-officiel-palier", sourceMessageId: "1510712992851951616", sourceChannel: "#💬〡général" },
+	{ pseudo: "Sanada", discordId: "908269053347504170", xp: 1075, niveauNoctaly: 5, mesureLe: "2026-05-21T17:14:49.702000+00:00", precision: "seuil-officiel-palier", sourceMessageId: "1507069168250392686", sourceChannel: "#🎨〡vos-fanarts" },
+	{ pseudo: "ETHAN", discordId: "330968901867274240", xp: 750, niveauNoctaly: 4, mesureLe: "2026-07-24T14:32:55.434000+00:00", precision: "seuil-officiel-palier", sourceMessageId: "1530221247055794217", sourceChannel: "#💬〡général" },
+	{ pseudo: "kittycaillou", discordId: "683044704967065626", xp: 750, niveauNoctaly: 4, mesureLe: "2026-05-08T23:27:49.306000+00:00", precision: "seuil-officiel-palier", sourceMessageId: "1502451992860164136", sourceChannel: "#💬〡général" },
+	{ pseudo: "𝑲𝒂𝒆𝒏 🔥", discordId: "332288456686305281", xp: 750, niveauNoctaly: 4, mesureLe: "2026-03-30T21:38:03.439000+00:00", precision: "seuil-officiel-palier", sourceMessageId: "1488291242973466814", sourceChannel: "#💬〡général" },
+	{ pseudo: "slosh", discordId: "554311681094975509", xp: 750, niveauNoctaly: 4, mesureLe: "2026-03-29T21:21:21.823000+00:00", precision: "seuil-officiel-palier", sourceMessageId: "1487924654025740379", sourceChannel: "#💬〡général" },
+	{ pseudo: "Kinun", discordId: "869633392814206977", xp: 490, niveauNoctaly: 3, mesureLe: "2026-08-07T17:47:36.982000+00:00", precision: "seuil-officiel-palier", sourceMessageId: "1535343673137430650", sourceChannel: "#💬〡général" },
+	{ pseudo: "Suumash", discordId: "1107734851085402206", xp: 490, niveauNoctaly: 3, mesureLe: "2026-05-29T13:16:16.320000+00:00", precision: "seuil-officiel-palier", sourceMessageId: "1509908236499816579", sourceChannel: "#💬〡général" },
+	{ pseudo: "Silva", discordId: "388714887498432512", xp: 490, niveauNoctaly: 3, mesureLe: "2026-03-18T18:01:45.294000+00:00", precision: "seuil-officiel-palier", sourceMessageId: "1483888154300780615", sourceChannel: "#💬〡général" },
+	{ pseudo: "Ruvi", discordId: "776818507974574111", xp: 490, niveauNoctaly: 3, mesureLe: "2026-03-14T12:56:43.964000+00:00", precision: "seuil-officiel-palier", sourceMessageId: "1482361841496887411", sourceChannel: "#💬〡général" },
+	{ pseudo: "Jenn Scarlet", discordId: "469900328758935552", xp: 490, niveauNoctaly: 3, mesureLe: "2026-06-24T14:44:26.470000+00:00", precision: "seuil-officiel-palier", sourceMessageId: "1519352509502853221", sourceChannel: "#🎨〡vos-fanarts" },
+	{ pseudo: "⋆ℳ@∃Ꮁ⋆", discordId: "724348833076740157", xp: 490, niveauNoctaly: 3, mesureLe: "2026-04-25T20:13:17.467000+00:00", precision: "seuil-officiel-palier", sourceMessageId: "1497691995366232248", sourceChannel: "#🎨〡vos-fanarts" },
+	{ pseudo: "COLZA", discordId: "371727859800080395", xp: 285, niveauNoctaly: 2, mesureLe: "2026-08-01T16:29:51.033000+00:00", precision: "seuil-officiel-palier", sourceMessageId: "1533149775535538286", sourceChannel: "#💬〡général" },
+	{ pseudo: "Abdel BMA", discordId: "1462508632993431724", xp: 285, niveauNoctaly: 2, mesureLe: "2026-07-13T07:39:42.037000+00:00", precision: "seuil-officiel-palier", sourceMessageId: "1526130989489721435", sourceChannel: "#💬〡général" },
+	{ pseudo: "RozenB", discordId: "366883009426882582", xp: 285, niveauNoctaly: 2, mesureLe: "2026-07-11T18:09:37.072000+00:00", precision: "seuil-officiel-palier", sourceMessageId: "1525564737625002214", sourceChannel: "#💬〡général" },
+	{ pseudo: "👑Skipper", discordId: "1039860340705480745", xp: 285, niveauNoctaly: 2, mesureLe: "2026-05-21T13:18:23.623000+00:00", precision: "seuil-officiel-palier", sourceMessageId: "1507009667522367631", sourceChannel: "#💬〡général" },
+	{ pseudo: "Binou", discordId: "1248351062277226518", xp: 285, niveauNoctaly: 2, mesureLe: "2026-04-21T19:11:28.469000+00:00", precision: "seuil-officiel-palier", sourceMessageId: "1496226887238811770", sourceChannel: "#💬〡général" },
+	{ pseudo: "Link Soleil", discordId: "437671719776550934", xp: 285, niveauNoctaly: 2, mesureLe: "2026-04-15T20:28:03.377000+00:00", precision: "seuil-officiel-palier", sourceMessageId: "1494071832486088775", sourceChannel: "#💬〡général" },
+	{ pseudo: "Kitsu", discordId: "747080080550789150", xp: 285, niveauNoctaly: 2, mesureLe: "2026-04-02T17:25:39.772000+00:00", precision: "seuil-officiel-palier", sourceMessageId: "1489314889427062944", sourceChannel: "#💬〡général" },
+	{ pseudo: "Tategami 👑", discordId: "239380696886411265", xp: 285, niveauNoctaly: 2, mesureLe: "2026-03-31T23:51:04.056000+00:00", precision: "seuil-officiel-palier", sourceMessageId: "1488687103972741182", sourceChannel: "#💬〡général" },
+	{ pseudo: "Masamune Kadoya", discordId: "1244715598102138970", xp: 180, niveauNoctaly: 1, mesureLe: "2026-03-14T03:47:24.860Z", precision: "exacte", sourceMessageId: "1482223600994881669", sourceChannel: "#🤖〡bots" },
+	{ pseudo: "Kuri", discordId: "1499191424732627076", xp: 125, niveauNoctaly: 1, mesureLe: "2026-08-07T18:49:14.959000+00:00", precision: "seuil-officiel-palier", sourceMessageId: "1535359183577153567", sourceChannel: "#💬〡général" },
+	{ pseudo: "Epic", discordId: "424975271683293184", xp: 125, niveauNoctaly: 1, mesureLe: "2026-08-06T20:43:48.983000+00:00", precision: "seuil-officiel-palier", sourceMessageId: "1535025627457916939", sourceChannel: "#💬〡général" },
+	{ pseudo: "Vincent(Thebutcher)", discordId: "565975991210737675", xp: 125, niveauNoctaly: 1, mesureLe: "2026-07-02T21:47:17.166000+00:00", precision: "seuil-officiel-palier", sourceMessageId: "1522358024839233790", sourceChannel: "#💬〡général" },
+	{ pseudo: "El pibe de oro", discordId: "737011881637707865", xp: 125, niveauNoctaly: 1, mesureLe: "2026-06-24T14:56:40.341000+00:00", precision: "seuil-officiel-palier", sourceMessageId: "1519355587580792965", sourceChannel: "#💬〡général" },
+	{ pseudo: "✧ 𝕾𝖔𝖗𝖆 ✧", discordId: "1202674352999501947", xp: 125, niveauNoctaly: 1, mesureLe: "2026-05-18T20:28:49.679000+00:00", precision: "seuil-officiel-palier", sourceMessageId: "1506030826255548568", sourceChannel: "#💬〡général" },
+	{ pseudo: "Bri", discordId: "1201870697463545917", xp: 125, niveauNoctaly: 1, mesureLe: "2026-05-11T22:34:51.088000+00:00", precision: "seuil-officiel-palier", sourceMessageId: "1503525826044629163", sourceChannel: "#💬〡général" },
+	{ pseudo: "Jojo Kirino", discordId: "274820033014661121", xp: 125, niveauNoctaly: 1, mesureLe: "2026-05-11T22:29:35.294000+00:00", precision: "seuil-officiel-palier", sourceMessageId: "1503524501508591616", sourceChannel: "#💬〡général" },
+	{ pseudo: "soledad", discordId: "841341826618884103", xp: 125, niveauNoctaly: 1, mesureLe: "2026-05-09T08:24:46.338000+00:00", precision: "seuil-officiel-palier", sourceMessageId: "1502587120886480897", sourceChannel: "#💬〡général" },
+	{ pseudo: "fentotomy", discordId: "904364583383367710", xp: 125, niveauNoctaly: 1, mesureLe: "2026-05-01T15:28:00.027000+00:00", precision: "seuil-officiel-palier", sourceMessageId: "1499794526812897423", sourceChannel: "#💬〡général" },
+	{ pseudo: "Frankos LeBeau", discordId: "1408861090212745371", xp: 125, niveauNoctaly: 1, mesureLe: "2026-04-12T20:22:31.609000+00:00", precision: "seuil-officiel-palier", sourceMessageId: "1492983277353439282", sourceChannel: "#💬〡général" },
+	{ pseudo: "Sofiane 4⚽❄", discordId: "1097785928342319155", xp: 125, niveauNoctaly: 1, mesureLe: "2026-04-10T12:40:06.860000+00:00", precision: "seuil-officiel-palier", sourceMessageId: "1492142131710525461", sourceChannel: "#💬〡général" },
+	{ pseudo: "Paimy", discordId: "410892709264621568", xp: 125, niveauNoctaly: 1, mesureLe: "2026-04-04T12:54:42.502000+00:00", precision: "seuil-officiel-palier", sourceMessageId: "1489971477225672856", sourceChannel: "#💬〡général" },
+	{ pseudo: "✝🌪", discordId: "1433177208075190395", xp: 125, niveauNoctaly: 1, mesureLe: "2026-04-02T14:14:33.461000+00:00", precision: "seuil-officiel-palier", sourceMessageId: "1489266796233228372", sourceChannel: "#💬〡général" },
+	{ pseudo: "Nxzo", discordId: "515928091382775820", xp: 125, niveauNoctaly: 1, mesureLe: "2026-03-31T23:44:15.907000+00:00", precision: "seuil-officiel-palier", sourceMessageId: "1488685392071888987", sourceChannel: "#💬〡général" },
+	{ pseudo: "Michou 🧀", discordId: "1424828785731174452", xp: 125, niveauNoctaly: 1, mesureLe: "2026-03-14T02:50:36.948000+00:00", precision: "seuil-officiel-palier", sourceMessageId: "1482209307176079482", sourceChannel: "#💬〡général" },
+	{ pseudo: "Neoverse", discordId: "644512674692202504", xp: 125, niveauNoctaly: 1, mesureLe: "2026-05-26T21:35:05.447000+00:00", precision: "seuil-officiel-palier", sourceMessageId: "1508946604760105102", sourceChannel: "#📷〡médias" },
+	{ pseudo: "Yuki ★", discordId: "264765469716774912", xp: 125, niveauNoctaly: 1, mesureLe: "2026-03-17T22:13:35.680000+00:00", precision: "seuil-officiel-palier", sourceMessageId: "1483589143987753113", sourceChannel: "#📷〡médias" },
+	{ pseudo: "JoJoNA", discordId: "1536431102523342998", xp: 125, niveauNoctaly: 1, mesureLe: "2026-08-13T22:06:13.113000+00:00", precision: "seuil-officiel-palier", sourceMessageId: "1537583079701618760", sourceChannel: "#🎨〡vos-fanarts" },
+	{ pseudo: "Vind", discordId: "690138166136668211", xp: 125, niveauNoctaly: 1, mesureLe: "2026-08-06T20:38:30.339000+00:00", precision: "seuil-officiel-palier", sourceMessageId: "1535024290968244368", sourceChannel: "#🎨〡vos-fanarts" },
 ] as const;
 
 /**
  * Pseudos rencontrés dans l'historique mais volontairement NON importés :
  * aucun ID Discord fiable n'a pu leur être assigné (zéro invention plutôt
- * qu'un mauvais compte crédité de l'XP d'un autre).
+ * qu'un mauvais compte crédité de l'XP d'un autre). Le doute sur « mimi »
+ * (3 comptes candidats au même pseudo lors du premier passage) a depuis été
+ * levé par un embed « Niveau supérieur » qui la mentionne directement dans
+ * #📷〡médias — elle est donc dans `HISTORIQUE_NOCTALY`, plus ici.
  */
 const MESURES_NON_RESOLUES: ReadonlyArray<{ pseudo: string; raison: string }> = [
 	{
-		pseudo: "mimi",
-		raison:
-			"3 comptes du serveur ont exactement global_name=\"mimi\" (stsra, miminariz, miwee_) ; comparaison des avatars actuels avec l'avatar affiché sur la carte Noctaly du 14/3→26/4/2026 non concluante pour départager.",
-	},
-	{
 		pseudo: "⼁M@∃⼁⼁",
-		raison: "Pseudo à caractères Unicode décoratifs (bloc de présentation) — non cherchable de façon fiable via members/search.",
+		raison:
+			"Pseudo à caractères Unicode décoratifs (bloc de présentation) rencontré uniquement sur une image de /leaderboard (11/3/2026) — non cherchable de façon fiable via members/search, et aucun embed de montée de niveau ne l'a mentionné directement pour lever le doute (contrairement à mimi).",
 	},
 ] as const;
 
