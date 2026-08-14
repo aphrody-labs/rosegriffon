@@ -20,6 +20,7 @@ const COLLECTIONS = [
 	{ path: "/sons", label: "Sons & voix", icon: "graphic_eq", hint: "5 403 banques" },
 	{ path: "/videos", label: "Vidéos", icon: "movie", hint: "96 cinématiques" },
 	{ path: "/modeles", label: "Modèles 3D", icon: "deployed_code", hint: "6 236 modèles" },
+	{ path: "/mode", label: "Modes de jeu", icon: "stadia_controller", hint: "10 modes" },
 ] as const;
 
 /** Chemin d'une des collections média. */
