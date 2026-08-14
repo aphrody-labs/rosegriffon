@@ -16,6 +16,7 @@ import Link from "next/link";
 import { lsOrNull, texContainer, texUrl } from "@rosegriffon/azalee/cpk/live";
 import { MediaBack, MediaCount, MediaEmpty, MediaHeader } from "@/components/wiki/MediaShell";
 import { itemNames } from "@/lib/cpk/media-names";
+import { MediaDownload } from "@/components/wiki/MediaDownload";
 import { cpkThumbUrl, segLabel } from "@rosegriffon/azalee/cpk/shared";
 
 export const dynamic = "force-dynamic";
@@ -271,6 +272,8 @@ async function VueConteneur({ rel, segments }: { rel: string; segments: string[]
 			</MediaHeader>
 
 			<MediaBack href={parent} label={`Retour à ${segLabel(segments.at(-2) ?? "")}`} />
+
+			<MediaDownload path={`data/dx11/${segments.join("/")}`} />
 
 			{!conteneur || conteneur.count === 0 ? (
 				<MediaEmpty>Ce conteneur n'expose aucune texture décodable.</MediaEmpty>

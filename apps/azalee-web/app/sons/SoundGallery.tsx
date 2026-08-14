@@ -9,11 +9,11 @@
  * WAV. On adresse par `awbId` et non par rang : le rang dépend de l'ordre du fichier.
  */
 
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import Link from "next/link";
+import { AudioPlayer } from "@/app/sons/AudioPlayer";
 import {
 	audioBankKindLabel,
-	cpkAudioCueUrl,
 	fetchAudioBankOrNull,
 	formatDuration,
 	type AudioBank,
@@ -62,8 +62,9 @@ export function SoundGallery({ banks, namedCount }: { banks: BankEntry[]; namedC
 	const [ouverte, setOuverte] = useState<string | null>(null);
 	const [catalogues, setCatalogues] = useState<Record<string, AudioBank | null>>({});
 	const [chargement, setChargement] = useState<string | null>(null);
-	const audioRef = useRef<HTMLAudioElement | null>(null);
-	const [joue, setJoue] = useState<string | null>(null);
+	// Ce qui joue : la banque et le RANG du cue dans son catalogue. Le rang permet de passer au
+	// suivant sans rechercher la piste dans la liste.
+	const [piste, setPiste] = useState<{ path: string; index: number } | null>(null);
 
 	const comptes = useMemo(() => {
 		const c = new Map<AudioBankKind, number>();
@@ -98,18 +99,38 @@ export function SoundGallery({ banks, namedCount }: { banks: BankEntry[]; namedC
 		[ouverte, catalogues],
 	);
 
-	const jouer = useCallback((path: string, awbId: number | null, cle: string) => {
-		const el = audioRef.current;
-		if (!el) return;
-		el.src = cpkAudioCueUrl(path, awbId);
-		setJoue(cle);
-		void el.play().catch(() => setJoue(null));
-	}, []);
+	// La piste transmise au lecteur, reconstruite depuis le catalogue déjà chargé — aucune
+	// requête supplémentaire pour connaître son nom ou sa durée.
+	const pisteCourante = useMemo(() => {
+		if (!piste) return null;
+		const cat = catalogues[piste.path];
+		const cue = cat?.cues[piste.index];
+		if (!cat || !cue) return null;
+		const banque = banks.find((b) => b.path === piste.path);
+		return {
+			path: piste.path,
+			awbId: cue.awbId,
+			label: cue.name ?? `cue ${cue.index}`,
+			banque: banque?.owner ?? cat.name ?? piste.path,
+			duree: cue.durationSec,
+		};
+	}, [piste, catalogues, banks]);
+
+	/** Passe au cue précédent (`-1`) ou suivant (`+1`), borné aux extrémités du catalogue. */
+	const naviguer = useCallback(
+		(delta: number) => {
+			setPiste((p) => {
+				if (!p) return p;
+				const total = catalogues[p.path]?.cues.length ?? 0;
+				const suivant = p.index + delta;
+				return suivant >= 0 && suivant < total ? { ...p, index: suivant } : p;
+			});
+		},
+		[catalogues],
+	);
 
 	return (
 		<div className="space-y-4">
-			{/* eslint-disable-next-line jsx-a11y/media-has-caption -- flux audio du jeu, sans dialogue transcrit */}
-			<audio ref={audioRef} onEnded={() => setJoue(null)} className="hidden" />
 
 			<div className="flex flex-wrap items-center gap-2">
 				<button
@@ -214,19 +235,20 @@ export function SoundGallery({ banks, namedCount }: { banks: BankEntry[]; namedC
 												)}
 											</div>
 											<ul className="max-h-80 space-y-0.5 overflow-y-auto">
-												{cat.cues.map((c) => {
+												{cat.cues.map((c, rang) => {
 													const cle = `${b.path}#${c.index}`;
+													const actif = piste?.path === b.path && piste.index === rang;
 													return (
 														<li key={cle}>
 															<button
 																type="button"
-																onClick={() => jouer(b.path, c.awbId, cle)}
+																onClick={() => setPiste({ path: b.path, index: rang })}
 																className={`flex w-full items-center gap-3 rounded-lg px-2 py-1.5 text-left text-xs transition hover:bg-surface-container ${
-																	joue === cle ? "bg-surface-container-high" : ""
+																	actif ? "bg-surface-container-high" : ""
 																}`}
 															>
 																<span className="shrink-0 text-on-surface-variant">
-																	{joue === cle ? "⏸" : "▶"}
+																	{actif ? "◆" : "▶"}
 																</span>
 																<span className="min-w-0 flex-1 truncate font-mono text-on-surface">
 																	{c.name ?? `cue ${c.index}`}
@@ -262,6 +284,12 @@ export function SoundGallery({ banks, namedCount }: { banks: BankEntry[]; namedC
 					pour atteindre les autres.
 				</p>
 			)}
+
+			<AudioPlayer
+				piste={pisteCourante}
+				onNavigate={naviguer}
+				onClose={() => setPiste(null)}
+			/>
 		</div>
 	);
 }

@@ -176,6 +176,38 @@ export async function lsOrNull(dir: string, limit = 1000, offset = 0): Promise<V
 	}
 }
 
+/**
+ * URL de téléchargement d'un fichier du jeu **converti au format voulu**.
+ *
+ * Même table de formats et même règle de nommage que l'app desktop
+ * (`nie_explore::export`) : une texture sort en png/webp/gif/jpg/bmp/tga/tiff/qoi/json, un
+ * audio en wav, un film en mp4, un modèle en glb. Le serveur pose le `Content-Disposition`,
+ * donc le fichier arrive avec son vrai nom au lieu de celui de l'URL.
+ *
+ * @param path chemin VFS complet, préfixe `data/` compris.
+ * @param format identifiant de format (`raw` rend les octets d'origine).
+ * @param options `awbId` exporte un cue précis d'une banque audio.
+ */
+export function exportUrl(
+	path: string,
+	format: string,
+	options: { awbId?: number | null } = {},
+): string {
+	const q = new URLSearchParams({ format });
+	if (options.awbId != null) q.set("id", String(options.awbId));
+	return `${CDN_BASE}/export/${path}?${q}`;
+}
+
+/**
+ * Emplacement du fichier dans l'explorateur CPK du site.
+ *
+ * Une page média montre un fichier décodé ; l'explorateur montre où il VIT — son dossier, son
+ * archive CPK, sa taille, ses formats. Le lien manquait dans les deux sens.
+ */
+export function cpkExplorerHref(path: string): string {
+	return `/cpk/${path.replace(/^data\//, "")}`;
+}
+
 /** Une texture nommée à l'intérieur d'un conteneur G4TX. */
 export interface TexEntry {
 	/** Identifiant dans la table d'ids du conteneur. */
