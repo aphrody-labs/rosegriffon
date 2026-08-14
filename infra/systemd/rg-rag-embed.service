@@ -11,9 +11,19 @@ Environment=HF_HUB_CACHE=/home/ubuntu/niers/data/.hf-cache
 Environment=TRANSFORMERS_CACHE=/home/ubuntu/niers/data/.hf-cache
 Environment=HF_HUB_OFFLINE=0
 ExecStart=/home/ubuntu/.bun/bin/bun /home/ubuntu/.rg-rag-embed/server.ts
-Restart=on-failure
+# `always` : une sortie en code 0 laissait le service mort sans alerte (cf. cdn-variants).
+Restart=always
 RestartSec=5
+# MemoryHigh manquait : sans lui, le service n'a aucune pression de récupération avant
+# le mur des 8 Gio, et il accumulait — 5,6 Gio résidents et plus de la moitié du swap
+# occupée, jamais rendus. MemoryHigh déclenche la récupération sous contrainte au lieu
+# du tout-ou-rien, et MemorySwapMax borne ce qu'il peut pousser hors RAM.
+MemoryHigh=5G
 MemoryMax=8G
+MemorySwapMax=2G
+# Deuxième consommateur de la machine, et sans visiteur derrière : si l'hôte manque de
+# mémoire, c'est lui qu'on sacrifie avant le wiki (-200) ou les bots (-300).
+OOMScoreAdjust=300
 
 [Install]
 WantedBy=multi-user.target

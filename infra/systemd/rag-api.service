@@ -13,8 +13,15 @@ Environment=RAG_API_HOST=127.0.0.1
 Environment=RAG_EMBED_URL=http://127.0.0.1:8799
 Environment=RAG_STORE_PATH=/home/ubuntu/rg/apps/azalee/data/rag/rag-store.sqlite
 ExecStart=/home/ubuntu/.bun/bin/bun server.ts
-Restart=on-failure
+# `always` : une sortie en code 0 laissait le service mort sans alerte (cf. cdn-variants).
+Restart=always
 RestartSec=3
+
+# Plafond mémoire (raisonnement complet dans azalee-api.service). Mesuré : 121 Mio,
+# mais un index SQLite chargé en mémoire peut croître avec le corpus.
+MemoryHigh=1G
+MemoryMax=2G
+MemorySwapMax=256M
 
 [Install]
 WantedBy=multi-user.target

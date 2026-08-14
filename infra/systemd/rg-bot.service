@@ -51,7 +51,9 @@ Environment=WEBSITE_URL=https://rosegriffon.fr
 Environment=WEBSITE_API_URL=https://rosegriffon.fr
 
 ExecStart=/home/ubuntu/.bun/bin/bun run src/index.ts
-Restart=on-failure
+# `always` : une déconnexion Discord qui se solde par une sortie en code 0 n'était
+# jamais relancée — le bot restait silencieux sans qu'aucune unité ne soit en échec.
+Restart=always
 RestartSec=5s
 TimeoutStopSec=15s
 KillMode=mixed

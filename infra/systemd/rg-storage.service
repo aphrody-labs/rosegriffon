@@ -12,6 +12,13 @@ EnvironmentFile=/etc/rg-storage.env
 ExecStart=/home/ubuntu/.bun/bin/bun /home/ubuntu/rg/apps/storage/server.ts
 Restart=always
 RestartSec=2
+
+# Plafond mémoire (raisonnement complet dans azalee-api.service). Mesuré : 38 Mio.
+# Un envoi de fichier passe en flux, sans être bufferisé entièrement en mémoire — d'où
+# un plafond bas assumé : s'il est atteint, c'est que ce n'est plus vrai.
+MemoryHigh=512M
+MemoryMax=1G
+MemorySwapMax=256M
 ProtectSystem=full
 ReadWritePaths=/var/www/rg-storage /tmp
 PrivateTmp=true

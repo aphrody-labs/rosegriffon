@@ -36,7 +36,10 @@ Environment=API_URL=https://api.rosegriffon.fr
 Environment=CDN_URL=https://cdn.rosegriffon.fr
 
 ExecStart=/home/ubuntu/.bun/bin/bun run src/index.ts
-Restart=on-failure
+# `always` : le démon planifie en continu, il n'a aucune raison de sortir. Une sortie
+# en code 0 — fin de boucle inattendue, exception avalée — n'était pas relancée, et
+# TOUTES les tâches planifiées s'arrêtaient sans qu'aucune unité soit en échec.
+Restart=always
 RestartSec=5s
 TimeoutStopSec=15s
 KillMode=mixed

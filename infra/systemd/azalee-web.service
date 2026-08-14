@@ -31,9 +31,11 @@ WorkingDirectory=/home/ubuntu/rg-releases/azalee/slot-a/apps/azalee
 EnvironmentFile=-/home/ubuntu/rg/apps/azalee/.env
 Environment=NODE_ENV=production
 Environment=PORT=3003
-# Écoute sur toutes les interfaces pour permettre la vérification directe par IP
-# (http://51.77.147.152:3003/) ; nginx reste le seul chemin public.
-Environment=HOSTNAME=0.0.0.0
+# Boucle locale uniquement, comme le slot B et website-web. L'écoute sur 0.0.0.0
+# servait la vérification directe par IP, mais nginx répond déjà sur l'IP
+# (`server_name azalee.rosegriffon.fr 51.77.147.152`) : le port direct n'apportait
+# qu'un second chemin d'entrée, en HTTP clair, qui contournait HSTS et CSP.
+Environment=HOSTNAME=127.0.0.1
 # Base locale par socket unix (peer auth ubuntu) — latence < 1 ms
 Environment=PGHOST=/var/run/postgresql
 Environment=PGDATABASE=rose_griffon
@@ -56,8 +58,14 @@ RestartSec=5
 
 # Ressources : working set observé ~6 GiB, pics SSR/ISR absorbés sans redémarrage
 # préventif. Hôte = 45 GiB, ~20 autres services actifs → on garde de la marge.
-MemoryHigh=20G
-MemoryMax=28G
+#
+# 14/8/2026 — plafonds ramenés de 20/28 Gio à 8/12. La somme des MemoryMax déclarés
+# atteignait 67 Gio pour 45 Gio de RAM : aucun plafond ne pouvait donc jouer son rôle,
+# et c'est l'OOM killer global qui arbitrait (nie-model-serve tué à 02h16, sans que sa
+# propre limite de 24 Gio soit approchée). 12 Gio, c'est le double du working set
+# observé : assez pour un pic de rendu, trop peu pour emporter l'hôte.
+MemoryHigh=8G
+MemoryMax=12G
 MemorySwapMax=512M
 MemoryLow=256M
 TasksMax=2048

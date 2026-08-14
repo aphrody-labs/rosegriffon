@@ -29,6 +29,16 @@ ExecStart=/home/ubuntu/.bun/bin/bun packages/azalee/src/server/main.ts
 Restart=always
 RestartSec=5
 
+# Plafond mémoire. Le 14/8/2026, huit unités de production tournaient en
+# MemoryMax=infinity : une fuite dans n'importe laquelle d'entre elles pouvait épuiser
+# les 45 Gio de l'hôte, et c'est l'OOM killer GLOBAL qui tranchait — il a tué
+# nie-model-serve à 02h16 ce jour-là, mais le prochain choisi aurait pu être le wiki.
+# Un plafond par service transforme une panne d'hôte en panne d'un seul service, que
+# Restart= répare seul. Mesuré ici : 38 Mio de working set.
+MemoryHigh=1G
+MemoryMax=2G
+MemorySwapMax=256M
+
 # Lecture seule : le service n'écrit que ses SQLite matérialisés en tmpfs.
 ProtectSystem=strict
 ProtectHome=read-only

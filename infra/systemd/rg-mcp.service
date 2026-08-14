@@ -40,6 +40,11 @@ ExecStart=/home/ubuntu/.bun/bin/bun packages/mcp/src/cli.ts serve --http
 Restart=always
 RestartSec=5
 
+# Plafond mémoire (raisonnement complet dans azalee-api.service). Mesuré : 97 Mio.
+MemoryHigh=1G
+MemoryMax=2G
+MemorySwapMax=256M
+
 # Durcissement. Le système reste en lecture seule : même la portée `admin`
 # ne peut écrire que dans le dépôt et /tmp (matérialisation de l'index CPK).
 # C'est une seconde barrière — la première reste le jeton.

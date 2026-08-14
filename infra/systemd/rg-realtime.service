@@ -12,6 +12,12 @@ EnvironmentFile=/etc/rg-realtime.env
 ExecStart=/home/ubuntu/.bun/bin/bun /home/ubuntu/rg/apps/realtime/server.ts
 Restart=always
 RestartSec=2
+
+# Plafond mémoire (raisonnement complet dans azalee-api.service). Mesuré : 18 Mio ;
+# la diffusion SSE ne retient que les connexions ouvertes.
+MemoryHigh=512M
+MemoryMax=1G
+MemorySwapMax=256M
 ProtectSystem=full
 PrivateTmp=true
 

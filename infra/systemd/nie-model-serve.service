@@ -4,7 +4,11 @@
 # --uniform-map : resolution des uniformes (CRC32 -> G4MD+G4TX).
 [Unit]
 Description=nie-model-serve — assemblage GLB IEVR live (corps+face+uniforme depuis CPK)
-After=network.target iecode-cdn.service
+# `iecode-cdn.service` a disparu du dépôt le 11/8/2026 et de la machine le 14 : son
+# WorkingDirectory n'existait plus et l'unité rebouclait en échec. La dépendance est
+# retirée plutôt que laissée pendante — systemd ignore une unité inconnue en silence,
+# ce qui rend ce genre de reste invisible pour des mois.
+After=network.target
 
 [Service]
 Type=simple
@@ -25,6 +29,25 @@ Environment=NIE_CPK_CACHE_BUDGET_GIB=8
 Restart=always
 RestartSec=5s
 LimitNOFILE=4096
+
+# Plafonds mémoire — fusionnés depuis le drop-in memory.conf, qui échappait au dépôt.
+#
+# Ce service a été tué le 14/8/2026 à 02h16 par l'OOM killer GLOBAL
+# (`constraint=CONSTRAINT_NONE`, 10,7 Gio résidents), alors que sa propre limite était
+# à 24 Gio : ce n'est pas son cgroup qui a cédé, c'est l'hôte entier. Un plafond plus
+# haut que la RAM disponible ne protège rien — il désigne seulement la victime au
+# hasard, et la prochaine aurait pu être le wiki public.
+#
+# 10 Gio, c'est le budget applicatif du cache CPK (NIE_CPK_CACHE_BUDGET_GIB=8) plus la
+# marge de décodage. Si ce plafond est atteint, le service redémarre seul en cinq
+# secondes ; c'est très préférable à un hôte qui manque de mémoire pour tout le monde.
+MemoryHigh=8G
+MemoryMax=10G
+MemorySwapMax=2G
+# Si l'hôte manque quand même de mémoire, que le noyau choisisse CELUI-CI plutôt qu'une
+# surface publique : azalee-web et website-web sont à -200, les bots à -300. Un rendu de
+# modèle 3D interrompu se relance ; un wiki tué se voit.
+OOMScoreAdjust=300
 
 [Install]
 WantedBy=multi-user.target
