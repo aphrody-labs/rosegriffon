@@ -42,6 +42,11 @@ type Mode = {
 	note: string | null;
 	screens: { screen: string; cfg: string }[];
 	assets: Record<string, string[]>;
+	/**
+	 * Libellés d'interface de l'écran, par locale — résolus depuis `menu_text` via le CRC-32
+	 * que porte chaque slot de `MenuTextSetting`.
+	 */
+	texts?: Record<string, { obj: string; slot: string; text: string }[]>;
 };
 
 /**
@@ -162,6 +167,40 @@ export default async function PageModes({
 						Icône : région <code>{mode.icon.region}</code> de l’atlas <code>{mode.icon.atlas}</code>.
 					</p>
 				) : null}
+
+				{(() => {
+					const fr = mode.texts?.fr ?? [];
+					// Les slots de guide de boutons (`<CMD_BACK|10>`) sont de l'UI de manette, pas des
+					// libellés d'écran : on les compte à part plutôt que de les mêler aux vrais textes.
+					const libelles = fr.filter((t) => !t.text.startsWith("<"));
+					const guides = fr.length - libelles.length;
+					return (
+						<section className="space-y-2">
+							<h2 className="text-sm font-semibold text-on-surface">
+								Textes d’interface{" "}
+								<span className="font-normal text-on-surface-variant">
+									— {libelles.length} libellé{libelles.length > 1 ? "s" : ""}
+									{guides > 0 ? ` · ${guides} guide${guides > 1 ? "s" : ""} de boutons` : ""}
+								</span>
+							</h2>
+							{libelles.length === 0 ? (
+								<p className="text-sm text-on-surface-variant">
+									Aucun libellé d’interface résolu pour ce mode — ses écrans ne portent pas de slot
+									de texte connu de <code>menu_text</code>.
+								</p>
+							) : (
+								<ul className="space-y-1">
+									{libelles.map((t) => (
+										<li key={`${t.obj}/${t.slot}`} className="text-sm text-on-surface">
+											{t.text.replaceAll("\\n", " ")}{" "}
+											<span className="font-mono text-xs text-on-surface-variant">{t.slot}</span>
+										</li>
+									))}
+								</ul>
+							)}
+						</section>
+					);
+				})()}
 
 				<div className="space-y-6">
 					{familles.map((f) => (
