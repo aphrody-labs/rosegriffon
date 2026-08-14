@@ -56,6 +56,7 @@ const adminNavItems: NavItem[] = [
 		icon: Bot,
 		submenu: [
 			{ title: "Vue d'ensemble", href: "/admin/bot" },
+			{ title: "Membres", href: "/admin/bot/membres" },
 			{ title: "Réglages", href: "/admin/bot/reglages" },
 			{ title: "Commandes", href: "/admin/bot/commandes" },
 			{ title: "Tâches planifiées", href: "/admin/cron" },
