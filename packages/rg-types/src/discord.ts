@@ -21,6 +21,17 @@ export const RG_GUILD_ID = "1072991720268111892" as const;
 export const AZALEE_GUILD_ID = "1349526851672080414" as const;
 
 /**
+ * Guild Achillea (« Achillea 💮 - Compétitif Inazuma Eleven FR »), qui a invité le
+ * bot Azalée le 14/8/2026.
+ *
+ * Valeur relevée sur l'API (`GET /users/@me/guilds`), pas déduite d'un nom. Elle
+ * n'ouvre aucun droit : depuis que le bot Azalée publie ses commandes
+ * globalement, cet identifiant ne sert qu'au nettoyage des anciennes commandes de
+ * guilde — un serveur n'a plus besoin d'être listé ici pour être servi.
+ */
+export const ACHILLEA_GUILD_ID = "1055585286320554055" as const;
+
+/**
  * Discord role IDs publics/utilitaires.
  */
 export const DISCORD_ROLES = {

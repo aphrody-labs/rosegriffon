@@ -63,14 +63,27 @@ const client = new Client({
 	// les journaux lisibles et prépare le jour où l'on voudrait les deux bots
 	// dans un seul processus.
 	botId: PROFIL.identifiantBot,
-	// Intersection entre les guildes VOULUES et celles où le bot est réellement
-	// présent. Lister en dur une guilde qu'il n'a pas encore rejointe ferait
-	// échouer l'enregistrement des commandes (l'API refuse une guilde inconnue)
-	// et priverait AUSSI l'autre serveur des siennes. Ici, une guilde pas encore
+	// Portée des commandes — c'est ici que se joue « bot d'un serveur » contre
+	// « bot public ».
+	//
+	// `guildes` : intersection entre les guildes VOULUES et celles où le bot est
+	// réellement présent. Lister en dur une guilde qu'il n'a pas encore rejointe
+	// ferait échouer l'enregistrement (l'API refuse une guilde inconnue) et
+	// priverait AUSSI l'autre serveur des siennes ; ici, une guilde pas encore
 	// autorisée est simplement ignorée, et prise en compte au redémarrage suivant.
-	botGuilds: [
-		(bot: Client) => bot.guilds.cache.map((g) => g.id).filter((id) => GUILD_IDS.includes(id)),
-	],
+	//
+	// `globale` : aucune liste. discordx publie alors les commandes sur
+	// l'application elle-même, donc sur tout serveur qui l'invite — y compris
+	// ceux qui n'existent pas encore. C'est la seule portée qui tienne pour un
+	// bot public : sans elle, chaque nouvelle invitation demanderait un commit.
+	...(PROFIL.porteeCommandes === "guildes"
+		? {
+				botGuilds: [
+					(bot: Client) =>
+						bot.guilds.cache.map((g) => g.id).filter((id) => GUILD_IDS.includes(id)),
+				],
+			}
+		: {}),
 });
 
 /**
@@ -134,21 +147,55 @@ client.once("clientReady", async () => {
 		);
 	}
 
+	// Portée globale : effacer les commandes de guilde héritées de l'ancien mode.
+	// Discord ADDITIONNE les deux portées — sans ce nettoyage, un membre de Rose
+	// Griffon verrait chaque commande deux fois, sans moyen de distinguer laquelle
+	// répond. L'ordre compte : les globales sont déjà publiées ci-dessus, donc
+	// aucun serveur ne se retrouve sans commande entre les deux appels.
+	//
+	// Seules les guildes réellement rejointes sont nettoyées : l'API refuse une
+	// guilde inconnue, et l'erreur ferait échouer tout le lot.
+	if (PROFIL.porteeCommandes === "globale") {
+		const àNettoyer = PROFIL.guildes.filter((id) => client.guilds.cache.has(id));
+		if (àNettoyer.length > 0) {
+			try {
+				await client.clearApplicationCommands(...àNettoyer);
+				console.log(
+					`✓ Commandes de guilde effacées sur ${àNettoyer.length} serveur(s) — les globales prennent le relais.`
+				);
+			} catch (err) {
+				// Un nettoyage raté laisse des doublons visibles, pas un bot muet :
+				// on le signale sans empêcher le démarrage.
+				console.warn(
+					"⚠ Nettoyage des commandes de guilde impossible (doublons possibles) :",
+					err instanceof Error ? err.message : err
+				);
+			}
+		}
+	}
+
 	// Dire OÙ les commandes ont atterri, et surtout où elles manquent : un bot en
 	// ligne mais sans commande sur un serveur est indiscernable d'un bot en panne
 	// pour qui le regarde depuis Discord.
-	const servies = client.guilds.cache.filter((g) => GUILD_IDS.includes(g.id));
-	const absentes = GUILD_IDS.filter((id) => !client.guilds.cache.has(id));
 	console.log(
 		`✓ Profil « ${PROFIL.nom} » (${PROFIL.titre}) — ${PROFIL.modules.length} module(s) de commandes chargé(s).`
 	);
-	console.log(
-		`✓ Commandes enregistrées sur ${servies.size} serveur(s) : ${servies.map((g) => g.name).join(", ") || "aucun"}`
-	);
-	if (absentes.length > 0) {
-		console.warn(
-			`⚠ Guilde(s) configurée(s) mais non rejointe(s) : ${absentes.join(", ")} — le bot doit y être autorisé via l'URL OAuth2 avant que ses commandes n'y apparaissent.`
+	if (PROFIL.porteeCommandes === "globale") {
+		const rejointes = client.guilds.cache.map((g) => g.name).join(", ") || "aucun";
+		console.log(
+			`✓ Commandes publiées GLOBALEMENT — servies sur les ${client.guilds.cache.size} serveur(s) rejoint(s) (${rejointes}) et sur tout serveur qui invitera le bot. Discord propage une modification globale en quelques minutes.`
 		);
+	} else {
+		const servies = client.guilds.cache.filter((g) => GUILD_IDS.includes(g.id));
+		const absentes = GUILD_IDS.filter((id) => !client.guilds.cache.has(id));
+		console.log(
+			`✓ Commandes enregistrées sur ${servies.size} serveur(s) : ${servies.map((g) => g.name).join(", ") || "aucun"}`
+		);
+		if (absentes.length > 0) {
+			console.warn(
+				`⚠ Guilde(s) configurée(s) mais non rejointe(s) : ${absentes.join(", ")} — le bot doit y être autorisé via l'URL OAuth2 avant que ses commandes n'y apparaissent.`
+			);
+		}
 	}
 
 	console.log(`✓ Logged in as ${client.user?.tag}`);

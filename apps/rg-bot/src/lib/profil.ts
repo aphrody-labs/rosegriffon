@@ -37,7 +37,12 @@
  */
 import { GatewayIntentBits } from "discord.js";
 
-import { AZALEE_GUILD_ID, RG_GUILD_ID, resolveGuildIds } from "@rosegriffon/types/discord";
+import {
+	ACHILLEA_GUILD_ID,
+	AZALEE_GUILD_ID,
+	RG_GUILD_ID,
+	resolveGuildIds,
+} from "@rosegriffon/types/discord";
 
 /**
  * Vue lisible de l'environnement.
@@ -179,6 +184,24 @@ export interface Profil {
 	variablesJetonSecours: readonly string[];
 	/** Guildes où enregistrer les commandes (défaut, avant lecture de l'env). */
 	guildes: readonly string[];
+	/**
+	 * Où les slash commands sont publiées.
+	 *
+	 * `"guildes"` — l'enregistrement vise la liste ci-dessus, et seulement elle.
+	 * La publication est immédiate, mais tout serveur absent de la liste voit un
+	 * bot en ligne et muet : il faut modifier le code puis redéployer pour
+	 * l'accueillir.
+	 *
+	 * `"globale"` — les commandes appartiennent à l'application, donc à tous les
+	 * serveurs qui l'invitent, présents comme futurs. C'est le mode d'un bot
+	 * public. Discord met quelques minutes à propager une modification globale
+	 * (contre l'instant pour une guilde), ce qui est le prix à payer pour ne plus
+	 * avoir à déclarer chaque serveur.
+	 *
+	 * Un profil global ne doit PAS conserver de commandes de guilde : Discord les
+	 * additionne, et le membre voit chaque commande en double.
+	 */
+	porteeCommandes: "globale" | "guildes";
 	/**
 	 * Intents de la passerelle — ILS NE SONT PAS LES MÊMES POUR LES DEUX BOTS.
 	 *
@@ -341,6 +364,11 @@ export const PROFILS: Readonly<Record<NomProfil, Profil>> = Object.freeze({
 		// y sert ses commandes de communauté. Le second bot s'y AJOUTE, il ne le
 		// remplace pas.
 		guildes: [RG_GUILD_ID, AZALEE_GUILD_ID],
+		// Ce bot-ci reste par guilde : il porte l'administration de la communauté
+		// Rose Griffon (synchronisation des membres, niveaux, accueil), qui n'a
+		// aucun sens ailleurs. Le publier globalement l'offrirait à des serveurs
+		// dont il ne connaît ni les membres ni les rôles.
+		porteeCommandes: "guildes",
 		// `GuildMessages` s'ajoute pour le système de niveaux : il livre l'événement
 		// `messageCreate`, donc l'AUTEUR, le SALON et l'HORODATAGE d'un message.
 		// Il ne livre PAS son contenu — ça, c'est `MessageContent`, un intent
@@ -375,17 +403,20 @@ export const PROFILS: Readonly<Record<NomProfil, Profil>> = Object.freeze({
 		identifiantBot: "azalee",
 		variableJeton: "AZALEE_DISCORD_BOT_TOKEN",
 		variablesJetonSecours: [],
-		// Les deux serveurs, comme le profil Rose Griffon — et sans risque de
-		// doublon, puisque les deux listes de modules sont DISJOINTES : ce que ce
-		// bot sert, l'autre ne le sert plus.
-		//
-		// Le bot Azalée n'a d'ailleurs rejoint QUE Rose Griffon à ce jour
-		// (`GET /users/@me/guilds` le 13/8/2026 : une seule guilde), et son salon
-		// d'annonce y est. Lister ici une guilde qu'il n'a pas rejointe est sans
-		// danger : `src/index.ts` intersecte cette liste avec les guildes
-		// réellement rejointes avant d'enregistrer quoi que ce soit — l'API
-		// refuserait sinon TOUT l'enregistrement, y compris sur le bon serveur.
-		guildes: [RG_GUILD_ID, AZALEE_GUILD_ID],
+		// Conservée pour le NETTOYAGE seulement : ce profil publie désormais ses
+		// commandes globalement (voir `porteeCommandes`), et cette liste sert à
+		// savoir où effacer les anciennes commandes de guilde, qui feraient
+		// doublon. Aucun enregistrement ne la vise plus.
+		guildes: [RG_GUILD_ID, AZALEE_GUILD_ID, ACHILLEA_GUILD_ID],
+		// Bot PUBLIC (`bot_public: true` sur l'application 1537394034769657867) :
+		// n'importe quel serveur peut l'inviter, et le 14/8/2026 Achillea l'a fait.
+		// Avec un enregistrement par guilde, ce serveur voyait un bot en ligne et
+		// sans aucune commande — la liste ci-dessus ne le contenait pas, et
+		// l'ajouter à la main aurait fallu recommencer au serveur suivant.
+		// Ce que sert ce profil (fiches du wiki, données de jeu) ne dépend
+		// d'aucune configuration propre à un serveur : c'est exactement le cas
+		// d'usage des commandes globales.
+		porteeCommandes: "globale",
 		// `Guilds` SEUL : l'intent privilégié `GuildMembers` n'est pas accordé à
 		// cette application (vérifié — « Used disallowed intents »), et aucune
 		// commande de ce profil ne résout un membre.
