@@ -14,8 +14,15 @@ import {
 	bilanVide,
 	CADENCE_DEFAUT,
 	classerReponse,
+	CODE_MODULE_DESACTIVE,
+	codeErreur,
 	convertirMonnaie,
 	distribution,
+	extraireFluxRsc,
+	extraireTableau,
+	FENETRE_OBSERVEE,
+	fusionnerClassements,
+	lireClassement,
 	lireProfil,
 	lireProfilEconomie,
 	lireQuota,
@@ -25,10 +32,13 @@ import {
 	meriteEcritureEconomie,
 	PLAFOND_DOCUMENTE,
 	resumerBilan,
+	TRIS_CLASSEMENT,
+	urlClassementPublic,
 	urlCoffresGuilde,
 	urlObjetsGuilde,
 	urlProfilEconomie,
 	urlProfilNiveau,
+	type ProfilClasse,
 	type Quota,
 } from "./noctaly";
 
@@ -157,9 +167,27 @@ describe("attenteAvantSuivante", () => {
 		expect(attenteAvantSuivante(sansInfo, 4)).toBe(250);
 	});
 
-	test("la cadence par défaut est cinq fois sous le plafond documenté", () => {
-		expect(CADENCE_DEFAUT * 5).toBe(PLAFOND_DOCUMENTE);
-		expect(attenteAvantSuivante(sansInfo)).toBe(100);
+	/**
+	 * La cadence suit la fenêtre MESURÉE, pas la documentation.
+	 *
+	 * Relevé le 14/8/2026 avec une vraie clé : `X-RateLimit-Limit: 120` et
+	 * `X-RateLimit-Reset-After: 60`, soit 2 req/s soutenues — vingt-cinq fois
+	 * moins que les 50/s annoncés par la documentation. Régler la cadence sur la
+	 * documentation vidait le quota en douze secondes puis passait le reste de
+	 * l'import à attendre, en frôlant le 429 à chaque redémarrage de fenêtre.
+	 */
+	test("la cadence par défaut est le régime permanent de la fenêtre mesurée", () => {
+		expect(CADENCE_DEFAUT).toBe(FENETRE_OBSERVEE.requetes / FENETRE_OBSERVEE.secondes);
+		expect(CADENCE_DEFAUT).toBe(2);
+		expect(attenteAvantSuivante(sansInfo)).toBe(500);
+	});
+
+	test("la documentation reste connue, mais comme borne haute seulement", () => {
+		expect(PLAFOND_DOCUMENTE).toBeGreaterThan(CADENCE_DEFAUT);
+		// Une cadence demandée au-delà du plafond documenté est ramenée à celui-ci.
+		expect(attenteAvantSuivante(sansInfo, 1_000)).toBe(
+			Math.ceil(1_000 / PLAFOND_DOCUMENTE)
+		);
 	});
 
 	// Le cœur de la prudence : on n'attend pas d'être à 0, on attend d'être
@@ -366,5 +394,251 @@ describe("resumerBilan", () => {
 		const texte = resumerBilan({ ...bilanVide(), illisibles: 2, pannes: 3 });
 		expect(texte).toContain("2 réponse(s) illisible(s)");
 		expect(texte).toContain("3 erreur(s) réseau");
+	});
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// LE MODULE ÉTEINT
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe("classerReponse — module désactivé", () => {
+	/**
+	 * Ce cas fait gagner la moitié d'un import.
+	 *
+	 * L'économie est un module optionnel, éteint sur la guilde Rose Griffon
+	 * (relevé le 14/8/2026 : `GET /items` → `400 {"code":"module_disabled"}`).
+	 * Le distinguer d'une panne permet d'abandonner la passe entière au lieu de
+	 * poser mille huit cents fois une question dont la réponse est connue.
+	 */
+	test("un 400 « module_disabled » n'est pas une panne", () => {
+		expect(classerReponse(400, { code: CODE_MODULE_DESACTIVE })).toBe("module-desactive");
+	});
+
+	test("un 400 sans ce code reste une panne", () => {
+		expect(classerReponse(400, { code: "bad_request" })).toBe("panne");
+		expect(classerReponse(400, null)).toBe("panne");
+		expect(classerReponse(400)).toBe("panne");
+	});
+
+	test("le corps ne change rien aux autres statuts", () => {
+		expect(classerReponse(200, { code: CODE_MODULE_DESACTIVE })).toBe("ok");
+		expect(classerReponse(404, { code: CODE_MODULE_DESACTIVE })).toBe("absent");
+		expect(classerReponse(429, { code: CODE_MODULE_DESACTIVE })).toBe("quota");
+	});
+
+	test("codeErreur ne lève sur aucune forme de corps", () => {
+		expect(codeErreur({ code: "x" })).toBe("x");
+		expect(codeErreur({ code: 42 })).toBeNull();
+		expect(codeErreur(null)).toBeNull();
+		expect(codeErreur("texte")).toBeNull();
+		expect(codeErreur(undefined)).toBeNull();
+	});
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// LE CLASSEMENT PUBLIC
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** Fabrique une page Next porteuse d'un classement, comme le fait noctaly.com. */
+function pageClassement(entrees: unknown[]): string {
+	const charge = JSON.stringify({ initProfiles: entrees, autre: true });
+	// Next dépose sa charge échappée dans un littéral de chaîne JavaScript.
+	const echappe = JSON.stringify(`3:${charge}\n`).slice(1, -1);
+	return `<!DOCTYPE html><body><script>self.__next_f.push([1,"${echappe}"])</script></body>`;
+}
+
+const ENTREE_TYPE = {
+	userID: "435479810731409408",
+	username: "Mioleen_",
+	avatarID: "a_732ce41fa793f5e5f340b6b2abedf99b",
+	level: 26,
+	xp: 44_480,
+	messages: 4_977,
+	reactions: 231,
+	voiceMinutes: 298,
+};
+
+describe("urlClassementPublic", () => {
+	test("sans tri, l'URL est nue", () => {
+		expect(urlClassementPublic("123")).toBe("https://noctaly.com/fr/leaderboard/123");
+	});
+
+	test("les quatre tris sont ceux que la page accepte", () => {
+		expect(TRIS_CLASSEMENT).toEqual(["level", "messages", "voice", "reactions"]);
+		expect(urlClassementPublic("123", "voice")).toBe(
+			"https://noctaly.com/fr/leaderboard/123?sort=voice"
+		);
+	});
+});
+
+describe("extraireFluxRsc", () => {
+	test("les fragments sont recollés dans l'ordre", () => {
+		const html =
+			'<script>self.__next_f.push([1,"deb"])</script>' +
+			'<script>self.__next_f.push([1,"ut"])</script>';
+		expect(extraireFluxRsc(html)).toBe("debut");
+	});
+
+	/**
+	 * Un objet coupé entre deux fragments doit rester lisible : c'est le cas
+	 * NORMAL sur une vraie page (100 profils font 40 Ko, largement de quoi être
+	 * découpé). Chercher dans chaque fragment séparément en perdrait la moitié.
+	 */
+	test("un objet coupé en deux fragments se relit entier", () => {
+		const html =
+			'<script>self.__next_f.push([1,"{\\"initProfiles\\":[{\\"userID\\":\\"1"])</script>' +
+			'<script>self.__next_f.push([1,"11111111111111111\\",\\"xp\\":5}]}"])</script>';
+		expect(lireClassement(html)).toHaveLength(1);
+	});
+
+	test("les appels d'un autre type sont ignorés", () => {
+		const html = '<script>self.__next_f.push([2,"parasite"])</script>';
+		expect(extraireFluxRsc(html)).toBe("");
+	});
+
+	test("un fragment illisible n'emporte pas les autres", () => {
+		const html =
+			'<script>self.__next_f.push([1,"\\u"])</script>' +
+			'<script>self.__next_f.push([1,"sain"])</script>';
+		expect(extraireFluxRsc(html)).toContain("sain");
+	});
+});
+
+describe("extraireTableau", () => {
+	test("rend le tableau demandé, pas un bout de page", () => {
+		expect(extraireTableau('{"a":[1,2],"b":[3]}', "a")).toBe("[1,2]");
+	});
+
+	/**
+	 * Les pseudonymes sont arbitraires. Un membre nommé « [RG] Yoyo » ferait
+	 * fermer le tableau trop tôt à qui compte les crochets sans savoir qu'il est
+	 * dans une chaîne — et le classement se lirait tronqué, sans erreur.
+	 */
+	test("un crochet DANS un pseudo ne ferme pas le tableau", () => {
+		const source = '{"initProfiles":[{"username":"[RG] Yoyo"},{"username":"b]"}],"apres":1}';
+		expect(extraireTableau(source, "initProfiles")).toBe(
+			'[{"username":"[RG] Yoyo"},{"username":"b]"}]'
+		);
+	});
+
+	test("un guillemet échappé dans un pseudo ne casse rien", () => {
+		const source = String.raw`{"p":[{"username":"a\"b]"}]}`;
+		expect(JSON.parse(extraireTableau(source, "p")!)).toEqual([{ username: 'a"b]' }]);
+	});
+
+	test("une clef absente ou un tableau non fermé rendent null", () => {
+		expect(extraireTableau('{"a":[1]}', "b")).toBeNull();
+		expect(extraireTableau('{"a":[1,2', "a")).toBeNull();
+	});
+});
+
+describe("lireClassement", () => {
+	test("lit les champs que l'API rend aussi", () => {
+		const [profil] = lireClassement(pageClassement([ENTREE_TYPE]));
+		expect(profil?.discordId).toBe("435479810731409408");
+		expect(profil?.pseudo).toBe("Mioleen_");
+		expect(profil?.profil.xpTotale).toBe(44_480);
+		expect(profil?.profil.messages).toBe(4_977);
+		expect(profil?.profil.minutesVocal).toBe(298);
+		expect(profil?.profil.reactions).toBe(231);
+		expect(profil?.profil.niveau).toBe(26);
+	});
+
+	/**
+	 * `xp` du classement EST l'XP totale, pas l'XP intra-niveau.
+	 *
+	 * Vérifié en croisant les deux sources sur le même membre le 14/8/2026 :
+	 * le classement annonce `xp: 44480`, l'API répond `totalXp: 44480` et
+	 * `xp: 3855`. Confondre les deux diviserait l'XP importée par dix.
+	 */
+	test("l'XP lue est bien la totale, et l'intra-niveau reste à zéro", () => {
+		const [profil] = lireClassement(pageClassement([ENTREE_TYPE]));
+		expect(profil?.profil.xpTotale).toBe(44_480);
+		expect(profil?.profil.xp).toBe(0);
+		expect(profil?.profil.xpRestante).toBe(0);
+	});
+
+	test("une entrée sans identifiant valide est ignorée, pas fatale", () => {
+		const profils = lireClassement(
+			pageClassement([{ ...ENTREE_TYPE, userID: "pas-un-flocon" }, ENTREE_TYPE])
+		);
+		expect(profils).toHaveLength(1);
+	});
+
+	test("une entrée sans XP numérique est ignorée", () => {
+		expect(lireClassement(pageClassement([{ ...ENTREE_TYPE, xp: "beaucoup" }]))).toHaveLength(0);
+		expect(lireClassement(pageClassement([{ ...ENTREE_TYPE, xp: -1 }]))).toHaveLength(0);
+	});
+
+	test("un pseudo manquant retombe sur l'identifiant, jamais sur du vide", () => {
+		const [profil] = lireClassement(pageClassement([{ ...ENTREE_TYPE, username: null }]));
+		expect(profil?.pseudo).toBe("435479810731409408");
+	});
+
+	/**
+	 * Une page d'erreur, un défi Cloudflare ou une guilde sans module de niveaux
+	 * rendent tous du HTML parfaitement valide. L'appelant doit pouvoir les
+	 * distinguer d'une panne : c'est le nombre de profils qui le dit, pas une
+	 * exception.
+	 */
+	test("une page sans classement rend zéro profil sans lever", () => {
+		expect(lireClassement("<html>Just a moment...</html>")).toEqual([]);
+		expect(lireClassement(pageClassement([]))).toEqual([]);
+		expect(lireClassement("")).toEqual([]);
+	});
+});
+
+describe("fusionnerClassements", () => {
+	const base: ProfilClasse = {
+		avatarId: null,
+		brut: { source: "a" },
+		discordId: "111111111111111111",
+		profil: {
+			messages: 10,
+			minutesVocal: 0,
+			niveau: 1,
+			reactions: 0,
+			xp: 0,
+			xpRestante: 0,
+			xpTotale: 100,
+		},
+		pseudo: "Un",
+	};
+
+	test("le même membre vu deux fois ne compte qu'une", () => {
+		expect(fusionnerClassements([[base], [base]])).toHaveLength(1);
+	});
+
+	/**
+	 * Les quatre tris sont quatre instantanés du même état. Ils devraient
+	 * coïncider — mais si l'un est plus ancien, prendre le maximum garantit
+	 * qu'aucun compteur ne régresse. Même règle que le `GREATEST` du SQL.
+	 */
+	test("chaque compteur garde son maximum", () => {
+		const autre: ProfilClasse = {
+			...base,
+			brut: { source: "b" },
+			profil: { ...base.profil, messages: 4, minutesVocal: 99, xpTotale: 80 },
+		};
+		const [fusion] = fusionnerClassements([[base], [autre]]);
+		expect(fusion?.profil.messages).toBe(10);
+		expect(fusion?.profil.minutesVocal).toBe(99);
+		expect(fusion?.profil.xpTotale).toBe(100);
+		// L'archive retenue est celle de l'instantané le plus riche en XP.
+		expect(fusion?.brut).toEqual({ source: "a" });
+	});
+
+	test("le résultat est trié par XP décroissante", () => {
+		const petit: ProfilClasse = {
+			...base,
+			discordId: "222222222222222222",
+			profil: { ...base.profil, xpTotale: 5 },
+		};
+		expect(fusionnerClassements([[petit, base]]).map((p) => p.profil.xpTotale)).toEqual([100, 5]);
+	});
+
+	test("aucune source rend une liste vide", () => {
+		expect(fusionnerClassements([])).toEqual([]);
+		expect(fusionnerClassements([[], []])).toEqual([]);
 	});
 });
