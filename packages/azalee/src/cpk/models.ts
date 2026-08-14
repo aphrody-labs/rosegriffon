@@ -17,7 +17,7 @@
 const CDN_BASE = "https://cdn.rosegriffon.fr";
 
 /** Identifiant d'une famille de modèles. */
-export type ModelFamily = "perso" | "waza" | "item" | "keshin" | "armd" | "animal";
+export type ModelFamily = "chara" | "waza" | "item" | "keshin" | "armd" | "animal";
 
 /** Ce qui définit une famille : son nom, sa source, sa route d'assemblage. */
 export interface ModelFamilyDef {
@@ -45,7 +45,7 @@ export interface ModelFamilyDef {
  */
 export const MODEL_FAMILIES: ModelFamilyDef[] = [
 	{
-		id: "perso",
+		id: "chara",
 		label: "Personnages",
 		hint: "corps + visage + uniforme assemblés",
 		vfsDir: null,
@@ -84,7 +84,7 @@ export function modelFamily(id: string): ModelFamilyDef | undefined {
  * autrement rend un 404 « sous-domaine chr non servable ».
  */
 export function modelGlbUrl(famille: ModelFamily, code: string): string {
-	return famille === "perso"
+	return famille === "chara"
 		? `${CDN_BASE}/model-full/${code}.glb`
 		: `${CDN_BASE}/model-chr/${famille}/${code}.glb`;
 }
@@ -94,7 +94,7 @@ export function modelGlbUrl(famille: ModelFamily, code: string): string {
  * textures sont éclatées entre visage, uniforme et corps, et n'ont pas de dossier unique.
  */
 export function modelTextureDir(famille: ModelFamily, code: string): string | null {
-	return famille === "perso" ? null : `data/dx11/chr/_${famille}/${code}`;
+	return famille === "chara" ? null : `data/dx11/chr/_${famille}/${code}`;
 }
 
 /** Chemin de la fiche d'un modèle. */
