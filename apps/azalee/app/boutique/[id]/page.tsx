@@ -7,8 +7,18 @@ import { SHOP_CATEGORY_FR, getShop } from "@/lib/wiki/shops";
 
 export const dynamic = "force-dynamic";
 
-function parseId(raw: string): number {
-	return Number.parseInt(raw, 10);
+/**
+ * Un identifiant de boutique est un entier décimal, rien d'autre.
+ *
+ * `Number.parseInt` s'arrêtait au premier caractère non chiffré : `/boutique/1629770002abc`
+ * servait donc la boutique 1629770002 à l'identique, et chaque suffixe inventé créait une
+ * URL de plus se déclarant canonique — un espace d'URL infini pour un seul contenu.
+ * On exige la forme stricte pour que toute variante tombe en 404.
+ */
+function parseShopId(raw: string): number | null {
+	if (!/^\d+$/.test(raw)) return null;
+	const id = Number(raw);
+	return Number.isSafeInteger(id) ? id : null;
 }
 
 export async function generateMetadata({
@@ -17,14 +27,24 @@ export async function generateMetadata({
 	params: Promise<{ id: string }>;
 }): Promise<Metadata> {
 	const { id } = await params;
-	const shop = await getShop(parseId(id));
-	const name = shop?.name || "Boutique";
-	const description = shop
-		? `${name} dans Inazuma Eleven: Victory Road — ${shop.itemCount} objets en vente. Liste complète et liens vers chaque objet.`
-		: "Boutique Inazuma Eleven: Victory Road.";
+	const shopId = parseShopId(id);
+	const shop = shopId === null ? null : await getShop(shopId);
+
+	// Pas de boutique → pas de canonique : la page rendra un 404, ne la déclarons pas indexable.
+	if (!shop) {
+		return {
+			description: "Cette boutique d'Inazuma Eleven: Victory Road n'existe pas.",
+			robots: { follow: true, index: false },
+			title: "Boutique introuvable | Inazuma Eleven Victory Road - Azalée",
+		};
+	}
+
+	const name = shop.name;
+	const description = `${name} dans Inazuma Eleven: Victory Road — ${shop.itemCount} objets en vente. Liste complète et liens vers chaque objet.`;
 
 	return {
-		alternates: { canonical: `/boutique/${id}` },
+		// Canonique construite sur l'identifiant normalisé, jamais sur le segment brut.
+		alternates: { canonical: `/boutique/${shopId}` },
 		description,
 		openGraph: {
 			description,
@@ -32,7 +52,7 @@ export async function generateMetadata({
 			siteName: "Azalée - Inazuma Eleven Victory Road",
 			title: `${name} | Azalée`,
 			type: "article",
-			url: `/boutique/${id}`,
+			url: `/boutique/${shopId}`,
 		},
 		title: `${name} | Inazuma Eleven Victory Road - Azalée`,
 	};
@@ -40,7 +60,8 @@ export async function generateMetadata({
 
 export default async function ShopDetailPage({ params }: { params: Promise<{ id: string }> }) {
 	const { id } = await params;
-	const shop = await getShop(parseId(id));
+	const shopId = parseShopId(id);
+	const shop = shopId === null ? null : await getShop(shopId);
 
 	if (!shop) {
 		notFound();

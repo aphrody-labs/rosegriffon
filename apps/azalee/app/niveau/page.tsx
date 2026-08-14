@@ -5,6 +5,19 @@ import { NiveauExplorer } from "@/app/niveau/NiveauExplorer";
 import { formatExp } from "@/lib/wiki/exp-table-shared";
 import { getExpTable } from "@/lib/wiki/exp-table";
 
+/**
+ * Image de partage de convention (`app/opengraph-image.png`, 1200×630).
+ * Déclarer un bloc `openGraph` sans `images` n'hérite PAS de celle du layout :
+ * Next fusionne les métadonnées de façon superficielle, l'objet enfant remplace
+ * le parent en entier. Sans cette entrée, la page ne livrait aucune `og:image`.
+ */
+const OG_PAR_DEFAUT = {
+	url: "/opengraph-image.png",
+	width: 1200,
+	height: 630,
+	alt: "Azalée — wiki Inazuma Eleven: Victory Road",
+};
+
 export const metadata: Metadata = {
 	alternates: { canonical: "/niveau" },
 	description:
@@ -12,6 +25,7 @@ export const metadata: Metadata = {
 	openGraph: {
 		description:
 			"Courbe d'expérience, coût de chaque palier et calculateurs de niveau pour Inazuma Eleven: Victory Road.",
+		images: [OG_PAR_DEFAUT],
 		locale: "fr_FR",
 		siteName: "Azalée - Inazuma Eleven Victory Road",
 		title: "Niveaux & Expérience | Azalée",
@@ -19,6 +33,16 @@ export const metadata: Metadata = {
 		url: "/niveau",
 	},
 	title: "Niveaux & Expérience | Inazuma Eleven Victory Road - Azalée",
+	// `site`/`creator` sont recopiés : un bloc `twitter` local efface celui du layout.
+	twitter: {
+		card: "summary_large_image",
+		creator: "@Azalee_IE",
+		description:
+			"Courbe d'expérience, coût de chaque palier et calculateurs de niveau pour Inazuma Eleven: Victory Road.",
+		images: [OG_PAR_DEFAUT.url],
+		site: "@Azalee_IE",
+		title: "Niveaux & Expérience | Azalée",
+	},
 };
 
 export default async function NiveauPage() {

@@ -10,10 +10,15 @@ import { WikiPagination } from "@/components/wiki/WikiPagination";
 import { WikiSearchToolbar } from "@/components/wiki/WikiSearchToolbar";
 import type { SpriteCommonKey } from "@/config/sprites-common";
 import { translatePassiveEffect } from "@rosegriffon/azalee/text/aura-translations";
-import { normalizeText } from "@rosegriffon/azalee/search/utils";
 import { cn } from "@/lib/utils";
 
-const ITEMS_PER_PAGE = 48;
+/**
+ * Taille de page des auras — autorité UNIQUE, importée par la page serveur qui
+ * interroge la base. Une constante dupliquée des deux côtés finirait par diverger,
+ * et une découpe locale d'une page déjà découpée rendait les auras suivantes
+ * inatteignables (total menteur, donc une seule page).
+ */
+export const AURAS_PAR_PAGE = 48;
 
 const ELEMENTS = [
 	{ icon: "blur_on", label: "Tous", value: "" },
@@ -37,12 +42,33 @@ interface AuraItem {
 	assetCode?: string;
 }
 
-export function AuraList({ auras, category }: { auras: AuraItem[]; category: string }) {
+/**
+ * Grille paginée d'une catégorie d'auras.
+ *
+ * Ne filtre et ne découpe RIEN : la recherche, le filtre d'élément et la
+ * découpe en pages sont faits par la base (le service reçoit `q`, `element`,
+ * `page`). Le composant se contente d'afficher la page reçue et de renvoyer
+ * les changements de filtre dans l'URL, seule source de vérité partagée.
+ */
+export function AuraList({
+	auras,
+	category,
+	total,
+	page,
+	perPage = AURAS_PAR_PAGE,
+}: {
+	auras: AuraItem[];
+	category: string;
+	/** Nombre réel d'auras de la catégorie après filtres, compté en base. */
+	total: number;
+	/** Page courante, telle que résolue par la page serveur depuis `?page=`. */
+	page: number;
+	perPage?: number;
+}) {
 	const searchParams = useSearchParams();
 	const router = useRouter();
-	const q = searchParams.get("q") || "";
 	const element = searchParams.get("element") || "";
-	const currentPage = Number.parseInt(searchParams.get("page") || "1", 10);
+	const totalPages = Math.max(1, Math.ceil(total / perPage));
 
 	const updateElement = useCallback(
 		(value: string) => {
@@ -60,31 +86,6 @@ export function AuraList({ auras, category }: { auras: AuraItem[]; category: str
 		},
 		[router, searchParams, category]
 	);
-
-	// Client-side filtering (server already filters, this is for instant re-filter)
-	let filteredAuras = auras;
-
-	if (element) {
-		const target = element.toLowerCase();
-		filteredAuras = filteredAuras.filter((a) => {
-			const el = (a.element || "").toLowerCase();
-			return el.includes(target);
-		});
-	}
-
-	if (q) {
-		const qNormalized = normalizeText(q);
-		filteredAuras = filteredAuras.filter(
-			(a) =>
-				normalizeText(a.name || "").includes(qNormalized) ||
-				normalizeText(a.passive || "").includes(qNormalized) ||
-				normalizeText(a.hissatsu_name || "").includes(qNormalized)
-		);
-	}
-
-	const totalItems = filteredAuras.length;
-	const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-	const paginatedAuras = filteredAuras.slice(startIndex, startIndex + ITEMS_PER_PAGE);
 
 	return (
 		<div className="space-y-6">
@@ -121,15 +122,15 @@ export function AuraList({ auras, category }: { auras: AuraItem[]; category: str
 			</div>
 
 			<div className="flex items-center justify-between text-xs font-medium text-on-surface-variant px-1 uppercase tracking-wider">
-				<span>{totalItems.toLocaleString("fr-FR")} résultats</span>
+				<span>{total.toLocaleString("fr-FR")} résultats</span>
 				<span>
-					Page {currentPage} sur {Math.max(1, Math.ceil(totalItems / ITEMS_PER_PAGE))}
+					Page {page} sur {totalPages}
 				</span>
 			</div>
 
-			{paginatedAuras.length > 0 ? (
+			{auras.length > 0 ? (
 				<FadeInStagger className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-					{paginatedAuras.map((aura) => {
+					{auras.map((aura) => {
 						const sd = aura.sheetData || {};
 						const passiveRaw = sd.passiveEffect;
 						const passiveFr = passiveRaw ? translatePassiveEffect(passiveRaw) : undefined;
@@ -160,11 +161,7 @@ export function AuraList({ auras, category }: { auras: AuraItem[]; category: str
 				</div>
 			)}
 
-			<WikiPagination
-				totalItems={totalItems}
-				itemsPerPage={ITEMS_PER_PAGE}
-				currentPage={currentPage}
-			/>
+			<WikiPagination totalItems={total} itemsPerPage={perPage} currentPage={page} />
 		</div>
 	);
 }

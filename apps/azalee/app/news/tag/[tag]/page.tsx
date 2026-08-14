@@ -5,6 +5,7 @@ import { fr } from "date-fns/locale";
 import { ArrowLeft, Tag } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { notFound } from "next/navigation";
 import { Badge, Button } from "@rosegriffon/ui";
 import { WikiPagination } from "@/components/wiki/WikiPagination";
 import { getPgPool } from "@/lib/db/pg";
@@ -17,18 +18,24 @@ interface TagPageProps {
 	searchParams: Promise<Record<string, string | string[] | undefined>>;
 }
 
+/**
+ * Le segment arrive DÉJÀ décodé : Next décode chaque paramètre de route dans
+ * `getRouteMatcher` (`shared/lib/router/utils/route-matcher.js`). Le `decodeURIComponent`
+ * qui traînait ici était un second décodage : `/news/tag/100%25` levait une `URIError`
+ * sur `decodeURIComponent("100%")` et renvoyait une page d'erreur sans titre en HTTP 200.
+ * Pour reconstruire une URL à partir du tag, c'est donc `encodeURIComponent` qu'il faut.
+ */
 export async function generateMetadata({ params }: TagPageProps) {
 	const { tag } = await params;
-	const decodedTag = decodeURIComponent(tag);
 	return {
-		description: `Tous les articles avec le tag "${decodedTag}" sur Azalée.`,
-		title: `Articles tagués "${decodedTag}" - Azalée`,
+		alternates: { canonical: `/news/tag/${encodeURIComponent(tag)}` },
+		description: `Tous les articles avec le tag "${tag}" sur Azalée.`,
+		title: `Articles tagués "${tag}" - Azalée`,
 	};
 }
 
 export default async function TagPage({ params, searchParams }: TagPageProps) {
 	const { tag } = await params;
-	const decodedTag = decodeURIComponent(tag);
 	const { page: currentPage } = parseSearchParams(await searchParams);
 
 	// Lecture Postgres DIRECTE (bypass le Data API PostgREST — cf. lib/db/pg.ts).
@@ -37,7 +44,7 @@ export default async function TagPage({ params, searchParams }: TagPageProps) {
 	// Count
 	const { rows: countRows } = await pool.query<{ count: string }>(
 		`SELECT count(*) AS count FROM articles WHERE status = $1 AND app = $2 AND tags @> $3`,
-		["published", "azalee", [decodedTag]]
+		["published", "azalee", [tag]]
 	);
 
 	const totalItems = countRows[0] ? Number(countRows[0].count) : 0;
@@ -52,7 +59,7 @@ export default async function TagPage({ params, searchParams }: TagPageProps) {
 		[
 			"published",
 			"azalee",
-			[decodedTag],
+			[tag],
 			ITEMS_PER_PAGE,
 			(currentPage - 1) * ITEMS_PER_PAGE,
 		]
@@ -73,7 +80,7 @@ export default async function TagPage({ params, searchParams }: TagPageProps) {
 					</div>
 					<div>
 						<h1 className="text-2xl md:text-3xl font-black font-sans tracking-tight text-on-surface">
-							{decodedTag}
+							{tag}
 						</h1>
 						<p className="text-sm text-on-surface-variant">
 							{totalItems} article{totalItems !== 1 ? "s" : ""}

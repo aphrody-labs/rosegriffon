@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
-import { AuraList } from "@/components/wiki/AuraList";
+import { notFound, redirect } from "next/navigation";
+import { AURAS_PAR_PAGE, AuraList } from "@/components/wiki/AuraList";
 import { buildCanonical, LIST_CANONICAL_KEYS } from "@/lib/seo";
 import { parseSearchParams } from "@/lib/validations";
 import { wikiService } from "@/lib/wiki-service";
@@ -16,6 +16,16 @@ const CATEGORIES = {
 } as const;
 
 type CategoryKey = keyof typeof CATEGORIES;
+
+/**
+ * Numéro de page issu de l'URL. `?page=abc` remonte en NaN du schéma zod
+ * (`Math.max(1, NaN)` vaut NaN) : sans ce garde-fou, le NaN partait jusqu'au
+ * `OFFSET` de la requête et jusqu'au titre de la page.
+ */
+function numeroDePage(valeur: unknown): number {
+	const n = Number(valeur);
+	return Number.isFinite(n) ? Math.max(1, Math.trunc(n)) : 1;
+}
 
 export async function generateMetadata({
 	params,
@@ -47,7 +57,7 @@ export async function generateMetadata({
 		title += ` : ${filters.join(" ")}`;
 	}
 
-	const pageNum = page ? Number.parseInt(page.toString(), 10) : 1;
+	const pageNum = numeroDePage(page);
 	if (pageNum > 1) {
 		title += ` (Page ${pageNum})`;
 	}
@@ -100,7 +110,7 @@ export default async function AuraCategoryPage({
 				<p className="text-on-surface-variant">{total} résultats trouvés</p>
 			</div>
 
-			<AuraList auras={auras} category={category} />
+			<AuraList auras={auras} category={category} total={total} page={pageNumber} />
 		</div>
 	);
 }
