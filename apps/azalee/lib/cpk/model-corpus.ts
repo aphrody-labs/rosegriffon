@@ -25,6 +25,36 @@ export interface ModelEntry {
 	name: string | null;
 	/** Slug de la fiche personnage, pour lier. `null` hors famille `perso`. */
 	slug: string | null;
+	/**
+	 * Nombre de fichiers dans le dossier du modèle — maillage, squelette, motions, packs.
+	 *
+	 * C'est le seul contexte disponible à l'échelle d'une liste : il vient du listing du dossier
+	 * PARENT, déjà chargé, et ne coûte donc aucune requête supplémentaire. `null` pour les
+	 * personnages, dont les pièces sont éclatées entre corps, visage et uniforme.
+	 */
+	files: number | null;
+}
+
+/**
+ * Filtre une liste de modèles sur une recherche libre — nom ET code.
+ *
+ * Comparaison insensible à la casse et aux accents : `deja` doit trouver « Déjà ». La recherche
+ * porte sur la famille entière côté serveur, jamais sur la seule page rendue.
+ */
+export function filtrer(entrees: ModelEntry[], q: string): ModelEntry[] {
+	const besoin = normaliser(q);
+	if (!besoin) return entrees;
+	return entrees.filter(
+		(m) => normaliser(m.code).includes(besoin) || (m.name && normaliser(m.name).includes(besoin)),
+	);
+}
+
+function normaliser(s: string): string {
+	return s
+		.normalize("NFD")
+		.replace(/\p{Diacritic}/gu, "")
+		.toLowerCase()
+		.trim();
 }
 
 /** Ligne du miroir dont on a besoin. */
@@ -59,6 +89,7 @@ export function characters(): Promise<ModelEntry[]> {
 				if (parCode.has(code)) continue;
 				parCode.set(code, {
 					code,
+					files: null,
 					name: row.name_fr || row.name_en || row.name_ja || null,
 					slug: row.slug,
 				});
@@ -89,7 +120,10 @@ function famillleVfs(famille: ModelFamily): Promise<ModelEntry[]> {
 		if (!def?.vfsDir) return [];
 		const listing = await lsOrNull(def.vfsDir, 0);
 		return (listing?.dirs ?? [])
-			.map((d) => ({ code: d.name, name: null, slug: null }) satisfies ModelEntry)
+			.map(
+				(d) =>
+					({ code: d.name, files: d.count ?? null, name: null, slug: null }) satisfies ModelEntry,
+			)
 			.toSorted((a, b) => a.code.localeCompare(b.code, "fr", { numeric: true }));
 	})();
 	_familles.set(famille, p);
