@@ -374,7 +374,73 @@ Le texte accepte trois jetons et **rien d'autre** : `{membre}`, `{serveur}`,
 `{compte}`. Un moteur de gabarit dans un champ réglable serait une surface
 d'injection pour rien.
 
-## 11. Permissions du bot — Administrator, et c'est voulu
+## 11. Modération — sanctions, dossier, auto-modération
+
+Les sanctions existaient déjà (`bannir`, `debannir`, `expulser`, `exclure`,
+`lever-exclusion`, `avertir`), toutes consignées dans `admin_audit_log`. Deux
+ajouts closent le dispositif.
+
+### `/moderation historique` — la boucle qui n'était pas fermée
+
+Le code de `avertir` dit lui-même pourquoi il consigne : « une récidive se juge
+sur l'historique ». Sauf qu'**aucune commande ne lisait cet historique** : pour
+savoir si un membre en était à son premier ou à son cinquième avertissement, il
+fallait ouvrir Postgres — donc jamais, et la gradation se faisait de mémoire.
+
+Le dossier distingue **le total** (ce qui s'est passé depuis toujours) et **les
+90 derniers jours** (ce qui pèse aujourd'hui) : quatre avertissements dont trois
+datent de deux ans, ce n'est pas trois avertissements ce mois-ci. Une **levée**
+(exclusion levée, débannissement) figure dans l'historique mais ne compte pas
+dans la gravité — on ne punit pas d'avoir été gracié.
+
+La commande ne **recommande aucune sanction**. « Trois avertissements ⇒
+exclusion » est une règle de communauté, pas de code : l'écrire ici la rendrait
+invisible à ceux qui l'appliquent.
+
+### `/moderation automod` — celle de Discord, pas la nôtre
+
+Un filtre maison exigerait de lire le contenu des messages, donc l'intent
+privilégié `MessageContent` — et de renoncer à la garantie du §2. L'AutoMod de
+Discord fait mieux et ailleurs : il s'exécute **avant publication** (un message
+bloqué n'a jamais existé, là où un filtre maison le supprime après que tout le
+monde l'a vu), ne consomme aucun intent, et ses jeux de mots-clés sont maintenus
+par Discord dans toutes les langues.
+
+Ce bot ne filtre donc rien : il **configure** les règles de Discord et les rend
+visibles depuis Discord. Discord n'autorise qu'**une** règle par type
+(anti-spam, mots-clés prédéfinis, anti-mentions) : on lit l'existant et on met à
+jour plutôt que de créer — une seconde création échoue avec une erreur illisible.
+
+État du serveur au 14/8/2026 : 3 règles déjà en place (mots dans les pseudos,
+anti-mentions, un filtre de mots-clés). Manquent l'**anti-spam** et les **jeux
+de mots-clés de Discord** — à activer par un admin, conformément au principe 3.
+
+⚠ Les rôles à permission « Gérer le serveur » échappent nativement à l'AutoMod :
+Discord ne les filtre pas, quelle que soit la règle.
+
+## 12. Suggestions — le vote reste chez Discord
+
+`/suggestion proposer` publie dans le salon configuré (fermé par défaut) ; le
+bot pose 👍 et 👎, et **c'est tout**. Le registre de qui a voté quoi reste chez
+Discord ; nous n'en lisons que les compteurs, au moment où le staff tranche.
+
+C'est la même ligne rouge que les sondages : le réflexe serait une table
+`(suggestion, membre, valeur)` — une table nominative de votes, chez nous, pour
+toujours, sur un serveur où tout le monde se connaît.
+
+`/gestion suggestion trancher` **réécrit le message d'origine** au lieu d'en
+poster un second : sinon le salon accumule deux messages par suggestion, et
+surtout le vote reste attaché au premier — les gens continuent de voter une
+suggestion déjà tranchée. Les réactions sont retirées à la décision.
+
+Le **motif est obligatoire**, et l'auteur est prévenu en message privé : une
+suggestion écartée sans raison est pire qu'une suggestion ignorée.
+
+Détail qui se voit tout de suite s'il manque : le bot pose lui-même les deux
+réactions, donc ses propres clics sont dans les compteurs. `score()` les retire
+— sans ça, une suggestion que personne n'a votée s'affiche « 1 pour, 1 contre ».
+
+## 13. Permissions du bot — Administrator, et c'est voulu
 
 Le bot Rose Griffon porte la permission **Administrator** sur le serveur.
 
@@ -390,7 +456,7 @@ gain nul — le vrai verrou d'accès n'est pas Discord, c'est `requireRgAdmin`
 attribue AUTOMATIQUEMENT (§3) — pas ce qu'il peut faire quand un administrateur
 Rose Griffon le lui demande.
 
-## 12. Exploitation
+## 14. Exploitation
 
 ```bash
 # après toute modification de apps/bot
