@@ -24,7 +24,7 @@
 			"zod": "^4.4.3",
 			"@supabase/supabase-js": "^2.107.0",
 			"@supabase/ssr": "^0.10.3",
-			"better-auth": "^1.6.14",
+			"better-auth": "^1.6.28",
 			"@rpbey/discordx": "^0.1.1",
 			"discord.js": "^14.26.4",
 			"discord-api-types": "^0.38.48",
@@ -252,7 +252,7 @@
 		"wanakana": "^5.3.1"
 	},
 	"overrides": {
-		"kysely": "0.28.2",
+		"kysely": "0.28.17",
 		"@aphrody-code/bxc": "npm:@aphrody/bxc@^0.6.7",
 		"@aphrody-code/zukan": "npm:@aphrody/zukan@^0.1.5",
 		"@aphrody-code/x": "npm:@aphrody/x@^1.0.10",
