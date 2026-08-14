@@ -27,7 +27,16 @@ export const runtime = "nodejs";
 /** Un mode tel que l'exporte `niers mode export`. */
 type Mode = {
 	slug: string;
+	/** Libellé français, tel que le jeu l'affiche quand il en fournit un. */
 	label: string;
+	labelEn: string | null;
+	labelJa: string | null;
+	/**
+	 * Vrai si le jeu énumère lui-même ce mode. La liste ne vient pas de nous : `menu_text`
+	 * porte un réglage audio par mode (« Volume de la musique (…) »), et trois familles de
+	 * réglages concordent sur les mêmes cinq entrées.
+	 */
+	official: boolean;
 	icon: { atlas: string | null; region: string | null };
 	counts: { screens: number; layers: number; focus: number };
 	note: string | null;
@@ -129,6 +138,17 @@ export default async function PageModes({
 				<MediaBack href="/mode" label="Tous les modes" />
 				<header className="space-y-1">
 					<h1 className="text-fluid-headline-md font-extrabold text-on-surface">{mode.label}</h1>
+					{mode.labelEn || mode.labelJa ? (
+						<p className="text-sm text-on-surface-variant">
+							{[mode.labelEn, mode.labelJa].filter(Boolean).join(" · ")}
+						</p>
+					) : null}
+					{mode.official ? (
+						<p className="text-xs text-on-surface-variant">
+							Mode énuméré par le jeu lui-même : <code>menu_text</code> porte un réglage audio à son
+							nom.
+						</p>
+					) : null}
 					<p className="max-w-3xl text-sm text-on-surface-variant">{mode.note}</p>
 				</header>
 
@@ -174,6 +194,30 @@ export default async function PageModes({
 
 	// ── Liste des modes ────────────────────────────────────────────────────────
 	const total = modes.reduce((n, m) => n + m.counts.screens, 0);
+	const officiels = modes.filter((m) => m.official);
+	const autres = modes.filter((m) => !m.official);
+
+	const carte = (m: Mode) => {
+		const textures = m.assets.g4tx?.length ?? 0;
+		return (
+			<li key={m.slug}>
+				<Link
+					href={`/mode/${m.slug}`}
+					className="block rounded-lg border border-outline-variant p-4 transition hover:bg-surface-container"
+				>
+					<span className="block font-semibold text-on-surface">{m.label}</span>
+					{m.labelJa ? (
+						<span className="block text-xs text-on-surface-variant">{m.labelJa}</span>
+					) : null}
+					<span className="mt-1 block text-xs text-on-surface-variant">
+						{m.counts.screens} écran{m.counts.screens > 1 ? "s" : ""} · {m.counts.layers} calques ·{" "}
+						{textures} texture{textures > 1 ? "s" : ""}
+					</span>
+				</Link>
+			</li>
+		);
+	};
+
 	return (
 		<div className="space-y-6">
 			<MediaHeader
@@ -182,25 +226,26 @@ export default async function PageModes({
 				description="Les modes du menu principal, et les fichiers dont ils sont faits. Les comptes sont mesurés sur le VFS du jeu."
 			/>
 			<MediaCount left={`${modes.length} modes`} right={`${total} écrans au total`} />
-			<ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-				{modes.map((m) => {
-					const textures = m.assets.g4tx?.length ?? 0;
-					return (
-						<li key={m.slug}>
-							<Link
-								href={`/mode/${m.slug}`}
-								className="block rounded-lg border border-outline-variant p-4 transition hover:bg-surface-container"
-							>
-								<span className="block font-semibold text-on-surface">{m.label}</span>
-								<span className="mt-1 block text-xs text-on-surface-variant">
-									{m.counts.screens} écran{m.counts.screens > 1 ? "s" : ""} ·{" "}
-									{m.counts.layers} calques · {textures} texture{textures > 1 ? "s" : ""}
-								</span>
-							</Link>
-						</li>
-					);
-				})}
-			</ul>
+
+			<section className="space-y-2">
+				<h2 className="text-sm font-semibold text-on-surface">
+					Modes de jeu{" "}
+					<span className="font-normal text-on-surface-variant">
+						— {officiels.length}, énumérés par le jeu
+					</span>
+				</h2>
+				<ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">{officiels.map(carte)}</ul>
+			</section>
+
+			<section className="space-y-2">
+				<h2 className="text-sm font-semibold text-on-surface">
+					Écrans du menu principal{" "}
+					<span className="font-normal text-on-surface-variant">
+						— {autres.length}, que le jeu ne compte pas parmi ses modes
+					</span>
+				</h2>
+				<ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">{autres.map(carte)}</ul>
+			</section>
 		</div>
 	);
 }
