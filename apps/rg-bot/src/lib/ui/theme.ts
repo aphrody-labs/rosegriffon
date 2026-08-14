@@ -89,6 +89,13 @@ export const ICONES = Object.freeze({
 	campagne: "💛",
 	post: "🐦",
 	jeu: "🎮",
+	// Vie de communauté
+	niveau: "⭐",
+	// 💛 est déjà pris par `campagne` : une icône par idée, jamais deux.
+	kizuna: "🤝",
+	collection: "🎴",
+	classement: "🏆",
+	ticket: "🎫",
 	fichier: "📁",
 	image: "🖼️",
 	modele: "🧊",

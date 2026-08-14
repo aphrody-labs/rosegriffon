@@ -12,8 +12,27 @@ import { resolve } from "node:path";
 import { GlobalFonts } from "@aphrody-code/canvas";
 import { FORMES, MARQUE, THEMES } from "@rosegriffon/ui/tokens";
 
+import { profilActif } from "../profil";
+
 const PUBLIC_WEBSITE = resolve(import.meta.dir, "../../../../website/public");
 const POLICES_WEBSITE = `${PUBLIC_WEBSITE}/fonts`;
+
+/**
+ * Identité écrite sur les images — celle du PROFIL qui tourne.
+ *
+ * Les cartes portaient « ROSE GRIFFON » en surtitre et « rosegriffon.fr » en
+ * pied, écrits en dur. C'était juste tant qu'il n'existait qu'un bot ; depuis
+ * l'arrivée du profil `azalee`, toute carte rendue par le second bot annonçait
+ * la mauvaise marque et le mauvais domaine. Les couleurs, elles, ne changent
+ * pas : les deux bots appartiennent à la même association et la DA est
+ * commune — c'est le NOM qui devait suivre le profil, pas la palette.
+ */
+export const MARQUE_CANVAS = {
+	/** Surtitre de l'en-tête, en capitales. */
+	surtitre: profilActif().titre.toUpperCase(),
+	/** Domaine affiché en pied de carte. */
+	domaine: profilActif().marque.piedDePage,
+} as const;
 
 /** Mascottes et logos servis par le site, réutilisés tels quels sur les cartes. */
 export const VISUELS = {

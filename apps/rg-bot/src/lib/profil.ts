@@ -276,6 +276,9 @@ const MODULES_RG = [
 	"commands/membre.ts",
 	"commands/patreon.ts",
 	"commands/sondage.ts",
+	"commands/profil.ts",
+	"commands/kizuna.ts",
+	"commands/collection.ts",
 ] as const;
 
 /**
@@ -322,7 +325,17 @@ export const PROFILS: Readonly<Record<NomProfil, Profil>> = Object.freeze({
 		// y sert ses commandes de communauté. Le second bot s'y AJOUTE, il ne le
 		// remplace pas.
 		guildes: [RG_GUILD_ID, AZALEE_GUILD_ID],
-		intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMembers],
+		// `GuildMessages` s'ajoute pour le système de niveaux : il livre l'événement
+		// `messageCreate`, donc l'AUTEUR, le SALON et l'HORODATAGE d'un message.
+		// Il ne livre PAS son contenu — ça, c'est `MessageContent`, un intent
+		// privilégié que ces applications n'ont pas et ne demanderont pas. On compte
+		// les messages sans jamais les lire, et ce n'est pas une promesse : c'est ce
+		// que Discord nous envoie.
+		intents: [
+			GatewayIntentBits.Guilds,
+			GatewayIntentBits.GuildMembers,
+			GatewayIntentBits.GuildMessages,
+		],
 		modules: MODULES_RG,
 		marque: {
 			couleurHex: "#a14b3f" as const,
