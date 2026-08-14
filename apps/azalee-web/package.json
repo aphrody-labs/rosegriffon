@@ -11,7 +11,7 @@
 		"format": "oxfmt .",
 		"format:check": "oxfmt --check .",
 		"type-check": "bun --bun tsc --noEmit",
-		"test": "bun test src tests",
+		"test": "bun test lib src tests",
 		"test:run": "bun --bun vitest run",
 		"create-draft": "bun scripts/create-draft.ts",
 		"backup:supabase": "bun scripts/ops/backup-supabase-to-sqlite.ts",
