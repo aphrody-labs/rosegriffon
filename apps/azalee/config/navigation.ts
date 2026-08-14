@@ -146,7 +146,9 @@ export const navigationItems: NavItem[] = [
 			{ label: "nav.wiki.textures", path: "/textures", icon: "texture" },
 			{ label: "nav.wiki.sounds", path: "/sons", icon: "graphic_eq" },
 			{ label: "nav.wiki.videos", path: "/videos", icon: "movie" },
-			{ label: "nav.wiki.keshin_models", path: "/keshin", icon: "view_in_ar" },
+			// `/keshin` a fusionné dans `/modeles` : une seule page couvre les 6 236 modèles du
+			// jeu (personnages, techniques, objets, esprits, armures, animaux). L'ancienne URL
+			// redirige, mais elle n'a plus à figurer au menu à côté de celle qui la contient.
 			{ label: "nav.wiki.models", path: "/modeles", icon: "deployed_code" },
 		],
 		icon: "perm_media",
