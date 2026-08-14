@@ -664,6 +664,11 @@ console.log("✅ Toutes les tâches cron ont été planifiées avec succès.");
 const PORT = Number(process.env.CRON_PORT) || 3005;
 
 const server = Bun.serve({
+	// Boucle locale : sans `hostname`, Bun écoute sur toutes les interfaces et le tableau
+	// de bord du cron se retrouvait joignable en HTTP clair depuis l'Internet public.
+	// L'accès depuis le VPN reste assuré par `wg-forward@3005.service`, qui relaie
+	// 10.8.0.1:3005 vers cette même boucle — le motif déjà utilisé par treize autres ports.
+	hostname: "127.0.0.1",
 	port: PORT,
 	async fetch(req, server) {
 		const url = new URL(req.url);
