@@ -17,6 +17,13 @@
  * Regarder le profil de quelqu'un ne lui fabrique pas de ligne en base (cf.
  * `services/communaute.profilDe`). Un membre qui n'a jamais parlé voit une
  * carte de niveau 1, et n'apparaît dans aucun classement.
+ *
+ * ── RÉPONSES PRIVÉES PAR DÉFAUT ────────────────────────────────────────────
+ * Sur un serveur de deux mille membres, une commande qui répond publiquement
+ * est une commande qui pollue. Ces réponses sont donc ÉPHÉMÈRES par défaut —
+ * visibles de qui les demande, et de personne d'autre — avec une option
+ * `partager` pour celles qu'on veut montrer. C'est le membre qui décide de
+ * faire du bruit, jamais le bot.
  */
 import { Discord, Slash, SlashChoice, SlashOption } from "@rpbey/discordx";
 import {
@@ -93,9 +100,16 @@ export class ProfilCommand {
 			type: ApplicationCommandOptionType.User,
 		})
 		membre: User | undefined,
+		@SlashOption({
+			description: "Afficher la carte dans le salon (privé par défaut)",
+			name: "partager",
+			required: false,
+			type: ApplicationCommandOptionType.Boolean,
+		})
+		partager: boolean | undefined,
 		interaction: ChatInputCommandInteraction
 	) {
-		await differer(interaction);
+		await differer(interaction, { prive: partager !== true });
 		const guildId = guildeDe(interaction);
 		if (!guildId) {
 			await repondre(interaction, echec("Hors serveur", HORS_GUILDE));
@@ -205,9 +219,16 @@ export class ProfilCommand {
 			type: ApplicationCommandOptionType.Integer,
 		})
 		page: number | undefined,
+		@SlashOption({
+			description: "Afficher le classement dans le salon (privé par défaut)",
+			name: "partager",
+			required: false,
+			type: ApplicationCommandOptionType.Boolean,
+		})
+		partager: boolean | undefined,
 		interaction: ChatInputCommandInteraction
 	) {
-		await differer(interaction);
+		await differer(interaction, { prive: partager !== true });
 		const guildId = guildeDe(interaction);
 		if (!guildId) {
 			await repondre(interaction, echec("Hors serveur", HORS_GUILDE));

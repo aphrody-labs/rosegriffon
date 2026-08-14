@@ -35,11 +35,16 @@ const flocons = z
 /**
  * Où annoncer une montée de niveau.
  *
+ * ── LE DÉFAUT EST « AUCUNE », ET C'EST VOLONTAIRE ──────────────────────────
  * `place` (dans le salon où le message a été envoyé) est le défaut des bots du
- * marché, et c'est le plus bruyant : sur un serveur actif, il transforme chaque
- * salon en flux d'annonces. `salon` centralise, `prive` n'embête personne,
- * `aucune` coupe. On garde les quatre parce que les quatre ont un usage réel,
- * mais le DÉFAUT est `salon` : visible, sans polluer les conversations.
+ * marché. Sur un serveur de deux mille membres, il transforme chaque salon en
+ * flux d'annonces : c'est LA raison pour laquelle les communautés finissent par
+ * couper leur bot de niveaux. `salon` centralise le bruit, `prive` l'envoie en
+ * message direct, `aucune` n'en fait aucun.
+ *
+ * Ici le défaut est `aucune` : un bot qui s'installe ne doit RIEN publier tant
+ * que le staff n'a pas dit où. Le membre voit sa progression avec `/profil`,
+ * quand il la demande.
  */
 export const LIEUX_ANNONCE = ["salon", "place", "prive", "aucune"] as const;
 
@@ -50,7 +55,22 @@ const reglagesNiveaux = z
 		actif: z.boolean().default(true),
 		/** Salon d'annonce quand `annonce = "salon"`. */
 		salonAnnonce: flocon.nullable().default(null),
-		annonce: z.enum(LIEUX_ANNONCE).default("salon"),
+		annonce: z.enum(LIEUX_ANNONCE).default("aucune"),
+		/**
+		 * N'annoncer QUE les niveaux multiples de cette valeur.
+		 *
+		 * Sans ce filtre, un membre actif déclenche une annonce tous les deux ou
+		 * trois jours en début de courbe — et deux mille membres actifs, c'est un
+		 * salon inutilisable. À 5, on ne fête que ce qui se fête : les paliers
+		 * ronds. `1` rétablit l'annonce à chaque niveau.
+		 */
+		palierAnnonce: z.number().int().min(1).max(100).default(5),
+		/**
+		 * Annoncer aussi les CHANGEMENTS DE RANG (Normal → Expérimenté → Héros →
+		 * BASARA), même hors palier. Trois fois dans une vie de membre : c'est le
+		 * genre d'événement qui mérite un message.
+		 */
+		annoncerRang: z.boolean().default(true),
 		/** Salons qui ne rapportent aucune XP (bots, journaux, vitrines). */
 		salonsExclus: flocons,
 		/** Rôles qui ne gagnent pas d'XP (bots, comptes de service). */

@@ -38,6 +38,7 @@ import {
 } from "../services/communaute";
 import {
 	attention,
+	creerEmbed,
 	differer,
 	differerEnPrive,
 	echec,
@@ -45,6 +46,7 @@ import {
 	fiche,
 	ilYA,
 	leJour,
+	pied,
 	piedDeCommande,
 	repondre,
 	vide,
@@ -69,9 +71,16 @@ export class KizunaCommand {
 			type: ApplicationCommandOptionType.User,
 		})
 		membre: User | undefined,
+		@SlashOption({
+			description: "Afficher le solde dans le salon (privé par défaut)",
+			name: "partager",
+			required: false,
+			type: ApplicationCommandOptionType.Boolean,
+		})
+		partager: boolean | undefined,
 		interaction: ChatInputCommandInteraction
 	) {
-		await differer(interaction);
+		await differer(interaction, { prive: partager !== true });
 		const guildId = interaction.guildId;
 		if (!guildId) {
 			await repondre(interaction, echec("Hors serveur", HORS_GUILDE));
@@ -109,7 +118,9 @@ export class KizunaCommand {
 		name: "quotidien",
 	})
 	async quotidien(interaction: ChatInputCommandInteraction) {
-		await differer(interaction);
+		// Toujours privé : c'est un geste qu'on répète tous les jours. Publié, il
+		// remplirait un salon à lui seul.
+		await differerEnPrive(interaction);
 		const guildId = interaction.guildId;
 		if (!guildId) {
 			await repondre(interaction, echec("Hors serveur", HORS_GUILDE));
@@ -185,7 +196,11 @@ export class KizunaCommand {
 		montant: number,
 		interaction: ChatInputCommandInteraction
 	) {
-		await differer(interaction);
+		// Le don est confirmé EN PRIVÉ au donateur, et annoncé au destinataire par
+		// message direct. Publier chaque don remplirait le salon ; ne rien dire au
+		// destinataire viderait le geste de son sens. Les deux personnes concernées
+		// sont prévenues, et personne d'autre.
+		await differerEnPrive(interaction);
 		const guildId = interaction.guildId;
 		if (!guildId) {
 			await repondre(interaction, echec("Hors serveur", HORS_GUILDE));
@@ -219,11 +234,30 @@ export class KizunaCommand {
 
 			// Publique, et volontairement : la générosité est la seule chose que ce
 			// système récompense socialement. Le JOURNAL, lui, reste privé.
+			// Le destinataire est prévenu en message direct. S'il a fermé ses MP, on
+			// n'insiste pas : ses jetons sont déjà crédités, et le forcer à voir
+			// l'annonce dans un salon serait exactement le bruit qu'on refuse.
+			await destinataire
+				.send({
+					embeds: [
+						pied(
+							creerEmbed({
+								description: `${interaction.user.toString()} t'offre ${formaterJetons(validation.montant)}.`,
+								icone: "kizuna",
+								intention: "succes",
+								titre: "Don reçu",
+							}),
+							{ note: "/kizuna solde pour voir ton compte" }
+						),
+					],
+				})
+				.catch(() => undefined);
+
 			const carte = fiche({
-				description: `${interaction.user.toString()} offre ${formaterJetons(validation.montant)} à ${destinataire.toString()}.`,
+				description: `Tu offres ${formaterJetons(validation.montant)} à ${destinataire.toString()}.`,
 				icone: "kizuna",
 				intention: "succes",
-				titre: "Don de jetons",
+				titre: "Don envoyé",
 			});
 			carte
 				.champ("Ton solde", formaterJetons(soldes.soldeExpediteur), { enLigne: true })

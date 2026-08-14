@@ -16,6 +16,7 @@ import { describe, expect, test } from "bun:test";
 import {
 	gainDeMessage,
 	GAIN_DEFAUT,
+	meriteAnnonce,
 	messageEligible,
 	NIVEAU_MAX,
 	niveauPour,
@@ -156,6 +157,47 @@ describe("rangs", () => {
 		expect(prochainRang(1)?.depuis).toBe(20);
 		expect(prochainRang(49)?.depuis).toBe(50);
 		expect(prochainRang(80)).toBeNull();
+	});
+});
+
+describe("filtre d'annonce", () => {
+	test("sans montée, rien à annoncer", () => {
+		expect(meriteAnnonce(10, 10)).toBe(false);
+		expect(meriteAnnonce(10, 9)).toBe(false);
+	});
+
+	test("par défaut, un niveau sur cinq seulement", () => {
+		// Le cas qui compte : un membre actif monte tous les deux ou trois jours en
+		// début de courbe. Sans filtre, deux mille membres rendent le salon
+		// illisible en une semaine.
+		expect(meriteAnnonce(6, 7)).toBe(false);
+		expect(meriteAnnonce(8, 9)).toBe(false);
+		expect(meriteAnnonce(9, 10)).toBe(true);
+		expect(meriteAnnonce(14, 15)).toBe(true);
+	});
+
+	test("un palier TRAVERSÉ compte, pas seulement atterri dessus", () => {
+		// Un gain exceptionnel peut sauter par-dessus le multiple.
+		expect(meriteAnnonce(9, 11)).toBe(true);
+		expect(meriteAnnonce(2, 8)).toBe(true);
+	});
+
+	test("un changement de rang s'annonce même hors palier", () => {
+		// Niveau 20 = passage de Normal à Expérimenté. Trois fois dans une vie de
+		// membre : ça se fête.
+		expect(meriteAnnonce(19, 20, { palier: 100 })).toBe(true);
+		expect(meriteAnnonce(49, 50, { palier: 100 })).toBe(true);
+		expect(meriteAnnonce(79, 80, { palier: 100 })).toBe(true);
+		expect(meriteAnnonce(19, 20, { annoncerRang: false, palier: 100 })).toBe(false);
+	});
+
+	test("palier 1 rétablit l'annonce à chaque niveau", () => {
+		expect(meriteAnnonce(6, 7, { palier: 1 })).toBe(true);
+	});
+
+	test("un palier aberrant ne fait pas tout passer", () => {
+		expect(meriteAnnonce(6, 7, { annoncerRang: false, palier: 0 })).toBe(true);
+		expect(meriteAnnonce(6, 7, { annoncerRang: false, palier: Number.NaN })).toBe(false);
 	});
 });
 

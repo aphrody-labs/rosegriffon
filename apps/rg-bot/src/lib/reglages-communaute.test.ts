@@ -22,7 +22,9 @@ import {
 describe("document par défaut", () => {
 	test("un document vide rend TOUTES les valeurs, pas des sections vides", () => {
 		expect(REGLAGES_DEFAUT.niveaux.actif).toBe(true);
-		expect(REGLAGES_DEFAUT.niveaux.annonce).toBe("salon");
+		expect(REGLAGES_DEFAUT.niveaux.annonce).toBe("aucune");
+		expect(REGLAGES_DEFAUT.niveaux.palierAnnonce).toBe(5);
+		expect(REGLAGES_DEFAUT.niveaux.annoncerRang).toBe(true);
 		expect(REGLAGES_DEFAUT.niveaux.gain.minimum).toBe(GAIN_DEFAUT.minimum);
 		expect(REGLAGES_DEFAUT.niveaux.gain.delaiSecondes).toBe(GAIN_DEFAUT.delaiSecondes);
 		expect(REGLAGES_DEFAUT.tickets.rolesStaff).toEqual([]);
@@ -30,10 +32,12 @@ describe("document par défaut", () => {
 		expect(REGLAGES_DEFAUT.kizuna.actif).toBe(true);
 	});
 
-	test("l'annonce de niveau ne pollue pas les salons par défaut", () => {
+	test("un bot fraîchement installé ne publie RIEN de lui-même", () => {
 		// `place` est le défaut du marché ; il transforme chaque salon en flux
-		// d'annonces sur un serveur de deux mille membres.
-		expect(REGLAGES_DEFAUT.niveaux.annonce).not.toBe("place");
+		// d'annonces sur un serveur de deux mille membres. Ici, tant que le staff
+		// n'a pas dit où annoncer, on n'annonce nulle part.
+		expect(REGLAGES_DEFAUT.niveaux.annonce).toBe("aucune");
+		expect(REGLAGES_DEFAUT.niveaux.salonAnnonce).toBeNull();
 	});
 });
 
@@ -83,7 +87,7 @@ describe("fusion", () => {
 		const apres = fusionnerReglages(avec, { tickets: { mode: "salon" } });
 		expect(apres.tickets.rolesStaff).toEqual(["1086314307383459880"]);
 		expect(apres.tickets.mode).toBe("salon");
-		expect(apres.niveaux.annonce).toBe("salon");
+		expect(apres.niveaux.annonce).toBe("aucune");
 	});
 
 	test("remplacer une liste la REMPLACE — sinon on ne pourrait rien retirer", () => {

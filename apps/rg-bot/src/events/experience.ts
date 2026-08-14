@@ -31,7 +31,8 @@ import { type ArgsOf, Discord, On } from "@rpbey/discordx";
 import type { GuildMember, Message, TextBasedChannel } from "discord.js";
 
 import { formaterJetons } from "../lib/kizuna";
-import { gainDeMessage, prochainRang, rangDe } from "../lib/experience";
+import { gainDeMessage, meriteAnnonce, prochainRang, rangDe } from "../lib/experience";
+import { filtrerRecompenses, type FaitsRoleVise } from "../lib/hierarchie";
 import {
 	ajouterExperience,
 	consommerDelai,
@@ -79,7 +80,44 @@ async function appliquerRoles(membre: GuildMember, niveau: number, guildId: stri
 	if (recompenses.length === 0) {
 		return [];
 	}
-	const { aPoser, aRetirer } = rolesPourNiveau(recompenses, niveau);
+
+	// ── SECOND VERROU DE HIÉRARCHIE ──────────────────────────────────────────
+	// `/gestion niveaux recompense` refuse déjà d'enregistrer un rôle dangereux
+	// ou hors de portée. On revérifie ICI, à chaque attribution, parce qu'une
+	// ligne peut arriver autrement : import depuis un autre bot, écriture SQL
+	// directe, ou simplement un rôle dont les permissions ont changé APRÈS son
+	// enregistrement — c'est le cas le plus vicieux, et il ne déclenche aucune
+	// alerte.
+	const guilde = membre.guild;
+	const faits = new Map<string, FaitsRoleVise>();
+	for (const recompense of recompenses) {
+		const role = guilde.roles.cache.get(recompense.roleId);
+		if (role) {
+			faits.set(role.id, {
+				estEveryone: role.id === guilde.id,
+				gereParIntegration: role.managed,
+				id: role.id,
+				nom: role.name,
+				permissions: role.permissions.bitfield.toString(),
+				position: role.position,
+			});
+		}
+	}
+	const bot = {
+		peutGererRoles: guilde.members.me?.permissions.has("ManageRoles") ?? false,
+		positionMax: guilde.members.me?.roles.highest.position ?? 0,
+	};
+	const { bloquees, posables } = filtrerRecompenses(recompenses, faits, bot);
+	for (const bloquee of bloquees) {
+		console.warn(
+			`[xp] récompense niveau ${bloquee.recompense.niveau} NON appliquée : ${bloquee.motif}`
+		);
+	}
+	if (posables.length === 0) {
+		return [];
+	}
+
+	const { aPoser, aRetirer } = rolesPourNiveau(posables, niveau);
 	const poses: string[] = [];
 
 	for (const roleId of aPoser) {
@@ -121,6 +159,7 @@ async function appliquerRoles(membre: GuildMember, niveau: number, guildId: stri
  */
 async function annoncer(
 	message: Message<true>,
+	niveauAvant: number,
 	niveau: number,
 	jetonsOfferts: number,
 	rolesPoses: string[]
@@ -128,6 +167,17 @@ async function annoncer(
 	const reglages = await reglagesDe(message.guildId);
 	const lieu = reglages.niveaux.annonce;
 	if (lieu === "aucune") {
+		return;
+	}
+	// Le filtre anti-bruit. Il vient AVANT toute construction d'embed : sur un
+	// serveur actif, la très grande majorité des montées ne s'annonce pas, et ce
+	// chemin doit rester le moins cher possible.
+	if (
+		!meriteAnnonce(niveauAvant, niveau, {
+			annoncerRang: reglages.niveaux.annoncerRang,
+			palier: reglages.niveaux.palierAnnonce,
+		})
+	) {
 		return;
 	}
 
@@ -213,7 +263,13 @@ export class ExperienceEvents {
 
 			const membre = message.member;
 			const rolesPoses = membre ? await appliquerRoles(membre, resultat.niveauApres, guildId) : [];
-			await annoncer(message, resultat.niveauApres, resultat.jetonsOfferts, rolesPoses);
+			await annoncer(
+				message,
+				resultat.niveauAvant,
+				resultat.niveauApres,
+				resultat.jetonsOfferts,
+				rolesPoses
+			);
 		} catch (err) {
 			// Ce gestionnaire tourne sur chaque message : une exception qui remonte
 			// jusqu'à la passerelle couperait le bot pour tout le monde.
