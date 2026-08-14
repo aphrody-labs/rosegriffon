@@ -85,5 +85,15 @@ export function resolveGuildIds(env: Record<string, string | undefined>): string
 		.map((v) => v.trim())
 		.filter((v) => /^\d{15,25}$/.test(v));
 
-	return [...new Set([principale, AZALEE_GUILD_ID, ...supplementaires])];
+	// Achillea rejoint la liste par défaut le 14/8/2026 : le bot Rose Griffon y est
+	// réellement présent (`GET /users/@me/guilds`), et sans cette ligne il y était en
+	// ligne et muet — exactement le symptôme décrit plus haut. Le poser ici plutôt que
+	// dans `DISCORD_EXTRA_GUILD_IDS` le rend visible, testé et versionné : une variable
+	// d'environnement posée à la main sur une seule machine se perd au redéploiement
+	// suivant, et personne ne sait plus pourquoi les commandes ont disparu.
+	//
+	// Lister une guilde que le bot n'a pas rejointe reste sans danger : `src/index.ts`
+	// intersecte cette liste avec les guildes réellement rejointes avant d'enregistrer
+	// quoi que ce soit.
+	return [...new Set([principale, AZALEE_GUILD_ID, ACHILLEA_GUILD_ID, ...supplementaires])];
 }

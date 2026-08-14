@@ -273,6 +273,10 @@ const MODULES_AZALEE = [
  * décorateur : il n'a rien à faire ici.
  */
 const MODULES_RG = [
+	// Passerelle vers le bot Achillea : il tient sa propre base et sa propre API, et
+	// c'est le profil Rose Griffon qui l'interroge — le bot Azalée, lui, ne parle que
+	// du wiki.
+	"commands/achillea.ts",
 	"commands/administration/racine.ts",
 	"commands/administration/racine-gestion.ts",
 	"commands/administration/racine-moderation.ts",
