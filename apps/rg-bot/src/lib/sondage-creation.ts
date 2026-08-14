@@ -326,3 +326,48 @@ export function clotureDe(projet: Pick<ProjetSondage, "duree">, maintenant = new
 export function libelleRegleDeVote(projet: Pick<ProjetSondage, "multiple">): string {
 	return projet.multiple ? "Choix illimités" : "1 choix par personne";
 }
+
+// ─── Désignation d'un sondage déjà publié ───────────────────────────────────
+
+/** Salon et message désignés par une saisie de clôture. */
+export interface ReferenceMessage {
+	/** `null` quand la saisie ne portait qu'un identifiant : au caller de choisir. */
+	salonId: string | null;
+	messageId: string;
+}
+
+/**
+ * Comprend ce qu'un membre du staff colle pour désigner un sondage à clore.
+ *
+ * ── POURQUOI ACCEPTER LE LIEN ──────────────────────────────────────────────
+ * Personne ne connaît par cœur l'identifiant d'un message. Ce qu'on a sous la
+ * main, c'est « Copier le lien du message » — la seule action que le client
+ * Discord propose sans activer le mode développeur. Refuser cette forme, c'est
+ * refuser la seule que l'utilisateur sait produire.
+ *
+ * Le lien porte le SALON, et c'est ce qui compte : sans lui, il faut deviner
+ * dans lequel des 159 salons chercher le message. Trois hôtes sont acceptés
+ * (`discord.com`, `discordapp.com`, `canary.discord.com`) parce que les trois
+ * apparaissent dans les liens copiés selon le client utilisé.
+ *
+ * Une saisie qui n'est ni un lien ni un flocon rend `null` : c'est une erreur
+ * de saisie, pas un cas à deviner.
+ */
+export function referenceMessage(brut: unknown): ReferenceMessage | null {
+	if (typeof brut !== "string") {
+		return null;
+	}
+	const valeur = brut.trim();
+	if (valeur === "") {
+		return null;
+	}
+	const lien = valeur.match(
+		/^https?:\/\/(?:canary\.|ptb\.)?discord(?:app)?\.com\/channels\/(\d{15,25}|@me)\/(\d{15,25})\/(\d{15,25})/
+	);
+	if (lien) {
+		return { messageId: lien[3] as string, salonId: lien[2] as string };
+	}
+	// Flocon nu : Discord les rend sur 17 à 20 chiffres aujourd'hui, la borne
+	// large (15–25) laisse la place à leur croissance sans rien casser.
+	return /^\d{15,25}$/.test(valeur) ? { messageId: valeur, salonId: null } : null;
+}

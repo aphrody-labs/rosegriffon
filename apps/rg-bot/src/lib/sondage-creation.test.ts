@@ -18,6 +18,7 @@ import {
 	libelleRegleDeVote,
 	normaliserDuree,
 	preparerSondage,
+	referenceMessage,
 	separerEmojiDeTete,
 } from "./sondage-creation";
 
@@ -217,5 +218,39 @@ describe("préparation d'un sondage", () => {
 	test("la règle de vote est dite comme sur le site", () => {
 		expect(libelleRegleDeVote({ multiple: false })).toBe("1 choix par personne");
 		expect(libelleRegleDeVote({ multiple: true })).toBe("Choix illimités");
+	});
+});
+
+describe("désignation d'un sondage publié", () => {
+	test("un lien de message rend le salon ET le message", () => {
+		expect(
+			referenceMessage(
+				"https://discord.com/channels/1400000000000000000/1155779116612714506/1400000000000000001"
+			)
+		).toEqual({ messageId: "1400000000000000001", salonId: "1155779116612714506" });
+	});
+
+	test("les hôtes des différents clients sont acceptés", () => {
+		for (const hote of ["canary.discord.com", "ptb.discord.com", "discordapp.com"]) {
+			expect(
+				referenceMessage(
+					`https://${hote}/channels/1400000000000000000/1155779116612714506/1400000000000000001`
+				)
+			).not.toBeNull();
+		}
+	});
+
+	test("un identifiant nu laisse le salon à décider par l'appelante", () => {
+		expect(referenceMessage("  1400000000000000001 ")).toEqual({
+			messageId: "1400000000000000001",
+			salonId: null,
+		});
+	});
+
+	test("tout le reste est refusé plutôt que deviné", () => {
+		expect(referenceMessage("le sondage d'hier")).toBeNull();
+		expect(referenceMessage("42")).toBeNull();
+		expect(referenceMessage("https://rosegriffon.fr/sondages")).toBeNull();
+		expect(referenceMessage(undefined)).toBeNull();
 	});
 });
