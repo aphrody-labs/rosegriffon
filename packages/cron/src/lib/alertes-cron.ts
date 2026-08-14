@@ -91,7 +91,10 @@ export async function signalerDecisionAlerte(decision: DecisionAlerte): Promise<
 				decision.erreur ?? "sans message"
 			}`
 		);
-	} else {
+	} else if (decision.type === "retablissement") {
+		// Test explicite et non `else` : `encartDecision` a déjà écarté le cas
+		// `aucune` juste au-dessus, mais TypeScript ne le déduit pas d'un `null` —
+		// un `else` nu lisait donc `.nom` sur une variante qui n'en a pas.
 		console.log(
 			`[cron-alerte] ${decision.nom} : rétablie après ${decision.echecsPrecedents} échec(s).`
 		);

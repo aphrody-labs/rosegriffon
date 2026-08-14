@@ -810,7 +810,12 @@ describe("appliquerVotesDepuisReactions — les quatre garde-fous", () => {
 		expect(s.results_hidden).toBe(true);
 		// Le nombre de votants distincts reste inconnu — on ne l'invente pas.
 		expect(s.total_voters).toBeNull();
-		expect(s.avertissements.join(" ")).toContain("reconstitué");
+		// La reconstitution est une NOTE, pas un avertissement : elle est attendue
+		// et sans gravité. Rangée dans `avertissements`, elle en noyait le signal
+		// (25 entrées sur 51 sondages) et le rapport de fin de passe, censé rester
+		// vide, n'avertissait plus de rien.
+		expect(s.notes.join(" ")).toContain("reconstitué");
+		expect(s.avertissements.join(" ")).not.toContain("reconstitué");
 	});
 
 	test("489f97c9 : résultats publiés ET réactions alignées → l'encart PRIME", () => {
