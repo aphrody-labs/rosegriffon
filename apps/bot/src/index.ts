@@ -41,7 +41,11 @@ import { demarrerNotifieurTweets } from "./services/tweetsNotifier";
  * `GuildMembers` — les brancher chez lui serait au mieux inerte, au pire une
  * écriture de membres sous la mauvaise identité.
  */
-const MODULES_EVENEMENTS_RG = ["events/ready.ts", "events/memberEvents.ts"] as const;
+const MODULES_EVENEMENTS_RG = [
+	"events/ready.ts",
+	"events/memberEvents.ts",
+	"events/experience.ts",
+] as const;
 
 const client = new Client({
 	// Les intents viennent du PROFIL, et ce n'est pas cosmétique : `GuildMembers`

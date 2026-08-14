@@ -14,6 +14,7 @@ import {
 	BORDURE_OR,
 	ensureFonts,
 	MARGE,
+	MARQUE_CANVAS,
 	OMBRE_DURE,
 	PALETTE,
 	POLICES,
@@ -65,7 +66,7 @@ function dessinerEnTete(ctx: SKRSContext2D, opts: OptionsEnTete): void {
 	ctx.font = `bold 14px ${POLICES.corps}`;
 	ctx.fillStyle = PALETTE.or;
 	ctx.textBaseline = "alphabetic";
-	ctx.fillText("ROSE GRIFFON", MARGE, 46);
+	ctx.fillText(MARQUE_CANVAS.surtitre, MARGE, 46);
 
 	dessinerTitreCartoon(ctx, titre, MARGE, 96, {
 		taille: 50,
@@ -110,7 +111,7 @@ function dessinerPied(ctx: SKRSContext2D, hauteur: number, note?: string): void 
 	ctx.fillStyle = PALETTE.or;
 	ctx.fillRect(MARGE, y - 14, L - MARGE * 2, 2);
 	ctx.font = `bold 17px ${POLICES.corps}`;
-	ctx.fillText("rosegriffon.fr", MARGE, y + 14);
+	ctx.fillText(MARQUE_CANVAS.domaine, MARGE, y + 14);
 	const propre = assainir(note, POLICES.corps);
 	if (propre) {
 		ctx.font = `16px ${POLICES.corps}`;
