@@ -13,9 +13,9 @@
  */
 import type { Metadata } from "next";
 import Link from "next/link";
-import { lsOrNull } from "@rosegriffon/azalee/cpk/live";
+import { lsOrNull, texContainer, texUrl } from "@rosegriffon/azalee/cpk/live";
 import { MediaCount, MediaEmpty, MediaHeader } from "@/components/wiki/MediaShell";
-import { cpkAssetUrl, cpkThumbUrl, segLabel } from "@rosegriffon/azalee/cpk/shared";
+import { cpkThumbUrl, segLabel } from "@rosegriffon/azalee/cpk/shared";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -50,6 +50,15 @@ export default async function TexturesPage({
 	const [{ path }, sp] = await Promise.all([params, searchParams]);
 	const segments = (path ?? []).filter((s) => s !== ".." && s !== ".");
 	const dir = segments.length > 0 ? `${RACINE}/${segments.join("/")}` : RACINE;
+
+	// Dernier segment en `.g4tx` : ce n'est pas un dossier mais un CONTENEUR, et il faut
+	// l'ouvrir. Un `.g4tx` porte jusqu'à 203 textures nommées ; la vue dossier n'en montrerait
+	// qu'une seule vignette, laissant tout le reste inatteignable.
+	const dernier = segments.at(-1) ?? "";
+	if (dernier.toLowerCase().endsWith(".g4tx")) {
+		const rel = `dx11/${segments.join("/")}`.replace(/\.g4tx$/i, "");
+		return <VueConteneur rel={rel} segments={segments} />;
+	}
 
 	const pageParam = typeof sp.page === "string" ? Number.parseInt(sp.page, 10) : 1;
 	const page = Number.isFinite(pageParam) && pageParam > 0 ? pageParam : 1;
@@ -140,10 +149,10 @@ export default async function TexturesPage({
 				<ul className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-6">
 					{textures.map((t) => (
 						<li key={t.path}>
-							<a
-								href={cpkAssetUrl(t.path, t.ext) ?? "#"}
-								target="_blank"
-								rel="noreferrer"
+							{/* Le lien mène au CONTENEUR, pas au PNG : le fichier porte souvent des
+							    dizaines de textures nommées, que seule la vue conteneur expose. */}
+							<Link
+								href={`${base}/${t.name}`}
 								className="group block overflow-hidden rounded-xl border border-outline-variant/30 bg-surface-container transition hover:border-primary/50"
 							>
 								<span className="flex aspect-square items-center justify-center bg-surface-container-high bg-[linear-gradient(45deg,rgba(128,128,128,.12)_25%,transparent_25%,transparent_75%,rgba(128,128,128,.12)_75%),linear-gradient(45deg,rgba(128,128,128,.12)_25%,transparent_25%,transparent_75%,rgba(128,128,128,.12)_75%)] bg-[length:16px_16px] bg-[position:0_0,8px_8px]">
@@ -163,7 +172,7 @@ export default async function TexturesPage({
 								>
 									{t.name.replace(/\.g4tx$/i, "")}
 								</span>
-							</a>
+							</Link>
 						</li>
 					))}
 				</ul>
@@ -197,6 +206,99 @@ export default async function TexturesPage({
 						</Link>
 					)}
 				</nav>
+			)}
+		</div>
+	);
+}
+
+/**
+ * Vue d'un conteneur G4TX : toutes ses textures nommées, chacune adressable.
+ *
+ * C'est ce que la vue dossier ne pouvait pas montrer. Un `.g4tx` porte en moyenne 82,8 textures
+ * dans `200_icon/02_icon_item` (mesuré sur 10 conteneurs, jusqu'à 203 dans un seul fichier) :
+ * s'arrêter au fichier, c'était n'en exposer qu'une sur quatre-vingts.
+ */
+async function VueConteneur({ rel, segments }: { rel: string; segments: string[] }) {
+	const conteneur = await texContainer(rel);
+	const nom = segments.at(-1) ?? "";
+	const parent = `/textures/${segments.slice(0, -1).join("/")}`;
+
+	return (
+		<div className="w-full space-y-5">
+			<MediaHeader
+				title={nom.replace(/\.g4tx$/i, "")}
+				active="/textures"
+				description="Conteneur de textures : chaque image ci-dessous est un payload nommé du même fichier."
+			>
+				<nav
+					aria-label="Fil d'Ariane"
+					className="flex flex-wrap items-center gap-1 pt-1 text-sm text-on-surface-variant"
+				>
+					<Link href="/textures" className="hover:text-primary">
+						dx11
+					</Link>
+					{segments.slice(0, -1).map((seg, i) => (
+						<span key={`${seg}-${i}`} className="flex items-center gap-1">
+							<span aria-hidden>›</span>
+							<Link
+								href={`/textures/${segments.slice(0, i + 1).join("/")}`}
+								className="hover:text-primary"
+							>
+								{segLabel(seg)}
+							</Link>
+						</span>
+					))}
+					<span aria-hidden>›</span>
+					<span className="font-mono text-on-surface">{nom}</span>
+				</nav>
+			</MediaHeader>
+
+			{!conteneur || conteneur.count === 0 ? (
+				<MediaEmpty>Ce conteneur n'expose aucune texture décodable.</MediaEmpty>
+			) : (
+				<>
+					<MediaCount
+						left={`${conteneur.count.toLocaleString("fr")} texture${
+							conteneur.count > 1 ? "s" : ""
+						} dans ce fichier`}
+						right={<Link href={parent}>↩ Retour au dossier</Link>}
+					/>
+					<ul className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-6">
+						{conteneur.textures.map((t) => (
+							<li key={`${t.id}-${t.name}`}>
+								<a
+									href={texUrl(t.path)}
+									target="_blank"
+									rel="noreferrer"
+									className="group block overflow-hidden rounded-xl border border-outline-variant/30 bg-surface-container transition hover:border-primary/50"
+								>
+									<span className="flex aspect-square items-center justify-center bg-surface-container-high bg-[linear-gradient(45deg,rgba(128,128,128,.12)_25%,transparent_25%,transparent_75%,rgba(128,128,128,.12)_75%),linear-gradient(45deg,rgba(128,128,128,.12)_25%,transparent_25%,transparent_75%,rgba(128,128,128,.12)_75%)] bg-[length:16px_16px] bg-[position:0_0,8px_8px]">
+										{/* eslint-disable-next-line @next/next/no-img-element */}
+										<img
+											src={texUrl(t.path, 400)}
+											alt={t.name}
+											loading="lazy"
+											decoding="async"
+											className="max-h-full max-w-full object-contain"
+										/>
+									</span>
+									<span className="block px-2 py-1.5">
+										<span
+											className="block truncate font-mono text-[11px] text-on-surface-variant group-hover:text-on-surface"
+											title={t.name}
+										>
+											{t.name}
+										</span>
+										<span className="block text-[10px] text-on-surface-variant/70">
+											{t.width}×{t.height}
+											{t.regions > 0 && ` · ${t.regions} région${t.regions > 1 ? "s" : ""}`}
+										</span>
+									</span>
+								</a>
+							</li>
+						))}
+					</ul>
+				</>
 			)}
 		</div>
 	);
