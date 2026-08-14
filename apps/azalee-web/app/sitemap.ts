@@ -85,7 +85,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 		// `/keshin` a fusionné dans `/modeles` (redirection permanente) : ne pas l'annoncer, un
 		// sitemap ne doit lister que des URLs canoniques.
 		{ changeFrequency: "weekly" as const, priority: 0.6, url: "/modeles/keshin" },
-		{ changeFrequency: "weekly" as const, priority: 0.6, url: "/modeles/perso" },
+		{ changeFrequency: "weekly" as const, priority: 0.6, url: "/modeles/chara" },
 		{ changeFrequency: "weekly" as const, priority: 0.6, url: "/modeles/waza" },
 		{ changeFrequency: "weekly" as const, priority: 0.6, url: "/modeles/item" },
 		{ changeFrequency: "weekly" as const, priority: 0.6, url: "/modeles/armd" },

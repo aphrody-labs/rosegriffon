@@ -36,7 +36,7 @@ interface CharaRow {
 	slug: string | null;
 }
 
-let _persos: Promise<ModelEntry[]> | null = null;
+let _characters: Promise<ModelEntry[]> | null = null;
 
 /**
  * Les personnages, dédoublonnés par code d'assemblage et triés par nom.
@@ -45,8 +45,8 @@ let _persos: Promise<ModelEntry[]> | null = null;
  * les lister toutes afficherait le même modèle des dizaines de fois. La promesse est mémorisée,
  * pas son résultat, pour que deux rendus concurrents partagent la requête.
  */
-export function personnages(): Promise<ModelEntry[]> {
-	_persos ??= (async () => {
+export function characters(): Promise<ModelEntry[]> {
+	_characters ??= (async () => {
 		const parCode = new Map<string, ModelEntry>();
 		try {
 			const client = createSqliteClient();
@@ -70,7 +70,7 @@ export function personnages(): Promise<ModelEntry[]> {
 			(a.name ?? a.code).localeCompare(b.name ?? b.code, "fr", { numeric: true }),
 		);
 	})();
-	return _persos;
+	return _characters;
 }
 
 const _familles = new Map<ModelFamily, Promise<ModelEntry[]>>();
@@ -98,5 +98,5 @@ function famillleVfs(famille: ModelFamily): Promise<ModelEntry[]> {
 
 /** Tous les modèles d'une famille, quelle qu'en soit la source. */
 export function modelesDe(famille: ModelFamily): Promise<ModelEntry[]> {
-	return famille === "perso" ? personnages() : famillleVfs(famille);
+	return famille === "chara" ? characters() : famillleVfs(famille);
 }
