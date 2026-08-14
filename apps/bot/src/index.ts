@@ -30,6 +30,7 @@ import { MessageFlags, Partials } from "discord.js";
 import { closeCache } from "./lib/cache";
 import { DISCORD_TOKEN, GUILD_IDS, PROFIL, PROFIL_ANNONCEUR } from "./lib/config";
 import { sql } from "./lib/db";
+import { demarrerServeurAdmin, type ServeurAdmin } from "./lib/serveur-admin";
 import { demarrerNotifieurTweets } from "./services/tweetsNotifier";
 
 /**
@@ -102,6 +103,16 @@ if (PROFIL.nom === "rg") {
 /** Coupe le notifieur de posts (minuteurs + abonnement au pont cron). */
 let arreterNotifieur: (() => void) | null = null;
 
+/**
+ * Fenêtre du site sur l'exécution de CE processus (`lib/serveur-admin.ts`).
+ *
+ * Démarrée après `ready` comme le notifieur : `/etat` et `/commandes` n'ont de
+ * sens qu'une fois l'arbre construit et la passerelle ouverte. Répondre « zéro
+ * commande » à un tableau de bord parce qu'on a ouvert le port trop tôt, c'est
+ * signaler une panne qui n'existe pas.
+ */
+let serveurAdmin: ServeurAdmin | null = null;
+
 // `clientReady`, pas `ready` : discord.js 14.26 déprécie le second (« The ready
 // event has been renamed to clientReady […] and will only emit under that name
 // in v15 », WebSocketManager.js). L'écouter émettait un `DeprecationWarning` à
@@ -151,6 +162,10 @@ client.once("clientReady", async () => {
 	// connexion d'abonnement survivaient au `client.destroy()` et retenaient la
 	// boucle d'événements (arrêt du service en timeout, puis SIGKILL).
 	arreterNotifieur = demarrerNotifieurTweets(client, PROFIL_ANNONCEUR);
+
+	// Sans `BOT_ADMIN_TOKEN`, rend `null` et n'ouvre aucun port : un serveur
+	// d'administration sans secret est une porte, pas une fenêtre.
+	serveurAdmin = demarrerServeurAdmin(client);
 });
 
 /**
@@ -229,6 +244,12 @@ async function arreter(signal: string): Promise<void> {
 
 	arreterNotifieur?.();
 	arreterNotifieur = null;
+
+	// Avant la passerelle : un port encore ouvert retient la boucle d'événements
+	// et fait finir l'arrêt en timeout puis SIGKILL, exactement comme le
+	// minuteur du notifieur avant qu'on ne le coupe ici.
+	serveurAdmin?.stop();
+	serveurAdmin = null;
 
 	try {
 		await client.destroy();
