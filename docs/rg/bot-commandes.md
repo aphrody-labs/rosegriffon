@@ -194,6 +194,24 @@ Poids estimé : **≈ 2 743 / 8 000** (34 %).
 | `ticket` | `info` | L'état du ticket de ce fil | — |
 | `ticket` | `liste` | Les tickets encore ouverts (staff) | — |
 
+#### `/achillea` — lecture des serveurs scannés par le bot Achillea (14/8/2026)
+
+*Description racine : « Les serveurs scannés par le bot Achillea : métadonnées, rôles, salons »*
+
+| Sous-commande | Description | Options |
+| --- | --- | --- |
+| `serveur` | Fiche d'un serveur scanné : membres, rôles, salons, date du dernier scan | `identifiant` (optionnel) |
+| `roles` | Les rôles du serveur, du plus haut au plus bas | `identifiant` (optionnel) |
+| `salons` | Les salons rangés sous leurs catégories | `identifiant` (optionnel) |
+| `scan` | État global : serveurs relevés, membres cumulés, dernier passage | — |
+
+Lecture seule, publique : elle n'expose que ce que l'API d'Achillea publie déjà, sans
+aucune donnée de membre. Sans `identifiant`, elle vise le serveur courant, et Achillea
+par défaut. Les données viennent de `GET /guilds/:id` du bot Achillea, validées à
+l'exécution par des schémas Zod (`services/achillea.ts`) : les deux dépôts sont séparés,
+aucun type ne traverse, donc la vérification remplace la garantie du compilateur. Voir
+[`achillea.md`](achillea.md).
+
 Poids par racine : toutes **< 620 / 8 000** (< 8 %). `validation-annonce.ts` ne déclare aucune commande (boutons seuls).
 
 ### 1.3 Arbre complet — bot Azalée (`MODULES_AZALEE`)
