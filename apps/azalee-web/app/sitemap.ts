@@ -2,6 +2,14 @@ export const dynamic = "force-dynamic";
 
 import { getSupabaseClient } from "@/lib/api/supabase";
 import type { MetadataRoute } from "next";
+import { getCoachesList } from "@/lib/wiki/coaches";
+import { getCapsuleList } from "@/lib/wiki/gacha";
+import { getAllQuests } from "@/lib/wiki/quests";
+import { getShopsList } from "@/lib/wiki/shops";
+import { getStadiumsList } from "@/lib/wiki/stadiums";
+import { getAllTeamIds } from "@/lib/wiki/teams";
+import { getAllTrophies } from "@/lib/wiki/trophies";
+import { wikiService } from "@/lib/wiki-service";
 
 const BASE_URL = "https://azalee.rosegriffon.fr";
 
@@ -93,6 +101,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 		{ changeFrequency: "weekly" as const, priority: 0.6, url: "/textures" },
 		{ changeFrequency: "weekly" as const, priority: 0.6, url: "/sons" },
 		{ changeFrequency: "monthly" as const, priority: 0.5, url: "/modeles" },
+		// Sections existantes qui n'étaient annoncées nulle part : la sixième
+		// collection média, la table d'expérience et la démonstration technique.
+		{ changeFrequency: "monthly" as const, priority: 0.5, url: "/mode" },
+		{ changeFrequency: "monthly" as const, priority: 0.6, url: "/niveau" },
+		{ changeFrequency: "monthly" as const, priority: 0.4, url: "/demo" },
 		{ changeFrequency: "monthly" as const, priority: 0.5, url: "/videos" },
 		{ changeFrequency: "monthly" as const, priority: 0.5, url: "/cross" },
 		{ changeFrequency: "monthly" as const, priority: 0.4, url: "/save" },
@@ -233,6 +246,75 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 				priority: 0.7,
 				url: `${BASE_URL}/news/${n.slug}`,
 			});
+		}
+	}
+
+	// Fiches des sections servies par la bibliothèque `@rosegriffon/azalee` :
+	// équipes, entraîneurs, stades, quêtes, succès, lots de capsule, boutiques et
+	// passifs. Leurs pages de liste étaient annoncées, mais aucune de leurs
+	// ~4 000 fiches ne l'était — elles n'existaient, pour un robot, que par le
+	// maillage interne. Chaque source est isolée : une section indisponible ne
+	// doit pas vider le plan de site des autres.
+	const familles: { chemin: string; priorite: number; ids: () => Promise<string[]> }[] = [
+		{ chemin: "/equipe", priorite: 0.6, ids: () => getAllTeamIds() },
+		{
+			chemin: "/entraineur",
+			priorite: 0.5,
+			ids: async () => (await getCoachesList()).map((c) => String(c.id)),
+		},
+		{
+			chemin: "/stade",
+			priorite: 0.5,
+			ids: async () => (await getStadiumsList()).data.map((s) => s.id),
+		},
+		{ chemin: "/quete", priorite: 0.6, ids: async () => (await getAllQuests()).map((q) => q.id) },
+		{
+			chemin: "/succes",
+			priorite: 0.5,
+			ids: async () => (await getAllTrophies()).map((t) => t.id),
+		},
+		{
+			chemin: "/capsule",
+			priorite: 0.4,
+			// `getCapsuleList` plafonne la page à 200 lignes : on la parcourt.
+			ids: async () => {
+				const ids: string[] = [];
+				for (let page = 1; ; page += 1) {
+					const { data, total } = await getCapsuleList({ limit: 200, page });
+					ids.push(...data.map((p) => p.id));
+					if (ids.length >= total || data.length === 0) break;
+				}
+				return ids;
+			},
+		},
+		{
+			chemin: "/boutique",
+			priorite: 0.5,
+			ids: async () => (await getShopsList()).map((s) => String(s.shopId)),
+		},
+		{
+			chemin: "/passive",
+			priorite: 0.5,
+			ids: async () =>
+				wikiService
+					.getPassivesList({ limit: 5000, page: 1 })
+					.data.map((p) => p.passive_id)
+					.filter(Boolean),
+		},
+	];
+
+	for (const famille of familles) {
+		try {
+			for (const id of await famille.ids()) {
+				entries.push({
+					changeFrequency: "monthly",
+					lastModified: new Date(),
+					priority: famille.priorite,
+					url: `${BASE_URL}${famille.chemin}/${encodeURIComponent(id)}`,
+				});
+			}
+		} catch (erreur) {
+			console.error(`[sitemap] ${famille.chemin} indisponible :`, erreur);
 		}
 	}
 

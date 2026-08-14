@@ -20,6 +20,35 @@ export interface NavItem {
 	activePaths?: string[];
 }
 
+/**
+ * Une route est-elle « sous » une entrée de menu ?
+ *
+ * Comparaison par SEGMENT, jamais par préfixe de chaîne : `/modeles` commence par
+ * `/mode` sans être dedans, et les trois barres de navigation (colonne, rail,
+ * barre du bas) testaient `pathname.startsWith(item.path)` — la page des modèles
+ * allumait donc aussi l'entrée des modes. Symétriquement, un simple `===`
+ * n'allumait rien du tout sur une fiche : `/chara/c05028001` laissait « Joueurs »
+ * éteint. Les deux défauts se corrigent au même endroit.
+ *
+ * La racine est un cas à part : tout chemin lui est subordonné, seule l'égalité
+ * la rend active.
+ */
+export function estRouteActive(pathname: string, path: string): boolean {
+	if (path === "/") return pathname === "/";
+	return pathname === path || pathname.startsWith(`${path}/`);
+}
+
+/**
+ * Une entrée de menu est active quand on est sur sa route, sur une de ses routes
+ * annexes (`activePaths`), ou sur la route d'un de ses enfants — un parent replié
+ * doit se signaler quand la page courante est dans sa section.
+ */
+export function estItemActif(pathname: string, item: NavItem): boolean {
+	if (item.activePaths?.some((p) => estRouteActive(pathname, p))) return true;
+	if (!item.groupOnly && estRouteActive(pathname, item.path)) return true;
+	return Boolean(item.children?.some((enfant) => estItemActif(pathname, enfant)));
+}
+
 export const navigationItems: NavItem[] = [
 	{
 		icon: "home",
@@ -150,6 +179,10 @@ export const navigationItems: NavItem[] = [
 			// jeu (personnages, techniques, objets, esprits, armures, animaux). L'ancienne URL
 			// redirige, mais elle n'a plus à figurer au menu à côté de celle qui la contient.
 			{ label: "nav.wiki.models", path: "/modeles", icon: "deployed_code" },
+			// `/mode` figurait dans la sous-navigation média (`MediaShell`) mais nulle part
+			// dans le menu : la sixième collection n'était atteignable qu'en passant par une
+			// des cinq autres.
+			{ label: "nav.wiki.modes", path: "/mode", icon: "stadia_controller" },
 		],
 		icon: "perm_media",
 		label: "nav.section.media",
@@ -228,6 +261,10 @@ export const mobileNavItems: NavItem[] = [
 			"/niveau",
 			"/keshin",
 			"/modeles",
+			"/mode",
+			"/textures",
+			"/sons",
+			"/videos",
 			"/cpk",
 			"/wiki",
 			"/search",

@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import { GameSpriteIcon } from "@/components/ui/GameSpriteIcon";
 import type { GameIconKey } from "@/config/game-icons";
 import { useLanguage } from "@/components/providers/language-provider";
-import { mobileNavItems } from "@/config/navigation";
+import { estRouteActive, mobileNavItems } from "@/config/navigation";
 import { haptic } from "@/lib/haptics";
 import { iconMap } from "@/lib/icons";
 import { cn } from "@/lib/utils";
@@ -157,8 +157,8 @@ export function MaterialBottomNav() {
 				{items.map((item) => {
 					const activePaths = "activePaths" in item ? item.activePaths : undefined;
 					const isActive = activePaths
-						? activePaths.some((p) => pathname === p || pathname.startsWith(`${p}/`))
-						: pathname === item.path || (item.path !== "/" && pathname.startsWith(item.path));
+						? activePaths.some((p) => estRouteActive(pathname, p))
+						: estRouteActive(pathname, item.path);
 
 					if ("isAction" in item && item.isAction) {
 						return (
