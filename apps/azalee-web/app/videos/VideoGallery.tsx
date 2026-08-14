@@ -11,11 +11,23 @@ import { Icon } from "@/components/ui/Icon";
 import { cpkRawUrl, cpkVideoUrl } from "@rosegriffon/azalee/cpk/shared";
 
 export interface MovieEntry {
-	/** Chemin d'index complet (`data/common/movie/<name>.usm`). */
+	/** Chemin VFS complet (`data/dx11/movie/<name>.usm`). */
 	path: string;
 	/** Nom sans extension. */
 	name: string;
 	kind: "title" | "chronicle" | "event" | "other";
+	/** Taille du USM d'origine, en octets. */
+	size: number;
+	/** Variante servie : `haute` = dx11 (débit PC), `standard` = common. */
+	variante: "haute" | "standard";
+}
+
+/** Taille en unités binaires, telle qu'on l'annonce à côté d'un lien de téléchargement. */
+function formatSize(octets: number): string {
+	const mio = octets / 1024 ** 2;
+	return mio >= 1024
+		? `${(mio / 1024).toFixed(1).replace(".", ",")} Gio`
+		: `${Math.round(mio)} Mio`;
 }
 
 const KIND_LABEL: Record<MovieEntry["kind"], string> = {
@@ -65,7 +77,14 @@ function MovieCard({ movie }: { movie: MovieEntry }) {
 					{movie.name}
 				</p>
 				<div className="mt-1 flex items-center justify-between gap-2">
-					<span className="text-[11px] text-on-surface-variant/70">{KIND_LABEL[movie.kind]}</span>
+					<span className="text-[11px] text-on-surface-variant/70">
+						{KIND_LABEL[movie.kind]}
+						{movie.variante === "haute" && (
+							<span title="Variante PC, débit supérieur"> · HD</span>
+						)}
+						{" · "}
+						{formatSize(movie.size)}
+					</span>
 					<span className="flex items-center gap-2">
 						<a
 							href={videoUrl}

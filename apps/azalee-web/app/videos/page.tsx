@@ -1,16 +1,22 @@
 /**
- * Galerie vidéo — expose les cinématiques USM d'Inazuma Eleven: Victory Road, décodées **à la
- * volée** par nie-model-serve (route CDN `/video/<vfs-path>` : démux USM Sofdec2 → MP4 H.264
- * fragmenté, seek par Range). C'est l'une des capacités niers (vidéo) non encore exploitée par
- * azalee — intégration « niers → azalee ».
+ * Galerie vidéo — les cinématiques USM d'Inazuma Eleven: Victory Road, décodées **à la volée**
+ * par nie-model-serve (route CDN `/video/<vfs-path>` : démux USM Sofdec2 → MP4 H.264 fragmenté,
+ * seek par Range).
  *
- * Server Component (`force-dynamic`) : liste les `.usm` de `data/common/movie` depuis l'index CPK
- * (lib serveur `lib/cpk/index`), puis délègue le rendu à l'îlot client `VideoGallery` qui lit le
- * flux MP4 à la demande (`cpkVideoUrl`, client-safe). Pas de prerender (l'index n'est pas bundlé).
+ * Server Component (`force-dynamic`) : la liste vient du VFS **live** (`/vfs/ls`, crate
+ * `nie_explore::listing`) et non de l'index CPK figé, puis l'îlot client `VideoGallery` lit le
+ * flux MP4 à la demande.
+ *
+ * ⚠ `dx11/movie` n'est PAS un doublon de `common/movie`, contrairement à ce que cette page
+ * affirmait. Les deux dossiers portent les 96 mêmes noms, mais AUCUN fichier n'a la même taille :
+ * 16,1 Gio contre 3,7 Gio. Vérifié au ffprobe sur `Chronicle_Title_JP_01` — même définition
+ * (1920×1080), débit 3,8× supérieur côté dx11. C'est la variante PC de meilleure qualité, et
+ * c'est elle qu'on sert désormais ; `common/movie` ne sert que de repli pour un titre qui n'y
+ * serait pas.
  */
 import type { Metadata } from "next";
 import { VideoGallery, type MovieEntry } from "@/app/videos/VideoGallery";
-import { listDir } from "@/lib/cpk/index";
+import { lsOrNull } from "@rosegriffon/azalee/cpk/live";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -39,17 +45,30 @@ function classify(name: string): MovieEntry["kind"] {
 	return "other";
 }
 
-export default function VideosPage() {
-	// Les `.usm` canoniques vivent sous `common/movie` (le miroir `dx11/movie` est le doublon PC).
-	const listing = listDir("data/common/movie");
-	const movies: MovieEntry[] = listing.files
-		.filter((f) => f.ext === "usm")
-		.map((f) => ({
-			path: f.path,
-			name: f.name.replace(/\.usm$/i, ""),
-			kind: classify(f.name),
-		}))
-		.sort((a, b) => a.name.localeCompare(b.name, "fr", { numeric: true }));
+export default async function VideosPage() {
+	// dx11 d'abord : c'est la variante à haut débit. `common` complète ce qui manquerait.
+	const [hd, sd] = await Promise.all([
+		lsOrNull("data/dx11/movie", 500),
+		lsOrNull("data/common/movie", 500),
+	]);
+
+	const parNom = new Map<string, MovieEntry>();
+	for (const [listing, variante] of [
+		[sd, "standard"],
+		[hd, "haute"],
+	] as const) {
+		for (const f of listing?.files ?? []) {
+			if (f.ext !== "usm") continue;
+			const name = f.name.replace(/\.usm$/i, "");
+			// L'ordre d'insertion fait la priorité : `haute` écrase `standard`.
+			parNom.set(name, { path: f.path, name, kind: classify(f.name), size: f.size, variante });
+		}
+	}
+
+	const movies = [...parNom.values()].toSorted((a, b) =>
+		a.name.localeCompare(b.name, "fr", { numeric: true }),
+	);
+	const hautes = movies.filter((m) => m.variante === "haute").length;
 
 	return (
 		<div className="w-full space-y-6">
@@ -57,13 +76,24 @@ export default function VideosPage() {
 				<h1 className="text-fluid-headline-md font-extrabold text-on-surface">
 					Vidéos & cinématiques
 				</h1>
-				<p className="text-sm text-on-surface-variant max-w-2xl">
+				<p className="max-w-2xl text-sm text-on-surface-variant">
 					{movies.length.toLocaleString("fr")} cinématiques d'Inazuma Eleven: Victory Road,
 					décodées à la volée depuis les fichiers du jeu (USM → MP4 H.264). Lecture et
 					téléchargement à la demande.
+					{hautes > 0 &&
+						` ${hautes.toLocaleString("fr")} sont servies dans leur variante PC haut débit.`}
 				</p>
 			</header>
-			<VideoGallery movies={movies} />
+			{movies.length === 0 ? (
+				<div className="rounded-[32px] border border-dashed border-outline-variant bg-surface-container-low py-20 text-center">
+					<p className="italic text-on-surface-variant">
+						Le VFS du jeu est momentanément injoignable — la liste des cinématiques ne peut pas
+						être établie.
+					</p>
+				</div>
+			) : (
+				<VideoGallery movies={movies} />
+			)}
 		</div>
 	);
 }
