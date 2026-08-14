@@ -30,6 +30,7 @@ import {
 	modelTextureDir,
 	type ModelFamily,
 } from "@rosegriffon/azalee/cpk/models";
+import { type ChrModelSub, getChrModelTextureUrl } from "@rosegriffon/azalee/images";
 import { filtrer, type ModelEntry, modelesDe } from "@/lib/cpk/model-corpus";
 
 export const dynamic = "force-dynamic";
@@ -55,6 +56,21 @@ const ROLE_EXT: Record<string, string> = {
 	g4tx: "textures",
 	objbin: "table d'objets",
 };
+
+/**
+ * URL de la texture d'un modèle, quand elle est connue.
+ *
+ * Le maillage `/model-chr` n'embarque pas sa texture : la carte l'affiche à part. Le nom du
+ * fichier n'est PAS toujours celui du dossier (variantes `_10`/`_20`, objets sans texture),
+ * d'où le passage par la carte relevée sur l'index CPK plutôt que par un chemin forgé — 38 cas
+ * rendaient un 404. Ce relevé ne couvre que `waza`/`item`/`animal` ; ailleurs, `null`.
+ *
+ * C'est un BONUS, jamais un filtre : un modèle sans texture connue reste listé et visualisable.
+ */
+function textureDe(famille: ModelFamily, code: string): string | null {
+	if (famille !== "waza" && famille !== "item" && famille !== "animal") return null;
+	return getChrModelTextureUrl(famille satisfies ChrModelSub, code);
+}
 
 /** Poids lisible — un octet brut ne dit rien à l'œil. */
 function poids(o: number): string {
@@ -168,11 +184,22 @@ async function Familles() {
 function Carte({ famille, m }: { famille: ModelFamily; m: ModelEntry }) {
 	const titre = m.name ?? m.code;
 	const glb = modelGlbUrl(famille, m.code);
+	const tex = textureDe(famille, m.code);
 	return (
 		<li className="group overflow-hidden rounded-2xl border border-outline-variant/40 bg-surface-container-low transition hover:border-primary/50">
 			<Link href={modelHref(famille, m.code)} className="block">
 				<span className="relative block aspect-[3/4] bg-surface-container-high">
 					<InlineModelViewer glbUrl={glb} name={titre} />
+					{tex && (
+						// eslint-disable-next-line @next/next/no-img-element
+						<img
+							src={`${tex}?w=160&format=webp`}
+							alt={`Texture de ${titre}`}
+							loading="lazy"
+							decoding="async"
+							className="absolute bottom-2 right-2 size-11 rounded-lg border border-outline-variant/30 bg-surface-container object-cover shadow [image-rendering:pixelated]"
+						/>
+					)}
 				</span>
 			</Link>
 			<div className="flex items-center gap-2 border-t border-outline-variant/20 px-2.5 py-2">
@@ -194,6 +221,16 @@ function Carte({ famille, m }: { famille: ModelFamily; m: ModelEntry }) {
 				>
 					glb
 				</a>
+				{tex && (
+					<a
+						href={tex}
+						download={`${m.code}.png`}
+						title="Télécharger la texture (PNG)"
+						className="shrink-0 rounded-full bg-surface-container px-2.5 py-1 text-[11px] font-medium uppercase text-on-surface-variant transition hover:bg-surface-container-high hover:text-on-surface"
+					>
+						png
+					</a>
+				)}
 			</div>
 		</li>
 	);
@@ -202,6 +239,7 @@ function Carte({ famille, m }: { famille: ModelFamily; m: ModelEntry }) {
 /** Une ligne de la vue liste : dense, lisible, sans coût 3D. */
 function Ligne({ famille, m }: { famille: ModelFamily; m: ModelEntry }) {
 	const titre = m.name ?? m.code;
+	const tex = textureDe(famille, m.code);
 	return (
 		<li className="flex items-center gap-3 border-b border-outline-variant/20 px-3 py-2 last:border-0 hover:bg-surface-container-low">
 			<Link href={modelHref(famille, m.code)} className="min-w-0 flex-1">
@@ -227,6 +265,16 @@ function Ligne({ famille, m }: { famille: ModelFamily; m: ModelEntry }) {
 			>
 				glb
 			</a>
+			{tex && (
+				<a
+					href={tex}
+					download={`${m.code}.png`}
+					title="Télécharger la texture (PNG)"
+					className="shrink-0 rounded-full bg-surface-container px-2.5 py-1 text-[11px] font-medium uppercase text-on-surface-variant transition hover:bg-surface-container-high hover:text-on-surface"
+				>
+					png
+				</a>
+			)}
 		</li>
 	);
 }
