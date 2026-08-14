@@ -113,10 +113,10 @@ export const CATEGORIES_TICKET: readonly CategorieTicket[] = Object.freeze([
 		sensible: true,
 	},
 	{
-		cle: "boutique",
-		description: "Une commande, une livraison, un remboursement sur la boutique.",
-		emoji: "🛍️",
-		libelle: "Boutique",
+		cle: "patreon",
+		description: "Un palier, un avantage, une facturation ou un accès Patreon.",
+		emoji: "🧡",
+		libelle: "Patreon",
 		sensible: false,
 	},
 	{
