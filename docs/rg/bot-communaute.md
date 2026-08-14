@@ -106,10 +106,69 @@ quasi identique, « IceCream » (toujours sur le serveur) et « Icecream »
 par pseudo ne le trouvait pas). Vérifié avant écriture pour ne pas fusionner
 leurs deux XP sur un seul profil.
 
-**Pour importer les ~1 837 autres**, il faut une clé API générée depuis le
-tableau de bord Noctaly, puis relancer le script. Sans elle, ces membres
-repartent de zéro — et le classement s'en trouve faussé tant qu'ils n'ont pas
-reparlé.
+### L'import complet par l'API — `import-noctaly.ts`
+
+`apps/bot/src/scripts/import-noctaly.ts` reprend **tout** ce que l'API Noctaly
+expose en lecture, une fois la clé posée dans `apps/bot/.env`
+(`NOCTALY_API_KEY`, générée sur `noctaly.com/dashboard` par un compte ayant
+« Gérer le serveur » — une clé par serveur, connexion humaine obligatoire) :
+
+| Route | Portée | Ce qu'on en fait |
+| --- | --- | --- |
+| `GET …/users/{id}/level-profile` | 1 requête / membre | `xp`, `niveau`, `messages_comptes` |
+| `GET …/users/{id}/eco-profile?items&chests&dailyStreak` | 1 requête / membre | `serie_quotidienne`, monnaie → jetons (taux explicite) |
+| `GET …/items` et `GET …/chests` | 2 requêtes en tout | catalogue archivé tel quel |
+
+**Il n'existe aucune route de liste** : ni classement, ni export, ni
+pagination. L'import est donc une boucle d'une à deux requêtes par membre sur
+les 1 834 humains présents de `discord_members`.
+
+**Le 429 coûte une heure, pas une seconde.** La documentation annonce 50 req/s
+mais aussi un `retryAfter` de 3600 et une mise en liste noire pour les
+applications qui insistent. D'où trois choix : cadence par défaut à **10 req/s**
+(un cinquième du plafond), arrêt à `MARGE_QUOTA` requêtes de la limite avec
+attente du `X-RateLimit-Reset-After`, et **interruption pure et simple** sur un
+429 plutôt qu'un réessai. L'import étant idempotent, reprendre plus tard ne
+coûte rien.
+
+**Tout est archivé brut avant d'être interprété.** `bot_import_noctaly` garde
+les deux réponses JSON verbatim, `bot_import_noctaly_catalogue` les deux
+catalogues (migration `20260814_bot_import_noctaly.sql`, RLS sans policy). La
+raison est simple : le jour où Noctaly quitte le serveur, l'API cesse de
+répondre et l'import ne se rejoue pas. Ce qu'on n'a pas mappé aujourd'hui —
+l'inventaire d'objets, les coffres, la durabilité — n'a aucun équivalent chez
+nous (notre collection, ce sont les 6 090 joueurs du jeu, pas des épées), mais
+le jeter aurait été irréversible.
+
+**La monnaie ne s'importe pas sans avoir regardé.** Un jeton Kizuna se gagne à
+25/jour et un recrutement en coûte 150 ; la monnaie Noctaly suit une
+configuration de serveur inconnue avant lecture. Le taux est donc explicite et
+vaut **0 par défaut** — aucune monnaie importée — et `--essai` affiche la
+distribution réelle (médiane, maximum, total) pour choisir ensuite avec
+`--taux=`. Les jetons s'additionnent une seule fois, gardés par
+`bot_import_noctaly.importe_le` : un crédit est un mouvement, pas un état, et
+relancer l'import ne recrédite personne.
+
+**Aucune valeur n'est jamais rétrogradée** : `GREATEST` sur `xp`, `niveau`,
+`messages_comptes` et `serie_quotidienne`. Le bot crédite déjà de l'XP depuis
+le 14/8/2026 — un import lancé après coup ne doit pas ramener un membre actif à
+sa valeur Noctaly, plus ancienne.
+
+**Les membres sans rien ne créent pas de ligne** : un 404 ou un profil à zéro
+n'écrit pas. La ligne se créera d'elle-même au premier message.
+
+```bash
+bun apps/bot/src/scripts/import-noctaly.ts --essai      # rien n'est écrit
+bun apps/bot/src/scripts/import-noctaly.ts              # XP + archive
+bun apps/bot/src/scripts/import-noctaly.ts --taux=0.1   # + monnaie ÷10
+bun apps/bot/src/scripts/import-noctaly.ts --cadence=5  # plus prudent
+bun apps/bot/src/scripts/import-noctaly.ts --tous       # + membres partis
+```
+
+Les 4 paliers de rôles ont été **confirmés sur le tableau de bord Noctaly le
+14/8/2026** — 10 → Joueur Intermédiaire, 25 → Joueur FF, 40 → Joueur FFI,
+60 → Joueur Route Victoire — identiques à ce que `import-xp-tiers.ts` avait
+déduit du salon `#🎀〡rôles`, donc rien à corriger en base.
 
 ---
 
