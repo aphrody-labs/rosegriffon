@@ -21,11 +21,27 @@ import {
 } from "./cron-taches";
 
 describe("catalogue", () => {
-	test("les 18 tâches servies par GET :3005/tasks", () => {
-		expect(TACHES_CRON).toHaveLength(18);
+	test("les 22 tâches servies par GET :3005/tasks", () => {
+		expect(TACHES_CRON).toHaveLength(22);
 		expect(TACHES_CRON).toContain("db");
 		expect(TACHES_CRON).toContain("stats:achillea");
 		expect(TACHES_CRON).toContain("github-publish");
+	});
+
+	/**
+	 * Les quatre tâches que le catalogue du bot ignorait.
+	 *
+	 * Elles existent dans `runnerMap` (`packages/cron/src/index.ts`) et sont
+	 * servies par `GET /tasks` depuis leur écriture, mais la liste recopiée dans
+	 * le bot s'était arrêtée à dix-huit : `/cron lancer noctaly:import` répondait
+	 * « tâche inconnue » sur une tâche qui marche. C'est la raison d'être du
+	 * catalogue partagé — ce test est là pour que la divergence ne revienne pas.
+	 */
+	test("les tâches ajoutées au démon après la première rédaction sont là", () => {
+		expect(TACHES_CRON).toContain("noctaly:import");
+		expect(TACHES_CRON).toContain("campagnes:discord");
+		expect(TACHES_CRON).toContain("campagnes:instagram");
+		expect(TACHES_CRON).toContain("campagnes:relais");
 	});
 
 	test("aucun doublon", () => {
@@ -109,7 +125,10 @@ describe("niveauTache", () => {
 describe("raisonRefus", () => {
 	test("distingue « inconnue » de « interdite »", () => {
 		expect(raisonRefus("nawak")).toContain("inconnue");
-		expect(raisonRefus("db")).toContain("ne peut pas être déclenchée depuis Discord");
+		expect(raisonRefus("db")).toContain("ne peut pas être déclenchée à distance");
+		// Le motif fait partie du refus : une interdiction sans raison finit
+		// toujours par être levée « parce qu'on ne sait plus pourquoi ».
+		expect(raisonRefus("db")).toContain("miroir");
 	});
 
 	test("indique la porte de sortie légitime", () => {
