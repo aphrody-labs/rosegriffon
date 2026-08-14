@@ -3,6 +3,7 @@
 import {
 	BookOpen,
 	BarChart3,
+	Bot,
 	Calendar,
 	Database,
 	Hash,
@@ -45,6 +46,22 @@ const adminNavItems: NavItem[] = [
 		title: "Patreon",
 	},
 	{ href: "/admin/stats", icon: BarChart3, title: "Statistiques" },
+	// Le bot Discord n'avait aucune surface web : ses réglages ne se voyaient
+	// que depuis `/administration réglages`, dans Discord, et son état
+	// d'exécution nulle part. Les quatre pages vivent sous `/admin/bot` sauf
+	// l'ordonnanceur, qui a son propre chemin parce qu'il n'est pas le bot —
+	// c'est `rg-cron.service`, un troisième service.
+	{
+		href: "/admin/bot",
+		icon: Bot,
+		submenu: [
+			{ title: "Vue d'ensemble", href: "/admin/bot" },
+			{ title: "Réglages", href: "/admin/bot/reglages" },
+			{ title: "Commandes", href: "/admin/bot/commandes" },
+			{ title: "Tâches planifiées", href: "/admin/cron" },
+		],
+		title: "Bot Discord",
+	},
 	{ href: "/admin/base", icon: Database, title: "Infrastructure" },
 	{ href: "/admin/settings", icon: Settings, title: "Configuration" },
 ];
