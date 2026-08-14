@@ -747,39 +747,17 @@ async function importTeams(service: any, db: DataAdapter) {
 	console.log(`✅ Teams imported (${successCount}/${teams.length}).`);
 }
 
-async function importFormations(service: any, db: DataAdapter) {
-	console.log("🔄 Importing Formations...");
-	const formations = service.teams.allFormations();
-	const BATCH_SIZE = 50;
-	let successCount = 0;
-
-	for (let i = 0; i < formations.length; i += BATCH_SIZE) {
-		const batch = formations.slice(i, i + BATCH_SIZE);
-		let records = batch.map((f: any) => ({
-			id: f.formationId || f.formId || f.id,
-			name_fr: getLoc(f, "fr"),
-			name_en: getLoc(f, "en"),
-			name_ja: getLoc(f, "ja"),
-			description_fr: getDesc(f, "fr"),
-			description_en: getDesc(f, "en"),
-			description_ja: getDesc(f, "ja"),
-			category: f.balance,
-			power_offense: f.powerOffense || 0,
-			power_defense: f.powerDefense || 0,
-			data: f,
-			updated_at: new Date().toISOString(),
-		}));
-		records = dedup(records);
-		const { error } = await db.upsert("inagle_formations", records);
-		if (error) {
-			console.error("❌ Error batch formations:", error);
-		} else {
-			successCount += records.length;
-		}
-		await new Promise((resolve) => setTimeout(resolve, 100));
-	}
-	console.log(`✅ Formations imported (${successCount}/${formations.length}).`);
-}
+// `importFormations` n'est PAS redéfinie ici : elle est importée de
+// `./push-categories.js` (voir l'en-tête du fichier).
+//
+// Une copie locale vivait à cet endroit et lisait `service.teams.allFormations()`
+// — l'ancien chemin, sans les noms ni les onze placements. Elle entrait en
+// conflit avec l'import du même nom (TS2440), ce qui cassait `inagle#build`
+// depuis le 5/6/2026 : `dist/` n'a plus été régénéré, et le fichier lui-même
+// était de toute façon inexécutable (redéclaration en module ES).
+// La version retenue est celle de `push-categories.ts`, qui construit la base
+// depuis `formation/formation_config` + `formation_text` et journalise combien
+// de formations sont réellement nommées.
 
 async function importQuests(service: any, db: DataAdapter) {
 	console.log("🔄 Importing Quests...");
