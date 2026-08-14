@@ -159,7 +159,10 @@ export class StaffVeilleCommand {
 		}
 	}
 
-	@Slash({ name: "profil", description: "Fiche d'un compte X, lue chez X à l'instant" })
+	// `compte` et non `profil` : depuis l'arrivée de `/profil` (la carte de
+	// progression d'un membre), « profil » ne doit plus désigner qu'une seule
+	// chose dans tout le bot.
+	@Slash({ name: "compte", description: "Fiche d'un compte X, lue chez X à l'instant" })
 	async profil(
 		@SlashOption({
 			name: "pseudo",

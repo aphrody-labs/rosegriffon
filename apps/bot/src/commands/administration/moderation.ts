@@ -978,7 +978,7 @@ export class AdministrationModerationCommand {
 			);
 			// `GuildMember.timeout(timeout: number | null, reason?: string):
 			// Promise<GuildMember>` — la durée est en millisecondes, `null` lève
-			// l'exclusion (voir `leverexclusion`).
+			// l'exclusion (voir `lever-exclusion`).
 			const apres = await cible.membre.timeout(
 				millisecondes,
 				motifAudit({ auteur: interaction.user.tag, motif })
@@ -1011,7 +1011,7 @@ export class AdministrationModerationCommand {
 					{ name: "Motif", value: truncate(motif, 1_000) }
 				)
 				.setFooter(
-					piedTexte({ note: "Lever avant terme : /administration moderation leverexclusion" })
+					piedTexte({ note: "Lever avant terme : /moderation moderation lever-exclusion" })
 				);
 			ajouterAlerteJournal(embed, alerteJournal);
 			if (exclusionEnCours) {
@@ -1027,7 +1027,9 @@ export class AdministrationModerationCommand {
 	}
 
 	@Slash({
-		name: "leverexclusion",
+		// Seul nom de sous-commande collé du dépôt : `leverexclusion` se lit mal et
+		// se tape mal. Kebab-case, comme partout ailleurs.
+		name: "lever-exclusion",
 		description: "Lever une exclusion temporaire avant son terme",
 	})
 	async leverexclusion(

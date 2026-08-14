@@ -241,7 +241,7 @@ export class AdministrationEquipeCommand {
 		@SlashOption({
 			name: "image",
 			description:
-				"URL du portrait (à défaut : l'avatar Discord, via /administration equipe photos)",
+				"URL du portrait (à défaut : l'avatar Discord, via /administration equipe actualiser-photos)",
 			type: ApplicationCommandOptionType.String,
 			required: false,
 			maxLength: 1000,
@@ -358,7 +358,7 @@ export class AdministrationEquipeCommand {
 							piedTexte({
 								note: imageValide.valeur
 									? "Le site reprendra la fiche à sa prochaine revalidation."
-									: "Sans portrait : /administration equipe photos ira chercher l'avatar Discord.",
+									: "Sans portrait : /administration equipe actualiser-photos ira chercher l'avatar Discord.",
 							})
 						),
 				],
@@ -710,7 +710,9 @@ export class AdministrationEquipeCommand {
 	}
 
 	@Slash({
-		name: "photos",
+		// `photos` nommait une ressource pour une action ponctuelle. Kebab-case pour
+		// le mot composé, comme les options (cf. `docs/bot-commandes.md`).
+		name: "actualiser-photos",
 		description: "Reprend les avatars Discord des membres actifs qui en ont un",
 	})
 	async photos(interaction: ChatInputCommandInteraction) {

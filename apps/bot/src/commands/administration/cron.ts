@@ -214,7 +214,9 @@ export class AdministrationCronCommand {
 	 * qu'il n'est pas refermé, on ne bâtit rien de neuf dessus.
 	 */
 	@Slash({
-		name: "annonce",
+		// Un VERBE : la commande publie maintenant, elle ne règle pas un
+		// comportement (cf. la convention de nommage, `docs/bot-commandes.md`).
+		name: "annoncer",
 		description: "Publie l'annonce d'un article publié dans le salon dédié (rôle admin)",
 	})
 	async annonce(

@@ -159,7 +159,10 @@ function messageErreur(err: unknown): string {
 })
 @SlashGroup("membre")
 export class MembreCommand {
-	@Slash({ name: "profil", description: "Le compte d'un membre sur rosegriffon.fr" })
+	// `compte` et non `profil` : `/profil` désigne désormais la carte de
+	// progression d'un membre (XP, niveau, jetons Kizuna). Deux « profil » dans la
+	// même liste d'autocomplétion, personne ne sait lequel il déclenche.
+	@Slash({ name: "compte", description: "Le compte d'un membre sur rosegriffon.fr" })
 	async profil(
 		@SlashOption({
 			name: "qui",

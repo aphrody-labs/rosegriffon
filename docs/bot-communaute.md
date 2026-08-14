@@ -272,7 +272,23 @@ classement.
 
 ---
 
-## 9. Exploitation
+## 9. Permissions du bot — Administrator, et c'est voulu
+
+Le bot Rose Griffon porte la permission **Administrator** sur le serveur.
+
+C'est une **décision explicite du 14/8/2026**, pas un oubli : le bot doit savoir
+faire le plus de choses possible, et il est déjà le seul outil qui écrit dans
+`administration`, `gestion` et `moderation` (rôles, salons, bannissements,
+exclusions, fils, webhooks). Réduire ses permissions au minimum théorique
+casserait des commandes existantes à chaque ajout de fonctionnalité, pour un
+gain nul — le vrai verrou d'accès n'est pas Discord, c'est `requireRgAdmin`
+(`lib/rbac.ts`), qui lit le rôle réel dans `profiles` et décide seul.
+
+**Ne pas « corriger » ce point.** Ce qui doit rester strict, c'est ce que le bot
+attribue AUTOMATIQUEMENT (§3) — pas ce qu'il peut faire quand un administrateur
+Rose Griffon le lui demande.
+
+## 10. Exploitation
 
 ```bash
 # après toute modification de apps/bot
