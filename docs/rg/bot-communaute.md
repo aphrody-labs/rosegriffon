@@ -304,7 +304,32 @@ tient déjà cette information, et la dupliquer chez nous en ferait un historiqu
 de préférences (pronoms, centres d'intérêt, âge) consultable des années plus
 tard.
 
-## 10. Permissions du bot — Administrator, et c'est voulu
+## 10. Accueil des nouveaux membres
+
+`/gestion accueil` règle le message de bienvenue (salon, message privé, ou
+rien), son texte, la carte image, et le rôle posé à l'arrivée.
+
+- **`aucune` par défaut**, comme les annonces de niveau. Un serveur qui reçoit
+  vingt arrivées par jour n'a peut-être aucune envie de vingt messages.
+- **Le rôle d'arrivée est la surface la plus large du bot** — posé à *chaque*
+  arrivée, sans clic, sans niveau à atteindre. Il passe donc par la garde
+  stricte du §3, et il est revérifié à chaque arrivée.
+- **Aucune mention de masse possible.** Le texte est réglable par le staff ;
+  `allowedMentions: { users: [membre.id] }` borne l'envoi, pour qu'un
+  `@everyone` glissé dedans ne devienne pas un ping de deux mille personnes.
+- **Pas de message de départ.** Il annoncerait publiquement chaque départ, y
+  compris ceux qui suivent un conflit ou une sanction — le journal d'audit
+  Discord porte déjà cette information, et elle appartient au staff.
+
+`/gestion accueil apercu` montre exactement ce que verra le prochain arrivant,
+sans rien publier, et signale les configurations muettes (lieu « salon » sans
+salon posé).
+
+Le texte accepte trois jetons et **rien d'autre** : `{membre}`, `{serveur}`,
+`{compte}`. Un moteur de gabarit dans un champ réglable serait une surface
+d'injection pour rien.
+
+## 11. Permissions du bot — Administrator, et c'est voulu
 
 Le bot Rose Griffon porte la permission **Administrator** sur le serveur.
 
@@ -320,7 +345,7 @@ gain nul — le vrai verrou d'accès n'est pas Discord, c'est `requireRgAdmin`
 attribue AUTOMATIQUEMENT (§3) — pas ce qu'il peut faire quand un administrateur
 Rose Griffon le lui demande.
 
-## 11. Exploitation
+## 12. Exploitation
 
 ```bash
 # après toute modification de apps/bot

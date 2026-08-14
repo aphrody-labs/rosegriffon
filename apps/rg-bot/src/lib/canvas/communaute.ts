@@ -655,6 +655,127 @@ export async function renderCarteClassement(
 	return await canvas.encode("png");
 }
 
+// ─── Accueil ────────────────────────────────────────────────────────────────
+
+export interface DonneesCarteAccueil {
+	pseudo: string;
+	avatarUrl: string | null;
+	/** Rang d'arrivée : « 1 903ᵉ membre ». */
+	rang: number;
+	/** Nom du serveur, affiché en surtitre. */
+	serveur: string;
+	/** Ligne libre du staff, `null` pour la phrase par défaut. */
+	message: string | null;
+}
+
+/**
+ * La carte d'accueil d'un nouveau membre.
+ *
+ * ── FORMAT LARGE ET COURT ──────────────────────────────────────────────────
+ * 1 200 × 420. Une carte d'accueil est vue une seconde, dans un salon où elle
+ * défile : elle doit tenir en un coup d'œil, sans que personne n'ait à cliquer
+ * pour l'agrandir. Tout ce qui n'est pas le pseudo et l'avatar y est
+ * secondaire.
+ */
+export async function renderCarteAccueil(donnees: DonneesCarteAccueil): Promise<Buffer> {
+	ensureFonts();
+
+	const largeur = L;
+	const hauteur = 420;
+	const canvas = createCanvas(largeur, hauteur);
+	const ctx = canvas.getContext("2d");
+	await dessinerFond(ctx, largeur, hauteur);
+
+	const pseudo = assainir(donnees.pseudo, POLICES.display) || "Nouveau membre";
+	const rayon = 96;
+	const cx = MARGE + RESPIRATION + rayon;
+	const cy = hauteur / 2 - 14;
+
+	ctx.save();
+	ctx.beginPath();
+	ctx.fillStyle = OMBRE_DURE.couleur;
+	ctx.arc(cx + OMBRE_DURE.x, cy + OMBRE_DURE.y, rayon + 4, 0, Math.PI * 2);
+	ctx.fill();
+	ctx.restore();
+
+	const avatar = donnees.avatarUrl
+		? await drawCircularImage(ctx, donnees.avatarUrl, cx, cy, rayon)
+		: false;
+	if (!avatar) {
+		ctx.save();
+		ctx.beginPath();
+		ctx.fillStyle = PALETTE.brique;
+		ctx.arc(cx, cy, rayon, 0, Math.PI * 2);
+		ctx.fill();
+		ctx.fillStyle = PALETTE.surBrique;
+		ctx.font = `${Math.round(rayon * 1.05)}px ${POLICES.display}`;
+		ctx.textAlign = "center";
+		ctx.textBaseline = "middle";
+		ctx.fillText(initiale(pseudo, POLICES.display), cx, cy + rayon * 0.06);
+		ctx.textAlign = "left";
+		ctx.textBaseline = "alphabetic";
+		ctx.restore();
+	}
+	ctx.save();
+	ctx.beginPath();
+	ctx.strokeStyle = PALETTE.or;
+	ctx.lineWidth = 8;
+	ctx.arc(cx, cy, rayon + 4, 0, Math.PI * 2);
+	ctx.stroke();
+	ctx.restore();
+
+	const xTexte = cx + rayon + 44;
+	const largeurTexte = largeur - MARGE - RESPIRATION - xTexte;
+
+	ctx.save();
+	ctx.textAlign = "left";
+	ctx.textBaseline = "alphabetic";
+	ctx.font = `bold 16px ${POLICES.corps}`;
+	ctx.fillStyle = PALETTE.or;
+	ctx.fillText(
+		tronquer(ctx, (assainir(donnees.serveur, POLICES.corps) || "Rose Griffon").toUpperCase(), largeurTexte),
+		xTexte,
+		cy - 74
+	);
+	ctx.restore();
+
+	dessinerTitreCartoon(ctx, pseudo, xTexte, cy - 12, {
+		largeurMax: largeurTexte,
+		police: POLICES.display,
+		remplissage: PALETTE.surFond,
+		taille: 54,
+	});
+
+	ctx.save();
+	ctx.textAlign = "left";
+	ctx.textBaseline = "alphabetic";
+	ctx.font = `22px ${POLICES.corps}`;
+	ctx.fillStyle = PALETTE.surFond;
+	const lignes = decouperEnLignes(
+		ctx,
+		assainir(donnees.message, POLICES.corps) || "Bienvenue parmi nous !",
+		{ largeurMax: largeurTexte, maxLignes: 2 }
+	);
+	lignes.forEach((ligne, index) => {
+		ctx.fillText(ligne, xTexte, cy + 30 + index * 32);
+	});
+	ctx.restore();
+
+	const libelleRang = `${entierLisible(donnees.rang)}ᵉ membre`;
+	const largeurRang = largeurPastille(ctx, libelleRang, 18, POLICES.corps);
+	dessinerPastille(ctx, largeur - MARGE - largeurRang, MARGE, libelleRang, {
+		fond: PALETTE.or,
+		hauteur: 38,
+		largeurMax: 300,
+		police: POLICES.corps,
+		taillePolice: 18,
+		texte: PALETTE.surOr,
+	});
+
+	dessinerPied(ctx, hauteur, "/profil pour ta carte de progression");
+	return await canvas.encode("png");
+}
+
 // ─── Collection ─────────────────────────────────────────────────────────────
 
 export interface CaseCollection {

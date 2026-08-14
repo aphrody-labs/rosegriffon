@@ -265,6 +265,7 @@ const MODULES_RG = [
 	"commands/administration/ticket.ts",
 	"commands/administration/niveaux.ts",
 	"commands/administration/roles.ts",
+	"commands/administration/accueil.ts",
 	"commands/administration/stream.ts",
 	"commands/administration/synchroniser.ts",
 	"commands/administration/utilisateur.ts",
