@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
- * infra.ts — versionnement de l'infrastructure servie : unités systemd, vhosts nginx et
- * réglages noyau.
+ * infra.ts — versionnement de l'infrastructure servie : unités systemd, vhosts nginx,
+ * réglages noyau et rotation des journaux.
  *
  * Pourquoi ce script existe
  * -------------------------
@@ -36,8 +36,10 @@ const RACINE = "/home/ubuntu/rg";
 const INFRA_SYSTEMD = `${RACINE}/infra/systemd`;
 const INFRA_NGINX = `${RACINE}/infra/nginx`;
 const INFRA_SYSCTL = `${RACINE}/infra/sysctl`;
+const INFRA_LOGROTATE = `${RACINE}/infra/logrotate`;
 const NGINX_CONF_D = "/etc/nginx/conf.d";
 const SYSCTL_D = "/etc/sysctl.d";
+const LOGROTATE_D = "/etc/logrotate.d";
 
 /**
  * Préfixes d'unités systemd du périmètre. Une unité qui commence par l'un d'eux est
@@ -56,7 +58,7 @@ interface Objet {
 	dépôt: string;
 	/** Chemin sur la machine, ou null si l'objet n'existe que dans le dépôt. */
 	machine: string | null;
-	famille: "systemd" | "nginx" | "sysctl";
+	famille: "systemd" | "nginx" | "sysctl" | "logrotate";
 }
 
 type État = "identique" | "diverge" | "absent-dépôt" | "absent-machine";
@@ -134,6 +136,21 @@ async function réglagesNoyau(): Promise<Objet[]> {
 	}));
 }
 
+/**
+ * Politiques de rotation des journaux posées par ce dépôt. Même règle que pour les
+ * réglages noyau : seuls les fichiers déjà versionnés sont suivis, le reste de
+ * `/etc/logrotate.d` appartient aux paquets du système.
+ */
+async function rotationJournaux(): Promise<Objet[]> {
+	const dansDépôt = await readdir(INFRA_LOGROTATE).catch(() => [] as string[]);
+	return dansDépôt.toSorted().map((nom) => ({
+		dépôt: `${INFRA_LOGROTATE}/${nom}`,
+		famille: "logrotate" as const,
+		machine: `${LOGROTATE_D}/${nom}`,
+		nom,
+	}));
+}
+
 async function état(objet: Objet): Promise<État> {
 	const [côtéDépôt, côtéMachine] = await Promise.all([lire(objet.dépôt), lire(objet.machine)]);
 	if (côtéDépôt === null && côtéMachine === null) {return "identique";}
@@ -176,11 +193,11 @@ const LÉGENDE: Record<État, string> = {
 };
 
 async function commandeCheck(options: { secrets: boolean }): Promise<number> {
-	const objets = [...(await unités()), ...(await vhosts()), ...(await réglagesNoyau())];
+	const objets = [...(await unités()), ...(await vhosts()), ...(await réglagesNoyau()), ...(await rotationJournaux())];
 	const états = await Promise.all(objets.map(async (o) => ({ objet: o, état: await état(o) })));
 
 	let dérive = 0;
-	for (const famille of ["systemd", "nginx", "sysctl"] as const) {
+	for (const famille of ["systemd", "nginx", "sysctl", "logrotate"] as const) {
 		const lot = états.filter((e) => e.objet.famille === famille);
 		process.stdout.write(`\n${famille} (${lot.length})\n`);
 		for (const { objet, état: st } of lot) {
@@ -215,7 +232,7 @@ async function commandeCheck(options: { secrets: boolean }): Promise<number> {
 }
 
 async function commandePull(): Promise<number> {
-	const objets = [...(await unités()), ...(await vhosts()), ...(await réglagesNoyau())];
+	const objets = [...(await unités()), ...(await vhosts()), ...(await réglagesNoyau()), ...(await rotationJournaux())];
 	let importés = 0;
 	for (const objet of objets) {
 		const st = await état(objet);
@@ -233,7 +250,7 @@ async function commandePull(): Promise<number> {
 }
 
 async function commandeDiff(nom: string): Promise<number> {
-	const objets = [...(await unités()), ...(await vhosts()), ...(await réglagesNoyau())];
+	const objets = [...(await unités()), ...(await vhosts()), ...(await réglagesNoyau()), ...(await rotationJournaux())];
 	const objet = objets.find((o) => o.nom === nom || o.nom === `${nom}.service`);
 	if (!objet) {
 		process.stderr.write(`objet inconnu : ${nom}\n`);
