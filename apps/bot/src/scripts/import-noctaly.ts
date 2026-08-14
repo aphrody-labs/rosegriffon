@@ -277,12 +277,23 @@ for (const membre of membres) {
 	// L'économie s'interroge même quand le niveau est absent : les deux modules
 	// de Noctaly sont indépendants, un membre peut avoir de la monnaie sans XP.
 	let eco = null;
+	/**
+	 * La réponse d'économie TELLE QUELLE, gardée pour l'archive.
+	 *
+	 * `lireProfilEconomie` réduit `items[]` et `chests[]` à leur nombre — c'est
+	 * tout ce dont l'import a besoin. Mais archiver cette réduction viderait
+	 * l'archive de sa raison d'être : le détail de l'inventaire (noms, prix,
+	 * durabilité, quantités) ne se retrouvera nulle part une fois Noctaly
+	 * retiré du serveur. C'est le corps brut qu'on garde.
+	 */
+	let ecoBrut: unknown = null;
 	if (!sansEco) {
 		const ecoRep = await interroger(urlProfilEconomie(GUILD_ID, membre.discord_id));
 		if (interrompu) {
 			break;
 		}
 		if (ecoRep.issue === "ok") {
+			ecoBrut = ecoRep.corps;
 			eco = lireProfilEconomie(ecoRep.corps);
 		} else if (ecoRep.issue !== "absent") {
 			bilan.pannes++;
@@ -305,7 +316,7 @@ for (const membre of membres) {
 			VALUES (
 				${GUILD_ID}, ${membre.discord_id},
 				${niveauRep.issue === "ok" ? JSON.stringify(niveauRep.corps) : null}::jsonb,
-				${eco ? JSON.stringify(eco) : null}::jsonb
+				${ecoBrut === null ? null : JSON.stringify(ecoBrut)}::jsonb
 			)
 			ON CONFLICT (guild_id, discord_id) DO UPDATE SET
 				profil_niveau = COALESCE(EXCLUDED.profil_niveau, bot_import_noctaly.profil_niveau),
