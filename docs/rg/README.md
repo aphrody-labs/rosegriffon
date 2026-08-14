@@ -48,6 +48,7 @@ dans `.gitignore` — c'est donc ici que vit toute la doc de fond.
 | [bot-communaute.md](bot-communaute.md) | Niveaux sur la courbe du jeu, jetons Kizuna, collection de joueurs, tickets en fils privés. Hiérarchie stricte des récompenses de rôle et discrétion par défaut. |
 | [bot-format.md](bot-format.md) | Charte de présentation des deux bots : trousse `lib/ui`, couleurs, icônes, pagination, limites de l'API, patron d'une commande. |
 | [bot-commandes.md](bot-commandes.md) | Catalogue définitif des slash commandes des deux bots : inventaire complet, bots tiers du serveur, convention de nommage, plan de bascule. |
+| [bot-administration.md](bot-administration.md) | Surface web du bot : contrat de types partagé, serveur d'administration en boucle locale, API et pages `/admin/bot` + `/admin/cron`. |
 | [campagnes-hashtag.md](campagnes-hashtag.md) | Campagnes à hashtag : récolte X + Discord, tolérance aux fautes de frappe, relais vers le salon de suivi. |
 | [insta.md](insta.md) | Instagram : pourquoi aucune récolte automatique n'est possible, la vérification oEmbed, le dépôt manuel et la table dédiée. |
 | [mcp.md](mcp.md) | Serveur MCP du monorepo : mise en service, connexion distante, portées. |
