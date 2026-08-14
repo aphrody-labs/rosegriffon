@@ -572,6 +572,7 @@ export function parseEasyPollEmbed(
 		created_at: message.created_at,
 		options,
 		avertissements,
+		notes: [],
 	};
 }
 
@@ -677,6 +678,7 @@ export function parseSondageNatif(
 		created_at: message.created_at,
 		options,
 		avertissements: [],
+		notes: [],
 	};
 }
 
@@ -741,10 +743,12 @@ export function appliquerVotesDepuisReactions(
 			reactions,
 			note: "count - 1 (réaction d'amorçage du bot)",
 		},
-		avertissements: [
-			...sondage.avertissements,
-			"décompte reconstitué depuis les réactions (± 1 vote)",
-		],
+		// La reconstitution va dans `notes`, PAS dans `avertissements` : elle est
+		// attendue et sans gravité, alors que les avertissements sont le canari
+		// d'une ère d'encart inconnue. Mélangées, elle en noyait le signal — 25
+		// entrées sur 51 sondages, pour un rapport censé rester vide.
+		avertissements: sondage.avertissements,
+		notes: [...sondage.notes, "décompte reconstitué depuis les réactions (± 1 vote)"],
 	};
 }
 

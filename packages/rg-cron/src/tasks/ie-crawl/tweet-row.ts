@@ -115,7 +115,13 @@ export function tweetToRow(t: Tweet): DBTweetRow {
 	const media = ((t.media ?? []) as MediaBrut[]).map(mapMedia);
 	return {
 		id: t.id,
-		author_id: t.author_id || t.author?.id || "",
+		// ⚠ PAS de repli sur `t.author.id` : le schéma `Author` de `@aphrody/x` ne
+		// porte QUE `username` et `name`. Le repli qui figurait ici lisait un champ
+		// inexistant — toujours `undefined`, donc toujours la chaîne vide au bout,
+		// en donnant l'illusion d'un second chemin. Le pseudo n'est pas un
+		// identifiant : le mettre là ferait diverger deux lignes du même compte
+		// renommé.
+		author_id: t.author_id || "",
 		author_name: t.author?.name || t.author?.username || "",
 		author_username: t.author?.username || "",
 		created_at: createdAtIso,

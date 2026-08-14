@@ -368,8 +368,14 @@ export async function crawlTwitter(options: {
 							}
 						}
 
-						const lastTweet = threadGroup[threadGroup.length - 1];
+						// `filteredGroup` est non vide (testé plus haut) et la fusion ne
+						// retire rien — mais l'indexation reste `T | undefined` pour le
+						// compilateur, et les trente lectures qui suivent partaient donc
+						// sur une valeur non vérifiée. Le garde est explicite plutôt
+						// qu'assumé : un thread vide se saute, il ne plante pas le crawl.
+						const lastTweet = threadGroup.at(-1);
 						const firstTweet = threadGroup[0];
+						if (!lastTweet || !firstTweet) continue;
 
 						const createdAtIso = lastTweet.created_at
 							? new Date(lastTweet.created_at).toISOString()
@@ -428,7 +434,11 @@ export async function crawlTwitter(options: {
 							}
 						}
 					} else {
+						// Même garde que pour le fil : `filteredGroup` est non vide, mais
+						// le compilateur ne le sait pas et les vingt lectures qui suivent
+						// s'appuyaient dessus sans l'avoir vérifié.
 						const t = filteredGroup[0];
+						if (!t) continue;
 						const createdAtIso = t.created_at
 							? new Date(t.created_at).toISOString()
 							: snowflakeToIso(t.id);
