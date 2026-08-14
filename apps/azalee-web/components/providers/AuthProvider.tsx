@@ -7,7 +7,6 @@ import { signOutAction } from "@/app/actions/auth";
 import { useSupabase } from "@/hooks/use-supabase";
 import { authClient } from "@/lib/auth-client";
 import { ADMIN_ROLES } from "@/lib/auth-roles";
-import type { Database } from "@rosegriffon/db";
 import { PUBLIC_PROFILE_COLUMNS, type PublicProfile } from "@rosegriffon/db";
 
 // Le client navigateur (clé anon) ne lit QUE les colonnes publiques :
