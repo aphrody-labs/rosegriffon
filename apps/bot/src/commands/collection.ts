@@ -186,9 +186,16 @@ export class CollectionCommand {
 			type: ApplicationCommandOptionType.User,
 		})
 		membre: User | undefined,
+		@SlashOption({
+			description: "Afficher la collection dans le salon (privé par défaut)",
+			name: "partager",
+			required: false,
+			type: ApplicationCommandOptionType.Boolean,
+		})
+		partager: boolean | undefined,
 		interaction: ChatInputCommandInteraction
 	) {
-		await differer(interaction);
+		await differer(interaction, { prive: partager !== true });
 		const guildId = interaction.guildId;
 		if (!guildId) {
 			await repondre(interaction, echec("Hors serveur", HORS_GUILDE));
@@ -258,8 +265,17 @@ export class CollectionCommand {
 		description: `Recruter un joueur au hasard (${TARIFS.tirage} jetons Kizuna)`,
 		name: "recruter",
 	})
-	async recruter(interaction: ChatInputCommandInteraction) {
-		await differer(interaction);
+	async recruter(
+		@SlashOption({
+			description: "Montrer la prise dans le salon (privé par défaut)",
+			name: "partager",
+			required: false,
+			type: ApplicationCommandOptionType.Boolean,
+		})
+		partager: boolean | undefined,
+		interaction: ChatInputCommandInteraction
+	) {
+		await differer(interaction, { prive: partager !== true });
 		const guildId = interaction.guildId;
 		if (!guildId) {
 			await repondre(interaction, echec("Hors serveur", HORS_GUILDE));

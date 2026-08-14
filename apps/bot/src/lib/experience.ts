@@ -285,6 +285,40 @@ export function messageEligible(
 }
 
 /**
+ * Cette montée mérite-t-elle une annonce publique ?
+ *
+ * ── POURQUOI FILTRER ───────────────────────────────────────────────────────
+ * En début de courbe, un membre actif monte tous les deux ou trois jours (le
+ * niveau 10 coûte 2 422 XP, soit ~121 messages). Multiplié par les membres
+ * actifs d'un serveur de deux mille, l'annonce à chaque niveau rend le salon
+ * illisible en une semaine — et c'est toujours la même chose qui se passe
+ * ensuite : le staff coupe le bot.
+ *
+ * On n'annonce donc que ce qui se fête : les paliers ronds, et les trois
+ * changements de rang d'une vie de membre. Le reste se lit sur `/profil`, à la
+ * demande de l'intéressé.
+ */
+export function meriteAnnonce(
+	niveauAvant: number,
+	niveauApres: number,
+	options: { palier?: number; annoncerRang?: boolean } = {}
+): boolean {
+	if (niveauApres <= niveauAvant) {
+		return false;
+	}
+	if (options.annoncerRang !== false && rangDe(niveauApres).nom !== rangDe(niveauAvant).nom) {
+		return true;
+	}
+	const palier = Math.max(1, Math.floor(options.palier ?? 5));
+	if (palier === 1) {
+		return true;
+	}
+	// Un gain exceptionnel peut franchir plusieurs niveaux d'un coup : on annonce
+	// dès qu'un palier a été TRAVERSÉ, pas seulement atterri dessus.
+	return Math.floor(niveauApres / palier) > Math.floor(niveauAvant / palier);
+}
+
+/**
  * Jetons Kizuna offerts pour une montée de niveau.
  *
  * Croissants avec le niveau : franchir le niveau 50 doit rapporter plus que

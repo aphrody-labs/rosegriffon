@@ -47,11 +47,19 @@ values (
 	'1072991720268111892',
 	jsonb_build_object(
 		'niveaux', jsonb_build_object(
-			'actif',        true,
-			'annonce',      'salon',
-			'salonAnnonce', '1135698156835852369',
-			'salonsExclus', jsonb_build_array('1135698156835852369'),
-			'rolesExclus',  jsonb_build_array()
+			'actif',          true,
+			-- Le salon `🤖〡bots`, et lui seul. Le mode `place` (annoncer là où le
+			-- message a été écrit) est le défaut des bots du marché : sur 2 000
+			-- membres, il rend chaque salon illisible en une semaine.
+			'annonce',        'salon',
+			'salonAnnonce',   '1135698156835852369',
+			-- Un niveau sur cinq, plus les trois changements de rang d'une vie de
+			-- membre. Sans ce filtre, un membre actif déclenche une annonce tous les
+			-- deux ou trois jours en début de courbe (le niveau 10 coûte 2 422 XP).
+			'palierAnnonce',  5,
+			'annoncerRang',   true,
+			'salonsExclus',   jsonb_build_array('1135698156835852369'),
+			'rolesExclus',    jsonb_build_array()
 		),
 		'tickets', jsonb_build_object(
 			'actif',            true,
@@ -64,7 +72,7 @@ values (
 				'1072993826400124958', '1371547071362105374', '1267847004919300096'
 			)
 		),
-		'amitie', jsonb_build_object(
+		'kizuna', jsonb_build_object(
 			'actif',        true,
 			'salonAnnonce', '1135698156835852369'
 		)
