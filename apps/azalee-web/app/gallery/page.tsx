@@ -2,6 +2,7 @@ export const dynamic = "force-dynamic";
 
 import type { Metadata } from "next";
 import { GalleryGrid } from "@/components/wiki/GalleryGrid";
+import { MediaCount, MediaEmpty, MediaHeader } from "@/components/wiki/MediaShell";
 import { GalleryFilterBar } from "@/components/wiki/filters/GalleryFilterBar";
 import { WikiPagination } from "@/components/wiki/WikiPagination";
 import { WikiSearchToolbar } from "@/components/wiki/WikiSearchToolbar";
@@ -95,32 +96,26 @@ export default async function GalleryPage({
 
 	return (
 		<div className="space-y-6">
-			<div className="space-y-2">
-				<h1 className="text-fluid-headline-md font-bold text-on-surface">Galerie d'illustrations</h1>
-				<p className="text-sm text-on-surface-variant">
-					Illustrations in-game d'Inazuma Eleven: Victory Road — scènes d'histoire, chroniques et
-					images spéciales.
-				</p>
-			</div>
+			<MediaHeader
+				title="Galerie d'illustrations"
+				description="Illustrations in-game d'Inazuma Eleven: Victory Road — scènes d'histoire, chroniques et images spéciales."
+				active="/gallery"
+			/>
 
 			<div className="space-y-4">
 				<WikiSearchToolbar placeholder="Rechercher une illustration..." showFilters={false} />
 				<GalleryFilterBar categories={categoryOptions} currentCategory={activeCategory} />
 			</div>
 
-			<div className="flex items-center justify-between px-1 text-xs font-medium uppercase tracking-wider text-on-surface-variant">
-				<span>{total.toLocaleString("fr-FR")} illustrations</span>
-				<span>
-					Page {pageNumber} sur {totalPages}
-				</span>
-			</div>
+			<MediaCount
+				left={`${total.toLocaleString("fr")} illustrations`}
+				right={`Page ${pageNumber} sur ${totalPages}`}
+			/>
 
 			{items.length > 0 ? (
 				<GalleryGrid items={gridItems} />
 			) : (
-				<div className="rounded-[32px] border border-dashed border-outline-variant bg-surface-container-low py-20 text-center">
-					<p className="italic text-on-surface-variant">Aucune illustration trouvée.</p>
-				</div>
+				<MediaEmpty>Aucune illustration trouvée.</MediaEmpty>
 			)}
 
 			<WikiPagination totalItems={total} itemsPerPage={ITEMS_PER_PAGE} currentPage={pageNumber} />

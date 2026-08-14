@@ -14,6 +14,7 @@
  */
 import type { Metadata } from "next";
 import { SoundGallery, type BankEntry } from "@/app/sons/SoundGallery";
+import { MediaEmpty, MediaHeader } from "@/components/wiki/MediaShell";
 import { audioBankKind } from "@rosegriffon/azalee/cpk/audio";
 import { lsOrNull } from "@rosegriffon/azalee/cpk/live";
 import { bankOwner, ownerIndex } from "@/lib/cpk/audio-names";
@@ -76,22 +77,17 @@ export default async function SonsPage() {
 
 	return (
 		<div className="w-full space-y-6">
-			<header className="space-y-1">
-				<h1 className="text-fluid-headline-md font-extrabold text-on-surface">Sons & voix</h1>
-				<p className="max-w-2xl text-sm text-on-surface-variant">
-					{banks.length.toLocaleString("fr")} banques sonores d'Inazuma Eleven: Victory Road,
-					décodées à la volée depuis les fichiers du jeu. Ouvrez une banque pour en lister les
-					cues et les écouter un par un.
-				</p>
-			</header>
+			<MediaHeader
+				title="Sons & voix"
+				active="/sons"
+				description={`${banks.length.toLocaleString("fr")} banques sonores d'Inazuma Eleven: Victory Road, décodées à la volée depuis les fichiers du jeu. Ouvrez une banque pour en lister les cues et les écouter un par un.`}
+			/>
 
 			{indisponible ? (
-				<div className="rounded-[32px] border border-dashed border-outline-variant bg-surface-container-low py-20 text-center">
-					<p className="italic text-on-surface-variant">
-						Le VFS du jeu est momentanément injoignable — la liste des banques ne peut pas être
-						établie.
-					</p>
-				</div>
+				<MediaEmpty>
+					Le VFS du jeu est momentanément injoignable — la liste des banques ne peut pas être
+					établie.
+				</MediaEmpty>
 			) : (
 				<SoundGallery banks={banks} namedCount={nommees} />
 			)}

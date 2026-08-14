@@ -16,6 +16,7 @@
  */
 import type { Metadata } from "next";
 import { VideoGallery, type MovieEntry } from "@/app/videos/VideoGallery";
+import { MediaEmpty, MediaHeader } from "@/components/wiki/MediaShell";
 import { lsOrNull } from "@rosegriffon/azalee/cpk/live";
 
 export const dynamic = "force-dynamic";
@@ -72,25 +73,24 @@ export default async function VideosPage() {
 
 	return (
 		<div className="w-full space-y-6">
-			<header className="space-y-1">
-				<h1 className="text-fluid-headline-md font-extrabold text-on-surface">
-					Vidéos & cinématiques
-				</h1>
-				<p className="max-w-2xl text-sm text-on-surface-variant">
-					{movies.length.toLocaleString("fr")} cinématiques d'Inazuma Eleven: Victory Road,
-					décodées à la volée depuis les fichiers du jeu (USM → MP4 H.264). Lecture et
-					téléchargement à la demande.
-					{hautes > 0 &&
-						` ${hautes.toLocaleString("fr")} sont servies dans leur variante PC haut débit.`}
-				</p>
-			</header>
+			<MediaHeader
+				title="Vidéos & cinématiques"
+				active="/videos"
+				description={
+					`${movies.length.toLocaleString("fr")} cinématiques d'Inazuma Eleven: Victory Road, ` +
+					`décodées à la volée depuis les fichiers du jeu (USM → MP4 H.264). Lecture et ` +
+					`téléchargement à la demande.` +
+					(hautes > 0
+						? ` ${hautes.toLocaleString("fr")} sont servies dans leur variante PC haut débit.`
+						: "")
+				}
+			/>
+
 			{movies.length === 0 ? (
-				<div className="rounded-[32px] border border-dashed border-outline-variant bg-surface-container-low py-20 text-center">
-					<p className="italic text-on-surface-variant">
-						Le VFS du jeu est momentanément injoignable — la liste des cinématiques ne peut pas
-						être établie.
-					</p>
-				</div>
+				<MediaEmpty>
+					Le VFS du jeu est momentanément injoignable — la liste des cinématiques ne peut pas être
+					établie.
+				</MediaEmpty>
 			) : (
 				<VideoGallery movies={movies} />
 			)}

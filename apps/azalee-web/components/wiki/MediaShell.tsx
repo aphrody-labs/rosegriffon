@@ -1,0 +1,121 @@
+import Link from "next/link";
+import { Icon } from "@/components/ui/Icon";
+
+/**
+ * Ossature commune des pages média — `/gallery`, `/textures`, `/sons`, `/videos`.
+ *
+ * Ces quatre pages sont des vues d'un même fonds : les médias du jeu. Elles avaient pourtant
+ * chacune leur en-tête, leur état vide et leur ligne de compte, écrits séparément — et surtout
+ * rien ne les reliait : une collection ajoutée restait invisible depuis les trois autres, à
+ * commencer par la galerie d'illustrations, qui en est la porte d'entrée naturelle.
+ *
+ * Tout est ici : un titre, une sous-navigation, un état de source indisponible, une ligne de
+ * compte. Composants serveur — aucun état, rien que des liens.
+ */
+
+/** Une collection média, avec le volume réel de son fonds (mesuré sur le VFS du jeu). */
+const COLLECTIONS = [
+	{ path: "/gallery", label: "Illustrations", icon: "image", hint: "sélection in-game" },
+	{ path: "/textures", label: "Textures", icon: "texture", hint: "53 126 fichiers" },
+	{ path: "/sons", label: "Sons & voix", icon: "graphic_eq", hint: "5 403 banques" },
+	{ path: "/videos", label: "Vidéos", icon: "movie", hint: "96 cinématiques" },
+] as const;
+
+/** Chemin d'une des collections média. */
+export type MediaPath = (typeof COLLECTIONS)[number]["path"];
+
+/**
+ * Sous-navigation des collections média.
+ *
+ * @param active chemin de la page courante — l'entrée correspondante est mise en avant et rendue
+ *   non cliquable : on ne propose pas d'aller là où on est déjà.
+ */
+export function MediaNav({ active }: { active: MediaPath }) {
+	return (
+		<nav aria-label="Collections média" className="flex flex-wrap gap-2">
+			{COLLECTIONS.map((c) => {
+				const courante = c.path === active;
+				const contenu = (
+					<>
+						<Icon name={c.icon} size={18} className="shrink-0" />
+						<span className="font-medium">{c.label}</span>
+						<span className={courante ? "text-xs opacity-80" : "text-xs text-on-surface-variant"}>
+							{c.hint}
+						</span>
+					</>
+				);
+				return courante ? (
+					<span
+						key={c.path}
+						aria-current="page"
+						className="flex items-center gap-2 rounded-full bg-primary px-3.5 py-2 text-sm text-on-primary"
+					>
+						{contenu}
+					</span>
+				) : (
+					<Link
+						key={c.path}
+						href={c.path}
+						className="flex items-center gap-2 rounded-full border border-outline-variant bg-surface-container-low px-3.5 py-2 text-sm text-on-surface transition hover:border-primary/50 hover:bg-surface-container"
+					>
+						{contenu}
+					</Link>
+				);
+			})}
+		</nav>
+	);
+}
+
+/**
+ * En-tête commun : titre, une phrase de description, puis la sous-navigation.
+ *
+ * `children` accueille ce qui est propre à la page (fil d'Ariane des textures, rôle du dossier)
+ * et se place SOUS la description, avant la navigation.
+ */
+export function MediaHeader({
+	title,
+	description,
+	active,
+	children,
+}: {
+	title: string;
+	description: React.ReactNode;
+	active: MediaPath;
+	children?: React.ReactNode;
+}) {
+	return (
+		<div className="space-y-4">
+			<header className="space-y-1">
+				<h1 className="text-fluid-headline-md font-extrabold text-on-surface">{title}</h1>
+				<p className="max-w-2xl text-sm text-on-surface-variant">{description}</p>
+				{children}
+			</header>
+			<MediaNav active={active} />
+		</div>
+	);
+}
+
+/**
+ * État « rien à montrer », dans le même cadre pour les quatre pages.
+ *
+ * Distingue deux cas que l'utilisateur ne doit pas confondre : le fonds est vide (`raison`
+ * absente) ou la source est injoignable — une page qui rend son cadre et le dit vaut mieux
+ * qu'une 500.
+ */
+export function MediaEmpty({ children }: { children: React.ReactNode }) {
+	return (
+		<div className="rounded-[32px] border border-dashed border-outline-variant bg-surface-container-low py-20 text-center">
+			<p className="italic text-on-surface-variant">{children}</p>
+		</div>
+	);
+}
+
+/** Ligne de compte au-dessus d'une grille : ce qui est montré, sur quel total. */
+export function MediaCount({ left, right }: { left: React.ReactNode; right?: React.ReactNode }) {
+	return (
+		<div className="flex items-center justify-between gap-3 px-1 text-xs font-medium uppercase tracking-wider text-on-surface-variant">
+			<span>{left}</span>
+			{right && <span>{right}</span>}
+		</div>
+	);
+}

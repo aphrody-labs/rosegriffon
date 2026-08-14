@@ -272,6 +272,9 @@ export const iconMap: Record<string, LucideIcon> = {
 	table_rows: Rows3,
 	tag: Tag,
 	task_alt: ListChecks,
+	// Collections de textures (`/textures`). Sans cette clé l'entrée de menu s'affiche
+	// SANS icône, en silence : `iconMap[name]` vaut `undefined` et le rendu retombe sur `null`.
+	texture: LayoutGrid,
 	timer: Timer,
 	touch_app: Pointer,
 	translate: Languages,
