@@ -4,11 +4,45 @@ Niveaux, jetons Kizuna, collection de joueurs, tickets. Tout vit dans
 `apps/bot`, sous le profil **`rg`** (le bot Rose Griffon) ; le profil `azalee`
 ne charge aucun de ces modules.
 
-> **Deux principes gouvernent tout ce document.**
+> **Trois principes gouvernent tout ce document.**
 > 1. **Discrétion.** Le bot ne publie rien de lui-même tant que le staff ne l'a
 >    pas demandé, et les commandes répondent en privé par défaut.
 > 2. **Hiérarchie stricte.** Aucun rôle à permission sensible ne peut être
 >    attribué automatiquement, jamais, quelle que soit la configuration.
+> 3. **Activation manuelle.** Tout cron, tâche ou service qui publie dans un
+>    salon public doit être **activé, validé et configuré à la main** par un
+>    administrateur ou un modérateur. Une migration ne l'allume pas, un défaut
+>    de code ne l'allume pas, et un salon ne se devine jamais par son nom.
+
+### Ce qui est déjà validé, et ne doit pas être coupé
+
+| Publication automatique | Décidé le | Garde en place |
+|---|---|---|
+| **Posts X du bot Azalée** (`🌸〡𝓐𝔃𝓪𝓵𝓮́𝓮`) | validé | carte de validation humaine dans `🌿📰〡général-azalée` — rien ne part sans un clic |
+| **Relais des créations iergday** (`⚙🍰〡iergday-staff`) | validé | salon de STAFF, pas public ; `relais_depuis` borne le déluge |
+
+Tout le reste (annonces de niveau, accueil, recrutements remarquables, annonces
+d'articles) est **éteint** tant qu'un humain ne l'a pas allumé.
+
+### Le défaut que cette règle a fait trouver
+
+`packages/cron/src/index.ts` exposait un service HTTP d'annonces (port 3006)
+avec trois problèmes, corrigés le 14/8/2026 :
+
+- le secret valait `default-secret-key-12345` **des deux côtés** quand
+  `DISCORD_ANNOUNCE_SECRET` n'était pas posé — et il ne l'était pas ;
+- il écoutait sur `*` au lieu de la boucle locale ;
+- sans salon configuré, il en **cherchait un par nom** (`annonces`, `news`,
+  `general`) et publiait dedans.
+
+Le service refuse désormais tout sans secret (503), n'écoute que
+`127.0.0.1`, et exige un salon **désigné**. Conséquence à connaître : les
+annonces d'articles ne partiront pas tant que
+`DISCORD_WEBSITE_ANNOUNCEMENTS_CHANNEL_ID` (et/ou
+`DISCORD_WIKI_ANNOUNCEMENTS_CHANNEL_ID`) n'aura pas été posé. Elles ne
+partaient de toute façon pas : aucun salon de ce serveur ne s'appelle
+exactement `annonces` — le vrai s'appelle `🚨〡annonces` —, donc la devinette
+échouait à chaque fois.
 
 ---
 

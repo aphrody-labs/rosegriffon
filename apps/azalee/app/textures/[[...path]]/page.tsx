@@ -14,7 +14,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { lsOrNull, texContainer, texUrl } from "@rosegriffon/azalee/cpk/live";
-import { MediaCount, MediaEmpty, MediaHeader } from "@/components/wiki/MediaShell";
+import { MediaBack, MediaCount, MediaEmpty, MediaHeader } from "@/components/wiki/MediaShell";
+import { itemNames } from "@/lib/cpk/media-names";
 import { cpkThumbUrl, segLabel } from "@rosegriffon/azalee/cpk/shared";
 
 export const dynamic = "force-dynamic";
@@ -88,7 +89,7 @@ export default async function TexturesPage({
 	return (
 		<div className="w-full space-y-5">
 			<MediaHeader
-				title="Textures"
+				title={segments.length > 0 ? segLabel(segments.at(-1) ?? "Textures") : "Textures"}
 				active="/textures"
 				description="Le corpus complet des textures du jeu, décodées en PNG à la volée et parcourues par dossier."
 			>
@@ -117,6 +118,17 @@ export default async function TexturesPage({
 					</p>
 				)}
 			</MediaHeader>
+
+			{segments.length > 0 && (
+				<MediaBack
+					href={`/textures${segments.length > 1 ? `/${segments.slice(0, -1).join("/")}` : ""}`}
+					label={
+						segments.length > 1
+							? `Retour à ${segLabel(segments.at(-2) ?? "")}`
+							: "Retour aux textures"
+					}
+				/>
+			)}
 
 			{listing.dirs.length > 0 && (
 				<ul className="flex flex-wrap gap-2">
@@ -219,9 +231,14 @@ export default async function TexturesPage({
  * s'arrêter au fichier, c'était n'en exposer qu'une sur quatre-vingts.
  */
 async function VueConteneur({ rel, segments }: { rel: string; segments: string[] }) {
-	const conteneur = await texContainer(rel);
+	const [conteneur, objets] = await Promise.all([texContainer(rel), itemNames()]);
 	const nom = segments.at(-1) ?? "";
 	const parent = `/textures/${segments.slice(0, -1).join("/")}`;
+
+	// Le nom de texture EST le code interne de l'objet dans les conteneurs d'icônes : la
+	// jointure rend une grille d'objets là où il n'y avait qu'une grille de codes.
+	const libelle = (n: string) => objets.get(n.toLowerCase()) ?? null;
+	const nommees = conteneur?.textures.filter((t) => libelle(t.name)).length ?? 0;
 
 	return (
 		<div className="w-full space-y-5">
@@ -253,6 +270,8 @@ async function VueConteneur({ rel, segments }: { rel: string; segments: string[]
 				</nav>
 			</MediaHeader>
 
+			<MediaBack href={parent} label={`Retour à ${segLabel(segments.at(-2) ?? "")}`} />
+
 			{!conteneur || conteneur.count === 0 ? (
 				<MediaEmpty>Ce conteneur n'expose aucune texture décodable.</MediaEmpty>
 			) : (
@@ -261,7 +280,11 @@ async function VueConteneur({ rel, segments }: { rel: string; segments: string[]
 						left={`${conteneur.count.toLocaleString("fr")} texture${
 							conteneur.count > 1 ? "s" : ""
 						} dans ce fichier`}
-						right={<Link href={parent}>↩ Retour au dossier</Link>}
+						right={
+							nommees > 0
+								? `${nommees.toLocaleString("fr")} rattachée${nommees > 1 ? "s" : ""} à un objet`
+								: undefined
+						}
 					/>
 					<ul className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-6">
 						{conteneur.textures.map((t) => (
@@ -283,13 +306,19 @@ async function VueConteneur({ rel, segments }: { rel: string; segments: string[]
 										/>
 									</span>
 									<span className="block px-2 py-1.5">
+										{/* Le nom de l'objet prime ; le code technique passe dessous. */}
 										<span
-											className="block truncate font-mono text-[11px] text-on-surface-variant group-hover:text-on-surface"
-											title={t.name}
+											className={`block truncate text-[11px] group-hover:text-on-surface ${
+												libelle(t.name)
+													? "font-medium text-on-surface"
+													: "font-mono text-on-surface-variant"
+											}`}
+											title={libelle(t.name) ?? t.name}
 										>
-											{t.name}
+											{libelle(t.name) ?? t.name}
 										</span>
-										<span className="block text-[10px] text-on-surface-variant/70">
+										<span className="block truncate text-[10px] text-on-surface-variant/70">
+											{libelle(t.name) && <span className="font-mono">{t.name} · </span>}
 											{t.width}×{t.height}
 											{t.regions > 0 && ` · ${t.regions} région${t.regions > 1 ? "s" : ""}`}
 										</span>

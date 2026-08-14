@@ -260,7 +260,18 @@ async function triggerDiscordAnnouncement(article: {
 	featured_image_url?: string | null;
 	type: "wiki" | "website";
 }) {
-	const secret = process.env.DISCORD_ANNOUNCE_SECRET || "default-secret-key-12345";
+	// Pas de secret de repli : `default-secret-key-12345` était écrit des deux
+	// côtés, donc l'annonce partait sans qu'aucun secret n'ait jamais été posé.
+	// Sans variable, on ne tente rien et on le DIT — une publication publique qui
+	// échoue en silence est pire qu'une publication qui n'a pas lieu.
+	const secret = (process.env.DISCORD_ANNOUNCE_SECRET ?? "").trim();
+	if (secret === "") {
+		console.warn(
+			"[Discord Announcement] DISCORD_ANNOUNCE_SECRET absent : aucune annonce envoyée. " +
+				"Pose la variable côté site ET côté rg-cron pour activer la publication."
+		);
+		return;
+	}
 	try {
 		const res = await fetch("http://localhost:3006/announce", {
 			method: "POST",

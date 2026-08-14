@@ -40,6 +40,22 @@ export interface BankEntry {
 
 const FAMILLES: AudioBankKind[] = ["voix", "bgm", "technique", "effet", "systeme", "autre"];
 
+/** Langues telles que les dossiers du jeu les nomment. */
+const LANGUES: Record<string, string> = { ja: "japonais", en: "anglais" };
+
+/**
+ * Ce qu'une banque EST, quand on ne sait pas à qui elle appartient.
+ *
+ * 3 378 des 5 403 banques portent un code absent du miroir. Afficher ce code comme titre ne
+ * renseigne personne : mieux vaut dire « Voix — japonais » et reléguer le code en dessous. On
+ * ne devine pas de porteur, on décrit ce qui est attesté par l'emplacement du fichier.
+ */
+function contexte(b: BankEntry): string {
+	const famille = audioBankKindLabel(b.kind);
+	const langue = b.lang ? LANGUES[b.lang] : null;
+	return langue ? `${famille} — ${langue}` : famille;
+}
+
 export function SoundGallery({ banks, namedCount }: { banks: BankEntry[]; namedCount: number }) {
 	const [famille, setFamille] = useState<AudioBankKind | "all">("all");
 	const [recherche, setRecherche] = useState("");
@@ -155,16 +171,17 @@ export function SoundGallery({ banks, namedCount }: { banks: BankEntry[]; namedC
 								<span className="rounded-full bg-surface-container-high px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-on-surface-variant">
 									{audioBankKindLabel(b.kind)}
 								</span>
+								{/* Le code de banque n'est pas un titre. À défaut d'un personnage identifié,
+								    on affiche ce que le fichier EST — sa famille et sa langue — et le code
+								    passe en dessous, en petit. */}
 								<span className="min-w-0 flex-1">
 									<span className="block truncate text-sm font-medium text-on-surface">
-										{b.owner ?? b.name}
+										{b.owner ?? contexte(b)}
 									</span>
-									{b.owner && (
-										<span className="block truncate font-mono text-[11px] text-on-surface-variant">
-											{b.name}
-											{b.lang ? ` · ${b.lang}` : ""}
-										</span>
-									)}
+									<span className="block truncate text-[11px] text-on-surface-variant">
+										{b.lang ? `${LANGUES[b.lang] ?? b.lang} · ` : ""}
+										<span className="font-mono">{b.name}</span>
+									</span>
 								</span>
 								<span className="shrink-0 text-xs text-on-surface-variant">
 									{est_ouverte ? "▾" : "▸"}

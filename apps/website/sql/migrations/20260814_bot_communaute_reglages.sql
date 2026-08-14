@@ -48,11 +48,19 @@ values (
 	jsonb_build_object(
 		'niveaux', jsonb_build_object(
 			'actif',          true,
-			-- Le salon `🤖〡bots`, et lui seul. Le mode `place` (annoncer là où le
-			-- message a été écrit) est le défaut des bots du marché : sur 2 000
-			-- membres, il rend chaque salon illisible en une semaine.
-			'annonce',        'salon',
-			'salonAnnonce',   '1135698156835852369',
+			-- ⚠ `aucune`, et c'est une RÈGLE, pas un défaut prudent : aucune
+			-- publication publique automatique ne s'active par une migration. Un
+			-- administrateur ou un modérateur doit l'allumer lui-même, en connaissance
+			-- de cause, avec `/gestion niveaux annonce` — c'est lui qui choisit le
+			-- salon et le palier, et c'est lui qui répond du bruit produit.
+			--
+			-- Ce fichier ne fait que PRÉPARER le terrain : le salon `🤖〡bots` est
+			-- exclu du gain d'XP (c'est le salon des commandes, l'y compter ferait de
+			-- l'appel répété d'une commande la façon la plus rentable de monter), et
+			-- les valeurs de filtrage sont posées pour que l'activation n'ait rien à
+			-- régler d'autre.
+			'annonce',        'aucune',
+			'salonAnnonce',   null,
 			-- Un niveau sur cinq, plus les trois changements de rang d'une vie de
 			-- membre. Sans ce filtre, un membre actif déclenche une annonce tous les
 			-- deux ou trois jours en début de courbe (le niveau 10 coûte 2 422 XP).
@@ -60,6 +68,16 @@ values (
 			'annoncerRang',   true,
 			'salonsExclus',   jsonb_build_array('1135698156835852369'),
 			'rolesExclus',    jsonb_build_array()
+		),
+		-- Idem : l'accueil des nouveaux ne publie rien tant qu'un humain n'a pas
+		-- dit où (`/gestion accueil lieu`). Le rôle d'arrivée reste vide.
+		'accueil', jsonb_build_object(
+			'actif',       true,
+			'lieu',        'aucune',
+			'salon',       null,
+			'texte',       null,
+			'roleArrivee', null,
+			'carte',       true
 		),
 		'tickets', jsonb_build_object(
 			'actif',            true,
@@ -72,9 +90,10 @@ values (
 				'1072993826400124958', '1371547071362105374', '1267847004919300096'
 			)
 		),
+		-- Même règle : pas de salon d'annonce posé d'avance.
 		'kizuna', jsonb_build_object(
 			'actif',        true,
-			'salonAnnonce', '1135698156835852369'
+			'salonAnnonce', null
 		)
 	),
 	now()
