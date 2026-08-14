@@ -1,6 +1,7 @@
 #!/usr/bin/env bun
 /**
- * infra.ts — versionnement de l'infrastructure servie : unités systemd et vhosts nginx.
+ * infra.ts — versionnement de l'infrastructure servie : unités systemd, vhosts nginx et
+ * réglages noyau.
  *
  * Pourquoi ce script existe
  * -------------------------
@@ -34,7 +35,9 @@ import { readdir } from "node:fs/promises";
 const RACINE = "/home/ubuntu/rg";
 const INFRA_SYSTEMD = `${RACINE}/infra/systemd`;
 const INFRA_NGINX = `${RACINE}/infra/nginx`;
+const INFRA_SYSCTL = `${RACINE}/infra/sysctl`;
 const NGINX_CONF_D = "/etc/nginx/conf.d";
+const SYSCTL_D = "/etc/sysctl.d";
 
 /**
  * Préfixes d'unités systemd du périmètre. Une unité qui commence par l'un d'eux est
@@ -53,13 +56,13 @@ interface Objet {
 	dépôt: string;
 	/** Chemin sur la machine, ou null si l'objet n'existe que dans le dépôt. */
 	machine: string | null;
-	famille: "systemd" | "nginx";
+	famille: "systemd" | "nginx" | "sysctl";
 }
 
 type État = "identique" | "diverge" | "absent-dépôt" | "absent-machine";
 
 const lire = async (chemin: string | null): Promise<string | null> => {
-	if (!chemin) return null;
+	if (!chemin) {return null;}
 	const fichier = Bun.file(chemin);
 	return (await fichier.exists()) ? await fichier.text() : null;
 };
@@ -67,56 +70,75 @@ const lire = async (chemin: string | null): Promise<string | null> => {
 /** Unités du périmètre connues de systemd, plus celles déjà présentes dans le dépôt. */
 async function unités(): Promise<Objet[]> {
 	const sortie =
-		await $`systemctl list-unit-files --type=service --no-pager --plain --no-legend`.text();
+		await $`systemctl list-unit-files --type=service,timer --no-pager --plain --no-legend`.text();
+	// Un service planifié n'est rien sans son timer : les deux se versionnent ensemble.
+	const suffixe = (nom: string) => nom.endsWith(".service") || nom.endsWith(".timer");
 	const surMachine = sortie
 		.split("\n")
 		.map((ligne) => ligne.trim().split(/\s+/u)[0] ?? "")
-		.filter((nom) => nom.endsWith(".service"))
+		.filter(suffixe)
 		.filter((nom) => PRÉFIXES_UNITÉS.some((préfixe) => nom.startsWith(préfixe)));
 
 	const dansDépôt = await readdir(INFRA_SYSTEMD).catch(() => [] as string[]);
-	const noms = [...new Set([...surMachine, ...dansDépôt.filter((f) => f.endsWith(".service"))])];
+	const noms = [...new Set([...surMachine, ...dansDépôt.filter(suffixe)])];
 
 	return Promise.all(
-		noms.sort().map(async (nom) => {
+		noms.toSorted().map(async (nom) => {
 			const fragment = (
 				await $`systemctl show ${nom} -p FragmentPath --value`.text().catch(() => "")
 			).trim();
 			// Les unités livrées par un paquet (/usr/lib/systemd) ne sont pas les nôtres.
 			const nôtre = fragment.startsWith("/etc/systemd/system/");
 			return {
-				nom,
 				dépôt: `${INFRA_SYSTEMD}/${nom}`,
-				machine: nôtre ? fragment : null,
 				famille: "systemd" as const,
+				machine: nôtre ? fragment : null,
+				nom,
 			};
-		}),
+		})
 	).then((liste) => liste.filter((o) => o.machine !== null || dansDépôt.includes(o.nom)));
 }
 
 /** Vhosts et fragments nginx effectivement chargés (`conf.d/*.conf` et les `.inc` inclus). */
 async function vhosts(): Promise<Objet[]> {
 	const surMachine = (await readdir(NGINX_CONF_D).catch(() => [] as string[])).filter(
-		(nom) => (nom.endsWith(".conf") || nom.endsWith(".inc")) && !IGNORÉS_NGINX.test(nom),
+		(nom) => (nom.endsWith(".conf") || nom.endsWith(".inc")) && !IGNORÉS_NGINX.test(nom)
 	);
 	const dansDépôt = (await readdir(INFRA_NGINX).catch(() => [] as string[])).filter(
-		(nom) => nom.endsWith(".conf") || nom.endsWith(".inc") || nom.endsWith(".http"),
+		(nom) => nom.endsWith(".conf") || nom.endsWith(".inc") || nom.endsWith(".http")
 	);
-	const noms = [...new Set([...surMachine, ...dansDépôt])].sort();
+	const noms = [...new Set([...surMachine, ...dansDépôt])].toSorted();
 
 	return noms.map((nom) => ({
-		nom,
 		dépôt: `${INFRA_NGINX}/${nom}`,
-		machine: surMachine.includes(nom) ? `${NGINX_CONF_D}/${nom}` : null,
 		famille: "nginx" as const,
+		machine: surMachine.includes(nom) ? `${NGINX_CONF_D}/${nom}` : null,
+		nom,
+	}));
+}
+
+/**
+ * Réglages noyau posés par ce dépôt. Seuls les fichiers déjà versionnés sont suivis : le
+ * reste de `/etc/sysctl.d` appartient à l'image du fournisseur ou à d'autres projets du VPS,
+ * et l'importer reviendrait à s'en déclarer propriétaire.
+ */
+async function réglagesNoyau(): Promise<Objet[]> {
+	const dansDépôt = (await readdir(INFRA_SYSCTL).catch(() => [] as string[])).filter((nom) =>
+		nom.endsWith(".conf")
+	);
+	return dansDépôt.toSorted().map((nom) => ({
+		dépôt: `${INFRA_SYSCTL}/${nom}`,
+		famille: "sysctl" as const,
+		machine: `${SYSCTL_D}/${nom}`,
+		nom,
 	}));
 }
 
 async function état(objet: Objet): Promise<État> {
 	const [côtéDépôt, côtéMachine] = await Promise.all([lire(objet.dépôt), lire(objet.machine)]);
-	if (côtéDépôt === null && côtéMachine === null) return "identique";
-	if (côtéDépôt === null) return "absent-dépôt";
-	if (côtéMachine === null) return "absent-machine";
+	if (côtéDépôt === null && côtéMachine === null) {return "identique";}
+	if (côtéDépôt === null) {return "absent-dépôt";}
+	if (côtéMachine === null) {return "absent-machine";}
 	return côtéDépôt === côtéMachine ? "identique" : "diverge";
 }
 
@@ -130,44 +152,42 @@ const MOTIF_SECRET =
 function secrets(contenu: string): string[] {
 	const trouvés: string[] = [];
 	for (const [, clé, valeur] of contenu.matchAll(MOTIF_SECRET)) {
-		const brut = (valeur ?? "").trim().replace(/^["']|["']$/gu, "");
+		const brut = (valeur ?? "").trim().replaceAll(/^["']|["']$/gu, "");
 		// Un chemin de fichier ou une valeur courte n'est pas un secret.
-		if (brut.startsWith("/") || brut.length < 12) continue;
+		if (brut.startsWith("/") || brut.length < 12) {continue;}
 		trouvés.push(`${clé}… = ${brut.slice(0, 6)}…`);
 	}
 	return trouvés;
 }
 
 const COULEUR = {
-	identique: "[32m",
-	diverge: "[33m",
 	"absent-dépôt": "[31m",
 	"absent-machine": "[36m",
+	diverge: "[33m",
+	identique: "[32m",
 } as const;
 const FIN = "[0m";
 
 const LÉGENDE: Record<État, string> = {
-	identique: "identique",
-	diverge: "DIVERGE",
 	"absent-dépôt": "ABSENT DU DÉPÔT",
 	"absent-machine": "absent de la machine",
+	diverge: "DIVERGE",
+	identique: "identique",
 };
 
 async function commandeCheck(options: { secrets: boolean }): Promise<number> {
-	const objets = [...(await unités()), ...(await vhosts())];
+	const objets = [...(await unités()), ...(await vhosts()), ...(await réglagesNoyau())];
 	const états = await Promise.all(objets.map(async (o) => ({ objet: o, état: await état(o) })));
 
 	let dérive = 0;
-	for (const famille of ["systemd", "nginx"] as const) {
+	for (const famille of ["systemd", "nginx", "sysctl"] as const) {
 		const lot = états.filter((e) => e.objet.famille === famille);
 		process.stdout.write(`\n${famille} (${lot.length})\n`);
 		for (const { objet, état: st } of lot) {
 			// « absent de la machine » n'est pas une dérive : ce sont les gabarits que le dépôt
-			// garde sans les servir (bascule HTTP-only d'azalée, doublure b hors rotation).
-			if (st === "diverge" || st === "absent-dépôt") dérive += 1;
-			process.stdout.write(
-				`  ${COULEUR[st]}${LÉGENDE[st].padEnd(20)}${FIN} ${objet.nom}\n`,
-			);
+			// Garde sans les servir (bascule HTTP-only d'azalée, doublure b hors rotation).
+			if (st === "diverge" || st === "absent-dépôt") {dérive += 1;}
+			process.stdout.write(`  ${COULEUR[st]}${LÉGENDE[st].padEnd(20)}${FIN} ${objet.nom}\n`);
 		}
 	}
 
@@ -181,38 +201,39 @@ async function commandeCheck(options: { secrets: boolean }): Promise<number> {
 				process.stdout.write(`  [31m${objet.nom}[0m : ${trouvé}\n`);
 			}
 		}
-		if (compte === 0) process.stdout.write("  aucun — tous les secrets passent par EnvironmentFile\n");
-		else dérive += compte;
+		if (compte === 0)
+			{process.stdout.write("  aucun — tous les secrets passent par EnvironmentFile\n");}
+		else {dérive += compte;}
 	}
 
 	process.stdout.write(
 		dérive === 0
 			? "\n[32m✓ dépôt et machine alignés[0m\n"
-			: `\n[33m${dérive} écart(s)[0m — « bun scripts/ops/infra.ts pull » pour importer la machine\n`,
+			: `\n[33m${dérive} écart(s)[0m — « bun scripts/ops/infra.ts pull » pour importer la machine\n`
 	);
 	return dérive === 0 ? 0 : 1;
 }
 
 async function commandePull(): Promise<number> {
-	const objets = [...(await unités()), ...(await vhosts())];
+	const objets = [...(await unités()), ...(await vhosts()), ...(await réglagesNoyau())];
 	let importés = 0;
 	for (const objet of objets) {
 		const st = await état(objet);
-		if (st === "identique" || st === "absent-machine") continue;
+		if (st === "identique" || st === "absent-machine") {continue;}
 		const contenu = await lire(objet.machine);
-		if (contenu === null) continue;
+		if (contenu === null) {continue;}
 		await Bun.write(objet.dépôt, contenu);
 		importés += 1;
 		process.stdout.write(`  importé  ${objet.famille}/${objet.nom}\n`);
 	}
 	process.stdout.write(
-		importés === 0 ? "rien à importer\n" : `\n${importés} fichier(s) importé(s) dans infra/\n`,
+		importés === 0 ? "rien à importer\n" : `\n${importés} fichier(s) importé(s) dans infra/\n`
 	);
 	return 0;
 }
 
 async function commandeDiff(nom: string): Promise<number> {
-	const objets = [...(await unités()), ...(await vhosts())];
+	const objets = [...(await unités()), ...(await vhosts()), ...(await réglagesNoyau())];
 	const objet = objets.find((o) => o.nom === nom || o.nom === `${nom}.service`);
 	if (!objet) {
 		process.stderr.write(`objet inconnu : ${nom}\n`);
@@ -229,17 +250,19 @@ async function commandeDiff(nom: string): Promise<number> {
 const [commande = "check", argument] = process.argv.slice(2);
 const code = await (async () => {
 	switch (commande) {
-		case "check":
+		case "check": {
 			return commandeCheck({ secrets: true });
-		case "pull":
+		}
+		case "pull": {
 			return commandePull();
-		case "diff":
+		}
+		case "diff": {
 			return argument ? commandeDiff(argument) : 2;
-		default:
-			process.stderr.write(
-				"usage : bun scripts/ops/infra.ts [check|pull|diff <nom>]\n",
-			);
+		}
+		default: {
+			process.stderr.write("usage : bun scripts/ops/infra.ts [check|pull|diff <nom>]\n");
 			return 2;
+		}
 	}
 })();
 process.exit(code);
