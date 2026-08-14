@@ -193,16 +193,28 @@ describe("accès", () => {
 	const staff = ["role-mod-1", "role-mod-2"];
 	const direction = ["role-direction"];
 
-	test("un ticket ordinaire va à toute la prise en charge, sans doublon", () => {
+	test("un ticket ordinaire ne ping QUE la prise en charge, pas la direction", () => {
 		const liste = invitations({
 			auteurId: "membre",
 			rolesDirection: direction,
-			rolesStaff: [...staff, "role-direction"],
+			rolesStaff: staff,
 			sensible: false,
 		});
 		expect(liste[0]).toEqual({ genre: "membre", id: "membre", raison: "Auteur du ticket." });
 		const roles = liste.filter((e) => e.genre === "role").map((e) => e.id);
-		expect(roles).toEqual([...staff, "role-direction"]);
+		expect(roles).toEqual(staff);
+		expect(roles).not.toContain("role-direction");
+	});
+
+	test("un rôle dupliqué dans rolesStaff n'est mentionné qu'une fois", () => {
+		const liste = invitations({
+			auteurId: "membre",
+			rolesDirection: direction,
+			rolesStaff: [...staff, "role-mod-1"],
+			sensible: false,
+		});
+		const roles = liste.filter((e) => e.genre === "role").map((e) => e.id);
+		expect(roles).toEqual(staff);
 	});
 
 	test("un ticket sensible ne va QU'À la direction", () => {

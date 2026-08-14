@@ -400,14 +400,21 @@ export interface Invitation {
  * le staff n'ait lu la demande. Les tickets `sensible` ne vont donc qu'à la
  * DIRECTION, et l'absence de rôle de direction configuré est une erreur
  * d'exploitation — pas une raison de retomber sur la modération ordinaire.
+ *
+ * ── UN TICKET ORDINAIRE NE PING QUE LA PRISE EN CHARGE ─────────────────────
+ * La direction ne fait PLUS partie du ping des tickets ordinaires (elle l'a
+ * été un temps, par symétrie avec la lecture — d'où le `Set` ci-dessous qui
+ * reste prêt si la règle devait un jour redevenir plus large). Sur un serveur
+ * de deux mille membres, notifier l'Administrateur et le Vice-administrateur
+ * à chaque ticket banal est le genre de bruit que la règle « rester discret »
+ * interdit. La direction garde l'accès (elle porte `ManageThreads`, comme
+ * tout rôle de tickets) — elle ne reçoit simplement plus la notification.
  */
 export function invitations(contexte: ContexteAcces): Invitation[] {
 	const liste: Invitation[] = [
 		{ genre: "membre", id: contexte.auteurId, raison: "Auteur du ticket." },
 	];
-	const habilites = contexte.sensible
-		? contexte.rolesDirection
-		: [...new Set([...contexte.rolesStaff, ...contexte.rolesDirection])];
+	const habilites = contexte.sensible ? contexte.rolesDirection : [...new Set(contexte.rolesStaff)];
 	for (const roleId of habilites) {
 		liste.push({
 			genre: "role",
