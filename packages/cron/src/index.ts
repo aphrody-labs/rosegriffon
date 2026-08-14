@@ -11,6 +11,7 @@ import { crawlTwitterSearch } from "./tasks/ie-crawl/harvest-search";
 import { crawlTwitter } from "./tasks/ie-crawl/twitter";
 import { crawlHashtagCampaigns } from "./tasks/ie-crawl/hashtag-harvest";
 import { recolterCreationsDiscord } from "./tasks/campagnes-discord";
+import { revaliderCreationsInstagram } from "./tasks/campagnes-instagram";
 import { relayerCampagnesDiscord } from "./tasks/campagnes-relais-discord";
 import { runRagSync, queryRag, ragGroundedQuery, ingestWikiCorpus } from "./tasks/ie-crawl/rag-index";
 import {
@@ -195,6 +196,7 @@ const DELAIS_TACHES_MS: Record<string, number> = {
 	cdn: 3600_000,
 	"x:campagnes": 3600_000,
 	"campagnes:discord": 3600_000,
+	"campagnes:instagram": 3600_000,
 	"campagnes:relais": 900_000,
 	"seo:llms-txt": 3600_000,
 	// Timelines des comptes officiels (`x-accounts.ts`). Elle EXISTAIT dans
@@ -458,6 +460,18 @@ if (indexRun >= 0) {
 				slugDiscord && !slugDiscord.startsWith("-") ? { slug: slugDiscord } : {}
 			)
 		);
+	} else if (
+		task === "campagnes:instagram" ||
+		task === "campagnes-instagram" ||
+		task === "instagram"
+	) {
+		// `--run campagnes:instagram <slug>` restreint la revalidation à une campagne.
+		const slugInstagram = args[taskIdx + 1];
+		await executeTask("campagnes:instagram", () =>
+			revaliderCreationsInstagram(
+				slugInstagram && !slugInstagram.startsWith("-") ? { slug: slugInstagram } : {}
+			)
+		);
 	} else if (task === "seo:indexnow") {
 		await executeTask("seo:indexnow", runSeoIndexNow);
 	} else if (task === "seo:llms-txt" || task === "seo:llms") {
@@ -486,13 +500,14 @@ if (indexRun >= 0) {
 		await executeTask("discord:polls", () => runDiscordPollsImport());
 		await executeTask("x:campagnes", () => crawlHashtagCampaigns());
 		await executeTask("campagnes:discord", () => recolterCreationsDiscord());
+		await executeTask("campagnes:instagram", () => revaliderCreationsInstagram());
 		await executeTask("campagnes:relais", () => relayerCampagnesDiscord());
 		await executeTask("seo:llms-txt", runSeoLlmsTxt);
 		await executeTask("seo:indexnow", runSeoIndexNow);
 		await executeTask("stats:achillea", collecterAudienceAchillea);
 	} else {
 		console.error(
-			`❌ Tâche inconnue : ${task}. Choisissez parmi : db, cdn, crawl, rag, x, x-search, x:campagnes, query, publish, github-publish, patreon, reminders, warm, discord, discord:scan, discord:archives, discord:messages, discord:backfill, discord:polls, campagnes:discord, campagnes:relais, seo, seo:indexnow, seo:llms-txt, stats:achillea, backup:postgres, backup:pg, all.`
+			`❌ Tâche inconnue : ${task}. Choisissez parmi : db, cdn, crawl, rag, x, x-search, x:campagnes, query, publish, github-publish, patreon, reminders, warm, discord, discord:scan, discord:archives, discord:messages, discord:backfill, discord:polls, campagnes:discord, campagnes:instagram, campagnes:relais, seo, seo:indexnow, seo:llms-txt, stats:achillea, backup:postgres, backup:pg, all.`
 		);
 	}
 	process.exit(0);
@@ -550,6 +565,23 @@ Bun.cron("20 * * * *", async () => {
 // requête SQL.
 Bun.cron("25 * * * *", async () => {
 	await executeTask("campagnes:discord", () => recolterCreationsDiscord());
+});
+
+// 2f-bis. Revalidation des créations Instagram : toutes les heures, minute 35.
+//
+// PAS UNE RÉCOLTE — LE CONTRAIRE. Instagram n'a aucun collecteur possible
+// (`docs/insta.md`) : la table est remplie par le formulaire de /iergday. Cette
+// passe repose la seule question que Meta accepte encore sans compte — « ce post
+// existe-t-il toujours, et est-il public ? » — parce que rien d'autre ne nous le
+// dirait : un post supprimé chez Instagram laisserait sinon une carte morte dans
+// la galerie pour toujours.
+//
+// Dix minutes APRÈS la récolte Discord et dix AVANT le relais de la minute 45 :
+// une création masquée dans cette passe ne part donc jamais dans le salon de
+// suivi comme si elle était encore en ligne. La fraîcheur de 12 h et le plafond
+// de 60 lignes font qu'une passe sans changement ne coûte qu'une requête SQL.
+Bun.cron("35 * * * *", async () => {
+	await executeTask("campagnes:instagram", () => revaliderCreationsInstagram());
 });
 
 // 2g. Relais des créations vers le salon de suivi : tous les quarts d'heure.
@@ -750,6 +782,7 @@ const server = Bun.serve({
 					"discord:polls",
 					"x:campagnes",
 					"campagnes:discord",
+					"campagnes:instagram",
 					"campagnes:relais",
 					"seo:indexnow",
 					"seo:llms-txt",
@@ -774,6 +807,7 @@ const server = Bun.serve({
 					"discord:polls": "10 * * * *",
 					"x:campagnes": "20 * * * *",
 					"campagnes:discord": "25 * * * *",
+					"campagnes:instagram": "35 * * * *",
 					"campagnes:relais": "*/15 * * * *",
 				},
 			});
@@ -817,6 +851,8 @@ const server = Bun.serve({
 				"x-campagnes": () => crawlHashtagCampaigns(),
 				"campagnes:discord": () => recolterCreationsDiscord(),
 				"campagnes-discord": () => recolterCreationsDiscord(),
+				"campagnes:instagram": () => revaliderCreationsInstagram(),
+				"campagnes-instagram": () => revaliderCreationsInstagram(),
 				"campagnes:relais": () => relayerCampagnesDiscord(),
 				"campagnes-relais": () => relayerCampagnesDiscord(),
 				"seo:indexnow": runSeoIndexNow,

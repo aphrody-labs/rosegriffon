@@ -11,4 +11,5 @@ export * from "./visitor";
 export * from "./event";
 export * from "./stream";
 export * from "./team";
+export * from "./instagram";
 export * from "./schemas";
