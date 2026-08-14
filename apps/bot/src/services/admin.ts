@@ -314,9 +314,13 @@ export async function getSettingDetail(key: string): Promise<SettingRow | null> 
 }
 
 export async function setSetting(key: string, value: unknown, description?: string) {
+	// Pas de `JSON.stringify(value)` : Bun.SQL encode déjà en JSON une valeur
+	// liée à un paramètre `::jsonb`. La stringifier avant coup double
+	// l'encodage (la colonne reçoit une chaîne, pas un objet) — voir le même
+	// correctif dans `services/communaute.ts`.
 	await sql`
     INSERT INTO settings (key, value, description, updated_at)
-    VALUES (${key}, ${JSON.stringify(value)}::jsonb, ${description ?? null}, NOW())
+    VALUES (${key}, ${value}::jsonb, ${description ?? null}, NOW())
     ON CONFLICT (key) DO UPDATE SET
       value = EXCLUDED.value,
       description = COALESCE(EXCLUDED.description, settings.description),

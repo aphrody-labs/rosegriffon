@@ -230,9 +230,12 @@ if (!sansEco) {
 			: 0;
 		console.log(`  catalogue ${genre} : ${compte} entrée(s)`);
 		if (!essai) {
+			// Pas de `JSON.stringify(corps)` : Bun.SQL encode déjà en JSON une
+			// valeur liée à un paramètre `::jsonb` — la stringifier double
+			// l'encodage (la colonne reçoit une chaîne, pas un objet).
 			await sql`
 				INSERT INTO bot_import_noctaly_catalogue (guild_id, genre, contenu)
-				VALUES (${GUILD_ID}, ${genre}, ${JSON.stringify(corps)}::jsonb)
+				VALUES (${GUILD_ID}, ${genre}, ${corps}::jsonb)
 				ON CONFLICT (guild_id, genre) DO UPDATE SET
 					contenu = EXCLUDED.contenu, importe_le = now()
 			`;
@@ -311,12 +314,16 @@ for (const membre of membres) {
 	// garde contre un double crédit de jetons.
 	const premierPassage = !dejaCredites.has(membre.discord_id);
 	if (!essai) {
+		// Pas de `JSON.stringify(...)` sur les corps : Bun.SQL encode déjà en
+		// JSON une valeur liée à un paramètre `::jsonb` — la stringifier double
+		// l'encodage. `null` reste `null` (NULL SQL), le cast ne s'applique qu'à
+		// une valeur présente.
 		await sql`
 			INSERT INTO bot_import_noctaly (guild_id, discord_id, profil_niveau, profil_eco)
 			VALUES (
 				${GUILD_ID}, ${membre.discord_id},
-				${niveauRep.issue === "ok" ? JSON.stringify(niveauRep.corps) : null}::jsonb,
-				${ecoBrut === null ? null : JSON.stringify(ecoBrut)}::jsonb
+				${niveauRep.issue === "ok" ? niveauRep.corps : null}::jsonb,
+				${ecoBrut === null ? null : ecoBrut}::jsonb
 			)
 			ON CONFLICT (guild_id, discord_id) DO UPDATE SET
 				profil_niveau = COALESCE(EXCLUDED.profil_niveau, bot_import_noctaly.profil_niveau),

@@ -285,11 +285,13 @@ export async function ecrireFiltreNotification(
 ): Promise<FiltreTweets> {
 	const courant = await lireFiltreNotification();
 	const fusionne: FiltreTweets = { ...courant, ...patch };
+	// Pas de `JSON.stringify(fusionne)` : Bun.SQL encode déjà en JSON une valeur
+	// liée à un paramètre `::jsonb` — la stringifier double l'encodage.
 	await sql`
 		INSERT INTO public.settings (key, value, description)
 		VALUES (
 			${CLE_REGLAGE_TWEETS},
-			${JSON.stringify(fusionne)}::jsonb,
+			${fusionne}::jsonb,
 			'Notification Discord des nouveaux tweets (piloté depuis /tweets suivi).'
 		)
 		ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value, updated_at = now()
