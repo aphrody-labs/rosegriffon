@@ -20,6 +20,10 @@ export interface MovieEntry {
 	size: number;
 	/** Variante servie : `haute` = dx11 (débit PC), `standard` = common. */
 	variante: "haute" | "standard";
+	/** Libellé affichable — un vrai nom quand les données du jeu en portent un, sinon le code. */
+	title: string;
+	/** Contexte attesté (épisode, langue), `null` s'il n'y en a pas. */
+	context: string | null;
 }
 
 /** Taille en unités binaires, telle qu'on l'annonce à côté d'un lien de téléchargement. */
@@ -73,8 +77,14 @@ function MovieCard({ movie }: { movie: MovieEntry }) {
 				)}
 			</div>
 			<div className="p-2.5 min-w-0">
-				<p className="truncate text-sm font-medium text-on-surface" title={movie.name}>
-					{movie.name}
+				{/* Le code de fichier n'est pas un titre : il passe sous le libellé résolu. */}
+				<p className="truncate text-sm font-medium text-on-surface" title={movie.title}>
+					{movie.title}
+				</p>
+				<p className="truncate text-[11px] text-on-surface-variant">
+					{movie.context}
+					{movie.context && " · "}
+					<span className="font-mono">{movie.name}</span>
 				</p>
 				<div className="mt-1 flex items-center justify-between gap-2">
 					<span className="text-[11px] text-on-surface-variant/70">
@@ -115,8 +125,15 @@ export function VideoGallery({ movies }: { movies: MovieEntry[] }) {
 
 	const shown = useMemo(() => {
 		const q = query.trim().toLowerCase();
+		// La recherche porte sur le libellé ET sur le code : « épisode ev01 » doit se trouver par
+		// son nom, et un code connu doit continuer de fonctionner.
 		return movies.filter(
-			(m) => (filter === "all" || m.kind === filter) && (q === "" || m.name.toLowerCase().includes(q)),
+			(m) =>
+				(filter === "all" || m.kind === filter) &&
+				(q === "" ||
+					m.name.toLowerCase().includes(q) ||
+					m.title.toLowerCase().includes(q) ||
+					(m.context?.toLowerCase().includes(q) ?? false)),
 		);
 	}, [movies, filter, query]);
 

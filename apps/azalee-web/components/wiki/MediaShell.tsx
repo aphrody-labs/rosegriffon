@@ -111,6 +111,58 @@ export function MediaEmpty({ children }: { children: React.ReactNode }) {
 	);
 }
 
+/**
+ * Bouton de retour d'une vue imbriquée.
+ *
+ * Un fil d'Ariane dit *où l'on est* ; il ne remplace pas une cible de retour franche, surtout
+ * sur mobile où ses segments sont minuscules. Chaque vue imbriquée — dossier de textures,
+ * conteneur, fiche de modèle — en porte un.
+ */
+export function MediaBack({ href, label }: { href: string; label: string }) {
+	return (
+		<Link
+			href={href}
+			className="inline-flex items-center gap-1.5 rounded-full border border-outline-variant bg-surface-container-low px-3.5 py-2 text-sm text-on-surface transition hover:border-primary/50 hover:bg-surface-container"
+		>
+			<Icon name="arrow_back" size={16} className="shrink-0" />
+			{label}
+		</Link>
+	);
+}
+
+/**
+ * Titre d'une entrée média, où le code de fichier passe en DERNIER.
+ *
+ * Un identifiant comme `c01000010` ou `ev01_00050` ne dit rien à un lecteur. La règle est :
+ * un vrai nom s'il existe dans les données du jeu, sinon le contexte (épisode, famille,
+ * rôle du dossier), et le code seulement en repli — relégué en petit sous le titre, jamais
+ * à sa place.
+ */
+export function MediaTitle({
+	title,
+	code,
+	context,
+}: {
+	title: string;
+	code?: string;
+	context?: string;
+}) {
+	return (
+		<span className="min-w-0">
+			<span className="block truncate text-sm font-medium text-on-surface" title={title}>
+				{title}
+			</span>
+			{(context || code) && (
+				<span className="block truncate text-[11px] text-on-surface-variant">
+					{context}
+					{context && code && " · "}
+					{code && <span className="font-mono">{code}</span>}
+				</span>
+			)}
+		</span>
+	);
+}
+
 /** Ligne de compte au-dessus d'une grille : ce qui est montré, sur quel total. */
 export function MediaCount({ left, right }: { left: React.ReactNode; right?: React.ReactNode }) {
 	return (

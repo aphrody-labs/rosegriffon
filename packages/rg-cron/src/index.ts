@@ -957,15 +957,51 @@ onTelemetryUpdate((telemetry) => {
 });
 
 // ─── SERVEUR HTTP D'ANNONCES DISCORD (PORT 3006) ─────────────────────────────
+//
+// ── CE SERVICE PUBLIE DANS UN SALON PUBLIC ──────────────────────────────────
+// Il en découle trois règles, et elles ont toutes corrigé un défaut réel
+// (relevé le 14/8/2026) :
+//
+//  1. **AUCUN SECRET PAR DÉFAUT.** Il valait `default-secret-key-12345` quand
+//     `DISCORD_ANNOUNCE_SECRET` n'était pas posé — et il ne l'était pas. Toute
+//     personne pouvant atteindre le port publiait donc un embed arbitraire
+//     (titre, lien, image) dans le salon d'annonces. Sans secret, le service
+//     refuse maintenant TOUT : il vaut mieux une annonce qui ne part pas qu'une
+//     annonce que personne n'a demandée.
+//  2. **BOUCLE LOCALE.** Le seul appelant légitime est le site, sur ce VPS.
+//     Écouter sur `*` exposait la surface à tout ce qui atteint la machine — le
+//     pare-feu tenait, mais il n'a pas à être la seule barrière.
+//  3. **AUCUNE DEVINETTE DE SALON.** Sans salon configuré, la version
+//     précédente en cherchait un par NOM (`annonces`, `news`, `general`) et
+//     publiait dedans. Un salon d'annonces se DÉSIGNE par un administrateur ;
+//     il ne se devine pas.
 const ANNOUNCE_PORT = 3006;
-const announceSecret = Bun.env.DISCORD_ANNOUNCE_SECRET || "default-secret-key-12345";
+const announceSecret = (Bun.env.DISCORD_ANNOUNCE_SECRET ?? "").trim();
+
+if (announceSecret === "") {
+	console.warn(
+		"⚠ [announce-server] DISCORD_ANNOUNCE_SECRET absent : le service d'annonces refusera TOUTES les requêtes. " +
+			"Pose la variable pour l'activer — une publication publique ne s'ouvre pas toute seule."
+	);
+}
 
 Bun.serve({
+	// Boucle locale : le site tourne sur la même machine.
+	hostname: "127.0.0.1",
 	port: ANNOUNCE_PORT,
 	async fetch(req) {
 		const url = new URL(req.url);
 		if (req.method !== "POST" || url.pathname !== "/announce") {
 			return new Response("Not Found", { status: 404 });
+		}
+
+		// Fail closed : pas de secret configuré, pas d'annonce. Jamais de valeur
+		// de repli — un secret par défaut est un secret public.
+		if (announceSecret === "") {
+			console.error(
+				"[announce-server] requête refusée : DISCORD_ANNOUNCE_SECRET n'est pas configuré."
+			);
+			return new Response("Announce service not configured", { status: 503 });
 		}
 
 		// Check Authorization
@@ -1006,24 +1042,23 @@ Bun.serve({
 				? (Bun.env.DISCORD_WIKI_ANNOUNCEMENTS_CHANNEL_ID || Bun.env.DISCORD_NEWS_CHANNEL_ID)
 				: (Bun.env.DISCORD_WEBSITE_ANNOUNCEMENTS_CHANNEL_ID || Bun.env.DISCORD_NEWS_CHANNEL_ID);
 
-			let channel;
-			if (channelId) {
-				channel = guild.channels.cache.get(channelId);
+			// Le salon est DÉSIGNÉ, jamais deviné. La version précédente cherchait
+			// un salon nommé `annonces`, `news` ou `general` quand la variable
+			// n'était pas posée : un salon de discussion générale pouvait recevoir
+			// des annonces automatiques sans que personne ne l'ait décidé.
+			if (!channelId) {
+				console.error(
+					"[announce-server] refusé : aucun salon d'annonces configuré. " +
+						"Pose DISCORD_WIKI_ANNOUNCEMENTS_CHANNEL_ID / DISCORD_WEBSITE_ANNOUNCEMENTS_CHANNEL_ID " +
+						"(ou DISCORD_NEWS_CHANNEL_ID). Un salon public ne se devine pas."
+				);
+				return new Response("Announce channel not configured", { status: 503 });
 			}
-
-			if (!channel) {
-				const possibleNames = type === "wiki"
-					? ["wiki-annonces", "annonces-wiki", "annonces", "📢-annonces"]
-					: ["annonces", "📢-annonces", "news", "general"];
-
-				for (const name of possibleNames) {
-					channel = guild.channels.cache.find(c => c.name.toLowerCase() === name && c.isTextBased());
-					if (channel) break;
-				}
-			}
-
+			const channel = guild.channels.cache.get(channelId);
 			if (!channel || !channel.isTextBased()) {
-				console.error("[announce-server] Aucun salon textuel d'annonces trouvé.");
+				console.error(
+					`[announce-server] refusé : le salon configuré (${channelId}) est introuvable ou n'est pas textuel.`
+				);
 				return new Response("Channel not found", { status: 500 });
 			}
 

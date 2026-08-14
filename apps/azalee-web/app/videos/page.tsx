@@ -17,6 +17,7 @@
 import type { Metadata } from "next";
 import { VideoGallery, type MovieEntry } from "@/app/videos/VideoGallery";
 import { MediaEmpty, MediaHeader } from "@/components/wiki/MediaShell";
+import { videoLabel } from "@/lib/cpk/media-names";
 import { lsOrNull } from "@rosegriffon/azalee/cpk/live";
 
 export const dynamic = "force-dynamic";
@@ -62,8 +63,25 @@ export default async function VideosPage() {
 			if (f.ext !== "usm") continue;
 			const name = f.name.replace(/\.usm$/i, "");
 			// L'ordre d'insertion fait la priorité : `haute` écrase `standard`.
-			parNom.set(name, { path: f.path, name, kind: classify(f.name), size: f.size, variante });
+			parNom.set(name, {
+				path: f.path,
+				name,
+				kind: classify(f.name),
+				size: f.size,
+				variante,
+				title: name,
+				context: null,
+			});
 		}
+	}
+
+	// Le code de fichier n'est pas un titre : on résout un vrai libellé quand les données du jeu
+	// en portent un (épisode via `inagle_events`, langue des écrans-titre), et le code passe en
+	// sous-titre. Résolu ici, côté serveur, parce que la table vit dans le miroir SQLite.
+	for (const [nom, entree] of parNom) {
+		const label = await videoLabel(nom);
+		entree.title = label.title;
+		entree.context = label.context;
 	}
 
 	const movies = [...parNom.values()].toSorted((a, b) =>
