@@ -176,6 +176,61 @@ export async function lsOrNull(dir: string, limit = 1000, offset = 0): Promise<V
 	}
 }
 
+/** Une texture nommée à l'intérieur d'un conteneur G4TX. */
+export interface TexEntry {
+	/** Identifiant dans la table d'ids du conteneur. */
+	id: number;
+	/** Nom résolu, ex. `performance_type_01`. */
+	name: string;
+	/** Largeur en pixels. */
+	width: number;
+	/** Hauteur en pixels. */
+	height: number;
+	/** Le payload est un DDS. */
+	dds: boolean;
+	/** Taille du payload, en octets. */
+	size: number;
+	/** Chemin CDN de CETTE texture (forme nommée de `/tex`), à préfixer de l'origine. */
+	path: string;
+	/** Nombre de régions d'atlas rattachées. */
+	regions: number;
+}
+
+/** Catalogue d'un conteneur G4TX. */
+export interface TexContainer {
+	/** Chemin VFS du conteneur. */
+	path: string;
+	/** Nombre de textures. */
+	count: number;
+	/** Les textures, dans l'ordre du fichier. */
+	textures: TexEntry[];
+}
+
+/**
+ * Catalogue des textures d'un conteneur G4TX.
+ *
+ * Un `.g4tx` n'est pas une image mais un conteneur : les icônes d'objets vivent à des dizaines
+ * par fichier (mesuré : 82,8 en moyenne sur `200_icon/02_icon_item`, jusqu'à 203). Sans cet
+ * index, une galerie ne peut afficher qu'une image par fichier et laisse tout le reste invisible.
+ *
+ * @param rel chemin SANS le préfixe `data/` ni l'extension, ex. `dx11/menu/…/icon_item01`.
+ */
+export async function texContainer(rel: string): Promise<TexContainer | null> {
+	try {
+		const res = await fetch(`${CDN_BASE}/tex-info/${rel}.g4tx`);
+		if (!res.ok) return null;
+		return (await res.json()) as TexContainer;
+	} catch {
+		return null;
+	}
+}
+
+/** URL absolue d'une texture du catalogue (le champ `path` est relatif au CDN). */
+export function texUrl(path: string, width?: number): string {
+	const url = `${CDN_BASE}${path}`;
+	return width ? `${url}?w=${width}&format=webp` : url;
+}
+
 /** Variante tolérante de [`vfsFind`]. */
 export async function findOrNull(
 	query: string,
