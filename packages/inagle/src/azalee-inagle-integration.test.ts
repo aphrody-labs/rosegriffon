@@ -3,6 +3,7 @@ import { createInagleService } from "./service.js";
 import { DATA_ROOT, FILES } from "./core/paths.js";
 import { join } from "node:path";
 import { readdir, exists } from "node:fs/promises";
+import { existsSync } from "node:fs";
 import { Database } from "bun:sqlite";
 
 // Helper to find latest SQLite database
@@ -22,7 +23,27 @@ async function getSqlitePath(): Promise<string> {
 	return join(dir, sqliteFiles[0]);
 }
 
-describe("Azalée CLI & Inagle Real-World Integration Tests", () => {
+/**
+ * Ces tests exigent le corpus RÉEL du jeu (`<DATA_ROOT>/common/…`, ~50 fichiers
+ * `.cfg.bin` et 6 000 personnages) : ils ne testent rien d'autre que le fait de le lire.
+ *
+ * Ce corpus est un dérivé du jeu, gitignoré : il vit sur cette machine
+ * (`/home/ubuntu/niers/data`, résolu par `paths.ts`) mais n'existe ni dans une CI ni
+ * sur un poste neuf, où ces tests échouaient sans autre cause que son absence. Un test
+ * rouge en permanence ne signale plus rien.
+ *
+ * On les SAUTE donc quand le corpus est absent, et on le DIT. Un saut silencieux serait
+ * l'erreur inverse, et la pire des deux : une suite verte qui n'a rien exécuté.
+ */
+const CORPUS_PRESENT = existsSync(join(DATA_ROOT, "common"));
+if (!CORPUS_PRESENT) {
+	console.warn(
+		`⚠ Tests d'intégration inagle SAUTÉS : corpus du jeu absent sous ${DATA_ROOT}. ` +
+			"Poser DATA_PATH sur une copie contenant `common/` pour les exécuter."
+	);
+}
+
+describe.skipIf(!CORPUS_PRESENT)("Azalée CLI & Inagle Real-World Integration Tests", () => {
 	let service: any;
 	let sqlitePath: string;
 
@@ -107,7 +128,15 @@ describe("Azalée CLI & Inagle Real-World Integration Tests", () => {
 
 	test("5. Bun Process API - Execute Azalée CLI test suite under real conditions", async () => {
 		// Run '/home/ubuntu/.local/bin/azalee test' natively using Bun.spawn
+		// `SQLITE_DB_PATH` est transmis comme la PRODUCTION le fait (unité systemd
+		// azalee-web.service). Sans lui, la CLI retombe sur la découverte implicite du
+		// miroir, qui part du répertoire courant : lancée depuis `packages/inagle`, elle
+		// ne trouvait rien et sortait en 1 sur « Base de données SQLite introuvable ».
+		// Ce test vérifie la CLI, pas la capacité de deviner un chemin depuis un dossier
+		// quelconque — et le faire échouer pour cette raison rendait `bun run test` rouge
+		// en permanence.
 		const proc = Bun.spawn(["/home/ubuntu/.local/bin/azalee", "test"], {
+			env: { ...process.env, SQLITE_DB_PATH: sqlitePath },
 			stdout: "pipe",
 			stderr: "pipe"
 		});
