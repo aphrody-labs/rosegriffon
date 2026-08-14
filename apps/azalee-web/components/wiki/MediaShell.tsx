@@ -19,6 +19,7 @@ const COLLECTIONS = [
 	{ path: "/textures", label: "Textures", icon: "texture", hint: "53 126 fichiers" },
 	{ path: "/sons", label: "Sons & voix", icon: "graphic_eq", hint: "5 403 banques" },
 	{ path: "/videos", label: "Vidéos", icon: "movie", hint: "96 cinématiques" },
+	{ path: "/modeles", label: "Modèles 3D", icon: "deployed_code", hint: "6 236 modèles" },
 ] as const;
 
 /** Chemin d'une des collections média. */

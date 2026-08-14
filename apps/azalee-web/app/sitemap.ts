@@ -82,7 +82,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 		{ changeFrequency: "weekly" as const, priority: 0.6, url: "/capsule" },
 		{ changeFrequency: "weekly" as const, priority: 0.6, url: "/drops" },
 		{ changeFrequency: "weekly" as const, priority: 0.6, url: "/invocation" },
-		{ changeFrequency: "weekly" as const, priority: 0.6, url: "/keshin" },
+		// `/keshin` a fusionné dans `/modeles` (redirection permanente) : ne pas l'annoncer, un
+		// sitemap ne doit lister que des URLs canoniques.
+		{ changeFrequency: "weekly" as const, priority: 0.6, url: "/modeles/keshin" },
+		{ changeFrequency: "weekly" as const, priority: 0.6, url: "/modeles/perso" },
+		{ changeFrequency: "weekly" as const, priority: 0.6, url: "/modeles/waza" },
+		{ changeFrequency: "weekly" as const, priority: 0.6, url: "/modeles/item" },
+		{ changeFrequency: "weekly" as const, priority: 0.6, url: "/modeles/armd" },
 		{ changeFrequency: "weekly" as const, priority: 0.6, url: "/gallery" },
 		{ changeFrequency: "weekly" as const, priority: 0.6, url: "/textures" },
 		{ changeFrequency: "weekly" as const, priority: 0.6, url: "/sons" },
