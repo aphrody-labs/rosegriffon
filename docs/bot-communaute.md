@@ -22,16 +22,46 @@ ne charge aucun de ces modules.
 ### Import de l'XP — état réel
 
 `apps/bot/src/scripts/import-xp-tiers.ts` a récupéré **65 membres sur ~1 902**
-(3,4 %), en épluchant l'historique des salons à la recherche des cartes `/rank`
-et `/leaderboard` de Noctaly. C'est tout ce qui était atteignable :
+(3,4 %). Deux modes : le premier (top 10, image `/leaderboard` du 9/8/2026,
+XP arrondie à la centaine) puis `--source=historique`, qui a dépouillé
+l'historique COMPLET de six salons plutôt qu'un seul instantané — fusion
+`GREATEST(xp, ...)` en base, une mesure ancienne ne rétrograde jamais une
+valeur plus fraîche déjà écrite.
+
+| Salon | Couverture | Trouvé |
+|---|---|---:|
+| `#🤖〡bots` | intégrale, 2023→2026 | 19 (`/rank` + `/leaderboard`) |
+| `#🤪〡memes-inazuma` | intégrale, 2023→2026 | 3 |
+| `#🎈〡questions` | intégrale, 2023→2026 | 1 |
+| `#💬〡général` | arrêtée au 11/3/2026 | 207 |
+| `#📷〡médias` | arrêtée au 11/3/2026 | 45 |
+| `#🎨〡vos-fanarts` | arrêtée au 17/3/2026 | 7 |
+
+L'essentiel du volume (54 des 65 membres) ne vient PAS d'une carte `/rank` ou
+`/leaderboard`, mais des embeds automatiques **« 🎉 Niveau supérieur ! »**
+postés dans les salons de discussion générale — ils mentionnent l'ID Discord
+en clair, donc aucune résolution par pseudo. Leur XP est le seuil OFFICIEL du
+palier annoncé (table `noctaly.com/table`), un minorant réel et non la valeur
+exacte de l'instant.
+
+C'est tout ce qui était atteignable :
 
 - l'API de Noctaly (`GET /api/v1/guilds/{id}/users/{id}/level-profile`) répond
-  **401** sans clé, et la clé s'obtient par une connexion humaine sur leur
-  tableau de bord ;
-- Noctaly n'a été activé sur le serveur que le **11/3/2026** : rien n'existe
-  avant cette date, même dans les salons entièrement dépouillés.
+  **401** sans clé (testé en direct), et la clé s'obtient par une connexion
+  humaine sur leur tableau de bord ; la page publique du classement charge ses
+  données côté client (rien dans le HTML brut) et se limite au top 100 ;
+- Noctaly n'a été activé sur le serveur que le **11/3/2026** : les 3 salons
+  paginés en entier jusqu'à 2023 n'ont RIEN trouvé avant cette date, ce qui a
+  justifié d'arrêter les 3 autres dès qu'ils y remontaient sans rien trouver
+  de plus.
 
-**Pour importer les 1 837 autres**, il faut une clé API générée depuis le
+**Piège trouvé et évité** : deux comptes différents partagent un pseudo
+quasi identique, « IceCream » (toujours sur le serveur) et « Icecream »
+(parti — `404 Unknown Member` à l'API, ce qui explique pourquoi la recherche
+par pseudo ne le trouvait pas). Vérifié avant écriture pour ne pas fusionner
+leurs deux XP sur un seul profil.
+
+**Pour importer les ~1 837 autres**, il faut une clé API générée depuis le
 tableau de bord Noctaly, puis relancer le script. Sans elle, ces membres
 repartent de zéro — et le classement s'en trouve faussé tant qu'ils n'ont pas
 reparlé.
