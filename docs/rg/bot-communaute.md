@@ -35,14 +35,25 @@ avec trois problèmes, corrigés le 14/8/2026 :
 - sans salon configuré, il en **cherchait un par nom** (`annonces`, `news`,
   `general`) et publiait dedans.
 
-Le service refuse désormais tout sans secret (503), n'écoute que
-`127.0.0.1`, et exige un salon **désigné**. Conséquence à connaître : les
-annonces d'articles ne partiront pas tant que
-`DISCORD_WEBSITE_ANNOUNCEMENTS_CHANNEL_ID` (et/ou
-`DISCORD_WIKI_ANNOUNCEMENTS_CHANNEL_ID`) n'aura pas été posé. Elles ne
-partaient de toute façon pas : aucun salon de ce serveur ne s'appelle
-exactement `annonces` — le vrai s'appelle `🚨〡annonces` —, donc la devinette
-échouait à chaque fois.
+Le service refuse désormais tout sans secret (503), n'écoute que `127.0.0.1`,
+et exige un salon **désigné**.
+
+Le secret n'était pas seulement absent : `packages/cron/.env` le fixait
+**explicitement à la valeur publique** `default-secret-key-12345`, des deux
+côtés du fil (site et cron). Il a été remplacé par 32 octets aléatoires dans
+les trois fichiers concernés, et `packages/cron/.env.example` ne livre plus de
+valeur utilisable.
+
+⚠ **À arbitrer par le staff** : `DISCORD_NEWS_CHANNEL_ID` vaut
+`1441915377754964061`, c'est-à-dire **`🚨〡live`**. Les annonces d'articles
+partent donc dans le salon des directs, faute de
+`DISCORD_WEBSITE_ANNOUNCEMENTS_CHANNEL_ID` et
+`DISCORD_WIKI_ANNOUNCEMENTS_CHANNEL_ID`. Ces deux variables existent
+précisément pour séparer les trois flux ; tant qu'elles sont vides, tout tombe
+au même endroit.
+
+**Salon de test** : `1086617065818947624`. Toute vérification qui publie
+réellement passe par lui — jamais par un salon vu par les membres.
 
 ---
 
