@@ -16,7 +16,7 @@
 import { describe, expect, test } from "bun:test";
 import { GatewayIntentBits } from "discord.js";
 
-import { AZALEE_GUILD_ID, RG_GUILD_ID } from "@rosegriffon/types/discord";
+import { ACHILLEA_GUILD_ID, AZALEE_GUILD_ID, RG_GUILD_ID } from "@rosegriffon/types/discord";
 
 import {
 	NOMS_PROFILS,
@@ -139,12 +139,30 @@ describe("jetonDuProfil", () => {
 });
 
 describe("guildes", () => {
-	test("les deux profils visent les deux serveurs — c'est la disjonction des modules qui évite le doublon", () => {
-		// Le bot Azalée n'a rejoint que Rose Griffon, et son salon d'annonce y est.
-		// Restreindre son enregistrement au serveur Azalée l'aurait rendu muet là
-		// où il est réellement présent.
+	test("rg publie par guilde, azalee publie globalement", () => {
+		// Deux portées, deux raisons. Le bot Rose Griffon administre UNE communauté
+		// (membres, niveaux, accueil) : ses commandes n'ont aucun sens sur un
+		// serveur dont il ne connaît ni les membres ni les rôles, donc il reste
+		// enregistré serveur par serveur.
+		expect(PROFILS.rg.porteeCommandes).toBe("guildes");
 		expect(PROFILS.rg.guildes).toEqual([RG_GUILD_ID, AZALEE_GUILD_ID]);
-		expect(PROFILS.azalee.guildes).toEqual([RG_GUILD_ID, AZALEE_GUILD_ID]);
+
+		// Le bot Azalée sert le wiki : les mêmes fiches partout, aucune
+		// configuration propre à un serveur. Il est public (`bot_public: true`), et
+		// avec un enregistrement par guilde, Achillea l'a invité le 14/8/2026 pour
+		// n'y voir qu'un bot en ligne et sans commande. La portée globale est ce
+		// qui rend l'invitation suffisante — sans commit, sans redéploiement.
+		expect(PROFILS.azalee.porteeCommandes).toBe("globale");
+	});
+
+	test("la liste de guildes d'azalee ne sert plus qu'au nettoyage des commandes héritées", () => {
+		// Discord ADDITIONNE commandes globales et commandes de guilde : sans
+		// effacer les secondes, un membre verrait chaque commande en double. La
+		// liste doit donc contenir tout serveur où le bot a PU enregistrer des
+		// commandes de guilde par le passé — pas la liste de ceux qu'il sert.
+		expect(PROFILS.azalee.guildes).toContain(RG_GUILD_ID);
+		expect(PROFILS.azalee.guildes).toContain(AZALEE_GUILD_ID);
+		expect(PROFILS.azalee.guildes).toContain(ACHILLEA_GUILD_ID);
 	});
 
 	test("chaque profil déclare ses intents, et azalee n'en demande aucun de privilégié", () => {
@@ -174,7 +192,12 @@ describe("guildes", () => {
 			DISCORD_GUILD_ID: RG_GUILD_ID,
 			DISCORD_EXTRA_GUILD_IDS: "111111111111111111",
 		};
-		expect(guildesDuProfil(PROFILS.azalee, env)).toEqual([RG_GUILD_ID, AZALEE_GUILD_ID]);
+		expect(guildesDuProfil(PROFILS.azalee, env)).toEqual([
+			RG_GUILD_ID,
+			AZALEE_GUILD_ID,
+			ACHILLEA_GUILD_ID,
+		]);
+		expect(guildesDuProfil(PROFILS.azalee, env)).not.toContain("111111111111111111");
 	});
 });
 
