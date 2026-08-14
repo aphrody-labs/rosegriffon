@@ -78,9 +78,18 @@ export async function enregistrerReglages(
 	guildId: string,
 	reglages: ReglagesCommunaute
 ): Promise<void> {
+	// ⚠ NE PAS `JSON.stringify(reglages)` ici : Bun.SQL encode déjà en JSON
+	// toute valeur liée à un paramètre casté `::jsonb`. Stringifier avant coup
+	// double l'encodage — la colonne reçoit une CHAÎNE contenant du JSON, pas
+	// un objet, et `jsonb_typeof()` répond `string` au lieu de `object`. La
+	// lecture suivante (`lireReglages`, zod) échoue alors sur « expected
+	// object, received string » et retombe sur les défauts, EFFAÇANT en
+	// pratique tout réglage déjà posé au prochain `fusionnerReglages`. Vérifié
+	// en direct le 14/8/2026 : `${reglages}::jsonb` produit un objet,
+	// `${JSON.stringify(reglages)}::jsonb` une chaîne, à chaque fois.
 	await sql`
 		INSERT INTO bot_reglages_guilde (guild_id, valeurs, maj_le)
-		VALUES (${guildId}, ${JSON.stringify(reglages)}::jsonb, NOW())
+		VALUES (${guildId}, ${reglages}::jsonb, NOW())
 		ON CONFLICT (guild_id) DO UPDATE
 			SET valeurs = EXCLUDED.valeurs, maj_le = NOW()
 	`;

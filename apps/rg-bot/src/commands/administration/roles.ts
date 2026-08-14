@@ -507,7 +507,7 @@ export class GestionRolesCommand {
 			const entrees = [...menu.entrees, entree];
 			await sql`
 				UPDATE bot_menus_roles
-				   SET roles = ${JSON.stringify(entrees)}::jsonb, maj_le = NOW()
+				   SET roles = ${entrees}::jsonb, maj_le = NOW()
 				 WHERE id = ${menu.id}
 			`;
 			const rafraichi = await rafraichirPanneau(interaction, { ...menu, entrees });
@@ -579,7 +579,7 @@ export class GestionRolesCommand {
 			}
 			await sql`
 				UPDATE bot_menus_roles
-				   SET roles = ${JSON.stringify(entrees)}::jsonb, maj_le = NOW()
+				   SET roles = ${entrees}::jsonb, maj_le = NOW()
 				 WHERE id = ${menu.id}
 			`;
 			await rafraichirPanneau(interaction, { ...menu, entrees });
