@@ -91,7 +91,21 @@ type Contenu = {
 			regions: { nom: string; x: number; y: number; w: number; h: number }[];
 		}[];
 	}[];
-	lua: { path: string; octets: number }[];
+	lua: {
+		path: string;
+		octets: number;
+		/** Absent si le fichier n'a pas pu être décodé comme bytecode Lua 5.2 (rare). */
+		erreur?: string;
+		/** Instructions totales (fonction principale + imbriquées) — désassemblage byte-exact. */
+		instructions?: number;
+		/** Nombre de fonctions (principale comprise). */
+		fonctions?: number;
+		/** Modules `INCLUDE()`d, lus depuis le pool de constantes. */
+		includes?: string[];
+		/** Commandes `funcLuaMenuCommand` que le script est structurellement capable d'émettre —
+		 * un entier constant du script qui correspond à un `cmdId` connu du dump de reverse. */
+		commandes?: { cmdId: string; nom: string | null; handler: string | null }[];
+	}[];
 	/** locale → clé de message → texte, résolu par CRC-32 depuis les tables du jeu. */
 	messages: Record<string, Record<string, { texte: string; table: string }>>;
 };
@@ -147,6 +161,27 @@ async function lireContenu(slug: string): Promise<Contenu | null> {
 		return JSON.parse(await fs.readFile(path.join(CONTENUS, `${slug}.json`), "utf8")) as Contenu;
 	} catch {
 		return null;
+	}
+}
+
+/**
+ * Écrans dont une RECONSTRUCTION composée existe (`DATA_PATH/mode-tex/<slug>/screens/<écran>.png`).
+ *
+ * Produite hors-ligne par `nie-game --menu <écran> --from-setting --runtime --export-layout` puis
+ * `--compose-layout` : layout STATIQUE de l'écran (`*_setting.cfg.bin`) posé sur son canvas, avec
+ * les mutations de la VRAIE VM Lua 5.2 du script (visibilité/texture/texte) appliquées par-dessus.
+ * Ce n'est PAS une capture vérifiée pixel-à-pixel (aucune référence n'existe pour ce mode) : les
+ * positions hors bind-pose de squelette restent approximatives (cf. `docs/PLAN.md`) — d'où
+ * l'avertissement affiché à côté, plutôt qu'un silence qui laisserait croire à une fidélité
+ * prouvée. Renvoie un ensemble vide (pas `null`) si le dossier n'existe pas encore.
+ */
+async function lireEcransRendus(slug: string): Promise<Set<string>> {
+	if (!/^[a-z0-9-]+$/.test(slug)) return new Set();
+	try {
+		const fichiers = await fs.readdir(path.join(process.env.DATA_PATH ?? "/home/ubuntu/niers/data", "mode-tex", slug, "screens"));
+		return new Set(fichiers.filter((f) => f.endsWith(".png")).map((f) => f.slice(0, -".png".length)));
+	} catch {
+		return new Set();
 	}
 }
 
@@ -212,6 +247,7 @@ export default async function PageModes({
 			entrees: f.kind === "screen" ? mode.screens.map((s) => s.screen) : (mode.assets[f.kind] ?? []),
 		}));
 		const contenu = await lireContenu(mode.slug);
+		const ecransRendus = await lireEcransRendus(mode.slug);
 		const messagesFr = Object.entries(contenu?.messages?.fr ?? {});
 		const vignettes = (contenu?.textures ?? []).flatMap((g) =>
 			g.textures
@@ -289,6 +325,59 @@ export default async function PageModes({
 					);
 				})()}
 
+				{ecransRendus.size > 0 ? (
+					<section className="space-y-2">
+						<h2 className="text-sm font-semibold text-on-surface">
+							Écrans reconstruits{" "}
+							<span className="font-normal text-on-surface-variant">
+								— {ecransRendus.size} sur {mode.counts.screens}, composés depuis les
+								vraies textures + le layout `<code>*_setting.cfg.bin</code>` + l&apos;état
+								produit en exécutant les scripts Lua du mode dans la VM réelle
+							</span>
+						</h2>
+						<p className="max-w-3xl text-sm text-on-surface-variant">
+							Reconstruction data-driven, pas une capture vérifiée : aucune référence pixel
+							n&apos;existe pour ce mode, et le jeu ne stocke la position d&apos;un widget
+							animé nulle part dans les fichiers (seul le repli sur la pose du squelette
+							3D est utilisé) — le placement de certains éléments reste donc approximatif,
+							en particulier les libellés de texte qui peuvent se chevaucher.
+						</p>
+						<ul className="
+        grid grid-cols-1 gap-3
+        sm:grid-cols-2
+        lg:grid-cols-3
+      ">
+							{mode.screens
+								.filter((s) => ecransRendus.has(s.screen))
+								.map((s) => (
+									<li key={s.screen} className="space-y-1 rounded-lg border border-outline-variant p-2">
+										{/* Damier : un écran sans sprite reconnu compose un PNG transparent — sans lui,
+										   ça se lirait comme une image cassée plutôt que comme « rien trouvé ici ». */}
+										<div
+											className="overflow-hidden rounded"
+											style={{
+												backgroundImage:
+													"repeating-conic-gradient(rgb(0 0 0 / 0.08) 0% 25%, transparent 0% 50%)",
+												backgroundSize: "16px 16px",
+											}}
+										>
+											{/* biome-ignore lint/performance/noImgElement: PNG servi par notre route, hors pipeline next/image */}
+											<img
+												src={`/api/mode-tex/${mode.slug}/screens/${s.screen}.png`}
+												alt={s.screen}
+												loading="lazy"
+												className="w-full rounded"
+											/>
+										</div>
+										<p className="truncate font-mono text-xs text-on-surface-variant" title={s.screen}>
+											{s.screen}
+										</p>
+									</li>
+								))}
+						</ul>
+					</section>
+				) : null}
+
 				{vignettes.length > 0 ? (
 					<section className="space-y-2">
 						<h2 className="text-sm font-semibold text-on-surface">
@@ -298,7 +387,11 @@ export default async function PageModes({
 								{vignettes.length > 1 ? "s" : ""} depuis les <code>.g4tx</code> du mode
 							</span>
 						</h2>
-						<ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+						<ul className="
+        grid grid-cols-2 gap-3
+        sm:grid-cols-3
+        lg:grid-cols-4
+      ">
 							{vignettes.map((v) => (
 								<li
 									key={v.src}
@@ -377,7 +470,11 @@ export default async function PageModes({
 												— {s.layers.length} calques · {s.focus} focusables · {s.octets} o
 											</span>
 										</summary>
-										<ul className="mt-2 grid gap-1 sm:grid-cols-2 lg:grid-cols-3">
+										<ul className="
+            mt-2 grid gap-1
+            sm:grid-cols-2
+            lg:grid-cols-3
+          ">
 											{s.layers.map((l) => (
 												<li
 													key={l}
@@ -438,6 +535,64 @@ export default async function PageModes({
 					</section>
 				) : null}
 
+				{contenu && contenu.lua.some((l) => l.instructions !== undefined) ? (
+					<section className="space-y-2">
+						<h2 className="text-sm font-semibold text-on-surface">
+							Scripts Lua, en détail{" "}
+							<span className="font-normal text-on-surface-variant">
+								— {contenu.lua.length} scripts, désassemblés depuis le bytecode Lua 5.2
+								RÉEL (pas une décompilation externe) via <code>nie-lua::bytecode</code>
+							</span>
+						</h2>
+						<p className="max-w-3xl text-sm text-on-surface-variant">
+							Les commandes listées sont les entiers du script qui correspondent à un{" "}
+							<code>cmdId</code> `<code>funcLuaMenuCommand</code>` connu du dump de reverse
+							— ce que le script est structurellement capable d&apos;envoyer au moteur, pas
+							une trace d&apos;exécution. `<code>?</code>` = cmdId reversé (adresse connue)
+							mais dont la sémantique n&apos;est pas encore modélisée.
+						</p>
+						<ul className="space-y-1">
+							{contenu.lua.map((l) => {
+								const nom = l.path.split("/").pop() ?? l.path;
+								return (
+									<li key={l.path}>
+										<details className="rounded-lg border border-outline-variant p-2">
+											<summary className="cursor-pointer font-mono text-xs text-on-surface">
+												{nom}{" "}
+												<span className="text-on-surface-variant">
+													— {l.erreur
+														? `erreur : ${l.erreur}`
+														: `${l.instructions ?? 0} instructions · ${l.fonctions ?? 0} fonctions · ${l.commandes?.length ?? 0} commandes`}
+												</span>
+											</summary>
+											{!l.erreur ? (
+												<div className="mt-2 space-y-2 text-xs text-on-surface-variant">
+													{l.includes && l.includes.length > 0 ? (
+														<p>inclut : {l.includes.map((i) => <code key={i} className="mr-1">{i}</code>)}</p>
+													) : null}
+													{l.commandes && l.commandes.length > 0 ? (
+														<ul className="
+                grid gap-1
+                sm:grid-cols-2
+                lg:grid-cols-3
+              ">
+															{l.commandes.map((c) => (
+																<li key={c.cmdId} className="font-mono">
+																	{c.nom ?? "?"} <span className="opacity-70">{c.cmdId}</span>
+																</li>
+															))}
+														</ul>
+													) : null}
+												</div>
+											) : null}
+										</details>
+									</li>
+								);
+							})}
+						</ul>
+					</section>
+				) : null}
+
 				<div className="space-y-6">
 					{familles.map((f) => (
 						<section key={f.kind} className="space-y-2">
@@ -452,7 +607,11 @@ export default async function PageModes({
 									Aucun fichier de cette famille pour ce mode.
 								</p>
 							) : (
-								<ul className="grid gap-1 sm:grid-cols-2 lg:grid-cols-3">
+								<ul className="
+          grid gap-1
+          sm:grid-cols-2
+          lg:grid-cols-3
+        ">
 									{f.entrees.map((e) => (
 										<li key={e} className="truncate font-mono text-xs text-on-surface-variant" title={e}>
 											{e.split("/").pop()}
@@ -478,7 +637,10 @@ export default async function PageModes({
 			<li key={m.slug}>
 				<Link
 					href={`/mode/${m.slug}`}
-					className="block rounded-lg border border-outline-variant p-4 transition hover:bg-surface-container"
+					className="
+       block rounded-lg border border-outline-variant p-4 transition
+       hover:bg-surface-container
+     "
 				>
 					<span className="block font-semibold text-on-surface">{m.label}</span>
 					{m.labelJa ? (
@@ -509,7 +671,11 @@ export default async function PageModes({
 						— {officiels.length}, énumérés par le jeu
 					</span>
 				</h2>
-				<ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">{officiels.map(carte)}</ul>
+				<ul className="
+      grid gap-3
+      sm:grid-cols-2
+      lg:grid-cols-3
+    ">{officiels.map(carte)}</ul>
 			</section>
 
 			<section className="space-y-2">
@@ -519,7 +685,11 @@ export default async function PageModes({
 						— {autres.length}, que le jeu ne compte pas parmi ses modes
 					</span>
 				</h2>
-				<ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">{autres.map(carte)}</ul>
+				<ul className="
+      grid gap-3
+      sm:grid-cols-2
+      lg:grid-cols-3
+    ">{autres.map(carte)}</ul>
 			</section>
 		</div>
 	);
