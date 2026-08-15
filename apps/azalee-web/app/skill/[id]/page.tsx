@@ -7,6 +7,7 @@ import { SkillCutinSection } from "@/components/wiki/SkillCutinSection";
 import { SkillDetail } from "@/components/wiki/SkillDetail";
 import type { SkillVideoVariant } from "@/components/wiki/SkillVideoPlayer";
 import { cutinHasAssets, getSkillCutin } from "@rosegriffon/azalee/game/skills-cutin";
+import { getSkillImageUrl } from "@rosegriffon/azalee/images";
 import { createClient } from "@/lib/supabase/server";
 import { wikiService } from "@/lib/wiki-service";
 
@@ -107,12 +108,18 @@ export async function generateMetadata({
 	const description = `${metaParts.join(" - ")}. Technique spéciale Inazuma Eleven: Victory Road.`;
 	const title = `${name} | Inazuma Eleven Victory Road - Azalée`;
 
+	// getSkillImageUrl gate : `skill.image` brut (DB) contredisait la page (`SkillDetail` s'en
+	// détourne déjà, cf. commentaire de la fonction) — servait un og:image 404 sur les 19
+	// techniques `rh*` sans telop (audit d'images azalee, 2026-08-15).
+	const ogImage = getSkillImageUrl(skill?.internalCode, skill?.image);
+	const ogImageUrl = ogImage.startsWith("/") ? `https://azalee.rosegriffon.fr${ogImage}` : ogImage;
+
 	return {
 		alternates: { canonical: `/skill/${id}` },
 		description,
 		openGraph: {
 			description,
-			images: skill?.image ? [{ url: skill.image, alt: name }] : [],
+			images: ogImage ? [{ url: ogImageUrl, alt: name }] : [],
 			locale: "fr_FR",
 			siteName: "Azalée - Inazuma Eleven Victory Road",
 			title: `${name} | Azalée`,
