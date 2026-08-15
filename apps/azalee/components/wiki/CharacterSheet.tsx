@@ -879,7 +879,11 @@ export function CharacterSheet({
 												{skill.evolutionSuffix}
 											</span>
 										)}
-										{skill.element && (
+										{/* getSkillElementIconUrl ne couvre que 4 des 5 éléments (pas de
+										`spirit_type/void.webp`) : sans ce garde, un skill "Void"/"Néant"
+										rendait un <Image fill src=""> — vide, jamais 404 mais visible dans
+										le DOM. */}
+										{skill.element && getSkillElementIconUrl(skill.element) && (
 											<div className="size-3 sm:w-3.5 sm:h-3.5 relative shrink-0 opacity-80">
 												<NextImage
 													src={getSkillElementIconUrl(skill.element)}

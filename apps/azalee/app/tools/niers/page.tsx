@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Image from "next/image";
 import { Button } from "@rosegriffon/ui";
 import { Icon } from "@/components/ui/Icon";
 import { getLatestNiersDesktopRelease, type NiersDesktopRelease } from "@/lib/niers-releases";
@@ -108,36 +107,11 @@ export default async function NiersToolPage() {
 			</div>
 
 			{/* La capture porte toute la démonstration : entrée en fondu, flottement lent,
-			 * halo coloré derrière le cadre, léger rapprochement au survol. */}
-			<figure className="
-   relative w-full max-w-6xl px-2
-   animate-[fadeSlideUp_0.9s_ease-out_0.4s_both]
- ">
-				<div
-					aria-hidden
-					className="
-     pointer-events-none absolute inset-x-8 top-8 bottom-0 rounded-[40px] bg-primary/25 blur-3xl
-     animate-[glowPulse_6s_ease-in-out_infinite]
-   "
-				/>
-				<div className="
-    group relative motion-safe:animate-[gentleFloat_7s_ease-in-out_infinite]
-  ">
-					<Image
-						src="/niers/app.webp"
-						alt="Fenêtre de niers : explorateur du système de fichiers virtuel d'Inazuma Eleven: Victory Road, avec ses vignettes de textures."
-						width={2880}
-						height={1800}
-						priority
-						sizes="(max-width: 1280px) 100vw, 1152px"
-						className="
-      relative w-full rounded-2xl border border-outline-variant/60 shadow-2xl
-      transition-transform duration-700 ease-out
-      motion-safe:group-hover:scale-[1.015]
-    "
-					/>
-				</div>
-			</figure>
+			 * halo coloré derrière le cadre, léger rapprochement au survol.
+			 * `/niers/app.webp` n'a JAMAIS été déposé dans public/ (404 constaté 2026-08-15,
+			 * audit d'images du site) : le bloc reste désactivé plutôt que de fabriquer une
+			 * fausse capture — cf. mémoire "tools-niers-screenshot-manquant" pour capturer une
+			 * vraie capture via la skill `run` avant de le réactiver. */}
 
 			{!release && (
 				<p className="type-body-small text-error">

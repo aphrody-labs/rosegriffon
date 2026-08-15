@@ -2,9 +2,9 @@
   "assets": [
     {
       "code": "c01001900",
-      "face_g4md": "data/common/chr/_face/01_ie1/c01001900/c01001900.g4md",
-      "face_g4mg": "data/common/chr/_face/01_ie1/c01001900/c01001900.g4mg",
-      "face_g4tx": "data/dx11/chr/_face/01_ie1/c01001900/c01001900.g4tx",
+      "face_g4md": "data/common/chr/_face/01_IE1/c01001900/c01001900.g4md",
+      "face_g4mg": "data/common/chr/_face/01_IE1/c01001900/c01001900.g4mg",
+      "face_g4tx": "data/dx11/chr/_face/01_IE1/c01001900/c01001900.g4tx",
       "icon_g4tx": "data/dx11/menu/200_icon/10_icon_chr/face/c01001900_l.g4tx",
       "model_full_code": "c01001900",
       "voice_acb": "data/common/sound_asset/ja/c01001900.acb",
@@ -12,9 +12,9 @@
     },
     {
       "code": "c05026590",
-      "face_g4md": "data/common/chr/_face/05_go2/c05026590/c05026590.g4md",
-      "face_g4mg": "data/common/chr/_face/05_go2/c05026590/c05026590.g4mg",
-      "face_g4tx": "data/dx11/chr/_face/05_go2/c05026590/c05026590.g4tx",
+      "face_g4md": "data/common/chr/_face/05_GO2/c05026590/c05026590.g4md",
+      "face_g4mg": "data/common/chr/_face/05_GO2/c05026590/c05026590.g4mg",
+      "face_g4tx": "data/dx11/chr/_face/05_GO2/c05026590/c05026590.g4tx",
       "icon_g4tx": "data/dx11/menu/200_icon/10_icon_chr/face/c05026590_l.g4tx",
       "model_full_code": "c05026590",
       "voice_acb": "data/common/sound_asset/ja/c05026590.acb",
@@ -22,9 +22,9 @@
     },
     {
       "code": "c07080010",
-      "face_g4md": "data/common/chr/_face/07_ares/c07080010/c07080010.g4md",
-      "face_g4mg": "data/common/chr/_face/07_ares/c07080010/c07080010.g4mg",
-      "face_g4tx": "data/dx11/chr/_face/07_ares/c07080010/c07080010.g4tx",
+      "face_g4md": "data/common/chr/_face/07_ARES/c07080010/c07080010.g4md",
+      "face_g4mg": "data/common/chr/_face/07_ARES/c07080010/c07080010.g4mg",
+      "face_g4tx": "data/dx11/chr/_face/07_ARES/c07080010/c07080010.g4tx",
       "icon_g4tx": "data/dx11/menu/200_icon/10_icon_chr/face/c07080010_l.g4tx",
       "model_full_code": "c07080010",
       "voice_acb": "data/common/sound_asset/ja/c07080010.acb",
@@ -498,19 +498,19 @@
     {
       "base_id": 936881403,
       "code": "c01001900",
-      "face_subdir": "01_ie1",
+      "face_subdir": "01_IE1",
       "label": "Inazuma Eleven (IE1)"
     },
     {
       "base_id": 4233601308,
       "code": "c05026590",
-      "face_subdir": "05_go2",
+      "face_subdir": "05_GO2",
       "label": "Inazuma Eleven GO"
     },
     {
       "base_id": 3389112235,
       "code": "c07080010",
-      "face_subdir": "07_ares",
+      "face_subdir": "07_ARES",
       "label": "Ares"
     }
   ],
