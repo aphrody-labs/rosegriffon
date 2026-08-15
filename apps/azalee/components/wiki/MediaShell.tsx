@@ -13,14 +13,33 @@ import { Icon } from "@/components/ui/Icon";
  * compte. Composants serveur — aucun état, rien que des liens.
  */
 
-/** Une collection média, avec le volume réel de son fonds (mesuré sur le VFS du jeu). */
+/**
+ * Une collection média, avec le volume réel de son fonds (mesuré sur le VFS du jeu).
+ *
+ * Ces volumes sont un **instantané**, pas une mesure vivante : les afficher exigerait
+ * d'interroger le VFS à chaque rendu de page média, pour un simple indice sous un lien.
+ * Ils dérivent donc à chaque mise à jour du jeu — au 15/08/2026 l'écart accumulé était de
+ * −1 077 textures, −109 banques, −2 vidéos et −1 mode, sans que rien ne le signale.
+ *
+ * Pour les rafraîchir, depuis le dépôt `niers` (les extensions sont celles du VFS, pas des
+ * catégories de l'UI) :
+ *
+ * ```
+ * niers vfs stats --top 40     # .g4tx = textures, .acb = banques de sons, .usm = vidéos
+ * ```
+ *
+ * Deux pièges de comptage : les `.usm` sont **dupliqués** sous `data/dx11/movie` ET
+ * `data/common/movie` (194 fichiers pour 98 vidéos distinctes — compter les basenames
+ * uniques) ; et `niers vfs find` **plafonne à 102 résultats** sans `-n`, ce qui donne un
+ * faux compte rond. Le nombre de modes vient de `data/modes.json`.
+ */
 const COLLECTIONS = [
 	{ path: "/gallery", label: "Illustrations", icon: "image", hint: "sélection in-game" },
-	{ path: "/textures", label: "Textures", icon: "texture", hint: "53 126 fichiers" },
-	{ path: "/sons", label: "Sons & voix", icon: "graphic_eq", hint: "5 403 banques" },
-	{ path: "/videos", label: "Vidéos", icon: "movie", hint: "96 cinématiques" },
+	{ path: "/textures", label: "Textures", icon: "texture", hint: "54 203 fichiers" },
+	{ path: "/sons", label: "Sons & voix", icon: "graphic_eq", hint: "5 512 banques" },
+	{ path: "/videos", label: "Vidéos", icon: "movie", hint: "98 cinématiques" },
 	{ path: "/modeles", label: "Modèles 3D", icon: "deployed_code", hint: "6 236 modèles" },
-	{ path: "/mode", label: "Modes de jeu", icon: "stadia_controller", hint: "10 modes" },
+	{ path: "/mode", label: "Modes de jeu", icon: "stadia_controller", hint: "11 modes" },
 ] as const;
 
 /** Chemin d'une des collections média. */
