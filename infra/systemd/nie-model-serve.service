@@ -2,6 +2,13 @@
 # repond 503 « miroir SQLite absent » : la resolution automatique ne le trouve pas
 # depuis WorkingDirectory=/home/ubuntu/niers.
 # --uniform-map : resolution des uniformes (CRC32 -> G4MD+G4TX).
+# --menu-cfg-dir : les dumps `*_setting.cfg.bin.json` que lit /menu-tree. Ils vivent dans le
+# depot niers (475 fichiers), PAS dans l'installation Steam : sans ce drapeau la route se
+# rabat sur `<game-dir>/data/common/gamedata/menu/cfg`, qui n'existe pas cote Steam, et
+# /menu-tree repond 404 « aucun menu_setting (dump absent ?) » — une route eteinte en
+# silence, alors que les donnees sont la.
+# --asset-cross-ref : etait passe a l'unite active mais absent de ce fichier (derive non
+# reportee) ; reintegre ici pour que le depot decrive vraiment ce qui tourne.
 [Unit]
 Description=nie-model-serve — assemblage GLB IEVR live (corps+face+uniforme depuis CPK)
 # `iecode-cdn.service` a disparu du dépôt le 11/8/2026 et de la machine le 14 : son
@@ -22,6 +29,8 @@ ExecStart=/home/ubuntu/niers/target/release/nie-model-serve \
     --body-manifest /home/ubuntu/niers/var/body-type-manifest.ndjson \
     --cache-dir /home/ubuntu/niers/var/model-cache \
     --uniform-map /home/ubuntu/niers/var/uniform-model-map.ndjson \
+    --asset-cross-ref /home/ubuntu/niers/data/asset-cross-reference.json \
+    --menu-cfg-dir /home/ubuntu/niers/data/common/gamedata/menu/cfg \
     --db /home/ubuntu/rg/apps/azalee/data/backups/mirror.sqlite \
     --port 8790 --preload
 Environment=RUST_LOG=info
