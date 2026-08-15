@@ -65,7 +65,7 @@ interface DossierTechInfo {
 interface DossierTechCutin {
 	event_id_name: string;
 	texture_g4tx?: string;
-	telop_by_lang?: [string, string][];
+	telop_by_lang?: string[][];
 }
 interface DossierVariant {
 	code: string;
@@ -88,7 +88,7 @@ const d = dossier as unknown as {
 };
 
 /** URL du telop FR d'une liste `[langue, chemin]` (repli en/1ère langue), ou `null`. */
-function telopFrUrl(pairs: [string, string][] | undefined): string | null {
+function telopFrUrl(pairs: string[][] | undefined): string | null {
 	if (!pairs?.length) return null;
 	const chosen = pairs.find(([l]) => l === "fr") ?? pairs.find(([l]) => l === "en") ?? pairs[0];
 	return chosen ? cpkAssetUrl(chosen[1]) : null;
