@@ -422,7 +422,7 @@ export default async function PageModes({
 								n&apos;en déclare pas retombe au centre du canvas, d&apos;où des éléments encore
 								empilés sur certains écrans.
 								{vides > 0
-									? ` ${vides} autre${vides > 1 ? "s" : ""} écran${vides > 1 ? "s" : ""} du mode ne pose aucun sprite résoluble et n’est pas affiché ici.`
+									? ` ${vides} autre${vides > 1 ? "s" : ""} écran${vides > 1 ? "s" : ""} du mode ne ${vides > 1 ? "posent" : "pose"} aucun sprite résoluble et ${vides > 1 ? "ne sont" : "n’est"} pas affiché${vides > 1 ? "s" : ""} ici.`
 									: ""}
 							</p>
 							<ul className="
