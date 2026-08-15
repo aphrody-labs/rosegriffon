@@ -14,6 +14,11 @@
  * affiché est donc compté sur le VFS du jeu, pas rédigé à la main — y compris quand le compte
  * est zéro, ce qui est en soi une information : un mode sans texture propre est un mode dont
  * l'habillage n'est pas dans les fichiers installés.
+ *
+ * Un second fichier, facultatif, porte le **contenu** de ces fichiers (`niers mode contenu
+ * <slug>`) : les calques de chaque écran, les objets de menu parsés, les régions de chaque
+ * texture et les messages localisés du mode. Quand il est là, la fiche ne se contente plus de
+ * lister des noms de fichiers — elle montre ce qu'ils contiennent, images comprises.
  */
 import fs from "node:fs/promises";
 import path from "node:path";
@@ -55,6 +60,62 @@ type Mode = {
  */
 const CATALOGUE = path.join(process.env.DATA_PATH ?? "/home/ubuntu/niers/data", "modes.json");
 
+/** Dossier des exports de contenu, un fichier par mode (`<slug>.json`). */
+const CONTENUS = path.join(process.env.DATA_PATH ?? "/home/ubuntu/niers/data", "mode-contenu");
+
+/** Le contenu des fichiers d'un mode, tel que l'exporte `niers mode contenu <slug>`. */
+type Contenu = {
+	slug: string;
+	screens: { screen: string; cfg: string; octets: number; layers: string[]; focus: number }[];
+	objbins: {
+		path: string;
+		octets: number;
+		objet: {
+			name: string;
+			engine_type: string;
+			g4pkm_path: string | null;
+			g4tx_path: string | null;
+			components: Record<string, { type_name: string }>[];
+		};
+	}[];
+	textures: {
+		path: string;
+		catalogue: string;
+		octets: number;
+		textures: {
+			id: number;
+			nom: string;
+			largeur: number;
+			hauteur: number;
+			dds: boolean;
+			regions: { nom: string; x: number; y: number; w: number; h: number }[];
+		}[];
+	}[];
+	lua: { path: string; octets: number }[];
+	/** locale → clé de message → texte, résolu par CRC-32 depuis les tables du jeu. */
+	messages: Record<string, Record<string, { texte: string; table: string }>>;
+};
+
+/**
+ * Nom du PNG décodé d'une texture — même règle que `niers convert --toutes` :
+ * `<fichier sans extension>__<nom de texture assaini>.png`.
+ */
+function fichierTexture(cheminG4tx: string, nomTexture: string): string {
+	const base = cheminG4tx.split("/").pop() ?? cheminG4tx;
+	const tronc = base.replace(/\.g4tx$/, "");
+	const nom = nomTexture.replace(/[^A-Za-z0-9_-]/g, "_");
+	return `${tronc}__${nom}.png`;
+}
+
+/** Les balises de mise en forme du jeu (`[CUP]`, `[$gaiji_x]`, `\n`) rendues lisibles. */
+function texteLisible(brut: string): string {
+	return brut
+		.replaceAll("\\n", " ")
+		.replace(/\[\$?[A-Za-z0-9_|]+\]/g, "")
+		.replace(/\s+/g, " ")
+		.trim();
+}
+
 /** Libellé lisible d'une famille d'assets, et ordre d'affichage. */
 const FAMILLES: { kind: string; label: string; hint: string }[] = [
 	{ kind: "screen", label: "Écrans", hint: "définitions `*_setting.cfg.bin`" },
@@ -72,6 +133,18 @@ async function lireCatalogue(): Promise<Mode[] | null> {
 		const brut = await fs.readFile(CATALOGUE, "utf8");
 		const parsed = JSON.parse(brut) as { modes?: Mode[] };
 		return parsed.modes ?? [];
+	} catch {
+		return null;
+	}
+}
+
+/** Lit le contenu d'un mode, ou `null` s'il n'a pas encore été exporté. */
+async function lireContenu(slug: string): Promise<Contenu | null> {
+	// Le slug vient de l'URL : on refuse tout ce qui n'est pas un identifiant, plutôt que de
+	// laisser un `../` remonter hors du dossier.
+	if (!/^[a-z0-9-]+$/.test(slug)) return null;
+	try {
+		return JSON.parse(await fs.readFile(path.join(CONTENUS, `${slug}.json`), "utf8")) as Contenu;
 	} catch {
 		return null;
 	}
@@ -138,6 +211,20 @@ export default async function PageModes({
 			...f,
 			entrees: f.kind === "screen" ? mode.screens.map((s) => s.screen) : (mode.assets[f.kind] ?? []),
 		}));
+		const contenu = await lireContenu(mode.slug);
+		const messagesFr = Object.entries(contenu?.messages?.fr ?? {});
+		const vignettes = (contenu?.textures ?? []).flatMap((g) =>
+			g.textures
+				.filter((t) => t.dds)
+				.map((t) => ({
+					src: `/api/mode-tex/${mode.slug}/${fichierTexture(g.path, t.nom)}`,
+					nom: t.nom,
+					largeur: t.largeur,
+					hauteur: t.hauteur,
+					regions: t.regions,
+					fichier: g.path,
+				})),
+		);
 		return (
 			<div className="space-y-6">
 				<MediaBack href="/mode" label="Tous les modes" />
@@ -201,6 +288,155 @@ export default async function PageModes({
 						</section>
 					);
 				})()}
+
+				{vignettes.length > 0 ? (
+					<section className="space-y-2">
+						<h2 className="text-sm font-semibold text-on-surface">
+							Images{" "}
+							<span className="font-normal text-on-surface-variant">
+								— {vignettes.length} texture{vignettes.length > 1 ? "s" : ""} décodée
+								{vignettes.length > 1 ? "s" : ""} depuis les <code>.g4tx</code> du mode
+							</span>
+						</h2>
+						<ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+							{vignettes.map((v) => (
+								<li
+									key={v.src}
+									className="space-y-1 rounded-lg border border-outline-variant p-2"
+								>
+									{/* Damier : sans lui, une texture à fond transparent est invisible. */}
+									<div
+										className="flex items-center justify-center overflow-hidden rounded"
+										style={{
+											minHeight: "5rem",
+											backgroundImage:
+												"repeating-conic-gradient(rgb(0 0 0 / 0.08) 0% 25%, transparent 0% 50%)",
+											backgroundSize: "16px 16px",
+										}}
+									>
+										{/* biome-ignore lint/performance/noImgElement: PNG servi par notre route, hors pipeline next/image */}
+										<img
+											src={v.src}
+											alt={v.nom}
+											loading="lazy"
+											className="max-h-40 max-w-full"
+											style={{ imageRendering: v.largeur <= 256 ? "pixelated" : "auto" }}
+										/>
+									</div>
+									<p className="truncate font-mono text-xs text-on-surface" title={v.nom}>
+										{v.nom}
+									</p>
+									<p className="text-xs text-on-surface-variant">
+										{v.largeur}×{v.hauteur}
+										{v.regions.length > 1 ? ` · ${v.regions.length} régions` : ""}
+									</p>
+								</li>
+							))}
+						</ul>
+					</section>
+				) : null}
+
+				{messagesFr.length > 0 ? (
+					<section className="space-y-2">
+						<h2 className="text-sm font-semibold text-on-surface">
+							Messages du mode{" "}
+							<span className="font-normal text-on-surface-variant">
+								— {messagesFr.length}, résolus par CRC-32 depuis les tables du jeu
+							</span>
+						</h2>
+						<p className="max-w-3xl text-sm text-on-surface-variant">
+							Ces messages ne sont nommés que dans <code>nie.exe</code> ; les tables de texte n’en
+							portent que le hash. Ce sont les phrases que le mode affiche réellement en jeu.
+						</p>
+						<ul className="space-y-1">
+							{messagesFr.map(([cle, m]) => (
+								<li key={cle} className="text-sm text-on-surface">
+									{texteLisible(m.texte)}{" "}
+									<span className="font-mono text-xs text-on-surface-variant">{cle}</span>
+								</li>
+							))}
+						</ul>
+					</section>
+				) : null}
+
+				{contenu ? (
+					<section className="space-y-2">
+						<h2 className="text-sm font-semibold text-on-surface">
+							Écrans, en détail{" "}
+							<span className="font-normal text-on-surface-variant">
+								— les calques que chaque <code>*_setting.cfg.bin</code> déclare
+							</span>
+						</h2>
+						<ul className="space-y-1">
+							{contenu.screens.map((s) => (
+								<li key={s.screen}>
+									<details className="rounded-lg border border-outline-variant p-2">
+										<summary className="cursor-pointer font-mono text-xs text-on-surface">
+											{s.screen}{" "}
+											<span className="text-on-surface-variant">
+												— {s.layers.length} calques · {s.focus} focusables · {s.octets} o
+											</span>
+										</summary>
+										<ul className="mt-2 grid gap-1 sm:grid-cols-2 lg:grid-cols-3">
+											{s.layers.map((l) => (
+												<li
+													key={l}
+													className="truncate font-mono text-xs text-on-surface-variant"
+													title={l}
+												>
+													{l}
+												</li>
+											))}
+										</ul>
+									</details>
+								</li>
+							))}
+						</ul>
+					</section>
+				) : null}
+
+				{contenu ? (
+					<section className="space-y-2">
+						<h2 className="text-sm font-semibold text-on-surface">
+							Objets de menu, en détail{" "}
+							<span className="font-normal text-on-surface-variant">
+								— {contenu.objbins.length} <code>.objbin</code> parsés, avec leurs composants
+							</span>
+						</h2>
+						<ul className="space-y-1">
+							{contenu.objbins.map((o) => (
+								<li key={o.path}>
+									<details className="rounded-lg border border-outline-variant p-2">
+										<summary className="cursor-pointer font-mono text-xs text-on-surface">
+											{o.objet.name}{" "}
+											<span className="text-on-surface-variant">
+												— {o.objet.components.length} composants · {o.octets} o
+											</span>
+										</summary>
+										<div className="mt-2 space-y-1 text-xs text-on-surface-variant">
+											{o.objet.g4pkm_path ? (
+												<p className="truncate font-mono" title={o.objet.g4pkm_path}>
+													pack : {o.objet.g4pkm_path}
+												</p>
+											) : null}
+											{o.objet.g4tx_path ? (
+												<p className="truncate font-mono" title={o.objet.g4tx_path}>
+													texture : {o.objet.g4tx_path}
+												</p>
+											) : null}
+											<p className="font-mono">
+												{o.objet.components
+													.map((c) => Object.values(c)[0]?.type_name)
+													.filter(Boolean)
+													.join(" · ")}
+											</p>
+										</div>
+									</details>
+								</li>
+							))}
+						</ul>
+					</section>
+				) : null}
 
 				<div className="space-y-6">
 					{familles.map((f) => (
