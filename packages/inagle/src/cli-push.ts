@@ -53,6 +53,11 @@ import { type DataAdapter, dedup, PostgresAdapter, SupabaseAdapter } from "./pus
 import { type AuraHissatsu, buildAuraHashSet, loadAuraSkills } from "./skills/mapper-aura.js";
 import { importLuaScripts } from "./lua/pusher.js";
 
+// Même racine que `push-categories.ts` (DATA_PATH). `exp_table.json`/`growth_tables.json`
+// vivaient sous un chemin relatif au SOURCE de ce module (`../data/all-gamedata/`, jamais
+// peuplé) au lieu du dump niers — les deux imports échouaient `ENOENT` à chaque `push` et
+// arrêtaient le reste des catégories (exception non rattrapée), silencieusement chaque nuit.
+const DATA_ROOT = process.env.DATA_PATH || "/home/ubuntu/niers/data";
 
 // === Helpers ===
 
@@ -911,10 +916,7 @@ async function importOpponentTeams(_service: any, db: DataAdapter) {
 
 async function importExpTable(db: DataAdapter) {
 	console.log("🔄 Importing Exp Table...");
-	const dataPath = path.join(
-		path.dirname(new URL(import.meta.url).pathname),
-		"../data/all-gamedata/exp_table.json"
-	);
+	const dataPath = path.join(DATA_ROOT, "all-gamedata/exp_table.json");
 	const rows: { level: number; need_exp: number }[] = await Bun.file(dataPath).json();
 	const records = rows.map((r: any) => ({ level: r.level, need_exp: r.needExp ?? r.need_exp }));
 	const { error } = await db.upsert("inagle_exp_table", records, "level");
@@ -924,10 +926,7 @@ async function importExpTable(db: DataAdapter) {
 
 async function importGrowthTables(db: DataAdapter) {
 	console.log("🔄 Importing Growth Tables...");
-	const dataPath = path.join(
-		path.dirname(new URL(import.meta.url).pathname),
-		"../data/all-gamedata/growth_tables.json"
-	);
+	const dataPath = path.join(DATA_ROOT, "all-gamedata/growth_tables.json");
 	const raw: Record<string, any[]> = await Bun.file(dataPath).json();
 
 	const records: any[] = [];

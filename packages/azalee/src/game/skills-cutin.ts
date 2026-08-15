@@ -17,8 +17,11 @@ export interface SkillCutin {
 	texture_g4tx: string;
 	sound_cfg: string;
 	effects_dir: string;
-	/** `[langue, chemin .g4tx du telop]`. */
-	telop_by_lang: [string, string][];
+	/** `[langue, chemin .g4tx du telop]` par langue disponible (8 avec la MAJ du 2026-08-15 :
+	 * de/en/es/fr/it/pt/zh_hans/zh_hant). `string[][]`, pas un tuple : un import JSON brut
+	 * n'inférerait jamais `[string,string]` (TS widen systématiquement en `string[]`), et le
+	 * cast `as SkillsCutinFile` échouait le type-check de déploiement pour cette seule raison. */
+	telop_by_lang: string[][];
 }
 
 /** Une entrée skill enrichie (identité + cut-in). */
