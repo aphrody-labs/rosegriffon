@@ -164,6 +164,14 @@ async function lireContenu(slug: string): Promise<Contenu | null> {
 	}
 }
 
+/** Un écran reconstruit, avec de quoi juger la richesse du rendu. */
+type EcranRendu = {
+	/** Nom de l'écran (= nom du PNG sans extension, et du `*_setting.cfg.bin` d'origine). */
+	screen: string;
+	/** Sprites réellement posés et visibles. 0 = rien n'a pu être résolu, l'image est vide. */
+	sprites: number;
+};
+
 /**
  * Écrans dont une RECONSTRUCTION composée existe (`DATA_PATH/mode-tex/<slug>/screens/<écran>.png`).
  *
@@ -175,14 +183,46 @@ async function lireContenu(slug: string): Promise<Contenu | null> {
  * l'avertissement affiché à côté, plutôt qu'un silence qui laisserait croire à une fidélité
  * prouvée. Renvoie un ensemble vide (pas `null`) si le dossier n'existe pas encore.
  */
-async function lireEcransRendus(slug: string): Promise<Set<string>> {
-	if (!/^[a-z0-9-]+$/.test(slug)) return new Set();
+async function lireEcransRendus(slug: string): Promise<EcranRendu[]> {
+	if (!/^[a-z0-9-]+$/.test(slug)) return [];
+	const dossier = path.join(
+		process.env.DATA_PATH ?? "/home/ubuntu/niers/data",
+		"mode-tex",
+		slug,
+		"screens",
+	);
+	let fichiers: string[];
 	try {
-		const fichiers = await fs.readdir(path.join(process.env.DATA_PATH ?? "/home/ubuntu/niers/data", "mode-tex", slug, "screens"));
-		return new Set(fichiers.filter((f) => f.endsWith(".png")).map((f) => f.slice(0, -".png".length)));
+		fichiers = await fs.readdir(dossier);
 	} catch {
-		return new Set();
+		return [];
 	}
+
+	const rendus = await Promise.all(
+		fichiers
+			.filter((f) => f.endsWith(".png"))
+			.map(async (f): Promise<EcranRendu> => {
+				const screen = f.slice(0, -".png".length);
+				// Le layout est le compte-rendu de ce que la composition a réellement pu poser :
+				// on en dérive la richesse du rendu plutôt que de la stocker dans un manifeste
+				// à maintenir en parallèle des PNG (qui se désynchroniserait au premier rendu).
+				try {
+					const layout = JSON.parse(
+						await fs.readFile(path.join(dossier, `${screen}.layout.json`), "utf8"),
+					) as { objects?: { sprite?: unknown; visible?: boolean }[] };
+					const sprites = (layout.objects ?? []).filter((o) => o.sprite && o.visible).length;
+					return { screen, sprites };
+				} catch {
+					// Layout illisible : l'image existe, on la garde en fin de liste plutôt que
+					// de la faire disparaître.
+					return { screen, sprites: 0 };
+				}
+			}),
+	);
+	// Les meilleures reconstructions d'abord. Sans ce tri, l'ordre alphabétique ouvrait la
+	// galerie sur les écrans `fake_vroad_*`, qui ne posent aucun sprite : le mode se présentait
+	// par ses six images vides.
+	return rendus.sort((a, b) => b.sprites - a.sprites || a.screen.localeCompare(b.screen));
 }
 
 export async function generateMetadata({
@@ -325,58 +365,77 @@ export default async function PageModes({
 					);
 				})()}
 
-				{ecransRendus.size > 0 ? (
-					<section className="space-y-2">
-						<h2 className="text-sm font-semibold text-on-surface">
-							Écrans reconstruits{" "}
-							<span className="font-normal text-on-surface-variant">
-								— {ecransRendus.size} sur {mode.counts.screens}, composés depuis les
-								vraies textures + le layout `<code>*_setting.cfg.bin</code>` + l&apos;état
-								produit en exécutant les scripts Lua du mode dans la VM réelle
-							</span>
-						</h2>
-						<p className="max-w-3xl text-sm text-on-surface-variant">
-							Reconstruction data-driven, pas une capture vérifiée : aucune référence pixel
-							n&apos;existe pour ce mode, et le jeu ne stocke la position d&apos;un widget
-							animé nulle part dans les fichiers (seul le repli sur la pose du squelette
-							3D est utilisé) — le placement de certains éléments reste donc approximatif,
-							en particulier les libellés de texte qui peuvent se chevaucher.
-						</p>
-						<ul className="
-        grid grid-cols-1 gap-3
-        sm:grid-cols-2
-        lg:grid-cols-3
-      ">
-							{mode.screens
-								.filter((s) => ecransRendus.has(s.screen))
-								.map((s) => (
-									<li key={s.screen} className="space-y-1 rounded-lg border border-outline-variant p-2">
-										{/* Damier : un écran sans sprite reconnu compose un PNG transparent — sans lui,
-										   ça se lirait comme une image cassée plutôt que comme « rien trouvé ici ». */}
-										<div
-											className="overflow-hidden rounded"
-											style={{
-												backgroundImage:
-													"repeating-conic-gradient(rgb(0 0 0 / 0.08) 0% 25%, transparent 0% 50%)",
-												backgroundSize: "16px 16px",
-											}}
-										>
-											{/* biome-ignore lint/performance/noImgElement: PNG servi par notre route, hors pipeline next/image */}
-											<img
-												src={`/api/mode-tex/${mode.slug}/screens/${s.screen}.png`}
-												alt={s.screen}
-												loading="lazy"
-												className="w-full rounded"
-											/>
-										</div>
-										<p className="truncate font-mono text-xs text-on-surface-variant" title={s.screen}>
-											{s.screen}
-										</p>
-									</li>
-								))}
-						</ul>
-					</section>
-				) : null}
+				{(() => {
+					if (ecransRendus.length === 0) return null;
+					// `lireEcransRendus` trie déjà du plus riche au plus pauvre. Les écrans sans
+					// aucun sprite ne sont pas montrés : leur PNG est transparent, et six vignettes
+					// vides en tête de galerie donnaient du mode une image fausse. On les compte
+					// quand même — un écran qu'on ne sait pas encore composer est une information,
+					// pas quelque chose à cacher.
+					const composes = ecransRendus.filter((e) => e.sprites > 0);
+					const vides = ecransRendus.length - composes.length;
+					if (composes.length === 0) return null;
+					const [vedette, ...suite] = composes;
+					const carte = (e: EcranRendu, grand: boolean) => (
+						<li
+							key={e.screen}
+							className={`
+         space-y-1 rounded-lg border border-outline-variant p-2
+         ${grand ? `
+           sm:col-span-2
+           lg:col-span-3
+         ` : ""}
+       `}
+						>
+							{/* biome-ignore lint/performance/noImgElement: PNG servi par notre route, hors pipeline next/image */}
+							<img
+								src={`/api/mode-tex/${mode.slug}/screens/${e.screen}.png`}
+								alt={`Reconstruction de l’écran ${e.screen}`}
+								loading={grand ? "eager" : "lazy"}
+								className="w-full rounded bg-surface-container"
+							/>
+							<p className="flex items-baseline justify-between gap-2">
+								<span className="truncate font-mono text-xs text-on-surface-variant" title={e.screen}>
+									{e.screen}
+								</span>
+								<span className="shrink-0 text-xs text-on-surface-variant">
+									{e.sprites} sprites
+								</span>
+							</p>
+						</li>
+					);
+					return (
+						<section className="space-y-2">
+							<h2 className="text-sm font-semibold text-on-surface">
+								Écrans reconstruits{" "}
+								<span className="font-normal text-on-surface-variant">
+									— {composes.length} sur {mode.counts.screens}, composés depuis les vraies
+									textures + le layout <code>*_setting.cfg.bin</code> + l&apos;état produit en
+									exécutant les scripts Lua du mode dans la VM réelle. Les mieux reconstruits
+									d&apos;abord.
+								</span>
+							</h2>
+							<p className="max-w-3xl text-sm text-on-surface-variant">
+								Reconstruction data-driven, pas une capture vérifiée : aucune référence pixel
+								n&apos;existe pour ce mode. La position des widgets vient des points d&apos;attache
+								déclarés par les écrans eux-mêmes (<code>CMenuAttachLocator</code>) ; ce qui
+								n&apos;en déclare pas retombe au centre du canvas, d&apos;où des éléments encore
+								empilés sur certains écrans.
+								{vides > 0
+									? ` ${vides} autre${vides > 1 ? "s" : ""} écran${vides > 1 ? "s" : ""} du mode ne pose aucun sprite résoluble et n’est pas affiché ici.`
+									: ""}
+							</p>
+							<ul className="
+         grid grid-cols-1 gap-3
+         sm:grid-cols-2
+         lg:grid-cols-3
+       ">
+								{carte(vedette, true)}
+								{suite.map((e) => carte(e, false))}
+							</ul>
+						</section>
+					);
+				})()}
 
 				{vignettes.length > 0 ? (
 					<section className="space-y-2">
