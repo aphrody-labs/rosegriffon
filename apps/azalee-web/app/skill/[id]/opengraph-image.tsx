@@ -1,3 +1,4 @@
+import { getSkillImageUrl } from "@rosegriffon/azalee/images";
 import { ImageResponse } from "next/og";
 import { wikiService } from "@/lib/wiki-service";
 
@@ -122,9 +123,9 @@ export default async function Image({ params }: { params: Promise<{ id: string }
 					width: 300,
 				}}
 			>
-				{absoluteUrl(skill.image) ? (
+				{absoluteUrl(getSkillImageUrl(skill.internalCode)) ? (
 					<img
-						src={absoluteUrl(skill.image)!}
+						src={absoluteUrl(getSkillImageUrl(skill.internalCode))!}
 						width={180}
 						height={180}
 						style={{

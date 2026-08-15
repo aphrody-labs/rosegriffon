@@ -21,7 +21,7 @@
 
 
 import { createClient } from "../db/provider";
-import { getCharacterFaceUrl, getEmblemImageUrl, resolveAssetUrl } from "../images";
+import { getCharacterFaceUrl, getEmblemImageUrl } from "../images";
 // Table CRC → nom d'emblème (`emNNNNNN`), générée depuis l'index CPK
 // (crc32 standard de chaque `emNNNNNN`). Couvre 206/208 emblèmes réels.
 import emblemCrcMap from "../data/emblem-crc-map.json";
@@ -134,9 +134,13 @@ function resolveTeamEmblem(row: RawTeamRow): string | null {
 			}
 		}
 	}
-	// 2) Repli : `emblem_url` (URL proxy Supabase, souvent HTTP 400 — dernier recours).
-	const fromUrl = resolveAssetUrl(row.emblem_url);
-	if (fromUrl) return fromUrl;
+	// 2) PAS de repli sur `emblem_url` brut : `resolveAssetUrl` renvoie une URL `http…`
+	// telle quelle SANS la vérifier contre le manifeste (son seul gate porte sur les formes
+	// `/storage/…`/`/menu/…`, pas sur une URL déjà absolue) — `emblem_url` en base est ce
+	// même genre d'URL forgée, jamais confrontée aux 542 emblèmes réels. Mesuré : ~20/208
+	// équipes (le CRC de step 1 n'a pas de correspondance dans `emblem-crc-map.json`, ex.
+	// `0x86D317FE` série `aresOrion`) obtenaient ainsi une URL garantie 404 plutôt que le
+	// placeholder que le composant sait déjà afficher (`TeamCard`/`hasEmblem`).
 	return null;
 }
 
