@@ -32,6 +32,8 @@ interface Args {
 	outPath: string;
 	redisDb: string;
 	sqlite: boolean;
+	source: "vfs" | "redis";
+	niers: string;
 }
 
 function parseArgs(argv: string[]): Args {
@@ -45,7 +47,30 @@ function parseArgs(argv: string[]): Args {
 		outPath: path.resolve(get("--out") ?? path.join(appRoot, "data/cpk-index.ndjson.gz")),
 		redisDb: get("--redis-db") ?? process.env.IEV_REDIS_DB ?? "3",
 		sqlite: argv.includes("--sqlite"),
+		// Le VFS par défaut : c'est la seule source qui suit les mises à jour du jeu (cf. le
+		// commentaire de `readVfsIndex`). `--source=redis` garde l'ancien chemin.
+		source: get("--source") === "redis" ? "redis" : "vfs",
+		niers: get("--niers") ?? process.env.NIERS_BIN ?? "/home/ubuntu/niers/target/debug/niers",
 	};
+}
+
+/**
+ * Récupère l'index complet depuis le **VFS live** du jeu, via `niers vfs find --json`.
+ *
+ * C'est la source à préférer : l'index Redis `iev:file:index` n'est réalimenté par rien
+ * d'automatique et se périme silencieusement à chaque mise à jour du jeu. Au 15/08/2026 il
+ * portait 250 800 entrées contre 255 308 dans le VFS — **4 508 fichiers ajoutés par les MAJ
+ * étaient invisibles dans `/cpk`**, alors que `/textures`, `/sons`, `/videos` et `/modeles`,
+ * qui interrogent le VFS live, les voyaient déjà. Rien ne signalait l'écart.
+ *
+ * `niers` monte les CPK et rend `{path, size, cpk}` — exactement ce que l'index demande.
+ * La limite `-n` est explicite : sans elle la commande plafonne à 102 résultats, ce qui
+ * produirait un index tronqué d'allure normale.
+ */
+async function readVfsIndex(niers: string): Promise<CpkEntry[]> {
+	const brut = await $`${niers} vfs find data/ --json -n 400000`.quiet().text();
+	const lignes = JSON.parse(brut) as { path: string; cpk?: string }[];
+	return lignes.filter((e) => e.path && e.cpk).map((e): CpkEntry => [e.path, e.cpk as string]);
 }
 
 /** Récupère l'index complet depuis Redis via `redis-cli HGETALL`. */
@@ -66,11 +91,17 @@ async function readRedisIndex(redisDb: string): Promise<CpkEntry[]> {
 async function main(): Promise<void> {
 	const args = parseArgs(Bun.argv.slice(2));
 
-	const entries = await readRedisIndex(args.redisDb);
+	const entries =
+		args.source === "vfs" ? await readVfsIndex(args.niers) : await readRedisIndex(args.redisDb);
 	if (entries.length === 0) {
-		console.error("[build-cpk-index] index Redis vide — abandon (Redis db3 down ?)");
+		console.error(
+			args.source === "vfs"
+				? `[build-cpk-index] VFS vide — abandon (binaire ${args.niers} absent, ou jeu non installé ?)`
+				: "[build-cpk-index] index Redis vide — abandon (Redis db3 down ?)",
+		);
 		process.exit(1);
 	}
+	console.log(`[build-cpk-index] ${entries.length} entrées depuis ${args.source}`);
 
 	mkdirSync(path.dirname(args.outPath), { recursive: true });
 
