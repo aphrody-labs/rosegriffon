@@ -1,4 +1,18 @@
-export const dynamic = "force-dynamic";
+/**
+ * Rendu incrémental plutôt que `force-dynamic`.
+ *
+ * La fiche ne lit ni cookie ni en-tête (le pont JWT Supabase est désactivé :
+ * `createClient()` ne touche à `headers()` que si on le réactive) — elle
+ * n'avait donc aucune raison d'être recalculée à chaque visite. En
+ * `force-dynamic`, les 993 techniques repayaient trois requêtes SQLite par
+ * affichage, TTFB compris : c'est du budget d'exploration gaspillé pour un
+ * robot d'indexation, et un Core Web Vital dégradé pour tout le monde.
+ *
+ * Une heure de fraîcheur couvre largement le rythme réel de la donnée : le
+ * miroir SQLite n'est échangé qu'une fois par nuit (`azalee-mirror-sync`), et
+ * la republication qui suit repart de toute façon sur un cache vide.
+ */
+export const revalidate = 3600;
 
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
@@ -72,23 +86,39 @@ async function enrichSkillFromDbColumns(skill: Record<string, unknown>): Promise
  * table de liaison porte les autres. Lecture sur la même source que le reste de
  * la fiche (miroir SQLite en prod, Postgres sinon).
  */
-async function fetchSkillVideos(skillId: string): Promise<SkillVideoVariant[]> {
+interface SkillVideos {
+	variants: SkillVideoVariant[];
+	/**
+	 * Date à laquelle la vidéo a été publiée sur cette fiche (`created_at` de la
+	 * ligne la plus ancienne). C'est `uploadDate` du `VideoObject` : zukan ne
+	 * date pas ses vidéos, et Google exige le champ — on donne la seule date
+	 * réelle en notre possession plutôt que d'en inventer une.
+	 */
+	publishedAt: string | null;
+}
+
+async function fetchSkillVideos(skillId: string): Promise<SkillVideos> {
 	try {
 		const supabase = await createClient();
 		const { data } = await supabase
 			.from("inagle_skill_videos")
-			.select("position, label, video_url, poster_url")
+			.select("position, label, video_url, poster_url, created_at")
 			.eq("skill_id", skillId)
 			.order("position", { ascending: true });
-		return (data ?? []).map((row) => ({
-			label: row.label,
-			posterUrl: row.poster_url,
-			position: row.position,
-			videoUrl: row.video_url,
-		}));
+		const rows = data ?? [];
+		const dates = rows.map((row) => row.created_at).filter(Boolean) as string[];
+		return {
+			publishedAt: dates.length > 0 ? dates.toSorted()[0]! : null,
+			variants: rows.map((row) => ({
+				label: row.label,
+				posterUrl: row.poster_url,
+				position: row.position,
+				videoUrl: row.video_url,
+			})),
+		};
 	} catch {
 		// Miroir/Postgres indisponible — la fiche retombe sur `skill.videoUrl`.
-		return [];
+		return { publishedAt: null, variants: [] };
 	}
 }
 
@@ -104,35 +134,84 @@ export async function generateMetadata({
 	const element = skill?.elementName?.fr || "";
 	const power = skill?.power_min ? `Puissance ${skill.power_min}` : "";
 	const tp = skill?.consumeTp ? `${skill.consumeTp} TP` : "";
-	const metaParts = [name, category, element, power, tp].filter(Boolean);
-	const description = `${metaParts.join(" - ")}. Technique spéciale Inazuma Eleven: Victory Road.`;
+	const metaParts = [category, element, power, tp].filter(Boolean);
+
+	// La description du jeu D'ABORD, la fiche technique ensuite.
+	//
+	// Toutes les fiches partageaient auparavant le même gabarit « Nom - Catégorie -
+	// Élément - Puissance - TP », c'est-à-dire un extrait quasi identique d'une
+	// technique à l'autre : rien qui distingue deux tirs de feu de même puissance
+	// dans une page de résultats. Le texte du jeu, lui, est unique par technique —
+	// c'est la seule phrase qui donne une raison de cliquer sur celle-ci plutôt que
+	// sur la voisine. Les chiffres restent, en fin de ligne, quand il reste la place.
+	const gameDesc = (skill?.desc_FR || skill?.desc_EN || "").replace(/\s+/g, " ").trim();
+	const facts = metaParts.join(" · ");
+	const description = gameDesc
+		? `${truncate(gameDesc, 145 - facts.length)} ${facts}`.trim()
+		: `${[name, ...metaParts].join(" - ")}. Technique spéciale Inazuma Eleven: Victory Road.`;
 	const title = `${name} | Inazuma Eleven Victory Road - Azalée`;
 
 	// getSkillImageUrl gate : `skill.image` brut (DB) contredisait la page (`SkillDetail` s'en
 	// détourne déjà, cf. commentaire de la fonction) — servait un og:image 404 sur les 19
 	// techniques `rh*` sans telop (audit d'images azalee, 2026-08-15).
-	const ogImage = getSkillImageUrl(skill?.internalCode, skill?.image);
-	const ogImageUrl = ogImage.startsWith("/") ? `https://azalee.rosegriffon.fr${ogImage}` : ogImage;
+	const telop = getSkillImageUrl(skill?.internalCode, skill?.image);
+
+	// Le poster de la vidéo zukan est une vraie image large (image extraite de
+	// l'animation, ~1280 px) : c'est la carte « grande image » que l'on veut sur X
+	// et Discord. Le telop est une bannière de titre — informative, mais pas une
+	// vignette. On ne bascule en `summary_large_image` que si on a le poster :
+	// annoncer une grande image et servir un telop étroit donne un aperçu vide.
+	const poster = skill?.posterUrl || null;
+	const ogImage = poster || telop;
+	const ogImageUrl =
+		ogImage && ogImage.startsWith("/") ? `https://azalee.rosegriffon.fr${ogImage}` : ogImage;
 
 	return {
 		alternates: { canonical: `/skill/${id}` },
 		description,
+		keywords: [
+			name,
+			skill?.name_EN,
+			skill?.name_JA,
+			category,
+			element,
+			"Inazuma Eleven Victory Road",
+			"technique spéciale",
+			"hissatsu",
+		].filter(Boolean) as string[],
 		openGraph: {
 			description,
-			images: ogImage ? [{ url: ogImageUrl, alt: name }] : [],
+			images: ogImageUrl ? [{ url: ogImageUrl, alt: name }] : [],
 			locale: "fr_FR",
 			siteName: "Azalée - Inazuma Eleven Victory Road",
 			title: `${name} | Azalée`,
 			type: "article",
 			url: `/skill/${id}`,
+			...(skill?.videoUrl
+				? { videos: [{ type: "video/webm", url: skill.videoUrl as string }] }
+				: {}),
 		},
 		title,
 		twitter: {
-			card: "summary",
+			card: poster ? "summary_large_image" : "summary",
 			description,
+			images: ogImageUrl ? [ogImageUrl] : undefined,
 			title: `${name} | Azalée`,
 		},
 	};
+}
+
+/** Coupe sur un mot entier, sans laisser d'espace ni de ponctuation orpheline. */
+function truncate(text: string, max: number): string {
+	if (max < 40) {
+		max = 40;
+	}
+	if (text.length <= max) {
+		return text;
+	}
+	const cut = text.slice(0, max);
+	const lastSpace = cut.lastIndexOf(" ");
+	return `${(lastSpace > 20 ? cut.slice(0, lastSpace) : cut).replace(/[\s,;:.–-]+$/, "")}…`;
 }
 
 export default async function MoveDetailPage({ params }: { params: Promise<{ id: string }> }) {
@@ -186,10 +265,11 @@ export default async function MoveDetailPage({ params }: { params: Promise<{ id:
 	const cutinEntry = getSkillCutin((skill as any).internalCode || id);
 
 	// Vidéos officielles zukan (1 ou 2 variantes selon la technique).
-	const videos = await fetchSkillVideos((skill as any).skillId || id);
+	const { variants: videos, publishedAt } = await fetchSkillVideos((skill as any).skillId || id);
+
+	const pageUrl = `https://azalee.rosegriffon.fr/skill/${id}`;
 
 	const breadcrumbJsonLd = {
-		"@context": "https://schema.org",
 		"@type": "BreadcrumbList",
 		itemListElement: [
 			{ "@type": "ListItem", item: "https://azalee.rosegriffon.fr", name: "Accueil", position: 1 },
@@ -199,15 +279,49 @@ export default async function MoveDetailPage({ params }: { params: Promise<{ id:
 				name: "Techniques",
 				position: 2,
 			},
-			{ "@type": "ListItem", name, position: 3 },
+			{ "@type": "ListItem", item: pageUrl, name, position: 3 },
 		],
+	};
+
+	/**
+	 * `VideoObject` par variante — la seule donnée de cette fiche qui puisse
+	 * prétendre à un résultat enrichi.
+	 *
+	 * Une technique a une ou deux animations officielles (réussite/échec,
+	 * défense/contre-tir) : chacune est une vidéo distincte, avec son propre
+	 * poster et son propre libellé. Les décrire toutes plutôt qu'une seule évite
+	 * de déclarer une page à vidéo unique là où il y en a deux.
+	 *
+	 * `uploadDate` vient de `inagle_skill_videos.created_at` — la date à laquelle
+	 * la vidéo est apparue ici. Zukan ne date pas ses fichiers ; à défaut de cette
+	 * date réelle on n'émettrait pas de `VideoObject` du tout plutôt que d'en
+	 * fabriquer une. Sans vidéo, pas de bloc : un `VideoObject` sans `contentUrl`
+	 * est un balisage qui ment.
+	 */
+	const videoJsonLd = videos
+		.filter((v) => v.videoUrl)
+		.map((v) => ({
+			"@type": "VideoObject",
+			contentUrl: v.videoUrl,
+			description: `${v.label} — ${name}, technique ${category.toLowerCase()} d'élément ${element.toLowerCase()} d'Inazuma Eleven: Victory Road.`,
+			inLanguage: "fr-FR",
+			isFamilyFriendly: true,
+			name: videos.length > 1 ? `${name} (${v.label})` : name,
+			thumbnailUrl: [v.posterUrl, (skill as any).thumbnailUrl].filter(Boolean),
+			...(publishedAt ? { uploadDate: publishedAt } : {}),
+			url: pageUrl,
+		}));
+
+	const jsonLd = {
+		"@context": "https://schema.org",
+		"@graph": [breadcrumbJsonLd, ...videoJsonLd],
 	};
 
 	return (
 		<>
 			<script
 				type="application/ld+json"
-				dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+				dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
 			/>
 			<SkillDetail
 				skill={skill}
