@@ -119,6 +119,16 @@ export function SkillDetail({
 	videos,
 }: SkillDetailProps) {
 	const imageUrl = getSkillImageUrl(skill.skillIDStr, (skill as any).image);
+
+	// La variante affichée est choisie dans le lecteur (colonne de gauche) mais
+	// c'est la barre d'actions (plus bas) qui la télécharge : l'état vit donc ici,
+	// leur premier parent commun. Auparavant le bouton téléchargeait toujours
+	// `skill.videoUrl`, la vidéo de rang 0 — sur les 236 techniques à deux vidéos,
+	// choisir « Échec » puis « Télécharger » rapportait la vidéo de réussite.
+	const variants = buildVideoVariants(skill, videos);
+	const [activeVideoIndex, setActiveVideoIndex] = useState(0);
+	const activeVariant = variants[activeVideoIndex] ?? variants[0];
+
 	const sheetData = (skill as any).sheetData as CommunitySheetData | undefined;
 	const nameJA = (skill as any).name_JA || (skill as any).names?.ja;
 	const nameEN = (skill as any).name_EN || (skill as any).names?.en;
@@ -142,7 +152,14 @@ export function SkillDetail({
 				{/* Left Column: Main Content */}
 				<div className="space-y-4">
 					{/* Video Player Section */}
-					<VideoSection skill={skill} name={name} imageUrl={imageUrl} videos={videos} />
+					<VideoSection
+						skill={skill}
+						name={name}
+						imageUrl={imageUrl}
+						variants={variants}
+						activeIndex={activeVideoIndex}
+						onActiveIndexChange={setActiveVideoIndex}
+					/>
 
 					{/* Title + Alt Names */}
 					<div>
@@ -174,6 +191,8 @@ export function SkillDetail({
 						category={category}
 						element={element}
 						sheetData={sheetData}
+						activeVariant={activeVariant}
+						variantCount={variants.length}
 					/>
 
 					{/* Description Box */}
@@ -210,32 +229,50 @@ export function SkillDetail({
 	);
 }
 
+/**
+ * Variantes vidéo de la technique, dans l'ordre d'affichage.
+ *
+ * Elles viennent de `inagle_skill_videos` ; à défaut (technique non peuplée, ou
+ * lecture DB indisponible) on retombe sur la vidéo principale portée par la
+ * colonne scalaire `video_url`.
+ */
+function buildVideoVariants(skill: Skill, videos?: SkillVideoVariant[]): SkillVideoVariant[] {
+	if (videos && videos.length > 0) {
+		return videos;
+	}
+	const posterUrl = (skill as any).posterUrl as string | null | undefined;
+	return skill.videoUrl
+		? [{ label: "Movie", position: 0, posterUrl: posterUrl ?? null, videoUrl: skill.videoUrl }]
+		: [];
+}
+
 function VideoSection({
 	skill,
 	name,
 	imageUrl,
-	videos,
+	variants,
+	activeIndex,
+	onActiveIndexChange,
 }: {
 	skill: Skill;
 	name: string;
 	imageUrl: string;
-	videos?: SkillVideoVariant[];
+	variants: SkillVideoVariant[];
+	activeIndex: number;
+	onActiveIndexChange: (index: number) => void;
 }) {
 	const [skillImgError, setSkillImgError] = useState(false);
 
-	// Les variantes viennent de `inagle_skill_videos` ; à défaut (technique non
-	// peuplée, ou lecture DB indisponible) on retombe sur la vidéo principale
-	// portée par la colonne scalaire.
-	const posterUrl = (skill as any).posterUrl as string | null | undefined;
-	const variants: SkillVideoVariant[] =
-		videos && videos.length > 0
-			? videos
-			: skill.videoUrl
-				? [{ label: "Movie", position: 0, posterUrl: posterUrl ?? null, videoUrl: skill.videoUrl }]
-				: [];
-
 	if (variants.length > 0) {
-		return <SkillVideoPlayer videos={variants} skillName={name} fallbackPoster={imageUrl} />;
+		return (
+			<SkillVideoPlayer
+				videos={variants}
+				skillName={name}
+				fallbackPoster={imageUrl}
+				activeIndex={activeIndex}
+				onActiveIndexChange={onActiveIndexChange}
+			/>
+		);
 	}
 
 	return (
@@ -269,12 +306,17 @@ function MetaRow({
 	category,
 	element,
 	sheetData,
+	activeVariant,
+	variantCount,
 }: {
 	skill: Skill;
 	name: string;
 	category: string;
 	element: string;
 	sheetData?: CommunitySheetData;
+	/** Variante actuellement affichée par le lecteur — c'est elle qu'on télécharge. */
+	activeVariant?: SkillVideoVariant;
+	variantCount: number;
 }) {
 	const elementIconUrl = getSkillIconUrl(element);
 	const { skillType } = skill as any;
@@ -337,7 +379,14 @@ function MetaRow({
 				)}
 
 				{/* Client Component for Actions */}
-				<SkillVideoActions videoUrl={skill.videoUrl} skillName={name} />
+				<SkillVideoActions
+					videoUrl={activeVariant?.videoUrl ?? skill.videoUrl}
+					skillName={name}
+					// Le nom du fichier porte la variante quand il y en a plusieurs :
+					// deux téléchargements successifs d'une même technique écrasaient
+					// sinon le premier fichier.
+					variantLabel={variantCount > 1 ? activeVariant?.label : undefined}
+				/>
 			</div>
 		</div>
 	);

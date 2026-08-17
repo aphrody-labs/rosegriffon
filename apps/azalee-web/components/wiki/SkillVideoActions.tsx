@@ -6,9 +6,11 @@ import { useState } from "react";
 interface SkillVideoActionsProps {
 	videoUrl?: string;
 	skillName: string;
+	/** Libellé de la variante téléchargée (« Réussite », « Échec »…), s'il y en a plusieurs. */
+	variantLabel?: string;
 }
 
-export function SkillVideoActions({ videoUrl, skillName }: SkillVideoActionsProps) {
+export function SkillVideoActions({ videoUrl, skillName, variantLabel }: SkillVideoActionsProps) {
 	const [isDownloading, setIsDownloading] = useState(false);
 	const [shareConfirmed, setShareConfirmed] = useState(false);
 
@@ -48,12 +50,13 @@ export function SkillVideoActions({ videoUrl, skillName }: SkillVideoActionsProp
 			const blob = await response.blob();
 			const blobUrl = window.URL.createObjectURL(blob);
 
-			// Determine extension
-			const ext = videoUrl.split(".").pop() || "mp4";
+			// Extension réelle du fichier servi : zukan publie du `.webm`, pas du mp4.
+			const ext = videoUrl.split(".").pop() || "webm";
 
+			const base = [skillName, variantLabel].filter(Boolean).join(" ");
 			const link = document.createElement("a");
 			link.href = blobUrl;
-			link.download = `${skillName.replaceAll(/\s+/g, "_")}.${ext}`;
+			link.download = `${base.replaceAll(/\s+/g, "_")}.${ext}`;
 			document.body.append(link);
 			link.click();
 			document.body.removeChild(link);

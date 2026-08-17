@@ -60,7 +60,6 @@ export interface MoveCardProps {
 	powerMax?: number;
 	tensionCost?: number;
 	element?: string;
-	imageUrl?: string;
 	category: string;
 	className?: string;
 	videoUrl?: string;
