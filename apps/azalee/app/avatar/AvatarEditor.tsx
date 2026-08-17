@@ -16,15 +16,16 @@
 
 import Image from "next/image";
 import { useMemo, useState } from "react";
-import type { Catalogue, Categorie, Part } from "./types";
+import type { Catalogue, Categorie, Part, Theme } from "./types";
 
-/** Les cinq volets, calqués sur ce que les données couvrent réellement. */
+/** Les six volets, calqués sur ce que les données couvrent réellement. */
 const VOLETS = [
 	{ cle: "visage", label: "Visage et parts", icone: "face" },
 	{ cle: "physionomie", label: "Physionomie", icone: "accessibility_new" },
 	{ cle: "presets", label: "Visages prédéfinis", icone: "auto_awesome" },
 	{ cle: "identite", label: "Personnalité et voix", icone: "badge" },
 	{ cle: "code", label: "Code de partage", icone: "qr_code_2" },
+	{ cle: "theme", label: "Police et couleurs", icone: "palette" },
 ] as const;
 
 type Volet = (typeof VOLETS)[number]["cle"];
@@ -87,7 +88,15 @@ function Vignette({
 	);
 }
 
-export function AvatarEditor({ catalogue, cdn }: { catalogue: Catalogue; cdn: string }) {
+export function AvatarEditor({
+	catalogue,
+	theme,
+	cdn,
+}: {
+	catalogue: Catalogue;
+	theme: Theme | null;
+	cdn: string;
+}) {
 	const [volet, setVolet] = useState<Volet>("visage");
 	// Les catégories qui ont au moins une part : les autres n'ont rien à montrer.
 	const categories = useMemo(
@@ -494,6 +503,82 @@ export function AvatarEditor({ catalogue, cdn }: { catalogue: Catalogue; cdn: st
 							</tbody>
 						</table>
 					</div>
+				</div>
+			)}
+
+			{volet === "theme" && (
+				<div className="space-y-4">
+					{!theme && (
+						<p className="text-sm italic text-on-surface-variant">
+							Thème injoignable — il est servi sur /ui/theme.json.
+						</p>
+					)}
+					{theme && (
+						<>
+							<section className="space-y-2">
+								<h2 className="text-sm font-bold text-on-surface">
+									Police du jeu ({theme.polices.length} familles)
+								</h2>
+								<p className="text-xs text-on-surface-variant">
+									Les polices du jeu sont des <strong>atlas bitmap</strong> accompagnés de
+									métriques, pas des polices vectorielles : elles ne peuvent pas être chargées
+									comme webfont. Le texte ci-dessous est donc composé côté serveur avec la police
+									latine réelle du jeu, puis servi en PNG.
+								</p>
+								{/* Rendu par /ui/text.png : la vraie police, dans une vraie couleur de la palette. */}
+								{/* eslint-disable-next-line @next/next/no-img-element */}
+								<img
+									src={`${cdn}/ui/text.png?t=${encodeURIComponent("Editeur d'avatar")}&fg=${theme.couleursTexte[0]?.hex.slice(1) ?? "FFFFFF"}`}
+									alt="« Éditeur d'avatar » rendu dans la police du jeu"
+									className="max-w-full"
+								/>
+								<div className="flex flex-wrap gap-1">
+									{theme.polices.map((f) => (
+										<span
+											key={f}
+											className="rounded-lg bg-surface-container px-2 py-1 font-mono text-[11px] text-on-surface-variant"
+										>
+											{f}
+										</span>
+									))}
+								</div>
+							</section>
+
+							<section className="space-y-2">
+								<h2 className="text-sm font-bold text-on-surface">
+									Palette de texte ({theme.couleursTexte.length} couleurs)
+								</h2>
+								<p className="text-xs text-on-surface-variant">
+									Ce sont les couleurs que le moteur de texte du jeu utilise, avec leur variante
+									pour les furigana. Aucune n'est choisie ici — elles sont lues dans les fichiers.
+								</p>
+								<div className="grid grid-cols-[repeat(auto-fill,minmax(9rem,1fr))] gap-2">
+									{theme.couleursTexte.map((c) => (
+										<div
+											key={c.id}
+											className="flex items-center gap-2 rounded-xl border border-outline-variant bg-surface-container-low p-2"
+										>
+											<span
+												className="size-8 shrink-0 rounded-lg border border-outline-variant"
+												style={{ backgroundColor: c.hex }}
+											/>
+											<span
+												className="size-5 shrink-0 rounded border border-outline-variant"
+												style={{ backgroundColor: c.rubiHex }}
+												title={`rubis ${c.rubiHex}`}
+											/>
+											<span className="min-w-0">
+												<span className="block font-mono text-[11px] text-on-surface">{c.hex}</span>
+												<span className="block truncate font-mono text-[10px] text-on-surface-variant">
+													{c.id}
+												</span>
+											</span>
+										</div>
+									))}
+								</div>
+							</section>
+						</>
+					)}
 				</div>
 			)}
 
