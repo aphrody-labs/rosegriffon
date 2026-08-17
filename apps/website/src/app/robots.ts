@@ -25,6 +25,14 @@ export default function robots() {
 				userAgent: "Googlebot-Image",
 			},
 			{
+				// Mediapartners-Google = robot d'AdSense. Il lit le contenu de la page
+				// pour choisir les annonces ; sans autorisation explicite il ne reste que
+				// du remplissage générique, et le revenu s'effondre sans message d'erreur.
+				allow: "/",
+				disallow: ["/api/", "/admin/", "/_next/", "/dashboard/"],
+				userAgent: "Mediapartners-Google",
+			},
+			{
 				allow: "/",
 				disallow: ["/admin/", "/_next/", "/dashboard/"],
 				userAgent: [

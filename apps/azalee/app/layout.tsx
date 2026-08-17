@@ -5,7 +5,7 @@ import { LanguageProvider } from "@/components/providers/language-provider";
 import { SupabaseProvider } from "@/components/providers/SupabaseProvider";
 import { ThemeProvider } from "@/components/providers/theme-provider";
 import { Shell } from "@/components/Shell";
-import { Toaster } from "@rosegriffon/ui";
+import { ADSENSE_CLIENT, AdSenseScript, Toaster } from "@rosegriffon/ui";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -53,6 +53,11 @@ export const metadata: Metadata = {
 	},
 	manifest: "/manifest.webmanifest",
 	metadataBase: new URL("https://azalee.rosegriffon.fr"),
+	// Balise de propriété AdSense. C'est ce que la vérification du tableau de bord
+	// cherche dans le HTML servi ; le script seul ne suffit pas à valider le site.
+	other: {
+		"google-adsense-account": ADSENSE_CLIENT,
+	},
 	openGraph: {
 		locale: "fr_FR",
 		siteName: "Azalée - Inazuma Eleven Victory Road",
@@ -111,6 +116,7 @@ export default function RootLayout({
 				/>
 				{/* Material Symbols: self-hosted in globals.css, no external CSS needed */}
 				<link rel="preconnect" href="https://www.googletagmanager.com" />
+				<link rel="preconnect" href="https://pagead2.googlesyndication.com" />
 				<link rel="author" href="/humans.txt" />
 				<link rel="author" href="https://x.com/yoyo__goat" />
 				{/* Données structurées site-wide : Organization + WebSite + Person (rich results Google). */}
@@ -185,6 +191,12 @@ export default function RootLayout({
 				    JavaScript n'étaient pas comptés.
 				    La CSP de `next.config.ts` autorise déjà googletagmanager.com. */}
 				{GTM_ID && <GoogleTagManager gtmId={GTM_ID} />}
+				{/* Google AdSense — chargeur unique du site. Les annonces automatiques
+				    sont pilotées depuis le tableau de bord, donc aucune page n'a
+				    d'emplacement à déclarer. La CSP de `next.config.ts` autorise les
+				    hôtes correspondants, `frame-src` compris : les annonces vivent dans
+				    des iframes, et sans cette directive l'emplacement reste vide. */}
+				<AdSenseScript />
 				<LanguageProvider>
 					<ThemeProvider
 						attribute="class"
