@@ -1965,6 +1965,10 @@ export const wikiService = {
 				names: { en: h.name_en, fr: h.name_fr, ja: h.name_ja },
 				displayName: h.name_fr || h.name_en || "Inconnu",
 				name_FR: h.name_fr,
+				// `getSkill` expose les deux ; la liste et son JSON-LD lisent
+				// `name_FR || name_EN` — sans ce champ le repli anglais était mort, et
+				// une technique sans nom français serait retombée sur « Technique ».
+				name_EN: h.name_en,
 				power_min: h.power_min,
 				power_max: h.power_max,
 				consumeTp: h.tension_cost,

@@ -36,6 +36,13 @@ interface SkillVideoPlayerProps {
 	/** Image de repli quand la variante n'a pas de poster (icône de la technique). */
 	fallbackPoster?: string;
 	className?: string;
+	/**
+	 * Variante affichée, quand le parent doit la connaître (le bouton
+	 * « Télécharger » de la fiche vit hors du lecteur et doit suivre l'onglet
+	 * choisi). Sans ces deux props, le lecteur gère son onglet tout seul.
+	 */
+	activeIndex?: number;
+	onActiveIndexChange?: (index: number) => void;
 }
 
 export function SkillVideoPlayer({
@@ -43,9 +50,17 @@ export function SkillVideoPlayer({
 	skillName,
 	fallbackPoster,
 	className,
+	activeIndex: controlledIndex,
+	onActiveIndexChange,
 }: SkillVideoPlayerProps) {
-	const [activeIndex, setActiveIndex] = useState(0);
+	const [internalIndex, setInternalIndex] = useState(0);
 	const [failed, setFailed] = useState<Record<number, boolean>>({});
+
+	const activeIndex = controlledIndex ?? internalIndex;
+	const setActiveIndex = (index: number) => {
+		setInternalIndex(index);
+		onActiveIndexChange?.(index);
+	};
 
 	const active = videos[activeIndex];
 	if (!active) {

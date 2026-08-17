@@ -222,7 +222,13 @@ const nextConfig: NextConfig = {
 			`img-src 'self' blob: data:${cdnSrc} ${ASSET_CDN_ORIGIN} https://dxi4wb638ujep.cloudfront.net https://*.inazuma.jp https://lh3.googleusercontent.com https://cdn.discordapp.com https://pbs.twimg.com ${ADS_IMG_SRC}`,
 			`media-src 'self' blob: data:${cdnSrc} ${ASSET_CDN_ORIGIN} https://dxi4wb638ujep.cloudfront.net https://*.inazuma.jp https://video.twimg.com https://pbs.twimg.com ${ADS_IMG_SRC}`,
 			`font-src 'self'${cdnSrc} ${ASSET_CDN_ORIGIN} https://*.gstatic.com`,
-			`connect-src 'self' blob:${cdnSrc} ${ASSET_CDN_ORIGIN} https://www.google-analytics.com https://www.googletagmanager.com ${ADS_CONNECT_SRC}`,
+			// CloudFront est aussi en `connect-src`, pas seulement en `media-src` : le
+			// bouton « Télécharger » d'une fiche technique fait un `fetch()` sur le
+			// `.webm` pour le récupérer en blob et forcer l'enregistrement
+			// (`SkillVideoActions`). Sans cette source, la CSP bloque la requête et le
+			// bouton dégrade silencieusement en ouverture d'onglet — le visiteur voit
+			// la vidéo se lire au lieu de se télécharger, sans un mot d'erreur.
+			`connect-src 'self' blob:${cdnSrc} ${ASSET_CDN_ORIGIN} https://dxi4wb638ujep.cloudfront.net https://www.google-analytics.com https://www.googletagmanager.com ${ADS_CONNECT_SRC}`,
 			`frame-src ${ADS_FRAME_SRC}`,
 			"frame-ancestors 'none'",
 			"base-uri 'self'",
