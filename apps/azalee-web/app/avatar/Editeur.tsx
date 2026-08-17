@@ -57,9 +57,12 @@ const G = {
 	rubriqueY: (253 / 1440) * 100,
 	rubriqueH: (71 / 1440) * 100,
 	rubriquePas: (90.5 / 1440) * 100,
-	panneauX: (1614 / 2560) * 100,
-	panneauY: (262 / 1440) * 100,
-	panneauW: ((2470 - 1614) / 2560) * 100,
+	// Recalage mesuré du panneau : bornes relevées à x=1645..2438 et y=287 contre 1614..2559 et
+	// 262 en référence — 31 px trop à droite, 25 px trop bas, 152 px trop étroit. Les 14 px de
+	// marge transparente du sprite de chaque côté sont inclus dans la largeur.
+	panneauX: (1583 / 2560) * 100,
+	panneauY: (237 / 1440) * 100,
+	panneauW: (973 / 2560) * 100,
 	panneauH: ((1281 - 262) / 1440) * 100,
 	ongletsX: [50, 56.8, 63.5, 70.2, 77, 83.8],
 } as const;
