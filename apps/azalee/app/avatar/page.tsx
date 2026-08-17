@@ -26,9 +26,8 @@
  * `menu_text`, pas d'une liste écrite à la main.
  */
 import type { Metadata } from "next";
-import { AvatarEditor } from "./AvatarEditor";
-import { GameScreen } from "./GameScreen";
-import type { Catalogue, Theme } from "./types";
+import { Editeur } from "./Editeur";
+import type { Catalogue } from "./types";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -46,16 +45,6 @@ const CDN = process.env.NEXT_PUBLIC_CDN_ORIGIN ?? "https://cdn.rosegriffon.fr";
  * Charge le catalogue résolu. `null` si la source est injoignable — la page rend alors son
  * cadre en le disant, plutôt qu'une 500 : une source absente n'est pas une page cassée.
  */
-async function chargerTheme(): Promise<Theme | null> {
-	try {
-		const reponse = await fetch(`${CDN}/ui/theme.json`, { cache: "no-store" });
-		if (!reponse.ok) return null;
-		return (await reponse.json()) as Theme;
-	} catch {
-		return null;
-	}
-}
-
 async function chargerCatalogue(): Promise<Catalogue | null> {
 	try {
 		const reponse = await fetch(`${CDN}/avatar/catalog.json`, { cache: "no-store" });
@@ -67,7 +56,7 @@ async function chargerCatalogue(): Promise<Catalogue | null> {
 }
 
 export default async function Page() {
-	const [catalogue, theme] = await Promise.all([chargerCatalogue(), chargerTheme()]);
+	const catalogue = await chargerCatalogue();
 
 	if (!catalogue) {
 		return (
@@ -82,26 +71,5 @@ export default async function Page() {
 		);
 	}
 
-	const parts = catalogue.categories.reduce((n, c) => n + c.parts.length, 0);
-	const couleurs = catalogue.categories.reduce((n, c) => n + c.couleurs.length, 0);
-	const curseurs = catalogue.curseurs.reduce((n, g) => n + g.params.length, 0);
-
-	return (
-		<div className="space-y-6">
-			{/* L'écran du jeu, avec ses propres assets — pas l'habillage d'azalée. */}
-			<GameScreen catalogue={catalogue} cdn={CDN} />
-
-			{/* Les données derrière l'écran, pour qui veut les chiffres plutôt que l'image. */}
-			<details className="rounded-3xl border border-outline-variant bg-surface-container-low p-4">
-				<summary className="cursor-pointer text-sm font-medium text-on-surface">
-					Les données derrière l'écran — {parts} parts, {couleurs} couleurs, {curseurs} curseurs,{" "}
-					{catalogue.presets.length} visages prédéfinis, code de partage de{" "}
-					{catalogue.codePartage.bits} bits
-				</summary>
-				<div className="mt-4">
-					<AvatarEditor catalogue={catalogue} theme={theme} cdn={CDN} />
-				</div>
-			</details>
-		</div>
-	);
+	return <Editeur catalogue={catalogue} cdn={CDN} />;
 }
