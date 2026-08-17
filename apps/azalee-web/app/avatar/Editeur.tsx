@@ -286,6 +286,29 @@ export function Editeur({
 		return res ? `${cdn}/model-edit/_facebase/${res}.glb` : null;
 	}, [catalogue.modelesDeBase.visages, categories, choix, morphologie, cdn]);
 
+	// Layout de l'écran de la rubrique courante : le catalogue nomme l'écran, la route sert son
+	// layout, et ses positions viennent des points d'attache du jeu. Chargé à la demande.
+	const [layoutRubrique, setLayoutRubrique] = useState<Layout | null>(null);
+	const ecran = active?.ecran ?? null;
+	useEffect(() => {
+		if (!ecran) {
+			setLayoutRubrique(null);
+			return;
+		}
+		let annule = false;
+		void fetch(`${cdn}/avatar/layout/${ecran}.json`)
+			.then((r) => (r.ok ? (r.json() as Promise<Layout>) : null))
+			.then((l) => {
+				if (!annule) setLayoutRubrique(l);
+			})
+			.catch(() => {
+				if (!annule) setLayoutRubrique(null);
+			});
+		return () => {
+			annule = true;
+		};
+	}, [ecran, cdn]);
+
 	const iOnglet = ONGLETS.findIndex((o) => o.cle === onglet);
 
 	// L'écran est monté dans `document.body` : posé dans le flux de la page, il restait sous la
@@ -312,7 +335,10 @@ export function Editeur({
 			    à 153 px au lieu de 163, soit un facteur 0,94 sur chaque position). */}
 			<div className="relative overflow-hidden" style={{ width: "100vw", height: "100vh" }}>
 				{layout ? (
-					<LayoutRender layout={layout} cdn={cdn} />
+					<>
+						<LayoutRender layout={layout} cdn={cdn} />
+						{layoutRubrique && <LayoutRender layout={layoutRubrique} cdn={cdn} />}
+					</>
 				) : (
 					// Sans layout, le fond seul plutôt qu'un écran vide.
 					// eslint-disable-next-line @next/next/no-img-element
