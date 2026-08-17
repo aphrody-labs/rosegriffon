@@ -932,6 +932,61 @@ export function Editeur({
 					</Panneau>
 				)}
 
+
+				{/* Barre du bas : retour à gauche, commandes au centre, validation à droite. */}
+				<div className="absolute inset-x-0 bottom-0 flex items-center justify-between px-[2%] pb-[1%]">
+					<button type="button" aria-label="Retour" className="relative h-[4.2%]">
+						{/* eslint-disable-next-line @next/next/no-img-element */}
+						<img src={`${cdn}${S.retour}`} alt="" className="h-full w-auto" />
+					</button>
+
+					<div className="flex items-center gap-[1.5vw]">
+						{[
+							{ libelle: "Choisir", icone: "icon_cmd_on_type01" },
+							{ libelle: "Zoom", icone: "icon_cmd_on_type02" },
+							{ libelle: "Tourner", icone: "icon_cmd_on_type03" },
+							{ libelle: "Expression", icone: "icon_cmd_on_type04" },
+							{ libelle: "Modèle", icone: "icon_cmd_on_type11" },
+						].map(({ libelle, icone }) => (
+							<span key={libelle} className="flex items-center gap-[0.4vw]">
+								{/* eslint-disable-next-line @next/next/no-img-element */}
+								<img
+									src={`${cdn}${ICN}/${icone}.png`}
+									alt=""
+									className="h-[1.4vw] w-auto"
+									aria-hidden
+								/>
+								<Txt t={libelle} cdn={cdn} h="1vw" />
+							</span>
+						))}
+					</div>
+
+					{/* Validation : applique le visage choisi comme photo du compte connecté. */}
+					<button
+						type="button"
+						disabled={enregistrement}
+						onClick={() => {
+							const partChoisie = categories
+								.flatMap((c) => c.parts)
+								.find((p) => Object.values(choix).includes(p.id));
+							if (!partChoisie?.icone) {
+								setMessageValidation("Choisis un visage");
+								return;
+							}
+							demarrerEnregistrement(async () => {
+								const r = await definirPhotoDepuisAvatar(partChoisie.icone as string);
+								setMessageValidation(r.error ? r.error : "Photo enregistrée");
+							});
+						}}
+						className="relative flex items-center"
+					>
+						{/* eslint-disable-next-line @next/next/no-img-element */}
+						<img src={`${cdn}${S.valider}`} alt="" className="h-[3vw] w-auto" aria-hidden />
+						<span className="absolute inset-0 flex items-center justify-center px-[8%]">
+							<Txt t={messageValidation} cdn={cdn} h="38%" />
+						</span>
+					</button>
+				</div>
 			</div>
 		</div>,
 		document.body,
