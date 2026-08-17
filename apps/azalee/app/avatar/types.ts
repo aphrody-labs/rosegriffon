@@ -98,6 +98,14 @@ export type Catalogue = {
 		alphabet: string[];
 		emplacements: Emplacement[];
 	};
+	/**
+	 * Les rubriques de l'éditeur dans l'ordre où le jeu les affiche, extraites de la suite
+	 * contiguë de hachages de libellés du script `chara_edit_list_menu`.
+	 *
+	 * L'ordre et les libellés sont établis ; l'association d'une rubrique à une catégorie
+	 * technique (`faceSettingType`) ne l'est pas — elle se fait dans le code du menu.
+	 */
+	rubriques: { hash: string; libelle: string }[];
 	categories: Categorie[];
 	presets: Preset[];
 	avatarsFichiers: {

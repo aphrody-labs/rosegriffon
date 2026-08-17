@@ -139,6 +139,32 @@ export function AvatarEditor({ catalogue, cdn }: { catalogue: Catalogue; cdn: st
 				))}
 			</nav>
 
+			{/* Les rubriques telles que le jeu les nomme et les ordonne. Elles ne sont PAS
+			    appariées aux catégories techniques ci-dessous : cette association se fait dans le
+			    code du menu, et rien dans les fichiers ne la donne. */}
+			{volet === "visage" && catalogue.rubriques.length > 0 && (
+				<div className="space-y-2 rounded-2xl border border-outline-variant bg-surface-container-low p-4">
+					<p className="text-xs font-medium uppercase tracking-wider text-on-surface-variant">
+						Rubriques de l'éditeur, dans l'ordre du jeu
+					</p>
+					<ol className="flex flex-wrap gap-2">
+						{catalogue.rubriques.map((r, i) => (
+							<li
+								key={r.hash}
+								className="rounded-xl bg-surface-container px-2.5 py-1 text-xs text-on-surface"
+							>
+								<span className="mr-1.5 tabular-nums text-on-surface-variant">{i + 1}.</span>
+								{r.libelle}
+							</li>
+						))}
+					</ol>
+					<p className="text-[11px] italic text-on-surface-variant">
+						Libellés et ordre lus dans le script de l'écran de liste. Leur correspondance avec les
+						catégories techniques ci-dessous n'est pas établie — elle est faite par le code du jeu.
+					</p>
+				</div>
+			)}
+
 			{volet === "visage" && active && (
 				<div className="
       grid gap-4
