@@ -102,7 +102,7 @@ const ONGLETS = [
 	{ cle: "style", icone: "icon_menu01", libelle: "Style" },
 	{ cle: "physionomie", icone: "icon_menu02", libelle: "Physionomie" },
 	{ cle: "visage", icone: "icon_menu03", libelle: "Visage et coupe de cheveux" },
-	{ cle: "tenue", icone: "icon_menu04", libelle: "Tenue" },
+	{ cle: "habits", icone: "icon_menu04", libelle: "Habits" },
 	{ cle: "stats", icone: "icon_menu05", libelle: "Stats" },
 	{ cle: "nom", icone: "icon_menu06", libelle: "Nom" },
 ] as const;
@@ -242,7 +242,6 @@ export function Editeur({
 	const [choix, setChoix] = useState<Record<number, string>>({});
 	const [morphologie, setMorphologie] = useState(0);
 	const [taille, setTaille] = useState(7);
-	const [tenue, setTenue] = useState(0);
 	const [personnalite, setPersonnalite] = useState(0);
 	const [modele, setModele] = useState(0);
 	const [voix, setVoix] = useState<string | null>(null);
@@ -630,18 +629,68 @@ export function Editeur({
 				)}
 
 				{/* Tenue */}
-				{onglet === "tenue" && (
-					<Panneau cdn={cdn} titre="Tenue">
+				{onglet === "habits" && (
+					<Panneau cdn={cdn} titre="Habits">
 						<div className="grow overflow-y-auto pr-[2%]">
-							{catalogue.tenues.map((t, i) => (
-								<Plaque
-									key={t.hash}
-									cdn={cdn}
-									libelle={`Tenue ${i + 1}`}
-									choisie={i === tenue}
-									onClick={() => setTenue(i)}
-								/>
-							))}
+							{[
+								{ libelle: "Col", fst: 19 },
+								{ libelle: "Manches", fst: 20 },
+								{ libelle: "Ourlet", fst: 21 },
+							].map(({ libelle, fst }) => {
+								const cat = catalogue.categories.find((c) => c.faceSettingType === fst);
+								if (!cat) return null;
+								return (
+									<div key={fst} className="mb-[4%]">
+										<Txt t={libelle} cdn={cdn} h="1vw" className="mb-[1%]" />
+										<div className="flex gap-[3%]">
+											{cat.parts.map((p, i) => {
+												const on = choix[fst] === p.id;
+												return (
+													<button
+														key={`${p.id}-${i}`}
+														type="button"
+														onClick={() => setChoix((c) => ({ ...c, [fst]: on ? "" : p.id }))}
+														className="relative flex w-[22%] flex-col items-center"
+													>
+														{on && (
+															// eslint-disable-next-line @next/next/no-img-element
+															<img
+																src={`${cdn}${S.cadreChoisi}`}
+																alt=""
+																className="absolute inset-0 size-full"
+																aria-hidden
+															/>
+														)}
+														<Txt
+															t={String(i).padStart(2, "0")}
+															cdn={cdn}
+															couleur="9AA6B2"
+															h="0.9vw"
+															className="self-start"
+														/>
+														{p.icone && (
+															// eslint-disable-next-line @next/next/no-img-element
+															<img
+																src={`${cdn}/avatar/icon/${p.icone}.png`}
+																alt=""
+																className="relative aspect-square w-full object-contain"
+															/>
+														)}
+														{on && (
+															// eslint-disable-next-line @next/next/no-img-element
+															<img
+																src={`${cdn}${S.coche}`}
+																alt=""
+																className="absolute right-[4%] top-0 w-[26%]"
+															/>
+														)}
+													</button>
+												);
+											})}
+										</div>
+									</div>
+								);
+							})}
 						</div>
 					</Panneau>
 				)}
