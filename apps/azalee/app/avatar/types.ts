@@ -113,6 +113,17 @@ export type Catalogue = {
 	 * technique (`faceSettingType`) ne l'est pas — elle se fait dans le code du menu.
 	 */
 	rubriques: { hash: string; libelle: string }[];
+	/**
+	 * Les libellés de chaque panneau de l'éditeur, lus dans le script Lua qui les affiche.
+	 *
+	 * Un panneau porte le nom de son script (`chara_edit_parts_menu_status`) et la liste ordonnée
+	 * des libellés que ce script référence — titres de sections, noms de curseurs, choix, messages
+	 * d'aide. Le texte est déjà dépouillé des marqueurs de style du jeu, et les glyphes spéciaux
+	 * (`gaiji`) sont rendus à part pour être posés comme images.
+	 *
+	 * C'est la source de tous les textes de l'interface : aucun libellé n'est écrit à la main.
+	 */
+	panneaux: { nom: string; libelles: { hash: string; libelle: string; gaiji: string[] }[] }[];
 	categories: Categorie[];
 	presets: Preset[];
 	avatarsFichiers: {
