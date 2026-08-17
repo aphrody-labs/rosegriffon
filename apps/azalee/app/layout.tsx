@@ -4,8 +4,9 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { LanguageProvider } from "@/components/providers/language-provider";
 import { SupabaseProvider } from "@/components/providers/SupabaseProvider";
 import { ThemeProvider } from "@/components/providers/theme-provider";
+import { AdSenseGate } from "@/components/AdSenseGate";
 import { Shell } from "@/components/Shell";
-import { ADSENSE_CLIENT, AdSenseScript, Toaster } from "@rosegriffon/ui";
+import { ADSENSE_CLIENT, Toaster } from "@rosegriffon/ui";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -182,7 +183,11 @@ export default function RootLayout({
 					}}
 				/>
 			</head>
-			<body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+			<body className={`
+     ${geistSans.variable}
+     ${geistMono.variable}
+     antialiased
+   `}>
 				{/* Google Tag Manager — composant officiel de `@next/third-parties`.
 				    Il remplace un `<Script>` écrit à la main qui codait en dur le
 				    conteneur `GTM-WLLFJZF8` : l'identifiant vient désormais de
@@ -196,7 +201,9 @@ export default function RootLayout({
 				    d'emplacement à déclarer. La CSP de `next.config.ts` autorise les
 				    hôtes correspondants, `frame-src` compris : les annonces vivent dans
 				    des iframes, et sans cette directive l'emplacement reste vide. */}
-				<AdSenseScript />
+				{/* Pas sur les pages plein écran : la bannière d'ancrage y recouvrait l'écran de jeu.
+				    Cf. `components/AdSenseGate.tsx`. */}
+				<AdSenseGate />
 				<LanguageProvider>
 					<ThemeProvider
 						attribute="class"

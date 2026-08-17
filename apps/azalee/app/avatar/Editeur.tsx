@@ -34,6 +34,7 @@ import { definirPhotoDepuisAvatar } from "./actions";
 import { H, MORPHOLOGIES, resolveur } from "./libelles";
 import { Modele3D } from "./Modele3D";
 import {
+	CentreStats,
 	PanHabits,
 	PanNom,
 	PanPersonnalite,
@@ -300,8 +301,16 @@ export function Editeur({ catalogue, cdn }: { catalogue: Catalogue; cdn: string 
 
 	return createPortal(
 		<div
-			className="fixed inset-0 flex items-center justify-center"
+			className="flex items-center justify-center"
 			style={{
+				// `position` et `inset` en style INLINE, pas par classe : la classe utilitaire ne
+				// suffisait pas ici — l'élément restait dans le flux et sa hauteur se limitait à son
+				// contenu, laissant paraître le fond de la page sous l'écran sur ~80 px.
+				position: "fixed",
+				top: 0,
+				left: 0,
+				width: "100%",
+				height: "100%",
 				zIndex: 2147483000,
 				backgroundImage: `url(${cdn}${A01}/avatar01_00/avatar01_00.png)`,
 				backgroundSize: "100% auto",
@@ -318,6 +327,17 @@ export function Editeur({ catalogue, cdn }: { catalogue: Catalogue; cdn: string 
 					</div>
 				)}
 
+				{/* Panneau central des statistiques : le jeu le pose à gauche du panneau de droite,
+				    entre le modèle et lui (emprise relevée sur la capture de « Stats de base »). */}
+				{onglet === "stats" && rubrique === 0 && (
+					<div
+						className="absolute"
+						style={{ left: "41.4%", top: "18%", width: "19%", height: "70.5%" }}
+					>
+						<CentreStats ctx={ctx} />
+					</div>
+				)}
+
 				{/* Bandeau, titre et onglets */}
 				<div
 					className="absolute inset-x-0 top-0 flex items-center"
@@ -326,9 +346,17 @@ export function Editeur({ catalogue, cdn }: { catalogue: Catalogue; cdn: string 
 						background: `linear-gradient(90deg, ${C.bandeauGauche} 0%, ${C.bandeauDroite} 100%)`,
 					}}
 				>
-					<span className="ml-[2%] flex h-full items-center gap-[1vw]">
+					<span className="ml-[2%] flex h-full shrink-0 items-center gap-[1vw]">
 						<Sprite cdn={cdn} src={`${MM2}/icon_header_avatar01.png`} className="h-[62%] w-auto" />
-						<Txt t={txt(H.titre)} cdn={cdn} couleur="FFFFFF" h="42%" />
+						{/* `max-w-full` rognait le titre ("Éditeur d'avatai") : le texte du jeu est une
+						    image, sa largeur doit rester libre. */}
+						<Txt
+							t={txt(H.titre)}
+							cdn={cdn}
+							couleur="FFFFFF"
+							h="42%"
+							className="!max-w-none"
+						/>
 					</span>
 
 					{/* Badges de bascule d'onglet, aux deux bouts de la rangée, comme le jeu. */}
