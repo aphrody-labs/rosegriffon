@@ -254,7 +254,6 @@ export function Editeur({
 	/** Sélecteurs de voix : genre et type de ton, les deux champs que portent les données. */
 	const [genreVoix, setGenreVoix] = useState(1);
 	const [tonVoix, setTonVoix] = useState(0);
-	const [modele, setModele] = useState(0);
 	const [voix, setVoix] = useState<string | null>(null);
 	const [enregistrement, demarrerEnregistrement] = useTransition();
 	const [messageValidation, setMessageValidation] = useState("Suivant");
@@ -842,76 +841,60 @@ export function Editeur({
 				)}
 
 				{/* Modèles : les avatars prêts du jeu */}
+				{/* Style : le choix du genre, deux vignettes numérotées avec le libellé du choix
+				    courant au-dessus — disposition de la capture. Les deux valeurs (1, 2) sont
+				    celles que portent les données (`gender` des parts, `genre` des voix). */}
 				{onglet === "style" && (
 					<Panneau cdn={cdn} titre="Style">
-						<div className="grow overflow-y-auto pr-[2%]">
-							{catalogue.avatarsFichiers.map((a, i) => (
-								<Plaque
-									key={a.nom}
-									cdn={cdn}
-									libelle={a.libelle ?? `Modèle ${i + 1}`}
-									choisie={i === modele}
-									onClick={() => setModele(i)}
-								/>
+						<Txt
+							t={genreVoix === 1 ? "Masculin" : "Féminin"}
+							cdn={cdn}
+							h="1.2vw"
+							className="mb-[4%] self-center"
+						/>
+						<div className="flex justify-center gap-[6%]">
+							{[1, 2].map((g) => (
+								<button
+									key={g}
+									type="button"
+									onClick={() => setGenreVoix(g)}
+									className="relative flex w-[36%] flex-col items-center"
+								>
+									{g === genreVoix && (
+										// eslint-disable-next-line @next/next/no-img-element
+										<img
+											src={`${cdn}${S.cadreChoisi}`}
+											alt=""
+											className="absolute inset-0 size-full"
+											aria-hidden
+										/>
+									)}
+									<Txt
+										t={String(g).padStart(2, "0")}
+										cdn={cdn}
+										couleur="9AA6B2"
+										h="1.4vw"
+										className="self-start"
+									/>
+									{/* eslint-disable-next-line @next/next/no-img-element */}
+									<img
+										src={`${cdn}${ICN}/icon_body_type0${g}.png`}
+										alt=""
+										className="relative aspect-square w-[70%] object-contain"
+									/>
+									{g === genreVoix && (
+										// eslint-disable-next-line @next/next/no-img-element
+										<img
+											src={`${cdn}${S.coche}`}
+											alt=""
+											className="absolute right-[8%] top-[2%] w-[18%]"
+										/>
+									)}
+								</button>
 							))}
 						</div>
 					</Panneau>
 				)}
-
-				{/* Barre du bas : retour à gauche, commandes au centre, validation à droite —
-				    disposition et sprites relevés sur les captures du jeu. */}
-				<div className="absolute inset-x-0 bottom-0 flex items-center justify-between px-[2%] pb-[1%]">
-					<button type="button" aria-label="Retour" className="relative h-[4.2%]">
-						{/* eslint-disable-next-line @next/next/no-img-element */}
-						<img src={`${cdn}${S.retour}`} alt="" className="h-full w-auto" />
-					</button>
-
-					<div className="flex items-center gap-[1.5vw]">
-						{["Choisir", "Zoom", "Tourner", "Expression", "Modèle"].map((c) => (
-							<span key={c} className="relative flex items-center gap-[0.3vw]">
-								{/* eslint-disable-next-line @next/next/no-img-element */}
-								<img src={`${cdn}${S.cmdBadge}`} alt="" className="h-[1.2vw] w-auto" aria-hidden />
-								{/* eslint-disable-next-line @next/next/no-img-element */}
-								<img
-									src={`${cdn}${S.cmdOff}`}
-									alt=""
-									className="h-[2.4vw] w-auto"
-									aria-hidden
-								/>
-								<span className="absolute inset-0 flex items-center justify-center">
-									<Txt t={c} cdn={cdn} h="42%" />
-								</span>
-							</span>
-						))}
-					</div>
-
-					{/* Validation : le jeu propose « Suivant ». Ici il applique le visage choisi comme
-					    photo du compte connecté (l'identité vient de la session). */}
-					<button
-						type="button"
-						disabled={enregistrement}
-						onClick={() => {
-							const partChoisie = categories
-								.flatMap((c) => c.parts)
-								.find((p) => Object.values(choix).includes(p.id));
-							if (!partChoisie?.icone) {
-								setMessageValidation("Choisis un visage");
-								return;
-							}
-							demarrerEnregistrement(async () => {
-								const r = await definirPhotoDepuisAvatar(partChoisie.icone as string);
-								setMessageValidation(r.error ? r.error : "Photo enregistrée");
-							});
-						}}
-						className="relative flex items-center"
-					>
-						{/* eslint-disable-next-line @next/next/no-img-element */}
-						<img src={`${cdn}${S.valider}`} alt="" className="h-[3vw] w-auto" aria-hidden />
-						<span className="absolute inset-0 flex items-center justify-center px-[8%]">
-							<Txt t={messageValidation} cdn={cdn} h="38%" />
-						</span>
-					</button>
-				</div>
 
 				{/* Nom : le jeu ouvre un clavier ; ici un champ, sans habillage étranger */}
 				{onglet === "nom" && (
