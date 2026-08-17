@@ -39,8 +39,7 @@ import { createPortal } from "react-dom";
 import CharacterModelViewer from "@/components/wiki/CharacterModelViewer";
 
 import { definirPhotoDepuisAvatar } from "./actions";
-import { LayoutRender } from "./LayoutRender";
-import type { Catalogue, Categorie, Layout, Part } from "./types";
+import type { Catalogue, Categorie, Part } from "./types";
 
 /** Proportions relevées sur les captures, en pourcentage du cadre. */
 const G = {
@@ -220,12 +219,9 @@ function Plaque({
 
 export function Editeur({
 	catalogue,
-	layout,
 	cdn,
 }: {
 	catalogue: Catalogue;
-	/** Layout de l'écran : sa disposition vient des fichiers du jeu (points d'attache). */
-	layout: Layout | null;
 	cdn: string;
 }) {
 	const [onglet, setOnglet] = useState<Onglet>("visage");
@@ -286,29 +282,6 @@ export function Editeur({
 		return res ? `${cdn}/model-edit/_facebase/${res}.glb` : null;
 	}, [catalogue.modelesDeBase.visages, categories, choix, morphologie, cdn]);
 
-	// Layout de l'écran de la rubrique courante : le catalogue nomme l'écran, la route sert son
-	// layout, et ses positions viennent des points d'attache du jeu. Chargé à la demande.
-	const [layoutRubrique, setLayoutRubrique] = useState<Layout | null>(null);
-	const ecran = active?.ecran ?? null;
-	useEffect(() => {
-		if (!ecran) {
-			setLayoutRubrique(null);
-			return;
-		}
-		let annule = false;
-		void fetch(`${cdn}/avatar/layout/${ecran}.json`)
-			.then((r) => (r.ok ? (r.json() as Promise<Layout>) : null))
-			.then((l) => {
-				if (!annule) setLayoutRubrique(l);
-			})
-			.catch(() => {
-				if (!annule) setLayoutRubrique(null);
-			});
-		return () => {
-			annule = true;
-		};
-	}, [ecran, cdn]);
-
 	const iOnglet = ONGLETS.findIndex((o) => o.cle === onglet);
 
 	// L'écran est monté dans `document.body` : posé dans le flux de la page, il restait sous la
@@ -334,21 +307,17 @@ export function Editeur({
 			    cadre 16/9 plein, et une mise en boîte à lettres les décalait toutes (bandeau mesuré
 			    à 153 px au lieu de 163, soit un facteur 0,94 sur chaque position). */}
 			<div className="relative overflow-hidden" style={{ width: "100vw", height: "100vh" }}>
-				{layout ? (
-					<>
-						<LayoutRender layout={layout} cdn={cdn} />
-						{layoutRubrique && <LayoutRender layout={layoutRubrique} cdn={cdn} />}
-					</>
-				) : (
-					// Sans layout, le fond seul plutôt qu'un écran vide.
-					// eslint-disable-next-line @next/next/no-img-element
-					<img
-						src={`${cdn}${S.fond}`}
-						alt=""
-						className="absolute inset-0 size-full object-cover"
-						aria-hidden
-					/>
-				)}
+				{/* Fond du jeu. Le rendu par layout (`LayoutRender`) est ecrit et sa route servie,
+				    mais pas branche ici : l'interpretation de ses transforms en coordonnees ecran
+				    n'est pas resolue — le fond finissait hors cadre et la colonne perdait 28 points
+				    de pixels proches. Mesure avant de rebrancher. */}
+				{/* eslint-disable-next-line @next/next/no-img-element */}
+				<img
+					src={`${cdn}${S.fond}`}
+					alt=""
+					className="absolute inset-0 size-full object-cover"
+					aria-hidden
+				/>
 
 				{/* Le modèle, au centre comme dans le jeu (emprise relevée sur les captures). */}
 				{modeleUrl && (

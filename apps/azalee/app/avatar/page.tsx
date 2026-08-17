@@ -70,10 +70,7 @@ async function chargerCatalogue(): Promise<Catalogue | null> {
 }
 
 export default async function Page() {
-	const [catalogue, layout] = await Promise.all([
-		chargerCatalogue(),
-		chargerLayout("chara_edit_menu"),
-	]);
+	const catalogue = await chargerCatalogue();
 
 	if (!catalogue) {
 		return (
@@ -88,5 +85,5 @@ export default async function Page() {
 		);
 	}
 
-	return <Editeur catalogue={catalogue} layout={layout} cdn={CDN} />;
+	return <Editeur catalogue={catalogue} cdn={CDN} />;
 }
