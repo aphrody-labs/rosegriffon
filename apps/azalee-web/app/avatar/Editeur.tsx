@@ -331,7 +331,12 @@ export function Editeur({
 	return createPortal(
 		<div
 			className="fixed inset-0 flex items-center justify-center bg-black"
-			style={{ zIndex: 2147483000 }}
+			style={{
+				zIndex: 2147483000,
+				backgroundImage: `url(${cdn}${S.fond})`,
+				backgroundSize: "cover",
+				backgroundPosition: "center",
+			}}
 		>
 			{/* La scène occupe EXACTEMENT le cadre : les proportions ci-dessus sont relevées sur un
 			    cadre 16/9 plein, et une mise en boîte à lettres les décalait toutes (bandeau mesuré
@@ -341,9 +346,6 @@ export function Editeur({
 				style={{
 					width: "100vw",
 					height: "100vh",
-					backgroundImage: `url(${cdn}${S.fond})`,
-					backgroundSize: "cover",
-					backgroundPosition: "center",
 				}}
 			>
 				{/* Fond du jeu. Le rendu par layout (`LayoutRender`) est ecrit et sa route servie,
