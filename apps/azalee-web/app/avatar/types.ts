@@ -124,6 +124,12 @@ export type Catalogue = {
 	 * C'est la source de tous les textes de l'interface : aucun libellé n'est écrit à la main.
 	 */
 	panneaux: { nom: string; libelles: { hash: string; libelle: string; gaiji: string[] }[] }[];
+	/**
+	 * Les sept axes du radar de statistiques, dans l'ordre du dessin (frappe en haut, puis sens
+	 * horaire). Les libellés viennent de `menu_text` comme les autres ; leur appartenance à cet
+	 * écran vient des captures, l'éditeur ne les nommant pas dans ses propres scripts.
+	 */
+	statsRadar?: { hash: string; libelle: string }[];
 	categories: Categorie[];
 	presets: Preset[];
 	avatarsFichiers: {

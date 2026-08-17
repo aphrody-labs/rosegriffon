@@ -31,7 +31,7 @@ import {
 	SECTIONS_HABITS,
 	type Section,
 } from "./structure";
-import { A01, Barre, BOUTS, Curseur, FONT, GRIS, ICN, Ligne, Note, Pagination, Sprite, Titre, Txt, TxtGaiji, Vignette } from "./ui";
+import { A01, Barre, BOUTS, Curseur, FONT, GRIS, ICN, ICN2, Ligne, Note, Pagination, Sprite, Titre, Txt, TxtGaiji, Vignette } from "./ui";
 import type { Catalogue, Categorie } from "./types";
 
 /** Ce que tous les panneaux reçoivent. */
@@ -395,7 +395,7 @@ export function PanPhysionomie({ ctx }: { ctx: Contexte }) {
 							key={d}
 							cdn={ctx.cdn}
 							numero={String(i + 1).padStart(2, "0")}
-							image={`${ctx.cdn}${ICN}/icon_body_type0${i}.png`}
+							image={`${ctx.cdn}${i === 0 ? ICN2 : ICN}/icon_body_type0${i}.png`}
 							choisie={d === 0}
 							onClick={() => ctx.setMorphologie(i)}
 							className="aspect-[4/5] w-[26%]"
@@ -532,6 +532,118 @@ export function PanStatsBase({ ctx }: { ctx: Contexte }) {
 	);
 }
 
+/**
+ * Le panneau central de « Stats de base » : l'élément, le radar des sept statistiques et les
+ * techniques à apprendre.
+ *
+ * Ce que le jeu montre ici et que rien ne permet de reproduire : les **valeurs** des sept
+ * statistiques et la liste des techniques. Aucune des seize listes de `chara_edit` n'en porte —
+ * elles dépendent du personnage créé, calculé ailleurs. Le jeu a lui-même un sprite pour ce cas,
+ * `status_blank01` (des « ? »), et c'est lui qui est posé : la structure est juste, les valeurs
+ * sont annoncées inconnues au lieu d'être inventées.
+ */
+export function CentreStats({ ctx }: { ctx: Contexte }) {
+	const axes = ctx.catalogue.statsRadar ?? [];
+	const element = ctx.valeurs["element"] ?? 0;
+	return (
+		<div className="flex size-full flex-col gap-[3%]">
+			{/* Bandeau d'élément */}
+			<div className="relative flex h-[9%] shrink-0 items-center gap-[4%] px-[4%]">
+				<Sprite
+					cdn={ctx.cdn}
+					src={`${A01}/avatar01_05/param_plate01.png`}
+					className="absolute inset-0 size-full"
+				/>
+				<Sprite
+					cdn={ctx.cdn}
+					src={`${ICN}/icon_cmd_on_type0${element + 1}.png`}
+					className="relative h-[70%] w-auto"
+				/>
+				<Txt t={ctx.txt(ELEMENTS[element] ?? "")} cdn={ctx.cdn} h="46%" className="relative" />
+			</div>
+
+			{/* Radar : les sept axes nommés, valeurs inconnues */}
+			<div className="relative grow">
+				<Sprite
+					cdn={ctx.cdn}
+					src={`${A01}/avatar01_10/status_frame01.png`}
+					className="absolute inset-0 size-full"
+				/>
+				<div className="relative size-full">
+					{axes.map((a, i) => {
+						const angle = (i / axes.length) * 2 * Math.PI - Math.PI / 2;
+						const x = 50 + 38 * Math.cos(angle);
+						const y = 50 + 38 * Math.sin(angle);
+						return (
+							<span
+								key={a.hash}
+								className="absolute flex -translate-x-1/2 -translate-y-1/2 flex-col items-center"
+								style={{ left: `${x}%`, top: `${y}%` }}
+							>
+								<Sprite
+									cdn={ctx.cdn}
+									src={`${A01}/avatar01_10/status_blank01.png`}
+									className="h-[1.1vw] w-auto"
+								/>
+								<Txt t={a.libelle} cdn={ctx.cdn} couleur={GRIS} h="0.85vw" />
+							</span>
+						);
+					})}
+					{/* Le treillis du radar : les axes seuls, sans surface — une surface affirmerait des
+					    valeurs que rien ne fournit. */}
+					<svg viewBox="0 0 100 100" className="absolute inset-0 size-full" aria-hidden>
+						{axes.map((a, i) => {
+							const angle = (i / axes.length) * 2 * Math.PI - Math.PI / 2;
+							return (
+								<line
+									key={a.hash}
+									x1="50"
+									y1="50"
+									x2={50 + 26 * Math.cos(angle)}
+									y2={50 + 26 * Math.sin(angle)}
+									stroke="#8FC7F5"
+									strokeWidth="0.4"
+								/>
+							);
+						})}
+						<polygon
+							points={axes
+								.map((_, i) => {
+									const angle = (i / axes.length) * 2 * Math.PI - Math.PI / 2;
+									return `${50 + 26 * Math.cos(angle)},${50 + 26 * Math.sin(angle)}`;
+								})
+								.join(" ")}
+							fill="none"
+							stroke="#8FC7F5"
+							strokeWidth="0.5"
+						/>
+					</svg>
+				</div>
+			</div>
+
+			{/* Techniques à apprendre : les emplacements du jeu, valeurs inconnues */}
+			<div className="relative h-[30%] shrink-0 px-[4%] py-[2%]">
+				<Sprite
+					cdn={ctx.cdn}
+					src={`${A01}/avatar01_05/waza_plate01.png`}
+					className="absolute inset-0 size-full"
+				/>
+				<div className="relative flex size-full flex-col justify-start gap-[4%]">
+					<Txt t={ctx.txt(H.techniquesAApprendre)} cdn={ctx.cdn} couleur={GRIS} h="14%" />
+					{[0, 1, 2].map((i) => (
+						<Sprite
+							key={i}
+							cdn={ctx.cdn}
+							src={`${A01}/avatar01_10/status_blank02.png`}
+							className="h-[20%] w-full"
+						/>
+					))}
+				</div>
+			</div>
+		</div>
+	);
+}
+
 /** Les quatre positions du jeu, choisies par leur icône. */
 function Positions({ ctx, cle }: { ctx: Contexte; cle: string }) {
 	const choisie = ctx.valeurs[cle] ?? 0;
@@ -555,7 +667,7 @@ function Positions({ ctx, cle }: { ctx: Contexte; cle: string }) {
 					/>
 					<Sprite
 						cdn={ctx.cdn}
-						src={`${ICN}/icon_cmd_position0${n}.png`}
+						src={`${ICN2}/icon_cmd_position0${n}.png`}
 						className="relative h-[1.5vw] w-auto"
 					/>
 				</button>

@@ -27,8 +27,14 @@ import type { Libelle } from "./libelles";
 
 /** Racine des sprites de l'éditeur dans le dump servi par le CDN. */
 export const A01 = "/dx11/menu/161_avatar/avatar01";
-/** Icônes communes (builds, éléments, positions, morphologies). */
+/** Icônes communes (builds, éléments, morphologies 01 à 07). */
 export const ICN = "/dx11/menu/200_icon/15_icon_common";
+/**
+ * Second atlas d'icônes communes, **localisé** : le jeu y range ce qui porte du texte dessiné —
+ * les pastilles de position (`icon_cmd_positionNN`, où « DÉF » et « MIL » sont peints dans
+ * l'image) et la morphologie `00`. Une copie par langue existe ; celle-ci est la française.
+ */
+export const ICN2 = "/dx11/menu/200_icon/15_icon_common2/fr";
 /** Gaiji : les glyphes images de la police du jeu. */
 export const FONT = "/dx11/font";
 
