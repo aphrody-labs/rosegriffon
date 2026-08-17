@@ -36,6 +36,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { createPortal } from "react-dom";
 
+import CharacterModelViewer from "@/components/wiki/CharacterModelViewer";
+
 import { definirPhotoDepuisAvatar } from "./actions";
 import type { Catalogue, Categorie, Part } from "./types";
 
@@ -225,6 +227,14 @@ export function Editeur({ catalogue, cdn }: { catalogue: Catalogue; cdn: string 
 		[cdn],
 	);
 
+	// Modèle affiché au centre. Le mapping morphologie → ressource n'est pas devine : le
+	// catalogue le fournit (`modelesDeBase.visages[].resources`, un modèle par morphologie).
+	const modeleUrl = useMemo(() => {
+		const visage = catalogue.modelesDeBase.visages[0];
+		const res = visage?.resources[morphologie] ?? visage?.resources[0];
+		return res ? `${cdn}/model-edit/_facebase/${res}.glb` : null;
+	}, [catalogue.modelesDeBase.visages, morphologie, cdn]);
+
 	const iOnglet = ONGLETS.findIndex((o) => o.cle === onglet);
 
 	// L'écran est monté dans `document.body` : posé dans le flux de la page, il restait sous la
@@ -257,6 +267,16 @@ export function Editeur({ catalogue, cdn }: { catalogue: Catalogue; cdn: string 
 					className="absolute inset-0 size-full object-cover"
 					aria-hidden
 				/>
+
+				{/* Le modèle, au centre comme dans le jeu (emprise relevée sur les captures). */}
+				{modeleUrl && (
+					<div
+						className="absolute"
+						style={{ left: "26%", top: "13%", width: "34%", height: "84%" }}
+					>
+						<CharacterModelViewer glbUrl={modeleUrl} name="" inline />
+					</div>
+				)}
 
 				{/* Bandeau et onglets */}
 				<div
