@@ -6,60 +6,56 @@
  * ## Règle de composition
  *
  * Tout ce qui s'affiche ici existe dans le jeu : ses sprites, sa police, ses libellés, ses voix.
- * Pas d'identifiant technique, pas de compte, pas de hachage, pas d'icône de bibliothèque web.
- * Un élément absent du jeu est absent d'ici.
+ * Pas d'identifiant technique, pas de hachage à l'écran, pas d'icône de bibliothèque web. Un
+ * élément absent du jeu est absent d'ici.
  *
- * | élément | sprite du jeu |
- * |---|---|
- * | fond | `avatar01_00` |
- * | onglets | `icon_menu0N_{on,off}` (atlas `mainmenu90_02_2`) |
- * | languette | `edit_type_base01` |
- * | plaques | `list_base01_{on,off}` + `icon_edit_listNN_{on,off}` |
- * | panneau | `edit_win_base01` |
- * | vignette | `preset_list01`, sélection `preset_list01_ol`, validation `edit_check01` |
- * | curseur | `edit_bar_base02_{on,off}`, `edit_bar_gauge01_{on,off}` |
- * | page | `icon_menu_arrow01` |
- * | textes | police bitmap du jeu, composée par `/ui/text.png` |
- * | voix | banques `sound_asset/<locale>/<banque>.acb`, décodées par `/audio/…` |
+ * - les **libellés** viennent de `menu_text` par hachage (`libelles.ts`) ;
+ * - la **structure** des écrans vient des `objbin` du jeu (`structure.ts`) ;
+ * - les **sprites** viennent des atlas `menu/161_avatar/avatar01`, `menu/20_cmn`, `font/` ;
+ * - les **briques** (curseur, vignette, ligne, note) sont dans `ui.tsx` ;
+ * - les **panneaux** des six onglets sont dans `panneaux.tsx`.
  *
- * Les sprites sont **pré-décodés** dans le dump disque et servis en statique : les décoder à la
- * volée passait par le décodeur live, qui rend 502 pendant les redémarrages du service.
+ * ## Géométrie du cadre
  *
- * ## Géométrie
+ * Relevée sur les captures du jeu (2560×1440) : bandeau jusqu'à y = 163 ; plaques de rubrique de
+ * x = 34 à 533, première à y = 253, hauteur 71, pas 90,5 ; panneau de x = 1583 à 2556, y = 237.
  *
- * Relevée sur des captures du jeu (2560×1440) : bandeau jusqu'à y = 163 ; plaques de rubrique de
- * x = 34 à 533, première à y = 294, hauteur 71, pas 90,5 ; panneau de x = 1614 à 2470, y = 262 à
- * 1281.
- *
- * **Correction d'une affirmation fausse écrite ici auparavant** : la position des widgets EST
- * dans les fichiers du jeu. `nie_formats::menu::attach_slots` la résout depuis les
- * `CMenuAttachLocator`, et le layout exporté place 14 des 18 objets de cet écran dans son
- * canevas. Le relevé sur captures reste utilisé parce que la conversion de ces transforms en
- * coordonnées écran (ancre, échelle, repère) n'est pas encore juste — un premier essai plaçait
- * le fond hors cadre — pas parce que la donnée manquerait. Cf. `/avatar/layout/<ecran>.json`.
+ * La position des widgets EST dans les fichiers du jeu — `nie_formats::menu::attach_slots` la
+ * résout depuis les `CMenuAttachLocator`, et le layout exporté place 14 des 18 objets de cet écran
+ * dans son canevas. Le relevé sur captures reste utilisé parce que la conversion de ces transforms
+ * en coordonnées écran (ancre, échelle, repère) n'est pas encore juste, pas parce que la donnée
+ * manquerait. Cf. `/avatar/layout/<ecran>.json`.
  */
 
 import { useCallback, useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { createPortal } from "react-dom";
 
 import { definirPhotoDepuisAvatar } from "./actions";
+import { H, MORPHOLOGIES, resolveur } from "./libelles";
 import { Modele3D } from "./Modele3D";
-import type { Catalogue, Categorie, Part } from "./types";
+import {
+	PanHabits,
+	PanNom,
+	PanPersonnalite,
+	PanPhysionomie,
+	PanStatsBase,
+	PanStyle,
+	PanVisage,
+	PanVoix,
+	type Contexte,
+} from "./panneaux";
+import { RUBRIQUES_STATS, RUBRIQUES_VISAGE } from "./structure";
+import type { Catalogue } from "./types";
+import { A01, BLEU, Curseur, FONT, Sprite, Txt } from "./ui";
 
 /** Proportions relevées sur les captures, en pourcentage du cadre. */
 const G = {
 	bandeauH: (163 / 1440) * 100,
 	colonneX: (34 / 2560) * 100,
 	colonneW: ((533 - 34) / 2560) * 100,
-	// Recalage mesuré : la première plaque tombait 41 px trop bas par rapport à la référence
-	// (bande claire à y=394 contre 353). 294 est le bord relevé sur la capture ; l'écart vient de
-	// la marge transparente du sprite (opaque sur 54 de ses 72 px), compensée ici.
 	rubriqueY: (253 / 1440) * 100,
 	rubriqueH: (71 / 1440) * 100,
 	rubriquePas: (90.5 / 1440) * 100,
-	// Recalage mesuré du panneau : bornes relevées à x=1645..2438 et y=287 contre 1614..2559 et
-	// 262 en référence — 31 px trop à droite, 25 px trop bas, 152 px trop étroit. Les 14 px de
-	// marge transparente du sprite de chaque côté sont inclus dans la largeur.
 	panneauX: (1583 / 2560) * 100,
 	panneauY: (237 / 1440) * 100,
 	panneauW: (973 / 2560) * 100,
@@ -67,222 +63,114 @@ const G = {
 	ongletsX: [50, 56.8, 63.5, 70.2, 77, 83.8],
 } as const;
 
-/** Teintes échantillonnées sur les captures. */
-const C = { bandeauGauche: "#0EAFFF", bandeauDroite: "#1067F8", texte: "047AFF" } as const;
+/** Teintes du bandeau, échantillonnées sur les captures. */
+const C = { bandeauGauche: "#0EAFFF", bandeauDroite: "#1067F8" } as const;
 
-const A01 = "/dx11/menu/161_avatar/avatar01";
-const MM = "/dx11/menu/100_mainmenu/mainmenu90/mainmenu90_02_2";
-/** Atlas d'interface communs à tous les écrans (barre de commandes, bouton de retour). */
 const CMN = "/dx11/menu/20_cmn";
+const MM = "/dx11/menu/100_mainmenu/mainmenu90/mainmenu90_02_2";
 const MM2 = "/dx11/menu/100_mainmenu/mainmenu90/mainmenu90_02";
-/** Icônes communes à tous les écrans, et gaiji (glyphes spéciaux) de la police du jeu.
-    Localisés via l'index de régions du dépôt plutôt qu'en balayant les atlas à l'aveugle. */
-const ICN = "/dx11/menu/200_icon/15_icon_common";
-const GAIJI = "/dx11/font";
-const S = {
-	fond: `${A01}/avatar01_00/avatar01_00.png`,
-	// Plaques de la colonne, avec leurs trois états. J'avais bascule sur `category_btn_*_l`
-	// (428×144) en croyant mieux coller : ses pixels sont GRIS (RGBA moyen 185,185,185) alors
-	// que le jeu affiche des plaques BLANCHES — `list_base01_off` mesure 250,251,251. Mesure
-	// avant substitution.
-	plaqueOn: `${A01}/avatar01_02/list_base01_on.png`,
-	plaqueOff: `${A01}/avatar01_02/list_base01_off.png`,
-	plaqueSurvol: `${A01}/avatar01_02/list_base01_ol.png`,
-	voixOff: `${A01}/avatar01_48/voice_base01_off.png`,
-	voixOn: `${A01}/avatar01_48/voice_base01_on.png`,
-	iconeSon: `${A01}/avatar01_48/icon_sound01.png`,
-	retour: `${CMN}/cmn03/cmn03_01/cmd_back_base01.png`,
-	cmdOff: `${CMN}/cmn03/cmn03_02/cmd_btn_base01_off.png`,
-	cmdOn: `${CMN}/cmn03/cmn03_02/cmd_btn_base01_on.png`,
-	valider: `${CMN}/cmn03/cmn03_03/cmd_press_btn_base_on01.png`,
-	coche: `${GAIJI}/gaiji_check01_on.png`,
-	// Curseur de sélection du jeu (vert, mesuré RGBA 59,167,77) : calque `cmn05_01_cursor`,
-	// nommé `cur01` — mes recherches sur « cursor » le manquaient.
-	curseur: `${CMN}/cmn05/cmn05_01/cur01.png`,
-	// Icône d'en-tête de l'éditeur, nommée par le bytecode Lua de cet écran. Le motif rose
-	// visible à cet emplacement sur les captures n'est pas identifié dans les atlas balayés.
-	enTete: `${MM2}/icon_header_avatar01.png`,
-	cmdBadge: `${GAIJI}/gaiji_cmd_type01.png`,
-	flecheG: `${A01}/avatar01_11/arrow01_l.png`,
-	flecheD: `${A01}/avatar01_11/arrow01_r.png`,
-	languette: `${A01}/avatar01_03/edit_type_base01.png`,
-	panneau: `${A01}/avatar01_10/edit_win_base01.png`,
-	cadre: `${A01}/avatar01_17/preset_list01.png`,
-	cadreChoisi: `${A01}/avatar01_17/preset_list01_ol.png`,
-	barreOff: `${A01}/avatar01_13/edit_bar_base02_off.png`,
-	barreOn: `${A01}/avatar01_13/edit_bar_base02_on.png`,
-	jaugeFond: `${A01}/avatar01_13/edit_bar_gauge_base01.png`,
-	jauge: `${A01}/avatar01_13/edit_bar_gauge01_on.png`,
-	fleche: `${MM}/icon_menu_arrow01.png`,
-} as const;
+/** Sol du jeu sous le sprite de fond : la couleur de sa dernière ligne opaque. */
+const SOL = "#BEF2FC";
 
-/** Les six onglets du bandeau, avec le libellé que le jeu affiche dessous. */
+/** Les six onglets, dans l'ordre du jeu, avec l'icône et le hachage de leur libellé. */
 const ONGLETS = [
-	{ cle: "style", icone: "icon_menu_avatar01", libelle: "Style" },
-	{ cle: "physionomie", icone: "icon_menu_avatar02", libelle: "Physionomie" },
-	{ cle: "visage", icone: "icon_menu_avatar03", libelle: "Visage et coupe de cheveux" },
-	{ cle: "habits", icone: "icon_menu_avatar04", libelle: "Habits" },
-	{ cle: "stats", icone: "icon_menu_avatar05", libelle: "Stats" },
-	{ cle: "nom", icone: "icon_menu_avatar06", libelle: "Nom" },
+	{ cle: "style", icone: "icon_menu_avatar01", hash: H.ongletStyle },
+	{ cle: "physionomie", icone: "icon_menu_avatar02", hash: H.ongletPhysionomie },
+	{ cle: "visage", icone: "icon_menu_avatar03", hash: H.ongletVisage },
+	{ cle: "habits", icone: "icon_menu_avatar04", hash: H.ongletHabits },
+	{ cle: "stats", icone: "icon_menu_avatar05", hash: H.ongletStats },
+	{ cle: "nom", icone: "icon_menu_avatar06", hash: H.ongletNom },
 ] as const;
 
 type Onglet = (typeof ONGLETS)[number]["cle"];
 
 /**
- * Grille de la page de vignettes, par rubrique, **relevée sur les captures du jeu** :
- * l'échantillon de visage est en 3×3, la coupe de cheveux en 4×4, la forme de visage sur quatre
- * colonnes. Les rubriques sans capture gardent le défaut plutôt qu'une disposition inventée.
+ * Les commandes de la barre du bas, par onglet — celles que les captures du jeu montrent.
+ *
+ * Chaque entrée est `[badge de touche, hachage du libellé]`. Les badges sont les gaiji du jeu
+ * (`gaiji_mouse_l`, `gaiji_arrow_ud`, `gaiji_x`…), pas des glyphes de police web.
  */
-const GRILLES: Record<number, { colonnes: number; lignes: number }> = {
-	0: { colonnes: 3, lignes: 3 },
-	1: { colonnes: 4, lignes: 2 },
-	3: { colonnes: 4, lignes: 4 },
+const COMMANDES: Record<Onglet, [string, string][]> = {
+	style: [
+		["gaiji_mouse_l", H.choisir],
+		["gaiji_arrow_ud", H.zoom],
+		["gaiji_arrow_lr", H.tourner],
+		["gaiji_n", H.expression],
+		["gaiji_v", H.modele],
+	],
+	physionomie: [
+		["gaiji_mouse_l", H.choisir],
+		["gaiji_arrow_ud", H.zoom],
+		["gaiji_arrow_lr", H.tourner],
+		["gaiji_n", H.expression],
+		["gaiji_v", H.modele],
+	],
+	visage: [
+		["gaiji_mouse_l", H.choisir],
+		["gaiji_arrow_ud", H.zoom],
+		["gaiji_arrow_lr", H.tourner],
+		["gaiji_n", H.expression],
+		["gaiji_x", H.cacherCheveux],
+		["gaiji_v", H.modele],
+	],
+	habits: [
+		["gaiji_mouse_l", H.choisir],
+		["gaiji_arrow_ud", H.zoom],
+		["gaiji_arrow_lr", H.tourner],
+		["gaiji_x", H.cacherCheveux],
+		["gaiji_v", H.modele],
+	],
+	stats: [
+		["gaiji_mouse_l", H.choisir],
+		["gaiji_arrow_ud", H.zoom],
+		["gaiji_arrow_lr", H.tourner],
+		["gaiji_x", H.apercuPoses],
+		["gaiji_v", H.modele],
+	],
+	nom: [
+		["gaiji_mouse_l", H.choisir],
+		["gaiji_arrow_ud", H.zoom],
+		["gaiji_arrow_lr", H.tourner],
+		["gaiji_x", H.voirApparence],
+		["gaiji_v", H.modele],
+	],
 };
 
-/** Grille par défaut, celle de l'échantillon de visage. */
-const GRILLE_DEFAUT = { colonnes: 3, lignes: 3 };
-
-/** Un texte composé dans la police du jeu. */
-function Txt({
-	t,
-	cdn,
-	couleur = C.texte,
-	h,
-	className,
-}: {
-	t: string;
-	cdn: string;
-	couleur?: string;
-	h: string;
-	className?: string;
-}) {
-	if (!t) return null;
-	return (
-		// eslint-disable-next-line @next/next/no-img-element
-		<img
-			src={`${cdn}/ui/text.png?t=${encodeURIComponent(t)}&fg=${couleur}`}
-			alt={t}
-			style={{ height: h }}
-			className={`
-     w-auto max-w-full object-contain
-     ${className ?? ""}
-   `}
-		/>
-	);
-}
-
-/** Le panneau de droite du jeu, sur son sprite. */
-function Panneau({
-	cdn,
-	titre,
-	children,
-}: {
-	cdn: string;
-	titre: string;
-	children: React.ReactNode;
-}) {
-	return (
-		<div
-			className="absolute"
-			style={{
-				left: `${G.panneauX}%`,
-				top: `${G.panneauY}%`,
-				width: `${G.panneauW}%`,
-				height: `${G.panneauH}%`,
-			}}
-		>
-			{/* eslint-disable-next-line @next/next/no-img-element */}
-			<img
-				src={`${cdn}${S.panneau}`}
-				alt=""
-				className="absolute inset-0 size-full"
-				aria-hidden
-			/>
-			<div className="relative flex h-full flex-col px-[6%] py-[4%]">
-				<Txt t={titre} cdn={cdn} h="7%" className="mb-[3%] shrink-0" />
-				{children}
-			</div>
-		</div>
-	);
-}
-
-/** Une plaque du jeu, cliquable, avec son libellé. */
-function Plaque({
-	cdn,
-	libelle,
-	choisie,
-	onClick,
-	hauteur = "9%",
-	ouverte = false,
-}: {
-	cdn: string;
-	libelle: string;
-	choisie: boolean;
-	onClick: () => void;
-	hauteur?: string;
-	/** Rubrique ouverte : le jeu passe alors la plaque en bleu (`category_btn_on_l`). */
-	ouverte?: boolean;
-}) {
-	return (
-		<button
-			type="button"
-			onClick={onClick}
-			className="relative mb-[1.5%] flex w-full shrink-0 items-center"
-			style={{ height: hauteur, minHeight: "2.1vw" }}
-		>
-			{/* eslint-disable-next-line @next/next/no-img-element */}
-			<img
-				src={`${cdn}${ouverte ? S.plaqueOn : choisie ? S.plaqueSurvol : S.plaqueOff}`}
-				alt=""
-				className="absolute inset-0 size-full"
-				aria-hidden
-			/>
-			<Txt
-				t={libelle}
-				cdn={cdn}
-				couleur={ouverte ? "FFFFFF" : C.texte}
-				h="52%"
-				className="relative ml-[6%]"
-			/>
-		</button>
-	);
-}
-
-export function Editeur({
-	catalogue,
-	cdn,
-}: {
-	catalogue: Catalogue;
-	cdn: string;
-}) {
-	const [onglet, setOnglet] = useState<Onglet>("visage");
+export function Editeur({ catalogue, cdn }: { catalogue: Catalogue; cdn: string }) {
+	const [onglet, setOnglet] = useState<Onglet>("style");
 	const [rubrique, setRubrique] = useState(0);
-	const [page, setPage] = useState(0);
-	const [choix, setChoix] = useState<Record<number, string>>({});
+	const [choix, setChoixBrut] = useState<Record<number, string>>({});
+	const [valeurs, setValeursBrut] = useState<Record<string, number>>({});
+	const [pages, setPagesBrut] = useState<Record<string, number>>({});
+	const [genre, setGenre] = useState(0);
 	const [morphologie, setMorphologie] = useState(0);
-	const [taille, setTaille] = useState(7);
-	const [personnalite, setPersonnalite] = useState(0);
-	/** Sous-rubrique de l'onglet Stats : 0 = stats de base, 1 = personnalité, 2 = voix. */
-	const [sousStats, setSousStats] = useState(2);
-	/** Sélecteurs de voix : genre et type de ton, les deux champs que portent les données. */
-	const [genreVoix, setGenreVoix] = useState(1);
-	const [tonVoix, setTonVoix] = useState(0);
+	const [ligneOuverte, setLigneOuverte] = useState<string | null>(null);
+	const [champs, setChampsBrut] = useState<Record<string, string>>({});
 	const [voix, setVoix] = useState<string | null>(null);
 	const [enregistrement, demarrerEnregistrement] = useTransition();
-	const [messageValidation, setMessageValidation] = useState("Suivant");
+	const [messageFin, setMessageFin] = useState<string | null>(null);
 	const audio = useRef<HTMLAudioElement | null>(null);
 
-	const categories = useMemo(
-		() => catalogue.categories.filter((c) => c.parts.length > 0),
-		[catalogue.categories],
+	const lib = useMemo(() => resolveur(catalogue), [catalogue]);
+	const txt = useCallback((hash: string) => lib(hash)?.libelle ?? "", [lib]);
+
+	const setChoix = useCallback(
+		(cat: number, id: string) =>
+			setChoixBrut((c) => ({ ...c, [cat]: c[cat] === id ? "" : id })),
+		[],
 	);
-	const rubriques = useMemo(() => catalogue.rubriques.slice(0, 10), [catalogue.rubriques]);
-	const active: Categorie | undefined = categories[Math.min(rubrique, categories.length - 1)];
-	const grille = GRILLES[rubrique] ?? GRILLE_DEFAUT;
-	const parPage = grille.colonnes * grille.lignes;
-	const pages = active ? Math.max(1, Math.ceil(active.parts.length / parPage)) : 1;
-	const visibles = active ? active.parts.slice(page * parPage, page * parPage + parPage) : [];
-	const morphologies = catalogue.modelesDeBase.morphologies;
+	const setValeur = useCallback(
+		(cle: string, v: number) => setValeursBrut((s) => ({ ...s, [cle]: v })),
+		[],
+	);
+	const setPage = useCallback(
+		(cle: string, n: number) => setPagesBrut((s) => ({ ...s, [cle]: n })),
+		[],
+	);
+	const setChamp = useCallback(
+		(cle: string, v: string) => setChampsBrut((s) => ({ ...s, [cle]: v })),
+		[],
+	);
 
 	/** Joue une banque de voix du jeu, décodée à la volée. */
 	const jouer = useCallback(
@@ -297,22 +185,16 @@ export function Editeur({
 		[cdn],
 	);
 
-	// Modèle affiché au centre. Le mapping morphologie → ressource n'est pas devine : le
-	// catalogue le fournit (`modelesDeBase.visages[].resources`, un modèle par morphologie).
-	// Modèle affiché au centre. Priorité à la part choisie : le catalogue donne ses chemins VFS
-	// réels, dont on tire le dossier et le nom que sert `/model-edit/`. À défaut, le visage de la
-	// morphologie courante — mapping fourni par les données, pas deviné.
-	// Modèle affiché au centre : l'avatar est un EMPILEMENT de pièces, pas un modèle unique.
-	// On assemble donc le visage de la morphologie courante (mapping fourni par le catalogue)
-	// avec chaque part choisie qui possède un modèle sous `20_EDIT/`, et `/model-avatar/` rend
-	// le GLB combiné. Les chemins viennent des données, aucun n'est deviné.
+	// Modèle affiché au centre : l'avatar est un EMPILEMENT de pièces, pas un modèle unique. On
+	// assemble le visage de la morphologie courante (mapping fourni par le catalogue) avec chaque
+	// part choisie qui possède un modèle sous `20_EDIT/`, et `/model-avatar/` rend le GLB combiné.
 	const modeleUrl = useMemo(() => {
 		const pieces: string[] = [];
 		const visage = catalogue.modelesDeBase.visages[0];
 		const res = visage?.resources[morphologie] ?? visage?.resources[0];
 		if (res) pieces.push(`_facebase/${res}`);
 
-		for (const c of categories) {
+		for (const c of catalogue.categories) {
 			const id = choix[c.faceSettingType];
 			if (!id) continue;
 			const part = c.parts.find((p) => p.id === id);
@@ -325,13 +207,62 @@ export function Editeur({
 		}
 		if (pieces.length === 0) return null;
 		return `${cdn}/model-avatar/${pieces.join("+")}.glb`;
-	}, [catalogue.modelesDeBase.visages, categories, choix, morphologie, cdn]);
+	}, [catalogue.modelesDeBase.visages, catalogue.categories, choix, morphologie, cdn]);
+
+	/** Applique l'avatar composé comme photo du compte : la vignette du visage choisi. */
+	const appliquer = useCallback(() => {
+		const cat = catalogue.categories.find((c) => c.faceSettingType === 1);
+		const id = choix[1];
+		const icone =
+			cat?.parts.find((p) => p.id === id)?.icone ??
+			cat?.parts.find((p) => p.icone)?.icone ??
+			null;
+		if (!icone) return;
+		demarrerEnregistrement(async () => {
+			const r = await definirPhotoDepuisAvatar(icone);
+			setMessageFin(r.error ?? null);
+		});
+	}, [catalogue.categories, choix]);
+
+	const ctx: Contexte = {
+		cdn,
+		catalogue,
+		lib,
+		txt,
+		choix,
+		setChoix,
+		valeurs,
+		setValeur,
+		page: pages,
+		setPage,
+		genre,
+		setGenre,
+		morphologie,
+		setMorphologie,
+		rubrique,
+		ligneOuverte,
+		setLigneOuverte,
+	};
 
 	const iOnglet = ONGLETS.findIndex((o) => o.cle === onglet);
 
+	/** Les rubriques de la colonne, selon l'onglet : dix pour le visage, trois pour les stats. */
+	const rubriques = useMemo(() => {
+		if (onglet === "visage") {
+			return catalogue.rubriques
+				.slice(0, 10)
+				.map((r, i) => ({ ...r, icone: RUBRIQUES_VISAGE[i]?.icone ?? i + 1 }));
+		}
+		if (onglet === "stats") {
+			return catalogue.rubriques
+				.slice(10, 13)
+				.map((r, i) => ({ ...r, icone: RUBRIQUES_STATS[i]?.icone ?? i + 11 }));
+		}
+		return [];
+	}, [catalogue.rubriques, onglet]);
+
 	// L'écran est monté dans `document.body` : posé dans le flux de la page, il restait sous la
-	// navigation d'azalée, qui le décalait et le rognait. Le défilement est neutralisé pendant
-	// l'affichage, comme le jeu qui occupe tout l'écran.
+	// navigation d'azalée, qui le décalait et le rognait.
 	const [monte, setMonte] = useState(false);
 	useEffect(() => {
 		setMonte(true);
@@ -343,44 +274,51 @@ export function Editeur({
 	}, []);
 	if (!monte) return null;
 
+	/** Le contenu du panneau de droite, selon l'onglet et la rubrique ouverte. */
+	const panneau = (() => {
+		switch (onglet) {
+			case "style":
+				return <PanStyle ctx={ctx} />;
+			case "physionomie":
+				return <PanPhysionomie ctx={ctx} />;
+			case "visage":
+				return <PanVisage ctx={ctx} />;
+			case "habits":
+				return <PanHabits ctx={ctx} />;
+			case "stats":
+				return rubrique === 0 ? (
+					<PanStatsBase ctx={ctx} />
+				) : rubrique === 1 ? (
+					<PanPersonnalite ctx={ctx} />
+				) : (
+					<PanVoix ctx={ctx} jouer={jouer} enCours={voix} />
+				);
+			case "nom":
+				return <PanNom ctx={ctx} champs={champs} setChamp={setChamp} />;
+		}
+	})();
+
 	return createPortal(
 		<div
 			className="fixed inset-0 flex items-center justify-center"
 			style={{
 				zIndex: 2147483000,
-				backgroundImage: `url(${cdn}${S.fond})`,
+				backgroundImage: `url(${cdn}${A01}/avatar01_00/avatar01_00.png)`,
 				backgroundSize: "100% auto",
 				backgroundPosition: "top center",
 				backgroundRepeat: "no-repeat",
-				// Le sprite de fond du jeu est TRANSPARENT sous y≈1090 (sur 1364) : le jeu y peint
-				// la suite de son sol. La couleur ci-dessous est celle de sa dernière ligne opaque
-				// (190, 242, 252), mesurée sur le sprite — la transition est donc continue, et non
-				// noire comme quand le conteneur laissait voir son propre fond.
-				backgroundColor: "#BEF2FC",
+				backgroundColor: SOL,
 			}}
 		>
-			{/* La scène occupe EXACTEMENT le cadre : les proportions ci-dessus sont relevées sur un
-			    cadre 16/9 plein, et une mise en boîte à lettres les décalait toutes (bandeau mesuré
-			    à 153 px au lieu de 163, soit un facteur 0,94 sur chaque position). */}
-			{/* La scène épouse son parent (`inset-0`), pas `100vw/100vh` : les deux ne coïncident
-			    pas toujours — le fond, porté par le parent, laissait alors une bande non couverte. */}
 			<div className="absolute inset-0 overflow-hidden">
-				{/* Fond du jeu. Le rendu par layout (`LayoutRender`) est ecrit et sa route servie,
-				    mais pas branche ici : l'interpretation de ses transforms en coordonnees ecran
-				    n'est pas resolue — le fond finissait hors cadre et la colonne perdait 28 points
-				    de pixels proches. Mesure avant de rebrancher. */}
-
 				{/* Le modèle, au centre comme dans le jeu (emprise relevée sur les captures). */}
 				{modeleUrl && (
-					<div
-						className="absolute"
-						style={{ left: "26%", top: "13%", width: "34%", height: "84%" }}
-					>
+					<div className="absolute" style={{ left: "22%", top: "12%", width: "38%", height: "84%" }}>
 						<Modele3D url={modeleUrl} />
 					</div>
 				)}
 
-				{/* Bandeau et onglets */}
+				{/* Bandeau, titre et onglets */}
 				<div
 					className="absolute inset-x-0 top-0 flex items-center"
 					style={{
@@ -389,29 +327,56 @@ export function Editeur({
 					}}
 				>
 					<span className="ml-[2%] flex h-full items-center gap-[1vw]">
-						{/* eslint-disable-next-line @next/next/no-img-element */}
-						<img src={`${cdn}${S.enTete}`} alt="" className="h-[62%] w-auto" aria-hidden />
-						<Txt t="Editeur d'avatar" cdn={cdn} couleur="FFFFFF" h="42%" />
+						<Sprite cdn={cdn} src={`${MM2}/icon_header_avatar01.png`} className="h-[62%] w-auto" />
+						<Txt t={txt(H.titre)} cdn={cdn} couleur="FFFFFF" h="42%" />
 					</span>
+
+					{/* Badges de bascule d'onglet, aux deux bouts de la rangée, comme le jeu. */}
+					<Sprite
+						cdn={cdn}
+						src={`${FONT}/gaiji_a.png`}
+						className="absolute h-[26%] w-auto"
+						style={{ left: `${G.ongletsX[0] - 5}%`, top: "38%" }}
+					/>
+					<Sprite
+						cdn={cdn}
+						src={`${FONT}/gaiji_e.png`}
+						className="absolute h-[26%] w-auto"
+						style={{ left: `${G.ongletsX[5] + 5}%`, top: "38%" }}
+					/>
+
 					{ONGLETS.map((o, i) => (
-						<button
-							key={o.cle}
-							type="button"
-							onClick={() => {
-								setOnglet(o.cle);
-								setPage(0);
-							}}
-							aria-label={o.libelle}
-							className="absolute top-1/2 -translate-x-1/2 -translate-y-1/2"
-							style={{ left: `${G.ongletsX[i]}%`, height: "58%" }}
-						>
-							{/* eslint-disable-next-line @next/next/no-img-element */}
-							<img
-								src={`${cdn}${MM}/${o.icone}_${onglet === o.cle ? "on" : "off"}.png`}
-								alt=""
-								className="size-full object-contain"
-							/>
-						</button>
+						<span key={o.cle}>
+							<button
+								type="button"
+								onClick={() => {
+									setOnglet(o.cle);
+									setRubrique(0);
+									setLigneOuverte(null);
+								}}
+								aria-label={txt(o.hash)}
+								className="absolute top-1/2 -translate-x-1/2 -translate-y-1/2"
+								style={{ left: `${G.ongletsX[i]}%`, height: "58%" }}
+							>
+								<Sprite
+									cdn={cdn}
+									src={`${MM}/${o.icone}_${onglet === o.cle ? "on" : "off"}.png`}
+									className="size-full object-contain"
+								/>
+							</button>
+							{/* Chevron de séparation entre deux onglets. */}
+							{i < ONGLETS.length - 1 && (
+								<Sprite
+									cdn={cdn}
+									src={`${MM}/icon_menu_arrow01.png`}
+									className="absolute h-[22%] w-auto"
+									style={{
+										left: `${(G.ongletsX[i]! + G.ongletsX[i + 1]!) / 2}%`,
+										top: "40%",
+									}}
+								/>
+							)}
+						</span>
 					))}
 				</div>
 
@@ -426,15 +391,13 @@ export function Editeur({
 							height: "4.2%",
 						}}
 					>
-						{/* eslint-disable-next-line @next/next/no-img-element */}
-						<img
-							src={`${cdn}${S.languette}`}
-							alt=""
+						<Sprite
+							cdn={cdn}
+							src={`${A01}/avatar01_03/edit_type_base01.png`}
 							className="absolute inset-0 size-full"
-							aria-hidden
 						/>
 						<Txt
-							t={ONGLETS[iOnglet]?.libelle ?? ""}
+							t={txt(ONGLETS[iOnglet]!.hash)}
 							cdn={cdn}
 							couleur="FFFFFF"
 							h="74%"
@@ -443,380 +406,26 @@ export function Editeur({
 					</div>
 				)}
 
-				{/* Colonne des rubriques — onglet Visage */}
-				{onglet === "visage" &&
-					rubriques.map((r, i) => {
-						const on = i === rubrique;
-						return (
-							<button
-								key={r.hash}
-								type="button"
-								onClick={() => {
-									setRubrique(i);
-									setPage(0);
-								}}
-								className="absolute flex items-center"
-								style={{
-									left: `${G.colonneX}%`,
-									width: `${G.colonneW}%`,
-									top: `${G.rubriqueY + i * G.rubriquePas}%`,
-									height: `${G.rubriqueH}%`,
-								}}
-							>
-								{/* eslint-disable-next-line @next/next/no-img-element */}
-								<img
-									src={`${cdn}${on ? S.plaqueOn : S.plaqueOff}`}
-									alt=""
-									className="absolute inset-0 size-full"
-									aria-hidden
-								/>
-								{on && (
-									// eslint-disable-next-line @next/next/no-img-element
-									<img
-										src={`${cdn}${S.curseur}`}
-										alt=""
-										className="absolute h-[80%] w-auto"
-										style={{ left: "-4%" }}
-										aria-hidden
-									/>
-								)}
-								{/* Libellé en blanc quand la plaque passe en bleu, comme le jeu. */}
-								{/* eslint-disable-next-line @next/next/no-img-element */}
-								<img
-									src={`${cdn}${A01}/avatar01_02/icon_edit_list${String(i + 1).padStart(2, "0")}_${on ? "on" : "off"}.png`}
-									alt=""
-									className="relative ml-[5%] h-[60%] w-auto"
-								/>
-								<Txt
-									t={r.libelle}
-									cdn={cdn}
-									couleur={on ? "FFFFFF" : C.texte}
-									h="44%"
-									className="relative ml-[5%]"
-								/>
-							</button>
-						);
-					})}
+				{/* Entrée d'un code d'avatar, sous le titre */}
+				<span
+					className="absolute flex items-center gap-[0.5vw] rounded-r-[0.3vw] bg-[#0B3E86]/70 py-[0.35%] pl-[1%] pr-[1.5%]"
+					style={{ left: 0, top: `${G.bandeauH + 1.2}%` }}
+				>
+					<Sprite cdn={cdn} src={`${FONT}/gaiji_tab.png`} className="h-[1vw] w-auto" />
+					<Txt t={txt(H.codeAvatar)} cdn={cdn} couleur="FFFFFF" h="1vw" />
+				</span>
 
-				{/* Grille de vignettes — onglet Visage */}
-				{onglet === "visage" && active && (
-					<Panneau cdn={cdn} titre={rubriques[rubrique]?.libelle ?? ""}>
-						<div
-							className="grid grow gap-[3%]"
-							style={{
-								gridTemplateColumns: `repeat(${grille.colonnes}, minmax(0, 1fr))`,
-								gridTemplateRows: `repeat(${grille.lignes}, minmax(0, 1fr))`,
-							}}
-						>
-							{visibles.map((p: Part) => {
-								const on = choix[active.faceSettingType] === p.id;
-								return (
-									<button
-										key={`${p.id}-${p.itemNo}`}
-										type="button"
-										onClick={() =>
-											setChoix((c) => ({ ...c, [active.faceSettingType]: on ? "" : p.id }))
-										}
-										className="relative flex flex-col items-center justify-start"
-									>
-										{on && (
-											// eslint-disable-next-line @next/next/no-img-element
-											<img
-												src={`${cdn}${S.cadreChoisi}`}
-												alt=""
-												className="absolute inset-0 size-full"
-												aria-hidden
-											/>
-										)}
-										{/* Numéro de la vignette, comme le jeu : rang dans la page, sur deux chiffres. */}
-										<Txt
-											t={String(page * parPage + visibles.indexOf(p) + 1).padStart(2, "0")}
-											cdn={cdn}
-											couleur="9AA6B2"
-											h="18%"
-											className="absolute left-[6%] top-[2%]"
-										/>
-										{p.icone && (
-											// eslint-disable-next-line @next/next/no-img-element
-											<img
-												src={`${cdn}/avatar/icon/${p.icone}.png`}
-												alt=""
-												className="relative size-[84%] object-contain"
-											/>
-										)}
-										{on && (
-											<>
-												{/* eslint-disable-next-line @next/next/no-img-element */}
-												<img
-													src={`${cdn}${S.coche}`}
-													alt=""
-													className="absolute right-[5%] top-[5%] w-[20%]"
-												/>
-												{/* eslint-disable-next-line @next/next/no-img-element */}
-												<img
-													src={`${cdn}${S.curseur}`}
-													alt=""
-													className="absolute h-[38%] w-auto"
-													style={{ left: "-10%", top: "30%" }}
-													aria-hidden
-												/>
-											</>
-										)}
-									</button>
-								);
-							})}
-						</div>
-						{active.grillePalette && active.couleurs.length > 0 && (
-							<div
-								className="mt-[3%] grid shrink-0 gap-[2%]"
-								style={{
-									gridTemplateColumns: `repeat(${active.grillePalette.colonnes}, minmax(0, 1fr))`,
-								}}
-							>
-								{/* Les pastilles portent l'identifiant de leur préréglage : la valeur RVB
-								    n'est dans aucun fichier lu à ce jour, et aucune teinte n'est inventée. */}
-								{active.couleurs.map((c) => (
-									<span
-										key={c}
-										title={c}
-										className="aspect-square rounded-[0.25vw] border border-[#C9D6E2] bg-white"
-									/>
-								))}
-							</div>
-						)}
-
-						{pages > 1 && (
-							<div className="mt-[3%] flex shrink-0 items-center justify-center gap-[6%]">
-								<button
-									type="button"
-									onClick={() => setPage((n) => (n - 1 + pages) % pages)}
-									aria-label="Page précédente"
-								>
-									{/* eslint-disable-next-line @next/next/no-img-element */}
-									<img
-										src={`${cdn}${S.flecheG}`}
-										alt=""
-										className="h-[1.5vw] w-auto"
-									/>
-								</button>
-								<Txt t={`${page + 1} / ${pages}`} cdn={cdn} h="1.1vw" />
-								<button
-									type="button"
-									onClick={() => setPage((n) => (n + 1) % pages)}
-									aria-label="Page suivante"
-								>
-									{/* eslint-disable-next-line @next/next/no-img-element */}
-									<img src={`${cdn}${S.flecheD}`} alt="" className="h-[1.5vw] w-auto" />
-								</button>
-							</div>
-						)}
-					</Panneau>
-				)}
-
-				{/* Physionomie : morphologie et taille, sur les sprites de curseur du jeu */}
-				{/* Physionomie : carrousel de silhouettes avec flèches, puis le curseur de taille et
-				    sa valeur — disposition de la capture. Les silhouettes viennent des morphologies
-				    du catalogue, les icônes de l'atlas commun (`icon_body_type*`). */}
-				{onglet === "physionomie" && (
-					<Panneau cdn={cdn} titre="Physionomie">
-						<div className="flex items-center justify-center gap-[3%]">
-							<button
-								type="button"
-								aria-label="Silhouette précédente"
-								onClick={() =>
-									setMorphologie((m) => (m - 1 + morphologies.length) % morphologies.length)
-								}
-							>
-								{/* eslint-disable-next-line @next/next/no-img-element */}
-								<img src={`${cdn}${S.flecheG}`} alt="" className="h-[2vw] w-auto" />
-							</button>
-
-							{[-1, 0, 1].map((decalage) => {
-								const i =
-									(morphologie + decalage + morphologies.length) % morphologies.length;
-								const courante = decalage === 0;
-								return (
-									<button
-										key={decalage}
-										type="button"
-										onClick={() => setMorphologie(i)}
-										className="relative flex w-[26%] flex-col items-center"
-										style={{ opacity: courante ? 1 : 0.75 }}
-									>
-										{courante && (
-											// eslint-disable-next-line @next/next/no-img-element
-											<img
-												src={`${cdn}${S.cadreChoisi}`}
-												alt=""
-												className="absolute inset-0 size-full"
-												aria-hidden
-											/>
-										)}
-										<Txt
-											t={String(i + 1).padStart(2, "0")}
-											cdn={cdn}
-											couleur="9AA6B2"
-											h="1.2vw"
-											className="self-start"
-										/>
-										{/* eslint-disable-next-line @next/next/no-img-element */}
-										<img
-											src={`${cdn}${ICN}/icon_body_type0${Math.min(i + 1, 7)}.png`}
-											alt=""
-											className="relative aspect-square w-[86%] object-contain"
-										/>
-										{courante && (
-											// eslint-disable-next-line @next/next/no-img-element
-											<img
-												src={`${cdn}${S.coche}`}
-												alt=""
-												className="absolute right-[6%] top-[2%] w-[20%]"
-											/>
-										)}
-									</button>
-								);
-							})}
-
-							<button
-								type="button"
-								aria-label="Silhouette suivante"
-								onClick={() => setMorphologie((m) => (m + 1) % morphologies.length)}
-							>
-								{/* eslint-disable-next-line @next/next/no-img-element */}
-								<img src={`${cdn}${S.flecheD}`} alt="" className="h-[2vw] w-auto" />
-							</button>
-						</div>
-
-						<div className="mt-[6%]">
-							<Txt t="Taille" cdn={cdn} h="1.1vw" className="mb-[2%]" />
-							<div className="flex items-center gap-[3%]">
-								<div className="relative flex h-[2.4vw] grow items-center px-[3%]">
-									{/* eslint-disable-next-line @next/next/no-img-element */}
-									<img
-										src={`${cdn}${S.barreOn}`}
-										alt=""
-										className="absolute inset-0 size-full"
-										aria-hidden
-									/>
-									<button
-										type="button"
-										onClick={() => setTaille((v) => Math.max(0, v - 1))}
-										aria-label="Diminuer la taille"
-										className="relative z-10"
-									>
-										{/* eslint-disable-next-line @next/next/no-img-element */}
-										<img src={`${cdn}${S.flecheG}`} alt="" className="h-[1.1vw] w-auto" />
-									</button>
-									<span className="relative z-10 mx-[3%] h-[0.6vw] grow overflow-hidden">
-										{/* eslint-disable-next-line @next/next/no-img-element */}
-										<img
-											src={`${cdn}${S.jaugeFond}`}
-											alt=""
-											className="absolute inset-0 size-full"
-											aria-hidden
-										/>
-										{/* eslint-disable-next-line @next/next/no-img-element */}
-										<img
-											src={`${cdn}${S.jauge}`}
-											alt=""
-											className="absolute inset-y-0 left-0 h-full"
-											style={{ width: `${(taille / 14) * 100}%`, objectFit: "fill" }}
-										/>
-									</span>
-									<button
-										type="button"
-										onClick={() => setTaille((v) => Math.min(14, v + 1))}
-										aria-label="Augmenter la taille"
-										className="relative z-10"
-									>
-										{/* eslint-disable-next-line @next/next/no-img-element */}
-										<img src={`${cdn}${S.flecheD}`} alt="" className="h-[1.1vw] w-auto" />
-									</button>
-								</div>
-								{/* La valeur, en gros chiffres à droite du curseur, comme le jeu. */}
-								<Txt t={String(taille)} cdn={cdn} h="1.8vw" />
-							</div>
-						</div>
-					</Panneau>
-				)}
-
-				{/* Tenue */}
-				{onglet === "habits" && (
-					<Panneau cdn={cdn} titre="Habits">
-						<div className="grow overflow-y-auto pr-[2%]">
-							{[
-								{ libelle: "Col", fst: 19 },
-								{ libelle: "Manches", fst: 20 },
-								{ libelle: "Ourlet", fst: 21 },
-							].map(({ libelle, fst }) => {
-								const cat = catalogue.categories.find((c) => c.faceSettingType === fst);
-								if (!cat) return null;
-								return (
-									<div key={fst} className="mb-[4%]">
-										{/* Le jeu place une icône à gauche de chaque section ; laquelle n'est
-										    établi par aucun fichier, donc le titre reste seul plutôt que
-										    d'afficher un pictogramme pris au hasard. */}
-										<Txt t={libelle} cdn={cdn} h="1vw" className="mb-[1%]" />
-										<div className="flex gap-[3%]">
-											{cat.parts.map((p, i) => {
-												const on = choix[fst] === p.id;
-												return (
-													<button
-														key={`${p.id}-${i}`}
-														type="button"
-														onClick={() => setChoix((c) => ({ ...c, [fst]: on ? "" : p.id }))}
-														className="relative flex w-[22%] flex-col items-center"
-													>
-														{on && (
-															// eslint-disable-next-line @next/next/no-img-element
-															<img
-																src={`${cdn}${S.cadreChoisi}`}
-																alt=""
-																className="absolute inset-0 size-full"
-																aria-hidden
-															/>
-														)}
-														<Txt
-															t={String(i).padStart(2, "0")}
-															cdn={cdn}
-															couleur="9AA6B2"
-															h="0.9vw"
-															className="self-start"
-														/>
-														{p.icone && (
-															// eslint-disable-next-line @next/next/no-img-element
-															<img
-																src={`${cdn}/avatar/icon/${p.icone}.png`}
-																alt=""
-																className="relative aspect-square w-full object-contain"
-															/>
-														)}
-														{on && (
-															// eslint-disable-next-line @next/next/no-img-element
-															<img
-																src={`${cdn}${S.coche}`}
-																alt=""
-																className="absolute right-[4%] top-0 w-[26%]"
-															/>
-														)}
-													</button>
-												);
-											})}
-										</div>
-									</div>
-								);
-							})}
-						</div>
-					</Panneau>
-				)}
-
-				{/* Stats : personnalité, puis les voix — écoutables */}
-				{onglet === "stats" &&
-					["Stats de base", "Personnalité", "Voix"].map((r, i) => (
+				{/* Colonne des rubriques */}
+				{rubriques.map((r, i) => {
+					const on = i === rubrique;
+					return (
 						<button
-							key={r}
+							key={r.hash}
 							type="button"
-							onClick={() => setSousStats(i)}
+							onClick={() => {
+								setRubrique(i);
+								setLigneOuverte(null);
+							}}
 							className="absolute flex items-center"
 							style={{
 								left: `${G.colonneX}%`,
@@ -825,263 +434,119 @@ export function Editeur({
 								height: `${G.rubriqueH}%`,
 							}}
 						>
-							{/* eslint-disable-next-line @next/next/no-img-element */}
-							<img
-								src={`${cdn}${i === sousStats ? S.plaqueOn : S.plaqueOff}`}
-								alt=""
+							<Sprite
+								cdn={cdn}
+								src={`${A01}/avatar01_02/list_base01_${on ? "on" : "off"}.png`}
 								className="absolute inset-0 size-full"
-								aria-hidden
 							/>
-							{/* eslint-disable-next-line @next/next/no-img-element */}
-							<img
-								src={`${cdn}${A01}/avatar01_02/icon_edit_list${String(11 + i).padStart(2, "0")}_${
-									i === sousStats ? "on" : "off"
-								}.png`}
-								alt=""
+							{on && <Curseur cdn={cdn} className="absolute left-[-4%] h-[80%]" />}
+							<Sprite
+								cdn={cdn}
+								src={`${A01}/avatar01_02/icon_edit_list${String(r.icone).padStart(2, "0")}_${on ? "on" : "off"}.png`}
 								className="relative ml-[5%] h-[60%] w-auto"
 							/>
 							<Txt
-								t={r}
+								t={r.libelle}
 								cdn={cdn}
-								couleur={i === sousStats ? "FFFFFF" : C.texte}
+								couleur={on ? "FFFFFF" : BLEU}
 								h="44%"
 								className="relative ml-[5%]"
 							/>
 						</button>
-					))}
+					);
+				})}
 
-				{onglet === "stats" && sousStats === 2 && (
-					<Panneau cdn={cdn} titre="Voix">
-						<div className="grow overflow-y-auto pr-[2%]">
-							{/* Style : le genre auquel la voix est proposée. */}
-							<Txt t="Style" cdn={cdn} h="1vw" className="mb-[1%]" />
-							<div className="mb-[4%] flex gap-[3%]">
-								{[1, 2].map((g) => (
-									<button
-										key={g}
-										type="button"
-										onClick={() => setGenreVoix(g)}
-										className="relative flex h-[2.2vw] w-[46%] items-center justify-center"
-									>
-										{/* eslint-disable-next-line @next/next/no-img-element */}
-										<img
-											src={`${cdn}${g === genreVoix ? S.plaqueOn : S.plaqueOff}`}
-											alt=""
-											className="absolute inset-0 size-full"
-											aria-hidden
-										/>
-										<Txt
-											t={g === 1 ? "Masculin" : "Féminin"}
-											cdn={cdn}
-											couleur={g === genreVoix ? "FFFFFF" : C.texte}
-											h="46%"
-											className="relative"
-										/>
-									</button>
-								))}
-							</div>
+				{/* Panneau de droite */}
+				<div
+					className="absolute"
+					style={{
+						left: `${G.panneauX}%`,
+						top: `${G.panneauY}%`,
+						width: `${G.panneauW}%`,
+						height: `${G.panneauH}%`,
+					}}
+				>
+					<Sprite
+						cdn={cdn}
+						src={`${A01}/avatar01_10/edit_win_base01.png`}
+						className="absolute inset-0 size-full"
+					/>
+					<div className="relative flex h-full flex-col overflow-hidden px-[6%] py-[3%]">
+						{panneau}
+					</div>
+				</div>
 
-							{/* Personnalité : les libellés viennent de la table de texte du jeu. */}
-							<Txt t="Personnalité" cdn={cdn} h="1vw" className="mb-[1%]" />
-							<div className="mb-[4%] max-h-[38%] overflow-y-auto pr-[2%]">
-								{catalogue.personnalites.map((pp, i) => (
-									<Plaque
-										key={pp.texte}
-										cdn={cdn}
-										libelle={pp.libelle ?? ""}
-										choisie={i === personnalite}
-										ouverte={i === personnalite}
-										onClick={() => setPersonnalite(i)}
-										hauteur="14%"
-									/>
-								))}
-							</div>
-
-							{/* Type : la variante de ton, jouée au clic. */}
-							<Txt t="Type" cdn={cdn} h="1vw" className="mb-[1%]" />
-							<div className="flex flex-wrap gap-[3%]">
-								{catalogue.voix
-									.filter(
-										(v) =>
-											v.genre === genreVoix &&
-											v.personnalite === catalogue.personnalites[personnalite]?.type,
-									)
-									.map((v) => (
-										<button
-											key={v.banque}
-											type="button"
-											onClick={() => {
-												setTonVoix(v.ton);
-												jouer(v.banque);
-											}}
-											className="relative flex h-[2.2vw] w-[30%] items-center justify-center"
-										>
-											{/* eslint-disable-next-line @next/next/no-img-element */}
-											<img
-												src={`${cdn}${voix === v.banque || v.ton === tonVoix ? S.voixOn : S.voixOff}`}
-												alt=""
-												className="absolute inset-0 size-full"
-												aria-hidden
-											/>
-											{/* eslint-disable-next-line @next/next/no-img-element */}
-											<img
-												src={`${cdn}${S.iconeSon}`}
-												alt=""
-												className="relative mr-[6%] h-[48%] w-auto"
-											/>
-											<Txt
-												t={String.fromCharCode(65 + v.ton)}
-												cdn={cdn}
-												h="46%"
-												className="relative"
-											/>
-										</button>
-									))}
-							</div>
-						</div>
-					</Panneau>
-				)}
-
-				{/* Modèles : les avatars prêts du jeu */}
-				{/* Style : le choix du genre, deux vignettes numérotées avec le libellé du choix
-				    courant au-dessus — disposition de la capture. Les deux valeurs (1, 2) sont
-				    celles que portent les données (`gender` des parts, `genre` des voix). */}
-				{onglet === "style" && (
-					<Panneau cdn={cdn} titre="Style">
-						<Txt
-							t={genreVoix === 1 ? "Masculin" : "Féminin"}
-							cdn={cdn}
-							h="1.2vw"
-							className="mb-[4%] self-center"
-						/>
-						<div className="flex justify-center gap-[6%]">
-							{[1, 2].map((g) => (
-								<button
-									key={g}
-									type="button"
-									onClick={() => setGenreVoix(g)}
-									className="relative flex w-[36%] flex-col items-center"
-								>
-									{g === genreVoix && (
-										// eslint-disable-next-line @next/next/no-img-element
-										<img
-											src={`${cdn}${S.cadreChoisi}`}
-											alt=""
-											className="absolute inset-0 size-full"
-											aria-hidden
-										/>
-									)}
-									<Txt
-										t={String(g).padStart(2, "0")}
-										cdn={cdn}
-										couleur="9AA6B2"
-										h="1.4vw"
-										className="self-start"
-									/>
-									{/* eslint-disable-next-line @next/next/no-img-element */}
-									<img
-										src={`${cdn}${ICN}/icon_body_type0${g}.png`}
-										alt=""
-										className="relative aspect-square w-[70%] object-contain"
-									/>
-									{g === genreVoix && (
-										// eslint-disable-next-line @next/next/no-img-element
-										<img
-											src={`${cdn}${S.coche}`}
-											alt=""
-											className="absolute right-[8%] top-[2%] w-[18%]"
-										/>
-									)}
-								</button>
-							))}
-						</div>
-					</Panneau>
-				)}
-
-				{/* Nom : le jeu ouvre un clavier ; ici un champ, sans habillage étranger */}
+				{/* Bandeau d'aide du bas, que le jeu affiche sur l'écran de nom */}
 				{onglet === "nom" && (
-					<Panneau cdn={cdn} titre="Nom">
-						<div className="grow overflow-y-auto pr-[2%]">
-							{["Nom", "Surnom", "Nom de l'uniforme", "N° du maillot en ville Kizuna"].map(
-								(champ, i) => (
-									<div key={champ} className="mb-[4%]">
-										<Txt t={champ} cdn={cdn} h="1vw" className="mb-[1%]" />
-										<div className="relative flex h-[2.4vw] items-center">
-											{/* eslint-disable-next-line @next/next/no-img-element */}
-											<img
-												src={`${cdn}${i === 0 ? S.plaqueOn : S.plaqueOff}`}
-												alt=""
-												className="absolute inset-0 size-full"
-												aria-hidden
-											/>
-											<input
-												type="text"
-												maxLength={i === 3 ? 2 : 12}
-												aria-label={champ}
-												className="relative w-full border-0 bg-transparent text-center text-[1.2vw] font-semibold outline-none"
-												style={{ color: i === 0 ? "#FFFFFF" : `#${C.texte}` }}
-											/>
-										</div>
-									</div>
-								),
-							)}
-						</div>
-					</Panneau>
+					<div
+						className="absolute inset-x-0 flex items-center bg-[#2A5C93]/55 py-[0.6%] pl-[2%]"
+						style={{ bottom: "8.5%" }}
+					>
+						<Txt t={txt(H.aideNom)} cdn={cdn} couleur="FFFFFF" h="1.1vw" />
+					</div>
 				)}
 
-
-				{/* Barre du bas : retour à gauche, commandes au centre, validation à droite. */}
-				<div className="absolute inset-x-0 bottom-0 flex items-center justify-between px-[2%] pb-[1%]">
-					<button type="button" aria-label="Retour" className="relative h-[4.2%]">
-						{/* eslint-disable-next-line @next/next/no-img-element */}
-						<img src={`${cdn}${S.retour}`} alt="" className="h-full w-auto" />
+				{/* Barre du bas : retour, commandes, validation */}
+				<div className="absolute inset-x-0 bottom-0 flex items-center" style={{ height: "8.5%" }}>
+					<button type="button" className="relative ml-[1.5%] h-[64%]" aria-label="Retour">
+						<Sprite
+							cdn={cdn}
+							src={`${CMN}/cmn03/cmn03_01/cmd_back_base01.png`}
+							className="h-full w-auto"
+						/>
 					</button>
-
-					<div className="flex items-center gap-[1.5vw]">
-						{["Choisir", "Zoom", "Tourner", "Expression", "Modèle"].map((libelle) => (
-							<span key={libelle} className="flex items-center gap-[0.4vw]">
-								{/* Badge de touche du jeu : un gaiji de la police, pas une icône d'atlas.
-								    `icon_cmd_on_type01..04` s'est avéré être les icônes d'élément. */}
-								{/* eslint-disable-next-line @next/next/no-img-element */}
-								<img
-									src={`${cdn}${S.cmdBadge}`}
-									alt=""
-									className="h-[1.2vw] w-auto"
-									aria-hidden
-								/>
-								<Txt t={libelle} cdn={cdn} h="1vw" />
+					<span className="ml-[6%] flex items-center gap-[2.4vw]">
+						{COMMANDES[onglet].map(([badge, hash]) => (
+							<span key={badge + hash} className="flex items-center gap-[0.5vw]">
+								<Sprite cdn={cdn} src={`${FONT}/${badge}.png`} className="h-[1.15vw] w-auto" />
+								<Txt t={txt(hash)} cdn={cdn} couleur="FFFFFF" h="1.15vw" />
 							</span>
 						))}
-					</div>
-
-					{/* Validation : applique le visage choisi comme photo du compte connecté. */}
+					</span>
 					<button
 						type="button"
-						disabled={enregistrement}
-						onClick={() => {
-							const partChoisie = categories
-								.flatMap((c) => c.parts)
-								.find((p) => Object.values(choix).includes(p.id));
-							if (!partChoisie?.icone) {
-								setMessageValidation("Choisis un visage");
-								return;
+						onClick={onglet === "nom" ? appliquer : () => {
+							const i = ONGLETS.findIndex((o) => o.cle === onglet);
+							const suivant = ONGLETS[Math.min(i + 1, ONGLETS.length - 1)];
+							if (suivant) {
+								setOnglet(suivant.cle);
+								setRubrique(0);
 							}
-							demarrerEnregistrement(async () => {
-								const r = await definirPhotoDepuisAvatar(partChoisie.icone as string);
-								setMessageValidation(r.error ? r.error : "Photo enregistrée");
-							});
 						}}
-						className="relative flex items-center"
+						disabled={enregistrement}
+						className="relative ml-auto mr-[1.5%] flex h-[62%] items-center justify-center"
 					>
-						{/* eslint-disable-next-line @next/next/no-img-element */}
-						<img src={`${cdn}${S.valider}`} alt="" className="h-[3vw] w-auto" aria-hidden />
-						<span className="absolute inset-0 flex items-center justify-center px-[8%]">
-							<Txt t={messageValidation} cdn={cdn} h="38%" />
+						<Sprite
+							cdn={cdn}
+							src={`${CMN}/cmn03/cmn03_03/cmd_press_btn_base_on01.png`}
+							className="absolute inset-0 size-full"
+						/>
+						<span className="relative flex items-center gap-[0.6vw] px-[1.4vw]">
+							<Sprite cdn={cdn} src={`${FONT}/gaiji_e.png`} className="h-[1.1vw] w-auto" />
+							<Txt
+								t={txt(onglet === "nom" ? H.termine : H.suivant)}
+								cdn={cdn}
+								couleur="FFFFFF"
+								h="1.25vw"
+							/>
 						</span>
 					</button>
 				</div>
+
+				{/* Message d'échec de l'enregistrement, dans la forme des notes du jeu */}
+				{messageFin && (
+					<div className="
+       absolute inset-x-[30%] bottom-[12%] flex items-center gap-[1vw] rounded-[0.3vw] bg-white/90 px-[2%] py-[1%]
+     ">
+						<Sprite cdn={cdn} src={`${FONT}/gaiji_system02.png`} className="h-[1.6vw] w-auto" />
+						<Txt t={messageFin} cdn={cdn} h="1.05vw" />
+					</div>
+				)}
 			</div>
 		</div>,
 		document.body,
 	);
 }
+
+/** Les morphologies du jeu, réexportées pour les écrans qui les nomment. */
+export { MORPHOLOGIES };
