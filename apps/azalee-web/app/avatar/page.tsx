@@ -27,7 +27,7 @@
  */
 import type { Metadata } from "next";
 import { Editeur } from "./Editeur";
-import type { Catalogue } from "./types";
+import type { Catalogue, Layout } from "./types";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -45,6 +45,20 @@ const CDN = process.env.NEXT_PUBLIC_CDN_ORIGIN ?? "https://cdn.rosegriffon.fr";
  * Charge le catalogue résolu. `null` si la source est injoignable — la page rend alors son
  * cadre en le disant, plutôt qu'une 500 : une source absente n'est pas une page cassée.
  */
+/**
+ * Charge le layout d'un écran. Les positions y viennent des points d'attache du jeu, pas d'un
+ * relevé : c'est la source de la disposition.
+ */
+async function chargerLayout(ecran: string): Promise<Layout | null> {
+	try {
+		const reponse = await fetch(`${CDN}/avatar/layout/${ecran}.json`, { cache: "no-store" });
+		if (!reponse.ok) return null;
+		return (await reponse.json()) as Layout;
+	} catch {
+		return null;
+	}
+}
+
 async function chargerCatalogue(): Promise<Catalogue | null> {
 	try {
 		const reponse = await fetch(`${CDN}/avatar/catalog.json`, { cache: "no-store" });
@@ -56,7 +70,10 @@ async function chargerCatalogue(): Promise<Catalogue | null> {
 }
 
 export default async function Page() {
-	const catalogue = await chargerCatalogue();
+	const [catalogue, layout] = await Promise.all([
+		chargerCatalogue(),
+		chargerLayout("chara_edit_menu"),
+	]);
 
 	if (!catalogue) {
 		return (
@@ -71,5 +88,5 @@ export default async function Page() {
 		);
 	}
 
-	return <Editeur catalogue={catalogue} cdn={CDN} />;
+	return <Editeur catalogue={catalogue} layout={layout} cdn={CDN} />;
 }
