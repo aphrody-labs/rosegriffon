@@ -26,8 +26,8 @@
  * `menu_text`, pas d'une liste écrite à la main.
  */
 import type { Metadata } from "next";
-import { MediaCount, MediaEmpty, MediaHeader } from "@/components/wiki/MediaShell";
 import { AvatarEditor } from "./AvatarEditor";
+import { GameScreen } from "./GameScreen";
 import type { Catalogue, Theme } from "./types";
 
 export const dynamic = "force-dynamic";
@@ -71,16 +71,13 @@ export default async function Page() {
 
 	if (!catalogue) {
 		return (
-			<div className="space-y-6">
-				<MediaHeader
-					title="Éditeur d'avatar"
-					description="Le catalogue de création de personnage, lu dans les fichiers du jeu."
-					active="/avatar"
-				/>
-				<MediaEmpty>
+			<div className="
+     rounded-[32px] border border-dashed border-outline-variant bg-surface-container-low py-20 text-center
+   ">
+				<p className="italic text-on-surface-variant">
 					Catalogue injoignable — il est produit par «&nbsp;niers avatar export&nbsp;» et servi sur
 					/avatar/catalog.json.
-				</MediaEmpty>
+				</p>
 			</div>
 		);
 	}
@@ -91,22 +88,20 @@ export default async function Page() {
 
 	return (
 		<div className="space-y-6">
-			<MediaHeader
-				title="Éditeur d'avatar"
-				description={
-					<>
-						Le jeu compose un joueur à partir de {parts} parts, {couleurs} couleurs et {curseurs}{" "}
-						curseurs de morphing. Tout ce qui suit est lu dans ses fichiers — vignettes comprises,
-						décodées depuis les atlas d'icônes.
-					</>
-				}
-				active="/avatar"
-			/>
-			<MediaCount
-				left={`${catalogue.categories.length} catégories · ${catalogue.presets.length} visages prédéfinis`}
-				right={`code de partage : ${catalogue.codePartage.bits} bits sur ${catalogue.codePartage.alphabet.length} caractères`}
-			/>
-			<AvatarEditor catalogue={catalogue} theme={theme} cdn={CDN} />
+			{/* L'écran du jeu, avec ses propres assets — pas l'habillage d'azalée. */}
+			<GameScreen catalogue={catalogue} cdn={CDN} />
+
+			{/* Les données derrière l'écran, pour qui veut les chiffres plutôt que l'image. */}
+			<details className="rounded-3xl border border-outline-variant bg-surface-container-low p-4">
+				<summary className="cursor-pointer text-sm font-medium text-on-surface">
+					Les données derrière l'écran — {parts} parts, {couleurs} couleurs, {curseurs} curseurs,{" "}
+					{catalogue.presets.length} visages prédéfinis, code de partage de{" "}
+					{catalogue.codePartage.bits} bits
+				</summary>
+				<div className="mt-4">
+					<AvatarEditor catalogue={catalogue} theme={theme} cdn={CDN} />
+				</div>
+			</details>
 		</div>
 	);
 }
