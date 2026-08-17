@@ -109,8 +109,19 @@ const ONGLETS = [
 
 type Onglet = (typeof ONGLETS)[number]["cle"];
 
-/** Neuf vignettes par page, comme la grille du jeu. */
-const PAR_PAGE = 9;
+/**
+ * Grille de la page de vignettes, par rubrique, **relevée sur les captures du jeu** :
+ * l'échantillon de visage est en 3×3, la coupe de cheveux en 4×4, la forme de visage sur quatre
+ * colonnes. Les rubriques sans capture gardent le défaut plutôt qu'une disposition inventée.
+ */
+const GRILLES: Record<number, { colonnes: number; lignes: number }> = {
+	0: { colonnes: 3, lignes: 3 },
+	1: { colonnes: 4, lignes: 2 },
+	3: { colonnes: 4, lignes: 4 },
+};
+
+/** Grille par défaut, celle de l'échantillon de visage. */
+const GRILLE_DEFAUT = { colonnes: 3, lignes: 3 };
 
 /** Un texte composé dans la police du jeu. */
 function Txt({
@@ -245,8 +256,10 @@ export function Editeur({
 	);
 	const rubriques = useMemo(() => catalogue.rubriques.slice(0, 10), [catalogue.rubriques]);
 	const active: Categorie | undefined = categories[Math.min(rubrique, categories.length - 1)];
-	const pages = active ? Math.max(1, Math.ceil(active.parts.length / PAR_PAGE)) : 1;
-	const visibles = active ? active.parts.slice(page * PAR_PAGE, page * PAR_PAGE + PAR_PAGE) : [];
+	const grille = GRILLES[rubrique] ?? GRILLE_DEFAUT;
+	const parPage = grille.colonnes * grille.lignes;
+	const pages = active ? Math.max(1, Math.ceil(active.parts.length / parPage)) : 1;
+	const visibles = active ? active.parts.slice(page * parPage, page * parPage + parPage) : [];
 	const morphologies = catalogue.modelesDeBase.morphologies;
 
 	/** Joue une banque de voix du jeu, décodée à la volée. */
@@ -434,7 +447,13 @@ export function Editeur({
 				{/* Grille de vignettes — onglet Visage */}
 				{onglet === "visage" && active && (
 					<Panneau cdn={cdn} titre={rubriques[rubrique]?.libelle ?? ""}>
-						<div className="grid grow grid-cols-3 grid-rows-3 gap-[3%]">
+						<div
+							className="grid grow gap-[3%]"
+							style={{
+								gridTemplateColumns: `repeat(${grille.colonnes}, minmax(0, 1fr))`,
+								gridTemplateRows: `repeat(${grille.lignes}, minmax(0, 1fr))`,
+							}}
+						>
 							{visibles.map((p: Part) => {
 								const on = choix[active.faceSettingType] === p.id;
 								return (
@@ -457,7 +476,7 @@ export function Editeur({
 										)}
 										{/* Numéro de la vignette, comme le jeu : rang dans la page, sur deux chiffres. */}
 										<Txt
-											t={String(page * PAR_PAGE + visibles.indexOf(p) + 1).padStart(2, "0")}
+											t={String(page * parPage + visibles.indexOf(p) + 1).padStart(2, "0")}
 											cdn={cdn}
 											couleur="9AA6B2"
 											h="18%"
@@ -745,14 +764,34 @@ export function Editeur({
 				{/* Nom : le jeu ouvre un clavier ; ici un champ, sans habillage étranger */}
 				{onglet === "nom" && (
 					<Panneau cdn={cdn} titre="Nom">
-						<input
-							type="text"
-							maxLength={12}
-							placeholder=""
-							className="w-full border-0 bg-transparent text-center text-[1.6vw] font-semibold text-[#047AFF] outline-none"
-						/>
+						<div className="grow overflow-y-auto pr-[2%]">
+							{["Nom", "Surnom", "Nom de l'uniforme", "N° du maillot en ville Kizuna"].map(
+								(champ, i) => (
+									<div key={champ} className="mb-[4%]">
+										<Txt t={champ} cdn={cdn} h="1vw" className="mb-[1%]" />
+										<div className="relative flex h-[2.4vw] items-center">
+											{/* eslint-disable-next-line @next/next/no-img-element */}
+											<img
+												src={`${cdn}${i === 0 ? S.plaqueOn : S.plaqueOff}`}
+												alt=""
+												className="absolute inset-0 size-full"
+												aria-hidden
+											/>
+											<input
+												type="text"
+												maxLength={i === 3 ? 2 : 12}
+												aria-label={champ}
+												className="relative w-full border-0 bg-transparent text-center text-[1.2vw] font-semibold outline-none"
+												style={{ color: i === 0 ? "#FFFFFF" : `#${C.texte}` }}
+											/>
+										</div>
+									</div>
+								),
+							)}
+						</div>
 					</Panneau>
 				)}
+
 			</div>
 		</div>,
 		document.body,
