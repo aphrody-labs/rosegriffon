@@ -338,7 +338,13 @@ export function Editeur({
 				<img
 					src={`${cdn}${S.fond}`}
 					alt=""
-					className="absolute inset-0 size-full object-cover"
+					style={{
+						position: "fixed",
+						inset: 0,
+						width: "100vw",
+						height: "100vh",
+						objectFit: "cover",
+					}}
 					aria-hidden
 				/>
 
@@ -988,19 +994,15 @@ export function Editeur({
 					</button>
 
 					<div className="flex items-center gap-[1.5vw]">
-						{[
-							{ libelle: "Choisir", icone: "icon_cmd_on_type01" },
-							{ libelle: "Zoom", icone: "icon_cmd_on_type02" },
-							{ libelle: "Tourner", icone: "icon_cmd_on_type03" },
-							{ libelle: "Expression", icone: "icon_cmd_on_type04" },
-							{ libelle: "Modèle", icone: "icon_cmd_on_type11" },
-						].map(({ libelle, icone }) => (
+						{["Choisir", "Zoom", "Tourner", "Expression", "Modèle"].map((libelle) => (
 							<span key={libelle} className="flex items-center gap-[0.4vw]">
+								{/* Badge de touche du jeu : un gaiji de la police, pas une icône d'atlas.
+								    `icon_cmd_on_type01..04` s'est avéré être les icônes d'élément. */}
 								{/* eslint-disable-next-line @next/next/no-img-element */}
 								<img
-									src={`${cdn}${ICN}/${icone}.png`}
+									src={`${cdn}${S.cmdBadge}`}
 									alt=""
-									className="h-[1.4vw] w-auto"
+									className="h-[1.2vw] w-auto"
 									aria-hidden
 								/>
 								<Txt t={libelle} cdn={cdn} h="1vw" />
