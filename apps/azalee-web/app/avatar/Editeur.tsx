@@ -256,10 +256,10 @@ export function Editeur({ catalogue, cdn }: { catalogue: Catalogue; cdn: string 
 			className="fixed inset-0 flex items-center justify-center bg-black"
 			style={{ zIndex: 2147483000 }}
 		>
-			<div
-				className="relative w-full overflow-hidden"
-				style={{ aspectRatio: "16 / 9", maxHeight: "100vh" }}
-			>
+			{/* La scène occupe EXACTEMENT le cadre : les proportions ci-dessus sont relevées sur un
+			    cadre 16/9 plein, et une mise en boîte à lettres les décalait toutes (bandeau mesuré
+			    à 153 px au lieu de 163, soit un facteur 0,94 sur chaque position). */}
+			<div className="relative overflow-hidden" style={{ width: "100vw", height: "100vh" }}>
 				{/* eslint-disable-next-line @next/next/no-img-element */}
 				<img
 					src={`${cdn}${S.fond}`}
