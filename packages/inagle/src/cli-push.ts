@@ -383,11 +383,13 @@ async function importCharacters(service: any, db: DataAdapter) {
 	console.log(`✅ Characters imported (${successCount}/${processedChars.length}).`);
 }
 
-/** Colonnes de `inagle_skills` renseignées par zukan, jamais par le dump du jeu. */
-interface ZukanSkillEnrichment {
+/** Ce qu'une ligne `inagle_skills` sait d'elle-même et que le dump du jeu ignore. */
+interface PreservedSkill {
 	video_url: string | null;
 	poster_url: string | null;
 	thumbnail_url: string | null;
+	/** Date de première apparition de la technique — voir `importSkills`. */
+	created_at: string | null;
 }
 
 async function importSkills(service: any, db: DataAdapter) {
@@ -408,25 +410,32 @@ async function importSkills(service: any, db: DataAdapter) {
 	// n'existe nulle part dans le dépôt : la lecture retombait toujours sur `null`,
 	// donc le push écrasait activement la donnée au lieu de simplement la perdre.
 	// La base fait désormais foi, et `zukan:videos` la rafraîchit juste après (cron 2h00).
-	const preserved = new Map<string, ZukanSkillEnrichment>();
+	//
+	// `created_at` EST AUSSI PRÉSERVÉE, ET C'EST DU SEO. Le plan de site
+	// (`apps/azalee/app/sitemap.ts`) l'annonce en `lastModified` pour les 993
+	// techniques. Réinsérées chaque nuit, elles prenaient toutes le `default now()`
+	// du jour : le plan jurait à Google que 993 pages inchangées venaient d'être
+	// modifiées, toutes les nuits. Un plan de site qui ment sur ses dates finit par
+	// ne plus être cru — et gaspille le budget d'exploration en attendant.
+	const preserved = new Map<string, PreservedSkill>();
 	for (const r of await db.fetchAll(
 		"inagle_skills",
-		"id, video_url, poster_url, thumbnail_url"
+		"id, video_url, poster_url, thumbnail_url, created_at"
 	)) {
-		if (r.video_url || r.poster_url || r.thumbnail_url) {
-			preserved.set(String(r.id), {
-				poster_url: r.poster_url ?? null,
-				thumbnail_url: r.thumbnail_url ?? null,
-				video_url: r.video_url ?? null,
-			});
-		}
+		preserved.set(String(r.id), {
+			created_at: r.created_at ?? null,
+			poster_url: r.poster_url ?? null,
+			thumbnail_url: r.thumbnail_url ?? null,
+			video_url: r.video_url ?? null,
+		});
 	}
 	const preservedVideos = await db.fetchAll(
 		"inagle_skill_videos",
 		"skill_id, position, label, video_url, poster_url, source"
 	);
+	const avecZukan = [...preserved.values()].filter((p) => p.video_url || p.thumbnail_url).length;
 	console.log(
-		`  ${preserved.size} enrichissements zukan et ${preservedVideos.length} variantes vidéo préservés.`
+		`  ${preserved.size} techniques préservées (${avecZukan} enrichies zukan, ${preservedVideos.length} variantes vidéo).`
 	);
 
 	// Clean existing skills in database first to remove leftover passive/stat boost and duplicate entries
@@ -445,11 +454,16 @@ async function importSkills(service: any, db: DataAdapter) {
 	);
 
 	// Map to database records
+	const maintenant = new Date().toISOString();
 	let records = skills.map((s: any) => {
 		const id = s.internalCode || s.skillIDStr || s.skillID || s.id;
 		const zukan = preserved.get(String(id));
 
 		return {
+			// Une technique déjà connue garde sa date de première apparition ; une
+			// technique réellement nouvelle (mise à jour du jeu) est datée d'aujourd'hui,
+			// et c'est alors une vraie information pour le plan de site.
+			created_at: zukan?.created_at ?? maintenant,
 			id: String(id),
 			name_fr: getLoc(s, "fr"),
 			name_en: getLoc(s, "en"),
