@@ -33,7 +33,8 @@
  * repli qui sort du canevas, la position des widgets ne vivant pas dans les fichiers du jeu.
  */
 
-import { useCallback, useMemo, useRef, useState, useTransition } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, useTransition } from "react";
+import { createPortal } from "react-dom";
 
 import { definirPhotoDepuisAvatar } from "./actions";
 import type { Catalogue, Categorie, Part } from "./types";
@@ -226,8 +227,25 @@ export function Editeur({ catalogue, cdn }: { catalogue: Catalogue; cdn: string 
 
 	const iOnglet = ONGLETS.findIndex((o) => o.cle === onglet);
 
-	return (
-		<div className="fixed inset-0 z-50 flex items-center justify-center bg-black">
+	// L'écran est monté dans `document.body` : posé dans le flux de la page, il restait sous la
+	// navigation d'azalée, qui le décalait et le rognait. Le défilement est neutralisé pendant
+	// l'affichage, comme le jeu qui occupe tout l'écran.
+	const [monte, setMonte] = useState(false);
+	useEffect(() => {
+		setMonte(true);
+		const avant = document.body.style.overflow;
+		document.body.style.overflow = "hidden";
+		return () => {
+			document.body.style.overflow = avant;
+		};
+	}, []);
+	if (!monte) return null;
+
+	return createPortal(
+		<div
+			className="fixed inset-0 flex items-center justify-center bg-black"
+			style={{ zIndex: 2147483000 }}
+		>
 			<div
 				className="relative w-full overflow-hidden"
 				style={{ aspectRatio: "16 / 9", maxHeight: "100vh" }}
@@ -575,6 +593,7 @@ export function Editeur({ catalogue, cdn }: { catalogue: Catalogue; cdn: string 
 					</Panneau>
 				)}
 			</div>
-		</div>
+		</div>,
+		document.body,
 	);
 }
