@@ -40,6 +40,7 @@ const COLLECTIONS = [
 	{ path: "/videos", label: "Vidéos", icon: "movie", hint: "98 cinématiques" },
 	{ path: "/modeles", label: "Modèles 3D", icon: "deployed_code", hint: "6 236 modèles" },
 	{ path: "/mode", label: "Modes de jeu", icon: "stadia_controller", hint: "11 modes" },
+	{ path: "/avatar", label: "Éditeur d'avatar", icon: "face", hint: "502 parts" },
 ] as const;
 
 /** Chemin d'une des collections média. */
@@ -77,7 +78,11 @@ export function MediaNav({ active }: { active: MediaPath }) {
 					<Link
 						key={c.path}
 						href={c.path}
-						className="flex items-center gap-2 rounded-full border border-outline-variant bg-surface-container-low px-3.5 py-2 text-sm text-on-surface transition hover:border-primary/50 hover:bg-surface-container"
+						className="
+        flex items-center gap-2 rounded-full border border-outline-variant bg-surface-container-low px-3.5 py-2 text-sm
+        text-on-surface transition
+        hover:border-primary/50 hover:bg-surface-container
+      "
 					>
 						{contenu}
 					</Link>
@@ -142,7 +147,11 @@ export function MediaBack({ href, label }: { href: string; label: string }) {
 	return (
 		<Link
 			href={href}
-			className="inline-flex items-center gap-1.5 rounded-full border border-outline-variant bg-surface-container-low px-3.5 py-2 text-sm text-on-surface transition hover:border-primary/50 hover:bg-surface-container"
+			className="
+     inline-flex items-center gap-1.5 rounded-full border border-outline-variant bg-surface-container-low px-3.5 py-2
+     text-sm text-on-surface transition
+     hover:border-primary/50 hover:bg-surface-container
+   "
 		>
 			<Icon name="arrow_back" size={16} className="shrink-0" />
 			{label}
@@ -186,7 +195,9 @@ export function MediaTitle({
 /** Ligne de compte au-dessus d'une grille : ce qui est montré, sur quel total. */
 export function MediaCount({ left, right }: { left: React.ReactNode; right?: React.ReactNode }) {
 	return (
-		<div className="flex items-center justify-between gap-3 px-1 text-xs font-medium uppercase tracking-wider text-on-surface-variant">
+		<div className="
+    flex items-center justify-between gap-3 px-1 text-xs font-medium uppercase tracking-wider text-on-surface-variant
+  ">
 			<span>{left}</span>
 			{right && <span>{right}</span>}
 		</div>
