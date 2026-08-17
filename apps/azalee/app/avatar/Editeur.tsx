@@ -479,6 +479,25 @@ export function Editeur({
 								);
 							})}
 						</div>
+						{active.grillePalette && active.couleurs.length > 0 && (
+							<div
+								className="mt-[3%] grid shrink-0 gap-[2%]"
+								style={{
+									gridTemplateColumns: `repeat(${active.grillePalette.colonnes}, minmax(0, 1fr))`,
+								}}
+							>
+								{/* Les pastilles portent l'identifiant de leur préréglage : la valeur RVB
+								    n'est dans aucun fichier lu à ce jour, et aucune teinte n'est inventée. */}
+								{active.couleurs.map((c) => (
+									<span
+										key={c}
+										title={c}
+										className="aspect-square rounded-[0.25vw] border border-[#C9D6E2] bg-white"
+									/>
+								))}
+							</div>
+						)}
+
 						{pages > 1 && (
 							<div className="mt-[3%] flex shrink-0 items-center justify-center gap-[6%]">
 								<button
