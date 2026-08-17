@@ -11,7 +11,7 @@ export default function PrivacyPolicyPage() {
 	return (
 		<div className="container mx-auto px-4 py-12 max-w-4xl">
 			<h1 className="text-4xl font-bold mb-4 text-[#B03519]">Politique de Confidentialité</h1>
-			<p className="text-sm text-muted-foreground mb-8">Dernière mise à jour : 24 novembre 2025</p>
+			<p className="text-sm text-muted-foreground mb-8">Dernière mise à jour : 17 août 2026</p>
 
 			<div className="prose prose-lg dark:prose-invert max-w-none space-y-8">
 				<section className="bg-muted/30 p-6 rounded-lg">
@@ -101,7 +101,10 @@ export default function PrivacyPolicyPage() {
 						<ul className="list-disc pl-6 space-y-1">
 							<li>Cookies de session (authentification, préférences utilisateur)</li>
 							<li>Logs de connexion (adresse IP, type de navigateur, horodatage)</li>
-							<li>Données d'analyse anonymisées (auto-hébergées)</li>
+							<li>
+								Données d'analyse (auto-hébergées, plus Google Tag Manager et Google AdSense — cf. §
+								8)
+							</li>
 						</ul>
 					</div>
 
@@ -158,8 +161,10 @@ export default function PrivacyPolicyPage() {
 							Engagement de Rose Griffon :
 						</p>
 						<p className="mt-2 text-green-800 dark:text-green-300">
-							Nous ne vendons <strong>jamais</strong> vos données personnelles. Nous ne les
-							partageons pas avec des tiers commerciaux à des fins publicitaires ou marketing.
+							Nous ne vendons <strong>jamais</strong> vos données personnelles et ne transmettons
+							aucun fichier de membres à un annonceur. Les annonces du site sont servies par Google
+							AdSense, qui dépose ses propres cookies (§ 8) sans recevoir de nous la moindre donnée
+							de compte.
 						</p>
 					</div>
 				</section>
@@ -176,8 +181,20 @@ export default function PrivacyPolicyPage() {
 							serveur dédié en France/Europe.
 						</li>
 						<li>
-							<strong>Supabase</strong> (base de données et authentification) - Données hébergées
-							dans l'UE
+							<strong>PostgreSQL auto-hébergé</strong> (base de données et authentification) - sur le
+							même serveur dédié, en France
+						</li>
+						<li>
+							<strong>Google Ireland Limited</strong> (diffusion des annonces AdSense et mesure
+							d'audience) - selon sa{" "}
+							<a
+								href="https://policies.google.com/privacy"
+								target="_blank"
+								rel="noopener noreferrer"
+								className="text-[#344E8C] hover:underline"
+							>
+								politique de confidentialité
+							</a>
 						</li>
 						<li>
 							<strong>Discord Inc.</strong> (authentification OAuth et bot) - Selon leur{" "}
@@ -353,23 +370,55 @@ export default function PrivacyPolicyPage() {
 					<h2 className="text-2xl font-semibold mb-4 text-[#FFC46E]">
 						8. Cookies et Technologies Similaires
 					</h2>
-					<p>
-						Notre site utilise uniquement des cookies strictement nécessaires au fonctionnement :
-					</p>
+					<p>Cookies déposés par le site lui-même :</p>
 					<ul className="list-disc pl-6 space-y-2">
 						<li>
-							<strong>Cookies de session</strong> : Pour maintenir votre authentification (Supabase
+							<strong>Cookies de session</strong> : pour maintenir votre authentification (Better
 							Auth)
 						</li>
 						<li>
-							<strong>Cookies de préférences</strong> : Pour sauvegarder vos choix (thème
+							<strong>Cookies de préférences</strong> : pour sauvegarder vos choix (thème
 							clair/sombre, langue)
+						</li>
+						<li>
+							<strong>Cookies de panier</strong> : pour conserver votre commande en cours dans la
+							boutique
+						</li>
+					</ul>
+					<p className="mt-4">Cookies déposés par des tiers :</p>
+					<ul className="list-disc pl-6 space-y-2">
+						<li>
+							<strong>Google AdSense</strong> : les annonces affichées sur le site participent au
+							financement de l'association. Google et ses partenaires peuvent déposer des cookies pour
+							mesurer les affichages, limiter la répétition d'une même annonce et, si vous y avez
+							consenti, personnaliser les annonces d'après votre navigation. Nous ne transmettons à
+							Google aucune donnée de votre compte.
+						</li>
+						<li>
+							<strong>Google Tag Manager</strong> : mesure d'audience (pages consultées, appareil,
+							provenance).
 						</li>
 					</ul>
 					<p className="mt-4">
-						Nous n'utilisons <strong>pas</strong> de cookies publicitaires ou de tracking tiers. Les
-						statistiques d'utilisation sont collectées de manière anonymisée via nos outils internes
-						(conforme RGPD).
+						Vous pouvez refuser la personnalisation des annonces à tout moment depuis les{" "}
+						<a
+							href="https://myadcenter.google.com/"
+							target="_blank"
+							rel="noopener noreferrer"
+							className="underline hover:text-blue-600"
+						>
+							paramètres publicitaires Google
+						</a>{" "}
+						et consulter le détail des cookies utilisés par Google sur{" "}
+						<a
+							href="https://policies.google.com/technologies/partner-sites"
+							target="_blank"
+							rel="noopener noreferrer"
+							className="underline hover:text-blue-600"
+						>
+							sa page dédiée
+						</a>
+						. Un blocage de ces cookies par votre navigateur n'empêche pas la consultation du site.
 					</p>
 				</section>
 
@@ -378,8 +427,8 @@ export default function PrivacyPolicyPage() {
 						9. Transferts de Données Hors UE
 					</h2>
 					<p>
-						Certains de nos prestataires (Discord) sont basés aux États-Unis. Ces transferts sont
-						encadrés par :
+						Certains de nos prestataires (Discord, Google) sont basés aux États-Unis. Ces transferts
+						sont encadrés par :
 					</p>
 					<ul className="list-disc pl-6 space-y-2">
 						<li>Des clauses contractuelles types (SCC) approuvées par la Commission européenne</li>
