@@ -68,6 +68,7 @@ const A01 = "/dx11/menu/161_avatar/avatar01";
 const MM = "/dx11/menu/100_mainmenu/mainmenu90/mainmenu90_02_2";
 /** Atlas d'interface communs à tous les écrans (barre de commandes, bouton de retour). */
 const CMN = "/dx11/menu/20_cmn";
+const MM2 = "/dx11/menu/100_mainmenu/mainmenu90/mainmenu90_02";
 /** Icônes communes à tous les écrans, et gaiji (glyphes spéciaux) de la police du jeu.
     Localisés via l'index de régions du dépôt plutôt qu'en balayant les atlas à l'aveugle. */
 const ICN = "/dx11/menu/200_icon/15_icon_common";
@@ -92,6 +93,9 @@ const S = {
 	// Curseur de sélection du jeu (vert, mesuré RGBA 59,167,77) : calque `cmn05_01_cursor`,
 	// nommé `cur01` — mes recherches sur « cursor » le manquaient.
 	curseur: `${CMN}/cmn05/cmn05_01/cur01.png`,
+	// Icône d'en-tête de l'éditeur, nommée par le bytecode Lua de cet écran. Le motif rose
+	// visible à cet emplacement sur les captures n'est pas identifié dans les atlas balayés.
+	enTete: `${MM2}/icon_header_avatar01.png`,
 	cmdBadge: `${GAIJI}/gaiji_cmd_type01.png`,
 	flecheG: `${A01}/avatar01_11/arrow01_l.png`,
 	flecheD: `${A01}/avatar01_11/arrow01_r.png`,
@@ -369,7 +373,9 @@ export function Editeur({
 						background: `linear-gradient(90deg, ${C.bandeauGauche} 0%, ${C.bandeauDroite} 100%)`,
 					}}
 				>
-					<span className="ml-[7%] flex h-full items-center">
+					<span className="ml-[2%] flex h-full items-center gap-[1vw]">
+						{/* eslint-disable-next-line @next/next/no-img-element */}
+						<img src={`${cdn}${S.enTete}`} alt="" className="h-[62%] w-auto" aria-hidden />
 						<Txt t="Editeur d'avatar" cdn={cdn} couleur="FFFFFF" h="42%" />
 					</span>
 					{ONGLETS.map((o, i) => (
