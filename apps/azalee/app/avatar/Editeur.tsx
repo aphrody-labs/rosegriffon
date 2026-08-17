@@ -63,6 +63,10 @@ const A01 = "/dx11/menu/161_avatar/avatar01";
 const MM = "/dx11/menu/100_mainmenu/mainmenu90/mainmenu90_02_2";
 /** Atlas d'interface communs à tous les écrans (barre de commandes, bouton de retour). */
 const CMN = "/dx11/menu/20_cmn";
+/** Icônes communes à tous les écrans, et gaiji (glyphes spéciaux) de la police du jeu.
+    Localisés via l'index de régions du dépôt plutôt qu'en balayant les atlas à l'aveugle. */
+const ICN = "/dx11/menu/200_icon/15_icon_common";
+const GAIJI = "/dx11/font";
 const S = {
 	fond: `${A01}/avatar01_00/avatar01_00.png`,
 	// Boutons de catégorie du jeu (428×144, trois états) — `list_base01` (392×72) servait
@@ -77,13 +81,14 @@ const S = {
 	cmdOff: `${CMN}/cmn03/cmn03_02/cmd_btn_base01_off.png`,
 	cmdOn: `${CMN}/cmn03/cmn03_02/cmd_btn_base01_on.png`,
 	valider: `${CMN}/cmn03/cmn03_03/cmd_press_btn_base_on01.png`,
+	coche: `${GAIJI}/gaiji_check01_on.png`,
+	cmdBadge: `${GAIJI}/gaiji_cmd_type01.png`,
 	flecheG: `${A01}/avatar01_11/arrow01_l.png`,
 	flecheD: `${A01}/avatar01_11/arrow01_r.png`,
 	languette: `${A01}/avatar01_03/edit_type_base01.png`,
 	panneau: `${A01}/avatar01_10/edit_win_base01.png`,
 	cadre: `${A01}/avatar01_17/preset_list01.png`,
 	cadreChoisi: `${A01}/avatar01_17/preset_list01_ol.png`,
-	coche: `${A01}/avatar01_17/edit_check01.png`,
 	barreOff: `${A01}/avatar01_13/edit_bar_base02_off.png`,
 	barreOn: `${A01}/avatar01_13/edit_bar_base02_on.png`,
 	jaugeFond: `${A01}/avatar01_13/edit_bar_gauge_base01.png`,
@@ -452,7 +457,7 @@ export function Editeur({ catalogue, cdn }: { catalogue: Catalogue; cdn: string 
 											<img
 												src={`${cdn}${S.coche}`}
 												alt=""
-												className="absolute right-[5%] top-[5%] w-[22%]"
+												className="absolute right-[5%] top-[5%] w-[20%]"
 											/>
 										)}
 									</button>
@@ -492,13 +497,26 @@ export function Editeur({ catalogue, cdn }: { catalogue: Catalogue; cdn: string 
 					<Panneau cdn={cdn} titre="Physionomie">
 						<div className="grow overflow-y-auto pr-[2%]">
 							{morphologies.map((m, i) => (
-								<Plaque
+								<button
 									key={m}
-									cdn={cdn}
-									libelle={`Silhouette ${i + 1}`}
-									choisie={i === morphologie}
+									type="button"
 									onClick={() => setMorphologie(i)}
-								/>
+									className="relative mb-[1.5%] flex h-[9%] min-h-[2.1vw] w-full shrink-0 items-center"
+								>
+									{/* eslint-disable-next-line @next/next/no-img-element */}
+									<img
+										src={`${cdn}${i === morphologie ? S.plaqueOn : S.plaqueOff}`}
+										alt=""
+										className="absolute inset-0 size-full"
+										aria-hidden
+									/>
+									{/* eslint-disable-next-line @next/next/no-img-element */}
+									<img
+										src={`${cdn}${ICN}/icon_body_type0${Math.min(i + 1, 7)}.png`}
+										alt=""
+										className="relative ml-[5%] h-[62%] w-auto"
+									/>
+								</button>
 							))}
 						</div>
 						<div className="mt-[3%] shrink-0">
@@ -641,7 +659,9 @@ export function Editeur({ catalogue, cdn }: { catalogue: Catalogue; cdn: string 
 
 					<div className="flex items-center gap-[1.5vw]">
 						{["Choisir", "Zoom", "Tourner", "Expression", "Modèle"].map((c) => (
-							<span key={c} className="relative flex items-center">
+							<span key={c} className="relative flex items-center gap-[0.3vw]">
+								{/* eslint-disable-next-line @next/next/no-img-element */}
+								<img src={`${cdn}${S.cmdBadge}`} alt="" className="h-[1.2vw] w-auto" aria-hidden />
 								{/* eslint-disable-next-line @next/next/no-img-element */}
 								<img
 									src={`${cdn}${S.cmdOff}`}
