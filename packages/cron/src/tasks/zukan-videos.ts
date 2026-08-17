@@ -17,9 +17,13 @@
  * `inagle_skill_videos` (une ligne par variante). Le miroir SQLite servi par
  * azalée est rafraîchi par `azalee-mirror-sync.timer`, pas ici.
  *
- * Aucune planification n'est posée : la tâche se lance à la demande
- * (`bun packages/cron/src/index.ts --run zukan:videos`). Le catalogue upstream
- * ne bouge qu'aux mises à jour du jeu.
+ * Planifiée à 2h00 UTC, ENTRE `db:sync` et `db:sqlite-backup` (cf. `index.ts`).
+ * Ce n'est pas une question de fraîcheur — le catalogue upstream ne bouge qu'aux
+ * mises à jour du jeu — mais de réparation : `db:sync` vide `inagle_skills`, et
+ * la clé étrangère `on delete cascade` emporte `inagle_skill_videos` avec elle.
+ * Le push préserve maintenant ce qu'il trouvait en base ; cette tâche est la
+ * seule qui sache le reconstruire depuis zukan si la préservation a échoué.
+ * Toujours joignable à la demande : `bun packages/cron/src/index.ts --run zukan:videos`.
  */
 import { syncZukanSkillVideos } from "@rosegriffon/inagle/zukan/sync-skill-videos";
 

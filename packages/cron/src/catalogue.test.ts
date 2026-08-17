@@ -65,13 +65,17 @@ describe("catalogue partagé vs démon", () => {
 
 	/**
 	 * L'inverse n'est PAS symétrique : `runnerMap` porte des alias d'écriture
-	 * (`discord-scan` pour `discord:scan`) et deux entrées non publiées
-	 * (`discord:archives`, `zukan:videos`). On vérifie donc seulement qu'aucune
-	 * entrée non aliasée ne manque au catalogue.
+	 * (`discord-scan` pour `discord:scan`) et une entrée non publiée
+	 * (`discord:archives`). On vérifie donc seulement qu'aucune entrée non
+	 * aliasée ne manque au catalogue.
+	 *
+	 * `zukan:videos` était tolérée ici tant qu'elle n'était lançable qu'à la
+	 * main ; elle est publiée depuis qu'elle est planifiée (2h00, entre la
+	 * poussée des données et la sauvegarde SQLite).
 	 */
 	test("les entrées du démon absentes du catalogue sont connues et assumées", async () => {
 		const catalogue = new Set(TACHES_CRON.map(normaliserNomTache));
-		const tolerees = new Set(["discord:archives", "zukan:videos"]);
+		const tolerees = new Set(["discord:archives"]);
 		const surplus = [...(await clefsDuRunnerMap())]
 			.map(normaliserNomTache)
 			.filter((nom) => !catalogue.has(nom) && !tolerees.has(nom));

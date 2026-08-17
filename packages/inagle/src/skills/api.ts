@@ -70,6 +70,10 @@ export interface EnrichedSkill extends SkillInfo {
 	shops?: { en: string[]; fr: string[] };
 	/** Video URL from Zukan (WebM) */
 	videoUrl?: string;
+	/** Image d'attente de la vidéo zukan (jpg ~1280 px, extraite de l'animation). */
+	posterUrl?: string;
+	/** Vignette webp zukan (~6 Ko) — celle des grilles, pas le poster. */
+	thumbnailUrl?: string;
 	/** Image Path (Auto-resolved) */
 	image?: string;
 	/** Foul rate percentage */

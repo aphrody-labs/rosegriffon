@@ -21,11 +21,14 @@ import {
 } from "./cron-taches";
 
 describe("catalogue", () => {
-	test("les 22 tâches servies par GET :3005/tasks", () => {
-		expect(TACHES_CRON).toHaveLength(22);
+	test("les 23 tâches servies par GET :3005/tasks", () => {
+		expect(TACHES_CRON).toHaveLength(23);
 		expect(TACHES_CRON).toContain("db");
 		expect(TACHES_CRON).toContain("stats:achillea");
 		expect(TACHES_CRON).toContain("github-publish");
+		// Publiée le 17/8/2026 en même temps qu'elle a été planifiée : elle répare
+		// ce que `db` efface (vidéos et vignettes des techniques).
+		expect(TACHES_CRON).toContain("zukan:videos");
 	});
 
 	/**

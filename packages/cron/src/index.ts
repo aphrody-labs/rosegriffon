@@ -600,8 +600,18 @@ Bun.cron("*/15 * * * *", async () => {
 });
 
 // 3. Synchronisation Inagle DB & SQLite Backup : tous les jours à 2h00 UTC
+//
+// L'ORDRE DES TROIS TÂCHES EST LE CORRECTIF, PAS UN DÉTAIL. `db:sync` vide puis
+// réécrit `inagle_skills` : le push préserve désormais les vidéos et vignettes
+// zukan, mais c'est `zukan:videos` qui va les rechercher à la source. Il doit
+// donc tourner APRÈS le push (sinon il écrit dans une table qui sera vidée dans
+// la foulée) et AVANT `db:sqlite-backup` (sinon le miroir servi par azalée
+// embarque un instantané sans vidéos). Le 17/8/2026, `zukan:videos` n'était
+// planifiée nulle part : le push a effacé les 1211 variantes de la nuit, et
+// plus rien ne les remettait — /skill a perdu vidéos et aperçus d'un coup.
 Bun.cron("0 2 * * *", async () => {
 	await executeTask("db:sync", runInaglePush);
+	await executeTask("zukan:videos", rafraichirVideosTechniques);
 	await executeTask("db:sqlite-backup", runSQLiteBackup);
 });
 

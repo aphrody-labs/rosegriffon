@@ -383,8 +383,51 @@ async function importCharacters(service: any, db: DataAdapter) {
 	console.log(`✅ Characters imported (${successCount}/${processedChars.length}).`);
 }
 
+/** Colonnes de `inagle_skills` renseignées par zukan, jamais par le dump du jeu. */
+interface ZukanSkillEnrichment {
+	video_url: string | null;
+	poster_url: string | null;
+	thumbnail_url: string | null;
+}
+
 async function importSkills(service: any, db: DataAdapter) {
 	console.log("🔄 Importing Skills...");
+
+	// Préserve l'enrichissement zukan (vidéo, poster, vignette) AVANT le delete+reinsert,
+	// sinon chaque push le wipe — même régression que `sheet_data` sur les items.
+	//
+	// CE QUI S'EST PASSÉ EN PRODUCTION LE 17/8/2026. `deleteAllExcept` vide la table :
+	//  1. `video_url` / `poster_url` / `thumbnail_url` repartaient à NULL (le dump du jeu
+	//     ne les contient pas — elles viennent de `zukan/sync-skill-videos.ts`) ;
+	//  2. la clé étrangère `inagle_skill_videos.skill_id … on delete cascade` emportait
+	//     avec elle les 1211 variantes, dont les deux vidéos des 236 techniques qui en ont.
+	// Résultat : plus une seule vidéo ni vignette sur /skill après le push de 2h00, et
+	// rien pour les remettre — la tâche `zukan:videos` n'était pas planifiée.
+	//
+	// Le nom du fichier `data/zukan/skill-videos.json` que ce code lisait auparavant
+	// n'existe nulle part dans le dépôt : la lecture retombait toujours sur `null`,
+	// donc le push écrasait activement la donnée au lieu de simplement la perdre.
+	// La base fait désormais foi, et `zukan:videos` la rafraîchit juste après (cron 2h00).
+	const preserved = new Map<string, ZukanSkillEnrichment>();
+	for (const r of await db.fetchAll(
+		"inagle_skills",
+		"id, video_url, poster_url, thumbnail_url"
+	)) {
+		if (r.video_url || r.poster_url || r.thumbnail_url) {
+			preserved.set(String(r.id), {
+				poster_url: r.poster_url ?? null,
+				thumbnail_url: r.thumbnail_url ?? null,
+				video_url: r.video_url ?? null,
+			});
+		}
+	}
+	const preservedVideos = await db.fetchAll(
+		"inagle_skill_videos",
+		"skill_id, position, label, video_url, poster_url, source"
+	);
+	console.log(
+		`  ${preserved.size} enrichissements zukan et ${preservedVideos.length} variantes vidéo préservés.`
+	);
 
 	// Clean existing skills in database first to remove leftover passive/stat boost and duplicate entries
 	console.log("  Cleaning existing skills in database...");
@@ -401,37 +444,10 @@ async function importSkills(service: any, db: DataAdapter) {
 			s.category !== "Boost Stats"
 	);
 
-	// Charger les vidéos depuis skill-videos.json (db_skills.json absent)
-	const skillVideosPath = path.join(
-		path.dirname(new URL(import.meta.url).pathname),
-		"../data/zukan/skill-videos.json"
-	);
-	const zukanMap = new Map<string, { videoUrl: string; posterUrl?: string }>();
-	if (Bun.file(skillVideosPath).size > 0) {
-		const skillVideos: { name: string; videoUrl: string; posterUrl?: string }[] =
-			await Bun.file(skillVideosPath).json();
-		for (const sv of skillVideos) {
-			if (sv.videoUrl) {
-				// Convertir .wmv → .webm (CDN CloudFront héberge les deux)
-				const videoUrl = sv.videoUrl.endsWith(".wmv")
-					? sv.videoUrl.replace(".wmv", ".webm")
-					: sv.videoUrl;
-				zukanMap.set(sv.name.toLowerCase(), { ...sv, videoUrl });
-			}
-		}
-	}
-
 	// Map to database records
 	let records = skills.map((s: any) => {
 		const id = s.internalCode || s.skillIDStr || s.skillID || s.id;
-		const nameEn = getLoc(s, "en")?.toLowerCase();
-		const nameJa = getLoc(s, "ja");
-		const zukanEntry =
-			(nameEn ? zukanMap.get(nameEn) : undefined) ||
-			(nameJa ? zukanMap.get(nameJa.toLowerCase()) : undefined) ||
-			null;
-		const videoUrl = zukanEntry?.videoUrl || null;
-		const posterUrl = zukanEntry?.posterUrl || null;
+		const zukan = preserved.get(String(id));
 
 		return {
 			id: String(id),
@@ -450,8 +466,9 @@ async function importSkills(service: any, db: DataAdapter) {
 			growth_type: s.growthType,
 			internal_code: s.internalCode || null,
 			hash_id: s.hashId || null,
-			video_url: videoUrl,
-			poster_url: posterUrl,
+			video_url: zukan?.video_url ?? null,
+			poster_url: zukan?.poster_url ?? null,
+			thumbnail_url: zukan?.thumbnail_url ?? null,
 			recast_time: s.recastTime || 0,
 			is_eldorado: s.eldorado || false,
 			partner_count: s.partnerCount || 0,
@@ -479,6 +496,17 @@ async function importSkills(service: any, db: DataAdapter) {
 		else successCount += batch.length;
 	}
 	console.log(`✅ Skills imported (${successCount}/${records.length}).`);
+
+	// Restauration des variantes vidéo emportées par la cascade. On ne réinsère que
+	// celles dont la technique existe encore : une technique disparue du dump ne doit
+	// pas ressusciter par sa clé étrangère (l'insert échouerait, et à raison).
+	const keptIds = new Set(records.map((r: { id: string }) => r.id));
+	const restorable = preservedVideos.filter((v: any) => keptIds.has(String(v.skill_id)));
+	if (restorable.length > 0) {
+		const { error } = await db.upsert("inagle_skill_videos", restorable, "skill_id,position");
+		if (error) console.error("❌ Error restoring skill videos:", error.message || error);
+		else console.log(`✅ Skill videos restored (${restorable.length}/${preservedVideos.length}).`);
+	}
 }
 
 async function importItems(service: any, db: DataAdapter) {
@@ -1024,6 +1052,20 @@ async function exportStoryTextDatabase() {
 	const { writeFileSync } = await import("node:fs");
 
 	const storyTextPath = path.join(PATHS.allGamedata, "story_text_database.json");
-	writeFileSync(storyTextPath, JSON.stringify(db, null, 2), "utf-8");
-	console.log(`✅ Story Text Database written to ${storyTextPath}`);
+	try {
+		writeFileSync(storyTextPath, JSON.stringify(db, null, 2), "utf-8");
+		console.log(`✅ Story Text Database written to ${storyTextPath}`);
+	} catch (error: any) {
+		// Le dump du jeu est monté en lecture seule sur le VPS : cette écriture y échoue
+		// en EROFS chaque nuit. C'est un export de confort (fichier statique dérivé), pas
+		// une écriture en base — le faire remonter en « Fatal error during push » masquait
+		// les vraies pannes du push dans le journal, et le shell rendait quand même 0.
+		if (error?.code === "EROFS" || error?.code === "EACCES") {
+			console.warn(
+				`⚠️  Story Text Database non écrite (${error.code} sur ${storyTextPath}) — dump monté en lecture seule, export ignoré.`
+			);
+			return;
+		}
+		throw error;
+	}
 }

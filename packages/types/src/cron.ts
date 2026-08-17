@@ -23,9 +23,10 @@
  * aussi bien dans un composant React que dans une commande Discord.
  */
 
-/** Les 22 tâches servies par `GET :3005/tasks`. */
+/** Les 23 tâches servies par `GET :3005/tasks`. */
 export const TACHES_CRON = [
 	"db",
+	"zukan:videos",
 	"cdn",
 	"crawl",
 	"rag",
@@ -115,6 +116,16 @@ export const CATALOGUE_TACHES: readonly DescriptionTache[] = Object.freeze([
 		motifInterdiction:
 			"réécrit la production ET échange le miroir servi par azalee-web — une bévue de frappe ne doit pas pouvoir la lancer",
 		dureeIndicative: "plusieurs minutes",
+	},
+	{
+		nom: "zukan:videos",
+		titre: "Vidéos officielles des techniques",
+		role: "relit zukan.inazuma.jp et repose les vidéos, posters et vignettes que la poussée des données efface",
+		planification: "0 2 * * *",
+		famille: "donnees",
+		niveau: "admin",
+		motifInterdiction: null,
+		dureeIndicative: "moins d'une minute",
 	},
 	{
 		nom: "cdn",
