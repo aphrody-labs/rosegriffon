@@ -93,7 +93,7 @@ const S = {
 
 /** Les six onglets du bandeau, avec le libellé que le jeu affiche dessous. */
 const ONGLETS = [
-	{ cle: "modeles", icone: "icon_menu01", libelle: "Modèles" },
+	{ cle: "style", icone: "icon_menu01", libelle: "Style" },
 	{ cle: "physionomie", icone: "icon_menu02", libelle: "Physionomie" },
 	{ cle: "visage", icone: "icon_menu03", libelle: "Visage et coupe de cheveux" },
 	{ cle: "tenue", icone: "icon_menu04", libelle: "Tenue" },
@@ -177,12 +177,15 @@ function Plaque({
 	choisie,
 	onClick,
 	hauteur = "9%",
+	ouverte = false,
 }: {
 	cdn: string;
 	libelle: string;
 	choisie: boolean;
 	onClick: () => void;
 	hauteur?: string;
+	/** Rubrique ouverte : le jeu passe alors la plaque en bleu (`category_btn_on_l`). */
+	ouverte?: boolean;
 }) {
 	return (
 		<button
@@ -193,12 +196,18 @@ function Plaque({
 		>
 			{/* eslint-disable-next-line @next/next/no-img-element */}
 			<img
-				src={`${cdn}${choisie ? S.plaqueOn : S.plaqueOff}`}
+				src={`${cdn}${ouverte ? S.plaqueOn : choisie ? S.plaqueSurvol : S.plaqueOff}`}
 				alt=""
 				className="absolute inset-0 size-full"
 				aria-hidden
 			/>
-			<Txt t={libelle} cdn={cdn} h="52%" className="relative ml-[6%]" />
+			<Txt
+				t={libelle}
+				cdn={cdn}
+				couleur={ouverte ? "FFFFFF" : C.texte}
+				h="52%"
+				className="relative ml-[6%]"
+			/>
 		</button>
 	);
 }
@@ -388,13 +397,20 @@ export function Editeur({ catalogue, cdn }: { catalogue: Catalogue; cdn: string 
 									className="absolute inset-0 size-full"
 									aria-hidden
 								/>
+								{/* Libellé en blanc quand la plaque passe en bleu, comme le jeu. */}
 								{/* eslint-disable-next-line @next/next/no-img-element */}
 								<img
 									src={`${cdn}${A01}/avatar01_02/icon_edit_list${String(i + 1).padStart(2, "0")}_${on ? "on" : "off"}.png`}
 									alt=""
 									className="relative ml-[5%] h-[60%] w-auto"
 								/>
-								<Txt t={r.libelle} cdn={cdn} h="44%" className="relative ml-[5%]" />
+								<Txt
+									t={r.libelle}
+									cdn={cdn}
+									couleur={on ? "FFFFFF" : C.texte}
+									h="44%"
+									className="relative ml-[5%]"
+								/>
 							</button>
 						);
 					})}
@@ -599,8 +615,8 @@ export function Editeur({ catalogue, cdn }: { catalogue: Catalogue; cdn: string 
 				)}
 
 				{/* Modèles : les avatars prêts du jeu */}
-				{onglet === "modeles" && (
-					<Panneau cdn={cdn} titre="Modèles">
+				{onglet === "style" && (
+					<Panneau cdn={cdn} titre="Style">
 						<div className="grow overflow-y-auto pr-[2%]">
 							{catalogue.avatarsFichiers.map((a, i) => (
 								<Plaque
