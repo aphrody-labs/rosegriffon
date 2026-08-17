@@ -564,80 +564,127 @@ export function Editeur({
 				)}
 
 				{/* Physionomie : morphologie et taille, sur les sprites de curseur du jeu */}
+				{/* Physionomie : carrousel de silhouettes avec flèches, puis le curseur de taille et
+				    sa valeur — disposition de la capture. Les silhouettes viennent des morphologies
+				    du catalogue, les icônes de l'atlas commun (`icon_body_type*`). */}
 				{onglet === "physionomie" && (
 					<Panneau cdn={cdn} titre="Physionomie">
-						<div className="grow overflow-y-auto pr-[2%]">
-							{morphologies.map((m, i) => (
-								<button
-									key={m}
-									type="button"
-									onClick={() => setMorphologie(i)}
-									className="relative mb-[1.5%] flex h-[9%] min-h-[2.1vw] w-full shrink-0 items-center"
-								>
-									{/* eslint-disable-next-line @next/next/no-img-element */}
-									<img
-										src={`${cdn}${i === morphologie ? S.plaqueOn : S.plaqueOff}`}
-										alt=""
-										className="absolute inset-0 size-full"
-										aria-hidden
-									/>
-									{/* eslint-disable-next-line @next/next/no-img-element */}
-									<img
-										src={`${cdn}${ICN}/icon_body_type0${Math.min(i + 1, 7)}.png`}
-										alt=""
-										className="relative ml-[5%] h-[62%] w-auto"
-									/>
-								</button>
-							))}
-						</div>
-						<div className="mt-[3%] shrink-0">
-							<Txt t="Taille" cdn={cdn} h="1.1vw" />
-							<div className="relative mt-[2%] flex items-center">
+						<div className="flex items-center justify-center gap-[3%]">
+							<button
+								type="button"
+								aria-label="Silhouette précédente"
+								onClick={() =>
+									setMorphologie((m) => (m - 1 + morphologies.length) % morphologies.length)
+								}
+							>
 								{/* eslint-disable-next-line @next/next/no-img-element */}
-								<img
-									src={`${cdn}${S.barreOn}`}
-									alt=""
-									className="absolute inset-0 size-full"
-									aria-hidden
-								/>
-								<button
-									type="button"
-									onClick={() => setTaille((v) => Math.max(0, v - 1))}
-									aria-label="Diminuer"
-									className="relative z-10 px-[4%] py-[2%]"
-								>
+								<img src={`${cdn}${S.flecheG}`} alt="" className="h-[2vw] w-auto" />
+							</button>
+
+							{[-1, 0, 1].map((decalage) => {
+								const i =
+									(morphologie + decalage + morphologies.length) % morphologies.length;
+								const courante = decalage === 0;
+								return (
+									<button
+										key={decalage}
+										type="button"
+										onClick={() => setMorphologie(i)}
+										className="relative flex w-[26%] flex-col items-center"
+										style={{ opacity: courante ? 1 : 0.75 }}
+									>
+										{courante && (
+											// eslint-disable-next-line @next/next/no-img-element
+											<img
+												src={`${cdn}${S.cadreChoisi}`}
+												alt=""
+												className="absolute inset-0 size-full"
+												aria-hidden
+											/>
+										)}
+										<Txt
+											t={String(i + 1).padStart(2, "0")}
+											cdn={cdn}
+											couleur="9AA6B2"
+											h="1.2vw"
+											className="self-start"
+										/>
+										{/* eslint-disable-next-line @next/next/no-img-element */}
+										<img
+											src={`${cdn}${ICN}/icon_body_type0${Math.min(i + 1, 7)}.png`}
+											alt=""
+											className="relative aspect-square w-[86%] object-contain"
+										/>
+										{courante && (
+											// eslint-disable-next-line @next/next/no-img-element
+											<img
+												src={`${cdn}${S.coche}`}
+												alt=""
+												className="absolute right-[6%] top-[2%] w-[20%]"
+											/>
+										)}
+									</button>
+								);
+							})}
+
+							<button
+								type="button"
+								aria-label="Silhouette suivante"
+								onClick={() => setMorphologie((m) => (m + 1) % morphologies.length)}
+							>
+								{/* eslint-disable-next-line @next/next/no-img-element */}
+								<img src={`${cdn}${S.flecheD}`} alt="" className="h-[2vw] w-auto" />
+							</button>
+						</div>
+
+						<div className="mt-[6%]">
+							<Txt t="Taille" cdn={cdn} h="1.1vw" className="mb-[2%]" />
+							<div className="flex items-center gap-[3%]">
+								<div className="relative flex h-[2.4vw] grow items-center px-[3%]">
 									{/* eslint-disable-next-line @next/next/no-img-element */}
 									<img
-										src={`${cdn}${S.fleche}`}
-										alt=""
-										className="h-[1.1vw] w-auto rotate-180"
-									/>
-								</button>
-								<span className="relative z-10 h-[0.7vw] grow overflow-hidden">
-									{/* eslint-disable-next-line @next/next/no-img-element */}
-									<img
-										src={`${cdn}${S.jaugeFond}`}
+										src={`${cdn}${S.barreOn}`}
 										alt=""
 										className="absolute inset-0 size-full"
 										aria-hidden
 									/>
-									{/* eslint-disable-next-line @next/next/no-img-element */}
-									<img
-										src={`${cdn}${S.jauge}`}
-										alt=""
-										className="absolute inset-y-0 left-0 h-full"
-										style={{ width: `${(taille / 14) * 100}%`, objectFit: "fill" }}
-									/>
-								</span>
-								<button
-									type="button"
-									onClick={() => setTaille((v) => Math.min(14, v + 1))}
-									aria-label="Augmenter"
-									className="relative z-10 px-[4%] py-[2%]"
-								>
-									{/* eslint-disable-next-line @next/next/no-img-element */}
-									<img src={`${cdn}${S.fleche}`} alt="" className="h-[1.1vw] w-auto" />
-								</button>
+									<button
+										type="button"
+										onClick={() => setTaille((v) => Math.max(0, v - 1))}
+										aria-label="Diminuer la taille"
+										className="relative z-10"
+									>
+										{/* eslint-disable-next-line @next/next/no-img-element */}
+										<img src={`${cdn}${S.flecheG}`} alt="" className="h-[1.1vw] w-auto" />
+									</button>
+									<span className="relative z-10 mx-[3%] h-[0.6vw] grow overflow-hidden">
+										{/* eslint-disable-next-line @next/next/no-img-element */}
+										<img
+											src={`${cdn}${S.jaugeFond}`}
+											alt=""
+											className="absolute inset-0 size-full"
+											aria-hidden
+										/>
+										{/* eslint-disable-next-line @next/next/no-img-element */}
+										<img
+											src={`${cdn}${S.jauge}`}
+											alt=""
+											className="absolute inset-y-0 left-0 h-full"
+											style={{ width: `${(taille / 14) * 100}%`, objectFit: "fill" }}
+										/>
+									</span>
+									<button
+										type="button"
+										onClick={() => setTaille((v) => Math.min(14, v + 1))}
+										aria-label="Augmenter la taille"
+										className="relative z-10"
+									>
+										{/* eslint-disable-next-line @next/next/no-img-element */}
+										<img src={`${cdn}${S.flecheD}`} alt="" className="h-[1.1vw] w-auto" />
+									</button>
+								</div>
+								{/* La valeur, en gros chiffres à droite du curseur, comme le jeu. */}
+								<Txt t={String(taille)} cdn={cdn} h="1.8vw" />
 							</div>
 						</div>
 					</Panneau>
