@@ -243,6 +243,11 @@ export function Editeur({
 	const [morphologie, setMorphologie] = useState(0);
 	const [taille, setTaille] = useState(7);
 	const [personnalite, setPersonnalite] = useState(0);
+	/** Sous-rubrique de l'onglet Stats : 0 = stats de base, 1 = personnalité, 2 = voix. */
+	const [sousStats, setSousStats] = useState(2);
+	/** Sélecteurs de voix : genre et type de ton, les deux champs que portent les données. */
+	const [genreVoix, setGenreVoix] = useState(1);
+	const [tonVoix, setTonVoix] = useState(0);
 	const [modele, setModele] = useState(0);
 	const [voix, setVoix] = useState<string | null>(null);
 	const [enregistrement, demarrerEnregistrement] = useTransition();
@@ -696,44 +701,125 @@ export function Editeur({
 				)}
 
 				{/* Stats : personnalité, puis les voix — écoutables */}
-				{onglet === "stats" && (
-					<Panneau cdn={cdn} titre="Personnalité">
+				{onglet === "stats" &&
+					["Stats de base", "Personnalité", "Voix"].map((r, i) => (
+						<button
+							key={r}
+							type="button"
+							onClick={() => setSousStats(i)}
+							className="absolute flex items-center"
+							style={{
+								left: `${G.colonneX}%`,
+								width: `${G.colonneW}%`,
+								top: `${G.rubriqueY + i * G.rubriquePas}%`,
+								height: `${G.rubriqueH}%`,
+							}}
+						>
+							{/* eslint-disable-next-line @next/next/no-img-element */}
+							<img
+								src={`${cdn}${i === sousStats ? S.plaqueOn : S.plaqueOff}`}
+								alt=""
+								className="absolute inset-0 size-full"
+								aria-hidden
+							/>
+							<Txt
+								t={r}
+								cdn={cdn}
+								couleur={i === sousStats ? "FFFFFF" : C.texte}
+								h="44%"
+								className="relative ml-[5%]"
+							/>
+						</button>
+					))}
+
+				{onglet === "stats" && sousStats === 2 && (
+					<Panneau cdn={cdn} titre="Voix">
 						<div className="grow overflow-y-auto pr-[2%]">
-							{catalogue.personnalites.map((p, i) => (
-								<Plaque
-									key={p.texte}
-									cdn={cdn}
-									libelle={p.libelle ?? ""}
-									choisie={i === personnalite}
-									onClick={() => setPersonnalite(i)}
-								/>
-							))}
-							<Txt t="Voix" cdn={cdn} h="1.1vw" className="mb-[2%] mt-[4%]" />
-							{catalogue.voix
-								.filter((v) => v.personnalite === catalogue.personnalites[personnalite]?.type)
-								.map((v) => (
+							{/* Style : le genre auquel la voix est proposée. */}
+							<Txt t="Style" cdn={cdn} h="1vw" className="mb-[1%]" />
+							<div className="mb-[4%] flex gap-[3%]">
+								{[1, 2].map((g) => (
 									<button
-										key={v.banque}
+										key={g}
 										type="button"
-										onClick={() => jouer(v.banque)}
-										className="relative mb-[1.5%] flex h-[9%] min-h-[2.1vw] w-full shrink-0 items-center"
+										onClick={() => setGenreVoix(g)}
+										className="relative flex h-[2.2vw] w-[46%] items-center justify-center"
 									>
 										{/* eslint-disable-next-line @next/next/no-img-element */}
 										<img
-											src={`${cdn}${voix === v.banque ? S.voixOn : S.voixOff}`}
+											src={`${cdn}${g === genreVoix ? S.plaqueOn : S.plaqueOff}`}
 											alt=""
 											className="absolute inset-0 size-full"
 											aria-hidden
 										/>
-										{/* eslint-disable-next-line @next/next/no-img-element */}
-										<img
-											src={`${cdn}${S.iconeSon}`}
-											alt=""
-											className="relative ml-[5%] h-[54%] w-auto"
+										<Txt
+											t={g === 1 ? "Masculin" : "Féminin"}
+											cdn={cdn}
+											couleur={g === genreVoix ? "FFFFFF" : C.texte}
+											h="46%"
+											className="relative"
 										/>
-										<Txt t={`Voix ${v.ton + 1}`} cdn={cdn} h="50%" className="relative ml-[5%]" />
 									</button>
 								))}
+							</div>
+
+							{/* Personnalité : les libellés viennent de la table de texte du jeu. */}
+							<Txt t="Personnalité" cdn={cdn} h="1vw" className="mb-[1%]" />
+							<div className="mb-[4%] max-h-[38%] overflow-y-auto pr-[2%]">
+								{catalogue.personnalites.map((pp, i) => (
+									<Plaque
+										key={pp.texte}
+										cdn={cdn}
+										libelle={pp.libelle ?? ""}
+										choisie={i === personnalite}
+										ouverte={i === personnalite}
+										onClick={() => setPersonnalite(i)}
+										hauteur="14%"
+									/>
+								))}
+							</div>
+
+							{/* Type : la variante de ton, jouée au clic. */}
+							<Txt t="Type" cdn={cdn} h="1vw" className="mb-[1%]" />
+							<div className="flex flex-wrap gap-[3%]">
+								{catalogue.voix
+									.filter(
+										(v) =>
+											v.genre === genreVoix &&
+											v.personnalite === catalogue.personnalites[personnalite]?.type,
+									)
+									.map((v) => (
+										<button
+											key={v.banque}
+											type="button"
+											onClick={() => {
+												setTonVoix(v.ton);
+												jouer(v.banque);
+											}}
+											className="relative flex h-[2.2vw] w-[30%] items-center justify-center"
+										>
+											{/* eslint-disable-next-line @next/next/no-img-element */}
+											<img
+												src={`${cdn}${voix === v.banque || v.ton === tonVoix ? S.voixOn : S.voixOff}`}
+												alt=""
+												className="absolute inset-0 size-full"
+												aria-hidden
+											/>
+											{/* eslint-disable-next-line @next/next/no-img-element */}
+											<img
+												src={`${cdn}${S.iconeSon}`}
+												alt=""
+												className="relative mr-[6%] h-[48%] w-auto"
+											/>
+											<Txt
+												t={String.fromCharCode(65 + v.ton)}
+												cdn={cdn}
+												h="46%"
+												className="relative"
+											/>
+										</button>
+									))}
+							</div>
 						</div>
 					</Panneau>
 				)}
