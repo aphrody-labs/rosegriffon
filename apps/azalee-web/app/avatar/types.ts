@@ -126,3 +126,23 @@ export type Catalogue = {
 		accessoires: { presetID: string; resources: string[] }[];
 	};
 };
+
+/**
+ * Le thème de l'interface du jeu, servi par `/ui/theme.json`.
+ *
+ * Les couleurs ne sont pas un choix graphique : ce sont les 70 entrées de `font_color.cfg.bin`,
+ * la palette que le moteur de texte du jeu utilise. `rubiHex` est la teinte des furigana, souvent
+ * différente de celle du texte principal.
+ */
+export type Theme = {
+	source: string;
+	couleursTexte: {
+		id: string;
+		hex: string;
+		rubiHex: string;
+		rgb: [number, number, number];
+		rubiRgb: [number, number, number];
+	}[];
+	/** Familles de police du jeu (atlas bitmap, une par dossier `font/<famille>/font.g4tx`). */
+	polices: string[];
+};

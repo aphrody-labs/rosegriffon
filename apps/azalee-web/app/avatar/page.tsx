@@ -28,7 +28,7 @@
 import type { Metadata } from "next";
 import { MediaCount, MediaEmpty, MediaHeader } from "@/components/wiki/MediaShell";
 import { AvatarEditor } from "./AvatarEditor";
-import type { Catalogue } from "./types";
+import type { Catalogue, Theme } from "./types";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -46,6 +46,16 @@ const CDN = process.env.NEXT_PUBLIC_CDN_ORIGIN ?? "https://cdn.rosegriffon.fr";
  * Charge le catalogue résolu. `null` si la source est injoignable — la page rend alors son
  * cadre en le disant, plutôt qu'une 500 : une source absente n'est pas une page cassée.
  */
+async function chargerTheme(): Promise<Theme | null> {
+	try {
+		const reponse = await fetch(`${CDN}/ui/theme.json`, { cache: "no-store" });
+		if (!reponse.ok) return null;
+		return (await reponse.json()) as Theme;
+	} catch {
+		return null;
+	}
+}
+
 async function chargerCatalogue(): Promise<Catalogue | null> {
 	try {
 		const reponse = await fetch(`${CDN}/avatar/catalog.json`, { cache: "no-store" });
@@ -57,7 +67,7 @@ async function chargerCatalogue(): Promise<Catalogue | null> {
 }
 
 export default async function Page() {
-	const catalogue = await chargerCatalogue();
+	const [catalogue, theme] = await Promise.all([chargerCatalogue(), chargerTheme()]);
 
 	if (!catalogue) {
 		return (
@@ -96,7 +106,7 @@ export default async function Page() {
 				left={`${catalogue.categories.length} catégories · ${catalogue.presets.length} visages prédéfinis`}
 				right={`code de partage : ${catalogue.codePartage.bits} bits sur ${catalogue.codePartage.alphabet.length} caractères`}
 			/>
-			<AvatarEditor catalogue={catalogue} cdn={CDN} />
+			<AvatarEditor catalogue={catalogue} theme={theme} cdn={CDN} />
 		</div>
 	);
 }
