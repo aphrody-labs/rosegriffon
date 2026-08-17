@@ -29,8 +29,14 @@
  *
  * Relevée sur des captures du jeu (2560×1440) : bandeau jusqu'à y = 163 ; plaques de rubrique de
  * x = 34 à 533, première à y = 294, hauteur 71, pas 90,5 ; panneau de x = 1614 à 2470, y = 262 à
- * 1281. Le layout runtime de cet écran ne peut pas servir de source : ses transforms sont un
- * repli qui sort du canevas, la position des widgets ne vivant pas dans les fichiers du jeu.
+ * 1281.
+ *
+ * **Correction d'une affirmation fausse écrite ici auparavant** : la position des widgets EST
+ * dans les fichiers du jeu. `nie_formats::menu::attach_slots` la résout depuis les
+ * `CMenuAttachLocator`, et le layout exporté place 14 des 18 objets de cet écran dans son
+ * canevas. Le relevé sur captures reste utilisé parce que la conversion de ces transforms en
+ * coordonnées écran (ancre, échelle, repère) n'est pas encore juste — un premier essai plaçait
+ * le fond hors cadre — pas parce que la donnée manquerait. Cf. `/avatar/layout/<ecran>.json`.
  */
 
 import { useCallback, useEffect, useMemo, useRef, useState, useTransition } from "react";
@@ -646,6 +652,9 @@ export function Editeur({
 								if (!cat) return null;
 								return (
 									<div key={fst} className="mb-[4%]">
+										{/* Le jeu place une icône à gauche de chaque section ; laquelle n'est
+										    établi par aucun fichier, donc le titre reste seul plutôt que
+										    d'afficher un pictogramme pris au hasard. */}
 										<Txt t={libelle} cdn={cdn} h="1vw" className="mb-[1%]" />
 										<div className="flex gap-[3%]">
 											{cat.parts.map((p, i) => {
@@ -721,6 +730,14 @@ export function Editeur({
 								alt=""
 								className="absolute inset-0 size-full"
 								aria-hidden
+							/>
+							{/* eslint-disable-next-line @next/next/no-img-element */}
+							<img
+								src={`${cdn}${A01}/avatar01_02/icon_edit_list${String(11 + i).padStart(2, "0")}_${
+									i === sousStats ? "on" : "off"
+								}.png`}
+								alt=""
+								className="relative ml-[5%] h-[60%] w-auto"
 							/>
 							<Txt
 								t={r}
