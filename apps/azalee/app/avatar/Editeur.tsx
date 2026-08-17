@@ -36,9 +36,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { createPortal } from "react-dom";
 
-import CharacterModelViewer from "@/components/wiki/CharacterModelViewer";
-
 import { definirPhotoDepuisAvatar } from "./actions";
+import { Modele3D } from "./Modele3D";
 import type { Catalogue, Categorie, Part } from "./types";
 
 /** Proportions relevées sur les captures, en pourcentage du cadre. */
@@ -327,7 +326,7 @@ export function Editeur({
 						className="absolute"
 						style={{ left: "26%", top: "13%", width: "34%", height: "84%" }}
 					>
-						<CharacterModelViewer glbUrl={modeleUrl} name="" inline />
+						<Modele3D url={modeleUrl} />
 					</div>
 				)}
 
@@ -456,6 +455,14 @@ export function Editeur({
 												aria-hidden
 											/>
 										)}
+										{/* Numéro de la vignette, comme le jeu : rang dans la page, sur deux chiffres. */}
+										<Txt
+											t={String(page * PAR_PAGE + visibles.indexOf(p) + 1).padStart(2, "0")}
+											cdn={cdn}
+											couleur="9AA6B2"
+											h="18%"
+											className="absolute left-[6%] top-[2%]"
+										/>
 										{p.icone && (
 											// eslint-disable-next-line @next/next/no-img-element
 											<img

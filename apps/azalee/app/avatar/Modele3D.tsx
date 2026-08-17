@@ -1,0 +1,83 @@
+"use client";
+
+/**
+ * Le modèle au centre de l'écran, sans habillage.
+ *
+ * Le visualiseur commun (`CharacterModelViewer`) impose un fond opaque, un rapport 3:4 et un
+ * bouton de téléchargement : trois éléments que le jeu n'a pas, et le fond masquait sa scène.
+ * Ici, seul le `model-viewer` est monté, sur fond transparent, aux dimensions du conteneur.
+ *
+ * Le script du composant est celui déjà servi par azalée (`/vendor/model-viewer.min.js`) : la
+ * politique de sécurité n'autorise que l'origine du site, aucun script tiers n'est chargé.
+ */
+
+import { useEffect, useRef, useState } from "react";
+
+const SCRIPT = "/vendor/model-viewer.min.js";
+
+let chargement: Promise<void> | null = null;
+
+/** Charge le composant une seule fois pour toute la page. */
+function chargerModelViewer(): Promise<void> {
+	if (typeof window === "undefined") return Promise.resolve();
+	if (customElements.get("model-viewer")) return Promise.resolve();
+	chargement ??= new Promise<void>((resolve, reject) => {
+		const existant = document.querySelector<HTMLScriptElement>(`script[src="${SCRIPT}"]`);
+		if (existant) {
+			existant.addEventListener("load", () => resolve());
+			existant.addEventListener("error", () => reject(new Error("script indisponible")));
+			return;
+		}
+		const script = document.createElement("script");
+		script.type = "module";
+		script.src = SCRIPT;
+		script.addEventListener("load", () => resolve());
+		script.addEventListener("error", () => {
+			chargement = null;
+			reject(new Error("script indisponible"));
+		});
+		document.head.appendChild(script);
+	});
+	return chargement;
+}
+
+export function Modele3D({ url }: { url: string }) {
+	const hote = useRef<HTMLDivElement>(null);
+	const [pret, setPret] = useState(false);
+
+	useEffect(() => {
+		let annule = false;
+		chargerModelViewer()
+			.then(() => {
+				if (!annule) setPret(true);
+			})
+			.catch(() => {
+				/* sans le composant, la scène reste sans modèle plutôt qu'avec un cadre d'erreur */
+			});
+		return () => {
+			annule = true;
+		};
+	}, []);
+
+	useEffect(() => {
+		if (!pret || !hote.current) return;
+		const boite = hote.current;
+		boite.innerHTML = "";
+		const mv = document.createElement("model-viewer");
+		mv.setAttribute("alt", "");
+		mv.setAttribute("camera-controls", "");
+		mv.setAttribute("touch-action", "pan-y");
+		mv.setAttribute("exposure", "1");
+		mv.setAttribute("shadow-intensity", "0");
+		mv.style.width = "100%";
+		mv.style.height = "100%";
+		mv.style.backgroundColor = "transparent";
+		mv.setAttribute("src", url);
+		boite.appendChild(mv);
+		return () => {
+			boite.innerHTML = "";
+		};
+	}, [pret, url]);
+
+	return <div ref={hote} className="size-full" />;
+}
