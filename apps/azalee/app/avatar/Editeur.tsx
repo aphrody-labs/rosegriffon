@@ -61,6 +61,8 @@ const C = { bandeauGauche: "#0EAFFF", bandeauDroite: "#1067F8", texte: "047AFF" 
 
 const A01 = "/dx11/menu/161_avatar/avatar01";
 const MM = "/dx11/menu/100_mainmenu/mainmenu90/mainmenu90_02_2";
+/** Atlas d'interface communs à tous les écrans (barre de commandes, bouton de retour). */
+const CMN = "/dx11/menu/20_cmn";
 const S = {
 	fond: `${A01}/avatar01_00/avatar01_00.png`,
 	// Boutons de catégorie du jeu (428×144, trois états) — `list_base01` (392×72) servait
@@ -71,6 +73,10 @@ const S = {
 	voixOff: `${A01}/avatar01_48/voice_base01_off.png`,
 	voixOn: `${A01}/avatar01_48/voice_base01_on.png`,
 	iconeSon: `${A01}/avatar01_48/icon_sound01.png`,
+	retour: `${CMN}/cmn03/cmn03_01/cmd_back_base01.png`,
+	cmdOff: `${CMN}/cmn03/cmn03_02/cmd_btn_base01_off.png`,
+	cmdOn: `${CMN}/cmn03/cmn03_02/cmd_btn_base01_on.png`,
+	valider: `${CMN}/cmn03/cmn03_03/cmd_press_btn_base_on01.png`,
 	flecheG: `${A01}/avatar01_11/arrow01_l.png`,
 	flecheD: `${A01}/avatar01_11/arrow01_r.png`,
 	languette: `${A01}/avatar01_03/edit_type_base01.png`,
@@ -609,29 +615,58 @@ export function Editeur({ catalogue, cdn }: { catalogue: Catalogue; cdn: string 
 					</Panneau>
 				)}
 
-				{/* Validation : le jeu propose « Suivant » en bas à droite. Ici il applique le visage
-				    choisi comme photo du compte connecté (l'identité vient de la session). */}
-				<button
-					type="button"
-					disabled={enregistrement}
-					onClick={() => {
-						const partChoisie = categories
-							.flatMap((c) => c.parts)
-							.find((p) => Object.values(choix).includes(p.id));
-						if (!partChoisie?.icone) {
-							setMessageValidation("Choisis un visage");
-							return;
-						}
-						demarrerEnregistrement(async () => {
-							const r = await definirPhotoDepuisAvatar(partChoisie.icone as string);
-							setMessageValidation(r.error ? r.error : "Photo enregistrée");
-						});
-					}}
-					className="absolute bottom-[2%] right-[3%] flex items-center"
-					style={{ height: "4%" }}
-				>
-					<Txt t={messageValidation} cdn={cdn} h="100%" />
-				</button>
+				{/* Barre du bas : retour à gauche, commandes au centre, validation à droite —
+				    disposition et sprites relevés sur les captures du jeu. */}
+				<div className="absolute inset-x-0 bottom-0 flex items-center justify-between px-[2%] pb-[1%]">
+					<button type="button" aria-label="Retour" className="relative h-[4.2%]">
+						{/* eslint-disable-next-line @next/next/no-img-element */}
+						<img src={`${cdn}${S.retour}`} alt="" className="h-full w-auto" />
+					</button>
+
+					<div className="flex items-center gap-[1.5vw]">
+						{["Choisir", "Zoom", "Tourner", "Expression", "Modèle"].map((c) => (
+							<span key={c} className="relative flex items-center">
+								{/* eslint-disable-next-line @next/next/no-img-element */}
+								<img
+									src={`${cdn}${S.cmdOff}`}
+									alt=""
+									className="h-[2.4vw] w-auto"
+									aria-hidden
+								/>
+								<span className="absolute inset-0 flex items-center justify-center">
+									<Txt t={c} cdn={cdn} h="42%" />
+								</span>
+							</span>
+						))}
+					</div>
+
+					{/* Validation : le jeu propose « Suivant ». Ici il applique le visage choisi comme
+					    photo du compte connecté (l'identité vient de la session). */}
+					<button
+						type="button"
+						disabled={enregistrement}
+						onClick={() => {
+							const partChoisie = categories
+								.flatMap((c) => c.parts)
+								.find((p) => Object.values(choix).includes(p.id));
+							if (!partChoisie?.icone) {
+								setMessageValidation("Choisis un visage");
+								return;
+							}
+							demarrerEnregistrement(async () => {
+								const r = await definirPhotoDepuisAvatar(partChoisie.icone as string);
+								setMessageValidation(r.error ? r.error : "Photo enregistrée");
+							});
+						}}
+						className="relative flex items-center"
+					>
+						{/* eslint-disable-next-line @next/next/no-img-element */}
+						<img src={`${cdn}${S.valider}`} alt="" className="h-[3vw] w-auto" aria-hidden />
+						<span className="absolute inset-0 flex items-center justify-center px-[8%]">
+							<Txt t={messageValidation} cdn={cdn} h="38%" />
+						</span>
+					</button>
+				</div>
 
 				{/* Nom : le jeu ouvre un clavier ; ici un champ, sans habillage étranger */}
 				{onglet === "nom" && (
