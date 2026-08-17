@@ -69,11 +69,13 @@ const ICN = "/dx11/menu/200_icon/15_icon_common";
 const GAIJI = "/dx11/font";
 const S = {
 	fond: `${A01}/avatar01_00/avatar01_00.png`,
-	// Boutons de catégorie du jeu (428×144, trois états) — `list_base01` (392×72) servait
-	// auparavant, mais c'est la plaque des listes internes, pas celle de la colonne.
-	plaqueOn: `${A01}/avatar01_26/category_btn_on_l.png`,
-	plaqueOff: `${A01}/avatar01_26/category_btn_off_l.png`,
-	plaqueSurvol: `${A01}/avatar01_26/category_btn_ol_l.png`,
+	// Plaques de la colonne, avec leurs trois états. J'avais bascule sur `category_btn_*_l`
+	// (428×144) en croyant mieux coller : ses pixels sont GRIS (RGBA moyen 185,185,185) alors
+	// que le jeu affiche des plaques BLANCHES — `list_base01_off` mesure 250,251,251. Mesure
+	// avant substitution.
+	plaqueOn: `${A01}/avatar01_02/list_base01_on.png`,
+	plaqueOff: `${A01}/avatar01_02/list_base01_off.png`,
+	plaqueSurvol: `${A01}/avatar01_02/list_base01_ol.png`,
 	voixOff: `${A01}/avatar01_48/voice_base01_off.png`,
 	voixOn: `${A01}/avatar01_48/voice_base01_on.png`,
 	iconeSon: `${A01}/avatar01_48/icon_sound01.png`,
