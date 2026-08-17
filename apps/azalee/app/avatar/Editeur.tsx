@@ -341,13 +341,9 @@ export function Editeur({
 			{/* La scène occupe EXACTEMENT le cadre : les proportions ci-dessus sont relevées sur un
 			    cadre 16/9 plein, et une mise en boîte à lettres les décalait toutes (bandeau mesuré
 			    à 153 px au lieu de 163, soit un facteur 0,94 sur chaque position). */}
-			<div
-				className="relative overflow-hidden"
-				style={{
-					width: "100vw",
-					height: "100vh",
-				}}
-			>
+			{/* La scène épouse son parent (`inset-0`), pas `100vw/100vh` : les deux ne coïncident
+			    pas toujours — le fond, porté par le parent, laissait alors une bande non couverte. */}
+			<div className="absolute inset-0 overflow-hidden">
 				{/* Fond du jeu. Le rendu par layout (`LayoutRender`) est ecrit et sa route servie,
 				    mais pas branche ici : l'interpretation de ses transforms en coordonnees ecran
 				    n'est pas resolue — le fond finissait hors cadre et la colonne perdait 28 points
