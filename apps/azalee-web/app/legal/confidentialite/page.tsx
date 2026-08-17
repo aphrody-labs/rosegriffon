@@ -15,7 +15,7 @@ export default function PrivacyPolicyPage() {
 				Politique de Confidentialité
 			</h1>
 			<p className="type-body-small text-on-surface-variant mb-8">
-				Dernière mise à jour : 24 novembre 2025
+				Dernière mise à jour : 17 août 2026
 			</p>
 
 			<div className="prose prose-base md:prose-lg dark:prose-invert max-w-none space-y-8 text-on-surface">
@@ -65,25 +65,54 @@ export default function PrivacyPolicyPage() {
 
 				<section>
 					<h2 className="type-headline-small font-semibold mb-4 text-secondary">
-						8. Cookies et Technologies Similaires
+						2. Cookies et Technologies Similaires
 					</h2>
-					<p>
-						Notre site utilise uniquement des cookies strictement nécessaires au fonctionnement :
-					</p>
+					<p>Cookies déposés par le site lui-même :</p>
 					<ul className="list-disc pl-6 space-y-2">
 						<li>
-							<strong>Cookies de session</strong> : Pour maintenir votre authentification (Supabase
+							<strong>Cookies de session</strong> : pour maintenir votre authentification (Better
 							Auth)
 						</li>
 						<li>
-							<strong>Cookies de préférences</strong> : Pour sauvegarder vos choix (thème
+							<strong>Cookies de préférences</strong> : pour sauvegarder vos choix (thème
 							clair/sombre, langue)
 						</li>
 					</ul>
+					<p className="mt-4">Cookies déposés par des tiers :</p>
+					<ul className="list-disc pl-6 space-y-2">
+						<li>
+							<strong>Google AdSense</strong> : les annonces affichées sur le site financent son
+							hébergement. Google et ses partenaires peuvent déposer des cookies pour mesurer les
+							affichages, limiter la répétition d&apos;une même annonce et, si vous y avez consenti,
+							personnaliser les annonces d&apos;après votre navigation. Nous ne transmettons à Google
+							aucune donnée de votre compte.
+						</li>
+						<li>
+							<strong>Google Tag Manager</strong> : mesure d&apos;audience (pages consultées, appareil,
+							provenance).
+						</li>
+					</ul>
 					<p className="mt-4">
-						Nous n&apos;utilisons <strong>pas</strong> de cookies publicitaires ou de tracking
-						tiers. Les statistiques d&apos;utilisation sont collectées de manière anonymisée via nos
-						outils internes (conforme RGPD).
+						Vous pouvez refuser la personnalisation des annonces à tout moment depuis les{" "}
+						<a
+							href="https://myadcenter.google.com/"
+							target="_blank"
+							rel="noopener noreferrer"
+							className="text-primary hover:underline"
+						>
+							paramètres publicitaires Google
+						</a>{" "}
+						et consulter le détail des cookies utilisés par Google sur{" "}
+						<a
+							href="https://policies.google.com/technologies/partner-sites"
+							target="_blank"
+							rel="noopener noreferrer"
+							className="text-primary hover:underline"
+						>
+							sa page dédiée
+						</a>
+						. Un blocage de ces cookies par votre navigateur n&apos;empêche pas la consultation du
+						site.
 					</p>
 				</section>
 			</div>
