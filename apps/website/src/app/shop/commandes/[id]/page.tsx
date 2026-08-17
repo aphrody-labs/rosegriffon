@@ -8,6 +8,7 @@ import { formatEuros, getProduct } from "@/lib/shop/products";
 import { getServerUser } from "@/lib/auth-helpers";
 
 export const metadata = {
+	robots: { follow: false, index: false },
 	title: "Détail commande · Boutique Rose Griffon",
 };
 

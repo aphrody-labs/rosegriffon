@@ -3,6 +3,7 @@ import type { Metadata, Viewport } from "next";
 import { MobileBottomNavigationWrapper } from "@/components/layout/MobileBottomNavigationWrapper";
 
 export const metadata: Metadata = {
+	alternates: { canonical: "https://rosegriffon.fr/rose-griffon-tv" },
 	description:
 		"Votre rendez-vous quotidien 100% Inazuma Eleven sur Twitch et YouTube avec Rose Griffon TV.",
 	openGraph: {

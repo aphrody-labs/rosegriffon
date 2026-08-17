@@ -125,6 +125,19 @@ interface ArticleSchemaProps {
 	url: string;
 }
 
+/** La plus récente des deux dates ISO, en repli sur la publication. */
+function plusRecente(publication: string, modification?: string): string {
+	if (!modification) {
+		return publication;
+	}
+	const a = Date.parse(publication);
+	const b = Date.parse(modification);
+	if (Number.isNaN(a) || Number.isNaN(b)) {
+		return publication;
+	}
+	return b > a ? modification : publication;
+}
+
 export function ArticleSchema({
 	title,
 	description,
@@ -143,7 +156,11 @@ export function ArticleSchema({
 			name: authorName,
 			url: authorUrl,
 		},
-		dateModified: dateModified || datePublished,
+		// `updated_at` de la table `articles` porte la date de la dernière écriture en
+		// base, qui peut précéder la publication (article rédigé puis publié plus
+		// tard). Une modification antérieure à la publication est incohérente et
+		// invalide le balisage Article aux yeux de Google : on plafonne par le bas.
+		dateModified: plusRecente(datePublished, dateModified),
 		datePublished: datePublished,
 		description: description,
 		headline: title,

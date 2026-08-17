@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
+	alternates: { canonical: "https://rosegriffon.fr/legal/cgu" },
 	description:
 		"Conditions générales d'utilisation des services de l'association Rose Griffon, conformes aux lois françaises.",
 	title: "Conditions Générales d'Utilisation | Rose Griffon",

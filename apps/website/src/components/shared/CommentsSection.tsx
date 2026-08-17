@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
+import { usePathname } from "next/navigation";
 import {
 	Avatar,
 	AvatarFallback,
@@ -52,6 +53,11 @@ export function CommentsSection({ targetId, targetType, className = "" }: Commen
 	const [isLoading, setIsLoading] = useState(true);
 
 	const { data: session } = authClient.useSession();
+	// `window.location` n'existe pas pendant le rendu serveur : l'y lire faisait
+	// échouer le SSR de toute page portant les commentaires (les chroniques
+	// n'arrivaient plus qu'en squelette, sans <h1> ni texte, donc sans contenu
+	// indexable). `usePathname` donne le même chemin des deux côtés.
+	const pathname = usePathname();
 	const supabase = createClient();
 	const commentsEndRef = useRef<HTMLDivElement>(null);
 
@@ -331,7 +337,7 @@ export function CommentsSection({ targetId, targetType, className = "" }: Commen
 						<div className="text-center py-4 bg-gray-50 dark:bg-gray-800/30 rounded-lg border border-dashed border-gray-200 dark:border-gray-800">
 							<p className="text-sm text-gray-500 mb-2">Connecte-toi pour participer à la discussion !</p>
 							<Button asChild size="sm" className="bg-[#a14b3f] hover:bg-[#a14b3f]/90 text-white">
-								<a href={`/login?redirectTo=${encodeURIComponent(window.location.pathname)}`}>
+								<a href={`/login?redirectTo=${encodeURIComponent(pathname)}`}>
 									Se connecter
 								</a>
 							</Button>

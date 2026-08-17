@@ -6,6 +6,7 @@ import { getCart } from "@/lib/shop/cart";
 import { CartIconButton } from "./_components/cart-icon-button";
 
 export const metadata = {
+	alternates: { canonical: "https://rosegriffon.fr/shop" },
 	description:
 		"Stickers, prints, badges, t-shirts et packs personnage édition limitée illustrés par les artistes de la communauté Rose Griffon.",
 	openGraph: {

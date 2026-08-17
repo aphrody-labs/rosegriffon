@@ -1,5 +1,14 @@
 import { Geist, Geist_Mono } from "next/font/google";
 
+import type { Metadata } from "next";
+
+// Page technique affichée pendant une coupure : aucun contenu propre à indexer.
+export const metadata: Metadata = {
+	robots: { follow: false, index: false },
+	title: "Maintenance · Rose Griffon",
+};
+
+
 const geistSans = Geist({
 	subsets: ["latin"],
 	variable: "--font-geist-sans",

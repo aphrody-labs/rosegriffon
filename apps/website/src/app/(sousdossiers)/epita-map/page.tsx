@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import GoogleMapEpita from "@/components/maps/GoogleMapEpita";
 
 export const metadata: Metadata = {
+	alternates: { canonical: "https://rosegriffon.fr/epita-map" },
 	description: "Retrouvez-nous sur le campus de l'EPITA Kremlin-Bicêtre.",
 	title: "Localisation EPITA - Rose Griffon",
 };

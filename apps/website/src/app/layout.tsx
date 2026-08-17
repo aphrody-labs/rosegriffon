@@ -28,7 +28,12 @@ export const viewport: Viewport = {
 
 export const metadata: Metadata = {
 	alternates: {
-		canonical: "/",
+		// PAS de `canonical` ici. Les métadonnées Next sont héritées : un canonical
+		// posé sur le layout racine s'applique à toute page qui n'en déclare pas un,
+		// et /projets, /evenements, /notre-equipe, /legal/*, /shop, /shop/<produit>
+		// et les chroniques annonçaient donc toutes « la page canonique, c'est
+		// l'accueil » — soit l'instruction explicite de ne pas les indexer. L'accueil
+		// pose le sien dans `app/page.tsx` ; chaque page publique pose le sien.
 		types: {
 			"text/markdown": "/llm.txt",
 		},
