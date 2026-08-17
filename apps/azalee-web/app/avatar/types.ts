@@ -48,6 +48,11 @@ export type Categorie = {
 	parts: Part[];
 	/** CRC-32 des couleurs de la palette associée. */
 	couleurs: string[];
+	/**
+	 * Grille de la palette, recoupée par deux sources : le nombre de couleurs et le nom des
+	 * écrans du jeu (`chara_edit_color_menu_10x4_skin`, `_12x5`, `_13x5`).
+	 */
+	grillePalette?: { colonnes: number; lignes: number } | null;
 };
 
 /** Une ligne de recette : « pour cet emplacement, cette valeur / cette part / cette couleur ». */
