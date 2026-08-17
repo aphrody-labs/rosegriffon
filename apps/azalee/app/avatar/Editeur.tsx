@@ -302,20 +302,29 @@ export function Editeur({
 	// Modèle affiché au centre. Priorité à la part choisie : le catalogue donne ses chemins VFS
 	// réels, dont on tire le dossier et le nom que sert `/model-edit/`. À défaut, le visage de la
 	// morphologie courante — mapping fourni par les données, pas deviné.
+	// Modèle affiché au centre : l'avatar est un EMPILEMENT de pièces, pas un modèle unique.
+	// On assemble donc le visage de la morphologie courante (mapping fourni par le catalogue)
+	// avec chaque part choisie qui possède un modèle sous `20_EDIT/`, et `/model-avatar/` rend
+	// le GLB combiné. Les chemins viennent des données, aucun n'est deviné.
 	const modeleUrl = useMemo(() => {
-		const partChoisie = categories
-			.flatMap((c) => c.parts)
-			.find((p) => Object.values(choix).includes(p.id));
-		const chemin = partChoisie?.modeles.find((m) => m.includes("/20_EDIT/") && m.endsWith(".g4md"));
-		if (chemin) {
+		const pieces: string[] = [];
+		const visage = catalogue.modelesDeBase.visages[0];
+		const res = visage?.resources[morphologie] ?? visage?.resources[0];
+		if (res) pieces.push(`_facebase/${res}`);
+
+		for (const c of categories) {
+			const id = choix[c.faceSettingType];
+			if (!id) continue;
+			const part = c.parts.find((p) => p.id === id);
+			const chemin = part?.modeles.find((m) => m.includes("/20_EDIT/") && m.endsWith(".g4md"));
+			if (!chemin) continue;
 			const bouts = chemin.split("/20_EDIT/")[1]?.split("/");
 			const dossier = bouts?.[0];
 			const nom = bouts?.[1]?.replace(/\.g4md$/, "");
-			if (dossier && nom) return `${cdn}/model-edit/${dossier}/${nom}.glb`;
+			if (dossier && nom) pieces.push(`${dossier}/${nom}`);
 		}
-		const visage = catalogue.modelesDeBase.visages[0];
-		const res = visage?.resources[morphologie] ?? visage?.resources[0];
-		return res ? `${cdn}/model-edit/_facebase/${res}.glb` : null;
+		if (pieces.length === 0) return null;
+		return `${cdn}/model-avatar/${pieces.join("+")}.glb`;
 	}, [catalogue.modelesDeBase.visages, categories, choix, morphologie, cdn]);
 
 	const iOnglet = ONGLETS.findIndex((o) => o.cle === onglet);
