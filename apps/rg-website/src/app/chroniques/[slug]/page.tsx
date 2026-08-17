@@ -44,6 +44,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 	const image = article.featured_image_url || "/opengraph-image.png";
 
 	return {
+		alternates: { canonical: `https://rosegriffon.fr/chroniques/${slug}` },
 		description,
 		openGraph: {
 			description,

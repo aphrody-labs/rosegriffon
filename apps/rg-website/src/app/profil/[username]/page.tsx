@@ -57,6 +57,7 @@ export async function generateMetadata({
 	const image = profile.avatar_url || "/opengraph-image.png";
 
 	return {
+		alternates: { canonical: `https://rosegriffon.fr/profil/${username}` },
 		description,
 		openGraph: {
 			description,
@@ -65,6 +66,9 @@ export async function generateMetadata({
 			type: "profile",
 			url: `https://rosegriffon.fr/profil/${username}`,
 		},
+		// Même politique que sur le wiki Azalée : la fiche publie la biographie
+		// d'un membre sans que son indexation ait jamais été demandée.
+		robots: { follow: true, index: false },
 		title,
 		twitter: {
 			card: "summary",

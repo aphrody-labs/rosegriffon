@@ -11,6 +11,16 @@ import { getPgPool } from "@/lib/db/pg";
 import { cn } from "@/lib/utils";
 import { parseSearchParams } from "@/lib/validations";
 
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+	alternates: { canonical: "https://rosegriffon.fr/community" },
+	description:
+		"Les membres de la communauté Rose Griffon : profils, rôles et contributions autour d'Inazuma Eleven.",
+	title: "Communauté | Rose Griffon",
+};
+
+
 // --- Types ---
 
 interface DiscordMember {

@@ -9,6 +9,7 @@ import { PatreonDiscountBanner } from "../_components/patreon-discount-banner";
 import { formatEuros } from "@/lib/shop/products";
 
 export const metadata = {
+	robots: { follow: false, index: false },
 	title: "Panier · Boutique Rose Griffon",
 };
 

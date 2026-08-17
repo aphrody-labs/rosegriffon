@@ -25,6 +25,7 @@ export async function generateMetadata({ params }: ProductPageProps): Promise<Me
 		return { title: "Produit introuvable · Rose Griffon" };
 	}
 	return {
+		alternates: { canonical: `https://rosegriffon.fr/shop/${product.slug}` },
 		description: product.tagline,
 		openGraph: {
 			description: product.tagline,

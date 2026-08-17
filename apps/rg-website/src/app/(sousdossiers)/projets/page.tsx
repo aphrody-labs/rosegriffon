@@ -9,6 +9,7 @@ import { Sparkles } from "@/lib/icons-config";
 import { PROJETS } from "@/lib/projets";
 
 export const metadata: Metadata = {
+	alternates: { canonical: "https://rosegriffon.fr/projets" },
 	description: "Découvrez les outils et initiatives créatives de la communauté Rose Griffon.",
 	title: "Projets | Rose Griffon",
 };

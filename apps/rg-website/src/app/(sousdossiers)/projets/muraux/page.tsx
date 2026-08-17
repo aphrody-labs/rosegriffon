@@ -7,6 +7,16 @@ import { BreadcrumbSchema, ImageObjectSchema } from "@/components/shared/Structu
 
 import { ExternalLink, Info, Users } from "@/lib/icons-config";
 
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+	alternates: { canonical: "https://rosegriffon.fr/projets/muraux" },
+	description:
+		"Les fresques murales Inazuma Eleven réalisées par la communauté Rose Griffon : genèse, lieux et coulisses.",
+	title: "Fresques murales | Rose Griffon",
+};
+
+
 export default function MurauxPage() {
 	const murals = [
 		{

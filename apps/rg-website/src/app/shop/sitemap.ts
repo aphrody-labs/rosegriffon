@@ -12,12 +12,9 @@ export default function sitemap(): MetadataRoute.Sitemap {
 			priority: 0.9,
 			url: `${baseUrl}/shop`,
 		},
-		{
-			changeFrequency: "never",
-			lastModified: now,
-			priority: 0.3,
-			url: `${baseUrl}/shop/panier`,
-		},
+		// `/shop/panier` a été retiré : le panier est en `noindex` (état personnel,
+		// vide pour un robot). Le laisser ici revenait à demander l'indexation d'une
+		// page qui refuse d'être indexée.
 		...PRODUCTS.map((p) => ({
 			changeFrequency: "monthly" as const,
 			lastModified: now,

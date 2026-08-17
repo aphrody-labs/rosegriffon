@@ -5,6 +5,7 @@ import { getStripe } from "@/lib/shop/stripe";
 import { formatEuros } from "@/lib/shop/products";
 
 export const metadata = {
+	robots: { follow: false, index: false },
 	title: "Merci · Commande Rose Griffon",
 };
 

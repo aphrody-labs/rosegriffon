@@ -1,4 +1,34 @@
-export default function robots() {
+import type { MetadataRoute } from "next";
+
+/**
+ * Chemins sans valeur d'index, communs à tous les robots :
+ * espaces d'administration, espace membre, parcours d'authentification,
+ * tunnel d'achat et fiches de profil (biographie d'un membre, publiée sans
+ * qu'aucune indexation ait été demandée — même politique que le wiki Azalée).
+ *
+ * `/_next/` n'y figure PAS et ne doit pas y revenir : ce préfixe sert les
+ * feuilles de style, le JavaScript et les images optimisées. Le bloquer
+ * empêchait Google de rendre les pages telles qu'un visiteur les voit, et
+ * mettait toutes les images passées par `next/image` hors de portée de
+ * l'indexation d'images.
+ */
+const PRIVE = [
+	"/api/",
+	"/admin/",
+	"/dashboard/",
+	"/login",
+	"/complete-profile",
+	"/forgot-password",
+	"/reset-password",
+	"/auth/",
+	"/profil/",
+	"/shop/panier",
+	"/shop/merci",
+	"/shop/commandes",
+	"/maintenance",
+];
+
+export default function robots(): MetadataRoute.Robots {
 	// Host canonique (apex, sans www) — cohérent avec le `metadataBase` du layout et
 	// la redirection 301 www → apex de next.config. Évite que la directive Sitemap
 	// pointe vers une URL redirigée.
@@ -11,17 +41,17 @@ export default function robots() {
 			{
 				// /api/llm/* = contexte IA (CLAUDE.md/GEMINI.md/Grok) : explicitement autorisé (allow plus spécifique que disallow /api/).
 				allow: ["/", "/api/llm/"],
-				disallow: ["/api/", "/admin/", "/_next/", "/dashboard/"],
+				disallow: PRIVE,
 				userAgent: "*",
 			},
 			{
 				allow: ["/", "/api/llm/"],
-				disallow: ["/api/", "/admin/", "/_next/", "/dashboard/"],
+				disallow: PRIVE,
 				userAgent: "Googlebot",
 			},
 			{
 				allow: "/",
-				disallow: ["/admin/", "/dashboard/"],
+				disallow: ["/admin/", "/dashboard/", "/profil/"],
 				userAgent: "Googlebot-Image",
 			},
 			{
@@ -29,12 +59,12 @@ export default function robots() {
 				// pour choisir les annonces ; sans autorisation explicite il ne reste que
 				// du remplissage générique, et le revenu s'effondre sans message d'erreur.
 				allow: "/",
-				disallow: ["/api/", "/admin/", "/_next/", "/dashboard/"],
+				disallow: PRIVE,
 				userAgent: "Mediapartners-Google",
 			},
 			{
 				allow: "/",
-				disallow: ["/admin/", "/_next/", "/dashboard/"],
+				disallow: PRIVE,
 				userAgent: [
 					// Crawlers IA explicitement autorisés (condition pour l'ingestion LLM)
 					"GPTBot",
@@ -59,6 +89,9 @@ export default function robots() {
 				],
 			},
 		],
-		sitemap: `${baseUrl}/sitemap.xml`,
+		// Deux plans de site : Next en génère un par fichier `sitemap.ts`, et celui
+		// de la boutique (`app/shop/sitemap.ts`) n'était déclaré nulle part — ses
+		// douze fiches produit n'avaient donc aucun point d'entrée de découverte.
+		sitemap: [`${baseUrl}/sitemap.xml`, `${baseUrl}/shop/sitemap.xml`],
 	};
 }

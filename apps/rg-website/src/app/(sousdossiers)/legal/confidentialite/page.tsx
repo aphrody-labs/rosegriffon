@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
+	alternates: { canonical: "https://rosegriffon.fr/legal/confidentialite" },
 	description:
 		"Politique de confidentialité et protection des données personnelles de l'association Rose Griffon, conforme au RGPD et à la loi Informatique et Libertés.",
 	title: "Politique de Confidentialité | Rose Griffon",

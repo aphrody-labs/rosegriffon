@@ -5,6 +5,7 @@ import PfpGenerator from "@/components/tools/PfpGenerator";
 import PfpThemeImage from "@/components/tools/PfpThemeImage";
 
 export const metadata: Metadata = {
+	alternates: { canonical: "https://rosegriffon.fr/projets/outils/pfp" },
 	description:
 		"Créez votre photo de profil aux couleurs de Rose Griffon avec notre outil de personnalisation d'avatar.",
 	title: "Avatar RG | Rose Griffon",

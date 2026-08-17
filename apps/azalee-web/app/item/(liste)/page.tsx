@@ -37,11 +37,11 @@ export async function generateMetadata({
 			// `page` vient des paramètres BRUTS : `parseSearchParams` lui donne un
 			// défaut de 1, si bien que la page nue `/item` se canonicalisait vers
 			// `/item?category=shoes&page=1` — une URL qui n'est pas celle servie.
-			canonical: buildCanonical(
-				"/item",
-				{ category: activeCategory, page },
-				["category", "page"]
-			),
+			// Même raisonnement pour `category` : `activeCategory` porte le défaut
+			// `shoes`, et `/item` se canonicalisait encore vers `/item?category=shoes`.
+			// C'est `category` BRUT qu'il faut passer — la catégorie par défaut ne va
+			// dans l'URL canonique que si le visiteur l'a réellement demandée.
+			canonical: buildCanonical("/item", { category, page }, ["category", "page"]),
 		},
 		description: `Liste complète des ${categoryLabel.toLowerCase()} et objets dans Inazuma Eleven: Victory Road. Localisation, stats et effets.`,
 		title: `${title} | Inazuma Eleven Victory Road - Azalée`,

@@ -4,6 +4,18 @@ import Link from "next/link";
 import { Newspaper, Search } from "@/lib/icons-config";
 import { getPgPool } from "@/lib/db/pg";
 
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+	alternates: { canonical: "https://rosegriffon.fr/search" },
+	description: "Rechercher un article ou une chronique sur le site de l'association Rose Griffon.",
+	// Page de résultats : contenu dupliqué des chroniques, aucune valeur ajoutée
+	// en index. Suivie (les liens comptent), pas indexée.
+	robots: { follow: true, index: false },
+	title: "Recherche | Rose Griffon",
+};
+
+
 export const dynamic = "force-dynamic";
 
 interface SearchArticleRow {
