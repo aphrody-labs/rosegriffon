@@ -125,7 +125,12 @@ export default async function SkillsPage({
 		isPartOf: { "@type": "WebSite", name: "Azalée", url: "https://azalee.rosegriffon.fr" },
 		mainEntity: {
 			"@type": "ItemList",
-			itemListElement: skills.slice(0, 10).map((s: any, i: number) => ({
+			// Toutes les techniques affichées, pas les dix premières : le balisage
+			// décrivait un sixième de la page, et une liste qui s'arrête à 10 quand
+			// l'écran en montre 60 se lit comme une page presque vide. Les positions
+			// sont absolues (numérotation continue de page en page), ce qui rattache
+			// chaque page de pagination au même ensemble.
+			itemListElement: skills.map((s: any, i: number) => ({
 				"@type": "ListItem",
 				position: (pageNumber - 1) * ITEMS_PER_PAGE + i + 1,
 				url: `https://azalee.rosegriffon.fr/skill/${s.skillId}`,
@@ -190,7 +195,6 @@ export default async function SkillsPage({
 								videoUrl={skill.videoUrl || undefined}
 								posterUrl={skill.posterUrl || undefined}
 								thumbnailUrl={skill.thumbnailUrl || undefined}
-								imageUrl={skill.image}
 								shop={skill.shop || undefined}
 								className="h-full"
 							/>
