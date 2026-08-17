@@ -175,6 +175,11 @@ export function g4pk_parse_json(bytes: Uint8Array): string;
 export function g4tx_info_json(bytes: Uint8Array): string;
 
 /**
+ * Décode la texture nommée `nom` d'un `.g4tx` en PNG, in-browser.
+ */
+export function g4tx_named_to_png(bytes: Uint8Array, nom: string): Uint8Array;
+
+/**
  * Feuille de sprites d'un atlas `.g4tx` : régions nommées avec leur rectangle, en JSON.
  *
  * `g4tx_info_json` rend la structure brute du conteneur ; celle-ci rend ce qu'une interface
@@ -199,6 +204,11 @@ export function g4tx_to_png(bytes: Uint8Array): Uint8Array;
 export function init_panic_hook(): void;
 
 /**
+ * Vrai si les octets commencent par la signature d'un bytecode Lua 5.2.
+ */
+export function is_lua_bytecode(bytes: Uint8Array): boolean;
+
+/**
  * Parse un `item_config.cfg.bin.json` et retourne les objets (catégorie + stats).
  *
  * - `item_config_json` : contenu du dump `item_config_*.cfg.bin.json`.
@@ -212,6 +222,11 @@ export function item_lookup(item_config_json: string): string;
  * Décode une piste de lip-sync `.p3lip` (visèmes datés) en JSON, in-browser.
  */
 export function lip_to_json(bytes: Uint8Array): string;
+
+/**
+ * Décode un `.lua.bin` du jeu (bytecode Lua 5.2) en résumé JSON.
+ */
+export function lua_bytecode_json(bytes: Uint8Array): string;
 
 /**
  * Avance la machine à états du match d'un tick (transition nominale).
@@ -320,10 +335,13 @@ export interface InitOutput {
     readonly g4mg_extract_json: (a: number, b: number, c: number, d: number) => [number, number, number, number];
     readonly g4pk_parse_json: (a: number, b: number) => [number, number, number, number];
     readonly g4tx_info_json: (a: number, b: number) => [number, number, number, number];
+    readonly g4tx_named_to_png: (a: number, b: number, c: number, d: number) => [number, number, number, number];
     readonly g4tx_sprite_sheet_json: (a: number, b: number) => [number, number, number, number];
     readonly g4tx_to_png: (a: number, b: number) => [number, number, number, number];
+    readonly is_lua_bytecode: (a: number, b: number) => number;
     readonly item_lookup: (a: number, b: number) => [number, number, number, number];
     readonly lip_to_json: (a: number, b: number) => [number, number, number, number];
+    readonly lua_bytecode_json: (a: number, b: number) => [number, number, number, number];
     readonly match_tick: (a: number, b: number, c: number, d: number) => [number, number, number, number];
     readonly model_to_glb: (a: number, b: number, c: number, d: number) => [number, number, number, number];
     readonly parse_save_json: (a: number, b: number, c: number, d: number) => [number, number, number, number];

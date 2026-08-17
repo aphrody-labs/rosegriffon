@@ -492,6 +492,26 @@ export function g4tx_info_json(bytes) {
 }
 
 /**
+ * Décode la texture nommée `nom` d'un `.g4tx` en PNG, in-browser.
+ * @param {Uint8Array} bytes
+ * @param {string} nom
+ * @returns {Uint8Array}
+ */
+export function g4tx_named_to_png(bytes, nom) {
+    const ptr0 = passArray8ToWasm0(bytes, wasm.__wbindgen_malloc);
+    const len0 = WASM_VECTOR_LEN;
+    const ptr1 = passStringToWasm0(nom, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+    const len1 = WASM_VECTOR_LEN;
+    const ret = wasm.g4tx_named_to_png(ptr0, len0, ptr1, len1);
+    if (ret[3]) {
+        throw takeFromExternrefTable0(ret[2]);
+    }
+    var v3 = getArrayU8FromWasm0(ret[0], ret[1]).slice();
+    wasm.__wbindgen_free(ret[0], ret[1] * 1, 1);
+    return v3;
+}
+
+/**
  * Feuille de sprites d'un atlas `.g4tx` : régions nommées avec leur rectangle, en JSON.
  *
  * `g4tx_info_json` rend la structure brute du conteneur ; celle-ci rend ce qu'une interface
@@ -551,6 +571,18 @@ export function init_panic_hook() {
 }
 
 /**
+ * Vrai si les octets commencent par la signature d'un bytecode Lua 5.2.
+ * @param {Uint8Array} bytes
+ * @returns {boolean}
+ */
+export function is_lua_bytecode(bytes) {
+    const ptr0 = passArray8ToWasm0(bytes, wasm.__wbindgen_malloc);
+    const len0 = WASM_VECTOR_LEN;
+    const ret = wasm.is_lua_bytecode(ptr0, len0);
+    return ret !== 0;
+}
+
+/**
  * Parse un `item_config.cfg.bin.json` et retourne les objets (catégorie + stats).
  *
  * - `item_config_json` : contenu du dump `item_config_*.cfg.bin.json`.
@@ -593,6 +625,32 @@ export function lip_to_json(bytes) {
         const ptr0 = passArray8ToWasm0(bytes, wasm.__wbindgen_malloc);
         const len0 = WASM_VECTOR_LEN;
         const ret = wasm.lip_to_json(ptr0, len0);
+        var ptr2 = ret[0];
+        var len2 = ret[1];
+        if (ret[3]) {
+            ptr2 = 0; len2 = 0;
+            throw takeFromExternrefTable0(ret[2]);
+        }
+        deferred3_0 = ptr2;
+        deferred3_1 = len2;
+        return getStringFromWasm0(ptr2, len2);
+    } finally {
+        wasm.__wbindgen_free(deferred3_0, deferred3_1, 1);
+    }
+}
+
+/**
+ * Décode un `.lua.bin` du jeu (bytecode Lua 5.2) en résumé JSON.
+ * @param {Uint8Array} bytes
+ * @returns {string}
+ */
+export function lua_bytecode_json(bytes) {
+    let deferred3_0;
+    let deferred3_1;
+    try {
+        const ptr0 = passArray8ToWasm0(bytes, wasm.__wbindgen_malloc);
+        const len0 = WASM_VECTOR_LEN;
+        const ret = wasm.lua_bytecode_json(ptr0, len0);
         var ptr2 = ret[0];
         var len2 = ret[1];
         if (ret[3]) {
@@ -1065,7 +1123,7 @@ async function __wbg_init(module_or_path) {
     }
 
     if (module_or_path === undefined) {
-        throw new Error("nie-wasm: module_or_path requis");
+        module_or_path = new URL('nie_wasm_bg.wasm', import.meta.url);
     }
     const imports = __wbg_get_imports();
 

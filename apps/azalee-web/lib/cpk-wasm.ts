@@ -13,6 +13,8 @@ import init, {
 	cfgbin_typed_json,
 	g4pk_parse_json,
 	g4tx_to_png,
+	is_lua_bytecode,
+	lua_bytecode_json,
 	init_panic_hook,
 	model_to_glb,
 } from "./nie-wasm-web/nie_wasm.js";
@@ -117,4 +119,30 @@ export async function g4pkParse(bytes: Uint8Array): Promise<G4pkParsed> {
 export async function modelToGlb(g4md: Uint8Array, g4mg: Uint8Array): Promise<Uint8Array> {
 	await ensureWasm();
 	return model_to_glb(g4md, g4mg);
+}
+
+/** Résumé d'un script `.lua.bin` du jeu, décodé dans le navigateur. */
+export type LuaBytecodeResume = {
+	instructions: number;
+	prototypes: number;
+	params: number;
+	constantes: string[];
+	source: string;
+};
+
+/**
+ * Décode un `.lua.bin` du jeu (bytecode Lua 5.2) sans quitter le navigateur.
+ *
+ * C'est le décodeur du dépôt (`nie_lua::bytecode`), compilé **sans la VM** : `mlua` embarque Lua
+ * en C, qui ne se construit pas pour wasm32, alors que le décodeur est du Rust pur.
+ */
+export async function luaBytecode(bytes: Uint8Array): Promise<LuaBytecodeResume> {
+	await ensureWasm();
+	return JSON.parse(lua_bytecode_json(bytes)) as LuaBytecodeResume;
+}
+
+/** Vrai si ces octets sont un bytecode Lua 5.2 du jeu. */
+export async function estLuaBytecode(bytes: Uint8Array): Promise<boolean> {
+	await ensureWasm();
+	return is_lua_bytecode(bytes);
 }
