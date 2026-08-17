@@ -63,8 +63,16 @@ const A01 = "/dx11/menu/161_avatar/avatar01";
 const MM = "/dx11/menu/100_mainmenu/mainmenu90/mainmenu90_02_2";
 const S = {
 	fond: `${A01}/avatar01_00/avatar01_00.png`,
-	plaqueOn: `${A01}/avatar01_02/list_base01_on.png`,
-	plaqueOff: `${A01}/avatar01_02/list_base01_off.png`,
+	// Boutons de catégorie du jeu (428×144, trois états) — `list_base01` (392×72) servait
+	// auparavant, mais c'est la plaque des listes internes, pas celle de la colonne.
+	plaqueOn: `${A01}/avatar01_26/category_btn_on_l.png`,
+	plaqueOff: `${A01}/avatar01_26/category_btn_off_l.png`,
+	plaqueSurvol: `${A01}/avatar01_26/category_btn_ol_l.png`,
+	voixOff: `${A01}/avatar01_48/voice_base01_off.png`,
+	voixOn: `${A01}/avatar01_48/voice_base01_on.png`,
+	iconeSon: `${A01}/avatar01_48/icon_sound01.png`,
+	flecheG: `${A01}/avatar01_11/arrow01_l.png`,
+	flecheD: `${A01}/avatar01_11/arrow01_r.png`,
 	languette: `${A01}/avatar01_03/edit_type_base01.png`,
 	panneau: `${A01}/avatar01_10/edit_win_base01.png`,
 	cadre: `${A01}/avatar01_17/preset_list01.png`,
@@ -229,11 +237,24 @@ export function Editeur({ catalogue, cdn }: { catalogue: Catalogue; cdn: string 
 
 	// Modèle affiché au centre. Le mapping morphologie → ressource n'est pas devine : le
 	// catalogue le fournit (`modelesDeBase.visages[].resources`, un modèle par morphologie).
+	// Modèle affiché au centre. Priorité à la part choisie : le catalogue donne ses chemins VFS
+	// réels, dont on tire le dossier et le nom que sert `/model-edit/`. À défaut, le visage de la
+	// morphologie courante — mapping fourni par les données, pas deviné.
 	const modeleUrl = useMemo(() => {
+		const partChoisie = categories
+			.flatMap((c) => c.parts)
+			.find((p) => Object.values(choix).includes(p.id));
+		const chemin = partChoisie?.modeles.find((m) => m.includes("/20_EDIT/") && m.endsWith(".g4md"));
+		if (chemin) {
+			const bouts = chemin.split("/20_EDIT/")[1]?.split("/");
+			const dossier = bouts?.[0];
+			const nom = bouts?.[1]?.replace(/\.g4md$/, "");
+			if (dossier && nom) return `${cdn}/model-edit/${dossier}/${nom}.glb`;
+		}
 		const visage = catalogue.modelesDeBase.visages[0];
 		const res = visage?.resources[morphologie] ?? visage?.resources[0];
 		return res ? `${cdn}/model-edit/_facebase/${res}.glb` : null;
-	}, [catalogue.modelesDeBase.visages, morphologie, cdn]);
+	}, [catalogue.modelesDeBase.visages, categories, choix, morphologie, cdn]);
 
 	const iOnglet = ONGLETS.findIndex((o) => o.cle === onglet);
 
@@ -299,14 +320,9 @@ export function Editeur({ catalogue, cdn }: { catalogue: Catalogue; cdn: string 
 							}}
 							aria-label={o.libelle}
 							className="absolute top-1/2 -translate-x-1/2 -translate-y-1/2"
-							style={{ left: `${G.ongletsX[i]}%`, height: "58%" }}
+							style={{ left: `${G.ongletsX[i]}%`, height: "34%", opacity: onglet === o.cle ? 1 : 0.55 }}
 						>
-							{/* eslint-disable-next-line @next/next/no-img-element */}
-							<img
-								src={`${cdn}${MM}/${o.icone}_${onglet === o.cle ? "on" : "off"}.png`}
-								alt=""
-								className="size-full object-contain"
-							/>
+							<Txt t={o.libelle.split(" ")[0] ?? ""} cdn={cdn} couleur="FFFFFF" h="100%" />
 						</button>
 					))}
 				</div>
@@ -390,15 +406,17 @@ export function Editeur({ catalogue, cdn }: { catalogue: Catalogue; cdn: string 
 										onClick={() =>
 											setChoix((c) => ({ ...c, [active.faceSettingType]: on ? "" : p.id }))
 										}
-										className="relative flex items-center justify-center"
+										className="relative flex flex-col items-center justify-start"
 									>
-										{/* eslint-disable-next-line @next/next/no-img-element */}
-										<img
-											src={`${cdn}${on ? S.cadreChoisi : S.cadre}`}
-											alt=""
-											className="absolute inset-0 size-full"
-											aria-hidden
-										/>
+										{on && (
+											// eslint-disable-next-line @next/next/no-img-element
+											<img
+												src={`${cdn}${S.cadreChoisi}`}
+												alt=""
+												className="absolute inset-0 size-full"
+												aria-hidden
+											/>
+										)}
 										{p.icone && (
 											// eslint-disable-next-line @next/next/no-img-element
 											<img
@@ -428,9 +446,9 @@ export function Editeur({ catalogue, cdn }: { catalogue: Catalogue; cdn: string 
 								>
 									{/* eslint-disable-next-line @next/next/no-img-element */}
 									<img
-										src={`${cdn}${S.fleche}`}
+										src={`${cdn}${S.flecheG}`}
 										alt=""
-										className="h-[1.5vw] w-auto rotate-180"
+										className="h-[1.5vw] w-auto"
 									/>
 								</button>
 								<Txt t={`${page + 1} / ${pages}`} cdn={cdn} h="1.1vw" />
@@ -440,7 +458,7 @@ export function Editeur({ catalogue, cdn }: { catalogue: Catalogue; cdn: string 
 									aria-label="Page suivante"
 								>
 									{/* eslint-disable-next-line @next/next/no-img-element */}
-									<img src={`${cdn}${S.fleche}`} alt="" className="h-[1.5vw] w-auto" />
+									<img src={`${cdn}${S.flecheD}`} alt="" className="h-[1.5vw] w-auto" />
 								</button>
 							</div>
 						)}
@@ -548,13 +566,27 @@ export function Editeur({ catalogue, cdn }: { catalogue: Catalogue; cdn: string 
 							{catalogue.voix
 								.filter((v) => v.personnalite === catalogue.personnalites[personnalite]?.type)
 								.map((v) => (
-									<Plaque
+									<button
 										key={v.banque}
-										cdn={cdn}
-										libelle={`Voix ${v.ton + 1}`}
-										choisie={voix === v.banque}
+										type="button"
 										onClick={() => jouer(v.banque)}
-									/>
+										className="relative mb-[1.5%] flex h-[9%] min-h-[2.1vw] w-full shrink-0 items-center"
+									>
+										{/* eslint-disable-next-line @next/next/no-img-element */}
+										<img
+											src={`${cdn}${voix === v.banque ? S.voixOn : S.voixOff}`}
+											alt=""
+											className="absolute inset-0 size-full"
+											aria-hidden
+										/>
+										{/* eslint-disable-next-line @next/next/no-img-element */}
+										<img
+											src={`${cdn}${S.iconeSon}`}
+											alt=""
+											className="relative ml-[5%] h-[54%] w-auto"
+										/>
+										<Txt t={`Voix ${v.ton + 1}`} cdn={cdn} h="50%" className="relative ml-[5%]" />
+									</button>
 								))}
 						</div>
 					</Panneau>
