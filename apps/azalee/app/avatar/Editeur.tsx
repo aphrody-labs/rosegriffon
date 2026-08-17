@@ -105,12 +105,12 @@ const S = {
 
 /** Les six onglets du bandeau, avec le libellé que le jeu affiche dessous. */
 const ONGLETS = [
-	{ cle: "style", icone: "icon_menu01", libelle: "Style" },
-	{ cle: "physionomie", icone: "icon_menu02", libelle: "Physionomie" },
-	{ cle: "visage", icone: "icon_menu03", libelle: "Visage et coupe de cheveux" },
-	{ cle: "habits", icone: "icon_menu04", libelle: "Habits" },
-	{ cle: "stats", icone: "icon_menu05", libelle: "Stats" },
-	{ cle: "nom", icone: "icon_menu06", libelle: "Nom" },
+	{ cle: "style", icone: "icon_menu_avatar01", libelle: "Style" },
+	{ cle: "physionomie", icone: "icon_menu_avatar02", libelle: "Physionomie" },
+	{ cle: "visage", icone: "icon_menu_avatar03", libelle: "Visage et coupe de cheveux" },
+	{ cle: "habits", icone: "icon_menu_avatar04", libelle: "Habits" },
+	{ cle: "stats", icone: "icon_menu_avatar05", libelle: "Stats" },
+	{ cle: "nom", icone: "icon_menu_avatar06", libelle: "Nom" },
 ] as const;
 
 type Onglet = (typeof ONGLETS)[number]["cle"];
@@ -373,9 +373,14 @@ export function Editeur({
 							}}
 							aria-label={o.libelle}
 							className="absolute top-1/2 -translate-x-1/2 -translate-y-1/2"
-							style={{ left: `${G.ongletsX[i]}%`, height: "34%", opacity: onglet === o.cle ? 1 : 0.55 }}
+							style={{ left: `${G.ongletsX[i]}%`, height: "58%" }}
 						>
-							<Txt t={o.libelle.split(" ")[0] ?? ""} cdn={cdn} couleur="FFFFFF" h="100%" />
+							{/* eslint-disable-next-line @next/next/no-img-element */}
+							<img
+								src={`${cdn}${MM}/${o.icone}_${onglet === o.cle ? "on" : "off"}.png`}
+								alt=""
+								className="size-full object-contain"
+							/>
 						</button>
 					))}
 				</div>
