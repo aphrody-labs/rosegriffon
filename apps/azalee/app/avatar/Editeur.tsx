@@ -39,7 +39,8 @@ import { createPortal } from "react-dom";
 import CharacterModelViewer from "@/components/wiki/CharacterModelViewer";
 
 import { definirPhotoDepuisAvatar } from "./actions";
-import type { Catalogue, Categorie, Part } from "./types";
+import { LayoutRender } from "./LayoutRender";
+import type { Catalogue, Categorie, Layout, Part } from "./types";
 
 /** Proportions relevées sur les captures, en pourcentage du cadre. */
 const G = {
@@ -217,7 +218,16 @@ function Plaque({
 	);
 }
 
-export function Editeur({ catalogue, cdn }: { catalogue: Catalogue; cdn: string }) {
+export function Editeur({
+	catalogue,
+	layout,
+	cdn,
+}: {
+	catalogue: Catalogue;
+	/** Layout de l'écran : sa disposition vient des fichiers du jeu (points d'attache). */
+	layout: Layout | null;
+	cdn: string;
+}) {
 	const [onglet, setOnglet] = useState<Onglet>("visage");
 	const [rubrique, setRubrique] = useState(0);
 	const [page, setPage] = useState(0);
@@ -301,13 +311,18 @@ export function Editeur({ catalogue, cdn }: { catalogue: Catalogue; cdn: string 
 			    cadre 16/9 plein, et une mise en boîte à lettres les décalait toutes (bandeau mesuré
 			    à 153 px au lieu de 163, soit un facteur 0,94 sur chaque position). */}
 			<div className="relative overflow-hidden" style={{ width: "100vw", height: "100vh" }}>
-				{/* eslint-disable-next-line @next/next/no-img-element */}
-				<img
-					src={`${cdn}${S.fond}`}
-					alt=""
-					className="absolute inset-0 size-full object-cover"
-					aria-hidden
-				/>
+				{layout ? (
+					<LayoutRender layout={layout} cdn={cdn} />
+				) : (
+					// Sans layout, le fond seul plutôt qu'un écran vide.
+					// eslint-disable-next-line @next/next/no-img-element
+					<img
+						src={`${cdn}${S.fond}`}
+						alt=""
+						className="absolute inset-0 size-full object-cover"
+						aria-hidden
+					/>
+				)}
 
 				{/* Le modèle, au centre comme dans le jeu (emprise relevée sur les captures). */}
 				{modeleUrl && (

@@ -146,3 +146,34 @@ export type Theme = {
 	/** Familles de police du jeu (atlas bitmap, une par dossier `font/<famille>/font.g4tx`). */
 	polices: string[];
 };
+
+/**
+ * Un objet d'un layout d'écran, tel que `nie-game --export-layout` l'écrit.
+ *
+ * `transform` est résolu depuis les points d'attache de l'écran (`CMenuAttachLocator`) : les
+ * coordonnées sont celles du jeu, dans le repère du canevas du layout.
+ */
+export type LayoutObjet = {
+	name: string;
+	drawPriority?: number;
+	visible?: boolean;
+	transform?: {
+		x?: number;
+		y?: number;
+		scaleX?: number;
+		scaleY?: number;
+		anchorX?: number;
+		anchorY?: number;
+		rot?: number;
+	} | null;
+	sprite?: { w: number; h: number; pngUrl: string; logicalPath?: string } | null;
+	text?: unknown;
+};
+
+/** Le layout d'un écran de l'éditeur. */
+export type Layout = {
+	screen: string;
+	locale?: string;
+	canvas: { w: number; h: number };
+	objects: LayoutObjet[];
+};
