@@ -89,6 +89,9 @@ const S = {
 	cmdOn: `${CMN}/cmn03/cmn03_02/cmd_btn_base01_on.png`,
 	valider: `${CMN}/cmn03/cmn03_03/cmd_press_btn_base_on01.png`,
 	coche: `${GAIJI}/gaiji_check01_on.png`,
+	// Curseur de sélection du jeu (vert, mesuré RGBA 59,167,77) : calque `cmn05_01_cursor`,
+	// nommé `cur01` — mes recherches sur « cursor » le manquaient.
+	curseur: `${CMN}/cmn05/cmn05_01/cur01.png`,
 	cmdBadge: `${GAIJI}/gaiji_cmd_type01.png`,
 	flecheG: `${A01}/avatar01_11/arrow01_l.png`,
 	flecheD: `${A01}/avatar01_11/arrow01_r.png`,
@@ -446,6 +449,16 @@ export function Editeur({
 									className="absolute inset-0 size-full"
 									aria-hidden
 								/>
+								{on && (
+									// eslint-disable-next-line @next/next/no-img-element
+									<img
+										src={`${cdn}${S.curseur}`}
+										alt=""
+										className="absolute h-[80%] w-auto"
+										style={{ left: "-4%" }}
+										aria-hidden
+									/>
+								)}
 								{/* Libellé en blanc quand la plaque passe en bleu, comme le jeu. */}
 								{/* eslint-disable-next-line @next/next/no-img-element */}
 								<img
@@ -511,12 +524,22 @@ export function Editeur({
 											/>
 										)}
 										{on && (
-											// eslint-disable-next-line @next/next/no-img-element
-											<img
-												src={`${cdn}${S.coche}`}
-												alt=""
-												className="absolute right-[5%] top-[5%] w-[20%]"
-											/>
+											<>
+												{/* eslint-disable-next-line @next/next/no-img-element */}
+												<img
+													src={`${cdn}${S.coche}`}
+													alt=""
+													className="absolute right-[5%] top-[5%] w-[20%]"
+												/>
+												{/* eslint-disable-next-line @next/next/no-img-element */}
+												<img
+													src={`${cdn}${S.curseur}`}
+													alt=""
+													className="absolute h-[38%] w-auto"
+													style={{ left: "-10%", top: "30%" }}
+													aria-hidden
+												/>
+											</>
 										)}
 									</button>
 								);
