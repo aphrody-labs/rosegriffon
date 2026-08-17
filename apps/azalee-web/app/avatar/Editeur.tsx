@@ -330,12 +330,18 @@ export function Editeur({
 
 	return createPortal(
 		<div
-			className="fixed inset-0 flex items-center justify-center bg-black"
+			className="fixed inset-0 flex items-center justify-center"
 			style={{
 				zIndex: 2147483000,
 				backgroundImage: `url(${cdn}${S.fond})`,
-				backgroundSize: "cover",
-				backgroundPosition: "center",
+				backgroundSize: "100% auto",
+				backgroundPosition: "top center",
+				backgroundRepeat: "no-repeat",
+				// Le sprite de fond du jeu est TRANSPARENT sous y≈1090 (sur 1364) : le jeu y peint
+				// la suite de son sol. La couleur ci-dessous est celle de sa dernière ligne opaque
+				// (190, 242, 252), mesurée sur le sprite — la transition est donc continue, et non
+				// noire comme quand le conteneur laissait voir son propre fond.
+				backgroundColor: "#BEF2FC",
 			}}
 		>
 			{/* La scène occupe EXACTEMENT le cadre : les proportions ci-dessus sont relevées sur un
