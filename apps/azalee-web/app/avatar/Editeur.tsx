@@ -336,24 +336,20 @@ export function Editeur({
 			{/* La scène occupe EXACTEMENT le cadre : les proportions ci-dessus sont relevées sur un
 			    cadre 16/9 plein, et une mise en boîte à lettres les décalait toutes (bandeau mesuré
 			    à 153 px au lieu de 163, soit un facteur 0,94 sur chaque position). */}
-			<div className="relative overflow-hidden" style={{ width: "100vw", height: "100vh" }}>
+			<div
+				className="relative overflow-hidden"
+				style={{
+					width: "100vw",
+					height: "100vh",
+					backgroundImage: `url(${cdn}${S.fond})`,
+					backgroundSize: "cover",
+					backgroundPosition: "center",
+				}}
+			>
 				{/* Fond du jeu. Le rendu par layout (`LayoutRender`) est ecrit et sa route servie,
 				    mais pas branche ici : l'interpretation de ses transforms en coordonnees ecran
 				    n'est pas resolue — le fond finissait hors cadre et la colonne perdait 28 points
 				    de pixels proches. Mesure avant de rebrancher. */}
-				{/* eslint-disable-next-line @next/next/no-img-element */}
-				<img
-					src={`${cdn}${S.fond}`}
-					alt=""
-					style={{
-						position: "fixed",
-						inset: 0,
-						width: "100vw",
-						height: "100vh",
-						objectFit: "cover",
-					}}
-					aria-hidden
-				/>
 
 				{/* Le modèle, au centre comme dans le jeu (emprise relevée sur les captures). */}
 				{modeleUrl && (
