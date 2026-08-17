@@ -11,6 +11,25 @@ const CDN_LOADER = CDN_URL && process.env.NEXT_PUBLIC_CDN_LOADER === "1";
 // indépendamment du toggle NEXT_PUBLIC_CDN_URL (qui ne sert qu'à offloader .next/static).
 const ASSET_CDN_ORIGIN = "https://cdn.rosegriffon.fr";
 
+// Google AdSense — hôtes contactés par `adsbygoogle.js` : le chargeur et les
+// créations (`*.googlesyndication.com`), le réseau de diffusion historique
+// (`*.doubleclick.net`, `*.googleadservices.com`), la mesure anti-fraude
+// (`*.adtrafficquality.google`) et les messages de consentement RGPD
+// (`fundingchoicesmessages.google.com`).
+// `frame-src` est le piège : une annonce s'affiche dans une iframe, donc avec
+// `frame-src 'none'` le script se charge, ne signale rien, et l'emplacement reste
+// vide — seule la console dit « Refused to frame ». Le contenu des créations est
+// régi par la CSP de ces iframes, pas par la nôtre : inutile d'ouvrir
+// 'unsafe-eval' ici.
+const ADS_SCRIPT_SRC =
+	"https://pagead2.googlesyndication.com https://*.googlesyndication.com https://*.googleadservices.com https://*.doubleclick.net https://*.adtrafficquality.google https://fundingchoicesmessages.google.com https://adservice.google.com https://www.google.com";
+const ADS_FRAME_SRC =
+	"https://googleads.g.doubleclick.net https://*.doubleclick.net https://*.googlesyndication.com https://*.adtrafficquality.google https://www.google.com https://fundingchoicesmessages.google.com";
+const ADS_IMG_SRC =
+	"https://*.googlesyndication.com https://*.doubleclick.net https://*.adtrafficquality.google https://www.google.com https://*.googleusercontent.com https://*.gstatic.com";
+const ADS_CONNECT_SRC =
+	"https://*.googlesyndication.com https://*.doubleclick.net https://*.adtrafficquality.google https://www.google.com https://*.gstatic.com https://fundingchoicesmessages.google.com";
+
 const nextConfig: NextConfig = {
 	poweredByHeader: false,
 
@@ -198,13 +217,13 @@ const nextConfig: NextConfig = {
 			"default-src 'self'",
 			// 'wasm-unsafe-eval' : requis pour instancier les modules WebAssembly
 			// (lecteur de sauvegarde /save, renderer menu webgpu) sous CSP strict.
-			`script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'${cdnSrc} https://www.googletagmanager.com https://www.google-analytics.com${isDev ? " 'unsafe-eval'" : ""}`,
+			`script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'${cdnSrc} https://www.googletagmanager.com https://www.google-analytics.com ${ADS_SCRIPT_SRC}${isDev ? " 'unsafe-eval'" : ""}`,
 			`style-src 'self' 'unsafe-inline'${cdnSrc}`,
-			`img-src 'self' blob: data:${cdnSrc} ${ASSET_CDN_ORIGIN} https://dxi4wb638ujep.cloudfront.net https://*.inazuma.jp https://lh3.googleusercontent.com https://cdn.discordapp.com https://pbs.twimg.com`,
-			`media-src 'self' blob: data:${cdnSrc} ${ASSET_CDN_ORIGIN} https://dxi4wb638ujep.cloudfront.net https://*.inazuma.jp https://video.twimg.com https://pbs.twimg.com`,
-			`font-src 'self'${cdnSrc} ${ASSET_CDN_ORIGIN}`,
-			`connect-src 'self' blob:${cdnSrc} ${ASSET_CDN_ORIGIN} https://www.google-analytics.com https://www.googletagmanager.com`,
-			"frame-src 'none'",
+			`img-src 'self' blob: data:${cdnSrc} ${ASSET_CDN_ORIGIN} https://dxi4wb638ujep.cloudfront.net https://*.inazuma.jp https://lh3.googleusercontent.com https://cdn.discordapp.com https://pbs.twimg.com ${ADS_IMG_SRC}`,
+			`media-src 'self' blob: data:${cdnSrc} ${ASSET_CDN_ORIGIN} https://dxi4wb638ujep.cloudfront.net https://*.inazuma.jp https://video.twimg.com https://pbs.twimg.com ${ADS_IMG_SRC}`,
+			`font-src 'self'${cdnSrc} ${ASSET_CDN_ORIGIN} https://*.gstatic.com`,
+			`connect-src 'self' blob:${cdnSrc} ${ASSET_CDN_ORIGIN} https://www.google-analytics.com https://www.googletagmanager.com ${ADS_CONNECT_SRC}`,
+			`frame-src ${ADS_FRAME_SRC}`,
 			"frame-ancestors 'none'",
 			"base-uri 'self'",
 			"form-action 'self'",

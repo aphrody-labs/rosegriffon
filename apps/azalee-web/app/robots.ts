@@ -26,6 +26,23 @@ export default function robots(): MetadataRoute.Robots {
 				userAgent: "*",
 			},
 			{
+				// Mediapartners-Google = robot d'AdSense. Il lit le contenu de la page
+				// pour choisir les annonces ; sans autorisation explicite il ne reste que
+				// du remplissage générique, et le revenu s'effondre sans message d'erreur.
+				// Mêmes exclusions que la règle générique : rien de privé ne s'ouvre ici.
+				allow: "/",
+				disallow: [
+					"/dashboard/",
+					"/api/",
+					"/auth/",
+					"/login",
+					"/settings",
+					"/profil/",
+					"/maintenance",
+				],
+				userAgent: "Mediapartners-Google",
+			},
+			{
 				// Crawlers IA explicitement autorisés (condition pour l'ingestion LLM)
 				// `/api/og/` : les cartes de partage des 5 204 fiches de personnage sont
 				// servies depuis là ; interdites, elles laissaient chaque partage sans

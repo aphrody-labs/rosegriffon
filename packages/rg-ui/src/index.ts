@@ -4,6 +4,11 @@
 
 export { cn } from "./lib/utils";
 
+// Identifiants AdSense : réexportés depuis le module PUR, pas depuis
+// `components/adsense` (« use client »), pour rester lisibles par un composant
+// serveur — les layouts en ont besoin dans `metadata.other`.
+export { ADSENSE_CLIENT, ADSENSE_PUBLISHER } from "./lib/adsense";
+
 // Hooks
 export { useIsMobile, useBreakpoint, BREAKPOINTS } from "./hooks/use-mobile";
 export { useMediaQuery } from "./hooks/use-media-query";
@@ -11,6 +16,7 @@ export { useSwipe } from "./hooks/use-swipe";
 
 export * from "./components/account";
 export * from "./components/accordion";
+export * from "./components/adsense";
 export * from "./components/admin-page-header";
 export * from "./components/admin-sidebar";
 export * from "./components/alert-dialog";

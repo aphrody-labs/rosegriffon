@@ -6,6 +6,7 @@ import { lato, notoSans, poppins, roboto } from "@/lib/fonts";
 import { Geist } from "next/font/google";
 
 import { GoogleTagManager } from "@next/third-parties/google";
+import { ADSENSE_CLIENT, AdSenseScript } from "@rosegriffon/ui";
 
 import ClientLayout from "./client-layout";
 
@@ -52,6 +53,11 @@ export const metadata: Metadata = {
 	keywords:
 		"Rose Griffon, Inazuma Eleven, association, communauté, gaming, France, Azalée, Achilléa, Roy, Gaëlle, Inazuma Eleven France, Inazuma Eleven France Association, Inazuma Eleven France Association Rose Griffon",
 	metadataBase: new URL("https://rosegriffon.fr"),
+	// Balise de propriété AdSense. C'est ce que la vérification du tableau de bord
+	// cherche dans le HTML servi ; le script seul ne suffit pas à valider le site.
+	other: {
+		"google-adsense-account": ADSENSE_CLIENT,
+	},
 	openGraph: {
 		description:
 			"Site officiel de l'association Rose Griffon, rassemblant la communauté Inazuma Eleven en France. Découvrez nos événements, projets et rejoignez-nous !",
@@ -99,6 +105,7 @@ export default function RootLayout({
 				/>
 				<link rel="preconnect" href="https://cdn.discordapp.com" />
 				<link rel="dns-prefetch" href="https://cdn.discordapp.com" />
+				<link rel="preconnect" href="https://pagead2.googlesyndication.com" />
 				<link rel="author" href="/humans.txt" />
 				{/* Données structurées site-wide : Organization + WebSite (rich results Google). */}
 				<script
@@ -195,6 +202,12 @@ export default function RootLayout({
 			    L'identifiant vient de l'environnement : sans lui, rien n'est chargé,
 			    ce qui laisse les environnements de développement propres. */}
 				{GTM_ID && <GoogleTagManager gtmId={GTM_ID} />}
+				{/* Google AdSense — chargeur unique du site. Les annonces automatiques
+				    sont pilotées depuis le tableau de bord, donc aucune page n'a
+				    d'emplacement à déclarer. La CSP de rosegriffon.fr est posée par
+				    nginx (`infra/nginx/rg-csp-website.inc`) : y ajouter les hôtes
+				    publicitaires avant toute bascule en mode bloquant. */}
+				<AdSenseScript />
 				<ClientLayout>{children}</ClientLayout>
 			</body>
 		</html>

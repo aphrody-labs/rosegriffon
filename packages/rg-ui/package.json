@@ -10,6 +10,7 @@
 		".": "./src/index.ts",
 		"./tokens": "./src/tokens.ts",
 		"./lib/utils": "./src/lib/utils.ts",
+		"./lib/adsense": "./src/lib/adsense.ts",
 		"./styles.css": "./src/styles.css",
 		"./hooks/*": "./src/hooks/*.ts",
 		"./*": "./src/components/*.tsx"
