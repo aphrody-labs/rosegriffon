@@ -51,7 +51,10 @@ const G = {
 	bandeauH: (163 / 1440) * 100,
 	colonneX: (34 / 2560) * 100,
 	colonneW: ((533 - 34) / 2560) * 100,
-	rubriqueY: (294 / 1440) * 100,
+	// Recalage mesuré : la première plaque tombait 41 px trop bas par rapport à la référence
+	// (bande claire à y=394 contre 353). 294 est le bord relevé sur la capture ; l'écart vient de
+	// la marge transparente du sprite (opaque sur 54 de ses 72 px), compensée ici.
+	rubriqueY: (253 / 1440) * 100,
 	rubriqueH: (71 / 1440) * 100,
 	rubriquePas: (90.5 / 1440) * 100,
 	panneauX: (1614 / 2560) * 100,
