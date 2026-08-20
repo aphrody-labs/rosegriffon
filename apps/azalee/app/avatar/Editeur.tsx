@@ -202,24 +202,78 @@ export function Editeur({ catalogue, cdn }: { catalogue: Catalogue; cdn: string 
 	// assemble le visage de la morphologie courante (mapping fourni par le catalogue) avec chaque
 	// part choisie qui possède un modèle sous `20_EDIT/`, et `/model-avatar/` rend le GLB combiné.
 	const modeleUrl = useMemo(() => {
-		const pieces: string[] = [];
-		const visage = catalogue.modelesDeBase.visages[0];
+		// Le CORPS d'abord. Il ne vient pas de `_base/` malgré le nom de ce dossier : ces mailles-là
+		// ne portent que l'œil et la bouche, à hauteur de tête. Les 32 recettes
+		// `common/chr/_test/default/mdl_edit_avatar*.cfg.bin` habillent toutes l'avatar de la même
+		// tenue — slot 1 `u117401_10` (haut et short) et slot 2 `s117401_10` (chaussures) — dont les
+		// mailles sont `_uniform/u000101` et `_uniform/s000201`, qui couvrent la cheville au cou.
+		//
+		// La déclinaison par morphologie n'est PAS câblée : `u000101` a bien 8 variantes de tailles
+		// mesurées différentes (u000101…u000108), mais aucune source lue à ce jour ne dit laquelle
+		// répond à quelle morphologie. On sert donc la première, et on ne devine pas.
+		//
+		// `_bodySK/…` n'apporte AUCUNE maille (les 15 slots `Mesh` de son objbin sont vides) : elle
+		// donne le squelette dans lequel replacer les pièces de tête. Sans elle, le visage et la
+		// coiffure — exprimés dans le repère de leur os, boîte centrée sur l'origine — se posaient
+		// au niveau des chaussures. Le serveur y lit l'os `c_head_1_0`.
+		const pieces: string[] = [
+			"_bodySK/c000101_edit",
+			"u000101/u000101",
+			"s000201/s000201",
+		];
+
+		// La MAILLE de tête ne dépend que de deux choses : la morphologie et le nez. Les 42 entrées
+		// de `visages` sont indexées nez-major (7 nez × 6 blocs) et ne portent que 7 ressources
+		// distinctes par morphologie — `face51_nose01`…`face51_nose07` pour la première. Tout le
+		// reste du visage (forme, yeux, pupilles, sourcils, bouche) est de la TEXTURE, pas de la
+		// géométrie : c'est pourquoi changer ces rubriques-là ne déforme jamais la maille.
+		const catNez = catalogue.categories.find((c) => c.faceSettingType === 9);
+		const iNez = Math.max(0, catNez?.parts.findIndex((p) => p.id === choix[9]) ?? 0);
+		const visage = catalogue.modelesDeBase.visages[iNez] ?? catalogue.modelesDeBase.visages[0];
 		const res = visage?.resources[morphologie] ?? visage?.resources[0];
 		if (res) pieces.push(`_facebase/${res}`);
 
+		// Chaque rubrique choisie apporte soit une MAILLE (`.g4md` — coiffure, oreilles,
+		// accessoire), soit une COUCHE DE TEXTURE (`.g4tx` sous `_facetex` — peau, yeux, pupilles,
+		// reflets, sourcils, bouche). Les secondes sont de loin les plus nombreuses, et c'est
+		// pourquoi tant de rubriques semblaient sans effet tant que seules les mailles étaient
+		// envoyées : le visage du jeu n'est pas une planche par combinaison, c'est un empilement.
+		const couches: string[] = [];
 		for (const c of catalogue.categories) {
+			// À défaut de choix, la PREMIÈRE part de la rubrique. Sans ce repli, l'avatar de départ
+			// arrivait sans yeux, sans bouche et sans sourcils : `choix` est vide tant que rien n'a
+			// été sélectionné, alors que le jeu, lui, ouvre l'éditeur sur un visage complet.
+			// Quelle part exacte le jeu retient au départ n'est pas établi — la première est un
+			// défaut assumé, pas un relevé.
 			const id = choix[c.faceSettingType];
-			if (!id) continue;
-			const part = c.parts.find((p) => p.id === id);
-			const chemin = part?.modeles.find((m) => m.includes("/20_EDIT/") && m.endsWith(".g4md"));
-			if (!chemin) continue;
-			const bouts = chemin.split("/20_EDIT/")[1]?.split("/");
-			const dossier = bouts?.[0];
-			const nom = bouts?.[1]?.replace(/\.g4md$/, "");
-			if (dossier && nom) pieces.push(`${dossier}/${nom}`);
+			const part = id ? c.parts.find((p) => p.id === id) : c.parts[0];
+			if (!part) continue;
+
+			const maille = part.modeles.find((m) => m.includes("/20_EDIT/") && m.endsWith(".g4md"));
+			if (maille) {
+				const bouts = maille.split("/20_EDIT/")[1]?.split("/");
+				const dossier = bouts?.[0];
+				const nom = bouts?.[1]?.replace(/\.g4md$/, "");
+				if (dossier && nom) pieces.push(`${dossier}/${nom}`);
+				continue;
+			}
+
+			const texture = part.modeles.find(
+				(m) => m.includes("/_facetex/") && m.endsWith(".g4tx"),
+			);
+			if (texture) {
+				const rel = texture.split("/_facetex/")[1]?.replace(/\.g4tx$/, "");
+				if (rel) couches.push(rel);
+			}
 		}
+
 		if (pieces.length === 0) return null;
-		return `${cdn}/model-avatar/${pieces.join("+")}.glb`;
+		// Les familles sont numérotées dans leur ordre de superposition — `00_face` la peau, puis
+		// `01_eye`, `02_pupil`, `03_highlight`, `04_eyebrow`, `05_mouth` : trier par nom donne
+		// l'ordre d'empilement sans avoir à le décider.
+		couches.sort();
+		const q = couches.length > 0 ? `?face=${encodeURIComponent(couches.join(","))}` : "";
+		return `${cdn}/model-avatar/${pieces.join("+")}.glb${q}`;
 	}, [catalogue.modelesDeBase.visages, catalogue.categories, choix, morphologie, cdn]);
 
 	/** Applique l'avatar composé comme photo du compte : la vignette du visage choisi. */
