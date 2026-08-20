@@ -216,7 +216,18 @@ export function Editeur({ catalogue, cdn }: { catalogue: Catalogue; cdn: string 
 		// féminines partagent le squelette de leur équivalent — `smallfemale` comme `small`
 		// pointent `c000201_edit`, ce qui rend le genre sans effet ici.
 		const catMorpho = catalogue.categories.find((c) => c.faceSettingType === 17);
-		const nomMorpho = catalogue.modelesDeBase.morphologies[morphologie];
+		// Le GENRE et la MORPHOLOGIE sont deux réglages distincts de l'interface, mais le jeu, lui,
+		// les fond dans une seule liste : `male` et `female` y sont deux morphologies parmi les
+		// huit. Sans ce raccord, changer le genre ne changeait rien au modèle — l'état `genre`
+		// pilotait l'interface sans jamais atteindre l'URL.
+		const morphos = catalogue.modelesDeBase.morphologies;
+		const nomBrut = morphos[morphologie];
+		const nomMorpho =
+			genre === 1 && nomBrut === "male"
+				? "female"
+				: genre === 0 && nomBrut === "female"
+					? "male"
+					: nomBrut;
 		const partMorpho =
 			catMorpho?.parts.find((p) => p.id === choix[17]) ??
 			catMorpho?.parts.find((p) => p.resource === `edit_body_${nomMorpho}`);
@@ -313,6 +324,7 @@ export function Editeur({ catalogue, cdn }: { catalogue: Catalogue; cdn: string 
 				: `${teinte}${morpho}`.replace("&", "?");
 		return `${cdn}/model-avatar/${piecesUniques.join("+")}.glb${q}`;
 	}, [
+		genre,
 		valeurs,
 		catalogue.couleursRgb,
 		catalogue.modelesDeBase.visages,
