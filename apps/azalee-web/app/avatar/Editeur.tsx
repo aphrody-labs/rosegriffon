@@ -33,6 +33,8 @@ import { createPortal } from "react-dom";
 import { definirPhotoDepuisAvatar } from "./actions";
 import { H, MORPHOLOGIES, resolveur } from "./libelles";
 import { Modele3D } from "./Modele3D";
+import { Partage } from "./Partage";
+import { encoder, specDe, valeursDepuisChoix, verifierSpec } from "./partage";
 import {
 	CentreStats,
 	PanHabits,
@@ -162,6 +164,7 @@ export function Editeur({ catalogue, cdn }: { catalogue: Catalogue; cdn: string 
 	const [voix, setVoix] = useState<string | null>(null);
 	const [enregistrement, demarrerEnregistrement] = useTransition();
 	const [messageFin, setMessageFin] = useState<string | null>(null);
+	const [partageOuvert, setPartageOuvert] = useState(false);
 	const audio = useRef<HTMLAudioElement | null>(null);
 
 	const lib = useMemo(() => resolveur(catalogue), [catalogue]);
@@ -424,6 +427,38 @@ export function Editeur({ catalogue, cdn }: { catalogue: Catalogue; cdn: string 
 		}
 	})();
 
+	// Le CODE de l'avatar courant. La spécification vient du catalogue ; si elle est absente ou
+	// incohérente, on n'affiche pas de code plutôt que d'en fabriquer un qui ne se relirait pas.
+	const codePartage = useMemo(() => {
+		const spec = specDe(catalogue);
+		if (!spec || verifierSpec(spec) !== null) return null;
+		return encoder(spec, valeursDepuisChoix(catalogue, spec, choix, genre, morphologie));
+	}, [catalogue, choix, genre, morphologie]);
+
+	/** Rétablit un avatar enregistré dans l'éditeur. */
+	const restaurer = useCallback(
+		(a: {
+			choix: Record<number, string>;
+			valeurs: Record<string, number>;
+			champs: Record<string, string>;
+			genre: number;
+			morphologie: number;
+		}) => {
+			setChoixBrut(a.choix ?? {});
+			setValeursBrut(a.valeurs ?? {});
+			setChampsBrut(a.champs ?? {});
+			setGenre(a.genre ?? 0);
+			setMorphologie(a.morphologie ?? 0);
+			setPartageOuvert(false);
+		},
+		[],
+	);
+
+	const etatAEnregistrer = useMemo(
+		() => ({ choix, valeurs, champs, genre, morphologie }),
+		[choix, valeurs, champs, genre, morphologie],
+	);
+
 	return createPortal(
 		<div
 			className="flex items-center justify-center"
@@ -585,13 +620,15 @@ export function Editeur({ catalogue, cdn }: { catalogue: Catalogue; cdn: string 
 				)}
 
 				{/* Entrée d'un code d'avatar, sous le titre */}
-				<span
-					className="absolute flex items-center gap-[0.5vw] rounded-r-[0.3vw] bg-[#0B3E86]/70 py-[0.35%] pl-[1%] pr-[1.5%]"
+				<button
+					type="button"
+					onClick={() => setPartageOuvert(true)}
+					className="absolute flex items-center gap-[0.5vw] rounded-r-[0.3vw] bg-[#0B3E86]/70 py-[0.35%] pl-[1%] pr-[1.5%] transition hover:bg-[#0B3E86]"
 					style={{ left: 0, top: `${G.bandeauH + 1.2}%` }}
 				>
 					<Sprite cdn={cdn} src={`${FONT}/gaiji_tab.png`} className="h-[1vw] w-auto" />
 					<Txt t={txt(H.codeAvatar)} cdn={cdn} couleur="FFFFFF" h="1vw" />
-				</span>
+				</button>
 
 				{/* Colonne des rubriques */}
 				{rubriques.map((r, i) => {
@@ -728,6 +765,15 @@ export function Editeur({ catalogue, cdn }: { catalogue: Catalogue; cdn: string 
 					</div>
 				)}
 			</div>
+
+			{partageOuvert && (
+				<Partage
+					etat={etatAEnregistrer}
+					code={codePartage}
+					restaurer={restaurer}
+					fermer={() => setPartageOuvert(false)}
+				/>
+			)}
 		</div>,
 		document.body,
 	);
