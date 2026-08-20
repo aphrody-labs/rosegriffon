@@ -252,12 +252,19 @@ export function Editeur({ catalogue, cdn }: { catalogue: Catalogue; cdn: string 
 			const part = id ? c.parts.find((p) => p.id === id) : c.parts[0];
 			if (!part) continue;
 
-			const maille = part.modeles.find((m) => m.includes("/20_EDIT/") && m.endsWith(".g4md"));
-			if (maille) {
-				const bouts = maille.split("/20_EDIT/")[1]?.split("/");
-				const dossier = bouts?.[0];
-				const nom = bouts?.[1]?.replace(/\.g4md$/, "");
-				if (dossier && nom) pieces.push(`${dossier}/${nom}`);
+			// `modeles` ET `modeles2` : une coiffure est en DEUX morceaux, l'avant (`_hairF`) et
+			// l'arrière (`_hairB`). Sur les 98 coiffures, 45 n'ont QUE `modeles2` — ne lire que
+			// `modeles` les rendait chauves — et les 53 autres perdaient leur nuque.
+			const mailles = [...part.modeles, ...(part.modeles2 ?? [])].filter(
+				(m) => m.includes("/20_EDIT/") && m.endsWith(".g4md"),
+			);
+			if (mailles.length > 0) {
+				for (const maille of mailles) {
+					const bouts = maille.split("/20_EDIT/")[1]?.split("/");
+					const dossier = bouts?.[0];
+					const nom = bouts?.[1]?.replace(/\.g4md$/, "");
+					if (dossier && nom) pieces.push(`${dossier}/${nom}`);
+				}
 				continue;
 			}
 
@@ -271,6 +278,9 @@ export function Editeur({ catalogue, cdn }: { catalogue: Catalogue; cdn: string 
 		}
 
 		if (pieces.length === 0) return null;
+		// Dédupliqué comme les couches : deux rubriques peuvent désigner la même maille, et le
+		// serveur l'incorporerait deux fois, superposée à elle-même.
+		const piecesUniques = [...new Set(pieces)];
 		// Les familles sont numérotées dans leur ordre de superposition — `00_face` la peau, puis
 		// `01_eye`, `02_pupil`, `03_highlight`, `04_eyebrow`, `05_mouth` : trier par nom donne
 		// l'ordre d'empilement sans avoir à le décider.
@@ -278,7 +288,7 @@ export function Editeur({ catalogue, cdn }: { catalogue: Catalogue; cdn: string 
 		// 13 pointent tous deux `00_face`), et chacune coûterait un décodage de 2048×1024.
 		const uniques = [...new Set(couches)].sort();
 		const q = uniques.length > 0 ? `?face=${encodeURIComponent(uniques.join(","))}` : "";
-		return `${cdn}/model-avatar/${pieces.join("+")}.glb${q}`;
+		return `${cdn}/model-avatar/${piecesUniques.join("+")}.glb${q}`;
 	}, [
 		catalogue.modelesDeBase.visages,
 		catalogue.modelesDeBase.morphologies,
