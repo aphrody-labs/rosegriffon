@@ -73,9 +73,15 @@ const G = {
 /** Teintes du bandeau, échantillonnées sur les captures. */
 const C = { bandeauGauche: "#0EAFFF", bandeauDroite: "#1067F8" } as const;
 
-const CMN = "/dx11/menu/20_cmn";
 const MM = "/dx11/menu/100_mainmenu/mainmenu90/mainmenu90_02_2";
 const MM2 = "/dx11/menu/100_mainmenu/mainmenu90/mainmenu90_02";
+/** Les sprites du bandeau de guide du bas. Ce ne sont PAS ceux de `20_cmn/cmn03` : le layout
+ *  exporté de `chara_edit_menu` désigne `mainmenu01_06_base_button_guide`,
+ *  `mainmenu01_10_return_arrow_button_guide` et `mainmenu01_12_next_button_guide`. Les sprites
+ *  `cmn03/cmd_back_base01` et `cmd_press_btn_base_on01` qui étaient posés ici sont des fonds de
+ *  bouton CYAN — d'où les deux rectangles turquoise là où le jeu montre des pilules blanches
+ *  translucides (l'alpha de `mainmenu01_12` plafonne à 60 %). */
+const MM1 = "/dx11/menu/100_mainmenu/mainmenu01";
 /** Sol du jeu sous le sprite de fond : la couleur de sa dernière ligne opaque. */
 const SOL = "#BEF2FC";
 
@@ -326,9 +332,17 @@ export function Editeur({ catalogue, cdn }: { catalogue: Catalogue; cdn: string 
 			}}
 		>
 			<div className="absolute inset-0 overflow-hidden">
-				{/* Le modèle, au centre comme dans le jeu (emprise relevée sur les captures). */}
+				{/* Le modèle, à l'emprise MESURÉE sur le vrai jeu (et non estimée).
+				    Deux captures du même écran, l'une avant que l'avatar soit chargé et l'autre
+				    après, différenciées puis seuillées, donnent sa boîte englobante : 215 × 609 px
+				    à (533, 381) sur 1920 × 1080, stable du seuil 25 % au seuil 35 %. L'ancienne
+				    emprise (730 × 907) faisait cadrer `model-viewer` sur toute la hauteur, d'où une
+				    tête démesurée au milieu de la scène. */}
 				{modeleUrl && (
-					<div className="absolute" style={{ left: "22%", top: "12%", width: "38%", height: "84%" }}>
+					<div
+						className="absolute"
+						style={{ left: "27.76%", top: "35.28%", width: "11.20%", height: "56.39%" }}
+					>
 						<Modele3D url={modeleUrl} />
 					</div>
 				)}
@@ -379,6 +393,18 @@ export function Editeur({ catalogue, cdn }: { catalogue: Catalogue; cdn: string 
 						style={{ left: `${G.ongletsX[5] + 5}%`, top: "38%" }}
 					/>
 
+					{/* La tuile de l'onglet ACTIF : `icon_base01` de `mainmenu90_02_2`, un parallélogramme
+					    bleu de 352 × 264 dont seuls ~64 % de la hauteur sont opaques (le reste est un
+					    halo). Le jeu la montre à 132 × 90 px, centrée sur l'icône active ; le sprite
+					    complet occupe donc ~140 px, soit 112 % de la hauteur du bandeau. Sans elle,
+					    l'onglet actif ne se distinguait que par son icône pleine. */}
+					<Sprite
+						cdn={cdn}
+						src={`${MM}/icon_base01.png`}
+						className="pointer-events-none absolute -translate-x-1/2 w-auto"
+						style={{ left: `${G.ongletsX[iOnglet]}%`, top: "2.4%", height: "112%" }}
+					/>
+
 					{ONGLETS.map((o, i) => (
 						<span key={o.cle}>
 							<button
@@ -414,7 +440,12 @@ export function Editeur({ catalogue, cdn }: { catalogue: Catalogue; cdn: string 
 					))}
 				</div>
 
-				{/* Languette du libellé de l'onglet actif */}
+				{/* Languette du libellé de l'onglet actif.
+				    L'emprise relevée à l'œil sur la capture du jeu (22 % × 5,7 % au lieu de
+				    26 % × 4,2 %) a été ESSAYÉE puis retirée : mesurée, elle fait passer la région
+				    `ergot_onglet` de 0,4971 à 0,4860 de SSIM. Le sprite `edit_type_base01` n'a pas
+				    les mêmes marges transparentes que la forme visible du jeu ; recaler la boîte
+				    sans recaler le sprite déplace l'erreur au lieu de la réduire. */}
 				{iOnglet >= 0 && (
 					<div
 						className="absolute flex -translate-x-1/2 items-center justify-center"
@@ -529,15 +560,18 @@ export function Editeur({ catalogue, cdn }: { catalogue: Catalogue; cdn: string 
 					<button type="button" className="relative ml-[1.5%] h-[64%]" aria-label="Retour">
 						<Sprite
 							cdn={cdn}
-							src={`${CMN}/cmn03/cmn03_01/cmd_back_base01.png`}
+							src={`${MM1}/mainmenu01_10/mainmenu01_10.png`}
 							className="h-full w-auto"
 						/>
 					</button>
-					<span className="ml-[6%] flex items-center gap-[2.4vw]">
+					{/* Échelle relevée sur la capture du jeu : le bloc de commandes y couvre 975 px
+					    (x 380 → 1355) contre 625 px ici, soit un facteur 1,56 — d'où 1,15vw → 1,8vw
+					    et un écart de groupe porté en proportion. */}
+					<span className="ml-[4%] flex items-center gap-[3vw]">
 						{COMMANDES[onglet].map(([badge, hash]) => (
-							<span key={badge + hash} className="flex items-center gap-[0.5vw]">
-								<Sprite cdn={cdn} src={`${FONT}/${badge}.png`} className="h-[1.15vw] w-auto" />
-								<Txt t={txt(hash)} cdn={cdn} couleur="FFFFFF" h="1.15vw" />
+							<span key={badge + hash} className="flex items-center gap-[0.6vw]">
+								<Sprite cdn={cdn} src={`${FONT}/${badge}.png`} className="h-[1.5vw] w-auto" />
+								<Txt t={txt(hash)} cdn={cdn} couleur="FFFFFF" h="1.8vw" />
 							</span>
 						))}
 					</span>
@@ -556,7 +590,7 @@ export function Editeur({ catalogue, cdn }: { catalogue: Catalogue; cdn: string 
 					>
 						<Sprite
 							cdn={cdn}
-							src={`${CMN}/cmn03/cmn03_03/cmd_press_btn_base_on01.png`}
+							src={`${MM1}/mainmenu01_12/mainmenu01_12.png`}
 							className="absolute inset-0 size-full"
 						/>
 						<span className="relative flex items-center gap-[0.6vw] px-[1.4vw]">
