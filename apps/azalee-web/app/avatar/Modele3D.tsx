@@ -69,6 +69,24 @@ export function Modele3D({ url }: { url: string }) {
 		mv.setAttribute("touch-action", "pan-y");
 		mv.setAttribute("exposure", "1");
 		mv.setAttribute("shadow-intensity", "0");
+
+		// Cadrage fixe, plutôt que le cadrage automatique sur la boîte englobante : celui-ci
+		// changeait de distance à chaque pièce ajoutée, si bien que l'avatar rapetissait ou
+		// grandissait sans raison visible. La cible vise le buste — l'avatar mesure de 1,25 m à
+		// 2,08 m selon la morphologie, et viser le milieu le garde entier dans le cadre.
+		mv.setAttribute("camera-target", "0m 0.85m 0m");
+		mv.setAttribute("camera-orbit", "0deg 82deg 3.2m");
+		mv.setAttribute("field-of-view", "28deg");
+		mv.setAttribute("min-field-of-view", "12deg");
+		mv.setAttribute("max-field-of-view", "45deg");
+
+		// L'éditeur du jeu ne propose que deux gestes, ceux que sa barre annonce : « Tourner »
+		// autour de l'axe vertical et « Zoom ». On borne donc la caméra à cela — laisser basculer
+		// la vue sous les pieds ou déplacer la cible n'existe pas dans le jeu et désoriente.
+		mv.setAttribute("min-camera-orbit", "auto 72deg 1.8m");
+		mv.setAttribute("max-camera-orbit", "auto 96deg 5m");
+		mv.setAttribute("disable-pan", "");
+		mv.setAttribute("interaction-prompt", "none");
 		mv.style.width = "100%";
 		mv.style.height = "100%";
 		mv.style.backgroundColor = "transparent";
