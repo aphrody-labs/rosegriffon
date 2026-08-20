@@ -171,7 +171,14 @@ function Couleur({ ctx, cat, cle }: { ctx: Contexte; cat: Categorie; cle: string
 							<button
 								key={`${c}-${i}`}
 								type="button"
-								onClick={() => ctx.setValeur(`${cle}.preset`, i)}
+								onClick={() => {
+									ctx.setValeur(`${cle}.preset`, i);
+									// Clé canonique, indépendante du chemin de panneau : c'est elle que
+									// l'assemblage du modèle lit pour teinter. Sans elle il faudrait
+									// reconstituer `cle` depuis l'éditeur, qui ne connaît pas la
+									// hiérarchie des panneaux.
+									ctx.setValeur(`couleur.${cat.faceSettingType}`, i);
+								}}
 								className="relative aspect-square"
 							>
 								{ctx.valeurs[`${cle}.preset`] === i && (

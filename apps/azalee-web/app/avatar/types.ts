@@ -99,6 +99,8 @@ export type Curseur = {
 
 /** Le catalogue complet. */
 export type Catalogue = {
+	/** Couleurs des palettes, relevées dans le jeu vivant par `niers mem palettes` (165). */
+	couleursRgb?: Record<string, { rgb: string; alpha: number }>;
 	source: string;
 	codePartage: {
 		bits: number;

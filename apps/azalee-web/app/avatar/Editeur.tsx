@@ -287,9 +287,28 @@ export function Editeur({ catalogue, cdn }: { catalogue: Catalogue; cdn: string 
 		// Dédupliqué : deux rubriques distinctes peuvent désigner la même planche (les types 3 et
 		// 13 pointent tous deux `00_face`), et chacune coûterait un décodage de 2048×1024.
 		const uniques = [...new Set(couches)].sort();
-		const q = uniques.length > 0 ? `?face=${encodeURIComponent(uniques.join(","))}` : "";
+
+		// La TEINTE. Le canal rouge des planches de `_facetex` porte la carnation : la couleur de
+		// peau choisie y va. Les valeurs RGB des palettes ne vivent que dans la mémoire du jeu —
+		// `niers mem palettes` les relève et les fusionne dans le catalogue sous `couleursRgb`.
+		// À défaut de choix, la route retombe sur la couleur des recettes du jeu.
+		const rgbDe = (type: number): string | null => {
+			const cat = catalogue.categories.find((c) => c.faceSettingType === type);
+			const i = valeurs[`couleur.${type}`];
+			const id = cat?.couleurs?.[i ?? -1];
+			return id ? (catalogue.couleursRgb?.[id]?.rgb ?? null) : null;
+		};
+		const peau = rgbDe(3);
+		const teinte = peau ? `&tint=${peau},000000,FFFFFF` : "";
+
+		const q =
+			uniques.length > 0
+				? `?face=${encodeURIComponent(uniques.join(","))}${teinte}`
+				: teinte.replace("&", "?");
 		return `${cdn}/model-avatar/${piecesUniques.join("+")}.glb${q}`;
 	}, [
+		valeurs,
+		catalogue.couleursRgb,
 		catalogue.modelesDeBase.visages,
 		catalogue.modelesDeBase.morphologies,
 		catalogue.categories,
