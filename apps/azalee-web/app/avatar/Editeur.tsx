@@ -271,8 +271,10 @@ export function Editeur({ catalogue, cdn }: { catalogue: Catalogue; cdn: string 
 		// Les familles sont numérotées dans leur ordre de superposition — `00_face` la peau, puis
 		// `01_eye`, `02_pupil`, `03_highlight`, `04_eyebrow`, `05_mouth` : trier par nom donne
 		// l'ordre d'empilement sans avoir à le décider.
-		couches.sort();
-		const q = couches.length > 0 ? `?face=${encodeURIComponent(couches.join(","))}` : "";
+		// Dédupliqué : deux rubriques distinctes peuvent désigner la même planche (les types 3 et
+		// 13 pointent tous deux `00_face`), et chacune coûterait un décodage de 2048×1024.
+		const uniques = [...new Set(couches)].sort();
+		const q = uniques.length > 0 ? `?face=${encodeURIComponent(uniques.join(","))}` : "";
 		return `${cdn}/model-avatar/${pieces.join("+")}.glb${q}`;
 	}, [catalogue.modelesDeBase.visages, catalogue.categories, choix, morphologie, cdn]);
 
