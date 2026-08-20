@@ -301,10 +301,16 @@ export function Editeur({ catalogue, cdn }: { catalogue: Catalogue; cdn: string 
 		const peau = rgbDe(3);
 		const teinte = peau ? `&tint=${peau},000000,FFFFFF` : "";
 
+		// La MORPHOLOGIE désigne le corps exact. Le squelette seul ne suffit pas : il n'en réduit
+		// le choix qu'à deux, et c'est la corpulence mesurée qui départage — `female` a les épaules
+		// plus étroites et le tour de taille plus large que `male`, `big` un tour de taille de
+		// 0,99 m quand `muscle`, aussi grand, garde 0,65. La table vit côté serveur.
+		const morpho = nomMorpho ? `&morpho=${nomMorpho}` : "";
+
 		const q =
 			uniques.length > 0
-				? `?face=${encodeURIComponent(uniques.join(","))}${teinte}`
-				: teinte.replace("&", "?");
+				? `?face=${encodeURIComponent(uniques.join(","))}${teinte}${morpho}`
+				: `${teinte}${morpho}`.replace("&", "?");
 		return `${cdn}/model-avatar/${piecesUniques.join("+")}.glb${q}`;
 	}, [
 		valeurs,
