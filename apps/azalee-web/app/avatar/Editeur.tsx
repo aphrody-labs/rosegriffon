@@ -49,18 +49,24 @@ import { RUBRIQUES_STATS, RUBRIQUES_VISAGE } from "./structure";
 import type { Catalogue } from "./types";
 import { A01, BLEU, Curseur, FONT, Sprite, Txt } from "./ui";
 
-/** Proportions relevées sur les captures, en pourcentage du cadre. */
+/**
+ * Proportions **mesurées** sur les captures du jeu (2560×1440), en pourcentage du cadre.
+ *
+ * Relevé par balayage de pixels, pas à l'œil : le bandeau bleu s'arrête à y = 166 ; les plaques de
+ * rubrique occupent x = 2 à 533, la première de y = 263 à 333 (hauteur 71, pas 90,6) ; le panneau
+ * de droite va de x = 1614 au bord droit et de y = 262 à 1285.
+ */
 const G = {
-	bandeauH: (163 / 1440) * 100,
-	colonneX: (34 / 2560) * 100,
-	colonneW: ((533 - 34) / 2560) * 100,
-	rubriqueY: (253 / 1440) * 100,
+	bandeauH: (166 / 1440) * 100,
+	colonneX: 0,
+	colonneW: (533 / 2560) * 100,
+	rubriqueY: (263 / 1440) * 100,
 	rubriqueH: (71 / 1440) * 100,
-	rubriquePas: (90.5 / 1440) * 100,
-	panneauX: (1583 / 2560) * 100,
-	panneauY: (237 / 1440) * 100,
-	panneauW: (973 / 2560) * 100,
-	panneauH: ((1281 - 262) / 1440) * 100,
+	rubriquePas: (90.6 / 1440) * 100,
+	panneauX: (1614 / 2560) * 100,
+	panneauY: (262 / 1440) * 100,
+	panneauW: ((2560 - 1614) / 2560) * 100,
+	panneauH: ((1285 - 262) / 1440) * 100,
 	ongletsX: [50, 56.8, 63.5, 70.2, 77, 83.8],
 } as const;
 
@@ -494,10 +500,14 @@ export function Editeur({ catalogue, cdn }: { catalogue: Catalogue; cdn: string 
 						height: `${G.panneauH}%`,
 					}}
 				>
+					{/* Le sprite du panneau est gris (225) alors que le jeu l'affiche blanc : sa teinte
+					    est posée au rendu, par le même mécanisme qui colore les palettes. Le facteur
+					    ci-dessous porte 225 à 255, la valeur mesurée sur les captures. */}
 					<Sprite
 						cdn={cdn}
 						src={`${A01}/avatar01_10/edit_win_base01.png`}
 						className="absolute inset-0 size-full"
+						style={{ filter: "brightness(1.133)" }}
 					/>
 					<div className="relative flex h-full flex-col overflow-hidden px-[6%] py-[3%]">
 						{panneau}
