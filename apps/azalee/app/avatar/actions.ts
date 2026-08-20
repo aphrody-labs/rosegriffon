@@ -94,3 +94,155 @@ export async function definirPhotoDepuisAvatar(
 	revalidatePath("/avatar");
 	return { url: publicUrl };
 }
+
+// ─── Sauvegarde et partage ────────────────────────────────────────────────────
+
+/** Ce qu'une sauvegarde retient de l'éditeur : de quoi rétablir l'avatar à l'identique. */
+export type AvatarEnregistre = {
+	choix: Record<number, string>;
+	valeurs: Record<string, number>;
+	champs: Record<string, string>;
+	genre: number;
+	morphologie: number;
+};
+
+/** Une sauvegarde telle qu'elle revient de la base. */
+export type Sauvegarde = {
+	id: string;
+	nom: string;
+	code: string | null;
+	donnees: AvatarEnregistre;
+	modifieLe: string;
+};
+
+/** Longueur du code de partage, imposée par la spécification du jeu : 410 bits sur 6. */
+const LONGUEUR_CODE = 69;
+
+/** Nombre de sauvegardes qu'un compte peut garder. */
+const MAX_SAUVEGARDES = 24;
+
+/** Un nom de sauvegarde lisible, borné, sans caractères de contrôle. */
+function nomPropre(brut: string): string {
+	const nettoye = [...brut.trim()].filter((c) => c >= " ").join("").slice(0, 40);
+	return nettoye.length > 0 ? nettoye : "Avatar";
+}
+
+/**
+ * Enregistre l'avatar courant sous le compte connecté.
+ *
+ * `code` est le code de partage produit par l'éditeur : il rend la sauvegarde lisible par
+ * quiconque le possède, ce que la politique de lecture par code autorise explicitement. Le passer
+ * à `null` garde la sauvegarde privée.
+ */
+export async function enregistrerAvatar(
+	nom: string,
+	donnees: AvatarEnregistre,
+	code: string | null,
+): Promise<{ id?: string; error?: string }> {
+	const session = await getServerSession();
+	if (!session?.user?.id) {
+		return { error: "Connecte-toi pour enregistrer un avatar." };
+	}
+	if (code !== null && code.length !== LONGUEUR_CODE) {
+		return { error: "Ce code de partage n'a pas la bonne longueur." };
+	}
+
+	const admin = createAdminClient();
+	const { count } = await admin
+		.from("avatar_saves")
+		.select("id", { count: "exact", head: true })
+		.eq("user_id", session.user.id);
+	if ((count ?? 0) >= MAX_SAUVEGARDES) {
+		return { error: `Tu as atteint ${MAX_SAUVEGARDES} avatars enregistrés — supprimes-en un.` };
+	}
+
+	const { data, error } = await admin
+		.from("avatar_saves")
+		.insert({ user_id: session.user.id, nom: nomPropre(nom), donnees, code })
+		.select("id")
+		.single();
+	if (error) {
+		// Le code est unique : deux avatars identiques donneraient le même, ce qui n'est pas une
+		// panne mais un doublon à signaler comme tel.
+		if (error.code === "23505") return { error: "Cet avatar est déjà partagé sous ce code." };
+		console.error("[avatar] enregistrement impossible", error);
+		return { error: "Impossible d'enregistrer cet avatar." };
+	}
+
+	revalidatePath("/avatar");
+	return { id: data.id };
+}
+
+/** Les avatars enregistrés du compte connecté, du plus récent au plus ancien. */
+export async function listerAvatars(): Promise<{ avatars?: Sauvegarde[]; error?: string }> {
+	const session = await getServerSession();
+	if (!session?.user?.id) return { avatars: [] };
+
+	const admin = createAdminClient();
+	const { data, error } = await admin
+		.from("avatar_saves")
+		.select("id, nom, code, donnees, modifie_le")
+		.eq("user_id", session.user.id)
+		.order("modifie_le", { ascending: false })
+		.limit(MAX_SAUVEGARDES);
+	if (error) {
+		console.error("[avatar] lecture impossible", error);
+		return { error: "Impossible de relire tes avatars." };
+	}
+	return {
+		avatars: (data ?? []).map((r) => ({
+			id: r.id,
+			nom: r.nom,
+			code: r.code,
+			donnees: r.donnees as AvatarEnregistre,
+			modifieLe: r.modifie_le,
+		})),
+	};
+}
+
+/**
+ * Retrouve un avatar par son code de partage.
+ *
+ * Sert à ouvrir l'avatar de quelqu'un d'autre : la lecture par code est ouverte, l'écriture reste
+ * réservée au propriétaire.
+ */
+export async function ouvrirParCode(
+	code: string,
+): Promise<{ avatar?: AvatarEnregistre; nom?: string; error?: string }> {
+	const propre = code.trim();
+	if (propre.length !== LONGUEUR_CODE) {
+		return { error: "Ce code de partage n'a pas la bonne longueur." };
+	}
+
+	const admin = createAdminClient();
+	const { data, error } = await admin
+		.from("avatar_saves")
+		.select("nom, donnees")
+		.eq("code", propre)
+		.maybeSingle();
+	if (error) {
+		console.error("[avatar] ouverture par code impossible", error);
+		return { error: "Impossible d'ouvrir ce code." };
+	}
+	if (!data) return { error: "Aucun avatar ne porte ce code." };
+	return { avatar: data.donnees as AvatarEnregistre, nom: data.nom };
+}
+
+/** Supprime une sauvegarde du compte connecté. */
+export async function supprimerAvatar(id: string): Promise<{ error?: string }> {
+	const session = await getServerSession();
+	if (!session?.user?.id) return { error: "Connecte-toi pour supprimer un avatar." };
+
+	const admin = createAdminClient();
+	const { error } = await admin
+		.from("avatar_saves")
+		.delete()
+		.eq("id", id)
+		.eq("user_id", session.user.id);
+	if (error) {
+		console.error("[avatar] suppression impossible", error);
+		return { error: "Impossible de supprimer cet avatar." };
+	}
+	revalidatePath("/avatar");
+	return {};
+}
