@@ -11,18 +11,26 @@
  * 85 tickets en trois ans en salons auraient déjà mangé un sixième du quota.
  *
  * ── QUI VOIT UN FIL PRIVÉ ──────────────────────────────────────────────────
- * Deux populations, et deux mécanismes DIFFÉRENTS :
+ * Deux mécanismes, et ils s'ADDITIONNENT :
  *
- *   - les MEMBRES invités. On y entre par mention : mentionner quelqu'un dans
- *     un fil l'y ajoute. C'est comme ça que l'auteur du ticket entre.
- *   - le STAFF, par la permission **Gérer les fils** (`ManageThreads`) sur le
- *     salon parent. Mentionner un RÔLE n'ajoute personne — c'est le piège
- *     classique, et il produit des tickets que le staff ne voit jamais.
+ *   - la LISTE DES MEMBRES du fil. On y entre par mention : mentionner
+ *     quelqu'un l'ajoute — et mentionner un RÔLE ajoute TOUS ses porteurs.
+ *     Vérifié en direct le 20/8/2026 sur `ticket-0087` : le message d'accueil
+ *     mentionnait `@Modérateurs` et `@Staffs`, le fil comptait 35 membres, dont
+ *     les 26 porteurs de `@Staffs`. Le commentaire qui vivait ici affirmait
+ *     l'inverse (« mentionner un rôle ne fait que notifier ») ; c'était faux, et
+ *     c'est ce qui a ouvert tous les tickets au staff large.
+ *     Conséquence : **ne mentionner QUE des rôles habilités**. Une mention n'est
+ *     pas une notification, c'est une clé.
+ *   - la permission **Gérer les fils** (`ManageThreads`) sur le salon parent,
+ *     qui donne la lecture de TOUS les fils privés sans y être membre. Et
+ *     « Administrateur » la contient : aucune surcharge de salon n'y peut rien.
  *
  * Conséquence d'exploitation, écrite ici parce qu'elle ne se devine pas : les
  * rôles configurés dans `tickets.rolesStaff` / `rolesDirection` DOIVENT porter
- * « Gérer les fils » sur le salon du panneau. `diagnostiquerAcces` le vérifie et
- * le dit, plutôt que de laisser découvrir le trou au premier signalement.
+ * « Gérer les fils » sur le salon du panneau, et les AUTRES rôles ne doivent
+ * PAS la porter. `diagnostiquerAcces` vérifie les deux sens et le dit, plutôt
+ * que de laisser découvrir le trou au premier signalement.
  */
 import {
 	ChannelType,
@@ -52,6 +60,7 @@ export function porteDesFils(salon: GuildTextBasedChannel | null): salon is Salo
 import { sql } from "../lib/db";
 import {
 	categorieTicket,
+	fuitesDAcces,
 	invitations,
 	nomSalonTicket,
 	prochainNumero,
@@ -250,8 +259,9 @@ export async function ouvrirTicket(demande: DemandeOuverture): Promise<TicketOuv
 	await sql`UPDATE bot_tickets SET salon_id = ${fil.id}, maj_le = NOW() WHERE id = ${ticket.id}`;
 	ticket = { ...ticket, salonId: fil.id };
 
-	// Mentionner l'auteur l'AJOUTE au fil ; mentionner les rôles ne fait que
-	// notifier (leurs porteurs voient le fil par « Gérer les fils »).
+	// Mentionner AJOUTE au fil — l'auteur comme les porteurs des rôles cités.
+	// C'est donc `invitations()` qui décide qui lira le ticket : un rôle de trop
+	// dans les réglages, et ses membres sont dans le fil pour de bon.
 	const aInviter = invitations({
 		auteurId: demande.auteurId,
 		rolesDirection: demande.rolesDirection,
@@ -352,11 +362,16 @@ export interface Diagnostic {
 /**
  * Vérifie que le système PEUT fonctionner, avant qu'un membre ne s'en aperçoive.
  *
- * Deux vérifications que rien d'autre ne fait :
+ * Trois vérifications que rien d'autre ne fait :
  *   - le BOT peut-il créer un fil privé et y écrire ?
  *   - les rôles de prise en charge portent-ils « Gérer les fils » ? Sans elle,
  *     les tickets existent, sont bien créés, et personne ne les voit. C'est la
  *     panne la plus coûteuse du domaine : elle est silencieuse.
+ *   - et l'inverse, qui coûte plus cher encore : QUI D'AUTRE les voit ? La règle
+ *     du serveur est « modération et direction, personne d'autre » ; un rôle de
+ *     staff large qui garde « Gérer les fils » sur ce salon lit tous les
+ *     tickets, signalements compris, sans figurer nulle part dans les réglages.
+ *     Cette fuite-là est encore plus silencieuse que la panne : rien ne casse.
  */
 export async function diagnostiquerAcces(
 	guilde: Guild,
@@ -402,6 +417,27 @@ export async function diagnostiquerAcces(
 			);
 		}
 	}
+
+	// ── Et tous les AUTRES rôles du serveur ────────────────────────────────
+	// `@everyone` est gardé dans l'observation — « tout le serveur lit les
+	// tickets » est précisément le cas qu'il ne faut pas manquer. La règle, elle,
+	// vit dans `lib/tickets.fuitesDAcces` (pure, testée) ; ici on ne fait que
+	// mesurer la permission RÉELLE sur le salon, surcharges comprises.
+	const tousLesRoles = await guilde.roles.fetch().catch(() => guilde.roles.cache);
+	// Les porteurs ne sont comptés que si la liste des membres est vraiment en
+	// cache (le bot la charge au démarrage) : un cache vide ferait passer TOUS
+	// les rôles pour inhabités, et la vérification pour muette.
+	const membresConnus = guilde.members.cache.size > 1;
+	const observes = tousLesRoles.map((role) => ({
+		administrateur: role.permissions.has(PermissionFlagsBits.Administrator),
+		gereLesFils: salonPanneau.permissionsFor(role)?.has(PermissionFlagsBits.ManageThreads) ?? false,
+		id: role.id,
+		integration: role.managed,
+		nom: role.toString(),
+		porteursHumains: membresConnus ? role.members.filter((m) => !m.user.bot).size : null,
+	}));
+	const fuites = fuitesDAcces([...observes.values()], roles, salonPanneau.toString());
+	avertissements.push(...fuites.avertissements);
 
 	return { avertissements, blocages };
 }

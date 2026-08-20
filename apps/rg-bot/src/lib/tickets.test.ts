@@ -15,6 +15,7 @@ import {
 	CATEGORIES_TICKET,
 	categorieTicket,
 	estEtatTicket,
+	fuitesDAcces,
 	identifiantComposant,
 	invitations,
 	libelleCategorieTicket,
@@ -236,6 +237,60 @@ describe("accès", () => {
 		const manque = manqueDeConfiguration(sensible, { rolesDirection: [], rolesStaff: staff });
 		expect(manque).not.toBeNull();
 		expect(manque as string).toContain("direction");
+	});
+
+	test("un rôle qui lit les tickets sans être habilité est signalé", () => {
+		// Le cas réel du 20/8/2026 : `@Staffs` déclaré en prise en charge, donc
+		// mentionné, donc AJOUTÉ au fil — 26 personnes dans un ticket d'aide.
+		const fuites = fuitesDAcces(
+			[
+				{ administrateur: false, gereLesFils: true, id: "role-mod-1", integration: false, nom: "@Modérateurs", porteursHumains: 3 },
+				{ administrateur: false, gereLesFils: true, id: "role-staffs", integration: false, nom: "@Staffs", porteursHumains: 3 },
+			],
+			staff,
+			"#tickets"
+		);
+		expect(fuites.avertissements).toHaveLength(1);
+		expect(fuites.avertissements[0]).toContain("@Staffs");
+		expect(fuites.avertissements[0]).toContain("Gérer les fils");
+	});
+
+	test("« Administrateur » est dit à part : aucun salon ne peut le refermer", () => {
+		const fuites = fuitesDAcces(
+			[{ administrateur: true, gereLesFils: false, id: "role-fondateur", integration: false, nom: "@Double des Clés", porteursHumains: 3 }],
+			staff,
+			"#tickets"
+		);
+		expect(fuites.avertissements[0]).toContain("Administrateur");
+	});
+
+	test("un rôle que seuls des bots portent n'est pas une fuite", () => {
+		const fuites = fuitesDAcces(
+			[{ administrateur: true, gereLesFils: true, id: "role-garde", integration: false, nom: "@Robot de Garde", porteursHumains: 0 }],
+			staff,
+			"#tickets"
+		);
+		expect(fuites.avertissements).toEqual([]);
+	});
+
+	test("les rôles de bots ne sont pas des fuites", () => {
+		const fuites = fuitesDAcces(
+			[{ administrateur: true, gereLesFils: true, id: "role-bot", integration: true, nom: "@RG", porteursHumains: 3 }],
+			staff,
+			"#tickets"
+		);
+		expect(fuites.avertissements).toEqual([]);
+	});
+
+	test("une fuite ne bloque JAMAIS : le champ n'existe même pas", () => {
+		// Refuser de publier le panneau pour un rôle en trop priverait le serveur
+		// de ses tickets pour une raison qui n'a rien à voir avec leur marche.
+		const fuites = fuitesDAcces(
+			[{ administrateur: false, gereLesFils: true, id: "role-staffs", integration: false, nom: "@Staffs", porteursHumains: 3 }],
+			staff,
+			"#tickets"
+		);
+		expect(Object.keys(fuites)).toEqual(["avertissements"]);
 	});
 
 	test("sans aucun rôle, même une catégorie ordinaire est refusée", () => {

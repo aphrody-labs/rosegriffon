@@ -243,10 +243,14 @@ export class GestionTicketCommand {
 			});
 
 			// La vérification qui compte : ce rôle VERRA-T-IL les tickets ?
+			// Les DEUX listes sont passées, jamais celle qu'on vient de modifier
+			// seule : le diagnostic signale aussi les rôles qui voient les tickets
+			// sans y être habilités, et la direction en ferait partie à tort.
 			const salon = await salonDesReglages(interaction, modifies);
+			const habilites = [...modifies.tickets.rolesStaff, ...modifies.tickets.rolesDirection];
 			const diagnostic =
 				salon && interaction.guild
-					? await diagnostiquerAcces(interaction.guild, salon, apres)
+					? await diagnostiquerAcces(interaction.guild, salon, habilites)
 					: { avertissements: [], blocages: [] };
 
 			const carte = fiche({

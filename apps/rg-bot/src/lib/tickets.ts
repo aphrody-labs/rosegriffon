@@ -368,8 +368,10 @@ export function lireComposant(identifiant: unknown): ComposantTicket | null {
  * Un ticket est un FIL PRIVÉ, comme aujourd'hui — pas un salon.
  *
  * Un fil privé n'a pas de surcharges de permissions : sa visibilité est sa
- * liste de membres. Le plan ci-dessous est donc une liste de gens à INVITER,
- * et non des `PermissionOverwrites`. C'est aussi ce qui rend le système
+ * liste de membres (plus les porteurs de « Gérer les fils » sur le salon
+ * parent, qui lisent tout sans y être). Le plan ci-dessous est donc une liste
+ * de gens à INVITER, et non des `PermissionOverwrites` — et y ajouter un rôle
+ * lui donne l'accès pour de bon, pas seulement une notification. C'est aussi ce qui rend le système
  * increvable : 85 tickets en trois ans, ce sont 85 salons dans la limite de
  * 500 salons d'un serveur si on les crée en salons — en fils, aucune limite ne
  * s'approche.
@@ -384,7 +386,11 @@ export interface ContexteAcces {
 }
 
 export interface Invitation {
-	/** `role` : à mentionner une fois dans le fil pour y faire entrer ses porteurs. */
+	/**
+	 * `role` : mentionné une fois dans le fil, il y fait ENTRER tous ses
+	 * porteurs (Discord les ajoute à la liste des membres). Ne jamais y mettre
+	 * un rôle qui n'a pas à lire le ticket : la mention est une clé, pas un ping.
+	 */
 	genre: "role" | "membre";
 	id: string;
 	/** Pourquoi cette entrée existe — repris tel quel dans le journal d'audit. */
@@ -425,6 +431,92 @@ export function invitations(contexte: ContexteAcces): Invitation[] {
 		});
 	}
 	return liste;
+}
+
+/**
+ * Un rôle du serveur, réduit à ce qui décide de la lecture d'un ticket.
+ *
+ * `gereLesFils` est la permission CALCULÉE sur le salon du panneau (surcharges
+ * comprises), pas celle du rôle : c'est la seule qui dit la vérité.
+ */
+export interface RoleObserve {
+	id: string;
+	nom: string;
+	administrateur: boolean;
+	gereLesFils: boolean;
+	/** Rôle géré par une intégration (bot) : sa permission vient de son application. */
+	integration: boolean;
+	/**
+	 * Combien d'HUMAINS le portent, `null` si la liste des membres n'est pas
+	 * connue. Un rôle que seuls des bots portent (« Robot de Garde ») n'est pas
+	 * une fuite : personne ne lit rien. Le signaler noierait les deux lignes qui
+	 * comptent vraiment sous du bruit qu'on ne corrigera jamais.
+	 */
+	porteursHumains: number | null;
+}
+
+/**
+ * Ce que le diagnostic a trouvé de trop : qui lit les tickets sans y avoir droit.
+ *
+ * Rien ici n'est un BLOCAGE. Une fuite se corrige, elle n'empêche pas le
+ * système de tourner — refuser de publier le panneau pour un rôle en trop
+ * priverait le serveur de ses tickets pour une raison qui n'a rien à voir avec
+ * leur fonctionnement.
+ */
+export interface Fuites {
+	avertissements: string[];
+}
+
+/**
+ * Qui lit les tickets sans figurer dans les rôles habilités.
+ *
+ * ── POURQUOI CETTE VÉRIFICATION EXISTE ─────────────────────────────────────
+ * Le diagnostic ne regardait que dans un sens — « le staff verra-t-il les
+ * tickets ? ». L'autre sens coûte plus cher : le 20/8/2026, les 26 porteurs de
+ * `@Staffs` étaient membres du dernier ticket ouvert, parce que le rôle était
+ * déclaré en prise en charge et que la mention d'un rôle AJOUTE ses porteurs au
+ * fil. La règle du serveur est « modération et direction, personne d'autre » ;
+ * rien ne la vérifiait, et rien ne cassait.
+ *
+ * Deux remèdes différents, dits séparément :
+ *   - « Gérer les fils » sur le salon → ça se retire sur le salon ;
+ *   - « Administrateur » → aucune surcharge de salon n'y peut rien, il faut
+ *     toucher au rôle lui-même. Le taire ferait croire qu'une case décochée sur
+ *     le salon a refermé la porte.
+ *
+ * Aucun des deux ne bloque quoi que ce soit : ce sont des avertissements.
+ *
+ * Les rôles d'intégration sont écartés : ce sont des bots, pas des lecteurs, et
+ * leur retirer leur permission les casse.
+ */
+export function fuitesDAcces(
+	roles: readonly RoleObserve[],
+	habilites: readonly string[],
+	nomDuSalon: string
+): Fuites {
+	const permis = new Set(habilites);
+	const fuites: Fuites = { avertissements: [] };
+	for (const role of roles) {
+		if (permis.has(role.id) || role.integration || role.porteursHumains === 0) {
+			continue;
+		}
+		if (role.administrateur) {
+			fuites.avertissements.push(
+				`${role.nom} porte « Administrateur » : ses membres voient tous les tickets, ` +
+					"signalements compris, et aucune permission de salon ne peut l'empêcher. " +
+					"Retire-lui « Administrateur » si ce n'est pas voulu."
+			);
+			continue;
+		}
+		if (role.gereLesFils) {
+			fuites.avertissements.push(
+				`${role.nom} a « Gérer les fils » sur ${nomDuSalon} sans être habilité : ` +
+					"ses membres LISENT tous les tickets. Retire-lui la permission sur ce salon, " +
+					"ou déclare-le avec `/gestion ticket role`."
+			);
+		}
+	}
+	return fuites;
 }
 
 /**
