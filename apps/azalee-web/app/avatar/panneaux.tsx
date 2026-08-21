@@ -397,12 +397,26 @@ export function PanPhysionomie({ ctx }: { ctx: Contexte }) {
 				</button>
 				{[-1, 0, 1].map((d) => {
 					const i = (ctx.morphologie + d + n) % n;
-					return (
+						// La série d'icônes commence à **01** : `icon_body_type00` n'existe dans aucun
+						// atlas commun. Le nom se trouve bien dans `15_icon_common2/fr`, mais il y
+						// désigne un bouton « TOUT » — d'où le pavé gris à la place de la première
+						// silhouette. Vérifié en listant les 29 régions de `icon_common2.g4tx` :
+						// aucune ne s'appelle ainsi.
+						//
+						// Deux séries de 84 × 84 cohabitent, et c'est le GENRE qui les sépare :
+						// `01`…`07` sont bleues, `11`…`15` et `17` rouges. Sept silhouettes pour
+						// huit entrées, parce que `male` et `female` sont la même morphologie —
+						// toutes deux « Moyen » (`81E951EF`) — d'où le rang plafonné en tête.
+						// La série féminine n'a pas de `16` : ce rang-là retombe sur la bleue,
+						// faute d'icône, plutôt que de casser l'image.
+						const rang = Math.max(1, i);
+						const feminin = ctx.genre === 1 && rang !== 6;
+						return (
 						<Vignette
 							key={d}
 							cdn={ctx.cdn}
 							numero={String(i + 1).padStart(2, "0")}
-							image={`${ctx.cdn}${i === 0 ? ICN2 : ICN}/icon_body_type0${i}.png`}
+							image={`${ctx.cdn}${ICN}/icon_body_type${feminin ? 1 : 0}${rang}.png`}
 							choisie={d === 0}
 							onClick={() => ctx.setMorphologie(i)}
 							className="aspect-[4/5] w-[26%]"
