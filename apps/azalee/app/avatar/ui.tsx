@@ -35,6 +35,7 @@ export const ICN = "/dx11/menu/200_icon/15_icon_common";
  * l'image) et la morphologie `00`. Une copie par langue existe ; celle-ci est la française.
  */
 export const ICN2 = "/dx11/menu/200_icon/15_icon_common2/fr";
+
 /** Gaiji : les glyphes images de la police du jeu. */
 export const FONT = "/dx11/font";
 
