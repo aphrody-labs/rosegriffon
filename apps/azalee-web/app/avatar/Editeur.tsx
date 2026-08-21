@@ -170,10 +170,44 @@ export function Editeur({ catalogue, cdn }: { catalogue: Catalogue; cdn: string 
 	const lib = useMemo(() => resolveur(catalogue), [catalogue]);
 	const txt = useCallback((hash: string) => lib(hash)?.libelle ?? "", [lib]);
 
+	/**
+	 * Pose un choix, et traite le cas particulier des ÉCHANTILLONS DE VISAGE.
+	 *
+	 * Les 36 parts de la catégorie 1 ne portent ni maille ni texture — leur `resource` n'est qu'un
+	 * nom, `preset_01_normal` et suivants. Les sélectionner ne pouvait donc rien changer.
+	 *
+	 * Un échantillon est une RECETTE : il fixe d'un coup les traits des autres rubriques. Le
+	 * catalogue ne dit pas laquelle, aussi la recette est-elle **dérivée du rang** de l'échantillon,
+	 * de façon déterministe — chaque rubrique reçoit une part choisie par un pas premier, ce qui
+	 * évite que deux échantillons voisins ne se ressemblent. C'est une reconstitution assumée : le
+	 * comportement est celui attendu d'un échantillon, la correspondance exacte n'est pas établie.
+	 */
 	const setChoix = useCallback(
-		(cat: number, id: string) =>
-			setChoixBrut((c) => ({ ...c, [cat]: c[cat] === id ? "" : id })),
-		[],
+		(cat: number, id: string) => {
+			if (cat !== 1) {
+				setChoixBrut((c) => ({ ...c, [cat]: c[cat] === id ? "" : id }));
+				return;
+			}
+			const presets = catalogue.categories.find((c) => c.faceSettingType === 1);
+			const rang = Math.max(0, presets?.parts.findIndex((p) => p.id === id) ?? 0);
+			// Les rubriques qu'un échantillon fixe : forme, cheveux, frange, yeux, pupilles,
+			// reflets, nez, bouche, sourcils, oreilles.
+			const PAS: Record<number, number> = {
+				2: 1, 4: 7, 5: 3, 6: 5, 7: 3, 8: 2, 9: 3, 10: 5, 11: 7, 12: 2,
+			};
+			setChoixBrut((c) => {
+				const suite: Record<number, string> = { ...c, 1: c[1] === id ? "" : id };
+				if (suite[1] === "") return suite;
+				for (const [type, pas] of Object.entries(PAS)) {
+					const t = Number(type);
+					const cat2 = catalogue.categories.find((x) => x.faceSettingType === t);
+					const n = cat2?.parts.length ?? 0;
+					if (n > 0) suite[t] = cat2!.parts[(rang * pas) % n]!.id;
+				}
+				return suite;
+			});
+		},
+		[catalogue.categories],
 	);
 	const setValeur = useCallback(
 		(cle: string, v: number) => setValeursBrut((s) => ({ ...s, [cle]: v })),
@@ -343,10 +377,20 @@ export function Editeur({ catalogue, cdn }: { catalogue: Catalogue; cdn: string 
 		const iForme = catForme?.parts.findIndex((p) => p.id === choix[2]) ?? -1;
 		const forme = iForme >= 0 ? `&forme=${iForme}` : "";
 
+		// Les HABITS — col (19), manches (20), ourlet (21). Leurs parts ne portent aucune maille ni
+		// texture, rien qu'un nom de découpe (`fashion_collar`, `fashion_shoulder_baring`,
+		// `fashion_shirt_out`, `fashion_navel_baring`) : la route ajuste la coupe du maillot.
+		const rangDe = (type: number) => {
+			const cat = catalogue.categories.find((c) => c.faceSettingType === type);
+			const i = cat?.parts.findIndex((p) => p.id === choix[type]) ?? -1;
+			return Math.max(0, i);
+		};
+		const habits = `&habits=${rangDe(19)},${rangDe(20)},${rangDe(21)}`;
+
 		const q =
 			uniques.length > 0
-				? `?face=${encodeURIComponent(uniques.join(","))}${teinte}${teinteCheveux}${morpho}${taille}${forme}`
-				: `${teinte}${teinteCheveux}${morpho}${taille}${forme}`.replace("&", "?");
+				? `?face=${encodeURIComponent(uniques.join(","))}${teinte}${teinteCheveux}${morpho}${taille}${forme}${habits}`
+				: `${teinte}${teinteCheveux}${morpho}${taille}${forme}${habits}`.replace("&", "?");
 		return `${cdn}/model-avatar/${piecesUniques.join("+")}.glb${q}`;
 	}, [
 		genre,
@@ -414,15 +458,11 @@ export function Editeur({ catalogue, cdn }: { catalogue: Catalogue; cdn: string 
 
 	// L'écran est monté dans `document.body` : posé dans le flux de la page, il restait sous la
 	// navigation d'azalée, qui le décalait et le rognait.
+	// Le défilement de la page n'est PAS verrouillé : l'éditeur reste une page du site, pas une
+	// fenêtre modale. On la bloquait pour imiter le plein écran du jeu, au prix d'une page où la
+	// molette ne faisait rien — ce qui déroute sur un écran court ou un portable.
 	const [monte, setMonte] = useState(false);
-	useEffect(() => {
-		setMonte(true);
-		const avant = document.body.style.overflow;
-		document.body.style.overflow = "hidden";
-		return () => {
-			document.body.style.overflow = avant;
-		};
-	}, []);
+	useEffect(() => setMonte(true), []);
 	if (!monte) return null;
 
 	/** Le contenu du panneau de droite, selon l'onglet et la rubrique ouverte. */
@@ -712,7 +752,10 @@ export function Editeur({ catalogue, cdn }: { catalogue: Catalogue; cdn: string 
 						className="absolute inset-0 size-full"
 						style={{ filter: "brightness(1.133)" }}
 					/>
-					<div className="relative flex h-full flex-col overflow-hidden px-[6%] py-[3%]">
+					{/* Le panneau DÉFILE : certaines rubriques (98 coupes, 40 sourcils) débordent, et
+					    leur fin était inatteignable. `overscroll-contain` évite que la molette ne
+					    fasse défiler la page une fois le panneau au bout. */}
+					<div className="relative flex h-full flex-col overflow-y-auto overscroll-contain px-[6%] py-[3%] [scrollbar-color:rgba(255,255,255,.45)_transparent] [scrollbar-width:thin]">
 						{panneau}
 					</div>
 				</div>
