@@ -315,6 +315,12 @@ export function Editeur({ catalogue, cdn }: { catalogue: Catalogue; cdn: string 
 		const peau = rgbDe(3);
 		const teinte = peau ? `&tint=${peau},000000,FFFFFF` : "";
 
+		// La chevelure a sa propre couleur (catégorie 4, 98 coupes et 65 teintes). Sa planche est
+		// NEUTRE dans les fichiers — `hair_10` vaut 255,255,255 partout — donc sans cette couleur
+		// l'avatar porte un casque blanc. La route la multiplie sur la planche.
+		const cheveux = rgbDe(4);
+		const teinteCheveux = cheveux ? `&hair=${cheveux}` : "";
+
 		// La MORPHOLOGIE désigne le corps exact. Le squelette seul ne suffit pas : il n'en réduit
 		// le choix qu'à deux, et c'est la corpulence mesurée qui départage — `female` a les épaules
 		// plus étroites et le tour de taille plus large que `male`, `big` un tour de taille de
@@ -323,8 +329,8 @@ export function Editeur({ catalogue, cdn }: { catalogue: Catalogue; cdn: string 
 
 		const q =
 			uniques.length > 0
-				? `?face=${encodeURIComponent(uniques.join(","))}${teinte}${morpho}`
-				: `${teinte}${morpho}`.replace("&", "?");
+				? `?face=${encodeURIComponent(uniques.join(","))}${teinte}${teinteCheveux}${morpho}`
+				: `${teinte}${teinteCheveux}${morpho}`.replace("&", "?");
 		return `${cdn}/model-avatar/${piecesUniques.join("+")}.glb${q}`;
 	}, [
 		genre,
