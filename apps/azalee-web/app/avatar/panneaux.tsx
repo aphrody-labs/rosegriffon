@@ -382,7 +382,14 @@ export function PanStyle({ ctx }: { ctx: Contexte }) {
  * taille de poitrine n'apparaît que pour le style féminin, comme dans le jeu.
  */
 export function PanPhysionomie({ ctx }: { ctx: Contexte }) {
-	const n = MORPHOLOGIES.length;
+	// Les deux premières entrées, `male` et `female`, sont la MÊME morphologie « Moyen » : c'est le
+	// genre qui les départage. Les proposer toutes deux offrait un cran qui ne changeait rien au
+	// modèle. On masque donc celle que le genre courant rend redondante.
+	const redondante = ctx.genre === 1 ? 0 : 1;
+	const visibles = MORPHOLOGIES.map((_, i) => i).filter((i) => i !== redondante);
+	const n = visibles.length;
+	const rangVisible = Math.max(0, visibles.indexOf(ctx.morphologie));
+	const allerA = (d: number) => ctx.setMorphologie(visibles[(rangVisible + d + n) % n] ?? 0);
 	return (
 		<>
 			<Titre cdn={ctx.cdn} t={ctx.txt(H.ongletPhysionomie)} />
@@ -390,13 +397,13 @@ export function PanPhysionomie({ ctx }: { ctx: Contexte }) {
 				<button
 					type="button"
 					aria-label="Morphologie précédente"
-					onClick={() => ctx.setMorphologie((ctx.morphologie - 1 + n) % n)}
+					onClick={() => allerA(-1)}
 					className="absolute left-[0%]"
 				>
 					<Sprite cdn={ctx.cdn} src={`${A01}/avatar01_11/arrow01_l.png`} className="h-[1.7vw] w-auto" />
 				</button>
 				{[-1, 0, 1].map((d) => {
-					const i = (ctx.morphologie + d + n) % n;
+					const i = visibles[(rangVisible + d + n) % n] ?? 0;
 						// La série d'icônes commence à **01** : `icon_body_type00` n'existe dans aucun
 						// atlas commun. Le nom se trouve bien dans `15_icon_common2/fr`, mais il y
 						// désigne un bouton « TOUT » — d'où le pavé gris à la place de la première
@@ -426,7 +433,7 @@ export function PanPhysionomie({ ctx }: { ctx: Contexte }) {
 				<button
 					type="button"
 					aria-label="Morphologie suivante"
-					onClick={() => ctx.setMorphologie((ctx.morphologie + 1) % n)}
+					onClick={() => allerA(1)}
 					className="absolute right-[0%]"
 				>
 					<Sprite cdn={ctx.cdn} src={`${A01}/avatar01_11/arrow01_r.png`} className="h-[1.7vw] w-auto" />

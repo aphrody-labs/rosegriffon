@@ -312,8 +312,12 @@ export function Editeur({ catalogue, cdn }: { catalogue: Catalogue; cdn: string 
 			const id = cat?.couleurs?.[i ?? -1];
 			return id ? (catalogue.couleursRgb?.[id]?.rgb ?? null) : null;
 		};
+		// Les TROIS canaux de teinte du visage : le rouge porte la carnation, le vert l'iris, le
+		// bleu reste clair. La couleur d'œil est la catégorie 6, celle de peau la 3.
 		const peau = rgbDe(3);
-		const teinte = peau ? `&tint=${peau},000000,FFFFFF` : "";
+		const iris = rgbDe(6);
+		const teinte =
+			peau || iris ? `&tint=${peau ?? "F3CAC1"},${iris ?? "533B3B"},FFFFFF` : "";
 
 		// La chevelure a sa propre couleur (catégorie 4, 98 coupes et 65 teintes). Sa planche est
 		// NEUTRE dans les fichiers — `hair_10` vaut 255,255,255 partout — donc sans cette couleur
@@ -327,10 +331,15 @@ export function Editeur({ catalogue, cdn }: { catalogue: Catalogue; cdn: string 
 		// 0,99 m quand `muscle`, aussi grand, garde 0,65. La table vit côté serveur.
 		const morpho = nomMorpho ? `&morpho=${nomMorpho}` : "";
 
+		// La TAILLE : quinze crans, que le jeu fait correspondre à une stature de 1,25 m à 2,08 m.
+		// Le modèle est mis à l'échelle côté serveur.
+		const cranTaille = valeurs["taille"];
+		const taille = cranTaille === undefined ? "" : `&taille=${cranTaille}`;
+
 		const q =
 			uniques.length > 0
-				? `?face=${encodeURIComponent(uniques.join(","))}${teinte}${teinteCheveux}${morpho}`
-				: `${teinte}${teinteCheveux}${morpho}`.replace("&", "?");
+				? `?face=${encodeURIComponent(uniques.join(","))}${teinte}${teinteCheveux}${morpho}${taille}`
+				: `${teinte}${teinteCheveux}${morpho}${taille}`.replace("&", "?");
 		return `${cdn}/model-avatar/${piecesUniques.join("+")}.glb${q}`;
 	}, [
 		genre,
