@@ -336,10 +336,17 @@ export function Editeur({ catalogue, cdn }: { catalogue: Catalogue; cdn: string 
 		const cranTaille = valeurs["taille"];
 		const taille = cranTaille === undefined ? "" : `&taille=${cranTaille}`;
 
+		// La FORME DE VISAGE : ses six parts ne désignent aucune ressource dans le catalogue
+		// (`resource = 0xFFFFFFFF`), le choix ne pouvait donc rien changer. La route l'applique en
+		// déformant la tête ; on lui transmet le rang de la part choisie.
+		const catForme = catalogue.categories.find((c) => c.faceSettingType === 2);
+		const iForme = catForme?.parts.findIndex((p) => p.id === choix[2]) ?? -1;
+		const forme = iForme >= 0 ? `&forme=${iForme}` : "";
+
 		const q =
 			uniques.length > 0
-				? `?face=${encodeURIComponent(uniques.join(","))}${teinte}${teinteCheveux}${morpho}${taille}`
-				: `${teinte}${teinteCheveux}${morpho}${taille}`.replace("&", "?");
+				? `?face=${encodeURIComponent(uniques.join(","))}${teinte}${teinteCheveux}${morpho}${taille}${forme}`
+				: `${teinte}${teinteCheveux}${morpho}${taille}${forme}`.replace("&", "?");
 		return `${cdn}/model-avatar/${piecesUniques.join("+")}.glb${q}`;
 	}, [
 		genre,
