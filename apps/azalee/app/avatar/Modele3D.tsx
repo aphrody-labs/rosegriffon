@@ -80,12 +80,14 @@ export function Modele3D({ url }: { url: string }) {
 		mv.setAttribute("min-field-of-view", "12deg");
 		mv.setAttribute("max-field-of-view", "45deg");
 
-		// L'éditeur du jeu ne propose que deux gestes, ceux que sa barre annonce : « Tourner »
-		// autour de l'axe vertical et « Zoom ». On borne donc la caméra à cela — laisser basculer
-		// la vue sous les pieds ou déplacer la cible n'existe pas dans le jeu et désoriente.
-		mv.setAttribute("min-camera-orbit", "auto 72deg 1.8m");
-		mv.setAttribute("max-camera-orbit", "auto 96deg 5m");
-		mv.setAttribute("disable-pan", "");
+		// Les gestes sont LIBRES : tourner, zoomer et déplacer la vue. Le jeu n'en propose que deux,
+		// mais sur le web on attend d'un modèle qu'il se manipule entièrement — et l'on ne peut pas
+		// s'approcher d'un détail sans pouvoir recentrer dessus.
+		//
+		// Les bornes restent larges plutôt qu'absentes : elles empêchent seulement de passer sous
+		// le sol ou de s'éloigner au point de perdre l'avatar de vue.
+		mv.setAttribute("min-camera-orbit", "auto 15deg 0.5m");
+		mv.setAttribute("max-camera-orbit", "auto 155deg 8m");
 		mv.setAttribute("interaction-prompt", "none");
 		mv.style.width = "100%";
 		mv.style.height = "100%";
