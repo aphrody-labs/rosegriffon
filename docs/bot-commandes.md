@@ -60,7 +60,7 @@ savoir lequel des deux répond.
 | `utilisateur` | `debannir` | Rend un profil banni à « member », le rôle par défaut réel | `membre`, `identifiant` |
 | `veille` | `regler` | Change la notification des posts X : salon, comptes, filtre, curseur | `actif`, `salon`, `max`, `ajouter`, `retirer`, `exclure`, `inclure`, `curseur` |
 
-Poids estimé : **≈ 3 933 / 8 000** (49 %).
+Poids mesuré le 29/8/2026 : **4 647 / 8 000** (58 %).
 
 #### `/gestion` — contenu éditorial, réservé au staff
 
@@ -94,7 +94,7 @@ Poids estimé : **≈ 3 933 / 8 000** (49 %).
 | `ticket` | `panneau` | Publier le panneau d'ouverture de tickets | `salon` |
 | `ticket` | `encours` | Les tickets encore ouverts, avec leur âge | — |
 
-Poids estimé : **≈ 5 364 / 8 000** (67 %) — **la racine la plus chargée du bot**, à surveiller avant tout nouvel ajout (6 groupes déjà, marge de 19 groupes avant le plafond de 25 groupes, mais plus que 2 636 caractères).
+Poids **mesuré le 29/8/2026 sur l'arbre construit** : **7 798 / 8 000** (97 %) — **la racine la plus chargée du bot, et elle est à 202 caractères de la rupture**. Le prochain groupe ou la prochaine option ajoutée ici fera échouer l'enregistrement de TOUTES les commandes du bot (`50035 APPLICATION_COMMAND_TOO_LARGE`), pas seulement la sienne. L'estimation précédente (≈ 5 364) sous-évaluait de 45 % : elle ne comptait pas les valeurs des choix. À dégonfler avant tout ajout.
 
 #### `/moderation` — pouvoirs Discord, réservé au staff
 
@@ -122,8 +122,14 @@ Poids estimé : **≈ 5 364 / 8 000** (67 %) — **la racine la plus chargée du
 | `salon` | `purger` | Supprime en masse les derniers messages (jamais au-delà de 14 jours) | `salon`, `nombre`, `auteur`, `motif` |
 | `salon` | `annoncer` | Publie un embed signé Rose Griffon dans un salon | `salon`, `titre`, `texte`, `image` |
 | `salon` | `supprimer` | Supprime définitivement un salon ou une catégorie | `salon`, `motif` |
+| `historique` | `membre` | Le dossier de modération d'un membre : décompte, gravité, journal | `membre`, `nombre` |
+| `historique` | `recentes` | Les dernières actions de modération du serveur | `nombre` |
+| `multicomptes` | `membre` | Les comptes qui ressemblent à un membre, avec le détail des indices | `membre`, `niveau` |
+| `multicomptes` | `balayage` | Tous les rapprochements du serveur, du plus fort au plus faible | `niveau`, `jours` |
+| `multicomptes` | `verdict` | Trancher une paire : même personne, ou faux positif | `compte`, `autre-compte`, `decision`, `motif` |
+| `multicomptes` | `tranchees` | Les paires déjà tranchées par le staff | — |
 
-Poids estimé : **≈ 4 941 / 8 000** (62 %).
+Poids mesuré le 29/8/2026 : **7 086 / 8 000** (89 %), dont 892 pour `multicomptes`. Marge : 914 caractères.
 
 #### `/staff` — consultation d'exploitation, ne modifie jamais rien
 
@@ -155,7 +161,7 @@ Poids estimé : **≈ 4 941 / 8 000** (62 %).
 | `web` | `google` | Recherche web, avec le moteur qui a réellement répondu | `requete`, `limite` |
 | `web` | `recon` | Diagnostic d'une page : en-têtes, technologies détectées, liens | `url` |
 
-Poids estimé : **≈ 2 743 / 8 000** (34 %).
+Poids mesuré le 29/8/2026 : **2 743 / 8 000** (34 %).
 
 #### Racines publiques (communauté, aucune écriture)
 
@@ -258,12 +264,18 @@ ce paragraphe.
 
 ### 1.4 Récapitulatif des poids (plafond Discord = 8 000 caractères/racine)
 
-| Racine | Bot | Poids estimé | % du plafond |
+Les quatre racines du bot Rose Griffon ont été **mesurées** le 29/8/2026 sur
+l'arbre réellement construit par discordx (somme des `name`, `description` et
+valeurs de choix, la métrique que Discord applique) ; les autres restent des
+estimations. L'écart est important — les estimations ne comptaient pas les
+valeurs des choix et sous-évaluaient `/gestion` de 45 %.
+
+| Racine | Bot | Poids | % du plafond |
 | --- | --- | ---: | ---: |
-| `gestion` | rg | ≈ 5 364 | **67 %** |
-| `moderation` | rg | ≈ 4 941 | **62 %** |
-| `administration` | rg | ≈ 3 933 | 49 % |
-| `staff` | rg | ≈ 2 743 | 34 % |
+| `gestion` | rg | **7 798** (mesuré) | **97 % — à 202 caractères de la rupture** |
+| `moderation` | rg | **7 086** (mesuré) | **89 %** |
+| `administration` | rg | **4 647** (mesuré) | 58 % |
+| `staff` | rg | **2 743** (mesuré) | 34 % |
 | `azalee` | azalee | ≈ 2 368 | 30 % (mais 76 % du plafond de 25 sous-commandes) |
 | `rag` | azalee | ≈ 919 | 11 % |
 | `cdn` | azalee | ≈ 852 | 11 % |

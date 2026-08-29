@@ -18,12 +18,20 @@
  * dire pourquoi. On diffère donc TOUJOURS en premier, et le refus part par
  * `editReply`.
  *
+ * ── POURQUOI `RepliableInteraction` ET NON `ChatInputCommandInteraction` ───
+ * La garde ne lit que `interaction.user.id` et répond par `lib/ui`, qui accepte
+ * déjà toute interaction répondable. Un clic sur un bouton de pagination d'une
+ * surface d'exploitation doit être gardé exactement comme la commande qui l'a
+ * produit — un `customId` est devinable, et un bouton n'hérite d'aucun droit de
+ * celui qui l'a affiché. Le type étroit obligeait à un transtypage à chaque
+ * appel depuis un bouton, c'est-à-dire à contourner la garde pour l'appeler.
+ *
  * ── POURQUOI CE FICHIER VIT SOUS `staff/` ──────────────────────────────────
  * Les deux racines de cette unité en ont besoin. Le placer dans `lib/` aurait
  * demandé d'écrire hors du périmètre de l'unité ; le dupliquer aurait garanti
  * la divergence. `administration/` l'importe donc par `../staff/garde`.
  */
-import { MessageFlags, type ChatInputCommandInteraction } from "discord.js";
+import { MessageFlags, type RepliableInteraction } from "discord.js";
 
 import { NotAdminError, requireRgAdmin, requireRgAdminStrict, type RgAdmin } from "../../lib/rbac";
 import { CronInjoignableError, cheminSocketCron } from "../../lib/cron-ipc";
@@ -39,7 +47,7 @@ export type { RgAdmin };
  * unités systemd, des ports en boucle locale, des identifiants internes. Rien
  * de tout ça n'a à rester dans l'historique d'un salon.
  */
-export async function differerEnPrive(interaction: ChatInputCommandInteraction): Promise<void> {
+export async function differerEnPrive(interaction: RepliableInteraction): Promise<void> {
 	if (!interaction.deferred && !interaction.replied) {
 		await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 	}
@@ -53,7 +61,7 @@ export async function differerEnPrive(interaction: ChatInputCommandInteraction):
  *          revenir.
  */
 export async function exigerDroits(
-	interaction: ChatInputCommandInteraction,
+	interaction: RepliableInteraction,
 	options: { strict?: boolean } = {}
 ): Promise<RgAdmin | null> {
 	try {

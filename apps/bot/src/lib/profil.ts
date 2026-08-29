@@ -285,6 +285,7 @@ const MODULES_RG = [
 	"commands/administration/equipe.ts",
 	"commands/administration/evenement.ts",
 	"commands/administration/moderation.ts",
+	"commands/administration/multicomptes.ts",
 	"commands/administration/reglages.ts",
 	"commands/administration/role.ts",
 	"commands/administration/salon.ts",
