@@ -55,11 +55,13 @@ import {
 	poserVerdict,
 	rapprochementsDe,
 	retirerVerdict,
+	verdictsDe,
 	VERDICTS,
 	type LigneVerdict,
 	type Verdict,
 } from "../../services/multicomptes";
 import {
+	borner,
 	bornerPage,
 	decoderEtat,
 	echapper,
@@ -86,13 +88,23 @@ const PREFIXE = "mc";
 const PAR_PAGE = 6;
 
 /**
+ * Décisions affichées par `tranchees`.
+ *
+ * Vingt tiennent dans les cinq champs de `bloc()` même quand chaque motif fait
+ * ses 400 caractères réglementaires — au-delà, `decouper` jetterait le surplus
+ * en silence, et le titre continuerait d'annoncer un total que le corps ne
+ * montre pas.
+ */
+const PAR_PAGE_TRANCHEES = 20;
+
+/**
  * Niveau retenu par défaut.
  *
  * `faible` n'est pas le défaut, et c'est une décision : sur la production du
- * 29/8/2026, le balayage complet rend 1 338 rapprochements dont 1 232 de niveau
+ * 30/8/2026, le balayage complet rend 1 048 rapprochements dont 979 de niveau
  * `faible` — deux comptes créés le même jour, rien de plus. Servir cette liste
  * en premier, c'est garantir qu'on n'ouvrira plus jamais la commande. À
- * `possible`, il en reste une centaine, c'est-à-dire une file de travail.
+ * `possible`, il en reste 69, c'est-à-dire une file de travail.
  */
 const NIVEAU_DEFAUT: Niveau = "possible";
 
@@ -336,7 +348,11 @@ export class ModerationMulticomptesCommand {
 					`${ICONES_NIVEAU[rapprochement.niveau]} ${rapprochement.score} · ${nomDe(resultat.empreintes, autre)}${marqueVerdict(verdict)}`,
 					[
 						`<@${autre}> · \`${autre}\``,
-						...rapprochement.indices.map((indice) => `${indice.icone} ${indice.detail}`),
+						// `detail` recopie des pseudos et des surnoms — donc du texte écrit
+						// par le membre examiné. Un surnom de 27 caractères suffit à poser
+						// un lien Markdown cliquable au milieu d'un rapport de modération
+						// que le staff lit comme venant du bot.
+						...rapprochement.indices.map((indice) => `${indice.icone} ${echapper(indice.detail)}`),
 						verdict?.motif ? `📝 ${echapper(verdict.motif)}` : null,
 					]
 						.filter(Boolean)
@@ -466,12 +482,33 @@ export class ModerationMulticomptesCommand {
 			if (decision === "retirer") {
 				const retire = await retirerVerdict(GUILD_ID, premier.id, second.id);
 				oublierPopulation();
+				if (retire) {
+					// Journalisé comme la POSE l'est, et pour une raison plus forte :
+					// après le `delete`, plus rien en base ne dit ce que le staff avait
+					// décidé. Annuler la décision d'un collègue est précisément ce qui
+					// doit laisser une trace — on y recopie donc le verdict effacé.
+					await logAdminAction({
+						action: "discord.multicomptes-verdict-retire",
+						adminId: admin.profileId,
+						details: {
+							autre_compte: second.id,
+							motif_efface: retire.motif,
+							pose_par: retire.parQui,
+							verdict_efface: retire.verdict,
+						},
+						discordId: interaction.user.id,
+						targetId: premier.id,
+						targetType: "discord_member",
+					});
+				}
 				await repondre(
 					interaction,
 					retire
 						? succes(
 								"Verdict retiré",
-								`La paire ${premier.displayName} ↔ ${second.displayName} redevient examinable.`
+								`La paire ${echapper(premier.displayName)} ↔ ${echapper(second.displayName)} redevient examinable.` +
+									`\nDécision effacée : ${LIBELLES_VERDICT[retire.verdict]}` +
+									(retire.motif ? ` — ${echapper(retire.motif)}` : "")
 							)
 						: vide("Aucun verdict à retirer", "Cette paire n'avait jamais été tranchée.")
 				);
@@ -512,8 +549,8 @@ export class ModerationMulticomptesCommand {
 				interaction,
 				succes(
 					LIBELLES_VERDICT[decision],
-					`${premier.displayName} ↔ ${second.displayName}` +
-						(motif ? `\n📝 ${motif}` : "") +
+					`${echapper(premier.displayName)} ↔ ${echapper(second.displayName)}` +
+						(motif ? `\n📝 ${echapper(motif)}` : "") +
 						(decision === "ecarte"
 							? "\n\nLa paire ne remontera plus dans les balayages. `verdict … retirer` annule cette décision."
 							: "\n\nCe verdict est une NOTE : il ne bannit personne et ne déclenche rien.")
@@ -531,11 +568,11 @@ export class ModerationMulticomptesCommand {
 			return;
 		}
 		try {
-			const resultat = await balayerServeur(GUILD_ID, {
-				avecTranchees: true,
-				niveauMinimum: "faible",
-			});
-			const lignes = [...resultat.verdicts.values()].toSorted(
+			// `verdictsDe` et non `balayerServeur` : cette sous-commande ne lit que la
+			// table des décisions. Passer par le balayage chargeait les 2 098 comptes,
+			// calculait 4 821 paires et 1 338 rapprochements — puis n'en gardait rien.
+			const verdicts = await verdictsDe(GUILD_ID);
+			const lignes = [...verdicts.values()].toSorted(
 				(gauche, droite) => droite.le.getTime() - gauche.le.getTime()
 			);
 			if (lignes.length === 0) {
@@ -549,6 +586,11 @@ export class ModerationMulticomptesCommand {
 				);
 				return;
 			}
+			// Le titre annonçait un total dont le corps ne montrait qu'une part : au-delà
+			// de cinq champs, `decouper` jette le reste SANS que `Fiche.tronquee` s'en
+			// aperçoive — la troncature était donc muette, sur la seule surface où une
+			// décision manquante se lit comme une décision jamais prise.
+			const montrees = lignes.slice(0, PAR_PAGE_TRANCHEES);
 			const carte = fiche({
 				description:
 					"Ce que le staff a déjà décidé. Les paires écartées ne remontent plus dans " +
@@ -557,18 +599,26 @@ export class ModerationMulticomptesCommand {
 				titre: `${lignes.length} paire(s) tranchée(s)`,
 			});
 			carte.bloc(
-				"Décisions",
-				lignes
-					.slice(0, 30)
+				montrees.length < lignes.length
+					? `Décisions — les ${montrees.length} plus récentes sur ${lignes.length}`
+					: "Décisions",
+				montrees
 					.map(
 						(ligne) =>
 							`${ligne.verdict === "confirme" ? "✔️" : "✖️"} <@${ligne.compteA}> ↔ <@${ligne.compteB}>` +
 							`${ligne.parQui ? ` · par <@${ligne.parQui}>` : ""} · ${ilYA(ligne.le)}` +
-							`${ligne.motif ? `\n   ${echapper(ligne.motif)}` : ""}`
+							`${ligne.motif ? `\n   ${borner(echapper(ligne.motif), 120)}` : ""}`
 					)
 					.join("\n"),
 				5
 			);
+			if (montrees.length < lignes.length) {
+				carte.champ(
+					"Suite",
+					`${lignes.length - montrees.length} décision(s) plus ancienne(s) non affichée(s). ` +
+						"Elles restent visibles sur la fiche de chaque membre concerné."
+				);
+			}
 			await interaction.editReply({ embeds: [piedDeCommande(carte.embed, interaction)] });
 		} catch (err) {
 			await repondre(interaction, echec("Lecture impossible", messagePanne(err)));

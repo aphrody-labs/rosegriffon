@@ -24,6 +24,17 @@
  * près. Les poids sont donc calibrés pour qu'aucun indice faible ne franchisse
  * seul le seuil de `fort`.
  *
+ * Encore faut-il que les indices soient VRAIMENT distincts. Deux pièges, tous
+ * deux relevés sur les données réelles et corrigés depuis :
+ *
+ *   - le même surnom était facturé DEUX fois (indice `surnom`, puis indice
+ *     `pseudo` qui le retrouvait comme meilleure ressemblance) — 42 points,
+ *     soit le seuil de `fort`, sur UNE seule observation ;
+ *   - les trois indices de DATE (`creation`, `arrivee`, `jeune`) décrivent le
+ *     même fait — deux personnes se sont inscrites en même temps. Ils partagent
+ *     désormais un budget (`PLAFOND_TEMPOREL`), sans quoi 92 % des
+ *     rapprochements reposaient sur eux seuls.
+ *
  * ── LE PIÈGE QUI REND CE GENRE D'OUTIL INUTILISABLE ────────────────────────
  * La fréquence. Relevé sur la production le 29/8/2026 : 25 comptes portent la
  * MÊME URL d'avatar par défaut (`/embed/avatars/1.png` — Discord en sert cinq
@@ -179,20 +190,44 @@ const SUFFIXES_DE_DOUBLE = [
  * racine de deux caractères rapprocherait la moitié du serveur.
  */
 export function racinePseudo(valeur: string | null | undefined): string {
-	let base = normaliserPseudo(valeur).replace(/\d+$/, "");
-	// Un suffixe à la fois, en boucle : `markalt2` a déjà perdu son `2`, il lui
-	// reste `alt` ; `markofficielfr` en porte deux.
+	// Le retrait de queue se fait AVANT le pliage leet, sur une chaîne seulement
+	// mise en minuscules et désaccentuée : après le pliage, un chiffre de queue
+	// n'est plus reconnaissable comme tel — `christo931` vaut `christo9ei`, qui ne
+	// finit plus par un chiffre et garderait son suffixe pour toujours.
+	let queue =
+		typeof valeur === "string"
+			? valeur
+					.normalize("NFKD")
+					.replaceAll(/[\u0300-\u036f]/g, "")
+					.toLowerCase()
+			: "";
+	// Un retrait à la fois, en boucle : `markalt2` perd d'abord son `2`, puis son
+	// `alt` ; `markofficielfr` en porte deux.
 	let coupe = true;
 	while (coupe) {
 		coupe = false;
+		const sansChiffres = queue.replace(/[^a-z0-9]*\d+[^a-z0-9]*$/, "");
+		if (sansChiffres.length > 0 && sansChiffres !== queue) {
+			queue = sansChiffres;
+			coupe = true;
+			continue;
+		}
+		const normalisee = normaliserPseudo(queue);
 		for (const suffixe of SUFFIXES_DE_DOUBLE) {
-			if (base.length > suffixe.length + 2 && base.endsWith(suffixe)) {
-				base = base.slice(0, -suffixe.length).replace(/\d+$/, "");
+			if (normalisee.length > suffixe.length + 2 && normalisee.endsWith(suffixe)) {
+				// Le suffixe est reconnu sur la forme normalisée, mais retranché de la
+				// chaîne brute — seule à porter encore les chiffres non pliés.
+				const position = queue.lastIndexOf(suffixe);
+				if (position <= 0) {
+					break;
+				}
+				queue = queue.slice(0, position);
 				coupe = true;
 				break;
 			}
 		}
 	}
+	const base = normaliserPseudo(queue).replace(/\d+$/, "");
 	const reduite = base.replaceAll(/(.)\1+/g, "$1");
 	return reduite.length >= 3 ? reduite : "";
 }
@@ -391,6 +426,23 @@ export const POIDS: Readonly<Record<CleIndice, number>> = Object.freeze({
 	simultaneite: -8,
 });
 
+/**
+ * Budget commun aux indices de DATE (`creation`, `arrivee`, `jeune`).
+ *
+ * Il vaut le seuil de « à examiner », et pas un point de plus : une cohorte
+ * d'arrivée mérite un coup d'œil, jamais l'étiquette « faisceau d'indices ».
+ * Sans plafond, leur somme atteignait 42 — le seuil de `fort` — sur deux
+ * comptes n'ayant aucun trait d'identité commun.
+ */
+export const PLAFOND_TEMPOREL = 24;
+
+/** Les indices qui ne parlent que de dates, et partagent donc un seul budget. */
+const EST_TEMPOREL: ReadonlySet<CleIndice> = new Set<CleIndice>([
+	"creation",
+	"arrivee",
+	"jeune",
+]);
+
 const ICONES_INDICE: Readonly<Record<CleIndice, string>> = Object.freeze({
 	liaison: "🔗",
 	avatar: "🖼️",
@@ -534,13 +586,23 @@ export function ecartLisible(ms: number): string {
 	return `${Math.round(absolu / JOUR)} j`;
 }
 
-/** Toutes les chaînes d'identité d'un compte, normalisées et dédoublonnées. */
-function identites(compte: EmpreinteCompte): string[] {
+/**
+ * Toutes les chaînes d'identité d'un compte, normalisées et dédoublonnées.
+ *
+ * `exclure` retire une chaîne déjà comptée ailleurs. Sans elle, deux comptes
+ * portant le MÊME surnom se voyaient facturer deux fois la même constatation —
+ * l'indice `surnom` (24) puis l'indice `pseudo` (18), qui retrouvait forcément
+ * ce surnom comme meilleure ressemblance. Total : 42, c'est-à-dire exactement
+ * le seuil de « faisceau d'indices », atteint par UNE seule observation. Or
+ * « Capitaine » ou « Coach » sont des surnoms de serveur que plusieurs membres
+ * peuvent porter sans avoir le moindre rapport.
+ */
+function identites(compte: EmpreinteCompte, exclure?: string): string[] {
 	return [
 		...new Set(
 			[compte.pseudo, compte.nomAffiche, compte.surnom]
 				.map(normaliserPseudo)
-				.filter((valeur) => valeur.length >= 3)
+				.filter((valeur) => valeur.length >= 3 && valeur !== exclure)
 		),
 	];
 }
@@ -619,7 +681,8 @@ export function comparer(
 
 	// ── Identités ────────────────────────────────────────────────────────────
 	const surnomA = normaliserPseudo(a.surnom);
-	if (surnomA.length >= 3 && surnomA === normaliserPseudo(b.surnom)) {
+	const surnomPartage = surnomA.length >= 3 && surnomA === normaliserPseudo(b.surnom);
+	if (surnomPartage) {
 		poser("surnom", POIDS.surnom, `même surnom sur le serveur (« ${a.surnom} »)`);
 	}
 
@@ -640,8 +703,11 @@ export function comparer(
 		// d'affichage de l'autre, c'est même le cas le plus fréquent.
 		let meilleure = 0;
 		let couple: [string, string] | null = null;
-		for (const gauche of identites(a)) {
-			for (const droite of identites(b)) {
+		// Le surnom déjà facturé par l'indice `surnom` est retiré des deux côtés :
+		// une même constatation ne doit peser qu'une fois.
+		const dejaCompte = surnomPartage ? surnomA : undefined;
+		for (const gauche of identites(a, dejaCompte)) {
+			for (const droite of identites(b, dejaCompte)) {
 				const score = similarite(gauche, droite);
 				if (score > meilleure) {
 					meilleure = score;
@@ -661,6 +727,34 @@ export function comparer(
 	}
 
 	// ── Dates ────────────────────────────────────────────────────────────────
+	//
+	// ⚠ CES TROIS INDICES NE SONT PAS INDÉPENDANTS, et les additionner à plein
+	// poids était le principal défaut de calibrage de ce module. Deux amis
+	// invités le même soir créent leur compte dans la même demi-heure ET
+	// rejoignent dans la même minute ET sont neufs à l'arrivée : trois indices,
+	// 42 points, c'est-à-dire « faisceau d'indices » sur deux personnes qui n'ont
+	// fait que cliquer sur la même invitation.
+	//
+	// Mesuré sur la production du 29/8/2026 : 1 234 des 1 338 rapprochements
+	// (92 %) ne reposaient QUE sur ces trois-là, dont `lord098861 ↔ ksar0075`
+	// (37 points, avatars par défaut différents, pseudos sans rapport).
+	//
+	// La cohorte d'arrivée est un CONTEXTE, pas une preuve : le budget commun la
+	// plafonne au niveau « à examiner », qu'elle ne peut plus dépasser seule.
+	let budgetTemporel = PLAFOND_TEMPOREL;
+	const poserTemporel = (cle: CleIndice, poids: number, detail: string): void => {
+		const accorde = Math.min(poids, budgetTemporel);
+		if (accorde <= 0) {
+			return;
+		}
+		budgetTemporel -= accorde;
+		poser(
+			cle,
+			accorde,
+			accorde < poids ? `${detail} — plafonné, les dates ne sont pas des indices séparés` : detail
+		);
+	};
+
 	if (creationA > 0 && creationB > 0) {
 		const ecart = creationB - creationA;
 		const poids = poidsDEcart(ecart, [
@@ -670,7 +764,7 @@ export function comparer(
 			[45 * JOUR, 4],
 		]);
 		if (poids !== null) {
-			poser("creation", poids, `comptes créés à ${ecartLisible(ecart)} d'intervalle`);
+			poserTemporel("creation", poids, `comptes créés à ${ecartLisible(ecart)} d'intervalle`);
 		}
 	}
 
@@ -683,7 +777,7 @@ export function comparer(
 			[3 * JOUR, 3],
 		]);
 		if (poids !== null) {
-			poser("arrivee", poids, `arrivés sur le serveur à ${ecartLisible(ecart)} d'intervalle`);
+			poserTemporel("arrivee", poids, `arrivés sur le serveur à ${ecartLisible(ecart)} d'intervalle`);
 		}
 	}
 
@@ -714,8 +808,16 @@ export function comparer(
 	// arrivée ALORS QU'il ressemble à un membre déjà là, il l'est beaucoup moins.
 	if (b.arriveeLe && creationB > 0) {
 		const age = b.arriveeLe.getTime() - creationB;
-		if (age >= 0 && age <= 7 * JOUR && indices.length > 0) {
-			poser("jeune", POIDS.jeune, `le compte le plus récent a rejoint ${ecartLisible(age)} après sa création`);
+		// Il faut un indice d'IDENTITÉ, pas seulement une date : « créé la veille
+		// de son arrivée » décrit la moitié des nouveaux membres d'un serveur, et
+		// l'accoler à « arrivé le même jour qu'un autre » ne dit rien de plus que
+		// « deux personnes se sont inscrites en même temps ».
+		if (age >= 0 && age <= 7 * JOUR && indices.some((indice) => !EST_TEMPOREL.has(indice.cle))) {
+			poserTemporel(
+				"jeune",
+				POIDS.jeune,
+				`le compte le plus récent a rejoint ${ecartLisible(age)} après sa création`
+			);
 		}
 	}
 
@@ -988,8 +1090,17 @@ export function libelleBalayage(balayage: Balayage): string {
 	if (balayage.rapprochements.length === 0) {
 		return `${balayage.comptes} comptes examinés — aucun rapprochement au-dessus du seuil.`;
 	}
+	// Le décompte est refait SUR LA LISTE, jamais lu dans `parNiveau` : un
+	// appelant qui filtre les rapprochements (`balayerServeur` le fait pour
+	// l'option `jours`) laisserait sinon la phrase décrire une liste qu'il ne
+	// montre pas — « 32 rapprochements — 3 faisceaux » sous une page qui n'en
+	// contient aucun.
+	const compte = new Map<Niveau, number>(NIVEAUX.map((niveau) => [niveau, 0]));
+	for (const rapprochement of balayage.rapprochements) {
+		compte.set(rapprochement.niveau, (compte.get(rapprochement.niveau) ?? 0) + 1);
+	}
 	const morceaux = NIVEAUX.toReversed()
-		.filter((niveau) => balayage.parNiveau[niveau] > 0)
-		.map((niveau) => `${balayage.parNiveau[niveau]} ${LIBELLES_NIVEAU[niveau].toLowerCase()}`);
+		.filter((niveau) => (compte.get(niveau) ?? 0) > 0)
+		.map((niveau) => `${compte.get(niveau)} ${LIBELLES_NIVEAU[niveau].toLowerCase()}`);
 	return `${balayage.comptes} comptes · ${balayage.rapprochements.length} rapprochements — ${morceaux.join(", ")}.`;
 }
