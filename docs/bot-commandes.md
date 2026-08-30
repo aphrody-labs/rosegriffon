@@ -276,6 +276,36 @@ valeurs des choix et sous-évaluaient `/gestion` de 45 %.
 | `moderation` | rg | **7 086** (mesuré) | **89 %** |
 | `administration` | rg | **4 647** (mesuré) | 58 % |
 | `staff` | rg | **2 743** (mesuré) | 34 % |
+
+Pour remesurer avant d'ajouter quoi que ce soit (depuis `apps/bot`) :
+
+```ts
+// bun -e '...' — construit l'arbre réel et applique la métrique de Discord
+import "reflect-metadata";
+const { PROFILS } = await import("./src/lib/profil.ts");
+for (const m of PROFILS.rg.modules) await import(`./src/${m}`);
+const { MetadataStorage } = await import("@rpbey/discordx");
+await MetadataStorage.instance.build();
+function poids(n) {
+  if (!n || typeof n !== "object") return 0;
+  let t = 0;
+  for (const [k, v] of Object.entries(n)) {
+    if ((k === "name" || k === "description" || k === "value") && typeof v === "string") t += v.length;
+    else if (k.endsWith("_localizations")) continue;
+    else if (Array.isArray(v)) for (const e of v) t += poids(e);
+    else if (v && typeof v === "object") t += poids(v);
+  }
+  return t;
+}
+for (const c of MetadataStorage.instance.applicationCommands) {
+  const t = poids(c.toJSON());
+  if (t > 3000) console.log(String(t).padStart(5), "/" + c.name, t > 8000 ? "⚠" : "");
+}
+```
+
+⚠ Ne PAS mesurer `JSON.stringify(c.toJSON()).length` : le JSON brut compte les
+clés et la structure, et rend 26 672 pour `/gestion` — trois fois la vraie
+valeur. Discord ne compte que les `name`, `description` et valeurs de choix.
 | `azalee` | azalee | ≈ 2 368 | 30 % (mais 76 % du plafond de 25 sous-commandes) |
 | `rag` | azalee | ≈ 919 | 11 % |
 | `cdn` | azalee | ≈ 852 | 11 % |
