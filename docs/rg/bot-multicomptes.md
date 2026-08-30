@@ -26,17 +26,25 @@ n'a pas de colonne `guild_id`, elle ne décrit que cette communauté.
 
 | Indice | Poids | Ce qu'il constate |
 | --- | --- | --- |
-| 🔗 Même compte du site | 70 | Deux comptes Discord rattachés au même profil, courriel, Steam ou Patreon. **Ce n'est pas une ressemblance** : la personne l'a établi elle-même en se connectant. |
+| 🔗 Même compte du site | 70 | Deux comptes Discord rattachés au même profil, courriel, Steam ou Patreon. **Ce n'est pas une ressemblance** : la personne l'a établi elle-même en se connectant. Mais c'est aussi le plus rare — 16 membres sur 2 079 portent une liaison exploitable (voir *Limites*). |
 | 🖼️ Même avatar | 34 | Même condensat d'image — donc le même fichier téléversé. Dégressif : partagé par huit comptes, il ne vaut presque plus rien. |
 | 🏷️ Même surnom | 24 | Même surnom posé sur le serveur. |
 | 🔁 Relève | 24 | Un compte part, l'autre arrive dans la foulée. Le motif du contournement de sanction. |
 | 🔤 Même racine de pseudo | 22 | `markevans` et `markevans_alt2` tombent sur la même racine. Dégressif aussi. |
 | 🔤 Pseudos voisins | 18 | Ressemblance entre toutes les identités (pseudo, nom d'affichage, surnom) des deux comptes. |
-| 🕰️ Activités alternées | 18 | Jamais actifs dans le même créneau de dix minutes, alors qu'ils écrivent dans les mêmes salons. |
+| 🕰️ Activités alternées | 18 | Jamais actifs dans le même créneau de dix minutes, alors qu'ils écrivent dans les mêmes salons. **Ne se déclenche pas encore** : l'archive manque de matière (voir *Limites*). |
 | 🥚 Créations rapprochées | 18 | Comptes créés à quelques heures d'intervalle (date lue dans le flocon). |
 | 🚪 Arrivées rapprochées | 16 | Arrivés sur le serveur à quelques minutes d'intervalle. |
-| 🌱 Compte neuf | 8 | Le plus récent a rejoint moins d'une semaine après sa création. Ne compte qu'en présence d'un autre indice. |
+| 🌱 Compte neuf | 8 | Le plus récent a rejoint moins d'une semaine après sa création. Exige un indice **d'identité** à côté : « créé la veille de son arrivée » décrit la moitié des nouveaux membres. |
 | 👥 Activités simultanées | −8 | Souvent actifs en même temps. **Ne disculpe pas** — on tient très bien deux comptes sur deux appareils. |
+
+**Les trois indices de date partagent un budget de 24 points** — le seuil de
+« à examiner », et pas un de plus. Ils ne sont pas indépendants : deux amis
+invités le même soir créent leur compte dans la même demi-heure, rejoignent
+dans la même minute et sont neufs à l'arrivée. Sans ce plafond, cela faisait
+42 points, c'est-à-dire « faisceau d'indices » sur deux personnes qui ont
+cliqué sur la même invitation — et 92 % des rapprochements reposaient sur ces
+trois-là seuls. Une cohorte d'arrivée est un contexte, pas une preuve.
 
 Le score est la somme des poids, et le niveau en découle :
 
@@ -47,8 +55,10 @@ Le score est la somme des poids, et le niveau en découle :
 | 🟨 À examiner | 24 | La valeur par défaut du balayage. |
 | ⬜ Coïncidence | 12 | Deux comptes créés le même jour, rien de plus. |
 
-**Aucun indice observable n'atteint seul le seuil de « faisceau ».** C'est le
-calibrage, et `lib/multicomptes.test.ts` le vérifie.
+**Aucun indice observable n'atteint seul le seuil de « faisceau »**, et aucune
+constatation n'est facturée deux fois — un surnom partagé ne peut pas compter à
+la fois comme « même surnom » et comme « pseudos voisins ». C'est le calibrage,
+et `lib/multicomptes.test.ts` le verrouille.
 
 ## Ce qui a été refusé
 
@@ -101,16 +111,37 @@ Le balayage ne compare pas tout avec tout : 2 098 membres feraient 2,2 millions
 de paires. Les candidats sont fabriqués par regroupement (même avatar, même
 racine, même préfixe, même jour de création ou d'arrivée, même liaison), et une
 grappe trop large est ignorée — un préfixe de quatre lettres partagé par treize
-comptes ne dit rien. **Mesuré sur la production du 29/8/2026 : 4 821 paires
-examinées, 450 ms à froid, 207 ms sur le cliché.**
+comptes ne dit rien.
+
+**Mesuré sur la production du 30/8/2026 :** 2 079 comptes, 4 824 paires
+examinées, 469 ms à froid et 207 ms sur le cliché. 1 048 rapprochements —
+1 rattachement établi, 2 faisceaux, 66 à examiner, le reste en coïncidences.
+Déclenchements par indice : `creation` 781, `arrivee` 290, `pseudo` 59,
+`avatar` 36, `jeune` 35, `racine` 23, `releve` 4.
+
+⚠ **Un piège qui coûte cher, et qui ne se voit pas.** La normalisation plie les
+chiffres en lettres (`m4rk` → `mark`). Retirer les chiffres de queue APRÈS ce
+pliage ne retire rien : `christo931` vaut déjà `christo9ei`, qui ne finit plus
+par un chiffre. C'était le cas de 94 % des pseudos à suffixe numérique, et
+l'indice `racine` ne se déclenchait que 4 fois au lieu de 23. Le retrait de
+queue se fait donc sur la chaîne NON pliée. Le test qui aurait dû l'attraper ne
+le voyait pas : son seul cas était `MarkEvans_alt2`, et `2` est l'unique chiffre
+absent de la table de pliage.
 
 ## Limites connues
 
-- `discord_messages` ne couvre que les salons suivis et 254 auteurs sur 2 098 :
-  l'indice temporel ne joue que pour les membres réguliers, et le module exige un
-  minimum d'activité **des deux côtés** avant d'en conclure quoi que ce soit.
-- Le rattachement déclaré ne couvre que les comptes liés au site — 7 par Better
-  Auth, ~1 836 par `profiles.discord_id`.
+- **L'indice « activités alternées » ne se déclenche aujourd'hui jamais.** Il
+  n'est pas faux, il manque de matière : `discord_messages` ne couvre que les
+  salons suivis, 50 auteurs seulement franchissent le minimum de 25 créneaux, et
+  sur les 1 048 rapprochements une seule paire a les deux comptes assez actifs —
+  sans salon commun. Il se réveillera quand l'archive s'étoffera ; d'ici là, ne
+  pas le compter dans la couverture.
+- **Le rattachement déclaré est cent fois plus étroit qu'il n'y paraît.** 1 816
+  profils portent un `discord_id`, mais la liaison exige aussi un courriel ou un
+  `patreon_id`, et `profiles.email` est presque toujours NULL : **16 membres sur
+  2 079** portent une liaison, et aucune paire du balayage n'en porte
+  aujourd'hui. C'est l'indice le plus lourd du module et le plus rare — ne pas
+  le lire comme une couverture large.
 - `discord_members` est alimentée par `rg-cron` : un membre arrivé dans la
   demi-heure peut ne pas encore y figurer.
 - Il n'existe **pas** d'alerte à l'arrivée. Elle demanderait un salon de veille

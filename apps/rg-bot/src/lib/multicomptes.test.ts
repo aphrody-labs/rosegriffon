@@ -136,6 +136,23 @@ describe("racinePseudo", () => {
 		expect(racinePseudo("m4rrrrk3vans")).toBe("markevans");
 	});
 
+	test("retire les chiffres de queue AVANT de les plier en lettres", () => {
+		// Le piège : `normaliserPseudo` plie 0,1,3,4,5,7,8 en lettres. Si le retrait
+		// des chiffres de queue passe APRÈS, il ne trouve plus de chiffre —
+		// `christo931` vaut déjà `christo9ei`. Mesuré sur la production du
+		// 29/8/2026 : 94 % des pseudos à suffixe numérique gardaient leur suffixe,
+		// et l'indice `racine` ne se déclenchait que 4 fois sur 1 338
+		// rapprochements au lieu de 23.
+		//
+		// `MarkEvans_alt2` seul ne voit RIEN : 2 est le seul chiffre absent de la
+		// table « leet ». Il faut des cas avec 3, 0, 1, 5…
+		expect(racinePseudo("christo931")).toBe(racinePseudo("christo"));
+		expect(racinePseudo("markevans3")).toBe(racinePseudo("markevans10"));
+		expect(racinePseudo("rudy5859")).toBe("rudy");
+		expect(racinePseudo("theo07142")).toBe(racinePseudo("theo0005"));
+		expect(racinePseudo("shadow12_70")).toBe(racinePseudo("shadow234314"));
+	});
+
 	test("refuse une racine trop courte pour discriminer", () => {
 		// « xx » rapprocherait la moitié du serveur.
 		expect(racinePseudo("xx")).toBe("");
@@ -250,6 +267,58 @@ describe("comparer — ce qui NE DOIT PAS rapprocher", () => {
 		});
 		const grappeDeHuit = comparer(a, b, { tailleGrappeAvatar: 8 });
 		expect(grappeDeHuit).toBeNull();
+	});
+
+	test("un surnom partagé ne suffit pas à faire un faisceau", () => {
+		// « Capitaine », « Coach », « Manager » : des surnoms de serveur que
+		// plusieurs membres portent sans le moindre rapport. La même constatation
+		// était facturée DEUX fois — l'indice `surnom` (24) puis l'indice `pseudo`
+		// (18), qui retrouvait forcément ce surnom comme meilleure ressemblance —
+		// et atteignait 42, c'est-à-dire pile le seuil de « faisceau d'indices ».
+		const rapprochement = comparer(
+			compte({
+				discordId: flocon(new Date("2019-01-01T00:00:00Z")),
+				pseudo: "zorglubxyz",
+				surnom: "Capitaine",
+			}),
+			compte({
+				discordId: flocon(new Date("2025-01-01T00:00:00Z")),
+				pseudo: "qwertyasdf",
+				surnom: "Capitaine",
+			})
+		);
+		expect(rapprochement?.indices.map((indice) => indice.cle)).toEqual(["surnom"]);
+		expect(rapprochement?.niveau).toBe("possible");
+	});
+
+	test("les seules dates ne dépassent JAMAIS « à examiner »", () => {
+		// Deux amis invités le même soir créent leur compte dans la même
+		// demi-heure, rejoignent dans la même minute, et sont neufs à l'arrivée.
+		// Sans budget commun, cela faisait 42 points — « faisceau d'indices » sur
+		// deux personnes qui ont cliqué sur la même invitation. Cas réel :
+		// `lord098861 ↔ ksar0075`, 37 points, avatars par défaut différents et
+		// pseudos sans rapport.
+		const creation = new Date("2024-05-05T20:00:00Z");
+		const arrivee = new Date("2024-05-05T20:35:00Z");
+		const rapprochement = comparer(
+			compte({
+				arriveeLe: arrivee,
+				discordId: flocon(creation),
+				pseudo: "lordzzzqqq",
+			}),
+			compte({
+				arriveeLe: new Date(arrivee.getTime() + 60_000),
+				discordId: flocon(new Date(creation.getTime() + 32 * 60_000)),
+				pseudo: "ksarwwwvvv",
+			})
+		);
+		expect(rapprochement?.score).toBeLessThanOrEqual(24);
+		expect(rapprochement?.niveau).toBe("possible");
+		// `jeune` exige un indice d'IDENTITÉ : « créé la veille de son arrivée »
+		// décrit la moitié des nouveaux membres, et l'accoler à « arrivé le même
+		// jour » ne dit rien de plus que « deux personnes se sont inscrites en
+		// même temps ».
+		expect(rapprochement?.indices.map((indice) => indice.cle) ?? []).not.toContain("jeune");
 	});
 
 	test("une seule journée de création partagée reste une coïncidence", () => {
@@ -522,6 +591,27 @@ describe("présentation", () => {
 		expect(ecartLisible(120_000)).toBe("2 min");
 		expect(ecartLisible(3 * 3_600_000)).toBe("3 h");
 		expect(ecartLisible(5 * JOUR)).toBe("5 j");
+	});
+
+	test("libelleBalayage décrit la liste qu'on lui donne, pas une autre", () => {
+		// `balayerServeur` filtre les rapprochements pour l'option `jours` puis
+		// rend `{...balayage, rapprochements}` : `parNiveau` restait celui de la
+		// liste NON filtrée, et l'embed affichait « 32 rapprochements — 3 faisceaux »
+		// au-dessus d'une page qui n'en contenait aucun.
+		const a = compte({
+			avatar: avatar(IMAGE_B),
+			discordId: flocon(new Date("2021-05-05T00:00:00Z")),
+			pseudo: "kazemaru",
+		});
+		const b = compte({
+			avatar: avatar(IMAGE_B),
+			discordId: flocon(new Date("2026-01-30T00:00:00Z")),
+			pseudo: "kazemaru_alt",
+		});
+		const balayage = balayer([a, b]);
+		expect(balayage.rapprochements.length).toBe(1);
+		const filtre = { ...balayage, rapprochements: [] };
+		expect(libelleBalayage(filtre)).toContain("aucun rapprochement");
 	});
 
 	test("libelleBalayage ne suggère aucune sanction", () => {

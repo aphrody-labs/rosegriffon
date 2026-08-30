@@ -18,8 +18,14 @@
  *     conclure quoi que ce soit (cf. `ActiviteCroisee` et son garde-fou).
  *  3. `account` (Better Auth) — les rattachements DÉCLARÉS. Sept liaisons
  *     Discord seulement, mais ce sont les seules certitudes du module.
- *  4. `profiles` — les mêmes rattachements pour les 1 836 profils qui portent
- *     un `discord_id` sans être passés par Better Auth.
+ *  4. `profiles` — les mêmes rattachements pour les profils du site qui n'ont
+ *     pas d'entrée Better Auth. 1 816 portent un `discord_id`, mais la
+ *     jointure exige AUSSI un courriel ou un `patreon_id`, et `email` y est
+ *     presque toujours NULL : la branche rattache 14 membres, pas 1 816.
+ *     Toutes sources confondues, 16 membres sur 2 079 portent une liaison,
+ *     et un balayage complet n'en fait aujourd'hui ressortir aucune paire.
+ *     C'est l'indice le plus lourd du module (70 points, sans plafond) et
+ *     de loin le plus rare — ne pas le lire comme une couverture large.
  *
  * ── AUCUNE DONNÉE PERSONNELLE NE SORT D'ICI ────────────────────────────────
  * Les liaisons sont des empreintes opaques : `courriel:<md5>`, jamais l'adresse.
@@ -81,8 +87,9 @@ const REQUETE_MEMBRES = `
 		  join "user" u on u.id = a.user_id
 		 where a.provider_id = 'discord' and u.steam_id is not null
 		union all
-		-- Les 1 836 profils du site qui portent un discord_id sans passer par
-		-- Better Auth : sans eux, le rattachement ne couvrirait que 7 comptes.
+		-- Les profils du site qui portent un discord_id sans passer par Better
+		-- Auth. 1 816 en portent un, mais seuls 16 ont aussi un courriel : la
+		-- branche fait passer le rattachement de 5 à 16 membres liés, pas à 1 816.
 		select p.discord_id, 'courriel:' || md5(lower(p.email))
 		  from profiles p
 		 where p.discord_id is not null and coalesce(p.email, '') <> ''
@@ -300,15 +307,46 @@ export async function poserVerdict(entree: {
 	`;
 }
 
-/** Retire un verdict — la paire redevient examinable. */
-export async function retirerVerdict(guildId: string, a: string, b: string): Promise<boolean> {
+/**
+ * Retire un verdict — la paire redevient examinable.
+ *
+ * Rend la ligne SUPPRIMÉE, et pas un simple booléen : c'est la seule occasion
+ * de la journaliser. Une fois le `delete` passé, plus personne ne peut dire ce
+ * que le staff avait décidé ni pourquoi — or annuler la décision d'un collègue
+ * est exactement ce qui doit laisser une trace.
+ */
+export async function retirerVerdict(
+	guildId: string,
+	a: string,
+	b: string
+): Promise<LigneVerdict | null> {
 	const [compteA, compteB] = a < b ? [a, b] : [b, a];
-	const lignes = await sql<Array<{ compte_a: string }>>`
+	const lignes = await sql<
+		Array<{
+			compte_a: string;
+			compte_b: string;
+			verdict: Verdict;
+			motif: string | null;
+			par_qui: string | null;
+			maj_le: Date;
+		}>
+	>`
 		delete from bot_multicomptes_verdicts
 		 where guild_id = ${guildId} and compte_a = ${compteA} and compte_b = ${compteB}
-		returning compte_a
+		returning compte_a, compte_b, verdict, motif, par_qui, maj_le
 	`;
-	return lignes.length > 0;
+	const ligne = lignes[0];
+	if (!ligne) {
+		return null;
+	}
+	return {
+		compteA: ligne.compte_a,
+		compteB: ligne.compte_b,
+		le: new Date(ligne.maj_le),
+		motif: ligne.motif,
+		parQui: ligne.par_qui,
+		verdict: ligne.verdict,
+	};
 }
 
 // ─── Le balayage, avec son cache ────────────────────────────────────────────
