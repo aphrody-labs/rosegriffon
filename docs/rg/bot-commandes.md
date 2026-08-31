@@ -48,6 +48,7 @@ savoir lequel des deux répond.
 | `equipe` | `activer` | Affiche ou retire un membre du site, sans rien supprimer | `membre`, `actif` |
 | `equipe` | `supprimer` | SUPPRIME définitivement un membre (confirmation, journalisé) | `membre` |
 | `equipe` | `photos` | Reprend les avatars Discord des membres actifs qui en ont un | — |
+| `journal` | `salon` | Choisir le salon du journal de modération (vide = ne rien publier) | `salon` |
 | `reglages` | `liste` | Toutes les clés de réglage, avec leur rôle | — |
 | `reglages` | `lire` | Valeur exacte d'une clé, telle qu'elle est stockée | `clef` |
 | `reglages` | `ecrire` | Remplace la valeur d'une clé (rôle admin, destructif, tracé) | `clef`, `valeur`, `description`, `creer` |
@@ -264,7 +265,7 @@ ce paragraphe.
 
 ### 1.4 Récapitulatif des poids (plafond Discord = 8 000 caractères/racine)
 
-Les quatre racines du bot Rose Griffon ont été **mesurées** le 29/8/2026 sur
+Les quatre racines du bot Rose Griffon ont été **mesurées** le 31/8/2026 sur
 l'arbre réellement construit par discordx (somme des `name`, `description` et
 valeurs de choix, la métrique que Discord applique) ; les autres restent des
 estimations. L'écart est important — les estimations ne comptaient pas les
@@ -274,7 +275,7 @@ valeurs des choix et sous-évaluaient `/gestion` de 45 %.
 | --- | --- | ---: | ---: |
 | `gestion` | rg | **7 798** (mesuré) | **97 % — à 202 caractères de la rupture** |
 | `moderation` | rg | **7 086** (mesuré) | **89 %** |
-| `administration` | rg | **4 647** (mesuré) | 58 % |
+| `administration` | rg | **4 839** (mesuré) | 60 % |
 | `staff` | rg | **2 743** (mesuré) | 34 % |
 
 Pour remesurer avant d'ajouter quoi que ce soit (depuis `apps/bot`) :
@@ -325,12 +326,15 @@ Estimation, pas une valeur renvoyée par l'API ; marge de quelques dizaines de
 caractères possible (localisations non utilisées ici, donc pas de charge
 supplémentaire de ce côté).
 
-**Aucune racine n'est en danger immédiat**, mais **`/gestion` (67 %) est
-celle à surveiller** : c'est déjà la racine à 6 groupes (le plus grand nombre
-avec `/staff` et `/administration`), et c'est celle qui a reçu le plus
-d'ajouts récents (`niveaux`, `ticket`, `sondage` dans les dernières
-semaines). Un septième groupe de taille moyenne (~700-1 000 caractères, la
-taille courante d'un groupe à 4-5 sous-commandes) la ferait dépasser 75 %.
+**`/gestion` (97 %) n'a plus que 202 caractères de marge** : c'est la racine
+à neuf groupes, et le moindre ajout — un groupe, une option, une description
+reformulée — y ferait échouer l'enregistrement de TOUTES les commandes du bot
+(`50035`), pas seulement le sien. Rien ne doit plus y entrer sans l'avoir
+dégonflée d'abord (sortir `stream`, 1 535, ou `evenement`, 1 176, vers une
+racine dédiée). Les ajouts vont donc sous `/administration` (3 161 de marge),
+comme `journal` le 31/8/2026 — et `/moderation`, malgré ses 914 caractères
+libres, refuse un second groupe nommé `moderation` : ce serait un doublon de
+nom, pas un dépassement, donc invisible dans un calcul de budget.
 
 ---
 
