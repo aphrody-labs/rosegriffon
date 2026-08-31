@@ -77,6 +77,42 @@ async function syncUserImage(discordId: string, avatarUrl: string | null): Promi
   `;
 }
 
+/**
+ * Propage l'avatar Discord jusqu'à `profiles.avatar_url`.
+ *
+ * ── LA TABLE QUE LA SYNCHRO OUBLIAIT ───────────────────────────────────────
+ * La synchronisation écrivait `discord_members.avatar_url` et `"user".image`,
+ * jamais `profiles.avatar_url` — or c'est CETTE colonne que le site affiche :
+ * page de profil publique, commentaires, annuaire de la communauté, tableau de
+ * bord. Résultat, la photo posée à l'inscription ne bougeait plus jamais.
+ * Relevé le 31/8/2026 : 17 comptes montraient encore un avatar périmé, dont
+ * des comptes actifs qui avaient changé le leur depuis des mois.
+ *
+ * ── LA GARDE N'EST PAS UNE PRÉCAUTION, C'EST LA CONDITION ──────────────────
+ * `/dashboard/account` laisse chacun TÉLÉVERSER sa photo (elle part sur notre
+ * stockage), et onze comptes portent l'avatar de leur fournisseur d'origine
+ * (Google, Twitch). Écraser sans condition remplacerait ces choix par l'avatar
+ * Discord à la première synchronisation — une perte silencieuse, et impossible
+ * à distinguer d'un bug. On ne remplace donc QUE ce que Discord avait posé, ou
+ * rien du tout.
+ */
+async function syncProfileAvatar(discordId: string, avatarUrl: string | null): Promise<void> {
+	if (!avatarUrl) return;
+	await sql`
+    UPDATE profiles
+    SET avatar_url = ${avatarUrl}, updated_at = NOW()
+    WHERE discord_id = ${discordId}
+      AND avatar_url IS DISTINCT FROM ${avatarUrl}
+      AND (avatar_url IS NULL OR avatar_url LIKE '%cdn.discordapp.com%')
+  `;
+}
+
+/** Les trois tables où vit une photo de profil, mises à jour ensemble. */
+async function syncAvatars(discordId: string, avatarUrl: string | null): Promise<void> {
+	await syncUserImage(discordId, avatarUrl);
+	await syncProfileAvatar(discordId, avatarUrl);
+}
+
 export interface SyncReport {
 	fetched: number;
 	upserted: number;
@@ -94,7 +130,7 @@ export async function syncAllMembers(guild: Guild): Promise<SyncReport> {
 		try {
 			const row = memberToRow(member);
 			await upsertRow(row);
-			await syncUserImage(row.discord_id, row.avatar_url);
+			await syncAvatars(row.discord_id, row.avatar_url);
 			upserted++;
 		} catch (err) {
 			errors.push({
@@ -115,7 +151,7 @@ export async function syncAllMembers(guild: Guild): Promise<SyncReport> {
 export async function syncOneMember(member: GuildMember): Promise<void> {
 	const row = memberToRow(member);
 	await upsertRow(row);
-	await syncUserImage(row.discord_id, row.avatar_url);
+	await syncAvatars(row.discord_id, row.avatar_url);
 }
 
 export async function syncOneUser(user: User, guild: Guild): Promise<void> {
@@ -134,5 +170,5 @@ export async function syncOneUser(user: User, guild: Guild): Promise<void> {
         updated_at = NOW()
     WHERE discord_id = ${user.id}
   `;
-	await syncUserImage(user.id, resolveUserAvatarUrl(user));
+	await syncAvatars(user.id, resolveUserAvatarUrl(user));
 }

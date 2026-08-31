@@ -2,10 +2,11 @@
  * Sync des avatars Discord pour les `team_members` du website.
  *
  * Ce service complète `syncMembers.ts` (qui ne touche que `discord_members`)
- * en propageant les changements d'avatar aux 3 tables impactées :
+ * en propageant les changements d'avatar aux 4 tables impactées :
  *   - team_members.image_url
  *   - discord_members (upsert)
  *   - "user".image (Better Auth, via account bridge)
+ *   - profiles.avatar_url (ce que le site affiche), sauf photo choisie à la main
  *
  * Utilise `client.users.fetch(id)` de discord.js qui gère le rate-limit nativement.
  */
@@ -71,6 +72,18 @@ export async function syncStaffPhotos(client: Client): Promise<StaffPhotoSyncRep
         WHERE a.user_id = u.id
           AND a.provider_id = 'discord'
           AND a.account_id = ${row.discord_user_id}
+      `;
+			// Quatrième table, et la seule que le SITE affiche vraiment (profil
+			// public, commentaires, annuaire). Même garde que `syncMembers.ts` : on
+			// ne remplace que ce que Discord avait posé — jamais une photo
+			// téléversée depuis `/dashboard/account`, jamais l'avatar Google ou
+			// Twitch d'un compte lié autrement.
+			await sql`
+        UPDATE profiles
+        SET avatar_url = ${newWebp}, updated_at = NOW()
+        WHERE discord_id = ${row.discord_user_id}
+          AND avatar_url IS DISTINCT FROM ${newWebp}
+          AND (avatar_url IS NULL OR avatar_url LIKE '%cdn.discordapp.com%')
       `;
 
 			updated++;
