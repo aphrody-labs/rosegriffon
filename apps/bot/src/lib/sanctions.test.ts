@@ -11,11 +11,14 @@ import {
 	ACTIONS_MODERATION,
 	estActionModeration,
 	iconeAction,
+	intentionAction,
 	JOURS_RECENTS,
 	libelleAction,
 	libelleResume,
+	ligneJournal,
 	poidsAction,
 	resumer,
+	type ActionJournalisee,
 	type EntreeHistorique,
 } from "./sanctions";
 
@@ -119,5 +122,82 @@ describe("résumé", () => {
 		);
 		expect(resume.total).toBe(1);
 		expect(resume.recentes).toBe(0);
+	});
+});
+
+describe("ligne de journal", () => {
+	const AVERTISSEMENT: ActionJournalisee = {
+		action: "discord.avertir",
+		cibleId: "233992655959228418",
+		cibleEtiquette: "hellsaww",
+		parQui: "531549483067244566",
+		motif: "Insultes en vocal",
+	};
+
+	test("la cible est mentionnée ET nommée ET identifiée", () => {
+		// Un pseudo change, une mention ne se résout plus quand le compte est
+		// parti : le journal se relit six mois plus tard, il lui faut les trois.
+		const ligne = ligneJournal(AVERTISSEMENT);
+		expect(ligne.description).toContain("<@233992655959228418>");
+		expect(ligne.description).toContain("hellsaww");
+		expect(ligne.description).toContain("`233992655959228418`");
+	});
+
+	test("le motif et l'auteur de la sanction sont toujours là", () => {
+		const ligne = ligneJournal(AVERTISSEMENT);
+		expect(ligne.champs[0]).toEqual({ enLigne: false, nom: "Motif", valeur: "Insultes en vocal" });
+		expect(ligne.champs[1]).toEqual({
+			enLigne: true,
+			nom: "Par",
+			valeur: "<@531549483067244566>",
+		});
+	});
+
+	test("un motif absent devient un tiret plutôt qu'un champ vide refusé par Discord", () => {
+		const ligne = ligneJournal({ ...AVERTISSEMENT, motif: null });
+		expect(ligne.champs[0].valeur).toBe("—");
+	});
+
+	test("les précisions vides sont écartées, les autres suivent dans l'ordre", () => {
+		const ligne = ligneJournal({
+			...AVERTISSEMENT,
+			precisions: [
+				null,
+				{ nom: "Durée", valeur: "1 heure" },
+				{ nom: "Compte", valeur: null },
+				{ nom: "Vide", valeur: "   " },
+				{ nom: "Message privé", valeur: "remise" },
+			],
+		});
+		expect(ligne.champs.map((c) => c.nom)).toEqual(["Motif", "Par", "Durée", "Message privé"]);
+	});
+
+	test("le titre porte le libellé et l'icône séparément — l'embed n'en ajoute pas d'autre", () => {
+		const ligne = ligneJournal(AVERTISSEMENT);
+		expect(ligne.titre).toBe(libelleAction("discord.avertir"));
+		expect(ligne.icone).toBe(iconeAction("discord.avertir"));
+	});
+
+	test("une levée se lit en vert, une sanction non", () => {
+		// Le journal se parcourt à la couleur avant de se lire : une exclusion
+		// levée affichée en rouge dirait le contraire de ce qui s'est passé.
+		expect(intentionAction("discord.lever-exclusion")).toBe("succes");
+		expect(intentionAction("discord.debannir")).toBe("succes");
+		expect(intentionAction("discord.avertir")).toBe("attention");
+		expect(intentionAction("discord.bannir")).toBe("echec");
+	});
+
+	test("chaque action consignable sait se mettre en forme", () => {
+		for (const action of ACTIONS_MODERATION) {
+			const ligne = ligneJournal({ ...AVERTISSEMENT, action });
+			expect(ligne.titre.length).toBeGreaterThan(0);
+			expect(ligne.icone.length).toBeGreaterThan(0);
+			expect(ligne.champs.length).toBeGreaterThanOrEqual(2);
+		}
+	});
+
+	test("un motif très long est borné — Discord refuse un champ de plus de 1024", () => {
+		const ligne = ligneJournal({ ...AVERTISSEMENT, motif: "x".repeat(3_000) });
+		expect(ligne.champs[0].valeur.length).toBeLessThanOrEqual(1_000);
 	});
 });

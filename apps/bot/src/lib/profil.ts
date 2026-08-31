@@ -295,6 +295,7 @@ const MODULES_RG = [
 	"commands/administration/roles.ts",
 	"commands/administration/accueil.ts",
 	"commands/administration/historique.ts",
+	"commands/administration/journal.ts",
 	"commands/administration/automod.ts",
 	"commands/administration/suggestion.ts",
 	"commands/administration/stream.ts",

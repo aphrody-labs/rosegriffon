@@ -83,6 +83,8 @@ import {
 	type SanctionNotifiee,
 } from "../../lib/discord-admin";
 import { rgEmbed, truncate } from "../../lib/embeds";
+import type { ActionModeration } from "../../lib/sanctions";
+import { publierAuJournal } from "../../services/journal-moderation";
 import { borner, echapperMarkdown, horodatageRelatif } from "../staff/format";
 import { differerEnPrive, exigerDroits, messagePanne, type RgAdmin } from "../staff/garde";
 import {
@@ -462,6 +464,66 @@ async function tracer(entree: Parameters<typeof logAdminAction>[0]): Promise<str
 	}
 }
 
+/**
+ * Consigne une action de modération — la table ET le salon, jamais l'une sans
+ * l'autre.
+ *
+ * ── POURQUOI CETTE FONCTION PLUTÔT QUE DEUX APPELS ─────────────────────────
+ * `admin_audit_log` est la SOURCE (elle se requête, elle survit à la purge d'un
+ * salon, le site la lit) ; le salon de journal en est la LECTURE, celle qui
+ * arrive au staff sans qu'il la demande. Tant que les deux étaient deux appels
+ * distincts, la sous-commande suivante n'en écrivait qu'un — c'est exactement
+ * ce qui s'est produit : six actions consignaient en base, aucune ne publiait
+ * nulle part, et le reste du staff apprenait les sanctions par la personne
+ * sanctionnée.
+ *
+ * Les trois détails communs (`etiquette`, `motif`, `guilde`) sont posés ICI :
+ * ils étaient recopiés à l'identique dans les six appels, donc oubliables un à
+ * un. Chaque appelante ne fournit plus que ce qui lui est propre.
+ *
+ * Rend `null` quand tout s'est bien passé, sinon les phrases d'alerte à
+ * afficher dans l'accusé de réception — une action déjà appliquée ne se rejoue
+ * pas, la seule chose utile est de dire ce qui n'a PAS été écrit.
+ */
+async function consigner(contexte: Contexte, entree: ActionAConsigner): Promise<string | null> {
+	const alerteAudit = await tracer({
+		adminId: contexte.admin.profileId,
+		discordId: contexte.admin.discordId,
+		action: entree.action,
+		targetType: "discord_user",
+		targetId: entree.cibleId,
+		details: {
+			etiquette: entree.cibleEtiquette,
+			motif: entree.motif,
+			guilde: contexte.guild.id,
+			...entree.details,
+		},
+	});
+	const alerteSalon = await publierAuJournal(contexte.guild.client, contexte.guild.id, {
+		action: entree.action,
+		cibleId: entree.cibleId,
+		cibleEtiquette: entree.cibleEtiquette,
+		parQui: contexte.admin.discordId,
+		motif: entree.motif,
+		precisions: entree.precisions,
+	});
+	const alertes = [alerteAudit, alerteSalon].filter((alerte): alerte is string => alerte !== null);
+	return alertes.length === 0 ? null : alertes.join("\n");
+}
+
+/** Ce qu'une sous-commande a à dire d'une action, une fois qu'elle est faite. */
+interface ActionAConsigner {
+	action: ActionModeration;
+	cibleId: string;
+	cibleEtiquette: string;
+	/** Motif saisi par le staff. `null` seulement si l'action n'en demande pas. */
+	motif: string | null;
+	/** Précisions affichées au salon : durée, purge, remise du message privé. */
+	precisions?: ReadonlyArray<{ nom: string; valeur: string | null } | null>;
+	/** Détails supplémentaires de la ligne d'audit (valeurs machine). */
+	details: Record<string, unknown>;
+}
+
 /** Ajoute le champ d'alerte du journal, quand il y a quelque chose à dire. */
 function ajouterAlerteJournal(embed: EmbedBuilder, alerte: string | null): EmbedBuilder {
 	return alerte
@@ -622,19 +684,20 @@ export class AdministrationModerationCommand {
 
 			const compte = aussiLeCompte ? await bannirLeCompte(contexte.admin, cible.id) : "non touché";
 
-			const alerteJournal = await tracer({
-				adminId: contexte.admin.profileId,
-				discordId: contexte.admin.discordId,
+			const alerteJournal = await consigner(contexte, {
 				action: "discord.bannir",
-				targetType: "discord_user",
-				targetId: cible.id,
+				cibleId: cible.id,
+				cibleEtiquette: cible.etiquette,
+				motif,
+				precisions: [
+					{ nom: "Messages effacés", valeur: jours === 0 ? "aucun" : `les ${jours} derniers jours` },
+					{ nom: "Message privé", valeur: remise },
+					{ nom: "Compte rosegriffon.fr", valeur: aussiLeCompte ? "banni également" : null },
+				],
 				details: {
-					etiquette: cible.etiquette,
-					motif,
 					jours_messages: jours,
 					etait_membre: cible.membre !== null,
 					aussi_le_compte: aussiLeCompte === true,
-					guilde: contexte.guild.id,
 				},
 			});
 
@@ -740,18 +803,13 @@ export class AdministrationModerationCommand {
 			await contexte.guild.bans.remove(saisie, motifAudit({ auteur: interaction.user.tag, motif }));
 			invalidate(clefBannis(contexte.guild.id));
 
-			const alerteJournal = await tracer({
-				adminId: contexte.admin.profileId,
-				discordId: contexte.admin.discordId,
+			const alerteJournal = await consigner(contexte, {
 				action: "discord.debannir",
-				targetType: "discord_user",
-				targetId: saisie,
-				details: {
-					etiquette,
-					motif,
-					motif_du_bannissement: motifOrigine,
-					guilde: contexte.guild.id,
-				},
+				cibleId: saisie,
+				cibleEtiquette: etiquette,
+				motif,
+				precisions: [{ nom: "Motif du bannissement levé", valeur: motifOrigine }],
+				details: { motif_du_bannissement: motifOrigine },
 			});
 
 			await interaction.editReply({
@@ -869,13 +927,13 @@ export class AdministrationModerationCommand {
 			// `GuildMember.kick(reason?: string): Promise<GuildMember>` (14.26.4).
 			await cible.membre.kick(motifAudit({ auteur: interaction.user.tag, motif }));
 
-			const alerteJournal = await tracer({
-				adminId: contexte.admin.profileId,
-				discordId: contexte.admin.discordId,
+			const alerteJournal = await consigner(contexte, {
 				action: "discord.expulser",
-				targetType: "discord_user",
-				targetId: cible.id,
-				details: { etiquette: cible.etiquette, motif, guilde: contexte.guild.id },
+				cibleId: cible.id,
+				cibleEtiquette: cible.etiquette,
+				motif,
+				precisions: [{ nom: "Message privé", valeur: remise }],
+				details: {},
 			});
 
 			await conclure(
@@ -984,20 +1042,21 @@ export class AdministrationModerationCommand {
 				motifAudit({ auteur: interaction.user.tag, motif })
 			);
 
-			const alerteJournal = await tracer({
-				adminId: contexte.admin.profileId,
-				discordId: contexte.admin.discordId,
+			const alerteJournal = await consigner(contexte, {
 				action: "discord.exclure",
-				targetType: "discord_user",
-				targetId: cible.id,
+				cibleId: cible.id,
+				cibleEtiquette: cible.etiquette,
+				motif,
+				precisions: [
+					{ nom: "Durée", valeur: dureeLisible(millisecondes) },
+					{ nom: "Fin", valeur: horodatageRelatif(apres.communicationDisabledUntil) },
+					{ nom: "Message privé", valeur: remise },
+				],
 				details: {
-					etiquette: cible.etiquette,
-					motif,
 					duree_saisie: duree,
 					duree_ms: millisecondes,
 					fin: apres.communicationDisabledUntil?.toISOString() ?? null,
 					exclusion_precedente: exclusionEnCours?.toISOString() ?? null,
-					guilde: contexte.guild.id,
 				},
 			});
 
@@ -1088,18 +1147,13 @@ export class AdministrationModerationCommand {
 			// il n'existe pas de méthode `removeTimeout`.
 			await cible.membre.timeout(null, motifAudit({ auteur: interaction.user.tag, motif }));
 
-			const alerteJournal = await tracer({
-				adminId: contexte.admin.profileId,
-				discordId: contexte.admin.discordId,
-				action: "discord.exclusion.levee",
-				targetType: "discord_user",
-				targetId: cible.id,
-				details: {
-					etiquette: cible.etiquette,
-					motif,
-					fin_prevue: fin?.toISOString() ?? null,
-					guilde: contexte.guild.id,
-				},
+			const alerteJournal = await consigner(contexte, {
+				action: "discord.lever-exclusion",
+				cibleId: cible.id,
+				cibleEtiquette: cible.etiquette,
+				motif,
+				precisions: [{ nom: "Elle devait courir jusqu'à", valeur: horodatageRelatif(fin) }],
+				details: { fin_prevue: fin?.toISOString() ?? null },
 			});
 
 			await interaction.editReply({
@@ -1179,18 +1233,18 @@ export class AdministrationModerationCommand {
 			// remis : c'est la trace qui compte pour la suite (une récidive se juge
 			// sur l'historique), et le staff doit savoir que la personne n'a pas été
 			// prévenue.
-			const alerteJournal = await tracer({
-				adminId: contexte.admin.profileId,
-				discordId: contexte.admin.discordId,
+			const alerteJournal = await consigner(contexte, {
 				action: "discord.avertir",
-				targetType: "discord_user",
-				targetId: cible.id,
+				cibleId: cible.id,
+				cibleEtiquette: cible.etiquette,
+				motif,
+				precisions: [
+					{ nom: "Message privé", valeur: remise },
+					{ nom: "Sur le serveur", valeur: cible.membre ? null : "non — compte parti" },
+				],
 				details: {
-					etiquette: cible.etiquette,
-					motif,
 					message_prive_remis: transmis,
 					sur_le_serveur: cible.membre !== null,
-					guilde: contexte.guild.id,
 				},
 			});
 

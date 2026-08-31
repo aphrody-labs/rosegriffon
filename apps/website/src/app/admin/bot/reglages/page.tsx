@@ -13,7 +13,7 @@ export const dynamic = "force-dynamic";
 
 export const metadata = {
 	description:
-		"Niveaux, tickets, accueil, suggestions et jetons Kizuna — les réglages que le bot applique sur le serveur.",
+		"Niveaux, tickets, journal de modération, accueil, suggestions et jetons Kizuna — les réglages que le bot applique sur le serveur.",
 	title: "Réglages du bot — Administration",
 };
 

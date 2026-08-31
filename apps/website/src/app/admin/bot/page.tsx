@@ -297,7 +297,7 @@ export default async function BotDashboardPage() {
 					{sectionsIncompletes.length === 0 ? (
 						<p className="flex items-center gap-2 text-sm text-succes">
 							<CheckCircle2 className="size-4" aria-hidden />
-							Les cinq sections sont exploitables.
+							Les six sections sont exploitables.
 						</p>
 					) : (
 						<ul className="space-y-2">

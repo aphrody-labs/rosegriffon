@@ -157,6 +157,29 @@ describe("manques", () => {
 		expect(manquesParSection(doc).niveaux).toHaveLength(1);
 	});
 
+	test("le journal de modération réclame son salon tant qu'il n'en a pas", () => {
+		expect(manquesParSection(REGLAGES_DEFAUT).moderation).toEqual([
+			"le salon du journal de modération",
+		]);
+		const branche = fusionnerReglages(REGLAGES_DEFAUT, {
+			moderation: { salonJournal: "1073752409387573339" },
+		});
+		expect(manquesParSection(branche).moderation).toEqual([]);
+		// Coupé volontairement, il ne réclame plus rien : ce n'est pas une panne.
+		const coupe = fusionnerReglages(REGLAGES_DEFAUT, { moderation: { actif: false } });
+		expect(manquesParSection(coupe).moderation).toEqual([]);
+	});
+
+	test("enregistrer une autre section n'efface pas le salon du journal", () => {
+		// Le piège du `.prefault({})` : une section absente de `fusionnerReglages`
+		// est RECRÉÉE aux défauts à chaque parse — donc effacée en silence.
+		const branche = fusionnerReglages(REGLAGES_DEFAUT, {
+			moderation: { salonJournal: "1073752409387573339" },
+		});
+		const apres = fusionnerReglages(branche, { niveaux: { actif: false } });
+		expect(apres.moderation.salonJournal).toBe("1073752409387573339");
+	});
+
 	test("toutes les sections ont une entrée, même vide", () => {
 		const manques = manquesParSection(REGLAGES_DEFAUT);
 		for (const section of SECTIONS_REGLAGES) {

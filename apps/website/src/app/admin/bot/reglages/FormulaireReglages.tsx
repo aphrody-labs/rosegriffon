@@ -483,6 +483,45 @@ export function FormulaireReglages({
 				</Champ>
 			</SectionCarte>
 
+			{/* ── Modération ───────────────────────────────────────────────────── */}
+			<SectionCarte
+				section="moderation"
+				manques={manques.moderation}
+				etat={etats.moderation ?? REPOS}
+				onEnregistrer={() =>
+					enregistrer("moderation", {
+						moderation: {
+							actif: reglages.moderation.actif,
+							salonJournal: reglages.moderation.salonJournal,
+						},
+					})
+				}
+			>
+				<Interrupteur
+					id="moderation-actif"
+					libelle="Publier les sanctions dans un salon"
+					aide="Coupé, les sanctions restent consignées dans admin_audit_log — elles ne sont simplement plus publiées."
+					valeur={reglages.moderation.actif}
+					onChange={(actif) =>
+						setReglages((r) => ({ ...r, moderation: { ...r.moderation, actif } }))
+					}
+				/>
+				<Champ
+					id="moderation-salon"
+					libelle="Salon du journal de modération"
+					aide="Avertissements, exclusions, expulsions et bannissements y paraissent au moment où ils sont pris. Réserve-le au staff : il nomme les membres sanctionnés et leurs motifs."
+				>
+					<SelecteurSalon
+						id="moderation-salon"
+						options={optionsSalons}
+						valeur={reglages.moderation.salonJournal}
+						onChange={(salonJournal) =>
+							setReglages((r) => ({ ...r, moderation: { ...r.moderation, salonJournal } }))
+						}
+					/>
+				</Champ>
+			</SectionCarte>
+
 			{/* ── Accueil ──────────────────────────────────────────────────────── */}
 			<SectionCarte
 				section="accueil"
