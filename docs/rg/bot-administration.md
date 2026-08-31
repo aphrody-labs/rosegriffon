@@ -15,7 +15,7 @@ site, et **quatre pages** sous `/admin`.
 
 | Avant | Maintenant |
 | --- | --- |
-| Réglages éditables seulement par slash command | `/admin/bot/reglages` — les cinq sections, avec des noms de salons au lieu de flocons |
+| Réglages éditables seulement par slash command | `/admin/bot/reglages` — les six sections, avec des noms de salons au lieu de flocons |
 | Aucune vue de l'état des deux bots | `/admin/bot` — passerelle, latence, serveurs, mémoire, commandes |
 | Aucun inventaire des slash commands hors du code | `/admin/bot/commandes` — lu dans les processus, filtrable |
 | Classement visible seulement dans Discord, dix lignes à la fois | `/admin/bot/membres` — 283 profils, 4 tris, provenance de chaque XP |
@@ -193,7 +193,7 @@ empêché personne de poster la requête à la main.
 | --- | --- |
 | `/admin/bot` | Les deux profils (identité, uptime, latence, serveurs, mémoire), les compteurs de communauté, et ce qu'il reste à configurer |
 | `/admin/bot/membres` | Classement paginé : 4 tris, rang calculé en SQL, **provenance de chaque XP** |
-| `/admin/bot/reglages` | Les cinq sections, un bouton d'enregistrement chacune |
+| `/admin/bot/reglages` | Les six sections, un bouton d’enregistrement chacune |
 | `/admin/bot/commandes` | Catalogue filtrable par texte, profil et portée |
 | `/admin/cron` | Les 22 tâches par famille, avec leur planification et leur bouton |
 

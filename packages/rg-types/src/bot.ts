@@ -205,6 +205,29 @@ const reglagesKizuna = z
 	})
 	.prefault({});
 
+/**
+ * Journal de modération — la trace, là où le staff la lit.
+ *
+ * ── LE JOURNAL EXISTAIT DÉJÀ, PERSONNE NE POUVAIT LE LIRE ──────────────────
+ * Chaque avertissement, exclusion ou bannissement passé par le bot s'écrit dans
+ * `admin_audit_log`. C'est une table Postgres : pour savoir qu'un membre vient
+ * d'être averti, il fallait ouvrir la base — autant dire que ça n'arrivait
+ * jamais, et que le reste du staff apprenait la sanction par la personne
+ * sanctionnée. Le salon de journal ferme cette boucle : la ligne d'audit reste
+ * la source, le salon en est la lecture.
+ *
+ * `salonJournal` à `null` par défaut, comme toute publication de ce bot : rien
+ * n'est publié tant qu'un administrateur n'a pas dit où. Le défaut ne parle
+ * pas.
+ */
+const reglagesModeration = z
+	.object({
+		actif: z.boolean().default(true),
+		/** Salon où publier chaque action de modération. `null` = rien n'est publié. */
+		salonJournal: flocon.nullable().default(null),
+	})
+	.prefault({});
+
 export const SchemaReglages = z
 	.object({
 		niveaux: reglagesNiveaux,
@@ -212,15 +235,17 @@ export const SchemaReglages = z
 		kizuna: reglagesKizuna,
 		accueil: reglagesAccueil,
 		suggestions: reglagesSuggestions,
+		moderation: reglagesModeration,
 	})
 	.prefault({});
 
 export type ReglagesCommunaute = z.infer<typeof SchemaReglages>;
 
-/** Les cinq sections réglables, dans l'ordre d'affichage de l'interface. */
+/** Les six sections réglables, dans l'ordre d'affichage de l'interface. */
 export const SECTIONS_REGLAGES = [
 	"niveaux",
 	"tickets",
+	"moderation",
 	"accueil",
 	"suggestions",
 	"kizuna",
@@ -239,6 +264,10 @@ export const LIBELLES_SECTIONS: Readonly<
 	tickets: {
 		titre: "Tickets",
 		role: "Panneau d'ouverture, prise en charge et historique des tickets.",
+	},
+	moderation: {
+		titre: "Modération",
+		role: "Salon où publier les avertissements, exclusions et bannissements.",
 	},
 	accueil: {
 		titre: "Accueil",
@@ -307,7 +336,7 @@ export type ModificationReglages = {
 /**
  * Fusionne une modification partielle dans un document existant.
  *
- * Fusion PROFONDE sur les cinq sections ET sur `niveaux.gain`, superficielle
+ * Fusion PROFONDE sur les six sections ET sur `niveaux.gain`, superficielle
  * partout ailleurs : régler `niveaux.annonce` ne doit pas effacer
  * `niveaux.salonsExclus`, mais remplacer `niveaux.salonsExclus` doit bien le
  * remplacer et non l'additionner (sinon on ne pourrait jamais retirer une
@@ -333,6 +362,7 @@ export function fusionnerReglages(
 			gain: { ...actuels.niveaux.gain, ...gainModifie },
 		},
 		tickets: { ...actuels.tickets, ...modification.tickets },
+		moderation: { ...actuels.moderation, ...modification.moderation },
 	});
 }
 
@@ -387,6 +417,7 @@ export const SchemaModificationReglages = z
 		kizuna: partielSansDefauts(reglagesKizuna.unwrap()).optional(),
 		accueil: partielSansDefauts(reglagesAccueil.unwrap()).optional(),
 		suggestions: partielSansDefauts(reglagesSuggestions.unwrap()).optional(),
+		moderation: partielSansDefauts(reglagesModeration.unwrap()).optional(),
 	})
 	.strict();
 
@@ -442,8 +473,14 @@ export function manquesParSection(
 		manquePousse(suggestions, "le salon de dépôt des suggestions");
 	}
 
+	const moderation: string[] = [];
+	if (reglages.moderation.actif && !reglages.moderation.salonJournal) {
+		manquePousse(moderation, "le salon du journal de modération");
+	}
+
 	return Object.freeze({
 		niveaux,
+		moderation,
 		tickets: reglages.tickets.actif ? manquesTickets(reglages) : [],
 		accueil,
 		suggestions,
