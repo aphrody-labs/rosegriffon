@@ -552,7 +552,7 @@ d'injection pour rien.
 ## 11. Modération — sanctions, dossier, auto-modération
 
 Les sanctions existaient déjà (`bannir`, `debannir`, `expulser`, `exclure`,
-`lever-exclusion`, `avertir`), toutes consignées dans `admin_audit_log`. Deux
+`lever-exclusion`, `avertir`), toutes consignées dans `admin_audit_log`. Trois
 ajouts closent le dispositif.
 
 ### `/moderation historique` — la boucle qui n'était pas fermée
@@ -571,6 +571,35 @@ dans la gravité — on ne punit pas d'avoir été gracié.
 La commande ne **recommande aucune sanction**. « Trois avertissements ⇒
 exclusion » est une règle de communauté, pas de code : l'écrire ici la rendrait
 invisible à ceux qui l'appliquent.
+
+### `/administration journal salon` — la sanction, là où le staff la lit
+
+`admin_audit_log` est la source : elle se requête, elle survit à la purge d'un
+salon, le site la lit. Elle ne se lit pas depuis Discord — donc le reste du
+staff apprenait un avertissement par la personne avertie, deux modérateurs
+pouvaient traiter le même incident sans le savoir, et l'historique ne servait
+qu'à celui qui pensait à l'ouvrir.
+
+Chaque action de `/moderation moderation` (avertissement, exclusion, levée,
+expulsion, bannissement, débannissement) paraît désormais dans le salon réglé
+par `/administration journal salon` — sur le serveur Rose Griffon, `#💬📖〡logs`
+(`1073752409387573339`), branché le 31/8/2026. La carte porte la mention **et**
+le nom **et** l'identifiant du membre visé (un pseudo change, une mention ne se
+résout plus quand le compte est parti), le motif, l'auteur de la sanction, et
+les précisions propres à l'action — durée, messages effacés, remise du message
+privé. Les levées sont **vertes** : le journal se parcourt à la couleur avant de
+se lire.
+
+Rien n'est publié tant qu'un salon n'a pas été posé : c'est la règle
+d'activation manuelle du §3, et le réglage vit en base (`moderation.salonJournal`)
+— éditable aussi depuis `/admin/bot/reglages`. Si la publication échoue (salon
+supprimé, droits retirés), l'accusé de réception de la sanction le dit en clair
+à celui qui vient de sanctionner : une action déjà appliquée ne se rejoue pas,
+la seule chose utile est de savoir ce qui n'a PAS été écrit.
+
+⚠ Le salon nomme des membres et leurs motifs : il se réserve au staff. Sur le
+serveur Rose Griffon, `@everyone` n'y voit rien, seuls les Modérateurs y ont
+accès.
 
 ### `/moderation automod` — celle de Discord, pas la nôtre
 
