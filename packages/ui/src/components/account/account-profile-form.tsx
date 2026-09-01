@@ -1,7 +1,16 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { AtSign, Check, Crown, Heart, ShieldCheck, Sparkles, Star } from "lucide-react";
+import {
+	AtSign,
+	Check,
+	Crown,
+	Heart,
+	Image as ImageIcon,
+	ShieldCheck,
+	Sparkles,
+	Star,
+} from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -21,6 +30,7 @@ import {
 	FormMessage,
 } from "../form";
 import { Input } from "../input";
+import { BannerPicker } from "./banner-picker";
 import { Textarea } from "../textarea";
 import type { AccountActionResult, AccountProfileValues } from "./types";
 
@@ -72,26 +82,26 @@ export const AVAILABLE_BADGES = [
 
 export const MAX_BADGES = 3;
 
-const PRESET_BANNERS = [
-	{
-		className: "bg-linear-to-r from-rg-brique via-rg-brique-clair to-rg-brique",
-		id: "none",
-		name: "Aura Rose Griffon (défaut)",
-		url: "",
-	},
-	{
-		className: "",
-		id: "griffon_one",
-		name: "Rose Griffon officiel",
-		url: "/images/banners/griffon_banner_one.png",
-	},
-	{
-		className: "",
-		id: "lightning_two",
-		name: "Foudre Inazuma",
-		url: "/images/banners/lightning_banner_two.png",
-	},
-] as const;
+/**
+ * La bannière par défaut : un dégradé de la charte, et rien d'autre.
+ *
+ * Les deux vignettes qui l'accompagnaient étaient des images générées par IA
+ * (`/images/banners/griffon_banner_one.png`, `lightning_banner_two.png`) : un
+ * griffon dans un cadre dans un cadre, un stade au texte illisible, et aucune
+ * des deux ne montrant le jeu. Elles ont été retirées le 31/8/2026 — le CDN
+ * sert les vraies illustrations d'Inazuma Eleven: Victory Road, décodées en
+ * direct depuis les archives, et c'est ce que propose désormais la popup.
+ */
+const BANNIERE_DEFAUT = {
+	className: "bg-linear-to-r from-rg-brique via-rg-brique-clair to-rg-brique",
+	name: "Aura Rose Griffon (défaut)",
+	url: "",
+} as const;
+
+/** Une bannière venue du CDN se reconnaît à son hôte, pas à une liste en dur. */
+function estIllustrationCdn(url: string | null | undefined): boolean {
+	return typeof url === "string" && url.includes("cdn.rosegriffon.fr");
+}
 
 const BIO_MAX = 500;
 
@@ -127,9 +137,13 @@ export function AccountProfileForm({
 	showCosmetics = false,
 	onSubmit,
 }: AccountProfileFormProps) {
+	// « URL personnalisée » ne s'ouvre que si la bannière posée n'est ni le
+	// défaut ni une illustration du CDN — sinon le champ libre s'afficherait
+	// pré-rempli à chaque visite de quelqu'un qui a choisi dans la galerie.
 	const [customBanner, setCustomBanner] = useState(
-		Boolean(values.banner_url) && !PRESET_BANNERS.some((b) => b.url === values.banner_url)
+		Boolean(values.banner_url) && !estIllustrationCdn(values.banner_url)
 	);
+	const [galerieOuverte, setGalerieOuverte] = useState(false);
 
 	const form = useForm({
 		defaultValues: values,
@@ -305,63 +319,75 @@ export function AccountProfileForm({
 										</p>
 									</div>
 
-									<div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-										{PRESET_BANNERS.map((preset) => {
-											const selected = !customBanner && bannerUrl === preset.url;
-											return (
-												<button
-													type="button"
-													key={preset.id}
-													aria-pressed={selected}
-													onClick={() => {
-														setCustomBanner(false);
-														form.setValue("banner_url", preset.url, { shouldDirty: true });
-													}}
-													className={cn(
-														"group relative h-20 overflow-hidden rounded-xl border-2 text-left transition-colors",
-														selected
-															? "border-primary ring-2 ring-ring/30"
-															: "border-border hover:border-muted-foreground/50"
-													)}
-												>
-													{preset.url ? (
-														// eslint-disable-next-line @next/next/no-img-element
-														<img
-															src={preset.url}
-															alt=""
-															className="absolute inset-0 size-full object-cover"
-														/>
-													) : (
-														<div className={cn("absolute inset-0", preset.className)} />
-													)}
-													<span className="absolute inset-0 flex items-end bg-foreground/40 p-2 text-[10px] leading-tight font-bold text-background">
-														{preset.name}
-													</span>
-													{selected && (
-														<span className="absolute top-1.5 right-1.5 flex size-5 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-md">
-															<Check className="size-3" strokeWidth={3} aria-hidden />
-														</span>
-													)}
-												</button>
-											);
-										})}
+									{/* Aperçu réel plutôt qu'une vignette de catalogue : ce qu'on
+									    voit ici est ce que le profil public affichera. */}
+									<div className="relative h-24 overflow-hidden rounded-xl border-2 border-border sm:h-28">
+										{bannerUrl ? (
+											// eslint-disable-next-line @next/next/no-img-element
+											<img
+												src={bannerUrl}
+												alt=""
+												className="absolute inset-0 size-full object-cover"
+											/>
+										) : (
+											<div className={cn("absolute inset-0", BANNIERE_DEFAUT.className)} />
+										)}
+										<span className="absolute inset-0 flex items-end bg-foreground/40 p-2 text-[10px] leading-tight font-bold text-background">
+											{bannerUrl ? "Bannière choisie" : BANNIERE_DEFAUT.name}
+										</span>
 									</div>
 
-									<Button
-										type="button"
-										variant={customBanner ? "secondary" : "outline"}
-										size="sm"
-										className="rounded-full"
-										aria-pressed={customBanner}
-										onClick={() => {
-											if (!customBanner) {
-												form.setValue("banner_url", "", { shouldDirty: true });
-											}
-											setCustomBanner(true);
+									<div className="flex flex-wrap gap-2">
+										<Button
+											type="button"
+											variant="secondary"
+											size="sm"
+											className="rounded-full"
+											onClick={() => setGalerieOuverte(true)}
+										>
+											<ImageIcon className="size-4" aria-hidden />
+											Choisir une illustration du jeu
+										</Button>
+										{bannerUrl && (
+											<Button
+												type="button"
+												variant="outline"
+												size="sm"
+												className="rounded-full"
+												onClick={() => {
+													setCustomBanner(false);
+													form.setValue("banner_url", "", { shouldDirty: true });
+												}}
+											>
+												Remettre le défaut
+											</Button>
+										)}
+										<Button
+											type="button"
+											variant={customBanner ? "secondary" : "outline"}
+											size="sm"
+											className="rounded-full"
+											aria-pressed={customBanner}
+											onClick={() => {
+												if (!customBanner) {
+													form.setValue("banner_url", "", { shouldDirty: true });
+												}
+												setCustomBanner(true);
+											}}
+										>
+											Utiliser une URL personnalisée
+										</Button>
+									</div>
+
+									<BannerPicker
+										open={galerieOuverte}
+										onOpenChange={setGalerieOuverte}
+										valeur={bannerUrl}
+										onChoisir={(url) => {
+											setCustomBanner(false);
+											form.setValue("banner_url", url, { shouldDirty: true });
 										}}
-									>
-										Utiliser une URL personnalisée
-									</Button>
+									/>
 
 									{customBanner && (
 										<FormField

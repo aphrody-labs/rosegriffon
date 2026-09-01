@@ -2,10 +2,11 @@ import crypto from "node:crypto";
 import { createClient as createSupabaseAdmin } from "@supabase/supabase-js";
 import { betterAuth } from "better-auth";
 import { nextCookies } from "better-auth/next-js";
-import { bearer, genericOAuth, twoFactor } from "better-auth/plugins";
+import { bearer, genericOAuth } from "better-auth/plugins";
 import {
 	commonAuthOptions,
 	createAccountOptions,
+	deuxFacteurs,
 	ensureUserProfile,
 	googleProvider,
 } from "@rosegriffon/auth";
@@ -84,7 +85,13 @@ export const auth = betterAuth({
 	// défaut dans Better Auth.
 	user: {
 		...commonAuthOptions.user,
-		...createAccountOptions({ appName: "Rose Griffon", sendEmail }),
+		...createAccountOptions({
+			appName: "Rose Griffon",
+			// L'effacement des données personnelles passe par le pool de l'app :
+			// `profiles` et `auth.users` sont hors de portée de Better Auth.
+			executerSql: (requete, parametres) => pool.query(requete, parametres as unknown[]),
+			sendEmail,
+		}),
 	},
 
 	// Le changement d'adresse d'un compte déjà vérifié exige un envoi de
@@ -228,9 +235,7 @@ export const auth = betterAuth({
 	},
 
 	plugins: [
-		twoFactor({
-			issuer: "Rose Griffon",
-		}),
+		deuxFacteurs("Rose Griffon"),
 		bearer(),
 		genericOAuth({
 			config: [

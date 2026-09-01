@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { SchemaProfilPublic } from "@rosegriffon/types/profil";
 import { z } from "zod";
 
 import { logAudit } from "@/lib/audit";
@@ -18,21 +19,14 @@ import { createAdminClient } from "@/lib/supabase/admin";
  * Chaque action ne touche QUE ses propres colonnes.
  */
 
-const profileSchema = z.object({
-	badges: z.array(z.string()).max(3),
-	banner_url: z.string().optional().or(z.literal("")),
-	bio: z.string().max(500).optional(),
-	full_name: z.string().optional(),
-	twitter_handle: z.string().optional(),
-	username: z
-		.string()
-		.min(3, "Le nom d'utilisateur doit faire au moins 3 caractères.")
-		.max(20, "Le nom d'utilisateur ne peut pas dépasser 20 caractères."),
-	website: z.string().url("URL invalide").optional().or(z.literal("")),
-});
+// Le schéma vit dans `@rosegriffon/types/profil`, avec celui du site principal :
+// les deux écrivent dans la MÊME colonne `profiles.badges`, et une validation
+// recopiée finit toujours par diverger. C'est là qu'est la règle des badges
+// mérités et le refus des URL `javascript:`.
+const profileSchema = SchemaProfilPublic;
 
 export async function updateProfile(
-	values: z.infer<typeof profileSchema>
+	values: z.input<typeof profileSchema>
 ): Promise<{ error?: string }> {
 	const session = await getServerSession();
 	if (!session?.user) {

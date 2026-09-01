@@ -10,11 +10,11 @@ import {
 	type AccountProviderConfig,
 	AccountSessions,
 	AccountShell,
-	AccountTwoFactorCard,
 	type AccountLinkedAccount,
 	type AccountProfileValues,
 	type AccountSession,
 	type AccountTabId,
+	TwoFactorCard,
 } from "@rosegriffon/ui";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
@@ -110,6 +110,59 @@ export function AccountClient({
 		{ id: "google", onLink: () => link("google"), onUnlink: () => unlink("google") },
 	];
 
+	/**
+	 * La carte de double authentification, définie UNE fois.
+	 *
+	 * Elle est rendue à deux endroits selon le compte : à côté de l'adresse
+	 * e-mail quand il n'y a pas de mot de passe (la place qu'occuperait la carte
+	 * mot de passe), sur sa propre ligne sinon. Recopier le bloc aux deux
+	 * endroits, c'était garantir qu'une correction n'en toucherait qu'un.
+	 */
+	const carteDoubleFacteur = (
+		<TwoFactorCard
+			enabled={twoFactorEnabled}
+			// Azalée ouvre l'inscription par e-mail : un compte qui a un mot de
+			// passe doit le fournir, Better Auth l'exige. Un compte purement OAuth
+			// n'en a aucun à donner — le réclamer le refuserait pour rien.
+			demandeMotDePasse={hasPassword}
+			onChangement={reload}
+			actions={{
+				demarrer: async (motDePasse) => {
+					const { data, error } = await authClient.twoFactor.enable({
+						password: motDePasse ?? "",
+					});
+					if (error || !data) {
+						throw new Error(error?.message ?? "Activation impossible.");
+					}
+					return { backupCodes: data.backupCodes, totpURI: data.totpURI };
+				},
+				confirmer: async (code) => {
+					const { error } = await authClient.twoFactor.verifyTotp({ code });
+					if (error) {
+						throw new Error(error.message ?? "Code refusé.");
+					}
+				},
+				desactiver: async (motDePasse) => {
+					const { error } = await authClient.twoFactor.disable({
+						password: motDePasse ?? "",
+					});
+					if (error) {
+						throw new Error(error.message ?? "Désactivation impossible.");
+					}
+				},
+				regenererCodes: async (motDePasse) => {
+					const { data, error } = await authClient.twoFactor.generateBackupCodes({
+						password: motDePasse ?? "",
+					});
+					if (error || !data) {
+						throw new Error(error?.message ?? "Impossible de régénérer les codes.");
+					}
+					return data.backupCodes;
+				},
+			}}
+		/>
+	);
+
 	return (
 		<AccountShell
 			email={email}
@@ -173,22 +226,31 @@ export function AccountClient({
 										}}
 									/>
 								) : (
-									<AccountTwoFactorCard enabled={twoFactorEnabled} />
+									carteDoubleFacteur
 								)}
 							</div>
 
-							{hasPassword && <AccountTwoFactorCard enabled={twoFactorEnabled} />}
+							{hasPassword && carteDoubleFacteur}
 
 							<AccountSessions
 								sessions={sessions}
 								onRevoke={async (token) => {
-									await authClient.revokeSession({ token });
+									// `revokeSession` NE LÈVE PAS : il rend `{ data, error }`. Sans
+									// cette vérification, un refus du serveur ressortait en
+									// « Session révoquée » et la session restait ouverte.
+									const { error } = await authClient.revokeSession({ token });
+									if (error) {
+										throw new Error(error.message ?? "Révocation refusée.");
+									}
 									reload();
 								}}
 								onRevokeOthers={async () => {
 									// `revokeOtherSessions` et non `revokeSessions` : le second
 									// supprime aussi la session courante et déconnecte.
-									await authClient.revokeOtherSessions();
+									const { error } = await authClient.revokeOtherSessions();
+									if (error) {
+										throw new Error(error.message ?? "Révocation refusée.");
+									}
 									reload();
 								}}
 							/>

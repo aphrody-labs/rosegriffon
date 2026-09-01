@@ -1,6 +1,6 @@
 "use client";
 
-import { KeyRound, Loader2, Mail, ShieldCheck } from "lucide-react";
+import { KeyRound, Loader2, Mail } from "lucide-react";
 import { useId, useState } from "react";
 import { toast } from "sonner";
 
@@ -193,41 +193,6 @@ export function AccountPasswordCard({
 						Changer le mot de passe
 					</Button>
 				</form>
-			</CardContent>
-		</Card>
-	);
-}
-
-interface AccountTwoFactorCardProps {
-	enabled: boolean;
-	/** Absent = la double authentification n'est pas encore proposée par l'app. */
-	onManage?: () => void;
-}
-
-export function AccountTwoFactorCard({ enabled, onManage }: AccountTwoFactorCardProps) {
-	return (
-		<Card>
-			<CardHeader>
-				<CardTitle className="flex items-center gap-2">
-					<ShieldCheck className="size-5 shrink-0 text-succes" aria-hidden />
-					Double authentification
-				</CardTitle>
-				<CardDescription>
-					{enabled
-						? "Active. Un code temporaire est demandé à chaque connexion depuis un nouvel appareil."
-						: "Ajoute un code temporaire (Google Authenticator, Authy, 1Password) en plus du mot de passe."}
-				</CardDescription>
-			</CardHeader>
-			<CardContent>
-				{onManage ? (
-					<Button variant={enabled ? "outline" : "default"} onClick={onManage}>
-						{enabled ? "Gérer" : "Activer"}
-					</Button>
-				) : (
-					<Button variant="outline" disabled>
-						Bientôt disponible
-					</Button>
-				)}
 			</CardContent>
 		</Card>
 	);

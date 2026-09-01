@@ -51,9 +51,13 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
 	const isOwner = currentUser?.id === userProfile.id;
 
 	// Format date
-	const joinedDate = (profile as any).created_at
-		? format(new Date((profile as any).created_at), "MMMM yyyy", { locale: fr })
-		: "Date inconnue";
+	// `profiles.created_at` n'existe pas : la page affichait « A rejoint en Date
+	// inconnue » pour tout le monde. `claimed_at` est la date de réclamation du
+	// profil — et quand elle manque, on n'affiche pas la ligne du tout plutôt
+	// que d'écrire une non-information.
+	const joinedDate = profile.claimed_at
+		? format(new Date(profile.claimed_at), "MMMM yyyy", { locale: fr })
+		: null;
 
 	// Role badge config
 	const roleConfig: Record<string, { label: string; color: string; icon: any }> = {
@@ -153,9 +157,11 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
 
 							{/* Meta */}
 							<div className="flex flex-wrap items-center gap-x-5 gap-y-2 type-body-medium text-on-surface-variant">
-								<div className="flex items-center gap-2">
-									<CalendarDays className="size-4" />A rejoint en {joinedDate}
-								</div>
+								{joinedDate && (
+									<div className="flex items-center gap-2">
+										<CalendarDays className="size-4" />A rejoint en {joinedDate}
+									</div>
+								)}
 								{/* L'adresse n'est plus lue depuis le profil : seule celle de la
 								    session est affichée, et uniquement à son propriétaire. */}
 								{isOwner &&

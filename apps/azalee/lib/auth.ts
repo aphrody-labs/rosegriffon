@@ -3,7 +3,7 @@ import { createSupabaseServiceClient } from "@rosegriffon/db/service";
 import bcrypt from "bcryptjs";
 import { betterAuth } from "better-auth";
 import { nextCookies } from "better-auth/next-js";
-import { bearer, twoFactor } from "better-auth/plugins";
+import { bearer } from "better-auth/plugins";
 import { agentAuth } from "@better-auth/agent-auth";
 import { Pool } from "pg";
 import { logAudit } from "@/lib/audit";
@@ -14,6 +14,7 @@ import { sendEmail } from "@/src/lib/email";
 import {
 	commonAuthOptions,
 	createAccountOptions,
+	deuxFacteurs,
 	ensureUserProfile,
 	googleProvider,
 } from "@rosegriffon/auth";
@@ -62,7 +63,13 @@ function createAuth() {
 		// correspondants de `/settings` échouaient donc systématiquement.
 		user: {
 			...commonAuthOptions.user,
-			...createAccountOptions({ appName: "Azalée", sendEmail }),
+			...createAccountOptions({
+				appName: "Azalée",
+				// Même pool que Better Auth : `profiles` et `auth.users` ne sont
+				// atteignables que par SQL direct (cf. `beforeDelete`).
+				executerSql: (requete, parametres) => pool.query(requete, parametres as unknown[]),
+				sendEmail,
+			}),
 		},
 
 		trustedOrigins: [
@@ -335,9 +342,7 @@ function createAuth() {
 					}
 				},
 			}),
-			twoFactor({
-				issuer: "Azalée",
-			}),
+			deuxFacteurs("Azalée"),
 			bearer(),
 			nextCookies(),
 		],

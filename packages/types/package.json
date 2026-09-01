@@ -9,6 +9,7 @@
 		"./user": "./src/user.ts",
 		"./discord": "./src/discord.ts",
 		"./bot": "./src/bot.ts",
+		"./profil": "./src/profil.ts",
 		"./cron": "./src/cron.ts",
 		"./article": "./src/article.ts",
 		"./stats": "./src/stats.ts",
