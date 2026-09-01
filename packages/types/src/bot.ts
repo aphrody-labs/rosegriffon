@@ -38,9 +38,20 @@ import { z } from "zod";
  * comparaison avec l'historique Noctaly fausse.
  */
 export const GAIN_XP_DEFAUT = Object.freeze({
-	/** Fourchette d'XP d'un message éligible. */
-	minimum: 15,
-	maximum: 25,
+	/**
+	 * XP d'un message éligible — 20, fixe.
+	 *
+	 * C'est la règle de Noctaly, écrite noir sur blanc sur son classement :
+	 * « Toutes les 60 secondes, tu peux envoyer un message pour obtenir 20 XP ».
+	 * La fourchette 15–25 d'avant venait de la convention des bots du marché ;
+	 * elle rendait la progression légèrement plus rapide en moyenne et, surtout,
+	 * elle empêchait de retrouver le compte exact d'un membre. Minimum et
+	 * maximum sont donc égaux : le tirage aléatoire existe toujours dans le code
+	 * (il suffit d'écarter les deux bornes pour le réactiver), il ne tire juste
+	 * plus rien.
+	 */
+	minimum: 20,
+	maximum: 20,
 	/** Délai avant qu'un nouveau message rapporte. */
 	delaiSecondes: 60,
 	/** Jetons Kizuna offerts à chaque montée de niveau, multipliés par le niveau. */

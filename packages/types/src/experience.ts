@@ -1,56 +1,53 @@
 /**
- * Niveaux de communauté — la courbe RÉELLE d'Inazuma Eleven Victory Road.
+ * Niveaux de communauté — la courbe que les membres connaissent déjà.
  *
- * ── POURQUOI LA COURBE DU JEU, ET PAS UNE FORMULE MAISON ───────────────────
- * Tous les bots de niveaux du marché utilisent la même parabole (`5·n² + 50n`,
- * héritée de MEE6). Elle marche, et elle ne veut rien dire : elle n'appartient
- * à personne et ne raconte rien du serveur qui l'utilise.
+ * ── POURQUOI CELLE-CI, ET PLUS CELLE DU JEU ────────────────────────────────
+ * Ce module reprenait la table d'expérience d'Inazuma Eleven Victory Road
+ * (`inagle_exp_table`, cent paliers), pour que monter de niveau sur le Discord
+ * coûte ce que ça coûte en jeu. L'idée était juste et le résultat ne l'était
+ * pas : la communauté a passé des années sur **Noctaly**, dont la courbe est
+ * celle de tous les bots de niveaux (`5n² + 50n + 100` par palier). Les mêmes
+ * XP y donnaient quatre à six niveaux de MOINS — un membre à 44 580 XP lisait
+ * « niveau 26 » depuis toujours et se voyait soudain « niveau 32 ».
  *
- * Ce serveur parle d'un jeu qui a SA propre table d'expérience — 100 paliers,
- * extraits des données du jeu et présents en base (`inagle_exp_table`, colonnes
- * `level` et `need_exp`). C'est elle qui est reprise ici, valeur pour valeur.
- * Conséquence directe et voulue : monter de niveau sur le Discord coûte
- * exactement ce que ça coûte en jeu, et le niveau 99 reste un exploit.
+ * Un niveau n'a de valeur que comparé : entre membres, et à ce qu'on avait
+ * hier. Reprendre la courbe de Noctaly, c'est garder cette continuité. La
+ * courbe du jeu, elle, reste ce qu'elle a toujours été — la courbe du jeu, que
+ * le wiki expose là où elle a un sens.
  *
- *   niveau 10 →      2 422 XP  ≈    121 messages
- *   niveau 20 →     12 291 XP  ≈    615 messages
- *   niveau 30 →     38 310 XP  ≈  1 916 messages
- *   niveau 50 →    195 502 XP  ≈  9 776 messages
- *   niveau 99 →  2 878 742 XP  ≈ 143 938 messages
+ * Aligné le 1/9/2026 sur le classement Noctaly, vérifié point par point :
  *
- * (à 20 XP par message et un message éligible par minute — les valeurs par
- * défaut ci-dessous.)
+ *   XP        Noctaly   ici
+ *   44 580      26       26
+ *   29 045      22       22
+ *   20 572      19       19
+ *   12 280      16       16
  *
- * ── POURQUOI LA TABLE EST RECOPIÉE ICI ─────────────────────────────────────
- * Elle vit aussi en base, mais ce module doit rester PUR : aucune E/S, aucun
- * import de `discord.js`, aucune connexion. C'est ce qui permet de le couvrir
- * intégralement par `bun:test` sans base ni bot allumé — et la courbe d'un jeu
- * sorti ne bouge plus. Le test de ce fichier fixe la valeur totale et trois
- * points de contrôle relevés en base le 14/8/2026 : une recopie fautive ne
- * passerait pas.
+ * ── LE NIVEAU 1 EST LE DÉPART ──────────────────────────────────────────────
+ * Noctaly affiche « niveau 1 » à zéro XP, là où la formule d'origine compte à
+ * partir de 0. C'est le décalage qui explique le dernier écart : `CUMULS[1]`
+ * vaut 0, et le premier palier (100 XP) mène au niveau 2.
  *
- * Requête d'origine :
- *   select string_agg(need_exp::text, ',' order by level) from inagle_exp_table;
+ *   niveau 10 →      3 720 XP  ≈    186 messages
+ *   niveau 25 →     37 820 XP  ≈  1 891 messages
+ *   niveau 40 →    136 045 XP  ≈  6 802 messages
+ *   niveau 60 →    425 095 XP  ≈ 21 255 messages
+ *
+ * (à 20 XP par message éligible, soit un message par minute — les règles de
+ * Noctaly, reprises telles quelles dans `GAIN_DEFAUT`.)
  */
 
 /**
- * XP nécessaire pour passer du niveau `n` au niveau `n + 1`, `n` allant de 1 à
- * 100. L'index 0 porte donc le palier du niveau 1.
+ * XP nécessaire pour passer du niveau `n` au niveau `n + 1`.
  *
- * Le centième palier (124 072) n'est jamais consommé : le niveau 100 est le
- * plafond, il n'y a pas de niveau 101. Il est conservé pour que la table reste
- * la copie exacte de `inagle_exp_table`, et pour que sa recopie soit
- * vérifiable ligne à ligne.
+ * `PALIERS_EXPERIENCE[0]` est le coût du niveau 1 → 2, et vaut 100. La formule
+ * est celle des bots de niveaux : `5·i² + 50·i + 100` pour le i-ième palier,
+ * i comptant à partir de 0. Elle est CALCULÉE plutôt que recopiée : une table
+ * de cent nombres se relit mal, et une formule d'une ligne se vérifie.
  */
-export const PALIERS_EXPERIENCE: readonly number[] = Object.freeze([
-	124, 130, 146, 165, 196, 230, 275, 323, 384, 449, 524, 603, 693, 789, 896, 1009, 1132, 1263, 1407,
-	1553, 1715, 1883, 2065, 2252, 2454, 2664, 2887, 3117, 3363, 3619, 3888, 4166, 4459, 4763, 5081,
-	5410, 5796, 6223, 6675, 7148, 7649, 8173, 8728, 9305, 9917, 10555, 11228, 11927, 12666, 13435,
-	14242, 15082, 15966, 16884, 17846, 18844, 19891, 20976, 22115, 23290, 24522, 25800, 27133, 28510,
-	29949, 31438, 32990, 34591, 36258, 37984, 39780, 41631, 43555, 45543, 47605, 49731, 51938, 54216,
-	56574, 59004, 61521, 64113, 66797, 69555, 72412, 75352, 78391, 81511, 84740, 88058, 91479, 94994,
-	98626, 102355, 106196, 110138, 114202, 118371, 120541, 124072,
-]);
+export const PALIERS_EXPERIENCE: readonly number[] = Object.freeze(
+	Array.from({ length: 100 }, (_, index) => 5 * index * index + 50 * index + 100)
+);
 
 /** Plafond, celui du jeu. */
 export const NIVEAU_MAX = 100;
