@@ -8,6 +8,13 @@ export { cn } from "./lib/utils";
 // `components/adsense` (« use client »), pour rester lisibles par un composant
 // serveur — les layouts en ont besoin dans `metadata.other`.
 export { ADSENSE_CLIENT, ADSENSE_PUBLISHER } from "./lib/adsense";
+// Même règle que ci-dessus : une page SERVEUR lit ces badges, ils ne peuvent
+// donc pas être exportés depuis le formulaire `"use client"`.
+export {
+	AVAILABLE_BADGES,
+	MAX_BADGES,
+	type BadgeProfilAffichable,
+} from "./lib/badges-profil";
 // Module PUR, exporté depuis `lib/` et jamais depuis le composant client :
 // une route serveur lit ces constantes (cf. l'en-tête de `lib/galerie-cdn.ts`).
 export {

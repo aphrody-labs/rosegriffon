@@ -526,6 +526,7 @@
         "@radix-ui/react-toggle-group": "catalog:",
         "@radix-ui/react-tooltip": "catalog:",
         "@rosegriffon/db": "workspace:*",
+        "@rosegriffon/types": "workspace:*",
         "@tanstack/react-table": "catalog:",
         "class-variance-authority": "catalog:",
         "clsx": "catalog:",
