@@ -25,7 +25,20 @@ interface AccountAvatarCardProps {
 	onUpload: (file: File) => Promise<string>;
 }
 
-const MAX_BYTES = 4 * 1024 * 1024;
+/**
+ * Ce que le stockage accepte réellement, pas ce qu'on aimerait.
+ *
+ * Le bucket `avatars` est plafonné à 2 Mo et n'accepte que PNG, JPEG et WebP
+ * (vérifié dans `storage.buckets` le 1/9/2026). L'interface annonçait « 4 Mo
+ * maximum » et proposait les GIF dans le sélecteur : le fichier partait, la
+ * barre tournait, et le refus arrivait du serveur sous forme de message brut.
+ * Une limite qui ment fait échouer APRÈS l'attente — le pire moment pour
+ * apprendre la règle.
+ */
+const MAX_BYTES = 2 * 1024 * 1024;
+
+/** Les types que le bucket accepte, dans la forme attendue par `accept`. */
+const TYPES_ACCEPTES = "image/png,image/jpeg,image/webp";
 
 export function AccountAvatarCard({
 	avatarUrl,
@@ -46,12 +59,14 @@ export function AccountAvatarCard({
 		if (!file) {
 			return;
 		}
-		if (!file.type.startsWith("image/")) {
-			toast.error("Choisis un fichier image.");
+		if (!TYPES_ACCEPTES.split(",").includes(file.type)) {
+			// Le bucket refuse tout le reste, GIF compris : autant le dire avant de
+			// téléverser plutôt que de relayer son erreur après coup.
+			toast.error("Choisis une image PNG, JPEG ou WebP.");
 			return;
 		}
 		if (file.size > MAX_BYTES) {
-			toast.error("Image trop lourde (4 Mo maximum).");
+			toast.error("Image trop lourde (2 Mo maximum).");
 			return;
 		}
 
@@ -113,7 +128,7 @@ export function AccountAvatarCard({
 						id={inputId}
 						type="file"
 						className="sr-only"
-						accept="image/png,image/jpeg,image/webp,image/gif"
+						accept={TYPES_ACCEPTES}
 						onChange={handleChange}
 						disabled={uploading}
 						tabIndex={-1}
@@ -128,7 +143,7 @@ export function AccountAvatarCard({
 						</Badge>
 					)}
 					<p className="text-xs text-muted-foreground">
-						PNG, JPEG ou WebP — 400 × 400 px recommandé, 4 Mo maximum.
+						PNG, JPEG ou WebP — 400 × 400 px recommandé, 2 Mo maximum.
 					</p>
 				</div>
 			</CardContent>
