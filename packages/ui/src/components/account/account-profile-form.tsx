@@ -62,12 +62,22 @@ function estIllustrationCdn(url: string | null | undefined): boolean {
 	return typeof url === "string" && url.includes("cdn.rosegriffon.fr");
 }
 
+/** Les quatre postes du jeu, plus « aucun » — l'ordre du terrain. */
+const POSTES_CHOISISSABLES = [
+	{ libelle: "Aucun", valeur: "" },
+	{ libelle: "Gardien", valeur: "GAR" },
+	{ libelle: "Défenseur", valeur: "DEF" },
+	{ libelle: "Milieu", valeur: "MIL" },
+	{ libelle: "Attaquant", valeur: "ATT" },
+] as const;
+
 const BIO_MAX = 500;
 
 const schema = z.object({
 	badges: z.array(z.string()).max(MAX_BADGES).default([]),
 	banner_url: z.string().optional().or(z.literal("")),
 	banner_position: z.coerce.number().int().min(0).max(100).default(50),
+	poste: z.string().nullable().default(null),
 	bio: z.string().max(BIO_MAX, `La bio ne peut pas dépasser ${BIO_MAX} caractères.`).optional(),
 	full_name: z.string().optional(),
 	twitter_handle: z.string().optional(),
@@ -116,6 +126,7 @@ export function AccountProfileForm({
 			const res = await onSubmit({
 				badges: next.badges ?? [],
 				banner_position: next.banner_position ?? 50,
+				poste: next.poste || null,
 				banner_url: next.banner_url ?? "",
 				bio: next.bio ?? "",
 				full_name: next.full_name ?? "",
@@ -145,6 +156,7 @@ export function AccountProfileForm({
 	// lui passer une chaîne) : on ramène la valeur observée à un nombre avant de
 	// la donner au curseur, qui n'accepte rien d'autre.
 	const cadrage = Number(form.watch("banner_position") ?? 50) || 50;
+	const posteChoisi = form.watch("poste") ?? null;
 	const bio = form.watch("bio") ?? "";
 	const username = form.watch("username");
 
@@ -404,6 +416,38 @@ export function AccountProfileForm({
 											)}
 										/>
 									)}
+								</div>
+
+								<div className="space-y-4 border-t border-border pt-6">
+									<div>
+										<h3 className="text-sm font-semibold text-foreground">Poste</h3>
+										<p className="text-xs text-muted-foreground">
+											Affiché sur ta carte, comme sur une fiche de joueur du jeu.
+										</p>
+									</div>
+									<div className="flex flex-wrap gap-2">
+										{POSTES_CHOISISSABLES.map((entree) => {
+											const choisi = posteChoisi === entree.valeur;
+											return (
+												<button
+													key={entree.valeur || "aucun"}
+													type="button"
+													aria-pressed={choisi}
+													onClick={() =>
+														form.setValue("poste", entree.valeur || null, { shouldDirty: true })
+													}
+													className={cn(
+														"rounded-full border-2 px-3 py-1 text-xs font-bold transition-colors",
+														choisi
+															? "border-primary bg-primary/10 text-foreground"
+															: "border-border text-muted-foreground hover:border-muted-foreground/50"
+													)}
+												>
+													{entree.libelle}
+												</button>
+											);
+										})}
+									</div>
 								</div>
 
 								<div className="space-y-4 border-t border-border pt-6">

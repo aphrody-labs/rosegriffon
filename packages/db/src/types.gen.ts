@@ -4820,6 +4820,7 @@ export type Database = {
           badges: string[] | null
           banner_position: number
           banner_url: string | null
+          poste: string | null
           bio: string | null
           city: string | null
           claimed_at: string | null

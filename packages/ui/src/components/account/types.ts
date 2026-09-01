@@ -46,6 +46,8 @@ export interface AccountProfileValues {
 	banner_url: string;
 	/** Cadrage vertical de la bannière, de 0 (haut de l'image) à 100 (bas). */
 	banner_position: number;
+	/** Poste affiché sur la carte (`GAR`, `DEF`, `MIL`, `ATT`), ou rien. */
+	poste: string | null;
 	badges: string[];
 }
 

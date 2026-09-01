@@ -91,6 +91,26 @@ export const SchemaLienPublic = z
  * sortie. Les actions serveur doivent donc typer leur paramètre avec
  * `z.input<typeof SchemaProfilPublic>`, jamais `z.infer`.
  */
+/**
+ * Les quatre postes du jeu, par leur abréviation.
+ *
+ * Ce sont les valeurs de `inagle_characters.position` (Gardien, Défenseur,
+ * Milieu, Attaquant) abrégées comme le jeu les affiche sur une fiche de joueur.
+ * `null` reste possible : on n'attribue pas un poste par défaut à quelqu'un qui
+ * n'en a pas choisi.
+ */
+export const POSTES_PROFIL = ["GAR", "DEF", "MIL", "ATT"] as const;
+
+export type PosteProfil = (typeof POSTES_PROFIL)[number];
+
+/** Nom complet d'un poste, tel que le wiki le nomme. */
+export const LIBELLES_POSTES: Readonly<Record<PosteProfil, string>> = Object.freeze({
+	ATT: "Attaquant",
+	DEF: "Défenseur",
+	GAR: "Gardien",
+	MIL: "Milieu",
+});
+
 export const SchemaProfilPublic = z.object({
 	/**
 	 * Les badges inconnus sont ÉCARTÉS, pas refusés.
@@ -121,6 +141,27 @@ export const SchemaProfilPublic = z.object({
 	 * 50 reproduit exactement l'ancien comportement.
 	 */
 	banner_position: z.coerce.number().int().min(0).max(100).default(50),
+	/** Poste affiché sur la carte, ou rien. */
+	/**
+	 * Poste affiché sur la carte, ou rien.
+	 *
+	 * La chaîne vide est traduite en `null` : un `<select>` sans choix renvoie
+	 * `""`, que l'enum refuserait — le formulaire afficherait alors une erreur
+	 * sur un champ que l'on vient justement de vider.
+	 */
+	poste: z
+		.string()
+		.nullable()
+		.default(null)
+		// Même règle que les badges : ce qui n'est pas au catalogue est ÉCARTÉ, pas
+		// refusé. Un `<select>` vide renvoie `""`, et le jour où un poste
+		// disparaîtra du jeu, les profils qui le portaient doivent rester
+		// enregistrables.
+		.transform((valeur) =>
+			valeur && (POSTES_PROFIL as readonly string[]).includes(valeur)
+				? (valeur as PosteProfil)
+				: null
+		),
 	bio: z.string().max(MAX_BIO_PROFIL).optional(),
 	full_name: z.string().optional(),
 	twitter_handle: z.string().optional(),
