@@ -28,7 +28,7 @@ export async function generateMetadata({ params }: ProfilePageProps): Promise<Me
 
 	const item = profile as any;
 	return {
-		description: item.bio || `Découvrez le profil de ${username} sur Azalée.`,
+		description: item.bio || `Profil de ${username} sur le wiki Azalée.`,
 		title: `@${username} | Azalée`,
 	};
 }

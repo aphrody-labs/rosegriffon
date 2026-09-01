@@ -49,7 +49,7 @@ function ResetPasswordContent() {
 				setTimeout(() => router.push("/login"), 2000);
 			}
 		} catch {
-			toast.error("Une erreur est survenue.");
+			toast.error("La réinitialisation a échoué. Réessaie.");
 		}
 		setLoading(false);
 	};

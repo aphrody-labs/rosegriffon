@@ -26,7 +26,7 @@ export default function Error({
 					Impossible de charger ce profil
 				</h2>
 				<p className="text-on-surface-variant">
-					Une erreur est survenue lors du chargement du profil.
+					Le profil n'a pas pu s'afficher.
 				</p>
 			</div>
 			<div className="flex gap-3">

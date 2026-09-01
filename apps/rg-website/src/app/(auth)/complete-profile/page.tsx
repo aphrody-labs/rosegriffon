@@ -78,7 +78,7 @@ export default function CompleteProfilePage() {
 				router.push("/");
 			}, 1500);
 		} catch (error) {
-			setError(error instanceof Error ? error.message : "Une erreur est survenue");
+			setError(error instanceof Error ? error.message : "La mise à jour du profil a échoué.");
 		} finally {
 			setIsLoading(false);
 		}
@@ -112,15 +112,17 @@ export default function CompleteProfilePage() {
 				<CardHeader className="text-center">
 					<CardTitle className="text-2xl">Complétez votre profil</CardTitle>
 					<CardDescription>
-						{success ? "Profil mis à jour avec succès ! 🎉" : "Aidez-nous à mieux vous connaître"}
+						{success ? "Profil enregistré." : "Un nom d'affichage, et une bio si tu veux."}
 					</CardDescription>
 				</CardHeader>
 
 				<CardContent>
+					{/* Un seul message de succès : le titre de la carte l'annonce déjà,
+					    une seconde félicitation juste en dessous ne disait rien de plus. */}
 					{success && (
-						<Alert className="mb-4 border-green-500 text-green-700 dark:text-green-400">
+						<Alert className="mb-4 border-succes/50 text-succes">
 							<CheckCircle className="size-4" />
-							<AlertDescription>Bienvenue sur Rose Griffon !</AlertDescription>
+							<AlertDescription>Redirection vers l&apos;accueil…</AlertDescription>
 						</Alert>
 					)}
 

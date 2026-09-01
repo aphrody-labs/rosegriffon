@@ -56,7 +56,10 @@ export async function generateMetadata({
 
 	const displayName = profile.username || username;
 	const title = `Profil de ${displayName} · Rose Griffon`;
-	const description = profile.bio || `Découvrez le profil de ${displayName} sur Rose Griffon.`;
+	// Sans bio, on annonce ce que la page EST — « Découvrez le profil de X »
+	// répétait le titre juste au-dessus, en aperçu de lien comme en résultat de
+	// recherche.
+	const description = profile.bio || `Profil de ${displayName} sur Rose Griffon.`;
 	const image = profile.avatar_url || "/opengraph-image.png";
 
 	return {
