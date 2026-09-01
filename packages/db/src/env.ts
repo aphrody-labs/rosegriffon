@@ -76,10 +76,46 @@ export function getSupabaseUrl(preferInternal = false): string {
 	return origineDeRepli();
 }
 
+/**
+ * Un JWT compact a TROIS parties séparées par des points.
+ *
+ * Notre PostgREST valide les jetons avec `SUPABASE_JWT_SECRET` : il lui faut
+ * donc un vrai JWT. Les clés du nouveau format Supabase (`sb_publishable_…`,
+ * `sb_secret_…`) n'en sont pas — elles n'ont de sens que devant la passerelle
+ * du Cloud, qui les traduit. Envoyées ici, elles font répondre
+ * `PGRST301 JWSError (CompactDecodeError Invalid number of parts: Expected 3
+ * parts; got 1)`, et toute lecture navigateur échoue.
+ */
+function estJwt(value: string | undefined | null): value is string {
+	return isValidKey(value) && value.split(".").length === 3;
+}
+
+/**
+ * Clé publique du client navigateur.
+ *
+ * ── POURQUOI DEUX VARIABLES, ET DANS CET ORDRE ─────────────────────────────
+ * `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` porte le format récent, mais l'env de
+ * ce dépôt y met une clé `sb_publishable_…` que notre PostgREST auto-hébergé
+ * refuse (cf. `estJwt`). `NEXT_PUBLIC_SUPABASE_ANON_KEY` porte le JWT anon
+ * historique, signé par `SUPABASE_JWT_SECRET` — celui qui marche.
+ *
+ * On prend donc la première qui est un VRAI JWT, en gardant la publishable en
+ * tête : le jour où elle en contiendra un (ou si la pile change), rien à
+ * réécrire. Une clé au mauvais format n'est plus utilisée, elle est ignorée.
+ *
+ * Constaté en production le 1/9/2026 : le profil ne se chargeait pas et le
+ * téléversement d'avatar échouait, avec `PGRST301` dans la console.
+ */
 export function getSupabasePublishableKey(): string {
-	const key = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
-	if (isValidKey(key)) return key;
-	return PLACEHOLDER_ANON_JWT;
+	const publiable = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
+	if (estJwt(publiable)) return publiable;
+
+	const anon = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+	if (estJwt(anon)) return anon;
+
+	// Ni l'une ni l'autre : on rend la publishable telle quelle si elle est au
+	// moins exploitable (une pile qui l'accepterait), sinon le placeholder.
+	return isValidKey(publiable) ? publiable : PLACEHOLDER_ANON_JWT;
 }
 
 export function getSupabaseServiceRoleKey(): string | null {
