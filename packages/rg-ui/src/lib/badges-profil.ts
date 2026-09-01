@@ -15,15 +15,31 @@
  * s'importe des deux côtés tant que le module qui le réexporte n'est pas marqué
  * client.
  */
-import { Flame, Mountain, Trees, Wind } from "lucide-react";
-import type { LucideIcon } from "lucide-react";
 import { BADGES_PROFIL, MAX_BADGES_PROFIL } from "@rosegriffon/types/profil";
 
 export interface BadgeProfilAffichable {
 	id: string;
 	label: string;
+	/**
+	 * Ce que le badge est — pas ce qu'il ferait s'il était une statistique.
+	 *
+	 * La première version décrivait chaque élément comme un style de jeu
+	 * (« Frappe et pression : l'attaque avant tout ») : une phrase inventée, que
+	 * ni le jeu ni le site ne soutiennent. Un badge de profil dit une affinité
+	 * choisie, rien de plus.
+	 */
 	description: string;
-	icon: LucideIcon;
+	/**
+	 * Icône OFFICIELLE de l'élément, extraite du jeu.
+	 *
+	 * Chemin servi par les deux applications depuis leur `public/spirit_type/` —
+	 * ce sont les mêmes fichiers que la fiche de personnage du wiki utilise
+	 * (`getSkillElementIconUrl`), donc le même symbole partout : sur une
+	 * technique de feu, sur un joueur de feu, et sur le badge d'un membre.
+	 * Des pictogrammes génériques auraient dit « flamme », pas « Feu d'Inazuma
+	 * Eleven ».
+	 */
+	iconeUrl: string;
 	/** Classes de teinte, en tokens du design system — jamais de couleur en dur. */
 	tone: string;
 }
@@ -37,38 +53,37 @@ export interface BadgeProfilAffichable {
  * divergence ancienne : le VENT était bleu dans certains écrans d'Azalée et
  * vert dans d'autres. L'icône du jeu tranche — il est bleu.
  *
- * ── POURQUOI DES ICÔNES LUCIDE ET PAS LES `.webp` DU JEU ───────────────────
- * Les icônes officielles vivent dans `apps/website/public/spirit_type/` et
- * n'existent pas côté Azalée : un composant partagé qui les référencerait
- * afficherait quatre carrés vides sur le wiki. Les pictogrammes Lucide
- * (flamme, tourbillon, feuillage, sommet) disent la même chose, se colorent
- * avec le thème et ne dépendent d'aucun fichier.
+ * ── LES ICÔNES SONT CELLES DU JEU ──────────────────────────────────────────
+ * `/spirit_type/<element>.webp`, extraites des archives et servies par les DEUX
+ * applications depuis leur `public/` (vérifié). Ce sont exactement les fichiers
+ * qu'utilise déjà la fiche de personnage du wiki : le symbole du feu est le
+ * même sur une technique, sur un joueur et sur le badge d'un membre.
  */
 export const AVAILABLE_BADGES: readonly BadgeProfilAffichable[] = [
 	{
-		description: "Frappe et pression : l'attaque avant tout.",
-		icon: Flame,
+		description: "Élément Feu.",
+		iconeUrl: "/spirit_type/fire.webp",
 		id: "fire",
 		label: "Feu",
 		tone: "border-element-feu/30 bg-element-feu/10 text-element-feu",
 	},
 	{
-		description: "Vitesse et esquive : passer avant d'être vu.",
-		icon: Wind,
+		description: "Élément Vent.",
+		iconeUrl: "/spirit_type/wind.webp",
 		id: "wind",
 		label: "Vent",
 		tone: "border-element-vent/30 bg-element-vent/10 text-element-vent",
 	},
 	{
-		description: "Technique et contrôle : le ballon ne se perd pas.",
-		icon: Trees,
+		description: "Élément Forêt.",
+		iconeUrl: "/spirit_type/forest.webp",
 		id: "forest",
 		label: "Forêt",
 		tone: "border-element-foret/30 bg-element-foret/10 text-element-foret",
 	},
 	{
-		description: "Défense et endurance : rien ne passe.",
-		icon: Mountain,
+		description: "Élément Montagne.",
+		iconeUrl: "/spirit_type/mountain.webp",
 		id: "mountain",
 		label: "Montagne",
 		tone: "border-element-montagne/30 bg-element-montagne/10 text-element-montagne",

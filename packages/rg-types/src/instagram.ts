@@ -19,14 +19,32 @@
  * même choix que `resolveGuildId(env)` : un module partagé ne devine pas dans
  * quel processus il tourne.
  *
- * ── CE QU'INSTAGRAM LAISSE ENCORE FAIRE (mesuré le 13/8/2026) ──────────────
- * `graph.facebook.com/v23.0/instagram_oembed` est le DERNIER point d'entrée qui
- * réponde à un client non authentifié. Il a été vidé : il ne rend plus que
+ * ── CE QU'INSTAGRAM LAISSE ENCORE FAIRE ────────────────────────────────────
+ * `graph.facebook.com/v23.0/instagram_oembed` — celui qu'interroge
+ * `verifierPublication()` ci-dessous — a été vidé : il ne rend plus que
  * `version, provider_name, provider_url, type, width, html`, et ce `html` est un
  * `<blockquote>` dont le seul texte visible est « View this post on Instagram ».
- * Ni auteur, ni miniature, ni légende. Il ne sert donc PAS à récolter — il
- * répond à UNE question, et il y répond gratuitement et sans jeton : **cette
- * publication existe-t-elle et est-elle publique ?**
+ * Ni auteur, ni miniature, ni légende (re-mesuré le 22/8/2026 : toujours ces 6
+ * champs). Il ne sert donc PAS à récolter — il répond à UNE question, et il y
+ * répond gratuitement et sans jeton : **cette publication existe-t-elle et
+ * est-elle publique ?**
+ *
+ * ⚠ CE N'EST PAS LE SEUL oEMBED PUBLIC, et l'avoir cru l'a été longtemps.
+ * `https://www.instagram.com/api/v1/oembed/?url=<permalien>&omitscript=true`
+ * répond 200 SANS jeton lui aussi, mais rend SEIZE champs : `title` (la légende
+ * entière), `author_name`, `author_url`, `author_id`, `media_id`,
+ * `thumbnail_url` (640 px, signée et périssable), `thumbnail_width/height`.
+ * Mesuré le 22/8/2026 en interrogeant les deux points d'entrée côte à côte sur
+ * le même permalien. C'est lui qui a permis de saisir à la main les deux
+ * participations Instagram d'IERG Day
+ * (`apps/website/sql/migrations/20260822_iergday_participations_instagram.sql`),
+ * légende et auteur compris, sans rien demander à l'autrice.
+ *
+ * `verifierPublication()` reste néanmoins sur `graph.facebook.com`, et ce n'est
+ * pas un oubli : c'est un point d'entrée DOCUMENTÉ, dont les codes d'erreur
+ * (`error.code = 24`) sont ceux que lit `verdictDepuisReponse()` — le verdict
+ * d'un dépôt ne doit pas dépendre d'une route interne non contractuelle. Le
+ * riche sert à LIRE (saisie manuelle, outillage), le documenté à DÉCIDER.
  */
 
 // ─────────────────────────────────────────────────────────────────────────────
