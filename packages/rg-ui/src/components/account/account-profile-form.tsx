@@ -16,6 +16,7 @@ import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
 
+import { AVAILABLE_BADGES, MAX_BADGES } from "../../lib/badges-profil";
 import { cn } from "../../lib/utils";
 import { Badge } from "../badge";
 import { Button } from "../button";
@@ -34,53 +35,9 @@ import { BannerPicker } from "./banner-picker";
 import { Textarea } from "../textarea";
 import type { AccountActionResult, AccountProfileValues } from "./types";
 
-/**
- * Badges cosmétiques affichables à côté du pseudo.
- *
- * Les couleurs passent par les tokens de marque et sémantiques du design system
- * (`rg-or`, `rg-rose`, `info`, `patreon`, `succes`) : elles suivent donc le
- * thème actif au lieu d'être figées comme dans la version précédente, qui
- * codait en dur des teintes Tailwind (`amber-500`, `purple-500`…).
- */
-export const AVAILABLE_BADGES = [
-	{
-		description: "Membre fondateur de la communauté Rose Griffon.",
-		icon: Crown,
-		id: "founder",
-		label: "Fondateur",
-		tone: "border-rg-or/25 bg-rg-or/10 text-rg-or",
-	},
-	{
-		description: "Invité de marque ou contributeur exceptionnel.",
-		icon: Star,
-		id: "vip",
-		label: "VIP",
-		tone: "border-rg-rose/25 bg-rg-rose/10 text-rg-rose",
-	},
-	{
-		description: "A participé activement aux tests de Victory Road.",
-		icon: Sparkles,
-		id: "beta",
-		label: "Bêta-testeur",
-		tone: "border-info/25 bg-info/10 text-info",
-	},
-	{
-		description: "Soutien officiel du projet sur Patreon.",
-		icon: Heart,
-		id: "patreon",
-		label: "Patreon",
-		tone: "border-patreon/25 bg-patreon/10 text-patreon",
-	},
-	{
-		description: "Membre de l'équipe d'administration du site.",
-		icon: ShieldCheck,
-		id: "staff",
-		label: "Staff",
-		tone: "border-succes/25 bg-succes/10 text-succes",
-	},
-] as const;
-
-export const MAX_BADGES = 3;
+// `AVAILABLE_BADGES` et `MAX_BADGES` vivent dans `lib/badges-profil.ts` : lus
+// depuis un module `"use client"`, ils devenaient des références client et la
+// page serveur `/profil/[username]` échouait au build.
 
 /**
  * La bannière par défaut : un dégradé de la charte, et rien d'autre.

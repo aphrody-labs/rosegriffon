@@ -13,7 +13,7 @@ export {
 	AccountPasswordCard,
 } from "./account-credentials";
 export { AccountDangerZone } from "./account-danger-zone";
-export { AVAILABLE_BADGES, AccountProfileForm, MAX_BADGES } from "./account-profile-form";
+export { AccountProfileForm } from "./account-profile-form";
 export { AccountSessions, describeUserAgent } from "./account-sessions";
 export { TwoFactorCard, type TwoFactorActions } from "./two-factor-card";
 export { TwoFactorChallenge } from "./two-factor-challenge";
