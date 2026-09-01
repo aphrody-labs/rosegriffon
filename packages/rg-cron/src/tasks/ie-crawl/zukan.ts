@@ -49,12 +49,22 @@ export async function crawlZukanOrder(): Promise<{
 		);
 
 		const orderMapObj = buildOrderMap(allCharacters);
+		// Groupe d'âge / année scolaire / surnom : mêmes cartes que l'ordre, mais leur
+		// propre signature — sinon un ordre inchangé masquerait un age_group/nickname
+		// corrigé sur zukan (ou simplement pas encore synchronisé, cf. déploiement du
+		// 1/9/2026) puisque la comparaison ci-dessous décide SEULE si on écrit en base.
+		const bioMapObj: Record<string, { a: string | null; s: string | null; n: string | null }> =
+			{};
+		for (const c of allCharacters) {
+			if (c.zukanHash) bioMapObj[c.zukanHash] = { a: c.ageGroup, s: c.schoolYear, n: c.nickname };
+		}
+		const snapshot = { bio: bioMapObj, order: orderMapObj };
 
 		const cacheKey = "crawl:zukan:orders";
-		const cachedOrders = await cache.get<Record<string, number>>(cacheKey);
+		const cachedSnapshot = await cache.get<typeof snapshot>(cacheKey);
 
 		const hasChanged =
-			!cachedOrders || JSON.stringify(cachedOrders) !== JSON.stringify(orderMapObj);
+			!cachedSnapshot || JSON.stringify(cachedSnapshot) !== JSON.stringify(snapshot);
 
 		if (!hasChanged) {
 			console.log(
@@ -64,7 +74,7 @@ export async function crawlZukanOrder(): Promise<{
 		}
 
 		console.log(
-			"[Crawl Zukan] Des changements d'ordre ont été détectés. Mise à jour de Supabase..."
+			"[Crawl Zukan] Des changements ont été détectés (ordre et/ou biographie). Mise à jour de Supabase..."
 		);
 
 		// Mise à jour de la table inagle_characters dans Supabase
@@ -80,13 +90,27 @@ export async function crawlZukanOrder(): Promise<{
 				}
 			}
 
+			// Un `null` de crawl ne doit jamais écraser une valeur déjà connue en base
+			// (page de secours/erreur de rendu ponctuelle) : on n'envoie que du renseigné.
 			for (const char of dbChars) {
 				if (char.zukan_hash) {
 					const order = hashToOrder.get(char.zukan_hash);
-					if (order !== undefined) {
+					const bio = bioMapObj[char.zukan_hash];
+					const updatePayload: {
+						zukan_order?: number;
+						age_group?: string;
+						school_year?: string;
+						nickname?: string;
+					} = {};
+					if (order !== undefined) updatePayload.zukan_order = order;
+					if (bio?.a) updatePayload.age_group = bio.a;
+					if (bio?.s) updatePayload.school_year = bio.s;
+					if (bio?.n) updatePayload.nickname = bio.n;
+
+					if (Object.keys(updatePayload).length > 0) {
 						const { error: updateError } = await client
 							.from("inagle_characters")
-							.update({ zukan_order: order })
+							.update(updatePayload)
 							.eq("id", char.id);
 
 						if (updateError) {
@@ -102,8 +126,8 @@ export async function crawlZukanOrder(): Promise<{
 			}
 		}
 
-		// Sauvegarder les nouveaux ordres dans Redis
-		await cache.set(cacheKey, orderMapObj, 86400 * 7); // Expiration de 7 jours
+		// Sauvegarder le nouvel instantané (ordre + biographie) dans Redis
+		await cache.set(cacheKey, snapshot, 86400 * 7); // Expiration de 7 jours
 
 		console.log(
 			`[Crawl Zukan] Base de données mise à jour. ${updatedCount} personnages synchronisés.`

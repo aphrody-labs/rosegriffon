@@ -61,6 +61,7 @@ interface ListParams {
 	power_max?: string;
 	status?: string;
 	role?: string;
+	ageGroup?: string;
 }
 
 interface ListResult<T> {
@@ -1315,6 +1316,12 @@ export const wikiService = {
 			// No prefix-based fallback needed — DB series are correct
 			query = query.eq("series", params.series);
 		}
+		if (params.ageGroup) {
+			// Valeur brute EN, telle que capturée par crawlZukanOrder (zukan.inazuma.jp
+			// `ul.basic`) — pas de table de correspondance FR côté DB, l'UI traduit à
+			// l'affichage (cf. CharacterFilters).
+			query = query.eq("age_group", params.ageGroup);
+		}
 		// Default sort: zukan_order ASC (official zukan.inazuma.jp order), fallback internal_code
 		const { data, count, error } = await query
 			.order("zukan_order", { ascending: true, nullsFirst: false })
@@ -2366,6 +2373,9 @@ export const wikiService = {
 			teamId: char.team_id,
 			teamName: char.teams?.[0]?.names?.fr || char.teams?.[0]?.names?.en || "",
 			zukanHash,
+			nickname: char.nickname || undefined,
+			ageGroup: char.age_group || undefined,
+			schoolYear: char.school_year || undefined,
 			// `gameAppearances` retiré : la colonne `game_appearances` est morte (vide 0/6148) →
 			// elle n'injectait jamais rien d'utile (la section « Apparitions » reste donc masquée).
 			controlType: char.control_type || undefined,

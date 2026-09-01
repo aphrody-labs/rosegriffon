@@ -655,6 +655,424 @@ export type Database = {
         }
         Relationships: []
       }
+      avatar_saves: {
+        Row: {
+          code: string | null
+          cree_le: string
+          donnees: Json
+          id: string
+          modifie_le: string
+          nom: string
+          user_id: string
+        }
+        Insert: {
+          code?: string | null
+          cree_le?: string
+          donnees: Json
+          id?: string
+          modifie_le?: string
+          nom?: string
+          user_id: string
+        }
+        Update: {
+          code?: string | null
+          cree_le?: string
+          donnees?: Json
+          id?: string
+          modifie_le?: string
+          nom?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "avatar_saves_user_id_fkey"
+            columns: ["user_id"]
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      bot_import_noctaly: {
+        Row: {
+          discord_id: string
+          guild_id: string
+          importe_le: string
+          profil_eco: Json | null
+          profil_niveau: Json | null
+        }
+        Insert: {
+          discord_id: string
+          guild_id: string
+          importe_le?: string
+          profil_eco?: Json | null
+          profil_niveau?: Json | null
+        }
+        Update: {
+          discord_id?: string
+          guild_id?: string
+          importe_le?: string
+          profil_eco?: Json | null
+          profil_niveau?: Json | null
+        }
+        Relationships: []
+      }
+      bot_import_noctaly_catalogue: {
+        Row: {
+          contenu: Json
+          genre: string
+          guild_id: string
+          importe_le: string
+        }
+        Insert: {
+          contenu: Json
+          genre: string
+          guild_id: string
+          importe_le?: string
+        }
+        Update: {
+          contenu?: Json
+          genre?: string
+          guild_id?: string
+          importe_le?: string
+        }
+        Relationships: []
+      }
+      bot_inventaire: {
+        Row: {
+          categorie: string
+          discord_id: string
+          guild_id: string
+          objet_id: string
+          obtenu_le: string
+          prix_paye: number
+        }
+        Insert: {
+          categorie: string
+          discord_id: string
+          guild_id: string
+          objet_id: string
+          obtenu_le?: string
+          prix_paye?: number
+        }
+        Update: {
+          categorie?: string
+          discord_id?: string
+          guild_id?: string
+          objet_id?: string
+          obtenu_le?: string
+          prix_paye?: number
+        }
+        Relationships: []
+      }
+      bot_journal_kizuna: {
+        Row: {
+          contrepartie: string | null
+          cree_le: string
+          delta: number
+          discord_id: string
+          guild_id: string
+          id: number
+          motif: string
+          reference: string | null
+        }
+        Insert: {
+          contrepartie?: string | null
+          cree_le?: string
+          delta: number
+          discord_id: string
+          guild_id: string
+          id?: number
+          motif: string
+          reference?: string | null
+        }
+        Update: {
+          contrepartie?: string | null
+          cree_le?: string
+          delta?: number
+          discord_id?: string
+          guild_id?: string
+          id?: number
+          motif?: string
+          reference?: string | null
+        }
+        Relationships: []
+      }
+      bot_menus_roles: {
+        Row: {
+          choix_max: number
+          cree_le: string
+          cree_par: string
+          description: string | null
+          forme: string
+          guild_id: string
+          id: number
+          maj_le: string
+          message_id: string
+          roles: Json
+          salon_id: string
+          titre: string
+        }
+        Insert: {
+          choix_max?: number
+          cree_le?: string
+          cree_par: string
+          description?: string | null
+          forme?: string
+          guild_id: string
+          id?: number
+          maj_le?: string
+          message_id: string
+          roles?: Json
+          salon_id: string
+          titre: string
+        }
+        Update: {
+          choix_max?: number
+          cree_le?: string
+          cree_par?: string
+          description?: string | null
+          forme?: string
+          guild_id?: string
+          id?: number
+          maj_le?: string
+          message_id?: string
+          roles?: Json
+          salon_id?: string
+          titre?: string
+        }
+        Relationships: []
+      }
+      bot_multicomptes_verdicts: {
+        Row: {
+          compte_a: string
+          compte_b: string
+          cree_le: string
+          guild_id: string
+          id: number
+          maj_le: string
+          motif: string | null
+          par_qui: string | null
+          verdict: string
+        }
+        Insert: {
+          compte_a: string
+          compte_b: string
+          cree_le?: string
+          guild_id: string
+          id?: number
+          maj_le?: string
+          motif?: string | null
+          par_qui?: string | null
+          verdict: string
+        }
+        Update: {
+          compte_a?: string
+          compte_b?: string
+          cree_le?: string
+          guild_id?: string
+          id?: number
+          maj_le?: string
+          motif?: string | null
+          par_qui?: string | null
+          verdict?: string
+        }
+        Relationships: []
+      }
+      bot_profils: {
+        Row: {
+          cree_le: string
+          dernier_gain_le: string | null
+          dernier_quotidien_le: string | null
+          discord_id: string
+          guild_id: string
+          jetons: number
+          jetons_gagnes: number
+          maj_le: string
+          messages_comptes: number
+          niveau: number
+          perso_favori: string | null
+          plaque: string | null
+          serie_quotidienne: number
+          titre: string | null
+          xp: number
+        }
+        Insert: {
+          cree_le?: string
+          dernier_gain_le?: string | null
+          dernier_quotidien_le?: string | null
+          discord_id: string
+          guild_id: string
+          jetons?: number
+          jetons_gagnes?: number
+          maj_le?: string
+          messages_comptes?: number
+          niveau?: number
+          perso_favori?: string | null
+          plaque?: string | null
+          serie_quotidienne?: number
+          titre?: string | null
+          xp?: number
+        }
+        Update: {
+          cree_le?: string
+          dernier_gain_le?: string | null
+          dernier_quotidien_le?: string | null
+          discord_id?: string
+          guild_id?: string
+          jetons?: number
+          jetons_gagnes?: number
+          maj_le?: string
+          messages_comptes?: number
+          niveau?: number
+          perso_favori?: string | null
+          plaque?: string | null
+          serie_quotidienne?: number
+          titre?: string | null
+          xp?: number
+        }
+        Relationships: []
+      }
+      bot_recompenses_niveau: {
+        Row: {
+          cree_le: string
+          cumulable: boolean
+          guild_id: string
+          niveau: number
+          role_id: string
+        }
+        Insert: {
+          cree_le?: string
+          cumulable?: boolean
+          guild_id: string
+          niveau: number
+          role_id: string
+        }
+        Update: {
+          cree_le?: string
+          cumulable?: boolean
+          guild_id?: string
+          niveau?: number
+          role_id?: string
+        }
+        Relationships: []
+      }
+      bot_reglages_guilde: {
+        Row: {
+          guild_id: string
+          maj_le: string
+          valeurs: Json
+        }
+        Insert: {
+          guild_id: string
+          maj_le?: string
+          valeurs?: Json
+        }
+        Update: {
+          guild_id?: string
+          maj_le?: string
+          valeurs?: Json
+        }
+        Relationships: []
+      }
+      bot_suggestions: {
+        Row: {
+          auteur_id: string
+          cree_le: string
+          decide_le: string | null
+          decide_par: string | null
+          guild_id: string
+          id: number
+          maj_le: string
+          message_id: string | null
+          motif: string | null
+          numero: number
+          salon_id: string
+          statut: string
+          texte: string
+        }
+        Insert: {
+          auteur_id: string
+          cree_le?: string
+          decide_le?: string | null
+          decide_par?: string | null
+          guild_id: string
+          id?: number
+          maj_le?: string
+          message_id?: string | null
+          motif?: string | null
+          numero: number
+          salon_id: string
+          statut?: string
+          texte: string
+        }
+        Update: {
+          auteur_id?: string
+          cree_le?: string
+          decide_le?: string | null
+          decide_par?: string | null
+          guild_id?: string
+          id?: number
+          maj_le?: string
+          message_id?: string | null
+          motif?: string | null
+          numero?: number
+          salon_id?: string
+          statut?: string
+          texte?: string
+        }
+        Relationships: []
+      }
+      bot_tickets: {
+        Row: {
+          auteur_id: string
+          categorie: string
+          ferme_le: string | null
+          ferme_par: string | null
+          guild_id: string
+          id: number
+          maj_le: string
+          numero: number
+          ouvert_le: string
+          pris_le: string | null
+          pris_par: string | null
+          salon_id: string
+          statut: string
+          sujet: string | null
+        }
+        Insert: {
+          auteur_id: string
+          categorie: string
+          ferme_le?: string | null
+          ferme_par?: string | null
+          guild_id: string
+          id?: number
+          maj_le?: string
+          numero: number
+          ouvert_le?: string
+          pris_le?: string | null
+          pris_par?: string | null
+          salon_id: string
+          statut?: string
+          sujet?: string | null
+        }
+        Update: {
+          auteur_id?: string
+          categorie?: string
+          ferme_le?: string | null
+          ferme_par?: string | null
+          guild_id?: string
+          id?: number
+          maj_le?: string
+          numero?: number
+          ouvert_le?: string
+          pris_le?: string | null
+          pris_par?: string | null
+          salon_id?: string
+          statut?: string
+          sujet?: string | null
+        }
+        Relationships: []
+      }
       campagne_creations_discord: {
         Row: {
           a_media: boolean
@@ -707,6 +1125,73 @@ export type Database = {
             columns: ["message_id"]
             referencedRelation: "discord_messages"
             referencedColumns: ["message_id"]
+          },
+        ]
+      }
+      campagne_creations_instagram: {
+        Row: {
+          a_media: boolean
+          auteur_pseudo: string | null
+          campagne_slug: string
+          collecte_le: string
+          hashtag_trouve: string | null
+          images: Json
+          legende: string | null
+          masque: boolean
+          mis_en_avant: boolean
+          motif_masquage: string | null
+          nb_images: number
+          origine: string
+          permalink: string
+          publie_le: string | null
+          shortcode: string
+          soumis_par: string | null
+          verifie_le: string | null
+        }
+        Insert: {
+          a_media?: boolean
+          auteur_pseudo?: string | null
+          campagne_slug: string
+          collecte_le?: string
+          hashtag_trouve?: string | null
+          images?: Json
+          legende?: string | null
+          masque?: boolean
+          mis_en_avant?: boolean
+          motif_masquage?: string | null
+          nb_images?: number
+          origine?: string
+          permalink: string
+          publie_le?: string | null
+          shortcode: string
+          soumis_par?: string | null
+          verifie_le?: string | null
+        }
+        Update: {
+          a_media?: boolean
+          auteur_pseudo?: string | null
+          campagne_slug?: string
+          collecte_le?: string
+          hashtag_trouve?: string | null
+          images?: Json
+          legende?: string | null
+          masque?: boolean
+          mis_en_avant?: boolean
+          motif_masquage?: string | null
+          nb_images?: number
+          origine?: string
+          permalink?: string
+          publie_le?: string | null
+          shortcode?: string
+          soumis_par?: string | null
+          verifie_le?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "campagne_creations_instagram_campagne_slug_fkey"
+            columns: ["campagne_slug"]
+            referencedRelation: "x_campagnes"
+            referencedColumns: ["slug"]
           },
         ]
       }
@@ -831,6 +1316,45 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      cron_executions: {
+        Row: {
+          demarre_le: string
+          duree_ms: number
+          erreur: string | null
+          expiree: boolean
+          hote: string
+          id: number
+          origine: string
+          succes: boolean
+          tache: string
+          termine_le: string
+        }
+        Insert: {
+          demarre_le: string
+          duree_ms: number
+          erreur?: string | null
+          expiree?: boolean
+          hote: string
+          id?: never
+          origine: string
+          succes: boolean
+          tache: string
+          termine_le: string
+        }
+        Update: {
+          demarre_le?: string
+          duree_ms?: number
+          erreur?: string | null
+          expiree?: boolean
+          hote?: string
+          id?: never
+          origine?: string
+          succes?: boolean
+          tache?: string
+          termine_le?: string
+        }
+        Relationships: []
       }
       discord_channels: {
         Row: {
@@ -1220,6 +1744,52 @@ export type Database = {
         }
         Relationships: []
       }
+      discord_roles_catalogue: {
+        Row: {
+          categorie: string | null
+          gere_par_integration: boolean
+          guild_id: string
+          maj_le: string
+          permissions_dangereuses: boolean
+          permissions_decodees: string[]
+          porteurs_count: number
+          role_id: string
+          type_integration: string | null
+          utilite: string | null
+        }
+        Insert: {
+          categorie?: string | null
+          gere_par_integration?: boolean
+          guild_id: string
+          maj_le?: string
+          permissions_dangereuses?: boolean
+          permissions_decodees?: string[]
+          porteurs_count?: number
+          role_id: string
+          type_integration?: string | null
+          utilite?: string | null
+        }
+        Update: {
+          categorie?: string | null
+          gere_par_integration?: boolean
+          guild_id?: string
+          maj_le?: string
+          permissions_dangereuses?: boolean
+          permissions_decodees?: string[]
+          porteurs_count?: number
+          role_id?: string
+          type_integration?: string | null
+          utilite?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "discord_roles_catalogue_role_id_fkey"
+            columns: ["role_id"]
+            referencedRelation: "discord_roles"
+            referencedColumns: ["role_id"]
+          },
+        ]
+      }
       discord_sync_logs: {
         Row: {
           created_at: string | null
@@ -1579,6 +2149,7 @@ export type Database = {
       }
       inagle_characters: {
         Row: {
+          age_group: string | null
           base_slug: string | null
           chara_id: string | null
           constellation: string | null
@@ -1603,11 +2174,13 @@ export type Database = {
           name_en: string | null
           name_fr: string | null
           name_ja: string | null
+          nickname: string | null
           position: string | null
           position_id: number | null
           rarity: string | null
           rarity_code: number | null
           rarity_label: string | null
+          school_year: string | null
           series: string | null
           sheet_data: Json | null
           skills: Json | null
@@ -1635,6 +2208,7 @@ export type Database = {
           zukan_order: number | null
         }
         Insert: {
+          age_group?: string | null
           base_slug?: string | null
           chara_id?: string | null
           constellation?: string | null
@@ -1659,11 +2233,13 @@ export type Database = {
           name_en?: string | null
           name_fr?: string | null
           name_ja?: string | null
+          nickname?: string | null
           position?: string | null
           position_id?: number | null
           rarity?: string | null
           rarity_code?: number | null
           rarity_label?: string | null
+          school_year?: string | null
           series?: string | null
           sheet_data?: Json | null
           skills?: Json | null
@@ -1691,6 +2267,7 @@ export type Database = {
           zukan_order?: number | null
         }
         Update: {
+          age_group?: string | null
           base_slug?: string | null
           chara_id?: string | null
           constellation?: string | null
@@ -1715,11 +2292,13 @@ export type Database = {
           name_en?: string | null
           name_fr?: string | null
           name_ja?: string | null
+          nickname?: string | null
           position?: string | null
           position_id?: number | null
           rarity?: string | null
           rarity_code?: number | null
           rarity_label?: string | null
+          school_year?: string | null
           series?: string | null
           sheet_data?: Json | null
           skills?: Json | null
@@ -2243,6 +2822,8 @@ export type Database = {
           name_en: string | null
           name_fr: string | null
           name_ja: string | null
+          power_defense: number | null
+          power_offense: number | null
           type: string | null
           updated_at: string | null
         }
@@ -2257,6 +2838,8 @@ export type Database = {
           name_en?: string | null
           name_fr?: string | null
           name_ja?: string | null
+          power_defense?: number | null
+          power_offense?: number | null
           type?: string | null
           updated_at?: string | null
         }
@@ -2271,6 +2854,8 @@ export type Database = {
           name_en?: string | null
           name_fr?: string | null
           name_ja?: string | null
+          power_defense?: number | null
+          power_offense?: number | null
           type?: string | null
           updated_at?: string | null
         }
@@ -3396,8 +3981,8 @@ export type Database = {
         Row: {
           created_at: string
           label: string
-          poster_url: string | null
           position: number
+          poster_url: string | null
           skill_id: string
           source: string
           updated_at: string
@@ -3406,8 +3991,8 @@ export type Database = {
         Insert: {
           created_at?: string
           label: string
-          poster_url?: string | null
           position?: number
+          poster_url?: string | null
           skill_id: string
           source?: string
           updated_at?: string
@@ -3416,8 +4001,8 @@ export type Database = {
         Update: {
           created_at?: string
           label?: string
-          poster_url?: string | null
           position?: number
+          poster_url?: string | null
           skill_id?: string
           source?: string
           updated_at?: string
@@ -3427,7 +4012,6 @@ export type Database = {
           {
             foreignKeyName: "inagle_skill_videos_skill_id_fkey"
             columns: ["skill_id"]
-            isOneToOne: false
             referencedRelation: "inagle_skills"
             referencedColumns: ["id"]
           },
@@ -4820,7 +5404,6 @@ export type Database = {
           badges: string[] | null
           banner_position: number
           banner_url: string | null
-          poste: string | null
           bio: string | null
           city: string | null
           claimed_at: string | null
@@ -4831,6 +5414,7 @@ export type Database = {
           id: string
           patreon_id: string | null
           postal_code: string | null
+          poste: string | null
           role: string | null
           twitter_handle: string | null
           updated_at: string | null
@@ -4842,6 +5426,7 @@ export type Database = {
           address_line2?: string | null
           avatar_url?: string | null
           badges?: string[] | null
+          banner_position?: number
           banner_url?: string | null
           bio?: string | null
           city?: string | null
@@ -4853,6 +5438,7 @@ export type Database = {
           id: string
           patreon_id?: string | null
           postal_code?: string | null
+          poste?: string | null
           role?: string | null
           twitter_handle?: string | null
           updated_at?: string | null
@@ -4864,6 +5450,7 @@ export type Database = {
           address_line2?: string | null
           avatar_url?: string | null
           badges?: string[] | null
+          banner_position?: number
           banner_url?: string | null
           bio?: string | null
           city?: string | null
@@ -4875,6 +5462,7 @@ export type Database = {
           id?: string
           patreon_id?: string | null
           postal_code?: string | null
+          poste?: string | null
           role?: string | null
           twitter_handle?: string | null
           updated_at?: string | null
@@ -5234,6 +5822,43 @@ export type Database = {
         }
         Relationships: []
       }
+      two_factor: {
+        Row: {
+          backup_codes: string
+          failed_verification_count: number
+          id: string
+          locked_until: string | null
+          secret: string
+          user_id: string
+          verified: boolean
+        }
+        Insert: {
+          backup_codes: string
+          failed_verification_count?: number
+          id: string
+          locked_until?: string | null
+          secret: string
+          user_id: string
+          verified?: boolean
+        }
+        Update: {
+          backup_codes?: string
+          failed_verification_count?: number
+          id?: string
+          locked_until?: string | null
+          secret?: string
+          user_id?: string
+          verified?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "two_factor_user_id_fkey"
+            columns: ["user_id"]
+            referencedRelation: "user"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user: {
         Row: {
           created_at: string
@@ -5440,6 +6065,155 @@ export type Database = {
           },
         ]
       }
+      x_campagne_oeuvres: {
+        Row: {
+          campagne_slug: string
+          cle: string
+          construit_le: string
+          creation_gardee_id: string
+          creation_gardee_source: string
+          creations: Json
+          dhash: string | null
+          hauteur: number | null
+          image_master_chemin: string | null
+          image_master_id: string | null
+          image_master_index: number
+          image_master_source: string | null
+          image_master_url: string | null
+          largeur: number | null
+          motif_regroupement: string | null
+          nb_creations: number
+          oeuvre_id: string
+          phash: string | null
+          sha256: string | null
+        }
+        Insert: {
+          campagne_slug: string
+          cle: string
+          construit_le?: string
+          creation_gardee_id: string
+          creation_gardee_source: string
+          creations?: Json
+          dhash?: string | null
+          hauteur?: number | null
+          image_master_chemin?: string | null
+          image_master_id?: string | null
+          image_master_index?: number
+          image_master_source?: string | null
+          image_master_url?: string | null
+          largeur?: number | null
+          motif_regroupement?: string | null
+          nb_creations?: number
+          oeuvre_id: string
+          phash?: string | null
+          sha256?: string | null
+        }
+        Update: {
+          campagne_slug?: string
+          cle?: string
+          construit_le?: string
+          creation_gardee_id?: string
+          creation_gardee_source?: string
+          creations?: Json
+          dhash?: string | null
+          hauteur?: number | null
+          image_master_chemin?: string | null
+          image_master_id?: string | null
+          image_master_index?: number
+          image_master_source?: string | null
+          image_master_url?: string | null
+          largeur?: number | null
+          motif_regroupement?: string | null
+          nb_creations?: number
+          oeuvre_id?: string
+          phash?: string | null
+          sha256?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "x_campagne_oeuvres_campagne_slug_cle_fkey"
+            columns: ["campagne_slug", "cle"]
+            referencedRelation: "x_campagne_participants"
+            referencedColumns: ["campagne_slug", "cle"]
+          },
+          {
+            foreignKeyName: "x_campagne_oeuvres_campagne_slug_fkey"
+            columns: ["campagne_slug"]
+            referencedRelation: "x_campagnes"
+            referencedColumns: ["slug"]
+          },
+        ]
+      }
+      x_campagne_participants: {
+        Row: {
+          campagne_slug: string
+          cle: string
+          construit_le: string
+          derniere_le: string | null
+          eligible: boolean
+          fusionne_dans: string | null
+          identifiants: Json
+          motif_ineligible: string | null
+          nb_creations_brutes: number
+          nb_oeuvres: number
+          notes: string | null
+          premiere_le: string | null
+          pseudo_affichage: string
+          sources: string[]
+          updated_at: string
+          verrouille: boolean
+        }
+        Insert: {
+          campagne_slug: string
+          cle: string
+          construit_le?: string
+          derniere_le?: string | null
+          eligible?: boolean
+          fusionne_dans?: string | null
+          identifiants?: Json
+          motif_ineligible?: string | null
+          nb_creations_brutes?: number
+          nb_oeuvres?: number
+          notes?: string | null
+          premiere_le?: string | null
+          pseudo_affichage: string
+          sources?: string[]
+          updated_at?: string
+          verrouille?: boolean
+        }
+        Update: {
+          campagne_slug?: string
+          cle?: string
+          construit_le?: string
+          derniere_le?: string | null
+          eligible?: boolean
+          fusionne_dans?: string | null
+          identifiants?: Json
+          motif_ineligible?: string | null
+          nb_creations_brutes?: number
+          nb_oeuvres?: number
+          notes?: string | null
+          premiere_le?: string | null
+          pseudo_affichage?: string
+          sources?: string[]
+          updated_at?: string
+          verrouille?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "x_campagne_participants_campagne_slug_fkey"
+            columns: ["campagne_slug"]
+            referencedRelation: "x_campagnes"
+            referencedColumns: ["slug"]
+          },
+          {
+            foreignKeyName: "x_campagne_participants_campagne_slug_fusionne_dans_fkey"
+            columns: ["campagne_slug", "fusionne_dans"]
+            referencedRelation: "x_campagne_participants"
+            referencedColumns: ["campagne_slug", "cle"]
+          },
+        ]
+      }
       x_campagne_posts: {
         Row: {
           a_media: boolean
@@ -5492,10 +6266,237 @@ export type Database = {
           },
         ]
       }
+      x_campagne_relais: {
+        Row: {
+          campagne_slug: string
+          message_id: string | null
+          poste_le: string
+          reference_id: string
+          salon_id: string
+          saute_motif: string | null
+          source: string
+        }
+        Insert: {
+          campagne_slug: string
+          message_id?: string | null
+          poste_le?: string
+          reference_id: string
+          salon_id: string
+          saute_motif?: string | null
+          source: string
+        }
+        Update: {
+          campagne_slug?: string
+          message_id?: string | null
+          poste_le?: string
+          reference_id?: string
+          salon_id?: string
+          saute_motif?: string | null
+          source?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "x_campagne_relais_campagne_slug_fkey"
+            columns: ["campagne_slug"]
+            referencedRelation: "x_campagnes"
+            referencedColumns: ["slug"]
+          },
+        ]
+      }
+      x_campagne_tirage_entrees: {
+        Row: {
+          cle: string
+          cle_tri: number | null
+          empreinte: string | null
+          oeuvres: string[]
+          poids: number
+          pseudo_affichage: string
+          rang: number | null
+          tirage_id: string
+          u: number | null
+        }
+        Insert: {
+          cle: string
+          cle_tri?: number | null
+          empreinte?: string | null
+          oeuvres?: string[]
+          poids: number
+          pseudo_affichage: string
+          rang?: number | null
+          tirage_id: string
+          u?: number | null
+        }
+        Update: {
+          cle?: string
+          cle_tri?: number | null
+          empreinte?: string | null
+          oeuvres?: string[]
+          poids?: number
+          pseudo_affichage?: string
+          rang?: number | null
+          tirage_id?: string
+          u?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "x_campagne_tirage_entrees_tirage_id_fkey"
+            columns: ["tirage_id"]
+            referencedRelation: "x_campagne_tirages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      x_campagne_tirage_gagnants: {
+        Row: {
+          cle: string
+          creation_identifiant: string
+          creation_source: string
+          lot: string | null
+          oeuvre_id: string | null
+          pseudo_affichage: string
+          rang: number
+          tirage_id: string
+        }
+        Insert: {
+          cle: string
+          creation_identifiant: string
+          creation_source: string
+          lot?: string | null
+          oeuvre_id?: string | null
+          pseudo_affichage: string
+          rang: number
+          tirage_id: string
+        }
+        Update: {
+          cle?: string
+          creation_identifiant?: string
+          creation_source?: string
+          lot?: string | null
+          oeuvre_id?: string | null
+          pseudo_affichage?: string
+          rang?: number
+          tirage_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "x_campagne_tirage_gagnants_tirage_id_cle_fkey"
+            columns: ["tirage_id", "cle"]
+            referencedRelation: "x_campagne_tirage_entrees"
+            referencedColumns: ["tirage_id", "cle"]
+          },
+          {
+            foreignKeyName: "x_campagne_tirage_gagnants_tirage_id_fkey"
+            columns: ["tirage_id"]
+            referencedRelation: "x_campagne_tirages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      x_campagne_tirages: {
+        Row: {
+          annonce_discord_message_id: string | null
+          annonce_discord_salon_id: string | null
+          annonce_le: string | null
+          annule_le: string | null
+          balise_chaine: string | null
+          balise_recuperee_le: string | null
+          balise_reseau: string | null
+          balise_round: number | null
+          balise_signature: string | null
+          campagne_slug: string
+          effectue_le: string | null
+          effectue_par: string | null
+          empreinte_engagement: string
+          empreinte_graine: string | null
+          empreinte_participants: string
+          engagement_le: string
+          engagement_message_id: string | null
+          graine: string | null
+          graine_origine: string
+          id: string
+          motif_annulation: string | null
+          nb_gagnants: number
+          nb_participants: number
+          numero: number
+          parametres: Json
+          poids_mode: string
+          publie: boolean
+          publie_le: string | null
+        }
+        Insert: {
+          annonce_discord_message_id?: string | null
+          annonce_discord_salon_id?: string | null
+          annonce_le?: string | null
+          annule_le?: string | null
+          balise_chaine?: string | null
+          balise_recuperee_le?: string | null
+          balise_reseau?: string | null
+          balise_round?: number | null
+          balise_signature?: string | null
+          campagne_slug: string
+          effectue_le?: string | null
+          effectue_par?: string | null
+          empreinte_engagement: string
+          empreinte_graine?: string | null
+          empreinte_participants: string
+          engagement_le?: string
+          engagement_message_id?: string | null
+          graine?: string | null
+          graine_origine: string
+          id?: string
+          motif_annulation?: string | null
+          nb_gagnants: number
+          nb_participants: number
+          numero: number
+          parametres?: Json
+          poids_mode: string
+          publie?: boolean
+          publie_le?: string | null
+        }
+        Update: {
+          annonce_discord_message_id?: string | null
+          annonce_discord_salon_id?: string | null
+          annonce_le?: string | null
+          annule_le?: string | null
+          balise_chaine?: string | null
+          balise_recuperee_le?: string | null
+          balise_reseau?: string | null
+          balise_round?: number | null
+          balise_signature?: string | null
+          campagne_slug?: string
+          effectue_le?: string | null
+          effectue_par?: string | null
+          empreinte_engagement?: string
+          empreinte_graine?: string | null
+          empreinte_participants?: string
+          engagement_le?: string
+          engagement_message_id?: string | null
+          graine?: string | null
+          graine_origine?: string
+          id?: string
+          motif_annulation?: string | null
+          nb_gagnants?: number
+          nb_participants?: number
+          numero?: number
+          parametres?: Json
+          poids_mode?: string
+          publie?: boolean
+          publie_le?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "x_campagne_tirages_campagne_slug_fkey"
+            columns: ["campagne_slug"]
+            referencedRelation: "x_campagnes"
+            referencedColumns: ["slug"]
+          },
+        ]
+      }
       x_campagnes: {
         Row: {
           actif: boolean
           collecte_le: string | null
+          comptes_organisateurs: string[]
           created_at: string
           debut_le: string | null
           description: string | null
@@ -5510,6 +6511,8 @@ export type Database = {
           principale: boolean
           publiee: boolean
           reglement: string[]
+          relais_depuis: string | null
+          relais_salon: string | null
           requetes: string[]
           salons_depot: string[]
           slug: string
@@ -5520,6 +6523,7 @@ export type Database = {
         Insert: {
           actif?: boolean
           collecte_le?: string | null
+          comptes_organisateurs?: string[]
           created_at?: string
           debut_le?: string | null
           description?: string | null
@@ -5534,6 +6538,8 @@ export type Database = {
           principale?: boolean
           publiee?: boolean
           reglement?: string[]
+          relais_depuis?: string | null
+          relais_salon?: string | null
           requetes?: string[]
           salons_depot?: string[]
           slug: string
@@ -5544,6 +6550,7 @@ export type Database = {
         Update: {
           actif?: boolean
           collecte_le?: string | null
+          comptes_organisateurs?: string[]
           created_at?: string
           debut_le?: string | null
           description?: string | null
@@ -5558,6 +6565,8 @@ export type Database = {
           principale?: boolean
           publiee?: boolean
           reglement?: string[]
+          relais_depuis?: string | null
+          relais_salon?: string | null
           requetes?: string[]
           salons_depot?: string[]
           slug?: string
@@ -5683,9 +6692,9 @@ export type Database = {
       }
       check_rate_limit: {
         Args: {
+          p_user_id: string
           p_max_count?: number
           p_window_minutes?: number
-          p_user_id: string
           p_action: string
         }
         Returns: boolean
@@ -5704,36 +6713,36 @@ export type Database = {
       get_my_patreon_status: {
         Args: Record<PropertyKey, never>
         Returns: {
-          currently_entitled_cents: number
-          is_active: boolean
-          status: string
-          tier_titles: string[]
-          next_charge_date: string
-          is_free_trial: boolean
-          is_gifted: boolean
           discount_percent: number
+          next_charge_date: string
+          currently_entitled_cents: number
+          tier_titles: string[]
+          status: string
+          is_free_trial: boolean
+          is_active: boolean
+          is_gifted: boolean
         }[]
       }
       get_share_counts: {
         Args: { p_article_ids: string[] }
         Returns: {
+          by_platform: Json
           total: number
           article_id: string
-          by_platform: Json
         }[]
       }
       get_trending_articles: {
         Args: { days_window?: number; result_limit?: number }
         Returns: {
-          excerpt: string
-          trending_score: number
-          title: string
           id: string
+          title: string
           slug: string
+          excerpt: string
           featured_image_url: string
           category: string
           view_count: number
           published_at: string
+          trending_score: number
         }[]
       }
       gtrgm_compress: {
@@ -5793,7 +6802,7 @@ export type Database = {
         Returns: undefined
       }
       increment_share_count: {
-        Args: { p_article_id: string; p_platform: string }
+        Args: { p_platform: string; p_article_id: string }
         Returns: undefined
       }
       is_active_patron: {
@@ -5825,7 +6834,7 @@ export type Database = {
         Returns: string
       }
       patreon_heartbeat: {
-        Args: { p_success: boolean; p_trigger: string; p_event_id: string }
+        Args: { p_success: boolean; p_event_id: string; p_trigger: string }
         Returns: undefined
       }
       rg_libelle_equipe: {
@@ -5872,7 +6881,7 @@ export type Database = {
         Returns: number
       }
       upsert_reading_progress: {
-        Args: { p_user_id: string; p_article_id: string; p_progress: number }
+        Args: { p_article_id: string; p_user_id: string; p_progress: number }
         Returns: undefined
       }
       vector_avg: {
@@ -5898,6 +6907,10 @@ export type Database = {
       vector_typmod_in: {
         Args: { "": unknown[] }
         Returns: number
+      }
+      x_creation_doublon_ecarte: {
+        Args: { p_campagne: string; p_source: string; p_identifiant: string }
+        Returns: boolean
       }
       x_masquer_hashtags: {
         Args: { tags: string[]; texte: string }

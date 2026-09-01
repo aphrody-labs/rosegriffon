@@ -126,6 +126,17 @@ export function PlayersClient({
 			case "team": {
 				return teams?.find((t) => t.id === value)?.name || value;
 			}
+			case "ageGroup": {
+				if (value === "Child") return t("wiki.age_groups.child");
+				if (value === "Elementary") return t("wiki.age_groups.elementary");
+				if (value === "Middle School") return t("wiki.age_groups.middle_school");
+				if (value === "High School") return t("wiki.age_groups.high_school");
+				if (value === "College") return t("wiki.age_groups.college");
+				if (value === "Adult") return t("wiki.age_groups.adult");
+				if (value === "Elder") return t("wiki.age_groups.elder");
+				if (value === "Exobeing") return t("wiki.age_groups.exobeing");
+				return value;
+			}
 			default:
 				return value;
 		}
@@ -140,6 +151,7 @@ export function PlayersClient({
 		"series",
 		"team",
 		"role",
+		"ageGroup",
 	];
 	const activeFilters = filterKeys
 		.map((key) => {
