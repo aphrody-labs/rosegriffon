@@ -1,15 +1,17 @@
 /**
  * Tests du noyau de niveaux.
  *
- * Le rôle principal de ce fichier est de FIXER la recopie de
- * `inagle_exp_table` : une table de cent nombres recopiée à la main se dégrade
- * en silence, et personne ne s'en aperçoit avant qu'un membre ne trouve son
- * niveau bizarre six mois plus tard. Les points de contrôle ci-dessous ont été
- * relevés en base le 14/8/2026 par
+ * Le rôle principal de ce fichier est de FIXER la courbe : un membre qui trouve
+ * son niveau bizarre six mois plus tard ne saura jamais quel changement l'a
+ * causé. Les points de contrôle ci-dessous viennent du classement **Noctaly**
+ * du 1/9/2026 — la référence que la communauté connaît, et sur laquelle la
+ * courbe a été alignée.
  *
- *   with c as (select level, sum(need_exp) over (order by level) as cum
- *              from inagle_exp_table)
- *   select level, cum from c where level in (5,10,20,30,40,50,60,70,80,90,99);
+ *   membre          XP      niveau affiché par Noctaly
+ *   Mioleen_        44 580     26
+ *   Ichigo Kurosaki 29 045     22
+ *   Inazo           20 572     19
+ *   LeCrépuscule    12 280     16
  */
 import { describe, expect, test } from "bun:test";
 
@@ -31,22 +33,48 @@ import {
 	xpPourAtteindre,
 } from "./experience";
 
-/** `cum(level)` de la requête ci-dessus = XP cumulée pour atteindre level + 1. */
+/** XP cumulée pour ATTEINDRE chaque niveau, avec `5·i² + 50·i + 100` par palier. */
 const CONTROLES: ReadonlyArray<[niveau: number, cumule: number]> = [
-	[5, 761],
-	[10, 2_422],
-	[20, 12_291],
-	[30, 38_310],
-	[40, 91_919],
-	[50, 195_502],
-	[60, 380_638],
-	[70, 689_813],
-	[80, 1_179_390],
-	[90, 1_921_840],
-	[99, 2_878_742],
+	[2, 100],
+	[5, 770],
+	[10, 3_720],
+	[16, 11_825],
+	[19, 18_375],
+	[22, 26_950],
+	[25, 37_820],
+	[26, 42_000],
+	[40, 136_045],
+	[60, 425_095],
+	[100, 1_845_195],
 ];
 
-describe("table d'expérience du jeu", () => {
+/**
+ * Ce que Noctaly affiche, pour les membres dont nous avons l'XP exacte.
+ *
+ * C'est LE test qui compte : il échouera le jour où quelqu'un retouchera la
+ * courbe sans mesurer ce que ça fait au classement que les membres connaissent.
+ */
+const CLASSEMENT_NOCTALY: ReadonlyArray<[xp: number, niveau: number]> = [
+	[44_580, 26],
+	[29_045, 22],
+	[20_572, 19],
+	[12_280, 16],
+	[6_086, 12],
+];
+
+describe("courbe d'expérience", () => {
+	test("les niveaux de Noctaly sont reproduits", () => {
+		for (const [xp, niveau] of CLASSEMENT_NOCTALY) {
+			expect(niveauPour(xp)).toBe(niveau);
+		}
+	});
+
+	test("le premier palier coûte 100 XP, comme chez tous les bots de niveaux", () => {
+		expect(PALIERS_EXPERIENCE[0]).toBe(100);
+		expect(niveauPour(99)).toBe(1);
+		expect(niveauPour(100)).toBe(2);
+	});
+
 	test("cent paliers, strictement croissants", () => {
 		expect(PALIERS_EXPERIENCE).toHaveLength(100);
 		for (let index = 1; index < PALIERS_EXPERIENCE.length; index++) {
@@ -54,30 +82,28 @@ describe("table d'expérience du jeu", () => {
 		}
 	});
 
-	test("les cumuls relevés en base sont reproduits à l'unité près", () => {
+	test("les cumuls sont ceux de la formule, à l'unité près", () => {
 		for (const [niveau, cumule] of CONTROLES) {
-			// `cum(level)` inclut le palier de `level` : c'est donc l'XP pour
-			// atteindre `level + 1`.
-			expect(xpPourAtteindre(niveau + 1)).toBe(cumule);
+			expect(xpPourAtteindre(niveau)).toBe(cumule);
 		}
 	});
 
-	test("le plafond est celui du jeu", () => {
+	test("le plafond reste à cent niveaux", () => {
 		expect(NIVEAU_MAX).toBe(100);
-		expect(XP_NIVEAU_MAX).toBe(2_878_742);
+		expect(XP_NIVEAU_MAX).toBe(1_845_195);
 	});
 });
 
 describe("niveau depuis l'XP", () => {
 	test("on commence au niveau 1, sans XP", () => {
 		expect(niveauPour(0)).toBe(1);
-		expect(niveauPour(123)).toBe(1);
+		expect(niveauPour(99)).toBe(1);
 		expect(xpPourAtteindre(1)).toBe(0);
 	});
 
 	test("le palier exact fait monter, un point en dessous ne fait pas monter", () => {
-		expect(niveauPour(124)).toBe(2);
-		expect(niveauPour(123)).toBe(1);
+		expect(niveauPour(100)).toBe(2);
+		expect(niveauPour(99)).toBe(1);
 		expect(niveauPour(xpPourAtteindre(50))).toBe(50);
 		expect(niveauPour(xpPourAtteindre(50) - 1)).toBe(49);
 	});
@@ -118,12 +144,12 @@ describe("progression affichable", () => {
 
 describe("niveaux franchis", () => {
 	test("aucun franchissement sans changement de niveau", () => {
-		expect(niveauxFranchis(0, 100)).toEqual([]);
+		expect(niveauxFranchis(0, 99)).toEqual([]);
 		expect(niveauxFranchis(1_000, 500)).toEqual([]);
 	});
 
 	test("un gain ordinaire franchit un palier", () => {
-		expect(niveauxFranchis(120, 130)).toEqual([2]);
+		expect(niveauxFranchis(90, 110)).toEqual([2]);
 	});
 
 	test("un gain exceptionnel rend TOUS les paliers, pas seulement le dernier", () => {
@@ -202,11 +228,20 @@ describe("filtre d'annonce", () => {
 });
 
 describe("gain d'un message", () => {
-	test("le tirage couvre toute la fourchette, bornes comprises", () => {
-		expect(gainDeMessage(GAIN_DEFAUT, 0)).toBe(15);
-		expect(gainDeMessage(GAIN_DEFAUT, 0.999_999)).toBe(25);
-		expect(gainDeMessage(GAIN_DEFAUT, 0.5)).toBeGreaterThanOrEqual(15);
-		expect(gainDeMessage(GAIN_DEFAUT, 0.5)).toBeLessThanOrEqual(25);
+	test("le défaut donne 20 XP, quel que soit le tirage", () => {
+		// Règle de Noctaly, affichée sur son classement : « Toutes les 60
+		// secondes, tu peux envoyer un message pour obtenir 20 XP ». Bornes
+		// égales, donc aucun hasard — mais le tirage reste opérant si on les
+		// écarte de nouveau (test suivant).
+		for (const tirage of [0, 0.25, 0.5, 0.999_999]) {
+			expect(gainDeMessage(GAIN_DEFAUT, tirage)).toBe(20);
+		}
+	});
+
+	test("une fourchette élargie retrouve un tirage sur toute son étendue", () => {
+		const large = { delaiSecondes: 60, maximum: 25, minimum: 15 };
+		expect(gainDeMessage(large, 0)).toBe(15);
+		expect(gainDeMessage(large, 0.999_999)).toBe(25);
 	});
 
 	test("une fourchette inversée ne rend jamais moins que son minimum", () => {
@@ -214,8 +249,8 @@ describe("gain d'un message", () => {
 	});
 
 	test("un tirage aberrant ne casse pas le gain", () => {
-		expect(gainDeMessage(GAIN_DEFAUT, Number.NaN)).toBe(15);
-		expect(gainDeMessage(GAIN_DEFAUT, 42)).toBe(25);
+		expect(gainDeMessage(GAIN_DEFAUT, Number.NaN)).toBe(20);
+		expect(gainDeMessage(GAIN_DEFAUT, 42)).toBe(20);
 	});
 
 	test("le premier message d'un membre rapporte toujours", () => {
