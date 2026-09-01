@@ -524,6 +524,29 @@ async function assembleRelease(app: AppConfig): Promise<string> {
 			log(`⚠ ${relative} absent du dépôt — ignoré`);
 			continue;
 		}
+		// Nettoyer les fichiers SQLite transients (WAL + SHM) avant hardlink,
+		// qui ne peut pas les copier ("Operation not permitted").
+		if (relative === "data") {
+			const walFiles = await run([
+				"find",
+				source,
+				"-type",
+				"f",
+				"(",
+				"-name",
+				"*.sqlite-wal",
+				"-o",
+				"-name",
+				"*.sqlite-shm",
+				")",
+			]);
+			if (walFiles.stdout.trim()) {
+				for (const file of walFiles.stdout.trim().split("\n")) {
+					await rm(file, { force: true });
+				}
+				log(`⚠ ${walFiles.stdout.trim().split("\n").length} fichier(s) SQLite WAL/SHM supprimés avant assemblage`);
+			}
+		}
 		const target = `${appPath}/${relative}`;
 		await rm(target, { recursive: true, force: true });
 		await mkdir(target.slice(0, target.lastIndexOf("/")), { recursive: true });
