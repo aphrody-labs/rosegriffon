@@ -127,3 +127,24 @@ function nombre(valeur: unknown, defaut: number): number {
 	const n = typeof valeur === "number" ? valeur : Number.parseInt(String(valeur ?? ""), 10);
 	return Number.isFinite(n) && n > 0 ? n : defaut;
 }
+
+/**
+ * Normalise une bannière enregistrée pour l'affichage.
+ *
+ * Les illustrations du jeu sont livrées en letterbox : deux bandes noires
+ * horizontales que le CDN sait retirer avec `crop=bandes`. Les bannières
+ * choisies AVANT que ce paramètre n'existe ne le portent pas — elles
+ * s'afficheraient donc avec leurs bandes, en travers d'une carte de profil.
+ * Plutôt que de réécrire la base à chaque évolution du CDN, on l'ajoute au
+ * moment du rendu : une URL déjà recadrée est renvoyée telle quelle, une URL
+ * étrangère au CDN n'est pas touchée.
+ */
+export function urlBanniereAffichable(url: string | null | undefined): string | null {
+	if (!url) {
+		return null;
+	}
+	if (!/\/(dx11|g4tx)\//.test(url) || url.includes("crop=bandes")) {
+		return url;
+	}
+	return `${url}${url.includes("?") ? "&" : "?"}crop=bandes`;
+}

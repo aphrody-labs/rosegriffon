@@ -394,7 +394,9 @@ export function AccountProfileForm({
 													)}
 												>
 													<span className={cn("shrink-0 rounded-xl border p-2", badge.tone)}>
-														<badge.icon className="size-5" aria-hidden />
+														{/* Icône extraite du jeu, pas un pictogramme générique.
+														    eslint-disable-next-line @next/next/no-img-element */}
+														<img src={badge.iconeUrl} alt="" aria-hidden className="size-5" />
 													</span>
 													<span className="min-w-0 flex-1">
 														<span className="block text-sm font-bold text-foreground">

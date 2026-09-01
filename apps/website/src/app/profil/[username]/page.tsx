@@ -1,5 +1,9 @@
 import { notFound } from "next/navigation";
 
+import { CarteJoueur } from "@rosegriffon/ui";
+import { progression, rangDe } from "@rosegriffon/types/experience";
+import { libelleRole } from "@rosegriffon/types/roles";
+
 import { LegacyBanner } from "@/components/patreon/LegacyBanner";
 import { PatreonConnectionCard } from "@/components/patreon/PatreonConnectionCard";
 import { PatreonMembershipCard } from "@/components/patreon/PatreonMembershipCard";
@@ -10,7 +14,6 @@ import { createAdminClient } from "@/lib/supabase/server";
 
 import { ProfileAbout } from "./_components/profile-about";
 import { ProfileActivity } from "./_components/profile-activity";
-import { ProfileBanner } from "./_components/profile-banner";
 import { ProfileIdentity } from "./_components/profile-identity";
 import { ProfileQuickLinks } from "./_components/profile-quick-links";
 
@@ -110,6 +113,34 @@ export default async function UserProfilePage({
 
 	const isOwnProfile = user?.id === profile.id;
 
+	// Niveau de communauté : l'XP réellement gagnée sur le Discord, via le compte
+	// lié. Un profil sans `discord_id` (inscription Google, compte non réclamé)
+	// n'a pas de niveau — la carte n'affiche alors pas le bloc plutôt que
+	// d'inventer un « niveau 1 » que personne n'a joué.
+	let niveauCommunaute: { valeur: number; restant: number; rang: string } | null = null;
+	let titreJoueur: string | null = null;
+	if (profile.discord_id) {
+		try {
+			const { rows } = await pool.query<{ xp: string | number; titre: string | null }>(
+				`SELECT xp, titre FROM bot_profils WHERE discord_id = $1 ORDER BY xp DESC LIMIT 1`,
+				[profile.discord_id]
+			);
+			const ligne = rows[0];
+			if (ligne) {
+				const avancement = progression(Number(ligne.xp) || 0);
+				niveauCommunaute = {
+					rang: rangDe(avancement.niveau).nom,
+					restant: avancement.restant,
+					valeur: avancement.niveau,
+				};
+				titreJoueur = ligne.titre;
+			}
+		} catch (error) {
+			// Le profil doit s'afficher même si le bot n'a jamais vu ce membre.
+			console.error("[profil] niveau de communauté indisponible", error);
+		}
+	}
+
 	let activities: Chronicle[] = [];
 	try {
 		const { rows } = await pool.query<Chronicle>(
@@ -190,19 +221,24 @@ export default async function UserProfilePage({
 				}
 			/>
 
-			{/* Bannière de profil personnalisé */}
-			<ProfileBanner src={profile.banner_url} />
-
-			<div className="container mx-auto px-4 pt-8 sm:px-6 sm:pt-10 lg:px-8">
-				<ProfileIdentity
-					username={profile.username ?? username}
+			{/* Carte de joueur : bannière, portrait, nom, description et éléments
+			    dans la composition des fiches du jeu. */}
+			<div className="container mx-auto px-4 pt-6 sm:px-6 sm:pt-8 lg:px-8">
+				<CarteJoueur
+					pseudo={profile.username ?? username}
+					titre={titreJoueur}
+					description={profile.bio}
 					avatarUrl={profile.avatar_url}
-					bio={profile.bio}
-					role={profile.role}
+					banniereUrl={profile.banner_url}
+					badges={profile.badges}
+					role={libelleRole(profile.role)}
+					niveau={niveauCommunaute}
+				/>
+
+				<ProfileIdentity
 					website={profile.website}
 					twitterHandle={profile.twitter_handle}
 					isOwnProfile={isOwnProfile}
-					badges={profile.badges}
 				/>
 
 				{isOwnProfile && (

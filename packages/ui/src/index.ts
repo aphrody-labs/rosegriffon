@@ -22,6 +22,7 @@ export {
 	GALERIE_PAR_PAGE,
 	ROUTE_GALERIE,
 	lireReponseGalerie,
+	urlBanniereAffichable,
 	urlPageGalerie,
 	type IllustrationGalerie,
 	type PageGalerie,
@@ -33,6 +34,7 @@ export { useMediaQuery } from "./hooks/use-media-query";
 export { useSwipe } from "./hooks/use-swipe";
 
 export * from "./components/account";
+export { CarteJoueur, type CarteJoueurProps } from "./components/profil/carte-joueur";
 export * from "./components/accordion";
 export * from "./components/adsense";
 export * from "./components/admin-page-header";
