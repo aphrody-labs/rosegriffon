@@ -82,7 +82,7 @@ function LoginPageContent() {
 							</Link>
 							<CardTitle className="text-2xl font-bold">Rose Griffon</CardTitle>
 							<CardDescription>
-								Connecte-toi avec Discord ou lie ton compte Patreon pour accéder à ton espace.
+								Connecte-toi avec Discord ou Google. Le bouton Patreon lie ton mécénat au passage.
 							</CardDescription>
 						</CardHeader>
 
@@ -158,8 +158,8 @@ function LoginPageContent() {
 							<div className="space-y-3">
 								<h2 className="text-2xl font-bold tracking-tight">Personnalise ton identité</h2>
 								<p className="text-sm leading-relaxed text-muted-foreground">
-									Rejoins la communauté et utilise notre générateur d'avatar exclusif pour créer ta
-									photo de profil officielle.
+									Compose ta photo de profil avec un cadre Rose Griffon, puis pose-la sur ton
+									compte.
 								</p>
 							</div>
 
