@@ -1,19 +1,36 @@
 "use client";
 
-import { Camera, Loader2, Upload } from "lucide-react";
+import { Camera, ExternalLink, Loader2, Upload } from "lucide-react";
+import Link from "next/link";
 import { useId, useRef, useState } from "react";
 import { toast } from "sonner";
+
+import { libelleRole } from "@rosegriffon/types/roles";
 
 import { cn } from "../../lib/utils";
 import { Avatar, AvatarFallback, AvatarImage } from "../avatar";
 import { Badge } from "../badge";
+import { Button } from "../button";
 import { Card, CardContent } from "../card";
 
 interface AccountAvatarCardProps {
 	avatarUrl?: string | null;
 	username?: string | null;
-	/** Rôle affiché sous le pseudo (« Membre », « Admin »…). */
+	/** Rôle affiché sous le pseudo — traduit ici, jamais la valeur brute. */
 	role?: string | null;
+	/**
+	 * Adresse du profil public.
+	 *
+	 * Il n'y avait qu'un lien « Retour à mon profil » en haut de page, en gris,
+	 * au-dessus du titre : à cet endroit il se lit comme un fil d'Ariane, pas
+	 * comme une action. Or la question qu'on se pose en modifiant son profil est
+	 * toujours la même — « ça donne quoi ? » —, et la réponse doit être à côté de
+	 * l'avatar, pas dans la barre de navigation.
+	 *
+	 * Absent, aucun bouton n'est rendu : un compte sans pseudo n'a pas encore de
+	 * page publique.
+	 */
+	profileHref?: string | null;
 	/**
 	 * Téléverse le fichier et renvoie l'URL publique définitive.
 	 *
@@ -44,6 +61,7 @@ export function AccountAvatarCard({
 	avatarUrl,
 	username,
 	role,
+	profileHref,
 	onUpload,
 }: AccountAvatarCardProps) {
 	const inputId = useId();
@@ -139,8 +157,16 @@ export function AccountAvatarCard({
 					<p className="truncate text-lg font-bold text-foreground">{username || "Utilisateur"}</p>
 					{role && (
 						<Badge variant="secondary" className="rounded-full">
-							{role}
+							{libelleRole(role)}
 						</Badge>
+					)}
+					{profileHref && (
+						<Button variant="outline" size="sm" asChild className="w-full rounded-full">
+							<Link href={profileHref}>
+								<ExternalLink className="size-4" aria-hidden />
+								Voir mon profil public
+							</Link>
+						</Button>
 					)}
 					<p className="text-xs text-muted-foreground">
 						PNG, JPEG ou WebP — 400 × 400 px recommandé, 2 Mo maximum.

@@ -38,11 +38,14 @@ export interface PassiveDetailData {
 // ── Libellés ──
 
 const ELEMENT_COLORS: Record<string, string> = {
-	fire: "bg-red-500/15 text-red-600 border-red-300/40",
-	forest: "bg-green-500/15 text-green-600 border-green-300/40",
-	mountain: "bg-stone-500/15 text-stone-600 border-stone-300/40",
-	neutral: "bg-slate-500/10 text-slate-500 border-slate-300/30",
-	wind: "bg-sky-500/15 text-sky-600 border-sky-300/40",
+	// Tokens `element-*` de `@rosegriffon/ui` : les teintes du JEU, relevées sur
+	// ses icônes officielles. Les classes Tailwind en dur d'avant divergeaient
+	// d'un écran à l'autre — le vent y était bleu ici, vert ailleurs.
+	fire: "bg-element-feu/15 text-element-feu border-element-feu/40",
+	forest: "bg-element-foret/15 text-element-foret border-element-foret/40",
+	mountain: "bg-element-montagne/15 text-element-montagne border-element-montagne/40",
+	neutral: "bg-outline-variant/20 text-on-surface-variant border-outline-variant/40",
+	wind: "bg-element-vent/15 text-element-vent border-element-vent/40",
 };
 
 const ELEMENT_LABELS: Record<string, string> = {

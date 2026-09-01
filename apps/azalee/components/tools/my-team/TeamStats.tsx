@@ -17,10 +17,15 @@ const ELEMENT_SPRITE: Record<string, SpriteCommonKey> = {
 	Wind: "wind",
 };
 const ELEMENT_COLORS: Record<string, string> = {
-	Fire: "#ef4444",
-	Forest: "#a855f7",
-	Mountain: "#f59e0b",
-	Wind: "#22c55e",
+	// Les mêmes teintes que partout ailleurs, lues sur les tokens du design
+	// system : ici en `var()` parce que ces valeurs partent dans des attributs
+	// SVG et des styles en ligne, où une classe Tailwind ne s'applique pas.
+	// L'ancienne table donnait un vent VERT et une forêt VIOLETTE — ni l'un ni
+	// l'autre ne sont les couleurs du jeu.
+	Fire: "var(--color-element-feu)",
+	Forest: "var(--color-element-foret)",
+	Mountain: "var(--color-element-montagne)",
+	Wind: "var(--color-element-vent)",
 };
 const ELEMENT_LABELS: Record<string, string> = {
 	Fire: "Feu",

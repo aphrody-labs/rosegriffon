@@ -178,6 +178,8 @@ export function AccountClient({
 									avatarUrl={avatarUrl}
 									username={username}
 									role={role}
+									// Le wiki a sa propre page publique, à la même adresse.
+									profileHref={username ? `/profil/${username}` : null}
 									onUpload={uploadAvatar}
 								/>
 							</div>

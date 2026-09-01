@@ -27,6 +27,35 @@ export const ALL_ROLES = [
 
 export type RgRole = (typeof ALL_ROLES)[number];
 
+/**
+ * Le nom qu'on donne à un rôle devant quelqu'un.
+ *
+ * La carte du compte affichait la valeur BRUTE de la colonne — « member »,
+ * « superadmin », « moderator » — à côté du pseudo. Ce sont des clés de base de
+ * données, pas des mots destinés à être lus : elles sont en anglais sur un site
+ * entièrement français, et « superadmin » ne dit rien à personne. Azalée avait
+ * déjà sa propre table de traduction, dans un composant de page ; celle-ci est
+ * partagée pour que les deux surfaces disent la même chose.
+ */
+export const LIBELLES_ROLES: Readonly<Record<RgRole, string>> = Object.freeze({
+	admin: "Administrateur",
+	banned: "Banni",
+	editor: "Rédacteur",
+	moderator: "Modérateur",
+	premium: "Patron",
+	staff: "Équipe",
+	superadmin: "Administrateur principal",
+	user: "Membre",
+});
+
+/** Libellé lisible d'un rôle, y compris quand la colonne dit autre chose. */
+export function libelleRole(role: string | null | undefined): string {
+	if (!role) {
+		return LIBELLES_ROLES.user;
+	}
+	return (LIBELLES_ROLES as Record<string, string>)[role] ?? LIBELLES_ROLES.user;
+}
+
 /** Roles qui peuvent accéder au dashboard editorial (azalee + website). */
 export const ADMIN_ROLES = [
 	"admin",

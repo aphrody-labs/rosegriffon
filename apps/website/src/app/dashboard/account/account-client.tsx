@@ -186,6 +186,9 @@ export function AccountClient({
 									avatarUrl={avatarUrl}
 									username={username}
 									role={role}
+									// Sans pseudo, la page publique n'existe pas encore : le
+									// bouton ne s'affiche pas plutôt que de mener à un 404.
+									profileHref={username ? `/profil/${username}` : null}
 									onUpload={uploadAvatar}
 								/>
 							</div>
