@@ -100,7 +100,7 @@ export default async function UserProfilePage({
 		// dont deux étaient rendus sur cette page sans authentification.
 		const { rows } = await pool.query<Profile>(
 			`SELECT id, updated_at, username, avatar_url, role, website, discord_id,
-			        bio, banner_url, banner_position, twitter_handle, badges
+			        bio, banner_url, banner_position, poste, twitter_handle, badges
 			   FROM profiles WHERE username = $1 AND claimed_at IS NOT NULL LIMIT 1`,
 			[username]
 		);
@@ -126,6 +126,7 @@ export default async function UserProfilePage({
 	// est ce que le membre porte réellement, avec la couleur de son pseudo dans
 	// les salons. On prend le rôle de plus haute position, comme Discord.
 	let roleDiscord: { nom: string; couleur: number | null } | null = null;
+	let classementServeur: { place: number; total: number } | null = null;
 	if (profile.discord_id) {
 		try {
 			const { rows } = await pool.query<{ name: string; color: number | null }>(
@@ -160,6 +161,27 @@ export default async function UserProfilePage({
 					valeur: avancement.niveau,
 				};
 				titreJoueur = ligne.titre;
+
+				// Le « Grade » de la fiche du jeu, en vrai : la place au classement du
+				// serveur. Une seconde requête plutôt qu'une jointure — le classement
+				// se calcule sur toute la table, pas sur une ligne.
+				const { rows: rang } = await pool.query<{ place: string; total: string }>(
+					`SELECT place, total FROM (
+					   SELECT discord_id,
+					          rank() OVER (ORDER BY xp DESC) AS place,
+					          count(*) OVER () AS total
+					     FROM bot_profils
+					    WHERE xp > 0
+					 ) c WHERE discord_id = $1`,
+					[profile.discord_id]
+				);
+				const ligneRang = rang[0];
+				if (ligneRang) {
+					classementServeur = {
+						place: Number(ligneRang.place),
+						total: Number(ligneRang.total),
+					};
+				}
 			}
 		} catch (error) {
 			// Le profil doit s'afficher même si le bot n'a jamais vu ce membre.
@@ -257,6 +279,8 @@ export default async function UserProfilePage({
 					avatarUrl={profile.avatar_url}
 					banniereUrl={profile.banner_url}
 					banniereCadrage={profile.banner_position}
+					poste={profile.poste}
+					classement={classementServeur}
 					badges={profile.badges}
 					role={roleDiscord}
 					niveau={niveauCommunaute}

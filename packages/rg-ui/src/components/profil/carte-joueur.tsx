@@ -47,6 +47,15 @@ export interface CarteJoueurProps {
 	banniereCadrage?: number | null;
 	/** Identifiants d'éléments portés par le membre. */
 	badges?: readonly string[] | null;
+	/** Poste, abrégé comme sur une fiche du jeu (`GAR`, `DEF`, `MIL`, `ATT`). */
+	poste?: string | null;
+	/**
+	 * Place au classement du serveur.
+	 *
+	 * C'est notre équivalent du « Grade » de la fiche du jeu : un chiffre gagné,
+	 * pas un rang décoratif. Absent quand le membre n'est pas classé.
+	 */
+	classement?: { place: number; total: number } | null;
 	/**
 	 * Rôle DISCORD du membre — celui du serveur, pas celui du site.
 	 *
@@ -63,6 +72,21 @@ export interface CarteJoueurProps {
 	actions?: React.ReactNode;
 }
 
+/**
+ * Les quatre postes, avec les couleurs du jeu.
+ *
+ * Les valeurs passent par les tokens `poste-*` de `styles.css` : elles étaient
+ * écrites en hexadécimal au milieu d'un composant du wiki, sous le commentaire
+ * « matching game exactly ». Une couleur juste mais recopiée finit toujours par
+ * diverger.
+ */
+const POSTES: Record<string, { abrege: string; nom: string; couleur: string }> = {
+	ATT: { abrege: "FW", couleur: "var(--color-poste-attaquant)", nom: "Attaquant" },
+	DEF: { abrege: "DF", couleur: "var(--color-poste-defenseur)", nom: "Défenseur" },
+	GAR: { abrege: "GK", couleur: "var(--color-poste-gardien)", nom: "Gardien" },
+	MIL: { abrege: "MF", couleur: "var(--color-poste-milieu)", nom: "Milieu" },
+};
+
 export function CarteJoueur({
 	pseudo,
 	nom,
@@ -72,6 +96,8 @@ export function CarteJoueur({
 	banniereUrl,
 	banniereCadrage,
 	badges,
+	poste,
+	classement,
 	role,
 	niveau,
 	actions,
@@ -84,6 +110,7 @@ export function CarteJoueur({
 	}, [badges]);
 
 	const nomAffiche = nom?.trim() || pseudo;
+	const posteAffiche = poste ? POSTES[poste] : null;
 	// Une bannière choisie avant l'arrivée du recadrage garde ses bandes noires
 	// en base : on les retire à l'affichage plutôt que de réécrire les lignes.
 	const fond = urlBanniereAffichable(banniereUrl);
@@ -202,8 +229,22 @@ export function CarteJoueur({
 							</p>
 						)}
 
-						{elements.length > 0 && (
+						{(elements.length > 0 || posteAffiche || classement) && (
 							<ul className="flex flex-wrap items-center gap-1.5 pt-0.5">
+								{posteAffiche && (
+									<li
+										title={posteAffiche.nom}
+										className="rounded-md px-2 py-0.5 text-[11px] font-extrabold tracking-wider text-white uppercase"
+										style={{ backgroundColor: posteAffiche.couleur }}
+									>
+										{posteAffiche.abrege}
+									</li>
+								)}
+								{classement && (
+									<li className="rounded-md border border-white/40 bg-black/35 px-2 py-0.5 text-[11px] font-bold text-white uppercase">
+										{classement.place}ᵉ / {classement.total.toLocaleString("fr-FR")}
+									</li>
+								)}
 								{elements.map((element) => {
 									return (
 										<li

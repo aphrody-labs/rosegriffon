@@ -8,10 +8,31 @@
 // `window` n'est pas typé dans les paquets sans lib DOM (serveur MCP, scripts
 // Bun) : on interroge `globalThis` pour rester compilable partout.
 const INTERNAL_URL = "http://127.0.0.1:8811";
-const PLACEHOLDER_URL =
-	"location" in globalThis
+
+/**
+ * Origine de repli, évaluée À L'APPEL — jamais au chargement du module.
+ *
+ * ── LE BUG QUE CETTE FONCTION CORRIGE ──────────────────────────────────────
+ * C'était une CONSTANTE : `"location" in globalThis ? location.origin :
+ * INTERNAL_URL`. Next évalue ce module pendant le BUILD, côté serveur, où
+ * `location` n'existe pas — la constante valait donc `http://127.0.0.1:8811`
+ * et partait telle quelle dans le bundle envoyé au navigateur. Résultat vu en
+ * production le 1/9/2026 : le téléversement d'avatar échouait en
+ * « Failed to fetch » (le navigateur du visiteur essayait de joindre le port
+ * 8811 de SA machine), et une URL d'avatar avait même été enregistrée sous
+ * cette forme en base.
+ *
+ * Le repli n'est atteint que si `NEXT_PUBLIC_SUPABASE_URL` est absente ou
+ * inexploitable — ce qui arrive : la valeur de `apps/website/.env.local` avait
+ * été remplacée par un blob scellé `eyJ2Ijo…`, exactement le cas que
+ * `isValidHttpUrl` refuse. Le garde-fou faisait son travail ; c'est le repli
+ * qui était mauvais.
+ */
+function origineDeRepli(): string {
+	return "location" in globalThis
 		? (globalThis as unknown as { location: { origin: string } }).location.origin
 		: INTERNAL_URL;
+}
 const PLACEHOLDER_ANON_JWT =
 	"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlzYmthZWx0dWJxaXR0eXdpYmVoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY1NDYyNzUsImV4cCI6MjA5MjEyMjI3NX0.eAyJfqREb8Kh5F_yLf5Jp43S2qOil4qUcqFTLQiExx0";
 
@@ -52,7 +73,7 @@ export function getSupabaseUrl(preferInternal = false): string {
 		: process.env.NEXT_PUBLIC_SUPABASE_URL;
 
 	if (isValidHttpUrl(url)) return url;
-	return PLACEHOLDER_URL;
+	return origineDeRepli();
 }
 
 export function getSupabasePublishableKey(): string {
