@@ -281,6 +281,8 @@ export const googleProvider = {
 	},
 } as const;
 
+export { deuxFacteurs } from "./two-factor";
+
 export {
 	type AccountEmailMessage,
 	type AccountEmailSender,

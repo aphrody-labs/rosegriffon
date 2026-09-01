@@ -10,12 +10,12 @@ import {
 	type AccountProviderConfig,
 	AccountSessions,
 	AccountShell,
-	AccountTwoFactorCard,
 	type AccountAddressValues,
 	type AccountLinkedAccount,
 	type AccountProfileValues,
 	type AccountSession,
 	type AccountTabId,
+	TwoFactorCard,
 } from "@rosegriffon/ui";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
@@ -211,28 +211,83 @@ export function AccountClient({
 										return { error: error?.message ?? null };
 									}}
 								/>
-								<AccountTwoFactorCard enabled={twoFactorEnabled} />
+								<TwoFactorCard
+									enabled={twoFactorEnabled}
+									// Aucun compte du site principal n'a de mot de passe :
+									// `emailAndPassword` n'y est pas activé, on s'y connecte par
+									// Discord, Google, Twitch ou Patreon. Le réclamer refuserait
+									// tout le monde.
+									demandeMotDePasse={false}
+									onChangement={reload}
+									actions={{
+										demarrer: async () => {
+											const { data, error } = await authClient.twoFactor.enable({});
+											if (error || !data) {
+												throw new Error(error?.message ?? "Activation impossible.");
+											}
+											return { backupCodes: data.backupCodes, totpURI: data.totpURI };
+										},
+										confirmer: async (code) => {
+											const { error } = await authClient.twoFactor.verifyTotp({ code });
+											if (error) {
+												throw new Error(error.message ?? "Code refusé.");
+											}
+										},
+										desactiver: async () => {
+											const { error } = await authClient.twoFactor.disable({});
+											if (error) {
+												throw new Error(error.message ?? "Désactivation impossible.");
+											}
+										},
+										regenererCodes: async () => {
+											const { data, error } = await authClient.twoFactor.generateBackupCodes({});
+											if (error || !data) {
+												throw new Error(error?.message ?? "Impossible de régénérer les codes.");
+											}
+											return data.backupCodes;
+										},
+									}}
+								/>
 							</div>
 
 							<AccountSessions
 								sessions={sessions}
 								onRevoke={async (token) => {
-									await authClient.revokeSession({ token });
+									// `revokeSession` NE LÈVE PAS : il rend `{ data, error }`. Sans
+									// cette vérification, un refus du serveur ressortait en
+									// « Session révoquée » et la session restait ouverte.
+									const { error } = await authClient.revokeSession({ token });
+									if (error) {
+										throw new Error(error.message ?? "Révocation refusée.");
+									}
 									reload();
 								}}
 								onRevokeOthers={async () => {
 									// `revokeOtherSessions` et pas `revokeSessions` : le second
 									// supprime aussi la session courante et déconnecte.
-									await authClient.revokeOtherSessions();
+									const { error } = await authClient.revokeOtherSessions();
+									if (error) {
+										throw new Error(error.message ?? "Révocation refusée.");
+									}
 									reload();
 								}}
 							/>
 
 							<AccountDangerZone
+								// Ce que la suppression emporte VRAIMENT, vérifié sur les clés
+								// étrangères de la base : `comments`, `user_teams` et
+								// `avatar_saves` pendent au profil en CASCADE. Les commandes,
+								// elles, ne sont PAS supprimées — `orders.user_id` passe à
+								// `NULL` : une facture se conserve, et annoncer sa disparition
+								// était faux dans les deux sens (on promettait un effacement
+								// qui n'a pas lieu, et on inquiétait sur une garantie légale).
 								losses={[
-									"Ton profil public, ta bio et tes badges.",
-									"Tes commentaires et tes contributions.",
-									"L'historique de tes commandes en boutique.",
+									"Ton profil public, ta bio, tes badges et ton adresse postale.",
+									"Tes commentaires, tes équipes enregistrées et tes avatars sauvegardés.",
+									"Ton accès : la connexion Discord, Google, Twitch ou Patreon liée à ce compte.",
+								]}
+								kept={[
+									"Tes commandes en boutique restent, détachées de ton compte — une facture doit pouvoir être retrouvée.",
 								]}
 								onDelete={async () => {
 									const { error } = await authClient.deleteUser({ callbackURL: "/" });

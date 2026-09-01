@@ -3,6 +3,9 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
+import { badgeMerite, filtrerBadges, SchemaProfilPublic } from "@rosegriffon/types/profil";
+import { isAdminRole } from "@rosegriffon/types/roles";
+
 import { getServerUser } from "@/lib/auth-helpers";
 import { createAdminClient } from "@/lib/supabase/server";
 
@@ -19,19 +22,6 @@ import { createAdminClient } from "@/lib/supabase/server";
  * sauvegarde d'une adresse écrasait le pseudo et la bio par des chaînes vides.
  */
 
-const profileSchema = z.object({
-	badges: z.array(z.string()).max(3),
-	banner_url: z.string().optional().or(z.literal("")),
-	bio: z.string().max(500).optional(),
-	full_name: z.string().optional(),
-	twitter_handle: z.string().optional(),
-	username: z
-		.string()
-		.min(3, "Le nom d'utilisateur doit faire au moins 3 caractères.")
-		.max(20, "Le nom d'utilisateur ne peut pas dépasser 20 caractères."),
-	website: z.string().url("URL invalide").optional().or(z.literal("")),
-});
-
 const addressSchema = z.object({
 	address_line1: z.string().optional(),
 	address_line2: z.string().optional(),
@@ -45,21 +35,28 @@ function firstIssue(error: z.ZodError): string {
 }
 
 export async function updateProfile(
-	values: z.infer<typeof profileSchema>
+	// `z.input` et non `z.infer` : le formulaire partagé envoie des `string[]`,
+	// c'est la validation qui les restreint aux badges connus. Prendre le type
+	// de SORTIE ferait refuser l'appel au compilateur alors que la valeur est
+	// exactement celle attendue.
+	values: z.input<typeof SchemaProfilPublic>
 ): Promise<{ error?: string }> {
 	const user = await getServerUser();
 	if (!user) {
 		return { error: "Session expirée — reconnecte-toi." };
 	}
 
-	const parsed = profileSchema.safeParse(values);
+	const parsed = SchemaProfilPublic.safeParse(values);
 	if (!parsed.success) {
 		return { error: firstIssue(parsed.error) };
 	}
 
-	const { error } = await createAdminClient()
+	const admin = createAdminClient();
+	const badges = await badgesAutorises(user.id, parsed.data.badges);
+
+	const { error } = await admin
 		.from("profiles")
-		.update({ ...parsed.data, updated_at: new Date().toISOString() })
+		.update({ ...parsed.data, badges, updated_at: new Date().toISOString() })
 		.eq("id", user.id);
 
 	if (error) {
@@ -73,6 +70,38 @@ export async function updateProfile(
 	revalidatePath("/dashboard/account");
 	revalidatePath(`/profil/${parsed.data.username}`);
 	return {};
+}
+
+/**
+ * Ne garde que les badges auxquels le compte a droit.
+ *
+ * La règle est dans `@rosegriffon/types/profil` (partagée avec Azalée) ; ici on
+ * ne fait que lui apporter ce que la base sait : le rôle du compte, son
+ * mécénat, et les badges déjà posés.
+ */
+async function badgesAutorises(userId: string, demandes: string[]): Promise<string[]> {
+	if (!demandes.some((badge) => badgeMerite(badge))) {
+		return [...demandes];
+	}
+
+	const admin = createAdminClient();
+	const [{ data: profil }, { data: mecenat }] = await Promise.all([
+		admin.from("profiles").select("role, badges").eq("id", userId).maybeSingle(),
+		admin
+			.from("patreon_memberships")
+			.select("patron_status")
+			.eq("user_id", userId)
+			.eq("patron_status", "active_patron")
+			.limit(1)
+			.maybeSingle(),
+	]);
+
+	const ligne = profil as { role?: string | null; badges?: unknown } | null;
+	return filtrerBadges(demandes, {
+		dejaPoses: Array.isArray(ligne?.badges) ? (ligne.badges as string[]) : [],
+		estMecene: Boolean(mecenat),
+		estStaff: isAdminRole(ligne?.role ?? null),
+	});
 }
 
 export async function updateAddress(

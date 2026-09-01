@@ -23,9 +23,18 @@ interface AccountDangerZoneProps {
 	onDelete: () => Promise<AccountActionResult>;
 	/** Ce qui sera perdu, listé explicitement pour un consentement éclairé. */
 	losses?: string[];
+	/**
+	 * Ce qui SURVIT à la suppression.
+	 *
+	 * Dire seulement ce qu'on perd laisse croire que tout disparaît. Les
+	 * commandes de la boutique, elles, restent — détachées du compte, parce
+	 * qu'une facture doit pouvoir être retrouvée. Le taire, c'est promettre un
+	 * effacement total qui n'a pas lieu.
+	 */
+	kept?: string[];
 }
 
-export function AccountDangerZone({ onDelete, losses }: AccountDangerZoneProps) {
+export function AccountDangerZone({ onDelete, losses, kept }: AccountDangerZoneProps) {
 	const fieldId = useId();
 	const [confirm, setConfirm] = useState("");
 	const [pending, setPending] = useState(false);
@@ -73,6 +82,13 @@ export function AccountDangerZone({ onDelete, losses }: AccountDangerZoneProps) 
 							<ul className="list-disc space-y-1 pl-5">
 								{losses.map((loss) => (
 									<li key={loss}>{loss}</li>
+								))}
+							</ul>
+						)}
+						{kept && kept.length > 0 && (
+							<ul className="list-disc space-y-1 pl-5 text-muted-foreground/80">
+								{kept.map((entree) => (
+									<li key={entree}>{entree}</li>
 								))}
 							</ul>
 						)}

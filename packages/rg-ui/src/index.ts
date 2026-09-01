@@ -8,6 +8,17 @@ export { cn } from "./lib/utils";
 // `components/adsense` (« use client »), pour rester lisibles par un composant
 // serveur — les layouts en ont besoin dans `metadata.other`.
 export { ADSENSE_CLIENT, ADSENSE_PUBLISHER } from "./lib/adsense";
+// Module PUR, exporté depuis `lib/` et jamais depuis le composant client :
+// une route serveur lit ces constantes (cf. l'en-tête de `lib/galerie-cdn.ts`).
+export {
+	CATEGORIES_GALERIE,
+	GALERIE_PAR_PAGE,
+	ROUTE_GALERIE,
+	lireReponseGalerie,
+	urlPageGalerie,
+	type IllustrationGalerie,
+	type PageGalerie,
+} from "./lib/galerie-cdn";
 
 // Hooks
 export { useIsMobile, useBreakpoint, BREAKPOINTS } from "./hooks/use-mobile";

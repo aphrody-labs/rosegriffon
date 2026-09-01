@@ -6,15 +6,17 @@
  */
 export { AccountAddressForm } from "./account-address-form";
 export { AccountAvatarCard } from "./account-avatar-card";
+export { BannerPicker } from "./banner-picker";
 export { AccountConnections, type AccountProviderConfig } from "./account-connections";
 export {
 	AccountEmailCard,
 	AccountPasswordCard,
-	AccountTwoFactorCard,
 } from "./account-credentials";
 export { AccountDangerZone } from "./account-danger-zone";
 export { AVAILABLE_BADGES, AccountProfileForm, MAX_BADGES } from "./account-profile-form";
 export { AccountSessions, describeUserAgent } from "./account-sessions";
+export { TwoFactorCard, type TwoFactorActions } from "./two-factor-card";
+export { TwoFactorChallenge } from "./two-factor-challenge";
 export { AccountShell } from "./account-shell";
 export { ACCOUNT_TAB_IDS, resolveAccountTab } from "./tabs";
 export type {

@@ -1,6 +1,5 @@
-import { Badge, Button, Avatar, AvatarFallback, AvatarImage } from "@rosegriffon/ui";
-import type { LucideIcon } from "lucide-react";
-import { Edit, ExternalLink, Crown, Star, ShieldCheck, Heart, Sparkles } from "lucide-react";
+import { AVAILABLE_BADGES, Badge, Button, Avatar, AvatarFallback, AvatarImage } from "@rosegriffon/ui";
+import { Edit, ExternalLink } from "lucide-react";
 import Link from "next/link";
 
 import TwitterIcon from "@/shared/icons/twitter";
@@ -16,33 +15,36 @@ interface ProfileIdentityProps {
 	badges?: string[] | null;
 }
 
-const BADGE_MAP: Record<string, { label: string; icon: LucideIcon; color: string }> = {
-	founder: {
-		label: "Fondateur",
-		icon: Crown,
-		color: "bg-amber-500/10 text-amber-500 border-amber-500/20",
-	},
-	vip: {
-		label: "VIP",
-		icon: Star,
-		color: "bg-purple-500/10 text-purple-500 border-purple-500/20",
-	},
-	beta: {
-		label: "Bêta-testeur",
-		icon: Sparkles,
-		color: "bg-cyan-500/10 text-cyan-500 border-cyan-500/20",
-	},
-	patreon: {
-		label: "Patreon",
-		icon: Heart,
-		color: "bg-rose-500/10 text-rose-500 border-rose-500/20",
-	},
-	staff: {
-		label: "Staff",
-		icon: ShieldCheck,
-		color: "bg-blue-500/10 text-blue-500 border-blue-500/20",
-	},
-};
+/**
+ * La description des badges vient de `@rosegriffon/ui`, pas d'une table locale.
+ *
+ * Elle existait ici en double, avec des couleurs Tailwind en dur
+ * (`amber-500`, `purple-500`, `blue-500`…) que le thème ne suivait pas : le
+ * même badge n'avait donc pas la même couleur dans le formulaire de compte et
+ * sur le profil public, et aucune des deux ne respectait la charte. La source
+ * unique porte les tokens du design system (`rg-or`, `rg-rose`, `info`,
+ * `patreon`, `succes`).
+ */
+const BADGES = new Map(AVAILABLE_BADGES.map((badge) => [badge.id as string, badge]));
+
+/**
+ * Un lien de profil n'est suivi que s'il s'ouvre dans un navigateur.
+ *
+ * La validation du formulaire refuse désormais les schémas exotiques, mais des
+ * lignes plus anciennes peuvent encore porter un `javascript:` accepté à
+ * l'époque — et c'est ici, au rendu, que cela deviendrait exécutable.
+ */
+function lienSuivable(valeur: string | null): string | null {
+	if (!valeur) {
+		return null;
+	}
+	try {
+		const url = new URL(valeur);
+		return url.protocol === "http:" || url.protocol === "https:" ? valeur : null;
+	} catch {
+		return null;
+	}
+}
 
 export function ProfileIdentity({
 	username,
@@ -55,6 +57,7 @@ export function ProfileIdentity({
 	badges,
 }: ProfileIdentityProps) {
 	const selectedBadges = badges || [];
+	const lienSite = lienSuivable(website);
 
 	return (
 		<section
@@ -78,14 +81,14 @@ export function ProfileIdentity({
 					{selectedBadges.length > 0 && (
 						<div className="flex flex-wrap gap-1.5 justify-center md:justify-start">
 							{selectedBadges.map((badgeId) => {
-								const badge = BADGE_MAP[badgeId];
+								const badge = BADGES.get(badgeId);
 								if (!badge) return null;
 								const IconComponent = badge.icon;
 								return (
 									<Badge
 										key={badgeId}
 										variant="outline"
-										className={`rounded-full px-2.5 py-0.5 text-[10px] font-extrabold uppercase tracking-wider flex items-center gap-1 shadow-sm border ${badge.color}`}
+										className={`rounded-full px-2.5 py-0.5 text-[10px] font-extrabold uppercase tracking-wider flex items-center gap-1 shadow-sm border ${badge.tone}`}
 									>
 										<IconComponent className="size-3" />
 										{badge.label}
@@ -119,11 +122,11 @@ export function ProfileIdentity({
 
 				{bio && <p className="max-w-2xl leading-relaxed text-foreground/85">{bio}</p>}
 
-				{(website || twitterHandle) && (
+				{(lienSite || twitterHandle) && (
 					<div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 pt-2 md:justify-start">
-						{website && (
+						{lienSite && (
 							<a
-								href={website}
+								href={lienSite}
 								target="_blank"
 								rel="noopener noreferrer"
 								className="flex items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-primary"
