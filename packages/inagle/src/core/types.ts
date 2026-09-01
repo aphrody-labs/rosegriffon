@@ -269,6 +269,12 @@ export interface BaseCharacter {
 	internalCode: string;
 	/** Zukan Hash (representative image) */
 	zukanHash?: string;
+	/** Surnom officiel zukan.inazuma.jp (ex. "Evans" pour Mark Evans) */
+	nickname?: string;
+	/** Groupe d'âge zukan.inazuma.jp, brut EN (ex. "Middle School", "Adult") */
+	ageGroup?: string;
+	/** Année scolaire zukan.inazuma.jp, brut EN (ex. "Grade 8") */
+	schoolYear?: string;
 
 	/** Localized names */
 	names: LocalizedNames;

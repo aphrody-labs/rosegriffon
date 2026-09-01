@@ -36,6 +36,12 @@ export interface ZukanOrderCharacter {
 	element: string;
 	game: string;
 	order: number;
+	/** Surnom affiché sous le nom complet (`.lBox .name .nickname`), ex. "Evans". */
+	nickname: string | null;
+	/** `ul.basic` : "Elementary School" / "Middle School" / "High School" / "Adult"… (brut, EN). */
+	ageGroup: string | null;
+	/** `ul.basic` : "Grade 7" / "Grade 8" / "Grade 9" (brut, EN). */
+	schoolYear: string | null;
 }
 
 export interface CrawlZukanOrderOptions {
@@ -128,6 +134,14 @@ export async function crawlZukanOrderPages(
 					const position = $(el).find("dl:has(dt:contains('Position')) dd p").text().trim() || "?";
 					const element = $(el).find("dl:has(dt:contains('Element')) dd p").text().trim() || "?";
 					const game = $(el).find("dl.appearedWorks dd").text().trim() || "?";
+					// `.basic` porte Age Group / School Year / Gender / Character Role — déjà présents
+					// dans la même page (SSR, pas besoin d'un crawl séparé de chara_list/chara_param
+					// en détail). Seuls Age Group/School Year/le surnom manquaient à l'appel.
+					const nickname = $(el).find(".lBox .name .nickname").text().trim() || null;
+					const ageGroup =
+						$(el).find(".basic dl:has(dt:contains('Age Group')) dd").text().trim() || null;
+					const schoolYear =
+						$(el).find(".basic dl:has(dt:contains('School Year')) dd").text().trim() || null;
 
 					allCharacters.push({
 						id: zukanHash || `chara-${globalIndex}`,
@@ -137,6 +151,9 @@ export async function crawlZukanOrderPages(
 						element,
 						game,
 						order: globalIndex,
+						nickname,
+						ageGroup,
+						schoolYear,
 					});
 					globalIndex++;
 				});

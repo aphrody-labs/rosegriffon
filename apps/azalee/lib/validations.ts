@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 export const searchParamsSchema = z.object({
+	ageGroup: z.string().optional(),
 	category: z.string().optional(),
 	element: z.string().optional(),
 	gender: z.string().optional(),

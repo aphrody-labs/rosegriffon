@@ -91,6 +91,7 @@ function listParams(query: URLSearchParams): Record<string, string | number | un
 		"power_max",
 		"status",
 		"role",
+		"ageGroup",
 	]) {
 		const value = query.get(key);
 		if (value !== null) params[key] = value;

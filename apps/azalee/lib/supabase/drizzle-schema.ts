@@ -145,6 +145,9 @@ export const inagle_characters = sqliteTable("inagle_characters", {
 	updated_at: text("updated_at"),
 	hero_type: text("hero_type"),
 	is_primary: integer("is_primary"),
+	age_group: text("age_group"),
+	school_year: text("school_year"),
+	nickname: text("nickname"),
 });
 
 export const inagle_chat_emotes = sqliteTable("inagle_chat_emotes", {

@@ -77,6 +77,7 @@ export default async function PlayersPage({
 		series,
 		status,
 		role,
+		ageGroup,
 		page,
 		perPage,
 	} = params;
@@ -87,6 +88,7 @@ export default async function PlayersPage({
 
 	// Data First: Fetch paginated data from DB
 	const { data: characters, total } = await wikiService.getCharactersList({
+		ageGroup: ageGroup?.toString(),
 		element: element?.toString(),
 		gender: gender?.toString(),
 		limit: itemsPerPage,

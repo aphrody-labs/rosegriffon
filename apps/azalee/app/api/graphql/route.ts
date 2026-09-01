@@ -37,6 +37,9 @@ const typeDefs = `
     internalCode: String
     name: LocalizedString
     gender: Int
+    nickname: String
+    ageGroup: String
+    schoolYear: String
     image: String
     variants: [CharacterVariant]
     sheetData: JSON
@@ -99,7 +102,7 @@ const typeDefs = `
 
   type Query {
     ragSearch(query: String!, k: Int, kinds: [String!]): [RagChunk]
-    characters(page: Int, limit: Int, q: String, element: String, position: String, rarity: String, team: String, series: String): [Character]
+    characters(page: Int, limit: Int, q: String, element: String, position: String, rarity: String, team: String, series: String, ageGroup: String): [Character]
     character(id: ID!): Character
     items(page: Int, limit: Int, q: String, category: String): [Item]
     item(id: ID!): Item
@@ -167,6 +170,9 @@ const resolvers = {
 				internalCode: c.internalCode,
 				name: c.names,
 				gender: c.gender,
+				nickname: c.nickname,
+				ageGroup: c.ageGroup,
+				schoolYear: c.schoolYear,
 				image: c.image,
 				variants: c.variants.map((v: any) => ({
 					charaParamId: v.charaParamId,
@@ -186,6 +192,9 @@ const resolvers = {
 				internalCode: c.internalCode,
 				name: c.names,
 				gender: c.gender,
+				nickname: c.nickname,
+				ageGroup: c.ageGroup,
+				schoolYear: c.schoolYear,
 				image: c.image,
 				variants: c.variants.map((v: any) => ({
 					charaParamId: v.charaParamId,

@@ -114,6 +114,31 @@ export function CharacterFilters({ teams = [] }: CharacterFiltersProps) {
 
 			<hr className="border-outline-variant/20" />
 
+			{/* Age Group — comme zukan.inazuma.jp/en/chara_list (colonne "Age Group").
+			    8 valeurs réelles mesurées en base après crawl (le zukan-wide catalogue
+			    en a d'autres, mais seules celles-ci apparaissent sur nos personnages). */}
+			<section className="space-y-2">
+				<h4 className="text-xs font-bold text-primary uppercase tracking-wider">
+					{t("wiki.filters.age_group")}
+				</h4>
+				<FilterChips
+					paramName="ageGroup"
+					className="flex flex-wrap gap-1.5"
+					options={[
+						{ label: t("wiki.age_groups.child"), value: "Child" },
+						{ label: t("wiki.age_groups.elementary"), value: "Elementary" },
+						{ label: t("wiki.age_groups.middle_school"), value: "Middle School" },
+						{ label: t("wiki.age_groups.high_school"), value: "High School" },
+						{ label: t("wiki.age_groups.college"), value: "College" },
+						{ label: t("wiki.age_groups.adult"), value: "Adult" },
+						{ label: t("wiki.age_groups.elder"), value: "Elder" },
+						{ label: t("wiki.age_groups.exobeing"), value: "Exobeing" },
+					]}
+				/>
+			</section>
+
+			<hr className="border-outline-variant/20" />
+
 			{/* Rarity */}
 			<section className="space-y-2">
 				<h4 className="text-xs font-bold text-primary uppercase tracking-wider">
