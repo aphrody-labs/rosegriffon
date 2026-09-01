@@ -15,7 +15,7 @@
  * s'importe des deux côtés tant que le module qui le réexporte n'est pas marqué
  * client.
  */
-import { Crown, Heart, ShieldCheck, Sparkles, Star } from "lucide-react";
+import { Flame, Mountain, Trees, Wind } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { BADGES_PROFIL, MAX_BADGES_PROFIL } from "@rosegriffon/types/profil";
 
@@ -29,52 +29,49 @@ export interface BadgeProfilAffichable {
 }
 
 /**
- * Badges cosmétiques affichables à côté du pseudo.
+ * Les quatre éléments d'Inazuma Eleven, tels qu'ils s'affichent.
  *
- * Les couleurs passent par les tokens de marque et sémantiques (`rg-or`,
- * `rg-rose`, `info`, `patreon`, `succes`) : elles suivent le thème actif au lieu
- * d'être figées. La page de profil public en gardait une copie avec des teintes
- * Tailwind en dur (`amber-500`, `purple-500`…), si bien que le même badge
- * n'avait pas la même couleur dans le formulaire et sur le profil.
+ * ── LES COULEURS SONT CELLES DU JEU ────────────────────────────────────────
+ * Elles passent par les tokens `element-*` de `styles.css`, relevés sur les
+ * icônes officielles (`public/spirit_type/*.webp`). C'est ce qui règle une
+ * divergence ancienne : le VENT était bleu dans certains écrans d'Azalée et
+ * vert dans d'autres. L'icône du jeu tranche — il est bleu.
  *
- * ⚠ Les identifiants doivent rester alignés sur `BADGES_PROFIL` de
- * `@rosegriffon/types/profil`, qui est ce que la validation serveur accepte.
+ * ── POURQUOI DES ICÔNES LUCIDE ET PAS LES `.webp` DU JEU ───────────────────
+ * Les icônes officielles vivent dans `apps/website/public/spirit_type/` et
+ * n'existent pas côté Azalée : un composant partagé qui les référencerait
+ * afficherait quatre carrés vides sur le wiki. Les pictogrammes Lucide
+ * (flamme, tourbillon, feuillage, sommet) disent la même chose, se colorent
+ * avec le thème et ne dépendent d'aucun fichier.
  */
 export const AVAILABLE_BADGES: readonly BadgeProfilAffichable[] = [
 	{
-		description: "Membre fondateur de la communauté Rose Griffon.",
-		icon: Crown,
-		id: "founder",
-		label: "Fondateur",
-		tone: "border-rg-or/25 bg-rg-or/10 text-rg-or",
+		description: "Frappe et pression : l'attaque avant tout.",
+		icon: Flame,
+		id: "fire",
+		label: "Feu",
+		tone: "border-element-feu/30 bg-element-feu/10 text-element-feu",
 	},
 	{
-		description: "Invité de marque ou contributeur exceptionnel.",
-		icon: Star,
-		id: "vip",
-		label: "VIP",
-		tone: "border-rg-rose/25 bg-rg-rose/10 text-rg-rose",
+		description: "Vitesse et esquive : passer avant d'être vu.",
+		icon: Wind,
+		id: "wind",
+		label: "Vent",
+		tone: "border-element-vent/30 bg-element-vent/10 text-element-vent",
 	},
 	{
-		description: "A participé activement aux tests de Victory Road.",
-		icon: Sparkles,
-		id: "beta",
-		label: "Bêta-testeur",
-		tone: "border-info/25 bg-info/10 text-info",
+		description: "Technique et contrôle : le ballon ne se perd pas.",
+		icon: Trees,
+		id: "forest",
+		label: "Forêt",
+		tone: "border-element-foret/30 bg-element-foret/10 text-element-foret",
 	},
 	{
-		description: "Soutien officiel du projet sur Patreon.",
-		icon: Heart,
-		id: "patreon",
-		label: "Patreon",
-		tone: "border-patreon/25 bg-patreon/10 text-patreon",
-	},
-	{
-		description: "Membre de l'équipe d'administration du site.",
-		icon: ShieldCheck,
-		id: "staff",
-		label: "Staff",
-		tone: "border-succes/25 bg-succes/10 text-succes",
+		description: "Défense et endurance : rien ne passe.",
+		icon: Mountain,
+		id: "mountain",
+		label: "Montagne",
+		tone: "border-element-montagne/30 bg-element-montagne/10 text-element-montagne",
 	},
 ] as const;
 

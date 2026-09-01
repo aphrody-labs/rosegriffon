@@ -153,6 +153,24 @@
 	--color-info: var(--rg-info);
 	--color-alerte: var(--rg-alerte);
 
+	/* ─── Éléments d'Inazuma Eleven ──────────────────────────────────────── */
+	/* Comme les marques tierces ci-dessous : ces quatre teintes ne sont pas des
+	 * choix de design system, ce sont celles du JEU. Elles ont été relevées sur
+	 * ses propres icônes (`public/spirit_type/*.webp` : feu #b50100, vent
+	 * #0244b0, forêt #207d00, montagne #ab5200), puis remontées à une clarté
+	 * commune (0.60) pour rester lisibles sur fond clair comme sur fond sombre —
+	 * le rouge d'origine disparaît sur le marine du thème Roy.
+	 *
+	 * ⚠ Elles existaient en SIX exemplaires divergents dans `apps/azalee`
+	 * (`PassiveCard`, `PassiveDetail`, `TeamStats`, `FormationField`, deux
+	 * `opengraph-image`), et le VENT y était tantôt bleu, tantôt vert. L'icône du
+	 * jeu tranche : il est bleu. Toute nouvelle surface qui colore un élément
+	 * doit lire ces tokens, pas réinventer sa palette. */
+	--color-element-feu: oklch(0.6 0.16 29.3);
+	--color-element-vent: oklch(0.6 0.16 261);
+	--color-element-foret: oklch(0.6 0.16 140.4);
+	--color-element-montagne: oklch(0.6 0.139 52);
+
 	/* Couleurs de marque tierces — constantes imposées par chaque marque, pas
 	 * des choix de design system : elles ne varient donc pas selon le thème. */
 	--color-discord: #5865f2;

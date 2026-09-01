@@ -20,23 +20,42 @@
  */
 import { z } from "zod";
 
-/** Les seuls badges qui existent — la table de rendu ne connaît qu'eux. */
-export const BADGES_PROFIL = ["founder", "vip", "beta", "patreon", "staff"] as const;
+/**
+ * Les badges de profil : les quatre éléments d'Inazuma Eleven.
+ *
+ * ── CE QU'ILS REMPLACENT ───────────────────────────────────────────────────
+ * Avant, c'étaient cinq distinctions — « Fondateur », « VIP », « Bêta-testeur »,
+ * « Patreon », « Staff » — dont deux affirmaient quelque chose de vérifiable que
+ * personne ne vérifiait : n'importe quel compte pouvait porter « Membre de
+ * l'équipe d'administration » à côté de son pseudo. Les éléments, eux, ne
+ * prétendent à rien : ce sont des couleurs d'appartenance, exactement comme
+ * dans le jeu où chaque joueur en a un. Il n'y a donc plus rien à mériter, et
+ * plus rien à usurper.
+ *
+ * Les identifiants restent en anglais, comme partout où le jeu est indexé
+ * (`inagle_*`, `GALLERY_CATEGORIES`, les icônes `spirit_type/*.webp`) ; les
+ * libellés français vivent côté interface.
+ */
+export const BADGES_PROFIL = ["fire", "wind", "forest", "mountain"] as const;
 
 export type BadgeProfil = (typeof BADGES_PROFIL)[number];
 
 /**
- * Badges que l'on ne s'attribue pas soi-même.
+ * Badges que l'on ne s'attribue pas soi-même — aucun, désormais.
  *
- * Ils affirment quelque chose de vérifiable : appartenir à l'équipe, soutenir
- * le projet. Les autres (`founder`, `vip`, `beta`) sont des distinctions posées
- * à la main par l'administration ; ils restent modifiables par leur porteur,
- * qui peut choisir de les afficher ou non, mais l'ajout d'un badge mérité passe
- * par une vérification en base.
+ * La liste reste (et la vérification avec elle) parce que la question se
+ * reposera le jour où un badge dira de nouveau quelque chose de vérifiable :
+ * mécène, membre de l'équipe, vainqueur d'un tournoi. La retirer obligerait à
+ * réécrire la garde à ce moment-là, c'est-à-dire à l'oublier.
  */
-export const BADGES_MERITES = ["staff", "patreon"] as const satisfies readonly BadgeProfil[];
+export const BADGES_MERITES = [] as const satisfies readonly BadgeProfil[];
 
-/** Nombre de badges affichables à la fois, à côté du pseudo. */
+/**
+ * Nombre de badges affichables à la fois.
+ *
+ * Trois sur quatre éléments : on choisit une affinité, on n'aligne pas la
+ * collection complète — un profil qui porte les quatre ne dit plus rien.
+ */
 export const MAX_BADGES_PROFIL = 3;
 
 /** Longueur maximale de la biographie. */
@@ -73,10 +92,25 @@ export const SchemaLienPublic = z
  * `z.input<typeof SchemaProfilPublic>`, jamais `z.infer`.
  */
 export const SchemaProfilPublic = z.object({
+	/**
+	 * Les badges inconnus sont ÉCARTÉS, pas refusés.
+	 *
+	 * Un `z.enum` strict paraît plus sûr, et c'est un piège : le catalogue change
+	 * (les cinq distinctions d'hier sont devenues les quatre éléments du jeu), et
+	 * les profils qui portaient un badge disparu renvoient cette valeur au premier
+	 * enregistrement — le formulaire répondait alors « Données invalides » sur un
+	 * champ que la personne ne voit même plus, sans aucun moyen de s'en sortir.
+	 * On filtre donc : ce qui n'est plus au catalogue s'efface en silence, et
+	 * l'enregistrement passe.
+	 */
 	badges: z
 		.array(z.string())
 		.max(MAX_BADGES_PROFIL)
-		.pipe(z.array(z.enum(BADGES_PROFIL)).max(MAX_BADGES_PROFIL)),
+		.transform((liste) =>
+			liste.filter((badge): badge is BadgeProfil =>
+				(BADGES_PROFIL as readonly string[]).includes(badge)
+			)
+		),
 	banner_url: z.string().optional().or(z.literal("")),
 	bio: z.string().max(MAX_BIO_PROFIL).optional(),
 	full_name: z.string().optional(),
@@ -110,12 +144,12 @@ export function filtrerBadges(
 ): string[] {
 	const deja = new Set(droits.dejaPoses);
 	return demandes.filter((badge) => {
-		if (badge === "staff") {
-			return droits.estStaff || deja.has("staff");
+		if (!badgeMerite(badge)) {
+			return true;
 		}
-		if (badge === "patreon") {
-			return droits.estMecene || deja.has("patreon");
+		if (deja.has(badge)) {
+			return true;
 		}
-		return true;
+		return badge === "staff" ? droits.estStaff : droits.estMecene;
 	});
 }
