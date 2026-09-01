@@ -33,7 +33,7 @@ export function AccountEmailCard({ currentEmail, onChangeEmail }: AccountEmailCa
 				toast.error(res.error);
 				return;
 			}
-			toast.success("Vérifie ta boîte mail pour confirmer le changement.");
+			toast.success("Ouvre le lien envoyé à ton adresse actuelle pour confirmer le changement.");
 			setNewEmail("");
 		} catch (error) {
 			console.error("[compte] changement d'adresse en échec", error);
@@ -50,9 +50,16 @@ export function AccountEmailCard({ currentEmail, onChangeEmail }: AccountEmailCa
 					<Mail className="size-5 shrink-0 text-muted-foreground" aria-hidden />
 					Adresse e-mail
 				</CardTitle>
+				{/* Le lien part vers l'adresse ACTUELLE, pas la nouvelle : c'est elle
+				    qui autorise le changement, sinon quiconque prend la main sur une
+				    session ouverte déplacerait le compte vers sa propre boîte. La carte
+				    annonçait l'inverse et envoyait donc regarder la mauvaise boîte —
+				    les 33 comptes du site ont tous une adresse vérifiée, personne n'est
+				    dans le cas où le changement s'applique directement. */}
 				<CardDescription>
-					Un lien de confirmation est envoyé à la nouvelle adresse : le changement ne prend effet
-					qu'une fois ce lien ouvert.
+					Un lien de confirmation part vers ton adresse <strong>actuelle</strong> : le changement ne
+					prend effet qu'une fois ce lien ouvert. Une vérification est ensuite envoyée à la
+					nouvelle.
 				</CardDescription>
 			</CardHeader>
 			<CardContent>
