@@ -26,6 +26,18 @@ export async function crawlZukanOrder(): Promise<{
 	const client = createSupabaseServiceClient();
 
 	try {
+		// Lue AVANT le crawl (indépendante de son résultat), et réellement `await`ée
+		// ici (un tag `sql\`…\`` est un thenable paresseux chez Bun.SQL, il ne part
+		// sur le fil qu'au premier `await` — le stocker dans une promesse sans
+		// l'attendre ne l'exécute PAS plus tôt). Le crawl navigue ~30 pages en
+		// headless (plusieurs minutes) via un Chrome enfant ; lancé APRÈS cette
+		// lecture, il ne peut plus lui faire perdre sa connexion Postgres directe
+		// (`ERR_POSTGRES_CONNECTION_CLOSED` constaté le 1/9/2026 quand la requête
+		// n'était exécutée qu'après le crawl).
+		const dbChars = await sql<
+			{ id: string; zukan_hash: string | null; name_en: string | null }[]
+		>`SELECT id, zukan_hash, name_en FROM inagle_characters`;
+
 		const allCharacters = await crawlZukanOrderPages();
 
 		if (allCharacters.length === 0) {
@@ -57,11 +69,6 @@ export async function crawlZukanOrder(): Promise<{
 
 		// Mise à jour de la table inagle_characters dans Supabase
 		let updatedCount = 0;
-
-		// Récupérer les personnages de la DB pour mapper par zukan_hash (lecture Postgres directe)
-		const dbChars = await sql<
-			{ id: string; zukan_hash: string | null; name_en: string | null }[]
-		>`SELECT id, zukan_hash, name_en FROM inagle_characters`;
 
 		if (dbChars && dbChars.length > 0) {
 			// Créer une map hash -> order
