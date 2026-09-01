@@ -30,7 +30,6 @@ import { useMemo } from "react";
 import { AVAILABLE_BADGES } from "../../lib/badges-profil";
 import { urlBanniereAffichable } from "../../lib/galerie-cdn";
 import { cn } from "../../lib/utils";
-import { Avatar, AvatarFallback, AvatarImage } from "../avatar";
 
 export interface CarteJoueurProps {
 	/** Pseudo — la plaque claire sous le nom. */
@@ -44,10 +43,20 @@ export interface CarteJoueurProps {
 	avatarUrl?: string | null;
 	/** Illustration de fond, déjà recadrée de ses bandes noires par le CDN. */
 	banniereUrl?: string | null;
+	/** Cadrage vertical de cette illustration, de 0 (haut) à 100 (bas). */
+	banniereCadrage?: number | null;
 	/** Identifiants d'éléments portés par le membre. */
 	badges?: readonly string[] | null;
-	/** Rôle traduit (« Administrateur »…), affiché à côté du pseudo. */
-	role?: string | null;
+	/**
+	 * Rôle DISCORD du membre — celui du serveur, pas celui du site.
+	 *
+	 * `profiles.role` dit un droit d'accès au site (« member », « admin ») : ça
+	 * n'intéresse personne sur un profil public, et ça ne correspond à rien de ce
+	 * que les membres voient d'eux-mêmes. Le rôle qui les identifie est celui
+	 * qu'ils portent sur le Discord — « Joueur Route Victoire », « Modérateurs » —
+	 * avec sa couleur, celle-là même qui colore leur pseudo dans le salon.
+	 */
+	role?: { nom: string; couleur: number | null } | null;
 	/** Niveau de communauté et progression, quand le compte est lié au Discord. */
 	niveau?: { valeur: number; restant: number; rang: string } | null;
 	/** Actions posées en bas de carte (éditer, partager…). */
@@ -61,6 +70,7 @@ export function CarteJoueur({
 	description,
 	avatarUrl,
 	banniereUrl,
+	banniereCadrage,
 	badges,
 	role,
 	niveau,
@@ -77,6 +87,7 @@ export function CarteJoueur({
 	// Une bannière choisie avant l'arrivée du recadrage garde ses bandes noires
 	// en base : on les retire à l'affichage plutôt que de réécrire les lignes.
 	const fond = urlBanniereAffichable(banniereUrl);
+	const cadrage = Math.min(100, Math.max(0, banniereCadrage ?? 50));
 
 	return (
 		<section aria-label={`Carte de ${nomAffiche}`} className="relative isolate w-full">
@@ -103,6 +114,9 @@ export function CarteJoueur({
 						alt=""
 						aria-hidden
 						className="absolute inset-0 -z-10 size-full object-cover"
+						// Le cadrage choisi par le membre : `object-cover` seul prend
+						// toujours le centre de l'image.
+						style={{ objectPosition: `50% ${cadrage}%` }}
 					/>
 				) : (
 					<div
@@ -127,16 +141,26 @@ export function CarteJoueur({
 				/>
 
 				<div className="flex flex-col gap-4 px-5 py-5 sm:flex-row sm:items-center sm:gap-6 sm:px-10 sm:py-6">
-					<Avatar className="size-20 shrink-0 border-2 border-white/80 shadow-lg sm:size-28">
-						<AvatarImage
-							src={avatarUrl ?? ""}
-							alt={`Avatar de ${pseudo}`}
-							className="object-cover"
+					{/* Une `<img>` et pas le composant `Avatar` de Radix : celui-ci ne
+					    monte son image qu'APRÈS hydratation (le HTML servi ne contient
+					    que les initiales), si bien que la photo restait absente du rendu
+					    serveur — et donc de tout aperçu de lien partagé. Ici l'image est
+					    dans le document dès la première réponse. */}
+					{avatarUrl ? (
+						// eslint-disable-next-line @next/next/no-img-element
+						<img
+							src={avatarUrl}
+							alt={`Photo de profil de ${pseudo}`}
+							className="size-20 shrink-0 rounded-full border-2 border-white/80 object-cover shadow-lg sm:size-28"
 						/>
-						<AvatarFallback className="bg-rg-marine text-lg font-bold text-white">
+					) : (
+						<span
+							aria-hidden
+							className="flex size-20 shrink-0 items-center justify-center rounded-full border-2 border-white/80 bg-rg-marine text-lg font-bold text-white shadow-lg sm:size-28"
+						>
 							{pseudo.slice(0, 2).toUpperCase()}
-						</AvatarFallback>
-					</Avatar>
+						</span>
+					)}
 
 					<div className="min-w-0 flex-1 space-y-2">
 						<h1
@@ -153,8 +177,21 @@ export function CarteJoueur({
 								@{pseudo}
 							</span>
 							{role && (
-								<span className="text-xs font-semibold tracking-wide text-white/85 uppercase">
-									{role}
+								<span
+									className="rounded-md border px-2 py-0.5 text-xs font-bold tracking-wide uppercase"
+									// Couleur du rôle telle que Discord la donne (entier RVB).
+									// `0` signifie « pas de couleur » chez Discord : on retombe
+									// alors sur le blanc du reste de la carte.
+									style={
+										role.couleur
+											? {
+													borderColor: `#${role.couleur.toString(16).padStart(6, "0")}`,
+													color: `#${role.couleur.toString(16).padStart(6, "0")}`,
+												}
+											: { borderColor: "rgb(255 255 255 / 0.4)", color: "rgb(255 255 255 / 0.9)" }
+									}
+								>
+									{role.nom}
 								</span>
 							)}
 						</div>

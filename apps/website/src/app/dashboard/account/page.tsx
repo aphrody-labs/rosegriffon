@@ -82,6 +82,7 @@ export default async function AccountPage({
 			twoFactorEnabled={Boolean((user as { twoFactorEnabled?: boolean }).twoFactorEnabled)}
 			profile={{
 				badges: Array.isArray(profile.badges) ? (profile.badges as string[]) : [],
+				banner_position: Number(profile.banner_position ?? 50) || 50,
 				banner_url: str("banner_url"),
 				bio: str("bio"),
 				full_name: str("full_name"),

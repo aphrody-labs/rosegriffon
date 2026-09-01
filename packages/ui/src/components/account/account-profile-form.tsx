@@ -31,6 +31,8 @@ import {
 	FormMessage,
 } from "../form";
 import { Input } from "../input";
+import { Label } from "../label";
+import { Slider } from "../slider";
 import { BannerPicker } from "./banner-picker";
 import { Textarea } from "../textarea";
 import type { AccountActionResult, AccountProfileValues } from "./types";
@@ -65,6 +67,7 @@ const BIO_MAX = 500;
 const schema = z.object({
 	badges: z.array(z.string()).max(MAX_BADGES).default([]),
 	banner_url: z.string().optional().or(z.literal("")),
+	banner_position: z.coerce.number().int().min(0).max(100).default(50),
 	bio: z.string().max(BIO_MAX, `La bio ne peut pas dépasser ${BIO_MAX} caractères.`).optional(),
 	full_name: z.string().optional(),
 	twitter_handle: z.string().optional(),
@@ -112,6 +115,7 @@ export function AccountProfileForm({
 		try {
 			const res = await onSubmit({
 				badges: next.badges ?? [],
+				banner_position: next.banner_position ?? 50,
 				banner_url: next.banner_url ?? "",
 				bio: next.bio ?? "",
 				full_name: next.full_name ?? "",
@@ -137,6 +141,10 @@ export function AccountProfileForm({
 
 	const badges = form.watch("badges") ?? [];
 	const bannerUrl = form.watch("banner_url");
+	// `z.coerce.number()` donne un type d'ENTRÉE incertain au formulaire (on peut
+	// lui passer une chaîne) : on ramène la valeur observée à un nombre avant de
+	// la donner au curseur, qui n'accepte rien d'autre.
+	const cadrage = Number(form.watch("banner_position") ?? 50) || 50;
 	const bio = form.watch("bio") ?? "";
 	const username = form.watch("username");
 
@@ -285,6 +293,7 @@ export function AccountProfileForm({
 												src={bannerUrl}
 												alt=""
 												className="absolute inset-0 size-full object-cover"
+												style={{ objectPosition: `50% ${cadrage}%` }}
 											/>
 										) : (
 											<div className={cn("absolute inset-0", BANNIERE_DEFAUT.className)} />
@@ -293,6 +302,39 @@ export function AccountProfileForm({
 											{bannerUrl ? "Bannière choisie" : BANNIERE_DEFAUT.name}
 										</span>
 									</div>
+
+									{/* Le curseur ne s'affiche que s'il y a une image à cadrer : sur
+									    le dégradé par défaut, il ne déplacerait rien. */}
+									{bannerUrl && (
+										<div className="space-y-1.5">
+											<div className="flex items-center justify-between gap-2">
+												<Label htmlFor="banniere-cadrage">Cadrage vertical</Label>
+												<span className="text-xs text-muted-foreground">
+													{cadrage === 0
+														? "Haut de l'image"
+														: cadrage === 100
+															? "Bas de l'image"
+															: `${cadrage} %`}
+												</span>
+											</div>
+											<Slider
+												id="banniere-cadrage"
+												min={0}
+												max={100}
+												step={1}
+												value={[cadrage]}
+												onValueChange={(valeurs) =>
+													form.setValue("banner_position", Number(valeurs[0] ?? 50), {
+														shouldDirty: true,
+													})
+												}
+											/>
+											<p className="text-xs text-muted-foreground">
+												Une illustration du jeu est bien plus haute que la bande affichée :
+												déplace-la pour choisir ce qui reste visible.
+											</p>
+										</div>
+									)}
 
 									<div className="flex flex-wrap gap-2">
 										<Button

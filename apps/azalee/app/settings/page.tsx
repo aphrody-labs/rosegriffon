@@ -96,6 +96,7 @@ export default async function SettingsPage({
 			hasPassword={hasPassword}
 			profile={{
 				badges: Array.isArray(profile.badges) ? (profile.badges as string[]) : [],
+				banner_position: Number((profile as Record<string, unknown>).banner_position ?? 50) || 50,
 				banner_url: str("banner_url"),
 				bio: str("bio"),
 				full_name: str("full_name"),
