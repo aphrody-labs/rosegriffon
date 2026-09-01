@@ -99,8 +99,12 @@ function rowToStadium(row: StadiumRow): Stadium {
 		index: row.field_index,
 		title: genericTitle(row.field_index, code),
 		image,
-		thumb: galleryVariantUrl(image, 400),
-		full: galleryVariantUrl(image, 1600),
+		// Même traitement que la galerie : les visuels de stade n'ont pas de bandes
+		// aujourd'hui (vérifié), mais le service ne coupe que ce qui est
+		// effectivement noir — l'option est sans risque et couvre le jour où un
+		// visuel arrivera en letterbox.
+		thumb: galleryVariantUrl(image, 400, { recadrerBandes: true }),
+		full: galleryVariantUrl(image, 1600, { recadrerBandes: true }),
 	};
 }
 

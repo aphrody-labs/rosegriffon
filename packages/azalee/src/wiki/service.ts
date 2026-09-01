@@ -97,10 +97,16 @@ function galleryVariants(image: string | null): {
 	thumb: string | null;
 	full: string | null;
 } {
+	// `crop=bandes` sur la vignette ET sur la version large : le jeu enveloppe ses
+	// illustrations de deux bandes noires (letterbox) qui mangent près d'un tiers
+	// de la hauteur — sur une grille à ratio fixe, elles se cumulent avec le
+	// cadrage et il ne reste qu'un bandeau. `image` reste l'ORIGINAL intact :
+	// c'est ce qu'on télécharge, et un téléchargement doit rendre le fichier du
+	// jeu, pas notre interprétation.
 	return {
 		image,
-		thumb: galleryVariantUrl(image, 400),
-		full: galleryVariantUrl(image, 1600),
+		thumb: galleryVariantUrl(image, 400, { recadrerBandes: true }),
+		full: galleryVariantUrl(image, 1600, { recadrerBandes: true }),
 	};
 }
 

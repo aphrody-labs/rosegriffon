@@ -7,8 +7,10 @@
  * mises en cache sur disque, et les ressert en quelques Ko.
  *
  * Contrat :
- *   GET /dx11/<path>?w=<width>&format=webp   → WebP resize (fit inside, pas d'agrandissement)
- *   GET /g4tx/<path>?w=<width>&format=webp   → idem (chemin g4tx live)
+ *   GET /dx11/<path>?w=<width>&format=webp          → WebP resize (fit inside, pas d'agrandissement)
+ *   GET /g4tx/<path>?w=<width>&format=webp          → idem (chemin g4tx live)
+ *   GET …&crop=bandes                               → retire d'abord les bandes noires
+ *                                                     horizontales (letterbox du jeu)
  *
  * Source de l'asset (dans l'ordre) :
  *   1. fichier du dump disque `DX11_DUMP_ROOT/<path>` (rapide) — s'il existe ET non vide
@@ -88,10 +90,116 @@ function snapWidth(raw: number): number {
   return best;
 }
 
+/**
+ * Seuil au-delà duquel un pixel n'est plus « noir ».
+ *
+ * Mesuré, pas supposé, sur une illustration de la galerie (3840×2160,
+ * `img_story_ev01_main_0010`) : le corps des bandes est à 0, mais la toute
+ * PREMIÈRE et la toute DERNIÈRE ligne de la texture décodée valent 15 sur
+ * toute leur largeur — un liseré de bord, pas un contenu. Un seuil à 12
+ * s'arrêtait donc sur cette ligne-là et mesurait des bandes de zéro pixel sur
+ * des images qui en ont deux cent quatre-vingts.
+ *
+ * À 24, le liseré (15) passe, la première ligne d'image (93 sur cette
+ * illustration, 240 sur la ligne suivante) ne passe pas. La marge est large des
+ * deux côtés.
+ */
+const SEUIL_NOIR = Number(process.env.VARIANTS_SEUIL_NOIR ?? "24");
+
+/**
+ * Colonnes claires tolérées dans une ligne considérée comme noire.
+ *
+ * Ceinture en plus du seuil : un pixel mort, un artefact de compression ou un
+ * angle de texture ne doivent pas décider à eux seuls qu'une bande n'en est pas
+ * une. Deux colonnes sur soixante-quatre, c'est trois pour cent — bien en
+ * dessous de ce que porte n'importe quelle ligne d'illustration, même nocturne.
+ */
+const TOLERANCE_COLONNES = Number(process.env.VARIANTS_TOLERANCE_COLONNES ?? "2");
+
+/**
+ * Part maximale de l'image qu'un recadrage peut retirer, par côté.
+ *
+ * Garde-fou : une illustration réellement noire en haut (une nuit, une entrée de
+ * tunnel) ne doit pas se faire amputer de sa moitié. Au-delà, on considère que
+ * ce n'est pas une bande technique mais le sujet, et on ne coupe rien.
+ */
+const MAX_BANDE = Number(process.env.VARIANTS_MAX_BANDE ?? "0.35");
+
+/**
+ * Mesure les bandes noires HORIZONTALES d'une image.
+ *
+ * ── POURQUOI PAS `sharp.trim()` ────────────────────────────────────────────
+ * `trim()` rogne les quatre côtés d'un coup, à partir de la couleur du pixel
+ * d'angle. Sur ces illustrations, il mangerait aussi les bords GAUCHE et DROIT
+ * dès que la scène s'assombrit sur les côtés — c'est-à-dire précisément sur les
+ * plus belles. Les bandes du jeu sont un letterbox : elles n'existent qu'en haut
+ * et en bas, et c'est tout ce qu'on retire.
+ *
+ * On lit l'image en niveaux de gris à taille réduite (largeur 64) : il ne s'agit
+ * pas de trouver le pixel exact mais la ligne, et 64 colonnes suffisent à savoir
+ * si une ligne est noire de bout en bout. Le coût reste négligeable devant le
+ * décodage, et le résultat part au cache.
+ */
+async function mesurerBandes(
+  source: Uint8Array,
+): Promise<{ haut: number; bas: number; hauteur: number } | null> {
+  const image = sharp(source, { failOn: "none" });
+  const meta = await image.metadata();
+  const hauteur = meta.height ?? 0;
+  if (hauteur < 8) {
+    return null;
+  }
+
+  const largeurAnalyse = 64;
+  const { data, info } = await image
+    .clone()
+    .resize({ width: largeurAnalyse, fit: "fill", height: hauteur })
+    .greyscale()
+    .raw()
+    .toBuffer({ resolveWithObject: true });
+
+  const ligneEstNoire = (y: number): boolean => {
+    const depart = y * info.width * info.channels;
+    let claires = 0;
+    for (let x = 0; x < info.width; x += 1) {
+      if (data[depart + x * info.channels] > SEUIL_NOIR) {
+        claires += 1;
+        if (claires > TOLERANCE_COLONNES) {
+          return false;
+        }
+      }
+    }
+    return true;
+  };
+
+  let haut = 0;
+  while (haut < info.height && ligneEstNoire(haut)) {
+    haut += 1;
+  }
+  // Image entièrement noire : il n'y a rien à recadrer, et tout à perdre.
+  if (haut >= info.height) {
+    return null;
+  }
+  let bas = 0;
+  while (bas < info.height && ligneEstNoire(info.height - 1 - bas)) {
+    bas += 1;
+  }
+
+  const plafond = Math.floor(info.height * MAX_BANDE);
+  return {
+    bas: Math.min(bas, plafond),
+    hauteur: info.height,
+    haut: Math.min(haut, plafond),
+  };
+}
+
 /** Clé de cache déterministe (path logique + largeur + format + qualité). */
-function cacheKey(logical: string, width: number): string {
+function cacheKey(logical: string, width: number, crop: boolean): string {
+  // Le recadrage fait PARTIE de la clé : sans lui, la première requête servirait
+  // sa version à toutes les suivantes — image rognée à qui n'en voulait pas, ou
+  // l'inverse, selon qui arrive en premier.
   const h = createHash("sha1")
-    .update(`${logical}|w=${width}|webp|q=${WEBP_QUALITY}`)
+    .update(`${logical}|w=${width}|webp|q=${WEBP_QUALITY}${crop ? "|crop=bandes" : ""}`)
     .digest("hex");
   return `${h}.webp`;
 }
@@ -204,6 +312,7 @@ const server = Bun.serve({
       return Response.json({
         ok: true,
         cacheRoot: CACHE_ROOT,
+        crop: { max: MAX_BANDE, seuilNoir: SEUIL_NOIR, tolerance: TOLERANCE_COLONNES },
         widths: ALLOWED_WIDTHS,
         quality: WEBP_QUALITY,
       });
@@ -226,8 +335,12 @@ const server = Bun.serve({
       return new Response("bad width", { status: 400, headers: CORS_HEADERS });
     }
     const width = snapWidth(rawWidth);
+    // `crop=bandes` : les illustrations du jeu sont livrées en letterbox — deux
+    // bandes noires horizontales qui font perdre un cinquième de la hauteur dans
+    // une vignette, et qui sautent aux yeux dès qu'on les pose en bannière.
+    const crop = url.searchParams.get("crop") === "bandes";
 
-    const key = cacheKey(logical, width);
+    const key = cacheKey(logical, width, crop);
     const cachePath = pathJoin(CACHE_ROOT, key);
     const ifNoneMatch = req.headers.get("if-none-match");
 
@@ -248,7 +361,28 @@ const server = Bun.serve({
 
     let out: Uint8Array;
     try {
-      const buf = await sharp(src, { failOn: "none" })
+      let pipeline = sharp(src, { failOn: "none" });
+
+      if (crop) {
+        // Mesure AVANT le redimensionnement : sur une vignette de 200 px, une
+        // bande de trois pixels a déjà été mélangée à l'image par le
+        // rééchantillonnage, et elle ne se détecte plus proprement.
+        const bandes = await mesurerBandes(src);
+        if (bandes && bandes.haut + bandes.bas > 0) {
+          const meta = await pipeline.metadata();
+          const hauteurUtile = bandes.hauteur - bandes.haut - bandes.bas;
+          if (meta.width && hauteurUtile > 0) {
+            pipeline = pipeline.extract({
+              height: hauteurUtile,
+              left: 0,
+              top: bandes.haut,
+              width: meta.width,
+            });
+          }
+        }
+      }
+
+      const buf = await pipeline
         .resize({ width, fit: "inside", withoutEnlargement: true })
         .webp({ quality: WEBP_QUALITY, effort: 4 })
         .toBuffer();

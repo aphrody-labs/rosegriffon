@@ -364,10 +364,19 @@ export type GalleryVariantWidth = (typeof GALLERY_VARIANT_WIDTHS)[number];
  * Ne réécrit QUE les URLs `/dx11/` ou `/g4tx/` raster (png/jpg). Tout autre host/chemin
  * (placeholder local, webp déjà léger, route relative) est renvoyé tel quel — la
  * fonction est donc idempotente et sûre à appliquer partout.
+ *
+ * `recadrerBandes` ajoute `&crop=bandes` : le service retire alors les deux
+ * bandes noires horizontales dont le jeu entoure ses illustrations (letterbox).
+ * Elles coûtent près d'un tiers de la hauteur d'une vignette — mesuré : 450 px
+ * de haut dont 124 de bandes sur les scènes d'histoire — et se voient d'autant
+ * plus qu'on affiche l'image dans un cadre à ratio fixe. Le service ne coupe
+ * que ce qui est effectivement noir, et jamais plus de 35 % par côté : une
+ * illustration sans bande ressort inchangée.
  */
 export function galleryVariantUrl(
 	url: string | null | undefined,
-	width: GalleryVariantWidth
+	width: GalleryVariantWidth,
+	options: { recadrerBandes?: boolean } = {}
 ): string | null {
 	if (!url) {
 		return null;
@@ -383,7 +392,8 @@ export function galleryVariantUrl(
 	}
 	// Si une query existe déjà (improbable ici), on évite de doubler `?`.
 	const sep = url.includes("?") ? "&" : "?";
-	return `${url}${sep}w=${width}&format=webp`;
+	const recadrage = options.recadrerBandes ? "&crop=bandes" : "";
+	return `${url}${sep}w=${width}&format=webp${recadrage}`;
 }
 
 /**
