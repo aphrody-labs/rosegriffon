@@ -44,6 +44,8 @@ export interface AccountProfileValues {
 	website: string;
 	twitter_handle: string;
 	banner_url: string;
+	/** Cadrage vertical de la bannière, de 0 (haut de l'image) à 100 (bas). */
+	banner_position: number;
 	badges: string[];
 }
 

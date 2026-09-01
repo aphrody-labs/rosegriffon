@@ -27,8 +27,10 @@
  */
 import { Discord, Slash, SlashChoice, SlashOption } from "@rpbey/discordx";
 import {
+	ActionRowBuilder,
 	ApplicationCommandOptionType,
 	AttachmentBuilder,
+	type ButtonBuilder,
 	type ChatInputCommandInteraction,
 	type User,
 } from "discord.js";
@@ -50,7 +52,17 @@ import {
 	totalPersonnages,
 	type ProfilCommunaute,
 } from "../services/communaute";
-import { differer, echec, entierLisible, fiche, piedDeCommande, repondre } from "../lib/ui";
+import {
+	boutonLien,
+	differer,
+	echec,
+	entierLisible,
+	fiche,
+	piedDeCommande,
+	repondre,
+} from "../lib/ui";
+import { rgUrl } from "../lib/embeds";
+import { pseudoDuSite } from "../services/website";
 
 /**
  * La guilde de l'interaction, ou `null` en message privé.
@@ -122,12 +134,17 @@ export class ProfilCommand {
 			const avancement = progression(profil.xp);
 			const rang = rangDe(avancement.niveau);
 
-			const [position, total, collection, recense, plaqueUrl] = await Promise.all([
+			const [position, total, collection, recense, plaqueUrl, pseudoSite] = await Promise.all([
 				rangClassement(guildId, cible.id),
 				nombreClasses(guildId),
 				personnagesPossedes(guildId, cible.id),
 				totalPersonnages(),
 				plaqueDe(profil),
+				// Le membre a-t-il une page publique ? Elle porte la MÊME progression,
+				// affichée sur sa carte de joueur — d'où le bouton plutôt qu'un simple
+				// rappel : les deux surfaces montrent le même niveau, il n'y a aucune
+				// raison de les laisser s'ignorer.
+				pseudoDuSite(cible.id),
 			]);
 
 			const favoriId = profil.persoFavori;
@@ -184,7 +201,22 @@ export class ProfilCommand {
 					{ enLigne: true }
 				);
 
+			// Un bouton de style `Link` n'a pas d'identifiant et ne déclenche aucune
+			// interaction : il survit intact au redémarrage du bot, contrairement à
+			// tout composant qu'il faudrait écouter.
+			const versLeSite = pseudoSite
+				? [
+						new ActionRowBuilder<ButtonBuilder>().addComponents(
+							boutonLien({
+								libelle: "Voir sur rosegriffon.fr",
+								url: rgUrl(`/profil/${encodeURIComponent(pseudoSite)}`),
+							})
+						),
+					]
+				: [];
+
 			await interaction.editReply({
+				components: versLeSite,
 				embeds: [piedDeCommande(carte.embed, interaction)],
 				files: [new AttachmentBuilder(image, { name: `profil-${cible.id}.png` })],
 			});

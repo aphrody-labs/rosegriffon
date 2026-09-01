@@ -56,6 +56,34 @@ describe("badges", () => {
 	});
 });
 
+describe("cadrage de la bannière", () => {
+	test("le centre par défaut — le rendu d'avant ce réglage", () => {
+		const resultat = SchemaProfilPublic.safeParse({ ...BASE });
+		expect(resultat.success && resultat.data.banner_position).toBe(50);
+	});
+
+	test("les deux extrêmes sont acceptés", () => {
+		for (const position of [0, 100]) {
+			const resultat = SchemaProfilPublic.safeParse({ ...BASE, banner_position: position });
+			expect(resultat.success && resultat.data.banner_position).toBe(position);
+		}
+	});
+
+	test("hors bornes : refusé plutôt que rogné en silence", () => {
+		// La contrainte existe aussi en base (`check between 0 and 100`) : mieux
+		// vaut un message qu'une valeur discrètement corrigée d'un côté seulement.
+		expect(SchemaProfilPublic.safeParse({ ...BASE, banner_position: 140 }).success).toBe(false);
+		expect(SchemaProfilPublic.safeParse({ ...BASE, banner_position: -10 }).success).toBe(false);
+	});
+
+	test("une chaîne de formulaire est convertie", () => {
+		// Un `<input type=range>` renvoie une chaîne ; sans `z.coerce`, le profil
+		// serait refusé au premier déplacement du curseur.
+		const resultat = SchemaProfilPublic.safeParse({ ...BASE, banner_position: "30" });
+		expect(resultat.success && resultat.data.banner_position).toBe(30);
+	});
+});
+
 describe("lien public", () => {
 	test("http et https passent", () => {
 		expect(SchemaLienPublic.safeParse("https://rosegriffon.fr").success).toBe(true);

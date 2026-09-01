@@ -43,6 +43,35 @@ export async function getProfile(query: string) {
 	return rows[0] ?? null;
 }
 
+/**
+ * Le pseudo du site d'un membre Discord — ou `null` s'il n'en a pas.
+ *
+ * ── POURQUOI PAS `getProfile()` ────────────────────────────────────────────
+ * `getProfile()` trouve la ligne, mais ne dit RIEN de sa publication : la page
+ * `/profil/<pseudo>` filtre sur `claimed_at IS NOT NULL` (un profil non réclamé
+ * n'existe pas publiquement, c'est un fantôme d'import Discord). Un lien posé
+ * sans cette condition mènerait donc à un 404 — et il le ferait pour la
+ * majorité des membres, puisque 1 816 profils portent un `discord_id` quand
+ * dix-neuf seulement ont été réclamés.
+ *
+ * Rend aussi `null` quand la lecture échoue : un profil Discord doit s'afficher
+ * même si la base du site est indisponible, sans son bouton.
+ */
+export async function pseudoDuSite(discordId: string): Promise<string | null> {
+	try {
+		const rows = await sql<Array<{ username: string | null }>>`
+      SELECT username
+      FROM profiles
+      WHERE discord_id = ${discordId} AND claimed_at IS NOT NULL AND username IS NOT NULL
+      LIMIT 1
+    `;
+		return rows[0]?.username ?? null;
+	} catch (err) {
+		console.warn("[website] pseudo du site illisible :", err instanceof Error ? err.message : err);
+		return null;
+	}
+}
+
 export async function listChronicles(category: string | null, limit: number) {
 	if (category) {
 		return await sql<Chronicle[]>`

@@ -112,6 +112,15 @@ export const SchemaProfilPublic = z.object({
 			)
 		),
 	banner_url: z.string().optional().or(z.literal("")),
+	/**
+	 * Cadrage vertical de la bannière, de 0 (haut de l'image) à 100 (bas).
+	 *
+	 * Une illustration du jeu fait 3840×2160 et la bannière n'en montre qu'une
+	 * bande : sans ce réglage, `object-cover` prenait toujours le centre, et un
+	 * visage placé dans le tiers supérieur se retrouvait coupé sans recours.
+	 * 50 reproduit exactement l'ancien comportement.
+	 */
+	banner_position: z.coerce.number().int().min(0).max(100).default(50),
 	bio: z.string().max(MAX_BIO_PROFIL).optional(),
 	full_name: z.string().optional(),
 	twitter_handle: z.string().optional(),

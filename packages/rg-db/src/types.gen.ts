@@ -4818,6 +4818,7 @@ export type Database = {
           address_line2: string | null
           avatar_url: string | null
           badges: string[] | null
+          banner_position: number
           banner_url: string | null
           bio: string | null
           city: string | null

@@ -2,7 +2,6 @@ import { notFound } from "next/navigation";
 
 import { CarteJoueur } from "@rosegriffon/ui";
 import { progression, rangDe } from "@rosegriffon/types/experience";
-import { libelleRole } from "@rosegriffon/types/roles";
 
 import { LegacyBanner } from "@/components/patreon/LegacyBanner";
 import { PatreonConnectionCard } from "@/components/patreon/PatreonConnectionCard";
@@ -101,7 +100,7 @@ export default async function UserProfilePage({
 		// dont deux étaient rendus sur cette page sans authentification.
 		const { rows } = await pool.query<Profile>(
 			`SELECT id, updated_at, username, avatar_url, role, website, discord_id,
-			        bio, banner_url, twitter_handle, badges
+			        bio, banner_url, banner_position, twitter_handle, badges
 			   FROM profiles WHERE username = $1 AND claimed_at IS NOT NULL LIMIT 1`,
 			[username]
 		);
@@ -122,6 +121,30 @@ export default async function UserProfilePage({
 	// d'inventer un « niveau 1 » que personne n'a joué.
 	let niveauCommunaute: { valeur: number; restant: number; rang: string } | null = null;
 	let titreJoueur: string | null = null;
+	// Le rôle affiché est celui du DISCORD, pas `profiles.role` : « member » ou
+	// « admin » décrit un droit d'accès au site, quand « Joueur Route Victoire »
+	// est ce que le membre porte réellement, avec la couleur de son pseudo dans
+	// les salons. On prend le rôle de plus haute position, comme Discord.
+	let roleDiscord: { nom: string; couleur: number | null } | null = null;
+	if (profile.discord_id) {
+		try {
+			const { rows } = await pool.query<{ name: string; color: number | null }>(
+				`SELECT r.name, r.color
+				   FROM discord_members m
+				   JOIN discord_roles r ON r.role_id = ANY(m.roles)
+				  WHERE m.discord_id = $1
+				  ORDER BY r.position DESC
+				  LIMIT 1`,
+				[profile.discord_id]
+			);
+			const ligne = rows[0];
+			if (ligne) {
+				roleDiscord = { couleur: ligne.color || null, nom: ligne.name };
+			}
+		} catch (error) {
+			console.error("[profil] rôle Discord indisponible", error);
+		}
+	}
 	if (profile.discord_id) {
 		try {
 			const { rows } = await pool.query<{ xp: string | number; titre: string | null }>(
@@ -233,8 +256,9 @@ export default async function UserProfilePage({
 					description={profile.bio}
 					avatarUrl={profile.avatar_url}
 					banniereUrl={profile.banner_url}
+					banniereCadrage={profile.banner_position}
 					badges={profile.badges}
-					role={libelleRole(profile.role)}
+					role={roleDiscord}
 					niveau={niveauCommunaute}
 				/>
 
