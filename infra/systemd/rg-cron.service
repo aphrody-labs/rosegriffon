@@ -35,6 +35,15 @@ Environment=WEBSITE_URL=https://rosegriffon.fr
 Environment=API_URL=https://api.rosegriffon.fr
 Environment=CDN_URL=https://cdn.rosegriffon.fr
 
+# `@aphrody-code/bxc` (npm:@aphrody/bxc, tâche `crawl`/zukan) tente en dernier
+# recours `cargo run --manifest-path rust-bridge/Cargo.toml` pour localiser
+# Chrome — ce dossier n'est jamais publié dans le tarball npm, donc l'appel
+# échoue toujours en prod (« rust-bridge/Cargo.toml does not exist »).
+# CHROME_PATH court-circuite entièrement cette résolution. Repéré le 1/9/2026 :
+# 3 échecs consécutifs de la tâche `crawl` (alerte cron), aucun cargo installé
+# côté rg de toute façon.
+Environment=CHROME_PATH=/usr/local/bin/google-chrome
+
 ExecStart=/home/ubuntu/.bun/bin/bun run src/index.ts
 # `always` : le démon planifie en continu, il n'a aucune raison de sortir. Une sortie
 # en code 0 — fin de boucle inattendue, exception avalée — n'était pas relancée, et
