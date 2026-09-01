@@ -47,6 +47,16 @@ interface AccountClientProps {
  * que ce qui est propre au site — instance Better Auth, stockage Supabase,
  * fournisseurs OAuth proposés et actions serveur.
  */
+/** Rend la phrase envoyée par la route, ou un repli — jamais un code HTTP nu. */
+async function raisonHttp(reponse: Response, defaut: string): Promise<string> {
+	try {
+		const charge = (await reponse.json()) as { error?: string };
+		return charge.error || defaut;
+	} catch {
+		return defaut;
+	}
+}
+
 export function AccountClient({
 	userId,
 	email,
@@ -143,7 +153,9 @@ export function AccountClient({
 			onRefresh: async () => {
 				const res = await fetch("/api/auth/patreon/refresh", { method: "POST" });
 				if (!res.ok) {
-					throw new Error(`Synchronisation impossible (HTTP ${res.status}).`);
+					// Le message de la route, pas son code : « HTTP 409 » ne dit pas à
+					// quelqu'un ce qu'il doit faire, « lie d'abord Discord » si.
+					throw new Error(await raisonHttp(res, "Synchronisation impossible."));
 				}
 				toast.success("Patreon synchronisé.");
 				reload();
@@ -151,7 +163,7 @@ export function AccountClient({
 			onUnlink: async () => {
 				const res = await fetch("/api/auth/patreon/disconnect", { method: "POST" });
 				if (!res.ok) {
-					throw new Error(`Dissociation impossible (HTTP ${res.status}).`);
+					throw new Error(await raisonHttp(res, "Dissociation impossible."));
 				}
 				toast.success("Compte Patreon dissocié.");
 				reload();

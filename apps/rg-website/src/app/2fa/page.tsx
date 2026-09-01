@@ -8,7 +8,7 @@
  * se joue justement autour de la naissance de cette session. La garde du groupe
  * transformerait la page en boucle de redirection au pire moment.
  */
-import { TwoFactorChallenge } from "@rosegriffon/ui";
+import { Skeleton, TwoFactorChallenge } from "@rosegriffon/ui";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense } from "react";
 
@@ -57,8 +57,24 @@ function Verification() {
 }
 
 export default function Page() {
+	// `useSearchParams` impose une frontière `Suspense`, donc le HTML servi est
+	// vide et tout arrive côté client. Un `fallback` à `null` laissait une page
+	// entièrement blanche le temps de l'hydratation — sur l'écran qui décide si
+	// l'on entre ou non dans son compte, c'est l'endroit où l'on croit le moins
+	// à une panne passagère.
 	return (
-		<Suspense fallback={null}>
+		<Suspense
+			fallback={
+				<main className="flex min-h-[70vh] items-center justify-center px-4 py-12">
+					<div className="w-full max-w-md space-y-4 rounded-xl border border-border p-6">
+						<Skeleton className="h-6 w-64" />
+						<Skeleton className="h-4 w-full" />
+						<Skeleton className="h-10 w-full" />
+						<Skeleton className="h-10 w-full rounded-full" />
+					</div>
+				</main>
+			}
+		>
 			<Verification />
 		</Suspense>
 	);
