@@ -77,10 +77,14 @@ export interface RagChunkResult {
 
 function resolveStorePath(): string {
 	if (process.env.RAG_STORE_PATH) return path.resolve(process.env.RAG_STORE_PATH);
+	// Le store a suivi les données de jeu dans `niers` : c'est là qu'il est écrit par le
+	// cron et lu par `rag-api.service`. Le garder ici en aurait fait deux, divergents et
+	// silencieux — celui qu'on ingère et celui qu'on sert.
 	const candidates = [
+		path.resolve(process.cwd(), "var/rag/rag-store.sqlite"),
+		"/home/ubuntu/niers/var/rag/rag-store.sqlite",
 		path.resolve(process.cwd(), "data/rag/rag-store.sqlite"),
 		path.resolve(process.cwd(), "apps/azalee/data/rag/rag-store.sqlite"),
-		"/home/ubuntu/rg/apps/azalee/data/rag/rag-store.sqlite",
 	];
 	for (const c of candidates) {
 		if (existsSync(path.dirname(c))) return c;

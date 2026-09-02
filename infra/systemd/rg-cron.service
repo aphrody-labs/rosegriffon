@@ -75,7 +75,11 @@ ProtectHome=read-only
 # `/var/lib/rg` : cache de la collecte d'audience du second serveur, lu par la
 # page /admin/stats. Sans cette entrée, `ProtectSystem=strict` le rend en
 # lecture seule et la tâche `stats:achillea` échoue en EROFS.
-ReadWritePaths=/home/ubuntu/rg /tmp /home/ubuntu/.bxc /var/www/cdn/static/azalee/public /var/www/cdn/static/website/public /var/lib/rg
+# `/home/ubuntu/niers/var` : le pipeline de données du jeu a suivi la fusion. La tâche `db`
+#   y lance le push d'inagle et la republication du miroir SQLite (`scripts/donnees/
+#   miroir-inagle.sh`), qui écrit dans `var/miroir/`. Sans cette entrée, `ProtectSystem=strict`
+#   la fait échouer en EROFS.
+ReadWritePaths=/home/ubuntu/rg /home/ubuntu/niers/var /tmp /home/ubuntu/.bxc /var/www/cdn/static/azalee/public /var/www/cdn/static/website/public /var/lib/rg
 PrivateTmp=true
 PrivateDevices=true
 ProtectKernelTunables=true
