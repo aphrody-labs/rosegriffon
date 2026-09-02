@@ -7,11 +7,25 @@
  * Il n'existe AUCUN moyen automatique de récolter un hashtag Instagram
  * aujourd'hui (mesuré le 13/8/2026 : `?__a=1` rend une enveloppe d'erreur,
  * GraphQL rend 401 `require_login`, `api/v1/tags/web_info` redirige vers la page
- * de connexion, et le HTML d'un post ne porte plus ni `og:`, ni JSON-LD, ni
- * `window._sharedData`). Les bibliothèques exigent toutes une session — les
- * employer avec le compte de l'association l'exposerait à un blocage en pleine
- * campagne. L'API Graph officielle marche mais demande une revue Meta de deux à
- * quatre semaines, et ne rend même pas le pseudo de l'auteur.
+ * de connexion). Les bibliothèques exigent toutes une session — les employer
+ * avec le compte de l'association l'exposerait à un blocage en pleine campagne.
+ * L'API Graph officielle marche mais demande une revue Meta de deux à quatre
+ * semaines, et ne rend même pas le pseudo de l'auteur.
+ *
+ * ⚠ CE QUI EST FAUX DANS LA PHRASE PRÉCÉDENTE, ET QUI L'ÉTAIT DÉJÀ ICI.
+ * Ce commentaire affirmait aussi que « le HTML d'un post ne porte plus ni `og:`,
+ * ni JSON-LD, ni `window._sharedData` ». Re-mesuré le 22/8/2026 sur deux posts
+ * réels : JSON-LD et `_sharedData` ont bien disparu, mais les balises `og:` sont
+ * TOUJOURS LÀ — `og:title`, `og:image` (recadrée en 640 carré) et surtout
+ * `og:description`, qui écrit la date en clair (« on August 21, 2026 »). Et
+ * `https://www.instagram.com/api/v1/oembed/` répond 200 sans jeton avec la
+ * légende entière, le pseudo et le `media_id` (cf. l'en-tête de
+ * `@rosegriffon/types/instagram`). Le HASHTAG reste introuvable sans session —
+ * donc rien ne change pour la RÉCOLTE, et ce formulaire garde sa raison d'être.
+ * Mais une publication DONT ON A DÉJÀ LE LIEN se lit très bien : c'est ce qui a
+ * permis à l'équipe de saisir les deux participations Instagram d'IERG Day.
+ * « On ne peut pas récolter » ne veut pas dire « on ne peut rien lire », et
+ * confondre les deux a failli coûter deux créations au tirage.
  *
  * Le participant dépose donc lui-même son permalien et son image. C'est plus
  * fiable sur un point que tout collecteur : **l'attribution est exacte**, parce

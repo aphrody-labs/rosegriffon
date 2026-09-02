@@ -58,6 +58,8 @@ import {
 	fermerTicket,
 	ouvrirTicket,
 	prendreTicket,
+	publierFermeture,
+	reconcilierTicketsOuverts,
 	rendreTicket,
 	ticketDuSalon,
 	ticketsOuverts,
@@ -74,7 +76,6 @@ import {
 	echec,
 	fiche,
 	ilYA,
-	leJour,
 	pied,
 	piedDeCommande,
 	repondre,
@@ -134,10 +135,10 @@ async function salonPanneauDe(
 async function estStaff(
 	guildId: string,
 	membreRoles: readonly string[],
-	sensible: boolean
+	pourLaDirection: boolean
 ): Promise<boolean> {
 	const reglages = await reglagesDe(guildId);
-	const habilites = sensible
+	const habilites = pourLaDirection
 		? reglages.tickets.rolesDirection
 		: [...reglages.tickets.rolesStaff, ...reglages.tickets.rolesDirection];
 	return habilites.some((roleId) => membreRoles.includes(roleId));
@@ -193,7 +194,12 @@ async function ouvrir(
 		return { message: HORS_GUILDE, ok: false };
 	}
 
-	const dejaOuverts = await ticketsOuvertsDe(guildId, interaction.user.id);
+	// Les fils supprimés ne se ferment pas tout seuls en base : sans ce passage,
+	// un ticket dont le fil a disparu mure son auteur pour toujours.
+	const dejaOuverts = await reconcilierTicketsOuverts(
+		interaction.guild,
+		await ticketsOuvertsDe(guildId, interaction.user.id)
+	);
 	const verification = verifierOuverture(
 		categorieCle,
 		sujetBrut,
@@ -239,62 +245,6 @@ async function ouvrir(
 		);
 
 	return { fil, ok: true, ticket };
-}
-
-/**
- * Publie la carte de fermeture dans le salon d'historique.
- *
- * Les champs reprennent EXACTEMENT ceux des 84 cartes déjà présentes
- * (Ticket ID · Opened By · Closed By · Open Time · Claimed By · Reason) : le
- * salon doit rester lisible d'un seul coup d'œil sur trois ans d'archives, pas
- * se scinder en un « avant » et un « après ».
- */
-async function publierFermeture(
-	interaction: ChatInputCommandInteraction | ButtonInteraction | ModalSubmitInteraction,
-	ticket: Ticket,
-	motif: string,
-	fil: ThreadChannel | null
-): Promise<void> {
-	const guildId = interaction.guildId;
-	if (!guildId) {
-		return;
-	}
-	const reglages = await reglagesDe(guildId);
-	if (!reglages.tickets.salonHistorique) {
-		return;
-	}
-	const salon = await interaction.client.channels
-		.fetch(reglages.tickets.salonHistorique)
-		.catch(() => null);
-	if (!salon || !salon.isTextBased() || !("send" in salon)) {
-		return;
-	}
-
-	const carte = fiche({
-		icone: "ticket",
-		intention: "succes",
-		titre: `Ticket ${referenceTicket(ticket.numero)} fermé`,
-		url: fil?.url ?? null,
-	});
-	carte
-		.champ("Catégorie", libelleCategorieTicket(ticket.categorie), { enLigne: true })
-		.champ("Ouvert par", `<@${ticket.auteurId}>`, { enLigne: true })
-		.champ("Fermé par", `<@${ticket.fermePar ?? interaction.user.id}>`, { enLigne: true })
-		.champ("Ouvert le", leJour(ticket.ouvertLe, "f"), { enLigne: true })
-		.champ("Pris en charge par", ticket.prisPar ? `<@${ticket.prisPar}>` : "personne", {
-			enLigne: true,
-		})
-		.champ("Durée", ilYA(ticket.ouvertLe), { enLigne: true })
-		.champ("Motif", motif);
-	if (ticket.sujet) {
-		carte.champ("Sujet à l'ouverture", ticket.sujet);
-	}
-
-	await salon
-		.send({ embeds: [pied(carte.embed, { note: "le fil reste lisible, il n'est pas supprimé" })] })
-		.catch((err: unknown) =>
-			console.warn("[tickets] historique non écrit :", err instanceof Error ? err.message : err)
-		);
 }
 
 @Discord()
@@ -405,7 +355,7 @@ export class TicketCommand {
 					: [];
 			const autorise =
 				ticket.auteurId === interaction.user.id ||
-				(await estStaff(ticket.guildId, listeRoles, categorie?.sensible ?? false));
+				(await estStaff(ticket.guildId, listeRoles, categorie?.pourLaDirection ?? false));
 			if (!autorise) {
 				await repondre(
 					interaction,
@@ -423,7 +373,14 @@ export class TicketCommand {
 			}
 
 			const fil = interaction.channel?.isThread() ? (interaction.channel as ThreadChannel) : null;
-			await publierFermeture(interaction, ferme, motif, fil);
+			await publierFermeture({
+				client: interaction.client,
+				fermePar: interaction.user.id,
+				guildId: ferme.guildId,
+				motif,
+				ticket: ferme,
+				urlFil: fil?.url ?? null,
+			});
 
 			await interaction.editReply({
 				embeds: [
@@ -587,13 +544,13 @@ async function basculerPriseEnCharge(
 			: roles && "cache" in roles
 				? [...roles.cache.keys()]
 				: [];
-		if (!(await estStaff(ticket.guildId, listeRoles, categorie?.sensible ?? false))) {
+		if (!(await estStaff(ticket.guildId, listeRoles, categorie?.pourLaDirection ?? false))) {
 			await repondre(
 				interaction,
 				attention(
 					"Réservé au staff",
-					categorie?.sensible
-						? "Ce ticket est un signalement : seule la direction le prend en charge."
+					categorie?.pourLaDirection
+						? "Ce ticket est réservé à la direction : elle seule le prend en charge."
 						: "Seuls les rôles de prise en charge peuvent le faire.",
 					{ prive: true }
 				)
@@ -768,7 +725,14 @@ export class TicketComposants {
 			}
 
 			const fil = interaction.channel?.isThread() ? (interaction.channel as ThreadChannel) : null;
-			await publierFermeture(interaction, ferme, motif, fil);
+			await publierFermeture({
+				client: interaction.client,
+				fermePar: interaction.user.id,
+				guildId: ferme.guildId,
+				motif,
+				ticket: ferme,
+				urlFil: fil?.url ?? null,
+			});
 			await interaction.editReply({
 				embeds: [
 					pied(
@@ -820,7 +784,7 @@ async function basculerParBouton(
 			: roles && "cache" in roles
 				? [...roles.cache.keys()]
 				: [];
-		if (!(await estStaff(ticket.guildId, listeRoles, categorie?.sensible ?? false))) {
+		if (!(await estStaff(ticket.guildId, listeRoles, categorie?.pourLaDirection ?? false))) {
 			await interaction.editReply(
 				attention("Réservé au staff", "Seuls les rôles de prise en charge peuvent le faire.", {
 					prive: true,

@@ -330,7 +330,7 @@ export async function assurerCurseur(canal = CANAL_NOTIFICATION): Promise<Curseu
 		Array<{ canal: string; curseur_le: Date; dernier_tweet_id: string | null; annonces: number }>
 	>`
 		INSERT INTO public.tweet_notification_curseurs (canal, curseur_le)
-		VALUES (${canal}, now())
+		VALUES (${canal}, date_trunc('milliseconds', now()))
 		ON CONFLICT (canal) DO NOTHING
 		RETURNING canal, curseur_le, dernier_tweet_id, annonces
 	`;
@@ -471,6 +471,19 @@ export async function tweetsAPublier(
  * L'exclusion porte sur `(canal, curseur_le)` : elle départage deux drains du
  * MÊME profil, et ne gêne jamais un autre profil, qui écrit sa propre ligne.
  *
+ * ⚠ LA COMPARAISON SE FAIT À LA MILLISECONDE, et c'est indispensable.
+ * `timestamptz` porte des MICROsecondes, `Date` de JavaScript s'arrête à la
+ * milliseconde : une ligne posée par `now()` vaut `10:29:09.045051`, revient
+ * dans le drain comme `10:29:09.045` et ne se retrouve JAMAIS avec un
+ * `curseur_le = ${attendu}` brut. L'échange-comparaison échouait donc à tous
+ * les coups — silencieusement, puisqu'il ne fait que ne toucher aucune ligne.
+ * Le curseur d'Azalée est resté figé au 13/8/2026 pendant onze jours, et le
+ * drain a reproposé le même post toutes les cinq minutes dans le salon de
+ * validation (`propose, 1/1` en boucle dans le journal). Le `date_trunc` des
+ * deux côtés remet la comparaison dans la précision que le lecteur peut
+ * représenter ; l'écriture est tronquée de même pour que la valeur relue soit
+ * exactement celle qui a été écrite.
+ *
  * @returns `false` si un autre drain a déjà avancé le curseur.
  */
 export async function avancerCurseur(
@@ -482,11 +495,12 @@ export async function avancerCurseur(
 ): Promise<boolean> {
 	const lignes = await sql<Array<{ canal: string }>>`
 		UPDATE public.tweet_notification_curseurs
-		SET curseur_le = ${jusqua},
+		SET curseur_le = date_trunc('milliseconds', ${jusqua}::timestamptz),
 		    dernier_tweet_id = ${dernierTweetId},
 		    annonces = annonces + ${publies},
 		    maj_le = now()
-		WHERE canal = ${canal} AND curseur_le = ${attendu}
+		WHERE canal = ${canal}
+		  AND date_trunc('milliseconds', curseur_le) = date_trunc('milliseconds', ${attendu}::timestamptz)
 		RETURNING canal
 	`;
 	return lignes.length > 0;

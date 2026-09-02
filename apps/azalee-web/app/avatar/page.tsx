@@ -29,7 +29,14 @@ import type { Metadata } from "next";
 import { Editeur } from "./Editeur";
 import type { Catalogue } from "./types";
 
-export const dynamic = "force-dynamic";
+/**
+ * Le catalogue ne change qu'au réexport des données (`niers avatar export`) : la page est
+ * rendue une fois puis resservie pendant une journée, au lieu d'être recalculée — et de
+ * retélécharger 450 Ko au décodeur d'assets — à chaque visite. Rien ici ne dépend de la
+ * requête : ni session, ni cookie, ni paramètre d'URL. Le 21/8/2026, c'est ce `fetch` en
+ * `no-store` qui a vidé la page quand le décodeur a répondu 504.
+ */
+export const revalidate = 86_400;
 export const runtime = "nodejs";
 
 export const metadata: Metadata = {
@@ -47,7 +54,9 @@ const CDN = process.env.NEXT_PUBLIC_CDN_ORIGIN ?? "https://cdn.rosegriffon.fr";
  */
 async function chargerCatalogue(): Promise<Catalogue | null> {
 	try {
-		const reponse = await fetch(`${CDN}/avatar/catalog.json`, { cache: "no-store" });
+		const reponse = await fetch(`${CDN}/avatar/catalog.json`, {
+			next: { revalidate: 86_400 },
+		});
 		if (!reponse.ok) return null;
 		return (await reponse.json()) as Catalogue;
 	} catch {

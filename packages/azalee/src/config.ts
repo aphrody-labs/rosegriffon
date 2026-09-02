@@ -134,6 +134,14 @@ export function resolveMirrorPath(): string | null {
 	if (explicit.mirrorPath) return explicit.mirrorPath;
 	if (process.env.SQLITE_DB_PATH) return path.resolve(process.env.SQLITE_DB_PATH);
 
+	// Le miroir a suivi les données du jeu dans `niers` : c'est `nie-miroir.timer` qui le
+	// publie, et `azalee-mirror-sync` est désarmé depuis. L'ancien dossier `data/backups`
+	// existe encore mais ne se rafraîchit plus — le lire ferait servir des données figées
+	// sans qu'aucune erreur ne le dise. Les unités de production l'épinglent déjà par
+	// `SQLITE_DB_PATH` ; ce repli couvre la CLI, les tests et les scripts.
+	const miroirDuJeu = process.env.NIERS_MIRROR ?? "/home/ubuntu/niers/var/mirror.sqlite";
+	if (existsSync(miroirDuJeu)) return miroirDuJeu;
+
 	for (const dir of dataDirCandidates()) {
 		const backups = path.join(dir, "backups");
 		const pinned = path.join(backups, "mirror.sqlite");

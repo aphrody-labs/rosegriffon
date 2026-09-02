@@ -56,7 +56,7 @@ export function HashtagsCopiables({ hashtags }: { hashtags: HashtagAffichable[] 
 	};
 
 	return (
-		<div className="mt-6">
+		<div>
 			<ul className="flex list-none flex-wrap gap-2 p-0">
 				{hashtags.map((hashtag) => {
 					const copieCeluiCi = copie === hashtag.libelle;

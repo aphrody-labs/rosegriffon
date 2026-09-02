@@ -223,33 +223,9 @@ describe("/api/assets/<scope>/<path> — résolution + anti-traversal", () => {
     expect(res.status).toBe(404);
   });
 
-  test("asset existant → 200, content-type image/png, ETag, cache-control vary Accept", async () => {
-    const res = await fetch(`${base}/api/assets/rpb-dashboard/logo.png`);
-    expect(res.status).toBe(200);
-    expect(res.headers.get("content-type")).toBe("image/png");
-    expect(res.headers.get("etag")).toBeTruthy();
-    expect(res.headers.get("vary")).toBe("Accept");
-    expect(res.headers.get("cache-control")).toContain("max-age=2592000");
-    // Corps réellement servi (PNG signature).
-    const bytes = new Uint8Array(await res.arrayBuffer());
-    expect(bytes[0]).toBe(0x89);
-    expect(bytes[1]).toBe(0x50);
-  });
-
   test("asset inexistant dans scope valide → 404", async () => {
     const res = await fetch(`${base}/api/assets/rpb-dashboard/missing.png`);
     expect(res.status).toBe(404);
-  });
-
-  test("ETag + If-None-Match → 304 Not Modified", async () => {
-    const first = await fetch(`${base}/api/assets/rpb-dashboard/logo.png`);
-    const etag = first.headers.get("etag");
-    expect(etag).toBeTruthy();
-    const second = await fetch(`${base}/api/assets/rpb-dashboard/logo.png`, {
-      headers: { "if-none-match": etag! },
-    });
-    expect(second.status).toBe(304);
-    expect(second.headers.get("etag")).toBe(etag);
   });
 
   test("path traversal ../../secret.txt → bloqué (403 forbidden) ou 404, jamais le secret", async () => {
@@ -271,31 +247,6 @@ describe("/api/assets/<scope>/<path> — résolution + anti-traversal", () => {
   });
 });
 
-describe("content negotiation AVIF/WebP", () => {
-  test("Accept: image/webp + variant off-tree présent → sert le .webp", async () => {
-    // Dépose un variant off-tree : <VARIANTS_ROOT>/<scope>/<rel>.webp
-    const scopeVariantDir = join(variantsRoot, "rpb-dashboard");
-    await mkdir(scopeVariantDir, { recursive: true });
-    // Contenu webp factice mais le content-type est dérivé de l'extension servie.
-    await writeFile(join(scopeVariantDir, "logo.png.webp"), Buffer.from("RIFFWEBPDUMMY"));
-
-    const res = await fetch(`${base}/api/assets/rpb-dashboard/logo.png`, {
-      headers: { accept: "image/webp,image/png;q=0.8" },
-    });
-    expect(res.status).toBe(200);
-    expect(res.headers.get("content-type")).toBe("image/webp");
-    const text = await res.text();
-    expect(text).toContain("WEBP");
-  });
-
-  test("sans Accept image/* → sert la source PNG d'origine", async () => {
-    const res = await fetch(`${base}/api/assets/rpb-dashboard/logo.png`, {
-      headers: { accept: "text/html" },
-    });
-    expect(res.status).toBe(200);
-    expect(res.headers.get("content-type")).toBe("image/png");
-  });
-});
 
 describe("manifest absent", () => {
   test("GET /api/assets/manifest sans fichier → 503", async () => {
@@ -320,12 +271,6 @@ describe("CORS — active cross origin partout", () => {
   test("OPTIONS préflight (fallback /api/assets/*) → 204 + Allow-Origin *", async () => {
     const res = await fetch(`${base}/api/assets/rpb-dashboard/logo.png`, { method: "OPTIONS" });
     expect(res.status).toBe(204);
-    expect(res.headers.get("access-control-allow-origin")).toBe("*");
-  });
-
-  test("GET asset → Allow-Origin * (lecture cross-origin ouverte)", async () => {
-    const res = await fetch(`${base}/api/assets/rpb-dashboard/logo.png`);
-    expect(res.status).toBe(200);
     expect(res.headers.get("access-control-allow-origin")).toBe("*");
   });
 

@@ -33,9 +33,24 @@ import {
 	manquesTickets,
 	type ReglagesCommunaute,
 } from "../../lib/reglages-communaute";
-import { CATEGORIES_TICKET, libelleCategorieTicket, referenceTicket } from "../../lib/tickets";
+import {
+	CATEGORIES_TICKET,
+	libelleCategorieTicket,
+	LONGUEUR_MOTIF,
+	motifPropre,
+	referenceTicket,
+} from "../../lib/tickets";
 import { enregistrerReglages, reglagesDe } from "../../services/communaute";
-import { compterTickets, diagnostiquerAcces, ticketsOuverts } from "../../services/tickets";
+import {
+	clore,
+	compterTickets,
+	diagnostiquerAcces,
+	fermerTicket,
+	publierFermeture,
+	reconcilierTicketsOuverts,
+	ticketParNumero,
+	ticketsOuverts,
+} from "../../services/tickets";
 import { construirePanneau } from "../ticket";
 import { attention, echec, fiche, ilYA, piedDeCommande, repondre, succes } from "../../lib/ui";
 import { differerEnPrive, exigerDroits, messagePanne } from "../staff/garde";
@@ -407,10 +422,14 @@ export class GestionTicketCommand {
 			return;
 		}
 		try {
-			const [ouverts, compte] = await Promise.all([
-				ticketsOuverts(guildId, 25),
-				compterTickets(guildId),
-			]);
+			// Un fil supprimé laisse sa ligne « ouverte » : la liste du staff doit
+			// montrer les tickets qui existent, pas des salons introuvables.
+			const bruts = await ticketsOuverts(guildId, 25);
+			const ouverts = interaction.guild
+				? await reconcilierTicketsOuverts(interaction.guild, bruts)
+				: bruts;
+			const compte = await compterTickets(guildId);
+			const fantomes = bruts.length - ouverts.length;
 			const carte = fiche({
 				description:
 					ouverts.length === 0
@@ -436,9 +455,118 @@ export class GestionTicketCommand {
 				"Total",
 				`${compte.ouvert} en attente · ${compte.pris} pris en charge · ${compte.ferme} fermés`
 			);
+			if (fantomes > 0) {
+				carte.champ(
+					"Fermés d'office",
+					`${fantomes} ticket(s) dont le fil avait été supprimé — leur auteur peut de nouveau en ouvrir un.`
+				);
+			}
 			await interaction.editReply({ embeds: [piedDeCommande(carte.embed, interaction)] });
 		} catch (err) {
 			await repondre(interaction, echec("Liste illisible", messagePanne(err)));
+		}
+	}
+
+	@Slash({
+		description: "Fermer d'office un ticket par son numéro, depuis n'importe où",
+		name: "fermer",
+	})
+	async fermerDoffice(
+		@SlashOption({
+			description: "Numéro du ticket, celui de « ticket-0086 »",
+			minValue: 1,
+			name: "numero",
+			required: true,
+			type: ApplicationCommandOptionType.Integer,
+		})
+		numero: number,
+		@SlashOption({
+			description: "Pourquoi il est fermé — obligatoire",
+			maxLength: LONGUEUR_MOTIF,
+			minLength: 3,
+			name: "motif",
+			required: true,
+			type: ApplicationCommandOptionType.String,
+		})
+		motifBrut: string,
+		interaction: ChatInputCommandInteraction
+	) {
+		await differerEnPrive(interaction);
+		const admin = await exigerDroits(interaction);
+		if (!admin) {
+			return;
+		}
+		const guildId = interaction.guildId;
+		if (!guildId) {
+			await repondre(interaction, echec("Hors serveur", "Les tickets vivent sur un serveur."));
+			return;
+		}
+		try {
+			const ticket = await ticketParNumero(guildId, numero);
+			if (!ticket) {
+				await repondre(
+					interaction,
+					attention("Inconnu", `Aucun ticket ${referenceTicket(numero)} sur ce serveur.`)
+				);
+				return;
+			}
+			if (ticket.statut === "ferme") {
+				await repondre(
+					interaction,
+					attention("Déjà fermé", `${referenceTicket(numero)} est fermé depuis ${ilYA(ticket.fermeLe ?? ticket.ouvertLe)}.`)
+				);
+				return;
+			}
+			const motif = motifPropre(motifBrut);
+			if (!motif) {
+				await repondre(interaction, echec("Motif vide", "Toujours fermer avec un motif."));
+				return;
+			}
+
+			const ferme = await fermerTicket(ticket.id, interaction.user.id, motif);
+			if (!ferme) {
+				await repondre(interaction, attention("Déjà fermé", "Quelqu'un a été plus rapide."));
+				return;
+			}
+
+			const salon = await interaction.client.channels
+				.fetch(ferme.salonId)
+				.catch(() => null);
+			const fil = salon?.isThread() ? salon : null;
+			await publierFermeture({
+				client: interaction.client,
+				fermePar: interaction.user.id,
+				guildId,
+				motif,
+				ticket: ferme,
+				urlFil: fil?.url ?? null,
+			});
+			if (fil) {
+				await clore(fil, `Fermé d'office par ${interaction.user.tag} — ${motif}`);
+			}
+			await logAdminAction({
+				action: "ticket.fermeture-office",
+				adminId: admin.profileId,
+				details: { auteur: ferme.auteurId, filPresent: fil !== null, motif, numero },
+				discordId: interaction.user.id,
+				targetId: String(ferme.id),
+				targetType: "bot_tickets",
+			});
+
+			await repondre(
+				interaction,
+				succes(
+					`Ticket ${referenceTicket(ferme.numero)} fermé`,
+					[
+						`**Motif** ${motif}`,
+						`Ouvert par <@${ferme.auteurId}> — il peut de nouveau ouvrir un ticket.`,
+						fil ? "Le fil est archivé et verrouillé." : "Son fil n'existait plus.",
+					].join("\n"),
+					{ prive: true }
+				)
+			);
+		} catch (err) {
+			await repondre(interaction, echec("Fermeture impossible", messagePanne(err)));
 		}
 	}
 }

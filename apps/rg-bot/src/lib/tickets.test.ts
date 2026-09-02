@@ -198,8 +198,8 @@ describe("accès", () => {
 		const liste = invitations({
 			auteurId: "membre",
 			rolesDirection: direction,
+			pourLaDirection: false,
 			rolesStaff: staff,
-			sensible: false,
 		});
 		expect(liste[0]).toEqual({ genre: "membre", id: "membre", raison: "Auteur du ticket." });
 		const roles = liste.filter((e) => e.genre === "role").map((e) => e.id);
@@ -211,30 +211,50 @@ describe("accès", () => {
 		const liste = invitations({
 			auteurId: "membre",
 			rolesDirection: direction,
+			pourLaDirection: false,
 			rolesStaff: [...staff, "role-mod-1"],
-			sensible: false,
 		});
 		const roles = liste.filter((e) => e.genre === "role").map((e) => e.id);
 		expect(roles).toEqual(staff);
 	});
 
-	test("un ticket sensible ne va QU'À la direction", () => {
-		// La règle qui justifie tout le module : un signalement peut viser un
-		// modérateur.
+	test("un ticket réservé à la direction ne va QU'À la direction", () => {
 		const liste = invitations({
 			auteurId: "membre",
+			pourLaDirection: true,
 			rolesDirection: direction,
 			rolesStaff: staff,
-			sensible: true,
 		});
 		const roles = liste.filter((e) => e.genre === "role").map((e) => e.id);
 		expect(roles).toEqual(direction);
 		expect(roles).not.toContain("role-mod-1");
 	});
 
-	test("sans direction configurée, la catégorie sensible est refusée — pas rabattue", () => {
-		const sensible = CATEGORIES_TICKET.find((c) => c.sensible) as (typeof CATEGORIES_TICKET)[number];
-		const manque = manqueDeConfiguration(sensible, { rolesDirection: [], rolesStaff: staff });
+	test("« sensible » ne décide plus du destinataire — le signalement va à la modération", () => {
+		// Décision du 22/8/2026 : le premier vrai signalement notifiait trois
+		// membres de la direction et aucun modérateur, pour un incident de vocal.
+		const signalement = CATEGORIES_TICKET.find(
+			(c) => c.cle === "signalement"
+		) as (typeof CATEGORIES_TICKET)[number];
+		expect(signalement.sensible).toBe(true);
+		expect(signalement.pourLaDirection).toBe(false);
+		const liste = invitations({
+			auteurId: "membre",
+			pourLaDirection: signalement.pourLaDirection,
+			rolesDirection: direction,
+			rolesStaff: staff,
+		});
+		const roles = liste.filter((e) => e.genre === "role").map((e) => e.id);
+		expect(roles).toEqual(staff);
+		expect(roles).not.toContain("role-direction");
+	});
+
+	test("sans direction configurée, une catégorie de direction est refusée — pas rabattue", () => {
+		const pourLaDirection = { ...CATEGORIES_TICKET[1], pourLaDirection: true } as const;
+		const manque = manqueDeConfiguration(pourLaDirection, {
+			rolesDirection: [],
+			rolesStaff: staff,
+		});
 		expect(manque).not.toBeNull();
 		expect(manque as string).toContain("direction");
 	});
@@ -294,7 +314,9 @@ describe("accès", () => {
 	});
 
 	test("sans aucun rôle, même une catégorie ordinaire est refusée", () => {
-		const ordinaire = CATEGORIES_TICKET.find((c) => !c.sensible) as (typeof CATEGORIES_TICKET)[number];
+		const ordinaire = CATEGORIES_TICKET.find(
+			(c) => !c.pourLaDirection
+		) as (typeof CATEGORIES_TICKET)[number];
 		expect(manqueDeConfiguration(ordinaire, { rolesDirection: [], rolesStaff: [] })).not.toBeNull();
 		expect(manqueDeConfiguration(ordinaire, { rolesDirection: [], rolesStaff: staff })).toBeNull();
 	});

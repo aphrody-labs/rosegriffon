@@ -35,6 +35,7 @@
 import {
 	ChannelType,
 	PermissionFlagsBits,
+	type Client,
 	type Guild,
 	type GuildTextBasedChannel,
 	type TextChannel,
@@ -62,12 +63,15 @@ import {
 	categorieTicket,
 	fuitesDAcces,
 	invitations,
+	libelleCategorieTicket,
 	nomSalonTicket,
 	prochainNumero,
 	referenceTicket,
 	type CategorieTicket,
 	type EtatTicket,
 } from "../lib/tickets";
+import { fiche, ilYA, leJour, pied } from "../lib/ui";
+import { reglagesDe } from "./communaute";
 
 // ─── Lignes ─────────────────────────────────────────────────────────────────
 
@@ -130,6 +134,20 @@ const COLONNES = sql`
 export async function ticketDuSalon(salonId: string): Promise<Ticket | null> {
 	const lignes = await sql<LigneTicket[]>`
 		SELECT ${COLONNES} FROM bot_tickets WHERE salon_id = ${salonId} LIMIT 1
+	`;
+	const ligne = lignes[0];
+	return ligne ? versTicket(ligne) : null;
+}
+
+/**
+ * Un ticket par son numéro lisible — la seule prise sur un ticket dont le fil
+ * n'existe plus. Sans elle, `/ticket fermer` (qui se lance DANS le fil) laisse
+ * la ligne ouverte à jamais, et son auteur muré par la garde anti-doublon.
+ */
+export async function ticketParNumero(guildId: string, numero: number): Promise<Ticket | null> {
+	const lignes = await sql<LigneTicket[]>`
+		SELECT ${COLONNES} FROM bot_tickets
+		 WHERE guild_id = ${guildId} AND numero = ${numero} LIMIT 1
 	`;
 	const ligne = lignes[0];
 	return ligne ? versTicket(ligne) : null;
@@ -265,8 +283,8 @@ export async function ouvrirTicket(demande: DemandeOuverture): Promise<TicketOuv
 	const aInviter = invitations({
 		auteurId: demande.auteurId,
 		rolesDirection: demande.rolesDirection,
+		pourLaDirection: demande.categorie.pourLaDirection,
 		rolesStaff: demande.rolesStaff,
-		sensible: demande.categorie.sensible,
 	});
 	const mentions = aInviter
 		.map((entree) => (entree.genre === "membre" ? `<@${entree.id}>` : `<@&${entree.id}>`))
@@ -348,6 +366,163 @@ export async function clore(fil: ThreadChannel, raison: string): Promise<void> {
 			err instanceof Error ? err.message : err
 		);
 	}
+}
+
+// ─── Réconciliation ─────────────────────────────────────────────────────────
+
+/** Code d'erreur Discord « Unknown Channel ». Le seul qui prouve une disparition. */
+const SALON_INCONNU = 10_003;
+
+/** Motif écrit quand le bot ferme lui-même un ticket dont le fil a disparu. */
+export const MOTIF_FIL_DISPARU = "Fil supprimé — ticket clos d'office.";
+
+/**
+ * Le fil d'un ticket existe-t-il encore ?
+ *
+ * `disparu` n'est vrai QUE sur `Unknown Channel` (10003). Une panne réseau, un
+ * 500 de l'API ou un droit manquant laissent `disparu` faux : fermer d'office un
+ * ticket bien vivant sur une erreur passagère serait pire que le laisser ouvert.
+ *
+ * Le `force` n'est pas décoratif — un fil supprimé pendant que le bot était
+ * arrêté reste en cache tel qu'il était, et la question posée ici est justement
+ * celle à laquelle le cache ne sait pas répondre.
+ */
+async function filDuTicket(
+	guilde: Guild,
+	salonId: string
+): Promise<{ fil: ThreadChannel | null; disparu: boolean }> {
+	try {
+		const salon = await guilde.channels.fetch(salonId, { force: true });
+		if (!salon) {
+			return { disparu: true, fil: null };
+		}
+		return { disparu: false, fil: salon.isThread() ? salon : null };
+	} catch (err) {
+		return { disparu: (err as { code?: unknown }).code === SALON_INCONNU, fil: null };
+	}
+}
+
+/**
+ * Ne garde que les tickets dont le fil existe encore, et ferme les autres.
+ *
+ * ── POURQUOI CE PASSAGE EXISTE ─────────────────────────────────────────────
+ * La garde anti-doublon lit la BASE, et un fil supprimé sur Discord n'écrit
+ * rien en base. Le 14/8/2026, un ticket de test (`ticket-0086`) a vu son fil
+ * supprimé sans être fermé : sa ligne est restée `ouvert`, et son auteur s'est
+ * retrouvé incapable d'ouvrir le moindre ticket pendant huit jours — renvoyé
+ * par le refus vers un salon qui n'existait plus. Une garde qui protège d'un
+ * doublon ne doit pas pouvoir murer quelqu'un.
+ *
+ * La réconciliation est donc faite AVANT la garde, à chaque ouverture : c'est
+ * le seul moment où l'on sait qui interroger, et le coût est d'un appel par
+ * ticket non fermé du membre — soit un, en pratique.
+ */
+export async function reconcilierTicketsOuverts(
+	guilde: Guild,
+	tickets: readonly Ticket[]
+): Promise<Ticket[]> {
+	const vivants: Ticket[] = [];
+	for (const ticket of tickets) {
+		const { disparu } = await filDuTicket(guilde, ticket.salonId);
+		if (!disparu) {
+			vivants.push(ticket);
+			continue;
+		}
+		const ferme = await fermerTicket(
+			ticket.id,
+			guilde.client.user?.id ?? ticket.auteurId,
+			MOTIF_FIL_DISPARU
+		).catch((err: unknown) => {
+			console.warn(
+				`[tickets] fermeture d'office impossible de ${referenceTicket(ticket.numero)} :`,
+				err instanceof Error ? err.message : err
+			);
+			return null;
+		});
+		if (ferme) {
+			console.warn(
+				`[tickets] ${referenceTicket(ticket.numero)} fermé d'office : fil ${ticket.salonId} supprimé.`
+			);
+		} else {
+			// La ligne n'a pas pu être fermée : la compter vivante plutôt que de
+			// laisser ouvrir un second ticket à chaque tentative.
+			vivants.push(ticket);
+		}
+	}
+	return vivants;
+}
+
+// ─── Carte d'historique ─────────────────────────────────────────────────────
+
+export interface FermetureAPublier {
+	client: Client;
+	guildId: string;
+	ticket: Ticket;
+	motif: string;
+	/** Lien du fil archivé, `null` s'il a disparu. */
+	urlFil: string | null;
+	/** Qui a fermé, quand la ligne ne le porte pas encore. */
+	fermePar: string;
+}
+
+/**
+ * Publie la carte de fermeture dans le salon d'historique.
+ *
+ * Les champs reprennent EXACTEMENT ceux des 84 cartes déjà présentes
+ * (Ticket ID · Opened By · Closed By · Open Time · Claimed By · Reason) : le
+ * salon doit rester lisible d'un seul coup d'œil sur trois ans d'archives, pas
+ * se scinder en un « avant » et un « après ».
+ */
+export async function publierFermeture({
+	client,
+	fermePar,
+	guildId,
+	motif,
+	ticket,
+	urlFil,
+}: FermetureAPublier): Promise<void> {
+	const reglages = await reglagesDe(guildId);
+	if (!reglages.tickets.salonHistorique) {
+		return;
+	}
+	const salon = await client.channels.fetch(reglages.tickets.salonHistorique).catch(() => null);
+	if (!salon || !salon.isTextBased() || !("send" in salon)) {
+		return;
+	}
+
+	const carte = fiche({
+		icone: "ticket",
+		intention: "succes",
+		titre: `Ticket ${referenceTicket(ticket.numero)} fermé`,
+		url: urlFil,
+	});
+	carte
+		.champ("Catégorie", libelleCategorieTicket(ticket.categorie), { enLigne: true })
+		.champ("Ouvert par", `<@${ticket.auteurId}>`, { enLigne: true })
+		.champ("Fermé par", `<@${ticket.fermePar ?? fermePar}>`, { enLigne: true })
+		.champ("Ouvert le", leJour(ticket.ouvertLe, "f"), { enLigne: true })
+		.champ("Pris en charge par", ticket.prisPar ? `<@${ticket.prisPar}>` : "personne", {
+			enLigne: true,
+		})
+		.champ("Durée", ilYA(ticket.ouvertLe), { enLigne: true })
+		.champ("Motif", motif);
+	if (ticket.sujet) {
+		carte.champ("Sujet à l'ouverture", ticket.sujet);
+	}
+
+	await salon
+		.send({
+			embeds: [
+				pied(carte.embed, {
+					note: urlFil
+						? "le fil reste lisible, il n'est pas supprimé"
+						: "le fil de ce ticket n'existe plus",
+				}),
+			],
+		})
+		.catch((err: unknown) =>
+			console.warn("[tickets] historique non écrit :", err instanceof Error ? err.message : err)
+		);
 }
 
 // ─── Diagnostic ─────────────────────────────────────────────────────────────

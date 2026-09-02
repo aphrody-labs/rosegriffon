@@ -82,11 +82,27 @@ export interface CategorieTicket {
 	/** Ce que le membre doit y mettre, en une phrase — affiché dans le panneau. */
 	description: string;
 	/**
-	 * Vrai quand le ticket parle d'une PERSONNE (signalement, conflit).
-	 * Ces tickets-là ne sont jamais visibles des modérateurs ordinaires : ils
-	 * peuvent viser un modérateur.
+	 * Vrai quand le ticket parle d'une PERSONNE (signalement, conflit). Sert à
+	 * le signaler à l'œil — bouton rouge dans le panneau — pas à décider qui le
+	 * reçoit : c'est `pourLaDirection` qui en décide.
 	 */
 	sensible: boolean;
+	/**
+	 * Vrai quand SEULE la direction reçoit et traite le ticket : les rôles de
+	 * modération n'y sont ni invités, ni notifiés, ni habilités à le fermer.
+	 *
+	 * Les deux champs ont été distincts le 22/8/2026. « Signalement » les
+	 * portait tous les deux, au motif qu'un signalement peut viser un
+	 * modérateur — et la conséquence, sur le premier vrai signalement reçu
+	 * (`ticket-0088`), a été de notifier l'Administrateur, le
+	 * Vice-administrateur et le Resp. Modération pour un incident de vocal que
+	 * la modération traite tous les jours, sans prévenir les modérateurs. La
+	 * décision de l'admin : les signalements vont à `@Modérateurs`.
+	 *
+	 * Le mécanisme reste entier, testé, et à un booléen d'une catégorie
+	 * réservée à la direction si elle devient nécessaire.
+	 */
+	pourLaDirection: boolean;
 }
 
 /**
@@ -103,13 +119,15 @@ export const CATEGORIES_TICKET: readonly CategorieTicket[] = Object.freeze([
 		description: "Une question sur le serveur, un souci technique, une demande d'accès.",
 		emoji: "❓",
 		libelle: "Aide",
+		pourLaDirection: false,
 		sensible: false,
 	},
 	{
 		cle: "signalement",
-		description: "Signaler un comportement, un message, un conflit. Traité par la direction.",
+		description: "Signaler un comportement, un message, un conflit. Traité par la modération.",
 		emoji: "🛡️",
 		libelle: "Signalement",
+		pourLaDirection: false,
 		sensible: true,
 	},
 	{
@@ -117,6 +135,7 @@ export const CATEGORIES_TICKET: readonly CategorieTicket[] = Object.freeze([
 		description: "Un palier, un avantage, une facturation ou un accès Patreon.",
 		emoji: "🧡",
 		libelle: "Patreon",
+		pourLaDirection: false,
 		sensible: false,
 	},
 	{
@@ -124,6 +143,7 @@ export const CATEGORIES_TICKET: readonly CategorieTicket[] = Object.freeze([
 		description: "Contribuer au wiki Azalée, signaler une donnée fausse, demander un accès.",
 		emoji: "📚",
 		libelle: "Wiki Azalée",
+		pourLaDirection: false,
 		sensible: false,
 	},
 	{
@@ -131,6 +151,7 @@ export const CATEGORIES_TICKET: readonly CategorieTicket[] = Object.freeze([
 		description: "Partenariat, presse, collaboration, événement commun.",
 		emoji: "🤝",
 		libelle: "Partenariat",
+		pourLaDirection: false,
 		sensible: false,
 	},
 ]);
@@ -380,9 +401,10 @@ export interface ContexteAcces {
 	auteurId: string;
 	/** Rôles qui prennent en charge les tickets ordinaires. */
 	rolesStaff: readonly string[];
-	/** Rôles qui voient AUSSI les tickets sensibles. */
+	/** Rôles qui voient AUSSI les tickets réservés à la direction. */
 	rolesDirection: readonly string[];
-	sensible: boolean;
+	/** Le ticket est-il réservé à la direction ? (`CategorieTicket.pourLaDirection`) */
+	pourLaDirection: boolean;
 }
 
 export interface Invitation {
@@ -400,12 +422,15 @@ export interface Invitation {
 /**
  * Qui doit rejoindre le fil.
  *
- * ── LE CAS QUI JUSTIFIE TOUT ───────────────────────────────────────────────
- * Un signalement peut viser un modérateur. Ouvrir le fil à « toute la
- * modération » par défaut revient à prévenir la personne visée avant même que
- * le staff n'ait lu la demande. Les tickets `sensible` ne vont donc qu'à la
- * DIRECTION, et l'absence de rôle de direction configuré est une erreur
- * d'exploitation — pas une raison de retomber sur la modération ordinaire.
+ * ── CE QUI DÉCIDE : `pourLaDirection`, PAS `sensible` ──────────────────────
+ * Une catégorie réservée à la direction ne va QU'À la direction, et l'absence
+ * de rôle de direction configuré est une erreur d'exploitation — pas une raison
+ * de retomber sur la modération ordinaire. Aucune catégorie ne l'est
+ * aujourd'hui : « Signalement » l'a été jusqu'au 22/8/2026, et le premier vrai
+ * signalement a montré ce que ça coûte — trois membres de la direction
+ * notifiés pour un incident de vocal, et pas un seul modérateur. La règle
+ * inverse (« un signalement peut viser un modérateur ») garde sa valeur : elle
+ * attend une catégorie qui la porte, pas un champ qui la suppose.
  *
  * ── UN TICKET ORDINAIRE NE PING QUE LA PRISE EN CHARGE ─────────────────────
  * La direction ne fait PLUS partie du ping des tickets ordinaires (elle l'a
@@ -420,13 +445,15 @@ export function invitations(contexte: ContexteAcces): Invitation[] {
 	const liste: Invitation[] = [
 		{ genre: "membre", id: contexte.auteurId, raison: "Auteur du ticket." },
 	];
-	const habilites = contexte.sensible ? contexte.rolesDirection : [...new Set(contexte.rolesStaff)];
+	const habilites = contexte.pourLaDirection
+		? contexte.rolesDirection
+		: [...new Set(contexte.rolesStaff)];
 	for (const roleId of habilites) {
 		liste.push({
 			genre: "role",
 			id: roleId,
-			raison: contexte.sensible
-				? "Ticket sensible : direction seulement."
+			raison: contexte.pourLaDirection
+				? "Ticket réservé à la direction."
 				: "Rôle de prise en charge des tickets.",
 		});
 	}
@@ -530,10 +557,10 @@ export function manqueDeConfiguration(
 	categorie: CategorieTicket,
 	contexte: Pick<ContexteAcces, "rolesStaff" | "rolesDirection">
 ): string | null {
-	if (categorie.sensible) {
+	if (categorie.pourLaDirection) {
 		return contexte.rolesDirection.length > 0
 			? null
-			: "Aucun rôle de direction n'est configuré : un ticket sensible n'aurait aucun destinataire. " +
+			: "Aucun rôle de direction n'est configuré : ce ticket n'aurait aucun destinataire. " +
 					"Pose-le avec `/gestion ticket reglages`.";
 	}
 	return contexte.rolesStaff.length > 0 || contexte.rolesDirection.length > 0

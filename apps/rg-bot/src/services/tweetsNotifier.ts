@@ -480,9 +480,15 @@ export async function drainerTweets(
 		// rien de lui-même. Il dépose une carte par post, et l'annonce ne part
 		// qu'au clic (`commands/validation.ts`).
 		//
-		// ⚠ LE CURSEUR AVANCE QUAND MÊME. Sans ça, le même post serait proposé
-		// toutes les cinq minutes jusqu'à ce que quelqu'un tranche — c'est-à-dire
-		// une carte de plus toutes les cinq minutes dans un salon de communauté.
+		// ⚠ LE CURSEUR AVANCE QUAND MÊME, ET IL AVANCE D'ABORD. Sans ça, le même
+		// post serait proposé toutes les cinq minutes jusqu'à ce que quelqu'un
+		// tranche — c'est-à-dire une carte de plus toutes les cinq minutes dans un
+		// salon de communauté. C'est arrivé : l'échange-comparaison échouait à
+		// tous les coups (microsecondes de `timestamptz` contre millisecondes de
+		// `Date`, cf. `avancerCurseur`), et rien ne le disait puisque l'état
+		// renvoyé restait « propose ». On avance donc AVANT d'envoyer, et un
+		// refus arrête le drain sans rien déposer : une proposition perdue se
+		// rattrape à la main (`/x annoncer`), une boucle de propositions non.
 		if (annonce.salonValidation && !options.simulation) {
 			const { salon: salonValidation, raison: raisonValidation } = await resoudreSalon(
 				client,
@@ -498,6 +504,15 @@ export async function drainerTweets(
 					publies: 0,
 					detail: `Salon de validation \`${annonce.salonValidation}\` injoignable : ${raisonValidation ?? "le bot doit y voir et y écrire"}.`,
 				};
+			}
+
+			if (!(await avancerCurseur(canal, attendu, borneFinale, dernier.id, 0))) {
+				// Un autre drain du même profil a déjà pris ce lot : le laisser
+				// proposer seul, sinon chaque post reçoit deux cartes.
+				console.warn(
+					`[tweets:${canal}] curseur déplacé par un autre drain — ${retenus.length} proposition(s) abandonnée(s).`
+				);
+				return { etat: "concurrent", candidats: candidats.length, publies: 0 };
 			}
 
 			let proposes = 0;
@@ -524,7 +539,6 @@ export async function drainerTweets(
 				proposes += 1;
 			}
 
-			await avancerCurseur(canal, attendu, borneFinale, dernier.id, 0);
 			return { etat: "propose", candidats: candidats.length, publies: proposes };
 		}
 

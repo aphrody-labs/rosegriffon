@@ -51,8 +51,27 @@
  *   bun packages/cron/src/tasks/campagnes-relais-discord.ts [--campagne <slug>] [--limite N] [--dry]
  */
 
+import {
+	borner,
+	COULEUR_MARQUE,
+	emotesRoseGriffon,
+	LIMITE_AUTEUR,
+	LIMITE_CONTENU,
+	LIMITE_DESCRIPTION,
+} from "@rosegriffon/types/discord";
+
 import { sql } from "../lib/db.js";
 import { DISCORD_TOKEN, GUILD_ID } from "../lib/discord.js";
+
+/*
+ * `borner`, les limites de l'API, la couleur de marque et les émotes viennent
+ * de `@rosegriffon/types/discord` depuis le 23/8/2026 : l'annonce de tirage du
+ * site en a besoin des mêmes, `apps/website` ne peut pas dépendre de ce paquet
+ * (un site n'embarque pas un démon d'exploitation), et deux copies finissent
+ * toujours par diverger sur la valeur qui fait refuser le message entier.
+ * `borner` est RÉ-EXPORTÉ plus bas : c'est la même implémentation, à un seul
+ * endroit, et les appelants historiques n'ont pas à bouger.
+ */
 
 const API_DISCORD = "https://discord.com/api/v10";
 const PREFIXE = "[Relais campagne]";
@@ -81,8 +100,7 @@ const PAUSE_ENVOI_MS = 1200;
  * Surchargeables par l'environnement : si une émote est renommée ou supprimée,
  * on ne veut pas d'un déploiement pour remettre le relais d'aplomb.
  */
-const EMOTE_ANNONCE = Bun.env.RG_EMOTE_ANNONCE ?? "<:RG_gaelle_hautparleur:1412136626167218286>";
-const EMOTE_FETE = Bun.env.RG_EMOTE_FETE ?? "<:RG_roy_confetti:1412136639303520380>";
+const { annonce: EMOTE_ANNONCE, fete: EMOTE_FETE } = emotesRoseGriffon(Bun.env);
 
 /**
  * Réactions posées sur chaque relais, dans cet ordre.
@@ -96,14 +114,6 @@ const REACTIONS = [
 	Bun.env.RG_REACTION_ROY ?? "RG_Roy_coeur1:1141460972754702436",
 	Bun.env.RG_REACTION_GAELLE ?? "RG_Gaelle_coeur1:1141461416503693384",
 ];
-
-/** Couleur des embeds du relais : le brique Rose Griffon de la charte. */
-const COULEUR_MARQUE = 0xa14b3f;
-
-/** Limites DURES de l'API Discord — un dépassement fait refuser le message ENTIER. */
-const LIMITE_DESCRIPTION = 4096;
-const LIMITE_AUTEUR = 256;
-const LIMITE_CONTENU = 2000;
 
 /** Provenance d'une création. Miroir de la contrainte `check` de la table. */
 export type SourceCreation = "x" | "discord" | "instagram";
@@ -206,11 +216,15 @@ async function appelDiscord<T>(chemin: string, init: RequestInit = {}): Promise<
 
 // ─── Mise en forme (PURE, testée seule) ──────────────────────────────────────
 
-/** Coupe au caractère près, en signalant la coupe — jamais en la masquant. */
-export function borner(texte: string, limite: number): string {
-	if (texte.length <= limite) return texte;
-	return `${texte.slice(0, Math.max(0, limite - 1)).trimEnd()}…`;
-}
+/**
+ * Coupe au caractère près, en signalant la coupe — jamais en la masquant.
+ *
+ * L'implémentation vit dans `@rosegriffon/types/discord`, partagée avec
+ * l'annonce de tirage du site. Elle reste exportée d'ici pour les appelants
+ * historiques (dont `campagnes-relais-discord.test.ts`) : un ré-export n'est pas
+ * un doublon, c'est le même code sous deux chemins.
+ */
+export { borner };
 
 /** Adresse publique d'une publication X. */
 export function urlPublication(username: string, id: string): string {

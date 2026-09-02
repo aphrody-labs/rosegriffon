@@ -44,7 +44,16 @@ export async function telechargerPieceJointeDiscord(
 	salonId: string,
 	url: string,
 	tailleMax: number,
-	typeMimeAttendu?: string | null
+	typeMimeAttendu?: string | null,
+	/**
+	 * Familles de types MIME acceptées, en préfixe.
+	 *
+	 * Défaut `image/` : c'est ce qu'attendent les visuels de sondage et tous les
+	 * appelants historiques. `campagnes-discord.ts` y ajoute `video/` — une
+	 * participation à une campagne peut être une vidéo, et la refuser ici la
+	 * faisait disparaître sans qu'aucun compteur ne bouge.
+	 */
+	prefixesAutorises: readonly string[] = ["image/"]
 ): Promise<TelechargementDiscord> {
 	let urlUtilisee = url;
 	let reponse = await fetch(urlUtilisee).catch(() => null);
@@ -62,8 +71,11 @@ export async function telechargerPieceJointeDiscord(
 	}
 
 	const typeMime = reponse.headers.get("content-type") ?? typeMimeAttendu ?? "";
-	if (!typeMime.startsWith("image/")) {
-		return { ok: false, motif: `type non image (${typeMime || "inconnu"})` };
+	if (!prefixesAutorises.some((prefixe) => typeMime.startsWith(prefixe))) {
+		return {
+			ok: false,
+			motif: `type refusé (${typeMime || "inconnu"} ; attendu ${prefixesAutorises.join(" ou ")})`,
+		};
 	}
 
 	const octets = await reponse.arrayBuffer();

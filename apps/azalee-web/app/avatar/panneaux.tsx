@@ -31,7 +31,7 @@ import {
 	SECTIONS_HABITS,
 	type Section,
 } from "./structure";
-import { A01, Barre, BOUTS, Curseur, FONT, GRIS, ICN, ICN2, Ligne, Note, Pagination, Sprite, Titre, Txt, TxtGaiji, Vignette } from "./ui";
+import { A01, Barre, BOUTS, Curseur, FONT, GRIS, ICN, ICN2, Ligne, Note, Pagination, Sprite, Titre, Txt, TxtGaiji, urlVignette, VIGNETTE_W, Vignette } from "./ui";
 import type { Catalogue, Categorie } from "./types";
 
 /** Ce que tous les panneaux reçoivent. */
@@ -64,11 +64,6 @@ function categorie(catalogue: Catalogue, type: number | undefined): Categorie | 
 	return catalogue.categories.find((c) => c.faceSettingType === type);
 }
 
-/** URL de la vignette d'une part, servie par le décodeur d'atlas. */
-function urlIcone(cdn: string, icone: string | null): string | null {
-	return icone ? `${cdn}/avatar/icon/${icone}.png` : null;
-}
-
 /** Une grille de vignettes paginée, avec ses chevrons et ses badges de touche. */
 function Grille({
 	ctx,
@@ -98,7 +93,7 @@ function Grille({
 						key={`${p.id}-${p.itemNo}`}
 						cdn={ctx.cdn}
 						numero={String(page * parPage + i + 1).padStart(2, "0")}
-						image={urlIcone(ctx.cdn, p.icone)}
+						image={urlVignette(ctx.cdn, p.icone)}
 						choisie={ctx.choix[cat.faceSettingType] === p.id}
 						onClick={() => ctx.setChoix(cat.faceSettingType, p.id)}
 						className="aspect-square"
@@ -242,7 +237,7 @@ function SectionRendue({ ctx, s, cle }: { ctx: Contexte; s: Section; cle: string
 								cdn={ctx.cdn}
 								icone={`${A01}/avatar01_10/edit_win_icon${l.icone}.png`}
 								numero={choisi ? String(choisi.itemNo).padStart(2, "0") : "00"}
-								image={urlIcone(ctx.cdn, choisi?.icone ?? null)}
+								image={urlVignette(ctx.cdn, choisi?.icone ?? null)}
 								choisie={ouverte}
 								onClick={() => ctx.setLigneOuverte(ouverte ? null : l.hash)}
 							/>
@@ -355,8 +350,11 @@ export function PanStyle({ ctx }: { ctx: Contexte }) {
 						/>
 						{/* eslint-disable-next-line @next/next/no-img-element */}
 						<img
-							src={`${ctx.cdn}/avatar/icon/icon_ava_gender01_00${g + 1}.png`}
+							src={urlVignette(ctx.cdn, `icon_ava_gender01_00${g + 1}`) ?? ""}
 							alt=""
+							decoding="async"
+							width={VIGNETTE_W}
+							height={VIGNETTE_W}
 							className="relative size-[84%] object-contain"
 						/>
 						{ctx.genre === g && (

@@ -16,14 +16,11 @@
  * être oubliée.
  */
 
-import { isAdmin, resolveProfile } from "@rosegriffon/auth";
-import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
+import { exigerAdmin, revaliderCampagne } from "@/lib/admin-garde";
 import { logAdminAction } from "@/lib/admin-logger";
-import { getServerUser } from "@/lib/auth-helpers";
 import { getPgPool } from "@/lib/db/pg";
-import { createAdminClient } from "@/lib/supabase/server";
 
 /** Retour uniforme de toutes les actions de cet écran. */
 export interface Resultat {
@@ -32,23 +29,14 @@ export interface Resultat {
 	message?: string;
 }
 
-async function exigerAdmin(): Promise<{ ok: true } | { ok: false; message: string }> {
-	const user = await getServerUser();
-	if (!user) return { message: "Non authentifié", ok: false };
-
-	const admin = createAdminClient();
-	const profil = admin ? await resolveProfile(admin, user) : null;
-	if (!profil || !isAdmin(profil.role)) {
-		return { message: "Permissions insuffisantes", ok: false };
-	}
-	return { ok: true };
-}
-
-/** Rafraîchit les deux écrans concernés par un changement de campagne. */
-function revaliderCampagne(): void {
-	revalidatePath("/admin/iergday");
-	revalidatePath("/iergday");
-}
+/*
+ * `exigerAdmin()` et `revaliderCampagne()` ont été SORTIES de ce fichier le
+ * 23/8/2026, vers `@/lib/admin-garde` (`import "server-only"`, PAS `"use
+ * server"`). Le tirage au sort a ajouté `actions-tirage.ts` sur le même écran :
+ * garder la garde ici l'aurait obligé soit à en recopier une seconde
+ * implémentation, soit à l'exporter depuis un fichier `"use server"` — ce qui en
+ * ferait un point d'entrée HTTP répondant publiquement « suis-je admin ? ».
+ */
 
 // ─── Configuration de la campagne ────────────────────────────────────────────
 

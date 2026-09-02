@@ -44,8 +44,18 @@ import {
 	urlRechercheX,
 } from "@/lib/x-campagnes/types";
 
+import { exigerAdmin } from "@/lib/admin-garde";
+import {
+	bilanRoster,
+	chargerDernierTirage,
+	chargerEngagementEnAttente,
+	chargerTiragePublie,
+} from "@/lib/x-campagnes/tirage-queries";
+
 import { BoutonsParticiper } from "./BoutonsParticiper";
 import { CampagneGalerie } from "./CampagneGalerie";
+import { Gagnants } from "./Gagnants";
+import { TirageAdmin } from "./TirageAdmin";
 import { DepotInstagram } from "./DepotInstagram";
 import { CompteARebours } from "./CompteARebours";
 import { HashtagsCopiables } from "./HashtagsCopiables";
@@ -322,6 +332,59 @@ export default async function IergDayPage({
 		lienDepotDiscord(campagne.slug),
 	]);
 
+	/*
+	 * ── LE TIRAGE AU SORT ──────────────────────────────────────────────────
+	 *
+	 * Deux lectures seulement pour un visiteur anonyme : le tirage PUBLIÉ (qui
+	 * n'existe qu'une fois qu'un administrateur l'a décidé) et, pour l'animation,
+	 * la liste complète des créations. Tout le reste — engagement en cours,
+	 * gagnants non publiés, graine — n'est lu QUE si la session est
+	 * administratrice, et n'est donc jamais sérialisé dans le HTML des autres.
+	 *
+	 * ⚠ `exigerAdmin()` NE REDIRIGE PAS, contrairement au `requireAdmin()` des
+	 * écrans d'administration. Sur une page publique, une redirection renverrait
+	 * tout visiteur anonyme vers le tableau de bord : ici on veut simplement
+	 * « non » comme réponse, et la page continue de se rendre normalement.
+	 */
+	const garde = await exigerAdmin();
+	const estAdmin = garde.ok;
+
+	const [tiragePublie, postsTirage] = await Promise.all([
+		chargerTiragePublie(campagne.slug),
+		// L'animation balaie TOUTES les créations, pas la page courante : sinon le
+		// gagnant serait absent du mur dès qu'on regarde la page 2.
+		listerPostsCampagne(campagne.slug, 1, 200),
+	]);
+
+	const etatTirage = estAdmin
+		? await (async () => {
+				const [engagement, dernier, bilan] = await Promise.all([
+					chargerEngagementEnAttente(campagne.slug),
+					chargerDernierTirage(campagne.slug),
+					bilanRoster(campagne.slug),
+				]);
+				return {
+					dejaPublie: Boolean(tiragePublie),
+					engagement: engagement
+						? {
+								empreinteParticipants: engagement.empreinteParticipants,
+								pret: engagement.pret,
+								round: engagement.baliseRound,
+								roundTombeAMs: engagement.roundTombeAMs,
+								tirageId: engagement.tirageId,
+							}
+						: null,
+					nbOeuvres: bilan.oeuvres,
+					nbParticipants: bilan.personnesEligibles,
+					tirageId: dernier?.id ?? null,
+					tireNonPublie:
+						dernier && dernier.etat === "tire"
+							? { nbGagnants: dernier.nbGagnants, tirageId: dernier.id }
+							: null,
+				};
+			})()
+		: null;
+
 	const etat = etatCampagne(campagne);
 	const periode = formaterPeriode(campagne);
 	const hashtags = hashtagsAffichables(campagne);
@@ -372,29 +435,32 @@ export default async function IergDayPage({
 					{campagne.surTitre ? `${campagne.surTitre} — ${campagne.titre}` : campagne.titre}
 				</h1>
 
-				{/* Les trois seules choses que l'affiche NE dit pas : le hashtag
-				    copiable d'un geste, ce qui a déjà été déposé, et le temps qui
-				    reste. */}
+				{/*
+				 * ── LE COMPTE À REBOURS D'ABORD, ET EN COULEURS DE MARQUE ────────────
+				 *
+				 * C'est la seule information de la page qui PÉRIME, et elle était rendue
+				 * en dernier d'un bloc de puces grises, sur une page entièrement claire.
+				 * Retour de relecture communautaire du 20/8/2026 : « mettre le timer plus
+				 * avant […] il ressort pas assez bien car tout est en blanc ». Il ouvre
+				 * donc la page, et il est le seul bloc à porter le dégradé de marque.
+				 *
+				 * Il n'y en a pas toujours un : une campagne terminée ne décompte rien
+				 * (cf. `choisirRebours`), et la page doit alors commencer par le hashtag.
+				 */}
+				{rebours && (
+					<CompteARebours
+						cibleIso={rebours.cibleIso}
+						libelle={rebours.libelle}
+						libelleEcoule={rebours.libelleEcoule}
+						echeance={rebours.echeance}
+					/>
+				)}
+
+				{/* Les deux choses que ni l'affiche ni le compte à rebours ne disent : le
+				    hashtag copiable d'un geste, et ce qui a déjà été déposé. Les boutons
+				    « où poster », eux, ont rejoint le pied de page. */}
 				<div className="space-y-3">
 					<HashtagsCopiables hashtags={hashtags} />
-
-					{etat !== "terminee" && (
-						<>
-							<BoutonsParticiper
-								urlX={
-									hashtagPrincipal
-										? urlPublicationX(libelleHashtagPrincipal || hashtagPrincipal)
-										: null
-								}
-								depotDiscord={depotDiscord}
-								hashtag={libelleHashtagPrincipal || `#${hashtagPrincipal}`}
-							/>
-							{/* La seule voie qui demande un geste de plus : Instagram n'est
-							    pas récoltable, le participant dépose donc lui-même. Replié
-							    par défaut — c'est la voie minoritaire. */}
-							<DepotInstagram slug={campagne.slug} />
-						</>
-					)}
 
 					<div className="flex flex-wrap items-center gap-2">
 						<Compteur
@@ -415,15 +481,6 @@ export default async function IergDayPage({
 							</span>
 						)}
 					</div>
-
-					{rebours && (
-						<CompteARebours
-							cibleIso={rebours.cibleIso}
-							libelle={rebours.libelle}
-							libelleEcoule={rebours.libelleEcoule}
-							echeance={rebours.echeance}
-						/>
-					)}
 				</div>
 
 				{/*
@@ -486,6 +543,57 @@ export default async function IergDayPage({
 				 * le même chemin : elle est désormais SOUS le bouton Instagram, à
 				 * l'endroit exact où elle sert.
 				 */}
+
+				{/*
+				 * LES AUTRES CAMPAGNES, ENTRE L'AFFICHE ET LE MUR.
+				 *
+				 * Le sélecteur fermait la page : personne n'y arrivait, parce qu'il
+				 * fallait d'abord dérouler jusqu'à vingt-quatre créations. Or c'est la
+				 * seule chose de l'écran qui dise que Rose Griffon organise PLUSIEURS
+				 * opérations, et pas juste celle du mois. Il est donc remonté juste après
+				 * l'affiche, là où l'on vient de comprendre de quoi parle la page
+				 * (recommandation de relecture communautaire du 20/8/2026 : « entre
+				 * création et les affiches […] pour attirer l'attention »).
+				 *
+				 * Encadré et posé sur une surface, contrairement au reste de la page qui
+				 * est en aplat : sans cela, remonter le bloc l'aurait simplement fait
+				 * passer pour un rang de puces de plus au-dessus de la galerie.
+				 */}
+				{campagnes.length > 1 && (
+					<section
+						aria-labelledby="titre-campagnes"
+						className="rounded-3xl border border-outline-variant/50 bg-surface-container-lowest p-4 sm:p-5"
+					>
+						<TitreSection id="titre-campagnes">Les autres campagnes</TitreSection>
+						<SelecteurCampagne campagnes={campagnes} slugActif={campagne.slug} />
+					</section>
+				)}
+
+				{tiragePublie && tiragePublie.gagnants.length > 0 && (
+					<Gagnants
+						posts={postsTirage}
+						gagnants={tiragePublie.gagnants.map((gagnant) => ({
+							cleCreation: gagnant.creation?.cleCreation ?? null,
+							clePublique: gagnant.clePublique,
+							lot: gagnant.lot,
+							pseudoAffichage: gagnant.pseudoAffichage,
+							rang: gagnant.rang,
+						}))}
+						preuve={{
+							chaine: tiragePublie.balise?.chaine ?? null,
+							empreinteParticipants: tiragePublie.empreinteParticipants,
+							graine: tiragePublie.graine,
+							nbParticipants: tiragePublie.nbParticipants,
+							poidsMode: tiragePublie.poidsMode,
+							publieLe: tiragePublie.publieLe,
+							reseau: tiragePublie.balise?.reseau ?? null,
+							round: tiragePublie.balise?.round ?? null,
+							signature: tiragePublie.balise?.signature ?? null,
+						}}
+					/>
+				)}
+
+				{etatTirage && <TirageAdmin slug={campagne.slug} etat={etatTirage} />}
 
 				{enAvant.length > 0 && (
 					<section aria-labelledby="titre-a-la-une">
@@ -623,18 +731,42 @@ export default async function IergDayPage({
 				</section>
 
 				{/*
-				 * LE SÉLECTEUR EN PIED, PAS EN TÊTE.
+				 * ── LES RÉSEAUX FERMENT LA PAGE ─────────────────────────────────────
 				 *
-				 * Il affichait le titre de la campagne courante en pastille pleine —
-				 * juste au-dessus de l'affiche, qui l'écrit déjà en gros. C'était le
-				 * dernier doublon de texte de la page. Ce n'est pas un en-tête : c'est
-				 * de la navigation VERS LES AUTRES campagnes, et sa place est là où
-				 * l'on arrive quand on a fini de regarder celle-ci.
+				 * « Où poster » vivait tout en haut, entre le hashtag et les compteurs.
+				 * Trois boutons vers l'extérieur en ouverture d'écran, c'est trois
+				 * façons de partir avant d'avoir vu l'affiche, le règlement et le mur.
+				 * Ils sont désormais à l'endroit où l'on arrive quand on a tout regardé
+				 * et où la seule question qui reste est justement « et moi, je poste
+				 * où ? » (recommandation de relecture communautaire du 20/8/2026 :
+				 * « mettre l'onglet des réseaux tout en bas »).
+				 *
+				 * ⚠ CE N'EST PAS LE SEUL CHEMIN VERS L'ACTION : le mur vide rend ses
+				 * propres boutons « Publier sur X » / « Voir le fil », et le hashtag
+				 * copiable reste en tête. Une campagne terminée, elle, n'affiche rien de
+				 * tout cela — on n'invite pas à participer à ce qui est clos.
 				 */}
-				{campagnes.length > 1 && (
-					<section aria-labelledby="titre-campagnes" className="border-t border-outline-variant/40 pt-6">
-						<TitreSection id="titre-campagnes">Les autres campagnes</TitreSection>
-						<SelecteurCampagne campagnes={campagnes} slugActif={campagne.slug} />
+				{etat !== "terminee" && (
+					<section
+						aria-labelledby="titre-reseaux"
+						className="border-t border-outline-variant/40 pt-6"
+					>
+						<TitreSection id="titre-reseaux">Les réseaux</TitreSection>
+						<div className="space-y-3">
+							<BoutonsParticiper
+								urlX={
+									hashtagPrincipal
+										? urlPublicationX(libelleHashtagPrincipal || hashtagPrincipal)
+										: null
+								}
+								depotDiscord={depotDiscord}
+								hashtag={libelleHashtagPrincipal || `#${hashtagPrincipal}`}
+							/>
+							{/* La seule voie qui demande un geste de plus : Instagram n'est pas
+							    récoltable, le participant dépose donc lui-même. Replié par
+							    défaut — c'est la voie minoritaire. */}
+							<DepotInstagram slug={campagne.slug} />
+						</div>
 					</section>
 				)}
 			</PageContainer>

@@ -22,7 +22,7 @@ status: "stable"
   <a aria-label="Join the community on GitHub" href="https://github.com/vercel/turborepo/discussions"><img alt="" src="https://img.shields.io/badge/Join%20the%20community-blueviolet.svg?style=for-the-badge&logo=turborepo&labelColor=000000&logoWidth=20&logoColor=white"></a>
 </p>
 
-Turborepo is a high-performance build system for JavaScript and TypeScript codebases, written in Rust.
+Turborepo is the build system for coding agents.
 
 ## Getting Started
 
@@ -52,4 +52,4 @@ Follow [@turborepo](https://x.com/turborepo) on X for project updates.
 
 If you believe you have found a security vulnerability in Turborepo, we encourage you to responsibly disclose this and not open a public issue. We will investigate all legitimate reports. Email `security@vercel.com` to disclose any security vulnerabilities.
 
-https://vercel.com/security
+https://security.vercel.com/
