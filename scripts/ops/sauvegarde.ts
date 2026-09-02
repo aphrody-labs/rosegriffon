@@ -25,8 +25,10 @@
  *    la supprimer. Une sauvegarde qui échoue à la restauration est signalée comme un échec.
  * 3. **Elle sort de la machine.** Un dump posé à côté de la base ne protège que de l'erreur
  *    humaine, pas de la perte du disque. Les archives partent vers l'archive froide
- *    (`rg-archive`) ; si l'hôte distant est injoignable, le script le dit sans échouer —
- *    une copie locale vaut mieux que rien, mais elle ne doit pas passer pour suffisante.
+ *    déclarée par `RG_ARCHIVE_HOTE` ; si l'hôte est injoignable, c'est un échec — une
+ *    copie locale vaut mieux que rien, mais elle ne doit pas passer pour suffisante.
+ *    Sans variable, l'envoi est simplement annoncé comme absent : depuis le 21/8/2026
+ *    aucune machine tierce ne porte de données rg, et le second VPS n'en porte plus.
  * 4. **Rotation** locale et distante, pour ne pas remplir un disque déjà à 94 %.
  *
  * Usage
@@ -36,12 +38,28 @@
  *   bun scripts/ops/sauvegarde.ts --verifier # revérifie les archives existantes
  */
 
-import { $ } from "bun";
 import { mkdir, readdir, stat, unlink } from "node:fs/promises";
+import { $ } from "bun";
 
 const DESTINATION = "/var/backups/postgres";
-const HÔTE_FROID = "ubuntu@51.255.162.6";
-const DOSSIER_FROID = "/srv/rg-archive/postgres";
+/**
+ * Hôte de l'archive froide, **vide par défaut**.
+ *
+ * L'adresse était codée en dur sur le second VPS. Deux choses l'ont invalidée : le
+ * chemin visé (`/srv/rg-archive`) n'a jamais existé là-bas — `/srv` appartient à
+ * `root`, donc le `mkdir -p` de l'utilisateur `ubuntu` échouait et le script
+ * concluait « injoignable » alors que SSH répondait très bien ; puis, le 21/8/2026,
+ * toutes les données rg et niers ont été rapatriées ici et le second VPS ne porte
+ * plus rien du projet. Un hôte codé en dur qui échoue tous les jours n'est pas une
+ * sauvegarde hors machine, c'est une alarme qu'on apprend à ignorer.
+ *
+ * Renseigner `RG_ARCHIVE_HOTE` (et éventuellement `RG_ARCHIVE_RACINE`) réactive
+ * l'envoi et lui rend sa sévérité : dès qu'une destination est déclarée, ne pas
+ * l'atteindre redevient un échec.
+ */
+const HÔTE_FROID = Bun.env.RG_ARCHIVE_HOTE ?? "";
+const RACINE_FROIDE = Bun.env.RG_ARCHIVE_RACINE ?? "/srv/rg-archive";
+const DOSSIER_FROID = `${RACINE_FROIDE}/postgres`;
 /**
  * Fichiers déposés par les utilisateurs, servis par `rg-storage.service`.
  *
@@ -50,7 +68,7 @@ const DOSSIER_FROID = "/srv/rg-archive/postgres";
  * des fichiers disparus — une sauvegarde qui a l'air complète et ne l'est pas.
  */
 const FICHIERS_UTILISATEURS = "/var/www/rg-storage";
-const FICHIERS_FROID = "/srv/rg-archive/rg-storage";
+const FICHIERS_FROID = `${RACINE_FROIDE}/rg-storage`;
 /** Bases système : leur contenu est recréé par l'installation, seuls les rôles comptent. */
 const BASES_IGNORÉES = new Set(["template0", "template1", "postgres"]);
 const COPIES_GARDÉES = 7;
@@ -73,7 +91,7 @@ let échecs = 0;
 const log = (message: string) => process.stdout.write(`${message}\n`);
 const erreur = (message: string) => {
 	échecs += 1;
-	process.stdout.write(`\x1B[31m✗ ${message}\u001b[0m\n`);
+	process.stdout.write(`\u001B[31m✗ ${message}\u001B[0m\n`);
 };
 
 /** `psql`/`pg_dump` tournent sous l'identité `postgres` : authentification par pair, zéro secret. */
@@ -229,6 +247,10 @@ async function rotation(): Promise<void> {
  * référencerait des objets pas encore copiés, alors que l'inverse est sans danger.
  */
 async function sauverFichiersUtilisateurs(): Promise<void> {
+	if (!HÔTE_FROID) {
+		log("  · pas d'archive froide déclarée — les fichiers utilisateurs restent sur ce disque");
+		return;
+	}
 	// `Bun.file(...).exists()` répond FAUX sur un répertoire : la première version de
 	// cette fonction annonçait donc « rien à copier » alors que les 5,4 Gio étaient là,
 	// et sortait en succès. Un faux vert sur une sauvegarde est pire que pas de
@@ -279,6 +301,10 @@ async function sauverFichiersUtilisateurs(): Promise<void> {
 }
 
 async function envoyerHorsMachine(): Promise<void> {
+	if (!HÔTE_FROID) {
+		log("  · pas d'archive froide déclarée (RG_ARCHIVE_HOTE) — sauvegardes locales seules");
+		return;
+	}
 	const joignable =
 		await $`ssh -o BatchMode=yes -o ConnectTimeout=8 ${HÔTE_FROID} mkdir -p ${DOSSIER_FROID}`
 			.nothrow()
@@ -354,6 +380,6 @@ if (drapeaux.has("--verifier")) {
 }
 
 log(
-	échecs === 0 ? "\n\x1B[32m✓ sauvegarde vérifiée\x1B[0m" : `\n\x1B[31m${échecs} échec(s)\x1B[0m`
+	échecs === 0 ? "\n\u001B[32m✓ sauvegarde vérifiée\u001B[0m" : `\n\u001B[31m${échecs} échec(s)\u001B[0m`
 );
 process.exit(échecs === 0 ? 0 : 1);

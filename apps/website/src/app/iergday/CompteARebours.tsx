@@ -8,6 +8,22 @@ import { decouperDuree, type DureeRestante } from "@/lib/x-campagnes/types";
 /*
  * Compte à rebours d'une campagne — îlot client, forcément.
  *
+ * ── POURQUOI C'EST UNE SURFACE DE MARQUE ET NON UNE CARTE D'INTERFACE ───────
+ *
+ * Il était rendu en `bg-surface-container-low` sous un liseré discret, au
+ * milieu d'une page qui n'est faite que de surfaces claires : sur un écran
+ * entièrement blanc, la seule information PÉRISSABLE de la page ne se
+ * distinguait plus des puces de comptage posées juste au-dessus. Retour de
+ * relecture communautaire du 20/8/2026, mot pour mot : « le timer ressort pas
+ * assez bien car tout est en blanc ».
+ *
+ * D'où le dégradé marine → brique de `PageHero`, le liseré or et l'ombre dure
+ * de la DA : ce bloc est le seul de la page à porter les couleurs de marque,
+ * donc le seul que l'œil trouve sans le chercher. Les tokens `rg-*` sont
+ * volontairement CONSTANTS d'un thème à l'autre (cf. `PageShell`) — on maîtrise
+ * ici le fond ET le texte, la règle « pas de couleur de marque sur une surface
+ * d'interface » ne s'applique donc pas.
+ *
  * ⚠ HYDRATATION. La page est `force-dynamic`, mais elle est quand même rendue
  * une première fois sur le serveur : afficher « il reste 9 j 21 h 04 min 12 s »
  * dès ce rendu-là produirait un HTML qui ne peut PAS correspondre au premier
@@ -39,6 +55,11 @@ import { decouperDuree, type DureeRestante } from "@/lib/x-campagnes/types";
  * (« j », « h », « min », « s ») tant que la place manque, le mot entier dès
  * `sm`. Pas de coût pour les lecteurs d'écran : la grille est `aria-hidden`,
  * l'échéance en clair vit sous elle.
+ *
+ * ⚠ `tabular-nums` N'EST PAS DÉCORATIF ICI. Sans chasse fixe, « 11 » et « 08 »
+ * n'ont pas la même largeur et la grille tressaute à chaque seconde. C'est
+ * aussi pourquoi les chiffres restent dans la police de labeur : la police
+ * d'affichage de la DA n'a pas de chiffres à chasse fixe.
  */
 function Case({
 	valeur,
@@ -52,11 +73,11 @@ function Case({
 	abrege: string;
 }) {
 	return (
-		<div className="rounded-2xl border border-outline-variant/60 bg-surface-container-low px-2 py-2 text-center xs:px-3">
-			<p className="text-lg font-bold leading-tight text-on-surface tabular-nums sm:text-xl">
+		<div className="rounded-2xl border border-rg-or/40 bg-rg-sur-marine/10 px-1 py-2.5 text-center backdrop-blur-sm xs:px-2 sm:py-3">
+			<p className="text-3xl font-bold leading-none text-rg-or tabular-nums xs:text-4xl sm:text-5xl">
 				{valeur === null ? "--" : String(valeur).padStart(2, "0")}
 			</p>
-			<p className="text-[0.65rem] leading-tight text-on-surface-variant xs:text-xs">
+			<p className="mt-1.5 text-[0.65rem] leading-tight font-semibold tracking-wide text-rg-sur-marine/80 uppercase xs:text-xs">
 				<span className="sm:hidden">{abrege}</span>
 				<span className="hidden sm:inline">
 					{valeur !== null && valeur === 1 ? singulier : pluriel}
@@ -113,39 +134,51 @@ export function CompteARebours({
 	}, [cibleIso]);
 
 	return (
-		<div className="rounded-2xl border border-outline-variant/60 bg-surface-container-low p-3">
-			<div className="flex items-center gap-2">
-				<Timer className="size-4 shrink-0 text-primary" aria-hidden />
-				<p className="text-xs font-semibold uppercase tracking-wide text-primary">
-					{ecoule ? libelleEcoule : libelle}
+		<section
+			aria-label={ecoule ? libelleEcoule : libelle}
+			className="relative overflow-hidden rounded-3xl border-2 border-rg-or/70 bg-linear-to-br from-rg-marine via-rg-marine-clair to-rg-brique p-4 shadow-[0_4px_0_0_rgba(0,0,0,0.5)] xs:p-5 sm:p-6"
+		>
+			{/* Même texture que les bannières de marque — un asset, pas une couleur. */}
+			<div
+				className="pointer-events-none absolute inset-0 opacity-20 mix-blend-overlay"
+				style={{ backgroundImage: "url(/images/noise.svg)" }}
+				aria-hidden
+			/>
+
+			<div className="relative z-10">
+				<div className="flex items-center gap-2">
+					<Timer className="size-4 shrink-0 text-rg-or" aria-hidden />
+					<p className="text-xs font-bold tracking-[0.16em] text-rg-or uppercase sm:text-sm">
+						{ecoule ? libelleEcoule : libelle}
+					</p>
+				</div>
+
+				{/* La grille chiffrée est décorative pour un lecteur d'écran : elle change
+				    chaque seconde et serait insupportable à l'écoute. La phrase complète,
+				    elle, est annoncée une fois, juste en dessous. */}
+				{!ecoule && (
+					<div className="mt-3 grid grid-cols-4 gap-2 sm:mt-4 sm:gap-3" aria-hidden>
+						<Case valeur={restant?.jours ?? null} singulier="jour" pluriel="jours" abrege="j" />
+						<Case valeur={restant?.heures ?? null} singulier="heure" pluriel="heures" abrege="h" />
+						<Case
+							valeur={restant?.minutes ?? null}
+							singulier="minute"
+							pluriel="minutes"
+							abrege="min"
+						/>
+						<Case
+							valeur={restant?.secondes ?? null}
+							singulier="seconde"
+							pluriel="secondes"
+							abrege="s"
+						/>
+					</div>
+				)}
+
+				<p className="mt-3 text-xs text-rg-sur-marine/85">
+					<time dateTime={cibleIso}>{echeance}</time>
 				</p>
 			</div>
-
-			{/* La grille chiffrée est décorative pour un lecteur d'écran : elle change
-			    chaque seconde et serait insupportable à l'écoute. La phrase complète,
-			    elle, est annoncée une fois, juste en dessous. */}
-			{!ecoule && (
-				<div className="mt-3 grid grid-cols-4 gap-2" aria-hidden>
-					<Case valeur={restant?.jours ?? null} singulier="jour" pluriel="jours" abrege="j" />
-					<Case valeur={restant?.heures ?? null} singulier="heure" pluriel="heures" abrege="h" />
-					<Case
-						valeur={restant?.minutes ?? null}
-						singulier="minute"
-						pluriel="minutes"
-						abrege="min"
-					/>
-					<Case
-						valeur={restant?.secondes ?? null}
-						singulier="seconde"
-						pluriel="secondes"
-						abrege="s"
-					/>
-				</div>
-			)}
-
-			<p className="mt-2 text-xs text-on-surface-variant">
-				<time dateTime={cibleIso}>{echeance}</time>
-			</p>
-		</div>
+		</section>
 	);
 }

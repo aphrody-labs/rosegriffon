@@ -55,7 +55,7 @@ dans `.gitignore` — c'est donc ici que vit toute la doc de fond.
 | [insta.md](insta.md) | Instagram : pourquoi aucune récolte automatique n'est possible, la vérification oEmbed, le dépôt manuel et la table dédiée. |
 | [mcp.md](mcp.md) | Serveur MCP du monorepo : mise en service, connexion distante, portées. |
 | [rag-unified.md](rag-unified.md) | Recherche sémantique unifiée : embeddings auto-hébergés, graphe de liens, ingestion. |
-| [stockage-secondaire.md](stockage-secondaire.md) | Le second VPS en archive froide : outil de déport, ce qui est déporté, ce qui ne doit pas l'être. |
+| [stockage-secondaire.md](stockage-secondaire.md) | Archive froide sur le second VPS : pourquoi elle a existé, ce qui en est revenu le 21/8/2026, et ce qui ne doit jamais être déporté. |
 
 ## Écosystème
 

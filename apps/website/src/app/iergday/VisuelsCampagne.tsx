@@ -197,7 +197,7 @@ export function VisuelsCampagne({
 				baseNomFichier: `${slug}-affiche`,
 				cle: "affiche",
 				etiquette,
-				images: [{ alt: etiquette, source: imageAffiche, src: imageAffiche }],
+				images: [{ alt: etiquette, kind: "image", source: imageAffiche, src: imageAffiche }],
 				// La rectification suit l'affiche jusque dans la visionneuse : c'est
 				// là que l'image est la plus lisible, donc là que la consigne fautive
 				// se lit le mieux.
@@ -212,7 +212,7 @@ export function VisuelsCampagne({
 				baseNomFichier: `${slug}-reglement`,
 				cle: "reglement",
 				etiquette,
-				images: [{ alt: etiquette, source: imageReglement, src: imageReglement }],
+				images: [{ alt: etiquette, kind: "image", source: imageReglement, src: imageReglement }],
 					// Pas de légende : le règlement a été retiré de la page, visionneuse
 				// comprise. La carte « Règles » se lit dans l'image.
 				legende: null,

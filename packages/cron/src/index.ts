@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { runInaglePush, runSQLiteBackup, runPostgresBackup } from "./tasks/db";
+import { runInaglePush, runSQLiteBackup } from "./tasks/db";
 import { syncCdnAssets } from "./tasks/cdn";
 import { runIeCrawl } from "./tasks/ie-crawl";
 import { crawlTwitterSearch } from "./tasks/ie-crawl/harvest-search";
@@ -192,7 +192,6 @@ const DELAIS_TACHES_MS: Record<string, number> = {
 	"rag:wiki": 2 * 3600_000,
 	"db:sync": 2 * 3600_000,
 	"db:sqlite-backup": 2 * 3600_000,
-	"db:postgres-backup": 2 * 3600_000,
 	"discord:backfill": 4 * 3600_000,
 	"discord:scan": 3600_000,
 	cdn: 3600_000,
@@ -370,8 +369,6 @@ if (indexRun >= 0) {
 	if (task === "db") {
 		await executeTask("db:sync", runInaglePush);
 		await executeTask("db:sqlite-backup", runSQLiteBackup);
-	} else if (task === "backup:postgres" || task === "backup:pg") {
-		await executeTask("db:postgres-backup", runPostgresBackup);
 	} else if (task === "cdn") {
 		await executeTask("cdn", syncCdnAssets);
 	} else if (task === "crawl") {
@@ -493,7 +490,6 @@ if (indexRun >= 0) {
 		await executeTask("warm", warmCaches);
 		await executeTask("db:sync", runInaglePush);
 		await executeTask("db:sqlite-backup", runSQLiteBackup);
-		await executeTask("db:postgres-backup", runPostgresBackup);
 		await executeTask("patreon", triggerPatreonRefresh);
 		await executeTask("cdn", syncCdnAssets);
 		await executeTask("crawl", runIeCrawl);
@@ -615,10 +611,19 @@ Bun.cron("0 2 * * *", async () => {
 	await executeTask("db:sqlite-backup", runSQLiteBackup);
 });
 
-// 3b. Sauvegarde logique PostgreSQL Supabase : tous les jours à 2h45 UTC
-Bun.cron("45 2 * * *", async () => {
-	await executeTask("db:postgres-backup", runPostgresBackup);
-});
+// 3b. Sauvegarde logique PostgreSQL : elle N'EST PLUS ICI.
+//
+// `db:postgres-backup` appelait `scripts/ops/backup-postgres.sh`, hérité de
+// l'époque Supabase Cloud. Depuis la bascule en auto-hébergement du 11/8/2026,
+// son `pg_dumpall --globals-only` tourne sous le rôle `rg`, qui n'est pas
+// superutilisateur : « permission denied for table pg_authid ». Le `set -e` du
+// script coupait alors avant le dump du schéma et des données, en laissant un
+// dossier ne contenant qu'un `roles.sql` vide — seize jours d'échec quotidien
+// pour une sauvegarde qui n'en était plus une.
+// `rg-sauvegarde.timer` (`scripts/ops/sauvegarde.ts`) fait déjà le même travail
+// en mieux : dump de CHAQUE base sous le rôle `postgres`, restauration de
+// contrôle, rotation à 7 copies, dans `/var/backups/postgres`. Deux
+// sauvegardes dont une muette valent moins qu'une seule qui se vérifie.
 
 // 4. Rafraîchissement Patreon Website : tous les jours à 3h00 UTC
 Bun.cron("0 3 * * *", async () => {

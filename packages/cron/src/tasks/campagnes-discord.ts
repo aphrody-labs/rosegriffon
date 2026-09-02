@@ -32,6 +32,27 @@
  *     2023, 2024 ET 2025 : sans borne, une création de 2023 serait attribuée
  *     aux trois éditions à la fois.
  *
+ * CE QUI COMPTE COMME CRÉATION : TOUT MÉDIA AFFICHABLE, PAS SEULEMENT UNE IMAGE
+ * L'annonce d'IERG Day dit « liberté créative totale ». Le filtre « images
+ * seulement » a pourtant écarté en silence, le 22/8/2026, la vidéo `.mov` de
+ * karuminasan — postée DANS LES DÉLAIS et seule participation de son auteur,
+ * donc un participant entier disparu du tirage sans qu'aucune ligne de journal
+ * ne le dise. Les pièces jointes VIDÉO sont désormais récoltées et comptées.
+ * Un `.pdf`, un `.psd` ou une archive restent écartés : la galerie ne saurait
+ * pas les rendre, et annoncer une création qu'on ne peut pas montrer est pire
+ * que de ne pas la compter.
+ *
+ * LE DÉLAI DE GRÂCE DU SALON DE DÉPÔT N'EST PAS UN REPORT DE LA CLÔTURE
+ * Le même règlement dit « vous pouvez également le poster APRÈS dans le salon ».
+ * Le chemin « salon de dépôt » accepte donc les dépôts jusqu'à
+ * `DELAI_GRACE_DEPOT_MS` après `fin_le`, bornés en plus par l'ouverture de la
+ * campagne suivante qui déclare le MÊME salon (⚡〡inatober-rg a servi à trois
+ * éditions : sans cette borne, un dépôt tardif de 2023 deviendrait une création
+ * de 2024). Cela ne donne AUCUN ticket de tirage : le roster écarte lui-même
+ * toute création postée après `fin_le`, avec le motif « publiée après la clôture
+ * de la campagne » (`apps/website/src/lib/x-campagnes/tirage-queries.ts`,
+ * `SQL_CREATIONS`). La fresque les montre, le tirage ne les compte pas.
+ *
  * TROIS GARANTIES STRUCTURANTES (les mêmes que la récolte X)
  *  1. Idempotence : rejouer ne crée aucun doublon (upsert par clé) et ne
  *     retélécharge aucune image déjà ré-hébergée (le chemin est relu en base).
@@ -71,6 +92,26 @@ const BUCKET = "assets";
  */
 const TAILLE_IMAGE_MAX = 16 * 1024 * 1024;
 
+/**
+ * Taille maximale d'une vidéo recopiée.
+ *
+ * C'est le plafond de pièce jointe d'un compte Discord non boosté : au-delà,
+ * le fichier n'existe pas. Mesuré sur la seule vidéo reçue à ce jour
+ * (`copy_7F99427F….mov`, karuminasan, IERG Day) : 1,29 Mo.
+ */
+const TAILLE_VIDEO_MAX = 25 * 1024 * 1024;
+
+/**
+ * Tolérance de dépôt APRÈS la clôture, sur le chemin « salon de dépôt ».
+ *
+ * Sept jours : le règlement invite explicitement à déposer le dessin dans le
+ * salon après l'avoir publié sur les réseaux, et cinq participants d'IERG Day
+ * l'ont fait entre H+1 et J+3. Ce délai ne déplace PAS la clôture (cf. l'encadré
+ * en tête de fichier) ; il empêche seulement la fresque de perdre des dessins
+ * réellement déposés.
+ */
+const DELAI_GRACE_DEPOT_MS = 7 * 24 * 60 * 60 * 1000;
+
 /** Plafond de créations traitées par campagne et par run (surchargé par `--limite`). */
 const MAX_CREATIONS_PAR_CAMPAGNE = 500;
 
@@ -85,6 +126,9 @@ const PAUSE_TELECHARGEMENT_MS = 120;
  * `content_type` (le cas des pièces jointes les plus anciennes).
  */
 const EXTENSIONS_IMAGE = /\.(png|jpe?g|gif|webp|avif|bmp)$/i;
+
+/** Même repli que ci-dessus, pour les vidéos. */
+const EXTENSIONS_VIDEO = /\.(mp4|mov|m4v|webm|ogv)$/i;
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Types
@@ -117,6 +161,16 @@ export interface StatsCampagneDiscord {
 	imagesEchouees: number;
 	/** Lignes écrites (insertions + mises à jour). */
 	rattachements: number;
+	/** Créations retenues dont au moins un média est une vidéo. */
+	avecVideo: number;
+	/**
+	 * Créations retenues DÉPOSÉES APRÈS `fin_le`, dans le délai de grâce.
+	 *
+	 * Elles entrent dans la fresque et ne portent AUCUN ticket : le roster du
+	 * tirage les écarte lui-même. Le compteur existe pour qu'elles ne passent
+	 * jamais inaperçues dans le journal.
+	 */
+	horsDelaiTolere: number;
 	/**
 	 * Salons de dépôt déclarés dont aucun message n'a été récolté.
 	 *
@@ -158,9 +212,17 @@ interface LigneMessage {
 	created_at: Date | string;
 }
 
-/** Une image ré-hébergée, telle qu'elle est stockée dans `images` (jsonb). */
-interface ImageRehebergee {
+/** Un média ré-hébergé, tel qu'il est stocké dans `images` (jsonb). */
+interface MediaReheberge {
 	attachment_id: string;
+	/**
+	 * `image` ou `video`.
+	 *
+	 * Champ AJOUTÉ à un jsonb existant : les lignes récoltées avant le 26/8/2026
+	 * ne le portent pas. Tout lecteur doit donc traiter son absence comme
+	 * `image` — c'est ce que fait `imagesDiscord()` côté site.
+	 */
+	kind: "image" | "video";
 	/** Chemin dans le bucket `assets`, ou `null` si la recopie a échoué. */
 	chemin: string | null;
 	nom: string;
@@ -172,9 +234,10 @@ interface ImageRehebergee {
 	url_origine: string;
 }
 
-/** Pièce jointe image d'un message, avant recopie. */
-interface PieceJointeImage {
+/** Pièce jointe affichable d'un message, avant recopie. */
+interface PieceJointeMedia {
 	id: string;
+	kind: "image" | "video";
 	nom: string;
 	typeMime: string | null;
 	largeur: number | null;
@@ -234,8 +297,8 @@ function message(err: unknown): string {
  * que de ne pas les compter. Le `content_type` fait foi ; l'extension ne sert
  * que pour les pièces jointes anciennes, que Discord n'a pas typées.
  */
-export function extraireImages(attachments: unknown): PieceJointeImage[] {
-	const images: PieceJointeImage[] = [];
+export function extraireMedias(attachments: unknown): PieceJointeMedia[] {
+	const medias: PieceJointeMedia[] = [];
 	for (const brut of tableau(attachments)) {
 		if (!brut || typeof brut !== "object") continue;
 		const item = brut as Record<string, unknown>;
@@ -244,11 +307,12 @@ export function extraireImages(attachments: unknown): PieceJointeImage[] {
 		if (!url || !id) continue;
 		const nom = chaine(item.filename) ?? "fichier";
 		const typeMime = chaine(item.content_type);
-		const estImage = typeMime ? typeMime.startsWith("image/") : EXTENSIONS_IMAGE.test(nom);
-		if (!estImage) continue;
-		images.push({
+		const kind = classerMedia(typeMime, nom);
+		if (!kind) continue;
+		medias.push({
 			hauteur: entier(item.height),
 			id,
+			kind,
 			largeur: entier(item.width),
 			nom,
 			taille: entier(item.size),
@@ -256,7 +320,25 @@ export function extraireImages(attachments: unknown): PieceJointeImage[] {
 			url,
 		});
 	}
-	return images;
+	return medias;
+}
+
+/**
+ * Image, vidéo, ou rien du tout.
+ *
+ * Le `content_type` annoncé par Discord fait foi ; l'extension ne sert que pour
+ * les pièces jointes anciennes, que Discord n'a pas typées. Tout le reste
+ * (`application/pdf`, archives, `.psd`) renvoie `null` et n'est pas récolté.
+ */
+export function classerMedia(typeMime: string | null, nom: string): "image" | "video" | null {
+	if (typeMime) {
+		if (typeMime.startsWith("image/")) return "image";
+		if (typeMime.startsWith("video/")) return "video";
+		return null;
+	}
+	if (EXTENSIONS_IMAGE.test(nom)) return "image";
+	if (EXTENSIONS_VIDEO.test(nom)) return "video";
+	return null;
 }
 
 /**
@@ -297,16 +379,41 @@ export function dansFenetre(
 }
 
 /**
- * Chemin déterministe de l'image dans le bucket `assets`.
+ * Jusqu'à quand ce salon accepte-t-il un dépôt pour cette campagne ?
+ *
+ * `fin_le` + `DELAI_GRACE_DEPOT_MS`, mais JAMAIS au-delà de l'ouverture de la
+ * campagne suivante qui déclare le même salon (moins une milliseconde, pour que
+ * les deux fenêtres ne se touchent pas). Sans `fin_le`, il n'y a rien à
+ * prolonger : la campagne accepte déjà tout, on renvoie `null` tel quel.
+ */
+export function borneDepot(
+	fin: Date | null,
+	salon: string,
+	ouverturesParSalon: ReadonlyMap<string, readonly Date[]>
+): Date | null {
+	if (!fin) return null;
+	const grace = new Date(fin.getTime() + DELAI_GRACE_DEPOT_MS);
+	const suivante = (ouverturesParSalon.get(salon) ?? [])
+		.filter((ouverture) => ouverture > fin)
+		.sort((a, b) => a.getTime() - b.getTime())[0];
+	if (suivante && suivante.getTime() - 1 < grace.getTime()) {
+		return new Date(suivante.getTime() - 1);
+	}
+	return grace;
+}
+
+/**
+ * Chemin déterministe du média dans le bucket `assets`.
  *
  * Groupé par campagne pour qu'une campagne se purge d'une seule commande. Le
  * couple (message, pièce jointe) est unique côté Discord : deux runs écrivent
  * donc au même endroit, et `x-upsert` fait le reste.
  */
-export function cheminImage(slug: string, messageId: string, image: PieceJointeImage): string {
-	const extension = (image.nom.split(".").pop() ?? "").toLowerCase();
-	const extensionSure = /^(png|jpe?g|gif|webp|avif|bmp)$/.test(extension) ? extension : "bin";
-	return `campagnes/${slug}/discord/${messageId}-${image.id}.${extensionSure}`;
+export function cheminMedia(slug: string, messageId: string, media: PieceJointeMedia): string {
+	const extension = (media.nom.split(".").pop() ?? "").toLowerCase();
+	const attendue = media.kind === "video" ? EXTENSIONS_VIDEO : EXTENSIONS_IMAGE;
+	const extensionSure = attendue.test(`.${extension}`) ? extension : "bin";
+	return `campagnes/${slug}/discord/${messageId}-${media.id}.${extensionSure}`;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -364,6 +471,25 @@ export async function recolterCreationsDiscord(
 			campagnes.flatMap((campagne) => campagne.salons_depot ?? [])
 		);
 
+		/*
+		 * Toutes les OUVERTURES de campagne, salon par salon. C'est ce qui borne le
+		 * délai de grâce : `⚡〡inatober-rg` est le salon de dépôt des éditions 2023,
+		 * 2024 ET 2025 — la grâce de 2023 doit s'arrêter net à l'ouverture de 2024,
+		 * sinon un dépôt tardif appartiendrait aux deux éditions à la fois. Les
+		 * campagnes sans `debut_le` (iergday) ne bornent rien : on ne sait pas
+		 * quand elles commencent, on n'invente pas une frontière.
+		 */
+		const ouverturesParSalon = new Map<string, Date[]>();
+		for (const campagne of campagnes) {
+			const ouverture = versDate(campagne.debut_le);
+			if (!ouverture) continue;
+			for (const salon of campagne.salons_depot ?? []) {
+				const liste = ouverturesParSalon.get(salon) ?? [];
+				liste.push(ouverture);
+				ouverturesParSalon.set(salon, liste);
+			}
+		}
+
 		const messages = (await sql`
 			select m.message_id, m.channel_id, m.content, m.attachments, m.created_at,
 			       c.name as salon_nom, c.type as salon_type
@@ -385,7 +511,14 @@ export async function recolterCreationsDiscord(
 
 		for (const campagne of campagnes) {
 			details.push(
-				await recolterCampagne(campagne, messages, salonsDepotDeclares, limite, dry)
+				await recolterCampagne(
+					campagne,
+					messages,
+					salonsDepotDeclares,
+					ouverturesParSalon,
+					limite,
+					dry
+				)
 			);
 		}
 
@@ -449,11 +582,12 @@ async function diagnostiquerSalons(salons: readonly string[]): Promise<string[]>
 	});
 }
 
-/** Récolte une campagne : sélection, ré-hébergement des images, écriture. */
+/** Récolte une campagne : sélection, ré-hébergement des médias, écriture. */
 async function recolterCampagne(
 	campagne: LigneCampagne,
 	messages: readonly LigneMessage[],
 	salonsDepotDeclares: ReadonlySet<string>,
+	ouverturesParSalon: ReadonlyMap<string, readonly Date[]>,
 	limite: number,
 	dry: boolean
 ): Promise<StatsCampagneDiscord> {
@@ -467,6 +601,8 @@ async function recolterCampagne(
 		imagesRehebergees: 0,
 		imagesEchouees: 0,
 		rattachements: 0,
+		avecVideo: 0,
+		horsDelaiTolere: 0,
 		salonsInaccessibles: [],
 	};
 
@@ -482,14 +618,14 @@ async function recolterCampagne(
 
 	// Ce qui a DÉJÀ été ré-hébergé : relu une fois, pour ne retélécharger aucune
 	// image d'un run précédent. C'est ce qui rend la tâche rejouable à coût nul.
-	const dejaLa = new Map<string, ImageRehebergee[]>();
+	const dejaLa = new Map<string, MediaReheberge[]>();
 	const existantes = (await sql`
 		select message_id, images
 		  from public.campagne_creations_discord
 		 where campagne_slug = ${campagne.slug}
 	`) as Array<{ message_id: string; images: unknown }>;
 	for (const ligne of existantes) {
-		dejaLa.set(ligne.message_id, tableau(ligne.images) as ImageRehebergee[]);
+		dejaLa.set(ligne.message_id, tableau(ligne.images) as MediaReheberge[]);
 	}
 
 	const lignes: Array<{
@@ -498,7 +634,7 @@ async function recolterCampagne(
 		hashtag_trouve: string | null;
 		a_media: boolean;
 		nb_images: number;
-		images: ImageRehebergee[];
+		images: MediaReheberge[];
 		publie_le: Date;
 		collecte_le: Date;
 	}> = [];
@@ -513,43 +649,73 @@ async function recolterCampagne(
 		// 1. Le hashtag l'emporte : il est explicite et sans ambiguïté de date.
 		let hashtagTrouve = trouverHashtag(ligne.content, hashtags);
 		let parSalon = false;
+		let horsDelai = false;
 		if (!hashtagTrouve) {
 			// 2. Le salon de dépôt, BORNÉ par la fenêtre de la campagne (un même
 			// salon a servi à trois éditions d'Inatober).
 			if (!salonsDepot.has(ligne.channel_id)) continue;
-			if (!dansFenetre(publieLe, debut, fin)) continue;
+			const finDepot = borneDepot(fin, ligne.channel_id, ouverturesParSalon);
+			if (!dansFenetre(publieLe, debut, finDepot)) continue;
 			parSalon = true;
+			if (fin && publieLe > fin) horsDelai = true;
 		} else if (ligne.salon_type === 5 && !salonsDepotDeclares.has(ligne.channel_id)) {
 			// Salon d'annonces non déclaré comme dépôt : c'est l'annonce de la
 			// campagne, pas une participation (cf. le commentaire de l'appelant).
 			continue;
 		}
 
-		const images = extraireImages(ligne.attachments);
-		if (images.length === 0) continue;
+		const medias = extraireMedias(ligne.attachments);
+		if (medias.length === 0) continue;
 
-		const rehebergees = await rehebergerImages(
+		const rehebergees = await rehebergerMedias(
 			campagne.slug,
 			ligne,
-			images,
+			medias,
 			dejaLa.get(ligne.message_id) ?? [],
 			stats,
 			dry
 		);
-		const servables = rehebergees.filter((image) => image.chemin !== null);
+		const servables = rehebergees.filter((media) => media.chemin !== null);
+
+		/*
+		 * UN DÉPÔT TARDIF QU'ON NE SAIT PAS MONTRER N'EST PAS ÉCRIT.
+		 *
+		 * Mesuré le 26/8/2026 en ouvrant le délai de grâce : 47 messages de 2023 et 2024 sont
+		 * entrés dans les salons de dépôt d'`inazuma-rg` et `inazuma-rg-2` après leur clôture,
+		 * tous avec une pièce jointe dont l'URL Discord a expiré et n'est plus re-signable. Ils
+		 * donnaient 47 lignes `a_media = false` : invisibles sur la fresque, absentes du tirage,
+		 * et retéléchargées EN VAIN à chaque passage. Une ligne qui ne peut rien montrer et ne
+		 * peut rien porter n'est pas une trace, c'est du bruit.
+		 *
+		 * ⚠ La règle vaut UNIQUEMENT hors délai. Dans la fenêtre, une recopie en échec s'écrit
+		 * quand même avec `a_media = false` : c'est ce qui permet au run suivant de la rattraper
+		 * quand le Storage ou Discord a eu un hoquet, sans perdre la participation.
+		 */
+		if (horsDelai && servables.length === 0) {
+			console.warn(
+				`${PREFIXE} ${campagne.slug} : dépôt tardif ${ligne.message_id} ignoré — aucun de ses ` +
+					`${medias.length} média(s) n'est récupérable (URL Discord expirée). Rien écrit.`
+			);
+			continue;
+		}
 
 		stats.retenus++;
 		if (parSalon) stats.parSalon++;
 		else stats.parHashtag++;
+		// Compté sur TOUS les médias, pas seulement les servables : en simulation
+		// aucun n'est recopié, et un compteur à zéro laisserait croire qu'aucune
+		// vidéo n'a été vue.
+		if (rehebergees.some((media) => media.kind === "video")) stats.avecVideo++;
+		if (horsDelai) stats.horsDelaiTolere++;
 
 		lignes.push({
 			campagne_slug: campagne.slug,
 			message_id: ligne.message_id,
 			hashtag_trouve: hashtagTrouve,
-			// `a_media` = « au moins une image SERVABLE », pas « le message porte une
-			// image » : une recopie encore en échec ne doit pas gonfler le compteur
-			// d'une galerie qui ne pourra rien montrer. Le prochain run rebascule la
-			// ligne à `true` tout seul.
+			// `a_media` = « au moins un média SERVABLE », pas « le message porte une
+			// pièce jointe » : une recopie encore en échec ne doit pas gonfler le
+			// compteur d'une galerie qui ne pourra rien montrer. Le prochain run
+			// rebascule la ligne à `true` tout seul.
 			a_media: servables.length > 0,
 			nb_images: servables.length,
 			images: rehebergees,
@@ -607,7 +773,9 @@ async function recolterCampagne(
 	console.log(
 		`${PREFIXE} ${campagne.slug} : ${stats.rattachements} rattachement(s) ` +
 			`(${stats.parHashtag} par hashtag, ${stats.parSalon} par salon de dépôt), ` +
-			`${stats.imagesRehebergees} image(s) recopiée(s), ${stats.imagesDejaLa} déjà en stock` +
+			`${stats.imagesRehebergees} média(s) recopié(s), ${stats.imagesDejaLa} déjà en stock` +
+			`${stats.avecVideo > 0 ? `, ${stats.avecVideo} avec vidéo` : ""}` +
+			`${stats.horsDelaiTolere > 0 ? `, ${stats.horsDelaiTolere} déposée(s) après la clôture (fresque oui, tirage non)` : ""}` +
 			`${stats.imagesEchouees > 0 ? `, ${stats.imagesEchouees} en échec (retentée(s) au prochain run)` : ""}.`
 	);
 
@@ -621,32 +789,35 @@ async function recolterCampagne(
  * aucun appel réseau, aucune réécriture. C'est ce qui rend la tâche rejouable à
  * coût nul, y compris toutes les heures.
  */
-async function rehebergerImages(
+async function rehebergerMedias(
 	slug: string,
 	ligne: LigneMessage,
-	images: readonly PieceJointeImage[],
-	deja: readonly ImageRehebergee[],
+	medias: readonly PieceJointeMedia[],
+	deja: readonly MediaReheberge[],
 	stats: StatsCampagneDiscord,
 	dry: boolean
-): Promise<ImageRehebergee[]> {
-	const parIdentifiant = new Map(deja.map((image) => [image.attachment_id, image]));
-	const resultat: ImageRehebergee[] = [];
+): Promise<MediaReheberge[]> {
+	const parIdentifiant = new Map(deja.map((media) => [media.attachment_id, media]));
+	const resultat: MediaReheberge[] = [];
 
-	for (const image of images) {
-		const base: ImageRehebergee = {
-			attachment_id: image.id,
+	for (const media of medias) {
+		const base: MediaReheberge = {
+			attachment_id: media.id,
 			chemin: null,
-			hauteur: image.hauteur,
-			largeur: image.largeur,
-			nom: image.nom,
-			taille: image.taille,
-			type_mime: image.typeMime,
-			url_origine: urlSansSignature(image.url),
+			hauteur: media.hauteur,
+			kind: media.kind,
+			largeur: media.largeur,
+			nom: media.nom,
+			taille: media.taille,
+			type_mime: media.typeMime,
+			url_origine: urlSansSignature(media.url),
 		};
 
-		const connue = parIdentifiant.get(image.id);
+		const connue = parIdentifiant.get(media.id);
 		if (connue?.chemin) {
 			stats.imagesDejaLa++;
+			// `kind` n'existait pas avant le 26/8/2026 : une ligne d'alors le rejoue
+			// ici depuis le type MIME courant plutôt que de rester sans réponse.
 			resultat.push({ ...base, chemin: connue.chemin });
 			continue;
 		}
@@ -656,17 +827,18 @@ async function rehebergerImages(
 			continue;
 		}
 
-		const chemin = cheminImage(slug, ligne.message_id, image);
+		const chemin = cheminMedia(slug, ligne.message_id, media);
 		const fichier = await telechargerPieceJointeDiscord(
 			ligne.channel_id,
-			image.url,
-			TAILLE_IMAGE_MAX,
-			image.typeMime
+			media.url,
+			media.kind === "video" ? TAILLE_VIDEO_MAX : TAILLE_IMAGE_MAX,
+			media.typeMime,
+			[`${media.kind}/`]
 		);
 		if (!fichier.ok) {
 			stats.imagesEchouees++;
 			console.warn(
-				`${PREFIXE} ${slug} : image ${image.nom} du message ${ligne.message_id} non recopiée — ${fichier.motif}`
+				`${PREFIXE} ${slug} : ${media.kind} ${media.nom} du message ${ligne.message_id} non recopiée — ${fichier.motif}`
 			);
 			resultat.push(base);
 			continue;
@@ -676,7 +848,7 @@ async function rehebergerImages(
 		if (!envoi.ok) {
 			stats.imagesEchouees++;
 			console.warn(
-				`${PREFIXE} ${slug} : image ${image.nom} du message ${ligne.message_id} non téléversée — ${envoi.motif}`
+				`${PREFIXE} ${slug} : ${media.kind} ${media.nom} du message ${ligne.message_id} non téléversée — ${envoi.motif}`
 			);
 			resultat.push(base);
 			continue;
@@ -730,7 +902,8 @@ if (import.meta.main) {
 	for (const detail of resultat.details) {
 		console.log(
 			`  ${detail.slug.padEnd(20)} retenus=${detail.retenus} hashtag=${detail.parHashtag} salon=${detail.parSalon} ` +
-				`rattachements=${detail.rattachements} images=${detail.imagesRehebergees}(+${detail.imagesDejaLa} en stock, ${detail.imagesEchouees} en échec)` +
+				`rattachements=${detail.rattachements} medias=${detail.imagesRehebergees}(+${detail.imagesDejaLa} en stock, ${detail.imagesEchouees} en échec) ` +
+			`video=${detail.avecVideo} hors_delai=${detail.horsDelaiTolere}` +
 				`${detail.salonsInaccessibles.length > 0 ? ` salons_sans_creation=${detail.salonsInaccessibles.join("/")}` : ""}`
 		);
 	}

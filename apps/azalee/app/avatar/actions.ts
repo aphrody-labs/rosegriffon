@@ -53,7 +53,9 @@ export async function definirPhotoDepuisAvatar(
 
 	let octets: ArrayBuffer;
 	try {
-		const reponse = await fetch(`${CDN}/avatar/icon/${icone}.png`, { cache: "no-store" });
+		// La vignette est un fichier du jeu : elle ne change pas. `no-store` faisait re-décoder
+		// l'atlas au serveur d'assets à chaque clic, pour un résultat identique.
+		const reponse = await fetch(`${CDN}/avatar/icon/${icone}.png`, { cache: "force-cache" });
 		if (!reponse.ok) {
 			return { error: "Cette vignette n'a pas pu être récupérée." };
 		}

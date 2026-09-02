@@ -6,14 +6,16 @@ import { fr } from "date-fns/locale";
 import { ExternalLink, Heart, ImageIcon, MessageCircle, Repeat2 } from "lucide-react";
 import Image from "next/image";
 
+import { extraitTexteDiscord } from "@/lib/x-campagnes/discord-texte";
 import {
 	afficherHashtag,
-	extraitTexte,
 	formaterNombre,
 	type PostCampagne,
 	urlMessageDiscord,
 	urlPostX,
 } from "@/lib/x-campagnes/types";
+
+import { TexteDiscord } from "./TexteDiscord";
 
 /*
  * Carte d'une publication de campagne — purement présentationnelle.
@@ -103,7 +105,11 @@ export function PostCarte({
 	onOuvrir: () => void;
 }) {
 	const image = post.images[0];
-	const extrait = extraitTexte(post.texte, 160);
+	// `extraitTexteDiscord` et non `extraitTexte` : le second coupe au caractère près et
+	// tranchait `<:mouahaha:1296067836388708513>` en plein milieu, laissant un déchet que
+	// plus aucun rendu ne rattrape. Le premier compte un émoji pour deux caractères et ne
+	// coupe jamais à l'intérieur d'une balise.
+	const extrait = extraitTexteDiscord(post.texte, 160);
 	const date = post.publieLe ? new Date(post.publieLe) : null;
 	const dateValide = date && !Number.isNaN(date.getTime()) ? date : null;
 
@@ -163,7 +169,32 @@ export function PostCarte({
 				className={`relative block w-full cursor-zoom-in overflow-hidden ${FOCUS_VIGNETTE}`}
 			>
 				<AspectRatio ratio={4 / 5}>
-					{image ? (
+					{image?.kind === "video" ? (
+						/*
+						 * Vignette d'une participation VIDÉO. `muted` + `playsInline` sont
+						 * obligatoires pour que la lecture automatique soit tolérée par les
+						 * navigateurs mobiles ; `preload="metadata"` ne télécharge que
+						 * l'en-tête tant que la carte n'est pas survolée. Le pictogramme en
+						 * coin dit ce que c'est sans qu'il faille cliquer.
+						 */
+						// eslint-disable-next-line jsx-a11y/media-has-caption
+						<video
+							src={image.src}
+							muted
+							loop
+							playsInline
+							preload="metadata"
+							aria-label={`Vidéo publiée sur ${reseau} par ${post.auteurNom}`}
+							className="size-full object-cover transition-transform duration-500 motion-safe:group-hover:scale-105"
+							onMouseEnter={(evenement) => {
+								void evenement.currentTarget.play().catch(() => {});
+							}}
+							onMouseLeave={(evenement) => {
+								evenement.currentTarget.pause();
+								evenement.currentTarget.currentTime = 0;
+							}}
+						/>
+					) : image ? (
 						<Image
 							src={image.src}
 							alt={`Image publiée sur ${reseau} par ${post.auteurNom}`}
@@ -211,7 +242,9 @@ export function PostCarte({
 				)}
 
 				{extrait && (
-					<p className="line-clamp-3 text-sm leading-relaxed text-on-surface-variant">{extrait}</p>
+					<p className="line-clamp-3 text-sm leading-relaxed text-on-surface-variant">
+						<TexteDiscord texte={extrait} />
+					</p>
 				)}
 
 				<div className="mt-auto flex flex-wrap items-center justify-between gap-2 pt-2">

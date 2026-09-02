@@ -13,6 +13,7 @@ import { createAdminClient } from "@/lib/supabase/server";
 
 import { ProfileAbout } from "./_components/profile-about";
 import { ProfileActivity } from "./_components/profile-activity";
+import { ProfileStats, type StatistiquesProfil } from "./_components/profile-stats";
 import { ProfileIdentity } from "./_components/profile-identity";
 import { ProfileQuickLinks } from "./_components/profile-quick-links";
 
@@ -100,7 +101,7 @@ export default async function UserProfilePage({
 		// dont deux étaient rendus sur cette page sans authentification.
 		const { rows } = await pool.query<Profile>(
 			`SELECT id, updated_at, username, avatar_url, role, website, discord_id,
-			        bio, banner_url, banner_position, poste, twitter_handle, badges
+			        bio, banner_url, banner_position, poste, claimed_at, twitter_handle, badges
 			   FROM profiles WHERE username = $1 AND claimed_at IS NOT NULL LIMIT 1`,
 			[username]
 		);
@@ -127,6 +128,7 @@ export default async function UserProfilePage({
 	// les salons. On prend le rôle de plus haute position, comme Discord.
 	let roleDiscord: { nom: string; couleur: number | null } | null = null;
 	let classementServeur: { place: number; total: number } | null = null;
+	let fiche: StatistiquesProfil = { inscriptionSite: profile.claimed_at ?? null };
 	if (profile.discord_id) {
 		try {
 			const { rows } = await pool.query<{ name: string; color: number | null }>(
@@ -135,21 +137,48 @@ export default async function UserProfilePage({
 				   JOIN discord_roles r ON r.role_id = ANY(m.roles)
 				  WHERE m.discord_id = $1
 				  ORDER BY r.position DESC
-				  LIMIT 1`,
+				  LIMIT 12`,
 				[profile.discord_id]
 			);
-			const ligne = rows[0];
-			if (ligne) {
-				roleDiscord = { couleur: ligne.color || null, nom: ligne.name };
-			}
+			// Tous les rôles, du plus haut au plus bas : le premier sert d'identité
+			// sur la carte, la liste complète nourrit la fiche du bas.
+			roleDiscord = rows[0] ? { couleur: rows[0].color || null, nom: rows[0].name } : null;
+			fiche = {
+				...fiche,
+				roles: rows.map((ligne) => ({ couleur: ligne.color || null, nom: ligne.name })),
+			};
 		} catch (error) {
 			console.error("[profil] rôle Discord indisponible", error);
 		}
 	}
 	if (profile.discord_id) {
 		try {
-			const { rows } = await pool.query<{ xp: string | number; titre: string | null }>(
-				`SELECT xp, titre FROM bot_profils WHERE discord_id = $1 ORDER BY xp DESC LIMIT 1`,
+			const { rows } = await pool.query<{ joined_at: string | null; premium_since: string | null }>(
+				`SELECT joined_at, premium_since FROM discord_members WHERE discord_id = $1 LIMIT 1`,
+				[profile.discord_id]
+			);
+			if (rows[0]) {
+				fiche = {
+					...fiche,
+					arriveeDiscord: rows[0].joined_at,
+					boostDepuis: rows[0].premium_since,
+				};
+			}
+		} catch (error) {
+			console.error("[profil] arrivée sur le serveur indisponible", error);
+		}
+	}
+	if (profile.discord_id) {
+		try {
+			const { rows } = await pool.query<{
+				xp: string | number;
+				titre: string | null;
+				jetons: string | number | null;
+				messages_comptes: string | number | null;
+				serie_quotidienne: number | null;
+			}>(
+				`SELECT xp, titre, jetons, messages_comptes, serie_quotidienne
+				   FROM bot_profils WHERE discord_id = $1 ORDER BY xp DESC LIMIT 1`,
 				[profile.discord_id]
 			);
 			const ligne = rows[0];
@@ -161,6 +190,13 @@ export default async function UserProfilePage({
 					valeur: avancement.niveau,
 				};
 				titreJoueur = ligne.titre;
+				fiche = {
+					...fiche,
+					jetons: Number(ligne.jetons ?? 0),
+					messages: Number(ligne.messages_comptes ?? 0),
+					serie: Number(ligne.serie_quotidienne ?? 0),
+					xp: Number(ligne.xp) || 0,
+				};
 
 				// Le « Grade » de la fiche du jeu, en vrai : la place au classement du
 				// serveur. Une seconde requête plutôt qu'une jointure — le classement
@@ -318,6 +354,10 @@ export default async function UserProfilePage({
 					<div className="md:col-span-2">
 						<ProfileActivity activities={activities} />
 					</div>
+				</div>
+
+				<div className="mt-8 mb-12">
+					<ProfileStats stats={fiche} />
 				</div>
 			</div>
 		</div>

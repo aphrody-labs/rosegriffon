@@ -13,13 +13,15 @@ import { ChevronLeft, ChevronRight, Download, ExternalLink, Loader2, X } from "l
 import Image from "next/image";
 import { useCallback, useEffect, useRef, useState } from "react";
 
+import { extraitTexteDiscord } from "@/lib/x-campagnes/discord-texte";
 import {
 	clePost,
-	extraitTexte,
 	type PostCampagne,
 	urlMessageDiscord,
 	urlPostX,
 } from "@/lib/x-campagnes/types";
+
+import { TexteDiscord } from "./TexteDiscord";
 
 /*
  * LA visionneuse plein écran de la page — il n'y en a qu'une, et il ne doit y en
@@ -61,6 +63,11 @@ export interface ImageVisionnee {
 	source: string;
 	/** Texte alternatif : seul l'appelant sait ce que montre l'image. */
 	alt: string;
+	/**
+	 * Image ou vidéo. `next/image` ne sait pas décoder un `.mov` : sans cette
+	 * distinction, une participation vidéo s'affichait comme un cadre vide.
+	 */
+	kind: "image" | "video";
 }
 
 /** Ce que la visionneuse sait montrer : un document illustré, quelle qu'en soit l'origine. */
@@ -129,11 +136,15 @@ export function documentDepuisPost(post: PostCampagne): DocumentVisionne {
 		 * (vérifié), le repli sur l'original reste donc l'exception.
 		 */
 		images: post.images.map((image, position) => ({
-			alt: `Image ${position + 1} sur ${post.images.length} publiée sur ${reseau} par ${pseudoSur}`,
+			alt: `${image.kind === "video" ? "Vidéo" : "Image"} ${position + 1} sur ${post.images.length} publiée sur ${reseau} par ${pseudoSur}`,
+			kind: image.kind,
 			source: image.src || image.source,
 			src: image.src,
 		})),
-		legende: extraitTexte(post.texte, 400),
+		// Même raison que sur la carte : `extraitTexte` coupe au caractère et peut trancher une
+		// balise d'émoji en deux. Ici la légende est longue (400), mais un message qui commence
+		// par quatre émojis suffisait à faire apparaître un fragment `<:RG_R` en fin de texte.
+		legende: extraitTexteDiscord(post.texte, 400),
 		/*
 		 * Un lien vers un message Discord n'a de sens QUE pour qui est déjà sur le
 		 * serveur : `discord.com/channels/…` renvoie les autres vers un écran de
@@ -358,7 +369,23 @@ export function Visionneuse({
 
 				{/* Image + flèches de navigation entre documents. */}
 				<div className="relative flex h-[52dvh] items-center justify-center bg-surface-container-low sm:h-[62dvh]">
-					{image ? (
+					{image?.kind === "video" ? (
+						/*
+						 * Une vidéo n'est ni optimisée ni redimensionnée par Next : elle est
+						 * servie telle qu'elle a été déposée. `controls` sans lecture
+						 * automatique — la visionneuse s'ouvre sur un clic, pas sur un son.
+						 */
+						// eslint-disable-next-line jsx-a11y/media-has-caption
+						<video
+							key={`${documentOuvert.cle}-${indexImage}`}
+							src={image.src}
+							controls
+							playsInline
+							preload="metadata"
+							aria-label={image.alt}
+							className="max-h-full max-w-full object-contain"
+						/>
+					) : image ? (
 						/*
 						 * ⚠ PAS DE `unoptimized` ICI. La boîte plafonne à `max-w-[96vw]`,
 						 * `sm:max-w-4xl` (896 px) puis `lg:max-w-5xl` (1024 px) : servir
@@ -380,7 +407,7 @@ export function Visionneuse({
 							className="object-contain"
 						/>
 					) : (
-						<p className="text-sm text-on-surface-variant">Image indisponible.</p>
+						<p className="text-sm text-on-surface-variant">Média indisponible.</p>
 					)}
 
 					{aPrecedent && (
@@ -433,7 +460,7 @@ export function Visionneuse({
 				<div className="space-y-3 border-t border-outline-variant/40 px-4 py-4">
 					{documentOuvert.legende && (
 						<p className="whitespace-pre-wrap text-sm leading-relaxed text-on-surface-variant">
-							{documentOuvert.legende}
+							<TexteDiscord texte={documentOuvert.legende} />
 						</p>
 					)}
 					<div className="flex flex-wrap items-center justify-between gap-3">

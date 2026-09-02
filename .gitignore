@@ -173,3 +173,9 @@ playwright-report/
 tools/llm-agents/workspace/.coord/*.jsonl
 tools/llm-agents/workspace/.coord/heartbeat-*.txt
 /tools/llm-agents/reference/
+
+# Roster de campagne, variante COMPLÈTE : elle porte les identifiants de plateforme et le
+# graphe qui les relie entre X, Discord et Instagram. Ce lien-là, personne ne l'a publié —
+# c'est nous qui l'avons établi à l'empreinte d'image. Le fichier committé, lui, ne
+# désigne chacun que par sa clé pseudonymisée (`<slug>-roster.json`).
+apps/website/src/data/campagnes/*-complet.json

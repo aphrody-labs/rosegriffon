@@ -117,6 +117,17 @@ export interface ImageCampagne {
 	hauteur: number | null;
 	/** URL d'origine (pbs.twimg.com le plus souvent) — attribution et téléchargement. */
 	source: string;
+	/**
+	 * Image ou vidéo.
+	 *
+	 * Le nom du type dit « image » parce que ce fut vrai jusqu'au 26/8/2026 : une
+	 * participation d'IERG Day déposée en `.mov` a montré qu'une création n'est
+	 * pas forcément une image. Le renommer toucherait six écrans pour rien ; ce
+	 * champ, lui, est OBLIGATOIRE — sans quoi une vidéo repartirait en silence
+	 * dans `next/image`, qui ne sait pas la décoder, et la vignette resterait
+	 * vide sans qu'aucune erreur ne soit levée.
+	 */
+	kind: "image" | "video";
 }
 
 /** Métriques publiques d'un post X. Toutes optionnelles : X n'en renvoie pas toujours. */
@@ -377,6 +388,9 @@ export function extraireImages(media: unknown): ImageCampagne[] {
 		}
 		images.push({
 			src,
+			// `type !== "photo"` est déjà écarté plus haut : côté X, tout ce qui
+			// arrive ici est une image.
+			kind: "image",
 			largeur: typeof item.width === "number" ? item.width : null,
 			hauteur: typeof item.height === "number" ? item.height : null,
 			source: normaliserUrlMedia(item.original_url ?? preferee) || src,

@@ -1,7 +1,5 @@
 import { existsSync, readFileSync } from "node:fs";
-import { join } from "node:path";
-
-import { basename } from "node:path";
+import { basename, join } from "node:path";
 
 import { PATHS, resolveGameDataFile } from "../../core/paths.js";
 import { loadBattleDropsFromConfig } from "../../parsers/drops-parser.js";

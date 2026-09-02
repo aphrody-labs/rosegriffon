@@ -39,6 +39,29 @@ export const ICN2 = "/dx11/menu/200_icon/15_icon_common2/fr";
 /** Gaiji : les glyphes images de la police du jeu. */
 export const FONT = "/dx11/font";
 
+/** Conteneur des vignettes de l'éditeur dans les fichiers du jeu. */
+export const ATLAS_AVATAR = "/g4tx/dx11/menu/200_icon/21_icon_avatar";
+/** Largeur servie : la case de grille fait ~134 px, 200 px la couvre en écran dense. */
+export const VIGNETTE_W = 200;
+
+/**
+ * URL d'une vignette de l'éditeur, en WebP redimensionné et mis en cache sur disque.
+ *
+ * Une vignette n'est pas un fichier : c'est une TEXTURE NOMMÉE d'un conteneur `.g4tx` —
+ * `icon_ava_face04_001` vit dans `icon_ava_face04.g4tx`, et les ~493 vignettes du catalogue ne
+ * viennent que d'une douzaine de conteneurs. La route `/avatar/icon/<nom>.png` les décode au
+ * serveur d'assets ; la surface `/g4tx/…?w=` passe par `cdn-variants`, qui redimensionne une
+ * fois, écrit le WebP sur disque et le ressert sous `immutable` — le même chemin que la
+ * galerie. Une page complète y gagne ~1,5 Mo.
+ */
+export function urlVignette(cdn: string, icone: string | null): string | null {
+	if (!icone) return null;
+	const coupe = icone.lastIndexOf("_");
+	if (coupe <= 0) return null;
+	const atlas = icone.slice(0, coupe);
+	return `${cdn}${ATLAS_AVATAR}/${atlas}.g4tx/${icone}.png?w=${VIGNETTE_W}&format=webp`;
+}
+
 /** Couleur du texte de l'éditeur, échantillonnée sur les captures. */
 export const BLEU = "047AFF";
 /** Couleur des messages d'avertissement du jeu (texte rouge de l'écran Habits). */
@@ -68,6 +91,8 @@ export function Txt({
 		<img
 			src={`${cdn}/ui/text.png?t=${encodeURIComponent(t)}&fg=${couleur}`}
 			alt={t}
+			loading="lazy"
+			decoding="async"
 			style={{ height: h, ...style }}
 			className={`
      w-auto max-w-full object-contain
@@ -192,7 +217,15 @@ export function Vignette({
 			)}
 			{image ? (
 				// eslint-disable-next-line @next/next/no-img-element
-				<img src={image} alt="" className="relative size-[86%] object-contain" />
+				<img
+					src={image}
+					alt=""
+					loading="lazy"
+					decoding="async"
+					width={VIGNETTE_W}
+					height={VIGNETTE_W}
+					className="relative size-[86%] object-contain"
+				/>
 			) : (
 				<Sprite cdn={cdn} src={`${A01}/avatar01_17/icon_none02.png`} className="relative w-[52%]" />
 			)}
@@ -414,7 +447,15 @@ export function Ligne({
 						/>
 						{image ? (
 							// eslint-disable-next-line @next/next/no-img-element
-							<img src={image} alt="" className="relative size-[84%] object-contain" />
+							<img
+								src={image}
+								alt=""
+								loading="lazy"
+								decoding="async"
+								width={VIGNETTE_W}
+								height={VIGNETTE_W}
+								className="relative size-[84%] object-contain"
+							/>
 						) : (
 							<Sprite
 								cdn={cdn}

@@ -714,3 +714,49 @@ describe("liste de comptes par profil", () => {
 		expect(ecarte.publies).toBe(0);
 	});
 });
+
+describe("validation humaine — le curseur avance AVANT la carte", () => {
+	/*
+	 * La boucle du 13 au 24/8/2026 : l'échange-comparaison échouait à tous les
+	 * coups (microsecondes de `timestamptz` contre millisecondes de `Date`), le
+	 * curseur restait figé, et le drain redéposait la MÊME carte de validation
+	 * toutes les cinq minutes — 188 exemplaires du même post dans
+	 * `🌿📰〡général-azalée`. Le refus était muet : l'état renvoyé restait
+	 * « propose ». Deux garde-fous depuis : on avance d'abord, et un refus
+	 * arrête le drain au lieu de déposer une carte de plus.
+	 */
+	const SALON_VALIDATION = "333333333333333333";
+	const ANNONCE_VALIDEE = { ...ANNONCE_AZALEE, salonValidation: SALON_VALIDATION } as const;
+
+	test("le curseur avance avant l'envoi, et la carte part dans le salon de validation", async () => {
+		curseurCourant = curseurFactice("azalee", "2026-08-13T00:00:00.000Z", false);
+		tweetsCourants = [tweetFactice("1", "2026-08-13T10:00:00Z")];
+		const envois: Envoi[] = [];
+
+		const { valeur: resultat } = await sansJournal(() =>
+			drainerTweets(clientFactice(envois), { annonce: ANNONCE_VALIDEE })
+		);
+
+		expect(resultat.etat).toBe("propose");
+		expect(resultat.publies).toBe(1);
+		expect(appels.avance).toHaveLength(1);
+		expect(appels.avance[0]!.jusqua.toISOString()).toBe("2026-08-13T10:00:00.000Z");
+		// Rien dans le salon d'annonce : la publication attend un clic.
+		expect(envois.map((e) => e.salonId)).toEqual([SALON_VALIDATION]);
+	});
+
+	test("un curseur refusé n'envoie AUCUNE carte", async () => {
+		curseurCourant = curseurFactice("azalee", "2026-08-13T00:00:00.000Z", false);
+		tweetsCourants = [tweetFactice("1", "2026-08-13T10:00:00Z")];
+		avancementAccepte = false;
+		const envois: Envoi[] = [];
+
+		const { valeur: resultat } = await sansJournal(() =>
+			drainerTweets(clientFactice(envois), { annonce: ANNONCE_VALIDEE })
+		);
+
+		expect(resultat.etat).toBe("concurrent");
+		expect(resultat.publies).toBe(0);
+		expect(envois).toHaveLength(0);
+	});
+});

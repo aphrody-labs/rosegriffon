@@ -3,6 +3,12 @@ import "server-only";
 import { getPgPool } from "@/lib/db/pg";
 
 import {
+	collecterIdentifiantsDiscord,
+	RESOLUTION_VIDE,
+	type ResolutionDiscord,
+	resoudreMentions,
+} from "./discord-texte";
+import {
 	type Campagne,
 	entierPositif,
 	extraireImages,
@@ -105,6 +111,9 @@ interface ImageDiscordStockee {
 	largeur?: number | null;
 	hauteur?: number | null;
 	url_origine?: string | null;
+	/** Absent des lignes récoltées avant le 26/8/2026 : elles sont toutes des images. */
+	kind?: string | null;
+	type_mime?: string | null;
 }
 
 /*
@@ -174,6 +183,14 @@ function imagesDiscord(brut: unknown): ImageCampagne[] {
 		}
 		images.push({
 			hauteur: typeof image.hauteur === "number" ? image.hauteur : null,
+			// Le `kind` écrit par la récolte fait foi ; à défaut — lignes d'avant le
+			// 26/8/2026 — le type MIME tranche, et sinon c'est une image. Aucune de
+			// ces trois lectures ne devine : la dernière décrit l'état réel du stock
+			// à cette date (aucune vidéo récoltée avant elle).
+			kind:
+				image.kind === "video" || (image.type_mime ?? "").startsWith("video/")
+					? "video"
+					: "image",
 			largeur: typeof image.largeur === "number" ? image.largeur : null,
 			source: src,
 			src,
@@ -182,7 +199,66 @@ function imagesDiscord(brut: unknown): ImageCampagne[] {
 	return images;
 }
 
-function versPost(ligne: LigneCreation): PostCampagne {
+/**
+ * Traduit les identifiants Discord d'un lot de textes en noms lisibles.
+ *
+ * TROIS REQUÊTES POUR TOUTE UNE PAGE, jamais une par carte : la galerie en affiche vingt-quatre,
+ * et une résolution par publication ferait soixante-douze allers-retours pour afficher trois noms.
+ * Un texte sans mention ne déclenche AUCUNE requête.
+ *
+ * Le nom retenu est celui que Discord affiche lui-même : le surnom de serveur d'abord, sinon le nom
+ * global, sinon le pseudo. Un membre parti (`left_at`) reste résolu — il a bel et bien été nommé
+ * dans un message, et le remplacer par « membre » réécrirait l'histoire de la conversation.
+ *
+ * Un échec de lecture n'est pas fatal : on rend la résolution vide, les mentions retombent sur
+ * « @membre » et la galerie s'affiche. Personne ne doit tomber sur une 500 en venant voir des dessins.
+ */
+async function resoudreDiscord(lignes: readonly LigneCreation[]): Promise<ResolutionDiscord> {
+	const { membres, roles, salons } = collecterIdentifiantsDiscord(
+		lignes.map((ligne) => ligne.texte ?? "")
+	);
+	if (membres.length === 0 && roles.length === 0 && salons.length === 0) {
+		return RESOLUTION_VIDE;
+	}
+
+	const pool = getPgPool();
+	try {
+		const [lignesMembres, lignesRoles, lignesSalons] = await Promise.all([
+			membres.length > 0
+				? pool.query<{ discord_id: string; nom: string }>(
+						`select discord_id,
+						        coalesce(nullif(btrim(nickname), ''), nullif(btrim(display_name), ''),
+						                 nullif(btrim(username), ''), 'membre') as nom
+						   from public.discord_members where discord_id = any($1::text[])`,
+						[membres]
+					)
+				: null,
+			roles.length > 0
+				? pool.query<{ role_id: string; name: string }>(
+						`select role_id, name from public.discord_roles where role_id = any($1::text[])`,
+						[roles]
+					)
+				: null,
+			salons.length > 0
+				? pool.query<{ channel_id: string; name: string }>(
+						`select channel_id, name from public.discord_channels where channel_id = any($1::text[])`,
+						[salons]
+					)
+				: null,
+		]);
+
+		return {
+			membres: Object.fromEntries((lignesMembres?.rows ?? []).map((r) => [r.discord_id, r.nom])),
+			roles: Object.fromEntries((lignesRoles?.rows ?? []).map((r) => [r.role_id, r.name])),
+			salons: Object.fromEntries((lignesSalons?.rows ?? []).map((r) => [r.channel_id, r.name])),
+		};
+	} catch (error) {
+		console.error("Erreur de résolution des identifiants Discord :", error);
+		return RESOLUTION_VIDE;
+	}
+}
+
+function versPost(ligne: LigneCreation, resolution: ResolutionDiscord = RESOLUTION_VIDE): PostCampagne {
 	const commun = {
 		// ⚠ `||` ET NON `??`. Mesuré le 13/8/2026 : 55 des 451 créations Discord ont
 		// un `author_display_name` VIDE (chaîne vide, pas `null`) — `??` les
@@ -195,7 +271,14 @@ function versPost(ligne: LigneCreation): PostCampagne {
 		hashtagTrouve: ligne.hashtag_trouve,
 		misEnAvant: ligne.mis_en_avant,
 		publieLe: versISO(ligne.publie_le),
-		texte: ligne.texte ?? "",
+		/*
+		 * ⚠ LES MENTIONS SONT RÉSOLUES ICI, UNE FOIS, ET PAS DANS LES ÉCRANS.
+		 * `<@198209347589898240>` s'affichait tel quel sur la galerie publique. La résolution
+		 * demande la base : la faire côté écran obligerait chaque composant à devenir serveur,
+		 * ou à recevoir un dictionnaire dont il n'a que faire. Les émojis personnalisés, eux,
+		 * traversent intacts : `<TexteDiscord>` les rendra en images.
+		 */
+		texte: resoudreMentions(ligne.texte ?? "", resolution),
 	};
 
 	if (ligne.source === "instagram") {
@@ -334,7 +417,38 @@ export async function chargerCampagne(slug?: string): Promise<Campagne | null> {
 	}
 }
 
-/** Compteurs de l'en-tête : publications avec image, participants distincts, dernière. */
+/**
+ * Compteurs de l'en-tête : publications avec image, participants distincts, dernière.
+ *
+ * ⚠ CE COMPTEUR DOIT LIRE LA MÊME CHOSE QUE LA GALERIE. Il n'interrogeait que
+ * `x_campagne_posts`, c'est-à-dire X seul, alors que `SELECT_POSTS` est devenue
+ * le 13/8/2026 l'union des TROIS sources. Résultat mesuré sur `iergday` le
+ * 23/8/2026 : la page annonçait « 9 créations · 9 participants » juste au-dessus
+ * d'une galerie qui en affichait 20 (9 X + 9 Discord + 2 Instagram). Le correctif
+ * de l'union avait réparé l'affichage sans emmener le compteur avec lui.
+ *
+ * Un en-tête qui contredit ce qu'on voit dessous n'est pas un détail cosmétique :
+ * il fait douter du décompte au moment précis où le décompte compte, par exemple
+ * si l'on annonce un jour un tirage parmi ces créations.
+ *
+ * `auteurs` compte les PERSONNES quand le roster de la campagne a été construit,
+ * et les PSEUDONYMES DISTINCTS sinon.
+ *
+ * ⚠ CE N'EST PAS UN DÉTAIL DE PRÉSENTATION. Sur `iergday`, Sanada a publié deux
+ * dessins différents : l'un sur X sous « San_La_Vraie », l'autre sur Discord sous
+ * « san_la_vraie ». Compter les pseudonymes en fait DEUX participantes, et
+ * l'en-tête annoncerait 15 personnes juste au-dessus d'un tirage qui en désigne
+ * 14. Le premier participant qui compare les deux chiffres conclut que le
+ * périmètre a bougé au moment du tirage — et la vérifiabilité de tout le
+ * dispositif ne survit pas à ce doute-là.
+ *
+ * Le repli sur les pseudonymes n'est pas un pis-aller : tant qu'aucun roster
+ * n'existe, rapprocher deux pseudonymes serait une DEVINETTE. Ça l'était encore
+ * ce matin. Ça ne l'est plus : `x_campagne_participants` matérialise des fusions
+ * PROUVÉES (empreinte perceptuelle du dessin, signature lisible dans
+ * l'illustration), chacune avec son niveau de preuve. Un compteur peut lire un
+ * acte de modération déjà posé ; ce qu'il ne doit pas faire, c'est en inventer un.
+ */
 export async function compterPostsCampagne(slug: string): Promise<StatsCampagne> {
 	try {
 		const { rows } = await getPgPool().query<{
@@ -342,13 +456,25 @@ export async function compterPostsCampagne(slug: string): Promise<StatsCampagne>
 			auteurs: number;
 			derniere: Date | string | null;
 		}>(
-			`select count(*)::int                          as posts,
-			        count(distinct t.author_username)::int as auteurs,
-			        max(p.publie_le)                       as derniere
-			   from public.x_campagne_posts p
-			   join public.tweets t on t.id = p.tweet_id
-			   join public.x_campagnes c on c.slug = p.campagne_slug and c.publiee
-			  where p.campagne_slug = $1 and not p.masque and p.a_media`,
+			`select count(*)::int   as posts,
+			        -- ⚠ PAS de \`coalesce\` ici : \`count(*)\` rend 0, jamais NULL, donc
+			        -- le repli ne se serait JAMAIS déclenché et les six campagnes
+			        -- archivées auraient affiché « 0 participants ». Mesuré sur
+			        -- \`inatober-rg-2024\` : 63 créations et 0 auteur. C'est l'existence
+			        -- du roster qui décide, pas la valeur du compte.
+			        case
+			          when exists (select 1 from public.x_campagne_participants pa
+			                        where pa.campagne_slug = $1)
+			          then (select count(*)::int
+			                  from public.x_campagne_participants pa
+			                 where pa.campagne_slug = $1
+			                   and pa.eligible
+			                   and pa.fusionne_dans is null)
+			          else count(distinct auteur_pseudo)::int
+			        end              as auteurs,
+			        max(publie_le)   as derniere
+			   from (${SELECT_POSTS}) as creations
+			  where campagne_slug = $1 and not masque and a_media`,
 			[slug]
 		);
 		const ligne = rows[0];
@@ -421,6 +547,7 @@ const SELECT_POSTS = `
 	  from public.x_campagne_posts p
 	  join public.tweets t on t.id = p.tweet_id
 	  join public.x_campagnes c on c.slug = p.campagne_slug and c.publiee
+	 where not public.x_creation_doublon_ecarte(p.campagne_slug, 'x', p.tweet_id)
 
 	union all
 
@@ -440,6 +567,7 @@ const SELECT_POSTS = `
 	  join public.discord_channels s on s.channel_id = m.channel_id
 	  join public.x_campagnes c on c.slug = d.campagne_slug and c.publiee
 	 where m.deleted_at is null and s.suivi
+	   and not public.x_creation_doublon_ecarte(d.campagne_slug, 'discord', d.message_id)
 
 	union all
 
@@ -455,7 +583,8 @@ const SELECT_POSTS = `
 	       i.permalink,
 	       i.campagne_slug, i.masque, i.a_media
 	  from public.campagne_creations_instagram i
-	  join public.x_campagnes c on c.slug = i.campagne_slug and c.publiee`;
+	  join public.x_campagnes c on c.slug = i.campagne_slug and c.publiee
+	 where not public.x_creation_doublon_ecarte(i.campagne_slug, 'instagram', i.shortcode)`;
 
 /**
  * La galerie, TOUTES SOURCES — enveloppe de l'`union all` ci-dessus.
@@ -477,6 +606,23 @@ const SELECT_POSTS = `
  * `getPgPool()` se connecte en rôle propriétaire, donc SANS RLS. Sans elles, la
  * page publierait les créations d'une campagne dépubliée, d'un salon retiré de
  * la veille ou masquées par un modérateur.
+ *
+ * ⚠ LE MÊME DESSIN N'APPARAÎT QU'UNE FOIS, ET C'EST LA PUBLICATION X QUI GAGNE.
+ * Quatre personnes ont posté leur dessin sur X ET sur Discord : le mur montrait
+ * donc 20 vignettes pour 16 dessins. `x_creation_doublon_ecarte()` (migration
+ * `20260823_02_galerie_privilegie_x.sql`) écarte la publication qui n'a pas été
+ * retenue dans `x_campagne_oeuvres` — en pratique le dépôt Discord, puisque
+ * c'est la publication sur un réseau social qui atteste la participation, le
+ * salon n'étant qu'un miroir. Le choix est DANS LA DONNÉE, avec son motif écrit
+ * en clair (`motif_regroupement`), pas dans cette requête.
+ *
+ * La clause est posée dans les TROIS branches, jamais dans l'enveloppe : sinon
+ * `compterPostsCampagne`, qui lit `SELECT_POSTS` directement et non `GALERIE`,
+ * compterait les doublons que la galerie n'affiche pas — et l'en-tête
+ * recommencerait à contredire le mur juste dessous.
+ *
+ * Une campagne sans ligne dans `x_campagne_oeuvres` n'est pas filtrée du tout :
+ * les six campagnes archivées gardent exactement la galerie qu'elles avaient.
  */
 const GALERIE = `select * from (${SELECT_POSTS}) as creations`;
 
@@ -500,7 +646,8 @@ export async function listerPostsCampagne(
 			 limit $2 offset $3`,
 			[slug, taille, offset]
 		);
-		return rows.map(versPost);
+		const resolution = await resoudreDiscord(rows);
+		return rows.map((ligne) => versPost(ligne, resolution));
 	} catch (error) {
 		console.error("Erreur de lecture des publications de campagne :", error);
 		return [];
@@ -521,7 +668,8 @@ export async function listerPostsEnAvant(slug: string, limite = 6): Promise<Post
 			 limit $2`,
 			[slug, entierPositif(limite, 6)]
 		);
-		return rows.map(versPost);
+		const resolution = await resoudreDiscord(rows);
+		return rows.map((ligne) => versPost(ligne, resolution));
 	} catch (error) {
 		console.error("Erreur de lecture des publications à la une :", error);
 		return [];

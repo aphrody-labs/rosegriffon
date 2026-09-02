@@ -28,10 +28,22 @@ import { GlobalRegistrator } from "@happy-dom/global-registrator";
  * Primitives réseau à conserver en version Bun native. On garde la famille
  * `fetch` COMPLÈTE et cohérente : `fetch` natif renvoie une `Response` native,
  * un `Response` global resté en version happy-dom casserait alors tout
- * `instanceof`. À l'inverse on ne touche NI à `FormData`, NI à `Blob`/`File` :
+ * `instanceof`, et un `AbortSignal` happy-dom serait refusé par la `Request`
+ * native. À l'inverse on ne touche NI à `FormData`, NI à `Blob`/`File` :
  * happy-dom en a besoin pour ses propres formulaires (`new FormData(form)`).
  */
-const PRIMITIVES_RESEAU = ["fetch", "Headers", "Request", "Response"] as const;
+const PRIMITIVES_RESEAU = [
+	"fetch",
+	"Headers",
+	"Request",
+	"Response",
+	// `AbortController`/`AbortSignal` font partie de la même famille : happy-dom les remplace
+	// aussi, et un signal happy-dom passé au `Request` NATIF est refusé — « Failed to construct
+	// 'Request': signal is not of type AbortSignal ». Le symptôme apparaissait loin de sa cause :
+	// six tests de `packages/azalee` échouaient sur un appel réseau bouchonné, jamais sur le DOM.
+	"AbortController",
+	"AbortSignal",
+] as const;
 
 const descripteursNatifs = new Map<string, PropertyDescriptor>();
 for (const nom of PRIMITIVES_RESEAU) {
@@ -39,8 +51,23 @@ for (const nom of PRIMITIVES_RESEAU) {
 	if (descripteur) descripteursNatifs.set(nom, descripteur);
 }
 
+/**
+ * Réinstalle les primitives réseau natives de Bun par-dessus celles de happy-dom.
+ *
+ * Exporté parce qu'un test qui refait `GlobalRegistrator.register()` (cf.
+ * `packages/azalee/test/remote.test.ts`, qui désenregistre happy-dom pour monter un vrai
+ * `Bun.serve` puis le remet) réinstalle du même coup la pile réseau simulée — et TOUS les
+ * fichiers de test exécutés ensuite en héritent. Le symptôme se manifeste alors très loin :
+ * `Headers` de happy-dom conserve la casse des clés (`User-Agent`), là où celui de Bun les
+ * met en minuscules, et quatre tests de `patreon-bun` échouaient sur cette seule différence
+ * — en suite complète uniquement, jamais isolément.
+ */
+export function rendreReseauNatif(): void {
+	for (const [nom, descripteur] of descripteursNatifs) {
+		Object.defineProperty(globalThis, nom, { ...descripteur, configurable: true });
+	}
+}
+
 GlobalRegistrator.register();
 
-for (const [nom, descripteur] of descripteursNatifs) {
-	Object.defineProperty(globalThis, nom, { ...descripteur, configurable: true });
-}
+rendreReseauNatif();

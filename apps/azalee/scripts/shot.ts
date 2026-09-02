@@ -29,7 +29,7 @@ const page = await navigateur.newPage({
 await page.goto(url, { waitUntil: "networkidle", timeout: 120_000 });
 // Le modèle 3D et les sprites arrivent après `networkidle` : sans cette pause, la capture montre
 // une page à moitié peinte et la mesure qui suit est fausse.
-await page.waitForTimeout(4000);
+await page.waitForTimeout(Number(process.env.SHOT_WAIT_MS ?? 4000));
 await page.screenshot({ path: sortie });
 await navigateur.close();
 console.log(sortie);

@@ -1,15 +1,45 @@
-# Stockage secondaire — le second VPS comme archive froide
+# Stockage secondaire — histoire d'une archive froide, et de son retour
 
-Le VPS principal (`51.77.147.152`) porte toute la production : les deux applications
-Next, la base PostgreSQL, la pile qui remplace Supabase, le CDN — et le dump du jeu,
-qui pèse à lui seul près de 70 Go. Son disque de 193 Go était plein à 91 %.
+> **Terminé le 21 août 2026.** Le second VPS ne porte plus aucune donnée
+> Rose Griffon ni niers : tout a été rapatrié sur le VPS principal, vérifié
+> fichier par fichier et octet par octet, puis supprimé là-bas. Ce document
+> garde le raisonnement — il resservira le jour où le disque se resserrera de
+> nouveau — mais **l'outil `scripts/ops/archive-froid.ts` n'a plus de
+> destination** et `scripts/ops/sauvegarde.ts` n'envoie plus rien hors machine
+> tant que `RG_ARCHIVE_HOTE` n'est pas renseigné.
 
-Le second VPS (`51.255.162.6`) n'héberge qu'achillea et shenron et laisse
-plusieurs dizaines de gigaoctets inutilisés. Il sert désormais de **stockage
-secondaire** : tout ce qu'aucun service ne lit y est déporté, avec un chemin de
-retour en une commande.
+## Ce qui est revenu, et où
 
-## L'outil
+| Contenu | Volume | Emplacement sur le VPS principal |
+| --- | --- | --- |
+| Médias de tweets + assets (`/srv/rg-storage`) | 5,4 Go | `/var/www/rg-storage/` — servi de nouveau en local |
+| Sauvegardes Postgres (`/srv/rg-backups`) | 609 Mo | `/home/ubuntu/rg-backups/` |
+| Corpus audio niers (`/srv/niers-corpus`) | 156 Mo | `/home/ubuntu/niers/var/corpus/` |
+| Site achillée retiré, espace de travail azalée, journaux `rg-stats` | 15 Mo | `/home/ubuntu/rg-archive-vps2/` |
+
+Deux conséquences de configuration, faites dans le même mouvement :
+
+- `infra/nginx/supabase-compat.inc` n'a **jamais** contenu les deux blocs
+  `proxy_pass http://51.255.162.6:8811/` qui avaient été ajoutés à la main dans
+  `/etc/nginx/conf.d/` : la copie active a simplement été réalignée sur le
+  dépôt, et `/storage/v1/object/public/{tweets,assets}/` repasse par
+  `rg-storage.service`. Vérifié avant et après bascule sur le même média :
+  200, 264 579 octets dans les deux cas.
+- Le vhost `rg-tweets` du second VPS (port 8811, `allow` sur l'IP du principal)
+  a été retiré de `sites-enabled`.
+
+### Le corpus audio n'est pas revenu entier, et c'est voulu
+
+`/srv/niers-corpus/audio_awb` pesait 8,25 Go pour 5 512 fichiers. Comparés aux
+`.awb` réellement présents dans les CPK locaux (index Redis `iev:file:index`,
+4 559 noms distincts), **164 fichiers seulement n'existaient nulle part
+ailleurs**. Ceux-là sont revenus (43 Mo) ; les autres ont été supprimés, parce
+qu'un extrait d'archive dont l'archive est intacte à côté n'est pas une
+sauvegarde, c'est un doublon. `data/packs` reste sur le VPS principal, donc la
+régénération est possible à tout moment.
+
+## L'outil, tant qu'il existe
+
 
 ```
 bun scripts/ops/archive-froid.ts pousser <chemin...>   # déporte et libère la place
@@ -145,16 +175,37 @@ explicitement (`--glb-dir`).
 
 ### Effet de bord corrigé dans `cdn-variants`
 
-`apps/cdn-variants/server.ts` tentait d'abord l'ancien décodeur `iecode-cdn`
+`apps/cdn-variants/server.ts` (passé dans `niers`) tentait d'abord l'ancien décodeur `iecode-cdn`
 (:8788), retiré du dépôt le 11 août 2026 et dont le port ne répond plus, puis
 seulement niers. Tant que le dump couvrait presque tout, cet aller-retour perdu
 restait rare ; le dump parti, il serait devenu le cas courant. `nie-model-serve`
 est donc passé en primaire, `LIVE_ORIGIN` en simple repli.
 
-## Ce qui ne doit pas être déporté
+## Ce qui ne doit jamais être déporté
 
 - **`data/packs` (57 Go)** — les archives CPK. C'est la source de tout le contenu
   décodé en direct par le CDN. Les déporter couperait `cdn.rosegriffon.fr`.
 - **`data/dx11/model`** — référencé par l'unité `nie-model-serve`.
 - **`/opt/google/chrome`** — le navigateur que pilote `bxc`.
 - **`niers/target`** — contient le binaire `nie-model-serve` en service.
+
+## Le second VPS aujourd'hui
+
+Il n'héberge plus que **shenron** (bot Discord, site `dragonballfr.com`, serveur
+MCP, sidecar d'embeddings) et **bxc** (automatisation de navigateur : API,
+crawler, ordonnanceur), plus PostgreSQL, Redis, nginx et un serveur de fichiers.
+Son disque de 96 Go était plein à 91 % le 21 août 2026 ; après rapatriement et
+nettoyage il est redescendu à environ 60 %.
+
+Deux pièges rencontrés ce jour-là, qui valent pour n'importe quel nettoyage :
+
+- **Un dossier vide peut être une dépendance.** Supprimer les caches
+  `apps/*/.bun-cache` a mis `shenron-embed.service` en échec instantané
+  (`226/NAMESPACE`) : l'unité les monte via ses directives d'espace de noms, et
+  systemd refuse de démarrer si le point de montage n'existe pas. Recréer les
+  dossiers vides a suffi.
+- **Ce qui fuit revient.** 930 profils Chrome éphémères (`scoped_dir*`, 2,9 Go)
+  s'étaient accumulés sous `~/.config/google-chrome-headless` parce qu'un
+  lancement headless mort ne nettoie pas le sien. Purger sans traiter la fuite
+  n'aurait rien réglé : une règle `tmpfiles.d` les efface désormais au-delà de
+  24 heures.
