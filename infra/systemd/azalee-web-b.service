@@ -31,7 +31,7 @@ Environment=PGHOST=/var/run/postgresql
 Environment=PGDATABASE=rose_griffon
 Environment=PGUSER=ubuntu
 Environment=BUN_RUNTIME_TRANSPILER_CACHE_PATH=/home/ubuntu/rg-releases/azalee/bun-cache-b
-Environment=SQLITE_DB_PATH=/home/ubuntu/rg/apps/azalee/data/backups/mirror.sqlite
+Environment=SQLITE_DB_PATH=/home/ubuntu/niers/var/mirror.sqlite
 
 ExecStart=/home/ubuntu/.bun/bin/bun /home/ubuntu/rg-releases/azalee/slot-b/apps/azalee/server.js
 
