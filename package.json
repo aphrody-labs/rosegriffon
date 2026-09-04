@@ -210,6 +210,8 @@
 		"deploy:website": "bun scripts/ops/deploy.ts deploy website",
 		"deploy:status": "bun scripts/ops/deploy.ts status",
 		"deploy:rollback": "bun scripts/ops/deploy.ts rollback",
+		"deploy:vercel:preflight": "bun scripts/ops/vercel-failover.ts preflight",
+		"deploy:vercel": "bun scripts/ops/vercel-failover.ts deploy",
 		"deploy:install": "bun scripts/ops/deploy.ts install",
 		"infra:check": "bun scripts/ops/infra.ts check",
 		"infra:pull": "bun scripts/ops/infra.ts pull",
