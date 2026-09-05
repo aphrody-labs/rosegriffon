@@ -28,15 +28,17 @@ export type PartageProps = {
 	etat: AvatarEnregistre;
 	/** Le code de partage de l'état courant, déjà calculé par l'éditeur. */
 	code: string | null;
+	/** Code fourni par un lien `/avatar?code=…`, à valider exclusivement côté serveur. */
+	codeInitial?: string;
 	/** Rétablit un avatar dans l'éditeur. */
 	restaurer: (avatar: AvatarEnregistre) => void;
 	/** Ferme le panneau. */
 	fermer: () => void;
 };
 
-export function Partage({ etat, code, restaurer, fermer }: PartageProps) {
+export function Partage({ etat, code, codeInitial = "", restaurer, fermer }: PartageProps) {
 	const [avatars, setAvatars] = useState<Sauvegarde[]>([]);
-	const [saisie, setSaisie] = useState("");
+	const [saisie, setSaisie] = useState(codeInitial);
 	const [nom, setNom] = useState("");
 	const [message, setMessage] = useState<string | null>(null);
 	const [copie, setCopie] = useState(false);
@@ -51,10 +53,25 @@ export function Partage({ etat, code, restaurer, fermer }: PartageProps) {
 
 	useEffect(recharger, [recharger]);
 
+	useEffect(() => {
+		if (codeInitial.length === 0) return;
+		demarrer(() => {
+			void ouvrirParCode(codeInitial).then((r) => {
+				if (r.error) setMessage(r.error);
+				else if (r.avatar) {
+					restaurer(r.avatar);
+					setMessage(`Avatar « ${r.nom ?? "sans nom"} » ouvert depuis le lien.`);
+				}
+			});
+		});
+	}, [codeInitial, restaurer]);
+
 	const copier = useCallback(() => {
 		if (!code) return;
+		const lien = new URL("/avatar", globalThis.location.origin);
+		lien.searchParams.set("code", code);
 		void navigator.clipboard
-			.writeText(code)
+			.writeText(lien.href)
 			.then(() => {
 				setCopie(true);
 				setTimeout(() => setCopie(false), 2000);
@@ -96,7 +113,6 @@ export function Partage({ etat, code, restaurer, fermer }: PartageProps) {
 			onKeyDown={(e) => e.key === "Escape" && fermer()}
 			role="presentation"
 		>
-			{/* eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions */}
 			<div
 				className="w-full max-w-lg rounded-2xl bg-white p-6 text-slate-900 shadow-2xl"
 				onClick={(e) => e.stopPropagation()}
@@ -118,7 +134,7 @@ export function Partage({ etat, code, restaurer, fermer }: PartageProps) {
 							disabled={!code}
 							className="shrink-0 rounded-lg bg-slate-900 px-3 py-2 text-sm text-white disabled:opacity-40"
 						>
-							{copie ? "Copié" : "Copier"}
+							{copie ? "Lien copié" : "Copier le lien"}
 						</button>
 					</div>
 				</section>

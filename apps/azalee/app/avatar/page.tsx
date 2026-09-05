@@ -64,14 +64,22 @@ async function chargerCatalogue(): Promise<Catalogue | null> {
 	}
 }
 
-export default async function Page() {
+export default async function Page({
+	searchParams,
+}: {
+	searchParams: Promise<{ code?: string | string[] }>;
+}) {
 	const catalogue = await chargerCatalogue();
+	const codeBrut = (await searchParams).code;
+	const codeInitial = typeof codeBrut === "string" && codeBrut.length <= 128 ? codeBrut : "";
 
 	if (!catalogue) {
 		return (
-			<div className="
+			<div
+				className="
      rounded-[32px] border border-dashed border-outline-variant bg-surface-container-low py-20 text-center
-   ">
+   "
+			>
 				<p className="italic text-on-surface-variant">
 					Catalogue injoignable — il est produit par «&nbsp;niers avatar export&nbsp;» et servi sur
 					/avatar/catalog.json.
@@ -80,5 +88,5 @@ export default async function Page() {
 		);
 	}
 
-	return <Editeur catalogue={catalogue} cdn={CDN} />;
+	return <Editeur catalogue={catalogue} cdn={CDN} codeInitial={codeInitial} />;
 }
