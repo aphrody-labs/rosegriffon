@@ -231,6 +231,14 @@ encore marqué actif : `MemoryCurrent` avait atteint environ 5,64 Gio, `memory.e
 environ 219 Mio utilisés au démarrage, et les sondes Azalée/CDN restent HTTP 200. Cette reprise est
 une preuve de restauration du service, pas une preuve de parcours navigateur complet.
 
+À 04:42 UTC, l'audit des unités a réaffirmé `disabled/inactive` pour trois vestiges sans PID :
+`cdn.service` (ancien chemin `rpbey`, répertoire absent, remplacé par `rg-cdn`), `rg-cron.service`
+(ancien singleton explicitement remplacé par `nie-cron`) et `azalee-watchdog.timer` (ancien timer
+remplacé par `rg-watchdog@azalee-web.timer`). Aucun fichier d'unité n'a été supprimé. Les slots B
+restent des doublures de bascule désactivées, tandis que `nie-miroir` et `rg-sauvegarde` restent des
+oneshots appelés par leurs timers ; `systemctl --failed` comptait zéro unité et les services
+applicatifs, modèle, CDN et site répondaient encore aux sondes HTTP 200.
+
 ## Coordination A2A
 
 Niers versionne désormais sa carte `ai.json` et `docs/A2A-CODEX.md`. Les objectifs sont échangés
