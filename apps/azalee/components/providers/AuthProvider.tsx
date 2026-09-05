@@ -85,18 +85,21 @@ export function AuthProvider({
 
 	// Initialize session from Better Auth
 	useEffect(() => {
+		let actif = true;
 		const initialize = async () => {
 			try {
 				const { data: session } = await authClient.getSession();
-				if (session?.user) {
+				if (actif && session?.user) {
 					setUser(session.user as BetterAuthUser);
 					const profileData = await fetchProfile(session.user.id);
-					setProfile(profileData);
+					if (actif) setProfile(profileData);
 				}
 			} catch (error) {
-				console.error("Auth init error:", error);
+				// Une navigation de document annule normalement cette requête d'initialisation.
+				// Ne pas transformer ce démontage en erreur console du nouveau parcours.
+				if (actif) console.error("Auth init error:", error);
 			} finally {
-				setLoading(false);
+				if (actif) setLoading(false);
 			}
 		};
 
@@ -106,6 +109,9 @@ export function AuthProvider({
 		} else {
 			setLoading(false);
 		}
+		return () => {
+			actif = false;
+		};
 	}, [fetchProfile, initialUser]);
 
 	const signOut = async () => {
