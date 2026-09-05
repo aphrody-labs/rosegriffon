@@ -2,7 +2,6 @@
 
 import { ArrowLeft, KeyRound, Loader2, Lock, LogIn, Mail, UserPlus } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Button, Input } from "@rosegriffon/ui";
@@ -30,7 +29,6 @@ interface LoginFormProps {
 }
 
 export function LoginForm({ onSuccess, returnTo }: LoginFormProps) {
-	const router = useRouter();
 	const safeReturnTo = sanitizeReturnTo(returnTo);
 	// Résolveur serveur : décide /dashboard (admin) vs returnTo selon le rôle réel.
 	const postLoginUrl = returnTo
@@ -103,7 +101,9 @@ export function LoginForm({ onSuccess, returnTo }: LoginFormProps) {
 				if (onSuccess) {
 					onSuccess();
 				}
-				router.push(safeReturnTo);
+				// Même navigation complète que la connexion : le cookie de session tout juste
+				// posé doit accompagner une nouvelle requête serveur, sans cache RSC anonyme.
+				window.location.href = postLoginUrl;
 			} else {
 				const { error } = await authClient.signIn.email({
 					email,
