@@ -213,6 +213,9 @@
 		"deploy:vercel:preflight": "bun scripts/ops/vercel-failover.ts preflight",
 		"deploy:vercel": "bun scripts/ops/vercel-failover.ts deploy",
 		"deploy:install": "bun scripts/ops/deploy.ts install",
+		"ops:sync": "bun scripts/ops/repo-sync.ts --repo all --pull --commit --push",
+		"ops:sync:check": "bun scripts/ops/repo-sync.ts --repo all --commit --dry-run --json",
+		"ops:prune-runtime": "bun scripts/ops/prune-runtime.ts",
 		"infra:check": "bun scripts/ops/infra.ts check",
 		"infra:pull": "bun scripts/ops/infra.ts pull",
 		"infra:diff": "bun scripts/ops/infra.ts diff",
@@ -255,17 +258,17 @@
 		"wanakana": "catalog:"
 	},
 	"overrides": {
-		"kysely": "0.28.17",
 		"@aphrody-code/bxc": "npm:@aphrody/bxc@^0.6.7",
-		"@aphrody-code/zukan": "npm:@aphrody/zukan@^0.1.5",
-		"@aphrody-code/x": "npm:@aphrody/x@^1.0.10",
-		"@aphrody-code/xcom": "npm:@aphrody/xcom@^0.1.6",
-		"@aphrody-code/xai": "npm:@aphrody/xai@^1.0.5",
-		"@aphrody-code/fut": "npm:@aphrody/fut@^0.1.5",
+		"@aphrody-code/canvas": "npm:@aphrody/canvas@0.1.99",
 		"@aphrody-code/challonge": "npm:@aphrody/challonge@^0.1.6",
+		"@aphrody-code/fut": "npm:@aphrody/fut@^0.1.5",
 		"@aphrody-code/voiranime": "npm:@aphrody/voiranime@^0.1.5",
 		"@aphrody-code/worldbeyblade": "npm:@aphrody/worldbeyblade@^0.1.5",
-		"@aphrody-code/canvas": "npm:@aphrody/canvas@0.1.99"
+		"@aphrody-code/x": "npm:@aphrody/x@^1.0.10",
+		"@aphrody-code/xai": "npm:@aphrody/xai@^1.0.5",
+		"@aphrody-code/xcom": "npm:@aphrody/xcom@^0.1.6",
+		"@aphrody-code/zukan": "npm:@aphrody/zukan@^0.1.5",
+		"kysely": "0.28.17"
 	},
 	"engines": {
 		"bun": ">=1.3.14"
