@@ -43,7 +43,9 @@ try {
 
 const DRY = process.argv.includes("--dry") || !process.argv.includes("--apply");
 const ONLY_SHAWN = process.argv.includes("--only-shawn");
-const MIRROR_ARG = process.argv.find((arg) => arg.startsWith("--mirror="))?.slice("--mirror=".length);
+const MIRROR_ARG = process.argv
+	.find((arg) => arg.startsWith("--mirror="))
+	?.slice("--mirror=".length);
 
 const PARAM_EN = "/home/ubuntu/niers/data/zukan/param_en.json";
 const PARAM_JA = "/home/ubuntu/niers/data/zukan/param_ja.json";
@@ -662,6 +664,10 @@ async function main() {
 		"k/m/c/mc0a0kigy_k": { age: "Middle School", school: "Grade 8" },
 		"k/g/1/g1zm_1kbai8": { age: "Middle School", school: "Grade 9" },
 	};
+	const SHAWN_INTERNAL_CODES: Record<string, string> = {
+		"0x2D3CA337": "c02023380",
+		"0x36D8C89C": "c02023380",
+	};
 	for (const [id, { hash, order }] of Object.entries(MANUAL_OVERRIDES)) {
 		if (dbById.has(id)) assigned.set(id, hash);
 		if (order !== undefined) orderMap[hash] = order;
@@ -794,6 +800,11 @@ async function main() {
 					`UPDATE inagle_characters SET age_group = '${sqlEsc(bio.age)}', school_year = ${schoolSql} WHERE zukan_hash = '${sqlEsc(hash)}';`
 				);
 			}
+			for (const [id, internalCode] of Object.entries(SHAWN_INTERNAL_CODES)) {
+				lines.push(
+					`UPDATE inagle_characters SET internal_code = '${sqlEsc(internalCode)}' WHERE id = '${sqlEsc(id)}';`
+				);
+			}
 		}
 		lines.push("COMMIT;");
 		await Bun.write(SUPABASE_SQL_OUT, lines.join("\n") + "\n");
@@ -816,6 +827,10 @@ async function main() {
 				);
 				for (const [hash, bio] of Object.entries(SHAWN_BIO)) {
 					bioStmt.run(bio.age, bio.school, hash);
+				}
+				const codeStmt = rw.query("UPDATE inagle_characters SET internal_code = ? WHERE id = ?");
+				for (const [id, internalCode] of Object.entries(SHAWN_INTERNAL_CODES)) {
+					codeStmt.run(internalCode, id);
 				}
 			}
 		});
