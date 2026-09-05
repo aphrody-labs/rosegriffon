@@ -5,6 +5,7 @@ import { buildCanonical, LIST_CANONICAL_KEYS } from "@/lib/seo";
 import { parseSearchParams } from "@/lib/validations";
 import { wikiService } from "@/lib/wiki-service";
 import { PlayersClient } from "../players-client";
+import { WikiPageHeader } from "@/components/wiki/WikiPageHeader";
 
 export async function generateMetadata({
 	searchParams,
@@ -134,14 +135,7 @@ export default async function PlayersPage({
 				type="application/ld+json"
 				dangerouslySetInnerHTML={{ __html: JSON.stringify(collectionJsonLd) }}
 			/>
-			<div className="space-y-1">
-				<h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-on-surface font-display">
-					Personnages
-				</h1>
-				<p className="text-sm text-on-surface-variant">
-					Base de données complète des joueurs d'Inazuma Eleven: Victory Road.
-				</p>
-			</div>
+			<WikiPageHeader icon="group" title="Personnages" count={`${total.toLocaleString("fr-FR")} joueurs`} description="Base de données complète des joueurs d'Inazuma Eleven: Victory Road." />
 			<PlayersClient
 				paginatedCharacters={characters}
 				totalItems={total}

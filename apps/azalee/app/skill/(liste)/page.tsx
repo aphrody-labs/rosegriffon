@@ -6,6 +6,7 @@ import { SkillFilterBar } from "@/components/wiki/filters/SkillFilterBar";
 import { MoveCard } from "@/components/wiki/MoveCard";
 import { WikiPagination } from "@/components/wiki/WikiPagination";
 import { WikiSearchToolbar } from "@/components/wiki/WikiSearchToolbar";
+import { WikiPageHeader } from "@/components/wiki/WikiPageHeader";
 import { getSkillCategoryIconUrl } from "@rosegriffon/azalee/images";
 import { buildCanonical, LIST_CANONICAL_KEYS } from "@/lib/seo";
 import { parseSearchParams } from "@/lib/validations";
@@ -149,14 +150,7 @@ export default async function SkillsPage({
 				type="application/ld+json"
 				dangerouslySetInnerHTML={{ __html: JSON.stringify(collectionJsonLd) }}
 			/>
-			<div className="space-y-1">
-				<h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-on-surface font-display">
-					Techniques Spéciales
-				</h1>
-				<p className="text-sm text-on-surface-variant">
-					Base de données complète des techniques (Hissatsu) d'Inazuma Eleven: Victory Road.
-				</p>
-			</div>
+			<WikiPageHeader icon="bolt" title="Techniques spéciales" count={`${total.toLocaleString("fr-FR")} techniques`} description="Base de données complète des techniques (Hissatsu) d'Inazuma Eleven: Victory Road." />
 			<div className="space-y-4">
 				<WikiSearchToolbar placeholder="Rechercher une technique..." showFilters={false} />
 				<SkillFilterBar
