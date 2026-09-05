@@ -84,7 +84,18 @@
  * journalisation (chaînée) et pour les sondes (émises en parallèle).
  */
 
-import { appendFile, mkdir, readdir, readFile, readlink, rename, rm, stat, symlink, writeFile } from "node:fs/promises";
+import {
+	appendFile,
+	mkdir,
+	readdir,
+	readFile,
+	readlink,
+	rename,
+	rm,
+	stat,
+	symlink,
+	writeFile,
+} from "node:fs/promises";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Configuration
@@ -239,7 +250,12 @@ interface RunResult {
 
 async function run(
 	command: string[],
-	options: { cwd?: string; timeoutMs?: number; env?: Record<string, string>; inherit?: boolean } = {},
+	options: {
+		cwd?: string;
+		timeoutMs?: number;
+		env?: Record<string, string>;
+		inherit?: boolean;
+	} = {}
 ): Promise<RunResult> {
 	const started = Date.now();
 	const proc = Bun.spawn(command, {
@@ -266,7 +282,8 @@ async function mustRun(command: string[], options?: Parameters<typeof run>[1]): 
 	return result;
 }
 
-const sudo = (command: string[], options?: Parameters<typeof run>[1]) => run(["sudo", "-n", ...command], options);
+const sudo = (command: string[], options?: Parameters<typeof run>[1]) =>
+	run(["sudo", "-n", ...command], options);
 const mustSudo = (command: string[], options?: Parameters<typeof run>[1]) =>
 	mustRun(["sudo", "-n", ...command], options);
 
@@ -303,7 +320,8 @@ const liveEnvPath = (app: AppConfig) => `${appRoot(app)}/live.env`;
 const lockPath = (app: AppConfig) => `${appRoot(app)}/deploy.lock`;
 const releasePath = (app: AppConfig, release: string) => `${releasesDir(app)}/${release}`;
 /** Racine applicative *dans* une version : c'est le `WorkingDirectory` du service. */
-const releaseAppPath = (app: AppConfig, release: string) => `${releasePath(app, release)}/apps/${app.standaloneDir}`;
+const releaseAppPath = (app: AppConfig, release: string) =>
+	`${releasePath(app, release)}/apps/${app.standaloneDir}`;
 
 interface HistoryEntry {
 	at: string;
@@ -368,7 +386,7 @@ async function writeState(app: AppConfig, state: DeployState): Promise<void> {
 			`LIVE_PORT=${slot.port}`,
 			`LIVE_RELEASE=${state.release ?? ""}`,
 			"",
-		].join("\n"),
+		].join("\n")
 	);
 }
 
@@ -433,11 +451,14 @@ async function unitMemoryMiB(unit: string, property = "MemoryCurrent"): Promise<
  * l'OOM killer coûterait exactement ce qu'il prétend éviter.
  */
 async function checkMemory(app: AppConfig, options: { allowLow: boolean }): Promise<void> {
-	const [memory, empreinteLive] = await Promise.all([readMemory(), unitMemoryMiB(app.slots.a.unit)]);
+	const [memory, empreinteLive] = await Promise.all([
+		readMemory(),
+		unitMemoryMiB(app.slots.a.unit),
+	]);
 	const besoin = Math.max(empreinteLive, app.memoryFloorMiB) + MEMORY_MARGIN_MIB;
 	log(
 		`mémoire : ${memory.availableMiB} Mio disponibles sur ${memory.totalMiB} Mio — ` +
-			`la doublure en demande ~${besoin} Mio (slot vivant : ${empreinteLive} Mio)`,
+			`la doublure en demande ~${besoin} Mio (slot vivant : ${empreinteLive} Mio)`
 	);
 	if (memory.availableMiB >= besoin) return;
 	if (options.allowLow) {
@@ -447,7 +468,7 @@ async function checkMemory(app: AppConfig, options: { allowLow: boolean }): Prom
 	fail(
 		`mémoire insuffisante pour une bascule sans coupure : ${memory.availableMiB} Mio disponibles, ` +
 			`${besoin} Mio nécessaires. Libérer de la mémoire, ou forcer avec --allow-low-memory ` +
-			`(le déploiement redeviendrait alors une simple relance, avec coupure).`,
+			`(le déploiement redeviendrait alors une simple relance, avec coupure).`
 	);
 }
 
@@ -486,11 +507,14 @@ async function buildApp(app: AppConfig): Promise<void> {
 			(await exists(buildIdPath)) && Bun.file(buildIdPath).lastModified >= start - 2_000;
 		const standaloneOk = await exists(serverJs);
 		if (buildIdFresh && standaloneOk) {
-			if (result.code !== 0) log(`⚠ build OK malgré le code de sortie ${result.code} (artefacts présents)`);
+			if (result.code !== 0)
+				log(`⚠ build OK malgré le code de sortie ${result.code} (artefacts présents)`);
 			log(`✓ build ${app.key} en ${Math.round(result.ms / 1000)} s`);
 			return;
 		}
-		log(`⚠ build incomplet (BUILD_ID frais=${buildIdFresh} server.js=${standaloneOk}, code ${result.code})`);
+		log(
+			`⚠ build incomplet (BUILD_ID frais=${buildIdFresh} server.js=${standaloneOk}, code ${result.code})`
+		);
 	}
 	fail(`build ${app.key} réellement échoué après 3 tentatives`);
 }
@@ -499,7 +523,9 @@ async function buildApp(app: AppConfig): Promise<void> {
 async function repositoryCommit(): Promise<string> {
 	const result = await run(["git", "rev-parse", "HEAD"]);
 	if (result.code !== 0 || !result.stdout.trim()) {
-		fail(`impossible de déterminer le commit du checkout :\n${(result.stdout + result.stderr).trim()}`);
+		fail(
+			`impossible de déterminer le commit du checkout :\n${(result.stdout + result.stderr).trim()}`
+		);
 	}
 	return result.stdout.trim();
 }
@@ -508,7 +534,9 @@ async function repositoryCommit(): Promise<string> {
 async function assertRepositoryCommit(expected: string, phase: string): Promise<void> {
 	const actual = await repositoryCommit();
 	if (actual !== expected) {
-		fail(`checkout modifié pendant ${phase} : attendu ${expected}, trouvé ${actual} — release abandonnée`);
+		fail(
+			`checkout modifié pendant ${phase} : attendu ${expected}, trouvé ${actual} — release abandonnée`
+		);
 	}
 }
 
@@ -562,7 +590,9 @@ async function assembleRelease(app: AppConfig, expectedCommit?: string): Promise
 				for (const file of walFiles.stdout.trim().split("\n")) {
 					await rm(file, { force: true });
 				}
-				log(`⚠ ${walFiles.stdout.trim().split("\n").length} fichier(s) SQLite WAL/SHM supprimés avant assemblage`);
+				log(
+					`⚠ ${walFiles.stdout.trim().split("\n").length} fichier(s) SQLite WAL/SHM supprimés avant assemblage`
+				);
 			}
 		}
 		const target = `${appPath}/${relative}`;
@@ -582,7 +612,9 @@ async function assembleRelease(app: AppConfig, expectedCommit?: string): Promise
 	await mkdir(`${appPath}/.next/cache`, { recursive: true });
 
 	const [commit, branch] = await Promise.all([
-		expectedCommit ? Promise.resolve({ stdout: expectedCommit }) : repositoryCommit().then((stdout) => ({ stdout })),
+		expectedCommit
+			? Promise.resolve({ stdout: expectedCommit })
+			: repositoryCommit().then((stdout) => ({ stdout })),
 		run(["git", "rev-parse", "--abbrev-ref", "HEAD"]),
 	]);
 	if (expectedCommit) await assertRepositoryCommit(expectedCommit, "l'assemblage");
@@ -598,8 +630,8 @@ async function assembleRelease(app: AppConfig, expectedCommit?: string): Promise
 				branch: branch.stdout.trim(),
 			},
 			null,
-			"\t",
-		)}\n`,
+			"\t"
+		)}\n`
 	);
 	log(`✓ version ${release} assemblée`);
 	return release;
@@ -646,7 +678,7 @@ async function refreshStaticPool(app: AppConfig, keep: number): Promise<void> {
 	await Promise.all(
 		entries
 			.filter((entry) => entry.startsWith("static-pool-") && `${appRoot(app)}/${entry}` !== pool)
-			.map((entry) => rm(`${appRoot(app)}/${entry}`, { recursive: true, force: true })),
+			.map((entry) => rm(`${appRoot(app)}/${entry}`, { recursive: true, force: true }))
 	);
 	log(`✓ réservoir statique reconstruit depuis ${releases.length} version(s)`);
 }
@@ -751,14 +783,14 @@ async function probeSlot(app: AppConfig, slot: SlotId): Promise<ProbeReport> {
 				log(`✗ sonde ${path} : ${error instanceof Error ? error.message : String(error)}`);
 				return { path, status: 0, ms: Date.now() - start };
 			}
-		}),
+		})
 	);
 	const ok = results.every((entry) => entry.status > 0 && entry.status < 500);
 	const résumé = results.map((entry) => `${entry.path}=${entry.status}`).join(" ");
 	const empreinte = await unitMemoryMiB(unit);
 	log(
 		`${ok ? "✓" : "✗"} slot ${slot} (:${port}) démarré en ${Math.round(bootMs / 1000)} s, ` +
-			`${empreinte} Mio — ${résumé}`,
+			`${empreinte} Mio — ${résumé}`
 	);
 	return { ok, bootMs, results };
 }
@@ -804,7 +836,10 @@ async function nginxWorkerPids(): Promise<number[]> {
 		const master = Number.parseInt((await readFile("/run/nginx.pid", "utf8")).trim(), 10);
 		if (!Number.isFinite(master)) return [];
 		const { stdout } = await run(["pgrep", "-P", String(master)]);
-		return stdout.split("\n").filter(Boolean).map((entry) => Number.parseInt(entry, 10));
+		return stdout
+			.split("\n")
+			.filter(Boolean)
+			.map((entry) => Number.parseInt(entry, 10));
 	} catch {
 		return [];
 	}
@@ -843,7 +878,9 @@ async function switchTraffic(app: AppConfig, slot: SlotId): Promise<void> {
 	const { port } = app.slots[slot];
 	await writeAsRoot(`${NGINX_UPSTREAM_DIR}/${app.upstream}.conf`, upstreamContent(app, port));
 	const drain = await reloadNginxAndDrain();
-	log(`✓ trafic basculé sur le slot ${slot} (:${port})${drain >= 0 ? ` — drainage ${drain} ms` : ""}`);
+	log(
+		`✓ trafic basculé sur le slot ${slot} (:${port})${drain >= 0 ? ` — drainage ${drain} ms` : ""}`
+	);
 }
 
 async function verifyPublic(app: AppConfig): Promise<number> {
@@ -856,7 +893,9 @@ async function verifyPublic(app: AppConfig): Promise<number> {
 		log(`${response.status < 400 ? "✓" : "✗"} ${app.publicUrl} → ${response.status}`);
 		return response.status;
 	} catch (error) {
-		log(`✗ ${app.publicUrl} injoignable : ${error instanceof Error ? error.message : String(error)}`);
+		log(
+			`✗ ${app.publicUrl} injoignable : ${error instanceof Error ? error.message : String(error)}`
+		);
 		return 0;
 	}
 }
@@ -876,7 +915,11 @@ interface PublishOptions {
  * Publie `release` sans coupure : doublure B → bascule → slot A → re-bascule.
  * L'état stable reste « A seul debout », identique à la topologie historique.
  */
-async function publishRelease(app: AppConfig, release: string, options: PublishOptions): Promise<boolean> {
+async function publishRelease(
+	app: AppConfig,
+	release: string,
+	options: PublishOptions
+): Promise<boolean> {
 	const state = await readState(app);
 	const previousRelease = state.release;
 
@@ -916,7 +959,9 @@ async function publishRelease(app: AppConfig, release: string, options: PublishO
 	await startSlot(app, "a");
 	const probeA = await probeSlot(app, "a");
 	if (!probeA.ok) {
-		log("⚠ le slot A refuse la version — la production reste sur la doublure B (dégradé, pas coupé)");
+		log(
+			"⚠ le slot A refuse la version — la production reste sur la doublure B (dégradé, pas coupé)"
+		);
 		state.history.push({
 			at: new Date().toISOString(),
 			action: options.action,
@@ -985,13 +1030,17 @@ async function preflight(app: AppConfig, flags: Flags): Promise<void> {
 		}
 	}
 	if (!(await exists(`${NGINX_UPSTREAM_DIR}/${app.upstream}.conf`))) {
-		fail(`amont nginx ${app.upstream} non installé — lancer : bun scripts/ops/deploy.ts install ${app.key}`);
+		fail(
+			`amont nginx ${app.upstream} non installé — lancer : bun scripts/ops/deploy.ts install ${app.key}`
+		);
 	}
 	const free = await run(["df", "--output=avail", "-BG", RELEASES_ROOT]);
 	const gigas = Number.parseInt(free.stdout.split("\n")[1]?.trim().replace("G", "") ?? "0", 10);
-	if (gigas > 0 && gigas < 5) fail(`espace disque insuffisant (${gigas} Go libres sous ${RELEASES_ROOT})`);
+	if (gigas > 0 && gigas < 5)
+		fail(`espace disque insuffisant (${gigas} Go libres sous ${RELEASES_ROOT})`);
 	const test = await sudo(["nginx", "-t"], { timeoutMs: 30_000 });
-	if (test.code !== 0) fail(`configuration nginx déjà invalide avant déploiement :\n${test.stderr}`);
+	if (test.code !== 0)
+		fail(`configuration nginx déjà invalide avant déploiement :\n${test.stderr}`);
 	await checkMemory(app, { allowLow: flags.allowLowMemory });
 }
 
@@ -1053,7 +1102,8 @@ async function commandRollback(app: AppConfig, flags: Flags): Promise<boolean> {
 	try {
 		const state = await readState(app);
 		const candidates = await listReleases(app);
-		const target = flags.to ?? state.previousRelease ?? candidates.find((entry) => entry !== state.release);
+		const target =
+			flags.to ?? state.previousRelease ?? candidates.find((entry) => entry !== state.release);
 		if (!target) fail(`aucune version antérieure disponible pour ${app.key}`);
 		if (!(await exists(releasePath(app, target)))) fail(`version ${target} introuvable sur disque`);
 		log(`── retour arrière ${app.title} : ${state.release ?? "?"} → ${target} ──`);
@@ -1096,12 +1146,17 @@ async function commandPreview(app: AppConfig, flags: Flags): Promise<boolean> {
 		state.preview = { release, token, startedAt: new Date().toISOString() };
 		state.slots.b.release = release;
 		await writeState(app, state);
-		await writeAsRoot(`${NGINX_UPSTREAM_DIR}/${app.previewUpstream}.conf`, previewContent(app, state.preview));
+		await writeAsRoot(
+			`${NGINX_UPSTREAM_DIR}/${app.previewUpstream}.conf`,
+			previewContent(app, state.preview)
+		);
 		await reloadNginxAndDrain();
 
 		const url = `${app.publicUrl.replace(/\/$/u, "")}/__preview?token=${token}`;
 		log(`✓ prévisualisation ${release} en ligne — ouvrir : ${url}`);
-		log(`  (sortir : ${app.publicUrl.replace(/\/$/u, "")}/__preview?off=1 · arrêter : deploy.ts preview-off ${app.key})`);
+		log(
+			`  (sortir : ${app.publicUrl.replace(/\/$/u, "")}/__preview?off=1 · arrêter : deploy.ts preview-off ${app.key})`
+		);
 		log("  la production n'a pas bougé ; `promote` publiera cette version.");
 		return true;
 	} finally {
@@ -1133,7 +1188,8 @@ async function commandPromote(app: AppConfig, flags: Flags): Promise<boolean> {
 		const state = await readState(app);
 		const release = flags.to ?? state.preview?.release ?? (await currentSlotRelease(app, "b"));
 		if (!release) fail(`aucune prévisualisation à promouvoir pour ${app.key}`);
-		if (!(await exists(releasePath(app, release)))) fail(`version ${release} introuvable sur disque`);
+		if (!(await exists(releasePath(app, release))))
+			fail(`version ${release} introuvable sur disque`);
 		log(`── promotion ${app.title} : ${release} ──`);
 		await preflight(app, flags);
 		await closePreview(app, "promotion en production");
@@ -1182,30 +1238,41 @@ async function commandStatus(apps: AppConfig[], flags: Flags): Promise<boolean> 
 				publicStatus: await verifyPublic(app),
 				lastActions: state.history.slice(-3),
 			};
-		}),
+		})
 	);
 
 	if (flags.json) {
 		process.stdout.write(`${JSON.stringify({ memory, apps: rapport }, null, "\t")}\n`);
 	} else {
-		process.stdout.write(`mémoire : ${memory.availableMiB} Mio disponibles / ${memory.totalMiB} Mio\n`);
+		process.stdout.write(
+			`mémoire : ${memory.availableMiB} Mio disponibles / ${memory.totalMiB} Mio\n`
+		);
 		for (const entry of rapport) {
 			const slots = entry.slots as Record<
 				string,
-				{ unit: string; port: number; active: boolean; release: string | null; live: boolean; memoryMiB: number }
+				{
+					unit: string;
+					port: number;
+					active: boolean;
+					release: string | null;
+					live: boolean;
+					memoryMiB: number;
+				}
 			>;
-			process.stdout.write(`${entry.app} — version ${entry.release ?? "aucune"} (slot ${entry.live})\n`);
+			process.stdout.write(
+				`${entry.app} — version ${entry.release ?? "aucune"} (slot ${entry.live})\n`
+			);
 			for (const [id, slot] of Object.entries(slots)) {
 				process.stdout.write(
 					`  slot ${id} :${slot.port} ${slot.unit.padEnd(22)} ${(slot.active ? "actif" : "arrêté").padEnd(7)}` +
-						`${slot.live ? "← trafic" : "        "} ${String(slot.memoryMiB).padStart(5)} Mio  ${slot.release ?? "-"}\n`,
+						`${slot.live ? "← trafic" : "        "} ${String(slot.memoryMiB).padStart(5)} Mio  ${slot.release ?? "-"}\n`
 				);
 			}
 			if (entry.running) process.stdout.write("  publication en cours\n");
 			if (entry.preview) process.stdout.write(`  prévisualisation : ${entry.preview.release}\n`);
 			process.stdout.write(`  public ${entry.publicUrl} → ${entry.publicStatus}\n`);
 			process.stdout.write(
-				`  versions sur disque : ${entry.releases} · précédente : ${entry.previousRelease ?? "-"}\n`,
+				`  versions sur disque : ${entry.releases} · précédente : ${entry.previousRelease ?? "-"}\n`
 			);
 		}
 	}
@@ -1224,15 +1291,92 @@ async function commandReleases(apps: AppConfig[]): Promise<boolean> {
 			].filter(Boolean);
 			let meta = "";
 			try {
-				const info = JSON.parse(await readFile(`${releasePath(app, release)}/RELEASE.json`, "utf8"));
+				const info = JSON.parse(
+					await readFile(`${releasePath(app, release)}/RELEASE.json`, "utf8")
+				);
 				meta = ` ${String(info.commit).slice(0, 8)} (${info.branch})`;
 			} catch {
 				/* version assemblée hors dépôt git */
 			}
-			process.stdout.write(`  ${release}${meta}${marques.length ? ` ← ${marques.join(", ")}` : ""}\n`);
+			process.stdout.write(
+				`  ${release}${meta}${marques.length ? ` ← ${marques.join(", ")}` : ""}\n`
+			);
 		}
 	}
 	return true;
+}
+
+/**
+ * Retire les versions générées qui ne servent plus aucun slot.
+ *
+ * Cette commande est volontairement distincte de la rétention automatique : elle ne conserve
+ * que les versions réellement attachées à un service actif, répare les liens de slot inactifs,
+ * remet `previousRelease` à null et reconstruit le réservoir statique sur ce petit ensemble.
+ * Un aperçu en cours est refusé plutôt que supprimé sous les pieds d'un testeur.
+ */
+async function commandCleanup(app: AppConfig): Promise<boolean> {
+	const unlock = await acquireLock(app);
+	try {
+		const state = await readState(app);
+		if (state.preview) {
+			fail(`prévisualisation active (${state.preview.release}) — fermez-la avant le nettoyage`);
+		}
+
+		const slotsActifs = new Set<string>();
+		for (const slot of ["a", "b"] as SlotId[]) {
+			if (!(await unitActive(app.slots[slot].unit))) continue;
+			const release = await currentSlotRelease(app, slot);
+			if (release) slotsActifs.add(release);
+		}
+		const releaseVivant = (await currentSlotRelease(app, state.live)) ?? state.release;
+		if (!releaseVivant || !(await exists(releasePath(app, releaseVivant)))) {
+			fail("aucune version active fiable à préserver — nettoyage annulé");
+		}
+		slotsActifs.add(releaseVivant);
+
+		const releases = await listReleases(app);
+		const obsoletes = releases.filter((release) => !slotsActifs.has(release));
+		for (const release of obsoletes) {
+			await rm(releasePath(app, release), { recursive: true, force: true });
+			log(`purge de la version obsolète ${release}`);
+		}
+
+		// Un slot arrêté ne doit pas conserver un lien symbolique vers une version supprimée.
+		// Il est repointé vers la version vivante afin que la prochaine bascule puisse repartir
+		// d'une disposition complète, sans redémarrage ni changement de trafic ici.
+		for (const slot of ["a", "b"] as SlotId[]) {
+			const release = await currentSlotRelease(app, slot);
+			if (!release || !slotsActifs.has(release)) {
+				await pointSlot(app, slot, releaseVivant);
+				state.slots[slot] = { release: releaseVivant };
+			} else state.slots[slot] = { release };
+		}
+		state.release = releaseVivant;
+		state.previousRelease = null;
+		state.preview = null;
+		state.history.push({
+			at: new Date().toISOString(),
+			action: "cleanup",
+			release: releaseVivant,
+			ok: true,
+			note: `${obsoletes.length} version(s) retirée(s)`,
+		});
+		await writeState(app, state);
+		await refreshStaticPool(app, Math.max(1, slotsActifs.size));
+
+		// `.next` est un cache de build régénérable. Les releases utilisent des liens physiques,
+		// donc ce nettoyage ne retire aucun fichier encore servi par un slot.
+		const buildDir = `${app.appDir}/.next`;
+		if (await exists(buildDir)) {
+			await rm(buildDir, { recursive: true, force: true });
+			log(`cache de build ${buildDir} retiré (régénérable)`);
+		}
+
+		const status = await verifyPublic(app);
+		return status > 0 && status < 400;
+	} finally {
+		await unlock();
+	}
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -1253,9 +1397,12 @@ async function installApp(app: AppConfig, flags: Flags): Promise<boolean> {
 	try {
 		log(`── installation de la mécanique bleu/vert pour ${app.title} ──`);
 		await Promise.all(
-			[releasesDir(app), `${appRoot(app)}/bun-cache`, `${appRoot(app)}/bun-cache-b`, `${appRoot(app)}/logs`].map(
-				(path) => mkdir(path, { recursive: true }),
-			),
+			[
+				releasesDir(app),
+				`${appRoot(app)}/bun-cache`,
+				`${appRoot(app)}/bun-cache-b`,
+				`${appRoot(app)}/logs`,
+			].map((path) => mkdir(path, { recursive: true }))
 		);
 		await ensureNginxShutdownTimeout();
 
@@ -1281,7 +1428,8 @@ async function installApp(app: AppConfig, flags: Flags): Promise<boolean> {
 		await startSlot(app, "b");
 		const probe = await probeSlot(app, "b");
 		await stopSlot(app, "b");
-		if (!probe.ok) fail("la disposition par versions ne démarre pas — unité de production laissée intacte");
+		if (!probe.ok)
+			fail("la disposition par versions ne démarre pas — unité de production laissée intacte");
 
 		// 3. Unité de production. Le processus en cours n'est pas affecté : le nouveau
 		//    fichier ne prendra effet qu'à son prochain démarrage, orchestré par `deploy`.
@@ -1294,11 +1442,16 @@ async function installApp(app: AppConfig, flags: Flags): Promise<boolean> {
 		const state = await readState(app);
 		const port = app.slots[state.live].port;
 		await writeAsRoot(`${NGINX_UPSTREAM_DIR}/${app.upstream}.conf`, upstreamContent(app, port));
-		await writeAsRoot(`${NGINX_UPSTREAM_DIR}/${app.previewUpstream}.conf`, previewContent(app, state.preview));
+		await writeAsRoot(
+			`${NGINX_UPSTREAM_DIR}/${app.previewUpstream}.conf`,
+			previewContent(app, state.preview)
+		);
 		await patchSiteConf(app);
 		await reloadNginxAndDrain();
 		await verifyPublic(app);
-		log(`✓ ${app.key} prêt pour le déploiement sans coupure (slot vivant : ${state.live}, :${port})`);
+		log(
+			`✓ ${app.key} prêt pour le déploiement sans coupure (slot vivant : ${state.live}, :${port})`
+		);
 		return true;
 	} finally {
 		await unlock();
@@ -1349,10 +1502,12 @@ async function patchSiteConf(app: AppConfig): Promise<void> {
 	if (declaration.test(content)) {
 		content = content.replace(
 			declaration,
-			`# Amont piloté par scripts/ops/deploy.ts (bascule bleu/vert sans coupure).\n${inclusion}\n${inclusionPreview}`,
+			`# Amont piloté par scripts/ops/deploy.ts (bascule bleu/vert sans coupure).\n${inclusion}\n${inclusionPreview}`
 		);
 	} else if (!content.includes(inclusion)) {
-		fail(`amont ${app.upstream} introuvable dans ${app.siteConf} — instrumentation manuelle requise`);
+		fail(
+			`amont ${app.upstream} introuvable dans ${app.siteConf} — instrumentation manuelle requise`
+		);
 	} else if (!content.includes(inclusionPreview)) {
 		content = content.replace(inclusion, `${inclusion}\n${inclusionPreview}`);
 	}
@@ -1364,7 +1519,10 @@ async function patchSiteConf(app: AppConfig): Promise<void> {
 	// Aiguillage par cookie : `proxy_pass` sur une variable est résolu à chaque requête
 	// contre les groupes d'amont déclarés. Sans cookie, la variable vaut l'amont de
 	// production — le comportement par défaut est donc rigoureusement inchangé.
-	content = content.replaceAll(`proxy_pass http://${app.upstream};`, `proxy_pass http://$${app.backendVariable};`);
+	content = content.replaceAll(
+		`proxy_pass http://${app.upstream};`,
+		`proxy_pass http://$${app.backendVariable};`
+	);
 
 	if (!content.includes("location = /__preview")) {
 		const bloc = [
@@ -1372,7 +1530,7 @@ async function patchSiteConf(app: AppConfig): Promise<void> {
 			"    # Prévisualisation : pose (ou retire) le cookie qui aiguille vers le slot B.",
 			"    # Généré par scripts/ops/deploy.ts.",
 			"    location = /__preview {",
-			'        if ($arg_off) {',
+			"        if ($arg_off) {",
 			'            add_header Set-Cookie "rg_preview=; Path=/; Max-Age=0; SameSite=Lax" always;',
 			"            return 302 /;",
 			"        }",
@@ -1394,7 +1552,9 @@ async function patchSiteConf(app: AppConfig): Promise<void> {
 	const test = await sudo(["nginx", "-t"], { timeoutMs: 30_000 });
 	if (test.code !== 0) {
 		await mustSudo(["cp", "-a", sauvegarde, app.siteConf]);
-		fail(`nginx -t refuse l'instrumentation de ${app.siteConf} — configuration restaurée :\n${test.stderr}`);
+		fail(
+			`nginx -t refuse l'instrumentation de ${app.siteConf} — configuration restaurée :\n${test.stderr}`
+		);
 	}
 	log(`${app.siteConf} instrumenté (sauvegarde : ${sauvegarde})`);
 }
@@ -1427,6 +1587,7 @@ Commandes
   preview-off  arrête la prévisualisation et rend la mémoire
   reload       republie la version courante sans coupure (après un swap de miroir)
   rollback     revient à la version précédente (--to=<version> pour viser)
+  cleanup      retire les vieux builds/releases et garde uniquement les slots actifs
   status       état des slots, versions, mémoire, santé publique
   releases     versions présentes sur disque
   install      (ré)installe unités systemd + amonts nginx (idempotent)
@@ -1453,6 +1614,7 @@ async function main(): Promise<number> {
 		"preview-off",
 		"reload",
 		"rollback",
+		"cleanup",
 		"status",
 		"releases",
 		"install",
@@ -1472,7 +1634,11 @@ async function main(): Promise<number> {
 	}
 
 	const flag = (name: string): string | undefined =>
-		options.find((option) => option.startsWith(`--${name}=`))?.split("=").slice(1).join("=");
+		options
+			.find((option) => option.startsWith(`--${name}=`))
+			?.split("=")
+			.slice(1)
+			.join("=");
 	const flags: Flags = {
 		build: !options.includes("--no-build"),
 		gate: !options.includes("--no-gate"),
@@ -1494,6 +1660,7 @@ async function main(): Promise<number> {
 		logFile = `${appRoot(app)}/logs/${command}-${stamp()}.log`;
 		try {
 			if (command === "install") ok = (await installApp(app, flags)) && ok;
+			else if (command === "cleanup") ok = (await commandCleanup(app)) && ok;
 			else if (command === "reload") ok = (await commandReload(app, flags)) && ok;
 			else if (command === "rollback") ok = (await commandRollback(app, flags)) && ok;
 			else if (command === "preview") ok = (await commandPreview(app, flags)) && ok;
@@ -1513,7 +1680,7 @@ async function main(): Promise<number> {
 			await Promise.all(
 				journaux
 					.slice(0, Math.max(0, journaux.length - 30))
-					.map((nom) => rm(`${appRoot(app)}/logs/${nom}`, { force: true })),
+					.map((nom) => rm(`${appRoot(app)}/logs/${nom}`, { force: true }))
 			);
 		}
 	}

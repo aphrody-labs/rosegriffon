@@ -11,7 +11,7 @@ navigateur effectivement exécuté.
 
 - Baseline demandée : `2d82512504add30060ddc25b5fa08996c16de0b6`, retrouvée dans
   `/home/ubuntu/niers` avec le sujet `feat(avatar): livrer atelier, imports locaux et audit des
-  liaisons`.
+liaisons`.
 - Publication de la baseline vérifiée : `origin/main` du dépôt Niers contient ce commit. Les
   sources atelier de cette baseline et les correctifs WASM ultérieurs ont été intégrés
   sélectivement dans le monorepo RG ; les artefacts `outputs/` n'ont pas été recopiés.
@@ -24,15 +24,17 @@ navigateur effectivement exécuté.
 
 ## Fonctionnalités livrées
 
-| Fonction | État et preuve locale |
-| --- | --- |
-| Édition réelle | Catalogue CDN, choix par identifiant stable, transformations, annuler/rétablir et projet JSON ; tests projet/liaisons verts |
-| Composition et aperçu 3D | GLB composé chargé dans `model-viewer`, chargement local des décodeurs Basis/Draco/Meshopt ; smoke Chromium vert |
-| Imports locaux | PNG réel, GLB et GLB/gzip validés dans Chromium ; signatures, URI, tailles et traversées couvertes par 7 tests |
-| Export | Téléchargement `avatar.glb` observé dans Chromium après composition et après import |
-| Compte | Enregistrer, lister, restaurer et supprimer via Server Actions ; absence de session refusée |
-| Partage | Lien `/avatar?code=…`, format exact de 69 caractères, ouverture privilégiée côté serveur uniquement |
-| Sécurité des recettes | Validation structurelle et volumétrique à l'écriture et à l'ouverture ; clés de pollution et valeurs hors bornes refusées |
+| Fonction                 | État et preuve locale                                                                                                                                          |
+| ------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Édition réelle           | Catalogue CDN, choix par identifiant stable, transformations, annuler/rétablir et projet JSON ; tests projet/liaisons verts                                    |
+| Composition et aperçu 3D | GLB composé chargé dans `model-viewer`, chargement local des décodeurs Basis/Draco/Meshopt ; smoke Chromium vert                                               |
+| Imports locaux           | PNG réel, GLB et GLB/gzip validés dans Chromium ; signatures, URI, tailles et traversées couvertes par 7 tests                                                 |
+| Export                   | Téléchargement `avatar.glb` observé dans Chromium après composition et après import                                                                            |
+| Compte                   | Enregistrer, lister, restaurer et supprimer via Server Actions ; absence de session refusée                                                                    |
+| Partage                  | Lien `/avatar?code=…`, format exact de 69 caractères, ouverture privilégiée côté serveur uniquement                                                            |
+| Sécurité des recettes    | Validation structurelle et volumétrique à l’écriture et à l’ouverture ; clés de pollution et valeurs hors bornes refusées                                      |
+| Travail d'auteur / OC    | Fiche libre (surnom, pronoms, âge, taille, univers, notes), couleurs hexadécimales libres et capture PNG ; contrat documenté dans `docs/ASTRO-LOR-RG-NIERS.md` |
+| Fiche Astro Lor          | Données wiki, migration `wiki_sections`/`uniform_number` et médias suivis ; la jouabilité native NIE.exe reste explicitement bloquée par les preuves Niers     |
 
 ## Persistance et RLS
 
@@ -61,17 +63,20 @@ La baseline n'est pas un bloc opaque : son parent direct est `49951018` et son d
 fichiers, 50 836 ajouts et 269 suppressions. Ce volume inclut beaucoup d'artefacts d'étude ; seuls
 les éléments exécutables nécessaires à Azalée ont été admis dans RG.
 
-| Commit NIE | Date | Fait vérifié dans le diff |
-| --- | --- | --- |
-| `19831b52` | 2026-09-05 02:02 +02 | point de sauvegarde WIP de l'atelier et du pipeline de rendu |
-| `1044e5db` | 02:06 | préparation du viewport WebGPU et partage des backends natifs |
-| `a62fa043` | 02:14 | ouverture de NIE Studio natif sur le moteur GPU partagé |
-| `2d825125` | 02:42 | livraison atelier : UI, imports locaux, composition, tests, vérification CDN, moteur web Rust/WASM et artefacts de mesure |
-| `46f7370d` | 02:44 | publication du binaire WASM d'atlas et versionnage de son URL de chargement |
-| `fcb23d2b` | 02:44 | correction de typage du tampon gzip dans le contrôle navigateur |
-| `010765d4` | 02:49 | contraste des actions de l'atelier en thème sombre |
-| `6f180526`, `8aa6a291`, `032b2e70`, `d6ecaf41` | 02:52–04:08 | changements Explorer postérieurs, explicitement non portés dans cette livraison |
-| `50837759` | 04:15 | documentation CLI des captures GLB GPU, sans changement de l'atelier web porté |
+| Commit NIE                                     | Date                 | Fait vérifié dans le diff                                                                                                    |
+| ---------------------------------------------- | -------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| `19831b52`                                     | 2026-09-05 02:02 +02 | point de sauvegarde WIP de l'atelier et du pipeline de rendu                                                                 |
+| `1044e5db`                                     | 02:06                | préparation du viewport WebGPU et partage des backends natifs                                                                |
+| `a62fa043`                                     | 02:14                | ouverture de NIE Studio natif sur le moteur GPU partagé                                                                      |
+| `2d825125`                                     | 02:42                | livraison atelier : UI, imports locaux, composition, tests, vérification CDN, moteur web Rust/WASM et artefacts de mesure    |
+| `46f7370d`                                     | 02:44                | publication du binaire WASM d'atlas et versionnage de son URL de chargement                                                  |
+| `fcb23d2b`                                     | 02:44                | correction de typage du tampon gzip dans le contrôle navigateur                                                              |
+| `010765d4`                                     | 02:49                | contraste des actions de l'atelier en thème sombre                                                                           |
+| `6f180526`, `8aa6a291`, `032b2e70`, `d6ecaf41` | 02:52–04:08          | changements Explorer postérieurs, explicitement non portés dans cette livraison                                              |
+| `50837759`                                     | 04:15                | documentation CLI des captures GLB GPU, sans changement de l'atelier web porté                                               |
+| `51cd26a` (Niers)                              | 2026-09-05           | fiche Astro Lor, migration des sections wiki, genre `X`, numéro de maillot et médias OC ; portage sélectif dans RG           |
+| `dee4a0e` (Niers)                              | 2026-09-05           | fiche d'auteur, couleurs libres et capture PNG ; ajouts réappliqués dans l'atelier RG moderne, sans cherry-pick global       |
+| `47beadf`, `6ff04c6` (Niers)                   | 2026-09-05           | manifeste et état mesuré des assets Astro, avec planches BD ; source canonique Niers pour les formats et l'injection NIE.exe |
 
 Avant cette baseline, les commits NIE mesurables qui alimentent le moteur actuel comprennent la
 résolution des planches (`7844d8fc`), la correction de la couche œil inversée (`418cba09`), le
@@ -83,20 +88,20 @@ CDN et les smokes navigateur exécutés.
 
 ## Inventaire des fichiers admis depuis NIE
 
-| Fichier ou groupe | Responsabilité observable |
-| --- | --- |
-| `app/avatar/Atelier.tsx`, `atelier.css` | coque responsive, bibliothèque de pièces, inspection, transformations, historique, projet et accès compte/partage |
-| `app/avatar/Editeur.tsx` | adaptateur mince entre catalogue, état de recette, composition d'URL et atelier |
-| `app/avatar/composition.ts` | transforme les choix stables de catalogue en pièces, couches, teintes, morphologie, taille, forme et habits pour `/model-avatar` |
-| `app/avatar/ImportAvatar.tsx`, `import-local.ts` | import local PNG/GLB/gzip, validation des signatures/tailles/URI, réécriture sûre des ressources GLB |
-| `app/avatar/Modele3D.tsx` | cycle de vie `model-viewer`, état de chargement et export de l'instantané GLB |
-| `app/avatar/projet.ts` | format de projet JSON NIE, validation, copie défensive et historique borné à 50 étapes |
-| `app/avatar/liaisons.ts` | CRC IEEE, URL d'icône, invariants catalogue→icône→composition et audit des sélections |
-| `app/avatar/verification/*` | audit automatisé CDN et banc web ; outils de preuve, pas preuve autonome |
-| `lib/model-viewer-loader.ts` | chargement unique du viewer auto-hébergé et configuration des chemins de décodeurs locaux |
-| `public/vendor/basis`, `public/vendor/draco`, `meshopt_decoder.module.js` | dépendances d'exécution 3D auto-hébergées avec licences Basis/Draco conservées |
-| `lib/nie-wasm-web/*`, `public/wasm/nie_wasm_bg.wasm`, `lib/cpk-wasm.ts` | bindings WASM, binaire source et binaire public optimisé, dont l'export atlas `g4tx_sprite_sheet_json` |
-| `*.test.ts` de l'avatar | 34 tests de baseline : 7 import, 5 liaisons, 22 projet/historique |
+| Fichier ou groupe                                                         | Responsabilité observable                                                                                                        |
+| ------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| `app/avatar/Atelier.tsx`, `atelier.css`                                   | coque responsive, bibliothèque de pièces, inspection, transformations, historique, projet et accès compte/partage                |
+| `app/avatar/Editeur.tsx`                                                  | adaptateur mince entre catalogue, état de recette, composition d'URL et atelier                                                  |
+| `app/avatar/composition.ts`                                               | transforme les choix stables de catalogue en pièces, couches, teintes, morphologie, taille, forme et habits pour `/model-avatar` |
+| `app/avatar/ImportAvatar.tsx`, `import-local.ts`                          | import local PNG/GLB/gzip, validation des signatures/tailles/URI, réécriture sûre des ressources GLB                             |
+| `app/avatar/Modele3D.tsx`                                                 | cycle de vie `model-viewer`, état de chargement et export de l'instantané GLB                                                    |
+| `app/avatar/projet.ts`                                                    | format de projet JSON NIE, validation, copie défensive et historique borné à 50 étapes                                           |
+| `app/avatar/liaisons.ts`                                                  | CRC IEEE, URL d'icône, invariants catalogue→icône→composition et audit des sélections                                            |
+| `app/avatar/verification/*`                                               | audit automatisé CDN et banc web ; outils de preuve, pas preuve autonome                                                         |
+| `lib/model-viewer-loader.ts`                                              | chargement unique du viewer auto-hébergé et configuration des chemins de décodeurs locaux                                        |
+| `public/vendor/basis`, `public/vendor/draco`, `meshopt_decoder.module.js` | dépendances d'exécution 3D auto-hébergées avec licences Basis/Draco conservées                                                   |
+| `lib/nie-wasm-web/*`, `public/wasm/nie_wasm_bg.wasm`, `lib/cpk-wasm.ts`   | bindings WASM, binaire source et binaire public optimisé, dont l'export atlas `g4tx_sprite_sheet_json`                           |
+| `*.test.ts` de l'avatar                                                   | 34 tests de baseline : 7 import, 5 liaisons, 22 projet/historique                                                                |
 
 Les composants de l'ancien explorateur CPK ne sont plus une surface produit : ils ont été retirés
 dans Azalée par `84461f04`. Les pages `/modeles`, `/gallery`, `/videos`, `/sons` et `/textures`
@@ -111,18 +116,24 @@ construits par `scripts/build-wasm.sh`, ce qui évite deux implémentations dive
 
 ## Chronologie factuelle de l'intégration RG/Azalée
 
-| Commit RG | Fait vérifié |
-| --- | --- |
-| `4270b715` (2026-08-20) | premier codec de 69 caractères, 86 emplacements/410 bits, panneau et persistance initiale ; sa lecture RLS publique par code a été remplacée dans cette livraison |
-| `0eae3639` à `34c2d41e` (20–21 août) | personnage habillé, cheveux avant/arrière, teintes, morphologie, genre, taille, forme, habits, échantillons et manipulation de l'ancien écran |
-| `63ba8ec4` (2026-09-01) | enrichissement Zukan et filtre groupe d'âge, indépendant du cœur atelier mais source du catalogue personnage |
-| `9fbb4a6f` (2026-09-05) | six profils officiels Shawn rétablis, métadonnées/filtres Zukan et corpus de modèles consolidés avant reprise de l'atelier |
-| `44eee069` | port sélectif de la baseline, persistance privée, E2E, migration et registre : 39 fichiers, 4 472 ajouts, 1 070 suppressions |
-| `dff9534b` | mapping `twoFactorEnabled` du schéma propre au plugin Better Auth vers `two_factor_enabled`, avec test du schéma fusionné |
-| `d5aecd1e` | navigation complète après inscription et capture des rejets SMTP, afin que la nouvelle session soit relue côté serveur sans rejet non géré |
-| `c63b7bb9` | CSP : autorisation du pixel GTM utilisé par le parcours public |
-| `84461f04` | suppression de l'interface CPK Azalée en doublon ; API et bindings conservés |
-| `5c81e971` | état d'erreur partagé pour les fiches wiki, avec reprise et retour cohérents |
+| Commit RG                            | Fait vérifié                                                                                                                                                      |
+| ------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `4270b715` (2026-08-20)              | premier codec de 69 caractères, 86 emplacements/410 bits, panneau et persistance initiale ; sa lecture RLS publique par code a été remplacée dans cette livraison |
+| `0eae3639` à `34c2d41e` (20–21 août) | personnage habillé, cheveux avant/arrière, teintes, morphologie, genre, taille, forme, habits, échantillons et manipulation de l'ancien écran                     |
+| `63ba8ec4` (2026-09-01)              | enrichissement Zukan et filtre groupe d'âge, indépendant du cœur atelier mais source du catalogue personnage                                                      |
+| `9fbb4a6f` (2026-09-05)              | six profils officiels Shawn rétablis, métadonnées/filtres Zukan et corpus de modèles consolidés avant reprise de l'atelier                                        |
+| `44eee069`                           | port sélectif de la baseline, persistance privée, E2E, migration et registre : 39 fichiers, 4 472 ajouts, 1 070 suppressions                                      |
+| `dff9534b`                           | mapping `twoFactorEnabled` du schéma propre au plugin Better Auth vers `two_factor_enabled`, avec test du schéma fusionné                                         |
+| `d5aecd1e`                           | navigation complète après inscription et capture des rejets SMTP, afin que la nouvelle session soit relue côté serveur sans rejet non géré                        |
+| `c63b7bb9`                           | CSP : autorisation du pixel GTM utilisé par le parcours public                                                                                                    |
+| `84461f04`                           | suppression de l'interface CPK Azalée en doublon ; API et bindings conservés                                                                                      |
+| `5c81e971`                           | état d'erreur partagé pour les fiches wiki, avec reprise et retour cohérents                                                                                      |
+
+La convergence des fichiers ressemblants RG/Niers et la règle « un rôle, une source » sont
+détaillées dans [`docs/ASTRO-LOR-RG-NIERS.md`](ASTRO-LOR-RG-NIERS.md). L'interface Azalée reste
+dans RG ; les scripts, manifestes et formats qui alimentent le jeu restent dans Niers. Les
+migrations homonymes sont conservées dans chaque arbre uniquement comme points d'entrée de leur
+outil de déploiement, avec le même SQL rejouable.
 
 Le remplacement de l'ancien `Editeur.tsx` (884 lignes retirées, adaptateur de 41 lignes) est
 intentionnel : la logique monolithique a été répartie entre `Atelier`, `composition`, `projet`,
@@ -153,16 +164,16 @@ tests et le smoke public vérifient les chemins effectivement réutilisés.
 
 ## Preuves exécutées le 2026-09-05
 
-| Gate | Commande / environnement | Résultat |
-| --- | --- | --- |
-| Tests atelier et serveur | `bun test app/avatar/*.test.ts tests/avatar-sauvegardes-server.test.ts tests/partage.test.ts` | 51 verts, 0 échec, dont les 34 tests atelier de la baseline et 7 tests de persistance |
-| Audit catalogue réel | `bun app/avatar/verification/check-assets.ts` | 502 pièces, 491 icônes uniques, 0 erreur liaison, 0 erreur image/pixels, 0 erreur sélection→composition |
-| TypeScript | `bun --bun tsc --noEmit --incremental false -p tsconfig.json` | succès |
-| Lint atelier | ESLint et Oxlint ciblés sur `app/avatar`, serveur, E2E et configuration Playwright | succès, 0 erreur |
-| Lint global | `bun run lint` puis `eslint . --quiet` | bloqué par 2 erreurs préexistantes hors périmètre dans `app/vroid/GalerieVroid.tsx` et `lib/vroid/client.ts` |
-| Build WASM | `AZALEE_DIR=/home/ubuntu/rg/apps/azalee bash scripts/build-wasm.sh` depuis Niers | succès ; wasm-bindgen 0.2.125, wasm public optimisé de 2 111 117 à 1 775 695 octets |
-| Build Azalée | `bun run build` | succès Next.js 16.3 canary, 120 routes ; `/avatar` dynamique |
-| Smoke Chromium public | Playwright sur build local, Chromium réel | vert en 8,5 s : édition, PNG 3×4, GLB, gzip, export, refus hors session, code invalide ; 0 console.error, pageerror ou réponse HTTP ≥400 |
+| Gate                     | Commande / environnement                                                                      | Résultat                                                                                                                                 |
+| ------------------------ | --------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| Tests atelier et serveur | `bun test app/avatar/*.test.ts tests/avatar-sauvegardes-server.test.ts tests/partage.test.ts` | 52 verts, 0 échec, dont les 35 tests atelier (34 de la baseline + couleur libre) et 7 tests de persistance |
+| Audit catalogue réel     | `bun app/avatar/verification/check-assets.ts`                                                 | 502 pièces, 491 icônes uniques, 0 erreur liaison, 0 erreur image/pixels, 0 erreur sélection→composition                                  |
+| TypeScript               | `bun --bun tsc --noEmit --incremental false -p tsconfig.json`                                 | succès                                                                                                                                   |
+| Lint atelier             | ESLint et Oxlint ciblés sur `app/avatar`, serveur, E2E et configuration Playwright            | succès, 0 erreur                                                                                                                         |
+| Lint global              | `bun run lint` puis `eslint . --quiet`                                                        | bloqué par 2 erreurs préexistantes hors périmètre dans `components/wiki/MediaDownload.tsx` et `components/auth/login-form.tsx` |
+| Build WASM               | `AZALEE_DIR=/home/ubuntu/rg/apps/azalee bash scripts/build-wasm.sh` depuis Niers              | succès ; wasm-bindgen 0.2.125, wasm public optimisé de 2 111 117 à 1 775 695 octets                                                      |
+| Build Azalée             | `bun run build`                                                                               | succès Next.js 16.3 canary, 120 routes ; `/avatar` dynamique (à rejouer après la convergence Astro/auteur)                               |
+| Smoke Chromium public    | Playwright sur build local, Chromium réel                                                     | vert en 8,5 s : édition, PNG 3×4, GLB, gzip, export, refus hors session, code invalide ; 0 console.error, pageerror ou réponse HTTP ≥400 |
 
 Le rapport JSON de l'audit CDN est produit dans `var/json/avatar-assets-audit.json`; le décompte
 ci-dessus provient de l'exécution réelle de la commande et non de la seule présence de ce fichier.
@@ -195,6 +206,8 @@ mais cela ne constitue pas une preuve de livraison d'un courriel de vérificatio
 
 - Le codec fait un aller-retour exact dans l'atelier. Sa compatibilité avec l'éditeur du jeu n'est
   pas revendiquée sans table canonique publiée des 86 emplacements.
+- Astro Lor possède une fiche wiki et des références visuelles, mais n'est pas encore injecté dans
+  `nie.exe` : le manifeste Niers compte les assets manquants et les verrous `cfg.bin`/G4MD/G4MG.
 - L'audit pixels compare les icônes d'interface aux icônes canoniques du CDN avec un écart absolu
   moyen maximal de 8/255. Il ne mesure pas la fidélité du rendu 3D complet.
 - La fidélité visuelle du personnage n'est donc pas qualifiée de pixel-perfect sans comparaison

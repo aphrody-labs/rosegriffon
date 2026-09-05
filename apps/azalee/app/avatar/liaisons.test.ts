@@ -72,4 +72,13 @@ describe("Liaisons catalogue → icône → composition", () => {
 		expect(urlB).toContain("_hairB/hair_b");
 		expect(urlB).toContain("_hairF/hair_f");
 	});
+	test("une couleur libre valide prime sur la palette", () => {
+		const hair = part("hair", ["data/common/chara/20_EDIT/_hairF/hair/hair.g4md"]);
+		const url = composerUrlAvatar(catalogue([hair], 4), "https://cdn.test", {
+			...etat,
+			choix: { 4: "hair" },
+			champs: { "couleur.libre.4": "a1b2c3" },
+		});
+		expect(url).toContain("hair=A1B2C3");
+	});
 });

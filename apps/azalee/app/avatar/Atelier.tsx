@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useReducer, useState } from "react";
+import { useEffect, useMemo, useReducer, useState } from "react";
 import { Button } from "@rosegriffon/ui/button";
 import { Input } from "@rosegriffon/ui/input";
 import {
@@ -27,6 +27,36 @@ import type { Catalogue } from "./types";
 import "./atelier.css";
 
 const CATEGORIES_MASQUEES = new Set([1, 16, 17, 18]);
+
+/**
+ * Les champs d'auteur voyagent avec la recette sans devenir des réglages de composition.
+ * Le préfixe `fiche.` garde cette extension compatible avec les projets existants.
+ */
+const CHAMPS_FICHE: Array<{ cle: string; libelle: string; exemple: string; long?: boolean }> = [
+	{ cle: "fiche.surnom", libelle: "Surnom", exemple: "Le marchand de sable" },
+	{ cle: "fiche.pronoms", libelle: "Pronoms", exemple: "iel / il" },
+	{ cle: "fiche.age", libelle: "Âge", exemple: "10 à 12 ans" },
+	{ cle: "fiche.taille", libelle: "Taille", exemple: "162 cm" },
+	{ cle: "fiche.univers", libelle: "Univers", exemple: "Inazuma Eleven — saison 1" },
+	{
+		cle: "fiche.notes",
+		libelle: "Notes",
+		exemple: "Yeux caméléon, frange rousse sur blond rosé…",
+		long: true,
+	},
+];
+
+/** Pose ou retire une valeur : une clé vide ne doit pas gonfler le JSON partagé. */
+function champsAvec(
+	champs: Record<string, string>,
+	cle: string,
+	valeur: string
+): Record<string, string> {
+	const suite = { ...champs };
+	if (valeur.trim()) suite[cle] = valeur;
+	else delete suite[cle];
+	return suite;
+}
 
 /** Le serveur reste propriétaire de l’assemblage ; l’atelier édite sa recette. */
 export function Atelier({
@@ -301,6 +331,22 @@ export function Atelier({
 								</Select>
 							</label>
 						)}
+						{cat && [3, 4, 6].includes(active) && (
+							<CouleurLibre
+								cle={`couleur.libre.${active}`}
+								libre={p.avatar.champs[`couleur.libre.${active}`] ?? ""}
+								palette={
+									catalogue.couleursRgb?.[
+										cat.couleurs[p.avatar.valeurs[`couleur.${active}`] ?? -1] ?? ""
+									]?.rgb ?? ""
+								}
+								changer={(hex) =>
+									changerAvatar({
+										champs: champsAvec(p.avatar.champs, `couleur.libre.${active}`, hex),
+									})
+								}
+							/>
+						)}
 					</div>
 					<div className="atelier-groupe">
 						<h3>Objet complet</h3>
@@ -337,6 +383,39 @@ export function Atelier({
 							Glissez pour orbiter, utilisez la molette pour zoomer. Les transformations portent sur
 							l’objet entier.
 						</p>
+					</div>
+					<div className="atelier-groupe">
+						<h3>Fiche du personnage</h3>
+						<p className="atelier-note">
+							Ces champs voyagent avec le projet. Ils ne changent pas la composition 3D : ils
+							décrivent le personnage original.
+						</p>
+						{CHAMPS_FICHE.map(({ cle, libelle, exemple, long }) => (
+							<label key={cle} className="atelier-champ">
+								<span>{libelle}</span>
+								{long ? (
+									<textarea
+										className="atelier-zone-texte"
+										rows={4}
+										maxLength={500}
+										placeholder={exemple}
+										value={p.avatar.champs[cle] ?? ""}
+										onChange={(e) =>
+											changerAvatar({ champs: champsAvec(p.avatar.champs, cle, e.target.value) })
+										}
+									/>
+								) : (
+									<Input
+										maxLength={500}
+										placeholder={exemple}
+										value={p.avatar.champs[cle] ?? ""}
+										onChange={(e) =>
+											changerAvatar({ champs: champsAvec(p.avatar.champs, cle, e.target.value) })
+										}
+									/>
+								)}
+							</label>
+						))}
 					</div>
 					<div className="atelier-groupe">
 						<label className="atelier-champ">
@@ -377,6 +456,74 @@ export function Atelier({
 				/>
 			)}
 		</section>
+	);
+}
+
+/**
+ * Couleur libre : la palette reste la valeur par défaut, mais l'auteur peut fournir
+ * une teinte exacte sans inventer une nouvelle entrée dans le catalogue du jeu.
+ */
+function CouleurLibre({
+	cle,
+	libre,
+	palette,
+	changer,
+}: {
+	cle: string;
+	libre: string;
+	palette: string;
+	changer: (hex: string) => void;
+}) {
+	const [saisie, setSaisie] = useState(libre);
+	useEffect(() => setSaisie(libre), [cle, libre]);
+	const fallback = /^[0-9A-Fa-f]{6}$/.test(palette) ? palette : "9A8F86";
+	const apercu = `#${(/^[0-9A-Fa-f]{6}$/.test(libre) ? libre : fallback).replace(/^#/, "")}`;
+
+	return (
+		<div className="atelier-champ">
+			<span>Couleur libre</span>
+			<div className="atelier-couleur-libre">
+				<input
+					type="color"
+					aria-label="Choisir une couleur libre"
+					value={apercu}
+					onChange={(e) => {
+						const hex = e.target.value.slice(1).toUpperCase();
+						setSaisie(hex);
+						changer(hex);
+					}}
+				/>
+				<Input
+					aria-label="Couleur libre en hexadécimal"
+					maxLength={7}
+					placeholder="#A9571F"
+					value={saisie ? `#${saisie}` : ""}
+					onChange={(e) => {
+						const hex = e.target.value
+							.replace(/[^0-9A-Fa-f]/g, "")
+							.slice(0, 6)
+							.toUpperCase();
+						setSaisie(hex);
+						if (hex.length === 6 || hex.length === 0) changer(hex);
+					}}
+				/>
+				<Button
+					variant="outline"
+					disabled={!libre}
+					onClick={() => {
+						setSaisie("");
+						changer("");
+					}}
+				>
+					Palette
+				</Button>
+			</div>
+			<p className="atelier-note">
+				{libre
+					? "Cette teinte remplace la palette du jeu."
+					: "Aucune teinte libre : la palette du jeu décide."}
+			</p>
+		</div>
 	);
 }
 
