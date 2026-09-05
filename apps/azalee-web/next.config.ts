@@ -219,7 +219,7 @@ const nextConfig: NextConfig = {
 			// (lecteur de sauvegarde /save, renderer menu webgpu) sous CSP strict.
 			`script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'${cdnSrc} https://www.googletagmanager.com https://www.google-analytics.com ${ADS_SCRIPT_SRC}${isDev ? " 'unsafe-eval'" : ""}`,
 			`style-src 'self' 'unsafe-inline'${cdnSrc}`,
-			`img-src 'self' blob: data:${cdnSrc} ${ASSET_CDN_ORIGIN} https://dxi4wb638ujep.cloudfront.net https://*.inazuma.jp https://lh3.googleusercontent.com https://cdn.discordapp.com https://pbs.twimg.com ${ADS_IMG_SRC}`,
+			`img-src 'self' blob: data:${cdnSrc} ${ASSET_CDN_ORIGIN} https://dxi4wb638ujep.cloudfront.net https://*.inazuma.jp https://lh3.googleusercontent.com https://cdn.discordapp.com https://pbs.twimg.com https://www.googletagmanager.com ${ADS_IMG_SRC}`,
 			`media-src 'self' blob: data:${cdnSrc} ${ASSET_CDN_ORIGIN} https://dxi4wb638ujep.cloudfront.net https://*.inazuma.jp https://video.twimg.com https://pbs.twimg.com ${ADS_IMG_SRC}`,
 			`font-src 'self'${cdnSrc} ${ASSET_CDN_ORIGIN} https://*.gstatic.com`,
 			// CloudFront est aussi en `connect-src`, pas seulement en `media-src` : le
