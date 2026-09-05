@@ -116,6 +116,11 @@ function createAuth() {
   </table>
 </body>
 </html>`,
+				}).catch((error: unknown) => {
+					console.warn(
+						"[auth] email de vérification non envoyé :",
+						error instanceof Error ? error.message : error
+					);
 				});
 			},
 		},
@@ -170,6 +175,11 @@ function createAuth() {
   </table>
 </body>
 </html>`,
+				}).catch((error: unknown) => {
+					console.warn(
+						"[auth] email de réinitialisation non envoyé :",
+						error instanceof Error ? error.message : error
+					);
 				});
 			},
 		},
