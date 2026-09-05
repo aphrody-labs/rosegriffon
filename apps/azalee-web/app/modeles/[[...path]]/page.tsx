@@ -21,7 +21,7 @@ import { MediaBack, MediaCount, MediaEmpty, MediaHeader } from "@/components/wik
 import InlineModelViewer from "@/components/wiki/InlineModelViewer";
 import { SafeImage } from "@/components/ui/SafeImage";
 import { ModelToolbar, type ModelView } from "@/components/wiki/ModelToolbar";
-import { cpkExplorerHref, lsOrNull } from "@rosegriffon/azalee/cpk/live";
+import { lsOrNull } from "@rosegriffon/azalee/cpk/live";
 import { cpkThumbUrl } from "@rosegriffon/azalee/cpk/shared";
 import {
 	MODEL_FAMILIES,
@@ -509,22 +509,6 @@ async function Fiche({ famille, code }: { famille: ModelFamily; code: string }) 
 				)}
 				<p className="mt-2 text-xs text-on-surface-variant">
 					glTF binaire — maillage, squelette et textures dans un seul fichier.
-					{srcDir && (
-						<>
-							{" "}
-							<Link href={cpkExplorerHref(srcDir)} className="text-primary hover:underline">
-								Ouvrir le dossier du modèle dans l'explorateur CPK
-							</Link>
-						</>
-					)}
-					{texDir && (
-						<>
-							{" · "}
-							<Link href={cpkExplorerHref(texDir)} className="text-primary hover:underline">
-								Ouvrir le dossier des textures
-							</Link>
-						</>
-					)}
 				</p>
 			</section>
 

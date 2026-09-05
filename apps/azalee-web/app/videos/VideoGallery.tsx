@@ -20,7 +20,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Icon } from "@/components/ui/Icon";
 import { MediaCount, MediaTitle } from "@/components/wiki/MediaShell";
-import { cpkExplorerHref } from "@rosegriffon/azalee/cpk/live";
 import {
 	aDuSon,
 	type FilmDto,
@@ -217,13 +216,6 @@ function CarteFilm({ film }: { film: FilmVue }) {
 								WAV
 							</a>
 						)}
-						<a
-							href={cpkExplorerHref(film.cheminServi)}
-							className="text-[11px] text-on-surface-variant/70 transition-colors hover:text-primary"
-							title="Voir le fichier dans l'explorateur CPK"
-						>
-							USM
-						</a>
 					</span>
 				</div>
 			</div>
