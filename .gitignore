@@ -95,6 +95,15 @@ copilot-instructions.md
 !packages/mcp/context/**/*.md
 # Plugin Claude du dépôt (skills, agents, README) — livrable versionné.
 !plugins/**/*.md
+# Documentation source des applications et du paquet Patreon : ces fichiers
+# font partie du produit et doivent rester révisables/versionnés. Les
+# consignes locales (AGENTS/CLAUDE/GEMINI) et les sorties SEO public/llm*.md
+# restent volontairement ignorées plus haut.
+!apps/*/docs/**/*.md
+!packages/patreon-bun/.github/**/*.md
+!packages/patreon-bun/*.md
+!packages/patreon-bun/apps/**/*.md
+!packages/patreon-bun/docs/**/*.md
 # SEO : llms.txt / llm.txt / llms-full.txt + clé IndexNow (publics par design)
 !apps/*/public/llms.txt
 !apps/*/public/llm.txt

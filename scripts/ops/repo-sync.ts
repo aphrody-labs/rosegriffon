@@ -262,12 +262,16 @@ async function processRepo(key: RepoKey, root: string, flags: Flags): Promise<Re
 		result.branch = current.branch;
 		result.paths = current.paths;
 		if (flags.pull) {
-			await pullFastForward(root, flags.branch);
-			result.pulled = true;
-			current = await status(root);
-			result.head = current.head;
-			result.branch = current.branch;
-			result.paths = current.paths;
+			if (flags.dryRun) {
+				out(`${key}: pull prévu (fetch --prune + merge --ff-only)`, flags.json);
+			} else {
+				await pullFastForward(root, flags.branch);
+				result.pulled = true;
+				current = await status(root);
+				result.head = current.head;
+				result.branch = current.branch;
+				result.paths = current.paths;
+			}
 		}
 		const autoCommit = flags.commit || envFlag("REPO_SYNC_AUTOCOMMIT");
 		if (autoCommit) {
