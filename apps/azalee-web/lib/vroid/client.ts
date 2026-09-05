@@ -108,7 +108,7 @@ async function appeler<T>(
 	try {
 		charge = (await reponse.json()) as ReponseVroid<T>;
 	} catch {
-		charge = null;
+		// `charge` conserve sa valeur nulle déclarée si le corps n'est pas du JSON.
 	}
 
 	if (!reponse.ok) {

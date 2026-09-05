@@ -57,6 +57,58 @@ La variable `REPO_SYNC_AUTOCOMMIT=1` active le checkpoint sans option CLI ;
 wrapper `bun run ops:sync` est volontairement explicite et le contrôle rapide
 est disponible avec `bun run ops:sync:check`.
 
+## Publication coordonnée
+
+`release-stack.ts` orchestre le même enchaînement sans mélanger les deux dépôts :
+Git, régénération des données et miroir, formats, WASM, serveur de modèles,
+gates Azalée, build bleu/vert, CDN/nginx puis sondes publiques. Le mode par
+défaut est sans écriture :
+
+```bash
+bun run release:check
+```
+
+Les mutations sont explicites et arrêtent la chaîne à la première étape en
+échec :
+
+```bash
+# prévisualisation sur le slot B, sans promotion
+bun run release:preview
+
+# promotion du slot déjà validé
+bun run release:promote
+
+# publication directe après les mêmes gates (push Git inclus)
+bun run release:deploy
+```
+
+`--dry-run` affiche les mutations sans les exécuter. `--skip-*` permet une
+reprise bornée, mais ne transforme pas une compilation en preuve navigateur :
+la validation réelle doit encore charger `/avatar`, importer PNG et GLB/gzip,
+exporter, sauvegarder/restaurer et ouvrir un partage. Une promotion n'est
+autorisée qu'après le smoke test public et la vérification des réponses HTTP.
+
+## Politique Markdown
+
+La règle de livraison est : tout Markdown source du produit, de sa
+documentation ou d'un paquet distribué est suivi par Git. Le contrôle qui a
+servi à cette livraison est reproductible :
+
+```bash
+git ls-files '*.md' | wc -l
+git ls-files --others --exclude-standard '*.md'
+git ls-files --others -i --exclude-standard '*.md'
+```
+
+Les sorties générées (SEO `public/llm*.md`, rapports de crawl, snapshots de
+`data/`), dépendances (`node_modules`, `.venv`), builds et caches restent
+ignorées : les versionner ne fournirait pas une source révisable et ferait
+entrer des données locales dans l'autocommit. Les instructions privées
+`AGENTS.md`, `CLAUDE.md` et `GEMINI.md` restent également hors publication ;
+leur présence et leur rôle sont documentés dans les règles de chaque dépôt.
+Toute exception doit être ajoutée explicitement au `.gitignore`, relue par un
+agent, puis validée par `git diff --check` avant le checkpoint.
+
 ## Timer d'autocommit sur le VPS
 
 `infra/systemd/rg-repo-sync.service` est un oneshot borné à 20 % CPU et 256 Mio
@@ -93,7 +145,7 @@ exécuter avant activation est :
 
 ```bash
 ssh -o BatchMode=yes "$REPO_SYNC_VPS" \
-  'test -d "$REPO_SYNC_REMOTE_RG_ROOT" && test -d "$REPO_SYNC_REMOTE_NIERS_ROOT"'
+  "test -d '${REPO_SYNC_REMOTE_RG_ROOT:-/home/ubuntu/rg}' && test -d '${REPO_SYNC_REMOTE_NIERS_ROOT:-/home/ubuntu/niers}'"
 ```
 
 Tant que cette sonde échoue, le timer local reste un checkpoint local et ne

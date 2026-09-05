@@ -109,7 +109,6 @@ export function GalerieVroid({ pageInitiale, erreurInitiale = null, connecte }: 
 		const abandon = new AbortController();
 		void charger(false, abandon.signal);
 		return () => abandon.abort();
-		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [source, motCleActif, telechargeablesSeulement]);
 
 	return (

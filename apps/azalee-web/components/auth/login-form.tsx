@@ -55,13 +55,6 @@ async function sessionEstDisponible(): Promise<boolean> {
 	return false;
 }
 
-async function attendreSessionCreee(): Promise<void> {
-	const disponible = await sessionEstDisponible();
-	if (!disponible) {
-		throw new Error("La session vient d'être créée mais n'est pas encore disponible. Réessaie.");
-	}
-}
-
 /**
  * Validate that returnTo is a safe relative path (no external redirects).
  */
