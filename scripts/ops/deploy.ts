@@ -1627,7 +1627,50 @@ async function main(): Promise<number> {
 	}
 
 	const cible = positional[0] ?? "all";
-	const apps = cible === "all" ? Object.values(APPS) : [APPS[cible]];
+
+	// `azalee` a MIGRÉ vers le dépôt `niers` : il s'y construit et s'y déploie désormais.
+	//
+	// La table `APPS` ci-dessus le décrit encore, et son `appDir` pointe le `apps/azalee`
+	// de CE dépôt-ci. Publier depuis ici produisait donc une version issue du mauvais
+	// arbre, sans le moindre avertissement — c'est ce qui s'est passé : les six dernières
+	// versions mises en ligne portent des commits qui n'existent que dans `rg`, alors que
+	// le travail se fait dans `niers`. Rien ne le signalait, puisque le déploiement
+	// réussissait.
+	//
+	// On refuse donc la cible plutôt que de compter sur la discipline de l'appelant.
+	//
+	// Mais on ne refuse QUE ce qui publie. `status`, `releases` et surtout `rollback`
+	// portent sur des versions DÉJÀ en ligne, produites d'ici : les bloquer retirerait le
+	// diagnostic et le secours sur la production au moment précis où on en a besoin. C'est
+	// aussi pourquoi `azalee` reste décrite dans `APPS`.
+	const REDIRIGEES: Record<string, string> = {
+		azalee: "bun /home/ubuntu/niers/scripts/ops/deploy.ts",
+	};
+	const PUBLIENT = new Set(["deploy", "preview", "promote", "reload"]);
+	const publie = PUBLIENT.has(command);
+	if (publie && cible !== "all" && REDIRIGEES[cible]) {
+		process.stderr.write(
+			`\`${cible}\` ne se déploie plus depuis ce dépôt : il a migré vers \`niers\`.\n` +
+				`Utiliser : ${REDIRIGEES[cible]} ${[command, ...positional, ...options].join(" ")}\n`,
+		);
+		return 2;
+	}
+
+	const apps = (cible === "all" ? Object.values(APPS) : [APPS[cible]]).filter((app) => {
+		// `all` est la cible PAR DÉFAUT (aucun argument) : sans ce filtre, un `deploy` nu
+		// lancé ici republierait azalée depuis le mauvais arbre. En lecture (`status`,
+		// `releases`), on la garde au contraire dans la liste — c'est ce qui permet de voir
+		// l'état réel de la production depuis n'importe lequel des deux dépôts.
+		if (publie && app && REDIRIGEES[app.key]) {
+			process.stderr.write(`↷ ${app.key} ignoré : déployé depuis \`niers\`, pas d'ici.\n`);
+			return false;
+		}
+		return true;
+	});
+	if (apps.length === 0) {
+		process.stderr.write(`Aucune application à déployer depuis ce dépôt.\n`);
+		return 2;
+	}
 	if (apps.some((app) => !app)) {
 		process.stderr.write(`Application inconnue : ${cible}\n${USAGE}`);
 		return 2;
