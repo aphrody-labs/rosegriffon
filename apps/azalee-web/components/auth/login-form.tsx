@@ -11,7 +11,7 @@ type AuthMode = "login" | "signup" | "forgot-password";
 const TENTATIVES_SESSION = 20;
 const DELAI_SESSION_MS = 100;
 
-async function attendreSessionCreee(): Promise<void> {
+async function sessionEstDisponible(): Promise<boolean> {
 	for (let tentative = 0; tentative < TENTATIVES_SESSION; tentative += 1) {
 		const reponse = await fetch("/api/auth/get-session?disableCookieCache=true", {
 			credentials: "include",
@@ -27,11 +27,18 @@ async function attendreSessionCreee(): Promise<void> {
 			| { user?: unknown; data?: { user?: unknown } }
 			| null;
 		if (payload?.user || payload?.data?.user) {
-			return;
+			return true;
 		}
 		await new Promise<void>((resolve) => setTimeout(resolve, DELAI_SESSION_MS));
 	}
-	throw new Error("La session vient d'être créée mais n'est pas encore disponible. Réessaie.");
+	return false;
+}
+
+async function attendreSessionCreee(): Promise<void> {
+	const disponible = await sessionEstDisponible();
+	if (!disponible) {
+		throw new Error("La session vient d'être créée mais n'est pas encore disponible. Réessaie.");
+	}
 }
 
 /**
@@ -126,10 +133,22 @@ export function LoginForm({ onSuccess, returnTo }: LoginFormProps) {
 				if (onSuccess) {
 					onSuccess();
 				}
-				// Better Auth peut résoudre `signUp.email` avant que Set-Cookie soit visible du
-				// prochain document. La sonde réseau force la fin de cette transition ; sans elle,
-				// la navigation annule parfois l'inscription encore active dans Chromium.
-				await attendreSessionCreee();
+				// Better Auth peut résoudre `signUp.email` avant que Set-Cookie soit visible.
+				// On vérifie d'abord la session existante, puis fallback explicite au sign-in si besoin.
+				let sessionOK = await sessionEstDisponible();
+				if (!sessionOK) {
+					const { error: loginError } = await authClient.signIn.email({
+						email,
+						password,
+					});
+					if (loginError) {
+						throw new Error(loginError.message);
+					}
+					sessionOK = await sessionEstDisponible();
+				}
+				if (!sessionOK) {
+					throw new Error("La session n'est pas encore disponible. Réessaie.");
+				}
 				window.location.href = postLoginUrl;
 			} else {
 				const { error } = await authClient.signIn.email({
