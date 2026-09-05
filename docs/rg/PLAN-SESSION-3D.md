@@ -17,8 +17,10 @@ navigateur effectivement exécuté.
   sélectivement dans le monorepo RG ; les artefacts `outputs/` n'ont pas été recopiés.
 - Monorepo cible : branche `main`, tête avant intégration `d76577511ba5`, remote
   `https://github.com/rose-griffon/rg.git`.
-- Les changements Explorer restent hors périmètre. Aucun chemin Explorer n'apparaît dans le diff
-  de cette livraison et aucune modification Explorer non commitée n'a été écrasée.
+- Les changements Explorer de NIE restent hors périmètre : aucun fichier du dépôt Niers n'a été
+  modifié. Après la livraison initiale, une convergence Azalée explicite a supprimé l'interface
+  `/cpk` locale, qui faisait doublon avec Niers, tout en conservant l'API `/api/cpk` et les
+  bibliothèques de décodage nécessaires aux pages publiques et aux imports.
 
 ## Fonctionnalités livrées
 
@@ -96,6 +98,12 @@ CDN et les smokes navigateur exécutés.
 | `lib/nie-wasm-web/*`, `public/wasm/nie_wasm_bg.wasm`, `lib/cpk-wasm.ts` | bindings WASM, binaire source et binaire public optimisé, dont l'export atlas `g4tx_sprite_sheet_json` |
 | `*.test.ts` de l'avatar | 34 tests de baseline : 7 import, 5 liaisons, 22 projet/historique |
 
+Les composants de l'ancien explorateur CPK ne sont plus une surface produit : ils ont été retirés
+dans Azalée par `84461f04`. Les pages `/modeles`, `/gallery`, `/videos`, `/sons` et `/textures`
+consomment directement leurs API/domaines respectifs (`lib/cpk/*`, catalogue wiki et CDN), sans
+exposer de navigation brute des fichiers. Les primitives d'état réutilisables du wiki sont
+centralisées dans `components/wiki` (notamment `WikiPageHeader` et `WikiErrorState`).
+
 Les fichiers Rust `crates/engine/nie-render3d/src/web.rs` et
 `crates/engine/nie-wasm/src/web_viewer.rs` font partie de la baseline NIE et restent la source du
 build WASM côté Niers. Ils ne sont pas dupliqués dans RG : RG reçoit leurs bindings et binaires
@@ -112,6 +120,9 @@ construits par `scripts/build-wasm.sh`, ce qui évite deux implémentations dive
 | `44eee069` | port sélectif de la baseline, persistance privée, E2E, migration et registre : 39 fichiers, 4 472 ajouts, 1 070 suppressions |
 | `dff9534b` | mapping `twoFactorEnabled` du schéma propre au plugin Better Auth vers `two_factor_enabled`, avec test du schéma fusionné |
 | `d5aecd1e` | navigation complète après inscription et capture des rejets SMTP, afin que la nouvelle session soit relue côté serveur sans rejet non géré |
+| `c63b7bb9` | CSP : autorisation du pixel GTM utilisé par le parcours public |
+| `84461f04` | suppression de l'interface CPK Azalée en doublon ; API et bindings conservés |
+| `5c81e971` | état d'erreur partagé pour les fiches wiki, avec reprise et retour cohérents |
 
 Le remplacement de l'ancien `Editeur.tsx` (884 lignes retirées, adaptateur de 41 lignes) est
 intentionnel : la logique monolithique a été répartie entre `Atelier`, `composition`, `projet`,
@@ -129,13 +140,16 @@ tests et le smoke public vérifient les chemins effectivement réutilisés.
 - Après chacun de ces diagnostics, le nettoyage a vérifié zéro résidu dans `user`, `account`,
   `session`, `profiles`, `auth.users` et `avatar_saves`.
 - Release preview B `2026-09-05T02-44-51-570-vkdWKsHwUClCT-XrRBjEy` (SHA `92c26dc6`) :
-  build/lint/type/gates publics verts, mais le parcours d’inscription reste non authentifié sur `/avatar`
-  (`POST /api/auth/sign-up/email` annulé, redirection immédiate vers `/avatar`, aucune session active).
-- Candidats de déploiement récents : `d5aecd1e`, `eb211231`, `9f97cd8d` (`attendreSessionCreee`),
-  `8801a205` (format endpoint session), `92c26dc6` (fallback `signIn`).
-- Tous les tests publics/build/lint/type/probes restent bons ; la preuve auth navigateur reste en échec :
-  `/avatar` reste anonyme après inscription en preview B, malgré sessions injectées en contexte de test.
-  Production maintenue sur slot A.
+  build/lint/type/gates publics verts ; les premières tentatives d'inscription SPA restaient
+  anonymes après redirection.
+- Les correctifs `2d97b37d`, `ef71704c` et `b44e38ce` ont ensuite rendu le flux déterministe :
+  réponse HTTP d'inscription attendue, initialisations annulées neutralisées, puis lecture
+  réseau de session avant navigation. Le smoke E2E à deux comptes a été rejoué avec sauvegarde,
+  restauration, partage visiteur, isolation et suppression, sans résidu. Cette preuve doit encore
+  être rejouée sur la release finale construite depuis la tête publiée.
+- Une tentative de promotion a été interrompue car le worktree avait avancé vers `84461f04` pendant
+  le build. La production a été restaurée sur le slot A précédent (`2026-09-05T01-33-59-015-MQF1OoRspqfLIs7pY4OmR`,
+  commit `d7657751`) et reste à promouvoir depuis une release isolée intégrant les commits wiki validés.
 
 ## Preuves exécutées le 2026-09-05
 
@@ -155,9 +169,12 @@ ci-dessus provient de l'exécution réelle de la commande et non de la seule pr�
 
 ## Gates de publication encore ouvertes
 
-- Committer et publier l'intégration RG, puis construire une release isolée depuis ce commit.
-- Sauvegarder la base de production, appliquer la migration dans une transaction et auditer
-  immédiatement colonnes, contraintes, index, grants et politiques.
+- Publier l'intégration RG (`84461f04`, `5c81e971` et les correctifs d'auth associés), puis construire
+  une release isolée depuis ce commit exact ; refuser l'assemblage si le SHA ou le worktree change
+  pendant le build.
+- La migration de production est appliquée et rejouée sans erreur ; conserver l'audit des colonnes,
+  contraintes, index, grants et politiques comme preuve de base, sans la confondre avec la preuve
+  de déploiement applicatif.
 - Déployer sur le slot de prévisualisation Azalée, exécuter le smoke public puis le parcours complet
   avec deux comptes éphémères : sauvegarde, restauration, partage visiteur, isolation du second
   compte et suppression. Supprimer ensuite comptes, sessions, profils et sauvegardes de test et
@@ -166,6 +183,13 @@ ci-dessus provient de l'exécution réelle de la commande et non de la seule pr�
   slot de production actuel et corriger à partir des journaux.
 - Après promotion, vérifier la version active, le domaine en HTTP 200 et les parcours
   non authentifié/authentifié en production.
+
+Les contrôles opérationnels à ne pas omettre lors de cette nouvelle release sont : capturer le
+SHA avant le build et le comparer à celui du manifeste après assemblage, tester chaque contexte
+Playwright avec l'activation preview réellement routée, et invalider le cache HTML de `/login` (ou
+le servir avec une revalidation courte) afin de ne pas rejouer un ancien bundle. Les identifiants
+SMTP de production restent à vérifier séparément ; les erreurs d'envoi sont maintenant capturées,
+mais cela ne constitue pas une preuve de livraison d'un courriel de vérification.
 
 ## Limites explicites
 
