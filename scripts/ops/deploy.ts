@@ -495,11 +495,29 @@ async function buildApp(app: AppConfig): Promise<void> {
 	fail(`build ${app.key} réellement échoué après 3 tentatives`);
 }
 
+/** Retourne le commit du checkout qui fournit les sources du build. */
+async function repositoryCommit(): Promise<string> {
+	const result = await run(["git", "rev-parse", "HEAD"]);
+	if (result.code !== 0 || !result.stdout.trim()) {
+		fail(`impossible de déterminer le commit du checkout :\n${(result.stdout + result.stderr).trim()}`);
+	}
+	return result.stdout.trim();
+}
+
+/** Empêche un autre processus de déplacer HEAD pendant une construction. */
+async function assertRepositoryCommit(expected: string, phase: string): Promise<void> {
+	const actual = await repositoryCommit();
+	if (actual !== expected) {
+		fail(`checkout modifié pendant ${phase} : attendu ${expected}, trouvé ${actual} — release abandonnée`);
+	}
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 // Assemblage d'une version
 // ─────────────────────────────────────────────────────────────────────────────
 
-async function assembleRelease(app: AppConfig): Promise<string> {
+async function assembleRelease(app: AppConfig, expectedCommit?: string): Promise<string> {
+	if (expectedCommit) await assertRepositoryCommit(expectedCommit, "le build");
 	const standalone = `${app.appDir}/.next/standalone`;
 	const serverJs = `${standalone}/apps/${app.standaloneDir}/server.js`;
 	const buildIdPath = `${app.appDir}/.next/BUILD_ID`;
@@ -564,9 +582,10 @@ async function assembleRelease(app: AppConfig): Promise<string> {
 	await mkdir(`${appPath}/.next/cache`, { recursive: true });
 
 	const [commit, branch] = await Promise.all([
-		run(["git", "rev-parse", "HEAD"]),
+		expectedCommit ? Promise.resolve({ stdout: expectedCommit }) : repositoryCommit().then((stdout) => ({ stdout })),
 		run(["git", "rev-parse", "--abbrev-ref", "HEAD"]),
 	]);
+	if (expectedCommit) await assertRepositoryCommit(expectedCommit, "l'assemblage");
 	await writeFile(
 		`${destination}/RELEASE.json`,
 		`${JSON.stringify(
@@ -991,11 +1010,12 @@ async function commandDeploy(app: AppConfig, flags: Flags): Promise<boolean> {
 	const unlock = await acquireLock(app);
 	try {
 		log(`── déploiement ${app.title} ──`);
+		const expectedCommit = await repositoryCommit();
 		await preflight(app, flags);
 		if (flags.gate) await typeCheck(app);
 		if (flags.build) await buildApp(app);
 		await closePreview(app, "le slot B sert de doublure de bascule");
-		const release = await assembleRelease(app);
+		const release = await assembleRelease(app, expectedCommit);
 		await refreshStaticPool(app, flags.keep);
 		return await publishRelease(app, release, {
 			drainSeconds: flags.drainSeconds,
@@ -1056,10 +1076,11 @@ async function commandPreview(app: AppConfig, flags: Flags): Promise<boolean> {
 	const unlock = await acquireLock(app);
 	try {
 		log(`── prévisualisation ${app.title} ──`);
+		const expectedCommit = await repositoryCommit();
 		await preflight(app, flags);
 		if (flags.gate) await typeCheck(app);
 		if (flags.build) await buildApp(app);
-		const release = flags.to ?? (await assembleRelease(app));
+		const release = flags.to ?? (await assembleRelease(app, expectedCommit));
 		if (!(await exists(releasePath(app, release)))) fail(`version ${release} introuvable`);
 		await refreshStaticPool(app, flags.keep);
 		await pointSlot(app, "b", release);
