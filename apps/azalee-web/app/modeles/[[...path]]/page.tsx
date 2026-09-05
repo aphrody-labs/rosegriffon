@@ -19,6 +19,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { MediaBack, MediaCount, MediaEmpty, MediaHeader } from "@/components/wiki/MediaShell";
 import InlineModelViewer from "@/components/wiki/InlineModelViewer";
+import { SafeImage } from "@/components/ui/SafeImage";
 import { ModelToolbar, type ModelView } from "@/components/wiki/ModelToolbar";
 import { cpkExplorerHref, lsOrNull } from "@rosegriffon/azalee/cpk/live";
 import { cpkThumbUrl } from "@rosegriffon/azalee/cpk/shared";
@@ -144,7 +145,7 @@ function EnTete({ titre, description }: { titre: string; description?: string })
 /** Vue d'accueil : les familles et leur volume. */
 async function Familles() {
 	const comptes = await Promise.all(
-		MODEL_FAMILIES.map(async (f) => (await modelesDe(f.id)).length),
+		MODEL_FAMILIES.map(async (f) => (await modelesDe(f.id)).length)
 	);
 	const total = comptes.reduce((a, b) => a + b, 0);
 
@@ -189,7 +190,19 @@ function Carte({ famille, m }: { famille: ModelFamily; m: ModelEntry }) {
 		<li className="group overflow-hidden rounded-2xl border border-outline-variant/40 bg-surface-container-low transition hover:border-primary/50">
 			<Link href={modelHref(famille, m.code)} className="block">
 				<span className="relative block aspect-[3/4] bg-surface-container-high">
-					<InlineModelViewer glbUrl={glb} name={titre} />
+					{m.previewOnly && m.zukanHash ? (
+						<SafeImage
+							src={`https://dxi4wb638ujep.cloudfront.net/1/${m.zukanHash}.png`}
+							zukanHash={m.zukanHash}
+							alt={`${titre} — ${m.variantLabel}`}
+							fill
+							unoptimized
+							className="object-contain object-bottom p-2"
+							sizes="(min-width: 1280px) 16vw, (min-width: 640px) 33vw, 50vw"
+						/>
+					) : (
+						<InlineModelViewer glbUrl={glb} name={titre} />
+					)}
 					{tex && (
 						// eslint-disable-next-line @next/next/no-img-element
 						<img
@@ -207,20 +220,29 @@ function Carte({ famille, m }: { famille: ModelFamily; m: ModelEntry }) {
 					<span className="block truncate text-sm text-on-surface" title={titre}>
 						{titre}
 					</span>
-					<span className="block truncate text-[11px] text-on-surface-variant">
-						{m.name && <span className="font-mono">{m.code}</span>}
+					<span
+						className="block truncate text-[11px] text-on-surface-variant"
+						title={m.variantLabel}
+					>
+						{m.variantLabel || (m.name && <span className="font-mono">{m.code}</span>)}
 						{m.name && m.files ? " · " : null}
 						{m.files ? `${m.files} fichier${m.files > 1 ? "s" : ""}` : null}
 					</span>
 				</Link>
-				<a
-					href={glb}
-					download={`${m.code}.glb`}
-					title="Télécharger le modèle (GLB)"
-					className="shrink-0 rounded-full bg-surface-container px-2.5 py-1 text-[11px] font-medium uppercase text-on-surface-variant transition hover:bg-surface-container-high hover:text-on-surface"
-				>
-					glb
-				</a>
+				{!m.previewOnly ? (
+					<a
+						href={glb}
+						download={`${m.code}.glb`}
+						title="Télécharger le modèle (GLB)"
+						className="shrink-0 rounded-full bg-surface-container px-2.5 py-1 text-[11px] font-medium uppercase text-on-surface-variant transition hover:bg-surface-container-high hover:text-on-surface"
+					>
+						glb
+					</a>
+				) : (
+					<span className="shrink-0 rounded-full bg-surface-container px-2 py-1 text-[10px] text-on-surface-variant">
+						Zukan
+					</span>
+				)}
 				{tex && (
 					<a
 						href={tex}
@@ -246,9 +268,9 @@ function Ligne({ famille, m }: { famille: ModelFamily; m: ModelEntry }) {
 				<span className="block truncate text-sm text-on-surface" title={titre}>
 					{titre}
 				</span>
-				{m.name && (
+				{(m.name || m.variantLabel) && (
 					<span className="block truncate font-mono text-[11px] text-on-surface-variant">
-						{m.code}
+						{m.variantLabel || m.code}
 					</span>
 				)}
 			</Link>
@@ -257,14 +279,20 @@ function Ligne({ famille, m }: { famille: ModelFamily; m: ModelEntry }) {
 					{m.files} fichier{m.files > 1 ? "s" : ""}
 				</span>
 			) : null}
-			<a
-				href={modelGlbUrl(famille, m.code)}
-				download={`${m.code}.glb`}
-				title="Télécharger le modèle (GLB)"
-				className="shrink-0 rounded-full bg-surface-container px-2.5 py-1 text-[11px] font-medium uppercase text-on-surface-variant transition hover:bg-surface-container-high hover:text-on-surface"
-			>
-				glb
-			</a>
+			{!m.previewOnly ? (
+				<a
+					href={modelGlbUrl(famille, m.code)}
+					download={`${m.code}.glb`}
+					title="Télécharger le modèle (GLB)"
+					className="shrink-0 rounded-full bg-surface-container px-2.5 py-1 text-[11px] font-medium uppercase text-on-surface-variant transition hover:bg-surface-container-high hover:text-on-surface"
+				>
+					glb
+				</a>
+			) : (
+				<span className="shrink-0 text-[11px] text-on-surface-variant">
+					Version Zukan illustrée
+				</span>
+			)}
 			{tex && (
 				<a
 					href={tex}
@@ -337,8 +365,8 @@ async function Grille({
 				</MediaEmpty>
 			) : trouves.length === 0 ? (
 				<MediaEmpty>
-					Aucun modèle ne correspond à « {q} » parmi les {tous.length.toLocaleString("fr")} de
-					cette famille.
+					Aucun modèle ne correspond à « {q} » parmi les {tous.length.toLocaleString("fr")} de cette
+					famille.
 				</MediaEmpty>
 			) : (
 				<>
@@ -415,7 +443,11 @@ async function Fiche({ famille, code }: { famille: ModelFamily; code: string }) 
 		<div className="w-full space-y-5">
 			<EnTete
 				titre={entree?.name ?? code}
-				description={`${def?.label ?? famille} · code ${code} — modèle assemblé à la volée depuis les fichiers du jeu.`}
+				description={
+					entree?.previewOnly
+						? `${entree.variantLabel} · version officielle Zukan sans géométrie 3D dans le VFS.`
+						: `${def?.label ?? famille} · code ${code} — modèle assemblé à la volée depuis les fichiers du jeu.`
+				}
 			/>
 
 			<MediaBack href={`/modeles/${famille}`} label={`Retour — ${def?.label ?? famille}`} />
@@ -445,18 +477,36 @@ async function Fiche({ famille, code }: { famille: ModelFamily; code: string }) 
 			{/* `relative` + une hauteur : le viewer se pose en `absolute inset-0`, un conteneur
 			    sans position ni hauteur le réduisait à zéro pixel — cadre visible, 3D invisible. */}
 			<div className="relative h-[min(70vh,560px)] overflow-hidden rounded-2xl border border-outline-variant bg-surface-container-low">
-				<InlineModelViewer glbUrl={modelGlbUrl(famille, code)} name={entree?.name ?? code} />
+				{entree?.previewOnly && entree.zukanHash ? (
+					<SafeImage
+						src={`https://dxi4wb638ujep.cloudfront.net/1/${entree.zukanHash}.png`}
+						zukanHash={entree.zukanHash}
+						alt={`${entree.name ?? code} — ${entree.variantLabel}`}
+						fill
+						unoptimized
+						className="object-contain object-bottom p-6"
+						sizes="100vw"
+					/>
+				) : (
+					<InlineModelViewer glbUrl={modelGlbUrl(famille, code)} name={entree?.name ?? code} />
+				)}
 			</div>
 
 			<section className="rounded-2xl border border-outline-variant bg-surface-container-low p-4">
 				<h2 className="mb-2 text-sm font-medium text-on-surface">Télécharger</h2>
-				<a
-					href={modelGlbUrl(famille, code)}
-					download={`${code}.glb`}
-					className="inline-flex items-center gap-1.5 rounded-full border border-outline-variant bg-surface-container px-3 py-1.5 text-xs text-on-surface transition hover:border-primary/50 hover:bg-surface-container-high"
-				>
-					<span className="font-medium uppercase">glb</span>
-				</a>
+				{!entree?.previewOnly ? (
+					<a
+						href={modelGlbUrl(famille, code)}
+						download={`${code}.glb`}
+						className="inline-flex items-center gap-1.5 rounded-full border border-outline-variant bg-surface-container px-3 py-1.5 text-xs text-on-surface transition hover:border-primary/50 hover:bg-surface-container-high"
+					>
+						<span className="font-medium uppercase">glb</span>
+					</a>
+				) : (
+					<span className="text-xs text-on-surface-variant">
+						Aucun GLB : rendu officiel Zukan uniquement.
+					</span>
+				)}
 				<p className="mt-2 text-xs text-on-surface-variant">
 					glTF binaire — maillage, squelette et textures dans un seul fichier.
 					{srcDir && (

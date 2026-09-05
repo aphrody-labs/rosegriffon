@@ -86,6 +86,8 @@ export function PlayersClient({
 			"series",
 			"team",
 			"role",
+			"ageGroup",
+			"schoolYear",
 		];
 		filterKeys.forEach((key) => params.delete(key));
 		params.delete("page");
@@ -137,6 +139,14 @@ export function PlayersClient({
 				if (value === "Exobeing") return t("wiki.age_groups.exobeing");
 				return value;
 			}
+			case "schoolYear": {
+				const labels: Record<string, string> = {
+					"Grade 7": "7e année",
+					"Grade 8": "8e année",
+					"Grade 9": "9e année",
+				};
+				return labels[value] || value;
+			}
 			default:
 				return value;
 		}
@@ -152,6 +162,7 @@ export function PlayersClient({
 		"team",
 		"role",
 		"ageGroup",
+		"schoolYear",
 	];
 	const activeFilters = filterKeys
 		.map((key) => {
