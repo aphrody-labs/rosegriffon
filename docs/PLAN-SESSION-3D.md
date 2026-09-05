@@ -15,8 +15,9 @@ liaisons`.
 - Publication de la baseline vérifiée : `origin/main` du dépôt Niers contient ce commit. Les
   sources atelier de cette baseline et les correctifs WASM ultérieurs ont été intégrés
   sélectivement dans le monorepo RG ; les artefacts `outputs/` n'ont pas été recopiés.
-- Monorepo cible : branche `main`, tête publiée `7a6bc7e4`, remote
-  `https://github.com/rose-griffon/rg.git` ; `origin/main` pointe sur cette même tête.
+- Monorepo cible : branche `main`, code de l'atelier validé dans `7a6bc7e4`, remote
+  `https://github.com/rose-griffon/rg.git` ; le registre et les correctifs suivants sont publiés
+  sur `origin/main` (capturer le SHA exact avant chaque release).
 - Les changements Explorer de NIE restent hors périmètre : ils ne sont pas portés dans RG. Le
   canal A2A a toutefois continué ses lots Niers indépendants (docs, chemins `csharp/**`/`src/**`)
   dans leurs commits dédiés, sans les mélanger à l'atelier. Après la livraison initiale, une
@@ -155,7 +156,7 @@ tests et le smoke public vérifient les chemins effectivement réutilisés.
 - Release preview B `2026-09-05T02-44-51-570-vkdWKsHwUClCT-XrRBjEy` (SHA `92c26dc6`) :
   build/lint/type/gates publics verts ; les premières tentatives d'inscription SPA restaient
   anonymes après redirection.
-- La tête RG `7a6bc7e4` est maintenant poussée sur `origin/main`. Le contrôle opératoire
+- Le code de l'atelier `7a6bc7e4` et le registre courant sont poussés sur `origin/main`. Le contrôle opératoire
   `bun run release:check` a exécuté 5/5 étapes (git-sync en dry-run, `nginx -t`, santé modèle,
   santé Azalée et santé CDN). Aucune preview ni promotion n'a été déclenchée par ce contrôle.
 - Le smoke public rejoué le 2026-09-05 avec Chromium isolé et allowlist `azalee.rosegriffon.fr,
