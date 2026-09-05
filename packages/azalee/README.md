@@ -78,7 +78,7 @@ texte, et expose l'API HTTP headless. Runtime Bun (ou Node ≥ 22).
 ```ts
 import { wikiService, resolveMirrorPath, resolveDataDir } from "@rosegriffon/azalee/server";
 
-resolveMirrorPath(); // /home/ubuntu/rg/apps/azalee/data/backups/mirror.sqlite
+resolveMirrorPath(); // /home/ubuntu/niers/var/mirror.sqlite
 resolveDataDir();    // /home/ubuntu/rg/apps/azalee/data
 
 const { data, total } = await wikiService.getCharactersList({ q: "Mark", page: 1, limit: 2 });
@@ -151,7 +151,7 @@ Sur cette machine, les artefacts vivent dans `apps/azalee/data/` :
 
 ```text
 apps/azalee/data/
-├── backups/mirror.sqlite            # miroir des tables inagle_* (source par défaut)
+├── backups/mirror.sqlite            # fallback local ; la prod lit le miroir niers
 ├── cpk-index.ndjson.gz              # 250 800 fichiers des CPK
 ├── game-text-names.ndjson.gz        # noms/descriptions (fr/en/ja)
 └── game-text-dialogue.ndjson.gz     # dialogues event/map/phase/purpose
@@ -161,7 +161,8 @@ apps/azalee/data/
 
 | Variable | Lue par | Effet |
 |----------|---------|-------|
-| `SQLITE_DB_PATH` | `src/config.ts` | Chemin explicite du miroir SQLite. **Épinglé en production** (drop-in systemd) : sans lui, le repli prend le snapshot `supabase-*.sqlite` au nom le plus grand — source silencieuse. |
+| `SQLITE_DB_PATH` | `src/config.ts` | Chemin explicite du miroir SQLite. **Épinglé en production** (drop-in systemd) : sans lui, le repli essaie le miroir canonique niers puis, à défaut, le snapshot `supabase-*.sqlite` au nom le plus grand. |
+| `NIERS_MIRROR` | `src/config.ts` | Chemin du miroir canonique niers utilisé par le fallback CLI/tests quand `SQLITE_DB_PATH` n'est pas défini. |
 | `AZALEE_DATA_DIR` | `src/config.ts` | Dossier des artefacts runtime, testé avant les chemins conventionnels (`<cwd>/data`, `<cwd>/apps/azalee/data`, `<pkg>/../../apps/azalee/data`). |
 | `AZALEE_CACHE_DIR` | `src/config.ts` | Base des SQLite matérialisés (défaut : `os.tmpdir()`, tmpfs sur le VPS). |
 | `CPK_INDEX_PATH` | `src/cpk/index.ts` | Chemin explicite de `cpk-index.ndjson.gz`. |
@@ -357,7 +358,7 @@ import { createAzaleeData } from "@rosegriffon/azalee/server";
 
 const data = createAzaleeData();          // "auto"
 console.log(data.source, "|", data.reason);
-// local | source locale retenue : miroir SQLite présent (…/data/backups/mirror.sqlite)
+// local | source locale retenue : miroir SQLite présent (…/niers/var/mirror.sqlite)
 
 const teams = await data.teams();         // 208 — depuis le disque, zéro socket
 ```

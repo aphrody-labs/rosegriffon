@@ -1,4 +1,6 @@
 export const revalidate = 3600; // ISR: Revalidate every hour
+export const dynamic = "force-static";
+export const dynamicParams = true;
 
 import { ArrowLeftRight } from "lucide-react";
 import type { Metadata } from "next";

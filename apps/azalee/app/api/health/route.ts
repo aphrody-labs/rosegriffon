@@ -1,24 +1,35 @@
-import { getSupabaseClient } from "@/src/lib/api/supabase";
+import { existsSync } from "node:fs";
 import { NextResponse } from "next/server";
+import { resolveMirrorPath } from "@rosegriffon/azalee/config";
+import { createSqliteClient } from "@rosegriffon/azalee/db";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 
 export async function GET() {
-	const checks: Record<string, "ok" | "error"> = {};
+	const mirrorPath = resolveMirrorPath();
+	const checks: Record<string, "ok" | "error"> = {
+		mirror: "error",
+	};
 
-	try {
-		const supabase = getSupabaseClient();
-		const { error } = await supabase.from("profiles").select("id").limit(1);
-		checks.db = error ? "error" : "ok";
-	} catch {
-		checks.db = "error";
+	if (mirrorPath && existsSync(mirrorPath)) {
+		try {
+			const { error } = await createSqliteClient().from("inagle_characters").select("id").limit(1);
+			checks.mirror = error ? "error" : "ok";
+		} catch {
+			checks.mirror = "error";
+		}
 	}
 
-	const allOk = Object.values(checks).every((v) => v === "ok");
+	const allOk = checks.mirror === "ok";
 
 	return NextResponse.json(
-		{ checks, status: allOk ? "ok" : "degraded", uptime: process.uptime() },
+		{
+			checks,
+			source: "sqlite-mirror",
+			status: allOk ? "ok" : "degraded",
+			uptime: process.uptime(),
+		},
 		{ status: allOk ? 200 : 503 }
 	);
 }

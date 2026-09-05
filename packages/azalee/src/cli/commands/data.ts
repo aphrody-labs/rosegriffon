@@ -13,15 +13,26 @@ import type { Command } from "commander";
 
 import { colors } from "../context";
 import type { DataMigrateOptions, DataSyncOptions } from "../types";
+import { resolveMirrorPath } from "../../config";
 
 /** Racine du monorepo (les scripts orchestrés y sont ancrés). */
 const REPO_ROOT = "/home/ubuntu/rg";
 /** Fichier d'environnement chargé par le pousseur inagle. */
 const AZALEE_ENV = `${REPO_ROOT}/apps/azalee/.env`;
 /** Racine des dumps de jeu. */
-const DATA_ROOT_DEFAULT = process.env.DATA_ROOT || process.env.DATA_PATH || "/home/ubuntu/niers/data";
+const DATA_ROOT_DEFAULT =
+	process.env.DATA_ROOT || process.env.DATA_PATH || "/home/ubuntu/niers/data";
+const NIERS_ROOT = process.env.NIERS_ROOT || "/home/ubuntu/niers";
+const NIERS_MIRROR_PUBLISHER = `${NIERS_ROOT}/scripts/donnees/miroir-inagle.sh`;
 /** Âge maximal toléré pour le miroir SQLite, en heures. */
 const MIRROR_MAX_AGE_H = 48;
+
+/** Publisher canonique, avec repli explicite pour un checkout sans `niers`. */
+function mirrorRefreshCommand(): string {
+	return existsSync(NIERS_MIRROR_PUBLISHER)
+		? NIERS_MIRROR_PUBLISHER
+		: `bun --filter @rosegriffon/azalee-web backup:supabase`;
+}
 
 /**
  * Exécute une étape du pipeline et journalise son issue.
@@ -39,7 +50,9 @@ function runDataStep(label: string, cmd: string, env: Record<string, string> = {
 		env: { ...process.env, ...env },
 	});
 	if (res.exitCode === 0) {
-		console.log(`${colors.green}✓ ${label} (${((Date.now() - t0) / 1000).toFixed(1)}s)${colors.reset}`);
+		console.log(
+			`${colors.green}✓ ${label} (${((Date.now() - t0) / 1000).toFixed(1)}s)${colors.reset}`
+		);
 		return true;
 	}
 	console.log(`${colors.red}✗ ${label} — échec${colors.reset}`);
@@ -58,14 +71,16 @@ export function registerDataCommand(program: Command): void {
 			const ok = runDataStep(
 				"data push (inagle → Supabase)",
 				`bun packages/inagle/src/cli.ts push --env ${AZALEE_ENV}`,
-				{ DATA_ROOT: DATA_ROOT_DEFAULT, DATA_PATH: DATA_ROOT_DEFAULT },
+				{ DATA_ROOT: DATA_ROOT_DEFAULT, DATA_PATH: DATA_ROOT_DEFAULT }
 			);
 			process.exit(ok ? 0 : 1);
 		});
 
 	dataCmd
 		.command("migrate")
-		.description("Migrations SQL (better-auth_migrations/*.sql) — liste par défaut, --apply pour exécuter")
+		.description(
+			"Migrations SQL (better-auth_migrations/*.sql) — liste par défaut, --apply pour exécuter"
+		)
 		.option("--apply", "Applique les migrations via psql (rose_griffon local)")
 		.action((opts: DataMigrateOptions) => {
 			const dir = `${REPO_ROOT}/apps/azalee/better-auth_migrations`;
@@ -85,24 +100,25 @@ export function registerDataCommand(program: Command): void {
 			console.log(`${colors.cyan}${files.length} migration(s) SQL:${colors.reset}`);
 			for (const f of files) console.log(`  - ${f}`);
 			if (!opts.apply) {
-				console.log(`${colors.yellow}(dry-run — relancer avec --apply pour exécuter)${colors.reset}`);
+				console.log(
+					`${colors.yellow}(dry-run — relancer avec --apply pour exécuter)${colors.reset}`
+				);
 				return;
 			}
 			let allOk = true;
 			for (const f of files) {
-				allOk = runDataStep(`migrate ${f}`, `sudo -u postgres psql -d rose_griffon -f ${dir}/${f}`) && allOk;
+				allOk =
+					runDataStep(`migrate ${f}`, `sudo -u postgres psql -d rose_griffon -f ${dir}/${f}`) &&
+					allOk;
 			}
 			process.exit(allOk ? 0 : 1);
 		});
 
 	dataCmd
 		.command("load")
-		.description("Régénère le miroir SQLite local depuis Supabase (backup:supabase)")
+		.description("Publie le miroir SQLite canonique niers (repli local: backup:supabase)")
 		.action(() => {
-			const ok = runDataStep(
-				"data load (Supabase → miroir SQLite)",
-				`bun --filter @rosegriffon/azalee-web backup:supabase`,
-			);
+			const ok = runDataStep("data load (Supabase → miroir canonique)", mirrorRefreshCommand());
 			process.exit(ok ? 0 : 1);
 		});
 
@@ -115,7 +131,7 @@ export function registerDataCommand(program: Command): void {
 			const flags = `${opts.full ? " --full" : ""}${opts.deletes ? " --deletes" : ""}`;
 			const ok = runDataStep(
 				"data sync (Supabase ↔ SQLite)",
-				`bun apps/azalee/scripts/ops/sync-supabase-to-sqlite.ts${flags}`,
+				`bun apps/azalee/scripts/ops/sync-supabase-to-sqlite.ts${flags}`
 			);
 			process.exit(ok ? 0 : 1);
 		});
@@ -131,39 +147,49 @@ export function registerDataCommand(program: Command): void {
 
 	dataCmd
 		.command("verify")
-		.description("Vérifie les chemins/données : miroir présent+récent, DATA_ROOT, entries, snapshot schéma")
+		.description(
+			"Vérifie les chemins/données : miroir présent+récent, DATA_ROOT, entries, snapshot schéma"
+		)
 		.action(() => {
 			let ok = true;
 			const check = (label: string, cond: boolean, detail = "") => {
 				console.log(
-					`  ${cond ? colors.green + "✓" : colors.red + "✗"} ${label}${colors.reset}${detail ? ` — ${detail}` : ""}`,
+					`  ${cond ? colors.green + "✓" : colors.red + "✗"} ${label}${colors.reset}${detail ? ` — ${detail}` : ""}`
 				);
 				if (!cond) ok = false;
 			};
-			const backupsDir = `${REPO_ROOT}/apps/azalee/data/backups`;
+			const mirrorPath = resolveMirrorPath();
 			let mirror: string | null = null;
 			let ageH = Infinity;
-			try {
-				const m = readdirSync(backupsDir)
-					.filter((f: string) => f.startsWith("supabase-") && f.endsWith(".sqlite"))
-					.sort()
-					.pop();
-				if (m) {
-					mirror = `${backupsDir}/${m}`;
-					ageH = (Date.now() - statSync(mirror).mtimeMs) / 3_600_000;
-				}
-			} catch {}
+			if (mirrorPath && existsSync(mirrorPath)) {
+				mirror = mirrorPath;
+				ageH = (Date.now() - statSync(mirrorPath).mtimeMs) / 3_600_000;
+			}
 			check("miroir SQLite présent", !!mirror, mirror ? mirror.split("/").pop()! : "absent");
-			check("miroir récent (< 48h)", ageH < MIRROR_MAX_AGE_H, ageH === Infinity ? "?" : `${ageH.toFixed(1)}h`);
+			check(
+				"miroir récent (< 48h)",
+				ageH < MIRROR_MAX_AGE_H,
+				ageH === Infinity ? "?" : `${ageH.toFixed(1)}h`
+			);
 			check("DATA_ROOT existe", existsSync(DATA_ROOT_DEFAULT), DATA_ROOT_DEFAULT);
-			check("dump chara_param présent", existsSync(`${DATA_ROOT_DEFAULT}/common/gamedata/character`));
-			check("inagle entries/characters.json", existsSync(`${REPO_ROOT}/packages/inagle/src/entries/characters.json`));
+			check(
+				"dump chara_param présent",
+				existsSync(`${DATA_ROOT_DEFAULT}/common/gamedata/character`)
+			);
+			check(
+				"inagle entries/characters.json",
+				existsSync(`${REPO_ROOT}/packages/inagle/src/entries/characters.json`)
+			);
 			check("snapshot schéma DB", existsSync(`${REPO_ROOT}/apps/azalee/data/schema-snapshot`));
 			check(
 				"standalone embarque un miroir",
-				existsSync(`${REPO_ROOT}/apps/azalee/.next/standalone/apps/azalee/data/backups`),
+				existsSync(`${REPO_ROOT}/apps/azalee/.next/standalone/apps/azalee/data/backups`)
 			);
-			console.log(ok ? `${colors.green}verify OK${colors.reset}` : `${colors.red}verify: anomalies détectées${colors.reset}`);
+			console.log(
+				ok
+					? `${colors.green}verify OK${colors.reset}`
+					: `${colors.red}verify: anomalies détectées${colors.reset}`
+			);
 			process.exit(ok ? 0 : 1);
 		});
 
@@ -177,7 +203,7 @@ export function registerDataCommand(program: Command): void {
 					`bun packages/inagle/src/cli.ts push --env ${AZALEE_ENV}`,
 					{ DATA_ROOT: DATA_ROOT_DEFAULT, DATA_PATH: DATA_ROOT_DEFAULT },
 				],
-				["load", `bun --filter @rosegriffon/azalee-web backup:supabase`, {}],
+				["load", mirrorRefreshCommand(), {}],
 				["typecheck azalee", `bun --filter @rosegriffon/azalee-web type-check`, {}],
 				["typecheck inagle", `bun --filter @rosegriffon/inagle type-check`, {}],
 			];

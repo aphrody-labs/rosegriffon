@@ -15,7 +15,8 @@
  */
 
 import type { Database } from "bun:sqlite";
-import { existsSync, mkdirSync, readFileSync } from "node:fs";
+import { createHash } from "node:crypto";
+import { existsSync, mkdirSync, readFileSync, renameSync, statSync, unlinkSync } from "node:fs";
 import path from "node:path";
 import { getCacheDir, resolveDataFile } from "../config";
 import { gunzipSync } from "node:zlib";
@@ -57,6 +58,8 @@ function resolveSourcePaths(): string[] {
 
 let _db: Database | null = null;
 
+type DatabaseConstructor = typeof import("bun:sqlite").Database;
+
 function readEntries(srcPath: string): TextEntry[] {
 	const gz = readFileSync(srcPath);
 	const ndjson = gunzipSync(gz).toString("utf8");
@@ -69,6 +72,57 @@ function readEntries(srcPath: string): TextEntry[] {
 	return entries;
 }
 
+/**
+ * Versionne le cache sur les artefacts réellement lus. Plusieurs workers
+ * peuvent ainsi préparer la même version dans des fichiers distincts sans se
+ * verrouiller mutuellement ; un cache publié ne sera jamais reconstruit en
+ * place sous un lecteur actif.
+ */
+function cachePath(cacheDir: string, sources: string[]): string {
+	const fingerprint = createHash("sha256")
+		.update(
+			sources
+				.map((source) => {
+					const stat = statSync(source);
+					return `${source}\0${stat.size}\0${stat.mtimeMs}`;
+				})
+				.join("\n")
+		)
+		.digest("hex")
+		.slice(0, 20);
+	return path.join(cacheDir, `game-text-${fingerprint}.sqlite`);
+}
+
+function openReadyCache(DatabaseConstructor: DatabaseConstructor, dbPath: string): Database | null {
+	if (!existsSync(dbPath)) return null;
+	let db: Database | null = null;
+	try {
+		db = new DatabaseConstructor(dbPath, { readonly: true });
+		const ready = db
+			.query<{ name: string }, []>(
+				"SELECT name FROM sqlite_master WHERE type = 'table' AND name = 'text' LIMIT 1"
+			)
+			.get();
+		if (!ready) {
+			db.close();
+			return null;
+		}
+		db.exec("PRAGMA temp_store = MEMORY");
+		return db;
+	} catch {
+		db?.close();
+		return null;
+	}
+}
+
+function removeCacheArtifact(filePath: string): void {
+	try {
+		unlinkSync(filePath);
+	} catch (error) {
+		if ((error as NodeJS.ErrnoException).code !== "ENOENT") throw error;
+	}
+}
+
 /** Ouvre (ou matérialise) le SQLite de l'index de texte. Singleton process-local. */
 function getDb(): Database {
 	if (_db) return _db;
@@ -78,21 +132,50 @@ function getDb(): Database {
 	const sources = resolveSourcePaths();
 	if (sources.length === 0) {
 		throw new Error(
-			"[game-text] aucun artefact game-text-*.ndjson.gz trouvé (lancer scripts/build-game-text-index.ts)",
+			"[game-text] aucun artefact game-text-*.ndjson.gz trouvé (lancer scripts/build-game-text-index.ts)"
 		);
 	}
 
 	const cacheDir = getCacheDir("azalee-game-text");
 	mkdirSync(cacheDir, { recursive: true });
-	const dbPath = path.join(cacheDir, "game-text.sqlite");
+	const DBConstructor = require("bun:sqlite").Database as DatabaseConstructor;
+	const dbPath = cachePath(cacheDir, sources);
+	const cached = openReadyCache(DBConstructor, dbPath);
+	if (cached) {
+		_db = cached;
+		return cached;
+	}
 
-	const db = new Database(dbPath);
+	const buildPath = `${dbPath}.${process.pid}.${Date.now()}.${Math.random().toString(16).slice(2)}.tmp`;
+	let db: Database | null = null;
 	const all: TextEntry[] = [];
-	for (const src of sources) all.push(...readEntries(src));
-	buildSqliteFromEntries(db, all);
+	try {
+		db = new DBConstructor(buildPath, { create: true });
+		for (const src of sources) all.push(...readEntries(src));
+		buildSqliteFromEntries(db, all);
+		db.close();
+		db = null;
 
-	_db = db;
-	return db;
+		// Le premier worker publie ; les suivants conservent le cache complet
+		// déjà publié et suppriment uniquement leur fichier temporaire.
+		if (!existsSync(dbPath)) {
+			try {
+				renameSync(buildPath, dbPath);
+			} catch (error) {
+				if (!existsSync(dbPath)) throw error;
+			}
+		}
+
+		const ready = openReadyCache(DBConstructor, dbPath);
+		if (!ready) throw new Error("[game-text] le cache SQLite matérialisé est illisible");
+		_db = ready;
+		return ready;
+	} finally {
+		if (db) db.close();
+		removeCacheArtifact(buildPath);
+		removeCacheArtifact(`${buildPath}-wal`);
+		removeCacheArtifact(`${buildPath}-shm`);
+	}
 }
 
 // --- API de lecture --------------------------------------------------------
@@ -102,7 +185,7 @@ export function getText(hashId: string | number): GameTextLocalized | undefined 
 	const key = normalizeHashId(hashId);
 	const rows = getDb()
 		.query<{ locale: string; category: string; value: string }, [string]>(
-			"SELECT locale, category, value FROM text WHERE hashId = ?",
+			"SELECT locale, category, value FROM text WHERE hashId = ?"
 		)
 		.all(key);
 	if (rows.length === 0) return undefined;
@@ -116,7 +199,10 @@ export function getText(hashId: string | number): GameTextLocalized | undefined 
 }
 
 /** Résout un hashId dans une langue précise (avec repli fr → en → ja). */
-export function getTextLocale(hashId: string | number, locale: GameTextLocale = "fr"): string | undefined {
+export function getTextLocale(
+	hashId: string | number,
+	locale: GameTextLocale = "fr"
+): string | undefined {
 	const t = getText(hashId);
 	if (!t) return undefined;
 	return t[locale] ?? t.fr ?? t.en ?? t.ja;
@@ -132,7 +218,7 @@ export function getTexts(hashIds: Array<string | number>): Map<string, GameTextL
 		const placeholders = batch.map(() => "?").join(",");
 		const rows = db
 			.query<{ hashId: string; locale: string; category: string; value: string }, string[]>(
-				`SELECT hashId, locale, category, value FROM text WHERE hashId IN (${placeholders})`,
+				`SELECT hashId, locale, category, value FROM text WHERE hashId IN (${placeholders})`
 			)
 			.all(...batch);
 		for (const r of rows) {
@@ -154,11 +240,11 @@ export function listCategory(
 	category: string,
 	locale: GameTextLocale = "fr",
 	limit = 200,
-	offset = 0,
+	offset = 0
 ): GameText[] {
 	return getDb()
 		.query<GameText, [string, string, number, number]>(
-			"SELECT hashId, locale, category, value FROM text WHERE category = ? AND locale = ? ORDER BY hashId LIMIT ? OFFSET ?",
+			"SELECT hashId, locale, category, value FROM text WHERE category = ? AND locale = ? ORDER BY hashId LIMIT ? OFFSET ?"
 		)
 		.all(category, locale, limit, offset);
 }
@@ -167,7 +253,7 @@ export function listCategory(
 export function searchText(query: string, locale: GameTextLocale = "fr", limit = 50): GameText[] {
 	return getDb()
 		.query<GameText, [string, string, number]>(
-			"SELECT hashId, locale, category, value FROM text WHERE locale = ? AND value LIKE ? LIMIT ?",
+			"SELECT hashId, locale, category, value FROM text WHERE locale = ? AND value LIKE ? LIMIT ?"
 		)
 		.all(locale, `%${query}%`, limit);
 }
@@ -176,7 +262,7 @@ export function searchText(query: string, locale: GameTextLocale = "fr", limit =
 export function categoryStats(): Array<{ category: string; count: number }> {
 	return getDb()
 		.query<{ category: string; count: number }, [string]>(
-			"SELECT category, COUNT(*) as count FROM text WHERE locale = ? GROUP BY category ORDER BY count DESC",
+			"SELECT category, COUNT(*) as count FROM text WHERE locale = ? GROUP BY category ORDER BY count DESC"
 		)
 		.all("fr");
 }

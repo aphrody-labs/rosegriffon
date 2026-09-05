@@ -5,7 +5,7 @@ import { resolveMirrorPath } from "../config";
 
 /**
  * Chemin du miroir SQLite. La résolution (option explicite → `SQLITE_DB_PATH` →
- * `data/backups/mirror.sqlite` → snapshot le plus récent) vit dans `config.ts`,
+ * miroir canonique niers → snapshot local de secours) vit dans `config.ts`,
  * source unique pour toute la lib.
  */
 function getSqlitePath(): string | null {
@@ -44,7 +44,9 @@ function fingerprintOf(path: string): string {
 		// `statSync` existe sous Bun comme sous Node ; la version asynchrone de
 		// `Bun.file()` ne conviendrait pas dans ce chemin synchrone.
 		// eslint-disable-next-line @typescript-eslint/no-require-imports -- accès synchrone au système de fichiers
-		const { statSync } = require("node:fs") as { statSync: (p: string) => { ino: number; mtimeMs: number; size: number } };
+		const { statSync } = require("node:fs") as {
+			statSync: (p: string) => { ino: number; mtimeMs: number; size: number };
+		};
 		const info = statSync(path);
 		return `${info.ino}:${info.mtimeMs}:${info.size}`;
 	} catch {
@@ -130,7 +132,9 @@ function getSqliteDb(): Database {
 	// échoue: "Unsupported external type Url for commonjs reference").
 	const nodeSqlite = (
 		process as unknown as {
-			getBuiltinModule?: (id: string) => { DatabaseSync: new (p: string, o?: unknown) => SqliteLike };
+			getBuiltinModule?: (id: string) => {
+				DatabaseSync: new (p: string, o?: unknown) => SqliteLike;
+			};
 		}
 	).getBuiltinModule?.("node:sqlite");
 	if (!nodeSqlite) {
@@ -510,9 +514,7 @@ export class SqliteQueryBuilder {
 	// (`*`, `id, name_fr`, …) émise via `sql.raw` — identique au SQL maison
 	// d'origine (`SELECT ${this.selects} FROM "table" …`).
 	private compileSelect(): SQL {
-		const parts: SQL[] = [
-			sql`SELECT ${sql.raw(this.selects)} FROM ${sql.raw(`"${this.table}"`)}`,
-		];
+		const parts: SQL[] = [sql`SELECT ${sql.raw(this.selects)} FROM ${sql.raw(`"${this.table}"`)}`];
 		if (this.wheres.length > 0) {
 			parts.push(sql`WHERE ${sql.join(this.wheres, sql` AND `)}`);
 		}

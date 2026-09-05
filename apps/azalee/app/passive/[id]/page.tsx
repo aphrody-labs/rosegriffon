@@ -1,13 +1,13 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import {
-	PASSIVE_CATEGORY_LABELS,
-	PassiveDetailView,
-} from "@/components/wiki/PassiveDetail";
+import { PASSIVE_CATEGORY_LABELS, PassiveDetailView } from "@/components/wiki/PassiveDetail";
 import { wikiService } from "@/lib/wiki-service";
 
-export const dynamic = "force-dynamic";
+/** Données de miroir en lecture seule : la fiche est servie en ISR. */
+export const dynamic = "force-static";
+export const revalidate = 3600;
+export const dynamicParams = true;
 
 export async function generateMetadata({
 	params,
@@ -46,11 +46,7 @@ export async function generateMetadata({
 	};
 }
 
-export default async function PassiveDetailPage({
-	params,
-}: {
-	params: Promise<{ id: string }>;
-}) {
+export default async function PassiveDetailPage({ params }: { params: Promise<{ id: string }> }) {
 	const { id } = await params;
 	const passive = await wikiService.getPassive(id);
 
@@ -58,8 +54,7 @@ export default async function PassiveDetailPage({
 		notFound();
 	}
 
-	const passiveName =
-		passive.description.fr || passive.description.en || passive.string_id;
+	const passiveName = passive.description.fr || passive.description.en || passive.string_id;
 	const cleanName = passiveName.replace(/\s*\n\s*/g, " ").trim();
 
 	const breadcrumbJsonLd = {

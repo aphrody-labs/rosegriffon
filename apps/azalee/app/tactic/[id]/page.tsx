@@ -1,4 +1,7 @@
-export const dynamic = "force-dynamic";
+/** Données de miroir en lecture seule : la fiche est servie en ISR. */
+export const dynamic = "force-static";
+export const revalidate = 3600;
+export const dynamicParams = true;
 
 import type { Metadata } from "next";
 import Link from "next/link";

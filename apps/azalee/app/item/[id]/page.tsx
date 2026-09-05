@@ -4,7 +4,10 @@ import { notFound } from "next/navigation";
 import { ItemDetail } from "@/components/wiki/ItemDetail";
 import { wikiService } from "@/lib/wiki-service";
 
-export const dynamic = "force-dynamic";
+/** Données de miroir en lecture seule : la fiche est servie en ISR. */
+export const dynamic = "force-static";
+export const revalidate = 3600;
+export const dynamicParams = true;
 
 export async function generateMetadata({
 	params,
