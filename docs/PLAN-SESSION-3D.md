@@ -219,8 +219,17 @@ L'orchestration machine a aussi été bornée : `nie-model-serve` fonctionne san
 budget CPK 4 Gio, deux workers, quatre threads HTTP, et cgroup `MemoryHigh=5G`/`MemoryMax=7G` ; le
 pruner a libéré 36,21 Gio (cache modèle ramené à 6 Gio, `target/debug` retiré après contrôle
 `/proc`). Les services `azalee-web`, `nie-model-serve`, `rg-cdn` et `cdn-variants` restent actifs.
-Le timer `rg-repo-sync` est installé mais attend un arbre Niers propre avant activation afin de ne
-pas capturer un sous-lot Claude en cours ; l'endpoint SSH de poste local n'est pas configuré.
+Le timer `rg-repo-sync` est installé mais désactivé par conception ; l'unité de contrôle est en
+lecture seule (sans `--commit` ni `REPO_SYNC_AUTOCOMMIT`) et tout checkpoint doit être lancé
+manuellement après revue. Cela évite de capturer un sous-lot Claude en cours ; l'endpoint SSH de
+poste local n'est pas configuré.
+
+Le 2026-09-05 à 04:24 UTC, une sonde `/health` du modèle a expiré alors que le processus était
+encore marqué actif : `MemoryCurrent` avait atteint environ 5,64 Gio, `memory.events high=17107` et
+`sock_throttled=128`, sans OOM. Le responsable déploiement a redémarré uniquement
+`nie-model-serve` à 04:34 UTC ; le PID `3449473` répond depuis lors `ok` sous cinq secondes, avec
+environ 219 Mio utilisés au démarrage, et les sondes Azalée/CDN restent HTTP 200. Cette reprise est
+une preuve de restauration du service, pas une preuve de parcours navigateur complet.
 
 ## Coordination A2A
 

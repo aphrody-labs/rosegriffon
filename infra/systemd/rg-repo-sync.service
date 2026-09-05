@@ -1,5 +1,5 @@
 [Unit]
-Description=checkpoint Git RG/Niers — sans déploiement
+Description=contrôle Git RG/Niers manuel — sans autocommit ni déploiement
 Documentation=file:///home/ubuntu/rg/docs/REPO-SYNC.md
 After=network-online.target
 Wants=network-online.target
@@ -13,10 +13,11 @@ WorkingDirectory=/home/ubuntu/rg
 Environment=PATH=/home/ubuntu/.bun/bin:/usr/local/bin:/usr/bin:/bin
 Environment=RG_ROOT=/home/ubuntu/rg
 Environment=NIERS_ROOT=/home/ubuntu/niers
-# Le timer checkpoint les changements sûrs, mais ne pousse ni ne publie rien.
-Environment=REPO_SYNC_AUTOCOMMIT=1
+# L'autocommit est volontairement désactivé : toute écriture Git doit être demandée
+# explicitement par un opérateur avec `repo-sync.ts --commit`.
+Environment=REPO_SYNC_AUTOCOMMIT=0
 Environment=REPO_SYNC_PUSH=0
-ExecStart=/home/ubuntu/.bun/bin/bun /home/ubuntu/rg/scripts/ops/repo-sync.ts --repo all --commit --json
+ExecStart=/home/ubuntu/.bun/bin/bun /home/ubuntu/rg/scripts/ops/repo-sync.ts --repo all --json
 Nice=15
 IOSchedulingClass=idle
 CPUQuota=20%

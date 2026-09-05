@@ -1,5 +1,5 @@
 [Unit]
-Description=checkpoint Git RG/Niers toutes les 30 minutes
+Description=contrôle Git RG/Niers désactivé par défaut
 
 [Timer]
 OnBootSec=15min
