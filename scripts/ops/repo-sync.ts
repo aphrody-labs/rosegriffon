@@ -136,10 +136,15 @@ function sensitivePath(path: string): string | undefined {
 	const normalized = path.replaceAll("\\", "/").replace(/^\.\//u, "");
 	const segments = normalized.split("/").filter(Boolean);
 	if (segments.length === 0) return "chemin vide";
-	if (segments[0] === "data" || normalized.startsWith("data/backups/")) {
+	const ocRegistry = /^data\/oc\/[^/]+\/(?:README\.md|manifest\.json|provenance\/)/iu.test(
+		normalized
+	);
+	if (segments[0] === "data" && !ocRegistry) {
 		return "données locales non versionnables";
 	}
-	if (normalized.includes("astro/sources/")) return "sources Astro privées";
+	if (normalized.includes("astro/sources/") || /(?:^|\/)source(?:\/|$)/iu.test(normalized)) {
+		return "sources Astro privées";
+	}
 	if (segments.some((segment) => SENSITIVE_SEGMENTS.has(segment))) {
 		return "artefact ou cache généré";
 	}
