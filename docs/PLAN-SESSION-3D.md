@@ -15,7 +15,7 @@ liaisons`.
 - Publication de la baseline vérifiée : `origin/main` du dépôt Niers contient ce commit. Les
   sources atelier de cette baseline et les correctifs WASM ultérieurs ont été intégrés
   sélectivement dans le monorepo RG ; les artefacts `outputs/` n'ont pas été recopiés.
-- Monorepo cible : branche `main`, tête publiée `a2418d82`, remote
+- Monorepo cible : branche `main`, tête publiée `7a6bc7e4`, remote
   `https://github.com/rose-griffon/rg.git` ; `origin/main` pointe sur cette même tête.
 - Les changements Explorer de NIE restent hors périmètre : ils ne sont pas portés dans RG. Le
   canal A2A a toutefois continué ses lots Niers indépendants (docs, chemins `csharp/**`/`src/**`)
@@ -29,9 +29,9 @@ liaisons`.
 | Fonction                 | État et preuve locale                                                                                                                                          |
 | ------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Édition réelle           | Catalogue CDN, choix par identifiant stable, transformations, annuler/rétablir et projet JSON ; tests projet/liaisons verts                                    |
-| Composition et aperçu 3D | GLB composé chargé dans `model-viewer`, chargement local des décodeurs Basis/Draco/Meshopt ; smoke Chromium vert                                               |
-| Imports locaux           | PNG réel, GLB et GLB/gzip validés dans Chromium ; signatures, URI, tailles et traversées couvertes par 7 tests                                                 |
-| Export                   | Téléchargement `avatar.glb` observé dans Chromium après composition et après import                                                                            |
+| Composition et aperçu 3D | GLB composé chargé dans `model-viewer`, chargement local des décodeurs Basis/Draco/Meshopt ; smoke Chromium local historique vert                               |
+| Imports locaux           | PNG réel, GLB et GLB/gzip validés dans le smoke Chromium local historique ; signatures, URI, tailles et traversées couvertes par 7 tests ; non rejoué sur le build public actuel |
+| Export                   | Téléchargement `avatar.glb` observé dans le smoke Chromium local historique ; non revendiqué pour la release publique actuelle                                  |
 | Compte                   | Enregistrer, lister, restaurer et supprimer via Server Actions ; absence de session refusée                                                                    |
 | Partage                  | Lien `/avatar?code=…`, format exact de 69 caractères, ouverture privilégiée côté serveur uniquement                                                            |
 | Sécurité des recettes    | Validation structurelle et volumétrique à l’écriture et à l’ouverture ; clés de pollution et valeurs hors bornes refusées                                      |
@@ -155,7 +155,7 @@ tests et le smoke public vérifient les chemins effectivement réutilisés.
 - Release preview B `2026-09-05T02-44-51-570-vkdWKsHwUClCT-XrRBjEy` (SHA `92c26dc6`) :
   build/lint/type/gates publics verts ; les premières tentatives d'inscription SPA restaient
   anonymes après redirection.
-- La tête RG `a2418d82` est maintenant poussée sur `origin/main`. Le contrôle opératoire
+- La tête RG `7a6bc7e4` est maintenant poussée sur `origin/main`. Le contrôle opératoire
   `bun run release:check` a exécuté 5/5 étapes (git-sync en dry-run, `nginx -t`, santé modèle,
   santé Azalée et santé CDN). Aucune preview ni promotion n'a été déclenchée par ce contrôle.
 - Le smoke public rejoué le 2026-09-05 avec Chromium isolé et allowlist `azalee.rosegriffon.fr,
@@ -179,7 +179,7 @@ cdn.rosegriffon.fr` ne remonte aucune erreur réseau ou console, mais le build s
 | Audit catalogue réel           | `bun app/avatar/verification/check-assets.ts`                                                            | 502 pièces, 491 icônes uniques, 0 erreur liaison, 0 erreur image/pixels, 0 erreur sélection→composition                                                                                                                                                |
 | TypeScript                     | `bun --bun tsc --noEmit --incremental false -p tsconfig.json`                                            | succès                                                                                                                                                                                                                                                 |
 | Lint atelier                   | ESLint et Oxlint ciblés sur `app/avatar`, serveur, E2E et configuration Playwright                       | succès, 0 erreur                                                                                                                                                                                                                                       |
-| Lint Azalée                    | `bun run --filter @rosegriffon/azalee-web lint` (Oxlint + ESLint)                                        | 0 erreur après retrait des imports/instructions inutiles ; 2 219 avertissements existants (principalement wrapping Tailwind et règles de style)                                                                                                        |
+| Lint Azalée                    | `bun run --filter @rosegriffon/azalee-web lint` (Oxlint + ESLint)                                        | succès, code 0 après stabilisation de l'effet galerie VRoid ; 0 erreur, 2 219 avertissements existants (principalement wrapping Tailwind et règles de style)                                                                                      |
 | Build WASM                     | `AZALEE_DIR=/home/ubuntu/rg/apps/azalee bash scripts/build-wasm.sh` depuis Niers                         | succès ; wasm-bindgen 0.2.125, wasm public optimisé de 2 111 117 à 1 775 695 octets                                                                                                                                                                    |
 | Build Azalée                   | `bun run build`                                                                                          | succès Next.js 16.3 canary, 120 routes ; `/avatar` dynamique (à rejouer après la convergence Astro/auteur)                                                                                                                                             |
 | Smoke Chromium local antérieur | Playwright sur build local, Chromium réel                                                                | vert en 8,5 s : édition, PNG 3×4, GLB, gzip, export, refus hors session, code invalide ; 0 console.error, pageerror ou réponse HTTP ≥400                                                                                                               |
@@ -241,6 +241,6 @@ volatile.
   moyen maximal de 8/255. Il ne mesure pas la fidélité du rendu 3D complet.
 - La fidélité visuelle du personnage n'est donc pas qualifiée de pixel-perfect sans comparaison
   raster mesurée du rendu final.
-- Les avertissements NFT/cache du build et les deux erreurs lint globales Vroid sont antérieurs et
-  distincts de l'atelier ; ils restent consignés, pas masqués par une affirmation de gate global
-  entièrement vert.
+- Les 2 219 avertissements lint globaux (principalement wrapping Tailwind et règles de style), ainsi
+  que les avertissements NFT/cache du build, restent distincts de l'atelier ; ils sont consignés et
+  ne sont pas masqués par une affirmation de fidélité visuelle ou de gate global sans réserve.
