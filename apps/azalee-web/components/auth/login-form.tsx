@@ -24,9 +24,9 @@ async function attendreSessionCreee(): Promise<void> {
 		}
 
 		const payload = (await reponse.json().catch(() => null)) as
-			| { data?: { user?: unknown } }
+			| { user?: unknown; data?: { user?: unknown } }
 			| null;
-		if (payload?.data?.user) {
+		if (payload?.user || payload?.data?.user) {
 			return;
 		}
 		await new Promise<void>((resolve) => setTimeout(resolve, DELAI_SESSION_MS));
