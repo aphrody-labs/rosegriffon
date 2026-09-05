@@ -109,12 +109,13 @@ leur présence et leur rôle sont documentés dans les règles de chaque dépôt
 Toute exception doit être ajoutée explicitement au `.gitignore`, relue par un
 agent, puis validée par `git diff --check` avant le checkpoint.
 
-## Timer d'autocommit sur le VPS
+## Contrôle Git manuel sur le VPS
 
 `infra/systemd/rg-repo-sync.service` est un oneshot borné à 20 % CPU et 256 Mio
-de RAM. `rg-repo-sync.timer` le déclenche après le démarrage puis toutes les
-30 minutes. Il checkpoint les deux arbres mais pousse à `0` : une publication
-reste une action séparée, après les gates et la validation navigateur.
+de RAM. L'unité installée n'a volontairement ni `--commit` ni
+`REPO_SYNC_AUTOCOMMIT=1` : elle ne fait qu'un contrôle en lecture seule. Le
+timer est livré désactivé et ne doit pas être activé pour capturer des lots en
+cours ; un checkpoint reste une action manuelle explicite, après revue.
 
 Installation idempotente :
 
@@ -122,14 +123,17 @@ Installation idempotente :
 sudo install -m 0644 infra/systemd/rg-repo-sync.service /etc/systemd/system/
 sudo install -m 0644 infra/systemd/rg-repo-sync.timer /etc/systemd/system/
 sudo systemctl daemon-reload
-sudo systemctl enable --now rg-repo-sync.timer
+sudo systemctl disable --now rg-repo-sync.timer
 systemctl list-timers rg-repo-sync.timer
 systemctl status rg-repo-sync.service --no-pager
 ```
 
-Le timer peut être désactivé sans toucher aux services web :
+Le timer reste désactivé sans toucher aux services web :
 `sudo systemctl disable --now rg-repo-sync.timer`. Les journaux sont ceux de
-systemd (`journalctl -u rg-repo-sync.service`).
+systemd (`journalctl -u rg-repo-sync.service`). Pour un checkpoint volontaire,
+lancer directement `bun scripts/ops/repo-sync.ts --repo all --commit` après
+vérification de l'arbre ; aucune unité ou variable d'environnement ne l'active
+automatiquement.
 
 ## Poste local et accès SSH
 
