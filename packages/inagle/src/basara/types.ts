@@ -1,3 +1,5 @@
+import { ELEMENT_NAMES as CANONICAL_ELEMENT_NAMES } from "../core/game-codes.js";
+
 /**
  * BASARA Types - Complete typings for BASARA/FABLED characters
  *
@@ -143,12 +145,7 @@ export interface BasaraDatabase {
  * - Axel Blaze: element=3 → Fire
  * - Nathan Swift: element=1 → Wind
  */
-export const ELEMENT_NAMES: Record<number, { en: string; ja: string; fr: string }> = {
-	1: { en: "Wind", ja: "風", fr: "Vent" },
-	2: { en: "Wood", ja: "林", fr: "Forêt" },
-	3: { en: "Fire", ja: "火", fr: "Feu" },
-	4: { en: "Mountain", ja: "山", fr: "Montagne" },
-};
+export const ELEMENT_NAMES = CANONICAL_ELEMENT_NAMES;
 
 /** Position name mappings */
 export const POSITION_NAMES: Record<number, { en: string; ja: string; fr: string }> = {

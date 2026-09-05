@@ -1,17 +1,7 @@
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
+import type { ConfigNode, ConfigVariable } from "../core/config-contract.js";
 import { resolveGameDataFile } from "../core/paths.js";
-
-interface ConfigVariable {
-	type: string;
-	value: string;
-}
-
-interface ConfigNode {
-	name: string;
-	variables: ConfigVariable[];
-	children?: ConfigNode[];
-}
 
 interface AuraConfigData {
 	entries: ConfigNode[];

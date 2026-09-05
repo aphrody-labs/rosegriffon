@@ -22,6 +22,11 @@
  * jamais attribués comme rareté de base via la gacha.
  */
 
+import { GACHA_GROWTH_RANKS, GACHA_RARITY_NAMES } from "../core/game-codes.js";
+
+/** Alias explicite de la table StarSign/gacha pour les consommateurs avancés. */
+export const RarityNames = GACHA_RARITY_NAMES;
+
 /**
  * Convertit un code de rareté en label d'affichage français.
  *
@@ -30,27 +35,7 @@
  *   FR: Normal / En progression / Expérimenté / Émérite / Légendaire / Héros / BASARA
  */
 export function rarityCodeToName(code: number): string {
-	switch (code) {
-		case 0:
-		case 1:
-			return "Normal";
-		case 2:
-			return "Expérimenté";
-		case 3:
-			return "Émérite";
-		case 4:
-			return "Normal";
-		case 5:
-		case 6:
-		case 7:
-			return "Légendaire";
-		case 10:
-			return "Héros";
-		case 20:
-			return "BASARA";
-		default:
-			return `Rank${code}`;
-	}
+	return GACHA_RARITY_NAMES[code] ?? `Rank${code}`;
 }
 
 /**
@@ -60,25 +45,6 @@ export function rarityCodeToName(code: number): string {
  * starSign codes : 0=N, 2=R, 5=UR, 6=LR, 7=Legend, 20=BASARA
  */
 export function rarityToGrowthRank(code: number): number {
-	// Rangs de la table de croissance : 0, 1, 2, 3, 4, 5
-	switch (code) {
-		case 0:
-			return 0; // N -> rang 0
-		case 2:
-			return 2; // R -> rang 2
-		case 3:
-			return 3; // SR -> rang 3
-		case 4:
-			return 4; // SSR -> rang 4
-		case 5:
-			return 5; // UR -> rang 5
-		case 6:
-			return 5; // LR -> stats UR
-		case 7:
-			return 5; // Legend -> stats UR
-		case 20:
-			return 5; // BASARA -> stats UR
-		default:
-			return code <= 5 ? code : 5;
-	}
+	// Rangs de la table de croissance : 0, 1, 2, 3, 4, 5.
+	return GACHA_GROWTH_RANKS[code] ?? (code <= 5 ? code : 5);
 }

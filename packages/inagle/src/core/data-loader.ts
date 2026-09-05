@@ -21,7 +21,7 @@ import {
 	cfgbinDbLoad,
 	cfgbinDbLoadText,
 } from "./cfgbin-db.js";
-import type { ConfigFile, ConfigNode } from "./config-parser.js";
+import type { ConfigDocument, ConfigFile, ConfigNode, RawConfigFile } from "./config-parser.js";
 import { DATA_ROOT, FILES, PATHS } from "./paths.js";
 
 /**
@@ -133,9 +133,7 @@ export function findConfigFile(category: string, prefix: string): string | null 
 export async function loadConfigAsync(category: string, filename: string): Promise<ConfigFile> {
 	if (cfgbinDbAvailable()) {
 		try {
-			const raw = cfgbinDbLoad(category, filename) as {
-				entries?: ConfigNode[];
-			};
+			const raw = cfgbinDbLoad(category, filename) as Partial<RawConfigFile>;
 			return {
 				name: filename,
 				variables: [],
@@ -147,7 +145,7 @@ export async function loadConfigAsync(category: string, filename: string): Promi
 	}
 
 	const filePath = join(PATHS.gamedata, category, filename);
-	const raw = await loadJSONAsync<{ entries: ConfigNode[] }>(filePath);
+	const raw = await loadJSONAsync<ConfigDocument>(filePath);
 
 	return {
 		name: filename,
@@ -171,16 +169,14 @@ export async function loadGamedataAsync<T>(filename: string): Promise<T> {
 export function loadConfig(category: string, filename: string): ConfigFile {
 	if (cfgbinDbAvailable()) {
 		try {
-			const raw = cfgbinDbLoad(category, filename) as {
-				entries?: ConfigNode[];
-			};
+			const raw = cfgbinDbLoad(category, filename) as Partial<RawConfigFile>;
 			return { name: filename, variables: [], children: raw.entries || [] };
 		} catch {
 			// Fallback to filesystem
 		}
 	}
 	const filePath = join(PATHS.gamedata, category, filename);
-	const raw = loadJSON<{ entries: ConfigNode[] }>(filePath);
+	const raw = loadJSON<ConfigDocument>(filePath);
 	return { name: filename, variables: [], children: raw.entries || [] };
 }
 

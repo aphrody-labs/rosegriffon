@@ -3,6 +3,8 @@
  * @description Complete type definitions for IEVR game data entities
  */
 
+import { ELEMENT_NAMES, RANK_RARITY_NAMES } from "./game-codes.js";
+
 // ============================================================================
 // ELEMENT & POSITION ENUMS
 // ============================================================================
@@ -25,14 +27,8 @@ export const ElementId = {
 
 export type ElementId = (typeof ElementId)[keyof typeof ElementId];
 
-export const ElementNames = {
-	0: { ja: "なし", en: "Void", fr: "Néant" },
-	1: { ja: "風", en: "Wind", fr: "Vent" },
-	2: { ja: "林", en: "Forest", fr: "Forêt" },
-	3: { ja: "火", en: "Fire", fr: "Feu" },
-	4: { ja: "山", en: "Mountain", fr: "Montagne" },
-	5: { ja: "無", en: "Void", fr: "Néant" },
-} as const;
+/** Alias public de la table d'éléments canonique. */
+export const ElementNames = ELEMENT_NAMES;
 
 /**
  * Character positions (ポジション)
@@ -65,12 +61,13 @@ export const PositionNames = {
  *   2 = Expérimenté   (EN: ADVANCED)   — 150 characters
  *   3 = Émérite       (EN: TOP)        — upgrade tier
  *   4 = Légendaire    (EN: LEGENDARY)  — upgrade tier
- *   5 = Héros         (EN: HERO)       — 34 UR + 36 LR + 38 Legend
- *   6 = Basara        (EN: FABLED)     — 64 characters
+ *   5/6/7 = Héros     (EN: HERO/FABLED) — normalized progression output
+ *   10 = Héros         (EN: HERO)       — enriched hero tier
+ *   20 = BASARA
  *
- * StarSign gacha codes: 0, 2, 5, 6, 7, 20
- * Codes 5/6/7 all map to "Légendaire" display (SR gacha pool).
- * "Héros" is set by match-heroes enrichment, not starSign.
+ * `RarityNames` is the normalized progression/rank space. StarSign gacha raw
+ * labels remain separate in `lib/rarity.ts`: raw codes 5/6/7 display as
+ * "Légendaire" in the gacha pool, while "Héros" is assigned by enrichment.
  */
 export const RarityId = {
 	Normal: 0,
@@ -99,18 +96,8 @@ export type RarityId = (typeof RarityId)[keyof typeof RarityId];
  *   Héros         — HERO (set by enrichment only)
  *   BASARA        — FABLED
  */
-export const RarityNames = {
-	0: "Normal",
-	1: "En progression",
-	2: "Expérimenté",
-	3: "Émérite",
-	4: "Légendaire",
-	5: "Héros",
-	6: "Héros",
-	7: "Héros",
-	10: "Héros",
-	20: "BASARA",
-} as const;
+/** Alias public de la table de labels de progression canonique. */
+export const RarityNames = RANK_RARITY_NAMES;
 
 // ============================================================================
 // NAMES & LOCALIZATION

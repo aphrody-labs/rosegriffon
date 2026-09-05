@@ -4,6 +4,10 @@
  */
 
 import type { CfgBinEntry, CfgBinFile } from "../characters/types.js";
+import {
+	CATEGORY_NAMES as CANONICAL_CATEGORY_NAMES,
+	ELEMENT_NAMES as CANONICAL_ELEMENT_NAMES,
+} from "../core/game-codes.js";
 
 export type { CfgBinEntry, CfgBinFile };
 
@@ -82,26 +86,10 @@ export interface PassiveSkillVariable {
  * Verified: Fire Tornado (whs00030) has element=3, so 3=Fire
  * Character elements use same IDs (see chara-param.ts elementIdToNames)
  */
-export const ELEMENT_NAMES: Record<number, { en: string; ja: string; fr: string }> = {
-	0: { en: "None", ja: "なし", fr: "Aucun" },
-	1: { en: "Wind", ja: "風", fr: "Vent" },
-	2: { en: "Forest", ja: "林", fr: "Forêt" },
-	3: { en: "Fire", ja: "火", fr: "Feu" },
-	4: { en: "Mountain", ja: "山", fr: "Montagne" },
-	5: { en: "Void", ja: "無", fr: "Néant" },
-};
+export const ELEMENT_NAMES = CANONICAL_ELEMENT_NAMES;
 
 /** Skill category enum - based on skillInfo dump and menu_text localization */
-export const CATEGORY_NAMES: Record<number, { en: string; ja: string; fr: string }> = {
-	0: { en: "None", ja: "なし", fr: "Aucun" },
-	1: { en: "Shoot", ja: "シュート", fr: "Tir" },
-	2: { en: "Dribble", ja: "ドリブル", fr: "Dribble" },
-	3: { en: "Block", ja: "ブロック", fr: "Défense" },
-	4: { en: "Catch", ja: "キャッチ", fr: "Arrêt" },
-	5: { en: "Special", ja: "スペシャル", fr: "Spécial" },
-	6: { en: "Passive", ja: "パッシブ", fr: "Passif" },
-	9: { en: "Stat Boost", ja: "ステータス", fr: "Boost Stats" },
-};
+export const CATEGORY_NAMES = CANONICAL_CATEGORY_NAMES;
 
 /** Unified active skill with all localized data */
 export interface UnifiedSkill {

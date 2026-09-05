@@ -10,6 +10,7 @@
  */
 
 import { createImageAPI } from "../core/images.js";
+import { GACHA_RARITY_NAMES } from "../core/game-codes.js";
 import type { BaseCharacter, Character } from "../core/types.js";
 import { loadAllCharacters, loadBaseCharacters } from "../entities/character.js";
 
@@ -46,18 +47,7 @@ export interface CharacterIdMapping {
 }
 
 /** Rarity names (French display labels — system_text NOUN_INFO 76-82) */
-export const RARITY_NAMES: Record<number, string> = {
-	0: "Normal",
-	1: "En progression",
-	2: "Expérimenté",
-	3: "Émérite",
-	4: "Normal",
-	5: "Normal",
-	6: "Normal",
-	7: "Normal",
-	10: "Héros",
-	20: "BASARA",
-};
+export const RARITY_NAMES = GACHA_RARITY_NAMES;
 
 /** Personality names */
 export const PERSONALITY_NAMES: Record<number, { en: string; ja: string; fr: string }> = {

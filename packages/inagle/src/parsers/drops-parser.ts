@@ -1,6 +1,6 @@
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
-import type { ConfigNode } from "../core/config-parser.js";
+import type { ConfigNode, RawConfigFile } from "../core/config-parser.js";
 import { toHex } from "../core/data-loader.js";
 import { DATA_ROOT } from "../core/paths.js";
 
@@ -13,10 +13,6 @@ export interface DropEntry {
 export interface DropTable {
 	tableId: string;
 	entries: DropEntry[];
-}
-
-interface ConfigFile {
-	entries: ConfigNode[];
 }
 
 function parseDropTable(node: ConfigNode): DropEntry | null {
@@ -48,7 +44,7 @@ export function loadDropTablesFromConfig(
 	}
 
 	try {
-		const content: ConfigFile = JSON.parse(readFileSync(filePath, "utf-8"));
+		const content: RawConfigFile = JSON.parse(readFileSync(filePath, "utf-8"));
 
 		// Traverse to find lists
 		// Note: The structure is flattened in the JSON representation usually

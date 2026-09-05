@@ -7,23 +7,19 @@
  * - Variables with type (Int, Float, String, List) and value
  */
 
-export interface ConfigVariable {
-	type: "Int" | "Float" | "String" | "List";
-	value: string;
-	items?: string[];
-}
+import type { ConfigFile, ConfigNode, ConfigVariable } from "./config-contract.js";
 
-export interface ConfigNode {
-	name: string;
-	variables: ConfigVariable[];
-	children?: ConfigNode[];
-}
-
-export interface ConfigFile {
-	name: string;
-	variables: ConfigVariable[];
-	children: ConfigNode[];
-}
+export {
+	CONFIG_SCHEMA_VERSION,
+	isVersionedConfigDocument,
+	type ConfigDocument,
+	type ConfigFile,
+	type ConfigNode,
+	type ConfigVariable,
+	type ConfigVariableType,
+	type RawConfigFile,
+	type VersionedConfigDocument,
+} from "./config-contract.js";
 
 /**
  * Parse an integer variable (handles negative hex values)

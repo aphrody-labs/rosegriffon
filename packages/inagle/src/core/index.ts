@@ -17,13 +17,19 @@
 
 export { loadJsonAsync as loadJsonFileAsync, loadJsonStream, measureTime } from "./async-loader.js";
 export {
+	CONFIG_SCHEMA_VERSION,
 	type CharaBaseData,
 	type CharaParamData,
+	type ConfigDocument,
 	type ConfigFile,
 	type ConfigNode,
 	type ConfigVariable,
+	type ConfigVariableType,
+	type RawConfigFile,
+	type VersionedConfigDocument,
 	extractVariables,
 	getNodesByName,
+	isVersionedConfigDocument,
 	parseCharaBaseNode,
 	parseCharaParamNode,
 	parseFloatVar,
