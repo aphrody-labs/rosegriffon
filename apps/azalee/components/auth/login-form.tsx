@@ -11,6 +11,27 @@ type AuthMode = "login" | "signup" | "forgot-password";
 const TENTATIVES_SESSION = 20;
 const DELAI_SESSION_MS = 100;
 
+async function requeteEmailAuth(
+	chemin: "sign-up" | "sign-in",
+	payload: { email: string; password: string; name?: string }
+): Promise<void> {
+	const reponse = await fetch(`/api/auth/${chemin}/email`, {
+		method: "POST",
+		credentials: "include",
+		cache: "no-store",
+		headers: { Accept: "application/json", "Content-Type": "application/json" },
+		body: JSON.stringify(payload),
+	});
+	const resultat = (await reponse.json().catch(() => null)) as
+		| { message?: string; error?: { message?: string } }
+		| null;
+	if (!reponse.ok) {
+		throw new Error(
+			resultat?.message ?? resultat?.error?.message ?? "L'authentification a échoué."
+		);
+	}
+}
+
 async function sessionEstDisponible(): Promise<boolean> {
 	for (let tentative = 0; tentative < TENTATIVES_SESSION; tentative += 1) {
 		const reponse = await fetch("/api/auth/get-session?disableCookieCache=true", {
@@ -121,14 +142,14 @@ export function LoginForm({ onSuccess, returnTo }: LoginFormProps) {
 			}
 
 			if (mode === "signup") {
-				const { error } = await authClient.signUp.email({
+				// La méthode réactive Better Auth peut publier son état local avant la fin de
+				// la réponse HTTP. Un fetch natif garantit que Set-Cookie est entièrement reçu
+				// avant toute sonde de session ou navigation du document.
+				await requeteEmailAuth("sign-up", {
 					email,
 					name: name || email.split("@")[0],
 					password,
 				});
-				if (error) {
-					throw new Error(error.message);
-				}
 				toast.success("Compte créé ! Tu es maintenant connecté.");
 				if (onSuccess) {
 					onSuccess();
@@ -137,13 +158,7 @@ export function LoginForm({ onSuccess, returnTo }: LoginFormProps) {
 				// On vérifie d'abord la session existante, puis fallback explicite au sign-in si besoin.
 				let sessionOK = await sessionEstDisponible();
 				if (!sessionOK) {
-					const { error: loginError } = await authClient.signIn.email({
-						email,
-						password,
-					});
-					if (loginError) {
-						throw new Error(loginError.message);
-					}
+					await requeteEmailAuth("sign-in", { email, password });
 					sessionOK = await sessionEstDisponible();
 				}
 				if (!sessionOK) {
