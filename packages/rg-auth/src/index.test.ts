@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { isAdmin, isStaff, resolveProfile, commonAuthOptions } from "./index";
+import { commonAuthOptions, deuxFacteurs, isAdmin, isStaff, resolveProfile } from "./index";
 
 describe("resolveProfile", () => {
 	const mockSupabase = {
@@ -106,5 +106,13 @@ describe("commonAuthOptions", () => {
 		expect(commonAuthOptions.user.fields.twoFactorEnabled).toBe("two_factor_enabled");
 		expect(commonAuthOptions.user.fields.twoFactorSecret).toBe("two_factor_secret");
 		expect(commonAuthOptions.user.fields.twoFactorBackupCodes).toBe("two_factor_backup_codes");
+	});
+});
+
+describe("deuxFacteurs", () => {
+	it("mappe aussi le champ user ajouté par le plugin", () => {
+		const plugin = deuxFacteurs("Azalée");
+		const champ = plugin.schema?.user?.fields.twoFactorEnabled as { fieldName?: string };
+		expect(champ.fieldName).toBe("two_factor_enabled");
 	});
 });

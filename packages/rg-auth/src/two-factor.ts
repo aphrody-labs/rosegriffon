@@ -45,6 +45,14 @@ export function deuxFacteurs(issuer: string) {
 		// Comptes OAuth sans mot de passe : voir l'en-tête.
 		allowPasswordless: true,
 		schema: {
+			// `twoFactorEnabled` est ajouté au modèle user par le plugin lui-même. Better Auth
+			// fusionne ce schéma après `commonAuthOptions.user.fields` : le mapping doit donc
+			// aussi être déclaré ici, sinon l'adaptateur SQL cherche une colonne camelCase.
+			user: {
+				fields: {
+					twoFactorEnabled: "two_factor_enabled",
+				},
+			},
 			twoFactor: {
 				modelName: "two_factor",
 				fields: {
