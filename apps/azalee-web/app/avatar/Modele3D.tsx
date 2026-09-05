@@ -1,103 +1,211 @@
 "use client";
 
-/**
- * Le modèle au centre de l'écran, sans habillage.
- *
- * Le visualiseur commun (`CharacterModelViewer`) impose un fond opaque, un rapport 3:4 et un
- * bouton de téléchargement : trois éléments que le jeu n'a pas, et le fond masquait sa scène.
- * Ici, seul le `model-viewer` est monté, sur fond transparent, aux dimensions du conteneur.
- *
- * Le script du composant est celui déjà servi par azalée (`/vendor/model-viewer.min.js`) : la
- * politique de sécurité n'autorise que l'origine du site, aucun script tiers n'est chargé.
- */
+import { useCallback, useEffect, useRef, useState } from "react";
+import { Button } from "@rosegriffon/ui/button";
+import { Slider } from "@rosegriffon/ui/slider";
+import { loadModelViewer } from "../../lib/model-viewer-loader";
+import { telecharger, type Projet } from "./projet";
+import "./atelier.css";
 
-import { useEffect, useRef, useState } from "react";
+type Viewer = HTMLElement & {
+	exportScene: () => Promise<Blob>;
+	updateFraming: () => void;
+	updateComplete: Promise<boolean>;
+};
+const IDENTITE = { rotation: 0, echelle: 1 };
 
-const SCRIPT = "/vendor/model-viewer.min.js";
-
-let chargement: Promise<void> | null = null;
-
-/** Charge le composant une seule fois pour toute la page. */
-function chargerModelViewer(): Promise<void> {
-	if (typeof window === "undefined") return Promise.resolve();
-	if (customElements.get("model-viewer")) return Promise.resolve();
-	chargement ??= new Promise<void>((resolve, reject) => {
-		const existant = document.querySelector<HTMLScriptElement>(`script[src="${SCRIPT}"]`);
-		if (existant) {
-			existant.addEventListener("load", () => resolve());
-			existant.addEventListener("error", () => reject(new Error("script indisponible")));
-			return;
-		}
-		const script = document.createElement("script");
-		script.type = "module";
-		script.src = SCRIPT;
-		script.addEventListener("load", () => resolve());
-		script.addEventListener("error", () => {
-			chargement = null;
-			reject(new Error("script indisponible"));
-		});
-		document.head.appendChild(script);
-	});
-	return chargement;
-}
-
-export function Modele3D({ url }: { url: string }) {
+/** Un seul viewer : les changements de recette préservent la caméra. */
+export function Modele3D({
+	url,
+	transformation = IDENTITE,
+	edition = false,
+}: {
+	url: string;
+	transformation?: Projet["transformation"];
+	edition?: boolean;
+}) {
 	const hote = useRef<HTMLDivElement>(null);
-	const [pret, setPret] = useState(false);
-
+	const viewer = useRef<Viewer | null>(null);
+	const [instance, setInstance] = useState<Viewer | null>(null);
+	const revision = useRef(0);
+	const exportToken = useRef(0);
+	const [charge, setCharge] = useState(false);
+	const [erreur, setErreur] = useState("");
+	const [tentative, setTentative] = useState(0);
+	const [exporte, setExporte] = useState(false);
+	const invaliderTravail = useCallback(() => {
+		revision.current++;
+		exportToken.current++;
+	}, []);
 	useEffect(() => {
 		let annule = false;
-		chargerModelViewer()
+		let element: Viewer | null = null;
+		const loaded = () => {
+			if (!annule) {
+				setCharge(true);
+				setErreur("");
+			}
+		};
+		const failed = () => {
+			if (!annule) {
+				setCharge(false);
+				setErreur("Assemblage 3D indisponible. Réessayez ou choisissez une autre pièce.");
+			}
+		};
+		setCharge(false);
+		setExporte(false);
+		setErreur("");
+		loadModelViewer()
 			.then(() => {
-				if (!annule) setPret(true);
+				if (annule || !hote.current) return;
+				const mv = document.createElement("model-viewer") as Viewer;
+				element = mv;
+				for (const [nom, valeur] of Object.entries({
+					alt: "Avatar NIE éditable en 3D",
+					"camera-controls": "",
+					"touch-action": "pan-y",
+					"camera-orbit": "0deg 82deg auto",
+					"interaction-prompt": "none",
+					exposure: "1",
+					"shadow-intensity": "0",
+				}))
+					mv.setAttribute(nom, valeur);
+				mv.style.cssText = "width:100%;height:100%;min-height:28rem;flex:1";
+				mv.addEventListener("load", loaded);
+				mv.addEventListener("error", failed);
+				hote.current.appendChild(mv);
+				viewer.current = mv;
+				setInstance(mv);
 			})
-			.catch(() => {
-				/* sans le composant, la scène reste sans modèle plutôt qu'avec un cadre d'erreur */
+			.catch((e) => {
+				if (!annule) setErreur(e instanceof Error ? e.message : "Visualiseur indisponible.");
 			});
 		return () => {
 			annule = true;
+			invaliderTravail();
+			element?.removeEventListener("load", loaded);
+			element?.removeEventListener("error", failed);
+			element?.remove();
+			if (viewer.current === element) viewer.current = null;
 		};
-	}, []);
-
+	}, [invaliderTravail, tentative]);
 	useEffect(() => {
-		if (!pret || !hote.current) return;
-		const boite = hote.current;
-		boite.innerHTML = "";
-		const mv = document.createElement("model-viewer");
-		mv.setAttribute("alt", "");
-		mv.setAttribute("camera-controls", "");
-		mv.setAttribute("touch-action", "pan-y");
-		mv.setAttribute("exposure", "1");
-		mv.setAttribute("shadow-intensity", "0");
+		if (!instance || instance !== viewer.current) return;
+		revision.current++;
+		setCharge(false);
+		setErreur("");
+		instance.setAttribute("src", url);
+	}, [url, instance]);
+	useEffect(() => {
+		if (!instance || instance !== viewer.current) return;
+		revision.current++;
+		instance.setAttribute("orientation", `0deg 0deg ${transformation.rotation}deg`);
+		instance.setAttribute(
+			"scale",
+			`${transformation.echelle} ${transformation.echelle} ${transformation.echelle}`
+		);
+	}, [instance, transformation.rotation, transformation.echelle]);
+	return (
+		<div className="atelier-visualiseur">
+			<div ref={hote} className="atelier-visualiseur-hote" />
+			<div className="atelier-visualiseur-outils">
+				<p role="status" className="mr-auto text-sm">
+					{erreur || (charge ? "Modèle prêt" : "Chargement du modèle…")}
+				</p>
+				{erreur && (
+					<Button
+						variant="outline"
+						onClick={() => {
+							setCharge(false);
+							setTentative((t) => t + 1);
+						}}
+					>
+						Réessayer
+					</Button>
+				)}
+				{edition && (
+					<>
+						<Button
+							variant="outline"
+							disabled={!charge}
+							onClick={() => {
+								viewer.current?.setAttribute("camera-orbit", "0deg 82deg auto");
+								viewer.current?.updateFraming();
+							}}
+						>
+							Recadrer
+						</Button>
+						<Button
+							disabled={!charge || exporte}
+							onClick={async () => {
+								const mv = viewer.current;
+								if (!mv) return;
+								const version = revision.current;
+								const token = ++exportToken.current;
+								setExporte(true);
+								try {
+									await mv.updateComplete;
+									if (viewer.current !== mv || revision.current !== version) return;
+									const blob = await mv.exportScene();
+									if (viewer.current === mv && revision.current === version)
+										telecharger(blob, "avatar.glb");
+								} catch {
+									if (viewer.current === mv)
+										setErreur("Export GLB impossible. Réessayez après le chargement complet.");
+								} finally {
+									if (viewer.current === mv && exportToken.current === token) setExporte(false);
+								}
+							}}
+						>
+							{exporte ? "Export en cours…" : "Exporter le GLB"}
+						</Button>
+					</>
+				)}
+			</div>
+		</div>
+	);
+}
 
-		// Cadrage fixe, plutôt que le cadrage automatique sur la boîte englobante : celui-ci
-		// changeait de distance à chaque pièce ajoutée, si bien que l'avatar rapetissait ou
-		// grandissait sans raison visible. La cible vise le buste — l'avatar mesure de 1,25 m à
-		// 2,08 m selon la morphologie, et viser le milieu le garde entier dans le cadre.
-		mv.setAttribute("camera-target", "0m 0.85m 0m");
-		mv.setAttribute("camera-orbit", "0deg 82deg 3.2m");
-		mv.setAttribute("field-of-view", "28deg");
-		mv.setAttribute("min-field-of-view", "12deg");
-		mv.setAttribute("max-field-of-view", "45deg");
-
-		// Les gestes sont LIBRES : tourner, zoomer et déplacer la vue. Le jeu n'en propose que deux,
-		// mais sur le web on attend d'un modèle qu'il se manipule entièrement — et l'on ne peut pas
-		// s'approcher d'un détail sans pouvoir recentrer dessus.
-		//
-		// Les bornes restent larges plutôt qu'absentes : elles empêchent seulement de passer sous
-		// le sol ou de s'éloigner au point de perdre l'avatar de vue.
-		mv.setAttribute("min-camera-orbit", "auto 15deg 0.5m");
-		mv.setAttribute("max-camera-orbit", "auto 155deg 8m");
-		mv.setAttribute("interaction-prompt", "none");
-		mv.style.width = "100%";
-		mv.style.height = "100%";
-		mv.style.backgroundColor = "transparent";
-		mv.setAttribute("src", url);
-		boite.appendChild(mv);
-		return () => {
-			boite.innerHTML = "";
-		};
-	}, [pret, url]);
-
-	return <div ref={hote} className="size-full" />;
+/** Le kit expose le root ; le nom accessible est aussi posé sur son thumb interactif. */
+export function CurseurAtelier({
+	label,
+	valeur,
+	unite,
+	min,
+	max,
+	step,
+	changer,
+}: {
+	label: string;
+	valeur: number;
+	unite: string;
+	min: number;
+	max: number;
+	step: number;
+	changer: (valeur: number) => void;
+}) {
+	return (
+		<div className="atelier-curseur">
+			<div>
+				<span>{label}</span>
+				<output>
+					{Number(valeur.toFixed(2))}
+					{unite}
+				</output>
+			</div>
+			<Slider
+				aria-label={label}
+				min={min}
+				max={max}
+				step={step}
+				value={[valeur]}
+				ref={(element) => {
+					element?.querySelector('[role="slider"]')?.setAttribute("aria-label", label);
+				}}
+				onValueChange={(values) => {
+					if (values[0] !== undefined) changer(values[0]);
+				}}
+			/>
+		</div>
+	);
 }
