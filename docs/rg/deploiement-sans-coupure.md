@@ -46,8 +46,9 @@ un `next build` ultérieur remplace les fichiers du dépôt sans jamais toucher 
 déjà publié, donc sans retirer sous les pieds du processus en cours les fragments de
 route qu'il charge à la demande.
 
-`data/backups` (miroir SQLite) est un lien vers le dépôt et non une copie : la synchro
-nocturne permute ce fichier, et une version doit voir la permutation.
+`/home/ubuntu/niers/var/mirror.sqlite` est le lien stable du miroir SQLite canonique :
+`nie-miroir.timer` permute sa cible par échange atomique, et une version doit voir la
+permutation.
 
 Les 5 dernières versions sont conservées (`--keep=n`), ce qui donne un retour arrière
 immédiat : `bun scripts/ops/deploy.ts rollback azalee` (ou `--to=<version>`).
@@ -151,8 +152,9 @@ certificat pour chaque prévisualisation.
 ## Conséquences ailleurs
 
 - `scripts/ship-azalee.sh` / `ship-website.sh` sont conservés mais délèguent ici.
-- `apps/azalee/scripts/ops/mirror-sync.sh` appelle `deploy.ts reload azalee` : le wiki ne
-  tombe plus chaque nuit au moment de la permutation du miroir SQLite.
+- `niers/scripts/donnees/miroir-inagle.sh` publie le miroir par échange atomique ; le
+  wiki ne tombe pas pendant la permutation et ses lecteurs réouvrent le handle si
+  l'inode change.
 - `scripts/azalee-watchdog.sh` lit `rg-releases/azalee/live.env` pour sonder le slot
   **vivant**, saute son tour tant que `deploy.lock` existe, et relance le slot vivant
   s'il est arrêté (cas d'un redémarrage machine alors que la production était sur B).

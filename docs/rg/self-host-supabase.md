@@ -266,9 +266,9 @@ curl -s http://127.0.0.1:8812/health
 Secrets : `/etc/postgrest.conf`, `/etc/rg-storage.env`, `/etc/rg-realtime.env`
 (tous en 0600).
 
-Le miroir SQLite (`azalee-mirror-sync.timer`) et les sauvegardes continuent de
-fonctionner sans modification : ils passent par `DATABASE_URL`, qui pointe
-désormais sur la base locale.
+Le miroir SQLite (`nie-miroir.timer`, possédé par `/home/ubuntu/niers`) et les
+sauvegardes continuent de fonctionner sur la base locale. Le publisher écrit
+`/home/ubuntu/niers/var/mirror.sqlite`; Azalée le consomme via `SQLITE_DB_PATH`.
 
 ## Pièges
 

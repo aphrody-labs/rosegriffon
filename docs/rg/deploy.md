@@ -28,7 +28,7 @@ une commande explicite sur la machine.
 | `cdn-variants` | 8805 | redimensionnement + WebP à la volée | non |
 | `nie-model-serve` | 8790 | modèles 3D assemblés à la volée, décodage **live** des textures des archives CPK | non (binaire Rust) |
 | `rg-cron` | — | tâches planifiées | non |
-| `azalee-mirror-sync` | — | rafraîchissement quotidien du miroir SQLite | non |
+| `nie-miroir.timer` | — | rafraîchissement quotidien du miroir SQLite canonique | non |
 
 Domaines : `rosegriffon.fr`, `azalee.rosegriffon.fr`, `api.rosegriffon.fr`
 (passerelle des outils internes), `cdn.rosegriffon.fr`, `mcp.rosegriffon.fr`.
@@ -153,11 +153,16 @@ Le serveur MCP expose ces vérifications en outils (`ops_status`, `ops_logs`,
 ## Données
 
 Le miroir SQLite des tables `inagle_*` est rafraîchi chaque nuit par
-`azalee-mirror-sync.timer` : dump Supabase → validation → échange atomique du
-lien `mirror.sqlite` → rétention de deux snapshots → redémarrage des services
-concernés. Les consommateurs de la bibliothèque détectent aussi le changement
-de fichier tout seuls (vérification d'inode), donc un processus long ne sert
-jamais un snapshot périmé.
+`nie-miroir.timer`, possédé par le dépôt `/home/ubuntu/niers` : dump Supabase →
+validation → échange atomique du lien `/home/ubuntu/niers/var/mirror.sqlite` →
+rétention de deux snapshots. Les unités Azalée épinglent ce chemin via
+`SQLITE_DB_PATH`. Les consommateurs de la bibliothèque détectent aussi le
+changement d'inode tout seuls, donc un processus long ne sert jamais un snapshot
+périmé.
+
+Après une publication réussie, le publisher peut invalider les fiches ISR avec
+`POST /api/ops/revalidate/wiki` et le secret `AZALEE_REVALIDATE_SECRET`. La route
+est inactive par défaut si le secret n'est pas défini.
 
 Corriger une donnée du jeu ne se fait **jamais** dans le miroir : la source est
 `packages/inagle`, poussée vers Supabase, puis répliquée. Voir

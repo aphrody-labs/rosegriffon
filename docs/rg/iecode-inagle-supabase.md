@@ -1,6 +1,6 @@
 # iecode → inagle → Supabase → azalee — référence unifiée du pipeline data IEVR
 
-Document de référence consolidé pour la chaîne de traitement des données du jeu **Inazuma Eleven: Victory Road (IEVR)** dans le monorepo `rg`. Il agrège trois audits lecture-seule (iecode, inagle, Supabase) réalisés le 2026-06-04, harmonisés et recoupés. Tout est ancré au réel (parsers, schéma DB live, comptes `COUNT(*)`) ; les incertitudes sont signalées explicitement. Aucun code n'a été modifié.
+Document de référence consolidé pour la chaîne de traitement des données du jeu **Inazuma Eleven: Victory Road (IEVR)** dans le monorepo `rg`. Il agrège trois audits lecture-seule (iecode, inagle, Supabase) réalisés le 2026-06-04, harmonisés et recoupés. Tout est ancré au réel (parsers, schéma DB live, comptes `COUNT(*)`) ; les incertitudes sont signalées explicitement. Les garde-fous ajoutés depuis l'audit sont indiqués dans les sections d'état et dans `docs/decision-archi-donnees-azalee.md`.
 
 Références connexes existantes : `docs/inagle.md`, `docs/database.md`, `docs/wiki-filters.md`, `docs/lvl5.md`.
 
@@ -33,17 +33,17 @@ Le flux part des binaires bruts du jeu (extraits de Steam via iecode) et finit d
 │  inagle_rag_chunks : embedding halfvec(1024) HNSW + content_tsv GIN            │
 │  RPC rag_hybrid_search (vecteur + lexical fusionnés par RRF)                    │
 └───────────────────────────────┬──────────────────────────────────────────────┘
-                                 │ azalee `backup:supabase` (cron) → miroir SQLite
+                                 │ `nie-miroir.timer` (publisher niers) → miroir SQLite
                                  ▼
 ┌──────────────────────────────────────────────────────────────────────────────┐
 │ azalee (Next 16, self-host VPS :3003) — wiki + cron                            │
-│  apps/azalee/data/backups/supabase-*.sqlite  (miroir embarqué, gitignoré)      │
+│  /home/ubuntu/niers/var/mirror.sqlite  (miroir canonique, chemin épinglé)      │
 │  lib/supabase/sqlite-client.ts + lib/wiki-service.ts ──▶ SSR wiki              │
-│  cron rg-cron : inagle push → backup SQLite → RAG (ie-crawl/zukan remap)       │
+│  cron rg-cron : inagle push → publisher miroir → RAG (ie-crawl/zukan remap)   │
 └──────────────────────────────────────────────────────────────────────────────┘
 ```
 
-Orchestration cron (systemd `rg-cron.service`, **pas** pg_cron côté DB) : `packages/cron/src/tasks/db.ts` enchaîne `runInaglePush()` (= `bun run --filter @rosegriffon/inagle push`) puis `runSQLiteBackup()` (= `azalee backup:supabase`, régénère le miroir). Le cron lit/écrit aussi `inagle_rag_chunks` pour le RAG et remappe l'ordre zukan via les subpaths leaf `@rosegriffon/inagle/zukan/order`.
+Orchestration cron (systemd `rg-cron.service`, **pas** pg_cron côté DB) : `packages/cron/src/tasks/db.ts` enchaîne `runInaglePush()` (= `bun run --filter @rosegriffon/inagle push`) puis `runSQLiteBackup()` (= `niers/scripts/donnees/miroir-inagle.sh`, validation et publication atomique du miroir). Le cron lit/écrit aussi `inagle_rag_chunks` pour le RAG et remappe l'ordre zukan via les subpaths leaf `@rosegriffon/inagle/zukan/order`.
 
 Idempotence Steam : le pipeline iecode est gardé par le **buildid Steam** (`.build-snapshot.json`) ; côté RAG, la clé de dédup est `(source_id, content_hash)`.
 
@@ -152,8 +152,8 @@ API universelle de données de jeu pour IEVR. Package `@rosegriffon/inagle` v1.2
         ▼   src/cli-push.ts  (cron `--run` → push)
    Supabase Postgres  (tables inagle_*)
         │
-        ▼   azalee `backup:supabase` (cron)
-   apps/azalee/data/backups/supabase-*.sqlite  (MIROIR SQLite embarqué, ~10-180 Mo, gitignoré, PII emails)
+        ▼   `nie-miroir.timer` / `miroir-inagle.sh`
+   /home/ubuntu/niers/var/mirror.sqlite  (MIROIR SQLite canonique, publié atomiquement)
         │
         ▼   apps/azalee/lib/supabase/sqlite-client.ts + lib/wiki-service.ts
    Wiki azalee (SSR Next 16, :3003)
@@ -225,11 +225,11 @@ Points sensibles :
 - **Auras** : source de vérité = parse natif (`loadAuraSkills`) s'il est ≥ au snapshot du service ; hissatsu natif écrit dans `sheet_data.hissatsu` (ce que `getAura` côté azalee consomme), réparti par sous-type vers `inagle_keshins/souls/awakenings/mode_changes/miximax/auras`.
 - Skills filtrés : exclut catégories passif (6/"Passive") et stat-boost (9). Vidéos depuis `skill-videos.json` (`.wmv`→`.webm`).
 
-Déclenché par cron : `packages/cron/src/tasks/db.ts` → `runInaglePush()` = `bun run --filter @rosegriffon/inagle push`, puis `runSQLiteBackup()` = `azalee backup:supabase` qui régénère le miroir SQLite.
+Déclenché par cron : `packages/cron/src/tasks/db.ts` → `runInaglePush()` = `bun run --filter @rosegriffon/inagle push`, puis `runSQLiteBackup()` = `niers/scripts/donnees/miroir-inagle.sh`, qui valide et republie le miroir SQLite canonique. `backup:supabase` reste disponible pour fabriquer un snapshot local de secours, hors chemin de production.
 
 ### 2.8 Consommation par azalee + cron
 
-- **azalee n'importe PAS le runtime de parsing** (`createInagleService`) — il importe seulement les **types** et constantes (`apps/azalee/lib/wiki-service.ts` : `import type { BaseCharacter, Item, Skill, Team }`, `ElementNames`, `CATEGORY_NAMES`, et le JSON `change_aura_skills.json`). La donnée vient des **tables `inagle_*`** lues via `lib/supabase/sqlite-client.ts` (miroir SQLite embarqué `apps/azalee/data/backups/supabase-*.sqlite`, sélectionne le plus récent ; override `SQLITE_DB_PATH`) ou Supabase. `lib/wiki-service.ts` est la couche d'accès (listes/filtres/getAura/getSkill…).
+- **azalee n'importe PAS le runtime de parsing** (`createInagleService`) — il importe seulement les **types** et constantes (`apps/azalee/lib/wiki-service.ts` : `import type { BaseCharacter, Item, Skill, Team }`, `ElementNames`, `CATEGORY_NAMES`, et le JSON `change_aura_skills.json`). La donnée vient des **tables `inagle_*`** lues via `lib/supabase/sqlite-client.ts` (miroir canonique `/home/ubuntu/niers/var/mirror.sqlite`, override `SQLITE_DB_PATH`) ou Supabase. `lib/wiki-service.ts` est la couche d'accès (listes/filtres/getAura/getSkill…).
 - **cron** consomme inagle de deux façons : (a) exécute le push (`db.ts`) ; (b) importe des subpaths leaf (`@rosegriffon/inagle/zukan/order` pour `buildOrderMap`/`crawlZukanOrderPages`) et lit/écrit les tables `inagle_characters/inagle_skills/inagle_rag_chunks` pour le RAG et le remap zukan. Le `dist/` d'inagle doit exister (subpath exports) sinon `rg-cron` crash-loop.
 
 **Piège NULL `category_id`/`element_id`** : sur `inagle_skills`, `category_id` et `element_id` sont à **NULL** en base. La résolution se fait via les **colonnes texte FR** : `wiki-service.ts` filtre `query.eq("category", searchCat)` (ligne ~1497) après mapping `shoot/block/dribble/catch` → nom FR via `CATEGORY_NAMES`. À noter : pour les **auras** (`inagle_auras` etc.), `element_id` **est** peuplé et filtré via `.eq/.in("element_id", …)` avec `getElementIds()` (Néant mappe 0 ET 5) — spécifique aux auras, pas aux skills. Voir `docs/wiki-filters.md`.
@@ -387,7 +387,7 @@ Liens inter-étages vérifiés entre les trois audits :
 - **inagle (cli-push) → Supabase (tables `inagle_*`)** : les tables `inagle_*` sont des projections écrasées par `cli-push.ts` (delete+reinsert) ; cohérent avec l'absence totale de FK Postgres entre elles (audit Supabase §3.4) et avec leur corrélation par champs métier (`internal_code`, `team_id`, `partner_ids`). Le piège `category_id`/`element_id = NULL` est constaté des deux côtés : décrit dans inagle (`wiki-service.ts` filtre via texte FR) et **mesuré** dans Supabase (`skills_null_catid=1002` sur 1 002 lignes). Triple confirmation avec CLAUDE.md.
 - **inagle (auras hissatsu natif) → Supabase répartition** : le `loadAuraSkills`/`resolveAuraHissatsu` d'inagle (228/387 auras résolues) alimente `sheet_data.hissatsu` et la répartition par sous-type → tables `inagle_keshins (282) / souls (56) / miximax (70) / auras (9)`. Les comptes Supabase reflètent cette ventilation.
 - **cron ie-crawl → `inagle_rag_chunks`** : le RAG est alimenté par le cron, pas par cli-push. La répartition `source_kind` le prouve : `sqlite` 6 962 (miroir inagle embarqué côté azalee re-chunké), `tweet` 1 328, `json/doc/lua/ts/cfg` (sources iecode/docs). La dédup `(source_id, content_hash)` rend le crawl idempotent. La RPC `rag_hybrid_search` (HNSW + GIN fusionnés par RRF) est consommée par azalee.
-- **Supabase → azalee (miroir SQLite)** : `azalee backup:supabase` (cron) régénère `apps/azalee/data/backups/supabase-*.sqlite` depuis les tables `inagle_*`. azalee lit ce miroir via `lib/supabase/sqlite-client.ts` (sélectionne le plus récent). Le test d'intégration inagle §2.9 vérifie l'alignement `COUNT(*) inagle_characters` (SQLite) ≥ parsé : cohérence bout-en-bout testée.
+- **Supabase → azalee (miroir SQLite)** : `nie-miroir.timer` publie atomiquement `/home/ubuntu/niers/var/mirror.sqlite` depuis les tables `inagle_*`; azalee le lit via `lib/supabase/sqlite-client.ts` avec détection d'inode. Le test d'intégration inagle §2.9 vérifie l'alignement `COUNT(*) inagle_characters` (SQLite) ≥ parsé : cohérence bout-en-bout testée.
 - **Idempotence par buildid** : iecode garde le pipeline par buildid Steam (`.build-snapshot.json`). Réserve cohérente des deux côtés : ce buildid **n'est pas propagé** jusqu'au RAG (`inagle_rag_chunks.buildid = NULL` partout, `rag_distinct_builds=0`).
 
 ## 5. Gaps / NON_FAIT agrégés

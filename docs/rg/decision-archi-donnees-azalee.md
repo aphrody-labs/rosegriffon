@@ -1,20 +1,35 @@
 # Décision : architecture de données azalée
 
-Statut : PROPOSÉE — 2026-06-05. Cible : `apps/azalee` (wiki IEVR, self-host VPS).
+Statut : ADOPTÉE — 2026-09-05. Cible : `apps/azalee` (wiki IEVR, self-host VPS).
+
+## État d'implémentation
+
+- **Miroir** : le publisher canonique est `niers/scripts/donnees/miroir-inagle.sh`
+  et son unité `nie-miroir.timer`. Azalée consomme le chemin stable fourni par
+  `SQLITE_DB_PATH` et réouvre le handle après un échange d'inode.
+- **Accès données** : le pont Drizzle dual-runtime est présent derrière la façade
+  de compatibilité `SqliteQueryBuilder`. La façade reste conservée tant que la
+  parité PostgREST des 1445 call-sites n'est pas démontrée par comparaison.
+- **Rendu** : les six fiches détail `/chara`, `/skill`, `/item`, `/passive`,
+  `/tactic` et `/aura` sont en ISR horaire avec `dynamicParams=true`; les listes,
+  filtres, comptes et surfaces authentifiées restent dynamiques.
+- **Invalidation** : `POST /api/ops/revalidate/wiki` est protégé par
+  `AZALEE_REVALIDATE_SECRET`. Le câblage du publisher externe à cette route reste
+  une opération de déploiement, pas une dépendance silencieuse de l'application.
 
 ## 1. Contexte
 
 Azalée est un wiki IEVR public, read-heavy, servi en self-host sur 1 VPS via `azalee-web.service` (Next 16 standalone, port 3003, build = `bash scripts/ship-azalee.sh` qui contourne le crash SIGILL/code 132 de Next16+Bun à l'exit). La donnée de jeu = ~44-63 tables `inagle_*` STATIQUES (ne changent qu'à un re-dump du jeu) : ~6148 personnages (5204 base_slug), ~1002 skills, ~1668 items, auras/keshins/tactics, etc. → des milliers de pages adressables.
 
-Source de vérité = inagle (TS) → Supabase. État réel constaté dans le code :
+Source de vérité = inagle (TS) → Supabase ; le publisher `niers` en extrait le miroir de lecture canonique. État réel constaté dans le code :
 
-- **Miroir SQLite embarqué** (`data/backups/supabase-*.sqlite`, ~104 Mo) + **`SqliteQueryBuilder`** (494 LOC, `lib/supabase/sqlite-client.ts`) qui RÉ-IMPLÉMENTE À LA MAIN la surface PostgREST (eq/neq/ilike/or/range/count, vues `*_clean` émulées via GROUP BY name_fr, json_extract pour `->>`, parser `.or()` splitTopLevel maison).
+- **Miroir SQLite canonique** (`/home/ubuntu/niers/var/mirror.sqlite`, publié par `nie-miroir.timer`) + **`SqliteQueryBuilder`** (494 LOC, `lib/supabase/sqlite-client.ts`) qui RÉ-IMPLÉMENTE À LA MAIN la surface PostgREST (eq/neq/ilike/or/range/count, vues `*_clean` émulées via GROUP BY name_fr, json_extract pour `->>`, parser `.or()` splitTopLevel maison). Les snapshots de `data/backups/` ne sont plus que le repli local.
 - **Proxy** (`lib/supabase/server.ts` l.105) : SEULES les tables `inagle_*` sont servies depuis SQLite ; tout le reste (auth, RAG, RPC, éditorial) reste sur Supabase. Fallback Postgres silencieux sur exception.
-- **Rendu** : `/skill /item /aura /tactic` toutes en `force-dynamic` ; `/chara` plafonné `slice(0,50)` sur 5204, `revalidate=3600`. Donnée immuable servie en dynamique runtime.
+- **Rendu** : les fiches détail `/skill /item /aura /tactic /chara` sont en ISR horaire, avec les chemins restants rendus à la demande ; les listes, filtres et surfaces authentifiées restent dynamiques.
 
 Fragilités Supabase DOCUMENTÉES et confirmées : `DATABASE_URL` pointe l'hôte direct IPv6-only (`getaddrinfo ENOTFOUND` / login 500), env « sensitive » scellé en blob `eyJ2Ijo` (filtré dans server.ts l.14/20). Le miroir local sert justement à DÉCOUPLER de ça.
 
-Fragilités du miroir confirmées : `SQLITE_DB_PATH` défini NULLE PART → `getSqlitePath()` (l.23) prend « le fichier au nom le plus récent » (`b.localeCompare(a)`), non-déterministe. Risque MATÉRIEL constaté : 2 snapshots tronqués de 14 Mo présents à l'instant dans `data/backups/` à côté du 104 Mo. AUCUN timer/cron de refresh n'existe (seuls shenron-*/rpbey-* présents = modèles). PII inutilement embarquée (le backup dump `information_schema` sans exclude → account/session/user/profiles/orders/patreon_* snapshotés mais jamais lus).
+Fragilités historiques du miroir corrigées : `SQLITE_DB_PATH` est maintenant épinglé sur le chemin canonique et `nie-miroir.timer` valide puis publie les snapshots. Les anciens fichiers de `data/backups/` peuvent encore contenir de la PII et restent donc un repli local à purger selon la politique de rétention, jamais une source de production.
 
 ## 2. Axes de durabilité évalués
 
@@ -29,8 +44,8 @@ Maintenabilité (tuer le PostgREST maison) · Fraîcheur/automatisation (fini le
 **On retient (e) l'hybride.** Trois chantiers orthogonaux, chacun adossé à une recherche :
 
 1. **Couche data → Drizzle ORM** (tue les 494 LOC d'émulation PostgREST). Seule option couvrant nativement la contrainte dual-runtime d'azalée : `drizzle-orm/node-sqlite` (DatabaseSync) au BUILD sous `/usr/bin/node` v22 (next-build.sh l.25/37, Bun crashe le prerender) ET `drizzle-orm/bun-sqlite` au RUNTIME sous azalee-web.service, MÊME schéma, swap derrière le garde `typeof Bun` DÉJÀ présent (sqlite-client.ts l.55-85). Schéma introspecté une fois via `drizzle-kit pull` (donnée statique → 0 churn entre dumps).
-2. **Sync → industrialiser le miroir** (tue le snapshot périmé) : épingler `SQLITE_DB_PATH` (chemin stable `mirror.sqlite`) + timer systemd post-`inagle push` (sync incrémental watermark + WAL → reload à chaud SANS restart) + swap atomique + purge de rétention. Modèle = shenron-neon-sync.timer existant.
-3. **Rendu → ISR** (tue le rendu dynamique de donnée immuable) : pages-détail wiki de `force-dynamic` vers `revalidate=false` + invalidation on-demand, `dynamicParams=true`, pré-rendu borné (PAS de SSG complet : milliers de pages × build SIGILL = inacceptable).
+2. **Sync → industrialiser le miroir** (tue le snapshot périmé) : épingler `SQLITE_DB_PATH` (chemin stable `mirror.sqlite`) + publisher systemd quotidien post-`inagle push` (dump validé → swap atomique → purge de rétention). Le lecteur rouvre son handle sans redémarrage.
+3. **Rendu → ISR** (tue le rendu dynamique de donnée immuable) : pages-détail wiki de `force-dynamic` vers `revalidate=3600` + invalidation on-demand, `dynamicParams=true`, pré-rendu borné (PAS de SSG complet : milliers de pages × build SIGILL = inacceptable).
 
 Supabase reste : (i) fallback durci (pooler Supavisor session-mode IPv4) pour le wiki ; (ii) source de vérité UNIQUE pour RAG pgvector, 6 RPC PostgREST, auth Better Auth, éditorial/social (non découplables par le miroir, par design).
 
@@ -38,7 +53,7 @@ Supabase reste : (i) fallback durci (pooler Supavisor session-mode IPv4) pour le
 
 - **Résilience (axe prioritaire)** : double découplage — HTML ISR caché + data locale SQLite. Une fiche cachée ne touche ni miroir ni Supabase à la requête → immunité aux fragilités IPv6/env scellé/login 500.
 - **Maintenabilité** : Drizzle supprime l'émulation PostgREST fragile (parser .or() splitTopLevel, *_clean GROUP BY, NULLS FIRST/LAST) ; typage introspecté de bout en bout.
-- **Fraîcheur** : timer + WAL = fraîcheur ~minute sans restart ni péremption ; invalidation ISR on-demand au swap.
+- **Fraîcheur** : publication quotidienne validée, swap atomique et détection d'inode sans restart ; invalidation ISR on-demand au swap.
 - **Pérennité** : ISR stable depuis v13 ; Drizzle dual-runtime natif ; SQLite = format portable lisible par niers (Rust) → aligné sur la convergence Rust long terme sans coupler azalée au Cloud fragile. Kysely écarté (SqliteDialect core = better-sqlite3 only + pin 0.28.2 gelé-interdit-au-bump).
 - **Ops** : 1 timer + 1 var d'env + 1 purge, homogène avec l'infra cron existante (1 seul VPS, pas de Redis, pas de 2e Postgres).
 

@@ -67,6 +67,19 @@ Le pipeline unifié est une chaîne unique. Pour chaque étape, l'implémentatio
 
 ## 3. Tableau des duplications
 
+### État des premiers garde-fous (2026-09-05)
+
+- Les tables d'éléments et de catégories sont centralisées dans
+  `packages/inagle/src/core/game-codes.ts` et réexportées par les adaptateurs.
+- Les espaces de rareté gacha (`charaRarity`) et progression (`charaRank`) sont
+  nommés séparément afin de ne pas propager une conversion ambiguë entre les
+  outils.
+- Le contrat TypeScript `ConfigNode` est isolé dans
+  `packages/inagle/src/core/config-contract.ts`; il conserve la forme brute
+  `{ entries }` et réserve `schema_version`/`buildid` à l'échange versionné.
+- Le miroir wiki et l'invalidation ISR sont désormais explicitement séparés :
+  `niers` publie le fichier, Azalée invalide ses pages via une route protégée.
+
 | Capacité | Référence actuelle | Portage Rust (niers) | Statut |
 | --- | --- | --- | --- |
 | Téléchargement Steam natif | iecode `Steam/Content/` (SteamKit2) | `nie-steam` (steamroom) | FAIT (33 tests, fidélité C# vérifiée) |
