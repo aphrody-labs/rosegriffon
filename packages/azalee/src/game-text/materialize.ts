@@ -28,8 +28,14 @@ export type TextEntry = [hashId: string, locale: string, category: string, value
  * `(hashId, locale)`. Le compteur de collisions ignorées est journalisé par le
  * script générateur.
  */
-export function buildSqliteFromEntries(db: Database, entries: TextEntry[]): { inserted: number; ignored: number } {
-	db.exec("PRAGMA journal_mode = WAL");
+export function buildSqliteFromEntries(
+	db: Database,
+	entries: TextEntry[]
+): { inserted: number; ignored: number } {
+	// Les appelants runtime construisent dans un fichier temporaire avant de le
+	// publier par renommage atomique. DELETE évite donc de laisser un `-wal` ou
+	// un `-shm` attaché à un ancien cache pendant qu'un autre worker le lit.
+	db.exec("PRAGMA journal_mode = DELETE");
 	db.exec("DROP TABLE IF EXISTS text");
 	db.exec(`
 		CREATE TABLE text (
@@ -42,7 +48,7 @@ export function buildSqliteFromEntries(db: Database, entries: TextEntry[]): { in
 	`);
 
 	const insert = db.prepare(
-		"INSERT OR IGNORE INTO text (hashId, locale, category, value) VALUES (?, ?, ?, ?)",
+		"INSERT OR IGNORE INTO text (hashId, locale, category, value) VALUES (?, ?, ?, ?)"
 	);
 	let inserted = 0;
 	let ignored = 0;

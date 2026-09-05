@@ -9,10 +9,12 @@
  * robot d'indexation, et un Core Web Vital dégradé pour tout le monde.
  *
  * Une heure de fraîcheur couvre largement le rythme réel de la donnée : le
- * miroir SQLite n'est échangé qu'une fois par nuit (`azalee-mirror-sync`), et
+ * miroir SQLite n'est échangé qu'une fois par nuit (`nie-miroir.timer`), et
  * la republication qui suit repart de toute façon sur un cache vide.
  */
 export const revalidate = 3600;
+export const dynamic = "force-static";
+export const dynamicParams = true;
 
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";

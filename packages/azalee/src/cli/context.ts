@@ -149,7 +149,7 @@ export function renderAsciiTable(rows: readonly TableRow[]): string {
 	const bottomBorder = "└─" + colWidths.map((w) => "─".repeat(w)).join("─┴─") + "─┘";
 
 	const formattedRows = stringifiedRows.map(
-		(r) => "│ " + keys.map((k, i) => r[k].padEnd(colWidths[i])).join(" │ ") + " │",
+		(r) => "│ " + keys.map((k, i) => r[k].padEnd(colWidths[i])).join(" │ ") + " │"
 	);
 
 	return [topBorder, headerLine, midBorder, ...formattedRows, bottomBorder].join("\n");
@@ -192,7 +192,7 @@ export function createPgClient(connectionString: string): PgClient {
 
 /**
  * Miroir SQLite des tables `inagle_*`. Résolution déléguée à la lib
- * (`SQLITE_DB_PATH` épinglé → `mirror.sqlite` → snapshot le plus récent) :
+ * (`SQLITE_DB_PATH` épinglé → miroir canonique niers → snapshot local de secours) :
  * une seule implémentation partagée par le CLI, l'API et le wiki web.
  */
 export function getSqlitePath(): string | null {

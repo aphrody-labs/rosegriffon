@@ -59,7 +59,8 @@ export interface AzaleeLocalAvailability {
 /**
  * Inspecte les sources locales sans rien ouvrir.
  *
- * `resolveMirrorPath()` accepte un chemin explicite ou `SQLITE_DB_PATH` sans
+ * `resolveMirrorPath()` accepte un chemin explicite, `SQLITE_DB_PATH` ou le
+ * miroir canonique niers sans
  * vérifier son existence (c'est voulu : l'appelant a été explicite). Ici on
  * vérifie, sinon `mode: "auto"` choisirait « local » pour un chemin épinglé qui
  * n'existe pas — exactement la panne silencieuse qu'on veut éviter.
@@ -131,7 +132,10 @@ function localTransport(prefix: string, cors: boolean | string): AzaleeTransport
 		if (prefix && url.pathname.startsWith(prefix)) {
 			url.pathname = url.pathname.slice(prefix.length) || "/";
 		}
-		return handleAzaleeRequest(new Request(`http://azalee.local${url.pathname}${url.search}`, request), { cors });
+		return handleAzaleeRequest(
+			new Request(`http://azalee.local${url.pathname}${url.search}`, request),
+			{ cors }
+		);
 	};
 }
 
@@ -148,7 +152,7 @@ function localTransport(prefix: string, cors: boolean | string): AzaleeTransport
 function fallbackTransport(
 	local: AzaleeTransport,
 	remote: AzaleeTransport,
-	state: { degraded: boolean },
+	state: { degraded: boolean }
 ): AzaleeTransport {
 	return async (request) => {
 		if (state.degraded) return remote(request);
@@ -204,7 +208,11 @@ export function createAzaleeData(options: AzaleeDataOptions = {}): AzaleeData {
 	if (source === "local") {
 		const direct = localTransport(basePathPrefix(baseUrl), cors);
 		transport = allowFallback
-			? fallbackTransport(direct, (request) => (clientOptions.fetch ?? globalThis.fetch)(request), state)
+			? fallbackTransport(
+					direct,
+					(request) => (clientOptions.fetch ?? globalThis.fetch)(request),
+					state
+				)
 			: direct;
 	}
 

@@ -62,7 +62,9 @@ export function resetAzaleeConfig(): void {
 function packageRoot(): string {
 	// `import.meta.dir` (Bun) / `import.meta.url` (Node) → `<pkg>/src`.
 	const here =
-		typeof import.meta.dir === "string" ? import.meta.dir : path.dirname(new URL(import.meta.url).pathname);
+		typeof import.meta.dir === "string"
+			? import.meta.dir
+			: path.dirname(new URL(import.meta.url).pathname);
 	return path.resolve(here, "..");
 }
 
@@ -126,16 +128,17 @@ export function resolveDataFile(name: string): string | null {
 /**
  * Résout le miroir SQLite des tables `inagle_*`.
  *
- * `SQLITE_DB_PATH` est épinglé en production (drop-in systemd) sur
- * `data/backups/mirror.sqlite` : sans épinglage, le repli prend le snapshot au
- * nom lexicographiquement le plus grand, ce qui est une source silencieuse.
+ * `SQLITE_DB_PATH` est épinglé en production (drop-in systemd) sur le miroir
+ * canonique publié par niers : sans épinglage, le repli local peut prendre un
+ * snapshot au nom lexicographiquement le plus grand, ce qui est une source
+ * silencieuse.
  */
 export function resolveMirrorPath(): string | null {
 	if (explicit.mirrorPath) return explicit.mirrorPath;
 	if (process.env.SQLITE_DB_PATH) return path.resolve(process.env.SQLITE_DB_PATH);
 
 	// Le miroir a suivi les données du jeu dans `niers` : c'est `nie-miroir.timer` qui le
-	// publie, et `azalee-mirror-sync` est désarmé depuis. L'ancien dossier `data/backups`
+	// publie. L'ancien dossier `data/backups`
 	// existe encore mais ne se rafraîchit plus — le lire ferait servir des données figées
 	// sans qu'aucune erreur ne le dise. Les unités de production l'épinglent déjà par
 	// `SQLITE_DB_PATH` ; ce repli couvre la CLI, les tests et les scripts.
