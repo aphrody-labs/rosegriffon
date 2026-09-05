@@ -15,10 +15,12 @@ liaisons`.
 - Publication de la baseline vérifiée : `origin/main` du dépôt Niers contient ce commit. Les
   sources atelier de cette baseline et les correctifs WASM ultérieurs ont été intégrés
   sélectivement dans le monorepo RG ; les artefacts `outputs/` n'ont pas été recopiés.
-- Monorepo cible : branche `main`, tête avant intégration `d76577511ba5`, remote
-  `https://github.com/rose-griffon/rg.git`.
-- Les changements Explorer de NIE restent hors périmètre : aucun fichier du dépôt Niers n'a été
-  modifié. Après la livraison initiale, une convergence Azalée explicite a supprimé l'interface
+- Monorepo cible : branche `main`, tête publiée `a2418d82`, remote
+  `https://github.com/rose-griffon/rg.git` ; `origin/main` pointe sur cette même tête.
+- Les changements Explorer de NIE restent hors périmètre : ils ne sont pas portés dans RG. Le
+  canal A2A a toutefois continué ses lots Niers indépendants (docs, chemins `csharp/**`/`src/**`)
+  dans leurs commits dédiés, sans les mélanger à l'atelier. Après la livraison initiale, une
+  convergence Azalée explicite a supprimé l'interface
   `/cpk` locale, qui faisait doublon avec Niers, tout en conservant l'API `/api/cpk` et les
   bibliothèques de décodage nécessaires aux pages publiques et aux imports.
 
@@ -153,6 +155,13 @@ tests et le smoke public vérifient les chemins effectivement réutilisés.
 - Release preview B `2026-09-05T02-44-51-570-vkdWKsHwUClCT-XrRBjEy` (SHA `92c26dc6`) :
   build/lint/type/gates publics verts ; les premières tentatives d'inscription SPA restaient
   anonymes après redirection.
+- La tête RG `a2418d82` est maintenant poussée sur `origin/main`. Le contrôle opératoire
+  `bun run release:check` a exécuté 5/5 étapes (git-sync en dry-run, `nginx -t`, santé modèle,
+  santé Azalée et santé CDN). Aucune preview ni promotion n'a été déclenchée par ce contrôle.
+- Le smoke public rejoué le 2026-09-05 avec Chromium isolé et allowlist `azalee.rosegriffon.fr,
+cdn.rosegriffon.fr` ne remonte aucune erreur réseau ou console, mais le build servi n'expose pas
+  les contrôles d'import attendus par le scénario source. Cela constitue une limite de publication,
+  pas une preuve de l'atelier complet.
 - Les correctifs `2d97b37d`, `ef71704c` et `b44e38ce` ont ensuite rendu le flux déterministe :
   réponse HTTP d'inscription attendue, initialisations annulées neutralisées, puis lecture
   réseau de session avant navigation. Le smoke E2E à deux comptes a été rejoué avec sauvegarde,
@@ -164,16 +173,19 @@ tests et le smoke public vérifient les chemins effectivement réutilisés.
 
 ## Preuves exécutées le 2026-09-05
 
-| Gate                     | Commande / environnement                                                                      | Résultat                                                                                                                                 |
-| ------------------------ | --------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
-| Tests atelier et serveur | `bun test app/avatar/*.test.ts tests/avatar-sauvegardes-server.test.ts tests/partage.test.ts` | 52 verts, 0 échec, dont les 35 tests atelier (34 de la baseline + couleur libre) et 7 tests de persistance |
-| Audit catalogue réel     | `bun app/avatar/verification/check-assets.ts`                                                 | 502 pièces, 491 icônes uniques, 0 erreur liaison, 0 erreur image/pixels, 0 erreur sélection→composition                                  |
-| TypeScript               | `bun --bun tsc --noEmit --incremental false -p tsconfig.json`                                 | succès                                                                                                                                   |
-| Lint atelier             | ESLint et Oxlint ciblés sur `app/avatar`, serveur, E2E et configuration Playwright            | succès, 0 erreur                                                                                                                         |
-| Lint global              | `bun run lint` puis `eslint . --quiet`                                                        | bloqué par 2 erreurs préexistantes hors périmètre dans `components/wiki/MediaDownload.tsx` et `components/auth/login-form.tsx` |
-| Build WASM               | `AZALEE_DIR=/home/ubuntu/rg/apps/azalee bash scripts/build-wasm.sh` depuis Niers              | succès ; wasm-bindgen 0.2.125, wasm public optimisé de 2 111 117 à 1 775 695 octets                                                      |
-| Build Azalée             | `bun run build`                                                                               | succès Next.js 16.3 canary, 120 routes ; `/avatar` dynamique (à rejouer après la convergence Astro/auteur)                               |
-| Smoke Chromium public    | Playwright sur build local, Chromium réel                                                     | vert en 8,5 s : édition, PNG 3×4, GLB, gzip, export, refus hors session, code invalide ; 0 console.error, pageerror ou réponse HTTP ≥400 |
+| Gate                           | Commande / environnement                                                                                 | Résultat                                                                                                                                                                                                                                               |
+| ------------------------------ | -------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Tests atelier et serveur       | `bun test app/avatar/*.test.ts tests/avatar-sauvegardes-server.test.ts tests/partage.test.ts`            | 52 verts, 0 échec, dont les 35 tests atelier (34 de la baseline + couleur libre) et 7 tests de persistance                                                                                                                                             |
+| Audit catalogue réel           | `bun app/avatar/verification/check-assets.ts`                                                            | 502 pièces, 491 icônes uniques, 0 erreur liaison, 0 erreur image/pixels, 0 erreur sélection→composition                                                                                                                                                |
+| TypeScript                     | `bun --bun tsc --noEmit --incremental false -p tsconfig.json`                                            | succès                                                                                                                                                                                                                                                 |
+| Lint atelier                   | ESLint et Oxlint ciblés sur `app/avatar`, serveur, E2E et configuration Playwright                       | succès, 0 erreur                                                                                                                                                                                                                                       |
+| Lint Azalée                    | `bun run --filter @rosegriffon/azalee-web lint` (Oxlint + ESLint)                                        | 0 erreur après retrait des imports/instructions inutiles ; 2 219 avertissements existants (principalement wrapping Tailwind et règles de style)                                                                                                        |
+| Build WASM                     | `AZALEE_DIR=/home/ubuntu/rg/apps/azalee bash scripts/build-wasm.sh` depuis Niers                         | succès ; wasm-bindgen 0.2.125, wasm public optimisé de 2 111 117 à 1 775 695 octets                                                                                                                                                                    |
+| Build Azalée                   | `bun run build`                                                                                          | succès Next.js 16.3 canary, 120 routes ; `/avatar` dynamique (à rejouer après la convergence Astro/auteur)                                                                                                                                             |
+| Smoke Chromium local antérieur | Playwright sur build local, Chromium réel                                                                | vert en 8,5 s : édition, PNG 3×4, GLB, gzip, export, refus hors session, code invalide ; 0 console.error, pageerror ou réponse HTTP ≥400                                                                                                               |
+| Smoke navigateur production    | `bunx --bun agent-browser … open https://azalee.rosegriffon.fr/avatar`, HAR `/tmp/azalee-avatar-cdn.har` | 149 requêtes, 0 réponse HTTP ≥400, 0 console/page error avec allowlist Azalée+CDN ; `model-viewer` présent, mais 0 bouton `data-part-id` et 0 input fichier dans le build public observé : parcours édition/import/export non validé sur cette release |
+| Tests serveur/auth ciblés      | `bun test tests/avatar-sauvegardes-server.test.ts tests/partage.test.ts`                                 | 17 réussis, 0 échec ; absence de session, quota 24, collision, isolation et ouverture code couverts                                                                                                                                                    |
+| Suite avatar ciblée            | `bun test app/avatar/*.test.ts`                                                                          | 35 réussis, 0 échec ; la suite officielle `bun test lib src tests` totalise 74 réussis, 0 échec                                                                                                                                                        |
 
 Le rapport JSON de l'audit CDN est produit dans `var/json/avatar-assets-audit.json`; le décompte
 ci-dessus provient de l'exécution réelle de la commande et non de la seule présence de ce fichier.
@@ -201,6 +213,23 @@ Playwright avec l'activation preview réellement routée, et invalider le cache 
 le servir avec une revalidation courte) afin de ne pas rejouer un ancien bundle. Les identifiants
 SMTP de production restent à vérifier séparément ; les erreurs d'envoi sont maintenant capturées,
 mais cela ne constitue pas une preuve de livraison d'un courriel de vérification.
+
+L'orchestration machine a aussi été bornée : `nie-model-serve` fonctionne sans preload global avec
+budget CPK 4 Gio, deux workers, quatre threads HTTP, et cgroup `MemoryHigh=5G`/`MemoryMax=7G` ; le
+pruner a libéré 36,21 Gio (cache modèle ramené à 6 Gio, `target/debug` retiré après contrôle
+`/proc`). Les services `azalee-web`, `nie-model-serve`, `rg-cdn` et `cdn-variants` restent actifs.
+Le timer `rg-repo-sync` est installé mais attend un arbre Niers propre avant activation afin de ne
+pas capturer un sous-lot Claude en cours ; l'endpoint SSH de poste local n'est pas configuré.
+
+## Coordination A2A
+
+Niers versionne désormais sa carte `ai.json` et `docs/A2A-CODEX.md`. Les objectifs sont échangés
+par `aphrody a2a tick --kind fact` avec un sujet `claim:`, `done:` ou `goal:` ; les lots restent
+disjoints et les commits sont arbitrés par Claude. Le 2026-09-05, le dépôt Niers comptait 136
+Markdown suivis et aucun Markdown non suivi hors ignore ; les lots `csharp/**` et `src/**` ont
+rapporté leurs commandes et limites (dotnet/CMake indisponibles sur le VPS). RG a transmis ses
+résultats de tests et de release-check par la même boîte `.coord/`, sans versionner cette boîte
+volatile.
 
 ## Limites explicites
 
