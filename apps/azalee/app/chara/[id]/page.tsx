@@ -179,13 +179,17 @@ export default async function PlayerDetailPage({ params }: { params: Promise<{ i
 	const player = {
 		...variant,
 		constellation: baseChar.constellation || variant.constellation,
-		descriptions: baseChar.descriptions,
-		internalCode: baseChar.internalCode,
+		descriptions: (variant as any).descriptions || baseChar.descriptions,
+		// Une URL de variante doit piloter ses propres ressources. Utiliser le code de la
+		// fiche de base faisait notamment rendre le Shawn IE2 (`c02023380`) sur la fiche
+		// Chrono Stone `0x2DEC08C2`, que le miroir relie pourtant à `c05024700`.
+		internalCode: variant.internalCode || baseChar.internalCode,
 		names: baseChar.names,
 		teamId: (baseChar as any).teams?.[0]?.id as string | undefined,
 		teamName: (baseChar as any).teams?.[0]?.names?.fr || (baseChar as any).teams?.[0]?.names?.en,
-		zukanHash: baseChar.zukanHash || variant.zukanHash,
+		zukanHash: variant.zukanHash || baseChar.zukanHash,
 	};
+	const playerSeries = (variant as any).series || (baseChar as any).series;
 
 	// Fetch all distinct forms of this character (same baseSlug/chara_id, different pos/elem/rarity)
 	const sheetId = (player as any).sheetData?.sheetId;
@@ -513,7 +517,7 @@ export default async function PlayerDetailPage({ params }: { params: Promise<{ i
 			player.descriptions?.fr ||
 			player.descriptions?.en ||
 			`${charName} est un joueur ${POSITION_FR[player.position] || player.position} de type ${ELEMENT_FR[player.element] || player.element} dans Inazuma Eleven: Victory Road.`,
-		genre: (baseChar as any).series || undefined,
+		genre: playerSeries || undefined,
 		image: baseChar.image || undefined,
 		isPartOf: {
 			"@type": "VideoGame",
@@ -587,7 +591,7 @@ export default async function PlayerDetailPage({ params }: { params: Promise<{ i
 				jerseyNumber={10}
 				rarity={player.rarity}
 				element={player.element}
-				series={(baseChar as any).series}
+				series={playerSeries}
 				gender={(baseChar as any).gender === 1 ? "F" : "M"}
 				stats={{
 					agility: stats.agility,
@@ -690,9 +694,9 @@ export default async function PlayerDetailPage({ params }: { params: Promise<{ i
 			<div className="bg-surface-container-low rounded-[20px] sm:rounded-[24px] border border-outline-variant/30 px-4 py-3 sm:px-6 sm:py-5 space-y-3 sm:space-y-5">
 				{/* Series + Control Type */}
 				<div className="flex flex-wrap items-center gap-2 sm:gap-3">
-					{(baseChar as any).series && (
+					{playerSeries && (
 						<span className="inline-flex items-center px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-full text-[10px] sm:text-xs font-bold bg-secondary-container text-on-secondary-container">
-							{(baseChar as any).series}
+							{playerSeries}
 						</span>
 					)}
 					{(baseChar as any).controlType && (

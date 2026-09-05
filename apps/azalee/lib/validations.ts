@@ -28,6 +28,7 @@ export const searchParamsSchema = z.object({
 	q: z.string().optional().default(""),
 	rarity: z.string().optional(),
 	role: z.string().optional(),
+	schoolYear: z.string().optional(),
 	series: z.string().optional(),
 	show_aura: z.string().optional(),
 	sort: z.string().optional(),

@@ -62,6 +62,7 @@ interface ListParams {
 	status?: string;
 	role?: string;
 	ageGroup?: string;
+	schoolYear?: string;
 }
 
 interface ListResult<T> {
@@ -210,12 +211,10 @@ function menuManifestToItem(it: MenuGalleryManifestItem): GalleryItem {
  * les catégories menu confondues) puis par recherche texte (titre/file insensible
  * à la casse). Renvoie le sous-ensemble paginé + le total filtré.
  */
-function getMenuGalleryPage(params: {
-	category?: string;
-	q?: string;
-	from: number;
-	to: number;
-}): { data: GalleryItem[]; total: number } {
+function getMenuGalleryPage(params: { category?: string; q?: string; from: number; to: number }): {
+	data: GalleryItem[];
+	total: number;
+} {
 	const q = params.q?.trim().toLowerCase();
 	let pool: ReadonlyArray<MenuGalleryManifestItem> = MENU_MANIFEST_ITEMS;
 
@@ -325,7 +324,8 @@ function isPlaceholderSpecialTactic(row: any): boolean {
 /** Forme « détail » (cf. getTactic) depuis une ligne `inagle_tactics`, complétée par le superset. */
 function tacticDetailFromTactics(match: any, special: any | null): any {
 	// Ne complète QUE si le champ historique est absent (préserve ex. l'élément accentué « Néant »).
-	const fill = (tVal: any, sVal: any) => (tVal === null || tVal === undefined ? (sVal ?? null) : tVal);
+	const fill = (tVal: any, sVal: any) =>
+		tVal === null || tVal === undefined ? (sVal ?? null) : tVal;
 	const img = resolveAssetUrl(match.image_url) || null;
 	return {
 		slug: tacticSlug(match.name),
@@ -648,7 +648,14 @@ export const wikiService = {
 							: getAuraImageUrl(a.asset_code, sd.subType) || resolveAssetUrl(a.image_url);
 					results.push({
 						id: a.id,
-						name: a.name_fr || a.name_en || a.name_ja || sd.displayName || sd.name_FR || sd.name_EN || "Inconnu",
+						name:
+							a.name_fr ||
+							a.name_en ||
+							a.name_ja ||
+							sd.displayName ||
+							sd.name_FR ||
+							sd.name_EN ||
+							"Inconnu",
 						type: t.table.replace("inagle_", "").replace("s", ""),
 						categorySlug: t.slug,
 						imageUrl: resolvedImageUrl,
@@ -656,7 +663,8 @@ export const wikiService = {
 						subType: t.table.replace("inagle_", "").replace("s", ""),
 						element: ElementNames[a.element_id as keyof typeof ElementNames] || undefined,
 						sheetData: sd,
-						passiveEffect: sd.passiveEffect || sd.passive || a.description_fr || sd.desc_FR || undefined,
+						passiveEffect:
+							sd.passiveEffect || sd.passive || a.description_fr || sd.desc_FR || undefined,
 						hissatsuName: sd.hissatsu?.name || sd.sheetData?.hissatsu?.name || undefined,
 					});
 					break; // Found it in this table, move to the next hexId
@@ -749,7 +757,9 @@ export const wikiService = {
 		// Push owner query
 		let ownerCharaId = a.owner_chara_id || (a.data as any)?.ownerCharaParamId;
 		if (!ownerCharaId) {
-			const cleanAuraId = (a.id || "").replace(/^(keshin|soul|miximax|awakening|mode_change)_/i, "").toLowerCase();
+			const cleanAuraId = (a.id || "")
+				.replace(/^(keshin|soul|miximax|awakening|mode_change)_/i, "")
+				.toLowerCase();
 			const mapping = changeAuraSkills.find(
 				(m: any) =>
 					m.id &&
@@ -1152,13 +1162,17 @@ export const wikiService = {
 			zukanHash?: string;
 			internalCode?: string;
 			heroType?: string;
+			series?: string;
+			ageGroup?: string;
+			schoolYear?: string;
+			zukanOrder?: number;
 		}>
 	> {
 		const supabase = await createClient();
 		let query = supabase
 			.from("inagle_characters")
 			.select(
-				"id, slug, position, element, rarity_label, rarity, zukan_hash, internal_code, stat_frappe, hero_type"
+				"id, slug, position, element, rarity_label, rarity, zukan_hash, zukan_order, internal_code, stat_frappe, hero_type, series, age_group, school_year"
 			);
 		if (baseSlug) {
 			query = query.eq("base_slug", baseSlug);
@@ -1196,6 +1210,10 @@ export const wikiService = {
 			zukanHash?: string;
 			internalCode?: string;
 			heroType?: string;
+			series?: string;
+			ageGroup?: string;
+			schoolYear?: string;
+			zukanOrder?: number;
 		}> = [];
 		for (const r of sorted) {
 			const pos = r.position || "MF";
@@ -1216,6 +1234,10 @@ export const wikiService = {
 				zukanHash: r.zukan_hash || undefined,
 				internalCode: r.internal_code || undefined,
 				heroType: r.hero_type || undefined,
+				series: r.series || undefined,
+				ageGroup: r.age_group || undefined,
+				schoolYear: r.school_year || undefined,
+				zukanOrder: r.zukan_order ?? undefined,
 			});
 		}
 		return results;
@@ -1321,6 +1343,11 @@ export const wikiService = {
 			// `ul.basic`) — pas de table de correspondance FR côté DB, l'UI traduit à
 			// l'affichage (cf. CharacterFilters).
 			query = query.eq("age_group", params.ageGroup);
+		}
+		if (params.schoolYear) {
+			// Valeur EN officielle du Zukan (Grade 7/8/9), alimentée par le même crawl
+			// que zukan_order et filtrée en base avant pagination.
+			query = query.eq("school_year", params.schoolYear);
 		}
 		// Default sort: zukan_order ASC (official zukan.inazuma.jp order), fallback internal_code
 		const { data, count, error } = await query
@@ -1562,11 +1589,23 @@ export const wikiService = {
 			// parser (non poussés) → ce repli garantit qu'ils survivent à chaque sync.
 			const enrich = (ITEM_ENRICHMENT as Record<string, ItemEnrichment>)[item.id] || {};
 			const descFr =
-				item.description_fr || sd.descriptions?.fr || parsed.descriptions?.fr || enrich.descriptions?.fr || null;
+				item.description_fr ||
+				sd.descriptions?.fr ||
+				parsed.descriptions?.fr ||
+				enrich.descriptions?.fr ||
+				null;
 			const descEn =
-				item.description_en || sd.descriptions?.en || parsed.descriptions?.en || enrich.descriptions?.en || null;
+				item.description_en ||
+				sd.descriptions?.en ||
+				parsed.descriptions?.en ||
+				enrich.descriptions?.en ||
+				null;
 			const descJa =
-				item.description_ja || sd.descriptions?.ja || parsed.descriptions?.ja || enrich.descriptions?.ja || null;
+				item.description_ja ||
+				sd.descriptions?.ja ||
+				parsed.descriptions?.ja ||
+				enrich.descriptions?.ja ||
+				null;
 			// Bonus de stats RÉELS (kick +6, …) — natifs parser, jamais les codes bruts stat1/stat2.
 			const bonuses =
 				sd.bonuses && Object.keys(sd.bonuses).length
@@ -1794,13 +1833,13 @@ export const wikiService = {
 				Forêt: { en: "Forest", ja: "林", fr: "Forêt" },
 				Montagne: { en: "Mountain", ja: "山", fr: "Montagne" },
 				Néant: { en: "Void", ja: "無", fr: "Néant" },
-				Aucun: { en: "Void", ja: "無", fr: "Néant" }
+				Aucun: { en: "Void", ja: "無", fr: "Néant" },
 			};
 			const categoryMap: Record<string, { en: string; ja: string; fr: string }> = {
 				Tir: { en: "Shoot", ja: "シュート", fr: "Tir" },
 				Dribble: { en: "Dribble", ja: "ドリブル", fr: "Dribble" },
 				Défense: { en: "Block", ja: "ブロック", fr: "Défense" },
-				Arrêt: { en: "Catch", ja: "キャッチ", fr: "Arrêt" }
+				Arrêt: { en: "Catch", ja: "キャッチ", fr: "Arrêt" },
 			};
 			const elementInfo = elementMap[h.element || ""] || { en: "Void", ja: "無", fr: "Néant" };
 			const categoryInfo = categoryMap[h.category || ""] || { en: "None", ja: "なし", fr: "Aucun" };
@@ -1878,7 +1917,7 @@ export const wikiService = {
 				wind: "Vent",
 				forest: "Forêt",
 				mountain: "Montagne",
-				void: "Néant"
+				void: "Néant",
 			};
 			const searchElem = elementMap[params.element.toLowerCase()] || params.element;
 			query = query.eq("element", searchElem);
@@ -1890,7 +1929,7 @@ export const wikiService = {
 				shoot: "Tir",
 				block: "Défense",
 				dribble: "Dribble",
-				catch: "Arrêt"
+				catch: "Arrêt",
 			};
 			const searchCat = categoryMap[params.category.toLowerCase()] || params.category;
 			query = query.eq("category", searchCat);
@@ -1958,13 +1997,13 @@ export const wikiService = {
 				Forêt: { en: "Forest", ja: "林", fr: "Forêt" },
 				Montagne: { en: "Mountain", ja: "山", fr: "Montagne" },
 				Néant: { en: "Void", ja: "無", fr: "Néant" },
-				Aucun: { en: "Void", ja: "無", fr: "Néant" }
+				Aucun: { en: "Void", ja: "無", fr: "Néant" },
 			};
 			const categoryMap: Record<string, { en: string; ja: string; fr: string }> = {
 				Tir: { en: "Shoot", ja: "シュート", fr: "Tir" },
 				Dribble: { en: "Dribble", ja: "ドリブル", fr: "Dribble" },
 				Défense: { en: "Block", ja: "ブロック", fr: "Défense" },
-				Arrêt: { en: "Catch", ja: "キャッチ", fr: "Arrêt" }
+				Arrêt: { en: "Catch", ja: "キャッチ", fr: "Arrêt" },
 			};
 			const elementInfo = elementMap[h.element || ""] || { en: "Void", ja: "無", fr: "Néant" };
 			const categoryInfo = categoryMap[h.category || ""] || { en: "None", ja: "なし", fr: "Aucun" };
@@ -2410,7 +2449,10 @@ export const wikiService = {
 
 		// Catégories menu (`gallery_img2`, `ev_pic`, `stadium`, …) ou `menu` (toutes) →
 		// servies depuis le manifeste statique, pas la table DB `inagle_gallery`.
-		if (params.category && (params.category === "menu" || MENU_GALLERY_CATEGORIES.has(params.category))) {
+		if (
+			params.category &&
+			(params.category === "menu" || MENU_GALLERY_CATEGORIES.has(params.category))
+		) {
 			const { data, total } = getMenuGalleryPage({
 				category: params.category,
 				q: params.q,
@@ -2542,9 +2584,7 @@ export const wikiService = {
 	 * la courbe d'effets par valeur. Repli `inagle_passives` (miroir) pour `image_url`.
 	 */
 	async getPassive(id: string): Promise<PassiveDetail | undefined> {
-		const inst = PASSIVE_INSTANCES.find(
-			(p) => p.passive_id === id || p.string_id === id
-		);
+		const inst = PASSIVE_INSTANCES.find((p) => p.passive_id === id || p.string_id === id);
 		if (!inst) return undefined;
 
 		// Toutes les instances partageant le même effet (courbe de valeurs).

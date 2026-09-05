@@ -18,6 +18,7 @@
  */
 
 import { Database } from "bun:sqlite";
+import { createRequire } from "node:module";
 import {
 	assignBest,
 	createMatchContext,
@@ -28,31 +29,46 @@ import {
 	normElem,
 	normPos,
 	zukanGameToSeries,
-} from "@rosegriffon/inagle/zukan/matcher.ts";
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-expect-error — no types for kuroshiro
-import Kuroshiro from "kuroshiro";
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-expect-error — no types for kuroshiro-analyzer-kuromoji
-import KuromojiAnalyzer from "kuroshiro-analyzer-kuromoji";
+} from "../../../packages/inagle/src/zukan/matcher.ts";
+const requireNiers = createRequire("/home/ubuntu/niers/package.json");
+let Kuroshiro: any = null;
+let KuromojiAnalyzer: any = null;
+try {
+	Kuroshiro = requireNiers("kuroshiro").default;
+	KuromojiAnalyzer = requireNiers("kuroshiro-analyzer-kuromoji").default;
+} catch {
+	// Le remap strict EN/FR/JA, les héritages et les overrides restent exécutables dans
+	// un checkout minimal. Seule la passe optionnelle de translittération sera sautée.
+}
 
 const DRY = process.argv.includes("--dry") || !process.argv.includes("--apply");
+const ONLY_SHAWN = process.argv.includes("--only-shawn");
+const MIRROR_ARG = process.argv.find((arg) => arg.startsWith("--mirror="))?.slice("--mirror=".length);
 
 const PARAM_EN = "/home/ubuntu/niers/data/zukan/param_en.json";
 const PARAM_JA = "/home/ubuntu/niers/data/zukan/param_ja.json";
-const ORDER_PATH = "/tmp/zukan_official_order.json";
+const ORDER_PATH = Bun.file("/tmp/zukan_official_order.json").size
+	? "/tmp/zukan_official_order.json"
+	: "/home/ubuntu/niers/data/zukan/zukan_order_en.json";
 const SUPABASE_SQL_OUT = "/tmp/zukan_remap_supabase.sql";
 const AUDIT_OUT = "/home/ubuntu/niers/data/zukan-audit-mirror.json";
 
 function mirrorPath(): string {
-	// newest backup
-	const dir = "/home/ubuntu/rg/apps/azalee/data/backups";
-	const files = require("node:fs")
-		.readdirSync(dir)
-		.filter((f: string) => /^supabase-.*\.sqlite$/.test(f))
-		.sort();
-	if (files.length === 0) throw new Error("no supabase-*.sqlite mirror found");
-	return `${dir}/${files[files.length - 1]}`;
+	if (MIRROR_ARG) return MIRROR_ARG;
+	const fs = require("node:fs");
+	const candidates = [
+		["/home/ubuntu/rg/apps/azalee/data/backups", /^supabase-.*\.sqlite$/],
+		["/home/ubuntu/niers/var/miroir", /^inagle-.*\.sqlite$/],
+	] as const;
+	for (const [dir, pattern] of candidates) {
+		if (!fs.existsSync(dir)) continue;
+		const files = fs
+			.readdirSync(dir)
+			.filter((f: string) => pattern.test(f))
+			.sort();
+		if (files.length > 0) return `${dir}/${files[files.length - 1]}`;
+	}
+	throw new Error("aucun miroir SQLite Azalée/Inagle trouvé");
 }
 
 // ============================================================================
@@ -112,10 +128,16 @@ async function main() {
 	// ── Load zukan EN + JA (merge by hash so JA names available where needed) ──
 	const enEntries: ZukanEntry[] = JSON.parse(await Bun.file(PARAM_EN).text());
 	const jaEntries: ZukanEntry[] = JSON.parse(await Bun.file(PARAM_JA).text());
-	const order: { order_map: Record<string, number> } = JSON.parse(
+	const orderRaw:
+		| { order_map: Record<string, number> }
+		| Array<{ zukanHash: string | null; order: number }> = JSON.parse(
 		await Bun.file(ORDER_PATH).text()
 	);
-	const orderMap = order.order_map;
+	const orderMap = Array.isArray(orderRaw)
+		? Object.fromEntries(
+				orderRaw.filter((row) => row.zukanHash).map((row) => [row.zukanHash!, row.order])
+			)
+		: orderRaw.order_map;
 
 	const withHash = enEntries.filter((e) => e.zukanHash).length;
 	const jaWithHash = jaEntries.filter((e) => e.zukanHash).length;
@@ -342,62 +364,66 @@ async function main() {
 
 	// ═══ Phase JA-R: Romaji transliteration match ═══
 	const beforeJAR = assigned.size;
-	console.log("  Initializing Kuroshiro...");
-	const kuroshiro = new Kuroshiro();
-	await kuroshiro.init(new KuromojiAnalyzer());
+	if (!Kuroshiro || !KuromojiAnalyzer) {
+		console.log("Phase JA-R: skipped (kuroshiro non installé)");
+	} else {
+		console.log("  Initializing Kuroshiro...");
+		const kuroshiro = new Kuroshiro();
+		await kuroshiro.init(new KuromojiAnalyzer());
 
-	function normalizeForMatch(s: string): string {
-		return s
-			.normalize("NFD")
-			.replace(/[̀-ͯ]/g, "")
-			.toLowerCase()
-			.replace(/[^a-z0-9]/g, " ")
-			.replace(/\s+/g, " ")
-			.trim();
-	}
-
-	const enNormIndex = new Map<string, ZukanEntry[]>();
-	for (const e of enEntries.filter((e) => e.zukanHash)) {
-		const norm = normalizeForMatch(e.name);
-		if (!enNormIndex.has(norm)) enNormIndex.set(norm, []);
-		enNormIndex.get(norm)!.push(e);
-		const first = norm.split(" ")[0];
-		if (first.length >= 3) {
-			const fKey = `_first:${first}`;
-			if (!enNormIndex.has(fKey)) enNormIndex.set(fKey, []);
-			enNormIndex.get(fKey)!.push(e);
+		function normalizeForMatch(s: string): string {
+			return s
+				.normalize("NFD")
+				.replace(/[̀-ͯ]/g, "")
+				.toLowerCase()
+				.replace(/[^a-z0-9]/g, " ")
+				.replace(/\s+/g, " ")
+				.trim();
 		}
-	}
 
-	const unmatched = dbChars.filter((c) => !assigned.has(c.id) && c.name_ja);
-	console.log(`  Converting ${unmatched.length} JA names to romaji...`);
-
-	for (const c of unmatched) {
-		const romaji = (await kuroshiro.convert(c.name_ja, {
-			to: "romaji",
-			romajiSystem: "hepburn",
-		})) as string;
-		const normRomaji = normalizeForMatch(romaji);
-		if (!normRomaji || normRomaji.length < 2) continue;
-
-		let zukanGroup = enNormIndex.get(normRomaji);
-		if (!zukanGroup) {
-			const firstWord = normRomaji.split(" ")[0];
-			if (firstWord.length >= 3) zukanGroup = enNormIndex.get(`_first:${firstWord}`);
+		const enNormIndex = new Map<string, ZukanEntry[]>();
+		for (const e of enEntries.filter((e) => e.zukanHash)) {
+			const norm = normalizeForMatch(e.name);
+			if (!enNormIndex.has(norm)) enNormIndex.set(norm, []);
+			enNormIndex.get(norm)!.push(e);
+			const first = norm.split(" ")[0];
+			if (first.length >= 3) {
+				const fKey = `_first:${first}`;
+				if (!enNormIndex.has(fKey)) enNormIndex.set(fKey, []);
+				enNormIndex.get(fKey)!.push(e);
+			}
 		}
-		if (!zukanGroup || zukanGroup.length === 0) continue;
 
-		const candidates = zukanGroup
-			.filter((z) => z.zukanHash)
-			.map((z) => ({ z, score: matchScore(z, c) }))
-			.filter((p) => p.score >= 20)
-			.sort((a, b) => b.score - a.score);
-		if (candidates.length > 0) {
-			// NOTE: original does NOT add to usedHashes here — preserved verbatim.
-			assigned.set(c.id, candidates[0].z.zukanHash!);
+		const unmatched = dbChars.filter((c) => !assigned.has(c.id) && c.name_ja);
+		console.log(`  Converting ${unmatched.length} JA names to romaji...`);
+
+		for (const c of unmatched) {
+			const romaji = (await kuroshiro.convert(c.name_ja, {
+				to: "romaji",
+				romajiSystem: "hepburn",
+			})) as string;
+			const normRomaji = normalizeForMatch(romaji);
+			if (!normRomaji || normRomaji.length < 2) continue;
+
+			let zukanGroup = enNormIndex.get(normRomaji);
+			if (!zukanGroup) {
+				const firstWord = normRomaji.split(" ")[0];
+				if (firstWord.length >= 3) zukanGroup = enNormIndex.get(`_first:${firstWord}`);
+			}
+			if (!zukanGroup || zukanGroup.length === 0) continue;
+
+			const candidates = zukanGroup
+				.filter((z) => z.zukanHash)
+				.map((z) => ({ z, score: matchScore(z, c) }))
+				.filter((p) => p.score >= 20)
+				.sort((a, b) => b.score - a.score);
+			if (candidates.length > 0) {
+				// NOTE: original does NOT add to usedHashes here — preserved verbatim.
+				assigned.set(c.id, candidates[0].z.zukanHash!);
+			}
 		}
+		console.log(`Phase JA-R: +${assigned.size - beforeJAR} (total: ${assigned.size})`);
 	}
-	console.log(`Phase JA-R: +${assigned.size - beforeJAR} (total: ${assigned.size})`);
 
 	// ═══ Phase C: Inherit from same-name siblings (strict) ═══
 	const beforeC = assigned.size;
@@ -599,14 +625,46 @@ async function main() {
 	}
 	console.log(`Validation description: rejected ${descRejected} (sim=0).`);
 
-	// ═══ Manual overrides — Lucas Star (Orion BASARA/Héros/Normal) ═══
-	const MANUAL_OVERRIDES: Record<string, { hash: string }> = {
+	// ═══ Manual overrides — ambiguïtés que les attributs seuls ne peuvent départager ═══
+	// Shawn possède 7 cartes officielles pour 17 lignes IEVR. Plusieurs partagent nom,
+	// poste, élément et statistiques : une politique 1:1 ou un héritage par frère écrase
+	// alors IE2 DF/FW/Aiden/Bear Killer sur une seule image et confond adulte/Miximax.
+	// Associations vérifiées sur la recherche officielle (IDs 1162, 1163, 1164, 1166,
+	// 2813, 3955, 4538) et consignées dans outputs/hakuren-shawn/zukan-profiles/manifest.json.
+	const MANUAL_OVERRIDES: Record<string, { hash: string; order?: number }> = {
 		"0x3F14143F": { hash: "k/p/j/pjw-aty8hpc" },
 		"0x24F07F94": { hash: "k/p/j/pjw-aty8hpc" },
 		"0xB380F082": { hash: "k/p/j/pjw-aty8hpc" },
+		"0xA2957757": { hash: "k/o/p/opancch54ie", order: 1116 },
+		"0x8AB17EED": { hash: "k/o/p/opancch54ie", order: 1116 },
+		"0x3DD430EE": { hash: "k/i/g/iggcoacccik", order: 1117 },
+		"0xEBBD5BFF": { hash: "k/i/g/iggcoacccik", order: 1117 },
+		"0x15F03954": { hash: "k/i/g/iggcoacccik", order: 1117 },
+		"0x3CFE7E61": { hash: "k/i/3/i30spf7yhce", order: 1118 },
+		"0xBA4C2C21": { hash: "k/w/k/wk5ezxf-7dm", order: 1119 },
+		"0x0B8A439A": { hash: "k/w/k/wk5ezxf-7dm" },
+		"0xA9C5C501": { hash: "k/w/k/wk5ezxf-7dm" },
+		"0xA5AAAB6B": { hash: "k/w/k/wk5ezxf-7dm" },
+		"0xE4A9DA7F": { hash: "k/w/k/wk5ezxf-7dm" },
+		"0x04F417C5": { hash: "k/w/k/wk5ezxf-7dm" },
+		"0x2D3CA337": { hash: "k/w/k/wk5ezxf-7dm" },
+		"0x36D8C89C": { hash: "k/w/k/wk5ezxf-7dm" },
+		"0x2DEC08C2": { hash: "k/n/p/npvivtwkt3m", order: 2696 },
+		"0x04DB53B4": { hash: "k/m/c/mc0a0kigy_k", order: 3661 },
+		"0x5E959869": { hash: "k/g/1/g1zm_1kbai8", order: 4187 },
 	};
-	for (const [id, { hash }] of Object.entries(MANUAL_OVERRIDES)) {
+	const SHAWN_BIO: Record<string, { age: string; school: string | null }> = {
+		"k/o/p/opancch54ie": { age: "Middle School", school: "Grade 8" },
+		"k/i/g/iggcoacccik": { age: "Middle School", school: "Grade 8" },
+		"k/i/3/i30spf7yhce": { age: "Middle School", school: "Grade 8" },
+		"k/w/k/wk5ezxf-7dm": { age: "Middle School", school: "Grade 8" },
+		"k/n/p/npvivtwkt3m": { age: "Adult", school: null },
+		"k/m/c/mc0a0kigy_k": { age: "Middle School", school: "Grade 8" },
+		"k/g/1/g1zm_1kbai8": { age: "Middle School", school: "Grade 9" },
+	};
+	for (const [id, { hash, order }] of Object.entries(MANUAL_OVERRIDES)) {
 		if (dbById.has(id)) assigned.set(id, hash);
+		if (order !== undefined) orderMap[hash] = order;
 	}
 	console.log(`Manual overrides: ${Object.keys(MANUAL_OVERRIDES).length} applied`);
 
@@ -621,7 +679,7 @@ async function main() {
 	let changedCount = 0;
 	let toNull = 0;
 	let fromNull = 0;
-	const changes: { id: string; hash: string | null; order: number | null }[] = [];
+	let changes: { id: string; hash: string | null; order: number | null }[] = [];
 	for (const c of dbChars) {
 		const cur = currentHashById.get(c.id) ?? null;
 		const next = finalHashById.get(c.id) ?? null;
@@ -645,6 +703,10 @@ async function main() {
 		}
 	}
 	ro.close();
+	if (ONLY_SHAWN) {
+		const shawnIds = new Set(Object.keys(MANUAL_OVERRIDES).slice(3));
+		changes = changes.filter((change) => shawnIds.has(change.id));
+	}
 
 	console.log("\n════════ DIFF SUMMARY ════════");
 	console.log(`Total rows: ${dbChars.length}`);
@@ -652,7 +714,9 @@ async function main() {
 	console.log(`Hash CHANGED vs current: ${changedCount}`);
 	console.log(`  -> becoming NULL: ${toNull}`);
 	console.log(`  -> from NULL to a hash: ${fromNull}`);
-	console.log(`Rows to UPDATE (hash and/or order delta): ${changes.length}`);
+	console.log(
+		`Rows to UPDATE${ONLY_SHAWN ? " (Shawn uniquement)" : ""} (hash and/or order delta): ${changes.length}`
+	);
 
 	// ── Top-15 by zukan_order (after remap) ──
 	console.log("\n════════ TOP-15 by zukan_order (after remap) ════════");
@@ -723,6 +787,14 @@ async function main() {
 				`UPDATE inagle_characters SET zukan_hash = ${hashSql}, zukan_order = ${orderSql} WHERE id IN (${idList});`
 			);
 		}
+		if (ONLY_SHAWN) {
+			for (const [hash, bio] of Object.entries(SHAWN_BIO)) {
+				const schoolSql = bio.school === null ? "NULL" : `'${sqlEsc(bio.school)}'`;
+				lines.push(
+					`UPDATE inagle_characters SET age_group = '${sqlEsc(bio.age)}', school_year = ${schoolSql} WHERE zukan_hash = '${sqlEsc(hash)}';`
+				);
+			}
+		}
 		lines.push("COMMIT;");
 		await Bun.write(SUPABASE_SQL_OUT, lines.join("\n") + "\n");
 		const updateCount = lines.filter((l) => l.startsWith("UPDATE")).length;
@@ -738,6 +810,14 @@ async function main() {
 		);
 		const tx = rw.transaction((rows: typeof changes) => {
 			for (const ch of rows) stmt.run(ch.hash, ch.order, ch.id);
+			if (ONLY_SHAWN) {
+				const bioStmt = rw.query(
+					"UPDATE inagle_characters SET age_group = ?, school_year = ? WHERE zukan_hash = ?"
+				);
+				for (const [hash, bio] of Object.entries(SHAWN_BIO)) {
+					bioStmt.run(bio.age, bio.school, hash);
+				}
+			}
 		});
 		tx(changes);
 		rw.close();

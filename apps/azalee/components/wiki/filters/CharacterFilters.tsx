@@ -139,6 +139,22 @@ export function CharacterFilters({ teams = [] }: CharacterFiltersProps) {
 
 			<hr className="border-outline-variant/20" />
 
+			{/* School Year — valeurs du filtre officiel Zukan. */}
+			<section className="space-y-2">
+				<h4 className="text-xs font-bold text-primary uppercase tracking-wider">Année scolaire</h4>
+				<FilterChips
+					paramName="schoolYear"
+					className="flex flex-wrap gap-1.5"
+					options={[
+						{ label: "7e année", value: "Grade 7" },
+						{ label: "8e année", value: "Grade 8" },
+						{ label: "9e année", value: "Grade 9" },
+					]}
+				/>
+			</section>
+
+			<hr className="border-outline-variant/20" />
+
 			{/* Rarity */}
 			<section className="space-y-2">
 				<h4 className="text-xs font-bold text-primary uppercase tracking-wider">

@@ -33,7 +33,57 @@ export interface ModelEntry {
 	 * personnages, dont les pièces sont éclatées entre corps, visage et uniforme.
 	 */
 	files: number | null;
+	/** Libellé de version officiel, quand plusieurs modèles portent le même nom. */
+	variantLabel?: string;
+	/** Hash du portrait officiel Zukan, notamment pour une forme sans géométrie VFS. */
+	zukanHash?: string;
+	/** Le Zukan documente la forme, mais le VFS ne contient aucun modèle 3D assemblable. */
+	previewOnly?: boolean;
 }
+
+/** Shawn est ambigu par nom : 7 cartes Zukan, 17 variantes IEVR et seulement 5 GLB VFS. */
+const SHAWN_MODELS: Record<
+	string,
+	{ label: string; slug: string; zukanHash: string; previewOnly?: boolean }
+> = {
+	c02023290: {
+		label: "IE2 · Défenseur · collège (8e année)",
+		slug: "shawn-froste-0xA2957757",
+		zukanHash: "k/o/p/opancch54ie",
+	},
+	c02023370: {
+		label: "IE2 · Attaquant · collège (8e année)",
+		slug: "shawn-froste-0x3DD430EE",
+		zukanHash: "k/i/g/iggcoacccik",
+	},
+	c11902360: {
+		label: "IE2 · personnalité d’Aiden · collège",
+		slug: "shawn-froste-0x3CFE7E61",
+		zukanHash: "k/i/3/i30spf7yhce",
+		previewOnly: true,
+	},
+	c02023380: {
+		label: "IE2 · Bear Killer · collège (8e année)",
+		slug: "shawn-froste-0xBA4C2C21",
+		zukanHash: "k/w/k/wk5ezxf-7dm",
+	},
+	c05024700: {
+		label: "GO Chrono Stone · adulte · Inazuma Legend National",
+		slug: "shawn-froste-0x2DEC08C2",
+		zukanHash: "k/n/p/npvivtwkt3m",
+	},
+	c11908200: {
+		label: "GO Chrono Stone · Miximax Axel × Shawn",
+		slug: "shawn-froste-0x04DB53B4",
+		zukanHash: "k/m/c/mc0a0kigy_k",
+		previewOnly: true,
+	},
+	c07090010: {
+		label: "Ares · capitaine d’Alpin · collège",
+		slug: "shawn-froste-0x5E959869",
+		zukanHash: "k/g/1/g1zm_1kbai8",
+	},
+};
 
 /**
  * Filtre une liste de modèles sur une recherche libre — nom ET code.
@@ -45,7 +95,10 @@ export function filtrer(entrees: ModelEntry[], q: string): ModelEntry[] {
 	const besoin = normaliser(q);
 	if (!besoin) return entrees;
 	return entrees.filter(
-		(m) => normaliser(m.code).includes(besoin) || (m.name && normaliser(m.name).includes(besoin)),
+		(m) =>
+			normaliser(m.code).includes(besoin) ||
+			(m.name && normaliser(m.name).includes(besoin)) ||
+			(m.variantLabel && normaliser(m.variantLabel).includes(besoin))
 	);
 }
 
@@ -87,18 +140,22 @@ export function characters(): Promise<ModelEntry[]> {
 				const code = row.internal_code?.split("_")[0];
 				if (!code) continue;
 				if (parCode.has(code)) continue;
+				const shawn = SHAWN_MODELS[code];
 				parCode.set(code, {
 					code,
 					files: null,
 					name: row.name_fr || row.name_en || row.name_ja || null,
-					slug: row.slug,
+					slug: shawn?.slug || row.slug,
+					variantLabel: shawn?.label,
+					zukanHash: shawn?.zukanHash,
+					previewOnly: shawn?.previewOnly,
 				});
 			}
 		} catch {
 			// Miroir absent : la famille rend vide plutôt que d'échouer.
 		}
 		return [...parCode.values()].toSorted((a, b) =>
-			(a.name ?? a.code).localeCompare(b.name ?? b.code, "fr", { numeric: true }),
+			(a.name ?? a.code).localeCompare(b.name ?? b.code, "fr", { numeric: true })
 		);
 	})();
 	return _characters;
@@ -122,7 +179,7 @@ function famillleVfs(famille: ModelFamily): Promise<ModelEntry[]> {
 		return (listing?.dirs ?? [])
 			.map(
 				(d) =>
-					({ code: d.name, files: d.count ?? null, name: null, slug: null }) satisfies ModelEntry,
+					({ code: d.name, files: d.count ?? null, name: null, slug: null }) satisfies ModelEntry
 			)
 			.toSorted((a, b) => a.code.localeCompare(b.code, "fr", { numeric: true }));
 	})();

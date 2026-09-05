@@ -15,6 +15,10 @@ interface FormSelectorForm {
 	zukanHash?: string;
 	internalCode?: string;
 	heroType?: string;
+	series?: string;
+	ageGroup?: string;
+	schoolYear?: string;
+	zukanOrder?: number;
 }
 
 interface FormSelectorProps {
@@ -56,7 +60,7 @@ export function FormSelector({ forms, currentFormId }: FormSelectorProps) {
 	return (
 		<div className="space-y-1.5 text-center sm:text-left w-full">
 			<span className="text-[10px] font-black uppercase tracking-widest text-white/40 block">
-				Formes
+				Versions officielles · ordre Zukan
 			</span>
 			<div className="flex items-center justify-center sm:justify-start gap-2 overflow-x-auto pb-1 scrollbar-none w-full">
 				{forms.map((form) => {
@@ -118,7 +122,12 @@ export function FormSelector({ forms, currentFormId }: FormSelectorProps) {
 									: "";
 								const raritySuffix =
 									form.rarity !== "Normal" ? ` (${form.rarity}${heroSuffix})` : "";
-								return `${posLabel} ${elemLabel}${raritySuffix}`;
+								const age = [form.ageGroup, form.schoolYear]
+									.filter((value) => value && value !== "-")
+									.join(" · ");
+								const order =
+									form.zukanOrder !== undefined ? ` · Zukan #${form.zukanOrder + 1}` : "";
+								return `${form.series || "Version"} · ${posLabel} ${elemLabel}${raritySuffix}${age ? ` · ${age}` : ""}${order}`;
 							})()}
 						>
 							{/* Portrait */}
@@ -126,7 +135,9 @@ export function FormSelector({ forms, currentFormId }: FormSelectorProps) {
 								<SafeImage
 									src={imageUrl}
 									zukanHash={form.zukanHash}
-									fallbackSrc={form.internalCode ? getCharacterFaceUrl(form.internalCode) : undefined}
+									fallbackSrc={
+										form.internalCode ? getCharacterFaceUrl(form.internalCode) : undefined
+									}
 									alt={`${posLabel} ${elemLabel}`}
 									fill
 									unoptimized
