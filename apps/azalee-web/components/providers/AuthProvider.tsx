@@ -97,7 +97,8 @@ export function AuthProvider({
 			} catch (error) {
 				// Une navigation de document annule normalement cette requête d'initialisation.
 				// Ne pas transformer ce démontage en erreur console du nouveau parcours.
-				if (actif) console.error("Auth init error:", error);
+				const requeteAnnulee = error instanceof TypeError && error.message === "Failed to fetch";
+				if (actif && !requeteAnnulee) console.error("Auth init error:", error);
 			} finally {
 				if (actif) setLoading(false);
 			}
