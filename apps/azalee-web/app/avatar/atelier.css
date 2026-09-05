@@ -302,6 +302,41 @@
 	grid-template-columns: minmax(0, 1fr);
 	gap: 20px;
 }
+.atelier-couleur-libre {
+	display: grid;
+	grid-template-columns: 44px minmax(0, 1fr) auto;
+	gap: 8px;
+	align-items: center;
+}
+.atelier-couleur-libre input[type="color"] {
+	width: 44px;
+	height: 36px;
+	padding: 2px;
+	border: 1px solid #a5b0bd;
+	border-radius: 8px;
+	background: #fff;
+	cursor: pointer;
+}
+.atelier-couleur-libre [data-slot="input"] {
+	background: #fff;
+	font-variant-numeric: tabular-nums;
+}
+.atelier-zone-texte {
+	width: 100%;
+	min-height: 84px;
+	padding: 8px 10px;
+	font: inherit;
+	font-weight: 400;
+	color: inherit;
+	background: #fff;
+	border: 1px solid #d9dfe7;
+	border-radius: 9px;
+	resize: vertical;
+}
+.atelier-zone-texte:focus-visible {
+	outline: 2px solid #315c96;
+	outline-offset: 1px;
+}
 .nie-atelier :is(button, input, [role="slider"]):focus-visible {
 	outline: 2px solid #658dc4;
 	outline-offset: 3px;

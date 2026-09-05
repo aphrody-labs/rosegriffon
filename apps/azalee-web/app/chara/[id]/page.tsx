@@ -188,6 +188,10 @@ export default async function PlayerDetailPage({ params }: { params: Promise<{ i
 		teamId: (baseChar as any).teams?.[0]?.id as string | undefined,
 		teamName: (baseChar as any).teams?.[0]?.names?.fr || (baseChar as any).teams?.[0]?.names?.en,
 		zukanHash: variant.zukanHash || baseChar.zukanHash,
+		// Ces métadonnées appartiennent au personnage de base et doivent suivre toutes
+		// ses variantes, notamment pour les fiches d'OC.
+		uniformNumber: (baseChar as any).uniformNumber,
+		wikiSections: (baseChar as any).wikiSections,
 	};
 	const playerSeries = (variant as any).series || (baseChar as any).series;
 
@@ -588,11 +592,11 @@ export default async function PlayerDetailPage({ params }: { params: Promise<{ i
 				description={formatDescription(player.descriptions?.fr || player.descriptions?.en, "fr")}
 				descriptions={player.descriptions}
 				position={displayPosition as "ATT" | "MIL" | "DEF" | "GAR"}
-				jerseyNumber={10}
+				jerseyNumber={(player as any).uniformNumber ?? 10}
 				rarity={player.rarity}
 				element={player.element}
 				series={playerSeries}
-				gender={(baseChar as any).gender === 1 ? "F" : "M"}
+				gender={(baseChar as any).gender === 1 ? "F" : (baseChar as any).gender === 2 ? "X" : "M"}
 				stats={{
 					agility: stats.agility,
 					control: stats.control,

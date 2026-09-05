@@ -9,6 +9,12 @@ import "./atelier.css";
 
 type Viewer = HTMLElement & {
 	exportScene: () => Promise<Blob>;
+	/** Capture la vue courante sans recalculer son cadrage. */
+	toBlob: (options?: {
+		mimeType?: string;
+		qualityArgument?: number;
+		idealAspect?: boolean;
+	}) => Promise<Blob>;
 	updateFraming: () => void;
 	updateComplete: Promise<boolean>;
 };
@@ -29,13 +35,16 @@ export function Modele3D({
 	const [instance, setInstance] = useState<Viewer | null>(null);
 	const revision = useRef(0);
 	const exportToken = useRef(0);
+	const captureToken = useRef(0);
 	const [charge, setCharge] = useState(false);
 	const [erreur, setErreur] = useState("");
 	const [tentative, setTentative] = useState(0);
 	const [exporte, setExporte] = useState(false);
+	const [captureEnCours, setCaptureEnCours] = useState(false);
 	const invaliderTravail = useCallback(() => {
 		revision.current++;
 		exportToken.current++;
+		captureToken.current++;
 	}, []);
 	useEffect(() => {
 		let annule = false;
@@ -54,6 +63,7 @@ export function Modele3D({
 		};
 		setCharge(false);
 		setExporte(false);
+		setCaptureEnCours(false);
 		setErreur("");
 		loadModelViewer()
 			.then(() => {
@@ -93,6 +103,7 @@ export function Modele3D({
 		if (!instance || instance !== viewer.current) return;
 		revision.current++;
 		setCharge(false);
+		setCaptureEnCours(false);
 		setErreur("");
 		instance.setAttribute("src", url);
 	}, [url, instance]);
@@ -158,6 +169,32 @@ export function Modele3D({
 							}}
 						>
 							{exporte ? "Export en cours…" : "Exporter le GLB"}
+						</Button>
+						<Button
+							variant="outline"
+							disabled={!charge || captureEnCours}
+							onClick={async () => {
+								const mv = viewer.current;
+								if (!mv || typeof mv.toBlob !== "function") return;
+								const version = revision.current;
+								const token = ++captureToken.current;
+								setCaptureEnCours(true);
+								try {
+									await mv.updateComplete;
+									if (viewer.current !== mv || revision.current !== version) return;
+									const image = await mv.toBlob({ mimeType: "image/png", idealAspect: false });
+									if (viewer.current === mv && revision.current === version)
+										telecharger(image, "avatar.png");
+								} catch {
+									if (viewer.current === mv)
+										setErreur("Capture PNG impossible. Réessayez après le chargement complet.");
+								} finally {
+									if (viewer.current === mv && captureToken.current === token)
+										setCaptureEnCours(false);
+								}
+							}}
+						>
+							{captureEnCours ? "Capture en cours…" : "Capturer en PNG"}
 						</Button>
 					</>
 				)}

@@ -7,7 +7,7 @@ export function composerUrlAvatar(
 	cdn: string,
 	avatar: EtatAvatar
 ): string | null {
-	const { choix, valeurs, genre, morphologie } = avatar;
+	const { choix, valeurs, champs, genre, morphologie } = avatar;
 	// Le SQUELETTE de la morphologie choisie, et rien d'autre : le serveur en déduit le corps
 	// habillé qui va avec. L'appariement corps↔squelette est mesuré (chaque variante de corps
 	// épouse un squelette à 33 mm près, tout autre appariement dépassant 194 mm) et vit dans
@@ -110,7 +110,11 @@ export function composerUrlAvatar(
 	// peau choisie y va. Les valeurs RGB des palettes ne vivent que dans la mémoire du jeu —
 	// `niers mem palettes` les relève et les fusionne dans le catalogue sous `couleursRgb`.
 	// À défaut de choix, la route retombe sur la couleur des recettes du jeu.
+	// Une couleur libre prime sur la palette. Elle reste dans `champs` afin de ne pas
+	// changer le format de partage historique : six chiffres hexadécimaux, sans `#`.
 	const rgbDe = (type: number): string | null => {
+		const libre = champs[`couleur.libre.${type}`];
+		if (libre && /^[0-9A-Fa-f]{6}$/.test(libre)) return libre.toUpperCase();
 		const cat = catalogue.categories.find((c) => c.faceSettingType === type);
 		const i = valeurs[`couleur.${type}`];
 		const id = cat?.couleurs?.[i ?? -1];
