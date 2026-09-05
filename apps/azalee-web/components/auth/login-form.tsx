@@ -8,6 +8,19 @@ import { Button, Input } from "@rosegriffon/ui";
 import { authClient } from "@/lib/auth-client";
 
 type AuthMode = "login" | "signup" | "forgot-password";
+const TENTATIVES_SESSION = 20;
+const DELAI_SESSION_MS = 100;
+
+async function attendreSessionCreee(): Promise<void> {
+	for (let tentative = 0; tentative < TENTATIVES_SESSION; tentative += 1) {
+		const { data } = await authClient.getSession({
+			query: { disableCookieCache: true },
+		});
+		if (data?.user) return;
+		await new Promise<void>((resolve) => setTimeout(resolve, DELAI_SESSION_MS));
+	}
+	throw new Error("La session vient d'être créée mais n'est pas encore disponible. Réessaie.");
+}
 
 /**
  * Validate that returnTo is a safe relative path (no external redirects).
@@ -101,8 +114,10 @@ export function LoginForm({ onSuccess, returnTo }: LoginFormProps) {
 				if (onSuccess) {
 					onSuccess();
 				}
-				// Même navigation complète que la connexion : le cookie de session tout juste
-				// posé doit accompagner une nouvelle requête serveur, sans cache RSC anonyme.
+				// Better Auth peut résoudre `signUp.email` avant que Set-Cookie soit visible du
+				// prochain document. La sonde réseau force la fin de cette transition ; sans elle,
+				// la navigation annule parfois l'inscription encore active dans Chromium.
+				await attendreSessionCreee();
 				window.location.href = postLoginUrl;
 			} else {
 				const { error } = await authClient.signIn.email({
