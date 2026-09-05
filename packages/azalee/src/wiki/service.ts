@@ -1185,9 +1185,14 @@ export const wikiService = {
 			.order("zukan_order", { ascending: true, nullsFirst: false })
 			.order("id", { ascending: true });
 		if (!data) return [];
+		const groupByZukanVersion = baseSlug?.startsWith("shawn-froste") ?? false;
 		// Sort within groups: prefer versions with zukan_hash, then highest stat_frappe
 		// This ensures dedup picks the most enriched version as canonical
 		const sorted = (data as any[]).sort((a: any, b: any) => {
+			if (groupByZukanVersion) {
+				const orderDiff = (a.zukan_order ?? 999999) - (b.zukan_order ?? 999999);
+				if (orderDiff !== 0) return orderDiff;
+			}
 			// Primary: rarity DESC
 			const rDiff = (Number(b.rarity) || 0) - (Number(a.rarity) || 0);
 			if (rDiff !== 0) return rDiff;
@@ -1221,7 +1226,10 @@ export const wikiService = {
 			const rar = r.rarity_label || "Normal";
 			const heroType = r.hero_type || "";
 			const internalCode = r.internal_code || "";
-			const key = `${pos}|${elem}|${rar}|${heroType}|${internalCode}`;
+			const key =
+				groupByZukanVersion && r.zukan_hash
+					? `zukan:${r.zukan_hash}`
+					: `${pos}|${elem}|${rar}|${heroType}|${internalCode}`;
 			if (seen.has(key)) continue;
 			seen.add(key);
 			results.push({
