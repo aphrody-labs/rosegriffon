@@ -189,15 +189,6 @@ export const navigationItems: NavItem[] = [
 		path: "/gallery",
 	},
 	{
-		// Explorer le jeu : données brutes des CPK.
-		children: [
-			{ label: "nav.wiki.cpk_browser", path: "/cpk", icon: "account_tree" },
-		],
-		icon: "travel_explore",
-		label: "nav.section.explore",
-		path: "/cpk",
-	},
-	{
 		children: [
 			{
 				label: "nav.tools.stats",
@@ -265,7 +256,6 @@ export const mobileNavItems: NavItem[] = [
 			"/textures",
 			"/sons",
 			"/videos",
-			"/cpk",
 			"/wiki",
 			"/search",
 		],

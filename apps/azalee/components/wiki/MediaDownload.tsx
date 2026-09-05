@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Icon } from "@/components/ui/Icon";
-import { cpkExplorerHref, exportUrl, vfsStat } from "@rosegriffon/azalee/cpk/live";
+import { exportUrl, vfsStat } from "@rosegriffon/azalee/cpk/live";
 
 /**
  * Bloc « ce fichier » : téléchargement **au format voulu**, et lien vers son emplacement réel.
@@ -51,9 +51,7 @@ export async function MediaDownload({ path, awbId }: { path: string; awbId?: num
 				))}
 			</ul>
 			<p className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-on-surface-variant">
-				<Link href={cpkExplorerHref(path)} className="text-primary hover:underline">
-					Voir dans l'explorateur CPK
-				</Link>
+				<span>Source CDN</span>
 				<span className="font-mono">{path}</span>
 				<span>{octets} o</span>
 				{meta.cpk && <span className="font-mono">{meta.cpk}</span>}
