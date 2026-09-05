@@ -13,10 +13,22 @@ const DELAI_SESSION_MS = 100;
 
 async function attendreSessionCreee(): Promise<void> {
 	for (let tentative = 0; tentative < TENTATIVES_SESSION; tentative += 1) {
-		const { data } = await authClient.getSession({
-			query: { disableCookieCache: true },
+		const reponse = await fetch("/api/auth/get-session?disableCookieCache=true", {
+			credentials: "include",
+			cache: "no-store",
+			headers: { Accept: "application/json" },
 		});
-		if (data?.user) return;
+		if (!reponse.ok) {
+			await new Promise<void>((resolve) => setTimeout(resolve, DELAI_SESSION_MS));
+			continue;
+		}
+
+		const payload = (await reponse.json().catch(() => null)) as
+			| { data?: { user?: unknown } }
+			| null;
+		if (payload?.data?.user) {
+			return;
+		}
 		await new Promise<void>((resolve) => setTimeout(resolve, DELAI_SESSION_MS));
 	}
 	throw new Error("La session vient d'être créée mais n'est pas encore disponible. Réessaie.");
