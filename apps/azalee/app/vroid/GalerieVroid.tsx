@@ -53,7 +53,7 @@ export function GalerieVroid({ pageInitiale, erreurInitiale = null, connecte }: 
 	 * @param suite `true` pour ajouter à la suite, `false` pour repartir de zéro.
 	 */
 	const charger = useCallback(
-		async (suite: boolean, signal?: AbortSignal) => {
+		async (suite: boolean, signal?: AbortSignal, curseurCourant?: string | null) => {
 			if (source === "recherche" && motCleActif.trim().length === 0) {
 				setModeles([]);
 				setCurseur(null);
@@ -66,7 +66,7 @@ export function GalerieVroid({ pageInitiale, erreurInitiale = null, connecte }: 
 				const parametres = new URLSearchParams({ source, nombre: "24" });
 				if (source === "recherche") parametres.set("q", motCleActif.trim());
 				if (telechargeablesSeulement) parametres.set("telechargeables", "1");
-				if (suite && curseur) parametres.set("curseur", curseur);
+				if (suite && curseurCourant) parametres.set("curseur", curseurCourant);
 
 				const reponse = await fetch(`/api/vroid/models?${parametres}`, { signal });
 				const charge = (await reponse.json()) as Partial<PageModeles> & { erreur?: string };
@@ -96,7 +96,7 @@ export function GalerieVroid({ pageInitiale, erreurInitiale = null, connecte }: 
 				if (!signal?.aborted) setChargement(false);
 			}
 		},
-		[source, motCleActif, telechargeablesSeulement, curseur]
+			[source, motCleActif, telechargeablesSeulement]
 	);
 
 	// Rechargement à chaque changement de source, de mot-clé validé ou de filtre.
@@ -109,7 +109,7 @@ export function GalerieVroid({ pageInitiale, erreurInitiale = null, connecte }: 
 		const abandon = new AbortController();
 		void charger(false, abandon.signal);
 		return () => abandon.abort();
-	}, [source, motCleActif, telechargeablesSeulement]);
+		}, [charger, source, motCleActif, telechargeablesSeulement]);
 
 	return (
 		<div className="space-y-5">
@@ -200,7 +200,7 @@ export function GalerieVroid({ pageInitiale, erreurInitiale = null, connecte }: 
 						<button
 							className="w-full rounded-full bg-surface-container px-4 py-2.5 text-sm font-medium text-on-surface transition hover:bg-surface-container-high disabled:opacity-50"
 							disabled={chargement}
-							onClick={() => void charger(true)}
+							onClick={() => void charger(true, undefined, curseur)}
 							type="button"
 						>
 							{chargement ? "Chargement…" : "Charger la suite"}
