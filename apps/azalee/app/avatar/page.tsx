@@ -81,8 +81,7 @@ export default async function Page({
    "
 			>
 				<p className="italic text-on-surface-variant">
-					Catalogue injoignable — il est produit par «&nbsp;niers avatar export&nbsp;» et servi sur
-					/avatar/catalog.json.
+					Catalogue injoignable pour le moment.
 				</p>
 			</div>
 		);

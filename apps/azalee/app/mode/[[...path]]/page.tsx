@@ -263,10 +263,7 @@ export default async function PageModes({
 					title="Modes de jeu"
 					description="Les modes du menu principal, et les fichiers dont ils sont faits."
 				/>
-				<MediaEmpty>
-					Catalogue absent de cette machine. Il se produit avec <code>niers mode index</code> puis{" "}
-					<code>niers mode export -o data/modes.json</code>.
-				</MediaEmpty>
+				<MediaEmpty>Catalogue indisponible pour le moment.</MediaEmpty>
 			</div>
 		);
 	}

@@ -67,6 +67,11 @@ case "$CIBLE" in
 	website-web)     PORT=3004; SEUIL_GIB=3.4; SANTE="/";       RELEASES=/home/ubuntu/rg-releases/website ;;
 	azalee-api)      PORT=8807; SEUIL_GIB=1.6; SANTE="/";       RELEASES="" ;;
 	nie-model-serve) PORT=8790; SEUIL_GIB=8.5; SANTE="/health"; RELEASES="" ;;
+	# `nie-site` sert le site public. Il etait le SEUL service de facade sans sonde,
+	# alors que son propre amont (`nie-model-serve`) en avait une : la panne surveillee
+	# etait celle du decodeur, pas celle de la page qui le montre. Seuil recalcule sur
+	# son `MemoryMax=10G`.
+	nie-site)        PORT=8085; SEUIL_GIB=8.5; SANTE="/healthz"; RELEASES="" ;;
 	rg-postgrest)    PORT=8809; SEUIL_GIB=1.6; SANTE="/";       RELEASES="" ;;
 	rg-storage)      PORT=8810; SEUIL_GIB=0.8; SANTE="/";       RELEASES="" ;;
 	rag-api)         PORT=8806; SEUIL_GIB=1.6; SANTE="/";       RELEASES="" ;;

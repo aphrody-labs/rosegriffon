@@ -4,7 +4,7 @@ import { StatCalculator } from "@/components/wiki/StatCalculator";
 export const metadata: Metadata = {
 	alternates: { canonical: "/tools/stats" },
 	description:
-		"Calculateur de statistiques Inazuma Eleven: Victory Road (Lv1→99) — tables de croissance réelles du jeu (moteur niers, byte-exact). Choisissez position, rareté et pattern de croissance.",
+		"Calculateur de statistiques Inazuma Eleven: Victory Road (Lv1→99) — tables de croissance réelles du jeu. Choisissez position, rareté et pattern de croissance.",
 	openGraph: {
 		description:
 			"Simulez les statistiques d'un joueur du niveau 1 à 99 avec les vraies tables de croissance d'Inazuma Eleven: Victory Road.",
@@ -26,8 +26,7 @@ export default function StatsToolPage() {
 				</h1>
 				<p className="text-sm text-on-surface-variant max-w-2xl">
 					Simulez les 7 statistiques d'un joueur du niveau 1 à 99 avec les vraies tables de
-					croissance d'Inazuma Eleven: Victory Road, calculées par le moteur niers (byte-exact,
-					ancré sur le jeu) directement dans le navigateur.
+					croissance d'Inazuma Eleven: Victory Road, calculées directement dans le navigateur.
 				</p>
 			</header>
 			<StatCalculator />

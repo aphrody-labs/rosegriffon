@@ -96,7 +96,7 @@ export function DemoStatsPanel({
 
 	return (
 		<div className="space-y-4 rounded-2xl border border-outline-variant/20 bg-surface-container p-4 sm:p-5">
-			<h3 className="text-sm font-bold text-on-surface">Statistiques (moteur niers, byte-exact)</h3>
+			<h3 className="text-sm font-bold text-on-surface">Statistiques</h3>
 
 			{/* Paramètres. */}
 			<div className="space-y-3">
