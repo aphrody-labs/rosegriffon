@@ -125,4 +125,3 @@ export class Migration20260425230000 extends Migration {
     this.addSql(`DROP TABLE IF EXISTS "cast_event";`);
   }
 }
-

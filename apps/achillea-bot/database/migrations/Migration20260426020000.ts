@@ -63,4 +63,3 @@ export class Migration20260426020000 extends Migration {
     this.addSql(`DROP TYPE IF EXISTS phase_kind;`);
   }
 }
-

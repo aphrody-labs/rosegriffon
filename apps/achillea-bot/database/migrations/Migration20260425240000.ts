@@ -15,4 +15,3 @@ export class Migration20260425240000 extends Migration {
     this.addSql(`ALTER TABLE cast_attribution DROP COLUMN IF EXISTS notified_h2;`);
   }
 }
-

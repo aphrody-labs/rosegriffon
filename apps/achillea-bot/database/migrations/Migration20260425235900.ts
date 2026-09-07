@@ -60,4 +60,3 @@ export class Migration20260425235900 extends Migration {
     this.addSql(`DROP TYPE IF EXISTS sanction_type;`);
   }
 }
-

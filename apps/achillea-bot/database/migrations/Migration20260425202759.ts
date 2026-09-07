@@ -71,4 +71,3 @@ export class Migration20260425202759 extends Migration {
     this.addSql(`ALTER TABLE "guild" DROP COLUMN IF EXISTS "audit_log_channel_id";`);
   }
 }
-

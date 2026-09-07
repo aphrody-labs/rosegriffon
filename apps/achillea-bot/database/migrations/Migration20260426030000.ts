@@ -69,4 +69,3 @@ export class Migration20260426030000 extends Migration {
     this.addSql(`DROP TYPE IF EXISTS season_state;`);
   }
 }
-

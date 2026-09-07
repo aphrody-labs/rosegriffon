@@ -14,4 +14,3 @@ export class Migration20260426050000 extends Migration {
     this.addSql(`ALTER TABLE "user_elo" DROP COLUMN IF EXISTS "losses";`);
   }
 }
-
