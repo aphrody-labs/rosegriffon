@@ -35,7 +35,6 @@ export const metadata: Metadata = {
 		// l'accueil » — soit l'instruction explicite de ne pas les indexer. L'accueil
 		// pose le sien dans `app/page.tsx` ; chaque page publique pose le sien.
 		types: {
-			"text/markdown": "/llm.txt",
 		},
 	},
 	appleWebApp: {
